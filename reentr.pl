@@ -135,6 +135,7 @@ my %seenp; # the different prototype signatures for all functions
 my %seent; # the return type of this function
 my %seens; # the type of this function's "S"
 my %seend; # the type of this function's "D"
+my %seenm; # all the types
 my %seenu; # the length of the argument list of this function
 
 while (<DATA>) { # Read in the protypes.
@@ -188,7 +189,7 @@ while (<DATA>) { # Read in the protypes.
 	print <<EOF;
 ?RCS: \$Id: d_${func}_r.U,v $
 ?RCS:
-?RCS: Copyright (c) 2002 Jarkko Hietaniemi
+?RCS: Copyright (c) 2002,2003 Jarkko Hietaniemi
 ?RCS:
 ?RCS: You may distribute under the terms of either the GNU General Public
 ?RCS: License or the Artistic License, as specified in the README file.
@@ -259,6 +260,7 @@ EOF
         $seent{$func} = $type;
         $seens{$func} = $m{S};
         $seend{$func} = $m{D};
+	$seenm{$func} = \%m;
     }
     if ($opts{U}) {
 	print <<EOF;
@@ -472,6 +474,18 @@ EOF
 	        push @struct, <<EOF;
 	double	_${func}_double;
 EOF
+	    } elsif ($1 eq 'random') {
+	    push @struct, <<EOF;
+#   if RANDOM_R_PROTO == REENTRANT_PROTO_iS
+	int	_${func}_retval;
+#   endif
+#   if RANDOM_R_PROTO == REENTRANT_PROTO_lS
+	long	_${func}_retval;
+#   endif
+#   if RANDOM_R_PROTO == REENTRANT_PROTO_tS
+	int32_t	_${func}_retval;
+#   endif
+EOF
 	    }
 	    pushssif $endif;
 	}
@@ -616,7 +630,9 @@ EOF
 	    my $b = $a;
 	    my $w = '';
 	    substr($b, 0, $seenu{$func}) = '';
-	    if ($b =~ /R/) {
+	    if ($func =~ /^random$/) {
+		$true = "PL_reentrant_buffer->_random_retval";
+	    } elsif ($b =~ /R/) {
 		$true = "PL_reentrant_buffer->_${genfunc}_ptr";
 	    } elsif ($b =~ /T/ && $func eq 'drand48') {
 		$true = "PL_reentrant_buffer->_${genfunc}_double";
@@ -650,12 +666,14 @@ EOF
 				  "&PL_reentrant_buffer->_${genfunc}_struct" ) :
 			     $_ eq 'T' && $func eq 'drand48' ?
 				 "&PL_reentrant_buffer->_${genfunc}_double" :
+			     $_ =~ /^[ilt]$/ && $func eq 'random' ?
+				 "&PL_reentrant_buffer->_random_retval" :
 				 $_
 			 } split '', $b;
 		$w = ", $w" if length $v;
 	    }
 	    my $call = "${func}_r($v$w)";
-	    $call = "((errno = $call))" if $r eq 'I';
+	    $call = "((errno = $call))" if $r eq 'I' && $func ne 'random';
 	    push @wrap, <<EOF;
 #   if !defined($func) && ${FUNC}_R_PROTO == REENTRANT_PROTO_$p
 EOF
@@ -997,11 +1015,11 @@ endservent	|netdb	|		|I_D|V_D|D=struct servent_data*
 getgrent	|grp	|struct group	|I_SBWR|I_SBIR|S_SBW|S_SBI|I_SBI|I_SBIH
 getgrgid T	|grp	|struct group	|I_TSBWR|I_TSBIR|I_TSBI|S_TSBI|T=gid_t
 getgrnam C	|grp	|struct group	|I_CSBWR|I_CSBIR|S_CBI|I_CSBI|S_CSBI
-gethostbyaddr CWI	|netdb	|struct hostent	|I_CWISBWRE|S_CWISBWIE|S_CWISBIE|S_TWISBIE|S_CIISBIE|S_CSBIE|S_TSBIE|I_CWISD|I_CIISD|I_CII|D=struct hostent_data*|T=const void*
+gethostbyaddr CWI	|netdb	|struct hostent	|I_CWISBWRE|S_CWISBWIE|S_CWISBIE|S_TWISBIE|S_CIISBIE|S_CSBIE|S_TSBIE|I_CWISD|I_CIISD|I_CII|I_TsISBWRE|D=struct hostent_data*|T=const void*|s=socklen_t
 gethostbyname C	|netdb	|struct hostent	|I_CSBWRE|S_CSBIE|I_CSD|D=struct hostent_data*
 gethostent	|netdb	|struct hostent	|I_SBWRE|I_SBIE|S_SBIE|S_SBI|I_SBI|I_SD|D=struct hostent_data*
 getlogin	|unistd	|		|I_BW|I_BI|B_BW|B_BI
-getnetbyaddr LI	|netdb	|struct netent	|I_UISBWRE|I_LISBI|S_TISBI|S_LISBI|I_TISD|I_LISD|I_IISD|D=struct netent_data*|T=in_addr_t|U=unsigned long
+getnetbyaddr LI	|netdb	|struct netent	|I_UISBWRE|I_LISBI|S_TISBI|S_LISBI|I_TISD|I_LISD|I_IISD|I_uISBWRE|D=struct netent_data*|T=in_addr_t|U=unsigned long|u=uint32_t
 getnetbyname C	|netdb	|struct netent	|I_CSBWRE|I_CSBI|S_CSBI|I_CSD|D=struct netent_data*
 getnetent	|netdb	|struct netent	|I_SBWRE|I_SBIE|S_SBIE|S_SBI|I_SBI|I_SD|D=struct netent_data*
 getprotobyname C|netdb	|struct protoent|I_CSBWR|S_CSBI|I_CSD|D=struct protoent_data*
@@ -1016,7 +1034,7 @@ getservent	|netdb	|struct servent	|I_SBWR|I_SBI|S_SBI|I_SD|D=struct servent_data
 getspnam C	|shadow	|struct spwd	|I_CSBWR|S_CSBI
 gmtime T	|time	|struct tm	|S_TS|I_TS|T=const time_t*
 localtime T	|time	|struct tm	|S_TS|I_TS|T=const time_t*
-random		|stdlib	|struct random_data|I_TS|T=int*
+random		|stdlib	|struct random_data|I_iS|I_lS|I_St|i=int*|l=long*|t=int32_t*
 readdir T	|dirent	|struct dirent	|I_TSR|I_TS|T=DIR*
 readdir64 T	|dirent	|struct dirent64|I_TSR|I_TS|T=DIR*
 setgrent	|grp	|		|I_H|V_H

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Feb  3 15:49:19 EET 2003 [metaconfig 3.0 PL70]
+# Generated on Wed Mar  5 23:02:07 EET 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -12299,6 +12299,10 @@ case "$d_gethostbyaddr_r" in
 	./protochk "extern $try" $hdrs && gethostbyaddr_r_proto=I_CII ;;
 	esac
 	case "$gethostbyaddr_r_proto" in
+	''|0) try='int gethostbyaddr_r(const void*, socklen_t, int, struct hostent*, char*, size_t, struct hostent**, int*);'
+	./protochk "extern $try" $hdrs && gethostbyaddr_r_proto=I_TsISBWRE ;;
+	esac
+	case "$gethostbyaddr_r_proto" in
 	''|0)	d_gethostbyaddr_r=undef
  	        gethostbyaddr_r_proto=0
 		echo "Disabling gethostbyaddr_r, cannot determine prototype." >&4 ;;
@@ -12558,6 +12562,10 @@ case "$d_getnetbyaddr_r" in
 	case "$getnetbyaddr_r_proto" in
 	''|0) try='int getnetbyaddr_r(int, int, struct netent*, struct netent_data*);'
 	./protochk "extern $try" $hdrs && getnetbyaddr_r_proto=I_IISD ;;
+	esac
+	case "$getnetbyaddr_r_proto" in
+	''|0) try='int getnetbyaddr_r(uint32_t, int, struct netent*, char*, size_t, struct netent**, int*);'
+	./protochk "extern $try" $hdrs && getnetbyaddr_r_proto=I_uISBWRE ;;
 	esac
 	case "$getnetbyaddr_r_proto" in
 	''|0)	d_getnetbyaddr_r=undef
@@ -14326,7 +14334,15 @@ case "$d_random_r" in
 	define)
 	case "$random_r_proto" in
 	''|0) try='int random_r(int*, struct random_data*);'
-	./protochk "extern $try" $hdrs && random_r_proto=I_TS ;;
+	./protochk "extern $try" $hdrs && random_r_proto=I_iS ;;
+	esac
+	case "$random_r_proto" in
+	''|0) try='int random_r(long*, struct random_data*);'
+	./protochk "extern $try" $hdrs && random_r_proto=I_lS ;;
+	esac
+	case "$random_r_proto" in
+	''|0) try='int random_r(struct random_data*, int32_t*);'
+	./protochk "extern $try" $hdrs && random_r_proto=I_St ;;
 	esac
 	case "$random_r_proto" in
 	''|0)	d_random_r=undef
