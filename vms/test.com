@@ -144,7 +144,7 @@ if (lc($ARGV[0]) eq '-v') {
 chdir 't' if -f 't/TEST';
 
 if ($ARGV[0] eq '') {
-    foreach (<[-.ext...]*.t>, <[-.lib...]*.t>, <[.*]*.t>) {
+    foreach (<[.*]*.t>, <[-.ext...]*.t>, <[-.lib...]*.t>) {
       $_ = File::Spec->abs2rel($_);
       s/\[([a-z]+)/[.$1/;      # hmm, abs2rel doesn't do subdirs of the cwd
       ($fname = $_) =~ s/.*\]//;
