@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-$VERSION = '1.02';
+$VERSION = '1.01';
 
 BEGIN {
   push @INC, './lib';
@@ -414,7 +414,7 @@ while (<DATA>) {
 #$list{'all'} = [ $offset .. 8 * ($warn_size/2) - 1 ] ;
 
 $last_ver = 0;
-print PM "our %Offsets : unique = (\n" ;
+print PM "%Offsets = (\n" ;
 foreach my $k (sort { $a <=> $b } keys %ValueToName) {
     my ($name, $version) = @{ $ValueToName{$k} };
     $name = lc $name;
@@ -430,7 +430,7 @@ foreach my $k (sort { $a <=> $b } keys %ValueToName) {
 
 print PM "  );\n\n" ;
 
-print PM "our %Bits : unique = (\n" ;
+print PM "%Bits = (\n" ;
 foreach $k (sort keys  %list) {
 
     my $v = $list{$k} ;
@@ -444,7 +444,7 @@ foreach $k (sort keys  %list) {
 
 print PM "  );\n\n" ;
 
-print PM "our %DeadBits : unique = (\n" ;
+print PM "%DeadBits = (\n" ;
 foreach $k (sort keys  %list) {
 
     my $v = $list{$k} ;
@@ -475,7 +475,7 @@ __END__
 
 package warnings;
 
-our $VERSION = '1.03';
+our $VERSION = '1.02';
 
 =head1 NAME
 
@@ -600,7 +600,7 @@ See L<perlmodlib/Pragmatic Modules> and L<perllexwarn>.
 
 =cut
 
-use Carp ();
+use Carp ;
 
 KEYWORDS
 
@@ -609,7 +609,7 @@ $All = "" ; vec($All, $Offsets{'all'}, 2) = 3 ;
 sub Croaker
 {
     delete $Carp::CarpInternal{'warnings'};
-    Carp::croak(@_);
+    croak(@_);
 }
 
 sub bits
@@ -778,10 +778,10 @@ sub warn
 
     my $message = pop ;
     my ($callers_bitmask, $offset, $i) = __chk(@_) ;
-    Carp::croak($message)
+    croak($message)
 	if vec($callers_bitmask, $offset+1, 1) ||
 	   vec($callers_bitmask, $Offsets{'all'}+1, 1) ;
-    Carp::carp($message) ;
+    carp($message) ;
 }
 
 sub warnif
@@ -797,11 +797,11 @@ sub warnif
             	(vec($callers_bitmask, $offset, 1) ||
             	vec($callers_bitmask, $Offsets{'all'}, 1)) ;
 
-    Carp::croak($message)
+    croak($message)
 	if vec($callers_bitmask, $offset+1, 1) ||
 	   vec($callers_bitmask, $Offsets{'all'}+1, 1) ;
 
-    Carp::carp($message) ;
+    carp($message) ;
 }
 
 1;
