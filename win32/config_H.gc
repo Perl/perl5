@@ -273,7 +273,7 @@
  *	This symbol, if defined, indicates that the link routine is
  *	available to create hard links.
  */
-/*#define HAS_LINK	/**/
+#define HAS_LINK	/**/
 
 /* HAS_LOCALECONV:
  *	This symbol, if defined, indicates that the localeconv routine is

@@ -1356,18 +1356,6 @@ typedef struct svtbl SVTBL;
 #   endif
 #endif
 
-/* I couldn't find any -Ddefine or -flags in IRIX 6.5 that would
- * have done the necessary symbol renaming using cpp. --jhi */
-#ifdef __sgi
-#define USE_FOPEN64
-#define USE_FSEEK64
-#define USE_FTELL64
-#define USE_FSETPOS64
-#define USE_FGETPOS64
-#define USE_TMPFILE64
-#define USE_FREOPEN64
-#endif
-
 #ifdef USE_64_BIT_RAWIO
 #   ifdef HAS_OFF64_T
 #       undef Off_t
@@ -1859,27 +1847,6 @@ struct svtbl {
 /* These do not care about the fractional part, only about the range. */
 #define NV_WITHIN_IV(nv) (I_V(nv) >= IV_MIN && I_V(nv) <= IV_MAX)
 #define NV_WITHIN_UV(nv) ((nv)>=0.0 && U_V(nv) >= UV_MIN && U_V(nv) <= UV_MAX)
-
-/* The correct way: a Configure test where (UV)~0 is cast to NV and back. */
-/* Believe. */
-#define IV_FITS_IN_NV
-/* Doubt. */
-#if defined(USE_LONG_DOUBLE) && \
-	defined(LDBL_MANT_DIG) && IV_DIG >= LDBL_MANT_DIG
-#   undef IV_FITS_IN_NV
-#else
-#   if defined(DBL_MANT_DIG) && IV_DIG >= DBL_MANT_DIG
-#       undef IV_FITS_IN_NV
-#   else
-#       if IV_DIG >= NV_DIG
-#           undef IV_FITS_IN_NV
-#       else
-#           if IVSIZE >= NVSIZE
-#               undef IV_FITS_IN_NV
-#           endif
-#       endif
-#   endif
-#endif
 
 /* Used with UV/IV arguments: */
 					/* XXXX: need to speed it up */

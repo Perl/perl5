@@ -196,6 +196,7 @@
 #    define fstat		PerlLIO_fstat
 #    define ioctl		PerlLIO_ioctl
 #    define isatty		PerlLIO_isatty
+#    define link                PerlLIO_link
 #    define lseek		PerlLIO_lseek
 #    define lstat		PerlLIO_lstat
 #    define mktemp		PerlLIO_mktemp

@@ -131,6 +131,7 @@ DllExport  unsigned 	win32_alarm(unsigned int sec);
 DllExport  int		win32_stat(const char *path, struct stat *buf);
 DllExport  char*	win32_longpath(char *path);
 DllExport  int		win32_ioctl(int i, unsigned int u, char *data);
+DllExport  int          win32_link(const char *oldname, const char *newname);
 DllExport  int		win32_utime(const char *f, struct utimbuf *t);
 DllExport  int		win32_uname(struct utsname *n);
 DllExport  int		win32_wait(int *status);
@@ -271,6 +272,7 @@ END_EXTERN_C
 #define times			win32_times
 #define alarm			win32_alarm
 #define ioctl			win32_ioctl
+#define link			win32_link
 #define utime			win32_utime
 #define uname			win32_uname
 #define wait			win32_wait

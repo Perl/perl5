@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Nov 12 01:02:11 EET 1999 [metaconfig 3.0 PL70]
+# Generated on Sat Nov 13 17:55:50 EET 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -829,7 +829,6 @@ sitelib=''
 sitelibexp=''
 siteprefix=''
 siteprefixexp=''
-sizesize=''
 sizetype=''
 so=''
 sharpbang=''
@@ -8582,7 +8581,7 @@ else
 	val="$undef"
 	echo "No, it doesn't."
 	case "$lseeksize" in
-	8) echo "(This is okay because your off_t is 64 bits wide.)" ;;
+	8) echo "(Your off_t is 64 bits, so you could use that.)" ;;
 	esac
 fi
 $rm -f try.* try
@@ -8604,7 +8603,7 @@ else
 	val="$undef"
 	echo "No, it doesn't."
 	case "$fpossize" in
-	8) echo "(This is okay because your fpos_t is 64 bits wide.)" >&4 ;;
+	8) echo "(Your fpos_t is 64 bits, so you could use that.)" ;;
 	esac
 fi
 $rm -f try.* try
@@ -8654,6 +8653,9 @@ esac
 : see if fseeko exists
 set fseeko d_fseeko
 eval $inlibc
+case "$longsize" in
+8) echo "(Your long is 64 bits, so in a pinch you could use fseek.)" ;;
+esac
 
 : see if fsetpos exists
 set fsetpos d_fsetpos
@@ -8677,6 +8679,9 @@ eval $inlibc
 : see if ftello exists
 set ftello d_ftello
 eval $inlibc
+case "$longsize" in
+8) echo "(Your long is 64 bits, so in a pinch you could use ftell.)" ;;
+esac
 
 : see if getgrent exists
 set getgrent d_getgrent
@@ -9602,7 +9607,12 @@ case "$quadtype" in
 	esac
 	d_quad="$undef"
 	;;
-*)	echo "We could use '$quadtype' for 64-bit integers." >&4
+*)	if test X"$use64bits" = Xdefine -o X"$longsize" = X8; then
+	    verb="will"
+	else
+	    verb="could"
+	fi
+	echo "We $verb use '$quadtype' for 64-bit integers." >&4
 	d_quad="$define"
 	;;
 esac
@@ -13003,37 +13013,6 @@ echo $sig_name | $awk \
 }'
 $rm -f signal signal.c signal.awk signal.lst signal_cmd 
 
-echo " "
-case "$sizetype" in
-*_t) zzz="$sizetype"	;;
-*)   zzz="filesize"	;;
-esac
-echo "Checking the size of $zzz..." >&4 
-cat > try.c <<EOCP
-#include <sys/types.h>
-#include <stdio.h>
-int main() {
-    printf("%d\n", (int)sizeof($sizetype));
-    exit(0);
-}
-EOCP
-set try
-if eval $compile_ok; then
-	yyy=`./try`
-	case "$yyy" in
-	'')	sizesize=4
-		echo "(I can't execute the test program--guessing $sizesize.)" >&4
-		;;
-	*)	sizesize=$yyy
-		echo "Your $zzz size is $sizesize bytes."
-		;;
-	esac
-else
-	sizesize=4
-	echo "(I can't compile the test program--guessing $sizesize.)" >&4
-fi
-
-
 : see what type is used for signed size_t
 set ssize_t ssizetype int stdio.h sys/types.h
 eval $typedef
@@ -14708,7 +14687,6 @@ sitelib='$sitelib'
 sitelibexp='$sitelibexp'
 siteprefix='$siteprefix'
 siteprefixexp='$siteprefixexp'
-sizesize='$sizesize'
 sizetype='$sizetype'
 sleep='$sleep'
 smail='$smail'

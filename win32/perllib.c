@@ -548,6 +548,12 @@ PerlLIOIsatty(struct IPerlLIO *I, int fd)
     return isatty(fd);
 }
 
+int
+PerlLIOLink(struct IPerlLIO*, const char*oldname, const char *newname)
+{
+    return win32_link(oldname, newname);
+}
+
 long
 PerlLIOLseek(struct IPerlLIO *I, int handle, long offset, int origin)
 {
@@ -652,6 +658,7 @@ struct IPerlLIO perlLIO =
     PerlLIOFileStat,
     PerlLIOIOCtl,
     PerlLIOIsatty,
+    PerlLIOLink,
     PerlLIOLseek,
     PerlLIOLstat,
     PerlLIOMktemp,

@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Thu Nov 11 21:42:49 EET 1999
+ * Configuration time: Sat Nov 13 15:28:21 EET 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -992,10 +992,6 @@
  *	This symbol holds the type used for 64-bit integers.
  *	It can be int, long, long long, int64_t etc...
  */
-/* QUADCASE:
- *	This symbol, if defined, encodes the type of a quad:
- *	1 = int, 2 = long, 3 = long long, 4 = int64_t.
- */
 /* Uquad_t:
  *	This symbol holds the type used for unsigned 64-bit integers.
  *	It can be unsigned int, unsigned long, unsigned long long,
@@ -1004,7 +1000,13 @@
 #define HAS_QUAD	/**/
 #define Quad_t long	/**/
 #define Uquad_t unsigned long	/**/
-#define QUADCASE 2	/**/
+#ifdef HAS_QUAD
+#   define QUADKIND 2	/**/
+#   define QUAD_IS_INT	1
+#   define QUAD_IS_LONG	2
+#   define QUAD_IS_LONG_LONG	3
+#   define QUAD_IS_INT64_T	4
+#endif
 
 /* HAS_ACCESSX:
  *	This symbol, if defined, indicates that the accessx routine is
@@ -2206,6 +2208,13 @@
  */
 /*#define HAS_HASMNTOPT		/ **/
 
+/* HAS_INT64_T:
+ *     This symbol will defined if the C compiler supports int64_t.
+ *     Usually the <inttypes.h> needs to be included, but sometimes
+ *	<sys/types.h> is enough.
+ */
+/*#define     HAS_INT64_T               / **/
+
 /* HAS_LDBL_DIG:
  *	This symbol, if defined, indicates that this system's <float.h>
  *	or <limits.h> defines the symbol LDBL_DIG, which is the number
@@ -2306,13 +2315,7 @@
  *     This symbol, if defined, indicates to the C program that it should
  *     include <inttypes.h>.
  */
-/* HAS_INT64_T:
- *     This symbol will defined if the C compiler supports int64_t.
- *     Usually the <inttypes.h> needs to be included, but sometimes
- *	<sys/types.h> is enough.
- */
 /*#define   I_INTTYPES                / **/
-/*#define     HAS_INT64_T               / **/
 
 /* I_MNTENT:
  *	This symbol, if defined, indicates that <mntent.h> exists and
@@ -2817,8 +2820,12 @@
 /* LSEEKSIZE:
  *	This symbol holds the number of bytes used by the Off_t.
  */
+/* Off_t_size:
+ *	This symbol holds the number of bytes used by the Off_t.
+ */
 #define Off_t off_t		/* <offset> type */
 #define LSEEKSIZE 8		/* <offset> size */
+#define Off_t_size 8	/* <offset> size */
 
 /* Mode_t:
  *	This symbol holds the type used to declare file modes 

@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Thu Nov 11 21:42:49 EET 1999
+# Configuration time: Sat Nov 13 15:28:21 EET 1999
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -56,7 +56,7 @@ ccflags='-pthread -std -DLANGUAGE_C'
 ccsymbols='LANGUAGE_C=1 SYSTYPE_BSD=1 _LONGLONG=1 __LANGUAGE_C__=1'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Thu Nov 11 21:42:49 EET 1999'
+cf_time='Sat Nov 13 15:28:21 EET 1999'
 charsize='1'
 chgrp=''
 chmod=''
@@ -591,7 +591,7 @@ privlib='/opt/perl/lib/5.00563'
 privlibexp='/opt/perl/lib/5.00563'
 prototype='define'
 ptrsize='8'
-quadcase='2'
+quadkind='2'
 quadtype='long'
 randbits='48'
 randfunc='drand48'

@@ -9,6 +9,8 @@ BEGIN {
 }
 
 use Data::Dumper;
+use Config;
+my $Is_ebcdic = defined($Config{'ebcdic'}) && $Config{'ebcdic'} eq 'define';
 
 $Data::Dumper::Pad = "#";
 my $TMAX;
@@ -238,11 +240,20 @@ EOT
 
 ############# 43
 ##
+if (!$Is_ebcdic) {
 $WANT = <<'EOT';
 #$VAR1 = {
 #  "abc\0'\efg" => "mno\0"
 #};
 EOT
+}
+else {
+$WANT = <<"EOT";
+#\$VAR1 = {
+#  "\\201\\202\\203\\340\\360'\e\\206\\207" => "\\224\\225\\226\\340\\360"
+#};
+EOT
+}
 
 $foo = { "abc\000\'\efg" => "mno\000" };
 {
@@ -277,6 +288,7 @@ EOT
 
 ############# 49
 ##
+if (!$Is_ebcdic) {
   $WANT = <<'EOT';
 #$foo = \*::foo;
 #*::foo = \5;
@@ -301,6 +313,33 @@ EOT
 #@bar = @{*::foo{ARRAY}};
 #%baz = %{*::foo{ARRAY}->[2]};
 EOT
+}
+else {
+  $WANT = <<'EOT';
+#$foo = \*::foo;
+#*::foo = \5;
+#*::foo = [
+#           #0
+#           10,
+#           #1
+#           '',
+#           #2
+#           {
+#             'd' => {},
+#             'a' => 1,
+#             'b' => '',
+#             'c' => []
+#           }
+#         ];
+#*::foo{ARRAY}->[1] = $foo;
+#*::foo{ARRAY}->[2]{'d'} = *::foo{ARRAY}->[2];
+#*::foo{ARRAY}->[2]{'b'} = *::foo{SCALAR};
+#*::foo{ARRAY}->[2]{'c'} = *::foo{ARRAY};
+#*::foo = *::foo{ARRAY}->[2];
+#@bar = @{*::foo{ARRAY}};
+#%baz = %{*::foo{ARRAY}->[2]};
+EOT
+}
 
   $Data::Dumper::Purity = 1;
   $Data::Dumper::Indent = 3;
@@ -309,6 +348,7 @@ EOT
 
 ############# 55
 ##
+if (!$Is_ebcdic) {
   $WANT = <<'EOT';
 #$foo = \*::foo;
 #*::foo = \5;
@@ -330,6 +370,30 @@ EOT
 #$bar = *::foo{ARRAY};
 #$baz = *::foo{ARRAY}->[2];
 EOT
+}
+else {
+  $WANT = <<'EOT';
+#$foo = \*::foo;
+#*::foo = \5;
+#*::foo = [
+#  10,
+#  '',
+#  {
+#    'd' => {},
+#    'a' => 1,
+#    'b' => '',
+#    'c' => []
+#  }
+#];
+#*::foo{ARRAY}->[1] = $foo;
+#*::foo{ARRAY}->[2]{'d'} = *::foo{ARRAY}->[2];
+#*::foo{ARRAY}->[2]{'b'} = *::foo{SCALAR};
+#*::foo{ARRAY}->[2]{'c'} = *::foo{ARRAY};
+#*::foo = *::foo{ARRAY}->[2];
+#$bar = *::foo{ARRAY};
+#$baz = *::foo{ARRAY}->[2];
+EOT
+}
 
   $Data::Dumper::Indent = 1;
   TEST q(Data::Dumper->Dump([\\*foo, \\@foo, \\%foo], ['foo', 'bar', 'baz']));
@@ -337,6 +401,7 @@ EOT
 
 ############# 61
 ##
+if (!$Is_ebcdic) {
   $WANT = <<'EOT';
 #@bar = (
 #  10,
@@ -358,12 +423,37 @@ EOT
 #%baz = %{*::foo{HASH}};
 #$foo = $bar[1];
 EOT
+}
+else {
+  $WANT = <<'EOT';
+#@bar = (
+#  10,
+#  \*::foo,
+#  {}
+#);
+#*::foo = \5;
+#*::foo = \@bar;
+#*::foo = {
+#  'd' => {},
+#  'a' => 1,
+#  'b' => '',
+#  'c' => []
+#};
+#*::foo{HASH}->{'d'} = *::foo{HASH};
+#*::foo{HASH}->{'b'} = *::foo{SCALAR};
+#*::foo{HASH}->{'c'} = \@bar;
+#$bar[2] = *::foo{HASH};
+#%baz = %{*::foo{HASH}};
+#$foo = $bar[1];
+EOT
+}
 
   TEST q(Data::Dumper->Dump([\\@foo, \\%foo, \\*foo], ['*bar', '*baz', '*foo']));
   TEST q(Data::Dumper->Dumpxs([\\@foo, \\%foo, \\*foo], ['*bar', '*baz', '*foo'])) if $XS;
 
 ############# 67
 ##
+if (!$Is_ebcdic) {
   $WANT = <<'EOT';
 #$bar = [
 #  10,
@@ -385,12 +475,37 @@ EOT
 #$baz = *::foo{HASH};
 #$foo = $bar->[1];
 EOT
+}
+else {
+  $WANT = <<'EOT';
+#$bar = [
+#  10,
+#  \*::foo,
+#  {}
+#];
+#*::foo = \5;
+#*::foo = $bar;
+#*::foo = {
+#  'd' => {},
+#  'a' => 1,
+#  'b' => '',
+#  'c' => []
+#};
+#*::foo{HASH}->{'d'} = *::foo{HASH};
+#*::foo{HASH}->{'b'} = *::foo{SCALAR};
+#*::foo{HASH}->{'c'} = $bar;
+#$bar->[2] = *::foo{HASH};
+#$baz = *::foo{HASH};
+#$foo = $bar->[1];
+EOT
+}
 
   TEST q(Data::Dumper->Dump([\\@foo, \\%foo, \\*foo], ['bar', 'baz', 'foo']));
   TEST q(Data::Dumper->Dumpxs([\\@foo, \\%foo, \\*foo], ['bar', 'baz', 'foo'])) if $XS;
 
 ############# 73
 ##
+if (!$Is_ebcdic) {
   $WANT = <<'EOT';
 #$foo = \*::foo;
 #@bar = (
@@ -405,6 +520,23 @@ EOT
 #);
 #%baz = %{$bar[2]};
 EOT
+}
+else {
+  $WANT = <<'EOT';
+#$foo = \*::foo;
+#@bar = (
+#  10,
+#  $foo,
+#  {
+#    d => $bar[2],
+#    a => 1,
+#    b => \5,
+#    c => \@bar
+#  }
+#);
+#%baz = %{$bar[2]};
+EOT
+}
 
   $Data::Dumper::Purity = 0;
   $Data::Dumper::Quotekeys = 0;
@@ -413,6 +545,7 @@ EOT
 
 ############# 79
 ##
+if (!$Is_ebcdic) {
   $WANT = <<'EOT';
 #$foo = \*::foo;
 #$bar = [
@@ -427,6 +560,23 @@ EOT
 #];
 #$baz = $bar->[2];
 EOT
+}
+else {
+  $WANT = <<'EOT';
+#$foo = \*::foo;
+#$bar = [
+#  10,
+#  $foo,
+#  {
+#    d => $bar->[2],
+#    a => 1,
+#    b => \5,
+#    c => $bar
+#  }
+#];
+#$baz = $bar->[2];
+EOT
+}
 
   TEST q(Data::Dumper->Dump([\\*foo, \\@foo, \\%foo], ['foo', 'bar', 'baz']));
   TEST q(Data::Dumper->Dumpxs([\\*foo, \\@foo, \\%foo], ['foo', 'bar', 'baz'])) if $XS;
@@ -448,6 +598,7 @@ EOT
   
 ############# 85
 ##
+if (!$Is_ebcdic) {
   $WANT = <<'EOT';
 #%kennels = (
 #  First => \'Fido',
@@ -460,6 +611,21 @@ EOT
 #);
 #%mutts = %kennels;
 EOT
+}
+else {
+  $WANT = <<'EOT';
+#%kennels = (
+#  Second => \'Wags',
+#  First => \'Fido'
+#);
+#@dogs = (
+#  ${$kennels{First}},
+#  ${$kennels{Second}},
+#  \%kennels
+#);
+#%mutts = %kennels;
+EOT
+}
 
   TEST q(
 	 $d = Data::Dumper->new([\\%kennel, \\@dogs, $mutts],
@@ -487,6 +653,7 @@ EOT
   
 ############# 97
 ##
+if (!$Is_ebcdic) {
   $WANT = <<'EOT';
 #%kennels = (
 #  First => \'Fido',
@@ -499,6 +666,21 @@ EOT
 #);
 #%mutts = %kennels;
 EOT
+}
+else {
+  $WANT = <<'EOT';
+#%kennels = (
+#  Second => \'Wags',
+#  First => \'Fido'
+#);
+#@dogs = (
+#  ${$kennels{First}},
+#  ${$kennels{Second}},
+#  \%kennels
+#);
+#%mutts = %kennels;
+EOT
+}
 
   
   TEST q($d->Reset; $d->Dump);
@@ -508,6 +690,7 @@ EOT
 
 ############# 103
 ##
+if (!$Is_ebcdic) {
   $WANT = <<'EOT';
 #@dogs = (
 #  'Fido',
@@ -520,6 +703,21 @@ EOT
 #%kennels = %{$dogs[2]};
 #%mutts = %{$dogs[2]};
 EOT
+}
+else {
+  $WANT = <<'EOT';
+#@dogs = (
+#  'Fido',
+#  'Wags',
+#  {
+#    Second => \$dogs[1],
+#    First => \$dogs[0]
+#  }
+#);
+#%kennels = %{$dogs[2]};
+#%mutts = %{$dogs[2]};
+EOT
+}
 
   TEST q(
 	 $d = Data::Dumper->new([\\@dogs, \\%kennel, $mutts],
@@ -543,6 +741,7 @@ EOT
 
 ############# 115
 ##
+if (!$Is_ebcdic) {
   $WANT = <<'EOT';
 #@dogs = (
 #  'Fido',
@@ -557,6 +756,23 @@ EOT
 #  Second => \'Wags'
 #);
 EOT
+}
+else {
+  $WANT = <<'EOT';
+#@dogs = (
+#  'Fido',
+#  'Wags',
+#  {
+#    Second => \'Wags',
+#    First => \'Fido'
+#  }
+#);
+#%kennels = (
+#  Second => \'Wags',
+#  First => \'Fido'
+#);
+EOT
+}
 
   TEST q(
 	 $d = Data::Dumper->new( [\@dogs, \%kennel], [qw(*dogs *kennels)] );

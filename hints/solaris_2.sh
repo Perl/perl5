@@ -339,7 +339,7 @@ EOCBU
 	lflibs="`getconf LFS_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
 case "$lfcflags$lfldflags$lflibs" in
 '');;
-*) ccflags="$ccflags $lfcflags"
+*) ccflags="$ccflags -DUSE_LONG_LONG $lfcflags"
    ldflags="$ldflags $ldldflags"
    libswanted="$libswanted $lflibs"
    ;;

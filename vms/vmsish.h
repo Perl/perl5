@@ -635,7 +635,7 @@ int     my_sigdelset   (sigset_t *, int);
 int     my_sigismember (sigset_t *, int);
 int     my_sigprocmask (int, sigset_t *, sigset_t *);
 #endif
-I32	cando_by_name (I32, I32, char *);
+I32	cando_by_name (I32, Uid_t, char *);
 int	flex_fstat (int, Stat_t *);
 int	flex_stat (const char *, Stat_t *);
 int	trim_unixpath (char *, char*, int);

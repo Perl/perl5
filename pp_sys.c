@@ -1592,10 +1592,10 @@ PP(pp_send)
     djSP; dMARK; dORIGMARK; dTARGET;
     GV *gv;
     IO *io;
-    int offset;
+    Off_t offset;
     SV *bufsv;
     char *buffer;
-    int length;
+    Off_t length;
     STRLEN blen;
     MAGIC *mg;
 
@@ -1618,7 +1618,11 @@ PP(pp_send)
 	goto say_undef;
     bufsv = *++MARK;
     buffer = SvPV(bufsv, blen);
+#if Off_t_SIZE > IVSIZE
+    length = SvNVx(*++MARK);
+#else
     length = SvIVx(*++MARK);
+#endif
     if (length < 0)
 	DIE(aTHX_ "Negative length");
     SETERRNO(0,0);
@@ -1634,7 +1638,11 @@ PP(pp_send)
     }
     else if (PL_op->op_type == OP_SYSWRITE) {
 	if (MARK < SP) {
+#if Off_t_SIZE > IVSIZE
+	    offset = SvNVx(*++MARK);
+#else
 	    offset = SvIVx(*++MARK);
+#endif
 	    if (offset < 0) {
 		if (-offset > blen)
 		    DIE(aTHX_ "Offset outside string");
@@ -1737,7 +1745,11 @@ PP(pp_tell)
 	RETURN;
     }
 
+#if LSEEKSIZE > IVSIZE
+    PUSHn( do_tell(gv) );
+#else
     PUSHi( do_tell(gv) );
+#endif
     RETURN;
 }
 
@@ -1751,7 +1763,11 @@ PP(pp_sysseek)
     djSP;
     GV *gv;
     int whence = POPi;
+#if LSEEKSIZE > IVSIZE
+    Off_t offset = (Off_t)SvNVx(POPs);
+#else
     Off_t offset = (Off_t)SvIVx(POPs);
+#endif
     MAGIC *mg;
 
     gv = PL_last_in_gv = (GV*)POPs;
@@ -1773,9 +1789,18 @@ PP(pp_sysseek)
 	PUSHs(boolSV(do_seek(gv, offset, whence)));
     else {
 	Off_t n = do_sysseek(gv, offset, whence);
-	PUSHs((n < 0) ? &PL_sv_undef
-	      : sv_2mortal(n ? newSViv((IV)n)
-			   : newSVpvn(zero_but_true, ZBTLEN)));
+        if (n < 0)
+            PUSHs(&PL_sv_undef);
+        else {
+            SV* sv = n ?
+#if LSEEKSIZE > IVSIZE
+                newSVnv((NV)n)
+#else
+                newSViv((IV)n)
+#endif
+                : newSVpvn(zero_but_true, ZBTLEN);
+            PUSHs(sv_2mortal(sv));
+        }
     }
     RETURN;
 }
@@ -2478,7 +2503,7 @@ PP(pp_stat)
 #else
 	PUSHs(sv_2mortal(newSVpvn("", 0)));
 #endif
-#if Size_t_size > IVSIZE
+#if Off_t_size > IVSIZE
 	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_size)));
 #else
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_size)));
@@ -2708,7 +2733,7 @@ PP(pp_ftsize)
     djSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
-#if Size_t_size > IVSISE
+#if Off_t_size > IVSIZE
     PUSHn(PL_statcache.st_size);
 #else
     PUSHi(PL_statcache.st_size);
@@ -3175,7 +3200,7 @@ PP(pp_link)
     char *tmps2 = POPpx;
     char *tmps = SvPV(TOPs, n_a);
     TAINT_PROPER("link");
-    SETi( link(tmps, tmps2) >= 0 );
+    SETi( PerlLIO_link(tmps, tmps2) >= 0 );
 #else
     DIE(aTHX_ PL_no_func, "Unsupported function link");
 #endif

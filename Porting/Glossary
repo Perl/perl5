@@ -828,7 +828,7 @@ d_inetaton (d_inetaton.U):
 	indicates to the C program that the inet_aton() function is available
 	to parse IP address "dotted-quad" strings.
 
-d_int64t (i_inttypes.U):
+d_int64t (d_int64t.U):
 	This symbol will be defined if the C compiler supports int64_t.
 
 d_isascii (d_isascii.U):
@@ -2676,7 +2676,7 @@ ptrsize (ptrsize.U):
 	This variable contains the value of the PTRSIZE symbol, which
 	indicates to the C program how many bytes there are in a pointer.
 
-quadcase (quadtype.U):
+quadkind (quadtype.U):
 	This variable, if defined, encodes the type of a quad:
 	1 = int, 2 = long, 3 = long long, 4 = int64_t.
 

@@ -213,7 +213,8 @@ sub require_version {
     my $version = ${"${pkg}::VERSION"};
     if (!$version or $version < $wanted) {
 	$version ||= "(undef)";
-	my $file = $INC{"$pkg.pm"};
+	    # %INC contains slashes, but $pkg contains double-colons.
+	my $file = (map {s,::,/,g; $INC{$_}} "$pkg.pm")[0];
 	$file &&= " ($file)";
 	require Carp;
 	Carp::croak("$pkg $wanted required--this is only version $version$file")
