@@ -2059,10 +2059,10 @@ ExtUtils::Install, ExtUtils::Embed
 =head1 AUTHORS
 
 Andy Dougherty <F<doughera@lafcol.lafayette.edu>>, Andreas KE<ouml>nig
-<F<A.Koenig@franz.ww.TU-Berlin.DE>>, Tim Bunce <F<Tim.Bunce@ig.co.uk>>.
-VMS support by Charles Bailey <F<bailey@newman.upenn.edu>>.  OS/2
-support by Ilya Zakharevich <F<ilya@math.ohio-state.edu>>.  Contact the
-makemaker mailing list C<mailto:makemaker@franz.ww.tu-berlin.de>, if
-you have any questions.
+<F<andreas.koenig@mind.de>>, Tim Bunce <F<Tim.Bunce@ig.co.uk>>.  VMS
+support by Charles Bailey <F<bailey@newman.upenn.edu>>.  OS/2 support
+by Ilya Zakharevich <F<ilya@math.ohio-state.edu>>.
+
+Send patches and bug reports to <F<perlbug@perl.org>>.
 
 =cut
