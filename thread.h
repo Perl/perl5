@@ -303,8 +303,11 @@
 #endif
 
 #ifndef PTHREAD_ATFORK
+typedef void(*Perl_pthread_atfork_t)(void);
 #  define PTHREAD_ATFORK(prepare,parent,child)			\
-    pthread_atfork(prepare,parent,child)
+    pthread_atfork((Perl_pthread_atfork_t)prepare,\
+	           (Perl_pthread_atfork_t)parent,\
+                   (Perl_pthread_atfork_t)child)
 #endif
 
 #ifndef THREAD_RET_TYPE
