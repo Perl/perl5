@@ -435,15 +435,20 @@ determined by Configure.  The full definitions of all Configure
 variables are in the file Porting/Glossary.
 
     Configure variable	Default value
-    $prefix		/usr/local
-    $bin		$prefix/bin
-    $scriptdir		$prefix/bin
-    $privlib		$prefix/lib/perl5/$version
-    $archlib 		$prefix/lib/perl5/$version/$archname
-    $man1dir		$prefix/man/man1
-    $man3dir		$prefix/man/man3
-    $html1dir		(none)
-    $html3dir		(none)
+    $prefixexp		/usr/local
+    $binexp		$prefixexp/bin
+    $scriptdirexp	$prefixexp/bin
+    $privlibexp		$prefixexp/lib/perl5/$version
+    $archlibexp		$prefixexp/lib/perl5/$version/$archname
+    $man1direxp		$prefixexp/man/man1
+    $man3direxp		$prefixexp/man/man3
+    $html1direxp	(none)
+    $html3direxp	(none)
+
+$prefixexp is generated from $prefix, with ~ expansion done to convert home
+directories into absolute paths. Similarly for the other variables listed. As
+file system calls do not do this, you should always reference the ...exp
+variables, to support users who build perl in their home directory.
 
 Actually, Configure recognizes the SVR3-style
 /usr/local/man/l_man/man1 directories, if present, and uses those
@@ -458,15 +463,15 @@ CPAN) or scripts.  Configure will set up the following directories to
 be used for installing those add-on modules and scripts.
 
     Configure variable	Default value
-    $siteprefix		$prefix
-    $sitebin		$siteprefix/bin
-    $sitescript		$siteprefix/bin
-    $sitelib		$siteprefix/lib/perl5/site_perl/$version
-    $sitearch		$siteprefix/lib/perl5/site_perl/$version/$archname
-    $siteman1dir	$siteprefix/man/man1
-    $siteman3dir	$siteprefix/man/man3
-    $sitehtml1dir	(none)
-    $sitehtml3dir	(none)
+    $siteprefixexp	$prefixexp
+    $sitebinexp		$siteprefixexp/bin
+    $sitescriptexp	$siteprefixexp/bin
+    $sitelibexp		$siteprefixexp/lib/perl5/site_perl/$version
+    $sitearchexp	$siteprefixexp/lib/perl5/site_perl/$version/$archname
+    $siteman1direxp	$siteprefixexp/man/man1
+    $siteman3direxp	$siteprefixexp/man/man3
+    $sitehtml1direxp	(none)
+    $sitehtml3direxp	(none)
 
 By default, ExtUtils::MakeMaker will install architecture-independent
 modules into $sitelib and architecture-dependent modules into $sitearch.
@@ -478,46 +483,48 @@ distribution, Configure can optionally set up the following directories
 for you to use to distribute add-on modules.
 
     Configure variable	Default value
-    $vendorprefix	(none)
+    $vendorprefixexp	(none)
     (The next ones are set only if vendorprefix is set.)
-    $vendorbin		$vendorprefix/bin
-    $vendorscript	$vendorprefix/bin
-    $vendorlib		$vendorprefix/lib/perl5/vendor_perl/$version
-    $vendorarch		$vendorprefix/lib/perl5/vendor_perl/$version/$archname
-    $vendorman1dir	$vendorprefix/man/man1
-    $vendorman3dir	$vendorprefix/man/man3
-    $vendorhtml1dir	(none)
-    $vendorhtml3dir	(none)
+    $vendorbinexp	$vendorprefixexp/bin
+    $vendorscriptexp	$vendorprefixexp/bin
+    $vendorlibexp
+	$vendorprefixexp/lib/perl5/vendor_perl/$version
+    $vendorarchexp
+	$vendorprefixexp/lib/perl5/vendor_perl/$version/$archname
+    $vendorman1direxp	$vendorprefixexp/man/man1
+    $vendorman3direxp	$vendorprefixexp/man/man3
+    $vendorhtml1direxp	(none)
+    $vendorhtml3direxp	(none)
 
 These are normally empty, but may be set as needed.  For example,
 a vendor might choose the following settings:
 
-	$prefix		/usr
-	$siteprefix	/usr/local
-	$vendorprefix	/usr
+    $prefix		/usr
+    $siteprefix		/usr/local
+    $vendorprefix	/usr
 
 This would have the effect of setting the following:
 
-	$bin		/usr/bin
-	$scriptdir	/usr/bin
-	$privlib	/usr/lib/perl5/$version
-	$archlib 	/usr/lib/perl5/$version/$archname
-	$man1dir	/usr/man/man1
-	$man3dir	/usr/man/man3
+    $binexp		/usr/bin
+    $scriptdirexp	/usr/bin
+    $privlibexp		/usr/lib/perl5/$version
+    $archlibexp 	/usr/lib/perl5/$version/$archname
+    $man1direxp		/usr/man/man1
+    $man3direxp		/usr/man/man3
 
-	$sitebin	/usr/local/bin
-	$sitescript	/usr/local/bin
-	$sitelib	/usr/local/lib/perl5/site_perl/$version
-	$sitearch	/usr/local/lib/perl5/site_perl/$version/$archname
-	$siteman1dir	/usr/local/man/man1
-	$siteman3dir	/usr/local/man/man3
+    $sitebinexp		/usr/local/bin
+    $sitescriptexp	/usr/local/bin
+    $sitelibexp		/usr/local/lib/perl5/site_perl/$version
+    $sitearchexp	/usr/local/lib/perl5/site_perl/$version/$archname
+    $siteman1direxp	/usr/local/man/man1
+    $siteman3direxp	/usr/local/man/man3
 
-	$vendorbin	/usr/bin
-	$vendorscript	/usr/bin
-	$vendorlib	/usr/lib/perl5/vendor_perl/$version
-	$vendorarch	/usr/lib/perl5/vendor_perl/$version/$archname
-	$vendorman1dir	/usr/man/man1
-	$vendorman3dir	/usr/man/man3
+    $vendorbinexp	/usr/bin
+    $vendorscriptexp	/usr/bin
+    $vendorlibexp	/usr/lib/perl5/vendor_perl/$version
+    $vendorarchexp	/usr/lib/perl5/vendor_perl/$version/$archname
+    $vendorman1direxp	/usr/man/man1
+    $vendorman3direxp	/usr/man/man3
 
 Note how in this example, the vendor-supplied directories are in the
 /usr hierarchy, while the directories reserved for the end-user are in
