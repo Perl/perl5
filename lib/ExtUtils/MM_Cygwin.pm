@@ -10,11 +10,12 @@ require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
 
-$VERSION = 1.01_01;
+$VERSION = 1.02_01;
 
 sub cflags {
     my($self,$libperl)=@_;
     return $self->{CFLAGS} if $self->{CFLAGS};
+    return '' unless $self->needs_linking();
 
     my $base = $self->SUPER::cflags($libperl);
     foreach (split /\n/, $base) {

@@ -184,14 +184,15 @@ sub constants {
     for $tmp (qw/
 
 	      AR_STATIC_ARGS NAME DISTNAME NAME_SYM VERSION
-	      VERSION_SYM XS_VERSION INST_BIN INST_EXE INST_LIB
+	      VERSION_SYM XS_VERSION INST_BIN INST_LIB
 	      INST_ARCHLIB INST_SCRIPT PREFIX  INSTALLDIRS
 	      INSTALLPRIVLIB INSTALLARCHLIB INSTALLSITELIB
 	      INSTALLSITEARCH INSTALLBIN INSTALLSCRIPT PERL_LIB
 	      PERL_ARCHLIB SITELIBEXP SITEARCHEXP LIBPERL_A MYEXTLIB
 	      FIRST_MAKEFILE MAKE_APERL_FILE PERLMAINCC PERL_SRC
 	      PERL_INC PERL FULLPERL PERLRUN FULLPERLRUN PERLRUNINST 
-          FULLPERLRUNINST TEST_LIBS FULL_AR PERL_CORE
+          FULLPERLRUNINST ABSPERL ABSPERLRUN ABSPERLRUNINST
+          FULL_AR PERL_CORE
 
 	      / ) {
 	next unless defined $self->{$tmp};
@@ -473,26 +474,6 @@ sub export_list
 {
  my ($self) = @_;
  return "$self->{BASEEXT}.def";
-}
-
-=item canonpath
-
-No physical check on the filesystem, but a logical cleanup of a
-path. On UNIX eliminated successive slashes and successive "/.".
-
-=cut
-
-sub canonpath {
-    my($self,$path) = @_;
-    $path =~ s/^([a-z]:)/\u$1/;
-    $path =~ s|/|\\|g;
-    $path =~ s|(.)\\+|$1\\|g ;                     # xx////xx  -> xx/xx
-    $path =~ s|(\\\.)+\\|\\|g ;                    # xx/././xx -> xx/xx
-    $path =~ s|^(\.\\)+|| unless $path eq ".\\";   # ./xx      -> xx
-    $path =~ s|\\$|| 
-             unless $path =~ m#^([a-z]:)?\\#;      # xx/       -> xx
-    $path .= '.' if $path =~ m#\\$#;
-    $path;
 }
 
 =item perl_script
@@ -784,7 +765,6 @@ sub pasthru {
     my($self) = shift;
     return "PASTHRU = " . ($NMAKE ? "-nologo" : "");
 }
-
 
 
 1;

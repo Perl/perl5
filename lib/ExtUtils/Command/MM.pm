@@ -34,18 +34,21 @@ Any $(FOO) used in the examples are make variables, not Perl.
 
 =item B<test_harness>
 
-  perl -MExtUtils::Command::MM -e "test_harness($(TEST_VERBOSE))" t/*.t
+  test_harness($verbose, @test_libs);
 
-Runs the given tests via Test::Harness.  Will exit with non-zero if
-the test fails.
-
-Typically used with t/*.t files.
+Runs the tests on @ARGV via Test::Harness passing through the $verbose
+flag.  Any @test_libs will be unshifted onto the test's @INC.
 
 =cut
 
 sub test_harness {
     require Test::Harness;
+    require File::Spec;
+
     $Test::Harness::verbose = shift;
+
+    local @INC = @INC;
+    unshift @INC, map { File::Spec->rel2abs($_) } @_;
     Test::Harness::runtests(@ARGV);
 }
 

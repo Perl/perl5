@@ -1,13 +1,25 @@
 package ExtUtils::MM_Win95;
 
 use vars qw($VERSION @ISA);
-$VERSION = 0.01;
+$VERSION = 0.02;
 
 require ExtUtils::MM_Win32;
 @ISA = qw(ExtUtils::MM_Win32);
 
 
 # a few workarounds for command.com (very basic)
+
+sub dist_test {
+    my($self) = shift;
+    return q{
+disttest : distdir
+        cd $(DISTVNAME)
+        $(ABSPERLRUN) Makefile.PL
+        $(MAKE) $(PASTHRU)
+        $(MAKE) test $(PASTHRU)
+        cd ..
+};
+}
 
 sub xs_c {
     my($self) = shift;

@@ -14,7 +14,7 @@ use VMS::Filespec;
 use File::Basename;
 use File::Spec;
 use vars qw($Revision @ISA $VERSION);
-($VERSION) = $Revision = '5.62_01';
+($VERSION) = $Revision = '5.63_01';
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
@@ -332,6 +332,20 @@ sub replace_manpage_separator {
     $man;
 }
 
+=item init_main (override)
+
+Override DISTVNAME so it uses VERSION_SYM to avoid getting too many
+dots in the name.
+
+=cut
+
+sub init_main {
+    my($self) = shift;
+
+    $self->SUPER::init_main;
+    $self->{DISTVNAME} = "$self->{DISTNAME}-$self->{VERSION_SYM}";
+}
+
 =item init_others (override)
 
 Provide VMS-specific forms of various utility commands, then hand
@@ -373,6 +387,7 @@ sub constants {
     # Be kind about case for pollution
     for (@ARGV) { $_ = uc($_) if /POLLUTE/i; }
 
+    $self->{DEFINE} ||= '';
     if ($self->{DEFINE} ne '') {
 	my(@terms) = split(/\s+/,$self->{DEFINE});
 	my(@defs,@udefs);
@@ -391,8 +406,12 @@ sub constants {
 	    push @$targ, $def;
 	}
 	$self->{DEFINE} = '';
-	if (@defs)  { $self->{DEFINE}  = '/Define=(' . join(',',@defs)  . ')'; }
-	if (@udefs) { $self->{DEFINE} .= '/Undef=('  . join(',',@udefs) . ')'; }
+	if (@defs)  { 
+            $self->{DEFINE}  = '/Define=(' . join(',',@defs)  . ')'; 
+        }
+	if (@udefs) { 
+            $self->{DEFINE} .= '/Undef=('  . join(',',@udefs) . ')'; 
+        }
     }
 
     if ($self->{OBJECT} =~ /\s/) {
@@ -403,7 +422,7 @@ sub constants {
 
 
     foreach $macro ( qw [
-            INST_BIN INST_SCRIPT INST_LIB INST_ARCHLIB INST_EXE INSTALLPRIVLIB
+            INST_BIN INST_SCRIPT INST_LIB INST_ARCHLIB INSTALLPRIVLIB
             INSTALLARCHLIB INSTALLSCRIPT INSTALLBIN PERL_LIB PERL_ARCHLIB
             PERL_INC PERL_SRC FULLEXT INST_MAN1DIR INSTALLMAN1DIR
             INST_MAN3DIR INSTALLMAN3DIR INSTALLSITELIB INSTALLSITEARCH
@@ -424,13 +443,14 @@ sub constants {
 
     foreach $macro (qw/
 	      AR_STATIC_ARGS NAME DISTNAME NAME_SYM VERSION VERSION_SYM XS_VERSION
-	      INST_BIN INST_EXE INST_LIB INST_ARCHLIB INST_SCRIPT PREFIX
+	      INST_BIN INST_LIB INST_ARCHLIB INST_SCRIPT PREFIX
 	      INSTALLDIRS INSTALLPRIVLIB  INSTALLARCHLIB INSTALLSITELIB
 	      INSTALLSITEARCH INSTALLBIN INSTALLSCRIPT PERL_LIB
 	      PERL_ARCHLIB SITELIBEXP SITEARCHEXP LIBPERL_A MYEXTLIB
 	      FIRST_MAKEFILE MAKE_APERL_FILE PERLMAINCC PERL_SRC PERL_VMS
 	      PERL_INC PERL FULLPERL PERLRUN FULLPERLRUN PERLRUNINST
-          FULLPERLRUNINST TEST_LIBS PERL_CORE NOECHO NOOP
+          FULLPERLRUNINST ABSPERL ABSPERLRUN ABSPERLRUNINST
+          PERL_CORE NOECHO NOOP
 	      / ) {
 	next unless defined $self->{$macro};
 	push @m, "$macro = $self->{$macro}\n";
@@ -631,6 +651,8 @@ sub cflags {
 #    $quals =~ s/,,/,/g; $quals =~ s/\(,/(/g;
     $self->{CCFLAGS} = $quals;
 
+    $self->{PERLTYPE} ||= '';
+
     $self->{OPTIMIZE} ||= $flagoptstr || $Config{'optimize'};
     if ($self->{OPTIMIZE} !~ m!/!) {
 	if    ($self->{OPTIMIZE} =~ m!-g!) { $self->{OPTIMIZE} = '/Debug/NoOptimize' }
@@ -681,7 +703,7 @@ sub const_cccmd {
         push @m,'
 .FIRST
 	',$self->{NOECHO},'If F$TrnLnm("Sys").eqs."" .and. F$TrnLnm("DECC$System_Include").eqs."" Then Define/NoLog SYS ',
-		($Config{'arch'} eq 'VMS_AXP' ? 'Sys$Library' : 'DECC$Library_Include'),'
+		($Config{'archname'} eq 'VMS_AXP' ? 'Sys$Library' : 'DECC$Library_Include'),'
 	',$self->{NOECHO},'If F$TrnLnm("Sys").eqs."" .and. F$TrnLnm("DECC$System_Include").nes."" Then Define/NoLog SYS DECC$System_Include';
     }
 
@@ -938,6 +960,8 @@ sub dist {
     # Sanitize these for use in $(DISTVNAME) filespec
     $attribs{VERSION} =~ s/[^\w\$]/_/g;
     $attribs{NAME} =~ s/[^\w\$]/-/g;
+
+    $attribs{DISTVNAME} ||= '$(DISTNAME)-$(VERSION_SYM)';
 
     return $self->SUPER::dist(%attribs);
 }
@@ -1578,7 +1602,7 @@ q{
 disttest : distdir
 	startdir = F$Environment("Default")
 	Set Default [.$(DISTVNAME)]
-	$(PERLRUN) Makefile.PL
+	$(ABSPERLRUN) Makefile.PL
 	$(MMS)$(MMSQUALIFIERS)
 	$(MMS)$(MMSQUALIFIERS) test
 	Set Default 'startdir'
@@ -1620,9 +1644,6 @@ install_perl :: all pure_perl_install doc_perl_install
 install_site :: all pure_site_install doc_site_install
 	$(NOECHO) $(NOOP)
 
-install_ :: install_site
-	$(NOECHO) $(SAY) "INSTALLDIRS not defined, defaulting to INSTALLDIRS=site"
-
 pure_install :: pure_$(INSTALLDIRS)_install
 	$(NOECHO) $(NOOP)
 
@@ -1637,8 +1658,8 @@ doc__install : doc_site_install
 
 # This hack brought to you by DCL's 255-character command line limit
 pure_perl_install ::
-	$(NOECHO) $(PERLRUN) "-MFile::Spec" -e "print 'read '.File::Spec->catfile('$(PERL_ARCHLIB)','auto','$(FULLEXT)','.packlist') " >.MM_tmp
-	$(NOECHO) $(PERLRUN) "-MFile::Spec" -e "print 'write '.File::Spec->catfile('$(INSTALLARCHLIB)','auto','$(FULLEXT)','.packlist') " >>.MM_tmp
+	$(NOECHO) $(PERLRUN) "-MFile::Spec" -e "print 'read '.File::Spec->catfile('$(PERL_ARCHLIB)','auto','$(FULLEXT)','.packlist').' '" >.MM_tmp
+	$(NOECHO) $(PERLRUN) "-MFile::Spec" -e "print 'write '.File::Spec->catfile('$(INSTALLARCHLIB)','auto','$(FULLEXT)','.packlist').' '" >>.MM_tmp
 	$(NOECHO) $(PERL) -e "print '$(INST_LIB) $(INSTALLPRIVLIB) '" >>.MM_tmp
 	$(NOECHO) $(PERL) -e "print '$(INST_ARCHLIB) $(INSTALLARCHLIB) '" >>.MM_tmp
 	$(NOECHO) $(PERL) -e "print '$(INST_BIN) $(INSTALLBIN) '" >>.MM_tmp
@@ -1651,8 +1672,8 @@ pure_perl_install ::
 
 # Likewise
 pure_site_install ::
-	$(NOECHO) $(PERLRUN) "-MFile::Spec" -e "print 'read '.File::Spec->catfile('$(SITEARCHEXP)','auto','$(FULLEXT)','.packlist') " >.MM_tmp
-	$(NOECHO) $(PERLRUN) "-MFile::Spec" -e "print 'write '.File::Spec->catfile('$(INSTALLSITEARCH)','auto','$(FULLEXT)','.packlist') " >>.MM_tmp
+	$(NOECHO) $(PERLRUN) "-MFile::Spec" -e "print 'read '.File::Spec->catfile('$(SITEARCHEXP)','auto','$(FULLEXT)','.packlist').' '" >.MM_tmp
+	$(NOECHO) $(PERLRUN) "-MFile::Spec" -e "print 'write '.File::Spec->catfile('$(INSTALLSITEARCH)','auto','$(FULLEXT)','.packlist').' '" >>.MM_tmp
 	$(NOECHO) $(PERL) -e "print '$(INST_LIB) $(INSTALLSITELIB) '" >>.MM_tmp
 	$(NOECHO) $(PERL) -e "print '$(INST_ARCHLIB) $(INSTALLSITEARCH) '" >>.MM_tmp
 	$(NOECHO) $(PERL) -e "print '$(INST_BIN) $(INSTALLBIN) '" >>.MM_tmp
@@ -1743,7 +1764,7 @@ $(OBJECT) : $(PERL_INC)util.h, $(PERL_INC)vmsish.h, $(PERL_INC)warnings.h
     if ($self->{PERL_SRC}) {
 	my(@macros);
 	my($mmsquals) = '$(USEMAKEFILE)[.vms]$(MAKEFILE)';
-	push(@macros,'__AXP__=1') if $Config{'arch'} eq 'VMS_AXP';
+	push(@macros,'__AXP__=1') if $Config{'archname'} eq 'VMS_AXP';
 	push(@macros,'DECC=1')    if $Config{'vms_cc_type'} eq 'decc';
 	push(@macros,'GNUC=1')    if $Config{'vms_cc_type'} eq 'gcc';
 	push(@macros,'SOCKET=1')  if $Config{'d_has_sockets'};

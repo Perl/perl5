@@ -1003,6 +1003,8 @@ lib/ExtUtils/MM_Win95.pm        MakeMaker methods for Win95
 lib/ExtUtils/MY.pm              MakeMaker user override class
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
 lib/ExtUtils/t/basic.t		See if MakeMaker can build a module
+lib/ExtUtils/t/Big-Fat-Dummy/Liar/Makefile.PL         MakeMaker dummy module
+lib/ExtUtils/t/Big-Fat-Dummy/Liar/lib/Big/Fat/Liar.pm MakeMaker dummy module
 lib/ExtUtils/t/Big-Fat-Dummy/lib/Big/Fat/Dummy.pm     MakeMaker dummy module
 lib/ExtUtils/t/Big-Fat-Dummy/Makefile.PL              MakeMaker dummy module
 lib/ExtUtils/t/Command.t	See if ExtUtils::Command works (Win32 only)
@@ -1010,6 +1012,7 @@ lib/ExtUtils/t/Constant.t	See if ExtUtils::Constant works
 lib/ExtUtils/t/Embed.t		See if ExtUtils::Embed and embedding works
 lib/ExtUtils/t/hints.t          See if hint files are honored.
 lib/ExtUtils/t/Installed.t	See if ExtUtils::Installed works
+lib/ExtUtils/t/INST.t           Check MakeMaker INST_* macros 
 lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
 lib/ExtUtils/t/Mkbootstrap.t	See if ExtUtils::Mkbootstrap works
 lib/ExtUtils/t/MM_BeOS.t	See if ExtUtils::MM_BeOS works
@@ -1019,6 +1022,7 @@ lib/ExtUtils/t/MM_Unix.t	See if ExtUtils::MM_UNIX works
 lib/ExtUtils/t/MM_VMS.t		See if ExtUtils::MM_VMS works
 lib/ExtUtils/t/MM_Win32.t	See if ExtUtils::MM_Win32 works
 lib/ExtUtils/t/Packlist.t	See if Packlist works
+lib/ExtUtils/t/prefixify.t      See if MakeMaker can apply a PREFIX
 lib/ExtUtils/t/Problem-Module/Makefile.PL           MakeMaker dummy module
 lib/ExtUtils/t/Problem-Module/subdir/Makefile.PL    MakeMaker dummy module
 lib/ExtUtils/t/problems.t       How MakeMaker reacts to build problems

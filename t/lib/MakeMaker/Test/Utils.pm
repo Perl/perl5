@@ -9,10 +9,10 @@ use vars qw($VERSION @ISA @EXPORT);
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = 0.01;
+$VERSION = 0.02;
 
 @EXPORT = qw(which_perl perl_lib makefile_name makefile_backup
-             make make_run make_macro
+             make make_run make_macro calibrate_mtime
             );
 
 my $Is_VMS = $^O eq 'VMS';
@@ -35,6 +35,8 @@ MakeMaker::Test::Utils - Utility routines for testing MakeMaker
   my $make          = make;
   my $make_run      = make_run;
   make_macro($make, $targ, %macros);
+
+  my $mtime         = calibrate_mtime;
 
 =head1 DESCRIPTION
 
@@ -63,17 +65,24 @@ sub which_perl {
     # VMS should have 'perl' aliased properly
     return $perl if $Is_VMS;
 
-    $perl = File::Spec->rel2abs( $perl );
+    $perl .= $Config{exe_ext} unless $perl =~ m/$Config{exe_ext}$/i;
 
-    unless( -x $perl ) {
+    my $perlpath = File::Spec->rel2abs( $perl );
+    unless( -x $perlpath ) {
         # $^X was probably 'perl'
+
+        # When building in the core, *don't* go off and find
+        # another perl
+        die "Can't find a perl to use (\$^X=$^X), (\$perlpath=$perlpath)" 
+          if $ENV{PERL_CORE};
+
         foreach my $path (File::Spec->path) {
-            $perl = File::Spec->catfile($path, $^X);
-            last if -x $perl;
+            $perlpath = File::Spec->catfile($path, $perl);
+            last if -x $perlpath;
         }
     }
 
-    return $perl;
+    return $perlpath;
 }
 
 =item B<perl_lib>
@@ -199,6 +208,25 @@ sub make_macro {
     }
 
     return $is_mms ? "$make$macros $target" : "$make $target $macros";
+}
+
+=item B<calibrate_mtime>
+
+  my $mtime = calibrate_mtime;
+
+When building on NFS, file modification times can often lose touch
+with reality.  This returns the mtime of a file which has just been
+touched.
+
+=cut
+
+sub calibrate_mtime {
+    open(FILE, ">calibrate_mtime.tmp") || die $!;
+    print FILE "foo";
+    close FILE;
+    my($mtime) = (stat('calibrate_mtime.tmp'))[9];
+    unlink 'calibrate_mtime.tmp';
+    return $mtime;
 }
 
 =back
