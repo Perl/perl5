@@ -1453,6 +1453,13 @@ t/io/tell.t		See if file seeking works
 t/io/utf8.t		See if file seeking works
 t/lib/1_compile.t	See if the various libraries and extensions compile
 t/lib/MyFilter.pm	Helper file for t/lib/filter-simple.t
+t/lib/Test/fail.t	See if Test works
+t/lib/Test/mix.t	See if Test works
+t/lib/Test/onfail.t	See if Test works
+t/lib/Test/qr.t	See if Test works
+t/lib/Test/skip.t	See if Test works
+t/lib/Test/success.t	See if Test works
+t/lib/Test/todo.t	See if Test works
 t/lib/abbrev.t		See if Text::Abbrev works
 t/lib/ansicolor.t	See if Term::ANSIColor works
 t/lib/anydbm.t		See if AnyDBM_File works

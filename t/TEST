@@ -192,8 +192,9 @@ EOT
 		print $_;
 	    }
 	    unless (/^#/) {
-		if (/^1\.\.([0-9]+)/) {
+		if (/^1\.\.([0-9]+)( todo ([\d ]+))?/) {
 		    $max = $1;
+                    %todo = map { $_ => 1 } split / /, $3 if $3;
 		    $totmax += $max;
 		    $files += 1;
 		    $next = 1;
@@ -205,6 +206,7 @@ EOT
 		    {
 			my($not, $num, $extra) = ($1, $2, $3);
 			my($istodo) = $extra =~ /^\s*#\s*TODO/ if $extra;
+                        $istodo = 1 if $todo{$num};
 
 			if( $not && !$istodo ) {
 			    $ok = 0;
