@@ -17,7 +17,7 @@ BEGIN {
 use warnings;
 no warnings qw(overflow portable);
 
-print "1..59\n";
+print "1..63\n";
 
 # as 6 * 6 = 36, the last digit of 6**n will always be six. Hence the last
 # digit of 16**n will always be six. Hence 16**n - 1 will always end in 5.
@@ -349,6 +349,34 @@ if ($q == 0x5555555555555555 and ($q != 0x5555555555555556
 } else {
   print "not ok 59 # 0xFFFFFFFFFFFFFFFF / 3 = $q\n";
   print "# Should not be floating point\n" if $q =~ tr/e.//;
+}
+
+$q = 0xFFFFFFFFFFFFFFFF % 0x5555555555555555;
+if ($q == 0) {
+  print "ok 60\n";
+} else {
+  print "not ok 60 # 0xFFFFFFFFFFFFFFFF % 0x5555555555555555 => $q\n";
+}
+
+$q = 0xFFFFFFFFFFFFFFFF % 0xFFFFFFFFFFFFFFF0;
+if ($q == 0xF) {
+  print "ok 61\n";
+} else {
+  print "not ok 61 # 0xFFFFFFFFFFFFFFFF % 0xFFFFFFFFFFFFFFF0 => $q\n";
+}
+
+$q = 0x8000000000000000 % 9223372036854775807;
+if ($q == 1) {
+  print "ok 62\n";
+} else {
+  print "not ok 62 # 0x8000000000000000 % 9223372036854775807 => $q\n";
+}
+
+$q = 0x8000000000000000 % -9223372036854775807;
+if ($q == -9223372036854775806) {
+  print "ok 63\n";
+} else {
+  print "not ok 63 # 0x8000000000000000 % -9223372036854775807 => $q\n";
 }
 
 # eof

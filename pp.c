@@ -1115,61 +1115,90 @@ PP(pp_modulo)
 	UV right = 0;
 	bool left_neg;
 	bool right_neg;
-	bool use_double = 0;
+	bool use_double = FALSE;
+	bool dright_valid = FALSE;
 	NV dright = 0.0;
 	NV dleft  = 0.0;
 
-	if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)) {
-	    IV i = SvIVX(POPs);
-	    right = (right_neg = (i < 0)) ? -i : i;
-	}
-	else {
+        SvIV_please(TOPs);
+        if (SvIOK(TOPs)) {
+            right_neg = !SvUOK(TOPs);
+            if (!right_neg) {
+                right = SvUVX(POPs);
+            } else {
+                IV biv = SvIVX(POPs);
+                if (biv >= 0) {
+                    right = biv;
+                    right_neg = FALSE; /* effectively it's a UV now */
+                } else {
+                    right = -biv;
+                }
+            }
+        }
+        else {
 	    dright = POPn;
-	    use_double = 1;
 	    right_neg = dright < 0;
 	    if (right_neg)
 		dright = -dright;
+            if (dright < UV_MAX_P1) {
+                right = U_V(dright);
+                dright_valid = TRUE; /* In case we need to use double below.  */
+            } else {
+                use_double = TRUE;
+            }
 	}
 
-	if (!use_double && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)) {
-	    IV i = SvIVX(POPs);
-	    left = (left_neg = (i < 0)) ? -i : i;
-	}
+        /* At this point use_double is only true if right is out of range for
+           a UV.  In range NV has been rounded down to nearest UV and
+           use_double false.  */
+        SvIV_please(TOPs);
+	if (!use_double && SvIOK(TOPs)) {
+            if (SvIOK(TOPs)) {
+                left_neg = !SvUOK(TOPs);
+                if (!left_neg) {
+                    left = SvUVX(POPs);
+                } else {
+                    IV aiv = SvIVX(POPs);
+                    if (aiv >= 0) {
+                        left = aiv;
+                        left_neg = FALSE; /* effectively it's a UV now */
+                    } else {
+                        left = -aiv;
+                    }
+                }
+            }
+        }
 	else {
 	    dleft = POPn;
-	    if (!use_double) {
-		use_double = 1;
-		dright = right;
-	    }
 	    left_neg = dleft < 0;
 	    if (left_neg)
 		dleft = -dleft;
-	}
 
+            /* This should be exactly the 5.6 behaviour - if left and right are
+               both in range for UV then use U_V() rather than floor.  */
+	    if (!use_double) {
+                if (dleft < UV_MAX_P1) {
+                    /* right was in range, so is dleft, so use UVs not double.
+                     */
+                    left = U_V(dleft);
+                }
+                /* left is out of range for UV, right was in range, so promote
+                   right (back) to double.  */
+                else {
+                    /* The +0.5 is used in 5.6 even though it is not strictly
+                       consistent with the implicit +0 floor in the U_V()
+                       inside the #if 1. */
+                    dleft = Perl_floor(dleft + 0.5);
+                    use_double = TRUE;
+                    if (dright_valid)
+                        dright = Perl_floor(dright + 0.5);
+                    else
+                        dright = right;
+                }
+            }
+        }
 	if (use_double) {
 	    NV dans;
-
-#if 1
-/* Somehow U_V is pessimized even if CASTFLAGS is 0 */
-#  if CASTFLAGS & 2
-#    define CAST_D2UV(d) U_V(d)
-#  else
-#    define CAST_D2UV(d) ((UV)(d))
-#  endif
-	    /* Tried to do this only in the case DOUBLESIZE <= UV_SIZE,
-	     * or, in other words, precision of UV more than of NV.
-	     * But in fact the approach below turned out to be an
-	     * optimization - floor() may be slow */
-	    if (dright <= UV_MAX && dleft <= UV_MAX) {
-		right = CAST_D2UV(dright);
-		left  = CAST_D2UV(dleft);
-		goto do_uv;
-	    }
-#endif
-
-	    /* Backward-compatibility clause: */
-	    dright = Perl_floor(dright + 0.5);
-	    dleft  = Perl_floor(dleft + 0.5);
 
 	    if (!dright)
 		DIE(aTHX_ "Illegal modulus zero");
@@ -1184,7 +1213,6 @@ PP(pp_modulo)
 	else {
 	    UV ans;
 
-	do_uv:
 	    if (!right)
 		DIE(aTHX_ "Illegal modulus zero");
 
