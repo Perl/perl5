@@ -1520,6 +1520,15 @@ explicitly above.
 
 This will attempt to make perl in the current directory.
 
+=head2 Expected errors
+
+These errors are normal, and can be ignored:
+
+  ...
+  make: [extra.pods] Error 1 (ignored)
+  ...
+  make: [extras.make] Error 1 (ignored)
+
 =head2 What if it doesn't work?
 
 If you can't compile successfully, try some of the following ideas.
