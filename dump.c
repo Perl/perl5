@@ -757,17 +757,19 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 #ifdef USE_ITHREADS
 	Perl_dump_indent(aTHX_ level, file, "PADIX = %" IVdf "\n", (IV)cPADOPo->op_padix);
 #else
-	if (cSVOPo->op_sv) {
-	    SV *tmpsv = NEWSV(0,0);
-	    STRLEN n_a;
-	    ENTER;
-	    SAVEFREESV(tmpsv);
-	    gv_fullname3(tmpsv, (GV*)cSVOPo->op_sv, Nullch);
-	    Perl_dump_indent(aTHX_ level, file, "GV = %s\n", SvPV(tmpsv, n_a));
-	    LEAVE;
+	if ( ! PL_op->op_flags & OPf_SPECIAL) { /* not lexical */
+	    if (cSVOPo->op_sv) {
+		SV *tmpsv = NEWSV(0,0);
+		STRLEN n_a;
+		ENTER;
+		SAVEFREESV(tmpsv);
+		gv_fullname3(tmpsv, (GV*)cSVOPo->op_sv, Nullch);
+		Perl_dump_indent(aTHX_ level, file, "GV = %s\n", SvPV(tmpsv, n_a));
+		LEAVE;
+	    }
+	    else
+		Perl_dump_indent(aTHX_ level, file, "GV = NULL\n");
 	}
-	else
-	    Perl_dump_indent(aTHX_ level, file, "GV = NULL\n");
 #endif
 	break;
     case OP_CONST:
