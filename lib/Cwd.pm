@@ -156,7 +156,7 @@ sub fastcwd {
 my $chdir_init = 0;
 
 sub chdir_init {
-    if ($ENV{'PWD'} and $^O ne 'os2' and $^O ne 'dos') {
+    if ($ENV{'PWD'} and $^O ne 'os2' and $^O ne 'dos' and $^O ne 'MSWin32') {
 	my($dd,$di) = stat('.');
 	my($pd,$pi) = stat($ENV{'PWD'});
 	if (!defined $dd or !defined $pd or $di != $pi or $dd != $pd) {
@@ -164,10 +164,12 @@ sub chdir_init {
 	}
     }
     else {
-	$ENV{'PWD'} = cwd();
+	my $wd = cwd();
+	$wd = Win32::GetFullPathName($wd) if $^O eq 'MSWin32';
+	$ENV{'PWD'} = $wd;
     }
     # Strip an automounter prefix (where /tmp_mnt/foo/bar == /foo/bar)
-    if ($ENV{'PWD'} =~ m|(/[^/]+(/[^/]+/[^/]+))(.*)|s) {
+    if ($^O ne 'MSWin32' and $ENV{'PWD'} =~ m|(/[^/]+(/[^/]+/[^/]+))(.*)|s) {
 	my($pd,$pi) = stat($2);
 	my($dd,$di) = stat($1);
 	if (defined $pd and defined $dd and $di == $pi and $dd == $pd) {
@@ -179,10 +181,16 @@ sub chdir_init {
 
 sub chdir {
     my $newdir = shift || '';	# allow for no arg (chdir to HOME dir)
-    $newdir =~ s|///*|/|g;
+    $newdir =~ s|///*|/|g unless $^O eq 'MSWin32';
     chdir_init() unless $chdir_init;
     return 0 unless CORE::chdir $newdir;
-    if ($^O eq 'VMS') { return $ENV{'PWD'} = $ENV{'DEFAULT'} }
+    if ($^O eq 'VMS') {
+	return $ENV{'PWD'} = $ENV{'DEFAULT'}
+    }
+    elsif ($^O eq 'MSWin32') {
+	$ENV{'PWD'} = Win32::GetFullPathName($newdir);
+	return 1;
+    }
 
     if ($newdir =~ m#^/#s) {
 	$ENV{'PWD'} = $newdir;
