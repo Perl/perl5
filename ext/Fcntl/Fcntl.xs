@@ -2,7 +2,11 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#include <fcntl.h>
+#ifdef VMS
+#  include <file.h>
+#else
+#  include <fcntl.h>
+#endif
 
 /* This comment is a kludge to get metaconfig to see the symbols
     VAL_O_NONBLOCK
