@@ -1865,19 +1865,27 @@ Perl_localize(pTHX_ OP *o, I32 lex)
 	    && PL_bufptr > PL_oldbufptr && PL_bufptr[-1] == ',')
 	{
 	    char *s = PL_bufptr;
-	    int sigil = 0;
+	    bool sigil = FALSE;
 
 	    /* some heuristics to detect a potential error */
-	    while (*s && (strchr(", \t\n", *s)
-			|| (strchr("@$%*", *s) && ++sigil) ))
+	    while (*s && (strchr(", \t\n", *s)))
 		s++;
-	    if (sigil) {
-		while (*s && (isALNUM(*s) || UTF8_IS_CONTINUED(*s)
-			    || strchr("@$%*, \t\n", *s)))
-		    s++;
 
-		if (*s == ';' || *s == '=')
-		    Perl_warner(aTHX_ packWARN(WARN_PARENTHESIS),
+	    while (1) {
+		if (*s && strchr("@$%*", *s) && *++s
+		       && (isALNUM(*s) || UTF8_IS_CONTINUED(*s))) {
+		    s++;
+		    sigil = TRUE;
+		    while (*s && (isALNUM(*s) || UTF8_IS_CONTINUED(*s)))
+			s++;
+		    while (*s && (strchr(", \t\n", *s)))
+			s++;
+		}
+		else
+		    break;
+	    }
+	    if (sigil && (*s == ';' || *s == '=')) {
+		Perl_warner(aTHX_ packWARN(WARN_PARENTHESIS),
 				"Parentheses missing around \"%s\" list",
 				lex ? (PL_in_my == KEY_our ? "our" : "my")
 				: "local");
