@@ -149,7 +149,7 @@ To find out I<all> modules installed on your system, including
 those without documentation or outside the standard release,
 just do this:
 
-    % find `perl -e 'print "@INC"'` -name '*.pm' -print
+    % find `perl -Te 'print "@INC"'` -name '*.pm' -print
 
 They should all have their own documentation installed and accessible
 via your system man(1) command.  If you do not have a B<find>
