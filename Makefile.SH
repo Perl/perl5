@@ -548,6 +548,7 @@ SYMH = perlvars.h intrpvar.h thrdvar.h
 #	ext/ByteLoader/byterun.h:	bytecode.pl
 #	ext/ByteLoader/byterun.c:	bytecode.pl
 #	ext/B/Asmdata.pm:	bytecode.pl
+#	global.sym:	embed.pl
 #	regnodes.h:	regcomp.pl
 #	warning.h lib/warning.pm:	warning.pl
 # The correct versions should be already supplied with the perl kit,

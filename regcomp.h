@@ -66,10 +66,10 @@ typedef OP OP_4tree;			/* Will be redefined later. */
  */
 
 struct regnode_string {
-    U8	flags;
+    U8	str_len;
     U8  type;
     U16 next_off;
-    U8 string[1];
+    char string[1];
 };
 
 struct regnode_1 {
@@ -133,6 +133,12 @@ struct regnode_2 {
 
 #define	OP(p)		((p)->type)
 #define	OPERAND(p)	(((struct regnode_string *)p)->string)
+#define MASK(p)		((char*)OPERAND(p))
+#define	STR_LEN(p)	(((struct regnode_string *)p)->str_len)
+#define	STRING(p)	(((struct regnode_string *)p)->string)
+#define STR_SZ(l)	((l + sizeof(regnode) - 1) / sizeof(regnode))
+#define NODE_SZ_STR(p)	(STR_SZ(STR_LEN(p))+1)
+
 #define	NODE_ALIGN(node)
 #define	ARG_LOC(p)	(((struct regnode_1 *)p)->arg1)
 #define	ARG1_LOC(p)	(((struct regnode_2 *)p)->arg1)

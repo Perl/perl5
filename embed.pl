@@ -1920,7 +1920,6 @@ s	|regnode*|reg		|I32|I32 *
 s	|regnode*|reganode	|U8|U32
 s	|regnode*|regatom	|I32 *
 s	|regnode*|regbranch	|I32 *|I32
-s	|void	|regc		|U8|char *
 s	|void	|reguni		|UV|char *|I32*
 s	|regnode*|regclass
 s	|regnode*|regclassutf8
