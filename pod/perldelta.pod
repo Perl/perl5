@@ -586,9 +586,9 @@ Many of the rarer platforms that worked 100% or pretty close to it
 with perl 5.8.0 have been left a little bit untended since their
 maintainers have been otherwise busy lately, and therefore there will
 be more failures on those platforms.  Such platforms include Mac OS
-Classic, HP MPE/iX, IBM z/OS (and other EBCDIC platforms), and NetWare.
-The most common Perl platforms (Unix and Unix-like, Microsoft platforms,
-and VMS) have large enough testing and expert population that they are
+Classic, IBM z/OS (and other EBCDIC platforms), and NetWare.  The most
+common Perl platforms (Unix and Unix-like, Microsoft platforms, and
+VMS) have large enough testing and expert population that they are
 doing well.
 
 =head1 Platform Specific Problems
