@@ -2509,13 +2509,10 @@ $ if (d_alwdeftype) then usedefaulttypes = "define"
 $!
 $! determine whether to use malloc wrapping
 $ echo ""
-$ IF .NOT. usedevel .AND. usedevel .NES. "define"
-$ THEN bool_dflt = "n"
-$ ELSE bool_dflt = "y"
-$ ENDIF
+$ bool_dflt = "y"
 $ IF F$TYPE(usemallocwrap) .nes. ""
 $ then
-$   if usemallocwrap .or. usemallocwrap .eqs. "define" then bool_dflt = "y"
+$   if .NOT. usemallocwrap .or. usemallocwrap .eqs. "undef" then bool_dflt = "n"
 $ endif
 $ rp = "Do you wish to wrap malloc calls to protect against potential overflows? [''bool_dflt'] "
 $ GOSUB myread
