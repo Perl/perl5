@@ -1,11 +1,11 @@
 #! /usr/local/perl -w
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
-# $Revision: 2.3 $
+# $Revision: 2.4 $
 
 #########################
 
-use Test::More tests => 71;
+use Test::More tests => 73;
 use_ok("version"); # If we made it this far, we are ok.
 
 my ($version, $new_version);
@@ -35,7 +35,7 @@ is ( "$version" , "5.5" , '5.005 eq 5.5' );
 $version = new version "5.006.001";
 is ( "$version" , "5.6.1" , '5.006.001 eq 5.6.1' );
 $version = new version "1.2.3_4";
-is ( "$version" , "1.2.3_4" , 'beta version 1.2.3_4 eq 1.2.3_4' );
+is ( "$version" , "1.2.3_4" , 'alpha version 1.2.3_4 eq 1.2.3_4' );
 
 # test illegal formats
 diag "test illegal formats" unless $ENV{PERL_CORE};
@@ -123,37 +123,39 @@ ok ( $version eq "2002.9.30.1",'$version eq 2002.9.30.1');
 ok ( $version->numify == 2002.009030001,
     '$version->numify == 2002.009030001');
 
-# now test with Beta version form with string
+# now test with alpha version form with string
 $version = new version "1.2.3";
 $new_version = "1.2.3_4";
-diag "tests with beta-style non-objects" unless $ENV{PERL_CORE};
+diag "tests with alpha-style non-objects" unless $ENV{PERL_CORE};
 ok ( $version lt $new_version, '$version lt $new_version' );
 ok ( $new_version gt $version, '$new_version gt $version' );
 ok ( $version ne $new_version, '$version ne $new_version' );
 
 $version = new version "1.2.4";
-diag "numeric tests with beta-style non-objects" unless $ENV{PERL_CORE};
+diag "numeric tests with alpha-style non-objects" unless $ENV{PERL_CORE};
 ok ( $version > $new_version, '$version > $new_version' );
 ok ( $new_version < $version, '$new_version < $version' );
 ok ( $version != $new_version, '$version != $new_version' );
 
-# now test with Beta version form with object
+# now test with alpha version form with object
 $version = new version "1.2.3";
 $new_version = new version "1.2.3_4";
-diag "tests with beta-style objects" unless $ENV{PERL_CORE};
+diag "tests with alpha-style objects" unless $ENV{PERL_CORE};
 ok ( $version < $new_version, '$version < $new_version' );
 ok ( $new_version > $version, '$new_version > $version' );
 ok ( $version != $new_version, '$version != $new_version' );
+ok ( !$version->is_alpha, '!$version->is_alpha');
+ok ( $new_version->is_alpha, '$new_version->is_alpha');
 
 $version = new version "1.2.4";
-diag "tests with beta-style objects" unless $ENV{PERL_CORE};
+diag "tests with alpha-style objects" unless $ENV{PERL_CORE};
 ok ( $version > $new_version, '$version > $new_version' );
 ok ( $new_version < $version, '$new_version < $version' );
 ok ( $version != $new_version, '$version != $new_version' );
 
 $version = new version "1.2.4";
 $new_version = new version "1.2_4";
-diag "tests with beta-style objects with same subversion" unless $ENV{PERL_CORE};
+diag "tests with alpha-style objects with same subversion" unless $ENV{PERL_CORE};
 ok ( $version > $new_version, '$version > $new_version' );
 ok ( $new_version < $version, '$new_version < $version' );
 ok ( $version != $new_version, '$version != $new_version' );

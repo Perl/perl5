@@ -171,6 +171,7 @@ XS(XS_version_numify);
 XS(XS_version_vcmp);
 XS(XS_version_boolean);
 XS(XS_version_noop);
+XS(XS_version_is_alpha);
 XS(XS_utf8_is_utf8);
 XS(XS_utf8_valid);
 XS(XS_utf8_encode);
@@ -210,6 +211,7 @@ Perl_boot_core_UNIVERSAL(pTHX)
 	newXS("version::boolean", XS_version_boolean, file);
 	newXS("version::(nomethod", XS_version_noop, file);
 	newXS("version::noop", XS_version_noop, file);
+	newXS("version::is_alpha", XS_version_is_alpha, file);
     }
     newXS("utf8::is_utf8", XS_utf8_is_utf8, file);
     newXS("utf8::valid", XS_utf8_valid, file);
@@ -526,6 +528,34 @@ XS(XS_version_noop)
 
      }
      XSRETURN_EMPTY;
+}
+
+XS(XS_version_is_alpha)
+{
+    dXSARGS;
+    if (items != 1)
+	Perl_croak(aTHX_ "Usage: version::is_alpha(lobj)");
+    SP -= items;
+    {
+	SV *lobj;
+
+        if (sv_derived_from(ST(0), "version")) {
+                SV *tmp = SvRV(ST(0));
+        	lobj = tmp;
+        }
+        else
+                Perl_croak(aTHX_ "lobj is not of type version");
+{
+    I32 len = av_len((AV *)lobj);
+    I32 digit = SvIVX(*av_fetch((AV *)lobj, len, 0));
+    if ( digit < 0 )
+	XSRETURN_YES;
+    else
+	XSRETURN_NO;
+}
+	PUTBACK;
+	return;
+    }
 }
 
 XS(XS_utf8_is_utf8)
