@@ -197,3 +197,7 @@ C<SV*>.
 			 ? (size) * sizeof(HE*)				\
 			 : (size) * sizeof(HE*) * 2 - MALLOC_OVERHEAD)
 #endif
+
+/* available as a function in hv.c */
+#define Perl_sharepvn(sv, len, hash) HEK_KEY(share_hek(sv, len, hash))
+#define sharepvn(sv, len, hash)	     Perl_sharepvn(sv, len, hash)

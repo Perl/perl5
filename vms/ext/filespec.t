@@ -3,6 +3,7 @@
 BEGIN { unshift(@INC,'../lib') if -d '../lib'; }
 
 use VMS::Filespec;
+use File::Spec;
 
 foreach (<DATA>) {
   chomp;
@@ -44,31 +45,33 @@ ok(rmdir('testdir/'),           '    rmdir()');
 
 __DATA__
 
+# lots of underscores used to minimize collision with existing logical names
+
 # Basic VMS to Unix filespecs
-some_logical_name_not_likely:[where.over]the.rainbow	unixify	/some_logical_name_not_likely/where/over/the.rainbow
-[.some_logical_name_not_likely.where.over]the.rainbow	unixify	some_logical_name_not_likely/where/over/the.rainbow
-[-.some_logical_name_not_likely.where.over]the.rainbow	unixify	../some_logical_name_not_likely/where/over/the.rainbow
-[.some_logical_name_not_likely.--.where.over]the.rainbow	unixify	some_logical_name_not_likely/../../where/over/the.rainbow
-[.some_logical_name_not_likely...where.over]the.rainbow	unixify	some_logical_name_not_likely/.../where/over/the.rainbow
-[...some_logical_name_not_likely.where.over]the.rainbow	unixify	.../some_logical_name_not_likely/where/over/the.rainbow
-[.some_logical_name_not_likely.where.over...]the.rainbow	unixify	some_logical_name_not_likely/where/over/.../the.rainbow
-[.some_logical_name_not_likely.where.over...]	unixify	some_logical_name_not_likely/where/over/.../
-[.some_logical_name_not_likely.where.over.-]	unixify	some_logical_name_not_likely/where/over/../
+__some_:[__where_.__over_]__the_.__rainbow_    unixify /__some_/__where_/__over_/__the_.__rainbow_
+[.__some_.__where_.__over_]__the_.__rainbow_   unixify __some_/__where_/__over_/__the_.__rainbow_
+[-.__some_.__where_.__over_]__the_.__rainbow_  unixify ../__some_/__where_/__over_/__the_.__rainbow_
+[.__some_.--.__where_.__over_]__the_.__rainbow_        unixify __some_/../../__where_/__over_/__the_.__rainbow_
+[.__some_...__where_.__over_]__the_.__rainbow_ unixify __some_/.../__where_/__over_/__the_.__rainbow_
+[...__some_.__where_.__over_]__the_.__rainbow_ unixify .../__some_/__where_/__over_/__the_.__rainbow_
+[.__some_.__where_.__over_...]__the_.__rainbow_        unixify __some_/__where_/__over_/.../__the_.__rainbow_
+[.__some_.__where_.__over_...] unixify __some_/__where_/__over_/.../
+[.__some_.__where_.__over_.-]  unixify __some_/__where_/__over_/../
 []	unixify		./
 [-]	unixify		../
 [--]	unixify		../../
 [...]	unixify		.../
 
 # and back again
-/some_logical_name_not_likely/where/over/the.rainbow	vmsify	some_logical_name_not_likely:[where.over]the.rainbow
-some_logical_name_not_likely/where/over/the.rainbow	vmsify	[.some_logical_name_not_likely.where.over]the.rainbow
-../some_logical_name_not_likely/where/over/the.rainbow	vmsify	[-.some_logical_name_not_likely.where.over]the.rainbow
-some_logical_name_not_likely/../../where/over/the.rainbow	vmsify	[-.where.over]the.rainbow
-.../some_logical_name_not_likely/where/over/the.rainbow	vmsify	[...some_logical_name_not_likely.where.over]the.rainbow
-some_logical_name_not_likely/.../where/over/the.rainbow	vmsify	[.some_logical_name_not_likely...where.over]the.rainbow
-/some_logical_name_not_likely/.../where/over/the.rainbow	vmsify	some_logical_name_not_likely:[...where.over]the.rainbow
-some_logical_name_not_likely/where/...	vmsify	[.some_logical_name_not_likely.where...]
-/where/...	vmsify	where:[...]
+/__some_/__where_/__over_/__the_.__rainbow_    vmsify  __some_:[__where_.__over_]__the_.__rainbow_
+__some_/__where_/__over_/__the_.__rainbow_     vmsify  [.__some_.__where_.__over_]__the_.__rainbow_
+../__some_/__where_/__over_/__the_.__rainbow_  vmsify  [-.__some_.__where_.__over_]__the_.__rainbow_
+__some_/../../__where_/__over_/__the_.__rainbow_       vmsify  [-.__where_.__over_]__the_.__rainbow_
+.../__some_/__where_/__over_/__the_.__rainbow_ vmsify  [...__some_.__where_.__over_]__the_.__rainbow_
+__some_/.../__where_/__over_/__the_.__rainbow_ vmsify  [.__some_...__where_.__over_]__the_.__rainbow_
+/__some_/.../__where_/__over_/__the_.__rainbow_        vmsify  __some_:[...__where_.__over_]__the_.__rainbow_
+__some_/__where_/...   vmsify  [.__some_.__where_...]
+/__where_/...  vmsify  __where_:[...]
 .	vmsify	[]
 ..	vmsify	[-]
 ../..	vmsify	[--]
@@ -76,48 +79,52 @@ some_logical_name_not_likely/where/...	vmsify	[.some_logical_name_not_likely.whe
 /	vmsify	sys$disk:[000000]
 
 # Fileifying directory specs
-down_logical_name_not_likely:[the.garden.path]	fileify	down_logical_name_not_likely:[the.garden]path.dir;1
-[.down_logical_name_not_likely.the.garden.path]	fileify	[.down_logical_name_not_likely.the.garden]path.dir;1
-/down_logical_name_not_likely/the/garden/path	fileify	/down_logical_name_not_likely/the/garden/path.dir;1
-/down_logical_name_not_likely/the/garden/path/	fileify	/down_logical_name_not_likely/the/garden/path.dir;1
-down_logical_name_not_likely/the/garden/path	fileify	down_logical_name_not_likely/the/garden/path.dir;1
-down_logical_name_not_likely:[the.garden]path	fileify	down_logical_name_not_likely:[the.garden]path.dir;1
-down_logical_name_not_likely:[the.garden]path.	fileify	# N.B. trailing . ==> null type
-down_logical_name_not_likely:[the]garden.path	fileify	
-/down_logical_name_not_likely/the/garden/path.	fileify	# N.B. trailing . ==> null type
-/down_logical_name_not_likely/the/garden.path	fileify	
+__down_:[__the_.__garden_.__path_]     fileify __down_:[__the_.__garden_]__path_.dir;1
+[.__down_.__the_.__garden_.__path_]    fileify [.__down_.__the_.__garden_]__path_.dir;1
+/__down_/__the_/__garden_/__path_      fileify /__down_/__the_/__garden_/__path_.dir;1
+/__down_/__the_/__garden_/__path_/     fileify /__down_/__the_/__garden_/__path_.dir;1
+__down_/__the_/__garden_/__path_       fileify __down_/__the_/__garden_/__path_.dir;1
+__down_:[__the_.__garden_]__path_      fileify __down_:[__the_.__garden_]__path_.dir;1
+__down_:[__the_.__garden_]__path_.     fileify # N.B. trailing . ==> null type
+__down_:[__the_]__garden_.__path_      fileify 
+/__down_/__the_/__garden_/__path_.     fileify # N.B. trailing . ==> null type
+/__down_/__the_/__garden_.__path_      fileify 
 
 # and pathifying them
-down_logical_name_not_likely:[the.garden]path.dir;1	pathify	down_logical_name_not_likely:[the.garden.path]
-[.down_logical_name_not_likely.the.garden]path.dir	pathify	[.down_logical_name_not_likely.the.garden.path]
-/down_logical_name_not_likely/the/garden/path.dir	pathify	/down_logical_name_not_likely/the/garden/path/
-down_logical_name_not_likely/the/garden/path.dir	pathify	down_logical_name_not_likely/the/garden/path/
-down_logical_name_not_likely:[the.garden]path	pathify	down_logical_name_not_likely:[the.garden.path]
-down_logical_name_not_likely:[the.garden]path.	pathify	# N.B. trailing . ==> null type
-down_logical_name_not_likely:[the]garden.path	pathify	
-/down_logical_name_not_likely/the/garden/path.	pathify	# N.B. trailing . ==> null type
-/down_logical_name_not_likely/the/garden.path	pathify	
-down_logical_name_not_likely:[the.garden]path.dir;2	pathify	#N.B. ;2
-__path	pathify	__path/
-/down_logical_name_not_likely/the/garden/.	pathify	/down_logical_name_not_likely/the/garden/./
-/down_logical_name_not_likely/the/garden/..	pathify	/down_logical_name_not_likely/the/garden/../
-/down_logical_name_not_likely/the/garden/...	pathify	/down_logical_name_not_likely/the/garden/.../
-path.notdir	pathify	
+__down_:[__the_.__garden_]__path_.dir;1        pathify __down_:[__the_.__garden_.__path_]
+[.__down_.__the_.__garden_]__path_.dir pathify [.__down_.__the_.__garden_.__path_]
+/__down_/__the_/__garden_/__path_.dir  pathify /__down_/__the_/__garden_/__path_/
+__down_/__the_/__garden_/__path_.dir   pathify __down_/__the_/__garden_/__path_/
+__down_:[__the_.__garden_]__path_      pathify __down_:[__the_.__garden_.__path_]
+__down_:[__the_.__garden_]__path_.     pathify # N.B. trailing . ==> null type
+__down_:[__the_]__garden_.__path_      pathify 
+/__down_/__the_/__garden_/__path_.     pathify # N.B. trailing . ==> null type
+/__down_/__the_/__garden_.__path_      pathify 
+__down_:[__the_.__garden_]__path_.dir;2        pathify #N.B. ;2
+__path_        pathify __path_/
+/__down_/__the_/__garden_/.    pathify /__down_/__the_/__garden_/./
+/__down_/__the_/__garden_/..   pathify /__down_/__the_/__garden_/../
+/__down_/__the_/__garden_/...  pathify /__down_/__the_/__garden_/.../
+__path_.notdir pathify 
 
 # Both VMS/Unix and file/path conversions
-down_logical_name_not_likely:[the.garden]path.dir;1	unixpath	/down_logical_name_not_likely/the/garden/path/
-/down_logical_name_not_likely/the/garden/path	vmspath	down_logical_name_not_likely:[the.garden.path]
-down_logical_name_not_likely:[the.garden.path]	unixpath	/down_logical_name_not_likely/the/garden/path/
-down_logical_name_not_likely:[the.garden.path...]	unixpath	/down_logical_name_not_likely/the/garden/path/.../
-/down_logical_name_not_likely/the/garden/path.dir	vmspath	down_logical_name_not_likely:[the.garden.path]
-[.down_logical_name_not_likely.the.garden]path.dir	unixpath	down_logical_name_not_likely/the/garden/path/
-down_logical_name_not_likely/the/garden/path	vmspath	[.down_logical_name_not_likely.the.garden.path]
-__path	vmspath	[.__path]
+__down_:[__the_.__garden_]__path_.dir;1        unixpath        /__down_/__the_/__garden_/__path_/
+/__down_/__the_/__garden_/__path_      vmspath __down_:[__the_.__garden_.__path_]
+__down_:[__the_.__garden_.__path_]     unixpath        /__down_/__the_/__garden_/__path_/
+__down_:[__the_.__garden_.__path_...]  unixpath        /__down_/__the_/__garden_/__path_/.../
+/__down_/__the_/__garden_/__path_.dir  vmspath __down_:[__the_.__garden_.__path_]
+[.__down_.__the_.__garden_]__path_.dir unixpath        __down_/__the_/__garden_/__path_/
+__down_/__the_/__garden_/__path_       vmspath [.__down_.__the_.__garden_.__path_]
+__path_        vmspath [.__path_]
 /	vmspath	sys$disk:[000000]
 
 # Redundant characters in Unix paths
-//some_logical_name_not_likely/where//over/../the.rainbow	vmsify	some_logical_name_not_likely:[where]the.rainbow
-/some_logical_name_not_likely/where//over/./the.rainbow	vmsify	some_logical_name_not_likely:[where.over]the.rainbow
+//__some_/__where_//__over_/../__the_.__rainbow_       vmsify  __some_:[__where_]__the_.__rainbow_
+/__some_/__where_//__over_/./__the_.__rainbow_ vmsify  __some_:[__where_.__over_]__the_.__rainbow_
 ..//../	vmspath	[--]
 ./././	vmspath	[]
 ./../.	vmsify	[-]
+
+# Our override of File::Spec->canonpath can do some strange things
+__dev:[__dir.000000]__foo     File::Spec->canonpath   __dev:[__dir]__foo
+__dev:[__dir.][000000]__foo   File::Spec->canonpath   __dev:[__dir]__foo

@@ -1172,6 +1172,7 @@ Perl_sig_to_vmscondition(int sig)
 int
 Perl_my_kill(int pid, int sig)
 {
+    dTHX;
     int iss;
     unsigned int code;
     int sys$sigprc(unsigned int *pidadr,
@@ -1522,8 +1523,8 @@ popen_completion_ast(pInfo info)
 
 }
 
-static unsigned long int setup_cmddsc(pTHX_ char *cmd, int check_img, int *suggest_quote);
-static void vms_execfree(pTHX);
+static unsigned long int setup_cmddsc(pTHX_ char *cmd, int check_img, int *suggest_quote, struct dsc$descriptor_s **pvmscmd);
+static void vms_execfree(struct dsc$descriptor_s *vmscmd);
 
 /*
     we actually differ from vmstrnenv since we use this to
@@ -1995,7 +1996,7 @@ store_pipelocs(pTHX)
     STRLEN n_a;
 
     if (head_PLOC)  
-        free_pipelocs(&head_PLOC);
+        free_pipelocs(aTHX_ &head_PLOC);
 
 /*  the . directory from @INC comes last */
 
@@ -2006,7 +2007,11 @@ store_pipelocs(pTHX)
 
 /*  get the directory from $^X */
 
+#ifdef PERL_IMPLICIT_CONTEXT
+    if (aTHX && PL_origargv && PL_origargv[0]) {    /* maybe nul if embedded Perl */
+#else
     if (PL_origargv && PL_origargv[0]) {    /* maybe nul if embedded Perl */
+#endif
         strcpy(temp, PL_origargv[0]);
         x = strrchr(temp,']');
         if (x) x[1] = '\0';
@@ -2022,6 +2027,9 @@ store_pipelocs(pTHX)
 
 /*  reverse order of @INC entries, skip "." since entered above */
 
+#ifdef PERL_IMPLICIT_CONTEXT
+    if (aTHX)
+#endif
     if (PL_incgv) av = GvAVn(PL_incgv);
 
     for (i = 0; av && i <= AvFILL(av); i++) {
@@ -2051,7 +2059,6 @@ store_pipelocs(pTHX)
         p->dir[NAM$C_MAXRSS] = '\0';
     }
 #endif
-    Perl_call_atexit(aTHX_ &free_pipelocs, &head_PLOC);
 }
 
 
@@ -2203,6 +2210,7 @@ safe_popen(pTHX_ char *cmd, char *in_mode, int *psts)
                                       DSC$K_CLASS_S, 0};
     struct dsc$descriptor_s d_sym_cmd = {0, DSC$K_DTYPE_T,
                                       DSC$K_CLASS_S, cmd_sym_name};
+    struct dsc$descriptor_s *vmscmd;
     $DESCRIPTOR(d_sym_in ,"PERL_POPEN_IN");
     $DESCRIPTOR(d_sym_out,"PERL_POPEN_OUT");
     $DESCRIPTOR(d_sym_err,"PERL_POPEN_ERR");
@@ -2254,7 +2262,7 @@ safe_popen(pTHX_ char *cmd, char *in_mode, int *psts)
     vmspipedsc.dsc$a_pointer = tfilebuf;
     vmspipedsc.dsc$w_length  = strlen(tfilebuf);
 
-    sts = setup_cmddsc(aTHX_ cmd,0,0);
+    sts = setup_cmddsc(aTHX_ cmd,0,0,&vmscmd);
     if (!(sts & 1)) { 
       switch (sts) {
         case RMS$_FNF:  case RMS$_DNF:
@@ -2432,10 +2440,10 @@ safe_popen(pTHX_ char *cmd, char *in_mode, int *psts)
     d_symbol.dsc$w_length = strlen(symbol);
     _ckvmssts(lib$set_symbol(&d_sym_out, &d_symbol, &table));
 
-    p = VMSCMD.dsc$a_pointer;
+    p = vmscmd->dsc$a_pointer;
     while (*p && *p != '\n') p++;
     *p = '\0';                                  /* truncate on \n */
-    p = VMSCMD.dsc$a_pointer;
+    p = vmscmd->dsc$a_pointer;
     while (*p == ' ' || *p == '\t') p++;        /* remove leading whitespace */
     if (*p == '$') p++;                         /* remove leading $ */
     while (*p == ' ' || *p == '\t') p++;
@@ -2477,9 +2485,13 @@ safe_popen(pTHX_ char *cmd, char *in_mode, int *psts)
     _ckvmssts(lib$delete_symbol(&d_sym_in,  &table));
     _ckvmssts(lib$delete_symbol(&d_sym_err, &table));
     _ckvmssts(lib$delete_symbol(&d_sym_out, &table));
-    vms_execfree(aTHX);
+    vms_execfree(vmscmd);
         
+#ifdef PERL_IMPLICIT_CONTEXT
+    if (aTHX) 
+#endif
     PL_forkprocess = info->pid;
+
     if (wait) {
          int done = 0;
          while (!done) {
@@ -4285,10 +4297,12 @@ static void
 pipe_and_fork(pTHX_ char **cmargv)
 {
     PerlIO *fp;
+    struct dsc$descriptor_s *vmscmd;
     char subcmd[2*MAX_DCL_LINE_LENGTH], *p, *q;
     int sts, j, l, ismcr, quote, tquote = 0;
 
-    sts = setup_cmddsc(cmargv[0],0,&quote);
+    sts = setup_cmddsc(aTHX_ cmargv[0],0,&quote,&vmscmd);
+    vms_execfree(vmscmd);
 
     j = l = 0;
     p = subcmd;
@@ -4324,7 +4338,7 @@ pipe_and_fork(pTHX_ char **cmargv)
     }
     *p = '\0';
 
-    fp = safe_popen(subcmd,"wbF",&sts);
+    fp = safe_popen(aTHX_ subcmd,"wbF",&sts);
     if (fp == Nullfp) {
         PerlIO_printf(Perl_debug_log,"Can't open output pipe (status %d)",sts);
 	}
@@ -4933,15 +4947,13 @@ my_vfork()
 
 
 static void
-vms_execfree(pTHX) {
-  if (PL_Cmd) {
-    if (PL_Cmd != VMSCMD.dsc$a_pointer) Safefree(PL_Cmd);
-    PL_Cmd = Nullch;
-  }
-  if (VMSCMD.dsc$a_pointer) {
-    Safefree(VMSCMD.dsc$a_pointer);
-    VMSCMD.dsc$w_length = 0;
-    VMSCMD.dsc$a_pointer = Nullch;
+vms_execfree(struct dsc$descriptor_s *vmscmd) 
+{
+  if (vmscmd) {
+      if (vmscmd->dsc$a_pointer) {
+          Safefree(vmscmd->dsc$a_pointer);
+      }
+      Safefree(vmscmd);
   }
 }
 
@@ -4990,16 +5002,25 @@ setup_argstr(pTHX_ SV *really, SV **mark, SV **sp)
 
 
 static unsigned long int
-setup_cmddsc(pTHX_ char *cmd, int check_img, int *suggest_quote)
+setup_cmddsc(pTHX_ char *cmd, int check_img, int *suggest_quote,
+                   struct dsc$descriptor_s **pvmscmd)
 {
   char vmsspec[NAM$C_MAXRSS+1], resspec[NAM$C_MAXRSS+1];
   $DESCRIPTOR(defdsc,".EXE");
   $DESCRIPTOR(defdsc2,".");
   $DESCRIPTOR(resdsc,resspec);
+  struct dsc$descriptor_s *vmscmd;
   struct dsc$descriptor_s imgdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
   unsigned long int cxt = 0, flags = 1, retsts = SS$_NORMAL;
   register char *s, *rest, *cp, *wordbreak;
   register int isdcl;
+
+  New(402,vmscmd,sizeof(struct dsc$descriptor_s),struct dsc$descriptor_s);
+  vmscmd->dsc$a_pointer = NULL;
+  vmscmd->dsc$b_dtype  = DSC$K_DTYPE_T;
+  vmscmd->dsc$b_class  = DSC$K_CLASS_S;
+  vmscmd->dsc$w_length = 0;
+  if (pvmscmd) *pvmscmd = vmscmd;
 
   if (suggest_quote) *suggest_quote = 0;
 
@@ -5084,29 +5105,30 @@ setup_cmddsc(pTHX_ char *cmd, int check_img, int *suggest_quote)
       if (check_img && isdcl) return RMS$_FNF;
 
       if (cando_by_name(S_IXUSR,0,resspec)) {
-        New(402,VMSCMD.dsc$a_pointer,7 + s - resspec + (rest ? strlen(rest) : 0),char);
+        New(402,vmscmd->dsc$a_pointer,7 + s - resspec + (rest ? strlen(rest) : 0),char);
         if (!isdcl) {
-            strcpy(VMSCMD.dsc$a_pointer,"$ MCR ");
+            strcpy(vmscmd->dsc$a_pointer,"$ MCR ");
             if (suggest_quote) *suggest_quote = 1;
         } else {
-            strcpy(VMSCMD.dsc$a_pointer,"@");
+            strcpy(vmscmd->dsc$a_pointer,"@");
             if (suggest_quote) *suggest_quote = 1;
         }
-        strcat(VMSCMD.dsc$a_pointer,resspec);
-        if (rest) strcat(VMSCMD.dsc$a_pointer,rest);
-        VMSCMD.dsc$w_length = strlen(VMSCMD.dsc$a_pointer);
-        return (VMSCMD.dsc$w_length > MAX_DCL_LINE_LENGTH ? CLI$_BUFOVF : retsts);
+        strcat(vmscmd->dsc$a_pointer,resspec);
+        if (rest) strcat(vmscmd->dsc$a_pointer,rest);
+        vmscmd->dsc$w_length = strlen(vmscmd->dsc$a_pointer);
+        return (vmscmd->dsc$w_length > MAX_DCL_LINE_LENGTH ? CLI$_BUFOVF : retsts);
       }
       else retsts = RMS$_PRV;
     }
   }
   /* It's either a DCL command or we couldn't find a suitable image */
-  VMSCMD.dsc$w_length = strlen(cmd);
-  if (cmd == PL_Cmd) {
-      VMSCMD.dsc$a_pointer = PL_Cmd;
+  vmscmd->dsc$w_length = strlen(cmd);
+/*  if (cmd == PL_Cmd) {
+      vmscmd->dsc$a_pointer = PL_Cmd;
       if (suggest_quote) *suggest_quote = 1;
   }
-  else VMSCMD.dsc$a_pointer = savepvn(cmd,VMSCMD.dsc$w_length);
+  else  */
+      vmscmd->dsc$a_pointer = savepvn(cmd,vmscmd->dsc$w_length);
 
   /* check if it's a symbol (for quoting purposes) */
   if (suggest_quote && !*suggest_quote) { 
@@ -5115,7 +5137,7 @@ setup_cmddsc(pTHX_ char *cmd, int check_img, int *suggest_quote)
     struct dsc$descriptor_s eqvdsc = {sizeof(equiv), DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
     eqvdsc.dsc$a_pointer = equiv;
 
-    iss = lib$get_symbol(&VMSCMD,&eqvdsc);
+    iss = lib$get_symbol(vmscmd,&eqvdsc);
     if (iss&1 && (*equiv == '$' || *equiv == '@')) *suggest_quote = 1;
   }
   if (!(retsts & 1)) {
@@ -5126,7 +5148,7 @@ setup_cmddsc(pTHX_ char *cmd, int check_img, int *suggest_quote)
     else { _ckvmssts(retsts); }
   }
 
-  return (VMSCMD.dsc$w_length > MAX_DCL_LINE_LENGTH ? CLI$_BUFOVF : retsts);
+  return (vmscmd->dsc$w_length > MAX_DCL_LINE_LENGTH ? CLI$_BUFOVF : retsts);
 
 }  /* end of setup_cmddsc() */
 
@@ -5157,6 +5179,7 @@ Perl_vms_do_aexec(pTHX_ SV *really,SV **mark,SV **sp)
 bool
 Perl_vms_do_exec(pTHX_ char *cmd)
 {
+  struct dsc$descriptor_s *vmscmd;
 
   if (vfork_called) {             /* this follows a vfork - act Unixish */
     vfork_called--;
@@ -5172,8 +5195,8 @@ Perl_vms_do_exec(pTHX_ char *cmd)
 
     TAINT_ENV();
     TAINT_PROPER("exec");
-    if ((retsts = setup_cmddsc(aTHX_ cmd,1,0)) & 1)
-      retsts = lib$do_command(&VMSCMD);
+    if ((retsts = setup_cmddsc(aTHX_ cmd,1,0,&vmscmd)) & 1)
+      retsts = lib$do_command(vmscmd);
 
     switch (retsts) {
       case RMS$_FNF: case RMS$_DNF:
@@ -5196,9 +5219,9 @@ Perl_vms_do_exec(pTHX_ char *cmd)
     set_vaxc_errno(retsts);
     if (ckWARN(WARN_EXEC)) {
       Perl_warner(aTHX_ WARN_EXEC,"Can't exec \"%*s\": %s",
-             VMSCMD.dsc$w_length, VMSCMD.dsc$a_pointer, Strerror(errno));
+             vmscmd->dsc$w_length, vmscmd->dsc$a_pointer, Strerror(errno));
     }
-    vms_execfree(aTHX);
+    vms_execfree(vmscmd);
   }
 
   return FALSE;
@@ -5256,7 +5279,7 @@ Perl_do_spawn(pTHX_ char *cmd)
     sts = substs;
   }
   else {
-    (void) safe_popen(cmd, "nW", (int *)&sts);
+    (void) safe_popen(aTHX_ cmd, "nW", (int *)&sts);
   }
   return sts;
 }  /* end of do_spawn() */
@@ -7228,18 +7251,13 @@ Perl_sys_intern_clear(pTHX)
 void  
 Perl_sys_intern_init(pTHX)
 {
-    int ix = RAND_MAX;
-    float x;
+    unsigned int ix = RAND_MAX;
+    double x;
 
     VMSISH_HUSHED = 0;
 
     x = (float)ix;
     MY_INV_RAND_MAX = 1./x;
-
-    VMSCMD.dsc$a_pointer = NULL;
-    VMSCMD.dsc$w_length  = 0;
-    VMSCMD.dsc$b_dtype   = DSC$K_DTYPE_T;
-    VMSCMD.dsc$b_class   = DSC$K_CLASS_S;
 }
 
 void

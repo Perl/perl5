@@ -815,10 +815,10 @@ PP(pp_undef)
 PP(pp_predec)
 {
     dSP;
-    if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
+    if (SvTYPE(TOPs) > SVt_PVLV)
 	DIE(aTHX_ PL_no_modify);
-    if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
-    	SvIVX(TOPs) != IV_MIN)
+    if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
+        && SvIVX(TOPs) != IV_MIN)
     {
 	--SvIVX(TOPs);
 	SvFLAGS(TOPs) &= ~(SVp_NOK|SVp_POK);
@@ -832,11 +832,11 @@ PP(pp_predec)
 PP(pp_postinc)
 {
     dSP; dTARGET;
-    if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
+    if (SvTYPE(TOPs) > SVt_PVLV)
 	DIE(aTHX_ PL_no_modify);
     sv_setsv(TARG, TOPs);
-    if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
-    	SvIVX(TOPs) != IV_MAX)
+    if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
+        && SvIVX(TOPs) != IV_MAX)
     {
 	++SvIVX(TOPs);
 	SvFLAGS(TOPs) &= ~(SVp_NOK|SVp_POK);
@@ -853,11 +853,11 @@ PP(pp_postinc)
 PP(pp_postdec)
 {
     dSP; dTARGET;
-    if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
+    if (SvTYPE(TOPs) > SVt_PVLV)
 	DIE(aTHX_ PL_no_modify);
     sv_setsv(TARG, TOPs);
-    if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
-    	SvIVX(TOPs) != IV_MIN)
+    if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
+        && SvIVX(TOPs) != IV_MIN)
     {
 	--SvIVX(TOPs);
 	SvFLAGS(TOPs) &= ~(SVp_NOK|SVp_POK);
@@ -3142,9 +3142,10 @@ PP(pp_chr)
 
 PP(pp_crypt)
 {
-    dSP; dTARGET; dPOPTOPssrl;
-    STRLEN n_a;
+    dSP; dTARGET;
 #ifdef HAS_CRYPT
+    dPOPTOPssrl;
+    STRLEN n_a;
     STRLEN len;
     char *tmps = SvPV(left, len);
     char *t    = 0;
@@ -3161,11 +3162,11 @@ PP(pp_crypt)
 	 }
 	 tmps = t;
     }
-#ifdef FCRYPT
+#   ifdef FCRYPT
     sv_setpv(TARG, fcrypt(tmps, SvPV(right, n_a)));
-#else
+#   else
     sv_setpv(TARG, PerlProc_crypt(tmps, SvPV(right, n_a)));
-#endif
+#   endif
     Safefree(t);
 #else
     DIE(aTHX_

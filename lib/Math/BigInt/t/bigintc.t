@@ -8,7 +8,7 @@ BEGIN
   $| = 1;
   chdir 't' if -d 't';
   unshift @INC, '../lib'; # for running manually
-  plan tests => 56;
+  plan tests => 63;
   }
 
 # testing of Math::BigInt::Calc, primarily for interface/api and not for the
@@ -127,6 +127,24 @@ $x = $C->_new(\$x); $C->_dec($x); ok (${$C->_str($x)},$z);
 
 # should not happen:
 # $x = $C->_new(\"-2"); $y = $C->_new(\"4"); ok ($C->_acmp($x,$y),-1);
+
+# _mod
+$x = $C->_new(\"1000"); $y = $C->_new(\"3");
+ok (${$C->_str(scalar $C->_mod($x,$y))},1);
+$x = $C->_new(\"1000"); $y = $C->_new(\"2");
+ok (${$C->_str(scalar $C->_mod($x,$y))},0);
+
+# _and, _or, _xor
+$x = $C->_new(\"5"); $y = $C->_new(\"2");
+ok (${$C->_str(scalar $C->_xor($x,$y))},7);
+$x = $C->_new(\"5"); $y = $C->_new(\"2");
+ok (${$C->_str(scalar $C->_or($x,$y))},7);
+$x = $C->_new(\"5"); $y = $C->_new(\"3");
+ok (${$C->_str(scalar $C->_and($x,$y))},1);
+
+# _from_hex, _from_bin
+ok (${$C->_str(scalar $C->_from_hex(\"0xFf"))},255);
+ok (${$C->_str(scalar $C->_from_bin(\"0b10101011"))},160+11);
 
 # _check
 $x = $C->_new(\"123456789");

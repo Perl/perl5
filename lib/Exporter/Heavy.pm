@@ -126,8 +126,13 @@ sub heavy_export {
 			last;
 		    }
 		} elsif ($sym !~ s/^&// || !$export_cache->{$sym}) {
-                    require Carp;
-		    Carp::carp(qq["$sym" is not exported by the $pkg module]);
+		    unless ($^S) {
+			# If we are trying to trap import of non-existent
+			# symbols using eval, let's be silent for now and
+			# just croak in the end.
+			require Carp;
+			Carp::carp(qq["$sym" is not exported by the $pkg module]);
+		    }
 		    $oops++;
 		}
 	    }

@@ -11,41 +11,43 @@ BEGIN {
 	exit 0;
     }
 }
-
-use I18N::Langinfo qw(langinfo ABDAY_1 DAY_1 ABMON_1 MON_1 RADIXCHAR);
+    
+use I18N::Langinfo qw(langinfo);
 use POSIX qw(setlocale LC_ALL);
-use Config;
 
-setlocale(LC_ALL, "C");
+setlocale(LC_ALL, $ENV{LC_ALL} = $ENV{LANG} = "C");
 
-print "1..5\n";
+my %want =
+    (
+     ABDAY_1	=> "Sun",
+     DAY_1	=> "Sunday",
+     ABMON_1	=> "Jan",
+     MON_1	=> "January",
+     RADIXCHAR	=> ".",
+     AM_STR	=> qr{^(?:am|a\.m\.)$}i,
+     THOUSEP	=> "",
+     D_T_FMT	=> qr{^%a %b %[de] %H:%M:%S %Y$},
+     D_FMT	=> qr{^%m/%d/%y$},
+     T_FMT	=> qr{^%H:%M:%S$},
+     );
 
-print "not " unless langinfo(ABDAY_1)   eq "Sun";
-print "ok 1\n";
+    
+my @want = sort keys %want;
 
-print "not " unless langinfo(DAY_1)     eq "Sunday";
-print "ok 2\n";
-
-print "not " unless langinfo(ABMON_1)   eq "Jan";
-print "ok 3\n";
-
-print "not " unless langinfo(MON_1)     eq "January";
-print "ok 4\n";
-
-unless (eval { langinfo(RADIXCHAR) } eq ".") {
-    print "not ok 5 - RADIXCHAR undefined\n";
-    if ($Config{d_gnulibc} || $Config{cppsymbols} =~ /__GNU_LIBRARY_/) {
-	print <<EOM;
-#
-# You are probably using GNU libc. The RADIXCHAR not getting defined
-# by I18N::Langinfo is a known problem in some older versions of the
-# GNU libc (caused by the combination of using only enums, not cpp
-# definitions, and of hiding the definitions behind rather obscure
-# feature tests).  Upgrading your libc is strongly suggested. 
-#
-EOM
+print "1..", scalar @want, "\n";
+    
+for my $i (1..@want) {
+    my $try = $want[$i-1];
+    eval { I18N::Langinfo->import($try) };
+    unless ($@) {
+	my $got = langinfo(&$try);
+	if (ref $want{$try} && $got =~ $want{$try} || $got eq $want{$try}) {
+	    print qq[ok $i - $try is "$got"\n];
+	} else {
+	    print qq[not ok $i - $try is "$got" not "$want{$try}"\n];
+	}
+    } else {
+	print qq[ok $i - Skip: $try not defined\n];
     }
-} else {
-    print "ok 5\n";
 }
 

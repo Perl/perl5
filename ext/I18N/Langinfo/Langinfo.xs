@@ -19,8 +19,14 @@ langinfo(code)
 	int	code
   CODE:
 #ifdef HAS_NL_LANGINFO
-	char *s = nl_langinfo(code);
-	RETVAL = newSVpvn(s, strlen(s));
+	{
+	  char *s;
+
+	  if ((s = nl_langinfo(code)))
+	      RETVAL = newSVpvn(s, strlen(s));
+	  else
+	      RETVAL = &PL_sv_undef;
+	}
 #else
 	croak("nl_langinfo() not implemented on this architecture");
 #endif

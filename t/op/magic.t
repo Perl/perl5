@@ -250,10 +250,7 @@ else {
 			    : (`echo \$__NoNeSuCh` eq "foo\n") );
 }
 
-if ($Is_VMS) {
-    ok(1,0,"'\$!=undef' does throw a warning");
-}
-else {
+{
     local $SIG{'__WARN__'} = sub { print "# @_\nnot " };
     $! = undef;
     ok 1;

@@ -519,6 +519,9 @@ cat > UU/uselongdouble.cbu <<'EOCBU'
 case "$uselongdouble" in
 "$define"|true|[yY]*)
 	if test -f /opt/SUNWspro/lib/libsunmath.so; then
+		# Unfortunately libpth has already been set and
+		# searched, so we need to add in everything manually.
+		libpth="$libpth /opt/SUNWspro/lib"
 		libs="$libs -lsunmath"
 		ldflags="$ldflags -L/opt/SUNWspro/lib -R/opt/SUNWspro/lib"
 		d_sqrtl=define

@@ -2591,7 +2591,7 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 f
     char *xfailed = Nullch;
     char tmpbuf[MAXPATHLEN];
     register char *s;
-    I32 len;
+    I32 len = 0;
     int retval;
 #if defined(DOSISH) && !defined(OS2) && !defined(atarist)
 #  define SEARCH_EXTS ".bat", ".cmd", NULL

@@ -691,11 +691,11 @@ Perl_nextargv(pTHX_ register GV *gv)
 			sv_catpv(sv,PL_inplace);
 		    }
 #ifndef FLEXFILENAMES
-		    if (PerlLIO_stat(SvPVX(sv),&PL_statbuf) >= 0
-		      && PL_statbuf.st_dev == filedev
-		      && PL_statbuf.st_ino == fileino
+		    if ((PerlLIO_stat(SvPVX(sv),&PL_statbuf) >= 0
+			 && PL_statbuf.st_dev == filedev
+			 && PL_statbuf.st_ino == fileino)
 #ifdef DJGPP
-                      || (_djstat_fail_bits & _STFAIL_TRUENAME)!=0
+			|| ((_djstat_fail_bits & _STFAIL_TRUENAME)!=0)
 #endif
                       )
 		    {

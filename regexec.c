@@ -3160,9 +3160,9 @@ S_regmatch(pTHX_ regnode *prog)
 			    c1 = *(PL_bostr + ln);
 			}
 			else { c1 = (U8)*STRING(text_node); }
-			if (OP(next) == EXACTF)
+			if (OP(text_node) == EXACTF || OP(text_node) == REFF)
 			    c2 = PL_fold[c1];
-			else if (OP(text_node) == EXACTFL)
+			else if (OP(text_node) == EXACTFL || OP(text_node) == REFFL)
 			    c2 = PL_fold_locale[c1];
 			else
 			    c2 = c1;
@@ -3243,9 +3243,9 @@ S_regmatch(pTHX_ regnode *prog)
 			    }
 			    else { c1 = (U8)*STRING(text_node); }
 
-			    if (OP(text_node) == EXACTF)
+			    if (OP(text_node) == EXACTF || OP(text_node) == REFF)
 				c2 = PL_fold[c1];
-			    else if (OP(text_node) == EXACTFL)
+			    else if (OP(text_node) == EXACTFL || OP(text_node) == REFFL)
 				c2 = PL_fold_locale[c1];
 			    else
 				c2 = c1;
@@ -3354,13 +3354,13 @@ S_regmatch(pTHX_ regnode *prog)
 
 		    if (!UTF) {
 			c2 = c1 = *s;
-			if (OP(text_node) == EXACTF)
+			if (OP(text_node) == EXACTF || OP(text_node) == REFF)
 			    c2 = PL_fold[c1];
-			else if (OP(text_node) == EXACTFL)
+			else if (OP(text_node) == EXACTFL || OP(text_node) == REFFL)
 			    c2 = PL_fold_locale[c1];
 		    }
 		    else { /* UTF */
-			if (OP(text_node) == EXACTF) {
+			if (OP(text_node) == EXACTF || OP(text_node) == REFF) {
 			     STRLEN ulen1, ulen2;
 			     U8 tmpbuf1[UTF8_MAXLEN*2+1];
 			     U8 tmpbuf2[UTF8_MAXLEN*2+1];

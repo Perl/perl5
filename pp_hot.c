@@ -302,10 +302,10 @@ PP(pp_eq)
 PP(pp_preinc)
 {
     dSP;
-    if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
+    if (SvTYPE(TOPs) > SVt_PVLV)
 	DIE(aTHX_ PL_no_modify);
-    if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
-    	SvIVX(TOPs) != IV_MAX)
+    if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
+        && SvIVX(TOPs) != IV_MAX)
     {
 	++SvIVX(TOPs);
 	SvFLAGS(TOPs) &= ~(SVp_NOK|SVp_POK);

@@ -183,7 +183,7 @@ eval { open::_get_locale_encoding() };
 like( $@, qr/too ambiguous/, 'should die with ambiguous locale encoding' );
 %%%
 # the special :locale layer
-$ENV{LANG} = 'ru_RU.KOI8-R';
+$ENV{LC_ALL} = $ENV{LANG} = 'ru_RU.KOI8-R';
 # the :locale will probe the locale environment variables like LANG
 use open OUT => ':locale';
 open(O, ">koi8");

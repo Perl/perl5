@@ -869,7 +869,6 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
     register char *s;
     char *ptr;
     STRLEN len, klen;
-    I32 i;
 
     s = SvPV(sv,len);
     ptr = MgPV(mg,klen);
@@ -922,6 +921,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 	    while (s < strend) {
 		char tmpbuf[256];
 		struct stat st;
+		I32 i;
 		s = delimcpy(tmpbuf, tmpbuf + sizeof tmpbuf,
 			     s, strend, ':', &i);
 		s++;
@@ -1102,6 +1102,7 @@ Perl_csighandler_init(void)
 
     for (sig = 1; sig < SIG_SIZE; sig++) {
 #ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
+        dTHX;
         sig_defaulting[sig] = 1;
         (void) rsignal(sig, &Perl_csighandler);
 #endif
@@ -1948,7 +1949,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 		SAVESPTR(PL_last_in_gv);
 	}
 	else if (SvOK(sv) && GvIO(PL_last_in_gv))
-	    IoLINES(GvIOp(PL_last_in_gv)) = (long)SvIV(sv);
+	    IoLINES(GvIOp(PL_last_in_gv)) = SvIV(sv);
 	break;
     case '^':
 	Safefree(IoTOP_NAME(GvIOp(PL_defoutgv)));
@@ -1961,15 +1962,15 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	IoFMT_GV(GvIOp(PL_defoutgv)) = gv_fetchpv(s,TRUE, SVt_PVIO);
 	break;
     case '=':
-	IoPAGE_LEN(GvIOp(PL_defoutgv)) = (long)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	IoPAGE_LEN(GvIOp(PL_defoutgv)) = (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '-':
-	IoLINES_LEFT(GvIOp(PL_defoutgv)) = (long)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	IoLINES_LEFT(GvIOp(PL_defoutgv)) = (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	if (IoLINES_LEFT(GvIOp(PL_defoutgv)) < 0L)
 	    IoLINES_LEFT(GvIOp(PL_defoutgv)) = 0L;
 	break;
     case '%':
-	IoPAGE(GvIOp(PL_defoutgv)) = (long)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	IoPAGE(GvIOp(PL_defoutgv)) = (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '|':
 	{

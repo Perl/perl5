@@ -298,12 +298,10 @@
 #define HAVE_INTERP_INTERN
 struct interp_intern {
     int    hushed;
-    float  inv_rand_max;
-    struct dsc$descriptor_s VMScmd;
+    double inv_rand_max;
 };
 #define VMSISH_HUSHED     (PL_sys_intern.hushed)
 #define MY_INV_RAND_MAX   (PL_sys_intern.inv_rand_max)
-#define VMSCMD            (PL_sys_intern.VMScmd)
 
 /* Flags for vmstrnenv() */
 #define PERL__TRNENV_SECURE 0x01

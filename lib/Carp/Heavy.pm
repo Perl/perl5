@@ -28,7 +28,7 @@ sub caller_info {
 
   my $sub_name = Carp::get_subname(\%call_info);
   if ($call_info{has_args}) {
-    my @args = map {Carp::format_arg($_)} @args;
+    my @args = map {Carp::format_arg($_)} @DB::args;
     if ($MaxArgNums and @args > $MaxArgNums) { # More than we want to show?
       $#args = $MaxArgNums;
       push @args, '...';
@@ -236,7 +236,10 @@ sub trusts {
 # Takes a package and gives a list of those trusted directly
 sub trusts_directly {
     my $class = shift;
-    return @{"$class\::ISA"};
+    no strict 'refs';
+    return @{"$class\::CARP_NOT"}
+      ? @{"$class\::CARP_NOT"}
+      : @{"$class\::ISA"};
 }
 
 1;

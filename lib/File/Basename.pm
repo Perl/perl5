@@ -17,9 +17,9 @@ dirname - extract just the directory from a path
     $basename = basename($fullname,@suffixlist);
     $dirname = dirname($fullname);
 
-    ($name,$path,$suffix) = fileparse("lib/File/Basename.pm","\.pm");
+    ($name,$path,$suffix) = fileparse("lib/File/Basename.pm",qr{\.pm});
     fileparse_set_fstype("VMS");
-    $basename = basename("lib/File/Basename.pm",".pm");
+    $basename = basename("lib/File/Basename.pm",qr{\.pm});
     $dirname = dirname("lib/File/Basename.pm");
 
 =head1 DESCRIPTION
@@ -60,7 +60,8 @@ B<path> contains everything up to and including the last directory
 separator in the input file specification.  The remainder of the input
 file specification is then divided into B<name> and B<suffix> based on
 the optional patterns you specify in C<@suffixlist>.  Each element of
-this list is interpreted as a regular expression, and is matched
+this list can be a qr-quoted pattern (or a string which is interpreted
+as a regular expression), and is matched
 against the end of B<name>.  If this succeeds, the matching portion of
 B<name> is removed and prepended to B<suffix>.  By proper use of
 C<@suffixlist>, you can remove file types or versions for examination.
@@ -76,7 +77,7 @@ file as the input file specification.
 Using Unix file syntax:
 
     ($base,$path,$type) = fileparse('/virgil/aeneid/draft.book7',
-				    '\.book\d+');
+				    qr{\.book\d+});
 
 would yield
 
@@ -87,7 +88,7 @@ would yield
 Similarly, using VMS syntax:
 
     ($name,$dir,$type) = fileparse('Doc_Root:[Help]Rhetoric.Rnh',
-				   '\..*');
+				   qr{\..*});
 
 would yield
 
@@ -197,6 +198,7 @@ sub fileparse {
       my $devspec  = $1;
       my $remainder = $3;
       ($dirpath,$basename) = ($remainder =~ m#^(.*/)?(.*)#s);
+      $dirpath ||= '';  # should always be defined
       $dirpath = $devspec.$dirpath;
     }
     $dirpath = './' unless $dirpath;

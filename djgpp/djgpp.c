@@ -1,20 +1,5 @@
 #define PERLIO_NOT_STDIO 0
-#include <libc/stubs.h>
-#include <io.h>
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <libc/file.h>
-#include <process.h>
-#include <fcntl.h>
-#include <glob.h>
-#include <sys/fsext.h>
-#include <crt0.h>
-#include "EXTERN.h"
-#include "perl.h"
-#include "XSUB.h"
+#include "djgpp.h"
 
 /* hold file pointer, command, mode, and the status of the command */
 struct pipe_list {
@@ -400,7 +385,8 @@ static char *perlprefix;
 
 #define PERL5 "/perl5"
 
-char *djgpp_pathexp (const char *p)
+char *
+djgpp_pathexp (const char *p)
 {
     static char expp[PATH_MAX];
     strcpy (expp,perlprefix);

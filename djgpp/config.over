@@ -46,7 +46,7 @@ repair()
      -e 's=cwd=Cwd=' \
      -e 's=perlio/via=PerlIO/Via=' \
      -e 's=xs/typemap=XS/Typemap=' \
-     -e 's=unicode/normalize=Unicode/Normalize=' \
+     -e 's=unicode/normalize?=Unicode/Normalize=' \
      -e 's=i18n/langinfo=I18N/Langinfo='
 }
 static_ext=$(repair "$static_ext")

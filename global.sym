@@ -174,6 +174,7 @@ Perl_is_uni_xdigit
 Perl_to_uni_upper
 Perl_to_uni_title
 Perl_to_uni_lower
+Perl_to_uni_fold
 Perl_is_uni_alnum_lc
 Perl_is_uni_alnumc_lc
 Perl_is_uni_idfirst_lc
@@ -387,7 +388,6 @@ Perl_scan_hex
 Perl_scan_num
 Perl_scan_oct
 Perl_screaminstr
-Perl_sharepvn
 Perl_stack_grow
 Perl_start_subparse
 Perl_sv_2bool

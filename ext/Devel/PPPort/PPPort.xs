@@ -8,7 +8,7 @@
 
 /* Global Data */
  
-#define MY_CXT_KEY "Devel::PPPort::Harness::_guts" XS_VERSION
+#define MY_CXT_KEY "Devel::PPPort::_guts" XS_VERSION
  
 typedef struct {
     /* Put Global Data in here */
@@ -19,13 +19,13 @@ START_MY_CXT
 
 void test1(void)
 {
-	newCONSTSUB(gv_stashpv("Devel::PPPort::Harness", FALSE), "test_value_1", newSViv(1));
+	newCONSTSUB(gv_stashpv("Devel::PPPort", FALSE), "test_value_1", newSViv(1));
 }
 
 extern void test2(void);
 extern void test3(void);
 
-MODULE = Devel::PPPort::Harness		PACKAGE = Devel::PPPort::Harness
+MODULE = Devel::PPPort		PACKAGE = Devel::PPPort
 
 BOOT:
 {

@@ -19,7 +19,7 @@ else {print "not ok 1\n";}
 
 # check `` processing
 
-$x = `echo hi there`;
+$x = `$^X -le "print 'hi there'"`;
 if ($x eq "hi there\n") {print "ok 2\n";} else {print "not ok 2\n";}
 
 # check $#array

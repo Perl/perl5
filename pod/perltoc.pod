@@ -426,22 +426,22 @@ lstat EXPR, lstat, m//, map BLOCK LIST, map EXPR,LIST, mkdir FILENAME,MASK,
 mkdir FILENAME, msgctl ID,CMD,ARG, msgget KEY,FLAGS, msgrcv
 ID,VAR,SIZE,TYPE,FLAGS, msgsnd ID,MSG,FLAGS, my EXPR, my EXPR : ATTRIBUTES,
 next LABEL, next, no Module LIST, oct EXPR, oct, open FILEHANDLE,EXPR, open
-FILEHANDLE,MODE,EXPR, open FILEHANDLE,MODE,EXPR,LIST, open FILEHANDLE,
-opendir DIRHANDLE,EXPR, ord EXPR, ord, our EXPR, our EXPR : ATTRIBUTES,
-pack TEMPLATE,LIST, package NAMESPACE, package, pipe
-READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos SCALAR, pos, print FILEHANDLE
-LIST, print LIST, print, printf FILEHANDLE FORMAT, LIST, printf FORMAT,
-LIST, prototype FUNCTION, push ARRAY,LIST, q/STRING/, qq/STRING/,
-qr/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR, quotemeta, rand EXPR,
-rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET, read FILEHANDLE,SCALAR,LENGTH,
-readdir DIRHANDLE, readline EXPR, readlink EXPR, readlink, readpipe EXPR,
-recv SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo, ref EXPR, ref, rename
-OLDNAME,NEWNAME, require VERSION, require EXPR, require, reset EXPR, reset,
-return EXPR, return, reverse LIST, rewinddir DIRHANDLE, rindex
-STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME, rmdir, s///, scalar
-EXPR, seek FILEHANDLE,POSITION,WHENCE, seekdir DIRHANDLE,POS, select
-FILEHANDLE, select, select RBITS,WBITS,EBITS,TIMEOUT, semctl
-ID,SEMNUM,CMD,ARG, semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, send
+FILEHANDLE,MODE,EXPR, open FILEHANDLE,MODE,EXPR,LIST, open
+FILEHANDLE,MODE,REFERENCE, open FILEHANDLE, opendir DIRHANDLE,EXPR, ord
+EXPR, ord, our EXPR, our EXPR : ATTRIBUTES, pack TEMPLATE,LIST, package
+NAMESPACE, package, pipe READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos
+SCALAR, pos, print FILEHANDLE LIST, print LIST, print, printf FILEHANDLE
+FORMAT, LIST, printf FORMAT, LIST, prototype FUNCTION, push ARRAY,LIST,
+q/STRING/, qq/STRING/, qr/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR,
+quotemeta, rand EXPR, rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET, read
+FILEHANDLE,SCALAR,LENGTH, readdir DIRHANDLE, readline EXPR, readlink EXPR,
+readlink, readpipe EXPR, recv SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo,
+ref EXPR, ref, rename OLDNAME,NEWNAME, require VERSION, require EXPR,
+require, reset EXPR, reset, return EXPR, return, reverse LIST, rewinddir
+DIRHANDLE, rindex STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME,
+rmdir, s///, scalar EXPR, seek FILEHANDLE,POSITION,WHENCE, seekdir
+DIRHANDLE,POS, select FILEHANDLE, select, select RBITS,WBITS,EBITS,TIMEOUT,
+semctl ID,SEMNUM,CMD,ARG, semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, send
 SOCKET,MSG,FLAGS,TO, send SOCKET,MSG,FLAGS, setpgrp PID,PGRP, setpriority
 WHICH,WHO,PRIORITY, setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL, shift ARRAY,
 shift, shmctl ID,CMD,ARG, shmget KEY,SIZE,FLAGS, shmread ID,VAR,POS,SIZE,
@@ -1168,6 +1168,8 @@ $ARGV, @ARGV, @F, @INC, @_, %INC, %ENV, $ENV{expr}, %SIG, $SIG{expr}
 
 =item  Unicode
 
+=item Another Portable Binary Encoding
+
 =back
 
 =item Lengths and Widths
@@ -1177,8 +1179,6 @@ $ARGV, @ARGV, @F, @INC, @_, %INC, %ENV, $ENV{expr}, %SIG, $SIG{expr}
 =item String Lengths
 
 =item Dynamic Templates
-
-=item Another Portable Binary Encoding
 
 =back
 
@@ -1197,6 +1197,8 @@ $ARGV, @ARGV, @F, @INC, @_, %INC, %ENV, $ENV{expr}, %SIG, $SIG{expr}
 =back
 
 =item Pack Recipes
+
+=item Funnies Section
 
 =item Authors
 
@@ -4977,6 +4979,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item DESCRIPTION
 
+=item Highlights
+
 =item Incompatible Changes
 
 =over 4
@@ -4986,6 +4990,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item AIX Dynaloading
 
 =item Socket Extension Dynamic in VMS
+
+=item IEEE-format Floating Point Default on OpenVMS Alpha
 
 =item Different Definition of the Unicode Character Classes \p{In...}
 
@@ -5072,6 +5078,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item  HP-UX lib/posix Subtest 9 Fails When LP64-Configured
 
 =item Linux With Sfio Fails op/misc Test 48
+
+=item Mac OS X
 
 =item OS/390
 
@@ -5442,6 +5450,420 @@ d_strtoq, d_u32align, d_ualarm, d_usleep
 =item The Compiler Suite Is Still Experimental
 
 =back
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=item HISTORY
+
+=back
+
+=head2 perl561delta, perldelta - what's new for perl v5.6.x
+
+=over 4
+
+=item DESCRIPTION
+
+=item Summary of changes between 5.6.0 and 5.6.1
+
+=over 4
+
+=item Security Issues
+
+=item Core bug fixes
+
+C<UNIVERSAL::isa()>, Memory leaks, Numeric conversions, qw(a\\b), caller(),
+Bugs in regular expressions, "slurp" mode, Autovivification of symbolic
+references to special variables, Lexical warnings, Spurious warnings and
+errors, glob(), Tainting, sort(), #line directives, Subroutine prototypes,
+map(), Debugger, PERL5OPT, chop(), Unicode support, 64-bit support,
+Compiler, Lvalue subroutines, IO::Socket, File::Find, xsubpp, C<no
+Module;>, Tests
+
+=item Core features
+
+=item Configuration issues
+
+=item Documentation
+
+=item Bundled modules
+
+B::Concise, File::Temp, Pod::LaTeX, Pod::Text::Overstrike, CGI, CPAN,
+Class::Struct, DB_File, Devel::Peek, File::Find, Getopt::Long, IO::Poll,
+IPC::Open3, Math::BigFloat, Math::Complex, Net::Ping, Opcode, Pod::Parser,
+Pod::Text, SDBM_File, Sys::Syslog, Tie::RefHash, Tie::SubstrHash
+
+=item Platform-specific improvements
+
+NCR MP-RAS, NonStop-UX
+
+=item Interpreter cloning, threads, and concurrency
+
+=item Lexically scoped warning categories
+
+=item Unicode and UTF-8 support
+
+=item Support for interpolating named characters
+
+=item "our" declarations
+
+=item Support for strings represented as a vector of ordinals
+
+=item Improved Perl version numbering system
+
+=item New syntax for declaring subroutine attributes
+
+=item File and directory handles can be autovivified
+
+=item open() with more than two arguments
+
+=item 64-bit support
+
+=item Large file support
+
+=item Long doubles
+
+=item "more bits"
+
+=item Enhanced support for sort() subroutines
+
+=item C<sort $coderef @foo> allowed
+
+=item File globbing implemented internally
+
+=item Support for CHECK blocks
+
+=item POSIX character class syntax [: :] supported
+
+=item Better pseudo-random number generator
+
+=item Improved C<qw//> operator
+
+=item Better worst-case behavior of hashes
+
+=item pack() format 'Z' supported
+
+=item pack() format modifier '!' supported
+
+=item pack() and unpack() support counted strings
+
+=item Comments in pack() templates
+
+=item Weak references
+
+=item Binary numbers supported
+
+=item Lvalue subroutines
+
+=item Some arrows may be omitted in calls through references
+
+=item Boolean assignment operators are legal lvalues
+
+=item exists() is supported on subroutine names
+
+=item exists() and delete() are supported on array elements
+
+=item Pseudo-hashes work better
+
+=item Automatic flushing of output buffers
+
+=item Better diagnostics on meaningless filehandle operations
+
+=item Where possible, buffered data discarded from duped input filehandle
+
+=item eof() has the same old magic as <>
+
+=item binmode() can be used to set :crlf and :raw modes
+
+=item C<-T> filetest recognizes UTF-8 encoded files as "text"
+
+=item system(), backticks and pipe open now reflect exec() failure
+
+=item Improved diagnostics
+
+=item Diagnostics follow STDERR
+
+=item More consistent close-on-exec behavior
+
+=item syswrite() ease-of-use
+
+=item Better syntax checks on parenthesized unary operators
+
+=item Bit operators support full native integer width
+
+=item Improved security features
+
+=item More functional bareword prototype (*)
+
+=item C<require> and C<do> may be overridden
+
+=item $^X variables may now have names longer than one character
+
+=item New variable $^C reflects C<-c> switch
+
+=item New variable $^V contains Perl version as a string
+
+=item Optional Y2K warnings
+
+=item Arrays now always interpolate into double-quoted strings
+
+=back
+
+=item Modules and Pragmata
+
+=over 4
+
+=item Modules
+
+attributes, B, Benchmark, ByteLoader, constant, charnames, Data::Dumper,
+DB, DB_File, Devel::DProf, Devel::Peek, Dumpvalue, DynaLoader, English,
+Env, Fcntl, File::Compare, File::Find, File::Glob, File::Spec,
+File::Spec::Functions, Getopt::Long, IO, JPL, lib, Math::BigInt,
+Math::Complex, Math::Trig, Pod::Parser, Pod::InputObjects, Pod::Checker,
+podchecker, Pod::ParseUtils, Pod::Find, Pod::Select, podselect, Pod::Usage,
+pod2usage, Pod::Text and Pod::Man, SDBM_File, Sys::Syslog, Sys::Hostname,
+Term::ANSIColor, Time::Local, Win32, XSLoader, DBM Filters
+
+=item Pragmata
+
+=back
+
+=item Utility Changes
+
+=over 4
+
+=item dprofpp
+
+=item find2perl
+
+=item h2xs
+
+=item perlcc
+
+=item perldoc
+
+=item The Perl Debugger
+
+=back
+
+=item Improved Documentation
+
+perlapi.pod, perlboot.pod, perlcompile.pod, perldbmfilter.pod,
+perldebug.pod, perldebguts.pod, perlfork.pod, perlfilter.pod, perlhack.pod,
+perlintern.pod, perllexwarn.pod, perlnumber.pod, perlopentut.pod,
+perlreftut.pod, perltootc.pod, perltodo.pod, perlunicode.pod
+
+=item Performance enhancements
+
+=over 4
+
+=item Simple sort() using { $a <=> $b } and the like are optimized
+
+=item Optimized assignments to lexical variables
+
+=item Faster subroutine calls
+
+=item delete(), each(), values() and hash iteration are faster
+
+=back
+
+=item Installation and Configuration Improvements
+
+=over 4
+
+=item -Dusethreads means something different
+
+=item New Configure flags
+
+=item Threadedness and 64-bitness now more daring
+
+=item Long Doubles
+
+=item -Dusemorebits
+
+=item -Duselargefiles
+
+=item installusrbinperl
+
+=item SOCKS support
+
+=item C<-A> flag
+
+=item Enhanced Installation Directories
+
+=item gcc automatically tried if 'cc' does not seem to be working
+
+=back
+
+=item Platform specific changes
+
+=over 4
+
+=item Supported platforms
+
+=item DOS
+
+=item OS390 (OpenEdition MVS)
+
+=item VMS
+
+=item Win32
+
+=back
+
+=item Significant bug fixes
+
+=over 4
+
+=item <HANDLE> on empty files
+
+=item C<eval '...'> improvements
+
+=item All compilation errors are true errors
+
+=item Implicitly closed filehandles are safer
+
+=item Behavior of list slices is more consistent
+
+=item C<(\$)> prototype and C<$foo{a}>
+
+=item C<goto &sub> and AUTOLOAD
+
+=item C<-bareword> allowed under C<use integer>
+
+=item Failures in DESTROY()
+
+=item Locale bugs fixed
+
+=item Memory leaks
+
+=item Spurious subroutine stubs after failed subroutine calls
+
+=item Taint failures under C<-U>
+
+=item END blocks and the C<-c> switch
+
+=item Potential to leak DATA filehandles
+
+=back
+
+=item New or Changed Diagnostics
+
+"%s" variable %s masks earlier declaration in same %s, "my sub" not yet
+implemented, "our" variable %s redeclared, '!' allowed only after types %s,
+/ cannot take a count, / must be followed by a, A or Z, / must be followed
+by a*, A* or Z*, / must follow a numeric type, /%s/: Unrecognized escape
+\\%c passed through, /%s/: Unrecognized escape \\%c in character class
+passed through, /%s/ should probably be written as "%s", %s() called too
+early to check prototype, %s argument is not a HASH or ARRAY element, %s
+argument is not a HASH or ARRAY element or slice, %s argument is not a
+subroutine name, %s package attribute may clash with future reserved word:
+%s, (in cleanup) %s, <> should be quotes, Attempt to join self, Bad evalled
+substitution pattern, Bad realloc() ignored, Bareword found in conditional,
+Binary number > 0b11111111111111111111111111111111 non-portable, Bit vector
+size > 32 non-portable, Buffer overflow in prime_env_iter: %s, Can't check
+filesystem of script "%s", Can't declare class for non-scalar %s in "%s",
+Can't declare %s in "%s", Can't ignore signal CHLD, forcing to default,
+Can't modify non-lvalue subroutine call, Can't read CRTL environ, Can't
+remove %s: %s, skipping file, Can't return %s from lvalue subroutine, Can't
+weaken a nonreference, Character class [:%s:] unknown, Character class
+syntax [%s] belongs inside character classes, Constant is not %s reference,
+constant(%s): %s, CORE::%s is not a keyword, defined(@array) is deprecated,
+defined(%hash) is deprecated, Did not produce a valid header, (Did you mean
+"local" instead of "our"?), Document contains no data, entering effective
+%s failed, false [] range "%s" in regexp, Filehandle %s opened only for
+output, flock() on closed filehandle %s, Global symbol "%s" requires
+explicit package name, Hexadecimal number > 0xffffffff non-portable,
+Ill-formed CRTL environ value "%s", Ill-formed message in prime_env_iter:
+|%s|, Illegal binary digit %s, Illegal binary digit %s ignored, Illegal
+number of bits in vec, Integer overflow in %s number, Invalid %s attribute:
+%s, Invalid %s attributes: %s, invalid [] range "%s" in regexp, Invalid
+separator character %s in attribute list, Invalid separator character %s in
+subroutine attribute list, leaving effective %s failed, Lvalue subs
+returning %s not implemented yet, Method %s not permitted, Missing
+%sbrace%s on \N{}, Missing command in piped open, Missing name in "my sub",
+No %s specified for -%c, No package name allowed for variable %s in "our",
+No space allowed after -%c, no UTC offset information; assuming local time
+is UTC, Octal number > 037777777777 non-portable, panic: del_backref,
+panic: kid popen errno read, panic: magic_killbackrefs, Parentheses missing
+around "%s" list, Possible unintended interpolation of %s in string,
+Possible Y2K bug: %s, pragma "attrs" is deprecated, use "sub NAME : ATTRS"
+instead, Premature end of script headers, Repeat count in pack overflows,
+Repeat count in unpack overflows, realloc() of freed memory ignored,
+Reference is already weak, setpgrp can't take arguments, Strange *+?{} on
+zero-length expression, switching effective %s is not implemented, This
+Perl can't reset CRTL environ elements (%s), This Perl can't set CRTL
+environ elements (%s=%s), Too late to run %s block, Unknown open() mode
+'%s', Unknown process %x sent message to prime_env_iter: %s, Unrecognized
+escape \\%c passed through, Unterminated attribute parameter in attribute
+list, Unterminated attribute list, Unterminated attribute parameter in
+subroutine attribute list, Unterminated subroutine attribute list, Value of
+CLI symbol "%s" too long, Version number must be a constant number
+
+=item New tests
+
+=item Incompatible Changes
+
+=over 4
+
+=item Perl Source Incompatibilities
+
+CHECK is a new keyword, Treatment of list slices of undef has changed,
+Format of $English::PERL_VERSION is different, Literals of the form
+C<1.2.3> parse differently, Possibly changed pseudo-random number
+generator, Hashing function for hash keys has changed, C<undef> fails on
+read only values, Close-on-exec bit may be set on pipe and socket handles,
+Writing C<"$$1"> to mean C<"${$}1"> is unsupported, delete(), each(),
+values() and C<\(%h)>, vec(EXPR,OFFSET,BITS) enforces powers-of-two BITS,
+Text of some diagnostic output has changed, C<%@> has been removed,
+Parenthesized not() behaves like a list operator, Semantics of bareword
+prototype C<(*)> have changed, Semantics of bit operators may have changed
+on 64-bit platforms, More builtins taint their results
+
+=item C Source Incompatibilities
+
+C<PERL_POLLUTE>, C<PERL_IMPLICIT_CONTEXT>, C<PERL_POLLUTE_MALLOC>
+
+=item Compatible C Source API Changes
+
+C<PATCHLEVEL> is now C<PERL_VERSION>
+
+=item Binary Incompatibilities
+
+=back
+
+=item Known Problems
+
+=over 4
+
+=item Localizing a tied hash element may leak memory
+
+=item Known test failures
+
+64-bit builds, Failure of Thread tests, NEXTSTEP 3.3 POSIX test failure,
+Tru64 (aka Digital UNIX, aka DEC OSF/1) lib/sdbm test failure with gcc
+
+=item EBCDIC platforms not fully supported
+
+=item UNICOS/mk CC failures during Configure run
+
+=item Arrow operator and arrays
+
+=item Experimental features
+
+Threads, Unicode, 64-bit support, Lvalue subroutines, Weak references, The
+pseudo-hash data type, The Compiler suite, Internal implementation of file
+globbing, The DB module, The regular expression code constructs:
+
+=back
+
+=item Obsolete Diagnostics
+
+Character class syntax [: :] is reserved for future extensions, Ill-formed
+logical name |%s| in prime_env_iter, In string, @%s now must be written as
+\@%s, Probable precedence problem on %s, regexp too big, Use of "$$<digit>"
+to mean "${$}<digit>" is deprecated
 
 =item Reporting Bugs
 
@@ -6518,50 +6940,6 @@ Source, Compiled Module Source, Perl Modules/Scripts
 
 =back
 
-=head2 perldos - Perl under DOS, W31, W95.
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item Prerequisites for Compiling Perl on DOS
-
-DJGPP, Pthreads
-
-=item Shortcomings of Perl under DOS
-
-=item Building Perl on DOS
-
-=item Testing Perl on DOS
-
-=item Installation of Perl on DOS
-
-=back
-
-=item BUILDING AND INSTALLING MODULES ON DOS
-
-=over 4
-
-=item Building Prerequisites for Perl on DOS
-
-=item Unpacking CPAN Modules on DOS
-
-=item Building Non-XS Modules on DOS
-
-=item Building XS Modules on DOS
-
-=back
-
-=item AUTHOR
-
-=item SEE ALSO
-
-=back
-
 =head2 perlepoc, README.epoc - Perl for EPOC
 
 =over 4
@@ -7442,48 +7820,6 @@ LIST, waitpid PID,FLAGS
 =item AUTHOR
 
 =item LAST UPDATE
-
-=back
-
-=head2 perlwin32 - Perl under Win32
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item Setting Up Perl on Win32
-
-Make, Command Shell, Borland C++, Microsoft Visual C++, Mingw32 with GCC
-
-=item Building
-
-=item Testing Perl on Win32
-
-=item Installation of Perl on Win32
-
-=item Usage Hints for Perl on Win32
-
-Environment Variables, File Globbing, Using perl from the command line,
-Building Extensions, Command-line Wildcard Expansion, Win32 Specific
-Extensions, Running Perl Scripts, Miscellaneous Things
-
-=back
-
-=item BUGS AND CAVEATS
-
-=item AUTHORS
-
-Gary Ng E<lt>71564.1743@CompuServe.COME<gt>, Gurusamy Sarathy
-E<lt>gsar@activestate.comE<gt>, Nick Ing-Simmons
-E<lt>nick@ing-simmons.netE<gt>
-
-=item SEE ALSO
-
-=item HISTORY
 
 =back
 
@@ -10058,6 +10394,8 @@ Dumper
 =item WriteFile
 
 =back
+
+=item ppport.h
 
 =item AUTHOR
 
@@ -13900,18 +14238,23 @@ MSGNUM ), reset (), quit ()
 
 =item DESCRIPTION
 
-icmp, udp, tcp, stream, external
-
 =over 4
 
 =item Functions
 
 Net::Ping->new([$proto [, $def_timeout [, $bytes]]]);, $p->ping($host [,
-$timeout]);, $p->open($host);, $p->close();, pingecho($host [, $timeout]);
+$timeout]);, $p->open($host);, $p->open($host);, $p->close();,
+pingecho($host [, $timeout]);
 
 =back
 
+=item WARNING
+
 =item NOTES
+
+=item AUTHOR(S)
+
+=item COPYRIGHT
 
 =back
 

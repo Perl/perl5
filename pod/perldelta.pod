@@ -4,8 +4,45 @@ perldelta - what is new for perl v5.8.0
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.6.0 release and the
-5.8.0 release.
+This document describes differences between the 5.6.0 release
+and the 5.8.0 release.
+
+Many of the bug fixes in 5.8.0 were already seen in the 5.6.1
+maintenance release since the two releases were kept closely
+coordinated.
+
+If you are upgrading from Perl 5.005_03, you might also want
+to read L<perl56delta>.
+
+=head1 Highlights In 5.8.0
+
+=over 4
+
+=item *
+
+Better Unicode support
+
+=item *
+
+New Thread Implementation
+
+=item *
+
+Many New Modules
+
+=item *
+
+Better Numeric Accuracy
+
+=item *
+
+Safe Signals
+
+=item *
+
+More Extensive Regression Testing
+
+=back
 
 =head1 Incompatible Changes
 
@@ -34,6 +71,13 @@ The Socket extension is now dynamically loaded instead of being
 statically built in.  This may or may not be a problem with ancient
 TCP/IP stacks of VMS: we do not know since we weren't able to test
 Perl in such configurations.
+
+=head2 IEEE-format Floating Point Default on OpenVMS Alpha
+
+Perl now uses IEEE format (T_FLOAT) as the default internal floating
+point format on OpenVMS Alpha, potentially breaking binary compatibility
+with external libraries or existing data.  G_FLOAT is still available as
+a configuration option.  The default on VAX (D_FLOAT) has not changed.
 
 =head2 Different Definition of the Unicode Character Classes \p{In...}
 
@@ -105,8 +149,14 @@ any C<\w> character.
 =item *
 
 The list of filenames from glob() (or <...>) is now by default sorted
-alphabetically to be csh-compliant.  (bsd_glob() does still sort platform
+alphabetically to be csh-compliant (which is what happened before
+in most UNIX platforms).  (bsd_glob() does still sort platform
 natively, ASCII or EBCDIC, unless GLOB_ALPHASORT is specified.)
+
+=item *
+
+Spurious syntax errors generated in certain situations, when glob()
+caused File::Glob to be loaded for the first time, have been fixed.
 
 =item *
 
@@ -323,6 +373,7 @@ Formats now support zero-padded decimal fields.
 =item *
 
 Lvalue subroutines can now return C<undef> in list context.
+However, the lvalue subroutine feature still remains experimental.
 
 =item *
 
@@ -358,8 +409,9 @@ C<%\d+\$> and C<*\d+\$> syntaxes.  For example
 
     print "%2\$s %1\$s\n", "foo", "bar";
 
-will print "bar foo\n"; This feature helps in writing
-internationalised software.
+will print "bar foo\n".  This feature helps in writing
+internationalised software, and in general when the order
+of the parameters can vary.
 
 =item *
 
@@ -372,7 +424,8 @@ prototype(\[$@%&]) is now available to implicitly create references
 
 =item *
 
-UNTIE method is now recognised.
+untie() will now call an UNTIE() hook if it exists.  See L<perltie>
+for details.
 
 =item *
 
@@ -799,6 +852,11 @@ using B::Deparse.
 
 =item *
 
+DB_File now supports newer Berkeley DB versions, among
+other improvements.
+
+=item *
+
 The English module can now be used without the infamous performance
 hit by saying
 
@@ -813,6 +871,10 @@ C<@LAST_MATCH_END> English aliases for C<@-> and C<@+>.
 Fcntl, Socket, and Sys::Syslog have been rewritten to use the
 new-style constant dispatch section (see L<ExtUtils::Constant>).
 This means that they will be more robust and hopefully faster.
+
+=item *
+
+File::Find now chdir()s correctly when chasing symbolic links.
 
 =item *
 
@@ -875,20 +937,35 @@ bignum libraries such as GMP and PARI as their backends.
 
 =item *
 
-Net::Ping has been enhanced.  There is now "external" protocol which
-uses Net::Ping::External module which runs external ping(1) and parses
-the output.  An alpha version of Net::Ping::External is available in
-CPAN and in 5.7.2 the Net::Ping::External may be integrated to Perl.
+Math::Complex handles inf, NaN etc., better.
 
 =item *
 
-C<POSIX::sigaction()> is now much more flexible and robust.
+Net::Ping has been enhanced.  There is now "external" protocol which
+uses Net::Ping::External module which runs external ping(1) and parses
+the output.  A version of Net::Ping::External is available in CPAN.
+
+=item *
+
+POSIX::sigaction() is now much more flexible and robust.
 You can now install coderef handlers, 'DEFAULT', and 'IGNORE'
 handlers, installing new handlers was not atomic.
 
 =item *
 
-C<%INC> now localised in a Safe compartment so that use/require work.
+In Safe the C<%INC> now localised in a Safe compartment so that
+use/require work.
+
+=item *
+
+In SDBM_File on dosish platforms, some keys went missing because of
+lack of support for files with "holes".  A workaround for the problem
+has been added.
+
+=item *
+
+In Search::Dict one can now have a pre-processing hook for the
+lines being searched.
 
 =item *
 
@@ -900,7 +977,7 @@ The Test module has been significantly enhanced.
 
 =item *
 
-The C<vars> pragma now supports declaring fully qualified variables.
+The vars pragma now supports declaring fully qualified variables.
 (Something that C<our()> does not and will not support.)
 
 =item *
@@ -963,6 +1040,7 @@ perl.org, not perl.com.
 
 C<perlcc> has been rewritten and its user interface (that is,
 command line) is much more like that of the UNIX C compiler, cc.
+(The perlbc tools has been removed.  Use C<perlcc -B> instead.)
 
 =item *
 
@@ -1103,7 +1181,9 @@ confusion with the perlwin32 documentation on 8.3-restricted filesystems.
 
 =item *
 
-map() that changes the size of the list should now work faster.
+map() could get pathologically slow when the result list it generates
+is larger than the source list.  The performance has been improved for
+common scenarios.
 
 =item *
 
@@ -1249,6 +1329,11 @@ no longer suggests including the 5.005 modules in @INC.
 =item *
 
 Configure C<-S> can now run non-interactively.
+
+=item *
+
+Configure support for pdp11-style memory models has been removed due
+to obsolescence.
 
 =item *
 
@@ -1447,6 +1532,10 @@ NonStop-UX is now supported.
 
 =item *
 
+NEC SUPER-UX is now supported.
+
+=item *
+
 Amdahl UTS UNIX mainframe platform is now supported.
 
 =item *
@@ -1472,6 +1561,11 @@ a bit.
 =item *
 
 The autouse pragma didn't work for Multi::Part::Function::Names.
+
+=item *
+
+caller() could cause core dumps in certain situations.  Carp was sometimes
+affected by this problem.
 
 =item *
 
@@ -1501,8 +1595,13 @@ The order of DESTROYs has been made more predictable.
 
 Several debugger fixes: exit code now reflects the script exit code,
 condition C<"0"> now treated correctly, the C<d> command now checks
-line number, the C<$.> no longer gets corrupted, all debugger output now
-goes correctly to the socket if RemotePort is set.
+line number, the C<$.> no longer gets corrupted, all debugger output
+now goes correctly to the socket if RemotePort is set.
+
+=item *
+
+Perl 5.6.0 could emit spurious warnings about redefinition of dl_error()
+when statically building extensions into perl.  This has been corrected.
 
 =item *
 
@@ -1511,6 +1610,9 @@ L<dprofpp> -R didn't work.
 =item *
 
 C<*foo{FORMAT}> now works.
+=item *
+
+Infinity is now recognized as a number.
 
 =item *
 
@@ -1530,7 +1632,18 @@ were declared before the lexicals.
 
 =item *
 
-Lexical warnings now propagating correctly between scopes.
+Lexical warnings now propagating correctly between scopes
+and into C<eval "...">.
+
+=item *
+
+C<use warnings qw(FATAL all)> did not work as intended.  This has been
+corrected.
+
+=item *
+
+warnings::enabled() now reports the state of $^W correctly if the caller
+isn't using lexical warnings.
 
 =item *
 
@@ -1564,11 +1677,22 @@ more compatible with 5.005.  Infinity is now recognised as a number.
 
 =item *
 
+Numeric conversions did not recognize changes in the string value
+properly in certain circumstances.
+
+=item *
+
 Attributes (like :shared) didn't work with our().
 
 =item *
 
 our() variables will not cause "will not stay shared" warnings.
+
+=item *
+
+"our" variables of the same name declared in two sibling blocks
+resulted in bogus warnings about "redeclaration" of the variables.
+The problem has been corrected.
 
 =item *
 
@@ -1594,7 +1718,12 @@ printf() no longer resets the numeric locale to "C".
 
 =item *
 
-C<q(a\\b)> now parses correctly as C<'a\\b'>.
+C<qw(a\\b)> now parses correctly as C<'a\\b'>.
+
+=item *
+
+pos() did not return the correct value within s///ge in earlier
+versions.  This is now handled correctly.
 
 =item *
 
@@ -1622,6 +1751,8 @@ SOCKS support is now much more robust.
 
 sort() arguments are now compiled in the right wantarray context
 (they were accidentally using the context of the sort() itself).
+The comparison block is now run in scalar context, and the arguments
+to be sorted are always provided list context.
 
 =item *
 
@@ -1638,13 +1769,49 @@ behaviour consistent with that of string interpolation.
 
 =item *
 
+Some cases of inconsistent taint propagation (such as within hash
+values) have been fixed.
+
+=item *
+
+The RE engine found in Perl 5.6.0 accidentally pessimised certain kinds
+of simple pattern matches.  These are now handled better.
+
+=item *
+
+Regular expression debug output (whether through C<use re 'debug'>
+or via C<-Dr>) now looks better.
+
+=item *
+
+Multi-line matches like C<"a\nxb\n" =~ /(?!\A)x/m> were flawed.  The
+bug has been fixed.
+
+=item *
+
+Use of $& could trigger a core dump under some situations.  This
+is now avoided.
+
+=item *
+
 The regular expression captured submatches ($1, $2, ...) are now
 more consistently unset if the match fails, instead of leaving false
 data lying around in them.
 
 =item *
 
-C<Sys::Syslog> ignored the C<LOG_AUTH> constant.
+readline() on files opened in "slurp" mode could return an extra "" at
+the end in certain situations.  This has been corrected.
+
+=item *
+
+Autovivification of symbolic references of special variables described
+in L<perlvar> (as in C<${$num}>) was accidentally disabled.  This works
+again now.
+
+=item *
+
+Sys::Syslog ignored the C<LOG_AUTH> constant.
 
 =item *
 
@@ -1705,9 +1872,19 @@ C<eval "v200"> now works.
 
 =item *
 
+Perl 5.6.0 parsed m/\x{ab}/ incorrectly, leading to spurious warnings.
+This has been corrected.
+
+=item *
+
 Zero entries were missing from the Unicode classes like C<IsDigit>.
 
 =back
+
+=item *
+
+Large unsigned numbers (those above 2**31) could sometimes lose their
+unsignedness, causing bogus results in arithmetic operations.
 
 =back
 
@@ -1837,6 +2014,20 @@ VMS
 chdir() now works better despite a CRT bug; now works with MULTIPLICITY
 (see INSTALL); now works with Perl's malloc.
 
+The tainting of C<%ENV> elements via C<keys> or C<values> was previously
+unimplemented.  It now works as documented.
+
+The C<waitpid> emulation has been improved.  The worst bug (now fixed)
+was that a pid of -1 would cause a wildcard search of all processes on
+the system.  The most significant enhancement is that we can now
+usually get the completion status of a terminated process.
+
+POSIX-style signals are now emulated much better on VMS versions prior
+to 7.0.
+
+The C<system> function and backticks operator have improved
+functionality and better error handling.
+
 =item *
 
 Windows
@@ -1867,16 +2058,26 @@ New %ENV entries now propagate to subprocesses.
 
 =item *
 
+Current directory entries in %ENV are now correctly propagated to child
+processes.
+
+=item *
+
 $ENV{LIB} now used to search for libs under Visual C.
+
+=item *
+
+fork() emulation has been improved in various ways, but still continues
+to be experimental.  See L<perlfork> for known bugs and caveats.
+
+=item *
+
+A failed (pseudo)fork now returns undef and sets errno to EAGAIN.
 
 =item *
 
 Win32::GetCwd() correctly returns C:\ instead of C: when at the drive root.
 Other bugs in chdir() and Cwd::cwd() have also been fixed.
-
-=item *
-
-A failed (pseudo)fork now returns undef and sets errno to EAGAIN.
 
 =item *
 
@@ -1901,6 +2102,11 @@ Fake signal handling reenabled, bugs and all.
 
 =item *
 
+%SIG has been enabled under USE_ITHREADS, but its use is completely
+unsupported under all configurations.
+
+=item *
+
 Less stack reserved per thread so that more threads can run
 concurrently. (Still 16M per thread.)
 
@@ -1915,7 +2121,8 @@ Better UNC path handling under ithreads.
 
 =item *
 
-wait() and waitpid() now work much better.
+wait(), waitpid() and backticks now return the correct exit status under
+Windows 9x.
 
 =item *
 
@@ -2093,17 +2300,24 @@ such as sudo (see http://www.courtesan.com/sudo/).
 
 =head1 New Tests
 
-Several new tests have been added, especially for the F<lib> subsection.
+Several new tests have been added, especially for the F<lib>
+subsection.  There are now about 34 000 individual tests (spread over
+about 530 test scripts), in the regression suite (5.6.1 has about
+11700 tests, in 258 test scripts) Many of the new tests are introduced
+by the new modules, but still in general Perl is now more thoroughly
+tested.
+
+Because of the large number of tests, running the regression suite
+will take considerably longer time than it used to: expect the suite
+to take up to 4-5 times longer to run than in perl 5.6.  In a really
+fast machine you can hope to finish the suite in about 5 minutes
+(wallclock time).
 
 The tests are now reported in a different order than in earlier Perls.
 (This happens because the test scripts from under t/lib have been moved
 to be closer to the library/extension they are testing.)
 
 =head1 Known Problems
-
-Note that unlike other sections in this document (which describe
-changes since 5.7.0) this section is cumulative containing known
-problems for all the 5.7 releases.
 
 =head2 AIX
 
@@ -2164,6 +2378,17 @@ subtest 9 failed.
 
 No known fix.
 
+=head2 Mac OS X
+
+The following tests are known to fail:
+
+ Failed Test                 Stat Wstat Total Fail  Failed  List of Failed
+ -------------------------------------------------------------------------
+ ../ext/DB_File/t/db-btree.t    0    11    ??   ??       %  ??
+ ../ext/DB_File/t/db-recno.t              149    3   2.01%  61 63 65
+ ../ext/POSIX/t/posix.t                    31    1   3.23%  10
+ ../lib/warnings.t                        450    1   0.22%  316
+
 =head2 OS/390
 
 OS/390 has rather many test failures but the situation is actually
@@ -2203,14 +2428,18 @@ the printf format "%.0f", most often they produce "0" and "-0".)
 
 =head2  Failure of Thread tests
 
-B<Note that support for 5.005-style threading remains experimental.>
+B<Note that support for 5.005-style threading remains experimental
+and practically unsupported.>
 
 The following tests are known to fail due to fundamental problems in
 the 5.005 threading implementation. These are not new failures--Perl
 5.005_0x has the same bugs, but didn't have these tests.
 
-  lib/autouse.t                 4
-  t/lib/thr5005.t               19-20
+  ext/List/Util/t/first         2
+  lib/autouse                   4
+  ext/Thread/thr5005            19-20
+
+These failures are unlikely to get fixed.
 
 =head2 UNICOS
 
@@ -2245,20 +2474,9 @@ There are a few known test failures, see L<perluts>.
 
 =head2 VMS
 
-Rather a lot of tests are failing in VMS, but actually more tests
-succeed in VMS than they used to; it's just that there are many,
-many more tests than there used to be.
-
-Here are the known failures from some compiler/platform combinations.
-
-Compaq C V6.2-009 on OpenVMS Alpha V7.3
+There is one known test failure with a default configuration:
  
   [.run]switches..........................FAILED on test 1
-  [-.ext.posix.t]posix....................FAILED on test 10
-  [-.ext.time.hires]hires.................FAILED on test 17
-  [-.lib]db...............................FAILED on test 24
-  [-.lib.net]hostent......................FAILED on test 5
-  [-.lib.pod.t]basic......................FAILED on test 10
   
 =head2 Win32
 
@@ -2325,8 +2543,8 @@ pP are testing for Unicode code points, not knowing about EBCDIC.
 
 =head2 The Compiler Suite Is Still Experimental
 
-The compiler suite is slowly getting better but is nowhere near
-working order yet.
+The compiler suite is slowly getting better but it continues to be
+highly experimental.  Use in production environments is discouraged.
 
 =head2 The Long Double Support is Still Experimental
 

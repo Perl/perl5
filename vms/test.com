@@ -102,7 +102,7 @@ $   PerlShr_filespec = f$parse("Sys$Disk:[-]''dbg'PerlShr''exe'")
 $   Define 'dbg'Perlshr 'PerlShr_filespec'
 $   MCR Sys$Disk:[]Perl. "-I[-.lib]" - "''p3'" "''p4'" "''p5'" "''p6'"
 $   Deck/Dollar=$$END-OF-TEST$$
-# $RCSfile: test.com,v $$Revision: 1.1 $$Date: 2001/11/13 00:26:19 $
+# $RCSfile: test.com,v $$Revision: 1.1 $$Date: 2001/12/05 06:53:37 $
 # Modified for VMS 30-Sep-1994  Charles Bailey  bailey@newman.upenn.edu
 #
 # This is written in a peculiar style, since we're trying to avoid
@@ -113,9 +113,6 @@ $   Deck/Dollar=$$END-OF-TEST$$
 # but the tests may use other operators which don't.)
 use Config;
 use File::Spec;
-
-@exclist=('exec.t','stat.t');
-foreach $file (@exclist) { $skip{$file}++; }
 
 $| = 1;
 
@@ -137,15 +134,8 @@ if ($ARGV[0] eq '') {
       $_ = File::Spec->abs2rel($_);
       s/\[([a-z]+)/[.$1/;      # hmm, abs2rel doesn't do subdirs of the cwd
       ($fname = $_) =~ s/.*\]//;
-      if ($skip{"\L$fname"}) { push(@skipped,$_); }
-      else { push(@ARGV,$_); }
+      push(@ARGV,$_);
     }
-}
-
-if (@skipped) {
-  print "The following tests were skipped because they rely extensively on\n";
-  print " Unixisms not compatible with the current version of perl for VMS:\n";
-  print "\t",join("\n\t",@skipped),"\n\n";
 }
 
 $bad = 0;

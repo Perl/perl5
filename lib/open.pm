@@ -10,11 +10,8 @@ sub in_locale { $^H & $locale::hint_bits }
 
 sub _get_locale_encoding {
     unless (defined $locale_encoding) {
-	eval {
-	    # I18N::Langinfo isn't available everywhere
-	    require I18N::Langinfo;
-	    I18N::Langinfo->import('langinfo', 'CODESET');
-	};
+	# I18N::Langinfo isn't available everywhere
+	eval "use I18N::Langinfo qw(langinfo CODESET)";
 	unless ($@) {
 	    $locale_encoding = langinfo(CODESET());
 	}
