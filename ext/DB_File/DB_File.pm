@@ -1,8 +1,8 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
-# last modified 12th Mar 1997
-# version 1.12
+# last modified 27th Apr 1997
+# version 1.13
 #
 #     Copyright (c) 1995, 1996, 1997 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -146,7 +146,7 @@ use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO) ;
 use Carp;
 
 
-$VERSION = "1.12" ;
+$VERSION = "1.13" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -1648,6 +1648,10 @@ Documented the untie gotcha.
 
 Documented the incompatibility with version 2 of Berkeley DB.
 
+=item 1.13
+
+Minor changes to DB_FIle.xs and DB_File.pm
+
 =back
 
 =head1 BUGS
@@ -1704,7 +1708,7 @@ L<perl(1)>, L<dbopen(3)>, L<hash(3)>, L<recno(3)>, L<btree(3)>
 
 The DB_File interface was written by Paul Marquess
 E<lt>pmarquess@bfsec.bt.co.ukE<gt>.
-Questions about the DB system itself may be addressed to Keith Bostic
-E<lt>bostic@cs.berkeley.eduE<gt>.
+Questions about the DB system itself may be addressed to
+E<lt>db@sleepycat.com<gt>.
 
 =cut

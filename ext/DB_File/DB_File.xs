@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
- last modified 12th Mar 1997
- version 1.12
+ last modified 27th Apr 1997
+ version 1.13
 
  All comments/suggestions/problems are welcome
 
@@ -39,6 +39,7 @@
 		in-memory files when db 1.86 is used.
 	1.11 -  No change to DB_File.xs
 	1.12 -  No change to DB_File.xs
+	1.13 -  Tidied up a few casts.
 
 */
 
@@ -283,7 +284,7 @@ RECNOINFO * recno ;
     printf ("  cachesize = %d\n", recno->cachesize) ;
     printf ("  psize     = %d\n", recno->psize) ;
     printf ("  lorder    = %d\n", recno->lorder) ;
-    printf ("  reclen    = %d\n", recno->reclen) ;
+    printf ("  reclen    = %lu\n", (unsigned long)recno->reclen) ;
     printf ("  bval      = %d 0x%x\n", recno->bval, recno->bval) ;
     printf ("  bfname    = %d [%s]\n", recno->bfname, recno->bfname) ;
 }
@@ -466,19 +467,19 @@ SV *   sv ;
             openinfo = (void *)info ;
 
             svp = hv_fetch(action, "flags", 5, FALSE);
-            info->recno.flags = (u_long) svp ? SvIV(*svp) : 0;
+            info->recno.flags = (u_long) (svp ? SvIV(*svp) : 0);
          
             svp = hv_fetch(action, "cachesize", 9, FALSE);
-            info->recno.cachesize = (u_int) svp ? SvIV(*svp) : 0;
+            info->recno.cachesize = (u_int) (svp ? SvIV(*svp) : 0);
          
             svp = hv_fetch(action, "psize", 5, FALSE);
-            info->recno.psize = (int) svp ? SvIV(*svp) : 0;
+            info->recno.psize = (u_int) (svp ? SvIV(*svp) : 0);
          
             svp = hv_fetch(action, "lorder", 6, FALSE);
-            info->recno.lorder = (int) svp ? SvIV(*svp) : 0;
+            info->recno.lorder = (int) (svp ? SvIV(*svp) : 0);
          
             svp = hv_fetch(action, "reclen", 6, FALSE);
-            info->recno.reclen = (size_t) svp ? SvIV(*svp) : 0;
+            info->recno.reclen = (size_t) (svp ? SvIV(*svp) : 0);
          
 	    svp = hv_fetch(action, "bval", 4, FALSE);
             if (svp && SvOK(*svp))
@@ -499,7 +500,7 @@ SV *   sv ;
             svp = hv_fetch(action, "bfname", 6, FALSE); 
             if (svp && SvOK(*svp)) {
 		char * ptr = SvPV(*svp,na) ;
-                info->recno.bfname = (char*) na ? ptr : NULL ;
+                info->recno.bfname = (char*) (na ? ptr : NULL) ;
 	    }
 	    else
 		info->recno.bfname = NULL ;
