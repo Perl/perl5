@@ -2050,7 +2050,7 @@
 #define my_atof2		Perl_my_atof2
 #define my_socketpair		Perl_my_socketpair
 #ifdef PERL_COPY_ON_WRITE
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define sv_setsv_cow		Perl_sv_setsv_cow
 #endif
 #endif
@@ -4543,7 +4543,7 @@
 #define my_atof2(a,b)		Perl_my_atof2(aTHX_ a,b)
 #define my_socketpair		Perl_my_socketpair
 #ifdef PERL_COPY_ON_WRITE
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define sv_setsv_cow(a,b)	Perl_sv_setsv_cow(aTHX_ a,b)
 #endif
 #endif
