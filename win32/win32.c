@@ -1913,8 +1913,8 @@ static
 XS(w32_DomainName)
 {
     dXSARGS;
-#ifdef __MINGW32__
-    /* mingw32 doesn't have NetWksta*() yet, so do it the old way */
+#ifndef HAS_NETWKSTAGETINFO
+    /* mingw32 (and Win95) don't have NetWksta*(), so do it the old way */
     char name[256];
     DWORD size = sizeof(name);
     if (GetUserName(name,&size)) {
@@ -1929,7 +1929,9 @@ XS(w32_DomainName)
 	}
     }
 #else
-    /* this way is more reliable, in case user has a local account */
+    /* this way is more reliable, in case user has a local account.
+     * XXX need dynamic binding of netapi32.dll symbols or this will fail on
+     * Win95. Probably makes more sense to move it into libwin32. */
     char dname[256];
     DWORD dnamelen = sizeof(dname);
     PWKSTA_INFO_100 pwi;
