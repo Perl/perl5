@@ -148,6 +148,7 @@ ext/B/B/Deparse.pm		smccam
 ext/DB_File*			pmarquess
 ext/DB_File/hints/dynixptx.pl	dynix/ptx
 ext/Data/Dumper/*		gsar
+ext/Devel/DProf/*
 ext/Devel/Peek/*		ilya
 ext/DynaLoader/DynaLoader_pm.PL	
 ext/DynaLoader/Makefile.PL	

@@ -217,30 +217,30 @@ ext/Data/Dumper/Dumper.pm	Data pretty printer, module
 ext/Data/Dumper/Dumper.xs	Data pretty printer, externals
 ext/Data/Dumper/Makefile.PL	Data pretty printer, makefile writer
 ext/Data/Dumper/Todo		Data pretty printer, futures
+ext/Devel/DProf/Changes		Perl code profiler changelog
+ext/Devel/DProf/DProf.pm	Perl code profiler
+ext/Devel/DProf/DProf.xs	Perl code profiler
+ext/Devel/DProf/Makefile.PL	Perl code profiler makefile writer
+ext/Devel/DProf/Todo		Perl code profiler todo list
+ext/Devel/DProf/dprofpp.PL	Perl code profile post-processor
+ext/Devel/DProf/t/test1.pl	Perl code profiler tests
+ext/Devel/DProf/t/test1.t	Perl code profiler tests
+ext/Devel/DProf/t/test1.v	Perl code profiler tests
+ext/Devel/DProf/t/test2.t	Perl code profiler tests
+ext/Devel/DProf/t/test2.v	Perl code profiler tests
+ext/Devel/DProf/t/test3.t	Perl code profiler tests
+ext/Devel/DProf/t/test3.v	Perl code profiler tests
+ext/Devel/DProf/t/test4.t	Perl code profiler tests
+ext/Devel/DProf/t/test4.v	Perl code profiler tests
+ext/Devel/DProf/t/test5.t	Perl code profiler tests
+ext/Devel/DProf/t/test5.v	Perl code profiler tests
+ext/Devel/DProf/t/test6.t	Perl code profiler tests
+ext/Devel/DProf/t/test6.v	Perl code profiler tests
+ext/Devel/DProf/test.pl		Perl code profiler testsuite driver
 ext/Devel/Peek/Changes		Data debugging tool, changelog
 ext/Devel/Peek/Makefile.PL	Data debugging tool, makefile writer
 ext/Devel/Peek/Peek.pm		Data debugging tool, module and pod
 ext/Devel/Peek/Peek.xs		Data debugging tool, externals
-ext/DProf/Changes		Perl code profiler changelog
-ext/DProf/DProf.pm		Perl code profiler
-ext/DProf/DProf.xs		Perl code profiler
-ext/DProf/Makefile.PL		Perl code profiler makefile writer
-ext/DProf/Todo			Perl code profiler todo list
-ext/DProf/dprofpp.PL		Perl code profile post-processor
-ext/DProf/t/test1.pl		Perl code profiler tests
-ext/DProf/t/test1.t		Perl code profiler tests
-ext/DProf/t/test1.v		Perl code profiler tests
-ext/DProf/t/test2.t		Perl code profiler tests
-ext/DProf/t/test2.v		Perl code profiler tests
-ext/DProf/t/test3.t		Perl code profiler tests
-ext/DProf/t/test3.v		Perl code profiler tests
-ext/DProf/t/test4.t		Perl code profiler tests
-ext/DProf/t/test4.v		Perl code profiler tests
-ext/DProf/t/test5.t		Perl code profiler tests
-ext/DProf/t/test5.v		Perl code profiler tests
-ext/DProf/t/test6.t		Perl code profiler tests
-ext/DProf/t/test6.v		Perl code profiler tests
-ext/DProf/test.pl		Perl code profiler testsuite driver
 ext/DynaLoader/DynaLoader_pm.PL	Dynamic Loader perl module
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
