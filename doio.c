@@ -43,6 +43,15 @@
 #include <sys/file.h>
 #endif
 
+#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
+#include <signal.h>
+#endif
+
+/* XXX If this causes problems, set i_unistd=undef in the hint file.  */
+#ifdef I_UNISTD
+#  include <unistd.h>
+#endif
+
 #if defined(HAS_SOCKET) && !defined(VMS) /* VMS handles sockets via vmsish.h */
 # include <sys/socket.h>
 # include <netdb.h>
