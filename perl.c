@@ -716,6 +716,8 @@ perl_destruct(pTHXx)
     Safefree(PL_reg_poscache);
     Safefree(HeKEY_hek(&PL_hv_fetch_ent_mh));
     Safefree(PL_op_mask);
+    Safefree(PL_psig_ptr);
+    Safefree(PL_psig_name);
     nuke_stacks();
     PL_hints = 0;		/* Reset hints. Should hints be per-interpreter ? */
     
