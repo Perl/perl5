@@ -156,7 +156,6 @@ Perl_hv_iternext_flags
 Perl_hv_iterval
 Perl_hv_ksplit
 Perl_hv_magic
-Perl_hv_scalar
 Perl_hv_store
 Perl_hv_store_ent
 Perl_hv_store_flags
@@ -667,3 +666,4 @@ Perl_PerlIO_stderr
 Perl_save_set_svflags
 Perl_hv_assert
 Perl_hv_clear_placeholders
+Perl_hv_scalar
