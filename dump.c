@@ -275,6 +275,8 @@ Perl_sv_peek(pTHX_ SV *sv)
 	    if (SvOOK(sv))
 		Perl_sv_catpvf(aTHX_ t, "[%s]", pv_display(tmp, SvPVX(sv)-SvIVX(sv), SvIVX(sv), 0, 127));
 	    Perl_sv_catpvf(aTHX_ t, "%s)", pv_display(tmp, SvPVX(sv), SvCUR(sv), SvLEN(sv), 127));
+	    if (SvUTF8(sv))
+		Perl_sv_catpvf(aTHX_ t, " [UTF8]"); 
 	    SvREFCNT_dec(tmp);
 	}
     }
