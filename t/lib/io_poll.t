@@ -34,6 +34,11 @@ print "ok 2\n";
 
 $poll->poll(0.1);
 
+if ($^O eq 'MSWin32') {
+print "ok 3 # skipped, doesn't work on non-socket fds\n";
+print "ok 4 # skipped, doesn't work on non-socket fds\n";
+}
+else {
 print "not "
 	unless $poll->events($stdout) == POLLOUT;
 print "ok 3\n";
@@ -41,6 +46,7 @@ print "ok 3\n";
 print "not "
 	if $poll->events($dupout);
 print "ok 4\n";
+}
 
 my @h = $poll->handles;
 print "not "
