@@ -10,7 +10,7 @@
 package Pod::Parser;
 
 use vars qw($VERSION);
-$VERSION = 1.14;  ## Current version of this package
+$VERSION = 1.30;  ## Current version of this package
 require  5.005;    ## requires this Perl version or later
 
 #############################################################################
@@ -1146,6 +1146,8 @@ performed). If the special output filename ">&STDERR" is given then the
 STDERR filehandle is used for output (and no open or close is
 performed). If no output filehandle is currently in use and no output
 filename is specified, then "-" is implied.
+Alternatively, an L<IO::String> object is also accepted as an output
+file handle.
 
 This method does I<not> usually need to be overridden by subclasses.
 
@@ -1158,16 +1160,20 @@ sub parse_from_file {
     my ($in_fh,  $out_fh) = (gensym, gensym)  if ($] < 5.6);
     my ($close_input, $close_output) = (0, 0);
     local *myData = $self;
-    local $_;
+    local *_;
 
     ## Is $infile a filename or a (possibly implied) filehandle
-    $infile  = '-'  unless ((defined $infile)  && (length $infile));
+    $infile  = '-'  unless ((defined $infile) && (length $infile));
     if (($infile  eq '-') || ($infile =~ /^<&(STDIN|0)$/i)) {
         ## Not a filename, just a string implying STDIN
+        $infile ||= '-';
         $myData{_INFILE} = "<standard input>";
         $in_fh = \*STDIN;
     }
     elsif (ref $infile) {
+        if (ref($infile) =~ /^(SCALAR|ARRAY|HASH|CODE|REF)$/) {
+            croak "Input from $1 reference not supported!\n";
+        }
         ## Must be a filehandle-ref (or else assume its a ref to an object
         ## that supports the common IO read operations).
         $myData{_INFILE} = ${$infile};
@@ -1186,37 +1192,53 @@ sub parse_from_file {
     ## the entire document (but *not* if this is an included file). We
     ## determine this by seeing if the input stream stack has been set-up
     ## already
-    ## 
-    unless ((defined $outfile) && (length $outfile)) {
-        (defined $myData{_TOP_STREAM}) && ($out_fh  = $myData{_OUTPUT})
-                                       || ($outfile = '-');
-    }
-    ## Is $outfile a filename or a (possibly implied) filehandle
-    if ((defined $outfile) && (length $outfile)) {
-        if (($outfile  eq '-') || ($outfile =~ /^>&?(?:STDOUT|1)$/i)) {
+
+    ## Is $outfile a filename, a (possibly implied) filehandle, maybe a ref?
+    if (!defined($outfile) || !length($outfile) || ($outfile eq '-')
+        || ($outfile =~ /^>&?(?:STDOUT|1)$/i))
+    {
+        if (defined $myData{_TOP_STREAM}) {
+            $out_fh = $myData{_OUTPUT};
+        }
+        else {
             ## Not a filename, just a string implying STDOUT
+            $outfile ||= '-';
             $myData{_OUTFILE} = "<standard output>";
             $out_fh  = \*STDOUT;
         }
-        elsif ($outfile =~ /^>&(STDERR|2)$/i) {
-            ## Not a filename, just a string implying STDERR
-            $myData{_OUTFILE} = "<standard error>";
-            $out_fh  = \*STDERR;
+    }
+    elsif (ref $outfile) {
+        ## we need to check for ref() first, as other checks involve reading
+        if (ref($outfile) =~ /^(ARRAY|HASH|CODE)$/) {
+            croak "Output to $1 reference not supported!\n";
         }
-        elsif (ref $outfile) {
+        elsif (ref($outfile) eq 'SCALAR') {
+#           # NOTE: IO::String isn't a part of the perl distribution,
+#           #       so probably we shouldn't support this case...
+#           require IO::String;
+#           $myData{_OUTFILE} = "$outfile";
+#           $out_fh = IO::String->new($outfile);
+            croak "Output to SCALAR reference not supported!\n";
+        }
+        else {
             ## Must be a filehandle-ref (or else assume its a ref to an
             ## object that supports the common IO write operations).
             $myData{_OUTFILE} = ${$outfile};
             $out_fh = $outfile;
         }
-        else {
-            ## We have a filename, open it for writing
-            $myData{_OUTFILE} = $outfile;
-            (-d $outfile) and croak "$outfile is a directory, not POD input!\n";
-            open($out_fh, "> $outfile")  or
-                 croak "Can't open $outfile for writing: $!\n";
-            $close_output = 1;
-        }
+    }
+    elsif ($outfile =~ /^>&(STDERR|2)$/i) {
+        ## Not a filename, just a string implying STDERR
+        $myData{_OUTFILE} = "<standard error>";
+        $out_fh  = \*STDERR;
+    }
+    else {
+        ## We have a filename, open it for writing
+        $myData{_OUTFILE} = $outfile;
+        (-d $outfile) and croak "$outfile is a directory, not POD input!\n";
+        open($out_fh, "> $outfile")  or
+             croak "Can't open $outfile for writing: $!\n";
+        $close_output = 1;
     }
 
     ## Whew! That was a lot of work to set up reasonably/robust behavior
@@ -1774,3 +1796,4 @@ Tom Christiansen E<lt>tchrist@mox.perl.comE<gt>
 =cut
 
 1;
+# vim: ts=4 sw=4 et

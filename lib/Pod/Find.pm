@@ -13,7 +13,7 @@
 package Pod::Find;
 
 use vars qw($VERSION);
-$VERSION = 0.24_01;   ## Current version of this package
+$VERSION = 1.30;   ## Current version of this package
 require  5.005;   ## requires this Perl version or later
 use Carp;
 
@@ -42,6 +42,9 @@ no function is exported by default to avoid pollution of your namespace,
 so be sure to specify them in the B<use> statement if you need them:
 
   use Pod::Find qw(pod_find);
+
+From this version on the typical SCM (software configuration management)
+files/directories like RCS, CVS, SCCS, .svn are ignored.
 
 =cut
 

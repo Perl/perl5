@@ -204,6 +204,7 @@ These may not necessarily cause trouble, but indicate mediocre style.
 
 The POD file has some C<=item> and/or C<=head> commands that have
 the same text. Potential hyperlinks to such a text cannot be unique then.
+This warning is printed only with warning level greater than one.
 
 =item * line containing nothing but whitespace in paragraph
 
@@ -786,11 +787,13 @@ sub end_pod {
 
     # check the internal nodes for uniqueness. This pertains to
     # =headX, =item and X<...>
-    foreach(grep($self->{_unique_nodes}->{$_} > 1,
-      keys %{$self->{_unique_nodes}})) {
-        $self->poderror({ -line => '-', -file => $infile,
+    if($self->{-warnings} && $self->{-warnings}>1) {
+      foreach(grep($self->{_unique_nodes}->{$_} > 1,
+        keys %{$self->{_unique_nodes}})) {
+          $self->poderror({ -line => '-', -file => $infile,
             -severity => 'WARNING',
             -msg => "multiple occurrence of link target '$_'"});
+      }
     }
 
     # no POD found here
