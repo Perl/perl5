@@ -91,7 +91,7 @@ sub _backtick_pwd {
 
 unless(defined &cwd) {
     # The pwd command is not available in some chroot(2)'ed environments
-    if(grep { -x "$_/pwd" } split(':', $ENV{PATH})) {
+    if($^O eq 'MacOS' || grep { -x "$_/pwd" } split(':', $ENV{PATH})) {
 	*cwd = \&_backtick_pwd;
     }
     else {
@@ -197,6 +197,9 @@ sub chdir {
     return 0 unless CORE::chdir $newdir;
     if ($^O eq 'VMS') {
 	return $ENV{'PWD'} = $ENV{'DEFAULT'}
+    }
+    elsif ($^O eq 'MacOS') {
+	return $ENV{'PWD'} = cwd();
     }
     elsif ($^O eq 'MSWin32') {
 	$ENV{'PWD'} = Win32::GetFullPathName($newdir);
@@ -416,6 +419,12 @@ sub _epoc_cwd {
         *fastgetcwd	= \&_epoc_cwd;
         *fastcwd	= \&_epoc_cwd;
         *abs_path	= \&fast_abs_path;
+    }
+    elsif ($^O eq 'MacOS') {
+    	*getcwd     = \&cwd;
+    	*fastgetcwd = \&cwd;
+    	*fastcwd    = \&cwd;
+    	*abs_path   = \&fast_abs_path;
     }
 }
 
