@@ -45,7 +45,7 @@ my \@pagers = ();
 push \@pagers, \$pager if -x \$pager;
 
 (my \$bindir = <<'/../') =~ s/\\s*\\z//;
-$Config{installscript}
+$Config{scriptdirexp}
 /../
 
 (my \$pod2man = <<'/../') =~ s/\\s*\\z//;
