@@ -8,8 +8,9 @@ BEGIN {
 }
 
 use strict;
-my ($Is_VMS, $Is_W32, $Is_OS2, $Is_Cygwin, $nonono, $dostrip,
-    $versiononly, $silent, $verbose, $otherperls, $archname,$Is_NetWare, $nwinstall);
+my ($Is_VMS, $Is_W32, $Is_OS2, $Is_Cygwin, $Is_Darwin,
+    $nonono, $dostrip, $versiononly, $silent, $verbose,
+    $otherperls, $archname,$Is_NetWare, $nwinstall);
 use vars qw /$depth/;
 
 BEGIN {
@@ -17,6 +18,7 @@ BEGIN {
     $Is_W32 = $^O eq 'MSWin32';
     $Is_OS2 = $^O eq 'os2';
     $Is_Cygwin = $^O eq 'cygwin';
+    $Is_Darwin = $^O eq 'darwin';
     if ($Is_VMS) { eval 'use VMS::Filespec;' }
 }
 
@@ -341,8 +343,8 @@ foreach my $file (@corefiles) {
     # on dynamically-loadable libraries. So we do it for all.
     if (copy_if_diff($file,"$installarchlib/CORE/$file")) {
 	if ($file =~ /\.(\Q$so\E|\Q$dlext\E)$/) {
-	    chmod(0555, "$installarchlib/CORE/$file");
 	    strip("-S", "$installarchlib/CORE/$file") if $^O =~ /^(rhapsody|darwin)$/;
+           chmod(0555, "$installarchlib/CORE/$file");
 	} else {
 	    chmod(0444, "$installarchlib/CORE/$file");
 	}
@@ -425,6 +427,7 @@ if (!$Is_NetWare) {
 	if (!$versiononly && ! samepath($installbin, 'x2p')) {
 		safe_unlink("$installbin/a2p$exe_ext");
 		copy("x2p/a2p$exe_ext", "$installbin/a2p$exe_ext");
+               strip("$installbin/a2p$exe_ext");
 		chmod(0755, "$installbin/a2p$exe_ext");
 	}
 }
@@ -486,7 +489,7 @@ if ($versiononly) {
 # Install pod pages.  Where? I guess in $installprivlib/pod
 # ($installprivlib/pods for cygwin).
 
-my $pod = $Is_Cygwin ? 'pods' : 'pod';
+my $pod = ($Is_Cygwin || $Is_Darwin) ? 'pods' : 'pod';
 if ( !$versiononly || ($installprivlib =~ m/\Q$ver/)) {
     mkpath("${installprivlib}/$pod", $verbose, 0777);
 
@@ -729,21 +732,28 @@ sub installlib {
 	    mkpath("$installlib/$dir", $verbose, 0777);
 	    # HP-UX (at least) needs to maintain execute permissions
 	    # on dynamically-loaded libraries.
-		if ($Is_NetWare && !$nwinstall) {
-			# Don't copy .nlp,.nlm files, doesn't make sense on Windows and also
-			# if copied will give problems when building new extensions.
-			# Has to be copied if we are installing on a NetWare server and hence
-			# the check !$nwinstall
-			if (!(/\.(?:nlp|nlm|bs)$/)) {
-				copy_if_diff($_, "$installlib/$name")
-				and chmod($name =~ /\.(so|$dlext)$/o ? 0555 : 0444,
-			   "$installlib/$name");
-			}
-		} else {
-			copy_if_diff($_, "$installlib/$name")
+           if ($Is_NetWare && !$nwinstall) {
+               # Don't copy .nlp,.nlm files, doesn't make sense on Windows and also
+               # if copied will give problems when building new extensions.
+               # Has to be copied if we are installing on a NetWare server and hence
+               # the check !$nwinstall
+               if (!(/\.(?:nlp|nlm|bs)$/)) {
+                   copy_if_diff($_, "$installlib/$name")
 			and chmod($name =~ /\.(so|$dlext)$/o ? 0555 : 0444,
-			   "$installlib/$name");
-		} #if ($Is_NetWare)	    
+                                 "$installlib/$name");
+               }
+           } else {
+               if (copy_if_diff($_, "$installlib/$name")) {
+                   if ($name =~ /\.(so|$dlext)$/o) {
+                       strip("-S", "$installlib/$name") if $^O =~ /^(rhapsody|darwin)$/;
+                       chmod(0555, "$installlib/$name");
+                   } else {
+                       strip("-S", "$installlib/$name")
+                           if ($name =~ /\.a$/o and $^O =~ /^(rhapsody|darwin)$/);
+                       chmod(0444, "$installlib/$name");
+                   }
+               }
+           } #if ($Is_NetWare)
 	}
     }
 }
@@ -791,11 +801,14 @@ sub strip
 
     foreach my $file (@args) {
         if (-f $file) {
-            print "  strip $file\n" if $verbose;
+           if ($verbose) {
+               print "  strip " . join(' ', @opts);
+               print " " if (@opts);
+               print "$file\n";
+           }
             system("strip", @opts, $file);
         } else {
             print "# file '$file' skipped\n" if $verbose;
         }
     }
 }
-
