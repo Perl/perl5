@@ -1464,8 +1464,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	execution path, but it should be accessible by the world.  The program
  *	should be prepared to do ~ expansion.
  *	The standard distribution will put nothing in this directory.
- *	Individual sites may place their own extensions and modules in
- *	this directory.
+ *	After perl has been installed, users may install their own local
+ *	architecture-dependent modules in this directory with
+ *		MakeMaker Makefile.PL
+ *	or equivalent.  See INSTALL for details.
  */
 /* SITEARCH_EXP:
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
@@ -1480,8 +1482,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	execution path, but it should be accessible by the world.  The program
  *	should be prepared to do ~ expansion.
  *	The standard distribution will put nothing in this directory.
- *	Individual sites may place their own extensions and modules in
- *	this directory.
+ *	After perl has been installed, users may install their own local
+ *	architecture-independent modules in this directory with
+ *		MakeMaker Makefile.PL
+ *	or equivalent.  See INSTALL for details.
  */
 /* SITELIB_EXP:
  *	This symbol contains the ~name expanded version of SITELIB, to be used

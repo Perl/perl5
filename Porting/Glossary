@@ -2792,6 +2792,11 @@ sitearch (sitearch.U):
 	which is the name of the private library for this package.  It may
 	have a ~ on the front. It is up to the makefile to eventually create
 	this directory while performing installation (with ~ substitution).
+	The standard distribution will put nothing in this directory.
+	After perl has been installed, users may install their own local
+	architecture-dependent modules in this directory with
+	MakeMaker Makefile.PL
+	or equivalent.  See INSTALL for details.
 
 sitearchexp (sitearch.U):
 	This variable is the ~name expanded version of sitearch, so that you
@@ -2802,6 +2807,11 @@ sitebin (sitebin.U):
 	to put add-on publicly executable files for the package in question.  It
 	is most often a local directory such as /usr/local/bin. Programs using
 	this variable must be prepared to deal with ~name substitution.
+	The standard distribution will put nothing in this directory.
+	After perl has been installed, users may install their own local
+	executables in this directory with
+	MakeMaker Makefile.PL
+	or equivalent.  See INSTALL for details.
 
 sitebinexp (sitebin.U):
 	This is the same as the sitebin variable, but is filename expanded at
@@ -2812,6 +2822,11 @@ sitelib (sitelib.U):
 	which is the name of the private library for this package.  It may
 	have a ~ on the front. It is up to the makefile to eventually create
 	this directory while performing installation (with ~ substitution).
+	The standard distribution will put nothing in this directory.
+	After perl has been installed, users may install their own local
+	architecture-independent modules in this directory with
+	MakeMaker Makefile.PL
+	or equivalent.  See INSTALL for details.
 
 sitelibexp (sitelib.U):
 	This variable is the ~name expanded version of sitelib, so that you
@@ -2820,6 +2835,7 @@ sitelibexp (sitelib.U):
 siteprefix (siteprefix.U):
 	This variable holds the full absolute path of the directory below
 	which the user will install add-on packages.
+	See INSTALL for usage and examples.
 
 siteprefixexp (siteprefix.U):
 	This variable holds the full absolute path of the directory below
@@ -3168,12 +3184,13 @@ uuname (Loc.U):
 	The value is a plain '' and is not useful.
 
 vendorbin (vendorbin.U):
-	This variable contains the eventual value of the VENDORBIN symbol,
-	which is the name of the private directory for exuctables for this package.
-	It may have a ~ on the front. It is up to the makefile to eventually create
-	this directory while performing installation (with ~ substitution).
-	Vendors who distribute perl binaries may place their own
-	extensions and modules in this directory.
+	This variable contains the eventual value of the VENDORBIN symbol.
+	It may have a ~ on the front.
+	The standard distribution will put nothing in this directory.
+	Vendors who distribute perl may wish to place additional
+	binaries in this directory with
+	MakeMaker Makefile.PL INSTALLDIRS=vendor 
+	or equivalent.  See INSTALL for details.
 
 vendorbinexp (vendorbin.U):
 	This variable is the ~name expanded version of vendorbin, so that you
@@ -3181,11 +3198,12 @@ vendorbinexp (vendorbin.U):
 
 vendorlib (vendorlib.U):
 	This variable contains the eventual value of the VENDORLIB symbol,
-	which is the name of the private library for this package.  It may
-	have a ~ on the front. It is up to the makefile to eventually create
-	this directory while performing installation (with ~ substitution).
-	Vendors who distribute perl binaries may place their own
-	extensions and modules in this directory.
+	which is the name of the private library for this package.
+	The standard distribution will put nothing in this directory.
+	Vendors who distribute perl may wish to place their own
+	modules in this directory with
+	MakeMaker Makefile.PL INSTALLDIRS=vendor 
+	or equivalent.  See INSTALL for details.
 
 vendorlibexp (vendorlib.U):
 	This variable is the ~name expanded version of vendorlib, so that you
@@ -3194,6 +3212,7 @@ vendorlibexp (vendorlib.U):
 vendorprefix (vendorprefix.U):
 	This variable holds the full absolute path of the directory below
 	which the vendor will install add-on packages.
+	See INSTALL for usage and examples.
 
 vendorprefixexp (vendorprefix.U):
 	This variable holds the full absolute path of the directory below
