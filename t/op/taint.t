@@ -99,7 +99,7 @@ print PROG 'print "@ARGV\n"', "\n";
 close PROG;
 my $echo = "$Invoke_Perl $ECHO";
 
-print "1..151\n";
+print "1..152\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -681,3 +681,13 @@ else {
     }
 }
 
+{
+    # bug id 20001004.006
+
+    open IN, "./TEST" or warn "$0: cannot read ./TEST: $!" ;
+    local $/;
+    my $a = <IN>;
+    my $b = <IN>;
+    print "not " unless tainted($a) && tainted($b) && !defined($b);
+    print "ok 152\n";
+}

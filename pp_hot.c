@@ -1450,6 +1450,13 @@ Perl_do_readline(pTHX)
 	offset = 0;
     }
 
+    /* This should not be marked tainted if the fp is marked clean */
+#define MAYBE_TAINT_LINE(io, sv) \
+    if (!(IoFLAGS(io) & IOf_UNTAINT)) { \
+	TAINT;				\
+	SvTAINTED_on(sv);		\
+    }
+
 /* delay EOF state for a snarfed empty file */
 #define SNARF_EOF(gimme,rs,io,sv) \
     (gimme != G_SCALAR || SvCUR(sv)					\
@@ -1478,13 +1485,10 @@ Perl_do_readline(pTHX)
 		(void)SvOK_off(TARG);
 		PUSHTARG;
 	    }
+	    MAYBE_TAINT_LINE(io, sv);
 	    RETURN;
 	}
-	/* This should not be marked tainted if the fp is marked clean */
-	if (!(IoFLAGS(io) & IOf_UNTAINT)) {
-	    TAINT;
-	    SvTAINTED_on(sv);
-	}
+	MAYBE_TAINT_LINE(io, sv);
 	IoLINES(io)++;
 	IoFLAGS(io) |= IOf_NOLINE;
 	SvSETMAGIC(sv);
