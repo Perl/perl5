@@ -20,7 +20,7 @@ if [ "$xxOsRevMajor" -ge 10 ]; then
     xxcpu=`printf '0x%x' $xxcpu`; # convert to hex
     archname=`sed -n -e "s/^#[ \t]*define[ \t]*CPU_//p" /usr/include/sys/unistd.h |
 	sed -n -e "s/[ \t]*$xxcpu[ \t].*//p" |
-	sed -e s/_RISC/-RISC/ -e s/HP_// -e s/_/./`;
+	sed -e s/_RISC/-RISC/ -e s/HP_// -e s/_/./ -e "s/[[:space:]]*//g"`;
 else
     # This system is running <= 9.x
     # Tested on 9.0[57] PA and [78].0 MC680[23]0.  Idea: After removing
@@ -162,14 +162,23 @@ case "$usemorebits" in
     $define|true|[yY]*) use64bitint="$define"; uselongdouble="$define" ;;
     esac
 
-case "$uselongdouble" in
-    $define|true|[yY]*)
-	cat <<EOM >&4
+case "$archname" in
+    IA64*)
+	# While here, override so=sl auto-detection
+	so='so'
+	;;
+    *)
+    case "$uselongdouble" in
+	*) ;;
+	$define|true|[yY]*)
+	    cat <<EOM >&4
 
 *** long doubles are not (yet) supported on HP-UX (any version)
 *** Until it does, we cannot continue, aborting.
 EOM
-	exit 1 ;;
+	    exit 1 ;;
+	esac
+	;;
     esac
 
 case "$use64bitint" in
@@ -227,6 +236,7 @@ EOM
 
 	# Reset the library checker to make sure libraries
 	# are the right type
+	# (NOTE: on IA64, this doesn't work with .a files.)
 	libscheck='case "`/usr/bin/file $xxx`" in
 		       *ELF-64*|*LP64*|*PA-RISC2.0*) ;;
 		       *) xxx=/no/64-bit$xxx ;;
@@ -294,6 +304,7 @@ optimization, raise the 'maxdsiz' kernel configuration parameter
 to at least 0x08000000 (128 Mb) and rebuild your kernel.
 EOM
 regexec_cflags=''
+doop_cflags=''
     fi
 
 case "$ccisgcc" in
@@ -336,15 +347,22 @@ case "$ccisgcc" in
 	    "")           optimize="+O2 +Onolimit" ;;
 	    *O[3456789]*) optimize=`echo "$optimize" | sed -e 's/O[3-9]/O2/'` ;;
 	    esac
-	if [ $maxdsiz -le 64 ]; then
-	    case "$optimize" in
-		*-O*|\
-		*O2*)	opt=`echo "$optimize" | sed -e 's/-O/+O2/' -e 's/O2/O1/' -e 's/ *+Onolimit//'`
-			toke_cflags="$toke_cflags;optimize=\"$opt\""
-			regexec_cflags="optimize=\"$opt\""
-			;;
+	case "$optimize" in
+	    *-O*|\
+	    *O2*)    opt=`echo "$optimize" | sed -e 's/-O/+O2/' -e 's/O2/O1/' -e 's/ *+Onolimit//'`
+		    ;;
+	    *)	opt="$optimize"
+		;;
 		esac
+	if [ $maxdsiz -le 64 ]; then
+		toke_cflags="$toke_cflags;optimize=\"$opt\""
+		regexec_cflags="optimize=\"$opt\""
 	    fi
+	case "$archname" in
+	    IA64*)
+		doop_cflags="optimize=\"$opt\""
+		;;
+	    esac
 	ld=/usr/bin/ld
 	cccdlflags='+Z'
 	lddlflags='-b +vnocompatwarnings'
@@ -374,8 +392,8 @@ case "$uselargefiles" in
 	# but we cheat for now.  (Keep that in the left margin.)
 ccflags_uselargefiles="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 
-	case "$ccflags" in
-	*" $ccflags_uselargefiles") ;;
+	case " $ccflags " in
+	*" $ccflags_uselargefiles "*) ;;
 	*) ccflags="$ccflags $ccflags_uselargefiles" ;;
 	esac
 
@@ -494,4 +512,9 @@ EOM
 EOCBU
 
 # fpclassify() is a macro, the library call is Fpclassify
+# Similarly with the others below.
 d_fpclassify='define'
+d_isnan='define'
+d_isinf='define'
+d_isfinite='define'
+d_unordered='define'
