@@ -259,7 +259,8 @@ sub full_setup {
     @Get_from_Config = 
 	qw(
 	   ar cc cccdlflags ccdlflags dlext dlsrc ld lddlflags ldflags libc
-	   lib_ext obj_ext osname osvers ranlib sitelibexp sitearchexp so exe_ext
+	   lib_ext obj_ext osname osvers ranlib sitelibexp sitearchexp so
+	   exe_ext full_ar
 	  );
 
     my $item;

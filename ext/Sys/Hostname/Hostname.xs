@@ -18,8 +18,7 @@
 #  endif
 #endif
 
-#if defined(HAS_UNAME) && !defined(WIN32)
-/* XXX need i_sys_utsname in config.sh */
+#ifdef I_SYS_UTSNAME
 #  include <sys/utsname.h>
 #endif
 

@@ -455,7 +455,8 @@ EOT
     my(@otherfiles) = values %{$self->{XS}}; # .c files from *.xs files
     push(@otherfiles, $attribs{FILES}) if $attribs{FILES};
     push(@otherfiles, qw[./blib $(MAKE_APERL_FILE) $(INST_ARCHAUTODIR)/extralibs.all
-			 perlmain.c mon.out core so_locations pm_to_blib
+			 perlmain.c mon.out core core.*perl.*.?
+			 *perl.core so_locations pm_to_blib
 			 *~ */*~ */*/*~ *$(OBJ_EXT) *$(LIB_EXT) perl.exe
 			 $(BOOTSTRAP) $(BASEEXT).bso $(BASEEXT).def
 			 $(BASEEXT).exp
@@ -555,7 +556,7 @@ sub constants {
 	      INSTALLSITEARCH INSTALLBIN INSTALLSCRIPT PERL_LIB
 	      PERL_ARCHLIB SITELIBEXP SITEARCHEXP LIBPERL_A MYEXTLIB
 	      FIRST_MAKEFILE MAKE_APERL_FILE PERLMAINCC PERL_SRC
-	      PERL_INC PERL FULLPERL
+	      PERL_INC PERL FULLPERL FULL_AR
 
 	      / ) {
 	next unless defined $self->{$tmp};
@@ -3179,9 +3180,18 @@ END
     # then copy that to $(INST_STATIC) and add $(OBJECT) into it.
     push(@m, "\t$self->{CP} \$(MYEXTLIB) \$\@\n") if $self->{MYEXTLIB};
 
+    my $ar; 
+    if (exists $self->{FULL_AR} && -x $self->{FULL_AR}) {
+        # Prefer the absolute pathed ar if available so that PATH
+        # doesn't confuse us.  Perl itself is built with the full_ar.  
+        $ar = 'FULL_AR';
+    } else {
+        $ar = 'AR';
+    }
     push @m,
-q{	$(AR) $(AR_STATIC_ARGS) $@ $(OBJECT) && $(RANLIB) $@
-	$(CHMOD) $(PERM_RWX) $@
+        "\t\$($ar) ".'$(AR_STATIC_ARGS) $@ $(OBJECT) && $(RANLIB) $@'."\n";
+    push @m,
+q{	$(CHMOD) $(PERM_RWX) $@
 	}.$self->{NOECHO}.q{echo "$(EXTRALIBS)" > $(INST_ARCHAUTODIR)/extralibs.ld
 };
     # Old mechanism - still available:

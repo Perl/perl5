@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Feb 14 06:52:21 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Wed Feb 16 01:07:15 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -666,6 +666,7 @@ i_systimes=''
 i_systypes=''
 i_sysuio=''
 i_sysun=''
+i_sysutsname=''
 i_sysvfs=''
 i_syswait=''
 i_sgtty=''
@@ -949,10 +950,11 @@ loclibpth="/usr/local/lib /opt/local/lib /usr/gnu/lib"
 loclibpth="$loclibpth /opt/gnu/lib /usr/GNU/lib /opt/GNU/lib"
 
 : general looking path for locating libraries
-glibpth="/shlib /usr/shlib /lib/pa20_64 /lib/pa1.1 /usr/lib/large"
-glibpth="$glibpth /lib /usr/lib $xlibpth"
+glibpth="/usr/lib/large /lib/pa1.1 /lib /usr/lib $xlibpth"
 glibpth="$glibpth /lib/large /usr/lib/small /lib/small"
 glibpth="$glibpth /usr/ccs/lib /usr/ucblib /usr/local/lib"
+test -f /usr/shlib/libc.so && glibpth="/usr/shlib $glibpth"
+test -f /shlib/libc.so     && glibpth="/shlib $glibpth"
 
 : Private path used by Configure to find libraries.  Its value
 : is prepended to libpth. This variable takes care of special
@@ -3697,32 +3699,47 @@ $define)
 	;;
 esac
 for thislib in $libswanted; do
-	
-	libname="$thislib"
-	if xxx=`./loc lib$thislib.$so.[0-9]'*' X $libpth`
-	   $test -f "$xxx" -a "X$ignore_versioned_solibs" = "X" ; then
-		libstyle=shared
-	elif xxx=`./loc lib$thislib.$so X $libpth` ; $test -f "$xxx"; then
-		libstyle=shared
-	elif xxx=`./loc lib$thislib$_a X $libpth`; $test -f "$xxx"; then
-		libstyle=static
-	elif xxx=`./loc $thislib$_a X $libpth`; $test -f "$xxx"; then
-		libstyle=static
-	elif xxx=`./loc lib${thislib}_s$_a X $libpth`; $test -f "$xxx"; then
-		libstyle=static
-		libname=${thislib}_s
-	elif xxx=`./loc Slib$thislib$_a X $xlibpth`; $test -f "$xxx"; then
-		libstyle="static"
-	fi
-	if $test -f "$xxx"; then
+	for thisdir in $libpth; do
+	    xxx=''
+	    if $test ! -f "$xxx" -a "X$ignore_versioned_solibs" = "X"; then
+		xxx=`ls $thisdir/lib$thislib.$so.[0-9] 2>/dev/null|tail -1`
+	        $test -f "$xxx" && eval $libscheck
+		$test -f "$xxx" && libstyle=shared
+	    fi
+	    if test ! -f "$xxx"; then
+		xxx=$thisdir/lib$thislib.$so
+	        $test -f "$xxx" && eval $libscheck
+		$test -f "$xxx" && libstyle=shared
+	    fi	
+	    if test ! -f "$xxx"; then
+		xxx=$thisdir/lib$thislib$_a
+	        $test -f "$xxx" && eval $libscheck
+		$test -f "$xxx" && libstyle=static
+	    fi
+	    if test ! -f "$xxx"; then
+		xxx=$thisdir/$thislib$_a
+	        $test -f "$xxx" && eval $libscheck
+		$test -f "$xxx" && libstyle=static
+	    fi
+	    if test ! -f "$xxx"; then
+		xxx=$thisdir/lib${thislib}_s$_a
+	        $test -f "$xxx" && eval $libscheck
+		$test -f "$xxx" && libstyle=static
+	    fi
+	    if test ! -f "$xxx"; then
+		xxx=$thisdir/Slib$thislib$_a
+	        $test -f "$xxx" && eval $libscheck
+		$test -f "$xxx" && libstyle=static
+	    fi
+	    if $test -f "$xxx"; then
 		case "$libstyle" in
-		shared) echo "Found -l$libname (shared)." ;;
-		static) echo "Found -l$libname." ;;
-		*)      echo "Found -l$libname ($libstyle)." ;;
+		shared) echo "Found -l$thislib (shared)." ;;
+		static) echo "Found -l$thislib." ;;
+		*)      echo "Found -l$thislib ($libstyle)." ;;
 		esac
 		case " $dflt " in
 		*"-l$thislib "*);;
-		*) dflt="$dflt -l$libname"
+		*) dflt="$dflt -l$thislib"
                    libsfound="$libsfound $xxx"
                    yyy=`basename $xxx`
                    libsfiles="$libsfiles $yyy"
@@ -3733,8 +3750,11 @@ for thislib in $libswanted; do
                    esac
 		   ;;
 		esac
-	else
-		echo "No -l$thislib."
+		break
+	    fi	
+	done
+	if $test ! -f "$xxx"; then
+	    echo "No -l$thislib."
 	fi
 done
 set X $dflt
@@ -6026,7 +6046,7 @@ EOM
     case "$lddlflags" in
     '') case "$osname" in
   			beos) dflt='-nostart' ;;
-			hpux)  dflt='-b' ;;
+			hpux)  dflt='-b +vnocompatwarnings' ;;
 			linux|irix*)	dflt='-shared' ;;
 			next)  dflt='none' ;;
 			solaris) dflt='-G' ;;
@@ -14106,6 +14126,11 @@ eval $inhdr
 set sys/un.h i_sysun
 eval $inhdr
 
+
+: see if this is a sys/utsname.h system
+set sys/utsname.h i_sysutsname
+eval $inhdr
+
 : see if this is a syswait system
 set sys/wait.h i_syswait
 eval $inhdr
@@ -14216,12 +14241,30 @@ for xxx in $known_extensions ; do
 		;;
 	NDBM_File|ndbm_fil)
 		case "$i_ndbm" in
-		$define) avail_ext="$avail_ext $xxx" ;;
+		$define)
+		    case "$osname-$use64bits" in
+		    hpux-define)
+			case "$libs" in
+			*-lndbm*) avail_ext="$avail_ext $xxx" ;;
+			esac
+			;;
+		    *) avail_ext="$avail_ext $xxx" ;;
+		    esac
+		    ;;
 		esac
 		;;
 	ODBM_File|odbm_fil) 
 		case "${i_dbm}${i_rpcsvcdbm}" in
-		*"${define}"*) avail_ext="$avail_ext $xxx" ;;
+		*"${define}"*)
+		    case "$osname-$use64bits" in
+		    hpux-define)
+			case "$libs" in
+			*-ldbm*) avail_ext="$avail_ext $xxx" ;;
+			esac
+			;;
+		    *) avail_ext="$avail_ext $xxx" ;;
+		    esac
+		    ;;
 		esac
 		;;
 	POSIX|posix)
@@ -14922,6 +14965,7 @@ i_systimes='$i_systimes'
 i_systypes='$i_systypes'
 i_sysuio='$i_sysuio'
 i_sysun='$i_sysun'
+i_sysutsname='$i_sysutsname'
 i_sysvfs='$i_sysvfs'
 i_syswait='$i_syswait'
 i_termio='$i_termio'

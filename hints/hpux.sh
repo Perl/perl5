@@ -61,7 +61,7 @@
 #
 # Lastly, you may want to include the "-z" HP linker flag so that
 # reading from a NULL pointer causes a SEGV.
-ccflags="$ccflags -D_HPUX_SOURCE"
+ccflags="$ccflags -D_HPUX_SOURCE -Wl,-z"
 
 # Check if you're using the bundled C compiler.  This compiler doesn't support
 # ANSI C (the -Aa flag) nor can it produce shared libraries.  Thus we have
@@ -316,14 +316,18 @@ Cannot continue, aborting.
 EOM
 		exit 1
 	fi
-        ccflags="$ccflags +DD64"
-        ldflags="$ldflags +DD64"
+
 	ld=/usr/bin/ld
 	ar=/usr/bin/ar
-	loclibpth="/lib/pa20_64 $loclibpth"
+	full_ar=$ar
 
         # The strict ANSI mode (-Aa) doesn't like the LL suffixes.
-	ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @'`
+	case "$ccflags" in
+	*-Aa*)
+	    echo "(Changing from strict ANSI compilation to extended because of 64-bitness)"
+	    ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @'`
+	    ;;
+	esac    
 
 	set `echo " $libswanted " | sed -e 's@ dl @ @'`
 	libswanted="$*"
@@ -331,6 +335,22 @@ EOM
 	;;
 esac
 EOCBU
+
+case "$use64bits" in
+$define|true|[yY]*)
+    glibpth="`echo $glibpth|sed 's: /lib/pa1.1 : /lib/pa20_64 :'`"
+    ccflags="$ccflags +DD64"
+    ldflags="$ldflags +DD64"
+    libscheck='case "`file $xxx`" in
+*LP64*|*PA-RISC2.0*) ;;
+*) xxx=/no/64-bit$xxx ;;
+esac'
+      ;;
+esac
+
+case "`getconf KERNEL_BITS 2>/dev/null`" in
+*64*) ldflags="$ldflags -Wl,+vnocompatwarnings" ;;
+esac
 
 # This script UU/uselfs.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use 64 bits.
@@ -342,8 +362,14 @@ $define|true|[yY]*)
 	ccflags="$ccflags -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 
         # The strict ANSI mode (-Aa) doesn't like large files.
-	ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @'`
+	case "$ccflags" in
+	*-Aa*)
+	    echo "(Changing from strict ANSI compilation to extended because of large files)"
+	    ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @'`
+	    ;;
+	esac    
 	;;
 esac
 EOCBU
+
 
