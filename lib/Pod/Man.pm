@@ -1,16 +1,16 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
-# $Id: Man.pm,v 1.29 2001/11/26 08:35:15 eagle Exp $
+# $Id: Man.pm,v 1.30 2001/11/28 01:14:28 eagle Exp $
 #
 # Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
 #
-# This module is intended to be a replacement for the pod2man script
-# distributed with versions of Perl prior to 5.6, and attempts to match its
-# output except for some specific circumstances where other decisions seemed
-# to produce better output.  It uses Pod::Parser and is designed to be easy to
-# subclass.
+# This module translates POD documentation into *roff markup using the man
+# macro set, and is intended for converting POD documents written as Unix
+# manual pages to manual pages that can be read by the man(1) command.  It is
+# a replacement for the pod2man command distributed with versions of Perl
+# prior to 5.6.
 #
 # Perl core hackers, please note that this module is also separately
 # maintained outside of the Perl core as part of the podlators.  Please send
@@ -23,7 +23,7 @@
 
 package Pod::Man;
 
-require 5.004;
+require 5.005;
 
 use Carp qw(carp croak);
 use Pod::ParseLink qw(parselink);
@@ -38,7 +38,7 @@ use vars qw(@ISA %ESCAPES $PREAMBLE $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 1.29;
+$VERSION = 1.30;
 
 
 ##############################################################################
@@ -324,7 +324,7 @@ sub initialize {
     # Extra stuff for page titles.
     $$self{center} = 'User Contributed Perl Documentation'
         unless defined $$self{center};
-    $$self{indent}  = 4 unless defined $$self{indent};
+    $$self{indent} = 4 unless defined $$self{indent};
 
     # We used to try first to get the version number from a local binary, but
     # we shouldn't need that any more.  Get the version from the running Perl.
@@ -552,17 +552,17 @@ sub textblock {
     $$self{NEEDSPACE} = 1;
 }
 
-# Called for an interior sequence.  Takes a Pod::InteriorSequence object and
+# Called for a formatting code.  Takes a Pod::InteriorSequence object and
 # returns a reference to a scalar.  This scalar is the final formatted text.
-# It's returned as a reference so that other interior sequences above us know
-# that the text has already been processed.
+# It's returned as a reference to an array so that other formatting codes
+# above us know that the text has already been processed.
 sub sequence {
     my ($self, $seq) = @_;
     my $command = $seq->cmd_name;
 
     # We have to defer processing of the inside of an L<> formatting code.  If
-    # this sequence is nested inside an L<> sequence, return the literal raw
-    # text of it.
+    # this code is nested inside an L<> code, return the literal raw text of
+    # it.
     my $parent = $seq->nested;
     while (defined $parent) {
         return $seq->raw_text if ($parent->cmd_name eq 'L');
@@ -570,46 +570,37 @@ sub sequence {
     }
 
     # Zero-width characters.
-    if ($command eq 'Z') {
-        # Workaround to generate a blessable reference, needed by 5.005.
-        my $tmp = '\&';
-        return bless \ "$tmp", 'Pod::Man::String';
-    }
+    return [ '\&' ] if ($command eq 'Z');
 
     # C<>, L<>, X<>, and E<> don't apply guesswork to their contents.  C<>
     # needs some additional special handling.
     my $literal = ($command =~ /^[CELX]$/);
-    $literal++ if $command eq 'C';
-    local $_ = $self->collapse ($seq->parse_tree, $literal);
+    local $_ = $self->collapse ($seq->parse_tree, $literal, $command eq 'C');
 
     # Handle E<> escapes.  Numeric escapes that match one of the supported ISO
     # 8859-1 characters don't work at present.
     if ($command eq 'E') {
         if (/^\d+$/) {
-            return bless \ chr ($_), 'Pod::Man::String';
+            return [ chr ($_) ];
         } elsif (exists $ESCAPES{$_}) {
-            return bless \ "$ESCAPES{$_}", 'Pod::Man::String';
+            return [ $ESCAPES{$_} ];
         } else {
             my ($file, $line) = $seq->file_line;
             warn "$file:$line: Unknown escape E<$_>\n";
-            return bless \ "E<$_>", 'Pod::Man::String';
+            return [ "E<$_>" ];
         }
     }
 
-    # For all the other sequences, empty content produces no output.
+    # For all the other codes, empty content produces no output.
     return '' if $_ eq '';
 
-    # Handle formatting sequences.
+    # Handle simple formatting codes.
     if ($command eq 'B') {
-        return bless \ ('\f(BS' . $_ . '\f(BE'), 'Pod::Man::String';
-    } elsif ($command eq 'F') {
-        return bless \ ('\f(IS' . $_ . '\f(IE'), 'Pod::Man::String';
-    } elsif ($command eq 'I') {
-        return bless \ ('\f(IS' . $_ . '\f(IE'), 'Pod::Man::String';
+        return [ '\f(BS' . $_ . '\f(BE' ];
+    } elsif ($command eq 'F' || $command eq 'I') {
+        return [ '\f(IS' . $_ . '\f(IE' ];
     } elsif ($command eq 'C') {
-        # A bug in lvalue subs in 5.6 requires the temporary variable.
-        my $tmp = $self->quote_literal ($_);
-        return bless \ "$tmp", 'Pod::Man::String';
+        return [ $self->quote_literal ($_) ];
     }
 
     # Handle links.
@@ -619,21 +610,24 @@ sub sequence {
         my ($file, $line) = $seq->file_line;
         $text = $self->parse ($text, $line);
         $text = '<' . $text . '>' if $type eq 'url';
-        return bless \ "$text", 'Pod::Man::String';
+        return [ $text ];
     }
 
     # Whitespace protection replaces whitespace with "\ ".
     if ($command eq 'S') {
         s/\s+/\\ /g;
-        return bless \ "$_", 'Pod::Man::String';
+        return [ $_ ];
     }
 
     # Add an index entry to the list of ones waiting to be output.
-    if ($command eq 'X') { push (@{ $$self{INDEX} }, $_); return '' }
+    if ($command eq 'X') {
+        push (@{ $$self{INDEX} }, $_);
+        return '';
+    }
 
     # Anything else is unknown.
     my ($file, $line) = $seq->file_line;
-    warn "$file:$line: Unknown sequence $command<$_>\n";
+    warn "$file:$line: Unknown formatting code $command<$_>\n";
 }
 
 
@@ -645,7 +639,7 @@ sub sequence {
 
 # First level heading.  We can't output .IX in the NAME section due to a bug
 # in some versions of catman, so don't output a .IX for that section.  .SH
-# already uses small caps, so remove any E<> sequences that would cause them.
+# already uses small caps, so remove \s1 and \s-1.
 sub cmd_head1 {
     my $self = shift;
     local $_ = $self->parse (@_);
@@ -879,36 +873,35 @@ sub parse {
                          -expand_ptree => 'collapse' }, @_);
 }
 
-# Takes a parse tree and a flag saying whether or not to treat it as literal
-# text (not call guesswork on it), and returns the concatenation of all of the
-# text strings in that parse tree.  If the literal flag isn't true,
-# guesswork() will be called on all plain scalars in the parse tree.
-# Otherwise, just escape backslashes in the normal case.  If collapse is being
-# called on a C<> sequence, literal is set to 2, and we do some additional
-# cleanup.  Assumes that everything in the parse tree is either a scalar or a
+# Takes a parse tree, a flag saying whether or not to treat it as literal text
+# (not call guesswork on it), and a flag saying whether or not to clean some
+# things up for *roff, and returns the concatenation of all of the text
+# strings in that parse tree.  If the literal flag isn't true, guesswork()
+# will be called on all plain scalars in the parse tree.  Otherwise, just
+# escape backslashes in the normal case.  If collapse is being called on a C<>
+# code, $cleanup should be set to true and some additional cleanup will be
+# done.  Assumes that everything in the parse tree is either a scalar or a
 # reference to a scalar.
 sub collapse {
-    my ($self, $ptree, $literal) = @_;
-    if ($literal) {
-        return join ('', map {
-            if (ref $_) {
-                $$_;
-            } else {
-                s/\\/\\e/g   if $literal > 1;
-                s/-/\\-/g    if $literal > 1;
-                s/__/_\\|_/g if $literal > 1;
-                $_;
+    my ($self, $ptree, $literal, $cleanup) = @_;
+    return join ('', map {
+        if (ref $_) {
+            join ('', @$_);
+        } elsif ($literal) {
+            if ($cleanup) {
+                s/\\/\\e/g;
+                s/-/\\-/g;
+                s/__/_\\|_/g;
             }
-        } $ptree->children);
-    } else {
-        return join ('', map {
-            ref ($_) ? $$_ : $self->guesswork ($_)
-        } $ptree->children);
-    }
+            $_;
+        } else {
+            $self->guesswork ($_);
+        }
+    } $ptree->children);
 }
 
 # Takes a text block to perform guesswork on; this is guaranteed not to
-# contain any interior sequences.  Returns the text block with remapping done.
+# contain any formatting codes.  Returns the text block with remapping done.
 sub guesswork {
     my $self = shift;
     local $_ = shift;
@@ -1116,36 +1109,6 @@ sub switchquotes {
 
 __END__
 
-.\" These are some extra bits of roff that I don't want to lose track of but
-.\" that have been removed from the preamble to make it a bit shorter since
-.\" they're not currently being used.  They're accents and special characters
-.\" we don't currently have escapes for.
-.if n \{\
-.    ds ? ?
-.    ds ! !
-.    ds q
-.\}
-.if t \{\
-.    ds ? \s-2c\h'-\w'c'u*7/10'\u\h'\*(#H'\zi\d\s+2\h'\w'c'u*8/10'
-.    ds ! \s-2\(or\s+2\h'-\w'\(or'u'\v'-.8m'.\v'.8m'
-.    ds q o\h'-\w'o'u*8/10'\s-4\v'.4m'\z\(*i\v'-.4m'\s+4\h'\w'o'u*8/10'
-.\}
-.ds v \\k:\h'-(\\n(.wu*9/10-\*(#H)'\v'-\*(#V'\*(#[\s-4v\s0\v'\*(#V'\h'|\\n:u'\*(#]
-.ds _ \\k:\h'-(\\n(.wu*9/10-\*(#H+(\*(#F*2/3))'\v'-.4m'\z\(hy\v'.4m'\h'|\\n:u'
-.ds . \\k:\h'-(\\n(.wu*8/10)'\v'\*(#V*4/10'\z.\v'-\*(#V*4/10'\h'|\\n:u'
-.ds 3 \*(#[\v'.2m'\s-2\&3\s0\v'-.2m'\*(#]
-.ds oe o\h'-(\w'o'u*4/10)'e
-.ds Oe O\h'-(\w'O'u*4/10)'E
-.if \n(.H>23 .if \n(.V>19 \
-\{\
-.    ds v \h'-1'\o'\(aa\(ga'
-.    ds _ \h'-1'^
-.    ds . \h'-1'.
-.    ds 3 3
-.    ds oe oe
-.    ds Oe OE
-.\}
-
 ##############################################################################
 # Documentation
 ##############################################################################
@@ -1312,9 +1275,9 @@ versions of B<nroff> and B<troff> don't either).
 
 =item Invalid link %s
 
-(W) The POD source contained a C<LE<lt>E<gt>> sequence that Pod::Man was
-unable to parse.  You should never see this error message; it probably
-indicates a bug in Pod::Man.
+(W) The POD source contained a C<LE<lt>E<gt>> formatting code that
+Pod::Man was unable to parse.  You should never see this error message; it
+probably indicates a bug in Pod::Man.
 
 =item Invalid quote specification "%s"
 
@@ -1331,9 +1294,9 @@ the form C<=command args>) that Pod::Man didn't know about.  It was ignored.
 (W) The POD source contained an C<EE<lt>E<gt>> escape that Pod::Man didn't
 know about.  C<EE<lt>%sE<gt>> was printed verbatim in the output.
 
-=item %s:%d: Unknown sequence %s
+=item %s:%d: Unknown formatting code %s
 
-(W) The POD source contained a non-standard interior sequence (something of
+(W) The POD source contained a non-standard formatting code (something of
 the form C<XE<lt>E<gt>>) that Pod::Man didn't know about.  It was ignored.
 
 =item %s:%d: Unmatched =back
