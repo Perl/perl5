@@ -1195,7 +1195,9 @@ PerlIO_define_layer
 PerlIO_define_layer
 PerlIO_getpos
 PerlIO_init
+PerlIO_modestr
 PerlIO_pending
+PerlIO_perlio
 PerlIO_push
 PerlIO_setpos
 PerlIO_sprintf
