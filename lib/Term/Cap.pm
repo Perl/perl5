@@ -602,7 +602,7 @@ termcap(5)
 # Below is a default entry for systems where there are terminals but no
 # termcap
 1;
-__END__
+__DATA__
 vt220|vt200|DEC VT220 in vt100 emulation mode:
 am:mi:xn:xo:
 co#80:li#24:
