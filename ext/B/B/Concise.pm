@@ -107,8 +107,11 @@ our $walkHandle = \*STDOUT;	# public for your convenience
 sub walk_output { # updates $walkHandle
     my $handle = shift;
     if (ref $handle eq 'SCALAR') {
+	require Config;
+	die "no perlio in this build, can't call walk_output (\\\$scalar)\n"
+	    unless $Config::Config{useperlio};
 	# in 5.8+, open(FILEHANDLE,MODE,REFERENCE) writes to string
-	open my $tmp, '>', $handle;	# but cant re-set an existing filehandle
+	open my $tmp, '>', $handle;	# but cant re-set existing STDOUT
 	$walkHandle = $tmp;		# so use my $tmp as intermediate var
 	return;
     }
@@ -1323,7 +1326,8 @@ coderef, you may change the output style; thereafter the coderef renders
 in the new style.
 
 B<walk_output> lets you change the print destination from STDOUT to
-another open filehandle, or into a string passed as a ref.
+another open filehandle, or (unless you've built with -Uuseperlio)
+into a string passed as a ref.
 
     walk_output(\my $buf);
     my $walker = B::Concise::compile('-concise','funcName', \&aSubRef);

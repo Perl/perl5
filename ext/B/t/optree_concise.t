@@ -8,8 +8,11 @@ BEGIN {
 
 # import checkOptree(), and %gOpts (containing test state)
 use OptreeCheck;	# ALSO DOES @ARGV HANDLING !!!!!!
+use Config;
 
-plan tests => 24;	# need to set based on testing state
+plan tests => 24;
+SKIP: {
+skip "no perlio in this build", 24 unless $Config::Config{useperlio};
 
 $SIG{__WARN__} = sub {
     my $err = shift;
@@ -442,6 +445,7 @@ EOT_EOT
 1        <;> nextstate(main 76 optree_concise.t:407) v ->2 
 EONT_EONT
 
+} #skip
 
 __END__
 

@@ -19,10 +19,13 @@ cmdline args in 'standard' way across all clients of OptreeCheck.
 
 =cut
 
-##################
-    ;
-
+use Config;
 plan tests => 5 + 19 + 14 * $gOpts{selftest};	# fudged
+
+SKIP: {
+    skip "no perlio in this build", 5 + 19 + 14 * $gOpts{selftest}
+    unless $Config::Config{useperlio};
+
 
 pass("REGEX TEST HARNESS SELFTEST");
 
@@ -233,6 +236,7 @@ EONT_EONT
 checkOptree ( name	=> 'tree reftext is messy cut-paste',
 	      skip	=> 1);
 
+} # skip
 
 __END__
 

@@ -6,8 +6,11 @@ BEGIN {
     require './test.pl';
 }
 use OptreeCheck;
-
+use Config;
 plan tests => 11;
+
+SKIP: {
+skip "no perlio in this build", 11 unless $Config::Config{useperlio};
 
 pass("SORT OPTIMIZATION");
 
@@ -288,6 +291,7 @@ EOT_EOT
 # a  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 
+} #skip
 
 __END__
 

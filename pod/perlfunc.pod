@@ -2908,7 +2908,9 @@ works for symmetry, but you really should consider writing something
 to the temporary file first.  You will need to seek() to do the
 reading.
 
-File handles can be opened to "in memory" files held in Perl scalars via:
+Since v5.8.0, perl has built using PerlIO by default.  Unless you've
+changed this (ie Configure -Uuseperlio), you can open file handles to
+"in memory" files held in Perl scalars via:
 
     open($fh, '>', \$variable) || ..
 
@@ -2970,6 +2972,8 @@ Examples:
 	    #...		# whatever
 	}
     }
+
+See L<perliol/> for detailed info on PerlIO.
 
 You may also, in the Bourne shell tradition, specify an EXPR beginning
 with C<< '>&' >>, in which case the rest of the string is interpreted
