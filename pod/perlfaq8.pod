@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq8 - System Interaction ($Revision: 1.16 $, $Date: 2003/01/03 20:03:57 $)
+perlfaq8 - System Interaction ($Revision: 1.17 $, $Date: 2003/01/26 17:44:04 $)
 
 =head1 DESCRIPTION
 
@@ -1036,9 +1036,15 @@ in L<perlfaq8/"How do I start a process in the background?">.
 
 =head2 How do I use an SQL database?
 
-There are a number of excellent interfaces to SQL databases.  See the
-DBD::* modules available from http://www.cpan.org/modules/by-module/DBD/ .
-A lot of information on this can be found at http://dbi.perl.org/
+The DBI module provides an abstract interface to most database
+servers and types, including Oracle, DB2, Sybase, mysql, Postgresql,
+ODBC, and flat files.  The DBI module accesses each database type
+through a database driver, or DBD.  You can see a complete list of
+available drivers on CPAN: http://www.cpan.org/modules/by-module/DBD/ .
+You can read more about DBI on http://dbi.perl.org .
+
+Other modules provide more specific access: Win32::ODBC, Alzabo, iodbc,
+and others found on CPAN Search: http://search.cpan.org .
 
 =head2 How do I make a system() exit on control-C?
 

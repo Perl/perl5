@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.39 $, $Date: 2003/01/03 20:06:21 $)
+perlfaq4 - Data Manipulation ($Revision: 1.40 $, $Date: 2003/01/26 17:43:21 $)
 
 =head1 DESCRIPTION
 
@@ -142,7 +142,7 @@ Using the CPAN module Bit::Vector:
 
 =item How do I convert from decimal to hexadecimal
 
-Using sprint:
+Using sprintf:
 
     $hex = sprintf("%X", 3735928559);
 
@@ -811,9 +811,6 @@ values of a hash if you use a slice:
 
 =head2 How do I pad a string with blanks or pad a number with zeroes?
 
-(This answer contributed by Uri Guttman, with kibitzing from
-Bart Lateur.)
-
 In the following examples, C<$pad_len> is the length to which you wish
 to pad the string, C<$text> or C<$num> contains the string to be padded,
 and C<$pad_char> contains the padding character. You can use a single
@@ -828,13 +825,16 @@ right with blanks and it will truncate the result to a maximum length of
 C<$pad_len>.
 
     # Left padding a string with blanks (no truncation):
-    $padded = sprintf("%${pad_len}s", $text);
+	$padded = sprintf("%${pad_len}s", $text);
+	$padded = sprintf("%*s", $pad_len, $text);  # same thing
 
     # Right padding a string with blanks (no truncation):
-    $padded = sprintf("%-${pad_len}s", $text);
+	$padded = sprintf("%-${pad_len}s", $text);
+	$padded = sprintf("%-*s", $pad_len, $text); # same thing
 
     # Left padding a number with 0 (no truncation):
-    $padded = sprintf("%0${pad_len}d", $num);
+	$padded = sprintf("%0${pad_len}d", $num);
+	$padded = sprintf("%0*d", $pad_len, $num); # same thing
 
     # Right padding a string with blanks using pack (will truncate):
     $padded = pack("A$pad_len",$text);
@@ -958,13 +958,13 @@ Stringification also destroys arrays.
     print "@lines";		# WRONG - extra blanks
     print @lines;		# right
 
-=head2 Why don't my <<HERE documents work?
+=head2 Why don't my E<lt>E<lt>HERE documents work?
 
 Check for these three things:
 
 =over 4
 
-=item There must be no space after the << part.
+=item There must be no space after the E<lt>E<lt> part.
 
 =item There (probably) should be a semicolon at the end.
 
