@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..12\n";
+print "1..13\n";
 
 for ($i = 0; $i <= 10; $i++) {
     $x[$i] = $i;
@@ -71,3 +71,8 @@ for ("-3" .. "0") {
     $loop_count++;
 }
 print $loop_count == 4 ? "ok" : "not ok", " 12\n";
+
+# modifying arrays in loops is a no-no
+@a = (3,4);
+eval { @a = () for (1,2,@a) };
+print $@ =~ /Use of freed value in iteration/ ? "ok" : "not ok", " 13\n";

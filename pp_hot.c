@@ -1859,6 +1859,12 @@ PP(pp_iter)
     else {
 	sv = AvARRAY(av)[++cx->blk_loop.iterix];
     }
+    if (sv && SvREFCNT(sv) == 0) {
+	*itersvp = Nullsv;
+	Perl_croak(aTHX_
+	    "Use of freed value in iteration (perhaps you modified the iterated array within the loop?)");
+    }
+
     if (sv)
 	SvTEMP_off(sv);
     else
