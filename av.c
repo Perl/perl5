@@ -175,10 +175,7 @@ av_fetch(register AV *av, I32 key, I32 lval)
     if (key > AvFILLp(av)) {
 	if (!lval)
 	    return 0;
-	if (AvREALISH(av))
-	    sv = NEWSV(5,0);
-	else
-	    sv = sv_newmortal();
+	sv = NEWSV(5,0);
 	return av_store(av,key,sv);
     }
     if (AvARRAY(av)[key] == &PL_sv_undef) {
