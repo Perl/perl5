@@ -1,3 +1,12 @@
+Thu Jun 17 12:26:43 BST 2004   Nicholas Clark <nick@ccl4.org>
+
+    Version 2.13
+
+        1. Don't change the type of top level overloaded references to RV -
+	   they are perfectly correct as PVMG
+	2. Storable needs to cope with incoming frozen data that happens to be
+	   utf8 encoded.
+
 Wed Mar 17 15:40:29 GMT 2004   Nicholas Clark <nick@ccl4.org>
 
     Version 2.12

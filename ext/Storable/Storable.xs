@@ -4287,9 +4287,8 @@ static SV *retrieve_ref(pTHX_ stcxt_t *cxt, char *cname)
 	 */
 
 	if (cname) {
-		/* Do not use sv_upgrade to preserve STASH */
-		SvFLAGS(rv) &= ~SVTYPEMASK;
-		SvFLAGS(rv) |= SVt_RV;
+		/* No need to do anything, as rv will already be PVMG.  */
+		assert (SvTYPE(rv) >= SVt_RV);
 	} else {
 		sv_upgrade(rv, SVt_RV);
 	}
@@ -5798,8 +5797,46 @@ static SV *do_retrieve(
 
 	KBUFINIT();			 		/* Allocate hash key reading pool once */
 
-	if (!f && in)
+	if (!f && in) {
+#ifdef SvUTF8_on
+		if (SvUTF8(in)) {
+			STRLEN length;
+			const char *orig = SvPV(in, length);
+			char *asbytes;
+			/* This is quite deliberate. I want the UTF8 routines
+			   to encounter the '\0' which perl adds at the end
+			   of all scalars, so that any new string also has
+			   this.
+			*/
+			STRLEN klen_tmp = length + 1;
+			bool is_utf8 = TRUE;
+
+			/* Just casting the &klen to (STRLEN) won't work
+			   well if STRLEN and I32 are of different widths.
+			   --jhi */
+			asbytes = (char*)bytes_from_utf8((U8*)orig,
+							 &klen_tmp,
+							 &is_utf8);
+			if (is_utf8) {
+				CROAK(("Frozen string corrupt - contains characters outside 0-255"));
+			}
+			if (asbytes != orig) {
+				/* String has been converted.
+				   There is no need to keep any reference to
+				   the old string.  */
+				in = sv_newmortal();
+				/* We donate the SV the malloc()ed string
+				   bytes_from_utf8 returned us.  */
+				SvUPGRADE(in, SVt_PV);
+				SvPOK_on(in);
+				SvPVX(in) = asbytes;
+				SvLEN(in) = klen_tmp;
+				SvCUR(in) = klen_tmp - 1;
+			}
+		}
+#endif
 		MBUF_SAVE_AND_LOAD(in);
+	}
 
 	/*
 	 * Magic number verifications.
