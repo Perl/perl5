@@ -1,7 +1,7 @@
 package Socket;
 
-use vars qw($VERSION @ISA @EXPORT);
-$VERSION = "1.6";
+use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+$VERSION = "1.7";
 
 =head1 NAME
 
@@ -44,6 +44,15 @@ file, this uses the B<h2xs> program (see the Perl source distribution)
 and your native C compiler.  This means that it has a 
 far more likely chance of getting the numbers right.  This includes
 all of the commonly used pound-defines like AF_INET, SOCK_STREAM, etc.
+
+Also, some common socket "newline" constants are provided: the
+constants C<CR>, C<LF>, and C<CRLF>, as well as C<$CR>, C<$LF>, and
+C<$CRLF>, which map to C<\015>, C<\012>, and C<\015\012>.  If you do
+not want to use the literal characters in your programs, then use
+the constants provided here.  They are not exported by default, but can
+be imported individually, and with the C<:crlf> export tag:
+
+    use Socket qw(:DEFAULT :crlf);
 
 In addition, some structure manipulation functions are available:
 
@@ -238,6 +247,23 @@ require DynaLoader;
 	SO_TYPE
 	SO_USELOOPBACK
 );
+
+@EXPORT_OK = qw(CR LF CRLF $CR $LF $CRLF);
+
+%EXPORT_TAGS = (
+    crlf    => [qw(CR LF CRLF $CR $LF $CRLF)]
+    all     => [@EXPORT, @EXPORT_OK],
+);
+
+BEGIN {
+    sub CR   () {"\015"}
+    sub LF   () {"\012"}
+    sub CRLF () {"\015\012"}
+}
+
+*CR   = \CR();
+*LF   = \LF();
+*CRLF = \CRLF();
 
 sub sockaddr_in {
     if (@_ == 6 && !wantarray) { # perl5.001m compat; use this && die
