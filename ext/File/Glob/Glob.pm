@@ -181,7 +181,8 @@ File::Glob - Perl extension for BSD glob routine
     # an error occurred reading $homedir
   }
 
-  ## override the core glob (even with -T)
+  ## override the core glob (core glob() does this automatically
+  ## by default anyway, since v5.6.0)
   use File::Glob ':globally';
   my @sources = <*.{c,h,y}>
 
