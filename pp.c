@@ -2853,12 +2853,8 @@ PP(pp_splice)
 
     newlen = SP - MARK;
     diff = newlen - length;
-    if (newlen && !AvREAL(ary)) {
-	if (AvREIFY(ary))
-	    av_reify(ary);
-	else
-	    assert(AvREAL(ary));		/* would leak, so croak */
-    }
+    if (newlen && !AvREAL(ary) && AvREIFY(ary))
+	av_reify(ary);
 
     if (diff < 0) {				/* shrinking the area */
 	if (newlen) {

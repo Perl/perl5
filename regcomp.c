@@ -146,6 +146,7 @@ static void regtail _((regnode *, regnode *));
 static char* regwhite _((char *, char *));
 static char* nextchar _((void));
 static void re_croak2 _((const char* pat1,const char* pat2,...)) __attribute__((noreturn));
+static char* regpposixcc _((I32 value));
 #endif
 
 /* Length of a variant. */

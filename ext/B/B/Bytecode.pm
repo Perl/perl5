@@ -11,7 +11,9 @@ use Carp;
 use IO::File;
 
 use B qw(minus_c main_cv main_root main_start comppadlist
-	 class peekop walkoptree svref_2object cstring walksymtable);
+	 class peekop walkoptree svref_2object cstring walksymtable
+	 SVf_POK SVp_POK SVf_IOK SVp_IOK
+	);
 use B::Asmdata qw(@optype @specialsv_name);
 use B::Assembler qw(assemble_fh);
 
@@ -23,11 +25,11 @@ for ($i = 0; $i < @optype; $i++) {
 
 # Following is SVf_POK|SVp_POK
 # XXX Shouldn't be hardwired
-sub POK () { 0x04040000 }
+sub POK () { SVf_POK|SVp_POK }
 
-# Following is SVf_IOK|SVp_OK
+# Following is SVf_IOK|SVp_IOK
 # XXX Shouldn't be hardwired
-sub IOK () { 0x01010000 }
+sub IOK () { SVf_IOK|SVp_IOK }
 
 my ($verbose, $module_only, $no_assemble, $debug_bc, $debug_cv);
 my $assembler_pid;

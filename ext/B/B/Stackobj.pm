@@ -5,7 +5,7 @@
 #      You may distribute under the terms of either the GNU General Public
 #      License or the Artistic License, as specified in the README file.
 #
-package B::Stackobj;
+package B::Stackobj;  
 use Exporter ();
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(set_callback T_UNKNOWN T_DOUBLE T_INT
@@ -16,11 +16,7 @@ use Exporter ();
 
 use Carp qw(confess);
 use strict;
-use B qw(class);
-
-# Perl internal constants that I should probably define elsewhere.
-sub SVf_IOK () { 0x10000 }
-sub SVf_NOK () { 0x20000 }
+use B qw(class SVf_IOK SVf_NOK);
 
 # Types
 sub T_UNKNOWN () { 0 }

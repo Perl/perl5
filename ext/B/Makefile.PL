@@ -18,17 +18,25 @@ WriteMakefile(
     VERSION	=> "a5",
     MAN3PODS => {},
     clean	=> {
-	FILES		=> "perl$e byteperl$e *$o B.c *~"
+	FILES		=> "perl$e byteperl$e *$o B.c defsubs.h *~"
     }
-);
+);   
 
-sub MY::post_constants {
+package MY;
+
+sub post_constants {
     "\nLIBS = $Config{libs}\n"
+}    
+
+sub postamble {
+'
+B$(OBJ_EXT) : defsubs.h 
+'
 }
 
 # Leave out doing byteperl for now. Probably should be built in the
 # core directory or somewhere else rather than here
-#sub MY::top_targets {
+#sub top_targets {
 #    my $self = shift;
 #    my $targets = $self->MM::top_targets();
 #    $targets =~ s/^(all ::.*)$/$1 byteperl$e/m;

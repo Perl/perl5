@@ -8,8 +8,16 @@
 
 package B::Deparse;
 use Carp 'cluck';
-use B qw(class main_root main_start main_cv svref_2object);
-$VERSION = 0.56;
+use B qw(class main_root main_start main_cv svref_2object opnumber
+         OPf_WANT OPf_WANT_VOID OPf_WANT_SCALAR OPf_WANT_LIST
+         OPpENTERSUB_AMPER OPf_KIDS OPpLVAL_INTRO
+         OPf_SPECIAL OPpSLICE OPpCONST_BARE OPf_REF OPf_STACKED
+         OPpENTERSUB_AMPER OPpTRANS_SQUASH OPpTRANS_DELETE
+         OPpTRANS_COMPLEMENT SVf_IOK  SVf_NOK SVf_ROK SVf_POK
+	 PMf_ONCE PMf_SKIPWHITE PMf_CONST PMf_KEEP PMf_GLOBAL PMf_CONTINUE
+	 PMf_EVAL PMf_LOCALE PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED
+        );
+$VERSION = 0.561;
 use strict;
 
 # Changes between 0.50 and 0.51:
@@ -187,7 +195,6 @@ sub next_todo {
     }
 }
 
-sub OPf_KIDS () { 4 }
 
 sub walk_tree {
     my($op, $sub) = @_;
@@ -349,7 +356,6 @@ sub indent {
     return join("\n", @lines);
 }
 
-sub SVf_POK () {0x40000}
 
 sub deparse_sub {
     my $self = shift;
@@ -483,12 +489,11 @@ sub maybe_parens_func {
     }
 }
 
-sub OPp_LVAL_INTRO () { 128 }
 
 sub maybe_local {
     my $self = shift;
     my($op, $cx, $text) = @_;
-    if ($op->private & OPp_LVAL_INTRO and not $self->{'avoid_local'}{$$op}) {
+    if ($op->private & OPpLVAL_INTRO and not $self->{'avoid_local'}{$$op}) {
 	return $self->maybe_parens_func("local", $text, $cx, 16);
     } else {
 	return $text;
@@ -504,7 +509,7 @@ sub padname_sv {
 sub maybe_my {
     my $self = shift;
     my($op, $cx, $text) = @_;
-    if ($op->private & OPp_LVAL_INTRO and not $self->{'avoid_local'}{$$op}) {
+    if ($op->private & OPpLVAL_INTRO and not $self->{'avoid_local'}{$$op}) {
 	return $self->maybe_parens_func("my", $text, $cx, 16);
     } else {
 	return $text;
@@ -787,7 +792,6 @@ sub pp_not {
     }
 }
 
-sub OPf_SPECIAL () { 128 }
 
 sub unop {
     my $self = shift;
@@ -894,8 +898,6 @@ sub pp_exists {
 				    $cx, 16);
 }
 
-sub OPpSLICE () { 64 }
-
 sub pp_delete {
     my $self = shift;
     my($op, $cx) = @_;
@@ -911,13 +913,11 @@ sub pp_delete {
     }
 }
 
-sub OPp_CONST_BARE () { 64 }
-
 sub pp_require {
     my $self = shift;
     my($op, $cx) = @_;
     if (class($op) eq "UNOP" and $op->first->ppaddr eq "pp_const"
-	and $op->first->private & OPp_CONST_BARE)
+	and $op->first->private & OPpCONST_BARE)
     {
 	my $name = $op->first->sv->PV;
 	$name =~ s[/][::]g;
@@ -945,8 +945,6 @@ sub padval {
     my $targ = shift;
     return (($self->{'curcv'}->PADLIST->ARRAY)[1]->ARRAY)[$targ];
 }
-
-sub OPf_REF () { 16 }
 
 sub pp_refgen {
     my $self = shift;	
@@ -1058,8 +1056,6 @@ sub pp_ftbinary { ftst(@_, "-B") }
 
 sub SWAP_CHILDREN () { 1 }
 sub ASSIGN () { 2 } # has OP= variant
-
-sub OPf_STACKED () { 64 }
 
 my(%left, %right);
 
@@ -1523,7 +1519,7 @@ sub pp_list {
 	# This assumes that no other private flags equal 128, and that
 	# OPs that store things other than flags in their op_private,
 	# like OP_AELEMFAST, won't be immediate children of a list.
-	unless ($lop->private & OPp_LVAL_INTRO or $lop->ppaddr eq "pp_undef")
+	unless ($lop->private & OPpLVAL_INTRO or $lop->ppaddr eq "pp_undef")
 	{
 	    $local = ""; # or not
 	    last;
@@ -1706,23 +1702,22 @@ sub pp_leaveloop {
 sub pp_leavetry {
     my $self = shift;
     return "eval {\n\t" . $self->pp_leave(@_) . "\n\b}";
-}
+}                                       
 
-sub OP_CONST () { 5 }
+my $OP_CONST = opnumber("const");
+my $OP_STRINGIFY = opnumber("stringify");
 
 # XXX need a better way to do this
-sub OP_STRINGIFY () { $] > 5.004_72 ? 67 : 65 }
-
 sub pp_null {
     my $self = shift;
     my($op, $cx) = @_;
     if (class($op) eq "OP") {
-	return "'???'" if $op->targ == OP_CONST; # old value is lost
+	return "'???'" if $op->targ == $OP_CONST; # old value is lost
     } elsif ($op->first->ppaddr eq "pp_pushmark") {
 	return $self->pp_list($op, $cx);
     } elsif ($op->first->ppaddr eq "pp_enter") {
 	return $self->pp_leave($op, $cx);
-    } elsif ($op->targ == OP_STRINGIFY) {
+    } elsif ($op->targ == $OP_STRINGIFY) {
 	return $self->dquote($op);
     } elsif (!null($op->first->sibling) and
 	     $op->first->sibling->ppaddr eq "pp_readline" and
@@ -1925,13 +1920,6 @@ sub pp_lslice {
     $idx = $self->deparse($idx, 1);
     return "($list)" . "[$idx]";
 }
-
-sub OPpENTERSUB_AMPER () { 8 }
-
-sub OPf_WANT () { 3 }
-sub OPf_WANT_VOID () { 1 }
-sub OPf_WANT_SCALAR () { 2 }
-sub OPf_WANT_LIST () { 2 }
 
 sub want_scalar {
     my $op = shift;
@@ -2175,9 +2163,6 @@ sub single_delim {
     }
 }
 
-sub SVf_IOK () {0x10000}
-sub SVf_NOK () {0x20000}
-sub SVf_ROK () {0x80000}
 
 sub const {
     my $sv = shift;
@@ -2203,7 +2188,7 @@ sub const {
 sub pp_const {
     my $self = shift;
     my($op, $cx) = @_;
-#    if ($op->private & OPp_CONST_BARE) { # trouble with `=>' autoquoting 
+#    if ($op->private & OPpCONST_BARE) { # trouble with `=>' autoquoting 
 #	return $op->sv->PV;
 #    }
     return const($op->sv);
@@ -2324,10 +2309,6 @@ sub collapse {
     return $str;
 }
 
-sub OPpTRANS_SQUASH () { 16 }
-sub OPpTRANS_DELETE () { 32 }
-sub OPpTRANS_COMPLEMENT () { 64 }
-
 sub pp_trans {
     my $self = shift;
     my($op, $cx) = @_;
@@ -2413,20 +2394,6 @@ sub pp_regcomp {
     return $self->re_dq($kid);
 }
 
-sub OPp_RUNTIME () { 64 }
-
-sub PMf_ONCE () { 0x2 }
-sub PMf_SKIPWHITE () { 0x10 }
-sub PMf_CONST () { 0x40 }
-sub PMf_KEEP () { 0x80 }
-sub PMf_GLOBAL () { 0x100 }
-sub PMf_CONTINUE () { 0x200 }
-sub PMf_EVAL () { 0x400 }
-sub PMf_LOCALE () { 0x800 }
-sub PMf_MULTILINE () { 0x1000 }
-sub PMf_SINGLELINE () { 0x2000 }
-sub PMf_FOLD () { 0x4000 }
-sub PMf_EXTENDED () { 0x8000 }
 
 # osmic acid -- see osmium tetroxide
 

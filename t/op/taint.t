@@ -383,10 +383,10 @@ else {
 	for (76..79) { print "ok $_ # Skipped: open('|') is not available\n" }
     }
     else {
-	test 76, eval { open FOO, "| $foo" } eq '', 'popen to';
+	test 76, eval { open FOO, "| x$foo" } eq '', 'popen to';
 	test 77, $@ =~ /^Insecure dependency/, $@;
 
-	test 78, eval { open FOO, "$foo |" } eq '', 'popen from';
+	test 78, eval { open FOO, "x$foo |" } eq '', 'popen from';
 	test 79, $@ =~ /^Insecure dependency/, $@;
     }
 

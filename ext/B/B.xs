@@ -435,7 +435,12 @@ MODULE = B	PACKAGE = B	PREFIX = B_
 PROTOTYPES: DISABLE
 
 BOOT:
+{
+    HV *stash = gv_stashpvn("B", 1, TRUE);
+    AV *export_ok = perl_get_av("B::EXPORT_OK",TRUE);
     INIT_SPECIALSV_LIST;
+#include "defsubs.h"
+}
 
 #define B_main_cv()	PL_main_cv
 #define B_init_av()	PL_initav

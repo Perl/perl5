@@ -49,7 +49,8 @@ use Exporter ();
 
 use B qw(minus_c sv_undef walkoptree walksymtable main_root main_start peekop
 	 class cstring cchar svref_2object compile_stats comppadlist hash
-	 threadsv_names main_cv init_av opnumber);
+	 threadsv_names main_cv init_av opnumber
+	 AVf_REAL HEf_SVKEY);
 use B::Asmdata qw(@specialsv_name);
 
 use FileHandle;
@@ -103,9 +104,6 @@ sub walk_and_save_optree {
 # to "know" that op_seq is a U16 and use 65535. Ugh.
 my $op_seq = 65535;
 
-sub AVf_REAL () { 1 }
-sub define HEf_SVKEY   () { -2 }
-
 # Look this up here so we can do just a number compare
 # rather than looking up the name of every BASEOP in B::OP
 my $OP_THREADSV = opnumber('threadsv');
@@ -154,6 +152,8 @@ sub savepv {
 
 sub B::OP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     my $type = $op->type;
     $nullop_count++ unless $type;
     if ($type == $OP_THREADSV) {
@@ -190,6 +190,8 @@ sub B::FAKEOP::private { $_[0]->{private} || 0 }
 
 sub B::UNOP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     $unopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x",
 			   ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			   $op->targ, $op->type, $op_seq, $op->flags,
@@ -199,6 +201,8 @@ sub B::UNOP::save {
 
 sub B::BINOP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     $binopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x",
 			    ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			    $op->targ, $op->type, $op_seq, $op->flags,
@@ -208,6 +212,8 @@ sub B::BINOP::save {
 
 sub B::LISTOP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     $listopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %u",
 			     ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			     $op->targ, $op->type, $op_seq, $op->flags,
@@ -218,6 +224,8 @@ sub B::LISTOP::save {
 
 sub B::LOGOP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     $logopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x",
 			    ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			    $op->targ, $op->type, $op_seq, $op->flags,
@@ -227,6 +235,8 @@ sub B::LOGOP::save {
 
 sub B::CONDOP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     $condopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, s\\_%x",
 			     ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			     $op->targ, $op->type, $op_seq, $op->flags,
@@ -237,6 +247,8 @@ sub B::CONDOP::save {
 
 sub B::LOOP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     #warn sprintf("LOOP: redoop %s, nextop %s, lastop %s\n",
     #		 peekop($op->redoop), peekop($op->nextop),
     #		 peekop($op->lastop)); # debug
@@ -251,6 +263,8 @@ sub B::LOOP::save {
 
 sub B::PVOP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     $pvopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, %s",
 			   ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			   $op->targ, $op->type, $op_seq, $op->flags,
@@ -260,6 +274,8 @@ sub B::PVOP::save {
 
 sub B::SVOP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     my $svsym = $op->sv->save;
     $svopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, %s",
 			   ${$op->next}, ${$op->sibling}, $op->ppaddr,
@@ -270,6 +286,8 @@ sub B::SVOP::save {
 
 sub B::GVOP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     my $gvsym = $op->gv->save;
     $gvopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, Nullgv",
 			   ${$op->next}, ${$op->sibling}, $op->ppaddr,
@@ -281,6 +299,8 @@ sub B::GVOP::save {
 
 sub B::COP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     my $gvsym = $op->filegv->save;
     my $stashsym = $op->stash->save;
     warn sprintf("COP: line %d file %s\n", $op->line, $op->filegv->SV->PV)
@@ -298,6 +318,8 @@ sub B::COP::save {
 
 sub B::PMOP::save {
     my ($op, $level) = @_;
+    my $sym = objsym($op);
+    return $sym if defined $sym;
     my $replroot = $op->pmreplroot;
     my $replstart = $op->pmreplstart;
     my $replrootfield = sprintf("s\\_%x", $$replroot);
@@ -685,7 +707,7 @@ sub B::CV::save {
 }
 
 sub B::GV::save {
-    my ($gv) = @_;
+    my ($gv,$skip_cv) = @_;
     my $sym = objsym($gv);
     if (defined($sym)) {
 	#warn sprintf("GV 0x%x already saved as $sym\n", $$gv); # debug
@@ -743,7 +765,7 @@ sub B::GV::save {
 	    $gvhv->save;
 	}
 	my $gvcv = $gv->CV;
-	if ($$gvcv) {
+	if ($$gvcv && !$skip_cv) {
 	    $init->add(sprintf("GvCV($sym) = (CV*)s\\_%x;", $$gvcv));
 #	    warn "GV::save &$name\n"; # debug
 	    $gvcv->save;
@@ -1119,25 +1141,22 @@ sub B::GV::savecv
  my $package=$gv->STASH->NAME;
  my $name = $gv->NAME;
  my $cv = $gv->CV;
- return unless ($$cv || $name eq 'ISA');
+ my $sv = $gv->SV;
+ my $av = $gv->AV;
+ my $hv = $gv->HV;
+ my $skip_cv = 0;
+
  # We may be looking at this package just because it is a branch in the 
  # symbol table which is on the path to a package which we need to save
- # e.g. this is 'Getopt' and wee need to save 'Getopt::Long'
+ # e.g. this is 'Getopt' and we need to save 'Getopt::Long'
  # 
- if ($$cv && $name eq "bootstrap" && $cv->XSUB)
-  {
-   my $file = $cv->FILEGV->SV->PV;
-   $bootstrap->add($file);
-  }
- unless ($unused_sub_packages{$package})
-  {
-   warn sprintf("omitting cv $name in %s\n", $package) if $$cv; # if $debug_cv;
-   return ;
-  }
+ return unless ($unused_sub_packages{$package});
  if ($$cv) 
   {
    if ($name eq "bootstrap" && $cv->XSUB) 
     {
+     my $file = $cv->FILEGV->SV->PV;
+     $bootstrap->add($file);
      my $name = $gv->STASH->NAME.'::'.$name;
      no strict 'refs';
      *{$name} = \&Dummy_BootStrap;   
@@ -1145,12 +1164,12 @@ sub B::GV::savecv
     }
    warn sprintf("saving extra CV &%s::%s (0x%x) from GV 0x%x\n",
                   $package, $name, $$cv, $$gv) if ($debug_cv); 
-   $gv->save;
-  }
- elsif ($name eq 'ISA')
+  }                                     
+ else
   {
-   $gv->save;
+   return unless ($$av || $$sv || $$hv)
   }
+ $gv->save($skip_cv);
 }
 
 sub mark_package
@@ -1270,6 +1289,13 @@ sub save_context
 	       "GvAV(PL_incgv) = $inc_av;",
                "av_store(CvPADLIST(PL_main_cv),0,SvREFCNT_inc($curpad_nam));",
                "av_store(CvPADLIST(PL_main_cv),1,SvREFCNT_inc($curpad_sym));");
+}
+
+sub descend_marked_unused {
+    foreach my $pack (keys %unused_sub_packages)
+    {
+    	mark_package($pack);
+    }
 }
 
 sub descend_marked_unused {

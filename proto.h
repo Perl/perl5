@@ -757,6 +757,10 @@ I32 dopoptosub _((I32 startingblock));
 I32 dopoptosub_at _((PERL_CONTEXT* cxstk, I32 startingblock));
 void save_lines _((AV *array, SV *sv));
 OP *doeval _((int gimme, OP** startop));
+I32 sv_ncmp _((SV *a, SV *b));
+I32 sv_i_ncmp _((SV *a, SV *b));
+I32 amagic_ncmp _((SV *a, SV *b));
+I32 amagic_i_ncmp _((SV *a, SV *b));
 I32 amagic_cmp _((SV *str1, SV *str2));
 I32 amagic_cmp_locale _((SV *str1, SV *str2));
 
@@ -864,6 +868,7 @@ void scan_commit _((scan_data_t *data));
 I32 study_chunk _((regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 flags));
 I32 add_data _((I32 n, char *s));
 void	re_croak2 _((const char* pat1,const char* pat2,...)) __attribute__((noreturn));
+char* regpposixcc _((I32 value));
 I32 regmatch _((regnode *prog));
 I32 regrepeat _((regnode *p, I32 max));
 I32 regrepeat_hard _((regnode *p, I32 max, I32 *lp));
@@ -889,6 +894,7 @@ void debprof _((OP *o));
 
 void *bset_obj_store _((void *obj, I32 ix));
 OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
+void simplify_sort _((OP *o));
 
 I32 do_trans_CC_simple _((SV *sv));
 I32 do_trans_CC_count _((SV *sv));
@@ -946,8 +952,6 @@ VIRTUAL void	sv_setsv_mg _((SV *dstr, SV *sstr));
 VIRTUAL void	sv_usepvn_mg _((SV *sv, char *ptr, STRLEN len));
 
 VIRTUAL MGVTBL*	get_vtbl _((int vtbl_id));
-VIRTUAL I32     amagic_cmp _((register SV *str1, register SV *str2));
-VIRTUAL I32     amagic_cmp_locale _((register SV *str1, register SV *str2));
 
 /* New virtual functions must be added here to maintain binary
  * compatablity with PERL_OBJECT

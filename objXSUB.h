@@ -793,6 +793,10 @@
 #define amagic_cmp		pPerl->Perl_amagic_cmp
 #undef  amagic_cmp_locale
 #define amagic_cmp_locale	pPerl->Perl_amagic_cmp_locale
+#undef  amagic_i_ncmp
+#define amagic_i_ncmp		pPerl->Perl_amagic_i_ncmp
+#undef  amagic_ncmp
+#define amagic_ncmp		pPerl->Perl_amagic_ncmp
 #undef  ao
 #define ao			pPerl->Perl_ao
 #undef  append_elem
@@ -2631,6 +2635,8 @@
 #define regoptail		pPerl->Perl_regoptail
 #undef  regpiece
 #define regpiece		pPerl->Perl_regpiece
+#undef  regpposixcc
+#define regpposixcc		pPerl->Perl_regpposixcc
 #undef  regprop
 #define regprop			pPerl->Perl_regprop
 #undef  regrepeat
@@ -2789,6 +2795,8 @@
 #define scalarseq		pPerl->Perl_scalarseq
 #undef  scalarvoid
 #define scalarvoid		pPerl->Perl_scalarvoid
+#undef  scan_bin
+#define scan_bin		pPerl->Perl_scan_bin
 #undef  scan_commit
 #define scan_commit		pPerl->Perl_scan_commit
 #undef  scan_const
@@ -2857,6 +2865,8 @@
 #define sharepvn		pPerl->Perl_sharepvn
 #undef  sighandler
 #define sighandler		pPerl->Perl_sighandler
+#undef  simplify_sort
+#define simplify_sort		pPerl->Perl_simplify_sort
 #undef  skipspace
 #define skipspace		pPerl->Perl_skipspace
 #undef  skipspace
@@ -2949,6 +2959,8 @@
 #define sv_gets			pPerl->Perl_sv_gets
 #undef  sv_grow
 #define sv_grow			pPerl->Perl_sv_grow
+#undef  sv_i_ncmp
+#define sv_i_ncmp		pPerl->Perl_sv_i_ncmp
 #undef  sv_inc
 #define sv_inc			pPerl->Perl_sv_inc
 #undef  sv_insert
@@ -2969,6 +2981,8 @@
 #define sv_mortalcopy		pPerl->Perl_sv_mortalcopy
 #undef  sv_mortalgrow
 #define sv_mortalgrow		pPerl->Perl_sv_mortalgrow
+#undef  sv_ncmp
+#define sv_ncmp			pPerl->Perl_sv_ncmp
 #undef  sv_newmortal
 #define sv_newmortal		pPerl->Perl_sv_newmortal
 #undef  sv_newref

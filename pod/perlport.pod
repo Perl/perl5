@@ -197,7 +197,7 @@ S<Mac OS> uses C<:> as a path separator instead of C</>.
 The filesystem may support neither hard links (C<link()>) nor
 symbolic links (C<symlink()>, C<readlink()>, C<lstat()>).
 
-The filesystem may not support neither access timestamp nor change
+The filesystem may support neither access timestamp nor change
 timestamp (meaning that about the only portable timestamp is the
 modification timestamp), or one second granularity of any timestamps
 (e.g. the FAT filesystem limits the time granularity to two seconds).

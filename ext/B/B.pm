@@ -14,7 +14,7 @@ require Exporter;
 		main_root main_start main_cv svref_2object opnumber
 		walkoptree walkoptree_slow walkoptree_exec walksymtable
 		parents comppadlist sv_undef compile_stats timing_info init_av);
-
+sub OPf_KIDS ();
 use strict;
 @B::SV::ISA = 'B::OBJECT';
 @B::NULL::ISA = 'B::SV';
@@ -64,10 +64,6 @@ sub debug {
     $debug = $value;
     walkoptree_debug($value);
 }
-
-# sub OPf_KIDS;
-# add to .xs for perl5.002
-sub OPf_KIDS () { 4 }
 
 sub class {
     my $obj = shift;

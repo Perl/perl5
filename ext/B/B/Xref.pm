@@ -85,11 +85,9 @@ Malcolm Beattie, mbeattie@sable.ox.ac.uk.
 =cut
 
 use strict;
-use B qw(peekop class comppadlist main_start svref_2object walksymtable);
-
-# Constants (should probably be elsewhere)
-sub OPpLVAL_INTRO () { 128 }
-sub SVf_POK () { 0x40000 }
+use B qw(peekop class comppadlist main_start svref_2object walksymtable
+         OPpLVAL_INTRO SVf_POK
+        );
 
 sub UNKNOWN { ["?", "?", "?"] }
 

@@ -256,6 +256,10 @@ my @staticfuncs = qw(
     dopoptosub_at
     save_lines
     doeval
+    sv_ncmp
+    sv_i_ncmp
+    amagic_ncmp
+    amagic_i_ncmp
     amagic_cmp
     amagic_cmp_locale
     mul128
@@ -351,6 +355,7 @@ my @staticfuncs = qw(
     study_chunk
     add_data
     re_croak2
+    regpposixcc
     regmatch
     regrepeat
     regrepeat_hard
@@ -369,6 +374,7 @@ my @staticfuncs = qw(
     debprof
     bset_obj_store
     new_logop
+    simplify_sort
     do_trans_CC_simple
     do_trans_CC_count
     do_trans_CC_complex

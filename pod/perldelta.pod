@@ -140,6 +140,11 @@ C<'>-delimited regular expression.
 (W) You used a backslash-character combination which is not recognized
 by Perl.
 
+=item Missing command in piped open
+
+(W) You used the C<open(FH, "| command")> or C<open(FH, "command |")>
+construction, but the command was missing or blank.
+
 =head1 Obsolete Diagnostics
 
 Todo.
