@@ -3045,7 +3045,7 @@ PP(pp_method)
 PP(pp_method_named)
 {
     dSP;
-    SV* sv = cSVOP->op_sv;
+    SV* sv = cSVOP_sv;
     U32 hash = SvUVX(sv);
 
     XPUSHs(method_common(sv, &hash));

@@ -47,7 +47,7 @@ true || exec sh $0 $argv:q
 (exit $?0) || exec sh $0 $argv:q
 rm -f c1$$ c2$$
 
-if test -e /dev/cputype -a -e /dev/drivers -a -e /dev/osversion -a -e /dev/bintime; then
+if test -f /dev/cputype -a -f /dev/drivers -a -f /dev/osversion; then
 	cat >&4 <<EOF
 ***
 *** I'm sorry but this system looks like Plan 9 and Plan 9 doesn't do
