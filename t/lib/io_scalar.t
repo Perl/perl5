@@ -10,7 +10,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..19\n";
+print "1..20\n";
 
 my $fh;
 my $var = "ok 2\n";
@@ -86,3 +86,16 @@ print $fh "is here";
 print "# Got [$var], expect [Something else is here]\n";
 print "not " unless $var eq "Something else is here";
 print "ok 19\n";
+close $fh;
+
+# Check that updates to the scalar from elsewhere do not
+# cause problems
+$var = "line one\nline two\line three\n";
+open $fh, "<", \$var;
+while (<$fh>) {
+    $var = "foo";
+}
+close $fh;
+print "# Got [$var], expect [foo]\n";
+print "not " unless $var eq "foo";
+print "ok 20\n";
