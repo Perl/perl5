@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Dec 27 17:16:22 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Fri Dec 28 04:17:47 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -13544,7 +13544,6 @@ EOM
 		d_u32align="$define"
 		;;
 	esac
-	$rm -f core core.try.* try.core
 else
 	rp='Can you access character data at unaligned addresses?'
 	dflt='n'
@@ -13554,6 +13553,7 @@ else
 	*)	d_u32align="$define" ;;
 	esac
 fi
+$rm -f core core.try.* try.core
 
 : see if ualarm exists
 set ualarm d_ualarm
