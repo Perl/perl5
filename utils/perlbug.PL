@@ -215,7 +215,7 @@ sub Init {
         MacPerl::Ask('Provide command-line args here (-h for help):')
         if $Is_MacOS && $MacPerl::Version =~ /App/;
 
-    if (!getopts("dhva:s:b:f:F:r:e:SCc:to:n:")) { Help(); exit; };
+    if (!getopts("Adhva:s:b:f:F:r:e:SCc:to:n:")) { Help(); exit; };
 
     # This comment is needed to notify metaconfig that we are
     # using the $perladmin, $cf_by, and $cf_time definitions.
@@ -574,6 +574,13 @@ sub Dump {
 Flags:
     category=$category
     severity=$severity
+EFF
+    if ($::opt_A) {
+	print OUT <<EFF;
+    ack=no
+EFF
+    }
+    print OUT <<EFF;
 ---
 EFF
     print OUT "This perlbug was built using Perl $config_tag1\n",
@@ -867,7 +874,7 @@ be needed.
 Usage:
 $0  [-v] [-a address] [-s subject] [-b body | -f inpufile ] [ -F outputfile ]
     [-r returnaddress] [-e editor] [-c adminaddress | -C] [-S] [-t] [-h]
-$0  [-v] [-r returnaddress] [-ok | -okay | -nok | -nokay]
+$0  [-v] [-r returnaddress] [-A] [-ok | -okay | -nok | -nokay]
 
 Simplest usage:  run "$0", and follow the prompts.
 
@@ -892,6 +899,7 @@ Options:
   -d    Data mode (the default if you redirect or pipe output.)
         This prints out your configuration data, without mailing
         anything. You can use this with -v to get more complete data.
+  -A    Don't send a bug received acknowledgement to the return address.
   -ok   Report successful build on this system to perl porters
         (use alone or with -v). Only use -ok if *everything* was ok:
         if there were *any* problems at all, use -nok.
@@ -939,10 +947,10 @@ B<perlbug> S<[ B<-v> ]> S<[ B<-a> I<address> ]> S<[ B<-s> I<subject> ]>
 S<[ B<-b> I<body> | B<-f> I<inputfile> ]> S<[ B<-F> I<outputfile> ]>
 S<[ B<-r> I<returnaddress> ]>
 S<[ B<-e> I<editor> ]> S<[ B<-c> I<adminaddress> | B<-C> ]>
-S<[ B<-S> ]> S<[ B<-t> ]>  S<[ B<-d> ]>  S<[ B<-h> ]>
+S<[ B<-S> ]> S<[ B<-t> ]>  S<[ B<-d> ]>  S<[ B<-A> ]>  S<[ B<-h> ]>
 
 B<perlbug> S<[ B<-v> ]> S<[ B<-r> I<returnaddress> ]>
-S<[ B<-ok> | B<-okay> | B<-nok> | B<-nokay> ]>
+ S<[ B<-A> ]> S<[ B<-ok> | B<-okay> | B<-nok> | B<-nokay> ]>
 
 =head1 DESCRIPTION
 
@@ -1086,6 +1094,13 @@ version of perl comes out and your bug is still present.
 =item B<-a>
 
 Address to send the report to.  Defaults to `perlbug@perl.org'.
+
+=item B<-A>
+
+Don't send a bug received acknowledgement to the reply address.
+Generally it is only a sensible to use this option if you are a
+perl maintainer actively watching perl porters for your message to
+arrive.
 
 =item B<-b>
 
