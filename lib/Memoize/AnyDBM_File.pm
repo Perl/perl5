@@ -1,5 +1,15 @@
 package Memoize::AnyDBM_File;
 
+=head1 NAME
+
+Memoize::AnyDBM_File - glue to provide EXISTS for AnyDBM_File for Storable use
+
+=head1 DESCRIPTION
+
+See L<Memoize>.
+
+=cut
+
 use vars qw(@ISA);
 @ISA = qw(DB_File GDBM_File Memoize::NDBM_File Memoize::SDBM_File ODBM_File) unless @ISA;
 

@@ -6091,6 +6091,40 @@ public_html/feedback.cgi, src/perl-5.6.0-mpe
 
 =item AUTHOR
 
+=item Name
+
+=item Description
+
+=item Build
+
+=over 4
+
+=item Tools & SDK
+
+=item Setup
+
+Buildtype.bat, SetNWBld.bat, MPKBuild.bat
+
+=item Make
+
+=item Interpreter
+
+=item Extensions
+
+=back
+
+=item Install
+
+=item Build new extensions
+
+=item Known Issues
+
+=item Acknowledgements
+
+=item Author
+
+=item Date
+
 =back
 
 =head2 perlos2 - Perl under OS/2, DOS, Win0.3*, Win0.95 and WinNT.
@@ -6772,6 +6806,18 @@ FETCH_I<type>_ATTRIBUTES, MODIFY_I<type>_ATTRIBUTES
 =item EXAMPLES
 
 =item SEE ALSO
+
+=back
+
+=head2 attrs - set/get attributes of a subroutine (deprecated)
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+method, locked
 
 =back
 
@@ -9390,6 +9436,22 @@ arrays
 
 =back
 
+=head2 Errno - System errno constants
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CAVEATS
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
 =head2 Exporter - Implements default import method for modules
 
 =over 4
@@ -9479,7 +9541,7 @@ test_f file
 
 =item USAGE
 
-IV, UV, NV, PV, PVN, YES, NO, UNDEF
+IV, UV, NV, PV, PVN, PVN, YES, NO, UNDEF
 
 =item FUNCTIONS
 
@@ -9491,9 +9553,9 @@ constant_types
 
 memEQ_clause NAME, CHECKED_AT, INDENT
 
-assign INDENT, TYPE, VALUE..
+assign INDENT, TYPE, PRE, POST, VALUE..
 
-return_clause VALUE, TYPE, INDENT, MACRO, DEFAULT
+return_clause VALUE, TYPE, INDENT, MACRO, DEFAULT, PRE, POST, PRE, POST
 
 switch_clause INDENT, NAMELEN, ITEMHASH, ITEM..
 
@@ -9501,11 +9563,15 @@ params WHAT
 
 dump_names
 
-C_constant, name, type, value, macro, default
+C_constant, name, type, value, macro, default, pre, post, def_pre =item
+def_post
 
 XS_constant PACKAGE, TYPES, SUBNAME, C_SUBNAME
 
 autoload PACKAGE, VERSION, AUTOLOADER
+
+WriteConstants ATTRIBUTE =E<gt> VALUE [, ...], NAME, DEFAULT_TYPE,
+BREAKOUT_AT, NAMES, C_FILE, XS_FILE, SUBNAME, C_SUBNAME
 
 =over 4
 
@@ -9613,6 +9679,53 @@ ExtUtils::MakeMaker
 canonpath, cflags, manifypods, perl_archive
 
 =back
+
+=head2 ExtUtils::MM_NW5 - methods to override UN*X behaviour in
+ExtUtils::MakeMaker
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+catfile
+
+constants (o)
+
+static_lib (o)
+
+dynamic_bs (o)
+
+dynamic_lib (o)
+
+canonpath
+
+perl_script
+
+pm_to_blib
+
+test_via_harness (o)
+
+tool_autosplit (override)
+
+tools_other (o)
+
+xs_o (o)
+
+top_targets (o)
+
+htmlifypods (o)
+
+manifypods (o)
+
+dist_ci (o)
+
+dist_core (o)
+
+pasthru (o)
 
 =head2 ExtUtils::MM_OS2 - methods to override UN*X behaviour in
 ExtUtils::MakeMaker
@@ -10299,6 +10412,8 @@ C<untaint_pattern>, C<untaint_skip>
 =item CAVEAT
 
 =item NOTES
+
+=item HISTORY
 
 =back
 
@@ -12156,7 +12271,7 @@ encode_qp($str), decode_qp($str);
 
 =back
 
-=head2 Math::BigFloat - Arbitrary length float math package
+=head2 Math::BigFloat - Arbitrary size floating point math package
 
 =over 4
 
@@ -12164,12 +12279,61 @@ encode_qp($str), decode_qp($str);
 
 =item DESCRIPTION
 
-number format, Error returns 'NaN', Division is computed to, Rounding is
-performed
+=over 4
+
+=item Canonical notation
+
+=item Output
+
+=item C<mantissa()>, C<exponent()> and C<parts()>
+
+=item Accuracy vs. Precision
+
+=item Rounding
+
+ffround ( +$scale ) rounds to the $scale'th place left from the '.',
+counting from the dot. The first digit is numbered 1, ffround ( -$scale )
+rounds to the $scale'th place right from the '.', counting from the dot,
+ffround ( 0 ) rounds to an integer, fround  ( +$scale ) preserves accuracy
+to $scale digits from the left (aka significant digits) and paddes the rest
+with zeros. If the number is between 1 and -1, the significant digits count
+from the first non-zero after the '.', fround  ( -$scale ) and fround ( 0 )
+are a no-ops
+
+=back
+
+=item EXAMPLES
+
+  use Math::BigFloat qw(bstr bint);
+  # not ready yet
+  $x = bstr("1234")		       # string "1234"
+  $x = "$x";			       # same as bstr()
+  $x = bneg("1234")		       # BigFloat "-1234"
+  $x = Math::BigFloat->bneg("1234");   # BigFloat "1234"
+  $x = Math::BigFloat->babs("-12345"); # BigFloat "12345"
+  $x = Math::BigFloat->bnorm("-0 00"); # BigFloat "0"
+  $x = bint(1) + bint(2);	       # BigFloat "3"
+  $x = bint(1) + "2";		       # ditto (auto-BigFloatify of "2")
+  $x = bint(1); 		       # BigFloat "1"
+  $x = $x + 5 / 2;		       # BigFloat "3"
+  $x = $x ** 3; 		       # BigFloat "27"
+  $x *= 2;			       # BigFloat "54"
+  $x = new Math::BigFloat;	       # BigFloat "0"
+  $x--; 			       # BigFloat "-1"
+
+=item Autocreating constants
+
+=item PERFORMANCE
 
 =item BUGS
 
-=item AUTHOR
+=item CAVEAT
+
+stringify, bstr(), bdiv, Modifying and =, bpow
+
+=item LICENSE
+
+=item AUTHORS
 
 =back
 
@@ -12183,13 +12347,38 @@ performed
 
 Canonical notation, Input, Output
 
-=item EXAMPLES
+=over 4
+
+=item Rounding
+
+bfround ( +$scale ) rounds to the $scale'th place left from the '.', bround
+ ( +$scale ) preserves accuracy to $scale sighnificant digits counted from
+the left and paddes the number with zeros, bround  ( -$scale ) preserves
+accuracy to $scale significant digits counted from the right and paddes the
+number with zeros
+
+=item Internals
+
+=item mantissa(), exponent() and parts()
+
+=back
 
 =item Autocreating constants
 
+=item PERFORMANCE
+
 =item BUGS
 
-=item AUTHOR
+:constant and eval()
+
+=item CAVEATS
+
+stringify, bstr(), bsstr() and 'cmp', int(), bdiv, Modifying and =, bpow,
+Overloading -$x, Mixing different object types, bsqrt()
+
+=item LICENSE
+
+=item AUTHORS
 
 =back
 
@@ -12274,6 +12463,147 @@ cylindrical_to_spherical, spherical_to_cartesian, spherical_to_cylindrical
 =item BUGS
 
 =item AUTHORS
+
+=back
+
+=head2 Memoize - Make your functions faster by trading space for time
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item DETAILS
+
+=item OPTIONS
+
+=over 4
+
+=item INSTALL
+
+=item NORMALIZER
+
+=item C<SCALAR_CACHE>, C<LIST_CACHE>
+
+C<MEMORY>, C<HASH>, C<TIE>, C<FAULT>, C<MERGE>
+
+=back
+
+=item OTHER FACILITIES
+
+=over 4
+
+=item C<unmemoize>
+
+=item C<flush_cache>
+
+=back
+
+=item CAVEATS
+
+=item PERSISTENT CACHE SUPPORT
+
+=item EXPIRATION SUPPORT
+
+=item BUGS
+
+=item MAILING LIST
+
+=item AUTHOR
+
+=item THANK YOU
+
+=back
+
+=head2 Memoize::AnyDBM_File - glue to provide EXISTS for AnyDBM_File for
+Storable use
+
+=over 4
+
+=item DESCRIPTION
+
+=back
+
+=head2 Memoize::Expire - Plug-in module for automatic expiration of
+memoized values
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item INTERFACE
+
+ TIEHASH,  EXISTS,  STORE
+
+=item ALTERNATIVES
+
+=item CAVEATS
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Memoize::ExpireFile - test for Memoize expiration semantics
+
+=over 4
+
+=item DESCRIPTION
+
+=back
+
+=head2 Memoize::ExpireTest - test for Memoize expiration semantics
+
+=over 4
+
+=item DESCRIPTION
+
+=back
+
+=head2 Memoize::NDBM_File - glue to provide EXISTS for NDBM_File for
+Storable use
+
+=over 4
+
+=item DESCRIPTION
+
+=back
+
+=head2 Memoize::SDBM_File - glue to provide EXISTS for SDBM_File for
+Storable use
+
+=over 4
+
+=item DESCRIPTION
+
+=back
+
+=head2 Memoize::Saves - Plug-in module to specify which return values
+should be memoized
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CAVEATS
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Memoize::Storable - store Memoized data in Storable database
+
+=over 4
+
+=item DESCRIPTION
 
 =back
 
@@ -14078,6 +14408,27 @@ C<Storable::is_retrieving>
 
 =back
 
+=head2 Syslog, Sys::Syslog, openlog, closelog, setlogmask, syslog - Perl
+interface to the UNIX syslog(3) calls
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+openlog $ident, $logopt, $facility, syslog $priority, $format, @args,
+setlogmask $mask_priority, setlogsock $sock_type (added in 5.004_02),
+closelog
+
+=item EXAMPLES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
 =head2 Syslog::Syslog, Sys::Syslog, openlog, closelog, setlogmask, syslog -
 Perl interface to the UNIX syslog(3) calls
 
@@ -14693,6 +15044,24 @@ getitimer ( $which )
 
 =head2 Time::Piece::Seconds, Time::Seconds - a simple API to convert
 seconds to other date values
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=item AUTHOR
+
+=item LICENSE
+
+=item Bugs
+
+=back
+
+=head2 Time::Seconds - a simple API to convert seconds to other date values
 
 =over 4
 

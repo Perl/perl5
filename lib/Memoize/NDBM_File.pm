@@ -1,4 +1,15 @@
 package Memoize::NDBM_File;
+
+=head1 NAME
+
+Memoize::NDBM_File - glue to provide EXISTS for NDBM_File for Storable use
+
+=head1 DESCRIPTION
+
+See L<Memoize>.
+
+=cut
+
 use NDBM_File;
 @ISA = qw(NDBM_File);
 

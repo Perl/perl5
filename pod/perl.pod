@@ -124,6 +124,7 @@ For ease of access, the Perl manual has been split up into several sections:
     perlmacos		Perl notes for Mac OS (Classic)
     perlmint		Perl notes for MiNT
     perlmpeix		Perl notes for MPE/iX
+    perlnetware		Perl notes for NetWare
     perlos2		Perl notes for OS/2
     perlos390		Perl notes for OS/390
     perlplan9		Perl notes for Plan 9

@@ -1,5 +1,15 @@
-
 package Memoize::ExpireFile;
+
+=head1 NAME
+
+Memoize::ExpireFile - test for Memoize expiration semantics
+
+=head1 DESCRIPTION
+
+See L<Memoize::Expire>.
+
+=cut
+
 use Carp;
 
 sub TIEHASH {
