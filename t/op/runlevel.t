@@ -311,7 +311,7 @@ $SIG{__DIE__} = sub {
 eval { die };
 &{sub { eval 'die' }}();
 sub foo { eval { die } } foo();
-{package rmb; sub{ eval{die} } ->() };	# check __ANON__ is global	
+{package rmb; sub{ eval{die} } ->() };	# check __ANON__ knows package	
 EXPECT
 In DIE
 main|-|8|(eval)
@@ -323,7 +323,7 @@ main|-|10|(eval)
 main|-|10|main::foo
 In DIE
 rmb|-|11|(eval)
-rmb|-|11|main::__ANON__
+rmb|-|11|rmb::__ANON__
 ########
 package TEST;
  

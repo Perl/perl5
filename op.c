@@ -4755,13 +4755,15 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     name = o ? SvPVx(cSVOPo->op_sv, n_a) : Nullch;
     if (!name && PERLDB_NAMEANON && CopLINE(PL_curcop)) {
 	SV *sv = sv_newmortal();
-	Perl_sv_setpvf(aTHX_ sv, "__ANON__[%s:%"IVdf"]",
+	Perl_sv_setpvf(aTHX_ sv, "%s[%s:%"IVdf"]",
+		       PL_curstash ? "__ANON__" : "__ANON__::__ANON__",
 		       CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
 	aname = SvPVX(sv);
     }
     else
 	aname = Nullch;
-    gv = gv_fetchpv(name ? name : (aname ? aname : "__ANON__"),
+    gv = gv_fetchpv(name ? name : (aname ? aname : 
+		    (PL_curstash ? "__ANON__" : "__ANON__::__ANON__")),
 		    GV_ADDMULTI | ((block || attrs) ? 0 : GV_NOINIT),
 		    SVt_PVCV);
 
@@ -5179,7 +5181,9 @@ Used by C<xsubpp> to hook up XSUBs as Perl subs.
 CV *
 Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
 {
-    GV *gv = gv_fetchpv(name ? name : "__ANON__", GV_ADDMULTI, SVt_PVCV);
+    GV *gv = gv_fetchpv(name ? name :
+			(PL_curstash ? "__ANON__" : "__ANON__::__ANON__"),
+			GV_ADDMULTI, SVt_PVCV);
     register CV *cv;
 
     if ((cv = (name ? GvCV(gv) : Nullcv))) {
