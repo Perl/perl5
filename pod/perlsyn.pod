@@ -317,7 +317,7 @@ do it:
 See how much easier this is?  It's cleaner, safer, and faster.  It's
 cleaner because it's less noisy.  It's safer because if code gets added
 between the inner and outer loops later on, the new code won't be
-accidentally excecuted:  the C<next> explicitly iterates the other loop
+accidentally executed, the C<next> explicitly iterates the other loop
 rather than merely terminating the inner one.  And it's faster because
 Perl executes a C<foreach> statement more rapidly than it would the
 equivalent C<for> loop.
