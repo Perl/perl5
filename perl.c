@@ -300,7 +300,6 @@ void
 perl_destruct(pTHXx)
 {
     int destruct_level;  /* 0=none, 1=full, 2=full with checks */
-    I32 last_sv_count;
     HV *hv;
 #ifdef USE_THREADS
     Thread t;
@@ -663,13 +662,13 @@ perl_destruct(pTHXx)
     }
 
     /* Now absolutely destruct everything, somehow or other, loops or no. */
-    last_sv_count = 0;
     SvFLAGS(PL_fdpid) |= SVTYPEMASK;		/* don't clean out pid table now */
     SvFLAGS(PL_strtab) |= SVTYPEMASK;		/* don't clean out strtab now */
-    while (PL_sv_count != 0 && PL_sv_count != last_sv_count) {
-	last_sv_count = PL_sv_count;
-	sv_clean_all();
-    }
+
+    /* the 2 is for PL_fdpid and PL_strtab */
+    while (PL_sv_count > 2 && sv_clean_all())
+	;
+
     SvFLAGS(PL_fdpid) &= ~SVTYPEMASK;
     SvFLAGS(PL_fdpid) |= SVt_PVAV;
     SvFLAGS(PL_strtab) &= ~SVTYPEMASK;
