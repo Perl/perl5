@@ -192,7 +192,7 @@ use SelectSaver;
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = "1.1401";
+$VERSION = "1.1402";
 
 @EXPORT_OK = qw(
     autoflush
@@ -269,24 +269,14 @@ sub new_from_fd {
     bless $fh, $class;
 }
 
-sub DESTROY {
-    my ($fh) = @_;
+#
+# There is no need for DESTROY to do anything, because when the
+# last reference to an IO object is gone, Perl automatically
+# closes its associated files (if any).  However, to avoid any
+# attempts to autoload DESTROY, we here define it to do nothing.
+#
+sub DESTROY {}
 
-    # During global object destruction, this function may be called
-    # on FILEHANDLEs as well as on the GLOBs that contains them.
-    # Thus the following trickery.  If only the CORE file operators
-    # could deal with FILEHANDLEs, it wouldn't be necessary...
-
-    if ($fh =~ /=FILEHANDLE\(/) {
-	local *TMP = $fh;
-	close(TMP)
-	    if defined fileno(TMP);
-    }
-    else {
-	close($fh)
-	    if defined fileno($fh);
-    }
-}
 
 ################################################
 ## Open and close.
