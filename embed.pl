@@ -452,8 +452,8 @@ print EM <<'END';
  */
 
 #if !defined(PERL_CORE)
-#  define sv_setptrobj(rv,ptr,name)	sv_setref_iv(rv,name,(IV)ptr)
-#  define sv_setptrref(rv,ptr)		sv_setref_iv(rv,Nullch,(IV)ptr)
+#  define sv_setptrobj(rv,ptr,name)	sv_setref_iv(rv,name,PTR2IV(ptr))
+#  define sv_setptrref(rv,ptr)		sv_setref_iv(rv,Nullch,PTR2IV(ptr))
 #endif
 
 #if !defined(PERL_CORE) && !defined(PERL_NOCOMPAT) && !defined(PERL_BINCOMPAT_5005)

@@ -49,7 +49,7 @@ T_JSTRING
 	    $var = ($type)(void*)SvIV(SvRV($arg));
 	}
 	else
-	    $var = ($type)(*env)->NewStringUTF(env, (char *) SvPV($arg,PL_na))
+	    $var = ($type)env->NewStringUTF((char *) SvPV($arg,PL_na))
 T_JVALUELIST
 	if (SvROK($arg)) {
 	    AV* av = (AV*)SvRV($arg);

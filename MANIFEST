@@ -490,11 +490,19 @@ installperl		Perl script to do "make install" dirty work
 intrpvar.h		Variables held in each interpreter instance
 iperlsys.h		Perl's interface to the system
 jpl/JNI/Changes		Java Native Interface changes
+jpl/JNI/Closer.java	Java Native Interface example
 jpl/JNI/JNI.pm		Java Native Interface module
-jpl/JNI/JNI.xs		Java Native Interface external subroutines
+jpl/JNI/JNI.pm		Java Native Interface module
+jpl/JNI/JNIConfig	Java Native Interface config
+jpl/JNI/JNIConfig.Win32	Java Native Interface config
+jpl/JNI/JNIConfig.kaffe	Java Native Interface config
+jpl/JNI/JNIConfig.noembed	Java Native Interface config
+jpl/JNI/JNIConfig.standard	Java Native Interface config
 jpl/JNI/Makefile.PL	Java Native Interface makefile generator
 jpl/JNI/test.pl		Java Native Interface tests
 jpl/JNI/typemap		Java/Perl interface typemap
+jpl/JNI/typemap.gcc	Java/Perl interface typemap
+jpl/JNI/typemap.win32	Java/Perl interface typemap
 jpl/JPL/AutoLoader.pm	Java/Perl compiler module
 jpl/JPL/Class.pm	Java/Perl compiler module
 jpl/JPL/Compile.pm	Java/Perl compiler module
@@ -508,6 +516,7 @@ jpl/PerlInterpreter/PerlInterpreter.c		Perl interpreter abstraction
 jpl/PerlInterpreter/PerlInterpreter.h		Perl interpreter abstraction
 jpl/PerlInterpreter/PerlInterpreter.java	Perl interpreter abstraction
 jpl/README					JPL instructions
+jpl/SETVARS.PL					JPL setup
 jpl/Sample/Makefile.PL				JPL sample makefile generator
 jpl/Sample/Sample.jpl				JPL sample
 jpl/Test/Makefile.PL				JPL tests makefile generator

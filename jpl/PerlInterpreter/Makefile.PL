@@ -9,10 +9,14 @@ eval `$JPL_SRC/setvars -perl`;
 if ($^O eq 'linux') {
     $flags = "-Dbool=char";	# avoid builtin bool altogether
     $libs = "-lc -lm -ldl";
-}
-else {
+} else {
     $flags = "";
     $libs = "-lc -lm -ldl";
+}
+
+# Needed for JNI.
+if ($^O eq 'solaris') {
+    $libs .= " -lthread";
 }
 
 open(MAKEFILE, ">Makefile");

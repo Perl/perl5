@@ -122,13 +122,13 @@ the strings?).
           5.003alpha7   1994-Mar-25
  Andy     5.000alpha8   1994-Apr-04
  Larry    5.000alpha9   1994-May-05     ext appears.
-          5.000alpha10  1994-???-??
-          5.000alpha11  1994-???-??
+          5.000alpha10  1994-Jun-11
+          5.000alpha11  1994-Jul-01
  Andy     5.000a11a     1994-Jul-07     To fit 14.
           5.000a11b     1994-Jul-14
           5.000a11c     1994-Jul-19
           5.000a11d     1994-Jul-22
- Larry    5.000alpha12  1994-???-??
+ Larry    5.000alpha12  1994-Aug-04
  Andy     5.000a12a     1994-Aug-08
           5.000a12b     1994-Aug-15
           5.000a12c     1994-Aug-22
@@ -137,8 +137,8 @@ the strings?).
           5.000a12f     1994-Aug-24
           5.000a12g     1994-Aug-24
           5.000a12h     1994-Aug-24
- Larry    5.000beta1    1994-???-??
- Andy     5.000b1a      1994-???-??
+ Larry    5.000beta1    1994-Aug-30
+ Andy     5.000b1a      1994-Sep-06
  Larry    5.000beta2    1994-Sep-14     Core slushified.
  Andy     5.000b2a      1994-Sep-14
           5.000b2b      1994-Sep-17
@@ -167,7 +167,7 @@ the strings?).
           5.000j        1995-Feb-07
           5.000k        1995-Feb-11
           5.000l        1995-Feb-21
-          5.000m        1995-???-??
+          5.000m        1995-Feb-28
           5.000n        1995-Mar-07
 
  Larry   5.001          1995-Mar-13
@@ -187,7 +187,7 @@ the strings?).
           5.001m        1995-Jul-02     Very stable.
           5.001n        1995-Oct-31     Very unstable.
           5.002beta1    1995-Nov-21
-          5.002b1a      1995-Nov-??
+          5.002b1a      1995-Dec-04
           5.002b1b      1995-Dec-04
           5.002b1c      1995-Dec-04
           5.002b1d      1995-Dec-04
@@ -549,7 +549,7 @@ Jarkko Hietaniemi <F<jhi@iki.fi>>.
 
 Thanks to the collective memory of the Perlfolk.  In addition to the
 Keepers of the Pumpkin also Alan Champion, Andreas König, John
-Macdonald, Matthias Neeracher, Michael Peppler, Randal Schwartz, and
-Paul D. Smith sent corrections and additions.
+Macdonald, Matthias Neeracher, Jeff Okamoto, Michael Peppler,
+Randal Schwartz, and Paul D. Smith sent corrections and additions.
 
 =cut
