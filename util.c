@@ -115,7 +115,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
     Malloc_t PerlMem_realloc();
 #endif /* !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE) */
 
-#ifdef HAS_64K_LIMIT 
+#ifdef HAS_64K_LIMIT
     if (size > 0xffff) {
 	PerlIO_printf(Perl_error_log,
 		      "Reallocation too large: %lx\n", size) FLUSH;
@@ -135,7 +135,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 #endif
     ptr = (Malloc_t)PerlMem_realloc(where,size);
     PERL_ALLOC_CHECK(ptr);
- 
+
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) rfree\n",PTR2UV(where),(long)PL_an++));
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) realloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
 
@@ -245,12 +245,12 @@ Perl_safexrealloc(Malloc_t wh, MEM_SIZE size)
 
     if (!wh)
 	return safexmalloc(0,size);
-    
+
     {
 	MEM_SIZE old = sizeof_chunk(where - ALIGN);
 	int t = typeof_chunk(where - ALIGN);
 	register char* new = (char*)saferealloc(where - ALIGN, size + ALIGN);
-    
+
 	xycount[t][SIZE_TO_Y(old)]--;
 	xycount[t][SIZE_TO_Y(size)]++;
 	xcount[t] += size - old;
@@ -265,7 +265,7 @@ Perl_safexfree(Malloc_t wh)
     I32 x;
     char *where = (char*)wh;
     MEM_SIZE size;
-    
+
     if (!where)
 	return;
     where -= ALIGN;
@@ -297,7 +297,7 @@ S_xstat(pTHX_ int flag)
     for (j = 0; j < MAXYCOUNT; j++) {
 	subtot[j] = 0;
     }
-    
+
     PerlIO_printf(Perl_debug_log, "   Id  subtot   4   8  12  16  20  24  28  32  36  40  48  56  64  72  80 80+\n", total);
     for (i = 0; i < MAXXCOUNT; i++) {
 	total += xcount[i];
@@ -306,21 +306,21 @@ S_xstat(pTHX_ int flag)
 	}
 	if (flag == 0
 	    ? xcount[i]			/* Have something */
-	    : (flag == 2 
+	    : (flag == 2
 	       ? xcount[i] != lastxcount[i] /* Changed */
 	       : xcount[i] > lastxcount[i])) { /* Growed */
-	    PerlIO_printf(Perl_debug_log,"%2d %02d %7ld ", i / 100, i % 100, 
+	    PerlIO_printf(Perl_debug_log,"%2d %02d %7ld ", i / 100, i % 100,
 			  flag == 2 ? xcount[i] - lastxcount[i] : xcount[i]);
 	    lastxcount[i] = xcount[i];
 	    for (j = 0; j < MAXYCOUNT; j++) {
-		if ( flag == 0 
+		if ( flag == 0
 		     ? xycount[i][j]	/* Have something */
-		     : (flag == 2 
+		     : (flag == 2
 			? xycount[i][j] != lastxycount[i][j] /* Changed */
 			: xycount[i][j] > lastxycount[i][j])) {	/* Growed */
-		    PerlIO_printf(Perl_debug_log,"%3ld ", 
-				  flag == 2 
-				  ? xycount[i][j] - lastxycount[i][j] 
+		    PerlIO_printf(Perl_debug_log,"%3ld ",
+				  flag == 2
+				  ? xycount[i][j] - lastxycount[i][j]
 				  : xycount[i][j]);
 		    lastxycount[i][j] = xycount[i][j];
 		} else {
@@ -759,18 +759,18 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
     if (setlocale_failure) {
 	char *p;
-	bool locwarn = (printwarn > 1 || 
+	bool locwarn = (printwarn > 1 ||
 			(printwarn &&
 			 (!(p = PerlEnv_getenv("PERL_BADLANG")) || atoi(p))));
 
 	if (locwarn) {
 #ifdef LC_ALL
-  
+
 	    PerlIO_printf(Perl_error_log,
 	       "perl: warning: Setting locale failed.\n");
 
 #else /* !LC_ALL */
-  
+
 	    PerlIO_printf(Perl_error_log,
 	       "perl: warning: Setting locale failed for the categories:\n\t");
 #ifdef USE_LOCALE_CTYPE
@@ -1070,9 +1070,9 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
     register I32 multiline = flags & FBMrf_MULTILINE;
 
     if (bigend - big < littlelen) {
-	if ( SvTAIL(littlestr) 
+	if ( SvTAIL(littlestr)
 	     && (bigend - big == littlelen - 1)
-	     && (littlelen == 1 
+	     && (littlelen == 1
 		 || (*big == *little &&
 		     memEQ((char *)big, (char *)little, littlelen - 1))))
 	    return (char*)big;
@@ -1164,7 +1164,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
     }
     if (SvTAIL(littlestr) && !multiline) {	/* tail anchored? */
 	s = bigend - littlelen;
-	if (s >= big && bigend[-1] == '\n' && *s == *little 
+	if (s >= big && bigend[-1] == '\n' && *s == *little
 	    /* Automatically of length > 2 */
 	    && memEQ((char*)s + 1, (char*)little + 1, littlelen - 2))
 	{
@@ -1193,7 +1193,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	}
 	return b;
     }
-    
+
     {	/* Do actual FBM.  */
 	register unsigned char *table = little + littlelen + FBM_TABLE_OFFSET;
 	register unsigned char *oldlittle;
@@ -1253,7 +1253,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
    of ends of some substring of bigstr.
    If `last' we want the last occurence.
    old_posp is the way of communication between consequent calls if
-   the next call needs to find the . 
+   the next call needs to find the .
    The initial *old_posp should be -1.
 
    Note that we take into account SvTAIL, so one can get extra
@@ -1282,7 +1282,7 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
 	? (pos = PL_screamfirst[BmRARE(littlestr)]) < 0
 	: (((pos = *old_posp), pos += PL_screamnext[pos]) == 0)) {
       cant_find:
-	if ( BmRARE(littlestr) == '\n' 
+	if ( BmRARE(littlestr) == '\n'
 	     && BmPREVIOUS(littlestr) == SvCUR(littlestr) - 1) {
 	    little = (unsigned char *)(SvPVX(littlestr));
 	    littleend = little + SvCUR(littlestr);
@@ -1345,7 +1345,7 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
 	    found = 1;
 	}
     } while ( pos += PL_screamnext[pos] );
-    if (last && found) 
+    if (last && found)
 	return (char *)(big+(*old_posp));
 #endif /* POINTERRIGOR */
   check_tail:
@@ -1532,7 +1532,7 @@ Perl_vmess(pTHX_ const char *pat, va_list *args)
 			      SvCUR(PL_rs) == 1 && *SvPVX(PL_rs) == '\n');
 	    Perl_sv_catpvf(aTHX_ sv, ", <%s> %s %"IVdf,
 		      PL_last_in_gv == PL_argvgv ? "" : GvNAME(PL_last_in_gv),
-		      line_mode ? "line" : "chunk", 
+		      line_mode ? "line" : "chunk",
 		      (IV)IoLINES(GvIOp(PL_last_in_gv)));
 	}
 #ifdef USE_THREADS
@@ -1813,7 +1813,7 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
 
 	PerlIO_write(serr, message, msglen);
 #ifdef LEAKTEST
-	DEBUG_L(*message == '!' 
+	DEBUG_L(*message == '!'
 		? (xstat(message[1]=='!'
 			 ? (message[2]=='!' ? 2 : 1)
 			 : 0)
@@ -1905,13 +1905,13 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
             if (cv && !CvDEPTH(cv) && (CvROOT(cv) || CvXSUB(cv))) {
                 dSP;
                 SV *msg;
- 
+
                 ENTER;
 		save_re_context();
                 msg = newSVpvn(message, msglen);
                 SvREADONLY_on(msg);
                 SAVEFREESV(msg);
- 
+
 		PUSHSTACKi(PERLSI_DIEHOOK);
                 PUSHMARK(sp);
                 XPUSHs(msg);
@@ -1946,13 +1946,13 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
             if (cv && !CvDEPTH(cv) && (CvROOT(cv) || CvXSUB(cv))) {
                 dSP;
                 SV *msg;
- 
+
                 ENTER;
 		save_re_context();
                 msg = newSVpvn(message, msglen);
                 SvREADONLY_on(msg);
                 SAVEFREESV(msg);
- 
+
 		PUSHSTACKi(PERLSI_WARNHOOK);
                 PUSHMARK(sp);
                 XPUSHs(msg);
@@ -1967,7 +1967,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 	    PerlIO *serr = Perl_error_log;
 	    PerlIO_write(serr, message, msglen);
 #ifdef LEAKTEST
-	    DEBUG_L(*message == '!' 
+	    DEBUG_L(*message == '!'
 		? (xstat(message[1]=='!'
 			 ? (message[2]=='!' ? 2 : 1)
 			 : 0)
@@ -2371,7 +2371,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
     if (doexec) {
 	return my_syspopen(aTHX_ cmd,mode);
     }
-#endif 
+#endif
     This = (*mode == 'w');
     that = !This;
     if (doexec && PL_tainting) {
@@ -2484,10 +2484,12 @@ FILE *popen();
 PerlIO *
 Perl_my_popen(pTHX_ char *cmd, char *mode)
 {
-    /* Needs work for PerlIO ! */
-    /* used 0 for 2nd parameter to PerlIO-exportFILE; apparently not used */
     PERL_FLUSHALL_FOR_CHILD;
-    return popen(PerlIO_exportFILE(cmd, 0), mode);
+    /* Call system's popen() to get a FILE *, then import it.
+       used 0 for 2nd parameter to PerlIO_importFILE;
+       apparently not used
+    */
+    return PerlIO_importFILE(popen(cmd, mode), 0);
 }
 #endif
 
@@ -2677,7 +2679,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     if (pid == -1) {			/* Opened by popen. */
 	return my_syspclose(ptr);
     }
-#endif 
+#endif
     if ((close_failed = (PerlIO_close(ptr) == EOF))) {
 	saved_errno = errno;
 #ifdef VMS
@@ -2796,7 +2798,7 @@ my_syspclose(PerlIO *ptr)
 #else
 I32
 Perl_my_pclose(pTHX_ PerlIO *ptr)
-#endif 
+#endif
 {
     /* Needs work for PerlIO ! */
     FILE *f = PerlIO_findFILE(ptr);
@@ -2860,7 +2862,7 @@ Perl_cast_ulong(pTHX_ NV f)
 /* Code modified to prefer proper named type ranges, I32, IV, or UV, instead
    of LONG_(MIN/MAX).
                            -- Kenneth Albanowski <kjahds@kjahds.com>
-*/                                      
+*/
 
 #ifndef MY_UV_MAX
 #  define MY_UV_MAX ((UV)IV_MAX * (UV)2 + (UV)1)
@@ -3006,7 +3008,7 @@ Perl_scan_bin(pTHX_ char *start, STRLEN len, STRLEN *retlen)
 #if UVSIZE > 4
 	|| (!overflowed && ruv > 0xffffffff  )
 #endif
-	) { 
+	) {
 	dTHR;
 	if (ckWARN(WARN_PORTABLE))
 	    Perl_warner(aTHX_ WARN_PORTABLE,
@@ -3149,7 +3151,7 @@ Perl_scan_hex(pTHX_ char *start, STRLEN len, STRLEN *retlen)
 #if UVSIZE > 4
 	|| (!overflowed && ruv > 0xffffffff  )
 #endif
-	) { 
+	) {
 	dTHR;
 	if (ckWARN(WARN_PORTABLE))
 	    Perl_warner(aTHX_ WARN_PORTABLE,
@@ -3370,7 +3372,7 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 f
 	}
 #ifndef DOSISH
 	if (!xfound && !seen_dot && !xfailed &&
-	    (PerlLIO_stat(scriptname,&PL_statbuf) < 0 
+	    (PerlLIO_stat(scriptname,&PL_statbuf) < 0
 	     || S_ISDIR(PL_statbuf.st_mode)))
 #endif
 	    seen_dot = 1;			/* Disable message. */
@@ -3450,7 +3452,7 @@ Perl_cond_signal(pTHX_ perl_cond *cp)
 {
     perl_os_thread t;
     perl_cond cond = *cp;
-    
+
     if (!cond)
 	return;
     t = cond->thread;
@@ -3470,7 +3472,7 @@ Perl_cond_broadcast(pTHX_ perl_cond *cp)
 {
     perl_os_thread t;
     perl_cond cond, cond_next;
-    
+
     for (cond = *cp; cond; cond = cond_next) {
 	t = cond->thread;
 	/* Insert t in the runnable queue just ahead of us */
@@ -3493,7 +3495,7 @@ Perl_cond_wait(pTHX_ perl_cond *cp)
 
     if (thr->i.next_run == thr)
 	Perl_croak(aTHX_ "panic: perl_cond_wait called by last runnable thread");
-    
+
     New(666, cond, 1, struct perl_wait_queue);
     cond->thread = thr;
     cond->next = *cp;
@@ -3509,7 +3511,7 @@ MAGIC *
 Perl_condpair_magic(pTHX_ SV *sv)
 {
     MAGIC *mg;
-    
+
     SvUPGRADE(sv, SVt_PVMG);
     mg = mg_find(sv, 'm');
     if (!mg) {
@@ -3681,7 +3683,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
 		"new_struct_thread: copied threadsv %"IVdf" %p->%p\n",
 				  (IV)i, t, thr));
 	}
-    } 
+    }
     thr->threadsvp = AvARRAY(thr->threadsv);
 
     MUTEX_LOCK(&PL_threads_mutex);
@@ -3706,10 +3708,10 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
 #if defined(HUGE_VAL) || (defined(USE_LONG_DOUBLE) && defined(HUGE_VALL))
 /*
  * This hack is to force load of "huge" support from libm.a
- * So it is in perl for (say) POSIX to use. 
+ * So it is in perl for (say) POSIX to use.
  * Needed for SunOS with Sun's 'acc' for example.
  */
-NV 
+NV
 Perl_huge(void)
 {
 #   if defined(USE_LONG_DOUBLE) && defined(HUGE_VALL)

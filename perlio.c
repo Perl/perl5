@@ -287,8 +287,8 @@ PerlIO_default_layer(I32 n)
    char *s  = PerlEnv_getenv("PERLIO");
    newXS("perlio::import",XS_perlio_import,__FILE__);
    newXS("perlio::unimport",XS_perlio_unimport,__FILE__);
-   PerlIO_layer_hv = get_hv("perlio::layers",GV_ADD|GV_ADDMULTI);
-   PerlIO_layer_av = get_av("perlio::layers",GV_ADD|GV_ADDMULTI);
+   PerlIO_layer_hv = get_hv("open::layers",GV_ADD|GV_ADDMULTI);
+   PerlIO_layer_av = get_av("open::layers",GV_ADD|GV_ADDMULTI);
    PerlIO_define_layer(&PerlIO_unix);
    PerlIO_define_layer(&PerlIO_perlio);
    PerlIO_define_layer(&PerlIO_stdio);

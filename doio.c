@@ -234,17 +234,13 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		if (ckWARN(WARN_PIPE))
 		    Perl_warner(aTHX_ WARN_PIPE, "Can't open bidirectional pipe");
 	    }
-	    {
-		char *mode;
-		if (out_raw)
-		    mode = "wb";
-		else if (out_crlf)
-		    mode = "wt";
-		else
-		    mode = "w";
-		fp = PerlProc_popen(name,mode);
-	    }
+	    mode[0] = 'w';
 	    writing = 1;
+	    if (out_raw)
+		strcat(mode, "b");
+	    else if (out_crlf)
+		strcat(mode, "t");
+	    fp = PerlProc_popen(name,mode);
 	}
 	else if (*type == IoTYPE_WRONLY) {
 	    TAINT_PROPER("open");
@@ -394,16 +390,12 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    if (strNE(name,"-") || num_svs)
 		TAINT_ENV();
 	    TAINT_PROPER("piped open");
-	    {
-		char *mode;
-		if (in_raw)
-		    mode = "rb";
-		else if (in_crlf)
-		    mode = "rt";
-		else
-		    mode = "r";
-		fp = PerlProc_popen(name,mode);
-	    }
+	    mode[0] = 'r';
+	    if (in_raw)
+		strcat(mode, "b");
+	    else if (in_crlf)
+		strcat(mode, "t");
+	    fp = PerlProc_popen(name,mode);
 	    IoTYPE(io) = IoTYPE_PIPE;
 	}
 	else {
@@ -418,13 +410,11 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		IoTYPE(io) = IoTYPE_STD;
 	    }
 	    else {
-		char *mode;
+	        mode[0] = 'r';
 		if (in_raw)
-		    mode = "rb";
+		    strcat(mode, "b");
 		else if (in_crlf)
-		    mode = "rt";
-		else
-		    mode = "r";
+		    strcat(mode, "t");
 		fp = PerlIO_open(name,mode);
 	    }
 	}
@@ -634,7 +624,7 @@ Perl_nextargv(pTHX_ register GV *gv)
 #if !defined(DOSISH) && !defined(__CYGWIN__)
 		    if (PerlLIO_rename(PL_oldname,SvPVX(sv)) < 0) {
 		        if (ckWARN_d(WARN_INPLACE))	
-			    Perl_warner(aTHX_ WARN_INPLACE, 
+			    Perl_warner(aTHX_ WARN_INPLACE,
 			      "Can't rename %s to %s: %s, skipping file",
 			      PL_oldname, SvPVX(sv), Strerror(errno) );
 			do_close(gv,FALSE);
@@ -881,7 +871,7 @@ Perl_do_eof(pTHX_ GV *gv)
 		 || IoIFP(io) == PerlIO_stderr()))
     {
 	/* integrate to report_evil_fh()? */
-        char *name = NULL; 
+        char *name = NULL;
 	if (isGV(gv)) {
 	    SV* sv = sv_newmortal();
 	    gv_efullname4(sv, gv, Nullch, FALSE);
@@ -1305,7 +1295,7 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 	else
 	    PerlProc_execvp(PL_Argv[0],PL_Argv);
 	if (ckWARN(WARN_EXEC))
-	    Perl_warner(aTHX_ WARN_EXEC, "Can't exec \"%s\": %s", 
+	    Perl_warner(aTHX_ WARN_EXEC, "Can't exec \"%s\": %s",
 		PL_Argv[0], Strerror(errno));
 	if (do_report) {
 	    int e = errno;
@@ -1440,7 +1430,7 @@ Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
 	    int e = errno;
 
 	    if (ckWARN(WARN_EXEC))
-		Perl_warner(aTHX_ WARN_EXEC, "Can't exec \"%s\": %s", 
+		Perl_warner(aTHX_ WARN_EXEC, "Can't exec \"%s\": %s",
 		    PL_Argv[0], Strerror(errno));
 	    if (do_report) {
 		PerlLIO_write(fd, (void*)&e, sizeof(int));
@@ -1515,7 +1505,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 	}
 	break;
 #endif
-/* 
+/*
 XXX Should we make lchown() directly available from perl?
 For now, we'll let Configure test for HAS_LCHOWN, but do
 nothing in the core.
@@ -1940,7 +1930,7 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
     flags = SvIVx(*++mark);
     SvPV_force(mstr, len);
     mbuf = SvGROW(mstr, sizeof(long)+msize+1);
-    
+
     SETERRNO(0,0);
     ret = msgrcv(id, (struct msgbuf *)mbuf, msize, mtype, flags);
     if (ret >= 0) {
