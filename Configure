@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Aug 31 07:18:29 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Thu Aug 31 17:56:37 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -5280,6 +5280,82 @@ EOM
 	;;
 esac
 
+: check for length of double
+echo " "
+case "$doublesize" in
+'')
+	echo "Checking to see how big your double precision numbers are..." >&4
+	$cat >try.c <<'EOCP'
+#include <stdio.h>
+int main()
+{
+    printf("%d\n", (int)sizeof(double));
+    exit(0);
+}
+EOCP
+	set try
+	if eval $compile_ok; then
+		doublesize=`./try`
+		echo "Your double is $doublesize bytes long."
+	else
+		dflt='8'
+		echo "(I can't seem to compile the test program.  Guessing...)"
+		rp="What is the size of a double precision number (in bytes)?"
+		. ./myread
+		doublesize="$ans"
+	fi
+	;;
+esac
+$rm -f try.c try
+
+: check for long doubles
+echo " "
+echo "Checking to see if you have long double..." >&4
+echo 'int main() { long double x = 7.0; }' > try.c
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have long double."
+else
+	val="$undef"
+	echo "You do not have long double."
+fi
+$rm try.*
+set d_longdbl
+eval $setvar
+
+: check for length of long double
+case "${d_longdbl}${longdblsize}" in
+$define)
+	echo " "
+	echo "Checking to see how big your long doubles are..." >&4
+	$cat >try.c <<'EOCP'
+#include <stdio.h>
+int main()
+{
+	printf("%d\n", sizeof(long double));
+}
+EOCP
+	set try
+	set try
+	if eval $compile; then
+		longdblsize=`./try$exe_ext`
+		echo "Your long doubles are $longdblsize bytes long."
+	else
+		dflt='8'
+		echo " "
+		echo "(I can't seem to compile the test program.  Guessing...)" >&4
+		rp="What is the size of a long double (in bytes)?"
+		. ./myread
+		longdblsize="$ans"
+	fi
+	if $test "X$doublesize" = "X$longdblsize"; then
+		echo "(That isn't any different from an ordinary double.)"
+	fi	
+	;;
+esac
+$rm -f try.* try
+
 : determine the architecture name
 echo " "
 if xxx=`./loc arch blurfl $pth`; $test -f "$xxx"; then
@@ -5338,13 +5414,14 @@ case "$use64bitint$use64bitall" in
 *"$define"*)
 	case "$archname64" in
 	'')
+		"This architecture is naturally 64-bit, not changing architecture name." >&4
 		;;
 	*)
 		case "$use64bitint" in
 		"$define") echo "64 bit integers selected." >&4 ;;
 		esac
 		case "$use64bitall" in
-		"$define") echo "64 bit memory model selected." >&4 ;;
+		"$define") echo "Maximal 64 bitness selected." >&4 ;;
 		esac
 		case "$archname" in
 	        *-$archname64*) echo "...and architecture name already has $archname64." >&4
@@ -5359,13 +5436,20 @@ esac
 case "$uselongdouble" in
 $define)
 	echo "Long doubles selected." >&4
-	case "$archname" in
-        *-ld*) echo "...and architecture name already has -ld." >&4
-                ;;
-        *)      archname="$archname-ld"
-                echo "...setting architecture name to $archname." >&4
-                ;;
-        esac
+	case "$longdblsize" in
+	$doublesize)
+		"...but long doubles are equal to doubles, not changing architecture name." >&4
+		;;
+	*)
+		case "$archname" in
+	        *-ld*) echo "...and architecture name already has -ld." >&4
+	                ;;
+	        *)      archname="$archname-ld"
+	                echo "...setting architecture name to $archname." >&4
+        	        ;;
+	        esac
+		;;
+	esac
 	;;
 esac
 
@@ -7539,82 +7623,6 @@ fi
 : see if qgcvt exists
 set qgcvt d_qgcvt
 eval $inlibc
-
-: check for length of double
-echo " "
-case "$doublesize" in
-'')
-	echo "Checking to see how big your double precision numbers are..." >&4
-	$cat >try.c <<'EOCP'
-#include <stdio.h>
-int main()
-{
-    printf("%d\n", (int)sizeof(double));
-    exit(0);
-}
-EOCP
-	set try
-	if eval $compile_ok; then
-		doublesize=`./try`
-		echo "Your double is $doublesize bytes long."
-	else
-		dflt='8'
-		echo "(I can't seem to compile the test program.  Guessing...)"
-		rp="What is the size of a double precision number (in bytes)?"
-		. ./myread
-		doublesize="$ans"
-	fi
-	;;
-esac
-$rm -f try.c try
-
-: check for long doubles
-echo " "
-echo "Checking to see if you have long double..." >&4
-echo 'int main() { long double x = 7.0; }' > try.c
-set try
-if eval $compile; then
-	val="$define"
-	echo "You have long double."
-else
-	val="$undef"
-	echo "You do not have long double."
-fi
-$rm try.*
-set d_longdbl
-eval $setvar
-
-: check for length of long double
-case "${d_longdbl}${longdblsize}" in
-$define)
-	echo " "
-	echo "Checking to see how big your long doubles are..." >&4
-	$cat >try.c <<'EOCP'
-#include <stdio.h>
-int main()
-{
-	printf("%d\n", sizeof(long double));
-}
-EOCP
-	set try
-	set try
-	if eval $compile; then
-		longdblsize=`./try$exe_ext`
-		echo "Your long doubles are $longdblsize bytes long."
-	else
-		dflt='8'
-		echo " "
-		echo "(I can't seem to compile the test program.  Guessing...)" >&4
-		rp="What is the size of a long double (in bytes)?"
-		. ./myread
-		longdblsize="$ans"
-	fi
-	if $test "X$doublesize" = "X$longdblsize"; then
-		echo "(That isn't any different from an ordinary double.)"
-	fi	
-	;;
-esac
-$rm -f try.* try
 
 echo " "
 
