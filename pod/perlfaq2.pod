@@ -229,7 +229,7 @@ might suffice for you to learn Perl from.  If you're not, check out
 
     Learning Perl (the "Llama Book"):
 	by Randal Schwartz and Tom Christiansen
-		    with Foreword by Larry Wall
+	    with Foreword by Larry Wall
 	ISBN 1-56592-284-0 [2nd Edition July 1997]
 	http://www.oreilly.com/catalog/lperl2/
 
@@ -395,6 +395,7 @@ following list is I<not> the complete list of CPAN mirrors
 
 One may also use xx.cpan.org where "xx" is the 2-letter country code
 for your domain; e.g. Australia would use au.cpan.org.
+[Note: This only applies to countries that host at least one mirror.]
 
 =head2 What mailing lists are there for Perl?
 
@@ -406,22 +407,15 @@ subscription information.
 
 =head2 Archives of comp.lang.perl.misc
 
-Have you tried Deja or AltaVista?  Those are the
-best archives.  Just look up "*perl*" as a newsgroup.
+The Google search engine now carries archived and searchable newsgroup
+content. 
 
-    http://www.deja.com/dnquery.xp?QRY=&DBS=2&ST=PS&defaultOp=AND&LNG=ALL&format=terse&showsort=date&maxhits=25&subjects=&groups=*perl*&authors=&fromdate=&todate=
+http://groups.google.com/groups?hl=en&lr=&safe=off&group=comp.lang.perl.misc
 
-You might want to trim that down a bit, though.
-
-You'll probably want more a sophisticated query and retrieval mechanism
-than a file listing, preferably one that allows you to retrieve
-articles using a fast-access indices, keyed on at least author, date,
-subject, thread (as in "trn") and probably keywords.  The best
-solution the FAQ authors know of is the MH pick command, but it is
-very slow to select on 18000 articles.
-
-If you have, or know where can be found, the missing sections, please
-let perlfaq-suggestions@perl.com know.
+If you have a question, you can be sure someone has already asked the
+same question at some point on c.l.p.m. It requires some time and patience
+to sift through all the content but often you will find the answer you
+seek.
 
 =head2 Where can I buy a commercial version of Perl?
 
