@@ -1,13 +1,13 @@
 #!./perl
 
-# $Header: op.dbm,v 3.0 89/10/18 15:28:31 lwall Locked $
+# $Header: op.dbm,v 3.0.1.1 90/03/27 16:25:57 lwall Locked $
 
 if (!-r '/usr/include/dbm.h' && !-r '/usr/include/ndbm.h') {
     print "1..0\n";
     exit;
 }
 
-print "1..9\n";
+print "1..10\n";
 
 unlink 'Op.dbmx.dir', 'Op.dbmx.pag';
 umask(0);
@@ -91,5 +91,9 @@ print ($ok ? "ok 8\n" : "not ok 8\n");
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
    $blksize,$blocks) = stat('Op.dbmx.pag');
 print ($size > 0 ? "ok 9\n" : "not ok 9\n");
+
+@h{0..200} = 200..400;
+@foo = @h{0..200};
+print join(':',200..400) eq join(':',@foo) ? "ok 10\n" : "no ok 10\n";
 
 unlink 'Op.dbmx.dir', 'Op.dbmx.pag';

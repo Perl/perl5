@@ -1,4 +1,4 @@
-/* $Header: str.c,v 3.0.1.6 90/03/12 17:02:14 lwall Locked $
+/* $Header: str.c,v 3.0.1.7 90/03/27 16:24:11 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	str.c,v $
+ * Revision 3.0.1.7  90/03/27  16:24:11  lwall
+ * patch16: strings with prefix chopped off sometimes freed wrong
+ * patch16: taint check blows up on undefined array element
+ * 
  * Revision 3.0.1.6  90/03/12  17:02:14  lwall
  * patch13: substr as lvalue didn't invalidate old numeric value
  * 
@@ -122,9 +126,13 @@ str_numset(str,num)
 register STR *str;
 double num;
 {
+    if (str->str_pok) {
+	str->str_pok = 0;	/* invalidate pointer */
+	if (str->str_state == SS_INCR)
+	    str_grow(str,0);
+    }
     str->str_u.str_nval = num;
     str->str_state = SS_NORM;
-    str->str_pok = 0;	/* invalidate pointer */
     str->str_nok = 1;			/* validate number */
 #ifdef TAINT
     str->str_tainted = tainted;
@@ -197,6 +205,8 @@ register STR *str;
 {
     if (!str)
 	return 0.0;
+    if (str->str_state == SS_INCR)
+	str_grow(str,0);       /* just force copy down */
     str->str_state = SS_NORM;
     if (str->str_len && str->str_pok)
 	str->str_u.str_nval = atof(str->str_ptr);
@@ -220,7 +230,8 @@ STR *dstr;
 register STR *sstr;
 {
 #ifdef TAINT
-    tainted |= sstr->str_tainted;
+    if (sstr)
+	tainted |= sstr->str_tainted;
 #endif
     if (sstr == dstr)
 	return;
@@ -245,6 +256,9 @@ register STR *sstr;
     else if (sstr->str_nok)
 	str_numset(dstr,sstr->str_u.str_nval);
     else {
+	if (dstr->str_state == SS_INCR)
+	    str_grow(dstr,0);       /* just force copy down */
+
 #ifdef STRUCTCOPY
 	dstr->str_u = sstr->str_u;
 #else
@@ -260,7 +274,8 @@ register char *ptr;
 register int len;
 {
     STR_GROW(str, len + 1);
-    (void)bcopy(ptr,str->str_ptr,len);
+    if (ptr)
+	(void)bcopy(ptr,str->str_ptr,len);
     str->str_cur = len;
     *(str->str_ptr+str->str_cur) = '\0';
     str->str_nok = 0;		/* invalidate number */

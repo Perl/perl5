@@ -1,4 +1,4 @@
-/* $Header: util.c,v 3.0.1.4 90/03/01 10:26:48 lwall Locked $
+/* $Header: util.c,v 3.0.1.5 90/03/27 16:35:13 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	util.c,v $
+ * Revision 3.0.1.5  90/03/27  16:35:13  lwall
+ * patch16: MSDOS support
+ * patch16: support for machines that can't cast negative floats to unsigned ints
+ * patch16: tail anchored pattern could dump if string to search was shorter
+ * 
  * Revision 3.0.1.4  90/03/01  10:26:48  lwall
  * patch9: fbminstr() called instr() rather than ninstr()
  * patch9: nested evals clobbered their longjmp environment
@@ -492,6 +497,8 @@ STR *littlestr;
     littlelen = littlestr->str_cur;
 #ifndef lint
     if (littlestr->str_pok & SP_TAIL && !multiline) {	/* tail anchored? */
+	if (littlelen > bigend - big)
+	    return Nullch;
 	little = (unsigned char*)littlestr->str_ptr;
 	if (littlestr->str_pok & SP_CASEFOLD) {	/* oops, fake it */
 	    big = bigend - littlelen;		/* just start near end */
@@ -1116,6 +1123,7 @@ register long l;
 #endif /* BYTEORDER != 0x4321 */
 #endif /* HTONS */
 
+#ifndef MSDOS
 FILE *
 mypopen(cmd,mode)
 char	*cmd;
@@ -1175,6 +1183,7 @@ char	*mode;
     forkprocess = pid;
     return fdopen(p[this], mode);
 }
+#endif /* !MSDOS */
 
 #ifdef NOTDEF
 dumpfds(s)
@@ -1209,6 +1218,7 @@ int newfd;
 }
 #endif
 
+#ifndef MSDOS
 int
 mypclose(ptr)
 FILE *ptr;
@@ -1250,6 +1260,7 @@ FILE *ptr;
     str_numset(str,0.0);
     return(status);
 }
+#endif /* !MSDOS */
 
 pidgone(pid,status)
 int pid;
@@ -1311,3 +1322,17 @@ register int count;
 	from = frombase;
     }
 }
+
+#ifndef CASTNEGFLOAT
+unsigned long
+castulong(f)
+double f;
+{
+    long along;
+
+    if (f >= 0.0)
+	return (unsigned long)f;
+    along = (long)f;
+    return (unsigned long)along;
+}
+#endif

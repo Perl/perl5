@@ -1,7 +1,10 @@
 ''' Beginning of part 2
-''' $Header: perl.man.2,v 3.0.1.4 90/03/12 16:46:02 lwall Locked $
+''' $Header: perl_man.2,v 3.0.1.5 90/03/27 16:15:17 lwall Locked $
 '''
 ''' $Log:	perl.man.2,v $
+''' Revision 3.0.1.5  90/03/27  16:15:17  lwall
+''' patch16: MSDOS support
+''' 
 ''' Revision 3.0.1.4  90/03/12  16:46:02  lwall
 ''' patch13: documented behavior of @array = /noparens/
 ''' 
@@ -62,6 +65,15 @@ See example in section on Interprocess Communication.
 Returns the arctangent of X/Y in the range
 .if t \-\(*p to \(*p.
 .if n \-PI to PI.
+.Ip "binmode(FILEHANDLE)" 8 4
+.Ip "binmode FILEHANDLE" 8 4
+Arranges for the file to be read in \*(L"binary\*(R" mode in operating systems
+that distinguish between binary and text files.
+Files that are not read in binary mode have CR LF sequences translated
+to LF on input and LF translated to CR LF on output.
+Binmode has no effect under Unix.
+If FILEHANDLE is an expression, the value is taken as the name of
+the filehandle.
 .Ip "bind(SOCKET,NAME)" 8 2
 Does the same thing that the bind system call does.
 Returns true if it succeeded, false otherwise.

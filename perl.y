@@ -1,4 +1,4 @@
-/* $Header: perl.y,v 3.0.1.5 90/03/12 16:55:56 lwall Locked $
+/* $Header: perl.y,v 3.0.1.6 90/03/27 16:13:45 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.y,v $
+ * Revision 3.0.1.6  90/03/27  16:13:45  lwall
+ * patch16: formats didn't work inside eval
+ * 
  * Revision 3.0.1.5  90/03/12  16:55:56  lwall
  * patch13: added list slice operator (LIST)[LIST]
  * patch13: (LIST,) now legal
@@ -67,7 +70,6 @@ ARG *arg5;
 %token <arg> RSTRING TRANS
 
 %type <ival> prog decl format remember
-%type <stabval>
 %type <cmdval> block lineseq line loop cond sideff nexpr else
 %type <arg> expr sexpr cexpr csexpr term handle aryword hshword
 %type <arg> texpr listop
@@ -307,14 +309,14 @@ decl	:	format
 
 format	:	FORMAT WORD '=' FORMLIST
 			{ if (strEQ($2,"stdout"))
-			    stab_form(stabent("STDOUT",TRUE)) = $4;
+			    make_form(stabent("STDOUT",TRUE),$4);
 			  else if (strEQ($2,"stderr"))
-			    stab_form(stabent("STDERR",TRUE)) = $4;
+			    make_form(stabent("STDERR",TRUE),$4);
 			  else
-			    stab_form(stabent($2,TRUE)) = $4;
+			    make_form(stabent($2,TRUE),$4);
 			  Safefree($2);}
 	|	FORMAT '=' FORMLIST
-			{ stab_form(stabent("STDOUT",TRUE)) = $3; }
+			{ make_form(stabent("STDOUT",TRUE),$3); }
 	;
 
 subrout	:	SUB WORD block

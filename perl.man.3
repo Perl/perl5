@@ -1,7 +1,10 @@
 ''' Beginning of part 3
-''' $Header: perl.man.3,v 3.0.1.5 90/03/12 16:52:21 lwall Locked $
+''' $Header: perl_man.3,v 3.0.1.6 90/03/27 16:17:56 lwall Locked $
 '''
 ''' $Log:	perl.man.3,v $
+''' Revision 3.0.1.6  90/03/27  16:17:56  lwall
+''' patch16: MSDOS support
+''' 
 ''' Revision 3.0.1.5  90/03/12  16:52:21  lwall
 ''' patch13: documented that print $filehandle &foo is ambiguous
 ''' patch13: added splice operator: @oldelems = splice(@array,$offset,$len,LIST)
@@ -235,7 +238,7 @@ Returns true if successful.
 DIRHANDLEs have their own namespace separate from FILEHANDLEs.
 .Ip "ord(EXPR)" 8 4
 .Ip "ord EXPR" 8
-Returns the ascii value of the first character of EXPR.
+Returns the numeric ascii value of the first character of EXPR.
 If EXPR is omitted, uses $_.
 .Ip "pack(TEMPLATE,LIST)" 8 4
 Takes an array or list of values and packs it into a binary structure,

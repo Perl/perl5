@@ -1,4 +1,4 @@
-/* $Header: stab.c,v 3.0.1.5 90/03/12 17:00:11 lwall Locked $
+/* $Header: stab.c,v 3.0.1.6 90/03/27 16:22:11 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	stab.c,v $
+ * Revision 3.0.1.6  90/03/27  16:22:11  lwall
+ * patch16: support for machines that can't cast negative floats to unsigned ints
+ * 
  * Revision 3.0.1.5  90/03/12  17:00:11  lwall
  * patch13: undef $/ didn't work as advertised
  * 
@@ -342,7 +345,7 @@ STR *str;
 	    arybase = (int)str_gnum(str);
 	    break;
 	case '?':
-	    statusvalue = (unsigned short)str_gnum(str);
+	    statusvalue = U_S(str_gnum(str));
 	    break;
 	case '!':
 	    errno = (int)str_gnum(str);		/* will anyone ever use this? */

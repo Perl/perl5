@@ -1,8 +1,8 @@
 #!./perl
 
-# $Header: op.range,v 3.0 89/10/18 15:30:53 lwall Locked $
+# $Header: op.range,v 3.0.1.1 90/03/27 16:27:58 lwall Locked $
 
-print "1..6\n";
+print "1..8\n";
 
 print join(':',1..5) eq '1:2:3:4:5' ? "ok 1\n" : "not ok 1\n";
 
@@ -28,3 +28,9 @@ for ((100,2..99,1)) {
     $x += $_;
 }
 print $x == 5050 ? "ok 6\n" : "not ok 6 $x\n";
+
+$x = join('','a'..'z');
+print $x eq 'abcdefghijklmnopqrstuvwxyz' ? "ok 7\n" : "not ok 7 $x\n";
+
+@x = 'A'..'ZZ';
+print @x == 27 * 26 ? "ok 8\n" : "not ok 8\n";

@@ -1,4 +1,4 @@
-/* $Header: arg.h,v 3.0.1.4 90/03/12 16:18:21 lwall Locked $
+/* $Header: arg.h,v 3.0.1.5 90/03/27 15:29:41 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	arg.h,v $
+ * Revision 3.0.1.5  90/03/27  15:29:41  lwall
+ * patch16: MSDOS support
+ * 
  * Revision 3.0.1.4  90/03/12  16:18:21  lwall
  * patch13: added list slice operator (LIST)[LIST]
  * patch13: added splice operator: @oldelems = splice(@array,$offset,$len,LIST)
@@ -267,7 +270,8 @@
 #define O_GETPEERNAME 240
 #define O_LSLICE 241
 #define O_SPLICE 242
-#define MAXO 243
+#define O_BINMODE 243
+#define MAXO 244
 
 #ifndef DOINIT
 extern char *opname[];
@@ -516,7 +520,8 @@ char *opname[] = {
     "GETPEERNAME",
     "LSLICE",
     "SPLICE",
-    "243"
+    "BINMODE",
+    "244"
 };
 #endif
 
@@ -892,6 +897,7 @@ char opargs[MAXO+1] = {
 	A(1,0,0),	/* GETPEERNAME */
 	A(0,3,3),	/* LSLICE */
 	A(0,3,1),	/* SPLICE */
+	A(1,0,0),	/* BINMODE */
 	0
 };
 #undef A

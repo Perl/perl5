@@ -1,4 +1,4 @@
-/* $Header: toke.c,v 3.0.1.6 90/03/12 17:06:36 lwall Locked $
+/* $Header: toke.c,v 3.0.1.7 90/03/27 16:32:37 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	toke.c,v $
+ * Revision 3.0.1.7  90/03/27  16:32:37  lwall
+ * patch16: MSDOS support
+ * patch16: formats didn't work inside eval
+ * patch16: final semicolon in program wasn't optional with -p or -n
+ * 
  * Revision 3.0.1.6  90/03/12  17:06:36  lwall
  * patch13: last semicolon of program is now optional, just for Randal
  * patch13: added splice operator: @oldelems = splice(@array,$offset,$len,LIST)
@@ -197,6 +202,7 @@ yylex()
 	    }
 	}
 	if (in_format) {
+	    bufptr = bufend;
 	    yylval.formval = load_format();
 	    in_format = FALSE;
 	    oldoldbufptr = oldbufptr = s = str_get(linestr) + 1;
@@ -211,8 +217,8 @@ yylex()
 		(void)fclose(rsfp);
 	    rsfp = Nullfp;
 	    if (minus_n || minus_p) {
-		str_set(linestr,minus_p ? "}continue{print;" : "");
-		str_cat(linestr,"}");
+		str_set(linestr,minus_p ? ";}continue{print" : "");
+		str_cat(linestr,";}");
 		oldoldbufptr = oldbufptr = s = str_get(linestr);
 		bufend = linestr->str_ptr + linestr->str_cur;
 		minus_n = minus_p = 0;
@@ -302,10 +308,16 @@ yylex()
 	    d = bufend;
 	    while (s < d && *s != '\n')
 		s++;
-	    if (s < d) {
+	    if (s < d)
 		s++;
-		line++;
+	    if (in_format) {
+		bufptr = s;
+		yylval.formval = load_format();
+		in_format = FALSE;
+		oldoldbufptr = oldbufptr = s = bufptr + 1;
+		TERM(FORMLIST);
 	    }
+	    line++;
 	}
 	else {
 	    *s = '\0';
@@ -556,6 +568,8 @@ yylex()
 	SNARFWORD;
 	if (strEQ(d,"bind"))
 	    FOP2(O_BIND);
+	if (strEQ(d,"binmode"))
+	    FOP(O_BINMODE);
 	break;
     case 'c': case 'C':
 	SNARFWORD;
@@ -2074,6 +2088,7 @@ load_format()
 {
     FCMD froot;
     FCMD *flinebeg;
+    char *eol;
     register FCMD *fprev = &froot;
     register FCMD *fcmd;
     register char *s;
@@ -2083,7 +2098,8 @@ load_format()
     bool repeater;
 
     Zero(&froot, 1, FCMD);
-    while ((s = str_gets(linestr,rsfp, 0)) != Nullch) {
+    s = bufptr;
+    while (s < bufend || (s = str_gets(linestr,rsfp, 0)) != Nullch) {
 	line++;
 	if (perldb) {
 	    STR *tmpstr = Str_new(89,0);
@@ -2091,21 +2107,29 @@ load_format()
 	    str_sset(tmpstr,linestr);
 	    astore(lineary,(int)line,tmpstr);
 	}
-	bufend = linestr->str_ptr + linestr->str_cur;
-	if (strEQ(s,".\n")) {
+	if (in_eval && !rsfp) {
+	    eol = index(s,'\n');
+	    if (!eol++)
+		eol = bufend;
+	}
+	else
+	    eol = bufend = linestr->str_ptr + linestr->str_cur;
+	if (strnEQ(s,".\n",2)) {
 	    bufptr = s;
 	    return froot.f_next;
 	}
-	if (*s == '#')
+	if (*s == '#') {
+	    s = eol;
 	    continue;
+	}
 	flinebeg = Nullfcmd;
 	noblank = FALSE;
 	repeater = FALSE;
-	while (s < bufend) {
+	while (s < eol) {
 	    Newz(804,fcmd,1,FCMD);
 	    fprev->f_next = fcmd;
 	    fprev = fcmd;
-	    for (t=s; t < bufend && *t != '@' && *t != '^'; t++) {
+	    for (t=s; t < eol && *t != '@' && *t != '^'; t++) {
 		if (*t == '~') {
 		    noblank = TRUE;
 		    *t = ' ';
@@ -2118,7 +2142,7 @@ load_format()
 	    fcmd->f_pre = nsavestr(s, t-s);
 	    fcmd->f_presize = t-s;
 	    s = t;
-	    if (s >= bufend) {
+	    if (s >= eol) {
 		if (noblank)
 		    fcmd->f_flags |= FC_NOBLANK;
 		if (repeater)
@@ -2162,7 +2186,7 @@ load_format()
 	}
 	if (flinebeg) {
 	  again:
-	    if ((s = str_gets(linestr, rsfp, 0)) == Nullch)
+	    if (s >= bufend && (s = str_gets(linestr, rsfp, 0)) == Nullch)
 		goto badform;
 	    line++;
 	    if (perldb) {
@@ -2171,55 +2195,67 @@ load_format()
 		str_sset(tmpstr,linestr);
 		astore(lineary,(int)line,tmpstr);
 	    }
-	    if (strEQ(s,".\n")) {
+	    if (in_eval && !rsfp) {
+		eol = index(s,'\n');
+		if (!eol++)
+		    eol = bufend;
+	    }
+	    else
+		eol = bufend = linestr->str_ptr + linestr->str_cur;
+	    if (strnEQ(s,".\n",2)) {
 		bufptr = s;
 		yyerror("Missing values line");
 		return froot.f_next;
 	    }
-	    if (*s == '#')
+	    if (*s == '#') {
+		s = eol;
 		goto again;
-	    bufend = linestr->str_ptr + linestr->str_cur;
-	    str = flinebeg->f_unparsed = Str_new(91,bufend - bufptr);
+	    }
+	    str = flinebeg->f_unparsed = Str_new(91,eol - s);
 	    str->str_u.str_hash = curstash;
 	    str_nset(str,"(",1);
 	    flinebeg->f_line = line;
-	    if (!flinebeg->f_next->f_type || index(linestr->str_ptr, ',')) {
-		str_scat(str,linestr);
+	    eol[-1] = '\0';
+	    if (!flinebeg->f_next->f_type || index(s, ',')) {
+		eol[-1] = '\n';
+		str_ncat(str, s, eol - s - 1);
 		str_ncat(str,",$$);",5);
+		s = eol;
 	    }
 	    else {
-		while (s < bufend && isspace(*s))
+		eol[-1] = '\n';
+		while (s < eol && isspace(*s))
 		    s++;
 		t = s;
-		while (s < bufend) {
+		while (s < eol) {
 		    switch (*s) {
 		    case ' ': case '\t': case '\n': case ';':
 			str_ncat(str, t, s - t);
 			str_ncat(str, "," ,1);
-			while (s < bufend && (isspace(*s) || *s == ';'))
+			while (s < eol && (isspace(*s) || *s == ';'))
 			    s++;
 			t = s;
 			break;
 		    case '$':
 			str_ncat(str, t, s - t);
 			t = s;
-			s = scanreg(s,bufend,tokenbuf);
+			s = scanreg(s,eol,tokenbuf);
 			str_ncat(str, t, s - t);
 			t = s;
-			if (s < bufend && *s && index("$'\"",*s))
+			if (s < eol && *s && index("$'\"",*s))
 			    str_ncat(str, ",", 1);
 			break;
 		    case '"': case '\'':
 			str_ncat(str, t, s - t);
 			t = s;
 			s++;
-			while (s < bufend && (*s != *t || s[-1] == '\\'))
+			while (s < eol && (*s != *t || s[-1] == '\\'))
 			    s++;
-			if (s < bufend)
+			if (s < eol)
 			    s++;
 			str_ncat(str, t, s - t);
 			t = s;
-			if (s < bufend && *s && index("$'\"",*s))
+			if (s < eol && *s && index("$'\"",*s))
 			    str_ncat(str, ",", 1);
 			break;
 		    default:

@@ -1,7 +1,10 @@
 .rn '' }`
-''' $Header: perl.man.1,v 3.0.1.4 90/03/12 16:44:33 lwall Locked $
+''' $Header: perl_man.1,v 3.0.1.5 90/03/27 16:14:37 lwall Locked $
 ''' 
 ''' $Log:	perl.man.1,v $
+''' Revision 3.0.1.5  90/03/27  16:14:37  lwall
+''' patch16: .. now works using magical string increment
+''' 
 ''' Revision 3.0.1.4  90/03/12  16:44:33  lwall
 ''' patch13: (LIST,) now legal
 ''' patch13: improved LIST documentation
@@ -1450,3 +1453,22 @@ as a string, preserving each character within its range, with carry:
 
 .fi
 The autodecrement is not magical.
+.PP
+The range operator (in an array context) makes use of the magical
+autoincrement algorithm if the minimum and maximum are strings.
+You can say
+
+	@alphabet = (\'A\' .. \'Z\');
+
+to get all the letters of the alphabet, or
+
+	$hexdigit = (0 .. 9, \'a\' .. \'f\')[$num & 15];
+
+to get a hexadecimal digit, or
+
+	@z2 = (\'01\' .. \'31\');  print @z2[$mday];
+
+to get dates with leading zeros.
+(If the final value specified is not in the sequence that the magical increment
+would produce, the sequence goes until the next value would be longer than
+the final value specified.)

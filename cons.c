@@ -1,4 +1,4 @@
-/* $Header: cons.c,v 3.0.1.5 90/03/12 16:23:10 lwall Locked $
+/* $Header: cons.c,v 3.0.1.6 90/03/27 15:35:21 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cons.c,v $
+ * Revision 3.0.1.6  90/03/27  15:35:21  lwall
+ * patch16: formats didn't work inside eval
+ * patch16: $foo++ now optimized to ++$foo where value not required
+ * 
  * Revision 3.0.1.5  90/03/12  16:23:10  lwall
  * patch13: perl -d coredumped on scripts with subs that did explicit return
  * 
@@ -93,6 +97,28 @@ CMD *cmd;
     }
     subline = 0;
     return sub;
+}
+
+make_form(stab,fcmd)
+STAB *stab;
+FCMD *fcmd;
+{
+    if (stab_form(stab)) {
+	FCMD *tmpfcmd;
+	FCMD *nextfcmd;
+
+	for (tmpfcmd = stab_form(stab); tmpfcmd; tmpfcmd = nextfcmd) {
+	    nextfcmd = tmpfcmd->f_next;
+	    if (tmpfcmd->f_expr)
+		arg_free(tmpfcmd->f_expr);
+	    if (tmpfcmd->f_unparsed)
+		str_free(tmpfcmd->f_unparsed);
+	    if (tmpfcmd->f_pre)
+		Safefree(tmpfcmd->f_pre);
+	    Safefree(tmpfcmd);
+	}
+    }
+    stab_form(stab) = fcmd;
 }
 
 CMD *
@@ -594,6 +620,10 @@ int acmd;
 
     if (arg[flp].arg_flags & (AF_PRE|AF_POST)) {
 	cmd->c_flags |= opt;
+	if (acmd && !cmd->ucmd.acmd.ac_expr && !(cmd->c_flags & CF_TERM)) {
+	    arg[flp].arg_flags &= ~AF_POST;	/* prefer ++$foo to $foo++ */
+	    arg[flp].arg_flags |= AF_PRE;	/*  if value not wanted */
+	}
 	return;				/* side effect, can't optimize */
     }
 

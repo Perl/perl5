@@ -1,4 +1,4 @@
-char rcsid[] = "$Header: perly.c,v 3.0.1.4 90/02/28 18:06:41 lwall Locked $\nPatch level: ###\n";
+char rcsid[] = "$Header: perly.c,v 3.0.1.5 90/03/27 16:20:57 lwall Locked $\nPatch level: ###\n";
 /*
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@ char rcsid[] = "$Header: perly.c,v 3.0.1.4 90/02/28 18:06:41 lwall Locked $\nPat
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perly.c,v $
+ * Revision 3.0.1.5  90/03/27  16:20:57  lwall
+ * patch16: MSDOS support
+ * patch16: do FILE inside eval blows up
+ * 
  * Revision 3.0.1.4  90/02/28  18:06:41  lwall
  * patch9: perl can now start up other interpreters scripts
  * patch9: nested evals clobbered their longjmp environment
@@ -71,6 +75,15 @@ setuid perl scripts securely.\n");
     euid = (int)geteuid();
     gid = (int)getgid();
     egid = (int)getegid();
+#ifdef MSDOS
+    /*
+     * There is no way we can refer to them from Perl so close them to save
+     * space.  The other alternative would be to provide STDAUX and STDPRN
+     * filehandles.
+     */
+    (void)fclose(stdaux);
+    (void)fclose(stdprn);
+#endif
     if (do_undump) {
 	do_undump = 0;
 	loop_ptr = -1;		/* start label stack again */
@@ -195,7 +208,12 @@ setuid perl scripts securely.\n");
 	    goto reswitch;
 	case 'v':
 	    fputs(rcsid,stdout);
-	    fputs("\nCopyright (c) 1989, Larry Wall\n\n\
+	    fputs("\nCopyright (c) 1989, 1990, Larry Wall\n",stdout);
+#ifdef MSDOS
+	    fputs("MS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n",
+	    stdout);
+#endif
+	    fputs("\n\
 Perl may be copied only under the terms of the GNU General Public License,\n\
 a copy of which can be found with the Perl 3.0 distribution kit.\n",stdout);
 	    exit(0);
@@ -748,7 +766,7 @@ int *arglast;
 	str_cat(linestr,";");		/* be kind to them */
     }
     else {
-	if (last_root) {
+	if (last_root && !in_eval) {
 	    Safefree(last_eval);
 	    cmd_free(last_root);
 	    last_root = Nullcmd;

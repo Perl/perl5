@@ -1,4 +1,4 @@
-/* $Header: perl.h,v 3.0.1.6 90/03/12 16:40:43 lwall Locked $
+/* $Header: perl.h,v 3.0.1.7 90/03/27 16:12:52 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.h,v $
+ * Revision 3.0.1.7  90/03/27  16:12:52  lwall
+ * patch16: MSDOS support
+ * patch16: support for machines that can't cast negative floats to unsigned ints
+ * 
  * Revision 3.0.1.6  90/03/12  16:40:43  lwall
  * patch13: did some ndir straightening up for Xenix
  * 
@@ -48,6 +52,51 @@
 
 #define VOIDUSED 1
 #include "config.h"
+
+#ifdef MSDOS
+/*
+ * BUGGY_MSC:
+ *	This symbol is defined if you are the unfortunate owner of a buggy
+ *	Microsoft C compiler and want to use intrinsic functions.  Versions
+ *	up to 5.1 are known conform to this definition.  This is not needed
+ *	under Unix.
+ */
+#define BUGGY_MSC			/**/
+/*
+ * BINARY:
+ *	This symbol is defined if you run under an operating system that
+ *	distinguishes between binary and text files.  If so the function
+ *	setmode will be used to set the file into binary mode.  Unix
+ *	doesn't distinguish.
+ */
+#define BINARY				/**/
+
+#else /* !MSDOS */
+
+/*
+ * The following symbols are defined if your operating system supports
+ * functions by that name.  All Unixes I know of support them, thus they
+ * are not checked by the configuration script, but are directly defined
+ * here.
+ */
+#define CHOWN
+#define CHROOT
+#define FORK
+#define GETLOGIN
+#define GETPPID
+#define KILL
+#define LINK
+#define PIPE
+#define WAIT
+#define UMASK
+/*
+ * The following symbols are defined if your operating system supports
+ * password and group functions in general.  All Unix systems do.
+ */
+#define GROUP
+#define PASSWD
+
+#endif /* !MSDOS */
 
 #if defined(HASVOLATILE) || defined(__STDC__)
 #define VOLATILE volatile
@@ -244,7 +293,7 @@ typedef struct stab STAB;
 #include "array.h"
 #include "hash.h"
 
-#if defined(iAPX286) || defined(M_I286) || defined(I80286)
+#if defined(iAPX286) || defined(M_I286) || defined(I80286) || defined(M_I86)
 #   define I286
 #endif
 
@@ -349,6 +398,17 @@ EXT STR *Str;
 #undef NTOHS
 #undef NTOHL
 #endif
+#endif
+
+#ifdef CASTNEGFLOAT
+#define U_S(what) ((unsigned short)(what))
+#define U_I(what) ((unsigned int)(what))
+#define U_L(what) ((unsigned long)(what))
+#else
+unsigned long castulong();
+#define U_S(what) ((unsigned int)castulong(what))
+#define U_I(what) ((unsigned int)castulong(what))
+#define U_L(what) (castulong(what))
 #endif
 
 CMD *add_label();

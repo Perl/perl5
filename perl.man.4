@@ -1,7 +1,10 @@
 ''' Beginning of part 4
-''' $Header: perl.man.4,v 3.0.1.7 90/03/14 12:29:50 lwall Locked $
+''' $Header: perl_man.4,v 3.0.1.8 90/03/27 16:19:31 lwall Locked $
 '''
 ''' $Log:	perl.man.4,v $
+''' Revision 3.0.1.8  90/03/27  16:19:31  lwall
+''' patch16: MSDOS support
+''' 
 ''' Revision 3.0.1.7  90/03/14  12:29:50  lwall
 ''' patch15: man page falsely states that you can't subscript array values
 ''' 
@@ -504,7 +507,7 @@ Here is a sample client (untested):
 
 	($name, $aliases, $proto) = getprotobyname('tcp');
 	($name, $aliases, $port) = getservbyname($port, 'tcp')
-		unless $port =~ /^\ed+$/;;
+		unless $port =~ /^\ed+$/;
 .ie t \{\
 	($name, $aliases, $type, $len, $thisaddr) = gethostbyname($hostname);
 'br\}
@@ -549,7 +552,7 @@ And here's a server:
 
 	($name, $aliases, $proto) = getprotobyname('tcp');
 	($name, $aliases, $port) = getservbyname($port, 'tcp')
-		unless $port =~ /^\ed+$/;;
+		unless $port =~ /^\ed+$/;
 
 	$this = pack($sockaddr, &AF_INET, $port, "\e0\e0\e0\e0");
 
@@ -1318,6 +1321,8 @@ before doing anything else, just to keep people honest:
 .fi
 .SH AUTHOR
 Larry Wall <lwall@jpl-devvax.Jpl.Nasa.Gov>
+.br
+MS-DOS port by Diomidis Spinellis <dds@cc.ic.ac.uk>
 .SH FILES
 /tmp/perl\-eXXXXXX	temporary file for
 .B \-e
