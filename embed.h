@@ -1034,6 +1034,7 @@
 #define sv_setpvf		Perl_sv_setpvf
 #define sv_vsetpvf		Perl_sv_vsetpvf
 #define sv_setiv		Perl_sv_setiv
+#define sv_setpviv		Perl_sv_setpviv
 #define sv_setuv		Perl_sv_setuv
 #define sv_setnv		Perl_sv_setnv
 #define sv_setref_iv		Perl_sv_setref_iv
@@ -1156,6 +1157,7 @@
 #define sv_setpvf_mg		Perl_sv_setpvf_mg
 #define sv_vsetpvf_mg		Perl_sv_vsetpvf_mg
 #define sv_setiv_mg		Perl_sv_setiv_mg
+#define sv_setpviv_mg		Perl_sv_setpviv_mg
 #define sv_setuv_mg		Perl_sv_setuv_mg
 #define sv_setnv_mg		Perl_sv_setnv_mg
 #define sv_setpv_mg		Perl_sv_setpv_mg
@@ -1230,7 +1232,9 @@
 #define custom_op_name		Perl_custom_op_name
 #define custom_op_desc		Perl_custom_op_desc
 #if defined(PERL_COPY_ON_WRITE)
+#ifdef PERL_CORE
 #define sv_release_IVX		Perl_sv_release_IVX
+#endif
 #endif
 #define sv_nosharing		Perl_sv_nosharing
 #define sv_nolocking		Perl_sv_nolocking
@@ -2029,7 +2033,9 @@
 #define my_atof2		Perl_my_atof2
 #define my_socketpair		Perl_my_socketpair
 #ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_CORE
 #define sv_setsv_cow		Perl_sv_setsv_cow
+#endif
 #endif
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
 #define PerlIO_close		Perl_PerlIO_close
@@ -3462,6 +3468,8 @@
 #define sv_eq(a,b)		Perl_sv_eq(aTHX_ a,b)
 #define sv_free(a)		Perl_sv_free(aTHX_ a)
 #ifdef PERL_CORE
+#endif
+#ifdef PERL_CORE
 #define sv_free_arenas()	Perl_sv_free_arenas(aTHX)
 #endif
 #define sv_gets(a,b,c)		Perl_sv_gets(aTHX_ a,b,c)
@@ -3490,6 +3498,7 @@
 #define sv_reset(a,b)		Perl_sv_reset(aTHX_ a,b)
 #define sv_vsetpvf(a,b,c)	Perl_sv_vsetpvf(aTHX_ a,b,c)
 #define sv_setiv(a,b)		Perl_sv_setiv(aTHX_ a,b)
+#define sv_setpviv(a,b)		Perl_sv_setpviv(aTHX_ a,b)
 #define sv_setuv(a,b)		Perl_sv_setuv(aTHX_ a,b)
 #define sv_setnv(a,b)		Perl_sv_setnv(aTHX_ a,b)
 #define sv_setref_iv(a,b,c)	Perl_sv_setref_iv(aTHX_ a,b,c)
@@ -3608,6 +3617,7 @@
 #define sv_catsv_mg(a,b)	Perl_sv_catsv_mg(aTHX_ a,b)
 #define sv_vsetpvf_mg(a,b,c)	Perl_sv_vsetpvf_mg(aTHX_ a,b,c)
 #define sv_setiv_mg(a,b)	Perl_sv_setiv_mg(aTHX_ a,b)
+#define sv_setpviv_mg(a,b)	Perl_sv_setpviv_mg(aTHX_ a,b)
 #define sv_setuv_mg(a,b)	Perl_sv_setuv_mg(aTHX_ a,b)
 #define sv_setnv_mg(a,b)	Perl_sv_setnv_mg(aTHX_ a,b)
 #define sv_setpv_mg(a,b)	Perl_sv_setpv_mg(aTHX_ a,b)
@@ -3680,7 +3690,9 @@
 #define custom_op_name(a)	Perl_custom_op_name(aTHX_ a)
 #define custom_op_desc(a)	Perl_custom_op_desc(aTHX_ a)
 #if defined(PERL_COPY_ON_WRITE)
+#ifdef PERL_CORE
 #define sv_release_IVX(a)	Perl_sv_release_IVX(aTHX_ a)
+#endif
 #endif
 #define sv_nosharing(a)		Perl_sv_nosharing(aTHX_ a)
 #define sv_nolocking(a)		Perl_sv_nolocking(aTHX_ a)
@@ -4478,7 +4490,9 @@
 #define my_atof2(a,b)		Perl_my_atof2(aTHX_ a,b)
 #define my_socketpair		Perl_my_socketpair
 #ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_CORE
 #define sv_setsv_cow(a,b)	Perl_sv_setsv_cow(aTHX_ a,b)
+#endif
 #endif
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
 #define PerlIO_close(a)		Perl_PerlIO_close(aTHX_ a)

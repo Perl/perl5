@@ -17,11 +17,11 @@
 :	r		function never returns
 :       o		has no compatibility macro (#define foo Perl_foo)
 :       x		not exported
-:       M		may change: no Perl_ proto, but exported
+:       X		explicitly exported
+:       M		may change
 :       E		visible to Perl core extensions
 :       b		binary backward compatibility; function is a macro
 :			but has also Perl_ implementation (which is exported)
-:       X		no Perl_ proto
 :
 : Individual flags may be separated by whitespace.
 :
@@ -731,7 +731,7 @@ Ap	|void	|sv_dump	|SV* sv
 Apd	|bool	|sv_derived_from|SV* sv|const char* name
 Apd	|I32	|sv_eq		|SV* sv1|SV* sv2
 Apd	|void	|sv_free	|SV* sv
-ApoMX	|void	|sv_free2	|SV* sv
+poMX	|void	|sv_free2	|SV* sv
 pd	|void	|sv_free_arenas
 Apd	|char*	|sv_gets	|SV* sv|PerlIO* fp|I32 append
 Apd	|char*	|sv_grow	|SV* sv|STRLEN newlen
