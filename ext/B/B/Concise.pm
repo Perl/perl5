@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.60";
+our $VERSION   = "0.61";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(set_style set_style_standard add_callback
 		    concise_subref concise_cv concise_main
@@ -52,14 +52,33 @@ my %style =
 	     $ENV{B_CONCISE_TREE_FORMAT}],
   );
 
-my($format, $gotofmt, $treefmt);
+# Renderings, ie how Concise prints, is controlled by these vars
+# primary:
+our $stylename;		# selects current style from %style
+my $order = "basic";	# how optree is walked & printed: basic, exec, tree
+
+# rendering mechanics:
+# these 'formats' are the line-rendering templates
+# they're updated from %style when $stylename changes
+my ($format, $gotofmt, $treefmt);
+
+# lesser players:
+my $base = 36;		# how <sequence#> is displayed
+my $big_endian = 1;	# more <sequence#> display
+my $tree_style = 0;	# tree-order details
+my $banner = 1;		# print banner before optree is traversed
+
+# another factor:
+our @callbacks;		# allow external management
+
+set_style_standard("concise");
+
 my $curcv;
 my $cop_seq_base;
-my @callbacks;
-my $stylename;
 
 sub set_style {
     ($format, $gotofmt, $treefmt) = @_;
+    #warn "set_style: deprecated, use set_style_standard instead\n"; # someday
     die "expecting 3 style-format args\n" unless @_ == 3;
 }
 
@@ -69,10 +88,11 @@ sub add_style {
 	if exists $style{$newstyle};
     die "expecting 3 style-format args\n" unless @args == 3;
     $style{$newstyle} = [@args];
+    $stylename = $newstyle; # update rendering state
 }
 
 sub set_style_standard {
-    ($stylename) = @_;
+    ($stylename) = @_; # update rendering state
     die "err: style '$stylename' unknown\n" unless exists $style{$stylename};
     set_style(@{$style{$stylename}});
 }
@@ -164,14 +184,6 @@ my @tree_decorations =
    ["  ", map("$start_sym$_$end_sym", "qq", "wq", "tq", "x ", "mq", "q"), 1],
    [" ", map("$start_sym$_$end_sym", "q", "w", "t", "x", "m"), "", 0],
   );
-my $tree_style = 0;
-
-my $base = 36;
-my $big_endian = 1;
-
-my $order = "basic";
-
-set_style_standard("concise");
 
 sub compile {
     my @options = grep(/^-/, @_);
@@ -200,9 +212,12 @@ sub compile {
 	    $big_endian = 1;
 	} elsif ($o eq "-littleendian") {
 	    $big_endian = 0;
-	} elsif (exists $style{substr($o, 1)}) {
+	} elsif ($o eq "-banner") {
+	    $banner = 0;
+	}
+	elsif (exists $style{substr($o, 1)}) {
 	    $stylename = substr($o, 1);
-	    set_style(@{$style{$stylename}});
+	    set_style_standard($stylename);
 	} else {
 	    warn "Option $o unrecognized";
 	}
@@ -230,7 +245,8 @@ sub compile {
 		    # convert function names to subrefs
 		    my $objref;
 		    if (ref $objname) {
-			print $walkHandle "B::Concise::compile($objname)\n";
+			print $walkHandle "B::Concise::compile($objname)\n"
+			    if $banner;
 			$objref = $objname;
 		    } else {
 			$objname = "main::" . $objname unless $objname =~ /::/;
@@ -252,7 +268,7 @@ sub compile {
 }
 
 my %labels;
-my $lastnext;
+my $lastnext;	# remembers op-chain, used to insert gotos
 
 my %opclass = ('OP' => "0", 'UNOP' => "1", 'BINOP' => "2", 'LOGOP' => "|",
 	       'LISTOP' => "@", 'PMOP' => "/", 'SVOP' => "\$", 'GVOP' => "*",
@@ -410,9 +426,9 @@ sub sequence {
     }
 }
 
-sub fmt_line {
+sub fmt_line {    # generate text-line for op.
     my($hr, $text, $level) = @_;
-    return '' if $hr->{SKIP};	# another way to suppress lines of output
+    return '' if $hr->{SKIP};	# suppress line if a callback said so
 
     $text =~ s/\(\?\(([^\#]*?)\#(\w+)([^\#]*?)\)\?\)/
 	$hr->{$2} ? $1.$hr->{$2}.$3 : ""/eg;
@@ -420,8 +436,9 @@ sub fmt_line {
     $text =~ s/\(x\((.*?);(.*?)\)x\)/$order eq "exec" ? $1 : $2/egs;
     $text =~ s/\(\*\(([^;]*?)\)\*\)/$1 x $level/egs;
     $text =~ s/\(\*\((.*?);(.*?)\)\*\)/$1 x ($level - 1) . $2 x ($level>0)/egs;
-    $text =~ s/#([a-zA-Z]+)(\d+)/sprintf("%-$2s", $hr->{$1})/eg;
-    $text =~ s/#([a-zA-Z]+)/$hr->{$1}/eg;
+    $text =~ s/\#([a-zA-Z]+)(\d+)/sprintf("%-$2s", $hr->{$1})/eg;
+
+    $text =~ s/\#([a-zA-Z]+)/$hr->{$1}/eg;  # populate data into template
     $text =~ s/[ \t]*~+[ \t]*/ /g;
     chomp $text;
     return "$text\n" if $text ne "";
@@ -676,6 +693,7 @@ sub concise_op {
 sub B::OP::concise {
     my($op, $level) = @_;
     if ($order eq "exec" and $lastnext and $$lastnext != $$op) {
+	# insert a 'goto' line
 	my $h = {"seq" => seq($lastnext), "class" => class($lastnext),
 		 "addr" => sprintf("%#x", $$lastnext)};
 	print $walkHandle fmt_line($h, $gotofmt, $level+1);
@@ -700,6 +718,7 @@ sub b_terse {
     $curcv = main_cv unless $curcv;
 
     if ($order eq "exec" and $lastnext and $$lastnext != $$op) {
+	# insert a 'goto'
 	my $h = {"seq" => seq($lastnext), "class" => class($lastnext),
 		 "addr" => sprintf("%#x", $$lastnext)};
 	print fmt_line($h, $style{"terse"}[1], $level+1);
@@ -805,8 +824,8 @@ sophisticated and flexible.
 
 =head1 EXAMPLE
 
-Here's is a short example of output, using the default formatting
-conventions :
+Here's is a short example of output (aka 'rendering'), using the
+default formatting conventions :
 
     % perl -MO=Concise -e '$a = $b + 42'
     8  <@> leave[1 ref] vKP/REFC ->(end)
@@ -820,7 +839,7 @@ conventions :
     -        <1> ex-rv2sv sKRM*/1 ->7
     6           <$> gvsv(*a) s ->7
 
-Each line corresponds to an operator. Null ops appear as C<ex-opname>,
+Each line corresponds to an opcode. Null ops appear as C<ex-opname>,
 where I<opname> is the op that has been optimized away by perl.
 
 The number on the first row indicates the op's sequence number. It's
@@ -850,6 +869,16 @@ including use'd or require'd files) is printed. Passing C<BEGIN>,
 C<CHECK>, C<INIT>, or C<END> will cause all of the corresponding
 special blocks to be printed.
 
+Options affect how things are rendered (ie printed).  They're presented
+here by their visual effect, 1st being strongest.  They're grouped
+according to how they interrelate; within each group the options are
+mutually exclusive (unless otherwise stated).
+
+=head2 Options for Opcode Ordering
+
+These options control the 'vertical display' of opcodes.  The display
+'order' is also called 'mode' elsewhere in this document.
+
 =over 4
 
 =item B<-basic>
@@ -876,6 +905,50 @@ at the left and 'left-to-right' order of children transformed into
 it isn't suitable for large programs (unless you have a very wide
 terminal).
 
+=back
+
+=head2 Options for Line-Style
+
+These options select the line-style (or just style) used to render
+each opcode, and dictates what info is actually printed into each line.
+
+=over 4
+
+=item B<-concise>
+
+Use the author's favorite set of formatting conventions. This is the
+default, of course.
+
+=item B<-terse>
+
+Use formatting conventions that emulate the output of B<B::Terse>. The
+basic mode is almost indistinguishable from the real B<B::Terse>, and the
+exec mode looks very similar, but is in a more logical order and lacks
+curly brackets. B<B::Terse> doesn't have a tree mode, so the tree mode
+is only vaguely reminiscent of B<B::Terse>.
+
+=item B<-linenoise>
+
+Use formatting conventions in which the name of each OP, rather than being
+written out in full, is represented by a one- or two-character abbreviation.
+This is mainly a joke.
+
+=item B<-debug>
+
+Use formatting conventions reminiscent of B<B::Debug>; these aren't
+very concise at all.
+
+=item B<-env>
+
+Use formatting conventions read from the environment variables
+C<B_CONCISE_FORMAT>, C<B_CONCISE_GOTO_FORMAT>, and C<B_CONCISE_TREE_FORMAT>.
+
+=back
+
+=head2 Options for tree-specific formatting
+
+=over 4
+
 =item B<-compact>
 
 Use a tree format in which the minimum amount of space is used for the
@@ -900,10 +973,13 @@ look as clean as the VT100 characters, but they'll work with almost any
 terminal (or the horizontal scrolling mode of less(1)) and are suitable
 for text documentation or email. This is the default.
 
-=item B<-main>
+=back
 
-Include the main program in the output, even if subroutines were also
-specified.
+These are pairwise exclusive, i.e. compact or loose, vt or ascii.
+
+=head2 Options controlling sequence numbering
+
+=over 4
 
 =item B<-base>I<n>
 
@@ -919,47 +995,51 @@ usual convention for Arabic numerals, and the default.
 
 =item B<-littleendian>
 
-Print seqence numbers with the least significant digit first.
-
-=item B<-concise>
-
-Use the author's favorite set of formatting conventions. This is the
-default, of course.
-
-=item B<-terse>
-
-Use formatting conventions that emulate the output of B<B::Terse>. The
-basic mode is almost indistinguishable from the real B<B::Terse>, and the
-exec mode looks very similar, but is in a more logical order and lacks
-curly brackets. B<B::Terse> doesn't have a tree mode, so the tree mode
-is only vaguely reminiscient of B<B::Terse>.
-
-=item B<-linenoise>
-
-Use formatting conventions in which the name of each OP, rather than being
-written out in full, is represented by a one- or two-character abbreviation.
-This is mainly a joke.
-
-=item B<-debug>
-
-Use formatting conventions reminiscient of B<B::Debug>; these aren't
-very concise at all.
-
-=item B<-env>
-
-Use formatting conventions read from the environment variables
-C<B_CONCISE_FORMAT>, C<B_CONCISE_GOTO_FORMAT>, and C<B_CONCISE_TREE_FORMAT>.
+Print seqence numbers with the least significant digit first.  This is
+obviously mutually exclusive with bigendian.
 
 =back
 
+=head2 Other options
+
+=over 4
+
+=item B<-main>
+
+Include the main program in the output, even if subroutines were also
+specified.  This is the only option that is not sticky (see below)
+
+=item B<-banner>
+
+B::Concise::compile normally prints a banner line identifying the
+function name, or in case of a subref, a generic message including
+(unfortunately) the stringified coderef.  This option suppresses the
+printing of the banner.
+
+=back
+
+=head2 Option Stickiness
+
+If you invoke Concise more than once in a program, you should know that
+the options are 'sticky'.  This means that the options you provide in
+the first call will be remembered for the 2nd call, unless you
+re-specify or change them.
+
 =head1 FORMATTING SPECIFICATIONS
 
-For each general style ('concise', 'terse', 'linenoise', etc.) there are
-three specifications: one of how OPs should appear in the basic or exec
-modes, one of how 'goto' lines should appear (these occur in the exec
-mode only), and one of how nodes should appear in tree mode. Each has the
-same format, described below. Any text that doesn't match a special
-pattern is copied verbatim.
+For each line-style ('concise', 'terse', 'linenoise', etc.) there are
+3 format-specs which control how OPs are rendered.
+
+The first is the 'default' format, which is used in both basic and exec
+modes to print all opcodes.  The 2nd, goto-format, is used in exec
+mode when branches are encountered.  They're not real opcodes, and are
+inserted to look like a closing curly brace.  The tree-format is tree
+specific.
+
+When a line is rendered, the correct format string is scanned for the
+following items, and data is substituted in, or other manipulations,
+like basic indenting.  Any text that doesn't match a special pattern
+(the items below) is copied verbatim.  (Yes, it's a set of s///g steps.)
 
 =over 4
 
@@ -1166,16 +1246,17 @@ The numeric value of the OP's type, in decimal.
 
 =head1 Using B::Concise outside of the O framework
 
-You can use B<B::Concise>, and call compile() directly, thereby
-avoiding the compile-only operation of O.  For example, you could use
-the debugger to step through B::Concise::compile() itself.
+You can use B<B::Concise>, and call compile() directly, and
+repeatedly.  By doing so, you can avoid the compile-time only
+operation of 'perl -MO=Concise ..'.  For example, you can use the
+debugger to step through B::Concise::compile() itself.
 
 When doing so, you can alter Concise output by providing new output
 styles, and optionally by adding callback routines which populate new
 variables that may be rendered as part of those styles.  For all
 following sections, please review L</FORMATTING SPECIFICATIONS>.
 
-=head2 example: Altering Concise Output
+=head2 Example: Altering Concise Renderings
 
     use B::Concise qw(set_style add_callback);
     set_style($your_format, $your_gotofmt, $your_treefmt);
@@ -1189,10 +1270,18 @@ following sections, please review L</FORMATTING SPECIFICATIONS>.
 
 =head2 set_style()
 
-B<set_style> accepts 3 arguments, and updates the three components of an
-output style (basic-exec, goto, tree). It has one minor drawback though:
-it doesn't register the style under a new name, thus you may prefer to use
-add_style() and/or set_style_standard() instead.
+B<set_style> accepts 3 arguments, and updates the three format-specs
+comprising a line-style (basic-exec, goto, tree).  It has one minor
+drawback though; it doesn't register the style under a new name.  This
+can become an issue if you render more than once and switch styles.
+Thus you may prefer to use add_style() and/or set_style_standard()
+instead.
+
+=head2 set_style_standard($name)
+
+This restores one of the standard line-styles: C<terse>, C<concise>,
+C<linenoise>, C<debug>, C<env>, into effect.  It also accepts style
+names previously defined with add_style().
 
 =head2 add_style()
 
@@ -1200,12 +1289,6 @@ This subroutine accepts a new style name and three style arguments as
 above, and creates, registers, and selects the newly named style.  It is
 an error to re-add a style; call set_style_standard() to switch between
 several styles.
-
-=head2 set_style_standard($name)
-
-This restores one of the standard styles: C<terse>, C<concise>,
-C<linenoise>, C<debug>, C<env>, into effect.  It also accepts style
-names previously defined with add_style().
 
 =head2 add_callback()
 
@@ -1229,7 +1312,7 @@ existing values if you need to.  The level and format are passed in as
 references to scalars, but it is unlikely that they will need to be
 changed or even used.
 
-=head2 running B::Concise::compile()
+=head2 Running B::Concise::compile()
 
 B<compile> accepts options as described above in L</OPTIONS>, and
 arguments, which are either coderefs, or subroutine names.
@@ -1243,11 +1326,14 @@ B<walk_output> lets you change the print destination from STDOUT to
 another open filehandle, or into a string passed as a ref.
 
     walk_output(\my $buf);
-    B::Concise::compile('-concise','funcName', \&aSubRef)->();
-    print "Concise Results: $buf\n";
+    my $walker = B::Concise::compile('-concise','funcName', \&aSubRef);
+    print "Concise Banner for Functions: $buf\n";
+    $walker->();
+    print "Concise Rendering(s)?: $buf\n";
 
-For each subroutine visited, the opcode info is preceded by a single
-line containing either the subroutine name or the stringified coderef.
+For each subroutine visited by Concise, the $buf will contain a
+banner naming the function or coderef about to be traversed.
+Once $walker is invoked, it prints the actual renderings for each.
 
 To switch back to one of the standard styles like C<concise> or
 C<terse>, call C<set_style_standard>, or pass the style name into
@@ -1269,9 +1355,8 @@ All detected errors, (invalid arguments, internal errors, etc.) are
 resolved with a die($message). Use an eval if you wish to catch these
 errors and continue processing.
 
-In particular, B<compile> will die as follows if you've asked for a
-non-existent function-name, a non-existent coderef, or a non-CODE
-reference.
+In particular, B<compile> will die if you've asked for a non-existent
+function-name, a non-existent coderef, or a non-CODE reference.
 
 =head1 AUTHOR
 
