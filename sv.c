@@ -6639,8 +6639,10 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 		   pv1 = SvPV(svrecode, cur1);
 	      }
 	      /* Now both are in UTF-8. */
-	      if (cur1 != cur2)
+	      if (cur1 != cur2) {
+		   SvREFCNT_dec(svrecode);
 		   return FALSE;
+	      }
 	 }
 	 else {
 	      bool is_utf8 = TRUE;
