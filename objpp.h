@@ -3,6 +3,10 @@
 
 #undef  amagic_call
 #define amagic_call       CPerlObj::Perl_amagic_call
+#undef  amagic_cmp
+#define amagic_cmp        CPerlObj::Perl_amagic_cmp
+#undef  amagic_cmp_locale
+#define amagic_cmp_locale CPerlObj::Perl_amagic_cmp_locale
 #undef  Gv_AMupdate
 #define Gv_AMupdate       CPerlObj::Perl_Gv_AMupdate
 #undef  add_data

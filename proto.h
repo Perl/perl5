@@ -899,6 +899,9 @@ VIRTUAL void	sv_usepvn_mg _((SV *sv, char *ptr, STRLEN len));
 VIRTUAL MGVTBL*	get_vtbl _((int vtbl_id));
 
 VIRTUAL void	save_generic_svref _((SV** sptr));
+VIRTUAL I32     amagic_cmp _((register SV *str1, register SV *str2));
+VIRTUAL I32     amagic_cmp_locale _((register SV *str1, register SV *str2));
+
 /* New virtual functions must be added here to maintain binary
  * compatablity with PERL_OBJECT
  */

@@ -489,6 +489,7 @@ threads_mutex
 malloc_mutex
 svref_mutex
 sv_mutex
+cred_mutex
 nthreads_cond
 eval_cond
 cryptseen

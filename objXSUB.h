@@ -690,6 +690,10 @@
 
 #undef  amagic_call
 #define amagic_call         pPerl->Perl_amagic_call
+#undef  amagic_cmp
+#define amagic_cmp          pPerl->Perl_amagic_cmp
+#undef  amagic_cmp_locale
+#define amagic_cmp_locale   pPerl->Perl_amagic_cmp_locale
 #undef  Perl_GetVars
 #define Perl_GetVars        pPerl->Perl_GetVars
 #undef  Gv_AMupdate
