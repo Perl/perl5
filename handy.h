@@ -1,4 +1,4 @@
-/* $RCSfile: handy.h,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:09:56 $
+/* $RCSfile: handy.h,v $$Revision: 4.0.1.3 $$Date: 91/11/05 22:54:26 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,12 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	handy.h,v $
+ * Revision 4.0.1.3  91/11/05  22:54:26  lwall
+ * patch11: erratum
+ * 
+ * Revision 4.0.1.2  91/11/05  17:23:38  lwall
+ * patch11: prepared for ctype implementations that don't define isascii()
+ * 
  * Revision 4.0.1.1  91/06/07  11:09:56  lwall
  * patch4: new copyright notice
  * 
@@ -52,6 +58,22 @@
 #define strnNE(s1,s2,l) (strncmp(s1,s2,l))
 #define strnEQ(s1,s2,l) (!strncmp(s1,s2,l))
 
+#if defined(CTYPE256) || !defined(isascii)
+#define isALNUM(c) (isalpha(c) || isdigit(c) || c == '_')
+#define isALPHA(c) isalpha(c)
+#define isSPACE(c) isspace(c)
+#define isDIGIT(c) isdigit(c)
+#define isUPPER(c) isupper(c)
+#define isLOWER(c) islower(c)
+#else
+#define isALNUM(c) (isascii(c) && (isalpha(c) || isdigit(c) || c == '_'))
+#define isALPHA(c) (isascii(c) && isalpha(c))
+#define isSPACE(c) (isascii(c) && isspace(c))
+#define isDIGIT(c) (isascii(c) && isdigit(c))
+#define isUPPER(c) (isascii(c) && isupper(c))
+#define isLOWER(c) (isascii(c) && islower(c))
+#endif
+
 #define MEM_SIZE unsigned int
 
 /* Line numbers are unsigned, 16 bits. */
@@ -64,9 +86,11 @@ typedef unsigned short line_t;
 
 #ifndef lint
 #ifndef LEAKTEST
+#ifndef safemalloc
 char *safemalloc();
 char *saferealloc();
 void safefree();
+#endif
 #ifndef MSDOS
 #define New(x,v,n,t)  (v = (t*)safemalloc((MEM_SIZE)((n) * sizeof(t))))
 #define Newc(x,v,n,t,c)  (v = (c*)safemalloc((MEM_SIZE)((n) * sizeof(t))))

@@ -1,4 +1,4 @@
-/* $RCSfile: arg.h,v $$Revision: 4.0.1.1 $$Date: 91/06/07 10:18:30 $
+/* $RCSfile: arg.h,v $$Revision: 4.0.1.2 $$Date: 91/11/05 15:51:05 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	arg.h,v $
+ * Revision 4.0.1.2  91/11/05  15:51:05  lwall
+ * patch11: added eval {}
+ * patch11: added sort {} LIST
+ * 
  * Revision 4.0.1.1  91/06/07  10:18:30  lwall
  * patch4: length($`), length($&), length($') now optimized to avoid string copy
  * patch4: new copyright notice
@@ -283,7 +287,9 @@
 #define O_CLOSEDIR 264
 #define O_SYSCALL 265
 #define O_PIPE 266
-#define MAXO 267
+#define O_TRY 267
+#define O_EVALONCE 268
+#define MAXO 269
 
 #ifndef DOINIT
 extern char *opname[];
@@ -556,7 +562,9 @@ char *opname[] = {
     "CLOSEDIR",
     "SYSCALL",
     "PIPE",
-    "267"
+    "TRY",
+    "EVALONCE",
+    "269"
 };
 #endif
 
@@ -957,6 +965,8 @@ unsigned short opargs[MAXO+1] = {
 	A(1,0,0),	/* CLOSEDIR */
 	A(1,3,0),	/* SYSCALL */
 	A(1,1,0),	/* PIPE */
+	A(0,0,0),	/* TRY */
+	A(1,0,0),	/* EVALONCE */
 	0
 };
 #undef A

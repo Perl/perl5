@@ -1,4 +1,4 @@
-/* $RCSfile: util.h,v $$Revision: 4.0.1.1 $$Date: 91/06/07 12:20:43 $
+/* $RCSfile: util.h,v $$Revision: 4.0.1.2 $$Date: 91/11/05 19:21:20 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	util.h,v $
+ * Revision 4.0.1.2  91/11/05  19:21:20  lwall
+ * patch11: various portability fixes
+ * 
  * Revision 4.0.1.1  91/06/07  12:20:43  lwall
  * patch4: new copyright notice
  * 
@@ -15,6 +18,8 @@
  */
 
 /* is the string for makedir a directory name or a filename? */
+
+#define fatal Myfatal
 
 #define MD_DIR 0
 #define MD_FILE 1

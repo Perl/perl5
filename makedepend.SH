@@ -15,9 +15,12 @@ esac
 echo "Extracting makedepend (with variable substitutions)"
 $spitshell >makedepend <<!GROK!THIS!
 $startsh
-# $RCSfile: makedepend.SH,v $$Revision: 4.0.1.2 $$Date: 91/06/07 15:40:06 $
+# $RCSfile: makedepend.SH,v $$Revision: 4.0.1.3 $$Date: 91/11/05 17:56:33 $
 #
 # $Log:	makedepend.SH,v $
+# Revision 4.0.1.3  91/11/05  17:56:33  lwall
+# patch11: various portability fixes
+# 
 # Revision 4.0.1.2  91/06/07  15:40:06  lwall
 # patch4: fixed cppstdin to run in the right directory
 # 
@@ -92,7 +95,8 @@ for file in `$cat .clist`; do
 	-e '}'
     $cppstdin -I/usr/local/include -I. $cppflags $cppminus <$file.c | sed -e 's#\.[0-9][0-9]*\.c#'"$file.c#" | \
     $sed \
-	-e '/^# *[0-9]/!d' \
+	-e 's/^[	 ]*#[	 ]*line/#/' \
+	-e '/^# *[0-9][0-9]* *"/!d' \
 	-e 's/^.*"\(.*\)".*$/'$filebase'.o: \1/' \
 	-e 's|: \./|: |' \
 	-e 's|\.c\.c|.c|' | \

@@ -1,4 +1,4 @@
-/* $RCSfile: walk.c,v $$Revision: 4.0.1.1 $$Date: 91/06/07 12:22:04 $
+/* $RCSfile: walk.c,v $$Revision: 4.0.1.2 $$Date: 91/11/05 19:25:09 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	walk.c,v $
+ * Revision 4.0.1.2  91/11/05  19:25:09  lwall
+ * patch11: in a2p, split on whitespace produced extra null field
+ * 
  * Revision 4.0.1.1  91/06/07  12:22:04  lwall
  * patch4: new copyright notice
  * patch4: a2p didn't correctly implement -n switch
@@ -30,6 +33,7 @@ bool saw_fh = FALSE;
 int maxtmp = 0;
 char *lparen;
 char *rparen;
+char *limit;
 STR *subs;
 STR *curargs = Nullstr;
 
@@ -670,6 +674,7 @@ sub Pick {\n\
 	break;
     case OSPLIT:
 	str = str_new(0);
+	limit = ", 9999)";
 	numeric = 1;
 	tmpstr = walk(1,level,ops[node+2].ival,&numarg,P_MIN);
 	if (useval)
@@ -700,12 +705,14 @@ sub Pick {\n\
 	}
 	else if (saw_FS)
 	    str_cat(str,"$FS");
-	else
+	else {
 	    str_cat(str,"' '");
+	    limit = ")";
+	}
 	str_cat(str,", ");
 	str_scat(str,fstr=walk(1,level,ops[node+1].ival,&numarg,P_COMMA+1));
 	str_free(fstr);
-	str_cat(str,", 9999)");
+	str_cat(str,limit);
 	if (useval) {
 	    str_cat(str,")");
 	}

@@ -1,4 +1,4 @@
-/* $RCSfile: array.c,v $$Revision: 4.0.1.1 $$Date: 91/06/07 10:19:08 $
+/* $RCSfile: array.c,v $$Revision: 4.0.1.2 $$Date: 91/11/05 16:00:14 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	array.c,v $
+ * Revision 4.0.1.2  91/11/05  16:00:14  lwall
+ * patch11: random cleanup
+ * patch11: passing non-existend array elements to subrouting caused core dump
+ * 
  * Revision 4.0.1.1  91/06/07  10:19:08  lwall
  * patch4: new copyright notice
  * 
@@ -87,17 +91,21 @@ STR *val;
 	    ar->ary_max = newmax;
 	}
     }
-    if ((ar->ary_flags & ARF_REAL) && ar->ary_fill < key) {
-	while (++ar->ary_fill < key) {
-	    if (ar->ary_array[ar->ary_fill] != Nullstr) {
-		str_free(ar->ary_array[ar->ary_fill]);
-		ar->ary_array[ar->ary_fill] = Nullstr;
+    if (ar->ary_flags & ARF_REAL) {
+	if (ar->ary_fill < key) {
+	    while (++ar->ary_fill < key) {
+		if (ar->ary_array[ar->ary_fill] != Nullstr) {
+		    str_free(ar->ary_array[ar->ary_fill]);
+		    ar->ary_array[ar->ary_fill] = Nullstr;
+		}
 	    }
 	}
+	retval = (ar->ary_array[key] != Nullstr);
+	if (retval)
+	    str_free(ar->ary_array[key]);
     }
-    retval = (ar->ary_array[key] != Nullstr);
-    if (retval && (ar->ary_flags & ARF_REAL))
-	str_free(ar->ary_array[key]);
+    else
+	retval = 0;
     ar->ary_array[key] = val;
     return retval;
 }
@@ -135,7 +143,9 @@ register STR **strp;
     ar->ary_max = size - 1;
     ar->ary_flags = 0;
     while (size--) {
-	(*strp++)->str_pok &= ~SP_TEMP;
+	if (*strp)
+	    (*strp)->str_pok &= ~SP_TEMP;
+	strp++;
     }
     return ar;
 }
@@ -148,6 +158,7 @@ register ARRAY *ar;
 
     if (!ar || !(ar->ary_flags & ARF_REAL) || ar->ary_max < 0)
 	return;
+    /*SUPPRESS 560*/
     if (key = ar->ary_array - ar->ary_alloc) {
 	ar->ary_max += key;
 	ar->ary_array -= key;
@@ -166,6 +177,7 @@ register ARRAY *ar;
 
     if (!ar)
 	return;
+    /*SUPPRESS 560*/
     if (key = ar->ary_array - ar->ary_alloc) {
 	ar->ary_max += key;
 	ar->ary_array -= key;
@@ -222,7 +234,7 @@ register int num;
 #ifdef BUGGY_MSC5
  # pragma loop_opt(off)	/* don't loop-optimize the following code */
 #endif /* BUGGY_MSC5 */
-	for (i = ar->ary_fill; i >= 0; i--) {
+	for (i = ar->ary_fill - num; i >= 0; i--) {
 	    *dstr-- = *sstr--;
 #ifdef BUGGY_MSC5
  # pragma loop_opt()	/* loop-optimization back to command-line setting */

@@ -1,4 +1,4 @@
-/* $RCSfile: form.c,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:07:59 $
+/* $RCSfile: form.c,v $$Revision: 4.0.1.2 $$Date: 91/11/05 17:18:43 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	form.c,v $
+ * Revision 4.0.1.2  91/11/05  17:18:43  lwall
+ * patch11: formats didn't fill their fields as well as they could
+ * patch11: ^ fields chopped hyphens on line break
+ * patch11: # fields could write outside allocated memory
+ * 
  * Revision 4.0.1.1  91/06/07  11:07:59  lwall
  * patch4: new copyright notice
  * patch4: default top-of-form format is now FILEHANDLE_TOP
@@ -97,6 +102,7 @@ int sp;
     for (; fcmd; fcmd = nextfcmd) {
 	nextfcmd = fcmd->f_next;
 	CHKLEN(fcmd->f_presize);
+	/*SUPPRESS 560*/
 	if (s = fcmd->f_pre) {
 	    while (*s) {
 		if (*s == '\n') {
@@ -141,7 +147,7 @@ int sp;
 		if (*s == '\n' && (fcmd->f_flags & FC_CHOP))
 		    *s = ' ';
 	    }
-	    if (size)
+	    if (size || !*s)
 		chophere = s;
 	    else if (chophere && chophere < s && *s && index(chopset,*s))
 		chophere = s;
@@ -165,7 +171,8 @@ int sp;
 		    *d++ = '.';
 		    size -= 3;
 		}
-		while (*chophere && index(chopset,*chophere))
+		while (*chophere && index(chopset,*chophere)
+		  && isSPACE(*chophere))
 		    chophere++;
 		str_chop(str,chophere);
 	    }
@@ -192,7 +199,7 @@ int sp;
 		if (*s == '\n' && (fcmd->f_flags & FC_CHOP))
 		    *s = ' ';
 	    }
-	    if (size)
+	    if (size || !*s)
 		chophere = s;
 	    else if (chophere && chophere < s && *s && index(chopset,*s))
 		chophere = s;
@@ -201,7 +208,8 @@ int sp;
 		    chophere = s;
 		size += (s - chophere);
 		s = chophere;
-		while (*chophere && index(chopset,*chophere))
+		while (*chophere && index(chopset,*chophere)
+		  && isSPACE(*chophere))
 		    chophere++;
 	    }
 	    tmpchar = *s;
@@ -235,7 +243,7 @@ int sp;
 		if (*s == '\n' && (fcmd->f_flags & FC_CHOP))
 		    *s = ' ';
 	    }
-	    if (size)
+	    if (size || !*s)
 		chophere = s;
 	    else if (chophere && chophere < s && *s && index(chopset,*s))
 		chophere = s;
@@ -244,7 +252,8 @@ int sp;
 		    chophere = s;
 		size += (s - chophere);
 		s = chophere;
-		while (*chophere && index(chopset,*chophere))
+		while (*chophere && index(chopset,*chophere)
+		  && isSPACE(*chophere))
 		    chophere++;
 	    }
 	    tmpchar = *s;
@@ -291,7 +300,7 @@ int sp;
 	    (void)eval(fcmd->f_expr,G_SCALAR,sp);
 	    str = stack->ary_array[sp+1];
 	    size = fcmd->f_size;
-	    CHKLEN(size);
+	    CHKLEN(size+1);
 	    /* If the field is marked with ^ and the value is undefined,
 	       blank it out. */
 	    if ((fcmd->f_flags & FC_CHOP) && !str->str_pok && !str->str_nok) {

@@ -1,5 +1,5 @@
 ;#
-;#	@(#)complete.pl	1.0 (sun!waynet) 11/11/88
+;#      @(#)complete.pl,v1.1            (me@anywhere.EBay.Sun.COM) 09/23/91
 ;#
 ;# Author: Wayne Thompson
 ;#
@@ -7,7 +7,7 @@
 ;#     This routine provides word completion.
 ;#     (TAB) attempts word completion.
 ;#     (^D)  prints completion list.
-;#	(These may be changed by setting $Complete'complete, etc.)
+;#      (These may be changed by setting $Complete'complete, etc.)
 ;#
 ;# Diagnostics:
 ;#     Bell when word completion fails.
@@ -18,78 +18,92 @@
 ;# Bugs:
 ;#
 ;# Usage:
-;#     $input = do Complete('prompt_string', @completion_list);
+;#     $input = &Complete('prompt_string', *completion_list);
+;#         or
+;#     $input = &Complete('prompt_string', @completion_list);
 ;#
 
 CONFIG: {
     package Complete;
 
-    $complete =	"\004";
-    $kill =	"\025";
-    $erase1 =	"\177";
-    $erase2 =	"\010";
+    $complete = "\004";
+    $kill     = "\025";
+    $erase1 =   "\177";
+    $erase2 =   "\010";
 }
 
 sub Complete {
     package Complete;
 
-    local ($prompt) = shift (@_);
-    local ($c, $cmp, $l, $r, $ret, $return, $test);
-    @_cmp_lst = sort @_;
     local($[) = 0;
-    system 'stty raw -echo';
-    loop: {
-	print $prompt, $return;
-	while (($c = getc(stdin)) ne "\r") {
-	    if ($c eq "\t") {			# (TAB) attempt completion
-		@_match = ();
-		foreach $cmp (@_cmp_lst) {
-		    push (@_match, $cmp) if $cmp =~ /^$return/;
-		}
-    	    	$test = $_match[0];
-    	    	$l = length ($test);
-		unless ($#_match == 0) {
-    	    	    shift (@_match);
-    	    	    foreach $cmp (@_match) {
-    	    	    	until (substr ($cmp, 0, $l) eq substr ($test, 0, $l)) {
-    	    	    	    $l--;
-    	    	    	}
-    	    	    }
-    	    	    print "\007";
-    	    	}
-    	    	print $test = substr ($test, $r, $l - $r);
-    	    	$r = length ($return .= $test);
-	    }
-	    elsif ($c eq $complete) {		# (^D) completion list
-		print "\r\n";
-		foreach $cmp (@_cmp_lst) {
-		    print "$cmp\r\n" if $cmp =~ /^$return/;
-		}
-		redo loop;
-	    }
-    	    elsif ($c eq $kill && $r) {	# (^U) kill
-    	    	$return = '';
-    	    	$r = 0;
-    	    	print "\r\n";
-    	    	redo loop;
-    	    }
-	    	    	    	    	    	# (DEL) || (BS) erase
-	    elsif ($c eq $erase1 || $c eq $erase2) {
-		if($r) {
-		    print "\b \b";
-		    chop ($return);
-		    $r--;
-		}
-	    }
-	    elsif ($c =~ /\S/) {    	    	# printable char
-		$return .= $c;
-		$r++;
-		print $c;
-	    }
-	}
+    if ($_[1] =~ /^StB\0/) {
+        ($prompt, *_) = @_;
     }
-    system 'stty -raw echo';
-    print "\n";
+    else {
+        $prompt = shift(@_);
+    }
+    @cmp_lst = sort(@_);
+
+    system('stty raw -echo');
+    LOOP: {
+        print($prompt, $return);
+        while (($_ = getc(STDIN)) ne "\r") {
+            CASE: {
+                # (TAB) attempt completion
+                $_ eq "\t" && do {
+                    @match = grep(/^$return/, @cmp_lst);
+                    $l = length($test = shift(@match));
+                    unless ($#match < 0) {
+                        foreach $cmp (@match) {
+                            until (substr($cmp, 0, $l) eq substr($test, 0, $l)) {
+                                $l--;
+                            }
+                        }
+                        print("\a");
+                    }
+                    print($test = substr($test, $r, $l - $r));
+                    $r = length($return .= $test);
+                    last CASE;
+                };
+
+                # (^D) completion list
+                $_ eq $complete && do {
+                    print(join("\r\n", '', grep(/^$return/, @cmp_lst)), "\r\n");
+                    redo LOOP;
+                };
+
+                # (^U) kill
+                $_ eq $kill && do {
+                    if ($r) {
+                        undef($r, $return);
+                        print("\r\n");
+                        redo LOOP;
+                    }
+                    last CASE;
+                };
+
+                # (DEL) || (BS) erase
+                ($_ eq $erase1 || $_ eq $erase2) && do {
+                    if($r) {
+                        print("\b \b");
+                        chop($return);
+                        $r--;
+                    }
+                    last CASE;
+                };
+
+                # printable char
+                ord >= 32 && do {
+                    $return .= $_;
+                    $r++;
+                    print;
+                    last CASE;
+                };
+            }
+        }
+    }
+    system('stty -raw echo');
+    print("\n");
     $return;
 }
 

@@ -12,11 +12,9 @@ sub cacheout {
     package cacheout;
 
     ($file) = @_;
-    ($package) = caller;
     if (!$isopen{$file}) {
 	if (++$numopen > $maxopen) {
-	    sub byseq {$isopen{$a} != $isopen{$b};}
-	    local(@lru) = sort byseq keys(%isopen);
+	    local(@lru) = sort {$isopen{$a} <=> $isopen{$b};} keys(%isopen);
 	    splice(@lru, $maxopen / 3);
 	    $numopen -= @lru;
 	    for (@lru) { close $_; delete $isopen{$_}; }
@@ -35,7 +33,7 @@ $numopen = 0;
 if (open(PARAM,'/usr/include/sys/param.h')) {
     local($.);
     while (<PARAM>) {
-	$maxopen = $1 - 4 if /^#define NOFILE\s+(\d+)/;
+	$maxopen = $1 - 4 if /^\s*#\s*define\s+NOFILE\s+(\d+)/;
     }
     close PARAM;
 }

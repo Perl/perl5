@@ -24,7 +24,7 @@ $spitshell >h2ph <<!GROK!THIS!
 'di';
 'ig00';
 
-\$perlincl = '$privlib';
+\$perlincl = '$installprivlib';
 !GROK!THIS!
 
 : In the following dollars and backticks do not need the extra backslash.
@@ -40,7 +40,7 @@ chdir '/usr/include' || die "Can't cd /usr/include";
 	FILE
 END
 
-$isatype{@isatype} = (1) x @isatype;
+@isatype{@isatype} = (1) x @isatype;
 
 @ARGV = ('-') unless @ARGV;
 
@@ -86,6 +86,7 @@ foreach $file (@ARGV) {
 		    $args = $1;
 		    if ($args ne '') {
 			foreach $arg (split(/,\s*/,$args)) {
+			    $arg =~ s/^\s*([^\s].*[^\s])\s*$/$1/;
 			    $curargs{$arg} = 1;
 			}
 			$args =~ s/\b(\w)/\$$1/g;
@@ -117,7 +118,7 @@ foreach $file (@ARGV) {
 		    }
 		}
 	    }
-	    elsif (/^include <(.*)>/) {
+	    elsif (/^include\s+<(.*)>/) {
 		($incl = $1) =~ s/\.h$/.ph/;
 		print OUT $t,"require '$incl';\n";
 	    }

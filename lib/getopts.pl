@@ -6,11 +6,12 @@
 
 sub Getopts {
     local($argumentative) = @_;
-    local(@args,$_,$first,$rest,$errs);
+    local(@args,$_,$first,$rest);
+    local($errs) = 0;
     local($[) = 0;
 
     @args = split( / */, $argumentative );
-    while(($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
+    while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
 	($first,$rest) = ($1,$2);
 	$pos = index($argumentative,$first);
 	if($pos >= $[) {

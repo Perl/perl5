@@ -7,9 +7,12 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $RCSfile: regcomp.c,v $$Revision: 4.0.1.3 $$Date: 91/11/05 18:22:28 $
+/* $RCSfile: regcomp.c,v $$Revision: 4.0.1.4 $$Date: 91/11/05 22:55:14 $
  *
  * $Log:	regcomp.c,v $
+ * Revision 4.0.1.4  91/11/05  22:55:14  lwall
+ * patch11: Erratum
+ * 
  * Revision 4.0.1.3  91/11/05  18:22:28  lwall
  * patch11: minimum match length calculation in regexp is now cumulative
  * patch11: initial .* in pattern had dependency on value of $*
@@ -157,7 +160,9 @@ int fold;
 	int backest;
 	int curback;
 	int minlen;
+#ifndef safemalloc
 	extern char *safemalloc();
+#endif
 	extern char *savestr();
 	int sawplus = 0;
 	int sawopen = 0;

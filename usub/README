@@ -6,9 +6,9 @@ See usersub.c.
 
 The sole purpose of the userinit() routine is to call the initialization
 routines for any modules that you want to link in.  In this example, we just
-call init_curses(), which sets up to link in the BSD curses routines.
+call init_curses(), which sets up to link in the System V curses routines.
 You'll find this in the file curses.c, which is the processed output of
-curses.mus.
+curses.mus.  (To get BSD curses, replace curses.mus with bsdcurses.mus.)
 
 The magicname() routine adds variable names into the symbol table.  Along
 with the name of the variable as Perl knows it, we pass a structure containing
@@ -96,15 +96,19 @@ to guess about input/output parameters, so you'll have to tidy up after it.
 But it can save you a lot of time if the man pages for a library are
 reasonably well formed.
 
-If you happen to have BSD curses on your machine, you might try compiling
+If you happen to have curses on your machine, you might try compiling
 a copy of curseperl.  The "pager" program in this directory is a rudimentary
 start on writing a pager--don't believe the help message, which is stolen
 from the less program.
 
-There is currently no official way to call a Perl routine back from C,
-but we're working on it.  It might be easiest to fake up a call to do_eval()
-or do_subr().  This is not for the faint of heart.  If you come up with
-such a glue routine, I'll be glad to add it into the distribution.
-
 User-defined subroutines may not currently be called as a signal handler,
 though a signal handler may itself call a user-defined subroutine.
+
+There are now glue routines to call back from C into Perl.  In usersub.c
+in this directory, you'll find callback() and callv().  The callback()
+routine presumes that any arguments to pass to the Perl subroutine
+have already been pushed onto the Perl stack.  The callv() routine
+is a wrapper that pushes an argv-style array of strings onto the
+stack for you, and then calls callback().  Be sure to recheck your
+stack pointer after returning from these routine, since the Perl code
+may have reallocated it.

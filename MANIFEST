@@ -13,6 +13,8 @@ Wishlist		Some things that may or may not happen
 arg.h			Public declarations for the above
 array.c			Numerically subscripted arrays
 array.h			Public declarations for the above
+c2ph.SH			program to translate dbx stabs to perl
+c2ph.doc		documentation for c2ph
 cflags.SH		A script that emits C compilation flags per file
 client			A client to test sockets
 cmd.c			Command interpreter
@@ -65,9 +67,9 @@ eg/van/unvanish		A program to undo what vanish does
 eg/van/vanexp		A program to expire vanished files
 eg/van/vanish		A program to put files in a trashcan
 eg/who			A sample who program
-emacs/perldb.pl		Emacs debugging
-emacs/perldb.el		Emacs debugging
 emacs/perl-mode.el	Emacs major mode for perl
+emacs/perldb.el		Emacs debugging
+emacs/perldb.pl		Emacs debugging
 emacs/tedstuff		Some optional patches
 eval.c			The expression evaluator
 form.c			Format processing
@@ -93,19 +95,25 @@ hints/3b1.sh
 hints/3b2.sh
 hints/aix_rs.sh
 hints/aix_rt.sh
+hints/altos486.sh	
 hints/apollo_C6_7.sh
+hints/apollo_C6_8.sh	
 hints/aux.sh
 hints/dnix.sh
 hints/dynix.sh
 hints/fps.sh
 hints/genix.sh
+hints/greenhills.sh	
 hints/hp9000_300.sh
 hints/hp9000_400.sh
+hints/hp9000_800.sh	
 hints/hpux.sh
 hints/i386.sh
 hints/mips.sh
+hints/mpc.sh	
 hints/ncr_tower.sh
 hints/next.sh
+hints/opus.sh	
 hints/osf_1.sh
 hints/sco_2_3_0.sh
 hints/sco_2_3_1.sh
@@ -113,11 +121,13 @@ hints/sco_2_3_2.sh
 hints/sco_2_3_3.sh
 hints/sco_3.sh
 hints/sgi.sh
+hints/stellar.sh	
 hints/sunos_3_4.sh
 hints/sunos_3_5.sh
 hints/sunos_4_0_1.sh
 hints/sunos_4_0_2.sh
 hints/svr4.sh
+hints/ti1500.sh	
 hints/ultrix_3.sh
 hints/ultrix_4.sh
 hints/uts.sh
@@ -125,16 +135,21 @@ hints/vax.sh
 installperl		Perl script to do "make install" dirty work
 ioctl.pl		Sample ioctl.pl
 lib/abbrev.pl		An abbreviation table builder
+lib/assert.pl		assertion and panic with stack trace
 lib/bigfloat.pl		An arbitrary precision floating point package
 lib/bigint.pl		An arbitrary precision integer arithmetic package
 lib/bigrat.pl		An arbitrary precision rational arithmetic package
 lib/cacheout.pl		Manages output filehandles when you need too many
+lib/chat2.pl		Randal's famous expect-ish routines
 lib/complete.pl		A command completion subroutine
 lib/ctime.pl		A ctime workalike
 lib/dumpvar.pl		A variable dumper
+lib/exceptions.pl	catch and throw routines
+lib/fastcwd.pl		a faster but more dangerous getcwd
 lib/find.pl		A find emulator--used by find2perl
 lib/finddepth.pl	A depth-first find emulator--used by find2perl
 lib/flush.pl		Routines to do single flush
+lib/getcwd.pl		a getcwd() emulator
 lib/getopt.pl		Perl library supporting option parsing
 lib/getopts.pl		Perl library supporting option parsing
 lib/importenv.pl	Perl routine to get environment into variables
@@ -155,8 +170,8 @@ msdos/Changes.dds	Expanation of MS-DOS patches by Diomidis Spinellis
 msdos/Makefile		MS-DOS makefile
 msdos/README.msdos	Compiling and usage information
 msdos/Wishlist.dds	My wishlist
-msdos/config.h		Definitions for msdos
 msdos/chdir.c		A chdir that can change drives
+msdos/config.h		Definitions for msdos
 msdos/dir.h		MS-DOS header for directory access functions
 msdos/directory.c	MS-DOS directory access functions.
 msdos/eg/crlf.bat	Convert files from unix to MS-DOS line termination
@@ -200,8 +215,8 @@ perl.c			main()
 perl.h			Global declarations
 perl.man		The manual page(s)
 perlsh			A poor man's perl shell
-perly.y			Yacc grammar for perl
 perly.fixer		A program to remove yacc stack limitations
+perly.y			Yacc grammar for perl
 regcomp.c		Regular expression compiler
 regcomp.h		Private declarations for above
 regexec.c		Regular expression evaluator
@@ -270,6 +285,7 @@ t/op/pack.t		See if pack and unpack work
 t/op/pat.t		See if esoteric patterns work
 t/op/push.t		See if push and pop work
 t/op/range.t		See if .. works
+t/op/re_tests		Input file for op.regexp
 t/op/read.t		See if read() works
 t/op/regexp.t		See if regular expressions work
 t/op/repeat.t		See if x operator works
@@ -286,11 +302,11 @@ t/op/undef.t		See if undef works
 t/op/unshift.t		See if unshift works
 t/op/vec.t		See if vectors work
 t/op/write.t		See if write works
-t/op/re_tests		Input file for op.regexp
 toke.c			The tokener
 usersub.c		User supplied (possibly proprietary) subroutines
-usub/README		Instructions for user supplied subroutines
 usub/Makefile		Makefile for curseperl
+usub/README		Instructions for user supplied subroutines
+usub/bsdcurses.mus	what used to be curses.mus
 usub/curses.mus		Glue routines for BSD curses
 usub/man2mus		A manual page to .mus translator
 usub/mus		A .mus to .c translator

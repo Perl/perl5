@@ -1,4 +1,4 @@
-/* $RCSfile: cmd.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 10:26:45 $
+/* $RCSfile: cmd.c,v $$Revision: 4.0.1.3 $$Date: 91/11/05 16:07:43 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	cmd.c,v $
+ * Revision 4.0.1.3  91/11/05  16:07:43  lwall
+ * patch11: random cleanup
+ * patch11: "foo\0" eq "foo" was sometimes optimized to true
+ * patch11: foreach on null list could spring memory leak
+ * 
  * Revision 4.0.1.2  91/06/07  10:26:45  lwall
  * patch4: new copyright notice
  * patch4: made some allowances for "semi-standard" C
@@ -230,7 +235,8 @@ tail_recursion_entry:
 #endif
 		    newsp = cmd_exec(cmd->ucmd.ccmd.cc_true,gimme && (cmdflags & CF_TERM),sp);
 		    st = stack->ary_array;	/* possibly reallocated */
-		    retstr = st[newsp];
+		    if (newsp >= 0)
+			retstr = st[newsp];
 		}
 		if (!goto_targ) {
 		    go_to = Nullch;
@@ -250,7 +256,8 @@ tail_recursion_entry:
 #endif
 		    newsp = cmd_exec(cmd->ucmd.ccmd.cc_alt,gimme && (cmdflags & CF_TERM),sp);
 		    st = stack->ary_array;	/* possibly reallocated */
-		    retstr = st[newsp];
+		    if (newsp >= 0)
+			retstr = st[newsp];
 		}
 		if (goto_targ)
 		    break;
@@ -331,12 +338,18 @@ until_loop:
 		else
 		    break;		/* must evaluate */
 	    }
-	    /* FALL THROUGH */
+	    match = 0;
+	    goto strop;
+
 	case CFT_STROP:		/* string op optimization */
+	    match = 1;
+	  strop:
 	    retstr = STAB_STR(cmd->c_stab);
 	    newsp = -2;
 #ifndef I286
 	    if (*cmd->c_short->str_ptr == *str_get(retstr) &&
+		    (match ? retstr->str_cur == cmd->c_slen - 1 :
+		    	     retstr->str_cur >= cmd->c_slen) &&
 		    bcmp(cmd->c_short->str_ptr, str_get(retstr),
 		      cmd->c_slen) == 0 ) {
 		if (cmdflags & CF_EQSURE) {
@@ -576,6 +589,9 @@ until_loop:
 	    }
 
 	    if (match >= ar->ary_fill) {	/* we're in LAST, probably */
+		if (match < 0 &&		/* er, probably not... */
+		  savestack->ary_fill > aryoptsave)
+		    restorelist(aryoptsave);
 		retstr = &str_undef;
 		cmd->c_short->str_u.str_useful = -1;	/* actually redundant */
 		match = FALSE;
