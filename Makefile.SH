@@ -450,6 +450,7 @@ SYMH = perlvars.h thrdvar.h
 #	byterun.h:	bytecode.pl
 #	byterun.c:	bytecode.pl
 #	lib/B/Asmdata.pm:	bytecode.pl
+#	regnodes.h:	regcomp.pl
 # The correct versions should be already supplied with the perl kit,
 # in case you don't have perl available.
 # To force them to run, type
@@ -459,6 +460,7 @@ regen_headers:	FORCE
 	perl opcode.pl
 	perl embed.pl
 	perl bytecode.pl
+	perl regcomp.pl
 
 # Extensions:
 # Names added to $(dynamic_ext) or $(static_ext) or $(nonxs_ext) will

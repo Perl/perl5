@@ -723,8 +723,11 @@ qnx/ar			QNX implementation of "ar" utility
 qnx/cpp			QNX implementation of preprocessor filter
 regcomp.c		Regular expression compiler
 regcomp.h		Private declarations for above
+regcomp.pl		Builder of regnodes.h
+regcomp.sym		Data for regnodes.h
 regexec.c		Regular expression evaluator
 regexp.h		Public declarations for the above
+regnodes.h		Description of nodes of RE engine
 run.c			The interpreter loop
 scope.c			Scope entry and exit code
 scope.h			Scope entry and exit header

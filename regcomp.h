@@ -49,174 +49,6 @@ typedef OP OP_4tree;			/* Will be redefined later. */
  * to the thing following the set of BRANCHes.)  The opcodes are:
  */
 
-/* definition	number	opnd?	meaning */
-#define	END	 0	/* no	End of program. */
-#define	BOL	 1	/* no	Match "" at beginning of line. */
-#define MBOL	 2	/* no	Same, assuming multiline. */
-#define SBOL	 3	/* no	Same, assuming singleline. */
-#define	EOL	 4	/* no	Match "" at end of line. */
-#define MEOL	 5	/* no	Same, assuming multiline. */
-#define SEOL	 6	/* no	Same, assuming singleline. */
-#define	ANY	 7	/* no	Match any one character (except newline). */
-#define	SANY	 8	/* no	Match any one character. */
-#define	ANYOF	 9	/* sv	Match character in (or not in) this class. */
-#define	CURLY	10	/* sv	Match this simple thing {n,m} times. */
-#define	CURLYX	11	/* sv	Match this complex thing {n,m} times. */
-#define	BRANCH	12	/* node	Match this alternative, or the next... */
-#define	BACK	13	/* no	Match "", "next" ptr points backward. */
-#define	EXACT	14	/* sv	Match this string (preceded by length). */
-#define	EXACTF	15	/* sv	Match this string, folded (prec. by length). */
-#define	EXACTFL	16	/* sv	Match this string, folded in locale (w/len). */
-#define	NOTHING	17	/* no	Match empty string. */
-#define	STAR	18	/* node	Match this (simple) thing 0 or more times. */
-#define	PLUS	19	/* node	Match this (simple) thing 1 or more times. */
-#define BOUND	20	/* no	Match "" at any word boundary */
-#define BOUNDL	21	/* no	Match "" at any word boundary */
-#define NBOUND	22	/* no	Match "" at any word non-boundary */
-#define NBOUNDL	23	/* no	Match "" at any word non-boundary */
-#define REF	24	/* num	Match some already matched string */
-#define	OPEN	25	/* num	Mark this point in input as start of #n. */
-#define	CLOSE	26	/* num	Analogous to OPEN. */
-#define MINMOD	27	/* no	Next operator is not greedy. */
-#define GPOS	28	/* no	Matches where last m//g left off. */
-#define IFMATCH	29	/* off	Succeeds if the following matches. */
-#define UNLESSM	30	/* off	Fails if the following matches. */
-#define SUCCEED	31	/* no	Return from a subroutine, basically. */
-#define WHILEM	32	/* no	Do curly processing and see if rest matches. */
-#define ALNUM	33	/* no	Match any alphanumeric character */
-#define ALNUML	34 	/* no	Match any alphanumeric char in locale */
-#define NALNUM	35	/* no	Match any non-alphanumeric character */
-#define NALNUML	36	/* no	Match any non-alphanumeric char in locale */
-#define SPACE	37	/* no	Match any whitespace character */
-#define SPACEL	38	/* no	Match any whitespace char in locale */
-#define NSPACE	39	/* no	Match any non-whitespace character */
-#define NSPACEL	40	/* no	Match any non-whitespace char in locale */
-#define DIGIT	41	/* no	Match any numeric character */
-#define NDIGIT	42	/* no	Match any non-numeric character */
-#define CURLYM	43	/* no	Match this medium-complex thing {n,m} times. */
-#define CURLYN	44	/* no	Match next-after-this simple thing
-			   {n,m} times, set parenths. */
-#define	TAIL	45	/* no	Match empty string. Can jump here from outside. */
-#define REFF	46      /* num  Match already matched string, folded */
-#define REFFL	47      /* num  Match already matched string, folded in loc. */
-#define EVAL	48      /* evl  Execute some Perl code. */
-#define LONGJMP	49      /* off  Jump far away. */
-#define BRANCHJ	50      /* off  BRANCH with long offset. */
-#define IFTHEN	51      /* off  Switch, should be preceeded by switcher . */
-#define GROUPP	52      /* num  Whether the group matched. */
-#define LOGICAL	53	/* no	Next opcode should set the flag only. */
-#define SUSPEND	54	/* off	"Independent" sub-RE. */
-#define RENUM	55	/* off	Group with independently numbered parens. */
-#define OPTIMIZED	56	/* off	Placeholder for dump. */
-
-/*
- * Opcode notes:
- *
- * BRANCH	The set of branches constituting a single choice are hooked
- *		together with their "next" pointers, since precedence prevents
- *		anything being concatenated to any individual branch.  The
- *		"next" pointer of the last BRANCH in a choice points to the
- *		thing following the whole choice.  This is also where the
- *		final "next" pointer of each individual branch points; each
- *		branch starts with the operand node of a BRANCH node.
- *
- * BACK		Normal "next" pointers all implicitly point forward; BACK
- *		exists to make loop structures possible.
- *
- * STAR,PLUS	'?', and complex '*' and '+', are implemented as circular
- *		BRANCH structures using BACK.  Simple cases (one character
- *		per match) are implemented with STAR and PLUS for speed
- *		and to minimize recursive plunges.
- *
- * OPEN,CLOSE,GROUPP	...are numbered at compile time.
- */
-
-#ifndef DOINIT
-EXTCONST U8 regkind[];
-#else
-EXTCONST U8 regkind[] = {
-	END,
-	BOL,
-	BOL,
-	BOL,
-	EOL,
-	EOL,
-	EOL,
-	ANY,
-	ANY,
-	ANYOF,
-	CURLY,
-	CURLY,
-	BRANCH,
-	BACK,
-	EXACT,
-	EXACT,
-	EXACT,
-	NOTHING,
-	STAR,
-	PLUS,
-	BOUND,
-	BOUND,
-	NBOUND,
-	NBOUND,
-	REF,
-	OPEN,
-	CLOSE,
-	MINMOD,
-	GPOS,
-	BRANCHJ,
-	BRANCHJ,
-	END,
-	WHILEM,
-	ALNUM,
-	ALNUM,
-	NALNUM,
-	NALNUM,
-	SPACE,
-	SPACE,
-	NSPACE,
-	NSPACE,
-	DIGIT,
-	NDIGIT,
-	CURLY,
-	CURLY,
-	NOTHING,
-	REF,
-	REF,
-	EVAL,
-	LONGJMP,
-	BRANCHJ,
-	BRANCHJ,
-	GROUPP,
-	LOGICAL,
-	BRANCHJ,
-	BRANCHJ,
-	NOTHING,
-};
-#endif
-
-/* The following have no fixed length. char* since we do strchr on it. */
-#ifndef DOINIT
-EXTCONST char varies[];
-#else
-EXTCONST char varies[] = {
-    BRANCH, BACK, STAR, PLUS, CURLY, CURLYX, REF, REFF, REFFL, 
-    WHILEM, CURLYM, CURLYN, BRANCHJ, IFTHEN, SUSPEND, 0
-};
-#endif
-
-/* The following always have a length of 1. char* since we do strchr on it. */
-#ifndef DOINIT
-EXTCONST char simple[];
-#else
-EXTCONST char simple[] = {
-    ANY, SANY, ANYOF,
-    ALNUM, ALNUML, NALNUM, NALNUML,
-    SPACE, SPACEL, NSPACE, NSPACEL,
-    DIGIT, NDIGIT, 0
-};
-#endif
-
 /*
  * A node is one char of opcode followed by two chars of "next" pointer.
  * "Next" pointers are stored as two 8-bit pieces, high order first.  The
@@ -359,44 +191,32 @@ struct regnode_2 {
 
 #define EXTRA_SIZE(guy) ((sizeof(guy)-1)/sizeof(struct regnode))
 
-#ifdef REG_COMP_C
-const static U8 regarglen[] = {
-    0,0,0,0,0,0,0,0,0,0,
-    /*CURLY*/ EXTRA_SIZE(struct regnode_2), 
-    /*CURLYX*/ EXTRA_SIZE(struct regnode_2),
-    0,0,0,0,0,0,0,0,0,0,0,0,
-    /*REF*/ EXTRA_SIZE(struct regnode_1), 
-    /*OPEN*/ EXTRA_SIZE(struct regnode_1),
-    /*CLOSE*/ EXTRA_SIZE(struct regnode_1),
-    0,0,
-    /*IFMATCH*/ EXTRA_SIZE(struct regnode_1),
-    /*UNLESSM*/ EXTRA_SIZE(struct regnode_1),
-    0,0,0,0,0,0,0,0,0,0,0,0,
-    /*CURLYM*/ EXTRA_SIZE(struct regnode_2),
-    /*CURLYN*/ EXTRA_SIZE(struct regnode_2),
-    0,
-    /*REFF*/ EXTRA_SIZE(struct regnode_1),
-    /*REFFL*/ EXTRA_SIZE(struct regnode_1),
-    /*EVAL*/ EXTRA_SIZE(struct regnode_1),
-    /*LONGJMP*/ EXTRA_SIZE(struct regnode_1),
-    /*BRANCHJ*/ EXTRA_SIZE(struct regnode_1),
-    /*IFTHEN*/ EXTRA_SIZE(struct regnode_1),
-    /*GROUPP*/ EXTRA_SIZE(struct regnode_1),
-    /*LOGICAL*/ 0,
-    /*SUSPEND*/ EXTRA_SIZE(struct regnode_1),
-    /*RENUM*/ EXTRA_SIZE(struct regnode_1), 0,
-};
-
-const static char reg_off_by_arg[] = {
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,	/* 0 .. 15 */
-    0,0,0,0,0,0,0,0,0,0,0,0,0, /*IFMATCH*/ 2, /*UNLESSM*/ 2, 0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,	/* 32 .. 47 */
-    0, /*LONGJMP*/ 1, /*BRANCHJ*/ 1, /*IFTHEN*/ 1, 0, 0,
-    /*RENUM*/ 1, /*RENUM*/ 1,0,
-};
-#endif
-
 #define REG_SEEN_ZERO_LEN	1
 #define REG_SEEN_LOOKBEHIND	2
 #define REG_SEEN_GPOS		4
 #define REG_SEEN_EVAL		8
+
+#include "regnodes.h"
+
+/* The following have no fixed length. char* since we do strchr on it. */
+#ifndef DOINIT
+EXTCONST char varies[];
+#else
+EXTCONST char varies[] = {
+    BRANCH, BACK, STAR, PLUS, CURLY, CURLYX, REF, REFF, REFFL, 
+    WHILEM, CURLYM, CURLYN, BRANCHJ, IFTHEN, SUSPEND, 0
+};
+#endif
+
+/* The following always have a length of 1. char* since we do strchr on it. */
+#ifndef DOINIT
+EXTCONST char simple[];
+#else
+EXTCONST char simple[] = {
+    ANY, SANY, ANYOF,
+    ALNUM, ALNUML, NALNUM, NALNUML,
+    SPACE, SPACEL, NSPACE, NSPACEL,
+    DIGIT, NDIGIT, 0
+};
+#endif
+
