@@ -232,9 +232,9 @@ Derived from FileHandle.pm by Graham Barr E<lt>F<gbarr@pobox.com>E<gt>
 
 =cut
 
-require 5.000;
+require 5.005_64;
 use strict;
-use vars qw($VERSION @EXPORT_OK @ISA);
+our($VERSION, @EXPORT_OK, @ISA);
 use Carp;
 use Symbol;
 use SelectSaver;

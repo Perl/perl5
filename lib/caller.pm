@@ -1,6 +1,5 @@
 package caller;
-use vars qw($VERSION);
-$VERSION = "1.0";
+our $VERSION = "1.0";
 
 =head1 NAME
 

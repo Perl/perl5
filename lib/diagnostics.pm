@@ -167,7 +167,7 @@ Tom Christiansen <F<tchrist@mox.perl.com>>, 25 June 1995.
 
 =cut
 
-require 5.005_64;
+use 5.005_64;
 use Carp;
 
 $VERSION = v1.0;

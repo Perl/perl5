@@ -6,13 +6,13 @@
 
 package IO::Socket;
 
-require 5.000;
+require 5.005_64;
 
 use IO::Handle;
 use Socket 1.3;
 use Carp;
 use strict;
-use vars qw(@ISA $VERSION);
+our(@ISA, $VERSION);
 use Exporter;
 
 # legacy

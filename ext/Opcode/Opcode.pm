@@ -1,8 +1,8 @@
 package Opcode;
 
-require 5.002;
+require 5.005_64;
 
-use vars qw($VERSION $XS_VERSION @ISA @EXPORT_OK);
+our($VERSION, $XS_VERSION, @ISA, @EXPORT_OK);
 
 $VERSION = "1.04";
 $XS_VERSION = "1.03";

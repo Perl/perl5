@@ -1,6 +1,7 @@
 package Tie::Handle;
 
-$VERSION = '1.0';
+use 5.005_64;
+our $VERSION = '1.0';
 
 =head1 NAME
 
@@ -185,8 +186,7 @@ sub CLOSE {
 } 
 
 package Tie::StdHandle; 
-use vars qw(@ISA);
-@ISA = 'Tie::Handle';       
+our @ISA = 'Tie::Handle';       
 use Carp;
 
 sub TIEHANDLE 

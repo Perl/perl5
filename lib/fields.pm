@@ -69,9 +69,10 @@ L<perlref/Pseudo-hashes: Using an array as a hash>
 
 =cut
 
+use 5.005_64;
 use strict;
 no strict 'refs';
-use vars qw(%attr $VERSION);
+our(%attr, $VERSION);
 
 $VERSION = "1.01";
 

@@ -1,8 +1,9 @@
 package ExtUtils::Liblist;
-use vars qw($VERSION);
+
+use 5.005_64;
 # Broken out of MakeMaker from version 4.11
 
-$VERSION = substr q$Revision: 1.25 $, 10;
+our $VERSION = substr q$Revision: 1.25 $, 10;
 
 use Config;
 use Cwd 'cwd';

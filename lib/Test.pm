@@ -1,9 +1,10 @@
 use strict;
 package Test;
+use 5.005_64;
 use Test::Harness 1.1601 ();
 use Carp;
-use vars (qw($VERSION @ISA @EXPORT @EXPORT_OK $ntest $TestLevel), #public-ish
-	  qw($TESTOUT $ONFAIL %todo %history $planned @FAILDETAIL)); #private-ish
+our($VERSION, @ISA, @EXPORT, @EXPORT_OK, $ntest, $TestLevel); #public-ish
+our($TESTOUT, $ONFAIL, %todo, %history, $planned, @FAILDETAIL); #private-ish
 $VERSION = '1.13';
 require Exporter;
 @ISA=('Exporter');

@@ -40,7 +40,7 @@ L<perl(1)>, L<DB_File(3)>, L<perldbmfilter>.
 package GDBM_File;
 
 use strict;
-use vars qw($VERSION @ISA @EXPORT $AUTOLOAD);
+our($VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
 require Carp;
 require Tie::Hash;

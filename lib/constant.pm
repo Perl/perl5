@@ -1,12 +1,12 @@
 package constant;
 
 use strict;
-use vars qw( $VERSION %declared );
+use 5.005_64;
+
+our($VERSION, %declared);
 $VERSION = '1.01';
 
 #=======================================================================
-
-require 5.005_62;
 
 # Some names are evil choices.
 my %keywords = map +($_, 1), qw{ BEGIN INIT STOP END DESTROY AUTOLOAD };

@@ -1,12 +1,13 @@
 package ExtUtils::Install;
 
+use 5.005_64;
+our(@ISA, @EXPORT, $VERSION);
 $VERSION = substr q$Revision: 1.28 $, 10;
 # $Date: 1998/01/25 07:08:24 $
 
 use Exporter;
 use Carp ();
 use Config qw(%Config);
-use vars qw(@ISA @EXPORT $VERSION);
 @ISA = ('Exporter');
 @EXPORT = ('install','uninstall','pm_to_blib', 'install_default');
 $Is_VMS = $^O eq 'VMS';
@@ -15,7 +16,7 @@ my $splitchar = $^O eq 'VMS' ? '|' : ($^O eq 'os2' || $^O eq 'dos') ? ';' : ':';
 my @PERL_ENV_LIB = split $splitchar, defined $ENV{'PERL5LIB'} ? $ENV{'PERL5LIB'} : $ENV{'PERLLIB'} || '';
 my $Inc_uninstall_warn_handler;
 
-#use vars qw( @EXPORT @ISA $Is_VMS );
+#our(@EXPORT, @ISA, $Is_VMS);
 #use strict;
 
 sub forceunlink {

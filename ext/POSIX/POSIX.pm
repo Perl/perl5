@@ -1,7 +1,6 @@
 package POSIX;
 
-# use vars qw($VERSION @ISA %EXPORT_TAGS @EXPORT_OK $AUTOLOAD); 
-(@ISA, %EXPORT_TAGS,@EXPORT_OK,$AUTOLOAD) = ();
+our(@ISA, %EXPORT_TAGS, @EXPORT_OK, $AUTOLOAD) = ();
 
 use Carp;
 use AutoLoader;
@@ -12,7 +11,7 @@ require Exporter;
 use XSLoader ();
 @ISA = qw(Exporter);
 
-$VERSION = "1.03" ;
+our $VERSION = "1.03" ;
 
 %EXPORT_TAGS = (
 

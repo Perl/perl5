@@ -43,8 +43,9 @@ L<fields>
 =cut
 
 package base;
-use vars qw($VERSION);
-$VERSION = "1.01";
+
+use 5.005_64;
+our $VERSION = "1.01";
 
 sub import {
     my $class = shift;

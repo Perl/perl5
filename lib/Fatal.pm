@@ -1,8 +1,9 @@
 package Fatal;
 
+use 5.005_64;
 use Carp;
 use strict;
-use vars qw( $AUTOLOAD $Debug $VERSION);
+our($AUTOLOAD, $Debug, $VERSION);
 
 $VERSION = 1.02;
 

@@ -1,7 +1,7 @@
-require 5.005;			# For (defined ref) and $#$v
+use 5.005_64;			# for (defined ref) and $#$v and our
 package Dumpvalue;
 use strict;
-use vars qw(%address *stab %subs);
+our(%address, $stab, @stab, %stab, %subs);
 
 # translate control chars to ^X - Randal Schwartz
 # Modifications to print types by Peter Gordon v1.0

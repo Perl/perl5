@@ -135,11 +135,11 @@ BEGIN {
 
 
 
-
+use 5.005_64;
+our(@ISA, @EXPORT, $VERSION, $Fileparse_fstype, $Fileparse_igncase);
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(fileparse fileparse_set_fstype basename dirname);
-use vars qw($VERSION $Fileparse_fstype $Fileparse_igncase);
 $VERSION = "2.6";
 
 

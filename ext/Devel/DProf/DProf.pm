@@ -1,4 +1,4 @@
-require 5.003;
+require 5.005_64;
 
 =head1 NAME
 
