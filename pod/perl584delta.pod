@@ -36,9 +36,10 @@ Perl can now be built to detect attempts to assign pathologically large chunks
 of memory.  Previously such assignments would suffer from integer wrap-around
 during size calculations causing a misallocation, which would crash perl, and
 could theoretically be used for "stack smashing" attacks.  The wrapping
-defaults to enabled on platforms where we know it works (AIX, BSDi, Darwin,
-DEC OSF/1, FreeBSD, HP/UX, GNU Linux, OpenBSD, Solaris, VMS and Win32) and
-defaults to disabled on other platforms.
+defaults to enabled on platforms where we know it works (most AIX
+configurations, BSDi, Darwin, DEC OSF/1, FreeBSD, HP/UX, GNU Linux, OpenBSD,
+Solaris, VMS and most Win32 compilers) and defaults to disabled on other
+platforms.
 
 =head2 Unicode Character Database 4.0.1
 
