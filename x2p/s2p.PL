@@ -54,12 +54,14 @@ use Symbol;
 
 =head1 NAME
 
-sed - a stream editor
+psed - a stream editor
 
 =head1 SYNOPSIS
 
-   sed [-an] script [file ...]
-   sed [-an] [-e script] [-f script-file] [file ...]
+   psed [-an] script [file ...]
+   psed [-an] [-e script] [-f script-file] [file ...]
+
+   s2p  [-an] [-e script] [-f script-file]
 
 =head1 DESCRIPTION
 
