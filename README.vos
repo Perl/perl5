@@ -46,8 +46,11 @@ following additional items.
 
 =item 1
 
-The VOS Standard C Compiler and Runtime, or the VOS Standard C
-Cross-Compiler.  This is a standard Stratus product.
+The VOS Standard C Compiler (or the VOS Standard C
+Cross-Compiler) and the VOS C Runtime.  If you are using
+the generally-available version of POSIX support, you may
+instead use the the VOS GNU C/C++ Compiler.  These are
+standard Stratus products.
 
 =item 2
 
@@ -72,10 +75,11 @@ your web browser.  Instructions for unbundling this file
 are at ftp://ftp.stratus.com/pub/vos/utility/utility.html.
 This is not a standard Stratus product.
 
-The generally-available version of POSIX.1 support is
-bundled with the VOS Standard C compiler and Runtime (or
-Cross-Compiler) in VOS Release 14.3.0 or higher.  This is a
-standard Stratus product.
+In VOS Release 14.3.0, the generally-available version of
+POSIX.1 support is bundled with the VOS Standard C compiler
+(or Standard C Cross-Compiler).  In VOS Release 14.4.0 or
+higher, it is also bundled with the VOS C Runtime.  These
+are standard Stratus products.
 
 =item 4
 
@@ -85,6 +89,15 @@ contain more than 32,767 source lines.  Due to VOS
 release-compatibility rules, this port of perl may not
 execute on VOS Release 12 or earlier.
 
+=item 5
+
+If you are using the generally-available version of VOS
+POSIX support, then you should also acquire the VOS GNU
+C/C++ Compiler and GNU Tools product.  When perl is built
+with this version of POSIX support, it assumes that it can
+find "bash", "sed" and other POSIX-compatible commands in
+the directory /system/gnu_library/bin.
+
 =back
 
 To build perl 5, change to the "vos" subdirectory and type the
@@ -92,6 +105,16 @@ command "compile_perl -processor X", where X is the processor
 type (mc68020, i80860, pa7100, pa8000) that you wish to use.
 Note that the generally-available version of POSIX.1 support is
 not available for the mc68020 or i80860 processors.
+
+Use the "-version alpha" control argument to build perl with
+the alpha version of POSIX support, and use the "-version
+ga" control argument to build it with the
+generally-available version of POSIX.  The default is "ga".
+
+Use the "-compiler cc" control argument to build perl with
+the VOS Standard C compiler.  Use the "-compiler gcc"
+control argument to build it with the GNU GCC compiler.  The
+default is "cc".
 
 You must have purchased the VOS Standard C Cross Compiler in
 order to compile perl for a processor type that is different
@@ -213,6 +236,6 @@ Paul Green (Paul_Green@stratus.com)
 
 =head1 LAST UPDATE
 
-October 24, 2000
+June 11, 2001
 
 =cut
