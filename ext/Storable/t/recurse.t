@@ -140,7 +140,7 @@ my $x = freeze $real;
 ok 1, 1;
 
 my $y = thaw $x;
-ok 2, 1;
+ok 2, ref $y eq 'OBJ_REAL';
 ok 3, $y->[0] eq 'a';
 ok 4, $y->[1] == 1;
 
