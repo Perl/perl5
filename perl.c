@@ -939,26 +939,40 @@ setuid perl scripts securely.\n");
 	 * contiguous with the argv[].  This is used in mg.c:mg_set()
 	 * as the maximum modifiable length of $0.  In the worst case
 	 * the area we are able to modify is limited to the size of
-	 * the original argv[0].
+	 * the original argv[0].  (See below for 'contiguous', though.)
 	 * --jhi */
 	 char *s;
 	 int i;
 	 UV mask =
 	   ~(UV)(PTRSIZE == 4 ? 3 : PTRSIZE == 8 ? 7 : PTRSIZE == 16 ? 15 : 0);
+         /* Do the mask check only if the args seem like aligned. */
+	 UV aligned =
+	   (mask < ~(UV)0) && ((PTR2UV(argv[0]) & mask) == PTR2UV(argv[0]));
 
-	 /* See if all the arguments are contiguous in memory.
-	  * Note that 'contiguous' is a loose term because some
-	  * platforms align the argv[] and the envp[].  We just check
-	  * that they are within aligned PTRSIZE bytes.  As long as no
-	  * system has something bizarre like the argv[] interleaved
-	  * with some other data, we are fine.  (Did I just evoke
-	  * Murphy's Law?) --jhi */
+	 /* See if all the arguments are contiguous in memory.  Note
+	  * that 'contiguous' is a loose term because some platforms
+	  * align the argv[] and the envp[].  If the arguments look
+	  * like non-aligned, assume that they are 'strictly' or
+	  * 'traditionally' contiguous.  If the arguments look like
+	  * aligned, we just check that they are within aligned
+	  * PTRSIZE bytes.  As long as no system has something bizarre
+	  * like the argv[] interleaved with some other data, we are
+	  * fine.  (Did I just evoke Murphy's Law?)  --jhi */
 	 s = PL_origargv[0];
 	 while (*s) s++;
 	 for (i = 1; i < PL_origargc; i++) {
-	      if (PL_origargv[i] >  s &&
-		  PL_origargv[i] <=
-		  INT2PTR(char *, PTR2UV(s + PTRSIZE) & mask)) {
+	      if ((PL_origargv[i] == s + 1
+#ifdef OS2
+		   || PL_origargv[i] == s + 2
+#endif 
+		  )
+		  ||
+		  (aligned &&
+		   (PL_origargv[i] >  s &&
+		    PL_origargv[i] <=
+		    INT2PTR(char *, PTR2UV(s + PTRSIZE) & mask)))
+		 )
+	      {
 		   s = PL_origargv[i];
 		   while (*s) s++;
 	      }
@@ -966,23 +980,41 @@ setuid perl scripts securely.\n");
 		   break;
 	 }
 	 /* Can we grab env area too to be used as the area for $0? */
-	 if (PL_origenviron &&
-	     PL_origenviron[0] >  s &&
-	     PL_origenviron[0] <=
-	     INT2PTR(char *, PTR2UV(s + PTRSIZE) & mask)) {
-	      s = PL_origenviron[0];
-	      while (*s) s++;
-	      my_setenv("NoNe  SuCh", Nullch);
-	      /* Force copy of environment. */
-	      for (i = 1; PL_origenviron[i]; i++)
-		   if (PL_origenviron[i] >  s &&
-		       PL_origenviron[i] <=
-		       INT2PTR(char *, PTR2UV(s + PTRSIZE) & mask)) {
-			s = PL_origenviron[i];
-			while (*s) s++;
+	 if (PL_origenviron) {
+	      if ((PL_origenviron[0] == s + 1
+#ifdef OS2
+		   || (PL_origenviron[0] == s + 9 && (s += 8))
+#endif 
+		  )
+		  ||
+		  (aligned &&
+		   (PL_origenviron[0] >  s &&
+		    PL_origenviron[0] <=
+		    INT2PTR(char *, PTR2UV(s + PTRSIZE) & mask)))
+		 )
+	      {
+#ifndef OS2
+		   s = PL_origenviron[0];
+		   while (*s) s++;
+#endif
+		   my_setenv("NoNe  SuCh", Nullch);
+		   /* Force copy of environment. */
+		   for (i = 1; PL_origenviron[i]; i++) {
+			if (PL_origenviron[i] == s + 1
+			    ||
+			    (aligned &&
+			     (PL_origenviron[i] >  s &&
+			      PL_origenviron[i] <=
+			      INT2PTR(char *, PTR2UV(s + PTRSIZE) & mask)))
+			   )
+			{
+			     s = PL_origenviron[i];
+			     while (*s) s++;
+			}
+			else
+			     break;
 		   }
-		   else
-			break;
+	      }
 	 }
 	 PL_origalen = s - PL_origargv[0];
     }
