@@ -11,9 +11,9 @@
 
 #ifdef PERL_FOR_X2P
 /*
- * This file is being used for x2p stuff. 
+ * This file is being used for x2p stuff.
  * Above symbol is defined via -D in 'x2p/Makefile.SH'
- * Decouple x2p stuff from some of perls more extreme eccentricities. 
+ * Decouple x2p stuff from some of perls more extreme eccentricities.
  */
 #undef MULTIPLICITY
 #undef USE_STDIO
@@ -21,7 +21,7 @@
 #endif /* PERL_FOR_X2P */
 
 #define VOIDUSED 1
-#ifdef PERL_MICRO 
+#ifdef PERL_MICRO
 #   include "uconfig.h"
 #else
 #   include "config.h"
@@ -266,8 +266,8 @@ struct perl_thread;
 #  define END_EXTERN_C }
 #  define EXTERN_C extern "C"
 #else
-#  define START_EXTERN_C 
-#  define END_EXTERN_C 
+#  define START_EXTERN_C
+#  define END_EXTERN_C
 #  define EXTERN_C extern
 #endif
 
@@ -367,7 +367,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #define TAINT_ENV()	if (PL_tainting) { taint_env(); }
 #define TAINT_PROPER(s)	if (PL_tainting) { taint_proper(Nullch, s); }
 
-/* XXX All process group stuff is handled in pp_sys.c.  Should these 
+/* XXX All process group stuff is handled in pp_sys.c.  Should these
    defines move there?  If so, I could simplify this a lot. --AD  9/96.
 */
 /* Process group stuff changed from traditional BSD to POSIX.
@@ -407,7 +407,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #  define HAS_GETPGRP  /* Well, effectively it does . . . */
 #endif
 
-/* These are not exact synonyms, since setpgrp() and getpgrp() may 
+/* These are not exact synonyms, since setpgrp() and getpgrp() may
    have different behaviors, but perl.h used to define USE_BSDPGRP
    (prior to 5.003_05) so some extension might depend on it.
 */
@@ -741,7 +741,7 @@ typedef struct perl_mstats perl_mstats_t;
 #       undef INCLUDE_PROTOTYPES
 #       undef PERL_SOCKS_NEED_PROTOTYPES
 #   endif
-# endif 
+# endif
 # ifdef I_NETDB
 #  include <netdb.h>
 # endif
@@ -989,15 +989,15 @@ typedef struct perl_mstats perl_mstats_t;
 
 #ifndef S_IRWXU
 #   define S_IRWXU (S_IRUSR|S_IWUSR|S_IXUSR)
-#endif 
+#endif
 
 #ifndef S_IRWXG
 #   define S_IRWXG (S_IRGRP|S_IWGRP|S_IXGRP)
-#endif 
+#endif
 
 #ifndef S_IRWXO
 #   define S_IRWXO (S_IROTH|S_IWOTH|S_IXOTH)
-#endif 
+#endif
 
 #ifndef S_IREAD
 #   define S_IREAD S_IRUSR
@@ -1089,7 +1089,7 @@ typedef UVTYPE UV;
 #define PERL_PRESERVE_IVUV
 #endif
 
-/*   
+/*
  *  The macros INT2PTR and NUM2PTR are (despite their names)
  *  bi-directional: they will convert int/float to or from pointers.
  *  However the conversion to int/float are named explicitly:
@@ -1103,7 +1103,7 @@ typedef UVTYPE UV;
 #  define PTRV			UV
 #  define INT2PTR(any,d)	(any)(d)
 #else
-#  if PTRSIZE == LONGSIZE 
+#  if PTRSIZE == LONGSIZE
 #    define PTRV		unsigned long
 #  else
 #    define PTRV		unsigned
@@ -1114,12 +1114,12 @@ typedef UVTYPE UV;
 #define PTR2IV(p)	INT2PTR(IV,p)
 #define PTR2UV(p)	INT2PTR(UV,p)
 #define PTR2NV(p)	NUM2PTR(NV,p)
-#if PTRSIZE == LONGSIZE 
+#if PTRSIZE == LONGSIZE
 #  define PTR2ul(p)	(unsigned long)(p)
 #else
 #  define PTR2ul(p)	INT2PTR(unsigned long,p)	
 #endif
-  
+
 #ifdef USE_LONG_DOUBLE
 #  if defined(HAS_LONG_DOUBLE) && LONG_DOUBLESIZE == DOUBLESIZE
 #      define LONG_DOUBLE_EQUALS_DOUBLE
@@ -1282,7 +1282,7 @@ typedef NVTYPE NV;
 #endif
 
 #if !defined(Perl_atof) && defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE)
-#   if !defined(Perl_atof) && defined(HAS_STRTOLD) 
+#   if !defined(Perl_atof) && defined(HAS_STRTOLD)
 #       define Perl_atof(s) (NV)strtold(s, (char**)NULL)
 #   endif
 #   if !defined(Perl_atof) && defined(HAS_ATOLF)
@@ -1300,7 +1300,7 @@ typedef NVTYPE NV;
 #   define Perl_atof2(s,f) ((f) = (NV)Perl_atof(s))
 #endif
 
-/* Previously these definitions used hardcoded figures. 
+/* Previously these definitions used hardcoded figures.
  * It is hoped these formula are more portable, although
  * no data one way or another is presently known to me.
  * The "PERL_" names are used because these calculated constants
@@ -1351,7 +1351,7 @@ typedef NVTYPE NV;
 #    define PERL_UCHAR_MAX       ((unsigned char)~(unsigned)0)
 #  endif
 #endif
- 
+
 /*
  * CHAR_MIN and CHAR_MAX are not included here, as the (char) type may be
  * ambiguous. It may be equivalent to (signed char) or (unsigned char)
@@ -1558,7 +1558,7 @@ typedef struct ptr_tbl PTR_TBL_t;
 #       define FSEEKSIZE LSEEKSIZE
 #   else
 #       define FSEEKSIZE LONGSIZE
-#   endif  
+#   endif
 #endif
 
 #if defined(USE_LARGE_FILES) && !defined(NO_64_BIT_STDIO)
@@ -1719,7 +1719,7 @@ typedef struct ptr_tbl PTR_TBL_t;
 #  endif
 #endif
 
-/* 
+/*
  * USE_THREADS needs to be after unixish.h as <pthread.h> includes
  * <sys/signal.h> which defines NSIG - which will stop inclusion of <signal.h>
  * this results in many functions being undeclared which bothers C++
@@ -1878,7 +1878,7 @@ typedef pthread_key_t	perl_key;
 #    define SVf "p"
 #  else
 #    define SVf "_"
-#  endif 
+#  endif
 #endif
 
 #ifndef UVf
@@ -1886,7 +1886,7 @@ typedef pthread_key_t	perl_key;
 #    define UVf UVuf
 #  else
 #    define UVf "Vu"
-#  endif 
+#  endif
 #endif
 
 #ifndef VDf
@@ -1894,7 +1894,7 @@ typedef pthread_key_t	perl_key;
 #    define VDf "p"
 #  else
 #    define VDf "vd"
-#  endif 
+#  endif
 #endif
 
 /* Some unistd.h's give a prototype for pause() even though
@@ -2352,7 +2352,7 @@ EXT char *** environ_pointer;
 #    if !defined(DONT_DECLARE_STD) || \
         (defined(__svr4__) && defined(__GNUC__) && defined(sun)) || \
         defined(__sgi) || \
-        defined(__DGUX) 
+        defined(__DGUX)
 extern char **	environ;	/* environment variables supplied via exec */
 #    endif
 #  endif
@@ -2757,9 +2757,9 @@ struct perl_vars *PL_VarsPtr;
 #endif /* PERL_GLOBAL_STRUCT */
 
 #if defined(MULTIPLICITY) || defined(PERL_OBJECT)
-/* If we have multiple interpreters define a struct 
+/* If we have multiple interpreters define a struct
    holding variables which must be per-interpreter
-   If we don't have threads anything that would have 
+   If we don't have threads anything that would have
    be per-thread is per-interpreter.
 */
 
@@ -2808,7 +2808,7 @@ typedef void *Thread;
 
 #ifndef PERL_CALLCONV
 #  define PERL_CALLCONV
-#endif 
+#endif
 
 #ifndef NEXT30_NO_ATTRIBUTE
 #  ifndef HASATTRIBUTE       /* disable GNU-cc attribute checking? */
@@ -2845,11 +2845,11 @@ typedef void *Thread;
 #  include "embedvar.h"
 #endif
 
-/* Now include all the 'global' variables 
+/* Now include all the 'global' variables
  * If we don't have threads or multiple interpreters
- * these include variables that would have been their struct-s 
+ * these include variables that would have been their struct-s
  */
-                         
+
 #define PERLVAR(var,type) EXT type PL_##var;
 #define PERLVARA(var,n,type) EXT type PL_##var[n];
 #define PERLVARI(var,type,init) EXT type  PL_##var INIT(init);
@@ -2984,6 +2984,9 @@ EXT MGVTBL PL_vtbl_amagicelem =   {0,     MEMBER_TO_FPTR(Perl_magic_setamagic),
 EXT MGVTBL PL_vtbl_backref = 	  {0,	0,
 					0,	0,	MEMBER_TO_FPTR(Perl_magic_killbackrefs)};
 
+EXT MGVTBL PL_vtbl_ovrld   = 	  {0,	0,
+					0,	0,	MEMBER_TO_FPTR(Perl_magic_freeovrld)};
+
 #else /* !DOINIT */
 
 EXT MGVTBL PL_vtbl_sv;
@@ -3007,6 +3010,7 @@ EXT MGVTBL PL_vtbl_pos;
 EXT MGVTBL PL_vtbl_bm;
 EXT MGVTBL PL_vtbl_fm;
 EXT MGVTBL PL_vtbl_uvar;
+EXT MGVTBL PL_vtbl_ovrld;
 
 #ifdef USE_THREADS
 EXT MGVTBL PL_vtbl_mutex;
@@ -3060,7 +3064,7 @@ enum {
   copy_amg,    neg_amg,
   to_sv_amg,   to_av_amg,
   to_hv_amg,   to_gv_amg,
-  to_cv_amg,   iter_amg,    
+  to_cv_amg,   iter_amg,
   DESTROY_amg, max_amg_code
   /* Do not leave a trailing comma here.  C9X allows it, C89 doesn't. */
 };
@@ -3292,9 +3296,9 @@ typedef struct am_table_short AMTS;
 #endif
 
 #if !defined(PERLIO_IS_STDIO) && defined(HASATTRIBUTE)
-/* 
- * Now we have __attribute__ out of the way 
- * Remap printf 
+/*
+ * Now we have __attribute__ out of the way
+ * Remap printf
  */
 #undef printf
 #define printf PerlIO_stdoutf
@@ -3477,7 +3481,7 @@ typedef struct am_table_short AMTS;
 #undef PERL_PATCHLEVEL_H_IMPLICIT
 
 /* Mention
-   
+
    NV_PRESERVES_UV
 
    HAS_ICONV

@@ -1662,6 +1662,7 @@ p	|int	|magic_clearpack|SV* sv|MAGIC* mg
 p	|int	|magic_clearsig	|SV* sv|MAGIC* mg
 p	|int	|magic_existspack|SV* sv|MAGIC* mg
 p	|int	|magic_freeregexp|SV* sv|MAGIC* mg
+p	|int	|magic_freeovrld|SV* sv|MAGIC* mg
 p	|int	|magic_get	|SV* sv|MAGIC* mg
 p	|int	|magic_getarylen|SV* sv|MAGIC* mg
 p	|int	|magic_getdefelem|SV* sv|MAGIC* mg
