@@ -629,6 +629,22 @@ and time formatting--amongst other things.
 If you really want to be international, you should consider Unicode.
 See L<perluniintro> and L<perlunicode> for more information.
 
+If you want to use non-ASCII bytes (outside the bytes 0x00..0x7f) in
+the "source code" of your code, to be portable you have to be explicit
+about what bytes they are.  Someone might for example be using your
+code under a UTF-8 locale, in which case random native bytes might be
+illegal ("Malformed UTF-8 ...")  This means that for example embedding
+ISO 8859-1 bytes beyond 0x7f into your strings might cause trouble
+later.  If the bytes are native 8-bit bytes, you can use the C<bytes>
+pragma.  If the bytes are in a string (regular expression being a
+curious string), you can often also use the C<\xHH> notation instead
+of embedding the bytes as-is.  If they are in some particular legacy
+encoding (ether single-byte or something more complicated), you can
+use the C<encoding> pragma.  (If you want to write your code in UTF-8,
+you can use either the C<utf8> pragma, or the C<encoding> pragma.)
+The C<bytes> and C<utf8> pragmata are available since Perl 5.6.0, and
+the C<encoding> pragma since Perl 5.8.0.
+
 =head2 System Resources
 
 If your code is destined for systems with severely constrained (or

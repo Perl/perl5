@@ -743,8 +743,8 @@ sub dist_ci {
 ci :
 	$(PERLRUN) "-MExtUtils::Manifest=maniread" \\
 	  -e "@all = keys %{ maniread() };" \\
-	  -e "print("Executing $(CI) @all\n"); system(qq{$(CI) @all});" \\
-	  -e "print("Executing $(RCS_LABEL) ...\n"); system(qq{$(RCS_LABEL) @all});"
+	  -e "print(qq{Executing $(CI) @all\n}); system(qq{$(CI) @all});" \\
+	  -e "print(qq{Executing $(RCS_LABEL) ...\n}); system(qq{$(RCS_LABEL) @all});"
 };
 }
 
@@ -1199,8 +1199,11 @@ WARNING
             # To avoid using the unportable 2>&1 to supress STDERR,
             # we close it before running the command.
             close STDERR if $stderr_duped;
-            $val = `$abs -e "require $ver; print qq{VER_OK\n}"`;
+            my $version_check = qq{$abs -e "require $ver; print qq{VER_OK\n}"};
+            $val = `$version_check`;
             open STDERR, '>&STDERR_COPY' if $stderr_duped;
+            print STDERR "Perl version check failed: '$version_check'\n"
+                unless defined $val;
 
             if ($val =~ /^VER_OK/) {
                 print "Using PERL=$abs\n" if $trace;
@@ -1507,6 +1510,7 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
             }
             return if /\#/;
             return if /~$/;    # emacs temp files
+            return if /,v$/;   # RCS files
 
 	    my $path   = $File::Find::name;
             my $prefix = $self->{INST_LIBDIR};
@@ -1608,7 +1612,7 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 	    my($manpagename) = $name;
 	    $manpagename =~ s/\.p(od|m|l)\z//;
            # everything below lib is ok
-	    if($self->{PARENT_NAME} && $manpagename !~ s!^\W*lib\W+!!s) {
+	    unless($manpagename =~ s!^\W*lib\W+!!s) {
 		$manpagename = $self->catfile(
                                 split(/::/,$self->{PARENT_NAME}),$manpagename
                                );
@@ -3801,7 +3805,7 @@ test :: \$(TEST_TYPE)
         push(@m, map("\t\$(NOECHO) cd $_ && \$(TEST_F) \$(FIRST_MAKEFILE) && \$(MAKE) test \$(PASTHRU)\n", @{$self->{DIR}}));
     }
 
-    push(@m, "\t\$(NOECHO) $(ECHO) 'No tests defined for \$(NAME) extension.'\n")
+    push(@m, "\t\$(NOECHO) \$(ECHO) 'No tests defined for \$(NAME) extension.'\n")
 	unless $tests or -f "test.pl" or @{$self->{DIR}};
     push(@m, "\n");
 

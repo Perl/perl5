@@ -9,7 +9,9 @@ BEGIN {
         unshift @INC, 't/lib/';
     }
 }
-chdir 't';
+
+my $Is_VMS = $^O eq 'VMS';
+chdir($Is_VMS ? 'BFD_TEST_ROOT:[t]' : 't');
 
 
 use strict;
@@ -54,7 +56,7 @@ my $prefix = $Config{prefix} || $Config{prefixexp};
 
 # You can concatenate /foo but not foo:, which defaults in the current 
 # directory
-$prefix = VMS::Filespec::unixify($prefix) if $^O eq 'VMS';
+$prefix = VMS::Filespec::unixify($prefix) if $Is_VMS;
 
 # ActivePerl 5.6.1/631 has $Config{prefixexp} as 'p:' for some reason
 $prefix = $Config{prefix} if $prefix eq 'p:' && $^O eq 'MSWin32';

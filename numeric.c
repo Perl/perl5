@@ -197,7 +197,7 @@ Perl_grok_bin(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
 		++s;
                 goto redo;
 	    }
-        if (ckWARN(WARN_DIGIT))
+        if (!(*flags & PERL_SCAN_SILENT_ILLDIGIT) && ckWARN(WARN_DIGIT))
             Perl_warner(aTHX_ packWARN(WARN_DIGIT),
                         "Illegal binary digit '%c' ignored", *s);
         break;
@@ -312,7 +312,7 @@ Perl_grok_hex(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
 		++s;
                 goto redo;
 	    }
-        if (ckWARN(WARN_DIGIT))
+        if (!(*flags & PERL_SCAN_SILENT_ILLDIGIT) && ckWARN(WARN_DIGIT))
             Perl_warner(aTHX_ packWARN(WARN_DIGIT),
                         "Illegal hexadecimal digit '%c' ignored", *s);
         break;
@@ -398,7 +398,7 @@ Perl_grok_oct(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
          * as soon as non-octal characters are seen, complain only iff
          * someone seems to want to use the digits eight and nine). */
         if (digit == 8 || digit == 9) {
-            if (ckWARN(WARN_DIGIT))
+            if (!(*flags & PERL_SCAN_SILENT_ILLDIGIT) && ckWARN(WARN_DIGIT))
                 Perl_warner(aTHX_ packWARN(WARN_DIGIT),
                             "Illegal octal digit '%c' ignored", *s);
         }

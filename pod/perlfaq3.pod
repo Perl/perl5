@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.32 $, $Date: 2003/01/26 17:41:53 $)
+perlfaq3 - Programming Tools ($Revision: 1.33 $, $Date: 2003/01/31 17:34:56 $)
 
 =head1 DESCRIPTION
 
@@ -466,45 +466,33 @@ module, which is curses-based, can help with this.
 
 The best way to do this is to come up with a better algorithm.  This
 can often make a dramatic difference.  Jon Bentley's book
-``Programming Pearls'' (that's not a misspelling!)  has some good tips
+I<Programming Pearls> (that's not a misspelling!)  has some good tips
 on optimization, too.  Advice on benchmarking boils down to: benchmark
 and profile to make sure you're optimizing the right part, look for
 better algorithms instead of microtuning your code, and when all else
 fails consider just buying faster hardware.  You will probably want to
-read the answer to the earlier question ``How do I profile my Perl programs?''
-if you haven't done so already.
+read the answer to the earlier question ``How do I profile my Perl
+programs?'' if you haven't done so already.
 
 A different approach is to autoload seldom-used Perl code.  See the
 AutoSplit and AutoLoader modules in the standard distribution for
 that.  Or you could locate the bottleneck and think about writing just
 that part in C, the way we used to take bottlenecks in C code and
-write them in assembler.  Similar to rewriting in C,
-modules that have critical sections can be written in C (for instance, the
-PDL module from CPAN).
+write them in assembler.  Similar to rewriting in C, modules that have
+critical sections can be written in C (for instance, the PDL module
+from CPAN).
 
-In some cases, it may be worth it to use the backend compiler to
-produce byte code (saving compilation time) or compile into C, which
-will certainly save compilation time and sometimes a small amount (but
-not much) execution time.  See the question about compiling your Perl
-programs for more on the compiler--the wins aren't as obvious as you'd
-hope.
+If you're currently linking your perl executable to a shared
+I<libc.so>, you can often gain a 10-25% performance benefit by
+rebuilding it to link with a static libc.a instead.  This will make a
+bigger perl executable, but your Perl programs (and programmers) may
+thank you for it.  See the F<INSTALL> file in the source distribution
+for more information.
 
-If you're currently linking your perl executable to a shared I<libc.so>,
-you can often gain a 10-25% performance benefit by rebuilding it to
-link with a static libc.a instead.  This will make a bigger perl
-executable, but your Perl programs (and programmers) may thank you for
-it.  See the F<INSTALL> file in the source distribution for more
-information.
-
-Unsubstantiated reports allege that Perl interpreters that use sfio
-outperform those that don't (for I/O intensive applications).  To try
-this, see the F<INSTALL> file in the source distribution, especially
-the ``Selecting File I/O mechanisms'' section.
-
-The undump program was an old attempt to speed up your Perl program
-by storing the already-compiled form to disk.  This is no longer
-a viable option, as it only worked on a few architectures, and
-wasn't a good solution anyway.
+The undump program was an ancient attempt to speed up Perl program by
+storing the already-compiled form to disk.  This is no longer a viable
+option, as it only worked on a few architectures, and wasn't a good
+solution anyway.
 
 =head2 How can I make my Perl program take less memory?
 

@@ -30,7 +30,7 @@ close MANIFEST;
 chdir 'lib';
 plan tests => scalar @modules * 2;
 foreach my $file (@modules) {
-    # 5.8.0 has a bug about require alone in an eval.  Thus the extra 
+    # 5.8.0 has a bug about require alone in an eval.  Thus the extra
     # statement.
     eval q{ require($file); 1 };
     is( $@, '', "require $file" );
@@ -39,5 +39,4 @@ foreach my $file (@modules) {
         skip "Test::Pod not installed", 1 unless $Has_Test_Pod;
         pod_file_ok($file);
     }
-    
 }

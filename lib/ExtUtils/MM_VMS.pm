@@ -21,7 +21,7 @@ BEGIN {
 use File::Basename;
 use vars qw($Revision @ISA $VERSION);
 ($VERSION) = '5.67';
-($Revision = substr(q$Revision: 1.89 $, 10)) =~ s/\s+$//;
+($Revision = substr(q$Revision: 1.91 $, 10)) =~ s/\s+$//;
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
@@ -1603,7 +1603,7 @@ uninstall_from_perldirs ::
 	$(NOECHO) $(ECHO) "the appropriate files.  Sorry for the inconvenience."
 
 uninstall_from_sitedirs ::
-	$(NOECHO) $(UNINSTALL) ],$self->catfile($self->{SITEARCHEXP},'auto',$self->{FULLEXT},'.packlist'),"\n",q[
+	$(NOECHO) $(UNINSTALL) ].$self->catfile($self->{SITEARCHEXP},'auto',$self->{FULLEXT},'.packlist').q[
 	$(NOECHO) $(ECHO) "Uninstall is now deprecated and makes no actual changes."
 	$(NOECHO) $(ECHO) "Please check the list above carefully for errors, and manually remove"
 	$(NOECHO) $(ECHO) "the appropriate files.  Sorry for the inconvenience."
@@ -2232,7 +2232,14 @@ sub init_linker {
     $self->{EXPORT_LIST} ||= '$(BASEEXT).opt';
 
     my $shr = $Config{dbgprefix} . 'PERLSHR';
-    $self->{PERL_ARCHIVE} ||=  $self->catfile($self->{PERL_SRC}, "$shr.$Config{'dlext'}");
+    if ($self->{PERL_SRC}) {
+        $self->{PERL_ARCHIVE} ||=
+          $self->catfile($self->{PERL_SRC}, "$shr.$Config{'dlext'}");
+    }
+    else {
+        $self->{PERL_ARCHIVE} ||=
+          $ENV{$shr} ? $ENV{$shr} : "Sys\$Share:$shr.$Config{'dlext'}";
+    }
 
     $self->{PERL_ARCHIVE_AFTER} ||= '';
 }
