@@ -99,7 +99,7 @@ do_eval1('print "ok $x\n"');
 $x++;
 do_eval1('eval q[print "ok $x\n"]');
 $x++;
-do_eval1('sub { eval q[print "ok $x\n"] }->()');
+do_eval1('sub { print "# $x\n"; eval q[print "ok $x\n"] }->()');
 $x++;
 
 # calls from within eval'' should clone outer lexicals
@@ -112,7 +112,7 @@ do_eval2('print "ok $x\n"');
 $x++;
 do_eval2('eval q[print "ok $x\n"]');
 $x++;
-do_eval2('sub { eval q[print "ok $x\n"] }->()');
+do_eval2('sub { print "# $x\n"; eval q[print "ok $x\n"] }->()');
 $x++;
 EOT
 
