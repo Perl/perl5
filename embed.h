@@ -1088,6 +1088,7 @@
 #define taint_env		Perl_taint_env
 #define taint_proper		Perl_taint_proper
 #define thisexpr		Perl_thisexpr
+#define thr_key			Perl_thr_key
 #define timesbuf		Perl_timesbuf
 #define tokenbuf		Perl_tokenbuf
 #define too_few_arguments	Perl_too_few_arguments
@@ -1298,6 +1299,8 @@
 #define multiline		(curinterp->Imultiline)
 #define mystrk			(curinterp->Imystrk)
 #define nrs			(curinterp->Inrs)
+#define nthreads		(curinterp->Inthreads)
+#define nthreads_cond		(curinterp->Inthreads_cond)
 #define ofmt			(curinterp->Iofmt)
 #define ofs			(curinterp->Iofs)
 #define ofslen			(curinterp->Iofslen)
@@ -1347,6 +1350,7 @@
 #define sv_root			(curinterp->Isv_root)
 #define tainted			(curinterp->Itainted)
 #define tainting		(curinterp->Itainting)
+#define threads_mutex		(curinterp->Ithreads_mutex)
 #define tmps_floor		(curinterp->Itmps_floor)
 #define tmps_ix			(curinterp->Itmps_ix)
 #define tmps_max		(curinterp->Itmps_max)
@@ -1449,6 +1453,8 @@
 #define Imultiline		multiline
 #define Imystrk			mystrk
 #define Inrs			nrs
+#define Inthreads		nthreads
+#define Inthreads_cond		nthreads_cond
 #define Iofmt			ofmt
 #define Iofs			ofs
 #define Iofslen			ofslen
@@ -1498,6 +1504,7 @@
 #define Isv_root		sv_root
 #define Itainted		tainted
 #define Itainting		tainting
+#define Ithreads_mutex		threads_mutex
 #define Itmps_floor		tmps_floor
 #define Itmps_ix		tmps_ix
 #define Itmps_max		tmps_max
@@ -1609,6 +1616,8 @@
 #define multiline		Perl_multiline
 #define mystrk			Perl_mystrk
 #define nrs			Perl_nrs
+#define nthreads		Perl_nthreads
+#define nthreads_cond		Perl_nthreads_cond
 #define ofmt			Perl_ofmt
 #define ofs			Perl_ofs
 #define ofslen			Perl_ofslen
@@ -1656,6 +1665,7 @@
 #define sv_objcount		Perl_sv_objcount
 #define sv_root			Perl_sv_root
 #define tainted			Perl_tainted
+#define threads_mutex		Perl_threads_mutex
 #define tmps_floor		Perl_tmps_floor
 #define tmps_ix			Perl_tmps_ix
 #define tmps_max		Perl_tmps_max

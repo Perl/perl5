@@ -108,7 +108,6 @@ Perl_setenv_getix
 Perl_skipspace
 Perl_sublex_done
 Perl_sublex_start
-Perl_sv_peek
 Perl_sv_ref
 Perl_sv_setptrobj
 Perl_timesbuf
@@ -136,11 +135,7 @@ Perl_my_memcmp
 Perl_my_memset
 Perl_cshlen
 Perl_cshname
-Perl_condpair_magic
-Perl_magic_mutexfree
 Perl_opsave
-Perl_unlock_condpair
-Perl_vtbl_mutex
 !END!OF!SKIP!
 
 # All symbols have a Perl_ prefix because that's what embed.h

@@ -39,6 +39,89 @@ typedef struct thread *perl_thread;
     } STMT_END
 #define COND_DESTROY(c)
 #else
+
+#ifdef WIN32
+
+typedef HANDLE perl_thread;
+
+/* XXX Critical Sections used instead of mutexes: lightweight,
+ * but can't be communicated to child processes, and can't get
+ * HANDLE to it for use elsewhere
+ */
+/*
+#define MUTEX_INIT(m) InitializeCriticalSection(m)
+#define MUTEX_LOCK(m) EnterCriticalSection(m)
+#define MUTEX_UNLOCK(m) LeaveCriticalSection(m)
+#define MUTEX_DESTROY(m) DeleteCriticalSection(m)
+*/
+
+#define MUTEX_INIT(m) \
+    STMT_START {						\
+	if ((*(m) = CreateMutex(NULL,FALSE,NULL)) == NULL)	\
+	    croak("panic: MUTEX_INIT");				\
+    } STMT_END
+#define MUTEX_LOCK(m) \
+    STMT_START {						\
+	if (WaitForSingleObject(*(m),INFINITE) == WAIT_FAILED)	\
+	    croak("panic: MUTEX_LOCK");				\
+    } STMT_END
+#define MUTEX_UNLOCK(m) \
+    STMT_START {						\
+	if (ReleaseMutex(*(m)) == 0)				\
+	    croak("panic: MUTEX_UNLOCK");			\
+    } STMT_END
+#define MUTEX_DESTROY(m) \
+    STMT_START {						\
+	if (CloseHandle(*(m)) == 0)				\
+	    croak("panic: MUTEX_DESTROY");			\
+    } STMT_END
+
+#define COND_INIT(c) \
+    STMT_START {						\
+	if ((*(c) = CreateEvent(NULL,TRUE,FALSE,NULL)) == NULL)	\
+	    croak("panic: COND_INIT");				\
+    } STMT_END
+#define COND_SIGNAL(c) \
+    STMT_START {						\
+	if (PulseEvent(*(c)) == 0)				\
+	    croak("panic: COND_SIGNAL (%ld)",GetLastError());	\
+    } STMT_END
+#define COND_BROADCAST(c) \
+    STMT_START {						\
+	if (PulseEvent(*(c)) == 0)				\
+	    croak("panic: COND_BROADCAST");			\
+    } STMT_END
+/* #define COND_WAIT(c, m) \
+    STMT_START {						\
+	if (WaitForSingleObject(*(c),INFINITE) == WAIT_FAILED)	\
+	    croak("panic: COND_WAIT");				\
+    } STMT_END
+*/
+#define COND_WAIT(c, m) \
+    STMT_START {						\
+	if (SignalObjectAndWait(*(m),*(c),INFINITE,FALSE) == WAIT_FAILED)\
+	    croak("panic: COND_WAIT");				\
+	else							\
+	    MUTEX_LOCK(m);					\
+    } STMT_END
+#define COND_DESTROY(c) \
+    STMT_START {						\
+	if (CloseHandle(*(c)) == 0)				\
+	    croak("panic: COND_DESTROY");			\
+    } STMT_END
+
+#define DETACH(t) \
+    STMT_START {						\
+	if (CloseHandle((t)->Tself) == 0)			\
+	    croak("panic: DETACH");				\
+    } STMT_END
+
+#define THR ((struct thread *) TlsGetValue(thr_key))
+#define pthread_getspecific(k)		TlsGetValue(k)
+#define pthread_setspecific(k,v)	(TlsSetValue(k,v) == 0)
+
+#else /* !WIN32 */
+
 /* POSIXish threads */
 typedef pthread_t perl_thread;
 #ifdef OLD_PTHREADS_API
@@ -80,6 +163,7 @@ struct thread *getTHR _((void));
 #else
 #define THR ((struct thread *) pthread_getspecific(thr_key))
 #endif /* OLD_PTHREADS_API */
+#endif /* WIN32 */
 #define dTHR struct thread *thr = THR
 #endif /* FAKE_THREADS */
 

@@ -122,7 +122,7 @@ register PerlInterpreter *sv_interp;
     if (!linestr) {
 #ifdef USE_THREADS
     	INIT_THREADS;
-	New(53, thr, 1, struct thread);
+	Newz(53, thr, 1, struct thread);
 	MUTEX_INIT(&malloc_mutex);
 	MUTEX_INIT(&sv_mutex);
 	MUTEX_INIT(&eval_mutex);
@@ -142,11 +142,28 @@ register PerlInterpreter *sv_interp;
 	thr->private = 0;
 	thr->tid = 0;
 #else
+#ifdef WIN32
+    DuplicateHandle(GetCurrentProcess(),
+		    GetCurrentThread(),
+		    GetCurrentProcess(),
+		    &self,
+		    0,
+		    FALSE,
+		    DUPLICATE_SAME_ACCESS);
+    /* XXX TlsAlloc() should probably be done in the DLL entry
+     * point also.
+     */
+    if ((thr_key = TlsAlloc()) == TLS_OUT_OF_INDEXES)
+	croak("panic: pthread_key_create");
+    if (TlsSetValue(thr_key, (LPVOID) thr) != TRUE)
+	croak("panic: pthread_setspecific");
+#else
 	self = pthread_self();
 	if (pthread_key_create(&thr_key, 0))
 	    croak("panic: pthread_key_create");
 	if (pthread_setspecific(thr_key, (void *) thr))
 	    croak("panic: pthread_setspecific");
+#endif /* WIN32 */
 #endif /* FAKE_THREADS */
 #endif /* USE_THREADS */
 

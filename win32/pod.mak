@@ -9,7 +9,7 @@ POD2HTML = pod2html \
 all: $(CONVERTERS) html
 
 PERL = ..\miniperl.exe
-PL2BAT = ..\win32\bin\pl2bat.bat
+PL2BAT = ..\win32\bin\pl2bat.pl
 
 POD = \
 	perl.pod	\

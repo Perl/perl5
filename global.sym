@@ -236,6 +236,7 @@ sv_no
 sv_undef
 sv_yes
 thisexpr
+thr_key
 timesbuf
 tokenbuf
 uid
