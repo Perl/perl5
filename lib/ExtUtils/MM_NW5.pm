@@ -31,13 +31,14 @@ use ExtUtils::MakeMaker qw( &neatvalue );
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
 
-$BORLAND  = 1 if $Config{'cc'} =~ /^bcc/i;
-$GCC      = 1 if $Config{'cc'} =~ /^gcc/i;
-$DMAKE    = 1 if $Config{'make'} =~ /^dmake/i;
-$NMAKE    = 1 if $Config{'make'} =~ /^nmake/i;
+$BORLAND = 1 if $Config{'cc'} =~ /^bcc/i;
+$GCC     = 1 if $Config{'cc'} =~ /^gcc/i;
+$DMAKE = 1 if $Config{'make'} =~ /^dmake/i;
+$NMAKE = 1 if $Config{'make'} =~ /^nmake/i;
 $PERLMAKE = 1 if $Config{'make'} =~ /^pmake/i;
 
 
+	
 sub init_others
 {
  my ($self) = @_;
@@ -70,10 +71,10 @@ sub const_cccmd {
     my($self,$libperl)=@_;
     return $self->{CONST_CCCMD} if $self->{CONST_CCCMD};
     return '' unless $self->needs_linking();
-    return $self->{CONST_CCCMD} =
+    return $self->{CONST_CCCMD} = 
 	q{CCCMD = $(CC) $(CCFLAGS) $(INC) $(OPTIMIZE) \\
 	$(PERLTYPE) $(MPOLLUTE) -o $@ \\
-	-DVERSION="$(VERSION)" -DXS_VERSION="$(XS_VERSION)"};
+	-DVERSION=\"$(VERSION)\" -DXS_VERSION=\"$(XS_VERSION)\"};
 }
 
 sub constants {
@@ -93,26 +94,27 @@ sub constants {
 	      PERL_ARCHLIB SITELIBEXP SITEARCHEXP LIBPERL_A MYEXTLIB
 	      FIRST_MAKEFILE MAKE_APERL_FILE PERLMAINCC PERL_SRC
 	      PERL_INC PERL FULLPERL LIBPTH BASE_IMPORT PERLRUN
-              FULLPERLRUN PERLRUNINST FULLPERLRUNINST
-              FULL_AR PERL_CORE NLM_VERSION MPKTOOL TOOLPATH
-
+		  FULLPERLRUN PERLRUNINST FULL_AR PERL_CORE FULLPERLRUNINST
+		  NLM_VERSION MPKTOOL TOOLPATH
+		  
 	      / ) {
 	next unless defined $self->{$tmp};
 	push @m, "$tmp = $self->{$tmp}\n";
     }
 
-    (my $boot = $self->{'NAME'}) =~ s/:/_/g;
-    $self->{'BOOT_SYMBOL'}=$boot;
-    push @m, "BOOT_SYMBOL = $self->{'BOOT_SYMBOL'}\n";
+	(my $boot = $self->{'NAME'}) =~ s/:/_/g;
+	$self->{'BOOT_SYMBOL'}=$boot;
+	push @m, "BOOT_SYMBOL = $self->{'BOOT_SYMBOL'}\n";
 
-    # If the final binary name is greater than 8 chars,
-    # truncate it here and rename it after creation
-    # otherwise, Watcom Linker fails
-    if(length($self->{'BASEEXT'}) > 8) {
-        $self->{'NLM_SHORT_NAME'} = substr($self->{'BASEEXT'},0,8);
-        push @m, "NLM_SHORT_NAME = $self->{'NLM_SHORT_NAME'}\n";
-    }
-
+	# If the final binary name is greater than 8 chars,
+	# truncate it here and rename it after creation
+	# otherwise, Watcom Linker fails
+	
+	if(length($self->{'BASEEXT'}) > 8) {
+		$self->{'NLM_SHORT_NAME'} = substr($self->{'BASEEXT'},0,8);
+		push @m, "NLM_SHORT_NAME = $self->{'NLM_SHORT_NAME'}\n";
+	}
+	
     push @m, qq{
 VERSION_MACRO = VERSION
 DEFINE_VERSION = -D\$(VERSION_MACRO)=\\\"\$(VERSION)\\\"
@@ -120,17 +122,16 @@ XS_VERSION_MACRO = XS_VERSION
 XS_DEFINE_VERSION = -D\$(XS_VERSION_MACRO)=\\\"\$(XS_VERSION)\\\"
 };
 
-    # Get the include path and replace the spaces with ;
-    # Copy this to makefile as INCLUDE = d:\...;d:\;
-    (my $inc = $Config{'incpath'}) =~ s/([ ]*)-I/;/g;
+	# Get the include path and replace the spaces with ;
+	# Copy this to makefile as INCLUDE = d:\...;d:\;
+	(my $inc = $Config{'incpath'}) =~ s/([ ]*)-I/;/g;
 
-    push @m, qq{
+push @m, qq{
 INCLUDE = $inc;
 };
-
-    # Set the path to CodeWarrior binaries which might not have been set in
-    # any other place
-    push @m, qq{
+	# Set the path to CodeWarrior binaries which might not have been set in
+	# any other place
+	push @m, qq{
 PATH = \$(PATH);\$(TOOLPATH)
 };
 
@@ -247,15 +248,8 @@ PM_TO_BLIB = }.join(" \\\n\t", %{$self->{PM}}).q{
     join('',@m);
 }
 
-
-=item dynamic_lib (o)
-
-Defines how to produce the *.so (or equivalent) files.
-
-=cut
-
-sub dynamic_lib {
-    my($self, %attribs) = @_;
+sub static_lib {
+	my($self, %attribs) = @_;
     return '' unless $self->needs_linking(); #might be because of a subdir
 
     return '' unless $self->has_link_code;
@@ -264,8 +258,127 @@ sub dynamic_lib {
     my($inst_dynamic_dep) = $attribs{INST_DYNAMIC_DEP} || "";
     my($ldfrom) = '$(LDFROM)';
     my(@m);
-    (my $boot = $self->{NAME}) =~ s/:/_/g;
+	(my $boot = $self->{NAME}) =~ s/:/_/g;
+	my ($mpk);
+    push(@m,'
+# This section creates the dynamically loadable $(INST_DYNAMIC)
+# from $(OBJECT) and possibly $(MYEXTLIB).
+OTHERLDFLAGS = '.$otherldflags.'
+INST_DYNAMIC_DEP = '.$inst_dynamic_dep.'
 
+$(INST_STATIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP)
+');
+#      push(@m,
+#      q{	$(LD) -out:$@ $(LDDLFLAGS) }.$ldfrom.q{ $(OTHERLDFLAGS) }
+#      .q{$(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) -def:$(EXPORT_LIST)});
+
+		# Create xdc data for an MT safe NLM in case of mpk build
+#	if ( scalar(keys %XS) == 0 ) { return; }
+    		 
+	push(@m, 
+    q{	@echo $(BASE_IMPORT) >> $(BASEEXT).def 
+});
+	push(@m, 
+    q{	@echo Import @$(PERL_INC)\perl.imp >> $(BASEEXT).def 
+});  
+
+		if ( $self->{CCFLAGS} =~ m/ -DMPK_ON /) {
+			$mpk=1;
+			push @m, '	$(MPKTOOL) $(XDCFLAGS) $(BASEEXT).xdc
+';
+			push @m, '	@echo xdcdata $(BASEEXT).xdc >> $(BASEEXT).def
+';
+		} else {
+			$mpk=0;
+		}
+		
+		push(@m,
+			q{	$(LD) $(LDFLAGS) $(OBJECT:.obj=.obj) } 
+			);
+
+		push(@m,
+			q{	-desc "Perl 5.7.3 Extension ($(BASEEXT))	XS_VERSION: $(XS_VERSION)" -nlmversion $(NLM_VERSION) } 
+			);
+			
+		# Taking care of long names like FileHandle, ByteLoader, SDBM_File etc
+		if($self->{NLM_SHORT_NAME}) {
+			# In case of nlms with names exceeding 8 chars, build nlm in the 
+			# current dir, rename and move to auto\lib.  If we create in auto\lib
+			# in the first place, we can't rename afterwards.
+			push(@m,
+				q{ -o $(NLM_SHORT_NAME).$(DLEXT)}
+				);
+		} else {
+			push(@m,
+				q{ -o $(INST_AUTODIR)\\$(BASEEXT).$(DLEXT)}
+				);
+		}
+
+		
+#		if ($mpk) {
+#		push (@m, 
+#		q{ Option XDCDATA=$(BASEEXT).xdc }
+#		);
+#		}
+
+		# Add additional lib files if any (SDBM_File)
+		if($self->{MYEXTLIB}) {
+			push(@m,
+				q{ $(MYEXTLIB) }
+				);
+		}
+
+#For now lets comment all the Watcom lib calls
+#q{ LibPath $(LIBPTH) Library plib3s.lib Library math3s.lib Library clib3s.lib Library emu387.lib Library $(PERL_ARCHIVE) Library $(PERL_INC)\Main.lib}
+        
+       
+		push(@m,
+				q{ $(PERL_INC)\Main.lib}
+			   .q{ -commandfile $(BASEEXT).def }
+			);
+
+		# If it is having a short name, rename it 
+		if($self->{NLM_SHORT_NAME}) {
+			push @m, '
+ if exist $(INST_AUTODIR)\\$(BASEEXT).$(DLEXT) del $(INST_AUTODIR)\\$(BASEEXT).$(DLEXT)';
+			push @m, '
+ rename $(NLM_SHORT_NAME).$(DLEXT) $(BASEEXT).$(DLEXT)';
+			push @m, '
+ move $(BASEEXT).$(DLEXT) $(INST_AUTODIR)';
+		}
+
+    push @m, '
+	$(CHMOD) 755 $@
+';
+
+    push @m, $self->dir_target('$(INST_ARCHAUTODIR)');
+# }  else {
+#	push @m, '
+#	@$(NOOP)
+#';
+# }
+    join('',@m);
+}
+
+
+=item dynamic_lib (o)
+
+Defines how to produce the *.so (or equivalent) files.
+
+=cut
+
+sub dynamic_lib {
+	my($self, %attribs) = @_;
+    return '' unless $self->needs_linking(); #might be because of a subdir
+
+    return '' unless $self->has_link_code;
+
+    my($otherldflags) = $attribs{OTHERLDFLAGS} || ($BORLAND ? 'c0d32.obj': '');
+    my($inst_dynamic_dep) = $attribs{INST_DYNAMIC_DEP} || "";
+    my($ldfrom) = '$(LDFROM)';
+    my(@m);
+	(my $boot = $self->{NAME}) =~ s/:/_/g;
+	my ($mpk);
     push(@m,'
 # This section creates the dynamically loadable $(INST_DYNAMIC)
 # from $(OBJECT) and possibly $(MYEXTLIB).
@@ -274,77 +387,86 @@ INST_DYNAMIC_DEP = '.$inst_dynamic_dep.'
 
 $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP)
 ');
+#      push(@m,
+#      q{	$(LD) -out:$@ $(LDDLFLAGS) }.$ldfrom.q{ $(OTHERLDFLAGS) }
+#      .q{$(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) -def:$(EXPORT_LIST)});
 
-    my ($mpk);
-    # Create xdc data for an MT safe NLM in case of mpk build
-    push(@m,
-         q{@echo Export boot_$(BOOT_SYMBOL) > $(BASEEXT).def
-    });
-    push(@m,
-         q{@echo $(BASE_IMPORT) >> $(BASEEXT).def
-    });
-    push(@m,
-         q{@echo Import @$(PERL_INC)\perl.imp >> $(BASEEXT).def
-    }); 
+		# Create xdc data for an MT safe NLM in case of mpk build
+#	if ( scalar(keys %XS) == 0 ) { return; }
+    		push(@m, 
+    		q{	@echo Export boot_$(BOOT_SYMBOL) > $(BASEEXT).def
+}); 
+	push(@m, 
+    q{	@echo $(BASE_IMPORT) >> $(BASEEXT).def 
+});
+	push(@m, 
+    q{	@echo Import @$(PERL_INC)\perl.imp >> $(BASEEXT).def 
+});  
 
+		if ( $self->{CCFLAGS} =~ m/ -DMPK_ON /) {
+			$mpk=1;
+			push @m, '	$(MPKTOOL) $(XDCFLAGS) $(BASEEXT).xdc
+';
+			push @m, '	@echo xdcdata $(BASEEXT).xdc >> $(BASEEXT).def
+';
+		} else {
+			$mpk=0;
+		}
+		
+		push(@m,
+			q{	$(LD) $(LDFLAGS) $(OBJECT:.obj=.obj) } 
+			);
 
-    if ( $self->{CCFLAGS} =~ m/ -DMPK_ON /) {
-        $mpk=1;
-        push @m, qq{\t\$(MPKTOOL) \$(XDCFLAGS) \$(BASEEXT).xdc\n},
-                 qq{\t\@echo xdcdata $(BASEEXT).xdc >> $(BASEEXT).def\n};
-    } else {
-        $mpk=0;
-    }
+		push(@m,
+			q{	-desc "Perl 5.7.3 Extension ($(BASEEXT))	XS_VERSION: $(XS_VERSION)" -nlmversion $(NLM_VERSION) } 
+			);
+			
+		# Taking care of long names like FileHandle, ByteLoader, SDBM_File etc
+		if($self->{NLM_SHORT_NAME}) {
+			# In case of nlms with names exceeding 8 chars, build nlm in the 
+			# current dir, rename and move to auto\lib.  If we create in auto\lib
+			# in the first place, we can't rename afterwards.
+			push(@m,
+				q{ -o $(NLM_SHORT_NAME).$(DLEXT)}
+				);
+		} else {
+			push(@m,
+				q{ -o $(INST_AUTODIR)\\$(BASEEXT).$(DLEXT)}
+				);
+		}
 
-    push(@m,
-         q{$(LD) $(LDFLAGS) $(OBJECT:.obj=.obj) }
-    );
+		# Add additional lib files if any (SDBM_File)
+		if($self->{MYEXTLIB}) {
+			push(@m,
+				q{ $(MYEXTLIB) }
+				);
+		}
 
-    push(@m,
-         qq{\t-desc "Perl 5.7.3 Extension (\$(BASEEXT))  XS_VERSION: \$(XS_VERSION)" -nlmversion \$(NLM_VERSION) }
-    );
+#For now lets comment all the Watcom lib calls
+#q{ LibPath $(LIBPTH) Library plib3s.lib Library math3s.lib Library clib3s.lib Library emu387.lib Library $(PERL_ARCHIVE) Library $(PERL_INC)\Main.lib}
+        
+       
+		push(@m,
+				q{ $(PERL_INC)\Main.lib}
+			   .q{ -commandfile $(BASEEXT).def }
+			);
 
-    # Taking care of long names like FileHandle, ByteLoader, SDBM_File etc
-    if($self->{NLM_SHORT_NAME}) {
-        # In case of nlms with names exceeding 8 chars, build nlm in the 
-        # current dir, rename and move to auto\lib.  If we create in auto\lib
-        # in the first place, we can't rename afterwards.
-        push(@m,
-             q{ -o $(NLM_SHORT_NAME).$(DLEXT)}
-        );
-    } else {
-        push(@m,
-             q{ -o $(INST_AUTODIR)\\$(BASEEXT).$(DLEXT)}
-        );
-    }
-
-    # Add additional lib files if any (SDBM_File)
-    if($self->{MYEXTLIB}) {
-        push(@m,
-             q{ $(MYEXTLIB) }
-        );
-    }
-
-    push(@m,
-         q{ $(PERL_INC)\Main.lib}.
-         q{ -commandfile $(BASEEXT).def }
-         );
-
-    # If it is having a short name, rename it 
-    if($self->{NLM_SHORT_NAME}) {
-        push @m, '
+		# If it is having a short name, rename it 
+		if($self->{NLM_SHORT_NAME}) {
+			push @m, '
  if exist $(INST_AUTODIR)\\$(BASEEXT).$(DLEXT) del $(INST_AUTODIR)\\$(BASEEXT).$(DLEXT)';
-        push @m, '
+			push @m, '
  rename $(NLM_SHORT_NAME).$(DLEXT) $(BASEEXT).$(DLEXT)';
-        push @m, '
+			push @m, '
  move $(BASEEXT).$(DLEXT) $(INST_AUTODIR)';
-    }
+		}
 
     push @m, '
 	$(CHMOD) 755 $@
 ';
 
     push @m, $self->dir_target('$(INST_ARCHAUTODIR)');
+
     join('',@m);
 }
 
@@ -355,5 +477,4 @@ __END__
 =back
 
 =cut 
-
 
