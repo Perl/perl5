@@ -112,7 +112,7 @@ sub heavy_export {
 	foreach $sym (@imports) {
 	    if (!$export_cache->{$sym}) {
 		if ($sym =~ m/^\d/) {
-		    $pkg->require_version($sym);
+		    $pkg->VERSION($sym); # inherit from UNIVERSAL
 		    # If the version number was the only thing specified
 		    # then we should act as if nothing was specified:
 		    if (@imports == 1) {
@@ -217,16 +217,7 @@ sub _push_tags {
 sub require_version {
     my($self, $wanted) = @_;
     my $pkg = ref $self || $self;
-    my $version = ${"${pkg}::VERSION"};
-    if (!defined $version or $version < $wanted) {
-	$version = defined $version ? $version : "(undef)";
-	    # %INC contains slashes, but $pkg contains double-colons.
-	my $file = (map {s,::,/,g; $INC{$_}} "$pkg.pm")[0];
-	$file = defined $file ? " ($file)" : '';
-	require Carp;
-	Carp::croak("$pkg $wanted required--this is only version $version$file")
-    }
-    $version;
+    return ${pkg}->VERSION($wanted);
 }
 
 1;
