@@ -1236,6 +1236,20 @@ C<@LAST_MATCH_END> English aliases for C<@-> and C<@+>.
 
 =item *
 
+ExtUtils::MakeMaker has been significantly cleaned up and fixed.
+The enhanced version has also been backported to earlier releases
+of Perl and submitted to CPAN so that the earlier releases can
+enjoy the fixes.
+
+=item *
+
+The arguments of WriteMakefile() in Makefile.PL are now checked
+for sanity much more carefully than before.  This may cause new
+warnings when modules are being insalled.  See L<ExtUtils::MakeMaker>
+for more details.
+
+=item *
+
 ExtUtils::MakeMaker now uses File::Spec internally, which hopefully
 leads to better portability.
 
