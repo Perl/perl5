@@ -6458,11 +6458,12 @@ Perl_peep(pTHX_ register OP *o)
 	    UNOP *rop;
 	    SV *lexname;
 	    GV **fields;
-	    SV **svp, **indsvp;
+	    SV **svp, **indsvp, *sv;
 	    I32 ind;
 	    char *key;
 	    STRLEN keylen;
 	
+	    o->op_seq = PL_op_seqmax++;
 	    if ((o->op_private & (OPpLVAL_INTRO))
 		|| ((BINOP*)o)->op_last->op_type != OP_CONST)
 		break;
@@ -6489,8 +6490,13 @@ Perl_peep(pTHX_ register OP *o)
 	    rop->op_ppaddr = PL_ppaddr[OP_RV2AV];
 	    o->op_type = OP_AELEM;
 	    o->op_ppaddr = PL_ppaddr[OP_AELEM];
+	    sv = newSViv(ind);
+	    if (SvREADONLY(*svp))
+		SvREADONLY_on(sv);
+	    SvFLAGS(sv) |= (SvFLAGS(*svp)
+			    & (SVs_PADBUSY|SVs_PADTMP|SVs_PADMY));
 	    SvREFCNT_dec(*svp);
-	    *svp = newSViv(ind);
+	    *svp = sv;
 	    break;
 	}
 	
@@ -6498,12 +6504,13 @@ Perl_peep(pTHX_ register OP *o)
 	    UNOP *rop;
 	    SV *lexname;
 	    GV **fields;
-	    SV **svp, **indsvp;
+	    SV **svp, **indsvp, *sv;
 	    I32 ind;
 	    char *key;
 	    STRLEN keylen;
 	    SVOP *first_key_op, *key_op;
-	
+
+	    o->op_seq = PL_op_seqmax++;
 	    if ((o->op_private & (OPpLVAL_INTRO))
 		/* I bet there's always a pushmark... */
 		|| ((LISTOP*)o)->op_first->op_sibling->op_type != OP_LIST)
@@ -6538,14 +6545,20 @@ Perl_peep(pTHX_ register OP *o)
 		key = SvPV(*svp, keylen);
 		indsvp = hv_fetch(GvHV(*fields), key, keylen, FALSE);
 		if (!indsvp) {
-		    Perl_croak(aTHX_ "No such pseudo-hash field \"%s\" in variable %s of type %s",
+		    Perl_croak(aTHX_ "No such pseudo-hash field \"%s\" "
+			       "in variable %s of type %s",
 			  key, SvPV(lexname, n_a), HvNAME(SvSTASH(lexname)));
 		}
 		ind = SvIV(*indsvp);
 		if (ind < 1)
 		    Perl_croak(aTHX_ "Bad index while coercing array into hash");
+		sv = newSViv(ind);
+		if (SvREADONLY(*svp))
+		    SvREADONLY_on(sv);
+		SvFLAGS(sv) |= (SvFLAGS(*svp)
+				& (SVs_PADBUSY|SVs_PADTMP|SVs_PADMY));
 		SvREFCNT_dec(*svp);
-		*svp = newSViv(ind);
+		*svp = sv;
 	    }
 	    break;
 	}
