@@ -859,7 +859,7 @@ cryptography.  (For that, see your nearby CPAN mirror.)
 
 When verifying an existing encrypted string you should use the
 encrypted text as the salt (like C<crypt($plain, $crypted) eq
-$crypted>).  This allows your code to work with the standard L<crypt|\crypt>
+$crypted>).  This allows your code to work with the standard L<crypt|/crypt>
 and with more exotic implementations.  In other words, do not assume
 anything about the returned string itself, or how many bytes in
 the encrypted string matter.
@@ -895,7 +895,7 @@ their own password:
 Of course, typing in your own password to whoever asks you
 for it is unwise.
 
-The L<crypt|\crypt> function is unsuitable for encrypting large quantities
+The L<crypt|/crypt> function is unsuitable for encrypting large quantities
 of data, not least of all because you can't get the information
 back.  Look at the F<by-module/Crypt> and F<by-module/PGP> directories
 on your favorite CPAN mirror for a slew of potentially useful
@@ -5814,9 +5814,10 @@ and 00:00:00 UTC, January 1, 1970 for most other systems).
 Suitable for feeding to C<gmtime> and C<localtime>.
 
 For measuring time in better granularity than one second,
-you may use either the Time::HiRes module from CPAN, or
-if you have gettimeofday(2), you may be able to use the
-C<syscall> interface of Perl, see L<perlfaq8> for details.
+you may use either the Time::HiRes module (from CPAN, and starting from
+Perl 5.8 part of the standard distribution), or if you have
+gettimeofday(2), you may be able to use the C<syscall> interface of Perl.
+See L<perlfaq8> for details.
 
 =item times
 

@@ -3082,6 +3082,7 @@ Perl_yylex(pTHX)
 	    PL_oldbufptr = PL_oldoldbufptr;		/* allow print(STDOUT 123) */
 	else
 	    PL_expect = XTERM;
+	s = skipspace(s);
 	TOKEN('(');
     case ';':
 	CLINE;
