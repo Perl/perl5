@@ -305,39 +305,40 @@ EOT
 	else {
 	    warn "Failed $bad test scripts out of $files, $pct% okay.\n";
 	}
-	warn <<'SHRDLU';
+	warn <<'SHRDLU_1';
    ### Since not all tests were successful, you may want to run some of
    ### them individually and examine any diagnostic messages they produce.
    ### See the INSTALL document's section on "make test".
-SHRDLU
-	warn <<'SHRDLU' if $good / $total > 0.8;
+SHRDLU_1
+	warn <<'SHRDLU_2' if $good / $total > 0.8;
    ### You have a good chance to get more information by running
    ###     ./perl harness
    ### in the 't' directory since most (>=80%) of the tests succeeded.
-SHRDLU
-	use Config;
-	if (my $p = $Config{ldlibpthname}) {
-	    warn <<SHRDLU;
+SHRDLU_2
+        if (eval {require Config; import Config; 1}) {
+	    if (my $p = $Config{ldlibpthname}) {
+		warn <<SHRDLU_3;
    ### You may have to set your dynamic library search path,
    ### $p, to point to the build directory:
-SHRDLU
-           if (exists $ENV{$p} && $ENV{$p} ne '') {
-	       warn <<SHRDLU;
+SHRDLU_3
+                if (exists $ENV{$p} && $ENV{$p} ne '') {
+		    warn <<SHRDLU_4a;
    ###     setenv $p `pwd`:\$$p; cd t; ./perl harness
    ###     $p=`pwd`:\$$p; export $p; cd t; ./perl harness
    ###     export $p=`pwd`:\$$p; cd t; ./perl harness
-SHRDLU
-            } else {
-		warn <<SHRDLU;
+SHRDLU_4a
+                } else {
+		    warn <<SHRDLU_4b;
    ###     setenv $p `pwd`; cd t; ./perl harness
    ###     $p=`pwd`; export $p; cd t; ./perl harness
    ###     export $p=`pwd`; cd t; ./perl harness
-SHRDLU
-            }    
-	    warn <<SHRDLU;
+SHRDLU_4b
+                }    
+		warn <<SHRDLU_5;
    ### for csh-style shells, like tcsh; or for traditional/modern
    ### Bourne-style shells, like bash, ksh, and zsh, respectively.
-SHRDLU
+SHRDLU_5
+            }
 	}
     }
     ($user,$sys,$cuser,$csys) = times;
