@@ -3870,7 +3870,7 @@ OP *op;
 	    return op;
 	}
 	else
-	    scalar(kid);
+	    scalar((OP*)kid);
     }
     else {
 	op_free(op);
