@@ -3,12 +3,12 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
- last modified 18th Dec 1996
- version 1.09
+ last modified 14th Jan 1997
+ version 1.10
 
  All comments/suggestions/problems are welcome
 
-     Copyright (c) 1995, 1996 Paul Marquess. All rights reserved.
+     Copyright (c) 1995, 1996, 1997 Paul Marquess. All rights reserved.
      This program is free software; you can redistribute it and/or
      modify it under the same terms as Perl itself.
 
@@ -35,6 +35,8 @@
 	1.07 -  Fixed bug with RECNO, where bval wasn't defaulting to "\n". 
 	1.08 -  No change to DB_File.xs
 	1.09 -  Default mode for dbopen changed to 0666
+	1.10 -  Fixed fd method so that it still returns -1 for
+		in-memory files when db 1.86 is used.
 
 */
 
@@ -72,6 +74,7 @@ typedef struct {
 	SV *	compare ;
 	SV *	prefix ;
 	SV *	hash ;
+	int	in_memory ;
 	union INFO info ;
 	} DB_File_type;
 
@@ -88,7 +91,9 @@ typedef DBT DBTKEY ;
 
 #define db_close(db)			((db->dbp)->close)(db->dbp)
 #define db_del(db, key, flags)          ((db->dbp)->del)(db->dbp, &key, flags)
-#define db_fd(db)                       ((db->dbp)->fd)(db->dbp) 
+#define db_fd(db)                       (db->in_memory	\
+						? -1 	\
+						: ((db->dbp)->fd)(db->dbp) )
 #define db_put(db, key, value, flags)   ((db->dbp)->put)(db->dbp, &key, &value, flags)
 #define db_get(db, key, value, flags)   ((db->dbp)->get)(db->dbp, &key, &value, flags)
 #define db_seq(db, key, value, flags)   ((db->dbp)->seq)(db->dbp, &key, &value, flags)
@@ -319,7 +324,7 @@ DB * db ;
     else if (RETVAL == 1) /* No key means empty file */
         RETVAL = 0 ;
 
-    return (RETVAL) ;
+    return ((I32)RETVAL) ;
 }
 
 static recno_t
@@ -362,6 +367,9 @@ SV *   sv ;
 
      /* DGH - Next line added to avoid SEGV on existing hash DB */
     CurrentDB = RETVAL; 
+
+    /* fd for 1.86 hash in memory files doesn't return -1 like 1.85 */
+    RETVAL->in_memory = (name == NULL) ;
 
     if (sv)
     {

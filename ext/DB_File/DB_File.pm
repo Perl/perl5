@@ -1,10 +1,10 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
-# last modified 18th Dec 1996
-# version 1.09
+# last modified 14th Jan 1997
+# version 1.10
 #
-#     Copyright (c) 1995, 1996 Paul Marquess. All rights reserved.
+#     Copyright (c) 1995, 1996, 1997 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
 #     modify it under the same terms as Perl itself.
 
@@ -146,7 +146,7 @@ use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO) ;
 use Carp;
 
 
-$VERSION = "1.09" ;
+$VERSION = "1.10" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -1564,6 +1564,11 @@ DB_File::BTREEINFO.
 
 Changed default mode to 0666.
 
+=item 1.10
+
+Fixed fd method so that it still returns -1 for in-memory files when db
+1.86 is used.
+
 =back
 
 =head1 BUGS
@@ -1589,6 +1594,25 @@ is I<not> under the GPL.
 If you are running IRIX, then get Berkeley DB from
 F<http://reality.sgi.com/ariel>. It has the patches necessary to
 compile properly on IRIX 5.3.
+
+As of January 1997, version 1.86 of Berkeley DB is available from the
+Berkeley DB home page. Although this release does fix a number of bugs
+that were present in 1.85 you should ba aware of the following
+information (taken from the Berkeley DB home page) before you consider
+using it:
+
+    DB version 1.86 includes a new implementation of the hash access
+    method that fixes a variety of hashing problems found in DB version
+    1.85. We are making it available as an interim solution until DB
+    2.0 is available.
+
+    PLEASE NOTE: the underlying file format for the hash access method
+    changed between version 1.85 and version 1.86, so you will have to
+    dump and reload all of your databases to convert from version 1.85
+    to version 1.86. If you do not absolutely require the fixes from
+    version 1.86, we strongly urge you to wait until DB 2.0 is released
+    before upgrading from 1.85.  
+
 
 =head1 SEE ALSO
 
