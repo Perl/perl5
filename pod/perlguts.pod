@@ -1405,11 +1405,6 @@ to indicate the number of items on the stack.
 Sets up the C<ix> variable for an XSUB which has aliases.  This is usually
 handled automatically by C<xsubpp>.
 
-=item dXSI32
-
-Sets up the C<ix> variable for an XSUB which has aliases.  This is usually
-handled automatically by C<xsubpp>.
-
 =item ENTER
 
 Opening bracket on a callback.  See C<LEAVE> and L<perlcall>.
@@ -2364,14 +2359,6 @@ C<sv2>.
 
 	I32	sv_cmp _((SV* sv1, SV* sv2));
 
-=item sv_cmp
-
-Compares the strings in two SVs.  Returns -1, 0, or 1 indicating whether the
-string in C<sv1> is less than, equal to, or greater than the string in
-C<sv2>.
-
-	I32	sv_cmp _((SV* sv1, SV* sv2));
-
 =item SvCUR
 
 Returns the length of the string which is in the SV.  See C<SvLEN>.
@@ -2383,12 +2370,6 @@ Returns the length of the string which is in the SV.  See C<SvLEN>.
 Set the length of the string which is in the SV.  See C<SvCUR>.
 
 	SvCUR_set (SV* sv, int val )
-
-=item sv_dec
-
-Auto-decrement of the value in the SV.
-
-	void	sv_dec _((SV* sv));
 
 =item sv_dec
 
@@ -2453,12 +2434,6 @@ Tells an SV that it is an integer and disables all other OK bits.
 
 	SvIOK_on (SV* sv)
 
-=item SvIOK_only
-
-Tells an SV that it is an integer and disables all other OK bits.
-
-	SvIOK_on (SV* sv)
-
 =item SvIOKp
 
 Returns a boolean indicating whether the SV contains an integer.  Checks the
@@ -2499,12 +2474,6 @@ Returns the integer which is stored in the SV.
 Returns the size of the string buffer in the SV.  See C<SvCUR>.
 
 	int SvLEN (SV* sv)
-
-=item sv_len
-
-Returns the length of the string in the SV.  Use C<SvCUR>.
-
-	STRLEN	sv_len _((SV* sv));
 
 =item sv_len
 
@@ -2585,12 +2554,6 @@ Tells an SV that it is a double and disables all other OK bits.
 
 	SvNOK_on (SV* sv)
 
-=item SvNOK_only
-
-Tells an SV that it is a double and disables all other OK bits.
-
-	SvNOK_on (SV* sv)
-
 =item SvNOKp
 
 Returns a boolean indicating whether the SV contains a double.  Checks the
@@ -2625,12 +2588,6 @@ Unsets the PV status of an SV.
 =item SvPOK_on
 
 Tells an SV that it is a string.
-
-	SvPOK_on (SV* sv)
-
-=item SvPOK_only
-
-Tells an SV that it is a string and disables all other OK bits.
 
 	SvPOK_on (SV* sv)
 
