@@ -332,6 +332,25 @@ MAGIC *mg;
     case '\004':		/* ^D */
 	sv_setiv(sv,(I32)(debug & 32767));
 	break;
+    case '\005':  /* ^E */
+#ifdef VMS
+	{
+#	    include <descrip.h>
+#	    include <starlet.h>
+	    char msg[255];
+	    $DESCRIPTOR(msgdsc,msg);
+	    sv_setnv(sv,(double)vaxc$errno);
+	    if (sys$getmsg(vaxc$errno,&msgdsc.dsc$w_length,&msgdsc,0,0) & 1)
+		sv_setpvn(sv,msgdsc.dsc$a_pointer,msgdsc.dsc$w_length);
+	    else
+		sv_setpv(sv,"");
+	}
+#else
+	sv_setnv(sv,(double)errno);
+	sv_setpv(sv, errno ? Strerror(errno) : "");
+#endif
+	SvNOK_on(sv);	/* what a wonderful hack! */
+	break;
     case '\006':		/* ^F */
 	sv_setiv(sv,(I32)maxsysfd);
 	break;
@@ -343,6 +362,9 @@ MAGIC *mg;
 	    sv_setpv(sv, inplace);
 	else
 	    sv_setsv(sv,&sv_undef);
+	break;
+    case '\017':		/* ^O */
+	sv_setpv(sv,osname);
 	break;
     case '\020':		/* ^P */
 	sv_setiv(sv,(I32)perldb);
@@ -1044,6 +1066,13 @@ MAGIC* mg;
 	debug = (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)) | 0x80000000;
 	DEBUG_x(dump_all());
 	break;
+    case '\005':  /* ^E */
+#ifdef VMS
+	set_vaxc_errno(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+#else
+	SETERRNO(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv),4);		/* will anyone ever use this? */
+#endif
+	break;
     case '\006':	/* ^F */
 	maxsysfd = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 	break;
@@ -1057,6 +1086,14 @@ MAGIC* mg;
 	    inplace = savepv(SvPV(sv,na));
 	else
 	    inplace = Nullch;
+	break;
+    case '\017':	/* ^O */
+	if (osname)
+	    Safefree(osname);
+	if (SvOK(sv))
+	    osname = savepv(SvPV(sv,na));
+	else
+	    osname = Nullch;
 	break;
     case '\020':	/* ^P */
 	i = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
@@ -1141,7 +1178,7 @@ MAGIC* mg;
 	statusvalue = FIXSTATUS(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '!':
-	SETERRNO(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv),4);		/* will anyone ever use this? */
+	SETERRNO(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv),SvIV(sv) == EVMSERR ? 4 : vaxc$errno);		/* will anyone ever use this? */
 	break;
     case '<':
 	uid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
