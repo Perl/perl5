@@ -121,7 +121,7 @@ sub getcwd
 	$cwd = "$dir/$cwd";
 	closedir(PARENT);
     } while ($dir);
-    chop($cwd); # drop the trailing /
+    chop($cwd) unless $cwd eq '/'; # drop the trailing /
     $cwd;
 }
 
@@ -246,12 +246,15 @@ if ($^O eq 'VMS') {
     *fastcwd    = \&_vms_cwd;
     *fastgetcwd = \&_vms_cwd;
 }
-elsif ($^O eq 'NT') {
+elsif ($^O eq 'NT' or $^O eq 'MSWin32') {
 
-    *getcwd     = \&cwd;
-    *fastgetcwd = \&cwd;
+    # We assume that &_NT_cwd is defined as an XSUB or in the core.
+    *getcwd     = \&_NT_cwd;
+    *fastcwd    = \&_NT_cwd;
+    *fastgetcwd = \&_NT_cwd;
 }
 elsif ($^O eq 'os2') {
+
     *cwd     = \&_os2_cwd;
     *getcwd     = \&_os2_cwd;
     *fastgetcwd = \&_os2_cwd;
