@@ -108,7 +108,8 @@ sub export {
 			last;
 		    }
 		} elsif ($sym !~ s/^&// || !$exports{$sym}) {
-		    warn qq["$sym" is not exported by the $pkg module];
+                    require Carp;
+		    Carp::carp(qq["$sym" is not exported by the $pkg module]);
 		    $oops++;
 		}
 	    }
@@ -137,8 +138,9 @@ sub export {
 	if (@failed) {
 	    @failed = $pkg->export_fail(@failed);
 	    foreach $sym (@failed) {
-		warn qq["$sym" is not implemented by the $pkg module ],
-			"on this architecture";
+                require Carp;
+		Carp::carp(qq["$sym" is not implemented by the $pkg module ],
+			"on this architecture");
 	    }
 	    if (@failed) {
 		require Carp;
