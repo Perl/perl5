@@ -606,8 +606,10 @@ extirpated as a potential munition).  This can prove useful for checking
 the password file for lousy passwords, amongst other things.  Only the
 guys wearing white hats should do this.
 
-Note that there is no corresponding decrypt, so this fucntion isn't
-all that useful for cryptography. (For that, see your nearby CPAN mirror.)
+Note that crypt is intended to be a one-way function, much like breaking
+eggs to make an omelette.  There is no (known) corresponding decrypt
+function.  As a result, this function isn't all that useful for
+cryptography.  (For that, see your nearby CPAN mirror.)
 
 Here's an example that makes sure that whoever runs this program knows
 their own password:
@@ -704,8 +706,6 @@ Examples:
     print "$val\n" while defined($val = pop(@ary));
     die "Can't readlink $sym: $!"
 	unless defined($value = readlink $sym);
-    eval '@foo = ()' if defined(@foo);
-    die "No XYZ package defined" unless defined %_XYZ;
     sub foo { defined &$bar ? &$bar(@_) : die "No bar"; }
     $debugging = 0 unless defined $debugging;
 
