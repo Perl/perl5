@@ -290,6 +290,69 @@
 #  define DEBUG_m(a)  if (PL_debug & 128)   a
 #endif
 
+/*
+ * Layout of memory:
+ * ~~~~~~~~~~~~~~~~
+ * The memory is broken into "blocks" which occupy multiples of 2K (and
+ * generally speaking, have size "close" to a power of 2).  The addresses
+ * of such *unused* blocks are kept in nextf[i] with big enough i.  (nextf
+ * is an array of linked lists.)  (Addresses of used blocks are not known.)
+ * 
+ * Moreover, since the algorithm may try to "bite" smaller blocks of out
+ * of unused bigger ones, there are also regions of "irregular" size,
+ * managed separately, by a linked list chunk_chain.
+ * 
+ * The third type of storage is the sbrk()ed-but-not-yet-used space, its
+ * end and size are kept in last_sbrk_top and sbrked_remains.
+ * 
+ * Growing blocks "in place":
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~
+ * The address of the block with the greatest address is kept in last_op
+ * (if not known, last_op is 0).  If it is known that the memory above
+ * last_op is not continuous, or contains a chunk from chunk_chain,
+ * last_op is set to 0.
+ * 
+ * The chunk with address last_op may be grown by expanding into
+ * sbrk()ed-but-not-yet-used space, or trying to sbrk() more continuous
+ * memory.
+ * 
+ * Management of last_op:
+ * ~~~~~~~~~~~~~~~~~~~~~
+ * 
+ * free() never changes the boundaries of blocks, so is not relevant.
+ * 
+ * The only way realloc() may change the boundaries of blocks is if it
+ * grows a block "in place".  However, in the case of success such a
+ * chunk is automatically last_op, and it remains last_op.  In the case
+ * of failure getpages_adjacent() clears last_op.
+ * 
+ * malloc() may change blocks by calling morecore() only.
+ * 
+ * morecore() may create new blocks by:
+ *   a) biting pieces from chunk_chain (cannot create one above last_op);
+ *   b) biting a piece from an unused block (if block was last_op, this
+ *      may create a chunk from chain above last_op, thus last_op is
+ *      invalidated in such a case).
+ *   c) biting of sbrk()ed-but-not-yet-used space.  This creates 
+ *      a block which is last_op.
+ *   d) Allocating new pages by calling getpages();
+ * 
+ * getpages() creates a new block.  It marks last_op at the bottom of
+ * the chunk of memory it returns.
+ * 
+ * Active pages footprint:
+ * ~~~~~~~~~~~~~~~~~~~~~~
+ * Note that we do not need to traverse the lists in nextf[i], just take
+ * the first element of this list.  However, we *need* to traverse the
+ * list in chunk_chain, but most the time it should be a very short one,
+ * so we do not step on a lot of pages we are not going to use.
+ * 
+ * Flaws:
+ * ~~~~~
+ * get_from_bigger_buckets(): forget to increment price => Quite
+ * aggressive.
+ */
+
 /* I don't much care whether these are defined in sys/types.h--LAW */
 
 #define u_char unsigned char
@@ -990,11 +1053,15 @@ getpages(int needed, int *nblksp, int bucket)
 	/* Common case, anything is fine. */
 	sbrk_good++;
 	ovp = (union overhead *) (cp - sbrked_remains);
+	last_op = cp - sbrked_remains;
 	sbrked_remains = require - (needed - sbrked_remains);
     } else if (cp == (char *)-1) { /* no more room! */
 	ovp = (union overhead *)emergency_sbrk(needed);
 	if (ovp == (union overhead *)-1)
 	    return 0;
+	if (((char*)ovp) > last_op) {	/* Cannot happen with current emergency_sbrk() */
+	    last_op = 0;
+	}
 	return ovp;
     } else {			/* Non-continuous or first sbrk(). */
 	long add = sbrked_remains;
@@ -1089,9 +1156,9 @@ getpages(int needed, int *nblksp, int bucket)
 	}
 #endif
 	sbrked_remains = require - needed;
+	last_op = cp;
     }
     last_sbrk_top = cp + require;
-    last_op = (char*) cp;
 #ifdef DEBUGGING_MSTATS
     goodsbrk += require;
 #endif	
