@@ -97,9 +97,9 @@ sub SWASHNEW {
                 ## If so, the associated name is the file we need.
                 ##
                 my $prefix = substr(lc($istype), 0, 2);
-                if (exists $utf8::IsPat{$prefix})
+                if (my $hashref = $utf8::IsPat{$prefix})
                 {
-                    while (my ($pat, $name) = each %{$utf8::IsPat{$prefix}})
+                    while (my ($pat, $name) = each %{$hashref})
                     {
                         print "isprefix = $prefix, Is = $istype, pat = $pat\n" if DEBUG;
                         ##
@@ -113,6 +113,7 @@ sub SWASHNEW {
                         if ($istype =~ /^$pat$/i)
                         {
                             $file = "unicore/Is/$name.pl";
+                            keys %{$hashref}; ## reset the 'each' above
                             last GETFILE;
                         }
                     }
@@ -148,16 +149,22 @@ sub SWASHNEW {
                     last GETFILE;
                 }
 
+                ##
+                ## Need to look at %utf8::InPat (loaded from "unicore/In.pl")
+                ## to see if there's a regex that matches this $intype.
+                ## If so, the associated name is the file we need.
+                ##
                 my $prefix = substr(lc($intype), 0, 2);
-                if (exists $utf8::InPat{$prefix})
+                if (my $hashref = $utf8::InPat{$prefix})
                 {
                     print "inprefix = $prefix, In = $intype\n" if DEBUG;
-                    while (my ($pat, $name) = each %{$utf8::InPat{$prefix}})
+                    while (my ($pat, $name) = each %{$hashref})
                     {
                         print "inprefix = $prefix, In = $intype, k = $pat\n" if DEBUG;
                         if ($intype =~ /^$pat$/i) {
                             $file = "unicore/In/$name.pl";
                             print "inprefix = $prefix, In = $intype, k = $pat, file = $file\n" if DEBUG;
+                            keys %{$hashref}; ## reset the 'each' above
                             last GETFILE;
                         }
                     }
