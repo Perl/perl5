@@ -608,11 +608,6 @@ d_getlogin (d_getlogin.U):
 	indicates to the C program that the getlogin() routine is available
 	to get the login name.
 
-d_getmnt (d_getmnt.U):
-	This variable conditionally defines the HAS_GETMNT symbol, which
-	indicates to the C program that the getmnt() routine is available
-	to retrieve one or more mount info blocks by filename.
-
 d_getmntent (d_getmntent.U):
 	This variable conditionally defines the HAS_GETMNTENT symbol, which
 	indicates to the C program that the getmntent() routine is available

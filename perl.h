@@ -3202,21 +3202,10 @@ typedef struct am_table_short AMTS;
 #   include <sys/statvfs.h>     /* for f?statvfs() */
 #endif
 #ifdef I_SYS_MOUNT
-#   include <sys/mount.h>       /* for *BSD f?statfs() or getmnt() */
+#   include <sys/mount.h>       /* for *BSD f?statfs() */
 #endif
 #ifdef I_MNTENT
 #   include <mntent.h>          /* for getmntent() */
-#endif
-
-#undef PERL_MOUNT_NOSUID
-#if !defined(PERL_MOUNT_NOSUID) && defined(MNT_NOSUID)
-#   define PERL_MOUNT_NOSUID MNT_NOSUID
-#endif
-#if !defined(PERL_MOUNT_NOSUID) && defined(MS_NOSUID)
-#   define PERL_MOUNT_NOSUID MS_NOSUID
-#endif
-#if !defined(PERL_MOUNT_NOSUID) && defined(M_NOSUID)
-#   define PERL_MOUNT_NOSUID M_NOSUID
 #endif
 
 #endif /* IAMSUID */

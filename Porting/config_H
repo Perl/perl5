@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Tue Oct 26 13:20:35 EET DST 1999
+ * Configuration time: Tue Oct 26 16:45:55 EET DST 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -2189,12 +2189,6 @@
  *	available to ftell beyond 32 bits (useful for ILP32 hosts).
  */
 /*#define HAS_FTELLO		/ **/
-
-/* HAS_GETMNT:
- *	This symbol, if defined, indicates that the getmnt routine is
- *	available to get filesystem mount info by filename.
- */
-/*#define HAS_GETMNT		/ **/
 
 /* HAS_GETMNTENT:
  *	This symbol, if defined, indicates that the getmntent routine is
