@@ -1657,10 +1657,11 @@ Gid_t getgid _((void));
 Gid_t getegid _((void));
 #endif
 
-#ifdef DEBUGGING
 #ifndef Perl_debug_log
 #define Perl_debug_log	PerlIO_stderr()
 #endif
+
+#ifdef DEBUGGING
 #undef  YYDEBUG
 #define YYDEBUG 1
 #define DEB(a)     			a
@@ -2184,7 +2185,6 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_regdata,
     want_vtbl_regdatum
 };
-
 
 				/* Note: the lowest 8 bits are reserved for
 				   stuffing into op->op_private */

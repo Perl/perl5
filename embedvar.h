@@ -30,6 +30,7 @@
 #define PL_defstash		(PL_curinterp->Tdefstash)
 #define PL_delaymagic		(PL_curinterp->Tdelaymagic)
 #define PL_dirty		(PL_curinterp->Tdirty)
+#define PL_dumpindent		(PL_curinterp->Tdumpindent)
 #define PL_extralen		(PL_curinterp->Textralen)
 #define PL_firstgv		(PL_curinterp->Tfirstgv)
 #define PL_formtarget		(PL_curinterp->Tformtarget)
@@ -168,7 +169,6 @@
 #define PL_doextract		(PL_curinterp->Idoextract)
 #define PL_doswitches		(PL_curinterp->Idoswitches)
 #define PL_dowarn		(PL_curinterp->Idowarn)
-#define PL_dumplvl		(PL_curinterp->Idumplvl)
 #define PL_e_script		(PL_curinterp->Ie_script)
 #define PL_endav		(PL_curinterp->Iendav)
 #define PL_envgv		(PL_curinterp->Ienvgv)
@@ -303,7 +303,6 @@
 #define PL_Idoextract		PL_doextract
 #define PL_Idoswitches		PL_doswitches
 #define PL_Idowarn		PL_dowarn
-#define PL_Idumplvl		PL_dumplvl
 #define PL_Ie_script		PL_e_script
 #define PL_Iendav		PL_endav
 #define PL_Ienvgv		PL_envgv
@@ -415,6 +414,7 @@
 #define PL_Tdefstash		PL_defstash
 #define PL_Tdelaymagic		PL_delaymagic
 #define PL_Tdirty		PL_dirty
+#define PL_Tdumpindent		PL_dumpindent
 #define PL_Textralen		PL_extralen
 #define PL_Tfirstgv		PL_firstgv
 #define PL_Tformtarget		PL_formtarget
@@ -541,6 +541,7 @@
 #define PL_defstash		(thr->Tdefstash)
 #define PL_delaymagic		(thr->Tdelaymagic)
 #define PL_dirty		(thr->Tdirty)
+#define PL_dumpindent		(thr->Tdumpindent)
 #define PL_extralen		(thr->Textralen)
 #define PL_firstgv		(thr->Tfirstgv)
 #define PL_formtarget		(thr->Tformtarget)

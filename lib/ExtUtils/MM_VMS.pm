@@ -1534,15 +1534,20 @@ sub processPL {
     return "" unless $self->{PL_FILES};
     my(@m, $plfile);
     foreach $plfile (sort keys %{$self->{PL_FILES}}) {
-	my $vmsplfile = vmsify($plfile);
-	my $vmsfile = vmsify($self->{PL_FILES}->{$plfile});
-	push @m, "
+        my $list = ref($self->{PL_FILES}->{$plfile})
+		? $self->{PL_FILES}->{$plfile}
+		: [$self->{PL_FILES}->{$plfile}];
+	foreach $target (@$list) {
+	    my $vmsplfile = vmsify($plfile);
+	    my $vmsfile = vmsify($target);
+	    push @m, "
 all :: $vmsfile
 	\$(NOECHO) \$(NOOP)
 
 $vmsfile :: $vmsplfile
-",'	$(PERL) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)" "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" '," $vmsplfile
+",'	$(PERL) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)" "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" '," $vmsplfile $vmsfile
 ";
+	}
     }
     join "", @m;
 }

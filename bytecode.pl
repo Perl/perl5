@@ -1,3 +1,6 @@
+BEGIN {
+  push @INC, './lib';
+}
 use strict;
 my %alias_to = (
     U32 => [qw(PADOFFSET STRLEN)],

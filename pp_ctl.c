@@ -617,7 +617,13 @@ PP(pp_formline)
 	    break;
 
 	case FF_MORE:
-	    if (itemsize) {
+	    s = chophere;
+	    send = item + len;
+	    if (chopspace) {
+		while (*s && isSPACE(*s) && s < send)
+		    s++;
+	    }
+	    if (s < send) {
 		arg = fieldsize - itemsize;
 		if (arg) {
 		    fieldsize -= arg;

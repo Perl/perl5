@@ -166,8 +166,8 @@
 #define PL_doswitches		pPerl->PL_doswitches
 #undef  PL_dowarn
 #define PL_dowarn		pPerl->PL_dowarn
-#undef  PL_dumplvl
-#define PL_dumplvl		pPerl->PL_dumplvl
+#undef  PL_dumpindent
+#define PL_dumpindent		pPerl->PL_dumpindent
 #undef  PL_e_script
 #define PL_e_script		pPerl->PL_e_script
 #undef  PL_egid
@@ -1021,6 +1021,12 @@
 #define do_exec			pPerl->Perl_do_exec
 #undef  do_execfree
 #define do_execfree		pPerl->Perl_do_execfree
+#undef  do_gv_dump
+#define do_gv_dump		pPerl->Perl_do_gv_dump
+#undef  do_gvgv_dump
+#define do_gvgv_dump		pPerl->Perl_do_gvgv_dump
+#undef  do_hv_dump
+#define do_hv_dump		pPerl->Perl_do_hv_dump
 #undef  do_ipcctl
 #define do_ipcctl		pPerl->Perl_do_ipcctl
 #undef  do_ipcget
@@ -1029,14 +1035,20 @@
 #define do_join			pPerl->Perl_do_join
 #undef  do_kv
 #define do_kv			pPerl->Perl_do_kv
+#undef  do_magic_dump
+#define do_magic_dump		pPerl->Perl_do_magic_dump
 #undef  do_msgrcv
 #define do_msgrcv		pPerl->Perl_do_msgrcv
 #undef  do_msgsnd
 #define do_msgsnd		pPerl->Perl_do_msgsnd
+#undef  do_op_dump
+#define do_op_dump		pPerl->Perl_do_op_dump
 #undef  do_open
 #define do_open			pPerl->Perl_do_open
 #undef  do_pipe
 #define do_pipe			pPerl->Perl_do_pipe
+#undef  do_pmop_dump
+#define do_pmop_dump		pPerl->Perl_do_pmop_dump
 #undef  do_print
 #define do_print		pPerl->Perl_do_print
 #undef  do_readline
@@ -1051,6 +1063,8 @@
 #define do_shmio		pPerl->Perl_do_shmio
 #undef  do_sprintf
 #define do_sprintf		pPerl->Perl_do_sprintf
+#undef  do_sv_dump
+#define do_sv_dump		pPerl->Perl_do_sv_dump
 #undef  do_sysseek
 #define do_sysseek		pPerl->Perl_do_sysseek
 #undef  do_tell
@@ -1123,16 +1137,12 @@
 #define dump_fds		pPerl->Perl_dump_fds
 #undef  dump_form
 #define dump_form		pPerl->Perl_dump_form
-#undef  dump_gv
-#define dump_gv			pPerl->Perl_dump_gv
+#undef  dump_indent
+#define dump_indent		pPerl->Perl_dump_indent
 #undef  dump_mstats
 #define dump_mstats		pPerl->Perl_dump_mstats
-#undef  dump_op
-#define dump_op			pPerl->Perl_dump_op
 #undef  dump_packsubs
 #define dump_packsubs		pPerl->Perl_dump_packsubs
-#undef  dump_pm
-#define dump_pm			pPerl->Perl_dump_pm
 #undef  dump_sub
 #define dump_sub		pPerl->Perl_dump_sub
 #undef  dumpuntil
@@ -1217,6 +1227,8 @@
 #define gv_autoload4		pPerl->Perl_gv_autoload4
 #undef  gv_check
 #define gv_check		pPerl->Perl_gv_check
+#undef  gv_dump
+#define gv_dump			pPerl->Perl_gv_dump
 #undef  gv_efullname
 #define gv_efullname		pPerl->Perl_gv_efullname
 #undef  gv_efullname3
@@ -1425,6 +1437,8 @@
 #define magic_clearpack		pPerl->Perl_magic_clearpack
 #undef  magic_clearsig
 #define magic_clearsig		pPerl->Perl_magic_clearsig
+#undef  magic_dump
+#define magic_dump		pPerl->Perl_magic_dump
 #undef  magic_existspack
 #define magic_existspack	pPerl->Perl_magic_existspack
 #undef  magic_freeregexp
@@ -1753,6 +1767,8 @@
 #define oopsHV			pPerl->Perl_oopsHV
 #undef  op_const_sv
 #define op_const_sv		pPerl->Perl_op_const_sv
+#undef  op_dump
+#define op_dump			pPerl->Perl_op_dump
 #undef  op_free
 #define op_free			pPerl->Perl_op_free
 #undef  open_script
@@ -1831,6 +1847,8 @@
 #define pidgone			pPerl->Perl_pidgone
 #undef  pmflag
 #define pmflag			pPerl->Perl_pmflag
+#undef  pmop_dump
+#define pmop_dump		pPerl->Perl_pmop_dump
 #undef  pmruntime
 #define pmruntime		pPerl->Perl_pmruntime
 #undef  pmtrans
@@ -2539,6 +2557,8 @@
 #define push_return		pPerl->Perl_push_return
 #undef  push_scope
 #define push_scope		pPerl->Perl_push_scope
+#undef  pv_display
+#define pv_display		pPerl->Perl_pv_display
 #undef  qsortsv
 #define qsortsv			pPerl->Perl_qsortsv
 #undef  re_croak2

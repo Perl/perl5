@@ -3,7 +3,8 @@
  */
 
 /*
-  Here are some notes on configuring Perl's malloc.
+  Here are some notes on configuring Perl's malloc.  (For non-perl
+  usage see below.)
  
   There are two macros which serve as bulk disablers of advanced
   features of this malloc: NO_FANCY_MALLOC, PLAIN_MALLOC (undef by
@@ -111,6 +112,43 @@
 
  */
 
+/*
+   If used outside of Perl environment, it may be useful to redefine
+   the following macros (listed below with defaults):
+
+     # Type of address returned by allocation functions
+     Malloc_t				void *
+
+     # Type of size argument for allocation functions
+     MEM_SIZE				unsigned long
+
+     # Maximal value in LONG
+     LONG_MAX				0x7FFFFFFF
+
+     # Unsigned integer type big enough to keep a pointer
+     UV					unsigned long
+
+     # Type of pointer with 1-byte granularity
+     caddr_t				char *
+
+     # Type returned by free()
+     Free_t				void
+
+     # Fatal error reporting function
+     croak(format, arg)			warn(idem) + exit(1)
+  
+     # Error reporting function
+     warn(format, arg)			fprintf(stderr, idem)
+
+     # Locking/unlocking for MT operation
+     MALLOC_LOCK			MUTEX_LOCK(&PL_malloc_mutex)
+     MALLOC_UNLOCK			MUTEX_UNLOCK(&PL_malloc_mutex)
+
+     # Locking/unlocking mutex for MT operation
+     MUTEX_LOCK(l)			void
+     MUTEX_UNLOCK(l)			void
+ */
+
 #ifndef NO_FANCY_MALLOC
 #  ifndef SMALL_BUCKET_VIA_TABLE
 #    define SMALL_BUCKET_VIA_TABLE
@@ -167,7 +205,18 @@
  * implementation, the available sizes are 2^n-4 (or 2^n-12) bytes long.
  * If PACK_MALLOC is defined, small blocks are 2^n bytes long.
  * This is designed for use in a program that uses vast quantities of memory,
- * but bombs when it runs out. 
+ * but bombs when it runs out.
+ * 
+ * Modifications Copyright Ilya Zakharevich 1996-98.
+ * 
+ * Still very quick, but much more thrifty.  (Std config is 10% slower
+ * than it was, and takes 67% of old heap size for typical usage.)
+ *
+ * Allocations of small blocks are now table-driven to many different
+ * buckets.  Sizes of really big buckets are increased to accomodata
+ * common size=power-of-2 blocks.  Running-out-of-memory is made into
+ * an exception.  Deeply configurable and thread-safe.
+ * 
  */
 
 #ifdef PERL_CORE
@@ -206,10 +255,10 @@
 #    define PerlIO_stderr() stderr
 #  endif
 #  ifndef croak				/* make depend */
-#    define croak(mess, arg) warn((mess), (arg)); exit(1);
+#    define croak(mess, arg) (warn((mess), (arg)), exit(1))
 #  endif 
 #  ifndef warn
-#    define warn(mess, arg) fprintf(stderr, (mess), (arg));
+#    define warn(mess, arg) fprintf(stderr, (mess), (arg))
 #  endif 
 #  ifdef DEBUG_m
 #    undef DEBUG_m
@@ -228,10 +277,81 @@
 #  define MUTEX_UNLOCK(l)
 #endif 
 
+#ifndef MALLOC_LOCK
+#  define MALLOC_LOCK		MUTEX_LOCK(&PL_malloc_mutex)
+#endif 
+
+#ifndef MALLOC_UNLOCK
+#  define MALLOC_UNLOCK		MUTEX_UNLOCK(&PL_malloc_mutex)
+#endif 
+
 #ifdef DEBUGGING
 #  undef DEBUG_m
 #  define DEBUG_m(a)  if (PL_debug & 128)   a
 #endif
+
+/*
+ * Layout of memory:
+ * ~~~~~~~~~~~~~~~~
+ * The memory is broken into "blocks" which occupy multiples of 2K (and
+ * generally speaking, have size "close" to a power of 2).  The addresses
+ * of such *unused* blocks are kept in nextf[i] with big enough i.  (nextf
+ * is an array of linked lists.)  (Addresses of used blocks are not known.)
+ * 
+ * Moreover, since the algorithm may try to "bite" smaller blocks of out
+ * of unused bigger ones, there are also regions of "irregular" size,
+ * managed separately, by a linked list chunk_chain.
+ * 
+ * The third type of storage is the sbrk()ed-but-not-yet-used space, its
+ * end and size are kept in last_sbrk_top and sbrked_remains.
+ * 
+ * Growing blocks "in place":
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~
+ * The address of the block with the greatest address is kept in last_op
+ * (if not known, last_op is 0).  If it is known that the memory above
+ * last_op is not continuous, or contains a chunk from chunk_chain,
+ * last_op is set to 0.
+ * 
+ * The chunk with address last_op may be grown by expanding into
+ * sbrk()ed-but-not-yet-used space, or trying to sbrk() more continuous
+ * memory.
+ * 
+ * Management of last_op:
+ * ~~~~~~~~~~~~~~~~~~~~~
+ * 
+ * free() never changes the boundaries of blocks, so is not relevant.
+ * 
+ * The only way realloc() may change the boundaries of blocks is if it
+ * grows a block "in place".  However, in the case of success such a
+ * chunk is automatically last_op, and it remains last_op.  In the case
+ * of failure getpages_adjacent() clears last_op.
+ * 
+ * malloc() may change blocks by calling morecore() only.
+ * 
+ * morecore() may create new blocks by:
+ *   a) biting pieces from chunk_chain (cannot create one above last_op);
+ *   b) biting a piece from an unused block (if block was last_op, this
+ *      may create a chunk from chain above last_op, thus last_op is
+ *      invalidated in such a case).
+ *   c) biting of sbrk()ed-but-not-yet-used space.  This creates 
+ *      a block which is last_op.
+ *   d) Allocating new pages by calling getpages();
+ * 
+ * getpages() creates a new block.  It marks last_op at the bottom of
+ * the chunk of memory it returns.
+ * 
+ * Active pages footprint:
+ * ~~~~~~~~~~~~~~~~~~~~~~
+ * Note that we do not need to traverse the lists in nextf[i], just take
+ * the first element of this list.  However, we *need* to traverse the
+ * list in chunk_chain, but most the time it should be a very short one,
+ * so we do not step on a lot of pages we are not going to use.
+ * 
+ * Flaws:
+ * ~~~~~
+ * get_from_bigger_buckets(): forget to increment price => Quite
+ * aggressive.
+ */
 
 /* I don't much care whether these are defined in sys/types.h--LAW */
 
@@ -588,7 +708,7 @@ emergency_sbrk(MEM_SIZE size)
 
     if (size >= BIG_SIZE) {
 	/* Give the possibility to recover: */
-	MUTEX_UNLOCK(&PL_malloc_mutex);
+	MALLOC_UNLOCK;
 	croak("Out of memory during \"large\" request for %i bytes", size);
     }
 
@@ -635,7 +755,7 @@ emergency_sbrk(MEM_SIZE size)
 	SvCUR(sv) = SvLEN(sv) = 0;
     }
   do_croak:
-    MUTEX_UNLOCK(&PL_malloc_mutex);
+    MALLOC_UNLOCK;
     croak("Out of memory during request for %i bytes", size);
 }
 
@@ -706,7 +826,7 @@ malloc(register size_t nbytes)
 		croak("%s", "panic: malloc");
 #endif
 
-	MUTEX_LOCK(&PL_malloc_mutex);
+	MALLOC_LOCK;
 	/*
 	 * Convert amount of memory requested into
 	 * closest block size stored in hash buckets
@@ -745,7 +865,7 @@ malloc(register size_t nbytes)
   	if (nextf[bucket] == NULL)    
   		morecore(bucket);
   	if ((p = nextf[bucket]) == NULL) {
-		MUTEX_UNLOCK(&PL_malloc_mutex);
+		MALLOC_UNLOCK;
 #ifdef PERL_CORE
 		if (!PL_nomemok) {
 		    PerlIO_puts(PerlIO_stderr(),"Out of memory!\n");
@@ -795,7 +915,7 @@ malloc(register size_t nbytes)
 	    *((u_int *)((caddr_t)p + nbytes - RSLOP)) = RMAGIC;
 	}
 #endif
-	MUTEX_UNLOCK(&PL_malloc_mutex);
+	MALLOC_UNLOCK;
   	return ((Malloc_t)(p + CHUNK_SHIFT));
 }
 
@@ -933,11 +1053,15 @@ getpages(int needed, int *nblksp, int bucket)
 	/* Common case, anything is fine. */
 	sbrk_good++;
 	ovp = (union overhead *) (cp - sbrked_remains);
+	last_op = cp - sbrked_remains;
 	sbrked_remains = require - (needed - sbrked_remains);
     } else if (cp == (char *)-1) { /* no more room! */
 	ovp = (union overhead *)emergency_sbrk(needed);
 	if (ovp == (union overhead *)-1)
 	    return 0;
+	if (((char*)ovp) > last_op) {	/* Cannot happen with current emergency_sbrk() */
+	    last_op = 0;
+	}
 	return ovp;
     } else {			/* Non-continuous or first sbrk(). */
 	long add = sbrked_remains;
@@ -980,7 +1104,7 @@ getpages(int needed, int *nblksp, int bucket)
 				      "failed to fix bad sbrk()\n"));
 #ifdef PACK_MALLOC
 		if (slack) {
-		    MUTEX_UNLOCK(&PL_malloc_mutex);
+		    MALLOC_UNLOCK;
 		    croak("%s", "panic: Off-page sbrk");
 		}
 #endif
@@ -1032,9 +1156,9 @@ getpages(int needed, int *nblksp, int bucket)
 	}
 #endif
 	sbrked_remains = require - needed;
+	last_op = cp;
     }
     last_sbrk_top = cp + require;
-    last_op = (char*) cp;
 #ifdef DEBUGGING_MSTATS
     goodsbrk += require;
 #endif	
@@ -1096,7 +1220,7 @@ morecore(register int bucket)
   	if (nextf[bucket])
   		return;
 	if (bucket == sizeof(MEM_SIZE)*8*BUCKETS_PER_POW2) {
-	    MUTEX_UNLOCK(&PL_malloc_mutex);
+	    MALLOC_UNLOCK;
 	    croak("%s", "Out of memory during ridiculously large request");
 	}
 	if (bucket > max_bucket)
@@ -1225,7 +1349,7 @@ free(void *mp)
 #endif
 		return;				/* sanity */
 	    }
-	MUTEX_LOCK(&PL_malloc_mutex);
+	MALLOC_LOCK;
 #ifdef RCHECK
   	ASSERT(ovp->ov_rmagic == RMAGIC, "chunk's head overwrite");
 	if (OV_INDEX(ovp) <= MAX_SHORT_BUCKET) {
@@ -1248,7 +1372,7 @@ free(void *mp)
   	size = OV_INDEX(ovp);
 	ovp->ov_next = nextf[size];
   	nextf[size] = ovp;
-	MUTEX_UNLOCK(&PL_malloc_mutex);
+	MALLOC_UNLOCK;
 }
 
 /*
@@ -1286,7 +1410,7 @@ realloc(void *mp, size_t nbytes)
 	if (!cp)
 		return malloc(nbytes);
 
-	MUTEX_LOCK(&PL_malloc_mutex);
+	MALLOC_LOCK;
 	ovp = (union overhead *)((caddr_t)cp 
 				- sizeof (union overhead) * CHUNK_SHIFT);
 	bucket = OV_INDEX(ovp);
@@ -1384,7 +1508,7 @@ realloc(void *mp, size_t nbytes)
 		}
 #endif
 		res = cp;
-		MUTEX_UNLOCK(&PL_malloc_mutex);
+		MALLOC_UNLOCK;
 		DEBUG_m(PerlIO_printf(Perl_debug_log, 
 			      "0x%lx: (%05lu) realloc %ld bytes inplace\n",
 			      (unsigned long)res,(unsigned long)(PL_an++),
@@ -1416,7 +1540,7 @@ realloc(void *mp, size_t nbytes)
 		goto hard_way;
 	} else {
 	  hard_way:
-	    MUTEX_UNLOCK(&PL_malloc_mutex);
+	    MALLOC_UNLOCK;
 	    DEBUG_m(PerlIO_printf(Perl_debug_log, 
 			      "0x%lx: (%05lu) realloc %ld bytes the hard way\n",
 			      (unsigned long)cp,(unsigned long)(PL_an++),

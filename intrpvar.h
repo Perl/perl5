@@ -146,7 +146,6 @@ PERLVAR(Ioldname,	char *)		/* what to preserve mode on */
 PERLVAR(IArgv,		char **)	/* stuff to free from do_aexec, vfork safe */
 PERLVAR(ICmd,		char *)		/* stuff to free from do_aexec, vfork safe */
 PERLVAR(Imystrk,	SV *)		/* temp key string for do_each() */
-PERLVAR(Idumplvl,	I32)		/* indentation level on syntax tree dump */
 PERLVAR(Ioldlastpm,	PMOP *)		/* for saving regexp context in debugger */
 PERLVAR(Igensym,	I32)		/* next symbol for getsym() to define */
 PERLVAR(Ipreambled,	bool)

@@ -1326,7 +1326,7 @@ The Data::Dumper module on CPAN is nice for printing out
 data structures, and FreezeThaw for copying them.  For example:
 
     use FreezeThaw qw(freeze thaw);
-    $new = thaw freeze $old;
+    ($new) = thaw freeze $old;
 
 Where $old can be (a reference to) any kind of data structure you'd like.
 It will be deeply copied.

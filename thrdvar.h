@@ -102,6 +102,7 @@ PERLVAR(Thv_fetch_ent_mh, HE)		/* owned by hv_fetch_ent() */
 PERLVAR(Tmodcount,	I32)		/* how much mod()ification in assignment? */
 
 PERLVAR(Tlastgotoprobe,	OP*)		/* from pp_ctl.c */
+PERLVARI(Tdumpindent,	I32, 4)		/* # of blanks per dump indentation level */
 
 /* sort stuff */
 PERLVAR(Tsortcop,	OP *)		/* user defined sort routine */
@@ -160,7 +161,7 @@ PERLVARI(Tregcompp,	regcomp_t, FUNC_NAME_TO_PTR(pregcomp))
 					/* Pointer to RE compiler */
 PERLVARI(Tregexecp,	regexec_t, FUNC_NAME_TO_PTR(regexec_flags))
 					/* Pointer to RE executer */
-PERLVARI(Treginterp_cnt,int,	    0)	/* Whether `Regexp'
+PERLVARI(Treginterp_cnt,int,	    0)	/* Whether `re'
 						   was interpolated. */
 #ifdef DEBUGGING
 PERLVARI(Twatchaddr,	char **,    0)

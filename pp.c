@@ -727,11 +727,11 @@ PP(pp_defined)
 	RETPUSHNO;
     switch (SvTYPE(sv)) {
     case SVt_PVAV:
-	if (AvMAX(sv) >= 0 || SvGMAGICAL(sv))
+	if (AvMAX(sv) >= 0 || SvGMAGICAL(sv) || (SvRMAGICAL(sv) && mg_find(sv,'P')))
 	    RETPUSHYES;
 	break;
     case SVt_PVHV:
-	if (HvARRAY(sv) || SvGMAGICAL(sv))
+	if (HvARRAY(sv) || SvGMAGICAL(sv) || (SvRMAGICAL(sv) && mg_find(sv,'P')))
 	    RETPUSHYES;
 	break;
     case SVt_PVCV:
@@ -762,8 +762,11 @@ PP(pp_undef)
 	RETPUSHUNDEF;
 
     if (SvTHINKFIRST(sv)) {
-	if (SvREADONLY(sv))
-	    RETPUSHUNDEF;
+	if (SvREADONLY(sv)) {
+	    dTHR;
+	    if (PL_curcop != &PL_compiling)
+		croak(PL_no_modify);
+	}
 	if (SvROK(sv))
 	    sv_unref(sv);
     }

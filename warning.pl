@@ -1,5 +1,8 @@
 #!/usr/bin/perl
 
+BEGIN {
+  push @INC, './lib';
+}
 use strict ;
 
 sub DEFAULT_ON  () { 1 }

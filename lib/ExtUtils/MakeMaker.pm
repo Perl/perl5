@@ -1577,7 +1577,11 @@ and the basename of the file being the value. E.g.
   {'foobar.PL' => 'foobar'}
 
 The *.PL files are expected to produce output to the target files
-themselves.
+themselves. If multiple files can be generated from the same *.PL
+file then the value in the hash can be a reference to an array of
+target file names. E.g.
+
+  {'foobar.PL' => ['foobar1','foobar2']}
 
 =item PM
 

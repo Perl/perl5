@@ -13,7 +13,7 @@ require Exporter;
 		class peekop cast_I32 cstring cchar hash threadsv_names
 		main_root main_start main_cv svref_2object
 		walkoptree walkoptree_slow walkoptree_exec walksymtable
-		parents comppadlist sv_undef compile_stats timing_info);
+		parents comppadlist sv_undef compile_stats timing_info init_av);
 
 use strict;
 @B::SV::ISA = 'B::OBJECT';
@@ -721,6 +721,10 @@ get an initial "handle" on an internal object.
 
 Return the (faked) CV corresponding to the main part of the Perl
 program.
+
+=item init_av
+
+Returns the AV object (i.e. in class B::AV) representing INIT blocks.
 
 =item main_root
 
