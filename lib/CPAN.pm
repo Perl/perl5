@@ -1,12 +1,12 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
-$VERSION = '1.58_55';
+$VERSION = '1.58_93';
 
-# $Id: CPAN.pm,v 1.366 2000/10/27 07:45:49 k Exp $
+# $Id: CPAN.pm,v 1.376 2000/11/15 07:14:58 k Exp $
 
 # only used during development:
 $Revision = "";
-# $Revision = "[".substr(q$Revision: 1.366 $, 10)."]";
+# $Revision = "[".substr(q$Revision: 1.376 $, 10)."]";
 
 use Carp ();
 use Config ();
@@ -139,20 +139,21 @@ ReadLine support %s
                             )
         unless $CPAN::Config->{'inhibit_startup_message'} ;
     my($continuation) = "";
-    while () {
+  SHELLCOMMAND: while () {
 	if ($Suppress_readline) {
 	    print $prompt;
-	    last unless defined ($_ = <> );
+	    last SHELLCOMMAND unless defined ($_ = <> );
 	    chomp;
 	} else {
-	    last unless defined ($_ = $term->readline($prompt, $commandline));
+	    last SHELLCOMMAND unless
+                defined ($_ = $term->readline($prompt, $commandline));
 	}
 	$_ = "$continuation$_" if $continuation;
 	s/^\s+//;
-	next if /^$/;
+	next SHELLCOMMAND if /^$/;
 	$_ = 'h' if /^\s*\?/;
 	if (/^(?:q(?:uit)?|bye|exit)$/i) {
-	    last;
+	    last SHELLCOMMAND;
 	} elsif (s/\\$//s) {
 	    chomp;
 	    $continuation = $_;
@@ -174,7 +175,9 @@ ReadLine support %s
 		@line = split;
 	    } else {
 		eval { @line = Text::ParseWords::shellwords($_) };
-		warn($@), next if $@;
+		warn($@), next SHELLCOMMAND if $@;
+                warn("Text::Parsewords could not parse the line [$_]"),
+                    next SHELLCOMMAND unless @line;
 	    }
 	    $CPAN::META->debug("line[".join("|",@line)."]") if $CPAN::DEBUG;
 	    my $command = shift @line;
@@ -231,7 +234,8 @@ package CPAN::Complete;
 @CPAN::Complete::ISA = qw(CPAN::Debug);
 @CPAN::Complete::COMMANDS = sort qw(
 		       ! a b d h i m o q r u autobundle clean dump
-		       make test install force readme reload look cvs_import
+		       make test install force readme reload look
+                       cvs_import ls
 ) unless @CPAN::Complete::COMMANDS;
 
 package CPAN::Index;
@@ -258,9 +262,10 @@ package CPAN::Module;
 @CPAN::Module::ISA = qw(CPAN::InfoObj);
 
 package CPAN::Shell;
-use vars qw($AUTOLOAD @ISA $COLOR_REGISTERED);
+use vars qw($AUTOLOAD @ISA $COLOR_REGISTERED $ADVANCED_QUERY $PRINT_ORNAMENTING);
 @CPAN::Shell::ISA = qw(CPAN::Debug);
 $COLOR_REGISTERED ||= 0;
+$PRINT_ORNAMENTING ||= 0;
 
 #-> sub CPAN::Shell::AUTOLOAD ;
 sub AUTOLOAD {
@@ -287,8 +292,9 @@ For this you just need to type
 }
 
 package CPAN::Tarzip;
-use vars qw($AUTOLOAD @ISA);
+use vars qw($AUTOLOAD @ISA $BUGHUNTING);
 @CPAN::Tarzip::ISA = qw(CPAN::Debug);
+$BUGHUNTING = 0; # released code must have turned off
 
 package CPAN::Queue;
 
@@ -1281,21 +1287,40 @@ sub a {
   $CPAN::Frontend->myprint($self->format_result('Author',@arg));
 }
 
-#-> sub CPAN::Shell::local_bundles ;
+#-> sub CPAN::Shell::ls ;
+sub ls      {
+    my($self,@arg) = @_;
+    for (@arg) {
+        $_ = uc $_;
+    }
+    for my $a (@arg){
+        my $author = $self->expand('Author',$a) or die "No author found for $a";
+        $author->ls;
+    }
+}
 
+#-> sub CPAN::Shell::local_bundles ;
 sub local_bundles {
     my($self,@which) = @_;
     my($incdir,$bdir,$dh);
     foreach $incdir ($CPAN::Config->{'cpan_home'},@INC) {
-	$bdir = MM->catdir($incdir,"Bundle");
-	if ($dh = DirHandle->new($bdir)) { # may fail
-	    my($entry);
-	    for $entry ($dh->read) {
-		next if -d MM->catdir($bdir,$entry);
-		next unless $entry =~ s/\.pm(?!\n)\Z//;
-		$CPAN::META->instance('CPAN::Bundle',"Bundle::$entry");
-	    }
-	}
+        my @bbase = "Bundle";
+        while (my $bbase = shift @bbase) {
+            $bdir = MM->catdir($incdir,split /::/, $bbase);
+            CPAN->debug("bdir[$bdir]\@bbase[@bbase]") if $CPAN::DEBUG;
+            if ($dh = DirHandle->new($bdir)) { # may fail
+                my($entry);
+                for $entry ($dh->read) {
+                    next if $entry =~ /^\./; # 
+                    if (-d MM->catdir($bdir,$entry)){
+                        push @bbase, "$bbase\::$entry";
+                    } else {
+                        next unless $entry =~ s/\.pm(?!\n)\Z//;
+                        $CPAN::META->instance('CPAN::Bundle',"$bbase\::$entry");
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -1326,10 +1351,14 @@ sub i {
     for $type (@type) {
 	push @result, $self->expand($type,@args);
     }
-    my $result =  @result == 1 ?
+    my $result = @result == 1 ?
 	$result[0]->as_string :
-	    join "", map {$_->as_glimpse} @result;
-    $result ||= "No objects found of any type for argument @args\n";
+            @result == 0 ?
+                "No objects found of any type for argument @args\n" :
+                    join("",
+                         (map {$_->as_glimpse} @result),
+                         scalar @result, " items found\n",
+                        );
     $CPAN::Frontend->myprint($result);
 }
 
@@ -1372,6 +1401,10 @@ sub o {
 	if (@o_what) {
 	    while (@o_what) {
 		my($what) = shift @o_what;
+                if ($what =~ s/^-// && exists $CPAN::DEBUG{$what}) {
+                    $CPAN::DEBUG &= $CPAN::DEBUG ^ $CPAN::DEBUG{$what};
+                    next;
+                }
 		if ( exists $CPAN::DEBUG{$what} ) {
 		    $CPAN::DEBUG |= $CPAN::DEBUG{$what};
 		} elsif ($what =~ /^\d/) {
@@ -1683,6 +1716,7 @@ sub expandany {
     my($self,$s) = @_;
     CPAN->debug("s[$s]") if $CPAN::DEBUG;
     if ($s =~ m|/|) { # looks like a file
+        $s = CPAN::Distribution->normalize($s);
         return $CPAN::META->instance('CPAN::Distribution',$s);
         # Distributions spring into existence, not expand
     } elsif ($s =~ m|^Bundle::|) {
@@ -1703,15 +1737,21 @@ sub expand {
     shift;
     my($type,@args) = @_;
     my($arg,@m);
+    CPAN->debug("type[$type]args[@args]") if $CPAN::DEBUG;
     for $arg (@args) {
 	my($regex,$command);
 	if ($arg =~ m|^/(.*)/$|) {
 	    $regex = $1;
-	} elsif ($arg =~ m/^=/) {
-            $command = substr($arg,1);
+	} elsif ($arg =~ m/=/) {
+            $command = 1;
         }
 	my $class = "CPAN::$type";
 	my $obj;
+        CPAN->debug(sprintf "class[%s]regex[%s]command[%s]",
+                    $class,
+                    defined $regex ? $regex : "UNDEFINED",
+                    $command || "UNDEFINED",
+                   ) if $CPAN::DEBUG;
 	if (defined $regex) {
             for $obj (
                       sort
@@ -1720,10 +1760,11 @@ sub expand {
                      ) {
                 unless ($obj->id){
                     # BUG, we got an empty object somewhere
+                    require Data::Dumper;
                     CPAN->debug(sprintf(
-                                        "Empty id on obj[%s]%%[%s]",
+                                        "Bug in CPAN: Empty id on obj[%s][%s]",
                                         $obj,
-                                        join(":", %$obj)
+                                        Data::Dumper::Dumper($obj)
                                        )) if $CPAN::DEBUG;
                     next;
                 }
@@ -1742,21 +1783,33 @@ sub expand {
                             );
             }
         } elsif ($command) {
-            die "leading equal sign in command disabled, ".
-                "please edit CPAN.pm to enable eval() or ".
-                    "do not use = on argument list";
+            die "equal sign in command disabled (immature interface), ".
+                "you can set
+ ! \$CPAN::Shell::ADVANCED_QUERY=1
+to enable it. But please note, this is HIGHLY EXPERIMENTAL code
+that may go away anytime.\n"
+                    unless $ADVANCED_QUERY;
+            my($method,$criterion) = $arg =~ /(.+?)=(.+)/;
+            my($matchcrit) = $criterion =~ m/^~(.+)/;
             for my $self (
                           sort
                           {$a->id cmp $b->id}
                           $CPAN::META->all_objects($class)
                          ) {
-                push @m, $self if eval $command;
+                my $lhs = $self->$method() or next; # () for 5.00503
+                if ($matchcrit) {
+                    push @m, $self if $lhs =~ m/$matchcrit/;
+                } else {
+                    push @m, $self if $lhs eq $criterion;
+                }
             }
 	} else {
 	    my($xarg) = $arg;
 	    if ( $type eq 'Bundle' ) {
 		$xarg =~ s/^(Bundle::)?(.*)/Bundle::$2/;
-	    }
+	    } elsif ($type eq "Distribution") {
+                $xarg = CPAN::Distribution->normalize($arg);
+            }
 	    if ($CPAN::META->exists($class,$xarg)) {
 		$obj = $CPAN::META->instance($class,$xarg);
 	    } elsif ($CPAN::META->exists($class,$arg)) {
@@ -1776,22 +1829,33 @@ sub format_result {
     my($type,@args) = @_;
     @args = '/./' unless @args;
     my(@result) = $self->expand($type,@args);
-    my $result =  @result == 1 ?
+    my $result = @result == 1 ?
 	$result[0]->as_string :
-	    join "", map {$_->as_glimpse} @result;
-    $result ||= "No objects of type $type found for argument @args\n";
+            @result == 0 ?
+                "No objects of type $type found for argument @args\n" :
+                    join("",
+                         (map {$_->as_glimpse} @result),
+                         scalar @result, " items found\n",
+                        );
     $result;
 }
 
 # The only reason for this method is currently to have a reliable
 # debugging utility that reveals which output is going through which
 # channel. No, I don't like the colors ;-)
+
+#-> sub CPAN::Shell::print_ornameted ;
 sub print_ornamented {
     my($self,$what,$ornament) = @_;
     my $longest = 0;
-    my $ornamenting = 0; # turn the colors on
+    return unless defined $what;
 
-    if ($ornamenting) {
+    if ($CPAN::Config->{term_is_latin}){
+        # courtesy jhi:
+        $what
+            =~ s{([\xC0-\xDF])([\x80-\xBF])}{chr(ord($1)<<6&0xC0|ord($2)&0x3F)}eg; #};
+    }
+    if ($PRINT_ORNAMENTING) {
 	unless (defined &color) {
 	    if ($CPAN::META->has_inst("Term::ANSIColor")) {
 		import Term::ANSIColor "color";
@@ -1819,6 +1883,7 @@ sub print_ornamented {
 
 sub myprint {
     my($self,$what) = @_;
+
     $self->print_ornamented($what, 'bold blue on_yellow');
 }
 
@@ -1903,13 +1968,17 @@ sub rematein {
             push @qcopy, $obj;
 	} elsif ($CPAN::META->exists('CPAN::Author',$s)) {
 	    $obj = $CPAN::META->instance('CPAN::Author',$s);
-	    $CPAN::Frontend->myprint(
-				     join "",
-				     "Don't be silly, you can't $meth ",
-				     $obj->fullname,
-				     " ;-)\n"
-				    );
-            sleep 2;
+            if ($meth eq "dump") {
+                $obj->dump;
+            } else {
+                $CPAN::Frontend->myprint(
+                                         join "",
+                                         "Don't be silly, you can't $meth ",
+                                         $obj->fullname,
+                                         " ;-)\n"
+                                        );
+                sleep 2;
+            }
 	} else {
 	    $CPAN::Frontend
 		->myprint(qq{Warning: Cannot $meth $s, }.
@@ -2167,7 +2236,7 @@ sub localize {
                         qq{E.g. with 'o conf urllist push ftp://myurl/'};
         $CPAN::Frontend->myprint(Text::Wrap::wrap("","",@mess). "\n\n");
         sleep 2;
-        $CPAN::Frontend->myprint("Cannot fetch $file\n\n");
+        $CPAN::Frontend->myprint("Could not fetch $file\n");
     }
     if ($restore) {
 	rename "$aslocal.bak", $aslocal;
@@ -2692,9 +2761,10 @@ sub cpl {
 	@return = grep /^$word/, @CPAN::Complete::COMMANDS;
     } elsif ( $line !~ /^[\!abcdhimorutl]/ ) {
 	@return = ();
-    } elsif ($line =~ /^a\s/) {
-	@return = cplx('CPAN::Author',$word);
+    } elsif ($line =~ /^(a|ls)\s/) {
+	@return = cplx('CPAN::Author',uc($word));
     } elsif ($line =~ /^b\s/) {
+        CPAN::Shell->local_bundles;
 	@return = cplx('CPAN::Bundle',$word);
     } elsif ($line =~ /^d\s/) {
 	@return = cplx('CPAN::Distribution',$word);
@@ -2884,9 +2954,6 @@ sub rd_authindex {
     my @lines;
     return unless defined $index_target;
     $CPAN::Frontend->myprint("Going to read $index_target\n");
-#    my $fh = CPAN::Tarzip->TIEHANDLE($index_target);
-#    while ($_ = $fh->READLINE) {
-    # no strict 'refs';
     local(*FH);
     tie *FH, CPAN::Tarzip, $index_target;
     local($/) = "\n";
@@ -3196,6 +3263,10 @@ sub set {
     # because of a typo, we do not like it that they are written into
     # the readonly area and made permanent (at least for a while) and
     # that is why we do not "allow" other places to call ->set.
+    unless ($self->id) {
+        CPAN->debug("Bug? Empty ID, rejecting");
+        return;
+    }
     my $ro = $self->{RO} =
         $CPAN::META->{readonly}{$class}{$self->id} ||= {};
 
@@ -3286,16 +3357,86 @@ sub as_glimpse {
 
 #-> sub CPAN::Author::fullname ;
 sub fullname {
-    my $fullname = shift->{RO}{FULLNAME};
-    return $fullname unless $CPAN::Config->{term_is_latin};
-    # courtesy jhi:
-    $fullname =~ s/([\xC0-\xDF])([\x80-\xBF])/chr(ord($1)<<6&0xC0|ord($2)&0x3F)/eg;
-    $fullname;
+    shift->{RO}{FULLNAME};
 }
 *name = \&fullname;
 
 #-> sub CPAN::Author::email ;
-sub email    { shift->{RO}{EMAIL} }
+sub email    { shift->{RO}{EMAIL}; }
+
+sub ls {
+    my $self = shift;
+    my $id = $self->id;
+
+    # adapted from CPAN::Distribution::verifyMD5 ;
+    my(@chksumfile);
+    @chksumfile = $self->id =~ /(.)(.)(.*)/;
+    $chksumfile[1] = join "", @chksumfile[0,1];
+    $chksumfile[2] = join "", @chksumfile[1,2];
+    push @chksumfile, "CHECKSUMS";
+    print join "", map {
+        sprintf("%8d %10s %s\n", @$_)
+    } sort { $a->[2] cmp $b->[2] } $self->dir_listing(\@chksumfile);
+}
+
+sub dir_listing {
+    my $self = shift;
+    my $chksumfile = shift;
+    my $lc_want =
+	MM->catfile($CPAN::Config->{keep_source_where},
+                    "authors", "id", @$chksumfile);
+    local($") = "/";
+    my $lc_file = CPAN::FTP->localize("authors/id/@$chksumfile",
+                                      $lc_want,1);
+    unless ($lc_file) {
+        $CPAN::Frontend->myprint("Trying $lc_want.gz\n");
+	$chksumfile->[-1] .= ".gz";
+	$lc_file = CPAN::FTP->localize("authors/id/@$chksumfile",
+				       "$lc_want.gz",1);
+	if ($lc_file) {
+	    $lc_file =~ s{\.gz(?!\n)\Z}{}; #};
+	    CPAN::Tarzip->gunzip("$lc_file.gz",$lc_file);
+	} else {
+	    return;
+	}
+    }
+
+    # adapted from CPAN::Distribution::MD5_check_file ;
+    my $fh = FileHandle->new;
+    my($cksum);
+    if (open $fh, $lc_file){
+	local($/);
+	my $eval = <$fh>;
+	$eval =~ s/\015?\012/\n/g;
+	close $fh;
+	my($comp) = Safe->new();
+	$cksum = $comp->reval($eval);
+	if ($@) {
+	    rename $lc_file, "$lc_file.bad";
+	    Carp::confess($@) if $@;
+	}
+    } else {
+	Carp::carp "Could not open $lc_file for reading";
+    }
+    my(@result,$f);
+    for $f (sort keys %$cksum) {
+        if (exists $cksum->{$f}{isdir}) {
+            my(@dir) = @$chksumfile;
+            pop @dir;
+            push @dir, $f, "CHECKSUMS";
+            push @result, map {
+                [$_->[0], $_->[1], "$f/$_->[2]"]
+            } $self->dir_listing(\@dir);
+        } else {
+            push @result, [
+                           ($cksum->{$f}{"size"}||0),
+                           $cksum->{$f}{"mtime"}||"---",
+                           $f
+                          ];
+        }
+    }
+    @result;
+}
 
 package CPAN::Distribution;
 
@@ -3305,6 +3446,16 @@ sub cpan_comment { shift->{RO}{CPAN_COMMENT} }
 sub undelay {
     my $self = shift;
     delete $self->{later};
+}
+
+sub normalize {
+    my($self,$s) = @_;
+    if ($s =~ tr|/|| == 1) {
+        $s =~ s|^(.)(.)([^/]*/)(.+)$|$1/$1$2/$1$2$3$4| or
+            $CPAN::Frontend->mywarn("Strange distribution name [$s]");
+        CPAN->debug("s[$s]") if $CPAN::DEBUG;
+    }
+    $s;
 }
 
 #-> sub CPAN::Distribution::color_cmd_tmps ;
@@ -3682,7 +3833,7 @@ sub verifyMD5 {
 	$CPAN::Frontend->myprint(join "", map {"  $_\n"} @e) and return if @e;
     }
     my($lc_want,$lc_file,@local,$basename);
-    @local = split("/",$self->{ID});
+    @local = split("/",$self->id);
     pop @local;
     push @local, "CHECKSUMS";
     $lc_want =
@@ -3699,6 +3850,7 @@ sub verifyMD5 {
     $lc_file = CPAN::FTP->localize("authors/id/@local",
 				   $lc_want,1);
     unless ($lc_file) {
+        $CPAN::Frontend->myprint("Trying $lc_want.gz\n");
 	$local[-1] .= ".gz";
 	$lc_file = CPAN::FTP->localize("authors/id/@local",
 				       "$lc_want.gz",1);
@@ -4629,8 +4781,8 @@ package CPAN::Module;
 # sub cpan_userid { shift->{RO}{CPAN_USERID} }
 sub userid {
     my $self = shift;
-    return unless exists $self->{RO}{userid};
-    $self->{RO}{userid};
+    return unless exists $self->{RO}; # should never happen
+    return $self->{RO}{CPAN_USERID} || $self->{RO}{userid};
 }
 sub description { shift->{RO}{description} }
 
@@ -4769,17 +4921,21 @@ sub as_string {
                 -f ($mff = MM->catfile($dist->{build_dir}, "MANIFEST")) and
                 $mfh = FileHandle->new($mff)
                ) {
-                # warn "mff[$mff]";
+                CPAN->debug("mff[$mff]") if $CPAN::DEBUG;
                 my $lfre = $self->id; # local file RE
                 $lfre =~ s/::/./g;
                 $lfre .= "\\.pm\$";
                 my($lfl); # local file file
                 local $/ = "\n";
                 my(@mflines) = <$mfh>;
+                for (@mflines) {
+                    s/^\s+//;
+                    s/\s.*//s;
+                }
                 while (length($lfre)>5 and !$lfl) {
                     ($lfl) = grep /$lfre/, @mflines;
+                    CPAN->debug("lfl[$lfl]lfre[$lfre]") if $CPAN::DEBUG;
                     $lfre =~ s/.+?\.//;
-                    # warn "lfl[$lfl]lfre[$lfre]";
                 }
                 $lfl =~ s/\s.*//; # remove comments
                 $lfl =~ s/\s+//g; # chomp would maybe be too system-specific
@@ -4843,25 +4999,28 @@ sub cpan_file    {
     }
     if (exists $self->{RO}{CPAN_FILE} && defined $self->{RO}{CPAN_FILE}){
 	return $self->{RO}{CPAN_FILE};
-    } elsif ( defined $self->userid ) {
-	my $fullname = $CPAN::META->instance("CPAN::Author",
-                                             $self->userid)->fullname;
-	my $email = $CPAN::META->instance("CPAN::Author",
-                                          $self->userid)->email;
-	unless (defined $fullname && defined $email) {
-            my $userid = $self->userid;
-	    return sprintf("Contact Author %s (Try 'a %s')",
-                           $userid,
-                           $userid,
-                          );
-	}
-	return "Contact Author $fullname <$email>";
     } else {
-	return "N/A";
+        my $userid = $self->userid;
+        if ( $userid ) {
+            if ($CPAN::META->exists("CPAN::Author",$userid)) {
+                my $author = $CPAN::META->instance("CPAN::Author",
+                                                   $userid);
+                my $fullname = $author->fullname;
+                my $email = $author->email;
+                unless (defined $fullname && defined $email) {
+                    return sprintf("Contact Author %s",
+                                   $userid,
+                                  );
+                }
+                return "Contact Author $fullname <$email>";
+            } else {
+                return "UserID $userid";
+            }
+        } else {
+            return "N/A";
+        }
     }
 }
-
-*name = \&cpan_file;
 
 #-> sub CPAN::Module::cpan_version ;
 sub cpan_version {
@@ -5186,10 +5345,29 @@ sub DESTROY {
 # CPAN::Tarzip::untar
 sub untar {
   my($class,$file) = @_;
+  my($prefer) = 0;
+
   if (0) { # makes changing order easier
+  } elsif ($BUGHUNTING){
+      $prefer=2;
   } elsif (MM->maybe_command($CPAN::Config->{gzip})
-      &&
-      MM->maybe_command($CPAN::Config->{'tar'})) {
+           &&
+           MM->maybe_command($CPAN::Config->{'tar'})) {
+      # should be default until Archive::Tar is fixed
+      $prefer = 1;
+  } elsif (
+           $CPAN::META->has_inst("Archive::Tar")
+           &&
+           $CPAN::META->has_inst("Compress::Zlib") ) {
+      $prefer = 2;
+  } else {
+    $CPAN::Frontend->mydie(qq{
+CPAN.pm needs either both external programs tar and gzip installed or
+both the modules Archive::Tar and Compress::Zlib. Neither prerequisite
+is available. Can\'t continue.
+});
+  }
+  if ($prefer==1) { # 1 => external gzip+tar
     my($system);
     my $is_compressed = $class->gtest($file);
     if ($is_compressed) {
@@ -5221,33 +5399,43 @@ sub untar {
     } else {
         return 1;
     }
-  } elsif ($CPAN::META->has_inst("Archive::Tar")
-      &&
-      $CPAN::META->has_inst("Compress::Zlib") ) {
+  } elsif ($prefer==2) { # 2 => modules
     my $tar = Archive::Tar->new($file,1);
     my $af; # archive file
     my @af;
-    for $af ($tar->list_files) {
-        if ($af =~ m!^(/|\.\./)!) {
-            $CPAN::Frontend->mydie("ALERT: Archive contains ".
-                                   "illegal member [$af]");
+    if ($BUGHUNTING) {
+        # RCS 1.337 had this code, it turned out unacceptable slow but
+        # it revealed a bug in Archive::Tar. Code is only here to hunt
+        # the bug again. It should never be enabled in published code.
+        # GDGraph3d-0.53 was an interesting case according to Larry
+        # Virden.
+        warn(">>>Bughunting code enabled<<< " x 20);
+        for $af ($tar->list_files) {
+            if ($af =~ m!^(/|\.\./)!) {
+                $CPAN::Frontend->mydie("ALERT: Archive contains ".
+                                       "illegal member [$af]");
+            }
+            $CPAN::Frontend->myprint("$af\n");
+            $tar->extract($af); # slow but effective for finding the bug
+            return if $CPAN::Signal;
         }
-        $CPAN::Frontend->myprint("$af\n");
-        push @af, $af;
-        return if $CPAN::Signal;
+    } else {
+        for $af ($tar->list_files) {
+            if ($af =~ m!^(/|\.\./)!) {
+                $CPAN::Frontend->mydie("ALERT: Archive contains ".
+                                       "illegal member [$af]");
+            }
+            $CPAN::Frontend->myprint("$af\n");
+            push @af, $af;
+            return if $CPAN::Signal;
+        }
+        $tar->extract(@af);
     }
-    $tar->extract(@af);
 
     ExtUtils::MM_MacOS::convert_files([$tar->list_files], 1)
         if ($^O eq 'MacOS');
 
     return 1;
-  } else {
-    $CPAN::Frontend->mydie(qq{
-CPAN.pm needs either both external programs tar and gzip installed or
-both the modules Archive::Tar and Compress::Zlib. Neither prerequisite
-is available. Can\'t continue.
-});
   }
 }
 
@@ -5325,9 +5513,8 @@ sub float2vv {
     my($self,$n) = @_;
     my($rev) = int($n);
     $rev ||= 0;
-    my($mantissa) = $n =~ /\.(\d{1,12})/; # limit to 12 digits so that
-                                          # architecture cannot
-                                          # influnce
+    my($mantissa) = $n =~ /\.(\d{1,12})/; # limit to 12 digits to limit
+                                          # architecture influence
     $mantissa ||= 0;
     $mantissa .= "0" while length($mantissa)%3;
     my $ret = "v" . $rev;
@@ -6140,9 +6327,22 @@ Have a look at the CPAN::Site module.
 =item 9) When I run CPAN's shell, I get error msg about line 1 to 4,
       setting meta input/output via the /etc/inputrc file.
 
-I guess, /etc/inputrc interacts with Term::ReadLine somehow. Maybe
-just remove /etc/inputrc or set the INPUTRC environment variable (see
-the readline documentation).
+Some versions of readline are picky about capitalization in the
+/etc/inputrc file and specifically RedHat 6.2 comes with a
+/etc/inputrc that contains the word C<on> in lowercase. Change the
+occurrences of C<on> to C<On> and the bug should disappear.
+
+=item 10) Some authors have strange characters in their names.
+
+Internally CPAN.pm uses the UTF-8 charset. If your terminal is
+expecting ISO-8859-1 charset, a converter can be activated by setting
+term_is_latin to a true value in your config file. One way of doing so
+would be
+
+    cpan> ! $CPAN::Config->{term_is_latin}=1
+
+Extended support for converters will be made available as soon as perl
+becomes stable with regard to charset issues.
 
 =back
 
