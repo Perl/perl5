@@ -12,7 +12,7 @@ Pod::Text - convert POD data to formatted ASCII text
 
 Also:
 
-	pod2text < input.pod
+	pod2text [B<-a>] [B<->I<width>] < input.pod
 
 =head1 DESCRIPTION
 
@@ -25,7 +25,9 @@ will be used to simulate bold and underlined text.
 A separate F<pod2text> program is included that is primarily a wrapper for
 Pod::Text.
 
-The single function C<pod2text()> can take one or two arguments. The first
+The single function C<pod2text()> can take the optional options B<-a>
+for an alternative output format, then a B<->I<width> option with the
+max terminal width, followed by one or two arguments. The first
 should be the name of a file to read the pod from, or "E<lt>&STDIN" to read from
 STDIN. A second argument, if provided, should be a filehandle glob where
 output should be sent.
@@ -48,9 +50,11 @@ require Exporter;
 @EXPORT = qw(pod2text);
 
 use vars qw($VERSION);
-$VERSION = "1.0202";
+$VERSION = "1.0203";
 
 $termcap=0;
+
+$opt_alt_format = 0;
 
 #$use_format=1;
 
@@ -60,8 +64,7 @@ $BOLD = "\x1b[1m";
 $NORM = "\x1b[0m";
 
 sub pod2text {
-local($file,*OUTPUT) = @_;
-*OUTPUT = *STDOUT if @_<2;
+shift if $opt_alt_format = ($_[0] eq '-a');
 
 if($termcap and !$setuptermcap) {
 	$setuptermcap=1;
@@ -78,6 +81,13 @@ $SCREEN = ($_[0] =~ /^-(\d+)/ && (shift, $1))
        || ($ENV{TERMCAP} =~ /co#(\d+)/)[0]
        || (`stty -a 2>/dev/null` =~ /(\d+) columns/)[0]
        || 72;
+
+@_ = ("<&STDIN") unless @_;
+local($file,*OUTPUT) = @_;
+*OUTPUT = *STDOUT if @_<2;
+
+local $: = $:;
+$: = " \n" if $opt_alt_format;	# Do not break ``-L/lib/'' into ``- L/lib/''.
 
 $/ = "";
 
@@ -142,7 +152,12 @@ sub prepare_for_output {
     $maxnest = 10;
     while ($maxnest-- && /[A-Z]</) {
 	unless ($FANCY) {
-	    s/C<(.*?)>/`$1'/sg;
+	    if ($opt_alt_format) {
+		s/[BC]<(.*?)>/``$1''/sg;
+		s/F<(.*?)>/"$1"/sg;
+	    } else {
+		s/C<(.*?)>/`$1'/sg;
+	    }
 	} else {
 	    s/C<(.*?)>/noremap("E<lchevron>${1}E<rchevron>")/sge;
 	}
@@ -215,8 +230,13 @@ sub prepare_for_output {
 	}
 	elsif ($Cmd eq 'head1') {
 	    makespace();
+	    if ($opt_alt_format) {
+		print OUTPUT "\n";
+		s/^(.+?)[ \t]*$/==== $1 ====/;
+	    }
 	    print OUTPUT;
 	    # print OUTPUT uc($_);
+	    $needspace = $opt_alt_format;
 	}
 	elsif ($Cmd eq 'head2') {
 	    makespace();
@@ -224,7 +244,13 @@ sub prepare_for_output {
 	    #print ' ' x $DEF_INDENT, $_;
 	    # print "\xA7";
 	    s/(\w)/\xA7 $1/ if $FANCY;
-	    print OUTPUT ' ' x ($DEF_INDENT/2), $_, "\n";
+	    if ($opt_alt_format) {
+		s/^(.+?)[ \t]*$/==   $1   ==/;
+		print OUTPUT "\n", $_;
+	    } else {
+		print OUTPUT ' ' x ($DEF_INDENT/2), $_, "\n";
+	    }
+	    $needspace = $opt_alt_format;
 	}
 	elsif ($Cmd eq 'over') {
 	    push(@indent,$indent);
@@ -252,7 +278,7 @@ sub prepare_for_output {
 		    IP_output($paratag, $_);
 		} else {
 		    local($indent) = $indent[$#index - 1] || $DEF_INDENT;
-		    output($_);
+		    output($_, 0);
 		}
 	    }
 	}
@@ -346,7 +372,9 @@ sub IP_output {
     s/\s+/ /g;
     s/^ //;
     $str = "format OUTPUT = \n"
-	. (" " x ($tag_indent))
+	. (($opt_alt_format && $tag_indent > 1)
+	   ? ":" . " " x ($tag_indent - 1)
+	   : " " x ($tag_indent))
 	. '@' . ('<' x ($indent - $tag_indent - 1))
 	. "^" .  ("<" x ($cols - 1)) . "\n"
 	. '$tag, $_'
@@ -374,6 +402,7 @@ sub output {
     } else {
 	s/^/' ' x $indent/gem;
 	s/^\s+\n$/\n/gm;
+	s/^  /: /s if defined($reformat) && $opt_alt_format;
 	print OUTPUT;
     }
 }
