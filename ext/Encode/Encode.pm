@@ -700,6 +700,11 @@ Miscellaneous:
 Encodes string from Perl's internal form into I<ENCODING> and returns
 a sequence of octets.  For CHECK see L</"Handling Malformed Data">.
 
+For example to convert (internally UTF-8 encoded) Unicode data
+to octets:
+
+	$octets = encode("utf8", $unicode);
+
 =item *
 
         $string = decode(ENCODING, $bytes[, CHECK])
@@ -707,6 +712,10 @@ a sequence of octets.  For CHECK see L</"Handling Malformed Data">.
 Decode sequence of octets assumed to be in I<ENCODING> into Perl's
 internal form and returns the resulting string.  For CHECK see
 L</"Handling Malformed Data">.
+
+For example to convert ISO 8859-1 data to UTF-8:
+
+	$utf8 = decode("latin1", $latin1);
 
 =item *
 
