@@ -4533,6 +4533,23 @@ $ ELSE
 $   d_getsent="undef"
 $ ENDIF
 $!
+$! Check for nanosleep
+$!
+$ OS
+$ WS "#if defined(__DECC) || defined(__DECCXX)"
+$ WS "#include <stdlib.h>"
+$ WS "#endif"
+$ WS "#include <time.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "int asleep = nanosleep(NULL,NULL);"
+$ WS "exit(0);"
+$ WS "}"
+$ CS
+$ tmp = "nanosleep"
+$ GOSUB inlibc
+$ d_nanosleep = tmp
+$!
 $! Check for socklen_t
 $!
 $ IF Has_Dec_C_Sockets .OR. Has_Socketshr
@@ -5109,13 +5126,8 @@ $   WS "    iss =  ((iss&1)==1 && code == 0x1234);"
 $   WS "    printf(""%d\n"",iss);"
 $   WS "}"
 $   CS
-$   IF (F$EXTRACT(0,7,archname) .EQS. "VMS_AXP")
-$   THEN
-$     GOSUB compile
-$   ELSE
-$     ! Causes SS$_BADSTACK on OpenVMS I64 v8.1 (but hey, it was undocumented)
-$     tmp = "0"	
-$   ENDIF
+$   ON ERROR THEN CONTINUE
+$   GOSUB compile
 $   IF tmp .EQS. "1"
 $   THEN
 $       echo4 "Yep, we can."
@@ -5417,7 +5429,7 @@ $ WC "d_msghdr_s='undef'"
 $ WC "d_msync='" + d_msync + "'"
 $ WC "d_munmap='" + d_munmap + "'"
 $ WC "d_mymalloc='" + d_mymalloc + "'"
-$ WC "d_nanosleep='undef'"
+$ WC "d_nanosleep='" + d_nanosleep + "'"
 $ WC "d_nice='define'"
 $ WC "d_nl_langinfo='" + d_nl_langinfo + "'"
 $ WC "d_nv_preserves_uv='" + d_nv_preserves_uv + "'"
