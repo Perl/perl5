@@ -356,6 +356,8 @@ the differences between 5.6.0 and 5.8.0.
 perlartistic has been added: it is the Artistic License in pod format,
 making it easier for modules to refer to it.
 
+perlcheat has been added: it is a Perl cheat sheet.
+
 perlgpl has been added: it is the GNU General Public License in pod
 format, making it easier for modules to refer to it.
 
