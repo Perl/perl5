@@ -168,8 +168,7 @@ extern long sdbm_hash proto((char *, int));
 /* This comes after <stdlib.h> so we don't try to change the standard
  * library prototypes; we'll use our own instead. */
 
-#if defined(MYMALLOC)
-
+#if defined(MYMALLOC) && !defined(PERL_POLLUTE_MALLOC)
 #  define malloc  Perl_malloc
 #  define calloc  Perl_calloc
 #  define realloc Perl_realloc
@@ -179,7 +178,6 @@ Malloc_t Perl_malloc proto((MEM_SIZE nbytes));
 Malloc_t Perl_calloc proto((MEM_SIZE elements, MEM_SIZE size));
 Malloc_t Perl_realloc proto((Malloc_t where, MEM_SIZE nbytes));
 Free_t   Perl_mfree proto((Malloc_t where));
-
 #endif /* MYMALLOC */
 
 #ifdef I_STRING
