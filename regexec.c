@@ -98,7 +98,6 @@
 #define RF_warned	2		/* warned about big count? */
 #define RF_evaled	4		/* Did an EVAL with setting? */
 #define RF_utf8		8		/* String contains multibyte chars? */
-#define RF_false	16		/* odd number of nested negatives */
 
 #define UTF ((PL_reg_flags & RF_utf8) != 0)
 
@@ -2265,6 +2264,42 @@ typedef union re_unwind_t {
 #define sayNO_SILENT goto do_no
 #define saySAME(x) if (x) goto yes; else goto no
 
+#define POSCACHE_SUCCESS 0	/* caching success rather than failure */
+#define POSCACHE_SEEN 1		/* we know what we're caching */
+#define POSCACHE_START 2	/* the real cache: this bit maps to pos 0 */
+#define CACHEsayYES STMT_START { \
+    if (cache_offset | cache_bit) { \
+	if (!(PL_reg_poscache[0] & (1<<POSCACHE_SEEN))) \
+	    PL_reg_poscache[0] |= (1<<POSCACHE_SUCCESS) || (1<<POSCACHE_SEEN); \
+        else if (!(PL_reg_poscache[0] & (1<<POSCACHE_SUCCESS))) { \
+	    /* cache records failure, but this is success */ \
+	    DEBUG_r( \
+		PerlIO_printf(Perl_debug_log, \
+		    "%*s  (remove success from failure cache)\n", \
+		    REPORT_CODE_OFF+PL_regindent*2, "") \
+	    ); \
+	    PL_reg_poscache[cache_offset] &= ~(1<<cache_bit); \
+	} \
+    } \
+    sayYES; \
+} STMT_END
+#define CACHEsayNO STMT_START { \
+    if (cache_offset | cache_bit) { \
+	if (!(PL_reg_poscache[0] & (1<<POSCACHE_SEEN))) \
+	    PL_reg_poscache[0] |= (1<<POSCACHE_SEEN); \
+        else if ((PL_reg_poscache[0] & (1<<POSCACHE_SUCCESS))) { \
+	    /* cache records success, but this is failure */ \
+	    DEBUG_r( \
+		PerlIO_printf(Perl_debug_log, \
+		    "%*s  (remove failure from success cache)\n", \
+		    REPORT_CODE_OFF+PL_regindent*2, "") \
+	    ); \
+	    PL_reg_poscache[cache_offset] &= ~(1<<cache_bit); \
+	} \
+    } \
+    sayNO; \
+} STMT_END
+
 /* this is used to determine how far from the left messages like
    'failed...' are printed. Currently 29 makes these messages line
    up with the opcode they refer to. Earlier perls used 25 which
@@ -3450,6 +3485,7 @@ S_regmatch(pTHX_ regnode *prog)
 		CHECKPOINT cp, lastcp;
 		CURCUR* cc = PL_regcc;
 		char *lastloc = cc->lastloc; /* Detection of 0-len. */
+		I32 cache_offset = 0, cache_bit = 0;
 		
 		n = cc->cur + 1;	/* how many we know we matched */
 		PL_reginput = locinput;
@@ -3502,7 +3538,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    PL_reg_leftiter = PL_reg_maxiter;
 		}
 		if (PL_reg_leftiter-- == 0) {
-		    I32 size = (PL_reg_maxiter + 7)/8;
+		    I32 size = (PL_reg_maxiter + 7 + POSCACHE_START)/8;
 		    if (PL_reg_poscache) {
 			if ((I32)PL_reg_poscache_size < size) {
 			    Renew(PL_reg_poscache, size, char);
@@ -3521,23 +3557,26 @@ S_regmatch(pTHX_ regnode *prog)
 			);
 		}
 		if (PL_reg_leftiter < 0) {
-		    I32 o = locinput - PL_bostr, b;
+		    cache_offset = locinput - PL_bostr;
 
-		    o = (scan->flags & 0xf) - 1 + o * (scan->flags>>4);
-		    b = o % 8;
-		    o /= 8;
-		    if (PL_reg_poscache[o] & (1<<b)) {
+		    cache_offset = (scan->flags & 0xf) - 1 + POSCACHE_START
+			    + cache_offset * (scan->flags>>4);
+		    cache_bit = cache_offset % 8;
+		    cache_offset /= 8;
+		    if (PL_reg_poscache[cache_offset] & (1<<cache_bit)) {
 		    DEBUG_EXECUTE_r(
 			PerlIO_printf(Perl_debug_log,
 				      "%*s  already tried at this position...\n",
 				      REPORT_CODE_OFF+PL_regindent*2, "")
 			);
-			if (PL_reg_flags & RF_false)
+			if (PL_reg_poscache[0] & (1<<POSCACHE_SUCCESS))
+			    /* cache records success */
 			    sayYES;
 			else
+			    /* cache records failure */
 			    sayNO_SILENT;
 		    }
-		    PL_reg_poscache[o] |= (1<<b);
+		    PL_reg_poscache[cache_offset] |= (1<<cache_bit);
 		}
 		}
 
@@ -3551,7 +3590,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    REGCP_SET(lastcp);
 		    if (regmatch(cc->next)) {
 			regcpblow(cp);
-			sayYES;	/* All done. */
+			CACHEsayYES;	/* All done. */
 		    }
 		    REGCP_UNWIND(lastcp);
 		    regcppop();
@@ -3567,7 +3606,7 @@ S_regmatch(pTHX_ regnode *prog)
 				 "Complex regular subexpression recursion",
 				 REG_INFTY - 1);
 			}
-			sayNO;
+			CACHEsayNO;
 		    }
 
 		    DEBUG_EXECUTE_r(
@@ -3583,13 +3622,13 @@ S_regmatch(pTHX_ regnode *prog)
 		    REGCP_SET(lastcp);
 		    if (regmatch(cc->scan)) {
 			regcpblow(cp);
-			sayYES;
+			CACHEsayYES;
 		    }
 		    REGCP_UNWIND(lastcp);
 		    regcppop();
 		    cc->cur = n - 1;
 		    cc->lastloc = lastloc;
-		    sayNO;
+		    CACHEsayNO;
 		}
 
 		/* Prefer scan over next for maximal matching. */
@@ -3601,7 +3640,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    REGCP_SET(lastcp);
 		    if (regmatch(cc->scan)) {
 			regcpblow(cp);
-			sayYES;
+			CACHEsayYES;
 		    }
 		    REGCP_UNWIND(lastcp);
 		    regcppop();		/* Restore some previous $<digit>s? */
@@ -3625,13 +3664,13 @@ S_regmatch(pTHX_ regnode *prog)
 		if (PL_regcc)
 		    ln = PL_regcc->cur;
 		if (regmatch(cc->next))
-		    sayYES;
+		    CACHEsayYES;
 		if (PL_regcc)
 		    PL_regcc->cur = ln;
 		PL_regcc = cc;
 		cc->cur = n - 1;
 		cc->lastloc = lastloc;
-		sayNO;
+		CACHEsayNO;
 	    }
 	    /* NOT REACHED */
 	case BRANCHJ:
@@ -4168,7 +4207,6 @@ S_regmatch(pTHX_ regnode *prog)
 	    }
 	    else
 		PL_reginput = locinput;
-	    PL_reg_flags ^= RF_false;
 	    goto do_ifmatch;
 	case IFMATCH:
 	    n = 1;
@@ -4184,8 +4222,6 @@ S_regmatch(pTHX_ regnode *prog)
 	  do_ifmatch:
 	    inner = NEXTOPER(NEXTOPER(scan));
 	    if (regmatch(inner) != n) {
-		if (n == 0)
-		    PL_reg_flags ^= RF_false;
 	      say_no:
 		if (logical) {
 		    logical = 0;
@@ -4195,8 +4231,6 @@ S_regmatch(pTHX_ regnode *prog)
 		else
 		    sayNO;
 	    }
-	    if (n == 0)
-		PL_reg_flags ^= RF_false;
 	  say_yes:
 	    if (logical) {
 		logical = 0;
