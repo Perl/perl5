@@ -167,6 +167,11 @@ Perl_wait4pid
 Perl_watch
 Perl_yyname
 Perl_yyrule
+Perl_Yes
+Perl_No
+Perl_hexdigit
+Perl_patleave
+Perl_vert
 allgvs
 curblock
 curcsv

@@ -72,6 +72,8 @@ void	cx_dump _((PERL_CONTEXT* cs));
 SV*	filter_add _((filter_t funcp, SV* datasv));
 void	filter_del _((filter_t funcp));
 I32	filter_read _((int idx, SV* buffer, int maxlen));
+char **	get_op_descs _((void));
+char **	get_op_names _((void));
 I32	cxinc _((void));
 void	deb _((const char* pat,...)) __attribute__((format(printf,1,2)));
 void	deb_growlevel _((void));

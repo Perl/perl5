@@ -35,6 +35,8 @@ find_threadsv
 fold
 fold_locale
 freq
+get_op_descs
+get_op_names
 ge_amg
 gt_amg
 hexdigit

@@ -1394,11 +1394,11 @@ EXT short *	ds;
 EXT char *	dc;
 
 /* handy constants */
-EXTCONST char *	Yes INIT("1");
-EXTCONST char *	No INIT("");
-EXTCONST char *	hexdigit INIT("0123456789abcdef0123456789ABCDEFx");
-EXTCONST char *	patleave INIT("\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}");
-EXTCONST char *	vert INIT("|");
+#define	Perl_Yes	"1"
+#define Perl_No		""
+#define Perl_hexdigit	"0123456789abcdef0123456789ABCDEFx"
+#define Perl_patleave	"\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}"
+#define Perl_vert 	"|"
 
 EXTCONST char warn_uninit[]
   INIT("Use of uninitialized value");
