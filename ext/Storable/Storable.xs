@@ -1960,7 +1960,7 @@ static int store_scalar(stcxt_t *cxt, SV *sv)
 #else
 
             SvIV_please(sv);
-            if (SvIOK(sv)) {
+	    if (SvIOK_notUV(sv)) {
                 iv = SvIV(sv);
                 goto integer;		/* Share code above */
             }

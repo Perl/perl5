@@ -189,7 +189,7 @@ case "$usethreads" in
 $define|true|[yY]*)
         ccflags="$ccflags"
         shift
-        libswanted="$*"
+        libswanted="$libswanted $*"
   case "$cc" in
        *gcc*)
            ccflags="-D_REENTRANT $ccflags -fpic -pthread"

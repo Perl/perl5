@@ -825,6 +825,7 @@
 #define set_numeric_standard	Perl_set_numeric_standard
 #define require_pv		Perl_require_pv
 #define pack_cat		Perl_pack_cat
+#define packlist		Perl_packlist
 #ifdef PERL_CORE
 #define pidgone			Perl_pidgone
 #endif
@@ -892,6 +893,7 @@
 #define savesharedpv		Perl_savesharedpv
 #define savepvn			Perl_savepvn
 #define savestack_grow		Perl_savestack_grow
+#define savestack_grow_cnt	Perl_savestack_grow_cnt
 #define save_aelem		Perl_save_aelem
 #define save_alloc		Perl_save_alloc
 #define save_aptr		Perl_save_aptr
@@ -1089,6 +1091,7 @@
 #define unlock_condpair		Perl_unlock_condpair
 #endif
 #define unpack_str		Perl_unpack_str
+#define unpackstring		Perl_unpackstring
 #define unsharepvn		Perl_unsharepvn
 #ifdef PERL_CORE
 #define unshare_hek		Perl_unshare_hek
@@ -3325,6 +3328,7 @@
 #define set_numeric_standard()	Perl_set_numeric_standard(aTHX)
 #define require_pv(a)		Perl_require_pv(aTHX_ a)
 #define pack_cat(a,b,c,d,e,f,g)	Perl_pack_cat(aTHX_ a,b,c,d,e,f,g)
+#define packlist(a,b,c,d,e)	Perl_packlist(aTHX_ a,b,c,d,e)
 #ifdef PERL_CORE
 #define pidgone(a,b)		Perl_pidgone(aTHX_ a,b)
 #endif
@@ -3392,6 +3396,7 @@
 #define savesharedpv(a)		Perl_savesharedpv(aTHX_ a)
 #define savepvn(a,b)		Perl_savepvn(aTHX_ a,b)
 #define savestack_grow()	Perl_savestack_grow(aTHX)
+#define savestack_grow_cnt(a)	Perl_savestack_grow_cnt(aTHX_ a)
 #define save_aelem(a,b,c)	Perl_save_aelem(aTHX_ a,b,c)
 #define save_alloc(a,b)		Perl_save_alloc(aTHX_ a,b)
 #define save_aptr(a)		Perl_save_aptr(aTHX_ a)
@@ -3587,6 +3592,7 @@
 #define unlock_condpair(a)	Perl_unlock_condpair(aTHX_ a)
 #endif
 #define unpack_str(a,b,c,d,e,f,g,h)	Perl_unpack_str(aTHX_ a,b,c,d,e,f,g,h)
+#define unpackstring(a,b,c,d,e)	Perl_unpackstring(aTHX_ a,b,c,d,e)
 #define unsharepvn(a,b,c)	Perl_unsharepvn(aTHX_ a,b,c)
 #ifdef PERL_CORE
 #define unshare_hek(a)		Perl_unshare_hek(aTHX_ a)

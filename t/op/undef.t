@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..28\n";
+print "1..36\n";
 
 print defined($a) ? "not ok 1\n" : "ok 1\n";
 
@@ -84,4 +84,21 @@ print $@ =~ /^Modification of a read/ ? "ok 23\n" : "not ok 23\n";
     # [perl #17753] segfault when undef'ing unquoted string constant
     eval 'undef tcp';
     print $@ =~ /^Can't modify constant item/ ? "ok 28\n" : "not ok 28\n";
+}
+
+# bugid 3096
+# undefing a hash may free objects with destructors that then try to
+# modify the hash. To them, the hash should appear empty.
+
+$test = 29;
+%hash = (
+    key1 => bless({}, 'X'),
+    key2 => bless({}, 'X'),
+);
+undef %hash;
+sub X::DESTROY {
+    print "not " if keys   %hash; print "ok $test\n"; $test++;
+    print "not " if values %hash; print "ok $test\n"; $test++;
+    print "not " if each   %hash; print "ok $test\n"; $test++;
+    print "not " if defined delete $hash{'key2'}; print "ok $test\n"; $test++;
 }

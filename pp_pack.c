@@ -494,12 +494,31 @@ S_next_symbol(pTHX_ register tempsym_t* symptr )
 /*
 =for apidoc unpack_str
 
-The engine implementing unpack() Perl function.
+The engine implementing unpack() Perl function. Note: parameters strbeg, new_s
+and ocnt are not used. This call should not be used, use unpackstring instead.
 
 =cut */
 
 I32
 Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *strbeg, char *strend, char **new_s, I32 ocnt, U32 flags)
+{
+    tempsym_t sym = { 0 };
+    sym.patptr = pat;
+    sym.patend = patend;
+    sym.flags  = flags;
+
+    return unpack_rec(&sym, s, s, strend, NULL );
+}
+
+/*
+=for apidoc unpackstring
+
+The engine implementing unpack() Perl function.
+
+=cut */
+
+I32
+Perl_unpackstring(pTHX_ char *pat, register char *patend, register char *s, char *strend, U32 flags)
 {
     tempsym_t sym = { 0 };
     sym.patptr = pat;
@@ -933,7 +952,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    break;
 	case 'S' | TYPE_IS_SHRIEKING:
 #if SHORTSIZE != SIZE16
-	    along = (strend - s) / SIZE16;
+	    along = (strend - s) / sizeof(unsigned short);
 	    if (len > along)
 		len = along;
 	    if (checksum) {
@@ -1704,7 +1723,7 @@ PP(pp_unpack)
     register I32 cnt;
 
     PUTBACK;
-    cnt = unpack_str(pat, patend, s, s, strend, NULL, 0,
+    cnt = unpackstring(pat, patend, s, strend,
 		     ((gimme == G_SCALAR) ? FLAG_UNPACK_ONLY_ONE : 0)
 		     | (DO_UTF8(right) ? FLAG_UNPACK_DO_UTF8 : 0));
 
@@ -1823,7 +1842,8 @@ S_div128(pTHX_ SV *pnum, bool *done)
 /*
 =for apidoc pack_cat
 
-The engine implementing pack() Perl function.
+The engine implementing pack() Perl function. Note: parameters next_in_list and
+flags are not used. This call should not be used; use packlist instead.
 
 =cut */
 
@@ -1834,7 +1854,27 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
     tempsym_t sym = { 0 };
     sym.patptr = pat;
     sym.patend = patend;
-    sym.flags  = flags;
+    sym.flags  = FLAG_PACK;
+
+    (void)pack_rec( cat, &sym, beglist, endlist );
+}
+
+
+/*
+=for apidoc packlist
+
+The engine implementing pack() Perl function.
+
+=cut */
+
+
+void
+Perl_packlist(pTHX_ SV *cat, char *pat, register char *patend, register SV **beglist, SV **endlist )
+{
+    tempsym_t sym = { 0 };
+    sym.patptr = pat;
+    sym.patend = patend;
+    sym.flags  = FLAG_PACK;
 
     (void)pack_rec( cat, &sym, beglist, endlist );
 }
@@ -2588,7 +2628,7 @@ PP(pp_pack)
     MARK++;
     sv_setpvn(cat, "", 0);
 
-    pack_cat(cat, pat, patend, MARK, SP + 1, NULL, FLAG_PACK);
+    packlist(cat, pat, patend, MARK, SP + 1);
 
     SvSETMAGIC(cat);
     SP = ORIGMARK;

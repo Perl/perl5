@@ -64,6 +64,8 @@ my @numbers =
    0x7FFFFFFF, 0x80000000, 0x80000001, 0xFFFFFFFF, 0xDEADBEEF,
    # UV bounds
    $max_iv_p1, $max_uv_m1, $max_uv, $lots_of_9C,
+   # NV-UV conversion
+   2559831922.0,
   );
 
 plan tests => @processes * @numbers * 5;

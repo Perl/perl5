@@ -966,7 +966,7 @@ Duplicate keys are entirely defined by the comparison function.
 In the case-insensitive example above, the keys: 'KEY' and 'key'
 would be considered duplicates, and assigning to the second one
 would overwrite the first. If duplicates are allowed for (with the
-R_DUPS flag discussed below), only a single copy of duplicate keys
+R_DUP flag discussed below), only a single copy of duplicate keys
 is stored in the database --- so (again with example above) assigning
 three values to the keys: 'KEY', 'Key', and 'key' would leave just
 the first key: 'KEY' in the database with three values. For some
