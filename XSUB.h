@@ -389,7 +389,7 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 #    define fclose		PerlSIO_fclose
 #    define feof		PerlSIO_feof
 #    define ferror		PerlSIO_ferror
-#    define fclearerr		PerlSIO_clearerr
+#    define clearerr		PerlSIO_clearerr
 #    define getc		PerlSIO_getc
 #    define fputc		PerlSIO_fputc
 #    define fputs		PerlSIO_fputs
