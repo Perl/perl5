@@ -103,6 +103,85 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6898] By: jhi                                   on 2000/08/29  20:46:21
+        Log: Undo namespace pollution of #6878.
+             
+             Subject: Re: Net::protoent does not export 'getproto'
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Tue, 29 Aug 2000 21:32:37 +0100
+             Message-Id: <E13Ts3h-0007eN-00@draco.cus.cam.ac.uk>
+     Branch: perl
+	   ! lib/Net/protoent.pm
+____________________________________________________________________________
+[  6897] By: jhi                                   on 2000/08/29  20:44:29
+        Log: Subject: [PATCH: 6889] updates to perlebcdic.pod
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Tue, 29 Aug 2000 13:32:41 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10008291327500.502507-100000@aspara.forte.com>
+     Branch: perl
+	   ! pod/perlebcdic.pod
+____________________________________________________________________________
+[  6896] By: jhi                                   on 2000/08/29  20:40:57
+        Log: There's no point repeating the 'revision' (5) of perl5.
+     Branch: metaconfig/U/perl
+	   ! Devel.U patchlevel.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  6895] By: jhi                                   on 2000/08/29  20:16:58
+        Log: Regen Configure for #6894.
+     Branch: metaconfig/U/perl
+	   ! perladmin.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  6894] By: jhi                                   on 2000/08/29  19:59:52
+        Log: Subject: [ID 20000829.023] [PATCH 6868] perlbug@perl.com --> perlbug@perl.org
+             From: "Philip Newton" <Philip.Newton@gmx.net>
+             Date: Tue, 29 Aug 2000 21:39:14 +0200
+             Message-Id: <200008291938.VAA98259@smtp1.nikoma.de>
+     Branch: perl
+	   ! Configure INSTALL README hints/README.hints hints/bsdos.sh
+	   ! hints/freebsd.sh pod/perl.pod pod/perl56delta.pod
+	   ! pod/perlfaq2.pod pod/perllocale.pod pod/perlxs.pod
+	   ! utils/perlbug.PL
+____________________________________________________________________________
+[  6893] By: jhi                                   on 2000/08/29  19:55:30
+        Log: Subject: [ID 20000829.022] [PATCH 6868] Minor nit in installhtml
+             From: "Philip Newton" <Philip.Newton@gmx.net>
+             Date: Tue, 29 Aug 2000 21:39:14 +0200
+             Message-Id: <200008291938.VAA98255@smtp1.nikoma.de>
+     Branch: perl
+	   ! installhtml
+____________________________________________________________________________
+[  6892] By: jhi                                   on 2000/08/29  19:53:59
+        Log: Subject: [ID 20000829.026] [PATCH 6868] File::Temp
+             From: "Philip Newton" <Philip.Newton@gmx.net>
+             Date: Tue, 29 Aug 2000 21:48:18 +0200
+             Message-Id: <200008291947.VAA13628@smtp2.nikoma.de>
+     Branch: perl
+	   ! lib/File/Temp.pm
+____________________________________________________________________________
+[  6891] By: jhi                                   on 2000/08/29  18:30:03
+        Log: Nail the ID 20000828.023.
+     Branch: perl
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[  6890] By: jhi                                   on 2000/08/29  16:50:17
+        Log: Under usethreads the dumped variable is IN_PAD.
+             
+             Subject: Re: [PATCH] Glob dumping
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 29 Aug 2000 18:45:05 +0200
+             Message-ID: <m37l9010fi.fsf@eik.g.aas.no>
+     Branch: perl
+	   ! t/lib/peek.t
+____________________________________________________________________________
+[  6889] By: jhi                                   on 2000/08/29  15:17:37
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6888] By: jhi                                   on 2000/08/29  14:49:59
         Log: Retract #6882, broke the safe tests.
      Branch: perl
