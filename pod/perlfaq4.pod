@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.13 $, $Date: 2002/01/31 04:27:54 $)
+perlfaq4 - Data Manipulation ($Revision: 1.14 $, $Date: 2002/02/08 22:30:23 $)
 
 =head1 DESCRIPTION
 
@@ -975,7 +975,7 @@ in the indentation.
             would deliver us. You are a liar, Saruman, and a corrupter
             of men's hearts.  --Theoden in /usr/src/perl/taint.c
         FINIS
-    $quote =~ s/\s*--/\n--/;
+    $quote =~ s/\s+--/\n--/;
 
 A nice general-purpose fixer-upper function for indented here documents
 follows.  It expects to be called with a here document as its argument.

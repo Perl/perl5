@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.12 $, $Date: 2002/01/28 04:17:26 $)
+perlfaq3 - Programming Tools ($Revision: 1.13 $, $Date: 2002/02/08 22:32:47 $)
 
 =head1 DESCRIPTION
 
@@ -123,9 +123,8 @@ of contrasting algorithms.
 
 =head2 How do I cross-reference my Perl programs?
 
-The B::Xref module, shipped with the new, alpha-release Perl compiler
-(not the general distribution prior to the 5.005 release), can be used
-to generate cross-reference reports for Perl programs.
+The B::Xref module can be used to generate cross-reference reports 
+for Perl programs.
 
     perl -MO=Xref[,OPTIONS] scriptname.plx
 
@@ -895,8 +894,7 @@ the tests pass, read the pods again and again and again.  If they
 fail, see L<perlbug> and send a bug report with the output of
 C<make test TEST_VERBOSE=1> along with C<perl -V>.
 
-=head2 When I tried to run my script, I got this message. What does it
-mean?
+=head2 When I tried to run my script, I got this message. What does it mean?
 
 A complete list of Perl's error messages and warnings with explanatory
 text can be found in L<perldiag>. You can also use the splain program
