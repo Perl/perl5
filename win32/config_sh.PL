@@ -45,11 +45,12 @@ while (@{$optref} && $optref->[0] =~ /^([\w_]+)=(.*)$/) {
 FindExt::scan_ext("../ext");
 FindExt::set_static_extensions(split ' ', $opt{'static_ext'});
 
-my @dynamic = grep(!/Thread/,FindExt::dynamic_ext());
+my @dynamic_ext = grep(!/Thread/,FindExt::dynamic_ext());
+my @extensions  = grep(!/Thread/,FindExt::extensions());
 $opt{'nonxs_ext'}        = join(' ',FindExt::nonxs_ext()) || ' ';
 $opt{'static_ext'}       = join(' ',FindExt::static_ext()) || ' ';
-$opt{'dynamic_ext'}      = join(' ',@dynamic) || ' ';
-$opt{'extensions'}       = join(' ',FindExt::extensions()) || ' ';
+$opt{'dynamic_ext'}      = join(' ',@dynamic_ext) || ' ';
+$opt{'extensions'}       = join(' ',@extensions) || ' ';
 $opt{'known_extensions'} = join(' ',FindExt::known_extensions()) || ' ';
 
 my $pl_h = '../patchlevel.h';
