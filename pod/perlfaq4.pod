@@ -1198,7 +1198,14 @@ lists, or you could just do something like this with an array:
 
 =head2 How do I shuffle an array randomly?
 
-Use this:
+If you either have Perl 5.8.0 or later installed, or if you have
+Scalar-List-Utils 1.03 or later installed, you can say:
+
+        use List::Util 'shuffle';
+
+	@shuffled = shuffle(@list);
+
+If not, you can use this:
 
     # fisher_yates_shuffle( \@array ) : 
     # generate a random permutation of @array in place
@@ -1212,6 +1219,10 @@ Use this:
     }
 
     fisher_yates_shuffle( \@array );    # permutes @array in place
+
+Note that the above implementation shuffles an array in place,
+unlike the List::Util::shuffle() which takes a list and returns
+a new shuffled list.
 
 You've probably seen shuffling algorithms that work using splice,
 randomly picking another element to swap the current element with
