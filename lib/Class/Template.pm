@@ -45,6 +45,8 @@ This module uses perl5 classes to create nested data types.
 
 =head1 EXAMPLES
 
+=over
+
 =item * Example 1
 
 	use Class::Template;
@@ -82,6 +84,8 @@ This module uses perl5 classes to create nested data types.
 		my $r = InitMembers( &OBJ::InitMembers() );
 		bless $r;
 	}
+
+=back
 
 =head1 NOTES
 

@@ -565,7 +565,7 @@ Next, we come to XPUSHs. This is where the parameters actually get
 pushed onto the stack. In this case we are pushing a string and an
 integer.
 
-See the L<perlguts/"XSUBs and the Argument Stack"> for details
+See the L<perlguts/"XSUB's and the Argument Stack"> for details
 on how the XPUSH macros work.
 
 =item 6.

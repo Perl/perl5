@@ -503,7 +503,7 @@ Even if you don't want to modify an array, this mechanism is useful for
 passing multiple arrays in a single LIST, because normally the LIST
 mechanism will merge all the array values so that you can't extract out
 the individual arrays.  For more on typeglobs, see
-L<perldata/"Typeglobs and FileHandles">.
+L<perldata/"Typeglobs and Filehandles">.
 
 =head2 Pass by Reference
 

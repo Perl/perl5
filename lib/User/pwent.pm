@@ -49,7 +49,7 @@ __END__
 
 =head1 NAME
 
-User::pwent.pm - by-name interface to Perl's built-in getpw*() functions
+User::pwent - by-name interface to Perl's built-in getpw*() functions
 
 =head1 SYNOPSIS
 

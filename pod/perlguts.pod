@@ -162,7 +162,7 @@ bus error, or just weird results.  Change the zero to C<&sv_undef> in the first
 line and all will be well.
 
 To free an SV that you've created, call C<SvREFCNT_dec(SV*)>.  Normally this
-call is not necessary (see the section on L<Mortality>).
+call is not necessary (see the section on L<Reference Counts and Mortality>).
 
 =head2 What's Really Stored in an SV?
 
@@ -422,8 +422,8 @@ A reference can be blessed into a package with the following function:
     SV* sv_bless(SV* sv, HV* stash);
 
 The C<sv> argument must be a reference.  The C<stash> argument specifies
-which class the reference will belong to.  See the section on L<Stashes>
-for information on converting class names into stashes.
+which class the reference will belong to.  See the section on 
+L<Stashes and Globs> for information on converting class names into stashes.
 
 /* Still under construction */
 
@@ -995,7 +995,7 @@ The correspondence between OP's and I<target>s is not 1-to-1. Different
 OP's in the compile tree of the unit can use the same target, if this
 would not conflict with the expected life of the temporary.
 
-=head2 Scratchpads and recursions
+=head2 Scratchpads and recursion
 
 In fact it is not 100% true that a compiled unit contains a pointer to
 the scratchpad AV. In fact it contains a pointer to an AV of

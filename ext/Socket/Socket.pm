@@ -47,6 +47,8 @@ all of the commonly used pound-defines like AF_INET, SOCK_STREAM, etc.
 
 In addition, some structure manipulation functions are available:
 
+=over
+
 =item inet_aton HOSTNAME
 
 Takes a string giving the name of a host, and translates that
@@ -143,6 +145,8 @@ getsockname() and recv().
 Takes a sockaddr_un structure (as returned by pack_sockaddr_un())
 and returns the pathname.  Will croak if the structure does not
 have AF_UNIX in the right place.
+
+=back
 
 =cut
 

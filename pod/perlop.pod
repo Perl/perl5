@@ -88,7 +88,7 @@ Also parsed as terms are the C<do {}> and C<eval {}> constructs, as
 well as subroutine and method calls, and the anonymous 
 constructors C<[]> and C<{}>.
 
-See also L<Quote and Quote-Like Operators> toward the end of this section,
+See also L<Quote and Quote-like Operators> toward the end of this section,
 as well as L<"I/O Operators">.
 
 =head2 The Arrow Operator

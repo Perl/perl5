@@ -272,6 +272,8 @@ ccdlflags(), xsi_header(), xsi_protos(), xsi_body()
 
 =head1 FUNCTIONS
 
+=over
+
 =item xsinit()
 
 Generate C/C++ code for the XS initializer function.
@@ -453,6 +455,8 @@ This function returns a string of calls to B<newXS()> that glue the module B<boo
 function to B<boot_ModuleName> for each @modules.
 
 B<xsinit()> uses the xsi_* functions to generate most of it's code.
+
+=back
 
 =head1 EXAMPLES
 

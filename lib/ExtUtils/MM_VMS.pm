@@ -36,6 +36,8 @@ the semantics.
 
 =head2 Methods always loaded
 
+=over
+
 =item eliminate_macros
 
 Expands MM[KS]/Make macros in a text string, using the contents of
@@ -312,6 +314,7 @@ sub ext {
   ExtUtils::Liblist::ext(@_);
 }
 
+=back
 
 =head2 SelfLoaded methods
 
@@ -320,6 +323,8 @@ Those methods which override default MM_Unix methods are marked
 For overridden methods, documentation is limited to an explanation
 of why this method overrides the MM_Unix method; see the ExtUtils::MM_Unix
 documentation for more details.
+
+=over
 
 =item guess_name (override)
 
@@ -2352,6 +2357,10 @@ sub nicetext {
 }
 
 1;
+
+=back
+
+=cut
 
 __END__
 

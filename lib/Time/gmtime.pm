@@ -35,7 +35,7 @@ __END__
 
 =head1 NAME
 
-Time::gmtime.pm - by-name interface to Perl's built-in gmtime() function
+Time::gmtime - by-name interface to Perl's built-in gmtime() function
 
 =head1 SYNOPSIS
 
