@@ -85,7 +85,7 @@ delete $h{'goner3'};
 if ($#keys == 29 && $#values == 29) {print "ok 5\n";} else {print "not ok 5\n";}
 
 while (($key,$value) = each(h)) {
-    if ($key eq $keys[$i] && $value eq $values[$i] && $key gt $value) {
+    if ($key eq $keys[$i] && $value eq $values[$i] && $key eq lc($value)) {
 	$key =~ y/a-z/A-Z/;
 	$i++ if $key eq $value;
     }

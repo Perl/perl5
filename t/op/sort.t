@@ -4,19 +4,22 @@
 
 print "1..10\n";
 
-sub backwards { $a lt $b ? 1 : $a gt $b ? -1 : 0; }
+sub backwards { $a lt $b ? 1 : $a gt $b ? -1 : 0 }
 
 @harry = ('dog','cat','x','Cain','Abel');
-@george = ('gone','chased','yz','Punished','Axed');
+@george = ('gone','chased','yz','punished','Axed');
 
 $x = join('', sort @harry);
 print ($x eq 'AbelCaincatdogx' ? "ok 1\n" : "not ok 1\n");
+print "# x = '$x'\n";
 
 $x = join('', sort( backwards @harry));
 print ($x eq 'xdogcatCainAbel' ? "ok 2\n" : "not ok 2\n");
+print "# x = '$x'\n";
 
 $x = join('', sort @george, 'to', @harry);
-print ($x eq 'AbelAxedCainPunishedcatchaseddoggonetoxyz'?"ok 3\n":"not ok 3\n");
+print ($x eq 'AbelAxedCaincatchaseddoggonepunishedtoxyz'?"ok 3\n":"not ok 3\n");
+print "# x = '$x'\n";
 
 @a = ();
 @b = reverse @a;

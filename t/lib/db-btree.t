@@ -158,7 +158,7 @@ ok(27, $#keys == 29 && $#values == 29) ;
 
 $i = 0 ;
 while (($key,$value) = each(%h)) {
-    if ($key eq $keys[$i] && $value eq $values[$i] && $key gt $value) {
+    if ($key eq $keys[$i] && $value eq $values[$i] && $key eq lc($value)) {
 	$key =~ y/a-z/A-Z/;
 	$i++ if $key eq $value;
     }
