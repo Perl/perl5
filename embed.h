@@ -101,6 +101,7 @@
 #define block_gimme		Perl_block_gimme
 #define block_start		Perl_block_start
 #define boot_core_UNIVERSAL	Perl_boot_core_UNIVERSAL
+#define boot_core_PerlIO	Perl_boot_core_PerlIO
 #define call_list		Perl_call_list
 #define cando			Perl_cando
 #define cast_ulong		Perl_cast_ulong
@@ -1629,6 +1630,7 @@
 #define block_gimme()		Perl_block_gimme(aTHX)
 #define block_start(a)		Perl_block_start(aTHX_ a)
 #define boot_core_UNIVERSAL()	Perl_boot_core_UNIVERSAL(aTHX)
+#define boot_core_PerlIO()	Perl_boot_core_PerlIO(aTHX)
 #define call_list(a,b)		Perl_call_list(aTHX_ a,b)
 #define cando(a,b,c)		Perl_cando(aTHX_ a,b,c)
 #define cast_ulong(a)		Perl_cast_ulong(aTHX_ a)
@@ -3166,6 +3168,8 @@
 #define block_start		Perl_block_start
 #define Perl_boot_core_UNIVERSAL	CPerlObj::Perl_boot_core_UNIVERSAL
 #define boot_core_UNIVERSAL	Perl_boot_core_UNIVERSAL
+#define Perl_boot_core_PerlIO	CPerlObj::Perl_boot_core_PerlIO
+#define boot_core_PerlIO	Perl_boot_core_PerlIO
 #define Perl_call_list		CPerlObj::Perl_call_list
 #define call_list		Perl_call_list
 #define Perl_cando		CPerlObj::Perl_cando

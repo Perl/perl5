@@ -91,6 +91,7 @@ PERL_CALLCONV OP*	Perl_block_end(pTHX_ I32 floor, OP* seq);
 PERL_CALLCONV I32	Perl_block_gimme(pTHX);
 PERL_CALLCONV int	Perl_block_start(pTHX_ int full);
 PERL_CALLCONV void	Perl_boot_core_UNIVERSAL(pTHX);
+PERL_CALLCONV void	Perl_boot_core_PerlIO(pTHX);
 PERL_CALLCONV void	Perl_call_list(pTHX_ I32 oldscope, AV* av_list);
 PERL_CALLCONV bool	Perl_cando(pTHX_ Mode_t mode, Uid_t effective, Stat_t* statbufp);
 PERL_CALLCONV U32	Perl_cast_ulong(pTHX_ NV f);
