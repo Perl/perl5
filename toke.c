@@ -2603,7 +2603,13 @@ yylex()
 		  (gv = *gvp) != (GV*)&sv_undef &&
 		  GvCVu(gv) && GvIMPORTED_CV(gv))))
 	    {
-		tmp = 0;
+		tmp = 0;		/* overridden by importation */
+	    }
+	    else if (gv && !gvp
+		     && -tmp==KEY_lock	/* XXX generalizable kludge */
+		     && !gv_fetchpv("Thread::join",FALSE,SVt_PVCV))
+	    {
+		tmp = 0;		/* any sub overrides "weak" keyword */
 	    }
 	    else {
 		tmp = -tmp; gv = Nullgv; gvp = 0;
