@@ -263,7 +263,7 @@ Newer examples can be found by perusing Larry's postings:
 
     http://x1.dejanews.com/dnquery.xp?QRY=*&DBS=2&ST=PS&defaultOp=AND&LNG=ALL&format=terse&showsort=date&maxhits=100&subjects=&groups=&authors=larry@*wall.org&fromdate=&todate=
 
-=head2 How can I convince my sysadmin/supervisor/employees to use (version 5/5.005/Perl) instead of some other language?
+=head2 How can I convince my sysadmin/supervisor/employees to use version 5/5.005/Perl instead of some other language?
 
 If your manager or employees are wary of unsupported software, or
 software which doesn't officially ship with your operating system, you

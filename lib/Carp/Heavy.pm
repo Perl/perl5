@@ -1,6 +1,12 @@
 package Carp;
 
+# use strict; # not yet
+
 =head1 NAME
+
+Carp heavy machinery - no user serviceable parts inside
+
+=cut
 
 Carp::Heavy - Carp guts
 

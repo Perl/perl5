@@ -193,16 +193,21 @@ examples given for the C<@-> variable.
 
 =item $*
 
-Set to 1 to do multi-line matching within a string, 0 to tell Perl
-that it can assume that strings contain a single line, for the purpose
-of optimizing pattern matches.  Pattern matches on strings containing
-multiple newlines can produce confusing results when C<$*> is 0.  Default
-is 0.  (Mnemonic: * matches multiple things.)  This variable
-influences the interpretation of only C<^> and C<$>.  A literal newline can
-be searched for even when C<$* == 0>.
+Set to a non-zero integer value to do multi-line matching within a
+string, 0 (or undefined) to tell Perl that it can assume that strings
+contain a single line, for the purpose of optimizing pattern matches.
+Pattern matches on strings containing multiple newlines can produce
+confusing results when C<$*> is 0 or undefined. Default is undefined.
+(Mnemonic: * matches multiple things.) This variable influences the
+interpretation of only C<^> and C<$>. A literal newline can be searched
+for even when C<$* == 0>.
 
 Use of C<$*> is deprecated in modern Perl, supplanted by 
 the C</s> and C</m> modifiers on pattern matching.
+
+Assigning a non-numerical value to C<$*> triggers a warning (and makes
+C<$*> act if C<$* == 0>), while assigning a numerical value to C<$*>
+makes that an implicit C<int> is applied on the value.
 
 =item input_line_number HANDLE EXPR
 

@@ -300,8 +300,13 @@ to the right argument.
 Binary "<=>" returns -1, 0, or 1 depending on whether the left
 argument is numerically less than, equal to, or greater than the right
 argument.  If your platform supports NaNs (not-a-numbers) as numeric
-values, using them with "<=>" (or any other numeric comparison)
-returns undef.
+values, using them with "<=>" returns undef.  NaN is not "<", "==", ">",
+"<=" or ">=" anything (even NaN), so those 5 return false. NaN != NaN
+returns true, as does NaN != anything else. If your platform doesn't
+support NaNs then NaN is just a string with numeric value 0.
+
+    perl -le '$a = NaN; print "No NaN support here" if $a == $a'
+    perl -le '$a = NaN; print "NaN support here" if $a != $a'
 
 Binary "eq" returns true if the left argument is stringwise equal to
 the right argument.

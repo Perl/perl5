@@ -101,9 +101,9 @@ easier to use your script under *nix.)
 Perl under AmigaOS lacks some features of perl under UNIX because of
 deficiencies in the UNIX-emulation, most notably:
 
-=over 6
+=over 4
 
-=item *
+=item * 
 
 fork()
 

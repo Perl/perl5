@@ -19,16 +19,6 @@ through to locate the proper section you're looking for.
 
 =item DESCRIPTION
 
-modularity and reusability using innumerable modules, embeddable and
-extensible, roll-your-own magic variables (including multiple simultaneous
-DBM implementations), subroutines can now be overridden, autoloaded, and
-prototyped, arbitrarily nested data structures and anonymous functions,
-object-oriented programming, compilability into C code or Perl bytecode,
-support for light-weight processes (threads), support for
-internationalization, localization, and Unicode, lexical scoping, regular
-expression enhancements, enhanced debugger and interactive Perl
-environment, with integrated editor support, POSIX 1003.1 compliant library
-
 =item AVAILABILITY
 
 =item ENVIRONMENT
@@ -54,228 +44,37 @@ environment, with integrated editor support, POSIX 1003.1 compliant library
 
 =item DESCRIPTION
 
-perlfaq: Structural overview of the FAQ, L<perlfaq1>: General Questions
-About Perl, What is Perl?, Who supports Perl?  Who develops it?  Why is it
-free?, Which version of Perl should I use?, What are perl4 and perl5?, What
-is perl6?, How stable is Perl?, Is Perl difficult to learn?, How does Perl
-compare with other languages like Java, Python, REXX, Scheme, or Tcl?, Can
-I do [task] in Perl?, When shouldn't I program in Perl?, What's the
-difference between "perl" and "Perl"?, Is it a Perl program or a Perl
-script?, What is a JAPH?, Where can I get a list of Larry Wall witticisms?,
-How can I convince my sysadmin/supervisor/employees to use (version
-5/5.005/Perl) instead of some other language?, L<perlfaq2>: Obtaining and
-Learning about Perl, What machines support Perl?  Where do I get it?, How
-can I get a binary version of Perl?, I don't have a C compiler on my
-system.  How can I compile perl?, I copied the Perl binary from one machine
-to another, but scripts don't work, I grabbed the sources and tried to
-compile but gdbm/dynamic loading/malloc/linking/... failed.  How do I make
-it work?, What modules and extensions are available for Perl?  What is
-CPAN?  What does CPAN/src/... mean?, Is there an ISO or ANSI certified
-version of Perl?, Where can I get information on Perl?, What are the Perl
-newsgroups on USENET?  Where do I post questions?, Where should I post
-source code?, Perl Books, Perl in Magazines, Perl on the Net: FTP and WWW
-Access, What mailing lists are there for perl?, Archives of
-comp.lang.perl.misc, Where can I buy a commercial version of Perl?, Where
-do I send bug reports?, What is perl.com?, L<perlfaq3>: Programming Tools,
-How do I do (anything)?, How can I use Perl interactively?, Is there a Perl
-shell?, How do I debug my Perl programs?, How do I profile my Perl
-programs?, How do I cross-reference my Perl programs?, Is there a
-pretty-printer (formatter) for Perl?, Is there a ctags for Perl?, Is there
-an IDE or Windows Perl Editor?, Where can I get Perl macros for vi?, Where
-can I get perl-mode for emacs?, How can I use curses with Perl?, How can I
-use X or Tk with Perl?, How can I generate simple menus without using CGI
-or Tk?, What is undump?, How can I make my Perl program run faster?, How
-can I make my Perl program take less memory?, Is it unsafe to return a
-pointer to local data?, How can I free an array or hash so my program
-shrinks?, How can I make my CGI script more efficient?, How can I hide the
-source for my Perl program?, How can I compile my Perl program into byte
-code or C?, How can I compile Perl into Java?, How can I get C<#!perl> to
-work on [MS-DOS,NT,...]?, Can I write useful perl programs on the command
-line?, Why don't perl one-liners work on my DOS/Mac/VMS system?, Where can
-I learn about CGI or Web programming in Perl?, Where can I learn about
-object-oriented Perl programming?, Where can I learn about linking C with
-Perl? [h2xs, xsubpp], I've read perlembed, perlguts, etc., but I can't
-embed perl in my C program; what am I doing wrong?, When I tried to run my
-script, I got this message. What does it mean?, What's MakeMaker?,
-L<perlfaq4>: Data Manipulation, Why am I getting long decimals (eg,
-19.9499999999999) instead of the numbers I should be getting (eg, 19.95)?,
-Why isn't my octal data interpreted correctly?, Does Perl have a round()
-function?  What about ceil() and floor()?  Trig functions?, How do I
-convert bits into ints?, Why doesn't & work the way I want it to?, How do I
-multiply matrices?, How do I perform an operation on a series of integers?,
-How can I output Roman numerals?, Why aren't my random numbers random?, How
-do I find the week-of-the-year/day-of-the-year?, How do I find the current
-century or millennium?, How can I compare two dates and find the
-difference?, How can I take a string and turn it into epoch seconds?, How
-can I find the Julian Day?, How do I find yesterday's date?, Does Perl have
-a year 2000 problem?  Is Perl Y2K compliant?, How do I validate input?, How
-do I unescape a string?, How do I remove consecutive pairs of characters?,
-How do I expand function calls in a string?, How do I find matching/nesting
-anything?, How do I reverse a string?, How do I expand tabs in a string?,
-How do I reformat a paragraph?, How can I access/change the first N letters
-of a string?, How do I change the Nth occurrence of something?, How can I
-count the number of occurrences of a substring within a string?, How do I
-capitalize all the words on one line?, How can I split a [character]
-delimited string except when inside [character]? (Comma-separated files),
-How do I strip blank space from the beginning/end of a string?, How do I
-pad a string with blanks or pad a number with zeroes?, How do I extract
-selected columns from a string?, How do I find the soundex value of a
-string?, How can I expand variables in text strings?, What's wrong with
-always quoting "$vars"?, Why don't my <<HERE documents work?, What is the
-difference between a list and an array?, What is the difference between
-$array[1] and @array[1]?, How can I remove duplicate elements from a list
-or array?, How can I tell whether a list or array contains a certain
-element?, How do I compute the difference of two arrays?  How do I compute
-the intersection of two arrays?, How do I test whether two arrays or hashes
-are equal?, How do I find the first array element for which a condition is
-true?, How do I handle linked lists?, How do I handle circular lists?, How
-do I shuffle an array randomly?, How do I process/modify each element of an
-array?, How do I select a random element from an array?, How do I permute N
-elements of a list?, How do I sort an array by (anything)?, How do I
-manipulate arrays of bits?, Why does defined() return true on empty arrays
-and hashes?, How do I process an entire hash?, What happens if I add or
-remove keys from a hash while iterating over it?, How do I look up a hash
-element by value?, How can I know how many entries are in a hash?, How do I
-sort a hash (optionally by value instead of key)?, How can I always keep my
-hash sorted?, What's the difference between "delete" and "undef" with
-hashes?, Why don't my tied hashes make the defined/exists distinction?, How
-do I reset an each() operation part-way through?, How can I get the unique
-keys from two hashes?, How can I store a multidimensional array in a DBM
-file?, How can I make my hash remember the order I put elements into it?,
-Why does passing a subroutine an undefined element in a hash create it?,
-How can I make the Perl equivalent of a C structure/C++ class/hash or array
-of hashes or arrays?, How can I use a reference as a hash key?, How do I
-handle binary data correctly?, How do I determine whether a scalar is a
-number/whole/integer/float?, How do I keep persistent data across program
-calls?, How do I print out or copy a recursive data structure?, How do I
-define methods for every class/object?, How do I verify a credit card
-checksum?, How do I pack arrays of doubles or floats for XS code?,
-L<perlfaq5>: Files and Formats, How do I flush/unbuffer an output
-filehandle?  Why must I do this?, How do I change one line in a file/delete
-a line in a file/insert a line in the middle of a file/append to the
-beginning of a file?, How do I count the number of lines in a file?, How do
-I make a temporary file name?, How can I manipulate fixed-record-length
-files?, How can I make a filehandle local to a subroutine?  How do I pass
-filehandles between subroutines?  How do I make an array of filehandles?,
-How can I use a filehandle indirectly?, How can I set up a footer format to
-be used with write()?, How can I write() into a string?, How can I output
-my numbers with commas added?, How can I translate tildes (~) in a
-filename?, How come when I open a file read-write it wipes it out?, Why do
-I sometimes get an "Argument list too long" when I use <*>?, Is there a
-leak/bug in glob()?, How can I open a file with a leading ">" or trailing
-blanks?, How can I reliably rename a file?, How can I lock a file?, Why
-can't I just open(FH, ">file.lock")?, I still don't get locking.  I just
-want to increment the number in the file.  How can I do this?, How do I
-randomly update a binary file?, How do I get a file's timestamp in perl?,
-How do I set a file's timestamp in perl?, How do I print to more than one
-file at once?, How can I read in an entire file all at once?, How can I
-read in a file by paragraphs?, How can I read a single character from a
-file?  From the keyboard?, How can I tell whether there's a character
-waiting on a filehandle?, How do I do a C<tail -f> in perl?, How do I dup()
-a filehandle in Perl?, How do I close a file descriptor by number?, Why
-can't I use "C:\temp\foo" in DOS paths?  What doesn't `C:\temp\foo.exe`
-work?, Why doesn't glob("*.*") get all the files?, Why does Perl let me
-delete read-only files?  Why does C<-i> clobber protected files?  Isn't
-this a bug in Perl?, How do I select a random line from a file?, Why do I
-get weird spaces when I print an array of lines?, L<perlfaq6>: Regexps, How
-can I hope to use regular expressions without creating illegible and
-unmaintainable code?, I'm having trouble matching over more than one line. 
-What's wrong?, How can I pull out lines between two patterns that are
-themselves on different lines?, I put a regular expression into $/ but it
-didn't work. What's wrong?, How do I substitute case insensitively on the
-LHS while preserving case on the RHS?, How can I make C<\w> match national
-character sets?, How can I match a locale-smart version of C</[a-zA-Z]/>?,
-How can I quote a variable to use in a regex?, What is C</o> really for?,
-How do I use a regular expression to strip C style comments from a file?,
-Can I use Perl regular expressions to match balanced text?, What does it
-mean that regexes are greedy?  How can I get around it?, How do I process
-each word on each line?, How can I print out a word-frequency or
-line-frequency summary?, How can I do approximate matching?, How do I
-efficiently match many regular expressions at once?, Why don't
-word-boundary searches with C<\b> work for me?, Why does using $&, $`, or
-$' slow my program down?, What good is C<\G> in a regular expression?, Are
-Perl regexes DFAs or NFAs?  Are they POSIX compliant?, What's wrong with
-using grep or map in a void context?, How can I match strings with
-multibyte characters?, How do I match a pattern that is supplied by the
-user?, L<perlfaq7>: General Perl Language Issues, Can I get a BNF/yacc/RE
-for the Perl language?, What are all these $@%&* punctuation signs, and how
-do I know when to use them?, Do I always/never have to quote my strings or
-use semicolons and commas?, How do I skip some return values?, How do I
-temporarily block warnings?, What's an extension?, Why do Perl operators
-have different precedence than C operators?, How do I declare/create a
-structure?, How do I create a module?, How do I create a class?, How can I
-tell if a variable is tainted?, What's a closure?, What is variable suicide
-and how can I prevent it?, How can I pass/return a {Function, FileHandle,
-Array, Hash, Method, Regex}?, How do I create a static variable?, What's
-the difference between dynamic and lexical (static) scoping?  Between
-local() and my()?, How can I access a dynamic variable while a similarly
-named lexical is in scope?, What's the difference between deep and shallow
-binding?, Why doesn't "my($foo) = <FILE>;" work right?, How do I redefine a
-builtin function, operator, or method?, What's the difference between
-calling a function as &foo and foo()?, How do I create a switch or case
-statement?, How can I catch accesses to undefined
-variables/functions/methods?, Why can't a method included in this same file
-be found?, How can I find out my current package?, How can I comment out a
-large block of perl code?, How do I clear a package?, How can I use a
-variable as a variable name?, L<perlfaq8>: System Interaction, How do I
-find out which operating system I'm running under?, How come exec() doesn't
-return?, How do I do fancy stuff with the keyboard/screen/mouse?, How do I
-print something out in color?, How do I read just one key without waiting
-for a return key?, How do I check whether input is ready on the keyboard?,
-How do I clear the screen?, How do I get the screen size?, How do I ask the
-user for a password?, How do I read and write the serial port?, How do I
-decode encrypted password files?, How do I start a process in the
-background?, How do I trap control characters/signals?, How do I modify the
-shadow password file on a Unix system?, How do I set the time and date?,
-How can I sleep() or alarm() for under a second?, How can I measure time
-under a second?, How can I do an atexit() or setjmp()/longjmp()? (Exception
-handling), Why doesn't my sockets program work under System V (Solaris)? 
-What does the error message "Protocol not supported" mean?, How can I call
-my system's unique C functions from Perl?, Where do I get the include files
-to do ioctl() or syscall()?, Why do setuid perl scripts complain about
-kernel problems?, How can I open a pipe both to and from a command?, Why
-can't I get the output of a command with system()?, How can I capture
-STDERR from an external command?, Why doesn't open() return an error when a
-pipe open fails?, What's wrong with using backticks in a void context?, How
-can I call backticks without shell processing?, Why can't my script read
-from STDIN after I gave it EOF (^D on Unix, ^Z on MS-DOS)?, How can I
-convert my shell script to perl?, Can I use perl to run a telnet or ftp
-session?, How can I write expect in Perl?, Is there a way to hide perl's
-command line from programs such as "ps"?, I {changed directory, modified my
-environment} in a perl script.	How come the change disappeared when I
-exited the script?  How do I get my changes to be visible?, How do I close
-a process's filehandle without waiting for it to complete?, How do I fork a
-daemon process?, How do I make my program run with sh and csh?, How do I
-find out if I'm running interactively or not?, How do I timeout a slow
-event?, How do I set CPU limits?, How do I avoid zombies on a Unix system?,
-How do I use an SQL database?, How do I make a system() exit on control-C?,
-How do I open a file without blocking?, How do I install a module from
-CPAN?, What's the difference between require and use?, How do I keep my own
-module/library directory?, How do I add the directory my program lives in
-to the module/library search path?, How do I add a directory to my include
-path at runtime?, What is socket.ph and where do I get it?, L<perlfaq9>:
-Networking, My CGI script runs from the command line but not the browser. 
-(500 Server Error), How can I get better error messages from a CGI
-program?, How do I remove HTML from a string?, How do I extract URLs?, How
-do I download a file from the user's machine?  How do I open a file on
-another machine?, How do I make a pop-up menu in HTML?, How do I fetch an
-HTML file?, How do I automate an HTML form submission?, How do I decode or
-create those %-encodings on the web?, How do I redirect to another page?,
-How do I put a password on my web pages?, How do I edit my .htpasswd and
-.htgroup files with Perl?, How do I make sure users can't enter values into
-a form that cause my CGI script to do bad things?, How do I parse a mail
-header?, How do I decode a CGI form?, How do I check a valid mail address?,
-How do I decode a MIME/BASE64 string?, How do I return the user's mail
-address?, How do I send mail?, How do I read mail?, How do I find out my
-hostname/domainname/IP address?, How do I fetch a news article or the
-active newsgroups?, How do I fetch/put an FTP file?, How can I do RPC in
-Perl?
+=over 4
+
+=item perlfaq: Structural overview of the FAQ.
+
+=item L<perlfaq1>: General Questions About Perl
+
+=item L<perlfaq2>: Obtaining and Learning about Perl
+
+=item L<perlfaq3>: Programming Tools
+
+=item L<perlfaq4>: Data Manipulation
+
+=item L<perlfaq5>: Files and Formats
+
+=item L<perlfaq6>: Regexps
+
+=item L<perlfaq7>: General Perl Language Issues
+
+=item L<perlfaq8>: System Interaction
+
+=item L<perlfaq9>: Networking
+
+=back
+
+=item About the perlfaq documents
 
 =over 4
 
-=item Where to get this document
+=item Where to get the perlfaq
 
-=item How to contribute to this document
+=item How to contribute to the perlfaq
 
 =item What will happen if you mail your Perl programming problems to the
 authors
@@ -299,30 +98,6 @@ authors
 1/November/2000, 23/May/99, 13/April/99, 7/January/99, 22/June/98,
 24/April/97, 23/April/97, 25/March/97, 18/March/97, 17/March/97 Version,
 Initial Release: 11/March/97
-
-=back
-
-=head2 perltoc - perl documentation table of contents
-
-=over 4
-
-=item DESCRIPTION
-
-=item BASIC DOCUMENTATION
-
-=over 4
-
-=item perl - Practical Extraction and Report Language
-
-SYNOPSIS, DESCRIPTION, AVAILABILITY, ENVIRONMENT, AUTHOR, FILES, SEE ALSO,
-DIAGNOSTICS, BUGS, NOTES
-
-=item perlfaq - frequently asked questions about Perl ($Date: 1999/05/23
-20:38:02 $)
-
-DESCRIPTION
-
-=back
 
 =back
 
@@ -510,10 +285,6 @@ regular expressions
 =item Passing Symbol Table Entries (typeglobs)
 
 =item When to Still Use local()
-
-1. You need to give a global variable a temporary value, especially $_, 2.
-You need to create a local file or directory handle or a local function, 3.
-You want to temporarily change just one element of an array or hash
 
 =item Pass by Reference
 
@@ -779,13 +550,6 @@ more elaborate constructs
 
 =item Using character classes
 
-\d is a digit and represents [0-9], \s is a whitespace character and
-represents [\ \t\r\n\f], \w is a word character (alphanumeric or _) and
-represents [0-9a-zA-Z_], \D is a negated \d; it represents any character
-but a digit [^0-9], \S is a negated \s; it represents any non-whitespace
-character [^\s], \W is a negated \w; it represents any non-word character
-[^\w], The period '.' matches any character but "\n"
-
 =item Matching this or that
 
 =item Grouping things and hierarchical matching
@@ -793,12 +557,6 @@ character [^\s], \W is a negated \w; it represents any non-word character
 =item Extracting matches
 
 =item Matching repetitions
-
-C<a?> = match 'a' 1 or 0 times, C<a*> = match 'a' 0 or more times, i.e.,
-any number of times, C<a+> = match 'a' 1 or more times, i.e., at least
-once, C<a{n,m}> = match at least C<n> times, but not more than C<m> times,
-C<a{n,}> = match at least C<n> or more times, C<a{n}> = match exactly C<n>
-times
 
 =item More matching
 
@@ -1263,89 +1021,15 @@ ${^WIDE_SYSTEM_CALLS}, $EXECUTABLE_NAME, $^X, $ARGV, @ARGV, @INC, @_, %INC,
 
 =item Using character classes
 
-\d is a digit and represents [0-9], \s is a whitespace character and
-represents [\ \t\r\n\f], \w is a word character (alphanumeric or _) and
-represents [0-9a-zA-Z_], \D is a negated \d; it represents any character
-but a digit [^0-9], \S is a negated \s; it represents any non-whitespace
-character [^\s], \W is a negated \w; it represents any non-word character
-[^\w], The period '.' matches any character but "\n", no modifiers (//):
-Default behavior.  C<'.'> matches any character except C<"\n">.  C<^>
-matches only at the beginning of the string and C<$> matches only at the
-end or before a newline at the end, s modifier (//s): Treat string as a
-single long line.  C<'.'> matches any character, even C<"\n">.	C<^>
-matches only at the beginning of the string and C<$> matches only at the
-end or before a newline at the end, m modifier (//m): Treat string as a set
-of multiple lines.  C<'.'> matches any character except C<"\n">.  C<^> and
-C<$> are able to match at the start or end of I<any> line within the
-string, both s and m modifiers (//sm): Treat string as a single long line,
-but detect multiple lines.  C<'.'> matches any character, even C<"\n">. 
-C<^> and C<$>, however, are able to match at the start or end of I<any>
-line within the string
-
 =item Matching this or that
 
 =item Grouping things and hierarchical matching
-
-0 Start with the first letter in the string 'a', 1 Try the first
-alternative in the first group 'abd', 2 Match 'a' followed by 'b'. So far
-so good, 3 'd' in the regexp doesn't match 'c' in the string - a dead end. 
-So backtrack two characters and pick the second alternative in the first
-group 'abc', 4 Match 'a' followed by 'b' followed by 'c'.  We are on a roll
-and have satisfied the first group. Set $1 to 'abc', 5 Move on to the
-second group and pick the first alternative 'df', 6 Match the 'd', 7 'f' in
-the regexp doesn't match 'e' in the string, so a dead end.  Backtrack one
-character and pick the second alternative in the second group 'd', 8 'd'
-matches. The second grouping is satisfied, so set $2 to 'd', 9 We are at
-the end of the regexp, so we are done! We have matched 'abcd' out of the
-string "abcde"
 
 =item Extracting matches
 
 =item Matching repetitions
 
-C<a?> = match 'a' 1 or 0 times, C<a*> = match 'a' 0 or more times, i.e.,
-any number of times, C<a+> = match 'a' 1 or more times, i.e., at least
-once, C<a{n,m}> = match at least C<n> times, but not more than C<m> times,
-C<a{n,}> = match at least C<n> or more times, C<a{n}> = match exactly C<n>
-times, Principle 0: Taken as a whole, any regexp will be matched at the
-earliest possible position in the string, Principle 1: In an alternation
-C<a|b|c...>, the leftmost alternative that allows a match for the whole
-regexp will be the one used, Principle 2: The maximal matching quantifiers
-C<?>, C<*>, C<+> and C<{n,m}> will in general match as much of the string
-as possible while still allowing the whole regexp to match, Principle 3: If
-there are two or more elements in a regexp, the leftmost greedy quantifier,
-if any, will match as much of the string as possible while still allowing
-the whole regexp to match.  The next leftmost greedy quantifier, if any,
-will try to match as much of the string remaining available to it as
-possible, while still allowing the whole regexp to match.  And so on, until
-all the regexp elements are satisfied, C<a??> = match 'a' 0 or 1 times. Try
-0 first, then 1, C<a*?> = match 'a' 0 or more times, i.e., any number of
-times, but as few times as possible, C<a+?> = match 'a' 1 or more times,
-i.e., at least once, but as few times as possible, C<a{n,m}?> = match at
-least C<n> times, not more than C<m> times, as few times as possible,
-C<a{n,}?> = match at least C<n> times, but as few times as possible,
-C<a{n}?> = match exactly C<n> times.  Because we match exactly C<n> times,
-C<a{n}?> is equivalent to C<a{n}> and is just there for notational
-consistency, Principle 3: If there are two or more elements in a regexp,
-the leftmost greedy (non-greedy) quantifier, if any, will match as much
-(little) of the string as possible while still allowing the whole regexp to
-match.	The next leftmost greedy (non-greedy) quantifier, if any, will try
-to match as much (little) of the string remaining available to it as
-possible, while still allowing the whole regexp to match.  And so on, until
-all the regexp elements are satisfied, 0 Start with the first letter in the
-string 't', 1 The first quantifier '.*' starts out by matching the whole
-string 'the cat in the hat', 2 'a' in the regexp element 'at' doesn't match
-the end of the string.	Backtrack one character, 3 'a' in the regexp
-element 'at' still doesn't match the last letter of the string 't', so
-backtrack one more character, 4 Now we can match the 'a' and the 't', 5
-Move on to the third element '.*'.  Since we are at the end of the string
-and '.*' can match 0 times, assign it the empty string, 6 We are done!
-
 =item Building a regexp
-
-specifying the task in detail,, breaking down the problem into smaller
-parts,, translating the small parts into regexps,, combining the regexps,,
-and optimizing the final combined regexp
 
 =item Using regular expressions in Perl
 
@@ -2252,15 +1936,6 @@ localization)
 
 =item SECURITY
 
-B<Comparison operators> (C<lt>, C<le>, C<ge>, C<gt> and C<cmp>):,
-B<Case-mapping interpolation> (with C<\l>, C<\L>, C<\u> or C<\U>),
-B<Matching operator> (C<m//>):, B<Substitution operator> (C<s///>):,
-B<Output formatting functions> (printf() and write()):, B<Case-mapping
-functions> (lc(), lcfirst(), uc(), ucfirst()):, B<POSIX locale-dependent
-functions> (localeconv(), strcoll(), strftime(), strxfrm()):, B<POSIX
-character class tests> (isalnum(), isalpha(), isdigit(), isgraph(),
-islower(), isprint(), ispunct(), isspace(), isupper(), isxdigit()):
-
 =item ENVIRONMENT
 
 PERL_BADLANG, LC_ALL, LANGUAGE, LC_CTYPE, LC_COLLATE, LC_MONETARY,
@@ -2546,20 +2221,8 @@ UNIVERSAL, User::grent, User::pwent
 
 =item CPAN
 
-Language Extensions and Documentation Tools, Development Support, Operating
-System Interfaces, Networking, Device Control (modems) and InterProcess
-Communication, Data Types and Data Type Utilities, Database Interfaces,
-User Interfaces, Interfaces to / Emulations of Other Programming Languages,
-File Names, File Systems and File Locking (see also File Handles), String
-Processing, Language Text Processing, Parsing, and Searching, Option,
-Argument, Parameter, and Configuration File Processing,
-Internationalization and Locale, Authentication, Security, and Encryption,
-World Wide Web, HTML, HTTP, CGI, MIME, Server and Daemon Utilities,
-Archiving and Compression, Images, Pixmap and Bitmap Manipulation, Drawing,
-and Graphing, Mail and Usenet News, Control Flow Utilities (callbacks and
-exceptions etc), File Handle and Input/Output Stream Utilities,
-Miscellaneous Modules, Africa, Asia, Australasia, Central America, Europe,
-North America, South America
+Africa, Asia, Australasia, Central America, Europe, North America, South
+America
 
 =item Modules: Creation, Use, and Abuse
 
@@ -2587,12 +2250,6 @@ Adds the standard Module prologue lines, Converts package specifiers from '
 to ::, Converts die(...) to croak(...), Several other minor changes
 
 =item Guidelines for Reusing Application Code
-
-Complete applications rarely belong in the Perl Module Library, Many
-applications contain some Perl code that could be reused, Break-out the
-reusable code into one or more separate module files, Take the opportunity
-to reconsider and redesign the interfaces, In some cases the 'application'
-can then be reduced to a small
 
 =back
 
@@ -2698,8 +2355,8 @@ Scheme, or Tcl?
 
 =item Where can I get a list of Larry Wall witticisms?
 
-=item How can I convince my sysadmin/supervisor/employees to use (version
-5/5.005/Perl) instead of some other language?
+=item How can I convince my sysadmin/supervisor/employees to use version
+5/5.005/Perl instead of some other language?
 
 =back
 
@@ -2959,11 +2616,7 @@ the tag
 
 =item How can I remove duplicate elements from a list or array?
 
-a) If @in is sorted, and you want @out to be sorted: (this assumes all true
-values in the array), b) If you don't know whether @in is sorted:, c) Like
-(b), but @in contains only small integers:, d) A way to do (b) without any
-loops or greps:, e) Like (d), but @in contains only small positive
-integers:
+a), b), c), d), e)
 
 =item How can I tell whether a list or array contains a certain element?
 
@@ -3185,7 +2838,7 @@ file?
 
 =item What does it mean that regexes are greedy?  How can I get around it?
 
-=item  How do I process each word on each line?
+=item How do I process each word on each line?
 
 =item How can I print out a word-frequency or line-frequency summary?
 
@@ -3544,14 +3197,6 @@ B<Use C from Perl?>, B<Use a Unix program from Perl?>, B<Use Perl from
 Perl?>, B<Use C from C?>, B<Use Perl from C?>
 
 =item ROADMAP
-
-Compiling your C program, Adding a Perl interpreter to your C program,
-Calling a Perl subroutine from your C program, Evaluating a Perl statement
-from your C program, Performing Perl pattern matches and substitutions from
-your C program, Fiddling with the Perl stack from your C program,
-Maintaining a persistent interpreter, Maintaining multiple interpreter
-instances, Using Perl modules, which themselves use C libraries, from your
-C program, Embedding Perl under Win32
 
 =item Compiling your C program
 
@@ -3933,6 +3578,8 @@ C<void save_hptr(HV **hptr)>
 
 =back
 
+=item Examining internal data structures with the C<dump> functions
+
 =item How multiple interpreters and concurrency are supported
 
 =over 4
@@ -3952,6 +3599,8 @@ A, p, d, s, n, r, f, m, o, j, x
 =over 4
 
 =item Formatted Printing of IVs, UVs, and NVs
+
+=item Pointer-To-Integer and Integer-To-Pointer
 
 =item Source Documentation
 
@@ -4164,24 +3813,25 @@ B<filter_fetch_value>
 
 AvFILL, av_clear, av_delete, av_exists, av_extend, av_fetch, av_fill,
 av_len, av_make, av_pop, av_push, av_shift, av_store, av_undef, av_unshift,
-bytes_to_utf8, call_argv, call_method, call_pv, call_sv, CLASS, Copy,
-croak, CvSTASH, dMARK, dORIGMARK, dSP, dXSARGS, dXSI32, ENTER, eval_pv,
-eval_sv, EXTEND, fbm_compile, fbm_instr, FREETMPS, get_av, get_cv, get_hv,
-get_sv, GIMME, GIMME_V, GvSV, gv_fetchmeth, gv_fetchmethod,
+bytes_from_utf8, bytes_to_utf8, call_argv, call_method, call_pv, call_sv,
+CLASS, Copy, croak, CvSTASH, dMARK, dORIGMARK, dSP, dXSARGS, dXSI32, ENTER,
+eval_pv, eval_sv, EXTEND, fbm_compile, fbm_instr, FREETMPS, get_av, get_cv,
+get_hv, get_sv, GIMME, GIMME_V, GvSV, gv_fetchmeth, gv_fetchmethod,
 gv_fetchmethod_autoload, gv_stashpv, gv_stashsv, G_ARRAY, G_DISCARD,
 G_EVAL, G_NOARGS, G_SCALAR, G_VOID, HEf_SVKEY, HeHASH, HeKEY, HeKLEN, HePV,
 HeSVKEY, HeSVKEY_force, HeSVKEY_set, HeVAL, HvNAME, hv_clear, hv_delete,
 hv_delete_ent, hv_exists, hv_exists_ent, hv_fetch, hv_fetch_ent,
 hv_iterinit, hv_iterkey, hv_iterkeysv, hv_iternext, hv_iternextsv,
 hv_iterval, hv_magic, hv_store, hv_store_ent, hv_undef, isALNUM, isALPHA,
-isDIGIT, isLOWER, isSPACE, isUPPER, items, ix, LEAVE, looks_like_number,
-MARK, mg_clear, mg_copy, mg_find, mg_free, mg_get, mg_length, mg_magical,
-mg_set, Move, New, newAV, Newc, newCONSTSUB, newHV, newRV_inc, newRV_noinc,
-NEWSV, newSViv, newSVnv, newSVpv, newSVpvf, newSVpvn, newSVrv, newSVsv,
-newSVuv, newXS, newXSproto, Newz, Nullav, Nullch, Nullcv, Nullhv, Nullsv,
-ORIGMARK, perl_alloc, perl_construct, perl_destruct, perl_free, perl_parse,
-perl_run, PL_DBsingle, PL_DBsub, PL_DBtrace, PL_dowarn, PL_modglobal,
-PL_na, PL_sv_no, PL_sv_undef, PL_sv_yes, POPi, POPl, POPn, POPp, POPs,
+isDIGIT, isLOWER, isSPACE, isUPPER, is_utf8_char, is_utf8_string, items,
+ix, LEAVE, looks_like_number, MARK, mg_clear, mg_copy, mg_find, mg_free,
+mg_get, mg_length, mg_magical, mg_set, Move, New, newAV, Newc, newCONSTSUB,
+newHV, newRV_inc, newRV_noinc, NEWSV, newSViv, newSVnv, newSVpv, newSVpvf,
+newSVpvn, newSVrv, newSVsv, newSVuv, newXS, newXSproto, Newz, Nullav,
+Nullch, Nullcv, Nullhv, Nullsv, ORIGMARK, perl_alloc, perl_construct,
+perl_destruct, perl_free, perl_parse, perl_run, PL_DBsingle, PL_DBsub,
+PL_DBtrace, PL_dowarn, PL_last_in_gv, PL_modglobal, PL_na, PL_ofs_sv,
+PL_rs, PL_sv_no, PL_sv_undef, PL_sv_yes, POPi, POPl, POPn, POPp, POPs,
 PUSHi, PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu, PUTBACK, Renew, Renewc,
 require_pv, RETVAL, Safefree, savepv, savepvn, SAVETMPS, SP, SPAGAIN, ST,
 strEQ, strGE, strGT, strLE, strLT, strNE, strnEQ, strnNE, StructCopy,
@@ -4205,9 +3855,10 @@ sv_setpviv, sv_setpviv_mg, sv_setpvn, sv_setpvn_mg, sv_setpv_mg,
 sv_setref_iv, sv_setref_nv, sv_setref_pv, sv_setref_pvn, sv_setsv,
 sv_setsv_mg, sv_setuv, sv_setuv_mg, sv_true, sv_unmagic, sv_unref,
 sv_upgrade, sv_usepvn, sv_usepvn_mg, sv_utf8_downgrade, sv_utf8_encode,
-sv_utf8_upgrade, sv_vcatpvfn, sv_vsetpvfn, THIS, toLOWER, toUPPER, U8 *s,
-utf8_to_bytes, utf8_to_uv, utf8_to_uv_simple, warn, XPUSHi, XPUSHn, XPUSHp,
-XPUSHs, XPUSHu, XS, XSRETURN, XSRETURN_EMPTY, XSRETURN_IV, XSRETURN_NO,
+sv_utf8_upgrade, sv_vcatpvfn, sv_vsetpvfn, THIS, toLOWER, toUPPER,
+utf8_distance, utf8_hop, utf8_length, utf8_to_bytes, utf8_to_uv,
+utf8_to_uv_simple, uv_to_utf8, warn, XPUSHi, XPUSHn, XPUSHp, XPUSHs,
+XPUSHu, XS, XSRETURN, XSRETURN_EMPTY, XSRETURN_IV, XSRETURN_NO,
 XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_YES, XST_mIV, XST_mNO,
 XST_mNV, XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION, XS_VERSION_BOOTCHECK,
 Zero
@@ -5019,13 +4670,12 @@ Format of $English::PERL_VERSION is different, Literals of the form
 C<1.2.3> parse differently, Possibly changed pseudo-random number
 generator, Hashing function for hash keys has changed, C<undef> fails on
 read only values, Close-on-exec bit may be set on pipe and socket handles,
-Writing C<"$$1"> to mean C<"${$}1"> is unsupported, delete(), values() and
-C<\(%h)> operate on aliases to values, not copies, vec(EXPR,OFFSET,BITS)
-enforces powers-of-two BITS, Text of some diagnostic output has changed,
-C<%@> has been removed, Parenthesized not() behaves like a list operator,
-Semantics of bareword prototype C<(*)> have changed, Semantics of bit
-operators may have changed on 64-bit platforms, More builtins taint their
-results
+Writing C<"$$1"> to mean C<"${$}1"> is unsupported, delete(), each(),
+values() and C<\(%h)>, vec(EXPR,OFFSET,BITS) enforces powers-of-two BITS,
+Text of some diagnostic output has changed, C<%@> has been removed,
+Parenthesized not() behaves like a list operator, Semantics of bareword
+prototype C<(*)> have changed, Semantics of bit operators may have changed
+on 64-bit platforms, More builtins taint their results
 
 =item C Source Incompatibilities
 
@@ -5062,8 +4712,7 @@ gcc
 
 Threads, Unicode, 64-bit support, Lvalue subroutines, Weak references, The
 pseudo-hash data type, The Compiler suite, Internal implementation of file
-globbing, The DB module, The regular expression constructs C<(?{ code })>
-and C<(??{ code })>
+globbing, The DB module, The regular expression code constructs:
 
 =back
 
@@ -5101,10 +4750,6 @@ to mean "${$}<digit>" is deprecated
 =item Perl Source Compatibility
 
 =item C Source Compatibility
-
-Core sources now require ANSI C compiler, All Perl global variables must
-now be referenced with an explicit prefix, Enabling threads has source
-compatibility issues
 
 =item Binary Compatibility
 
@@ -5243,9 +4888,9 @@ Eval-group not allowed at run time, Explicit blessing to '' (assuming
 package main), Illegal hex digit ignored, No such array field, No such
 field "%s" in variable %s of type %s, Out of memory during ridiculously
 large request, Range iterator outside integer range, Recursive inheritance
-detected while looking for method '%s' in package '%s', Reference found
-where even-sized list expected, Undefined value assigned to typeglob, Use
-of reserved word "%s" is deprecated, perl: warning: Setting locale failed
+detected while looking for method '%s' %s, Reference found where even-sized
+list expected, Undefined value assigned to typeglob, Use of reserved word
+"%s" is deprecated, perl: warning: Setting locale failed
 
 =item Obsolete Diagnostics
 
@@ -5442,14 +5087,14 @@ possible typo, Null picture in formline, Offset outside string, Out of
 memory!, Out of memory during request for %s, panic: frexp, Possible
 attempt to put comments in qw() list, Possible attempt to separate words
 with commas, Scalar value @%s{%s} better written as $%s{%s}, Stub found
-while resolving method `%s' overloading `%s' in package `%s', Too late for
-"B<-T>" option, untie attempted while %d inner references still exist,
-Unrecognized character %s, Unsupported function fork, Use of "$$<digit>" to
-mean "${$}<digit>" is deprecated, Value of %s can be "0"; test with
-defined(), Variable "%s" may be unavailable, Variable "%s" will not stay
-shared, Warning: something's wrong, Ill-formed logical name |%s| in
-prime_env_iter, Got an error from DosAllocMem, Malformed PERLLIB_PREFIX,
-PERL_SH_DIR too long, Process terminated by SIG%s
+while resolving method `%s' overloading `%s' in %s, Too late for "B<-T>"
+option, untie attempted while %d inner references still exist, Unrecognized
+character %s, Unsupported function fork, Use of "$$<digit>" to mean
+"${$}<digit>" is deprecated, Value of %s can be "0"; test with defined(),
+Variable "%s" may be unavailable, Variable "%s" will not stay shared,
+Warning: something's wrong, Ill-formed logical name |%s| in prime_env_iter,
+Got an error from DosAllocMem, Malformed PERLLIB_PREFIX, PERL_SH_DIR too
+long, Process terminated by SIG%s
 
 =item BUGS
 
@@ -5516,11 +5161,6 @@ B<Unix emulation for AmigaOS: ixemul.library>, B<Version of Amiga OS>
 =item Starting Perl programs under AmigaOS
 
 =item Shortcomings of Perl under AmigaOS
-
-fork(), some features of the UNIX filesystem regarding link count and file
-dates, inplace operation (the -i switch) without backup file, umask()
-works, but the correct permissions are only set when the file is      
-finally close()d
 
 =back
 
@@ -7445,10 +7085,6 @@ output.    =back
 
 =item CALLING CGI.PM ROUTINES
 
-1. Use another name for the argument, if one is available.  For example,
--value is an alias for -values, 2. Change the capitalization, e.g. -Values,
-3. Put quotes around the argument name, e.g. '-values'
-
 =item CREATING A NEW QUERY OBJECT (OBJECT-ORIENTED STYLE):
 
 =item CREATING A NEW QUERY OBJECT FROM AN INPUT FILE
@@ -7595,8 +7231,7 @@ B<Parameters:>
 
 =item CREATING A CLICKABLE IMAGE BUTTON
 
-B<Parameters:>, 3. The third option (-align, optional) is an alignment
-type, and may be TOP, BOTTOM or MIDDLE
+B<Parameters:>
 
 =item CREATING A JAVASCRIPT ACTION BUTTON
 
@@ -7626,16 +7261,15 @@ the <FORM> tag
 =item FETCHING ENVIRONMENT VARIABLES
 
 B<Accept()>, B<raw_cookie()>, B<user_agent()>, B<path_info()>,
-B<path_translated()>, B<remote_host()>, B<script_name()> Return the script
-name as a partial URL, for self-refering scripts, B<referer()>, B<auth_type
-()>, B<server_name ()>, B<virtual_host ()>, B<server_port ()>,
+B<path_translated()>, B<remote_host()>, B<script_name()>, B<referer()>,
+B<auth_type ()>, B<server_name ()>, B<virtual_host ()>, B<server_port ()>,
 B<server_software ()>, B<remote_user ()>, B<user_name ()>,
 B<request_method()>, B<content_type()>, B<http()>, B<https()>
 
 =item USING NPH SCRIPTS
 
 In the B<use> statement, By calling the B<nph()> method:, By using B<-nph>
-parameters in the B<header()> and B<redirect()>  statements:
+parameters
 
 =item Server Push
 
@@ -7958,20 +7592,7 @@ http firewall, ftp firewall, One way visibility, SOCKS, IP Masquerade
 
 =item FAQ
 
-1) I installed a new version of module X but CPAN keeps saying,       I
-have the old version installed, 2) So why is UNINST=1 not the default?, 3)
-I want to clean up my mess, and install a new perl along with	    all
-modules I have. How do I go about it?, 4) When I install bundles or
-multiple modules with one command	there is too much output to keep
-track of, 5) I am not root, how can I install a module in a personal	  
-directory?, 6) How to get a package, unwrap it, and make a change before   
-   building it?, 7) I installed a Bundle and had a couple of fails. When I 
-     retried, everything resolved nicely. Can this be fixed to work	 
-on first try?, 8) In our intranet we have many modules for internal use.
-How	  can I integrate these modules with CPAN.pm but without uploading 
-     the modules to CPAN?, 9) When I run CPAN's shell, I get error msg
-about line 1 to 4,	 setting meta input/output via the /etc/inputrc
-file, 10) Some authors have strange characters in their names
+1), 2), 3), 4), 5), 6), 7), 8), 9), 10)
 
 =item BUGS
 
@@ -8022,7 +7643,7 @@ module
 
 =back
 
-=head2 Carp::Heavy - Carp guts
+=head2 Carp::Heavy, Carp heavy machinery - no user serviceable parts inside
 
 =over 4
 
@@ -8153,32 +7774,33 @@ C<d_PRIu64>, C<d_PRIx64>, C<d_PRIXU64>, C<d_pthread_yield>, C<d_pwage>,
 C<d_pwchange>, C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>,
 C<d_pwpasswd>, C<d_pwquota>, C<d_qgcvt>, C<d_quad>, C<d_readdir>,
 C<d_readlink>, C<d_rename>, C<d_rewinddir>, C<d_rmdir>, C<d_safebcpy>,
-C<d_safemcpy>, C<d_sanemcmp>, C<d_sched_yield>, C<d_scm_rights>,
-C<d_SCNfldbl>, C<d_seekdir>, C<d_select>, C<d_sem>, C<d_semctl>,
-C<d_semctl_semid_ds>, C<d_semctl_semun>, C<d_semget>, C<d_semop>,
-C<d_setegid>, C<d_seteuid>, C<d_setgrent>, C<d_setgrps>, C<d_sethent>,
-C<d_setlinebuf>, C<d_setlocale>, C<d_setnent>, C<d_setpent>, C<d_setpgid>,
-C<d_setpgrp2>, C<d_setpgrp>, C<d_setprior>, C<d_setproctitle>,
-C<d_setpwent>, C<d_setregid>, C<d_setresgid>, C<d_setresuid>,
-C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>, C<d_setsid>,
-C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>, C<d_shmatprototype>,
-C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>, C<d_sigsetjmp>,
-C<d_socket>, C<d_socklen_t>, C<d_sockpair>, C<d_socks5_init>, C<d_sqrtl>,
-C<d_statblks>, C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>,
-C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>, C<d_stdio_ptr_lval_nochange_cnt>,
-C<d_stdio_ptr_lval_sets_cnt>, C<d_stdio_stream_array>, C<d_stdiobase>,
-C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>,
-C<d_strerror>, C<d_strtod>, C<d_strtol>, C<d_strtold>, C<d_strtoll>,
-C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>,
-C<d_symlink>, C<d_syscall>, C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>,
-C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
-C<d_telldirproto>, C<d_time>, C<d_times>, C<d_truncate>, C<d_tzname>,
-C<d_umask>, C<d_uname>, C<d_union_semun>, C<d_ustat>, C<d_vendorarch>,
-C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>, C<d_void_closedir>,
-C<d_voidsig>, C<d_voidtty>, C<d_volatile>, C<d_vprintf>, C<d_wait4>,
-C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>, C<d_xenix>, C<date>,
-C<db_hashtype>, C<db_prefixtype>, C<defvoidused>, C<direntrytype>,
-C<dlext>, C<dlsrc>, C<doublesize>, C<drand01>, C<dynamic_ext>
+C<d_safemcpy>, C<d_sanemcmp>, C<d_sbrkproto>, C<d_sched_yield>,
+C<d_scm_rights>, C<d_SCNfldbl>, C<d_seekdir>, C<d_select>, C<d_sem>,
+C<d_semctl>, C<d_semctl_semid_ds>, C<d_semctl_semun>, C<d_semget>,
+C<d_semop>, C<d_setegid>, C<d_seteuid>, C<d_setgrent>, C<d_setgrps>,
+C<d_sethent>, C<d_setlinebuf>, C<d_setlocale>, C<d_setnent>, C<d_setpent>,
+C<d_setpgid>, C<d_setpgrp2>, C<d_setpgrp>, C<d_setprior>,
+C<d_setproctitle>, C<d_setpwent>, C<d_setregid>, C<d_setresgid>,
+C<d_setresuid>, C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>,
+C<d_setsid>, C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>,
+C<d_shmatprototype>, C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>,
+C<d_sigsetjmp>, C<d_socket>, C<d_socklen_t>, C<d_sockpair>,
+C<d_socks5_init>, C<d_sqrtl>, C<d_statblks>, C<d_statfs_f_flags>,
+C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>,
+C<d_stdio_ptr_lval_nochange_cnt>, C<d_stdio_ptr_lval_sets_cnt>,
+C<d_stdio_stream_array>, C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>,
+C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>, C<d_strerror>, C<d_strtod>,
+C<d_strtol>, C<d_strtold>, C<d_strtoll>, C<d_strtoul>, C<d_strtoull>,
+C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>, C<d_symlink>, C<d_syscall>,
+C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>,
+C<d_tcsetpgrp>, C<d_telldir>, C<d_telldirproto>, C<d_time>, C<d_times>,
+C<d_truncate>, C<d_tzname>, C<d_umask>, C<d_uname>, C<d_union_semun>,
+C<d_ustat>, C<d_vendorarch>, C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>,
+C<d_void_closedir>, C<d_voidsig>, C<d_voidtty>, C<d_volatile>,
+C<d_vprintf>, C<d_wait4>, C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>,
+C<d_xenix>, C<date>, C<db_hashtype>, C<db_prefixtype>, C<defvoidused>,
+C<direntrytype>, C<dlext>, C<dlsrc>, C<doublesize>, C<drand01>,
+C<dynamic_ext>
 
 =item e
 
@@ -12736,12 +12358,6 @@ arrays
 
 =item EXAMPLES
 
-0 a simple word, 1 multiple spaces are skipped because of our $delim, 2 use
-of quotes to include a space in a word, 3 use of a backslash to include a
-space in a word, 4 use of a backslash to remove the special meaning of a
-double-quote, 5 another simple word (note the lack of effect of the
-backslashed double-quote)
-
 =item AUTHORS
 
 =back
@@ -13097,11 +12713,10 @@ Win32::GetChipName(), Win32::GetCwd(), Win32::GetFullPathName(FILENAME),
 Win32::GetLastError(), Win32::GetLongPathName(PATHNAME),
 Win32::GetNextAvailDrive(), Win32::GetOSVersion(),
 Win32::GetShortPathName(PATHNAME), Win32::GetProcAddress(INSTANCE,
-PROCNAME), Win32::GetTickCount(), Win32::InitiateSystemShutdown(MACHINE,
-MESSAGE, TIMEOUT, FORCECLOSE, REBOOT), Win32::IsWinNT(), Win32::IsWin95(),
-Win32::LoadLibrary(LIBNAME), Win32::LoginName(),
-Win32::LookupAccountName(SYSTEM, ACCOUNT, DOMAIN, SID, SIDTYPE),
-Win32::LookupAccountSID(SYSTEM, SID, ACCOUNT, DOMAIN, SIDTYPE),
+PROCNAME), Win32::GetTickCount(), Win32::InitiateSystemShutdown,
+Win32::IsWinNT(), Win32::IsWin95(), Win32::LoadLibrary(LIBNAME),
+Win32::LoginName(), Win32::LookupAccountName(SYSTEM, ACCOUNT, DOMAIN, SID,
+SIDTYPE), Win32::LookupAccountSID(SYSTEM, SID, ACCOUNT, DOMAIN, SIDTYPE),
 Win32::MsgBox(MESSAGE [, FLAGS [, TITLE]]), Win32::NodeName(),
 Win32::RegisterServer(LIBRARYNAME), Win32::SetCwd(NEWDIRECTORY),
 Win32::SetLastError(ERROR), Win32::Sleep(TIME), Win32::Spawn(COMMAND, ARGS,

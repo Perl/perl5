@@ -13,7 +13,7 @@ related matters.
 The standard release of Perl (the one maintained by the perl
 development team) is distributed only in source code form.  You
 can find this at http://www.perl.com/CPAN/src/latest.tar.gz , which
-in standard Internet format (a gzipped archive in POSIX tar format).
+is in a standard Internet format (a gzipped archive in POSIX tar format).
 
 Perl builds and runs on a bewildering number of platforms.  Virtually
 all known and current Unix derivatives are supported (Perl's native
@@ -107,7 +107,7 @@ CPAN/path/... is a naming convention for files available on CPAN
 sites.  CPAN indicates the base directory of a CPAN mirror, and the
 rest of the path is the path from that directory to the file.  For
 instance, if you're using ftp://ftp.funet.fi/pub/languages/perl/CPAN
-as your CPAN site, the file CPAN/misc/japh file is downloadable as
+as your CPAN site, the file CPAN/misc/japh is downloadable as
 ftp://ftp.funet.fi/pub/languages/perl/CPAN/misc/japh .
 
 Considering that there are hundreds of existing modules in the
@@ -372,7 +372,7 @@ To get the best performance, pick a site from
 the list below and use it to grab the complete list of mirror sites.
 From there you can find the quickest site for you.  Remember, the
 following list is I<not> the complete list of CPAN mirrors
-(the complete list contains 136 sites as of July 2000):
+(the complete list contains 161 sites as of January 2001):
 
   http://www.perl.com/CPAN/
   http://www.cpan.org/CPAN/

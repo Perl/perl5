@@ -1438,7 +1438,9 @@ Returns a name for a temporary file.
 
 	$tmpfile = POSIX::tmpnam();
 
-See also L<File::Temp>.
+For security reasons, which are probably detailed in your system's
+documentation for the C library tmpnam() function, this interface
+should not be used; instead see L<File::Temp>.
 
 =item tolower
 
