@@ -431,9 +431,27 @@ prints "true" if and only if the script is invoked with a B<-xyz> switch.
 =item B<-S>
 
 makes Perl use the PATH environment variable to search for the
-script (unless the name of the script starts with a slash).  Typically
-this is used to emulate #! startup on machines that don't support #!,
-in the following manner:
+script (unless the name of the script contains directory separators).
+On some platforms, this also makes Perl append suffixes to the
+filename while searching for it.  For example, on Win32 platforms,
+the ".bat" and ".cmd" suffixes are appended if a lookup for the
+original name fails, and if the name does not already end in one
+of those suffixes.  If your Perl was compiled with DEBUGGING turned
+on, using the -Dp switch to Perl shows how the search progresses.
+
+If the file supplied contains directory separators (i.e. it is an
+absolute or relative pathname), and if the file is not found,
+platforms that append file extensions will do so and try to look
+for the file with those extensions added, one by one.
+
+On DOS-like platforms, if the script does not contain directory
+separators, it will first be searched for in the current directory
+before being searched for on the PATH.  On Unix platforms, the
+script will be searched for strictly on the PATH.
+
+Typically this is used to emulate #! startup on platforms that
+don't support #!.  This example works on many platforms that
+have a shell compatible with Bourne shell:
 
     #!/usr/bin/perl
     eval 'exec /usr/bin/perl -S $0 ${1+"$@"}'

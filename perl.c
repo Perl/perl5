@@ -1632,10 +1632,30 @@ SV *sv;
     /* additional extensions to try in each dir if scriptname not found */
 #ifdef SEARCH_EXTS
     char *ext[] = { SEARCH_EXTS };
-    int extidx = (strchr(scriptname,'.')) ? -1 : 0; /* has ext already */
+    int extidx = 0, i = 0;
+    char *curext = Nullch;
 #else
 #  define MAX_EXT_LEN 0
 #endif
+
+    /*
+     * If dosearch is true and if scriptname does not contain path
+     * delimiters, search the PATH for scriptname.
+     *
+     * If SEARCH_EXTS is also defined, will look for each
+     * scriptname{SEARCH_EXTS} whenever scriptname is not found
+     * while searching the PATH.
+     *
+     * Assuming SEARCH_EXTS is C<".foo",".bar",NULL>, PATH search
+     * proceeds as follows:
+     *   If DOSISH:
+     *     + look for ./scriptname{,.foo,.bar}
+     *     + search the PATH for scriptname{,.foo,.bar}
+     *
+     *   If !DOSISH:
+     *     + look *only* in the PATH for scriptname{,.foo,.bar} (note
+     *       this will not look in '.' if it's not in the PATH)
+     */
 
 #ifdef VMS
     if (dosearch) {
@@ -1656,42 +1676,78 @@ SV *sv;
 		continue;	/* don't search dir with too-long name */
 	    strcat(tokenbuf, scriptname);
 #else  /* !VMS */
+
+#ifdef DOSISH
+    if (strEQ(scriptname, "-"))
+	dosearch = 0;
+    if (dosearch) {		/* Look in '.' first. */
+	char *cur = scriptname;
+#ifdef SEARCH_EXTS
+	if ((curext = strrchr(scriptname,'.')))	/* possible current ext */
+	    while (ext[i])
+		if (strEQ(ext[i++],curext)) {
+		    extidx = -1;		/* already has an ext */
+		    break;
+		}
+	do {
+#endif
+	    DEBUG_p(PerlIO_printf(Perl_debug_log,
+				  "Looking for %s\n",cur));
+	    if (Stat(cur,&statbuf) >= 0) {
+		dosearch = 0;
+		scriptname = cur;
+		break;
+	    }
+#ifdef SEARCH_EXTS
+	    if (cur == scriptname) {
+		len = strlen(scriptname);
+		if (len+MAX_EXT_LEN+1 >= sizeof(tokenbuf))
+		    break;
+		cur = strcpy(tokenbuf, scriptname);
+	    }
+	} while (extidx >= 0 && ext[extidx]	/* try an extension? */
+		 && strcpy(tokenbuf+len, ext[extidx++]));
+#endif
+    }
+#endif
     if (dosearch && !strchr(scriptname, '/')
 #ifdef DOSISH
 		 && !strchr(scriptname, '\\')
 #endif
 		 && (s = getenv("PATH"))) {
+	bool seen_dot = 0;
+
 	bufend = s + strlen(s);
 	while (s < bufend) {
-#ifndef atarist
-	    s = delimcpy(tokenbuf, tokenbuf + sizeof tokenbuf, s, bufend,
-#ifdef DOSISH
-			 ';',
-#else
-			 ':',
-#endif
-			 &len);
-#else  /* atarist */
-	    for (len = 0; *s && *s != ',' && *s != ';'; len++, s++) {
+#if defined(atarist) || defined(DOSISH)
+	    for (len = 0; *s
+#  ifdef atarist
+		    && *s != ','
+#  endif
+		    && *s != ';'; len++, s++) {
 		if (len < sizeof tokenbuf)
 		    tokenbuf[len] = *s;
 	    }
 	    if (len < sizeof tokenbuf)
 		tokenbuf[len] = '\0';
-#endif /* atarist */
+#else	/* ! (atarist || DOSISH) */
+	    s = delimcpy(tokenbuf, tokenbuf + sizeof tokenbuf, s, bufend
+			 ':',
+			 &len);
+#endif	/* ! (atarist || DOSISH) */
 	    if (s < bufend)
 		s++;
 	    if (len + 1 + strlen(scriptname) + MAX_EXT_LEN >= sizeof tokenbuf)
 		continue;	/* don't search dir with too-long name */
 	    if (len
-#if defined(atarist) && !defined(DOSISH)
-		&& tokenbuf[len - 1] != '/'
-#endif
 #if defined(atarist) || defined(DOSISH)
+		&& tokenbuf[len - 1] != '/'
 		&& tokenbuf[len - 1] != '\\'
 #endif
 	       )
 		tokenbuf[len++] = '/';
+	    if (len == 2 && tokenbuf[0] == '.') 
+		seen_dot = 1;
 	    (void)strcpy(tokenbuf + len, scriptname);
 #endif  /* !VMS */
 
@@ -1724,8 +1780,16 @@ SV *sv;
 	    if (!xfailed)
 		xfailed = savepv(tokenbuf);
 	}
+#ifndef DOSISH
+	if (!xfound && !seen_dot && !xfailed && (Stat(scriptname,&statbuf) < 0))
+#endif 
+	    seen_dot = 1;		/* Disable message. */
 	if (!xfound)
-	    croak("Can't execute %s", xfailed ? xfailed : scriptname );
+	    croak("Can't %s %s%s%s", 
+		  (xfailed ? "execute" : "find"),
+		  (xfailed ? xfailed : scriptname),
+		  (xfailed ? "" : " on PATH"),
+		  (xfailed || seen_dot) ? "" : ", '.' not in PATH");
 	if (xfailed)
 	    Safefree(xfailed);
 	scriptname = xfound;

@@ -549,8 +549,19 @@ mention "perl" on the #! line somewhere.
 
 =item Can't execute %s
 
+(F) You used the B<-S> switch, but the copies of the script to execute found
+in the PATH did not have correct permissions.
+
+=item Can't find %s on PATH, '.' not in PATH
+
 (F) You used the B<-S> switch, but the script to execute could not be found
-in the PATH, or at least not with the correct permissions.
+in the PATH, or at least not with the correct permissions.  The script
+exists in the current directory, but PATH prohibits running it.
+
+=item Can't find %s on PATH
+
+(F) You used the B<-S> switch, but the script to execute could not be found
+in the PATH.
 
 =item Can't find label %s
 
