@@ -25,8 +25,14 @@ features were added to Perl 5.
 
 =item *
 
-In version 5.002 before version 5.002b1h, the test.pl file was not
-automatically created by xsubpp.  This means that you cannot say "make test"
+In versions of 5.002 prior to version beta 3, then the line in the .xs file
+about "PROTOTYPES: DISABLE" will cause a compiler error.  Simply remove that
+line from the file.
+
+=item *
+
+In versions of 5.002 prior to version 5.002b1h, the test.pl file was not
+automatically created by h2xs.  This means that you cannot say "make test"
 to run the test script.  You will need to add the following line before the
 "use extension" statement:
 
@@ -74,10 +80,10 @@ test" is sufficient.
 Our first extension will be very simple.  When we call the routine in the
 extension, it will print out a well-known message and return.
 
-Run "h2xs -A -n mytest".  This creates a directory named mytest, possibly under
+Run "h2xs -A -n Mytest".  This creates a directory named Mytest, possibly under
 ext/ if that directory exists in the current working directory.  Several files
-will be created in the mytest dir, including MANIFEST, Makefile.PL, mytest.pm,
-mytest.xs, test.pl, and Changes.
+will be created in the Mytest dir, including MANIFEST, Makefile.PL, Mytest.pm,
+Mytest.xs, test.pl, and Changes.
 
 The MANIFEST file contains the names of all the files created.
 
@@ -87,16 +93,16 @@ The file Makefile.PL should look something like this:
 	# See lib/ExtUtils/MakeMaker.pm for details of how to influence
 	# the contents of the Makefile that is written.
 	WriteMakefile(
-	    'NAME'      => 'mytest',
-	    'VERSION_FROM' => 'mytest.pm', # finds $VERSION
+	    'NAME'      => 'Mytest',
+	    'VERSION_FROM' => 'Mytest.pm', # finds $VERSION
 	    'LIBS'      => [''],   # e.g., '-lm'
 	    'DEFINE'    => '',     # e.g., '-DHAVE_SOMETHING'
 	    'INC'       => '',     # e.g., '-I/usr/include/other'
 	);
 
-The file mytest.pm should start with something like this:
+The file Mytest.pm should start with something like this:
 
-	package mytest;
+	package Mytest;
 
 	require Exporter;
 	require DynaLoader;
@@ -110,7 +116,7 @@ The file mytest.pm should start with something like this:
 	);
 	$VERSION = '0.01';
 
-	bootstrap mytest $VERSION;
+	bootstrap Mytest $VERSION;
 
 	# Preloaded methods go here.
 
@@ -120,7 +126,7 @@ The file mytest.pm should start with something like this:
 	__END__
 	# Below is the stub of documentation for your module. You better edit it!
 
-And the mytest.xs file should look something like this:
+And the Mytest.xs file should look something like this:
 
 	#ifdef __cplusplus
 	extern "C" {
@@ -132,7 +138,9 @@ And the mytest.xs file should look something like this:
 	}
 	#endif
 	
-	MODULE = mytest		PACKAGE = mytest
+	PROTOTYPES: DISABLE
+
+	MODULE = Mytest		PACKAGE = Mytest
 
 Let's edit the .xs file by adding this to the end of the file:
 
@@ -147,37 +155,34 @@ which make needs.  It's output looks something like:
 	% perl Makefile.PL
 	Checking if your kit is complete...
 	Looks good
-	Writing Makefile for mytest
+	Writing Makefile for Mytest
 	%
 
 Now, running make will produce output that looks something like this
 (some long lines shortened for clarity):
 
 	% make
-	umask 0 && cp mytest.pm ./blib/mytest.pm
-	perl xsubpp -typemap typemap mytest.xs >mytest.tc && mv mytest.tc mytest.c
-	cc -c mytest.c
-	Running Mkbootstrap for mytest ()
-	chmod 644 mytest.bs
-	LD_RUN_PATH="" ld -o ./blib/PA-RISC1.1/auto/mytest/mytest.sl -b mytest.o
-	chmod 755 ./blib/PA-RISC1.1/auto/mytest/mytest.sl
-	cp mytest.bs ./blib/PA-RISC1.1/auto/mytest/mytest.bs
-	chmod 644 ./blib/PA-RISC1.1/auto/mytest/mytest.bs
+	umask 0 && cp Mytest.pm ./blib/Mytest.pm
+	perl xsubpp -typemap typemap Mytest.xs >Mytest.tc && mv Mytest.tc Mytest.c
+	cc -c Mytest.c
+	Running Mkbootstrap for Mytest ()
+	chmod 644 Mytest.bs
+	LD_RUN_PATH="" ld -o ./blib/PA-RISC1.1/auto/Mytest/Mytest.sl -b Mytest.o
+	chmod 755 ./blib/PA-RISC1.1/auto/Mytest/Mytest.sl
+	cp Mytest.bs ./blib/PA-RISC1.1/auto/Mytest/Mytest.bs
+	chmod 644 ./blib/PA-RISC1.1/auto/Mytest/Mytest.bs
 
 Now, although there is already a test.pl template ready for us, for this
 example only, we'll create a special test script.  Create a file called hello
 that looks like this:
 
-Now we'll create a test script, test1.pl in the mytest directory.  It should
-look like this:
-
 	#! /opt/perl5/bin/perl
 	
 	use lib './blib';
 	
-	use mytest;
+	use Mytest;
 	
-	mytest::hello();
+	Mytest::hello();
 
 Now we run the script and we should see the following output:
 
@@ -190,7 +195,7 @@ Now we run the script and we should see the following output:
 Now let's add to our extension a subroutine that will take a single argument
 and return 0 if the argument is even, 1 if the argument is odd.
 
-Add the following to the end of mytest.xs:
+Add the following to the end of Mytest.xs:
 
 	int
 	is_even(input)
@@ -200,9 +205,9 @@ Add the following to the end of mytest.xs:
 		OUTPUT:
 		RETVAL
 
-There must be some white space at the start of the "int input" line, and
-there must not be a semi-colon at the end of the line (as you'd expect in
-a C program).
+There does not need to be white space at the start of the "int input" line,
+but it is useful for improving readability.  The semi-colon at the end of
+that line is also optional.
 
 Any white space may be between the "int" and "input".  It is also okay for
 the four lines starting at the "CODE:" line to not be indented.  However,
@@ -220,12 +225,13 @@ structure that Perl itself has.  Within the test script, you perform a
 number of tests to confirm the behavior of the extension, printing "ok"
 when the test is correct, "not ok" when it is not.
 
-Let's change the print statement in the BEGIN block to print "1..4" and
-add the following code to the end of the file:
+Remove the line that starts with "use lib", change the print statement in
+the BEGIN block to print "1..4", and add the following code to the end of
+the file:
 
-	print &mytest::is_even(0) == 1 ? "ok 2" : "not ok 2", "\n";
-	print &mytest::is_even(1) == 0 ? "ok 3" : "not ok 3", "\n";
-	print &mytest::is_even(2) == 1 ? "ok 4" : "not ok 4", "\n";
+	print &Mytest::is_even(0) == 1 ? "ok 2" : "not ok 2", "\n";
+	print &Mytest::is_even(1) == 0 ? "ok 3" : "not ok 3", "\n";
+	print &Mytest::is_even(2) == 1 ? "ok 4" : "not ok 4", "\n";
 
 We will be calling the test script through the command "make test".  You
 should see output that looks something like this:
@@ -271,19 +277,12 @@ is that if you are testing an upgrade to an already-existing version, using
 "make test" insures that you use your new extension, not the already-existing
 version.
 
-Finally, our test scripts do two important things.  First of all, they place
-the directory "blib" at the head of the @INC array.  Placing this inside a
-BEGIN block assures us that Perl will look in the blib directory hierarchy
-before looking in the system directories.  This could be important if you are
-upgrading an already-existing extension and do not want to disturb the system
-version until you are ready to install it.
-
 When Perl sees a C<use extension;>, it searches for a file with the same name
 as the use'd extension that has a .pm suffix.  If that file cannot be found,
 Perl dies with a fatal error.  The default search path is contained in the
 @INC array.
 
-In our case, mytest.pm tells perl that it will need the Exporter and Dynamic
+In our case, Mytest.pm tells perl that it will need the Exporter and Dynamic
 Loader extensions.  It then sets the @ISA and @EXPORT arrays and the $VERSION
 scalar; finally it tells perl to bootstrap the module.  Perl will call its
 dynamic loader routine (if there is one) and load the shared library.
@@ -304,15 +303,29 @@ any of the functions via another array, called @EXPORT_OK.
 See L<perlmod> for more information.
 
 The $VERSION variable is used to ensure that the .pm file and the shared
-library are "in sync" with each other.  Any time you make changes to the
-.pm or .xs files, you should increment the value of this variable.
+library are "in sync" with each other.  Any time you make changes to
+the .pm or .xs files, you should increment the value of this variable.
+
+=head2 WRITING GOOD TEST SCRIPTS
+
+The importance of writing good test scripts cannot be overemphasized.  You
+should closely follow the "ok/not ok" style that Perl itself uses, so that
+it is very easy and unambiguous to determine the outcome of each test case.
+When you find and fix a bug, make sure you add a test case for it.
+
+By running "make test", you ensure that your test.pl script runs and uses
+the correct version of your extension.  If you have many test cases, you
+might want to copy Perl's test style.  Create a directory named "t", and
+ensure all your test files end with the suffix ".t".  The Makefile will
+properly run all these test files.
+
 
 =head2 EXAMPLE 3
 
 Our third extension will take one argument as its input, round off that
 value, and set the I<argument> to the rounded value.
 
-Add the following to the end of mytest.xs:
+Add the following to the end of Mytest.xs:
 
 	void
 	round(arg)
@@ -335,18 +348,18 @@ Edit the Makefile.PL file so that the corresponding line looks like this:
 Generate the Makefile and run make.  Change the BEGIN block to print out
 "1..9" and add the following to test.pl:
 
-	$i = -1.5; &mytest::round($i); print $i == -2.0 ? "ok 5" : "not ok 5", "\n";
-	$i = -1.1; &mytest::round($i); print $i == -1.0 ? "ok 6" : "not ok 6", "\n";
-	$i = 0.0; &mytest::round($i); print $i == 0.0 ? "ok 7" : "not ok 7", "\n";
-	$i = 0.5; &mytest::round($i); print $i == 1.0 ? "ok 8" : "not ok 8", "\n";
-	$i = 1.2; &mytest::round($i); print $i == 1.0 ? "ok 9" : "not ok 9", "\n";
+	$i = -1.5; &Mytest::round($i); print $i == -2.0 ? "ok 5" : "not ok 5", "\n";
+	$i = -1.1; &Mytest::round($i); print $i == -1.0 ? "ok 6" : "not ok 6", "\n";
+	$i = 0.0; &Mytest::round($i); print $i == 0.0 ? "ok 7" : "not ok 7", "\n";
+	$i = 0.5; &Mytest::round($i); print $i == 1.0 ? "ok 8" : "not ok 8", "\n";
+	$i = 1.2; &Mytest::round($i); print $i == 1.0 ? "ok 9" : "not ok 9", "\n";
 
 Running "make test" should now print out that all nine tests are okay.
 
 You might be wondering if you can round a constant.  To see what happens, add
 the following line to test.pl temporarily:
 
-	&mytest::round(3);
+	&Mytest::round(3);
 
 Run "make test" and notice that Perl dies with a fatal error.  Perl won't let
 you change the value of constants!
@@ -364,9 +377,8 @@ return value, but through the same variable that was passed into the function.
 =head2 INPUT AND OUTPUT PARAMETERS
 
 You specify the parameters that will be passed into the XSUB just after you
-declare the function return value and name.  The list of parameters looks
-very C-like, but the lines must be indented by a tab stop, and each line
-may not have an ending semi-colon.
+declare the function return value and name.  Each parameter line starts with
+optional white space, and may have an optional terminating semicolon.
 
 The list of output parameters occurs after the OUTPUT: directive.  The use
 of RETVAL tells Perl that you wish to send this value back as the return
@@ -395,11 +407,11 @@ C code later.
 
 Let's now take a look at a portion of the .c file created for our extension.
 
-	XS(XS_mytest_round)
+	XS(XS_Mytest_round)
 	{
 	    dXSARGS;
 	    if (items != 1)
-		croak("Usage: mytest::round(arg)");
+		croak("Usage: Mytest::round(arg)");
 	    {
 		double  arg = (double)SvNV(ST(0));	/* XXXXX */
 		if (arg > 0.0) {
@@ -429,13 +441,182 @@ section on the argument stack.
 In general, it's not a good idea to write extensions that modify their input
 parameters, as in Example 3.  However, in order to better accomodate calling
 pre-existing C routines, which often do modify their input parameters,
-this behavior is tolerated.  The next example will show how to do this.
+this behavior is tolerated.
 
-[Examples 4 and 5 have not been re-worked yet and are not included.]
+=head2 EXAMPLE 4
+
+In this example, we'll now begin to write XSUB's that will interact with
+pre-defined C libraries.  To begin with, we will build a small library of
+our own, then let h2xs write our .pm and .xs files for us.
+
+Create a new directory called Mytest2 at the same level as the directory
+Mytest.  In the Mytest2 directory, create another directory called mylib,
+and cd into that directory.
+
+Here we'll create some files that will generate a test library.  These will
+include a C source file and a header file.  We'll also create a Makefile.PL
+in this directory.  Then we'll make sure that running make at the Mytest2
+level will automatically run this Makefile.PL file and the resulting Makefile.
+
+In the testlib directory, create a file mylib.h that looks like this:
+
+	#define TESTVAL	4
+
+	extern double	foo(int, long, const char*);
+
+Also create a file mylib.c that looks like this:
+
+	#include <stdlib.h>
+	#include "./mylib.h"
+	
+	double
+	foo(a, b, c)
+	int		a;
+	long		b;
+	const char *	c;
+	{
+		return (a + b + atof(c) + TESTVAL);
+	}
+
+And finally create a file Makefile.PL that looks like this:
+
+	use ExtUtils::MakeMaker;
+	$Verbose = 1;
+	WriteMakefile(
+	    'NAME' => 'Mytest2::mylib',
+	    'clean'     => {'FILES' => 'libmylib.a'},
+	);
+
+
+	sub MY::postamble {
+		'
+	all :: static
+
+	static ::       libmylib$(LIB_EXT)
+
+	libmylib$(LIB_EXT): $(O_FILES)
+		$(AR) cr libmylib$(LIB_EXT) $(O_FILES)
+		$(RANLIB) libmylib$(LIB_EXT)
+
+	';
+	}
+
+We will now create the main top-level Mytest2 files.  Change to the directory
+above Mytest2 and run the following command:
+
+	% h2xs -O -n Mytest2 < ./Mytest2/mylib/mylib.h
+
+This will print out a warning about overwriting Mytest2, but that's okay.
+Our files are stored in Mytest2/mylib, and will be untouched.
+
+The normal Makefile.PL that h2xs generates doesn't know about the mylib
+directory.  We need to tell it that there is a subdirectory and that we
+will be generating a library in it.  Let's add the following key-value
+pair to the WriteMakefile call:
+
+	'MYEXTLIB' => 'mylib/libmylib$(LIB_EXT)',
+
+and a new replacement subroutine too:
+
+	sub MY::postamble {
+	'
+	$(MYEXTLIB): mylib/Makefile
+		cd mylib && $(MAKE)
+	';
+	}
+
+(Note: Most makes will require that there be a tab character that indents
+the line "cd mylib && $(MAKE)".)
+
+Let's also fix the MANIFEST file so that it accurately reflects the contents
+of our extension.  The single line that says "mylib" should be replaced by
+the following three lines:
+
+	mylib/Makefile.PL
+	mylib/mylib.c
+	mylib/mylib.h
+
+To keep our namespace nice and unpolluted, edit the .pm file and change
+the line setting @EXPORT to @EXPORT_OK.  And finally, in the .xs file,
+edit the #include line to read:
+
+	#include "mylib/mylib.h"
+
+And also add the following function definition to the end of the .xs file:
+
+	double
+	foo(a,b,c)
+		int             a
+		long            b
+		const char *    c
+		OUTPUT:
+		RETVAL
+
+Now we also need to create a typemap file because the default Perl doesn't
+currently support the const char * type.  Create a file called typemap and
+place the following in it:
+
+	const char *	T_PV
+
+Now run perl on the top-level Makefile.PL.  Notice that it also created a
+Makefile in the mylib directory.  Run make and see that it does cd into
+the mylib directory and run make in there as well.
+
+Now edit the test.pl script and change the BEGIN block to print "1..4",
+and add the following lines to the end of the script:
+
+	print &Mytest2::foo(1, 2, "Hello, world!") == 7 ? "ok 2\n" : "not ok 2\n";
+	print &Mytest2::foo(1, 2, "0.0") == 7 ? "ok 3\n" : "not ok 3\n";
+	print abs(&Mytest2::foo(0, 0, "-3.4") - 0.6) <= 0.01 ? "ok 4\n" : "not ok 4\n";
+
+(When dealing with floating-point comparisons, it is often useful to not check
+for equality, but rather the difference being below a certain epsilon factor,
+0.01 in this case)
+
+Run "make test" and all should be well.
+
+=head 2 WHAT HAS HAPPENED HERE?
+
+Unlike previous examples, we've now run h2xs on a real include file.  This
+has caused some extra goodies to appear in both the .pm and .xs files.
+
+=item *
+
+In the .xs file, there's now a #include declaration with the full path to
+the mylib.h header file.
+
+=item *
+
+There's now some new C code that's been added to the .xs file.  The purpose
+of the C<constant> routine is to make the values that are #define'd in the
+header file available to the Perl script (in this case, by calling
+C<&main::TESTVAL>).  There's also some XS code to allow calls to the
+C<constant> routine.
+
+=item *
+
+The .pm file has exported the name TESTVAL in the @EXPORT array.  This
+could lead to name clashes.  A good rule of thumb is that if the #define
+is only going to be used by the C routines themselves, and not by the user,
+they should be removed from the @EXPORT array.  Alternately, if you don't
+mind using the "fully qualified name" of a variable, you could remove most
+or all of the items in the @EXPORT array.
+
+=back
+
+We've also told Perl about the library that we built in the mylib
+subdirectory.  That required only the addition of the MYEXTLIB variable
+to the WriteMakefile call and the replacement of the postamble subroutine
+to cd into the subdirectory and run make.  The Makefile.PL for the
+library is a bit more complicated, but not excessively so.  Again we
+replaced the postamble subroutine to insert our own code.  This code
+simply specified that the library to be created here was a static
+archive (as opposed to a dynamically loadable library) and provided the
+commands to build it.
 
 =head2 SPECIFYING ARGUMENTS TO XSUBPP
 
-After completing Example 5, we now have an easy way to simulate some
+With the completion of Example 4, we now have an easy way to simulate some
 real-life libraries whose interfaces may not be the cleanest in the world.
 We shall now continue with a discussion of the arguments passed to the
 xsubpp compiler.
@@ -465,8 +646,18 @@ actual call to the function foo that xsubpp generates would look like this:
 
 	foo(&a, b);
 
-In other words, whatever is in the last column (or the variable name) is
-what is passed into the C function.
+Xsubpp will identically parse the following function argument lists:
+
+	char	&a
+	char&a
+	char	& a
+
+However, to help ease understanding, it is suggested that you place a "&"
+next to the variable name and away from the variable type), and place a
+"*" near the variable type, but away from the variable name (as in the
+complete example above).  By doing so, it is easy to understand exactly
+what will be passed to the C function -- it will be whatever is in the
+"last column".
 
 You should take great pains to try to pass the function the type of variable
 it wants, when possible.  It will save you a lot of trouble in the long run.
@@ -497,7 +688,7 @@ definition is placed.
 
 There is absolutely no excuse for not documenting your extension.
 Documentation belongs in the .pm file.  This file will be fed to pod2man,
-and the documentation embedded within it converted to man page format,
+and the embedded documentation will be converted to the man page format,
 then placed in the blib directory.  It will be copied to Perl's man
 page directory when the extension is installed.
 
@@ -528,5 +719,4 @@ and Tim Bunce.
 
 =head2 Last Changed
 
-1996/1/19
-
+1996/2/9
