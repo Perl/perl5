@@ -6737,7 +6737,7 @@ Perl_fp_dup(pTHX_ PerlIO *fp, char type)
 	return ret;
 
     /* create anew and remember what it is */
-    ret = PerlIO_fdupopen(fp);
+    ret = PerlIO_fdupopen(aTHX_ fp);
     ptr_table_store(PL_ptr_table, fp, ret);
     return ret;
 }

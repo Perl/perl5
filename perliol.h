@@ -82,7 +82,7 @@ extern PerlIO_funcs PerlIO_crlf;
 extern PerlIO_funcs PerlIO_mmap;
 #endif
 
-extern PerlIO *PerlIO_allocate(void);
+extern PerlIO *PerlIO_allocate(pTHX);
 
 #if O_BINARY != O_TEXT
 #define PERLIO_STDTEXT "t"

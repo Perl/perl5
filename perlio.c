@@ -28,6 +28,12 @@
 #define PERL_IN_PERLIO_C
 #include "perl.h"
 
+#undef PerlMemShared_calloc
+#define PerlMemShared_calloc(x,y) calloc(x,y)
+#undef PerlMemShared_free
+#define PerlMemShared_free(x) free(x)
+
+
 #ifndef PERLIO_LAYERS
 int
 PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
@@ -211,11 +217,12 @@ PerlIO *_perlio      = NULL;
 #define PERLIO_TABLE_SIZE 64
 
 PerlIO *
-PerlIO_allocate(void)
+PerlIO_allocate(pTHX)
 {
  /* Find a free slot in the table, allocating new table as necessary */
- PerlIO **last = &_perlio;
+ PerlIO **last;
  PerlIO *f;
+ last = &_perlio;
  while ((f = *last))
   {
    int i;
@@ -228,21 +235,23 @@ PerlIO_allocate(void)
       }
     }
   }
- Newz('I',f,PERLIO_TABLE_SIZE,PerlIO);
+ f = PerlMemShared_calloc(PERLIO_TABLE_SIZE,sizeof(PerlIO));
  if (!f)
-  return NULL;
+  {
+   return NULL;
+  } 
  *last = f;
  return f+1;
 }
 
 void
-PerlIO_cleantable(PerlIO **tablep)
+PerlIO_cleantable(pTHX_ PerlIO **tablep)
 {
  PerlIO *table = *tablep;
  if (table)
   {
    int i;
-   PerlIO_cleantable((PerlIO **) &(table[0]));
+   PerlIO_cleantable(aTHX_ (PerlIO **) &(table[0]));
    for (i=PERLIO_TABLE_SIZE-1; i > 0; i--)
     {
      PerlIO *f = table+i;
@@ -251,7 +260,7 @@ PerlIO_cleantable(PerlIO **tablep)
        PerlIO_close(f);
       }
     }
-   Safefree(table);
+   PerlMemShared_free(table);
    *tablep = NULL;
   }
 }
@@ -260,21 +269,23 @@ HV *PerlIO_layer_hv;
 AV *PerlIO_layer_av;
 
 void
-PerlIO_cleanup(void)
+PerlIO_cleanup()
 {
- PerlIO_cleantable(&_perlio);
+ dTHX;
+ PerlIO_cleantable(aTHX_ &_perlio);
 }
 
 void
 PerlIO_pop(PerlIO *f)
 {
+ dTHX;
  PerlIOl *l = *f;
  if (l)
   {
    PerlIO_debug("PerlIO_pop f=%p %s\n",f,l->tab->name);
    (*l->tab->Popped)(f);
    *f = l->next;
-   Safefree(l);
+   PerlMemShared_free(l);
   }
 }
 
@@ -500,7 +511,8 @@ PerlIO_stdstreams()
 {
  if (!_perlio)
   {
-   PerlIO_allocate();
+   dTHX;
+   PerlIO_allocate(aTHX);
    PerlIO_fdopen(0,"Ir" PERLIO_STDTEXT);
    PerlIO_fdopen(1,"Iw" PERLIO_STDTEXT);
    PerlIO_fdopen(2,"Iw" PERLIO_STDTEXT);
@@ -510,8 +522,9 @@ PerlIO_stdstreams()
 PerlIO *
 PerlIO_push(PerlIO *f,PerlIO_funcs *tab,const char *mode)
 {
+ dTHX;
  PerlIOl *l = NULL;
- Newc('L',l,tab->size,char,PerlIOl);
+ l = PerlMemShared_calloc(tab->size,sizeof(char));
  if (l)
   {
    Zero(l,tab->size,char);
@@ -618,6 +631,20 @@ PerlIO__close(PerlIO *f)
  return (*PerlIOBase(f)->tab->Close)(f);
 }
 
+#undef PerlIO_fdupopen
+PerlIO *
+PerlIO_fdupopen(pTHX_ PerlIO *f)
+{
+ char buf[8];
+ int fd = PerlLIO_dup(PerlIO_fileno(f));
+ PerlIO *new = PerlIO_fdopen(fd,PerlIO_modestr(f,buf));
+ if (new)
+  {
+   Off_t posn = PerlIO_tell(f);
+   PerlIO_seek(new,posn,SEEK_SET);
+  }
+ return new; 
+}
 
 #undef PerlIO_close
 int
@@ -898,14 +925,32 @@ PerlIO_modestr(PerlIO *f,char *buf)
 {
  char *s = buf;
  IV flags = PerlIOBase(f)->flags;
- if (flags & PERLIO_F_CANREAD)
-  *s++ = 'r';
- if (flags & PERLIO_F_CANWRITE)
-  *s++ = 'w';
- if (flags & PERLIO_F_CRLF)
-  *s++ = 't';
- else
+ if (flags & PERLIO_F_APPEND)
+  {
+   *s++ = 'a';
+   if (flags & PERLIO_F_CANREAD)
+    {
+     *s++ = '+';
+    }
+  } 
+ else if (flags & PERLIO_F_CANREAD)
+  {
+   *s++ = 'r';
+   if (flags & PERLIO_F_CANWRITE)
+    *s++ = '+';
+  }
+ else if (flags & PERLIO_F_CANWRITE)
+  {
+   *s++ = 'w';
+   if (flags & PERLIO_F_CANREAD)
+    {
+     *s++ = '+';
+    }
+  }
+#if O_TEXT != O_BINARY
+ if (!(flags & PERLIO_F_CRLF))
   *s++ = 'b';
+#endif
  *s = '\0';
  return buf;
 }
@@ -1142,6 +1187,7 @@ PerlIOUnix_fileno(PerlIO *f)
 PerlIO *
 PerlIOUnix_fdopen(PerlIO_funcs *self, int fd,const char *mode)
 {
+ dTHX;
  PerlIO *f = NULL;
  if (*mode == 'I')
   mode++;
@@ -1150,7 +1196,7 @@ PerlIOUnix_fdopen(PerlIO_funcs *self, int fd,const char *mode)
    int oflags = PerlIOUnix_oflags(mode);
    if (oflags != -1)
     {
-     PerlIOUnix *s = PerlIOSelf(PerlIO_push(f = PerlIO_allocate(),self,mode),PerlIOUnix);
+     PerlIOUnix *s = PerlIOSelf(PerlIO_push(f = PerlIO_allocate(aTHX),self,mode),PerlIOUnix);
      s->fd     = fd;
      s->oflags = oflags;
      PerlIOBase(f)->flags |= PERLIO_F_OPEN;
@@ -1170,7 +1216,7 @@ PerlIOUnix_open(PerlIO_funcs *self, const char *path,const char *mode)
    int fd = PerlLIO_open3(path,oflags,0666);
    if (fd >= 0)
     {
-     PerlIOUnix *s = PerlIOSelf(PerlIO_push(f = PerlIO_allocate(),self,mode),PerlIOUnix);
+     PerlIOUnix *s = PerlIOSelf(PerlIO_push(f = PerlIO_allocate(aTHX),self,mode),PerlIOUnix);
      s->fd     = fd;
      s->oflags = oflags;
      PerlIOBase(f)->flags |= PERLIO_F_OPEN;
@@ -1374,7 +1420,7 @@ PerlIOStdio_fdopen(PerlIO_funcs *self, int fd,const char *mode)
     }
    if (stdio)
     {
-     PerlIOStdio *s = PerlIOSelf(PerlIO_push(f = PerlIO_allocate(),self,mode),PerlIOStdio);
+     PerlIOStdio *s = PerlIOSelf(PerlIO_push(f = PerlIO_allocate(aTHX),self,mode),PerlIOStdio);
      s->stdio  = stdio;
     }
   }
@@ -1385,10 +1431,11 @@ PerlIOStdio_fdopen(PerlIO_funcs *self, int fd,const char *mode)
 PerlIO *
 PerlIO_importFILE(FILE *stdio, int fl)
 {
+ dTHX;
  PerlIO *f = NULL;
  if (stdio)
   {
-   PerlIOStdio *s = PerlIOSelf(PerlIO_push(f = PerlIO_allocate(),&PerlIO_stdio,"r+"),PerlIOStdio);
+   PerlIOStdio *s = PerlIOSelf(PerlIO_push(f = PerlIO_allocate(aTHX),&PerlIO_stdio,"r+"),PerlIOStdio);
    s->stdio  = stdio;
   }
  return f;
@@ -1403,7 +1450,7 @@ PerlIOStdio_open(PerlIO_funcs *self, const char *path,const char *mode)
  if (stdio)
   {
    char tmode[8];
-   PerlIOStdio *s = PerlIOSelf(PerlIO_push(f = PerlIO_allocate(), self,
+   PerlIOStdio *s = PerlIOSelf(PerlIO_push(f = PerlIO_allocate(aTHX), self,
                                (mode = PerlIOStdio_mode(mode,tmode))),
                                PerlIOStdio);
    s->stdio  = stdio;
@@ -2063,11 +2110,12 @@ PerlIOBuf_tell(PerlIO *f)
 IV
 PerlIOBuf_close(PerlIO *f)
 {
+ dTHX;
  IV code = PerlIOBase_close(f);
  PerlIOBuf *b = PerlIOSelf(f,PerlIOBuf);
  if (b->buf && b->buf != (STDCHAR *) &b->oneword)
   {
-   Safefree(b->buf);
+   PerlMemShared_free(b->buf);
   }
  b->buf = NULL;
  b->ptr = b->end = b->buf;
@@ -2110,9 +2158,10 @@ PerlIOBuf_get_base(PerlIO *f)
  PerlIOBuf *b = PerlIOSelf(f,PerlIOBuf);
  if (!b->buf)
   {
+   dTHX;
    if (!b->bufsiz)
     b->bufsiz = 4096;
-   New('B',b->buf,b->bufsiz,STDCHAR);
+   b->buf = PerlMemShared_calloc(b->bufsiz,sizeof(STDCHAR));
    if (!b->buf)
     {
      b->buf = (STDCHAR *)&b->oneword;
@@ -2212,7 +2261,8 @@ PerlIOPending_flush(PerlIO *f)
  PerlIOBuf *b = PerlIOSelf(f,PerlIOBuf);
  if (b->buf && b->buf != (STDCHAR *) &b->oneword)
   {
-   Safefree(b->buf);
+   dTHX;
+   PerlMemShared_free(b->buf);
    b->buf = NULL;
   }
  PerlIO_pop(f);
@@ -3059,7 +3109,7 @@ PerlIO_tmpfile(void)
  FILE *stdio = PerlSIO_tmpfile();
  if (stdio)
   {
-   PerlIOStdio *s = PerlIOSelf(PerlIO_push(f = PerlIO_allocate(),&PerlIO_stdio,"w+"),PerlIOStdio);
+   PerlIOStdio *s = PerlIOSelf(PerlIO_push(f = PerlIO_allocate(aTHX),&PerlIO_stdio,"w+"),PerlIOStdio);
    s->stdio  = stdio;
   }
  return f;

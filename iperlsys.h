@@ -902,6 +902,7 @@ typedef int		(*LPProcSpawnvp)(struct IPerlProc*, int, const char*,
 			    const char*const*);
 typedef int		(*LPProcASpawn)(struct IPerlProc*, void*, void**, void**);
 #endif
+typedef int		(*LPProcLastHost)(struct IPerlProc*);
 
 struct IPerlProc
 {
@@ -940,6 +941,7 @@ struct IPerlProc
     LPProcSpawnvp	pSpawnvp;
     LPProcASpawn	pASpawn;
 #endif
+    LPProcLastHost      pLastHost;
 };
 
 struct IPerlProcInfo
@@ -1019,6 +1021,8 @@ struct IPerlProcInfo
 #define PerlProc_aspawn(m,c,a)						\
 	(*PL_Proc->pASpawn)(PL_Proc, (m), (c), (a))
 #endif
+#define PerlProc_lasthost()						\
+	(*PL_Proc->pLastHost)(PL_Proc)
 
 #else	/* PERL_IMPLICIT_SYS */
 
