@@ -2771,7 +2771,7 @@ PP(pp_system)
     Signal_t (*ihand)();     /* place to save signal during system() */
     Signal_t (*qhand)();     /* place to save signal during system() */
 
-#if defined(HAS_FORK) && !defined(VMS)
+#if defined(HAS_FORK) && !defined(VMS) && !defined(OS2)
     if (SP - MARK == 1) {
 	if (tainting) {
 	    char *junk = SvPV(TOPs, na);
@@ -2817,7 +2817,7 @@ PP(pp_system)
 	value = (I32)do_exec(SvPVx(sv_mortalcopy(*SP), na));
     }
     _exit(-1);
-#else /* ! FORK or VMS */
+#else /* ! FORK or VMS or OS/2 */
     if (op->op_flags & OPf_STACKED) {
 	SV *really = *++MARK;
 	value = (I32)do_aspawn(really, MARK, SP);
@@ -2903,8 +2903,8 @@ PP(pp_getpgrp)
 	pid = 0;
     else
 	pid = SvIVx(POPs);
-#ifdef USE_BSDPGRP
-    value = (I32)getpgrp(pid);
+#ifdef BSD_GETPGRP
+    value = (I32)BSD_GETPGRP(pid);
 #else
     if (pid != 0)
 	DIE("POSIX getpgrp can't take an argument");
@@ -2933,8 +2933,8 @@ PP(pp_setpgrp)
     }
 
     TAINT_PROPER("setpgrp");
-#ifdef USE_BSDPGRP
-    SETi( setpgrp(pid, pgrp) >= 0 );
+#ifdef BSD_SETPGRP
+    SETi( BSD_SETPGRP(pid, pgrp) >= 0 );
 #else
     if ((pgrp != 0) || (pid != 0)) {
 	DIE("POSIX setpgrp can't take an argument");
