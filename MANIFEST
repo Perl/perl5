@@ -736,8 +736,6 @@ lib/unicode/CombiningClass.pl			Unicode character database
 lib/unicode/CompExcl.txt			Unicode character database
 lib/unicode/Decomposition.pl			Unicode character database
 lib/unicode/EAWidth.txt				Unicode character database
-lib/unicode/Eq/Latin1.pl			Unicode character database
-lib/unicode/Eq/Unicode.pl			Unicode character database
 lib/unicode/In/AlphabeticPresentationForms.pl	Unicode character database
 lib/unicode/In/Arabic.pl			Unicode character database
 lib/unicode/In/ArabicPresentationForms-A.pl	Unicode character database
