@@ -115,3 +115,21 @@ print "ok 3\n";
     print "ok 13\n";
     $test++;
 }
+
+# Now for Unicode with magical vtbls
+
+{
+    require Tie::Scalar;
+    my $a;
+    tie $a, 'Tie::StdScalar';  # makes $a magical
+    $a = "\x{263A}";
+    
+    print "not " unless length($a) == 1;
+    print "ok 14\n";
+    $test++;
+
+    use bytes;
+    print "not " unless length($a) == 3;
+    print "ok 15\n";
+    $test++;
+}

@@ -185,7 +185,13 @@ Perl_mg_length(pTHX_ SV *sv)
 	}
     }
 
-    (void)SvPV(sv, len);
+    if (DO_UTF8(sv)) 
+    {
+        U8 *s = (U8*)SvPV(sv, len);
+        len = Perl_utf8_length(aTHX_ s, s + len);
+    }
+    else
+        (void)SvPV(sv, len);
     return len;
 }
 
