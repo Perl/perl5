@@ -1723,7 +1723,7 @@ PerlProcFork(struct IPerlProc* piPerl)
 #ifdef USE_ITHREADS
     DWORD id;
     HANDLE handle;
-    CPerlHost *h = new CPerlHost();
+    CPerlHost *h = new CPerlHost(*(CPerlHost*)w32_internal_host);
     PerlInterpreter *new_perl = perl_clone_using((PerlInterpreter*)aTHXo, 1,
 						 h->m_pHostperlMem,
 						 h->m_pHostperlMemShared,
@@ -1735,6 +1735,7 @@ PerlProcFork(struct IPerlProc* piPerl)
 						 h->m_pHostperlSock,
 						 h->m_pHostperlProc
 						 );
+    new_perl->Isys_intern.internal_host = h;
 #  ifdef PERL_SYNC_FORK
     id = win32_start_child((LPVOID)new_perl);
     PERL_SET_INTERP(aTHXo);
@@ -1941,15 +1942,15 @@ CPerlHost::CPerlHost(CPerlHost& host)
     CopyMemory(&m_hostperlDir, &perlDir, sizeof(perlDir));
     CopyMemory(&m_hostperlSock, &perlSock, sizeof(perlSock));
     CopyMemory(&m_hostperlProc, &perlProc, sizeof(perlProc));
-    m_pHostperlMem	    = &host.m_hostperlMem;
-    m_pHostperlMemShared    = &host.m_hostperlMemShared;
-    m_pHostperlMemParse	    = &host.m_hostperlMemParse;
-    m_pHostperlEnv	    = &host.m_hostperlEnv;
-    m_pHostperlStdIO	    = &host.m_hostperlStdIO;
-    m_pHostperlLIO	    = &host.m_hostperlLIO;
-    m_pHostperlDir	    = &host.m_hostperlDir;
-    m_pHostperlSock	    = &host.m_hostperlSock;
-    m_pHostperlProc	    = &host.m_hostperlProc;
+    m_pHostperlMem	    = &m_hostperlMem;
+    m_pHostperlMemShared    = &m_hostperlMemShared;
+    m_pHostperlMemParse	    = &m_hostperlMemParse;
+    m_pHostperlEnv	    = &m_hostperlEnv;
+    m_pHostperlStdIO	    = &m_hostperlStdIO;
+    m_pHostperlLIO	    = &m_hostperlLIO;
+    m_pHostperlDir	    = &m_hostperlDir;
+    m_pHostperlSock	    = &m_hostperlSock;
+    m_pHostperlProc	    = &m_hostperlProc;
 
     m_dwEnvCount = 0;
     m_lppEnvList = NULL;
