@@ -471,6 +471,7 @@ UTILS		=			\
 		..\pod\podselect	\
 		..\x2p\find2perl	\
 		..\x2p\s2p		\
+		bin\exetype.pl		\
 		bin\runperl.pl		\
 		bin\pl2bat.pl		\
 		bin\perlglob.pl		\
