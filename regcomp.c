@@ -3224,7 +3224,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		value = UCHARAT(RExC_parse++);
 	    /* Some compilers cannot handle switching on 64-bit integer
 	     * values, therefore value cannot be an UV.  Yes, this will
-	     * be a problem later if we want switch on Unicode.  --jhi */
+	     * be a problem later if we want switch on Unicode.
+	     * A similar issue a little bit later when switching on
+	     * namedclass. --jhi */
 	    switch ((I32)value) {
 	    case 'w':	namedclass = ANYOF_ALNUM;	break;
 	    case 'W':	namedclass = ANYOF_NALNUM;	break;
@@ -3335,7 +3337,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	    }
 
 	    if (!SIZE_ONLY) {
-		switch (namedclass) {
+		/* Possible truncation here but in some 64-bit environments
+		 * the compiler gets heartburn about switch on 64-bit values.
+		 * A similar issue a little earlier when switching on value.
+		 * --jhi
+		switch ((I32)namedclass) {
 		case ANYOF_ALNUM:
 		    if (LOC)
 			ANYOF_CLASS_SET(ret, ANYOF_ALNUM);
