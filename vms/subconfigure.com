@@ -62,6 +62,7 @@ $ myname = myhostname
 $ if "''myname'" .eqs. "" THEN myname = f$trnlnm("SYS$NODE")
 $!
 $! ##ADD NEW CONSTANTS HERE##
+$ perl_d_telldirproto="define"
 $ perl_i_sysmount="undef"
 $ perl_d_fstatfs="undef"
 $ perl_d_fstatvfs="undef"
@@ -3064,6 +3065,7 @@ $ WC "d_fstatvfs='" + perl_d_fstatvfs + "'"
 $ WC "i_mntent='" + perl_i_mntent + "'"
 $ WC "d_getmntent='" + perl_d_getmntent + "'"
 $ WC "d_hasmntopt='" + perl_d_hasmntopt + "'"
+$ WC "d_telldirproto='" + perl_d_telldirproto + "'"
 $!
 $! ##WRITE NEW CONSTANTS HERE##
 $!
