@@ -56,7 +56,7 @@ Bell sounds when word completion fails.
 
 =head1 BUGS
 
-The completion charater E<lt>tabE<gt> cannot be changed.
+The completion character E<lt>tabE<gt> cannot be changed.
 
 =head1 AUTHOR
 
