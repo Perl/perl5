@@ -2153,6 +2153,9 @@
 #ifdef PERL_CORE
 #define hv_fetch_common		S_hv_fetch_common
 #endif
+#ifdef PERL_CORE
+#define hv_store_common		S_hv_store_common
+#endif
 #endif
 #define hv_clear_placeholders	Perl_hv_clear_placeholders
 #define ck_anoncode		Perl_ck_anoncode
@@ -4643,6 +4646,9 @@
 #endif
 #ifdef PERL_CORE
 #define hv_fetch_common(a,b,c,d,e,f,g)	S_hv_fetch_common(aTHX_ a,b,c,d,e,f,g)
+#endif
+#ifdef PERL_CORE
+#define hv_store_common(a,b,c,d,e,f,g)	S_hv_store_common(aTHX_ a,b,c,d,e,f,g)
 #endif
 #endif
 #define hv_clear_placeholders(a)	Perl_hv_clear_placeholders(aTHX_ a)
