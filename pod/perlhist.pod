@@ -6,7 +6,7 @@ perlhist - the Perl history records
 
 =for RCS
 #
-# $Id: perlhist.pod,v 1.29 1998/02/19 15:49:17 jhi Exp $
+# $Id: perlhist.pod,v 1.31 1998/03/10 16:39:28 jhi Exp $
 #
 =end RCS
 
@@ -18,8 +18,8 @@ This document aims to record the Perl source code releases.
 
 Perl history in brief, by Larry Wall:
 
-   Perl 0 introduced Perl to my officemates.
-   Perl 1 introduced Perl to the world, and changed /\(...\|...\)/ to
+    Perl 0 introduced Perl to my officemates.
+    Perl 1 introduced Perl to the world, and changed /\(...\|...\)/ to
         /(...|...)/.  \(Dan Faigin still hasn't forgiven me. :-\)
     Perl 2 introduced Henry Spencer's regular expression package.
     Perl 3 introduced the ability to handle binary data (embedded nulls).
@@ -30,8 +30,8 @@ Perl history in brief, by Larry Wall:
 
 =head1 THE KEEPERS OF THE PUMPKIN
 
-Larry Wall, Andy Dougherty, Tom Christiansen, Charles Bailey, Nick
-Ing-Simmons, Chip Salzenberg, Tim Bunce, Malcolm Beattie.
+Larry Wall, Andy Dougherty, Tom Christiansen, Charles Bailey,
+Nick Ing-Simmons, Chip Salzenberg, Tim Bunce, Malcolm Beattie.
 
 =head2 PUMPKIN?
 
@@ -269,6 +269,9 @@ the pumpking or the pumpkineer.
           5.004_57      1998-Feb-03
           5.004_58      1998-Feb-06
           5.004_59      1998-Feb-13
+          5.004_60      1998-Feb-20
+          5.004_61      1998-Feb-27
+          5.004_62      1998-Mar-06
 
 =head2 SELECTED RELEASE SIZES
 
@@ -305,6 +308,7 @@ explained below.
  5.004_53       1422  62   1295 141    438  70    394 162   1637  56
  5.004_56       1501  66   1301 140    447  74    408 165   1648  57
  5.004_59       1555  72   1317 142    448  74    424 171   1678  58   
+ 5.004_62	1602  77   1327 144    629  92    428 173   1674  58
 
 The "core"..."doc" mean the following files from the Perl source code
 distribution.  The glob notation ** means recursively, (.) means
@@ -360,22 +364,22 @@ the Perl source distribution for somewhat more selected releases.
 
  ======================================================================
 
-            5.003_07 5.004   5.004_04 5.004_59
+            5.003_07 5.004   5.004_04 5.004_62
                                               
- Configure  217  1   225  1  225  1   240  1  
+ Configure  217  1   225  1  225  1   240  1
  cygwin32     -  -    23  5   23  5    23  5  
- djgpp        -  -     -  -    -  -    15  5
+ djgpp        -  -     -  -    -  -    14  5
  eg          54 44    81 62   81 62    81 62
  emacs      143  1   194  1  204  1   212  2
  h2pl        12 12    12 12   12 12    12 12
- hints       90 62   129 69  132 71   139 72
- os2        117 42   121 42  127 42   134 44
+ hints       90 62   129 69  132 71   144 72
+ os2        117 42   121 42  127 42   127 44
  plan9       79 15    82 15   82 15    82 15
- Porting     51  1    94  2  109  4   109  4
+ Porting     51  1    94  2  109  4   203  6
  qnx          -  -     1  2    1  2     1  2
- utils       97  7   112  8  118  8   123  8
- vms        505 27   518 34  524 34   536 34
- win32        -  -   285 33  378 36   464 39
+ utils       97  7   112  8  118  8   124  8
+ vms        505 27   518 34  524 34   538 34
+ win32        -  -   285 33  378 36   470 39
  x2p        280 19   281 19  281 19   281 19
 
 =head2 SELECTED PATCH SIZES
@@ -436,7 +440,7 @@ context diff output format.
           p54rc1        1997-May-12       8   1  11
           p54rc2        1997-May-14       6   0  40
 
-        5.004           1997-May-15       4   0   4
+         5.004          1997-May-15       4   0   4
 
  Tim      5.004_01      1997-Jun-13     222  14  57
           5.004_02      1997-Aug-07     112  16 119

@@ -689,7 +689,7 @@ run-time only. This is a new mechanism and the details may change.
 
 Current state of the interpreter.  Undefined if parsing of the current
 module/eval is not finished (may happen in $SIG{__DIE__} and
-$SIG{__WARN__} handlers).  True if inside an eval, othewise false.
+$SIG{__WARN__} handlers).  True if inside an eval, otherwise false.
 
 =item $BASETIME
 

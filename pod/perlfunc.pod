@@ -1184,10 +1184,6 @@ that doesn't implement flock(2), fcntl(2) locking, or lockf(3).  flock()
 is Perl's portable file locking interface, although it locks only entire
 files, not records.
 
-On many platforms, locks established by flock() are B<merely advisory>.
-This means that files locked with flock() may be modified by programs
-which do not also use flock().  See your local documentation for details.
-
 On many platforms (including most versions or clones of Unix), locks
 established by flock() are B<merely advisory>.  This means that files
 locked with flock() may be modified by programs which do not also use
@@ -3492,13 +3488,17 @@ unimplemented, produces a fatal error.  The arguments are interpreted
 as follows: if a given argument is numeric, the argument is passed as
 an int.  If not, the pointer to the string value is passed.  You are
 responsible to make sure a string is pre-extended long enough to
-receive any result that might be written into a string.  If your
+receive any result that might be written into a string.  You can't use a
+string literal (or other read-only string) as an argument to syscall()
+because Perl has to assume that any string pointer might be written
+through.  If your
 integer arguments are not literals and have never been interpreted in a
 numeric context, you may need to add 0 to them to force them to look
 like numbers.
 
     require 'syscall.ph';		# may need to run h2ph
-    syscall(&SYS_write, fileno(STDOUT), "hi there\n", 9);
+    $s = "hi there\n";
+    syscall(&SYS_write, fileno(STDOUT), $s, length $s);
 
 Note that Perl supports passing of up to only 14 arguments to your system call,
 which in practice should usually suffice.

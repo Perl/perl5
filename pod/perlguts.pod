@@ -76,8 +76,8 @@ the format.
 The C<sv_set*()> functions are not generic enough to operate on values that
 have "magic".  See L<Magic Virtual Tables> later in this document.
 
-All SVs that will contain strings should, but need not, be terminated
-with a NUL character.  If it is not NUL-terminated there is a risk of
+All SVs that contain strings should be terminated with a NUL character.
+If it is not NUL-terminated there is a risk of
 core dumps and corruptions from code which passes the string to C
 functions or system calls which expect a NUL-terminated string.
 Perl's own functions typically add a trailing NUL for this reason.
@@ -3423,7 +3423,3 @@ Bowers, Matthew Green, Tim Bunce, Spider Boardman, Ulrich Pfeifer,
 Stephen McCamant, and Gurusamy Sarathy.
 
 API Listing by Dean Roehrich <F<roehrich@cray.com>>.
-
-=head1 DATE
-
-Version 31.8: 1997/5/17

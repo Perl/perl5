@@ -4634,7 +4634,7 @@ EOM
 		$cat <<EOM >&4
 
 To build perl, you must add the current working directory to your
-$xxx environtment variable before running make.  You can do
+$xxx environment variable before running make.  You can do
 this with
    $xxx=\`pwd\`; export $xxx
 for Bourne-style shells, or
