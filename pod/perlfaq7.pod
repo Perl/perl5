@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq7 - General Perl Language Issues ($Revision: 1.17 $, $Date: 2004/10/19 22:53:50 $)
+perlfaq7 - General Perl Language Issues ($Revision: 1.18 $, $Date: 2004/11/03 22:54:08 $)
 
 =head1 DESCRIPTION
 
@@ -97,6 +97,16 @@ See L<perllexwarn> for more details.
 	no warnings;          # temporarily turn off warnings
 	$a = $b + $c;         # I know these might be undef
     }
+    
+Additionally, you can enable and disable categories of warnings.
+You turn off the categories you want to ignore and you can still
+get other categories of warnings.  See L<perllexwarn> for the
+complete details, including the category names and hierarchy.
+
+	{
+	no warnings 'uninitialized';
+	$a = $b + $c;
+	}
 
 If you have an older version of Perl, the C<$^W> variable (documented
 in L<perlvar>) controls runtime warnings for a block:

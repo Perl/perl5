@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq6 - Regular Expressions ($Revision: 1.26 $, $Date: 2004/10/25 18:47:04 $)
+perlfaq6 - Regular Expressions ($Revision: 1.27 $, $Date: 2004/11/03 22:52:16 $)
 
 =head1 DESCRIPTION
 
@@ -151,7 +151,19 @@ Up to Perl 5.8.0, $/ has to be a string.  This may change in 5.10,
 but don't get your hopes up. Until then, you can use these examples
 if you really need to do this.
 
-Use the four argument form of sysread to continually add to
+If you have File::Stream, this is easy.
+
+			 use File::Stream;
+             my $stream = File::Stream->new(
+                  $filehandle,
+                  separator => qr/\s*,\s*/,
+                  );
+
+			 print "$_\n" while <$stream>;
+
+If you don't have File::Stream, you have to do a little more work.
+
+You can use the four argument form of sysread to continually add to
 a buffer.  After you add to the buffer, you check if you have a
 complete line (using your regular expression).
 

@@ -1928,7 +1928,7 @@ If the pe1 and pe2 are non-NULL, the scanning pointers will be copied
 in there (they will point at the beginning of the I<next> character).
 If the pointers behind pe1 or pe2 are non-NULL, they are the end
 pointers beyond which scanning will not continue under any
-circustances.  If the byte lengths l1 and l2 are non-zero, s1+l1 and
+circumstances.  If the byte lengths l1 and l2 are non-zero, s1+l1 and
 s2+l2 will be used as goal end pointers that will also stop the scan,
 and which qualify towards defining a successful match: all the scans
 that define an explicit length must reach their goal pointers for

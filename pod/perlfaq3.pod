@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.40 $, $Date: 2004/10/19 17:02:27 $)
+perlfaq3 - Programming Tools ($Revision: 1.41 $, $Date: 2004/11/03 22:45:32 $)
 
 =head1 DESCRIPTION
 
@@ -218,18 +218,24 @@ If you're on Unix, you already have an IDE--Unix itself.  The UNIX
 philosophy is the philosophy of several small tools that each do one
 thing and do it well.  It's like a carpenter's toolbox.
 
-If you want an IDE, check the following:
+If you want an IDE, check the following (in alphabetical order, not
+order of preference):
 
 =over 4
 
+=item Eclipse
+
+The Eclipse Perl Integration Project integrates Perl 
+editing/debugging with Eclipse.
+
+The website for the project is http://e-p-i-c.sf.net/
+
 =item Komodo
 
-ActiveState's cross-platform (as of April 2001 Windows and Linux),
-multi-language IDE has Perl support, including a regular expression
+ActiveState's cross-platform (as of October 2004, that's Windows, Linux,
+and Solaris), multi-language IDE has Perl support, including a regular expression
 debugger and remote debugging
-( http://www.ActiveState.com/Products/Komodo/ ).  (Visual
-Perl, a Visual Studio.NET plug-in is currently (early 2001) in beta
-( http://www.ActiveState.com/Products/VisualPerl/index.html )).
+( http://www.ActiveState.com/Products/Komodo/ ).
 
 =item Open Perl IDE
 
@@ -237,6 +243,11 @@ Perl, a Visual Studio.NET plug-in is currently (early 2001) in beta
 Open Perl IDE is an integrated development environment for writing
 and debugging Perl scripts with ActiveState's ActivePerl distribution
 under Windows 95/98/NT/2000.
+
+=item OptiPerl
+
+( http://www.optiperl.com/ ) is a Windows IDE with simulated CGI
+environment, including debugger and syntax highlighting editor.
 
 =item PerlBuilder
 
@@ -248,10 +259,11 @@ environment for Windows that supports Perl development.
 ( http://helpconsulting.net/visiperl/ )
 From Help Consulting, for Windows.
 
-=item OptiPerl
+=item Visual Perl
 
-( http://www.optiperl.com/ ) is a Windows IDE with simulated CGI
-environment, including debugger and syntax highlighting editor.
+( http://www.activestate.com/Products/Visual_Perl/ )
+Visual Perl is a Visual Studio.NET plug-in from ActiveState.
+
 
 =back
 
