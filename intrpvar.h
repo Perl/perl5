@@ -527,6 +527,8 @@ PERLVAR(IDBassertion,   SV *)
 
 /* Don't forget to add your variable also to perl_clone()! */
 
+PERLVARI(Icv_has_eval, I32, 0) /* PL_compcv includes an entereval or similar */
+
 /* New variables must be added to the very end, before this comment,
  * for binary compatibility (the offsets of the old members must not change).
  * XSUB.h provides wrapper functions via perlapi.h that make this

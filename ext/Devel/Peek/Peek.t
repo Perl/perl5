@@ -252,7 +252,7 @@ do_test(14,
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$pattern"
-      \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG"
+      \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG" flags=0x0 index=0
       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$dump"
     OUTSIDE = $ADDR \\(MAIN\\)');
 

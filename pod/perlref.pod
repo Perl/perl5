@@ -542,10 +542,10 @@ remains available.
 
 =head2 Function Templates
 
-As explained above, a closure is an anonymous function with access to the
-lexical variables visible when that function was compiled.  It retains
-access to those variables even though it doesn't get run until later,
-such as in a signal handler or a Tk callback.
+As explained above, an anonymous function with access to the lexical
+variables visible when that function was compiled, creates a closure.  It
+retains access to those variables even though it doesn't get run until
+later, such as in a signal handler or a Tk callback.
 
 Using a closure as a function template allows us to generate many functions
 that act similarly.  Suppose you wanted functions named after the colors
@@ -585,11 +585,13 @@ to occur during compilation.
 Access to lexicals that change over type--like those in the C<for> loop
 above--only works with closures, not general subroutines.  In the general
 case, then, named subroutines do not nest properly, although anonymous
-ones do.  If you are accustomed to using nested subroutines in other
-programming languages with their own private variables, you'll have to
-work at it a bit in Perl.  The intuitive coding of this type of thing
-incurs mysterious warnings about ``will not stay shared''.  For example,
-this won't work:
+ones do. Thus is because named subroutines are created (and capture any
+outer lexicals) only once at compile time, whereas anonymous subroutines
+get to capture each time you execute the 'sub' operator.  If you are
+accustomed to using nested subroutines in other programming languages with
+their own private variables, you'll have to work at it a bit in Perl.  The
+intuitive coding of this type of thing incurs mysterious warnings about
+``will not stay shared''.  For example, this won't work:
 
     sub outer {
         my $x = $_[0] + 35;

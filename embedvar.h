@@ -219,6 +219,7 @@
 #define PL_curstname		(vTHX->Icurstname)
 #define PL_custom_op_descs	(vTHX->Icustom_op_descs)
 #define PL_custom_op_names	(vTHX->Icustom_op_names)
+#define PL_cv_has_eval		(vTHX->Icv_has_eval)
 #define PL_dbargs		(vTHX->Idbargs)
 #define PL_debstash		(vTHX->Idebstash)
 #define PL_debug		(vTHX->Idebug)
@@ -520,6 +521,7 @@
 #define PL_Icurstname		PL_curstname
 #define PL_Icustom_op_descs	PL_custom_op_descs
 #define PL_Icustom_op_names	PL_custom_op_names
+#define PL_Icv_has_eval		PL_cv_has_eval
 #define PL_Idbargs		PL_dbargs
 #define PL_Idebstash		PL_debstash
 #define PL_Idebug		PL_debug

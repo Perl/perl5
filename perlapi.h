@@ -196,6 +196,8 @@ END_EXTERN_C
 #define PL_custom_op_descs	(*Perl_Icustom_op_descs_ptr(aTHX))
 #undef  PL_custom_op_names
 #define PL_custom_op_names	(*Perl_Icustom_op_names_ptr(aTHX))
+#undef  PL_cv_has_eval
+#define PL_cv_has_eval		(*Perl_Icv_has_eval_ptr(aTHX))
 #undef  PL_dbargs
 #define PL_dbargs		(*Perl_Idbargs_ptr(aTHX))
 #undef  PL_debstash

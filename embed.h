@@ -2128,9 +2128,6 @@
 #define cv_dump			S_cv_dump
 #endif
 #  endif
-#ifdef PERL_CORE
-#define cv_clone2		S_cv_clone2
-#endif
 #endif
 #ifdef PERL_CORE
 #define find_runcv		Perl_find_runcv
@@ -4595,16 +4592,13 @@
 #endif
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
-#define pad_findlex(a,b,c)	S_pad_findlex(aTHX_ a,b,c)
+#define pad_findlex(a,b,c,d,e,f,g)	S_pad_findlex(aTHX_ a,b,c,d,e,f,g)
 #endif
 #  if defined(DEBUGGING)
 #ifdef PERL_CORE
 #define cv_dump(a,b)		S_cv_dump(aTHX_ a,b)
 #endif
 #  endif
-#ifdef PERL_CORE
-#define cv_clone2(a,b)		S_cv_clone2(aTHX_ a,b)
-#endif
 #endif
 #ifdef PERL_CORE
 #define find_runcv(a)		Perl_find_runcv(aTHX_ a)

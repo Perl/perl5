@@ -2259,8 +2259,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 			FAIL("Eval-group not allowed at runtime, use re 'eval'");
 		    if (PL_tainting && PL_tainted)
 			FAIL("Eval-group in insecure regular expression");
+		    if (PL_curcop == &PL_compiling)
+			PL_cv_has_eval = 1;
 		}
-		
+
 		nextchar(pRExC_state);
 		if (logical) {
 		    ret = reg_node(pRExC_state, LOGICAL);
