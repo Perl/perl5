@@ -150,10 +150,13 @@ hv_fetch(HV *hv, const char *key, U32 klen, I32 lval)
     }
 #ifdef DYNAMIC_ENV_FETCH  /* %ENV lookup?  If so, try to fetch the value now */
     if (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME)) {
-      if ((sv = PerlEnv_ENVgetenv_sv(key)) != &PL_sv_undef) {
-        SvTAINTED_on(sv);
-        return hv_store(hv,key,klen,sv,hash);
-      }
+	unsigned long len;
+	char *env = PerlEnv_ENVgetenv_len(key,&len);
+	if (env) {
+	    sv = newSVpvn(env,len);
+	    SvTAINTED_on(sv);
+	    return hv_store(hv,key,klen,sv,hash);
+	}
     }
 #endif
     if (lval) {		/* gonna assign to this, so it better be there */
@@ -238,10 +241,13 @@ hv_fetch_ent(HV *hv, SV *keysv, I32 lval, register U32 hash)
     }
 #ifdef DYNAMIC_ENV_FETCH  /* %ENV lookup?  If so, try to fetch the value now */
     if (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME)) {
-      if ((sv = PerlEnv_ENVgetenv_sv(key)) != &PL_sv_undef) {
-        SvTAINTED_on(sv);
-        return hv_store_ent(hv,keysv,sv,hash);
-      }
+	unsigned long len;
+	char *env = PerlEnv_ENVgetenv_len(key,&len);
+	if (env) {
+	    sv = newSVpvn(env,len);
+	    SvTAINTED_on(sv);
+	    return hv_store_ent(hv,keysv,sv,hash);
+	}
     }
 #endif
     if (lval) {		/* gonna assign to this, so it better be there */
@@ -613,11 +619,15 @@ hv_exists(HV *hv, const char *key, U32 klen)
 	return TRUE;
     }
 #ifdef DYNAMIC_ENV_FETCH  /* is it out there? */
-    if (HvNAME(hv) && strEQ(HvNAME(hv), ENV_HV_NAME) &&
-        (sv = PerlEnv_ENVgetenv_sv(key)) != &PL_sv_undef) {
-	SvTAINTED_on(sv);
-	hv_store(hv,key,klen,sv,hash);
-	return TRUE;
+    if (HvNAME(hv) && strEQ(HvNAME(hv), ENV_HV_NAME)) {
+	unsigned long len;
+	char *env = PerlEnv_ENVgetenv_len(key,&len);
+	if (env) {
+	    sv = newSVpvn(env,len);
+	    SvTAINTED_on(sv);
+	    (void)hv_store(hv,key,klen,sv,hash);
+	    return TRUE;
+	}
     }
 #endif
     return FALSE;
@@ -680,11 +690,15 @@ hv_exists_ent(HV *hv, SV *keysv, U32 hash)
 	return TRUE;
     }
 #ifdef DYNAMIC_ENV_FETCH  /* is it out there? */
-    if (HvNAME(hv) && strEQ(HvNAME(hv), ENV_HV_NAME) &&
-        (sv = PerlEnv_ENVgetenv_sv(key)) != &PL_sv_undef) {
-	SvTAINTED_on(sv);
-	hv_store_ent(hv,keysv,sv,hash);
-	return TRUE;
+    if (HvNAME(hv) && strEQ(HvNAME(hv), ENV_HV_NAME)) {
+	unsigned long len;
+	char *env = PerlEnv_ENVgetenv_len(key,&len);
+	if (env) {
+	    sv = newSVpvn(env,len);
+	    SvTAINTED_on(sv);
+	    (void)hv_store_ent(hv,keysv,sv,hash);
+	    return TRUE;
+	}
     }
 #endif
     return FALSE;

@@ -99,7 +99,9 @@ VIRTUAL void    do_chop _((SV* asv, SV* sv));
 VIRTUAL bool	do_close _((GV* gv, bool not_implicit));
 VIRTUAL bool	do_eof _((GV* gv));
 VIRTUAL bool	do_exec _((char* cmd));
+#ifndef WIN32
 VIRTUAL bool	do_exec3 _((char* cmd, int fd, int flag));
+#endif
 VIRTUAL void	do_execfree _((void));
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 I32	do_ipcctl _((I32 optype, SV** mark, SV** sp));
@@ -155,8 +157,8 @@ VIRTUAL OP*	fold_constants _((OP* arg));
 VIRTUAL char*	form _((const char* pat, ...));
 VIRTUAL void	free_tmps _((void));
 VIRTUAL OP*	gen_constant_list _((OP* o));
-#ifndef HAS_GETENV_SV
-VIRTUAL SV*	getenv_sv _((char* key));
+#ifndef HAS_GETENV_LEN
+VIRTUAL char*	getenv_len _((char* key, unsigned long *len));
 #endif
 VIRTUAL void	gp_free _((GV* gv));
 VIRTUAL GP*	gp_ref _((GP* gp));
@@ -759,7 +761,7 @@ I32 dopoptosub _((I32 startingblock));
 I32 dopoptosub_at _((PERL_CONTEXT* cxstk, I32 startingblock));
 void save_lines _((AV *array, SV *sv));
 OP *doeval _((int gimme, OP** startop));
-PerlIO *doopen _((const char *name, const char *mode));
+PerlIO *doopen_pmc _((const char *name, const char *mode));
 I32 sv_ncmp _((SV *a, SV *b));
 I32 sv_i_ncmp _((SV *a, SV *b));
 I32 amagic_ncmp _((SV *a, SV *b));
@@ -896,7 +898,6 @@ void del_sv _((SV *p));
 #endif
 void debprof _((OP *o));
 
-void *bset_obj_store _((void *obj, I32 ix));
 OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
 void simplify_sort _((OP *o));
 bool is_handle_constructor _((OP *o, I32 argnum));
@@ -975,12 +976,13 @@ VIRTUAL void do_op_dump _((I32 level, PerlIO *file, OP *o));
 VIRTUAL void do_pmop_dump _((I32 level, PerlIO *file, PMOP *pm));
 VIRTUAL void do_sv_dump _((I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim));
 VIRTUAL void magic_dump _((MAGIC *mg));
-VIRTUAL void* default_protect _((int *except, protect_body_t, ...));
+VIRTUAL void* default_protect _((int *excpt, protect_body_t body, ...));
 VIRTUAL void reginitcolors _((void));
 VIRTUAL char* sv_2pv_nolen _((SV* sv));
 VIRTUAL char* sv_pv _((SV *sv));
 VIRTUAL void sv_force_normal _((SV *sv));
 VIRTUAL void tmps_grow _((I32 n));
+VIRTUAL void *bset_obj_store _((void *obj, I32 ix));
 
-VIRTUAL SV* sv_rvweaken _((SV *));
+VIRTUAL SV* sv_rvweaken _((SV *sv));
 VIRTUAL int magic_killbackrefs _((SV *sv, MAGIC *mg));

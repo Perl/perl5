@@ -527,7 +527,7 @@ RE		= $(EXTDIR)\re\re
 DUMPER		= $(EXTDIR)\Data\Dumper\Dumper
 ERRNO		= $(EXTDIR)\Errno\Errno
 PEEK		= $(EXTDIR)\Devel\Peek\Peek
-BYTELOADER	= $(EXTDIR)\ByteLoader
+BYTELOADER	= $(EXTDIR)\ByteLoader\ByteLoader
 
 SOCKET_DLL	= $(AUTODIR)\Socket\Socket.dll
 FCNTL_DLL	= $(AUTODIR)\Fcntl\Fcntl.dll

@@ -42,7 +42,7 @@ static void save_lines _((AV *array, SV *sv));
 static I32 sortcv _((SV *a, SV *b));
 static void qsortsv _((SV **array, size_t num_elts, I32 (*fun)(SV *a, SV *b)));
 static OP *doeval _((int gimme, OP** startop));
-static PerlIO *doopen _((const char *name, const char *mode));
+static PerlIO *doopen_pmc _((const char *name, const char *mode));
 static I32 sv_ncmp _((SV *a, SV *b));
 static I32 sv_i_ncmp _((SV *a, SV *b));
 static I32 amagic_ncmp _((SV *a, SV *b));
@@ -2511,7 +2511,7 @@ docatch(OP *o)
 #endif
     PL_op = o;
  redo_body:
-    CALLPROTECT(&ret, docatch_body);
+    CALLPROTECT(&ret, FUNC_NAME_TO_PTR(docatch_body));
     switch (ret) {
     case 0:
 	break;
@@ -2776,32 +2776,35 @@ doeval(int gimme, OP** startop)
     RETURNOP(PL_eval_start);
 }
 
-static PerlIO *
-doopen(const char *name, const char *mode)
+STATIC PerlIO *
+doopen_pmc(const char *name, const char *mode)
 {
     STRLEN namelen = strlen(name);
     PerlIO *fp;
 
     if (namelen > 3 && strcmp(name + namelen - 3, ".pm") == 0) {
-        SV *pmcsv = newSVpvf("%s%c", name, 'c');
+	SV *pmcsv = newSVpvf("%s%c", name, 'c');
 	char *pmc = SvPV_nolen(pmcsv);
 	Stat_t pmstat;
-        Stat_t pmcstat;
-        if (PerlLIO_stat(pmc, &pmcstat) < 0) {
+	Stat_t pmcstat;
+	if (PerlLIO_stat(pmc, &pmcstat) < 0) {
 	    fp = PerlIO_open(name, mode);
-	} else {
-	    if (PerlLIO_stat(name, &pmstat) < 0 ||
-	        pmstat.st_mtime < pmcstat.st_mtime) {
-	        fp = PerlIO_open(pmc, mode);
-	  } else {
-	        fp = PerlIO_open(name, mode);
-	  }
 	}
-        SvREFCNT_dec(pmcsv);
-    } else {
-        fp = PerlIO_open(name, mode);
+	else {
+	    if (PerlLIO_stat(name, &pmstat) < 0 ||
+	        pmstat.st_mtime < pmcstat.st_mtime)
+	    {
+		fp = PerlIO_open(pmc, mode);
+	    }
+	    else {
+		fp = PerlIO_open(name, mode);
+	    }
+	}
+	SvREFCNT_dec(pmcsv);
     }
-
+    else {
+	fp = PerlIO_open(name, mode);
+    }
     return fp;
 }
 
@@ -2855,7 +2858,7 @@ PP(pp_require)
     )
     {
 	tryname = name;
-	tryrsfp = doopen(name,PERL_SCRIPT_MODE);
+	tryrsfp = doopen_pmc(name,PERL_SCRIPT_MODE);
     }
     else {
 	AV *ar = GvAVn(PL_incgv);
@@ -2879,7 +2882,7 @@ PP(pp_require)
 #endif
 		TAINT_PROPER("require");
 		tryname = SvPVX(namesv);
-		tryrsfp = doopen(tryname, PERL_SCRIPT_MODE);
+		tryrsfp = doopen_pmc(tryname, PERL_SCRIPT_MODE);
 		if (tryrsfp) {
 		    if (tryname[0] == '.' && tryname[1] == '/')
 			tryname += 2;

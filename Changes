@@ -79,6 +79,41 @@ Version 5.005_57        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3385] By: gsar                                  on 1999/05/10  19:33:36
+        Log: "weak" references internals, still needs perlguts documentation
+             (somewhat modified version of patch suggested by Tuomas J. Lukka
+             <lukka@fas.harvard.edu>)
+     Branch: perl
+	   ! dump.c embed.h embed.pl global.sym mg.c objXSUB.h perl.h
+           ! pod/perldiag.pod proto.h sv.c sv.h util.c
+____________________________________________________________________________
+[  3384] By: jhi                                   on 1999/05/10  18:21:43
+        Log: Circumnavigate Digital UNIX 4.0D miniperl core dump
+             (due to QAR 56761) (the bug has been fixed in 4.0E or better)
+     Branch: cfgperl
+           ! INSTALL hints/dec_osf.sh
+____________________________________________________________________________
+[  3381] By: jhi                                   on 1999/05/10  14:39:28
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+	  +> cygwin32/Makefile.SHs cygwin32/build-instructions.READFIRST
+	  +> cygwin32/build-instructions.charles-wilson
+	  +> cygwin32/build-instructions.sebastien-barre
+	  +> cygwin32/build-instructions.steven-morlock
+	  +> cygwin32/build-instructions.steven-morlock2
+	  +> cygwin32/impure_ptr.c cygwin32/ld2.in cygwin32/perlld.in
+	  +> ext/ByteLoader/ByteLoader.pm ext/ByteLoader/ByteLoader.xs
+	  +> ext/ByteLoader/Makefile.PL pod/Win32.pod t/lib/io_linenum.t
+          +> t/op/numconvert.t utils/perlbc.PL
+	   - cygwin32/cw32imp.h cygwin32/gcc2 cygwin32/ld2 cygwin32/perlgcc
+           - cygwin32/perlld
+          !> (integrate 105 files)
+____________________________________________________________________________
+[  3380] By: gsar                                  on 1999/05/10  12:27:14
+        Log: regen regnodes.h
+     Branch: perl
+           ! Changes regnodes.h
+____________________________________________________________________________
 [  3379] By: gsar                                  on 1999/05/10  12:17:26
         Log: From: jan.dubois@ibm.net (Jan Dubois)
              Date: Sat, 01 May 1999 22:55:36 +0200

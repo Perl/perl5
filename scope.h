@@ -159,9 +159,8 @@ typedef struct jmpenv JMPENV;
  * Function that catches/throws, and its callback for the
  *  body of protected processing.
  */
-typedef void *(CPERLscope(*protect_body_t)) _((va_list args));
-typedef void *(CPERLscope(*protect_proc_t))
-			_((int *except, protect_body_t, ...));
+typedef void *(CPERLscope(*protect_body_t)) _((va_list));
+typedef void *(CPERLscope(*protect_proc_t)) _((int *, protect_body_t, ...));
 
 /*
  * How to build the first jmpenv.

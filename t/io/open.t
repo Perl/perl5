@@ -8,9 +8,10 @@ print "1..9\n";
 
 # my $file tests
 
-unlink("afile.new") if -f "afile";     
+unlink("afile") if -f "afile";     
 print "$!\nnot " unless open(my $f,"+>afile");
 print "ok 1\n";
+binmode $f;
 print "not " unless -f "afile";     
 print "ok 2\n";
 print "not " unless print $f "SomeData\n";

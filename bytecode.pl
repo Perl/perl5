@@ -169,8 +169,6 @@ struct bytestream {
 };
 #endif /* INDIRECT_BGET_MACROS */
 
-void *bset_obj_store _((void *, I32));
-
 enum {
 EOT
 

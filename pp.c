@@ -531,7 +531,7 @@ refto(SV *sv)
 	if (!(sv = LvTARG(sv)))
 	    sv = &PL_sv_undef;
 	else
-	    SvREFCNT_inc(sv);
+	    (void)SvREFCNT_inc(sv);
     }
     else if (SvPADTMP(sv))
 	sv = newSVsv(sv);

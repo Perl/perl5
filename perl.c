@@ -630,11 +630,17 @@ perl_atexit(void (*fn) (void *), void *ptr)
     ++PL_exitlistlen;
 }
 
+#ifdef PERL_OBJECT
+    typedef void (*xs_init_t)(CPerlObj*);
+#else
+    typedef void (*xs_init_t)(void);
+#endif
+
 int
 #ifdef PERL_OBJECT
-perl_parse(void (*xsinit) (CPerlObj*), int argc, char **argv, char **env)
+perl_parse(xs_init_t xsinit, int argc, char **argv, char **env)
 #else
-perl_parse(PerlInterpreter *sv_interp, void (*xsinit) (void), int argc, char **argv, char **env)
+perl_parse(PerlInterpreter *sv_interp, xs_init_t xsinit, int argc, char **argv, char **env)
 #endif
 {
     dTHR;
@@ -690,11 +696,7 @@ setuid perl scripts securely.\n");
     oldscope = PL_scopestack_ix;
     PL_dowarn = G_WARN_OFF;
 
-    CALLPROTECT(&ret, perl_parse_body, env
-#ifndef PERL_OBJECT
-		, xsinit
-#endif
-		);
+    CALLPROTECT(&ret, FUNC_NAME_TO_PTR(perl_parse_body), env, xsinit);
     switch (ret) {
     case 0:
 	return 0;
@@ -714,6 +716,7 @@ setuid perl scripts securely.\n");
 	PerlIO_printf(PerlIO_stderr(), "panic: top_env\n");
 	return 1;
     }
+    return 0;
 }
 
 STATIC void *
@@ -731,10 +734,7 @@ perl_parse_body(va_list args)
     register SV *sv;
     register char *s;
 
-#ifndef PERL_OBJECT
-    typedef void (*xs_init_t)(void);
     xs_init_t xsinit = va_arg(args, xs_init_t);
-#endif
 
     sv_setpvn(PL_linestr,"",0);
     sv = newSVpvn("",0);		/* first used for -I flags */
@@ -1071,7 +1071,7 @@ perl_run(PerlInterpreter *sv_interp)
     oldscope = PL_scopestack_ix;
 
  redo_body:
-    CALLPROTECT(&ret, perl_run_body, oldscope);
+    CALLPROTECT(&ret, FUNC_NAME_TO_PTR(perl_run_body), oldscope);
     switch (ret) {
     case 1:
 	cxstack_ix = -1;		/* start context stack again */
@@ -1321,7 +1321,7 @@ perl_call_sv(SV *sv, I32 flags)
 	PL_markstack_ptr++;
 
   redo_body:
-	CALLPROTECT(&ret, perl_call_body, (OP*)&myop, FALSE);
+	CALLPROTECT(&ret, FUNC_NAME_TO_PTR(perl_call_body), (OP*)&myop, FALSE);
 	switch (ret) {
 	case 0:
 	    retval = PL_stack_sp - (PL_stack_base + oldmark);
@@ -1443,7 +1443,7 @@ perl_eval_sv(SV *sv, I32 flags)
 	myop.op_flags |= OPf_SPECIAL;
 
  redo_body:
-    CALLPROTECT(&ret, perl_call_body, (OP*)&myop, TRUE);
+    CALLPROTECT(&ret, FUNC_NAME_TO_PTR(perl_call_body), (OP*)&myop, TRUE);
     switch (ret) {
     case 0:
 	retval = PL_stack_sp - (PL_stack_base + oldmark);
@@ -3005,7 +3005,7 @@ call_list(I32 oldscope, AV *paramList)
     while (AvFILL(paramList) >= 0) {
 	cv = (CV*)av_shift(paramList);
 	SAVEFREESV(cv);
-	CALLPROTECT(&ret, call_list_body, cv);
+	CALLPROTECT(&ret, FUNC_NAME_TO_PTR(call_list_body), cv);
 	switch (ret) {
 	case 0:
 	    (void)SvPV(atsv, len);

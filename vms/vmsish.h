@@ -74,7 +74,7 @@
   /* getenv used for regular logical names */
 #  define getenv(v) my_getenv(v,TRUE)
 #endif
-#define getenv_sv(v) my_getenv_sv(v,TRUE)
+#define getenv_len(v,l) my_getenv_len(v,l,TRUE)
 
 /* DECC introduces this routine in the RTL as of VMS 7.0; for now,
  * we'll use ours, since it gives us the full VMS exit status. */
@@ -90,7 +90,7 @@
 #define vmstrnenv		Perl_vmstrnenv
 #define my_trnlnm		Perl_my_trnlnm
 #define my_getenv		Perl_my_getenv
-#define my_getenv_sv		Perl_my_getenv_sv
+#define my_getenv_len		Perl_my_getenv_len
 #define prime_env_iter	Perl_prime_env_iter
 #define vmssetenv		Perl_vmssetenv
 #define my_setenv		Perl_my_setenv
@@ -413,7 +413,7 @@ struct utimbuf {
 #define ENV_HV_NAME "%EnV%VmS%"
   /* Special getenv function for retrieving %ENV elements. */
 #define ENVgetenv(v) my_getenv(v,FALSE)
-#define ENVgetenv_sv(v) my_getenv_sv(v,FALSE)
+#define ENVgetenv_len(v,l) my_getenv_len(v,l,FALSE)
 
 
 /* Thin jacket around cuserid() tomatch Unix' calling sequence */
@@ -581,7 +581,7 @@ typedef char  __VMS_PROTOTYPES__;
 int	vmstrnenv _((const char *, char *, unsigned long int, struct dsc$descriptor_s **, unsigned long int));
 int	my_trnlnm _((const char *, char *, unsigned long int));
 char *	my_getenv _((const char *, bool));
-SV *	my_getenv_sv _((const char *, bool));
+char *	my_getenv_len _((const char *, unsigned long *, bool));
 int	vmssetenv _((char *, char *, struct dsc$descriptor_s **));
 char *	my_crypt _((const char *, const char *));
 Pid_t	my_waitpid _((Pid_t, int *, int));

@@ -128,8 +128,6 @@ do_trans
 do_vecset
 do_vop
 dofile
-dofindlabel
-dopoptoeval
 dounwind
 dowantarray
 dump_all
@@ -196,7 +194,6 @@ hv_iternextsv
 hv_iterval
 hv_ksplit
 hv_magic
-hv_stashpv
 hv_store
 hv_store_ent
 hv_undef

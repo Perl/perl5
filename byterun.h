@@ -1,5 +1,5 @@
 /*
- *      Copyright (c) 1996-1998 Malcolm Beattie
+ *      Copyright (c) 1996-1999 Malcolm Beattie
  *
  *      You may distribute under the terms of either the GNU General Public
  *      License or the Artistic License, as specified in the README file.
@@ -16,8 +16,6 @@ struct bytestream {
     void (*freadpv)(U32, void*);
 };
 #endif /* INDIRECT_BGET_MACROS */
-
-void *bset_obj_store _((void *, I32));
 
 enum {
     INSN_RET,			/* 0 */

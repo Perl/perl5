@@ -3079,18 +3079,14 @@ get_specialsv_list(void)
  return PL_specialsv_list;
 }
 
-#ifndef HAS_GETENV_SV
-SV *
-getenv_sv(char *env_elem)
+#ifndef HAS_GETENV_LEN
+char *
+getenv_len(char *env_elem, unsigned long *len)
 {
-  char *env_trans;
-  SV *temp_sv;
-  if ((env_trans = PerlEnv_getenv(env_elem)) != Nullch) {
-    temp_sv = newSVpv(env_trans, strlen(env_trans));
-    return temp_sv;
-  } else {
-    return &PL_sv_undef;
-  }
+    char *env_trans = PerlEnv_getenv(env_elem);
+    if (env_trans)
+	*len = strlen(env_trans);
+    return env_trans;
 }
 #endif
 

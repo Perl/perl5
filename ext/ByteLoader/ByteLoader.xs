@@ -2,7 +2,10 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#include "byterun.c"
+#ifndef WIN32
+/* this is probably not needed manywhere */
+#  include "byterun.c"
+#endif
 
 /* defgv must be accessed differently under threaded perl */
 /* DEFSV et al are in 5.004_56 */
@@ -17,6 +20,7 @@ byteloader_filter(CPerlObj *pPerl, int idx, SV *buf_sv, int maxlen)
 byteloader_filter(int idx, SV *buf_sv, int maxlen)
 #endif
 {
+    dTHR;
     OP *saveroot = PL_main_root;
     OP *savestart = PL_main_start;
 

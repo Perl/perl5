@@ -16,7 +16,7 @@
 #include "perl.h"
 
 void *
-default_protect(int *except, protect_body_t body, ...)
+default_protect(int *excpt, protect_body_t body, ...)
 {
     dTHR;
     dJMPENV;
@@ -31,10 +31,10 @@ default_protect(int *except, protect_body_t body, ...)
 	ret = NULL;
     else {
 	va_start(args, body);
-	ret = body(args);
+	ret = CALL_FPTR(body)(args);
 	va_end(args);
     }
-    *except = ex;
+    *excpt = ex;
     JMPENV_POP;
     return ret;
 }

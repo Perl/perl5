@@ -48,16 +48,18 @@ static void
 SaveError(CPERLarg_ char* pat, ...)
 {
     va_list args;
+    SV *msv;
     char *message;
-    int len;
+    STRLEN len;
 
     /* This code is based on croak/warn, see mess() in util.c */
 
     va_start(args, pat);
-    message = mess(pat, &args);
+    msv = mess(pat, &args);
     va_end(args);
 
-    len = strlen(message) + 1 ;	/* include terminating null char */
+    message = SvPV(msv,len);
+    len++;		/* include terminating null char */
 
     /* Allocate some memory for the error message */
     if (LastError)

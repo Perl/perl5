@@ -447,24 +447,26 @@ class IPerlEnv
 {
 public:
     virtual char *	Getenv(const char *varname, int &err) = 0;
-#ifdef HAS_ENVGETENV
-    virtual char *	ENVGetenv(const char *varname, int &err) = 0;
-#endif
     virtual int		Putenv(const char *envstring, int &err) = 0;
     virtual char *	LibPath(char *patchlevel) =0;
     virtual char *	SiteLibPath(char *patchlevel) =0;
     virtual int		Uname(struct utsname *name, int &err) =0;
+    virtual char *	Getenv_len(const char *varname, unsigned long *len, int &err) = 0;
+#ifdef HAS_ENVGETENV
+    virtual char *	ENVGetenv(const char *varname, int &err) = 0;
+    virtual char *	ENVGetenv_len(const char *varname, unsigned long *len, int &err) = 0;
+#endif
 };
 
 #define PerlEnv_putenv(str)		PL_piENV->Putenv((str), ErrorNo())
 #define PerlEnv_getenv(str)		PL_piENV->Getenv((str), ErrorNo())
-#define PerlEnv_getenv_sv(str)		PL_piENV->getenv_sv((str))
+#define PerlEnv_getenv_len(str,l)	PL_piENV->Getenv_len((str), (l), ErrorNo())
 #ifdef HAS_ENVGETENV
 #  define PerlEnv_ENVgetenv(str)	PL_piENV->ENVGetenv((str), ErrorNo())
-#  define PerlEnv_ENVgetenv_sv(str)	PL_piENV->ENVgetenv_sv((str))
+#  define PerlEnv_ENVgetenv_len(str,l)	PL_piENV->ENVGetenv_len((str), (l), ErrorNo())
 #else
 #  define PerlEnv_ENVgetenv(str)	PerlEnv_getenv((str))
-#  define PerlEnv_ENVgetenv_sv(str)	PerlEnv_getenv_sv((str))
+#  define PerlEnv_ENVgetenv_len(str,l)	PerlEnv_getenv_len((str),(l))
 #endif
 #define PerlEnv_uname(name)		PL_piENV->Uname((name), ErrorNo())
 #ifdef WIN32
@@ -476,13 +478,13 @@ public:
 
 #define PerlEnv_putenv(str)		putenv((str))
 #define PerlEnv_getenv(str)		getenv((str))
-#define PerlEnv_getenv_sv(str)		getenv_sv((str))
+#define PerlEnv_getenv_len(str,l)	getenv_len((str), (l))
 #ifdef HAS_ENVGETENV
 #  define PerlEnv_ENVgetenv(str)	ENVgetenv((str))
-#  define PerlEnv_ENVgetenv_sv(str)	ENVgetenv_sv((str))
+#  define PerlEnv_ENVgetenv_len(str,l)	ENVgetenv_len((str), (l))
 #else
 #  define PerlEnv_ENVgetenv(str)	PerlEnv_getenv((str))
-#  define PerlEnv_ENVgetenv_sv(str)	PerlEnv_getenv_sv((str))
+#  define PerlEnv_ENVgetenv_len(str,l)	PerlEnv_getenv_len((str), (l))
 #endif
 #define PerlEnv_uname(name)		uname((name))
 

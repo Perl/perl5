@@ -155,9 +155,11 @@ EOF
     s/\.exe//i if $Is_Dos;
     s{\bminiperl\b}{perl}; # so that test doesn't fail with miniperl
     s{is perl}{is $perl}; # for systems where $^X is only a basename
+    s{\\}{/}g;
     ok 23, ($Is_MSWin32 ? uc($_) eq uc($s1) : $_ eq $s1), ":$_:!=:$s1:";
     $_ = `$perl $script`;
     s/\.exe//i if $Is_Dos;
+    s{\\}{/}g;
     ok 24, ($Is_MSWin32 ? uc($_) eq uc($s1) : $_ eq $s1), ":$_:!=:$s1: after `$perl $script`";
     ok 25, unlink($script), $!;
 }

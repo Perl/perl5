@@ -1903,12 +1903,13 @@ EXT char *** environ_pointer;
 #  endif
 #else
    /* VMS and some other platforms don't use the environ array */
-#  if !defined(VMS) || \
-      !defined(DONT_DECLARE_STD) || \
-      (defined(__svr4__) && defined(__GNUC__) && defined(sun)) || \
-      defined(__sgi) || \
-      defined(__DGUX)
+#  if !defined(VMS)
+#    if !defined(DONT_DECLARE_STD) || \
+        (defined(__svr4__) && defined(__GNUC__) && defined(sun)) || \
+        defined(__sgi) || \
+        defined(__DGUX)
 extern char **	environ;	/* environment variables supplied via exec */
+#    endif
 #  endif
 #endif
 

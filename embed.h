@@ -137,8 +137,6 @@
 #define do_vecset		Perl_do_vecset
 #define do_vop			Perl_do_vop
 #define dofile			Perl_dofile
-#define dofindlabel		Perl_dofindlabel
-#define dopoptoeval		Perl_dopoptoeval
 #define dounwind		Perl_dounwind
 #define dowantarray		Perl_dowantarray
 #define dump_all		Perl_dump_all
@@ -205,7 +203,6 @@
 #define hv_iterval		Perl_hv_iterval
 #define hv_ksplit		Perl_hv_ksplit
 #define hv_magic		Perl_hv_magic
-#define hv_stashpv		Perl_hv_stashpv
 #define hv_store		Perl_hv_store
 #define hv_store_ent		Perl_hv_store_ent
 #define hv_undef		Perl_hv_undef
@@ -1012,10 +1009,10 @@
 #define block_start		CPerlObj::Perl_block_start
 #define boot_core_UNIVERSAL	CPerlObj::Perl_boot_core_UNIVERSAL
 #define bset_obj_store		CPerlObj::Perl_bset_obj_store
-#define bset_obj_store		CPerlObj::Perl_bset_obj_store
 #define byterun			CPerlObj::Perl_byterun
 #define cache_re		CPerlObj::Perl_cache_re
 #define call_list		CPerlObj::Perl_call_list
+#define call_list_body		CPerlObj::Perl_call_list_body
 #define cando			CPerlObj::Perl_cando
 #define cast_i32		CPerlObj::Perl_cast_i32
 #define cast_iv			CPerlObj::Perl_cast_iv
@@ -1137,15 +1134,14 @@
 #define do_vecset		CPerlObj::Perl_do_vecset
 #define do_vop			CPerlObj::Perl_do_vop
 #define docatch			CPerlObj::Perl_docatch
+#define docatch_body		CPerlObj::Perl_docatch_body
 #define doencodes		CPerlObj::Perl_doencodes
 #define doeval			CPerlObj::Perl_doeval
 #define dofile			CPerlObj::Perl_dofile
 #define dofindlabel		CPerlObj::Perl_dofindlabel
-#define dofindlabel		CPerlObj::Perl_dofindlabel
 #define doform			CPerlObj::Perl_doform
-#define doopen			CPerlObj::Perl_doopen
+#define doopen_pmc		CPerlObj::Perl_doopen_pmc
 #define doparseform		CPerlObj::Perl_doparseform
-#define dopoptoeval		CPerlObj::Perl_dopoptoeval
 #define dopoptoeval		CPerlObj::Perl_dopoptoeval
 #define dopoptolabel		CPerlObj::Perl_dopoptolabel
 #define dopoptoloop		CPerlObj::Perl_dopoptoloop
@@ -1233,7 +1229,6 @@
 #define hv_iterval		CPerlObj::Perl_hv_iterval
 #define hv_ksplit		CPerlObj::Perl_hv_ksplit
 #define hv_magic		CPerlObj::Perl_hv_magic
-#define hv_stashpv		CPerlObj::Perl_hv_stashpv
 #define hv_store		CPerlObj::Perl_hv_store
 #define hv_store_ent		CPerlObj::Perl_hv_store_ent
 #define hv_undef		CPerlObj::Perl_hv_undef
@@ -1480,9 +1475,11 @@
 #define peep			CPerlObj::Perl_peep
 #define perl_atexit		CPerlObj::perl_atexit
 #define perl_call_argv		CPerlObj::perl_call_argv
+#define perl_call_body		CPerlObj::perl_call_body
 #define perl_call_method	CPerlObj::perl_call_method
 #define perl_call_pv		CPerlObj::perl_call_pv
 #define perl_call_sv		CPerlObj::perl_call_sv
+#define perl_call_xbody		CPerlObj::perl_call_xbody
 #define perl_construct		CPerlObj::perl_construct
 #define perl_destruct		CPerlObj::perl_destruct
 #define perl_eval_pv		CPerlObj::perl_eval_pv
@@ -1498,8 +1495,10 @@
 #define perl_new_ctype		CPerlObj::perl_new_ctype
 #define perl_new_numeric	CPerlObj::perl_new_numeric
 #define perl_parse		CPerlObj::perl_parse
+#define perl_parse_body		CPerlObj::perl_parse_body
 #define perl_require_pv		CPerlObj::perl_require_pv
 #define perl_run		CPerlObj::perl_run
+#define perl_run_body		CPerlObj::perl_run_body
 #define perl_set_numeric_local	CPerlObj::perl_set_numeric_local
 #define perl_set_numeric_standard	CPerlObj::perl_set_numeric_standard
 #define pidgone			CPerlObj::Perl_pidgone

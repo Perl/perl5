@@ -881,14 +881,14 @@
 #define boot_core_UNIVERSAL	pPerl->Perl_boot_core_UNIVERSAL
 #undef  bset_obj_store
 #define bset_obj_store		pPerl->Perl_bset_obj_store
-#undef  bset_obj_store
-#define bset_obj_store		pPerl->Perl_bset_obj_store
 #undef  byterun
 #define byterun			pPerl->Perl_byterun
 #undef  cache_re
 #define cache_re		pPerl->Perl_cache_re
 #undef  call_list
 #define call_list		pPerl->Perl_call_list
+#undef  call_list_body
+#define call_list_body		pPerl->Perl_call_list_body
 #undef  cando
 #define cando			pPerl->Perl_cando
 #undef  cast_i32
@@ -1131,6 +1131,8 @@
 #define do_vop			pPerl->Perl_do_vop
 #undef  docatch
 #define docatch			pPerl->Perl_docatch
+#undef  docatch_body
+#define docatch_body		pPerl->Perl_docatch_body
 #undef  doencodes
 #define doencodes		pPerl->Perl_doencodes
 #undef  doeval
@@ -1139,16 +1141,12 @@
 #define dofile			pPerl->Perl_dofile
 #undef  dofindlabel
 #define dofindlabel		pPerl->Perl_dofindlabel
-#undef  dofindlabel
-#define dofindlabel		pPerl->Perl_dofindlabel
 #undef  doform
 #define doform			pPerl->Perl_doform
-#undef  doopen
-#define doopen			pPerl->Perl_doopen
+#undef  doopen_pmc
+#define doopen_pmc		pPerl->Perl_doopen_pmc
 #undef  doparseform
 #define doparseform		pPerl->Perl_doparseform
-#undef  dopoptoeval
-#define dopoptoeval		pPerl->Perl_dopoptoeval
 #undef  dopoptoeval
 #define dopoptoeval		pPerl->Perl_dopoptoeval
 #undef  dopoptolabel
@@ -1323,8 +1321,6 @@
 #define hv_ksplit		pPerl->Perl_hv_ksplit
 #undef  hv_magic
 #define hv_magic		pPerl->Perl_hv_magic
-#undef  hv_stashpv
-#define hv_stashpv		pPerl->Perl_hv_stashpv
 #undef  hv_store
 #define hv_store		pPerl->Perl_hv_store
 #undef  hv_store_ent
@@ -1817,12 +1813,16 @@
 #define perl_atexit		pPerl->perl_atexit
 #undef  perl_call_argv
 #define perl_call_argv		pPerl->perl_call_argv
+#undef  perl_call_body
+#define perl_call_body		pPerl->perl_call_body
 #undef  perl_call_method
 #define perl_call_method	pPerl->perl_call_method
 #undef  perl_call_pv
 #define perl_call_pv		pPerl->perl_call_pv
 #undef  perl_call_sv
 #define perl_call_sv		pPerl->perl_call_sv
+#undef  perl_call_xbody
+#define perl_call_xbody		pPerl->perl_call_xbody
 #undef  perl_construct
 #define perl_construct		pPerl->perl_construct
 #undef  perl_destruct
@@ -1853,10 +1853,14 @@
 #define perl_new_numeric	pPerl->perl_new_numeric
 #undef  perl_parse
 #define perl_parse		pPerl->perl_parse
+#undef  perl_parse_body
+#define perl_parse_body		pPerl->perl_parse_body
 #undef  perl_require_pv
 #define perl_require_pv		pPerl->perl_require_pv
 #undef  perl_run
 #define perl_run		pPerl->perl_run
+#undef  perl_run_body
+#define perl_run_body		pPerl->perl_run_body
 #undef  perl_set_numeric_local
 #define perl_set_numeric_local	pPerl->perl_set_numeric_local
 #undef  perl_set_numeric_standard
