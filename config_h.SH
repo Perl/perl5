@@ -3484,6 +3484,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_dbminitproto	HAS_DBMINIT_PROTO	/**/
 
+/* HAS_DIRFD:
+ *	This manifest constant lets the C program know that dirfd
+ *	is available.
+ */
+#$d_dirfd HAS_DIRFD		/**/
+
 /* HAS_FLOCK_PROTO:
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the flock() function.  Otherwise, it is up

@@ -4003,6 +4003,30 @@ extern void moncontrol(int);
 #define PERL_GPROF_MONCONTROL(x)
 #endif
 
+#ifdef UNDER_CE
+#include "wince.h"
+#endif
+
+/* ISO 6429 NEL - C1 control NExt Line */
+/* See http://www.unicode.org/unicode/reports/tr13/ */
+#ifdef EBCDIC	/* In EBCDIC NEL is just an alias for LF */
+#   if '^' == 95	/* CP 1047: MVS OpenEdition - OS/390 - z/OS */
+#       define NEXT_LINE_CHAR	0x15
+#   else		/* CDRA */
+#       define NEXT_LINE_CHAR	0x25
+#   endif
+#else
+#   define NEXT_LINE_CHAR	0x85
+#endif
+
+/* The UTF-8 bytes of the Unicode LS and PS, U+2028 and U+2029 */
+#define UNICODE_LINE_SEPA_0	0xE2
+#define UNICODE_LINE_SEPA_1	0x80
+#define UNICODE_LINE_SEPA_2	0xA8
+#define UNICODE_PARA_SEPA_0	0xE2
+#define UNICODE_PARA_SEPA_1	0x80
+#define UNICODE_PARA_SEPA_2	0xA9
+
 /* and finally... */
 #define PERL_PATCHLEVEL_H_IMPLICIT
 #include "patchlevel.h"
@@ -4045,31 +4069,10 @@ extern void moncontrol(int);
    HAS_STRUCT_CMSGHDR
 
    HAS_NL_LANGINFO
+   
+   HAS_DIRFD
 
    so that Configure picks them up. */
 
-#ifdef UNDER_CE
-#include "wince.h"
-#endif
-
-/* ISO 6429 NEL - C1 control NExt Line */
-/* See http://www.unicode.org/unicode/reports/tr13/ */
-#ifdef EBCDIC	/* In EBCDIC NEL is just an alias for LF */
-#   if '^' == 95	/* CP 1047: MVS OpenEdition - OS/390 - z/OS */
-#       define NEXT_LINE_CHAR	0x15
-#   else		/* CDRA */
-#       define NEXT_LINE_CHAR	0x25
-#   endif
-#else
-#   define NEXT_LINE_CHAR	0x85
-#endif
-
-/* The UTF-8 bytes of the Unicode LS and PS, U+2028 and U+2029 */
-#define UNICODE_LINE_SEPA_0	0xE2
-#define UNICODE_LINE_SEPA_1	0x80
-#define UNICODE_LINE_SEPA_2	0xA8
-#define UNICODE_PARA_SEPA_0	0xE2
-#define UNICODE_PARA_SEPA_1	0x80
-#define UNICODE_PARA_SEPA_2	0xA9
-
 #endif /* Include guard */
+
