@@ -129,7 +129,7 @@ each statement.
 =item r
 
 Continue until return from the current subroutine.  Dump the return
-value, unless the PrintRet option is set.
+value, if the PrintRet option is set (default).
 
 =item <CR>
 
@@ -361,7 +361,7 @@ If 0, allows I<stepping off> the end of the script.
 
 =item C<PrintRet>
 
-If set, suppress printing of return value after C<r> command.
+Print return value after C<r> command if set (default).
 
 =item C<ornaments>
 

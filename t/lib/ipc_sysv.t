@@ -128,8 +128,8 @@ EOM
     }
 
     my($rmsgtype,$rmsgtext);
-    ($rmsgtype,$rmsgtext) = unpack("L! a*",$msgbuf)
-    unless($rmsgtype == $msgtype && $rmsgtext eq $msgtext) {
+    ($rmsgtype,$rmsgtext) = unpack("L! a*",$msgbuf);
+    unless ($rmsgtype == $msgtype && $rmsgtext eq $msgtext) {
 	print "not ";
 	$test6bad = 1;
     }

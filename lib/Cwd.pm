@@ -108,9 +108,6 @@ sub getcwd
 # This is a faster version of getcwd.  It's also more dangerous because
 # you might chdir out of a directory that you can't chdir back into.
     
-# List of metachars taken from do_exec() in doio.c
-my $quoted_shell_meta = quotemeta('$&*(){}[]";\\|?<>~`'."'\n");
-
 sub fastcwd {
     my($odev, $oino, $cdev, $cino, $tdev, $tino);
     my(@path, $path);

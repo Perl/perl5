@@ -1351,17 +1351,19 @@ sub process_puretext {
 	# skip space runs
  	next if $word =~ /^\s*$/;
 	# see if we can infer a link
-	if( $notinIS && $word =~ /^(\w+)\((.*)\)\W*$/ ) {
+	if( $notinIS && $word =~ /^(\w+)\((.*)\)$/ ) {
 	    # has parenthesis so should have been a C<> ref
             ## try for a pagename (perlXXX(1))?
-            if( $2 =~ /^\d+$/ ){
+            my( $func, $args ) = ( $1, $2 );
+            if( $args =~ /^\d+$/ ){
                 my $url = page_sect( $word, '' );
                 if( defined $url ){
                     $word = "<A HREF=\"$url\">the $word manpage</A>";
                     next;
                 }
             }
-	    $word = emit_C( $word );
+            ## try function name for a link, append tt'ed argument list
+            $word = emit_C( $func, '', "($args)");
 
 #### disabled. either all (including $\W, $\w+{.*} etc.) or nothing.
 ##      } elsif( $notinIS && $word =~ /^[\$\@%&*]+\w+$/) {
@@ -1397,9 +1399,7 @@ sub process_puretext {
 # converted to html commands.
 #
 
-sub process_text1($$;$$);
-sub pattern ($) { $_[0] ? '[^\S\n]+'.('>' x ($_[0] + 1)) : '>' }
-sub closing ($) { local($_) = shift; (defined && s/\s+$//) ? length : 0 }
+sub process_text1($$;$);
 
 sub process_text {
     return if $ignore;
@@ -1408,8 +1408,8 @@ sub process_text {
     $$tref = $res;
 }
 
-sub process_text1($$;$$){
-    my( $lev, $rstr, $func, $closing ) = @_;
+sub process_text1($$;$){
+    my( $lev, $rstr, $func ) = @_;
     $lev++ unless defined $func;
     my $res = '';
 
@@ -1421,7 +1421,7 @@ sub process_text1($$;$$){
     } elsif( $func eq 'C' ){
 	# C<code> - can be a ref or <CODE></CODE>
 	# need to extract text
-	my $par = go_ahead( $rstr, 'C', $closing );
+	my $par = go_ahead( $rstr, 'C' );
 
 	## clean-up of the link target
         my $text = depod( $par );
@@ -1449,7 +1449,7 @@ sub process_text1($$;$$){
 	## L<text|cross-ref> => produce text, use cross-ref for linking 
 	## L<cross-ref> => make text from cross-ref
 	## need to extract text
-	my $par = go_ahead( $rstr, 'L', $closing );
+	my $par = go_ahead( $rstr, 'L' );
 
         # some L<>'s that shouldn't be:
 	# a) full-blown URL's are emitted as-is
@@ -1574,16 +1574,15 @@ sub process_text1($$;$$){
 	    unless $$rstr =~ s/^>//;
 
     } else {
-        my $term = pattern $closing;
-	while( $$rstr =~ s/\A(.*?)(([BCEFILSXZ])<(<+[^\S\n]+)?|$term)//s ){
+	while( $$rstr =~ s/\A(.*?)([BCEFILSXZ]<|>)//s ){
 	    # all others: either recurse into new function or
-	    # terminate at closing angle bracket(s)
+	    # terminate at closing angle bracket
 	    my $pt = $1;
-            $pt .= $2 if !$3 &&  $lev == 1;
+            $pt .= '>' if $2 eq '>' &&  $lev == 1;
 	    $res .= $lev == 1 ? pure_text( $pt ) : inIS_text( $pt );
-	    return $res if !$3 && $lev > 1;
-            if( $3 ){
-		$res .= process_text1( $lev, $rstr, $3, closing $4 );
+	    return $res if $2 eq '>' && $lev > 1;
+            if( $2 ne '>' ){
+		$res .= process_text1( $lev, $rstr, substr($2,0,1) );
 	    }
 
 	}
@@ -1599,18 +1598,16 @@ sub process_text1($$;$$){
 #
 # go_ahead: extract text of an IS (can be nested)
 #
-sub go_ahead($$$){
-    my( $rstr, $func, $closing ) = @_;
+sub go_ahead($$){
+    my( $rstr, $func ) = @_;
     my $res = '';
-    my @closing = ($closing);
-    while( $$rstr =~
-      s/\A(.*?)(([BCEFILSXZ])<(<+[^\S\n]+)?|@{[pattern $closing[0]]})//s ){
+    my $level = 1;
+    while( $$rstr =~ s/\A(.*?)([BCEFILSXZ]<|>)//s ){
 	$res .= $1;
-	unless( $3 ){
-	    shift @closing;
-	    return $res unless @closing;
+	if( $2 eq '>' ){
+	    return $res if --$level == 0;
 	} else {
-	    unshift @closing, closing $4;
+	    ++$level;
 	}
 	$res .= $2;
     }
@@ -1622,13 +1619,14 @@ sub go_ahead($$$){
 # emit_C - output result of C<text>
 #    $text is the depod-ed text
 #
-sub emit_C($;$){
-    my( $text, $nocode ) = @_;
+sub emit_C($;$$){
+    my( $text, $nocode, $args ) = @_;
+    $args ||= '';
     my $res;
     my( $url, $fid ) = coderef( undef(), $text );
 
     # need HTML-safe text
-    my $linktext = html_escape( $text );
+    my $linktext = html_escape( "$text$args" );
 
     if( defined( $url ) &&
         (!defined( $EmittedItem ) || $EmittedItem ne $fid ) ){
@@ -1909,7 +1907,7 @@ $E2c{sol}    = '/';
 $E2c{verbar} = '|';
 $E2c{amp}    = '&'; # in Tk's pods
 
-sub depod1($;$$);
+sub depod1($;$);
 
 sub depod($){
     my $string;
@@ -1922,15 +1920,15 @@ sub depod($){
     }    
 }
 
-sub depod1($;$$){
-  my( $rstr, $func, $closing ) = @_;
+sub depod1($;$){
+  my( $rstr, $func ) = @_;
   my $res = '';
   return $res unless defined $$rstr;
   if( ! defined( $func ) ){
       # skip to next begin of an interior sequence
-      while( $$rstr =~ s/\A(.*?)([BCEFILSXZ])<(<+[^\S\n]+)?// ){
+      while( $$rstr =~ s/\A(.*?)([BCEFILSXZ])<// ){
          # recurse into its text
-         $res .= $1 . depod1( $rstr, $2, closing $3);
+         $res .= $1 . depod1( $rstr, $2 );
       }
       $res .= $$rstr;
   } elsif( $func eq 'E' ){
@@ -1946,11 +1944,10 @@ sub depod1($;$$){
   } else {
       # all others: either recurse into new function or
       # terminate at closing angle bracket
-      my $term = pattern $closing; 
-      while( $$rstr =~ s/\A(.*?)(([BCEFILSXZ])<(<+[^\S\n]+)?|$term)// ){
+      while( $$rstr =~ s/\A(.*?)([BCEFILSXZ]<|>)// ){
 	  $res .= $1;
-	  last unless $3;
-          $res .= depod1( $rstr, $3, closing $4 );
+	  last if $2 eq '>';
+          $res .= depod1( $rstr, substr($2,0,1) );
       }
       ## If we're here and $2 ne '>': undelimited interior sequence.
       ## Ignored, as this is called without proper indication of where we are.

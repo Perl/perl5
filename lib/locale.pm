@@ -25,12 +25,14 @@ locales.
 
 =cut
 
+$locale::hint_bits = 0x800;
+
 sub import {
-    $^H |= 0x800;
+    $^H |= $locale::hint_bits;
 }
 
 sub unimport {
-    $^H &= ~0x800;
+    $^H &= ~$locale::hint_bits;
 }
 
 1;

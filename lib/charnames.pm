@@ -1,4 +1,6 @@
 package charnames;
+use bytes ();		# for $bytes::hint_bits
+$charnames::hint_bits = 0x20000;
 
 my $fname = 'unicode/UnicodeData-Latest.txt';
 my $txt;
@@ -30,7 +32,7 @@ sub charnames {
   die "Unknown charname '$name'" unless @off;
   
   my $ord = hex substr $txt, $off[0] - 4, 4;
-  if ($^H & 0x8) {	# "use bytes" in effect?
+  if ($^H & $bytes::hint_bits) {	# "use bytes" in effect?
     use bytes;
     return chr $ord if $ord <= 255;
     my $hex = sprintf '%X=0%o', $ord, $ord;
@@ -42,8 +44,8 @@ sub charnames {
 
 sub import {
   shift;
-  die "No scripts for `use charnames'" unless @_;
-  $^H |= 0x20000;
+  die "`use charnames' needs explicit imports list" unless @_;
+  $^H |= $charnames::hint_bits;
   $^H{charnames} = \&charnames ;
   my %h;
   @h{@_} = (1) x @_;
@@ -84,42 +86,45 @@ C<CHARNAME> is looked up as a letter in the given scripts (in the
 specified order).
 
 For lookup of C<CHARNAME> inside a given script C<SCRIPTNAME>
-F<charcodes.pm> looks for the names
+this pragma looks for the names
 
   SCRIPTNAME CAPITAL LETTER CHARNAME
   SCRIPTNAME SMALL LETTER CHARNAME
   SCRIPTNAME LETTER CHARNAME
 
 in the table of standard Unicode names.  If C<CHARNAME> is lowercase,
-then the C<CAPITAL> variant is ignored, otherwise C<SMALL> variant is
+then the C<CAPITAL> variant is ignored, otherwise the C<SMALL> variant is
 ignored.
 
 =head1 CUSTOM TRANSLATORS
 
-The mechanism of translation is C<\N{...}> escapes is general and not
+The mechanism of translation of C<\N{...}> escapes is general and not
 hardwired into F<charnames.pm>.  A module can install custom
-translations (inside the scope which C<use>s the module) by the
+translations (inside the scope which C<use>s the module) with the
 following magic incantation:
 
-  sub import {
-    shift;
-    $^H |= 0x20000;
-    $^H{charnames} = \&translator;
-  }
+    use charnames ();		# for $charnames::hint_bits
+    sub import {
+	shift;
+	$^H |= $charnames::hint_bits;
+	$^H{charnames} = \&translator;
+    }
 
 Here translator() is a subroutine which takes C<CHARNAME> as an
 argument, and returns text to insert into the string instead of the
 C<\N{CHARNAME}> escape.  Since the text to insert should be different
-in C<utf8> mode and out of it, the function should check the current
-state of C<utf8>-flag as in
+in C<bytes> mode and out of it, the function should check the current
+state of C<bytes>-flag as in:
 
-  sub translator {
-    if ($^H & 0x8) {
-      return utf_translator(@_);
-    } else {
-      return no_utf_translator(@_);
+    use bytes ();			# for $bytes::hint_bits
+    sub translator {
+	if ($^H & $bytes::hint_bits) {
+	    return bytes_translator(@_);
+	}
+	else {
+	    return utf8_translator(@_);
+	}
     }
-  }
 
 =head1 BUGS
 
@@ -129,4 +134,3 @@ do any C<eval>s or C<require>s.  This restriction should be lifted in
 a future version of Perl.
 
 =cut
-
