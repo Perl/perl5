@@ -2512,6 +2512,9 @@ the system.
 POSIX-style signals are now emulated much better on VMS versions prior
 to 7.0.
 
+The Socket extension is now dynamically loaded instead of being
+statically built in.
+
 The C<system> function and backticks operator have improved
 functionality and better error handling. [561]
 
