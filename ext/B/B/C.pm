@@ -1244,6 +1244,7 @@ sub walkpackages
 sub save_unused_subs 
 {
  no strict qw(refs);
+ &descend_marked_unused;
  warn "Prescan\n";
  walkpackages(\%{"main::"}, sub { should_save($_[0]); return 1 });
  warn "Saving methods\n";
@@ -1263,12 +1264,15 @@ sub save_context
                "av_store(CvPADLIST(PL_main_cv),1,SvREFCNT_inc($curpad_sym));");
 }
 
+sub descend_marked_unused {
+    foreach my $pack (keys %unused_sub_packages)
+    {
+    	mark_package($pack);
+    }
+}
+
 sub save_main {
     warn "Starting compile\n";
-    foreach my $pack (keys %unused_sub_packages)
-     {
-      mark_package($pack);
-     }
     warn "Walking tree\n";
     walkoptree(main_root, "save");
     warn "done main optree, walking symtable for extras\n" if $debug_cv;

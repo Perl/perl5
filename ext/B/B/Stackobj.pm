@@ -81,6 +81,16 @@ sub as_numeric {
     return $obj->{type} == T_INT ? $obj->as_int : $obj->as_double;
 }
 
+sub as_bool {
+	my $obj=shift;
+	if ($obj->{flags} & VALID_INT ){
+		return $obj->{iv}; 
+	}
+	if ($obj->{flags} & VALID_DOUBLE ){
+		return $obj->{nv}; 
+	}
+	return sprintf("(SvTRUE(%s))", $obj->as_sv) ;
+}
 #
 # Debugging methods
 #
