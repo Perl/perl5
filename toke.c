@@ -1356,7 +1356,6 @@ filter_read(int idx, SV *buf_sv, int maxlen)
     return (*funcp)(idx, buf_sv, maxlen);
 }
 
-
 static char *
 filter_gets(register SV *sv, register PerlIO *fp, STRLEN append)
 {
@@ -4998,7 +4997,7 @@ scan_heredoc(register char *s)
     register char *d;
     register char *e;
     char *peek;
-    int outer = (rsfp && !lex_inwhat);
+    int outer = (rsfp && !(lex_inwhat == OP_SCALAR));
 
     s += 2;
     d = tokenbuf;
