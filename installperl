@@ -72,6 +72,24 @@ while (@ARGV) {
     $verbose = 1 if $ARGV[0] eq '-V' || $ARGV [0] eq '-n';
     $archname = 1 if $ARGV[0] eq '-A';
 	$nwinstall = 1 if $ARGV[0] eq '-netware';
+    if ($ARGV[0] eq '-?' or $ARGV[0] =~ /^-?-h/) {
+      print <<"EOT";
+Usage $0: [switches]
+  -n	    Don't actually run any commands; just print them.
+  -s        Run strip on installed binaries.
+  -v        Only install perl as a binary with the version number in the name.
+            (Override whatever config.sh says)
+  +v        Install perl as "perl" and as a binary with the version number in
+            the name.  (Override whatever config.sh says)
+  -S        Silent mode.
+  -o        Skip checking for other copies of perl in your PATH.
+  -V        Verbose mode.
+  -A        Also install perl with the architecture's name in the perl binary's
+            name.
+  -netware  Install correctly on a Netware server.
+EOT
+      exit;
+    }
     shift;
 }
 
