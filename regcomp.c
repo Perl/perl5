@@ -2297,7 +2297,7 @@ STATIC regnode *
 S_regclass(pTHX)
 {
     dTHR;
-    register I32 value;
+    register UV value;
     register I32 lastvalue = OOB_CHAR8;
     register I32 range = 0;
     register regnode *ret;
@@ -2725,7 +2725,7 @@ S_regclassutf8(pTHX)
 {
     dTHR;
     register char *e;
-    register U32 value;
+    register UV value;
     register U32 lastvalue = OOB_UTF8;
     register I32 range = 0;
     register regnode *ret;
