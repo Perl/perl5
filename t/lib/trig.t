@@ -29,7 +29,7 @@ sub near ($$;$) {
     abs($_[0] - $_[1]) < (defined $_[2] ? $_[2] : $eps);
 }
 
-print "1..20\n";
+print "1..23\n";
 
 $x = 0.9;
 print 'not ' unless (near(tan($x), sin($x) / cos($x)));
@@ -137,24 +137,44 @@ use Math::Trig ':radial';
 }
 
 {
-        use Math::Trig 'great_circle_distance';
+    use Math::Trig 'great_circle_distance';
 
-	print 'not '
-	    unless (near(great_circle_distance(0, 0, 0, pi/2), pi/2));
-	print "ok 18\n";
+    print 'not '
+	unless (near(great_circle_distance(0, 0, 0, pi/2), pi/2));
+    print "ok 18\n";
 
-	print 'not '
-	    unless (near(great_circle_distance(0, 0, pi, pi), pi));
-	print "ok 19\n";
+    print 'not '
+	unless (near(great_circle_distance(0, 0, pi, pi), pi));
+    print "ok 19\n";
 
-	# London to Tokyo.
-	my @L = (deg2rad(-0.5), deg2rad(90 - 51.3));
-        my @T = (deg2rad(139.8),deg2rad(90 - 35.7));
+    # London to Tokyo.
+    my @L = (deg2rad(-0.5), deg2rad(90 - 51.3));
+    my @T = (deg2rad(139.8),deg2rad(90 - 35.7));
 
-	my $km = great_circle_distance(@L, @T, 6378);
+    my $km = great_circle_distance(@L, @T, 6378);
 
-        print 'not ' unless (near($km, 9605.26637021388));
-	print "ok 20\n";
+    print 'not ' unless (near($km, 9605.26637021388));
+    print "ok 20\n";
+}
+
+{
+    my $lotta_radians = deg2rad(1E+20, 1);
+    print "not " unless near($lotta_radians,  1E+20/57.29577951308232087721);
+    print "ok 21\n";
+
+    my $negat_degrees = rad2deg(-1E20, 1);
+    print "not " unless near($negat_degrees, -1E+20*57.29577951308232087721);
+    print "ok 22\n";
+
+    my $posit_degrees = rad2deg(-10000, 1);
+    print "not " unless near($posit_degrees, -10000*57.29577951308232087721);
+
+    print "ok 23\n";
+
+    my $posiu_degrees = rad2deg(-10000, 0);
+    print "not " unless near($posiu_degrees, -197.795130823273);
+
+    print "ok 24\n";
 }
 
 # eof

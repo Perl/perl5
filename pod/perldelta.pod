@@ -155,8 +155,9 @@ the podlators bundle, Pod::LaTeX, Pod::Parser, Term::ANSIColor, Test.
 =item *
 
 Bug fixes and minor enhancements have been applied to B::Deparse,
-Data::Dumper, IO::Poll, IO::Socket::INET, Math::BigFloat, Math::Complex,
-re, SelfLoader, Sys::SysLog, Test::Harness, Text::Wrap, UNIVERSAL.
+Data::Dumper, IO::Poll, IO::Socket::INET, Math::BigFloat,
+Math::Complex, Math::Trig, re, SelfLoader, Sys::SysLog, Test::Harness,
+Text::Wrap, UNIVERSAL.
 
 =item *
 
