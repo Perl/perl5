@@ -915,14 +915,16 @@ block_gimme(void)
 	return G_VOID;
 
     switch (cxstack[cxix].blk_gimme) {
+    case G_VOID:
+	return G_VOID;
     case G_SCALAR:
 	return G_SCALAR;
     case G_ARRAY:
 	return G_ARRAY;
     default:
 	croak("panic: bad gimme: %d\n", cxstack[cxix].blk_gimme);
-    case G_VOID:
-	return G_VOID;
+	/* NOTREACHED */
+	return 0;
     }
 }
 

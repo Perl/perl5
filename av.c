@@ -369,7 +369,6 @@ av_undef(register AV *av)
 	    SvREFCNT_dec(AvARRAY(av)[--key]);
     }
     Safefree(AvALLOC(av));
-    SvPVX(av) = 0;
     AvALLOC(av) = 0;
     SvPVX(av) = 0;
     AvMAX(av) = AvFILLp(av) = -1;
@@ -479,7 +478,7 @@ av_unshift(register AV *av, register I32 num)
 	AvFILLp(av) += i;
 	SvPVX(av) = (char*)(AvARRAY(av) - i);
     }
-    if (num) {     
+    if (num) {
 	i = AvFILLp(av);
 	av_extend(av, i + num);
 	AvFILLp(av) += num;

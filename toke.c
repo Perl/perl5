@@ -189,7 +189,7 @@ missingterm(char *s)
     char q;
     if (s) {
 	char *nl = strrchr(s,'\n');
-	if (nl) 
+	if (nl)
 	    *nl = '\0';
     }
     else if (multi_close < 32 || multi_close == 127) {
@@ -5086,7 +5086,7 @@ scan_heredoc(register char *s)
 	}
 	sv_setpvn(tmpstr,d+1,s-d);
 	s += len - 1;
-	curcop->cop_line++;     /* the preceding stmt passes a newline */
+	curcop->cop_line++;	/* the preceding stmt passes a newline */
 
 	sv_catpvn(herewas,s,bufend-s);
 	sv_setsv(linestr,herewas);

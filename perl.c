@@ -2676,7 +2676,7 @@ call_list(I32 oldscope, AV *list)
     dJMPENV;
     int ret;
 
-    while (AvFILL(list) >= 0) { 
+    while (AvFILL(list) >= 0) {
 	CV *cv = (CV*)av_shift(list);
 
 	SAVEFREESV(cv);
@@ -2814,6 +2814,3 @@ my_exit_jump(void)
 
     JMPENV_JUMP(2);
 }
-
-
-

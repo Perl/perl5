@@ -581,7 +581,8 @@ PP(pp_untie)
 {
     djSP;
     SV * sv ;
-    sv = POPs;          
+
+    sv = POPs;
 
     if (dowarn) {
         MAGIC * mg ;
@@ -4152,7 +4153,7 @@ PP(pp_gpwent)
 	sv_setpv(sv, pwent->pw_gecos);
 #endif
 #ifndef INCOMPLETE_TAINTS
-	/* pw_gecos is tainted. */
+	/* pw_gecos is tainted because user himself can diddle with it. */
 	SvTAINTED_on(sv);
 #endif
 
@@ -4303,7 +4304,7 @@ PP(pp_getlogin)
 
 PP(pp_syscall)
 {
-#ifdef HAS_SYSCALL   
+#ifdef HAS_SYSCALL
     djSP; dMARK; dORIGMARK; dTARGET;
     register I32 items = SP - MARK;
     unsigned long a[20];
@@ -4517,4 +4518,3 @@ int operation;
 }
 
 #endif /* LOCKF_EMULATE_FLOCK */
-
