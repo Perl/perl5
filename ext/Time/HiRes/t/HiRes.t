@@ -30,6 +30,31 @@ import Time::HiRes 'ualarm'		if $have_ualarm;
 
 use Config;
 
+my $have_alarm = $Config{d_alarm};
+my $have_fork  = $Config{d_fork};
+my $waitfor = 60; # 10 seconds is normal.
+my $pid;
+
+if ($have_fork) {
+    print "# Testing process $$\n";
+    print "# Starting the timer process\n";
+    if (defined ($pid = fork())) {
+	if ($pid == 0) { # We are the kid, set up the timer.
+	    print "# Timer process $$\n";
+	    sleep($waitfor);
+	    warn "$0: Time's up!\n";
+	    print "# Terminating the testing process\n";
+	    kill('TERM', getppid());
+	    print "# Timer process exiting\n";
+	    exit(0);
+	}
+    } else {
+	warn "$0: fork failed: $!\n";
+    }
+} else {
+    print "# No timer process\n";
+}
+
 my $xdefine = ''; 
 
 if (open(XDEFINE, "xdefine")) {
@@ -131,7 +156,7 @@ else {
     ok 11, $f > 0.4 && $f < 0.9, "slept $f instead of 0.5 secs.";
 }
 
-if (!$have_ualarm || !$Config{d_alarm}) {
+if (!$have_ualarm || !$have_alarm) {
     skip 12..13;
 }
 else {
@@ -337,3 +362,9 @@ if ($have_ualarm) {
     skip 24;
     skip 25;
 }
+
+if (defined $pid) {
+    print "# Terminating the timer process $pid\n";
+    kill('TERM', $pid); # We are done, the timer can go.
+}
+

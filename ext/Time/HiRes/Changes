@@ -1,5 +1,10 @@
 Revision history for Perl extension Time::HiRes.
 
+1.52
+	- In AIX (v?) with perl 5.6.1 the HiRes.t can hang after
+	  the subtest 18.  No known analysis nor fix, but added
+	  an alarm (that requires fork() and alarm()) to the test.
+
 1.51
 	- doc tweaks from mjd (perl change #20456)
 	- NCR MP-RAS hints file added (svr4.pl) (perl change #21249)
