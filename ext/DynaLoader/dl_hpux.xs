@@ -3,6 +3,14 @@
  * Version: 2.1, 1995/1/25
  */
 
+/* o Added BIND_VERBOSE to dl_nonlazy condition to add names of missing
+ *   symbols to stderr message on fatal error.
+ *
+ * o Added BIND_NONFATAL comment to default condition.
+ *
+ * Chuck Phillips (cdp@fc.hp.com)
+ * Version: 2.2, 1997/5/4 */
+
 #ifdef __hp9000s300
 #define magic hpux_magic
 #define MAGIC HPUX_MAGIC
@@ -48,10 +56,15 @@ dl_load_file(filename, flags=0)
     DLDEBUG(1,PerlIO_printf(PerlIO_stderr(), "dl_load_file(%s,%x):\n", filename,flags));
     if (flags & 0x01)
 	warn("Can't make loaded symbols global on this platform while loading %s",filename);
-    if (dl_nonlazy)
-	bind_type = BIND_IMMEDIATE;
-    else
-	bind_type = BIND_DEFERRED;
+    if (dl_nonlazy) {
+      bind_type = BIND_IMMEDIATE|BIND_VERBOSE;
+    } else {
+      bind_type = BIND_DEFERRED;
+      /* For certain libraries, like DCE, deferred binding often causes run
+       * time problems.  Adding BIND_NONFATAL to BIND_IMMEDIATE still allows
+       * unresolved references in situations like this.  */
+      /* bind_type = BIND_IMMEDIATE|BIND_NONFATAL; */
+    }
 #ifdef DEBUGGING
     if (dl_debug)
 	bind_type |= BIND_VERBOSE;
