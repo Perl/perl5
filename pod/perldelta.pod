@@ -296,11 +296,6 @@ the old names are still supported when F<patchlevel.h> is explicitly
 included (as required before), so there is no source incompatibility
 from the change.
 
-=item Support for C++ exceptions
-
-change#3386, also needs perlguts documentation
-[TODO - Chip Salzenberg <chip@perlsupport.com>]
-
 =back
 
 =head2 Binary Incompatibilities
@@ -471,9 +466,6 @@ is adequate if you wish to run multiple B<independent> interpreters
 concurrently in different threads.  -Dusethreads only provides the
 additional functionality of the perl_clone() API call and other
 support for running B<cloned> interpreters concurrently.
-
-[XXX TODO - the Compiler backends may be broken when USE_ITHREADS is
-enabled.]
 
 =head2 Lexically scoped warning categories
 
@@ -649,7 +641,6 @@ filehandles that must be passed around, as in the following example:
 	# $f implicitly closed here
     }
 
-[TODO - this idiom needs more pod penetration]
 
 =head2 64-bit support
 
@@ -901,10 +892,6 @@ change#2150
 
 change#4052
 [TODO - Ilya Zakharevich <ilya@math.ohio-state.edu>]
-
-=head2 Experimental support for user-hooks in @INC
-
-[TODO - Ken Fox <kfox@ford.com>]
 
 =head2 C<require> and C<do> may be overridden
 
@@ -1183,10 +1170,6 @@ Certain operations in the RHS of assignment statements have been
 optimized to directly set the lexical variable on the LHS,
 eliminating redundant copying overheads.
 
-=head2 Method lookups optimized
-
-[TODO - Chip Salzenberg <chip@perlsupport.com>]
-
 =head2 Faster mechanism to invoke XSUBs
 
 change#4044,4125
@@ -1261,7 +1244,7 @@ This port is still using its own builtin globbing.
 
 [TODO - Ilya Zakharevich <ilya@math.ohio-state.edu>]
 
-=head2 OS/390 (OpenEdition MVS)
+=head2 OS390 (OpenEdition MVS)
 
 Support for this EBCDIC platform has not been renewed in this release.
 There are difficulties in reconciling Perl's standardization on UTF-8
@@ -1414,11 +1397,14 @@ See L<attributes>.
 
 =item B
 
-The Perl Compiler suite has been extensively reworked for this
-release.
+WARNING: The Compiler suite is still highly experimental.  The
+generated code may not be correct, even it manages to execute
+without errors.
 
-[TODO - Vishal Bhatia <vishal@gol.com>,
-Nick Ing-Simmons <nick@ni-s.u-net.com>]
+The Perl Compiler suite has been extensively reworked for this
+release.  More of the standard Perl testsuite passes when run
+under the Compiler, but there is still a significant way to
+go to achieve production quality compiled executables.
 
 =item ByteLoader
 
