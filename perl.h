@@ -1046,16 +1046,16 @@ Free_t   Perl_mfree (Malloc_t where);
 #define IV_DIG (BIT_DIGITS(IVSIZE * 8))
 #define UV_DIG (BIT_DIGITS(IVSIZE * 8))
 
-+ /*   
-+  *  The macros INT2PTR and NUM2PTR are (despite their names)
-+  *  bi-directional: they will convert int/float to or from pointers.
-+  *  However the conversion to int/float are named explicitly:
-+  *  PTR2IV, PTR2UV, PTR2NV.
-+  *
-+  *  For int conversions we do not need two casts if pointers are
-+  *  the same size as IV and UV.   Otherwise we need an explicit
-+  *  cast (PTRV) to avoid compiler warnings.
-+  */
+/*   
+ *  The macros INT2PTR and NUM2PTR are (despite their names)
+ *  bi-directional: they will convert int/float to or from pointers.
+ *  However the conversion to int/float are named explicitly:
+ *  PTR2IV, PTR2UV, PTR2NV.
+ *
+ *  For int conversions we do not need two casts if pointers are
+ *  the same size as IV and UV.   Otherwise we need an explicit
+ *  cast (PTRV) to avoid compiler warnings.
+ */
 #if (IVSIZE == PTRSIZE) && (UVSIZE == PTRSIZE)
 #  define PTRV			UV
 #  define INT2PTR(any,d)	(any)(d)
