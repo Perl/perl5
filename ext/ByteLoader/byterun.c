@@ -249,7 +249,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	    {
 		NV arg;
 		BGET_NV(arg);
-		SvNVX(bstate->bs_sv) = arg;
+		SvNV_set(bstate->bs_sv, arg);
 		break;
 	    }
 	  case INSN_XLV_TARGOFF:		/* 27 */

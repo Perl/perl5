@@ -1011,7 +1011,7 @@ S_force_version(pTHX_ char *s, int guessing)
 	    ver = cSVOPx(version)->op_sv;
 	    if (SvPOK(ver) && !SvNIOK(ver)) {
 		(void)SvUPGRADE(ver, SVt_PVNV);
-		SvNVX(ver) = str_to_version(ver);
+		SvNV_set(ver, str_to_version(ver));
 		SvNOK_on(ver);		/* hint that it is a version */
 	    }
         }

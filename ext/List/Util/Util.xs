@@ -353,7 +353,7 @@ CODE:
     (void)SvUPGRADE(ST(0),SVt_PVNV);
     sv_setpvn(ST(0),ptr,len);
     if(SvNOK(num) || SvPOK(num) || SvMAGICAL(num)) {
-	SvNVX(ST(0)) = SvNV(num);
+	SvNV_set(ST(0), SvNV(num));
 	SvNOK_on(ST(0));
     }
 #ifdef SVf_IVisUV

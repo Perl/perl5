@@ -1902,7 +1902,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	break;
     case SVt_NV:
 	SvANY(sv) = new_XNV();
-	SvNVX(sv)	= nv;
+	SvNV_set(sv, nv);
 	break;
     case SVt_RV:
 	SvANY(sv) = new_XRV();
@@ -1930,7 +1930,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	SvCUR(sv)	= cur;
 	SvLEN(sv)	= len;
 	SvIVX(sv)	= iv;
-	SvNVX(sv)	= nv;
+	SvNV_set(sv, nv);
 	break;
     case SVt_PVMG:
 	SvANY(sv) = new_XPVMG();
@@ -1938,7 +1938,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	SvCUR(sv)	= cur;
 	SvLEN(sv)	= len;
 	SvIVX(sv)	= iv;
-	SvNVX(sv)	= nv;
+	SvNV_set(sv, nv);
 	SvMAGIC(sv)	= magic;
 	SvSTASH(sv)	= stash;
 	break;
@@ -1948,7 +1948,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	SvCUR(sv)	= cur;
 	SvLEN(sv)	= len;
 	SvIVX(sv)	= iv;
-	SvNVX(sv)	= nv;
+	SvNV_set(sv, nv);
 	SvMAGIC(sv)	= magic;
 	SvSTASH(sv)	= stash;
 	LvTARGOFF(sv)	= 0;
@@ -1969,7 +1969,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	AvMAX(sv)	= -1;
 	AvFILLp(sv)	= -1;
 	SvIVX(sv)	= 0;
-	SvNVX(sv)	= 0.0;
+	SvNV_set(sv, 0.0);
 	SvMAGIC(sv)	= magic;
 	SvSTASH(sv)	= stash;
 	AvALLOC(sv)	= 0;
@@ -1999,7 +1999,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	SvCUR(sv)	= cur;
 	SvLEN(sv)	= len;
 	SvIVX(sv)	= iv;
-	SvNVX(sv)	= nv;
+	SvNV_set(sv, nv);
 	SvMAGIC(sv)	= magic;
 	SvSTASH(sv)	= stash;
 	break;
@@ -2009,7 +2009,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	SvCUR(sv)	= cur;
 	SvLEN(sv)	= len;
 	SvIVX(sv)	= iv;
-	SvNVX(sv)	= nv;
+	SvNV_set(sv, nv);
 	SvMAGIC(sv)	= magic;
 	SvSTASH(sv)	= stash;
 	GvGP(sv)	= 0;
@@ -2024,7 +2024,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	SvCUR(sv)	= cur;
 	SvLEN(sv)	= len;
 	SvIVX(sv)	= iv;
-	SvNVX(sv)	= nv;
+	SvNV_set(sv, nv);
 	SvMAGIC(sv)	= magic;
 	SvSTASH(sv)	= stash;
 	BmRARE(sv)	= 0;
@@ -2038,7 +2038,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	SvCUR(sv)	= cur;
 	SvLEN(sv)	= len;
 	SvIVX(sv)	= iv;
-	SvNVX(sv)	= nv;
+	SvNV_set(sv, nv);
 	SvMAGIC(sv)	= magic;
 	SvSTASH(sv)	= stash;
 	break;
@@ -2049,7 +2049,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	SvCUR(sv)	= cur;
 	SvLEN(sv)	= len;
 	SvIVX(sv)	= iv;
-	SvNVX(sv)	= nv;
+	SvNV_set(sv, nv);
 	SvMAGIC(sv)	= magic;
 	SvSTASH(sv)	= stash;
 	IoPAGE_LEN(sv)	= 60;
@@ -2291,7 +2291,7 @@ Perl_sv_setnv(pTHX_ register SV *sv, NV num)
 	Perl_croak(aTHX_ "Can't coerce %s to number in %s", sv_reftype(sv,0),
 		   OP_NAME(PL_op));
     }
-    SvNVX(sv) = num;
+    SvNV_set(sv, num);
     (void)SvNOK_only(sv);			/* validate number */
     SvTAINT(sv);
 }
@@ -2743,7 +2743,7 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
 		    SvNOK_on(sv);
 		    SvIOK_off(sv);
 		    SvIOKp_on(sv);
-		    SvNVX(sv) = -(NV)value;
+		    SvNV_set(sv, -(NV)value);
 		    SvIVX(sv) = IV_MIN;
 		}
 	    }
@@ -2755,7 +2755,7 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
 	if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
 	    != IS_NUMBER_IN_UV) {
 	    /* It wasn't an (integer that doesn't overflow the UV). */
-	    SvNVX(sv) = Atof(SvPVX(sv));
+	    SvNV_set(sv, Atof(SvPVX(sv)));
 
 	    if (! numtype && ckWARN(WARN_NUMERIC))
 		not_a_number(sv);
@@ -3045,7 +3045,7 @@ Perl_sv_2uv_flags(pTHX_ register SV *sv, I32 flags)
 		    SvNOK_on(sv);
 		    SvIOK_off(sv);
 		    SvIOKp_on(sv);
-		    SvNVX(sv) = -(NV)value;
+		    SvNV_set(sv, -(NV)value);
 		    SvIVX(sv) = IV_MIN;
 		}
 	    }
@@ -3054,7 +3054,7 @@ Perl_sv_2uv_flags(pTHX_ register SV *sv, I32 flags)
 	if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
 	    != IS_NUMBER_IN_UV) {
 	    /* It wasn't an integer, or it overflowed the UV. */
-	    SvNVX(sv) = Atof(SvPVX(sv));
+	    SvNV_set(sv, Atof(SvPVX(sv)));
 
             if (! numtype && ckWARN(WARN_NUMERIC))
 		    not_a_number(sv);
@@ -3226,7 +3226,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
         return SvNVX(sv);
     }
     if (SvIOKp(sv)) {
-	SvNVX(sv) = SvIsUV(sv) ? (NV)SvUVX(sv) : (NV)SvIVX(sv);
+	SvNV_set(sv, SvIsUV(sv) ? (NV)SvUVX(sv) : (NV)SvIVX(sv));
 #ifdef NV_PRESERVES_UV
 	SvNOK_on(sv);
 #else
@@ -3248,12 +3248,12 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
 	    == IS_NUMBER_IN_UV) {
 	    /* It's definitely an integer */
-	    SvNVX(sv) = (numtype & IS_NUMBER_NEG) ? -(NV)value : (NV)value;
+	    SvNV_set(sv, (numtype & IS_NUMBER_NEG) ? -(NV)value : (NV)value);
 	} else
-	    SvNVX(sv) = Atof(SvPVX(sv));
+	    SvNV_set(sv, Atof(SvPVX(sv)));
 	SvNOK_on(sv);
 #else
-	SvNVX(sv) = Atof(SvPVX(sv));
+	SvNV_set(sv, Atof(SvPVX(sv)));
 	/* Only set the public NV OK flag if this NV preserves the value in
 	   the PV at least as well as an IV/UV would.
 	   Not sure how to do this 100% reliably. */
@@ -4231,7 +4231,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		sv_upgrade(dstr, SVt_PVNV);
 		break;
 	    }
-	    SvNVX(dstr) = SvNVX(sstr);
+	    SvNV_set(dstr, SvNVX(sstr));
 	    (void)SvNOK_only(dstr);
 	    if (SvTAINTED(sstr))
 		SvTAINT(dstr);
@@ -4497,7 +4497,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    /* Only set the public OK flag if the source has public OK.  */
 	    if (sflags & SVf_NOK)
 		SvFLAGS(dstr) |= SVf_NOK;
-	    SvNVX(dstr) = SvNVX(sstr);
+	    SvNV_set(dstr, SvNVX(sstr));
 	}
 	if (sflags & SVp_IOK) {
 	    (void)SvIOKp_on(dstr);
@@ -4640,7 +4640,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    SvNOKp_on(dstr);
 	    if (sflags & SVf_NOK)
 		SvFLAGS(dstr) |= SVf_NOK;
-	    SvNVX(dstr) = SvNVX(sstr);
+	    SvNV_set(dstr, SvNVX(sstr));
 	}
 	if (sflags & SVp_IOK) {
 	    (void)SvIOKp_on(dstr);
@@ -4673,7 +4673,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		(void)SvNOK_on(dstr);
 	    else
 		(void)SvNOKp_on(dstr);
-	    SvNVX(dstr) = SvNVX(sstr);
+	    SvNV_set(dstr, SvNVX(sstr));
 	}
     }
     else if (sflags & SVp_NOK) {
@@ -4683,7 +4683,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    (void)SvOK_off(dstr);
 	    SvNOKp_on(dstr);
 	}
-	SvNVX(dstr) = SvNVX(sstr);
+	SvNV_set(dstr, SvNVX(sstr));
     }
     else {
 	if (dtype == SVt_PVGV) {
@@ -7357,7 +7357,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
     }
     if (flags & SVp_NOK) {
 	(void)SvNOK_only(sv);
-	SvNVX(sv) += 1.0;
+        SvNV_set(sv, SvNVX(sv) + 1.0);
 	return;
     }
 
@@ -7392,7 +7392,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
 	    /* sv_2iv *should* have made this an NV */
 	    if (flags & SVp_NOK) {
 		(void)SvNOK_only(sv);
-		SvNVX(sv) += 1.0;
+                SvNV_set(sv, SvNVX(sv) + 1.0);
 		return;
 	    }
 	    /* I don't think we can get here. Maybe I should assert this
@@ -7511,7 +7511,7 @@ Perl_sv_dec(pTHX_ register SV *sv)
 	return;
     }
     if (flags & SVp_NOK) {
-	SvNVX(sv) -= 1.0;
+        SvNV_set(sv, SvNVX(sv) - 1.0);
 	(void)SvNOK_only(sv);
 	return;
     }
@@ -7540,7 +7540,7 @@ Perl_sv_dec(pTHX_ register SV *sv)
 	    /* sv_2iv *should* have made this an NV */
 	    if (flags & SVp_NOK) {
 		(void)SvNOK_only(sv);
-		SvNVX(sv) -= 1.0;
+                SvNV_set(sv, SvNVX(sv) - 1.0);
 		return;
 	    }
 	    /* I don't think we can get here. Maybe I should assert this
@@ -10794,7 +10794,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	break;
     case SVt_NV:
 	SvANY(dstr)	= new_XNV();
-	SvNVX(dstr)	= SvNVX(sstr);
+	SvNV_set(dstr, SvNVX(sstr));
 	break;
     case SVt_RV:
 	SvANY(dstr)	= new_XRV();
@@ -10818,7 +10818,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvCUR(dstr)	= SvCUR(sstr);
 	SvLEN(dstr)	= SvLEN(sstr);
 	SvIVX(dstr)	= SvIVX(sstr);
-	SvNVX(dstr)	= SvNVX(sstr);
+	SvNV_set(dstr, SvNVX(sstr));
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	break;
     case SVt_PVMG:
@@ -10826,7 +10826,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvCUR(dstr)	= SvCUR(sstr);
 	SvLEN(dstr)	= SvLEN(sstr);
 	SvIVX(dstr)	= SvIVX(sstr);
-	SvNVX(dstr)	= SvNVX(sstr);
+	SvNV_set(dstr, SvNVX(sstr));
 	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
@@ -10836,7 +10836,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvCUR(dstr)	= SvCUR(sstr);
 	SvLEN(dstr)	= SvLEN(sstr);
 	SvIVX(dstr)	= SvIVX(sstr);
-	SvNVX(dstr)	= SvNVX(sstr);
+	SvNV_set(dstr, SvNVX(sstr));
 	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
@@ -10849,7 +10849,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvCUR(dstr)	= SvCUR(sstr);
 	SvLEN(dstr)	= SvLEN(sstr);
 	SvIVX(dstr)	= SvIVX(sstr);
-	SvNVX(dstr)	= SvNVX(sstr);
+	SvNV_set(dstr, SvNVX(sstr));
 	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
@@ -10881,7 +10881,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvCUR(dstr)	= SvCUR(sstr);
 	SvLEN(dstr)	= SvLEN(sstr);
 	SvIVX(dstr)	= SvIVX(sstr);
-	SvNVX(dstr)	= SvNVX(sstr);
+	SvNV_set(dstr, SvNVX(sstr));
 	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
@@ -10897,7 +10897,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvCUR(dstr)	= SvCUR(sstr);
 	SvLEN(dstr)	= SvLEN(sstr);
 	SvIVX(dstr)	= SvIVX(sstr);
-	SvNVX(dstr)	= SvNVX(sstr);
+	SvNV_set(dstr, SvNVX(sstr));
 	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
@@ -10939,7 +10939,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvCUR(dstr)	= SvCUR(sstr);
 	SvLEN(dstr)	= SvLEN(sstr);
 	SvIVX(dstr)	= SvIVX(sstr);
-	SvNVX(dstr)	= SvNVX(sstr);
+	SvNV_set(dstr, SvNVX(sstr));
 	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
 	AvARYLEN((AV*)dstr) = sv_dup_inc(AvARYLEN((AV*)sstr), param);
@@ -10976,7 +10976,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvCUR(dstr)	= SvCUR(sstr);
 	SvLEN(dstr)	= SvLEN(sstr);
 	SvIVX(dstr)	= SvIVX(sstr);
-	SvNVX(dstr)	= SvNVX(sstr);
+	SvNV_set(dstr, SvNVX(sstr));
 	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
 	HvRITER((HV*)dstr)	= HvRITER((HV*)sstr);
@@ -11016,7 +11016,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvCUR(dstr)	= SvCUR(sstr);
 	SvLEN(dstr)	= SvLEN(sstr);
 	SvIVX(dstr)	= SvIVX(sstr);
-	SvNVX(dstr)	= SvNVX(sstr);
+	SvNV_set(dstr, SvNVX(sstr));
 	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
@@ -11695,7 +11695,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     SvCUR(&PL_sv_no)		= 0;
     SvLEN(&PL_sv_no)		= 1;
     SvIVX(&PL_sv_no)		= 0;
-    SvNVX(&PL_sv_no)		= 0;
+    SvNV_set(&PL_sv_no, 0);
     ptr_table_store(PL_ptr_table, &proto_perl->Isv_no, &PL_sv_no);
 
     SvANY(&PL_sv_yes)		= new_XPVNV();
@@ -11706,7 +11706,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     SvCUR(&PL_sv_yes)		= 1;
     SvLEN(&PL_sv_yes)		= 2;
     SvIVX(&PL_sv_yes)		= 1;
-    SvNVX(&PL_sv_yes)		= 1;
+    SvNV_set(&PL_sv_yes, 1);
     ptr_table_store(PL_ptr_table, &proto_perl->Isv_yes, &PL_sv_yes);
 
     /* create (a non-shared!) shared string table */

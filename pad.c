@@ -352,7 +352,7 @@ Perl_pad_add_name(pTHX_ const char *name, HV* typestash, HV* ourstash, bool fake
     }
     else {
 	/* not yet introduced */
-	SvNVX(namesv) = (NV)PAD_MAX;	/* min */
+	SvNV_set(namesv, (NV)PAD_MAX);	/* min */
 	SvIVX(namesv) = 0;		/* max */
 
 	if (!PL_min_intro_pending)
@@ -459,7 +459,7 @@ Perl_pad_add_anon(pTHX_ SV* sv, OPCODE op_type)
     sv_upgrade(name, SVt_PVNV);
     sv_setpvn(name, "&", 1);
     SvIVX(name) = -1;
-    SvNVX(name) = 1;
+    SvNV_set(name, 1);
     ix = pad_alloc(op_type, SVs_PADMY);
     av_store(PL_comppad_name, ix, name);
     /* XXX DAPM use PL_curpad[] ? */
@@ -824,13 +824,13 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 	new_namesv = AvARRAY(PL_comppad_name)[new_offset];
 	SvIVX(new_namesv) = *out_flags;
 
-	SvNVX(new_namesv) = (NV)0;
+	SvNV_set(new_namesv, (NV)0);
 	if (SvFLAGS(new_namesv) & SVpad_OUR) {
 	   /* do nothing */
 	}
 	else if (CvLATE(cv)) {
 	    /* delayed creation - just note the offset within parent pad */
-	    SvNVX(new_namesv) = (NV)offset;
+	    SvNV_set(new_namesv, (NV)offset);
 	    CvCLONE_on(cv);
 	}
 	else {
@@ -960,7 +960,7 @@ Perl_intro_my(pTHX)
 		&& !SvFAKE(sv) && !SvIVX(sv))
 	{
 	    SvIVX(sv) = PAD_MAX;	/* Don't know scope end yet. */
-	    SvNVX(sv) = (NV)PL_cop_seqmax;
+	    SvNV_set(sv, (NV)PL_cop_seqmax);
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		"Pad intromy: %ld \"%s\", (%ld,%ld)\n",
 		(long)i, SvPVX(sv),
