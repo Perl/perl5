@@ -22,12 +22,14 @@ sub start_foo {
     my $r = 3 + int(10 * rand);
     print "start_foo: r is $r\n";
     whoami($r, "start_foo", "foo1", "foo2");
+    print "start_foo: finished\n";
 }
 
 sub start_bar {
     my $r = 3 + int(10 * rand);
     print "start_bar: r is $r\n";
     whoami($r, "start_bar", "bar1", "bar2");
+    print "start_bar: finished\n";
 }
 
 $foo = new Thread \&start_foo;

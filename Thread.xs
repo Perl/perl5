@@ -6,6 +6,45 @@ static void *
 threadstart(arg)
 void *arg;
 {
+#ifdef FAKE_THREADS
+    Thread savethread = thr;
+    LOGOP myop;
+    dSP;
+    I32 oldscope = scopestack_ix;
+    I32 retval;
+    AV *returnav = newAV();
+    int i;
+
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "new thread 0x%lx starting at %s\n",
+			  (unsigned long) thr, SvPEEK(TOPs)));
+    thr = (Thread) arg;
+    savemark = TOPMARK;
+    thr->prev = thr->prev_run = savethread;
+    thr->next = savethread->next;
+    thr->next_run = savethread->next_run;
+    savethread->next = savethread->next_run = thr;
+    thr->wait_queue = 0;
+    thr->private = 0;
+
+    /* Now duplicate most of perl_call_sv but with a few twists */
+    op = (OP*)&myop;
+    Zero(op, 1, LOGOP);
+    myop.op_flags = OPf_STACKED;
+    myop.op_next = Nullop;
+    myop.op_flags |= OPf_KNOW;
+    myop.op_flags |= OPf_WANT_LIST;
+    op = pp_entersub(ARGS);
+    DEBUG_L(if (!op)
+	    PerlIO_printf(PerlIO_stderr(), "thread starts at Nullop\n"));
+    /*
+     * When this thread is next scheduled, we start in the right
+     * place. When the thread runs off the end of the sub, perl.c
+     * handles things, using savemark to figure out how much of the
+     * stack is the return value for any join.
+     */
+    thr = savethread;		/* back to the old thread */
+    return 0;
+#else
     Thread thr = (Thread) arg;
     LOGOP myop;
     dSP;
@@ -14,7 +53,10 @@ void *arg;
     I32 retval;
     AV *returnav = newAV();
     int i;
-    
+    dJMPENV;
+    int ret;
+
+    /* Don't call *anything* requiring dTHR until after pthread_setspecific */
     /*
      * Wait until our creator releases us. If we didn't do this, then
      * it would be potentially possible for out thread to carry on and
@@ -27,8 +69,6 @@ void *arg;
     MUTEX_DESTROY(threadstart_mutexp);	/* don't need it any more */
     Safefree(threadstart_mutexp);
 
-    DEBUG_L(fprintf(stderr, "new thread 0x%lx starting at %s\n",
-		    (unsigned long) thr, SvPEEK(TOPs)));
     /*
      * It's safe to wait until now to set the thread-specific pointer
      * from our pthread_t structure to our struct thread, since we're
@@ -37,18 +77,23 @@ void *arg;
     if (pthread_setspecific(thr_key, (void *) thr))
 	croak("panic: pthread_setspecific");
 
-    switch (Sigsetjmp(top_env,1)) {
-      case 3:
-        fprintf(stderr, "panic: top_env\n");
+    /* Only now can we use SvPEEK (which calls sv_newmortal which does dTHR) */
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "new thread 0x%lx starting at %s\n",
+			  (unsigned long) thr, SvPEEK(TOPs)));
+
+    JMPENV_PUSH(ret);
+    switch (ret) {
+    case 3:
+        PerlIO_printf(PerlIO_stderr(), "panic: threadstart\n");
 	/* fall through */
-      case 1:
-#ifdef VMS
-        statusvalue = 255;
-#else
-        statusvalue = 1;
-#endif
+    case 1:
+	STATUS_ALL_FAILURE;
 	/* fall through */
-      case 2:
+    case 2:
+	/* my_exit() was called */
+	while (scopestack_ix > oldscope)
+	    LEAVE;
+	JMPENV_POP;
 	av_store(returnav, 0, newSViv(statusvalue));
 	goto finishoff;
     }
@@ -59,19 +104,26 @@ void *arg;
     myop.op_flags = OPf_STACKED;
     myop.op_next = Nullop;
     myop.op_flags |= OPf_KNOW;
-    myop.op_flags |= OPf_LIST;
+    myop.op_flags |= OPf_WANT_LIST;
     op = pp_entersub(ARGS);
     if (op)
 	runops();
     SPAGAIN;
     retval = sp - (stack_base + oldmark);
     sp = stack_base + oldmark + 1;
+    DEBUG_L(for (i = 1; i <= retval; i++)
+		PerlIO_printf(PerlIO_stderr(),
+			      "%p returnav[%d] = %s\n",
+			      thr, i, SvPEEK(sp[i - 1]));)
     av_store(returnav, 0, newSVpv("", 0));
     for (i = 1; i <= retval; i++, sp++)
 	sv_setsv(*av_fetch(returnav, i, TRUE), SvREFCNT_inc(*sp));
     
   finishoff:
-    SvREFCNT_dec(stack);
+#if 0    
+    /* removed for debug */
+    SvREFCNT_dec(curstack);
+#endif
     SvREFCNT_dec(cvcache);
     Safefree(markstack);
     Safefree(scopestack);
@@ -81,12 +133,16 @@ void *arg;
     Safefree(tmps_stack);
 
     if (ThrSTATE(thr) == THR_DETACHED) {
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+			      "%p detached...zapping returnav\n", thr));
 	SvREFCNT_dec(returnav);
 	ThrSETSTATE(thr, THR_DEAD);
     }
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p returning\n", thr));	
     return (void *) returnav;	/* Available for anyone to join with us */
 				/* unless we are detached in which case */
 				/* noone will see the value anyway. */
+#endif    
 }
 
 Thread
@@ -101,11 +157,16 @@ AV *initargs;
     
     savethread = thr;
     New(53, thr, 1, struct thread);
+    /* If we don't zero these foostack pointers, init_stacks won't init them */
+    markstack = 0;
+    scopestack = 0;
+    savestack = 0;
+    retstack = 0;
     init_stacks(ARGS);
+    curcop = savethread->Tcurcop;	/* XXX As good a guess as any? */
     SPAGAIN;
     defstash = savethread->Tdefstash;	/* XXX maybe these should */
     curstash = savethread->Tcurstash;	/* always be set to main? */
-    mainstack = stack;
     /* top_env? */
     /* runlevel */
     cvcache = newHV();
@@ -119,6 +180,9 @@ AV *initargs;
     XPUSHs(SvREFCNT_inc(startsv));
     PUTBACK;
 
+#ifdef FAKE_THREADS
+    threadstart(thr);
+#else    
     New(53, threadstart_mutexp, 1, perl_mutex);
     /* On your marks... */
     MUTEX_INIT(threadstart_mutexp);
@@ -134,6 +198,7 @@ AV *initargs;
 	return NULL;	/* XXX should clean up first */
     /* Go */
     MUTEX_UNLOCK(threadstart_mutexp);
+#endif
     return thr;
 }
 
@@ -246,8 +311,8 @@ CODE:
 	    sv = SvRV(sv);
 
 	mg = condpair_magic(sv);
-	DEBUG_L(fprintf(stderr, "0x%lx: cond_wait 0x%lx\n",
-			(unsigned long)thr, (unsigned long)sv));
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "0x%lx: cond_wait 0x%lx\n",
+			      (unsigned long)thr, (unsigned long)sv));
 	MUTEX_LOCK(MgMUTEXP(mg));
 	if (MgOWNER(mg) != thr) {
 	    MUTEX_UNLOCK(MgMUTEXP(mg));
@@ -271,8 +336,8 @@ CODE:
 	    sv = SvRV(sv);
 	}
 	mg = condpair_magic(sv);
-	DEBUG_L(fprintf(stderr, "0x%lx: cond_signal 0x%lx\n",
-			(unsigned long)thr, (unsigned long)sv));
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "0x%lx: cond_signal 0x%lx\n",
+			      (unsigned long)thr, (unsigned long)sv));
 	MUTEX_LOCK(MgMUTEXP(mg));
 	if (MgOWNER(mg) != thr) {
 	    MUTEX_UNLOCK(MgMUTEXP(mg));
@@ -286,16 +351,12 @@ cond_broadcast(sv)
 	SV *	sv
 	MAGIC *	mg = NO_INIT
 CODE:
-	if (SvROK(sv)) {
-	    /*
-	     * Kludge to allow lock of real objects without requiring
-	     * to pass in every type of argument by explicit reference.
-	     */
+	if (SvROK(sv))
 	    sv = SvRV(sv);
-	}
+
 	mg = condpair_magic(sv);
-	DEBUG_L(fprintf(stderr, "0x%lx: cond_broadcast 0x%lx\n",
-			(unsigned long)thr, (unsigned long)sv));
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "0x%lx: cond_broadcast 0x%lx\n",
+			      (unsigned long)thr, (unsigned long)sv));
 	MUTEX_LOCK(MgMUTEXP(mg));
 	if (MgOWNER(mg) != thr) {
 	    MUTEX_UNLOCK(MgMUTEXP(mg));

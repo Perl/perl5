@@ -11,7 +11,7 @@ sub worker
 	print "thread $num iteration $i\n";
 	select(undef, undef, undef, rand(10)/100);
 	{
-	    reset($lock);
+	    lock($lock);
 	    warn "thread $num saw non-zero level = $level\n" if $level;
 	    $level++;
 	    print "thread $num has lock\n";
