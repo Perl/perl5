@@ -208,6 +208,28 @@ ext/SDBM_File/typemap		SDBM extension interface types
 ext/Socket/Makefile.PL	Socket extension makefile writer
 ext/Socket/Socket.pm	Socket extension Perl module
 ext/Socket/Socket.xs	Socket extension external subroutines
+ext/Thread/Makefile.PL	Thread extension makefile writer
+ext/Thread/Notes	Thread notes
+ext/Thread/README	Thread README
+ext/Thread/Thread	Directory for Thread:: submodules
+ext/Thread/Thread/Queue.pm	Thread synchronised queue objects
+ext/Thread/Thread/Semaphore.pm	Thread semaphore objects
+ext/Thread/Thread.pm	Thread extension Perl module
+ext/Thread/Thread.xs	Thread extension external subroutines
+ext/Thread/create.t	Test thread creation
+ext/Thread/io.t		Test threads doing simple I/O
+ext/Thread/join.t	Test thread joining
+ext/Thread/join2.t	Test thread joining differently
+ext/Thread/list.t	Test getting list of all threads
+ext/Thread/lock.t	Test lock primitive
+ext/Thread/queue.t	Test Thread::Queue module
+ext/Thread/sync.t	Test thread synchronisation
+ext/Thread/sync2.t	Test thread synchronisation
+ext/Thread/typemap	Thread extension interface types
+ext/Thread/unsync.t	Test thread implicit synchronisation
+ext/Thread/unsync2.t	Test thread implicit synchronisation
+ext/Thread/unsync3.t	Test thread implicit synchronisation
+ext/Thread/unsync4.t	Test thread implicit synchronisation
 ext/attrs/Makefile.PL	attrs extension makefile writer
 ext/attrs/attrs.pm	attrs extension Perl module
 ext/attrs/attrs.xs	attrs extension external subroutines
