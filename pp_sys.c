@@ -1604,6 +1604,7 @@ PP(pp_sysread)
 	buffer = SvPVutf8_force(bufsv, blen);
 	/* UTF-8 may not have been set if they are all low bytes */
 	SvUTF8_on(bufsv);
+	buffer_utf8 = 0;
     }
     else {
 	buffer = SvPV_force(bufsv, blen);
