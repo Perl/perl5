@@ -1160,6 +1160,19 @@ Unrecognized alphabetic escapes encountered when parsing quote
 constructs now generate a warning, since they may take on new
 semantics in later versions of Perl.
 
+Many diagnostics now report the internal operation in which the warning
+was provoked, like so:
+
+    Use of uninitialized value in concatenation (.) at (eval 1) line 1.
+    Use of uninitialized value in print at (eval 1) line 1.
+
+Diagnostics  that occur within eval may also report the file and line
+number where the eval is located, in addition to the eval sequence
+number and the line number within the evaluated text itself.  For
+example:
+
+    Not enough arguments for scalar at (eval 4)[newlib/perl5db.pl:1411] line 2, at EOF
+
 =head1 Performance enhancements
 
 =head2 Simple sort() using { $a <=> $b } and the like are optimized
