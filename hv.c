@@ -983,21 +983,6 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	/* if placeholder is here, it's already been deleted.... */
 	if (HeVAL(entry) == &PL_sv_placeholder)
 	{
-	    if (SvREADONLY(hv))
-		return Nullsv; /* if still SvREADONLY, leave it deleted. */
-
-           /* okay, really delete the placeholder. */
-           *oentry = HeNEXT(entry);
-           if (i && !*oentry)
-               xhv->xhv_fill--; /* HvFILL(hv)-- */
-           if (entry == xhv->xhv_eiter /* HvEITER(hv) */)
-               HvLAZYDEL_on(hv);
-           else
-               hv_free_ent(hv, entry);
-           xhv->xhv_keys--; /* HvKEYS(hv)-- */
-	   if (xhv->xhv_keys == 0)
-               HvHASKFLAGS_off(hv);
-           xhv->xhv_placeholders--;
            return Nullsv;
 	}
 	else if (SvREADONLY(hv) && HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
