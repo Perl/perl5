@@ -908,12 +908,11 @@ contain a slash character cannot be processed.  Such files must be
 renamed before they can be processed by Perl.  Note that VOS limits
 file names to 32 or fewer characters.
 
-The following C functions are unimplemented on VOS, and any attempt by
-Perl to use them will result in a fatal error message and an immediate
-exit from Perl:  dup, do_aspawn, do_spawn, fork, waitpid.  Once these
-functions become available in the VOS POSIX.1 implementation, you can
-either recompile and rebind Perl, or you can download a newer port from
-ftp.stratus.com.
+See F<README.vos> for restrictions that apply when Perl is built
+with the alpha version of VOS POSIX.1 support.
+
+Perl on VOS is built without any extensions and does not support
+dynamic loading.
 
 The value of C<$^O> on VOS is "VOS".  To determine the architecture that
 you are running on without resorting to loading all of C<%Config> you

@@ -1692,10 +1692,13 @@ vms/writemain.pl	Generate perlmain.c from miniperlmain.c+extensions
 vos/Changes		Changes made to port Perl to the VOS operating system
 vos/build.cm		VOS command macro to build Perl
 vos/compile_perl.cm	VOS command macro to build multiple version of Perl
-vos/config.def		input for config.pl
-vos/config.h		config.h for VOS
+vos/config.alpha.def	definitions used by config.pl
+vos/config.ga.def	definitions used by config.pl
+vos/config.alpha.h	config.h for use with alpha VOS POSIX.1 support
+vos/config.ga.h		config.h for use with generally-available VOS POSIX.1 support
 vos/config.pl		script to convert a config_h.SH to a config.h
-vos/config_h.SH_orig	config_h.SH at the time config.h was created
+vos/configure_perl.cm	VOS command macro to configure perl before building
+vos/install_perl.cm	VOS command macro to install perl after building
 vos/perl.bind		VOS bind control file
 vos/test_vos_dummies.c	Test program for "vos_dummies.c"
 vos/vos_dummies.c	Wrappers to soak up undefined functions
