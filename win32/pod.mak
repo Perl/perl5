@@ -23,6 +23,9 @@ POD = \
 	perlsyn.pod	\
 	perlop.pod	\
 	perlre.pod	\
+	perlreref.pod	\
+	perlretut.pod	\
+	perlrequick.pod	\
 	perlrun.pod	\
 	perlfunc.pod	\
 	perlopentut.pod	\
@@ -33,6 +36,8 @@ POD = \
 	perlmodinstall.pod	\
 	perlform.pod	\
 	perllocale.pod	\
+	perlunicode.pod	\
+	perluniintro.pod	\
 	perlref.pod	\
 	perlreftut.pod	\
 	perldsc.pod	\
@@ -47,6 +52,7 @@ POD = \
 	perldiag.pod	\
 	perlsec.pod	\
 	perltrap.pod	\
+	perlcheat.pod	\
 	perlport.pod	\
 	perlstyle.pod	\
 	perlpod.pod	\
@@ -81,6 +87,9 @@ MAN = \
 	perlsyn.man	\
 	perlop.man	\
 	perlre.man	\
+	perlreref.man	\
+	perlretut.man	\
+	perlrequick.man	\
 	perlrun.man	\
 	perlfunc.man	\
 	perlopentut.man	\
@@ -91,6 +100,8 @@ MAN = \
 	perlmodinstall.man	\
 	perlform.man	\
 	perllocale.man	\
+	perlunicode.man	\
+	perluniintro.man	\
 	perlref.man	\
 	perlreftut.man	\
 	perldsc.man	\
@@ -105,6 +116,7 @@ MAN = \
 	perldiag.man	\
 	perlsec.man	\
 	perltrap.man	\
+	perlcheat.man	\
 	perlport.man	\
 	perlstyle.man	\
 	perlpod.man	\
@@ -139,6 +151,9 @@ HTML = \
 	perlsyn.html	\
 	perlop.html	\
 	perlre.html	\
+	perlreref.html	\
+	perlretut.html	\
+	perlrequick.html	\
 	perlrun.html	\
 	perlfunc.html	\
 	perlopentut.html	\
@@ -149,6 +164,8 @@ HTML = \
 	perlmodinstall.html	\
 	perlform.html	\
 	perllocale.html	\
+	perlunicode.html	\
+	perluniintro.html	\
 	perlref.html	\
 	perlreftut.html	\
 	perldsc.html	\
@@ -163,6 +180,7 @@ HTML = \
 	perldiag.html	\
 	perlsec.html	\
 	perltrap.html	\
+	perlcheat.html	\
 	perlport.html	\
 	perlstyle.html	\
 	perlpod.html	\
@@ -197,6 +215,9 @@ TEX = \
 	perlsyn.tex	\
 	perlop.tex	\
 	perlre.tex	\
+	perlreref.tex	\
+	perlretut.tex	\
+	perlrequick.tex	\
 	perlrun.tex	\
 	perlfunc.tex	\
 	perlopentut.tex	\
@@ -207,6 +228,8 @@ TEX = \
 	perlmodinstall.tex	\
 	perlform.tex	\
 	perllocale.tex	\
+	perlunicode.tex	\
+	perluniintro.tex	\
 	perlref.tex	\
 	perlreftut.tex	\
 	perldsc.tex	\
@@ -221,6 +244,7 @@ TEX = \
 	perldiag.tex	\
 	perlsec.tex	\
 	perltrap.tex	\
+	perlcheat.tex	\
 	perlport.tex	\
 	perlstyle.tex	\
 	perlpod.tex	\
