@@ -303,6 +303,7 @@ sub absolute_path {
 
 sub create_index {
     my($html, $dir) = @_;
+    (my $pod = $dir) =~ s,^.*/,,;
     my(@files, @filedata, @index, $file);
     my($lcp1,$lcp2);
 
@@ -328,20 +329,21 @@ sub create_index {
 	close(IN);
 
 	# pull out the NAME section
-  my $name;
-	($name) = grep(/NAME=/, @filedata);
-	($lcp1,$lcp2) = ($name =~ m,/H1>\s(\S+)\s[\s-]*(.*?)\s*$,sm);
-	if (defined $lcp1 and $lcp1 eq '<P>') { # Uninteresting.  Try again.
-	   ($lcp1,$lcp2) = ($name =~ m,/H1>\s<P>\s(\S+)\s[\s-]*(.*?)\s*$,sm);
+	my $name;
+	($name) = grep(/name="name"/i, @filedata);
+	($lcp1,$lcp2) = ($name =~ m,/H1>\s(\S+)\s[\s-]*(.*?)\s*$,smi);
+	if (defined $lcp1 and $lcp1 =~ m,^<P>$,i) { # Uninteresting.  Try again.
+	    ($lcp1,$lcp2) = ($name =~ m,/H1>\s<P>\s*(\S+)\s[\s-]*(.*?)\s*$,smi);
 	}
-	my $url= "$dir/$file" ;
+	my $url= "$pod/$file" ;
 	if ( ! defined $Options{htmlroot} || $Options{htmlroot} eq '' ) {
-	    $url = Pod::Html::relativize_url( "$dir/$file", $html ) ;
+	    $url = Pod::Html::relativize_url( "$pod/$file", $html ) ;
 	}
 
-	print HTML qq(<A HREF="$url">);
-	print HTML "<DT>$lcp1</A><DD>$lcp2\n" if defined $lcp1;
-#	print HTML qq(<A HREF="$url">$lcp1</A><BR>\n") if defined $lcp1;
+	if (defined $lcp1) {
+	    print HTML qq(<DT><A HREF="$url">);
+	    print HTML "$lcp1</A></DT><DD>$lcp2</DD>\n";
+	}
 
 	next;
 
@@ -350,7 +352,6 @@ sub create_index {
 	for (@index) {
 	    s/<!-- INDEX BEGIN -->(\s*<!--)(.*)(-->\s*)<!-- INDEX END -->/$lcp2/s;
 	    s,#,$dir/$file#,g;
-	    # print HTML "$_\n";
 	    print HTML "$_\n<P><HR><P>\n";
 	}
     }
@@ -369,7 +370,7 @@ sub split_on_head {
     foreach $pod (@splithead) {
 	# figure out the directory name and filename
 	$pod      =~ s,^([^/]*)$,/$1,;
-	$pod      =~ m,(.*?)/(.*?)(\.pod)?$,;
+	$pod      =~ m,(.*)/(.*?)(\.pod)?$,;
 	$dirname  = $1;
 	$filename = "$2.pod";
 
@@ -389,11 +390,11 @@ sub split_on_item {
 
     print "splitting files by item.\n" if $verbose && $#splititem >= 0;
     $pwd = getcwd();
-	my $splitter = absolute_path($pwd, "$splitpod/splitpod");
+    my $splitter = absolute_path($pwd, "$splitpod/splitpod");
     foreach my $pod (@splititem) {
 	# figure out the directory to split into
 	$pod      =~ s,^([^/]*)$,/$1,;
-	$pod      =~ m,(.*?)/(.*?)(\.pod)?$,;
+	$pod      =~ m,(.*)/(.*?)(\.pod)?$,;
 	$dirname  = "$1/$2";
 	$filename = "$2.pod";
 
@@ -550,7 +551,7 @@ sub installdir {
 	next if grep($_ eq "$podroot/$pod.pod", @$ignore);
 
 	# check if a .pm files exists too
-	if (grep($_ eq "$pod.pm", @pmlist)) {
+	if (grep($_ eq $pod, @pmlist)) {
 	    print  "$0: Warning both `$podroot/$pod.pod' and "
 		. "`$podroot/$pod.pm' exist, using pod\n";
 	    push(@ignore, "$pod.pm");
@@ -592,9 +593,7 @@ sub runpod2html {
 
     # invoke pod2html
     print "$podroot/$pod => $htmldir/$html\n" if $verbose;
-#system("./pod2html",
-        Pod::Html'pod2html(
-        #Pod::Html'pod2html($pod2html,
+    Pod::Html::pod2html(
         "--htmldir=$htmldir",
 	"--htmlroot=$htmlroot",
 	"--podpath=".join(":", @podpath),
