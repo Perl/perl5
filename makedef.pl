@@ -1038,6 +1038,7 @@ if ($PLATFORM =~ /^win(?:32|ce)$/) {
 			    win32_pclose
 			    win32_rename
 			    win32_setmode
+			    win32_chsize
 			    win32_lseek
 			    win32_tell
 			    win32_dup
