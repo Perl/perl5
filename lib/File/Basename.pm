@@ -149,7 +149,7 @@ sub fileparse {
   }
   if ($fstype =~ /^MSDOS/i) {
     ($dirpath,$basename) = ($fullname =~ /^(.*[:\\\/])?(.*)/);
-    $dirpath .= '.\\' unless $dirpath =~ /\\$/;
+    $dirpath .= '.\\' unless $dirpath =~ /[\\\/]$/;
   }
   elsif ($fstype =~ /^MacOS/i) {
     ($dirpath,$basename) = ($fullname =~ /^(.*:)?(.*)/);
@@ -202,10 +202,11 @@ sub dirname {
     }
     if ($fstype =~ /MacOS/i) { return $dirname }
     elsif ($fstype =~ /MSDOS/i) { 
-        if ( $dirname =~ /:\\$/) { return $dirname }
-        chop $dirname;
-        $dirname =~ s:[^\\]+$:: unless length($basename);
-        $dirname = '.' unless length($dirname);
+        $dirname =~ s/([^:])[\\\/]*$/$1/;
+        unless( length($basename) ) {
+	    ($basename,$dirname) = fileparse $dirname;
+	    $dirname =~ s/([^:])[\\\/]*$/$1/;
+	}
     }
     elsif ($fstype =~ /AmigaOS/i) {
         if ( $dirname =~ /:$/) { return $dirname }
@@ -213,11 +214,12 @@ sub dirname {
         $dirname =~ s#[^:/]+$## unless length($basename);
     }
     else { 
-        if ( $dirname =~ m:^/+$:) { return '/'; }
-        chop $dirname;
-        $dirname =~ s:[^/]+$:: unless length($basename);
-        $dirname =~ s:/+$:: ;
-        $dirname = '.' unless length($dirname);
+        $dirname =~ s:(.)/*$:$1:;
+        unless( length($basename) ) {
+	    local($File::Basename::Fileparse_fstype) = $fstype;
+	    ($basename,$dirname) = fileparse $dirname;
+	    $dirname =~ s:(.)/*$:$1:;
+	}
     }
 
     $dirname;

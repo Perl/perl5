@@ -7,7 +7,7 @@ BEGIN {
 
 use File::Basename qw(fileparse basename dirname);
 
-print "1..30\n";
+print "1..34\n";
 
 # import correctly?
 print +(defined(&basename) && !defined(&fileparse_set_fstype) ?
@@ -105,3 +105,16 @@ print +(basename(':arma:virumque:cano.trojae','.trojae') eq 'cano' ?
 print +(basename(':arma:virumque:cano_trojae','.trojae') eq 'cano_trojae' ?
         '' : 'not '),"ok 30\n";
 
+# extra tests for a few specific bugs
+
+File::Basename::fileparse_set_fstype 'MSDOS';
+# perl5.003_18 gives C:/perl/.\
+print +((fileparse 'C:/perl/lib')[1] eq 'C:/perl/' ? '' : 'not '), "ok 31\n";
+# perl5.003_18 gives C:\perl\
+print +(dirname('C:\\perl\\lib\\') eq 'C:\\perl' ? '' : 'not '), "ok 32\n";
+
+File::Basename::fileparse_set_fstype 'UNIX';
+# perl5.003_18 gives '.'
+print +(dirname('/perl/') eq '/' ? '' : 'not '), "ok 33\n";
+# perl5.003_18 gives '/perl/lib'
+print +(dirname('/perl/lib//') eq '/perl' ? '' : 'not '), "ok 34\n";
