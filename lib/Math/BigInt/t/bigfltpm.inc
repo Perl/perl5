@@ -1221,6 +1221,11 @@ NaNmul:-inf:NaN
 0:1:0,0
 9:4:2.25,1
 9:5:1.8,4
+# bug in v1.74 with bdiv in list context, when $y is 1 or -1
+2.1:-1:-2.1,0
+2.1:1:2.1,0
+-2.1:-1:2.1,0
+-2.1:1:-2.1,0
 &fdiv
 $div_scale = 40; $round_mode = 'even'
 abc:abc:NaN
@@ -1382,6 +1387,15 @@ abc:1:abc:NaN
 1230:2.5:0
 123.4:2.5:0.9
 123e1:25:5
+# 1 or -1 always gives remainder zero (bug up to v1.74)
+-2.1:1:0
+2.1:1:0
+-2.1:-1:0
+2.1:-1:0
+-3:1:0
+3:1:0
+-3:-1:0
+3:-1:0
 &ffac
 Nanfac:NaN
 -1:NaN

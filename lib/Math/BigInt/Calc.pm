@@ -6,7 +6,7 @@ use strict;
 
 use vars qw/$VERSION/;
 
-$VERSION = '0.45';
+$VERSION = '0.46';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -36,7 +36,7 @@ $VERSION = '0.45';
 sub api_version () { 1; }
  
 # constants for easier life
-my ($MBASE,$BASE,$RBASE,$BASE_LEN,$MAX_VAL,$BASE_LEN_SMALL);
+my ($BASE,$BASE_LEN,$MBASE,$RBASE,$MAX_VAL,$BASE_LEN_SMALL);
 my ($AND_BITS,$XOR_BITS,$OR_BITS);
 my ($AND_MASK,$XOR_MASK,$OR_MASK);
 
@@ -94,7 +94,7 @@ sub _base_len
       }
     }
   return $BASE_LEN unless wantarray;
-  return ($BASE_LEN, $AND_BITS, $XOR_BITS, $OR_BITS, $BASE_LEN_SMALL, $MAX_VAL);
+  return ($BASE_LEN, $AND_BITS, $XOR_BITS, $OR_BITS, $BASE_LEN_SMALL, $MAX_VAL, $BASE);
   }
 
 sub _new

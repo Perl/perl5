@@ -13,7 +13,7 @@ BEGIN
   plan tests => 3014;
   }
 
-use Math::BigInt;
+use Math::BigInt lib => 'Calc';
 
 use vars qw ($scale $class $try $x $y $f @args $ans $ans1 $ans1_str $setup $CL);
 $class = "Math::BigInt";

@@ -18,10 +18,10 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
-$VERSION = '1.75';
+$VERSION = '1.76';
 
-@ISA = qw( Exporter );
-@EXPORT_OK = qw( objectify bgcd blcm); 
+@ISA = qw(Exporter);
+@EXPORT_OK = qw(objectify bgcd blcm); 
 
 # _trap_inf and _trap_nan are internal and should never be accessed from the
 # outside
@@ -162,8 +162,8 @@ $_trap_nan = 0;				# are NaNs ok? set w/ config()
 $_trap_inf = 0;				# are infs ok? set w/ config()
 my $nan = 'NaN'; 			# constants for easier life
 
-my $CALC = 'Math::BigInt::Calc';	# module to do the low level math
-					# default is Calc.pm
+my $CALC = 'Math::BigInt::FastCalc';	# module to do the low level math
+					# default is FastCalc.pm
 my $IMPORT = 0;				# was import() called yet?
 					# used to make require work
 my %WARN;				# warn only once for low-level libs
@@ -528,11 +528,10 @@ sub new
     }
 
   # handle '+inf', '-inf' first
-  if ($wanted =~ /^[+-]?inf$/)
+  if ($wanted =~ /^[+-]?inf\z/)
     {
-    $self->{value} = $CALC->_zero();
-    $self->{sign} = $wanted; $self->{sign} = '+inf' if $self->{sign} eq 'inf';
-    return $self;
+    $self->{sign} = $wanted;		# set a default sign for bstr()
+    return $self->binf($wanted);
     }
   # split str in m mantissa, e exponent, i integer, f fraction, v value, s sign
   my ($mis,$miv,$mfv,$es,$ev) = _split($wanted);
@@ -663,7 +662,7 @@ sub binf
   if (${"${class}::_trap_inf"})
     {
     require Carp;
-    Carp::croak ("Tried to set $self to +-inf in $class\::binfn()");
+    Carp::croak ("Tried to set $self to +-inf in $class\::binf()");
     }
   $self->import() if $IMPORT == 0;		# make require work
   return if $self->modify('binf');
@@ -2414,7 +2413,7 @@ sub import
     {
     $_ =~ tr/a-zA-Z0-9://cd;			# limit to sane characters
     }
-  push @c,'Calc';				# if all fail, try this
+  push @c, 'FastCalc', 'Calc';			# if all fail, try these
   $CALC = '';					# signal error
   foreach my $lib (@c)
     {
@@ -2640,9 +2639,11 @@ sub modify () { 0; }
 1;
 __END__
 
+=pod
+
 =head1 NAME
 
-Math::BigInt - Arbitrary size integer math package
+Math::BigInt - Arbitrary size integer/float math package
 
 =head1 SYNOPSIS
 
@@ -2890,11 +2891,26 @@ Example:
 
 	$x->accuracy(5);		# local for $x
 	CLASS->accuracy(5);		# global for all members of CLASS
-	$A = $x->accuracy();		# read out
-	$A = CLASS->accuracy();		# read out
+					# Note: This also applies to new()!
+
+	$A = $x->accuracy();		# read out accuracy that affects $x
+	$A = CLASS->accuracy();		# read out global accuracy
 
 Set or get the global or local accuracy, aka how many significant digits the
-results have. 
+results have. If you set a global accuracy, then this also applies to new()!
+
+Warning! The accuracy I<sticks>, e.g. once you created a number under the
+influence of C<< CLASS->accuracy($A) >>, all results from math operations with
+that number will also be rounded. 
+
+In most cases, you should probably round the results explicitely using one of
+L<round()>, L<bround()> or L<bfround()> or by passing the desired accuracy
+to the math operation as additional parameter:
+
+        my $x = Math::BigInt->new(30000);
+        my $y = Math::BigInt->new(7);
+        print scalar $x->copy()->bdiv($y, 2);		# print 4300
+        print scalar $x->copy()->bdiv($y)->bround(2);	# print 4300
 
 Please see the section about L<ACCURACY AND PRECISION> for further details.
 
@@ -2909,7 +2925,7 @@ represents the accuracy that will be in effect for $x:
 
 	$y = Math::BigInt->new(1234567);	# unrounded
 	print Math::BigInt->accuracy(4),"\n";	# set 4, print 4
-	$x = Math::BigInt->new(123456);		# will be automatically rounded
+	$x = Math::BigInt->new(123456);		# $x will be automatically rounded!
 	print "$x $y\n";			# '123500 1234567'
 	print $x->accuracy(),"\n";		# will be 4
 	print $y->accuracy(),"\n";		# also 4, since global is 4
@@ -2924,35 +2940,46 @@ Math::BigInt.
 
 =head2 precision
 
-	$x->precision(-2);		# local for $x, round right of the dot
-	$x->precision(2);		# ditto, but round left of the dot
-	CLASS->accuracy(5);		# global for all members of CLASS
-	CLASS->precision(-5);		# ditto
-	$P = CLASS->precision();	# read out
-	$P = $x->precision();		# read out
+	$x->precision(-2);	# local for $x, round at the second digit right of the dot
+	$x->precision(2);	# ditto, round at the second digit left of the dot
 
-Set or get the global or local precision, aka how many digits the result has
-after the dot (or where to round it when passing a positive number). In
-Math::BigInt, passing a negative number precision has no effect since no
-numbers have digits after the dot.
+	CLASS->precision(5);	# Global for all members of CLASS
+				# This also applies to new()!
+	CLASS->precision(-5);	# ditto
+
+	$P = CLASS->precision();	# read out global precision 
+	$P = $x->precision();		# read out precision that affects $x
+
+Note: You probably want to use L<accuracy()> instead. With L<accuracy> you
+set the number of digits each result should have, with L<precision> you
+set the place where to round!
+
+C<precision()> sets or gets the global or local precision, aka at which digit
+before or after the dot to round all results. A set global precision also
+applies to all newly created numbers!
+
+In Math::BigInt, passing a negative number precision has no effect since no
+numbers have digits after the dot. In L<Math::BigFloat>, it will round all
+results to P digits after the dot.
 
 Please see the section about L<ACCURACY AND PRECISION> for further details.
 
-Value must be greater than zero. Pass an undef value to disable it:
+Pass an undef value to disable it:
 
 	$x->precision(undef);
 	Math::BigInt->precision(undef);
 
 Returns the current precision. For C<$x->precision()> it will return either the
 local precision of $x, or if not defined, the global. This means the return
-value represents the accuracy that will be in effect for $x:
+value represents the prevision that will be in effect for $x:
 
 	$y = Math::BigInt->new(1234567);	# unrounded
 	print Math::BigInt->precision(4),"\n";	# set 4, print 4
 	$x = Math::BigInt->new(123456);		# will be automatically rounded
+	print $x;				# print "120000"!
 
-Note: Works also for subclasses like Math::BigFloat. Each class has it's own
-globals separated from Math::BigInt, but it is possible to subclass
+Note: Works also for subclasses like L<Math::BigFloat>. Each class has its
+own globals separated from Math::BigInt, but it is possible to subclass
 Math::BigInt and make the globals of the subclass aliases to the ones from
 Math::BigInt.
 
