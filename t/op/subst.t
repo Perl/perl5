@@ -1,6 +1,10 @@
 #!./perl
 
-# $RCSfile: s.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:22 $
+
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib' if -d '../lib';
+}
 
 print "1..70\n";
 
@@ -276,6 +280,7 @@ $_ = <<'EOL';
 EOL
 $^R = 'junk';
 
+use re 'eval';
 $foo = ' $@%#lowercase $@%# lowercase UPPERCASE$@%#UPPERCASE' .
   ' $@%#lowercase$@%#lowercase$@%# lowercase lowercase $@%#lowercase' .
   ' lowercase $@%#MiXeD$@%# ';

@@ -1043,6 +1043,13 @@ reg(I32 paren, I32 *flagp)
 		    regcomp_rx->data->data[n+2] = (void*)sop;
 		    SvREFCNT_dec(sv);
 		} else {		/* First pass */
+		    if (curcop == &compiling) {
+			if (!(hints & HINT_RE_EVAL))
+			    FAIL("Eval-group not allowed, use re 'eval'");
+		    }
+		    else {
+			FAIL("Eval-group not allowed at run time");
+		    }
 		    if (tainted)
 			FAIL("Eval-group in insecure regular expression");
 		}

@@ -1063,6 +1063,27 @@ single form when it must operate on them directly.  Either you've
 passed an invalid file specification to Perl, or you've found a
 case the conversion routines don't handle.  Drat.
 
+=item %s: Eval-group in insecure regular expression
+
+(F) Perl detected tainted data when trying to compile a regular expression
+that contains the C<(?{ ... })> zero-width assertion, which is unsafe.
+See L<perlre/(?{ code })>, and L<perlsec>.
+
+=item %s: Eval-group not allowed, use re 'eval'
+
+(F) A regular expression contained the C<(?{ ... })> zero-width assertion,
+but that construct is only allowed when the C<use re 'eval'> pragma is
+in effect.  See L<perlre/(?{ code })>.
+
+=item %s: Eval-group not allowed at run time
+
+(F) Perl tried to compile a regular expression containing the C<(?{ ... })>
+zero-width assertion at run time, at it would when the pattern contains
+interpolated values.  Since this is a risk to security, it is not allowed.
+If you insist, you may still do this by explicitly building the pattern
+from an interpolated string at run time and using that in an eval().
+See L<perlre/(?{ code })>.
+
 =item Excessively long <> operator
 
 (F) The contents of a <> operator may not exceed the maximum size of a

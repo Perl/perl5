@@ -336,16 +336,18 @@ sub foo { local $_ = shift; split; @_ }
 @x = foo(' x  y  z ');
 print "you die joe!\n" unless "@x" eq 'x y z';
 ########
+use re 'eval';
 /(?{"{"})/	# Check it outside of eval too
 EXPECT
-Sequence (?{...}) not terminated or not {}-balanced at - line 1, within pattern
-/(?{"{"})/: Sequence (?{...}) not terminated or not {}-balanced at - line 1.
+Sequence (?{...}) not terminated or not {}-balanced at - line 2, within pattern
+/(?{"{"})/: Sequence (?{...}) not terminated or not {}-balanced at - line 2.
 ########
+use re 'eval';
 /(?{"{"}})/	# Check it outside of eval too
 EXPECT
 Unmatched right bracket at (re_eval 1) line 1, at end of line
 syntax error at (re_eval 1) line 1, near ""{"}"
-Compilation failed in regexp at - line 1.
+Compilation failed in regexp at - line 2.
 ########
 BEGIN { @ARGV = qw(a b c) }
 BEGIN { print "argv <@ARGV>\nbegin <",shift,">\n" }

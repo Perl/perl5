@@ -330,6 +330,10 @@ Experimental "evaluate any Perl code" zero-width assertion.  Always
 succeeds.  C<code> is not interpolated.  Currently the rules to
 determine where the C<code> ends are somewhat convoluted.
 
+Owing to the risks to security, this is only available when the
+C<use re 'eval'> pragma is used, and then only for patterns that don't
+have any variables that must be interpolated at run time.
+
 The C<code> is properly scoped in the following sense: if the assertion
 is backtracked (compare L<"Backtracking">), all the changes introduced after
 C<local>isation are undone, so
@@ -359,11 +363,6 @@ other C<(?{ code })> assertions inside the same regular expression.
 
 The above assignment to $^R is properly localized, thus the old value of $^R
 is restored if the assertion is backtracked (compare L<"Backtracking">).
-
-B<WARNING>: This is a grave security risk for arbitrarily interpolated
-patterns.  It introduces security holes in previously safe programs.
-A fix to Perl, and to this documentation, will be forthcoming prior
-to the actual 5.005 release.
 
 =item C<(?E<gt>pattern)>
 
