@@ -1757,7 +1757,7 @@ Not implemented. (Older versions of VMS)
 Truncation to zero-length only. (VOS)
 
 If a FILEHANDLE is supplied, it must be writable and opened in append
-mode (i.e., use C<open(FH, '>>filename')>
+mode (i.e., use C<<< open(FH, '>>filename') >>>
 or C<sysopen(FH,...,O_APPEND|O_RDWR)>.  If a filename is supplied, it
 should not be held open elsewhere. (Win32)
 
@@ -2067,6 +2067,7 @@ Larry Moore <ljmoore@freespace.net>,
 Paul Moore <Paul.Moore@uk.origin-it.com>,
 Chris Nandor <pudge@pobox.com>,
 Matthias Neeracher <neeri@iis.ee.ethz.ch>,
+Philip Newton <pne@cpan.org>,
 Gary Ng <71564.1743@CompuServe.COM>,
 Tom Phoenix <rootbeer@teleport.com>,
 AndrE<eacute> Pirard <A.Pirard@ulg.ac.be>,
