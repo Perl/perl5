@@ -2455,8 +2455,12 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 	PerlLIO_close(pp[0]);
 	did_pipes = 0;
 	if (n) {			/* Error */
+	    int pid2, status;
 	    if (n != sizeof(int))
 		Perl_croak(aTHX_ "panic: kid popen errno read");
+	    do {
+		pid2 = wait4pid(pid, &status, 0);
+	    } while (pid2 == -1 && errno == EINTR);
 	    errno = errkid;		/* Propagate errno from kid */
 	    return Nullfp;
 	}
