@@ -33,7 +33,7 @@ Prf_Get(HINI hini, PSZ app, PSZ key) {
     return sv;
 }
 
-U32
+I32
 Prf_GetLength(HINI hini, PSZ app, PSZ key) {
     U32 len;
 
@@ -110,7 +110,7 @@ Prf_Set(hini, app, key, s, l = (SvPOK(ST(3)) ? SvCUR(ST(3)): -1))
  PSZ s;
  ULONG l;
 
-U32
+I32
 Prf_GetLength(hini, app, key)
  HINI hini;
  PSZ app;
