@@ -4,7 +4,7 @@ specially designed to be readable as is.
 
 =head1 NAME
 
-perlhpux - Perl version 5 on Hewlett-Packard Unix (HP-UX) systems
+README.hpux - Perl version 5 on Hewlett-Packard Unix (HP-UX) systems
 
 =head1 DESCRIPTION
 
@@ -65,20 +65,29 @@ The following systems contain with PA-RISC 1.1 chips:
 The most recent upgrade to the PA-RISC design, it added support for 64-bit
 integer data.
 
-The following systems contain PA-RISC 2.0 chips:
+The following systems contain PA-RISC 2.0 chips (this is very likely to be
+out of date):
 
     D270, D280, D370, D380, K250, K260, K370, K380, K450, K460, K570, K580,
     T600, V2200
+
+A complete list of models at the time the OS was built is in the file
+/opt/langtools/lib/sched.models.
+The first column corresponds to the output of the "uname -m" command
+(without the leading "9000/").
+The second column is the PA-RISC version
+and the third column is the exact chip type used.
 
 =head2 Portability Between PA-RISC Versions
 
 An executable compiled on a PA-RISC 2.0 platform will not execute on a
 PA-RISC 1.1 platform, even if they are running the same version of HP-UX.
 If you are building Perl on a PA-RISC 2.0 platform and want that Perl to
-to also run on a PA-RISC 1.1, the compiler flag +DAportable should be used.
+to also run on a PA-RISC 1.1, the compiler flags +DAportable and +DS32
+should be used.
 
 It is no longer possible to compile PA-RISC 1.0 executables on either the
-PA-RISC 1.1 and 2.0 platforms.
+PA-RISC 1.1 or 2.0 platforms.
 
 =head2 Building Dynamic Extensions on HP-UX
 
@@ -131,10 +140,11 @@ config.sh file.
 
 =head2 Using Large Files with Perl
 
-Beginning with HP-UX version 10.10, files larger than 2GB (2^31) may be
+Beginning with HP-UX version 10.20, files larger than 2GB (2^31) may be
 created and manipulated.
 Three separate methods of doing this are available.
-The best method is to compile Perl using the -D_FILE_OFFSET_BITS=64
+Of these methods,
+the best method for Perl is to compile using the -D_FILE_OFFSET_BITS=64
 compiler flag.
 This causes Perl to be compiled using structures and functions in which
 these are 64 bits wide, rather than 32 bits wide.
@@ -143,9 +153,19 @@ There are only two drawbacks to this approach:
 the first is that the seek and tell functions (both the builtin version
 and the POSIX module's version) will not correctly
 function for these large files
-(POSIX declared the offset arguments in seek and tell as being of type long).
+(the offset arguments in seek and tell are implemented as type long).
 The second is that any extension which calls any file-manipulating C function
-will need to be recompiled.
+will need to be recompiled using the above-mentioned -D_FILE_OFFSET_BITS=64
+flag.
+The list of functions that will need to recompiled is:
+creat,		fgetpos,	fopen,
+freopen,	fsetpos,	fstat,
+fstatvfs,	fstatvfsdev,	ftruncate,
+ftw,		lockf,		lseek,
+lstat,		mmap,		nftw,
+open,		prealloc,	stat,
+statvfs,	statvfsdev,	tmpfile,
+truncate,	getrlimit,	setrlimit
 
 =head2 Threaded Perl
 
@@ -180,6 +200,19 @@ now located at /lib/pa20_64/libc.sl.
 On the brighter side, the large file problem goes away, as longs are now
 64 bits wide.
 
+=head2 GDBM and Threads
+
+If you attempt to compile Perl with threads on an 11.X system and also link
+in the GDBM library, then Perl will immediately core dump when it starts up.
+The only workaround at this point is to relink the GDBM library under 11.X,
+then relink it into Perl.
+
+=head2 NFS filesystems and utime(2)
+
+If you are compiling Perl on a remotely-mounted NFS filesystem, the test
+io/fs.t may fail on test #18.
+This appears to be a bug in HP-UX and no fix is currently available.
+
 =head1 AUTHOR
 
 Jeff Okamoto <okamoto@corp.hp.com>
@@ -188,6 +221,6 @@ With much assistance regarding shared libraries from Marc Sabatella.
 
 =head1 DATE
 
-Version 0.1: 1999/2/22
+Version 0.2: 1999/03/01
 
 =cut
