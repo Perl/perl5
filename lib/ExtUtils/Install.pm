@@ -108,20 +108,11 @@ sub install {
 	for (readdir DIR) {
 	    next if $_ eq $Curdir || $_ eq $Updir || $_ eq ".exists";
             my $targetdir = install_rooted_dir($from_to{$source_dir_or_file});
-	    if ($nonono) {
-		if (!-w $targetdir) {
-		    print "mkpath($targetdir)\n" if $verbose>1;
-		}
-		last;
-	    } else {
-		if (-w $targetdir ||
-		    mkpath($targetdir)) {
-		    last;
-		} else {
-		    warn "Warning: You do not have permissions to " .
-			"install into $from_to{$source_dir_or_file}"
-			    unless $warn_permissions++;
-		}
+            mkpath($targetdir) unless $nonono;
+	    if (!$nonono && !-w $targetdir) {
+		warn "Warning: You do not have permissions to " .
+		    "install into $from_to{$source_dir_or_file}"
+		    unless $warn_permissions++;
 	    }
 	}
 	closedir DIR;

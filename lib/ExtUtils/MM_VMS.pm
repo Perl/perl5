@@ -21,7 +21,7 @@ BEGIN {
 use File::Basename;
 use vars qw($Revision @ISA $VERSION);
 ($VERSION) = '5.67';
-($Revision = substr(q$Revision: 1.91 $, 10)) =~ s/\s+$//;
+($Revision) = q$Revision: 1.95 $ =~ /Revision:\s+(\S+)/;
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
@@ -1196,6 +1196,9 @@ sub installbin {
     push @m, "
 EXE_FILES = @exefiles
 
+pure_all :: @to
+	\$(NOECHO) \$(NOOP)
+
 realclean ::
 ";
 
@@ -1212,8 +1215,12 @@ realclean ::
     while (($from,$to) = each %fromto) {
 	last unless defined $from;
 	my $todir;
-	if ($to =~ m#[/>:\]]#) { $todir = dirname($to); }
-	else                   { ($todir = $to) =~ s/[^\)]+$//; }
+	if ($to =~ m#[/>:\]]#) {
+            $todir = dirname($to); 
+        }
+	else { 
+            ($todir = $to) =~ s/[^\)]+$//; 
+        }
 	$todir = $self->fixpath($todir,1);
 	push @m, "
 $to : $from \$(FIRST_MAKEFILE) ${todir}\$(DIRFILESEP).exists
@@ -1628,18 +1635,18 @@ sub perldepend {
 $(OBJECT) : $(PERL_INC)EXTERN.h, $(PERL_INC)INTERN.h, $(PERL_INC)XSUB.h
 $(OBJECT) : $(PERL_INC)av.h, $(PERL_INC)cc_runtime.h, $(PERL_INC)config.h
 $(OBJECT) : $(PERL_INC)cop.h, $(PERL_INC)cv.h, $(PERL_INC)embed.h
-$(OBJECT) : $(PERL_INC)embedvar.h, $(PERL_INC)fakethr.h, $(PERL_INC)form.h
+$(OBJECT) : $(PERL_INC)embedvar.h, $(PERL_INC)form.h
 $(OBJECT) : $(PERL_INC)gv.h, $(PERL_INC)handy.h, $(PERL_INC)hv.h
 $(OBJECT) : $(PERL_INC)intrpvar.h, $(PERL_INC)iperlsys.h, $(PERL_INC)keywords.h
 $(OBJECT) : $(PERL_INC)mg.h, $(PERL_INC)nostdio.h, $(PERL_INC)op.h
-$(OBJECT) : $(PERL_INC)opcode.h, $(PERL_INC)opnames.h, $(PERL_INC)patchlevel.h
-$(OBJECT) : $(PERL_INC)perl.h, $(PERL_INC)perlapi.h, $(PERL_INC)perlio.h
-$(OBJECT) : $(PERL_INC)perlsdio.h, $(PERL_INC)perlsfio.h, $(PERL_INC)perlvars.h
+$(OBJECT) : $(PERL_INC)opcode.h, $(PERL_INC)patchlevel.h
+$(OBJECT) : $(PERL_INC)perl.h, $(PERL_INC)perlio.h
+$(OBJECT) : $(PERL_INC)perlsdio.h, $(PERL_INC)perlvars.h
 $(OBJECT) : $(PERL_INC)perly.h, $(PERL_INC)pp.h, $(PERL_INC)pp_proto.h
 $(OBJECT) : $(PERL_INC)proto.h, $(PERL_INC)regcomp.h, $(PERL_INC)regexp.h
 $(OBJECT) : $(PERL_INC)regnodes.h, $(PERL_INC)scope.h, $(PERL_INC)sv.h
-$(OBJECT) : $(PERL_INC)thrdvar.h, $(PERL_INC)thread.h, $(PERL_INC)utf8.h
-$(OBJECT) : $(PERL_INC)util.h, $(PERL_INC)vmsish.h, $(PERL_INC)warnings.h
+$(OBJECT) : $(PERL_INC)thrdvar.h, $(PERL_INC)thread.h
+$(OBJECT) : $(PERL_INC)util.h, $(PERL_INC)vmsish.h
 
 ' if $self->{OBJECT}; 
 

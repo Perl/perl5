@@ -51,9 +51,10 @@ install( { 'blib/lib' => 'install-test/lib/perl',
            write  => 'install-test/packlist'
          },
        0, 1);
-ok( ! -d 'install-test/lib/perl',                 'install made dir - dry run' );
-ok( ! -r 'install-test/lib/perl/Big/Dummy.pm',    '  .pm file installed - dry run' );
-ok( ! -r 'install-test/packlist',                 '  packlist exists - dry run' );
+ok( ! -d 'install-test/lib/perl',        'install made dir (dry run)');
+ok( ! -r 'install-test/lib/perl/Big/Dummy.pm',
+                                         '  .pm file installed (dry run)');
+ok( ! -r 'install-test/packlist',        '  packlist exists (dry run)');
 
 install( { 'blib/lib' => 'install-test/lib/perl',
            read   => 'install-test/packlist',

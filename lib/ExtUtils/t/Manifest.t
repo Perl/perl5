@@ -14,7 +14,7 @@ chdir 't';
 use strict;
 
 # these files help the test run
-use Test::More tests => 37;
+use Test::More tests => 39;
 use Cwd;
 
 # these files are needed for the module itself
@@ -26,14 +26,14 @@ use File::Path;
 @INC = map { File::Spec->rel2abs($_) } @INC;
 
 # keep track of everything added so it can all be deleted
-my %files;
+my %Files;
 sub add_file {
     my ($file, $data) = @_;
     $data ||= 'foo';
-    unlink $file;  # or else we'll get multiple versions on VMS
+    1 while unlink $file;  # or else we'll get multiple versions on VMS
     open( T, '>'.$file) or return;
     print T $data;
-    ++$files{$file};
+    ++$Files{$file};
     close T;
 }
 
@@ -127,10 +127,12 @@ ok( exists( ExtUtils::Manifest::manifind()->{'moretest/quux'} ),
                                         "manifind found moretest/quux" );
 
 # only MANIFEST and foo are in the manifest
+$_ = 'foo';
 my $files = maniread();
 is( keys %$files, 2, 'two files found' );
 is( join(' ', sort { lc($a) cmp lc($b) } keys %$files), 'foo MANIFEST', 
                                         'both files found' );
+is( $_, 'foo', q{maniread() doesn't clobber $_} );
 
 # poison the manifest, and add a comment that should be reported
 add_file( 'MANIFEST', 'none #none' );
@@ -158,7 +160,7 @@ like($warn, qr/^Skipping MANIFEST.SKIP/i, 'warned about MANIFEST.SKIP' );
 	like( $warn, qr/Added to albatross: /, 'using a new manifest file' );
 	
 	# add the new file to the list of files to be deleted
-	$files{'albatross'}++;
+	$Files{'albatross'}++;
 }
 
 
@@ -188,10 +190,19 @@ is( $files->{wibble}, '',    'maniadd() with undef comment' );
 is( $files->{yarrow}, 'hock','          with comment' );
 is( $files->{foobar}, '',    '          preserved old entries' );
 
+add_file('MANIFEST'   => 'Makefile.PL');
+maniadd({ 'META.yml'  => 'Module meta-data (added by MakeMaker)' });
+$files = maniread;
+# VMS downcases the MANIFEST.  We normalize it here to match.
+%$files = map { (lc $_ => $files->{$_}) } keys %$files;
+my %expect = ( 'makefile.pl' => '',
+               'meta.yml'    => 'Module meta-data (added by MakeMaker)' 
+             );
+is_deeply( $files, \%expect, 'maniadd() vs MANIFEST without trailing newline');
 
 END {
 	# the args are evaluated in scalar context
-	is( unlink( keys %files ), keys %files, 'remove all added files' );
+	is( unlink( keys %Files ), keys %Files, 'remove all added files' );
 	remove_dir( 'moretest', 'copy' );
 
 	# now get rid of the parent directory
