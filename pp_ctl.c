@@ -667,6 +667,61 @@ PP(pp_mapwhile)
     }
 }
 
+#define tryCALL_AMAGICbin(left,right,meth,svp) STMT_START { \
+	  *svp = Nullsv;				\
+          if (PL_amagic_generation) { \
+	    if (SvAMAGIC(left)||SvAMAGIC(right))\
+		*svp = amagic_call(left, \
+				   right, \
+				   CAT2(meth,_amg), \
+				   0); \
+	  } \
+	} STMT_END
+
+STATIC I32
+amagic_cmp(register SV *str1, register SV *str2)
+{
+    SV *tmpsv;
+    tryCALL_AMAGICbin(str1,str2,scmp,&tmpsv);
+    if (tmpsv) {
+    	double d;
+    	
+        if (SvIOK(tmpsv)) {
+            I32 i = SvIVX(tmpsv);
+            if (i > 0)
+               return 1;
+            return i? -1 : 0;
+        }
+        d = SvNV(tmpsv);
+        if (d > 0)
+           return 1;
+        return d? -1 : 0;
+    }
+    return sv_cmp(str1, str2);
+}
+
+STATIC I32
+amagic_cmp_locale(register SV *str1, register SV *str2)
+{
+    SV *tmpsv;
+    tryCALL_AMAGICbin(str1,str2,scmp,&tmpsv);
+    if (tmpsv) {
+    	double d;
+    	
+        if (SvIOK(tmpsv)) {
+            I32 i = SvIVX(tmpsv);
+            if (i > 0)
+               return 1;
+            return i? -1 : 0;
+        }
+        d = SvNV(tmpsv);
+        if (d > 0)
+           return 1;
+        return d? -1 : 0;
+    }
+    return sv_cmp_locale(str1, str2);
+}
+
 PP(pp_sort)
 {
     djSP; dMARK; dORIGMARK;
@@ -678,6 +733,7 @@ PP(pp_sort)
     CV *cv;
     I32 gimme = GIMME;
     OP* nextop = PL_op->op_next;
+    I32 overloading = 0;
 
     if (gimme != G_ARRAY) {
 	SP = MARK;
@@ -730,8 +786,12 @@ PP(pp_sort)
 	/*SUPPRESS 560*/
 	if (*up = *++MARK) {			/* Weed out nulls. */
 	    SvTEMP_off(*up);
-	    if (!PL_sortcop && !SvPOK(*up))
-		(void)sv_2pv(*up, &PL_na);
+	    if (!PL_sortcop && !SvPOK(*up)) {
+	        if (SvAMAGIC(*up))
+	            overloading = 1;
+	        else
+		    (void)sv_2pv(*up, &PL_na);
+	    }
 	    up++;
 	}
     }
@@ -778,8 +838,12 @@ PP(pp_sort)
 	    MEXTEND(SP, 20);	/* Can't afford stack realloc on signal. */
 	    qsortsv(ORIGMARK+1, max,
 		    (PL_op->op_private & OPpLOCALE)
-		    ? FUNC_NAME_TO_PTR(sv_cmp_locale)
-		    : FUNC_NAME_TO_PTR(sv_cmp));
+		    ? ( overloading
+		        ? FUNC_NAME_TO_PTR(amagic_cmp_locale)
+		        : FUNC_NAME_TO_PTR(sv_cmp_locale))
+		    : ( overloading 
+		        ? FUNC_NAME_TO_PTR(amagic_cmp)
+		        : FUNC_NAME_TO_PTR(sv_cmp) ));
 	}
     }
     LEAVE;
