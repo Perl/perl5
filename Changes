@@ -28,6 +28,254 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 19791] By: jhi                                   on 2003/06/15  17:57:06
+        Log: Integrate:
+             [ 19775]
+             test.pl-ify and add a couple of tests.
+             
+             [ 19776]
+             Slight tweaks on the length() and chr() entries,
+             passing-by rewrapping on the rmdir entry.
+             
+             [ 19778]
+             Exercise the utf8:: "internal" functions.
+             
+             [ 19779]
+             Subject: [PATCH: sv.c] strchr() running amok in sv_vcatpvfn()
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Sat, 14 Jun 2003 12:51:31 +0200
+             Message-ID: <041901c33262$eac8ae30$f248eed9@R2D2>
+             
+             (choosing the safe alternative)
+             
+             [ 19781]
+             Followup on #19779: make the helper function static,
+             and rename it for paranoia reasons.
+             
+             [ 19782]
+             Mention the Unicode::Regex::Set module.
+             
+             [ 19783]
+             The FileCache 1.03 tests from belg4mit.
+             
+             [ 19785]
+             Most often unused variables.
+             
+             [ 19786]
+             Subject: Re: [PATCH: sv.c] strchr() running amok in sv_vcatpvfn()
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Sun, 15 Jun 2003 10:48:40 +0200
+             Message-ID: <004a01c3331a$ec001320$3445eed9@R2D2>
+             
+             [ 19787]
+             Unused variable.
+             
+             [ 19788]
+             Reindent a section of the file.
+             
+             [ 19789]
+             Subject: [PATCH 5.8.1 @19774] OS2 patches
+             From: Ilya Zakharevich <ilya@Math.Berkeley.EDU>
+             Date: Sat, 14 Jun 2003 17:49:57 -0700
+             Message-ID: <20030615004956.GA28272@math.berkeley.edu>
+             
+             [ 19790]
+             Start using Perl malloc in FreeBSD since the system malloc
+             is reaaally slooow for Perl.
+             
+             Subject: FreeBSD 5.1 vs. -Uusemymalloc
+             From: Dan Kogai <dankogai@dan.co.jp>
+             Date: Mon, 16 Jun 2003 01:48:49 +0900
+             Message-Id: <3CE9B94D-9F51-11D7-AF50-000393AE4244@dan.co.jp>
+     Branch: maint-5.8/perl
+	  +> lib/FileCache/t/01open.t lib/FileCache/t/02maxopen.t
+	  +> lib/FileCache/t/03append.t lib/FileCache/t/04twoarg.t
+	  +> lib/FileCache/t/05override.t os2/OS2/typemap os2/perlrexx.cmd
+	   - lib/FileCache.t os2/OS2/PrfDB/typemap
+	  !> (integrate 33 files)
+____________________________________________________________________________
+[ 19774] By: jhi                                   on 2003/06/14  08:06:18
+        Log: Integrate:
+             [ 19772]
+             Illegal cpp.
+             
+             [ 19773]
+             Slight reorg of the binmode() entry.
+     Branch: maint-5.8/perl
+	  !> pod/perlfunc.pod util.c
+____________________________________________________________________________
+[ 19771] By: jhi                                   on 2003/06/14  04:40:49
+        Log: Integrate:
+             [ 19763]
+             Define a cpp symbol, BSDish, if that looks appropriate.
+             
+             [ 19764]
+             Apparently the __APPLE__ cpp symbol is not Officially Sanctioned
+             way of detecting Darwin/Mac OS X; instead it is recommended to
+             detect the OS at a higher level and pass the information manually
+             down to the application, using e.g. a -Ddefinition.
+             
+             [ 19765]
+             Subject: [PATCH] Re: [perl #18849] fork/system bug on FreeBSD
+             From: alan <alan@pair.com>
+             Date: Wed, 11 Jun 2003 14:07:00 -0400 (EDT)
+             Message-ID: <Pine.BSF.4.30.0306111348450.32145-100000@smx.pair.com>
+             
+             (the first alternative)
+             
+             [ 19766]
+             Somehow MPE/iX managed to get
+             "18/0Illegal division by zero at ../lib/Test/Harness.pm line 921."
+             
+             [ 19767]
+             Redundancy removal from Brian De Pradine;
+             both the forms, pthread_mutexattr_settype() and               
+             pthread_mutexattr_setkind_np(), exist on z/OS.
+             
+             [ 19768]
+             Encode simply needs more work on EBCDIC.
+             
+             [ 19770]
+             Subject: Re: FileCache
+             From: belg4mit <belg4mit@MIT.EDU>
+             Date: Sat, 14 Jun 2003 01:35:05 -0400
+             Message-ID: <3EEAB409.7B4C21EA@mit.edu>
+             
+             FileCache 1.03.
+     Branch: maint-5.8/perl
+	  !> ext/Encode/t/Unicode.t hints/darwin.sh lib/FileCache.pm
+	  !> lib/Test/Harness.pm perl.h thread.h util.c x2p/util.c
+____________________________________________________________________________
+[ 19762] By: jhi                                   on 2003/06/13  12:09:16
+        Log: Integrate:
+             [ 19760]
+             Even more tweakage on symbol scanning from Alan Burlison. 
+     Branch: maint-5.8/perl
+	  !> Configure
+____________________________________________________________________________
+[ 19759] By: jhi                                   on 2003/06/13  07:22:57
+        Log: Integrate:
+             [ 19740]
+             Doc nit.
+             
+             [ 19741]
+             Subject: [PATCH: perl@19733] fix vmsish.t #25 by letting $0 find itself in the face of chdir() calls
+             From: PPrymmer@factset.com
+             Date: Wed, 11 Jun 2003 09:00:34 -0400
+             Message-ID: <OF2535E971.A30D9C74-ON85256D42.00461FF9-85256D42.004776C4@factset.com>
+             
+             [ 19742]
+             Subject: [PATCH] Configure -Dnoextensions would not accept a list
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Wed, 11 Jun 2003 13:35:26 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.53.0306111331550.2477@maxwell.phys.lafayette.edu>
+             
+             [ 19744]
+             Subject: Re: [PATCH] Annoyingly unhelpful messages from lib/File/Temp/t/security.t
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Wed, 11 Jun 2003 12:57:58 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.53.0306111252540.19074@maxwell.phys.lafayette.edu>
+             
+             [ 19746]
+             Be polite and destroy the mutexes and conditions we use!
+             
+             [ 19747]
+             Slightly amended version of the proposed patch for
+             "[perl #22390] export PERLIO=bytes segfaults";
+             the amendment is to set errno.
+             TODO: we really should not get here if the layer
+             stack is corrupt or non-sensical (like "bytes").
+             
+             [ 19748]
+             Further perlio doc tweaks.
+             
+             [ 19749]
+             More perlio ->Open paranoia.  Set errno to EINVAL if there's
+             no ->Open, not if ->Open returns NULL.
+             
+             [ 19750]
+             In free we want to destroy, not init, thanks to Tim Bunce for 
+             detecting this. Should hopefully fix memory leak on Tru64
+             
+             [ 19751]
+             Patch for a warning emitted twice, from :
+             Subject: [PATCH: perl@19733] "perldoc -f -X" + "extra warning from -T"
+             From: Steve Grazzini <grazz@pobox.com>
+             Date: Wed, 11 Jun 2003 00:46:47 -0400
+             Message-ID: <20030611044647.GA16696@grazzini.net>
+             
+             [ 19752]
+             Add a new warning, "Newline in left-justified string for printf/sprintf"
+             to be issued if the string to be left-justified by s?printf contains
+             a newline.
+             
+             Subject: [PATCH] RE: [perl #22599] Strange behaviour when combining foreac h and printf 
+             From: Robin Barker <Robin.Barker@npl.co.uk>
+             Date: Wed, 11 Jun 2003 18:10:14 +0100
+             Message-ID: <533D273D4014D411AB1D00062938C4D904046571@hotel.npl.co.uk>
+             
+             [ 19756]
+             The changes #8803 and #8896 that fixed JPL for use with
+             JDK 1.2/1.3 had somehow disappeared.
+             
+             [ 19758]
+             Sync with libnet 1.15
+     Branch: maint-5.8/perl
+	  !> Configure INSTALL ext/threads/shared/shared.xs
+	  !> lib/File/Temp/t/security.t lib/Net/ChangeLog.libnet
+	  !> lib/Net/FTP.pm lib/PerlIO.pm lib/vmsish.t perl.c perl.h
+	  !> perlio.c pod/perldiag.pod pod/perlrun.pod pp_sys.c sv.c
+	  !> t/lib/warnings/sv
+____________________________________________________________________________
+[ 19757] By: jhi                                   on 2003/06/13  05:23:22
+        Log: To go with #19745.
+     Branch: maint-5.8/perl
+	   ! pad.h
+____________________________________________________________________________
+[ 19755] By: jhi                                   on 2003/06/13  04:56:10
+        Log: Uncurliff.
+     Branch: maint-5.8/perl
+	   ! djgpp/configure.bat
+____________________________________________________________________________
+[ 19754] By: jhi                                   on 2003/06/13  04:54:04
+        Log: Forgotten check-in.
+     Branch: maint-5.8/perl
+	   ! Cross/config.sh-arm-linux
+____________________________________________________________________________
+[ 19753] By: jhi                                   on 2003/06/13  04:52:36
+        Log: Regen perlintern.
+     Branch: maint-5.8/perl
+	   ! pod/perlintern.pod
+____________________________________________________________________________
+[ 19745] By: jhi                                   on 2003/06/12  06:35:47
+        Log: Bandaid from Dave Mitchell for various pad-related
+             breakages in 5005threads builds.
+     Branch: maint-5.8/perl
+	   ! embedvar.h intrpvar.h perlapi.h thrdvar.h util.c
+____________________________________________________________________________
+[ 19736] By: jhi                                   on 2003/06/10  06:43:29
+        Log: Integrate:
+             [ 19734]
+             Upgrade to Unicode::Collate 0.25.
+             
+             [ 19735]
+             Upgrade to Unicode::Normalize 0.22.
+     Branch: maint-5.8/perl
+	  !> ext/Unicode/Normalize/Changes
+	  !> ext/Unicode/Normalize/Makefile.PL
+	  !> ext/Unicode/Normalize/Normalize.pm
+	  !> ext/Unicode/Normalize/Normalize.xs
+	  !> ext/Unicode/Normalize/README ext/Unicode/Normalize/mkheader
+	  !> ext/Unicode/Normalize/t/func.t ext/Unicode/Normalize/t/norm.t
+	  !> ext/Unicode/Normalize/t/test.t lib/Unicode/Collate.pm
+	  !> lib/Unicode/Collate/Changes lib/Unicode/Collate/README
+	  !> lib/Unicode/Collate/t/index.t lib/Unicode/Collate/t/test.t
+____________________________________________________________________________
+[ 19733] By: jhi                                   on 2003/06/09  20:55:44
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 19732] By: jhi                                   on 2003/06/09  20:52:02
         Log: Integrate:
              [ 19729]
