@@ -44,6 +44,7 @@ AOUT_CLDFLAGS_DLL	= -Zexe -Zmt -Zcrtdll -Zstack 32000
 SO_CCCMD	= \$(CC) $ccflags \$(OPTIMIZE)
 
 LD_OPT		= \$(OPTIMIZE)
+PERL_DLL_LD_OPT = -Zmap -Zlinker /map
 
 PERL_DLL_BASE	= perl$dll_post
 PERL_DLL	= \$(PERL_DLL_BASE)\$(DLSUFFIX)
@@ -90,7 +91,7 @@ t/$(PERL_DLL): $(PERL_DLL)
 	$(LNS) $(PERL_DLL) t/$(PERL_DLL)
 
 $(PERL_DLL): $(obj) perl5.def perl$(OBJ_EXT)
-	$(LD) $(LD_OPT) $(LDDLFLAGS) -o $@ perl$(OBJ_EXT) $(obj) $(libs) perl5.def || ( rm $(PERL_DLL) && sh -c false )
+	$(LD) $(LD_OPT) $(LDDLFLAGS) $(PERL_DLL_LD_OPT) -o $@ perl$(OBJ_EXT) $(obj) $(libs) perl5.def || ( rm $(PERL_DLL) && sh -c false )
 
 perl5.olddef: perl.linkexp
 	echo "LIBRARY '$(PERL_DLL_BASE)' INITINSTANCE TERMINSTANCE"	> $@
@@ -229,7 +230,9 @@ STAT_AOUT_CLDFLAGS = -Zexe -Zmt -Zstack 32000
 perl_stat_aout$(EXE_EXT) perl_stat_aout: $& perlmain$(AOUT_OBJ_EXT) $(AOUT_DYNALOADER_OBJ) $(aout_static_ext_dll) $(AOUT_LIBPERL_DLL) ext.libs
 	$(SHRPENV) $(CC) $(STAT_AOUT_CLDFLAGS) $(CCDLFLAGS) -o $@ perlmain$(AOUT_OBJ_EXT) $(AOUT_DYNALOADER_OBJ) $(aout_static_ext_dll) $(AOUT_LIBPERL_DLL) `cat ext.libs` $(libs)
 
-perl : perl__ perl___
+PERLREXX_DLL = perlrexx.dll
+
+perl : perl__ perl___ $(PERLREXX_DLL)
 
 # Dynamically loaded PM-application perl:
 
@@ -251,7 +254,7 @@ aout_install: perl_ aout_install.perl
 aout_install.perl: perl_ installperl
 	./perl_ installperl
 
-perlrexx: perlrexx.dll
+perlrexx: $(PERLREXX_DLL)
 	@sh -c true
 
 perlrexx.c: os2/perlrexx.c
@@ -262,10 +265,10 @@ SO_CLDFLAGS = -Zdll -Zso -Zomf -Zmt -Zsys
 
 # A callable-from-REXX DLL
 
-perlrexx.dll: perlrexx$(OBJ_EXT) perlrexx.def
+$(PERLREXX_DLL): perlrexx$(OBJ_EXT) perlrexx.def
 	$(SHRPENV) $(CC) $(SO_CLDFLAGS) $(CCDLFLAGS) -o $@ perlrexx$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs) perlrexx.def
 
-perlrexx.def: miniperl \$(_preplibrary)
+perlrexx.def: miniperl $(_preplibrary)
 	echo	"LIBRARY 'perlrexx' INITINSTANCE TERMINSTANCE"	> tmp.def
 	echo	"DESCRIPTION '@#perl5-porters@perl.org:`miniperl -Ilib -MConfig -e 'print \$$]'`#@ REXX to Perl `miniperl -Ilib -MConfig -e 'print \$$Config{version}'` interface'" >> tmp.def
 	echo	"EXPORTS"					>> tmp.def
@@ -274,6 +277,11 @@ perlrexx.def: miniperl \$(_preplibrary)
 	echo	'  "PERLINIT"'					>> tmp.def
 	echo	'  "PERLEXIT"'					>> tmp.def
 	echo	'  "PERLEVAL"'					>> tmp.def
+	echo	'  "PERLLASTERROR"'				>> tmp.def
+	echo	'  "PERLEVALSUBCOMMAND"'			>> tmp.def
+	echo	'  "PERLEXPORTALL"'				>> tmp.def
+	echo	'  "PERLDROPALL"'				>> tmp.def
+	echo	'  "PERLDROPALLEXIT"'				>> tmp.def
 	sh mv-if-diff tmp.def $@
 
 

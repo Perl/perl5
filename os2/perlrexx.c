@@ -27,6 +27,10 @@
 static void xs_init (pTHX);
 static PerlInterpreter *my_perl;
 
+ULONG PERLEXPORTALL(PCSZ name, LONG rargc, const RXSTRING *rargv, PCSZ queuename, PRXSTRING retstr);
+ULONG PERLDROPALL(PCSZ name, LONG rargc, const RXSTRING *rargv, PCSZ queuename, PRXSTRING retstr);
+ULONG PERLDROPALLEXIT(PCSZ name, LONG rargc, const RXSTRING *rargv, PCSZ queuename, PRXSTRING retstr);
+
 #if defined (__MINT__) || defined (atarist)
 /* The Atari operating system doesn't have a dynamic stack.  The
    stack size is determined from this value.  */
@@ -81,6 +85,26 @@ init_perl(int doparse)
     return !exitstatus;
 }
 
+static char last_error[4096];
+
+static int
+seterr(char *format, ...)
+{
+	va_list va;
+	char *s = last_error;
+
+	va_start(va, format);
+	if (s[0]) {
+	    s += strlen(s);
+	    if (s[-1] != '\n') {
+		snprintf(s, sizeof(last_error) - (s - last_error), "\n");
+		s += strlen(s);
+	    }
+	}
+	vsnprintf(s, sizeof(last_error) - (s - last_error), format, va);
+	return 1;
+}
+
 /* The REXX-callable entrypoints ... */
 
 ULONG PERL (PCSZ name, LONG rargc, const RXSTRING *rargv,
@@ -91,18 +115,11 @@ ULONG PERL (PCSZ name, LONG rargc, const RXSTRING *rargv,
     char *argv[3] = {"perl_from_REXX", "-e", buf};
     ULONG ret;
 
-    if (rargc != 1) {
-	sprintf(retstr->strptr, "one argument expected, got %ld", rargc);
-	retstr->strlength = strlen (retstr->strptr);
-	return 1;
-    }
-    if (rargv[0].strlength >= sizeof(buf)) {
-	sprintf(retstr->strptr,
-		"length of the argument %ld exceeds the maximum %ld",
-		rargv[0].strlength, (long)sizeof(buf) - 1);
-	retstr->strlength = strlen (retstr->strptr);
-	return 1;
-    }
+    if (rargc != 1)
+	return seterr("one argument expected, got %ld", rargc);
+    if (rargv[0].strlength >= sizeof(buf))
+	return seterr("length of the argument %ld exceeds the maximum %ld",
+		      rargv[0].strlength, (long)sizeof(buf) - 1);
 
     if (!init_perl(0))
 	return 1;
@@ -133,11 +150,8 @@ ULONG PERL (PCSZ name, LONG rargc, const RXSTRING *rargv,
 ULONG PERLEXIT (PCSZ name, LONG rargc, const RXSTRING *rargv,
                     PCSZ queuename, PRXSTRING retstr)
 {
-    if (rargc != 0) {
-	sprintf(retstr->strptr, "no arguments expected, got %ld", rargc);
-	retstr->strlength = strlen (retstr->strptr);
-	return 1;
-    }
+    if (rargc != 0)
+	return seterr("no arguments expected, got %ld", rargc);
     PERL_SYS_TERM1(0);
     return 0;
 }
@@ -145,16 +159,10 @@ ULONG PERLEXIT (PCSZ name, LONG rargc, const RXSTRING *rargv,
 ULONG PERLTERM (PCSZ name, LONG rargc, const RXSTRING *rargv,
                     PCSZ queuename, PRXSTRING retstr)
 {
-    if (rargc != 0) {
-	sprintf(retstr->strptr, "no arguments expected, got %ld", rargc);
-	retstr->strlength = strlen (retstr->strptr);
-	return 1;
-    }
-    if (!my_perl) {
-	sprintf(retstr->strptr, "no perl interpreter present");
-	retstr->strlength = strlen (retstr->strptr);
-	return 1;
-    }
+    if (rargc != 0)
+	return seterr("no arguments expected, got %ld", rargc);
+    if (!my_perl)
+	return seterr("no perl interpreter present");
     perl_destruct(my_perl);
     perl_free(my_perl);
     my_perl = 0;
@@ -168,11 +176,8 @@ ULONG PERLTERM (PCSZ name, LONG rargc, const RXSTRING *rargv,
 ULONG PERLINIT (PCSZ name, LONG rargc, const RXSTRING *rargv,
                     PCSZ queuename, PRXSTRING retstr)
 {
-    if (rargc != 0) {
-	sprintf(retstr->strptr, "no argument expected, got %ld", rargc);
-	retstr->strlength = strlen (retstr->strptr);
-	return 1;
-    }
+    if (rargc != 0)
+	return seterr("no argument expected, got %ld", rargc);
     if (!init_perl(1))
 	return 1;
 
@@ -181,21 +186,36 @@ ULONG PERLINIT (PCSZ name, LONG rargc, const RXSTRING *rargv,
     return 0;
 }
 
-ULONG PERLEVAL (PCSZ name, LONG rargc, const RXSTRING *rargv,
-                    PCSZ queuename, PRXSTRING retstr)
+ULONG
+PERLLASTERROR (PCSZ name, LONG rargc, const RXSTRING *rargv, PCSZ queuename, PRXSTRING retstr)
+{
+    int len = strlen(last_error);
+
+    if (len <= 256			/* Default buffer is 256-char long */
+	|| !DosAllocMem((PPVOID)&retstr->strptr, len,
+			PAG_READ|PAG_WRITE|PAG_COMMIT)) {
+	    memcpy(retstr->strptr, last_error, len);
+	    retstr->strlength = len;
+    } else {
+	strcpy(retstr->strptr, "[Not enough memory to copy the errortext]");
+	retstr->strlength = strlen(retstr->strptr);
+    }
+    return 0;
+}
+
+ULONG
+PERLEVAL (PCSZ name, LONG rargc, const RXSTRING *rargv, PCSZ queuename, PRXSTRING retstr)
 {
     SV *res, *in;
-    STRLEN len;
+    STRLEN len, n_a;
     char *str;
 
-    if (rargc != 1) {
-	sprintf(retstr->strptr, "one argument expected, got %ld", rargc);
-	retstr->strlength = strlen (retstr->strptr);
-	return 1;
-    }
+    last_error[0] = 0;
+    if (rargc != 1)
+	return seterr("one argument expected, got %ld", rargc);
 
     if (!init_perl(1))
-	return 1;
+	return seterr("error initializing perl");
 
   {
     dSP;
@@ -212,8 +232,10 @@ ULONG PERLEVAL (PCSZ name, LONG rargc, const RXSTRING *rargv,
     PUTBACK;
 
     ret = 0;
-    if (SvTRUE(ERRSV) || !SvOK(res))
-	ret = 1;
+    if (SvTRUE(ERRSV))
+	ret = seterr(SvPV(ERRSV, n_a));
+    if (!SvOK(res))
+	ret = seterr("undefined value returned by Perl-in-REXX");
     str = SvPV(res, len);
     if (len <= 256			/* Default buffer is 256-char long */
 	|| !DosAllocMem((PPVOID)&retstr->strptr, len,
@@ -221,13 +243,82 @@ ULONG PERLEVAL (PCSZ name, LONG rargc, const RXSTRING *rargv,
 	    memcpy(retstr->strptr, str, len);
 	    retstr->strlength = len;
     } else
-	ret = 1;
+	ret = seterr("Not enough memory for the return string of Perl-in-REXX");
 
     FREETMPS;
     LEAVE;
 
     return ret;
   }
+}
+
+ULONG
+PERLEVALSUBCOMMAND(
+  const RXSTRING    *command,          /* command to issue           */
+  PUSHORT      flags,                  /* error/failure flags        */
+  PRXSTRING    retstr )                /* return code                */
+{
+    ULONG rc = PERLEVAL(NULL, 1, command, NULL, retstr);
+
+    if (rc)
+	*flags = RXSUBCOM_ERROR;         /* raise error condition    */
+
+    return 0;                            /* finished                   */
+}
+
+#define ArrLength(a) (sizeof(a)/sizeof(*(a)))
+
+static const struct {
+  char *name;
+  RexxFunctionHandler *f;
+} funcs[] = {
+             {"PERL",			(RexxFunctionHandler *)&PERL},
+             {"PERLTERM",		(RexxFunctionHandler *)&PERLTERM},
+             {"PERLINIT",		(RexxFunctionHandler *)&PERLINIT},
+             {"PERLEXIT",		(RexxFunctionHandler *)&PERLEXIT},
+             {"PERLEVAL",		(RexxFunctionHandler *)&PERLEVAL},
+             {"PERLLASTERROR",		(RexxFunctionHandler *)&PERLLASTERROR},
+             {"PERLDROPALL",		(RexxFunctionHandler *)&PERLDROPALL},
+             {"PERLDROPALLEXIT",	(RexxFunctionHandler *)&PERLDROPALLEXIT},
+             /* Should be the last entry */
+             {"PERLEXPORTALL",		(RexxFunctionHandler *)&PERLEXPORTALL}
+          };
+
+ULONG
+PERLEXPORTALL(PCSZ name, LONG rargc, const RXSTRING *rargv, PCSZ queuename, PRXSTRING retstr)
+{
+   int i = -1;
+
+   while (++i < ArrLength(funcs) - 1)
+	RexxRegisterFunctionExe(funcs[i].name, funcs[i].f);
+   RexxRegisterSubcomExe("EVALPERL", (PFN)&PERLEVALSUBCOMMAND, NULL);
+   retstr->strlength = 0;
+   return 0;
+}
+
+ULONG
+PERLDROPALL(PCSZ name, LONG rargc, const RXSTRING *rargv, PCSZ queuename, PRXSTRING retstr)
+{
+   int i = -1;
+
+   while (++i < ArrLength(funcs))
+	RexxDeregisterFunction(funcs[i].name);
+   RexxDeregisterSubcom("EVALPERL", NULL /* Not a DLL version */);
+   retstr->strlength = 0;
+   return 0;
+}
+
+ULONG
+PERLDROPALLEXIT(PCSZ name, LONG rargc, const RXSTRING *rargv, PCSZ queuename, PRXSTRING retstr)
+{
+   int i = -1;
+
+   while (++i < ArrLength(funcs))
+	RexxDeregisterFunction(funcs[i].name);
+   RexxDeregisterSubcom("EVALPERL", NULL /* Not a DLL version */);
+   PERL_SYS_TERM1(0);
+   retstr->strlength = 0;
+   return 0;
 }
 #define INCL_DOSPROCESS
 #define INCL_DOSSEMAPHORES
