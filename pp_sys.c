@@ -1281,7 +1281,7 @@ PP(pp_leavewrite)
 			    SvPV_nolen(sv));
 	    }
 	    else if (ckWARN(WARN_CLOSED))
-		report_closed_fh(gv, io, "write", "filehandle");
+		report_evil_fh(gv, io, PL_op->op_type);
 	}
 	PUSHs(&PL_sv_no);
     }
@@ -1361,7 +1361,7 @@ PP(pp_prtf)
 			    SvPV(sv,n_a));
 	    }
 	    else if (ckWARN(WARN_CLOSED))
-		report_closed_fh(gv, io, "printf", "filehandle");
+		report_evil_fh(gv, io, PL_op->op_type);
 	}
 	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
 	goto just_say_no;
@@ -1630,12 +1630,8 @@ PP(pp_send)
     io = GvIO(gv);
     if (!io || !IoIFP(io)) {
 	retval = -1;
-	if (ckWARN(WARN_CLOSED)) {
-	    if (PL_op->op_type == OP_SYSWRITE)
-		report_closed_fh(gv, io, "syswrite", "filehandle");
-	    else
-		report_closed_fh(gv, io, "send", "socket");
-	}
+	if (ckWARN(WARN_CLOSED))
+	    report_evil_fh(gv, io, PL_op->op_type);
     }
     else if (PL_op->op_type == OP_SYSWRITE) {
 	if (MARK < SP) {
@@ -1992,6 +1988,7 @@ PP(pp_flock)
     I32 value;
     int argtype;
     GV *gv;
+    IO *io = NULL;
     PerlIO *fp;
 
 #ifdef FLOCK
@@ -2000,19 +1997,21 @@ PP(pp_flock)
 	gv = PL_last_in_gv;
     else
 	gv = (GV*)POPs;
-    if (gv && GvIO(gv))
-	fp = IoIFP(GvIOp(gv));
-    else
+    if (gv && (io = GvIO(gv)))
+	fp = IoIFP(io);
+    else {
 	fp = Nullfp;
+	io = NULL;
+    }
     if (fp) {
 	(void)PerlIO_flush(fp);
 	value = (I32)(PerlLIO_flock(PerlIO_fileno(fp), argtype) >= 0);
     }
     else {
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	    report_evil_fh(gv, io, PL_op->op_type);
 	value = 0;
 	SETERRNO(EBADF,RMS$_IFI);
-	if (ckWARN(WARN_CLOSED))
-	    report_closed_fh(gv, GvIO(gv), "flock", "filehandle");
     }
     PUSHi(value);
     RETURN;
@@ -2173,7 +2172,7 @@ PP(pp_bind)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	report_closed_fh(gv, io, "bind", "socket");
+	report_evil_fh(gv, io, PL_op->op_type);
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2203,7 +2202,7 @@ PP(pp_connect)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	report_closed_fh(gv, io, "connect", "socket");
+	report_evil_fh(gv, io, PL_op->op_type);
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2229,7 +2228,7 @@ PP(pp_listen)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	report_closed_fh(gv, io, "listen", "socket");
+	report_evil_fh(gv, io, PL_op->op_type);
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2286,7 +2285,7 @@ PP(pp_accept)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	report_closed_fh(ggv, ggv ? GvIO(ggv) : 0, "accept", "socket");
+	report_evil_fh(ggv, ggv ? GvIO(ggv) : 0, PL_op->op_type);
     SETERRNO(EBADF,SS$_IVCHAN);
 
 badexit:
@@ -2313,7 +2312,7 @@ PP(pp_shutdown)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	report_closed_fh(gv, io, "shutdown", "socket");
+	report_evil_fh(gv, io, PL_op->op_type);
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2392,9 +2391,7 @@ PP(pp_ssockopt)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	report_closed_fh(gv, io,
-			 optype == OP_GSOCKOPT ? "getsockopt" : "setsockopt",
-			 "socket");
+	report_evil_fh(gv, io, optype);
     SETERRNO(EBADF,SS$_IVCHAN);
 nuts2:
     RETPUSHUNDEF;
@@ -2467,10 +2464,7 @@ PP(pp_getpeername)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	report_closed_fh(gv, io,
-			 optype == OP_GETSOCKNAME ? "getsockname"
-						  : "getpeername",
-			 "socket");
+	report_evil_fh(gv, io, optype);
     SETERRNO(EBADF,SS$_IVCHAN);
 nuts2:
     RETPUSHUNDEF;

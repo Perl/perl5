@@ -2077,7 +2077,7 @@ Ap	|U8*	|uv_to_utf8	|U8 *d|UV uv
 p	|void	|vivify_defelem	|SV* sv
 p	|void	|vivify_ref	|SV* sv|U32 to_what
 p	|I32	|wait4pid	|Pid_t pid|int* statusp|int flags
-p	|void	|report_closed_fh|GV *gv|IO *io|const char *func|const char *obj
+p	|void	|report_evil_fh	|GV *gv|IO *io|I32 op
 p	|void	|report_uninit
 Afpd	|void	|warn		|const char* pat|...
 Ap	|void	|vwarn		|const char* pat|va_list* args
