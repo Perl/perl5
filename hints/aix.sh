@@ -126,6 +126,7 @@ d_setreuid='undef'
 # Changes for dynamic linking by Wayne Scott <wscott@ichips.intel.com>
 #
 # Tell perl which symbols to export for dynamic linking.
+cccdlflags='none'      # All AIX code is position independent
 case "$cc" in
 *gcc*) ccdlflags='-Xlinker' ;;
 *) ccversion=`lslpp -L | grep 'C for AIX Compiler$' | awk '{print $2}'`
@@ -299,6 +300,9 @@ EOM
 	# Remove xlc-spefific -qflags.
         ccflags="`echo $ccflags | sed -e 's@ -q[^ ]*@ @g' -e 's@^-q[^ ]* @@g'`"
         ldflags="`echo $ldflags | sed -e 's@ -q[^ ]*@ @g' -e 's@^-q[^ ]* @@g'`"
+        # Move xld-spefific -bflags.
+        ccflags="`echo $ccflags | sed -e 's@ -b@ -Wl,-b@g'`"
+        ldflags="`echo $ldflags | sed -e 's@ -b@ -Wl,-b@g'`"
 	echo >&4 "(using ccflags $ccflags)"
 	echo >&4 "(using ldflags $ldflags)"
         ;; 
