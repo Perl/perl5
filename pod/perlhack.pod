@@ -1803,6 +1803,47 @@ You must be triply conscious of cross-platform concerns.  This usually
 boils down to using File::Spec and avoiding things like C<fork()> and
 C<system()> unless absolutely necessary.
 
+=head2 Special Make Test Targets
+
+There are various special make targets that can be used to test Perl
+slightly differently than the standard "test" target.  Not all them
+are expected to give a 100% success rate.  Many of them have several
+aliases.
+
+=over 4
+
+=item coretest
+
+Run F<perl> on all but F<lib/*> tests.
+
+=item test.deparse
+
+Run all the tests through the B::Deparse.  Not all tests will succeed.
+
+=item minitest
+
+Run F<miniperl> on F<t/base>, F<t/comp>, F<t/cmd>, F<t/run>, F<t/io>,
+F<t/op>, and F<t/uni> tests.
+
+=item test.third check.third utest.third ucheck.third
+
+(Only in Tru64)  Run all the tests using the memory leak + naughty
+memory access tool "Third Degree".  The log files will be named
+F<perl3.log.testname>.
+
+=item test.torture torturetest
+
+Run all the usual tests and some extra tests.  As of Perl 5.8.0 the
+only extra tests are Abigail's JAPHs, t/japh/abigail.t.
+
+You can also run the torture test with F<t/harness> by giving
+C<-torture> argument to F<t/harness>.
+
+=item utest ucheck test.utf8 check.utf8
+
+Run all the tests with -Mutf8.  Not all tests will succeed.
+
+=back
 
 =head1 EXTERNAL TOOLS FOR DEBUGGING PERL
 

@@ -1,0 +1,76 @@
+#!./perl -w
+
+BEGIN {
+	chdir 't' if -d 't';
+	@INC = ('../lib', 'lib', '.');
+	require 'test.pl';
+}
+
+use strict;
+use Config;
+use File::Spec;
+use File::Path;
+
+my $path = File::Spec->catdir( 'lib', 'B' );
+unless (-d $path) {
+	mkpath( $path ) or skip_all( 'Cannot create fake module path' );
+}
+
+my $file = File::Spec->catfile( $path, 'success.pm' );
+local *OUT;
+open(OUT, '>', $file) or skip_all( 'Cannot write fake backend module');
+print OUT while <DATA>;
+close *OUT;
+
+plan( 9 ); # And someone's responsible.
+
+# use() makes it difficult to avoid O::import()
+require_ok( 'O' );
+
+my @args = ('-Ilib', '-MO=success,foo,bar', '-e', '1' );
+my @lines = get_lines( @args );
+
+is( $lines[0], '-e syntax OK', 'O.pm should not munge perl output without -qq');
+is( $lines[1], 'Compiling!', 'Output should not be saved without -q switch' );
+is( $lines[2], '(foo) <bar>', 'O.pm should call backend compile() method' );
+is( $lines[3], '[]', 'Nothing should be in $O::BEGIN_output without -q' );
+
+$args[1] = '-MO=-q,success,foo,bar';
+@lines = get_lines( @args );
+isnt( $lines[1], 'Compiling!', 'Output should not be printed with -q switch' );
+
+SKIP: {
+	skip( '-q redirection does not work without PerlIO', 2)
+		unless $Config{useperlio};
+	is( $lines[2], "[Compiling!", '... but should be in $O::BEGIN_output' );
+
+	$args[1] = '-MO=-qq,success,foo,bar';
+	@lines = get_lines( @args );
+	is( scalar @lines, 3, '-qq should suppress even the syntax OK message' );
+}
+
+$args[1] = '-MO=success,fail';
+@lines = get_lines( @args );
+like( $lines[0], qr/fail at .eval/,
+	'O.pm should die if backend compile() does not return a subref' );
+
+sub get_lines {
+	split(/[\r\n]+/, runperl( args => [ @_ ], stderr => 1 ));
+}
+
+END {
+	1 while unlink($file);
+}
+
+__END__
+package B::success;
+
+print "Compiling!\n";
+
+sub compile {
+	return 'fail' if ($_[0] eq 'fail');
+	print "($_[0]) <$_[1]>\n";
+	return sub { print "[$O::BEGIN_output]\n" };
+}
+
+1;

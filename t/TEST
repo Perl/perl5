@@ -19,6 +19,7 @@ if ($#ARGV >= 0) {
 	push( @argv, $ARGV[$idx] ), next unless $ARGV[$idx] =~ /^-(\S+)$/;
 	$core    = 1 if $1 eq 'core';
 	$verbose = 1 if $1 eq 'v';
+	$torture = 1 if $1 eq 'torture';
 	$with_utf= 1 if $1 eq 'utf8';
         $byte_compile = 1 if $1 eq 'bytecompile';
         $compile = 1 if $1 eq 'compile';
@@ -110,9 +111,11 @@ unless (@ARGV) {
     } else {
         warn "$0: cannot open $mani: $!\n";
     }
-    _find_tests('pod')  unless $core;
-    _find_tests('x2p')  unless $core;
-    _find_tests('japh') unless $core;
+    unless ($core) {
+	_find_tests('pod');  
+	_find_tests('x2p');
+	_find_tests('japh') if $torture;
+    }
 }
 
 # Tests known to cause infinite loops for the perlcc tests.

@@ -283,7 +283,7 @@ Method_needs_lines(obj)
 SV *	obj
 CODE:
 {
-    encode_t *enc = INT2PTR(encode_t *, SvIV(SvRV(obj)));
+    /* encode_t *enc = INT2PTR(encode_t *, SvIV(SvRV(obj))); */
     ST(0) = &PL_sv_no;
     XSRETURN(1);
 }
@@ -293,7 +293,7 @@ Method_perlio_ok(obj)
 SV *	obj
 CODE:
 {
-    encode_t *enc = INT2PTR(encode_t *, SvIV(SvRV(obj)));
+    /* encode_t *enc = INT2PTR(encode_t *, SvIV(SvRV(obj))); */
     /* require_pv(PERLIO_FILENAME); */
 
     eval_pv("require PerlIO::encoding", 0);
