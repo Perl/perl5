@@ -8,11 +8,9 @@ BEGIN {
 	}
 }
 
-use PerlIO;
+use Test::More tests => 37;
 
-print "1..19\n";
-
-print "ok 1\n";
+use_ok('PerlIO');
 
 my $txt = "txt$$";
 my $bin = "bin$$";
@@ -22,65 +20,112 @@ my $txtfh;
 my $binfh;
 my $utffh;
 
-print "not " unless open($txtfh, ">:crlf", $txt);
-print "ok 2\n";
+ok(open($txtfh, ">:crlf", $txt));
 
-print "not " unless open($binfh, ">:raw",  $bin);
-print "ok 3\n";
+ok(open($binfh, ">:raw",  $bin));
 
-print "not " unless open($utffh, ">:utf8", $utf);
-print "ok 4\n";
+ok(open($utffh, ">:utf8", $utf));
 
 print $txtfh "foo\n";
 print $txtfh "bar\n";
-print "not " unless close($txtfh);
-print "ok 5\n";
+
+ok(close($txtfh));
 
 print $binfh "foo\n";
 print $binfh "bar\n";
-print "not " unless close($binfh);
-print "ok 6\n";
+
+ok(close($binfh));
 
 print $utffh "foo\x{ff}\n";
 print $utffh "bar\x{abcd}\n";
-print "not " unless close($utffh);
-print "ok 7\n";
 
-print "not " unless open($txtfh, "<:crlf", $txt);
-print "ok 8\n";
+ok(close($utffh));
 
-print "not " unless open($binfh, "<:raw",  $bin);
-print "ok 9\n";
+ok(open($txtfh, "<:crlf", $txt));
 
-print "not " unless open($utffh, "<:utf8", $utf);
-print "ok 10\n";
+ok(open($binfh, "<:raw",  $bin));
 
-print "not " unless <$txtfh> eq "foo\n" && <$txtfh> eq "bar\n";
-print "ok 11\n";
 
-print "not " unless <$binfh> eq "foo\n" && <$binfh> eq "bar\n";
-print "ok 12\n";
+ok(open($utffh, "<:utf8", $utf));
 
-print "not " unless <$utffh> eq "foo\x{ff}\n" && <$utffh> eq "bar\x{abcd}\n";
-print "ok 13\n";
+is(scalar <$txtfh>, "foo\n");
+is(scalar <$txtfh>, "bar\n");
 
-print "not " unless eof($txtfh);
-print "ok 14\n";
+is(scalar <$binfh>, "foo\n");
+is(scalar <$binfh>, "bar\n");
 
-print "not " unless eof($binfh);
-print "ok 15\n";
+is(scalar <$utffh>,  "foo\x{ff}\n");
+is(scalar <$utffh>, "bar\x{abcd}\n");
 
-print "not " unless eof($utffh);
-print "ok 16\n";
+ok(eof($txtfh));;
 
-print "not " unless close($txtfh);
-print "ok 17\n";
+ok(eof($binfh));
 
-print "not " unless close($binfh);
-print "ok 18\n";
+ok(eof($utffh));
 
-print "not " unless close($utffh);
-print "ok 19\n";
+ok(close($txtfh));
+
+ok(close($binfh));
+
+ok(close($utffh));
+
+# magic temporary file via 3 arg open with undef
+{
+    ok( open(my $x,"+<",undef), 'magic temp file via 3 arg open with undef');
+    ok( defined fileno($x),     '       fileno' );
+
+    select $x;
+    ok( (print "ok\n"),         '       print' );
+
+    select STDOUT;
+    ok( seek($x,0,0),           '       seek' );
+    is( scalar <$x>, "ok\n",    '       readline' );
+    ok( tell($x) >= 3,          '       tell' );
+
+    # test magic temp file over STDOUT
+    open OLDOUT, ">&STDOUT" or die "cannot dup STDOUT: $!";
+    my $status = open(STDOUT,"+<",undef);
+    open STDOUT,  ">&OLDOUT" or die "cannot dup OLDOUT: $!";
+    # report after STDOUT is restored
+    ok($status, '       re-open STDOUT');
+    close OLDOUT;
+}
+
+# in-memory open
+{
+    my $var;
+    ok( open(my $x,"+<",\$var), 'magic in-memory file via 3 arg open with \\$var');
+    ok( defined fileno($x),     '       fileno' );
+
+    select $x;
+    ok( (print "ok\n"),         '       print' );
+
+    select STDOUT;
+    ok( seek($x,0,0),           '       seek' );
+    is( scalar <$x>, "ok\n",    '       readline' );
+    ok( tell($x) >= 3,          '       tell' );
+
+  TODO: {
+        local $TODO = "broken";
+
+        # test in-memory open over STDOUT
+        open OLDOUT, ">&STDOUT" or die "cannot dup STDOUT: $!";
+        #close STDOUT;
+        my $status = open(STDOUT,">",\$var);
+        my $error = "$!" unless $status; # remember the error
+        open STDOUT,  ">&OLDOUT" or die "cannot dup OLDOUT: $!";
+        print "# $error\n" unless $status;
+        # report after STDOUT is restored
+        ok($status, '       open STDOUT into in-memory var');
+
+        # test in-memory open over STDERR
+        open OLDERR, ">&STDERR" or die "cannot dup STDERR: $!";
+        #close STDERR;
+        ok( open(STDERR,">",\$var), '       open STDERR into in-memory var');
+        open STDERR,  ">&OLDERR" or die "cannot dup OLDERR: $!";
+    }
+}
+
 
 END {
     1 while unlink $txt;
