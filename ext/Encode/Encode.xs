@@ -388,6 +388,9 @@ int	check
 CODE:
 {
     encode_t *enc = INT2PTR(encode_t *, SvIV(SvRV(obj)));
+    if (SvUTF8(src)) {
+    	sv_utf8_downgrade(src, FALSE);
+    }
     ST(0) = encode_method(aTHX_ enc, enc->t_utf8, src, check);
     SvUTF8_on(ST(0));
     XSRETURN(1);
