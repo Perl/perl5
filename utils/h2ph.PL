@@ -449,7 +449,7 @@ sub next_line
 		}
 		next READ;
 	    }
-	    if ($in =~ /^extern inline / &&
+	    if ($in =~ /^extern inline / && # Inlined assembler.
 		$^O eq 'linux' && $file =~ m!(?:^|/)asm/[^/]+\.h$!) {
  		while (<IN>) {
 		    last if /^}/; 
