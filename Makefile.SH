@@ -137,6 +137,7 @@ CLDFLAGS = $ldflags
 mallocsrc = $mallocsrc
 mallocobj = $mallocobj
 LNS = $lns
+CPS = $cp -f
 RMS = rm -f
 ranlib = $ranlib
 
@@ -300,9 +301,13 @@ utilities:	miniperl lib/Config.pm $(plextract) lib/lib.pm FORCE
 FORCE:
 	@sh -c true
 
+# We do a copy of the op.c instead of a symlink because gcc gets huffy
+# if we have a symlink forest to another disk (it complains about too many
+# levels of symbolic links, even if we have only two)
+
 opmini$(OBJ_EXT): op.c config.h
 	$(RMS) opmini.c
-	$(LNS) op.c opmini.c
+	$(CPS) op.c opmini.c
 	$(CCCMD) $(PLDLFLAGS) -DPERL_EXTERNAL_GLOB opmini.c
 	$(RMS) opmini.c
 

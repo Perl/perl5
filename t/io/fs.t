@@ -129,10 +129,15 @@ chdir $wd || die "Can't cd back to $wd";
 unlink 'c';
 if ($^O ne 'MSWin32' and `ls -l perl 2>/dev/null` =~ /^l.*->/) {
     # we have symbolic links
-    if (symlink("TEST","c")) {print "ok 21\n";} else {print "not ok 21\n";}
-    $foo = `grep perl c`;
+    system("cp TEST TEST$$");
+    # we have to copy because e.g. GNU grep gets huffy if we have
+    # a symlink forest to another disk (it complains about too many
+    # levels of symbolic links, even if we have only two)
+    if (symlink("TEST$$","c")) {print "ok 21\n";} else {print "not ok 21\n";}
+    $foo = `grep perl c 2>&1`;
     if ($foo) {print "ok 22\n";} else {print "not ok 22\n";}
     unlink 'c';
+    unlink("TEST$$");
 }
 else {
     print "ok 21\nok 22\n";
