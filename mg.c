@@ -379,7 +379,7 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
-int
+void
 Perl_magic_regdatum_set(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHR;
