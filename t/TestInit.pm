@@ -17,6 +17,7 @@ package TestInit;
 
 chdir 't' if -d 't';
 @INC = '../lib';
+$ENV{PERL_CORE} = 1;
 $0 =~ s/\.dp$//; # for the test.deparse make target
 1;
 
