@@ -300,6 +300,7 @@ Perl_pmflag
 Perl_pop_scope
 Perl_push_scope
 Perl_regdump
+Perl_pregexec
 Perl_pregfree
 Perl_pregcomp
 Perl_re_intuit_start
