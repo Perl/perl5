@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Aug 10 20:19:08 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Thu Aug 12 22:03:15 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -847,6 +847,7 @@ trnl=''
 uidtype=''
 archname64=''
 use64bits=''
+uselongdouble=''
 usemultiplicity=''
 nm_opt=''
 nm_so_opt=''
@@ -6446,6 +6447,33 @@ if $test X"$prefix" != X"$installprefix"; then
 else
 	installsitearch="$sitearchexp"
 fi
+
+cat <<EOM
+
+Perl can be built to take advantage of long doubles which
+(if available) may give more accuracy and range for floating point
+numbers.  To do so, Configure must be run with -Duselongdouble.
+
+If this doesn't make any sense to you, just accept the default 'n'.
+EOM
+case "$uselongdouble" in
+$define|true|[yY]*)	dflt='y';;
+*) dflt='n';;
+esac
+rp='Try to use long doubles if available?'
+. ./myread
+case "$ans" in
+y|Y) 
+	val="$define"
+	ccflags="$ccflags -DUSE_LONG_DOUBLE"
+	;;     
+*)      
+	val="$undef"
+	;;
+esac
+set uselongdouble
+eval $setvar
+
 
 cat <<EOM
 
@@ -14076,6 +14104,7 @@ uname='$uname'
 uniq='$uniq'
 use64bits='$use64bits'
 usedl='$usedl'
+uselongdouble='$uselongdouble'
 usemultiplicity='$usemultiplicity'
 usemymalloc='$usemymalloc'
 usenm='$usenm'
