@@ -530,7 +530,7 @@ L</"Handling Malformed Data">.
 
 Convert B<in-place> the data between two encodings.  How did the data
 in $string originally get to be in FROM_ENCODING?  Either using
-encode() or through PerlIO: See L</"Encode and PerlIO">.  For CHECK
+encode() or through PerlIO: See L</"Encoding and IO">.  For CHECK
 see L</"Handling Malformed Data">.
 
 For example to convert ISO 8859-1 data to UTF-8:
@@ -705,8 +705,8 @@ names for the iso-8859-* family.
 
 =head2 Defining Encodings
 
-  use Encode qw(define_alias);
-  define_encoding( $object, 'canonicalName' [,alias...]);
+    use Encode qw(define_alias);
+    define_encoding( $object, 'canonicalName' [,alias...]);
 
 Causes I<canonicalName> to be associated with I<$object>.  The object
 should provide the interface described in L</"IMPLEMENTATION CLASSES">
@@ -721,14 +721,14 @@ If Perl is configured to use the new 'perlio' IO system then
 C<Encode> provides a "layer" (See L<perliol>) which can transform
 data as it is read or written.
 
-     open(my $ilyad,'>:encoding(iso-8859-7)','ilyad.greek');
-     print $ilyad @epic;
+    open(my $ilyad,'>:encoding(iso-8859-7)','ilyad.greek');
+    print $ilyad @epic;
 
 In addition the new IO system can also be configured to read/write
 UTF-8 encoded characters (as noted above this is efficient):
 
-     open(my $fh,'>:utf8','anything');
-     print $fh "Any \x{0021} string \N{SMILEY FACE}\n";
+    open(my $fh,'>:utf8','anything');
+    print $fh "Any \x{0021} string \N{SMILEY FACE}\n";
 
 Either of the above forms of "layer" specifications can be made the default
 for a lexical scope with the C<use open ...> pragma. See L<open>.
@@ -750,29 +750,22 @@ characters into bytes using the API above before doing writes, and to
 transform the bytes read from a handle into characters before doing
 "character operations" (e.g. C<lc>, C</\W+/>, ...).
 
-=head1 Encode and PerlIO
-
-The PerlIO layer (new since Perl 5.7) can be used to automatically
-convert the data being read in or written out to be converted from
-some encoding into Perl's internal encoding or from Perl's internal
-encoding into some other encoding.
-
-Examples:
-
-	open(my $f, "<:encoding(cp1252)")
-
-	open(my $g, ">:encoding(iso-8859-1)")
-
 You can also use PerlIO to convert larger amounts of data you don't
 want to bring into memory.  For example to convert between ISO 8859-1
 (Latin 1) and UTF-8 (or UTF-EBCDIC in EBCDIC machines):
 
-	open(F, "<:encoding(iso-8859-1)", "data.txt") or die $!;
-	open(G, ">:utf8",                 "data.utf") or die $!;
-	while (<F>) { print G }
+    open(F, "<:encoding(iso-8859-1)", "data.txt") or die $!;
+    open(G, ">:utf8",                 "data.utf") or die $!;
+    while (<F>) { print G }
 
-	# Could also do "print G <F>" but that would pull
-	# the whole file into memory just to write it out again.
+    # Could also do "print G <F>" but that would pull
+    # the whole file into memory just to write it out again.
+
+More examples:
+
+    open(my $f, "<:encoding(cp1252)")
+    open(my $g, ">:encoding(iso-8859-2)")
+    open(my $h, ">:encoding(latin9)")       # iso-8859-15
 
 See L<PerlIO> for more information.
 
