@@ -277,6 +277,7 @@ http://www.ptf.com/macperl/		The MacPerl Pages (PTF)
 @file macperl pod:pod/macperl.pod
 @file macperlcat pod:pod/macperlcat.pod
 @file macperlbook pod:pod/macperlbook.pod
+@file macperlbundled pod:pod/macperlbundled.pod
 @file perl pod:pod/perl.pod
 @file perlfaq pod:pod/perlfaq.pod
 @file perltoc pod:pod/perltoc.pod
