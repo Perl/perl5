@@ -8,7 +8,7 @@ BEGIN {
 }
 
 require "test.pl";
-plan(tests => 25);
+plan(tests => 31);
 
 my $IsVMS = $^O eq 'VMS';
 
@@ -19,14 +19,14 @@ use File::Spec::Functions qw(:DEFAULT splitdir rel2abs);
 # Can't use Cwd::abs_path() because it has different ideas about
 # path seperators than File::Spec.
 sub abs_path {
-    rel2abs(curdir);
+    $IsVMS ? uc(rel2abs(curdir)) : rel2abs(curdir);
 }
 
 my $Cwd = abs_path;
 
 # Let's get to a known position
 SKIP: {
-    skip("Already in t/", 2) if (splitdir(abs_path))[-1] eq 't';
+    skip("Already in t/", 2) if (splitdir(abs_path))[-1] eq ($IsVMS ? 'T' : 't');
 
     ok( chdir('t'),     'chdir("t")');
     is( abs_path, catdir($Cwd, 't'),       '  abs_path() agrees' );
@@ -84,14 +84,14 @@ foreach my $key (@magic_envs) {
     # We're going to be using undefs a lot here.
     no warnings 'uninitialized';
 
-    local %ENV = ();
-    $ENV{$key} = catdir $Cwd, 'op';
+    local %ENV = () if !$IsVMS;
+    $ENV{$key} = catdir $Cwd, ($IsVMS ? 'OP' : 'op');
     
     check_env($key);
 }
 
 {
-    local %ENV = ();
+    local %ENV = () if !$IsVMS;
 
     ok( !chdir(),                   'chdir() w/o any ENV set' );
     is( abs_path, $Cwd,             '  abs_path() agrees' );

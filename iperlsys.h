@@ -415,7 +415,7 @@ struct IPerlDirInfo
 
 #define PerlDir_mkdir(name, mode)	Mkdir((name), (mode))
 #ifdef VMS
-#  define PerlDir_chdir(n)		Chdir(((n) && *(n)) ? (n) : "SYS$LOGIN")
+#  define PerlDir_chdir(n)		Chdir((n))
 #else
 #  define PerlDir_chdir(name)		chdir((name))
 #endif
