@@ -27,7 +27,7 @@ $ENV{PATH} = "/bin";
 delete @ENV{BASH_ENV, CDPATH, ENV, IFS};
 @correct = ();
 if (opendir(D, ".")) {
-   @correct = grep { !/^\.\.?$/ } sort readdir(D);
+   @correct = grep { !/^\./ } sort readdir(D);
    closedir D;
 }
 @a = File::Glob::glob("*", 0);
