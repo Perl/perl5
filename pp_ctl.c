@@ -1056,11 +1056,10 @@ PP(pp_flip)
    an exception for .."0" [#18165]). AMS 20021031. */
 
 #define RANGE_IS_NUMERIC(left,right) ( \
-	(!SvOK(left) && !SvOK(right)) || \
 	SvNIOKp(left)  || (SvOK(left)  && !SvPOKp(left))  || \
 	SvNIOKp(right) || (SvOK(right) && !SvPOKp(right)) || \
-	(looks_like_number(left) && SvPOKp(left) && *SvPVX(left) != '0' && \
-	 looks_like_number(right)))
+	(((!SvOK(left) && SvOK(right)) || (looks_like_number(left) && \
+	  SvPOKp(left) && *SvPVX(left) != '0')) && looks_like_number(right)))
 
 PP(pp_flop)
 {
@@ -1792,11 +1791,11 @@ PP(pp_enteriter)
 	if (SvTYPE(cx->blk_loop.iterary) != SVt_PVAV) {
 	    dPOPss;
 	    if (RANGE_IS_NUMERIC(sv,(SV*)cx->blk_loop.iterary)) {
-		 if (SvNV(sv) < IV_MIN ||
-		     SvNV((SV*)cx->blk_loop.iterary) >= IV_MAX)
-		     DIE(aTHX_ "Range iterator outside integer range");
-		 cx->blk_loop.iterix = SvIV(sv);
-		 cx->blk_loop.itermax = SvIV((SV*)cx->blk_loop.iterary);
+		if (SvNV(sv) < IV_MIN ||
+		    SvNV((SV*)cx->blk_loop.iterary) >= IV_MAX)
+		    DIE(aTHX_ "Range iterator outside integer range");
+		cx->blk_loop.iterix = SvIV(sv);
+		cx->blk_loop.itermax = SvIV((SV*)cx->blk_loop.iterary);
 	    }
 	    else {
 		STRLEN n_a;
