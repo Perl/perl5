@@ -73,9 +73,7 @@
 
 #define MEM_SIZE Size_t
 
-#ifdef STANDARD_C
-#   include <stdlib.h>
-#else
+#ifndef STANDARD_C
     Malloc_t malloc (MEM_SIZE nbytes);
     Malloc_t calloc (MEM_SIZE elements, MEM_SIZE size);
     Malloc_t realloc (Malloc_t where, MEM_SIZE nbytes);
