@@ -3257,10 +3257,15 @@ S_init_perllib(pTHX)
 
 	if (path) {
 	    char buf[1024];
-	    strcpy(buf,path);
-	    if (strrchr(buf,'/'))	/* XXX Hack, Configure var needed */
-		*strrchr(buf,'/') = '\0';
-	    incpush(buf, TRUE);
+	    char *ver = strrchr(path,'/');	/* XXX Hack, Configure var needed */
+	    if (ver && ver[1] == (STRINGIFY(PERL_REVISION))[0]
+		&& strlen(path) < sizeof(buf))
+	    {
+		strcpy(buf,path);
+		buf[ver-path] = '\0';
+		path = buf;
+	    }
+	    incpush(path, TRUE);
 	}
     }
 #endif
