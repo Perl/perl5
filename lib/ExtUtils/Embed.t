@@ -8,6 +8,10 @@ use Config;
 use ExtUtils::Embed;
 use File::Spec;
 
+if ($^O eq 'VMS') {
+   print "1..0  # not on VMS\n"; 
+   exit 0;
+}
 open(my $fh,">embed_test.c") || die "Cannot open embed_test.c:$!";
 print $fh <DATA>;
 close($fh);
