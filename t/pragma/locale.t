@@ -352,7 +352,9 @@ foreach (0..15) {
     trylocale("iso_latin_$_");
 }
 
-$ENV{PATH} = '/bin:/usr/bin';
+# Sanitize the environment so that we can run the external 'locale'
+# program without the taint mode getting grumpy.
+delete @ENV{qw(PATH IFS CDPATH ENV BASH_ENV)};
 
 if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a|")) {
     while (<LOCALES>) {
