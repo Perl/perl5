@@ -1944,7 +1944,7 @@ Perl_dump_mstats(pTHX_ char *s)
 			  (long)BUCKET_SIZE(MIN_BUCKET),
 			  (long)BUCKET_SIZE_REAL(buffer.topbucket), 
 			  (long)BUCKET_SIZE(buffer.topbucket));
-  	PerlIO_printf(Perl_error_log, "%8d free:", buffer.totfree);
+  	PerlIO_printf(Perl_error_log, "%8ld free:", buffer.totfree);
   	for (i = MIN_EVEN_REPORT; i <= buffer.topbucket; i += BUCKETS_PER_POW2) {
   		PerlIO_printf(Perl_error_log, 
 			      ((i < 8*BUCKETS_PER_POW2 || i == 10*BUCKETS_PER_POW2)
@@ -1962,7 +1962,7 @@ Perl_dump_mstats(pTHX_ char *s)
 			      buffer.nfree[i]);
   	}
 #endif 
-  	PerlIO_printf(Perl_error_log, "\n%8d used:", buffer.total - buffer.totfree);
+  	PerlIO_printf(Perl_error_log, "\n%8ld used:", buffer.total - buffer.totfree);
   	for (i = MIN_EVEN_REPORT; i <= buffer.topbucket; i += BUCKETS_PER_POW2) {
   		PerlIO_printf(Perl_error_log, 
 			      ((i < 8*BUCKETS_PER_POW2 || i == 10*BUCKETS_PER_POW2)
@@ -1980,7 +1980,7 @@ Perl_dump_mstats(pTHX_ char *s)
 			      buffer.ntotal[i] - buffer.nfree[i]);
   	}
 #endif 
-	PerlIO_printf(Perl_error_log, "\nTotal sbrk(): %d/%d:%d. Odd ends: pad+heads+chain+tail: %d+%d+%d+%d.\n",
+	PerlIO_printf(Perl_error_log, "\nTotal sbrk(): %ld/%ld:%ld. Odd ends: pad+heads+chain+tail: %ld+%ld+%ld+%ld.\n",
 		      buffer.total_sbrk, buffer.sbrks, buffer.sbrk_good,
 		      buffer.sbrk_slack, buffer.start_slack,
 		      buffer.total_chain, buffer.sbrked_remains);
