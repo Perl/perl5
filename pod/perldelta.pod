@@ -1126,7 +1126,64 @@ instead of
 
 =item Getopt::Long
 
-[TODO - Johan Vromans <jvromans@squirrel.nl>]
+Getopt::Long licensing has changed to allow the Perl Artistic License
+as well as the GPL. It used to be GPL only, which got in the way of
+non-GPL applications that wanted to use Getopt::Long.
+
+Getopt::Long encourages the use of Pod::Usage to produce help
+messages. For example:
+
+    use Getopt::Long;
+    use Pod::Usage;
+    my $man = 0;
+    my $help = 0;
+    GetOptions('help|?' => \$help, man => \$man) or pod2usage(2);
+    pod2usage(1) if $help;
+    pod2usage(-exitstatus => 0, -verbose => 2) if $man;
+
+    __END__
+
+    =head1 NAME
+
+    sample - Using GetOpt::Long and Pod::Usage
+
+    =head1 SYNOPSIS
+
+    sample [options] [file ...]
+
+     Options:
+       -help            brief help message
+       -man             full documentation
+
+    =head1 OPTIONS
+
+    =over 8
+
+    =item B<-help>
+
+    Print a brief help message and exits.
+
+    =item B<-man>
+
+    Prints the manual page and exits.
+
+    =back
+
+    =head1 DESCRIPTION
+
+    B<This program> will read the given input file(s) and do someting
+    useful with the contents thereof.
+
+    =cut
+
+See L<Pod::Usage> for details.
+
+A bug that prevented the non-option call-back E<lt>E<gt> from being
+specified as the first argument has been fixed.
+
+To specify the characters E<lt> and E<gt> as option starters, use
+E<gt>E<lt>. Note, however, that changing option starters is strongly
+deprecated. 
 
 =item IO
 
@@ -1559,7 +1616,7 @@ two from 1 to 32 (or 64, if your platform supports that).
 =item Integer overflow in %s number
 
 (W) The hexadecimal, octal or binary number you have specified either
-as a literal in your code or as a scalar is too big for your
+as a literal or as an argument to hex() or oct() is too big for your
 architecture, and has been converted to a floating point number.  On a
 32-bit architecture the largest hexadecimal, octal or binary number
 representable without overflow is 0xFFFFFFFF, 037777777777, or
