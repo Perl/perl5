@@ -720,7 +720,7 @@ sub setvbuf {
 
 sub sleep {
     usage "sleep(seconds)" if @_ != 1;
-    CORE::sleep($_[0]);
+    $_[0] - CORE::sleep($_[0]);
 }
 
 sub unlink {
