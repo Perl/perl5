@@ -11223,6 +11223,13 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_unlockhook	= proto_perl->Iunlockhook;
     PL_threadhook	= proto_perl->Ithreadhook;
 
+    PL_runops_std	= proto_perl->Irunops_std;
+    PL_runops_dbg	= proto_perl->Irunops_dbg;
+
+#ifdef THREADS_HAVE_PIDS
+    PL_ppid		= proto_perl->Ippid;
+#endif
+
     /* swatch cache */
     PL_last_swash_hv	= Nullhv;	/* reinits on demand */
     PL_last_swash_klen	= 0;

@@ -350,6 +350,7 @@
 #define PL_perldb		(vTHX->Iperldb)
 #define PL_perlio		(vTHX->Iperlio)
 #define PL_pidstatus		(vTHX->Ipidstatus)
+#define PL_ppid			(vTHX->Ippid)
 #define PL_preambleav		(vTHX->Ipreambleav)
 #define PL_preambled		(vTHX->Ipreambled)
 #define PL_preprocess		(vTHX->Ipreprocess)
@@ -366,6 +367,8 @@
 #define PL_rsfp			(vTHX->Irsfp)
 #define PL_rsfp_filters		(vTHX->Irsfp_filters)
 #define PL_runops		(vTHX->Irunops)
+#define PL_runops_dbg		(vTHX->Irunops_dbg)
+#define PL_runops_std		(vTHX->Irunops_std)
 #define PL_savebegin		(vTHX->Isavebegin)
 #define PL_sawampersand		(vTHX->Isawampersand)
 #define PL_sh_path_compat	(vTHX->Ish_path_compat)
@@ -648,6 +651,7 @@
 #define PL_Iperldb		PL_perldb
 #define PL_Iperlio		PL_perlio
 #define PL_Ipidstatus		PL_pidstatus
+#define PL_Ippid		PL_ppid
 #define PL_Ipreambleav		PL_preambleav
 #define PL_Ipreambled		PL_preambled
 #define PL_Ipreprocess		PL_preprocess
@@ -664,6 +668,8 @@
 #define PL_Irsfp		PL_rsfp
 #define PL_Irsfp_filters	PL_rsfp_filters
 #define PL_Irunops		PL_runops
+#define PL_Irunops_dbg		PL_runops_dbg
+#define PL_Irunops_std		PL_runops_std
 #define PL_Isavebegin		PL_savebegin
 #define PL_Isawampersand	PL_sawampersand
 #define PL_Ish_path_compat	PL_sh_path_compat
@@ -891,9 +897,6 @@
 #define PL_malloc_mutex		(PL_Vars.Gmalloc_mutex)
 #define PL_op_mutex		(PL_Vars.Gop_mutex)
 #define PL_patleave		(PL_Vars.Gpatleave)
-#define PL_ppid			(PL_Vars.Gppid)
-#define PL_runops_dbg		(PL_Vars.Grunops_dbg)
-#define PL_runops_std		(PL_Vars.Grunops_std)
 #define PL_sh_path		(PL_Vars.Gsh_path)
 #define PL_thr_key		(PL_Vars.Gthr_key)
 
@@ -908,9 +911,6 @@
 #define PL_Gmalloc_mutex	PL_malloc_mutex
 #define PL_Gop_mutex		PL_op_mutex
 #define PL_Gpatleave		PL_patleave
-#define PL_Gppid		PL_ppid
-#define PL_Grunops_dbg		PL_runops_dbg
-#define PL_Grunops_std		PL_runops_std
 #define PL_Gsh_path		PL_sh_path
 #define PL_Gthr_key		PL_thr_key
 

@@ -458,6 +458,8 @@ END_EXTERN_C
 #define PL_perlio		(*Perl_Iperlio_ptr(aTHX))
 #undef  PL_pidstatus
 #define PL_pidstatus		(*Perl_Ipidstatus_ptr(aTHX))
+#undef  PL_ppid
+#define PL_ppid			(*Perl_Ippid_ptr(aTHX))
 #undef  PL_preambleav
 #define PL_preambleav		(*Perl_Ipreambleav_ptr(aTHX))
 #undef  PL_preambled
@@ -490,6 +492,10 @@ END_EXTERN_C
 #define PL_rsfp_filters		(*Perl_Irsfp_filters_ptr(aTHX))
 #undef  PL_runops
 #define PL_runops		(*Perl_Irunops_ptr(aTHX))
+#undef  PL_runops_dbg
+#define PL_runops_dbg		(*Perl_Irunops_dbg_ptr(aTHX))
+#undef  PL_runops_std
+#define PL_runops_std		(*Perl_Irunops_std_ptr(aTHX))
 #undef  PL_savebegin
 #define PL_savebegin		(*Perl_Isavebegin_ptr(aTHX))
 #undef  PL_sawampersand
@@ -932,12 +938,6 @@ END_EXTERN_C
 #define PL_op_mutex		(*Perl_Gop_mutex_ptr(NULL))
 #undef  PL_patleave
 #define PL_patleave		(*Perl_Gpatleave_ptr(NULL))
-#undef  PL_ppid
-#define PL_ppid			(*Perl_Gppid_ptr(NULL))
-#undef  PL_runops_dbg
-#define PL_runops_dbg		(*Perl_Grunops_dbg_ptr(NULL))
-#undef  PL_runops_std
-#define PL_runops_std		(*Perl_Grunops_std_ptr(NULL))
 #undef  PL_sh_path
 #define PL_sh_path		(*Perl_Gsh_path_ptr(NULL))
 #undef  PL_thr_key

@@ -48,15 +48,6 @@ PERLVAR(Gmalloc_mutex,	perl_mutex)	/* Mutex for malloc */
 PERLVAR(Gop_mutex,	perl_mutex)	/* Mutex for op refcounting */
 #endif
 
-/* Force inclusion of both runops options */
-PERLVARI(Grunops_std,	runops_proc_t,	MEMBER_TO_FPTR(Perl_runops_standard))
-PERLVARI(Grunops_dbg,	runops_proc_t,	MEMBER_TO_FPTR(Perl_runops_debug))
-
-/* Stores the PPID */
-#ifdef THREADS_HAVE_PIDS
-PERLVARI(Gppid,		IV,		0)
-#endif
-
 #ifdef USE_ITHREADS
 PERLVAR(Gdollarzero_mutex, perl_mutex)	/* Modifying $0 */
 #endif
