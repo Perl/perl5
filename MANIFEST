@@ -1655,12 +1655,17 @@ lib/Tie/File/t/23_rv_ac_splice.t	Like 07_rv_splice.t, but with autochomp
 lib/Tie/File/t/24_cache_loop.t	Regression for old Tie::File cache bug
 lib/Tie/File/t/25_gen_nocache.t	Like 01_gen.t, but with caching disabled
 lib/Tie/File/t/26_twrite.t	Unit tests for Tie::File::_twrite
+lib/Tie/File/t/27_iwrite.t	Unit tests for Tie::File::_iwrite
+lib/Tie/File/t/28_mtwrite.t	Unit tests for Tie::File::_mtwrite
+lib/Tie/File/t/29_downcopy.t	Unit tests for Tie::File::_downcopy
+lib/Tie/File/t/29a_upcopy.t	Unit tests for Tie::File::_upcopy
 lib/Tie/File/t/30_defer.t	deferred writing feature tests for Tie::File
 lib/Tie/File/t/31_autodefer.t	'autodefer' feature tests for Tie::File
 lib/Tie/File/t/32_defer_misc.t	Like 17_misc_meth.t, but with deferred writing
 lib/Tie/File/t/33_defer_vs.t	Like 30_defer.t, but with varying-length records
 lib/Tie/File/t/40_abs_cache.t	Unit tests for Tie::File::Cache
 lib/Tie/File/t/41_heap.t	Unit tests for Tie::File::Heap
+lib/Tie/File/t/42_offset.t	Unit tests for the offset method
 lib/Tie/Handle.pm		Base class for tied handles
 lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
 lib/Tie/Hash.pm			Base class for tied hashes
