@@ -712,8 +712,10 @@ dARGS
 	    sv_setsv(tmpstr,hv_iterval(hv,entry));
 	    SPAGAIN;
 	    DEBUG_H( {
-			sprintf(buf,"%d%%%d=%d\n", HeHASH(entry),
-				HvMAX(hv)+1, HeHASH(entry) & HvMAX(hv));
+			sprintf(buf,"%lu%%%d=%lu\n",
+				(unsigned long)HeHASH(entry),
+				HvMAX(hv)+1,
+				(unsigned long)(HeHASH(entry) & HvMAX(hv)));
 			sv_setpv(tmpstr,buf);
 	    } )
 	    XPUSHs(sv_2mortal(tmpstr));

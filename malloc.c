@@ -328,8 +328,8 @@ malloc(nbytes)
 	}
 
 #ifdef PERL_CORE
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) malloc %ld bytes\n",
-	(unsigned long)(p+1),an++,(long)size));
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05lu) malloc %ld bytes\n",
+	(unsigned long)(p+1),(unsigned long)(an++),(long)size));
 #endif /* PERL_CORE */
 
 	/* remove from linked list */
@@ -485,7 +485,7 @@ free(mp)
 #endif 
 
 #ifdef PERL_CORE
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) free\n",(unsigned long)cp,an++));
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05lu) free\n",(unsigned long)cp,(unsigned long)(an++)));
 #endif /* PERL_CORE */
 
 	if (cp == NULL)
@@ -645,9 +645,9 @@ realloc(mp, nbytes)
 #ifdef PERL_CORE
 #ifdef DEBUGGING
     if (debug & 128) {
-	PerlIO_printf(PerlIO_stderr(), "0x%lx: (%05d) rfree\n",(unsigned long)res,an++);
-	PerlIO_printf(PerlIO_stderr(), "0x%lx: (%05d) realloc %ld bytes\n",
-	    (unsigned long)res,an++,(long)size);
+	PerlIO_printf(PerlIO_stderr(), "0x%lx: (%05lu) rfree\n",(unsigned long)res,(unsigned long)(an++));
+	PerlIO_printf(PerlIO_stderr(), "0x%lx: (%05lu) realloc %ld bytes\n",
+	    (unsigned long)res,(unsigned long)(an++),(long)size);
     }
 #endif
 #endif /* PERL_CORE */

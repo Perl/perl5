@@ -3088,11 +3088,11 @@ I32 append;
     bp = (STDCHAR*)SvPVX(sv) + append;  /* move these two too to registers */
     ptr = (STDCHAR*)PerlIO_get_ptr(fp);
     DEBUG_P(PerlIO_printf(Perl_debug_log,
-	"Screamer: entering, ptr=%d, cnt=%d\n",ptr,cnt));
+	"Screamer: entering, ptr=%ld, cnt=%ld\n",(long)ptr,(long)cnt));
     DEBUG_P(PerlIO_printf(Perl_debug_log,
-	"Screamer: entering: FILE * thinks ptr=%d, cnt=%d, base=%d\n",
-	       PerlIO_get_ptr(fp), PerlIO_get_cnt(fp), 
-	       PerlIO_has_base(fp) ? PerlIO_get_base(fp) : 0));
+	"Screamer: entering: FILE * thinks ptr=%ld, cnt=%ld, base=%ld\n",
+	       (long)PerlIO_get_ptr(fp), (long)PerlIO_get_cnt(fp), 
+	       (long)(PerlIO_has_base(fp) ? PerlIO_get_base(fp) : 0)));
     for (;;) {
       screamer:
 	if (cnt > 0) {
@@ -3122,24 +3122,24 @@ I32 append;
 	}
 
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
-	    "Screamer: going to getc, ptr=%d, cnt=%d\n",ptr,cnt));
+	    "Screamer: going to getc, ptr=%ld, cnt=%ld\n",(long)ptr,(long)cnt));
 	PerlIO_set_ptrcnt(fp, ptr, cnt); /* deregisterize cnt and ptr */
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
-	    "Screamer: pre: FILE * thinks ptr=%d, cnt=%d, base=%d\n",
-	    PerlIO_get_ptr(fp), PerlIO_get_cnt(fp), 
-	    PerlIO_has_base (fp) ? PerlIO_get_base(fp) : 0));
+	    "Screamer: pre: FILE * thinks ptr=%ld, cnt=%ld, base=%ld\n",
+	    (long)PerlIO_get_ptr(fp), (long)PerlIO_get_cnt(fp), 
+	    (long)(PerlIO_has_base (fp) ? PerlIO_get_base(fp) : 0)));
 	/* This used to call 'filbuf' in stdio form, but as that behaves like 
 	   getc when cnt <= 0 we use PerlIO_getc here to avoid introducing
 	   another abstraction.  */
 	i   = PerlIO_getc(fp);		/* get more characters */
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
-	    "Screamer: post: FILE * thinks ptr=%d, cnt=%d, base=%d\n",
-	    PerlIO_get_ptr(fp), PerlIO_get_cnt(fp), 
-	    PerlIO_has_base (fp) ? PerlIO_get_base(fp) : 0));
+	    "Screamer: post: FILE * thinks ptr=%ld, cnt=%ld, base=%ld\n",
+	    (long)PerlIO_get_ptr(fp), (long)PerlIO_get_cnt(fp), 
+	    (long)(PerlIO_has_base (fp) ? PerlIO_get_base(fp) : 0)));
 	cnt = PerlIO_get_cnt(fp);
 	ptr = (STDCHAR*)PerlIO_get_ptr(fp);	/* reregisterize cnt and ptr */
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
-	    "Screamer: after getc, ptr=%d, cnt=%d\n",ptr,cnt));
+	    "Screamer: after getc, ptr=%ld, cnt=%ld\n",(long)ptr,(long)cnt));
 
 	if (i == EOF)			/* all done for ever? */
 	    goto thats_really_all_folks;
@@ -3163,12 +3163,12 @@ thats_really_all_folks:
     if (shortbuffered)
 	cnt += shortbuffered;
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
-	    "Screamer: quitting, ptr=%d, cnt=%d\n",ptr,cnt));
+	    "Screamer: quitting, ptr=%ld, cnt=%ld\n",(long)ptr,(long)cnt));
     PerlIO_set_ptrcnt(fp, ptr, cnt);	/* put these back or we're in trouble */
     DEBUG_P(PerlIO_printf(Perl_debug_log,
-	"Screamer: end: FILE * thinks ptr=%d, cnt=%d, base=%d\n",
-	PerlIO_get_ptr(fp), PerlIO_get_cnt(fp), 
-	PerlIO_has_base (fp) ? PerlIO_get_base(fp) : 0));
+	"Screamer: end: FILE * thinks ptr=%ld, cnt=%ld, base=%ld\n",
+	(long)PerlIO_get_ptr(fp), (long)PerlIO_get_cnt(fp), 
+	(long)(PerlIO_has_base (fp) ? PerlIO_get_base(fp) : 0)));
     *bp = '\0';
     SvCUR_set(sv, bp - (STDCHAR*)SvPVX(sv));	/* set length */
     DEBUG_P(PerlIO_printf(Perl_debug_log,

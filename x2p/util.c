@@ -33,7 +33,8 @@ MEM_SIZE size;
     ptr = malloc(size ? size : 1);
 #ifdef DEBUGGING
     if (debug & 128)
-	fprintf(stderr,"0x%x: (%05d) malloc %d bytes\n",ptr,an++,size);
+	fprintf(stderr,"0x%lx: (%05d) malloc %d bytes\n",(unsigned long)ptr,
+    	    	an++,size);
 #endif
     if (ptr != Nullch)
 	return ptr;
@@ -57,8 +58,8 @@ MEM_SIZE size;
     ptr = realloc(where, size ? size : 1);
 #ifdef DEBUGGING
     if (debug & 128) {
-	fprintf(stderr,"0x%x: (%05d) rfree\n",where,an++);
-	fprintf(stderr,"0x%x: (%05d) realloc %d bytes\n",ptr,an++,size);
+	fprintf(stderr,"0x%lx: (%05d) rfree\n",(unsigned long)where,an++);
+	fprintf(stderr,"0x%lx: (%05d) realloc %d bytes\n",(unsigned long)ptr,an++,size);
     }
 #endif
     if (ptr != Nullch)
@@ -78,7 +79,7 @@ Malloc_t where;
 {
 #ifdef DEBUGGING
     if (debug & 128)
-	fprintf(stderr,"0x%x: (%05d) free\n",where,an++);
+	fprintf(stderr,"0x%lx: (%05d) free\n",(unsigned long)where,an++);
 #endif
     free(where);
 }
