@@ -1209,7 +1209,7 @@ Perl_newHVhv(pTHX_ HV *ohv)
 		STRLEN len = HeKLEN_UTF8(oent);
 
 		ent = new_HE();
-		HeVAL(ent)     = SvREFCNT_inc(HeVAL(oent));
+		HeVAL(ent)     = newSVsv(HeVAL(oent));
 		HeKEY_hek(ent) = shared ? share_hek(key, len, hash)
 					:  save_hek(key, len, hash);
 		if (prev)
