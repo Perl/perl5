@@ -14,10 +14,19 @@ The basic steps to build and install perl5 are:
 
 Each of these is explained in further detail below.
 
+You should probably at least skim through this entire document before
+proceeding.  Special notes specific to this release are identified
+by B<NOTE>.
+
 =head1 BUILDING PERL5
 
 =head1 Start with a Fresh Distribution.
 
+If you have built perl before, you should clean out the build directory
+with the command
+
+	make realclean
+	
 The results of a Configure run are stored in the config.sh file.  If
 you are upgrading from a previous version of perl, or if you change
 systems or compilers or make other significant changes, or if you are
@@ -74,15 +83,15 @@ using the Configure command line option -Uusedl.
 
 =head2 Extensions
 
-By default, Configure will offer to build every extension which
-appears to be supported.  For example, Configure will offer to build
-GDBM_File only if it is able to find the gdbm library.  (See examples
-below.)  DynaLoader and Fcntl are always built by default.  Configure
-does not contain code to test for POSIX compliance, so POSIX is always
-built by default as well.  If you wish to skip POSIX, you can set the
-Configure variable useposix=false either in a hint file or from the
-Configure command line.  Similarly, the Safe extension is always built
-by default, but you can skip it by setting the Configure variable
+By default, Configure will offer to build every extension which appears
+to be supported.  For example, Configure will offer to build GDBM_File
+only if it is able to find the gdbm library.  (See examples below.)
+DynaLoader, Fcntl and FileHandle are always built by default.
+Configure does not contain code to test for POSIX compliance, so POSIX
+is always built by default as well.  If you wish to skip POSIX, you can
+set the Configure variable useposix=false either in a hint file or from
+the Configure command line.  Similarly, the Safe extension is always
+built by default, but you can skip it by setting the Configure variable
 usesafe=false either in a hint file for from the command line.
 
 In summary, here are the Configure command-line variables you can set
@@ -91,6 +100,7 @@ to turn off each extension:
     DB_File		i_db
     DynaLoader		(Must always be included)
     Fcntl		(Always included by default)
+    FileHandle		(Always included by default)
     GDBM_File		i_gdbm
     NDBM_File		i_ndbm
     ODBM_File		i_dbm
@@ -358,6 +368,39 @@ If you have any problems, it is a good idea to read the relevant hint
 file for further information.  See F<hints/solaris_2.sh> for an
 extensive example.
 
+=item *** WHOA THERE!!! ***
+
+Occasionally, Configure makes a wrong guess.  For example, on SunOS
+4.1.3, Configure incorrectly concludes that tzname[] is in the
+standard C library.  The hint file is set up to correct for this.  You
+will see a message:
+
+    *** WHOA THERE!!! ***
+	The recommended value for $d_tzname on this machine was "undef"!
+	Keep the recommended value? [y]
+
+You should always keep the recommended value unless, after reading the
+relevant section of the hint file, you are sure you want to try
+overriding it.
+
+If you are re-using an old config.sh, the word "previous" will be
+used instead of "recommended".  Again, you will almost always want
+to keep the previous value, unless you have changed something on your
+system.
+
+For example, suppose you have added libgdbm.a to your system
+and you decide to reconfigure perl to use GDBM_File.  When you run
+Configure again, you will need to add -lgdbm to the list of libraries.
+Now, Configure will find your gdbm library and will issue a message:
+
+    *** WHOA THERE!!! ***
+	The previous value for $i_gdbm on this machine was "undef"!
+	Keep the previous value? [y]
+
+In this case, you do I<not> want to keep the previous value, so you
+should answer 'n'.  (You'll also have to manuually add GDBM_File to
+the list of dynamic extensions to build.)
+
 =item Changing Compilers
 
 If you change compilers or make other significant changes, you should
@@ -523,7 +566,7 @@ If individual tests bomb, you can run them by hand, e.g.,
 
 	./perl op/groups.t
 
-B<NOTE>: one possible reason for errors is that some external programs
+B<Note>: one possible reason for errors is that some external programs
 may be broken due to the combination of your environment and the way
 C<make test> exercises them. This may happen for example if you have
 one or more of these environment variables set:
@@ -549,7 +592,7 @@ page, however.  You may need to be root to run B<make install>.  If you
 are not root, you must own the directories in question and you should
 ignore any messages about chown not working.
 
-B<Note:>  In the 5.002 release, you will see some harmless error
+B<NOTE:>  In the 5.002 release, you will see some harmless error
 messages and warnings from pod2man.  You may safely ignore them.  (Yes,
 they should be fixed, but they didn't seem important enough to warrant
 holding up the entire 5.002 release.)
@@ -653,6 +696,18 @@ and adding /opt/perl5.002/bin to the shell PATH variable.  Such users
 may also wish to add a symbolic link /usr/local/bin/perl so that
 scripts can still start with #!/usr/local/bin/perl.
 
+B<NOTE>: Starting with 5.002_01, all functions in the perl C source
+code are protected by default by the prefix Perl_ (or perl_) so that
+you may link with third-party libraries without fear of namespace
+collisons.  This breaks compatability with the initially released
+version of 5.002, so once you install 5.002_01 (or higher) you will
+need to re-build and install all of your dynamically loadable
+extensions.  (The standard extensions supplied with Perl are handled
+automatically).  You can turn off this namespace protection by adding
+-DNO_EMBED to your ccflags variable in config.sh.  This is a one-time
+change.  In the future, we certainly hope that most extensions won't
+need to be recompiled for use with a newer version of perl.
+
 =head1 Coexistence with perl4
 
 You can safely install perl5 even if you want to keep perl4 around.
@@ -665,7 +720,8 @@ F<perl4.036>.  That will not be touched by the perl5 installation
 process.  Most perl4 scripts should run just fine under perl5.
 However, if you have any scripts that require perl4, you can replace
 the C<#!> line at the top of them by C<#!/usr/local/bin/perl4.036>
-(or whatever the appropriate pathname is).
+(or whatever the appropriate pathname is).  See pod/perltrap.pod
+for possible problems running perl4 scripts under perl5.
 
 =head1 DOCUMENTATION
 
@@ -682,4 +738,4 @@ from the original README by Larry Wall.
 
 =head1 LAST MODIFIED
 
-04 January 1996
+19 March 1996
