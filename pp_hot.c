@@ -377,6 +377,7 @@ PP(pp_print)
     else
 	gv = PL_defoutgv;
     if ((mg = SvTIED_mg((SV*)gv, 'q'))) {
+      had_magic:
 	if (MARK == ORIGMARK) {
 	    /* If using default handle then we need to make space to
 	     * pass object as 1st arg, so move other args up ...
@@ -400,6 +401,8 @@ PP(pp_print)
     }
     if (!(io = GvIO(gv))) {
         dTHR;
+        if ((GvEGV(gv)) && (mg = SvTIED_mg((SV*)GvEGV(gv),'q')))
+            goto had_magic;
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
 	SETERRNO(EBADF,RMS$_IFI);
