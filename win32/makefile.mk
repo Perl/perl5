@@ -1217,14 +1217,14 @@ test-wide-notty : test-prep
 	    cd ..\t && $(PERLEXE) -I..\lib harness
 
 _test : $(RIGHTMAKE)
-       $(XCOPY) $(PERLEXE) ..\t\$(NULL)
-       $(XCOPY) $(PERLDLL) ..\t\$(NULL)
+	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
+	$(XCOPY) $(PERLDLL) ..\t\$(NULL)
 .IF "$(CCTYPE)" == "BORLAND"
-       $(XCOPY) $(GLOBBAT) ..\t\$(NULL)
+	$(XCOPY) $(GLOBBAT) ..\t\$(NULL)
 .ELSE
-       $(XCOPY) $(GLOBEXE) ..\t\$(NULL)
+	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 .ENDIF
-       cd ..\t && $(PERLEXE) -I..\lib harness
+	cd ..\t && $(PERLEXE) -I..\lib harness
 
 clean : Extensions_clean
 	-@erase miniperlmain$(o)
