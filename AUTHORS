@@ -7,6 +7,9 @@
 # send them to perl5-porters@perl.org, preferably as the output of diff(1),
 # diff -u or diff -c between the original and a corrected version of this file.
 #
+# The use of this database for anything else than Perl development
+# (and of course passive distribution with the Perl source code kit)
+# is strictly forbidden.
 -- 
 A. C. Yardley                  <yardley@tanet.net>
 Aaron B. Dossett               <aaron@iglou.com>
@@ -116,6 +119,7 @@ Dan Schmidt                    <dfan@harmonixmusic.com>
 Dan Sugalski                   <dan@sidhe.org>
 Daniel Chetlin                 <daniel@chetlin.com>
 Daniel Grisinger               <dgris@dimensional.com>
+Daniel Lieberman               <daniel@bitpusher.com>
 Daniel Muiño                   <dmuino@afip.gov.ar>
 Daniel S. Lewart               <d-lewart@uiuc.edu>
 Daniel Yacob                   <dmulholl@cs.indiana.edu>
@@ -155,6 +159,7 @@ Dominic Dunlop                 <domo@computer.org>
 Dominique Dumont               <Dominique_Dumont@grenoble.hp.com>
 Doug Campbell                  <soup@ampersand.com>
 Doug MacEachern                <dougm@covalent.net>
+Doug Wilson                    <Doug_Wilson@intuit.com>
 Douglas E. Wegscheid           <dwegscheid@qtm.net>
 Douglas Lankshear              <dougl@activestate.com>
 Dov Grobgeld                   <dov@Orbotech.Co.IL>
@@ -220,6 +225,7 @@ Hannu Napari                   <Hannu.Napari@hut.fi>
 Hans Ginzel                    <hans@kolej.mff.cuni.cz>
 Hans Mulder                    <hansmu@xs4all.nl>
 Hans de Graaff                 <J.J.deGraaff@twi.tudelft.nl>
+Harmon S. Nine                 <hnine@netarx.com>
 Harold O Morris                <hom00@utsglobal.com>
 Harri Pasanen                  <harri.pasanen@trema.com>
 Harry Edmon                    <harry@atmos.washington.edu>
@@ -462,6 +468,7 @@ Paul Saab                      <ps@yahoo-inc.com>
 Paul Schinder                  <schinder@pobox.com>
 Pete Peterson                  <petersonp@genrad.com>
 Peter Chines                   <pchines@nhgri.nih.gov>
+Peter Gessner                  <peter.gessner@post.rwth-aachen.de>
 Peter Gordon                   <peter@valor.com>
 Peter Haworth                  <pmh@edison.ioppublishing.com>
 Peter J. Farley III            <pjfarley@banet.net>
@@ -482,6 +489,7 @@ Radu Greab                     <radu@netsoft.ro>
 Rajesh Vaidheeswarran          <rv@gnu.org>
 Ralf S. Engelschall            <rse@engelschall.com>
 Randal L. Schwartz             <merlyn@stonehenge.com>
+Randall Gellens                <randy@qualcomm.com>
 Randy J. Ray                   <rjray@redhat.com>
 Raphael Manfredi               <Raphael.Manfredi@pobox.com>
 Raymund Will                   <ray@caldera.de>
@@ -572,6 +580,7 @@ Tim Conrow                     <tim@spindrift.srl.caltech.edu>
 Tim Freeman                    <tfreeman@infoseek.com>
 Tim Jenness                    <t.jenness@jach.hawaii.edu>
 Tim Mooney                     <mooney@dogbert.cc.ndsu.NoDak.edu>
+Tim Sweetman                   <tim@aldigital.co.uk>
 Tim Witham                     <twitham@pcocd2.intel.com>
 Timur I. Bakeyev               <bsdi@listserv.bat.ru>
 Tkil                           <tkil@reptile.scrye.com>
