@@ -317,7 +317,7 @@ B<Implementation details follow, please close your eyes.>
 The arguments to layers are by default returned in parenthesis after
 the name of the layer, and certain layers (like C<utf8>) are not real
 layers but instead flags on real layers: to get all of these returned
-separately use the optional C<separate> argument:
+separately use the optional C<details> argument:
 
    my @layer_and_args_and_flags = PerlIO::get_layers($fh, details => 1);
 

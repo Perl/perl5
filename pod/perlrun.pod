@@ -595,7 +595,8 @@ Note that the lines are not printed by default.  See B<-p> to have
 lines printed.  If a file named by an argument cannot be opened for
 some reason, Perl warns you about it and moves on to the next file.
 
-Here is an efficient way to delete all files older than a week:
+Here is an efficient way to delete all files that haven't been modifed for
+at least a week:
 
     find . -mtime +7 -print | perl -nle unlink
 
