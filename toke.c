@@ -1053,7 +1053,12 @@ GV *gv;
 	return *s == '(' ? FUNCMETH : METHOD;
     }
     if (!keyword(tmpbuf, len)) {
-	indirgv = gv_fetchpv(tmpbuf,FALSE, SVt_PVCV);
+	if (len > 2 && tmpbuf[len - 2] == ':' && tmpbuf[len - 1] == ':') {
+	    len -= 2;
+	    tmpbuf[len] = '\0';
+	    goto bare_package;
+	}
+	indirgv = gv_fetchpv(tmpbuf, FALSE, SVt_PVCV);
 	if (indirgv && GvCVu(indirgv))
 	    return 0;
 	/* filehandle or package name makes it a method */
@@ -1061,11 +1066,10 @@ GV *gv;
 	    s = skipspace(s);
 	    if ((bufend - s) >= 2 && *s == '=' && *(s+1) == '>')
 		return 0;	/* no assumptions -- "=>" quotes bearword */
-	    nextval[nexttoke].opval =
-		(OP*)newSVOP(OP_CONST, 0,
-			    newSVpv(tmpbuf,0));
-	    nextval[nexttoke].opval->op_private =
-		OPpCONST_BARE;
+      bare_package:
+	    nextval[nexttoke].opval = (OP*)newSVOP(OP_CONST, 0,
+						   newSVpv(tmpbuf,0));
+	    nextval[nexttoke].opval->op_private = OPpCONST_BARE;
 	    expect = XTERM;
 	    force_next(WORD);
 	    bufptr = s;
@@ -2586,10 +2590,12 @@ yylex()
 		/* Get the rest if it looks like a package qualifier */
 
 		if (*s == '\'' || *s == ':' && s[1] == ':') {
+		    STRLEN morelen;
 		    s = scan_word(s, tokenbuf + len, sizeof tokenbuf - len,
-				  TRUE, &len);
-		    if (!len)
+				  TRUE, &morelen);
+		    if (!morelen)
 			croak("Bad name after %s::", tokenbuf);
+		    len += morelen;
 		}
 
 		if (expect == XOPERATOR) {
@@ -2602,15 +2608,35 @@ yylex()
 			no_op("Bareword",s);
 		}
 
-		/* Look for a subroutine with this name in current package. */
+		/* Look for a subroutine with this name in current package,
+		   unless name is "Foo::", in which case Foo is a bearword
+		   (and a package name). */
 
-		gv = gv_fetchpv(tokenbuf,FALSE, SVt_PVCV);
+		if (len > 2 &&
+		    tokenbuf[len - 2] == ':' && tokenbuf[len - 1] == ':')
+		{
+		    if (! gv_fetchpv(tokenbuf, FALSE, SVt_PVHV))
+			warn("Bareword \"%s\" refers to nonexistent package",
+			     tokenbuf);
+		    len -= 2;
+		    tokenbuf[len] = '\0';
+		    gv = Nullgv;
+		}
+		else {
+		    len = 0;
+		    gv = gv_fetchpv(tokenbuf, FALSE, SVt_PVCV);
+		}
 
 		/* Presume this is going to be a bareword of some sort. */
 
 		CLINE;
 		yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(tokenbuf,0));
 		yylval.opval->op_private = OPpCONST_BARE;
+
+		/* And if "Foo::", then that's what it certainly is. */
+
+		if (len)
+		    goto safe_bareword;
 
 		/* See if it's the indirect object for a list operator. */
 
@@ -2740,6 +2766,8 @@ yylex()
 			    warn(warn_reserved, tokenbuf);
 		    }
 		}
+
+	    safe_bareword:
 		if (lastchar && strchr("*%&", lastchar)) {
 		    warn("Operator or semicolon missing before %c%s",
 			lastchar, tokenbuf);
@@ -4412,7 +4440,7 @@ STRLEN *slp;
 	    *d++ = ':';
 	    s++;
 	}
-	else if (*s == ':' && s[1] == ':' && allow_package && isIDFIRST(s[2])) {
+	else if (*s == ':' && s[1] == ':' && allow_package && s[2] != '$') {
 	    *d++ = *s++;
 	    *d++ = *s++;
 	}
