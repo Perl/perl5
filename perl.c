@@ -2578,10 +2578,16 @@ my_failure_exit()
 	    STATUS_NATIVE_SET(vaxc$errno);
     }
 #else
+    int exitstatus;
     if (errno & 255)
 	STATUS_POSIX_SET(errno);
-    else if (STATUS_POSIX == 0)
-	STATUS_POSIX_SET(255);
+    else {
+	exitstatus = STATUS_POSIX >> 8; 
+	if (exitstatus & 255)
+	    STATUS_POSIX_SET(exitstatus);
+	else
+	    STATUS_POSIX_SET(255);
+    }
 #endif
     my_exit_jump();
 }
