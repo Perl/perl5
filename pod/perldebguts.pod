@@ -19,8 +19,8 @@ F<INSTALL> podpage in the Perl source tree.
 
 For example, whenever you call Perl's built-in C<caller> function
 from the package DB, the arguments that the corresponding stack
-frame was called with are copied to the @DB::args array.  The
-general mechanisms is enabled by calling Perl with the B<-d> switch, the
+frame was called with are copied to the C<@DB::args> array.  The
+general mechanism is enabled by calling Perl with the B<-d> switch, the
 following additional features are enabled (cf. L<perlvar/$^P>):
 
 =over 4
@@ -111,11 +111,12 @@ The minimal working debugger consists of one line
 
   sub DB::DB {}
 
-which is quite handy as contents of C<PERL5DB> environment
+which you could even fit into the C<PERL5DB> environment
 variable:
 
   $ PERL5DB="sub DB::DB {}" perl -d your-script
 
+although it doesn't do anything that tells you it's working...
 Another brief debugger, slightly more useful, could be created
 with only the line:
 
