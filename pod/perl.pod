@@ -40,7 +40,6 @@ For ease of access, the Perl manual has been split up into several sections.
 
     perlstyle		Perl style guide
 
-    perlcheat		Perl cheat sheet
     perltrap		Perl traps for the unwary
     perldebtut		Perl debugging tutorial
 
@@ -56,6 +55,8 @@ For ease of access, the Perl manual has been split up into several sections.
       perlfaq9		Networking
 
 =head2 Reference Manual
+
+    perlcheat		Perl cheat sheet
 
     perlsyn		Perl syntax
     perldata		Perl data structures
