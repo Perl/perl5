@@ -5,7 +5,7 @@ generates pod documentation for Config.pm from this file--please try to keep
 the formatting regular.]
 
 Mcc (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the Mcc program.  After Configure runs,
 	the value is reset to a plain "Mcc" and is not useful.
 
@@ -52,7 +52,7 @@ apiversion (patchlevel.U):
 	will retain binary compatibility.
 
 ar (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the ar program.  After Configure runs,
 	the value is reset to a plain "ar" and is not useful.
 
@@ -79,7 +79,7 @@ archobjs (Unix.U):
 	include os2/os2.obj.
 
 awk (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the awk program.  After Configure runs,
 	the value is reset to a plain "awk" and is not useful.
 
@@ -105,7 +105,7 @@ bison (Loc.U):
 	The value is a plain '' and is not useful.
 
 byacc (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the byacc program.  After Configure runs,
 	the value is reset to a plain "byacc" and is not useful.
 
@@ -129,7 +129,7 @@ castflags (d_castneg.U):
 		4 = couldn't cast in argument expression list
 
 cat (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the cat program.  After Configure runs,
 	the value is reset to a plain "cat" and is not useful.
 
@@ -184,7 +184,7 @@ clocktype (d_times.U):
 	included).
 
 comm (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the comm program.  After Configure runs,
 	the value is reset to a plain "comm" and is not useful.
 
@@ -199,7 +199,7 @@ contains (contains.U):
 	is primarily for the use of other Configure units.
 
 cp (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the cp program.  After Configure runs,
 	the value is reset to a plain "cp" and is not useful.
 
@@ -208,7 +208,7 @@ cpio (Loc.U):
 	The value is a plain '' and is not useful.
 
 cpp (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the cpp program.  After Configure runs,
 	the value is reset to a plain "cpp" and is not useful.
 
@@ -250,7 +250,7 @@ cryptlib (d_crypt.U):
 	up to the Makefile to use this.
 
 csh (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the csh program.  After Configure runs,
 	the value is reset to a plain "csh" and is not useful.
 
@@ -1260,7 +1260,7 @@ d_xenix (Guess.U):
 	the C program that it runs under Xenix.
 
 date (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the date program.  After Configure runs,
 	the value is reset to a plain "date" and is not useful.
 
@@ -1307,12 +1307,12 @@ ebcdic (ebcdic.U):
 	See trnl.U
 
 echo (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the echo program.  After Configure runs,
 	the value is reset to a plain "echo" and is not useful.
 
 egrep (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the egrep program.  After Configure runs,
 	the value is reset to a plain "egrep" and is not useful.
 
@@ -1329,7 +1329,7 @@ exe_ext (Unix.U):
 	This is an old synonym for _exe.
 
 expr (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the expr program.  After Configure runs,
 	the value is reset to a plain "expr" and is not useful.
 
@@ -1340,7 +1340,7 @@ extensions (Extensions.U):
 	is available.
 
 find (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the find program.  After Configure runs,
 	the value is reset to a plain "find" and is not useful.
 
@@ -1387,7 +1387,7 @@ gidtype (gidtype.U):
 	of getgid().  Typically, it is the type of group ids in the kernel.
 
 grep (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the grep program.  After Configure runs,
 	the value is reset to a plain "grep" and is not useful.
 
@@ -1403,7 +1403,7 @@ groupstype (groupstype.U):
 	gidtype (gid_t), but sometimes it isn't.
 
 gzip (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the gzip program.  After Configure runs,
 	the value is reset to a plain "gzip" and is not useful.
 
@@ -1756,7 +1756,7 @@ ldflags (ccflags.U):
 	the user.  It is up to the Makefile to use this.
 
 less (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the less program.  After Configure runs,
 	the value is reset to a plain "less" and is not useful.
 
@@ -1788,7 +1788,7 @@ libswanted (Myinit.U):
 	ahead of ucb or bsd libraries for SVR4.
 
 line (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the line program.  After Configure runs,
 	the value is reset to a plain "line" and is not useful.
 
@@ -1801,7 +1801,7 @@ lkflags (ccflags.U):
 	the user.  It is up to the Makefile to use this.
 
 ln (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the ln program.  After Configure runs,
 	the value is reset to a plain "ln" and is not useful.
 
@@ -1845,7 +1845,7 @@ lpr (Loc.U):
 	The value is a plain '' and is not useful.
 
 ls (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the ls program.  After Configure runs,
 	the value is reset to a plain "ls" and is not useful.
 
@@ -1863,7 +1863,7 @@ mailx (Loc.U):
 	The value is a plain '' and is not useful.
 
 make (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the make program.  After Configure runs,
 	the value is reset to a plain "make" and is not useful.
 
@@ -1934,7 +1934,7 @@ mips_type (usrinc.U):
 	Possible values are "BSD 4.3" and "System V".
 
 mkdir (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the mkdir program.  After Configure runs,
 	the value is reset to a plain "mkdir" and is not useful.
 
@@ -1949,7 +1949,7 @@ modetype (modetype.U):
 	modes for system calls.
 
 more (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the more program.  After Configure runs,
 	the value is reset to a plain "more" and is not useful.
 
@@ -2006,7 +2006,7 @@ netdb_net_type (netdbtype.U):
 	This is only useful if you have getnetbyaddr(), naturally.
 
 nm (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the nm program.  After Configure runs,
 	the value is reset to a plain "nm" and is not useful.
 
@@ -2026,7 +2026,7 @@ nonxs_ext (Extensions.U):
 	in the package.  All of them will be built.
 
 nroff (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the nroff program.  After Configure runs,
 	the value is reset to a plain "nroff" and is not useful.
 
@@ -2086,7 +2086,7 @@ path_sep (Unix.U):
 	used to separate elements in the command shell search PATH.
 
 perl (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the perl program.  After Configure runs,
 	the value is reset to a plain "perl" and is not useful.
 
@@ -2099,7 +2099,7 @@ perlpath (perlpath.U):
 	shell scripts and in the "eval 'exec'" idiom.
 
 pg (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the pg program.  After Configure runs,
 	the value is reset to a plain "pg" and is not useful.
 
@@ -2172,7 +2172,7 @@ rd_nodata (nblock_io.U):
 	no data and an EOF.. Sigh!
 
 rm (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the rm program.  After Configure runs,
 	the value is reset to a plain "rm" and is not useful.
 
@@ -2197,7 +2197,7 @@ scriptdirexp (scriptdir.U):
 	at configuration time, for programs not wanting to bother with it.
 
 sed (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the sed program.  After Configure runs,
 	the value is reset to a plain "sed" and is not useful.
 
@@ -2208,7 +2208,7 @@ selecttype (selecttype.U):
 	have select(), naturally.
 
 sendmail (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the sendmail program.  After Configure runs,
 	the value is reset to a plain "sendmail" and is not useful.
 
@@ -2329,7 +2329,7 @@ socketlib (d_socket.U):
 	This variable has the names of any libraries needed for socket support.
 
 sort (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the sort program.  After Configure runs,
 	the value is reset to a plain "sort" and is not useful.
 
@@ -2440,12 +2440,12 @@ tbl (Loc.U):
 	The value is a plain '' and is not useful.
 
 tee (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the tee program.  After Configure runs,
 	the value is reset to a plain "tee" and is not useful.
 
 test (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the test program.  After Configure runs,
 	the value is reset to a plain "test" and is not useful.
 
@@ -2458,12 +2458,12 @@ timetype (d_time.U):
 	included). Anyway, the type Time_t should be used.
 
 touch (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the touch program.  After Configure runs,
 	the value is reset to a plain "touch" and is not useful.
 
 tr (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the tr program.  After Configure runs,
 	the value is reset to a plain "tr" and is not useful.
 
@@ -2482,12 +2482,12 @@ uidtype (uidtype.U):
 	ushort, or whatever type is used to declare user ids in the kernel.
 
 uname (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the uname program.  After Configure runs,
 	the value is reset to a plain "uname" and is not useful.
 
 uniq (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the uniq program.  After Configure runs,
 	the value is reset to a plain "uniq" and is not useful.
 
@@ -2574,7 +2574,7 @@ zcat (Loc.U):
 	The value is a plain '' and is not useful.
 
 zip (Loc.U):
-	This variable is be used internally by Configure to determine the
+	This variable is used internally by Configure to determine the
 	full pathname (if any) of the zip program.  After Configure runs,
 	the value is reset to a plain "zip" and is not useful.
 
