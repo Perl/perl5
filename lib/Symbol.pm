@@ -46,7 +46,7 @@ which are qualified by their nature.
 
 =cut
 
-require 5.002;
+BEGIN { require 5.002; }
 
 require Exporter;
 @ISA = qw(Exporter);
