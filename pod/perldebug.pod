@@ -334,7 +334,7 @@ affects printing of return value after C<r> command.
 
 =item C<ornaments>
 
-affects screen appearance of the command line (see L<Term::Readline>).
+affects screen appearance of the command line (see L<Term::ReadLine>).
 
 =item C<frame>
 

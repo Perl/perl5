@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq9 - Networking ($Revision: 1.16 $, $Date: 1997/04/23 18:12:06 $)
+perlfaq9 - Networking ($Revision: 1.17 $, $Date: 1997/04/24 22:44:29 $)
 
 =head1 DESCRIPTION
 
@@ -295,7 +295,7 @@ give you the hostname after which you can find out the IP address
     use Socket;
     use Sys::Hostname;
     my $host = hostname();
-    my $addr = inet_ntoa(scalar(gethostbyname($host || 'localhost')));
+    my $addr = inet_ntoa(scalar(gethostbyname($name)) || 'localhost');
 
 Probably the simplest way to learn your DNS domain name is to grok
 it out of /etc/resolv.conf, at least under Unix.  Of course, this

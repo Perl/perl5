@@ -34,7 +34,7 @@
 #endif
 
 #ifdef I_UTIME
-#  ifdef WIN32
+#  ifdef _MSC_VER
 #    include <sys/utime.h>
 #  else
 #    include <utime.h>
@@ -481,7 +481,10 @@ register GV *gv;
 #ifdef HAS_FCHMOD
 		(void)fchmod(lastfd,filemode);
 #else
+#  if !(defined(WIN32) && defined(__BORLANDC__))
+		/* Borland runtime creates a readonly file! */
 		(void)chmod(oldname,filemode);
+#  endif
 #endif
 		if (fileuid != statbuf.st_uid || filegid != statbuf.st_gid) {
 #ifdef HAS_FCHOWN
@@ -722,7 +725,6 @@ I32 my_chsize(fd, length)
 I32 fd;			/* file descriptor */
 Off_t length;		/* length to set file to */
 {
-    extern long lseek();
     struct flock fl;
     struct stat filebuf;
 
@@ -1331,6 +1333,9 @@ SV **sp;
     char *a;
     I32 id, n, cmd, infosize, getinfo;
     I32 ret = -1;
+#ifdef __linux__	/* XXX Need metaconfig test */
+    union semun unsemds;
+#endif
 
     id = SvIVx(*++mark);
     n = (optype == OP_SEMCTL) ? SvIVx(*++mark) : 0;
@@ -1359,11 +1364,29 @@ SV **sp;
 	    infosize = sizeof(struct semid_ds);
 	else if (cmd == GETALL || cmd == SETALL)
 	{
+#ifdef __linux__	/* XXX Need metaconfig test */
+/* linux uses :
+   int semctl (int semid, int semnun, int cmd, union semun arg)
+
+       union semun {
+            int val;
+            struct semid_ds *buf;
+            ushort *array;
+       };
+*/
+            union semun semds;
+	    if (semctl(id, 0, IPC_STAT, semds) == -1)
+#else
 	    struct semid_ds semds;
 	    if (semctl(id, 0, IPC_STAT, &semds) == -1)
+#endif
 		return -1;
 	    getinfo = (cmd == GETALL);
+#ifdef __linux__	/* XXX Need metaconfig test */
+	    infosize = semds.buf->sem_nsems * sizeof(short);
+#else
 	    infosize = semds.sem_nsems * sizeof(short);
+#endif
 		/* "short" is technically wrong but much more portable
 		   than guessing about u_?short(_t)? */
 	}
@@ -1406,7 +1429,12 @@ SV **sp;
 #endif
 #ifdef HAS_SEM
     case OP_SEMCTL:
+#ifdef __linux__	/* XXX Need metaconfig test */
+        unsemds.buf = (struct semid_ds *)a;
+	ret = semctl(id, n, cmd, unsemds);
+#else
 	ret = semctl(id, n, cmd, (struct semid_ds *)a);
+#endif
 	break;
 #endif
 #ifdef HAS_SHM

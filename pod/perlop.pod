@@ -392,7 +392,7 @@ As a scalar operator:
 As a list operator:
 
     for (101 .. 200) { print; }	# print $_ 100 times
-    @foo = @foo[$[ .. $#foo];	# an expensive no-op
+    @foo = @foo[0 .. $#foo];	# an expensive no-op
     @foo = @foo[$#foo-4 .. $#foo];	# slice last 5 items
 
 The range operator (in a list context) makes use of the magical
@@ -1058,7 +1058,7 @@ of filenames.  The loop
 
 is equivalent to the following Perl-like pseudo code:
 
-    unshift(@ARGV, '-') if $#ARGV < $[;
+    unshift(@ARGV, '-') unless @ARGV;
     while ($ARGV = shift) {
 	open(ARGV, $ARGV);
 	while (<ARGV>) {

@@ -66,10 +66,10 @@ DllMain(HANDLE hModule,		/* DLL module handle */
     case DLL_PROCESS_ATTACH:
 /* #define DEFAULT_BINMODE */
 #ifdef DEFAULT_BINMODE
-	_setmode( _fileno( stdin  ), _O_BINARY );
-	_setmode( _fileno( stdout ), _O_BINARY );
-	_setmode( _fileno( stderr ), _O_BINARY );
-	_fmode = _O_BINARY;
+	setmode( fileno( stdin  ), O_BINARY );
+	setmode( fileno( stdout ), O_BINARY );
+	setmode( fileno( stderr ), O_BINARY );
+	_fmode = O_BINARY;
 #endif
 	PerlDllHandle = hModule;
 	break;

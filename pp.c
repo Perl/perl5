@@ -178,7 +178,7 @@ PP(pp_rv2gv)
 	    GV *gv = (GV*) sv_newmortal();
 	    gv_init(gv, 0, "", 0, 0);
 	    GvIOp(gv) = (IO *)sv;
-	    SvREFCNT_inc(sv);
+	    (void)SvREFCNT_inc(sv);
 	    sv = (SV*) gv;
 	} else if (SvTYPE(sv) != SVt_PVGV)
 	    DIE("Not a GLOB reference");
@@ -776,6 +776,8 @@ PP(pp_modulo)
       if ((left_neg != right_neg) && ans)
 	ans = right - ans;
       if (right_neg) {
+	/* XXX may warn: unary minus operator applied to unsigned type */
+	/* could change -foo to be (~foo)+1 instead	*/
 	if (ans <= -(UV)IV_MAX)
 	  sv_setiv(TARG, (IV) -ans);
 	else

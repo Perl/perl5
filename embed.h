@@ -308,6 +308,7 @@
 #define lshift_ass_amg		Perl_lshift_ass_amg
 #define lt_amg			Perl_lt_amg
 #define magic_clearenv		Perl_magic_clearenv
+#define magic_clear_all_env	Perl_magic_clear_all_env
 #define magic_clearpack		Perl_magic_clearpack
 #define magic_clearsig		Perl_magic_clearsig
 #define magic_existspack	Perl_magic_existspack

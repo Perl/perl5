@@ -496,8 +496,15 @@ depend: makedepend
 makedepend: makedepend.SH config.sh
 	sh ./makedepend.SH
 
-check test: miniperl perl preplibrary $(dynamic_ext)
-	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../perl$(EXE_EXT) perl$(EXE_EXT)) && ./perl TEST </dev/tty
+test-prep: miniperl perl preplibrary $(dynamic_ext)
+	cd t && (rm -f perl$(EXE_EXT); $(LNS) ../perl$(EXE_EXT) perl$(EXE_EXT))
+
+test check: test-prep
+	cd t && ./perl TEST </dev/tty
+
+# For testing without a tty or controling terminal. See t/op/stat.t
+test-notty: test-prep
+	cd t && PERL_SKIP_TTY_TEST=1 ./perl TEST
 
 # Can't depend on lib/Config.pm because that might be where miniperl
 # is crashing.

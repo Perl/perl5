@@ -1334,7 +1334,7 @@ warn(pat,va_alist)
 }
 
 #ifndef VMS  /* VMS' my_setenv() is in VMS.c */
-#ifndef _WIN32
+#ifndef WIN32
 void
 my_setenv(nam,val)
 char *nam, *val;
@@ -1382,6 +1382,74 @@ char *nam, *val;
 #endif /* MSDOS */
 }
 
+#else /* if WIN32 */
+
+void
+my_setenv(nam,val)
+char *nam, *val;
+{
+
+#ifdef USE_WIN32_RTL_ENV
+
+    register char *envstr;
+    STRLEN namlen = strlen(nam);
+    STRLEN vallen;
+    char *oldstr = environ[setenv_getix(nam)];
+
+    /* putenv() has totally broken semantics in both the Borland
+     * and Microsoft CRTLs.  They either store the passed pointer in
+     * the environment without making a copy, or make a copy and don't
+     * free it. And on top of that, they dont free() old entries that
+     * are being replaced/deleted.  This means the caller must
+     * free any old entries somehow, or we end up with a memory
+     * leak every time my_setenv() is called.  One might think
+     * one could directly manipulate environ[], like the UNIX code
+     * above, but direct changes to environ are not allowed when
+     * calling putenv(), since the RTLs maintain an internal
+     * *copy* of environ[]. Bad, bad, *bad* stink.
+     * GSAR 97-06-07
+     */
+
+    if (!val) {
+	if (!oldstr)
+	    return;
+	val = "";
+	vallen = 0;
+    }
+    else
+	vallen = strlen(val);
+    New(904, envstr, namlen + vallen + 3, char);
+    (void)sprintf(envstr,"%s=%s",nam,val);
+    (void)putenv(envstr);
+    if (oldstr)
+	Safefree(oldstr);
+#ifdef _MSC_VER
+    Safefree(envstr);		/* MSVCRT leaks without this */
+#endif
+
+#else /* !USE_WIN32_RTL_ENV */
+
+    /* The sane way to deal with the environment.
+     * Has these advantages over putenv() & co.:
+     *  * enables us to store a truly empty value in the
+     *    environment (like in UNIX).
+     *  * we don't have to deal with RTL globals, bugs and leaks.
+     *  * Much faster.
+     * Why you may want to enable USE_WIN32_RTL_ENV:
+     *  * environ[] and RTL functions will not reflect changes,
+     *    which might be an issue if extensions want to access
+     *    the env. via RTL.  This cuts both ways, since RTL will
+     *    not see changes made by extensions that call the Win32
+     *    functions directly, either.
+     * GSAR 97-06-07
+     */
+    SetEnvironmentVariable(nam,val);
+
+#endif
+}
+
+#endif /* WIN32 */
+
 I32
 setenv_getix(nam)
 char *nam;
@@ -1389,41 +1457,18 @@ char *nam;
     register I32 i, len = strlen(nam);
 
     for (i = 0; environ[i]; i++) {
-	if (strnEQ(environ[i],nam,len) && environ[i][len] == '=')
+	if (
+#ifdef WIN32
+	    strnicmp(environ[i],nam,len) == 0
+#else
+	    strnEQ(environ[i],nam,len)
+#endif
+	    && environ[i][len] == '=')
 	    break;			/* strnEQ must come first to avoid */
     }					/* potential SEGV's */
     return i;
 }
 
-#else /* if _WIN32 */
-
-void
-my_setenv(nam,val)
-char *nam, *val;
-{
-    register char *envstr;
-    STRLEN namlen = strlen(nam);
-    STRLEN vallen = strlen(val ? val : "");
-
-    New(904, envstr, namlen + vallen + 3, char);
-    (void)sprintf(envstr,"%s=%s",nam,val);
-    if (!vallen) {
-        /* An attempt to delete the entry.
-	 * We try to fix a Win32 process handling goof: Children
-	 * of the current process will end up seeing the
-	 * grandparent's entry if the current process has never
-	 * modified the entry being deleted. So we call _putenv()
-	 * twice: once to pretend to modify the entry, and the
-	 * second time to actually delete it. GSAR 97-03-19
-	 */
-        envstr[namlen+1] = 'X'; envstr[namlen+2] = '\0';
-	(void)_putenv(envstr);
-	envstr[namlen+1] = '\0';
-    }
-    (void)_putenv(envstr);
-}
-
-#endif /* _WIN32 */
 #endif /* !VMS */
 
 #ifdef UNLINK_ALL_VERSIONS

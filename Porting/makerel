@@ -2,7 +2,6 @@
 
 # A first attempt at some automated support for making a perl release.
 # Very basic but functional - if you're on a unix system.
-# You should have at least run preprel before this.
 #
 # No matter how automated this gets, you'll always need to read
 # and re-read pumpkin.pod checking for things to be done at various
@@ -34,8 +33,9 @@ print "\nMaking a release for $perl in $reldir\n\n";
 
 print "Cross-checking the MANIFEST...\n";
 ($missfile, $missentry) = fullcheck();
-die "Can't make a release with MANIFEST files missing.\n" if @$missfile;
-die "Can't make a release with files not listed in MANIFEST.\n" if @$missentry;
+warn "Can't make a release with MANIFEST files missing.\n" if @$missfile;
+warn "Can't make a release with files not listed in MANIFEST.\n" if @$missentry;
+die "Aborted.\n" if @$missentry or @$missfile;
 print "\n";
 
 

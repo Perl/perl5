@@ -72,25 +72,27 @@
 #define BOUNDL	21	/* no	Match "" at any word boundary */
 #define NBOUND	22	/* no	Match "" at any word non-boundary */
 #define NBOUNDL	23	/* no	Match "" at any word non-boundary */
-#define REF	24	/* num	Match some already matched string */
-#define	OPEN	25	/* num	Mark this point in input as start of #n. */
-#define	CLOSE	26	/* num	Analogous to OPEN. */
-#define MINMOD	27	/* no	Next operator is not greedy. */
-#define GPOS	28	/* no	Matches where last m//g left off. */
-#define IFMATCH	29	/* no	Succeeds if the following matches. */
-#define UNLESSM	30	/* no	Fails if the following matches. */
-#define SUCCEED	31	/* no	Return from a subroutine, basically. */
-#define WHILEM	32	/* no	Do curly processing and see if rest matches. */
-#define ALNUM	33	/* no	Match any alphanumeric character */
-#define ALNUML	34 	/* no	Match any alphanumeric char in locale */
-#define NALNUM	35	/* no	Match any non-alphanumeric character */
-#define NALNUML	36	/* no	Match any non-alphanumeric char in locale */
-#define SPACE	37	/* no	Match any whitespace character */
-#define SPACEL	38	/* no	Match any whitespace char in locale */
-#define NSPACE	39	/* no	Match any non-whitespace character */
-#define NSPACEL	40	/* no	Match any non-whitespace char in locale */
-#define DIGIT	41	/* no	Match any numeric character */
-#define NDIGIT	42	/* no	Match any non-numeric character */
+#define REF	24	/* num	Match already matched string */
+#define REFF	25	/* num	Match already matched string, folded */
+#define REFFL	26	/* num	Match already matched string, folded in loc. */
+#define	OPEN	27	/* num	Mark this point in input as start of #n. */
+#define	CLOSE	28	/* num	Analogous to OPEN. */
+#define MINMOD	29	/* no	Next operator is not greedy. */
+#define GPOS	30	/* no	Matches where last m//g left off. */
+#define IFMATCH	31	/* no	Succeeds if the following matches. */
+#define UNLESSM	32	/* no	Fails if the following matches. */
+#define SUCCEED	33	/* no	Return from a subroutine, basically. */
+#define WHILEM	34	/* no	Do curly processing and see if rest matches. */
+#define ALNUM	35	/* no	Match any alphanumeric character */
+#define ALNUML	36 	/* no	Match any alphanumeric char in locale */
+#define NALNUM	37	/* no	Match any non-alphanumeric character */
+#define NALNUML	38	/* no	Match any non-alphanumeric char in locale */
+#define SPACE	39	/* no	Match any whitespace character */
+#define SPACEL	40	/* no	Match any whitespace char in locale */
+#define NSPACE	41	/* no	Match any non-whitespace character */
+#define NSPACEL	42	/* no	Match any non-whitespace char in locale */
+#define DIGIT	43	/* no	Match any numeric character */
+#define NDIGIT	44	/* no	Match any non-numeric character */
 
 /*
  * Opcode notes:
@@ -121,7 +123,7 @@ EXT char regarglen[] = {
     0,0,0,0,0,0,0,0,0,0,
     /*CURLY*/ 4, /*CURLYX*/ 4,
     0,0,0,0,0,0,0,0,0,0,0,0,
-    /*REF*/ 2, /*OPEN*/ 2, /*CLOSE*/ 2,
+    /*REF*/ 2, 2, 2, /*OPEN*/ 2, /*CLOSE*/ 2,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 };
 #endif
@@ -155,6 +157,8 @@ EXT char regkind[] = {
 	NBOUND,
 	NBOUND,
 	REF,
+	REF,
+	REF,
 	OPEN,
 	CLOSE,
 	MINMOD,
@@ -181,7 +185,7 @@ EXT char regkind[] = {
 EXT char varies[];
 #else
 EXT char varies[] = {
-    BRANCH, BACK, STAR, PLUS, CURLY, CURLYX, REF, WHILEM, 0
+    BRANCH, BACK, STAR, PLUS, CURLY, CURLYX, REF, REFF, REFFL, WHILEM, 0
 };
 #endif
 

@@ -1,6 +1,10 @@
 #ifndef WIN32IO_H
 #define WIN32IO_H
 
+#ifdef __BORLANDC__
+#include <stdarg.h>
+#endif
+
 typedef struct {
 int	signature_begin;
 int *	(*pfnerrno)(void);
@@ -51,7 +55,7 @@ int	(*pfnwrite)(int fd, const void *buf, unsigned int cnt);
 int	(*pfnopenmode)(int mode);
 int	(*pfn_open_osfhandle)(long handle, int flags);
 long	(*pfn_get_osfhandle)(int fd);
-int	(*pfnspawnvpe)(int mode, const char *cmdname, const char *const *argv, const char *const *envp);
+int	(*pfnspawnvp)(int mode, const char *cmdname, const char *const *argv);
 int	(*pfnmkdir)(const char *path);
 int	(*pfnrmdir)(const char *path);
 int	(*pfnchdir)(const char *path);

@@ -265,7 +265,7 @@ sub c_o {
     push @m, '
 .C$(OBJ_EXT):
 	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.C
-' if $^O ne 'os2';			# Case-specific
+' if $^O ne 'os2' and $^O ne 'MSWin32';		# Case-specific
     push @m, '
 .cpp$(OBJ_EXT):
 	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.cpp
@@ -1113,6 +1113,7 @@ sub force {
     my($self) = shift;
     '# Phony target to force checking subdirectories.
 FORCE:
+	'.$self->{NOECHO}.'$(NOOP)
 ';
 }
 
@@ -1913,7 +1914,7 @@ realclean ::
 	last unless defined $from;
 	my $todir = dirname($to);
 	push @m, "
-$to: $from $self->{MAKEFILE} $todir/.exists
+$to: $from $self->{MAKEFILE} ".$self->catfile($todir,'.exists')."
 	$self->{NOECHO}$self->{RM_F} $to
 	$self->{CP} $from $to
 ";

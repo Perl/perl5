@@ -454,11 +454,17 @@ sub ExtUtils::MakeMaker::new {
 
     if (! $self->{PERL_SRC} ) {
 	my($pthinks) = $self->canonpath($INC{'Config.pm'});
+	my($cthinks) = $self->catfile($Config{'archlibexp'},'Config.pm');
 	$pthinks = VMS::Filespec::vmsify($pthinks) if $Is_VMS;
-	if ($pthinks ne $self->catfile($Config{archlibexp},'Config.pm')){
-            print "Have $pthinks expected ",$self->catfile($Config{archlibexp},'Config.pm'),"\n";
-	    $pthinks =~ s!/Config\.pm$!!;
-	    $pthinks =~ s!.*/!!;
+	if ($pthinks ne $cthinks &&
+	    !($Is_Win32 and lc($pthinks) eq lc($cthinks))) {
+            print "Have $pthinks expected $cthinks\n";
+	    if ($Is_Win32) {
+		$pthinks =~ s![/\\]Config\.pm$!!i; $pthinks =~ s!.*[/\\]!!;
+	    }
+	    else {
+		$pthinks =~ s!/Config\.pm$!!; $pthinks =~ s!.*/!!;
+	    }
 	    print STDOUT <<END;
 Your perl and your Config.pm seem to have different ideas about the architecture
 they are running on.

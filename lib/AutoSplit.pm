@@ -126,7 +126,7 @@ sub autosplit{
 sub autosplit_lib_modules{
     my(@modules) = @_; # list of Module names
 
-    while($_ = shift @modules){
+    while(defined($_ = shift @modules)){
 	s#::#/#g;	# incase specified as ABC::XYZ
 	s|\\|/|g;		# bug in ksh OS/2
 	s#^lib/##; # incase specified as lib/*.pm

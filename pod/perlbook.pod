@@ -33,3 +33,5 @@ of regular expressions in various languages including Perl.
 
     Mastering Regular Expressions (the Hip Owl Book):
 	ISBN 1-56592-257-3      (English)
+
+A new edition of Learning Perl is due mid/late 1997.

@@ -18,7 +18,7 @@ while (<>) {
     } else { 
 	#s,L</,L<POSIX/,g;
 	s,L</,L<perlfunc/,g;
-	$pod{$cur} .= $_ if $cur;
+	push @{$pod{$cur} ||= []}, $_ if $cur;
     }
 } 
 
@@ -27,6 +27,12 @@ for $f ( keys %syn ) {
     $flavor = $Flavor{$f};
     $orig = $f;
     ($name = $f) =~ s/\W//g;
+    # deal with unbalanced =over and =back cause by the split
+    my $body = $pod{$orig};
+    my $has_over = $body =~ /^=over/;
+    my $has_back = $body =~ /^=back/;
+    $body =~ s/^=over\s*//m if $has_over and !$has_back;
+    $body =~ s/^=back\s*//m if $has_back and !$has_over;
     open (POD, "> $name.pod") || die "can't open $name.pod: $!";
     print POD <<EOF;
 =head1 NAME
@@ -39,7 +45,7 @@ $syn{$orig}
 
 =head1 DESCRIPTION
 
-$pod{$orig}
+$body
 
 EOF
 

@@ -58,7 +58,7 @@ it was assigned to.)  Note that assigning to the whole array @_ removes
 the aliasing, and does not update any arguments.
 
 The return value of the subroutine is the value of the last expression
-evaluated.  Alternatively, a return statement may be used exit the
+evaluated.  Alternatively, a return statement may be used to exit the
 subroutine, optionally specifying the returned value, which will be
 evaluated in the appropriate context (list, scalar, or void) depending
 on the context of the subroutine call.  If you specify no return value,
@@ -468,6 +468,42 @@ both supply a list context to the right-hand side, while
     local $foo = <STDIN>;
 
 supplies a scalar context.
+
+A note about C<local()> and composite types is in order.  Something
+like C<local(%foo)> works by temporarily placing a brand new hash in
+the symbol table.  The old hash is left alone, but is hidden "behind"
+the new one.
+
+This means the old variable is completely invisible via the symbol
+table (i.e. the hash entry in the C<*foo> typeglob) for the duration
+of the dynamic scope within which the C<local()> was seen.  This
+has the effect of allowing one to temporarily occlude any magic on
+composite types.  For instance, this will briefly alter a tied
+hash to some other implementation:
+
+    tie %ahash, 'APackage';
+    [...]
+    {
+       local %ahash;
+       tie %ahash, 'BPackage';
+       [..called code will see %ahash tied to 'BPackage'..]
+       {
+          local %ahash;
+          [..%ahash is a normal (untied) hash here..]
+       }
+    }
+    [..%ahash back to its initial tied self again..]
+
+As another example, a custom implementation of C<%ENV> might look
+like this:
+
+    {
+        local %ENV;
+        tie %ENV, 'MyOwnEnv';
+        [..do your own fancy %ENV manipulation here..]
+    }
+    [..normal %ENV behavior here..]
+
 
 =head2 Passing Symbol Table Entries (typeglobs)
 

@@ -630,6 +630,10 @@ method, nor does any of its base classes.  See L<perlobj>.
 (W) The @ISA array contained the name of another package that doesn't seem
 to exist.
 
+=item Can't make list assignment to \%ENV on this system
+
+(F) List assignment to %ENV is not supported on some systems, notably VMS.
+
 =item Can't mktemp()
 
 (F) The mktemp() routine failed for some reason while trying to process
@@ -893,7 +897,7 @@ a valid magic number.
 =item Deep recursion on subroutine "%s"
 
 (W) This subroutine has called itself (directly or indirectly) 100
-times than it has returned.  This probably indicates an infinite
+times more than it has returned.  This probably indicates an infinite
 recursion, unless you're writing strange benchmark programs, in which
 case it indicates something else.
 
@@ -2120,7 +2124,7 @@ think so.
 
 =item setruid() not implemented
 
-(F) You tried to assign to C<$<lt>>, and your operating system doesn't support
+(F) You tried to assign to C<$E<lt>>, and your operating system doesn't support
 the setruid() system call (or equivalent), or at least Configure didn't
 think so.
 
@@ -2211,9 +2215,11 @@ construct.  Remember that bracketing delimiters count nesting level.
 
 =item substr outside of string
 
-(W) You tried to reference a substr() that pointed outside of a string.
-That is, the absolute value of the offset was larger than the length of
-the string.  See L<perlfunc/substr>.
+(S),(W) You tried to reference a substr() that pointed outside of a
+string.  That is, the absolute value of the offset was larger than the
+length of the string.  See L<perlfunc/substr>.  This warning is
+mandatory if substr is used in an lvalue context (as the left hand side
+of an assignment or as a subroutine argument for example).
 
 =item suidperl is no longer needed since %s
 

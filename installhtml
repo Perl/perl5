@@ -1,5 +1,7 @@
 #!/usr/bin/perl -w
 
+use lib 'lib';		# use source library if present
+
 use Config;		# for config options in the makefile
 use Getopt::Long;	# for command-line parsing
 use Cwd;
@@ -32,15 +34,20 @@ pages found in the perl distribution.
 
 Displays the usage.
 
+=item B<--podroot> POD search path base directory
+
+The base directory to search for all .pod and .pm files to be converted.
+Default is current directory.
+
 =item B<--podpath> POD search path
 
 The list of directories to search for .pod and .pm files to be converted.
 Default is `podroot/.'.
 
-=item B<--podroot> POD search path base directory
+=item B<--recurse> recurse on subdirectories
 
-The base directory to search for all .pod and .pm files to be converted.
-Default is current directory.
+Whether or not to convert all .pm and .pod files found in subdirectories
+too.  Default is to not recurse.
 
 =item B<--htmldir> HTML destination directory
 
@@ -52,22 +59,22 @@ be a path relative to the filesystem, not the resulting URL.
 The base directory which all resulting HTML files will be visible at in
 a URL.  The default is `/'.
 
-=item B<--recurse> recurse on subdirectories
-
-Whether or not to convert all .pm and .pod files found in subdirectories
-too.  Default is to not recurse.
-
 =item B<--splithead> POD files to split on =head directive
 
-Colon-separated list of pod files to split by the =head directive.  These
-files should have names specified relative to podroot.
+Colon-separated list of pod files to split by the =head directive.  The
+.pod suffix is optional. These files should have names specified
+relative to podroot.
 
 =item B<--splititem> POD files to split on =item directive
 
 Colon-separated list of all pod files to split by the =item directive.
-I<installhtml> does not do the actual split, rather it invokes I<splitpod>
-to do the dirty work.  As with --splithead, these files should have names
-specified relative to podroot.
+The .pod suffix is optional.  I<installhtml> does not do the actual
+split, rather it invokes I<splitpod> to do the dirty work.  As with
+--splithead, these files should have names specified relative to podroot.
+
+=item B<--splitpod> Directory containing the splitpod program
+
+The directory containing the splitpod program. The default is `podroot/pod'.
 
 =item B<--libpods> library PODs for LE<lt>E<gt> links
 
@@ -89,7 +96,7 @@ perl documentation:
 		  --podroot=/usr/src/perl     \
                   --htmldir=/perl/nmanual     \
 		  --htmlroot=/perl/nmanual    \
-		  --splithead=pod/perlipc.pod \
+		  --splithead=pod/perlipc     \
 		  --splititem=pod/perlfunc    \
 		  --libpods=perlfunc:perlguts:perlvar:perlrun:perlop \
                   --recurse \
@@ -129,8 +136,8 @@ Usage: $0 --help --podpath=<name>:...:<name> --podroot=<name>
                   of a pod =head[1-6] directive.
     --splititem - comma-separated list of .pod or .pm files to split using
                   splitpod.
-    --splitpod  - where the program splitpod can be found (\$podroot/pod by
-                  default).
+    --splitpod  - directory where the program splitpod can be found
+                  (\$podroot/pod by default).
     --verbose   - self-explanatory.
 
 END_OF_USAGE
@@ -150,6 +157,7 @@ $verbose = 0; 	    	# whether or not to print debugging info
 
 $pod2html = "pod/pod2html";
 
+usage("") unless @ARGV;
 
 # parse the command-line
 $result = GetOptions( qw(
@@ -191,7 +199,7 @@ $splitpod = "$podroot/pod" unless $splitpod;
 #  it may effect some of the links
 @splitdirs = ();    # files in these directories won't get an index
 split_on_head($podroot, $htmldir, \@splitdirs, \@ignore, @splithead);
-split_on_item($podroot, \@splitdirs, \@ignore, @splititem);
+split_on_item($podroot,           \@splitdirs, \@ignore, @splititem);
 
 
 # convert the pod pages found in @poddirs
@@ -266,6 +274,15 @@ sub parse_command_line {
 
     $recurse  = $opt_recurse	    if defined $opt_recurse;
     $verbose  = $opt_verbose	    if defined $opt_verbose;
+}
+
+
+sub absolute_path {
+    my($cwd, $path) = @_;
+	return "$cwd/$path" unless $path =~ m:/:;
+    # add cwd if path is not already an absolute path
+    $path = "$cwd/$path" if (substr($path,0,1) ne '/');
+    return $path;
 }
 
 
@@ -346,6 +363,7 @@ sub split_on_item {
 
     print "splitting files by item.\n" if $verbose && $#splititem >= 0;
     $pwd = getcwd();
+	my $splitter = absolute_path($pwd, "$splitpod/splitpod");
     foreach $pod (@splititem) {
 	# figure out the directory to split into
 	$pod      =~ s,^([^/]*)$,/$1,;
@@ -364,8 +382,10 @@ sub split_on_item {
 	}
 	chdir("$podroot/$dirname") ||
 	    die "$0: error changing to directory $podroot/$dirname: $!\n";
-	system("../splitpod", "../$filename") &&
-	    warn "$0: error running '../splitpod ../$filename'"
+	die "$splitter not found. Use '-splitpod dir' option.\n"
+	    unless -f $splitter;
+	system("perl", $splitter, "../$filename") &&
+	    warn "$0: error running '$splitter ../$filename'"
 		 ." from $podroot/$dirname";
     }
     chdir($pwd);

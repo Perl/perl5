@@ -62,15 +62,16 @@ in MANIFEST.
 
 Installation
 
-1) Detailed instructions are in the file INSTALL.  In brief, the
-following should work on most systems:
+1) Detailed instructions are in the file INSTALL which you should read.
+In brief, the following should work on most systems:
 	rm -f config.sh
 	sh Configure
 	make
 	make test
 	make install
-For most systems, it should be safe to accept all the Configure
-defaults.
+For most systems, it should be safe to accept all the Configure defaults.
+(It is recommended that you accept the defaults the first time you build
+or if you have any problems building.)
 
 2) Read the manual entries before running perl.
 

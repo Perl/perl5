@@ -63,9 +63,11 @@ runpod2man('utils', $man1dir, $man1ext, 'h2xs');
 runpod2man('utils', $man1dir, $man1ext, 'perldoc');
 runpod2man('utils', $man1dir, $man1ext, 'perlbug');
 runpod2man('utils', $man1dir, $man1ext, 'pl2pm');
+runpod2man('utils', $man1dir, $man1ext, 'splain');
 runpod2man('x2p', $man1dir, $man1ext, 's2p');
 runpod2man('x2p', $man1dir, $man1ext, 'a2p.pod');
 runpod2man('pod', $man1dir, $man1ext, 'pod2man');
+runpod2man('pod', $man1dir, $man1ext, 'pod2html');
 
 # It would probably be better to have this page linked
 # to the c2ph man page.  Or, this one could say ".so man1/c2ph.1",

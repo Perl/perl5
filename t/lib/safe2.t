@@ -8,6 +8,8 @@ BEGIN {
         print "1..0\n";
         exit 0;
     }
+  # test 30 rather naughtily expects English error messages
+  $ENV{'LC_ALL'} = 'C';
 }
 
 # Tests Todo:

@@ -148,14 +148,14 @@ prefer:
     $q->do_push(-next_page=>\&draw_a_page);
 
         -or-
- 
+
     use CGI::Push qw(:standard);
     do_push(-next_page=>\&draw_a_page);
 
 Parameters are as follows:
 
 =over 4
-    
+
 =item -next_page
 
     do_push(-next_page=>\&my_draw_routine);
@@ -234,6 +234,6 @@ This section intentionally left blank.
 =head1 SEE ALSO
 
 L<CGI::Carp>, L<CGI>
- 
+
 =cut
 

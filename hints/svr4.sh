@@ -42,8 +42,8 @@ if [ "$uw_isuw" = "Release = 4.2MP" -a \
 fi
 
 # DDE SMES Supermax Enterprise Server
-case "`uname -svm`" in
-"UNIX_SV SMES mips")
+case "`uname -sm`" in
+"UNIX_SV SMES")
 	if test "$cc" = '/bin/cc' -o "$gccversion" = ""
 	then
 		# for cc we need -K PIC (not -K pic)

@@ -444,6 +444,7 @@ if ($name ne 'something') {
 		last FCHECK;
 	    }
 	    next if /^=cut\b/;	# DB_File and Net::Ping have =cut before NAME
+	    next if /^=pod\b/;  # It is OK to have =pod before NAME
 	    die "$0: Invalid man page - 1st pod line is not NAME in $ARGV[0]\n" unless $lax;
 	}
 	die "$0: Invalid man page - no documentation in $ARGV[0]\n" unless $lax;
@@ -499,16 +500,36 @@ print <<"END";
 .if (\\n(.H=4u)&(1m=20u) .ds -- \\(*W\\h'-12u'\\(*W\\h'-8u'-\\" diablo 12 pitch
 .ds L" ""
 .ds R" ""
+'''   \\*(M", \\*(S", \\*(N" and \\*(T" are the equivalent of
+'''   \\*(L" and \\*(R", except that they are used on ".xx" lines,
+'''   such as .IP and .SH, which do another additional levels of
+'''   double-quote interpretation
+.ds M" """
+.ds S" """
+.ds N" """""
+.ds T" """""
 .ds L' '
 .ds R' '
+.ds M' '
+.ds S' '
+.ds N' '
+.ds T' '
 'br\\}
 .el\\{\\
 .ds -- \\(em\\|
 .tr \\*(Tr
 .ds L" ``
 .ds R" ''
+.ds M" ``
+.ds S" ''
+.ds N" ``
+.ds T" ''
 .ds L' `
 .ds R' '
+.ds M' `
+.ds S' '
+.ds N' `
+.ds T' '
 .ds PI \\(*p
 'br\\}
 END
@@ -706,6 +727,10 @@ while (<>) {
 	# trofficate backslashes; must do it before what happens below
 	s/\\/noremap('\\e')/ge;
 
+# protect leading periods and quotes against *roff
+# mistaking them for directives
+s/^(?:[A-Z]<)?[.']/\\&$&/gm;
+
 	# first hide the escapes in case we need to
 	# intuit something and get it wrong due to fmting
 
@@ -833,8 +858,19 @@ while (<>) {
 
 	($Cmd, $_) = split(' ', $_, 2);
 
+	$dotlevel = 1;
+	if ($Cmd eq 'head1') {
+	   $dotlevel = 1;
+	}
+	elsif ($Cmd eq 'head2') {
+	   $dotlevel = 1;
+	}
+	elsif ($Cmd eq 'item') {
+	   $dotlevel = 2;
+	}
+
 	if (defined $_) {
-	    &escapes;
+	    &escapes($dotlevel);
 	    s/"/""/g;
 	}
 
@@ -883,7 +919,7 @@ while (<>) {
 	if ($needspace) {
 	    &makespace;
 	}
-	&escapes;
+	&escapes(0);
 	clear_noremap(1);
 	print $_, "\n";
 	$needspace = 1;
@@ -915,6 +951,7 @@ sub nobreak {
 }
 
 sub escapes {
+    my $indot = shift;
 
     s/X<(.*?)>/mkindex($1)/ge;
 
@@ -927,9 +964,19 @@ sub escapes {
     s/([^"])--"/$1\\*(--"/g;
 
     # fix up quotes; this is somewhat tricky
+    my $dotmacroL = 'L';
+    my $dotmacroR = 'R';
+    if ( $indot == 1 ) {
+	$dotmacroL = 'M';
+	$dotmacroR = 'S';
+    }  
+    elsif ( $indot >= 2 ) {
+	$dotmacroL = 'N';
+	$dotmacroR = 'T';
+    }  
     if (!/""/) {
-	s/(^|\s)(['"])/noremap("$1\\*(L$2")/ge;
-	s/(['"])($|[\-\s,;\\!?.])/noremap("\\*(R$1$2")/ge;
+	s/(^|\s)(['"])/noremap("$1\\*($dotmacroL$2")/ge;
+	s/(['"])($|[\-\s,;\\!?.])/noremap("\\*($dotmacroR$1$2")/ge;
     }
 
     #s/(?!")(?:.)--(?!")(?:.)/\\*(--/g;
