@@ -1440,12 +1440,12 @@ SV *sv;
 			(unsigned long) sv, SvPVX(sv), len));
 
 	} else if (flags & SVp_NOK) {		/* SvNOKp(sv) => double */
-		double nv = SvNV(sv);
+		NV nv = SvNV(sv);
 
 		/*
 		 * Watch for number being an integer in disguise.
 		 */
-		if (nv == (double) (iv = I_V(nv))) {
+		if (nv == (NV) (iv = I_V(nv))) {
 			TRACEME(("double %lf is actually integer %ld", nv, iv));
 			goto integer;		/* Share code below */
 		}
@@ -3527,7 +3527,7 @@ static SV *retrieve_double(cxt)
 stcxt_t *cxt;
 {
 	SV *sv;
-	double nv;
+	NV nv;
 
 	TRACEME(("retrieve_double (#%d)", cxt->tagnum));
 
