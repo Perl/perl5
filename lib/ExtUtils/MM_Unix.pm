@@ -1792,7 +1792,7 @@ usually solves this kind of problem.
 	$self->prefixify($install_variable,$configure_prefix,$replace_prefix);
     }
     my $funkylibdir = $self->catdir($configure_prefix,"lib","perl5");
-    $funkylibdir = '' unless -d $funklibdir;
+    $funkylibdir = '' unless -d $funkylibdir;
     $search_prefix = $funkylibdir || $self->catdir($configure_prefix,"lib");
     if ($self->{LIB}) {
 	$self->{INSTALLPRIVLIB} = $self->{INSTALLSITELIB} = $self->{LIB};
@@ -1817,7 +1817,7 @@ usually solves this kind of problem.
 	}
     }
     my $funkymandir = $self->catdir($configure_prefix,"lib","perl5","man");
-    $funkymandir = '' unless -d $funkmandir;
+    $funkymandir = '' unless -d $funkymandir;
     $search_prefix = $funkymandir || $self->catdir($configure_prefix,"man");
     if (-d $self->catdir($self->{PREFIX},"lib","perl5", "man")) {
 	$replace_prefix = $self->catdir(qq[\$\(PREFIX\)],"lib", "perl5", "man");
