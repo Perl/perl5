@@ -458,12 +458,14 @@ C<)> in the comment.
 
 =item C<(?imsx-imsx)>
 
-One or more embedded pattern-match modifiers.  This is particularly
-useful for dynamic patterns, such as those read in from a configuration
-file, read in as an argument, are specified in a table somewhere,
-etc.  Consider the case that some of which want to be case sensitive
-and some do not.  The case insensitive ones need to include merely
-C<(?i)> at the front of the pattern.  For example:
+One or more embedded pattern-match modifiers, to be turned on (or
+turned off, if preceded by C<->) for the remainder of the pattern or
+the remainder of the enclosing pattern group (if any). This is
+particularly useful for dynamic patterns, such as those read in from a
+configuration file, read in as an argument, are specified in a table
+somewhere, etc.  Consider the case that some of which want to be case
+sensitive and some do not.  The case insensitive ones need to include
+merely C<(?i)> at the front of the pattern.  For example:
 
     $pattern = "foobar";
     if ( /$pattern/i ) { } 
@@ -473,8 +475,7 @@ C<(?i)> at the front of the pattern.  For example:
     $pattern = "(?i)foobar";
     if ( /$pattern/ ) { } 
 
-Letters after a C<-> turn those modifiers off.  These modifiers are
-localized inside an enclosing group (if any).  For example,
+These modifiers are restored at the end of the enclosing group. For example,
 
     ( (?i) blah ) \s+ \1
 
