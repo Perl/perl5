@@ -943,8 +943,8 @@ setuid perl scripts securely.\n");
 	 * --jhi */
 	 char *s;
 	 int i;
-	 int mask =
-	   ~(PTRSIZE == 4 ? 3 : PTRSIZE == 8 ? 7 : PTRSIZE == 16 ? 15 : 0);
+	 UV mask =
+	   ~(UV)(PTRSIZE == 4 ? 3 : PTRSIZE == 8 ? 7 : PTRSIZE == 16 ? 15 : 0);
 
 	 /* See if all the arguments are contiguous in memory.
 	  * Note that 'contiguous' is a loose term because some
