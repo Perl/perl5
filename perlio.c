@@ -425,7 +425,7 @@ PerlIO_allocate(pTHX)
 	    }
 	}
     }
-    f = PerlMemShared_calloc(PERLIO_TABLE_SIZE, sizeof(PerlIO));
+    Newz('I',f,PERLIO_TABLE_SIZE,PerlIO);
     if (!f) {
 	return NULL;
     }
@@ -451,25 +451,6 @@ PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param)
 }
 
 void
-PerlIO_clone(pTHX_ PerlIO *proto, CLONE_PARAMS *param)
-{
-    PerlIO **table = &proto;
-    PerlIO *f;
-    PL_perlio = NULL;
-    PerlIO_allocate(aTHX); /* root slot is never used */
-    while ((f = *table)) {
-	    int i;
-	    table = (PerlIO **) (f++);
-	    for (i = 1; i < PERLIO_TABLE_SIZE; i++) {
-		if (*f) {
-		    PerlIO_fdupopen(aTHX_ f, param);
-		}
-		f++;
-	    }
-	}
-}
-
-void
 PerlIO_cleantable(pTHX_ PerlIO **tablep)
 {
     PerlIO *table = *tablep;
@@ -482,16 +463,14 @@ PerlIO_cleantable(pTHX_ PerlIO **tablep)
 		PerlIO_close(f);
 	    }
 	}
-	PerlMemShared_free(table);
+	Safefree(table);
 	*tablep = NULL;
     }
 }
 
-PerlIO_list_t *PerlIO_known_layers;
-PerlIO_list_t *PerlIO_def_layerlist;
 
 PerlIO_list_t *
-PerlIO_list_alloc(void)
+PerlIO_list_alloc(pTHX)
 {
     PerlIO_list_t *list;
     Newz('L', list, 1, PerlIO_list_t);
@@ -500,12 +479,11 @@ PerlIO_list_alloc(void)
 }
 
 void
-PerlIO_list_free(PerlIO_list_t *list)
+PerlIO_list_free(pTHX_ PerlIO_list_t *list)
 {
     if (list) {
 	if (--list->refcnt == 0) {
 	    if (list->array) {
-		dTHX;
 		IV i;
 		for (i = 0; i < list->cur; i++) {
 		    if (list->array[i].arg)
@@ -519,9 +497,8 @@ PerlIO_list_free(PerlIO_list_t *list)
 }
 
 void
-PerlIO_list_push(PerlIO_list_t *list, PerlIO_funcs *funcs, SV *arg)
+PerlIO_list_push(pTHX_ PerlIO_list_t *list, PerlIO_funcs *funcs, SV *arg)
 {
-    dTHX;
     PerlIO_pair_t *p;
     if (list->cur >= list->len) {
 	list->len += 8;
@@ -537,20 +514,44 @@ PerlIO_list_push(PerlIO_list_t *list, PerlIO_funcs *funcs, SV *arg)
     }
 }
 
-
-void
-PerlIO_cleanup_layers(pTHX_ void *data)
+PerlIO_list_t *
+PerlIO_clone_list(pTHX_ PerlIO_list_t *proto, CLONE_PARAMS *param)
 {
-#if 0
-    PerlIO_known_layers = Nullhv;
-    PerlIO_def_layerlist = Nullav;
-#endif
+    int i;
+    PerlIO_list_t *list = PerlIO_list_alloc(aTHX);
+    for (i=0; i < proto->cur; i++) {
+	SV *arg = Nullsv;
+	if (proto->array[i].arg)
+	    arg = sv_dup(proto->array[i].arg,param);
+	PerlIO_list_push(aTHX_ list, proto->array[i].funcs, arg);
+    }
+    return list;
 }
 
 void
-PerlIO_cleanup()
+PerlIO_clone(pTHX_ PerlInterpreter *proto, CLONE_PARAMS *param)
 {
-    dTHX;
+    PerlIO **table = &proto->Iperlio;
+    PerlIO *f;
+    PL_perlio = NULL;
+    PL_known_layers = PerlIO_clone_list(aTHX_ proto->Iknown_layers, param);
+    PL_def_layerlist = PerlIO_clone_list(aTHX_ proto->Idef_layerlist, param);
+    PerlIO_allocate(aTHX); /* root slot is never used */
+    while ((f = *table)) {
+	    int i;
+	    table = (PerlIO **) (f++);
+	    for (i = 1; i < PERLIO_TABLE_SIZE; i++) {
+		if (*f) {
+		    PerlIO_fdupopen(aTHX_ f, param);
+		}
+		f++;
+	    }
+	}
+}
+
+void
+PerlIO_cleanup(pTHX)
+{
     PerlIO_cleantable(aTHX_ &PL_perlio);
 }
 
@@ -578,6 +579,10 @@ PerlIO_destruct(pTHX)
 	    f++;
 	}
     }
+    PerlIO_list_free(aTHX_ PL_known_layers);
+    PL_known_layers = NULL;
+    PerlIO_list_free(aTHX_ PL_def_layerlist);
+    PL_def_layerlist = NULL;
 }
 
 void
@@ -596,7 +601,7 @@ PerlIO_pop(pTHX_ PerlIO *f)
 		return;
 	}
 	*f = l->next;;
-	PerlMemShared_free(l);
+	Safefree(l);
     }
 }
 
@@ -611,15 +616,15 @@ PerlIO_find_layer(pTHX_ const char *name, STRLEN len, int load)
     IV i;
     if ((SSize_t) len <= 0)
 	len = strlen(name);
-    for (i = 0; i < PerlIO_known_layers->cur; i++) {
-	PerlIO_funcs *f = PerlIO_known_layers->array[i].funcs;
+    for (i = 0; i < PL_known_layers->cur; i++) {
+	PerlIO_funcs *f = PL_known_layers->array[i].funcs;
 	if (memEQ(f->name, name, len)) {
 	    PerlIO_debug("%.*s => %p\n", (int) len, name, f);
 	    return f;
 	}
     }
-    if (load && PL_subname && PerlIO_def_layerlist
-	&& PerlIO_def_layerlist->cur >= 2) {
+    if (load && PL_subname && PL_def_layerlist
+	&& PL_def_layerlist->cur >= 2) {
 	SV *pkgsv = newSVpvn("PerlIO", 6);
 	SV *layer = newSVpvn(name, len);
 	ENTER;
@@ -742,9 +747,9 @@ XS(XS_PerlIO__Layer__find)
 void
 PerlIO_define_layer(pTHX_ PerlIO_funcs *tab)
 {
-    if (!PerlIO_known_layers)
-	PerlIO_known_layers = PerlIO_list_alloc();
-    PerlIO_list_push(PerlIO_known_layers, tab, Nullsv);
+    if (!PL_known_layers)
+	PL_known_layers = PerlIO_list_alloc(aTHX);
+    PerlIO_list_push(aTHX_ PL_known_layers, tab, Nullsv);
     PerlIO_debug("define %s %p\n", tab->name, tab);
 }
 
@@ -819,7 +824,7 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 		    PerlIO_funcs *layer =
 			PerlIO_find_layer(aTHX_ s, llen, 1);
 		    if (layer) {
-			PerlIO_list_push(av, layer,
+			PerlIO_list_push(aTHX_ av, layer,
 					 (as) ? newSVpvn(as,
 							 alen) :
 					 &PL_sv_undef);
@@ -850,7 +855,7 @@ PerlIO_default_buffer(pTHX_ PerlIO_list_t *av)
 	}
     }
     PerlIO_debug("Pushing %s\n", tab->name);
-    PerlIO_list_push(av, PerlIO_find_layer(aTHX_ tab->name, 0, 0),
+    PerlIO_list_push(aTHX_ av, PerlIO_find_layer(aTHX_ tab->name, 0, 0),
 		     &PL_sv_undef);
 }
 
@@ -876,10 +881,10 @@ PerlIO_layer_fetch(pTHX_ PerlIO_list_t *av, IV n, PerlIO_funcs *def)
 PerlIO_list_t *
 PerlIO_default_layers(pTHX)
 {
-    if (!PerlIO_def_layerlist) {
+    if (!PL_def_layerlist) {
 	const char *s = (PL_tainting) ? Nullch : PerlEnv_getenv("PERLIO");
 	PerlIO_funcs *osLayer = &PerlIO_unix;
-	PerlIO_def_layerlist = PerlIO_list_alloc();
+	PL_def_layerlist = PerlIO_list_alloc(aTHX);
 	PerlIO_define_layer(aTHX_ & PerlIO_unix);
 #if defined(WIN32) && !defined(UNDER_CE)
 	PerlIO_define_layer(aTHX_ & PerlIO_win32);
@@ -896,20 +901,20 @@ PerlIO_default_layers(pTHX)
 #endif
 	PerlIO_define_layer(aTHX_ & PerlIO_utf8);
 	PerlIO_define_layer(aTHX_ & PerlIO_byte);
-	PerlIO_list_push(PerlIO_def_layerlist,
+	PerlIO_list_push(aTHX_ PL_def_layerlist,
 			 PerlIO_find_layer(aTHX_ osLayer->name, 0, 0),
 			 &PL_sv_undef);
 	if (s) {
-	    PerlIO_parse_layers(aTHX_ PerlIO_def_layerlist, s);
+	    PerlIO_parse_layers(aTHX_ PL_def_layerlist, s);
 	}
 	else {
-	    PerlIO_default_buffer(aTHX_ PerlIO_def_layerlist);
+	    PerlIO_default_buffer(aTHX_ PL_def_layerlist);
 	}
     }
-    if (PerlIO_def_layerlist->cur < 2) {
-	PerlIO_default_buffer(aTHX_ PerlIO_def_layerlist);
+    if (PL_def_layerlist->cur < 2) {
+	PerlIO_default_buffer(aTHX_ PL_def_layerlist);
     }
-    return PerlIO_def_layerlist;
+    return PL_def_layerlist;
 }
 
 void
@@ -949,7 +954,7 @@ PerlIO *
 PerlIO_push(pTHX_ PerlIO *f, PerlIO_funcs *tab, const char *mode, SV *arg)
 {
     PerlIOl *l = NULL;
-    l = PerlMemShared_calloc(tab->size, sizeof(char));
+    Newc('L',l,tab->size,char,PerlIOl);
     if (l) {
 	Zero(l, tab->size, char);
 	l->next = *f;
@@ -1035,12 +1040,12 @@ PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
 {
     int code = 0;
     if (names) {
-	PerlIO_list_t *layers = PerlIO_list_alloc();
+	PerlIO_list_t *layers = PerlIO_list_alloc(aTHX);
 	code = PerlIO_parse_layers(aTHX_ layers, names);
 	if (code == 0) {
 	    code = PerlIO_apply_layera(aTHX_ f, mode, layers, 0);
 	}
-	PerlIO_list_free(layers);
+	PerlIO_list_free(aTHX_ layers);
     }
     return code;
 }
@@ -1179,8 +1184,8 @@ PerlIO_resolve_layers(pTHX_ const char *layers,
 	if (SvROK(arg) && !sv_isobject(arg)) {
 	    PerlIO_funcs *handler = PerlIO_layer_from_ref(aTHX_ SvRV(arg));
 	    if (handler) {
-		def = PerlIO_list_alloc();
-		PerlIO_list_push(def, handler, &PL_sv_undef);
+		def = PerlIO_list_alloc(aTHX);
+		PerlIO_list_push(aTHX_ def, handler, &PL_sv_undef);
 		incdef = 0;
 	    }
 	    /*
@@ -1196,9 +1201,9 @@ PerlIO_resolve_layers(pTHX_ const char *layers,
 	PerlIO_list_t *av;
 	if (incdef) {
 	    IV i = def->cur;
-	    av = PerlIO_list_alloc();
+	    av = PerlIO_list_alloc(aTHX);
 	    for (i = 0; i < def->cur; i++) {
-		PerlIO_list_push(av, def->array[i].funcs,
+		PerlIO_list_push(aTHX_ av, def->array[i].funcs,
 				 def->array[i].arg);
 	    }
 	}
@@ -1237,12 +1242,12 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 	     * yet
 	     */
 	    PerlIOl *l = *f;
-	    layera = PerlIO_list_alloc();
+	    layera = PerlIO_list_alloc(aTHX);
 	    while (l) {
 		SV *arg =
 		    (l->tab->Getarg) ? (*l->tab->
 					Getarg) (&l) : &PL_sv_undef;
-		PerlIO_list_push(layera, l->tab, arg);
+		PerlIO_list_push(aTHX_ layera, l->tab, arg);
 		l = *PerlIONext(&l);
 	    }
 	}
@@ -1283,7 +1288,7 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 		}
 	    }
 	}
-	PerlIO_list_free(layera);
+	PerlIO_list_free(aTHX_ layera);
     }
     return f;
 }
@@ -3076,7 +3081,7 @@ PerlIOBuf_close(PerlIO *f)
     IV code = PerlIOBase_close(f);
     PerlIOBuf *b = PerlIOSelf(f, PerlIOBuf);
     if (b->buf && b->buf != (STDCHAR *) & b->oneword) {
-	safefree(b->buf);
+	Safefree(b->buf);
     }
     b->buf = NULL;
     b->ptr = b->end = b->buf;
@@ -3226,7 +3231,7 @@ PerlIOPending_flush(PerlIO *f)
     dTHX;
     PerlIOBuf *b = PerlIOSelf(f, PerlIOBuf);
     if (b->buf && b->buf != (STDCHAR *) & b->oneword) {
-	PerlMemShared_free(b->buf);
+	Safefree(b->buf);
 	b->buf = NULL;
     }
     PerlIO_pop(aTHX_ f);
@@ -3914,17 +3919,9 @@ PerlIO_funcs PerlIO_mmap = {
 #endif				/* HAS_MMAP */
 
 void
-PerlIO_init(void)
+PerlIO_init(pTHX)
 {
-    dTHX;
-#ifndef WIN32
-    call_atexit(PerlIO_cleanup_layers, NULL);
-#endif
-    if (!PL_perlio) {
-#ifndef WIN32
-	atexit(&PerlIO_cleanup);
-#endif
-    }
+ /* Place holder for stdstreams call ??? */
 }
 
 #undef PerlIO_stdin

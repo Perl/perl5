@@ -9768,8 +9768,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     param->stashes      = newAV();  /* Setup array of objects to call clone on */
 
 #ifdef PERLIO_LAYERS
-    /* Clone PerlIO table as soon as we can handle general xx_dup() */
-    PerlIO_clone(aTHX_ proto_perl->Iperlio, param);
+    /* Clone PerlIO tables as soon as we can handle general xx_dup() */
+    PerlIO_clone(aTHX_ proto_perl, param);
 #endif
 
     PL_envgv		= gv_dup(proto_perl->Ienvgv, param);

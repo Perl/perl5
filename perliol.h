@@ -6,12 +6,12 @@ typedef struct {
     SV *arg;
 } PerlIO_pair_t;
 
-typedef struct {
+struct PerlIO_list_s {
     IV refcnt;
     IV cur;
     IV len;
     PerlIO_pair_t *array;
-} PerlIO_list_t;
+};
 
 struct _PerlIO_funcs {
     char *name;

@@ -183,6 +183,8 @@ END_EXTERN_C
 #define PL_debstash		(*Perl_Idebstash_ptr(aTHX))
 #undef  PL_debug
 #define PL_debug		(*Perl_Idebug_ptr(aTHX))
+#undef  PL_def_layerlist
+#define PL_def_layerlist	(*Perl_Idef_layerlist_ptr(aTHX))
 #undef  PL_defgv
 #define PL_defgv		(*Perl_Idefgv_ptr(aTHX))
 #undef  PL_diehook
@@ -269,6 +271,8 @@ END_EXTERN_C
 #define PL_initav		(*Perl_Iinitav_ptr(aTHX))
 #undef  PL_inplace
 #define PL_inplace		(*Perl_Iinplace_ptr(aTHX))
+#undef  PL_known_layers
+#define PL_known_layers		(*Perl_Iknown_layers_ptr(aTHX))
 #undef  PL_last_lop
 #define PL_last_lop		(*Perl_Ilast_lop_ptr(aTHX))
 #undef  PL_last_lop_op
