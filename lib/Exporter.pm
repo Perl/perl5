@@ -118,6 +118,18 @@ in L<perlfunc> and L<perlmod>. Understanding the concept of
 modules and how the C<use> statement operates is important to
 understanding the Exporter.
 
+=head2 How to Export
+
+The arrays C<@EXPORT> and C<@EXPORT_OK> in a module hold lists of
+symbols that are going to be exported into the users name space by
+default, or which they can request to be exported, respectively.  The
+symbols can represent functions, scalars, arrays, hashes, or typeglobs.
+The symbols must be given by full name with the exception that the
+ampersand in front of a function is optional, e.g.
+
+    @EXPORT    = qw(afunc $scalar @array);   # afunc is a function
+    @EXPORT_OK = qw(&bfunc %hash *typeglob); # explicit prefix on &bfunc
+
 =head2 Selecting What To Export
 
 Do B<not> export method names!
