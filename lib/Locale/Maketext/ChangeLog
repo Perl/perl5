@@ -1,6 +1,11 @@
 Revision history for Perl suite Locale::Maketext
-                                        Time-stamp: "2003-04-18 22:07:29 AHDT"
+                                        Time-stamp: "2003-06-21 23:38:38 AHDT"
 
+2003-06-21  Sean M. Burke  sburke@cpan.org
+	* Release 1.06:  Now has "use utf8" to make the things work
+	happily.  Some fancy footwork is required to make this work under
+	pre-utf8 perl versions.
+	
 2003-04-18  Sean M. Burke  sburke@cpan.org
 	* Release 1.05:  Different Makefile.PL, same .pm code.
 	

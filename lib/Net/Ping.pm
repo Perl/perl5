@@ -16,7 +16,10 @@ use Carp;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
-$VERSION = "2.30";
+$VERSION = "2.31";
+
+sub SOL_IP { 0; };
+sub IP_TOS { 1; };
 
 # Constants
 
@@ -74,6 +77,7 @@ sub new
       $timeout,           # Optional timeout in seconds
       $data_size,         # Optional additional bytes of data
       $device,            # Optional device to use
+      $tos,               # Optional ToS to set
       ) = @_;
   my  $class = ref($this) || $this;
   my  $self = {};
@@ -94,6 +98,8 @@ sub new
   $self->{"timeout"} = $timeout;
 
   $self->{"device"} = $device;
+
+  $self->{"tos"} = $tos;
 
   $min_datasize = ($proto eq "udp") ? 1 : 0;  # Determine data size
   $data_size = $min_datasize unless defined($data_size) && $proto ne "tcp";
@@ -127,6 +133,10 @@ sub new
       setsockopt($self->{"fh"}, SOL_SOCKET, SO_BINDTODEVICE(), pack("Z*", $self->{'device'}))
         or croak "error binding to device $self->{'device'} $!";
     }
+    if ($self->{'tos'}) {
+      setsockopt($self->{"fh"}, SOL_IP, IP_TOS(), pack("I*", $self->{'tos'}))
+        or croak "error configuring tos to $self->{'tos'} $!";
+    }
   }
   elsif ($self->{"proto"} eq "icmp")
   {
@@ -140,6 +150,10 @@ sub new
     if ($self->{'device'}) {
       setsockopt($self->{"fh"}, SOL_SOCKET, SO_BINDTODEVICE(), pack("Z*", $self->{'device'}))
         or croak "error binding to device $self->{'device'} $!";
+    }
+    if ($self->{'tos'}) {
+      setsockopt($self->{"fh"}, SOL_IP, IP_TOS(), pack("I*", $self->{'tos'}))
+        or croak "error configuring tos to $self->{'tos'} $!";
     }
   }
   elsif ($self->{"proto"} eq "tcp" || $self->{"proto"} eq "stream")
@@ -203,7 +217,7 @@ sub bind
   CORE::bind($self->{"fh"}, sockaddr_in(0, $ip)) ||
     croak("$self->{'proto'} bind error - $!");
   }
-  elsif ($self->{"proto"} ne "tcp")
+  elsif (($self->{"proto"} ne "tcp") && ($self->{"proto"} ne "syn"))
   {
     croak("Unknown protocol \"$self->{proto}\" in bind()");
   }
@@ -561,6 +575,10 @@ sub tcp_connect
     if ($self->{'device'}) {
       setsockopt($self->{"fh"}, SOL_SOCKET, SO_BINDTODEVICE(), pack("Z*", $self->{'device'}))
         or croak("error binding to device $self->{'device'} $!");
+    }
+    if ($self->{'tos'}) {
+      setsockopt($self->{"fh"}, SOL_IP, IP_TOS(), pack("I*", $self->{'tos'}))
+        or croak "error configuring tos to $self->{'tos'} $!";
     }
   };
   my $do_connect = sub {
@@ -1002,7 +1020,10 @@ sub ping_syn
     setsockopt($fh, SOL_SOCKET, SO_BINDTODEVICE(), pack("Z*", $self->{'device'}))
       or croak("error binding to device $self->{'device'} $!");
   }
-
+  if ($self->{'tos'}) {
+    setsockopt($fh, SOL_IP, IP_TOS(), pack("I*", $self->{'tos'}))
+      or croak "error configuring tos to $self->{'tos'} $!";
+  }
   # Set O_NONBLOCK property on filehandle
   $self->socket_blocking_mode($fh, 0);
 
@@ -1067,6 +1088,10 @@ sub ping_syn_fork {
       if ($self->{'device'}) {
         setsockopt($self->{"fh"}, SOL_SOCKET, SO_BINDTODEVICE(), pack("Z*", $self->{'device'}))
           or croak("error binding to device $self->{'device'} $!");
+      }
+      if ($self->{'tos'}) {
+        setsockopt($self->{"fh"}, SOL_IP, IP_TOS(), pack("I*", $self->{'tos'}))
+          or croak "error configuring tos to $self->{'tos'} $!";
       }
 
       $!=0;
@@ -1459,7 +1484,7 @@ This protocol does not require any special privileges.
 
 =over 4
 
-=item Net::Ping->new([$proto [, $def_timeout [, $bytes [, $device ]]]]);
+=item Net::Ping->new([$proto [, $def_timeout [, $bytes [, $device [, $tos ]]]]]);
 
 Create a new ping object.  All of the parameters are optional.  $proto
 specifies the protocol to use when doing a ping.  The current choices
@@ -1480,6 +1505,8 @@ otherwise.  The maximum number of data bytes that can be specified is
 If $device is given, this device is used to bind the source endpoint
 before sending the ping packet.  I beleive this only works with
 superuser privileges and with udp and icmp protocols at this time.
+
+If $tos is given, this ToS is configured into the soscket.
 
 =item $p->ping($host [, $timeout]);
 
@@ -1712,6 +1739,6 @@ Copyright (c) 2001, Colin McMillen.  All rights reserved.
 This program is free software; you may redistribute it and/or
 modify it under the same terms as Perl itself.
 
-$Id: Ping.pm,v 1.81 2003/04/18 04:16:03 rob Exp $
+$Id: Ping.pm,v 1.86 2003/06/27 21:31:07 rob Exp $
 
 =cut

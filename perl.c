@@ -315,39 +315,6 @@ perl_construct(pTHXx)
 
     PL_stashcache = newHV();
 
-#if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT)
-    /* [perl #22371] Algorimic Complexity Attack on Perl 5.6.1, 5.8.0 */
-    {
-       char *s = NULL;
-
-       if (!PL_earlytaint)
-	   s = PerlEnv_getenv("PERL_HASH_SEED");
-       if (s)
-           while (isSPACE(*s)) s++;
-       if (s && isDIGIT(*s))
-           PL_hash_seed = (UV)Atoul(s);
-#ifndef USE_HASH_SEED_EXPLICIT
-       else {
-           /* Compute a random seed */
-           (void)seedDrand01((Rand_seed_t)seed());
-           PL_srand_called = TRUE;
-           PL_hash_seed = (UV)(Drand01() * (NV)UV_MAX);
-#if RANDBITS < (UVSIZE * 8)
-           {
-               int skip = (UVSIZE * 8) - RANDBITS;
-               PL_hash_seed >>= skip;
-               /* The low bits might need extra help. */
-               PL_hash_seed += (UV)(Drand01() * ((1 << skip) - 1));
-           }
-#endif /* RANDBITS < (UVSIZE * 8) */
-       }
-#endif /* USE_HASH_SEED_EXPLICIT */
-       if (!PL_earlytaint && (s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG")))
-	   PerlIO_printf(Perl_debug_log, "HASH_SEED = %"UVuf"\n",
-			 PL_hash_seed);
-    }
-#endif /* #if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT) */
-
     ENTER;
 }
 
@@ -1059,6 +1026,41 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 setuid perl scripts securely.\n");
 #endif
 #endif
+
+#if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT)
+    /* [perl #22371] Algorimic Complexity Attack on Perl 5.6.1, 5.8.0
+     * This MUST be done before any hash stores or fetches take place. */
+    {
+       bool earlytaint = doing_taint(argc, argv, env);
+       char *s = NULL;
+
+       if (!earlytaint)
+	   s = PerlEnv_getenv("PERL_HASH_SEED");
+       if (s)
+           while (isSPACE(*s)) s++;
+       if (s && isDIGIT(*s))
+           PL_hash_seed = (UV)Atoul(s);
+#ifndef USE_HASH_SEED_EXPLICIT
+       else {
+           /* Compute a random seed */
+           (void)seedDrand01((Rand_seed_t)seed());
+           PL_srand_called = TRUE;
+           PL_hash_seed = (UV)(Drand01() * (NV)UV_MAX);
+#if RANDBITS < (UVSIZE * 8)
+           {
+               int skip = (UVSIZE * 8) - RANDBITS;
+               PL_hash_seed >>= skip;
+               /* The low bits might need extra help. */
+               PL_hash_seed += (UV)(Drand01() * ((1 << skip) - 1));
+           }
+#endif /* RANDBITS < (UVSIZE * 8) */
+       }
+#endif /* USE_HASH_SEED_EXPLICIT */
+       if (!earlytaint && (s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG")))
+	   PerlIO_printf(Perl_debug_log, "HASH_SEED = %"UVuf"\n",
+			 PL_hash_seed);
+    }
+#endif /* #if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT) */
 
     PL_origargc = argc;
     PL_origargv = argv;
@@ -3548,8 +3550,7 @@ S_init_ids(pTHX)
 
 /* This is used very early in the lifetime of the program,
  * before even the options are parsed, so PL_tainting has
- * not been initialized properly.  The variable PL_earlytaint
- * is set early in main() to the result of this function. */
+ * not been initialized properly.  */
 bool
 Perl_doing_taint(int argc, char *argv[], char *envp[])
 {

@@ -14,7 +14,7 @@ BEGIN {
   if (my $port = getservbyname('echo', 'tcp')) {
     socket(*ECHO, &Socket::PF_INET(), &Socket::SOCK_STREAM(), (getprotobyname 'tcp')[2]);
     unless (connect(*ECHO, scalar &Socket::sockaddr_in($port, &Socket::inet_aton("localhost")))) {
-      print "1..0 \# Skip: loopback echo service is off ($!)\n";
+      print "1..0 \# Skip: loopback tcp echo service is off ($!)\n";
       exit;
     }
     close (*ECHO);

@@ -1,7 +1,14 @@
 CHANGES
 -------
 
-3.30  Apr 18 14:00 2003
+2.31  Jun 28 14:00 2003
+	- Win32 Compatibility fixes.
+	  Patch by mhx-perl@gmx.net (Marcus Holland-Moritz)
+	- Apply bleadperl patch #22204
+	- Add ToS support.
+	  Patch by martin@lorensen.dk (Martin Lorensen)
+
+2.30  Apr 18 14:00 2003
 	- Fix select() bug for UDP and ICMP protocols
 	  in case packet comes from wrong source or seq.
 	- Allow UDP ping to different IP addresses
