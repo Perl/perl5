@@ -151,7 +151,7 @@ S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
     }
     else {
 	/* Need to free saved eventually assign to mortal SV */
-	SV *sv = sv_newmortal();
+	/* XXX is this line an error ???:  SV *sv = sv_newmortal(); */
 	sv_usepvn(sv, (char *) key, klen);
     }
     if (flags & HVhek_UTF8) {
@@ -1701,11 +1701,32 @@ Perl_hv_clear(pTHX_ HV *hv)
     if (!hv)
 	return;
 
+    xhv = (XPVHV*)SvANY(hv);
+
     if(SvREADONLY(hv)) {
-        Perl_croak(aTHX_ "Attempt to clear a restricted hash");
+	/* restricted hash: convert all keys to placeholders */
+	I32 i;
+	HE* entry;
+	for (i=0; i< (I32) xhv->xhv_max; i++) {
+	    entry = ((HE**)xhv->xhv_array)[i];
+	    for (; entry; entry = HeNEXT(entry)) {
+		/* not already placeholder */
+		if (HeVAL(entry) != &PL_sv_undef) {
+		    if (HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
+			SV* keysv = hv_iterkeysv(entry);
+			Perl_croak(aTHX_
+		"Attempt to delete readonly key '%_' from a restricted hash",
+				keysv);
+		    }
+		    SvREFCNT_dec(HeVAL(entry));
+		    HeVAL(entry) = &PL_sv_undef;
+		    xhv->xhv_placeholders++; /* HvPLACEHOLDERS(hv)++ */
+		}
+	    }
+	}
+	return;
     }
 
-    xhv = (XPVHV*)SvANY(hv);
     hfreeentries(hv);
     xhv->xhv_fill = 0; /* HvFILL(hv) = 0 */
     xhv->xhv_keys = 0; /* HvKEYS(hv) = 0 */
