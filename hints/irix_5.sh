@@ -12,7 +12,11 @@ i_time='define'
 
 case "$cc" in
 *gcc*) ccflags="$ccflags -D_BSD_TYPES" ;;
-*) ccflags="$ccflags -D_POSIX_SOURCE -ansiposix -D_BSD_TYPES -Olimit 4000" ;;
+*) ccflags="$ccflags -D_POSIX_SOURCE -ansiposix -D_BSD_TYPES -Olimit 4000"
+# Otherwise the cc thinks that a struct timeval * is not equivalent to
+# a struct timeval *.  Yeah, you read that right.
+pp_sys_cflags='ccflags="$ccflags -DPERL_IRIX5_SELECT_TIMEVAL_VOID_CAST"'
+   ;;
 esac
 
 lddlflags="-shared"

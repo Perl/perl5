@@ -1073,6 +1073,9 @@ PP(pp_sselect)
 	(Select_fd_set_t) fd_sets[1],
 	(Select_fd_set_t) fd_sets[2],
 	(Select_fd_set_t) fd_sets[3],
+#ifdef PERL_IRIX5_SELECT_TIMEVAL_VOID_CAST
+	(void*) /* Workaround for a compiler bug. */
+#endif
 	tbuf);
     for (i = 1; i <= 3; i++) {
 	if (fd_sets[i]) {
