@@ -1475,10 +1475,18 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 
     minlen = prog->minlen;
     if (do_utf8 && !(prog->reganch & ROPT_CANY_SEEN)) {
-        if (utf8_distance((U8*)strend, (U8*)startpos) < minlen) goto phooey;
+        if (utf8_distance((U8*)strend, (U8*)startpos) < minlen) {
+	    DEBUG_r(PerlIO_printf(Perl_debug_log,
+				  "Too short (in characters)...\n"));
+	    goto phooey;
+	}
     }
     else {
-        if (strend - startpos < minlen) goto phooey;
+        if (strend - startpos < minlen) {
+	    DEBUG_r(PerlIO_printf(Perl_debug_log,
+				  "Too short (in bytes)...\n"));
+	    goto phooey;
+	}
     }
 
     /* Check validity of program. */
@@ -1537,8 +1545,10 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	d.scream_olds = &scream_olds;
 	d.scream_pos = &scream_pos;
 	s = re_intuit_start(prog, sv, s, strend, flags, &d);
-	if (!s)
+	if (!s) {
+	    DEBUG_r(PerlIO_printf(Perl_debug_log, "Not present...\n"));
 	    goto phooey;	/* not present */
+	}
     }
 
     DEBUG_r({
