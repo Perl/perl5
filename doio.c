@@ -1257,7 +1257,7 @@ Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
     if (strnEQ(cmd,"exec",4) && isSPACE(cmd[4]))
 	goto doshell;
 
-    for (s = cmd; *s && isALPHA(*s); s++) ;	/* catch VAR=val gizmo */
+    for (s = cmd; *s && isALNUM(*s); s++) ;	/* catch VAR=val gizmo */
     if (*s == '=')
 	goto doshell;
 
