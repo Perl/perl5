@@ -177,9 +177,9 @@ __END__
 
 =head1 DESCRIPTION
 
-L<Test::Harness> expects to see particular output when it executes
-tests.  This module aims to make writing proper test scripts just a
-little bit easier (and less error prone :-).
+L<Test::Harness|Test::Harness> expects to see particular output when it
+executes tests.  This module aims to make writing proper test scripts just
+a little bit easier (and less error prone :-).
 
 =head1 TEST TYPES
 
