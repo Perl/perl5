@@ -1,0 +1,20 @@
+5.004050
+PL_na                          # E
+PL_sv_no                       # E
+PL_sv_undef                    # E
+PL_sv_yes                      # E
+SvGETMAGIC                     # U
+AvFILLp                        # added by devel/scanprov
+DEFSV                          # added by devel/scanprov
+ERRSV                          # added by devel/scanprov
+PL_compiling                   # added by devel/scanprov
+PL_curcop                      # added by devel/scanprov
+PL_curstash                    # added by devel/scanprov
+PL_defgv                       # added by devel/scanprov
+PL_dirty                       # added by devel/scanprov
+PL_perldb                      # added by devel/scanprov
+PL_rsfp                        # added by devel/scanprov
+PL_rsfp_filters                # added by devel/scanprov
+PL_stdingv                     # added by devel/scanprov
+SAVE_DEFSV                     # added by devel/scanprov
+dTHR                           # added by devel/scanprov
