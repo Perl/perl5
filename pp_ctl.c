@@ -1873,6 +1873,7 @@ PP(pp_goto)
 	    SV** mark;
 	    I32 items = 0;
 	    I32 oldsave;
+	    int arg_was_real = 0;
 
 	retry:
 	    if (!CvROOT(cv) && !CvXSUB(cv)) {
@@ -1917,7 +1918,10 @@ PP(pp_goto)
 		SvREFCNT_dec(GvAV(PL_defgv));
 		GvAV(PL_defgv) = cx->blk_sub.savearray;
 #endif /* USE_THREADS */
-		AvREAL_off(av);
+		if (AvREAL(av)) {
+		    arg_was_real = 1;
+		    AvREAL_off(av);	/* so av_clear() won't clobber elts */
+		}
 		av_clear(av);
 	    }
 	    else if (CvXSUB(cv)) {	/* put GvAV(defgv) back onto stack */
@@ -2073,7 +2077,11 @@ PP(pp_goto)
 		    }
 		    Copy(mark,AvARRAY(av),items,SV*);
 		    AvFILLp(av) = items - 1;
-		    
+		    /* preserve @_ nature */
+		    if (arg_was_real) {
+			AvREIFY_off(av);
+			AvREAL_on(av);
+		    }
 		    while (items--) {
 			if (*mark)
 			    SvTEMP_off(*mark);

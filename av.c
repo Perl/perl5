@@ -41,6 +41,7 @@ av_reify(AV *av)
     key = AvARRAY(av) - AvALLOC(av);
     while (key)
 	AvALLOC(av)[--key] = &PL_sv_undef;
+    AvREIFY_off(av);
     AvREAL_on(av);
 }
 
