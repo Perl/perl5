@@ -185,7 +185,7 @@
 #define MIN_BUC_POW2 (sizeof(void*) > 4 ? 3 : 2) /* Allow for 4-byte arena. */
 #define MIN_BUCKET (MIN_BUC_POW2 * BUCKETS_PER_POW2)
 
-#if !(defined(I286) || defined(atarist))
+#if !(defined(I286) || defined(atarist) || defined(__MINT__))
 	/* take 2k unless the block is bigger than that */
 #  define LOG_OF_MIN_ARENA 11
 #else
@@ -377,7 +377,7 @@
 #define u_short unsigned short
 
 /* 286 and atarist like big chunks, which gives too much overhead. */
-#if (defined(RCHECK) || defined(I286) || defined(atarist)) && defined(PACK_MALLOC)
+#if (defined(RCHECK) || defined(I286) || defined(atarist) || defined(__MINT__)) && defined(PACK_MALLOC)
 #  undef PACK_MALLOC
 #endif 
 
@@ -1093,7 +1093,7 @@ getpages(int needed, int *nblksp, int bucket)
 	/* Second, check alignment. */
 	slack = 0;
 
-#ifndef atarist /* on the atari we dont have to worry about this */
+#if !defined(atarist) && !defined(__MINT__) /* on the atari we dont have to worry about this */
 #  ifndef I286 	/* The sbrk(0) call on the I286 always returns the next segment */
 	/* WANTED_ALIGNMENT may be more than NEEDED_ALIGNMENT, but this may
 	   improve performance of memory access. */
@@ -1102,7 +1102,7 @@ getpages(int needed, int *nblksp, int bucket)
 	    add += slack;
 	}
 #  endif
-#endif /* atarist */
+#endif /* !atarist && !MINT */
 		
 	if (add) {
 	    DEBUG_m(PerlIO_printf(Perl_debug_log, 

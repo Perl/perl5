@@ -1758,6 +1758,9 @@ moreswitches(char *s)
 #ifdef POSIX_BC
 	printf("BS2000 (POSIX) port by Start Amadeus GmbH, 1998\n");
 #endif
+#ifdef __MINT__
+	printf("MiNT port by Guido Flohr, 1997\n");
+#endif
 #ifdef BINARY_BUILD_NOTICE
 	BINARY_BUILD_NOTICE;
 #endif

@@ -1,6 +1,8 @@
 #!./perl
 
-$ENV{PATH} = '/bin:/usr/bin:/usr/xpg4/bin:/usr/ucb';
+$ENV{PATH} ="/bin:/usr/bin:/usr/xpg4/bin:/usr/ucb" .
+    exists $ENV{PATH} ? ":$ENV{PATH}" : "";
+$ENV{LC_ALL} = "C"; # so that external utilities speak English
 
 # We have to find a command that prints all (effective
 # and real) group names (not ids).  The known commands are:
