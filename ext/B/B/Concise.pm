@@ -3,15 +3,15 @@ package B::Concise;
 # This program is free software; you can redistribute and/or modify it
 # under the same terms as Perl itself.
 
-our $VERSION = "0.50";
+our $VERSION = "0.51";
 use strict;
 use B qw(class ppname main_start main_root main_cv cstring svref_2object
 	 SVf_IOK SVf_NOK SVf_POK OPf_KIDS);
 
 my %style = 
   ("terse" =>
-   ["(?(#label =>\n)?)(*(    )*)#class (#addr) pp_#name "
-    . "(?([#targ])?) #svclass~(?((#svaddr))?)~#svval\n",
+   ["(?(#label =>\n)?)(*(    )*)#class (#addr) #name (?([#targ])?) "
+    . "#svclass~(?((#svaddr))?)~#svval~(?(label \"#coplabel\")?)\n",
     "(*(    )*)goto #class (#addr)\n",
     "#class pp_#name"],
    "concise" =>
@@ -352,6 +352,7 @@ sub concise_op {
 	$h{svval} = '"' . $op->pv . '"';
     } elsif ($h{class} eq "COP") {
 	my $label = $op->label;
+	$h{coplabel} = $label;
 	$label = $label ? "$label: " : "";
 	my $loc = $op->file;
 	$loc =~ s[.*/][];
@@ -666,6 +667,10 @@ The B-determined class of the OP, in all caps.
 =item B<#classym>
 
 A single symbol abbreviating the class of the OP.
+
+=item B<#coplabel>
+
+The label of the statement or block the OP is the start of, if any.
 
 =item B<#exname>
 
