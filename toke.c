@@ -1140,11 +1140,9 @@ filter_del(funcp)
     if (!rsfp_filters || AvFILL(rsfp_filters)<0)
 	return;
     /* if filter is on top of stack (usual case) just pop it off */
-    if (IoDIRP(FILTER_DATA(0)) == (void*)funcp){
-	/* sv_free(av_pop(rsfp_filters)); */
-	sv_free(av_shift(rsfp_filters));
-
-        return;
+    if (IoDIRP(FILTER_DATA(AvFILL(rsfp_filters))) == (void*)funcp){
+	sv_free(av_pop(rsfp_filters));
+	return;
     }
     /* we need to search for the correct entry and clear it	*/
     die("filter_del can only delete in reverse order (currently)");
