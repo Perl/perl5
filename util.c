@@ -4324,7 +4324,7 @@ Perl_parse_unicode_opts(pTHX_ char **popt)
        if (isDIGIT(*p)) {
 	    opt = (U32) atoi(p);
 	    while (isDIGIT(*p)) p++;
-	    if (*p)
+	    if (*p && *p != '\n' && *p != '\r')
 		 Perl_croak(aTHX_ "Unknown Unicode option letter '%c'", *p);
        }
        else {
@@ -4349,8 +4349,9 @@ Perl_parse_unicode_opts(pTHX_ char **popt)
 		 case PERL_UNICODE_ARGV:
 		      opt |= PERL_UNICODE_ARGV_FLAG;	break;
 		 default:
-		      Perl_croak(aTHX_
-				 "Unknown Unicode option letter '%c'", *p);
+		      if (*p != '\n' && *p != '\r')
+			  Perl_croak(aTHX_
+				     "Unknown Unicode option letter '%c'", *p);
 		 }
 	    }
        }
