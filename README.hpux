@@ -241,6 +241,25 @@ If you are compiling Perl on a remotely-mounted NFS filesystem, the test
 io/fs.t may fail on test #18.  This appears to be a bug in HP-UX and no
 fix is currently available.
 
+=head2 perl -P and //
+
+In HP-UX perl is compiled with flags that will cause problems if the
+-P flag of Perl (preprocess Perl code with the C preprocessor before
+perl sees it) is used.  The problem is that C<//>, being a C++-style
+until-end-of-line comment, will disappear along with the remainder
+of the line.  This means that common Perl constructs like
+
+	s/foo//;
+
+will turn into illegal code
+
+	s/foo
+
+The workaround is to use some other quoting characters than /,
+like for example !
+
+	s!foo!!;
+
 =head1 AUTHOR
 
 Jeff Okamoto <okamoto@corp.hp.com>
