@@ -1675,11 +1675,13 @@ PerlIOBuf_fdopen(PerlIO_funcs *self, int fd, const char *mode)
    init = 1;
    mode++;
   }
- if (O_BINARY != O_TEXT)
+#if O_BINARY != O_TEXT
   {
    int code = PerlLIO_setmode(fd, O_BINARY);
+   /* do something about failing setmode()? --jhi */
    PerlIO_debug("PerlIOBuf_fdopen %s fd=%d m=%s c=%d\n",tab->name,fd,mode,code); 
   }
+#endif
  f = (*tab->Fdopen)(tab,fd,mode);
  if (f)
   {
