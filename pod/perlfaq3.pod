@@ -163,32 +163,85 @@ If you're on Unix, you already have an IDE--Unix itself.  The UNIX
 philosophy is the philosophy of several small tools that each do one
 thing and do it well.  It's like a carpenter's toolbox.
 
-If you want a Windows IDE, check the following: PerlBuilder
-(http://www.solutionsoft.com/perl.htm) is an integrated development
-environment for Windows that supports Perl development.  Komodo,
+If you want a Windows IDE, check the following:
+
+=over 4
+
+=item CodeMagicCD
+
+http://www.codemagiccd.com/
+
+=item Komodo
+
 ActiveState's cross-platform, multi-language IDE has Perl support,
 including a regular expression debugger and remote debugging
 (http://www.ActiveState.com/Products/Komodo/index.html).
-(Visual Perl, a Visual Studio.NET plug-in is currently (late 2000)
+(Visual Perl, a Visual Studio.NET plug-in is currently (early 2001)
 in beta (http://www.ActiveState.com/Products/VisualPerl/index.html)).
-The visiPerl+ IDE is available from Help Consulting
-(http://helpconsulting.net/visiperl/).  Perl code magic is another IDE
-(http://www.petes-place.com/codemagic.html).  CodeMagicCD
-(http://www.codemagiccd.com/) is another IDE.  The Object System
+
+=item The Object System
+
 (http://www.castlelink.co.uk/object_system/) is a Perl web
 applications development IDE.
+
+=item PerlBuilder
+
+(http://www.solutionsoft.com/perl.htm) is an integrated development
+environment for Windows that supports Perl development.
+
+=item Perl code magic
+
+(http://www.petes-place.com/codemagic.html).
+
+=item visiPerl+
+
+http://helpconsulting.net/visiperl/, from Help Consulting.
+
+=back
 
 For editors: if you're on Unix you probably have vi or a vi clone already,
 and possibly an emacs too, so you may not need to download anything.
 In any emacs the cperl-mode (M-x cperl-mode) gives you perhaps the
 best available Perl editing mode in any editor.
 
-For Windows editors: you can download GNU Emacs
-(http://www.gnu.org/software/emacs/windows/ntemacs.html) or XEmacs
-(http://www.xemacs.org/Download/index.html), or a vi clone such as
-Elvis (ftp://ftp.cs.pdx.edu/pub/elvis/, http://www.fh-wedel.de/elvis/),
-Vile (http://vile.cx), or Vim (http://www.vim.org/)
-(win32: http://www.cs.vu.nl/%7Etmgil/vi.html).
+For Windows editors: you can download an Emacs
+
+=over 4
+
+=item GNU Emacs
+
+http://www.gnu.org/software/emacs/windows/ntemacs.html
+
+=item MicroEMACS
+
+http://members.nbci.com/uemacs/
+
+=item XEmacs
+
+http://www.xemacs.org/Download/index.html
+
+=back
+
+or a vi clone such as
+
+=over 4
+
+=item Elvis
+
+ftp://ftp.cs.pdx.edu/pub/elvis/ http://www.fh-wedel.de/elvis/
+
+=item Vile
+
+http://vile.cx/
+
+=item Vim
+
+http://www.vim.org/
+
+win32: http://www.cs.vu.nl/%7Etmgil/vi.html
+
+=back
+
 For vi lovers in general, Windows or elsewhere:
 http://www.thomer.com/thomer/vi/vi.html.
 
@@ -200,9 +253,23 @@ incarnation of it, and secondly because you can embed Perl inside it
 to use Perl as the scripting language.  nvi is not alone in this,
 though: at least also vim and vile offer an embedded Perl.
 
-The following are Win32 multilanguage editor/IDESs that support Perl: 
-Codewright (http://www.starbase.com/), MultiEdit (http://www.MultiEdit.com/),
-SlickEdit (http://www.slickedit.com/).
+The following are Win32 multilanguage editor/IDESs that support Perl:
+
+=over 4
+
+=item Codewright
+
+http://www.starbase.com/
+
+=item MultiEdit
+
+http://www.MultiEdit.com/
+
+=item SlickEdit
+
+http://www.slickedit.com/
+
+=back
 
 There is also a toyedit Text widget based editor written in Perl
 that is distributed with the Tk module on CPAN.  The ptkdb
@@ -212,13 +279,30 @@ acts as a development environment of sorts.  Perl Composer
 GUI creation.
 
 In addition to an editor/IDE you might be interested in a more
-powerful shell environment for Win32.  Your options include the Bash
-from the Cygwin package (http://sources.redhat.com/cygwin/), or the
-Ksh from the MKS Toolkit (http://www.mks.com/), or the Bourne shell of
-the U/WIN environment (http://www.research.att.com/sw/tools/uwin/), or
-the Tcsh (ftp://ftp.astron.com/pub/tcsh/, see also
-http://www.primate.wisc.edu/software/csh-tcsh-book/), or the Zsh
-(ftp://ftp.blarg.net/users/amol/zsh/, see also http://www.zsh.org/).
+powerful shell environment for Win32.  Your options include
+
+=over 4
+
+=item Bash
+
+from the Cygwin package (http://sources.redhat.com/cygwin/)
+
+=item Ksh
+
+from the MKS Toolkit (http://www.mks.com/), or the Bourne shell of
+the U/WIN environment (http://www.research.att.com/sw/tools/uwin/)
+
+=item Tcsh
+
+ftp://ftp.astron.com/pub/tcsh/, see also
+http://www.primate.wisc.edu/software/csh-tcsh-book/
+
+=item Zsh
+
+ftp://ftp.blarg.net/users/amol/zsh/, see also http://www.zsh.org/
+
+=back
+
 MKS and U/WIN are commercial (U/WIN is free for educational and
 research purposes), Cygwin is covered by the GNU Public License (but
 that shouldn't matter for Perl use).  The Cygwin, MKS, and U/WIN all
@@ -232,11 +316,25 @@ appropriately converted.
 On Mac OS the MacPerl Application comes with a simple 32k text editor
 that behaves like a rudimentary IDE.  In contrast to the MacPerl Application
 the MPW Perl tool can make use of the MPW Shell itself as an editor (with
-no 32k limit).  BBEdit and BBEdit Lite are text editors for Mac OS 
-that have a Perl sensitivity mode (http://web.barebones.com/).
-Alpha is an editor, written and extensible in Tcl, that nonetheless has
+no 32k limit).
+
+=over 4
+
+=item BBEdit and BBEdit Lite
+
+are text editors for Mac OS that have a Perl sensitivity mode
+(http://web.barebones.com/).
+
+=item Alpha
+
+is an editor, written and extensible in Tcl, that nonetheless has
 built in support for several popular markup and programming languages
 including Perl and HTML (http://alpha.olm.net/).
+
+=back
+
+Pepper and Pe are programming language sensitive text editors for Mac
+OS X and BeOS respectively (http://www.hekkelman.com/).
 
 =head2 Where can I get Perl macros for vi?
 
