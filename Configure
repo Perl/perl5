@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Feb  8 16:55:49 EET 1999 [metaconfig 3.0 PL70]
+# Generated on Fri Feb 12 13:46:36 EET 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -2075,7 +2075,11 @@ EOM
 		[23]100) osname=mips ;;
 		next*) osname=next ;;
 		i386*)
-			if $test -f /etc/kconfig; then
+			tmp=`/bin/uname -X 2>/dev/null|awk -e '/3\.2v[45]/{ print $(NF) }'`
+			if $test "$tmp" != "" -a "$3" = "3.2" -a test -e '/etc/systemid'; then
+				osname='sco'
+				osvers=$tmp
+			elif $test -f /etc/kconfig; then
 				osname=isc
 				if test "$lns" = "ln -s"; then
 					osvers=4
@@ -2085,6 +2089,7 @@ EOM
 					osvers=2
 				fi
 			fi
+			unset tmp
 			;;
 		pc*)
 			if test -n "$DJGPP"; then
@@ -2515,7 +2520,7 @@ case "$usethreads" in
 		. ./usethreads.cbu
 	fi
 	case "$osname" in
-	aix|dec_osf|dos_djgpp|freebsd|hpux|irix|linux|os2|solaris|vmesa)
+	aix|dec_osf|dos_djgpp|freebsd|hpux|irix|linux|openbsd|os2|solaris|vmesa)
 		# Known thread-capable platforms.
 		;;
 	*)
