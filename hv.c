@@ -1452,7 +1452,7 @@ Perl_hv_clear(pTHX_ HV *hv)
 		}
 	    }
 	}
-	return;
+	goto reset;
     }
 
     hfreeentries(hv);
@@ -1466,6 +1466,8 @@ Perl_hv_clear(pTHX_ HV *hv)
 
     HvHASKFLAGS_off(hv);
     HvREHASH_off(hv);
+    reset:
+    HvEITER(hv) = NULL;
 }
 
 /*

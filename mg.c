@@ -1539,11 +1539,6 @@ Perl_magic_wipepack(pTHX_ SV *sv, MAGIC *mg)
     POPSTACK;
     LEAVE;
 
-    if (SvTYPE(sv) == SVt_PVHV)
-        /* must reset iterator otherwise Perl_magic_scalarpack
-         * wont report a false value on a cleared hash */
-        HvEITER((HV*)sv) = NULL;
-    
     return 0;
 }
 
