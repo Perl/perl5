@@ -409,7 +409,7 @@ sub page {
     }
     else {
 	foreach my $pager (@pagers) {
-	    last if system("$pager $tmp") == 0;
+	    last if system("$pager \"$tmp\"") == 0;
 	}
     }
 }
