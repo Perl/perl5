@@ -8,7 +8,7 @@
 #define PERLIO_NOT_STDIO 1
 #include "perl.h"
 #include "XSUB.h"
-#if defined(PERL_OBJECT) || defined(PERL_CAPI)
+#if defined(PERL_OBJECT) || defined(PERL_CAPI) || defined(PERL_IMPLICIT_SYS)
 #  undef signal
 #  undef open
 #  undef setmode
@@ -108,7 +108,6 @@
 #else
 #if defined (CYGWIN)
 #    define tzname _tzname
-#    undef MB_CUR_MAX          /* XXX: bug in b20.1 */
 #endif
 #if defined (WIN32)
 #  undef mkfifo
@@ -290,7 +289,7 @@ unsigned long strtoul (const char *, char **, int);
 #endif
 
 #ifdef HAS_TZNAME
-#  ifndef WIN32
+#  if !defined(WIN32) && !defined(CYGWIN)
 extern char *tzname[];
 #  endif
 #else
@@ -3369,15 +3368,13 @@ sigaction(sig, action, oldaction = 0)
 # This code is really grody because we're trying to make the signal
 # interface look beautiful, which is hard.
 
-	if (!PL_siggv)
-	    gv_fetchpv("SIG", TRUE, SVt_PVHV);
-
 	{
+	    GV *siggv = gv_fetchpv("SIG", TRUE, SVt_PVHV);
 	    struct sigaction act;
 	    struct sigaction oact;
 	    POSIX__SigSet sigset;
 	    SV** svp;
-	    SV** sigsvp = hv_fetch(GvHVn(PL_siggv),
+	    SV** sigsvp = hv_fetch(GvHVn(siggv),
 				 PL_sig_name[sig],
 				 strlen(PL_sig_name[sig]),
 				 TRUE);
@@ -3858,28 +3855,35 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 	    ** If there is a better way to make it portable, go ahead by
 	    ** all means.
 	    */
-	    if ( ( len > 0 && len < sizeof(tmpbuf) )
-	    		|| ( len == 0 && strlen(fmt) == 0 ) ) {
+	    if ((len > 0 && len < sizeof(tmpbuf)) || (len == 0 && *fmt == '\0'))
 		ST(0) = sv_2mortal(newSVpv(tmpbuf, len));
-	    } else {
+            else {
 		/* Possibly buf overflowed - try again with a bigger buf */
-		int	bufsize = strlen(fmt) + sizeof(tmpbuf);
+                int     fmtlen = strlen(fmt);
+		int	bufsize = fmtlen + sizeof(tmpbuf);
 		char* 	buf;
 		int	buflen;
 
 		New(0, buf, bufsize, char);
-		while( buf ) {
+		while (buf) {
 		    buflen = strftime(buf, bufsize, fmt, &mytm);
-		    if ( buflen > 0 && buflen < bufsize ) break;
+		    if (buflen > 0 && buflen < bufsize)
+                        break;
+                    /* heuristic to prevent out-of-memory errors */
+                    if (bufsize > 100*fmtlen) {
+                        Safefree(buf);
+                        buf = NULL;
+                        break;
+                    }
 		    bufsize *= 2;
 		    Renew(buf, bufsize, char);
 		}
-		if ( buf ) {
+		if (buf) {
 		    ST(0) = sv_2mortal(newSVpvn(buf, buflen));
 		    Safefree(buf);
-		} else {
-		    ST(0) = sv_2mortal(newSVpvn(tmpbuf, len));
 		}
+                else
+		    ST(0) = sv_2mortal(newSVpvn(tmpbuf, len));
 	    }
 	}
 

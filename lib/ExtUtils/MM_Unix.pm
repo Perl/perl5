@@ -377,10 +377,22 @@ sub cflags {
 
     if ($Is_PERL_OBJECT) {
         $self->{CCFLAGS} =~ s/-DPERL_OBJECT(\b|$)/-DPERL_CAPI/g;
-        if ($Is_Win32 && $Config{'cc'} =~ /^cl/i) {
-            # Turn off C++ mode of the MSC compiler
-            $self->{CCFLAGS} =~ s/-TP(\s|$)//;
-            $self->{OPTIMIZE} =~ s/-TP(\s|$)//;
+        if ($Is_Win32) { 
+	    if ($Config{'cc'} =~ /^cl/i) {
+		# Turn off C++ mode of the MSC compiler
+		$self->{CCFLAGS} =~ s/-TP(\s|$)//g;
+		$self->{OPTIMIZE} =~ s/-TP(\s|$)//g;
+	    }
+	    elsif ($Config{'cc'} =~ /^bcc32/i) {
+		# Turn off C++ mode of the Borland compiler
+		$self->{CCFLAGS} =~ s/-P(\s|$)//g;
+		$self->{OPTIMIZE} =~ s/-P(\s|$)//g;
+	    }
+	    elsif ($Config{'cc'} =~ /^gcc/i) {
+		# Turn off C++ mode of the GCC compiler
+		$self->{CCFLAGS} =~ s/-xc\+\+(\s|$)//g;
+		$self->{OPTIMIZE} =~ s/-xc\+\+(\s|$)//g;
+	    }
         }
     }
 
@@ -425,7 +437,19 @@ clean ::
 ');
     # clean subdirectories first
     for $dir (@{$self->{DIR}}) {
-	push @m, "\t-cd $dir && \$(TEST_F) $self->{MAKEFILE} && \$(MAKE) clean\n";
+	if ($Is_Win32  &&  Win32::IsWin95()) {
+	    push @m, <<EOT;
+	cd $dir
+	\$(TEST_F) $self->{MAKEFILE}
+	\$(MAKE) clean
+	cd ..
+EOT
+	}
+	else {
+	    push @m, <<EOT;
+	-cd $dir && \$(TEST_F) $self->{MAKEFILE} && \$(MAKE) clean
+EOT
+	}
     }
 
     my(@otherfiles) = values %{$self->{XS}}; # .c files from *.xs files
@@ -1980,7 +2004,8 @@ usually solves this kind of problem.
 	push @defpath, $component if defined $component;
     }
     $self->{PERL} ||=
-        $self->find_perl(5.0, [ $self->canonpath($^X), 'miniperl','perl','perl5',"perl$]" ],
+        $self->find_perl(5.0, [ $self->canonpath($^X), 'miniperl',
+				'perl','perl5',"perl$Config{version}" ],
 	    \@defpath, $Verbose );
     # don't check if perl is executable, maybe they have decided to
     # supply switches with perl
@@ -2123,6 +2148,7 @@ pure_site_install ::
 		}.$self->catdir('$(PERL_ARCHLIB)','auto','$(FULLEXT)').q{
 
 doc_perl_install ::
+	-}.$self->{NOECHO}.q{$(MKPATH) $(INSTALLARCHLIB)
 	-}.$self->{NOECHO}.q{$(DOC_INSTALL) \
 		"Module" "$(NAME)" \
 		"installed into" "$(INSTALLPRIVLIB)" \
@@ -2132,6 +2158,7 @@ doc_perl_install ::
 		>> }.$self->catfile('$(INSTALLARCHLIB)','perllocal.pod').q{
 
 doc_site_install ::
+	-}.$self->{NOECHO}.q{$(MKPATH) $(INSTALLARCHLIB)
 	-}.$self->{NOECHO}.q{$(DOC_INSTALL) \
 		"Module" "$(NAME)" \
 		"installed into" "$(INSTALLSITELIB)" \
@@ -2498,6 +2525,7 @@ $tmp/perlmain.c: $makefilename}, q{
     push @m, q{
 doc_inst_perl:
 	}.$self->{NOECHO}.q{echo Appending installation info to $(INSTALLARCHLIB)/perllocal.pod
+	-}.$self->{NOECHO}.q{$(MKPATH) $(INSTALLARCHLIB)
 	-}.$self->{NOECHO}.q{$(DOC_INSTALL) \
 		"Perl binary" "$(MAP_TARGET)" \
 		MAP_STATIC "$(MAP_STATIC)" \
@@ -3071,7 +3099,9 @@ sub realclean {
 realclean purge ::  clean
 ');
     # realclean subdirectories first (already cleaned)
-    my $sub = "\t-cd %s && \$(TEST_F) %s && \$(MAKE) %s realclean\n";
+    my $sub = ($Is_Win32  &&  Win32::IsWin95()) ?
+      "\tcd %s\n\t\$(TEST_F) %s\n\t\$(MAKE) %s realclean\n\tcd ..\n" :
+      "\t-cd %s && \$(TEST_F) %s && \$(MAKE) %s realclean\n";
     foreach(@{$self->{DIR}}){
 	push(@m, sprintf($sub,$_,"$self->{MAKEFILE}.old","-f $self->{MAKEFILE}.old"));
 	push(@m, sprintf($sub,$_,"$self->{MAKEFILE}",''));
@@ -3215,12 +3245,25 @@ Helper subroutine for subdirs
 sub subdir_x {
     my($self, $subdir) = @_;
     my(@m);
-    qq{
+    if ($Is_Win32 && Win32::IsWin95()) {
+	# XXX: dmake-specific, like rest of Win95 port
+	return <<EOT;
+subdirs ::
+@[
+	cd $subdir
+	\$(MAKE) all \$(PASTHRU)
+	cd ..
+]
+EOT
+    }
+    else {
+	return <<EOT;
 
 subdirs ::
 	$self->{NOECHO}cd $subdir && \$(MAKE) all \$(PASTHRU)
 
-};
+EOT
+    }
 }
 
 =item subdirs (o)
@@ -3471,7 +3514,7 @@ sub tool_xsubpp {
 XSUBPPDIR = $xsdir
 XSUBPP = \$(XSUBPPDIR)/$xsubpp
 XSPROTOARG = $self->{XSPROTOARG}
-XSUBPPDEPS = @tmdeps
+XSUBPPDEPS = @tmdeps \$(XSUBPP)
 XSUBPPARGS = @tmargs
 };
 };
@@ -3568,12 +3611,6 @@ config :: $(INST_ARCHAUTODIR)/.exists
 config :: $(INST_AUTODIR)/.exists
 	'.$self->{NOECHO}.'$(NOOP)
 ';
-
-    push @m, qq{
-config :: Version_check
-	$self->{NOECHO}\$(NOOP)
-
-} unless $self->{PARENT} or ($self->{PERL_SRC} && $self->{INSTALLDIRS} eq "perl") or $self->{NO_VC};
 
     push @m, $self->dir_target(qw[$(INST_AUTODIR) $(INST_LIBDIR) $(INST_ARCHAUTODIR)]);
 

@@ -47,7 +47,7 @@
 # use the following two lines if you have perl5.003_22 or better and
 # do not encounter intermittent core dumps.
 
-ccflags='-DUSE_NEXT_CTYPE'
+ccflags="$ccflags -DUSE_NEXT_CTYPE"
 usemymalloc='n'
 
 ######################################################################

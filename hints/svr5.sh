@@ -1,101 +1,98 @@
-# svr5 hints, System V Release 5.x
-# Last modified 1999/09/21 by Boyd Gerber, gerberb@zenez.com
+# svr5 hints, System V Release 5.x (UnixWare 7)
+# mods after mail fm Andy Dougherty
+# Reworked by hops@sco.com Sept/Oct 1999 for UW7.1 platform support 
+#   Boyd Gerber, gerberb@zenez.com 1999/09/21 for threads support.
+# Originally taken from svr4 hints.sh  21-Sep-98 hops@sco.com
+# which was version of 1996/10/25 by Tye McQueen, tye@metronet.com
 
+# Use Configure -Dusethreads to enable threads.
 # Use Configure -Dcc=gcc to use gcc.
 case "$cc" in
-'') cc='/bin/cc'
-    test -f $cc || cc='/usr/ccs/bin/cc'
-    ;;
-  *)
-    case "$gccversion" in
-      *2.95*) 
-        ccflags='-fno-strict-aliasing'
-      ;;
-      *);;
+*gcc*)
+    #  "$gccversion" not set yet
+    vers=`gcc -v 2>&1 | sed -n -e 's@.*version \([^ ][^ ]*\) .*@\1@p'`
+    case $vers in
+    *2.95*)
+         ccflags='-fno-strict-aliasing'
+        # More optimisation provided in gcc-2.95 causes miniperl to segv.
+        # -fno-strict-aliasing is supposed to correct this but 
+        # if it doesn't and you get segv when the build runs miniperl then 
+        # disable optimisation as below
+        #  optimize=' '
+        ;;
     esac
-  ;;
+    ;;  
 esac
 
-# want_ucb=''
-# want_dbm='yes'
-want_gdbm='yes'
+# Hardwire the processor to 586 for consistancy with autoconf
+# archname='i586-svr5'
+#  -- seems this is generally disliked by perl porters so leave it to float
 
-# We include support for using libraries in /usr/ucblib, but the setting
-# of libswanted excludes some libraries found there.  If you run into
-# problems, you may have to remove "ucb" from libswanted.  Just delete
-# the comment '#' from the sed command below.
-# ldflags='-L/usr/ccs/lib -L/usr/ucblib'
-# ccflags='-I/usr/include -I/usr/ucbinclude'
-# Don't use problematic libraries:
-libswanted=`echo " $libswanted " | sed -e 's/ malloc / /'` # -e 's/ ucb / /'`
-# libmalloc.a - Probably using Perl's malloc() anyway.
-# libucb.a - Remove it if you have problems ld'ing.  We include it because
-#   it is needed for ODBM_File and NDBM_File extensions.
+# Our default setup excludes anything from /usr/ucblib (and consequently dbm)
+# as later modules assume symbols found are available in shared libs 
+# On svr5 these are static archives which causes problems for
+# dynamic modules loaded later (and ucblib is a bad dream anyway)
+# 
+# However there is a dbm library built from the ucb sources outside ucblib
+# at http://www.sco.com/skunkware (installing into /usr/local) so if we
+# detect this we'll use it. You can change the default
+# (to allow ucblib and its dbm or disallowing non ucb dbm) by 
+# changing 'want_*' config values below to '' to disable or otherwise to enable
+
+#    Leave leading tabs so Configure doesn't propagate variables to config.sh
+
+	want_ucb=''		# don't use anything from /usr/ucblib - icky
+	want_dbm='yes'		# use dbm if can find library in /usr/local/lib
+	want_gdbm='yes'		# use gdbm if can find library in /usr/local/lib
+	want_udk70=''		# link with old static libc pieces
+            # link with udk70 if building on 7.1 abd want resulting binary 
+            # to run on uw7.0* - it will link in referenced static symbols 
+            # of libc that are (now) in the shared libc.so on 7.1 but were 
+            # not there in 7.0.
+            # There are still scenarios where this is still insufficient so 
+            # overall it is preferable to get ptf7051e 
+            #   ftp://ftp.sco.com/SLS/ptf7051e.Z
+            # installed on any/all 7.0 systems and leave the above unset.
 
 if [ "$want_ucb" ] ; then 
-    ldflags= '-L/usr/ccs/lib -L/usr/ucblib'
-    ccflags='-I/usr/include -I/usr/ucbinclude'
-  if [ -r /usr/ucblib/libucb.a ]; then	# If using BSD-compat. library:
-    d_Gconvert='gcvt((x),(n),(b))'	# Try gcvt() before gconvert().
-    # Use the "native" counterparts, not the BSD emulation stuff:
-    d_bcmp='undef' d_bcopy='undef' d_bzero='undef' d_safebcpy='undef'
-    d_index='undef' d_killpg='undef' d_getprior='undef' d_setprior='undef'
-    d_setlinebuf='undef' 
-    # d_setregid='undef' d_setreuid='undef'  # ???
-  fi
+    ldflags= '-L/usr/ucblib'
+    ccflags='-I/usr/ucbinclude'
+    # /usr/ccs/include and /usr/ccs/lib are used implicitly by cc as reqd
 else
-#    libswanted=`echo " $libswanted " | sed -e 's/ ucb / /' -e 's/ dbm / /'`
     libswanted=`echo " $libswanted " | sed -e 's/ ucb / /'`
     glibpth=`echo " $glibpth " | sed -e 's/ \/usr\/ucblib / /'`
 
-    # a non ucb native version of libdbm for /usr/local is available from 
-    # http://www.sco.com/skunkware 
-    # if its installed (and not overidden) we'll use it.
+    # If see libdbm in /usr/local and not overidden assume its the 
+    # non ucblib rebuild from skunkware  and use it
     if [ ! -f /usr/local/lib/libdbm.so -o ! "$want_dbm" ] ; then
+        i_dbm='undef'
         libswanted=`echo " $libswanted " | sed -e 's/ dbm / /'`
     fi
 fi
 
-if [ "$want_gdbm" -a -f /usr/local/lib/libgdbm.so ] ; then 
-    i_gdbm='define'
-else
-    i_gdbm='undef'
+if [ ! "$want_gdbm" ] ; then 
+   i_gdbm='undef'
    libswanted=`echo " $libswanted " | sed -e 's/ gdbm / /'`
 fi
 
+
 # Don't use problematic libraries:
 #   libmalloc.a - Probably using Perl's malloc() anyway.
-#   libc:  on UW7 don't want -lc explicitly - cc gives warnings/errors
+#   libc:  on UW7 don't want -lc explicitly as native cc gives warnings/errors
 libswanted=`echo " $libswanted " | sed -e 's/ malloc / /' -e 's/ c / /'`
 
 # remove /shlib and /lib from library search path as both symlink to /usr/lib
 # where runtime shared libc is 
 glibpth=`echo " $glibpth " | sed -e 's/ \/shlib / /' -e 's/ \/lib / /`
 
-# UnixWare has /usr/lib/libc.so.1, /usr/lib/libc.so.1.1, and
-# /usr/ccs/lib/libc.so.  Configure chooses libc.so.1.1 while it
-# appears that /usr/ccs/lib/libc.so contains more symbols:
-#
-# Try the following if you want to use nm-extraction.  We'll just
-# skip the nm-extraction phase, since searching for all the different
-# library versions will be hard to keep up-to-date.
-#
-# if [ "" = "$libc" -a -f /usr/ccs/lib/libc.so -a \
-#   -f /usr/lib/libc.so.1 -a -f /usr/lib/libc.so.1.1 ]; then
-#     if nm -h /usr/ccs/lib/libc.so | egrep '\<_?select$' >/dev/null; then
-# 	if nm -h /usr/lib/libc.so.1 | egrep '\<_?select$'` >/dev/null ||
-# 	   nm -h /usr/lib/libc.so.1.1 | egrep '\<_?select$'` >/dev/null; then
-# 	    :
-# 	else
-# 	    libc=/usr/ccs/lib/libc.so
-# 	fi
-#     fi
-# fi
-#
-#  Don't bother with nm.  Just compile & link a small C program.
-case "$usenm" in
-'') usenm=false;;
-esac
+# Don't use BSD emulation pieces (/usr/ucblib) regardless
+# these would probably be autonondetected anyway but ...
+d_Gconvert='gcvt((x),(n),(b))'	# Try gcvt() before gconvert().
+d_bcopy='undef' d_bcmp='undef'  d_bzero='undef'  d_safebcpy='undef'
+d_index='undef' d_killpg='undef' d_getprior='undef' d_setprior='undef'
+d_setlinebuf='undef' 
+d_setregid='undef' d_setreuid='undef'  # -- in /usr/lib/libc.so.1
+
 
 # Broken C-Shell tests (Thanks to Tye McQueen):
 # The OS-specific checks may be obsoleted by the this generic test.
@@ -107,18 +104,34 @@ if [ "$sh_cnt" -ne "$csh_cnt" ]; then
     d_csh='undef'
 fi
 
-# Unixware-specific problems.  The undocumented -X argument to uname 
-# is probably a reasonable way of detecting UnixWare.  
+# Unixware-specific problems.  UW7 give correctname with uname -s
 # UnixWare has a broken csh.  (This might already be detected above).
 # Configure can't detect memcpy or memset on Unixware 2 or 7
 #
 #    Leave leading tabs on the next two lines so Configure doesn't 
 #    propagate these variables to config.sh
 	uw_ver=`uname -v`
-	uw_isuw=`uname -X 2>&1 | grep Release`
+	uw_isuw=`uname -s 2>&1`
 
-if [ "$uw_isuw" = "Release = 5" ]; then
+if [ "$uw_isuw" = "UnixWare" ]; then
    case $uw_ver in
+   7.1*)
+	d_csh='undef'
+	d_memcpy='define'
+	d_memset='define'
+	stdio_cnt='((fp)->__cnt)'
+	d_stdio_cnt_lval='define'
+	stdio_ptr='((fp)->__ptr)'
+	d_stdio_ptr_lval='define'
+
+        d_bcopy='define'    # In /usr/lib/libc.so.1
+        d_setregid='define' #  " 
+        d_setreuid='define' #  " 
+
+        if [ -f /usr/ccs/lib/libcudk70.a -a "$want_udk70" ] ; then
+            libswanted=" $libswanted cudk70"
+        fi
+	;;
    7*)
 	d_csh='undef'
 	d_memcpy='define'
@@ -130,93 +143,79 @@ if [ "$uw_isuw" = "Release = 5" ]; then
 	;;
    esac
 fi
+# End of Unixware-specific tests.
 
 ###############################################################
-# Dynamic loading section:
+# Dynamic loading section: Is default so it should just happen.
+# set below to explicitly force.
+# usedl='define'
+# dlext='so'
+# dlsrc='dl_dlopen.xs'
 #
 # ccdlflags : must tell the linker to export all global symbols
 # cccdlflags: must tell the compiler to generate relocatable code
 # lddlflags : must tell the linker to output a shared library
-#
-# /usr/local/lib is added for convenience, since additional libraries
-# are usually put there 
-#
+
 # use shared perl lib    
 useshrplib='true'
 
 case "$cc" in
        *gcc*)
-           ccdlflags='-Xlinker -Bexport -L/usr/local/lib'
+           ccdlflags='-Xlinker -Bexport '
            cccdlflags='-fpic'
-           lddlflags='-G -L/usr/local/lib'
+           lddlflags='-G '
         ;;
+
         *)
-           ccdlflags='-Wl,-Bexport -L/usr/local/lib'
-           cccdlflags='-KPIC'
-           lddlflags='-G -Wl,-Bexport -L/usr/local/lib'
+           ccdlflags='-Wl,-Bexport'
+           cccdlflags='-Kpic'
+           lddlflags='-G -Wl,-Bexport'
         ;;
 esac
 
-###############################################################
-# Use dynamic loading
-usedl='define'
-dlext='so'
-dlsrc='dl_dlopen.xs'
-
-# Configure may fail to find lstat() since it's a static/inline function
-# in <sys/stat.h> on Unisys U6000 SVR4, UnixWare 2.x, and possibly other
-# SVR4 derivatives.  (Though UnixWare has it in /usr/ccs/lib/libc.so.)
-d_lstat=define
-
-
-# DDE SMES Supermax Enterprise Server
-case "`uname -sm`" in
-"UNIX_SV SMES")
-    # the *grent functions are in libgen.
-    libswanted="$libswanted gen"
-    # csh is broken (also) in SMES
-    # This may already be detected by the generic test above.
-    d_csh='undef'
-    case "$cc" in
-    *gcc*) ;;
-    *)	# for cc we need -K PIC (not -K pic)
- 	cccdlflags="$cccdlflags -K PIC"
-	;;
-    esac
-    ;;
-esac
-
+############################################################################
+# Thread support
+# use Configure -Dusethreads to enable
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use threads.
 cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
         ccflags="$ccflags"
-        set `echo X "$libswanted "| sed -e 's/ c / pthread c /'`
         shift
         libswanted="$*"
   case "$cc" in
        *gcc*)
            ccflags="-D_REENTRANT $ccflags -fpic -pthread"
            cccdlflags='-fpic'
-           lddlflags='-pthread -G -L/usr/local/lib '
+           lddlflags='-pthread -G '
         ;;
         *)
            ccflags="-D_REENTRANT $ccflags -KPIC -Kthread"
-           ccdlflags='-Kthread -Wl,-Bexport -L/usr/local/lib'
+           ccdlflags='-Kthread -Wl,-Bexport'
            cccdlflags='-KPIC -Kthread'
-           lddlflags='-G -Kthread -Wl,-Bexport -L/usr/local/lib'
-           ldflags='-Kthread -L/usr/local/lib -L/usr/gnu/lib'
+           lddlflags='-G -Kthread -Wl,-Bexport '
+     	   ldflags='-Kthread'
         ;;
   esac
 esac
 EOCBU
 
-# End of Unixware-specific tests.
-# Configure may fail to find lstat() since it's a static/inline function
-# in <sys/stat.h> on Unisys U6000 SVR4, UnixWare 2.x, and possibly other
-# SVR4 derivatives.  (Though UnixWare has it in /usr/ccs/lib/libc.so.)
-d_lstat=define
 
-d_suidsafe='define'	# "./Configure -d" can't figure this out easilly
+d_suidsafe='define'	# "./Configure -d" can't figure this out easily
 
+################## final caveat msgs to builder ###############
+cat <<'EOM' >&4
+
+If you wish to use dynamic linking, you must use 
+	LD_LIBRARY_PATH=`pwd`; export LD_LIBRARY_PATH
+or
+	setenv LD_LIBRARY_PATH `pwd`
+before running make.
+
+If you are using shared libraries from /usr/local/lib
+for libdbm or libgdbm you may need to set
+	LD_RUN_PATH=/usr/local/lib; export LD_RUN_PATH
+in order for Configure to compile the simple test program
+
+EOM

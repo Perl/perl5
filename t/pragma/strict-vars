@@ -307,3 +307,35 @@ print our $fred,"\n";
 EXPECT
 2
 1
+########
+
+# "nailed" our declaration visibility across package boundaries
+use strict 'vars';
+our $foo;
+$foo = 20;
+package Foo;
+print $foo, "\n";
+EXPECT
+20
+########
+
+# multiple our declarations in same scope, different packages, no warning
+use strict 'vars';
+use warnings;
+our $foo;
+${foo} = 10;
+package Foo;
+our $foo = 20;
+print $foo, "\n";
+EXPECT
+20
+########
+
+# multiple our declarations in same scope, same package, warning
+use strict 'vars';
+use warnings;
+our $foo;
+${foo} = 10;
+our $foo;
+EXPECT
+"our" variable $foo masks earlier declaration in same scope at - line 7.

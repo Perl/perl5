@@ -56,7 +56,7 @@ typedef enum {
     OPc_LISTOP,	/* 5 */
     OPc_PMOP,	/* 6 */
     OPc_SVOP,	/* 7 */
-    OPc_GVOP,	/* 8 */
+    OPc_PADOP,	/* 8 */
     OPc_PVOP,	/* 9 */
     OPc_CVOP,	/* 10 */
     OPc_LOOP,	/* 11 */
@@ -72,7 +72,7 @@ static char *opclassnames[] = {
     "B::LISTOP",
     "B::PMOP",
     "B::SVOP",
-    "B::GVOP",
+    "B::PADOP",
     "B::PVOP",
     "B::CVOP",
     "B::LOOP",
@@ -117,8 +117,8 @@ cc_opclass(pTHX_ OP *o)
     case OA_SVOP:
 	return OPc_SVOP;
 
-    case OA_GVOP:
-	return OPc_GVOP;
+    case OA_PADOP:
+	return OPc_PADOP;
 
     case OA_PVOP_OR_SVOP:
         /*
@@ -155,10 +155,10 @@ cc_opclass(pTHX_ OP *o)
 	 * return OPc_UNOP so that walkoptree can find our children. If
 	 * OPf_KIDS is not set then we check OPf_REF. Without OPf_REF set
 	 * (no argument to the operator) it's an OP; with OPf_REF set it's
-	 * a GVOP (and op_gv is the GV for the filehandle argument).
+	 * an SVOP (and op_sv is the GV for the filehandle argument).
 	 */
 	return ((o->op_flags & OPf_KIDS) ? OPc_UNOP :
-		(o->op_flags & OPf_REF) ? OPc_GVOP : OPc_BASEOP);
+		(o->op_flags & OPf_REF) ? OPc_SVOP : OPc_BASEOP);
 
     case OA_LOOPEXOP:
 	/*
@@ -345,7 +345,7 @@ typedef LOGOP	*B__LOGOP;
 typedef LISTOP	*B__LISTOP;
 typedef PMOP	*B__PMOP;
 typedef SVOP	*B__SVOP;
-typedef GVOP	*B__GVOP;
+typedef PADOP	*B__PADOP;
 typedef PVOP	*B__PVOP;
 typedef LOOP	*B__LOOP;
 typedef COP	*B__COP;
@@ -491,10 +491,10 @@ hash(sv)
 	char *s;
 	STRLEN len;
 	U32 hash = 0;
-	char hexhash[19]; /* must fit "0xffffffff" plus trailing \0 */
+	char hexhash[19]; /* must fit "0xffffffffffffffff" plus trailing \0 */
 	s = SvPV(sv, len);
 	PERL_HASH(hash, s, len);
-	sprintf(hexhash, "0x%x", hash);
+	sprintf(hexhash, "0x%"UVxf, (UV)hash);
 	ST(0) = sv_2mortal(newSVpv(hexhash, 0));
 
 #define cast_I32(foo) (I32)foo
@@ -575,7 +575,7 @@ char *
 OP_desc(o)
 	B::OP		o
 
-U16
+PADOFFSET
 OP_targ(o)
 	B::OP		o
 
@@ -679,23 +679,38 @@ PMOP_precomp(o)
 	if (rx)
 	    sv_setpvn(ST(0), rx->precomp, rx->prelen);
 
-#define SVOP_sv(o)	o->op_sv
+#define SVOP_sv(o)	cSVOPx_sv(o)
+#define SVOP_gv(o)	cGVOPx_gv(o)
 
 MODULE = B	PACKAGE = B::SVOP		PREFIX = SVOP_
-
 
 B::SV
 SVOP_sv(o)
 	B::SVOP	o
 
-#define GVOP_gv(o)	o->op_gv
+B::GV
+SVOP_gv(o)
+	B::SVOP	o
 
-MODULE = B	PACKAGE = B::GVOP		PREFIX = GVOP_
+#define PADOP_padix(o)	o->op_padix
+#define PADOP_sv(o)	(o->op_padix ? PL_curpad[o->op_padix] : Nullsv)
+#define PADOP_gv(o)	((o->op_padix \
+			  && SvTYPE(PL_curpad[o->op_padix]) == SVt_PVGV) \
+			 ? (GV*)PL_curpad[o->op_padix] : Nullgv)
 
+MODULE = B	PACKAGE = B::PADOP		PREFIX = PADOP_
+
+PADOFFSET
+PADOP_padix(o)
+	B::PADOP o
+
+B::SV
+PADOP_sv(o)
+	B::PADOP o
 
 B::GV
-GVOP_gv(o)
-	B::GVOP	o
+PADOP_gv(o)
+	B::PADOP o
 
 MODULE = B	PACKAGE = B::PVOP		PREFIX = PVOP_
 
@@ -730,11 +745,12 @@ LOOP_lastop(o)
 	B::LOOP	o
 
 #define COP_label(o)	o->cop_label
-#define COP_stash(o)	o->cop_stash
-#define COP_filegv(o)	o->cop_filegv
+#define COP_stashpv(o)	CopSTASHPV(o)
+#define COP_stash(o)	CopSTASH(o)
+#define COP_file(o)	CopFILE(o)
 #define COP_cop_seq(o)	o->cop_seq
 #define COP_arybase(o)	o->cop_arybase
-#define COP_line(o)	o->cop_line
+#define COP_line(o)	CopLINE(o)
 #define COP_warnings(o)	o->cop_warnings
 
 MODULE = B	PACKAGE = B::COP		PREFIX = COP_
@@ -743,12 +759,16 @@ char *
 COP_label(o)
 	B::COP	o
 
+char *
+COP_stashpv(o)
+	B::COP	o
+
 B::HV
 COP_stash(o)
 	B::COP	o
 
-B::GV
-COP_filegv(o)
+char *
+COP_file(o)
 	B::COP	o
 
 U32
@@ -1012,6 +1032,10 @@ U16
 GvLINE(gv)
 	B::GV	gv
 
+char *
+GvFILE(gv)
+	B::GV	gv
+
 B::GV
 GvFILEGV(gv)
 	B::GV	gv
@@ -1133,8 +1157,8 @@ B::GV
 CvGV(cv)
 	B::CV	cv
 
-B::GV
-CvFILEGV(cv)
+char *
+CvFILE(cv)
 	B::CV	cv
 
 long

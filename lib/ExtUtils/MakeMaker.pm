@@ -2,7 +2,7 @@ BEGIN {require 5.002;} # MakeMaker 5.17 was the last MakeMaker that was compatib
 
 package ExtUtils::MakeMaker;
 
-$VERSION = "5.4302";
+$VERSION = "5.44";
 $Version_OK = "5.17";	# Makefiles older than $Version_OK will die
 			# (Will be checked from MakeMaker version 4.13 onwards)
 ($Revision = substr(q$Revision: 1.222 $, 10)) =~ s/\s+$//;
@@ -17,7 +17,7 @@ use Carp ();
 use vars qw(
 
 	    @ISA @EXPORT @EXPORT_OK $AUTOLOAD
-	    $ISA_TTY $Is_Mac $Is_OS2 $Is_VMS $Revision $Setup_done
+	    $ISA_TTY $Is_Mac $Is_OS2 $Is_VMS $Revision
 	    $VERSION $Verbose $Version_OK %Config %Keep_after_flush
 	    %MM_Sections %Prepend_dot_dot %Recognized_Att_Keys
 	    @Get_from_Config @MM_Sections @Overridable @Parent
@@ -70,7 +70,7 @@ $Is_VMS   = $^O eq 'VMS';
 $Is_OS2   = $^O eq 'os2';
 $Is_Mac   = $^O eq 'MacOS';
 $Is_Win32 = $^O eq 'MSWin32';
-$Is_Cygwin= $^O =~ /cygwin/i;
+$Is_Cygwin= $^O eq 'cygwin';
 
 require ExtUtils::MM_Unix;
 
@@ -91,35 +91,11 @@ if ($Is_Cygwin) {
     require ExtUtils::MM_Cygwin;
 }
 
-# The SelfLoader would bring a lot of overhead for MakeMaker, because
-# we know for sure we will use most of the autoloaded functions once
-# we have to use one of them. So we write our own loader
+full_setup();
 
-sub AUTOLOAD {
-    my $code;
-    if (defined fileno(DATA)) {
-	my $fh = select DATA;
-	my $o = $/;			# For future reads from the file.
-	$/ = "\n__END__\n";
-	$code = <DATA>;
-	$/ = $o;
-	select $fh;
-	close DATA;
-	eval $code;
-	if ($@) {
-	    $@ =~ s/ at .*\n//;
-	    Carp::croak $@;
-	}
-    } else {
-	warn "AUTOLOAD called unexpectedly for $AUTOLOAD"; 
-    }
-    defined(&$AUTOLOAD) or die "Myloader inconsistency error";
-    goto &$AUTOLOAD;
-}
-
-# The only subroutine we do not SelfLoad is Version_Check because it's
-# called so often. Loading this minimum still requires 1.2 secs on my
-# Indy :-(
+# The use of the Version_check target has been dropped between perl
+# 5.5.63 and 5.5.64. We must keep the subroutine for a while so that
+# old Makefiles can satisfy the Version_check target.
 
 sub Version_check {
     my($checkversion) = @_;
@@ -140,38 +116,10 @@ sub warnhandler {
     warn @_;
 }
 
-sub ExtUtils::MakeMaker::eval_in_subdirs ;
-sub ExtUtils::MakeMaker::eval_in_x ;
-sub ExtUtils::MakeMaker::full_setup ;
-sub ExtUtils::MakeMaker::writeMakefile ;
-sub ExtUtils::MakeMaker::new ;
-sub ExtUtils::MakeMaker::check_manifest ;
-sub ExtUtils::MakeMaker::parse_args ;
-sub ExtUtils::MakeMaker::check_hints ;
-sub ExtUtils::MakeMaker::mv_all_methods ;
-sub ExtUtils::MakeMaker::skipcheck ;
-sub ExtUtils::MakeMaker::flush ;
-sub ExtUtils::MakeMaker::mkbootstrap ;
-sub ExtUtils::MakeMaker::mksymlists ;
-sub ExtUtils::MakeMaker::neatvalue ;
-sub ExtUtils::MakeMaker::selfdocument ;
-sub ExtUtils::MakeMaker::WriteMakefile ;
-sub ExtUtils::MakeMaker::prompt ($;$) ;
-
-1;
-
-__DATA__
-
-package ExtUtils::MakeMaker;
-
 sub WriteMakefile {
     Carp::croak "WriteMakefile: Need even number of args" if @_ % 2;
     local $SIG{__WARN__} = \&warnhandler;
 
-    unless ($Setup_done++){
-	full_setup();
-	undef &ExtUtils::MakeMaker::full_setup; #safe memory
-    }
     my %att = @_;
     MM->new(\%att)->flush;
 }
@@ -382,9 +330,13 @@ sub ExtUtils::MakeMaker::new {
 
     my($prereq);
     foreach $prereq (sort keys %{$self->{PREREQ_PM}}) {
-	my $eval = "use $prereq $self->{PREREQ_PM}->{$prereq}";
+	my $eval = "require $prereq";
 	eval $eval;
-	if ($@){
+
+	if ($@) {
+	    warn "Warning: prerequisite $prereq failed to load: $@";
+	}
+	elsif ($prereq->VERSION < $self->{PREREQ_PM}->{$prereq} ){
 	    warn "Warning: prerequisite $prereq $self->{PREREQ_PM}->{$prereq} not found";
 # Why is/was this 'delete' here?  We need PREREQ_PM later to make PPDs.
 #	} else {
@@ -1183,7 +1135,7 @@ MakeMaker gives you much more freedom than needed to configure
 internal variables and get different results. It is worth to mention,
 that make(1) also lets you configure most of the variables that are
 used in the Makefile. But in the majority of situations this will not
-be necessary, and should only be done, if the author of a package
+be necessary, and should only be done if the author of a package
 recommends it (or you know what you're doing).
 
 =head2 Using Attributes and Parameters
@@ -1598,9 +1550,9 @@ Makefile.PL.
 
 =item NEEDS_LINKING
 
-MakeMaker will figure out, if an extension contains linkable code
+MakeMaker will figure out if an extension contains linkable code
 anywhere down the directory tree, and will set this variable
-accordingly, but you can speed it up a very little bit, if you define
+accordingly, but you can speed it up a very little bit if you define
 this boolean variable yourself.
 
 =item NOECHO
@@ -1615,7 +1567,7 @@ Boolean.  Attribute to inhibit descending into subdirectories.
 
 =item NO_VC
 
-In general any generated Makefile checks for the current version of
+In general, any generated Makefile checks for the current version of
 MakeMaker and the version the Makefile was built under. If NO_VC is
 set, the version check is neglected. Do not write this into your
 Makefile.PL, use it interactively instead.
@@ -1642,7 +1594,7 @@ to $(CC).
 
 =item PERL_ARCHLIB
 
-Same as above for architecture dependent files
+Same as above for architecture dependent files.
 
 =item PERL_LIB
 
@@ -1699,14 +1651,14 @@ Defining PM in the Makefile.PL will override PMLIBDIRS.
 =item POLLUTE
 
 Release 5.005 grandfathered old global symbol names by providing preprocessor
-macros for extension source compatibility.  As of release 5.006, these
+macros for extension source compatibility.  As of release 5.6, these
 preprocessor definitions are not available by default.  The POLLUTE flag
 specifies that the old names should still be defined:
 
   perl Makefile.PL POLLUTE=1
 
 Please inform the module author if this is necessary to successfully install
-a module under 5.006 or later.
+a module under 5.6 or later.
 
 =item PPM_INSTALL_EXEC
 
@@ -1736,8 +1688,8 @@ only check if any version is installed already.
 =item SKIP
 
 Arryref. E.g. [qw(name1 name2)] skip (do not write) sections of the
-Makefile. Caution! Do not use the SKIP attribute for the neglectible
-speedup. It may seriously damage the resulting Makefile. Only use it,
+Makefile. Caution! Do not use the SKIP attribute for the negligible
+speedup. It may seriously damage the resulting Makefile. Only use it
 if you really need it.
 
 =item TYPEMAPS
@@ -1860,7 +1812,7 @@ NB: Extensions that have nothing but *.pm files had to say
   {LINKTYPE => ''}
 
 with Pre-5.0 MakeMakers. Since version 5.00 of MakeMaker such a line
-can be deleted safely. MakeMaker recognizes, when there's nothing to
+can be deleted safely. MakeMaker recognizes when there's nothing to
 be linked.
 
 =item macro
@@ -1963,7 +1915,7 @@ details)
 =item    make distclean
 
 does a realclean first and then the distcheck. Note that this is not
-needed to build a new distribution as long as you are sure, that the
+needed to build a new distribution as long as you are sure that the
 MANIFEST file is ok.
 
 =item    make manifest

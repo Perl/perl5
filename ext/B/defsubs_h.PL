@@ -2,11 +2,10 @@
 # this file as a template for defsubs.h
 # Extracting defsubs.h (with variable substitutions)
 #!perl
-my ($out) = __FILE__ =~ /(^.*)\.PL/;
-if ($^O eq 'VMS') { ($out) = __FILE__ =~ /^(.+)_PL$/i; }
+my ($out) = __FILE__ =~ /(^.*)\.PL/i;
 $out =~ s/_h$/.h/;
 open(OUT,">$out") || die "Cannot open $file:$!";
-print "Extracting $out . . .\n";
+print "Extracting $out...\n";
 foreach my $const (qw(AVf_REAL 
 		      HEf_SVKEY
                       SVf_IOK SVf_IVisUV SVf_NOK SVf_POK 

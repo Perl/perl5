@@ -3,8 +3,9 @@ require 5.000;
 require Exporter;
 use Carp;
 
-@ISA = qw(Exporter);
-@EXPORT = qw(timegm timelocal);
+@ISA		= qw( Exporter );
+@EXPORT		= qw( timegm timelocal );
+@EXPORT_OK	= qw( timegm_nocheck timelocal_nocheck );
 
 # Set up constants
     $SEC  = 1;
@@ -16,6 +17,8 @@ use Carp;
     $nextCentury = int($thisYear / 100) * 100;
     $breakpoint = ($thisYear + 50) % 100;
     $nextCentury += 100 if $breakpoint < 50;
+
+my %options;
 
 sub timegm {
     my (@date) = @_;
@@ -35,6 +38,11 @@ sub timegm {
     + ($date[3]-1) * $DAY;
 }
 
+sub timegm_nocheck {
+    local $options{no_range_check} = 1;
+    &timegm;
+}
+
 sub timelocal {
     my $t = &timegm;
     my $tt = $t;
@@ -44,14 +52,13 @@ sub timelocal {
     if ($t < $DAY and ($lt[5] >= 70 or $gt[5] >= 70 )) {
 	# Wrap error, too early a date
 	# Try a safer date
-	$tt = $DAY;
+	$tt += $DAY;
 	@lt = localtime($tt);
 	@gt = gmtime($tt);
     }
 
     my $tzsec = ($gt[1] - $lt[1]) * $MIN + ($gt[2] - $lt[2]) * $HR;
 
-    my($lday,$gday) = ($lt[7],$gt[7]);
     if($lt[5] > $gt[5]) {
 	$tzsec -= $DAY;
     }
@@ -70,14 +77,21 @@ sub timelocal {
     $time;
 }
 
+sub timelocal_nocheck {
+    local $options{no_range_check} = 1;
+    &timelocal;
+}
+
 sub cheat {
     $year = $_[5];
     $month = $_[4];
-    croak "Month '$month' out of range 0..11"	if $month > 11 || $month < 0;
-    croak "Day '$_[3]' out of range 1..31"	if $_[3] > 31 || $_[3] < 1;
-    croak "Hour '$_[2]' out of range 0..23"	if $_[2] > 23 || $_[2] < 0;
-    croak "Minute '$_[1]' out of range 0..59"	if $_[1] > 59 || $_[1] < 0;
-    croak "Second '$_[0]' out of range 0..59"	if $_[0] > 59 || $_[0] < 0;
+    unless ($options{no_range_check}) {
+	croak "Month '$month' out of range 0..11" if $month > 11 || $month < 0;
+	croak "Day '$_[3]' out of range 1..31"	  if $_[3] > 31 || $_[3] < 1;
+	croak "Hour '$_[2]' out of range 0..23"	  if $_[2] > 23 || $_[2] < 0;
+	croak "Minute '$_[1]' out of range 0..59" if $_[1] > 59 || $_[1] < 0;
+	croak "Second '$_[0]' out of range 0..59" if $_[0] > 59 || $_[0] < 0;
+    }
     $guess = $^T;
     @g = gmtime($guess);
     $lastguess = "";
@@ -136,6 +150,27 @@ It is worth drawing particular attention to the expected ranges for
 the values provided.  While the day of the month is expected to be in
 the range 1..31, the month should be in the range 0..11.  
 This is consistent with the values returned from localtime() and gmtime().
+
+The timelocal() and timegm() functions perform range checking on the
+input $sec, $min, $hours, $mday, and $mon values by default.  If you'd
+rather they didn't, you can explicitly import the timelocal_nocheck()
+and timegm_nocheck() functions.
+
+	use Time::Local 'timelocal_nocheck';
+	
+	{
+	    # The 365th day of 1999
+	    print scalar localtime timelocal_nocheck 0,0,0,365,0,99;
+
+	    # The twenty thousandth day since 1970
+	    print scalar localtime timelocal_nocheck 0,0,0,20000,0,70;
+
+	    # And even the 10,000,000th second since 1999!
+	    print scalar localtime timelocal_nocheck 10000000,0,0,1,0,99;
+	}
+
+Your mileage may vary when trying these with minutes and hours,
+and it doesn't work at all for months.
 
 Strictly speaking, the year should also be specified in a form consistent
 with localtime(), i.e. the offset from 1900.

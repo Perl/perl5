@@ -462,13 +462,19 @@ EXPECT
 
 ########
 # toke.c
+BEGIN {
+    if (ord("\t") == 5) {
+        print "SKIPPED\n# Ebcdic platforms have different \\x constructs.";
+        exit 0;
+    }
+}
 use warnings 'utf8' ;
 use utf8 ;
 $_ = " \xffe " ;
 no warnings 'utf8' ;
 $_ = " \xffe " ;
 EXPECT
-\xff will produce malformed UTF-8 character; use \x{ff} for that at - line 4.
+\xff will produce malformed UTF-8 character; use \x{ff} for that at - line 10.
 ########
 # toke.c
 my $a = rand + 4 ;

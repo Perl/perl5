@@ -32,12 +32,13 @@ only available in the ActivePerl binary distribution.
 
 =item Win32::CopyFile(FROM, TO, OVERWRITE)
 
-The Win32::CopyFile() function copies an existing file to a new file. All
-file information like creation time and file attributes will be copied to
-the new file. However it will B<not> copy the security information. If the
-destination file already exists it will only be overwritten when the
-OVERWRITE parameter is true. But even this will not overwrite a read-only
-file; you have to unlink() it first yourself.
+[CORE] The Win32::CopyFile() function copies an existing file to a new
+file. All file information like creation time and file attributes will
+be copied to the new file. However it will B<not> copy the security
+information. If the destination file already exists it will only be
+overwritten when the OVERWRITE parameter is true. But even this will
+not overwrite a read-only file; you have to unlink() it first
+yourself.
 
 =item Win32::DomainName()
 
@@ -207,7 +208,7 @@ the SID type.
 
 =item Win32::LookupAccountSID(SYSTEM, SID, ACCOUNT, DOMAIN, SIDTYPE)
 
-[EXT] ]Looks up SID on SYSTEM and returns the account name, domain name,
+[EXT] Looks up SID on SYSTEM and returns the account name, domain name,
 and the SID type.
 
 =item Win32::MsgBox(MESSAGE [, FLAGS [, TITLE]])

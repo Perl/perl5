@@ -56,6 +56,9 @@ L<perlfunc/local>.
 The local() generated a compile-time error because you just touched a global
 name without fully qualifying it.
 
+Because of their special use by sort(), the variables $a and $b are
+exempted from this check.
+
 =item C<strict subs>
 
 This disables the poetry optimization, generating a compile-time error if

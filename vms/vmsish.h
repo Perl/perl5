@@ -252,6 +252,8 @@
 #define HAS_KILL
 #define HAS_WAIT
 
+#define PERL_FS_VER_FMT		"%d_%d_%d"
+
 /* VMS:
  *	This symbol, if defined, indicates that the program is running under
  *	VMS.  It's a symbol automagically defined by all VMS C compilers I've seen.
@@ -635,7 +637,7 @@ int     my_sigdelset   (sigset_t *, int);
 int     my_sigismember (sigset_t *, int);
 int     my_sigprocmask (int, sigset_t *, sigset_t *);
 #endif
-I32	cando_by_name (I32, I32, char *);
+I32	cando_by_name (I32, Uid_t, char *);
 int	flex_fstat (int, Stat_t *);
 int	flex_stat (const char *, Stat_t *);
 int	trim_unixpath (char *, char*, int);
@@ -680,7 +682,5 @@ typedef char __VMS_SEPYTOTORP__;
 #undef HAS_HTONL
 #undef HAS_NTOHL
 #endif
-
-#define TMPPATH "sys$scratch:perl-eXXXXXX"
 
 #endif  /* __vmsish_h_included */

@@ -719,7 +719,7 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 		if (offset >= srclen)
 		    retnum = 0;
 		else
-		    retnum = (UV) s[offset] << 8;
+		    retnum = (UV) s[offset] <<  8;
 	    }
 	    else if (size == 32) {
 		if (offset >= srclen)
@@ -737,7 +737,7 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 			((UV) s[offset + 1] << 16) +
 			(     s[offset + 2] <<  8);
 	    }
-#ifdef HAS_QUAD
+#ifdef UV_IS_QUAD
 	    else if (size == 64) {
 		dTHR;
 		if (ckWARN(WARN_PORTABLE))
@@ -786,7 +786,7 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 			((UV) s[offset + 3] << 32) +
 			((UV) s[offset + 4] << 24) +
 			((UV) s[offset + 5] << 16) +
-			(     s[offset + 6] << 8);
+			(     s[offset + 6] <<  8);
 	    }
 #endif
 	}
@@ -799,7 +799,7 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 	    retnum = s[offset];
 	else if (size == 16)
 	    retnum =
-		((UV) s[offset] <<  8) +
+		((UV) s[offset] <<      8) +
 		      s[offset + 1];
 	else if (size == 32)
 	    retnum =
@@ -807,7 +807,7 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 		((UV) s[offset + 1] << 16) +
 		(     s[offset + 2] <<  8) +
 		      s[offset + 3];
-#ifdef HAS_QUAD
+#ifdef UV_IS_QUAD
 	else if (size == 64) {
 	    dTHR;
 	    if (ckWARN(WARN_PORTABLE))
@@ -820,7 +820,7 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 		((UV) s[offset + 3] << 32) +
 		((UV) s[offset + 4] << 24) +
 		((UV) s[offset + 5] << 16) +
-		(     s[offset + 6] << 8) +
+		(     s[offset + 6] <<  8) +
 		      s[offset + 7];
 	}
 #endif
@@ -880,7 +880,7 @@ Perl_do_vecset(pTHX_ SV *sv)
 	    s[offset+2] = (lval >>  8) & 0xff;
 	    s[offset+3] =  lval        & 0xff;
 	}
-#ifdef HAS_QUAD
+#ifdef UV_IS_QUAD
 	else if (size == 64) {
 	    dTHR;
 	    if (ckWARN(WARN_PORTABLE))

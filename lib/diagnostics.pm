@@ -167,8 +167,10 @@ Tom Christiansen <F<tchrist@mox.perl.com>>, 25 June 1995.
 
 =cut
 
-require 5.001;
+require 5.005_64;
 use Carp;
+
+$VERSION = v1.0;
 
 use Config;
 ($privlib, $archlib) = @Config{qw(privlibexp archlibexp)};
@@ -177,9 +179,14 @@ if ($^O eq 'VMS') {
     $privlib = VMS::Filespec::unixify($privlib);
     $archlib = VMS::Filespec::unixify($archlib);
 }
-@trypod = ("$archlib/pod/perldiag.pod",
-	   "$privlib/pod/perldiag-$].pod",
-	   "$privlib/pod/perldiag.pod");
+@trypod = (
+	   "$archlib/pod/perldiag.pod",
+	   "$privlib/pod/perldiag-$Config{version}.pod",
+	   "$privlib/pod/perldiag.pod",
+	   "$archlib/pods/perldiag.pod",
+	   "$privlib/pods/perldiag-$Config{version}.pod",
+	   "$privlib/pods/perldiag.pod",
+	  );
 # handy for development testing of new warnings etc
 unshift @trypod, "./pod/perldiag.pod" if -e "pod/perldiag.pod";
 ($PODFILE) = ((grep { -e } @trypod), $trypod[$#trypod])[0];
@@ -328,7 +335,7 @@ EOFUNC
 	# strip formatting directives in =item line
 	($header = $1) =~ s/[A-Z]<(.*?)>/$1/g;
 
-	if ($header =~ /%[sd]/) {
+	if ($header =~ /%[csd]/) {
 	    $rhs = $lhs = $header;
 	    #if ($lhs =~ s/(.*?)%d(?!%d)(.*)/\Q$1\E\\d+\Q$2\E\$/g)  {
 	    if ($lhs =~ s/(.*?)%d(?!%d)(.*)/\Q$1\E\\d+\Q$2\E/g)  {
@@ -341,6 +348,7 @@ EOFUNC
 		$lhs =~ s/\377//g;
 		$lhs =~ s/\.\*\?$/.*/; # Allow %s at the end to eat it all
 	    } 
+	    $lhs =~ s/\\%c/./g;
 	    $transmo .= "    s{^$lhs}\n     {\Q$rhs\E}s\n\t&& return 1;\n";
 	} else {
 	    $transmo .= "    m{^\Q$header\E} && return 1;\n";
@@ -371,7 +379,8 @@ if ($standalone) {
     } 
     exit;
 } else { 
-    $old_w = 0; $oldwarn = ''; $olddie = '';
+    #$old_w = 0;
+    $oldwarn = ''; $olddie = '';
 }
 
 sub import {

@@ -105,13 +105,13 @@ dl_load_file(filename,flags=0)
     PREINIT:
     CODE:
   {
-    DLDEBUG(1,PerlIO_printf(PerlIO_stderr(),"dl_load_file(%s):\n", filename));
+    DLDEBUG(1,PerlIO_printf(Perl_debug_log,"dl_load_file(%s):\n", filename));
     if (dl_static_linked(filename) == 0) {
 	RETVAL = PerlProc_DynaLoad(filename);
     }
     else
 	RETVAL = (void*) GetModuleHandle(NULL);
-    DLDEBUG(2,PerlIO_printf(PerlIO_stderr()," libref=%x\n", RETVAL));
+    DLDEBUG(2,PerlIO_printf(Perl_debug_log," libref=%x\n", RETVAL));
     ST(0) = sv_newmortal() ;
     if (RETVAL == NULL)
 	SaveError(aTHXo_ "load_file:%s",
@@ -125,10 +125,10 @@ dl_find_symbol(libhandle, symbolname)
     void *	libhandle
     char *	symbolname
     CODE:
-    DLDEBUG(2,PerlIO_printf(PerlIO_stderr(),"dl_find_symbol(handle=%x, symbol=%s)\n",
+    DLDEBUG(2,PerlIO_printf(Perl_debug_log,"dl_find_symbol(handle=%x, symbol=%s)\n",
 		      libhandle, symbolname));
     RETVAL = (void*) GetProcAddress((HINSTANCE) libhandle, symbolname);
-    DLDEBUG(2,PerlIO_printf(PerlIO_stderr(),"  symbolref = %x\n", RETVAL));
+    DLDEBUG(2,PerlIO_printf(Perl_debug_log,"  symbolref = %x\n", RETVAL));
     ST(0) = sv_newmortal() ;
     if (RETVAL == NULL)
 	SaveError(aTHXo_ "find_symbol:%s",
@@ -151,7 +151,7 @@ dl_install_xsub(perl_name, symref, filename="$Package")
     void *		symref 
     char *		filename
     CODE:
-    DLDEBUG(2,PerlIO_printf(PerlIO_stderr(),"dl_install_xsub(name=%s, symref=%x)\n",
+    DLDEBUG(2,PerlIO_printf(Perl_debug_log,"dl_install_xsub(name=%s, symref=%x)\n",
 		      perl_name, symref));
     ST(0) = sv_2mortal(newRV((SV*)newXS(perl_name,
 					(void(*)(pTHXo_ CV *))symref,

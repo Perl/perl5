@@ -187,7 +187,6 @@ sub manicopy {
     require File::Basename;
     my(%dirs,$file);
     $target = VMS::Filespec::unixify($target) if $Is_VMS;
-    umask 0 unless $Is_VMS;
     File::Path::mkpath([ $target ],1,$Is_VMS ? undef : 0755);
     foreach $file (keys %$read){
 	$file = VMS::Filespec::unixify($file) if $Is_VMS;

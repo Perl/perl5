@@ -78,7 +78,7 @@ sub _write_os2 {
     }
     my $distname = $data->{DISTNAME} || $data->{NAME};
     $distname = "Distribution $distname";
-    my $comment = "Perl (v$]$threaded) module $data->{NAME}";
+    my $comment = "Perl (v$Config::Config{version}$threaded) module $data->{NAME}";
     if ($data->{INSTALLDIRS} and $data->{INSTALLDIRS} eq 'perl') {
 	$distname = 'perl5-porters@perl.org';
 	$comment = "Core $comment";

@@ -251,7 +251,7 @@ T_REFOBJ
 T_OPAQUE
 	sv_setpvn($arg, (char *)&$var, sizeof($var));
 T_OPAQUEPTR
-	sv_setpvn($arg, (char *)$var, sizeof(*$var)), XFree((char *)$var);
+	sv_setpvn($arg, (char *)$var, sizeof(*$var));
 T_PACKED
 	XS_pack_$ntype($arg, $var);
 T_PACKEDARRAY

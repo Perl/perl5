@@ -155,8 +155,8 @@ $DB_RECNO = new DB_File::RECNOINFO ;
 require Tie::Hash;
 require Exporter;
 use AutoLoader;
-require DynaLoader;
-@ISA = qw(Tie::Hash Exporter DynaLoader);
+use XSLoader ();
+@ISA = qw(Tie::Hash Exporter);
 @EXPORT = qw(
         $DB_BTREE $DB_HASH $DB_RECNO 
 
@@ -231,7 +231,7 @@ eval {
 #    };
 #}
 
-bootstrap DB_File $VERSION;
+XSLoader::load 'DB_File', $VERSION;
 
 # Preloaded methods go here.  Autoload methods go after __END__, and are
 # processed by the autosplit program.

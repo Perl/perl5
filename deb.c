@@ -47,31 +47,18 @@ Perl_vdeb(pTHX_ const char *pat, va_list *args)
 #ifdef DEBUGGING
     dTHR;
     register I32 i;
-    GV* gv = PL_curcop->cop_filegv;
+    char* file = CopFILE(PL_curcop);
 
 #ifdef USE_THREADS
-    PerlIO_printf(Perl_debug_log, "0x%lx (%s:%ld)\t",
-		  (unsigned long) thr,
-		  SvTYPE(gv) == SVt_PVGV ? SvPVX(GvSV(gv)) : "<free>",
-		  (long)PL_curcop->cop_line);
+    PerlIO_printf(Perl_debug_log, "0x%"UVxf" (%s:%ld)\t",
+		  PTR2UV(thr),
+		  (file ? file : "<free>"),
+		  (long)CopLINE(PL_curcop));
 #else
-    PerlIO_printf(Perl_debug_log, "(%s:%ld)\t",
-	SvTYPE(gv) == SVt_PVGV ? SvPVX(GvSV(gv)) : "<free>",
-	(long)PL_curcop->cop_line);
+    PerlIO_printf(Perl_debug_log, "(%s:%ld)\t", (file ? file : "<free>"),
+		  (long)CopLINE(PL_curcop));
 #endif /* USE_THREADS */
-    for (i=0; i<PL_dlevel; i++)
-	PerlIO_printf(Perl_debug_log, "%c%c ",PL_debname[i],PL_debdelim[i]);
     (void) PerlIO_vprintf(Perl_debug_log, pat, *args);
-#endif /* DEBUGGING */
-}
-
-void
-Perl_deb_growlevel(pTHX)
-{
-#ifdef DEBUGGING
-    PL_dlmax += 128;
-    Renew(PL_debname, PL_dlmax, char);
-    Renew(PL_debdelim, PL_dlmax, char);
 #endif /* DEBUGGING */
 }
 
@@ -80,13 +67,16 @@ Perl_debstackptrs(pTHX)
 {
 #ifdef DEBUGGING
     dTHR;
-    PerlIO_printf(Perl_debug_log, "%8lx %8lx %8ld %8ld %8ld\n",
-	(unsigned long)PL_curstack, (unsigned long)PL_stack_base,
-	(long)*PL_markstack_ptr, (long)(PL_stack_sp-PL_stack_base),
-	(long)(PL_stack_max-PL_stack_base));
-    PerlIO_printf(Perl_debug_log, "%8lx %8lx %8ld %8ld %8ld\n",
-	(unsigned long)PL_mainstack, (unsigned long)AvARRAY(PL_curstack),
-	(long)PL_mainstack, (long)AvFILLp(PL_curstack), (long)AvMAX(PL_curstack));
+    PerlIO_printf(Perl_debug_log,
+		  "%8"UVxf" %8"UVxf" %8"IVdf" %8"IVdf" %8"IVdf"\n",
+		  PTR2UV(PL_curstack), PTR2UV(PL_stack_base),
+		  (IV)*PL_markstack_ptr, (IV)(PL_stack_sp-PL_stack_base),
+		  (IV)(PL_stack_max-PL_stack_base));
+    PerlIO_printf(Perl_debug_log,
+		  "%8"UVxf" %8"UVxf" %8"UVuf" %8"UVuf" %8"UVuf"\n",
+		  PTR2UV(PL_mainstack), PTR2UV(AvARRAY(PL_curstack)),
+		  PTR2UV(PL_mainstack), PTR2UV(AvFILLp(PL_curstack)),
+		  PTR2UV(AvMAX(PL_curstack)));
 #endif /* DEBUGGING */
     return 0;
 }
@@ -98,7 +88,7 @@ Perl_debstack(pTHX)
     dTHR;
     I32 top = PL_stack_sp - PL_stack_base;
     register I32 i = top - 30;
-    I32 *markscan = PL_curstackinfo->si_markbase;
+    I32 *markscan = PL_markstack + PL_curstackinfo->si_markoff;
 
     if (i < 0)
 	i = 0;
@@ -108,8 +98,9 @@ Perl_debstack(pTHX)
 	    break;
 
 #ifdef USE_THREADS
-    PerlIO_printf(Perl_debug_log, i ? "0x%lx    =>  ...  " : "0x%lx    =>  ",
-		  (unsigned long) thr);
+    PerlIO_printf(Perl_debug_log,
+		  i ? "0x%"UVxf"    =>  ...  " : "0x%lx    =>  ",
+		  PTR2UV(thr));
 #else
     PerlIO_printf(Perl_debug_log, i ? "    =>  ...  " : "    =>  ");
 #endif /* USE_THREADS */

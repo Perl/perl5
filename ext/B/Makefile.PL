@@ -26,7 +26,7 @@ WriteMakefile(
 package MY;
 
 sub post_constants {
-    "\nLIBS = $Config{libs}\n"
+    "\nLIBS = $Config::Config{libs}\n"
 }    
 
 sub postamble {

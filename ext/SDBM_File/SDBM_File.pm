@@ -4,13 +4,13 @@ use strict;
 use vars qw($VERSION @ISA);
 
 require Tie::Hash;
-require DynaLoader;
+use XSLoader ();
 
-@ISA = qw(Tie::Hash DynaLoader);
+@ISA = qw(Tie::Hash);
 
 $VERSION = "1.02" ;
 
-bootstrap SDBM_File $VERSION;
+XSLoader::load 'SDBM_File', $VERSION;
 
 1;
 

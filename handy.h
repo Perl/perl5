@@ -91,6 +91,7 @@
 
    For dealing with issues that may arise from various 32/64-bit 
    systems, we will ask Configure to check out 
+
    	SHORTSIZE == sizeof(short)
    	INTSIZE == sizeof(int)
    	LONGSIZE == sizeof(long)
@@ -98,31 +99,43 @@
    	PTRSIZE == sizeof(void *)
 	DOUBLESIZE == sizeof(double)
 	LONG_DOUBLESIZE == sizeof(long double) (if HAS_LONG_DOUBLE).
-    Most of these are currently unused, but they are mentioned here so
-    metaconfig will include the appropriate tests in Configure and
-    we can then start to consider how best to deal with long long
-    variables.
-   Andy Dougherty	April 1998
+
 */
+
+typedef I8TYPE I8;
+typedef U8TYPE U8;
+typedef I16TYPE I16;
+typedef U16TYPE U16;
+typedef I32TYPE I32;
+typedef U32TYPE U32;
+#ifdef PERL_CORE
+#   ifdef HAS_QUAD
+#       if QUADKIND == QUAD_IS_INT64_T
+#           include <sys/types.h>
+#           ifdef I_INTTYPES /* e.g. Linux has int64_t without <inttypes.h> */
+#               include <inttypes.h>
+#           endif
+#       endif
+typedef I64TYPE I64;
+typedef U64TYPE U64;
+#   endif
+#endif /* PERL_CORE */
+
+/* Mention I8SIZE, U8SIZE, I16SIZE, U16SIZE, I32SIZE, U32SIZE,
+   I64SIZE, and U64SIZE here so that metaconfig pulls them in. */
 
 #if defined(UINT8_MAX) && defined(INT16_MAX) && defined(INT32_MAX)
 
-typedef int8_t		I8;
-typedef uint8_t		U8;
 /* I8_MAX and I8_MIN constants are not defined, as I8 is an ambiguous type.
    Please search CHAR_MAX in perl.h for further details. */
 #define U8_MAX UINT8_MAX
 #define U8_MIN UINT8_MIN
 
-typedef int16_t         I16;
-typedef uint16_t        U16;
 #define I16_MAX INT16_MAX
 #define I16_MIN INT16_MIN
 #define U16_MAX UINT16_MAX
 #define U16_MIN UINT16_MIN
 
-typedef int32_t         I32;
-typedef uint32_t        U32;
 #define I32_MAX INT32_MAX
 #define I32_MIN INT32_MIN
 #define U32_MAX UINT32_MAX
@@ -130,31 +143,22 @@ typedef uint32_t        U32;
 
 #else
 
-typedef char		I8;
-typedef unsigned char	U8;
 /* I8_MAX and I8_MIN constants are not defined, as I8 is an ambiguous type.
    Please search CHAR_MAX in perl.h for further details. */
 #define U8_MAX PERL_UCHAR_MAX
 #define U8_MIN PERL_UCHAR_MIN
 
-/* Beware.  SHORTSIZE > 2 in Cray C90ties. */
-typedef short		I16;
-typedef unsigned short	U16;
 #define I16_MAX PERL_SHORT_MAX
 #define I16_MIN PERL_SHORT_MIN
 #define U16_MAX PERL_USHORT_MAX
 #define U16_MIN PERL_USHORT_MIN
 
 #if LONGSIZE > 4
-  typedef int		I32;
-  typedef unsigned int	U32;
 # define I32_MAX PERL_INT_MAX
 # define I32_MIN PERL_INT_MIN
 # define U32_MAX PERL_UINT_MAX
 # define U32_MIN PERL_UINT_MIN
 #else
-  typedef long		I32;
-  typedef unsigned long	U32;
 # define I32_MAX PERL_LONG_MAX
 # define I32_MIN PERL_LONG_MIN
 # define U32_MAX PERL_ULONG_MAX

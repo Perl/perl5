@@ -162,8 +162,8 @@ have AF_UNIX in the right place.
 use Carp;
 
 require Exporter;
-require DynaLoader;
-@ISA = qw(Exporter DynaLoader);
+use XSLoader ();
+@ISA = qw(Exporter);
 @EXPORT = qw(
 	inet_aton inet_ntoa pack_sockaddr_in unpack_sockaddr_in
 	pack_sockaddr_un unpack_sockaddr_un
@@ -333,6 +333,6 @@ sub AUTOLOAD {
     goto &$AUTOLOAD;
 }
 
-bootstrap Socket $VERSION;
+XSLoader::load 'Socket', $VERSION;
 
 1;

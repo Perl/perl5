@@ -3,6 +3,10 @@
 #define INCL_DOSFILEMGR
 #define INCL_DOSMEMMGR
 #define INCL_DOSERRORS
+/* These 3 are needed for compile if os2.h includes os2tk.h, not os2emx.h */
+#define INCL_DOSPROCESS
+#define SPU_DISABLESUPPRESSION          0
+#define SPU_ENABLESUPPRESSION           1
 #include <os2.h>
 
 #include <sys/uflags.h>
@@ -802,7 +806,7 @@ U32 addflag;
 		 PL_Argv[0], Strerror(errno));
 	if (rc < 0 && (execf != EXECF_SPAWN_NOWAIT) 
 	    && ((trueflag & 0xFF) == P_WAIT)) 
-	    rc = 255 << 8; /* Emulate the fork(). */
+	    rc = -1;
 
   finish:
     if (new_stderr != -1) {	/* How can we use error codes? */
@@ -907,7 +911,8 @@ do_spawn3(char *cmd, int execf, int flag)
 		    Perl_warner(aTHX_ WARN_EXEC, "Can't %s \"%s\": %s", 
 			 (execf == EXECF_SPAWN ? "spawn" : "exec"),
 			 shell, Strerror(errno));
-		if (rc < 0) rc = 255 << 8; /* Emulate the fork(). */
+		if (rc < 0)
+		    rc = -1;
 	    }
 	    if (news)
 		Safefree(news);
@@ -1356,15 +1361,34 @@ os2error(int rc)
 		return NULL;
 	if (DosGetMessage(NULL, 0, buf, sizeof buf - 1, rc, "OSO001.MSG", &len))
 		sprintf(buf, "OS/2 system error code %d=0x%x", rc, rc);
-	else
+	else {
 		buf[len] = '\0';
-	if (len > 0 && buf[len - 1] == '\n')
-	    buf[len - 1] = '\0';
-	if (len > 1 && buf[len - 2] == '\r')
-	    buf[len - 2] = '\0';
-	if (len > 2 && buf[len - 3] == '.')
-	    buf[len - 3] = '\0';
+		if (len && buf[len - 1] == '\n')
+			buf[--len] = 0;
+		if (len && buf[len - 1] == '\r')
+			buf[--len] = 0;
+		if (len && buf[len - 1] == '.')
+			buf[--len] = 0;
+	}
 	return buf;
+}
+
+char *
+os2_execname(void)
+{
+  char buf[300], *p;
+
+  if (_execname(buf, sizeof buf) != 0)
+	return PL_origargv[0];
+  p = buf;
+  while (*p) {
+    if (*p == '\\')
+	*p = '/';
+    p++;
+  }
+  p = savepv(buf);
+  SAVEFREEPV(p);
+  return p;
 }
 
 char *
@@ -2067,7 +2091,7 @@ Perl_OS2_init(char **env)
     settmppath();
     OS2_Perl_data.xs_init = &Xs_OS2_init;
     _uflags (_UF_SBRK_MODEL, _UF_SBRK_ARBITRARY);
-    if (environ == NULL) {
+    if (environ == NULL && env) {
 	environ = env;
     }
     if ( (shell = getenv("PERL_SH_DRIVE")) ) {

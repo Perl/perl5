@@ -7,7 +7,6 @@
  *
  */
 
-#if !defined(PERL_IMPLICIT_SYS)
 
 #define VOIDUSED 1
 #include "config.h"
@@ -25,6 +24,8 @@
 #include "EXTERN.h"
 #define PERL_IN_PERLIO_C
 #include "perl.h"
+
+#if !defined(PERL_IMPLICIT_SYS)
 
 #ifdef PERLIO_IS_STDIO 
 
@@ -553,11 +554,9 @@ PerlIO_vsprintf(char *s, int n, const char *fmt, va_list ap)
   {
    if (strlen(s) >= (STRLEN)n)
     {
-     PerlIO_puts(PerlIO_stderr(),"panic: sprintf overflow - memory corrupted!\n");
-     {
-      dTHX;
-      my_exit(1);
-     }
+     dTHX;
+     PerlIO_puts(Perl_error_log,"panic: sprintf overflow - memory corrupted!\n");
+     my_exit(1);
     }
   }
  return val;

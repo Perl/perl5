@@ -42,6 +42,7 @@ toroff=`
     $mandir/perlmod.1	\
     $mandir/perlmodlib.1	\
     $mandir/perlmodinstall.1	\
+    $mandir/perlfork.1	\
     $mandir/perlform.1	\
     $mandir/perllocale.1	\
     $mandir/perlref.1	\
@@ -70,6 +71,7 @@ toroff=`
     $mandir/perlcall.1	\
     $mandir/perlcompile.1	\
     $mandir/perltodo.1	\
+    $mandir/perlhack.1	\
     $mandir/perlhist.1	\
     $mandir/perldelta.1	\
     $mandir/perl5004delta.1	\

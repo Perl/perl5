@@ -3,17 +3,17 @@
 
 package Devel::Peek;
 
-$VERSION = $VERSION = 0.95;
+$VERSION = 0.95;
 
 require Exporter;
-require DynaLoader;
+use XSLoader ();
 
-@ISA = qw(Exporter DynaLoader);
+@ISA = qw(Exporter);
 @EXPORT = qw(Dump mstat DeadCode DumpArray DumpWithOP DumpProg);
 @EXPORT_OK = qw(SvREFCNT SvREFCNT_inc SvREFCNT_dec);
 %EXPORT_TAGS = ('ALL' => [@EXPORT, @EXPORT_OK]);
 
-bootstrap Devel::Peek;
+XSLoader::load 'Devel::Peek';
 
 sub DumpWithOP ($;$) {
    local($Devel::Peek::dump_ops)=1;
@@ -364,7 +364,7 @@ Looks like this:
 	  XSUB = 0x0
 	  XSUBANY = 0
 	  GVGV::GV = 0x1d44e8   "MY" :: "top_targets"
-	  FILEGV = 0x1fab74     "_<(eval 5)"
+	  FILE = "(eval 5)"
 	  DEPTH = 0
 	  PADLIST = 0x1c9338
 

@@ -809,10 +809,8 @@ Change to the directory of extraction.
 
 =head2 Application of the patches
 
-You need to apply the patches in F<./os2/diff.*> and
-F<./os2/POSIX.mkfifo> like this:
+You need to apply the patches in F<./os2/diff.*> like this:
 
-  gnupatch -p0 < os2\POSIX.mkfifo
   gnupatch -p0 < os2\diff.configure
 
 You may also need to apply the patches supplied with the binary
@@ -938,6 +936,8 @@ The reasons for most important skipped tests are:
 =over 8
 
 =item F<op/fs.t>
+
+=over 4
 
 =item 18
 

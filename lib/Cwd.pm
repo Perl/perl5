@@ -372,7 +372,7 @@ sub _qnx_abs_path {
         *abs_path	= \&_qnx_abs_path;
         *fast_abs_path	= \&_qnx_abs_path;
     }
-    elsif ($^O =~ /cygwin/) {
+    elsif ($^O eq 'cygwin') {
         *getcwd	= \&cwd;
         *fastgetcwd	= \&cwd;
         *fastcwd	= \&cwd;

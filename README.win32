@@ -9,12 +9,12 @@ perlwin32 - Perl under Win32
 =head1 SYNOPSIS
 
 These are instructions for building Perl under Windows NT (versions
-3.51 or 4.0).  Currently, this port is reported to build
-under Windows95 using the 4DOS shell--the default shell that infests
-Windows95 will not work (see below).  Note this caveat is only about
-B<building> perl.  Once built, you should be able to B<use> it on
-either Win32 platform (modulo the problems arising from the inferior
-command shell).
+3.51 or 4.0).  Currently, this port is reported to build under
+Windows95 using the 4DOS shell--the default shell that infests
+Windows95 may not work fully (but see below).  Note that this caveat
+is only about B<building> perl.  Once built, you should be able to
+B<use> it on either Win32 platform (modulo the problems arising from
+the inferior command shell).
 
 =head1 DESCRIPTION
 
@@ -47,11 +47,11 @@ following compilers:
 
       Borland C++		version 5.02 or later
       Microsoft Visual C++	version 4.2 or later
-      Mingw32 with EGCS		versions 1.0.2, 1.1
-      Mingw32 with GCC		version 2.8.1
+      Mingw32 with GCC		version 2.95.2 or better
 
-The last two of these are high quality freeware compilers.  Support
-for them is still experimental.
+The last of these is a high quality freeware compiler.  Support
+for it is still experimental.  (Older versions of GCC are known
+not to work.)
 
 This port currently supports MakeMaker (the set of modules that
 is used to build extensions to perl).  Therefore, you should be
@@ -67,13 +67,16 @@ See L<Usage Hints> below for general hints about this.
 Use the default "cmd" shell that comes with NT.  Some versions of the
 popular 4DOS/NT shell have incompatibilities that may cause you trouble.
 If the build fails under that shell, try building again with the cmd
-shell.  The Makefile also has known incompatibilites with the "command.com"
-shell that comes with Windows95, so building under Windows95 should
-be considered "unsupported".  However, there have been reports of successful
-build attempts using 4DOS/NT version 6.01 under Windows95, using dmake, but
-your mileage may vary.
+shell.  The nmake Makefile also has known incompatibilites with the
+"command.com" shell that comes with Windows95.
 
-The surest way to build it is on WindowsNT, using the cmd shell.
+However, there have been reports of successful build attempts using
+4DOS/NT version 6.01 under Windows95, using dmake, but your mileage
+may vary.  There is also some basic support for building using dmake
+under command.com.  Nevertheless, if building under command.com
+doesn't work, try 4DOS/NT.
+
+The surest way to build it is on Windows NT, using the cmd shell.
 
 Make sure the path to the build directory does not contain spaces.  The
 build usually works in this circumstance, but some tests will fail.
@@ -87,14 +90,19 @@ work for MakeMaker builds.)
 
 A port of dmake for win32 platforms is available from:
 
-    http://www-personal.umich.edu/~gsar/dmake-4.1-win32.zip
+    ftp://ftp.linux.activestate.com/pub/staff/gsar/dmake-4.1-win32.zip
+
+(This is a fixed version of original dmake sources obtained from
+http://www.wticorp.com/dmake/.  As of version 4.1PL1, the original
+sources did not build as shipped, and had various other problems.
+A patch is included in the above fixed version.)
 
 Fetch and install dmake somewhere on your path (follow the instructions
 in the README.NOW file).
 
 =item Microsoft Visual C++
 
-The NMAKE that comes with Visual C++ will suffice for building.
+The nmake that comes with Visual C++ will suffice for building.
 You will need to run the VCVARS32.BAT file usually found somewhere
 like C:\MSDEV4.2\BIN.  This will set your build environment.
 
@@ -105,24 +113,17 @@ and edit win32/config.vc to change "make=nmake" into "make=dmake".  The
 latter step is only essential if you want to use dmake as your default
 make for building extensions using MakeMaker.
 
-=item Mingw32 with EGCS or GCC
+=item Mingw32 with GCC
 
-ECGS binaries can be downloaded from:
+GCC-2.95.2 binaries can be downloaded from:
 
     ftp://ftp.xraylith.wisc.edu/pub/khan/gnu-win32/mingw32/
 
-GCC-2.8.1 binaries are available from:
+The GCC-2.95.2 bundle comes with Mingw32 libraries and headers.
 
-    http://agnes.dida.physik.uni-essen.de/~janjaap/mingw32/
-
-You only need either one of those, not both.  Both bundles come with
-Mingw32 libraries and headers.  While both of them work to build perl,
-the EGCS binaries are currently favored by the maintainers, since they
-come with more up-to-date Mingw32 libraries.
-
-Make sure you install the binaries as indicated in the web sites
-above.  You will need to set up a few environment variables (usually
-run from a batch file).
+Make sure you install the binaries as indicated in the README for
+the GCC bundle.  You may need to set up a few environment variables
+(usually run from a batch file).
 
 You also need dmake.  See L</"Borland C++"> above on how to get it.
 
@@ -136,7 +137,7 @@ You also need dmake.  See L</"Borland C++"> above on how to get it.
 
 Make sure you are in the "win32" subdirectory under the perl toplevel.
 This directory contains a "Makefile" that will work with
-versions of NMAKE that come with Visual C++, and a dmake "makefile.mk"
+versions of nmake that come with Visual C++, and a dmake "makefile.mk"
 that will work for all supported compilers.  The defaults in the dmake
 makefile are setup to build using the Borland compiler.
 
@@ -157,7 +158,7 @@ is typically requested through:
     perl Makefile.PL CAPI=TRUE
 
 PERL_OBJECT requires VC++ 5.0 (Service Pack 3 recommended) or later. It
-is not yet supported under GCC or EGCS.  WARNING:  Binaries built with
+is not yet supported under GCC.  WARNING:  Binaries built with
 PERL_OBJECT enabled are B<not> compatible with binaries built without.
 Perl installs PERL_OBJECT binaries under a distinct architecture name,
 so they B<can> coexist, though.
@@ -248,10 +249,6 @@ arising from the inability to find the Borland Runtime DLLs on the system
 default path.  You will need to copy the DLLs reported by the messages
 from where Borland chose to install it, into the Windows system directory
 (usually somewhere like C:\WINNT\SYSTEM32), and rerun the test.
-
-The Visual C runtime apparently has a bug that causes posix.t to fail
-test#2.  This usually happens only if you extracted the files in text
-mode.  Enable the USE_PERLCRT option in the Makefile to fix this bug.
 
 Please report any other failures as described under L<BUGS AND CAVEATS>.
 
@@ -697,8 +694,9 @@ C<kill()> is implemented, but doesn't have the semantics of
 C<raise()>, i.e. it doesn't send a signal to the identified process
 like it does on Unix platforms.  Instead it immediately calls
 C<TerminateProcess(process,signal)>.  Thus the signal argument is
-used to set the exit-status of the terminated process.  This behavior
-may change in future.
+used to set the exit-status of the terminated process.  In particular,
+C<kill(0,$pid)> will kill the process identified by C<$pid> (unlike
+on Unix).  This behavior may change in future.
 
 =item *
 
@@ -725,7 +723,7 @@ by C<perl -V>.
 
 Gary Ng E<lt>71564.1743@CompuServe.COME<gt>
 
-Gurusamy Sarathy E<lt>gsar@umich.eduE<gt>
+Gurusamy Sarathy E<lt>gsar@activestate.comE<gt>
 
 Nick Ing-Simmons E<lt>nick@ni-s.u-net.comE<gt>
 
@@ -741,10 +739,8 @@ L<perl>
 
 This port was originally contributed by Gary Ng around 5.003_24,
 and borrowed from the Hip Communications port that was available
-at the time.
-
-Nick Ing-Simmons and Gurusamy Sarathy have made numerous and
-sundry hacks since then.
+at the time.  Various people have made numerous and sundry hacks
+since then.
 
 Borland support was added in 5.004_01 (Gurusamy Sarathy).
 
@@ -752,7 +748,10 @@ GCC/mingw32 support was added in 5.005 (Nick Ing-Simmons).
 
 Support for PERL_OBJECT was added in 5.005 (ActiveState Tool Corp).
 
-Last updated: 18 January 1999
+Support for fork() emulation was added in 5.6 (ActiveState Tool Corp).
+
+Win9x support was added in 5.6 (Benjamin Stuhl).
+
+Last updated: 28 December 1999
 
 =cut
-

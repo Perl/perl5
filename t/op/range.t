@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..13\n";
+print "1..15\n";
 
 print join(':',1..5) eq '1:2:3:4:5' ? "ok 1\n" : "not ok 1\n";
 
@@ -64,3 +64,12 @@ print "ok 12\n";
     $bad = 1 unless $x eq 'a:b:c:d:e';
     print $bad ? "not ok 13\n" : "ok 13\n";
 }
+
+# Should use magical autoinc only when both are strings
+print "not " unless 0 == (() = "0"..-1);
+print "ok 14\n";
+
+for my $x ("0"..-1) {
+    print "not ";
+}
+print "ok 15\n";

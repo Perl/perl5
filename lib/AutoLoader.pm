@@ -11,7 +11,7 @@ BEGIN {
     @EXPORT_OK = @EXPORT_OK = qw(AUTOLOAD);
     $is_dosish = $^O eq 'dos' || $^O eq 'os2' || $^O eq 'MSWin32';
     $is_vms = $^O eq 'VMS';
-    $VERSION = $VERSION = '5.57';
+    $VERSION = '5.57';
 }
 
 AUTOLOAD {

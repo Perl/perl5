@@ -64,7 +64,7 @@
 #ifndef SIGILL
 #    define SIGILL 6         /* blech */
 #endif
-#define ABORT() kill(getpid(),SIGABRT);
+#define ABORT() kill(PerlProc_getpid(),SIGABRT);
 
 #define BIT_BUCKET "/dev/nul"  /* Will this work? */
 
@@ -183,16 +183,26 @@ void Perl_OS2_init(char **);
 
 /* XXX This code hideously puts env inside: */
 
-#ifdef __EMX__
+#ifdef PERL_CORE
+#  define PERL_SYS_INIT3(argcp, argvp, envp) STMT_START {	\
+    _response(argcp, argvp);			\
+    _wildcard(argcp, argvp);			\
+    Perl_OS2_init(*envp);	} STMT_END
 #  define PERL_SYS_INIT(argcp, argvp) STMT_START {	\
     _response(argcp, argvp);			\
     _wildcard(argcp, argvp);			\
-    Perl_OS2_init(env);	} STMT_END
-#else  /* Compiling embedded Perl with non-EMX compiler */
+    Perl_OS2_init(NULL);	} STMT_END
+#else  /* Compiling embedded Perl or Perl extension */
+#  define PERL_SYS_INIT3(argcp, argvp, envp) STMT_START {	\
+    Perl_OS2_init(*envp);	} STMT_END
 #  define PERL_SYS_INIT(argcp, argvp) STMT_START {	\
-    Perl_OS2_init(env);	} STMT_END
+    Perl_OS2_init(NULL);	} STMT_END
+#endif
+
+#ifndef __EMX__
 #  define PERL_CALLCONV _System
 #endif
+
 #define PERL_SYS_TERM()		MALLOC_TERM
 
 /* #define PERL_SYS_TERM() STMT_START {	\
@@ -221,7 +231,6 @@ void *sys_alloc(int size);
 #  define PerlIO FILE
 #endif 
 
-#define TMPPATH tmppath
 #define TMPPATH1 "plXXXXXX"
 extern char *tmppath;
 PerlIO *my_syspopen(char *cmd, char *mode);
@@ -318,6 +327,7 @@ extern OS2_Perl_data_t OS2_Perl_data;
 #define Perl_rc			(OS2_Perl_data.rc)
 #define Perl_severity		(OS2_Perl_data.severity)
 #define errno_isOS2		12345678
+#define errno_isOS2_set		12345679
 #define OS2_Perl_flags	(OS2_Perl_data.flags)
 #define Perl_HAB_set_f	1
 #define Perl_HAB_set	(OS2_Perl_flags & Perl_HAB_set_f)
@@ -339,6 +349,7 @@ void	Perl_Deregister_MQ(int serve);
 int	Perl_Serve_Messages(int force);
 /* Cannot prototype with I32 at this point. */
 int	Perl_Process_Messages(int force, long *cntp);
+char	*os2_execname(void);
 
 struct _QMSG;
 struct PMWIN_entries_t {
@@ -356,23 +367,29 @@ struct PMWIN_entries_t {
 extern struct PMWIN_entries_t PMWIN_entries;
 void init_PMWIN_entries(void);
 
-#define perl_hmq_GET(serve)	Perl_Register_MQ(serve);
-#define perl_hmq_UNSET(serve)	Perl_Deregister_MQ(serve);
+#define perl_hmq_GET(serve)	Perl_Register_MQ(serve)
+#define perl_hmq_UNSET(serve)	Perl_Deregister_MQ(serve)
 
 #define OS2_XS_init() (*OS2_Perl_data.xs_init)()
+
+#if _EMX_CRT_REV_ >= 60
+# define os2_setsyserrno(rc)	(Perl_rc = rc, errno = errno_isOS2_set, \
+				_setsyserrno(rc))
+#else
+# define os2_setsyserrno(rc)	(Perl_rc = rc, errno = errno_isOS2)
+#endif
+
 /* The expressions below return true on error. */
 /* INCL_DOSERRORS needed. rc should be declared outside. */
 #define CheckOSError(expr) (!(rc = (expr)) ? 0 : (FillOSError(rc), 1))
 /* INCL_WINERRORS needed. */
 #define SaveWinError(expr) ((expr) ? : (FillWinError, 0))
 #define CheckWinError(expr) ((expr) ? 0: (FillWinError, 1))
-#define FillOSError(rc) (Perl_rc = rc,					\
-			errno = errno_isOS2,				\
+#define FillOSError(rc) (os2_setsyserrno(rc),				\
 			Perl_severity = SEVERITY_ERROR) 
-#define FillWinError (Perl_rc = WinGetLastError(Perl_hab),		\
-			errno = errno_isOS2,				\
-			Perl_severity = ERRORIDSEV(Perl_rc),		\
-			Perl_rc = ERRORIDERROR(Perl_rc)) 
+#define FillWinError (Perl_severity = ERRORIDSEV(Perl_rc),		\
+			Perl_rc = ERRORIDERROR(Perl_rc)),		\
+			os2_setsyserrno(Perl_rc)
 
 #define STATIC_FILE_LENGTH 127
 
@@ -392,7 +409,7 @@ char *os2error(int rc);
 #define QSS_FILE	8		/* Buggy until fixpack18 */
 #define QSS_SHARED	16
 
-#ifdef _OS2EMX_H
+#ifdef _OS2_H
 
 APIRET APIENTRY Dos32QuerySysState(ULONG func,ULONG arg1,ULONG pid,
 			ULONG _res_,PVOID buf,ULONG bufsz);
@@ -550,5 +567,5 @@ typedef struct {
 
 PQTOPLEVEL get_sysinfo(ULONG pid, ULONG flags);
 
-#endif /* _OS2EMX_H */
+#endif /* _OS2_H */
 

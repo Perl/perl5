@@ -77,7 +77,9 @@ stamp prepended.
 =head2 How do I remove HTML from a string?
 
 The most correct way (albeit not the fastest) is to use HTML::Parser
-from CPAN (part of the HTML-Tree package on CPAN).
+from CPAN (part of the HTML-Tree package on CPAN).  Another correct
+way is to use HTML::FormatText which not only removes HTML but also
+attempts to do a little simple formatting of the resulting plain text.
 
 Many folks attempt a simple-minded regular expression approach, like
 C<s/E<lt>.*?E<gt>//g>, but that fails in many cases because the tags

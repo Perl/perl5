@@ -240,12 +240,13 @@ sub fcmp #(fnum_str, fnum_str) return cond_code
     if ($x eq "NaN" || $y eq "NaN") {
 	undef;
     } else {
+	local($xm,$xe,$ym,$ye) = split('E', $x."E$y");
+	if ($xm eq '+0' || $ym eq '+0') {
+	    return $xm <=> $ym;
+	}
 	ord($y) <=> ord($x)
-	||
-	(  local($xm,$xe,$ym,$ye) = split('E', $x."E$y"),
-	     (($xe <=> $ye) * (substr($x,$[,1).'1')
-             || Math::BigInt::cmp($xm,$ym))
-	);
+	|| ($xe <=> $ye) * (substr($x,$[,1).'1')
+	|| Math::BigInt::cmp($xm,$ym);
     }
 }
 

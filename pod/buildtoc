@@ -8,7 +8,7 @@ sub output ($);
 	   perl perlfaq perlfaq1 perlfaq2 perlfaq3 perlfaq4 perlfaq5
 	   perlfaq6 perlfaq7 perlfaq8 perlfaq9 perldelta perldata
 	   perlsyn perlop perlre perlrun perlfunc perlvar perlsub
-	   perlmod perlmodlib perlmodinstall perlform perllocale 
+	   perlmod perlmodlib perlmodinstall perlfork perlform perllocale 
 	   perlref perlreftut perldsc
 	   perllol perltoot perltootc perlobj perltie perlbot perlipc
 	   perldbmfilter perldebug

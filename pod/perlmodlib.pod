@@ -48,15 +48,15 @@ The following pragmas are defined (and have their own documentation).
 
 =item attributes
 
-set/get the attributes of a subroutine or variable
+Get/set subroutine or variable attributes
 
 =item attrs
 
-set/get attributes of a subroutine (obsolescent)
+Set/get attributes of a subroutine (deprecated)
 
 =item autouse
 
-postpone load of modules until a function is used
+Postpone load of modules until a function is used
 
 =item base
 
@@ -66,77 +66,81 @@ Establish IS-A relationship with base class at compile time
 
 Use MakeMaker's uninstalled version of a package
 
+=item caller
+
+Inherit pragmatic attributes from caller's context 
+
+=item charnames
+
+Define character names for C<\N{named}> string literal escape.
+
 =item constant
 
-declare constants
+Declare constants
 
 =item diagnostics
 
-Perl compiler pragma to force verbose warning diagnostics
+Force verbose warning diagnostics
 
 =item fields
 
-compile-time class fields
+Declare a class's attribute fields at compile-time 
 
 =item filetest
 
-control the filetest permission operators
+Control the filetest operators like C<-r>, C<-w> for AFS, etc.
 
 =item integer
 
-compute arithmetic in integer instead of double
+Compute arithmetic in integer instead of double
 
 =item less
 
-perl pragma to request less of something from the compiler
+Request less of something from the compiler (unimplemented)
 
 =item lib
 
-manipulate @INC at compile time
+Manipulate @INC at compile time
 
 =item locale
 
-use and avoid POSIX locales for built-in operations
+Use or avoid POSIX locales for built-in operations
 
 =item ops
 
-restrict unsafe operations when compiling
+Restrict unsafe operations when compiling
 
 =item overload
 
-Package for overloading perl operations
+Overload Perl operations
 
 =item re
 
-alter regular expression behavior
+Alter regular expression behavior
 
 =item sigtrap
 
-enable simple signal handling
+Enable simple signal handling
 
 =item strict
 
-restrict unsafe constructs
+Restrict unsafe constructs
 
 =item subs
 
-predeclare sub names
+Predeclare subroutine names
 
 =item utf8
 
-turn on UTF-8 and Unicode support
+Turn on UTF-8 and Unicode support
 
 =item vars
 
-predeclare global variable names
+Predeclare global variable names (obsoleted by our())
 
 =item warnings
 
-control optional warnings
-
-=item vmsish
-
-control VMS-specific language features
+Control optional warnings
 
 =back
 
@@ -150,19 +154,19 @@ Exporter module.  See their own documentation for details.
 
 =item AnyDBM_File
 
-provide framework for multiple DBMs
+Provide framework for multiple DBM libraries
 
 =item AutoLoader
 
-load subroutines only on demand
+Load subroutines only on demand
 
 =item AutoSplit
 
-split a package for autoloading
+Split a package for autoloading
 
 =item B
 
-The Perl Compiler; See also L<perlcc>.
+Guts of the Perl code generator (aka compiler) 
 
 =item B::Asmdata
 
@@ -194,7 +198,7 @@ Walk Perl syntax tree, printing debug info about ops
 
 =item B::Deparse
 
-Perl compiler backend to produce perl code
+Perl compiler backend to produce Perl code
 
 =item B::Disassembler
 
@@ -202,7 +206,7 @@ Disassemble Perl bytecode
 
 =item B::Lint
 
-Perl lint
+Module to catch dubious constructs
 
 =item B::Showlex
 
@@ -211,6 +215,8 @@ Show lexical variables used in functions or files
 =item B::Stackobj
 
 Helper module for CC backend
+
+B::Stash -- XXX NFI XXX
 
 =item B::Terse
 
@@ -222,11 +228,15 @@ Generates cross reference reports for Perl programs
 
 =item Benchmark
 
-benchmark running times of code
+Benchmark running times of code
+
+=item ByteLoader
+
+Load byte-compiled Perl code
 
 =item CGI
 
-Simple Common Gateway Interface Class
+Simple Common Gateway Interface class
 
 =item CGI::Apache
 
@@ -244,6 +254,10 @@ Interface to Netscape Cookies
 
 CGI Interface for Fast CGI
 
+=item CGI::Pretty
+
+Module to produce nicely formatted HTML code
+
 =item CGI::Push
 
 Simple Interface to Server Push
@@ -254,11 +268,11 @@ Try more than one constructors and return the first object available
 
 =item CPAN
 
-query, download and build perl modules from CPAN sites
+Query, download, and build Perl modules from CPAN sites
 
 =item CPAN::FirstTime
 
-Utility for CPAN::Config file Initialization
+Utility for CPAN::Config file initialization
 
 =item CPAN::Nox
 
@@ -266,23 +280,27 @@ Wrapper around CPAN.pm without using any XS module
 
 =item Carp
 
-warn of errors (from perspective of caller)
+Act like warn/die from perspective of caller
+
+=item Carp::Heavy
+
+Carp guts
 
 =item Class::Struct
 
-declare struct-like datatypes as Perl classes
+Declare struct-like datatypes as Perl classes
 
 =item Config
 
-access Perl configuration information
+Access Perl configuration information
 
 =item Cwd
 
-get pathname of current working directory
+Get pathname of current working directory
 
 =item DB
 
-programmatic interface to the Perl debugging API 
+Programmatic interface to the Perl debugging API (experimental)
 
 =item DB_File
 
@@ -290,7 +308,11 @@ Perl5 access to Berkeley DB version 1.x
 
 =item Data::Dumper
 
-stringified perl data structures, suitable for both printing and C<eval>
+Serialize Perl data structures
+
+=item Devel::DProf
+
+A Perl execution profiler 
 
 =item Devel::Peek
 
@@ -298,15 +320,15 @@ A data debugging tool for the XS programmer
 
 =item Devel::SelfStubber
 
-generate stubs for a SelfLoading module
+Generate stubs for a SelfLoading module
 
 =item DirHandle
 
-supply object methods for directory handles
+Supply object methods for directory handles
 
 =item Dumpvalue
 
-provides screen dump of Perl data.
+Provide screen dump of Perl data
 
 =item DynaLoader
 
@@ -314,31 +336,35 @@ Dynamically load C libraries into Perl code
 
 =item English
 
-use nice English (or awk) names for ugly punctuation variables
+Use English (or awk) names for ugly punctuation variables
 
 =item Env
 
-perl module that imports environment variables
+Access environment variables as regular ones
 
 =item Errno
 
-System errno constants
+Load the libc errno.h defines
 
 =item Exporter
 
-Implements default import method for modules
+Implement default import method for modules
+
+=item Exporter::Heavy
+
+Exporter guts
 
 =item ExtUtils::Command
 
-utilities to replace common UNIX commands in Makefiles etc.
+Utilities to replace common Unix commands in Makefiles etc.
 
 =item ExtUtils::Embed
 
-Utilities for embedding Perl in C/C++ applications
+Utilities for embedding Perl in C/C++ programs
 
 =item ExtUtils::Install
 
-install files from here to there
+Install files from here to there
 
 =item ExtUtils::Installed
 
@@ -346,63 +372,69 @@ Inventory management of installed modules
 
 =item ExtUtils::Liblist
 
-determine libraries to use and how to use them
+Determine libraries to use and how to use them
+
+=item ExtUtils::MM_Cygwin
+
+Methods to override Unix behavior in ExtUtils::MakeMaker
 
 =item ExtUtils::MM_OS2
 
-methods to override UN*X behavior in ExtUtils::MakeMaker
+Methods to override Unix behavior in ExtUtils::MakeMaker
 
 =item ExtUtils::MM_Unix
 
-methods used by ExtUtils::MakeMaker
+Methods used by ExtUtils::MakeMaker
 
 =item ExtUtils::MM_VMS
 
-methods to override UN*X behavior in ExtUtils::MakeMaker
+Methods to override Unix behavior in ExtUtils::MakeMaker
 
 =item ExtUtils::MM_Win32
 
-methods to override UN*X behavior in ExtUtils::MakeMaker
+Methods to override Unix behavior in ExtUtils::MakeMaker
 
 =item ExtUtils::MakeMaker
 
-create an extension Makefile
+Create an extension Makefile
 
 =item ExtUtils::Manifest
 
-utilities to write and check a MANIFEST file
+Utilities to write and check a MANIFEST file
 
-=item ExtUtils::Miniperl
-
-write the C code for perlmain.c
+ExtUtils::Miniperl, writemain - Write the C code for perlmain.c
 
 =item ExtUtils::Mkbootstrap
 
-make a bootstrap file for use by DynaLoader
+Make a bootstrap file for use by DynaLoader
 
 =item ExtUtils::Mksymlists
 
-write linker options files for dynamic extension
+Write linker options files for dynamic extension
 
 =item ExtUtils::Packlist
 
-manage .packlist files
+Manage .packlist files
 
 =item ExtUtils::testlib
 
-add blib/* directories to @INC
+Add blib/* directories to @INC
 
 =item Fatal
 
-replace functions with equivalents which succeed or die
+Replace functions with equivalents which succeed or die
 
 =item Fcntl
 
-load the C Fcntl.h defines
+Load the libc fcntl.h defines
 
 =item File::Basename
 
-split a pathname into pieces
+Split a pathname into pieces
+
+=item File::CheckTree
+
+Run many filetest checks on a tree
 
 =item File::Compare
 
@@ -414,23 +446,27 @@ Copy files or filehandles
 
 =item File::DosGlob
 
-DOS like globbing and then some
+DOS-like globbing and then some
 
 =item File::Find
 
-traverse a file tree
+Traverse a file tree 
+
+=item File::Glob
+
+Perl extension for BSD filename globbing 
 
 =item File::Path
 
-create or remove a series of directories
+Create or remove a series of directories
 
 =item File::Spec
 
-portably perform operations on file names
+Portably perform operations on file names
 
 =item File::Spec::Functions
 
-portably perform operations on file names
+Portably perform operations on file names
 
 =item File::Spec::Mac
 
@@ -438,43 +474,43 @@ File::Spec for MacOS
 
 =item File::Spec::OS2
 
-methods for OS/2 file specs
+Methods for OS/2 file specs
 
 =item File::Spec::Unix
 
-methods used by File::Spec
+Methods used by File::Spec
 
 =item File::Spec::VMS
 
-methods for VMS file specs
+Methods for VMS file specs
 
 =item File::Spec::Win32
 
-methods for Win32 file specs
+Methods for Win32 file specs
 
 =item File::stat
 
-by-name interface to Perl's built-in stat() functions
+By-name interface to Perl's built-in stat() functions
 
 =item FileCache
 
-keep more files open than the system permits
+Keep more files open than the system permits
 
 =item FileHandle
 
-supply object methods for filehandles
+Supply object methods for filehandles
 
 =item FindBin
 
-Locate directory of original perl script
+Locate installation directory of running Perl program
 
 =item GDBM_File
 
-Perl5 access to the gdbm library.
+Access to the gdbm library
 
 =item Getopt::Long
 
-extended processing of command line options
+Extended processing of command line options
 
 =item Getopt::Std
 
@@ -482,27 +518,27 @@ Process single-character switches with switch clustering
 
 =item I18N::Collate
 
-compare 8-bit scalar data according to the current locale
+Compare 8-bit scalar data according to current locale
 
 =item IO
 
-load various IO modules
+Front-end to load various IO modules
 
 =item IO::Dir
 
-supply object methods for directory handles
+Supply object methods for directory handles
 
 =item IO::File
 
-supply object methods for filehandles
+Supply object methods for filehandles
 
 =item IO::Handle
 
-supply object methods for I/O handles
+Supply object methods for I/O handles
 
 =item IO::Pipe
 
-supply object methods for pipes
+Supply object methods for pipes
 
 =item IO::Poll
 
@@ -510,7 +546,7 @@ Object interface to system poll call
 
 =item IO::Seekable
 
-supply seek based methods for I/O objects
+Supply seek based methods for I/O objects
 
 =item IO::Select
 
@@ -534,11 +570,11 @@ SysV Msg IPC object class
 
 =item IPC::Open2
 
-open a process for both reading and writing
+Open a process for both reading and writing
 
 =item IPC::Open3
 
-open a process for reading, writing, and error handling
+Open a process for reading, writing, and error handling
 
 =item IPC::Semaphore
 
@@ -558,35 +594,31 @@ Arbitrary size integer math package
 
 =item Math::Complex
 
-complex numbers and associated mathematical functions
+Complex numbers and associated mathematical functions
 
 =item Math::Trig
 
-trigonometric functions
-
-=item NDBM_File
-
-Tied access to ndbm files
+Trigonometric functions
 
 =item Net::Ping
 
-check a remote host for reachability
+Check a remote host for reachability
 
 =item Net::hostent
 
-by-name interface to Perl's built-in gethost*() functions
+By-name interface to Perl's built-in gethost*() functions
 
 =item Net::netent
 
-by-name interface to Perl's built-in getnet*() functions
+By-name interface to Perl's built-in getnet*() functions
 
 =item Net::protoent
 
-by-name interface to Perl's built-in getproto*() functions
+By-name interface to Perl's built-in getproto*() functions
 
 =item Net::servent
 
-by-name interface to Perl's built-in getserv*() functions
+By-name interface to Perl's built-in getserv*() functions
 
 =item O
 
@@ -594,19 +626,47 @@ Generic interface to Perl Compiler backends
 
 =item Opcode
 
-Disable named opcodes when compiling perl code
+Disable named opcodes when compiling Perl code
 
 =item POSIX
 
 Perl interface to IEEE Std 1003.1
 
+=item Pod::Checker
+
+Check pod documents for syntax errors
+
 =item Pod::Html
 
-module to convert pod files to HTML
+Module to convert pod files to HTML
+
+=item Pod::InputObjects
+
+Manage POD objects 
+
+=item Pod::Man
+
+Convert POD data to formatted *roff input
+
+=item Pod::Parser
+
+Base class for creating POD filters and translators
+
+=item Pod::Select
+
+Extract selected sections of POD from input
 
 =item Pod::Text
 
-convert POD data to formatted ASCII text
+Convert POD data to formatted ASCII text
+
+=item Pod::Text::Color
+
+Convert POD data to formatted color ASCII text
+
+=item Pod::Usage
+
+Print a usage message from embedded pod documentation
 
 =item SDBM_File
 
@@ -618,27 +678,27 @@ Compile and execute code in restricted compartments
 
 =item Search::Dict
 
-search for key in dictionary file
+Search for key in dictionary file
 
 =item SelectSaver
 
-save and restore selected file handle
+Save and restore selected file handle
 
 =item SelfLoader
 
-load functions only on demand
+Load functions only on demand
 
 =item Shell
 
-run shell commands transparently within perl
+Run shell commands transparently within Perl
 
 =item Socket
 
-load the C socket.h defines and structure manipulators
+Load the libc socket.h defines and structure manipulators
 
 =item Symbol
 
-manipulate Perl symbols and their names
+Manipulate Perl symbols and their names
 
 =item Sys::Hostname
 
@@ -646,85 +706,65 @@ Try every conceivable way to get hostname
 
 =item Sys::Syslog
 
-Perl interface to the UNIX syslog(3) calls
+Interface to the libc syslog(3) calls
 
 =item Term::Cap
 
-Perl termcap interface
+Termcap interface
 
 =item Term::Complete
 
-Perl word completion module
+Word completion module
 
 =item Term::ReadLine
 
-Perl interface to various C<readline> packages. 
+Interface to various `readline' packages. 
 
 =item Test
 
-provides a simple framework for writing test scripts
+Provides a simple framework for writing test scripts
 
 =item Test::Harness
 
-run perl standard test scripts with statistics
+Run Perl standard test scripts with statistics
 
 =item Text::Abbrev
 
-create an abbreviation table from a list
+Create an abbreviation table from a list
 
 =item Text::ParseWords
 
-parse text into an array of tokens or array of arrays
+Parse text into a list of tokens or array of arrays
 
 =item Text::Soundex
 
-Implementation of the Soundex Algorithm as Described by Knuth
+Implementation of the Soundex Algorithm as described by Knuth
 
-=item Text::Tabs -- expand and unexpand tabs per the unix expand(1) and unexpand(1)
+Text::Tabs -- expand and unexpand tabs per expand(1) and unexpand(1)
 
 =item Text::Wrap
 
-line wrapping to form simple paragraphs
-
-=item Thread 
-
-multithreading
-
-=item Thread::Queue 
-
-thread-safe queues
-
-=item Thread::Semaphore 
-
-thread-safe semaphores
-
-=item Thread::Signal 
-
-Start a thread which runs signal handlers reliably
-
-=item Thread::Specific 
-
-thread-specific keys
+Line wrapping to form simple paragraphs
 
 =item Tie::Array
 
-base class for tied arrays
+Base class for tied arrays
 
 =item Tie::Handle
 
-base class definitions for tied handles
+Base class definitions for tied handles
 
-=item Tie::Hash, Tie::StdHash
+=item Tie::Hash
 
-base class definitions for tied hashes
+Base class definitions for tied hashes
 
 =item Tie::RefHash
 
-use references as hash keys
+Use references as hash keys
 
-=item Tie::Scalar, Tie::StdScalar
+=item Tie::Scalar
 
-base class definitions for tied scalars
+Base class definitions for tied scalars
 
 =item Tie::SubstrHash
 
@@ -732,31 +772,31 @@ Fixed-table-size, fixed-key-length hashing
 
 =item Time::Local
 
-efficiently compute time from local and GMT time
+Efficiently compute time from local and GMT time
 
 =item Time::gmtime
 
-by-name interface to Perl's built-in gmtime() function
+By-name interface to Perl's built-in gmtime() function
 
 =item Time::localtime
 
-by-name interface to Perl's built-in localtime() function
+By-name interface to Perl's built-in localtime() function
 
 =item Time::tm
 
-internal object used by Time::gmtime and Time::localtime
+Internal object used by Time::gmtime and Time::localtime
 
 =item UNIVERSAL
 
-base class for ALL classes (blessed references)
+Base class for ALL classes (blessed references)
 
 =item User::grent
 
-by-name interface to Perl's built-in getgr*() functions
+By-name interface to Perl's built-in getgr*() functions
 
 =item User::pwent
 
-by-name interface to Perl's built-in getpw*() functions
+By-name interface to Perl's built-in getpw*() functions
 
 =back
 
@@ -875,56 +915,64 @@ You should try to choose one close to you:
 
 =item Africa
 
-   South Africa    ftp://ftp.is.co.za/programming/perl/CPAN/
+    South Africa   ftp://ftp.is.co.za/programming/perl/CPAN/
+                   ftp://ftp.saix.net/pub/CPAN/
+                   ftp://ftp.sun.ac.za/CPAN/
                    ftp://ftpza.co.za/pub/mirrors/cpan/
 
 =item Asia
 
-   China           ftp://freesoft.cei.gov.cn/pub/languages/perl/CPAN/
-   Hong Kong       ftp://ftp.hkstar.com/pub/CPAN/
-   Israel          ftp://bioinfo.weizmann.ac.il/pub/software/perl/CPAN/
-   Japan           ftp://ftp.dti.ad.jp/pub/lang/CPAN/
+    China          ftp://freesoft.cei.gov.cn/pub/languages/perl/CPAN/
+    Hong Kong      ftp://ftp.hkstar.com/pub/CPAN/
+                   ftp://ftp.pacific.net.hk/pub/mirror/CPAN/
+    Indonesia      ftp://malone.piksi.itb.ac.id/pub/CPAN/
+    Israel         ftp://bioinfo.weizmann.ac.il/pub/software/perl/CPAN/
+    Japan          ftp://ftp.dti.ad.jp/pub/lang/CPAN/
                    ftp://ftp.jaist.ac.jp/pub/lang/perl/CPAN/
                    ftp://ftp.lab.kdd.co.jp/lang/perl/CPAN/
                    ftp://ftp.meisei-u.ac.jp/pub/CPAN/
                    ftp://ftp.ring.gr.jp/pub/lang/perl/CPAN/
                    ftp://mirror.nucba.ac.jp/mirror/Perl/
-   Singapore       ftp://ftp.nus.edu.sg/pub/unix/perl/CPAN/
-   South Korea     ftp://ftp.bora.net/pub/CPAN/
+    Singapore      ftp://ftp.nus.edu.sg/pub/unix/perl/CPAN/
+    South Korea    ftp://ftp.bora.net/pub/CPAN/
+                   ftp://ftp.kornet.net/pub/CPAN/
                    ftp://ftp.nuri.net/pub/CPAN/
-   Taiwan          ftp://ftp.wownet.net/pub2/PERL/
+    Taiwan         ftp://coda.nctu.edu.tw/computer-languages/perl/CPAN/
+                   ftp://ftp.ee.ncku.edu.tw/pub3/perl/CPAN/
+                   ftp://ftp.wownet.net/pub2/PERL/
                    ftp://ftp1.sinica.edu.tw/pub1/perl/CPAN/
-   Thailand        ftp://ftp.cs.riubon.ac.th/pub/mirrors/CPAN/
+    Thailand       ftp://ftp.cs.riubon.ac.th/pub/mirrors/CPAN/
                    ftp://ftp.nectec.or.th/pub/mirrors/CPAN/
 
 =item Australasia
 
-   Australia       ftp://cpan.topend.com.au/pub/CPAN/
+    Australia      ftp://cpan.topend.com.au/pub/CPAN/
                    ftp://ftp.labyrinth.net.au/pub/perl/CPAN/
                    ftp://ftp.sage-au.org.au/pub/compilers/perl/CPAN/
                    ftp://mirror.aarnet.edu.au/pub/perl/CPAN/
-   New Zealand     ftp://ftp.auckland.ac.nz/pub/perl/CPAN/
+    New Zealand    ftp://ftp.auckland.ac.nz/pub/perl/CPAN/
                    ftp://sunsite.net.nz/pub/languages/perl/CPAN/
 
-Central America
+=item Central America
 
-   Costa Rica      ftp://ftp.ucr.ac.cr/pub/Unix/CPAN/
+    Costa Rica     ftp://ftp.ucr.ac.cr/pub/Unix/CPAN/
 
 =item Europe
 
-   Austria         ftp://ftp.tuwien.ac.at/pub/languages/perl/CPAN/
-   Belgium         ftp://ftp.kulnet.kuleuven.ac.be/pub/mirror/CPAN/
-   Bulgaria        ftp://ftp.ntrl.net/pub/mirrors/CPAN/
-   Croatia         ftp://ftp.linux.hr/pub/CPAN/
-   Czech Republic  ftp://ftp.fi.muni.cz/pub/perl/
+    Austria        ftp://ftp.tuwien.ac.at/pub/languages/perl/CPAN/
+    Belgium        ftp://ftp.kulnet.kuleuven.ac.be/pub/mirror/CPAN/
+    Bulgaria       ftp://ftp.ntrl.net/pub/mirrors/CPAN/
+    Croatia        ftp://ftp.linux.hr/pub/CPAN/
+    Czech Republic ftp://ftp.fi.muni.cz/pub/perl/
                    ftp://sunsite.mff.cuni.cz/Languages/Perl/CPAN/
-   Denmark         ftp://sunsite.auc.dk/pub/languages/perl/CPAN/
-   Estonia         ftp://ftp.ut.ee/pub/languages/perl/CPAN/
-   Finland         ftp://ftp.funet.fi/pub/languages/perl/CPAN/
-   France          ftp://ftp.lip6.fr/pub/perl/CPAN/
+    Denmark        ftp://sunsite.auc.dk/pub/languages/perl/CPAN/
+    Estonia        ftp://ftp.ut.ee/pub/languages/perl/CPAN/
+    Finland        ftp://ftp.funet.fi/pub/languages/perl/CPAN/
+    France         ftp://ftp.lip6.fr/pub/perl/CPAN/
                    ftp://ftp.oleane.net/pub/mirrors/CPAN/
                    ftp://ftp.pasteur.fr/pub/computing/CPAN/
-   Germany         ftp://ftp.archive.de.uu.net/pub/CPAN/
+                   ftp://ftp.uvsq.fr/pub/perl/CPAN/
+    Germany        ftp://ftp.archive.de.uu.net/pub/CPAN/
                    ftp://ftp.gmd.de/packages/CPAN/
                    ftp://ftp.gwdg.de/pub/languages/perl/CPAN/
                    ftp://ftp.leo.org/pub/comp/programming/languages/script/perl/CPAN/
@@ -932,74 +980,87 @@ Central America
                    ftp://ftp.rz.ruhr-uni-bochum.de/pub/CPAN/
                    ftp://ftp.uni-erlangen.de/pub/source/CPAN/
                    ftp://ftp.uni-hamburg.de/pub/soft/lang/perl/CPAN/
-   Greece          ftp://ftp.ntua.gr/pub/lang/perl/
-   Hungary         ftp://ftp.kfki.hu/pub/packages/perl/CPAN/
-   Ireland         ftp://sunsite.compapp.dcu.ie/pub/perl/
-   Italy           ftp://cis.uniRoma2.it/CPAN/
+    Greece         ftp://ftp.ntua.gr/pub/lang/perl/
+    Hungary        ftp://ftp.kfki.hu/pub/packages/perl/CPAN/
+    Iceland        ftp://ftp.gm.is/pub/CPAN/
+    Ireland        ftp://cpan.indigo.ie/pub/CPAN/
+                   ftp://sunsite.compapp.dcu.ie/pub/perl/
+    Italy          ftp://cis.uniRoma2.it/CPAN/
                    ftp://ftp.flashnet.it/pub/CPAN/
                    ftp://ftp.unina.it/pub/Other/CPAN/
                    ftp://ftp.unipi.it/pub/mirror/perl/CPAN/
-   Netherlands     ftp://ftp.cs.uu.nl/mirror/CPAN/
+    Netherlands    ftp://ftp.cs.uu.nl/mirror/CPAN/
                    ftp://ftp.EU.net/packages/cpan/
                    ftp://ftp.nluug.nl/pub/languages/perl/CPAN/
-   Norway          ftp://ftp.uit.no/pub/languages/perl/cpan/
+    Norway         ftp://ftp.uit.no/pub/languages/perl/cpan/
                    ftp://sunsite.uio.no/pub/languages/perl/CPAN/
-   Poland          ftp://ftp.man.szczecin.pl/pub/perl/CPAN/
+    Poland         ftp://ftp.man.szczecin.pl/pub/perl/CPAN/
                    ftp://ftp.man.torun.pl/pub/doc/CPAN/
                    ftp://ftp.pk.edu.pl/pub/lang/perl/CPAN/
                    ftp://sunsite.icm.edu.pl/pub/CPAN/
-   Portugal        ftp://ftp.ci.uminho.pt/pub/mirrors/cpan/
+    Portugal       ftp://ftp.ci.uminho.pt/pub/mirrors/cpan/
                    ftp://ftp.ist.utl.pt/pub/CPAN/
                    ftp://ftp.ua.pt/pub/CPAN/
-   Romania         ftp://ftp.dntis.ro/pub/mirrors/perl-cpan/
+    Romania        ftp://ftp.dntis.ro/pub/mirrors/perl-cpan/
                    ftp://ftp.dnttm.ro/pub/CPAN/
     Russia         ftp://ftp.chg.ru/pub/lang/perl/CPAN/
                    ftp://ftp.sai.msu.su/pub/lang/perl/CPAN/
-   Slovakia        ftp://ftp.entry.sk/pub/languages/perl/CPAN/
-   Slovenia        ftp://ftp.arnes.si/software/perl/CPAN/
-   Spain           ftp://ftp.etse.urv.es/pub/perl/
+    Slovakia       ftp://ftp.entry.sk/pub/languages/perl/CPAN/
+    Slovenia       ftp://ftp.arnes.si/software/perl/CPAN/
+    Spain          ftp://ftp.etse.urv.es/pub/perl/
                    ftp://ftp.rediris.es/mirror/CPAN/
-   Sweden          ftp://ftp.sunet.se/pub/lang/perl/CPAN/
-   Switzerland     ftp://sunsite.cnlab-switch.ch/mirror/CPAN/
-   Turkey          ftp://sunsite.bilkent.edu.tr/pub/languages/CPAN/
-   United Kingdom  ftp://ftp.demon.co.uk/pub/mirrors/perl/CPAN/
+    Sweden         ftp://ftp.sunet.se/pub/lang/perl/CPAN/
+    Switzerland    ftp://sunsite.cnlab-switch.ch/mirror/CPAN/
+    Turkey         ftp://sunsite.bilkent.edu.tr/pub/languages/CPAN/
+    United Kingdom ftp://ftp.demon.co.uk/pub/mirrors/perl/CPAN/
                    ftp://ftp.flirble.org/pub/languages/perl/CPAN/
+                   ftp://ftp.mirror.ac.uk/sites/ftp.funet.fi/pub/languages/perl/CPAN/
                    ftp://ftp.plig.org/pub/CPAN/
                    ftp://sunsite.doc.ic.ac.uk/packages/CPAN/
-                   ftp://unix.hensa.ac.uk/mirrors/perl-CPAN/
 
 =item North America
 
-   Alberta         ftp://sunsite.ualberta.ca/pub/Mirror/CPAN/
+    Alberta        ftp://sunsite.ualberta.ca/pub/Mirror/CPAN/
     California     ftp://cpan.nas.nasa.gov/pub/perl/CPAN/
+                   ftp://cpan.valueclick.com/CPAN/
                    ftp://ftp.cdrom.com/pub/perl/CPAN/
                    ftp://ftp.digital.com/pub/plan/perl/CPAN/
-   Colorado        ftp://ftp.cs.colorado.edu/pub/perl/CPAN/
-   Florida         ftp://ftp.cise.ufl.edu/pub/perl/CPAN/
-   Illinois        ftp://uiarchive.uiuc.edu/pub/lang/perl/CPAN/
-   Indiana         ftp://csociety-ftp.ecn.purdue.edu/pub/CPAN/
+    California     ftp://cpan.nas.nasa.gov/pub/perl/CPAN/
+                   ftp://cpan.valueclick.com/CPAN/
+                   ftp://ftp.cdrom.com/pub/perl/CPAN/
+                   ftp://ftp.digital.com/pub/plan/perl/CPAN/
+    Colorado       ftp://ftp.cs.colorado.edu/pub/perl/CPAN/
+    Florida        ftp://ftp.cise.ufl.edu/pub/perl/CPAN/
+    Illinois       ftp://uiarchive.uiuc.edu/pub/lang/perl/CPAN/
+    Indiana        ftp://csociety-ftp.ecn.purdue.edu/pub/CPAN/
                    ftp://ftp.uwsg.indiana.edu/pub/perl/CPAN/
-   Manitoba        ftp://theory.uwinnipeg.ca/pub/CPAN/
-   Massachusetts   ftp://ftp.ccs.neu.edu/net/mirrors/ftp.funet.fi/pub/languages/perl/CPAN/
+    Kentucky       ftp://ftp.uky.edu/CPAN/
+    Manitoba       ftp://theoryx5.uwinnipeg.ca/pub/CPAN/
+    Massachusetts  ftp://ftp.ccs.neu.edu/net/mirrors/ftp.funet.fi/pub/languages/perl/CPAN/
                    ftp://ftp.iguide.com/pub/mirrors/packages/perl/CPAN/
     Mexico         ftp://ftp.msg.com.mx/pub/CPAN/
     Minnesota      ftp://ftp.midearthbbs.com/CPAN/
-   New York        ftp://ftp.rge.com/pub/languages/perl/
-   North Carolina  ftp://ftp.duke.edu/pub/perl/
-   Oklahoma        ftp://ftp.ou.edu/mirrors/CPAN/
+    New York       ftp://ftp.deao.net/pub/CPAN/
+                   ftp://ftp.rge.com/pub/languages/perl/
+                   ftp://ftp.tpj.com/pub/CPAN/
+    Nova Scotia    ftp://cpan.chebucto.ns.ca/pub/CPAN/
+    North Carolina ftp://ftp.duke.edu/pub/perl/
+    Oklahoma       ftp://ftp.ou.edu/mirrors/CPAN/
     Ontario        ftp://ftp.crc.ca/pub/packages/lang/perl/CPAN/
-   Oregon          ftp://ftp.orst.edu/pub/packages/CPAN/
-   Pennsylvania    ftp://ftp.epix.net/pub/languages/perl/
-   Texas           ftp://ftp.sedl.org/pub/mirrors/CPAN/
-   Utah            ftp://mirror.xmission.com/CPAN/
-   Virginia        ftp://ftp.perl.org/pub/perl/CPAN/
+    Oregon         ftp://ftp.orst.edu/pub/packages/CPAN/
+    Pennsylvania   ftp://ftp.epix.net/pub/languages/perl/
+    Tennessee      ftp://ftp.sunsite.utk.edu/pub/CPAN/
+    Texas          ftp://ftp.sedl.org/pub/mirrors/CPAN/
+    Utah           ftp://mirror.xmission.com/CPAN/
+    Virginia       ftp://ftp.perl.org/pub/perl/CPAN/
                    ftp://ruff.cs.jmu.edu/pub/CPAN/
     Washington     ftp://ftp-mirror.internap.com/pub/CPAN/
                    ftp://ftp.spu.edu/pub/CPAN/
 
 =item South America
 
-   Brazil          ftp://cpan.if.usp.br/pub/mirror/CPAN/
+    Brazil         ftp://cpan.if.usp.br/pub/mirror/CPAN/
+                   ftp://ftp.matrix.com.br/pub/perl/
     Chile          ftp://sunsite.dcc.uchile.cl/pub/Lang/perl/CPAN/
 
 =back

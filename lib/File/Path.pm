@@ -2,15 +2,14 @@ package File::Path;
 
 =head1 NAME
 
-File::Path - create or remove a series of directories
+File::Path - create or remove directory trees
 
 =head1 SYNOPSIS
 
-C<use File::Path>
+    use File::Path;
 
-C<mkpath(['/foo/bar/baz', 'blurfl/quux'], 1, 0711);>
-
-C<rmtree(['foo/bar/baz', 'blurfl/quux'], 1, 1);>
+    mkpath(['/foo/bar/baz', 'blurfl/quux'], 1, 0711);
+    rmtree(['foo/bar/baz', 'blurfl/quux'], 1, 1);
 
 =head1 DESCRIPTION
 
@@ -127,13 +126,15 @@ sub mkpath {
 	my $parent = File::Basename::dirname($path);
 	# Allow for creation of new logical filesystems under VMS
 	if (not $Is_VMS or $parent !~ m:/[^/]+/000000/?:) {
-	    push(@created,mkpath($parent, $verbose, $mode)) unless (-d $parent);
+	    unless (-d $parent or $path eq $parent) {
+		push(@created,mkpath($parent, $verbose, $mode));
+	    }
 	}
 	print "mkdir $path\n" if $verbose;
 	unless (mkdir($path,$mode)) {
-	  my $e = $!;
-	  # allow for another process to have created it meanwhile
-	  croak "mkdir $path: $e" unless -d $path;
+	    my $e = $!;
+	    # allow for another process to have created it meanwhile
+	    croak "mkdir $path: $e" unless -d $path;
 	}
 	push(@created, $path);
     }

@@ -504,6 +504,18 @@ constant(char *name, int arg)
 #else
 	        goto not_there;
 #endif
+	    if (strEQ(name, "O_ALIAS"))
+#ifdef O_ALIAS
+	        return O_ALIAS;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_RSRC"))
+#ifdef O_RSRC
+	        return O_RSRC;
+#else
+	        goto not_there;
+#endif
 	} else
 	  goto not_there;
 	break;

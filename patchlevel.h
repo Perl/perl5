@@ -5,7 +5,25 @@
 
 #define PERL_REVISION	5		/* age */
 #define PERL_VERSION	5		/* epoch */
-#define PERL_SUBVERSION	61		/* generation */
+#define PERL_SUBVERSION	640		/* generation */
+
+/* The following numbers describe the earliest compatible version of
+   Perl ("compatibility" here being defined as sufficient binary/API
+   compatibility to run XS code built with the older version).
+   Normally this should not change across maintenance releases.
+
+   This is used by Configure et al to figure out 
+   PERL_INC_VERSION_LIST, which lists version libraries
+   to include in @INC.  See INSTALL for how this works.
+*/
+#define PERL_API_REVISION	5	/* Adjust manually as needed.  */
+#define PERL_API_VERSION	5	/* Adjust manually as needed.  */
+#define PERL_API_SUBVERSION	640	/* Adjust manually as needed.  */
+/*
+   XXX Note:  The selection of non-default Configure options, such
+   as -Duselonglong may invalidate these settings.  Currently, Configure
+   does not adequately test for this.   A.D.  Jan 13, 2000
+*/
 
 #define __PATCHLEVEL_H_INCLUDED__
 #endif

@@ -173,7 +173,7 @@ $_.  The return value indicates the success of the operation.  (If the
 right argument is an expression rather than a search pattern,
 substitution, or transliteration, it is interpreted as a search pattern at run
 time.  This can be is less efficient than an explicit search, because the
-pattern must be compiled every time the expression is evaluated.
+pattern must be compiled every time the expression is evaluated).
 
 Binary "!~" is just like "=~" except the return value is negated in
 the logical sense.
@@ -195,10 +195,11 @@ to the modulus operator as implemented by your C compiler.  This
 operator is not as well defined for negative operands, but it will
 execute faster.
 
-Binary "x" is the repetition operator.  In scalar context, it
-returns a string consisting of the left operand repeated the number of
-times specified by the right operand.  In list context, if the left
-operand is a list in parentheses, it repeats the list.
+Binary "x" is the repetition operator.  In scalar context or if the left
+operand is not enclosed in parentheses, it returns a string consisting
+of the left operand repeated the number of times specified by the right
+operand.  In list context, if the left operand is enclosed in
+parentheses, it repeats the list.
 
     print '-' x 80;		# print row of dashes
 
@@ -510,10 +511,10 @@ The following are recognized:
 Although these are grouped by family, they all have the precedence
 of assignment.
 
-Unlike in C, the assignment operator produces a valid lvalue.  Modifying
-an assignment is equivalent to doing the assignment and then modifying
-the variable that was assigned to.  This is useful for modifying
-a copy of something, like this:
+Unlike in C, the scalar assignment operator produces a valid lvalue.
+Modifying an assignment is equivalent to doing the assignment and
+then modifying the variable that was assigned to.  This is useful
+for modifying a copy of something, like this:
 
     ($tmp = $global) =~ tr [A-Z] [a-z];
 
@@ -525,6 +526,11 @@ is equivalent to
 
     $a += 2;
     $a *= 3;
+
+Similarly, a list assignment in list context produces the list of
+lvalues assigned to, and a list assignment in scalar context returns
+the number of elements produced by the expression on the right hand
+side of the assignment.
 
 =head2 Comma Operator
 
@@ -957,7 +963,7 @@ notably if the result of qr() is used standalone:
 	my @compiled = map qr/$_/i, @$patterns;
 	grep {
 	    my $success = 0;
-	    foreach my $pat @compiled {
+	    foreach my $pat (@compiled) {
 		$success = 1, last if /$pat/;
 	    }
 	    $success;
@@ -1068,9 +1074,9 @@ this expression:
 
     qw(foo bar baz)
 
-is exactly equivalent to the list:
+is semantically equivalent to the list:
 
-    ('foo', 'bar', 'baz')
+    'foo', 'bar', 'baz'
 
 Some frequently seen examples:
 

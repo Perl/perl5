@@ -585,24 +585,6 @@ number of elements in the resulting list.
     # perl4 prints: second new
     # perl5 prints: 3
 
-=item * Discontinuance
-
-In Perl 4 (and versions of Perl 5 before 5.004), C<'\r'> characters in
-Perl code were silently allowed, although they could cause (mysterious!)
-failures in certain constructs, particularly here documents.  Now,
-C<'\r'> characters cause an immediate fatal error.  (Note: In this
-example, the notation B<\015> represents the incorrect line
-ending. Depending upon your text viewer, it will look different.)
-
-    print "foo";\015
-    print "bar";
-
-    # perl4     prints: foobar
-    # perl5.003 prints: foobar
-    # perl5.004 dies: Illegal character \015 (carriage return)
-
-See L<perldiag> for full details.
-
 =item * Deprecation
 
 Some error messages will be different.
@@ -714,6 +696,30 @@ Logical tests now return an null, instead of 0
 
 Also see L<"General Regular Expression Traps using s///, etc.">
 for another example of this new feature...
+
+=item * Bitwise string ops
+
+When bitwise operators which can operate upon either numbers or
+strings (C<& | ^ ~>) are given only strings as arguments, perl4 would
+treat the operands as bitstrings so long as the program contained a call
+to the C<vec()> function. perl5 treats the string operands as bitstrings.
+(See L<perlop/Bitwise String Operators> for more details.)
+
+    $fred = "10";
+    $barney = "12";
+    $betty = $fred & $barney;
+    print "$betty\n";
+    # Uncomment the next line to change perl4's behavior
+    # ($dummy) = vec("dummy", 0, 0);
+
+    # Perl4 prints:
+    8
+
+    # Perl5 prints:
+    10
+
+    # If vec() is used anywhere in the program, both print:
+    10
 
 =back
 

@@ -6,9 +6,9 @@ libpth='/lib /usr/lib /usr/local/lib'
 libswanted=' '
 libc='/NextLibrary/Frameworks/System.framework/System'
 
-ldflags='-dynamic -prebind'
-lddlflags='-dynamic -bundle -undefined suppress'
-ccflags='-dynamic -fno-common -DUSE_NEXT_CTYPE -DUSE_PERL_SBRK'
+ldflags="$ldflags -dynamic -prebind"
+lddlflags="$lddlflags -dynamic -bundle -undefined suppress"
+ccflags="$ccflags -dynamic -fno-common -DUSE_NEXT_CTYPE -DUSE_PERL_SBRK"
 cccdlflags='none'
 ld='cc'
 #optimize='-g -O'

@@ -3,7 +3,7 @@
 perllexwarn - Perl Lexical Warnings
 
 =head1 DESCRIPTION
- 
+
 The C<use warnings> pragma is a replacement for both the command line
 flag B<-w> and the equivalent Perl variable, C<$^W>.
 
@@ -160,7 +160,7 @@ introduction of lexically scoped warnings, or have code that uses both
 lexical warnings and C<$^W>, this section will describe how they interact.
 
 How Lexical Warnings interact with B<-w>/C<$^W>:
- 
+
 =over 5
 
 =item 1.

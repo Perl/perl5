@@ -1,11 +1,12 @@
-Last Revised 01-March-1999 by Dan Sugalski <sugalskd@ous.edu>
+Last revised 27-October-1999 by Craig Berry <craig.berry@metamor.com>
+Revised 01-March-1999 by Dan Sugalski <dan@sidhe.org>
 Originally by Charles Bailey <bailey@newman.upenn.edu>
 
 * Important safety tip
 
 The build and install procedures have changed significantly from the 5.004
 releases! Make sure you read the "Building Perl" and "Installing Perl"
-sections before you build or install.
+sections of this document before you build or install.
 
 Also note that, as of 5.005, an ANSI C compliant compiler is required to
 build Perl. Vax C is *not* ANSI compliant, as it died a natural death some
@@ -83,7 +84,7 @@ Building perl has two steps, configuration and compilation.
 
 To configure perl (a necessary first step), issue the command
 
-@CONFIGURE
+   @CONFIGURE
 
 from the top of an unpacked perl directory. You'll be asked a series of
 questions, and the answers to them (along with the capabilities of your C
@@ -95,7 +96,22 @@ you're using a version older than 5.2, check the Dec C Issues section.
 
 The configuration script will print out, at the very end, the MMS or MMK
 command you need to compile perl. Issue it (exactly as printed) to start
-the build.
+the build.  If you have any symbols or logical names in your environment
+that may interfere with the build or regression testing of perl then 
+configure.com will try to warn you about them.  If a logical name is causing
+you trouble but is in an LNM table that you do not have write access to
+then try defining your own to a harmless equivalence string in a table 
+such that it is resolved before the other (e.g. if TMP is defined in the
+SYSTEM table then try DEFINE TMP "NL:" or somesuch) otherwise simply deasign 
+the dangerous logical names.  The potentially troublesome logicals and
+symbols are:
+
+    TMP  "LOGICAL"
+    LIB  "LOGICAL"
+    T    "LOGICAL"
+    FOO  "LOGICAL"
+    EXT  "LOGICAL"
+    TEST "SYMBOL"
 
 Once you issue your MMS command, sit back and wait. Perl should build and
 link without a problem. If it doesn't, check the Gotchas to watch out for
@@ -104,7 +120,7 @@ Instructions are in the Mailing Lists section.
 
 As a handy shortcut, the command:
 
-@CONFIGURE "-des"
+    @CONFIGURE "-des"
 
 (note the quotation marks and case) will choose reasonable defaults. (It 
 takes Dec C over Gnu C, Dec C sockets over SOCKETSHR sockets, and either 
@@ -143,14 +159,14 @@ confident you are, make a bug report to the VMSPerl mailing list.
 If one or more tests fail, you can get more info on the failure by issuing
 this command sequence:
 
-$ @[.VMS]TEST .typ "-v" [.subdir]test.T
+$ @[.VMS]TEST .typ "" "-v" [.subdir]test.T
 
 where ".typ" is the file type of the Perl images you just built (if you
 didn't do anything special, use .EXE), and "[.subdir]test.T" is the test
 that failed. For example, with a normal Perl build, if the test indicated
 that [.op]time failed, then you'd do this:
 
-$ @[.VMS]TEST .EXE "-v" [.OP]TIME.T
+$ @[.VMS]TEST .EXE "" "-v" [.OP]TIME.T
 
 When you send in a bug report for failed tests, please include the output
 from this command, which is run from the main source directory:
@@ -244,18 +260,18 @@ into DCLTABLES, replace it with just perl.
 Execute the following command file to define PERL as a DCL command.
 You'll need CMKRNL priv to install the new dcltables.exe.
 
-$ create perl.cld
-!
-! modify to reflect location of your perl.exe
-!
-define verb perl
-  image perl_root:[000000]perl.exe
-  cliflags (foreign)
-$!
-$ set command perl /table=sys$common:[syslib]dcltables.exe -
- /output=sys$common:[syslib]dcltables.exe
-$ install replace sys$common:[syslib]dcltables.exe
-$ exit
+    $ create perl.cld
+    !
+    ! modify to reflect location of your perl.exe
+    !
+    define verb perl
+      image perl_root:[000000]perl.exe
+      cliflags (foreign)
+    $!
+    $ set command perl /table=sys$common:[syslib]dcltables.exe -
+     /output=sys$common:[syslib]dcltables.exe
+    $ install replace sys$common:[syslib]dcltables.exe
+    $ exit
 
 * Changing compile-time things
 
@@ -277,7 +293,7 @@ change these, as they can cause some fairly subtle problems.
 
 On systems that are using perl quite a bit, and particularly those with 
 minimal RAM, you can boost the performance of perl by INSTALLing it as
-a known image.  PERLSHR.EXE is typically larger than 1500 blocks
+a known image.  PERLSHR.EXE is typically larger than 2000 blocks
 and that is a reasonably large amount of IO to load each time perl is 
 invoked. 
 
@@ -358,7 +374,7 @@ before you rebuild.
 * Dec C issues
 
 Note to DECC users: Some early versions (pre-5.2, some pre-4. If you're Dec
-C 5.x or higher, with current patches if anym you're fine) of the DECCRTL
+C 5.x or higher, with current patches if any, you're fine) of the DECCRTL
 contained a few bugs which affect Perl performance:
     - Newlines are lost on I/O through pipes, causing lines to run together.
       This shows up as RMS RTB errors when reading from a pipe.  You can
@@ -380,16 +396,16 @@ specific issues (including both Perl questions and installation problems)
 there is the VMSPERL mailing list. It's usually a low-volume (10-12
 messages a week) mailing list.
 
-The subscription address is VMSPERL-REQUEST@NEWMAN.UPENN.EDU. Send a mail
-message with just the words SUBSCRIBE VMSPERL in the body of the message.
-
-The VMSPERL mailing list address is VMSPERL@NEWMAN.UPENN.EDU. Any mail
-sent there gets echoed to all subscribers of the list.
-
+The subscription address is MAJORDOMO@PERL.ORG. Send a mail message with just
+the words SUBSCRIBE VMSPERL in the body of the message.
+   
+The VMSPERL mailing list address is VMSPERL@PERL.ORG.  Any mail sent there
+gets echoed to all subscribers of the list.  There is a searchable archive of
+the list at <http://www.xray.mpe.mpg.de/mailing-lists/vmsperl/>.
+   
 To unsubscribe from VMSPERL send the message UNSUBSCRIBE VMSPERL to
-VMSPERL-REQUEST@NEWMAN.UPENN.EDU.  Be sure to do so from the subscribed 
-account that you are cancelling.
-
+MAJORDOMO@PERL.ORG.  Be sure to do so from the subscribed account that 
+you are cancelling.
 
 * Acknowledgements
 
@@ -409,10 +425,10 @@ missed someone.  That said, special thanks are due to the following:
      for the getredirection() code
   Rich Salz <rsalz@bbn.com>
      for readdir() and related routines
-  Peter Prymmer <pvhp@forte.com> or <pvhp@lns62.lns.cornell.edu>
+  Peter Prymmer <pvhp@forte.com> 
      for extensive testing, as well as development work on
      configuration and documentation for VMS Perl,
-  Dan Sugalski <sugalskd@ous.edu>
+  Dan Sugalski <dan@sidhe.org>
      for extensive contributions to recent version support,
      development of VMS-specific extensions, and dissemination
      of information about VMS Perl,

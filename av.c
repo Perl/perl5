@@ -591,6 +591,86 @@ Perl_av_fill(pTHX_ register AV *av, I32 fill)
 	(void)av_store(av,fill,&PL_sv_undef);
 }
 
+SV *
+Perl_av_delete(pTHX_ AV *av, I32 key, I32 flags)
+{
+    SV *sv;
+
+    if (!av)
+	return Nullsv;
+    if (SvREADONLY(av))
+	Perl_croak(aTHX_ PL_no_modify);
+    if (key < 0) {
+	key += AvFILL(av) + 1;
+	if (key < 0)
+	    return Nullsv;
+    }
+    if (SvRMAGICAL(av)) {
+	SV **svp;
+	if ((mg_find((SV*)av,'P') || mg_find((SV*)av,'D'))
+	    && (svp = av_fetch(av, key, TRUE)))
+	{
+	    sv = *svp;
+	    mg_clear(sv);
+	    if (mg_find(sv, 'p')) {
+		sv_unmagic(sv, 'p');		/* No longer an element */
+		return sv;
+	    }
+	    return Nullsv;			/* element cannot be deleted */
+	}
+    }
+    if (key > AvFILLp(av))
+	return Nullsv;
+    else {
+	sv = AvARRAY(av)[key];
+	if (key == AvFILLp(av)) {
+	    do {
+		AvFILLp(av)--;
+	    } while (--key >= 0 && AvARRAY(av)[key] == &PL_sv_undef);
+	}
+	else
+	    AvARRAY(av)[key] = &PL_sv_undef;
+	if (SvSMAGICAL(av))
+	    mg_set((SV*)av);
+    }
+    if (flags & G_DISCARD) {
+	SvREFCNT_dec(sv);
+	sv = Nullsv;
+    }
+    return sv;
+}
+
+/*
+ * This relies on the fact that uninitialized array elements
+ * are set to &PL_sv_undef.
+ */
+
+bool
+Perl_av_exists(pTHX_ AV *av, I32 key)
+{
+    if (!av)
+	return FALSE;
+    if (key < 0) {
+	key += AvFILL(av) + 1;
+	if (key < 0)
+	    return FALSE;
+    }
+    if (SvRMAGICAL(av)) {
+	if (mg_find((SV*)av,'P') || mg_find((SV*)av,'D')) {
+	    SV *sv = sv_newmortal();
+	    mg_copy((SV*)av, sv, 0, key);
+	    magic_existspack(sv, mg_find(sv, 'p'));
+	    return SvTRUE(sv);
+	}
+    }
+    if (key <= AvFILLp(av) && AvARRAY(av)[key] != &PL_sv_undef
+	&& AvARRAY(av)[key])
+    {
+	return TRUE;
+    }
+    else
+	return FALSE;
+}
 
 /* AVHV: Support for treating arrays as if they were hashes.  The
  * first element of the array should be a hash reference that maps
@@ -630,18 +710,41 @@ Perl_avhv_fetch_ent(pTHX_ AV *av, SV *keysv, I32 lval, U32 hash)
     SV **indsvp;
     HV *keys = avhv_keys(av);
     HE *he;
-    
+    STRLEN n_a;
+   
     he = hv_fetch_ent(keys, keysv, FALSE, hash);
     if (!he)
-        Perl_croak(aTHX_ "No such array field");
+        Perl_croak(aTHX_ "No such pseudo-hash field \"%s\"", SvPV(keysv,n_a));
     return av_fetch(av, avhv_index_sv(HeVAL(he)), lval);
 }
 
+SV *
+Perl_avhv_delete_ent(pTHX_ AV *av, SV *keysv, I32 flags, U32 hash)
+{
+    HV *keys = avhv_keys(av);
+    HE *he;
+	
+    he = hv_fetch_ent(keys, keysv, FALSE, hash);
+    if (!he || !SvOK(HeVAL(he)))
+	return Nullsv;
+
+    return av_delete(av, avhv_index_sv(HeVAL(he)), flags);
+}
+
+/* Check for the existence of an element named by a given key.
+ *
+ */
 bool
 Perl_avhv_exists_ent(pTHX_ AV *av, SV *keysv, U32 hash)
 {
     HV *keys = avhv_keys(av);
-    return hv_exists_ent(keys, keysv, hash);
+    HE *he;
+	
+    he = hv_fetch_ent(keys, keysv, FALSE, hash);
+    if (!he || !SvOK(HeVAL(he)))
+	return FALSE;
+
+    return av_exists(av, avhv_index_sv(HeVAL(he)));
 }
 
 HE *

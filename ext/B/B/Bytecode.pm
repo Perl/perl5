@@ -226,13 +226,11 @@ sub B::SVOP::bytecode {
     $sv->bytecode;
 }
 
-sub B::GVOP::bytecode {
+sub B::PADOP::bytecode {
     my $op = shift;
-    my $gv = $op->gv;
-    my $gvix = $gv->objix;
+    my $padix = $op->padix;
     $op->B::OP::bytecode;
-    print "op_gv $gvix\n";
-    $gv->bytecode;
+    print "op_padix $padix\n";
 }
 
 sub B::PVOP::bytecode {
@@ -280,29 +278,27 @@ sub B::LOOP::bytecode {
 
 sub B::COP::bytecode {
     my $op = shift;
-    my $stash = $op->stash;
-    my $stashix = $stash->objix;
-    my $filegv = $op->filegv;
-    my $filegvix = $filegv->objix;
+    my $stashpv = $op->stashpv;
+    my $file = $op->file;
     my $line = $op->line;
     my $warnings = $op->warnings;
     my $warningsix = $warnings->objix;
     if ($debug_bc) {
-	printf "# line %s:%d\n", $filegv->SV->PV, $line;
+	printf "# line %s:%d\n", $file, $line;
     }
     $op->B::OP::bytecode;
-    printf <<"EOT", pvstring($op->label), $op->cop_seq, $op->arybase;
+    printf <<"EOT", pvstring($op->label), pvstring($stashpv), $op->cop_seq, pvstring($file), $op->arybase;
 newpv %s
 cop_label
-cop_stash $stashix
+newpv %s
+cop_stashpv
 cop_seq %d
-cop_filegv $filegvix
+newpv %s
+cop_file
 cop_arybase %d
 cop_line $line
 cop_warnings $warningsix
 EOT
-    $filegv->bytecode;
-    $stash->bytecode;
 }
 
 sub B::PMOP::bytecode {
@@ -472,10 +468,12 @@ sub B::GV::bytecode {
     my $egv = $gv->EGV;
     my $egvix = $egv->objix;
     ldsv($ix);
-    printf <<"EOT", $gv->FLAGS, $gv->GvFLAGS, $gv->LINE;
+    printf <<"EOT", $gv->FLAGS, $gv->GvFLAGS, $gv->LINE, pvstring($gv->FILE);
 sv_flags 0x%x
 xgv_flags 0x%x
 gp_line %d
+newpv %s
+gp_file
 EOT
     my $refcnt = $gv->REFCNT;
     printf("sv_refcnt_add %d\n", $refcnt - 1) if $refcnt > 1;
@@ -486,7 +484,7 @@ EOT
     } else {
 	if ($gvname !~ /^([^A-Za-z]|STDIN|STDOUT|STDERR|ARGV|SIG|ENV)$/) {
 	    my $i;
-	    my @subfield_names = qw(SV AV HV CV FILEGV FORM IO);
+	    my @subfield_names = qw(SV AV HV CV FORM IO);
 	    my @subfields = map($gv->$_(), @subfield_names);
 	    my @ixes = map($_->objix, @subfields);
 	    # Reset sv register for $gv
@@ -569,7 +567,7 @@ sub B::CV::bytecode {
     my $ix = $cv->objix;
     $cv->B::PVMG::bytecode;
     my $i;
-    my @subfield_names = qw(ROOT START STASH GV FILEGV PADLIST OUTSIDE);
+    my @subfield_names = qw(ROOT START STASH GV PADLIST OUTSIDE);
     my @subfields = map($cv->$_(), @subfield_names);
     my @ixes = map($_->objix, @subfields);
     # Save OP tree from CvROOT (first element of @subfields)
@@ -583,6 +581,7 @@ sub B::CV::bytecode {
 	printf "xcv_%s %d\n", lc($subfield_names[$i]), $ixes[$i];
     }
     printf "xcv_depth %d\nxcv_flags 0x%x\n", $cv->DEPTH, $cv->FLAGS;
+    printf "newpv %s\nxcv_file\n", pvstring($cv->FILE);
     # Now save all the subfields (except for CvROOT which was handled
     # above) and CvSTART (now the initial element of @subfields).
     shift @subfields; # bye-bye CvSTART
@@ -705,6 +704,10 @@ sub compile {
 	    $arg ||= shift @options;
 	    open(OUT, ">$arg") or return "$arg: $!\n";
 	    binmode OUT;
+	} elsif ($opt eq "a") {
+	    $arg ||= shift @options;
+	    open(OUT, ">>$arg") or return "$arg: $!\n";
+	    binmode OUT;
 	} elsif ($opt eq "D") {
 	    $arg ||= shift @options;
 	    foreach $arg (split(//, $arg)) {
@@ -813,6 +816,10 @@ extra arguments, it saves the main program.
 =item B<-ofilename>
 
 Output to filename instead of STDOUT.
+
+=item B<-afilename>
+
+Append output to filename.
 
 =item B<-->
 

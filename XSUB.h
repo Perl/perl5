@@ -17,6 +17,9 @@
 #define dXSTARG SV * targ = ((PL_op->op_private & OPpENTERSUB_HASTARG) \
 			     ? PAD_SV(PL_op->op_targ) : sv_newmortal())
 
+/* Should be used before final PUSHi etc. if not in PPCODE section. */
+#define XSprePUSH (sp = PL_stack_base + ax - 1)
+
 #define XSANY CvXSUBANY(cv)
 
 #define dXSI32 I32 ix = XSANY.any_i32
@@ -128,7 +131,7 @@
 #  define aTHX_		aTHX,
 #endif
 
-#if defined(PERL_CAPI)
+#if (defined(PERL_CAPI) || defined(PERL_IMPLICIT_SYS)) && !defined(PERL_CORE)
 #  ifndef NO_XSLOCKS
 #    undef closedir
 #    undef opendir
@@ -196,6 +199,7 @@
 #    define fstat		PerlLIO_fstat
 #    define ioctl		PerlLIO_ioctl
 #    define isatty		PerlLIO_isatty
+#    define link                PerlLIO_link
 #    define lseek		PerlLIO_lseek
 #    define lstat		PerlLIO_lstat
 #    define mktemp		PerlLIO_mktemp
@@ -203,7 +207,7 @@
 #    define read		PerlLIO_read
 #    define rename		PerlLIO_rename
 #    define setmode		PerlLIO_setmode
-#    define stat		PerlLIO_stat
+#    define stat(buf,sb)	PerlLIO_stat(buf,sb)
 #    define tmpnam		PerlLIO_tmpnam
 #    define umask		PerlLIO_umask
 #    define unlink		PerlLIO_unlink
@@ -237,6 +241,7 @@
 #    define setjmp		PerlProc_setjmp
 #    define longjmp		PerlProc_longjmp
 #    define signal		PerlProc_signal
+#    define getpid		PerlProc_getpid
 #    define htonl		PerlSock_htonl
 #    define htons		PerlSock_htons
 #    define ntohl		PerlSock_ntohl
@@ -283,4 +288,4 @@
 #  endif  /* NO_XSLOCKS */
 #endif  /* PERL_CAPI */
 
-#endif _INC_PERL_XSUB_H		/* include guard */
+#endif /* _INC_PERL_XSUB_H */		/* include guard */

@@ -194,6 +194,10 @@ SHELL = $sh
 # how to tr(anslate) newlines
 TRNL = '$trnl'
 
+# not used by Makefile but by installperl;
+# mentioned here so that metaconfig picks it up
+INSTALL_USR_BIN_PERL = $installusrbinperl
+
 !GROK!THIS!
 
 ## In the following dollars and backticks do not need the extra backslash.
@@ -257,7 +261,7 @@ lintflags = -hbvxac
 .c$(OBJ_EXT):
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
-all: $(FIRSTMAKEFILE) miniperl $(private) $(plextract) $(public) $(dynamic_ext) $(nonxs_ext)
+all: $(FIRSTMAKEFILE) miniperl extra.pods $(private) $(public) $(dynamic_ext) $(nonxs_ext)
 	@echo " ";
 	@echo "	Everything is up to date. 'make test' to run test suite."
 
@@ -270,7 +274,7 @@ compile: all
 translators:	miniperl lib/Config.pm FORCE
 	@echo " "; echo "	Making x2p stuff"; cd x2p; $(LDLIBPTH) $(MAKE) all
 
-utilities:	miniperl lib/Config.pm FORCE
+utilities:	miniperl lib/Config.pm $(plextract) FORCE
 	@echo " "; echo "	Making utilities"; cd utils; $(LDLIBPTH) $(MAKE) all
 
 
@@ -281,6 +285,9 @@ utilities:	miniperl lib/Config.pm FORCE
 # Apparently some makes require an action for the FORCE target.
 FORCE:
 	@sh -c true
+
+opmini$(OBJ_EXT): op.c
+	$(CCCMD) $(PLDLFLAGS) -DPERL_EXTERNAL_GLOB -o opmini$(OBJ_EXT) op.c
 
 miniperlmain$(OBJ_EXT): miniperlmain.c
 	$(CCCMD) $(PLDLFLAGS) $*.c
@@ -332,8 +339,9 @@ $(LIBPERL_NONSHR): perl$(OBJ_EXT) $(obj)
 	$(RMS) $(LIBPERL_NONSHR)
 	$(AR) rcu $(LIBPERL_NONSHR) perl$(OBJ_EXT) $(obj)
 
-$(MINIPERL_NONSHR): $(LIBPERL_NONSHR) miniperlmain$(OBJ_EXT)
-	$(CC) $(LDFLAGS) -o $(MINIPERL_NONSHR) miniperlmain$(OBJ_EXT) $(LIBPERL_NONSHR) $(LIBS)
+$(MINIPERL_NONSHR): $(LIBPERL_NONSHR) miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT)
+	$(CC) $(LDFLAGS) -o $(MINIPERL_NONSHR) miniperlmain$(OBJ_EXT) \
+	    opmini$(OBJ_EXT) $(LIBPERL_NONSHR) $(LIBS)
 
 MINIPERLEXP		= $(MINIPERL_NONSHR)
 
@@ -415,9 +423,28 @@ $(LIBPERL): $& perl$(OBJ_EXT) $(obj) $(LIBPERLEXPORT)
 # build problems but that's not obvious to the novice.
 # The Module used here must not depend on Config or any extensions.
 
-miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL)
-	$(LDLIBPTH) $(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain$(OBJ_EXT) $(LLIBPERL) $(libs)
-	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e 0 || $(MAKE) minitest
+!NO!SUBS!
+
+	case "${osname}${osvers}" in
+	next4*)
+		$spitshell >>Makefile <<'!NO!SUBS!'
+miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
+	$(CC) -o miniperl `echo $(obj) | sed 's/ op$(OBJ_EXT) / /'` \
+	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) perl$(OBJ_EXT) $(libs)
+	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+!NO!SUBS!
+		;;
+	*)
+		$spitshell >>Makefile <<'!NO!SUBS!'
+miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
+	$(LDLIBPTH) $(CC) $(LARGE) $(CLDFLAGS) -o miniperl \
+	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) $(LLIBPERL) $(libs)
+	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+!NO!SUBS!
+		;;
+	esac
+
+	$spitshell >>Makefile <<'!NO!SUBS!'
 
 perl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
 	$(SHRPENV) $(LDLIBPTH) $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
@@ -454,7 +481,7 @@ sperl$(OBJ_EXT): perl.c perly.h patchlevel.h $(h)
 # We have to call our ./makedir because Ultrix 4.3 make can't handle the line
 #	test -d lib/auto || mkdir lib/auto
 #
-preplibrary: miniperl lib/Config.pm $(plextract)
+preplibrary: miniperl lib/Config.pm
 	@sh ./makedir lib/auto
 	@echo "	AutoSplitting perl library"
 	$(LDLIBPTH) ./miniperl -Ilib -e 'use AutoSplit; \
@@ -463,7 +490,7 @@ preplibrary: miniperl lib/Config.pm $(plextract)
 # Take care to avoid modifying lib/Config.pm without reason
 # (If trying to create a new port and having problems with the configpm script, 
 # try 'make minitest' and/or commenting out the tests at the end of configpm.)
-lib/Config.pm: config.sh miniperl configpm
+lib/Config.pm: config.sh miniperl configpm lib/re.pm
 	$(LDLIBPTH) ./miniperl configpm configpm.tmp
 	sh mv-if-diff configpm.tmp $@
 
@@ -475,9 +502,18 @@ lib/re.pm: ext/re/re.pm
 	rm -f $@
 	cat ext/re/re.pm > $@
 
-$(plextract):	miniperl lib/Config.pm lib/re.pm
+$(plextract):	miniperl lib/Config.pm
 	$(LDLIBPTH) ./miniperl -Ilib $@.PL
-	
+
+extra.pods: miniperl
+	-@test -f extra.pods && rm -f `cat extra.pods`
+	-@rm -f extra.pods
+	-@for x in `grep -l '^=[a-z]' README.*` ; do \
+	    nx=`echo $$x | sed -e "s/README\.//"`; \
+	    $(LNS) ../$$x "pod/perl"$$nx".pod" ; \
+	    echo "pod/perl"$$nx".pod" >> extra.pods ; \
+	done
+
 install: all install.perl install.man
 
 install.perl:	all installperl
@@ -539,6 +575,8 @@ SYM  = global.sym globvar.sym perlio.sym pp.sym
 
 SYMH = perlvars.h intrpvar.h thrdvar.h
 
+CHMOD_W = chmod +w
+
 # The following files are generated automatically
 #	keywords.h:	keywords.pl
 #	opcode.h:	opcode.pl
@@ -557,6 +595,7 @@ SYMH = perlvars.h intrpvar.h thrdvar.h
 # To force them to run, type
 #	make regen_headers
 regen_headers:	FORCE
+	$(CHMOD_W) proto.h warnings.h lib/warnings.pm 
 	perl keywords.pl
 	perl opcode.pl
 	perl embed.pl
@@ -599,7 +638,8 @@ distclean:	clobber
 # Do not 'make _mopup' directly.
 _mopup:
 	rm -f *$(OBJ_EXT) *$(LIB_EXT) all perlmain.c
-	rm -f perl.exp ext.libs
+	-@test -f extra.pods && rm -f `cat extra.pods`
+	-rm -f perl.exp ext.libs extra.pods
 	-rm -f perl.export perl.dll perl.libexp perl.map perl.def
 	-rm -f perl.loadmap miniperl.loadmap perl.prelmap miniperl.prelmap
 	rm -f perl suidperl miniperl $(LIBPERL)

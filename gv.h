@@ -17,9 +17,9 @@ struct gp {
     GV *	gp_egv;		/* effective gv, if *glob */
     CV *	gp_cv;		/* subroutine value */
     U32		gp_cvgen;	/* generational validity of cached gv_cv */
-    I32		gp_lastexpr;	/* used by nothing_in_common() */
+    U32		gp_flags;	/* XXX unused */
     line_t	gp_line;	/* line first declared at (for -w) */
-    GV *	gp_filegv;	/* file first declared in (for -w) */
+    char *	gp_file;	/* file first declared in (for -w) */
 };
 
 #if defined(CRIPPLED_CC) && (defined(iAPX286) || defined(M_I286) || defined(I80286))
@@ -67,10 +67,11 @@ HV *GvHVn();
 #define GvCVGEN(gv)	(GvGP(gv)->gp_cvgen)
 #define GvCVu(gv)	(GvGP(gv)->gp_cvgen ? Nullcv : GvGP(gv)->gp_cv)
 
-#define GvLASTEXPR(gv)	(GvGP(gv)->gp_lastexpr)
+#define GvGPFLAGS(gv)	(GvGP(gv)->gp_flags)
 
 #define GvLINE(gv)	(GvGP(gv)->gp_line)
-#define GvFILEGV(gv)	(GvGP(gv)->gp_filegv)
+#define GvFILE(gv)	(GvGP(gv)->gp_file)
+#define GvFILEGV(gv)	(gv_fetchfile(GvFILE(gv)))
 
 #define GvEGV(gv)	(GvGP(gv)->gp_egv)
 #define GvENAME(gv)	GvNAME(GvEGV(gv) ? GvEGV(gv) : gv)
@@ -79,6 +80,7 @@ HV *GvHVn();
 #define GVf_INTRO	0x01
 #define GVf_MULTI	0x02
 #define GVf_ASSUMECV	0x04
+#define GVf_IN_PAD	0x08
 #define GVf_IMPORTED	0xF0
 #define GVf_IMPORTED_SV	  0x10
 #define GVf_IMPORTED_AV	  0x20
@@ -117,6 +119,10 @@ HV *GvHVn();
 #define GvIMPORTED_CV_on(gv)	(GvFLAGS(gv) |= GVf_IMPORTED_CV)
 #define GvIMPORTED_CV_off(gv)	(GvFLAGS(gv) &= ~GVf_IMPORTED_CV)
 
+#define GvIN_PAD(gv)		(GvFLAGS(gv) & GVf_IN_PAD)
+#define GvIN_PAD_on(gv)		(GvFLAGS(gv) |= GVf_IN_PAD)
+#define GvIN_PAD_off(gv)	(GvFLAGS(gv) &= ~GVf_IN_PAD)
+
 #define Nullgv Null(GV*)
 
 #define DM_UID   0x003
@@ -135,4 +141,3 @@ HV *GvHVn();
 #define GV_ADDWARN	0x04	/* add, but warn if symbol wasn't already there */
 #define GV_ADDINEVAL	0x08	/* add, as though we're doing so within an eval */
 #define GV_NOINIT	0x10	/* add, but don't init symbol, if type != PVGV */
-#define GV_ADDOUR	0x20	/* add "our" variable */

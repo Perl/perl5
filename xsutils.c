@@ -35,10 +35,6 @@ Perl_boot_core_xsutils(pTHX)
     newXS("attributes::bootstrap",	XS_attributes_bootstrap,	file);
 }
 
-#ifdef PERL_OBJECT
-#define NO_XSLOCKS
-#endif  /* PERL_OBJECT */
-
 #include "XSUB.h"
 
 static int

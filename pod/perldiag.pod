@@ -80,7 +80,7 @@ See L<perlfunc/pack>.
 
 =item / must be followed by a*, A* or Z*
 
-(F) You had an pack template indicating a counted-length string,
+(F) You had a pack template indicating a counted-length string,
 Currently the only things that can have their length counted are a*, A* or Z*.
 See L<perlfunc/pack>.
 
@@ -110,12 +110,17 @@ your signed integers.  See L<perlfunc/unpack>.
 
 (W) You used a backslash-character combination which is not recognized
 by Perl.  This combination appears in an interpolated variable or a 
-C<'>-delimited regular expression.
+C<'>-delimited regular expression.  The character was understood literally.
+
+=item /%s/: Unrecognized escape \\%c in character class passed through
+
+(W) You used a backslash-character combination which is not recognized
+by Perl inside character classes.  The character was understood literally.
 
 =item /%s/ should probably be written as "%s"
 
 (W) You have used a pattern where Perl expected to find a string,
-like in the first argument to C<join>.  Perl will treat the true
+as in the first argument to C<join>.  Perl will treat the true
 or false result of matching the pattern against $_ as the string,
 which is probably not what you had in mind.
 
@@ -135,23 +140,23 @@ definition ahead of the call to get proper prototype checking.  Alternatively,
 if you are certain that you're calling the function correctly, you may put
 an ampersand before the name to avoid the warning.  See L<perlsub>.
 
-=item %s argument is not a HASH element
+=item %s argument is not a HASH or ARRAY element
 
-(F) The argument to exists() must be a hash element, such as
-
-    $foo{$bar}
-    $ref->[12]->{"susie"}
-
-=item %s argument is not a HASH element or slice
-
-(F) The argument to delete() must be either a hash element, such as
+(F) The argument to exists() must be a hash or array element, such as:
 
     $foo{$bar}
-    $ref->[12]->{"susie"}
+    $ref->[12]->["susie"]
 
-or a hash slice, such as
+=item %s argument is not a HASH or ARRAY element or slice
 
-    @foo{$bar, $baz, $xyzzy}
+(F) The argument to delete() must be either a hash or array element, such as:
+
+    $foo{$bar}
+    $ref->[12]->["susie"]
+
+or a hash or array slice, such as:
+
+    @foo[$bar, $baz, $xyzzy]
     @{$ref->[12]}{"susie", "queue"}
 
 =item %s did not return a true value
@@ -275,7 +280,7 @@ the string being unpacked.  See L<perlfunc/pack>.
 (F) You wrote C<require E<lt>fileE<gt>> when you should have written
 C<require 'file'>.
 
-=item accept() on closed fd
+=item accept() on closed socket
 
 (W) You tried to do an accept on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/accept>.
@@ -513,7 +518,7 @@ likely depends on its correct operation, Perl just gave up.
 (4294967295) and therefore non-portable between systems.  See
 L<perlport> for more on portability concerns.
 
-=item bind() on closed fd
+=item bind() on closed socket
 
 (W) You tried to do a bind on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/bind>.
@@ -537,7 +542,7 @@ so it was truncated to the string shown.
 (F) A subroutine invoked from an external package via perl_call_sv()
 exited by calling exit.
 
-=item Can't "goto" outside a block
+=item Can't "goto" out of a pseudo block
 
 (F) A "goto" statement was executed to jump out of what might look
 like a block, except that it isn't a proper block.  This usually
@@ -549,22 +554,24 @@ is a no-no.  See L<perlfunc/goto>.
 (F) A "goto" statement was executed to jump into the middle of a
 foreach loop.  You can't get there from here.  See L<perlfunc/goto>.
 
-=item Can't "last" outside a block
+=item Can't "last" outside a loop block
 
 (F) A "last" statement was executed to break out of the current block,
 except that there's this itty bitty problem called there isn't a
 current block.  Note that an "if" or "else" block doesn't count as a
-"loopish" block, as doesn't a block given to sort().  You can usually double
-the curlies to get the same effect though, because the inner curlies
-will be considered a block that loops once.  See L<perlfunc/last>.
+"loopish" block, as doesn't a block given to sort(), map() or grep().
+You can usually double the curlies to get the same effect though,
+because the inner curlies will be considered a block that loops once.
+See L<perlfunc/last>.
 
-=item Can't "next" outside a block
+=item Can't "next" outside a loop block
 
 (F) A "next" statement was executed to reiterate the current block, but
 there isn't a current block.  Note that an "if" or "else" block doesn't
-count as a "loopish" block, as doesn't a block given to sort().  You can
-usually double the curlies to get the same effect though, because the inner
-curlies will be considered a block that loops once.  See L<perlfunc/next>.
+count as a "loopish" block, as doesn't a block given to sort(), map()
+or grep().  You can usually double the curlies to get the same effect
+though, because the inner curlies will be considered a block that
+loops once.  See L<perlfunc/next>.
 
 =item Can't read CRTL environ
 
@@ -573,13 +580,14 @@ from the CRTL's internal environment array and discovered the array was
 missing.  You need to figure out where your CRTL misplaced its environ
 or define F<PERL_ENV_TABLES> (see L<perlvms>) so that environ is not searched.
 
-=item Can't "redo" outside a block
+=item Can't "redo" outside a loop block
 
 (F) A "redo" statement was executed to restart the current block, but
 there isn't a current block.  Note that an "if" or "else" block doesn't
-count as a "loopish" block, as doesn't a block given to sort().  You can
-usually double the curlies to get the same effect though, because the inner
-curlies will be considered a block that loops once.  See L<perlfunc/redo>.
+count as a "loopish" block, as doesn't a block given to sort(), map()
+or grep().  You can usually double the curlies to get the same effect
+though, because the inner curlies will be considered a block that
+loops once.  See L<perlfunc/redo>.
 
 =item Can't bless non-reference value
 
@@ -631,7 +639,7 @@ Something like this will reproduce the error:
 (F) You called C<perl -x/foo/bar>, but C</foo/bar> is not a directory
 that you can chdir to, possibly because it doesn't exist.
 
-=item Can't check filesystem of script "%s"
+=item Can't check filesystem of script "%s" for nosuid
 
 (P) For some reason you can't check the filesystem of the script for nosuid.
 
@@ -821,6 +829,15 @@ L<perlfunc/goto>.
 (F) The "goto subroutine" call can't be used to jump out of an eval "string".
 (You can use it to jump out of an eval {BLOCK}, but you probably don't want to.)
 
+=item Can't ignore signal CHLD, forcing to default
+
+(W) Perl has detected that it is being run with the SIGCHLD signal
+(sometimes known as SIGCLD) disabled.  Since disabling this signal
+will interfere with proper determination of exit status of child
+processes, Perl has reset the signal to its default value.
+This situation typically indicates that the parent program under
+which Perl may be running (e.g. cron) is being very careless.
+
 =item Can't localize through a reference
 
 (F) You said something like C<local $$ref>, which Perl can't currently
@@ -881,8 +898,8 @@ change it, such as with an auto-increment.
 
 =item Can't modify non-lvalue subroutine call
 
-(F) Subroutines used in lvalue context should be marked as such, see
-L<perlsub/"Lvalue subroutines">.
+(F) Subroutines meant to be used in lvalue context should be declared as
+such, see L<perlsub/"Lvalue subroutines">.
 
 =item Can't modify nonexistent substring
 
@@ -1051,7 +1068,7 @@ most likely an unexpected right brace '}'.
 reference of the type needed.  You can use the ref() function to
 test the type of the reference, if need be.
 
-=item Can't use \1 to mean $1 in expression
+=item Can't use \%c to mean $%c in expression
 
 (W) In an ordinary expression, backslash is a unary operator that creates
 a reference to its argument.  The use of backslash to indicate a backreference
@@ -1059,7 +1076,7 @@ to a matched substring is valid only as part of a regular expression pattern.
 Trying to do this in ordinary Perl code produces a value that prints
 out looking like SCALAR(0xdecaf).  Use the $1 form instead.
 
-=item Can't use bareword ("%s") as %s ref while \"strict refs\" in use
+=item Can't use bareword ("%s") as %s ref while "strict refs" in use
 
 (F) Only hard references are allowed by "strict refs".  Symbolic references
 are disallowed.  See L<perlref>.
@@ -1113,13 +1130,15 @@ package. If method name is C<???>, this is an internal error.
 =item Character class [:%s:] unknown
 
 (F) The class in the character class [: :] syntax is unknown.
+See L<perlre>.
 
 =item Character class syntax [%s] belongs inside character classes
 
 (W) The character class constructs [: :], [= =], and [. .]  go
 I<inside> character classes, the [] are part of the construct,
-for example: /[012[:alpha:]345]/.  Note that the last two constructs
-are not currently implemented, they are placeholders for future extensions.
+for example: /[012[:alpha:]345]/.  Note that [= =] and [. .]
+are not currently implemented; they are simply placeholders for
+future extensions.
 
 =item Character class syntax [. .] is reserved for future extensions
 
@@ -1168,7 +1187,7 @@ than in the regular expression engine; or rewriting the regular
 expression so that it is simpler or backtracks less.  (See L<perlbook>
 for information on I<Mastering Regular Expressions>.)
 
-=item connect() on closed fd
+=item connect() on closed socket
 
 (W) You tried to do a connect on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/connect>.
@@ -1300,10 +1319,11 @@ ugly.  Your code will be interpreted as an attempt to call a method
 named "elseif" for the class returned by the following block.  This is
 unlikely to be what you want.
 
-=item END failed--cleanup aborted
+=item %s failed--call queue aborted
 
-(F) An untrapped exception was raised while executing an END subroutine.
-The interpreter is immediately exited.
+(F) An untrapped exception was raised while executing a STOP, INIT, or
+END subroutine.  Processing of the remainder of the queue of such
+routines has been prematurely ended.
 
 =item entering effective %s failed
 
@@ -1378,6 +1398,13 @@ the effect of blessing the reference into the package main.  This is
 usually not what you want.  Consider providing a default target
 package, e.g. bless($ref, $p || 'MyPackage');
 
+=item false [] range "%s" in regexp
+
+(W) A character class range must start and end at a literal character, not
+another character class like C<\d> or C<[:alpha:]>.  The "-" in your false
+range is interpreted as a literal "-".  Consider quoting the "-",  "\-".
+See L<perlre>.
+
 =item Fatal VMS error at %s, line %d
 
 (P) An error peculiar to VMS.  Something untoward happened in a VMS system
@@ -1407,7 +1434,7 @@ L<perlfunc/open>.
 =item Filehandle %s opened only for output
 
 (W) You tried to read from a filehandle opened only for writing.  If you
-intended it to be a read-write filehandle, you needed to open it with
+intended it to be a read/write filehandle, you needed to open it with
 "+E<lt>" or "+E<gt>" or "+E<gt>E<gt>" instead of with "E<lt>" or nothing.  If
 you intended only to read from the file, use "E<lt>".  See
 L<perlfunc/open>.
@@ -1462,7 +1489,7 @@ when you meant
 because if it did, it'd feel morally obligated to return every hostname
 on the Internet.
 
-=item get{sock,peer}name() on closed fd
+=item get%sname() on closed socket
 
 (W) You tried to get a socket or peer socket name on a closed socket.
 Did you forget to check the return value of your socket() call?
@@ -1558,7 +1585,7 @@ don't take to this kindly.
 
 =item Illegal binary digit %s
 
-(F) You used a digit other than 0 and 1 in a binary number.
+(F) You used a digit other than 0 or 1 in a binary number.
 
 =item Illegal octal digit %s
 
@@ -1627,7 +1654,7 @@ known value, using trustworthy data.  See L<perlsec>.
 =item Integer overflow in %s number
 
 (W) The hexadecimal, octal or binary number you have specified either
-as a literal in your code or as a scalar is too big for your
+as a literal or as an argument to hex() or oct() is too big for your
 architecture, and has been converted to a floating point number.  On a
 32-bit architecture the largest hexadecimal, octal or binary number
 representable without overflow is 0xFFFFFFFF, 037777777777, or
@@ -1678,11 +1705,10 @@ by Perl or by a user-supplied handler.  See L<attributes>.
 The indicated attributes for a subroutine or variable were not recognized
 by Perl or by a user-supplied handler.  See L<attributes>.
 
-=item invalid [] range in regexp
+=item invalid [] range "%s" in regexp
 
 (F) The range specified in a character class had a minimum character
-greater than the maximum character, or the range didn't start/end with
-a literal character.  See L<perlre>.
+greater than the maximum character.  See L<perlre>.
 
 =item Invalid conversion in %s: "%s"
 
@@ -1740,7 +1766,7 @@ L<perlfunc/last>.
 (F) While under the C<use filetest> pragma, switching the real and
 effective uids or gids failed.
 
-=item listen() on closed fd
+=item listen() on closed socket
 
 (W) You tried to do a listen on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/listen>.
@@ -1878,6 +1904,11 @@ See L<perlsec>.
 
 (F) A setuid script can't be specified by the user.
 
+=item No %s specified for -%c
+
+(F) The indicated command line switch needs a mandatory argument, but
+you haven't specified one.
+
 =item No comma allowed after %s
 
 (F) A list operator that has a filehandle or "indirect object" is not
@@ -1962,18 +1993,18 @@ your system.
 (F) Configure didn't find anything resembling the setreuid() call for
 your system.
 
-=item No space allowed after B<-I>
+=item No space allowed after -%c
 
-(F) The argument to B<-I> must follow the B<-I> immediately with no
-intervening space.
+(F) The argument to the indicated command line switch must follow immediately
+after the switch, without intervening spaces.
 
-=item No such array field
+=item No such pseudo-hash field "%s"
 
 (F) You tried to access an array as a hash, but the field name used is
 not defined.  The hash at index 0 should map all valid field names to
 array indices for that to work.
 
-=item No such field "%s" in variable %s of type %s
+=item No such pseudo-hash field "%s" in variable %s of type %s
 
 (F) You tried to access a field of a typed variable where the type
 does not know about the field name.  The field names are looked up in
@@ -2140,6 +2171,12 @@ expecting an operator.  The parser has assumed you really meant
 to use an operator, but this is highly likely to be incorrect.
 For example, if you say "*foo *foo" it will be interpreted as
 if you said "*foo * 'foo'".
+
+=item Out of memory!
+
+(X) The malloc() function returned 0, indicating there was insufficient
+remaining memory (or virtual memory) to satisfy the request.  Perl
+has no option but to exit immediately.
 
 =item Out of memory for yacc stack
 
@@ -2333,6 +2370,10 @@ was string.
 
 (P) The lexer got into a bad state while processing a case modifier.
 
+=item panic: %s
+
+(P) An internal error.
+
 =item Parentheses missing around "%s" list
 
 (W) You said something like
@@ -2363,7 +2404,7 @@ perspective, it's probably not what you intended.
 
 =item POSIX getpgrp can't take an argument
 
-(F) Your C compiler uses POSIX getpgrp(), which takes no argument, unlike
+(F) Your system has POSIX getpgrp(), which takes no argument, unlike
 the BSD version, which takes a pid.
 
 =item Possible Y2K bug: %s
@@ -2442,12 +2483,12 @@ instead of "||".
 
 See Server error.
 
-=item print on closed filehandle %s
+=item print() on closed filehandle %s
 
 (W) The filehandle you're printing on got itself closed sometime before now.
 Check your logic flow.
 
-=item printf on closed filehandle %s
+=item printf() on closed filehandle %s
 
 (W) The filehandle you're writing to got itself closed sometime before now.
 Check your logic flow.
@@ -2472,7 +2513,7 @@ are outside the range which can be represented by integers internally.
 One possible workaround is to force Perl to use magical string
 increment by prepending "0" to your numbers.
 
-=item Read on closed filehandle %s
+=item readline() on closed filehandle %s
 
 (W) The filehandle you're reading from got itself closed sometime before now.
 Check your logic flow.
@@ -2613,9 +2654,9 @@ that had previously been marked as free.
 (W) A nearby syntax error was probably caused by a missing semicolon,
 or possibly some other missing operator, such as a comma.
 
-=item Send on closed socket
+=item send() on closed socket
 
-(W) The filehandle you're sending to got itself closed sometime before now.
+(W) The socket you're sending to got itself closed sometime before now.
 Check your logic flow.
 
 =item Sequence (? incomplete
@@ -2676,6 +2717,11 @@ think so.
 the seteuid() system call (or equivalent), or at least Configure didn't
 think so.
 
+=item setpgrp can't take arguments
+
+(F) Your system has the setpgrp() from BSD 4.2, which takes no arguments,
+unlike POSIX setpgid(), which takes a process ID and process group ID.
+
 =item setrgid() not implemented
 
 (F) You tried to assign to C<$(>, and your operating system doesn't support
@@ -2697,7 +2743,7 @@ because the world might have written on it already.
 
 (F) You don't have System V shared memory IPC on your system.
 
-=item shutdown() on closed fd
+=item shutdown() on closed socket
 
 (W) You tried to do a shutdown on a closed socket.  Seems a bit superfluous.
 
@@ -2835,7 +2881,7 @@ into Perl yourself.
 machine.  In some machines the functionality can exist but be
 unconfigured.  Consult your system support.
 
-=item Syswrite on closed filehandle
+=item syswrite() on closed filehandle
 
 (W) The filehandle you're writing to got itself closed sometime before now.
 Check your logic flow.
@@ -2889,7 +2935,7 @@ will deny it.
 if the last stat that wrote to the stat buffer already went past
 the symlink to get to the real file.  Use an actual filename instead.
 
-=item This Perl can't reset CRTL eviron elements (%s)
+=item This Perl can't reset CRTL environ elements (%s)
 
 =item This Perl can't set CRTL environ elements (%s=%s)
 
@@ -3056,9 +3102,9 @@ representative, who probably put it there in the first place.
 
 =item Unknown open() mode '%s'
 
-(F) The second argument of 3-arguments open is not one from the list
-of C<L<lt>>, C<L<gt>>, C<E<gt>E<gt>>, C<+L<lt>>, C<+L<gt>>,
-C<+E<gt>E<gt>>, C<-|>, C<|-> of possible open() modes.
+(F) The second argument of 3-argument open() is not among the list
+of valid modes: C<L<lt>>, C<L<gt>>, C<E<gt>E<gt>>, C<+L<lt>>,
+C<+L<gt>>, C<+E<gt>E<gt>>, C<-|>, C<|->.
 
 =item Unknown process %x sent message to prime_env_iter: %s
 
@@ -3228,7 +3274,7 @@ e.g. C<&our()>, or C<Foo::our()>.
 because there's a better way to do it, and also because the old way has
 bad side effects.
 
-=item Use of uninitialized value
+=item Use of uninitialized value%s
 
 (W) An undefined value was used as if it were already defined.  It was
 interpreted as a "" or a 0, but maybe it was a mistake.  To suppress this
@@ -3403,7 +3449,7 @@ but in actual fact, you got
 
 So put in parentheses to say what you really mean.
 
-=item Write on closed filehandle %s
+=item write() on closed filehandle %s
 
 (W) The filehandle you're writing to got itself closed sometime before now.
 Check your logic flow.
@@ -3446,11 +3492,11 @@ already have a subroutine of that name declared, which means that Perl 5
 will try to call the subroutine when the assignment is executed, which is
 probably not what you want.  (If it IS what you want, put an & in front.)
 
-=item [gs]etsockopt() on closed fd
+=item %cetsockopt() on closed fd
 
 (W) You tried to get or set a socket option on a closed socket.
 Did you forget to check the return value of your socket() call?
-See L<perlfunc/getsockopt>.
+See L<perlfunc/getsockopt> and L<perlfunc/setsockopt>.
 
 =item \1 better written as $1
 

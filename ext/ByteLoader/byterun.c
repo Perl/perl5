@@ -34,7 +34,7 @@ static int optype_size[] = {
     sizeof(LISTOP),
     sizeof(PMOP),
     sizeof(SVOP),
-    sizeof(GVOP),
+    sizeof(PADOP),
     sizeof(PVOP),
     sizeof(LOOP),
     sizeof(COP)
@@ -401,11 +401,11 @@ byterun(pTHXo_ struct bytestream bs)
 		*(SV**)&CvGV(bytecode_sv) = arg;
 		break;
 	    }
-	  case INSN_XCV_FILEGV:		/* 48 */
+	  case INSN_XCV_FILE:		/* 48 */
 	    {
-		svindex arg;
-		BGET_svindex(arg);
-		*(SV**)&CvFILEGV(bytecode_sv) = arg;
+		pvcontents arg;
+		BGET_pvcontents(arg);
+		CvFILE(bytecode_sv) = arg;
 		break;
 	    }
 	  case INSN_XCV_DEPTH:		/* 49 */
@@ -590,11 +590,11 @@ byterun(pTHXo_ struct bytestream bs)
 		*(SV**)&GvCV(bytecode_sv) = arg;
 		break;
 	    }
-	  case INSN_GP_FILEGV:		/* 75 */
+	  case INSN_GP_FILE:		/* 75 */
 	    {
-		svindex arg;
-		BGET_svindex(arg);
-		*(SV**)&GvFILEGV(bytecode_sv) = arg;
+		pvcontents arg;
+		BGET_pvcontents(arg);
+		GvFILE(bytecode_sv) = arg;
 		break;
 	    }
 	  case INSN_GP_IO:		/* 76 */
@@ -779,11 +779,11 @@ byterun(pTHXo_ struct bytestream bs)
 		cSVOP->op_sv = arg;
 		break;
 	    }
-	  case INSN_OP_GV:		/* 102 */
+	  case INSN_OP_PADIX:		/* 102 */
 	    {
-		svindex arg;
-		BGET_svindex(arg);
-		*(SV**)&cGVOP->op_gv = arg;
+		PADOFFSET arg;
+		BGET_U32(arg);
+		cPADOP->op_padix = arg;
 		break;
 	    }
 	  case INSN_OP_PV:		/* 103 */
@@ -828,18 +828,18 @@ byterun(pTHXo_ struct bytestream bs)
 		cCOP->cop_label = arg;
 		break;
 	    }
-	  case INSN_COP_STASH:		/* 109 */
+	  case INSN_COP_STASHPV:		/* 109 */
 	    {
-		svindex arg;
-		BGET_svindex(arg);
-		*(SV**)&cCOP->cop_stash = arg;
+		pvcontents arg;
+		BGET_pvcontents(arg);
+		BSET_cop_stashpv(cCOP, arg);
 		break;
 	    }
-	  case INSN_COP_FILEGV:		/* 110 */
+	  case INSN_COP_FILE:		/* 110 */
 	    {
-		svindex arg;
-		BGET_svindex(arg);
-		*(SV**)&cCOP->cop_filegv = arg;
+		pvcontents arg;
+		BGET_pvcontents(arg);
+		BSET_cop_file(cCOP, arg);
 		break;
 	    }
 	  case INSN_COP_SEQ:		/* 111 */
@@ -860,7 +860,7 @@ byterun(pTHXo_ struct bytestream bs)
 	    {
 		line_t arg;
 		BGET_U16(arg);
-		cCOP->cop_line = arg;
+		BSET_cop_line(cCOP, arg);
 		break;
 	    }
 	  case INSN_COP_WARNINGS:		/* 114 */

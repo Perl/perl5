@@ -1387,7 +1387,7 @@ yyparse()
 
     struct ysv *ysave;
     New(73, ysave, 1, struct ysv);
-    SAVEDESTRUCTOR(yydestruct, ysave);
+    SAVEDESTRUCTOR_X(yydestruct, ysave);
     ysave->oldyydebug	= yydebug;
     ysave->oldyynerrs	= yynerrs;
     ysave->oldyyerrflag	= yyerrflag;
@@ -1662,7 +1662,7 @@ case 21:
 break;
 case 22:
 #line 203 "perly.y"
-{ yyval.opval = scope(yyvsp[0].opval); }
+{ (yyvsp[0].opval)->op_flags |= OPf_PARENS; yyval.opval = scope(yyvsp[0].opval); }
 break;
 case 23:
 #line 205 "perly.y"
@@ -1826,7 +1826,7 @@ case 59:
 #line 338 "perly.y"
 { STRLEN n_a; char *name = SvPV(((SVOP*)yyvsp[0].opval)->op_sv,n_a);
 			  if (strEQ(name, "BEGIN") || strEQ(name, "END")
-			      || strEQ(name, "INIT"))
+			      || strEQ(name, "STOP") || strEQ(name, "INIT"))
 			      CvSPECIAL_on(PL_compcv);
 			  yyval.opval = yyvsp[0].opval; }
 break;
@@ -2481,7 +2481,6 @@ yyaccept:
 }
 
 #ifdef PERL_OBJECT
-#define NO_XSLOCKS
 #include "XSUB.h"
 #endif
 

@@ -353,16 +353,18 @@ Unmatched right curly bracket at (re_eval 1) line 1, at end of line
 syntax error at (re_eval 1) line 1, near ""{"}"
 Compilation failed in regexp at - line 1.
 ########
-BEGIN { @ARGV = qw(a b c) }
+BEGIN { @ARGV = qw(a b c d e) }
 BEGIN { print "argv <@ARGV>\nbegin <",shift,">\n" }
 END { print "end <",shift,">\nargv <@ARGV>\n" }
 INIT { print "init <",shift,">\n" }
+STOP { print "stop <",shift,">\n" }
 EXPECT
-argv <a b c>
+argv <a b c d e>
 begin <a>
-init <b>
-end <c>
-argv <>
+stop <b>
+init <c>
+end <d>
+argv <e>
 ########
 -l
 # fdopen from a system descriptor to a system descriptor used to close
@@ -504,4 +506,4 @@ else {
   if ($x == 0) { print "" } else { print $x }
 }
 EXPECT
-Use of uninitialized value at - line 4.
+Use of uninitialized value in numeric eq (==) at - line 4.

@@ -47,6 +47,7 @@ sections:
     perltie		Perl objects hidden behind simple variables
     perlbot		Perl OO tricks and examples
     perlipc		Perl interprocess communication
+    perlfork		Perl fork() information
     perlthrtut		Perl threads tutorial
     perldbmfilter	Perl DBM Filters
 
@@ -69,6 +70,7 @@ sections:
     perlcall		Perl calling conventions from C
 
     perltodo		Perl things to do
+    perlhack		Perl hackers guide
     perlhist		Perl history records
 
 (If you're intending to read these straight through for the first time,
@@ -295,7 +297,7 @@ Perl developers, please write to perl-thanks@perl.org .
  s2p	sed to perl translator
 
  http://www.perl.com/	    the Perl Home Page
- http://www.perl.com/CPAN   the Comphrehensive Perl Archive
+ http://www.perl.com/CPAN   the Comprehensive Perl Archive
 
 =head1 DIAGNOSTICS
 

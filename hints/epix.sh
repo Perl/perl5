@@ -43,9 +43,9 @@ d_flock='undef'
 # of libswanted excludes some libraries found there.  You may want to
 # prevent "ucb" from being removed from libswanted and see if perl will
 # build on your system.
-ldflags='-non_shared -systype svr4 -L/svr4/usr/lib -L/svr4/usr/lib/cmplrs/cc -L/usr/ccs/lib -L/svr4/usr/ucblib'
-ccflags='-systype svr4 -D__STDC__=0 -I/svr4/usr/include -I/svr4/usr/ucbinclude'
-cppflags='-D__STDC__=0 -I/svr4/usr/include -I/svr4/usr/ucbinclude'
+ldflags="$ldflags -non_shared -systype svr4 -L/svr4/usr/lib -L/svr4/usr/lib/cmplrs/cc -L/usr/ccs/lib -L/svr4/usr/ucblib"
+ccflags="$ccflags -systype svr4 -D__STDC__=0 -I/svr4/usr/include -I/svr4/usr/ucbinclude"
+cppflags="$ccflags -D__STDC__=0 -I/svr4/usr/include -I/svr4/usr/ucbinclude"
 
 # Don't use problematic libraries:
 

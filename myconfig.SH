@@ -33,8 +33,9 @@ Summary of my $package (revision $baserev version $PERL_VERSION subversion $PERL
     uname='$myuname'
     config_args='$config_args'
     hint=$hint, useposix=$useposix, d_sigaction=$d_sigaction
-    usethreads=$usethreads useperlio=$useperlio d_sfio=$d_sfio
-    use64bits=$use64bits usemultiplicity=$usemultiplicity
+    usethreads=$usethreads use5005threads=$use5005threads useithreads=$useithreads
+    usesocks=$usesocks useperlio=$useperlio d_sfio=$d_sfio
+    use64bits=$use64bits uselargefiles=$uselargefiles usemultiplicity=$usemultiplicity
   Compiler:
     cc='$cc', optimize='$optimize', gccversion=$gccversion
     cppflags='$cppflags'

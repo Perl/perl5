@@ -42,7 +42,7 @@ use warnings 'uninitialized' ;
 }
 my $b ; chop $b ;
 EXPECT
-Use of uninitialized value at - line 8.
+Use of uninitialized value in scalar chop at - line 8.
 ########
 
 # Check runtime scope of pragma
@@ -53,7 +53,7 @@ no warnings ;
 }
 my $b ; chop $b ;
 EXPECT
-Use of uninitialized value at - line 6.
+Use of uninitialized value in scalar chop at - line 6.
 ########
 
 # Check runtime scope of pragma
@@ -64,7 +64,7 @@ no warnings ;
 }
 &$a ;
 EXPECT
-Use of uninitialized value at - line 6.
+Use of uninitialized value in scalar chop at - line 6.
 ########
 
 use warnings 'deprecated' ;
@@ -103,7 +103,7 @@ require "./abc";
 my $a ; chop $a ;
 EXPECT
 Use of EQ is deprecated at ./abc line 2.
-Use of uninitialized value at - line 3.
+Use of uninitialized value in scalar chop at - line 3.
 ########
 
 --FILE-- abc.pm
@@ -116,7 +116,7 @@ use abc;
 my $a ; chop $a ;
 EXPECT
 Use of EQ is deprecated at abc.pm line 2.
-Use of uninitialized value at - line 3.
+Use of uninitialized value in scalar chop at - line 3.
 ########
 
 # Check scope of pragma with eval
@@ -137,7 +137,7 @@ eval {
 }; print STDERR $@ ;
 my $b ; chop $b ;
 EXPECT
-Use of uninitialized value at - line 6.
+Use of uninitialized value in scalar chop at - line 6.
 ########
 
 # Check scope of pragma with eval
@@ -147,8 +147,8 @@ eval {
 }; print STDERR $@ ;
 my $b ; chop $b ;
 EXPECT
-Use of uninitialized value at - line 5.
-Use of uninitialized value at - line 7.
+Use of uninitialized value in scalar chop at - line 5.
+Use of uninitialized value in scalar chop at - line 7.
 ########
 
 # Check scope of pragma with eval
@@ -159,7 +159,7 @@ eval {
 }; print STDERR $@ ;
 my $b ; chop $b ;
 EXPECT
-Use of uninitialized value at - line 8.
+Use of uninitialized value in scalar chop at - line 8.
 ########
 
 # Check scope of pragma with eval
@@ -223,7 +223,7 @@ eval q[
 ]; print STDERR $@;
 my $b ; chop $b ;
 EXPECT
-Use of uninitialized value at (eval 1) line 3.
+Use of uninitialized value in scalar chop at (eval 1) line 3.
 ########
 
 # Check scope of pragma with eval
@@ -233,8 +233,8 @@ eval '
 '; print STDERR $@ ;
 my $b ; chop $b ;
 EXPECT
-Use of uninitialized value at (eval 1) line 2.
-Use of uninitialized value at - line 7.
+Use of uninitialized value in scalar chop at (eval 1) line 2.
+Use of uninitialized value in scalar chop at - line 7.
 ########
 
 # Check scope of pragma with eval
@@ -245,7 +245,7 @@ eval '
 '; print STDERR $@ ;
 my $b ; chop $b ;
 EXPECT
-Use of uninitialized value at - line 8.
+Use of uninitialized value in scalar chop at - line 8.
 ########
 
 # Check scope of pragma with eval
@@ -303,6 +303,6 @@ no warnings 'deprecated' ;
 1 if $a EQ $b ;
 EXPECT
 Use of EQ is deprecated at - line 6.
-Use of uninitialized value at - line 9.
-Use of uninitialized value at - line 11.
-Use of uninitialized value at - line 11.
+Use of uninitialized value in scalar chop at - line 9.
+Use of uninitialized value in string eq at - line 11.
+Use of uninitialized value in string eq at - line 11.

@@ -154,7 +154,6 @@ ext/DynaLoader/DynaLoader_pm.PL
 ext/DynaLoader/Makefile.PL	
 ext/DynaLoader/README	
 ext/DynaLoader/dl_aix.xs	aix
-ext/DynaLoader/dl_cygwin.xs	cygwin
 ext/DynaLoader/dl_dld.xs	rsanders
 ext/DynaLoader/dl_dlopen.xs	timb
 ext/DynaLoader/dl_hpux.xs	hpux

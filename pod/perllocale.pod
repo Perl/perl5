@@ -641,11 +641,12 @@ case-mapping table is in effect.
 
 =item *
 
-If the decimal point character in the C<LC_NUMERIC> locale is
-surreptitiously changed from a dot to a comma, C<sprintf("%g",
-0.123456e3)> produces a string result of "123,456". Many people would
-interpret this as one hundred and twenty-three thousand, four hundred
-and fifty-six.
+Some systems are broken in that they allow the "C" locale to be
+overridden by users.  If the decimal point character in the
+C<LC_NUMERIC> category of the "C" locale is surreptitiously changed
+from a dot to a comma, C<sprintf("%g", 0.123456e3)> produces a
+string result of "123,456".  Many people would interpret this as
+one hundred and twenty-three thousand, four hundred and fifty-six.
 
 =item *
 
@@ -713,10 +714,6 @@ operand of C<=~> becomes tainted when C<use locale> in effect
 if modified as a result of a substitution based on a regular
 expression match involving C<\w>, C<\W>, C<\s>, or C<\S>; or of
 case-mapping with C<\l>, C<\L>,C<\u> or C<\U>.
-
-=item B<In-memory formatting function> (sprintf()):
-
-Result is tainted if C<use locale> is in effect.
 
 =item B<Output formatting functions> (printf() and write()):
 

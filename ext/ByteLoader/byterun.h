@@ -64,7 +64,7 @@ enum {
     INSN_XCV_START,			/* 45 */
     INSN_XCV_ROOT,			/* 46 */
     INSN_XCV_GV,			/* 47 */
-    INSN_XCV_FILEGV,			/* 48 */
+    INSN_XCV_FILE,			/* 48 */
     INSN_XCV_DEPTH,			/* 49 */
     INSN_XCV_PADLIST,			/* 50 */
     INSN_XCV_OUTSIDE,			/* 51 */
@@ -91,7 +91,7 @@ enum {
     INSN_GP_AV,			/* 72 */
     INSN_GP_HV,			/* 73 */
     INSN_GP_CV,			/* 74 */
-    INSN_GP_FILEGV,			/* 75 */
+    INSN_GP_FILE,			/* 75 */
     INSN_GP_IO,			/* 76 */
     INSN_GP_FORM,			/* 77 */
     INSN_GP_CVGEN,			/* 78 */
@@ -118,15 +118,15 @@ enum {
     INSN_OP_PMFLAGS,			/* 99 */
     INSN_OP_PMPERMFLAGS,			/* 100 */
     INSN_OP_SV,			/* 101 */
-    INSN_OP_GV,			/* 102 */
+    INSN_OP_PADIX,			/* 102 */
     INSN_OP_PV,			/* 103 */
     INSN_OP_PV_TR,			/* 104 */
     INSN_OP_REDOOP,			/* 105 */
     INSN_OP_NEXTOP,			/* 106 */
     INSN_OP_LASTOP,			/* 107 */
     INSN_COP_LABEL,			/* 108 */
-    INSN_COP_STASH,			/* 109 */
-    INSN_COP_FILEGV,			/* 110 */
+    INSN_COP_STASHPV,			/* 109 */
+    INSN_COP_FILE,			/* 110 */
     INSN_COP_SEQ,			/* 111 */
     INSN_COP_ARYBASE,			/* 112 */
     INSN_COP_LINE,			/* 113 */
@@ -145,7 +145,7 @@ enum {
     OPt_LISTOP,		/* 4 */
     OPt_PMOP,		/* 5 */
     OPt_SVOP,		/* 6 */
-    OPt_GVOP,		/* 7 */
+    OPt_PADOP,		/* 7 */
     OPt_PVOP,		/* 8 */
     OPt_LOOP,		/* 9 */
     OPt_COP		/* 10 */

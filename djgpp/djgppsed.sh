@@ -24,8 +24,6 @@ SDBHASH='s=dbhash\.tmp=dbhash_tmp=g'
 SSTAT='s=\.\(stat\.\)=_\1=g'
 STMP2='s=tmp2=tm2=g'
 SPACKLIST='s=\.\(packlist\)=_\1=g'
-SDEFSUB='s=defsubs\.h=defsubsh=g'
-SPLPLI='s=PL/;=PL/i;=g'
 
 sed -e $SCONFIG -e $SGREPTMP -e $SECHOTMP -e $SDDC -e $SOUT -e 's=\.\( \./\$file\)$=sh\1=g' Configure |tr -d '\r' >s; mv -f s Configure
 sed -e $SEXISTS -e $SLIST -e $SCONFIG Makefile.SH |tr -d '\r' >s; mv -f s Makefile.SH
@@ -49,6 +47,3 @@ sed -e $SPACKLIST lib/ExtUtils/Installed.pm >s; mv -f s lib/ExtUtils/Installed.p
 sed -e $SPACKLIST lib/ExtUtils/Packlist.pm >s; mv -f s lib/ExtUtils/Packlist.pm
 sed -e $SPACKLIST lib/ExtUtils/inst >s; mv -f s lib/ExtUtils/inst
 sed -e $SABC t/io/iprefix.t >s; mv -f s t/io/iprefix.t
-sed -e $SDEFSUB ext/B/Makefile.PL >s; mv -f s ext/B/Makefile.PL
-sed -e $SDEFSUB ext/B/B.xs >s; mv -f s ext/B/B.xs
-sed -e $SDEFSUB -e $SPLPLI ext/B/defsubsh.PL >s; mv -f s ext/B/defsubsh.PL

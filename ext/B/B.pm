@@ -6,9 +6,9 @@
 #      License or the Artistic License, as specified in the README file.
 #
 package B;
-require DynaLoader;
+use XSLoader ();
 require Exporter;
-@ISA = qw(Exporter DynaLoader);
+@ISA = qw(Exporter);
 @EXPORT_OK = qw(minus_c ppname
 		class peekop cast_I32 cstring cchar hash threadsv_names
 		main_root main_start main_cv svref_2object opnumber amagic_generation
@@ -40,7 +40,7 @@ use strict;
 @B::LOGOP::ISA = 'B::UNOP';
 @B::LISTOP::ISA = 'B::BINOP';
 @B::SVOP::ISA = 'B::OP';
-@B::GVOP::ISA = 'B::OP';
+@B::PADOP::ISA = 'B::OP';
 @B::PVOP::ISA = 'B::OP';
 @B::CVOP::ISA = 'B::OP';
 @B::LOOP::ISA = 'B::LISTOP';
@@ -259,7 +259,7 @@ sub walksymtable {
     }
 }
 
-bootstrap B;
+XSLoader::load 'B';
 
 1;
 
@@ -442,6 +442,8 @@ C<REFCNT> (corresponding to the C function C<SvREFCNT>).
 
 =item LINE
 
+=item FILE
+
 =item FILEGV
 
 =item GvREFCNT
@@ -510,7 +512,7 @@ C<REFCNT> (corresponding to the C function C<SvREFCNT>).
 
 =item GV
 
-=item FILEGV
+=item FILE
 
 =item DEPTH
 
@@ -549,7 +551,7 @@ C<REFCNT> (corresponding to the C function C<SvREFCNT>).
 =head2 OP-RELATED CLASSES
 
 B::OP, B::UNOP, B::BINOP, B::LOGOP, B::LISTOP, B::PMOP,
-B::SVOP, B::GVOP, B::PVOP, B::CVOP, B::LOOP, B::COP.
+B::SVOP, B::PADOP, B::PVOP, B::CVOP, B::LOOP, B::COP.
 These classes correspond in
 the obvious way to the underlying C structures of similar names. The
 inheritance hierarchy mimics the underlying C "inheritance". Access
@@ -648,13 +650,15 @@ This returns the op description from the global C PL_op_desc array
 
 =item sv
 
+=item gv
+
 =back
 
-=head2 B::GVOP METHOD
+=head2 B::PADOP METHOD
 
 =over 4
 
-=item gv
+=item padix
 
 =back
 
@@ -686,7 +690,7 @@ This returns the op description from the global C PL_op_desc array
 
 =item stash
 
-=item filegv
+=item file
 
 =item cop_seq
 

@@ -30,12 +30,13 @@ dl_generic_private_init(pTHXo)	/* called by dl_*.xs dl_private_init() */
 {
     char *perl_dl_nonlazy;
 #ifdef DEBUGGING
-    dl_debug = SvIV(get_sv("DynaLoader::dl_debug", 0x04) );
+    SV *sv = get_sv("DynaLoader::dl_debug", 0);
+    dl_debug = sv ? SvIV(sv) : 0;
 #endif
     if ( (perl_dl_nonlazy = getenv("PERL_DL_NONLAZY")) != NULL )
 	dl_nonlazy = atoi(perl_dl_nonlazy);
     if (dl_nonlazy)
-	DLDEBUG(1,PerlIO_printf(PerlIO_stderr(), "DynaLoader bind mode is 'non-lazy'\n"));
+	DLDEBUG(1,PerlIO_printf(Perl_debug_log, "DynaLoader bind mode is 'non-lazy'\n"));
 #ifdef DL_LOADONCEONLY
     if (!dl_loaded_files)
 	dl_loaded_files = newHV(); /* provide cache for dl_*.xs if needed */
@@ -69,6 +70,6 @@ SaveError(pTHXo_ char* pat, ...)
 
     /* Copy message into LastError (including terminating null char)	*/
     strncpy(LastError, message, len) ;
-    DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "DynaLoader: stored error msg '%s'\n",LastError));
+    DLDEBUG(2,PerlIO_printf(Perl_debug_log, "DynaLoader: stored error msg '%s'\n",LastError));
 }
 

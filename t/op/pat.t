@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..192\n";
+print "1..195\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -887,3 +887,21 @@ pos=1;
 m/^-.*bb/mg and print "not ";
 print "ok $test\n";
 $test++;
+
+$text = "aaXbXcc";
+pos($text)=0;
+$text =~ /\GXb*X/g and print 'not ';
+print "ok $test\n";
+$test++;
+
+$text = "xA\n" x 500;
+$text =~ /^\s*A/m and print 'not ';
+print "ok $test\n";
+$test++;
+
+$text = "abc dbf";
+@res = ($text =~ /.*?(b).*?\b/g);
+"@res" eq 'b b' or print 'not ';
+print "ok $test\n";
+$test++;
+

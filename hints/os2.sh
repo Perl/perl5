@@ -95,6 +95,8 @@ libpth="$libpth $libemx/mt $libemx"
 
 set `emxrev -f emxlibcm`
 emxcrtrev=$5
+# indented to not put it into config.sh
+  _defemxcrtrev=-D_EMX_CRT_REV_=$emxcrtrev
 
 so='dll'
 
@@ -124,8 +126,8 @@ fi
 aout_ldflags="$aout_ldflags"
 
 aout_d_fork='define'
-aout_ccflags='-DPERL_CORE -DDOSISH -DPERL_IS_AOUT -DOS2=2 -DEMBED -I.'
-aout_cppflags='-DPERL_CORE -DDOSISH -DPERL_IS_AOUT -DOS2=2 -DEMBED -I.'
+aout_ccflags="-DDOSISH -DPERL_IS_AOUT -DOS2=2 -DEMBED -I. $_defemxcrtrev"
+aout_cppflags="-DDOSISH -DPERL_IS_AOUT -DOS2=2 -DEMBED -I. $_defemxcrtrev"
 aout_use_clib='c'
 aout_usedl='undef'
 aout_archobjs="os2.o dl_os2.o"
@@ -165,9 +167,9 @@ else
     # Recursive regmatch may eat 2.5M of stack alone.
     ldflags='-Zexe -Zomf -Zmt -Zcrtdll -Zstack 32000'
     if [ $emxcrtrev -ge 50 ]; then 
-	ccflags='-Zomf -Zmt -DDOSISH -DOS2=2 -DEMBED -I.'
+	ccflags="-Zomf -Zmt -DDOSISH -DOS2=2 -DEMBED -I. $_defemxcrtrev"
     else
-	ccflags='-Zomf -Zmt -DDOSISH -DOS2=2 -DEMBED -I. -DEMX_BAD_SBRK'
+	ccflags="-Zomf -Zmt -DDOSISH -DOS2=2 -DEMBED -I. -DEMX_BAD_SBRK $_defemxcrtrev"
     fi
     use_clib='c_import'
     usedl='define'

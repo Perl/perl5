@@ -200,7 +200,7 @@ sideff	:	error
 else	:	/* NULL */
 			{ $$ = Nullop; }
 	|	ELSE mblock
-			{ $$ = scope($2); }
+			{ ($2)->op_flags |= OPf_PARENS; $$ = scope($2); }
 	|	ELSIF '(' mexpr ')' mblock else
 			{ PL_copline = $1;
 			    $$ = newCONDOP(0, $3, scope($5), $6);
@@ -337,7 +337,7 @@ startformsub:	/* NULL */	/* start a format subroutine scope */
 
 subname	:	WORD	{ STRLEN n_a; char *name = SvPV(((SVOP*)$1)->op_sv,n_a);
 			  if (strEQ(name, "BEGIN") || strEQ(name, "END")
-			      || strEQ(name, "INIT"))
+			      || strEQ(name, "STOP") || strEQ(name, "INIT"))
 			      CvSPECIAL_on(PL_compcv);
 			  $$ = $1; }
 	;

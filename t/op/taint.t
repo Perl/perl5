@@ -254,7 +254,8 @@ print "1..149\n";
 
 # Globs should be forbidden, except under VMS,
 #   which doesn't spawn an external program.
-if ($Is_VMS) {
+if (1  # built-in glob
+    or $Is_VMS) {
     for (35..36) { print "ok $_\n"; }
 }
 else {

@@ -134,7 +134,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	else
 	    result = PerlIO_close(IoIFP(io));
 	if (result == EOF && fd > PL_maxsysfd)
-	    PerlIO_printf(PerlIO_stderr(),
+	    PerlIO_printf(Perl_error_log,
 			  "Warning: unable to close filehandle %s properly.\n",
 			  GvENAME(gv));
 	IoOFP(io) = IoIFP(io) = Nullfp;
@@ -183,28 +183,29 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	}
     }
     else {
-	char *myname;
-	char *type = name;
-	char *otype = name;
+	char *type;
+	char *oname = name;
 	STRLEN tlen;
-	STRLEN otlen = len;
+	STRLEN olen = len;
 	char mode[3];		/* stdio file mode ("r\0" or "r+\0") */
 	int dodup;
 
+	type = savepvn(name, len);
+	tlen = len;
+	SAVEFREEPV(type);
 	if (num_svs) {
-	    type = name;
-	    name = SvPV(svs, tlen) ;
-	    len = (I32)tlen;
+	    STRLEN l;
+	    name = SvPV(svs, l) ;
+	    len = (I32)l;
+	    name = savepvn(name, len);
+	    SAVEFREEPV(name);
 	}
-
-	tlen = otlen;
-	myname = savepvn(name, len);
-	SAVEFREEPV(myname);
-	name = myname;
-	if (!num_svs)
+	else {
 	    while (tlen && isSPACE(type[tlen-1]))
 		type[--tlen] = '\0';
-
+	    name = type;
+	    len = tlen;
+	}
 	mode[0] = mode[1] = mode[2] = '\0';
 	IoTYPE(io) = *type;
 	if (*type == '+' && tlen > 1 && type[tlen-1] != '|') { /* scary */
@@ -216,12 +217,14 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	if (*type == '|') {
 	    if (num_svs && (tlen != 2 || type[1] != '-')) {
 	      unknown_desr:
-		Perl_croak(aTHX_ "Unknown open() mode '%.*s'", otlen, otype);
+		Perl_croak(aTHX_ "Unknown open() mode '%.*s'", olen, oname);
 	    }
 	    /*SUPPRESS 530*/
-	    for (type++; isSPACE(*type); type++) ;
-	    if (!num_svs)
+	    for (type++, tlen--; isSPACE(*type); type++, tlen--) ;
+	    if (!num_svs) {
 		name = type;
+		len = tlen;
+	    }
 	    if (*name == '\0') { /* command is missing 19990114 */
 		dTHR;
 		if (ckWARN(WARN_PIPE))
@@ -232,11 +235,11 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    if (strNE(name,"-") || num_svs)
 		TAINT_ENV();
 	    TAINT_PROPER("piped open");
-	    if (name[strlen(name)-1] == '|') {
+	    if (name[len-1] == '|') {
 		dTHR;
-		name[strlen(name)-1] = '\0' ;
+		name[--len] = '\0' ;
 		if (ckWARN(WARN_PIPE))
-		    Perl_warner(aTHX_ WARN_PIPE, "Can't do bidirectional pipe");
+		    Perl_warner(aTHX_ WARN_PIPE, "Can't open bidirectional pipe");
 	    }
 	    fp = PerlProc_popen(name,"w");
 	    writing = 1;
@@ -308,7 +311,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		    if (!(fp = PerlIO_fdopen(fd,mode))) {
 			if (dodup)
 			    PerlLIO_close(fd);
-			}
+		    }
 		}
 	    }
 	    else {
@@ -452,6 +455,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     }
 #endif
     IoIFP(io) = fp;
+    IoFLAGS(io) &= ~IOf_NOLINE;
     if (writing) {
 	dTHR;
 	if (IoTYPE(io) == 's'
@@ -484,9 +488,18 @@ Perl_nextargv(pTHX_ register GV *gv)
 #endif
     Uid_t fileuid;
     Gid_t filegid;
+    IO *io = GvIOp(gv);
 
     if (!PL_argvoutgv)
 	PL_argvoutgv = gv_fetchpv("ARGVOUT",TRUE,SVt_PVIO);
+    if (io && (IoFLAGS(io) & IOf_ARGV) && (IoFLAGS(io) & IOf_START)) {
+	IoFLAGS(io) &= ~IOf_START;
+	if (PL_inplace) {
+	    if (!PL_argvout_stack)
+		PL_argvout_stack = newAV();
+	    av_push(PL_argvout_stack, SvREFCNT_inc(PL_defoutgv));
+	}
+    }
     if (PL_filemode & (S_ISUID|S_ISGID)) {
 	PerlIO_flush(IoIFP(GvIOn(PL_argvoutgv)));  /* chmod must follow last write */
 #ifdef HAS_FCHMOD
@@ -610,11 +623,12 @@ Perl_nextargv(pTHX_ register GV *gv)
 		SETERRNO(0,0);		/* in case sprintf set errno */
 #ifdef VMS
 		if (!do_open(PL_argvoutgv,SvPVX(sv),SvCUR(sv),PL_inplace!=0,
-                 O_WRONLY|O_CREAT|O_TRUNC,0,Nullfp)) { 
+                 O_WRONLY|O_CREAT|O_TRUNC,0,Nullfp))
 #else
 		if (!do_open(PL_argvoutgv,SvPVX(sv),SvCUR(sv),PL_inplace!=0,
-			     O_WRONLY|O_CREAT|OPEN_EXCL,0666,Nullfp)) {
+			     O_WRONLY|O_CREAT|OPEN_EXCL,0666,Nullfp))
 #endif
+		{
 		    if (ckWARN_d(WARN_INPLACE))	
 		        Perl_warner(aTHX_ WARN_INPLACE, "Can't do inplace edit on %s: %s",
 		          PL_oldname, Strerror(errno) );
@@ -650,15 +664,25 @@ Perl_nextargv(pTHX_ register GV *gv)
 		if (!S_ISREG(PL_statbuf.st_mode))	
 		    Perl_warner(aTHX_ WARN_INPLACE,
 				"Can't do inplace edit: %s is not a regular file",
-				PL_oldname );
+				PL_oldname);
 		else
-		    Perl_warner(aTHX_ WARN_INPLACE, "Can't open %s: %s\n",
+		    Perl_warner(aTHX_ WARN_INPLACE, "Can't open %s: %s",
 				PL_oldname, Strerror(errno));
 	    }
 	}
     }
+    if (io && (IoFLAGS(io) & IOf_ARGV))
+	IoFLAGS(io) |= IOf_START;
     if (PL_inplace) {
 	(void)do_close(PL_argvoutgv,FALSE);
+	if (io && (IoFLAGS(io) & IOf_ARGV)
+	    && PL_argvout_stack && AvFILLp(PL_argvout_stack) >= 0)
+	{
+	    GV *oldout = (GV*)av_pop(PL_argvout_stack);
+	    setdefout(oldout);
+	    SvREFCNT_dec(oldout);
+	    return Nullfp;
+	}
 	setdefout(gv_fetchpv("STDOUT",TRUE,SVt_PVIO));
     }
     return Nullfp;
@@ -1006,24 +1030,17 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 	{
 	    dTHR;
 	    if (ckWARN(WARN_UNINITIALIZED))
-		Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+		report_uninit();
 	}
 	return TRUE;
     case SVt_IV:
 	if (SvIOK(sv)) {
 	    if (SvGMAGICAL(sv))
 		mg_get(sv);
-#ifdef IV_IS_QUAD
 	    if (SvIsUV(sv))
-		PerlIO_printf(fp, "%" PERL_PRIu64, (UV)SvUVX(sv));
+		PerlIO_printf(fp, "%"UVuf, (UV)SvUVX(sv));
 	    else
-		PerlIO_printf(fp, "%" PERL_PRId64, (IV)SvIVX(sv));
-#else
-	    if (SvIsUV(sv))
-		PerlIO_printf(fp, "%lu", (unsigned long)SvUVX(sv));
-	    else
-		PerlIO_printf(fp, "%ld", (long)SvIVX(sv));
-#endif
+		PerlIO_printf(fp, "%"IVdf, (IV)SvIVX(sv));
 	    return !PerlIO_error(fp);
 	}
 	/* FALL THROUGH */
@@ -1051,7 +1068,7 @@ Perl_my_stat(pTHX)
 
     if (PL_op->op_flags & OPf_REF) {
 	EXTEND(SP,1);
-	tmpgv = cGVOP->op_gv;
+	tmpgv = cGVOP_gv;
       do_fstat:
 	io = GvIO(tmpgv);
 	if (io && IoIFP(io)) {
@@ -1104,7 +1121,7 @@ Perl_my_lstat(pTHX)
     STRLEN n_a;
     if (PL_op->op_flags & OPf_REF) {
 	EXTEND(SP,1);
-	if (cGVOP->op_gv == PL_defgv) {
+	if (cGVOP_gv == PL_defgv) {
 	    if (PL_laststype != OP_LSTAT)
 		Perl_croak(aTHX_ "The stat preceding -l _ wasn't an lstat");
 	    return PL_laststatval;
@@ -1133,6 +1150,9 @@ bool
 Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 	       int fd, int do_report)
 {
+#ifdef MACOS_TRADITIONAL
+    Perl_croak(aTHX_ "exec? I'm not *that* kind of operating system");
+#else
     register char **a;
     char *tmps;
     STRLEN n_a;
@@ -1165,6 +1185,7 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 	}
     }
     do_execfree();
+#endif
     return FALSE;
 }
 
@@ -1181,7 +1202,7 @@ Perl_do_execfree(pTHX)
     }
 }
 
-#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC)
+#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC) && !defined(MACOS_TRADITIONAL)
 
 bool
 Perl_do_exec(pTHX_ char *cmd)
@@ -1562,6 +1583,10 @@ Perl_cando(pTHX_ Mode_t mode, Uid_t effective, register Stat_t *statbufp)
 bool
 Perl_ingroup(pTHX_ Gid_t testgid, Uid_t effective)
 {
+#ifdef MACOS_TRADITIONAL
+    /* This is simply not correct for AppleShare, but fix it yerself. */
+    return TRUE;
+#else
     if (testgid == (effective ? PL_egid : PL_gid))
 	return TRUE;
 #ifdef HAS_GETGROUPS
@@ -1579,6 +1604,7 @@ Perl_ingroup(pTHX_ Gid_t testgid, Uid_t effective)
     }
 #endif
     return FALSE;
+#endif
 }
 
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)

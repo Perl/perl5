@@ -29,6 +29,21 @@
 #include <a.out.h>
 #include <ldfcn.h>
 
+/* When using Perl extensions written in C++ the longer versions
+ * of load() and unload() from libC and libC_r need to be used,
+ * otherwise statics in the extensions won't get initialized right.
+ * -- Stephanie Beals <bealzy@us.ibm.com> */
+#ifdef USE_libC /* The define comes, when it comes, from hints/aix.pl. */
+#   define LOAD   loadAndInit
+#   define UNLOAD terminateAndUnload
+#   ifdef USE_load_h
+#       include <load.h>
+#   endif
+#else
+#   define LOAD   load
+#   define UNLOAD unload
+#endif
+
 /*
  * AIX 4.3 does remove some useful definitions from ldfcn.h. Define
  * these here to compensate for that lossage.
@@ -193,7 +208,7 @@ void *dlopen(char *path, int mode)
 	 * load should be declared load(const char *...). Thus we
 	 * cast the path to a normal char *. Ugly.
 	 */
-	if ((mp->entry = (void *)load((char *)path,
+	if ((mp->entry = (void *)LOAD((char *)path,
 #ifdef L_LIBPATH_EXEC
 				      L_LIBPATH_EXEC |
 #endif
@@ -324,7 +339,7 @@ int dlclose(void *handle)
 
 	if (--mp->refCnt > 0)
 		return 0;
-	result = unload(mp->entry);
+	result = UNLOAD(mp->entry);
 	if (result == -1) {
 		errvalid++;
 		strerrorcpy(errbuf, errno);
@@ -426,7 +441,7 @@ static int readExports(ModulePtr mp)
 		}
 		/*
 		 * Traverse the list of loaded modules. The entry point
-		 * returned by load() does actually point to the data
+		 * returned by LOAD() does actually point to the data
 		 * segment origin.
 		 */
 		lp = (struct ld_info *)buf;
@@ -543,7 +558,7 @@ static int readExports(ModulePtr mp)
 /* dl_dlopen.xs
  * 
  * Platform:	SunOS/Solaris, possibly others which use dlopen.
- * Author:	Paul Marquess (pmarquess@bfsec.bt.co.uk)
+ * Author:	Paul Marquess (Paul.Marquess@btinternet.com)
  * Created:	10th July 1994
  *
  * Modified:
@@ -581,11 +596,11 @@ dl_load_file(filename, flags=0)
 	char *	filename
 	int	flags
 	CODE:
-	DLDEBUG(1,PerlIO_printf(PerlIO_stderr(), "dl_load_file(%s,%x):\n", filename,flags));
+	DLDEBUG(1,PerlIO_printf(Perl_debug_log, "dl_load_file(%s,%x):\n", filename,flags));
 	if (flags & 0x01)
 	    Perl_warn(aTHX_ "Can't make loaded symbols global on this platform while loading %s",filename);
 	RETVAL = dlopen(filename, 1) ;
-	DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), " libref=%x\n", RETVAL));
+	DLDEBUG(2,PerlIO_printf(Perl_debug_log, " libref=%x\n", RETVAL));
 	ST(0) = sv_newmortal() ;
 	if (RETVAL == NULL)
 	    SaveError(aTHX_ "%s",dlerror()) ;
@@ -598,10 +613,10 @@ dl_find_symbol(libhandle, symbolname)
 	void *		libhandle
 	char *		symbolname
 	CODE:
-	DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "dl_find_symbol(handle=%x, symbol=%s)\n",
+	DLDEBUG(2,PerlIO_printf(Perl_debug_log, "dl_find_symbol(handle=%x, symbol=%s)\n",
 		libhandle, symbolname));
 	RETVAL = dlsym(libhandle, symbolname);
-	DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "  symbolref = %x\n", RETVAL));
+	DLDEBUG(2,PerlIO_printf(Perl_debug_log, "  symbolref = %x\n", RETVAL));
 	ST(0) = sv_newmortal() ;
 	if (RETVAL == NULL)
 	    SaveError(aTHX_ "%s",dlerror()) ;
@@ -623,7 +638,7 @@ dl_install_xsub(perl_name, symref, filename="$Package")
     void *	symref 
     char *	filename
     CODE:
-    DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "dl_install_xsub(name=%s, symref=%x)\n",
+    DLDEBUG(2,PerlIO_printf(Perl_debug_log, "dl_install_xsub(name=%s, symref=%x)\n",
 	perl_name, symref));
     ST(0) = sv_2mortal(newRV((SV*)newXS(perl_name,
 					(void(*)(pTHX_ CV *))symref,

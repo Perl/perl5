@@ -52,13 +52,13 @@ typedef struct regexp {
 #define ROPT_CHECK_ALL		0x00100
 #define ROPT_LOOKBEHIND_SEEN	0x00200
 #define ROPT_EVAL_SEEN		0x00400
-#define ROPT_TAINTED_SEEN	0x00800
 
 /* 0xf800 of reganch is used by PMf_COMPILETIME */
 
 #define ROPT_UTF8		0x10000
 #define ROPT_NAUGHTY		0x20000 /* how exponential is this pattern? */
 #define ROPT_COPY_DONE		0x40000	/* subbeg is a copy of the string */
+#define ROPT_TAINTED_SEEN	0x80000
 
 #define RE_USE_INTUIT_NOML	0x0100000 /* Best to intuit before matching */
 #define RE_USE_INTUIT_ML	0x0200000

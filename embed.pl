@@ -31,6 +31,7 @@ sub walk_table (&@) {
     seek DATA, $END, 0;		# so we may restart
     while (<DATA>) {
 	chomp;
+	next if /^:/;
 	while (s|\\$||) {
 	    $_ .= <DATA>;
 	    chomp;
@@ -106,8 +107,7 @@ sub write_protos {
     my $ret = "";
     if (@_ == 1) {
 	my $arg = shift;
-	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifdef|else|endif)\b/
-	    or $arg =~ /^\s*(public|protected|private):/;
+	$ret .= "$arg\n";
     }
     else {
 	my ($flags,$retval,$func,@args) = @_;
@@ -116,7 +116,7 @@ sub write_protos {
 	    $func = "S_$func";
 	}
 	else {
-	    $retval = "VIRTUAL $retval";
+	    $retval = "PERL_CALLCONV $retval";
 	    if ($flags =~ /p/) {
 		$func = "Perl_$func";
 	    }
@@ -144,7 +144,7 @@ sub write_global_sym {
     my $ret = "";
     if (@_ > 1) {
 	my ($flags,$retval,$func,@args) = @_;
-	unless ($flags =~ /s/) {
+	unless ($flags =~ /[sx]/) {
 	    $func = "Perl_$func" if $flags =~ /p/;
 	    $ret = "$func\n";
 	}
@@ -324,7 +324,7 @@ walk_table {
     my $ret = "";
     if (@_ == 1) {
 	my $arg = shift;
-	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifdef|else|endif)\b/;
+	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifn?def|else|endif)\b/;
     }
     else {
 	my ($flags,$retval,$func,@args) = @_;
@@ -357,7 +357,7 @@ walk_table {
     my $ret = "";
     if (@_ == 1) {
 	my $arg = shift;
-	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifdef|else|endif)\b/;
+	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifn?def|else|endif)\b/;
     }
     else {
 	my ($flags,$retval,$func,@args) = @_;
@@ -417,20 +417,20 @@ walk_table {
     my $ret = "";
     if (@_ == 1) {
 	my $arg = shift;
-	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifdef|else|endif)\b/;
+	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifn?def|else|endif)\b/;
     }
     else {
 	my ($flags,$retval,$func,@args) = @_;
 	if ($flags =~ /s/) {
-	    $ret .= hide("S_$func","CPerlObj::S_$func");
+	    $ret .= hide("S_$func","CPerlObj::S_$func") if $flags !~ /j/;
 	    $ret .= hide($func,"S_$func");
 	}
 	elsif ($flags =~ /p/) {
-	    $ret .= hide("Perl_$func","CPerlObj::Perl_$func");
+	    $ret .= hide("Perl_$func","CPerlObj::Perl_$func") if $flags !~ /j/;
 	    $ret .= hide($func,"Perl_$func");
 	}
 	else {
-	    $ret .= hide($func,"CPerlObj::$func");
+	    $ret .= hide($func,"CPerlObj::$func") if $flags !~ /j/;
 	}
     }
     $ret;
@@ -463,23 +463,23 @@ print EM <<'END';
    The following are not like that, but since they had a "perl_"
    prefix in previous versions, we provide compatibility macros.
  */
-#  define perl_atexit			call_atexit
-#  define perl_call_argv		call_argv
-#  define perl_call_pv			call_pv
-#  define perl_call_method		call_method
-#  define perl_call_sv			call_sv
-#  define perl_eval_sv			eval_sv
-#  define perl_eval_pv			eval_pv
-#  define perl_require_pv		require_pv
-#  define perl_get_sv			get_sv
-#  define perl_get_av			get_av
-#  define perl_get_hv			get_hv
-#  define perl_get_cv			get_cv
-#  define perl_init_i18nl10n		init_i18nl10n
-#  define perl_init_i18nl14n		init_i18nl14n
-#  define perl_new_ctype		new_ctype
-#  define perl_new_collate		new_collate
-#  define perl_new_numeric		new_numeric
+#  define perl_atexit(a,b)		call_atexit(a,b)
+#  define perl_call_argv(a,b,c)		call_argv(a,b,c)
+#  define perl_call_pv(a,b)		call_pv(a,b)
+#  define perl_call_method(a,b)		call_method(a,b)
+#  define perl_call_sv(a,b)		call_sv(a,b)
+#  define perl_eval_sv(a,b)		eval_sv(a,b)
+#  define perl_eval_pv(a,b)		eval_pv(a,b)
+#  define perl_require_pv(a)		require_pv(a)
+#  define perl_get_sv(a,b)		get_sv(a,b)
+#  define perl_get_av(a,b)		get_av(a,b)
+#  define perl_get_hv(a,b)		get_hv(a,b)
+#  define perl_get_cv(a,b)		get_cv(a,b)
+#  define perl_init_i18nl10n(a)		init_i18nl10n(a)
+#  define perl_init_i18nl14n(a)		init_i18nl14n(a)
+#  define perl_new_ctype(a)		new_ctype(a)
+#  define perl_new_collate(a)		new_collate(a)
+#  define perl_new_numeric(a)		new_numeric(a)
 
 /* varargs functions can't be handled with CPP macros. :-(
    This provides a set of compatibility functions that don't take
@@ -597,7 +597,26 @@ print EM <<'END';
 #  endif	/* USE_THREADS */
 
 #else	/* !MULTIPLICITY */
-/* cases 1, 4 and 6 above */
+
+#  if defined(PERL_OBJECT)
+/* case 6 above */
+
+END
+
+for $sym (sort keys %thread) {
+    print EM multon($sym,'T','aTHXo->interp.');
+}
+
+
+for $sym (sort keys %intrp) {
+    print EM multon($sym,'I','aTHXo->interp.');
+}
+
+print EM <<'END';
+
+#  else	/* !PERL_OBJECT */
+
+/* cases 1 and 4 above */
 
 END
 
@@ -607,7 +626,7 @@ for $sym (sort keys %intrp) {
 
 print EM <<'END';
 
-#  if defined(USE_THREADS)
+#    if defined(USE_THREADS)
 /* case 4 above */
 
 END
@@ -618,8 +637,8 @@ for $sym (sort keys %thread) {
 
 print EM <<'END';
 
-#  else		/* !USE_THREADS */
-/* cases 1 and 6 above */
+#    else	/* !USE_THREADS */
+/* case 1 above */
 
 END
 
@@ -629,7 +648,8 @@ for $sym (sort keys %thread) {
 
 print EM <<'END';
 
-#  endif	/* USE_THREADS */
+#    endif	/* USE_THREADS */
+#  endif	/* PERL_OBJECT */
 #endif	/* MULTIPLICITY */
 
 #if defined(PERL_GLOBAL_STRUCT)
@@ -712,11 +732,11 @@ walk_table {
     my $ret = "";
     if (@_ == 1) {
 	my $arg = shift;
-	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifdef|else|endif)\b/;
+	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifn?def|else|endif)\b/;
     }
     else {
 	my ($flags,$retval,$func,@args) = @_;
-	unless ($flags =~ /s/) {
+	unless ($flags =~ /[js]/) {
 	    if ($flags =~ /p/) {
 		$ret .= undefine("Perl_$func") . hide("Perl_$func","pPerl->Perl_$func");
 		$ret .= undefine($func) . hide($func,"Perl_$func");
@@ -813,9 +833,9 @@ START_EXTERN_C
 #undef PERLVARI
 #undef PERLVARIC
 #define PERLVAR(v,t)	t* Perl_##v##_ptr(pTHXo)			\
-			{ return &(aTHXo->PL_##v); }
+			{ return &(aTHXo->interp.v); }
 #define PERLVARA(v,n,t)	PL_##v##_t* Perl_##v##_ptr(pTHXo)		\
-			{ return &(aTHXo->PL_##v); }
+			{ return &(aTHXo->interp.v); }
 #define PERLVARI(v,t,i)	PERLVAR(v,t)
 #define PERLVARIC(v,t,i) PERLVAR(v, const t)
 
@@ -838,6 +858,7 @@ START_EXTERN_C
 EOT
 
 # functions that take va_list* for implementing vararg functions
+# NOTE: makedef.pl must be updated if you add symbols to %vfuncs
 my %vfuncs = qw(
     Perl_croak			Perl_vcroak
     Perl_warn			Perl_vwarn
@@ -922,12 +943,12 @@ walk_table {
     my $ret = "";
     if (@_ == 1) {
 	my $arg = shift;
-	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifdef|else|endif)\b/;
+	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifn?def|else|endif)\b/;
     }
     else {
 	my ($flags,$retval,$func,@args) = @_;
 	return $ret if exists $skipapi_funcs{$func};
-	unless ($flags =~ /s/) {
+	unless ($flags =~ /[js]/) {
 	    $ret .= "\n";
 	    my $addctx = 1 if $flags =~ /n/;
 	    if ($flags =~ /p/) {
@@ -964,7 +985,7 @@ Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...)
     dTHXo;
     va_list(arglist);
     va_start(arglist, format);
-    return (*pPerl->PL_StdIO->pVprintf)(pPerl->PL_StdIO, stream, format, arglist);
+    return (*PL_StdIO->pVprintf)(PL_StdIO, stream, format, arglist);
 }
 
 END_EXTERN_C
@@ -974,44 +995,104 @@ EOT
 
 __END__
 
-# Lines are of the form:
-#    flags|return_type|function_name|arg1|arg2|...|argN
-#
-# A line may be continued on another by ending it with a backslash.
-# Leading and trailing whitespace will be ignored in each component.
-#
-# flags are single letters with following meanings:
-#	s		static function, should have an S_ prefix in source
-#			file
-#	n		has no implicit interpreter/thread context argument
-#	p		function has a Perl_ prefix
-#	r		function never returns
-#       o		has no compatibility macro (#define foo Perl_foo)
-#
-# Individual flags may be separated by whitespace.
-#
-# New global functions should be added at the end for binary compatibility
-# in some configurations.
-#
-# TODO: 1) Add a flag to mark the functions that are part of the public API.
-#       2) Add a field for documentation, so that L<perlguts/"API LISTING">
-#          may be autogenerated.
-#
+: Lines are of the form:
+:    flags|return_type|function_name|arg1|arg2|...|argN
+:
+: A line may be continued on another by ending it with a backslash.
+: Leading and trailing whitespace will be ignored in each component.
+:
+: flags are single letters with following meanings:
+:	s		static function, should have an S_ prefix in source
+:			file
+:	n		has no implicit interpreter/thread context argument
+:	p		function has a Perl_ prefix
+:	r		function never returns
+:       o		has no compatibility macro (#define foo Perl_foo)
+:       j		not a member of CPerlObj
+:       x		not exported
+:
+: Individual flags may be separated by whitespace.
+:
+: New global functions should be added at the end for binary compatibility
+: in some configurations.
+:
+: TODO: 1) Add a flag to mark the functions that are part of the public API.
+:       2) Add a field for documentation, so that L<perlguts/"API LISTING">
+:          may be autogenerated.
 
+START_EXTERN_C
+
+#if defined(PERL_IMPLICIT_SYS)
+jno	|PerlInterpreter*	|perl_alloc_using \
+				|struct IPerlMem* m|struct IPerlMem* ms \
+				|struct IPerlMem* mp|struct IPerlEnv* e \
+				|struct IPerlStdIO* io|struct IPerlLIO* lio \
+				|struct IPerlDir* d|struct IPerlSock* s \
+				|struct IPerlProc* p
+#else
+jno	|PerlInterpreter*	|perl_alloc
+#endif
+jno	|void	|perl_construct	|PerlInterpreter* interp
+jno	|void	|perl_destruct	|PerlInterpreter* interp
+jno	|void	|perl_free	|PerlInterpreter* interp
+jno	|int	|perl_run	|PerlInterpreter* interp
+jno	|int	|perl_parse	|PerlInterpreter* interp|XSINIT_t xsinit \
+				|int argc|char** argv|char** env
+#if defined(USE_ITHREADS)
+jno	|PerlInterpreter*|perl_clone|PerlInterpreter* interp, UV flags
+#  if defined(PERL_IMPLICIT_SYS)
+jno	|PerlInterpreter*|perl_clone_using|PerlInterpreter *interp|UV flags \
+				|struct IPerlMem* m|struct IPerlMem* ms \
+				|struct IPerlMem* mp|struct IPerlEnv* e \
+				|struct IPerlStdIO* io|struct IPerlLIO* lio \
+				|struct IPerlDir* d|struct IPerlSock* s \
+				|struct IPerlProc* p
+#  endif
+#endif
+
+#if defined(MYMALLOC)
+jnop	|Malloc_t|malloc	|MEM_SIZE nbytes
+jnop	|Malloc_t|calloc	|MEM_SIZE elements|MEM_SIZE size
+jnop	|Malloc_t|realloc	|Malloc_t where|MEM_SIZE nbytes
+jnop	|Free_t	|mfree		|Malloc_t where
+jnp	|MEM_SIZE|malloced_size	|void *p
+#endif
+
+END_EXTERN_C
+
+/* functions with flag 'n' should come before here */
+#if defined(PERL_OBJECT)
+class CPerlObj {
+public:
+	struct interpreter interp;
+	CPerlObj(IPerlMem*, IPerlMem*, IPerlMem*, IPerlEnv*, IPerlStdIO*,
+	    IPerlLIO*, IPerlDir*, IPerlSock*, IPerlProc*);
+	void* operator new(size_t nSize, IPerlMem *pvtbl);
+#ifndef __BORLANDC__
+	static void operator delete(void* pPerl, IPerlMem *pvtbl);
+#endif
+	int do_aspawn (void *vreally, void **vmark, void **vsp);
+#endif
 #if defined(PERL_OBJECT)
 public:
+#else
+START_EXTERN_C
 #endif
+#  include "pp_proto.h"
 p	|SV*	|amagic_call	|SV* left|SV* right|int method|int dir
 p	|bool	|Gv_AMupdate	|HV* stash
 p	|OP*	|append_elem	|I32 optype|OP* head|OP* tail
 p	|OP*	|append_list	|I32 optype|LISTOP* first|LISTOP* last
 p	|I32	|apply		|I32 type|SV** mark|SV** sp
+p	|SV*	|avhv_delete_ent|AV *ar|SV* keysv|I32 flags|U32 hash
 p	|bool	|avhv_exists_ent|AV *ar|SV* keysv|U32 hash
 p	|SV**	|avhv_fetch_ent	|AV *ar|SV* keysv|I32 lval|U32 hash
 p	|HE*	|avhv_iternext	|AV *ar
 p	|SV*	|avhv_iterval	|AV *ar|HE* entry
 p	|HV*	|avhv_keys	|AV *ar
 p	|void	|av_clear	|AV* ar
+p	|SV*	|av_delete	|AV* ar|I32 key|I32 flags
+p	|bool	|av_exists	|AV* ar|I32 key
 p	|void	|av_extend	|AV* ar|I32 key
 p	|AV*	|av_fake	|I32 size|SV** svp
 p	|SV**	|av_fetch	|AV* ar|I32 key|I32 lval
@@ -1046,7 +1127,7 @@ p	|OP*	|convert	|I32 optype|I32 flags|OP* o
 pr	|void	|croak		|const char* pat|...
 pr	|void	|vcroak		|const char* pat|va_list* args
 #if defined(PERL_IMPLICIT_CONTEXT)
-npr	|void	|croak_nocontext|const char* pat|...
+nrp	|void	|croak_nocontext|const char* pat|...
 np	|OP*	|die_nocontext	|const char* pat|...
 np	|void	|deb_nocontext	|const char* pat|...
 np	|char*	|form_nocontext	|const char* pat|...
@@ -1077,7 +1158,6 @@ p	|PPADDR_t*|get_ppaddr
 p	|I32	|cxinc
 p	|void	|deb		|const char* pat|...
 p	|void	|vdeb		|const char* pat|va_list* args
-p	|void	|deb_growlevel
 p	|void	|debprofdump
 p	|I32	|debop		|OP* o
 p	|I32	|debstack
@@ -1321,9 +1401,6 @@ p	|int	|magic_set_all_env|SV* sv|MAGIC* mg
 p	|U32	|magic_sizepack	|SV* sv|MAGIC* mg
 p	|int	|magic_wipepack	|SV* sv|MAGIC* mg
 p	|void	|magicname	|char* sym|char* name|I32 namlen
-#if defined(MYMALLOC)
-np	|MEM_SIZE|malloced_size	|void *p
-#endif
 p	|void	|markstack_grow
 #if defined(USE_LOCALE_COLLATE)
 p	|char*	|mem_collxfrm	|const char* s|STRLEN len|STRLEN* xlen
@@ -1345,20 +1422,20 @@ p	|char*	|moreswitches	|char* s
 p	|OP*	|my		|OP* o
 p	|NV	|my_atof	|const char *s
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
-p	|char*	|my_bcopy	|const char* from|char* to|I32 len
+np	|char*	|my_bcopy	|const char* from|char* to|I32 len
 #endif
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
-p	|char*	|my_bzero	|char* loc|I32 len
+np	|char*	|my_bzero	|char* loc|I32 len
 #endif
 pr	|void	|my_exit	|U32 status
 pr	|void	|my_failure_exit
 p	|I32	|my_fflush_all
 p	|I32	|my_lstat
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
-p	|I32	|my_memcmp	|const char* s1|const char* s2|I32 len
+np	|I32	|my_memcmp	|const char* s1|const char* s2|I32 len
 #endif
 #if !defined(HAS_MEMSET)
-p	|void*	|my_memset	|char* loc|I32 ch|I32 len
+np	|void*	|my_memset	|char* loc|I32 ch|I32 len
 #endif
 #if !defined(PERL_OBJECT)
 p	|I32	|my_pclose	|PerlIO* ptr
@@ -1404,6 +1481,7 @@ p	|HV*	|newHV
 p	|HV*	|newHVhv	|HV* hv
 p	|IO*	|newIO
 p	|OP*	|newLISTOP	|I32 type|I32 flags|OP* first|OP* last
+p	|OP*	|newPADOP	|I32 type|I32 flags|SV* sv
 p	|OP*	|newPMOP	|I32 type|I32 flags
 p	|OP*	|newPVOP	|I32 type|I32 flags|char* pv
 p	|SV*	|newRV		|SV* pref
@@ -1442,23 +1520,15 @@ p	|void	|pad_reset
 p	|void	|pad_swipe	|PADOFFSET po
 p	|void	|peep		|OP* o
 #if defined(PERL_OBJECT)
-no	|void	|perl_construct
-no	|void	|perl_destruct
-no	|void	|perl_free
-no	|int	|perl_run
-no	|int	|perl_parse	|XSINIT_t xsinit \
+ox	|void	|Perl_construct
+ox	|void	|Perl_destruct
+ox	|void	|Perl_free
+ox	|int	|Perl_run
+ox	|int	|Perl_parse	|XSINIT_t xsinit \
 				|int argc|char** argv|char** env
-#else
-no	|PerlInterpreter*	|perl_alloc
-no	|void	|perl_construct	|PerlInterpreter* sv_interp
-no	|void	|perl_destruct	|PerlInterpreter* sv_interp
-no	|void	|perl_free	|PerlInterpreter* sv_interp
-no	|int	|perl_run	|PerlInterpreter* sv_interp
-no	|int	|perl_parse	|PerlInterpreter* sv_interp|XSINIT_t xsinit \
-				|int argc|char** argv|char** env
+#endif
 #if defined(USE_THREADS)
 p	|struct perl_thread*	|new_struct_thread|struct perl_thread *t
-#endif
 #endif
 p	|void	|call_atexit	|ATEXIT_t fn|void *ptr
 p	|I32	|call_argv	|const char* sub_name|I32 flags|char** argv
@@ -1528,7 +1598,8 @@ p	|void	|save_aptr	|AV** aptr
 p	|AV*	|save_ary	|GV* gv
 p	|void	|save_clearsv	|SV** svp
 p	|void	|save_delete	|HV* hv|char* key|I32 klen
-p	|void	|save_destructor|DESTRUCTORFUNC_t f|void* p
+p	|void	|save_destructor|DESTRUCTORFUNC_NOCONTEXT_t f|void* p
+p	|void	|save_destructor_x|DESTRUCTORFUNC_t f|void* p
 p	|void	|save_freesv	|SV* sv
 p	|void	|save_freeop	|OP* o
 p	|void	|save_freepv	|char* pv
@@ -1540,6 +1611,7 @@ p	|void	|save_hints
 p	|void	|save_hptr	|HV** hptr
 p	|void	|save_I16	|I16* intp
 p	|void	|save_I32	|I32* intp
+p	|void	|save_I8	|I8* bytep
 p	|void	|save_int	|int* intp
 p	|void	|save_item	|SV* item
 p	|void	|save_iv	|IV* iv
@@ -1549,6 +1621,7 @@ p	|void	|save_nogv	|GV* gv
 p	|void	|save_op
 p	|SV*	|save_scalar	|GV* gv
 p	|void	|save_pptr	|char** pptr
+p	|void	|save_vptr	|void* pptr
 p	|void	|save_re_context
 p	|void	|save_sptr	|SV** sptr
 p	|SV*	|save_svref	|SV** sptr
@@ -1582,11 +1655,15 @@ p	|IV	|sv_2iv		|SV* sv
 p	|SV*	|sv_2mortal	|SV* sv
 p	|NV	|sv_2nv		|SV* sv
 p	|char*	|sv_2pv		|SV* sv|STRLEN* lp
+p	|char*	|sv_2pvutf8	|SV* sv|STRLEN* lp
+p	|char*	|sv_2pvbyte	|SV* sv|STRLEN* lp
 p	|UV	|sv_2uv		|SV* sv
 p	|IV	|sv_iv		|SV* sv
 p	|UV	|sv_uv		|SV* sv
 p	|NV	|sv_nv		|SV* sv
 p	|char*	|sv_pvn		|SV *sv|STRLEN *len
+p	|char*	|sv_pvutf8n	|SV *sv|STRLEN *len
+p	|char*	|sv_pvbyten	|SV *sv|STRLEN *len
 p	|I32	|sv_true	|SV *sv
 p	|void	|sv_add_arena	|char* ptr|U32 size|U32 flags
 p	|int	|sv_backoff	|SV* sv
@@ -1630,6 +1707,8 @@ p	|char*	|sv_peek	|SV* sv
 p	|void	|sv_pos_u2b	|SV* sv|I32* offsetp|I32* lenp
 p	|void	|sv_pos_b2u	|SV* sv|I32* offsetp
 p	|char*	|sv_pvn_force	|SV* sv|STRLEN* lp
+p	|char*	|sv_pvutf8n_force|SV* sv|STRLEN* lp
+p	|char*	|sv_pvbyten_force|SV* sv|STRLEN* lp
 p	|char*	|sv_reftype	|SV* sv|int ob
 p	|void	|sv_replace	|SV* sv|SV* nsv
 p	|void	|sv_report_used
@@ -1665,7 +1744,7 @@ p	|SV*	|swash_init	|char* pkg|char* name|SV* listsv \
 				|I32 minbits|I32 none
 p	|UV	|swash_fetch	|SV *sv|U8 *ptr
 p	|void	|taint_env
-p	|void	|taint_proper	|const char* f|char* s
+p	|void	|taint_proper	|const char* f|const char* s
 p	|UV	|to_utf8_lower	|U8 *p
 p	|UV	|to_utf8_upper	|U8 *p
 p	|UV	|to_utf8_title	|U8 *p
@@ -1687,6 +1766,7 @@ p	|U8*	|uv_to_utf8	|U8 *d|UV uv
 p	|void	|vivify_defelem	|SV* sv
 p	|void	|vivify_ref	|SV* sv|U32 to_what
 p	|I32	|wait4pid	|Pid_t pid|int* statusp|int flags
+p	|void	|report_uninit
 p	|void	|warn		|const char* pat|...
 p	|void	|vwarn		|const char* pat|va_list* args
 p	|void	|warner		|U32 err|const char* pat|...
@@ -1703,20 +1783,16 @@ p	|int	|yyparse
 p	|int	|yywarn		|char* s
 #if defined(MYMALLOC)
 p	|void	|dump_mstats	|char* s
-pno	|Malloc_t|malloc	|MEM_SIZE nbytes
-pno	|Malloc_t|calloc	|MEM_SIZE elements|MEM_SIZE size
-pno	|Malloc_t|realloc	|Malloc_t where|MEM_SIZE nbytes
-pno	|Free_t	|mfree		|Malloc_t where
 #endif
-pn	|Malloc_t|safesysmalloc	|MEM_SIZE nbytes
-pn	|Malloc_t|safesyscalloc	|MEM_SIZE elements|MEM_SIZE size
-pn	|Malloc_t|safesysrealloc|Malloc_t where|MEM_SIZE nbytes
-pn	|Free_t	|safesysfree	|Malloc_t where
+np	|Malloc_t|safesysmalloc	|MEM_SIZE nbytes
+np	|Malloc_t|safesyscalloc	|MEM_SIZE elements|MEM_SIZE size
+np	|Malloc_t|safesysrealloc|Malloc_t where|MEM_SIZE nbytes
+np	|Free_t	|safesysfree	|Malloc_t where
 #if defined(LEAKTEST)
-pn	|Malloc_t|safexmalloc	|I32 x|MEM_SIZE size
-pn	|Malloc_t|safexcalloc	|I32 x|MEM_SIZE elements|MEM_SIZE size
-pn	|Malloc_t|safexrealloc	|Malloc_t where|MEM_SIZE size
-pn	|void	|safexfree	|Malloc_t where
+np	|Malloc_t|safexmalloc	|I32 x|MEM_SIZE size
+np	|Malloc_t|safexcalloc	|I32 x|MEM_SIZE elements|MEM_SIZE size
+np	|Malloc_t|safexrealloc	|Malloc_t where|MEM_SIZE size
+np	|void	|safexfree	|Malloc_t where
 #endif
 #if defined(PERL_GLOBAL_STRUCT)
 p	|struct perl_vars *|GetVars
@@ -1754,11 +1830,17 @@ p	|void	|do_pmop_dump	|I32 level|PerlIO *file|PMOP *pm
 p	|void	|do_sv_dump	|I32 level|PerlIO *file|SV *sv|I32 nest \
 				|I32 maxnest|bool dumpops|STRLEN pvlim
 p	|void	|magic_dump	|MAGIC *mg
-p	|void*	|default_protect|int *excpt|protect_body_t body|...
-p	|void*	|vdefault_protect|int *excpt|protect_body_t body|va_list *args
+p	|void*	|default_protect|volatile JMPENV *je|int *excpt \
+				|protect_body_t body|...
+p	|void*	|vdefault_protect|volatile JMPENV *je|int *excpt \
+				|protect_body_t body|va_list *args
 p	|void	|reginitcolors
 p	|char*	|sv_2pv_nolen	|SV* sv
+p	|char*	|sv_2pvutf8_nolen|SV* sv
+p	|char*	|sv_2pvbyte_nolen|SV* sv
 p	|char*	|sv_pv		|SV *sv
+p	|char*	|sv_pvutf8	|SV *sv
+p	|char*	|sv_pvbyte	|SV *sv
 p	|void	|sv_force_normal|SV *sv
 p	|void	|tmps_grow	|I32 n
 p	|SV*	|sv_rvweaken	|SV *sv
@@ -1768,10 +1850,34 @@ p	|CV*	|newATTRSUB	|I32 floor|OP *o|OP *proto|OP *attrs|OP *block
 p	|void	|newMYSUB	|I32 floor|OP *o|OP *proto|OP *attrs|OP *block
 p	|OP *	|my_attrs	|OP *o|OP *attrs
 p	|void	|boot_core_xsutils
+#if defined(USE_ITHREADS)
+p	|PERL_CONTEXT*|cx_dup	|PERL_CONTEXT* cx|I32 ix|I32 max
+p	|PERL_SI*|si_dup	|PERL_SI* si
+p	|ANY*	|ss_dup		|PerlInterpreter* proto_perl
+p	|void*	|any_dup	|void* v|PerlInterpreter* proto_perl
+p	|HE*	|he_dup		|HE* e|bool shared
+p	|REGEXP*|re_dup		|REGEXP* r
+p	|PerlIO*|fp_dup		|PerlIO* fp|char type
+p	|DIR*	|dirp_dup	|DIR* dp
+p	|GP*	|gp_dup		|GP* gp
+p	|MAGIC*	|mg_dup		|MAGIC* mg
+p	|SV*	|sv_dup		|SV* sstr
+#if defined(HAVE_INTERP_INTERN)
+p	|void	|sys_intern_dup	|struct interp_intern* src \
+				|struct interp_intern* dst
+#endif
+p	|PTR_TBL_t*|ptr_table_new
+p	|void*	|ptr_table_fetch|PTR_TBL_t *tbl|void *sv
+p	|void	|ptr_table_store|PTR_TBL_t *tbl|void *oldsv|void *newsv
+p	|void	|ptr_table_split|PTR_TBL_t *tbl
+#endif
 
 #if defined(PERL_OBJECT)
 protected:
+#else
+END_EXTERN_C
 #endif
+
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
 s	|I32	|avhv_index_sv	|SV* sv
 #endif
@@ -1829,6 +1935,7 @@ s	|OP*	|new_logop	|I32 type|I32 flags|OP **firstp|OP **otherp
 s	|void	|simplify_sort	|OP *o
 s	|bool	|is_handle_constructor	|OP *o|I32 argnum
 s	|char*	|gv_ename	|GV *gv
+s	|void	|cv_dump	|CV *cv
 s	|CV*	|cv_clone2	|CV *proto|CV *outside
 s	|bool	|scalar_mod_type|OP *o|I32 type
 s	|OP *	|my_kid		|OP *o|OP *attrs
@@ -1925,7 +2032,16 @@ s	|char*|regwhite	|char *|char *
 s	|char*|nextchar
 s	|regnode*|dumpuntil	|regnode *start|regnode *node \
 				|regnode *last|SV* sv|I32 l
+s	|void	|put_byte	|SV* sv|int c
 s	|void	|scan_commit	|struct scan_data_t *data
+s	|void	|cl_anything	|struct regnode_charclass_class *cl
+s	|int	|cl_is_anything	|struct regnode_charclass_class *cl
+s	|void	|cl_init	|struct regnode_charclass_class *cl
+s	|void	|cl_init_zero	|struct regnode_charclass_class *cl
+s	|void	|cl_and		|struct regnode_charclass_class *cl \
+				|struct regnode_charclass_class *and_with
+s	|void	|cl_or		|struct regnode_charclass_class *cl \
+				|struct regnode_charclass_class *or_with
 s	|I32	|study_chunk	|regnode **scanp|I32 *deltap \
 				|regnode *last|struct scan_data_t *data \
 				|U32 flags
@@ -1940,7 +2056,7 @@ s	|I32	|regmatch	|regnode *prog
 s	|I32	|regrepeat	|regnode *p|I32 max
 s	|I32	|regrepeat_hard	|regnode *p|I32 max|I32 *lp
 s	|I32	|regtry		|regexp *prog|char *startpos
-s	|bool	|reginclass	|char *p|I32 c
+s	|bool	|reginclass	|regnode *p|I32 c
 s	|bool	|reginclassutf8	|regnode *f|U8* p
 s	|CHECKPOINT|regcppush	|I32 parenfloor
 s	|char*|regcppop
@@ -1948,6 +2064,7 @@ s	|char*|regcp_set_to	|I32 ss
 s	|void	|cache_re	|regexp *prog
 s	|U8*	|reghop		|U8 *pos|I32 off
 s	|U8*	|reghopmaybe	|U8 *pos|I32 off
+s	|char*	|find_byclass	|regexp * prog|regnode *c|char *s|char *strend|char *startpos|I32 norun
 #endif
 
 #if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
@@ -2039,7 +2156,7 @@ s	|void	|force_ident	|char *s|int kind
 s	|void	|incline	|char *s
 s	|int	|intuit_method	|char *s|GV *gv
 s	|int	|intuit_more	|char *s
-s	|I32	|lop		|I32 f|expectation x|char *s
+s	|I32	|lop		|I32 f|int x|char *s
 s	|void	|missingterm	|char *s
 s	|void	|no_op		|char *what|char *s
 s	|void	|set_csh
@@ -2047,8 +2164,8 @@ s	|I32	|sublex_done
 s	|I32	|sublex_push
 s	|I32	|sublex_start
 s	|char *	|filter_gets	|SV *sv|PerlIO *fp|STRLEN append
-s	|SV*	|new_constant	|char *s|STRLEN len|char *key|SV *sv \
-				|SV *pv|char *type
+s	|SV*	|new_constant	|char *s|STRLEN len|const char *key|SV *sv \
+				|SV *pv|const char *type
 s	|int	|ao		|int toketype
 s	|void	|depcom
 s	|char*	|incl_perldb
@@ -2057,8 +2174,8 @@ s	|I32	|utf16rev_textfilter|int idx|SV *sv|int maxlen
 #  if defined(CRIPPLED_CC)
 s	|int	|uni		|I32 f|char *s
 #  endif
-#  if defined(WIN32)
-s	|I32	|win32_textfilter	|int idx|SV *sv|int maxlen
+#  if defined(PERL_CR_FILTER)
+s	|I32	|cr_textfilter	|int idx|SV *sv|int maxlen
 #  endif
 #endif
 
@@ -2071,4 +2188,8 @@ s	|SV*	|mess_alloc
 #  if defined(LEAKTEST)
 s	|void	|xstat		|int
 #  endif
+#endif
+
+#if defined(PERL_OBJECT)
+};
 #endif

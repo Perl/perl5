@@ -204,7 +204,7 @@ static void
 opmask_addlocal(pTHX_ SV *opset, char *op_mask_buf) /* Localise PL_op_mask then opmask_add() */
 {
     char *orig_op_mask = PL_op_mask;
-    SAVEPPTR(PL_op_mask);
+    SAVEVPTR(PL_op_mask);
 #if !defined(PERL_OBJECT)
     /* XXX casting to an ordinary function ptr from a member function ptr
      * is disallowed by Borland
@@ -253,6 +253,8 @@ PPCODE:
     save_hptr(&PL_defstash);		/* save current default stack	*/
     /* the assignment to global defstash changes our sense of 'main'	*/
     PL_defstash = gv_stashpv(Package, GV_ADDWARN); /* should exist already	*/
+    save_hptr(&PL_curstash);
+    PL_curstash = PL_defstash;
 
     /* defstash must itself contain a main:: so we'll add that now	*/
     /* take care with the ref counts (was cause of long standing bug)	*/
