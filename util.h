@@ -17,9 +17,8 @@
 #else		/* !VMS */
 #  ifdef WIN32
 #    define PERL_FILE_IS_ABSOLUTE(f) \
-	(*(f) == '/'							\
-	 || ((f)[0] && (f)[1] == ':')		/* drive name */	\
-	 || ((f)[0] == '\\' && (f)[1] == '\\'))	/* UNC path */
+	(*(f) == '/' || *(f) == '\\'		/* UNC/rooted path */	\
+	 || ((f)[0] && (f)[1] == ':'))		/* drive name */
 #  else		/* !WIN32 */
 #  ifdef NETWARE
 #    define PERL_FILE_IS_ABSOLUTE(f) \
