@@ -150,18 +150,6 @@ file).
 
 =item *
 
-A message of the form:
-
- shmat() found.
- and it returns (void *).
- *** WHOA THERE!!! ***
-     The recommended value for $d_shmatprototype on this machine was "define"!
-     Keep the recommended value? [y]
-
-is nothing to worry about at all.
-
-=item *
-
 Do not turn on the compiler optimization flag "-O".  There is
 a bug in either the optimizer or perl that causes perl to
 not work correctly when the optimizer is on.
