@@ -1783,3 +1783,16 @@ eval <<"EOT"; die if $@;
   /x && print "ok 632\n";
 EOT
 
+#test /o feature
+sub test_o { $_[0] =~/$_[1]/o; return $1}
+if(test_o('abc','(.)..') eq 'a') {
+    print "ok 631\n";
+} else {
+    print "not ok 631\n";
+}
+if(test_o('abc','..(.)') eq 'a') {
+    print "ok 632\n";
+} else {
+    print "not ok 632\n";
+}
+
