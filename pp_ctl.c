@@ -2446,6 +2446,8 @@ PP(pp_require)
 
 	RETPUSHUNDEF;
     }
+    else
+	SETERRNO(0, SS$_NORMAL);
 
     /* Assume success here to prevent recursive requirement. */
     (void)hv_store(GvHVn(incgv), name, strlen(name),
