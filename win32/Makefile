@@ -25,7 +25,7 @@ INST_TOP	= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	= \5.00473
+INST_VER	= \5.00474
 
 #
 # uncomment to enable threads-capabilities
@@ -139,10 +139,14 @@ USE_THREADS	= undef
 PROCESSOR_ARCHITECTURE	= x86
 !ENDIF
 
+!IF "$(OBJECT)" != ""
+ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-object
+!ELSE
 !IF "$(USE_THREADS)" == "define"
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-thread
 !ELSE
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
+!ENDIF
 !ENDIF
 
 ARCHDIR		= ..\lib\$(ARCHNAME)

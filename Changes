@@ -65,7 +65,257 @@ indicator:
 
 
 ----------------
-Version 5.004_73        Developer release working toward 5.005
+Version 5.004_74        Developer release working toward 5.005
+----------------
+
+____________________________________________________________________________
+[  1490] By: gsar                                  on 1998/07/14  08:31:13
+        Log: From:    Gisle Aas <gisle@aas.no>
+             Date:    14 Jul 1998 10:20:34 +0200
+             Message-Id: <m3hg0k973h.fsf@furu.g.aas.no>
+             Subject: [PATCH] Make -DP work (and readable)
+     Branch: perl
+           ! run.c
+____________________________________________________________________________
+[  1489] By: gsar                                  on 1998/07/14  08:23:46
+        Log: fix function parameter autovivification for pseudohashes
+     Branch: perl
+           ! mg.c t/op/avhv.t
+____________________________________________________________________________
+[  1488] By: gsar                                  on 1998/07/14  07:34:45
+        Log: merge changes#1423,1465 from maintbranch; checkin two missed files
+             from earlier changes#1461,1478
+     Branch: perl
+	   ! pod/perldiag.pod pod/perlfunc.pod pod/perlop.pod pp_sys.c
+	   ! t/TEST t/lib/thread.t t/op/local.t t/op/pat.t t/op/regexp.t
+           ! t/op/substr.t t/op/vec.t
+____________________________________________________________________________
+[  1487] By: gsar                                  on 1998/07/14  07:04:54
+        Log: tweak t/lib/thread.t
+     Branch: perl
+           ! t/lib/thread.t
+____________________________________________________________________________
+[  1486] By: gsar                                  on 1998/07/14  06:38:15
+        Log: applied patch, slightly tweaked
+             From: Dan Sugalski <sugalskd@osshe.edu>
+             Date: Mon, 13 Jul 1998 11:52:27 -0700
+             Message-Id: <3.0.5.32.19980713115227.00a73970@ous.edu>
+             Subject: [PATCH 5.004_73]Get re module working on VMS
+     Branch: perl
+           ! ext/re/Makefile.PL perl.h proto.h
+____________________________________________________________________________
+[  1485] By: gsar                                  on 1998/07/14  06:32:58
+        Log: add Porting/p4d2p
+     Branch: perl
+           + Porting/p4d2p
+           ! MANIFEST
+____________________________________________________________________________
+[  1484] By: gsar                                  on 1998/07/14  06:08:20
+        Log: doc patches from Tom Christiansen <tchrist@chthon.perl.com> (via PM)
+             Date: Mon, 13 Jul 1998 19:09:09 -0600
+             Message-Id: <199807140109.TAA04678@chthon.perl.com>
+             Subject: perlmod.pod patch
+             --
+             Date: Mon, 13 Jul 1998 18:37:07 -0600
+             Message-Id: <199807140037.SAA04556@chthon.perl.com>
+             Subject: perlbook.pod patch
+     Branch: perl
+           ! pod/perlbook.pod pod/perlmod.pod
+____________________________________________________________________________
+[  1483] By: gsar                                  on 1998/07/14  06:04:25
+        Log: OS/2 update
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Message-Id: <199807132336.TAA12967@monk.mps.ohio-state.edu>
+             Date: Mon, 13 Jul 1998 19:36:05 -0400 (EDT)
+             Subject: [PATCH 5.004_72] OS/2 system() and friends additions
+     Branch: perl
+           ! README.os2 hints/os2.sh os2/Changes os2/os2.c t/op/magic.t
+____________________________________________________________________________
+[  1482] By: gsar                                  on 1998/07/14  06:01:12
+        Log: more VMS patches from Dan Sugalski <sugalskd@osshe.edu>
+             Date: Mon, 13 Jul 1998 16:37:49 -0700
+             Message-Id: <3.0.5.32.19980713163749.00af1c40@ous.edu>
+             Subject: [PATCH 5.004_73]t/io/iprefix.t patch for VMS
+             --
+             Date: Mon, 13 Jul 1998 15:51:09 -0700
+             Message-Id: <3.0.5.32.19980713155109.00a52c30@ous.edu>
+             Subject: [PATCH5.004_73]Tweak t/lib/cgi-html.t to work on VMS
+     Branch: perl
+           ! t/io/iprefix.t t/lib/cgi-html.t
+____________________________________________________________________________
+[  1481] By: gsar                                  on 1998/07/14  05:57:36
+        Log: From: Dan Sugalski <sugalskd@osshe.edu>
+             Date: Mon, 13 Jul 1998 15:41:53 -0700
+             Message-Id: <3.0.5.32.19980713154153.00a87be0@ous.edu>
+             Subject: [PATCH 5.004_73]Fix t/base/rs.t test failures on VMS
+     Branch: perl
+           ! t/base/rs.t
+____________________________________________________________________________
+[  1480] By: gsar                                  on 1998/07/14  05:56:14
+        Log: From: Dan Sugalski <sugalskd@osshe.edu>
+             Message-Id: <3.0.5.32.19980713150427.00b2a540@ous.edu>
+             Date: Mon, 13 Jul 1998 15:04:27 -0700
+             Subject: [PATCH 5.004_73]Thread tweak for VMS.C
+     Branch: perl
+           ! vms/vms.c
+____________________________________________________________________________
+[  1479] By: gsar                                  on 1998/07/14  05:55:13
+        Log: From: Laszlo Molnar <molnarl@cdata.tvnet.hu>
+             Date: Mon, 13 Jul 1998 23:13:43 +0200
+             Message-ID: <19980713231343.A178@cdata.tvnet.hu>
+             Subject: [PATCH _72] Configure problem on dos-djgpp
+     Branch: perl
+           ! Configure
+____________________________________________________________________________
+[  1478] By: gsar                                  on 1998/07/14  05:53:08
+        Log: add files and tweaks needed for MPE/iX port (via PM)
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Tue, 14 Jul 1998 00:07:30 +0300 (EET DST)
+             Message-Id: <199807132107.AAA20603@alpha.hut.fi>
+             Subject: MPE/iX patches for _73
+     Branch: perl
+	   + README.mpeix ext/DynaLoader/dl_mpeix.xs ext/re/hints/mpeix.pl
+           + mpeix/mpeixish.h mpeix/nm mpeix/relink
+	   ! MANIFEST ext/Socket/Socket.xs hints/mpeix.sh installperl
+           ! lib/File/Copy.pm perl.c perl.h pod/perldelta.pod
+____________________________________________________________________________
+[  1477] By: gsar                                  on 1998/07/14  04:23:28
+        Log: added suggested patch (via PM), tweaked to implicitly specify -DDEBUGGING
+             From: Andy Dougherty <doughera@lafcol.lafayette.edu>
+             Date: Mon, 13 Jul 1998 16:50:55 -0400 (EDT)
+             Message-Id: <Pine.SUN.3.96.980713164922.28314B-100000@newton.phys>
+             Subject: Re: _70 and Devel::RE
+     Branch: perl
+           ! ext/re/Makefile.PL ext/re/re.xs regcomp.c regexec.c
+____________________________________________________________________________
+[  1476] By: gsar                                  on 1998/07/14  04:06:25
+        Log: minor Configure nits
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Mon, 13 Jul 1998 23:25:27 +0300 (EET DST)
+             Message-Id: <199807132025.XAA10771@alpha.hut.fi>
+             Subject: Configure patches for MVS (and one x2p/Makefile.SH)
+     Branch: perl
+           ! Configure x2p/Makefile.SH
+____________________________________________________________________________
+[  1475] By: gsar                                  on 1998/07/14  03:59:56
+        Log: From: Dan Sugalski <sugalskd@osshe.edu>
+             Date: Mon, 13 Jul 1998 12:54:19 -0700
+             Message-Id: <3.0.5.32.19980713125419.009e0100@ous.edu>
+             Subject: [PATCH 5.004_73] Fixes to the VMS configuration system
+     Branch: perl
+           ! vms/munchconfig.c vms/subconfigure.com
+____________________________________________________________________________
+[  1474] By: gsar                                  on 1998/07/14  03:58:13
+        Log: make Term::Readline::get_line() independent of caller's $/
+             From: kstar@chapin.edu
+             Date: Mon, 13 Jul 1998 15:17:49 -0400
+             Message-ID: <19980713151749.G8596@O2.chapin.edu>
+             Subject: [PATCH] Was: CPAN.pm still fails
+     Branch: perl
+           ! lib/Term/ReadLine.pm
+____________________________________________________________________________
+[  1473] By: gsar                                  on 1998/07/14  03:55:29
+        Log: fix $trnl interpolation in here-docs (via PM)
+             From: Andy Dougherty <doughera@lafcol.lafayette.edu>
+             Date: Mon, 13 Jul 1998 15:49:00 -0400 (EDT)
+             Message-Id: <Pine.SUN.3.96.980713151243.28129F-100000@newton.phys>
+             Subject: Re: [PATCH] 5.004_73: Re: Configure/trnl craziness
+     Branch: perl
+           ! Configure
+____________________________________________________________________________
+[  1472] By: gsar                                  on 1998/07/14  03:50:18
+        Log: From: Dominic Dunlop <domo@ppp52.vo.lu>
+             Date: Mon, 13 Jul 1998 15:55:09 +0100 (WET DST)
+             Message-Id: <199807131455.PAA23621@ppp52.vo.lu>
+             Subject: Not OK: perl 5.00473 on powerpc-machten 4.1 [PATCH 5.004_73]
+     Branch: perl
+           ! hints/machten.sh
+____________________________________________________________________________
+[  1471] By: gsar                                  on 1998/07/14  03:49:07
+        Log: From: Dan Sugalski <sugalskd@osshe.edu>
+             Message-Id: <3.0.5.32.19980713123005.00b6be50@ous.edu>
+             Date: Mon, 13 Jul 1998 12:30:05 -0700
+             Subject: [PATCH 5.004_73] Add Data::Dumper and re modules to VMS config stuff
+     Branch: perl
+           ! configure.com vms/descrip_mms.template
+____________________________________________________________________________
+[  1470] By: gsar                                  on 1998/07/14  03:40:14
+        Log: consistently refer to functions as C<foo()>
+             From: abigail@fnx.com
+             Date: Mon, 13 Jul 1998 03:04:24 -0400 (EDT)
+             Message-ID: <19980713070424.19841.qmail@betelgeuse.wayne.fnx.com>
+             Subject: Re: [PATCH 5.004_71] pod/perlfunc.pod
+     Branch: perl
+           ! pod/perlfunc.pod
+____________________________________________________________________________
+[  1469] By: gsar                                  on 1998/07/14  03:35:06
+        Log: From: Tom Hughes <thh@cyberscience.com>
+             Date: 13 Jul 1998 09:34:16 +0100
+             Message-ID: <yekk95i175j.fsf@elva.cyberscience.com>
+             Subject: [PATCH 5.004_72] Fix d_Gconvert definition in hints/svr4.sh
+     Branch: perl
+           ! hints/svr4.sh
+____________________________________________________________________________
+[  1468] By: gsar                                  on 1998/07/14  03:34:03
+        Log: From: andreas.koenig@kulturbox.de (Andreas J. Koenig)
+             Date: 13 Jul 1998 11:16:27 +0200
+             Message-ID: <sfc90lyqff8.fsf@dubravka.in-berlin.de>
+             Subject: Parallel Makefiles
+     Branch: perl
+           ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  1467] By: gsar                                  on 1998/07/14  03:31:39
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 13 Jul 1998 00:12:19 -0400 (EDT)
+             Message-Id: <199807130412.AAA27128@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.004_72] t/io/pipe.t - completely broken?
+     Branch: perl
+           ! t/io/pipe.t
+____________________________________________________________________________
+[  1466] By: gsar                                  on 1998/07/14  03:29:25
+        Log: minor tweaks to perldelta and README.win32
+     Branch: perl
+           ! Changes README.win32 pod/perldelta.pod
+____________________________________________________________________________
+[  1465] By: TimBunce                              on 1998/07/13  21:33:45
+        Log: Assorted patches:
+             
+             Title:  "Fix string substitution returncode problem"
+             From:  Dominic Dunlop <domo@vo.lu>, Gurusamy Sarathy <gsar@engin.umich.edu>
+             Msg-ID:  <199805271236.IAA28213@aatma.engin.umich.edu>,
+             <v03110700b191a557f041@[195.95.102.114]>
+             Files:  pp_hot.c
+             
+             Title:  "umask EXPR is fatal only if (EXPR & 0700) > 0"
+             From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+             Msg-ID:  <199807111656.MAA03310@aatma.engin.umich.edu>
+             Files:  pod/perldiag.pod pp_sys.c
+             
+             Title:  "Remove reference to qsort from perlfunc.pod"
+             From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+             Msg-ID:  <199807111923.PAA05124@aatma.engin.umich.edu>
+             Files:  pod/perlfunc.pod
+             
+             Title:  "Deprecate AvFILL in favor of av_len()"
+             From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+             Msg-ID:  <199807111945.PAA05489@aatma.engin.umich.edu>
+             Files:  pod/perlguts.pod
+             
+             Title:  "Further clarify effects of using quotes with m operator"
+             From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+             Msg-ID:  <199806201921.PAA03829@aatma.engin.umich.edu>
+             Files:  pod/perlop.pod
+             
+             Title:  "Add PERL_DESTRUCT_LEVEL=2 to test suite"
+             From:  Tim Bunce
+             Files:  t/TEST t/op/local.t t/op/pat.t t/op/regexp.t t/op/substr.t t/op/vec.t
+     Branch: maint-5.004/perl
+	   ! pod/perldiag.pod pod/perlfunc.pod pod/perlguts.pod
+	   ! pod/perlop.pod pp_hot.c pp_sys.c t/TEST t/op/local.t
+           ! t/op/pat.t t/op/regexp.t t/op/substr.t t/op/vec.t toke.c
+
+----------------
+Version 5.004_73
 ----------------
 
 ____________________________________________________________________________
