@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Apr 21 19:51:29 EET DST 2003 [metaconfig 3.0 PL70]
+# Generated on Wed Apr 23 23:08:10 EET DST 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
