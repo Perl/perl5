@@ -3486,7 +3486,7 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
 				    = complement ? ANYOF_NLOWER : ANYOF_LOWER;
 			    }
 			    if (memEQ(posixcc, "uppe", 4)) {
-				/*                      r     */
+				/*                  r     */
 				namedclass
 				    = complement ? ANYOF_NUPPER : ANYOF_UPPER;
 			    }
@@ -3498,7 +3498,7 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
 				    = complement ? ANYOF_NDIGIT : ANYOF_DIGIT;
 			    }
 			    if (memEQ(posixcc, "prin", 4)) {
-				/*                      t     */
+				/*                  t     */
 				namedclass
 				    = complement ? ANYOF_NPRINT : ANYOF_PRINT;
 			    }
