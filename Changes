@@ -28,6 +28,624 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 18379] By: jhi                                   on 2002/12/31  15:33:11
+        Log: Integrate:
+             [ 18371]
+             Subject: [PATCH] Re: [perl #19330] Uneffective increment of $\
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Fri, 27 Dec 2002 16:14:24 +0100
+             Message-Id: <20021227161424.17234e3c.rgarciasuarez@free.fr>
+             
+             [ 18372]
+             Subject: [PATCH lib/AutoSplit.pm] Holding filehandle open
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 21 Dec 2002 19:29:41 -0800
+             Message-ID: <20021222032941.GD24887@blackrider.schwern.org>
+             
+             [ 18373]
+             Subject: [perl #19343] perlfunc.pod patch for stat() and lstat()
+             From: Dave Paris (via RT) <perlbug-followup@perl.org>
+             Date: 22 Dec 2002 05:15:14 -0000
+             Message-Id: <rt-19343-46041.7.82970696202895@bugs6.perl.org>
+             
+             [ 18374]
+             Remove duplicate entry
+             
+             [ 18378]
+             integrate change#18377 from maint-5.6 branch
+             
+             change#17566 needs to be more defensive about win32_dup2()
+             itself calling SetStdHandle() (at least MSVCRT does this)
+     Branch: maint-5.8/perl
+	  !> MANIFEST lib/AutoSplit.pm mg.c pod/perlfunc.pod t/op/magic.t
+	  !> win32/win32.c
+____________________________________________________________________________
+[ 18375] By: jhi                                   on 2002/12/30  21:28:31
+        Log: Better version of change #18370; use the new 'E' flag
+             so that cxinc is exposed (as cpp) only to List::Util
+             (well, any extension) (well, anyone who does -DPERL_EXT),
+             no need to export it globally.
+     Branch: maint-5.8/perl
+	   ! embed.fnc embed.h ext/List/Util/Makefile.PL global.sym
+____________________________________________________________________________
+[ 18370] By: jhi                                   on 2002/12/30  02:37:38
+        Log: In AIX (strict symbol exports) the cxinc is needed for List::Util. 
+     Branch: maint-5.8/perl
+	   ! embed.fnc embed.h global.sym
+____________________________________________________________________________
+[ 18369] By: jhi                                   on 2002/12/30  01:38:38
+        Log: Missed one.
+     Branch: maint-5.8/perl
+	   ! embed.fnc embed.h
+____________________________________________________________________________
+[ 18368] By: jhi                                   on 2002/12/29  23:33:56
+        Log: Continue on change #18367; implement the said flag, 'E'.
+             (Some nm output studying was needed to get the right set
+             of re symbols defined.)
+     Branch: maint-5.8/perl
+	   ! embed.fnc embed.h embed.pl ext/re/Makefile.PL
+____________________________________________________________________________
+[ 18367] By: jhi                                   on 2002/12/29  21:40:08
+        Log: Caught by change #18366; thanks to the re extension we have some
+             functions that are file static but yet part of "the public API"...
+             Maybe a new class of exportability (a new embed.fnc flag) is
+             required for this case.
+     Branch: maint-5.8/perl
+	   ! embed.fnc embed.h
+____________________________________________________________________________
+[ 18366] By: jhi                                   on 2002/12/29  21:28:27
+        Log: Implement the CPP namespace protection from [perl #8610];
+             unless a function has an 'A' flag, it's defined only if
+             PERL_CORE.  (Why do we have so many many functions with an
+             'A' flag, is another matter.)  (The number of #ifdef PERL_COREs
+             could be cut down further by having a state variable and
+             inserting #ifdefs and #endifs when the state flips.)
+     Branch: maint-5.8/perl
+	   ! embed.h embed.pl
+____________________________________________________________________________
+[ 18365] By: jhi                                   on 2002/12/29  15:01:08
+        Log: Doc tweak on the S_ macros.
+     Branch: maint-5.8/perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 18364] By: jhi                                   on 2002/12/29  14:54:43
+        Log: Apply the doc patch from [perl #19343].
+     Branch: maint-5.8/perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 18363] By: jhi                                   on 2002/12/29  14:49:14
+        Log: Integrate:
+             [ 18354]
+             Subject: [PATCH] docpatch for cv.h
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Wed, 25 Dec 2002 21:01:04 +0000
+             Message-Id: <20021225210102.GA284@Bagpuss.unfortu.net>
+             
+             [ 18356]
+             fix signed/unsigned mismatch warning from change#18266
+             
+             [ 18358]
+             save_re_context() was not saving many regexec.c state
+             variables, resulting in various reentrancy problems when
+             the swatches were autoloaded by perl in the midst of a
+             match
+     Branch: maint-5.8/perl
+	  !> cv.h regcomp.c
+____________________________________________________________________________
+[ 18362] By: jhi                                   on 2002/12/29  00:51:29
+        Log: Fix [perl #18666] (taking the more conservative approach).
+     Branch: maint-5.8/perl
+	   ! lib/File/Spec/Unix.pm
+____________________________________________________________________________
+[ 18361] By: jhi                                   on 2002/12/29  00:45:16
+        Log: Document that the socketpair tests are unhappy in old SCO,
+             as per [perl #18537].
+     Branch: maint-5.8/perl
+	   ! pod/perl58delta.pod
+____________________________________________________________________________
+[ 18360] By: jhi                                   on 2002/12/29  00:38:01
+        Log: Fix from the bug report for [perl #19267].
+     Branch: maint-5.8/perl
+	   ! lib/Pod/Man.pm
+____________________________________________________________________________
+[ 18359] By: jhi                                   on 2002/12/28  22:33:16
+        Log: A small tweak on top of #18353: don't display mg_len bytes of
+             mg_ptr for PERL_MAGIC_utf8 because that's not what's there.
+     Branch: maint-5.8/perl
+	   ! dump.c
+____________________________________________________________________________
+[ 18353] By: jhi                                   on 2002/12/26  02:07:06
+        Log: Introduce a cache for UTF-8 data: length and byte<->char offset
+             mapping are stored in a new type of magic.  Speeds up length(),
+             substr(), index(), rindex(), pos(), and some parts of s///.
+             
+             The speedup varies a lot (on the usual suspects: what is the
+             access pattern of the data, compiler, CPU), but should be at
+             least one order of magnitude, and getting to the same magnitude
+             as byte string speeds, and in some cases  (length on unchanged data)
+             even reaching the byte string speed.  On the other hand, in some
+             cases (index) the byte speed is still faster by a factor of five
+             or so, but the bottleneck there does not seem to be any more
+             the byte<->char offset mapping (instead, the fbm_instr() speed).
+             
+             There is one cache slot for the length, and only two for the 
+             byte<->char offset mapping (the first one for the start->offset,
+             and the second for the offset->offset+length, when talking
+             in substr() terms).
+             
+             Code this hairy is bound to have hairy trolls hiding under it.
+     Branch: maint-5.8/perl
+	   ! dump.c embed.fnc embed.h mg.c perl.h proto.h sv.c util.c
+____________________________________________________________________________
+[ 18352] By: jhi                                   on 2002/12/25  13:42:10
+        Log: Integrate:
+             [ 18350]
+             Removal of duplicate comment block
+             
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Subject: Re: [perl #19306] Sys::Syslog issues.
+             Date: Mon, 23 Dec 2002 15:25:51 -0800
+             Message-ID: </t5B+gzkg6DR092yn@efn.org>
+             
+             [ 18351]
+             #18345 was still broken; should be fixed now.
+     Branch: maint-5.8/perl
+	  !> ext/Sys/Syslog/Syslog.pm sv.c
+____________________________________________________________________________
+[ 18349] By: jhi                                   on 2002/12/24  02:42:31
+        Log: At least partially address [perl #10000] by speeding
+             up both the ASCII case (by about 2-3%) and the UTF-8 case 
+             (by about 45%).  The major trick is to avoid hitting the
+             costly S_reginclass().  (Even before this patch the speedup
+             since 5.8.0 was about 40-50%.)  After this the UTF-8 case is
+             still about 30-60% slower than the ASCII case.  (Note that
+             I'm unable to reproduce the 10-fold speed difference of the
+             original bug report; I can see a factor of 2 or 3, but no more.)
+     Branch: maint-5.8/perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 18348] By: jhi                                   on 2002/12/23  06:42:29
+        Log: Make Math::Trig a little bit more better behaved module citizen.
+     Branch: maint-5.8/perl
+	   ! lib/Math/Trig.pm
+____________________________________________________________________________
+[ 18347] By: jhi                                   on 2002/12/23  06:37:31
+        Log: Integrate:
+             [ 18300]
+             Subject: [patch] typo in perlop
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: Wed, 11 Dec 2002 21:31:14 +0100
+             Message-ID: <m3k7igjo19.fsf@k242.linux.bogus>
+             
+             [ 18304]
+             Redone #18011 from metaunits
+             
+             [ 18305]
+             Enough changes to Configure and metaunits warrant an update.
+             Several small changes and three additions
+             
+             [ 18306]
+             More documentation of obscure flags is good, even if the
+             documentation might be not so good. Atleast it's not false!
+             Documents the flags one can give to perl_clone
+             
+             [ 18308]
+             Subject: [PATCH] Re: [perl #19017] lexical "my" variables not visible in debugger "x" command
+             From: peter@PSDT.com (Peter Scott)
+             Date: 12 Dec 2002 18:13:17 -0000
+             Message-ID: <20021212181317.50538.qmail@onion.perl.org>
+             (fix bug [perl #19058])
+             
+             [ 18310]
+             regen-headers to get new API docs from #18306
+             
+             [ 18312]
+             Subject: [Fwd: Patch for perl utf8-related bug]
+             From: Richard Hitt <rbh00@utsglobal.com>
+             Date: Fri, 06 Dec 2002 16:47:42 -0800
+             [perl #18932]
+             
+             [ 18313]
+             Subject: [PATCH 5.8.1 @oldish-18156] OS/2 REXX interface assuming Object REXX
+             From: Ilya Zakharevich <ilya@Math.Berkeley.EDU>
+             Date: Fri, 13 Dec 2002 14:08:00 -0800
+             Message-ID: <20021213220800.GA2625@math.berkeley.edu>
+             
+             [ 18314]
+             Subject: [PATCH 5.8.1 @oldish-18156] Morphing to PM on OS/2
+             From: Ilya Zakharevich <ilya@Math.Berkeley.EDU>
+             Date: Fri, 13 Dec 2002 14:00:48 -0800
+             Message-ID: <20021213220048.GA2606@math.berkeley.edu>
+             
+             [ 18315]
+             Subject: [PATCH 5.8.1 @oldish-18156] deprecated warnings
+             From: Ilya Zakharevich <ilya@Math.Berkeley.EDU>
+             Date: Fri, 13 Dec 2002 13:47:08 -0800
+             Message-ID: <20021213214707.GA2588@math.berkeley.edu>
+             
+             [ 18316]
+             Subject: [PATCH 5.8.1 @oldish-18156] build
+             From: Ilya Zakharevich <ilya@Math.Berkeley.EDU>
+             Date: Fri, 13 Dec 2002 13:54:05 -0800
+             Message-ID: <20021213215404.GA2597@math.berkeley.edu>
+             
+             [ 18317]
+             Integrate Net::Ping v2.26. (lib/Net/Ping/t/450_service.t should work now)
+             
+             [ 18323]
+             PerlSIO_stderr et al are not functions
+             
+             [ 18324]
+             windows: avoid prompting under some shells during $(MAKE) distclean
+             
+             [ 18325]
+             PerlIO_{stdoutf,vprintf} don't exist, should be PerlSIO_*
+             
+             [ 18326]
+             Win32.pod update
+             
+             [ 18327]
+             windows: support for large files
+             
+             note that this change will break binary compatibility with the
+             default 5.8.0 build options; nevertheless I think it is worth
+             having in 5.8.1 (people who want the compatibility can disable
+             the option in the makefile)
+             
+             [ 18328]
+             fix for GPF in C<print Win32::GetFullPathName('\\\\host\share')>
+             
+             [ 18330]
+             remove CRs from a couple of files (these show up as CRCRLF
+             on windows)
+             
+             [ 18332]
+             $Config{prefixexp} was set incorrectly on windows
+             
+             [ 18334]
+             AIX compiler version updates
+             
+             [ 18335]
+             my_fflush_all() wasn't doing the right thing under useperlio
+             on many platforms
+             
+             [ 18337]
+             handy hint: getting a perforce change as a usable patch
+             
+             [ 18338]
+             Subject: [PATCH] read permissions for h2ph-generated files
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: Fri, 22 Nov 2002 14:49:14 +0100 (CET)
+             Message-Id: <200211221349.gAMDnEAK014033@vran.herceg.de>
+             
+             [ 18339]
+             Integrate Time::HiRes v1.39 (for VMS build tweak)
+             
+             [ 18342]
+             Subject: [perl #18544] Patch included to fix problem.
+             From: Richard Kandarian <richard.kandarian@lanl.gov>
+             Date: Thu, 21 Nov 2002 08:00:20 -0700
+             (from RT)
+             
+             [ 18343]
+             Subject: [perl #19153] Term::Complete (the argument of stty)
+             From: OKAIE Yutaka (via RT) <perlbug-followup@perl.org>
+             Date: 15 Dec 2002 13:45:23 -0000
+             Message-Id: <rt-19153-45441.1.2145712923207@bugs6.perl.org>
+             
+             [ 18344]
+             more on #18312: sv.c:ss_dup()
+             
+             [ 18345]
+             more on #18344.
+     Branch: maint-5.8/perl
+	  +> lib/Net/Ping/t/410_syn_host.t
+	   ! Configure config_h.SH
+	  !> (integrate 56 files)
+____________________________________________________________________________
+[ 18301] By: jhi                                   on 2002/12/13  02:12:54
+        Log: Bad location of '==>' under the debugger,
+             apply the patch.
+     Branch: maint-5.8/perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 18297] By: jhi                                   on 2002/12/12  19:19:56
+        Log: Warn about the non-portabilities of strftime.
+     Branch: maint-5.8/perl
+	   ! ext/POSIX/POSIX.pod
+____________________________________________________________________________
+[ 18296] By: jhi                                   on 2002/12/12  18:21:12
+        Log: Integrate:
+             [ 18292]
+             Update to Scalar-List-Utils 1.09
+     Branch: maint-5.8/perl
+	  !> ext/List/Util/ChangeLog ext/List/Util/Util.xs
+	  !> ext/List/Util/lib/List/Util.pm
+____________________________________________________________________________
+[ 18295] By: jhi                                   on 2002/12/12  18:06:57
+        Log: Until proven otherwise I don't think any of the strftime
+             formats %c, %z, and %Z can be tested portably.
+     Branch: maint-5.8/perl
+	   ! ext/POSIX/t/posix.t
+____________________________________________________________________________
+[ 18294] By: jhi                                   on 2002/12/12  14:34:58
+        Log: Resolve Abe's failing is.t, diagnosed by Sarathy
+             (setlocale(LC_ALL, 'C') was the key).  Document that
+             locale settings may be hazardous to your isxxxx() health.
+             (Surgeon General warning). 
+     Branch: maint-5.8/perl
+	   ! ext/POSIX/POSIX.pod ext/POSIX/t/is.t
+____________________________________________________________________________
+[ 18293] By: jhi                                   on 2002/12/12  13:57:56
+        Log: Resolve [#perl 15774] by fiat: simply document that
+             \C in lookbehind is unsupported.
+     Branch: maint-5.8/perl
+	   ! pod/perlre.pod pod/perlretut.pod
+____________________________________________________________________________
+[ 18291] By: jhi                                   on 2002/12/11  20:13:30
+        Log: [perl #19048] has already been fixed; add its test.
+     Branch: maint-5.8/perl
+	   ! t/op/subst.t
+____________________________________________________________________________
+[ 18290] By: jhi                                   on 2002/12/11  18:56:01
+        Log: Fix [perl #15763].
+     Branch: maint-5.8/perl
+	   ! regexec.c t/op/pat.t
+____________________________________________________________________________
+[ 18286] By: jhi                                   on 2002/12/11  14:43:36
+        Log: Integrate:
+             [ 18272]
+             RT#15950
+             
+             Subject: [PATCH] Typo in Term::ANSIColor
+             Date: Fri, 2 Aug 2002 14:13:19 -0700 (PDT)
+             From: "Mr. Nobody" <mrnobo1024  at  yahoo.com>
+             
+             [ 18277]
+             Subject: [PATCH perl@18251] VMS build update
+             Message-ID: <3DF56BE2.9000300@mac.com>
+             Date: Mon, 09 Dec 2002 22:21:54 -0600
+             From: "Craig A. Berry" <craigberry@mac.com>
+             
+             [ 18278]
+             Subject: Re: default lib dir should examine $Config{installstyle}
+             Date: Tue, 10 Dec 2002 09:45:19 -0500 (EST)
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Message-ID: <Pine.SOL.4.10.10212100925400.17526-100000@maxwell.phys.lafayette.edu>
+             
+             [ 18279]
+             Subject: Re: ANSIColor 1.06 released
+             Version bump only after typo fix to sync with CPAN
+             
+             [ 18282]
+             Subject: Remove stale e-mail addresses
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Wed, 20 Nov 2002 09:40:33 -0500 (EST)
+             Message-ID: <Pine.SOL.4.10.10211200938110.19608-100000@maxwell.phys.lafayette.edu>
+             
+             [ 18283]
+             More email addresses for #18282
+             
+             [ 18284]
+             One more email address for #18282
+     Branch: maint-5.8/perl
+	  !> (integrate 31 files)
+____________________________________________________________________________
+[ 18276] By: jhi                                   on 2002/12/09  23:49:14
+        Log: Move the tests added to pat.t in #18248 to lc.t.
+     Branch: maint-5.8/perl
+	   ! t/op/lc.t t/op/pat.t
+____________________________________________________________________________
+[ 18275] By: jhi                                   on 2002/12/09  23:21:58
+        Log: Add Nick Clark's test case for [perl #18915].
+             (The bug was fixed by change #18266.)
+     Branch: maint-5.8/perl
+	   ! t/op/split.t
+____________________________________________________________________________
+[ 18274] By: jhi                                   on 2002/12/09  23:19:57
+        Log: test.pl-ise t/op/split.t
+     Branch: maint-5.8/perl
+	   ! t/op/split.t
+____________________________________________________________________________
+[ 18273] By: jhi                                   on 2002/12/09  22:48:39
+        Log: Add Nick Clark's test case for [perl #18931].
+             (The bug was fixed by change #18266.)
+     Branch: maint-5.8/perl
+	   ! t/op/lc.t
+____________________________________________________________________________
+[ 18271] By: jhi                                   on 2002/12/09  02:41:11
+        Log: Integrate:
+             [ 18249]
+             Suppress a compilation warning reported by Jarkko
+             (variable initialization skipped by goto).
+             
+             [ 18250]
+             Fix bug #18874, essentially by reverting change #11890.
+             Add a regression test for it.
+             
+             [ 18251]
+             Fix two cases of buffer overflow in the lexer.
+             
+             [ 18259]
+             Subject: [PATCH] Re: [perl #18651] Hash::Util's lock_key() breaks hash
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Mon, 2 Dec 2002 21:48:29 +0000
+             Message-ID: <20021202214828.GA284@Bagpuss.unfortu.net>
+             
+             [ 18260]
+             Document that $ENV{TERM} may produce taint failures.
+             Subject: Re: [perl #18717] spurious failures in regression test
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 29 Nov 2002 22:11:46 +0100
+             Message-ID: <87hee0nkrx.fsf@vran.herceg.de>
+             
+             [ 18261]
+             Change the set of characters that are considered to be
+             safe in $ENV{TERM} for taint checkings.
+             
+             [ 18262]
+             getservbyport() should accept an empty string as its
+             proto argument (as does getservbyname()).
+             
+             Subject: Re: Is this a bug or am I being stupid?
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 08 Dec 2002 01:54:37 +0100
+             Message-ID: <87znrhl48i.fsf@vran.herceg.de>
+             
+             [ 18263]
+             Subject: Re: [perl #18888] $Exporter::Verbose=1 does not work for testing, $Heavy::Verbose is not setting the value to $Exporter::Verbose
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 08 Dec 2002 01:31:45 +0100
+             Message-ID: <874r9pmjv2.fsf@vran.herceg.de>
+             
+             [ 18264]
+             Subject: Re: [perl #18165] "0" fails as right-hand argument to ..
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 30 Nov 2002 00:07:05 +0100
+             Message-ID: <8765ugnffq.fsf@vran.herceg.de>
+             
+             [ 18265]
+             Subject: Re: [perl #18927] barewords with no errors
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Date: Sun, 8 Dec 2002 17:12:56 +0100
+             Message-Id: <200212081712.56102.abe@ztreet.demon.nl>
+             
+             [ 18266]
+             Subject: Re: [perl #18107] lc(), uc() and ucfirst() broken inside utf8 regex
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Wed, 6 Nov 2002 19:38:11 +0530
+             Message-ID: <20021106193811.E20858@lustre.dyn.wiw.org>
+             
+             [ 18267]
+             Subject: Re: [perl #18238] timezone and gmt offset as output by POSIX::strftime()  are sometimes wrong
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 09 Nov 2002 23:21:16 +0100
+             Message-ID: <874raqz8o3.fsf@vran.herceg.de>
+             
+             [ 18268]
+             fix #18266 sprintf format mismatch
+             
+             [ 18269]
+             Subject: Re: Bug in Filter::Simple
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 07 Nov 2002 10:01:41 +0100
+             Message-ID: <87of91u51m.fsf@vran.herceg.de>
+             
+             [ 18270]
+             Subject: [perl #18256] xsubpp can make nested comments in C code
+             From: Nicholas Clark (via RT) <perlbug@perl.org>
+             Date: 7 Nov 2002 14:58:14 -0000
+             Message-Id: <rt-18256-41218.19.7625495305233@bugs6.perl.org>
+             
+             (plus regen Configure)
+     Branch: maint-5.8/perl
+	   ! Configure config_h.SH
+	  !> ext/Filter/Util/Call/Call.xs ext/Filter/t/call.t
+	  !> ext/POSIX/t/posix.t hv.c lib/English.pm lib/English.t
+	  !> lib/Exporter/Heavy.pm lib/ExtUtils/xsubpp lib/Hash/Util.t
+	  !> pod/perldiag.pod pp_ctl.c pp_sys.c regcomp.c t/cmd/for.t
+	  !> t/comp/parser.t t/lib/strict/subs t/op/lc.t taint.c toke.c
+	  !> util.c
+____________________________________________________________________________
+[ 18258] By: jhi                                   on 2002/12/08  15:24:00
+        Log: Retract #18252 and #18256.
+     Branch: maint-5.8/perl
+	   ! hv.c lib/Hash/Util.t regcomp.c t/op/lc.t
+____________________________________________________________________________
+[ 18257] By: jhi                                   on 2002/12/07  22:38:49
+        Log: Tiny doc tweak from Hugo for [perl #16783].
+     Branch: maint-5.8/perl
+	   ! pod/perlsec.pod
+____________________________________________________________________________
+[ 18256] By: jhi                                   on 2002/12/07  18:24:27
+        Log: Subject: [PATCH] Re: [perl #18651] Hash::Util's lock_key() breaks hash
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Mon, 2 Dec 2002 21:48:29 +0000
+             Message-ID: <20021202214828.GA284@Bagpuss.unfortu.net>
+             
+             (the pp_sys.c and util.c were accidentally open,
+             but luckily unmodified)
+     Branch: maint-5.8/perl
+	   ! hv.c lib/Hash/Util.t pp_sys.c util.c
+____________________________________________________________________________
+[ 18255] By: jhi                                   on 2002/12/07  16:57:32
+        Log: The [perl #16843] has been fixed, add its test.
+     Branch: maint-5.8/perl
+	   ! t/uni/tr_utf8.t
+____________________________________________________________________________
+[ 18254] By: jhi                                   on 2002/12/07  16:26:27
+        Log: Add user-definable To-mappings.	 (So if you don't agree
+             with the Unicode mappings, you can make your own.)
+             Resolves [perl #3741].
+     Branch: maint-5.8/perl
+	   + t/op/lc_user.t
+	   ! MANIFEST lib/utf8_heavy.pl pod/perldiag.pod
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 18253] By: jhi                                   on 2002/12/07  15:35:43
+        Log: test.pl-ise t/op/lc.t.
+     Branch: maint-5.8/perl
+	   ! t/op/lc.t
+____________________________________________________________________________
+[ 18252] By: jhi                                   on 2002/12/06  22:19:15
+        Log: Subject: Re: [perl #18107] lc(), uc() and ucfirst() broken inside utf8 regex
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             To: perl5-porters@perl.org
+             Date: Wed, 6 Nov 2002 19:38:11 +0530
+             Message-ID: <20021106193811.E20858@lustre.dyn.wiw.org>
+     Branch: maint-5.8/perl
+	   ! regcomp.c t/op/lc.t
+____________________________________________________________________________
+[ 18248] By: jhi                                   on 2002/12/06  13:58:05
+        Log: A test for [perl #18857] (that was fixed by #18107) from Nick Clark.
+     Branch: maint-5.8/perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 18247] By: jhi                                   on 2002/12/06  13:40:10
+        Log: More comments and robustness in pp_ucfirst() and pp_lcfirst().
+     Branch: maint-5.8/perl
+	   ! pp.c
+____________________________________________________________________________
+[ 18243] By: jhi                                   on 2002/12/03  23:39:28
+        Log: UTF8_IS_INVARIANT() is better then UTF8_IS_CONTINUED().
+             (The latter matches also post-initial bytes of a multibyte.)
+     Branch: maint-5.8/perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[ 18242] By: jhi                                   on 2002/12/03  15:04:07
+        Log: Slight tweaks on the XS-and-Unicode docs, inspired by [perl #17852].
+     Branch: maint-5.8/perl
+	   ! pod/perlguts.pod pod/perlunicode.pod
+____________________________________________________________________________
+[ 18241] By: jhi                                   on 2002/12/03  14:02:58
+        Log: Integrate:
+             [ 18239]
+             Fix up #18229.
+     Branch: maint-5.8/perl
+	  !> embedvar.h ext/threads/t/join.t perl.c perlapi.h perlvars.h
+	  !> pod/perlintern.pod
+____________________________________________________________________________
+[ 18239] By: jhi                                   on 2002/12/03  12:49:01
+        Log: Fix up #18229.
+     Branch: perl
+	   ! embedvar.h ext/threads/t/join.t perl.c perlapi.h perlvars.h
+	   ! pod/perlintern.pod
+____________________________________________________________________________
+[ 18236] By: jhi                                   on 2002/12/03  01:25:45
+        Log: According to Rainer Orth <ro@TechFak.Uni-Bielefeld.DE>
+             gcc on IRIX (6.2) does not need and does indeed much better
+             without -D_POSIX_C_SOURCE [perl #15128] (the inclusion of
+             _POSIX_C_SOURCE in CFLAGS disables the definition of _SGIAPI
+             and <sys/dirent.h> doesn't define struct dirent64,
+             which causes reentr.c not to compile)
+     Branch: maint-5.8/perl
+	   ! hints/irix_6.sh
+____________________________________________________________________________
+[ 18235] By: jhi                                   on 2002/12/02  23:15:05
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 18234] By: jhi                                   on 2002/12/02  22:30:41
         Log: Integrate
              
