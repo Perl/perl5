@@ -2961,14 +2961,14 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
 	pmop->op_pmpermflags |= PMf_LOCALE;
     pmop->op_pmflags = pmop->op_pmpermflags;
 
- #ifdef USE_ITHREADS
+#ifdef USE_ITHREADS
         {
                 SV* repointer = newSViv(0);
                 av_push(PL_regex_padav,SvREFCNT_inc(repointer));
                 pmop->op_pmoffset = av_len(PL_regex_padav);
                 PL_regex_pad = AvARRAY(PL_regex_padav);
         }
- #endif
+#endif
         
         /* link into pm list */
     if (type != OP_TRANS && PL_curstash) {
