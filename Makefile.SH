@@ -34,7 +34,7 @@ true)
 		-compatibility_version 1 -current_version $(PATCHLEVEL) \
 		-prebind -seg1addr 0x27000000 -install_name $(SHRPDIR)/$@'
 		;;
-	sunos*|freebsd[23]*)
+	sunos*|freebsd[23]*|netbsd*)
 		linklibperl="-lperl"
 		;;
 	esac
