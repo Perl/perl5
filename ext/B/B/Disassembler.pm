@@ -6,7 +6,7 @@
 #      License or the Artistic License, as specified in the README file.
 package B::Disassembler::BytecodeStream;
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 use FileHandle;
 use Carp;
