@@ -458,7 +458,9 @@ repertoire.  See L</"Encoding Names">.
 
 =item 2. As an object
 
-Encoding objects are returned by C<find_encoding($name)>.
+Encoding objects are returned by C<find_encoding($name, [$skip_external])>.
+If the second parameter is true, Encode will refrain from loading external
+modules for CJK encodings.
 
 =back
 
