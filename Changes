@@ -54,7 +54,7 @@ And the Keepers of the Patch Pumpkin:
     Tim Bunce           <Tim.Bunce@ig.co.uk>
     Andy Dougherty      <doughera@lafcol.lafayette.edu>
     Gurusamy Sarathy    <gsar@umich.edu>
-    Chip Salzenberg     <chip@perl.com>
+    Chip Salzenberg     <chip@pobox.com>
 
 And, of course, the Author of Perl:
 
@@ -72,6 +72,15 @@ indicator:
     	    +>	    branched (from elsewhere)
     	    !>	    merged changes (from elsewhere)
 
+
+----------------
+Version 5.005_04        Fourth maintenance release of 5.005
+----------------
+
+____________________________________________________________________________
+[ 17643] By: chip                                  on 2002/07/19  18:53:22
+        Log: Update Changes in preparation for 5.005_04.
+           ! Changes
 
 ----------------
 Version 5.005_03        Third maintenance release of 5.005
