@@ -1386,6 +1386,11 @@ PP(pp_repeat)
   dSP; dATARGET; tryAMAGICbin(repeat,opASSIGN);
   {
     register IV count = POPi;
+    if (count < 0) {
+	if (ckWARN(WARN_MISC))
+	    Perl_warner(aTHX_ packWARN(WARN_MISC), "Negative repeat count");
+	count = 0;
+    }
     if (GIMME == G_ARRAY && PL_op->op_private & OPpREPEAT_DOLIST) {
 	dMARK;
 	I32 items = SP - MARK;
