@@ -8,7 +8,7 @@ BEGIN {
 BEGIN {
     our $hasse;
     eval { my @n = getservbyname "echo", "tcp" };
-    $hasse = 1 unless $@ && $@ =~ /unimplemented/;
+    $hasse = 1 unless $@ && $@ =~ /unimplemented|unsupported/i;
     unless ($hasse) { print "1..0 # Skip: no getservbyname\n"; exit 0 }
     use Config;
     $hasse = 0 unless $Config{'i_netdb'} eq 'define';

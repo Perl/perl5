@@ -8,7 +8,7 @@ BEGIN {
 BEGIN {
     our $haspe;
     eval { my @n = getprotobyname "tcp" };
-    $haspe = 1 unless $@ && $@ =~ /unimplemented/;
+    $haspe = 1 unless $@ && $@ =~ /unimplemented|unsupported/i;
     unless ($haspe) { print "1..0 # Skip: no getprotobyname\n"; exit 0 }
     use Config;
     $haspe = 0 unless $Config{'i_netdb'} eq 'define';
