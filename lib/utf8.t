@@ -13,6 +13,8 @@ EOF
     }
 }
 
+no utf8; # Ironic, no?
+
 # NOTE!
 #
 # Think carefully before adding tests here.  In general this should be
