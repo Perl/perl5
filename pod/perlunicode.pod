@@ -98,11 +98,12 @@ system's native 8-bit encoding, so to change this for systems with
 non-Latin-1 (or non-EBCDIC) native encodings, use the C<encoding>
 pragma, see L<encoding>.
 
-Under character semantics, many operations that formerly operated on bytes
-change to operating on characters. A character in Perl is logically just a
-number ranging from 0 to 2**31 or so. Larger characters may encode to longer
-sequences of bytes internally, but this is just an internal detail
-which is hidden at the Perl level. See L<perluniintro> for more on this.
+Under character semantics, many operations that formerly operated on
+bytes change to operating on characters. A character in Perl is
+logically just a number ranging from 0 to 2**31 or so. Larger
+characters may encode to longer sequences of bytes internally, but
+this is just an internal detail which is hidden at the Perl level.
+See L<perluniintro> for more on this.
 
 =head2 Effects of character semantics
 
@@ -115,11 +116,11 @@ Character semantics have the following effects:
 Strings and patterns may contain characters that have an ordinal value
 larger than 255.
 
-If you use a Unicode editor to edit your program, Unicode characters may
-occur directly within the literal strings in one of the various Unicode
-encodings (UTF-8, UTF-EBCDIC, UCS-2, etc.), but are recognized as such (and
-converted to Perl's internal representation) only if the appropriate
-L<encoding> is specified.
+If you use a Unicode editor to edit your program, Unicode characters
+may occur directly within the literal strings in one of the various
+Unicode encodings (UTF-8, UTF-EBCDIC, UCS-2, etc.), but are recognized
+as such (and converted to Perl's internal representation) only if the
+appropriate L<encoding> is specified.
 
 You can also get Unicode characters into a string by using the C<\x{...}>
 notation, putting the Unicode code for the desired character, in
@@ -158,10 +159,11 @@ ideograph, for instance.
 Named Unicode properties and block ranges may be used as character
 classes via the new C<\p{}> (matches property) and C<\P{}> (doesn't
 match property) constructs.  For instance, C<\p{Lu}> matches any
-character with the Unicode "Lu" (Letter, uppercase) property, while C<\p{M}> matches
-any character with a "M" (mark -- accents and such) property.  Single letter properties may omit the brackets,
-so that can be written C<\pM> also.  Many predefined character classes
-are available, such as C<\p{IsMirrored}> and C<\p{InTibetan}>.
+character with the Unicode "Lu" (Letter, uppercase) property, while
+C<\p{M}> matches any character with a "M" (mark -- accents and such)
+property.  Single letter properties may omit the brackets, so that can
+be written C<\pM> also.  Many predefined character classes are
+available, such as C<\p{IsMirrored}> and C<\p{InTibetan}>.
 
 The C<\p{Is...}> test for "general properties" such as "letter",
 "digit", while the C<\p{In...}> test for Unicode scripts and blocks.
@@ -171,8 +173,8 @@ separators, but for convenience you can have dashes, spaces, and
 underbars at every word division, and you need not care about correct
 casing.  It is recommended, however, that for consistency you use the
 following naming: the official Unicode script, block, or property name
-(see below for the additional rules that apply to block names),
-with whitespace and dashes replaced with underbar, and the words
+(see below for the additional rules that apply to block names), with
+whitespace and dashes replaced with underbar, and the words
 "uppercase-first-lowercase-rest".  That is, "Latin-1 Supplement"
 becomes "Latin_1_Supplement".
 
@@ -368,9 +370,9 @@ scripts concept is closer to natural languages, while the blocks
 concept is more an artificial grouping based on groups of 256 Unicode
 characters.  For example, the C<Latin> script contains letters from
 many blocks.  On the other hand, the C<Latin> script does not contain
-all the characters from those blocks. It does not, for example, contain
-digits because digits are shared across many scripts.  Digits and
-other similar groups, like punctuation, are in a category called
+all the characters from those blocks. It does not, for example,
+contain digits because digits are shared across many scripts.  Digits
+and other similar groups, like punctuation, are in a category called
 C<Common>.
 
 For more about scripts, see the UTR #24:
@@ -387,9 +389,10 @@ version has C<Block> appended to its name, C<\p{InKatakanaBlock}>.
 
 Notice that this definition was introduced in Perl 5.8.0: in Perl
 5.6 only the blocks were used; in Perl 5.8.0 scripts became the
-preferential Unicode character class definition; this meant that
-the definitions of some character classes changed (the ones in the
-below list that have the C<Block> appended).
+preferential Unicode character class definition (prompted by
+recommendations from the Unicode consortium); this meant that
+the definitions of some character classes changed (the ones in
+the below list that have the C<Block> appended).
 
    Alphabetic Presentation Forms
    Arabic Block
@@ -599,16 +602,12 @@ See L<Encode>.
 
 =head1 CAVEATS
 
-As of yet, there is no method for automatically coercing input and
-output to some encoding other than UTF-8 or UTF-EBCDIC.  This is planned 
-in the near future, however.
-
 Whether an arbitrary piece of data will be treated as "characters" or
 "bytes" by internal operations cannot be divined at the current time.
 
-Use of locales with Unicode data may lead to odd results.  Currently there is
-some attempt to apply 8-bit locale info to characters in the range
-0..255, but this is demonstrably incorrect for locales that use
+Use of locales with Unicode data may lead to odd results.  Currently
+there is some attempt to apply 8-bit locale info to characters in the
+range 0..255, but this is demonstrably incorrect for locales that use
 characters above that range when mapped into Unicode.  It will also
 tend to run slower.  Avoidance of locales is strongly encouraged.
 
@@ -758,9 +757,10 @@ and the decoding is
 
 	$uni = 0x10000 + ($hi - 0xD8000) * 0x400 + ($lo - 0xDC00);
 
-If you try to generate surrogates (for example by using chr()), you will
-get a warning if warnings are turned on (C<-w> or C<use warnings;>) because
-those code points are not valid for a Unicode character.
+If you try to generate surrogates (for example by using chr()), you
+will get a warning if warnings are turned on (C<-w> or C<use
+warnings;>) because those code points are not valid for a Unicode
+character.
 
 Because of the 16-bitness, UTF-16 is byteorder dependent.  UTF-16
 itself can be used for in-memory computations, but if storage or
@@ -811,11 +811,12 @@ Unfortunately, the specification of UTF-8 leaves some room for
 interpretation of how many bytes of encoded output one should generate
 from one input Unicode character.  Strictly speaking, one is supposed
 to always generate the shortest possible sequence of UTF-8 bytes,
-because otherwise there is potential for input buffer overflow at the
-receiving end of a UTF-8 connection.  Perl always generates the shortest
-length UTF-8, and with warnings on (C<-w> or C<use warnings;>) Perl will
-warn about non-shortest length UTF-8 (and other malformations, too,
-such as the surrogates, which are not real character code points.)
+because otherwise there is potential for input buffer overflow at
+the receiving end of a UTF-8 connection.  Perl always generates the
+shortest length UTF-8, and with warnings on (C<-w> or C<use
+warnings;>) Perl will warn about non-shortest length UTF-8 (and other
+malformations, too, such as the surrogates, which are not real
+Unicode code points.)
 
 =head2 Unicode in Perl on EBCDIC
 
