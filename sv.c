@@ -1925,10 +1925,16 @@ register SV *sstr;
 	/* FALL THROUGH */
 
     default:
+	if (SvGMAGICAL(sstr)) {
+	    mg_get(sstr);
+	    if (SvTYPE(sstr) != stype) {
+		stype = SvTYPE(sstr);
+		if (stype == SVt_PVGV && dtype <= SVt_PVGV)
+		    goto glob_assign;
+	    }
+	}
 	if (dtype < stype)
 	    sv_upgrade(dstr, stype);
-	if (SvGMAGICAL(sstr))
-	    mg_get(sstr);
     }
 
     sflags = SvFLAGS(sstr);
