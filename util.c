@@ -835,7 +835,8 @@ Perl_savesvpv(pTHX_ SV *sv)
     const char *pv = SvPV(sv, len);
     register char *newaddr;
 
-    New(903,newaddr,++len,char);
+    ++len;
+    New(903,newaddr,len,char);
     return CopyD(pv,newaddr,len,char);
 }
 
