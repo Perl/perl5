@@ -527,11 +527,16 @@ variable is no longer "expensive" the way the other two are.
 
 =head2 What good is C<\G> in a regular expression?
 
-The notation C<\G> is used in a match or substitution in conjunction the
-C</g> modifier (and ignored if there's no C</g>) to anchor the regular
-expression to the point just past where the last match occurred, i.e. the
-pos() point.  A failed match resets the position of C<\G> unless the
-C</c> modifier is in effect.
+The notation C<\G> is used in a match or substitution in conjunction with
+the C</g> modifier to anchor the regular expression to the point just past
+where the last match occurred, i.e. the pos() point.  A failed match resets
+the position of C<\G> unless the C</c> modifier is in effect. C<\G> can be
+used in a match without the C</g> modifier; it acts the same (i.e. still
+anchors at the pos() point) but of course only matches once and does not
+update pos(), as non-C</g> expressions never do. C<\G> in an expression
+applied to a target string that has never been matched against a C</g>
+expression before or has had its pos() reset is functionally equivalent to
+C<\A>, which matches at the beginning of the string.
 
 For example, suppose you had a line of text quoted in standard mail
 and Usenet notation, (that is, with leading C<< > >> characters), and
