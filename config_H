@@ -14,7 +14,7 @@
  * $Id: Config_h.U,v 3.0.1.4 1995/09/25 09:10:49 ram Exp $
  */
 
-/* Configuration time: Mon Nov 20 15:21:41 EST 1995
+/* Configuration time: Thu Feb  8 17:15:11 EST 1996
  * Configured by: doughera
  * Target system: sunos fractal 5.4 generic_101946-29 i86pc i386 
  */
@@ -32,7 +32,7 @@
  *	This symbol holds the path of the bin directory where the package will
  *	be installed. Program must be prepared to deal with ~name substitution.
  */
-#define BIN "/opt/perl/bin"	/**/
+#define BIN "/usr/local/bin"	/**/
 
 /* CAT2:
  *	This macro catenates 2 tokens together.
@@ -73,7 +73,7 @@
  *	output.  This symbol will have the value "-" if CPPSTDIN needs a minus
  *	to specify standard input, otherwise the value is "".
  */
-#define CPPSTDIN "gcc -E"
+#define CPPSTDIN "cc -E"
 #define CPPMINUS "-"
 
 /* HAS_ALARM:
@@ -86,7 +86,7 @@
  *	This symbol indicates the C compiler can check for function attributes,
  *	such as printf formats. This is normally only supported by GNU cc.
  */
-#define HASATTRIBUTE 	/**/
+/*#define HASATTRIBUTE 	/**/
 #ifndef HASATTRIBUTE
 #define __attribute__(_arg_)
 #endif
@@ -197,26 +197,6 @@
  *	occurred from a call to dlopen(), dlclose() or dlsym().
  */
 #define HAS_DLERROR	/**/
-
-/* SETUID_SCRIPTS_ARE_SECURE_NOW:
- *	This symbol, if defined, indicates that the bug that prevents
- *	setuid scripts from being secure is not present in this kernel.
- */
-/* DOSUID:
- *	This symbol, if defined, indicates that the C program should
- *	check the script that it is executing for setuid/setgid bits, and
- *	attempt to emulate setuid/setgid on systems that have disabled
- *	setuid #! scripts because the kernel can't do it securely.
- *	It is up to the package designer to make sure that this emulation
- *	is done securely.  Among other things, it should do an fstat on
- *	the script it just opened to make sure it really is a setuid/setgid
- *	script, it should make sure the arguments passed correspond exactly
- *	to the argument on the #! line, and it should not trust any
- *	subprocesses to which it must pass the filename rather than the
- *	file descriptor of the script to be executed.
- */
-#define SETUID_SCRIPTS_ARE_SECURE_NOW	/**/
-/*#define DOSUID		/**/
 
 /* HAS_DUP2:
  *	This symbol, if defined, indicates that the dup2 routine is
@@ -690,6 +670,12 @@
  */
 #define Shmat_t void *	/**/
 #define HAS_SHMAT_PROTOTYPE	/**/
+
+/* HAS_SIGACTION:
+ *	This symbol, if defined, indicates that Vr4's sigaction() routine
+ *	is available.
+ */
+#define HAS_SIGACTION	/**/
 
 /* HAS_SOCKET:
  *	This symbol, if defined, indicates that the BSD socket interface is
@@ -1169,6 +1155,12 @@
  */
 #define	I_SYS_TYPES		/**/
 
+/* I_SYS_UN:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/un.h> to get UNIX domain socket definitions.
+ */
+#define I_SYS_UN		/**/
+
 /* I_TERMIO:
  *	This symbol, if defined, indicates that the program should include
  *	<termio.h> rather than <sgtty.h>.  There are also differences in
@@ -1217,17 +1209,6 @@
  */
 #define I_UTIME		/**/
 
-/* I_STDARG:
- *	This symbol, if defined, indicates that <stdarg.h> exists and should
- *	be included.
- */
-/* I_VARARGS:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <varargs.h>.
- */
-#define I_STDARG		/**/
-/*#define I_VARARGS	/**/
-
 /* I_VFORK:
  *	This symbol, if defined, indicates to the C program that it should
  *	include vfork.h.
@@ -1248,33 +1229,6 @@
  *	to get any typedef'ed information.
  */
 #define Mode_t mode_t	 /* file mode parameter for system calls */
-
-/* VAL_O_NONBLOCK:
- *	This symbol is to be used during open() or fcntl(F_SETFL) to turn on
- *	non-blocking I/O for the file descriptor. Note that there is no way
- *	back, i.e. you cannot turn it blocking again this way. If you wish to
- *	alternatively switch between blocking and non-blocking, use the
- *	ioctl(FIOSNBIO) call instead, but that is not supported by all devices.
- */
-/* VAL_EAGAIN:
- *	This symbol holds the errno error code set by read() when no data was
- *	present on the non-blocking file descriptor.
- */
-/* RD_NODATA:
- *	This symbol holds the return code from read() when no data is present
- *	on the non-blocking file descriptor. Be careful! If EOF_NONBLOCK is
- *	not defined, then you can't distinguish between no data and EOF by
- *	issuing a read(). You'll have to find another way to tell for sure!
- */
-/* EOF_NONBLOCK:
- *	This symbol, if defined, indicates to the C program that a read() on
- *	a non-blocking file descriptor will return 0 on EOF, and not the value
- *	held in RD_NODATA (-1 usually, in that case!).
- */
-#define VAL_O_NONBLOCK O_NONBLOCK
-#define VAL_EAGAIN EAGAIN
-#define RD_NODATA -1
-#define EOF_NONBLOCK
 
 /* CAN_PROTOTYPE:
  *	If defined, this macro indicates that the C compiler can handle
@@ -1306,7 +1260,7 @@
  *	is often a directory that is mounted across diverse architectures.
  *	Programs must be prepared to deal with ~name expansion.
  */
-#define SCRIPTDIR "/opt/perl/bin"	/**/
+#define SCRIPTDIR "/usr/local/script"	/**/
 
 /* Select_fd_set_t:
  *	This symbol holds the type used for the 2nd, 3rd, and 4th
@@ -1362,7 +1316,7 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB_EXP "/opt/perl/lib/i86pc-solaris/5.002"		/**/
+#define ARCHLIB_EXP "/usr/local/lib/perl5/i86pc-solaris/5.002"		/**/
 
 /* BYTEORDER:
  *	This symbol hold the hexadecimal constant defined in byteorder,
@@ -1383,6 +1337,26 @@
  *	case if you're using dl_dlopen.xs.
  */
 /*#define 	DLSYM_NEEDS_UNDERSCORE 	/* */
+
+/* SETUID_SCRIPTS_ARE_SECURE_NOW:
+ *	This symbol, if defined, indicates that the bug that prevents
+ *	setuid scripts from being secure is not present in this kernel.
+ */
+/* DOSUID:
+ *	This symbol, if defined, indicates that the C program should
+ *	check the script that it is executing for setuid/setgid bits, and
+ *	attempt to emulate setuid/setgid on systems that have disabled
+ *	setuid #! scripts because the kernel can't do it securely.
+ *	It is up to the package designer to make sure that this emulation
+ *	is done securely.  Among other things, it should do an fstat on
+ *	the script it just opened to make sure it really is a setuid/setgid
+ *	script, it should make sure the arguments passed correspond exactly
+ *	to the argument on the #! line, and it should not trust any
+ *	subprocesses to which it must pass the filename rather than the
+ *	file descriptor of the script to be executed.
+ */
+#define SETUID_SCRIPTS_ARE_SECURE_NOW	/**/
+/*#define DOSUID		/**/
 
 /* Gconvert:
  *	This preprocessor macro is defined to convert a floating point
@@ -1430,6 +1404,17 @@
  */
 #define	I_SYS_STAT		/**/
 
+/* I_STDARG:
+ *	This symbol, if defined, indicates that <stdarg.h> exists and should
+ *	be included.
+ */
+/* I_VARARGS:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <varargs.h>.
+ */
+#define I_STDARG		/**/
+/*#define I_VARARGS	/**/
+
 /* INTSIZE:
  *	This symbol contains the size of an int, so that the C preprocessor
  *	can make decisions based on it.
@@ -1451,6 +1436,33 @@
  */
 #define MYMALLOC			/**/
 
+/* VAL_O_NONBLOCK:
+ *	This symbol is to be used during open() or fcntl(F_SETFL) to turn on
+ *	non-blocking I/O for the file descriptor. Note that there is no way
+ *	back, i.e. you cannot turn it blocking again this way. If you wish to
+ *	alternatively switch between blocking and non-blocking, use the
+ *	ioctl(FIOSNBIO) call instead, but that is not supported by all devices.
+ */
+/* VAL_EAGAIN:
+ *	This symbol holds the errno error code set by read() when no data was
+ *	present on the non-blocking file descriptor.
+ */
+/* RD_NODATA:
+ *	This symbol holds the return code from read() when no data is present
+ *	on the non-blocking file descriptor. Be careful! If EOF_NONBLOCK is
+ *	not defined, then you can't distinguish between no data and EOF by
+ *	issuing a read(). You'll have to find another way to tell for sure!
+ */
+/* EOF_NONBLOCK:
+ *	This symbol, if defined, indicates to the C program that a read() on
+ *	a non-blocking file descriptor will return 0 on EOF, and not the value
+ *	held in RD_NODATA (-1 usually, in that case!).
+ */
+#define VAL_O_NONBLOCK O_NONBLOCK
+#define VAL_EAGAIN EAGAIN
+#define RD_NODATA -1
+#define EOF_NONBLOCK
+
 /* OLDARCHLIB_EXP:
  *	This symbol contains the ~name expanded version of OLDARCHLIB, to be
  *	used in programs that are not prepared to deal with ~ expansion at 
@@ -1462,7 +1474,7 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB_EXP "/opt/perl/lib"		/**/
+#define PRIVLIB_EXP "/usr/local/lib/perl5"		/**/
 
 /* SIG_NAME:
  *	This symbol contains a list of signal names in order of
@@ -1499,7 +1511,20 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH_EXP "/opt/perl/lib/site_perl/i86pc-solaris"		/**/
+#define SITEARCH_EXP "/usr/local/lib/perl5/site_perl/i86pc-solaris"		/**/
+
+/* SITELIB_EXP:
+ *	This symbol contains the ~name expanded version of SITELIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#define SITELIB_EXP "/usr/local/lib/perl5/site_perl"		/**/
+
+/* STARTPERL:
+ *	This variable contains the string to put in front of a perl
+ *	script to make sure (one hopes) that it runs with perl and not
+ *	some shell.
+ */
+#define STARTPERL "#!/usr/local/bin/perl"		/**/
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this
