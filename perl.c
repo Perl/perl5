@@ -1657,7 +1657,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	method_op.op_next = PL_op;
 	method_op.op_ppaddr = PL_ppaddr[OP_METHOD];
 	myop.op_ppaddr = PL_ppaddr[OP_ENTERSUB];
-	PL_op = &method_op;
+	PL_op = (OP*)&method_op;
     }
 
     if (!(flags & G_EVAL)) {

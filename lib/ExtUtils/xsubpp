@@ -894,7 +894,7 @@ sub fetch_para {
 
     for(;;) {
 	# Skip embedded PODs 
-	while ($lastline =~ /^=/) {
+	while ($lastline =~ /^=/) {
     	    while ($lastline = <$FH>) {
 	    	last if ($lastline =~ /^=cut\s*$/);
 	    }
