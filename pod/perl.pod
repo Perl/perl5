@@ -62,6 +62,7 @@ of sections:
     perlxstut		Perl XS tutorial
     perlguts		Perl internal functions for those doing extensions
     perlcall		Perl calling conventions from C
+    perlopentut		Perl open() tutorial
 
     perlhist		Perl history records
 
