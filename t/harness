@@ -80,6 +80,7 @@ if (@ARGV) {
 	    warn "$0: cannot open $mani: $!\n";
 	}
 	push @tests, <pod/*.t>;
+	push @tests, <x2p/*.t>;
     }
 }
 if ($^O eq 'MSWin32') {

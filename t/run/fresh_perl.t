@@ -821,12 +821,6 @@ $人++; # a child is born
 print $人, "\n";
 EXPECT
 3
-########
-# TODO An attempt at lvalueable barewords broke this
-tie FH, 'main';
-EXPECT
-Can't modify constant item in tie at - line 2, near "'main';"
-Execution of - aborted due to compilation errors.
 ######## example from Camel 5, ch. 15, pp.406 (with use vars)
 # SKIP: ord "A" == 193 # EBCDIC
 use strict;

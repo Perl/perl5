@@ -55,19 +55,44 @@ it returns FALSE.
 =head1 ppport.h
 
 The file written by this module, typically C<ppport.h>, provides access
-to the following Perl API if not already available:
+to the following Perl API if not already available (and in some cases [*]
+even if available, access to a fixed interface):
 
+    aMY_CXT
+    aMY_CXT_
+    _aMY_CXT
+    aTHX
+    aTHX_
+    AvFILLp
+    boolSV(b)
     DEFSV
+    dMY_CXT	
+    dMY_CXT_SV
+    dNOOP
+    dTHR
+    dTHX
+    dTHXa
+    dTHXoa
     ERRSV
-    INT2PTR(any,d)
+    gv_stashpvn(str,len,flags)
+    INT2PTR(type,int)
+    IVdf
     MY_CXT
     MY_CXT_INIT
+    newCONSTSUB(stash,name,sv)
+    newRV_inc(sv)
+    newRV_noinc(sv)
+    newSVpvn(data,len)
     NOOP
+    NV 
+    NVef
+    NVff
+    NVgf
     PERL_REVISION
     PERL_SUBVERSION
     PERL_UNUSED_DECL
+    PERL_UNUSED_DECL
     PERL_VERSION
-    PL_Sv
     PL_compiling
     PL_copline
     PL_curcop
@@ -80,32 +105,27 @@ to the following Perl API if not already available:
     PL_rsfp_filters
     PL_rsfpv
     PL_stdingv
+    PL_Sv
     PL_sv_no
     PL_sv_undef
     PL_sv_yes
-    PTR2IV(d)
-    SAVE_DEFSV
-    START_MY_CXT
-    _aMY_CXT
-    _pMY_CXT
-    aMY_CXT
-    aMY_CXT_
-    aTHX
-    aTHX_
-    boolSV(b)
-    dMY_CXT	
-    dMY_CXT_SV
-    dNOOP
-    dTHR
-    gv_stashpvn(str,len,flags)
-    newCONSTSUB(stash,name,sv)
-    newRV_inc(sv)
-    newRV_noinc(sv)
-    newSVpvn(data,len)
     pMY_CXT
     pMY_CXT_
+    _pMY_CXT
     pTHX
     pTHX_
+    PTR2IV(ptr)
+    PTR2NV(ptr)
+    PTR2ul(ptr)
+    PTR2UV(ptr)
+    SAVE_DEFSV
+    START_MY_CXT
+    SvPVbyte(sv,lp) [*]
+    UVof
+    UVSIZE
+    UVuf
+    UVxf
+    UVXf
 
 =head1 AUTHOR
 
@@ -688,6 +708,24 @@ typedef NVTYPE NV;
 
 #ifndef AvFILLp			/* Older perls (<=5.003) lack AvFILLp */
 #   define AvFILLp AvFILL
+#endif
+
+#ifdef SvPVbyte
+#   if PERL_REVISION == 5 && PERL_VERSION < 7
+       /* SvPVbyte does not work in perl-5.6.1, borrowed version for 5.7.3 */
+#       undef SvPVbyte
+#       define SvPVbyte(sv, lp) \
+          ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == (SVf_POK) \
+           ? ((lp = SvCUR(sv)), SvPVX(sv)) : my_sv_2pvbyte(aTHX_ sv, &lp))
+       static char *
+       my_sv_2pvbyte(pTHX_ register SV *sv, STRLEN *lp)
+       {   
+           sv_utf8_downgrade(sv,0);
+           return SvPV(sv,*lp);
+       }
+#   endif
+#else
+#   define SvPVbyte SvPV
 #endif
 
 #endif /* _P_P_PORTABILITY_H_ */

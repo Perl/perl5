@@ -4461,7 +4461,13 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
     /* Some magic sontains a reference loop, where the sv and object refer to
        each other.  To prevent a reference loop that would prevent such
        objects being freed, we look for such loops and if we find one we
-       avoid incrementing the object refcount. */
+       avoid incrementing the object refcount.
+
+       Note we cannot do this to avoid self-tie loops as intervening RV must
+       have its REFCNT incremented to keep it in existence - instead we could
+       special case them in sv_free() -- NI-S
+
+    */
     if (!obj || obj == sv ||
 	how == PERL_MAGIC_arylen ||
 	how == PERL_MAGIC_qr ||
