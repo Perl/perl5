@@ -2045,14 +2045,15 @@ regclass(void)
 	}
 	if (!SIZE_ONLY) {
 #ifndef ASCIIish
-	    if ((isLOWER(lastvalue) && isLOWER(value)) ||
-		(isUPPER(lastvalue) && isUPPER(value))) {
- 		if (isLOWER(lastvalue)) {
- 		    for (i = lastvalue; i <= value; i++)
+	    register I32 i;
+	    if ((isLOWER(lastclass) && isLOWER(Class)) ||
+		(isUPPER(lastclass) && isUPPER(Class))) {
+ 		if (isLOWER(lastclass)) {
+ 		    for (i = lastclass; i <= Class; i++)
 			if (isLOWER(i))
 			    ANYOF_SET(opnd, i);
  		} else {
- 		    for (i = lastvalue; i <= value; i++)
+ 		    for (i = lastclass; i <= Class; i++)
 			if (isUPPER(i))
 			    ANYOF_SET(opnd, i);
 		}
