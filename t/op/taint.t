@@ -297,7 +297,7 @@ else {
     }
     else {
 	print "# chown() is not available\n";
-	for (49..50) { print "ok $_\n" }
+	for (51..52) { print "ok $_\n" }
     }
 
     if ($Config{d_link}) {
@@ -306,7 +306,7 @@ else {
     }
     else {
 	print "# link() is not available\n";
-	for (51..52) { print "ok $_\n" }
+	for (53..54) { print "ok $_\n" }
     }
 
     if ($Config{d_symlink}) {
@@ -315,7 +315,7 @@ else {
     }
     else {
 	print "# symlink() is not available\n";
-	for (53..54) { print "ok $_\n" }
+	for (55..56) { print "ok $_\n" }
     }
 }
 
@@ -336,7 +336,7 @@ else {
     }
     else {
 	print "# chroot() is not available\n";
-	for (61..62) { print "ok $_\n" }
+	for (63..64) { print "ok $_\n" }
     }
 }
 
@@ -365,7 +365,7 @@ else {
 
     if ($^O eq 'amigaos') {
 	print "# open(\"|\") is not available\n";
-	for (70..73) { print "ok $_\n" }
+	for (72..75) { print "ok $_\n" }
     }
     else {
 	test 72, eval { open FOO, "| $foo" } eq '', 'popen to';
@@ -539,7 +539,7 @@ else {
 	endpwent();
     } else {
 	print "# getpwent() is not available\n";
-	print "ok 136\n";
+	print "ok 138\n";
     }
 
     if ($Config{d_readdir}) { # pretty hard to imagine not
@@ -550,7 +550,7 @@ else {
 	closedir(OP);
     } else {
 	print "# readdir() is not available\n";
-	print "ok 137\n";
+	print "ok 139\n";
     }
 
     if ($Config{d_readlink} && $Config{d_symlink}) {
@@ -562,7 +562,7 @@ else {
 	unlink($symlink);
     } else {
 	print "# readlink() or symlink() is not available\n";
-	print "ok 138\n";
+	print "ok 140\n";
     }
 }
 
