@@ -380,14 +380,14 @@ SOCKET,MSG,FLAGS,TO, send SOCKET,MSG,FLAGS, setpgrp PID,PGRP, setpriority
 WHICH,WHO,PRIORITY, setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL, shift ARRAY,
 shift, shmctl ID,CMD,ARG, shmget KEY,SIZE,FLAGS, shmread ID,VAR,POS,SIZE,
 shmwrite ID,STRING,POS,SIZE, shutdown SOCKET,HOW, sin EXPR, sin, sleep
-EXPR, sleep, socket SOCKET,DOMAIN,TYPE,PROTOCOL, socketpair
-SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL, sort SUBNAME LIST, sort BLOCK LIST,
-sort LIST, splice ARRAY,OFFSET,LENGTH,LIST, splice ARRAY,OFFSET,LENGTH,
-splice ARRAY,OFFSET, splice ARRAY, split /PATTERN/,EXPR,LIMIT, split
-/PATTERN/,EXPR, split /PATTERN/, split, sprintf FORMAT, LIST, sqrt EXPR,
-sqrt, srand EXPR, srand, stat FILEHANDLE, stat EXPR, stat, study SCALAR,
-study, sub BLOCK, sub NAME, sub NAME BLOCK, substr
-EXPR,OFFSET,LENGTH,REPLACEMENT, substr EXPR,OFFSET,LENGTH, substr
+EXPR, sleep, sockatmark SOCKET, socket SOCKET,DOMAIN,TYPE,PROTOCOL,
+socketpair SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL, sort SUBNAME LIST, sort
+BLOCK LIST, sort LIST, splice ARRAY,OFFSET,LENGTH,LIST, splice
+ARRAY,OFFSET,LENGTH, splice ARRAY,OFFSET, splice ARRAY, split
+/PATTERN/,EXPR,LIMIT, split /PATTERN/,EXPR, split /PATTERN/, split, sprintf
+FORMAT, LIST, sqrt EXPR, sqrt, srand EXPR, srand, stat FILEHANDLE, stat
+EXPR, stat, study SCALAR, study, sub BLOCK, sub NAME, sub NAME BLOCK,
+substr EXPR,OFFSET,LENGTH,REPLACEMENT, substr EXPR,OFFSET,LENGTH, substr
 EXPR,OFFSET, symlink OLDFILE,NEWFILE, syscall LIST, sysopen
 FILEHANDLE,FILENAME,MODE, sysopen FILEHANDLE,FILENAME,MODE,PERMS, sysread
 FILEHANDLE,SCALAR,LENGTH,OFFSET, sysread FILEHANDLE,SCALAR,LENGTH, sysseek
@@ -1858,9 +1858,9 @@ select RBITS,WBITS,EBITS,TIMEOUT, semctl ID,SEMNUM,CMD,ARG, semget
 KEY,NSEMS,FLAGS, semop KEY,OPSTRING, setgrent, setpgrp PID,PGRP,
 setpriority WHICH,WHO,PRIORITY, setpwent, setsockopt
 SOCKET,LEVEL,OPTNAME,OPTVAL, shmctl ID,CMD,ARG, shmget KEY,SIZE,FLAGS,
-shmread ID,VAR,POS,SIZE, shmwrite ID,STRING,POS,SIZE, socketpair
-SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL, stat FILEHANDLE, stat EXPR, stat,
-symlink OLDFILE,NEWFILE, syscall LIST, sysopen
+shmread ID,VAR,POS,SIZE, shmwrite ID,STRING,POS,SIZE, sockatmark SOCKET,
+socketpair SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL, stat FILEHANDLE, stat
+EXPR, stat, symlink OLDFILE,NEWFILE, syscall LIST, sysopen
 FILEHANDLE,FILENAME,MODE,PERMS, system LIST, times, truncate
 FILEHANDLE,LENGTH, truncate EXPR,LENGTH, umask EXPR, umask, utime LIST,
 wait, waitpid PID,FLAGS

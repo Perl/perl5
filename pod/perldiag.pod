@@ -1738,6 +1738,11 @@ strange for a machine that supports C.
 (W unopened) You tried ioctl() on a filehandle that was never opened.
 Check you control flow and number of arguments.
 
+=item IO::Socket::atmark not implemented on this architecture
+
+(F) Your machine doesn't implement the sockatmark() functionality,
+neither as a system call or an ioctl call (SIOCATMARK).
+
 =item `%s' is not a code reference
 
 (W) The second (fourth, sixth, ...) argument of overload::constant needs
