@@ -485,6 +485,10 @@ ext/Thread/unsync.t	Test thread implicit synchronisation
 ext/Thread/unsync2.t	Test thread implicit synchronisation
 ext/Thread/unsync3.t	Test thread implicit synchronisation
 ext/Thread/unsync4.t	Test thread implicit synchronisation
+ext/Time/HiRes/Changes	Time::HiRes
+ext/Time/HiRes/HiRes.pm	Time::HiRes
+ext/Time/HiRes/HiRes.xs	Time::HiRes
+ext/Time/HiRes/Makefile.PL	Time::HiRes
 ext/XS/Typemap/Makefile.PL	XS::Typemap extension
 ext/XS/Typemap/README		XS::Typemap extension
 ext/XS/Typemap/Typemap.pm	XS::Typemap extension
@@ -1601,6 +1605,7 @@ t/lib/tie-stdarray.t	Test for Tie::StdArray
 t/lib/tie-stdhandle.t	Test for Tie::StdHandle
 t/lib/tie-stdpush.t	Test for Tie::StdArray
 t/lib/tie-substrhash.t	Test for Tie::SubstrHash
+t/lib/time-hires.t	Time::HiRes
 t/lib/timelocal.t	See if Time::Local works
 t/lib/trig.t		See if Math::Trig works
 t/lib/xs-typemap.t	test that typemaps work

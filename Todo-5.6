@@ -144,8 +144,10 @@ Miscellaneous
 	the units exist)
     floating point handling: nans, infinities, fp exception masks, etc.
 	At least the following interfaces exist: fp_classify(), fp_class(),
-	class(), isinf(), isfinite(), finite(), isnormal(), unordered(),
-	<ieeefp.h>, <fp_class.h> (there are metaconfig units for all these),
+	fp_class_d(), class(), isinf(), isfinite(), finite(), isnormal(),
+	unordered(),
+	<ieeefp.h>, <fp_class.h> (there are metaconfig units for all these)
+	(I think),
 	fp_setmask(), fp_getmask(), fp_setround(), fp_getround()
 	(no metaconfig units yet for these).
         Don't forget finitel(), fp_classl(), fp_class_l(), (yes, both do,

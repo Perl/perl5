@@ -3,7 +3,8 @@ require SelfLoader;
 @ISA = qw(SelfLoader);
 @EXPORT = 'AUTOLOAD';
 $JUST_STUBS = 1;
-$VERSION = 1.01; sub Version {$VERSION}
+$VERSION = '1.02';
+sub Version {$VERSION}
 
 # Use as
 # perl -e 'use Devel::SelfStubber;Devel::SelfStubber->stub(MODULE_NAME,LIB)'

@@ -69,6 +69,12 @@ constant(char *name, int arg)
     case 'K':
 	break;
     case 'L':
+	if (strEQ(name, "GLOB_LIMIT"))
+#ifdef GLOB_LIMIT
+	    return GLOB_LIMIT;
+#else
+	    goto not_there;
+#endif
 	break;
     case 'M':
 	if (strEQ(name, "GLOB_MARK"))

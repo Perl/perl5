@@ -364,6 +364,37 @@ __END__
 
 # New ops always go at the very end
 
+# A recapitulation of the format of this file:
+# The file consists of five columns: the name of the op, an English
+# description, the name of the "check" routine used to optimize this
+# operation, some flags, and a description of the operands.
+
+# The flags consist of options followed by a mandatory op class signifier
+
+# The classes are:
+# baseop      - 0            unop     - 1            binop      - 2
+# logop       - |            listop   - @            pmop       - /
+# padop/svop  - $            padop    - # (unused)   loop       - {
+# baseop/unop - %            loopexop - }            filestatop - -
+# pvop/svop   - "
+
+# Other options are:
+#   needs stack mark                    - m
+#   needs constant folding              - f
+#   produces a scalar                   - s
+#   produces an integer                 - i
+#   needs a target                      - t
+#   target can be in a pad              - T
+#   has a corresponding integer version - I
+#   has side effects                    - d
+#   uses $_ if no argument given        - u
+
+# Values for the operands are:
+# scalar      - S            list     - L            array     - A
+# hash        - H            sub (CV) - C            file      - F
+# socket      - Fs           filetest - F-           reference - R
+# "?" denotes an optional operand.
+
 # Nothing.
 
 null		null operation		ck_null		0	

@@ -392,7 +392,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 			  && !PL_multiline ) );	/* Check after \n? */
 
 	if (!ml_anch) {
-	  if ( !(prog->reganch & ROPT_ANCH_GPOS) /* Checked by the caller */
+	  if ( !(prog->reganch & (ROPT_ANCH_GPOS /* Checked by the caller */
+				  | ROPT_IMPLICIT)) /* not a real BOL */
 	       /* SvCUR is not set on references: SvRV and SvPVX overlap */
 	       && sv && !SvROK(sv)
 	       && (strpos != strbeg)) {

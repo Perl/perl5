@@ -1,5 +1,3 @@
-/* $Id: MD5.xs,v 1.26 2000/09/18 14:27:44 gisle Exp $ */
-
 /* 
  * This library is free software; you can redistribute it and/or
  * modify it under the same terms as Perl itself.
@@ -553,7 +551,7 @@ add(self, ...)
 	STRLEN len;
     PPCODE:
 	for (i = 1; i < items; i++) {
-	    data = (unsigned char *)(SvPV(ST(i), len));
+	    data = (unsigned char *)(SvPVbyte(ST(i), len));
 	    MD5Update(context, data, len);
 	}
 	XSRETURN(1);  /* self */
@@ -618,7 +616,7 @@ md5(...)
     PPCODE:
 	MD5Init(&ctx);
 	for (i = 0; i < items; i++) {
-	    data = (unsigned char *)(SvPV(ST(i), len));
+	    data = (unsigned char *)(SvPVbyte(ST(i), len));
 	    MD5Update(&ctx, data, len);
 	}
 	MD5Final(digeststr, &ctx);
