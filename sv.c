@@ -5689,44 +5689,44 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
     if ((I32)len < *offsetp)
 	Perl_croak(aTHX_ "panic: sv_pos_b2u: bad byte offset");
     else {
-	 U8* send = s + *offsetp;
-	 MAGIC* mg = NULL;
-	 STRLEN *cache = NULL;
+	U8* send = s + *offsetp;
+	MAGIC* mg = NULL;
+	STRLEN *cache = NULL;
       
-	 len = 0;
+	len = 0;
 
-	 if (SvMAGICAL(sv) && !SvREADONLY(sv)) {
-	      mg = mg_find(sv, PERL_MAGIC_utf8);
-	      if (mg && mg->mg_ptr) {
-		   cache = (STRLEN *) mg->mg_ptr;
-                   if (cache[1] == (STRLEN)*offsetp) {
-                        /* An exact match. */
-                        *offsetp = cache[0];
+	if (SvMAGICAL(sv) && !SvREADONLY(sv)) {
+	    mg = mg_find(sv, PERL_MAGIC_utf8);
+	    if (mg && mg->mg_ptr) {
+		cache = (STRLEN *) mg->mg_ptr;
+		if (cache[1] == (STRLEN)*offsetp) {
+		    /* An exact match. */
+		    *offsetp = cache[0];
 
-			return;
-		   }
-		   else if (cache[1] < (STRLEN)*offsetp) {
-			/* We already know part of the way. */
-			len = cache[0];
-			s  += cache[1];
-			/* Let the below loop do the rest. */ 
-		   }
-		   else { /* cache[1] > *offsetp */
-			/* We already know all of the way, now we may
-			 * be able to walk back.  The same assumption
-			 * is made as in S_utf8_mg_pos(), namely that
-			 * walking backward is twice slower than
-			 * walking forward. */
-			STRLEN forw  = *offsetp;
-			STRLEN backw = cache[1] - *offsetp;
+		    return;
+		}
+		else if (cache[1] < (STRLEN)*offsetp) {
+		    /* We already know part of the way. */
+		    len = cache[0];
+		    s  += cache[1];
+		    /* Let the below loop do the rest. */ 
+		}
+		else { /* cache[1] > *offsetp */
+		    /* We already know all of the way, now we may
+		     * be able to walk back.  The same assumption
+		     * is made as in S_utf8_mg_pos(), namely that
+		     * walking backward is twice slower than
+		     * walking forward. */
+		    STRLEN forw  = *offsetp;
+		    STRLEN backw = cache[1] - *offsetp;
 
-			if (!(forw < 2 * backw)) {
-			     U8 *p = s + cache[1];
-			     STRLEN ubackw = 0;
+		    if (!(forw < 2 * backw)) {
+			U8 *p = s + cache[1];
+			STRLEN ubackw = 0;
 			     
-			     cache[1] -= backw;
+			cache[1] -= backw;
 
-			     while (backw--) {
+			while (backw--) {
 			    p--;
 			    while (UTF8_IS_CONTINUATION(*p)) {
 				p--;
@@ -5744,39 +5744,39 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 	    ASSERT_UTF8_CACHE(cache);
 	 }
 
-	 while (s < send) {
-	      STRLEN n = 1;
+	while (s < send) {
+	    STRLEN n = 1;
 
-	      /* Call utf8n_to_uvchr() to validate the sequence
-	       * (unless a simple non-UTF character) */
-	      if (!UTF8_IS_INVARIANT(*s))
-		   utf8n_to_uvchr(s, UTF8SKIP(s), &n, 0);
-	      if (n > 0) {
-		   s += n;
-		   len++;
-	      }
-	      else
-		   break;
-	 }
+	    /* Call utf8n_to_uvchr() to validate the sequence
+	     * (unless a simple non-UTF character) */
+	    if (!UTF8_IS_INVARIANT(*s))
+		utf8n_to_uvchr(s, UTF8SKIP(s), &n, 0);
+	    if (n > 0) {
+		s += n;
+		len++;
+	    }
+	    else
+		break;
+	}
 
-	 if (!SvREADONLY(sv)) {
-	      if (!mg) {
-		   sv_magic(sv, 0, PERL_MAGIC_utf8, 0, 0);
-		   mg = mg_find(sv, PERL_MAGIC_utf8);
-	      }
-	      assert(mg);
+	if (!SvREADONLY(sv)) {
+	    if (!mg) {
+		sv_magic(sv, 0, PERL_MAGIC_utf8, 0, 0);
+		mg = mg_find(sv, PERL_MAGIC_utf8);
+	    }
+	    assert(mg);
 
-	      if (!mg->mg_ptr) {
-		   Newz(0, cache, PERL_MAGIC_UTF8_CACHESIZE * 2, STRLEN);
-		   mg->mg_ptr = (char *) cache;
-	      }
-	      assert(cache);
+	    if (!mg->mg_ptr) {
+		Newz(0, cache, PERL_MAGIC_UTF8_CACHESIZE * 2, STRLEN);
+		mg->mg_ptr = (char *) cache;
+	    }
+	    assert(cache);
 
-	      cache[0] = len;
-	      cache[1] = *offsetp;
-	 }
+	    cache[0] = len;
+	    cache[1] = *offsetp;
+	}
 
-	 *offsetp = len;
+	*offsetp = len;
     }
 
     return;
