@@ -411,14 +411,17 @@ if (!$versiononly) {
         }
     }
     my @otherperls;
+    my %otherperls;
     for (@path) {
 	next unless m,^/,;
 	# Use &samepath here because some systems have other dirs linked
 	# to $mainperldir (like SunOS)
 	next if samepath($_, $binexp);
 	next if ($mainperl_is_instperl && samepath($_, $mainperldir));
-	push(@otherperls, "$_/$perl$exe_ext")
-	    if (-x "$_/$perl$exe_ext" && ! -d "$_/$perl$exe_ext");
+        my $otherperl = "$_/$perl$exe_ext";
+	next if $otherperls{$otherperl}++;
+	push(@otherperls, $otherperl)
+	    if (-x $otherperl && ! -d $otherperl);
     }
     if (@otherperls) {
 	print STDERR "\nWarning: $perl appears in your path in the following " .
