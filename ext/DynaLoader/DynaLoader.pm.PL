@@ -1,3 +1,19 @@
+
+use Config;
+
+sub to_string {
+    my ($value) = @_;
+    $value =~ s/\\/\\\\'/g;
+    $value =~ s/'/\\'/g;
+    return "'$value'";
+}
+
+unlink "DynaLoader.pm" if -f "DynaLoader.pm";
+open OUT, ">DynaLoader.pm" or die $!;
+print OUT <<'EOT';
+
+# Generated from DynaLoader.pm.PL (resolved %Config::Config values)
+
 package DynaLoader;
 
 #   And Gandalf said: 'Many folk like to know beforehand what is to
@@ -13,8 +29,6 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 $VERSION = $VERSION = "1.03";	# avoid typo warning
-
-require Config;
 
 require AutoLoader;
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;
@@ -43,10 +57,15 @@ $dl_debug = $ENV{PERL_DL_DEBUG} || 0 unless defined $dl_debug;
 
 sub dl_load_flags { 0x00 }
 
-# 
+# ($dl_dlext, $dlsrc)
+#         = @Config::Config{'dlext', 'dlsrc'};
+EOT
 
-($dl_dlext, $dlsrc)
-	= @Config::Config{'dlext', 'dlsrc'};
+print OUT "  (\$dl_dlext, \$dlsrc) = (",
+          to_string($Config::Config{'dlext'}), ",",
+          to_string($Config::Config{'dlsrc'}), ")\n;" ;
+
+print OUT <<'EOT';
 
 # Some systems need special handling to expand file specifications
 # (VMS support by Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>)
@@ -65,7 +84,14 @@ $do_expand = $Is_VMS = $^O eq 'VMS';
 
 # Initialise @dl_library_path with the 'standard' library path
 # for this platform as determined by Configure
-push(@dl_library_path, split(' ',$Config::Config{'libpth'}));
+
+# push(@dl_library_path, split(' ', $Config::Config{'libpth'});
+EOT
+
+print OUT "push(\@dl_library_path, split(' ', ",
+          to_string($Config::Config{'libpth'}), "));\n";
+
+print OUT <<'EOT';
 
 # Add to @dl_library_path any extra directories we can gather from
 # environment variables. So far LD_LIBRARY_PATH is the only known
@@ -205,8 +231,14 @@ sub dl_findfile {
     my (@args) = @_;
     my (@dirs,  $dir);   # which directories to search
     my (@found);         # full paths to real files we have found
-    my $dl_ext= $Config::Config{'dlext'}; # suffix for perl extensions
-    my $dl_so = $Config::Config{'so'};	# suffix for shared libraries
+EOT
+
+print OUT '    my $dl_ext= ' . to_string($Config::Config{'dlext'}) .
+          "; # \$Config::Config{'dlext'} suffix for perl extensions\n";
+print OUT '    my $dl_so = ' . to_string($Config::Config{'so'}) .
+          "; # \$Config::Config{'so'} suffix for shared libraries\n";
+
+print OUT <<'EOT';
 
     print STDERR "dl_findfile(@args)\n" if $dl_debug;
 
@@ -350,7 +382,7 @@ etc and also allow pseudo-dynamic linking (using C<ld -A> at runtime).
 It must be stressed that the DynaLoader, by itself, is practically
 useless for accessing non-Perl libraries because it provides almost no
 Perl-to-C 'glue'.  There is, for example, no mechanism for calling a C
-library function or supplying arguments.  A ExtUtils::DynaLib module
+library function or supplying arguments.  A C::DynaLib module
 is available from CPAN sites which performs that function for some
 common system types.
 
@@ -691,3 +723,7 @@ Solaris global loading added by Nick Ing-Simmons with design/coding
 assistance from Tim Bunce, January 1996.
 
 =cut
+EOT
+
+close OUT or die $!;
+
