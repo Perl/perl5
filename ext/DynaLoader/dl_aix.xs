@@ -72,7 +72,7 @@
 #       include "/usr/ibmcxx/include/load.h"
 #   elif defined(USE_xlC_load_h)
 #       include "/usr/lpp/xlC/include/load.h"
-#   else
+#   elif defined(USE_load_h)
 #       include "/usr/include/load.h"
 #   endif
 #else
