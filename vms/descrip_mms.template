@@ -30,6 +30,7 @@
 ~MALLOC~
 ~CC~
 ~MT~
+~FLAGS~
 
 #: >>>>> Architecture-specific options <<<<<
 .ifdef AXE
@@ -214,7 +215,7 @@ acth =
 .endif
 
 # C preprocessor manifest "DEBUGGING" ==> perl -D, not the VMS debugger
-CFLAGS = $(XTRACCFLAGS)$(DBGCCFLAGS)
+CFLAGS = $(XTRACCFLAGS)$(DBGCCFLAGS)$(FLAGS)
 # Flags for a core compile
 X2PCFLAGS = $(CFLAGS)/Define=PERL_FOR_X2P
 # Flags for an x2p compile
@@ -1170,6 +1171,8 @@ utf8$(O) : utf8.c $(h)
 util$(O) : util.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 vms$(O) : vms.c $(h)
+	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
+xsutils$(O) : xsutils.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
 [.x2p]hash$(O) : [.x2p]hash.c [.x2p]EXTERN.h [.x2p]a2p.h [.x2p]hash.h [.x2p]str.h [.x2p]util.h config.h handy.h vmsish.h $(SOCKH)

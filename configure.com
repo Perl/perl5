@@ -39,8 +39,12 @@ $ cat  = "type"
 $ gcc_symbol = "gcc"
 $ ans = ""
 $ macros = ""
+$ extra_fags = ""
+$ user_c_flags = ""
+$ use_debugging_perl = "y"
+$ use_ieee_math = "n"
+$ be_case_sensitive = "n"
 $ use_vmsdebug_perl = "n"
-$ use_debugging_perl = "Y"
 $ use_64bitint = "n"
 $ C_Compiler_Replace = "CC="
 $ Thread_Live_Dangerously = "MT="
@@ -127,6 +131,8 @@ $ Using_Vax_C = ""
 $ Using_Gnu_C = ""
 $ Dec_C_Version = ""
 $ use_threads = "F"
+$ use_5005_threads = "N"
+$ use_ithreads = "N"
 $!
 $!: option parsing
 $ IF (P1 .NES. "")
@@ -524,7 +530,7 @@ THIS PACKAGE SEEMS TO BE INCOMPLETE.
 You have the option of continuing the configuration process, despite the
 distinct possibility that your kit is damaged, by typing 'y'es.  If you
 do, don't blame me if something goes wrong.  I advise you to type 'n'o
-and contact the author (sugalskd@ous.edu).
+and contact the author (dan@sidhe.org)
 
 $     READ SYS$COMMAND/PROMPT="Continue? [n] " ans
 $     IF ans
@@ -629,7 +635,7 @@ $   TYPE SYS$INPUT:
 Much effort has been expended to ensure that this shell script will
 run on any VMS system.  If despite that it blows up on yours, your
 best bet is to edit Configure.com and @ it again.  Whatever problems
-you have with Configure.com, let me (sugalskd@ous.edu) know how I blew
+you have with Configure.com, let me (dan@sidhe.org) know how I blew
 it.
 
 $!This installation script affects things in two ways:
@@ -1772,6 +1778,31 @@ $   if ans.eqs."" then ans = dflt
 $   if (f$extract(0, 1, "''ans'").eqs."Y").or.(f$extract(0, 1, "''ans'").eqs."y")
 $   THEN
 $     use_threads="T"
+$!
+$     ! Shall we do the 5.005-stype threads, or IThreads?
+$     echo "As of 5.5.640, Perl has two different internal threading
+$     echo "implementations, the 5.005 version (5005threads) and an
+$     echo "interpreter-based version (ithreads) that has one
+$     echo "interpreter per thread.  Both are very experimental.  This
+$     echo "arrangement exists to help developers work out which one
+$     echo "is better.
+$     echo "
+$     echo "If you're a casual user, you probably don't want
+$     echo "interpreter-threads at this time.  There doesn't yet exist
+$     echo "a way to create threads from within Perl in this model,
+$     echo "i.e., "use Thread;" will NOT work.
+$     echo "
+$     dflt = "n"
+$     rp = "Build with Interpreter threads? [''dflt']
+$     if ans.eqs."" then ans = dflt
+$     if (f$extract(0, 1, "''ans'").eqs."Y").or.(f$extract(0, 1, "''ans'").eqs."y")
+$     THEN
+$       use_ithreads="Y"
+$       use_5005_threads="N"
+$     ELSE
+$       use_ithreads="N"
+$       use_5005_threads="Y"
+$     ENDIF
 $     ! Are they on VMS 7.1 on an alpha?
 $     if (Archname.eqs."VMS_AXP").and.("''f$extract(1,3, f$getsyi(""version""))'".ges."7.1")
 $     THEN
@@ -1795,6 +1826,51 @@ $       ENDIF
 $     ENDIF
 $   ENDIF
 $ ENDIF
+$ if archname .eqs. "VMS_AXP"
+$ then
+$!
+$! Case sensitive?
+$ echo ""
+$ echo "By default, perl (and pretty much everything else on VMS) uses
+$ echo "case-insensitive linker symbols. Which is to say, when the
+$ echo "underlying C code makes a call to a routine called Perl_foo in
+$ echo "the source, the name in the object modules or shareable images
+$ echo "is really PERL_FOO. There are some packages that use an
+$ echo "embedded perl interpreter that instead require case-sensitive
+$ echo "linker symbols.
+$ echo ""
+$ echo "If you have no idea what the heck this means, and don't have
+$ echo "any program requiring anything, choose the default.
+$ echo ""
+$ dflt = be_case_sensitive
+$ rp = "Case-sensitive symbols [''dflt'] "
+$ gosub myread
+$ if ans.eqs."" then ans="''dflt'"
+$ be_case_sensitive = "''ans'"
+$!
+$! IEEE math?
+$ echo ""
+$ echo "Perl normally uses G_FLOAT format floating point numbers
+$ echo "internally, as do most things on VMS. You can, however, build
+$ echo "with IEEE floating point numbers instead if you need to.
+$ echo ""
+$ dflt = use_ieee_math
+$ rp = "Use IEEE math [''dflt'] "
+$ gosub myread
+$ if ans.eqs."" then ans="''dflt'"
+$ use_ieee_math = "''ans'"
+$ endif
+$! CC Flags
+$ echo ""
+$ echo "You can, if you need to, pass extra flags on to the C
+$ echo "compiler. In general you should only do this if you really,
+$ echo "really know what you're doing.
+$ echo ""
+$ dflt = user_c_flags
+$ rp = "Flags [''dflt'] "
+$ gosub myread
+$ if ans.eqs."" then ans="''dflt'"
+$ user_c_flags = "''ans'"
 $!
 $! Ask whether they want to use secure logical translation when tainting
 $ echo ""
@@ -1885,14 +1961,10 @@ $ echo "break badly"
 $ echo "
 $ echo "Which modules do you want to build into perl?"
 $! dflt = "Fcntl Errno File::Glob IO Opcode Byteloader Devel::Peek Devel::DProf Data::Dumper attrs re VMS::Stdio VMS::DCLsym B SDBM_File"
-$ dflt = "re Fcntl Errno File::Glob IO Opcode Devel::Peek Devel::DProf Data::Dumper attrs VMS::Stdio VMS::DCLsym B SDBM_File"
+$ dflt = "re Fcntl Errno File::Glob IO Opcode Devel::Peek Devel::DProf Data::Dumper attrs VMS::Stdio VMS::DCLsym B SDBM_File Thread"
 $ if Using_Dec_C.eqs."Yes"
 $ THEN
 $   dflt = dflt + " POSIX"
-$   if Use_Threads.eqs."T"
-$   THEN
-$     dflt = dflt + " Thread"
-$   ENDIF
 $ ENDIF
 $ rp = "[''dflt'] "
 $ GOSUB myread
@@ -2031,6 +2103,17 @@ $   tmp = F$LENGTH(macros)
 $   macros = F$EXTRACT(0,(tmp-1),macros) !miss trailing comma
 $   macros = "/macro=(" + macros  + ")"
 $ ENDIF
+$! Build up the extra C flags
+$!
+$ if use_ieee_math
+$ then
+$   extra_flags = "''extra_flags'" + "/float=ieee/ieee=denorm_results"
+$ endif
+$ if be_case_sensitive
+$ then
+$   extra_flags = "''extra_flags'" + "/Names=As_Is"
+$ endif
+$ extra_flags = "''extra_flags'" + "''user_c_flags'"
 $!
 $! Invoke the subconfig piece
 $!
