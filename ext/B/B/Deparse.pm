@@ -2129,8 +2129,9 @@ sub listop {
     return $name if null $kid;
     my $first;
     $name = "socketpair" if $name eq "sockpair";
-    if (defined prototype("CORE::$name")
-	&& prototype("CORE::$name") =~ /^;?\*/
+    my $proto = prototype("CORE::$name");
+    if (defined $proto
+	&& $proto =~ /^;?\*/
 	&& $kid->name eq "rv2gv") {
 	$first = $self->deparse($kid->first, 6);
     }
@@ -2143,6 +2144,10 @@ sub listop {
     $first = "+$first" if not $parens and substr($first, 0, 1) eq "(";
     push @exprs, $first;
     $kid = $kid->sibling;
+    if ($proto =~ /^\*\*/ && $kid->name eq "rv2gv") {
+	push @exprs, $self->deparse($kid->first, 6);
+	$kid = $kid->sibling;
+    }
     for (; !null($kid); $kid = $kid->sibling) {
 	push @exprs, $self->deparse($kid, 6);
     }
