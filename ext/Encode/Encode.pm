@@ -102,8 +102,19 @@ sub define_alias
 # Allow variants of iso-8859-1 etc.
 define_alias( qr/^iso[-_]?(\d+)[-_](\d+)$/i => '"iso-$1-$2"' );
 
+# This is a font issue, not an encoding issue.
+# (The currency symbol of the Latin 1 upper half is redefined
+# as the euro symbol.)
+define_alias( qr/^(.+)\@euro$/i => '"$1"' );
+
+# Solaris has this as a generic Latin-1 encoding.
+define_alias( qr/^iso_8859_1$/ => 'iso-8859-1' );
+
+# At least HP-UX has these.
+define_alias( qr/^iso8859(\d+)$/i => '"iso-8859-$1"' );
+
 # Allow latin-1 style names as well
-define_alias( qr/^latin[-_]?(\d+)$/i => '"iso-8859-$latin2iso_num[$1]"' );
+define_alias( qr/^(?:iso[-_]?)?latin[-_]?(\d+)$/i => '"iso-8859-$latin2iso_num[$1]"' );
 
 # Common names for non-latin prefered MIME names
 define_alias( 'ascii'    => 'US-ascii',
@@ -112,7 +123,11 @@ define_alias( 'ascii'    => 'US-ascii',
               'greek'    => 'iso-8859-7',
               'hebrew'   => 'iso-8859-8');
 
-define_alias( 'ibm-1047' => 'cp1047');
+# At least AIX has IBM-NNN (surprisingly...) instead of cpNNN.
+define_alias( qr/^ibm[-_]?(\d\d\d\d?)$/i => '"cp$1"');
+
+# Standardize on the dashed version.
+define_alias( qr/^koi8r$/i => 'koi8-r' );
 
 # Map white space and _ to '-'
 define_alias( qr/^(\S+)[\s_]+(.*)$/i => '"$1-$2"' );
