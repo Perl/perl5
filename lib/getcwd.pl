@@ -54,7 +54,7 @@ sub getcwd
 	}
 	$cwd = "$dir/$cwd";
 	closedir(getcwd'PARENT);					#');
-    } while ($dir);
+    } while ($dir ne '');
     chop($cwd);
     $cwd;
 }
