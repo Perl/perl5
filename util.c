@@ -339,19 +339,19 @@ S_xstat(pTHX_ int flag)
 Malloc_t Perl_malloc (MEM_SIZE nbytes)
 {
     dTHXs;
-    return PerlMem_malloc(nbytes);
+    return (Malloc_t)PerlMem_malloc(nbytes);
 }
 
 Malloc_t Perl_calloc (MEM_SIZE elements, MEM_SIZE size)
 {
     dTHXs;
-    return PerlMem_calloc(elements, size);
+    return (Malloc_t)PerlMem_calloc(elements, size);
 }
 
 Malloc_t Perl_realloc (Malloc_t where, MEM_SIZE nbytes)
 {
     dTHXs;
-    return PerlMem_realloc(where, nbytes);
+    return (Malloc_t)PerlMem_realloc(where, nbytes);
 }
 
 Free_t   Perl_mfree (Malloc_t where)
@@ -941,7 +941,7 @@ Perl_savesharedpv(pTHX_ const char *sv)
 {
     register char *newaddr = Nullch;
     if (sv) {
-	newaddr = PerlMemShared_malloc(strlen(sv)+1);
+	newaddr = (char*)PerlMemShared_malloc(strlen(sv)+1);
     	(void)strcpy(newaddr,sv);
     }
     return newaddr;
