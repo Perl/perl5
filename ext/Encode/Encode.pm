@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 0.98 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.99 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 
 require DynaLoader;
@@ -221,7 +221,7 @@ require Encode::XS;
 require Encode::Internal;
 require Encode::Unicode;
 require Encode::utf8;
-require Encode::iso10646_1;
+require Encode::10646_1;
 require Encode::ucs2_le;
 
 1;

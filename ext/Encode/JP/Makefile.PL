@@ -4,9 +4,9 @@ use ExtUtils::MakeMaker;
 
 my %tables = (
 	      euc_jp_t   => ['euc-jp.ucm'],
-              sjis_t     => ['shiftjis.enc'],
-	      mac_jp_t   => ['macJapan.enc'],
-	      cp_jp_t    => ['cp932.enc'],
+              sjis_t     => ['shiftjis.ucm',
+			     'macJapan.ucm',
+			     'cp932.ucm'],
              );
 
 my $name = 'JP';

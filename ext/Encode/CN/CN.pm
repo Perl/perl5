@@ -4,7 +4,7 @@ BEGIN {
 	die "Encode::CN not supported on EBCDIC\n";
     }
 }
-our $VERSION = do { my @r = (q$Revision: 0.98 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.99 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use Encode::CN::HZ;
@@ -14,6 +14,8 @@ XSLoader::load('Encode::CN',$VERSION);
 # Relocated from Encode.pm
 # CP936 doesn't have vendor-addon for GBK, so they're identical.
 Encode::define_alias( qr/^gbk$/i => '"cp936"');
+
+use Encode::CN::2022_CN;
 
 1;
 __END__

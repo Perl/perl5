@@ -581,7 +581,7 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		   SvOOK would be ideal - but sv_backoff does not understand SvLEN == 0
 		   type SVs and sv_clear() calls it ...
 		 */
-		sv_setpvn(src,s+slen,sdone);
+		 sv_setpvn(src, (char*)s+slen, sdone);
 #else
 		Move(s + slen, SvPVX(src), sdone , U8);
 #endif

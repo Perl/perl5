@@ -2,9 +2,9 @@ use 5.7.2;
 use strict;
 use ExtUtils::MakeMaker;
 
-my %tables = (big5_t	=> ['big5.enc'],
-	      big5_hk_t	=> ['big5-hkscs.enc'],
-	      cp_tw_t	=> ['cp950.enc'],
+my %tables = (big5_t	=> ['big5.ucm',
+			    'big5-hk.ucm',
+			    'cp950.ucm'],
              );
 
 my $name = 'TW';

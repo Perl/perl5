@@ -1,9 +1,0 @@
-# Encoding file: iso2022-jp, escape-driven
-E
-name		iso2022-jp
-init		{}
-final		{}
-ascii		\x1b(B
-ascii		\x1b(J
-jis0208		\x1b$B
-jis0208		\x1b$@

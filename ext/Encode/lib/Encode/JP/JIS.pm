@@ -4,8 +4,7 @@ use base 'Encode::Encoding';
 
 use strict;
 
-use vars qw($VERSION);
-$VERSION = do { my @r = (q$Revision: 0.98 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.99 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 # Just for the time being, we implement jis-7bit
 # encoding via EUC
@@ -32,19 +31,19 @@ sub encode
     return $res;
 }
 
-use Encode::JP::Constants qw(:all);
+use Encode::CJKConstants qw(:all);
 
 # JIS<->EUC
 
 sub jis_euc {
     my $r_str = shift;
     $$r_str =~ s(
-		 ($RE{JIS_0212}|$RE{JIS_0208}|$RE{JIS_ASC}|$RE{JIS_KANA})
+		 ($RE{JIS_0212}|$RE{JIS_0208}|$RE{ISO_ASC}|$RE{JIS_KANA})
 		 ([^\e]*)
 		 )
     {
 	my ($esc, $str) = ($1, $2);
-	if ($esc !~ /$RE{JIS_ASC}/o) {
+	if ($esc !~ /$RE{ISO_ASC}/o) {
 	    $str =~ tr/\x21-\x7e/\xa1-\xfe/;
 	    if ($esc =~ /$RE{JIS_KANA}/o) {
 		$str =~ s/([\xa1-\xdf])/\x8e$1/og;
