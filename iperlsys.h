@@ -120,7 +120,7 @@ typedef void		(*LPSetCnt)(struct IPerlStdIO*, PerlIO*, int);
 typedef void		(*LPSetPtrCnt)(struct IPerlStdIO*, PerlIO*, char*,
 			    int);
 typedef void		(*LPSetlinebuf)(struct IPerlStdIO*, PerlIO*);
-typedef int		(*LPPrintf)(struct IPerlStdIO*, PerlIO*, const char*, 
+typedef int		(*LPPrintf)(struct IPerlStdIO*, PerlIO*, const char*,
 			    ...);
 typedef int		(*LPVprintf)(struct IPerlStdIO*, PerlIO*, const char*,
 			    va_list);
@@ -185,14 +185,14 @@ struct IPerlStdIOInfo
 };
 
 #ifdef USE_STDIO_PTR
-#  define PerlIO_has_cntptr(f)		1       
+#  define PerlIO_has_cntptr(f)		1
 #  ifdef STDIO_CNT_LVALUE
-#    define PerlIO_canset_cnt(f)	1      
+#    define PerlIO_canset_cnt(f)	1
 #    ifdef STDIO_PTR_LVALUE
-#      define PerlIO_fast_gets(f)	1        
+#      define PerlIO_fast_gets(f)	1
 #    endif
 #  else
-#    define PerlIO_canset_cnt(f)	0      
+#    define PerlIO_canset_cnt(f)	0
 #  endif
 #else  /* USE_STDIO_PTR */
 #  define PerlIO_has_cntptr(f)		0
@@ -200,7 +200,7 @@ struct IPerlStdIOInfo
 #endif /* USE_STDIO_PTR */
 
 #ifndef PerlIO_fast_gets
-#define PerlIO_fast_gets(f)		0        
+#define PerlIO_fast_gets(f)		0
 #endif
 
 #ifdef FILE_base
@@ -268,7 +268,7 @@ struct IPerlStdIOInfo
 #define PerlIO_printf		Perl_fprintf_nocontext
 #define PerlIO_stdoutf		*PL_StdIO->pPrintf
 #define PerlIO_vprintf(f,fmt,a)						\
-	(*PL_StdIO->pVprintf)(PL_StdIO, (f),(fmt),a)          
+	(*PL_StdIO->pVprintf)(PL_StdIO, (f),(fmt),a)
 #define PerlIO_tell(f)							\
 	(*PL_StdIO->pTell)(PL_StdIO, (f))
 #define PerlIO_seek(f,o,w)						\
@@ -325,8 +325,8 @@ struct IPerlStdIOInfo
 #endif
 
 #ifndef PerlIO
-struct _PerlIO;
-#define PerlIO struct _PerlIO
+typedef struct _PerlIO PerlIO;
+#define PerlIO PerlIO
 #endif /* No PerlIO */
 
 #ifndef Fpos_t
@@ -552,7 +552,7 @@ struct IPerlDirInfo
 #define PerlDir_mkdir(name, mode)	Mkdir((name), (mode))
 #ifdef VMS
 #  define PerlDir_chdir(n)		Chdir(((n) && *(n)) ? (n) : "SYS$LOGIN")
-#else 
+#else
 #  define PerlDir_chdir(name)		chdir((name))
 #endif
 #define PerlDir_rmdir(name)		rmdir((name))
@@ -1256,7 +1256,7 @@ typedef int		(*LPRecvfrom)(struct IPerlSock*, SOCKET, char*, int,
 typedef int		(*LPSelect)(struct IPerlSock*, int, char*, char*,
 			    char*, const struct timeval*);
 typedef int		(*LPSend)(struct IPerlSock*, SOCKET, const char*, int,
-			    int); 
+			    int);
 typedef int		(*LPSendto)(struct IPerlSock*, SOCKET, const char*,
 			    int, int, const struct sockaddr*, int);
 typedef void		(*LPSethostent)(struct IPerlSock*, int);
