@@ -95,7 +95,7 @@ struct io {
 #  endif /* EMULATE_ATOMIC_REFCOUNTS */
 #else
 #  define ATOMIC_INC(count) (++count)
-#  define ATOMIC_DEC_AND_TEST(res, count) (res = --count)
+#  define ATOMIC_DEC_AND_TEST(res, count) (res = (--count == 0))
 #endif /* USE_THREADS */
 
 #ifdef __GNUC__
