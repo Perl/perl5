@@ -167,7 +167,7 @@ PerlIOEncode_fill(PerlIO *f)
    XPUSHs(e->bufsv);
    XPUSHs(&PL_sv_yes);
    PUTBACK;
-   if (perl_call_method("toUnicode",G_SCALAR) != 1)
+   if (perl_call_method("decode",G_SCALAR) != 1)
     code = -1;
    SPAGAIN;
    uni = POPs;
@@ -223,7 +223,7 @@ PerlIOEncode_flush(PerlIO *f)
    XPUSHs(e->bufsv);
    XPUSHs(&PL_sv_yes);
    PUTBACK;
-   if (perl_call_method("fromUnicode",G_SCALAR) != 1)
+   if (perl_call_method("encode",G_SCALAR) != 1)
     code = -1;
    SPAGAIN;
    str = POPs;
@@ -453,7 +453,7 @@ bool
 sv_utf8_decode(sv)
 SV *	sv
 
-void
+STRLEN
 sv_utf8_upgrade(sv)
 SV *	sv
 
@@ -462,12 +462,12 @@ sv_utf8_downgrade(sv,failok=0)
 SV *	sv
 bool	failok
 
-MODULE = Encode		PACKAGE = Encode::XS	PREFIX = Encode_
+MODULE = Encode		PACKAGE = Encode::XS	PREFIX = Method_
 
 PROTOTYPES: ENABLE
 
 void
-Encode_toUnicode(obj,src,check = 0)
+Method_decode(obj,src,check = 0)
 SV *	obj
 SV *	src
 int	check
@@ -480,7 +480,7 @@ CODE:
  }
 
 void
-Encode_fromUnicode(obj,src,check = 0)
+Method_encode(obj,src,check = 0)
 SV *	obj
 SV *	src
 int	check
@@ -584,88 +584,16 @@ _utf8_to_bytes(sv, ...)
       OUTPUT:
 	RETVAL
 
-SV *
-_chars_to_utf8(sv, from, ...)
-	SV *	sv
-	SV *	from
-      CODE:
-	{
-	  SV * check = items == 3 ? ST(2) : Nullsv;
-	  RETVAL = &PL_sv_undef;
-	}
-      OUTPUT:
-	RETVAL
-
-SV *
-_utf8_to_chars(sv, to, ...)
-	SV *	sv
-	SV *	to
-      CODE:
-	{
-	  SV * check = items == 3 ? ST(2) : Nullsv;
-	  RETVAL = &PL_sv_undef;
-	}
-      OUTPUT:
-	RETVAL
-
-SV *
-_utf8_to_chars_check(sv, ...)
-	SV *	sv
-      CODE:
-	{
-	  SV * check = items == 2 ? ST(1) : Nullsv;
-	  RETVAL = &PL_sv_undef;
-	}
-      OUTPUT:
-	RETVAL
-
-SV *
-_bytes_to_chars(sv, from, ...)
-	SV *	sv
-	SV *	from
-      CODE:
-	{
-	  SV * check = items == 3 ? ST(2) : Nullsv;
-	  RETVAL = &PL_sv_undef;
-	}
-      OUTPUT:
-	RETVAL
-
-SV *
-_chars_to_bytes(sv, to, ...)
-	SV *	sv
-	SV *	to
-      CODE:
-	{
-	  SV * check = items == 3 ? ST(2) : Nullsv;
-	  RETVAL = &PL_sv_undef;
-	}
-      OUTPUT:
-	RETVAL
-
-SV *
-_from_to(sv, from, to, ...)
-	SV *	sv
-	SV *	from
-	SV *	to
-      CODE:
-	{
-	  SV * check = items == 4 ? ST(3) : Nullsv;
-	  RETVAL = &PL_sv_undef;
-	}
-      OUTPUT:
-	RETVAL
-
 bool
-_is_utf8(sv, ...)
-	SV *	sv
+is_utf8(sv, check = FALSE)
+SV *	sv
+bool	check
       CODE:
 	{
-	  SV *	check = items == 2 ? ST(1) : Nullsv;
 	  if (SvPOK(sv)) {
-	    RETVAL = SvUTF8(sv) ? 1 : 0;
+	    RETVAL = SvUTF8(sv) ? TRUE : FALSE;
 	    if (RETVAL &&
-		SvTRUE(check) &&
+		check  &&
 		!is_utf8_string((U8*)SvPVX(sv), SvCUR(sv)))
 	      RETVAL = FALSE;
 	  } else {
@@ -676,7 +604,7 @@ _is_utf8(sv, ...)
 	RETVAL
 
 SV *
-_on_utf8(sv)
+_utf8_on(sv)
 	SV *	sv
       CODE:
 	{
@@ -692,7 +620,7 @@ _on_utf8(sv)
 	RETVAL
 
 SV *
-_off_utf8(sv)
+_utf8_off(sv)
 	SV *	sv
       CODE:
 	{
@@ -703,19 +631,6 @@ _off_utf8(sv)
 	  } else {
 	    RETVAL = &PL_sv_undef;
 	  }
-	}
-      OUTPUT:
-	RETVAL
-
-SV *
-_utf_to_utf(sv, from, to, ...)
-	SV *	sv
-	SV *	from
-	SV *	to
-      CODE:
-	{
-	  SV * check = items == 4 ? ST(3) : Nullsv;
-	  RETVAL = &PL_sv_undef;
 	}
       OUTPUT:
 	RETVAL

@@ -2943,18 +2943,27 @@ Perl_sv_2bool(pTHX_ register SV *sv)
 =for apidoc sv_utf8_upgrade
 
 Convert the PV of an SV to its UTF8-encoded form.
+Forces the SV to string form it it is not already.
+Always sets the SvUTF8 flag to avoid future validity checks even
+if all the bytes have hibit clear.
 
 =cut
 */
 
-void
+STRLEN
 Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
 {
     char *s, *t, *e;
     int  hibit = 0;
 
-    if (!sv || !SvPOK(sv) || SvUTF8(sv))
-	return;
+    if (!sv)
+	return 0;
+
+    if (!SvPOK(sv))
+	(void) SvPV_nolen(sv);
+
+    if (SvUTF8(sv))
+	return SvCUR(sv);
 
     /* This function could be much more efficient if we had a FLAG in SVs
      * to signal if there are any hibit chars in the PV.
@@ -2981,8 +2990,10 @@ Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
 	if (SvLEN(sv) != 0)
 	    Safefree(s); /* No longer using what was there before. */
 	SvLEN(sv) = len; /* No longer know the real size. */
-	SvUTF8_on(sv);
     }
+    /* Mark as UTF-8 even if no hibit - saves scanning loop */
+    SvUTF8_on(sv);
+    return SvCUR(sv);
 }
 
 /*
@@ -3030,7 +3041,8 @@ Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
 =for apidoc sv_utf8_encode
 
 Convert the PV of an SV to UTF8-encoded, but then turn off the C<SvUTF8>
-flag so that it looks like bytes again. Nothing calls this.
+flag so that it looks like octets again. Used as a building block
+for encode_utf8 in Encode.xs
 
 =cut
 */
@@ -3038,9 +3050,21 @@ flag so that it looks like bytes again. Nothing calls this.
 void
 Perl_sv_utf8_encode(pTHX_ register SV *sv)
 {
-    sv_utf8_upgrade(sv);
+    (void) sv_utf8_upgrade(sv);
     SvUTF8_off(sv);
 }
+
+/*
+=for apidoc sv_utf8_decode
+
+Convert the octets in the PV from UTF-8 to chars. Scan for validity and then
+turn of SvUTF8 if needed so that we see characters. Used as a building block
+for decode_utf8 in Encode.xs
+
+=cut
+*/
+
+
 
 bool
 Perl_sv_utf8_decode(pTHX_ register SV *sv)
@@ -3049,6 +3073,7 @@ Perl_sv_utf8_decode(pTHX_ register SV *sv)
         char *c;
         char *e;
 
+	/* The octets may have got themselves encoded - get them back as bytes */
         if (!sv_utf8_downgrade(sv, TRUE))
 	    return FALSE;
 
@@ -7821,7 +7846,7 @@ S_gv_share(pTHX_ SV *sstr)
         return Nullsv;
     }
 
-    /* 
+    /*
      * write attempts will die with
      * "Modification of a read-only value attempted"
      */
