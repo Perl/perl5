@@ -1752,7 +1752,8 @@ Perl_realloc(void *mp, size_t nbytes)
 		nmalloc[bucket]--;
 		nmalloc[pow * BUCKETS_PER_POW2]++;
 #endif 	    
-		*(cp - M_OVERHEAD) = pow * BUCKETS_PER_POW2; /* Fill index. */
+		((union overhead *)(cp - M_OVERHEAD))->ov_index
+		  = pow * BUCKETS_PER_POW2; /* Fill index. */
 		MALLOC_UNLOCK;
 		goto inplace_label;
 	    } else {
@@ -1978,17 +1979,6 @@ Perl_dump_mstats(pTHX_ char *s)
 
 #   if defined(__MACHTEN_PPC__) || defined(NeXT) || defined(__NeXT__) || defined(PURIFY)
 #      define PERL_SBRK_VIA_MALLOC
-/*
- * MachTen's malloc() returns a buffer aligned on a two-byte boundary.
- * While this is adequate, it may slow down access to longer data
- * types by forcing multiple memory accesses.  It also causes
- * complaints when RCHECK is in force.  So we allocate six bytes
- * more than we need to, and return an address rounded up to an
- * eight-byte boundary.
- *
- * 980701 Dominic Dunlop <domo@computer.org>
- */
-#      define SYSTEM_ALLOC_ALIGNMENT 2
 #   endif
 
 #   ifdef PERL_SBRK_VIA_MALLOC

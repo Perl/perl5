@@ -1,18 +1,23 @@
+#! /bin/bash
 # machten.sh
-# This is for MachTen 4.0.3.  It might work on other versions and variants too.
+# This is for MachTen 4.1.4.  It might work on other versions and variants
+# too.  If it doesn't, tell me, and I'll try to fix it -- domo@computer.org
 #
 # Users of earlier MachTen versions might need a fixed tr from ftp.tenon.com.
 # This should be described in the MachTen release notes.
 #
 # MachTen 2.x has its own hint file.
 #
-# This file has been put together by Andy Dougherty
+# The original version of this file was put together by Andy Dougherty
 # <doughera@lafcol.lafayette.edu> based on comments from lots of
 # folks, especially 
 # 	Mark Pease <peasem@primenet.com>
 #	Martijn Koster <m.koster@webcrawler.com>
 #	Richard Yeh <rcyeh@cco.caltech.edu>
 #
+# Remove dynamic loading libraries from search; enable SysV IPC with
+# MachTen 4.1.4 and above; define SYSTEM_ALIGN_BYTES for old MT versions
+#                      -- Dominic Dunlop <domo@computer.org> 000224
 # Disable shadow password file access: MT 4.1.1 has necessary library
 # functions, but not header file (or documentation)
 #                      -- Dominic Dunlop <domo@computer.org> 990804
@@ -71,8 +76,16 @@ fi
 # by -DPLAIN_MALLOC and -DNO_FANCY_MALLOC.
 usemymalloc=${usemymalloc:-y}
 
+# Older versions of MachTen malloc() data on a two-byte boundary, which
+# works, but slows down operations on long, float and double data.
+# Perl's malloc() can compensate if SYSTEM_ALLOC_ALIGNMENT is suitably
+# defined.
+if expr "$osvers" \< "4.1" >/dev/null
+then
+system_alloc_alignment=" -DSYSTEM_ALLOC_ALIGNMENT=2"
+fi
 # Do not wrap the following long line
-malloc_cflags='ccflags="$ccflags -DPLAIN_MALLOC -DNO_FANCY_MALLOC -DUSE_PERL_SBRK"'
+malloc_cflags='ccflags="$ccflags -DPLAIN_MALLOC -DNO_FANCY_MALLOC -DUSE_PERL_SBRK$system_alloc_alignment"'
 
 # When MachTen does a fork(), it immediately copies the whole of
 # the parent process' data space for the child.  This can be
@@ -153,19 +166,22 @@ alignbytes=8
 # friends.  Use setjmp and friends instead.
 expr "$osvers" \< "4.0.3" > /dev/null && d_sigsetjmp='undef'
 
-# System V IPC support in MachTen 4.1 is incomplete (missing msg function
+# System V IPC before MachTen 4.1.4 is incomplete (missing msg function
 # prototypes, no ftok()), buggy (semctl(.., ..,  IPC_STATUS, ..) hangs
-# system), and undocumented.  Claim it's not there until things improve.
+# system), and undocumented.  Claim it's not there at all before 4.1.4.
+if expr "$osvers" \< "4.1.4" >/dev/null
+then
 d_msg=${d_msg:-undef}
 d_sem=${d_sem:-undef}
 d_shm=${d_shm:-undef}
+fi
 
 # Get rid of some extra libs which it takes Configure a tediously
-# long time never to find on MachTen
+# long time never to find on MachTen, or which break perl
 set `echo X "$libswanted "|sed -e 's/ net / /' -e 's/ socket / /' \
     -e 's/ inet / /' -e 's/ nsl / /' -e 's/ nm / /' -e 's/ malloc / /' \
     -e 's/ ld / /' -e 's/ sun / /' -e 's/ posix / /' \
-    -e 's/ cposix / /' -e 's/ crypt / /' \
+    -e 's/ cposix / /' -e 's/ crypt / /' -e 's/ dl / /' -e 's/ dld / /' \
     -e 's/ ucb / /' -e 's/ bsd / /' -e 's/ BSD / /' -e 's/ PW / /'`
 shift
 libswanted="$*"
@@ -213,6 +229,7 @@ Hmm...You had some extra variables I don't know about...I'll try to keep 'em.
         Propagating recommended variable nmopts
         Propagating recommended variable malloc_cflags...
         Propagating recommended variable reg_infty
+        Propagating recommended variable system_alloc_alignment
 Read the File::Find documentation for more information about dont_use_nlink
 
 Your perl will be built with a stack size of ${stack_size}k and a regular
