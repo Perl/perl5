@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Oct 25 22:43:09 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Mon Nov  5 17:50:04 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -16619,6 +16619,12 @@ echo " "
 : back to where it started
 if test -d ../UU; then
 	cd ..
+fi
+
+: configuration may be patched via a 'config.arch' file
+if $test -f config.arch; then
+	echo "I see a config.arch file, loading it."
+	. ./config.arch
 fi
 
 : configuration may be patched via a 'config.over' file

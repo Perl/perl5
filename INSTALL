@@ -1315,12 +1315,18 @@ You will then have to rebuild by running
 	make depend
 	make
 
-=item config.over
+=item config.over and config.arch
 
-You can also supply a shell script config.over to over-ride Configure's
-guesses.  It will get loaded up at the very end, just before config.sh
-is created.  You have to be careful with this, however, as Configure
-does no checking that your changes make sense.
+You can also supply a shell script config.over to over-ride
+Configure's guesses.  It will get loaded up at the very end, just
+before config.sh is created.  You have to be careful with this,
+however, as Configure does no checking that your changes make sense.
+This file is usually good for site-specific customizations.
+
+There is also another file that, if it exists, is loaded before the
+config.over, called config.arch.  This file is intended to be per
+architecture, not per site, and usually it's the architecture-specific
+hints file that creates the config.arch.
 
 =item config.h
 
