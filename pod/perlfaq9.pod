@@ -7,7 +7,7 @@ perlfaq9 - Networking ($Revision: 1.26 $, $Date: 1999/05/23 16:08:30 $)
 This section deals with questions related to networking, the internet,
 and a few on the web.
 
-=head2 My CGI script runs from the command line but not the browser.   (500 Server Error)
+=head2 My CGI script runs from the command line but not the browser.  (500 Server Error)
 
 If you can demonstrate that you've read the following FAQs and that
 your problem isn't something simple that can be easily answered, you'll
@@ -84,8 +84,8 @@ attempts to do a little simple formatting of the resulting plain text.
 Many folks attempt a simple-minded regular expression approach, like
 C<< s/<.*?>//g >>, but that fails in many cases because the tags
 may continue over line breaks, they may contain quoted angle-brackets,
-or HTML comment may be present.  Plus folks forget to convert
-entities, like C<&lt;> for example.
+or HTML comment may be present.  Plus, folks forget to convert
+entities--like C<&lt;> for example.
 
 Here's one "simple-minded" approach, that works for most files:
 
@@ -248,12 +248,12 @@ in the header.
 
     EOF
 
-To be correct to the spec, each of those virtual newlines should really be
-physical C<"\015\012"> sequences by the time you hit the client browser.
-Except for NPH scripts, though, that local newline should get translated
-by your server into standard form, so you shouldn't have a problem
-here, even if you are stuck on MacOS.  Everybody else probably won't
-even notice.
+To be correct to the spec, each of those virtual newlines should
+really be physical C<"\015\012"> sequences by the time your message is
+received by the client browser.  Except for NPH scripts, though, that
+local newline should get translated by your server into standard form,
+so you shouldn't have a problem here, even if you are stuck on MacOS.
+Everybody else probably won't even notice.
 
 =head2 How do I put a password on my web pages?
 
@@ -276,9 +276,9 @@ DBI compatible driver.  HTTPD::UserAdmin supports files used by the
 =head2 How do I make sure users can't enter values into a form that cause my CGI script to do bad things?
 
 Read the CGI security FAQ, at
-http://www-genome.wi.mit.edu/WWW/faqs/www-security-faq.html, and the
+http://www-genome.wi.mit.edu/WWW/faqs/www-security-faq.html , and the
 Perl/CGI FAQ at
-http://www.perl.com/CPAN/doc/FAQs/cgi/perl-cgi-faq.html.
+http://www.perl.com/CPAN/doc/FAQs/cgi/perl-cgi-faq.html .
 
 In brief: use tainting (see L<perlsec>), which makes sure that data
 from outside your script (eg, CGI parameters) are never used in
@@ -397,7 +397,7 @@ format after minor transliterations:
 
 =head2 How do I return the user's mail address?
 
-On systems that support getpwuid, the $< variable and the
+On systems that support getpwuid, the $< variable, and the
 Sys::Hostname module (which is part of the standard perl distribution),
 you can probably try using something like this:
 
@@ -465,7 +465,7 @@ include queueing, MX records, and security.
 
 While you could use the Mail::Folder module from CPAN (part of the
 MailFolder package) or the Mail::Internet module from CPAN (also part
-of the MailTools package), often a module is overkill, though.  Here's a
+of the MailTools package), often a module is overkill.  Here's a
 mail sorter.
 
     #!/usr/bin/perl
@@ -520,7 +520,7 @@ systems.)
 =head2 How do I fetch a news article or the active newsgroups?
 
 Use the Net::NNTP or News::NNTPClient modules, both available from CPAN.
-This can make tasks like fetching the newsgroup list as simple as:
+This can make tasks like fetching the newsgroup list as simple as
 
     perl -MNews::NNTPClient
       -e 'print News::NNTPClient->new->list("newsgroups")'
@@ -532,7 +532,7 @@ available from CPAN) is more complex but can put as well as fetch.
 
 =head2 How can I do RPC in Perl?
 
-A DCE::RPC module is being developed (but is not yet available), and
+A DCE::RPC module is being developed (but is not yet available) and
 will be released as part of the DCE-Perl package (available from
 CPAN).  The rpcgen suite, available from CPAN/authors/id/JAKE/, is
 an RPC stub generator and includes an RPC::ONC module.

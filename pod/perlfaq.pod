@@ -46,7 +46,7 @@ Very general, high-level information about Perl.
 
 =item * Where can I get a list of Larry Wall witticisms?
 
-=item * How can I convince my sysadmin/supervisor/employees to use version (5/5.005/Perl instead of some other language)?
+=item * How can I convince my sysadmin/supervisor/employees to use (version 5/5.005/Perl) instead of some other language?
 
 =back
 
@@ -162,7 +162,7 @@ Programmer tools and programming support.
 =item * Where can I learn about linking C with Perl? [h2xs, xsubpp]
 
 =item * I've read perlembed, perlguts, etc., but I can't embed perl in
-my C program, what am I doing wrong?
+my C program; what am I doing wrong?
 
 =item * When I tried to run my script, I got this message. What does it
 mean?
@@ -424,7 +424,7 @@ Pattern matching and regular expressions.
 
 =item * I put a regular expression into $/ but it didn't work. What's wrong?
 
-=item * How do I substitute case insensitively on the LHS, but preserving case on the RHS?
+=item * How do I substitute case insensitively on the LHS while preserving case on the RHS?
 
 =item * How can I make C<\w> match national character sets?
 
@@ -574,7 +574,7 @@ Interprocess communication (IPC), control over the user-interface
 
 =item * How can I do an atexit() or setjmp()/longjmp()? (Exception handling)
 
-=item * Why doesn't my sockets program work under System V (Solaris)? What does the error message "Protocol not supported" mean?
+=item * Why doesn't my sockets program work under System V (Solaris)?  What does the error message "Protocol not supported" mean?
 
 =item * How can I call my system's unique C functions from Perl?
 
@@ -647,7 +647,7 @@ Networking, the Internet, and a few on the web.
 
 =over 4
 
-=item * My CGI script runs from the command line but not the browser.   (500 Server Error)
+=item * My CGI script runs from the command line but not the browser.  (500 Server Error)
 
 =item * How can I get better error messages from a CGI program?
 
@@ -704,7 +704,7 @@ Networking, the Internet, and a few on the web.
 
 This document is posted regularly to comp.lang.perl.announce and
 several other related newsgroups.  It is available in a variety of
-formats from CPAN in the /CPAN/doc/FAQs/FAQ/ directory, or on the web
+formats from CPAN in the /CPAN/doc/FAQs/FAQ/ directory or on the web
 at http://www.perl.com/perl/faq/ .
 
 =head2 How to contribute to this document
@@ -740,11 +740,11 @@ All rights reserved.
 
 =head2 Bundled Distributions
 
-When included as part of the Standard Version of Perl, or as part of
+When included as part of the Standard Version of Perl or as part of
 its complete documentation whether printed or otherwise, this work
 may be distributed only under the terms of Perl's Artistic License.
 Any distribution of this file or derivatives thereof I<outside>
-of that package require that special arrangements be made with
+of that package requires that special arrangements be made with
 copyright holder.
 
 Irrespective of its distribution, all code examples in these files
@@ -763,6 +763,10 @@ in respect of this information or its use.
 =head1 Changes
 
 =over 4
+
+=item 1/November/2000
+
+A few grammatical fixes and updates implemented by John Borwick.
 
 =item 23/May/99
 
