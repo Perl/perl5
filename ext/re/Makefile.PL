@@ -6,6 +6,7 @@ WriteMakefile(
     XSPROTOARG		=> '-noprototypes',
     OBJECT		=> 're_exec$(OBJ_EXT) re_comp$(OBJ_EXT) re$(OBJ_EXT)',
     DEFINE		=> '-DDEBUGGING -DIN_XSUB_RE',
+    clean		=> { FILES => '*$(OBJ_EXT) *.c ../../lib/re.pm' },
 );
 
 sub MY::postamble {
