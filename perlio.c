@@ -2307,8 +2307,10 @@ SSize_t
 PerlIOUnix_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 {
     int fd = PerlIOSelf(f, PerlIOUnix)->fd;
-    if (!(PerlIOBase(f)->flags & PERLIO_F_CANREAD))
+    if (!(PerlIOBase(f)->flags & PERLIO_F_CANREAD) || 
+         PerlIOBase(f)->flags & (PERLIO_F_EOF|PERLIO_F_ERROR)) {
 	return 0;
+    }
     while (1) {
 	SSize_t len = PerlLIO_read(fd, vbuf, count);
 	if (len >= 0 || errno != EINTR) {
@@ -2455,25 +2457,30 @@ PerlIOStdio_mode(const char *mode, char *tmode)
     return ret;
 }
 
-/*
- * This isn't used yet ...
- */
 IV
 PerlIOStdio_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 {
-    if (*PerlIONext(f)) {
-	PerlIOStdio *s = PerlIOSelf(f, PerlIOStdio);
-	char tmode[8];
-	FILE *stdio =
-	    PerlSIO_fdopen(PerlIO_fileno(PerlIONext(f)), mode =
-			   PerlIOStdio_mode(mode, tmode));
-	if (stdio) {
-	    s->stdio = stdio;
-	    /* We never call down so do any pending stuff now */
-	    PerlIO_flush(PerlIONext(f));
-	}
-	else
-	    return -1;
+    PerlIO *n;
+    if (PerlIOValid(f) && PerlIOValid(n = PerlIONext(f))) {
+        PerlIO_funcs *toptab = PerlIOBase(n)->tab;
+        if (toptab == tab) {
+	    /* Top is already stdio - pop self (duplicate) and use original */
+	    PerlIO_pop(aTHX_ f);
+	    return 0;
+	} else {
+	    int fd = PerlIO_fileno(n);
+	    char tmode[8];
+	    FILE *stdio;
+	    if (fd >= 0 && (stdio  = PerlSIO_fdopen(fd, 
+			    mode = PerlIOStdio_mode(mode, tmode)))) {
+		PerlIOSelf(f, PerlIOStdio)->stdio = stdio;
+	    	/* We never call down so do any pending stuff now */
+	    	PerlIO_flush(PerlIONext(f));
+	    } 
+	    else {
+		return -1;
+	    }
+        }
     }
     return PerlIOBase_pushed(aTHX_ f, mode, arg, tab);
 }
@@ -2954,7 +2961,7 @@ PerlIO_funcs PerlIO_stdio = {
     "stdio",
     sizeof(PerlIOStdio),
     PERLIO_K_BUFFERED|PERLIO_K_RAW,
-    PerlIOBase_pushed,
+    PerlIOStdio_pushed,
     PerlIOBase_popped,
     PerlIOStdio_open,
     PerlIOBase_binmode,         /* binmode */
@@ -4623,6 +4630,7 @@ PerlIO_sprintf(char *s, int n, const char *fmt, ...)
     return result;
 }
 #endif
+
 
 
 
