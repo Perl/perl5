@@ -14,6 +14,8 @@ plan tests => 43;
 
 use Config;
 
+my $NONSTDIO = exists $ENV{PERLIO} && $ENV{PERLIO} ne 'stdio';
+
 SKIP: {
     skip("This perl does not have Encode", 43)
 	unless " $Config{extensions} " =~ / Encode /;
@@ -22,11 +24,11 @@ SKIP: {
 	my ($result, $expected, $id) = @_;
 	my $n = scalar @$expected;
 	is($n, scalar @$expected, "$id - layers = $n");
-	if ($ENV{PERLIO}) {
+	if ($NONSTDIO) {
 	    # Get rid of "unix" and similar OS-specific low lever layer.
 	    shift(@$result);
 	    # Change expectations.
-	    $expected->[0] = "perlio" if $expected->[0] eq "stdio";
+	    $expected->[0] = $ENV{PERLIO} if $expected->[0] eq "stdio";
 	}
 	for (my $i = 0; $i < $n; $i++) {
 	    my $j = $expected->[$i];
@@ -97,7 +99,7 @@ SKIP: {
 	my @results = PerlIO::get_layers(F, details => 1);
 
 	# Get rid of "unix" and undef.
-	splice(@results, 0, 2) if $ENV{PERLIO};
+	splice(@results, 0, 2) if $NONSTDIO;
 
 	check([ @results ],
 	      [ "stdio",    undef,        sub { $_[0] > 0 },
