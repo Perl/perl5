@@ -156,109 +156,94 @@ ideograph, for instance.
 
 =item *
 
-Named Unicode properties and block ranges may be used as character
-classes via the new C<\p{}> (matches property) and C<\P{}> (doesn't
-match property) constructs.  For instance, C<\p{Lu}> matches any
+Named Unicode properties, scripts, and block ranges may be used like
+character classes via the new C<\p{}> (matches property) and C<\P{}>
+(doesn't match property) constructs. For instance, C<\p{Lu}> matches any
 character with the Unicode "Lu" (Letter, uppercase) property, while
 C<\p{M}> matches any character with a "M" (mark -- accents and such)
-property.  Single letter properties may omit the brackets, so that can
-be written C<\pM> also.  Many predefined character classes are
-available, such as C<\p{IsMirrored}> and C<\p{InTibetan}>.
-
-The C<\p{Is...}> test for "general properties" such as "letter",
-"digit", while the C<\p{In...}> test for Unicode scripts and blocks.
+property. Single letter properties may omit the brackets, so that can be
+written C<\pM> also. Many predefined properties are available, such
+as C<\p{Mirrored}> and C<\p{Tibetan}>.
 
 The official Unicode script and block names have spaces and dashes as
-separators, but for convenience you can have dashes, spaces, and
-underbars at every word division, and you need not care about correct
-casing.  It is recommended, however, that for consistency you use the
-following naming: the official Unicode script, block, or property name
-(see below for the additional rules that apply to block names), with
-whitespace and dashes replaced with underbar, and the words
-"uppercase-first-lowercase-rest".  That is, "Latin-1 Supplement"
-becomes "Latin_1_Supplement".
+separators, but for convenience you can have dashes, spaces, and underbars
+at every word division, and you need not care about correct casing. It is
+recommended, however, that for consistency you use the following naming:
+the official Unicode script, block, or property name (see below for the
+additional rules that apply to block names), with whitespace and dashes
+removed, and the words "uppercase-first-lowercase-rest". That is, "Latin-1
+Supplement" becomes "Latin1Supplement".
 
 You can also negate both C<\p{}> and C<\P{}> by introducing a caret
-(^) between the first curly and the property name: C<\p{^In_Tamil}> is
-equal to C<\P{In_Tamil}>.
+(^) between the first curly and the property name: C<\p{^Tamil}> is
+equal to C<\P{Tamil}>.
 
-The C<In> and C<Is> can be left out: C<\p{Greek}> is equal to
-C<\p{In_Greek}>, C<\P{Pd}> is equal to C<\P{Pd}>.
+Here are the basic Unicode General Category properties, followed by their
+long form (you can use either, e.g. C<\p{Lu}> and C<\p{LowercaseLetter}>
+are identical).
 
     Short       Long
 
     L           Letter
-    Lu          Uppercase_Letter
-    Ll          Lowercase_Letter
-    Lt          Titlecase_Letter
-    Lm          Modifier_Letter
-    Lo          Other_Letter
+    Lu          UppercaseLetter
+    Ll          LowercaseLetter
+    Lt          TitlecaseLetter
+    Lm          ModifierLetter
+    Lo          OtherLetter
 
     M           Mark
-    Mn          Nonspacing_Mark
-    Mc          Spacing_Mark
-    Me          Enclosing_Mark
+    Mn          NonspacingMark
+    Mc          SpacingMark
+    Me          EnclosingMark
 
     N           Number
-    Nd          Decimal_Number
-    Nl          Letter_Number
-    No          Other_Number
+    Nd          DecimalNumber
+    Nl          LetterNumber
+    No          OtherNumber
 
     P           Punctuation
-    Pc          Connector_Punctuation
-    Pd          Dash_Punctuation
-    Ps          Open_Punctuation
-    Pe          Close_Punctuation
-    Pi          Initial_Punctuation
+    Pc          ConnectorPunctuation
+    Pd          DashPunctuation
+    Ps          OpenPunctuation
+    Pe          ClosePunctuation
+    Pi          InitialPunctuation
                 (may behave like Ps or Pe depending on usage)
-    Pf          Final_Punctuation
+    Pf          FinalPunctuation
                 (may behave like Ps or Pe depending on usage)
-    Po          Other_Punctuation
+    Po          OtherPunctuation
 
     S           Symbol
-    Sm          Math_Symbol
-    Sc          Currency_Symbol
-    Sk          Modifier_Symbol
-    So          Other_Symbol
+    Sm          MathSymbol
+    Sc          CurrencySymbol
+    Sk          ModifierSymbol
+    So          OtherSymbol
 
     Z           Separator
-    Zs          Space_Separator
-    Zl          Line_Separator
-    Zp          Paragraph_Separator
+    Zs          SpaceSeparator
+    Zl          LineSeparator
+    Zp          ParagraphSeparator
 
     C           Other
     Cc          Control
     Cf          Format
-    Cs          Surrogate
-    Co          Private_Use
+    Cs          Surrogate   (not usable)
+    Co          PrivateUse
     Cn          Unassigned
 
 The single-letter properties match all characters in any of the
 two-letter sub-properties starting with the same letter.
 There's also C<L&> which is an alias for C<Ll>, C<Lu>, and C<Lt>.
 
-The following reserved ranges have C<In> tests:
+Because Perl hides the need for the user to understand the internal
+representation of Unicode characters, it has no need to support the
+somewhat messy concept of surrogates. Therefore, the C<Cs> property is not
+supported.
 
-    CJK_Ideograph_Extension_A
-    CJK_Ideograph
-    Hangul_Syllable
-    Non_Private_Use_High_Surrogate
-    Private_Use_High_Surrogate
-    Low_Surrogate
-    Private_Surrogate
-    CJK_Ideograph_Extension_B
-    Plane_15_Private_Use
-    Plane_16_Private_Use
+Because scripts differ in their directionality (for example Hebrew is
+written right to left), Unicode supplies these properties:
 
-For example C<"\x{AC00}" =~ \p{HangulSyllable}> will test true.
-(Handling of surrogates is not implemented yet, because Perl
-uses UTF-8 and not UTF-16 internally to represent Unicode.
-So you really can't use the "Cs" category.)
-
-Additionally, because scripts differ in their directionality
-(for example Hebrew is written right to left), all characters
-have their directionality defined:
-
+    Property    Meaning
+  
     BidiL       Left-to-Right
     BidiLRE     Left-to-Right Embedding
     BidiLRO     Left-to-Right Override
@@ -279,18 +264,21 @@ have their directionality defined:
     BidiWS      Whitespace
     BidiON      Other Neutrals
 
+For example, C<\p{BidiR}> matches all characters that are normally
+written right to left.
+
 =back
 
 =head2 Scripts
 
-The scripts available for C<\p{In...}> and C<\P{In...}>, for example
-C<\p{InLatin}> or \p{InCyrillic>, are as follows:
+The scripts available via C<\p{...}> and C<\P{...}>, for example
+C<\p{Latin}> or \p{Cyrillic>, are as follows:
 
     Arabic
     Armenian
     Bengali
     Bopomofo
-    Canadian-Aboriginal
+    CanadianAboriginal
     Cherokee
     Cyrillic
     Deseret
@@ -315,7 +303,7 @@ C<\p{InLatin}> or \p{InCyrillic>, are as follows:
     Mongolian
     Myanmar
     Ogham
-    Old-Italic
+    OldItalic
     Oriya
     Runic
     Sinhala
@@ -331,49 +319,52 @@ There are also extended property classes that supplement the basic
 properties, defined by the F<PropList> Unicode database:
 
     ASCII_Hex_Digit
-    Bidi_Control
+    BidiControl
     Dash
     Diacritic
     Extender
-    Hex_Digit
+    HexDigit
     Hyphen
     Ideographic
-    Join_Control
-    Noncharacter_Code_Point
-    Other_Alphabetic
-    Other_Lowercase
-    Other_Math
-    Other_Uppercase
-    Quotation_Mark
-    White_Space
+    JoinControl
+    NoncharacterCodePoint
+    OtherAlphabetic
+    OtherLowercase
+    OtherMath
+    OtherUppercase
+    QuotationMark
+    WhiteSpace
 
 and further derived properties:
 
-    Alphabetic      Lu + Ll + Lt + Lm + Lo + Other_Alphabetic
-    Lowercase       Ll + Other_Lowercase
-    Uppercase       Lu + Other_Uppercase
-    Math            Sm + Other_Math
+    Alphabetic      Lu + Ll + Lt + Lm + Lo + OtherAlphabetic
+    Lowercase       Ll + OtherLowercase
+    Uppercase       Lu + OtherUppercase
+    Math            Sm + OtherMath
 
     ID_Start        Lu + Ll + Lt + Lm + Lo + Nl
     ID_Continue     ID_Start + Mn + Mc + Nd + Pc
 
     Any             Any character
-    Assigned        Any non-Cn character
+    Assigned        Any non-Cn character (i.e. synonym for C<\P{Cn}>)
+    Unassigned      Synonym for C<\p{Cn}>
     Common          Any character (or unassigned code point)
                     not explicitly assigned to a script
 
+For backward compatability, all properties mentioned so far may have C<Is>
+prepended to their name (e.g. C<\P{IsLu}> is equal to C<\P{Lu}>).
+
 =head2 Blocks
 
-In addition to B<scripts>, Unicode also defines B<blocks> of
-characters.  The difference between scripts and blocks is that the
-scripts concept is closer to natural languages, while the blocks
-concept is more an artificial grouping based on groups of 256 Unicode
-characters.  For example, the C<Latin> script contains letters from
-many blocks.  On the other hand, the C<Latin> script does not contain
-all the characters from those blocks. It does not, for example,
-contain digits because digits are shared across many scripts.  Digits
-and other similar groups, like punctuation, are in a category called
-C<Common>.
+In addition to B<scripts>, Unicode also defines B<blocks> of characters.
+The difference between scripts and blocks is that the scripts concept is
+closer to natural languages, while the blocks concept is more an artificial
+grouping based on groups of mostly 256 Unicode characters. For example, the
+C<Latin> script contains letters from many blocks. On the other hand, the
+C<Latin> script does not contain all the characters from those blocks. It
+does not, for example, contain digits because digits are shared across many
+scripts. Digits and other similar groups, like punctuation, are in a
+category called C<Common>.
 
 For more about scripts, see the UTR #24:
 
@@ -383,113 +374,110 @@ For more about blocks, see:
 
    http://www.unicode.org/Public/UNIDATA/Blocks.txt
 
-Because there are overlaps in naming (there are, for example, both
-a script called C<Katakana> and a block called C<Katakana>, the block
-version has C<Block> appended to its name, C<\p{InKatakanaBlock}>.
+Blocks names are given with the C<In> prefix. For example, the
+Katakana block is referenced via C<\p{InKatakana}. The C<In>
+prefix may be omitted if there is no nameing conflict with a script
+or any other property, but it is recommended that C<In> always be used
+to avoid confusion.
 
-Notice that this definition was introduced in Perl 5.8.0: in Perl
-5.6 only the blocks were used; in Perl 5.8.0 scripts became the
-preferential Unicode character class definition (prompted by
-recommendations from the Unicode consortium); this meant that
-the definitions of some character classes changed (the ones in
-the below list that have the C<Block> appended).
+These block names are supported:
 
-   Alphabetic Presentation Forms
-   Arabic Block
-   Arabic Presentation Forms-A
-   Arabic Presentation Forms-B
-   Armenian Block
-   Arrows
-   Basic Latin
-   Bengali Block
-   Block Elements
-   Bopomofo Block
-   Bopomofo Extended
-   Box Drawing
-   Braille Patterns
-   Byzantine Musical Symbols
-   CJK Compatibility
-   CJK Compatibility Forms
-   CJK Compatibility Ideographs
-   CJK Compatibility Ideographs Supplement
-   CJK Radicals Supplement
-   CJK Symbols and Punctuation
-   CJK Unified Ideographs
-   CJK Unified Ideographs Extension A
-   CJK Unified Ideographs Extension B
-   Cherokee Block
-   Combining Diacritical Marks
-   Combining Half Marks
-   Combining Marks for Symbols
-   Control Pictures
-   Currency Symbols
-   Cyrillic Block
-   Deseret Block
-   Devanagari Block
-   Dingbats
-   Enclosed Alphanumerics
-   Enclosed CJK Letters and Months
-   Ethiopic Block
-   General Punctuation
-   Geometric Shapes
-   Georgian Block
-   Gothic Block
-   Greek Block
-   Greek Extended
-   Gujarati Block
-   Gurmukhi Block
-   Halfwidth and Fullwidth Forms
-   Hangul Compatibility Jamo
-   Hangul Jamo
-   Hangul Syllables
-   Hebrew Block
-   High Private Use Surrogates
-   High Surrogates
-   Hiragana Block
-   IPA Extensions
-   Ideographic Description Characters
-   Kanbun
-   Kangxi Radicals
-   Kannada Block
-   Katakana Block
-   Khmer Block
-   Lao Block
-   Latin 1 Supplement
-   Latin Extended Additional
-   Latin Extended-A
-   Latin Extended-B
-   Letterlike Symbols
-   Low Surrogates
-   Malayalam Block
-   Mathematical Alphanumeric Symbols
-   Mathematical Operators
-   Miscellaneous Symbols
-   Miscellaneous Technical
-   Mongolian Block
-   Musical Symbols
-   Myanmar Block
-   Number Forms
-   Ogham Block
-   Old Italic Block
-   Optical Character Recognition
-   Oriya Block
-   Private Use
-   Runic Block
-   Sinhala Block
-   Small Form Variants
-   Spacing Modifier Letters
-   Specials
-   Superscripts and Subscripts
-   Syriac Block
-   Tags
-   Tamil Block
-   Telugu Block
-   Thaana Block
-   Thai Block
-   Tibetan Block
-   Unified Canadian Aboriginal Syllabics
-   Yi Radicals
-   Yi Syllables
+   InAlphabeticPresentationForms
+   InArabicBlock
+   InArabicPresentationFormsA
+   InArabicPresentationFormsB
+   InArmenianBlock
+   InArrows
+   InBasicLatin
+   InBengaliBlock
+   InBlockElements
+   InBopomofoBlock
+   InBopomofoExtended
+   InBoxDrawing
+   InBraillePatterns
+   InByzantineMusicalSymbols
+   InCJKCompatibility
+   InCJKCompatibilityForms
+   InCJKCompatibilityIdeographs
+   InCJKCompatibilityIdeographsSupplement
+   InCJKRadicalsSupplement
+   InCJKSymbolsAndPunctuation
+   InCJKUnifiedIdeographs
+   InCJKUnifiedIdeographsExtensionA
+   InCJKUnifiedIdeographsExtensionB
+   InCherokeeBlock
+   InCombiningDiacriticalMarks
+   InCombiningHalfMarks
+   InCombiningMarksForSymbols
+   InControlPictures
+   InCurrencySymbols
+   InCyrillicBlock
+   InDeseretBlock
+   InDevanagariBlock
+   InDingbats
+   InEnclosedAlphanumerics
+   InEnclosedCJKLettersAndMonths
+   InEthiopicBlock
+   InGeneralPunctuation
+   InGeometricShapes
+   InGeorgianBlock
+   InGothicBlock
+   InGreekBlock
+   InGreekExtended
+   InGujaratiBlock
+   InGurmukhiBlock
+   InHalfwidthAndFullwidthForms
+   InHangulCompatibilityJamo
+   InHangulJamo
+   InHangulSyllables
+   InHebrewBlock
+   InHighPrivateUseSurrogates
+   InHighSurrogates
+   InHiraganaBlock
+   InIPAExtensions
+   InIdeographicDescriptionCharacters
+   InKanbun
+   InKangxiRadicals
+   InKannadaBlock
+   InKatakanaBlock
+   InKhmerBlock
+   InLaoBlock
+   InLatin1Supplement
+   InLatinExtendedAdditional
+   InLatinExtended-A
+   InLatinExtended-B
+   InLetterlikeSymbols
+   InLowSurrogates
+   InMalayalamBlock
+   InMathematicalAlphanumericSymbols
+   InMathematicalOperators
+   InMiscellaneousSymbols
+   InMiscellaneousTechnical
+   InMongolianBlock
+   InMusicalSymbols
+   InMyanmarBlock
+   InNumberForms
+   InOghamBlock
+   InOldItalicBlock
+   InOpticalCharacterRecognition
+   InOriyaBlock
+   InPrivateUse
+   InRunicBlock
+   InSinhalaBlock
+   InSmallFormVariants
+   InSpacingModifierLetters
+   InSpecials
+   InSuperscriptsAndSubscripts
+   InSyriacBlock
+   InTags
+   InTamilBlock
+   InTeluguBlock
+   InThaanaBlock
+   InThaiBlock
+   InTibetanBlock
+   InUnifiedCanadianAboriginalSyllabics
+   InYiRadicals
+   InYiSyllables
 
 =over 4
 
@@ -634,7 +622,7 @@ Level 1 - Basic Unicode Support
 
         [ 1] \x{...}
         [ 2] \N{...}
-        [ 3] . \p{Is...} \P{Is...}
+        [ 3] . \p{...} \P{...}
         [ 4] now scripts (see UTR#24 Script Names) in addition to blocks
         [ 5] have negation
         [ 6] can use look-ahead to emulate subtraction (*)
@@ -657,8 +645,8 @@ For example, what TR18 might write as
 
 in Perl can be written as:
 
-    (?!\p{UNASSIGNED})\p{GreekBlock}
-    (?=\p{ASSIGNED})\p{GreekBlock}
+    (?!\p{Unassigned})\p{InGreek}
+    (?=\p{Assigned})\p{InGreek}
 
 But in this particular example, you probably really want
 

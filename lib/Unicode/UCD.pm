@@ -108,7 +108,7 @@ as defined by the Unicode standard:
     title            titlecase equivalent mapping
 
     block            block the character belongs to (used in \p{In...})
-    script           script the character belongs to 
+    script           script the character belongs to
 
 If no match is found, a reference to an empty hash is returned.
 
@@ -280,13 +280,12 @@ positions within all blocks are defined.
 
 See also L</Blocks versus Scripts>.
 
-If supplied with an argument that can't be a code point, charblock()
-tries to do the opposite and interpret the argument as a character
-block.  The return value is a I<range>: an anonymous list that
-contains anonymous lists, which in turn contain I<start-of-range>,
-I<end-of-range> code point pairs.  You can test whether a code point
-is in a range using the L</charinrange> function.  If the argument is
-not a known charater block, C<undef> is returned.
+If supplied with an argument that can't be a code point, charblock() tries
+to do the opposite and interpret the argument as a character block. The
+return value is a I<range>: an anonymous list of lists that contain
+I<start-of-range>, I<end-of-range> code point pairs. You can test whether a
+code point is in a range using the L</charinrange> function. If the
+argument is not a known charater block, C<undef> is returned.
 
 =cut
 
@@ -342,13 +341,12 @@ character belongs to, e.g.  C<Latin>, C<Greek>, C<Han>.
 
 See also L</Blocks versus Scripts>.
 
-If supplied with an argument that can't be a code point, charscript()
-tries to do the opposite and interpret the argument as a character
-script.  The return value is a I<range>: an anonymous list that
-contains anonymous lists, which in turn contain I<start-of-range>,
-I<end-of-range> code point pairs.  You can test whether a code point
-is in a range using the L</charinrange> function.  If the argument is
-not a known charater script, C<undef> is returned.
+If supplied with an argument that can't be a code point, charscript() tries
+to do the opposite and interpret the argument as a character script. The
+return value is a I<range>: an anonymous list of lists that contain
+I<start-of-range>, I<end-of-range> code point pairs. You can test whether a
+code point is in a range using the L</charinrange> function. If the
+argument is not a known charater script, C<undef> is returned.
 
 =cut
 
@@ -433,13 +431,13 @@ sub charscripts {
 The difference between a block and a script is that scripts are closer
 to the linguistic notion of a set of characters required to present
 languages, while block is more of an artifact of the Unicode character
-numbering and separation into blocks of 256 characters.
+numbering and separation into blocks of (mostly) 256 characters.
 
 For example the Latin B<script> is spread over several B<blocks>, such
 as C<Basic Latin>, C<Latin 1 Supplement>, C<Latin Extended-A>, and
 C<Latin Extended-B>.  On the other hand, the Latin script does not
 contain all the characters of the C<Basic Latin> block (also known as
-the ASCII): it includes only the letters, not for example the digits
+the ASCII): it includes only the letters, and not, for example, the digits
 or the punctuation.
 
 For blocks see http://www.unicode.org/Public/UNIDATA/Blocks.txt
@@ -448,18 +446,10 @@ For scripts see UTR #24: http://www.unicode.org/unicode/reports/tr24/
 
 =head2 Matching Scripts and Blocks
 
-Both scripts and blocks can be matched using the regular expression
-construct C<\p{In...}> and its negation C<\P{In...}>.
-
-The name of the script or the block comes after the C<In>, for example
-C<\p{InCyrillic}>, C<\P{InBasicLatin}>.  Spaces and dashes ('-') are
-removed from the names for the C<\p{In...}>, for example
-C<LatinExtendedA> instead of C<Latin Extended-A>.
-
-There are a few cases where there is both a script and a block by the
-same name, in these cases the block version has C<Block> appended to
-its name: C<\p{InKatakana}> is the script, C<\p{InKatakanaBlock}> is
-the block.
+Scripts are matched with the regular-expression construct
+C<\p{...}> (e.g. C<\p{Tibetan}> matches characters of the Tibetan script),
+while C<\p{In...}> is used for blocks (e.g. C<\p{InTibetan}> matches
+any of the 256 code points in the Tibetan block).
 
 =head2 Code Point Arguments
 
