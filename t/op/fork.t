@@ -8,7 +8,9 @@ BEGIN {
     require Config; import Config;
     unless ($Config{'d_fork'}
 	    or ($^O eq 'MSWin32' and $Config{useithreads}
-		and $Config{ccflags} =~ /-DPERL_IMPLICIT_SYS/))
+		and $Config{ccflags} =~ /-DPERL_IMPLICIT_SYS/ 
+#               and !defined $Config{'useperlio'}
+               ))
     {
 	print "1..0 # Skip: no fork\n";
 	exit 0;

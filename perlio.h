@@ -305,8 +305,10 @@ extern int	PerlIO_getpos		(PerlIO *,Fpos_t *);
 extern int	PerlIO_setpos		(PerlIO *,const Fpos_t *);
 #endif
 #ifndef PerlIO_fdupopen
-#define PerlIO_fdupopen(f)		(f)
-/* extern PerlIO *	PerlIO_fdupopen		(PerlIO *); */
+extern PerlIO *	PerlIO_fdupopen		(pTHX_ PerlIO *);
+#endif
+#ifndef PerlIO_modestr
+extern char *PerlIO_modestr		(PerlIO *,char *buf);
 #endif
 #ifndef PerlIO_isutf8
 extern int	PerlIO_isutf8		(PerlIO *);
@@ -318,7 +320,7 @@ extern int	PerlIO_apply_layers	(pTHX_ PerlIO *f, const char *mode, const char *n
 extern int	PerlIO_binmode		(pTHX_ PerlIO *f, int iotype, int omode, const char *names);
 #endif
 
-extern void PerlIO_cleanup(void);
+extern void PerlIO_cleanup();
 
 extern void PerlIO_debug(const char *fmt,...);
 

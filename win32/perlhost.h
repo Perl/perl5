@@ -35,6 +35,7 @@ extern int		g_do_aspawn(void *vreally, void **vmark, void **vsp);
 class CPerlHost
 {
 public:
+    /* Constructors */
     CPerlHost(void);
     CPerlHost(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
 		 struct IPerlMem** ppMemParse, struct IPerlEnv** ppEnv,
@@ -197,7 +198,12 @@ protected:
 
     DWORD   m_dwEnvCount;
     LPSTR*  m_lppEnvList;
+    static long num_hosts;
+public:
+    inline  int LastHost(void) { return num_hosts == 1L; };
 };
+
+long CPerlHost::num_hosts = 0L;
 
 
 #define STRUCT2PTR(x, y) (CPerlHost*)(((LPBYTE)x)-offsetof(CPerlHost, y))
@@ -1844,6 +1850,14 @@ PerlProcASpawn(struct IPerlProc* piPerl, void *vreally, void **vmark, void **vsp
     return do_aspawn(vreally, vmark, vsp);
 }
 
+int
+PerlProcLastHost(struct IPerlProc* piPerl)
+{
+ dTHXo;
+ CPerlHost *h = (CPerlHost*)w32_internal_host;
+ return h->LastHost();
+}
+
 struct IPerlProc perlProc =
 {
     PerlProcAbort,
@@ -1879,6 +1893,7 @@ struct IPerlProc perlProc =
     PerlProcSpawn,
     PerlProcSpawnvp,
     PerlProcASpawn,
+    PerlProcLastHost
 };
 
 
@@ -1888,6 +1903,8 @@ struct IPerlProc perlProc =
 
 CPerlHost::CPerlHost(void)
 {
+    /* Construct a host from scratch */
+    InterlockedIncrement(&num_hosts);
     m_pvDir = new VDir();
     m_pVMem = new VMem();
     m_pVMemShared = new VMem();
@@ -1936,6 +1953,7 @@ CPerlHost::CPerlHost(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
 		 struct IPerlDir** ppDir, struct IPerlSock** ppSock,
 		 struct IPerlProc** ppProc)
 {
+    InterlockedIncrement(&num_hosts);
     m_pvDir = new VDir(0);
     m_pVMem = new VMem();
     m_pVMemShared = new VMem();
@@ -1970,6 +1988,8 @@ CPerlHost::CPerlHost(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
 
 CPerlHost::CPerlHost(CPerlHost& host)
 {
+    /* Construct a host from another host */
+    InterlockedIncrement(&num_hosts);
     m_pVMem = new VMem();
     m_pVMemShared = host.GetMemShared();
     m_pVMemParse =  host.GetMemParse();
@@ -2010,6 +2030,7 @@ CPerlHost::CPerlHost(CPerlHost& host)
 CPerlHost::~CPerlHost(void)
 {
 //  Reset();
+    InterlockedDecrement(&num_hosts);
     delete m_pvDir;
     m_pVMemParse->Release();
     m_pVMemShared->Release();
