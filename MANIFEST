@@ -1165,6 +1165,7 @@ lib/Pod/ParseUtils.pm		Pod-Parser - pod utility functions
 lib/Pod/Plainer.pm		Pod migration utility module
 lib/Pod/Select.pm		Pod-Parser - select portions of POD docs
 lib/Pod/t/latex.t		Test for Pod::LaTeX
+lib/Pod/t/utils.t		Test for Pod::ParseUtils
 lib/Pod/Text.pm			Pod-Parser - convert POD data to formatted ASCII text
 lib/Pod/Text/Color.pm		Convert POD data to color ASCII text
 lib/Pod/Text/Overstrike.pm	Convert POD data to formatted overstrike text
