@@ -9,7 +9,7 @@ BEGIN {
     $| = 1;
 }
 
-print "1..84\n";
+print "1..87\n";
 
 $a = {};
 bless $a, "Bob";
