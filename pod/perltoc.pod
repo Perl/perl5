@@ -2699,17 +2699,45 @@ Unicode::UCD, User::grent, User::pwent, Win32
 
 =item Africa
 
+South Africa
+
 =item Asia
+
+China, India, Indonesia, Israel, Japan, Korea, Philippines, Russian
+Federation, Saudi Arabia, Singapore, South Korea, Taiwan, Thailand
 
 =item Central America
 
+Costa Rica
+
 =item Europe
+
+Austria, Belgium, Bulgaria, Croatia, Czech Republic, Denmark, Estonia,
+Finland, France, Germany, Greece, Hungary, Iceland, Ireland, Italy, Latvia,
+Lithuania, Netherlands, Norway, Poland, Portugal, Romania, Russia,
+Slovakia, Slovenia, Spain, Sweden, Switzerland, Turkey, Ukraine, United
+Kingdom
 
 =item North America
 
+Alberta, Manitoba, Nova Scotia, Ontario, Quebec, Mexico
+
+=item United States
+
+Alabama, California, Colorado, Delaware, District of Columbia, Florida,
+Illinois, Indiana, Kentucky, Massachusetts, Michigan, New Jersey, New York,
+North Carolina, Ohio, Oklahoma, Oregon, Pennsylvania, Tennessee, Texas,
+Utah, Virginia, ashington, Wisconsin
+
 =item Oceania
 
+Australia, New Zealand
+
 =item South America
+
+Argentina, Brazil, Chile
+
+=item RSYNC Mirrors
 
 =back
 
@@ -8356,10 +8384,12 @@ threads->list();, async BLOCK;
 
 A thread exited while %d other threads were still running
 
-=item BUGS / TODO
+=item TODO
 
-Parent-Child threads, tid is I32, Returning objects, PERL_OLD_SIGNALS are
-not threadsafe, will not be
+=item BUGS
+
+Parent-Child threads, Returning objects, Creating threads inside BEGIN
+blocks, PERL_OLD_SIGNALS are not threadsafe, will not be
 
 =item AUTHOR and COPYRIGHT
 
@@ -9025,10 +9055,12 @@ threads->list();, async BLOCK;
 
 A thread exited while %d other threads were still running
 
-=item BUGS / TODO
+=item TODO
 
-Parent-Child threads, tid is I32, Returning objects, PERL_OLD_SIGNALS are
-not threadsafe, will not be
+=item BUGS
+
+Parent-Child threads, Returning objects, Creating threads inside BEGIN
+blocks, PERL_OLD_SIGNALS are not threadsafe, will not be
 
 =item AUTHOR and COPYRIGHT
 

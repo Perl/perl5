@@ -1,6 +1,9 @@
 package Thread::Queue;
 use Thread qw(cond_wait cond_broadcast);
 
+use vars qw($VERSION);
+$VERSION = '1.00';
+
 =head1 NAME
 
 Thread::Queue - thread-safe queues (5.005-threads)

@@ -482,8 +482,6 @@ for reference.
 
 =head2 Perlbug remote interface
 
-=over 4
-
 There are three (3) remote administrative interfaces for modifying bug
 status, category, etc.  In all cases an admin must be first registered
 with the Perlbug database by sending an email request to
@@ -497,6 +495,8 @@ by asking on the admin mailing list at: bugmongers@perl.org
 For more info on the web see
 
 	http://bugs.perl.org/perlbug.cgi?req=spec
+
+=over 4
 
 =item 1 http://bugs.perl.org
 

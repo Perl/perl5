@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Fri Jun 21 16:39:44 EET DST 2002
+ * Configuration time: Sun Jul 14 02:21:32 EET DST 2002
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -28,7 +28,7 @@
 /* LOC_SED:
  *	This symbol holds the complete pathname to the sed program.
  */
-#define LOC_SED 	"/usr/bin/sed"	/**/
+#define LOC_SED 	"/usr/local/bin/sed"	/**/
 
 /* HAS_ALARM:
  *	This symbol, if defined, indicates that the alarm routine is

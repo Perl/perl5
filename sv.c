@@ -7959,7 +7959,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    goto string;
 	}
 
-	if (!args)
+	if (vectorize)
+	    argsv = vecsv;
+	else if (!args)
 	    argsv = (efix ? efix <= svmax : svix < svmax) ?
 		    svargs[efix ? efix-1 : svix++] : &PL_sv_undef;
 
@@ -7968,7 +7970,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    /* STRINGS */
 
 	case 'c':
-	    uv = args ? va_arg(*args, int) : SvIVx(argsv);
+	    uv = (args && !vectorize) ? va_arg(*args, int) : SvIVx(argsv);
 	    if ((uv > 255 ||
 		 (!UNI_IS_INVARIANT(uv) && SvUTF8(sv)))
 		&& !IN_BYTES) {
@@ -7984,7 +7986,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    goto string;
 
 	case 's':
-	    if (args) {
+	    if (args && !vectorize) {
 		eptr = va_arg(*args, char*);
 		if (eptr)
 #ifdef MACOS_TRADITIONAL
@@ -8021,7 +8023,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	     * if ISO or ANSI decide to use '_' for something.
 	     * So we keep it hidden from users' code.
 	     */
-	    if (!args)
+	    if (!args || vectorize)
 		goto unknown;
 	    argsv = va_arg(*args, SV*);
 	    eptr = SvPVx(argsv, elen);
@@ -8037,7 +8039,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    /* INTEGERS */
 
 	case 'p':
-	    if (alt)
+	    if (alt || vectorize)
 		goto unknown;
 	    uv = PTR2UV(args ? va_arg(*args, void*) : argsv);
 	    base = 16;
@@ -8252,7 +8254,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	    /* This is evil, but floating point is even more evil */
 
-	    vectorize = FALSE;
 	    /* for SV-style calling, we can only get NV
 	       for C-style calling, we assume %f is double;
 	       for simplicity we allow any of %Lf, %llf, %qf for long double
@@ -8281,7 +8282,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    }
 
 	    /* now we need (long double) if intsize == 'q', else (double) */
-	    nv = args ?
+	    nv = (args && !vectorize) ?
 #if LONG_DOUBLESIZE > DOUBLESIZE
 		intsize == 'q' ?
 	            va_arg(*args, long double) :
@@ -8292,6 +8293,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		: SvNVx(argsv);
 
 	    need = 0;
+	    vectorize = FALSE;
 	    if (c != 'e' && c != 'E') {
 		i = PERL_INT_MIN;
 		/* FIXME: if HAS_LONG_DOUBLE but not USE_LONG_DOUBLE this
@@ -8365,9 +8367,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    /* SPECIAL */
 
 	case 'n':
-	    vectorize = FALSE;
 	    i = SvCUR(sv) - origlen;
-	    if (args) {
+	    if (args && !vectorize) {
 		switch (intsize) {
 		case 'h':	*(va_arg(*args, short*)) = i; break;
 		default:	*(va_arg(*args, int*)) = i; break;
@@ -8380,6 +8381,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    }
 	    else
 		sv_setuv_mg(argsv, (UV)i);
+	    vectorize = FALSE;
 	    continue;	/* not "break" */
 
 	    /* UNKNOWN */

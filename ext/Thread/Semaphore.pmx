@@ -1,6 +1,9 @@
 package Thread::Semaphore;
 use Thread qw(cond_wait cond_broadcast);
 
+use vars qw($VERSION);
+$VERSION = '1.00';
+
 =head1 NAME
 
 Thread::Semaphore - thread-safe semaphores (5.005-threads)

@@ -95,7 +95,7 @@ change will probably break backward compatibility with compiled
 modules.  The change was made to make Perl more compliant with other
 applications like mod_perl which are using the AIX native interface.
 
-=head2 Attributes for C<my> variables now handled at run-time.
+=head2 Attributes for C<my> variables now handled at run-time
 
 The C<my EXPR : ATTRS> syntax now applies variable attributes at
 run-time.  (Subroutine and C<our> variables still get attributes applied
@@ -157,6 +157,13 @@ for better use: now they stand for long double (if supported by the
 platform) and NV (Perl internal floating point type).  (They used
 to be aliases for d/f, but you never knew that.)
 
+=head2 glob() now returns filenames in alphabetical order
+
+The list of filenames from glob() (or <...>) is now by default sorted
+alphabetically to be csh-compliant (which is what happened before
+in most UNIX platforms).  (bsd_glob() does still sort platform
+natively, ASCII or EBCDIC, unless GLOB_ALPHASORT is specified.) [561]
+
 =head2 Deprecations
 
 =over 4
@@ -193,27 +200,7 @@ any C<\w> character.
 
 =item *
 
-The list of filenames from glob() (or <...>) is now by default sorted
-alphabetically to be csh-compliant (which is what happened before
-in most UNIX platforms).  (bsd_glob() does still sort platform
-natively, ASCII or EBCDIC, unless GLOB_ALPHASORT is specified.) [561]
-
-=item *
-
-Spurious syntax errors generated in certain situations, when glob()
-caused File::Glob to be loaded for the first time, have been fixed. [561]
-
-=item *
-
-Although "you shouldn't do that", it was possible to write code that
-depends on Perl's hashed key order (Data::Dumper does this).  The new
-algorithm "One-at-a-Time" produces a different hashed key order.
-More details are in L</"Performance Enhancements">.
-
-=item *
-
-lstat(FILEHANDLE) now gives a warning because the operation makes no sense.
-In future releases this may become a fatal error.
+The *glob{FILEHANDLE} is deprecated, use *glob{IO} instead.
 
 =item *
 
@@ -237,16 +224,16 @@ source code level, this shouldn't be that drastic a change.
 
 =item *
 
-Previous versions of perl and some readings of some sections of Camel III
-implied that the C<:raw> "discipline" was the inverse of  C<:crlf>.
+Previous versions of perl and some readings of some sections of Camel
+III implied that the C<:raw> "discipline" was the inverse of C<:crlf>.
 Turning off "clrfness" is no longer enough to make a stream truly
-binary. So the PerlIO C<:raw> layer (or "discipline", to use the
-Camel book's older terminology) is now formally defined as being
-equivalent to binmode(FH) - which is in turn defined as doing whatever
-is necessary to pass each byte as-is without any translation.
-In particular binmode(FH) - and hence C<:raw> - will now turn off both CRLF
-and UTF-8  translation and remove other layers (e.g. :encoding()) which
-would modify byte stream.
+binary. So the PerlIO C<:raw> layer (or "discipline", to use the Camel
+book's older terminology) is now formally defined as being equivalent
+to binmode(FH) - which is in turn defined as doing whatever is
+necessary to pass each byte as-is without any translation.  In
+particular binmode(FH) - and hence C<:raw> - will now turn off both
+CRLF and UTF-8 translation and remove other layers (e.g. :encoding())
+which would modify byte stream.
 
 =item *
 
@@ -299,8 +286,8 @@ release.
 
 =item *
 
-The C<exec LIST> and C<system LIST> operations will produce fatal
-errors on tainted data in some future release.
+The C<exec LIST> and C<system LIST> operations now produce warnings on
+tainted data and in some future release they will produce fatal errors.
 
 =item *
 
@@ -588,6 +575,23 @@ L<perlembed>.
 =item *
 
 Formats now support zero-padded decimal fields.
+
+=item *
+
+Although "you shouldn't do that", it was possible to write code that
+depends on Perl's hashed key order (Data::Dumper does this).  The new
+algorithm "One-at-a-Time" produces a different hashed key order.
+More details are in L</"Performance Enhancements">.
+
+=item *
+
+lstat(FILEHANDLE) now gives a warning because the operation makes no sense.
+In future releases this may become a fatal error.
+
+=item *
+
+Spurious syntax errors generated in certain situations, when glob()
+caused File::Glob to be loaded for the first time, have been fixed. [561]
 
 =item *
 
@@ -1932,8 +1936,9 @@ The Thread extension is now not built at all under ithreads
 (C<Configure -Duseithreads>) because it wouldn't work anyway (the
 Thread extension requires being Configured with C<-Duse5005threads>).
 
-But note that the Thread.pm interface is now shared by both
-thread models.
+B<Note that the 5.005 threads are unsupported and deprecated: if you
+have code written for the old threads you should migrate it to the
+new ithreads model.>
 
 =item *
 
@@ -2110,6 +2115,33 @@ in some as 0, in some as a floating point number (don't ask).  This
 was caused by Perl's using the operating system libraries in a situation
 where the result of the string to number conversion is undefined: now
 Perl consistently handles such strings as zero in numeric contexts.
+
+=item *
+
+Several debugger fixes: exit code now reflects the script exit code,
+condition C<"0"> now treated correctly, the C<d> command now checks
+line number, C<$.> no longer gets corrupted, and all debugger output
+now goes correctly to the socket if RemotePort is set. [561]
+
+=item *
+
+The debugger (perl5db.pl) has been modified to present a more
+consistent commands interface, via (CommandSet=580).  perl5db.t was
+also added to test the changes, and as a placeholder for further tests.
+
+See L<perldebug>.
+
+=item *
+
+The debugger has a new C<dumpDepth> option to control the maximum
+depth to which nested structures are dumped.  The C<x> command has
+been extended so that C<x N EXPR> dumps out the value of I<EXPR> to a
+depth of at most I<N> levels.
+
+=item *
+
+The debugger can now show lexical variables if you have the CPAN
+module PadWalker installed.
 
 =item *
 
@@ -2781,31 +2813,14 @@ A socket handle leak in accept() has been fixed. [561]
 
 =head1 New or Changed Diagnostics
 
+Please see L<perldiag> for more details.
+
 =over 4
 
 =item *
 
-The lexical warnings category "deprecated" is no longer a sub-category
-of the "syntax" category. It is now a top-level category in its own
-right.
-
-=item *
-
-All regular expression compilation error messages are now hopefully
-easier to understand both because the error message now comes before
-the failed regex and because the point of failure is now clearly
-marked by a C<E<lt>-- HERE> marker.
-
-=item *
-
-The various "opened only for", "on closed", "never opened" warnings
-drop the C<main::> prefix for filehandles in the C<main> package,
-for example C<STDIN> instead of C<main::STDIN>.
-
-=item *
-
-The "Unrecognized escape" warning has been extended to include C<\8>,
-C<\9>, and C<\_>.  There is no need to escape any of the C<\w> characters.
+Ambiguous range in the transliteration operator (like a-z-9) now
+gives a warning.
 
 =item *
 
@@ -2816,30 +2831,69 @@ respectively.
 
 =item *
 
-Several debugger fixes: exit code now reflects the script exit code,
-condition C<"0"> now treated correctly, the C<d> command now checks
-line number, C<$.> no longer gets corrupted, and all debugger output
-now goes correctly to the socket if RemotePort is set. [561]
+The lexical warnings category "deprecated" is no longer a sub-category
+of the "syntax" category. It is now a top-level category in its own
+right.
 
 =item *
 
-The debugger (perl5db.pl) has been modified to present a more
-consistent commands interface, via (CommandSet=580).  perl5db.t was
-also added to test the changes, and as a placeholder for further tests.
-
-See L<perldebug>.
+Unadorned dump() will now give a warning suggesting to
+use explicit CORE::dump() if that's what really is meant.
 
 =item *
 
-The debugger has a new C<dumpDepth> option to control the maximum
-depth to which nested structures are dumped.  The C<x> command has
-been extended so that C<x N EXPR> dumps out the value of I<EXPR> to a
-depth of at most I<N> levels.
+The "Unrecognized escape" warning has been extended to include C<\8>,
+C<\9>, and C<\_>.  There is no need to escape any of the C<\w> characters.
 
 =item *
 
-The debugger can now show lexical variables if you have the CPAN
-module PadWalker installed.
+All regular expression compilation error messages are now hopefully
+easier to understand both because the error message now comes before
+the failed regex and because the point of failure is now clearly
+marked by a C<E<lt>-- HERE> marker.
+
+=item *
+
+Various I/O (and socket) functions like binmode(), close(), and so
+forth now more consistently warn if they are used illogically either
+on a yet unopened or on an already closed filehandle (or socket).
+
+=item *
+
+Using lstat() on a filehandle now gives a warning.  (It's a non-sensical
+thing to do.)
+
+=item *
+
+The C<-M> and C<-m> options now warn if you didn't supply the module name.
+
+=item *
+
+If you in C<use> specify a required minimum version, modules matching
+the name and but not defining a $VERSION will cause a fatal failure.
+
+=item *
+
+Using negative offset for vec() in lvalue context is now a warnable offense.
+
+=item *
+
+Odd number of arguments to oveload::constant now elicits a warning.
+
+=item *
+
+Odd number of elements to in anonymous hash now elicits a warning.
+
+=item *
+
+The various "opened only for", "on closed", "never opened" warnings
+drop the C<main::> prefix for filehandles in the C<main> package,
+for example C<STDIN> instead of C<main::STDIN>.
+
+=item *
+
+Subroutine prototypes are now checked more carefully, you may
+get warnings for example if you have used non-prototype characters.
 
 =item *
 
@@ -2860,9 +2914,26 @@ for the C<"c"> format and a number less than -128 or more than 127.
 
 =item *
 
+pack C<P> format now demands an explicit size.
+
+=item *
+
+unpack C<w> now warns of unterminated compressed integers.
+
+=item *
+
+Warnings relating to the use of PerlIO have been added.
+
+=item *
+
 Certain regex modifiers such as C<(?o)> make sense only if applied to
 the entire regex.  You will get an optional warning if you try to do
 otherwise.
+
+=item *
+
+Variable length lookbehind has not yet been implemented, trying to
+use it will tell that.
 
 =item *
 
@@ -2871,14 +2942,56 @@ has been deprecated for a while.  Now you will get an optional warning.
 
 =item *
 
+Warnings relating to the use of the new restricted hashes feature
+have been added.
+
+=item *
+
+Self-ties of arrays and hashes are not supported and fatal errors
+will happen even at an attempt to do so.
+
+=item *
+
 Using C<sort> in scalar context now issues an optional warning.
 This didn't do anything useful, as the sort was not performed.
+
+=item *
+
+Using the /g modifier in split() is meaningless and will cause a warning.
+
+=item *
+
+Using splice() past the end of an array now causes a warning.
+
+=item *
+
+Malformed Unicode encodings (UTF-8 and UTF-16) cause a lot of warnings,
+ad doestrying to use UTF-16 surrogates (which are unimplemented).
+
+=item *
+
+Trying to use Unicode characters on an I/O stream without marking the
+stream's encoding (using open() or binmode()) will cause "Wide character"
+warnings.
+
+=item *
+
+Use of v-strings in use/require causes a (backward) portability warning.
+
+=item *
+
+Warnings relating to the use interpreter threads and their shared data
+have been added.
 
 =back
 
 =head1 Changed Internals
 
 =over 4
+
+=item *
+
+PerlIO is now the default.
 
 =item *
 
@@ -3093,6 +3206,10 @@ detailed in here: http://sources.redhat.com/ml/cygwin/2001-12/msg00894.html
 One can build but not install (or test the build of) the NDBM_File
 on FAT filesystems.  Installation (or build) on NTFS works fine.
 
+=head2 DJGPP does not build
+
+Unfortunately DJGPP build broke somewhere after 5.7.1.
+
 =head2 ext/threads/t/libc
 
 If this test fails, it indicates that your libc (C library) is not
@@ -3101,8 +3218,8 @@ find out whether it is threadsafe.  See L<perlthrtut> for more information.
 
 =head2 FreeBSD built with ithreads coredumps reading large directories
 
-This is a known bug in FreeBSD's readdir_r() (see L<perlfreebsd>
-(README.freebsd)), which hopefully will be fixed in FreeBSD 4.6.
+This is a known bug in FreeBSD 4.5's readdir_r(), it has been fixed in
+FreeBSD 4.6 (see L<perlfreebsd> (README.freebsd)).
 
 =head2 FreeBSD Failing locale Test 117 For ISO 8859-15 Locales
 
@@ -3255,6 +3372,15 @@ failures.  Most of the rest point at problems with SysV IPC.
 
 Use PDL 2.3.4 or later.
 
+=head2 Perl_get_sv
+
+You may get errors like 'Undefined symbol "Perl_get_sv"' or
+"can't resolve symbol 'Perl_get_sv'".  This probably means that
+you are trying to use an older shared Perl library with Perl 5.8.0
+executable.  Perl used to have such a subroutine, but that is no more
+the case.  Check your shared library path, and any shared Perl
+libraries in those directories.
+
 =head2 Term::ReadKey not working on Win32
 
 Use Term::ReadKey 2.20 or later.
@@ -3263,7 +3389,7 @@ Use Term::ReadKey 2.20 or later.
 
 B<Note that support for 5.005-style threading is deprecated,
 experimental and practically unsupported.  In 5.10, it is expected
-to be removed.>
+to be removed.  You should migrate your code to ithreads.>
 
 The following tests are known to fail due to fundamental problems in
 the 5.005 threading implementation. These are not new failures--Perl
@@ -3383,7 +3509,7 @@ Use XML::Parser 2.31 or later.
 
 =head2 z/OS (OS/390)
 
-z/OS has rather many test failures but the situation is actually
+z/OS has rather many test failures but the situation is actually much
 better than it was in 5.6.0; it's just that so many new modules and
 tests have been added.
 
@@ -3396,7 +3522,8 @@ tests have been added.
                                                               110-111 150 161
  ../lib/ExtUtils/t/Constant.t   121 30976    48   48 100.00%  1-48
  ../lib/ExtUtils/t/Embed.t                    9    9 100.00%  1-9
- op/pat.t                         0    11   922  283  30.69%  640-922
+ op/pat.t                                   922    7   0.76%  665 776 785 832-
+                                                              834 845
  op/sprintf.t                               224    3   1.34%  98 100 136
  op/tr.t                                     97    5   5.15%  63 71-74
  uni/fold.t                                 780    6   0.77%  61 169 196 661
@@ -3471,18 +3598,6 @@ C<pP> are testing for Unicode code points, not knowing about EBCDIC.
 The compiler suite is slowly getting better but it continues to be
 highly experimental.  Use in production environments is discouraged.
 
-=head2 The Long Double Support Is Still Experimental
-
-The ability to configure Perl's numbers to use "long doubles",
-floating point numbers of hopefully better accuracy, is still
-experimental.  The implementations of long doubles are not yet
-widespread and the existing implementations are not quite mature
-or standardised, therefore trying to support them is a rare
-and moving target.  The gain of more precision may also be offset
-by slowdown in computations (more bits to move around, and the
-operations are more likely to be executed by less optimised
-libraries).
-
 =head2 Seen In Perl 5.7 But Gone Now
 
 C<Time::Piece> (previously known as C<Time::Object>) was removed
@@ -3498,9 +3613,15 @@ development release).
 
 The C<PerlIO::Scalar> and C<PerlIO::Via> (capitalised) were renamed as
 C<PerlIO::scalar> and C<PerlIO::via> (all lowercase) just before 5.8.0.
-The main rationale was to have all core IO layers to have all
+The main rationale was to have all core PerlIO layers to have all
 lowercase names.  The "plugins" are named as usual, for example
 C<PerlIO::via::QuotedPrint>.
+
+The C<threads::shared::queue> and C<threads::shared::semaphore> were
+renamed as C<Thread::Queue> and C<Thread::Semaphore> just before 5.8.0.
+The main rationale was to have thread modules to obey normal naming,
+C<Thread::> (the C<threads> and C<threads::shared> themselves are
+more pragma-like, they affect compile-time, so they stay lowercase).
 
 =head1 Reporting Bugs
 

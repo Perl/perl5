@@ -2805,7 +2805,7 @@ S_regmatch(pTHX_ regnode *prog)
 		CALLRUNOPS(aTHX);			/* Scalar context. */
 		SPAGAIN;
 		if (SP == before)
-		    ret = Nullsv;   /* protect against empty (?{}) blocks. */
+		    ret = &PL_sv_undef;   /* protect against empty (?{}) blocks. */
 		else {
 		    ret = POPs;
 		    PUTBACK;
