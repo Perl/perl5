@@ -13,7 +13,7 @@
 /*
  * Package name      : perl5
  * Source directory  : 
- * Configuration time: undef
+ * Configuration time: Mon Oct 11 21:24:59 1999
  * Configured by     : gsar
  * Target system     : 
  */
@@ -1419,7 +1419,7 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "c:\\perl\\5.00561\\lib\\MSWin32-x86"		/**/
+#define ARCHLIB "c:\\perl\\5.00562\\lib\\MSWin32-x86"		/**/
 /*#define ARCHLIB_EXP ""	/**/
 
 /* BIN:
@@ -1430,8 +1430,8 @@
  *	This symbol is the filename expanded version of the BIN symbol, for
  *	programs that do not want to deal with that at run-time.
  */
-#define BIN "c:\\perl\\5.00561\\bin\\MSWin32-x86"	/**/
-#define BIN_EXP "c:\\perl\\5.00561\\bin\\MSWin32-x86"	/**/
+#define BIN "c:\\perl\\5.00562\\bin\\MSWin32-x86"	/**/
+#define BIN_EXP "c:\\perl\\5.00562\\bin\\MSWin32-x86"	/**/
 
 /* INSTALL_USR_BIN_PERL:
  *	This symbol, if defined, indicates that Perl is to be installed
@@ -1449,8 +1449,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "c:\\perl\\5.00561\\lib"		/**/
-#define PRIVLIB_EXP (win32_get_privlib("5.00561"))	/**/
+#define PRIVLIB "c:\\perl\\5.00562\\lib"		/**/
+#define PRIVLIB_EXP (win32_get_privlib("5.00562"))	/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.
@@ -1465,7 +1465,7 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "c:\\perl\\site\\5.00561\\lib\\MSWin32-x86"		/**/
+#define SITEARCH "c:\\perl\\site\\5.00562\\lib\\MSWin32-x86"		/**/
 /*#define SITEARCH_EXP ""	/**/
 
 /* SITELIB:
@@ -1481,14 +1481,14 @@
  *	This symbol contains the ~name expanded version of SITELIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITELIB "c:\\perl\\site\\5.00561\\lib"		/**/
-#define SITELIB_EXP (win32_get_sitelib("5.00561"))	/**/
+#define SITELIB "c:\\perl\\site\\5.00562\\lib"		/**/
+#define SITELIB_EXP (win32_get_sitelib("5.00562"))	/**/
 
 /* PERL_VENDORLIB_EXP:
  *	This symbol contains the ~name expanded version of VENDORLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-/*#define PERL_VENDORLIB_EXP "undef"		/**/
+/*#define PERL_VENDORLIB_EXP ""		/**/
 
 /* OSNAME:
  *	This symbol contains the name of the operating system, as determined
@@ -1538,9 +1538,14 @@
  *	available directly to the user. Note that it may well be different from
  *	the preprocessor used to compile the C program.
  */
+/* CPPLAST:
+ *	This symbol is intended to be used along with CPPRUN in the same manner
+ *	symbol CPPMINUS is used with CPPSTDIN. It contains either "-" or "".
+ */
 #define CPPSTDIN "cl -nologo -E"
 #define CPPMINUS ""
 #define CPPRUN "cl -nologo -E"
+#define CPPLAST ""
 
 /* HAS_ACCESS:
  *	This manifest constant lets the C program know that the access()
@@ -1636,6 +1641,11 @@
  *	and HAS_UNAME.	Note that the command uses a fully qualified path,
  *	so that it is safe even if used by a process with super-user
  *	privileges.
+ */
+/* HAS_PHOSTNAME:
+ *	This symbol, if defined, indicates that the C program may use the
+ *	contents of PHOSTNAME as a command to feed to the popen() routine
+ *	to derive the host name.
  */
 #define HAS_GETHOSTNAME	/**/
 #define HAS_UNAME		/**/
@@ -1759,7 +1769,7 @@
  *	This symbol, if defined, indicates that the memchr routine is available
  *	to locate characters within a C string.
  */
-/*#define HAS_MEMCHR	/**/
+#define HAS_MEMCHR	/**/
 
 /* HAS_MMAP:
  *	This symbol, if defined, indicates that the mmap system call is
@@ -2052,7 +2062,12 @@
  *	This symbol, if defined, indicates that <sys/uio.h> exists and
  *	should be included.
  */
+/* HAS_STRUCT_IOVEC:
+ *	This symbol, if defined, indicates that the struct iovec
+ *	to do scatter writes/gather reads is supported.
+ */
 /*#define	I_SYSUIO		/**/
+/*#define	HAS_STRUCT_IOVEC		/**/
 
 /* Free_t:
  *	This variable contains the return type of free().  It is usually
@@ -2378,8 +2393,8 @@
  *	This symbol, if defined, contains the string used by stdio to
  *	format long doubles (format 'g') for output.
  */
-/*#define PERL_PRIfldbl	undef	/**/
-/*#define PERL_PRIgldbl	undef	/**/
+/*#define PERL_PRIfldbl	"f"	/**/
+/*#define PERL_PRIgldbl	"g"	/**/
 
 /* PERL_PRId64:
  *	This symbol, if defined, contains the string used by stdio to
@@ -2397,10 +2412,10 @@
  *	This symbol, if defined, contains the string used by stdio to
  *	format 64-bit hexadecimal numbers (format 'x') for output.
  */
-/*#define PERL_PRId64	undef	/**/
-/*#define PERL_PRIu64	undef	/**/
-/*#define PERL_PRIo64	undef	/**/
-/*#define PERL_PRIx64	undef	/**/
+/*#define PERL_PRId64	"ld"	/**/
+/*#define PERL_PRIu64	"lu"	/**/
+/*#define PERL_PRIo64	"lo"	/**/
+/*#define PERL_PRIx64	"lx"	/**/
 
 /* SELECT_MIN_BITS:
  *	This symbol holds the minimum number of bits operated by select.
@@ -2427,7 +2442,7 @@
  *	Usual values include _iob, __iob, and __sF.
  */
 /*#define	HAS_STDIO_STREAM_ARRAY	/**/
-#define STDIO_STREAM_ARRAY	undef
+#define STDIO_STREAM_ARRAY	
 
 /* HAS_STRTOULL:
  *	This symbol, if defined, indicates that the strtoull routine is
@@ -2441,6 +2456,13 @@
  *	will be used (be they 32 or 64 bits).
  */
 /*#define	USE_64_BITS		/**/
+
+/* USE_LARGE_FILES:
+ *	This symbol, if defined, indicates that large file support
+ *	should be used when available.  The USE_64_BITS symbol will
+ *	also be turned on if necessary.
+ */
+/*#define	USE_LARGE_FILES		/**/
 
 /* USE_LONG_DOUBLE:
  *	This symbol, if defined, indicates that long doubles should
@@ -2466,6 +2488,41 @@
  *	be built to use socks.
  */
 /*#define	USE_SOCKS		/**/
+
+/* PERL_XS_APIVERSION:
+ *	This variable contains the version of the oldest perl binary
+ *	compatible with the present perl.  perl.c:incpush() and
+ *	lib/lib.pm will automatically search in c:\\perl\\site\\5.00562\\lib\\MSWin32-x86 for older
+ *	directories across major versions back to xs_apiversion.
+ *	This is only useful if you have a perl library directory tree
+ *	structured like the default one.
+ *	See INSTALL for how this works.
+ *	The versioned site_perl directory was introduced in 5.005,
+ *	so that is the lowest possible value.
+ *	Since this can depend on compile time options (such as
+ *	bincompat) it is set by Configure.  Other non-default sources
+ *	of potential incompatibility, such as multiplicity, threads,
+ *	debugging, 64bits, sfio, etc., are not checked for currently,
+ *	though in principle we could go snooping around in old
+ *	Config.pm files.
+ */
+/* PERL_PM_APIVERSION:
+ *	This variable contains the version of the oldest perl
+ *	compatible with the present perl.  (That is, pure perl modules
+ *	written for pm_apiversion will still work for the current
+ *	version).  perl.c:incpush() and lib/lib.pm will automatically
+ *	search in c:\\perl\\site\\5.00562\\lib for older directories across major versions
+ *	back to pm_apiversion.  This is only useful if you have a perl
+ *	library directory tree structured like the default one.  The
+ *	versioned site_perl library was introduced in 5.005, so that's
+ *	the default setting for this variable.  It's hard to imagine
+ *	it changing before Perl6.  It is included here for symmetry
+ *	with xs_apiveprsion -- the searching algorithms will
+ *	(presumably) be similar.
+ *	See the INSTALL file for how this works.
+ */
+#define PERL_XS_APIVERSION 5.00562 /* Change to string for tuples?*/
+#define PERL_PM_APIVERSION 5.005 /* Change to string for tuples?*/
 
 /* HAS_DRAND48_PROTO:
  *	This symbol, if defined, indicates that the system provides
@@ -2579,6 +2636,12 @@
  */
 /*#define   I_MACH_CTHREADS	/**/
 
+/* I_PTHREAD:
+ *     This symbol, if defined, indicates to the C program that it should
+ *     include <pthread.h>.
+ */
+/*#define   I_PTHREAD	/**/
+
 /* USE_THREADS:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use threads.
@@ -2653,6 +2716,12 @@
  *	<sys/types.h> to get any typedef'ed information.
  */
 #define Size_t size_t	 /* length paramater for string functions */
+
+/* Uid_t_SIGN:
+ *	This symbol holds the signedess of a Uid_t.
+ *	1 for unsigned, -1 for signed.
+ */
+#define Uid_t_SIGN	-1		/* UID sign */
 
 /* Uid_t:
  *	This symbol holds the type used to declare user ids in the kernel.

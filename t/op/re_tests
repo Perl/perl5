@@ -45,7 +45,7 @@ a[b-d]e	ace	y	$&	ace
 a[b-d]	aac	y	$&	ac
 a[-b]	a-	y	$&	a-
 a[b-]	a-	y	$&	a-
-a[b-a]	-	c	-	/a[b-a]/: invalid [] range in regexp
+a[b-a]	-	c	-	/a[b-a]/: invalid [] range "b-a" in regexp
 a[]b	-	c	-	/a[]b/: unmatched [] in regexp
 a[	-	c	-	/a[/: unmatched [] in regexp
 a]	a]	y	$&	a]
@@ -218,7 +218,7 @@ a[-]?c	ac	y	$&	ac
 'a[b-d]'i	AAC	y	$&	AC
 'a[-b]'i	A-	y	$&	A-
 'a[b-]'i	A-	y	$&	A-
-'a[b-a]'i	-	c	-	/a[b-a]/: invalid [] range in regexp
+'a[b-a]'i	-	c	-	/a[b-a]/: invalid [] range "b-a" in regexp
 'a[]b'i	-	c	-	/a[]b/: unmatched [] in regexp
 'a['i	-	c	-	/a[/: unmatched [] in regexp
 'a]'i	A]	y	$&	A]
@@ -735,7 +735,10 @@ foo.bart	foo.bart	y	-	-
 .[X](.+)+[X][X]	bbbbXXXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	n	-	-
 .[X][X](.+)+[X]	bbbbXXXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	n	-	-
 tt+$	xxxtt	y	-	-
-[a-\w]	-	c	-	/[a-\w]/: invalid [] range in regexp
-[\w-z]	-	c	-	/[\w-z]/: invalid [] range in regexp
-[0-[:digit:]]	-	c	-	/[0-[:digit:]]/: invalid [] range in regexp
-[[:digit:]-9]	-	c	-	/[[:digit:]-9]/: invalid [] range in regexp
+([a-\d]+)	za-9z	y	$1	a-9
+([\d-z]+)	a0-za	y	$1	0-z
+([\d-\s]+)	a0- z	y	$1	0- 
+([a-[:digit:]]+)	za-9z	y	$1	a-9
+([[:digit:]-z]+)	=0-z=	y	$1	0-z
+([[:digit:]-[:alpha:]]+)	=0-z=	y	$1	0-z
+\GX.*X	aaaXbX	n	-	-

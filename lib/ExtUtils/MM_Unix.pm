@@ -425,7 +425,19 @@ clean ::
 ');
     # clean subdirectories first
     for $dir (@{$self->{DIR}}) {
-	push @m, "\t-cd $dir && \$(TEST_F) $self->{MAKEFILE} && \$(MAKE) clean\n";
+	if ($Is_Win32  &&  Win32::IsWin95()) {
+	    push @m, <<EOT;
+	cd $dir
+	\$(TEST_F) $self->{MAKEFILE}
+	\$(MAKE) clean
+	cd ..
+EOT
+	}
+	else {
+	    push @m, <<EOT;
+	-cd $dir && \$(TEST_F) $self->{MAKEFILE} && \$(MAKE) clean
+EOT
+	}
     }
 
     my(@otherfiles) = values %{$self->{XS}}; # .c files from *.xs files
@@ -2123,6 +2135,7 @@ pure_site_install ::
 		}.$self->catdir('$(PERL_ARCHLIB)','auto','$(FULLEXT)').q{
 
 doc_perl_install ::
+	-}.$self->{NOECHO}.q{$(MKPATH) $(INSTALLARCHLIB)
 	-}.$self->{NOECHO}.q{$(DOC_INSTALL) \
 		"Module" "$(NAME)" \
 		"installed into" "$(INSTALLPRIVLIB)" \
@@ -2132,6 +2145,7 @@ doc_perl_install ::
 		>> }.$self->catfile('$(INSTALLARCHLIB)','perllocal.pod').q{
 
 doc_site_install ::
+	-}.$self->{NOECHO}.q{$(MKPATH) $(INSTALLARCHLIB)
 	-}.$self->{NOECHO}.q{$(DOC_INSTALL) \
 		"Module" "$(NAME)" \
 		"installed into" "$(INSTALLSITELIB)" \
@@ -2498,6 +2512,7 @@ $tmp/perlmain.c: $makefilename}, q{
     push @m, q{
 doc_inst_perl:
 	}.$self->{NOECHO}.q{echo Appending installation info to $(INSTALLARCHLIB)/perllocal.pod
+	-}.$self->{NOECHO}.q{$(MKPATH) $(INSTALLARCHLIB)
 	-}.$self->{NOECHO}.q{$(DOC_INSTALL) \
 		"Perl binary" "$(MAP_TARGET)" \
 		MAP_STATIC "$(MAP_STATIC)" \
@@ -3071,7 +3086,9 @@ sub realclean {
 realclean purge ::  clean
 ');
     # realclean subdirectories first (already cleaned)
-    my $sub = "\t-cd %s && \$(TEST_F) %s && \$(MAKE) %s realclean\n";
+    my $sub = ($Is_Win32  &&  Win32::IsWin95()) ?
+      "\tcd %s\n\t\$(TEST_F) %s\n\t\$(MAKE) %s realclean\n\tcd ..\n" :
+      "\t-cd %s && \$(TEST_F) %s && \$(MAKE) %s realclean\n";
     foreach(@{$self->{DIR}}){
 	push(@m, sprintf($sub,$_,"$self->{MAKEFILE}.old","-f $self->{MAKEFILE}.old"));
 	push(@m, sprintf($sub,$_,"$self->{MAKEFILE}",''));
@@ -3215,12 +3232,22 @@ Helper subroutine for subdirs
 sub subdir_x {
     my($self, $subdir) = @_;
     my(@m);
-    qq{
+    if ($Is_Win32 && Win32::IsWin95()) {
+	return <<EOT;
+subdirs ::
+	cd $subdir
+	\$(MAKE) all \$(PASTHRU)
+	cd ..
+EOT
+    }
+    else {
+	return <<EOT;
 
 subdirs ::
 	$self->{NOECHO}cd $subdir && \$(MAKE) all \$(PASTHRU)
 
-};
+EOT
+    }
 }
 
 =item subdirs (o)

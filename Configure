@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Sep 30 19:41:54 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Sun Oct  3 02:41:02 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -814,6 +814,7 @@ stdio_stream_array=''
 d_strtoull=''
 sysman=''
 trnl=''
+uidsign=''
 uidtype=''
 archname64=''
 use64bits=''
@@ -842,6 +843,8 @@ vendorprefix=''
 vendorprefixexp=''
 defvoidused=''
 voidflags=''
+pm_apiversion=''
+xs_apiversion=''
 CONFIG=''
 
 define='define'
@@ -6719,7 +6722,7 @@ eval $setvar
 case "$use64bits" in
 "$define" )
 	echo " "
-	echo $n "Checking to see if your system supports int64_t...$c" >&4
+	$echo $n "Checking to see if your system supports int64_t...$c" >&4
 	$cat >try.c <<EOCP
 #include <sys/types.h>
 #$i_inttypes I_INTTYPES
@@ -6792,7 +6795,7 @@ $rm -f intsize intsize.*
 
 : check for long long
 echo " "
-echo $n "Checking to see if your system supports long long...$c" >&4
+$echo $n "Checking to see if your system supports long long...$c" >&4
 echo 'long long foo() { long long x; x = 7; return x; }' > try.c
 if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
 	val="$define"
@@ -7025,7 +7028,7 @@ $rm -f try.c try
 
 : check for long doubles
 echo " "
-echo $n "Checking to see if your system supports long double...$c" >&4
+$echo $n "Checking to see if your system supports long double...$c" >&4
 echo 'long double foo() { long double x; x = 7.0; return x; }' > try.c
 if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
 	val="$define"
@@ -8579,7 +8582,7 @@ eval $inlibc
 
 : check for off64_t
 echo " "
-echo $n "Checking to see if your system supports off64_t...$c" >&4
+$echo $n "Checking to see if your system supports off64_t...$c" >&4
 $cat >try.c <<EOCP
 #include <sys/types.h>
 #include <unistd.h>
@@ -8598,7 +8601,7 @@ eval $setvar
 
 : check for fpos64_t
 echo " "
-echo $n "Checking to see if your system supports fpos64_t...$c" >&4
+$echo $n "Checking to see if your system supports fpos64_t...$c" >&4
 $cat >try.c <<EOCP
 #include <sys/stdio.h>
 fpos64_t foo() { fpos64_t x; x = 7; return x; }'
@@ -11410,7 +11413,7 @@ if eval $compile_ok; then
 		echo "You have EBCDIC." >&4
 		val="$define"
 	else
-		echo "Nope, no EBCDIC.  Assuming ASCII or some ISO Latin, or UTF." >&4
+		echo "Nope, no EBCDIC, probably ASCII or some ISO Latin." >&4
 	fi
 else
 	echo "I'm unable to compile the test program." >&4
@@ -11937,6 +11940,15 @@ pager="$ans"
 rp="What is the type of process ids on this system?"
 set pid_t pidtype int stdio.h sys/types.h
 eval $typedef_ask
+
+: Find earliest binary compatible site_perl subdirectory perl can use.
+case "$bincompat5005" in
+"$define") xs_apiversion='5.005' ;;
+*) xs_apiversion=$apiversion ;;   # The current site_perl version.
+esac
+: Find earliest pure perl site_perl subdirectory perl can use.
+: The versioned directories started at 5.005.
+pm_apiversion='5.005'
 
 : check for length of pointer
 echo " "
@@ -12506,6 +12518,43 @@ uid_t)	echo "uid_t found." ;;
 	uidtype="$ans"
 	;;
 esac
+
+echo " "
+case "$uidtype" in
+*_t) zzz="$uidtype"	;;
+*)   zzz="uid"		;;
+esac
+echo "Checking the sign of $zzz..." >&4
+cat > try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+	$uidtype foo = -1;
+	if (foo < 0)
+		printf("-1\n");
+	else
+		printf("1\n");
+}
+EOCP
+set try
+if eval $compile; then
+	yyy=`./try`
+	case "$yyy" in
+	'')	uidsign=1
+		echo "(I can't execute the test program--guessing unsigned.)" >&4
+		;;
+	*)	uidsign=$yyy
+		case "$uidsign" in
+		 1) echo "Your $zzz is unsigned." ;;
+		-1) echo "Your $zzz is signed."   ;;
+		esac
+		;;
+	esac
+else
+	uidsign=1
+	echo "(I can't compile the test program--guessing unsigned.)" >&4
+fi
+
 
 : see if dbm.h is available
 : see if dbmclose exists
@@ -13901,6 +13950,7 @@ pg='$pg'
 phostname='$phostname'
 pidtype='$pidtype'
 plibpth='$plibpth'
+pm_apiversion='$pm_apiversion'
 pmake='$pmake'
 pr='$pr'
 prefix='$prefix'
@@ -13994,6 +14044,7 @@ touch='$touch'
 tr='$tr'
 trnl='$trnl'
 troff='$troff'
+uidsign='$uidsign'
 uidtype='$uidtype'
 uname='$uname'
 uniq='$uniq'
@@ -14024,6 +14075,7 @@ version='$version'
 vi='$vi'
 voidflags='$voidflags'
 xlibpth='$xlibpth'
+xs_apiversion='$xs_apiversion'
 zcat='$zcat'
 zip='$zip'
 EOT

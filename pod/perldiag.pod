@@ -80,7 +80,7 @@ See L<perlfunc/pack>.
 
 =item / must be followed by a*, A* or Z*
 
-(F) You had an pack template indicating a counted-length string,
+(F) You had a pack template indicating a counted-length string,
 Currently the only things that can have their length counted are a*, A* or Z*.
 See L<perlfunc/pack>.
 
@@ -110,12 +110,17 @@ your signed integers.  See L<perlfunc/unpack>.
 
 (W) You used a backslash-character combination which is not recognized
 by Perl.  This combination appears in an interpolated variable or a 
-C<'>-delimited regular expression.
+C<'>-delimited regular expression.  The character was understood literally.
+
+=item /%s/: Unrecognized escape \\%c in character class passed through
+
+(W) You used a backslash-character combination which is not recognized
+by Perl inside character classes.  The character was understood literally.
 
 =item /%s/ should probably be written as "%s"
 
 (W) You have used a pattern where Perl expected to find a string,
-like in the first argument to C<join>.  Perl will treat the true
+as in the first argument to C<join>.  Perl will treat the true
 or false result of matching the pattern against $_ as the string,
 which is probably not what you had in mind.
 
@@ -881,8 +886,8 @@ change it, such as with an auto-increment.
 
 =item Can't modify non-lvalue subroutine call
 
-(F) Subroutines used in lvalue context should be marked as such, see
-L<perlsub/"Lvalue subroutines">.
+(F) Subroutines meant to be used in lvalue context should be declared as
+such, see L<perlsub/"Lvalue subroutines">.
 
 =item Can't modify nonexistent substring
 
@@ -1113,13 +1118,15 @@ package. If method name is C<???>, this is an internal error.
 =item Character class [:%s:] unknown
 
 (F) The class in the character class [: :] syntax is unknown.
+See L<perlre>.
 
 =item Character class syntax [%s] belongs inside character classes
 
 (W) The character class constructs [: :], [= =], and [. .]  go
 I<inside> character classes, the [] are part of the construct,
-for example: /[012[:alpha:]345]/.  Note that the last two constructs
-are not currently implemented, they are placeholders for future extensions.
+for example: /[012[:alpha:]345]/.  Note that [= =] and [. .]
+are not currently implemented; they are simply placeholders for
+future extensions.
 
 =item Character class syntax [. .] is reserved for future extensions
 
@@ -1378,6 +1385,13 @@ the effect of blessing the reference into the package main.  This is
 usually not what you want.  Consider providing a default target
 package, e.g. bless($ref, $p || 'MyPackage');
 
+=item false [] range "%s" in regexp
+
+(W) A character class range must start and end at a literal character, not
+another character class like C<\d> or C<[:alpha:]>.  The "-" in your false
+range is interpreted as a literal "-".  Consider quoting the "-",  "\-".
+See L<perlre>.
+
 =item Fatal VMS error at %s, line %d
 
 (P) An error peculiar to VMS.  Something untoward happened in a VMS system
@@ -1407,7 +1421,7 @@ L<perlfunc/open>.
 =item Filehandle %s opened only for output
 
 (W) You tried to read from a filehandle opened only for writing.  If you
-intended it to be a read-write filehandle, you needed to open it with
+intended it to be a read/write filehandle, you needed to open it with
 "+E<lt>" or "+E<gt>" or "+E<gt>E<gt>" instead of with "E<lt>" or nothing.  If
 you intended only to read from the file, use "E<lt>".  See
 L<perlfunc/open>.
@@ -1558,7 +1572,7 @@ don't take to this kindly.
 
 =item Illegal binary digit %s
 
-(F) You used a digit other than 0 and 1 in a binary number.
+(F) You used a digit other than 0 or 1 in a binary number.
 
 =item Illegal octal digit %s
 
@@ -1627,7 +1641,7 @@ known value, using trustworthy data.  See L<perlsec>.
 =item Integer overflow in %s number
 
 (W) The hexadecimal, octal or binary number you have specified either
-as a literal in your code or as a scalar is too big for your
+as a literal or as an argument to hex() or oct() is too big for your
 architecture, and has been converted to a floating point number.  On a
 32-bit architecture the largest hexadecimal, octal or binary number
 representable without overflow is 0xFFFFFFFF, 037777777777, or
@@ -1678,11 +1692,10 @@ by Perl or by a user-supplied handler.  See L<attributes>.
 The indicated attributes for a subroutine or variable were not recognized
 by Perl or by a user-supplied handler.  See L<attributes>.
 
-=item invalid [] range in regexp
+=item invalid [] range "%s" in regexp
 
 (F) The range specified in a character class had a minimum character
-greater than the maximum character, or the range didn't start/end with
-a literal character.  See L<perlre>.
+greater than the maximum character.  See L<perlre>.
 
 =item Invalid conversion in %s: "%s"
 
@@ -1967,13 +1980,13 @@ your system.
 (F) The argument to B<-I> must follow the B<-I> immediately with no
 intervening space.
 
-=item No such array field
+=item No such pseudo-hash field "%s"
 
 (F) You tried to access an array as a hash, but the field name used is
 not defined.  The hash at index 0 should map all valid field names to
 array indices for that to work.
 
-=item No such field "%s" in variable %s of type %s
+=item No such pseudo-hash field "%s" in variable %s of type %s
 
 (F) You tried to access a field of a typed variable where the type
 does not know about the field name.  The field names are looked up in
@@ -2369,7 +2382,7 @@ perspective, it's probably not what you intended.
 
 =item POSIX getpgrp can't take an argument
 
-(F) Your C compiler uses POSIX getpgrp(), which takes no argument, unlike
+(F) Your system has POSIX getpgrp(), which takes no argument, unlike
 the BSD version, which takes a pid.
 
 =item Possible Y2K bug: %s
@@ -2682,6 +2695,11 @@ think so.
 the seteuid() system call (or equivalent), or at least Configure didn't
 think so.
 
+=item setpgrp can't take arguments
+
+(F) Your system has the setpgrp() from BSD 4.2, which takes no arguments,
+unlike POSIX setpgid(), which takes a process ID and process group ID.
+
 =item setrgid() not implemented
 
 (F) You tried to assign to C<$(>, and your operating system doesn't support
@@ -2895,7 +2913,7 @@ will deny it.
 if the last stat that wrote to the stat buffer already went past
 the symlink to get to the real file.  Use an actual filename instead.
 
-=item This Perl can't reset CRTL eviron elements (%s)
+=item This Perl can't reset CRTL environ elements (%s)
 
 =item This Perl can't set CRTL environ elements (%s=%s)
 
@@ -3062,9 +3080,9 @@ representative, who probably put it there in the first place.
 
 =item Unknown open() mode '%s'
 
-(F) The second argument of 3-arguments open is not one from the list
-of C<L<lt>>, C<L<gt>>, C<E<gt>E<gt>>, C<+L<lt>>, C<+L<gt>>,
-C<+E<gt>E<gt>>, C<-|>, C<|-> of possible open() modes.
+(F) The second argument of 3-argument open() is not among the list
+of valid modes: C<L<lt>>, C<L<gt>>, C<E<gt>E<gt>>, C<+L<lt>>,
+C<+L<gt>>, C<+E<gt>E<gt>>, C<-|>, C<|->.
 
 =item Unknown process %x sent message to prime_env_iter: %s
 

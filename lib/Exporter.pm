@@ -4,6 +4,7 @@ require 5.001;
 
 $ExportLevel = 0;
 $Verbose ||= 0;
+$VERSION = '5.562';
 
 sub export_to_level {
   require Exporter::Heavy;
@@ -118,6 +119,18 @@ in L<perlfunc> and L<perlmod>. Understanding the concept of
 modules and how the C<use> statement operates is important to
 understanding the Exporter.
 
+=head2 How to Export
+
+The arrays C<@EXPORT> and C<@EXPORT_OK> in a module hold lists of
+symbols that are going to be exported into the users name space by
+default, or which they can request to be exported, respectively.  The
+symbols can represent functions, scalars, arrays, hashes, or typeglobs.
+The symbols must be given by full name with the exception that the
+ampersand in front of a function is optional, e.g.
+
+    @EXPORT    = qw(afunc $scalar @array);   # afunc is a function
+    @EXPORT_OK = qw(&bfunc %hash *typeglob); # explicit prefix on &bfunc
+
 =head2 Selecting What To Export
 
 Do B<not> export method names!
@@ -196,11 +209,12 @@ Exporter has a special method, 'export_to_level' which is used in situations
 where you can't directly call Export's import method. The export_to_level
 method looks like:
 
-MyPackage->export_to_level($where_to_export, @what_to_export);
+MyPackage->export_to_level($where_to_export, $package, @what_to_export);
 
 where $where_to_export is an integer telling how far up the calling stack
 to export your symbols, and @what_to_export is an array telling what
-symbols *to* export (usually this is @_).
+symbols *to* export (usually this is @_).  The $package argument is
+currently unused.
 
 For example, suppose that you have a module, A, which already has an
 import function:

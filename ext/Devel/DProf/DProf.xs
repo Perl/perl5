@@ -471,7 +471,7 @@ test_time(clock_t *r, clock_t *u, clock_t *s)
 }
 
 static void
-prof_recordheader()
+prof_recordheader(void)
 {
 	clock_t r, u, s;
 
@@ -498,7 +498,7 @@ prof_recordheader()
 }
 
 static void
-prof_record()
+prof_record(void)
 {
         /* fp is opened in the BOOT section */
 
@@ -561,7 +561,7 @@ XS(XS_DB_sub)
         sv_setiv( DBsingle, 0 ); /* disable DB single-stepping */
 #endif 
 
-	SAVEDESTRUCTOR(check_depth, (void*)depth);
+	SAVEDESTRUCTOR_X(check_depth, (void*)depth);
 	depth++;
 
         prof_mark( OP_ENTERSUB );

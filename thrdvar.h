@@ -213,7 +213,6 @@ PERLVAR(threadsv,	AV *)		/* Per-thread SVs ($_, $@ etc.) */
 PERLVAR(threadsvp,	SV **)		/* AvARRAY(threadsv) */
 PERLVAR(specific,	AV *)		/* Thread-specific user data */
 PERLVAR(errsv,		SV *)		/* Backing SV for $@ */
-PERLVAR(errhv,		HV *)		/* HV for what was %@ in pp_ctl.c */
 PERLVAR(mutex,		perl_mutex)	/* For the fields others can change */
 PERLVAR(tid,		U32)
 PERLVAR(prev,		struct perl_thread *)

@@ -900,6 +900,8 @@ emergency_sbrk(MEM_SIZE size)
   do_croak:
     MALLOC_UNLOCK;
     croak("Out of memory during request for %i bytes", size);
+    /* NOTREACHED */
+    return Nullch;
 }
 
 #else /* !(defined(PERL_EMERGENCY_SBRK) && defined(PERL_CORE)) */
@@ -1574,7 +1576,7 @@ Perl_realloc(void *mp, size_t nbytes)
 		    bad_free_warn = (pbf) ? atoi(pbf) : 1;
 		}
 		if (!bad_free_warn)
-		    return;
+		    return Nullch;
 #ifdef RCHECK
 		warn("%srealloc() %signored",
 		    (ovp->ov_rmagic == RMAGIC - 1 ? "" : "Bad "),
@@ -1582,7 +1584,7 @@ Perl_realloc(void *mp, size_t nbytes)
 #else
 		warn("%s", "Bad realloc() ignored");
 #endif
-		return;				/* sanity */
+		return Nullch;			/* sanity */
 	    }
 
 	onb = BUCKET_SIZE_REAL(bucket);
@@ -1836,49 +1838,49 @@ Perl_dump_mstats(pTHX_ char *s)
 	}
 	MALLOC_UNLOCK;
   	if (s)
-	    PerlIO_printf(PerlIO_stderr(),
+	    PerlIO_printf(Perl_error_log,
 			  "Memory allocation statistics %s (buckets %ld(%ld)..%ld(%ld)\n",
 			  s, 
 			  (long)BUCKET_SIZE_REAL(MIN_BUCKET), 
 			  (long)BUCKET_SIZE(MIN_BUCKET),
 			  (long)BUCKET_SIZE_REAL(topbucket), (long)BUCKET_SIZE(topbucket));
-  	PerlIO_printf(PerlIO_stderr(), "%8d free:", totfree);
+  	PerlIO_printf(Perl_error_log, "%8d free:", totfree);
   	for (i = MIN_EVEN_REPORT; i <= topbucket; i += BUCKETS_PER_POW2) {
-  		PerlIO_printf(PerlIO_stderr(), 
+  		PerlIO_printf(Perl_error_log, 
 			      ((i < 8*BUCKETS_PER_POW2 || i == 10*BUCKETS_PER_POW2)
 			       ? " %5d" 
 			       : ((i < 12*BUCKETS_PER_POW2) ? " %3d" : " %d")),
 			      nfree[i]);
   	}
 #ifdef BUCKETS_ROOT2
-	PerlIO_printf(PerlIO_stderr(), "\n\t   ");
+	PerlIO_printf(Perl_error_log, "\n\t   ");
   	for (i = MIN_BUCKET + 1; i <= topbucket_odd; i += BUCKETS_PER_POW2) {
-  		PerlIO_printf(PerlIO_stderr(), 
+  		PerlIO_printf(Perl_error_log, 
 			      ((i < 8*BUCKETS_PER_POW2 || i == 10*BUCKETS_PER_POW2)
 			       ? " %5d" 
 			       : ((i < 12*BUCKETS_PER_POW2) ? " %3d" : " %d")),
 			      nfree[i]);
   	}
 #endif 
-  	PerlIO_printf(PerlIO_stderr(), "\n%8d used:", total - totfree);
+  	PerlIO_printf(Perl_error_log, "\n%8d used:", total - totfree);
   	for (i = MIN_EVEN_REPORT; i <= topbucket; i += BUCKETS_PER_POW2) {
-  		PerlIO_printf(PerlIO_stderr(), 
+  		PerlIO_printf(Perl_error_log, 
 			      ((i < 8*BUCKETS_PER_POW2 || i == 10*BUCKETS_PER_POW2)
 			       ? " %5d" 
 			       : ((i < 12*BUCKETS_PER_POW2) ? " %3d" : " %d")), 
 			      nmalloc[i] - nfree[i]);
   	}
 #ifdef BUCKETS_ROOT2
-	PerlIO_printf(PerlIO_stderr(), "\n\t   ");
+	PerlIO_printf(Perl_error_log, "\n\t   ");
   	for (i = MIN_BUCKET + 1; i <= topbucket_odd; i += BUCKETS_PER_POW2) {
-  		PerlIO_printf(PerlIO_stderr(), 
+  		PerlIO_printf(Perl_error_log, 
 			      ((i < 8*BUCKETS_PER_POW2 || i == 10*BUCKETS_PER_POW2)
 			       ? " %5d" 
 			       : ((i < 12*BUCKETS_PER_POW2) ? " %3d" : " %d")),
 			      nmalloc[i] - nfree[i]);
   	}
 #endif 
-	PerlIO_printf(PerlIO_stderr(), "\nTotal sbrk(): %d/%d:%d. Odd ends: pad+heads+chain+tail: %d+%d+%d+%d.\n",
+	PerlIO_printf(Perl_error_log, "\nTotal sbrk(): %d/%d:%d. Odd ends: pad+heads+chain+tail: %d+%d+%d+%d.\n",
 		      goodsbrk + sbrk_slack, sbrks, sbrk_good, sbrk_slack,
 		      start_slack, total_chain, sbrked_remains);
 #endif /* DEBUGGING_MSTATS */

@@ -684,15 +684,15 @@ Free_t   Perl_mfree (Malloc_t where);
 
 #ifdef USE_THREADS
 #  define ERRSV (thr->errsv)
-#  define ERRHV (thr->errhv)
 #  define DEFSV THREADSV(0)
 #  define SAVE_DEFSV save_threadsv(0)
 #else
 #  define ERRSV GvSV(PL_errgv)
-#  define ERRHV GvHV(PL_errgv)
 #  define DEFSV GvSV(PL_defgv)
 #  define SAVE_DEFSV SAVESPTR(GvSV(PL_defgv))
 #endif /* USE_THREADS */
+
+#define ERRHV GvHV(PL_errgv)	/* XXX unused, here for compatibility */
 
 #ifndef errno
 	extern int errno;     /* ANSI allows errno to be an lvalue expr.
@@ -1766,7 +1766,8 @@ union any {
     I32		any_i32;
     IV		any_iv;
     long	any_long;
-    void	(*any_dptr) (pTHXo_ void*);
+    void	(*any_dptr) (void*);
+    void	(*any_dxptr) (pTHXo_ void*);
 };
 #endif
 
@@ -1932,6 +1933,22 @@ typedef I32 CHECKPOINT;
 #   endif
 #endif
 
+#ifdef IV_IS_QUAD
+#  define UVuf PERL_PRIu64
+#  define IVdf PERL_PRId64
+#  define UVof PERL_PRIo64
+#  define UVxf PERL_PRIx64
+#else
+#   if LONGSIZE == 4
+#       define UVuf "lu"
+#       define IVdf "ld"
+#       define UVof "lo"
+#       define UVxf "lx"
+#   else
+        /* Any good ideas? */
+#   endif
+#endif
+
 /* Used with UV/IV arguments: */
 					/* XXXX: need to speed it up */
 #define CLUMP_2UV(iv)	((iv) < 0 ? 0 : (UV)(iv))
@@ -1959,7 +1976,13 @@ Gid_t getegid (void);
 #endif
 
 #ifndef Perl_debug_log
-#define Perl_debug_log	PerlIO_stderr()
+#  define Perl_debug_log	PerlIO_stderr()
+#endif
+
+#ifndef Perl_error_log
+#  define Perl_error_log	(PL_stderrgv			\
+				 ? IoOFP(GvIOp(PL_stderrgv))	\
+				 : PerlIO_stderr())
 #endif
 
 #ifdef DEBUGGING
@@ -2555,6 +2578,7 @@ typedef void	(CPERLscope(*regfree_t)) (pTHX_ struct regexp* r);
 int Perl_yylex(pTHX_ YYSTYPE *lvalp, int *lcharp);
 #endif
 
+typedef void (*DESTRUCTORFUNC_NOCONTEXT_t) (void*);
 typedef void (*DESTRUCTORFUNC_t) (pTHXo_ void*);
 typedef void (*SVFUNC_t) (pTHXo_ SV*);
 typedef I32  (*SVCOMPARE_t) (pTHXo_ SV*, SV*);
@@ -3132,12 +3156,21 @@ typedef struct am_table_short AMTS;
 #   include <sys/sem.h>
 #   ifndef HAS_UNION_SEMUN	/* Provide the union semun. */
     union semun {
-	int val;
-	struct semid_ds *buf;
-	unsigned short *array;
+	int		val;
+	struct semid_ds	*buf;
+	unsigned short	*array;
     };
 #   endif
 #   ifdef USE_SEMCTL_SEMUN
+#	ifdef IRIX32_SEMUN_BROKEN_BY_GCC
+            union gccbug_semun {
+		int             val;
+		struct semid_ds *buf;
+		unsigned short  *array;
+		char            __dummy[5];
+	    };
+#           define semun gccbug_semun
+#	endif
 #       define Semctl(id, num, cmd, semun) semctl(id, num, cmd, semun)
 #   else
 #       ifdef USE_SEMCTL_SEMID_DS

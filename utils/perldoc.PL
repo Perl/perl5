@@ -243,6 +243,7 @@ sub minus_f_nocase {
 
 sub check_file {
     my($dir,$file) = @_;
+    return "" if length $dir and not -d $dir;
     if ($opt_m) {
 	return minus_f_nocase($dir,$file);
     }
@@ -278,6 +279,8 @@ sub searchfor {
 		     $ret = check_file $dir,"$s.bat")
 		or ( $ret = check_file "$dir/pod","$s.pod")
 		or ( $ret = check_file "$dir/pod",$s)
+		or ( $ret = check_file "$dir/pods","$s.pod")
+		or ( $ret = check_file "$dir/pods",$s)
 	) {
 	    return $ret;
 	}
@@ -708,6 +711,10 @@ and others.
 =cut
 
 #
+# Version 1.15: Tue Aug 24 01:50:20 EST 1999
+#       Charles Wilson <cwilson@ece.gatech.edu>
+#	changed /pod/ directory to /pods/ for cygwin
+#         to support cygwin/win32
 # Version 1.14: Wed Jul 15 01:50:20 EST 1998
 #       Robin Barker <rmb1@cise.npl.co.uk>
 #	-strict, -w cleanups

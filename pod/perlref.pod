@@ -563,6 +563,25 @@ or try to access nonexistent fields.  For better performance, Perl can also
 do the translation from field names to array indices at compile time for
 typed object references.  See L<fields>.
 
+There are two ways to check for the existance of a key in a
+pseudo-hash.  The first is to use exists().  This checks to see if the
+given field has been used yet.  It acts this way to match the behavior
+of a regular hash.  For instance:
+
+	$phash = [{foo =>1, bar => 2, pants => 3}, 'FOO'];
+	$phash->{pants} = undef;
+
+	exists $phash->{foo};    # true, 'foo' was set in the declaration
+	exists $phash->{bar};    # false, 'bar' has not been used.
+	exists $phash->{pants};  # true, your 'pants' have been touched
+
+The second is to use exists() on the hash reference sitting in the
+first array element.  This checks to see if the given key is a valid
+field in the pseudo-hash.
+
+	exists $phash->[0]{bar};	# true, 'bar' is a valid field
+	exists $phash->[0]{shoes};	# false, 'shoes' can't be used
+
 =head2 Function Templates
 
 As explained above, a closure is an anonymous function with access to the

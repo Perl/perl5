@@ -540,6 +540,7 @@
 #define save_clearsv		Perl_save_clearsv
 #define save_delete		Perl_save_delete
 #define save_destructor		Perl_save_destructor
+#define save_destructor_x	Perl_save_destructor_x
 #define save_freesv		Perl_save_freesv
 #define save_freeop		Perl_save_freeop
 #define save_freepv		Perl_save_freepv
@@ -1909,6 +1910,7 @@
 #define save_clearsv(a)		Perl_save_clearsv(aTHX_ a)
 #define save_delete(a,b,c)	Perl_save_delete(aTHX_ a,b,c)
 #define save_destructor(a,b)	Perl_save_destructor(aTHX_ a,b)
+#define save_destructor_x(a,b)	Perl_save_destructor_x(aTHX_ a,b)
 #define save_freesv(a)		Perl_save_freesv(aTHX_ a)
 #define save_freeop(a)		Perl_save_freeop(aTHX_ a)
 #define save_freepv(a)		Perl_save_freepv(aTHX_ a)
@@ -2116,7 +2118,7 @@
 #define do_pmop_dump(a,b,c)	Perl_do_pmop_dump(aTHX_ a,b,c)
 #define do_sv_dump(a,b,c,d,e,f,g)	Perl_do_sv_dump(aTHX_ a,b,c,d,e,f,g)
 #define magic_dump(a)		Perl_magic_dump(aTHX_ a)
-#define vdefault_protect(a,b,c)	Perl_vdefault_protect(aTHX_ a,b,c)
+#define vdefault_protect(a,b,c,d)	Perl_vdefault_protect(aTHX_ a,b,c,d)
 #define reginitcolors()		Perl_reginitcolors(aTHX)
 #define sv_2pv_nolen(a)		Perl_sv_2pv_nolen(aTHX_ a)
 #define sv_2pvutf8_nolen(a)	Perl_sv_2pvutf8_nolen(aTHX_ a)
@@ -3750,6 +3752,8 @@
 #define save_delete		Perl_save_delete
 #define Perl_save_destructor	CPerlObj::Perl_save_destructor
 #define save_destructor		Perl_save_destructor
+#define Perl_save_destructor_x	CPerlObj::Perl_save_destructor_x
+#define save_destructor_x	Perl_save_destructor_x
 #define Perl_save_freesv	CPerlObj::Perl_save_freesv
 #define save_freesv		Perl_save_freesv
 #define Perl_save_freeop	CPerlObj::Perl_save_freeop
@@ -5482,23 +5486,23 @@
    The following are not like that, but since they had a "perl_"
    prefix in previous versions, we provide compatibility macros.
  */
-#  define perl_atexit			call_atexit
-#  define perl_call_argv		call_argv
-#  define perl_call_pv			call_pv
-#  define perl_call_method		call_method
-#  define perl_call_sv			call_sv
-#  define perl_eval_sv			eval_sv
-#  define perl_eval_pv			eval_pv
-#  define perl_require_pv		require_pv
-#  define perl_get_sv			get_sv
-#  define perl_get_av			get_av
-#  define perl_get_hv			get_hv
-#  define perl_get_cv			get_cv
-#  define perl_init_i18nl10n		init_i18nl10n
-#  define perl_init_i18nl14n		init_i18nl14n
-#  define perl_new_ctype		new_ctype
-#  define perl_new_collate		new_collate
-#  define perl_new_numeric		new_numeric
+#  define perl_atexit(a,b)		call_atexit(a,b)
+#  define perl_call_argv(a,b,c)		call_argv(a,b,c)
+#  define perl_call_pv(a,b)		call_pv(a,b)
+#  define perl_call_method(a,b)		call_method(a,b)
+#  define perl_call_sv(a,b)		call_sv(a,b)
+#  define perl_eval_sv(a,b)		eval_sv(a,b)
+#  define perl_eval_pv(a,b)		eval_pv(a,b)
+#  define perl_require_pv(a)		require_pv(a)
+#  define perl_get_sv(a,b)		get_sv(a,b)
+#  define perl_get_av(a,b)		get_av(a,b)
+#  define perl_get_hv(a,b)		get_hv(a,b)
+#  define perl_get_cv(a,b)		get_cv(a,b)
+#  define perl_init_i18nl10n(a)		init_i18nl10n(a)
+#  define perl_init_i18nl14n(a)		init_i18nl14n(a)
+#  define perl_new_ctype(a)		new_ctype(a)
+#  define perl_new_collate(a)		new_collate(a)
+#  define perl_new_numeric(a)		new_numeric(a)
 
 /* varargs functions can't be handled with CPP macros. :-(
    This provides a set of compatibility functions that don't take

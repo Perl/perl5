@@ -330,9 +330,9 @@ PP(pp_formline)
 	    case FF_END:	name = "END";		break;
 	    }
 	    if (arg >= 0)
-		PerlIO_printf(PerlIO_stderr(), "%-16s%ld\n", name, (long) arg);
+		PerlIO_printf(Perl_debug_log, "%-16s%ld\n", name, (long) arg);
 	    else
-		PerlIO_printf(PerlIO_stderr(), "%-16s\n", name);
+		PerlIO_printf(Perl_debug_log, "%-16s\n", name);
 	} )
 	switch (*fpc++) {
 	case FF_LINEMARK:
@@ -1187,6 +1187,7 @@ Perl_dounwind(pTHX_ I32 cxix)
     I32 optype;
 
     while (cxstack_ix > cxix) {
+	SV *sv;
 	cx = &cxstack[cxstack_ix];
 	DEBUG_l(PerlIO_printf(Perl_debug_log, "Unwinding block %ld, type %s\n",
 			      (long) cxstack_ix, PL_block_type[CxTYPE(cx)]));
@@ -1196,7 +1197,8 @@ Perl_dounwind(pTHX_ I32 cxix)
 	    POPSUBST(cx);
 	    continue;  /* not break */
 	case CXt_SUB:
-	    POPSUB(cx);
+	    POPSUB(cx,sv);
+	    LEAVESUB(sv);
 	    break;
 	case CXt_EVAL:
 	    POPEVAL(cx);
@@ -1272,26 +1274,25 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 
 	if (message) {
 	    if (PL_in_eval & EVAL_KEEPERR) {
-		SV **svp;
-		
-		svp = hv_fetch(ERRHV, message, msglen, TRUE);
-		if (svp) {
-		    if (!SvIOK(*svp)) {
-			static char prefix[] = "\t(in cleanup) ";
-			SV *err = ERRSV;
-			sv_upgrade(*svp, SVt_IV);
-			(void)SvIOK_only(*svp);
-			if (!SvPOK(err))
-			    sv_setpv(err,"");
-			SvGROW(err, SvCUR(err)+sizeof(prefix)+msglen);
-			sv_catpvn(err, prefix, sizeof(prefix)-1);
-			sv_catpvn(err, message, msglen);
-			if (ckWARN(WARN_UNSAFE)) {
-			    STRLEN start = SvCUR(err)-msglen-sizeof(prefix)+1;
-			    Perl_warner(aTHX_ WARN_UNSAFE, SvPVX(err)+start);
-			}
+		static char prefix[] = "\t(in cleanup) ";
+		SV *err = ERRSV;
+		char *e = Nullch;
+		if (!SvPOK(err))
+		    sv_setpv(err,"");
+		else if (SvCUR(err) >= sizeof(prefix)+msglen-1) {
+		    e = SvPV(err, n_a);
+		    e += n_a - msglen;
+		    if (*e != *message || strNE(e,message))
+			e = Nullch;
+		}
+		if (!e) {
+		    SvGROW(err, SvCUR(err)+sizeof(prefix)+msglen);
+		    sv_catpvn(err, prefix, sizeof(prefix)-1);
+		    sv_catpvn(err, message, msglen);
+		    if (ckWARN(WARN_UNSAFE)) {
+			STRLEN start = SvCUR(err)-msglen-sizeof(prefix)+1;
+			Perl_warner(aTHX_ WARN_UNSAFE, SvPVX(err)+start);
 		    }
-		    sv_inc(*svp);
 		}
 	    }
 	    else
@@ -1315,8 +1316,8 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 
 	    POPBLOCK(cx,PL_curpm);
 	    if (CxTYPE(cx) != CXt_EVAL) {
-		PerlIO_write(PerlIO_stderr(), "panic: die ", 11);
-		PerlIO_write(PerlIO_stderr(), message, msglen);
+		PerlIO_write(Perl_error_log, "panic: die ", 11);
+		PerlIO_write(Perl_error_log, message, msglen);
 		my_exit(1);
 	    }
 	    POPEVAL(cx);
@@ -1342,8 +1343,10 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 	/* SFIO can really mess with your errno */
 	int e = errno;
 #endif
-	PerlIO_write(PerlIO_stderr(), message, msglen);
-	(void)PerlIO_flush(PerlIO_stderr());
+	PerlIO *serr = Perl_error_log;
+
+	PerlIO_write(serr, message, msglen);
+	(void)PerlIO_flush(serr);
 #ifdef USE_SFIO
 	errno = e;
 #endif
@@ -1653,7 +1656,6 @@ PP(pp_leaveloop)
 {
     djSP;
     register PERL_CONTEXT *cx;
-    struct block_loop cxloop;
     I32 gimme;
     SV **newsp;
     PMOP *newpm;
@@ -1661,7 +1663,7 @@ PP(pp_leaveloop)
 
     POPBLOCK(cx,newpm);
     mark = newsp;
-    POPLOOP1(cx);	/* Delay POPLOOP2 until stack values are safe */
+    newsp = PL_stack_base + cx->blk_loop.resetsp;
 
     TAINT_NOT;
     if (gimme == G_VOID)
@@ -1681,7 +1683,7 @@ PP(pp_leaveloop)
     SP = newsp;
     PUTBACK;
 
-    POPLOOP2();		/* Stack values are safe: release loop vars ... */
+    POPLOOP(cx);	/* Stack values are safe: release loop vars ... */
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
     LEAVE;
@@ -1695,12 +1697,12 @@ PP(pp_return)
     djSP; dMARK;
     I32 cxix;
     register PERL_CONTEXT *cx;
-    struct block_sub cxsub;
     bool popsub2 = FALSE;
     I32 gimme;
     SV **newsp;
     PMOP *newpm;
     I32 optype = 0;
+    SV *sv;
 
     if (PL_curstackinfo->si_type == PERLSI_SORT) {
 	if (cxstack_ix == PL_sortcxix || dopoptosub(cxstack_ix) <= PL_sortcxix) {
@@ -1721,7 +1723,6 @@ PP(pp_return)
     POPBLOCK(cx,newpm);
     switch (CxTYPE(cx)) {
     case CXt_SUB:
-	POPSUB1(cx);	/* Delay POPSUB2 until stack values are safe */
 	popsub2 = TRUE;
 	break;
     case CXt_EVAL:
@@ -1746,7 +1747,7 @@ PP(pp_return)
     if (gimme == G_SCALAR) {
 	if (MARK < SP) {
 	    if (popsub2) {
-		if (cxsub.cv && CvDEPTH(cxsub.cv) > 1) {
+		if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
 		    if (SvTEMP(TOPs)) {
 			*++newsp = SvREFCNT_inc(*SP);
 			FREETMPS;
@@ -1773,11 +1774,14 @@ PP(pp_return)
 
     /* Stack values are safe: */
     if (popsub2) {
-	POPSUB2();	/* release CV and @_ ... */
+	POPSUB(cx,sv);	/* release CV and @_ ... */
     }
+    else
+	sv = Nullsv;
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
     LEAVE;
+    LEAVESUB(sv);
     return pop_return();
 }
 
@@ -1786,15 +1790,14 @@ PP(pp_last)
     djSP;
     I32 cxix;
     register PERL_CONTEXT *cx;
-    struct block_loop cxloop;
-    struct block_sub cxsub;
     I32 pop2 = 0;
     I32 gimme;
     I32 optype;
     OP *nextop;
     SV **newsp;
     PMOP *newpm;
-    SV **mark = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
+    SV **mark;
+    SV *sv = Nullsv;
 
     if (PL_op->op_flags & OPf_SPECIAL) {
 	cxix = dopoptoloop(cxstack_ix);
@@ -1810,14 +1813,14 @@ PP(pp_last)
 	dounwind(cxix);
 
     POPBLOCK(cx,newpm);
+    mark = newsp;
     switch (CxTYPE(cx)) {
     case CXt_LOOP:
-	POPLOOP1(cx);	/* Delay POPLOOP2 until stack values are safe */
 	pop2 = CXt_LOOP;
-	nextop = cxloop.last_op->op_next;
+	newsp = PL_stack_base + cx->blk_loop.resetsp;
+	nextop = cx->blk_loop.last_op->op_next;
 	break;
     case CXt_SUB:
-	POPSUB1(cx);	/* Delay POPSUB2 until stack values are safe */
 	pop2 = CXt_SUB;
 	nextop = pop_return();
 	break;
@@ -1850,16 +1853,17 @@ PP(pp_last)
     /* Stack values are safe: */
     switch (pop2) {
     case CXt_LOOP:
-	POPLOOP2();	/* release loop vars ... */
+	POPLOOP(cx);	/* release loop vars ... */
 	LEAVE;
 	break;
     case CXt_SUB:
-	POPSUB2();	/* release CV and @_ ... */
+	POPSUB(cx,sv);	/* release CV and @_ ... */
 	break;
     }
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
     LEAVE;
+    LEAVESUB(sv);
     return nextop;
 }
 
@@ -2432,18 +2436,20 @@ S_docatch(pTHX_ OP *o)
     dTHR;
     int ret;
     OP *oldop = PL_op;
+    volatile PERL_SI *cursi = PL_curstackinfo;
+    dJMPENV;
 
 #ifdef DEBUGGING
     assert(CATCH_GET == TRUE);
 #endif
     PL_op = o;
  redo_body:
-    CALLPROTECT(aTHX_ &ret, MEMBER_TO_FPTR(S_docatch_body));
+    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_docatch_body));
     switch (ret) {
     case 0:
 	break;
     case 3:
-	if (PL_restartop) {
+	if (PL_restartop && cursi == PL_curstackinfo) {
 	    PL_op = PL_restartop;
 	    PL_restartop = 0;
 	    goto redo_body;

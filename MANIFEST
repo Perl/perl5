@@ -91,7 +91,7 @@ eg/cgi/cookie.cgi		CGI example
 eg/cgi/crash.cgi		CGI example
 eg/cgi/customize.cgi		CGI example
 eg/cgi/diff_upload.cgi		CGI example
-eg/cgi/dna.small.gif.uu		Small image for CGI examples
+eg/cgi/dna_small_gif.uu		Small image for CGI examples
 eg/cgi/file_upload.cgi		CGI example
 eg/cgi/frameset.cgi		CGI example
 eg/cgi/index.html		Index page for CGI examples
@@ -104,7 +104,7 @@ eg/cgi/nph-multipart.cgi	CGI example
 eg/cgi/popup.cgi		CGI example
 eg/cgi/save_state.cgi		CGI example
 eg/cgi/tryit.cgi		CGI example
-eg/cgi/wilogo.gif.uu		Small image for CGI examples
+eg/cgi/wilogo_gif.uu		Small image for CGI examples
 eg/changes		A program to list recently changed files
 eg/client		A sample client
 eg/down			A program to do things to subdirectories
@@ -207,6 +207,7 @@ ext/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
 ext/DB_File/Makefile.PL		Berkeley DB extension makefile writer
 ext/DB_File/dbinfo		Berkeley DB database version checker
 ext/DB_File/hints/dynixptx.pl	Hint for DB_File for named architecture
+ext/DB_File/hints/sco.pl	Hint for DB_File for named architecture
 ext/DB_File/typemap		Berkeley DB extension interface types
 ext/DB_File/version.c		Berkeley DB extension interface version check
 ext/Data/Dumper/Changes		Data pretty printer, changelog
@@ -239,6 +240,7 @@ ext/DynaLoader/dl_rhapsody.xs	Rhapsody implementation
 ext/DynaLoader/dl_vmesa.xs	VM/ESA implementation
 ext/DynaLoader/dl_vms.xs	VMS implementation
 ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
+ext/DynaLoader/hints/aix.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/linux.pl	Hint for DynaLoader for named architecture
 ext/Errno/ChangeLog		Errno perl module change log
 ext/Errno/Errno_pm.PL		Errno perl module create script
@@ -246,6 +248,13 @@ ext/Errno/Makefile.PL		Errno extension makefile writer
 ext/Fcntl/Fcntl.pm		Fcntl extension Perl module
 ext/Fcntl/Fcntl.xs		Fcntl extension external subroutines
 ext/Fcntl/Makefile.PL		Fcntl extension makefile writer
+ext/File/Glob/Changes		File::Glob extension changelog
+ext/File/Glob/Glob.pm		File::Glob extension module
+ext/File/Glob/Glob.xs		File::Glob extension external subroutines
+ext/File/Glob/Makefile.PL	File::Glob extension makefile writer
+ext/File/Glob/TODO		File::Glob extension todo list
+ext/File/Glob/bsd_glob.c	File::Glob extension run time code
+ext/File/Glob/bsd_glob.h	File::Glob extension header file
 ext/GDBM_File/GDBM_File.pm	GDBM extension Perl module
 ext/GDBM_File/GDBM_File.xs	GDBM extension external subroutines
 ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
@@ -285,6 +294,7 @@ ext/NDBM_File/NDBM_File.xs	NDBM extension external subroutines
 ext/NDBM_File/hints/dec_osf.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dynixptx.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/solaris.pl	Hint for NDBM_File for named architecture
+ext/NDBM_File/hints/sco.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/svr4.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/typemap		NDBM extension interface types
 ext/ODBM_File/Makefile.PL	ODBM extension makefile writer
@@ -494,7 +504,7 @@ iperlsys.h		Perl's interface to the system
 jpl/JNI/Changes		Java Native Interface changes
 jpl/JNI/Closer.java	Java Native Interface example
 jpl/JNI/JNI.pm		Java Native Interface module
-jpl/JNI/JNI.pm		Java Native Interface module
+jpl/JNI/JNI.xs		Java Native Interface module
 jpl/JNI/JNIConfig	Java Native Interface config
 jpl/JNI/JNIConfig.Win32	Java Native Interface config
 jpl/JNI/JNIConfig.kaffe	Java Native Interface config
@@ -613,6 +623,7 @@ lib/Pod/Checker.pm	Pod-Parser - check POD documents for syntax errors
 lib/Pod/Functions.pm	used by pod/splitpod
 lib/Pod/Html.pm		Convert POD data to HTML
 lib/Pod/InputObjects.pm	Pod-Parser - define objects for input streams
+lib/Pod/Man.pm		Convert POD data to *roff
 lib/Pod/Parser.pm	Pod-Parser - define base class for parsing POD
 lib/Pod/Select.pm	Pod-Parser - select portions of POD docs
 lib/Pod/Text.pm		Pod-Parser - convert POD data to formatted ASCII text
@@ -1028,6 +1039,7 @@ pod/perlfaq9.pod	Frequently Asked Questions, Part 9
 pod/perlform.pod	Format info
 pod/perlfunc.pod	Function info
 pod/perlguts.pod	Internals info
+pod/perlhack.pod	Perl hackers guide
 pod/perlhist.pod	Perl history info
 pod/perlipc.pod		IPC info
 pod/perllexwarn.pod	Lexical Warnings info
@@ -1185,6 +1197,9 @@ t/lib/filespec.t	See if File::Spec works
 t/lib/findbin.t		See if FindBin works
 t/lib/gdbm.t		See if GDBM_File works
 t/lib/getopt.t		See if Getopt::Std and Getopt::Long work
+t/lib/glob-basic.t	See if File::Glob works
+t/lib/glob-global.t	See if File::Glob works
+t/lib/glob-taint.t	See if File::Glob works
 t/lib/gol-basic.t	See if Getopt::Long works
 t/lib/gol-compat.t	See if Getopt::Long works
 t/lib/gol-linkage.t	See if Getopt::Long works
@@ -1491,6 +1506,7 @@ win32/config_h.PL	Perl code to convert Win32 config.sh to config.h
 win32/config_sh.PL	Perl code to update Win32 config.sh from Makefile 
 win32/des_fcrypt.patch	Win32 port
 win32/dl_win32.xs	Win32 port
+win32/genmk95.pl	Perl code to generate command.com-usable makew95.mk
 win32/include/arpa/inet.h	Win32 port
 win32/include/dirent.h		Win32 port
 win32/include/netdb.h		Win32 port

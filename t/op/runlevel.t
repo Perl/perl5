@@ -335,3 +335,17 @@ tie my @bar, 'TEST';
 print join('|', @bar[0..3]), "\n"; 
 EXPECT
 foo|fee|fie|foe
+########
+package TH;
+sub TIEHASH { bless {}, TH }
+sub STORE { eval { print "@_[1,2]\n" }; die "bar\n" }
+tie %h, TH;
+eval { $h{A} = 1; print "never\n"; };
+print $@;
+eval { $h{B} = 2; };
+print $@;
+EXPECT
+A 1
+bar
+B 2
+bar

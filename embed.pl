@@ -463,23 +463,23 @@ print EM <<'END';
    The following are not like that, but since they had a "perl_"
    prefix in previous versions, we provide compatibility macros.
  */
-#  define perl_atexit			call_atexit
-#  define perl_call_argv		call_argv
-#  define perl_call_pv			call_pv
-#  define perl_call_method		call_method
-#  define perl_call_sv			call_sv
-#  define perl_eval_sv			eval_sv
-#  define perl_eval_pv			eval_pv
-#  define perl_require_pv		require_pv
-#  define perl_get_sv			get_sv
-#  define perl_get_av			get_av
-#  define perl_get_hv			get_hv
-#  define perl_get_cv			get_cv
-#  define perl_init_i18nl10n		init_i18nl10n
-#  define perl_init_i18nl14n		init_i18nl14n
-#  define perl_new_ctype		new_ctype
-#  define perl_new_collate		new_collate
-#  define perl_new_numeric		new_numeric
+#  define perl_atexit(a,b)		call_atexit(a,b)
+#  define perl_call_argv(a,b,c)		call_argv(a,b,c)
+#  define perl_call_pv(a,b)		call_pv(a,b)
+#  define perl_call_method(a,b)		call_method(a,b)
+#  define perl_call_sv(a,b)		call_sv(a,b)
+#  define perl_eval_sv(a,b)		eval_sv(a,b)
+#  define perl_eval_pv(a,b)		eval_pv(a,b)
+#  define perl_require_pv(a)		require_pv(a)
+#  define perl_get_sv(a,b)		get_sv(a,b)
+#  define perl_get_av(a,b)		get_av(a,b)
+#  define perl_get_hv(a,b)		get_hv(a,b)
+#  define perl_get_cv(a,b)		get_cv(a,b)
+#  define perl_init_i18nl10n(a)		init_i18nl10n(a)
+#  define perl_init_i18nl14n(a)		init_i18nl14n(a)
+#  define perl_new_ctype(a)		new_ctype(a)
+#  define perl_new_collate(a)		new_collate(a)
+#  define perl_new_numeric(a)		new_numeric(a)
 
 /* varargs functions can't be handled with CPP macros. :-(
    This provides a set of compatibility functions that don't take
@@ -838,6 +838,7 @@ START_EXTERN_C
 EOT
 
 # functions that take va_list* for implementing vararg functions
+# NOTE: makedef.pl must be updated if you add symbols to %vfuncs
 my %vfuncs = qw(
     Perl_croak			Perl_vcroak
     Perl_warn			Perl_vwarn
@@ -1528,7 +1529,8 @@ p	|void	|save_aptr	|AV** aptr
 p	|AV*	|save_ary	|GV* gv
 p	|void	|save_clearsv	|SV** svp
 p	|void	|save_delete	|HV* hv|char* key|I32 klen
-p	|void	|save_destructor|DESTRUCTORFUNC_t f|void* p
+p	|void	|save_destructor|DESTRUCTORFUNC_NOCONTEXT_t f|void* p
+p	|void	|save_destructor_x|DESTRUCTORFUNC_t f|void* p
 p	|void	|save_freesv	|SV* sv
 p	|void	|save_freeop	|OP* o
 p	|void	|save_freepv	|char* pv
@@ -1760,8 +1762,10 @@ p	|void	|do_pmop_dump	|I32 level|PerlIO *file|PMOP *pm
 p	|void	|do_sv_dump	|I32 level|PerlIO *file|SV *sv|I32 nest \
 				|I32 maxnest|bool dumpops|STRLEN pvlim
 p	|void	|magic_dump	|MAGIC *mg
-p	|void*	|default_protect|int *excpt|protect_body_t body|...
-p	|void*	|vdefault_protect|int *excpt|protect_body_t body|va_list *args
+p	|void*	|default_protect|volatile JMPENV *je|int *excpt \
+				|protect_body_t body|...
+p	|void*	|vdefault_protect|volatile JMPENV *je|int *excpt \
+				|protect_body_t body|va_list *args
 p	|void	|reginitcolors
 p	|char*	|sv_2pv_nolen	|SV* sv
 p	|char*	|sv_2pvutf8_nolen|SV* sv

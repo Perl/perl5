@@ -1099,10 +1099,15 @@ this:
 
   SAVEDELETE(PL_defstash, savepv(tmpbuf), strlen(tmpbuf));
 
-=item C<SAVEDESTRUCTOR(f,p)>
+=item C<SAVEDESTRUCTOR(DESTRUCTORFUNC_NOCONTEXT_t f, void *p)>
 
 At the end of I<pseudo-block> the function C<f> is called with the
-only argument (of type C<void*>) C<p>.
+only argument C<p>.
+
+=item C<SAVEDESTRUCTOR_X(DESTRUCTORFUNC_t f, void *p)>
+
+At the end of I<pseudo-block> the function C<f> is called with the
+implicit context argument (if any), and C<p>.
 
 =item C<SAVESTACK_POS()>
 

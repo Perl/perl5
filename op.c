@@ -614,7 +614,7 @@ Perl_find_threadsv(pTHX_ const char *name)
 	default:
 	    sv_magic(sv, 0, 0, name, 1); 
 	}
-	DEBUG_S(PerlIO_printf(PerlIO_stderr(),
+	DEBUG_S(PerlIO_printf(Perl_error_log,
 			      "find_threadsv: new SV %p for $%s%c\n",
 			      sv, (*name < 32) ? "^" : "",
 			      (*name < 32) ? toCTRL(*name) : *name));
@@ -1861,10 +1861,8 @@ Perl_scope(pTHX_ OP *o)
 		o->op_type = OP_SCOPE;
 		o->op_ppaddr = PL_ppaddr[OP_SCOPE];
 		kid = ((LISTOP*)o)->op_first;
-		if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE){
-		    kid->op_type = OP_SETSTATE;
-		    kid->op_ppaddr = PL_ppaddr[OP_SETSTATE];
-		}
+		if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE)
+		    null(kid);
 	    }
 	    else
 		o = newLISTOP(OP_SCOPE, 0, o, Nullop);
@@ -3001,6 +2999,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 	        newSTATEOP(0, Nullch, veop)),
 	    newSTATEOP(0, Nullch, imop) ));
 
+    PL_hints |= HINT_BLOCK_SCOPE;
     PL_copline = NOLINE;
     PL_expect = XSTATE;
 }
@@ -3352,14 +3351,20 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	    if (k2 && k2->op_type == OP_READLINE
 		  && (k2->op_flags & OPf_STACKED)
 		  && ((k1->op_flags & OPf_WANT) == OPf_WANT_SCALAR)) 
+	    {
 		warnop = k2->op_type;
+	    }
 	    break;
 
 	case OP_SASSIGN:
 	    if (k1->op_type == OP_READDIR
 		  || k1->op_type == OP_GLOB
+		  || (k1->op_type == OP_NULL && k1->op_targ == OP_GLOB)
 		  || k1->op_type == OP_EACH)
-		warnop = k1->op_type;
+	    {
+		warnop = ((k1->op_type == OP_NULL)
+			  ? k1->op_targ : k1->op_type);
+	    }
 	    break;
 	}
 	if (warnop) {
@@ -3531,6 +3536,7 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
 	      case OP_SASSIGN:
 		if (k1->op_type == OP_READDIR
 		      || k1->op_type == OP_GLOB
+		      || (k1->op_type == OP_NULL && k1->op_targ == OP_NULL)
 		      || k1->op_type == OP_EACH)
 		    expr = newUNOP(OP_DEFINED, 0, expr);
 		break;
@@ -3584,6 +3590,7 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *
 	  case OP_SASSIGN:
 	    if (k1->op_type == OP_READDIR
 		  || k1->op_type == OP_GLOB
+		  || (k1->op_type == OP_NULL && k1->op_targ == OP_GLOB)
 		  || k1->op_type == OP_EACH)
 		expr = newUNOP(OP_DEFINED, 0, expr);
 	    break;
@@ -5048,17 +5055,10 @@ Perl_ck_fun(pTHX_ OP *o)
 		    char *name = SvPVx(((SVOP*)kid)->op_sv, n_a);
 		    OP *newop = newAVREF(newGVOP(OP_GV, 0,
 			gv_fetchpv(name, TRUE, SVt_PVAV) ));
-#ifdef IV_IS_QUAD
 		    if (ckWARN(WARN_SYNTAX))
 			Perl_warner(aTHX_ WARN_SYNTAX,
-			    "Array @%s missing the @ in argument %" PERL_PRId64 " of %s()",
+			    "Array @%s missing the @ in argument %"IVdf" of %s()",
 			    name, (IV)numargs, PL_op_desc[type]);
-#else
-		    if (ckWARN(WARN_SYNTAX))
-			Perl_warner(aTHX_ WARN_SYNTAX,
-			    "Array @%s missing the @ in argument %ld of %s()",
-			    name, (long)numargs, PL_op_desc[type]);
-#endif
 		    op_free(kid);
 		    kid = newop;
 		    kid->op_sibling = sibl;
@@ -5075,17 +5075,10 @@ Perl_ck_fun(pTHX_ OP *o)
 		    char *name = SvPVx(((SVOP*)kid)->op_sv, n_a);
 		    OP *newop = newHVREF(newGVOP(OP_GV, 0,
 			gv_fetchpv(name, TRUE, SVt_PVHV) ));
-#ifdef IV_IS_QUAD
 		    if (ckWARN(WARN_SYNTAX))
 			Perl_warner(aTHX_ WARN_SYNTAX,
-			    "Hash %%%s missing the %% in argument %" PERL_PRId64 " of %s()",
+			    "Hash %%%s missing the %% in argument %"IVdf" of %s()",
 			    name, (IV)numargs, PL_op_desc[type]);
-#else
-		    if (ckWARN(WARN_SYNTAX))
-			Perl_warner(aTHX_ WARN_SYNTAX,
-			    "Hash %%%s missing the %% in argument %ld of %s()",
-			    name, (long)numargs, PL_op_desc[type]);
-#endif
 		    op_free(kid);
 		    kid = newop;
 		    kid->op_sibling = sibl;
@@ -5187,6 +5180,19 @@ Perl_ck_glob(pTHX_ OP *o)
 
     if (!((gv = gv_fetchpv("glob", FALSE, SVt_PVCV)) && GvIMPORTED_CV(gv)))
 	gv = gv_fetchpv("CORE::GLOBAL::glob", FALSE, SVt_PVCV);
+
+#if defined(PERL_INTERNAL_GLOB) && !defined(MINIPERL_BUILD)
+    /* XXX this can be tightened up and made more failsafe. */
+    if (!gv) {
+	OP *modname = newSVOP(OP_CONST, 0, newSVpvn("File::Glob", 10));
+	modname->op_private |= OPpCONST_BARE;
+	ENTER;
+	utilize(1, start_subparse(FALSE, 0), Nullop, modname,
+		newSVOP(OP_CONST, 0, newSVpvn("globally", 8)));
+	gv = gv_fetchpv("CORE::GLOBAL::glob", FALSE, SVt_PVCV);
+	LEAVE;
+    }
+#endif /* PERL_INTERNAL_GLOB && !MINIPERL_BUILD */
 
     if (gv && GvIMPORTED_CV(gv)) {
 	append_elem(OP_GLOB, o,
@@ -6155,7 +6161,7 @@ Perl_peep(pTHX_ register OP *o)
 	    key = SvPV(*svp, keylen);
 	    indsvp = hv_fetch(GvHV(*fields), key, keylen, FALSE);
 	    if (!indsvp) {
-		Perl_croak(aTHX_ "No such field \"%s\" in variable %s of type %s",
+		Perl_croak(aTHX_ "No such pseudo-hash field \"%s\" in variable %s of type %s",
 		      key, SvPV(lexname, n_a), HvNAME(SvSTASH(lexname)));
 	    }
 	    ind = SvIV(*indsvp);
@@ -6173,8 +6179,10 @@ Perl_peep(pTHX_ register OP *o)
 	case OP_RV2AV:
 	case OP_RV2HV:
 	    if (!(o->op_flags & OPf_WANT)
-		|| o->op_flags & OPf_WANT == OPf_WANT_LIST)
+		|| (o->op_flags & OPf_WANT) == OPf_WANT_LIST)
+	    {
 		last_composite = o;
+	    }
 	    o->op_seq = PL_op_seqmax++;
 	    break;
 

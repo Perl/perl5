@@ -532,22 +532,6 @@ PP(pp_open)
     if (GvIOp(gv))
 	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
 
-#if 0 /* no undef means tmpfile() yet */
-    if (sv == &PL_sv_undef) {
-#ifdef PerlIO
-	PerlIO *fp = PerlIO_tmpfile();
-#else
-	PerlIO *fp = tmpfile();
-#endif                   
-	if (fp != Nullfp && do_open(gv, "+>&", 3, FALSE, 0, 0, fp)) 
-	    PUSHi( (I32)PL_forkprocess );
-	else
-	    RETPUSHUNDEF;
-	RETURN;
-    }   
-#endif /* no undef means tmpfile() yet */
-
-
     if (mg = SvTIED_mg((SV*)gv, 'q')) {
 	PUSHMARK(SP);
 	XPUSHs(SvTIED_obj((SV*)gv, mg));
@@ -825,17 +809,10 @@ PP(pp_untie)
     if (ckWARN(WARN_UNTIE)) {
         MAGIC * mg ;
         if (mg = SvTIED_mg(sv, how)) {
-#ifdef IV_IS_QUAD
             if (mg && SvREFCNT(SvRV(mg->mg_obj)) > 1)  
 		Perl_warner(aTHX_ WARN_UNTIE,
-		    "untie attempted while %" PERL_PRIu64 " inner references still exist",
+		    "untie attempted while %"UVuf" inner references still exist",
 		    (UV)SvREFCNT(SvRV(mg->mg_obj)) - 1 ) ;
-#else
-            if (mg && SvREFCNT(SvRV(mg->mg_obj)) > 1)  
-		Perl_warner(aTHX_ WARN_UNTIE,
-		    "untie attempted while %lu inner references still exist",
-		    (unsigned long)SvREFCNT(SvRV(mg->mg_obj)) - 1 ) ;
-#endif
         }
     }
  
@@ -3815,7 +3792,7 @@ PP(pp_setpgrp)
     SETi( BSD_SETPGRP(pid, pgrp) >= 0 );
 #else
     if ((pgrp != 0 && pgrp != getpid()) || (pid != 0 && pid != getpid()))
-	DIE(aTHX_ "POSIX setpgrp can't take an argument");
+	DIE(aTHX_ "setpgrp can't take arguments");
     SETi( setpgrp() >= 0 );
 #endif /* USE_BSDPGRP */
     RETURN;

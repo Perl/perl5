@@ -2,7 +2,7 @@
 # AIX 3.x.x hints thanks to Wayne Scott <wscott@ichips.intel.com>
 # AIX 4.1 hints thanks to Christopher Chan-Nui <channui@austin.ibm.com>.
 # AIX 4.1 pthreading by Christopher Chan-Nui <channui@austin.ibm.com> and
-#         Jarkko Hietaniemi <jhi@iki.fi>.
+#	  Jarkko Hietaniemi <jhi@iki.fi>.
 # Merged on Mon Feb  6 10:22:35 EST 1995 by
 #   Andy Dougherty  <doughera@lafcol.lafayette.edu>
 
@@ -37,7 +37,7 @@
 # pages state:
 #    setrgid: The EPERM error code is always returned.
 #    setruid: The EPERM error code is always returned. Processes cannot
-#             reset only their real user IDs.
+#	      reset only their real user IDs.
 d_setrgid='undef'
 d_setruid='undef'
 
@@ -107,8 +107,8 @@ esac
 # The first 3 options would not be needed if dynamic libs. could be linked
 # with the compiler instead of ld.
 # -bI:$(PERL_INC)/perl.exp  Read the exported symbols from the perl binary
-# -bE:$(BASEEXT).exp        Export these symbols.  This file contains only one
-#                           symbol: boot_$(EXP)  can it be auto-generated?
+# -bE:$(BASEEXT).exp	    Export these symbols.  This file contains only one
+#			    symbol: boot_$(EXP)	 can it be auto-generated?
 case "$osvers" in
 3*) 
     lddlflags="$lddlflags -H512 -T512 -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -e _nostart -lc"
@@ -123,48 +123,55 @@ esac
 cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
-        ccflags="$ccflags -DNEED_PTHREAD_INIT"
-        case "$cc" in
-        gcc) ;;
-        cc_r) ;;
-        cc|xlc_r) 
+	ccflags="$ccflags -DNEED_PTHREAD_INIT"
+	case "$cc" in
+	gcc) ;;
+	cc_r) ;;
+	cc|xl[cC]_r) 
 	    echo >&4 "Switching cc to cc_r because of POSIX threads."
 	    # xlc_r has been known to produce buggy code in AIX 4.3.2.
-	    # (e.g. pragma/overload core dumps)
+	    # (e.g. pragma/overload core dumps)	 Let's suspect xlC_r, too.
 	    # --jhi@iki.fi
 	    cc=cc_r
 	    if test ! -e /bin/cc_r; then
-	 	    cat >&4 <<EOM
+		    cat >&4 <<EOM
 For pthreads you should use the AIX C compiler cc_r.
-But I cannot find it in /bin.
+But I cannot find it as /bin/cc_r.
 Cannot continue, aborting.
 EOM
 	    fi
-            ;;
-        '') 
+	    ;;
+	'') 
 	    cc=cc_r
-            ;;
-        *)
- 	    cat >&4 <<EOM
+	    ;;
+	*)
+	    cat >&4 <<EOM
 For pthreads you should use the AIX C compiler cc_r.
 (now your compiler was set to '$cc')
 Cannot continue, aborting.
 EOM
- 	    exit 1
+	    exit 1
 	    ;;
-        esac
+	esac
 
-        # Add the POSIX threads library and the re-entrant libc to lddflags.
-        set `echo X "$lddlflags"| sed -e 's/ -lc$/ -lpthreads -lc_r/'`
-        shift
-        lddlflags="$*"
+	# c_rify libswanted.
+	set `echo X "$libswanted "| sed -e 's/ \([cC]\) / \1_r /g'`
+	shift
+	libswanted="$*"
+	# c_rify lddlflags.
+	set `echo X "$lddlflags "| sed -e 's/ \(-l[cC]\) / \1_r /g'`
+	shift
+	lddlflags="$*"
 
-        # Add the POSIX threads library and the re-entrant libc to libswanted.
-        # Make sure the c_r library is before the c library or
-        # make will fail.
-        set `echo X "$libswanted "| sed -e 's/ c / pthreads c_r /'`
-        shift
-        libswanted="$*"
+	# Insert pthreads to libswanted, before any libc or libC.
+	set `echo X "$libswanted "| sed -e 's/ \([cC]\) / pthreads \1 /'`
+	shift
+	libswanted="$*"
+	# Insert pthreads to lddlflags, before any libc or libC.
+	set `echo X "$lddlflags " | sed -e 's/ \(-l[cC]\) / -lpthreads \1 /'`
+	shift
+	lddlflags="$*"
+
 	;;
 esac
 EOCBU
@@ -183,7 +190,7 @@ EOM
 		exit 1
 		;;
 	    esac
-    	    ccflags="$ccflags -DUSE_LONG_LONG"
+	    ccflags="$ccflags -DUSE_LONG_LONG"
 	    ccflags="$ccflags `getconf XBS5_ILP32_OFFBIG_CFLAGS 2>/dev/null`"
 
 	    ldflags="$ldflags `getconf XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
@@ -193,10 +200,10 @@ EOM
 	    # (nothing strange shows up in $ldflags even in hexdump;
 	    #  so it may be something in the shell, instead?)
 	    # Try it out: just uncomment the below line and rerun Configure:
-#	    echo >& "AIX $ldflags mystery" ; exit 1
+#	    echo >&4 "AIX 4.3.1.0 $ldflags mystery" ; exit 1
 	    # Just don't ask me how AIX does it.
 	    # Therefore the line re-evaluating ldflags: it seems to bypass
-	    # the whatever it was AIX managed to break. --jhi
+	    # the whatever it was that AIX managed to break. --jhi
 	    ldflags="`echo $ldflags`"
 
 	    libswanted="$libswanted `getconf XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g'`"
@@ -212,8 +219,26 @@ cat > UU/uselongdouble.cbu <<'EOCBU'
 case "$uselongdouble" in
 $define|true|[yY]*)
 	ccflags="$ccflags -qlongdouble"
+	# The explicit cc128, xlc128, xlC128 are not needed,
+	# the -qlongdouble should do the trick. --jhi
 	;;
 esac
 EOCBU
+
+# If the C++ libraries, libC and libC_r, are available we will prefer them
+# over the vanilla libc, because the libC contain loadAndInit() and
+# terminateAndUnload() which work correctly with C++ statics while libc
+# load() and unload() do not.  See ext/DynaLoader/dl_aix.xs.
+# The C-to-C_r switch is done by usethreads.cbu, if needed.
+if test -f /lib/libC.a -a X"$gccversion" = X; then
+    # Cify libswanted.
+    set `echo X "$libswanted "| sed -e 's/ c / C c /'`
+    shift
+    libswanted="$*"
+    # Cify lddlflags.
+    set `echo X "$lddlflags "| sed -e 's/ -lc / -lC -lc /'`
+    shift
+    lddlflags="$*"
+fi
 
 # EOF

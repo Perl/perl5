@@ -99,34 +99,6 @@ if you use the Benchmark module:
 
 =over 10
 
-=item cmpthese ( COUT, CODEHASHREF, [ STYLE ] )
-
-=item cmpthese ( RESULTSHASHREF )
-
-Optionally calls timethese(), then outputs comparison chart.  This 
-chart is sorted from slowest to highest, and shows the percent 
-speed difference between each pair of tests.  Can also be passed 
-the data structure that timethese() returns:
-
-    $results = timethese( .... );
-    cmpthese( $results );
-
-Returns the data structure returned by timethese().
-
-=item countit(TIME, CODE)
-
-Arguments: TIME is the minimum length of time to run CODE for, and CODE is
-the code to run.  CODE may be either a code reference or a string to
-be eval'd; either way it will be run in the caller's package.
-
-TIME is I<not> negative.  countit() will run the loop many times to
-calculate the speed of CODE before running it for TIME.  The actual
-time run for will usually be greater than TIME due to system clock
-resolution, so it's best to look at the number of iterations divided
-by the times that you are concerned with, not just the iterations.
-
-Returns: a Benchmark object.
-
 =item timeit(COUNT, CODE)
 
 Arguments: COUNT is the number of times to run the loop, and CODE is
@@ -187,11 +159,6 @@ Returns a hash of Benchmark objects, keyed by name.
 Returns the difference between two Benchmark times as a Benchmark
 object suitable for passing to timestr().
 
-=item timesum ( T1, T2 )
-
-Returns the sum of two Benchmark times as a Benchmark object suitable
-for passing to timestr().
-
 =item timestr ( TIMEDIFF, [ STYLE, [ FORMAT ] ] )
 
 Returns a string that formats the times in the TIMEDIFF object in
@@ -226,6 +193,34 @@ Clear the cached time for COUNT rounds of the null loop.
 
 Clear all cached times.
 
+=item cmpthese ( COUT, CODEHASHREF, [ STYLE ] )
+
+=item cmpthese ( RESULTSHASHREF )
+
+Optionally calls timethese(), then outputs comparison chart.  This 
+chart is sorted from slowest to fastest, and shows the percent 
+speed difference between each pair of tests.  Can also be passed 
+the data structure that timethese() returns:
+
+    $results = timethese( .... );
+    cmpthese( $results );
+
+Returns the data structure returned by timethese() (or passed in).
+
+=item countit(TIME, CODE)
+
+Arguments: TIME is the minimum length of time to run CODE for, and CODE is
+the code to run.  CODE may be either a code reference or a string to
+be eval'd; either way it will be run in the caller's package.
+
+TIME is I<not> negative.  countit() will run the loop many times to
+calculate the speed of CODE before running it for TIME.  The actual
+time run for will usually be greater than TIME due to system clock
+resolution, so it's best to look at the number of iterations divided
+by the times that you are concerned with, not just the iterations.
+
+Returns: a Benchmark object.
+
 =item disablecache ( )
 
 Disable caching of timings for the null loop. This will force Benchmark
@@ -236,6 +231,11 @@ to recalculate these timings for each new piece of code timed.
 Enable caching of timings for the null loop. The time taken for COUNT
 rounds of the null loop will be calculated only once for each
 different COUNT used.
+
+=item timesum ( T1, T2 )
+
+Returns the sum of two Benchmark times as a Benchmark object suitable
+for passing to timestr().
 
 =back
 
@@ -268,6 +268,35 @@ calls like these:
 
 Caching is off by default, as it can (usually slightly) decrease
 accuracy and does not usually noticably affect runtimes.
+
+=head1 EXAMPLES
+
+For example,
+
+   use Benchmark;$x=3;cmpthese(-5,{a=>sub{$x*$x},b=>sub{$x**2}})
+
+outputs something like this:
+
+   Benchmark: running a, b, each for at least 5 CPU seconds...
+	    a: 10 wallclock secs ( 5.14 usr +  0.13 sys =  5.27 CPU) @ 3835055.60/s (n=20210743)
+	    b:  5 wallclock secs ( 5.41 usr +  0.00 sys =  5.41 CPU) @ 1574944.92/s (n=8520452)
+	  Rate    b    a
+   b 1574945/s   -- -59%
+   a 3835056/s 144%   --
+
+while 
+
+   use Benchmark;
+   $x=3;
+   $r=timethese(-5,{a=>sub{$x*$x},b=>sub{$x**2}},'none');
+   cmpthese($r);
+
+outputs something like this:
+
+          Rate    b    a
+   b 1559428/s   -- -62%
+   a 4152037/s 166%   --
+
 
 =head1 INHERITANCE
 
@@ -324,8 +353,9 @@ sub _doeval { eval shift }
 use Carp;
 use Exporter;
 @ISA=(Exporter);
-@EXPORT=qw(cmpthese countit timeit timethis timethese timediff timestr);
-@EXPORT_OK=qw(clearcache clearallcache disablecache enablecache);
+@EXPORT=qw(timeit timethis timethese timediff timestr);
+@EXPORT_OK=qw(timesum cmpthese countit
+	      clearcache clearallcache disablecache enablecache);
 
 &init;
 
@@ -443,9 +473,7 @@ sub runloop {
     # in &countit.  This, in turn, can reduce the number of calls to
     # &runloop a lot, and thus reduce additive errors.
     my $tbase = Benchmark->new(0)->[1];
-    do {
-       $t0 = Benchmark->new(0);
-    } while ( $t0->[1] == $tbase );
+    while ( ( $t0 = Benchmark->new(0) )->[1] == $tbase ) {} ;
     &$subref;
     $t1 = Benchmark->new($n);
     $td = &timediff($t1, $t0);
@@ -728,7 +756,7 @@ sub cmpthese{
        sort { $$a <=> $$b } map { \$_ } @col_widths[2..$#col_widths];
     my $max_width = ${$sorted_width_refs[-1]};
 
-    my $total = 0;
+    my $total = @col_widths - 1 ;
     for ( @col_widths ) { $total += $_ }
 
     STRETCHER:

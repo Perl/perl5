@@ -36,6 +36,46 @@ $NMAKE = 1 if $Config{'make'} =~ /^nmake/i;
 $PERLMAKE = 1 if $Config{'make'} =~ /^pmake/i;
 $OBJ   = 1 if $Config{'ccflags'} =~ /PERL_OBJECT/i;
 
+# a few workarounds for command.com (very basic)
+if (Win32::IsWin95()) {
+    package ExtUtils::MM_Win95;
+    unshift @MM::ISA, 'ExtUtils::MM_Win95';
+
+    sub xs_c {
+	my($self) = shift;
+	return '' unless $self->needs_linking();
+	'
+.xs.c:
+	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) $(XSUBPP) \\
+	    $(XSPROTOARG) $(XSUBPPARGS) $*.xs > $*.c
+	'
+    }
+
+    sub xs_cpp {
+	my($self) = shift;
+	return '' unless $self->needs_linking();
+	'
+.xs.cpp:
+	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) $(XSUBPP) \\
+	    $(XSPROTOARG) $(XSUBPPARGS) $*.xs > $*.cpp
+	';
+    }
+
+    # many makes are too dumb to use xs_c then c_o
+    sub xs_o {
+	my($self) = shift;
+	return '' unless $self->needs_linking();
+	# Dmake gets confused with 2 ways of making things
+	return '' if $ExtUtils::MM_Win32::DMAKE;
+	'
+.xs$(OBJ_EXT):
+	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) $(XSUBPP) \\
+	    $(XSPROTOARG) $(XSUBPPARGS) $*.xs > $*.c
+	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.c
+	';
+    }
+}
+
 sub dlsyms {
     my($self,%attribs) = @_;
 

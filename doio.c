@@ -134,7 +134,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	else
 	    result = PerlIO_close(IoIFP(io));
 	if (result == EOF && fd > PL_maxsysfd)
-	    PerlIO_printf(PerlIO_stderr(),
+	    PerlIO_printf(Perl_error_log,
 			  "Warning: unable to close filehandle %s properly.\n",
 			  GvENAME(gv));
 	IoOFP(io) = IoIFP(io) = Nullfp;
@@ -1013,17 +1013,10 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 	if (SvIOK(sv)) {
 	    if (SvGMAGICAL(sv))
 		mg_get(sv);
-#ifdef IV_IS_QUAD
 	    if (SvIsUV(sv))
-		PerlIO_printf(fp, "%" PERL_PRIu64, (UV)SvUVX(sv));
+		PerlIO_printf(fp, "%"UVuf, (UV)SvUVX(sv));
 	    else
-		PerlIO_printf(fp, "%" PERL_PRId64, (IV)SvIVX(sv));
-#else
-	    if (SvIsUV(sv))
-		PerlIO_printf(fp, "%lu", (unsigned long)SvUVX(sv));
-	    else
-		PerlIO_printf(fp, "%ld", (long)SvIVX(sv));
-#endif
+		PerlIO_printf(fp, "%"IVdf, (IV)SvIVX(sv));
 	    return !PerlIO_error(fp);
 	}
 	/* FALL THROUGH */

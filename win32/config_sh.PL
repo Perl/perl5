@@ -19,9 +19,13 @@ while (@ARGV && $ARGV[0] =~ /^([\w_]+)=(.*)$/)
 
 $opt{VERSION} = $];
 $opt{INST_VER} =~ s|~VERSION~|$]|g;
-if ($] =~ /\.(\d\d\d)?(\d\d)?$/) { # should always be true
-  $opt{PERL_VERSION} = int($1 || 0);
-  $opt{PERL_SUBVERSION} = $2 || '00';
+if ($] =~ /^(\d+)\.(\d\d\d)?(\d\d)?$/) { # should always be true
+  $opt{PERL_REVISION} = $1;
+  $opt{PERL_VERSION} = int($2 || 0);
+  $opt{PERL_SUBVERSION} = $3 || '00';
+}
+else {
+  die "Can't parse perl version ($])";
 }
 
 $opt{'cf_by'} = $ENV{USERNAME} unless $opt{'cf_by'};

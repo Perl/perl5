@@ -1,6 +1,6 @@
 =head1 NAME
 
-perldelta - what's new for perl v5.6 (as of v5.005_61)
+perldelta - what's new for perl v5.6 (as of v5.005_62)
 
 =head1 DESCRIPTION
 
@@ -15,9 +15,39 @@ This document describes differences between the 5.005 release and this one.
 
 =head2 Perl Source Incompatibilities
 
-TODO
+Beware that any new warnings that have been added or enhanced old
+warnings are B<not> considered incompatible changes.
+
+Since all new warnings must be explicitly requested via the C<-w>
+switch or the C<warnings> pragma, it is ultimately the programmer's
+responsibility to ensure that warnings are enabled judiciously.
 
 =over 4
+
+=item Treatment of list slices of undef has changed
+
+When taking a slice of a literal list (as opposed to a slice of
+an array or hash), Perl used to return an empty list if the
+result happened to be composed of all undef values.
+
+The new behavior is to produce an empty list if (and only if)
+the original list was empty.  Consider the following example:
+
+    @a = (1,undef,undef,2)[2,1,2];
+
+The old behavior would have resulted in @a having no elements.
+The new behavior ensures it has three undefined elements.
+
+Note in particular that the behavior of slices of the following
+cases remains unchanged:
+
+    @a = ()[1,2];
+    @a = (getpwent)[7,0];
+    @a = (anything_returning_empty_list())[2,1,2];
+    @a = @b[2,1,2];
+    @a = @c{'a','b','c'};
+
+See L<perldata>.
 
 =item Possibly changed pseudo-random number generator
 
@@ -25,7 +55,69 @@ In 5.005_0x and earlier, perl's rand() function used the C library
 rand(3) function.  As of 5.005_52, Configure tests for drand48(),
 random(), and rand() (in that order) and picks the first one it finds.
 Perl programs that depend on reproducing a specific set of pseudo-random
-numbers will now likely produce different output.
+numbers will now likely produce different output.  You can use
+C<sh Configure -Drandfunc=rand> to obtain the old behavior.
+
+=item Hashing function for hash keys has changed
+
+Perl hashes are not order preserving.  The apparently random order
+encountered when iterating on the contents of a hash is determined
+by the hashing algorithm used.  To improve the distribution of lower
+bits in the hashed value, the algorithm has changed slightly as of
+5.005_52.  When iterating over hashes, this may yield a random order
+that is B<different> from that of previous versions.
+
+=item C<undef> fails on read only values
+
+Using the C<undef> operator on a readonly value (such as $1) has
+the same effect as assigning C<undef> to the readonly value--it
+throws an exception.
+
+=item Close-on-exec bit may be set on pipe() handles
+
+On systems that support a close-on-exec flag on filehandles, the
+flag will be set for any handles created by pipe(), if that is
+warranted by the value of $^F that may be in effect.  Earlier
+versions neglected to set the flag for handles created with
+pipe().  See L<perlfunc/pipe> and L<perlvar/$^F>.
+
+=item Writing C<"$$1"> to mean C<"${$}1"> is unsupported
+
+Perl 5.004 deprecated the interpretation of C<$$1> and
+similar within interpolated strings to mean C<$$ . "1">,
+but still allowed it.
+
+In Perl 5.6 and later, C<"$$1"> always means C<"${$1}">.
+
+=item values(%h) and C<\(%h)> operate on aliases to values, not copies
+
+each(), values() and hashes in a list context return the actual
+values in the hash, instead of copies (as they used to in earlier
+versions).  Typical idioms for using these constructs copy the
+returned values, but this can make a significant difference when
+creating references to the returned values.
+
+Keys in the hash are still returned as copies when iterating on
+a hash.
+
+=item vec(EXPR,OFFSET,BITS) enforces powers-of-two BITS
+
+vec() generates a run-time error if the BITS argument is not
+a valid power-of-two integer.
+
+=item Text of some diagnostic output has changed
+
+Most references to internal Perl operations in diagnostics
+have been changed to be more descriptive.  This may be an
+issue for programs that may incorrectly rely on the exact
+text of diagnostics for proper functioning.
+
+=item C<%@> has been removed
+
+The undocumented special variable C<%@> that used to accumulate
+"background" errors (such as those that happen in DESTROY())
+has been removed, because it could potentially result in memory
+leaks.
 
 =back
 
@@ -90,14 +182,6 @@ the default.
 Note that these functions do B<not> constitute Perl's memory allocation API.
 See L<perlguts/"Memory Allocation"> for further information about that.
 
-=item C<PL_na> and C<dTHR> Issues
-
-The C<PL_na> global is now thread local, so a C<dTHR> declaration is needed
-in the scope in which the global appears.  XSUBs should handle this automatically,
-but if you have used C<PL_na> in support functions, you either need to
-change the C<PL_na> to a local variable (which is recommended), or put in
-a C<dTHR>.
-
 =back
 
 =head2 Compatible C Source API Changes
@@ -118,6 +202,11 @@ the old names are still supported when F<patchlevel.h> is explicitly
 included (as required before), so there is no source incompatibility
 from the change.
 
+=item Support for C++ exceptions
+
+change#3386, also needs perlguts documentation
+[TODO - Chip Salzenberg <chip@perlsupport.com>]
+
 =back
 
 =head2 Binary Incompatibilities
@@ -128,12 +217,79 @@ release or its maintenance versions.
 The usethreads or usemultiplicity builds are B<not> binary compatible
 with the corresponding builds in 5.005.
 
+=head1 Installation and Configuration Improvements
+
+=head2 New Configure flags
+
+The following new flags may be enabled on the Configure command line
+by running Configure with C<-Dflag>.
+
+    usemultiplicity
+
+    uselongdouble
+    usemorebits
+    uselargefiles
+
+=head2 -Dusethreads and -Duse64bits now more daring
+
+The Configure options enabling the use of threads and the use of
+64-bitness are now more daring in the sense that they no more have
+an explicit list of operating systems of known threads/64-bit
+capabilities.  In other words: if your operating system has the
+necessary APIs, you should be able just to go ahead and use them.
+See also L<"64-bit support">.
+
+=head2 Long Doubles
+
+Some platforms have "long doubles", floating point numbers of even
+larger range than ordinary "doubles".  To enable using long doubles for
+Perl's scalars, use -Duselongdouble.
+
+=head2 -Dusemorebits
+
+You can enable both -Duse64bits and -Dlongdouble by -Dusemorebits.
+See also L<"64-bit support">.
+
+=head2 -Duselargefiles
+
+Some platforms support large files, files larger than two gigabytes.
+See L<"Large file support"> for more information. 
+
+=head2 installusrbinperl
+
+You can use "Configure -Uinstallusrbinperl" which causes installperl
+to skip installing perl also as /usr/bin/perl.  This is useful if you
+prefer not to modify /usr/bin for some reason or another but harmful
+because many scripts assume to find Perl in /usr/bin/perl.
+
+=head2 SOCKS support
+
+You can use "Configure -Dusesocks" which causes Perl to probe
+for the SOCKS (v5, not v4) proxy protocol library,
+http://www.socks.nec.com/
+
+=head2 C<-A> flag
+
+You can "post-edit" the Configure variables using the Configure C<-A>
+flag.  The editing happens immediately after the platform specific
+hints files have been processed but before the actual configuration
+process starts.  Run C<Configure -h> to find out the full C<-A> syntax.
+
+=head2 Enhanced Installation Directories
+
+The installation structure has been enriched to improve the support for 
+maintaining multiple versions of perl, to provide locations for
+vendor-supplied modules and scripts, and to ease maintenance of
+locally-added modules and scripts.  See the section on Installation 
+Directories in the INSTALL file for complete details.  For most users
+building and installing from source, the defaults should be fine.
+
 =head1 Core Changes
 
 =head2 Unicode and UTF-8 support
 
 Perl can optionally use UTF-8 as its internal representation for character
-strings.  The C<use utf8> pragma enables this support in the current lexical
+strings.  The C<utf8> pragma enables this support in the current lexical
 scope.  See L<utf8> for more information.
 
 =head2 Lexically scoped warning categories
@@ -141,6 +297,39 @@ scope.  See L<utf8> for more information.
 You can now control the granularity of warnings emitted by perl at a finer
 level using the C<use warnings> pragma.  See L<warnings> and L<perllexwarn>
 for details.
+
+=head2 Lvalue subroutines
+
+WARNING: This is an experimental feature.
+
+change#4081
+[TODO - Ilya Zakharevich <ilya@math.ohio-state.edu>,
+Tuomas Lukka <lukka@fas.harvard.edu>)]
+
+=head2 "our" declarations
+
+An "our" declaration introduces a value that can be best understood
+as a lexically scoped symbolic alias to a global variable in the
+current package.  This is mostly useful as an alternative to the
+C<vars> pragma, but also provides the opportunity to introduce
+typing and other attributes for such variables.  See L<perlfunc/our>.
+
+=head2 Weak references
+
+WARNING: This is an experimental feature.
+
+change#3385, also need perlguts documentation
+
+[TODO - Tuomas Lukka <lukka@fas.harvard.edu>]
+
+=head2 File globbing implemented internally
+
+WARNING: This is currently an experimental feature.  Interfaces and
+implementation are likely to change.
+
+Perl can be compiled with -DPERL_INTERNAL_GLOB to use the File::Glob
+implementation of the glob() operator.  This avoids using an external
+csh process and the problems associated with it.
 
 =head2 Binary numbers supported
 
@@ -150,9 +339,40 @@ C<oct()>:
     $answer = 0b101010;
     printf "The answer is: %b\n", oct("0b101010");
 
+=head2 Some arrows may be omitted in calls through references
+
+Perl now allows the arrow to be omitted in many constructs
+involving subroutine calls through references.  For example,
+C<$foo[10]->('foo')> may now be written C<$foo[10]('foo')>.
+This is rather similar to how the arrow may be omitted from
+C<$foo[10]->{'foo'}>.  Note however, that the arrow is still
+required for C<foo(10)->('bar')>.
+
 =head2 syswrite() ease-of-use
 
-The length argument of C<syswrite()> is now optional.
+The length argument of C<syswrite()> has become optional.
+
+=head2 Filehandles can be autovivified
+
+The construct C<open(my $fh, ...)> can be used to create filehandles
+more easily.  The filehandle will be automatically closed at the end
+of the scope of $fh, provided there are no other references to it.  This
+largely eliminates the need for typeglobs when opening filehandles
+that must be passed around, as in the following example:
+
+    sub myopen {
+        open my $fh, "@_"
+	     or die "Can't open '@_': $!";
+	return $fh;
+    }
+
+    {
+        my $f = myopen("</etc/motd");
+	print <$f>;
+	# $f implicitly closed here
+    }
+
+[TODO - this idiom needs more pod penetration]
 
 =head2 64-bit support
 
@@ -162,20 +382,34 @@ use "quads" (64-integers) as follows:
 
 =over 4
 
-=item constants (decimal, hexadecimal, octal, binary) in the code 
+=item *
 
-=item arguments to oct() and hex()
+constants (decimal, hexadecimal, octal, binary) in the code 
 
-=item arguments to print(), printf() and sprintf() (flag prefixes ll, L, q)
+=item *
 
-=item printed as such
+arguments to oct() and hex()
 
-=item pack() and unpack() "q" and "Q" formats
+=item *
 
-=item in basic arithmetics: + - * / %
+arguments to print(), printf() and sprintf() (flag prefixes ll, L, q)
 
-=item vec() (but see the below note about bit arithmetics)
-    
+=item *
+
+printed as such
+
+=item *
+
+pack() and unpack() "q" and "Q" formats
+
+=item *
+
+in basic arithmetics: + - * / %
+
+=item *
+
+vec() (but see the below note about bit arithmetics)
+
 =back
 
 Note that unless you have the case (a) you will have to configure
@@ -282,8 +516,14 @@ native shorts, ints, and longs.  See L<perlfunc/"pack">.
 
 =head2 pack() and unpack() support counted strings
 
-The template character '#' can be used to specify a counted string
+The template character '/' can be used to specify a counted string
 type to be packed or unpacked.  See L<perlfunc/"pack">.
+
+=head2 Comments in pack() templates
+
+The '#' character in a template introduces a comment up to
+end of the line.  This facilitates documentation of pack()
+templates.
 
 =head2 $^X variables may now have names longer than one character
 
@@ -323,6 +563,55 @@ That can now be accomplished with a declaration syntax, like this:
 F<AutoSplit.pm> and F<SelfLoader.pm> have been updated to keep the attributes
 with the stubs they provide.  See L<attributes>.
 
+=head2 Regular expression improvements
+
+change#2827,2373,2372,2365,1813,1800,4112,4158,4215,4301
+[TODO - Ilya Zakharevich <ilya@math.ohio-state.edu>]
+
+=head2 Overloading improvements
+
+change#2150
+[TODO - Ilya Zakharevich <ilya@math.ohio-state.edu>]
+
+=head2 open() with more than two arguments
+
+[TODO - Ilya Zakharevich <ilya@math.ohio-state.edu>]
+
+=head2 Support for interpolating named characters
+
+change#4052
+[TODO - Ilya Zakharevich <ilya@math.ohio-state.edu>]
+
+=head2 Experimental support for user-hooks in @INC
+
+[TODO - Ken Fox <kfox@ford.com>]
+
+=head2 C<require> and C<do> may be overridden
+
+C<require> and C<do 'file'> operations may be overridden locally
+by importing subroutines of the same name into the current package 
+(or globally by importing them into the CORE::GLOBAL:: namespace).
+Overriding C<require> will also affect C<use>, provided the override
+is visible at compile-time.
+See L<perlsub/"Overriding Built-in Functions">.
+
+=head2 New variable $^C reflects C<-c> switch
+
+C<$^C> has a boolean value that reflects whether perl is being run
+in compile-only mode (i.e. via the C<-c> switch).  Since
+BEGIN blocks are executed under such conditions, this variable
+enables perl code to determine whether actions that make sense
+only during normal running are warranted.  See L<perlvar>.
+
+=head2 Optional Y2K warnings
+
+If Perl is built with the cpp macro C<PERL_Y2KWARN> defined,
+it emits optional warnings when concatenating the number 19
+with another number.
+
+This behavior must be specifically enabled when running Configure.
+See L<INSTALL> and L<README.Y2K>.
+
 =head1 Significant bug fixes
 
 =head2 E<lt>HANDLEE<gt> on empty files
@@ -357,6 +646,21 @@ Parsing of here documents used to be flawed when they appeared as
 the replacement expression in C<eval 's/.../.../e'>.  This has
 been fixed.
 
+=head2 All compilation errors are true errors
+
+Some "errors" encountered at compile time were by neccessity 
+generated as warnings followed by eventual termination of the
+program.  This enabled more such errors to be reported in a
+single run, rather than causing a hard stop at the first error
+that was encountered.
+
+The mechanism for reporting such errors has been reimplemented
+to queue compile-time errors and report them at the end of the
+compilation as true errors rather than as warnings.  This fixes
+cases where error messages leaked through in the form of warnings
+when code was compiled at run time using C<eval STRING>, and
+also allows such errors to be reliably trapped using __DIE__ hooks.
+
 =head2 Automatic flushing of output buffers
 
 fork(), exec(), system(), qx//, and pipe open()s now flush buffers
@@ -372,15 +676,191 @@ are compile time errors.  Attempting to read from filehandles that
 were opened only for writing will now produce warnings (just as
 writing to read-only filehandles does).
 
-=head2 Buffered data discarded from input filehandle when dup'ed.
+=head2 Where possible, buffered data discarded from duped input filehandle
 
-C<open(NEW, "E<lt>&OLD")> now discards any data that was previously
-read and buffered in C<OLD>.  The next read operation on C<NEW> will
-return the same data as the corresponding operation on C<OLD>.
-Formerly, it would have returned the data from the start of the
-following disk block instead.
+C<open(NEW, "E<lt>&OLD")> now attempts to discard any data that
+was previously read and buffered in C<OLD> before duping the handle.
+On platforms where doing this is allowed, the next read operation
+on C<NEW> will return the same data as the corresponding operation
+on C<OLD>.  Formerly, it would have returned the data from the start
+of the following disk block instead.
 
-=head1 Supported Platforms
+=head2 system(), backticks and pipe open now reflect exec() failure
+
+On Unix and similar platforms, system(), qx() and open(FOO, "cmd |")
+etc., are implemented via fork() and exec().  When the underlying
+exec() fails, earlier versions did not report the error properly,
+since the exec() happened to be in a different process.
+
+The child process now communicates with the parent about the
+error in launching the external command, which allows these
+constructs to return with their usual error value and set $!.
+
+=head2 Implicitly closed filehandles are safer
+
+Sometimes implicitly closed filehandles (as when they are localized,
+and Perl automatically closes them on exiting the scope) could
+inadvertently set $? or $!.  This has been corrected.
+
+=head2 C<(\$)> prototype and C<$foo{a}>
+
+An scalar reference prototype now correctly allows a hash or
+array element in that slot.
+
+=head2 Pseudo-hashes work better
+
+Dereferencing some types of reference values in a pseudo-hash,
+such as C<$ph->{foo}[1]>, was accidentally disallowed.  This has
+been corrected.
+
+When applied to a pseudo-hash element, exists() now reports whether
+the specified value exists, not merely if the key is valid.
+
+=head2 C<goto &sub> and AUTOLOAD
+
+The C<goto &sub> construct works correctly when C<&sub> happens
+to be autoloaded.
+
+=head2 C<-bareword> allowed under C<use integer>
+
+The autoquoting of barewords preceded by C<-> did not work
+in prior versions when the C<integer> pragma was enabled.
+This has been fixed.
+
+=head2 Boolean assignment operators are legal lvalues
+
+Constructs such as C<($a ||= 2) += 1> are now allowed.
+
+=head2 C<sort $coderef @foo> allowed
+
+sort() did not accept a subroutine reference as the comparison
+function in earlier versions.  This is now permitted.
+
+=head2 Failures in DESTROY()
+
+When code in a destructor threw an exception, it went unnoticed
+in earlier versions of Perl, unless someone happened to be
+looking in $@ just after the point the destructor happened to
+run.  Such failures are now visible as warnings when warnings are
+enabled.
+
+=head2 Locale bugs fixed
+
+printf() and sprintf() previously reset the numeric locale
+back to the default "C" locale.  This has been fixed.
+
+Numbers formatted according to the local numeric locale
+(such as using a decimal comma instead of a decimal dot) caused
+"isn't numeric" warnings, even while the operations accessing
+those numbers produced correct results.  The warnings are gone.
+
+=head2 Memory leaks
+
+The C<eval 'return sub {...}'> construct could sometimes leak
+memory.  This has been fixed.
+
+Operations that aren't filehandle constructors used to leak memory
+when used on invalid filehandles.  This has been fixed.
+
+Constructs that modified C<@_> could fail to deallocate values
+in C<@_> and thus leak memory.  This has been corrected.
+
+=head2 Spurious subroutine stubs after failed subroutine calls
+
+Perl could sometimes create empty subroutine stubs when a
+subroutine was not found in the package.  Such cases stopped
+later method lookups from progressing into base packages.
+This has been corrected.
+
+=head2 Consistent numeric conversions
+
+change#3378,3318
+[TODO - Ilya Zakharevich <ilya@math.ohio-state.edu>]
+
+=head2 Taint failures under C<-U>
+
+When running in unsafe mode, taint violations could sometimes
+cause silent failures.  This has been fixed.
+
+=head2 END blocks and the C<-c> switch
+
+Prior versions used to run BEGIN B<and> END blocks when Perl was
+run in compile-only mode.  Since this is typically not the expected
+behavior, END blocks are not executed anymore when the C<-c> switch
+is used.
+
+Note that something resembling the previous behavior can still be
+obtained by putting C<BEGIN { $^C = 0; exit; }> at the very end of
+the top level source file.
+
+=head2 Potential to leak DATA filehandles
+
+Using the C<__DATA__> token creates an implicit filehandle to
+the file that contains the token.  It is the program's
+responsibility to close it when it is done reading from it.
+
+This caveat is now better explained in the documentation.
+See L<perldata>.
+
+=head2 Diagnostics follow STDERR
+
+Diagnostic output now goes to whichever file the C<STDERR> handle
+is pointing at, instead of always going to the underlying C runtime
+library's C<stderr>.
+
+=head2 Other fixes for better diagnostics
+
+Line numbers are no longer suppressed (under most likely circumstances)
+during the global destruction phase.
+
+Diagnostics emitted from code running in threads other than the main
+thread are now accompanied by the thread ID.
+
+Embedded null characters in diagnostics now actually show up.  They
+used to truncate the message in prior versions.
+
+$foo::a and $foo::b are now exempt from "possible typo" warnings only
+if sort() is encountered in package foo.
+
+Unrecognized alphabetic escapes encountered when parsing quote
+constructs now generate a warning, since they may take on new
+semantics in later versions of Perl.
+
+=head1 Performance enhancements
+
+=head2 Simple sort() using { $a <=> $b } and the like are optimized
+
+Many common sort() operations using a simple inlined block are now
+optimized for faster performance.
+
+=head2 Optimized assignments to lexical variables
+
+Certain operations in the RHS of assignment statements have been
+optimized to directly set the lexical variable on the LHS,
+eliminating redundant copying overheads.
+
+=head2 Method lookups optimized
+
+[TODO - Chip Salzenberg <chip@perlsupport.com>]
+
+=head2 Faster mechanism to invoke XSUBs
+
+change#4044,4125
+[TODO - Ilya Zakharevich <ilya@math.ohio-state.edu>]
+
+=head2 Perl_malloc() improvements
+
+change#4237
+[TODO - Ilya Zakharevich <ilya@math.ohio-state.edu>]
+
+=head2 Faster subroutine calls
+
+Minor changes in how subroutine calls are handled internally
+provide marginal improvements in performance.
+
+=head1 Platform specific changes
+
+=head2 Additional supported platforms
 
 =over 4
 
@@ -410,6 +890,48 @@ Rhapsody is now supported.
 EPOC is is now supported (on Psion 5).
 
 =back
+
+=head2 DOS
+
+[TODO - Laszlo Molnar <laszlo.molnar@eth.ericsson.se>]
+
+=head2 OS/2
+
+[TODO - Ilya Zakharevich <ilya@math.ohio-state.edu>]
+
+=head2 VMS
+
+[TODO - Charles Bailey <bailey@newman.upenn.edu>]
+
+=head2 Win32
+
+Site library searches failed to look for ".../site/5.XXX/lib"
+if ".../site/5.XXXYY/lib" wasn't found.  This has been corrected.
+
+When given a pathname that consists only of a drivename, such
+as C<A:>, opendir() and stat() now use the current working
+directory for the drive rather than the drive root.
+
+The builtin XSUB functions in the Win32:: namespace are
+documented.  See L<Win32>.
+
+$^X now contains the full path name of the running executable.
+
+A Win32::GetLongPathName() function is provided to complement
+Win32::GetFullPathName() and Win32::GetShortPathName().  See L<Win32>.
+
+POSIX::uname() is supported.
+
+system(1,...) now returns true process IDs rather than process
+handles.  kill() accepts any real process id, rather than strictly
+return values from system(1,...).
+
+The C<Shell> module is supported.
+
+Rudimentary support for building under command.com in Windows 95
+has been added.
+
+[TODO - GSAR]
 
 =head1 New tests
 
@@ -465,25 +987,56 @@ While used internally by Perl as a pragma, this module also
 provides a way to fetch subroutine and variable attributes.
 See L<attributes>.
 
-=item ByteLoader
-
-The ByteLoader is a dedication extension to generate and run
-Perl bytecode.  See L<ByteLoader>.
-
 =item B
 
 The Perl Compiler suite has been extensively reworked for this
 release.
 
+[TODO - Vishal Bhatia <vishal@gol.com>,
+Nick Ing-Simmons <nick@ni-s.u-net.com>]
+
+=item ByteLoader
+
+The ByteLoader is a dedicated extension to generate and run
+Perl bytecode.  See L<ByteLoader>.
+
+=item constant
+
+References can now be used.  See L<constant>.
+
+=item charnames
+
+change#4052
+[TODO - Ilya Zakharevich <ilya@math.ohio-state.edu>]
+
+=item Data::Dumper
+
+A C<Maxdepth> setting can be specified to avoid venturing
+too deeply into deep data structures.  See L<Data::Dumper>.
+
+Dumping C<qr//> objects works correctly.
+
+=item DB
+
+C<DB> is an experimental module that exposes a clean abstraction
+to Perl's debugging API.
+
+=item DB_File
+
+[TODO - Paul Marquess <paul.marquess@bt.com>]
+
 =item Devel::DProf
 
-Devel::DProf, a Perl source code profiler has been added.
+Devel::DProf, a Perl source code profiler has been added.  See L<DProf>.
 
 =item Dumpvalue
 
-Added Dumpvalue module provides screen dumps of Perl data.
+The Dumpvalue module provides screen dumps of Perl data.
 
 =item Benchmark
+
+Overall, Benchmark results exhibit lower average error and better timing
+accuracy.  
 
 You can now run tests for I<n> seconds instead of guessing the right
 number of tests to run: e.g. timethese(-5, ...) will run each 
@@ -491,21 +1044,44 @@ code for at least 5 CPU seconds.  Zero as the "number of repetitions"
 means "for at least 3 CPU seconds".  The output format has also
 changed.  For example:
 
-use Benchmark;$x=3;timethese(-5,{a=>sub{$x*$x},b=>sub{$x**2}})
+   use Benchmark;$x=3;timethese(-5,{a=>sub{$x*$x},b=>sub{$x**2}})
 
 will now output something like this:
 
-Benchmark: running a, b, each for at least 5 CPU seconds...
-         a:  5 wallclock secs ( 5.77 usr +  0.00 sys =  5.77 CPU) @ 200551.91/s (n=1156516)
-         b:  4 wallclock secs ( 5.00 usr +  0.02 sys =  5.02 CPU) @ 159605.18/s (n=800686)
+   Benchmark: running a, b, each for at least 5 CPU seconds...
+            a:  5 wallclock secs ( 5.77 usr +  0.00 sys =  5.77 CPU) @ 200551.91/s (n=1156516)
+            b:  4 wallclock secs ( 5.00 usr +  0.02 sys =  5.02 CPU) @ 159605.18/s (n=800686)
 
 New features: "each for at least N CPU seconds...", "wallclock secs",
 and the "@ operations/CPU second (n=operations)".
+
+timethese() now returns a reference to a hash of Benchmark objects containing
+the test results, keyed on the names of the tests.
+
+timethis() now returns the iterations field in the Benchmark result object
+instead of 0.
+
+timethese(), timethis(), and the new cmpthese() (see below) can also take
+a format specifier of 'none' to suppress output.
+
+A new function countit() is just like timeit() except that it takes a
+TIME instead of a COUNT.
+
+A new function cmpthese() prints a chart comparing the results of each test
+returned from a timethese() call.  For each possible pair of tests, the
+percentage speed difference (iters/sec or seconds/iter) is shown.
+
+For other details, see L<Benchmark>.
 
 =item Devel::Peek
 
 The Devel::Peek module provides access to the internal representation
 of Perl variables and data.  It is a data debugging tool for the XS programmer.
+
+=item ExtUtils::MakeMaker
+
+change#4135, also needs docs in module pod
+[TODO - Ilya Zakharevich <ilya@math.ohio-state.edu>]
 
 =item Fcntl
 
@@ -514,6 +1090,25 @@ large (more than 4G) file access (64-bit support is not yet
 working, though, so no need to get overly excited), Free/Net/OpenBSD
 locking behaviour flags F_FLOCK, F_POSIX, Linux F_SHLCK, and
 O_ACCMODE: the mask of O_RDONLY, O_WRONLY, and O_RDWR.
+
+=item File::Compare
+
+A compare_text() function has been added, which allows custom
+comparison functions.  See L<File::Compare>.
+
+=item File::Find
+
+File::Find now works correctly when the wanted() function is either
+autoloaded or is a symbolic reference.
+
+A bug that caused File::Find to lose track of the working directory
+when pruning top-level directories has been fixed.
+
+=item File::Glob
+
+This extension implements BSD-style file globbing.  It will also be
+used for the internal implementation of the glob() operator if
+Perl was compiled with -DPERL_INTERNAL_GLOB.  See L<File::Glob>.
 
 =item File::Spec
 
@@ -536,9 +1131,92 @@ instead of
 
     $fullname = File::Spec->catfile($dir1, $dir2, $file);
 
+=item Getopt::Long
+
+Getopt::Long licensing has changed to allow the Perl Artistic License
+as well as the GPL. It used to be GPL only, which got in the way of
+non-GPL applications that wanted to use Getopt::Long.
+
+Getopt::Long encourages the use of Pod::Usage to produce help
+messages. For example:
+
+    use Getopt::Long;
+    use Pod::Usage;
+    my $man = 0;
+    my $help = 0;
+    GetOptions('help|?' => \$help, man => \$man) or pod2usage(2);
+    pod2usage(1) if $help;
+    pod2usage(-exitstatus => 0, -verbose => 2) if $man;
+
+    __END__
+
+    =head1 NAME
+
+    sample - Using GetOpt::Long and Pod::Usage
+
+    =head1 SYNOPSIS
+
+    sample [options] [file ...]
+
+     Options:
+       -help            brief help message
+       -man             full documentation
+
+    =head1 OPTIONS
+
+    =over 8
+
+    =item B<-help>
+
+    Print a brief help message and exits.
+
+    =item B<-man>
+
+    Prints the manual page and exits.
+
+    =back
+
+    =head1 DESCRIPTION
+
+    B<This program> will read the given input file(s) and do someting
+    useful with the contents thereof.
+
+    =cut
+
+See L<Pod::Usage> for details.
+
+A bug that prevented the non-option call-back E<lt>E<gt> from being
+specified as the first argument has been fixed.
+
+To specify the characters E<lt> and E<gt> as option starters, use
+E<gt>E<lt>. Note, however, that changing option starters is strongly
+deprecated. 
+
+=item IO
+
+write() and syswrite() will now accept a single-argument
+form of the call, for consistency with Perl's syswrite().
+
+You can now create a TCP-based IO::Socket::INET without forcing
+a connect attempt.  This allows you to configure its options
+(like making it non-blocking) and then call connect() manually.
+
+A bug that prevented the IO::Socket::protocol() accessor
+from ever returning the correct value has been corrected.
+
+=item JPL
+
+Java Perl Lingo is now distributed with Perl.  See jpl/README
+for more information.
+
+=item lib
+
+C<use lib> now weeds out any trailing duplicate entries.
+C<no lib> removes all named entries.
+
 =item Math::BigInt
 
-The logical operations C<E<lt>E<lt>>, C<E<gt>E<gt>>, C<&>, C<|>,
+The bitwise operations C<E<lt>E<lt>>, C<E<gt>E<gt>>, C<&>, C<|>,
 and C<~> are now supported on bigints.
 
 =item Math::Complex
@@ -551,6 +1229,14 @@ act as mutators (accessor $z->Re(), mutator $z->Re(3)).
 A little bit of radial trigonometry (cylindrical and spherical),
 radial coordinate conversions, and the great circle distance were added.
 
+=item Pod::Parser
+
+[TODO - Brad Appleton <bradapp@enteract.com>]
+
+=item Pod::Text and Pod::Man
+
+[TODO - Russ Allbery <rra@stanford.edu>]
+
 =item SDBM_File
 
 An EXISTS method has been added to this module (and sdbm_exists() has
@@ -558,13 +1244,15 @@ been added to the underlying sdbm library), so one can now call exists
 on an SDBM_File tied hash and get the correct result, rather than a
 runtime error.
 
+A bug that may have caused data loss when more than one disk block
+happens to be read from the database in a single FETCH() has been
+fixed.
+
 =item Time::Local
 
 The timelocal() and timegm() functions used to silently return bogus
-results when the date exceeded the machine's integer range.  They
-now consistently croak() if the date falls in an unsupported range--
-but on the other hand they now accept "out-of-limits" day-of-month
-to make "Julian date" conversions easier.
+results when the date fell outside the machine's integer range.  They
+now consistently croak() if the date falls in an unsupported range.
 
 =item Win32
 
@@ -586,7 +1274,7 @@ to the Win32::GetLastError() function.
 The new Win32::GetFullPathName(FILENAME) returns the full absolute
 pathname for FILENAME in scalar context.  In list context it returns
 a two-element list containing the fully qualified directory name and
-the filename.
+the filename.  See L<Win32>.
 
 =item DBM Filters
 
@@ -607,7 +1295,7 @@ See L<perldbmfilter> for further information.
 
 =head2 Pragmata
 
-C<use attrs> is now obsolescent, and is only provided for
+C<use attrs> is now obsolete, and is only provided for
 backward-compatibility.  It's been replaced by the C<sub : attributes>
 syntax.  See L<perlsub/"Subroutine Attributes"> and L<attributes>.
 
@@ -618,21 +1306,45 @@ from the caller's context.  C<encoding> is currently the only supported
 attribute.
 
 Lexical warnings pragma, C<use warnings;>, to control optional warnings.
+See L<perllexwarn>.
 
-C<use filetest> to control the behaviour of filetests (C<-r> C<-w> ...).
-Currently only one subpragma implemented, "use filetest 'access';",
-that enables the use of access(2) or equivalent to check
-permissions instead of using stat(2) as usual.  This matters
-in filesystems where there are ACLs (access control lists): the
-stat(2) might lie, but access(2) knows better.
+C<use filetest> to control the behaviour of filetests (C<-r> C<-w>
+...).  Currently only one subpragma implemented, "use filetest
+'access';", that uses access(2) or equivalent to check permissions
+instead of using stat(2) as usual.  This matters in filesystems
+where there are ACLs (access control lists): the stat(2) might lie,
+but access(2) knows better.
 
 =head1 Utility Changes
 
-Todo.
+=head2 h2ph
+
+[TODO - Kurt Starsinic <kstar@chapin.edu>]
+
+=head2 perlcc
+
+C<perlcc> now supports the C and Bytecode backends.  By default,
+it generates output from the simple C backend rather than the
+optimized C backend.
+
+Support for non-Unix platforms has been improved.
+
+=head2 h2xs
+
+change#4232
+[TODO - Ilya Zakharevich <ilya@math.ohio-state.edu>]
 
 =head1 Documentation Changes
 
 =over 4
+
+=item perlcompile.pod
+
+An introduction to using the Perl Compiler suite.
+
+=item perlhack.pod
+
+Some guidelines for hacking the Perl source code.
 
 =item perlopentut.pod
 
@@ -648,12 +1360,82 @@ A tutorial on managing class data for object modules.
 
 =back
 
-=head1 New Diagnostics
+=head1 New or Changed Diagnostics
+
+=over 4
 
 =item "my sub" not yet implemented
 
 (F) Lexically scoped subroutines are not yet implemented.  Don't try that
 yet.
+
+=item '!' allowed only after types %s
+
+(F) The '!' is allowed in pack() and unpack() only after certain types.
+See L<perlfunc/pack>.
+
+=item / cannot take a count
+
+(F) You had an unpack template indicating a counted-length string,
+but you have also specified an explicit size for the string.
+See L<perlfunc/pack>.
+
+=item / must be followed by a, A or Z
+
+(F) You had an unpack template indicating a counted-length string,
+which must be followed by one of the letters a, A or Z
+to indicate what sort of string is to be unpacked.
+See L<perlfunc/pack>.
+
+=item / must be followed by a*, A* or Z*
+
+(F) You had a pack template indicating a counted-length string,
+Currently the only things that can have their length counted are a*, A* or Z*.
+See L<perlfunc/pack>.
+
+=item / must follow a numeric type
+
+(F) You had an unpack template that contained a '#',
+but this did not follow some numeric unpack specification.
+See L<perlfunc/pack>.
+
+=item Repeat count in pack overflows
+
+(F) You can't specify a repeat count so large that it overflows
+your signed integers.  See L<perlfunc/pack>.
+
+=item Repeat count in unpack overflows
+
+(F) You can't specify a repeat count so large that it overflows
+your signed integers.  See L<perlfunc/unpack>.
+
+=item /%s/: Unrecognized escape \\%c passed through
+
+(W) You used a backslash-character combination which is not recognized
+by Perl.  This combination appears in an interpolated variable or a
+C<'>-delimited regular expression.  The character was understood literally.
+
+=item /%s/: Unrecognized escape \\%c in character class passed through
+
+(W) You used a backslash-character combination which is not recognized
+by Perl inside character classes.  The character was understood literally.
+
+=item /%s/ should probably be written as "%s"
+
+(W) You have used a pattern where Perl expected to find a string,
+as in the first argument to C<join>.  Perl will treat the true
+or false result of matching the pattern against $_ as the string,
+which is probably not what you had in mind.
+
+=item %s() called too early to check prototype
+
+(W) You've called a function that has a prototype before the parser saw a
+definition or declaration for it, and Perl could not check that the call
+conforms to the prototype.  You need to either add an early prototype
+declaration for the subroutine in question, or move the subroutine
+definition ahead of the call to get proper prototype checking.  Alternatively,
+if you are certain that you're calling the function correctly, you may put
+an ampersand before the name to avoid the warning.  See L<perlsub>.
 
 =item %s package attribute may clash with future reserved word: %s
 
@@ -662,19 +1444,205 @@ That name might have a meaning to Perl itself some day, even though it
 doesn't yet.  Perhaps you should use a mixed-case attribute name, instead.
 See L<attributes>.
 
-=item /%s/: Unrecognized escape \\%c passed through
+=item         (in cleanup) %s
 
-(W) You used a backslash-character combination which is not recognized
-by Perl.  This combination appears in an interpolated variable or a
-C<'>-delimited regular expression.
+(W) This prefix usually indicates that a DESTROY() method raised
+the indicated exception.  Since destructors are usually called by
+the system at arbitrary points during execution, and often a vast
+number of times, the warning is issued only once for any number
+of failures that would otherwise result in the same message being
+repeated.
+
+Failure of user callbacks dispatched using the C<G_KEEPERR> flag
+could also result in this warning.  See L<perlcall/G_KEEPERR>.
+
+=item <> should be quotes
+
+(F) You wrote C<require E<lt>fileE<gt>> when you should have written
+C<require 'file'>.
+
+=item Attempt to join self
+
+(F) You tried to join a thread from within itself, which is an
+impossible task.  You may be joining the wrong thread, or you may
+need to move the join() to some other thread.
+
+=item Bad evalled substitution pattern
+
+(F) You've used the /e switch to evaluate the replacement for a
+substitution, but perl found a syntax error in the code to evaluate,
+most likely an unexpected right brace '}'.
+
+=item Bad realloc() ignored
+
+(S) An internal routine called realloc() on something that had never been
+malloc()ed in the first place. Mandatory, but can be disabled by
+setting environment variable C<PERL_BADFREE> to 1.
+
+=item Binary number > 0b11111111111111111111111111111111 non-portable
+
+(W) The binary number you specified is larger than 2**32-1
+(4294967295) and therefore non-portable between systems.  See
+L<perlport> for more on portability concerns.
+
+=item Bit vector size > 32 non-portable
+
+(W) Using bit vector sizes larger than 32 is non-portable.
+
+=item Buffer overflow in prime_env_iter: %s
+
+(W) A warning peculiar to VMS.  While Perl was preparing to iterate over
+%ENV, it encountered a logical name or symbol definition which was too long,
+so it was truncated to the string shown.
+
+=item Can't check filesystem of script "%s"
+
+(P) For some reason you can't check the filesystem of the script for nosuid.
+
+=item Can't modify non-lvalue subroutine call
+
+(F) Subroutines meant to be used in lvalue context should be declared as
+such, see L<perlsub/"Lvalue subroutines">.
+
+=item Can't read CRTL environ
+
+(S) A warning peculiar to VMS.  Perl tried to read an element of %ENV
+from the CRTL's internal environment array and discovered the array was
+missing.  You need to figure out where your CRTL misplaced its environ
+or define F<PERL_ENV_TABLES> (see L<perlvms>) so that environ is not searched.
+
+=item Can't remove %s: %s, skipping file 
+
+(S) You requested an inplace edit without creating a backup file.  Perl
+was unable to remove the original file to replace it with the modified
+file.  The file was left unmodified.
+
+=item Can't return %s from lvalue subroutine
+
+(F) Perl detected an attempt to return illegal lvalues (such
+as temporary or readonly values) from a subroutine used as an lvalue.
+This is not allowed.
+
+=item Can't weaken a nonreference
+
+(F) You attempted to weaken something that was not a reference.  Only
+references can be weakened.
+
+=item Character class [:%s:] unknown
+
+(F) The class in the character class [: :] syntax is unknown.
+See L<perlre>.
+
+=item Character class syntax [%s] belongs inside character classes
+
+(W) The character class constructs [: :], [= =], and [. .]  go
+I<inside> character classes, the [] are part of the construct,
+for example: /[012[:alpha:]345]/.  Note that [= =] and [. .]
+are not currently implemented; they are simply placeholders for
+future extensions.
+
+=item Constant is not %s reference
+
+(F) A constant value (perhaps declared using the C<use constant> pragma)
+is being dereferenced, but it amounts to the wrong type of reference.  The
+message indicates the type of reference that was expected. This usually
+indicates a syntax error in dereferencing the constant value.
+See L<perlsub/"Constant Functions"> and L<constant>.
+
+=item constant(%s): %%^H is not localized
+
+(F) When setting compile-time-lexicalized hash %^H one should set the 
+corresponding bit of $^H as well.
+
+=item constant(%s): %s
+
+(F) Compile-time-substitutions (such as overloaded constants and
+character names) were not correctly set up.
+
+=item defined(@array) is deprecated
+
+(D) defined() is not usually useful on arrays because it checks for an
+undefined I<scalar> value.  If you want to see if the array is empty,
+just use C<if (@array) { # not empty }> for example.  
+
+=item defined(%hash) is deprecated
+
+(D) defined() is not usually useful on hashes because it checks for an
+undefined I<scalar> value.  If you want to see if the hash is empty,
+just use C<if (%hash) { # not empty }> for example.  
+
+=item Did not produce a valid header
+
+See Server error.
+
+=item Document contains no data
+
+See Server error.
+
+=item entering effective %s failed
+
+(F) While under the C<use filetest> pragma, switching the real and
+effective uids or gids failed.
+
+=item false [] range "%s" in regexp
+
+(W) A character class range must start and end at a literal character, not
+another character class like C<\d> or C<[:alpha:]>.  The "-" in your false
+range is interpreted as a literal "-".  Consider quoting the "-",  "\-".
+See L<perlre>.
 
 =item Filehandle %s opened only for output
 
 (W) You tried to read from a filehandle opened only for writing.  If you
-intended it to be a read-write filehandle, you needed to open it with
+intended it to be a read/write filehandle, you needed to open it with
 "+E<lt>" or "+E<gt>" or "+E<gt>E<gt>" instead of with "E<lt>" or nothing.  If
 you intended only to read from the file, use "E<lt>".  See
 L<perlfunc/open>.
+
+=item Hexadecimal number > 0xffffffff non-portable
+
+(W) The hexadecimal number you specified is larger than 2**32-1
+(4294967295) and therefore non-portable between systems.  See
+L<perlport> for more on portability concerns.
+
+=item Ill-formed CRTL environ value "%s"
+
+(W) A warning peculiar to VMS.  Perl tried to read the CRTL's internal
+environ array, and encountered an element without the C<=> delimiter
+used to spearate keys from values.  The element is ignored.
+
+=item Ill-formed message in prime_env_iter: |%s|
+
+(W) A warning peculiar to VMS.  Perl tried to read a logical name
+or CLI symbol definition when preparing to iterate over %ENV, and
+didn't see the expected delimiter between key and value, so the
+line was ignored.
+
+=item Illegal binary digit %s
+
+(F) You used a digit other than 0 or 1 in a binary number.
+
+=item Illegal binary digit %s ignored
+
+(W) You may have tried to use a digit other than 0 or 1 in a binary number.
+Interpretation of the binary number stopped before the offending digit.
+
+=item Illegal number of bits in vec
+
+(F) The number of bits in vec() (the third argument) must be a power of
+two from 1 to 32 (or 64, if your platform supports that).
+
+=item Integer overflow in %s number
+
+(W) The hexadecimal, octal or binary number you have specified either
+as a literal or as an argument to hex() or oct() is too big for your
+architecture, and has been converted to a floating point number.  On a
+32-bit architecture the largest hexadecimal, octal or binary number
+representable without overflow is 0xFFFFFFFF, 037777777777, or
+0b11111111111111111111111111111111 respectively.  Note that Perl
+transparently promotes all numbers to a floating point representation
+internally--subject to loss of precision errors in subsequent
+operations.
 
 =item Invalid %s attribute: %s
 
@@ -686,12 +1654,43 @@ by Perl or by a user-supplied handler.  See L<attributes>.
 The indicated attributes for a subroutine or variable were not recognized
 by Perl or by a user-supplied handler.  See L<attributes>.
 
+=item invalid [] range "%s" in regexp
+
+The offending range is now explicitly displayed.
+
 =item Invalid separator character %s in attribute list
 
 (F) Something other than a comma or whitespace was seen between the
 elements of an attribute list.  If the previous attribute
 had a parenthesised parameter list, perhaps that list was terminated
 too soon.  See L<attributes>.
+
+=item Invalid separator character %s in subroutine attribute list
+
+(F) Something other than a comma or whitespace was seen between the
+elements of a subroutine attribute list.  If the previous attribute
+had a parenthesised parameter list, perhaps that list was terminated
+too soon.
+
+=item leaving effective %s failed
+
+(F) While under the C<use filetest> pragma, switching the real and
+effective uids or gids failed.
+
+=item Lvalue subs returning %s not implemented yet
+
+(F) Due to limitations in the current implementation, array and hash
+values cannot be returned in subroutines used in lvalue context.
+See L<perlsub/"Lvalue subroutines">.
+
+=item Method %s not permitted
+
+See Server error.
+
+=item Missing %sbrace%s on \N{}
+
+(F) Wrong syntax of character name literal C<\N{charname}> within
+double-quotish context.
 
 =item Missing command in piped open
 
@@ -703,10 +1702,101 @@ construction, but the command was missing or blank.
 (F) The reserved syntax for lexically scoped subroutines requires that they
 have a name with which they can be found.
 
+=item no UTC offset information; assuming local time is UTC
+
+(S) A warning peculiar to VMS.  Perl was unable to find the local
+timezone offset, so it's assuming that local system time is equivalent
+to UTC.  If it's not, define the logical name F<SYS$TIMEZONE_DIFFERENTIAL>
+to translate to the number of seconds which need to be added to UTC to
+get local time.
+
+=item Octal number > 037777777777 non-portable
+
+(W) The octal number you specified is larger than 2**32-1 (4294967295)
+and therefore non-portable between systems.  See L<perlport> for more
+on portability concerns.
+
+See also L<perlport> for writing portable code.
+
+=item panic: del_backref
+
+(P) Failed an internal consistency check while trying to reset a weak
+reference.
+
+=item panic: kid popen errno read
+
+(F) forked child returned an incomprehensible message about its errno.
+
+=item panic: magic_killbackrefs
+
+(P) Failed an internal consistency check while trying to reset all weak
+references to an object.
+
+=item Possible Y2K bug: %s
+
+(W) You are concatenating the number 19 with another number, which
+could be a potential Year 2000 problem.
+
+=item Premature end of script headers
+
+See Server error.
+
+=item realloc() of freed memory ignored
+
+(S) An internal routine called realloc() on something that had already
+been freed.
+
+=item Reference is already weak
+
+(W) You have attempted to weaken a reference that is already weak.
+Doing so has no effect.
+
+=item setpgrp can't take arguments
+
+(F) Your system has the setpgrp() from BSD 4.2, which takes no arguments,
+unlike POSIX setpgid(), which takes a process ID and process group ID.
+
+=item Strange *+?{} on zero-length expression
+
+(W) You applied a regular expression quantifier in a place where it
+makes no sense, such as on a zero-width assertion.
+Try putting the quantifier inside the assertion instead.  For example,
+the way to match "abc" provided that it is followed by three
+repetitions of "xyz" is C</abc(?=(?:xyz){3})/>, not C</abc(?=xyz){3}/>.
+
+=item switching effective %s is not implemented
+
+(F) While under the C<use filetest> pragma, we cannot switch the
+real and effective uids or gids.
+
+=item This Perl can't reset CRTL environ elements (%s)
+
+=item This Perl can't set CRTL environ elements (%s=%s)
+
+(W) Warnings peculiar to VMS.  You tried to change or delete an element
+of the CRTL's internal environ array, but your copy of Perl wasn't
+built with a CRTL that contained the setenv() function.  You'll need to
+rebuild Perl with a CRTL that does, or redefine F<PERL_ENV_TABLES> (see
+L<perlvms>) so that the environ array isn't the target of the change to
+%ENV which produced the warning.
+
+=item Unknown open() mode '%s'
+
+(F) The second argument of 3-argument open() is not among the list
+of valid modes: C<L<lt>>, C<L<gt>>, C<E<gt>E<gt>>, C<+L<lt>>,
+C<+L<gt>>, C<+E<gt>E<gt>>, C<-|>, C<|->.
+
+=item Unknown process %x sent message to prime_env_iter: %s
+
+(P) An error peculiar to VMS.  Perl was reading values for %ENV before
+iterating over it, and someone else stuck a message in the stream of
+data Perl expected.  Someone's very confused, or perhaps trying to
+subvert Perl's population of %ENV for nefarious purposes.
+
 =item Unrecognized escape \\%c passed through
 
 (W) You used a backslash-character combination which is not recognized
-by Perl.
+by Perl.  The character was understood literally.
 
 =item Unterminated attribute parameter in attribute list
 
@@ -722,30 +1812,6 @@ of an attribute, and it wasn't a semicolon or the start of a
 block.  Perhaps you terminated the parameter list of the previous attribute
 too soon.  See L<attributes>.
 
-=item defined(@array) is deprecated
-
-(D) defined() is not usually useful on arrays because it checks for an
-undefined I<scalar> value.  If you want to see if the array is empty,
-just use C<if (@array) { # not empty }> for example.  
-
-=item defined(%hash) is deprecated
-
-(D) defined() is not usually useful on hashes because it checks for an
-undefined I<scalar> value.  If you want to see if the hash is empty,
-just use C<if (%hash) { # not empty }> for example.  
-
-=item Invalid separator character %s in subroutine attribute list
-
-(F) Something other than a comma or whitespace was seen between the
-elements of a subroutine attribute list.  If the previous attribute
-had a parenthesised parameter list, perhaps that list was terminated
-too soon.
-
-=item Possible Y2K bug: %s
-
-(W) You are concatenating the number 19 with another number, which
-could be a potential Year 2000 problem.
-
 =item Unterminated attribute parameter in subroutine attribute list
 
 (F) The lexer saw an opening (left) parenthesis character while parsing a
@@ -760,41 +1826,67 @@ of a subroutine attribute, and it wasn't a semicolon or the start of a
 block.  Perhaps you terminated the parameter list of the previous attribute
 too soon.
 
-=item /%s/ should probably be written as "%s"
+=item Value of CLI symbol "%s" too long
 
-(W) You have used a pattern where Perl expected to find a string,
-like in the first argument to C<join>.  Perl will treat the true
-or false result of matching the pattern against $_ as the string,
-which is probably not what you had in mind.
+(W) A warning peculiar to VMS.  Perl tried to read the value of an %ENV
+element from a CLI symbol table, and found a resultant string longer
+than 1024 characters.  The return value has been truncated to 1024
+characters.
+
+=item Version number must be a constant number
+
+(P) The attempt to translate a C<use Module n.n LIST> statement into
+its equivalent C<BEGIN> block found an internal inconsistency with
+the version number.
+
+=back
 
 =head1 Obsolete Diagnostics
 
-Todo.
+=over 4
 
-=head1 Configuration Changes
+=item Character class syntax [: :] is reserved for future extensions
 
-=head2 installusrbinperl
+(W) Within regular expression character classes ([]) the syntax beginning
+with "[:" and ending with ":]" is reserved for future extensions.
+If you need to represent those character sequences inside a regular
+expression character class, just quote the square brackets with the
+backslash: "\[:" and ":\]".
 
-You can use "Configure -Uinstallusrbinperl" which causes installperl
-to skip installing perl also as /usr/bin/perl.  This is useful if you
-prefer not to modify /usr/bin for some reason or another but harmful
-because many scripts assume to find Perl in /usr/bin/perl.
+=item Ill-formed logical name |%s| in prime_env_iter
 
-=head2 SOCKS support
+(W) A warning peculiar to VMS.  A logical name was encountered when preparing
+to iterate over %ENV which violates the syntactic rules governing logical
+names.  Because it cannot be translated normally, it is skipped, and will not
+appear in %ENV.  This may be a benign occurrence, as some software packages
+might directly modify logical name tables and introduce nonstandard names,
+or it may indicate that a logical name table has been corrupted.
 
-You can use "Configure -Dusesocks" which causes Perl to probe
-for the SOCKS proxy protocol library, http://www.socks.nec.com/
+=item regexp too big
 
-=head2 -A flag
+(F) The current implementation of regular expressions uses shorts as
+address offsets within a string.  Unfortunately this means that if
+the regular expression compiles to longer than 32767, it'll blow up.
+Usually when you want a regular expression this big, there is a better
+way to do it with multiple statements.  See L<perlre>.
 
-You can "post-edit" the Configure variables using the Configure -A
-flag.  The editing happens immediately after the platform specific
-hints files have been processed but before the actual configuration
-process starts.  Run Configure -h to find out the full -A syntax.
+=item Use of "$$<digit>" to mean "${$}<digit>" is deprecated
+
+(D) Perl versions before 5.004 misinterpreted any type marker followed
+by "$" and a digit.  For example, "$$0" was incorrectly taken to mean
+"${$}0" instead of "${$0}".  This bug is (mostly) fixed in Perl 5.004.
+
+However, the developers of Perl 5.004 could not fix this bug completely,
+because at least two widely-used modules depend on the old meaning of
+"$$0" in a string.  So Perl 5.004 still interprets "$$<digit>" in the
+old (broken) way inside strings; but it generates this message as a
+warning.  And in Perl 5.005, this special treatment will cease.
+
+=back
 
 =head1 BUGS
 
-If you find what you think is a bug, you might check the headers of
+If you find what you think is a bug, you might check the
 articles recently posted to the comp.lang.perl.misc newsgroup.
 There may also be information at http://www.perl.com/perl/, the Perl
 Home Page.
@@ -817,8 +1909,8 @@ The F<Artistic> and F<Copying> files for copyright information.
 
 =head1 HISTORY
 
-Written by Gurusamy Sarathy <F<gsar@umich.edu>>, with many contributions
-from The Perl Porters.
+Written by Gurusamy Sarathy <F<gsar@activestate.com>>, with many
+contributions from The Perl Porters.
 
 Send omissions or corrections to <F<perlbug@perl.com>>.
 

@@ -29,7 +29,9 @@
 #endif
 
 #ifdef __GNUC__
-typedef long long __int64;
+#  ifndef __int64		/* some versions seem to #define it already */
+#    define __int64 long long
+#  endif
 #  define Win32_Winsock
 /* GCC does not do __declspec() - render it a nop 
  * and turn on options to avoid importing data 

@@ -420,6 +420,8 @@
 #define PL_statusvalue		(*Perl_Istatusvalue_ptr(aTHXo))
 #undef  PL_statusvalue_vms
 #define PL_statusvalue_vms	(*Perl_Istatusvalue_vms_ptr(aTHXo))
+#undef  PL_stderrgv
+#define PL_stderrgv		(*Perl_Istderrgv_ptr(aTHXo))
 #undef  PL_stdingv
 #define PL_stdingv		(*Perl_Istdingv_ptr(aTHXo))
 #undef  PL_strchop
@@ -2704,6 +2706,10 @@
 #define Perl_save_destructor	pPerl->Perl_save_destructor
 #undef  save_destructor
 #define save_destructor		Perl_save_destructor
+#undef  Perl_save_destructor_x
+#define Perl_save_destructor_x	pPerl->Perl_save_destructor_x
+#undef  save_destructor_x
+#define save_destructor_x	Perl_save_destructor_x
 #undef  Perl_save_freesv
 #define Perl_save_freesv	pPerl->Perl_save_freesv
 #undef  save_freesv

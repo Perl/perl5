@@ -92,7 +92,7 @@ Perl_thread_create(struct perl_thread *thr, thread_func_t *fn)
     DWORD junk;
     unsigned long th;
 
-    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
+    DEBUG_S(PerlIO_printf(Perl_debug_log,
 			  "%p: create OS thread\n", thr));
 #ifdef USE_RTL_THREAD_API
     /* See comment about USE_RTL_THREAD_API in win32thread.h */
@@ -123,7 +123,7 @@ Perl_thread_create(struct perl_thread *thr, thread_func_t *fn)
 #else	/* !USE_RTL_THREAD_API */
     thr->self = CreateThread(NULL, 0, fn, (void*)thr, 0, &junk);
 #endif	/* !USE_RTL_THREAD_API */
-    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
+    DEBUG_S(PerlIO_printf(Perl_debug_log,
 			  "%p: OS thread = %p, id=%ld\n", thr, thr->self, junk));
     return thr->self ? 0 : -1;
 }

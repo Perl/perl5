@@ -14,12 +14,12 @@ Perl_taint_proper(pTHX_ const char *f, char *s)
     dTHR;	/* just for taint */
     char *ug;
 
-#ifdef IV_IS_QUAD
+#if Uid_t_SIGN == -1
     DEBUG_u(PerlIO_printf(Perl_debug_log,
-            "%s %d %" PERL_PRId64 " %" PERL_PRId64 "\n", s, PL_tainted, (IV)PL_uid, (IV)PL_euid));
+            "%s %d %"IVdf" %"IVdf"\n", s, PL_tainted, (IV)PL_uid, (IV)PL_euid));
 #else
     DEBUG_u(PerlIO_printf(Perl_debug_log,
-            "%s %d %lu %lu\n", s, PL_tainted, (unsigned long)PL_uid, (unsigned long)PL_euid));
+            "%s %d %"UVuf" %"UVuf"\n", s, PL_tainted, (UV)PL_uid, (UV)PL_euid));
 #endif
 
     if (PL_tainted) {

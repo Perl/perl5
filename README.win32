@@ -9,12 +9,12 @@ perlwin32 - Perl under Win32
 =head1 SYNOPSIS
 
 These are instructions for building Perl under Windows NT (versions
-3.51 or 4.0).  Currently, this port is reported to build
-under Windows95 using the 4DOS shell--the default shell that infests
-Windows95 will not work (see below).  Note this caveat is only about
-B<building> perl.  Once built, you should be able to B<use> it on
-either Win32 platform (modulo the problems arising from the inferior
-command shell).
+3.51 or 4.0).  Currently, this port is reported to build under
+Windows95 using the 4DOS shell--the default shell that infests
+Windows95 may not work fully (but see below).  Note that this caveat
+is only about B<building> perl.  Once built, you should be able to
+B<use> it on either Win32 platform (modulo the problems arising from
+the inferior command shell).
 
 =head1 DESCRIPTION
 
@@ -67,13 +67,16 @@ See L<Usage Hints> below for general hints about this.
 Use the default "cmd" shell that comes with NT.  Some versions of the
 popular 4DOS/NT shell have incompatibilities that may cause you trouble.
 If the build fails under that shell, try building again with the cmd
-shell.  The Makefile also has known incompatibilites with the "command.com"
-shell that comes with Windows95, so building under Windows95 should
-be considered "unsupported".  However, there have been reports of successful
-build attempts using 4DOS/NT version 6.01 under Windows95, using dmake, but
-your mileage may vary.
+shell.  The nmake Makefile also has known incompatibilites with the
+"command.com" shell that comes with Windows95.
 
-The surest way to build it is on WindowsNT, using the cmd shell.
+However, there have been reports of successful build attempts using
+4DOS/NT version 6.01 under Windows95, using dmake, but your mileage
+may vary.  There is also some basic support for building using dmake
+under command.com.  Nevertheless, if building under command.com
+doesn't work, try 4DOS/NT.
+
+The surest way to build it is on Windows NT, using the cmd shell.
 
 Make sure the path to the build directory does not contain spaces.  The
 build usually works in this circumstance, but some tests will fail.
@@ -87,14 +90,14 @@ work for MakeMaker builds.)
 
 A port of dmake for win32 platforms is available from:
 
-    http://www-personal.umich.edu/~gsar/dmake-4.1-win32.zip
+    ftp://ftp.linux.activestate.com/pub/staff/gsar/dmake-4.1-win32.zip
 
 Fetch and install dmake somewhere on your path (follow the instructions
 in the README.NOW file).
 
 =item Microsoft Visual C++
 
-The NMAKE that comes with Visual C++ will suffice for building.
+The nmake that comes with Visual C++ will suffice for building.
 You will need to run the VCVARS32.BAT file usually found somewhere
 like C:\MSDEV4.2\BIN.  This will set your build environment.
 
@@ -136,7 +139,7 @@ You also need dmake.  See L</"Borland C++"> above on how to get it.
 
 Make sure you are in the "win32" subdirectory under the perl toplevel.
 This directory contains a "Makefile" that will work with
-versions of NMAKE that come with Visual C++, and a dmake "makefile.mk"
+versions of nmake that come with Visual C++, and a dmake "makefile.mk"
 that will work for all supported compilers.  The defaults in the dmake
 makefile are setup to build using the Borland compiler.
 
@@ -697,8 +700,9 @@ C<kill()> is implemented, but doesn't have the semantics of
 C<raise()>, i.e. it doesn't send a signal to the identified process
 like it does on Unix platforms.  Instead it immediately calls
 C<TerminateProcess(process,signal)>.  Thus the signal argument is
-used to set the exit-status of the terminated process.  This behavior
-may change in future.
+used to set the exit-status of the terminated process.  In particular,
+C<kill(0,$pid)> will kill the process identified by C<$pid> (unlike
+on Unix).  This behavior may change in future.
 
 =item *
 

@@ -689,7 +689,7 @@ EOP
 			
 			for ($i = 1; $i <= $max; $i++) {
 			    if (defined $dbline{$i}) {
-			        print "$file:\n" unless $was++;
+			        print $OUT "$file:\n" unless $was++;
 				print $OUT " $i:\t", $dbline[$i];
 				($stop,$action) = split(/\0/, $dbline{$i});
 				print $OUT "   break if (", $stop, ")\n"

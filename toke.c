@@ -120,7 +120,7 @@ int* yychar_pointer = NULL;
  * LOOPX        : loop exiting command (goto, last, dump, etc)
  * FTST         : file test operator
  * FUN0         : zero-argument function
- * FUN1         : not used
+ * FUN1         : not used, except for not, which isn't a UNIOP
  * BOop         : bitwise or or xor
  * BAop         : bitwise and
  * SHop         : shift operator
@@ -375,13 +375,13 @@ Perl_lex_start(pTHX_ SV *line)
     SAVESPTR(PL_linestr);
     SAVEPPTR(PL_lex_brackstack);
     SAVEPPTR(PL_lex_casestack);
-    SAVEDESTRUCTOR(restore_rsfp, PL_rsfp);
+    SAVEDESTRUCTOR_X(restore_rsfp, PL_rsfp);
     SAVESPTR(PL_lex_stuff);
     SAVEI32(PL_lex_defer);
     SAVEI32(PL_sublex_info.sub_inwhat);
     SAVESPTR(PL_lex_repl);
-    SAVEDESTRUCTOR(restore_expect, PL_tokenbuf + PL_expect); /* encode as pointer */
-    SAVEDESTRUCTOR(restore_lex_expect, PL_tokenbuf + PL_expect);
+    SAVEDESTRUCTOR_X(restore_expect, PL_tokenbuf + PL_expect); /* encode as pointer */
+    SAVEDESTRUCTOR_X(restore_lex_expect, PL_tokenbuf + PL_expect);
 
     PL_lex_state = LEX_NORMAL;
     PL_lex_defer = 0;
@@ -2266,7 +2266,8 @@ Perl_yylex(pTHX)
     PL_oldoldbufptr = PL_oldbufptr;
     PL_oldbufptr = s;
     DEBUG_p( {
-	PerlIO_printf(PerlIO_stderr(), "### Tokener expecting %s at %s\n", exp_name[PL_expect], s);
+	PerlIO_printf(Perl_debug_log, "### Tokener expecting %s at %s\n",
+		      exp_name[PL_expect], s);
     } )
 
   retry:
@@ -3603,7 +3604,8 @@ Perl_yylex(pTHX)
 
 		if (PL_oldoldbufptr &&
 		    PL_oldoldbufptr < PL_bufptr &&
-		    (PL_oldoldbufptr == PL_last_lop || PL_oldoldbufptr == PL_last_uni) &&
+		    (PL_oldoldbufptr == PL_last_lop
+		     || PL_oldoldbufptr == PL_last_uni) &&
 		    /* NO SKIPSPACE BEFORE HERE! */
 		    (PL_expect == XREF ||
 		     ((PL_opargs[PL_last_lop_op] >> OASHIFT)& 7) == OA_FILEREF))
@@ -3741,13 +3743,8 @@ Perl_yylex(pTHX)
 	    TERM(THING);
 
 	case KEY___LINE__:
-#ifdef IV_IS_QUAD
             yylval.opval = (OP*)newSVOP(OP_CONST, 0,
-                                    Perl_newSVpvf(aTHX_ "%" PERL_PRId64, (IV)PL_curcop->cop_line));
-#else
-            yylval.opval = (OP*)newSVOP(OP_CONST, 0,
-                                    Perl_newSVpvf(aTHX_ "%ld", (long)PL_curcop->cop_line));
-#endif
+                                    Perl_newSVpvf(aTHX_ "%"IVdf, (IV)PL_curcop->cop_line));
 	    TERM(THING);
 
 	case KEY___PACKAGE__:
@@ -4230,7 +4227,10 @@ Perl_yylex(pTHX)
 	    OPERATOR(USE);
 
 	case KEY_not:
-	    OPERATOR(NOTOP);
+	    if (*s == '(' || (s = skipspace(s), *s == '('))
+		FUN1(OP_NOT);
+	    else
+		OPERATOR(NOTOP);
 
 	case KEY_open:
 	    s = skipspace(s);
@@ -5441,7 +5441,8 @@ S_checkcomma(pTHX_ register char *s, char *name, char *what)
 	    if (*w)
 		for (; *w && isSPACE(*w); w++) ;
 	    if (!*w || !strchr(";|})]oaiuw!=", *w))	/* an advisory hack only... */
-		Perl_warner(aTHX_ WARN_SYNTAX, "%s (...) interpreted as function",name);
+		Perl_warner(aTHX_ WARN_SYNTAX,
+			    "%s (...) interpreted as function",name);
 	}
     }
     while (s < PL_bufend && isSPACE(*s))
@@ -5539,12 +5540,12 @@ S_new_constant(pTHX_ char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type)
 	STRLEN n_a;
  	sv_catpv(ERRSV, "Propagated");
 	yyerror(SvPV(ERRSV, n_a)); /* Duplicates the message inside eval */
-	POPs ;
+	(void)POPs;
  	res = SvREFCNT_inc(sv);
     }
     else {
  	res = POPs;
- 	SvREFCNT_inc(res);
+ 	(void)SvREFCNT_inc(res);
     }
     
     PUTBACK ;
@@ -6995,28 +6996,16 @@ Perl_yyerror(pTHX_ char *s)
 	where = SvPVX(where_sv);
     }
     msg = sv_2mortal(newSVpv(s, 0));
-#ifdef IV_IS_QUAD
-    Perl_sv_catpvf(aTHX_ msg, " at %_ line %" PERL_PRId64 ", ",
+    Perl_sv_catpvf(aTHX_ msg, " at %_ line %"IVdf", ",
               GvSV(PL_curcop->cop_filegv), (IV)PL_curcop->cop_line);
-#else
-    Perl_sv_catpvf(aTHX_ msg, " at %_ line %ld, ",
-              GvSV(PL_curcop->cop_filegv), (long)PL_curcop->cop_line);
-#endif
     if (context)
 	Perl_sv_catpvf(aTHX_ msg, "near \"%.*s\"\n", contlen, context);
     else
 	Perl_sv_catpvf(aTHX_ msg, "%s\n", where);
     if (PL_multi_start < PL_multi_end && (U32)(PL_curcop->cop_line - PL_multi_end) <= 1) {
-#ifdef IV_IS_QUAD
         Perl_sv_catpvf(aTHX_ msg,
-        "  (Might be a runaway multi-line %c%c string starting on line %" PERL_\
-PRId64 ")\n",
+        "  (Might be a runaway multi-line %c%c string starting on line %"IVdf")\n",
                 (int)PL_multi_open,(int)PL_multi_close,(IV)PL_multi_start);
-#else
-        Perl_sv_catpvf(aTHX_ msg,
-        "  (Might be a runaway multi-line %c%c string starting on line %ld)\n",
-                (int)PL_multi_open,(int)PL_multi_close,(long)PL_multi_start);
-#endif
         PL_multi_end = 0;
     }
     if (PL_in_eval & EVAL_WARNONLY)

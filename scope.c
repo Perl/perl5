@@ -17,26 +17,27 @@
 #include "perl.h"
 
 void *
-Perl_default_protect(pTHX_ int *excpt, protect_body_t body, ...)
+Perl_default_protect(pTHX_ volatile JMPENV *pcur_env, int *excpt,
+		     protect_body_t body, ...)
 {
     void *ret;
     va_list args;
     va_start(args, body);
-    ret = vdefault_protect(excpt, body, &args);
+    ret = vdefault_protect(pcur_env, excpt, body, &args);
     va_end(args);
     return ret;
 }
 
 void *
-Perl_vdefault_protect(pTHX_ int *excpt, protect_body_t body, va_list *args)
+Perl_vdefault_protect(pTHX_ volatile JMPENV *pcur_env, int *excpt,
+		      protect_body_t body, va_list *args)
 {
     dTHR;
-    dJMPENV;
     int ex;
     void *ret;
 
     DEBUG_l(Perl_deb(aTHX_ "Setting up local jumplevel %p, was %p\n",
-		&cur_env, PL_top_env));
+		pcur_env, PL_top_env));
     JMPENV_PUSH(ex);
     if (ex)
 	ret = NULL;
@@ -437,7 +438,7 @@ Perl_save_threadsv(pTHX_ PADOFFSET i)
 #ifdef USE_THREADS
     dTHR;
     SV **svp = &THREADSV(i);	/* XXX Change to save by offset */
-    DEBUG_S(PerlIO_printf(PerlIO_stderr(), "save_threadsv %u: %p %p:%s\n",
+    DEBUG_S(PerlIO_printf(Perl_debug_log, "save_threadsv %u: %p %p:%s\n",
 			  i, svp, *svp, SvPEEK(*svp)));
     save_svref(svp);
     return svp;
@@ -541,13 +542,23 @@ Perl_save_list(pTHX_ register SV **sarg, I32 maxsarg)
 }
 
 void
-Perl_save_destructor(pTHX_ DESTRUCTORFUNC_t f, void* p)
+Perl_save_destructor(pTHX_ DESTRUCTORFUNC_NOCONTEXT_t f, void* p)
 {
     dTHR;
     SSCHECK(3);
     SSPUSHDPTR(f);
     SSPUSHPTR(p);
     SSPUSHINT(SAVEt_DESTRUCTOR);
+}
+
+void
+Perl_save_destructor_x(pTHX_ DESTRUCTORFUNC_t f, void* p)
+{
+    dTHR;
+    SSCHECK(3);
+    SSPUSHDXPTR(f);
+    SSPUSHPTR(p);
+    SSPUSHINT(SAVEt_DESTRUCTOR_X);
 }
 
 void
@@ -646,7 +657,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    ptr = SSPOPPTR;
 	restore_sv:
 	    sv = *(SV**)ptr;
-	    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
+	    DEBUG_S(PerlIO_printf(Perl_debug_log,
 				  "restore svref: %p %p:%s -> %p:%s\n",
 			  	  ptr, sv, SvPEEK(sv), value, SvPEEK(value)));
 	    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv) &&
@@ -831,7 +842,11 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_DESTRUCTOR:
 	    ptr = SSPOPPTR;
-	    CALLDESTRUCTOR(aTHXo_ ptr);
+	    (*SSPOPDPTR)(ptr);
+	    break;
+	case SAVEt_DESTRUCTOR_X:
+	    ptr = SSPOPPTR;
+	    (*SSPOPDXPTR)(aTHXo_ ptr);
 	    break;
 	case SAVEt_REGCONTEXT:
 	case SAVEt_ALLOC:

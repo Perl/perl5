@@ -3264,6 +3264,7 @@ PP(pp_unpack)
     register U32 culong;
     NV cdouble;
     int commas = 0;
+    int star;
 #ifdef PERL_NATINT_PACK
     int natint;		/* native integer */
     int unatint;	/* unsigned native integer */
@@ -3305,11 +3306,13 @@ PP(pp_unpack)
 	    else
 		DIE(aTHX_ "'!' allowed only after types %s", natstr);
 	}
+	star = 0;
 	if (pat >= patend)
 	    len = 1;
 	else if (*pat == '*') {
 	    len = strend - strbeg;	/* long enough */
 	    pat++;
+	    star = 1;
 	}
 	else if (isDIGIT(*pat)) {
 	    len = *pat++ - '0';
@@ -3321,6 +3324,7 @@ PP(pp_unpack)
 	}
 	else
 	    len = (datumtype != '@');
+      redo_switch:
 	switch(datumtype) {
 	default:
 	    DIE(aTHX_ "Invalid type in unpack: '%c'", (int)datumtype);
@@ -3356,15 +3360,14 @@ PP(pp_unpack)
 	case '/':
 	    if (oldsp >= SP)
 		DIE(aTHX_ "/ must follow a numeric type");
-	    if (*pat != 'a' && *pat != 'A' && *pat != 'Z')
-		DIE(aTHX_ "/ must be followed by a, A or Z");
 	    datumtype = *pat++;
 	    if (*pat == '*')
 		pat++;		/* ignore '*' for compatibility with pack */
 	    if (isDIGIT(*pat))
 		DIE(aTHX_ "/ cannot take a count" );
 	    len = POPi;
-	    /* drop through */
+	    star = 0;
+	    goto redo_switch;
 	case 'A':
 	case 'Z':
 	case 'a':
@@ -3395,7 +3398,7 @@ PP(pp_unpack)
 	    break;
 	case 'B':
 	case 'b':
-	    if (pat[-1] == '*' || len > (strend - s) * 8)
+	    if (star || len > (strend - s) * 8)
 		len = (strend - s) * 8;
 	    if (checksum) {
 		if (!PL_bitcount) {
@@ -3463,7 +3466,7 @@ PP(pp_unpack)
 	    break;
 	case 'H':
 	case 'h':
-	    if (pat[-1] == '*' || len > (strend - s) * 2)
+	    if (star || len > (strend - s) * 2)
 		len = (strend - s) * 2;
 	    sv = NEWSV(35, len + 1);
 	    SvCUR_set(sv, len);
@@ -4427,10 +4430,16 @@ PP(pp_pack)
 	case 'a':
 	    fromstr = NEXTFROM;
 	    aptr = SvPV(fromstr, fromlen);
-	    if (pat[-1] == '*')
+	    if (pat[-1] == '*') {
 		len = fromlen;
-	    if (fromlen > len)
+		if (datumtype == 'Z')
+		    ++len;
+	    }
+	    if (fromlen >= len) {
 		sv_catpvn(cat, aptr, len);
+		if (datumtype == 'Z')
+		    *(SvEND(cat)-1) = '\0';
+	    }
 	    else {
 		sv_catpvn(cat, aptr, fromlen);
 		len -= fromlen;
@@ -5170,7 +5179,7 @@ Perl_unlock_condpair(pTHX_ void *svv)
 	Perl_croak(aTHX_ "panic: unlock_condpair unlocking mutex that we don't own");
     MgOWNER(mg) = 0;
     COND_SIGNAL(MgOWNERCONDP(mg));
-    DEBUG_S(PerlIO_printf(PerlIO_stderr(), "0x%lx: unlock 0x%lx\n",
+    DEBUG_S(PerlIO_printf(Perl_debug_log, "0x%lx: unlock 0x%lx\n",
 			  (unsigned long)thr, (unsigned long)svv);)
     MUTEX_UNLOCK(MgMUTEXP(mg));
 }
@@ -5195,10 +5204,10 @@ PP(pp_lock)
 	while (MgOWNER(mg))
 	    COND_WAIT(MgOWNERCONDP(mg), MgMUTEXP(mg));
 	MgOWNER(mg) = thr;
-	DEBUG_S(PerlIO_printf(PerlIO_stderr(), "0x%lx: pp_lock lock 0x%lx\n",
+	DEBUG_S(PerlIO_printf(Perl_debug_log, "0x%lx: pp_lock lock 0x%lx\n",
 			      (unsigned long)thr, (unsigned long)sv);)
 	MUTEX_UNLOCK(MgMUTEXP(mg));
-	SAVEDESTRUCTOR(Perl_unlock_condpair, sv);
+	SAVEDESTRUCTOR_X(Perl_unlock_condpair, sv);
     }
 #endif /* USE_THREADS */
     if (SvTYPE(retsv) == SVt_PVAV || SvTYPE(retsv) == SVt_PVHV

@@ -52,41 +52,40 @@ struct block_sub {
 	cx->blk_sub.dfoutgv = PL_defoutgv;				\
 	(void)SvREFCNT_inc(cx->blk_sub.dfoutgv)
 
-#define POPSUB(cx)							\
-	{ struct block_sub cxsub;					\
-	  POPSUB1(cx);							\
-	  POPSUB2(); }
-
-#define POPSUB1(cx)							\
-	cxsub = cx->blk_sub;	/* because DESTROY may clobber *cx */
-
 #ifdef USE_THREADS
 #define POPSAVEARRAY() NOOP
 #else
 #define POPSAVEARRAY()							\
     STMT_START {							\
 	SvREFCNT_dec(GvAV(PL_defgv));					\
-	GvAV(PL_defgv) = cxsub.savearray;				\
+	GvAV(PL_defgv) = cx->blk_sub.savearray;				\
     } STMT_END
 #endif /* USE_THREADS */
 
-#define POPSUB2()							\
-	if (cxsub.hasargs) {						\
+#define POPSUB(cx,sv)							\
+    STMT_START {							\
+	if (cx->blk_sub.hasargs) {					\
 	    POPSAVEARRAY();						\
 	    /* abandon @_ if it got reified */				\
-	    if (AvREAL(cxsub.argarray)) {				\
-		SSize_t fill = AvFILLp(cxsub.argarray);			\
-		SvREFCNT_dec(cxsub.argarray);				\
-		cxsub.argarray = newAV();				\
-		av_extend(cxsub.argarray, fill);			\
-		AvFLAGS(cxsub.argarray) = AVf_REIFY;			\
-		PL_curpad[0] = (SV*)cxsub.argarray;			\
+	    if (AvREAL(cx->blk_sub.argarray)) {				\
+		SSize_t fill = AvFILLp(cx->blk_sub.argarray);		\
+		SvREFCNT_dec(cx->blk_sub.argarray);			\
+		cx->blk_sub.argarray = newAV();				\
+		av_extend(cx->blk_sub.argarray, fill);			\
+		AvFLAGS(cx->blk_sub.argarray) = AVf_REIFY;		\
+		PL_curpad[0] = (SV*)cx->blk_sub.argarray;		\
 	    }								\
 	}								\
-	if (cxsub.cv) {							\
-	    if (!(CvDEPTH(cxsub.cv) = cxsub.olddepth))			\
-		SvREFCNT_dec(cxsub.cv);					\
-	}
+	sv = (SV*)cx->blk_sub.cv;					\
+	if (sv && (CvDEPTH((CV*)sv) = cx->blk_sub.olddepth))		\
+	    sv = Nullsv;						\
+    } STMT_END
+
+#define LEAVESUB(sv)							\
+    STMT_START {							\
+	if (sv)								\
+	    SvREFCNT_dec(sv);						\
+    } STMT_END
 
 #define POPFORMAT(cx)							\
 	setdefout(cx->blk_sub.dfoutgv);					\
@@ -103,9 +102,9 @@ struct block_eval {
 
 #define PUSHEVAL(cx,n,fgv)						\
 	cx->blk_eval.old_in_eval = PL_in_eval;				\
-	cx->blk_eval.old_op_type = PL_op->op_type;				\
+	cx->blk_eval.old_op_type = PL_op->op_type;			\
 	cx->blk_eval.old_name = n;					\
-	cx->blk_eval.old_eval_root = PL_eval_root;				\
+	cx->blk_eval.old_eval_root = PL_eval_root;			\
 	cx->blk_eval.cur_text = PL_linestr;
 
 #define POPEVAL(cx)							\
@@ -129,8 +128,8 @@ struct block_loop {
 };
 
 #define PUSHLOOP(cx, ivar, s)						\
-	cx->blk_loop.label = PL_curcop->cop_label;				\
-	cx->blk_loop.resetsp = s - PL_stack_base;				\
+	cx->blk_loop.label = PL_curcop->cop_label;			\
+	cx->blk_loop.resetsp = s - PL_stack_base;			\
 	cx->blk_loop.redo_op = cLOOP->op_redoop;			\
 	cx->blk_loop.next_op = cLOOP->op_nextop;			\
 	cx->blk_loop.last_op = cLOOP->op_lastop;			\
@@ -141,22 +140,13 @@ struct block_loop {
 	cx->blk_loop.iterix = -1;
 
 #define POPLOOP(cx)							\
-	{ struct block_loop cxloop;					\
-	  POPLOOP1(cx);							\
-	  POPLOOP2(); }
-
-#define POPLOOP1(cx)							\
-	cxloop = cx->blk_loop;	/* because DESTROY may clobber *cx */	\
-	newsp = PL_stack_base + cxloop.resetsp;
-
-#define POPLOOP2()							\
-	SvREFCNT_dec(cxloop.iterlval);					\
-	if (cxloop.itervar) {						\
-	    sv_2mortal(*cxloop.itervar);				\
-	    *cxloop.itervar = cxloop.itersave;				\
+	SvREFCNT_dec(cx->blk_loop.iterlval);				\
+	if (cx->blk_loop.itervar) {					\
+	    sv_2mortal(*(cx->blk_loop.itervar));			\
+	    *(cx->blk_loop.itervar) = cx->blk_loop.itersave;		\
 	}								\
-	if (cxloop.iterary && cxloop.iterary != PL_curstack)		\
-	    SvREFCNT_dec(cxloop.iterary);
+	if (cx->blk_loop.iterary && cx->blk_loop.iterary != PL_curstack)\
+	    SvREFCNT_dec(cx->blk_loop.iterary);
 
 /* context common to subroutines, evals and loops */
 struct block {
@@ -195,7 +185,7 @@ struct block {
 	cx->blk_oldretsp	= PL_retstack_ix,			\
 	cx->blk_oldpm		= PL_curpm,				\
 	cx->blk_gimme		= gimme;				\
-	DEBUG_l( PerlIO_printf(PerlIO_stderr(), "Entering block %ld, type %s\n",	\
+	DEBUG_l( PerlIO_printf(Perl_debug_log, "Entering block %ld, type %s\n",	\
 		    (long)cxstack_ix, PL_block_type[CxTYPE(cx)]); )
 
 /* Exit a block (RETURN and LAST). */
@@ -207,7 +197,7 @@ struct block {
 	PL_retstack_ix	 = cx->blk_oldretsp,				\
 	pm		 = cx->blk_oldpm,				\
 	gimme		 = cx->blk_gimme;				\
-	DEBUG_l( PerlIO_printf(PerlIO_stderr(), "Leaving block %ld, type %s\n",		\
+	DEBUG_l( PerlIO_printf(Perl_debug_log, "Leaving block %ld, type %s\n",		\
 		    (long)cxstack_ix+1,PL_block_type[CxTYPE(cx)]); )
 
 /* Continue a block elsewhere (NEXT and REDO). */
@@ -306,7 +296,6 @@ struct context {
 #define G_NOARGS	8	/* Don't construct a @_ array. */
 #define G_KEEPERR      16	/* Append errors to $@, don't overwrite it */
 #define G_NODEBUG      32	/* Disable debugging at toplevel.  */
-#define G_NOCATCH      64       /* Don't do CATCH_SET() */
 
 /* flag bits for PL_in_eval */
 #define EVAL_NULL	0	/* not in an eval */
@@ -380,7 +369,7 @@ typedef struct stackinfo PERL_SI;
 	djSP;								\
 	PERL_SI *prev = PL_curstackinfo->si_prev;			\
 	if (!prev) {							\
-	    PerlIO_printf(PerlIO_stderr(), "panic: POPSTACK\n");	\
+	    PerlIO_printf(Perl_error_log, "panic: POPSTACK\n");		\
 	    my_exit(1);							\
 	}								\
 	SWITCHSTACK(PL_curstack,prev->si_stack);			\

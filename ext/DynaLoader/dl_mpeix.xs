@@ -53,7 +53,7 @@ dl_load_file(filename, flags=0)
     p_mpe_dld           obj = NULL;
     int                 i;
     CODE:
-    DLDEBUG(1,PerlIO_printf(PerlIO_stderr(), "dl_load_file(%s,%x):\n", filename,
+    DLDEBUG(1,PerlIO_printf(Perl_debug_log, "dl_load_file(%s,%x):\n", filename,
 flags));
     if (flags & 0x01)
         Perl_warn(aTHX_ "Can't make loaded symbols global on this platform while loading %s
@@ -68,7 +68,7 @@ flags));
     else
         sprintf(obj->filename," %s ",filename);
 
-    DLDEBUG(2,PerlIO_printf(PerlIO_stderr()," libref=%x\n", obj));
+    DLDEBUG(2,PerlIO_printf(Perl_debug_log," libref=%x\n", obj));
 
     ST(0) = sv_newmortal() ;
     if (obj == NULL)
@@ -86,7 +86,7 @@ dl_find_symbol(libhandle, symbolname)
     char      symname[PATH_MAX + 3];
     void *    symaddr = NULL;
     int       status;
-    DLDEBUG(2,PerlIO_printf(PerlIO_stderr(),"dl_find_symbol(handle=%x, symbol=%s)\n",
+    DLDEBUG(2,PerlIO_printf(Perl_debug_log,"dl_find_symbol(handle=%x, symbol=%s)\n",
                 libhandle, symbolname));
     ST(0) = sv_newmortal() ;
     errno = 0;
@@ -95,7 +95,7 @@ dl_find_symbol(libhandle, symbolname)
     HPGETPROCPLABEL(8, symname, &symaddr, &status, obj->filename, 1,
                     0, &datalen, 1, 0, 0);
 
-    DLDEBUG(2,PerlIO_printf(PerlIO_stderr(),"  symbolref(PROCEDURE) = %x, status=%x\n", symaddr, status));
+    DLDEBUG(2,PerlIO_printf(Perl_debug_log,"  symbolref(PROCEDURE) = %x, status=%x\n", symaddr, status));
 
     if (status != 0) {
         SaveError(aTHX_"%s",(errno) ? Strerror(errno) : "Symbol not found") ;
@@ -115,7 +115,7 @@ dl_install_xsub(perl_name, symref, filename="$Package")
     void *      symref
     char *      filename
     CODE:
-    DLDEBUG(2,PerlIO_printf(PerlIO_stderr(),"dl_install_xsub(name=%s, symref=%x)\n",
+    DLDEBUG(2,PerlIO_printf(Perl_debug_log,"dl_install_xsub(name=%s, symref=%x)\n",
             perl_name, symref));
     ST(0) = sv_2mortal(newRV((SV*)newXS(perl_name,
 					(void(*)(pTHX_ CV *))symref,

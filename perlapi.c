@@ -3324,9 +3324,16 @@ Perl_save_delete(pTHXo_ HV* hv, char* key, I32 klen)
 
 #undef  Perl_save_destructor
 void
-Perl_save_destructor(pTHXo_ DESTRUCTORFUNC_t f, void* p)
+Perl_save_destructor(pTHXo_ DESTRUCTORFUNC_NOCONTEXT_t f, void* p)
 {
     ((CPerlObj*)pPerl)->Perl_save_destructor(f, p);
+}
+
+#undef  Perl_save_destructor_x
+void
+Perl_save_destructor_x(pTHXo_ DESTRUCTORFUNC_t f, void* p)
+{
+    ((CPerlObj*)pPerl)->Perl_save_destructor_x(f, p);
 }
 
 #undef  Perl_save_freesv
@@ -4789,12 +4796,12 @@ Perl_magic_dump(pTHXo_ MAGIC *mg)
 
 #undef  Perl_default_protect
 void*
-Perl_default_protect(pTHXo_ int *excpt, protect_body_t body, ...)
+Perl_default_protect(pTHXo_ volatile JMPENV *je, int *excpt, protect_body_t body, ...)
 {
     void* retval;
     va_list args;
     va_start(args, body);
-    retval = ((CPerlObj*)pPerl)->Perl_vdefault_protect(excpt, body, &args);
+    retval = ((CPerlObj*)pPerl)->Perl_vdefault_protect(je, excpt, body, &args);
     va_end(args);
     return retval;
 
@@ -4802,9 +4809,9 @@ Perl_default_protect(pTHXo_ int *excpt, protect_body_t body, ...)
 
 #undef  Perl_vdefault_protect
 void*
-Perl_vdefault_protect(pTHXo_ int *excpt, protect_body_t body, va_list *args)
+Perl_vdefault_protect(pTHXo_ volatile JMPENV *je, int *excpt, protect_body_t body, va_list *args)
 {
-    return ((CPerlObj*)pPerl)->Perl_vdefault_protect(excpt, body, args);
+    return ((CPerlObj*)pPerl)->Perl_vdefault_protect(je, excpt, body, args);
 }
 
 #undef  Perl_reginitcolors

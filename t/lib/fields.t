@@ -106,7 +106,7 @@ print "ok ", ++$testno, "\n";
 
 # We should get compile time failures field name typos
 eval q(my D3 $obj3 = $obj2; $obj3->{notthere} = "");
-print "not " unless $@ && $@ =~ /^No such field "notthere"/;
+print "not " unless $@ && $@ =~ /^No such pseudo-hash field "notthere"/;
 print "ok ", ++$testno, "\n";
 
 #fields::_dump();
