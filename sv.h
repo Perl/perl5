@@ -553,23 +553,28 @@ SV *newRV_noinc _((SV *));
 #define newRV_noinc(sv)	((Sv = newRV(sv)), --SvREFCNT(SvRV(Sv)), Sv)
 #endif
 
-/* the following macro updates any magic values this sv is associated with */
+/* the following macros update any magic values this sv is associated with */
 
-#define SvSETMAGIC(x) if (SvSMAGICAL(x)) mg_set(x)
+#define SvGETMAGIC(x) STMT_START { if (SvGMAGICAL(x)) mg_get(x); } STMT_END
+#define SvSETMAGIC(x) STMT_START { if (SvSMAGICAL(x)) mg_set(x); } STMT_END
 
 #define SvSetSV_and(dst,src,finally) \
+	STMT_START {					\
 	    if ((dst) != (src)) {			\
 		sv_setsv(dst, src);			\
 		finally;				\
-	    }
+	    }						\
+	} STMT_END
 #define SvSetSV_nosteal_and(dst,src,finally) \
+	STMT_START {					\
 	    if ((dst) != (src)) {			\
 		U32 tMpF = SvFLAGS(src) & SVs_TEMP;	\
 		SvTEMP_off(src);			\
 		sv_setsv(dst, src);			\
 		SvFLAGS(src) |= tMpF;			\
 		finally;				\
-	    }
+	    }						\
+	} STMT_END
 
 #define SvSetSV(dst,src) \
 		SvSetSV_and(dst,src,/*nothing*/;)

@@ -1130,6 +1130,15 @@ IV i;
 }
 
 void
+sv_setiv_mg(sv,i)
+register SV *sv;
+IV i;
+{
+    sv_setiv(sv,i);
+    SvSETMAGIC(sv);
+}
+
+void
 sv_setuv(sv,u)
 register SV *sv;
 UV u;
@@ -1138,6 +1147,15 @@ UV u;
 	sv_setiv(sv, u);
     else
 	sv_setnv(sv, (double)u);
+}
+
+void
+sv_setuv_mg(sv,u)
+register SV *sv;
+UV u;
+{
+    sv_setuv(sv,u);
+    SvSETMAGIC(sv);
 }
 
 void
@@ -1185,6 +1203,15 @@ double num;
     SvNVX(sv) = num;
     (void)SvNOK_only(sv);			/* validate number */
     SvTAINT(sv);
+}
+
+void
+sv_setnv_mg(sv,num)
+register SV *sv;
+double num;
+{
+    sv_setnv(sv,num);
+    SvSETMAGIC(sv);
 }
 
 static void
@@ -2162,6 +2189,15 @@ register SV *sstr;
 }
 
 void
+sv_setsv_mg(dstr,sstr)
+SV *dstr;
+register SV *sstr;
+{
+    sv_setsv(dstr,sstr);
+    SvSETMAGIC(dstr);
+}
+
+void
 sv_setpvn(sv,ptr,len)
 register SV *sv;
 register const char *ptr;
@@ -2191,6 +2227,16 @@ register STRLEN len;
     *SvEND(sv) = '\0';
     (void)SvPOK_only(sv);		/* validate pointer */
     SvTAINT(sv);
+}
+
+void
+sv_setpvn_mg(sv,ptr,len)
+register SV *sv;
+register const char *ptr;
+register STRLEN len;
+{
+    sv_setpvn(sv,ptr,len);
+    SvSETMAGIC(sv);
 }
 
 void
@@ -2225,6 +2271,15 @@ register const char *ptr;
 }
 
 void
+sv_setpv_mg(sv,ptr)
+register SV *sv;
+register const char *ptr;
+{
+    sv_setpv(sv,ptr);
+    SvSETMAGIC(sv);
+}
+
+void
 sv_usepvn(sv,ptr,len)
 register SV *sv;
 register char *ptr;
@@ -2251,6 +2306,16 @@ register STRLEN len;
     *SvEND(sv) = '\0';
     (void)SvPOK_only(sv);		/* validate pointer */
     SvTAINT(sv);
+}
+
+void
+sv_usepvn_mg(sv,ptr,len)
+register SV *sv;
+register char *ptr;
+register STRLEN len;
+{
+    sv_usepvn(sv,ptr,len);
+    SvSETMAGIC(sv);
 }
 
 void
@@ -2304,6 +2369,16 @@ register STRLEN len;
 }
 
 void
+sv_catpvn_mg(sv,ptr,len)
+register SV *sv;
+register char *ptr;
+register STRLEN len;
+{
+    sv_catpvn(sv,ptr,len);
+    SvSETMAGIC(sv);
+}
+
+void
 sv_catsv(dstr,sstr)
 SV *dstr;
 register SV *sstr;
@@ -2314,6 +2389,15 @@ register SV *sstr;
 	return;
     if (s = SvPV(sstr, len))
 	sv_catpvn(dstr,s,len);
+}
+
+void
+sv_catsv_mg(dstr,sstr)
+SV *dstr;
+register SV *sstr;
+{
+    sv_catsv(dstr,sstr);
+    SvSETMAGIC(dstr);
 }
 
 void
@@ -3495,6 +3579,15 @@ STRLEN len;
     return sv;
 }
 
+void
+sv_catpv_mg(sv,ptr)
+register SV *sv;
+register char *ptr;
+{
+    sv_catpv(sv,ptr);
+    SvSETMAGIC(sv);
+}
+
 #ifdef I_STDARG
 SV *
 newSVpvf(const char* pat, ...)
@@ -3995,8 +4088,10 @@ SV *rv;
 char *classname;
 void* pv;
 {
-    if (!pv)
+    if (!pv) {
 	sv_setsv(rv, &sv_undef);
+	SvSETMAGIC(rv);
+    }
     else
 	sv_setiv(newSVrv(rv,classname), (IV)pv);
     return rv;
@@ -4161,6 +4256,15 @@ IV iv;
     SvCUR(sv) = p - SvPVX(sv);
 }
 
+void
+sv_setpviv_mg(sv,iv)
+SV *sv;
+IV iv;
+{
+    sv_setpviv(sv,iv);
+    SvSETMAGIC(sv);
+}
+
 #ifdef I_STDARG
 void
 sv_setpvf(SV *sv, const char* pat, ...)
@@ -4183,6 +4287,30 @@ sv_setpvf(sv, pat, va_alist)
     va_end(args);
 }
 
+
+#ifdef I_STDARG
+void
+sv_setpvf_mg(SV *sv, const char* pat, ...)
+#else
+/*VARARGS0*/
+void
+sv_setpvf_mg(sv, pat, va_alist)
+    SV *sv;
+    const char *pat;
+    va_dcl
+#endif
+{
+    va_list args;
+#ifdef I_STDARG
+    va_start(args, pat);
+#else
+    va_start(args);
+#endif
+    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    va_end(args);
+    SvSETMAGIC(sv);
+}
+
 #ifdef I_STDARG
 void
 sv_catpvf(SV *sv, const char* pat, ...)
@@ -4203,6 +4331,29 @@ sv_catpvf(sv, pat, va_alist)
 #endif
     sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
+}
+
+#ifdef I_STDARG
+void
+sv_catpvf_mg(SV *sv, const char* pat, ...)
+#else
+/*VARARGS0*/
+void
+sv_catpvf_mg(sv, pat, va_alist)
+    SV *sv;
+    const char *pat;
+    va_dcl
+#endif
+{
+    va_list args;
+#ifdef I_STDARG
+    va_start(args, pat);
+#else
+    va_start(args);
+#endif
+    sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    va_end(args);
+    SvSETMAGIC(sv);
 }
 
 void
