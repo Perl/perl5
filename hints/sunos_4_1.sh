@@ -25,8 +25,12 @@ d_tzname='undef'
 # The gcc fix-includes script exposes those incorrect prototypes.
 # There may be other examples as well.  Volunteers are welcome to
 # track them all down :-).  In the meantime, we'll just skip unistd.h
-# for SunOS in most of the code.   (However, see ext/POSIX/hints/sunos_4.pl.)
+# for SunOS in most of the code.   
+# However, see ext/POSIX/hints/sunos_4.pl for one exception.
 i_unistd='undef'
+# See util.c for another:  We need _SC_OPEN_MAX, which is in
+# <unistd.h>.
+util_cflags='ccflags="$ccflags -DI_UNISTD"'
 
 cat << 'EOM' >&4
 

@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Mon Apr 19 22:33:54 EET DST 1999
+ * Configuration time: Thu May 20 09:56:03 EET DST 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1686,6 +1686,12 @@
 #define LONGLONGSIZE 8		/**/
 #endif
 
+/* HAS_MEMCHR:
+ *	This symbol, if defined, indicates that the memchr routine is available
+ *	to locate characters within a C string.
+ */
+#define HAS_MEMCHR	/**/
+
 /* HAS_MMAP:
  *	This symbol, if defined, indicates that the mmap system call is
  *	available to map a file into memory.
@@ -2199,6 +2205,18 @@
  */
 #define USE_DYNAMIC_LOADING		/**/
 
+/* FFLUSH_NULL:
+ *	This symbol, if defined, tells that fflush(NULL) does flush
+ *	all pending stdio output.
+ */
+/* FFLUSH_ALL:
+ *	This symbol, if defined, tells that to flush
+ *	all pending stdio output one must loop through all
+ *	the stdio file handles stored in an array and fflush them.
+ */
+#define	FFLUSH_NULL 		/**/
+/*#define	FFLUSH_ALL 		/ **/
+
 /* DB_Prefix_t:
  *	This symbol contains the type of the prefix structure element
  *	in the <db.h> header file.  In older versions of DB, it was
@@ -2229,6 +2247,12 @@
  *	should be included.
  */
 /*#define	I_MNTENT		/ **/
+
+/* I_NETINET_TCP:
+ *     This symbol, if defined, indicates to the C program that it should
+ *     include <netinet/tcp.h>.
+ */
+#define   I_NETINET_TCP                /**/
 
 /* I_POLL:
  *	This symbol, if defined, indicates that <poll.h> exists and
@@ -2430,6 +2454,17 @@
 /*#define     HAS_FTELL64		/ **/
 /*#define    HAS_FTELLO64		/ **/
 /*#define   HAS_TMPFILE64	/ **/
+
+/* HAS_STDIO_STREAM_ARRAY:
+ *	This symbol, if defined, tells that there is an array
+ *	holding the stdio streams.
+ */
+/* STDIO_STREAM_ARRAY:
+ *	This symbol tells the name of the array holding the stdio streams.
+ *	Usual values include _iob, __iob, and __sF.
+ */
+#define	HAS_STDIO_STREAM_ARRAY	/**/
+#define STDIO_STREAM_ARRAY	_iob
 
 /* USE_64_BITS:
  *	This symbol, if defined, indicates that 64-bit interfaces should
