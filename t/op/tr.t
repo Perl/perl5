@@ -5,7 +5,7 @@ BEGIN {
     unshift @INC, "../lib";
 }
 
-print "1..23\n";
+print "1..27\n";
 
 $_ = "abcdefghijklmnopqrstuvwxyz";
 
@@ -145,4 +145,21 @@ print (($_ eq '...d.f...j.l...p') ? '' : 'not ', "ok 22\n");
 eval "tr/m-d/ /";
 print (($@ =~ /^Invalid \[\] range "m-d" in transliteration operator/) 
        ? '' : 'not ', "ok 23\n");
+
+# 24: test cannot update if read-only
+eval '$1 =~ tr/x/y/';
+print (($@ =~ /^Modification of a read-only value attempted/) ? '' : 'not ',
+       "ok 24\n");
+
+# 25: test can count read-only
+'abcdef' =~ /(bcd)/;
+print (( eval '$1 =~ tr/abcd//' == 3) ? '' : 'not ', "ok 25\n");
+
+# 26: test lhs OK if not updating
+print ((eval '"123" =~ tr/12//' == 2) ? '' : 'not ', "ok 26\n");
+
+# 27: test lhs bad if updating
+eval '"123" =~ tr/1/1/';
+print (($@ =~ m|^Can't modify constant item in transliteration \(tr///\)|)
+       ? '' : 'not ', "ok 27\n");
 
