@@ -77,9 +77,10 @@ Parsing of the #! switches starts wherever "perl" is mentioned in the line.
 The sequences "-*" and "- " are specifically ignored so that you could,
 if you were so inclined, say
 
-    #!/bin/sh -- # -*- perl -*- -p
-    eval 'exec perl -wS $0 ${1+"$@"}'
-        if $running_under_some_shell;
+    #!/bin/sh
+    #! -*-perl-*-
+    eval 'exec perl -x -wS $0 ${1+"$@"}'
+        if 0;
 
 to let Perl see the B<-p> switch.
 
