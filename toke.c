@@ -717,7 +717,7 @@ S_force_next(pTHX_ I32 type)
  * it calls S_force_word to stick the next word into the PL_next lookahead.
  *
  * Arguments:
- *   char *start : start of the buffer
+ *   char *start : buffer position (must be within PL_linestr)
  *   int token   : PL_next will be this type of bare word (e.g., METHOD,WORD)
  *   int check_keyword : if true, Perl checks to make sure the word isn't
  *       a keyword (do this if the word is a label, e.g. goto FOO)
@@ -4504,6 +4504,7 @@ Perl_yylex(pTHX)
 	  really_sub:
 	    {
 		char tmpbuf[sizeof PL_tokenbuf];
+		SSize_t tboffset;
 		expectation attrful;
 		bool have_name, have_proto;
 		int key = tmp;
@@ -4515,6 +4516,8 @@ Perl_yylex(pTHX)
 		{
 		    PL_expect = XBLOCK;
 		    attrful = XATTRBLOCK;
+		    /* remember buffer pos'n for later force_word */
+		    tboffset = s - PL_oldbufptr;
 		    d = scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
 		    if (strchr(tmpbuf, ':'))
 			sv_setpv(PL_subname, tmpbuf);
@@ -4539,7 +4542,8 @@ Perl_yylex(pTHX)
 		    if (*s == '=')
 			PL_lex_formbrack = PL_lex_brackets + 1;
 		    if (have_name)
-			(void) force_word(tmpbuf, WORD, FALSE, TRUE, TRUE);
+			(void) force_word(PL_oldbufptr + tboffset, WORD,
+					  FALSE, TRUE, TRUE);
 		    OPERATOR(FORMAT);
 		}
 
@@ -4574,7 +4578,8 @@ Perl_yylex(pTHX)
 		    PL_expect = attrful;
 
 		if (have_proto) {
-		    PL_nextval[PL_nexttoke].opval = (OP*)newSVOP(OP_CONST, 0, PL_lex_stuff);
+		    PL_nextval[PL_nexttoke].opval =
+			(OP*)newSVOP(OP_CONST, 0, PL_lex_stuff);
 		    PL_lex_stuff = Nullsv;
 		    force_next(THING);
 		}
@@ -4582,7 +4587,8 @@ Perl_yylex(pTHX)
 		    sv_setpv(PL_subname,"__ANON__");
 		    TOKEN(ANONSUB);
 		}
-		(void) force_word(tmpbuf, WORD, FALSE, TRUE, TRUE);
+		(void) force_word(PL_oldbufptr + tboffset, WORD,
+				  FALSE, TRUE, TRUE);
 		if (key == KEY_my)
 		    TOKEN(MYSUB);
 		TOKEN(SUB);
