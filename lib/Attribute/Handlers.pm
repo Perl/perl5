@@ -145,7 +145,11 @@ sub _gen_handler_AH_() {
 			    _apply_handler_AH_($decl,$gphase)
 				if $global_phases{$gphase} <= $global_phase;
 			}
-			push @declarations, $decl;
+			# if _gen_handler_AH_ is being called after CHECK it's
+			# for a lexical, so we don't want to keep a reference 
+			# around
+			push @declarations, $decl
+				if $global_phase == 0;
 		}
 		$_ = undef;
 	    }

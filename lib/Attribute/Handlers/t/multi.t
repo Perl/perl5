@@ -131,3 +131,37 @@ $noisy[0]++;
 my %rowdy : Rowdy(37,'this arg should be ignored');
 $rowdy{key}++;
 
+
+# check that applying attributes to lexicals doesn't unduly worry
+# their refcounts
+my $out = "begin\n";
+my $applied;
+sub UNIVERSAL::Dummy :ATTR { ++$applied };
+sub Dummy::DESTROY { $out .= "bye\n" }
+
+{ my $dummy;          $dummy = bless {}, 'Dummy'; }
+ok( $out eq "begin\nbye\n", 45 );
+
+{ my $dummy : Dummy;  $dummy = bless {}, 'Dummy'; }
+ok( $out eq "begin\nbye\nbye\n", 46 );
+
+# are lexical attributes reapplied correctly?
+sub dummy { my $dummy : Dummy; }
+$applied = 0;
+dummy(); dummy();
+ok( $applied == 2, 47 );
+
+# 45-47 again, but for our variables
+$out = "begin\n";
+{ our $dummy;          $dummy = bless {}, 'Dummy'; }
+ok( $out eq "begin\n", 48 );
+{ our $dummy : Dummy;  $dummy = bless {}, 'Dummy'; }
+ok( $out eq "begin\nbye\n", 49 );
+undef $::dummy;
+ok( $out eq "begin\nbye\nbye\n", 50 );
+
+# are lexical attributes reapplied correctly?
+sub dummy_our { our $banjo : Dummy; }
+$applied = 0;
+dummy_our(); dummy_our();
+ok( $applied == 0, 51 );

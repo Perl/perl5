@@ -106,8 +106,8 @@ As C<$form_name>, one of the following names must be given.
 =head2 Character Data
 
 These functions are interface of character data used internally.
-If you want only to get unicode normalization forms, 
-you doesn't need call them by yourself.
+If you want only to get Unicode normalization forms, you don't need
+call them yourself.
 
 =over 4
 

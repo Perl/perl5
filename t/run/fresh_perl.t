@@ -2,7 +2,7 @@
 
 # ** DO NOT ADD ANY MORE TESTS HERE **
 # Instead, put the test in the appropriate test file and use the 
-# kill_perl() function in t/test.pl.
+# fresh_perl_is()/fresh_perl_like() functions in t/test.pl.
 
 # This is for tests that will normally cause segfaults, and other nasty
 # errors that might kill the interpreter and for some reason you can't
@@ -52,7 +52,9 @@ foreach my $prog (@prgs) {
 
     my($prog,$expected) = split(/\nEXPECT\n/, $raw_prog);
 
-    kill_perl($prog, $expected, { switches => [$switch] }, $name);
+    $expected =~ s/\n+$//;
+
+    fresh_perl_is($prog, $expected, { switches => [$switch] }, $name);
 }
 
 __END__
@@ -280,7 +282,7 @@ print "ok\n" if ("\0" lt "\xFF");
 EXPECT
 ok
 ########
-open(H,'run/kill_perl.t'); # must be in the 't' directory
+open(H,'run/fresh_perl.t'); # must be in the 't' directory
 stat(H);
 print "ok\n" if (-e _ and -f _ and -r _);
 EXPECT
@@ -756,18 +758,6 @@ ok
 print join '', @a, "\n";
 EXPECT
 123456789
-######## [ID 20010912.007] segfault or "Can't modify non-existent substring"
-$b="abcde";
-$s = \substr($b, 2, 1);
-print "before: $$s\n";
-{
-  local $k;
-  *k = $s;
-}
-print "after: $$s\n";
-EXPECT
-before: c
-after: c
 ######## [ID 20020104.007] "coredump on dbmclose"
 package Foo;
 eval { dbmclose %h }; # not all places have dbm* functions

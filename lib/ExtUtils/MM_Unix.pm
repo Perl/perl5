@@ -11,7 +11,7 @@ use strict;
 our ($Is_Mac,$Is_OS2,$Is_VMS,$Is_Win32,$Is_Dos,
 	    $Verbose,%pm,%static,$Xsubpp_Version);
 
-our $VERSION = '1.12606';
+our $VERSION = '1.12607';
 
 require ExtUtils::MakeMaker;
 ExtUtils::MakeMaker->import(qw($Verbose &neatvalue));
@@ -2027,21 +2027,20 @@ usually solves this kind of problem.
 	push @defpath, $component if defined $component;
     }
 
-    my @perls = ($self->canonpath($^X), 'perl', 'perl5', "perl$Config{version}");
+    # Build up a set of file names (not command names).
+    my $thisperl = $self->canonpath($^X);
+    $thisperl .= $Config{exe_ext} unless $thisperl =~ m/$Config{exe_ext}$/i;
+    my @perls = ('perl', 'perl5', "perl$Config{version}");
+    @perls = ($thisperl, (map $_.=$Config{exe_ext}, @perls));
 
-    # miniperl has priority over all but the cannonical perl when in the 
+    # miniperl has priority over all but the cannonical perl when in the
     # core.  Otherwise its a last resort.
+    my $miniperl = "miniperl$Config{exe_ext}";
     if( $self->{PERL_CORE} ) {
-        splice @perls, 1, 0, 'miniperl';
+        splice @perls, 1, 0, $miniperl;
     }
     else {
-        push @perls, 'miniperl';
-    }
-
-    # Build up a set of file names (not command names).
-    foreach $element (@perls) {
-        $element .= $Config{exe_ext}
-          unless $element =~ m/$Config{exe_ext}$/i;
+        push @perls, $miniperl;
     }
 
     $self->{PERL} ||=
@@ -3899,14 +3898,13 @@ sub xs_o {	# many makes are too dumb to use xs_c then c_o
 =item perl_archive
 
 This is internal method that returns path to libperl.a equivalent
-to be linked to dynamic extensions. UNIX does not have one but OS2
-and Win32 do.
+to be linked to dynamic extensions. UNIX does not have one but other
+OSs might have one.
 
 =cut 
 
 sub perl_archive
 {
- return '$(PERL_INC)' . "/$Config{libperl}" if $^O eq "beos";
  return "";
 }
 

@@ -62,7 +62,7 @@ op_names_init(pTHX)
     bitmap = SvPV(opset_all, len);
     i = len-1; /* deal with last byte specially, see below */
     while(i-- > 0)
-	bitmap[i] = 0xFF;
+	bitmap[i] = (char)0xFF;
     /* Take care to set the right number of bits in the last byte */
     bitmap[len-1] = (PL_maxo & 0x07) ? ~(0xFF << (PL_maxo & 0x07)) : 0xFF;
     put_op_bitspec(aTHX_ ":all",0, opset_all); /* don't mortalise */

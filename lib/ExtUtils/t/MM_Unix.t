@@ -3,6 +3,7 @@
 # 2001-12-16 Tels first version
 # 2002-01-13 Tels 0.02 added some tests for various functions, added Andreas
 #		       fix to the version test (>= vs ==)
+# 2002-01-14 Tels 0.03 exclude on beos and netware, /i for $^O test
 
 BEGIN {
     chdir 't' if -d 't';
@@ -12,7 +13,7 @@ BEGIN {
 BEGIN { 
     use Test::More; 
 
-    if( $^O =~ /^VMS|os2|MacOS|MSWin32|cygwin$/ ) {
+    if( $^O =~ /^VMS|os2|MacOS|MSWin32|cygwin|beos|netware$/i ) {
         plan skip_all => 'Non-Unix platform';
     }
     else {
