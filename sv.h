@@ -130,6 +130,7 @@ struct io {
 #define SVpbm_TAIL	0x20000000
 
 #define SVphv_SHAREKEYS 0x20000000	/* keys live on shared string table */
+#define SVphv_LAZYDEL	0x40000000	/* entry in xhv_eiter must be deleted */
 
 #ifdef OVERLOAD
 #define SVpgv_AM        0x40000000
@@ -269,6 +270,7 @@ struct xpvio {
 #define IOf_START 2	/* check for null ARGV and substitute '-' */
 #define IOf_FLUSH 4	/* this fp wants a flush after write op */
 #define IOf_DIDTOP 8	/* just did top of form */
+#define IOf_UNTAINT 16  /* consider this fp (and it's data) "safe" */
 
 /* The following macros define implementation-independent predicates on SVs. */
 
