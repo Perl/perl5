@@ -365,11 +365,25 @@ EOM
 esac
 EOCBU
 
+# This script UU/use64bitint.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use 64 bits.
+cat > UU/use64bitint.cbu <<'EOCBU'
 case "$use64bitall" in
 $define|true|[yY]*)
-	    ccflags="$ccflags `getconf XBS5_LP64_OFF64_CFLAGS`"
-	    ldflags="$ccflags `getconf XBS5_LP64_OFF64_LDFLAGS`"
-	    lddlflags="$lddlflags -G `getconf XBS5_LP64_OFF64_LDFLAGS`"
+	    case "$cc -v 2>/dev/null" in
+	    *gcc*)
+		# I don't know what are the flags to get gcc sparcv9-aware,
+	        # I'm just guessing. --jhi
+		ccflags="$ccflags -mv9"
+		ldflags="$ccflags -mv9"
+		lddlflags="$lddlflags -G -mv9"
+		;;
+	    *)
+		ccflags="$ccflags `getconf XBS5_LP64_OFF64_CFLAGS`"
+		ldflags="$ccflags `getconf XBS5_LP64_OFF64_LDFLAGS`"
+		lddlflags="$lddlflags -G `getconf XBS5_LP64_OFF64_LDFLAGS`"
+		;;
+	    esac	
 	    loclibpth="$loclibpth /usr/lib/sparcv9"
 	    libscheck='case "`/usr/bin/file $xxx`" in
 *64-bit*|*SPARCV9*) ;;
@@ -377,6 +391,7 @@ $define|true|[yY]*)
 esac'
 	    ;;
 esac
+EOCBU
  
 # This is just a trick to include some useful notes.
 cat > /dev/null <<'End_of_Solaris_Notes'
