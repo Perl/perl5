@@ -956,6 +956,8 @@ PP(pp_pow)
                             result *= base;
                             /* Only bother to clear the bit if it is set.  */
                             power &= ~bit;
+                           /* Avoid squaring base again if we're done. */
+                           if (power == 0) break;
                         }
                     }
                     SP--;

@@ -9342,7 +9342,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 	    case CXt_EVAL:
 		ncx->blk_eval.old_in_eval = cx->blk_eval.old_in_eval;
 		ncx->blk_eval.old_op_type = cx->blk_eval.old_op_type;
-		ncx->blk_eval.old_namesv = sv_dup_inc(cx->blk_eval.old_namesv, param);;
+		ncx->blk_eval.old_namesv = sv_dup_inc(cx->blk_eval.old_namesv, param);
 		ncx->blk_eval.old_eval_root = cx->blk_eval.old_eval_root;
 		ncx->blk_eval.cur_text	= sv_dup(cx->blk_eval.cur_text, param);
 		break;

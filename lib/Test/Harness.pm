@@ -1,5 +1,5 @@
 # -*- Mode: cperl; cperl-indent-level: 4 -*-
-# $Id: Harness.pm,v 1.33 2002/05/29 23:02:48 schwern Exp $
+# $Id: Harness.pm,v 1.37 2002/06/16 06:55:09 schwern Exp $
 
 package Test::Harness;
 
@@ -12,7 +12,7 @@ use Config;
 use strict;
 
 use vars qw($VERSION $Verbose $Switches $Have_Devel_Corestack $Curtest
-            $Columns $verbose $switches $ML
+            $Columns $verbose $switches $ML $Strap
             @ISA @EXPORT @EXPORT_OK
            );
 
@@ -22,7 +22,7 @@ use vars qw($VERSION $Verbose $Switches $Have_Devel_Corestack $Curtest
 
 $Have_Devel_Corestack = 0;
 
-$VERSION = '2.24';
+$VERSION = '2.25';
 
 $ENV{HARNESS_ACTIVE} = 1;
 
@@ -36,7 +36,7 @@ my $Ignore_Exitcode = $ENV{HARNESS_IGNORE_EXITCODE};
 
 my $Files_In_Dir = $ENV{HARNESS_FILELEAK_IN_DIR};
 
-my $Strap = Test::Harness::Straps->new;
+$Strap = Test::Harness::Straps->new;
 
 @ISA = ('Exporter');
 @EXPORT    = qw(&runtests);
@@ -324,7 +324,8 @@ or failed based on their output to STDOUT (details above).  It prints
 out each individual test which failed along with a summary report and
 a how long it all took.
 
-It returns true if everything was ok, false otherwise.
+It returns true if everything was ok.  Otherwise it will die() with
+one of the messages in the DIAGNOSTICS section.
 
 =for _private
 This is just _run_all_tests() plus _show_results()
@@ -496,7 +497,7 @@ sub _run_all_tests {
                 print "$test{ml}ok\n        ".join(', ', @msg)."\n";
             } elsif ($test{max}) {
                 print "$test{ml}ok\n";
-            } elsif (length $test{skip_all}) {
+            } elsif (defined $test{skip_all} and length $test{skip_all}) {
                 print "skipped\n        all skipped: $test{skip_all}\n";
                 $tot{skipped}++;
             } else {

@@ -10,13 +10,13 @@ BEGIN {
     }
 }
 
-use File::Spec::Functions;
-
-my $SAMPLE_TESTS = $ENV{PERL_CORE}
-    ? catdir(curdir(), 'lib', 'sample-tests')
-    : catdir(curdir(), 't', 'sample-tests');
-
 use Test::More;
+use File::Spec;
+
+my $Curdir = File::Spec->curdir;
+my $SAMPLE_TESTS = $ENV{PERL_CORE}
+                    ? File::Spec->catdir($Curdir, 'lib', 'sample-tests')
+                    : File::Spec->catdir($Curdir, 't',   'sample-tests');
 
 %samples = (
             bailout     => [qw( header test test test bailout )],
@@ -51,15 +51,10 @@ $strap->{callback} = sub {
     my($self, $line, $type, $totals) = @_;
     push @out, $type;
 };
-                            
-$SAMPLE_TESTS = VMS::Filespec::unixify($SAMPLE_TESTS) if $^O eq 'VMS';
 
 while( my($test, $expect) = each %samples ) {
     local @out = ();
-
-    $strap->analyze_file($^O eq 'MacOS' ?
-			 catfile($SAMPLE_TESTS, $test) :
-			 "$SAMPLE_TESTS/$test");
+    $strap->analyze_file(File::Spec->catfile($SAMPLE_TESTS, $test));
 
     is_deeply(\@out, $expect,   "$test callback");
 }

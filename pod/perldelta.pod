@@ -737,7 +737,8 @@ See L<perlmod>
 
 =item *
 
-C<Attribute::Handlers> allows a class to define attribute handlers.
+C<Attribute::Handlers>, originally by Damian Conway and now maintained
+by Arthur Bergman, allows a class to define attribute handlers.
 
     package MyPack;
     use Attribute::Handlers;
@@ -2071,13 +2072,6 @@ The order of DESTROYs has been made more predictable.
 
 =item *
 
-Several debugger fixes: exit code now reflects the script exit code,
-condition C<"0"> now treated correctly, the C<d> command now checks
-line number, C<$.> no longer gets corrupted, and all debugger output
-now goes correctly to the socket if RemotePort is set. [561]
-
-=item *
-
 Perl 5.6.0 could emit spurious warnings about redefinition of
 dl_error() when statically building extensions into perl.
 This has been corrected. [561]
@@ -2777,6 +2771,13 @@ respectively.
 
 =item *
 
+Several debugger fixes: exit code now reflects the script exit code,
+condition C<"0"> now treated correctly, the C<d> command now checks
+line number, C<$.> no longer gets corrupted, and all debugger output
+now goes correctly to the socket if RemotePort is set. [561]
+
+=item *
+
 The debugger (perl5db.pl) has been modified to present a more
 consistent commands interface, via (CommandSet=580).  perl5db.t was
 also added to test the changes, and as a placeholder for further tests.
@@ -2912,6 +2913,8 @@ There are now several profiling make targets.
 =head1 Security Vulnerability Closed [561]
 
 (This change was already made in 5.7.0 but bears repeating here.)
+(5.7.0 came out before 5.6.1: the development branch 5.7 released
+sooner than the maintenance branch 5.6)
 
 A potential security vulnerability in the optional suidperl component
 of Perl was identified in August 2000.  suidperl is neither built nor

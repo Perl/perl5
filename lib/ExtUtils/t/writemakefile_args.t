@@ -14,7 +14,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 12;
+use Test::More tests => 16;
 
 use TieOut;
 use MakeMaker::Test::Utils;
@@ -53,7 +53,7 @@ VERIFY
         VERSION_FROM    => 'lib/Big/Dummy.pm',
         AUTHOR          => sub {},
     );
-    
+
     is( $warnings, <<VERIFY );
 WARNING: AUTHOR takes a string/number not a code reference.
          Please inform the author.
@@ -70,7 +70,7 @@ VERIFY
         VERSION_FROM    => 'lib/Big/Dummy.pm',
         LIBS            => '-lwibble -lwobble',
     );
-    
+
     # We'll get warnings about the bogus libs, that's ok.
     unlike( $warnings, qr/WARNING: .* takes/ );
     is_deeply( $mm->{LIBS}, ['-lwibble -lwobble'] );
@@ -81,7 +81,7 @@ VERIFY
         VERSION_FROM    => 'lib/Big/Dummy.pm',
         LIBS            => ['-lwibble', '-lwobble'],
     );
-    
+
     # We'll get warnings about the bogus libs, that's ok.
     unlike( $warnings, qr/WARNING: .* takes/ );
     is_deeply( $mm->{LIBS}, ['-lwibble', '-lwobble'] );
@@ -92,9 +92,22 @@ VERIFY
         VERSION_FROM    => 'lib/Big/Dummy.pm',
         LIBS            => { wibble => "wobble" },
     );
-    
+
     # We'll get warnings about the bogus libs, that's ok.
     like( $warnings, qr{^WARNING: LIBS takes a array reference or string/number not a hash reference}m );
     is_deeply( $mm->{LIBS}, [] );
 
+
+    $warnings = '';
+    $mm = WriteMakefile(
+        NAME            => 'Big::Dummy',
+        WIBBLE          => 'something',
+        wump            => { foo => 42 },
+    );
+
+    like( $warnings, qr{^WARNING: WIBBLE is not a known parameter.\n}m );
+    like( $warnings, qr{^WARNING: wump is not a known parameter.\n}m );
+
+    is( $mm->{WIBBLE}, 'something' );
+    is_deeply( $mm->{wump}, { foo => 42 } );
 }

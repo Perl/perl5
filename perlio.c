@@ -632,7 +632,7 @@ PerlIO_pop(pTHX_ PerlIO *f)
 	    if ((*l->tab->Popped) (aTHX_ f) != 0)
 		return;
 	}
-	*f = l->next;;
+	*f = l->next;
 	Safefree(l);
     }
 }

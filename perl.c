@@ -435,14 +435,15 @@ perl_destruct(pTHXx)
 
     if (CALL_FPTR(PL_threadhook)(aTHX)) {
         /* Threads hook has vetoed further cleanup */
-        return STATUS_NATIVE_EXPORT;;
+        return STATUS_NATIVE_EXPORT;
     }
 
     /* We must account for everything.  */
 
     /* Destroy the main CV and syntax tree */
     if (PL_main_root) {
-	PL_curpad = AvARRAY(PL_comppad);
+        /* If running under -d may not have PL_comppad. */
+        PL_curpad = PL_comppad ? AvARRAY(PL_comppad) : NULL;
 	op_free(PL_main_root);
 	PL_main_root = Nullop;
     }
@@ -490,7 +491,7 @@ perl_destruct(pTHXx)
 #endif
 
 	/* The exit() function will do everything that needs doing. */
-        return STATUS_NATIVE_EXPORT;;
+        return STATUS_NATIVE_EXPORT;
     }
 
     /* jettison our possibly duplicated environment */

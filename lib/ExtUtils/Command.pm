@@ -106,9 +106,9 @@ sub rm_f
  expand_wildcards();
  foreach (@ARGV)
   {
-   next unless -f $_;        
+   next unless -f $_;
    next if unlink($_);
-   chmod(0777,$_);           
+   chmod(0777,$_);
    next if unlink($_);
    carp "Cannot delete $_:$!";
   }
@@ -147,7 +147,7 @@ sub mv
  croak("Too many arguments") if (@ARGV > 1 && ! -d $dst);
  while (@ARGV)
   {
-   my $src = shift(@ARGV);               
+   my $src = shift(@ARGV);
    move($src,$dst);
   }
 }
@@ -157,7 +157,7 @@ sub mv
 Copies source to destination.
 Multiple sources are allowed if destination is an existing directory.
 
-=cut 
+=cut
 
 sub cp
 {
@@ -166,7 +166,7 @@ sub cp
  croak("Too many arguments") if (@ARGV > 1 && ! -d $dst);
  while (@ARGV)
   {
-   my $src = shift(@ARGV);               
+   my $src = shift(@ARGV);
    copy($src,$dst);
   }
 }
