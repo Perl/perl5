@@ -114,9 +114,17 @@ foreach my $mod (<DATA>) {
 
 my @Core_Modules = sort keys %Core_Modules;
 
-print "1..".@Core_Modules."\n";
+print "1..".(1+@Core_Modules)."\n";
 
-my $test_num = 1;
+my $message
+  = "ok 1 - All modules should have tests # TODO Make Schwern Poorer\n";
+if (@Core_Modules) {
+  print "not $message";
+} else {
+  print $message;
+}
+
+my $test_num = 2;
 
 foreach my $module (@Core_Modules) {
     print "$module compile failed\nnot " unless compile_module($module);
