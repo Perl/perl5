@@ -441,7 +441,7 @@ Perl_sharedsv_cond_timedwait(perl_cond *cond, perl_mutex *mut, double abs)
     cond->waiters++;
     MUTEX_UNLOCK(mut);
     /* See comments in win32/win32thread.h COND_WAIT vis-a-vis race */
-    switch (WaitForSingleObject(cond->sem, abs)) {
+    switch (WaitForSingleObject(cond->sem, (DWORD)abs)) {
         case WAIT_OBJECT_0:   got_it = 1; break;
         case WAIT_TIMEOUT:                break;
         default:

@@ -8547,7 +8547,7 @@ F0convert(NV nv, char *endbuf, STRLEN *len)
 	nv = -nv;
     if (nv < UV_MAX) {
 	nv += 0.5;
-	uv = nv;
+	uv = (UV)nv;
 	if (uv & 1 && uv == nv)
 	    uv--;			/* Round to even */
 	do {
@@ -8641,7 +8641,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	pp = pat + 2;
 	while (*pp >= '0' && *pp <= '9')
 	    digits = 10 * digits + (*pp++ - '0');
-	if (pp - pat == patlen - 1) {
+	if (pp - pat == (int)patlen - 1) {
 	    NV nv;
 
 	    if (args)
