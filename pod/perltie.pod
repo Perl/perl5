@@ -1083,14 +1083,6 @@ source code to MLDBM.
 Tied filehandles are still incomplete.  sysopen(), truncate(),
 flock(), fcntl(), stat() and -X can't currently be trapped.
 
-The bucket usage information provided by C<scalar(%hash)> is not
-available.  If C<%hash> is tied, this will currently result in a
-fatal error.
-
-Counting the number of entries in a hash via C<scalar(keys(%hash))> or
-C<scalar(values(%hash)>) is inefficient since it needs to iterate
-through all the entries with FIRSTKEY/NEXTKEY.
-
 =head1 AUTHOR
 
 Tom Christiansen

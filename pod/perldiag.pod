@@ -915,14 +915,6 @@ for stdout.
 
 (F) The script you specified can't be opened for the indicated reason.
 
-=item Can't provide tied hash usage; use keys(%hash) to test if empty
-
-(F) When a hash is evaluated in scalar context, bucket usage is
-returned if the hash is populated, and false is returned if the hash
-is empty.  Bucket usage is not currently available for tied hashes.
-To test if a hash is empty or populated, use keys(%hash) in scalar
-context instead.
-
 =item Can't read CRTL environ
 
 (S) A warning peculiar to VMS.  Perl tried to read an element of %ENV

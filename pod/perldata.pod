@@ -259,9 +259,7 @@ Perl's internal hashing algorithm is performing poorly on your data
 set.  For example, you stick 10,000 things in a hash, but evaluating
 %HASH in scalar context reveals C<"1/16">, which means only one out
 of sixteen buckets has been touched, and presumably contains all
-10,000 of your items.  This isn't supposed to happen.  If a tied hash
-is evaluated in scalar context, a fatal error will result, since this
-bucket usage information is currently not available for tied hashes.
+10,000 of your items.  This isn't supposed to happen.
 
 You can preallocate space for a hash by assigning to the keys() function.
 This rounds up the allocated buckets to the next power of two:

@@ -342,20 +342,16 @@ else {
     skip('no caseless %ENV support') for 1..4;
 }
 
-{
-   no warnings 'void';
-
 # Make sure Errno hasn't been prematurely autoloaded
 
-   ok !defined %Errno::;
+ok !defined %Errno::;
 
 # Test auto-loading of Errno when %! is used
 
-   ok scalar eval q{
-      %!;
-      defined %Errno::;
-   }, $@;
-}
+ok scalar eval q{
+   my $errs = %!;
+   defined %Errno::;
+}, $@;
 
 
 # Make sure that Errno loading doesn't clobber $!
