@@ -67,6 +67,7 @@ my $tst = 1;
 my %perfect;
 my %seen;
 
+setgrent();
 while (<GR>) {
     chomp;
     my @s = split /:/;
@@ -111,6 +112,8 @@ while (<GR>) {
     $n++;
 }
 
+endgrent();
+
 if (keys %perfect == 0) {
     $max++;
     print <<EOEX;
@@ -140,23 +143,23 @@ print "\n";
 
 my @gr1;
 
-endgrent();
 setgrent();
 for (1..$max) {
     my $gr = scalar getgrent();
     last unless defined $gr;
     push @gr1, $gr;
 }
+endgrent();
 
 my @gr2;
 
-endgrent();
 setgrent();
 for (1..$max) {
     my ($gr) = (getgrent());
     last unless defined $gr;
     push @gr2, $gr;
 }
+endgrent();
 
 print "not " unless "@gr1" eq "@gr2";
 print "ok ", $tst++, "\n";

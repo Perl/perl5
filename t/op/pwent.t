@@ -68,6 +68,7 @@ my $tst = 1;
 my %perfect;
 my %seen;
 
+setpwent();
 while (<PW>) {
     chomp;
     my @s = split /:/;
@@ -108,6 +109,7 @@ while (<PW>) {
     }
     $n++;
 }
+endpwent();
 
 if (keys %perfect == 0) {
     $max++;
@@ -138,23 +140,23 @@ print "\n";
 
 my @pw1;
 
-endpwent();
 setpwent();
 for (1..$max) {
     my $pw = scalar getpwent();
     last unless defined $pw;
     push @pw1, $pw;
 }
+endpwent();
 
 my @pw2;
 
-endpwent();
 setpwent();
 for (1..$max) {
     my ($pw) = (getpwent());
     last unless defined $pw;
     push @pw2, $pw;
 }
+endpwent();
 
 print "not " unless "@pw1" eq "@pw2";
 print "ok ", $tst++, "\n";
