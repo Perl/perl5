@@ -2290,7 +2290,7 @@ print "# some Unicode properties\n";
     print "not " unless "a\x{100}" =~ /A/i;
     print "ok 754\n";
 
-    print "not " unless "A\x{100}" =~ /A/i;
+    print "not " unless "A\x{100}" =~ /a/i;
     print "ok 755\n";
 
     print "not " unless "a\x{100}" =~ /a/i;
@@ -2314,7 +2314,7 @@ print "# some Unicode properties\n";
     print "not " unless "a\x{100}" =~ /A\x{100}/i;
     print "ok 762\n";
 
-    print "not " unless "A\x{100}" =~ /A\x{100}/i;
+    print "not " unless "A\x{100}" =~ /a\x{100}/i;
     print "ok 763\n";
 
     print "not " unless "a\x{100}" =~ /a\x{100}/i;
@@ -2326,7 +2326,7 @@ print "# some Unicode properties\n";
     print "not " unless "a\x{100}" =~ /[A]/i;
     print "ok 766\n";
 
-    print "not " unless "A\x{100}" =~ /[A]/i;
+    print "not " unless "A\x{100}" =~ /[a]/i;
     print "ok 767\n";
 
     print "not " unless "a\x{100}" =~ /[a]/i;
