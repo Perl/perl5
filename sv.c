@@ -5846,6 +5846,8 @@ Perl_sv_inc(pTHX_ register SV *sv)
     if (SvGMAGICAL(sv))
 	mg_get(sv);
     if (SvTHINKFIRST(sv)) {
+	if (SvREADONLY(sv) && SvFAKE(sv))
+	    sv_force_normal(sv);
 	if (SvREADONLY(sv)) {
 	    if (PL_curcop != &PL_compiling)
 		Perl_croak(aTHX_ PL_no_modify);
@@ -6000,6 +6002,8 @@ Perl_sv_dec(pTHX_ register SV *sv)
     if (SvGMAGICAL(sv))
 	mg_get(sv);
     if (SvTHINKFIRST(sv)) {
+	if (SvREADONLY(sv) && SvFAKE(sv))
+	    sv_force_normal(sv);
 	if (SvREADONLY(sv)) {
 	    if (PL_curcop != &PL_compiling)
 		Perl_croak(aTHX_ PL_no_modify);
