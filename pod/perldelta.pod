@@ -149,6 +149,14 @@ needs to be written with additional parentheses now:
 
 The behavior remains unaffected when C<not> is not followed by parentheses.
 
+=item Semantics of bareword prototype C<(*)> have changed
+
+Arguments prototyped as C<*> will now be visible within the subroutine
+as either a simple scalar or as a reference to a typeglob.  Perl 5.005
+always coerced simple scalar arguments to a typeglob, which wasn't useful
+in situations where the subroutine must distinguish between a simple
+scalar and a typeglob.  See L<perlsub/Prototypes>.
+
 =back
 
 =head2 C Source Incompatibilities
