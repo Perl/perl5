@@ -437,10 +437,14 @@ PERLDLL_RES	=
 .IF  "$(CFG)" == "Debug"
 .IF "$(CCTYPE)" == "MSVC20"
 OPTIMIZE	= -Od -MD -Z7 -DDEBUGGING
-.ELSE
-OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
-.ENDIF
 LINK_DBG	= -debug -pdb:none
+.ELSE
+# -Zi requires .pdb file(s)
+#OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
+#LINK_DBG	= -debug 
+OPTIMIZE	= -O1 -MD -Z7 -DDEBUGGING
+LINK_DBG	= -debug -debugtype:both -pdb:none
+.ENDIF
 .ELSE
 .IF "$(CFG)" == "Optimize"
 # -O1 yields smaller code, which turns out to be faster than -O2
