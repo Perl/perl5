@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Nov 25 20:16:14 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Sun Nov 26 20:19:22 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -13616,7 +13616,7 @@ main(int ac, char **av)
 }
 EOCP
 	set try
-	if eval $compile_ok && ./try >/dev/null; then
+	if eval $compile && ./try 2>&1 >/dev/null; then
 		case "`./try`" in
 		"that's all right, then")
 			okay=yes
