@@ -11,7 +11,7 @@ README.mpeix - Perl/iX for HP e3000 MPE
    http://www.bixby.org/mark/perlix.html
    http://jazz.external.hp.com/src/hp_freeware/perl/
    Perl language for MPE
-   Last updated June 2, 2000 @ 0400 UTC
+   Last updated July 29, 2003 @ 2100 UTC
 
 =head1 NOTE
 
@@ -430,12 +430,6 @@ to add PM capability as appropriate.
 MPE requires that you bind() to an IP address of zero.  Perl/iX
 automatically replaces the IP address that you pass to bind() with
 a zero.
-
-=item *
-
-If you use Perl/iX fcntl() against a socket it will fail, because MPE
-requires that you use sfcntl() instead.  Perl/iX does not presently
-support sfcntl().
 
 =item *
 

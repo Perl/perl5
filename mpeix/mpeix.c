@@ -451,3 +451,56 @@ struct timezone *tpz;
    return 0;
 
 } /* gettimeofday() */
+
+/*
+**  MPE_FCNTL -- shadow function for fcntl()
+**
+**	MPE requires sfcntl() for sockets, and fcntl() for everything 
+**	else.  This shadow routine determines the descriptor type and
+**	makes the appropriate call.
+**
+**	Parameters:
+**		same as fcntl().
+**
+**	Returns:
+**		same as fcntl().
+*/
+
+#include <stdarg.h>
+#include <sys/socket.h>
+
+int
+mpe_fcntl(int fildes, int cmd, ...)
+{
+	int len, result;
+	struct sockaddr sa;
+	
+	void *arg;
+	va_list ap;
+	
+	va_start(ap, cmd);
+	arg = va_arg(ap, void *);
+	va_end(ap);
+	
+	len = sizeof sa;
+	if (getsockname(fildes, &sa, &len) == -1)
+	{
+	        if (errno == EAFNOSUPPORT)
+			/* AF_UNIX socket */
+	                return sfcntl(fildes, cmd, arg);
+
+	        if (errno == ENOTSOCK) 
+			/* file or pipe */
+	                return fcntl(fildes, cmd, arg);
+
+		/* unknown getsockname() failure */
+	        return (-1); 
+	}
+	else
+	{
+		/* AF_INET socket */
+		if ((result = sfcntl(fildes, cmd, arg)) != -1 && cmd == F_GETFL)
+			result |= O_RDWR;  /* fill in some missing flags */
+	        return result;
+	}
+}
