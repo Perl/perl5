@@ -828,6 +828,16 @@ static char bucket_of[] =
 #  define SBRK_FAILURE_PRICE 50
 #endif 
 
+static void	morecore	(register int bucket);
+#  if defined(DEBUGGING)
+static void	botch		(char *diag, char *s);
+#  endif
+static void	add_to_chain	(void *p, MEM_SIZE size, MEM_SIZE chip);
+static void*	get_from_chain	(MEM_SIZE size);
+static void*	get_from_bigger_buckets(int bucket, MEM_SIZE size);
+static union overhead *getpages	(MEM_SIZE needed, int *nblksp, int bucket);
+static int	getpages_adjacent(MEM_SIZE require);
+
 #if defined(PERL_EMERGENCY_SBRK) && defined(PERL_CORE)
 
 #  ifndef BIG_SIZE
@@ -843,17 +853,6 @@ static char bucket_of[] =
 
 static char *emergency_buffer;
 static MEM_SIZE emergency_buffer_size;
-
-static void	morecore	(register int bucket);
-#  if defined(DEBUGGING)
-static void	botch		(char *diag, char *s);
-#  endif
-static void	add_to_chain	(void *p, MEM_SIZE size, MEM_SIZE chip);
-static Malloc_t	emergency_sbrk	(MEM_SIZE size);
-static void*	get_from_chain	(MEM_SIZE size);
-static void*	get_from_bigger_buckets(int bucket, MEM_SIZE size);
-static union overhead *getpages	(MEM_SIZE needed, int *nblksp, int bucket);
-static int	getpages_adjacent(MEM_SIZE require);
 
 static Malloc_t
 emergency_sbrk(MEM_SIZE size)
@@ -981,7 +980,6 @@ Perl_malloc(register size_t nbytes)
   	register union overhead *p;
   	register int bucket;
   	register MEM_SIZE shiftr;
-  	static void morecore(int bucket);
 
 #if defined(DEBUGGING) || defined(RCHECK)
 	MEM_SIZE size = nbytes;
