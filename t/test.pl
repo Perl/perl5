@@ -27,6 +27,13 @@ END {
     }
 }
 
+# Use this instead of "print STDERR" when outputing failure diagnostic 
+# messages
+sub _diag {
+    my $fh = $TODO ? *STDOUT : *STDERR;
+    print $fh @_;
+}
+
 sub skip_all {
     if (@_) {
 	print STDOUT "1..0 - @_\n";
@@ -53,12 +60,12 @@ sub _ok {
     print STDOUT "$out\n";
 
     unless ($pass) {
-	print STDERR "# Failed $where\n";
+	_diag "# Failed $where\n";
     }
 
     # Ensure that the message is properly escaped.
-    print STDERR map { /^#/ ? "$_\n" : "# $_\n" } 
-                 map { split /\n/ } @mess if @mess;
+    _diag map { /^#/ ? "$_\n" : "# $_\n" } 
+          map { split /\n/ } @mess if @mess;
 
     $test++;
 
@@ -206,12 +213,12 @@ sub eq_hash {
     $key = "" . $key;
     if (exists $orig->{$key}) {
       if ($orig->{$key} ne $value) {
-        print STDERR "# key ", _qq($key), " was ", _qq($orig->{$key}),
-          " now ", _qq($value), "\n";
+        print STDOUT "# key ", _qq($key), " was ", _qq($orig->{$key}),
+                     " now ", _qq($value), "\n";
         $fail = 1;
       }
     } else {
-      print STDERR "# key ", _qq($key), " is ", _qq($value), 
+      print STDOUT "# key ", _qq($key), " is ", _qq($value), 
                    ", not in original.\n";
       $fail = 1;
     }
@@ -220,7 +227,7 @@ sub eq_hash {
     # Force a hash recompute if this perl's internals can cache the hash key.
     $_ = "" . $_;
     next if (exists $suspect->{$_});
-    print STDERR "# key ", _qq($_), " was ", _qq($orig->{$_}), " now missing.\n";
+    print STDOUT "# key ", _qq($_), " was ", _qq($orig->{$_}), " now missing.\n";
     $fail = 1;
   }
   !$fail;
