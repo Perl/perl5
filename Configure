@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Aug 14 00:51:07 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Sat Aug 14 02:00:00 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -6441,8 +6441,13 @@ esac
 rp='Try to use long doubles if available?'
 . ./myread
 case "$ans" in
-y|Y)	val="$define"	;;
-*)      val="$undef"	;;
+y|Y) 
+	val="$define"
+	ccflags="$ccflags -DUSE_LONG_DOUBLE"
+	;;     
+*)      
+	val="$undef"
+	;;
 esac
 set uselongdouble
 eval $setvar
@@ -7974,6 +7979,7 @@ EOM
 		esac
 	else
 		echo "I can't compile and run the test program." >&4
+                echo "I'm guessing that dlsym doesn't need a leading underscore." >&4
 	fi
 	;;
 esac
