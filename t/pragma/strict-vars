@@ -151,8 +151,6 @@ $d = 1;$i = 1;$n = 1;
 $e = 1;$j = 1;$o = 1;
 $p = 0b12;
 --FILE-- 
-# known scalar leak
-BEGIN { $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3; }
 use abc;
 EXPECT
 Global symbol "$f" requires explicit package name at abc.pm line 3.
@@ -171,8 +169,8 @@ Global symbol "$o" requires explicit package name at abc.pm line 7.
 Global symbol "$p" requires explicit package name at abc.pm line 8.
 Illegal binary digit '2' at abc.pm line 8, at end of line
 abc.pm has too many errors.
-Compilation failed in require at - line 3.
-BEGIN failed--compilation aborted at - line 3.
+Compilation failed in require at - line 1.
+BEGIN failed--compilation aborted at - line 1.
 ########
 
 # Check scope of pragma with eval
