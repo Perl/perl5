@@ -32,6 +32,225 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8530] By: jhi                                   on 2001/01/23  15:38:39
+        Log: De-cut-and-pasto.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[  8529] By: jhi                                   on 2001/01/23  15:11:04
+        Log: Document the mkdir trailing slashes case.
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  8528] By: jhi                                   on 2001/01/23  15:08:28
+        Log: lib/lib.pm is arch dependent, and lib/lib_pm.PL shouldn't
+             get installed:
+             
+             Subject: lib/lib.pm
+             From: <abigail@foad.org>
+             Date: Mon, 28 Aug 2000 20:35:08 -0400
+             Message-ID: <20000829003508.21281.qmail@foad.org>
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[  8527] By: jhi                                   on 2001/01/23  14:44:04
+        Log: Metaconfig unit change for #8526.
+     Branch: metaconfig
+	   ! U/threads/archname.U
+____________________________________________________________________________
+[  8526] By: jhi                                   on 2001/01/23  14:43:19
+        Log: Attach -perlio to the archname if so selected.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  8525] By: jhi                                   on 2001/01/23  14:24:01
+        Log: Subject: [PATCH] pod/perlvar.pod
+             From: abigail@foad.org
+             Date: Tue, 23 Jan 2001 01:41:10 +0100
+             Message-ID: <20010123004110.22259.qmail@foad.org>
+     Branch: perl
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[  8524] By: jhi                                   on 2001/01/23  14:22:32
+        Log: A bug introduced in #8217 (the undefined variable in the
+             lib/safe1_t #3) fixed, by Charles Lane:
+             
+             The earlier patch made it so that stuff running in Safe
+             compartments could do a "caller" and see "main".  That
+             little change in name is done right before the code in
+             the compartment is run, and apparantly the parser
+             was picking up the stash name before it got changed.
+             
+             (why it was threaded vs. unthreaded Perl that was sensitive to this
+             I still don't know...and it probably doesn't matter).
+             
+             I tryed removing the stash name-change and saw that threaded Perl
+             did indeed pass the lib/safe1.t tests.
+             
+             So here's a patch; a routine (_safe_pkg_prep) is added to Opcode to
+             do the name change (and to connect _ in the compartment to the global
+             _) which is removed from _safe_call_sv.   Then Safe.pm is modified
+             to call _safe_pkg_prep when creating a new compartment.
+             
+             Passes all tests with threaded perl on linux; passes all tests
+             with unthreaded perl on VMS.
+             
+             At some point I'll probably want to revisit Safe and Opcode to
+             provide more sensible handling of global variables...and to get
+             formats working in Safe compartments, which they don't do currently.
+     Branch: perl
+	   ! ext/Opcode/Opcode.xs ext/Opcode/Safe.pm
+____________________________________________________________________________
+[  8523] By: jhi                                   on 2001/01/23  14:11:58
+        Log: Also the lib/Thread.pm itself needs to be ignored if
+             the Thread extension hasn't been built.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[  8522] By: jhi                                   on 2001/01/23  13:51:28
+        Log: print() instead of warn() so that stderr doesn't get
+             unncessarily polluted.
+     Branch: perl
+	   ! ext/Encode/compile
+____________________________________________________________________________
+[  8521] By: jhi                                   on 2001/01/23  13:49:48
+        Log: Integrate perlio.
+     Branch: perl
+	  !> ext/Encode/Encode.xs ext/Encode/Makefile.PL ext/Encode/compile
+	  !> ext/Encode/encode.h
+____________________________________________________________________________
+[  8520] By: nick                                  on 2001/01/22  21:44:00
+        Log: More messing with Encode:
+             Extra fields in header to allow multiple names and to record
+             other things "compile" knows.
+             Re-organise compile to factor out common output routines.
+     Branch: perlio
+	   ! ext/Encode/Encode.xs ext/Encode/compile ext/Encode/encode.h
+____________________________________________________________________________
+[  8519] By: nick                                  on 2001/01/22  20:33:50
+        Log: Change file-of-files command line from -F to -f to avoid case issues on VMS.
+     Branch: perlio
+	   ! ext/Encode/Makefile.PL ext/Encode/compile
+____________________________________________________________________________
+[  8518] By: nick                                  on 2001/01/22  20:28:13
+        Log: Integrate mainline
+     Branch: perlio
+	  !> MANIFEST configure.com epoc/config.sh pp_sys.c regexec.c sv.c
+	  !> vos/config.alpha.def vos/config.alpha.h
+____________________________________________________________________________
+[  8517] By: jhi                                   on 2001/01/22  15:37:17
+        Log: Add sv_force_normal() to sv_utf8_downgrade() as suggested
+             by Inaba Hiroto.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  8516] By: jhi                                   on 2001/01/22  14:55:15
+        Log: More SIG_SIZE fixes.
+     Branch: perl
+	   ! epoc/config.sh vos/config.alpha.def vos/config.alpha.h
+____________________________________________________________________________
+[  8515] By: jhi                                   on 2001/01/22  14:50:27
+        Log: Subject: [PATCH perl@8506] typo in last week's configure.com frenzy
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 22 Jan 2001 00:42:24 -0600
+             Message-Id: <p04330103b6917f35375b@[172.16.52.1]>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[  8514] By: jhi                                   on 2001/01/22  14:31:17
+        Log: Subject: [PATCH perl@8506] VMS catches up with change #8501
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sun, 21 Jan 2001 23:03:25 -0600
+             Message-Id: <p04330101b691596f577f@[172.16.52.1]>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[  8513] By: jhi                                   on 2001/01/22  14:14:00
+        Log: Add the .ucm encoding tables to the MANIFEST.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[  8512] By: jhi                                   on 2001/01/22  13:43:33
+        Log: Integrate perlio.
+     Branch: perl
+	  +> ext/Encode/Encode/ascii.ucm ext/Encode/Encode/cp1047.ucm
+	  +> ext/Encode/Encode/cp1250.ucm ext/Encode/Encode/cp37.ucm
+	  +> ext/Encode/Encode/dingbats.ucm ext/Encode/Encode/iso8859-1.ucm
+	  +> ext/Encode/Encode/iso8859-10.ucm
+	  +> ext/Encode/Encode/iso8859-13.ucm
+	  +> ext/Encode/Encode/iso8859-14.ucm
+	  +> ext/Encode/Encode/iso8859-15.ucm
+	  +> ext/Encode/Encode/iso8859-16.ucm
+	  +> ext/Encode/Encode/iso8859-2.ucm
+	  +> ext/Encode/Encode/iso8859-3.ucm
+	  +> ext/Encode/Encode/iso8859-4.ucm
+	  +> ext/Encode/Encode/iso8859-5.ucm
+	  +> ext/Encode/Encode/iso8859-6.ucm
+	  +> ext/Encode/Encode/iso8859-7.ucm
+	  +> ext/Encode/Encode/iso8859-8.ucm
+	  +> ext/Encode/Encode/iso8859-9.ucm ext/Encode/Encode/posix-bc.ucm
+	  +> ext/Encode/Encode/symbol.ucm
+	  !> ext/Encode/Makefile.PL ext/Encode/compile lib/open.pm perlio.c
+	  !> perliol.h
+____________________________________________________________________________
+[  8511] By: nick                                  on 2001/01/21  23:44:47
+        Log: Make "real" layers of ":utf8" and ":raw".
+             So now PERLIO=utf8 perl ...
+             does what Andreas wanted.
+             Fix arg passing in open.pm (still have a Carp issue).
+     Branch: perlio
+	   ! lib/open.pm perlio.c perliol.h
+____________________________________________________________________________
+[  8510] By: jhi                                   on 2001/01/21  22:56:53
+        Log: Document the regex content pushing/popping a bit better.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[  8509] By: jhi                                   on 2001/01/21  22:55:44
+        Log: Tweak the mkdir trailing slash code some more.
+             
+             TO DO: the same handling should probably be done for
+             all the other filesystem functions that can have directories
+             as their arguments.
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  8508] By: nick                                  on 2001/01/21  21:37:43
+        Log: Switch "compiled in" encodings to .ucm format.
+             (Leave others as .enc till we can run-time load .ucm,
+             or find some other way to load them.)
+     Branch: perlio
+	   + ext/Encode/Encode/ascii.ucm ext/Encode/Encode/cp1047.ucm
+	   + ext/Encode/Encode/cp1250.ucm ext/Encode/Encode/cp37.ucm
+	   + ext/Encode/Encode/dingbats.ucm ext/Encode/Encode/iso8859-1.ucm
+	   + ext/Encode/Encode/iso8859-10.ucm
+	   + ext/Encode/Encode/iso8859-13.ucm
+	   + ext/Encode/Encode/iso8859-14.ucm
+	   + ext/Encode/Encode/iso8859-15.ucm
+	   + ext/Encode/Encode/iso8859-16.ucm
+	   + ext/Encode/Encode/iso8859-2.ucm
+	   + ext/Encode/Encode/iso8859-3.ucm
+	   + ext/Encode/Encode/iso8859-4.ucm
+	   + ext/Encode/Encode/iso8859-5.ucm
+	   + ext/Encode/Encode/iso8859-6.ucm
+	   + ext/Encode/Encode/iso8859-7.ucm
+	   + ext/Encode/Encode/iso8859-8.ucm
+	   + ext/Encode/Encode/iso8859-9.ucm ext/Encode/Encode/posix-bc.ucm
+	   + ext/Encode/Encode/symbol.ucm
+	   ! ext/Encode/Makefile.PL ext/Encode/compile
+____________________________________________________________________________
+[  8507] By: nick                                  on 2001/01/21  21:02:03
+        Log: Integrate (partial) mainline.
+     Branch: perlio
+	  !> Changes Configure config_h.SH patchlevel.h pod/perlfaq2.pod
+	  !> sv.c uconfig.h uconfig.sh vos/config.alpha.h vos/config.ga.h
+	  !> win32/config_H.bc win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[  8506] By: jhi                                   on 2001/01/21  20:09:30
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8505] By: jhi                                   on 2001/01/21  19:39:59
         Log: Subject: Minor typos in perlfaq2.pod
              From: "Stephen P. Potter" <spp@spotter.yi.org>
@@ -48,7 +267,7 @@ ____________________________________________________________________________
 	   ! U/threads/usethreads.U
 ____________________________________________________________________________
 [  8503] By: jhi                                   on 2001/01/21  19:32:21
-        Log: Sanity check for confliiting thread flavours.
+        Log: Sanity check for conflicting thread flavours.
      Branch: perl
 	   ! Configure config_h.SH
 ____________________________________________________________________________
