@@ -10035,7 +10035,9 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    break;
 	case SAVEt_BOOL:
 	    ptr = POPPTR;
-	    *(bool*)ptr = (bool)POPBOOL;
+	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
+	    longval = (long)POPBOOL;
+	    TOPBOOL(nss,ix) = (bool)longval;
 	    break;
 	default:
 	    Perl_croak(aTHX_ "panic: ss_dup inconsistency");
