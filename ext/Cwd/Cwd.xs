@@ -70,9 +70,7 @@ static char *rcsid = "$OpenBSD: realpath.c,v 1.4 1998/05/18 09:55:19 deraadt Exp
  */
 static
 char *
-bsd_realpath(path, resolved)
-	const char *path;
-	char *resolved;
+bsd_realpath(const char *path, char *resolved)
 {
 #ifdef VMS
        dTHX;
