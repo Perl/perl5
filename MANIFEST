@@ -1865,6 +1865,7 @@ lib/Text/Balanced/t/extvar.t	See if Text::Balanced works
 lib/Text/Balanced/t/gentag.t	See if Text::Balanced works
 lib/Text/ParseWords.pm		Perl module to split words on arbitrary delimiter
 lib/Text/ParseWords.t		See if Text::ParseWords works
+lib/Text/ParseWords/taint.t	See if Text::ParseWords works with tainting
 lib/Text/Soundex.pm		Perl module to implement Soundex
 lib/Text/Soundex.t		See if Soundex works
 lib/Text/Tabs.pm		Do expand and unexpand
