@@ -2248,7 +2248,7 @@ Perl_moreswitches(pTHX_ char *s)
 	return s;
     case 'v':
 	PerlIO_printf(PerlIO_stdout(),
-		      Perl_form(aTHX_ "\nThis is perl, v%vd built for %s",
+		      Perl_form(aTHX_ "\nThis is perl, v%"VDf" built for %s",
 				PL_patchlevel, ARCHNAME));
 #if defined(LOCAL_PATCH_COUNT)
 	if (LOCAL_PATCH_COUNT > 0)

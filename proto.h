@@ -130,11 +130,7 @@ PERL_CALLCONV char*	Perl_form_nocontext(const char* pat, ...)
  __attribute__((format(printf,1,2)))
 #endif
 ;
-PERL_CALLCONV void	Perl_load_module_nocontext(U32 flags, SV* name, SV* ver, ...)
-#ifdef CHECK_FORMAT
- __attribute__((format(printf,3,4)))
-#endif
-;
+PERL_CALLCONV void	Perl_load_module_nocontext(U32 flags, SV* name, SV* ver, ...);
 PERL_CALLCONV SV*	Perl_mess_nocontext(const char* pat, ...)
 #ifdef CHECK_FORMAT
  __attribute__((format(printf,1,2)))
@@ -394,11 +390,7 @@ PERL_CALLCONV void	Perl_lex_start(pTHX_ SV* line);
 PERL_CALLCONV OP*	Perl_linklist(pTHX_ OP* o);
 PERL_CALLCONV OP*	Perl_list(pTHX_ OP* o);
 PERL_CALLCONV OP*	Perl_listkids(pTHX_ OP* o);
-PERL_CALLCONV void	Perl_load_module(pTHX_ U32 flags, SV* name, SV* ver, ...)
-#ifdef CHECK_FORMAT
- __attribute__((format(printf,pTHX_3,pTHX_4)))
-#endif
-;
+PERL_CALLCONV void	Perl_load_module(pTHX_ U32 flags, SV* name, SV* ver, ...);
 PERL_CALLCONV void	Perl_vload_module(pTHX_ U32 flags, SV* name, SV* ver, va_list* args);
 PERL_CALLCONV OP*	Perl_localize(pTHX_ OP* arg, I32 lexical);
 PERL_CALLCONV I32	Perl_looks_like_number(pTHX_ SV* sv);

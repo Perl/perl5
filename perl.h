@@ -1079,6 +1079,11 @@ typedef UVTYPE UV;
 #define PTR2IV(p)	INT2PTR(IV,p)
 #define PTR2UV(p)	INT2PTR(UV,p)
 #define PTR2NV(p)	NUM2PTR(NV,p)
+#if PTRSIZE == LONGSIZE 
+#  define PTR2ul(p)	(unsigned long)(p)
+#else
+#  define PTR2ul(p)	INT2PTR(unsigned long,p)	
+#endif
   
 #ifdef USE_LONG_DOUBLE
 #  if !(defined(HAS_LONG_DOUBLE) && (LONG_DOUBLESIZE > DOUBLESIZE))
@@ -1813,9 +1818,25 @@ typedef pthread_key_t	perl_key;
 #  endif 
 #endif
 
+#ifndef UVf
+#  ifdef CHECK_FORMAT
+#    define UVf UVuf
+#  else
+#    define UVf "Vu"
+#  endif 
+#endif
+
+#ifndef VDf
+#  ifdef CHECK_FORMAT
+#    define VDf "p"
+#  else
+#    define VDf "vd"
+#  endif 
+#endif
+
 /* Some unistd.h's give a prototype for pause() even though
    HAS_PAUSE ends up undefined.  This causes the #define
-   below to be rejected by the compmiler.  Sigh.
+   below to be rejected by the compiler.  Sigh.
 */
 #ifdef HAS_PAUSE
 #define Pause	pause

@@ -173,7 +173,7 @@ void
 DumpProg()
 PPCODE:
 {
-    warn("dumpindent is %d", PL_dumpindent);
+    warn("dumpindent is %d", (int)PL_dumpindent);
     if (PL_main_root)
 	op_dump(PL_main_root);
 }

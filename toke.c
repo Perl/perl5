@@ -1219,7 +1219,7 @@ S_scan_const(pTHX_ char *start)
                 if (min > max) {
 		    Perl_croak(aTHX_
 			       "Invalid [] range \"%c-%c\" in transliteration operator",
-			       min, max);
+			       (char)min, (char)max);
                 }
 
 #ifndef ASCIIish
@@ -7354,7 +7354,7 @@ Perl_yyerror(pTHX_ char *s)
 	qerror(msg);
     if (PL_error_count >= 10) {
 	if (PL_in_eval && SvCUR(ERRSV))
-	    Perl_croak(aTHX_ "%_%s has too many errors.\n",
+	    Perl_croak(aTHX_ "%"SVf"%s has too many errors.\n",
 		       ERRSV, CopFILE(PL_curcop));
 	else
 	    Perl_croak(aTHX_ "%s has too many errors.\n",

@@ -234,7 +234,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	    ellipses = "...";                                                \
 	}                                                                    \
 	Perl_croak(aTHX_ "%s in regex m/%.*s%s/",                            \
-		   msg, len, PL_regprecomp, ellipses);                        \
+		   msg, (int)len, PL_regprecomp, ellipses);                  \
     } STMT_END
 
 /*
@@ -256,7 +256,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	    ellipses = "...";                                                \
 	}                                                                    \
 	S_re_croak2(aTHX_ pat, " in regex m/%.*s%s/",                        \
-		    msg, len, PL_regprecomp, ellipses);                     \
+		    msg, (int)len, PL_regprecomp, ellipses);                \
     } STMT_END
 
 
@@ -268,7 +268,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       unsigned offset = strlen(PL_regprecomp)-(PL_regxend-PL_regcomp_parse); \
                                                                              \
       Perl_croak(aTHX_ "%s" REPORT_LOCATION,               \
-		 m, offset, PL_regprecomp, PL_regprecomp + offset);          \
+		 m, (int)offset, PL_regprecomp, PL_regprecomp + offset);     \
     } STMT_END
 
 /*
@@ -289,7 +289,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       unsigned offset = strlen(PL_regprecomp)-(PL_regxend-PL_regcomp_parse); \
                                                                              \
       S_re_croak2(aTHX_ m, REPORT_LOCATION, a1,       \
-		  offset, PL_regprecomp, PL_regprecomp + offset);            \
+		  (int)offset, PL_regprecomp, PL_regprecomp + offset);       \
     } STMT_END
 
 /*
@@ -311,7 +311,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       unsigned offset = strlen(PL_regprecomp)-(PL_regxend-PL_regcomp_parse); \
                                                                              \
       S_re_croak2(aTHX_ m, REPORT_LOCATION, a1, a2,   \
-		  offset, PL_regprecomp, PL_regprecomp + offset);            \
+		  (int)offset, PL_regprecomp, PL_regprecomp + offset);       \
     } STMT_END
 
 /*
@@ -332,7 +332,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       unsigned offset = strlen(PL_regprecomp)-(PL_regxend-PL_regcomp_parse); \
                                                                              \
       S_re_croak2(aTHX_ m, REPORT_LOCATION, a1, a2, a3,\
-		  offset, PL_regprecomp, PL_regprecomp + offset);            \
+		  (int)offset, PL_regprecomp, PL_regprecomp + offset);       \
     } STMT_END
 
 /*
@@ -342,7 +342,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     STMT_START {                                                             \
       unsigned offset = strlen(PL_regprecomp)-(PL_regxend-PL_regcomp_parse); \
       S_re_croak2(aTHX_ m, REPORT_LOCATION, a1, a2, a3, a4,\
-		  offset, PL_regprecomp, PL_regprecomp + offset);            \
+		  (int)offset, PL_regprecomp, PL_regprecomp + offset);       \
     } STMT_END
 
 
@@ -350,7 +350,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     STMT_START {                                                             \
         unsigned offset = strlen(PL_regprecomp)-(PL_regxend-(loc));          \
 	Perl_warner(aTHX_ WARN_REGEXP, "%s" REPORT_LOCATION,\
-		 m, offset, PL_regprecomp, PL_regprecomp + offset);          \
+		 m, (int)offset, PL_regprecomp, PL_regprecomp + offset);          \
     } STMT_END                                                               \
 
 
@@ -359,7 +359,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         unsigned offset = strlen(PL_regprecomp)-(PL_regxend-(loc));          \
 	Perl_warner(aTHX_ WARN_REGEXP, m REPORT_LOCATION,\
                  a1,                                                         \
-		 offset, PL_regprecomp, PL_regprecomp + offset);             \
+		 (int)offset, PL_regprecomp, PL_regprecomp + offset);        \
     } STMT_END
 
 #define	vWARN3(loc, m, a1, a2)                                               \
@@ -367,7 +367,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       unsigned offset = strlen(PL_regprecomp) - (PL_regxend - (loc));        \
 	Perl_warner(aTHX_ WARN_REGEXP, m REPORT_LOCATION,                    \
                  a1, a2,                                                     \
-		 offset, PL_regprecomp, PL_regprecomp + offset);             \
+		 (int)offset, PL_regprecomp, PL_regprecomp + offset);        \
     } STMT_END
 
 #define	vWARN4(loc, m, a1, a2, a3)                                           \
@@ -375,7 +375,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       unsigned offset = strlen(PL_regprecomp)-(PL_regxend-(loc));            \
 	Perl_warner(aTHX_ WARN_REGEXP, m REPORT_LOCATION,\
                  a1, a2, a3,                                                 \
-		 offset, PL_regprecomp, PL_regprecomp + offset);             \
+		 (int)offset, PL_regprecomp, PL_regprecomp + offset);        \
     } STMT_END
 
 

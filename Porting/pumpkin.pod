@@ -701,6 +701,34 @@ supports dynamic loading, you can also test static loading with
 You can also hand-tweak your config.h to try out different #ifdef
 branches.
 
+=head2 Other tests
+
+=over 4
+
+=item CHECK_FORMAT
+
+To test the correct use of printf-style arguments, C<Configure> with
+S<-Dccflags='-DCHECK_FORMAT -Wformat'> and run C<make>.  The compiler
+will produce warning of incorrect use of format arguments.  CHECK_FORMAT
+changes perl-defined formats to common formats, so DO NOT USE the executable
+produced by this process. 
+
+A more accurate approach is the following commands:
+
+    sh Configure -des -Dccflags=-Wformat ...
+    make miniperl		# without -DCHECK_FORMAT
+    perl -i.orig -pwe 's/-Wformat/-DCHECK_FORMAT $&/' config.sh
+    sh Configure -S
+    make >& make.log		# build from correct miniperl
+    make clean
+    make miniperl >& mini.log	# build miniperl with -DCHECK_FORMAT 
+    perl -nwe 'print if /^\S+:/ and not /^make\b/' mini.log make.log
+    make clean
+
+(-Wformat support by Robin Barker.)
+
+=back
+
 =head1 Running Purify
 
 Purify is a commercial tool that is helpful in identifying memory

@@ -1060,7 +1060,7 @@ Perl_malloc(register size_t nbytes)
 	    dTHX;
 	    PerlIO_printf(PerlIO_stderr(),
 			  "Unaligned `next' pointer in the free "
-			  "chain 0x"UVxf" at 0x%"UVxf"\n",
+			  "chain 0x%"UVxf" at 0x%"UVxf"\n",
 			  PTR2UV(p->ov_next), PTR2UV(p));
 	}
 #endif

@@ -217,7 +217,11 @@ typedef IV IV64;
  *	-- BKS, June 2000
 */
 
-#define HEADER_FAIL(f, arg1, arg2)	\
+#define HEADER_FAIL(f)	\
+	Perl_croak(aTHX_ "Invalid bytecode for this architecture: " f)
+#define HEADER_FAIL1(f, arg1)	\
+	Perl_croak(aTHX_ "Invalid bytecode for this architecture: " f, arg1)
+#define HEADER_FAIL2(f, arg1, arg2)	\
 	Perl_croak(aTHX_ "Invalid bytecode for this architecture: " f, arg1, arg2)
 
 #define BYTECODE_HEADER_CHECK					\
@@ -227,27 +231,27 @@ typedef IV IV64;
 								\
 	    BGET_U32(sz); /* Magic: 'PLBC' */			\
 	    if (sz != 0x43424c50) {				\
-		HEADER_FAIL("bad magic (want 0x43424c50, got %#x)", sz, 0);		\
+		HEADER_FAIL1("bad magic (want 0x43424c50, got %#x)", (int)sz);		\
 	    }							\
 	    BGET_strconst(str);	/* archname */			\
 	    if (strNE(str, ARCHNAME)) {				\
-		HEADER_FAIL("wrong architecture (want %s, you have %s)",str,ARCHNAME);	\
+		HEADER_FAIL2("wrong architecture (want %s, you have %s)",str,ARCHNAME);	\
 	    }							\
 	    BGET_strconst(str); /* ByteLoader version */	\
 	    if (strNE(str, VERSION)) {				\
-		HEADER_FAIL("mismatched ByteLoader versions (want %s, you have %s)",	\
+		HEADER_FAIL2("mismatched ByteLoader versions (want %s, you have %s)",	\
 			str, VERSION);				\
 	    }							\
 	    BGET_U32(sz); /* ivsize */				\
 	    if (sz != IVSIZE) {					\
-		HEADER_FAIL("different IVSIZE", 0, 0);		\
+		HEADER_FAIL("different IVSIZE");		\
 	    }							\
 	    BGET_U32(sz); /* ptrsize */				\
 	    if (sz != PTRSIZE) {				\
-		HEADER_FAIL("different PTRSIZE", 0, 0);		\
+		HEADER_FAIL("different PTRSIZE");		\
 	    }							\
 	    BGET_strconst(str); /* byteorder */			\
 	    if (strNE(str, STRINGIFY(BYTEORDER))) {		\
-		HEADER_FAIL("different byteorder", 0, 0);	\
+		HEADER_FAIL("different byteorder");	\
 	    }							\
 	} STMT_END
