@@ -20,5 +20,7 @@ sub fromUnicode  { shift->encode(@_) }
 
 sub new_sequence { return $_[0] }
 
+sub DESTROY {}
+
 1;
 __END__
