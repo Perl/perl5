@@ -195,6 +195,26 @@ line, so you may need to use something like C<-wU> instead of C<-w -U>
 under such systems.  (This issue should arise only in Unix or
 Unix-like environments that support #! and setuid or setgid scripts.)
 
+=head2 Taint mode and @INC
+
+When the taint mode (C<-T>) is in effect, the "." directory is removed
+from C<@INC>, and the environment variables C<PERL5LIB> and C<PERLLIB>
+are ignored by Perl. You can still adjust C<@INC> from outside the
+program by using the C<-I> command line option as explained in
+L<perlrun>. The two environment variables are ignored because
+they are obscured, and a user running a program could be unaware that
+they are set, whereas the C<-I> option is clearly visible and
+therefore permitted.
+
+Another way to modify C<@INC> without modifying the program, is to use
+the C<lib> pragma, e.g.:
+
+  perl -Mlib=/foo program
+
+The benefit of using C<-Mlib=/foo> over C<-I/foo>, is that the former
+will automagically remove any duplicated directories, while the later
+will not.
+
 =head2 Cleaning Up Your Path
 
 For "Insecure C<$ENV{PATH}>" messages, you need to set C<$ENV{'PATH'}> to a
