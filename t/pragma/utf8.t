@@ -10,13 +10,19 @@ BEGIN {
     }
 }
 
-print "1..68\n";
+print "1..70\n";
 
 my $test = 1;
 
 sub ok {
     my ($got,$expect) = @_;
     print "# expected [$expect], got [$got]\nnot " if $got ne $expect;
+    print "ok $test\n";
+}
+
+sub nok {
+    my ($got,$expect) = @_;
+    print "# expected not [$expect], got [$got]\nnot " if $got eq $expect;
     print "ok $test\n";
 }
 
@@ -27,6 +33,12 @@ sub ok_bytes {
     print "ok $test\n";
 }
 
+sub nok_bytes {
+    use bytes;
+    my ($got,$expect) = @_;
+    print "# expected not [$expect], got [$got]\nnot " if $got eq $expect;
+    print "ok $test\n";
+}
 
 {
     use utf8;
@@ -309,4 +321,11 @@ sub ok_bytes {
     my @a = map ord, split(/$x/, join("", map chr, (1234, 123, 2345)));
     ok "@a", "1234 2345";
     $test++;                # 68
+}
+{
+  my($a,$b);
+  { use bytes; $a = "\xc3\xa4"; }  
+  { use utf8;  $b = "\xe4"; }
+  { use bytes; ok_bytes $a, $b; $test++; } # 69
+  { use utf8;  nok      $a, $b; $test++; } # 70
 }

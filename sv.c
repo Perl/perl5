@@ -4094,7 +4094,7 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 	pv2 = SvPV(sv2, cur2);
 
     /* do not utf8ize the comparands as a side-effect */
-    if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTE && 0) {
+    if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTE) {
 	if (SvUTF8(sv1)) {
 	    pv2 = (char*)bytes_to_utf8((U8*)pv2, &cur2);
 	    pv2tmp = TRUE;
