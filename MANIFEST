@@ -788,6 +788,7 @@ ext/XS/APItest/MANIFEST		XS::APItest extension
 ext/XS/APItest/README		XS::APItest extension
 ext/XS/APItest/t/hash.t		XS::APItest extension
 ext/XS/APItest/t/printf.t	XS::APItest extension
+ext/XS/APItest/t/push.t		XS::APItest extension
 ext/XS/Typemap/Makefile.PL	XS::Typemap extension
 ext/XS/Typemap/README		XS::Typemap extension
 ext/XS/Typemap/stdio.c		XS::Typemap extension
