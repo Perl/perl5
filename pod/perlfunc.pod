@@ -2539,7 +2539,8 @@ See also L</exp> for the inverse operation.
 Does the same thing as the C<stat> function (including setting the
 special C<_> filehandle) but stats a symbolic link instead of the file
 the symbolic link points to.  If symbolic links are unimplemented on
-your system, a normal C<stat> is done.
+your system, a normal C<stat> is done.  For much more detailed
+information, please see the documentation for C<stat>.
 
 If EXPR is omitted, stats C<$_>.
 
@@ -5309,7 +5310,8 @@ and the S_IF* functions are
     S_ISENFMT($mode) S_ISWHT($mode)
 
 See your native chmod(2) and stat(2) documentation for more details
-about the S_* constants.
+about the S_* constants.  To get status info for a symbolic link
+instead of the target file behind the link, use the C<lstat> function.
 
 =item study SCALAR
 
