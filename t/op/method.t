@@ -125,4 +125,4 @@ test(A->eee(), "new B: In A::eee, 4");	# We get a correct $autoload
 test(A->eee(), "new B: In A::eee, 4");	# Which sticks
 
 # this test added due to bug discovery
-test(exists($unknown_package::{"ISA"}) ? "defined" : "undefined", "undefined");
+test(defined(@{"unknown_package::ISA"}) ? "defined" : "undefined", "undefined");
