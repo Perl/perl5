@@ -6563,8 +6563,12 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		*--eptr = '#';
 	    *--eptr = '%';
 
-	    (void)sprintf(PL_efloatbuf, eptr, nv);
-	
+	    {
+		RESTORE_NUMERIC_STANDARD();
+		(void)sprintf(PL_efloatbuf, eptr, nv);
+		RESTORE_NUMERIC_LOCAL();
+	    }
+
 	    eptr = PL_efloatbuf;
 	    elen = strlen(PL_efloatbuf);
 	    break;
