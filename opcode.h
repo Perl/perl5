@@ -1994,7 +1994,7 @@ EXT U32 PL_opargs[] = {
 	0x00001a44,	/* dump */
 	0x00001a44,	/* goto */
 	0x00013644,	/* exit */
-	0x0012c81c,	/* open */
+	0x0132c81c,	/* open */
 	0x0001d614,	/* close */
 	0x000cc814,	/* pipe_op */
 	0x0000d61c,	/* fileno */

@@ -501,10 +501,16 @@ PP(pp_open)
     djSP; dTARGET;
     GV *gv;
     SV *sv;
+    SV *name;
+    I32 have_name = 0;
     char *tmps;
     STRLEN len;
     MAGIC *mg;
 
+    if (MAXARG > 2) {
+	name = POPs;
+	have_name = 1;
+    }
     if (MAXARG > 1)
 	sv = POPs;
     if (!isGV(TOPs))
@@ -537,6 +543,8 @@ PP(pp_open)
 	PUSHMARK(SP);
 	XPUSHs(SvTIED_obj((SV*)gv, mg));
 	XPUSHs(sv);
+	if (have_name)
+	    XPUSHs(name);
 	PUTBACK;
 	ENTER;
 	call_method("OPEN", G_SCALAR);
@@ -546,7 +554,7 @@ PP(pp_open)
     }
 
     tmps = SvPV(sv, len);
-    if (do_open(gv, tmps, len, FALSE, O_RDONLY, 0, Nullfp))
+    if (do_open9(gv, tmps, len, FALSE, O_RDONLY, 0, Nullfp, name, have_name))
 	PUSHi( (I32)PL_forkprocess );
     else if (PL_forkprocess == 0)		/* we are a new child */
 	PUSHi(0);

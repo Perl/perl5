@@ -99,8 +99,12 @@ extern long sdbm_hash proto((char *, int));
 #define dbm_clearerr sdbm_clearerr
 #endif
 
-/* Most of the following is stolen from perl.h. */
+/* Most of the following is stolen from perl.h.  We don't include
+   perl.h here because we just want the portability parts of perl.h,
+   not everything else.
+*/
 #ifndef H_PERL  /* Include guard */
+#include "embed.h"  /* Follow all the global renamings. */
 
 /*
  * The following contortions are brought to you on behalf of all the

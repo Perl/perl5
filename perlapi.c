@@ -798,6 +798,13 @@ Perl_do_open(pTHXo_ GV* gv, char* name, I32 len, int as_raw, int rawmode, int ra
     return ((CPerlObj*)pPerl)->Perl_do_open(gv, name, len, as_raw, rawmode, rawperm, supplied_fp);
 }
 
+#undef  Perl_do_open9
+bool
+Perl_do_open9(pTHXo_ GV *gv, char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp, SV *svs, I32 num)
+{
+    return ((CPerlObj*)pPerl)->Perl_do_open9(gv, name, len, as_raw, rawmode, rawperm, supplied_fp, svs, num);
+}
+
 #undef  Perl_do_pipe
 void
 Perl_do_pipe(pTHXo_ SV* sv, GV* rgv, GV* wgv)

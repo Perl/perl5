@@ -2419,6 +2419,8 @@ to be converted into a file mode, for example. (Although perl will
 automatically convert strings into numbers as needed, this automatic
 conversion assumes base 10.)
 
+=item open FILEHANDLE,MODE,EXPR
+
 =item open FILEHANDLE,EXPR
 
 =item open FILEHANDLE
@@ -2432,9 +2434,9 @@ for this purpose; so if you're using C<my>, specify EXPR in your call
 to open.)  See L<perlopentut> for a kinder, gentler explanation of opening
 files.
 
-If the filename begins with C<'E<lt>'> or nothing, the file is opened for input.
-If the filename begins with C<'E<gt>'>, the file is truncated and opened for
-output, being created if necessary.  If the filename begins with C<'E<gt>E<gt>'>,
+If MODE is C<'E<lt>'> or nothing, the file is opened for input.
+If MODE is C<'E<gt>'>, the file is truncated and opened for
+output, being created if necessary.  If MODE is C<'E<gt>E<gt>'>,
 the file is opened for appending, again being created if necessary. 
 You can put a C<'+'> in front of the C<'E<gt>'> or C<'E<lt>'> to indicate that
 you want both read and write access to the file; thus C<'+E<lt>'> is almost
@@ -2444,9 +2446,12 @@ textfiles, since they have variable length records.  See the B<-i>
 switch in L<perlrun> for a better approach.  The file is created with
 permissions of C<0666> modified by the process' C<umask> value.
 
-The prefix and the filename may be separated with spaces.
 These various prefixes correspond to the fopen(3) modes of C<'r'>, C<'r+'>, C<'w'>,
 C<'w+'>, C<'a'>, and C<'a+'>.
+
+In the 2-arguments (and 1-argument) form of the call the mode and
+filename should be concatenated (in this order), possibly separated by
+spaces.  It is possible to omit the mode if the mode is C<'E<lt>'>.
 
 If the filename begins with C<'|'>, the filename is interpreted as a
 command to which output is to be piped, and if the filename ends with a
@@ -2456,7 +2461,19 @@ for more examples of this.  (You are not allowed to C<open> to a command
 that pipes both in I<and> out, but see L<IPC::Open2>, L<IPC::Open3>,
 and L<perlipc/"Bidirectional Communication"> for alternatives.)
 
-Opening C<'-'> opens STDIN and opening C<'E<gt>-'> opens STDOUT.  Open returns
+If MODE is C<'|-'>, the filename is interpreted as a
+command to which output is to be piped, and if MODE is
+C<'-|'>, the filename is interpreted as a command which pipes output to
+us.  In the 2-arguments (and 1-argument) form one should replace dash
+(C<'-'>) with the command.  See L<perlipc/"Using open() for IPC">
+for more examples of this.  (You are not allowed to C<open> to a command
+that pipes both in I<and> out, but see L<IPC::Open2>, L<IPC::Open3>,
+and L<perlipc/"Bidirectional Communication"> for alternatives.)
+
+In the 2-arguments (and 1-argument) form opening C<'-'> opens STDIN
+and opening C<'E<gt>-'> opens STDOUT.  
+
+Open returns
 nonzero upon success, the undefined value otherwise.  If the C<open>
 involved a pipe, the return value happens to be the pid of the
 subprocess.
@@ -2483,16 +2500,22 @@ Examples:
     open ARTICLE or die "Can't find article $ARTICLE: $!\n";
     while (<ARTICLE>) {...
 
-    open(LOG, '>>/usr/spool/news/twitlog'); # (log is reserved)
+    open(LOG, '>>/usr/spool/news/twitlog');	# (log is reserved)
     # if the open fails, output is discarded
 
-    open(DBASE, '+<dbase.mine')		    # open for update
+    open(DBASE, '+<', 'dbase.mine')		# open for update
 	or die "Can't open 'dbase.mine' for update: $!";
 
-    open(ARTICLE, "caesar <$article |")     # decrypt article
+    open(DBASE, '+<dbase.mine')			# ditto
+	or die "Can't open 'dbase.mine' for update: $!";
+
+    open(ARTICLE, '-|', "caesar <$article")     # decrypt article
 	or die "Can't start caesar: $!";
 
-    open(EXTRACT, "|sort >/tmp/Tmp$$")      # $$ is our process id
+    open(ARTICLE, "caesar <$article |")		# ditto
+	or die "Can't start caesar: $!";
+
+    open(EXTRACT, "|sort >/tmp/Tmp$$")		# $$ is our process id
 	or die "Can't start sort: $!";
 
     # process argument list of files along with any includes
@@ -2522,11 +2545,13 @@ Examples:
 You may also, in the Bourne shell tradition, specify an EXPR beginning
 with C<'E<gt>&'>, in which case the rest of the string is interpreted as the
 name of a filehandle (or file descriptor, if numeric) to be
-duped and opened.  You may use C<&> after C<E<gt>>, C<E<gt>E<gt>>, C<E<lt>>, C<+E<gt>>,
-C<+E<gt>E<gt>>, and C<+E<lt>>.  The
+duped and opened.  You may use C<&> after C<E<gt>>, C<E<gt>E<gt>>,
+C<E<lt>>, C<+E<gt>>, C<+E<gt>E<gt>>, and C<+E<lt>>.  The
 mode you specify should match the mode of the original filehandle.
 (Duping a filehandle does not take into account any existing contents of
-stdio buffers.)
+stdio buffers.)  Duping file handles is not yet supported for 3-argument
+open().
+
 Here is a script that saves, redirects, and restores STDOUT and
 STDERR:
 
@@ -2534,8 +2559,8 @@ STDERR:
     open(OLDOUT, ">&STDOUT");
     open(OLDERR, ">&STDERR");
 
-    open(STDOUT, ">foo.out") || die "Can't redirect stdout";
-    open(STDERR, ">&STDOUT") || die "Can't dup stdout";
+    open(STDOUT, '>', "foo.out") || die "Can't redirect stdout";
+    open(STDERR, ">&STDOUT")     || die "Can't dup stdout";
 
     select(STDERR); $| = 1;	# make unbuffered
     select(STDOUT); $| = 1;	# make unbuffered
@@ -2558,7 +2583,8 @@ parsimonious of file descriptors.  For example:
 
     open(FILEHANDLE, "<&=$fd")
 
-If you open a pipe on the command C<'-'>, i.e., either C<'|-'> or C<'-|'>, then
+If you open a pipe on the command C<'-'>, i.e., either C<'|-'> or C<'-|'>
+with 2-arguments (or 1-argument) form of open(), then
 there is an implicit fork done, and the return value of open is the pid
 of the child within the parent process, and C<0> within the child
 process.  (Use C<defined($pid)> to determine whether the open was successful.)
@@ -2569,13 +2595,15 @@ the new STDOUT or STDIN.  Typically this is used like the normal
 piped open when you want to exercise more control over just how the
 pipe command gets executed, such as when you are running setuid, and
 don't want to have to scan shell commands for metacharacters.
-The following pairs are more or less equivalent:
+The following triples are more or less equivalent:
 
     open(FOO, "|tr '[a-z]' '[A-Z]'");
-    open(FOO, "|-") || exec 'tr', '[a-z]', '[A-Z]';
+    open(FOO, '|-', "tr '[a-z]' '[A-Z]'");
+    open(FOO, '|-') || exec 'tr', '[a-z]', '[A-Z]';
 
     open(FOO, "cat -n '$file'|");
-    open(FOO, "-|") || exec 'cat', '-n', $file;
+    open(FOO, '-|', "cat -n '$file'");
+    open(FOO, '-|') || exec 'cat', '-n', $file;
 
 See L<perlipc/"Safe Pipe Opens"> for more examples of this.
 
@@ -2587,7 +2615,8 @@ file descriptor as determined by the value of $^F.  See L<perlvar/$^F>.
 Closing any piped filehandle causes the parent process to wait for the
 child to finish, and returns the status value in C<$?>.
 
-The filename passed to open will have leading and trailing
+The filename passed to 2-argument (or 1-argument) form of open()
+will have leading and trailing
 whitespace deleted, and the normal redirection characters
 honored.  This property, known as "magic open", 
 can often be used to good effect.  A user could specify a filename of
@@ -2596,14 +2625,32 @@ F<"rsh cat file |">, or you could change certain filenames as needed:
     $filename =~ s/(.*\.gz)\s*$/gzip -dc < $1|/;
     open(FH, $filename) or die "Can't open $filename: $!";
 
-However, to open a file with arbitrary weird characters in it, it's
-necessary to protect any leading and trailing whitespace:
+Use 3-argument form to open a file with arbitrary weird characters in it,
+
+    open(FOO, '<', $file);
+
+otherwise it's necessary to protect any leading and trailing whitespace:
 
     $file =~ s#^(\s)#./$1#;
     open(FOO, "< $file\0");
 
+(this may not work on some bizzare filesystems).  One should
+conscientiously choose between the the I<magic> and 3-arguments form
+of open():
+
+    open IN, $ARGV[0];
+
+will allow the user to specify an argument of the form C<"rsh cat file |">,
+but will not work on a filename which happens to have a trailing space, while
+
+    open IN, '<', $ARGV[0];
+
+will have exactly the opposite restrictions.
+
 If you want a "real" C C<open> (see L<open(2)> on your system), then you
-should use the C<sysopen> function, which involves no such magic.  This is
+should use the C<sysopen> function, which involves no such magic (but
+may use subtly different filemodes than Perl open(), which is mapped
+to C fopen()).  This is
 another way to protect your filenames from interpretation.  For example:
 
     use IO::Handle;

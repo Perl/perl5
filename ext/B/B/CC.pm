@@ -54,7 +54,7 @@ my %ignore_op;		# Hash of ops which do nothing except returning op_next
 my %need_curcop;	# Hash of ops which need PL_curcop
 
 BEGIN {
-    foreach (qw(pp_setstate pp_scalar pp_regcmaybe pp_lineseq pp_scope pp_null)) {
+    foreach (qw(pp_scalar pp_regcmaybe pp_lineseq pp_scope pp_null)) {
 	$ignore_op{$_} = 1;
     }
 }
