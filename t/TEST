@@ -10,9 +10,10 @@ $| = 1;
 $ENV{PERL_CORE} = 1;
 
 # Cheesy version of Getopt::Std.  Maybe we should replace it with that.
+@argv = ();
 if ($#ARGV >= 0) {
     foreach my $idx (0..$#ARGV) {
-	next unless $ARGV[$idx] =~ /^-(\S+)$/;
+	push( @argv, $ARGV[$idx] ), next unless $ARGV[$idx] =~ /^-(\S+)$/;
 	$core    = 1 if $1 eq 'core';
 	$verbose = 1 if $1 eq 'v';
 	$with_utf= 1 if $1 eq 'utf8';
@@ -22,9 +23,9 @@ if ($#ARGV >= 0) {
 	    $deparse = 1;
 	    $deparse_opts = $1;
 	}
-	splice(@ARGV, $idx, 1);
     }
 }
+@ARGV = @argv;
 
 chdir 't' if -f 't/TEST';
 
@@ -181,6 +182,7 @@ EOT
  	    $switch = '';
  	}
 
+        my $test_executable; # for 'compile' tests
 	my $file_opts = "";
 	if ($type eq 'deparse') {
 	    # Look for #line directives which change the filename
@@ -208,17 +210,38 @@ EOT
 	    open(RESULTS,$run) or print "can't run '$run': $!.\n";
 	}
 	else {
-	    my $compile =
-		"./perl $testswitch -I../lib ../utils/perlcc -I .. $args -o ".
-                "$test.plc $utf $test ".
-		" && $test.plc |";
+	    my $compile;
+            my $pl2c = "$testswitch -I../lib ../utils/perlcc --testsuite " .
+                       "$switch -L .. " .
+                       "-I \".. ../lib/CORE\" $args $utf $test -o ";
+
+            if( $^O eq 'MSWin32' ) {
+                $test_executable = "$test.exe";
+                # hopefully unused name...
+                open HACK, "> xweghyz.pl";
+                print HACK <<EOT;
+#!./perl
+
+open HACK, '.\\perl $pl2c $test_executable |';
+# cl.exe prints the name of the .c file on stdout (\%^\$^#)
+while(<HACK>) {m/^\w+\.[cC]\$/ && next;print}
+open HACK, '$test_executable |';
+while(<HACK>) {print}
+EOT
+                close HACK;
+                $compile = 'xweghyz.pl |';
+            }
+            else {
+                $test_executable = "$test.plc";
+                $compile = "./perl $pl2c $test_executable && $test_executable |";
+            }
+            unlink $test_executable if -f $test_executable;
 	    open(RESULTS, $compile)
 		or print "can't compile '$compile': $!.\n";
-	    unlink "$test.plc";
 	}
 
-	$ok = 0;
-	$next = 0;
+        $ok = 0;
+        $next = 0;
 	while (<RESULTS>) {
 	    if ($verbose) {
 		print $_;
@@ -271,7 +294,12 @@ EOT
 		die "rename: perl3.log to perl.3log.$tpp: $!\n";
 	}
 	$next = $next - 1;
-	if ($ok && $next == $max) {
+        # test if the compiler compiled something
+        if( $type eq 'compile' && !-e "$test_executable" ) {
+            $ok = 0;
+            print "Test did not compile\n";
+        }
+	if ($ok && $next == $max ) {
 	    if ($max) {
 		print "ok\n";
 		$good = $good + 1;

@@ -74,7 +74,7 @@ static char *opclassnames[] = {
 
 typedef struct {
     int		x_walkoptree_debug;	/* Flag for walkoptree debug hook */
-    SV *	x_specialsv_list[6];
+    SV *	x_specialsv_list[7];
 } my_cxt_t;
 
 START_MY_CXT
@@ -229,6 +229,7 @@ cstring(pTHX_ SV *sv)
     SV *sstr = newSVpvn("", 0);
     STRLEN len;
     char *s;
+    char escbuff[5]; /* to fit backslash, 3 octals + trailing \0 */
 
     if (!SvOK(sv))
 	sv_setpvn(sstr, "0", 1);
@@ -244,6 +245,12 @@ cstring(pTHX_ SV *sv)
 		sv_catpv(sstr, "\\\"");
 	    else if (*s == '\\')
 		sv_catpv(sstr, "\\\\");
+            /* trigraphs - bleagh */
+            else if (*s == '?' && len>=3 && s[1] == '?')
+            {
+                sprintf(escbuff, "\\%03o", '?');
+                sv_catpv(sstr, escbuff);
+            }
 	    else if (*s >= ' ' && *s < 127) /* XXX not portable */
 		sv_catpvn(sstr, s, 1);
 	    else if (*s == '\n')
@@ -262,8 +269,6 @@ cstring(pTHX_ SV *sv)
 		sv_catpv(sstr, "\\v");
 	    else
 	    {
-		/* no trigraph support */
-		char escbuff[5]; /* to fit backslash, 3 octals + trailing \0 */
 		/* Don't want promotion of a signed -1 char in sprintf args */
 		unsigned char c = (unsigned char) *s;
 		sprintf(escbuff, "\\%03o", c);
@@ -390,6 +395,7 @@ BOOT:
     specialsv_list[3] = &PL_sv_no;
     specialsv_list[4] = pWARN_ALL;
     specialsv_list[5] = pWARN_NONE;
+    specialsv_list[6] = pWARN_STD;
 #include "defsubs.h"
 }
 
@@ -919,13 +925,33 @@ char*
 SvPVX(sv)
 	B::PV	sv
 
+B::SV
+SvRV(sv)
+        B::PV   sv
+    CODE:
+        if( SvROK(sv) ) {
+            RETVAL = SvRV(sv);
+        }
+        else {
+            croak( "argument is not SvROK" );
+        }
+    OUTPUT:
+        RETVAL
+
 void
 SvPV(sv)
 	B::PV	sv
     CODE:
-	ST(0) = sv_newmortal();
-	sv_setpvn(ST(0), SvPVX(sv), SvCUR(sv));
-	SvFLAGS(ST(0)) |= SvUTF8(sv);
+        ST(0) = sv_newmortal();
+        if( SvPOK(sv) ) {
+            sv_setpvn(ST(0), SvPVX(sv), SvCUR(sv));
+            SvFLAGS(ST(0)) |= SvUTF8(sv);
+        }
+        else {
+            /* XXX for backward compatibility, but should fail */
+            /* croak( "argument is not SvPOK" ); */
+            sv_setpvn(ST(0), NULL, 0);
+        }
 
 STRLEN
 SvLEN(sv)
@@ -979,6 +1005,30 @@ MgFLAGS(mg)
 B::SV
 MgOBJ(mg)
 	B::MAGIC	mg
+    CODE:
+        if( mg->mg_type != 'r' ) {
+            RETVAL = MgOBJ(mg);
+        }
+        else {
+            croak( "OBJ is not meaningful on r-magic" );
+        }
+    OUTPUT:
+        RETVAL
+
+SV*
+precomp(mg)
+        B::MAGIC        mg
+    CODE:
+        if (mg->mg_type == 'r') {
+            REGEXP* rx = (REGEXP*)mg->mg_obj;
+            if( rx )
+                RETVAL = newSVpvn( rx->precomp, rx->prelen );
+        }
+        else {
+            croak( "precomp is only meaningful on r-magic" );
+        }
+    OUTPUT:
+        RETVAL
 
 I32 
 MgLENGTH(mg)
@@ -1160,6 +1210,29 @@ short
 IoSUBPROCESS(io)
 	B::IO	io
 
+bool
+IsSTD(io,name)
+	B::IO	io
+	char*	name
+    PREINIT:
+	PerlIO* handle = 0;
+    CODE:
+	if( strEQ( name, "stdin" ) ) {
+	    handle = PerlIO_stdin();
+	}
+	else if( strEQ( name, "stdout" ) ) {
+	    handle = PerlIO_stdout();
+	}
+	else if( strEQ( name, "stderr" ) ) {
+	    handle = PerlIO_stderr();
+	}
+	else {
+	    croak( "Invalid value '%s'", name );
+	}
+	RETVAL = handle == IoIFP(io);
+    OUTPUT:
+	RETVAL
+
 MODULE = B	PACKAGE = B::IO
 
 char
@@ -1248,7 +1321,9 @@ void
 CvXSUBANY(cv)
 	B::CV	cv
     CODE:
-	ST(0) = sv_2mortal(newSViv(CvXSUBANY(cv).any_iv));
+	ST(0) = CvCONST(cv) ?
+                    make_sv_object(aTHX_ sv_newmortal(),CvXSUBANY(cv).any_ptr) :
+                    sv_2mortal(newSViv(CvXSUBANY(cv).any_iv));
 
 MODULE = B    PACKAGE = B::CV
 

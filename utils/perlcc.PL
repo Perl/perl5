@@ -63,11 +63,14 @@ use subs qw{
     grab_stash parse_argv sanity_check vprint yclept spawnit
 };
 sub opt(*); # imal quoting
+sub is_win32();
+sub is_msvc();
 
 our ($Options, $BinPerl, $Backend);
 our ($Input => $Output);
 our ($logfh);
 our ($cfile);
+our (@begin_output); # output from BEGIN {}, for testsuite
 
 # eval { main(); 1 } or die;
 
@@ -161,7 +164,7 @@ sub parse_argv {
         'L:s',          # lib directory
         'I:s',          # include directories (FOR C, NOT FOR PERL)
         'o:s',          # Output executable
-        'v:i',           # Verbosity level
+        'v:i',          # Verbosity level
         'e:s',          # One-liner
 	'r',            # run resulting executable
         'B',            # Byte compiler backend
@@ -170,24 +173,34 @@ sub parse_argv {
         'h',            # Help me
         'S',            # Dump C files
 	'r',            # run the resulting executable
+        'T',            # run the backend using perl -T
+        't',            # run the backend using perl -t
         'static',       # Dirty hack to enable -shared/-static
         'shared',       # Create a shared library (--shared for compat.)
-	'log:s'         # where to log compilation process information
+	'log:s',        # where to log compilation process information
+        'testsuite',    # try to be nice to testsuite
     );
-        
+
     $Options->{v} += 0;
+
+    if( opt(t) && opt(T) ) {
+        warn "Can't specify both -T and -t, -t ignored";
+        $Options->{t} = 0;
+    }
 
     helpme() if opt(h); # And exit
 
-    $Output = opt(o) || 'a.out';
-    $Output = relativize($Output);
+    $Output = opt(o) || ( is_win32 ? 'a.exe' : 'a.out' );
+    $Output = is_win32() ? $Output : relativize($Output);
     $logfh  = new FileHandle(">> " . opt('log')) if (opt('log'));
 
     if (opt(e)) {
         warn "$0: using -e 'code' as input file, ignoring @ARGV\n" if @ARGV;
         # We don't use a temporary file here; why bother?
         # XXX: this is not bullet proof -- spaces or quotes in name!
-        $Input = "-e '".opt(e)."'"; # Quotes eaten by shell
+        $Input = is_win32() ? # Quotes eaten by shell
+            '-e "'.opt(e).'"' :
+            "-e '".opt(e)."'";
     } else {
         $Input = shift @ARGV;  # XXX: more files?
         _usage_and_die("$0: No input file specified\n") unless $Input;
@@ -252,7 +265,7 @@ EOF
 	my @error = grep { !/^$Input syntax OK$/o } @$error_r;
 	warn "$0: Unexpected compiler output:\n@error" if @error;
     }
-	
+
     # Write it and leave.
     print OUT @$output_r               or _die("can't write $Output: $!");
     close OUT                          or _die("can't close $Output: $!");
@@ -264,11 +277,25 @@ EOF
 
 sub compile_cstyle {
     my $stash = grab_stash();
-    
+    my $taint = opt(T) ? '-T' :
+                opt(t) ? '-t' : '';
+
     # What are we going to call our output C file?
     my $lose = 0;
     my ($cfh);
+    my $testsuite = '';
 
+    if (opt(testsuite)) {
+        my $bo = join '', @begin_output;
+        $bo =~ s/\\/\\\\\\\\/gs;
+        $bo =~ s/\n/\\n/gs;
+        $bo =~ s/,/\\054/gs;
+        # don't look at that: it hurts
+        $testsuite = q{-fuse-script-name,-fsave-data,-fsave-sig-hash,}.
+            qq[-e"print q{$bo}",] .
+            q{-e"open(Test::Builder::TESTOUT\054 '>&STDOUT') or die $!",} .
+            q{-e"open(Test::Builder::TESTERR\054 '>&STDERR') or die $!",};
+    }
     if (opt(S) || opt(c)) {
         # We need to keep it.
         if (opt(e)) {
@@ -297,7 +324,7 @@ sub compile_cstyle {
 
     # This has to do the write itself, so we can't keep a lock. Life
     # sucks.
-    my $command = "$BinPerl -MO=$Backend,$max_line_len$stash,-o$cfile $Input";
+    my $command = "$BinPerl $taint -MO=$Backend,$testsuite$max_line_len$stash,-o$cfile $Input";
     vprint 1, "Compiling...";
     vprint 1, "Calling $command";
 
@@ -309,12 +336,31 @@ sub compile_cstyle {
         _die("$0: $Input did not compile, which can't happen:\n@error\n");
     }
 
-    cc_harness($cfile,$stash) unless opt(c);
+    is_msvc ?
+        cc_harness_msvc($cfile,$stash) :
+        cc_harness($cfile,$stash) unless opt(c);
 
     if ($lose) {
         vprint 2, "unlinking $cfile";
         unlink $cfile or _die("can't unlink $cfile: $!"); 
     }
+}
+
+sub cc_harness_msvc {
+    my ($cfile,$stash)=@_;
+    use ExtUtils::Embed ();
+    my $obj = "${Output}.obj";
+    my $compile = ExtUtils::Embed::ccopts." -c -Fo$obj $cfile ";
+    my $link = "-out:$Output $obj";
+    $compile .= " -I".$_ for split /\s+/, opt(I);
+    $link .= " -libpath:".$_ for split /\s+/, opt(L);
+    my @mods = split /-?u /, $stash;
+    $link .= " ".ExtUtils::Embed::ldopts("-std", \@mods);
+    $link .= " perl57.lib msvcrt.lib";
+    vprint 3, "running $Config{cc} $compile";
+    system("$Config{cc} $compile");
+    vprint 3, "running $Config{ld} $link";
+    system("$Config{ld} $link");
 }
 
 sub cc_harness {
@@ -356,7 +402,9 @@ sub yclept {
 
         warn "already called get_stash once" if $_stash;
 
-        my $command = "$BinPerl -MB::Stash -c $Input";
+        my $taint = opt(T) ? '-T' :
+                    opt(t) ? '-t' : '';
+        my $command = "$BinPerl $taint -MB::Stash -c $Input";
         # Filename here is perfectly sanitised.
         vprint 3, "Calling $command\n";
 
@@ -368,7 +416,14 @@ sub yclept {
             _die("$0: $Input did not compile:\n@error\n");
         }
 
+        # band-aid for modules with noisy BEGIN {}
+        foreach my $i ( @stash ) {
+            $i =~ m/-u(?:[\w:]+|\<none\>)$/ and $stash[0] = $i and next;
+            push @begin_output, $i;
+        }
+        chomp $stash[0];
         $stash[0] =~ s/,-u\<none\>//;
+        $stash[0] =~ s/^.*?-u/-u/s;
         vprint 2, "Stash: ", join " ", split /,?-u/, $stash[0];
         chomp $stash[0];
         return $_stash = $stash[0];
@@ -547,6 +602,9 @@ sub interruptrun
     close(FD);
     return($text);
 }
+
+sub is_win32() { $^O =~ m/^MSWin/ }
+sub is_msvc() { is_win32 && $Config{cc} =~ m/^cl/i }
 
 END {
     unlink $cfile if ($cfile && !opt(S) && !opt(c));
