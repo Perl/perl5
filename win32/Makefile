@@ -70,14 +70,14 @@ INST_VER	= \5.00502
 # file exists (see README.win32).  File should be located in the same
 # directory as this file.
 #
-#CRYPT_SRC	= des_fcrypt.c
+#CRYPT_SRC	= fcrypt.c
 
 #
 # if you didn't set CRYPT_SRC and if you have des_fcrypt() available in a
 # library, uncomment this, and make sure the library exists (see README.win32)
 # Specify the full pathname of the library.
 #
-#CRYPT_LIB	= des_fcrypt.lib
+#CRYPT_LIB	= fcrypt.lib
 
 #
 # set this if you wish to use perl's malloc

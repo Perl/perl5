@@ -1038,6 +1038,7 @@ win32/config_H.gc	Win32 config header (GNU build)?
 win32/config_H.vc	Win32 config header (Visual C++ build)
 win32/config_h.PL	Perl code to convert Win32 config.sh to config.h
 win32/config_sh.PL	Perl code to update Win32 config.sh from Makefile 
+win32/des_fcrypt.patch	Win32 port
 win32/dl_win32.xs	Win32 port
 win32/genxsdef.pl	Win32 port
 win32/include/arpa/inet.h	Win32 port
