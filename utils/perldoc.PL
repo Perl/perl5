@@ -289,7 +289,7 @@ if ($opt_f) {
 	   print @pod;
        }
    } else {
-       die "No documentation for perl function `$func' found\n";
+       die "No documentation for perl function `$opt_f' found\n";
    }
    exit;
 }
