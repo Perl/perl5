@@ -3,7 +3,7 @@ use strict;
 use ExtUtils::MakeMaker;
 
 my %tables = ('BIG5'		=> ['big5.enc'],
-	      'BIG5-HKSCS'	=> ['big5-hkscs.enc'],
+	      'BIG5_HKSCS'	=> ['big5-hkscs.enc'],
 	      'CP950'		=> ['cp950.enc'],
              );
 
