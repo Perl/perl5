@@ -8,7 +8,7 @@
 # hints/hpux_10.sh, Perl Configure hints file for Hewlett Packard HP-UX 10.x
 # From: Giles Lean <giles@nemeton.com.au>
 
-# This version: October 29, 1996
+# This version: December 4, 1996
 
 # Use Configure -Dcc=gcc to use gcc.
 # Use Configure -Dprefix=/usr/local to install in /usr/local.
@@ -51,7 +51,8 @@ xxuname=`uname -r`
 if echo $xxuname | $contains '10'
 then
 	# This system is running 10.0
-	xxcontext=`grep $(printf %#x $(getconf CPU_VERSION)) /usr/include/sys/unistd.h`
+	xxcpu=`printf %#x \`getconf CPU_VERSION\``
+	xxcontext=`grep "$xxcpu" /usr/include/sys/unistd.h`
 	if echo "$xxcontext" | $contains 'PA-RISC1.1'
 	then
 		archname='PA-RISC1.1'
