@@ -285,36 +285,110 @@ fi
 # Apply patches if needed
 case "$0$running_c_cmd" in
   *[/\\]Configure|*[/\\]Configure.|Configure|Configure.) # Skip Configure.cmd
-    if grep "^libnames" ./Configure > /dev/null; then
+    if test "Xyes" = "X$configure_cmd_loop"; then
+	cat <<EOC >&2
+!!!
+!!! PANIC: Loop of self-invocations detected, aborting!
+!!!
+EOC
+	exit 20
+    fi
+    configure_cmd_loop=yes
+    export configure_cmd_loop
+
+    configure_needs_patch=''
+    if test -s ./os2/diff.configure; then
+	if ! grep "^#OS2-PATCH-APPLIED" ./Configure > /dev/null; then
+	    configure_needs_patch=yes	    
+	fi
+    fi
+    if test -n "$configure_needs_patch"; then
 	# Not patched!
+	# Restore the initial command line arguments
 	if test -f ./Configure.cmd ; then
-	    echo "!!!" >&2
-	    echo "!!! I see that what is running is ./Configure." >&2
-	    echo "!!! ./Configure is not patched, but ./Configure.cmd exists." >&2
-	    echo "!!!" >&2
-	    echo "!!! You are supposed to run Configure.cmd, not Configure" >&2
-	    echo "!!!  after an automagic patching." >&2
-	    echo "!!!" >&2
-	    echo "!!! If you insist on running Configure, please" >&2
-	    echo "!!!  patch it manually from ./os2/diff.configure." >&2
-	    echo "!!!" >&2
+	    cat <<EOC >&2
+!!!
+!!! I see that what is running is ./Configure.
+!!! ./Configure is not patched, but ./Configure.cmd exists.
+!!!
+!!! You are supposed to run Configure.cmd, not Configure
+!!!  after an automagic patching.
+!!!
+!!! If you insist on running Configure, you may
+!!!  patch it manually from ./os2/diff.configure.
+!!!
+!!! However, I went through incredible hoolahoops, and I expect I can
+!!!  auto-restart Configure.cmd myself.  I will start it with arguments:
+!!!
+!!!    Configure.cmd $args_exp
+!!!
+EOC
+	    rp='Do you want to auto-restart Configure.cmd?'
+	    dflt='y'
+	    . UU/myread
+	    case "$ans" in
+		[yY]) echo >&4 "Okay, continuing." ;;
+		*) echo >&4 "Okay, bye."
+		   exit 2
+		   ;;
+	    esac
+	    eval "set X $args_exp";
+	    shift;
+	    # Restore the output
+	    exec Configure.cmd "$@" 1>&2
 	    exit 2
 	fi
-	echo "!!!" >&2
-	echo "!!! You did not patch ./Configure!" >&2
-	echo "!!! I create Configure.cmd and patch it from ./os2/diff.configure." >&2
-	echo "!!!" >&2
-	echo "$gnupatch -b -p1 --output=Configure.cmd <./os2/diff.configure 2>&1 | tee 00_auto_patch" >&2
+	cat <<EOC >&2
+!!!
+!!! You did not patch ./Configure!
+!!! I can create Configure.cmd and patch it from ./os2/diff.configure with the command
+!!!
+!!!   $gnupatch -b -p1 --output=Configure.cmd <./os2/diff.configure 2>&1 | tee 00_auto_patch
+EOC
+	rp='Do you want to auto-patch Configure to Configure.cmd?'
+	dflt='y'
+	. UU/myread
+	case "$ans" in
+		[yY]) echo >&4 "Okay, continuing." ;;
+		*) echo >&4 "Okay, bye."
+		   exit 2
+		   ;;
+	esac
 	($gnupatch -b -p1 --output=Configure.cmd <./os2/diff.configure 2>&1 | tee 00_auto_patch) >&2
-	echo "!!!" >&2
-	echo "!!! The report of patching is copied to 00_auto_patch." >&2
-	echo "!!! Now you need to restart Configure.cmd with all the options" >&2
-	echo "!!!" >&2
+	cat <<EOC >&2
+!!!
+!!! The report of patching is copied to 00_auto_patch.
+!!! Now we need to restart Configure.cmd with all the options.
+!!!
+EOC
 	echo "extproc sh" > Configure.ctm
-	cat Configure.cmd >> Configure.ctm && mv -f Configure.ctm Configure.cmd
-	exit 0
+	( cat Configure.cmd >> Configure.ctm && mv -f Configure.ctm Configure.cmd ) || (echo "!!! Failure to add extproc-line to Configure.cmd." >&2 ; exit 21)
+	cat <<EOC >&2
+!!! I went through incredible hoolahoops, and I expect I can
+!!!  auto-restart Configure.cmd myself.  I will start it with arguments:
+!!!
+!!!    Configure.cmd $args_exp
+!!!
+EOC
+	rp='Do you want to auto-restart Configure.cmd?'
+	dflt='y'
+	. UU/myread
+	case "$ans" in
+		[yY]) echo >&4 "Okay, continuing." ;;
+		*) echo >&4 "Okay, bye."
+		   exit 2
+		   ;;
+	esac
+	eval "set X $args_exp";
+	shift;
+	exec Configure.cmd "$@" 1>&2
+	exit 2
     else
-	echo "!!! Apparently we are running a patched Configure." >&2
+	if test -s ./os2/diff.configure; then
+	    echo "!!! Apparently we are running a patched Configure." >&2
+	else
+	    echo "!!! Apparently there is no need to patch Configure." >&2
+	fi
     fi 
     ;;
   *) echo "!!! Apparently we are running a renamed Configure: '$0'." >&2

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Jun 23 17:56:36 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Sun Jun 24 18:18:07 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1190,12 +1190,24 @@ config_args='$*'
 config_argc=$#
 EOSH
 argn=1
+args_exp=''
+args_sep=''
 for arg in "$@"; do
 	cat >>cmdline.opt <<EOSH
 config_arg$argn='$arg'
 EOSH
+	# Extreme backslashitis: replace each ' by '"'"'
+	cat <<EOC | sed -e "s/'/'"'"'"'"'"'"'/g" > cmdl.opt
+$arg
+EOC
+	arg_exp=`cat cmdl.opt`
+	args_exp="$args_exp$args_sep'$arg_exp'"
 	argn=`expr $argn + 1`
+	args_sep=' '
 done
+# args_exp is good for restarting self: eval "set X $args_exp"; shift; $0 "$@"
+# used by ./hints/os2.sh
+rm -f cmdl.opt
 
 : produce awk script to parse command line options
 cat >options.awk <<'EOF'
