@@ -16,10 +16,10 @@ sub _get_locale_encoding {
 	    I18N::Langinfo->import(qw(langinfo CODESET));
 	    $locale_encoding = langinfo(CODESET());
 	};
-	unless ($@) {
-	    print "# locale_encoding = $locale_encoding\n";
-	}
 	my $country_language;
+
+	no warnings 'uninitialized';
+
         if (not $locale_encoding && in_locale()) {
 	    if ($ENV{LC_ALL} =~ /^([^.]+)\.([^.]+)$/) {
 		($country_language, $locale_encoding) = ($1, $2);
@@ -45,8 +45,10 @@ sub _get_locale_encoding {
 		$locale_encoding = 'euc-jp';
 	    } elsif ($country_language =~ /^ko_KR|korean?$/i) {
 		$locale_encoding = 'euc-kr';
+	    } elsif ($country_language =~ /^zh_CN|chin(?:a|ese)?$/i) {
+		$locale_encoding = 'euc-cn';
 	    } elsif ($country_language =~ /^zh_TW|taiwan(?:ese)?$/i) {
-		$locale_encoding = 'euc-tw';
+		$locale_encoding = 'big5';
 	    }
 	    croak "Locale encoding 'euc' too ambiguous"
 		if $locale_encoding eq 'euc';
@@ -75,7 +77,7 @@ sub import {
 		use Encode;
 		_get_locale_encoding()
 		    unless defined $locale_encoding;
-		croak "Cannot figure out an encoding to use"
+		(carp("Cannot figure out an encoding to use"), last)
 		    unless defined $locale_encoding;
 		if ($locale_encoding =~ /^utf-?8$/i) {
 		    $layer = "utf8";
@@ -106,7 +108,7 @@ sub import {
 	    croak "Unknown discipline class '$type'";
 	}
     }
-    ${^OPEN} = join("\0",$in,$out);
+    ${^OPEN} = join("\0",$in,$out) if $in or $out;
 }
 
 1;
