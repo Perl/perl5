@@ -165,3 +165,14 @@ EOM
 esac
 EOSH
 # XXX EXPERIMENTAL  --end of call-back
+
+# From: Anton Berezin <tobez@plab.ku.dk>
+# To: perl5-porters@perl.org
+# Subject: [PATCH 5.005_54] Configure - hints/freebsd.sh signal handler type
+# Date: 30 Nov 1998 19:46:24 +0100
+# Message-ID: <864srhhvcv.fsf@lion.plab.ku.dk>
+
+signal_t='void'
+d_voidsig='define'
+
+
