@@ -26,7 +26,7 @@ package Storable; @ISA = qw(Exporter DynaLoader);
 use AutoLoader;
 use vars qw($forgive_me $VERSION);
 
-$VERSION = '1.003';
+$VERSION = '1.004';
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;		# Grrr...
 
 #
@@ -40,6 +40,10 @@ unless (defined @Log::Agent::EXPORT) {
 		sub logcroak {
 			require Carp;
 			Carp::croak(@_);
+		}
+		sub logcarp {
+			require Carp;
+			Carp::carp(@_);
 		}
 	};
 }
@@ -61,6 +65,7 @@ BEGIN {
 }
 
 sub logcroak;
+sub logcarp;
 
 sub retrieve_fd { &fd_retrieve }		# Backward compatibility
 
@@ -119,9 +124,8 @@ sub _store {
 	binmode FILE;				# Archaic systems...
 	if ($use_locking) {
 		if ($^O eq 'dos') {
-		    require Carp;
-		    Carp::carp "Storable::lock_store: fcntl/flock emulation broken on $^O\n";
-		    return undef;
+			logcarp "Storable::lock_store: fcntl/flock emulation broken on $^O";
+			return undef;
 		}
 		flock(FILE, LOCK_EX) ||
 			logcroak "can't get exclusive lock on $file: $!";
@@ -239,13 +243,11 @@ sub _retrieve {
 	my $self;
 	my $da = $@;							# Could be from exception handler
 	if ($use_locking) {
- 		if ($^O eq 'dos') {
- 			require Carp;
- 			Carp::carp "Storable::lock_retrieve: fcntl/flock emulation broken on $^O\n";
- 			return undef;
- 		}
-		flock(FILE, LOCK_SH) ||
-		    logcroak "can't get shared lock on $file: $!";
+		if ($^O eq 'dos') {
+			logcarp "Storable::lock_store: fcntl/flock emulation broken on $^O";
+			return undef;
+		}
+		flock(FILE, LOCK_SH) || logcroak "can't get shared lock on $file: $!";
 		# Unlocking will happen when FILE is closed
 	}
 	eval { $self = pretrieve(*FILE) };		# Call C routine

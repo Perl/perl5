@@ -1,18 +1,28 @@
 #!./perl
 
-# $Id: lock.t,v 1.0.1.1 2000/09/28 21:44:06 ram Exp $
+# $Id: lock.t,v 1.0.1.2 2000/10/23 18:03:07 ram Exp ram $
 #
 #  @COPYRIGHT@
 #
 # $Log: lock.t,v $
+# Revision 1.0.1.2  2000/10/23 18:03:07  ram
+# patch4: protected calls to flock() for dos platform
+#
 # Revision 1.0.1.1  2000/09/28 21:44:06  ram
 # patch2: created.
 #
 #
 
+use Config;
+
+if ($Config{'osname'} eq 'dos') {
+	print "1..0 # Skip: fcntl/flock emulation broken on this platform\n";
+	exit 0;
+}
+
 sub BEGIN {
     chdir('t') if -d 't';
-    @INC = '.';
+    @INC = '.'; 
     push @INC, '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bStorable\b/) {
@@ -22,10 +32,6 @@ sub BEGIN {
     if (!$Config{'d_flock'} && !$Config{'d_fcntl'} && !$Config{'d_lockf'}) {
         print "1..0 # Skip: no flock or flock emulation on this platform\n";
         exit 0;
-    }
-    if ($Config{'osname'} eq 'dos') {
-	print "1..0 # Skip: fcntl/flock emulation broken on this platform\n";
-	exit 0;
     }
     require 'lib/st-dump.pl';
 }
