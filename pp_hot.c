@@ -2320,10 +2320,10 @@ PP(pp_leavesub)
     }
     PUTBACK;
 
+    LEAVE;
     POPSUB(cx,sv);	/* Stack values are safe: release CV and @_ ... */
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
-    LEAVE;
     LEAVESUB(sv);
     return pop_return();
 }
@@ -2376,9 +2376,9 @@ PP(pp_leavesublv)
 	 * the refcounts so the caller gets a live guy. Cannot set
 	 * TEMP, so sv_2mortal is out of question. */
 	if (!CvLVALUE(cx->blk_sub.cv)) {
+	    LEAVE;
 	    POPSUB(cx,sv);
 	    PL_curpm = newpm;
-	    LEAVE;
 	    LEAVESUB(sv);
 	    DIE(aTHX_ "Can't modify non-lvalue subroutine call");
 	}
@@ -2387,9 +2387,9 @@ PP(pp_leavesublv)
 	    EXTEND_MORTAL(1);
 	    if (MARK == SP) {
 		if (SvFLAGS(TOPs) & (SVs_TEMP | SVs_PADTMP | SVf_READONLY)) {
+		    LEAVE;
 		    POPSUB(cx,sv);
 		    PL_curpm = newpm;
-		    LEAVE;
 		    LEAVESUB(sv);
 		    DIE(aTHX_ "Can't return %s from lvalue subroutine",
 			SvREADONLY(TOPs) ? (TOPs == &PL_sv_undef) ? "undef"
@@ -2402,9 +2402,9 @@ PP(pp_leavesublv)
 		}
 	    }
 	    else {			/* Should not happen? */
+		LEAVE;
 		POPSUB(cx,sv);
 		PL_curpm = newpm;
-		LEAVE;
 		LEAVESUB(sv);
 		DIE(aTHX_ "%s returned from lvalue subroutine in scalar context",
 		    (MARK > SP ? "Empty array" : "Array"));
@@ -2418,9 +2418,9 @@ PP(pp_leavesublv)
 		    && SvFLAGS(*mark) & (SVs_TEMP | SVs_PADTMP | SVf_READONLY)) {
 		    /* Might be flattened array after $#array =  */
 		    PUTBACK;
+		    LEAVE;
 		    POPSUB(cx,sv);
 		    PL_curpm = newpm;
-		    LEAVE;
 		    LEAVESUB(sv);
 		    DIE(aTHX_ "Can't return a %s from lvalue subroutine",
 			SvREADONLY(TOPs) ? "readonly value" : "temporary");
@@ -2472,10 +2472,10 @@ PP(pp_leavesublv)
     }
     PUTBACK;
 
+    LEAVE;
     POPSUB(cx,sv);	/* Stack values are safe: release CV and @_ ... */
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
-    LEAVE;
     LEAVESUB(sv);
     return pop_return();
 }

@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..9\n";
+print "1..11\n";
 
 # test various operations on @_
 
@@ -72,4 +72,17 @@ sub try {
 
 for (1..5) { try() }
 ++$ord;
+print "ok $ord\n";
+
+# bug #21542 local $_[0] causes reify problems and coredumps
+
+sub local1 { local $_[0] }
+my $foo = 'foo'; local1($foo); local1($foo);
+print "got [$foo], expected [foo]\nnot " if $foo ne 'foo';
+$ord++;
+print "ok $ord\n";
+
+sub local2 { local $_[0]; last L }
+L: { local2 }
+$ord++;
 print "ok $ord\n";
