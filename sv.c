@@ -9199,6 +9199,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    continue;	/* not "break" */
 	}
 
+	/* calculate width before utf8_upgrade changes it */
+	have = esignlen + zeros + elen;
+
 	if (is_utf8 != has_utf8) {
 	     if (is_utf8) {
 		  if (SvCUR(sv))
@@ -9222,7 +9225,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		"Newline in left-justified string for %sprintf",
 			(PL_op->op_type == OP_PRTF) ? "" : "s");
 	
-	have = esignlen + zeros + elen;
 	need = (have > width ? have : width);
 	gap = need - have;
 
