@@ -320,7 +320,7 @@ Perl used to be fragile in that signals arriving at inopportune moments
 could corrupt Perl's internal state.  Now Perl postpones handling of
 signals until it's safe (between opcodes).
 
-This change may have surprising side effects because signals no more
+This change may have surprising side effects because signals no longer
 interrupt Perl instantly.  Perl will now first finish whatever it was
 doing, like finishing an internal operation (like sort()) or an
 external operation (like an I/O operation), and only then look at any
