@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..213\n";
+print "1..215\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1010,5 +1010,14 @@ $a = 'S'->new;
 EOE
 
 $a and $a =~ /^Object\sS/ or print "# '$a' \nnot ";
+print "ok $test\n";
+$test++;
+
+# test result of match used as match (!)
+'a1b' =~ ('xyz' =~ /y/) and $` eq 'a' or print "not ";
+print "ok $test\n";
+$test++;
+
+'a1b' =~ ('xyz' =~ /t/) and $` eq 'a' or print "not ";
 print "ok $test\n";
 $test++;
