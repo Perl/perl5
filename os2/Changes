@@ -51,59 +51,6 @@ after 5.003_05:
 		perl___ - cannot fork, can dynalink.
 	The build of the first one - perl - is rather convoluted, and
 	  requires a build of miniperl_.
-after 5.003_05:
-	PERLLIB_PREFIX was not active if it matches an element of @INC
-		as a whole.
-	Do not need PERL_SBRK if crtdll-revision is >= 50.
-	Use -Zsmall-conv if crtdll-revision is >= 50 (in static perl!).
-:7: warning: #warning <dirent.h> requires <sys/types.h>
-	We compile miniperl static. It cannot fork, thus there may be
-		problems with pipes (since HAS_FORK is in
-		place). Pipes are required by makemaker.
-	We compile perl___.exe A.OUT and dynamic. It should be able to
-		fork.
-	If we can fork, we my_popen by popen unless "-|". Thus we
-		write a cooky "-1" into the pid array to indicate
-		this.
-	Apparently we can fork, and we can load dynamic extensions
-		now, though probably not simultaneously.
-	*DB tests corrected for OS/2 one-user stat[2].
-	/bin/sh is intercepted and replaced by SH_PATH.
-	Note that having '\\' in the command line of one-arg `system'
-		would trigger call via shell.
-	Segfault with system {'ls'} 'blah'; corrected.
-	Documentation of OS/2-different features added to main PODs.
-	New buitins in Cwd::
-
-		Cwd::current_drive
-		Cwd::sys_chdir		- leaves drive as it is.
-		Cwd::change_drive
-		Cwd::sys_is_absolute	- has drive letter and is_rooted
-		Cwd::sys_is_rooted	- has leading [/\\] (maybe
-					  after a drive)
-		Cwd::sys_is_relative	- changes with current dir
-		Cwd::sys_cwd		- Interface to cwd from EMX.
-		Cwd::sys_abspath(name, dir)	
-					- Really really odious
-					  function. Returns absolute
-					  name of file which would 
-					  have 'name' if CWD were 'dir'.
-					Dir defaults to the current dir.
-		Cwd::extLibpath [type]	- Get/set current value of extended
-		Cwd::extLibpath_set	- library search path.
-			path [type]
-					The optional last argument redirects
-					   to END-path if true,
-					   default is to search BEGIN-path.
-		(Note that some of these may be moved to different
-		  libraries - eventually).
-	Executables: 
-		perl - can fork, can dynalink (but not simultaneously)
-		perl_ - can fork, cannot dynalink
-		perl__ - same as perl___, but PM.
-		perl___ - cannot fork, can dynalink.
-	The build of the first one - perl - is rather convoluted, and
-	  requires a build of miniperl_.
 
 after 5.003_07:
 	custom tmpfile and tmpname which may use $TMP, $TEMP.
@@ -386,4 +333,4 @@ pre 5.6.1:
 	    condition appeared during a call to Perl function from REXX
 	    compartment.  As a result, the return string was not initialized.
 	A complete example of a mini-application added to OS2::REXX.
-
+	README.os2 updated to reflect the current state of Perl.

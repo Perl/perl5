@@ -81,6 +81,7 @@ my $global_target = "";
 my $Is_VMS = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
 my $Is_Dos = $^O eq 'dos';
+my $Is_OS2 = $^O eq 'os2';
 
 sub usage{
     warn "@_\n" if @_;
@@ -149,7 +150,7 @@ usage if $opt_h;
 
 # refuse to run if we should be tainting and aren't
 # (but regular users deserve protection too, though!)
-if (!($Is_VMS || $Is_MSWin32 || $Is_Dos) && ($> == 0 || $< == 0)
+if (!($Is_VMS || $Is_MSWin32 || $Is_Dos || $Is_OS2) && ($> == 0 || $< == 0)
      && !am_taint_checking()) 
 {{
     if ($opt_U) {
