@@ -1140,7 +1140,8 @@ sub bsub
     return $x;
     }
 
-  if (overload::StrVal($x) eq overload::StrVal($y))
+  require Scalar::Util;
+  if (Scalar::Util::refaddr($x) == Scalar::Util::refaddr($y)) 
     {
     # if we get the same variable twice, the result must be zero (the code
     # below fails in that case)
@@ -2034,17 +2035,15 @@ sub bfround
 
 sub _scan_for_nonzero
   {
-  # internal, used by bround()
-  my ($x,$pad,$xs) = @_;
+  # internal, used by bround() to scan for non-zeros after a '5'
+  my ($x,$pad,$xs,$len) = @_;
  
-  my $len = $x->length();
-  return 0 if $len == 1;		# '5' is trailed by invisible zeros
+  return 0 if $len == 1;		# "5" is trailed by invisible zeros
   my $follow = $pad - 1;
   return 0 if $follow > $len || $follow < 1;
 
-  # since we do not know underlying represention of $x, use decimal string
-  my $r = substr ("$x",-$follow);
-  $r =~ /[^0]/ ? 1 : 0;
+  # use the string form to check whether only '0's follow or not
+  substr ($xs,-$follow) =~ /[^0]/ ? 1 : 0;
   }
 
 sub fround
@@ -2094,8 +2093,8 @@ sub bround
   $pad = $len - $scale;
   $pad = abs($scale-1) if $scale < 0;
 
-  # do not use digit(), it is costly for binary => decimal
-
+  # do not use digit(), it is very costly for binary => decimal
+  # getting the entire string is also costly, but we need to do it only once
   my $xs = $CALC->_str($x->{value});
   my $pl = -$pad-1;
 
@@ -2113,7 +2112,7 @@ sub bround
     ($digit_after =~ /[01234]/)			|| 	# round down anyway,
 							# 6789 => round up
     ($digit_after eq '5')			&&	# not 5000...0000
-    ($x->_scan_for_nonzero($pad,$xs) == 0)		&&
+    ($x->_scan_for_nonzero($pad,$xs,$len) == 0)		&&
     (
      ($mode eq 'even') && ($digit_round =~ /[24680]/) ||
      ($mode eq 'odd')  && ($digit_round =~ /[13579]/) ||
@@ -2125,8 +2124,8 @@ sub bround
 	
   if (($pad > 0) && ($pad <= $len))
     {
-    substr($xs,-$pad,$pad) = '0' x $pad;
-    $put_back = 1;
+    substr($xs,-$pad,$pad) = '0' x $pad;		# replace with '00...'
+    $put_back = 1;					# need to put back
     }
   elsif ($pad > $len)
     {
@@ -2135,7 +2134,7 @@ sub bround
 
   if ($round_up)					# what gave test above?
     {
-    $put_back = 1;
+    $put_back = 1;					# need to put back
     $pad = $len, $xs = '0' x $pad if $scale < 0;	# tlr: whack 0.51=>1.0	
 
     # we modify directly the string variant instead of creating a number and
@@ -2150,7 +2149,7 @@ sub bround
     $xs = '1'.$xs if $c == 0;
 
     }
-  $x->{value} = $CALC->_new($xs) if $put_back == 1;	# put back in if needed
+  $x->{value} = $CALC->_new($xs) if $put_back == 1;	# put back, if needed
 
   $x->{_a} = $scale if $scale >= 0;
   if ($scale < 0)

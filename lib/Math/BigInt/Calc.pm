@@ -303,7 +303,7 @@ sub _inc
     return $x if (($i += 1) < $BASE);		# early out
     $i = 0;					# overflow, next
     }
-  push @$x,1 if ($x->[-1] == 0);		# last overflowed, so extend
+  push @$x,1 if (($x->[-1] || 0) == 0);		# last overflowed, so extend
   $x;
   }                                                                             
 

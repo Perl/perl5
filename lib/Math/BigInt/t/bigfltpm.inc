@@ -285,6 +285,21 @@ $x = $class->new('-3.14'); $x /= $x; ok ($x, '1');
 $x = $class->new('3.14');  $x %= $x; ok ($x, '0');
 $x = $class->new('-3.14'); $x %= $x; ok ($x, '0');
 
+###############################################################################
+# the following two were reported by "kenny" via hotmail.com:
+
+#perl -MMath::BigFloat -wle 'print Math::BigFloat->new(0)->bpow(".1")'
+#Use of uninitialized value in numeric le (<=) at BigFloat.pm line 1851.
+
+$x = $class->new(0); $y = $class->new('0.1');
+ok ($x ** $y, 0, 'no warnings and zero result');
+
+#perl -MMath::BigFloat -lwe 'print Math::BigFloat->new(".222222222222222222222222222222222222222222")->bceil()'
+#Use of uninitialized value in numeric le (<=) at BigFloat.pm line 1851.
+
+$x = $class->new(".222222222222222222222222222222222222222222"); 
+ok ($x->bceil(), 1, 'no warnings and one as result');
+
 1; # all done
 
 ###############################################################################

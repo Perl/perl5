@@ -1283,7 +1283,8 @@ sub bdiv
   
   # cases like $x /= $x (but not $x /= $y!) were wrong due to modifying $x
   # twice below)
-  if (overload::StrVal($x) eq overload::StrVal($y)) 
+  require Scalar::Util;
+  if (Scalar::Util::refaddr($x) == Scalar::Util::refaddr($y)) 
     {
     $x->bone();				# x/x => 1, rem 0
     }
@@ -1825,7 +1826,7 @@ sub _pow
 
   $below = $v->copy();
   $over = $u->copy();
- 
+
   $limit = $self->new("1E-". ($scale-1));
   #my $steps = 0;
   while (3 < 5)
@@ -1879,12 +1880,16 @@ sub bpow
 
   return $x if $x->{sign} =~ /^[+-]inf$/;
   return $x->bnan() if $x->{sign} eq $nan || $y->{sign} eq $nan;
-  return $x->bone() if $y->is_zero();
+
+  # cache the result of is_zero
+  my $y_is_zero = $y->is_zero();
+  return $x->bone() if $y_is_zero;
   return $x         if $x->is_one() || $y->is_one();
 
-  return $x->_pow($y,$a,$p,$r) if !$y->is_int();	# non-integer power
+  my $x_is_zero = $x->is_zero();
+  return $x->_pow($y,$a,$p,$r) if !$x_is_zero && !$y->is_int();	# non-integer power
 
-  my $y1 = $y->as_number()->{value};			# make CALC
+  my $y1 = $y->as_number()->{value};			# make MBI part
 
   # if ($x == -1)
   if ($x->{sign} eq '-' && $MBI->_is_one($x->{_m}) && $MBI->_is_zero($x->{_e}))
@@ -1892,27 +1897,27 @@ sub bpow
     # if $x == -1 and odd/even y => +1/-1  because +-1 ^ (+-1) => +-1
     return $MBI->_is_odd($y1) ? $x : $x->babs(1);
     }
-  if ($x->is_zero())
+  if ($x_is_zero)
     {
-    return $x->bone() if $y->is_zero();
+    return $x->bone() if $y_is_zero;
     return $x if $y->{sign} eq '+'; 	# 0**y => 0 (if not y <= 0)
     # 0 ** -y => 1 / (0 ** y) => 1 / 0! (1 / 0 => +inf)
     return $x->binf();
     }
 
   my $new_sign = '+';
-  $new_sign = $y->is_odd() ? '-' : '+' if ($x->{sign} ne '+');
+  $new_sign = $MBI->_is_odd($y1) ? '-' : '+' if $x->{sign} ne '+';
 
   # calculate $x->{_m} ** $y and $x->{_e} * $y separately (faster)
   $x->{_m} = $MBI->_pow( $x->{_m}, $y1);
-  $MBI->_mul ($x->{_e}, $y1);
+  $x->{_e} = $MBI->_mul ($x->{_e}, $y1);
 
   $x->{sign} = $new_sign;
   $x->bnorm();
   if ($y->{sign} eq '-')
     {
     # modify $x in place!
-    my $z = $x->copy(); $x->bzero()->binc();
+    my $z = $x->copy(); $x->bone();
     return $x->bdiv($z,$a,$p,$r);	# round in one go (might ignore y's A!)
     }
   $x->round($a,$p,$r,$y);
@@ -2025,7 +2030,7 @@ sub bfround
        }
     }
   # pass sign to bround for rounding modes '+inf' and '-inf'
-  my $m = Math::BigInt->new( $x->{sign} . $MBI->_str($x->{_m}));
+  my $m = bless { sign => $x->{sign}, value => $x->{_m} }, 'Math::BigInt';
   $m->bround($scale,$mode);
   $x->{_m} = $m->{value};			# get our mantissa back
   $x->bnorm();
@@ -2066,7 +2071,7 @@ sub bround
     }
 
   # pass sign to bround for '+inf' and '-inf' rounding modes
-  my $m = Math::BigInt->new( $x->{sign} . $MBI->_str($x->{_m}));
+  my $m = bless { sign => $x->{sign}, value => $x->{_m} }, 'Math::BigInt';
 
   $m->bround($scale,$mode);		# round mantissa
   $x->{_m} = $m->{value};		# get our mantissa back
