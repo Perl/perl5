@@ -55,9 +55,10 @@ B<You have to recompile your XS modules.>
 (Pure Perl modules should continue to work.)
 
 The major reason for the discontinuity is the new IO architecture
-called PerlIO.  PerlIO is the default configuration because
-without it many new features of Perl 5.8 cannot be used.  In other
-words: you just have to recompile your modules, sorry about that.
+called PerlIO.  PerlIO is the default configuration because without
+it many new features of Perl 5.8 cannot be used.  In other words:
+you just have to recompile your modules containing XS code, sorry
+about that.
 
 In future releases of Perl, non-PerlIO aware XS modules may become
 completely unsupported.  This shouldn't be too difficult for module
@@ -261,9 +262,10 @@ functionality, see pack('U0', ...) and pack('C0', ...).
 =item *
 
 Earlier Perls treated "sub foo (@bar)" as equivalent to "sub foo (@)".
-The prototypes are now checked at compile-time for invalid characters.
-An optional warning is generated ("Illegal character in prototype...")
-but this may be upgraded to a fatal error in a future release.
+The prototypes are now checked better at compile-time for invalid
+syntax.  An optional warning is generated ("Illegal character in
+prototype...")  but this may be upgraded to a fatal error in a future
+release.
 
 =back
 
@@ -389,7 +391,7 @@ to Unicode 3.2.0.  For more information, see http://www.unicode.org/ .
 
 For developers interested in enhancing Perl's Unicode capabilities:
 almost all the UCD files are included with the Perl distribution in
-the F<lib/unicore subdirectory>.  The most notable omission, for space
+the F<lib/unicore> subdirectory.  The most notable omission, for space
 considerations, is the Unihan database.
 
 =item *
@@ -1295,6 +1297,8 @@ perl.org, not perl.com.
 C<perlcc> has been rewritten and its user interface (that is,
 command line) is much more like that of the UNIX C compiler, cc.
 (The perlbc tools has been removed.  Use C<perlcc -B> instead.)
+B<Note that perlcc is still considered very experimental and
+unsupported.>
 
 =item *
 
@@ -2290,7 +2294,8 @@ Perl now works on post-3.0 FreeBSDs.
 
 HP-UX
 
-README.hpux updated; C<Configure -Duse64bitall> now works.
+README.hpux updated; C<Configure -Duse64bitall> now works;
+now uses HP-UX malloc instead of Perl malloc.
 
 =item *
 
@@ -2498,7 +2503,7 @@ concurrently. (Still 16M per thread.)
 
 =item *
 
-C<File::Spec-&gt;tmpdir()> now prefers C:/temp over /tmp
+C<< File::Spec->tmpdir() >> now prefers C:/temp over /tmp
 (works better when perl is running as service).
 
 =item *
@@ -2870,7 +2875,7 @@ When Perl is built using the native build process on VOS Release
 14.5.0 and GNU C++/GNU Tools 2.0.1, all attempted tests either
 pass or result in TODO (ignored) failures.
 
-=head Term::ReadKey not working on Win32
+=head2 Term::ReadKey not working on Win32
 
 Use Term::ReadKey 2.20 or later.
 
