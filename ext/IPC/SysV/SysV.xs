@@ -15,7 +15,7 @@
 #include <sys/sem.h>
 #endif
 #ifdef HAS_SHM
-#ifdef PERL_SCO5
+#if defined(PERL_SCO5) || defined(PERL_ISC)
 #include <sys/sysmacros.h>
 #endif
 #include <sys/shm.h>
