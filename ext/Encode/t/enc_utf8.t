@@ -1,4 +1,4 @@
-# $Id: enc_utf8.t,v 1.4 2003/08/20 11:15:31 dankogai Exp $
+# $Id: enc_utf8.t,v 2.0 2004/05/16 20:55:18 dankogai Exp $
 # This is the twin of enc_eucjp.t .
 
 BEGIN {
