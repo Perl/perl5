@@ -89,10 +89,10 @@ char* fnMy_MkTemp(char* templatestr);
  */
 #define DEFPERLROOT "sys:\\perl\\scripts"
 
-/* DEFTEMP:
+/* DEFPERLTEMP:
  *  This symbol contains the name of the default temp files directory.
  */
-#define DEFTEMP "sys:\\perl\\temp"
+#define DEFPERLTEMP "sys:\\perl\\temp"
 
 
 #endif	// __NWUtil_H__

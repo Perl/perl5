@@ -735,6 +735,7 @@ char* fnMy_MkTemp(char* templatestr)
 
 	char termchar = '\0';
 	char letter = 'a';
+	char letter1 = 'a';
 
 
 	if (templatestr && (pXs = strstr(templatestr, (char *)"XXXXXX")))
@@ -753,6 +754,14 @@ char* fnMy_MkTemp(char* templatestr)
 		else
 			pPid = numbuf;
 
+/**
+		Backtick operation uses temp files that are stored under DEFPERLTEMP directory.
+		They are temporarily used and then cleaned up after usage.
+		In the process of operation to allow for more temp files, the below logic is used.
+		This allows 26 files (like, pla00015.tmp through plz00015.tmp) plus
+		26x26=676 (like, plaa0015.tmp through plzz0015.tmp)
+**/
+
 		letter = 'a';
 		do
 		{
@@ -764,6 +773,23 @@ char* fnMy_MkTemp(char* templatestr)
 			}
 			letter++;
 		} while (letter <= 'z');
+
+		letter1 = 'a';
+		do
+		{
+			letter = 'a';
+			do
+			{
+				sprintf(pXs, (char *)"%c%c%04.5s", letter1, letter, pPid);
+				pXs[6] = termchar;
+				if (access(templatestr, 0) != 0)	// File does not exist
+				{
+					return templatestr;
+				}
+				letter++;
+			} while (letter <= 'z');
+			letter1++;
+		} while (letter1 <= 'z');
 
 		errno = ENOENT;
 		return NULL;

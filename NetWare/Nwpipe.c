@@ -344,7 +344,7 @@ FILE* fnPipeFileOpen(PTEMPPIPEFILE ptpf, char* command, char* mode)
 
 	// Create a temporary file name
 	//
-	strncpy ( tempName, fnNwGetEnvironmentStr((char *)"TEMP", DEFTEMP), (_MAX_PATH - 20) );
+	strncpy ( tempName, fnNwGetEnvironmentStr((char *)"TEMP", DEFPERLTEMP), (_MAX_PATH - 20) );
 	tempName[_MAX_PATH-20] = '\0';
 	strcat(tempName, (char *)"\\plXXXXXX.tmp");
 	if (!fnMy_MkTemp(tempName))

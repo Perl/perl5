@@ -160,8 +160,8 @@ void main(int argc, char *argv[])
 
 //	Ensure that we have a "temp" directory
 	fnSetupNamespace();
-	if (access(DEFTEMP, 0) != 0)
-		mkdir(DEFTEMP);
+	if (access(DEFPERLTEMP, 0) != 0)
+		mkdir(DEFPERLTEMP);
 
 	// Create the file NUL if not present. This is done only once per NLM load.
 	// This is required for -e.
