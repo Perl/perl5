@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <sys/unistd.h>
 #include <process.h>
-#include <emx.h>
 
 
 #include "EXTERN.h"
