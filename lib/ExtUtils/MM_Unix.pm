@@ -8,8 +8,8 @@ use strict;
 use vars qw($VERSION $Is_Mac $Is_OS2 $Is_VMS $Is_Win32 $Is_Dos
 	    $Verbose %pm %static $Xsubpp_Version);
 
-$VERSION = substr q$Revision: 1.118 $, 10;
-# $Id: MM_Unix.pm,v 1.118 1997/08/01 09:42:52 k Exp $
+$VERSION = substr q$Revision: 1.126 $, 10;
+# $Id: MM_Unix.pm,v 1.126 1998/06/28 21:32:49 k Exp k $
 
 Exporter::import('ExtUtils::MakeMaker',
 	qw( $Verbose &neatvalue));
@@ -567,6 +567,15 @@ MAN3PODS = ".join(" \\\n\t", sort keys %{$self->{MAN3PODS}})."
 	push @m, "$tmp = $self->{$tmp}\n";
     }
 
+    for $tmp (qw(
+		PERM_RW PERM_RWX
+		)
+	     ) {
+        my $method = lc($tmp);
+	# warn "self[$self] method[$method]";
+        push @m, "$tmp = ", $self->$method(), "\n";
+    }
+
     push @m, q{
 .NO_CONFIG_REC: Makefile
 } if $ENV{CLEARCASE_ROOT};
@@ -691,8 +700,8 @@ $targ :: $src
 	$self->{NOECHO}\$(MKPATH) $targdir
 	$self->{NOECHO}\$(EQUALIZE_TIMESTAMP) $src $targ
 };
-	push(@m,qq{
-	-$self->{NOECHO}\$(CHMOD) 755 $targdir
+	push(@m, qq{
+	-$self->{NOECHO}\$(CHMOD) \$(PERM_RWX) $targdir
 }) unless $Is_VMS;
     }
     join "", @m;
@@ -968,12 +977,12 @@ $(BOOTSTRAP): '."$self->{MAKEFILE} $self->{BOOTDEP}".' $(INST_ARCHAUTODIR)/.exis
 		-MExtUtils::Mkbootstrap \
 		-e "Mkbootstrap(\'$(BASEEXT)\',\'$(BSLOADLIBS)\');"
 	'.$self->{NOECHO}.'$(TOUCH) $(BOOTSTRAP)
-	$(CHMOD) 644 $@
+	$(CHMOD) $(PERM_RW) $@
 
 $(INST_BOOT): $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists
 	'."$self->{NOECHO}$self->{RM_RF}".' $(INST_BOOT)
 	-'.$self->{CP}.' $(BOOTSTRAP) $(INST_BOOT)
-	$(CHMOD) 644 $@
+	$(CHMOD) $(PERM_RW) $@
 ';
 }
 
@@ -1024,7 +1033,7 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists 
     push(@m,'	LD_RUN_PATH="$(LD_RUN_PATH)" $(LD) -o $@ '.$ldrun.' $(LDDLFLAGS) '.$ldfrom.
 		' $(OTHERLDFLAGS) $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) $(EXPORT_LIST)');
     push @m, '
-	$(CHMOD) 755 $@
+	$(CHMOD) $(PERM_RWX) $@
 ';
 
     push @m, $self->dir_target('$(INST_ARCHAUTODIR)');
@@ -1189,7 +1198,10 @@ eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
 	    next;
 	}
 	my($dev,$ino,$mode) = stat FIXIN;
-	$mode = 0755 unless $dev;
+	# If they override perm_rwx, we won't notice it during fixin,
+	# because fixin is run through a new instance of MakeMaker.
+	# That is why we must run another CHMOD later.
+	$mode = oct($self->perm_rwx) unless $dev;
 	chmod $mode, $file;
 	
 	# Print out the new #! line (or equivalent).
@@ -1213,7 +1225,8 @@ eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
 	}
 	unlink "$file.bak";
     } continue {
-	chmod 0755, $file or die "Can't reset permissions for $file: $!\n";
+	chmod oct($self->perm_rwx), $file or
+	  die "Can't reset permissions for $file: $!\n";
 	system("$Config{'eunicefix'} $file") if $Config{'eunicefix'} ne ':';;
     }
 }
@@ -2044,6 +2057,7 @@ $to: $from $self->{MAKEFILE} " . $self->catdir($todir,'.exists') . "
 	$self->{NOECHO}$self->{RM_F} $to
 	$self->{CP} $from $to
 	\$(FIXIN) $to
+	-$self->{NOECHO}\$(CHMOD) \$(PERM_RWX) $to
 ";
     }
     join "", @m;
@@ -2432,11 +2446,12 @@ END
     my(@m);
     push @m,
 qq[POD2MAN_EXE = $pod2man_exe\n],
-q[POD2MAN = $(PERL) -we '%m=@ARGV;for (keys %m){' \\
--e 'next if -e $$m{$$_} && -M $$m{$$_} < -M $$_ && -M $$m{$$_} < -M "].$self->{MAKEFILE}.q[";' \\
+qq[POD2MAN = \$(PERL) -we '%m=\@ARGV;for (keys %m){' \\\n],
+q[-e 'next if -e $$m{$$_} && -M $$m{$$_} < -M $$_ && -M $$m{$$_} < -M "],
+ $self->{MAKEFILE}, q[";' \\
 -e 'print "Manifying $$m{$$_}\n";' \\
 -e 'system(qq[$$^X ].q["-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" $(POD2MAN_EXE) ].qq[$$_>$$m{$$_}])==0 or warn "Couldn\\047t install $$m{$$_}\n";' \\
--e 'chmod 0644, $$m{$$_} or warn "chmod 644 $$m{$$_}: $$!\n";}'
+-e 'chmod(oct($(PERM_RW))), $$m{$$_} or warn "chmod $(PERM_RW) $$m{$$_}: $$!\n";}'
 ];
     push @m, "\nmanifypods : ";
     push @m, join " \\\n\t", keys %{$self->{MAN1PODS}}, keys %{$self->{MAN3PODS}};
@@ -2680,6 +2695,35 @@ $(OBJECT) : $(PERL_HDRS)
     join "\n", @m;
 }
 
+=item perm_rw (o)
+
+Returns the attribute C<PERM_RW> or the string C<644>.
+Used as the string that is passed
+to the C<chmod> command to set the permissions for read/writeable files.
+MakeMaker chooses C<644> because it has turned out in the past that
+relying on the umask provokes hard-to-track bugreports.
+When the return value is used by the perl function C<chmod>, it is
+interpreted as an octal value.
+
+=cut
+
+sub perm_rw {
+    shift->{PERM_RW} || "644";
+}
+
+=item perm_rwx (o)
+
+Returns the attribute C<PERM_RWX> or the string C<755>,
+i.e. the string that is passed
+to the C<chmod> command to set the permissions for executable files.
+See also perl_rw.
+
+=cut
+
+sub perm_rwx {
+    shift->{PERM_RWX} || "755";
+}
+
 =item pm_to_blib
 
 Defines target that copies all files in the hash PM to their
@@ -2863,7 +2907,7 @@ END
 
     push @m,
 q{	$(AR) $(AR_STATIC_ARGS) $@ $(OBJECT) && $(RANLIB) $@
-	$(CHMOD) 755 $@
+	$(CHMOD) $(PERM_RWX) $@
 	}.$self->{NOECHO}.q{echo "$(EXTRALIBS)" > $(INST_ARCHAUTODIR)/extralibs.ld
 };
     # Old mechanism - still available:
