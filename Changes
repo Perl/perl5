@@ -93,6 +93,93 @@ Version 5.004_05        Maintenance release 5 for 5.004
       - many bugs and all known run-time memory leaks fixed.
 
 
+Change 2442 on 1998/12/03 by TimBunce@ig.co.uk
+
+	Configure supplies bad ccflags for Irix/GCC combo
+	From: "Kurt D. Starsinic" <kstar@chapin.edu>
+
+Change 2439 on 1998/12/03 by TimBunce@ig.co.uk
+
+	 Title:  "hints/freebsd.sh signal handler type"
+	  From:  Anton Berezin <tobez@plab.ku.dk>
+	Msg-ID:  <864srhhvcv.fsf@lion.plab.ku.dk>
+	 Files:  hints/freebsd.sh
+
+Change 2438 on 1998/12/03 by TimBunce@ig.co.uk
+
+	 Title:  "erroneous 'none' in lddlflags"
+	  From:  Andy Dougherty <doughera@lafayette.edu>
+	 Files:  Configure
+
+Change 2422 on 1998/11/30 by TimBunce@ig.co.uk
+
+	 Title:  "defined and tie'ed hashes"
+	  From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+	Msg-ID:  <199811281759.MAA11474@aatma.engin.umich.edu>
+	 Files:  pp.c
+
+Change 2421 on 1998/11/30 by TimBunce@ig.co.uk
+
+	 Title:  "Problems with ExtUtils::Liblist on Win32: -L -> -libpath -> -l(ibpath)"
+	  From:  Gurusamy Sarathy <gsar@engin.umich.edu>, Swen Thuemmler
+	Msg-ID:  <199811280515.AAA18658@aatma.engin.umich.edu>
+	 Files:  lib/ExtUtils/Liblist.pm
+
+Change 2420 on 1998/11/30 by TimBunce@ig.co.uk
+
+	Apply MachTen malloc allignment work-around to NeXT.
+
+Change 2419 on 1998/11/30 by TimBunce@ig.co.uk
+
+	Add Configure config.msg warning mechanism from 5.005. Use it to warn
+	about LD_LIBRARY_PATH if appropriate (eg Digital UNIX aka DEC OSF/1)
+	From: Jarkko Hietaniemi <jhi@iki.fi>
+
+Change 2418 on 1998/11/30 by TimBunce@ig.co.uk
+
+	Copied change 2353 by Jarkko Hietaniemi.
+	Locale collation, ctype, and numeric, were initialized wrong
+	(if LC_ALL or LANG were unset, so were the collation/ctype/numeric),
+	as reported by Ilya.Sandler@etak.com (Ilya Sandler)
+
+Change 2331 on 1998/11/27 by TimBunce@ig.co.uk
+
+	 Title:  "Fix noises from the VC linker on RunPerl()"
+	  From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+	Msg-ID:  <199811210900.EAA07670@aatma.engin.umich.edu>
+	 Files:  win32/perllib.c
+
+Change 2330 on 1998/11/27 by TimBunce@ig.co.uk
+
+	win32 portability fix: make sysread() and syswrite() work on sockets
+	win32_recvfrom() compatibility fix
+	[Changes 2254 and 2255 by gsar]
+
+Change 2329 on 1998/11/27 by TimBunce@ig.co.uk
+
+	fix C<if (...) { package Foo; ... }> misoptimization that fails
+	to set the package for the block properly
+	[Change 2299 by gsar@aatma on 1998/11/26 06:51:16]
+
+Change 2328 on 1998/11/27 by TimBunce@ig.co.uk
+
+	Assorted (5.004 specific) fixes:
+	
+	 Title:  "Improve test for failed csh glob (-w warn on core dump)"
+	  From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+	Msg-ID:  <199811230134.UAA07516@aatma.engin.umich.edu>
+	 Files:  pp_hot.c
+	
+	 Title:  "Fix K&R compiler error on pad_findlex 'prototype'"
+	  From:  Paul Marquess <pmarquess@bfsec.bt.co.uk>
+	Msg-ID:  <199811231209.MAA23125@zog.bfsec.bt.co.uk>
+	 Files:  op.c
+	
+	 Title:  "Reversed embedvar (PL_foo) required for 5.004_0x"
+	  From:  Nick Ing-Simmons <nick@ni-s.u-net.com>
+	Msg-ID:  <199810171143.MAA11663@ni-s.u-net.com>
+	 Files:  embed.pl
+
 Change 2291 on 1998/11/22 by TimBunce@ig.co.uk
 
 	Updated Porting/patchls utility.
