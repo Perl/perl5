@@ -2654,6 +2654,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     I32 grows = 0;
     register short *tbl;
 
+    PL_hints |= HINT_BLOCK_SCOPE;
     complement	= o->op_private & OPpTRANS_COMPLEMENT;
     del		= o->op_private & OPpTRANS_DELETE;
     squash	= o->op_private & OPpTRANS_SQUASH;
