@@ -805,6 +805,7 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 			Perl_warner(aTHX_ packWARN(WARN_LAYER),
 			      "perlio: invalid separator character %c%c%c in layer specification list %s",
 			      q, *s, q, s);
+		    SETERRNO(EINVAL, LIB$_INVARG);
 		    return -1;
 		}
 		do {
@@ -1287,8 +1288,13 @@ PerlIO_resolve_layers(pTHX_ const char *layers,
 	else {
 	    av = def;
 	}
-	PerlIO_parse_layers(aTHX_ av, layers);
-	return av;
+	if (PerlIO_parse_layers(aTHX_ av, layers) == 0) {
+	     return av;
+	}
+	else {
+	    PerlIO_list_free(aTHX_ av);
+	    return (PerlIO_list_t *) NULL;
+	}
     }
     else {
 	if (incdef)
@@ -1330,6 +1336,9 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 	}
 	else {
 	    layera = PerlIO_resolve_layers(aTHX_ layers, mode, narg, args);
+	    if (!layera) {
+		return NULL;
+	    }
 	}
 	/*
 	 * Start at "top" of layer stack
