@@ -7,7 +7,7 @@ BEGIN {
     @INC = qw(. ../lib);
 }
 
-print "1..45\n";
+print "1..46\n";
 
 require "test.pl";
 
@@ -392,4 +392,19 @@ moretests:
 	}
     }
 }
+
+# deep recursion with gotos eventually caused a stack reallocation
+# which messed up buggy internals that didn't expect the stack to move
+
+sub recurse1 {
+    unshift @_, "x";
+    goto &recurse2;
+}
+sub recurse2 {
+    $x = shift;
+    $_[0] ? +1 + recurse1($_[0] - 1) : 0
+}
+print "not " unless recurse1(500) == 500;
+print "ok 46 - recursive goto &foo\n";
+
 
