@@ -4252,19 +4252,19 @@ correct type (for speed).
 */
 
 SV *
-Perl_vnumify(SV *sv, SV *vs)
+Perl_vnumify(pTHX_ SV *sv, SV *vs)
 {
     U8* pv = (U8*)SvPVX(vs);
     STRLEN len = SvCUR(vs);
     STRLEN retlen;
     UV digit = utf8_to_uvchr(pv,&retlen);
-    sv_setpvf(sv,"%"UVf".",digit);
+    Perl_sv_setpvf(aTHX_ sv,"%"UVf".",digit);
     for (pv += retlen, len -= retlen;
 	len > 0;
 	pv += retlen, len -= retlen)
     {
 	digit = utf8_to_uvchr(pv,&retlen);
-	sv_catpvf(sv,"%03"UVf,digit);
+	Perl_sv_catpvf(aTHX_ sv,"%03"UVf,digit);
     }
     return sv;
 }
@@ -4284,19 +4284,19 @@ correct type (for speed).
 */
 
 SV *
-Perl_vstringify(SV *sv, SV *vs)
+Perl_vstringify(pTHX_ SV *sv, SV *vs)
 {
     U8* pv = (U8*)SvPVX(vs);
     STRLEN len = SvCUR(vs);
     STRLEN retlen;
     UV digit = utf8_to_uvchr(pv,&retlen);
-    sv_setpvf(sv,"%"UVf,digit);
+    Perl_sv_setpvf(aTHX_ sv,"%"UVf,digit);
     for (pv += retlen, len -= retlen;
 	len > 0;
 	pv += retlen, len -= retlen)
     {
 	digit = utf8_to_uvchr(pv,&retlen);
-	sv_catpvf(sv,".%03"UVf,digit);
+	Perl_sv_catpvf(aTHX_ sv,".%03"UVf,digit);
     }
     if ( SvIVX(vs) < 0 )
 	sv_catpv(sv,"beta");

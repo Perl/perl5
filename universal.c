@@ -414,7 +414,7 @@ XS(XS_version_stringify)
         	lobj = tmp;
         }
         else
-                croak("lobj is not of type version");
+                Perl_croak(aTHX_ "lobj is not of type version");
 
 {
     SV  *vs = NEWSV(92,5);
@@ -444,7 +444,7 @@ XS(XS_version_numify)
         	lobj = tmp;
         }
         else
-                croak("lobj is not of type version");
+                Perl_croak(aTHX_ "lobj is not of type version");
 
 {
     SV  *vs = NEWSV(92,5);
@@ -471,7 +471,7 @@ XS(XS_version_vcmp)
         	lobj = tmp;
         }
         else
-                croak("lobj is not of type version");
+                Perl_croak(aTHX_ "lobj is not of type version");
 
 {
     SV	*rs;
@@ -516,7 +516,7 @@ XS(XS_version_boolean)
         	lobj = tmp;
         }
         else
-                croak("lobj is not of type version");
+                Perl_croak(aTHX_ "lobj is not of type version");
 
 {
     SV	*rs;
@@ -542,10 +542,10 @@ XS(XS_version_noop)
         	lobj = tmp;
         }
         else
-                croak("lobj is not of type version");
+                Perl_croak(aTHX_ "lobj is not of type version");
 
 {
-    croak("operation not supported with version object");
+    Perl_croak(aTHX_ "operation not supported with version object");
 }
 
     }
