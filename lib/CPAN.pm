@@ -1,17 +1,18 @@
 package CPAN;
-use vars qw{$Try_autoload $Revision
+use vars qw{$Try_autoload
+            $Revision
 	    $META $Signal $Cwd $End
 	    $Suppress_readline %Dontload
 	    $Frontend  $Defaultsite
-	   };
+	   }; #};
 
-$VERSION = '1.44';
+$VERSION = '1.48';
 
-# $Id: CPAN.pm,v 1.245 1999/01/09 17:53:32 k Exp $
+# $Id: CPAN.pm,v 1.260 1999/03/06 19:31:02 k Exp $
 
 # only used during development:
 $Revision = "";
-# $Revision = "[".substr(q$Revision: 1.245 $, 10)."]";
+# $Revision = "[".substr(q$Revision: 1.260 $, 10)."]";
 
 use Carp ();
 use Config ();
@@ -27,6 +28,7 @@ use FileHandle ();
 use Safe ();
 use Text::ParseWords ();
 use Text::Wrap;
+use File::Spec;
 
 END { $End++; &cleanup; }
 
@@ -69,6 +71,7 @@ sub AUTOLOAD {
     $l =~ s/.*:://;
     my(%EXPORT);
     @EXPORT{@EXPORT} = '';
+    CPAN::Config->load unless $CPAN::Config_loaded++;
     if (exists $EXPORT{$l}){
 	CPAN::Shell->$l(@_);
     } else {
@@ -86,7 +89,9 @@ sub AUTOLOAD {
 
 #-> sub CPAN::shell ;
 sub shell {
+    my($self) = @_;
     $Suppress_readline ||= ! -t STDIN;
+    CPAN::Config->load unless $CPAN::Config_loaded++;
 
     my $prompt = "cpan> ";
     local($^W) = 1;
@@ -94,8 +99,20 @@ sub shell {
 	require Term::ReadLine;
 #	import Term::ReadLine;
 	$term = Term::ReadLine->new('CPAN Monitor');
-	$readline::rl_completion_function =
-	    $readline::rl_completion_function = 'CPAN::Complete::cpl';
+	if ($term->ReadLine eq "Term::ReadLine::Gnu") {
+	    my $attribs = $term->Attribs;
+#	     $attribs->{completion_entry_function} =
+#		 $attribs->{'list_completion_function'};
+	     $attribs->{attempted_completion_function} = sub {
+		 &CPAN::Complete::gnu_cpl;
+	     }
+#	    $attribs->{completion_word} =
+#		[qw(help me somebody to find out how
+#                    to use completion with GNU)];
+	} else {
+	    $readline::rl_completion_function =
+		$readline::rl_completion_function = 'CPAN::Complete::cpl';
+	}
     }
 
     no strict;
@@ -103,6 +120,7 @@ sub shell {
     my $getcwd;
     $getcwd = $CPAN::Config->{'getcwd'} || 'cwd';
     my $cwd = CPAN->$getcwd();
+    my $try_detect_readline = $term->ReadLine eq "Term::ReadLine::Stub";
     my $rl_avail = $Suppress_readline ? "suppressed" :
 	($term->ReadLine ne "Term::ReadLine::Stub") ? "enabled" :
 	    "available (try ``install Bundle::CPAN'')";
@@ -162,6 +180,20 @@ ReadLine support $rl_avail
 	}
     } continue {
       $Signal=0;
+      CPAN::Queue->nullify_queue;
+      if ($try_detect_readline) {
+	if ($CPAN::META->has_inst("Term::ReadLine::Gnu")
+	    ||
+	    $CPAN::META->has_inst("Term::ReadLine::Perl")
+	   ) {
+	    delete $INC{"Term/ReadLine.pm"};
+	    my $redef;
+	    local($SIG{__WARN__}) = CPAN::Shell::dotdot_onreload(\$redef);
+	    require Term::ReadLine;
+	    $CPAN::Frontend->myprint("\n$redef subroutines in Term::ReadLine redefined\n");
+	    goto &shell;
+	}
+      }
     }
 }
 
@@ -269,7 +301,7 @@ sub try_dot_al {
 	    *$autoload = sub {};
 	    $ok = 1;
 	} else {
-	    if ($name =~ s/(\w{12,})\.al$/substr($1,0,11).".al"/e){
+	    if ($name =~ s{(\w{12,})\.al$}{substr($1,0,11).".al"}e){
 		eval {local $SIG{__DIE__};require $name};
 	    }
 	    if ($@){
@@ -281,7 +313,7 @@ sub try_dot_al {
 	}
     } else {
 
-	$ok = 1;
+      $ok = 1;
 
     }
     $@ = $save;
@@ -299,7 +331,7 @@ sub try_dot_al {
 # $Try_autoload = 1;
 
 if ($CPAN::Try_autoload) {
-    my $p;
+  my $p;
     for $p (qw(
 	       CPAN::Author CPAN::Bundle CPAN::CacheMgr CPAN::Complete
 	       CPAN::Config CPAN::Debug CPAN::Distribution CPAN::FTP
@@ -314,20 +346,127 @@ use vars qw($AUTOLOAD @ISA);
 @CPAN::Tarzip::ISA = qw(CPAN::Debug);
 
 package CPAN::Queue;
-# currently only used to determine if we should or shouldn't announce
-# the availability of a new CPAN module
+
+# One use of the queue is to determine if we should or shouldn't
+# announce the availability of a new CPAN module
+
+# Now we try to use it for dependency tracking. For that to happen
+# we need to draw a dependency tree and do the leaves first. This can
+# easily be reached by running CPAN.pm recursively, but we don't want
+# to waste memory and run into deep recursion. So what we can do is
+# this:
+
+# CPAN::Queue is the package where the queue is maintained. Dependencies
+# often have high priority and must be brought to the head of the queue,
+# possibly by jumping the queue if they are already there. My first code
+# attempt tried to be extremely correct. Whenever a module needed
+# immediate treatment, I either unshifted it to the front of the queue,
+# or, if it was already in the queue, I spliced and let it bypass the
+# others. This became a too correct model that made it impossible to put
+# an item more than once into the queue. Why would you need that? Well,
+# you need temporary duplicates as the manager of the queue is a loop
+# that
+#
+#  (1) looks at the first item in the queue without shifting it off
+#
+#  (2) cares for the item
+#
+#  (3) removes the item from the queue, *even if its agenda failed and
+#      even if the item isn't the first in the queue anymore* (that way
+#      protecting against never ending queues)
+#
+# So if an item has prerequisites, the installation fails now, but we
+# want to retry later. That's easy if we have it twice in the queue.
+#
+# I also expect insane dependency situations where an item gets more
+# than two lives in the queue. Simplest example is triggered by 'install
+# Foo Foo Foo'. People make this kind of mistakes and I don't want to
+# get in the way. I wanted the queue manager to be a dumb servant, not
+# one that knows everything.
+#
+# Who would I tell in this model that the user wants to be asked before
+# processing? I can't attach that information to the module object,
+# because not modules are installed but distributions. So I'd have to
+# tell the distribution object that it should ask the user before
+# processing. Where would the question be triggered then? Most probably
+# in CPAN::Distribution::rematein.
+# Hope that makes sense, my head is a bit off:-) -- AK
+
+use vars qw{ @All };
+
 sub new {
   my($class,$mod) = @_;
-  # warn "Queue object for mod[$mod]";
-  bless {mod => $mod}, $class;
+  my $self = bless {mod => $mod}, $class;
+  push @All, $self;
+  # my @all = map { $_->{mod} } @All;
+  # warn "Adding Queue object for mod[$mod] all[@all]";
+  return $self;
 }
+
+sub first {
+  my $obj = $All[0];
+  $obj->{mod};
+}
+
+sub delete_first {
+  my($class,$what) = @_;
+  my $i;
+  for my $i (0..$#All) {
+    if (  $All[$i]->{mod} eq $what ) {
+      splice @All, $i, 1;
+      return;
+    }
+  }
+}
+
+sub jumpqueue {
+  my $class = shift;
+  my @what = @_;
+  my $obj;
+  WHAT: for my $what (reverse @what) {
+    my $jumped = 0;
+    for (my $i=0; $i<$#All;$i++) { #prevent deep recursion
+      if ($All[$i]->{mod} eq $what){
+	$jumped++;
+	if ($jumped > 100) { # one's OK if e.g. just processing now;
+                             # more are OK if user typed it several
+                             # times
+	  $CPAN::Frontend->mywarn(
+qq{Object [$what] queued more than 100 times, ignoring}
+				 );
+	  next WHAT;
+	}
+      }
+    }
+    my $obj = bless { mod => $what }, $class;
+    unshift @All, $obj;
+  }
+}
+
+sub exists {
+  my($self,$what) = @_;
+  my @all = map { $_->{mod} } @All;
+  my $exists = grep { $_->{mod} eq $what } @All;
+  # warn "Checking exists in Queue object for mod[$what] all[@all] exists[$exists]";
+  $exists;
+}
+
+sub delete {
+  my($self,$mod) = @_;
+  @All = grep { $_->{mod} ne $mod } @All;
+  # my @all = map { $_->{mod} } @All;
+  # warn "Deleting Queue object for mod[$mod] all[@all]";
+}
+
+sub nullify_queue {
+  @All = ();
+}
+
+
 
 package CPAN;
 
 $META ||= CPAN->new; # In case we re-eval ourselves we need the ||
-
-# Do this after you have set up the whole inheritance
-CPAN::Config->load unless defined $CPAN::No_Config_is_ok;
 
 1;
 
@@ -351,12 +490,14 @@ sub clean;
 sub test;
 
 #-> sub CPAN::all ;
-sub all {
+sub all_objects {
     my($mgr,$class) = @_;
+    CPAN::Config->load unless $CPAN::Config_loaded++;
     CPAN->debug("mgr[$mgr] class[$class]") if $CPAN::DEBUG;
     CPAN::Index->reload;
     values %{ $META->{$class} };
 }
+*all = \&all_objects;
 
 # Called by shell, not in batch mode. Not clean XXX
 #-> sub CPAN::checklock ;
@@ -486,13 +627,18 @@ sub has_inst {
     $file =~ s|/|\\|g if $^O eq 'MSWin32';
     $file .= ".pm";
     if ($INC{$file}) {
-#	warn "$file in %INC"; #debug
+	# checking %INC is wrong, because $INC{LWP} may be true
+	# although $INC{"URI/URL.pm"} may have failed. But as
+	# I really want to say "bla loaded OK", I have to somehow
+	# cache results.
+	### warn "$file in %INC"; #debug
 	return 1;
     } elsif (eval { require $file }) {
 	# eval is good: if we haven't yet read the database it's
 	# perfect and if we have installed the module in the meantime,
 	# it tries again. The second require is only a NOOP returning
 	# 1 if we had success, otherwise it's retrying
+
 	$CPAN::Frontend->myprint("CPAN: $mod loaded ok\n");
 	if ($mod eq "CPAN::WAIT") {
 	    push @CPAN::Shell::ISA, CPAN::WAIT;
@@ -513,6 +659,8 @@ sub has_inst {
 
 });
 	sleep 2;
+    } else {
+	delete $INC{$file}; # if it inc'd LWP but failed during, say, URI
     }
     return 0;
 }
@@ -606,7 +754,8 @@ sub entries {
     $getcwd  = $CPAN::Config->{'getcwd'} || 'cwd';
     my($cwd) = CPAN->$getcwd();
     chdir $dir or Carp::croak("Can't chdir to $dir: $!");
-    my $dh = DirHandle->new(".") or Carp::croak("Couldn't opendir $dir: $!");
+    my $dh = DirHandle->new(File::Spec->curdir)
+        or Carp::croak("Couldn't opendir $dir: $!");
     my(@entries);
     for ($dh->read) {
 	next if $_ eq "." || $_ eq "..";
@@ -630,9 +779,15 @@ sub disk_usage {
     my($Du) = 0;
     find(
 	 sub {
-	     $File::Find::prune++ if $CPAN::Signal;
-	     return if -l $_;
-	     $Du += -s _;
+	   $File::Find::prune++ if $CPAN::Signal;
+	   return if -l $_;
+	   if ($^O eq 'MacOS') {
+	     require Mac::Files;
+	     my $cat  = Mac::Files::FSpGetCatInfo($_);
+	     $Du += $cat->ioFlLgLen() + $cat->ioFlRLgLen();
+	   } else {
+	     $Du += (-s _);
+	   }
 	 },
 	 $dir
 	);
@@ -927,7 +1082,7 @@ sub not_loaded {
 	    cpan_home keep_source_where build_dir build_cache scan_cache
 	    index_expire gzip tar unzip make pager makepl_arg make_arg
 	    make_install_arg urllist inhibit_startup_message
-	    ftp_proxy http_proxy no_proxy
+	    ftp_proxy http_proxy no_proxy prerequisites_policy
 	   )) {
 	push @miss, $_ unless defined $CPAN::Config->{$_};
     }
@@ -1162,6 +1317,21 @@ Known options:
     }
 }
 
+sub dotdot_onreload {
+    my($ref) = shift;
+    sub {
+	if ( $_[0] =~ /Subroutine (\w+) redefined/ ) {
+	    my($subr) = $1;
+	    ++$$ref;
+	    local($|) = 1;
+	    # $CPAN::Frontend->myprint(".($subr)");
+	    $CPAN::Frontend->myprint(".");
+	    return;
+	}
+	warn @_;
+    };
+}
+
 #-> sub CPAN::Shell::reload ;
 sub reload {
     my($self,$command,@arg) = @_;
@@ -1172,18 +1342,7 @@ sub reload {
 	my $fh = FileHandle->new($INC{'CPAN.pm'});
 	local($/);
 	$redef = 0;
-	local($SIG{__WARN__})
-	    = sub {
-		if ( $_[0] =~ /Subroutine (\w+) redefined/ ) {
-		  my($subr) = $1;
-		  ++$redef;
-		  local($|) = 1;
-		  # $CPAN::Frontend->myprint(".($subr)");
-		  $CPAN::Frontend->myprint(".");
-		  return;
-		}
-		warn @_;
-	    };
+	local($SIG{__WARN__}) = dotdot_onreload(\$redef);
 	eval <$fh>;
 	warn $@ if $@;
 	$CPAN::Frontend->myprint("\n$redef subroutines redefined\n");
@@ -1191,8 +1350,7 @@ sub reload {
       CPAN::Index->force_reload;
     } else {
       $CPAN::Frontend->myprint(qq{cpan     re-evals the CPAN.pm file
-index    re-reads the index files
-});
+index    re-reads the index files\n});
     }
 }
 
@@ -1347,6 +1505,7 @@ sub u {
 #-> sub CPAN::Shell::autobundle ;
 sub autobundle {
     my($self) = shift;
+    CPAN::Config->load unless $CPAN::Config_loaded++;
     my(@bundle) = $self->_u_r_common("a",@_);
     my($todir) = MM->catdir($CPAN::Config->{'cpan_home'},"Bundle");
     File::Path::mkpath($todir);
@@ -1403,7 +1562,7 @@ sub expand {
 	my $class = "CPAN::$type";
 	my $obj;
 	if (defined $regex) {
-	    for $obj ( sort {$a->id cmp $b->id} $CPAN::META->all($class)) {
+	    for $obj ( sort {$a->id cmp $b->id} $CPAN::META->all_objects($class)) {
 		push @m, $obj
 		    if
 			$obj->id =~ /$regex/i
@@ -1524,22 +1683,23 @@ sub rematein {
     CPAN->debug("pragma[$pragma]meth[$meth] some[@some]") if $CPAN::DEBUG;
     my($s,@s);
     foreach $s (@some) {
+      CPAN::Queue->new($s);
+    }
+    while ($s = CPAN::Queue->first) {
 	my $obj;
 	if (ref $s) {
 	    $obj = $s;
 	} elsif ($s =~ m|/|) { # looks like a file
 	    $obj = $CPAN::META->instance('CPAN::Distribution',$s);
 	} elsif ($s =~ m|^Bundle::|) {
-	    $CPAN::META->{'CPAN::Queue'}{$s} ||= CPAN::Queue->new($s);
 	    $obj = $CPAN::META->instance('CPAN::Bundle',$s);
 	} else {
-	    $CPAN::META->{'CPAN::Queue'}{$s} ||= CPAN::Queue->new($s);
 	    $obj = $CPAN::META->instance('CPAN::Module',$s)
 		if $CPAN::META->exists('CPAN::Module',$s);
 	}
 	if (ref $obj) {
 	    CPAN->debug(
-			qq{pragma[$pragma] meth[$meth] obj[$obj] as_string\[}.
+			qq{pragma[$pragma]meth[$meth]obj[$obj]as_string\[}.
 			$obj->as_string.
 			qq{\]}
 		       ) if $CPAN::DEBUG;
@@ -1554,7 +1714,9 @@ sub rematein {
 	    if ($]>=5.00303 && $obj->can('called_for')) {
 	      $obj->called_for($s);
 	    }
-	    $obj->$meth();
+	    CPAN::Queue->delete($s) if $obj->$meth(); # if it is more
+                                                      # than once in
+                                                      # the queue
 	} elsif ($CPAN::META->exists('CPAN::Author',$s)) {
 	    $obj = $CPAN::META->instance('CPAN::Author',$s);
 	    $CPAN::Frontend->myprint(
@@ -1564,7 +1726,9 @@ sub rematein {
 				     " ;-)\n"
 				    );
 	} else {
-	    $CPAN::Frontend->myprint(qq{Warning: Cannot $meth $s, don\'t know what it is.
+	    $CPAN::Frontend
+		->myprint(qq{Warning: Cannot $meth $s, }.
+			  qq{don\'t know what it is.
 Try the command
 
     i /$s/
@@ -1572,6 +1736,7 @@ Try the command
 to find objects with similar identifiers.
 });
 	}
+	CPAN::Queue->delete_first($s);
     }
 }
 
@@ -1688,6 +1853,20 @@ sub localize {
     $self->debug("file[$file] aslocal[$aslocal] force[$force]")
 	if $CPAN::DEBUG;
 
+    if ($^O eq 'MacOS') {
+        my($name, $path) = File::Basename::fileparse($aslocal, '');
+        if (length($name) > 31) {
+            $name =~ s/(\.(readme(\.(gz|Z))?|(tar\.)?(gz|Z)|tgz|zip|pm\.(gz|Z)))$//;
+            my $suf = $1;
+            my $size = 31 - length($suf);
+            while (length($name) > $size) {
+                chop $name;
+            }
+            $name .= $suf;
+            $aslocal = File::Spec->catfile($path, $name);
+        }
+    }
+
     return $aslocal if -f $aslocal && -r _ && !($force & 1);
     my($restore) = 0;
     if (-f $aslocal){
@@ -1703,7 +1882,7 @@ sub localize {
     to insufficient permissions.\n}) unless -w $aslocal_dir;
 
     # Inheritance is not easier to manage than a few if/else branches
-    if ($CPAN::META->has_inst('LWP')) {
+    if ($CPAN::META->has_inst('LWP::UserAgent')) {
 	require LWP::UserAgent;
  	unless ($Ua) {
 	    $Ua = LWP::UserAgent->new;
@@ -1744,6 +1923,7 @@ sub localize {
     } else {
 	@levels = qw/easy hard hardest/;
     }
+    @levels = qw/easy/ if $^O eq 'MacOS';
     for $level (@levels) {
 	my $method = "host$level";
 	my @host_seq = $level eq "easy" ?
@@ -1801,8 +1981,11 @@ sub hosteasy {
 		# fileurl = "file://" [ host | "localhost" ] "/" fpath
 		# Thanks to "Mark D. Baushke" <mdb@cisco.com> for
 		# the code
-		($l = $url) =~ s,^file://[^/]+,,; # discard the host part
-		$l =~ s/^file://;	# assume they meant file://localhost
+		($l = $url) =~ s|^file://[^/]*/|/|; # discard the host part
+		$l =~ s|^file:||;                   # assume they
+                                                    # meant
+                                                    # file://localhost
+		$l =~ s|^/|| unless -f $l;          # e.g. /P:
 	    }
 	    if ( -f $l && -r _) {
 		$Thesite = $i;
@@ -1822,6 +2005,10 @@ sub hosteasy {
 	  $CPAN::Frontend->myprint("Fetching with LWP:
   $url
 ");
+	  unless ($Ua) {
+	    require LWP::UserAgent;
+	    $Ua = LWP::UserAgent->new;
+	  }
 	  my $res = $Ua->mirror($url, $aslocal);
 	  if ($res->is_success) {
 	    $Thesite = $i;
@@ -2074,7 +2261,7 @@ sub hosthardest {
 	    $CPAN::Frontend->mywarn("Your ~/.netrc neither contains $host
   nor does it have a default entry\n");
 	}
-	
+
 	# OK, they don't have a valid ~/.netrc. Use 'ftp -n'
 	# then and login manually to host, using e-mail as
 	# password.
@@ -2238,6 +2425,27 @@ sub contains {
 
 package CPAN::Complete;
 
+sub gnu_cpl {
+    my($text, $line, $start, $end) = @_;
+    my(@perlret) = cpl($text, $line, $start);
+    # find longest common match. Can anybody show me how to peruse
+    # T::R::Gnu to have this done automatically? Seems expensive.
+    return () unless @perlret;
+    my($newtext) = $text;
+    for (my $i = length($text)+1;;$i++) {
+	last unless length($perlret[0]) && length($perlret[0]) >= $i;
+	my $try = substr($perlret[0],0,$i);
+	my @tries = grep {substr($_,0,$i) eq $try} @perlret;
+	# warn "try[$try]tries[@tries]";
+	if (@tries == @perlret) {
+	    $newtext = $try;
+	} else {
+	    last;
+	}
+    }
+    ($newtext,@perlret);
+}
+
 #-> sub CPAN::Complete::cpl ;
 sub cpl {
     my($word,$line,$pos) = @_;
@@ -2283,7 +2491,7 @@ sub cpl {
 #-> sub CPAN::Complete::cplx ;
 sub cplx {
     my($class, $word) = @_;
-    grep /^\Q$word\E/, map { $_->id } $CPAN::META->all($class);
+    grep /^\Q$word\E/, map { $_->id } $CPAN::META->all_objects($class);
 }
 
 #-> sub CPAN::Complete::cpl_any ;
@@ -2353,26 +2561,35 @@ sub reload {
 
     my $needshort = $^O eq "dos";
 
-    $cl->rd_authindex($cl->reload_x(
-				    "authors/01mailrc.txt.gz",
-				    $needshort ? "01mailrc.gz" : "",
-				    $force));
+    $cl->rd_authindex($cl
+		      ->reload_x(
+				 "authors/01mailrc.txt.gz",
+				 $needshort ?
+				 File::Spec->catfile('authors', '01mailrc.gz') :
+				 File::Spec->catfile('authors', '01mailrc.txt.gz'),
+				 $force));
     $t2 = time;
     $debug = "timing reading 01[".($t2 - $time)."]";
     $time = $t2;
     return if $CPAN::Signal; # this is sometimes lengthy
-    $cl->rd_modpacks($cl->reload_x(
-				   "modules/02packages.details.txt.gz",
-				   $needshort ? "02packag.gz" : "",
-				   $force));
+    $cl->rd_modpacks($cl
+		     ->reload_x(
+				"modules/02packages.details.txt.gz",
+				$needshort ?
+				File::Spec->catfile('modules', '02packag.gz') :
+				File::Spec->catfile('modules', '02packages.details.txt.gz'),
+				$force));
     $t2 = time;
     $debug .= "02[".($t2 - $time)."]";
     $time = $t2;
     return if $CPAN::Signal; # this is sometimes lengthy
-    $cl->rd_modlist($cl->reload_x(
-				  "modules/03modlist.data.gz",
-				  $needshort ? "03mlist.gz" : "",
-				  $force));
+    $cl->rd_modlist($cl
+		    ->reload_x(
+			       "modules/03modlist.data.gz",
+			       $needshort ?
+			       File::Spec->catfile('modules', '03mlist.gz') :
+			       File::Spec->catfile('modules', '03modlist.data.gz'),
+			       $force));
     $t2 = time;
     $debug .= "03[".($t2 - $time)."]";
     $time = $t2;
@@ -2405,7 +2622,8 @@ sub reload_x {
 
 #-> sub CPAN::Index::rd_authindex ;
 sub rd_authindex {
-    my($cl,$index_target) = @_;
+    my($cl, $index_target) = @_;
+    my @lines;
     return unless defined $index_target;
     $CPAN::Frontend->myprint("Going to read $index_target\n");
 #    my $fh = CPAN::Tarzip->TIEHANDLE($index_target);
@@ -2414,8 +2632,8 @@ sub rd_authindex {
     local(*FH);
     tie *FH, CPAN::Tarzip, $index_target;
     local($/) = "\n";
-    while (<FH>) {
-	chomp;
+    push @lines, split /\012/ while <FH>;
+    foreach (@lines) {
 	my($userid,$fullname,$email) =
 	    m/alias\s+(\S+)\s+\"([^\"\<]+)\s+\<([^\>]+)\>\"/;
 	next unless $userid && $fullname && $email;
@@ -2436,26 +2654,34 @@ sub userid {
 
 #-> sub CPAN::Index::rd_modpacks ;
 sub rd_modpacks {
-    my($cl,$index_target) = @_;
+    my($cl, $index_target) = @_;
+    my @lines;
     return unless defined $index_target;
     $CPAN::Frontend->myprint("Going to read $index_target\n");
     my $fh = CPAN::Tarzip->TIEHANDLE($index_target);
     local($/) = "\n";
     while ($_ = $fh->READLINE) {
-	last if /^\s*$/;
+	s/\012/\n/g;
+	my @ls = map {"$_\n"} split /\n/, $_;
+	unshift @ls, "\n" x length($1) if /^(\n+)/;
+	push @lines, @ls;
     }
-    while ($_ = $fh->READLINE) {
+    while (@lines) {
+	my $shift = shift(@lines);
+	last if $shift =~ /^\s*$/;
+    }
+    foreach (@lines) {
 	chomp;
 	my($mod,$version,$dist) = split;
 ###	$version =~ s/^\+//;
 
 	# if it is a bundle, instatiate a bundle object
 	my($bundle,$id,$userid);
-	
+
 	if ($mod eq 'CPAN' &&
 	    ! (
-	       $CPAN::META->exists('CPAN::Queue','Bundle::CPAN') ||
-	       $CPAN::META->exists('CPAN::Queue','CPAN')
+	       CPAN::Queue->exists('Bundle::CPAN') ||
+	       CPAN::Queue->exists('CPAN')
 	      )
 	   ) {
 	    local($^W)= 0;
@@ -2527,13 +2753,19 @@ sub rd_modlist {
     my @eval;
     local($/) = "\n";
     while ($_ = $fh->READLINE) {
-	if (/^Date:\s+(.*)/){
+	s/\012/\n/g;
+	my @ls = map {"$_\n"} split /\n/, $_;
+	unshift @ls, "\n" x length($1) if /^(\n+)/;
+	push @eval, @ls;
+    }
+    while (@eval) {
+	my $shift = shift(@eval);
+	if ($shift =~ /^Date:\s+(.*)/){
 	    return if $date_of_03 eq $1;
 	    ($date_of_03) = $1;
 	}
-	last if /^\s*$/;
+	last if $shift =~ /^\s*$/;
     }
-    push @eval, $_ while $_ = $fh->READLINE;
     undef $fh;
     push @eval, q{CPAN::Modulelist->data;};
     local($^W) = 0;
@@ -2632,6 +2864,7 @@ sub as_glimpse {
 #-> sub CPAN::Author::fullname ;
 sub fullname { shift->{'FULLNAME'} }
 *name = \&fullname;
+
 #-> sub CPAN::Author::email ;
 sub email    { shift->{'EMAIL'} }
 
@@ -2695,11 +2928,12 @@ sub get {
     } else {
 	$self->{archived} = "NO";
     }
-    chdir "..";
+    chdir File::Spec->updir;
     if ($self->{archived} ne 'NO') {
-	chdir "tmp";
+	chdir File::Spec->catdir(File::Spec->curdir, "tmp");
 	# Let's check if the package has its own directory.
-	my $dh = DirHandle->new(".") or Carp::croak("Couldn't opendir .: $!");
+	my $dh = DirHandle->new(File::Spec->curdir)
+	    or Carp::croak("Couldn't opendir .: $!");
 	my @readdir = grep $_ !~ /^\.\.?$/, $dh->read; ### MAC??
 	$dh->close;
 	my ($distdir,$packagedir);
@@ -2722,7 +2956,7 @@ sub get {
 	    }
 	}
 	$self->{'build_dir'} = $packagedir;
-	chdir "..";
+	chdir File::Spec->updir;
 
 	$self->debug("Changed directory to .. (self is $self [".$self->as_string."])")
 	    if $CPAN::DEBUG;
@@ -2811,6 +3045,12 @@ sub new {
 #-> sub CPAN::Distribution::look ;
 sub look {
     my($self) = @_;
+
+    if ($^O eq 'MacOS') {
+      $self->ExtUtils::MM_MacOS::look;
+      return;
+    }
+
     if (  $CPAN::Config->{'shell'} ) {
 	$CPAN::Frontend->myprint(qq{
 Trying to open a subshell in the build directory...
@@ -2853,6 +3093,12 @@ sub readme {
     $local_file = CPAN::FTP->localize("authors/id/$sans.readme",
 				      $local_wanted)
 	or $CPAN::Frontend->mydie(qq{No $sans.readme found});;
+
+    if ($^O eq 'MacOS') {
+        ExtUtils::MM_MacOS::launch_file($local_file);
+        return;
+    }
+
     my $fh_pager = FileHandle->new;
     local($SIG{PIPE}) = "IGNORE";
     $fh_pager->open("|$CPAN::Config->{'pager'}")
@@ -2919,6 +3165,7 @@ sub MD5_check_file {
     if (open $fh, $chk_file){
 	local($/);
 	my $eval = <$fh>;
+	$eval =~ s/\015?\012/\n/g;
 	close $fh;
 	my($comp) = Safe->new();
 	$cksum = $comp->reval($eval);
@@ -3006,16 +3253,14 @@ sub eq_MD5 {
 
 #-> sub CPAN::Distribution::force ;
 sub force {
-    my($self) = @_;
-    $self->{'force_update'}++;
-    delete $self->{'MD5_STATUS'};
-    delete $self->{'archived'};
-    delete $self->{'build_dir'};
-    delete $self->{'localfile'};
-    delete $self->{'make'};
-    delete $self->{'install'};
-    delete $self->{'unwrapped'};
-    delete $self->{'writemakefile'};
+  my($self) = @_;
+  $self->{'force_update'}++;
+  for my $att (qw(
+  MD5_STATUS archived build_dir localfile make install unwrapped
+  writemakefile have_sponsored
+ )) {
+    delete $self->{$att};
+  }
 }
 
 sub isa_perl {
@@ -3106,6 +3351,11 @@ or
     chdir $builddir or Carp::croak("Couldn't chdir $builddir: $!");
     $self->debug("Changed directory to $builddir") if $CPAN::DEBUG;
 
+    if ($^O eq 'MacOS') {
+        ExtUtils::MM_MacOS::make($self);
+        return;
+    }
+
     my $system;
     if ($self->{'configure'}) {
       $system = $self->{'configure'};
@@ -3125,10 +3375,11 @@ or
 	if ($CPAN::Config->{inactivity_timeout}) {
 	    eval {
 		alarm $CPAN::Config->{inactivity_timeout};
-		local $SIG{CHLD} = sub { wait };
+		local $SIG{CHLD}; # = sub { wait };
 		if (defined($pid = fork)) {
 		    if ($pid) { #parent
-			wait;
+			# wait;
+			waitpid $pid, 0;
 		    } else {    #child
 		      # note, this exec isn't necessary if
 		      # inactivity_timeout is 0. On the Mac I'd
@@ -3159,6 +3410,32 @@ or
 	$self->{writemakefile} = "YES";
     }
     return if $CPAN::Signal;
+    if (my @prereq = $self->needs_prereq){
+      my $id = $self->id;
+      $CPAN::Frontend->myprint("---- Dependencies detected ".
+			       "during [$id] -----\n");
+
+      for my $p (@prereq) {
+	$CPAN::Frontend->myprint("    $p\n");
+      }
+      my $follow = 0;
+      if ($CPAN::Config->{prerequisites_policy} eq "follow") {
+	$follow = 1;
+      } elsif ($CPAN::Config->{prerequisites_policy} eq "ask") {
+	require ExtUtils::MakeMaker;
+	my $answer = ExtUtils::MakeMaker::prompt(
+"Shall I follow them and prepend them to the queue
+of modules we are processing right now?", "yes");
+	$follow = $answer =~ /^\s*y/i;
+      } else {
+	local($") = ", ";
+	$CPAN::Frontend->myprint("  Ignoring dependencies on modules @prereq\n");
+      }
+      if ($follow) {
+	CPAN::Queue->jumpqueue(@prereq,$id); # requeue yourself
+	return;
+      }
+    }
     $system = join " ", $CPAN::Config->{'make'}, $CPAN::Config->{make_arg};
     if (system($system) == 0) {
 	 $CPAN::Frontend->myprint("  $system -- OK\n");
@@ -3168,6 +3445,44 @@ or
 	 $self->{'make'} = "NO";
 	 $CPAN::Frontend->myprint("  $system -- NOT OK\n");
     }
+}
+
+#-> sub CPAN::Distribution::needs_prereq ;
+sub needs_prereq {
+  my($self) = @_;
+  return unless -f "Makefile"; # we cannot say much
+  my $fh = FileHandle->new("<Makefile") or
+      $CPAN::Frontend->mydie("Couldn't open Makefile: $!");
+  local($/) = "\n";
+
+  my(@p,@need);
+  while (<$fh>) {
+    last if /MakeMaker post_initialize section/;
+    my($p) = m{^[\#]
+		 \s+PREREQ_PM\s+=>\s+(.+)
+		 }x;
+    next unless $p;
+    # warn "Found prereq expr[$p]";
+
+    while ( $p =~ m/(?:\s)([\w\:]+)=>q\[.*?\],?/g ){
+      push @p, $1;
+    }
+    last;
+  }
+  for my $p (@p) {
+    my $mo = $CPAN::META->instance("CPAN::Module",$p);
+    next if $mo->uptodate;
+    # it's not needed, so don't push it. We cannot omit this step, because
+    # if 'force' is in effect, nobody else will check.
+    if ($self->{'have_sponsored'}{$p}++){
+      # We have already sponsored it and for some reason it's still
+      # not available. So we do nothing. Or what should we do?
+      # if we push it again, we have a potential infinite loop
+      next;
+    }
+    push @need, $p;
+  }
+  return @need;
 }
 
 #-> sub CPAN::Distribution::test ;
@@ -3192,6 +3507,12 @@ sub test {
 	Carp::croak("Couldn't chdir to $self->{'build_dir'}");
     $self->debug("Changed directory to $self->{'build_dir'}")
 	if $CPAN::DEBUG;
+
+    if ($^O eq 'MacOS') {
+        ExtUtils::MM_MacOS::make_test($self);
+        return;
+    }
+
     my $system = join " ", $CPAN::Config->{'make'}, "test";
     if (system($system) == 0) {
 	 $CPAN::Frontend->myprint("  $system -- OK\n");
@@ -3214,6 +3535,12 @@ sub clean {
     chdir $self->{'build_dir'} or
 	Carp::croak("Couldn't chdir to $self->{'build_dir'}");
     $self->debug("Changed directory to $self->{'build_dir'}") if $CPAN::DEBUG;
+
+    if ($^O eq 'MacOS') {
+        ExtUtils::MM_MacOS::make_clean($self);
+        return;
+    }
+
     my $system = join " ", $CPAN::Config->{'make'}, "clean";
     if (system($system) == 0) {
 	$CPAN::Frontend->myprint("  $system -- OK\n");
@@ -3256,9 +3583,15 @@ sub install {
 	Carp::croak("Couldn't chdir to $self->{'build_dir'}");
     $self->debug("Changed directory to $self->{'build_dir'}")
 	if $CPAN::DEBUG;
+
+    if ($^O eq 'MacOS') {
+        ExtUtils::MM_MacOS::make_install($self);
+        return;
+    }
+
     my $system = join(" ", $CPAN::Config->{'make'},
 		      "install", $CPAN::Config->{make_install_arg});
-    my($stderr) = $^O eq "Win32" ? "" : " 2>&1 ";
+    my($stderr) = $^O =~ /Win/i ? "" : " 2>&1 ";
     my($pipe) = FileHandle->new("$system $stderr |");
     my($makeout) = "";
     while (<$pipe>){
@@ -3370,7 +3703,14 @@ sub find_bundle_file {
 	or Carp::croak("Couldn't open $manifest: $!");
     local($/) = "\n";
     my $what2 = $what;
-    $what2 =~ s|Bundle/||;
+    if ($^O eq 'MacOS') {
+      $what =~ s/^://;
+      $what2 =~ tr|:|/|;
+      $what2 =~ s/:Bundle://;
+      $what2 =~ tr|:|/|;
+    } else {
+	$what2 =~ s|Bundle/||;
+    }
     my $bu;
     while (<$fh>) {
 	next if /^\s*\#/;
@@ -3384,6 +3724,7 @@ sub find_bundle_file {
 	# have no Bundle directory
 	$bu = $file if $file =~ m|\Q$what2\E$|;
     }
+    $bu =~ tr|/|:| if $^O eq 'MacOS';
     return MM->catfile($where, $bu) if $bu;
     Carp::croak("Couldn't find a Bundle file in $where");
 }
@@ -3466,7 +3807,6 @@ sub test    { shift->rematein('test',@_); }
 sub install {
   my $self = shift;
   $self->rematein('install',@_);
-  $CPAN::META->delete('CPAN::Queue',$self->id);
 }
 #-> sub CPAN::Bundle::clean ;
 sub clean   { shift->rematein('clean',@_); }
@@ -3687,15 +4027,12 @@ sub uptodate {
     if (defined $inst_file) {
 	$have = $self->inst_version;
     }
-    if (1){ # A block for scoping $^W, the if is just for the visual
-            # appeal
-	local($^W)=0;
-	if ($inst_file
-	    &&
-	    $have >= $latest
-	   ) {
-	    return 1;
-	}
+    local($^W)=0;
+    if ($inst_file
+	&&
+	$have >= $latest
+       ) {
+      return 1;
     }
     return;
 }
@@ -3712,7 +4049,6 @@ sub install {
 	$doit = 1;
     }
     $self->rematein('install') if $doit;
-    $CPAN::META->delete('CPAN::Queue',$self->id);
 }
 #-> sub CPAN::Module::clean ;
 sub clean  { shift->rematein('clean') }
@@ -3884,14 +4220,16 @@ sub untar {
 	if (system($system)==0) {
 	    $CPAN::Frontend->myprint(qq{Uncompressed $file successfully\n});
 	} else {
-	    $CPAN::Frontend->mydie(qq{Couldn't uncompress $file\n});
+	    $CPAN::Frontend->mydie(
+				   qq{Couldn\'t uncompress $file\n}
+				  );
 	}
 	$file =~ s/\.gz$//;
 	$system = "$CPAN::Config->{tar} xvf $file";
 	if (system($system)==0) {
 	    $CPAN::Frontend->myprint(qq{Untarred $file successfully\n});
 	} else {
-	    $CPAN::Frontend->mydie(qq{Couldn't untar $file\n});
+	    $CPAN::Frontend->mydie(qq{Couldn\'t untar $file\n});
 	}
 	return 1;
     } else {
@@ -3905,6 +4243,10 @@ sub untar {
     my $tar = Archive::Tar->new($file,1);
     $tar->extract($tar->list_files); # I'm pretty sure we have nothing
                                      # that isn't compressed
+
+    ExtUtils::MM_MacOS::convert_files([$tar->list_files], 1)
+        if ($^O eq 'MacOS');
+
     return 1;
   } else {
     $CPAN::Frontend->mydie(qq{
@@ -4023,11 +4365,13 @@ each as object-E<gt>as_glimpse. E.g.
 
 =item make, test, install, clean  modules or distributions
 
-These commands take any number of arguments and investigate what is
+These commands take any number of arguments and investigates what is
 necessary to perform the action. If the argument is a distribution
-file name (recognized by embedded slashes), it is processed. If it is a
-module, CPAN determines the distribution file in which this module is
-included and processes that.
+file name (recognized by embedded slashes), it is processed. If it is
+a module, CPAN determines the distribution file in which this module
+is included and processes that, following any dependencies named in
+the module's Makefile.PL (this behavior is controlled by
+I<prerequisites_policy>.)
 
 Any C<make> or C<test> are run unconditionally. An
 
@@ -4352,6 +4696,9 @@ defined:
   make_install_arg   same as make_arg for 'make install'
   makepl_arg	     arguments passed to 'perl Makefile.PL'
   pager              location of external program more (or any pager)
+  prerequisites_policy
+                     what to do if you are missing module prerequisites
+                     ('follow' automatically, 'ask' me, or 'ignore')
   scan_cache	     controls scanning of cache ('atstart' or 'never')
   tar                location of external program tar
   unzip              location of external program unzip
@@ -4483,7 +4830,7 @@ will need to use Net::FTP.
 
 =item One way visibility
 
-I say one way visability as these firewalls try to make themselves look
+I say one way visibility as these firewalls try to make themselve look
 invisible to the users inside the firewall. An FTP data connection is
 normally created by sending the remote server your IP address and then
 listening for the connection. But the remote server will not be able to

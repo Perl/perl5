@@ -16,7 +16,7 @@ use FileHandle ();
 use File::Basename ();
 use File::Path ();
 use vars qw($VERSION);
-$VERSION = substr q$Revision: 1.32 $, 10;
+$VERSION = substr q$Revision: 1.36 $, 10;
 
 =head1 NAME
 
@@ -113,13 +113,18 @@ First of all, I\'d like to create this directory. Where?
 
     $default = $cpan_home;
     while ($ans = prompt("CPAN build and cache directory?",$default)) {
-	File::Path::mkpath($ans); # dies if it can't
-	if (-d $ans && -w _) {
-	    last;
-	} else {
-	    warn "Couldn't find directory $ans
+      eval { File::Path::mkpath($ans); }; # dies if it can't
+      if ($@) {
+	warn "Couldn't create directory $ans.
+Please retry.\n";
+	next;
+      }
+      if (-d $ans && -w _) {
+	last;
+      } else {
+	warn "Couldn't find directory $ans
   or directory is not writable. Please retry.\n";
-	}
+      }
     }
     $CPAN::Config->{cpan_home} = $ans;
 
@@ -156,7 +161,7 @@ with all the intermediate files?
     print qq{
 
 By default, each time the CPAN module is started, cache scanning
-is performed to keep the cache size in sync. To prevent from this, 
+is performed to keep the cache size in sync. To prevent from this,
 disable the cache scanning with 'never'.
 
 };
@@ -166,6 +171,28 @@ disable the cache scanning with 'never'.
         $ans = prompt("Perform cache scanning (atstart or never)?", $default);
     } while ($ans ne 'atstart' && $ans ne 'never');
     $CPAN::Config->{scan_cache} = $ans;
+
+    #
+    # prerequisites_policy
+    # Do we follow PREREQ_PM?
+    #
+    print qq{
+
+The CPAN module can detect when a module that which you are trying to
+build depends on prerequisites. If this happens, it can build the
+prerequisites for you automatically ('follow'), ask you for
+confirmation ('ask'), or just ignore them ('ignore'). Please set your
+policy to one of the three values.
+
+};
+
+    $default = $CPAN::Config->{prerequisites_policy} || 'follow';
+    do {
+      $ans =
+	  prompt("Policy on building prerequisites (follow, ask or ignore)?",
+		 $default);
+    } while ($ans ne 'follow' && $ans ne 'ask' && $ans ne 'ignore');
+    $CPAN::Config->{prerequisites_policy} = $ans;
 
     #
     # External programs
@@ -180,9 +207,16 @@ those.
 
 };
 
+    my $old_warn = $^W;
+    local $^W if $^O eq 'MacOS';
     my(@path) = split /$Config{'path_sep'}/, $ENV{'PATH'};
+    local $^W = $old_warn;
     my $progname;
     for $progname (qw/gzip tar unzip make lynx ncftpget ncftp ftp/){
+      if ($^O eq 'MacOS') {
+          $CPAN::Config->{$progname} = 'not_here';
+          next;
+      }
       my $progcall = $progname;
       # we don't need ncftp if we have ncftpget
       next if $progname eq "ncftp" && $CPAN::Config->{ncftpget} gt " ";
@@ -211,7 +245,8 @@ those.
     }
     my $path = $CPAN::Config->{'pager'} || 
 	$ENV{PAGER} || find_exe("less",[@path]) || 
-	    find_exe("more",[@path]) || "more";
+	    find_exe("more",[@path]) || ($^O eq 'MacOS' ? $ENV{EDITOR} : 0 )
+	    || "more";
     $ans = prompt("What is your favorite pager program?",$path);
     $CPAN::Config->{'pager'} = $ans;
     $path = $CPAN::Config->{'shell'};
@@ -220,9 +255,13 @@ those.
 	$path = "";
     }
     $path ||= $ENV{SHELL};
-    $path =~ s,\\,/,g if $^O eq 'os2';	# Cosmetic only
-    $ans = prompt("What is your favorite shell?",$path);
-    $CPAN::Config->{'shell'} = $ans;
+    if ($^O eq 'MacOS') {
+        $CPAN::Config->{'shell'} = 'not_here';
+    } else {
+        $path =~ s,\\,/,g if $^O eq 'os2';	# Cosmetic only
+        $ans = prompt("What is your favorite shell?",$path);
+        $CPAN::Config->{'shell'} = $ans;
+    }
 
     #
     # Arguments to make etc.
@@ -376,6 +415,7 @@ sub read_mirrored_by {
     my(%all,$url,$expected_size,$default,$ans,$host,$dst,$country,$continent,@location);
     my $fh = FileHandle->new;
     $fh->open($local) or die "Couldn't open $local: $!";
+    local $/ = "\012";
     while (<$fh>) {
 	($host) = /^([\w\.\-]+)/ unless defined $host;
 	next unless defined $host;
