@@ -1989,6 +1989,12 @@ typedef void *Thread;
 #endif
 
 #ifdef PERL_OBJECT
+/*
+ * The following is a buffer where new variables must
+ * be defined to maintain binary compatibility with PERL_OBJECT
+ * for 5.005
+ */
+PERLVAR(object_compatibility[30],	char)
 };
 
 #include "objpp.h"
