@@ -8676,6 +8676,9 @@ set qgcvt d_qgcvt
 eval $inlibc
 
 : Check how to convert floats to strings.
+
+if test "X$d_Gconvert" = X; then
+
 echo " "
 echo "Checking for an efficient way to convert floats to strings."
 echo " " > try.c
@@ -8703,8 +8706,12 @@ char *myname = "qgcvt";
 #define DOUBLETYPE long double
 #endif
 #ifdef TRY_sprintf
-#if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE) && defined(HAS_PRIgldbl)
+#if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE)
+#ifdef HAS_PRIgldbl
 #define Gconvert(x,n,t,b) sprintf((b),"%.*"$sPRIgldbl,(n),(x))
+#else
+#define Gconvert(x,n,t,b) sprintf((b),"%.*g",(n),(double)(x))
+#endif
 #else
 #define Gconvert(x,n,t,b) sprintf((b),"%.*g",(n),(x))
 #endif
@@ -8747,6 +8754,21 @@ int main()
 	/* Alan Burlison <AlanBurlsin@unn.unisys.com> */
 	Gconvert((DOUBLETYPE)0.1, 8, 0, buf);
 	checkit("0.1", buf);
+
+	Gconvert((DOUBLETYPE)0.01, 8, 0, buf); 
+	checkit("0.01", buf);
+
+	Gconvert((DOUBLETYPE)0.001, 8, 0, buf); 
+	checkit("0.001", buf);
+
+	Gconvert((DOUBLETYPE)0.0001, 8, 0, buf); 
+	checkit("0.0001", buf);
+
+	Gconvert((DOUBLETYPE)0.00009, 8, 0, buf);
+	if (strlen(buf) > 5)
+	    checkit("9e-005", buf); /* for Microsoft ?? */
+	else
+	    checkit("9e-05", buf);
 
 	Gconvert((DOUBLETYPE)1.0, 8, 0, buf); 
 	checkit("1", buf);
@@ -8796,21 +8818,49 @@ int main()
 	exit(0);
 }
 EOP
-case "$d_Gconvert" in
-gconvert*) xxx_list='gconvert gcvt sprintf' ;;
-gcvt*) xxx_list='gcvt gconvert sprintf' ;;
-sprintf*) xxx_list='sprintf gconvert gcvt' ;;
-*) xxx_list='gconvert gcvt sprintf' ;;
-esac
+: add prefered functions to our list first
+xxx_list=""
+for xxx_convert in $gcvt_preference; do
+    case $xxx_convert in
+    gcvt|gconvert|sprintf) xxx_list="$xxx_list $xxx_convert" ;;
+    *) echo "Discarding unrecognized gcvt_preference $xxx_convert" ;;
+    esac 
+done
+: then add any others
+for xxx_convert in gconvert gcvt sprintf; do
+    case "$xxx_list" in
+    *$xxx_convert*) ;;
+    *) xxx_list="$xxx_list $xxx_convert" ;;
+    esac 
+done
 
-case "$d_longdbl$uselongdouble$d_PRIgldbl" in
-"$define$define$define")
-    # for long doubles prefer first qgcvt, then sprintf
-    xxx_list="`echo $xxx_list|sed s/sprintf//`" 
-    xxx_list="sprintf $xxx_list"
-    case "$d_qgcvt" in
-    "$define") xxx_list="qgcvt $xxx_list" ;;
-    esac
+case "$d_longdbl$uselongdouble" in
+"$define$define")
+    : again, add prefered functions to our list first
+    xxx_ld_list=""
+    for xxx_convert in $gcvt_ld_preference; do
+        case $xxx_convert in
+        qgcvt|gcvt|gconvert|sprintf) xxx_ld_list="$xxx_ld_list $xxx_convert" ;;
+        *) echo "Discarding unrecognized gcvt_preference $xxx_convert" ;;
+        esac
+    done
+    : then add qgcvt, sprintf--then, in xxx_list order, gconvert and gcvt
+    for xxx_convert in qgcvt sprintf $xxx_list; do
+        case "$xxx_ld_list" in
+        $xxx_convert*|*" $xxx_convert"*) ;;
+        *) xxx_ld_list="$xxx_ld_list $xxx_convert" ;;
+        esac
+    done
+    : if sprintf cannot do long doubles, move it to the end
+    if test "$d_PRIgldbl" != "$define"; then
+        xxx_ld_list="`echo $xxx_ld_list|sed s/sprintf//` sprintf"
+    fi
+    : if no qgcvt, remove it
+    if test "$d_qgcvt" != "$define"; then
+        xxx_ld_list="`echo $xxx_ld_list|sed s/qgcvt//`"
+    fi
+    : use the ld_list
+    xxx_list="$xxx_ld_list"
     ;;
 esac
 
@@ -8825,12 +8875,19 @@ for xxx_convert in $xxx_list; do
 			break;
 		else
 			echo "...But $xxx_convert didn't work as I expected."
+			xxx_convert=''
 		fi
 	else
 		echo "$xxx_convert NOT found." >&4
 	fi
 done
 	
+if test X$xxx_convert = X; then
+    echo "*** WHOA THERE!!! ***" >&4
+    echo "None of ($xxx_list)  seemed to work properly.  I'll use sprintf." >&4
+    xxx_convert=sprintf
+fi
+
 case "$xxx_convert" in
 gconvert) d_Gconvert='gconvert((x),(n),(t),(b))' ;;
 gcvt) d_Gconvert='gcvt((x),(n),(b))' ;;
@@ -8838,10 +8895,14 @@ qgcvt) d_Gconvert='qgcvt((x),(n),(b))' ;;
 *) case "$uselongdouble$d_longdbl$d_PRIgldbl" in
    "$define$define$define")
       d_Gconvert="sprintf((b),\"%.*\"$sPRIgldbl,(n),(x))" ;;
+   "$define$define$undef")
+      d_Gconvert='sprintf((b),"%.*g",(n),(double)(x))' ;;
    *) d_Gconvert='sprintf((b),"%.*g",(n),(x))' ;;
    esac
    ;;  
 esac
+
+fi
 
 : see if _fwalk exists
 set fwalk d__fwalk
