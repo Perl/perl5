@@ -58,6 +58,8 @@ FIRSTMAKEFILE = $firstmakefile
 
 TRNL = '$trnl'
 
+OPTIMIZE = $optimize
+
 .SUFFIXES: .c \$(OBJ_EXT)
 
 !GROK!THIS!
@@ -65,7 +67,7 @@ TRNL = '$trnl'
 cat >>Makefile <<'!NO!SUBS!'
 
 REALPERL = ../perl
-CCCMD = `sh $(shellflags) cflags $@`
+CCCMD = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $@`
 
 public = a2p s2p find2perl
 
