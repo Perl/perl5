@@ -657,6 +657,10 @@ win32_opendir(char *filename)
     /* do the FindFirstFile call */
     fh = FindFirstFile(scanname, &FindData);
     if (fh == INVALID_HANDLE_VALUE) {
+	/* FindFirstFile() fails on empty drives! */
+	if (GetLastError() == ERROR_FILE_NOT_FOUND)
+	    return p;
+	Safefree( p);
 	return NULL;
     }
 
