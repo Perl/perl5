@@ -80,19 +80,8 @@ case "`${cc:-cc} -V 2>&1`" in
 esac
 
 case "$optimize" in
-'') # If we have modern enough gcc and well-supported enough CPU,
-    # crank up the optimization level.
-    case "`${cc:-gcc} -v 2>&1`" in
-    *"gcc version 2.95"*|*"gcc version 3."*)
-        case "`arch 2>&1`" in
-        i?86|ppc) optimize='-O3' ;;
-        esac
-        ;;
-    esac
-    case "$optimize" in
-    '') optimize='-O2' ;;
-    esac
-    ;;
+# use -O2 by default ; -O3 doesn't seem to bring significant benefits with gcc
+'') optimize='-O2' ;;
 esac
 
 # Are we using ELF?  Thanks to Kenneth Albanowski <kjahds@kjahds.com>
