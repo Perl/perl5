@@ -2344,7 +2344,7 @@ EXT U32 opargs[] = {
 	0x00000e14,	/* eof */
 	0x00000e0c,	/* tell */
 	0x00011604,	/* seek */
-	0x00001614,	/* truncate */
+	0x00001114,	/* truncate */
 	0x0001160c,	/* fcntl */
 	0x0001160c,	/* ioctl */
 	0x0000161c,	/* flock */
