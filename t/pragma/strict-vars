@@ -141,6 +141,38 @@ Compilation failed in require at - line 2.
 BEGIN failed--compilation aborted at - line 2.
 ########
 
+--FILE-- abc.pm
+package Burp;
+use strict;
+$a = 1;$f = 1;$k = 1; # just to get beyond the limit...
+$b = 1;$g = 1;$l = 1;
+$c = 1;$h = 1;$m = 1;
+$d = 1;$i = 1;$n = 1;
+$e = 1;$j = 1;$o = 1;
+$p = 0b12;
+--FILE-- 
+use abc;
+EXPECT
+Global symbol "$f" requires explicit package name at abc.pm line 3.
+Global symbol "$k" requires explicit package name at abc.pm line 3.
+Global symbol "$g" requires explicit package name at abc.pm line 4.
+Global symbol "$l" requires explicit package name at abc.pm line 4.
+Global symbol "$c" requires explicit package name at abc.pm line 5.
+Global symbol "$h" requires explicit package name at abc.pm line 5.
+Global symbol "$m" requires explicit package name at abc.pm line 5.
+Global symbol "$d" requires explicit package name at abc.pm line 6.
+Global symbol "$i" requires explicit package name at abc.pm line 6.
+Global symbol "$n" requires explicit package name at abc.pm line 6.
+Global symbol "$e" requires explicit package name at abc.pm line 7.
+Global symbol "$j" requires explicit package name at abc.pm line 7.
+Global symbol "$o" requires explicit package name at abc.pm line 7.
+Global symbol "$p" requires explicit package name at abc.pm line 8.
+Illegal binary digit '2' at abc.pm line 8, at end of line
+abc.pm has too many errors.
+Compilation failed in require at - line 1.
+BEGIN failed--compilation aborted at - line 1.
+########
+
 # Check scope of pragma with eval
 no strict ;
 eval {

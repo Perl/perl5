@@ -7304,8 +7304,14 @@ Perl_yyerror(pTHX_ char *s)
 	Perl_warn(aTHX_ "%"SVf, msg);
     else
 	qerror(msg);
-    if (PL_error_count >= 10)
-	Perl_croak(aTHX_ "%s has too many errors.\n", CopFILE(PL_curcop));
+    if (PL_error_count >= 10) {
+	if (PL_in_eval && SvCUR(ERRSV))
+	    Perl_croak(aTHX_ "%_%s has too many errors.\n",
+		       ERRSV, CopFILE(PL_curcop));
+	else
+	    Perl_croak(aTHX_ "%s has too many errors.\n",
+		       CopFILE(PL_curcop));
+    }
     PL_in_my = 0;
     PL_in_my_stash = Nullhv;
     return 0;
