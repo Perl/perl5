@@ -18,7 +18,7 @@ POD = \
 	perl.pod	\
 	perl5004delta.pod	\
 	perl5005delta.pod	\
-	perl56delta.pod	\
+	perldelta.pod	\
 	perlapi.pod	\
 	perlapio.pod	\
 	perlbook.pod	\
@@ -93,7 +93,7 @@ MAN = \
 	perl.man	\
 	perl5004delta.man	\
 	perl5005delta.man	\
-	perl56delta.man	\
+	perldelta.man	\
 	perlapi.man	\
 	perlapio.man	\
 	perlbook.man	\
@@ -168,7 +168,7 @@ HTML = \
 	perl.html	\
 	perl5004delta.html	\
 	perl5005delta.html	\
-	perl56delta.html	\
+	perldelta.html	\
 	perlapi.html	\
 	perlapio.html	\
 	perlbook.html	\
@@ -244,7 +244,7 @@ TEX = \
 	perl.tex	\
 	perl5004delta.tex	\
 	perl5005delta.tex	\
-	perl56delta.tex	\
+	perldelta.tex	\
 	perlapi.tex	\
 	perlapio.tex	\
 	perlbook.tex	\
