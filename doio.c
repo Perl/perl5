@@ -118,9 +118,16 @@ PerlIO *supplied_fp;
 	if (fd == -1)
 	    fp = NULL;
 	else {
-	    fp = PerlIO_fdopen(fd, ((result == 0) ? "r"
-			     : (result == 1) ? "w"
-			     : "r+"));
+	    char *fpmode;
+	    if (result == 0)
+		fpmode = "r";
+#ifdef O_APPEND
+	    else if (rawmode & O_APPEND)
+		fpmode = (result == 1) ? "a" : "a+";
+#endif
+	    else
+		fpmode = (result == 1) ? "w" : "r+";
+	    fp = PerlIO_fdopen(fd, fpmode);
 	    if (!fp)
 		close(fd);
 	}
