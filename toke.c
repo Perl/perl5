@@ -2521,7 +2521,7 @@ Perl_yylex(pTHX)
 	    if (bof)
 	    {
 		PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-		/* Shouldn't this wsallow_bom() be earlier, e.g.
+		/* Shouldn't this swallow_bom() be earlier, e.g.
 		 * immediately after where bof is set?  Currently you can't
 		 * have e.g. a UTF16 sharpbang line. --Mike Guy */
 		s = swallow_bom((U8*)s);
@@ -7390,6 +7390,7 @@ STATIC char*
 S_swallow_bom(pTHX_ U8 *s)
 {
     STRLEN slen;
+    U8 *olds = s;
     slen = SvCUR(PL_linestr);
     switch (*s) {
     case 0xFF:       
@@ -7404,8 +7405,10 @@ S_swallow_bom(pTHX_ U8 *s)
 	    s += 2;
 	    filter_add(utf16rev_textfilter, NULL);
 	    New(898, news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
+	    /* See the notes on utf16_to_utf8() in utf8.c --Mike Guy */
 	    PL_bufend = (char*)utf16_to_utf8((U16*)s, news,
 					     PL_bufend - (char*)s);
+	    Safefree(olds);
 	    s = news;
 #else
 	    Perl_croak(aTHX_ "Unsupported script encoding");
@@ -7418,8 +7421,10 @@ S_swallow_bom(pTHX_ U8 *s)
 	    U8 *news;
 	    filter_add(utf16_textfilter, NULL);
 	    New(898, news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
+	    /* See the notes on utf16_to_utf8() in utf8.c --Mike Guy */
 	    PL_bufend = (char*)utf16_to_utf8((U16*)s, news,
 					     PL_bufend - (char*)s);
+	    Safefree(olds);
 	    s = news;
 #else
 	    Perl_croak(aTHX_ "Unsupported script encoding");

@@ -333,6 +333,7 @@ Perl_bytes_to_utf8(pTHX_ U8* s, STRLEN *len)
  *     a hard error (and it should be listed in perldiag).
  * (4) The tests (in comp/t/require.t) are a joke: the UTF16 BOM
  *     really ought to be followed by valid UTF16 characters.
+ * See swallow_bom() in toke.c.
  * --Mike Guy */
 U8*
 Perl_utf16_to_utf8(pTHX_ U16* p, U8* d, I32 bytelen)
