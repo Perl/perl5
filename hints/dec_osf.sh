@@ -357,14 +357,10 @@ case "`/usr/sbin/sizer -v`" in
 *[1-4].0*) d_modfl=undef ;; # must wait till 5.0
 esac
 
-# Keep those leading tabs.
-	needusrshlib=''
+# Keep that leading tab.
 	old_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 for p in $loclibpth
 do
-	if test -n "`ls $p/libdb.so* 2>/dev/null`"; then
-	    needusrshlib=yes
-	fi
 	if test -d $p; then
 	    echo "Appending $p to LD_LIBRARY_PATH." >& 4
 	    case "$LD_LIBRARY_PATH" in
@@ -377,14 +373,6 @@ case "$LD_LIBRARY_PATH" in
 "$old_LD_LIBRARY_PATH") ;;
 *) echo "LD_LIBRARY_PATH is now $LD_LIBRARY_PATH." >& 4 ;;
 esac
-# This is evil but I can't think of a nice workaround:
-# the /usr/shlib/libdb.so needs to be seen first,
-# or running Configure will fail.
-if test -n "$needusrshlib"; then
-    echo "Prepending /usr/shlib to loclibpth." >& 4
-    loclibpth="/usr/shlib $loclibpth"
-    echo "loclibpth is now $loclibpth." >& 4
-fi
 
 #
 # Unset temporary variables no more needed.
