@@ -122,24 +122,24 @@ if ($h{''} eq 'bar') {
    print "ok 12\n" ;
 }
 else {
-   print "not ok 12\n" ;
    if ($AnyDBM_File::ISA[0] eq 'DB_File' && $DB_File::db_ver >= 2.004010) {
      ($major, $minor, $patch) = ($DB_File::db_ver =~ /^(\d+)\.(\d\d\d)(\d\d\d)/) ;
      $major =~ s/^0+// ;
      $minor =~ s/^0+// ;
      $patch =~ s/^0+// ;
      $compact = "$major.$minor.$patch" ;
-
-     print STDERR <<EOM ;
-#
-# anydbm.t test 12 will fail when AnyDBM_File uses the combination of
-# DB_File and Berkeley DB 2.4.10 (or greater). 
-# You are using DB_File $DB_File::VERSION and Berkeley DB $compact
-#
-# Berkeley DB 2 from version 2.4.10 onwards does not allow null keys.
-# This feature will be reenabled in a future version of Berkeley DB.
-#
-EOM
+     #
+     # anydbm.t test 12 will fail when AnyDBM_File uses the combination of
+     # DB_File and Berkeley DB 2.4.10 (or greater). 
+     # You are using DB_File $DB_File::VERSION and Berkeley DB $compact
+     #
+     # Berkeley DB 2 from version 2.4.10 onwards does not allow null keys.
+     # This feature will be reenabled in a future version of Berkeley DB.
+     #
+     print "ok 12 # skipped: db v$compact, no null key support\n" ;
+   }
+   else {
+     print "not ok 12\n" ;
    }
 }
 
