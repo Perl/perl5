@@ -133,6 +133,10 @@ mv .shlist .shlist.old
 $egrep -v '^makedepend\.SH' <.shlist.old >.shlist
 mv .shlist .shlist.old
 $egrep -v '^Makefile\.SH' <.shlist.old >.shlist
+mv .shlist .shlist.old
+$egrep -v '^perl_exp\.SH' <.shlist.old >.shlist
+mv .shlist .shlist.old
+$egrep -v '^config_h\.SH' <.shlist.old >.shlist
 rm .shlist.old
 
 if $test -s .deptmp; then
