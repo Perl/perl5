@@ -31,6 +31,216 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14923] By: jhi                                   on 2002/03/01  14:17:54
+        Log: Lost in the shuffle.
+     Branch: perl
+	   + lib/Math/BigInt/t/downgrade.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14922] By: jhi                                   on 2002/03/01  13:23:41
+        Log: Advertise Tie::File.
+     Branch: perl
+	   ! pod/perldelta.pod pod/perlfaq5.pod
+____________________________________________________________________________
+[ 14921] By: jhi                                   on 2002/03/01  13:14:18
+        Log: Subject: Re: Smoke 14900 /pro/3gl/CPAN/perl-current
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Thu, 28 Feb 2002 18:55:48 +0100
+             Message-Id: <20020228173120.6A15.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! x2p/walk.c
+____________________________________________________________________________
+[ 14920] By: ams                                   on 2002/03/01  09:06:01
+        Log: Subject: [PATCH @14577] autoloaded DESTROY bugfix
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 26 Feb 2002 19:54:31 -0500
+             Message-Id: <20020226195431.A9625@math.ohio-state.edu>
+     Branch: perl
+	   ! embed.fnc ext/B/B/Deparse.pm gv.c
+____________________________________________________________________________
+[ 14919] By: ams                                   on 2002/03/01  03:03:12
+        Log: Upgrade to Tie::File 0.13 (Win32 fixes.)
+     Branch: perl
+	   ! lib/Tie/File.pm lib/Tie/File/01_gen.t
+	   ! lib/Tie/File/02_fetchsize.t lib/Tie/File/03_longfetch.t
+	   ! lib/Tie/File/04_splice.t lib/Tie/File/05_size.t
+	   ! lib/Tie/File/06_fixrec.t lib/Tie/File/07_rv_splice.t
+	   ! lib/Tie/File/08_ro.t lib/Tie/File/09_gen_rs.t
+	   ! lib/Tie/File/10_splice_rs.t lib/Tie/File/11_rv_splice_rs.t
+	   ! lib/Tie/File/12_longfetch_rs.t lib/Tie/File/13_size_rs.t
+____________________________________________________________________________
+[ 14918] By: ams                                   on 2002/03/01  02:36:58
+        Log: Add Tie::File 0.12 from MJD.
+     Branch: perl
+	   + lib/Tie/File.pm lib/Tie/File/01_gen.t
+	   + lib/Tie/File/02_fetchsize.t lib/Tie/File/03_longfetch.t
+	   + lib/Tie/File/04_splice.t lib/Tie/File/05_size.t
+	   + lib/Tie/File/06_fixrec.t lib/Tie/File/07_rv_splice.t
+	   + lib/Tie/File/08_ro.t lib/Tie/File/09_gen_rs.t
+	   + lib/Tie/File/10_splice_rs.t lib/Tie/File/11_rv_splice_rs.t
+	   + lib/Tie/File/12_longfetch_rs.t lib/Tie/File/13_size_rs.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14917] By: jhi                                   on 2002/03/01  02:13:24
+        Log: Encoding name mapping tweaks.
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[ 14916] By: jhi                                   on 2002/02/28  21:26:07
+        Log: metaconfig unit change for #14915.
+     Branch: metaconfig
+	   ! U/modified/Init.U
+____________________________________________________________________________
+[ 14915] By: jhi                                   on 2002/02/28  21:25:23
+        Log: Subject: [PATCH] Configure to correctly recognize Amiga OS
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Thu, 28 Feb 02 15:05 est
+             Message-Id: <200202282007.PAA11412@mailhub1.stratus.com>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14914] By: jhi                                   on 2002/02/28  14:10:44
+        Log: PL_bostr was pointing to the wrong string
+             (a string left around from the loading of the Unicode \w)
+             "UTF-8 panic, blocks, coredumps, etc. in debugger with \w and m//g"
+             http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2002-01/msg01267.html
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 14913] By: gbarr                                 on 2002/02/28  13:06:11
+        Log: Sync with libnet-1.10
+     Branch: perl
+	   ! lib/Net/ChangeLog.libnet lib/Net/Cmd.pm lib/Net/Config.pm
+	   ! lib/Net/FTP.pm lib/Net/FTP/I.pm lib/Net/NNTP.pm
+	   ! lib/Net/Netrc.pm lib/Net/POP3.pm lib/Net/SMTP.pm
+	   ! lib/Net/t/netrc.t
+____________________________________________________________________________
+[ 14912] By: ams                                   on 2002/02/28  13:02:50
+        Log: Subject: [PATCH] perldelta.pod fixes
+             From: Autrijus Tang <autrijus@autrijus.org>
+             Date: Thu, 28 Feb 2002 21:44:15 +0800
+             Message-Id: <20020228134415.GB16422@not.autrijus.org>
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 14911] By: ams                                   on 2002/02/28  11:31:44
+        Log: Subject: File::Copy::syscopy doesn't preserve OS attrs on UNIX
+             From: Stas Bekman <stas@stason.org>
+             Date: Mon, 04 Feb 2002 16:18:53 +0800
+             Message-Id: <3C7E1E5F.1000605@stason.org>
+             (Applied by hand).
+     Branch: perl
+	   ! lib/File/Copy.pm
+____________________________________________________________________________
+[ 14910] By: ams                                   on 2002/02/28  11:26:47
+        Log: Subject: [PATCH lib/Pod/Html.pm]
+             From: Stas Bekman <stas@stason.org>
+             Date: Thu, 28 Feb 2002 20:05:01 +0800
+             Message-Id: <3C7E1CED.7000307@stason.org>
+     Branch: perl
+	   ! lib/Pod/Html.pm
+____________________________________________________________________________
+[ 14909] By: jhi                                   on 2002/02/28  05:50:24
+        Log: Tests for #14908.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 14908] By: jhi                                   on 2002/02/28  05:43:45
+        Log: Make shared hash keys to be \0-terminated:
+             one possible resolution for
+             "UTF-8, weird \w behaviour after HASH-KEY-ification"
+             http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2002-01/msg01327.html
+             The hash keys were shared (the SvLEN(sv) = 0 was the giveaway).
+             The hash keys weren't \0-terminated.  This meant that the EOL ($)
+             in regmatch() got the nextchr beyond the last character.  Since
+             the keys were UTF-8, the nextchr was \1, not the usual
+             string-terminating \0.  Wham, no match.
+             
+             I think another possible resolution could be to stop the nextchr
+             computation in regmatch() from peeking beyond the last character
+             of the string:
+             
+             nextchr = locinput < PL_regeol ? UCHARAT(locinput) : 0;
+     Branch: perl
+	   ! hv.c hv.h
+____________________________________________________________________________
+[ 14907] By: jhi                                   on 2002/02/28  03:25:44
+        Log: Subject: [PATCH] Perl interface to newIO()
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Wed, 27 Feb 2002 20:15:27 -0800
+             Message-ID: <f7af8gzkgaET092yn@efn.org>
+     Branch: perl
+	   ! lib/Symbol.pm
+____________________________________________________________________________
+[ 14906] By: jhi                                   on 2002/02/28  00:50:01
+        Log: The "list" part of
+             
+             Subject: [PATCH perlop] .. returns a *list* of *integers*
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Tue, 26 Feb 2002 18:30:22 +0000
+             Message-Id: <E16fmMo-00048Y-00@draco.cus.cam.ac.uk>
+             
+             plus few nits.
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[ 14905] By: jhi                                   on 2002/02/27  22:44:52
+        Log: Subject: [PATCH lib/File/stat.t] Win32 not happy with new test
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Date: Thu, 28 Feb 2002 00:04:06 +0100
+             Message-ID: <fhnq7u8ref3nqgsa0p4f9u1v5r3sv3akm1@4ax.com>
+     Branch: perl
+	   ! lib/File/stat.t
+____________________________________________________________________________
+[ 14904] By: pudge                                 on 2002/02/27  21:25:39
+        Log: Integrate from maintperl.
+     Branch: maint-5.6/macperl
+	  !> doio.c op.c t/io/open.t t/pragma/strict-subs
+____________________________________________________________________________
+[ 14903] By: jhi                                   on 2002/02/27  21:23:14
+        Log: Upgrade to Math::BigInt 1.53.
+     Branch: perl
+	   ! lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	   ! lib/Math/BigInt/Calc.pm lib/Math/BigInt/t/bare_mbi.t
+	   ! lib/Math/BigInt/t/bigintpm.inc lib/Math/BigInt/t/bigintpm.t
+	   ! lib/Math/BigInt/t/config.t lib/Math/BigInt/t/mbimbf.inc
+	   ! lib/Math/BigInt/t/mbimbf.t lib/Math/BigInt/t/sub_mbi.t
+	   ! lib/Math/BigInt/t/sub_mif.t lib/Math/BigInt/t/upgrade.t
+____________________________________________________________________________
+[ 14902] By: jhi                                   on 2002/02/27  21:17:38
+        Log: Subject: [PATCH] assorted VMS test fix-ups, $Config{prefixexp} revisited
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Wed, 27 Feb 2002 15:36:38 -0600
+             Message-Id: <5.1.0.14.2.20020227152131.01ade728@exchi01>
+     Branch: perl
+	   ! configure.com ext/Cwd/t/cwd.t lib/ExtUtils/t/Installed.t
+	   ! vms/ext/filespec.t
+____________________________________________________________________________
+[ 14901] By: jhi                                   on 2002/02/27  21:14:22
+        Log: Subject: [PATCH] Some minor changes for Cygwin
+             From: "Gerrit P. Haase" <gerrit@familiehaase.de>
+             Date: Wed, 27 Feb 2002 22:25:41 +0100
+             Message-ID: <14296492589.20020227222541@familiehaase.de>
+     Branch: perl
+	   ! Makefile.SH README.cygwin cygwin/perlld.in
+____________________________________________________________________________
+[ 14900] By: jhi                                   on 2002/02/27  19:06:39
+        Log: Update the UTF-8 explanation table.
+     Branch: perl
+	   ! pod/perlunicode.pod utf8.h
+____________________________________________________________________________
+[ 14899] By: jhi                                   on 2002/02/27  17:50:09
+        Log: Repatch from Robin Barker: anon subs in C<package;> are
+             now __ANON__::__ANON__ (should help for mod_perl package
+             since #12251)
+     Branch: perl
+	   ! gv.c op.c t/op/runlevel.t toke.c
+____________________________________________________________________________
+[ 14898] By: jhi                                   on 2002/02/27  16:01:47
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14897] By: jhi                                   on 2002/02/27  15:26:12
         Log: perldelta updates.
      Branch: perl
