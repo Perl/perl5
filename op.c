@@ -753,10 +753,14 @@ Perl_scalarvoid(pTHX_ OP *o)
 	else {
 	    if (ckWARN(WARN_VOID)) {
 		useless = "a constant";
+		/* don't warn on optimised away booleans, eg 
+		 * use constant Foo, 5; Foo || print; */
+		if (cSVOPo->op_private & OPpCONST_SHORTCIRCUIT)
+		    useless = 0;
 		/* the constants 0 and 1 are permitted as they are
 		   conventionally used as dummies in constructs like
 		        1 while some_condition_with_side_effects;  */
-		if (SvNIOK(sv) && (SvNV(sv) == 0.0 || SvNV(sv) == 1.0))
+		else if (SvNIOK(sv) && (SvNV(sv) == 0.0 || SvNV(sv) == 1.0))
 		    useless = 0;
 		else if (SvPOK(sv)) {
                   /* perl4's way of mixing documentation and code
@@ -3445,11 +3449,13 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	if ((type == OP_AND) == (SvTRUE(((SVOP*)first)->op_sv))) {
 	    op_free(first);
 	    *firstp = Nullop;
+	    other->op_private |= OPpCONST_SHORTCIRCUIT;
 	    return other;
 	}
 	else {
 	    op_free(other);
 	    *otherp = Nullop;
+	    first->op_private |= OPpCONST_SHORTCIRCUIT;
 	    return first;
 	}
     }
