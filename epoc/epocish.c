@@ -90,5 +90,5 @@ void epoc_gcvt( double x, int digits, unsigned char *buf) {
 #if 0
 void epoc_spawn_posix_server() {
   SpawnPosixServerThread(); 
-#endif
 }
+#endif
