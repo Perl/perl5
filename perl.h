@@ -20,7 +20,11 @@
 #define USE_STDIO
 #endif /* PERL_FOR_X2P */
 
+#ifdef VOIDUSED
+#   undef VOIDUSED
+#endif 
 #define VOIDUSED 1
+
 #include "config.h"
 
 #if defined(USE_ITHREADS) && defined(USE_5005THREADS)
