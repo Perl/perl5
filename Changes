@@ -96,6 +96,141 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6840] By: jhi                                   on 2000/08/26  14:23:03
+        Log: grep -e isn't portable.
+             
+             Subject: [ID 20000825.027] let me (perlbug@perl.com) know how I blew it
+             From: chris@broadband.att.com
+             Date: Sat, 26 Aug 2000 00:17:27 -0600 (MDT)
+             Message-Id: <200008260617.AAA10219@lazlo.tci.com>
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[  6839] By: jhi                                   on 2000/08/26  14:12:23
+        Log: no-install target a la man -n.
+             
+             Subject: [PATCH] make no-install (was Re: [PATCH] installation not quite silent yet.)
+             From: <abigail@foad.org>
+             Date: Sat, 26 Aug 2000 03:57:34 -0400
+             Message-ID: <20000826075735.18912.qmail@foad.org>
+     Branch: perl
+	   ! Makefile.SH installman installperl
+____________________________________________________________________________
+[  6838] By: jhi                                   on 2000/08/26  14:06:33
+        Log: Retract #6826 as the #6828 should be do the same
+             in a More Correct Way.
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[  6837] By: jhi                                   on 2000/08/26  05:24:00
+        Log: More casting.
+     Branch: perl
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[  6836] By: jhi                                   on 2000/08/26  05:05:46
+        Log: Nicer in decimal.
+     Branch: perl
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[  6835] By: jhi                                   on 2000/08/26  05:03:50
+        Log: There be no UVdf.
+     Branch: perl
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[  6834] By: jhi                                   on 2000/08/26  05:00:18
+        Log: Continue IVdfing and UVxfing.
+     Branch: perl
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[  6833] By: jhi                                   on 2000/08/26  04:53:14
+        Log: Use IVdf.
+     Branch: perl
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[  6832] By: jhi                                   on 2000/08/26  04:40:41
+        Log: Document PTR2XX and INT2PTR.
+     Branch: perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[  6831] By: jhi                                   on 2000/08/26  04:33:18
+        Log: Use UVxf, PTR2UV, NVff.
+     Branch: perl
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[  6830] By: jhi                                   on 2000/08/26  04:31:32
+        Log: Update the test count.
+     Branch: perl
+	   ! t/lib/trig.t
+____________________________________________________________________________
+[  6829] By: jhi                                   on 2000/08/26  03:05:50
+        Log: Subject: [PATCH] installation not quite silent yet.
+             From: <abigail@foad.org>
+             Date: Fri, 25 Aug 2000 20:07:53 -0400
+             Message-ID: <20000826000753.7822.qmail@foad.org>
+     Branch: perl
+	   ! installman installperl
+____________________________________________________________________________
+[  6828] By: jhi                                   on 2000/08/26  03:05:14
+        Log: Subject: Re: [ID 20000825.019] Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6820 on alpha-dec_osf 5.1 (UNINSTALLED) 
+             From: Spider Boardman <spider@web.zk3.dec.com>
+             Date: Fri, 25 Aug 2000 19:12:40 -0400
+             Message-Id: <200008252312.TAA17828@leggy.zk3.dec.com>
+     Branch: perl
+	   ! gv.c
+____________________________________________________________________________
+[  6827] By: jhi                                   on 2000/08/25  23:54:34
+        Log: Support preserving extremely big/small angles.
+     Branch: perl
+	   ! lib/Math/Trig.pm pod/perldelta.pod t/lib/trig.t
+____________________________________________________________________________
+[  6826] By: jhi                                   on 2000/08/25  23:01:20
+        Log: Patch installperl to be long double-aware.
+             
+             Subject: Re: [PATCH] [ID 20000825.019] Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6820 on alpha-dec_osf 5.1 (UNINSTALLED) 
+             From: Spider Boardman <spider@web.zk3.dec.com>
+             Date: Fri, 25 Aug 2000 18:15:23 -0400
+             Message-Id: <200008252215.SAA28740@leggy.zk3.dec.com>
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[  6825] By: jhi                                   on 2000/08/25  22:58:25
+        Log: Remove duplicately applied patch shards.
+             
+             Subject: [ID 20000825.012] [PATCH@6822] t/lib/cgi-html.t produces ugly cruft during 'make test'
+             From: Spider Boardman <spider@leggy.zk3.dec.com>
+             Date: Fri, 25 Aug 2000 16:45:03 -0400
+             Message-Id: <200008252045.QAA23518@leggy.zk3.dec.com>
+     Branch: perl
+	   ! t/lib/cgi-html.t
+____________________________________________________________________________
+[  6824] By: jhi                                   on 2000/08/25  22:57:00
+        Log: Subject: [PATCH @6820] installman under -w and strict (was Re: [PATCH] More silencing of installman.)
+             From: Daniel Chetlin <daniel@chetlin.com>
+             Date: Fri, 25 Aug 2000 12:23:16 -0700
+             Message-ID: <20000825122316.A10250@ilmd.chetlin.org>
+             
+             Subject: Re: [PATCH @6820] installman under -w and strict (was Re: [PATCH] More silencing of installman.)
+             From: Daniel Chetlin <daniel@chetlin.com>
+             Date: Fri, 25 Aug 2000 14:47:19 -0700
+             Message-ID: <20000825144719.A20587@ilmd.chetlin.org>
+     Branch: perl
+	   ! installman
+____________________________________________________________________________
+[  6823] By: jhi                                   on 2000/08/25  22:44:17
+        Log: Timestamp problem?
+     Branch: perl
+	   ! uconfig.h uconfig.sh
+____________________________________________________________________________
+[  6822] By: jhi                                   on 2000/08/25  19:01:06
+        Log: One forgotten file from #6816.
+     Branch: perl
+	   ! vos/config.h
+____________________________________________________________________________
+[  6821] By: jhi                                   on 2000/08/25  18:56:39
+        Log: Regen Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6820] By: jhi                                   on 2000/08/25  18:52:35
         Log: Fix Changes ordering.
      Branch: perl
