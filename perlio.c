@@ -3520,11 +3520,13 @@ PerlIOCrlf_get_cnt(pTHX_ PerlIO *f)
 		    /*
 		     * Blast - found CR as last char in buffer
 		     */
+            
 		    if (b->ptr < nl) {
 			/*
 			 * They may not care, defer work as long as
 			 * possible
 			 */
+			c->nl = nl;
 			return (nl - b->ptr);
 		    }
 		    else {
@@ -3545,6 +3547,7 @@ PerlIOCrlf_get_cnt(pTHX_ PerlIO *f)
 			/*
 			 * CR at EOF - just fall through
 			 */
+			/* Should we clear EOF though ??? */
 		    }
 		}
 	    }
@@ -3563,12 +3566,15 @@ PerlIOCrlf_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
     if (!b->buf)
 	PerlIO_get_base(f);
     if (!ptr) {
-	if (c->nl)
+	if (c->nl) {
 	    ptr = c->nl + 1;
+            if (ptr == b->end && *c->nl == 0xd) {
+		/* Defered CR at end of buffer case - we lied about count */
+		ptr--; 	
+            }
+        }
 	else {
 	    ptr = b->end;
-	    if ((flags & PERLIO_F_CRLF) && ptr > b->buf && ptr[-1] == 0xd)
-		ptr--;
 	}
 	ptr -= cnt;
     }
@@ -3577,10 +3583,14 @@ PerlIOCrlf_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 	 * Test code - delete when it works ...
 	 */
 	STDCHAR *chk = (c->nl) ? (c->nl+1) : b->end;
+        if (ptr+cnt == c->nl && c->nl+1 == b->end && *c->nl == 0xd) {
+	  /* Defered CR at end of buffer case - we lied about count */
+	  chk--;
+        } 
 	chk -= cnt;
 
-	if (ptr != chk) {
-	    Perl_croak(aTHX_ "ptr wrong %p != %p fl=%08" UVxf
+	if (ptr != chk ) {
+	    Perl_warn(aTHX_ "ptr wrong %p != %p fl=%08" UVxf
 		       " nl=%p e=%p for %d", ptr, chk, flags, c->nl,
 		       b->end, cnt);
 	}
