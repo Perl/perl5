@@ -239,7 +239,11 @@ Using Bit::Vector:
 
 =item How do I convert from decimal to binary
 
-Using unpack;
+Using sprintf (perl 5.6+):
+
+    $bin = sprintf("%b", 3735928559);
+
+Using unpack:
 
     $bin = unpack("B*", pack("N", 3735928559));
 
