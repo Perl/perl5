@@ -104,9 +104,9 @@ ext/ByteLoader/byterun.h	Header for byterun.c
 ext/ByteLoader/hints/sunos.pl	Hints for named architecture
 ext/ByteLoader/Makefile.PL	Bytecode loader makefile writer
 ext/Cwd/Cwd.xs			Cwd extension external subroutines
+ext/Cwd/Makefile.PL		Cwd extension makefile maker
 ext/Cwd/t/cwd.t			See if Cwd works
 ext/Cwd/t/taint.t		See if Cwd works with taint
-ext/Cwd/Makefile.PL		Cwd extension makefile maker
 ext/Data/Dumper/Changes		Data pretty printer, changelog
 ext/Data/Dumper/Dumper.pm	Data pretty printer, module
 ext/Data/Dumper/Dumper.xs	Data pretty printer, externals
@@ -954,10 +954,10 @@ lib/IPC/SysV.t			See if IPC::SysV works
 lib/less.pm			For "use less"
 lib/less.t			See if less support works
 lib/lib_pm.PL			For "use lib", produces lib/lib.pm
+lib/Lingua/KO/Hangul/Util.pm		Lingua::KO::Hangul::Util
 lib/Lingua/KO/Hangul/Util/Changes	Lingua::KO::Hangul::Util
 lib/Lingua/KO/Hangul/Util/README	Lingua::KO::Hangul::Util
 lib/Lingua/KO/Hangul/Util/t/test.t		Lingua::KO::Hangul::Util
-lib/Lingua/KO/Hangul/Util.pm		Lingua::KO::Hangul::Util
 lib/locale.pm			For "use locale"
 lib/locale.t			See if locale support works
 lib/Locale/Codes/t/all.t	See if Locale::Codes work
@@ -1123,17 +1123,20 @@ lib/Term/ReadLine.pm		Stub readline library
 lib/termcap.pl			Perl library supporting termcap usage
 lib/Test.pm			A simple framework for writing test scripts
 lib/Test/Harness.pm		A test harness
-lib/Test/Harness.t		See if Test::Harness works
+lib/Test/Harness/Changes	Test::Harness
+lib/Test/Harness/t/base.t	Test::Harness
+lib/Test/Harness/t/ok.t		Test::Harness
+lib/Test/Harness/t/test-harness.t	Test::Harness test
 lib/Test/More.pm                More utilities for writing tests
 lib/Test/Simple.pm              Basic utility for writing tests
 lib/Test/Simple/Changes		Test::Simple changes
-lib/Test/Simple/t/More.t        Test::More test, basic stuff
 lib/Test/Simple/t/exit.t        Test::Simple test, exit codes
 lib/Test/Simple/t/extra.t       Test::Simple test
 lib/Test/Simple/t/fail-like.t   Test::More test, like() failures
 lib/Test/Simple/t/fail-more.t   Test::More test, tests failing
 lib/Test/Simple/t/fail.t        Test::Simple test, test failures
 lib/Test/Simple/t/missing.t     Test::Simple test, missing tests
+lib/Test/Simple/t/More.t        Test::More test, basic stuff
 lib/Test/Simple/t/no_plan.t     Test::Simple test, forgot the plan
 lib/Test/Simple/t/plan_is_noplan.t      Test::Simple test, no_plan
 lib/Test/Simple/t/simple.t      Test::Simple test, basic stuff
@@ -1155,7 +1158,6 @@ lib/Text/Abbrev.t		Test Text::Abbrev
 lib/Text/Balanced.pm		Text::Balanced
 lib/Text/Balanced/Changes	Text::Balanced
 lib/Text/Balanced/README	Text::Balanced
-lib/Text/Balanced/t/gentag.t	See if Text::Balanced works
 lib/Text/Balanced/t/extbrk.t	See if Text::Balanced works
 lib/Text/Balanced/t/extcbk.t	See if Text::Balanced works
 lib/Text/Balanced/t/extdel.t	See if Text::Balanced works
@@ -1163,6 +1165,7 @@ lib/Text/Balanced/t/extmul.t	See if Text::Balanced works
 lib/Text/Balanced/t/extqlk.t	See if Text::Balanced works
 lib/Text/Balanced/t/exttag.t	See if Text::Balanced works
 lib/Text/Balanced/t/extvar.t	See if Text::Balanced works
+lib/Text/Balanced/t/gentag.t	See if Text::Balanced works
 lib/Text/ParseWords.pm		Perl module to split words on arbitrary delimiter
 lib/Text/ParseWords.t		See if Text::ParseWords works
 lib/Text/Soundex.pm		Perl module to implement Soundex
@@ -1940,22 +1943,25 @@ t/lib/dprof/test6_t		Perl code profiler tests
 t/lib/dprof/test6_v		Perl code profiler tests
 t/lib/dprof/V.pm		Perl code profiler tests
 t/lib/filter-util.pl		See if Filter::Util::Call works
+t/lib/FilterTest.pm		Helper file for lib/Filter/Simple/t/filter.t
 t/lib/h2ph.h			Test header file for h2ph
 t/lib/h2ph.pht			Generated output from h2ph.h by h2ph, for comparison
 t/lib/locale/latin1		Part of locale.t in Latin 1
 t/lib/locale/utf8		Part of locale.t in UTF8
-t/lib/FilterTest.pm		Helper file for lib/Filter/Simple/t/filter.t
 t/lib/sample-tests/bailout		Test data for Test::Harness
 t/lib/sample-tests/combined		Test data for Test::Harness
 t/lib/sample-tests/descriptive		Test data for Test::Harness
 t/lib/sample-tests/duplicates		Test data for Test::Harness
 t/lib/sample-tests/header_at_end	Test data for Test::Harness
+t/lib/sample-tests/header_at_end_fail	Test::Harness
 t/lib/sample-tests/no_nums		Test data for Test::Harness
 t/lib/sample-tests/simple		Test data for Test::Harness
 t/lib/sample-tests/simple_fail		Test data for Test::Harness
 t/lib/sample-tests/skip			Test data for Test::Harness
 t/lib/sample-tests/skip_all		Test data for Test::Harness
+t/lib/sample-tests/skip_no_msg	Test::Harness
 t/lib/sample-tests/todo			Test data for Test::Harness
+t/lib/sample-tests/todo_inline	Test::Harness
 t/lib/sample-tests/with_comments	Test data for Test::Harness
 t/lib/st-dump.pl		See if Storable works
 t/lib/strict/refs		Tests of "use strict 'refs'" for strict.t
