@@ -1744,40 +1744,12 @@ char *
 ttyname(fd)
 	int		fd
 
-#XXX: use sv_getcwd()
 void
 getcwd()
-	PPCODE:
-#ifdef HAS_GETCWD
-	char *		buf;
-	int		buflen = 128;
+    PPCODE:
+      {
+	dXSTARG;
+	sv_getcwd(TARG);
+	XSprePUSH; PUSHTARG;
+      }
 
-	New(0, buf, buflen, char);
-	/* Many getcwd()s know how to automatically allocate memory
-	 * for the directory if the buffer argument is NULL but...
-	 * (1) we cannot assume all getcwd()s do that
-  	 * (2) this may interfere with Perl's malloc
-         * So let's not.  --jhi */
-	while ((getcwd(buf, buflen) == NULL) && errno == ERANGE) {
-	    buflen += 128;
-	    if (buflen > MAXPATHLEN) {
-		Safefree(buf);
-		buf = NULL;
-		break;
-	    }
-	    Renew(buf, buflen, char);
-	}
-	if (buf) {
-	    PUSHs(sv_2mortal(newSVpv(buf, 0)));
-	    Safefree(buf);
-	}
-	else
-	    PUSHs(&PL_sv_undef);
-#else
-	require_pv("Cwd.pm");
-        /* Module require may have grown the stack */
-	SPAGAIN;
-	PUSHMARK(sp);
-	PUTBACK;
-	XSRETURN(call_pv("Cwd::cwd", GIMME_V));
-#endif

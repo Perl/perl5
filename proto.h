@@ -780,7 +780,7 @@ PERL_CALLCONV void	Perl_sv_pos_b2u(pTHX_ SV* sv, I32* offsetp);
 PERL_CALLCONV char*	Perl_sv_pvn_force(pTHX_ SV* sv, STRLEN* lp);
 PERL_CALLCONV char*	Perl_sv_pvutf8n_force(pTHX_ SV* sv, STRLEN* lp);
 PERL_CALLCONV char*	Perl_sv_pvbyten_force(pTHX_ SV* sv, STRLEN* lp);
-PERL_CALLCONV int	Perl_sv_realpath(pTHX_ SV* sv, char *path, STRLEN len);
+PERL_CALLCONV int	Perl_sv_realpath(pTHX_ SV* sv, char *path, STRLEN maxlen);
 PERL_CALLCONV char*	Perl_sv_reftype(pTHX_ SV* sv, int ob);
 PERL_CALLCONV void	Perl_sv_replace(pTHX_ SV* sv, SV* nsv);
 PERL_CALLCONV void	Perl_sv_report_used(pTHX);

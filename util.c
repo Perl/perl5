@@ -3604,35 +3604,47 @@ Fill the sv with current working directory
  *     because you might chdir out of a directory that you can't chdir
  *     back into. */
 
-/* XXX: this needs more porting #ifndef HAS_GETCWD */
 int
 Perl_sv_getcwd(pTHX_ register SV *sv)
 {
 #ifndef PERL_MICRO
 
-#ifndef HAS_GETCWD
+#ifdef HAS_GETCWD
+    {
+	char* buf;
+
+	SvPOK_off(sv);
+	New(0, buf, MAXPATHLEN, char);
+	if (buf) {
+	    buf[MAXPATHLEN] = 0;
+	    /* Yes, some getcwd()s automatically allocate a buffer
+	     * if given a NULL one.  Portability is the problem.
+	     * XXX Configure probe needed. */
+	    if (getcwd(buf, MAXPATHLEN - 1)) {
+	        STRLEN len = strlen(buf);
+	        sv_setpvn(sv, buf, len);
+		SvPOK_only(sv);
+		SvCUR_set(sv, len);
+	    }
+	    else
+	        sv_setsv(sv, &PL_sv_undef);
+	    Safefree(buf);
+	}
+	else
+	    sv_setsv(sv, &PL_sv_undef);
+
+	return SvPOK(sv) ? TRUE : FALSE;
+    }
+
+#else
+
     struct stat statbuf;
     int orig_cdev, orig_cino, cdev, cino, odev, oino, tdev, tino;
     int namelen, pathlen=0;
     DIR *dir;
     Direntry_t *dp;
-#endif
 
     (void)SvUPGRADE(sv, SVt_PV);
-
-#ifdef HAS_GETCWD
-
-    SvGROW(sv, 128);
-    while ((getcwd(SvPVX(sv), SvLEN(sv)-1) == NULL) && errno == ERANGE) {
-        if (SvLEN(sv) + 128 >= MAXPATHLEN) {
-            SV_CWD_RETURN_UNDEF;
-	}
-        SvGROW(sv, SvLEN(sv) + 128);
-    }
-    SvCUR_set(sv, strlen(SvPVX(sv)));
-    SvPOK_only(sv);
-
-#else
 
     if (PerlLIO_lstat(".", &statbuf) < 0) {
         SV_CWD_RETURN_UNDEF;
