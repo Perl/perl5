@@ -18,6 +18,7 @@ Porting/Contract	Social contract for contributed modules in Perl core
 Porting/Glossary	Glossary of config.sh variables
 Porting/config.sh	Sample config.sh
 Porting/config_H	Sample config.h
+Porting/genlog		Generate formatted changelogs by querying p4d
 Porting/makerel		Release making utility
 Porting/patching.pod	How to report changes made to Perl
 Porting/patchls		Flexible patch file listing utility

@@ -61,11 +61,9 @@ print "Setting file permissions...\n";
 system("find . -type f -print     | xargs chmod -w");
 system("find . -type d -print     | xargs chmod g-s");
 system("find t -name '*.t' -print | xargs chmod +x");
-system("chmod +w configure"); # special case (see pumpkin.pod)
 @exe = qw(
     Configure
     configpm
-    configure
     embed.pl
     installperl
     installman
@@ -78,7 +76,6 @@ system("chmod +w configure"); # special case (see pumpkin.pod)
     *.SH
     vms/ext/Stdio/test.pl
     vms/ext/filespec.t
-    vms/fndvers.com
     x2p/*.SH
     Porting/patchls
     Porting/makerel
