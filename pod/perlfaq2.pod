@@ -393,32 +393,29 @@ on them, as do the O'Reilly Perl Resource Kits (in both the Unix flavor
 and in the proprietary Microsoft flavor); the free Unix distributions
 also all come with Perl.
 
-Or you can purchase a real support contract.  Although Cygnus historically
-provided this service, they no longer sell support contracts for Perl.
-Instead, the Paul Ingram Group will be taking up the slack through The
-Perl Clinic.  The following is a commercial from them:
+Or you can purchase commercial incidence based support through the Perl
+Clinic.  The following is a commercial from them:
 
-"Do you need professional support for Perl and/or Oraperl?  Do you need
-a support contract with defined levels of service?  Do you want to pay
-only for what you need?
+"The Perl Clinic is a commercial Perl support service operated by
+ActiveState Tool Corp. and The Ingram Group.  The operators have many
+years of in-depth experience with Perl applications and Perl internals
+on a wide range of platforms.
 
-"The Paul Ingram Group has provided quality software development and
-support services to some of the world's largest corporations for ten
-years.  We are now offering the same quality support services for Perl
-at The Perl Clinic.  This service is led by Tim Bunce, an active perl
-porter since 1994 and well known as the author and maintainer of the
-DBI, DBD::Oracle, and Oraperl modules and author/co-maintainer of The
-Perl 5 Module List.  We also offer Oracle users support for Perl5
-Oraperl and related modules (which Oracle is planning to ship as part
-of Oracle Web Server 3).  20% of the profit from our Perl support work
-will be donated to The Perl Institute."
+"Through our group of highly experienced and well-trained support engineers,
+we will put our best effort into understanding your problem, providing an
+explanation of the situation, and a recommendation on how to proceed."
 
-For more information, contact The Perl Clinic:
+Contact The Perl Clinic at:
 
-    Tel:    +44 1483 424424
-    Fax:    +44 1483 419419
-    Web:    http://www.perl.co.uk/
-    Email:  perl-support-info@perl.co.uk or Tim.Bunce@ig.co.uk
+    www.PerlClinic.com
+
+    North America Pacific Standard Time (GMT-8)
+    Tel:    1 604 606-4611 hours 8am-6pm
+    Fax:    1 604 606-4640
+
+    Europe (GMT)
+    Tel:    00 44 1483 862814
+    Fax:    00 44 1483 862801
 
 See also www.perl.com for updates on tutorials, training, and support.
 
