@@ -137,6 +137,7 @@ $ProtoUsed = 0 ;
 $WantLineNumbers = 1 ;
 $WantOptimize = 1 ;
 $Overload = 0;
+$Fallback = 'PL_sv_undef';
 
 my $process_inout = 1;
 my $process_argtypes = 1;
@@ -293,7 +294,7 @@ $END = "!End!\n\n";		# "impossible" keyword (multiple newline)
 $BLOCK_re= '\s*(' . join('|', qw(
 	REQUIRE BOOT CASE PREINIT INPUT INIT CODE PPCODE OUTPUT
 	CLEANUP ALIAS ATTRS PROTOTYPES PROTOTYPE VERSIONCHECK INCLUDE
-	SCOPE INTERFACE INTERFACE_MACRO C_ARGS POSTCALL OVERLOAD
+	SCOPE INTERFACE INTERFACE_MACRO C_ARGS POSTCALL OVERLOAD FALLBACK
 	)) . "|$END)\\s*:";
 
 # Input:  ($_, @line) == unparsed input.
@@ -615,6 +616,24 @@ sub OVERLOAD_handler()
         }
     }
 
+}
+
+sub FALLBACK_handler()
+{
+    # the rest of the current line should contain either TRUE, 
+    # FALSE or UNDEF
+
+    TrimWhitespace($_) ;
+    my %map = (
+	TRUE => "PL_sv_yes", 1 => "PL_sv_yes",
+	FALSE => "PL_sv_no", 0 => "PL_sv_no",
+	UNDEF => "PL_sv_undef",
+    ) ;
+
+    # check for valid FALLBACK value
+    death ("Error: FALLBACK: TRUE/FALSE/UNDEF") unless exists $map{uc $_} ;
+
+    $Fallback = $map{uc $_} ;
 }
 
 sub REQUIRE_handler ()
@@ -1065,7 +1084,7 @@ while (fetch_para()) {
     $xsreturn = 0;
 
     $_ = shift(@line);
-    while ($kwd = check_keyword("REQUIRE|PROTOTYPES|VERSIONCHECK|INCLUDE")) {
+    while ($kwd = check_keyword("REQUIRE|PROTOTYPES|FALLBACK|VERSIONCHECK|INCLUDE")) {
         &{"${kwd}_handler"}() ;
         next PARAGRAPH unless @line ;
         $_ = shift(@line);
@@ -1554,6 +1573,25 @@ EOF
     }
 }
 
+if ($Overload) # make it findable with fetchmethod
+{
+    
+    print Q<<"EOF"; 
+#XS(XS_${Packid}_nil); /* prototype to pass -Wmissing-prototypes */
+#XS(XS_${Packid}_nil)
+#{
+#   XSRETURN_EMPTY;
+#}
+#
+EOF
+    unshift(@InitFileCode, <<"MAKE_FETCHMETHOD_WORK");
+    /* Making a sub named "${Package}::()" allows the package */
+    /* to be findable via fetchmethod(), and causes */
+    /* overload::Overloaded("${Package}") to return true. */
+    newXS("${Package}::()", XS_${Packid}_nil, file$proto);
+MAKE_FETCHMETHOD_WORK
+}
+
 # print initialization routine
 
 print Q<<"EOF";
@@ -1592,15 +1630,15 @@ print Q<<"EOF" if defined $XsubAliases or defined $Interfaces ;
 EOF
 
 print Q<<"EOF" if ($Overload);
-#    {
-#        /* create the package stash */
-#        HV *hv = get_hv(\"$Package\::OVERLOAD\",TRUE);
-#        SV *sv = *hv_fetch(hv,"register",8,1);
-#        sv_inc(sv);
-#        SvSETMAGIC(sv);
-#        /* Make it findable via fetchmethod */
-#        newXS(\"$Package\::()\", NULL, file);
-#    }
+#    /* register the overloading (type 'A') magic */
+#    PL_amagic_generation++;
+#    /* The magic for overload gets a GV* via gv_fetchmeth as */
+#    /* mentioned above, and looks in the SV* slot of it for */
+#    /* the "fallback" status. */
+#    sv_setsv(
+#        get_sv( "${Package}::()", TRUE ),
+#        $Fallback
+#    );
 EOF
 
 print @InitFileCode;
