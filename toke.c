@@ -2425,8 +2425,24 @@ Perl_yylex(pTHX)
 		 * Look for options.
 		 */
 		d = instr(s,"perl -");
-		if (!d)
+		if (!d) {
 		    d = instr(s,"perl");
+#if defined(DOSISH)
+		    /* avoid getting into infinite loops when shebang
+		     * line contains "Perl" rather than "perl" */
+		    if (!d) {
+			for (d = ipathend-4; d >= ipath; --d) {
+			    if ((*d == 'p' || *d == 'P')
+				&& !ibcmp(d, "perl", 4))
+			    {
+				break;
+			    }
+			}
+			if (d < ipath)
+			    d = Nullch;
+		    }
+#endif
+		}
 #ifdef ALTERNATE_SHEBANG
 		/*
 		 * If the ALTERNATE_SHEBANG on this system starts with a
