@@ -3035,7 +3035,6 @@ DIRHANDLEs have their own namespace separate from FILEHANDLEs.
 In three-argument form the middle argument may be C<:utf8> to force
 the filenames returned by readdir() to be in UTF-8 encoding of Unicode.
 This naturally works only if your filesystem returns UTF-8 filenames.
-The encoding pragma affects this feature, see L<encoding>.
 
 =item ord EXPR
 

@@ -3817,8 +3817,8 @@ PP(pp_readdir)
 	    if (!(IoFLAGS(io) & IOf_UNTAINT))
 		SvTAINTED_on(sv);
 #endif
-	    if (IoFLAGS(io) & IOf_DIR_UTF8)
-	        sv_utf8_upgrade(sv);
+	    if (IoFLAGS(io) & IOf_DIR_UTF8 && !IN_BYTES)
+	        SvUTF8_on(sv);
 	    XPUSHs(sv_2mortal(sv));
 	}
     }

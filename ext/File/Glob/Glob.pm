@@ -338,7 +338,6 @@ Unicode compatibility:
 The filenames returned will be marked as being in UTF-8 encoding of
 Unicode.  Note that it is your responsibility to ascertain that the
 filesystem you are globbing in returns valid UTF-8 filenames.
-The encoding pragma affects this feature, see L<encoding>.
 
 =head1 DIAGNOSTICS
 
