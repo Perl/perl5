@@ -1120,13 +1120,15 @@ Perl_pad_free(pTHX_ PADOFFSET po)
     if (PL_curpad[po] && PL_curpad[po] != &PL_sv_undef) {
 	SvPADTMP_off(PL_curpad[po]);
 #ifdef USE_ITHREADS
+	/* SV could be a shared hash key (eg bugid #19022) */
+	if (
 #ifdef PERL_COPY_ON_WRITE
-	if (SvIsCOW(PL_curpad[po])) {
-	    sv_force_normal_flags(PL_curpad[po], SV_COW_DROP_PV);
-	} else
+	    !SvIsCOW(PL_curpad[po])
+#else
+	    !SvFAKE(PL_curpad[po])
 #endif
+	    )
 	    SvREADONLY_off(PL_curpad[po]);	/* could be a freed constant */
-
 #endif
     }
     if ((I32)po < PL_padix)
