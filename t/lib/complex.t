@@ -13,7 +13,7 @@ use Math::Complex;
 
 $test = 0;
 $| = 1;
-$script = '';
+@script = ();
 my $eps = 1e-4; # for example root() is quite bad
 
 while (<DATA>) {
@@ -48,7 +48,7 @@ while (<DATA>) {
 }
 
 print "1..$test\n";
-eval $script;
+eval join '', @script;
 die $@ if $@;
 
 sub test {
@@ -57,13 +57,13 @@ sub test {
 	my $i;
 	for ($i = 0; $i < @args; $i++) {
 		$val = value($args[$i]);
-		$script .= "\$z$i = $val;\n";
+		push @script, "\$z$i = $val;\n";
 	}
 	if (defined $z) {
 		$args = "'$op'";		# Really the value
 		$try = "abs(\$z0 - \$z1) <= $eps ? \$z1 : \$z0";
-		$script .= "\$res = $try; ";
-		$script .= "check($test, $args[0], \$res, \$z$#args, $args);\n";
+		push @script, "\$res = $try; ";
+		push @script, "check($test, $args[0], \$res, \$z$#args, $args);\n";
 	} else {
 		my ($try, $args);
 		if (@args == 2) {
@@ -73,8 +73,8 @@ sub test {
 			$try = ($op =~ /^\w/) ? "$op(\$z0, \$z1)" : "\$z0 $op \$z1";
 			$args = "'$args[0]', '$args[1]'";
 		}
-		$script .= "\$res = $try; ";
-		$script .= "check($test, '$try', \$res, \$z$#args, $args);\n";
+		push @script, "\$res = $try; ";
+		push @script, "check($test, '$try', \$res, \$z$#args, $args);\n";
 	}
 }
 
@@ -88,8 +88,8 @@ sub set {
 	for ($i = 0; $i < @set; $i++) {
 		push(@{$valref}, $set[$i]);
 		my $val = value($set[$i]);
-		$script .= "\$s$i = $val;\n";
-		push(@{$setref}, "\$s$i");
+		push @script, "\$s$i = $val;\n";
+		push @{$setref}, "\$s$i";
 	}
 }
 
