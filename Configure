@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Jul 25 13:48:34 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Sun Jul 25 14:54:07 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -1296,7 +1296,12 @@ esac
 : Find the path to the source tree
 case "$src" in
 '') case "$0" in
-    */*) src=`echo $0 | sed -e 's%/[^/][^/]*$%%'`;;
+    */*) src=`echo $0 | sed -e 's%/[^/][^/]*$%%'`
+         case "$src" in
+	 /*)	;;
+         *)	src=`cd ../$src && pwd` ;;
+	 esac
+         ;;
     *)   src='.';;
     esac;;
 esac
@@ -2784,6 +2789,9 @@ exp_file=''
 nopath_ok=''
 orig_rp="$rp"
 orig_dflt="$dflt"
+case "$gfpth" in
+'') gfpth='.' ;;
+esac
 
 case "$fn" in
 *\(*)
@@ -2910,18 +2918,38 @@ while test "$type"; do
 		'')
 			case "$type" in
 			File)
-				if test -f "$ansexp"; then
-					type=''
-				elif test -r "$ansexp" || (test -h "$ansexp") >/dev/null 2>&1
-				then
-					echo "($value is not a plain file, but that's ok.)"
-					type=''
-				fi
+				for fp in $gfpth; do
+					if test "X$fp" = X.; then
+					    pf="$ansexp"
+					else    
+					    pf="$fp/$ansexp"
+					fi
+					if test -f "$pf"; then
+						type=''
+					elif test -r "$pf" || (test -h "$pf") >/dev/null 2>&1
+					then
+						echo "($value is not a plain file, but that's ok.)"
+						type=''
+					fi
+					if test X"$type" = X; then
+					    value="$pf"
+					    break
+					fi
+				done
 				;;
 			Directory)
-				if test -d "$ansexp"; then
-					type=''
-				fi
+				for fp in $gfpth; do
+					if test "X$fp" = X.; then
+					    pf="$ansexp"
+					else    
+					    pf="$fp/$ansexp"
+					fi
+					if test -d "$pf"; then
+						type=''
+						value="$pf"
+						break
+					fi
+				done
 				;;
 			Locate)
 				if test -d "$ansexp"; then
@@ -2975,6 +3003,7 @@ ans="$value"
 rp="$orig_rp"
 dflt="$orig_dflt"
 rm -f getfile.ok
+test "X$gfpthkeep" != Xy && gfpth=""
 EOSC
 
 : determine root of directory hierarchy where package will be installed.
@@ -5169,8 +5198,7 @@ y*) usedl="$define"
 	tdir=`pwd`; cd $rsrc; $ls -C $dldir/dl*.xs; cd $tdir
 	rp="Source file to use for dynamic loading"
 	fn="fne"
-	# XXX This getfile call will fail the existence check if you try 
-	# building away from $src (this is not supported yet).
+	gfpth="$src"
 	. ./getfile
 	usedl="$define"
 	: emulate basename
