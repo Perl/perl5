@@ -943,6 +943,7 @@
 #define dowarn			PL_dowarn
 #define errgv			PL_errgv
 #define na			PL_na
+#define no_modify		PL_no_modify
 #define perl_destruct_level	PL_perl_destruct_level
 #define perldb			PL_perldb
 #define rsfp			PL_rsfp

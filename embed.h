@@ -836,6 +836,7 @@
 #define scalarkids		Perl_scalarkids
 #define scalarseq		Perl_scalarseq
 #define scalarvoid		Perl_scalarvoid
+#define scan_bin		Perl_scan_bin
 #define scan_const		Perl_scan_const
 #define scan_formline		Perl_scan_formline
 #define scan_heredoc		Perl_scan_heredoc
@@ -852,6 +853,7 @@
 #define scan_word		Perl_scan_word
 #define scope			Perl_scope
 #define screaminstr		Perl_screaminstr
+#define seed			Perl_seed
 #define setdefout		Perl_setdefout
 #define setenv_getix		Perl_setenv_getix
 #define share_hek		Perl_share_hek
@@ -997,6 +999,8 @@
 #define amagic_call		CPerlObj::Perl_amagic_call
 #define amagic_cmp		CPerlObj::Perl_amagic_cmp
 #define amagic_cmp_locale	CPerlObj::Perl_amagic_cmp_locale
+#define amagic_i_ncmp		CPerlObj::Perl_amagic_i_ncmp
+#define amagic_ncmp		CPerlObj::Perl_amagic_ncmp
 #define ao			CPerlObj::Perl_ao
 #define append_elem		CPerlObj::Perl_append_elem
 #define append_list		CPerlObj::Perl_append_list
@@ -1916,6 +1920,7 @@
 #define regnext			CPerlObj::Perl_regnext
 #define regoptail		CPerlObj::Perl_regoptail
 #define regpiece		CPerlObj::Perl_regpiece
+#define regpposixcc		CPerlObj::Perl_regpposixcc
 #define regprop			CPerlObj::Perl_regprop
 #define regrepeat		CPerlObj::Perl_regrepeat
 #define regrepeat_hard		CPerlObj::Perl_regrepeat_hard
@@ -1995,6 +2000,7 @@
 #define scalarkids		CPerlObj::Perl_scalarkids
 #define scalarseq		CPerlObj::Perl_scalarseq
 #define scalarvoid		CPerlObj::Perl_scalarvoid
+#define scan_bin		CPerlObj::Perl_scan_bin
 #define scan_commit		CPerlObj::Perl_scan_commit
 #define scan_const		CPerlObj::Perl_scan_const
 #define scan_const		CPerlObj::Perl_scan_const
@@ -2023,12 +2029,14 @@
 #define scope			CPerlObj::Perl_scope
 #define screaminstr		CPerlObj::Perl_screaminstr
 #define seed			CPerlObj::Perl_seed
+#define seed			CPerlObj::Perl_seed
 #define set_csh			CPerlObj::Perl_set_csh
 #define setdefout		CPerlObj::Perl_setdefout
 #define setenv_getix		CPerlObj::Perl_setenv_getix
 #define share_hek		CPerlObj::Perl_share_hek
 #define sharepvn		CPerlObj::Perl_sharepvn
 #define sighandler		CPerlObj::Perl_sighandler
+#define simplify_sort		CPerlObj::Perl_simplify_sort
 #define skipspace		CPerlObj::Perl_skipspace
 #define skipspace		CPerlObj::Perl_skipspace
 #define sortcv			CPerlObj::Perl_sortcv
@@ -2075,6 +2083,7 @@
 #define sv_free_arenas		CPerlObj::Perl_sv_free_arenas
 #define sv_gets			CPerlObj::Perl_sv_gets
 #define sv_grow			CPerlObj::Perl_sv_grow
+#define sv_i_ncmp		CPerlObj::Perl_sv_i_ncmp
 #define sv_inc			CPerlObj::Perl_sv_inc
 #define sv_insert		CPerlObj::Perl_sv_insert
 #define sv_isa			CPerlObj::Perl_sv_isa
@@ -2085,6 +2094,7 @@
 #define sv_magic		CPerlObj::Perl_sv_magic
 #define sv_mortalcopy		CPerlObj::Perl_sv_mortalcopy
 #define sv_mortalgrow		CPerlObj::Perl_sv_mortalgrow
+#define sv_ncmp			CPerlObj::Perl_sv_ncmp
 #define sv_newmortal		CPerlObj::Perl_sv_newmortal
 #define sv_newref		CPerlObj::Perl_sv_newref
 #define sv_nv			CPerlObj::Perl_sv_nv
