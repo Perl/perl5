@@ -468,9 +468,6 @@ EOM
 	    ''|64*) archname64=64all ;;
 	    esac
 	    longsize="8"
-	    # Don't try backwards compatibility
-	    bincompat="$undef"
-	    d_bincompat5005="$undef"
 	    qacflags=''
 	    qaldflags=''
 	    qalibs=''

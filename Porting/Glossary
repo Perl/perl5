@@ -62,7 +62,7 @@ api_revision (patchlevel.U):
 	possible value.  The version list appropriate for the current
 	system is determined in inc_version_list.U.
 		XXX To do:  Since compatibility can depend on compile time
-	options (such as bincompat, longlong, etc.) it should
+	options (such as longlong, etc.) it should
 	(perhaps) be set by Configure, but currently it isn't.
 	Currently, we read a hard-wired value from patchlevel.h.
 	Perhaps what we ought to do is take the hard-wired value from
@@ -140,10 +140,6 @@ bin (bin.U):
 	to put publicly executable images for the package in question.  It
 	is most often a local directory such as /usr/local/bin. Programs using
 	this variable must be prepared to deal with ~name substitution.
-
-bincompat5005 (bincompat5005.U):
-	This variable contains y if this version of Perl should be
-	binary-compatible with Perl 5.005.
 
 binexp (bin.U):
 	This is the same as the bin variable, but is filename expanded at
@@ -399,13 +395,6 @@ d_bcmp (d_bcmp.U):
 d_bcopy (d_bcopy.U):
 	This variable conditionally defines the HAS_BCOPY symbol if
 	the bcopy() routine is available to copy strings.
-
-d_bincompat5005 (bincompat5005.U):
-	This variable conditionally defines BINCOMPAT5005 so that embed.h
-	can take special action if this version of Perl should be
-	binary-compatible with Perl 5.005.  This is impossible for builds
-	that use features like threads and multiplicity it is always $undef
-	for those versions.
 
 d_bsd (Guess.U):
 	This symbol conditionally defines the symbol BSD when running on a
@@ -4434,8 +4423,8 @@ xs_apiversion (xs_apiversion.U):
 	See INSTALL for how this works.
 	The versioned site_perl directory was introduced in 5.005,
 	so that is the lowest possible value.
-	Since this can depend on compile time options (such as
-	bincompat) it is set by Configure.  Other non-default sources
+	Since this can depend on compile time options
+	it is set by Configure.  Other non-default sources
 	of potential incompatibility, such as multiplicity, threads,
 	debugging, 64bits, sfio, etc., are not checked for currently,
 	though in principle we could go snooping around in old

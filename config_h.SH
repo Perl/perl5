@@ -3604,8 +3604,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	See INSTALL for how this works.
  *	The versioned site_perl directory was introduced in 5.005,
  *	so that is the lowest possible value.
- *	Since this can depend on compile time options (such as
- *	bincompat) it is set by Configure.  Other non-default sources
+ *	Since this can depend on compile time options
+ *	it is set by Configure.  Other non-default sources
  *	of potential incompatibility, such as multiplicity, threads,
  *	debugging, 64bits, sfio, etc., are not checked for currently,
  *	though in principle we could go snooping around in old

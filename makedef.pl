@@ -11,39 +11,6 @@
 my $PLATFORM;
 my $CCTYPE;
 
-my %bincompat5005 =
-      (
-       Perl_call_atexit		=>	"perl_atexit",
-       Perl_eval_sv		=>	"perl_eval_sv",
-       Perl_eval_pv		=>	"perl_eval_pv",
-       Perl_call_argv		=>	"perl_call_argv",
-       Perl_call_method		=>	"perl_call_method",
-       Perl_call_pv		=>	"perl_call_pv",
-       Perl_call_sv		=>	"perl_call_sv",
-       Perl_get_av		=>	"perl_get_av",
-       Perl_get_cv		=>	"perl_get_cv",
-       Perl_get_hv		=>	"perl_get_hv",
-       Perl_get_sv		=>	"perl_get_sv",
-       Perl_init_i18nl10n	=>	"perl_init_i18nl10n",
-       Perl_init_i18nl14n	=>	"perl_init_i18nl14n",
-       Perl_new_collate		=>	"perl_new_collate",
-       Perl_new_ctype		=>	"perl_new_ctype",
-       Perl_new_numeric		=>	"perl_new_numeric",
-       Perl_require_pv		=>	"perl_require_pv",
-       Perl_safesyscalloc	=>	"Perl_safecalloc",
-       Perl_safesysfree		=>	"Perl_safefree",
-       Perl_safesysmalloc	=>	"Perl_safemalloc",
-       Perl_safesysrealloc	=>	"Perl_saferealloc",
-       Perl_set_numeric_local	=>	"perl_set_numeric_local",
-       Perl_set_numeric_standard  =>	"perl_set_numeric_standard",
-       Perl_malloc		=>	"malloc",
-       Perl_mfree		=>	"free",
-       Perl_realloc		=>	"realloc",
-       Perl_calloc		=>	"calloc",
-      );
-
-my $bincompat5005 = join("|", keys %bincompat5005);
-
 while (@ARGV) {
     my $flag = shift;
     $define{$1} = 1 if ($flag =~ /^-D(\w+)$/);
@@ -1053,7 +1020,7 @@ elsif ($PLATFORM eq 'os2') {
     /^\s*[\da-f:]+\s+(\w+)/i and $mapped{$1}++ foreach <MAP>;
     close MAP or die 'Cannot close miniperl.map';
 
-    @missing = grep { !exists $mapped{$_} and !exists $bincompat5005{$_} }
+    @missing = grep { !exists $mapped{$_} }
 		    keys %export;
     delete $export{$_} foreach @missing;
 }
@@ -1226,8 +1193,6 @@ sub emit_symbol {
 
 sub output_symbol {
     my $symbol = shift;
-    $symbol = $bincompat5005{$symbol}
-	if $define{PERL_BINCOMPAT_5005} and $symbol =~ /^($bincompat5005)$/;
     if ($PLATFORM eq 'win32') {
 	$symbol = "_$symbol" if $CCTYPE eq 'BORLAND';
 	print "\t$symbol\n";

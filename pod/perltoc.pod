@@ -10167,7 +10167,7 @@ C<asctime_r_proto>, C<awk>
 
 =item b
 
-C<baserev>, C<bash>, C<bin>, C<bincompat5005>, C<binexp>, C<bison>,
+C<baserev>, C<bash>, C<bin>, C<binexp>, C<bison>,
 C<byacc>, C<byteorder>
 
 =item c
@@ -10184,7 +10184,7 @@ C<csh>, C<ctermid_r_proto>, C<ctime_r_proto>
 
 C<d__fwalk>, C<d_access>, C<d_accessx>, C<d_alarm>, C<d_archlib>,
 C<d_asctime_r>, C<d_atolf>, C<d_atoll>, C<d_attribut>, C<d_bcmp>,
-C<d_bcopy>, C<d_bincompat5005>, C<d_bsd>, C<d_bsdgetpgrp>, C<d_bsdsetpgrp>,
+C<d_bcopy>, C<d_bsd>, C<d_bsdgetpgrp>, C<d_bsdsetpgrp>,
 C<d_bzero>, C<d_casti32>, C<d_castneg>, C<d_charvspr>, C<d_chown>,
 C<d_chroot>, C<d_chsize>, C<d_class>, C<d_closedir>, C<d_cmsghdr_s>,
 C<d_const>, C<d_crypt>, C<d_crypt_r>, C<d_csh>, C<d_ctermid_r>,

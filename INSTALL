@@ -107,7 +107,7 @@ Using the default Configure options for building perl should get you
 a perl that will be binary compatible with the 5.005 release.
 
 However, if you run Configure with any custom options, such as
--Dusethreads, -Dusemultiplicity, -Dusemymalloc, -Ubincompat5005 etc.,
+-Dusethreads, -Dusemultiplicity, -Dusemymalloc, etc.,
 the resulting perl will not be binary compatible.  Under these
 circumstances, if you have dynamically loaded extensions that were
 built under perl 5.005, you will need to rebuild and reinstall all
@@ -991,15 +991,8 @@ or you can answer 'n' at the appropriate interactive Configure prompt.
 
 =item -DPERL_POLLUTE_MALLOC
 
-NOTE: This flag is enabled automatically on some platforms if you
-asked for binary compatibility with version 5.005, or if you just
-run Configure to accept all the defaults on those platforms.  You
-can refuse the automatic binary compatibility flags wholesale by
-running:
-
-	sh Configure -Ubincompat5005
-
-or by answering 'n' at the appropriate prompt.
+NOTE: This flag is enabled automatically on some platforms if you just
+run Configure to accept all the defaults on those platforms.
 
 Perl's malloc family of functions are called Perl_malloc(),
 Perl_realloc(), Perl_calloc() and Perl_mfree().  When this flag is
