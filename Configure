@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Nov 13 11:29:28 MET 2003 [metaconfig 3.0 PL70]
+# Generated on Fri Dec  5 12:57:38 MET 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -16955,10 +16955,10 @@ int main() {
     buf[1] = 0;
     buf[2] = 0;
     buf[3] = 1;
+    buf[4] = 0;
     buf[5] = 0;
     buf[6] = 0;
-    buf[7] = 0;
-    buf[8] = 1;
+    buf[7] = 1;
 
     for (i = 0; i < 4; i++) {
 	up = (U32*)(buf + i);
