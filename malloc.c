@@ -21,8 +21,8 @@
 #  ifndef TWO_POT_OPTIMIZE
 #    define TWO_POT_OPTIMIZE
 #  endif 
-#  if defined(PERL_CORE) && !defined(EMERGENCY_SBRK)
-#    define EMERGENCY_SBRK
+#  if defined(PERL_CORE) && !defined(PERL_EMERGENCY_SBRK)
+#    define PERL_EMERGENCY_SBRK
 #  endif 
 #  if defined(PERL_CORE) && !defined(DEBUGGING_MSTATS)
 #    define DEBUGGING_MSTATS
@@ -61,12 +61,46 @@
  * but bombs when it runs out. 
  */
 
-#include "EXTERN.h"
-#include "perl.h"
-
-#ifndef PERL_CORE
+#ifdef PERL_CORE
+#  include "EXTERN.h"
+#  include "perl.h"
+#else
+#  ifdef PERL_FOR_X2P
+#    include "../EXTERN.h"
+#    include "../perl.h"
+#  else
+#    include <stdlib.h>
+#    include <stdio.h>
+#    include <memory.h>
+#    define _(arg) arg
+#    ifndef Malloc_t
+#      define Malloc_t void *
+#    endif
+#    ifndef MEM_SIZE
+#      define MEM_SIZE unsigned long
+#    endif
+#    ifndef LONG_MAX
+#      define LONG_MAX 0x7FFFFFFF
+#    endif
+#    ifndef UV
+#      define UV unsigned long
+#    endif
+#    ifndef caddr_t
+#      define caddr_t char *
+#    endif
+#    ifndef Free_t
+#      define Free_t void
+#    endif
+#    define Copy(s,d,n,t) (void)memcpy((char*)(d),(char*)(s), (n) * sizeof(t))
+#    define PerlEnv_getenv getenv
+#    define PerlIO_printf fprintf
+#    define PerlIO_stderr() stderr
+#  endif
 #  ifndef croak				/* make depend */
-#    define croak(mess) fprintf(stderr,mess); exit(1);
+#    define croak(mess, arg) warn((mess), (arg)); exit(1);
+#  endif 
+#  ifndef warn
+#    define warn(mess, arg) fprintf(stderr, (mess), (arg));
 #  endif 
 #  ifdef DEBUG_m
 #    undef DEBUG_m
@@ -139,7 +173,7 @@ union	overhead {
 };
 
 #ifdef DEBUGGING
-static void botch _((char *s));
+static void botch _((char *diag, char *s));
 #endif
 static void morecore _((int bucket));
 static int findbucket _((union overhead *freep, int srchlen));
@@ -391,7 +425,7 @@ static char bucket_of[] =
 #endif 
 
 #ifndef FIRST_SBRK
-#  define FIRST_SBRK (32*1024)
+#  define FIRST_SBRK (48*1024)
 #endif 
 
 /* Minimal sbrk in percents of what is already alloced. */
@@ -422,8 +456,8 @@ emergency_sbrk(size)
 {
     if (size >= BIG_SIZE) {
 	/* Give the possibility to recover: */
-	die("Out of memory during request for %i bytes", size);
-	/* croak may eat too much memory. */
+	MUTEX_UNLOCK(&malloc_mutex);
+	croak("Out of memory during request for %i bytes", size);
     }
 
     if (!emergency_buffer) {		
@@ -451,7 +485,8 @@ emergency_sbrk(size)
 	emergency_buffer_size = SvLEN(sv) + M_OVERHEAD;
 	SvPOK_off(sv);
 	SvREADONLY_on(sv);
-	die("Out of memory!");		/* croak may eat too much memory. */
+	MUTEX_UNLOCK(&malloc_mutex);
+	croak("Out of memory during request for %i bytes", size);
     }
     else if (emergency_buffer_size >= size) {
 	emergency_buffer_size -= size;
@@ -499,15 +534,15 @@ static  u_int start_slack;
 static	u_int goodsbrk;
 
 #ifdef DEBUGGING
-#define	ASSERT(p)   if (!(p)) botch(STRINGIFY(p));  else
+#define	ASSERT(p,diag)   if (!(p)) botch(diag,STRINGIFY(p));  else
 static void
-botch(char *s)
+botch(char *diag, char *s)
 {
-	PerlIO_printf(PerlIO_stderr(), "assertion botched: %s\n", s);
+	PerlIO_printf(PerlIO_stderr(), "assertion botched (%s?): %s\n", diag, s);
 	PerlProc_abort();
 }
 #else
-#define	ASSERT(p)
+#define	ASSERT(p, diag)
 #endif
 
 Malloc_t
@@ -524,7 +559,7 @@ malloc(register size_t nbytes)
 	BARK_64K_LIMIT("Allocation",nbytes,nbytes);
 #ifdef DEBUGGING
 	if ((long)nbytes < 0)
-		croak("panic: malloc");
+		croak("%s", "panic: malloc");
 #endif
 
 	MUTEX_LOCK(&malloc_mutex);
@@ -734,12 +769,12 @@ morecore(register int bucket)
   	if (nextf[bucket])
   		return;
 	if (bucket == sizeof(MEM_SIZE)*8*BUCKETS_PER_POW2) {
-	    croak("Allocation too large");
+	    MUTEX_UNLOCK(&malloc_mutex);
+	    croak("%s", "Out of memory during ridiculously large request");
 	}
-
-	if (bucket > max_bucket) {
+	if (bucket > max_bucket)
 	    max_bucket = bucket;
-	}
+
   	rnu = ( (bucket <= (LOG_OF_MIN_ARENA << BUCKET_POW2_SHIFT)) 
 		? LOG_OF_MIN_ARENA 
 		: (bucket >> BUCKET_POW2_SHIFT) );
@@ -762,9 +797,9 @@ morecore(register int bucket)
 	    DEBUG_m(PerlIO_printf(Perl_debug_log, 
 				  "stealing %ld bytes from chain\n",
 				  (long) needed));
-	} else if (ovp = (union overhead*)
-		   get_from_bigger_buckets((rnu << BUCKET_POW2_SHIFT) + 1,
-					   needed)) {
+	} else if ( (ovp = (union overhead*)
+		     get_from_bigger_buckets((rnu << BUCKET_POW2_SHIFT) + 1,
+					     needed)) ) {
 	    DEBUG_m(PerlIO_printf(Perl_debug_log, 
 				  "stealing %ld bytes from bigger buckets\n",
 				  (long) needed));
@@ -849,8 +884,10 @@ morecore(register int bucket)
 			DEBUG_m(PerlIO_printf(Perl_debug_log, 
 					      "failed to fix bad sbrk()\n"));
 #ifdef PACK_MALLOC
-			if (slack)
-			    croak("panic: Off-page sbrk");
+			if (slack) {
+			    MUTEX_UNLOCK(&malloc_mutex);
+			    croak("%s", "panic: Off-page sbrk");
+			}
 #endif
 			if (sbrked_remains) {
 			    /* Try again. */
@@ -990,13 +1027,13 @@ free(void *mp)
 		warn("%s free() ignored",
 		    ovp->ov_rmagic == RMAGIC - 1 ? "Duplicate" : "Bad");
 #else
-		warn("Bad free() ignored");
+		warn("%s", "Bad free() ignored");
 #endif
 		return;				/* sanity */
 	    }
 	MUTEX_LOCK(&malloc_mutex);
 #ifdef RCHECK
-  	ASSERT(ovp->ov_rmagic == RMAGIC);
+  	ASSERT(ovp->ov_rmagic == RMAGIC, "chunk's head overwrite");
 	if (OV_INDEX(ovp) <= MAX_SHORT_BUCKET) {
 	    int i;
 	    MEM_SIZE nbytes = ovp->ov_size + 1;
@@ -1005,15 +1042,15 @@ free(void *mp)
 		i = 4 - i;
 		while (i--) {
 		    ASSERT(*((char *)((caddr_t)ovp + nbytes - RSLOP + i))
-			   == RMAGIC_C);
+			   == RMAGIC_C, "chunk's tail overwrite");
 		}
 	    }
 	    nbytes = (nbytes + 3) &~ 3; 
-	    ASSERT(*(u_int *)((caddr_t)ovp + nbytes - RSLOP) == RMAGIC);	    
+	    ASSERT(*(u_int *)((caddr_t)ovp + nbytes - RSLOP) == RMAGIC, "chunk's tail overwrite");	    
 	}
 	ovp->ov_rmagic = RMAGIC - 1;
 #endif
-  	ASSERT(OV_INDEX(ovp) < NBUCKETS);
+  	ASSERT(OV_INDEX(ovp) < NBUCKETS, "chunk's head overwrite");
   	size = OV_INDEX(ovp);
 	ovp->ov_next = nextf[size];
   	nextf[size] = ovp;
@@ -1038,7 +1075,8 @@ realloc(void *mp, size_t nbytes)
 {   
   	register MEM_SIZE onb;
 	union overhead *ovp;
-  	char *res, prev_bucket;
+  	char *res;
+	int prev_bucket;
 	register int bucket;
 	int was_alloced = 0, incr;
 	char *cp = (char*)mp;
@@ -1047,7 +1085,7 @@ realloc(void *mp, size_t nbytes)
 	MEM_SIZE size = nbytes;
 
 	if ((long)nbytes < 0)
-		croak("panic: realloc");
+		croak("%s", "panic: realloc");
 #endif
 
 	BARK_64K_LIMIT("Reallocation",nbytes,size);
@@ -1128,11 +1166,11 @@ realloc(void *mp, size_t nbytes)
 		       if ((i = nb & 3)) {
 			   i = 4 - i;
 			   while (i--) {
-			       ASSERT(*((char *)((caddr_t)ovp + nb - RSLOP + i)) == RMAGIC_C);
+			       ASSERT(*((char *)((caddr_t)ovp + nb - RSLOP + i)) == RMAGIC_C, "chunk's tail overwrite");
 			   }
 		       }
 		       nb = (nb + 3) &~ 3; 
-		       ASSERT(*(u_int *)((caddr_t)ovp + nb - RSLOP) == RMAGIC);
+		       ASSERT(*(u_int *)((caddr_t)ovp + nb - RSLOP) == RMAGIC, "chunk's tail overwrite");
 			/*
 			 * Convert amount of memory requested into
 			 * closest block size stored in hash buckets
@@ -1303,11 +1341,11 @@ dump_mstats(char *s)
   	}
   	if (s)
 	    PerlIO_printf(PerlIO_stderr(),
-			  "Memory allocation statistics %s (buckets %d(%d)..%d(%d)\n",
+			  "Memory allocation statistics %s (buckets %ld(%ld)..%ld(%ld)\n",
 			  s, 
-			  BUCKET_SIZE_REAL(MIN_BUCKET), 
-			  BUCKET_SIZE(MIN_BUCKET),
-			  BUCKET_SIZE_REAL(topbucket), BUCKET_SIZE(topbucket));
+			  (long)BUCKET_SIZE_REAL(MIN_BUCKET), 
+			  (long)BUCKET_SIZE(MIN_BUCKET),
+			  (long)BUCKET_SIZE_REAL(topbucket), (long)BUCKET_SIZE(topbucket));
   	PerlIO_printf(PerlIO_stderr(), "%8d free:", totfree);
   	for (i = MIN_EVEN_REPORT; i <= topbucket; i += BUCKETS_PER_POW2) {
   		PerlIO_printf(PerlIO_stderr(), 
