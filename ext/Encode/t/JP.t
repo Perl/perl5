@@ -6,6 +6,10 @@ BEGIN {
       print "1..0 # Skip: Encode was not built\n";
       exit 0;
     }
+    unless (find PerlIO::Layer 'perlio') {
+	print "1..0 # Skip: PerlIO was not built\n";
+	exit 0;
+    }
     $| = 1;
 }
 use strict;
