@@ -71,6 +71,17 @@ sub is {
     _ok($pass, _where(), @mess);
 }
 
+sub isnt {
+    my ($got, $isnt, $name, @mess) = @_;
+    my $pass = $got ne $isnt;
+    unless( $pass ) {
+        unshift(@mess, "# It should not be " .
+		       ( defined $got ? $got : "undef" ) . "\n",
+                       "# but it is.\n");
+    }
+    _ok($pass, _where(), $name, @mess);
+}
+
 # Note: this isn't quite as fancy as Test::More::like().
 sub like {
     my ($got, $expected, @mess) = @_;
@@ -98,6 +109,10 @@ sub pass {
 
 sub fail {
     _ok(0, _where(), @_);
+}
+
+sub next_test {
+    $test++
 }
 
 # Note: can't pass multipart messages since we try to
