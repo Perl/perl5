@@ -417,7 +417,7 @@ $priv{"exists"}{64} = "SUB";
 $priv{$_}{64} = "LOCALE"
   for ("sort", "prtf", "sprintf", "slt", "sle", "seq", "sne", "sgt", "sge",
        "scmp", "lc", "uc", "lcfirst", "ucfirst");
-@{$priv{"sort"}}{1,2,4} = ("NUM", "INT", "REV");
+@{$priv{"sort"}}{1,2,4,8} = ("NUM", "INT", "REV", "INPLACE");
 $priv{"threadsv"}{64} = "SVREFd";
 @{$priv{$_}}{16,32,64,128} = ("INBIN","INCR","OUTBIN","OUTCR")
   for ("open", "backtick");

@@ -14,7 +14,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPpLVAL_INTRO OPpOUR_INTRO OPpENTERSUB_AMPER OPpSLICE OPpCONST_BARE
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
 	 OPpCONST_ARYBASE OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER
-	 OPpSORT_REVERSE
+	 OPpSORT_REVERSE OPpSORT_INPLACE
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
          CVf_METHOD CVf_LOCKED CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
@@ -2307,6 +2307,10 @@ sub indirop {
 	$expr = $self->deparse($kid, 6);
 	push @exprs, $expr;
     }
+    if ($name eq "sort" && ($op->private & OPpSORT_INPLACE)) {
+	return "$exprs[0] = sort $indir $exprs[0]";
+    }
+
     my $args = $indir . join(", ", @exprs);
     if ($indir ne "" and $name eq "sort") {
 	# We don't want to say "sort(f 1, 2, 3)", since perl -w will

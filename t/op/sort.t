@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 use warnings;
-print "1..58\n";
+print "1..65\n";
 
 # these shouldn't hang
 {
@@ -322,3 +322,47 @@ sub cxt_six { sort test_if_scalar 1,2 }
     @a = sort(routine(1));
     print "@a" eq "one two" ? "ok 58\n" : "not ok 58\n";
 }
+
+
+my $test = 59;
+sub ok {
+    print "not " unless $_[0] eq $_[1];
+    print "ok $test - $_[2]\n";
+    print "#[$_[0]] ne [$_[1]]\n" unless $_[0] eq $_[1];
+    $test++;
+}
+
+# check for in-place optimisation of @a = sort @a
+{
+    my ($r1,$r2,@a);
+    our @g;
+    @g = (3,2,1); $r1 = \$g[2]; @g = sort @g; $r2 = \$g[0];
+    ok "$r1-@g", "$r2-1 2 3", "inplace sort of global";
+
+    @a = qw(b a c); $r1 = \$a[1]; @a = sort @a; $r2 = \$a[0];
+    ok "$r1-@a", "$r2-a b c", "inplace sort of lexical";
+
+    @g = (2,3,1); $r1 = \$g[1]; @g = sort { $b <=> $a } @g; $r2 = \$g[0];
+    ok "$r1-@g", "$r2-3 2 1", "inplace reversed sort of global";
+
+    @g = (2,3,1);
+    $r1 = \$g[1]; @g = sort { $a<$b?1:$a>$b?-1:0 } @g; $r2 = \$g[0];
+    ok "$r1-@g", "$r2-3 2 1", "inplace custom sort of global";
+
+    sub mysort { $b cmp $a };
+    @a = qw(b c a); $r1 = \$a[1]; @a = sort mysort @a; $r2 = \$a[0];
+    ok "$r1-@a", "$r2-c b a", "inplace sort with function of lexical";
+
+    use Tie::Array;
+    tie @a, 'Tie::StdArray';
+
+    @a = qw(b c a); @a = sort @a;
+    ok "@a", "a b c", "inplace sort of tied array";
+
+    @a = qw(b c a); @a = sort mysort @a;
+    ok "@a", "c b a", "inplace sort of tied array with function";
+}
+
+
+
+
