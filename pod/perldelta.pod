@@ -1526,7 +1526,7 @@ the installation as README.I<platform>, and after the installation
 as perlI<platform>:
 
     perlaix perlamiga perlapollo perlbeos perlbs2000
-    perlce perlcygwin perldgux perldos perlepoc perlhpux
+    perlce perlcygwin perldgux perldos perlepoc perlfreebsd perlhpux
     perlhurd perlmachten perlmacos perlmint perlmpeix
     perlnetware perlos2 perlos390 perlplan9 perlqnx perlsolaris
     perltru64 perluts perlvmesa perlvms perlvos perlwin32

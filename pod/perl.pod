@@ -155,6 +155,7 @@ For ease of access, the Perl manual has been split up into several sections.
     perldgux		Perl notes for DG/UX
     perldos		Perl notes for DOS
     perlepoc		Perl notes for EPOC
+    perlfreebsd		Perl notes for FreeBSD
     perlhpux		Perl notes for HP-UX
     perlhurd		Perl notes for Hurd
     perlmachten		Perl notes for Power MachTen

@@ -70,6 +70,7 @@ if (-d "pod") {
     perldgux             
     perldos             
     perlepoc             
+    perlfreebsd             
     perlhpux            
     perlhurd            
     perlmachten         
