@@ -8,7 +8,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..20\n";
+print "1..22\n";
 
 use charnames ':full';
 
@@ -145,4 +145,16 @@ sub to_bytes {
     print "not " if
 	defined charnames::vianame("NONE SUCH");
     print "ok 20\n";
+}
+
+{
+    # check that caching at least hasn't broken anything
+
+    print "not " unless charnames::viacode(0x1234) eq "ETHIOPIC SYLLABLE SEE";
+    print "ok 21\n";
+
+    print "not " unless
+	sprintf "%04X\n", charnames::vianame("GOTHIC LETTER AHSA") eq "10330";
+    print "ok 22\n";
+
 }
