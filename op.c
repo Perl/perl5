@@ -541,7 +541,7 @@ pad_reset(void)
 #ifdef USE_THREADS
 /* find_threadsv is not reentrant */
 PADOFFSET
-find_threadsv(char *name)
+find_threadsv(const char *name)
 {
     dTHR;
     char *p;

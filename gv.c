@@ -50,7 +50,7 @@ gv_IOadd(register GV *gv)
 }
 
 GV *
-gv_fetchfile(char *name)
+gv_fetchfile(const char *name)
 {
     dTHR;
     char smallbuf[256];
@@ -80,7 +80,7 @@ gv_fetchfile(char *name)
 }
 
 void
-gv_init(GV *gv, HV *stash, char *name, STRLEN len, int multi)
+gv_init(GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 {
     dTHR;
     register GP *gp;
@@ -152,7 +152,7 @@ gv_init_sv(GV *gv, I32 sv_type)
 }
 
 GV *
-gv_fetchmeth(HV *stash, char *name, STRLEN len, I32 level)
+gv_fetchmeth(HV *stash, const char *name, STRLEN len, I32 level)
 {
     AV* av;
     GV* topgv;
@@ -273,17 +273,17 @@ gv_fetchmeth(HV *stash, char *name, STRLEN len, I32 level)
 }
 
 GV *
-gv_fetchmethod(HV *stash, char *name)
+gv_fetchmethod(HV *stash, const char *name)
 {
     return gv_fetchmethod_autoload(stash, name, TRUE);
 }
 
 GV *
-gv_fetchmethod_autoload(HV *stash, char *name, I32 autoload)
+gv_fetchmethod_autoload(HV *stash, const char *name, I32 autoload)
 {
     dTHR;
-    register char *nend;
-    char *nsplit = 0;
+    register const char *nend;
+    const char *nsplit = 0;
     GV* gv;
     
     for (nend = name; *nend; nend++) {
@@ -293,7 +293,7 @@ gv_fetchmethod_autoload(HV *stash, char *name, I32 autoload)
 	    nsplit = ++nend;
     }
     if (nsplit) {
-	char *origname = name;
+	const char *origname = name;
 	name = nsplit + 1;
 	if (*nsplit == ':')
 	    --nsplit;
@@ -340,7 +340,7 @@ gv_fetchmethod_autoload(HV *stash, char *name, I32 autoload)
 }
 
 GV*
-gv_autoload4(HV *stash, char *name, STRLEN len, I32 method)
+gv_autoload4(HV *stash, const char *name, STRLEN len, I32 method)
 {
     dTHR;
     static char autoload[] = "AUTOLOAD";
@@ -385,13 +385,13 @@ gv_autoload4(HV *stash, char *name, STRLEN len, I32 method)
 }
 
 HV*
-gv_stashpv(char *name, I32 create)
+gv_stashpv(const char *name, I32 create)
 {
     return gv_stashpvn(name, strlen(name), create);
 }
 
 HV*
-gv_stashpvn(char *name, U32 namelen, I32 create)
+gv_stashpvn(const char *name, U32 namelen, I32 create)
 {
     char smallbuf[256];
     char *tmpbuf;
@@ -430,14 +430,14 @@ gv_stashsv(SV *sv, I32 create)
 
 
 GV *
-gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
+gv_fetchpv(const char *nambeg, I32 add, I32 sv_type)
 {
     dTHR;
-    register char *name = nambeg;
+    register const char *name = nambeg;
     register GV *gv = 0;
     GV**gvp;
     I32 len;
-    register char *namend;
+    register const char *namend;
     HV *stash = 0;
     U32 add_gvflags = 0;
 
@@ -826,7 +826,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 }
 
 void
-gv_fullname3(SV *sv, GV *gv, char *prefix)
+gv_fullname3(SV *sv, GV *gv, const char *prefix)
 {
     HV *hv = GvSTASH(gv);
     if (!hv) {
@@ -840,7 +840,7 @@ gv_fullname3(SV *sv, GV *gv, char *prefix)
 }
 
 void
-gv_efullname3(SV *sv, GV *gv, char *prefix)
+gv_efullname3(SV *sv, GV *gv, const char *prefix)
 {
     GV *egv = GvEGV(gv);
     if (!egv)

@@ -2304,7 +2304,7 @@ sv_chop(register SV *sv, register char *ptr)	/* like set but assuming ptr is in 
 }
 
 void
-sv_catpvn(register SV *sv, register char *ptr, register STRLEN len)
+sv_catpvn(register SV *sv, register const char *ptr, register STRLEN len)
 {
     STRLEN tlen;
     char *junk;
@@ -2321,7 +2321,7 @@ sv_catpvn(register SV *sv, register char *ptr, register STRLEN len)
 }
 
 void
-sv_catpvn_mg(register SV *sv, register char *ptr, register STRLEN len)
+sv_catpvn_mg(register SV *sv, register const char *ptr, register STRLEN len)
 {
     sv_catpvn(sv,ptr,len);
     SvSETMAGIC(sv);
@@ -2346,7 +2346,7 @@ sv_catsv_mg(SV *dstr, register SV *sstr)
 }
 
 void
-sv_catpv(register SV *sv, register char *ptr)
+sv_catpv(register SV *sv, register const char *ptr)
 {
     register STRLEN len;
     STRLEN tlen;
@@ -2366,7 +2366,7 @@ sv_catpv(register SV *sv, register char *ptr)
 }
 
 void
-sv_catpv_mg(register SV *sv, register char *ptr)
+sv_catpv_mg(register SV *sv, register const char *ptr)
 {
     sv_catpv(sv,ptr);
     SvSETMAGIC(sv);
@@ -2391,7 +2391,7 @@ newSV(STRLEN len)
 /* name is assumed to contain an SV* if (name && namelen == HEf_SVKEY) */
 
 void
-sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
+sv_magic(register SV *sv, SV *obj, int how, const char *name, I32 namlen)
 {
     MAGIC* mg;
     
@@ -3634,7 +3634,7 @@ sv_2mortal(register SV *sv)
 }
 
 SV *
-newSVpv(char *s, STRLEN len)
+newSVpv(const char *s, STRLEN len)
 {
     register SV *sv;
 
@@ -3649,7 +3649,7 @@ newSVpv(char *s, STRLEN len)
 }
 
 SV *
-newSVpvn(char *s, STRLEN len)
+newSVpvn(const char *s, STRLEN len)
 {
     register SV *sv;
 
@@ -4100,7 +4100,7 @@ sv_isobject(SV *sv)
 }
 
 int
-sv_isa(SV *sv, char *name)
+sv_isa(SV *sv, const char *name)
 {
     if (!sv)
 	return 0;
@@ -4116,7 +4116,7 @@ sv_isa(SV *sv, char *name)
 }
 
 SV*
-newSVrv(SV *rv, char *classname)
+newSVrv(SV *rv, const char *classname)
 {
     dTHR;
     SV *sv;
@@ -4144,7 +4144,7 @@ newSVrv(SV *rv, char *classname)
 }
 
 SV*
-sv_setref_pv(SV *rv, char *classname, void *pv)
+sv_setref_pv(SV *rv, const char *classname, void *pv)
 {
     if (!pv) {
 	sv_setsv(rv, &PL_sv_undef);
@@ -4156,21 +4156,21 @@ sv_setref_pv(SV *rv, char *classname, void *pv)
 }
 
 SV*
-sv_setref_iv(SV *rv, char *classname, IV iv)
+sv_setref_iv(SV *rv, const char *classname, IV iv)
 {
     sv_setiv(newSVrv(rv,classname), iv);
     return rv;
 }
 
 SV*
-sv_setref_nv(SV *rv, char *classname, double nv)
+sv_setref_nv(SV *rv, const char *classname, double nv)
 {
     sv_setnv(newSVrv(rv,classname), nv);
     return rv;
 }
 
 SV*
-sv_setref_pvn(SV *rv, char *classname, char *pv, I32 n)
+sv_setref_pvn(SV *rv, const char *classname, char *pv, I32 n)
 {
     sv_setpvn(newSVrv(rv,classname), pv, n);
     return rv;

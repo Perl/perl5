@@ -7,7 +7,7 @@
  */
 
 STATIC SV *
-isa_lookup(HV *stash, char *name, int len, int level)
+isa_lookup(HV *stash, const char *name, int len, int level)
 {
     AV* av;
     GV* gv;
@@ -73,7 +73,7 @@ isa_lookup(HV *stash, char *name, int len, int level)
 }
 
 bool
-sv_derived_from(SV *sv, char *name)
+sv_derived_from(SV *sv, const char *name)
 {
     SV *rv;
     char *type;

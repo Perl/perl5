@@ -275,7 +275,7 @@ mg_find(SV *sv, int type)
 }
 
 int
-mg_copy(SV *sv, SV *nsv, char *key, I32 klen)
+mg_copy(SV *sv, SV *nsv, const char *key, I32 klen)
 {
     int count = 0;
     MAGIC* mg;

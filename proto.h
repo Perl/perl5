@@ -147,7 +147,7 @@ VIRTUAL void	fbm_compile _((SV* sv, U32 flags));
 VIRTUAL char*	fbm_instr _((unsigned char* big, unsigned char* bigend, SV* littlesv, U32 flags));
 VIRTUAL char*	find_script _((char *scriptname, bool dosearch, char **search_ext, I32 flags));
 #ifdef USE_THREADS
-VIRTUAL PADOFFSET	find_threadsv _((char *name));
+VIRTUAL PADOFFSET	find_threadsv _((const char *name));
 #endif
 VIRTUAL OP*	force_list _((OP* arg));
 VIRTUAL OP*	fold_constants _((OP* arg));
@@ -159,28 +159,28 @@ VIRTUAL GP*	gp_ref _((GP* gp));
 VIRTUAL GV*	gv_AVadd _((GV* gv));
 VIRTUAL GV*	gv_HVadd _((GV* gv));
 VIRTUAL GV*	gv_IOadd _((GV* gv));
-VIRTUAL GV*	gv_autoload4 _((HV* stash, char* name, STRLEN len, I32 method));
+VIRTUAL GV*	gv_autoload4 _((HV* stash, const char* name, STRLEN len, I32 method));
 VIRTUAL void	gv_check _((HV* stash));
 VIRTUAL void	gv_efullname _((SV* sv, GV* gv));
-VIRTUAL void	gv_efullname3 _((SV* sv, GV* gv, char* prefix));
-VIRTUAL GV*	gv_fetchfile _((char* name));
-VIRTUAL GV*	gv_fetchmeth _((HV* stash, char* name, STRLEN len, I32 level));
-VIRTUAL GV*	gv_fetchmethod _((HV* stash, char* name));
-VIRTUAL GV*	gv_fetchmethod_autoload _((HV* stash, char* name, I32 autoload));
-VIRTUAL GV*	gv_fetchpv _((char* name, I32 add, I32 sv_type));
+VIRTUAL void	gv_efullname3 _((SV* sv, GV* gv, const char* prefix));
+VIRTUAL GV*	gv_fetchfile _((const char* name));
+VIRTUAL GV*	gv_fetchmeth _((HV* stash, const char* name, STRLEN len, I32 level));
+VIRTUAL GV*	gv_fetchmethod _((HV* stash, const char* name));
+VIRTUAL GV*	gv_fetchmethod_autoload _((HV* stash, const char* name, I32 autoload));
+VIRTUAL GV*	gv_fetchpv _((const char* name, I32 add, I32 sv_type));
 VIRTUAL void	gv_fullname _((SV* sv, GV* gv));
-VIRTUAL void	gv_fullname3 _((SV* sv, GV* gv, char* prefix));
-VIRTUAL void	gv_init _((GV* gv, HV* stash, char* name, STRLEN len, int multi));
-VIRTUAL HV*	gv_stashpv _((char* name, I32 create));
-VIRTUAL HV*	gv_stashpvn _((char* name, U32 namelen, I32 create));
+VIRTUAL void	gv_fullname3 _((SV* sv, GV* gv, const char* prefix));
+VIRTUAL void	gv_init _((GV* gv, HV* stash, const char* name, STRLEN len, int multi));
+VIRTUAL HV*	gv_stashpv _((const char* name, I32 create));
+VIRTUAL HV*	gv_stashpvn _((const char* name, U32 namelen, I32 create));
 VIRTUAL HV*	gv_stashsv _((SV* sv, I32 create));
 VIRTUAL void	hv_clear _((HV* tb));
 VIRTUAL void	hv_delayfree_ent _((HV* hv, HE* entry));
-VIRTUAL SV*	hv_delete _((HV* tb, char* key, U32 klen, I32 flags));
+VIRTUAL SV*	hv_delete _((HV* tb, const char* key, U32 klen, I32 flags));
 VIRTUAL SV*	hv_delete_ent _((HV* tb, SV* key, I32 flags, U32 hash));
-VIRTUAL bool	hv_exists _((HV* tb, char* key, U32 klen));
+VIRTUAL bool	hv_exists _((HV* tb, const char* key, U32 klen));
 VIRTUAL bool	hv_exists_ent _((HV* tb, SV* key, U32 hash));
-VIRTUAL SV**	hv_fetch _((HV* tb, char* key, U32 klen, I32 lval));
+VIRTUAL SV**	hv_fetch _((HV* tb, const char* key, U32 klen, I32 lval));
 VIRTUAL HE*	hv_fetch_ent _((HV* tb, SV* key, I32 lval, U32 hash));
 VIRTUAL void	hv_free_ent _((HV* hv, HE* entry));
 VIRTUAL I32	hv_iterinit _((HV* tb));
@@ -191,15 +191,15 @@ VIRTUAL SV*	hv_iternextsv _((HV* hv, char** key, I32* retlen));
 VIRTUAL SV*	hv_iterval _((HV* tb, HE* entry));
 VIRTUAL void	hv_ksplit _((HV* hv, IV newmax));
 VIRTUAL void	hv_magic _((HV* hv, GV* gv, int how));
-VIRTUAL SV**	hv_store _((HV* tb, char* key, U32 klen, SV* val, U32 hash));
+VIRTUAL SV**	hv_store _((HV* tb, const char* key, U32 klen, SV* val, U32 hash));
 VIRTUAL HE*	hv_store_ent _((HV* tb, SV* key, SV* val, U32 hash));
 VIRTUAL void	hv_undef _((HV* tb));
-VIRTUAL I32	ibcmp _((char* a, char* b, I32 len));
-VIRTUAL I32	ibcmp_locale _((char* a, char* b, I32 len));
+VIRTUAL I32	ibcmp _((const char* a, const char* b, I32 len));
+VIRTUAL I32	ibcmp_locale _((const char* a, const char* b, I32 len));
 VIRTUAL I32	ingroup _((I32 testgid, I32 effective));
 VIRTUAL void	init_stacks _((ARGSproto));
 VIRTUAL U32	intro_my _((void));
-VIRTUAL char*	instr _((char* big, char* little));
+VIRTUAL char*	instr _((const char* big, const char* little));
 VIRTUAL bool	io_close _((IO* io));
 VIRTUAL OP*	invert _((OP* cmd));
 VIRTUAL bool	is_uni_alnum _((U32 c));
@@ -304,7 +304,7 @@ VIRTUAL char*	mem_collxfrm _((const char* s, STRLEN len, STRLEN* xlen));
 #endif
 VIRTUAL char*	mess _((const char* pat, va_list* args));
 VIRTUAL int	mg_clear _((SV* sv));
-VIRTUAL int	mg_copy _((SV* sv, SV* nsv, char* key, I32 klen));
+VIRTUAL int	mg_copy _((SV* sv, SV* nsv, const char* key, I32 klen));
 VIRTUAL MAGIC*	mg_find _((SV* sv, int type));
 VIRTUAL int	mg_free _((SV* sv));
 VIRTUAL int	mg_get _((SV* sv));
@@ -316,7 +316,7 @@ VIRTUAL OP*	mod _((OP* o, I32 type));
 VIRTUAL char*	moreswitches _((char* s));
 VIRTUAL OP*	my _((OP* o));
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
-VIRTUAL char*	my_bcopy _((char* from, char* to, I32 len));
+VIRTUAL char*	my_bcopy _((const char* from, char* to, I32 len));
 #endif
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
 char*	my_bzero _((char* loc, I32 len));
@@ -325,7 +325,7 @@ VIRTUAL void	my_exit _((U32 status)) __attribute__((noreturn));
 VIRTUAL void	my_failure_exit _((void)) __attribute__((noreturn));
 VIRTUAL I32	my_lstat _((ARGSproto));
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
-VIRTUAL I32	my_memcmp _((char* s1, char* s2, I32 len));
+VIRTUAL I32	my_memcmp _((const char* s1, const char* s2, I32 len));
 #endif
 #if !defined(HAS_MEMSET)
 VIRTUAL void*	my_memset _((char* loc, I32 ch, I32 len));
@@ -382,10 +382,10 @@ VIRTUAL OP*	newSVREF _((OP* o));
 VIRTUAL OP*	newSVOP _((I32 type, I32 flags, SV* sv));
 VIRTUAL SV*	newSViv _((IV i));
 VIRTUAL SV*	newSVnv _((double n));
-VIRTUAL SV*	newSVpv _((char* s, STRLEN len));
-VIRTUAL SV*	newSVpvn _((char *s, STRLEN len));
+VIRTUAL SV*	newSVpv _((const char* s, STRLEN len));
+VIRTUAL SV*	newSVpvn _((const char *s, STRLEN len));
 VIRTUAL SV*	newSVpvf _((const char* pat, ...));
-VIRTUAL SV*	newSVrv _((SV* rv, char* classname));
+VIRTUAL SV*	newSVrv _((SV* rv, const char* classname));
 VIRTUAL SV*	newSVsv _((SV* old));
 VIRTUAL OP*	newUNOP _((I32 type, I32 flags, OP* first));
 VIRTUAL OP*	newWHILEOP _((I32 flags, I32 debuggable, LOOP* loop,
@@ -395,7 +395,7 @@ VIRTUAL struct perl_thread *	new_struct_thread _((struct perl_thread *t));
 #endif
 VIRTUAL PERL_SI *	new_stackinfo _((I32 stitems, I32 cxitems));
 VIRTUAL PerlIO*	nextargv _((GV* gv));
-VIRTUAL char*	ninstr _((char* big, char* bigend, char* little, char* lend));
+VIRTUAL char*	ninstr _((const char* big, const char* bigend, const char* little, const char* lend));
 VIRTUAL OP*	oopsCV _((OP* o));
 VIRTUAL void	op_free _((OP* arg));
 VIRTUAL void	package _((OP* o));
@@ -418,9 +418,9 @@ VIRTUAL void    perl_atexit _((void(*fn)(CPerlObj *, void *), void* ptr));
 #else
 void    perl_atexit _((void(*fn)(void *), void*));
 #endif
-VIRTUAL I32	perl_call_argv _((char* sub_name, I32 flags, char** argv));
-VIRTUAL I32	perl_call_method _((char* methname, I32 flags));
-VIRTUAL I32	perl_call_pv _((char* sub_name, I32 flags));
+VIRTUAL I32	perl_call_argv _((const char* sub_name, I32 flags, char** argv));
+VIRTUAL I32	perl_call_method _((const char* methname, I32 flags));
+VIRTUAL I32	perl_call_pv _((const char* sub_name, I32 flags));
 VIRTUAL I32	perl_call_sv _((SV* sv, I32 flags));
 #ifdef PERL_OBJECT
 VIRTUAL void	perl_construct _((void));
@@ -429,22 +429,22 @@ VIRTUAL void	perl_destruct _((void));
 void	perl_construct _((PerlInterpreter* sv_interp));
 void	perl_destruct _((PerlInterpreter* sv_interp));
 #endif
-VIRTUAL SV*	perl_eval_pv _((char* p, I32 croak_on_error));
+VIRTUAL SV*	perl_eval_pv _((const char* p, I32 croak_on_error));
 VIRTUAL I32	perl_eval_sv _((SV* sv, I32 flags));
 #ifdef PERL_OBJECT
 VIRTUAL void	perl_free _((void));
 #else
 void	perl_free _((PerlInterpreter* sv_interp));
 #endif
-VIRTUAL SV*	perl_get_sv _((char* name, I32 create));
-VIRTUAL AV*	perl_get_av _((char* name, I32 create));
-VIRTUAL HV*	perl_get_hv _((char* name, I32 create));
-VIRTUAL CV*	perl_get_cv _((char* name, I32 create));
+VIRTUAL SV*	perl_get_sv _((const char* name, I32 create));
+VIRTUAL AV*	perl_get_av _((const char* name, I32 create));
+VIRTUAL HV*	perl_get_hv _((const char* name, I32 create));
+VIRTUAL CV*	perl_get_cv _((const char* name, I32 create));
 VIRTUAL int	perl_init_i18nl10n _((int printwarn));
 VIRTUAL int	perl_init_i18nl14n _((int printwarn));
-VIRTUAL void	perl_new_collate _((char* newcoll));
-VIRTUAL void	perl_new_ctype _((char* newctype));
-VIRTUAL void	perl_new_numeric _((char* newcoll));
+VIRTUAL void	perl_new_collate _((const char* newcoll));
+VIRTUAL void	perl_new_ctype _((const char* newctype));
+VIRTUAL void	perl_new_numeric _((const char* newcoll));
 VIRTUAL void	perl_set_numeric_local _((void));
 VIRTUAL void	perl_set_numeric_standard _((void));
 #ifdef PERL_OBJECT
@@ -452,7 +452,7 @@ VIRTUAL int	perl_parse _((void(*xsinit)(CPerlObj*), int argc, char** argv, char*
 #else
 int	perl_parse _((PerlInterpreter* sv_interp, void(*xsinit)(void), int argc, char** argv, char** env));
 #endif
-VIRTUAL void	perl_require_pv _((char* pv));
+VIRTUAL void	perl_require_pv _((const char* pv));
 #define perl_requirepv perl_require_pv
 #ifdef PERL_OBJECT
 VIRTUAL int	perl_run _((void));
@@ -479,8 +479,8 @@ VIRTUAL I32	regexec_flags _((regexp* prog, char* stringarg, char* strend,
 			 void* data, U32 flags));
 VIRTUAL regnode* regnext _((regnode* p));
 VIRTUAL void	regprop _((SV* sv, regnode* o));
-VIRTUAL void	repeatcpy _((char* to, char* from, I32 len, I32 count));
-VIRTUAL char*	rninstr _((char* big, char* bigend, char* little, char* lend));
+VIRTUAL void	repeatcpy _((char* to, const char* from, I32 len, I32 count));
+VIRTUAL char*	rninstr _((const char* big, const char* bigend, const char* little, const char* lend));
 VIRTUAL Sighandler_t rsignal _((int i, Sighandler_t t));
 VIRTUAL int	rsignal_restore _((int i, Sigsave_t* t));
 VIRTUAL int	rsignal_save _((int i, Sighandler_t t1, Sigsave_t* t2));
@@ -491,8 +491,8 @@ VIRTUAL void	rxres_save _((void** rsp, REGEXP* prx));
 #ifndef HAS_RENAME
 VIRTUAL I32	same_dirent _((char* a, char* b));
 #endif
-VIRTUAL char*	savepv _((char* sv));
-VIRTUAL char*	savepvn _((char* sv, I32 len));
+VIRTUAL char*	savepv _((const char* sv));
+VIRTUAL char*	savepvn _((const char* sv, I32 len));
 VIRTUAL void	savestack_grow _((void));
 VIRTUAL void	save_aelem _((AV* av, I32 idx, SV **sptr));
 VIRTUAL I32	save_alloc _((I32 size, I32 pad));
@@ -547,8 +547,8 @@ VIRTUAL char*	screaminstr _((SV* bigsv, SV* littlesv, I32 start_shift, I32 end_s
 VIRTUAL I32	setenv_getix _((char* nam));
 #endif
 VIRTUAL void	setdefout _((GV* gv));
-VIRTUAL char*	sharepvn _((char* sv, I32 len, U32 hash));
-VIRTUAL HEK*	share_hek _((char* sv, I32 len, U32 hash));
+VIRTUAL char*	sharepvn _((const char* sv, I32 len, U32 hash));
+VIRTUAL HEK*	share_hek _((const char* sv, I32 len, U32 hash));
 VIRTUAL Signal_t sighandler _((int sig));
 VIRTUAL SV**	stack_grow _((SV** sp, SV**p, int n));
 VIRTUAL I32	start_subparse _((I32 is_format, U32 flags));
@@ -570,8 +570,8 @@ VIRTUAL void	sv_add_arena _((char* ptr, U32 size, U32 flags));
 VIRTUAL int	sv_backoff _((SV* sv));
 VIRTUAL SV*	sv_bless _((SV* sv, HV* stash));
 VIRTUAL void	sv_catpvf _((SV* sv, const char* pat, ...));
-VIRTUAL void	sv_catpv _((SV* sv, char* ptr));
-VIRTUAL void	sv_catpvn _((SV* sv, char* ptr, STRLEN len));
+VIRTUAL void	sv_catpv _((SV* sv, const char* ptr));
+VIRTUAL void	sv_catpvn _((SV* sv, const char* ptr, STRLEN len));
 VIRTUAL void	sv_catsv _((SV* dsv, SV* ssv));
 VIRTUAL void	sv_chop _((SV* sv, char* ptr));
 VIRTUAL void	sv_clean_all _((void));
@@ -585,7 +585,7 @@ VIRTUAL char*	sv_collxfrm _((SV* sv, STRLEN* nxp));
 VIRTUAL OP*	sv_compile_2op _((SV* sv, OP** startp, char* code, AV** avp));
 VIRTUAL void	sv_dec _((SV* sv));
 VIRTUAL void	sv_dump _((SV* sv));
-VIRTUAL bool	sv_derived_from _((SV* sv, char* name));
+VIRTUAL bool	sv_derived_from _((SV* sv, const char* name));
 VIRTUAL I32	sv_eq _((SV* sv1, SV* sv2));
 VIRTUAL void	sv_free _((SV* sv));
 VIRTUAL void	sv_free_arenas _((void));
@@ -593,11 +593,11 @@ VIRTUAL char*	sv_gets _((SV* sv, PerlIO* fp, I32 append));
 VIRTUAL char*	sv_grow _((SV* sv, STRLEN newlen));
 VIRTUAL void	sv_inc _((SV* sv));
 VIRTUAL void	sv_insert _((SV* bigsv, STRLEN offset, STRLEN len, char* little, STRLEN littlelen));
-VIRTUAL int	sv_isa _((SV* sv, char* name));
+VIRTUAL int	sv_isa _((SV* sv, const char* name));
 VIRTUAL int	sv_isobject _((SV* sv));
 VIRTUAL STRLEN	sv_len _((SV* sv));
 VIRTUAL STRLEN	sv_len_utf8 _((SV* sv));
-VIRTUAL void	sv_magic _((SV* sv, SV* obj, int how, char* name, I32 namlen));
+VIRTUAL void	sv_magic _((SV* sv, SV* obj, int how, const char* name, I32 namlen));
 VIRTUAL SV*	sv_mortalcopy _((SV* oldsv));
 VIRTUAL SV*	sv_newmortal _((void));
 VIRTUAL SV*	sv_newref _((SV* sv));
@@ -614,10 +614,10 @@ VIRTUAL void	sv_setiv _((SV* sv, IV num));
 VIRTUAL void	sv_setpviv _((SV* sv, IV num));
 VIRTUAL void	sv_setuv _((SV* sv, UV num));
 VIRTUAL void	sv_setnv _((SV* sv, double num));
-VIRTUAL SV*	sv_setref_iv _((SV* rv, char* classname, IV iv));
-VIRTUAL SV*	sv_setref_nv _((SV* rv, char* classname, double nv));
-VIRTUAL SV*	sv_setref_pv _((SV* rv, char* classname, void* pv));
-VIRTUAL SV*	sv_setref_pvn _((SV* rv, char* classname, char* pv, I32 n));
+VIRTUAL SV*	sv_setref_iv _((SV* rv, const char* classname, IV iv));
+VIRTUAL SV*	sv_setref_nv _((SV* rv, const char* classname, double nv));
+VIRTUAL SV*	sv_setref_pv _((SV* rv, const char* classname, void* pv));
+VIRTUAL SV*	sv_setref_pvn _((SV* rv, const char* classname, char* pv, I32 n));
 VIRTUAL void	sv_setpv _((SV* sv, const char* ptr));
 VIRTUAL void	sv_setpvn _((SV* sv, const char* ptr, STRLEN len));
 VIRTUAL void	sv_setsv _((SV* dsv, SV* ssv));
@@ -647,7 +647,7 @@ VIRTUAL I32	unlnk _((char* f));
 #ifdef USE_THREADS
 VIRTUAL void	unlock_condpair _((void* svv));
 #endif
-VIRTUAL void	unsharepvn _((char* sv, I32 len, U32 hash));
+VIRTUAL void	unsharepvn _((const char* sv, I32 len, U32 hash));
 VIRTUAL void	unshare_hek _((HEK* hek));
 VIRTUAL void	utilize _((int aver, I32 floor, OP* version, OP* id, OP* arg));
 VIRTUAL U8*	utf16_to_utf8 _((U16* p, U8 *d, I32 bytelen));
@@ -696,7 +696,7 @@ void hfreeentries _((HV *hv));
 void more_he _((void));
 HE* new_he _((void));
 void del_he _((HE *p));
-HEK *save_hek _((char *str, I32 len, U32 hash));
+HEK *save_hek _((const char *str, I32 len, U32 hash));
 SV *mess_alloc _((void));
 void gv_init_sv _((GV *gv, I32 sv_type));
 SV *save_scalar_at _((SV **sptr));
@@ -804,7 +804,7 @@ void depcom _((void));
 I32 win32_textfilter _((int idx, SV *sv, int maxlen));
 #endif
 char* incl_perldb _((void));
-SV *isa_lookup _((HV *stash, char *name, int len, int level));
+SV *isa_lookup _((HV *stash, const char *name, int len, int level));
 CV *get_db_sub _((SV **svp, CV *cv));
 I32 list_assignment _((OP *o));
 void bad_type _((I32 n, char *t, char *name, OP *kid));
@@ -934,8 +934,8 @@ VIRTUAL void byterun _((PerlIO *fp));
 #endif /* INDIRECT_BGET_MACROS */
 
 VIRTUAL void	sv_catpvf_mg _((SV *sv, const char* pat, ...));
-VIRTUAL void	sv_catpv_mg _((SV *sv, char *ptr));
-VIRTUAL void	sv_catpvn_mg _((SV *sv, char *ptr, STRLEN len));
+VIRTUAL void	sv_catpv_mg _((SV *sv, const char *ptr));
+VIRTUAL void	sv_catpvn_mg _((SV *sv, const char *ptr, STRLEN len));
 VIRTUAL void	sv_catsv_mg _((SV *dstr, SV *sstr));
 VIRTUAL void	sv_setpvf_mg _((SV *sv, const char* pat, ...));
 VIRTUAL void	sv_setiv_mg _((SV *sv, IV i));

@@ -19,6 +19,7 @@ static void hv_magic_check _((HV *hv, bool *needs_copy, bool *needs_store));
 static void hsplit _((HV *hv));
 static void hfreeentries _((HV *hv));
 static void more_he _((void));
+static HEK *save_hek _((const char *str, I32 len, U32 hash));
 #endif
 
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
@@ -66,7 +67,7 @@ more_he(void)
 }
 
 STATIC HEK *
-save_hek(char *str, I32 len, U32 hash)
+save_hek(const char *str, I32 len, U32 hash)
 {
     char *k;
     register HEK *hek;
@@ -90,7 +91,7 @@ unshare_hek(HEK *hek)
  * contains an SV* */
 
 SV**
-hv_fetch(HV *hv, char *key, U32 klen, I32 lval)
+hv_fetch(HV *hv, const char *key, U32 klen, I32 lval)
 {
     register XPVHV* xhv;
     register U32 hash;
@@ -276,7 +277,7 @@ hv_magic_check (HV *hv, bool *needs_copy, bool *needs_store)
 }
 
 SV**
-hv_store(HV *hv, char *key, U32 klen, SV *val, register U32 hash)
+hv_store(HV *hv, const char *key, U32 klen, SV *val, register U32 hash)
 {
     register XPVHV* xhv;
     register I32 i;
@@ -426,7 +427,7 @@ hv_store_ent(HV *hv, SV *keysv, SV *val, register U32 hash)
 }
 
 SV *
-hv_delete(HV *hv, char *key, U32 klen, I32 flags)
+hv_delete(HV *hv, const char *key, U32 klen, I32 flags)
 {
     register XPVHV* xhv;
     register I32 i;
@@ -569,7 +570,7 @@ hv_delete_ent(HV *hv, SV *keysv, I32 flags, U32 hash)
 }
 
 bool
-hv_exists(HV *hv, char *key, U32 klen)
+hv_exists(HV *hv, const char *key, U32 klen)
 {
     register XPVHV* xhv;
     register U32 hash;
@@ -1126,7 +1127,7 @@ hv_magic(HV *hv, GV *gv, int how)
 }
 
 char*	
-sharepvn(char *sv, I32 len, U32 hash)
+sharepvn(const char *sv, I32 len, U32 hash)
 {
     return HEK_KEY(share_hek(sv, len, hash));
 }
@@ -1135,7 +1136,7 @@ sharepvn(char *sv, I32 len, U32 hash)
  * len and hash must both be valid for str.
  */
 void
-unsharepvn(char *str, I32 len, U32 hash)
+unsharepvn(const char *str, I32 len, U32 hash)
 {
     register XPVHV* xhv;
     register HE *entry;
@@ -1181,7 +1182,7 @@ unsharepvn(char *str, I32 len, U32 hash)
  * len and hash must both be valid for str.
  */
 HEK *
-share_hek(char *str, I32 len, register U32 hash)
+share_hek(const char *str, I32 len, register U32 hash)
 {
     register XPVHV* xhv;
     register HE *entry;

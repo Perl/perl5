@@ -38,8 +38,8 @@ The six routines are:
 
     SV*  newSViv(IV);
     SV*  newSVnv(double);
-    SV*  newSVpv(char*, int);
-    SV*  newSVpvn(char*, int);
+    SV*  newSVpv(const char*, int);
+    SV*  newSVpvn(const char*, int);
     SV*  newSVpvf(const char*, ...);
     SV*  newSVsv(SV*);
 
@@ -48,8 +48,8 @@ To change the value of an *already-existing* SV, there are seven routines:
     void  sv_setiv(SV*, IV);
     void  sv_setuv(SV*, UV);
     void  sv_setnv(SV*, double);
-    void  sv_setpv(SV*, char*);
-    void  sv_setpvn(SV*, char*, int)
+    void  sv_setpv(SV*, const char*);
+    void  sv_setpvn(SV*, const char*, int)
     void  sv_setpvf(SV*, const char*, ...);
     void  sv_setpvfn(SV*, const char*, STRLEN, va_list *, SV **, I32, bool);
     void  sv_setsv(SV*, SV*);
@@ -150,8 +150,8 @@ But note that these last three macros are valid only if C<SvPOK()> is true.
 If you want to append something to the end of string stored in an C<SV*>,
 you can use the following functions:
 
-    void  sv_catpv(SV*, char*);
-    void  sv_catpvn(SV*, char*, int);
+    void  sv_catpv(SV*, const char*);
+    void  sv_catpvn(SV*, const char*, int);
     void  sv_catpvf(SV*, const char*, ...);
     void  sv_catpvfn(SV*, const char*, STRLEN, va_list *, SV **, I32, bool);
     void  sv_catsv(SV*, SV*);
@@ -297,8 +297,8 @@ To create an HV, you use the following routine:
 
 Once the HV has been created, the following operations are possible on HVs:
 
-    SV**  hv_store(HV*, char* key, U32 klen, SV* val, U32 hash);
-    SV**  hv_fetch(HV*, char* key, U32 klen, I32 lval);
+    SV**  hv_store(HV*, const char* key, U32 klen, SV* val, U32 hash);
+    SV**  hv_fetch(HV*, const char* key, U32 klen, I32 lval);
 
 The C<klen> parameter is the length of the key being passed in (Note that
 you cannot pass 0 in as a value of C<klen> to tell Perl to measure the
@@ -316,8 +316,8 @@ not NULL before dereferencing it.
 
 These two functions check if a hash table entry exists, and deletes it.
 
-    bool  hv_exists(HV*, char* key, U32 klen);
-    SV*   hv_delete(HV*, char* key, U32 klen, I32 flags);
+    bool  hv_exists(HV*, const char* key, U32 klen);
+    SV*   hv_delete(HV*, const char* key, U32 klen, I32 flags);
 
 If C<flags> does not include the C<G_DISCARD> flag then C<hv_delete> will
 create and return a mortal copy of the deleted value.
@@ -487,28 +487,28 @@ Upgrades rv to reference if not already one.  Creates new SV for rv to
 point to.  If C<classname> is non-null, the SV is blessed into the specified
 class.  SV is returned.
 
-	SV* newSVrv(SV* rv, char* classname);
+	SV* newSVrv(SV* rv, const char* classname);
 
 Copies integer or double into an SV whose reference is C<rv>.  SV is blessed
 if C<classname> is non-null.
 
-	SV* sv_setref_iv(SV* rv, char* classname, IV iv);
-	SV* sv_setref_nv(SV* rv, char* classname, NV iv);
+	SV* sv_setref_iv(SV* rv, const char* classname, IV iv);
+	SV* sv_setref_nv(SV* rv, const char* classname, NV iv);
 
 Copies the pointer value (I<the address, not the string!>) into an SV whose
 reference is rv.  SV is blessed if C<classname> is non-null.
 
-	SV* sv_setref_pv(SV* rv, char* classname, PV iv);
+	SV* sv_setref_pv(SV* rv, const char* classname, PV iv);
 
 Copies string into an SV whose reference is C<rv>.  Set length to 0 to let
 Perl calculate the string length.  SV is blessed if C<classname> is non-null.
 
-	SV* sv_setref_pvn(SV* rv, char* classname, PV iv, int length);
+	SV* sv_setref_pvn(SV* rv, const char* classname, PV iv, int length);
 
 Tests whether the SV is blessed into the specified class.  It does not
 check inheritance relationships.
 
-	int  sv_isa(SV* sv, char* name);
+	int  sv_isa(SV* sv, const char* name);
 
 Tests whether the SV is a reference to a blessed object.
 
@@ -518,7 +518,7 @@ Tests whether the SV is derived from the specified class. SV can be either
 a reference to a blessed object or a string containing a class name. This
 is the function implementing the C<UNIVERSAL::isa> functionality.
 
-	bool sv_derived_from(SV* sv, char* name);
+	bool sv_derived_from(SV* sv, const char* name);
 
 To check if you've got an object derived from a specific class you have 
 to write:
@@ -641,7 +641,7 @@ in the stash "Baz::" in "Bar::"'s stash.
 
 To get the stash pointer for a particular package, use the function:
 
-    HV*  gv_stashpv(char* name, I32 create)
+    HV*  gv_stashpv(const char* name, I32 create)
     HV*  gv_stashsv(SV*, I32 create)
 
 The first function takes a literal string, the second uses the string stored
@@ -739,7 +739,7 @@ Note this is current as of patchlevel 0, and could change at any time.
 
 Perl adds magic to an SV using the sv_magic function:
 
-    void sv_magic(SV* sv, SV* obj, int how, char* name, I32 namlen);
+    void sv_magic(SV* sv, SV* obj, int how, const char* name, I32 namlen);
 
 The C<sv> argument is a pointer to the SV that is to acquire a new magical
 feature.
@@ -918,7 +918,7 @@ This routine returns a pointer to the C<MAGIC> structure stored in the SV.
 If the SV does not have that magical feature, C<NULL> is returned.  Also,
 if the SV is not of type SVt_PVMG, Perl may core dump.
 
-    int mg_copy(SV* sv, SV* nsv, char* key, STRLEN klen);
+    int mg_copy(SV* sv, SV* nsv, const char* key, STRLEN klen);
 
 This routine checks to see what types of magic C<sv> has.  If the mg_type
 field is an uppercase letter, then the mg_obj is copied to C<nsv>, but
@@ -1213,9 +1213,9 @@ There are four routines that can be used to call a Perl subroutine from
 within a C program.  These four are:
 
     I32  perl_call_sv(SV*, I32);
-    I32  perl_call_pv(char*, I32);
-    I32  perl_call_method(char*, I32);
-    I32  perl_call_argv(char*, I32, register char**);
+    I32  perl_call_pv(const char*, I32);
+    I32  perl_call_method(const char*, I32);
+    I32  perl_call_argv(const char*, I32, register char**);
 
 The routine most often used is C<perl_call_sv>.  The C<SV*> argument
 contains either the name of the Perl subroutine to be called, or a
@@ -1784,7 +1784,7 @@ which is not visible to Perl code.  So when calling C<perl_call_sv>,
 you should not use the GV directly; instead, you should use the
 method's CV, which can be obtained from the GV with the C<GvCV> macro.
 
-        GV*     gv_fetchmeth (HV* stash, char* name, STRLEN len, I32 level)
+        GV*     gv_fetchmeth (HV* stash, const char* name, STRLEN len, I32 level)
 
 =item gv_fetchmethod
 
@@ -1813,8 +1813,8 @@ C<level==0>.  C<name> should be writable if contains C<':'> or C<'\''>.
 The warning against passing the GV returned by C<gv_fetchmeth> to
 C<perl_call_sv> apply equally to these functions.
 
-        GV*     gv_fetchmethod (HV* stash, char* name)
-        GV*     gv_fetchmethod_autoload (HV* stash, char* name, I32 autoload)
+        GV*     gv_fetchmethod (HV* stash, const char* name)
+        GV*     gv_fetchmethod_autoload (HV* stash, const char* name, I32 autoload)
 
 =item G_VOID
 
@@ -1826,7 +1826,7 @@ Returns a pointer to the stash for a specified package.  If C<create> is set
 then the package will be created if it does not already exist.  If C<create>
 is not set and the package does not exist then NULL is returned.
 
-	HV*	gv_stashpv (char* name, I32 create)
+	HV*	gv_stashpv (const char* name, I32 create)
 
 =item gv_stashsv
 
@@ -1923,7 +1923,7 @@ and returned to the caller.  The C<klen> is the length of the key.  The
 C<flags> value will normally be zero; if set to G_DISCARD then NULL will be
 returned.
 
-	SV*	hv_delete (HV* tb, char* key, U32 klen, I32 flags)
+	SV*	hv_delete (HV* tb, const char* key, U32 klen, I32 flags)
 
 =item hv_delete_ent
 
@@ -1939,7 +1939,7 @@ hash value, or 0 to ask for it to be computed.
 Returns a boolean indicating whether the specified hash key exists.  The
 C<klen> is the length of the key.
 
-	bool	hv_exists (HV* tb, char* key, U32 klen)
+	bool	hv_exists (HV* tb, const char* key, U32 klen)
 
 =item hv_exists_ent
 
@@ -1958,7 +1958,7 @@ dereferencing it to a C<SV*>.
 See L<Understanding the Magic of Tied Hashes and Arrays> for more
 information on how to use this function on tied hashes.
 
-	SV**	hv_fetch (HV* tb, char* key, U32 klen, I32 lval)
+	SV**	hv_fetch (HV* tb, const char* key, U32 klen, I32 lval)
 
 =item hv_fetch_ent
 
@@ -2050,7 +2050,7 @@ before the call, and decrementing it if the function returned NULL.
 See L<Understanding the Magic of Tied Hashes and Arrays> for more
 information on how to use this function on tied hashes.
 
-	SV**	hv_store (HV* tb, char* key, U32 klen, SV* val, U32 hash)
+	SV**	hv_store (HV* tb, const char* key, U32 klen, SV* val, U32 hash)
 
 =item hv_store_ent
 
@@ -2150,7 +2150,7 @@ Clear something magical that the SV represents.  See C<sv_magic>.
 
 Copies the magic from one SV to another.  See C<sv_magic>.
 
-	int	mg_copy (SV *, SV *, char *, STRLEN)
+	int	mg_copy (SV *, SV *, const char *, STRLEN)
 
 =item mg_find
 
@@ -2288,7 +2288,7 @@ SV is set to 1.
 Creates a new SV and copies a string into it.  The reference count for the
 SV is set to 1.  If C<len> is zero then Perl will compute the length.
 
-	SV*	newSVpv (char* s, STRLEN len)
+	SV*	newSVpv (const char* s, STRLEN len)
 
 =item newSVpvf
 
@@ -2303,7 +2303,7 @@ Creates a new SV and copies a string into it.  The reference count for the
 SV is set to 1.  If C<len> is zero then Perl will create a zero length 
 string.
 
-	SV*	newSVpvn (char* s, STRLEN len)
+	SV*	newSVpvn (const char* s, STRLEN len)
 
 =item newSVrv
 
@@ -2312,7 +2312,7 @@ it will be upgraded to one.  If C<classname> is non-null then the new SV will
 be blessed in the specified package.  The new SV is returned and its
 reference count is 1.
 
-	SV*	newSVrv (SV* rv, char* classname)
+	SV*	newSVrv (SV* rv, const char* classname)
 
 =item newSVsv
 
@@ -2368,20 +2368,20 @@ Allocates a new Perl interpreter.  See L<perlembed>.
 
 Performs a callback to the specified Perl sub.  See L<perlcall>.
 
-	I32	perl_call_argv (char* subname, I32 flags, char** argv)
+	I32	perl_call_argv (const char* subname, I32 flags, char** argv)
 
 =item perl_call_method
 
 Performs a callback to the specified Perl method.  The blessed object must
 be on the stack.  See L<perlcall>.
 
-	I32	perl_call_method (char* methname, I32 flags)
+	I32	perl_call_method (const char* methname, I32 flags)
 
 =item perl_call_pv
 
 Performs a callback to the specified Perl sub.  See L<perlcall>.
 
-	I32	perl_call_pv (char* subname, I32 flags)
+	I32	perl_call_pv (const char* subname, I32 flags)
 
 =item perl_call_sv
 
@@ -2408,7 +2408,7 @@ Tells Perl to C<eval> the string in the SV.
 
 Tells Perl to C<eval> the given string and return an SV* result.
 
-	SV*	perl_eval_pv (char* p, I32 croak_on_error)
+	SV*	perl_eval_pv (const char* p, I32 croak_on_error)
 
 =item perl_free
 
@@ -2420,7 +2420,7 @@ Returns the AV of the specified Perl array.  If C<create> is set and the
 Perl variable does not exist then it will be created.  If C<create> is not
 set and the variable does not exist then NULL is returned.
 
-	AV*	perl_get_av (char* name, I32 create)
+	AV*	perl_get_av (const char* name, I32 create)
 
 =item perl_get_cv
 
@@ -2428,7 +2428,7 @@ Returns the CV of the specified Perl sub.  If C<create> is set and the Perl
 variable does not exist then it will be created.  If C<create> is not
 set and the variable does not exist then NULL is returned.
 
-	CV*	perl_get_cv (char* name, I32 create)
+	CV*	perl_get_cv (const char* name, I32 create)
 
 =item perl_get_hv
 
@@ -2436,7 +2436,7 @@ Returns the HV of the specified Perl hash.  If C<create> is set and the Perl
 variable does not exist then it will be created.  If C<create> is not
 set and the variable does not exist then NULL is returned.
 
-	HV*	perl_get_hv (char* name, I32 create)
+	HV*	perl_get_hv (const char* name, I32 create)
 
 =item perl_get_sv
 
@@ -2444,7 +2444,7 @@ Returns the SV of the specified Perl scalar.  If C<create> is set and the
 Perl variable does not exist then it will be created.  If C<create> is not
 set and the variable does not exist then NULL is returned.
 
-	SV*	perl_get_sv (char* name, I32 create)
+	SV*	perl_get_sv (const char* name, I32 create)
 
 =item perl_parse
 
@@ -2454,7 +2454,7 @@ Tells a Perl interpreter to parse a Perl script.  See L<perlembed>.
 
 Tells Perl to C<require> a module.
 
-	void	perl_require_pv (char* pv)
+	void	perl_require_pv (const char* pv)
 
 =item perl_run
 
@@ -2574,14 +2574,14 @@ The XSUB-writer's interface to the C C<realloc> function.
 
 Copy a string to a safe spot.  This does not use an SV.
 
-	char*	savepv (char* sv)
+	char*	savepv (const char* sv)
 
 =item savepvn
 
 Copy a string to a safe spot.  The C<len> indicates number of bytes to
 copy.  This does not use an SV.
 
-	char*	savepvn (char* sv, I32 len)
+	char*	savepvn (const char* sv, I32 len)
 
 =item SAVETMPS
 
@@ -2681,13 +2681,13 @@ of the SV is unaffected.
 Concatenates the string onto the end of the string which is in the SV.
 Handles 'get' magic, but not 'set' magic.  See C<sv_catpv_mg>.
 
-	void	sv_catpv (SV* sv, char* ptr)
+	void	sv_catpv (SV* sv, const char* ptr)
 
 =item sv_catpv_mg
 
 Like C<sv_catpv>, but also handles 'set' magic.
 
-	void	sv_catpvn (SV* sv, char* ptr)
+	void	sv_catpvn (SV* sv, const char* ptr)
 
 =item sv_catpvn
 
@@ -2695,13 +2695,13 @@ Concatenates the string onto the end of the string which is in the SV.  The
 C<len> indicates number of bytes to copy.  Handles 'get' magic, but not
 'set' magic.  See C<sv_catpvn_mg>.
 
-	void	sv_catpvn (SV* sv, char* ptr, STRLEN len)
+	void	sv_catpvn (SV* sv, const char* ptr, STRLEN len)
 
 =item sv_catpvn_mg
 
 Like C<sv_catpvn>, but also handles 'set' magic.
 
-	void	sv_catpvn_mg (SV* sv, char* ptr, STRLEN len)
+	void	sv_catpvn_mg (SV* sv, const char* ptr, STRLEN len)
 
 =item sv_catpvf
 
@@ -2737,7 +2737,7 @@ buffer.  SvPOK(sv) must be true and the C<ptr> must be a pointer to
 somewhere inside the string buffer.  The C<ptr> becomes the first
 character of the adjusted string.
 
-	void    sv_chop(SV* sv, char *ptr)
+	void    sv_chop(SV* sv, const char *ptr)
 
 
 =item sv_cmp
@@ -2758,7 +2758,7 @@ Returns the length of the string which is in the SV.  See C<SvLEN>.
 
 Set the length of the string which is in the SV.  See C<SvCUR>.
 
-	void	SvCUR_set (SV* sv, int val )
+	void	SvCUR_set (SV* sv, int val)
 
 =item sv_dec
 
@@ -2768,18 +2768,11 @@ Auto-decrement of the value in the SV.
 
 =item sv_derived_from
 
-Returns a boolean indicating whether the SV is a subclass of the
-specified class.
-
-	int     sv_derived_from(SV* sv, char* class)
-
-=item sv_derived_from
-
 Returns a boolean indicating whether the SV is derived from the specified
 class.  This is the function that implements C<UNIVERSAL::isa>.  It works
 for class names as well as for objects.
 
-	bool	sv_derived_from _((SV* sv, char* name));
+	bool	sv_derived_from _((SV* sv, const char* name));
 
 =item SvEND
 
@@ -2800,7 +2793,7 @@ identical.
 Invokes C<mg_get> on an SV if it has 'get' magic.  This macro evaluates
 its argument more than once.
 
-	void	SvGETMAGIC( SV *sv )
+	void	SvGETMAGIC(SV *sv)
 
 =item SvGROW
 
@@ -2809,7 +2802,7 @@ indicated number of bytes (remember to reserve space for an extra
 trailing NUL character).  Calls C<sv_grow> to perform the expansion if
 necessary.  Returns a pointer to the character buffer.
 
-	char*	SvGROW( SV* sv, STRLEN len )
+	char*	SvGROW(SV* sv, STRLEN len)
 
 =item sv_grow
 
@@ -2906,7 +2899,7 @@ Returns the length of the string in the SV.  Use C<SvCUR>.
 
 Adds magic to an SV.
 
-	void	sv_magic (SV* sv, SV* obj, int how, char* name, I32 namlen)
+	void	sv_magic (SV* sv, SV* obj, int how, const char* name, I32 namlen)
 
 =item sv_mortalcopy
 
@@ -3141,13 +3134,13 @@ Like C<sv_setnv>, but also handles 'set' magic.
 Copies a string into an SV.  The string must be null-terminated.
 Does not handle 'set' magic.  See C<sv_setpv_mg>.
 
-	void	sv_setpv (SV* sv, char* ptr)
+	void	sv_setpv (SV* sv, const char* ptr)
 
 =item sv_setpv_mg
 
 Like C<sv_setpv>, but also handles 'set' magic.
 
-	void	sv_setpv_mg (SV* sv, char* ptr)
+	void	sv_setpv_mg (SV* sv, const char* ptr)
 
 =item sv_setpviv
 
@@ -3167,13 +3160,13 @@ Like C<sv_setpviv>, but also handles 'set' magic.
 Copies a string into an SV.  The C<len> parameter indicates the number of
 bytes to be copied.  Does not handle 'set' magic.  See C<sv_setpvn_mg>.
 
-	void	sv_setpvn (SV* sv, char* ptr, STRLEN len)
+	void	sv_setpvn (SV* sv, const char* ptr, STRLEN len)
 
 =item sv_setpvn_mg
 
 Like C<sv_setpvn>, but also handles 'set' magic.
 
-	void	sv_setpvn_mg (SV* sv, char* ptr, STRLEN len)
+	void	sv_setpvn_mg (SV* sv, const char* ptr, STRLEN len)
 
 =item sv_setpvf
 
