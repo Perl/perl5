@@ -3817,8 +3817,9 @@ Perl_sv_chop(pTHX_ register SV *sv, register char *ptr)	/* like set but assuming
 =for apidoc sv_catpvn
 
 Concatenates the string onto the end of the string which is in the SV.  The
-C<len> indicates number of bytes to copy.  Handles 'get' magic, but not
-'set' magic.  See C<sv_catpvn_mg>.
+C<len> indicates number of bytes to copy.  If the SV has the UTF8
+status set, then the bytes appended should be valid UTF8.
+Handles 'get' magic, but not 'set' magic.  See C<sv_catpvn_mg>.
 
 =cut
 */
@@ -3916,10 +3917,10 @@ Perl_sv_catsv_mg(pTHX_ SV *dsv, register SV *ssv)
 =for apidoc sv_catpv
 
 Concatenates the string onto the end of the string which is in the SV.
-Handles 'get' magic, but not 'set' magic.  See C<sv_catpv_mg>.
+If the SV has the UTF8 status set, then the bytes appended should be
+valid UTF8.  Handles 'get' magic, but not 'set' magic.  See C<sv_catpv_mg>.
 
-=cut
-*/
+=cut */
 
 void
 Perl_sv_catpv(pTHX_ register SV *sv, register const char *ptr)
@@ -6760,12 +6761,15 @@ Perl_sv_catpvf_mg_nocontext(SV *sv, const char* pat, ...)
 /*
 =for apidoc sv_catpvf
 
-Processes its arguments like C<sprintf> and appends the formatted output
-to an SV.  Handles 'get' magic, but not 'set' magic.  C<SvSETMAGIC()> must
-typically be called after calling this function to handle 'set' magic.
+Processes its arguments like C<sprintf> and appends the formatted
+output to an SV.  If the appended data contains "wide" characters
+(including, but not limited to, SVs with a UTF-8 PV formatted with %s,
+and characters >255 formatted with %c), the original SV might get
+upgraded to UTF-8.  Handles 'get' magic, but not 'set' magic.
+C<SvSETMAGIC()> must typically be called after calling this function
+to handle 'set' magic.
 
-=cut
-*/
+=cut */
 
 void
 Perl_sv_catpvf(pTHX_ SV *sv, const char* pat, ...)

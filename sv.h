@@ -478,6 +478,7 @@ Unsets the PV status of an SV.
 
 =for apidoc Am|void|SvPOK_only|SV* sv
 Tells an SV that it is a string and disables all other OK bits.
+Will also turn off the UTF8 status.
 
 =for apidoc Am|bool|SvOOK|SV* sv
 Returns a boolean indicating whether the SvIVX is a valid offset value for
@@ -584,14 +585,15 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 Returns a boolean indicating whether the SV contains UTF-8 encoded data.
 
 =for apidoc Am|void|SvUTF8_on|SV *sv
-Tells an SV that it is a string and encoded in UTF8.  Do not use frivolously.
+Turn on the UTF8 status of an SV (the data is not changed, just the flag).
+Do not use frivolously.
 
 =for apidoc Am|void|SvUTF8_off|SV *sv
 Unsets the UTF8 status of an SV.
 
 =for apidoc Am|void|SvPOK_only_UTF8|SV* sv
-Tells an SV that it is a UTF8 string (do not use frivolously)
-and disables all other OK bits.
+Tells an SV that it is a string and disables all other OK bits,
+and leaves the UTF8 status as it was.
   
 =cut
  */
