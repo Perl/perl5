@@ -298,8 +298,8 @@ sub expr {
 	s/^\&\&// && do { $new .= " &&"; next;}; # handle && operator
 	s/^\&([\(a-z\)]+)/$1/i;	# hack for things that take the address of
 	s/^(\s+)//		&& do {$new .= ' '; next;};
-	s/^(0X[0-9A-F]+)[UL]*//i	&& do {$new .= lc($1); next;};
-	s/^(-?\d+\.\d+E[-+]?\d+)F?//i	&& do {$new .= $1; next;};
+	s/^(0X[0-9A-F]+)[UL]*//i		&& do {$new .= lc($1); next;};
+	s/^(-?\d+\.\d+E[-+]?\d+)[FL]?//i	&& do {$new .= $1; next;};
 	s/^(\d+)\s*[LU]*//i	&& do {$new .= $1; next;};
 	s/^("(\\"|[^"])*")//	&& do {$new .= $1; next;};
 	s/^'((\\"|[^"])*)'//	&& do {
