@@ -7540,7 +7540,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl)
 	    TOPPTR(nss,ix) = gp = gp_dup(gp);
 	    (void)GpREFCNT_inc(gp);
 	    gv = (GV*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = gv_dup_inc(c);
+	    TOPPTR(nss,ix) = gv_dup_inc(gv);
             c = (char*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = pv_dup(c);
 	    iv = POPIV(ss,ix);
