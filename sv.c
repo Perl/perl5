@@ -2660,10 +2660,17 @@ STRLEN littlelen;
     register char *midend;
     register char *bigend;
     register I32 i;
+    STRLEN curlen;
+    
 
     if (!bigstr)
 	croak("Can't modify non-existent substring");
-    SvPV_force(bigstr, na);
+    SvPV_force(bigstr, curlen);
+    if (offset + len > curlen) {
+	SvGROW(bigstr, offset+len+1);
+	Zero(SvPVX(bigstr)+curlen, offset+len-curlen, char);
+	SvCUR_set(bigstr, offset+len);
+    }
 
     i = littlelen - len;
     if (i > 0) {			/* string might grow */
