@@ -1365,8 +1365,6 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 		sv_setpvn(ERRSV, message, msglen);
 	    }
 	}
-	else
-	    message = SvPVx(ERRSV, msglen);
 
 	while ((cxix = dopoptoeval(cxstack_ix)) < 0
 	       && PL_curstackinfo->si_prev)
@@ -1383,6 +1381,8 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 
 	    POPBLOCK(cx,PL_curpm);
 	    if (CxTYPE(cx) != CXt_EVAL) {
+		if (!message)
+		    message = SvPVx(ERRSV, msglen);
 		PerlIO_write(Perl_error_log, "panic: die ", 11);
 		PerlIO_write(Perl_error_log, message, msglen);
 		my_exit(1);
