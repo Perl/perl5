@@ -3651,7 +3651,7 @@ esac
 $cat <<EOM
 
 On some systems, shared libraries may be available.  Answer 'none' if
-you want to suppress searching of shared libraries for the remaining
+you want to suppress searching of shared libraries for the remainder
 of this configuration.
 
 EOM
@@ -6108,7 +6108,7 @@ EOM
     ' ')  dflt='none' ;;
     *)  dflt="$ccdlflags" ;;
     esac
-    rp="Any special flags to pass to $cc to use dynamic loading?"
+    rp="Any special flags to pass to $cc to use dynamic linking?"
     . ./myread
     case "$ans" in
     none) ccdlflags=' ' ;;
@@ -6812,7 +6812,7 @@ $cat <<EOM
 I need to get your e-mail address in Internet format if possible, i.e.
 something like user@host.domain. Please answer accurately since I have
 no easy means to double check it. The default value provided below
-is most probably close to the reality but may not be valid from outside
+is most probably close to reality but may not be valid from outside
 your organization...
 
 EOM
