@@ -205,12 +205,12 @@ foreach my $t (@templates) {
         is( $@, '' );
 
         is(scalar @t, 2);
-        if( $t =~ /[nv]/i ) {
+
+        SKIP: {
+            skip "$t not expected to work for some reason", 2 if $t =~ /[nv]/i;
+
             is($t[0], 12);
             is($t[1], 34);
-        }
-        else {
-            pass() for 1..2;
         }
     }
 }
