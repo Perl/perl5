@@ -1422,4 +1422,7 @@ sM	|HE*	|hv_fetch_common|HV* tb|SV* key_sv|const char* key|STRLEN klen|int flags
 Apd	|SV*	|hv_scalar	|HV* hv|
 p	|SV*	|magic_scalarpack|HV* hv|MAGIC*	mg
 
+#if defined(DEBUGGING)
+p	|int	|get_debug_opts_flags	|char **s|int flags
+#endif
 END_EXTERN_C

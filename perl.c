@@ -2520,6 +2520,12 @@ NULL
 int
 Perl_get_debug_opts(pTHX_ char **s)
 {
+  return get_debug_opts_flags(s, 1);
+}
+
+int
+Perl_get_debug_opts_flags(pTHX_ char **s, int flags)
+{
     static char *usage_msgd[] = {
       " Debugging flag values: (see also -d)",
       "  p  Tokenizing and parsing (with v, displays parse stack)",
@@ -2565,7 +2571,8 @@ Perl_get_debug_opts(pTHX_ char **s)
 	i = atoi(*s);
 	for (; isALNUM(**s); (*s)++) ;
     }
-    else {
+    else if (flags & 1) {
+      /* Give help.  */
       char **p = usage_msgd;
       while (*p) PerlIO_printf(PerlIO_stdout(), "%s\n", *p++);
     }
@@ -2686,7 +2693,7 @@ Perl_moreswitches(pTHX_ char *s)
 #ifdef DEBUGGING
 	forbid_setid("-D");
 	s++;
-	PL_debug = get_debug_opts(&s) | DEBUG_TOP_FLAG;
+	PL_debug = get_debug_opts_flags(&s, 1) | DEBUG_TOP_FLAG;
 #else /* !DEBUGGING */
 	if (ckWARN_d(WARN_DEBUGGING))
 	    Perl_warner(aTHX_ packWARN(WARN_DEBUGGING),
