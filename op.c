@@ -1869,7 +1869,7 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs)
     /* fake up C<use attributes $pkg,$rv,@attrs> */
     ENTER;		/* need to protect against side-effects of 'use' */
     SAVEINT(PL_expect);
-    if (stash && HvNAME(stash))
+    if (stash)
 	stashsv = newSVpv(HvNAME(stash), 0);
     else
 	stashsv = &PL_sv_no;
@@ -1969,8 +1969,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs)
 
 	/* check for C<my Dog $spot> when deciding package */
 	namesvp = av_fetch(PL_comppad_name, o->op_targ, FALSE);
-	if (namesvp && *namesvp && (SvFLAGS(*namesvp) & SVpad_TYPED)
-	    && HvNAME(SvSTASH(*namesvp)))
+	if (namesvp && *namesvp && (SvFLAGS(*namesvp) & SVpad_TYPED))
 	    stash = SvSTASH(*namesvp);
 	else
 	    stash = PL_curstash;
@@ -4668,9 +4667,9 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	 */
 	if (cv && !block) {
 	    rcv = (SV*)cv;
-	    if (CvGV(cv) && GvSTASH(CvGV(cv)) && HvNAME(GvSTASH(CvGV(cv))))
+	    if (CvGV(cv) && GvSTASH(CvGV(cv)))
 		stash = GvSTASH(CvGV(cv));
-	    else if (CvSTASH(cv) && HvNAME(CvSTASH(cv)))
+	    else if (CvSTASH(cv))
 		stash = CvSTASH(cv);
 	    else
 		stash = PL_curstash;
@@ -4678,7 +4677,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	else {
 	    /* possibly about to re-define existing subr -- ignore old cv */
 	    rcv = (SV*)PL_compcv;
-	    if (name && GvSTASH(gv) && HvNAME(GvSTASH(gv)))
+	    if (name && GvSTASH(gv))
 		stash = GvSTASH(gv);
 	    else
 		stash = PL_curstash;
@@ -4992,7 +4991,6 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
 	else if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
 	    /* already defined (or promised) */
 	    if (ckWARN(WARN_REDEFINE) && !(CvGV(cv) && GvSTASH(CvGV(cv))
-			    && HvNAME(GvSTASH(CvGV(cv)))
 			    && strEQ(HvNAME(GvSTASH(CvGV(cv))), "autouse"))) {
 		line_t oldline = CopLINE(PL_curcop);
 		if (PL_copline != NOLINE)
