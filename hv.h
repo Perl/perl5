@@ -212,7 +212,6 @@ C<SV*>.
  * is utf8 (including 8 bit keys that were entered as utf8, and need upgrading
  * when retrieved during iteration. It may still be set when there are no longer
  * any utf8 keys.
- * See HVhek_ENABLEHVKFLAGS for the trigger.
  */
 #define HvHASKFLAGS(hv)		(SvFLAGS(hv) & SVphv_HASKFLAGS)
 #define HvHASKFLAGS_on(hv)	(SvFLAGS(hv) |= SVphv_HASKFLAGS)
@@ -283,16 +282,6 @@ C<SV*>.
 #define HVhek_PLACEHOLD	0x200 /* Internal flag to create placeholder.
                                * (may change, but Storable is a core module) */
 #define HVhek_MASK	0xFF
-
-/* Which flags enable HvHASKFLAGS? Somewhat a hack on a hack, as
-   HVhek_REHASH is only needed because the rehash flag has to be duplicated
-   into all keys as hv_iternext has no access to the hash flags. At this
-   point Storable's tests get upset, because sometimes hashes are "keyed"
-   and sometimes not, depending on the order of data insertion, and whether
-   it triggered rehashing. So currently HVhek_REHAS is exempt.
-*/
-   
-#define HVhek_ENABLEHVKFLAGS	(HVhek_MASK - HVhek_REHASH)
 
 #define HEK_UTF8(hek)		(HEK_FLAGS(hek) & HVhek_UTF8)
 #define HEK_UTF8_on(hek)	(HEK_FLAGS(hek) |= HVhek_UTF8)
