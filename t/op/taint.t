@@ -124,7 +124,7 @@ my $echo = "$Invoke_Perl $ECHO";
 
 my $TEST = catfile(curdir(), 'TEST');
 
-print "1..205\n";
+print "1..206\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -970,4 +970,11 @@ else
     test 205, $@ eq '';
 
     # If you add tests here update also the above skip block for VMS.
+}
+
+{
+    # [ID 20020704.001] taint propagation failure
+    use re 'taint';
+    $TAINT =~ /(.*)/;
+    test 206, tainted(my $foo = $1);
 }
