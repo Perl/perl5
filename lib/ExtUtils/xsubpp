@@ -98,7 +98,7 @@ perl(1), perlxs(1), perlxstut(1)
 
 =cut
 
-require 5.0;
+require 5.002;
 use Cwd;
 use vars '$cplusplus';
 use vars '%v';
