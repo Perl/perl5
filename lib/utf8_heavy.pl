@@ -26,7 +26,7 @@ sub SWASHNEW {
     while (($caller = caller($i)) eq __PACKAGE__) { $i++ }
     my $encoding = $enc{$caller} || "unicore";
     (my $file = $type) =~ s!::!/!g;
-    if ($file =~ /^(In|in|IN|iN)[- _]?(.+?)\s*$/) { # /i would cause recursion.
+    if ($file =~ /^(?:In|in|IN|iN)[- _]?(.+?)\s*$/) { # /i would cause recursion.
 	my $In = $1;
 	defined %utf8::In || do "$encoding/In.pl";
 	my $prefix = substr(lc($In), 0, 3);
