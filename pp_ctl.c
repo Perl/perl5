@@ -2411,7 +2411,8 @@ PP(pp_entereval)
 	save_lines(GvAV(compiling.cop_filegv), linestr);
     PUTBACK;
     ret = doeval(gimme);
-    if (perldb && was != sub_generation) { /* Some subs defined here. */
+    if (perldb && was != sub_generation /* Some subs defined here. */
+	&& ret != op->op_next) {	/* Successive compilation. */
 	strcpy(safestr, "_<(eval )");	/* Anything fake and short. */
     }
     return DOCATCH(ret);
