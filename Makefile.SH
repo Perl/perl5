@@ -494,7 +494,7 @@ $(LIBPERL): $& perl$(OBJ_EXT) $(obj) $(LIBPERLEXPORT)
 	case "$useshrplib" in
 	true)
 		$spitshell >>Makefile <<'!NO!SUBS!'
-	$(LD) -o $@ $(SHRPLDFLAGS) perl$(OBJ_EXT) $(obj)
+	$(LD) -o $@ $(SHRPLDFLAGS) perl$(OBJ_EXT) $(obj) $(libs)
 !NO!SUBS!
 		case "$osname" in
 		aix)

@@ -330,6 +330,21 @@ to the beginning of your PATH.
 END
 	fi
 fi
+
+# Check to see if the selected compiler and linker
+# support the -z ignore, -z lazyload and -z combreloc flags.
+echo "int main() { return(0); } " > try.c
+	zflgs=''
+for zf in ignore lazyload combreloc; do
+	if ${cc:-cc} -o try try.c -z $zf > /dev/null 2>&1; then
+		zflgs="$zflgs -z $zf"
+	fi
+done
+if test -n "$zflgs"; then
+	ccdlflags="$ccdlflags $zflgs"
+	lddlflags="$lddlflags -G $zflgs"
+fi
+
 # as --version or ld --version might dump core.
 rm -f try try.c core
 EOCBU
@@ -341,12 +356,8 @@ case "$usethreads" in
 $define|true|[yY]*)
         ccflags="-D_REENTRANT $ccflags"
 
-        # sched_yield is in -lposix4 up to Solaris 2.6, in -lrt starting with Solaris 2.7
-	case `uname -r` in
-	5.[0-6] | 5.5.1) sched_yield_lib="posix4" ;;
-	*) sched_yield_lib="rt";
-	esac
-        set `echo X "$libswanted "| sed -e "s/ c / $sched_yield_lib pthread c /"`
+	sched_yield='yield'
+        set `echo X "$libswanted "| sed -e "s/ c / pthread c /"`
         shift
         libswanted="$*"
 
@@ -496,7 +507,7 @@ Cannot continue, aborting.
 EOM
 		exit 1
 	    fi
-	    case "$cc -v 2>/dev/null" in
+	    case "${cc:-cc} -v 2>/dev/null" in
 	    *gcc*)
 		echo 'int main() { return 0; }' > try.c
 		case "`${cc:-cc} -mcpu=v9 -m64 -S try.c 2>&1 | grep 'm64 is not supported by this configuration'`" in
@@ -561,7 +572,7 @@ case "$uselongdouble" in
 #include <sunmath.h>
 int main() { (void) powl(2, 256); return(0); }
 EOM
-		if cc try.c -lsunmath -o try > /dev/null 2>&1 && ./try; then
+		if ${cc:-cc} try.c -lsunmath -o try > /dev/null 2>&1 && ./try; then
 			libswanted="$libswanted sunmath"
 		fi
 	else
