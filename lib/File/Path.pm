@@ -205,7 +205,9 @@ sub rmtree {
 	}
 	else { 
 	    if ($safe &&
-		($Is_VMS ? !&VMS::Filespec::candelete($root) : !-w $root)) {
+		($Is_VMS ? !&VMS::Filespec::candelete($root)
+		         : !(-l $root || -w $root)))
+	    {
 		print "skipped $root\n" if $verbose;
 		next;
 	    }
