@@ -72,12 +72,20 @@ sub ok {
     _ok($pass, _where(), $name, @mess);
 }
 
+sub _q {
+    my $x = shift;
+    return 'undef' unless defined $x;
+    my $q = $x;
+    $q =~ s/'/\\'/;
+    return "'$q'";
+}
+
 sub is {
     my ($got, $expected, $name, @mess) = @_;
     my $pass = $got eq $expected;
     unless ($pass) {
-	unshift(@mess, "#      got '$got'\n",
-		       "# expected '$expected'\n");
+	unshift(@mess, "#      got "._q($got)."\n",
+		       "# expected "._q($expected)."\n");
     }
     _ok($pass, _where(), $name, @mess);
 }
@@ -86,7 +94,7 @@ sub isnt {
     my ($got, $isnt, $name, @mess) = @_;
     my $pass = $got ne $isnt;
     unless( $pass ) {
-        unshift(@mess, "# it should not be $got\n",
+        unshift(@mess, "# it should not be "._q($got)."\n",
                        "# but it is.\n");
     }
     _ok($pass, _where(), $name, @mess);
