@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess <Paul.Marquess@btinternet.com>
- last modified 22nd Oct 2001
- version 1.79
+ last modified 26th Nov 2001
+ version 1.801
 
  All comments/suggestions/problems are welcome
 
@@ -95,6 +95,9 @@
         1.78 -  Core patch 10335, 10372, 10534, 10549, 11051 included.
         1.79 -  NEXTKEY ignores the input key.
                 Added lots of casts
+        1.800 - Moved backward compatability code into ppport.h.
+                Use the new constants code.
+        1.801 - No change to DB_File.xs
 
 */
 
@@ -103,23 +106,8 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#ifndef PERL_VERSION
-#    include "patchlevel.h"
-#    define PERL_REVISION	5
-#    define PERL_VERSION	PATCHLEVEL
-#    define PERL_SUBVERSION	SUBVERSION
-#endif
-
-#if PERL_REVISION == 5 && (PERL_VERSION < 4 || (PERL_VERSION == 4 && PERL_SUBVERSION <= 75 ))
-
-#    define PL_sv_undef		sv_undef
-#    define PL_na		na
-
-#endif
-
-/* DEFSV appears first in 5.004_56 */
-#ifndef DEFSV
-#    define DEFSV		GvSV(defgv)
+#ifdef _NOT_CORE
+#  include "ppport.h"
 #endif
 
 /* Mention DB_VERSION_MAJOR_CFG, DB_VERSION_MINOR_CFG, and
@@ -135,13 +123,6 @@
 #endif
 
 
-
-/* If Perl has been compiled with Threads support,the symbol op will
-   be defined here. This clashes with a field name in db.h, so get rid of it.
- */
-#ifdef op
-#    undef op
-#endif
 
 #ifdef COMPAT185
 #    include <db_185.h>
@@ -176,17 +157,6 @@
 #  define dXSI32 dNOOP
 
 #endif /* Perl >= 5.7 */
-
-#ifndef pTHX
-#    define pTHX
-#    define pTHX_
-#    define aTHX
-#    define aTHX_
-#endif
-
-#ifndef newSVpvn
-#    define newSVpvn(a,b)	newSVpv(a,b)
-#endif
 
 #include <fcntl.h> 
 
@@ -463,6 +433,7 @@ extern void __getBerkeleyDBInfo(void);
 #endif
 
 /* Internal Global Data */
+
 #define MY_CXT_KEY "DB_File::_guts" XS_VERSION
 
 typedef struct {
@@ -1415,243 +1386,11 @@ SV *   sv ;
 } /* ParseOpenInfo */
 
 
-static double 
-#ifdef CAN_PROTOTYPE
-constant(char *name, int arg)
-#else
-constant(name, arg)
-char *name;
-int arg;
-#endif
-{
-    errno = 0;
-    switch (*name) {
-    case 'A':
-	break;
-    case 'B':
-	if (strEQ(name, "BTREEMAGIC"))
-#ifdef BTREEMAGIC
-	    return BTREEMAGIC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "BTREEVERSION"))
-#ifdef BTREEVERSION
-	    return BTREEVERSION;
-#else
-	    goto not_there;
-#endif
-	break;
-    case 'C':
-	break;
-    case 'D':
-	if (strEQ(name, "DB_LOCK"))
-#ifdef DB_LOCK
-	    return DB_LOCK;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "DB_SHMEM"))
-#ifdef DB_SHMEM
-	    return DB_SHMEM;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "DB_TXN"))
-#ifdef DB_TXN
-	    return (U32)DB_TXN;
-#else
-	    goto not_there;
-#endif
-	break;
-    case 'E':
-	break;
-    case 'F':
-	break;
-    case 'G':
-	break;
-    case 'H':
-	if (strEQ(name, "HASHMAGIC"))
-#ifdef HASHMAGIC
-	    return HASHMAGIC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "HASHVERSION"))
-#ifdef HASHVERSION
-	    return HASHVERSION;
-#else
-	    goto not_there;
-#endif
-	break;
-    case 'I':
-	break;
-    case 'J':
-	break;
-    case 'K':
-	break;
-    case 'L':
-	break;
-    case 'M':
-	if (strEQ(name, "MAX_PAGE_NUMBER"))
-#ifdef MAX_PAGE_NUMBER
-	    return (U32)MAX_PAGE_NUMBER;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "MAX_PAGE_OFFSET"))
-#ifdef MAX_PAGE_OFFSET
-	    return MAX_PAGE_OFFSET;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "MAX_REC_NUMBER"))
-#ifdef MAX_REC_NUMBER
-	    return (U32)MAX_REC_NUMBER;
-#else
-	    goto not_there;
-#endif
-	break;
-    case 'N':
-	break;
-    case 'O':
-	break;
-    case 'P':
-	break;
-    case 'Q':
-	break;
-    case 'R':
-	if (strEQ(name, "RET_ERROR"))
-#ifdef RET_ERROR
-	    return RET_ERROR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "RET_SPECIAL"))
-#ifdef RET_SPECIAL
-	    return RET_SPECIAL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "RET_SUCCESS"))
-#ifdef RET_SUCCESS
-	    return RET_SUCCESS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "R_CURSOR"))
-#ifdef R_CURSOR
-	    return R_CURSOR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "R_DUP"))
-#ifdef R_DUP
-	    return R_DUP;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "R_FIRST"))
-#ifdef R_FIRST
-	    return R_FIRST;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "R_FIXEDLEN"))
-#ifdef R_FIXEDLEN
-	    return R_FIXEDLEN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "R_IAFTER"))
-#ifdef R_IAFTER
-	    return R_IAFTER;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "R_IBEFORE"))
-#ifdef R_IBEFORE
-	    return R_IBEFORE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "R_LAST"))
-#ifdef R_LAST
-	    return R_LAST;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "R_NEXT"))
-#ifdef R_NEXT
-	    return R_NEXT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "R_NOKEY"))
-#ifdef R_NOKEY
-	    return R_NOKEY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "R_NOOVERWRITE"))
-#ifdef R_NOOVERWRITE
-	    return R_NOOVERWRITE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "R_PREV"))
-#ifdef R_PREV
-	    return R_PREV;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "R_RECNOSYNC"))
-#ifdef R_RECNOSYNC
-	    return R_RECNOSYNC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "R_SETCURSOR"))
-#ifdef R_SETCURSOR
-	    return R_SETCURSOR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "R_SNAPSHOT"))
-#ifdef R_SNAPSHOT
-	    return R_SNAPSHOT;
-#else
-	    goto not_there;
-#endif
-	break;
-    case 'S':
-	break;
-    case 'T':
-	break;
-    case 'U':
-	break;
-    case 'V':
-	break;
-    case 'W':
-	break;
-    case 'X':
-	break;
-    case 'Y':
-	break;
-    case 'Z':
-	break;
-    case '_':
-	break;
-    }
-    errno = EINVAL;
-    return 0;
-
-not_there:
-    errno = ENOENT;
-    return 0;
-}
+#include "constants.h"   
 
 MODULE = DB_File	PACKAGE = DB_File	PREFIX = db_
+
+INCLUDE: constants.xs
 
 BOOT:
   {
@@ -1663,10 +1402,6 @@ BOOT:
     empty.size =  sizeof(recno_t) ;
   }
 
-double
-constant(name,arg)
-	char *		name
-	int		arg
 
 
 DB_File
@@ -1759,8 +1494,8 @@ db_FETCH(db, key, flags=0)
 	DBTKEY		key
 	u_int		flags
 	PREINIT:
-	dMY_CXT ;
-	int RETVAL ;
+	  dMY_CXT ;
+	  int RETVAL ;
 	CODE:
 	{
             DBT		value ;
@@ -1789,8 +1524,8 @@ void
 db_FIRSTKEY(db)
 	DB_File		db
 	PREINIT:
-	dMY_CXT ;
-	int RETVAL ;
+	  dMY_CXT ;
+	  int RETVAL ;
 	CODE:
 	{
 	    DBTKEY	key ;
@@ -1809,8 +1544,8 @@ db_NEXTKEY(db, key)
 	DB_File		db
 	DBTKEY		key = NO_INIT
 	PREINIT:
-	dMY_CXT ;
-	int RETVAL ;
+	  dMY_CXT ;
+	  int RETVAL ;
 	CODE:
 	{
 	    DBT		value ;
@@ -1877,7 +1612,7 @@ pop(db)
 	  dMY_CXT;
 	ALIAS:		POP = 1
 	PREINIT:
-	I32 RETVAL;
+	  I32 RETVAL;
 	CODE:
 	{
 	    DBTKEY	key ;
@@ -1908,7 +1643,7 @@ shift(db)
 	  dMY_CXT;
 	ALIAS:		SHIFT = 1
 	PREINIT:
-	I32 RETVAL;
+	  I32 RETVAL;
 	CODE:
 	{
 	    DBT		value ;
@@ -2060,7 +1795,7 @@ int
 db_fd(db)
 	DB_File		db
 	PREINIT:
-	dMY_CXT ;
+	  dMY_CXT ;
 	CODE:
 	  CurrentDB = db ;
 #ifdef DB_VERSION_MAJOR

@@ -641,11 +641,20 @@ programming language, you insensitive scoundrel!
 
 =head2 How can I match strings with multibyte characters?
 
-This is hard, and there's no good way.  Perl does not directly support
-wide characters.  It pretends that a byte and a character are
-synonymous.  The following set of approaches was offered by Jeffrey
-Friedl, whose article in issue #5 of The Perl Journal talks about this
-very matter.
+Starting from Perl 5.6 Perl has had some level of multibyte character
+support.  Perl 5.8 or later is recommended.  Supported multibyte
+character repetoires include Unicode, and legacy encodings
+through the Encode module.  See L<perluniintro>, L<perlunicode>,
+and L<Encode>.
+
+If you are stuck with older Perls, you can do Unicode with the
+C<Unicode::String> module, and character conversions using the
+C<Unicode::Map8> and C<Unicode::Map> modules.  If you are using
+Japanese encodings, you might try using the jperl 5.005_03.
+
+Finally, the following set of approaches was offered by Jeffrey
+Friedl, whose article in issue #5 of The Perl Journal talks about
+this very matter.
 
 Let's suppose you have some weird Martian encoding where pairs of
 ASCII uppercase letters encode single Martian letters (i.e. the two

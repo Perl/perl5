@@ -307,4 +307,35 @@ unchanged but will trigger a warning (with C<-w>) to avoid misspelt tags
 names being silently added to @EXPORT or @EXPORT_OK. Future versions
 may make this a fatal error.
 
+=head2 C<AUTOLOAD>ed Constants
+
+Many modules make use of C<AUTOLOAD>ing for constant subroutines to
+avoid having to compile and waste memory on rarely used values (see
+L<perlsub> for details on constant subroutines).  Calls to such
+constant subroutines are not optimized away at compile time because
+they can't be checked at compile time for constancy.
+
+Even if a prototype is available at compile time, the body of the
+subroutine is not (it hasn't been C<AUTOLOAD>ed yet). perl needs to
+examine both the C<()> prototype and the body of a subroutine at
+compile time to detect that it can safely replace calls to that
+subroutine with the constant value.
+
+A workaround for this is to call the constants once in a C<BEGIN> block:
+
+   package My ;
+
+   use Socket ;
+
+   foo( SO_LINGER );     ## SO_LINGER NOT optimized away; called at runtime
+   BEGIN { SO_LINGER }
+   foo( SO_LINGER );     ## SO_LINGER optimized away at compile time.
+
+This forces the C<AUTOLOAD> for C<SO_LINGER> to take place before
+SO_LINGER is encountered later in C<My> package.
+
+If you are writing a package that C<AUTOLOAD>s, consider forcing
+an C<AUTOLOAD> for any constants explicitly imported by other packages
+or which are usually used when your package is C<use>d.
+
 =cut

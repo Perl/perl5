@@ -45,7 +45,7 @@ print OUT <<'!NO!SUBS!';
 
 use strict;
 use warnings;
-use v5.6.0;
+use 5.006_000;
 
 use FileHandle;
 use Config;

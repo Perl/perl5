@@ -169,7 +169,6 @@ sub FILL
  my ($obj,$fh) = @_;
  my $line = <$fh>;
  return (defined $line) ? decode_qp($line) : undef;
- return undef;
 }
 
 sub WRITE

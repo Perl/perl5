@@ -545,7 +545,7 @@ though the call specified that the change should not persist after
 Perl exited.  This is fixed by DEC CSC patch ALPACRT04_061 or later.
 See also:
 
-    http://ftp.service.compaq.com/patches/.new/openvms.shtml
+    http://ftp.support.compaq.com/patches/.new/openvms.shtml
 
 =back
 

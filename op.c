@@ -3431,10 +3431,10 @@ Perl_dofile(pTHX_ OP *term)
     GV *gv;
 
     gv = gv_fetchpv("do", FALSE, SVt_PVCV);
-    if (!(gv && GvIMPORTED_CV(gv)))
+    if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv)))
 	gv = gv_fetchpv("CORE::GLOBAL::do", FALSE, SVt_PVCV);
 
-    if (gv && GvIMPORTED_CV(gv)) {
+    if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) {
 	doop = ck_subr(newUNOP(OP_ENTERSUB, OPf_STACKED,
 			       append_elem(OP_LIST, term,
 					   scalar(newUNOP(OP_RV2CV, 0,
@@ -5929,8 +5929,11 @@ Perl_ck_glob(pTHX_ OP *o)
     if ((o->op_flags & OPf_KIDS) && !cLISTOPo->op_first->op_sibling)
 	append_elem(OP_GLOB, o, newDEFSVOP());
 
-    if (!((gv = gv_fetchpv("glob", FALSE, SVt_PVCV)) && GvIMPORTED_CV(gv)))
+    if (!((gv = gv_fetchpv("glob", FALSE, SVt_PVCV))
+	  && GvCVu(gv) && GvIMPORTED_CV(gv)))
+    {
 	gv = gv_fetchpv("CORE::GLOBAL::glob", FALSE, SVt_PVCV);
+    }
 
 #if !defined(PERL_EXTERNAL_GLOB)
     /* XXX this can be tightened up and made more failsafe. */
@@ -5948,7 +5951,7 @@ Perl_ck_glob(pTHX_ OP *o)
     }
 #endif /* PERL_EXTERNAL_GLOB */
 
-    if (gv && GvIMPORTED_CV(gv)) {
+    if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) {
 	append_elem(OP_GLOB, o,
 		    newSVOP(OP_CONST, 0, newSViv(PL_glob_index++)));
 	o->op_type = OP_LIST;
@@ -6259,10 +6262,10 @@ Perl_ck_require(pTHX_ OP *o)
 
     /* handle override, if any */
     gv = gv_fetchpv("require", FALSE, SVt_PVCV);
-    if (!(gv && GvIMPORTED_CV(gv)))
+    if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv)))
 	gv = gv_fetchpv("CORE::GLOBAL::require", FALSE, SVt_PVCV);
 
-    if (gv && GvIMPORTED_CV(gv)) {
+    if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) {
 	OP *kid = cUNOPo->op_first;
 	cUNOPo->op_first = 0;
 	op_free(o);

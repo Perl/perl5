@@ -1977,6 +1977,9 @@ XS(XS_Cwd_sys_cwd)
 	RETVAL = _getcwd2(p, MAXPATHLEN);
 	ST(0) = sv_newmortal();
 	sv_setpv((SV*)ST(0), RETVAL);
+#ifndef INCOMPLETE_TAINTS
+	SvTAINTED_on(ST(0));
+#endif
     }
     XSRETURN(1);
 }
@@ -2571,18 +2574,13 @@ check_emx_runtime(char **env, EXCEPTIONREGISTRATIONRECORD *preg)
     /* if (flags & FORCE_EMX_INIT_INSTALL_ATEXIT) */
     atexit(jmp_out_of_atexit);		/* Allow run of atexit() w/o exit()  */
 
-    if (!env) {				/* Fetch from the process info block */
+    if (env == NULL) {			/* Fetch from the process info block */
 	int c = 0;
 	PPIB pib;
 	PTIB tib;
 	char *e, **ep;
 
 	DosGetInfoBlocks(&tib, &pib);
-	e = pib->pib_pchenv;
-	while (*e) {			/* Get count */
-	    c++;
-	    e = e + strlen(e) + 1;
-	}
 	e = pib->pib_pchenv;
 	while (*e) {			/* Get count */
 	    c++;

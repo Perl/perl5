@@ -20,7 +20,7 @@ use vars qw($VERSION $Verbose $Switches $Have_Devel_Corestack $Curtest
 
 $Have_Devel_Corestack = 0;
 
-$VERSION = 1.25;
+$VERSION = 1.26;
 
 $ENV{HARNESS_ACTIVE} = 1;
 

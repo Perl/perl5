@@ -31,7 +31,7 @@ sub writefile {
 sub readfile {
   $READFILE_CALLS++;
   my $FILE = shift;
-  open F, "< $FILE" or die "Couldn't write temporary file $FILE: $!";
+  open F, "< $FILE" or die "Couldn't read temporary file $FILE: $!";
   my $data = <F>;
   close F;
   $data;
@@ -61,7 +61,7 @@ my $t2 = readfile($FILE);
 ++$n; print ((($READFILE_CALLS == 1) ? '' : 'not '), "ok $n\n");
 ++$n; print ((($t1 eq $t2) ? '' : 'not '), "ok $n\n");
 
-sleep 2;
+sleep 3;
 writefile($FILE);
 my $t3 = readfile($FILE);
 ++$n; print "ok $n\n";

@@ -809,3 +809,13 @@ read($bla, FILE, 1);
 EXPECT
 Can't modify constant item in read at - line 1, near "1)"
 Execution of - aborted due to compilation errors.
+######## scalar ref to file test operator segfaults on 5.6.1 [ID 20011127.155]
+# This only happens if the filename is 11 characters or less.
+$foo = \-f "blah";
+print "ok" if ref $foo && !$$foo;
+EXPECT
+ok
+######## [ID 20011128.159] 'X' =~ /\X/ segfault in 5.6.1
+print "ok" if 'X' =~ /\X/;
+EXPECT
+ok

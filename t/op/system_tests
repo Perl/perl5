@@ -1,5 +1,6 @@
 #!perl
 
+use Config;
 use Cwd;
 use strict;
 
@@ -80,6 +81,7 @@ my @av = (
   ["\ta b c ", " "],
   ["", "\ta b c ", "abc"],
   [" ", "\ta b c ", "abc"],
+  ['" "', 'a" "b" "c', "abc"],
 );
 
 print "1.." . (@commands * @av * 2) . "\n";
@@ -89,21 +91,29 @@ for my $cmds (@commands) {
 	my @cmds = defined($cmds) ? (ref($cmds) ? @$cmds : $cmds) : ();
 	my @args = defined($args) ? (ref($args) ? @$args : $args) : ();
 	print "######## [@cmds]\n";
-	print "<", join('><', $cmds[$#cmds], @args), ">\n";
+	print "<", join('><',
+			$cmds[$#cmds],
+			map { my $x = $_; $x =~ s/"//g; $x } @args),
+	      ">\n";
 	if (system(@cmds,@args) != 0) {
 	    print "Failed, status($?)\n";
-#	    print "Running again in debug mode\n";
-#	    $^D = 1; # -Dp
-#	    system(@cmds,@args);
+	    if ($Config{ccflags} =~ /\bDDEBUGGING\b/) {
+		print "Running again in debug mode\n";
+		$^D = 1; # -Dp
+		system(@cmds,@args);
+	    }
 	}
 	$^D = 0;
-	my $cmdstr = join " ", map { /\s|^$/ ? qq["$_"] : $_ } @cmds, @args;
+	my $cmdstr = join " ", map { /\s|^$/ && !/\"/
+				    ? qq["$_"] : $_ } @cmds, @args;
 	print "######## '$cmdstr'\n";
 	if (system($cmdstr) != 0) {
 	    print "Failed, status($?)\n";
-#	    print "Running again in debug mode\n";
-#	    $^D = 1; # -Dp
-#	    system($cmdstr);
+	    if ($Config{ccflags} =~ /\bDDEBUGGING\b/) {
+		print "Running again in debug mode\n";
+		$^D = 1; # -Dp
+		system($cmdstr);
+	    }
 	}
 	$^D = 0;
     }

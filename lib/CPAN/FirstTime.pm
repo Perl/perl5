@@ -16,6 +16,7 @@ use ExtUtils::MakeMaker qw(prompt);
 use FileHandle ();
 use File::Basename ();
 use File::Path ();
+use File::Spec;
 use vars qw($VERSION);
 $VERSION = substr q$Revision: 1.54 $, 10;
 
@@ -97,7 +98,7 @@ This may be a site-wide directory or a personal directory.
 
 };
 
-    my $cpan_home = $CPAN::Config->{cpan_home} || MM->catdir($ENV{HOME}, ".cpan");
+    my $cpan_home = $CPAN::Config->{cpan_home} || File::Spec->catdir($ENV{HOME}, ".cpan");
     if (-d $cpan_home) {
 	print qq{
 
@@ -140,8 +141,8 @@ next question.
 
 };
 
-    $CPAN::Config->{keep_source_where} = MM->catdir($CPAN::Config->{cpan_home},"sources");
-    $CPAN::Config->{build_dir} = MM->catdir($CPAN::Config->{cpan_home},"build");
+    $CPAN::Config->{keep_source_where} = File::Spec->catdir($CPAN::Config->{cpan_home},"sources");
+    $CPAN::Config->{build_dir} = File::Spec->catdir($CPAN::Config->{cpan_home},"build");
 
     #
     # Cache size, Index expire
@@ -268,7 +269,7 @@ by ENTER.
       my $path = $CPAN::Config->{$progname} 
 	  || $Config::Config{$progname}
 	      || "";
-      if (MM->file_name_is_absolute($path)) {
+      if (File::Spec->file_name_is_absolute($path)) {
 	# testing existence is not good enough, some have these exe
 	# extensions
 
@@ -295,7 +296,7 @@ by ENTER.
     $ans = prompt("What is your favorite pager program?",$path);
     $CPAN::Config->{'pager'} = $ans;
     $path = $CPAN::Config->{'shell'};
-    if (MM->file_name_is_absolute($path)) {
+    if (File::Spec->file_name_is_absolute($path)) {
 	warn "Warning: configured $path does not exist\n" unless -e $path;
 	$path = "";
     }
@@ -451,7 +452,7 @@ you don\'t know a WAIT server near you, just press ENTER.
 
 sub conf_sites {
   my $m = 'MIRRORED.BY';
-  my $mby = MM->catfile($CPAN::Config->{keep_source_where},$m);
+  my $mby = File::Spec->catfile($CPAN::Config->{keep_source_where},$m);
   File::Path::mkpath(File::Basename::dirname($mby));
   if (-f $mby && -f $m && -M $m < -M $mby) {
     require File::Copy;
@@ -507,7 +508,7 @@ sub find_exe {
     my($dir);
     #warn "in find_exe exe[$exe] path[@$path]";
     for $dir (@$path) {
-	my $abs = MM->catfile($dir,$exe);
+	my $abs = File::Spec->catfile($dir,$exe);
 	if (($abs = MM->maybe_command($abs))) {
 	    return $abs;
 	}

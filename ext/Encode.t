@@ -8,7 +8,9 @@ BEGIN {
     }
 }
 use Test;
-use Encode qw(from_to encode decode encode_utf8 decode_utf8 find_encoding);
+use Encode qw(from_to encode decode
+	      encode_utf8 decode_utf8
+	      find_encoding is_utf8);
 use charnames qw(greek);
 my @encodings = grep(/iso-?8859/,Encode::encodings());
 my $n = 2;
@@ -16,7 +18,7 @@ my @character_set = ('0'..'9', 'A'..'Z', 'a'..'z');
 my @source = qw(ascii iso8859-1 cp1250);
 my @destiny = qw(cp1047 cp37 posix-bc);
 my @ebcdic_sets = qw(cp1047 cp37 posix-bc);
-plan test => 38+$n*@encodings + 2*@source*@destiny*@character_set + 2*@ebcdic_sets*256;
+plan test => 38+$n*@encodings + 2*@source*@destiny*@character_set + 2*@ebcdic_sets*256 + 6;
 my $str = join('',map(chr($_),0x20..0x7E));
 my $cpy = $str;
 ok(length($str),from_to($cpy,'iso8859-1','Unicode'),"Length Wrong");
@@ -118,5 +120,21 @@ for my $i (0x41,128,256,0x20AC)
   ok(encode('utf8',$c),$o,"utf8 encode by name broken for $i");
   ok(decode('utf8',$o),$c,"utf8 decode by name broken for $i");
  }
+
+
+# is_utf8
+
+ok(  is_utf8("\x{100}"));
+ok(! is_utf8("a"));
+ok(! is_utf8(""));
+"\x{100}" =~ /(.)/;
+ok(  is_utf8($1)); # ID 20011127.151
+$a = $1;
+ok(  is_utf8($a));
+$a = "\x{100}";
+chop $a;
+ok(  is_utf8($a)); # weird but true: an empty UTF-8 string
+
+
 
 

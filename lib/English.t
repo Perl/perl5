@@ -112,13 +112,13 @@ is( $INPUT_LINE_NUMBER, 2, '$INPUT_LINE_NUMBER' );
 
 my %hash;
 $SUBSCRIPT_SEPARATOR = '|';
-$hash{1,2,3} = 1;
+$hash{d,e,f} = 1;
 $SUBSEP = ',';
 $hash{'a', 'b', 'c'} = 1;
 my @keys = sort keys %hash;
 
-is( $keys[0], '1|2|3', '$SUBSCRIPT_SEPARATOR' ); 
-is( $keys[1], 'a,b,c', '$SUBSCRIPT_SEPARATOR' ); 
+is( $keys[0], 'a,b,c', '$SUBSCRIPT_SEPARATOR' ); 
+is( $keys[1], 'd|e|f', '$SUBSCRIPT_SEPARATOR' ); 
 
 eval { is( $EXCEPTIONS_BEING_CAUGHT, 1, '$EXCEPTIONS_BEING_CAUGHT' ) };
 ok( !$EXCEPTIONS_BEING_CAUGHT, '$EXCEPTIONS_BEING_CAUGHT should be false' );

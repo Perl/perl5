@@ -1,6 +1,13 @@
 #!./perl
 
-print "1..61\n";
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = qw(.);
+}
+
+print "1..62\n";
+
+require 'test.pl';
 
 # Test glob operations.
 
@@ -295,9 +302,22 @@ sub x::DESTROY {print "ok ", 54 + shift->[0], "\n"}
 }
 
 
+my $result = runperl (switches=>['-l'],
+                      prog=> 'print 1; print qq-*$\*-;print 1;');
+my $expect = "1\n*\n*\n1\n";
+if ($result eq $expect) {
+  print "ok 59\n";
+} else {
+  print "not ok 59\n";
+  foreach ($expect, $result) {
+    s/\n/\\n/gs;
+  }
+  print "# expected \"$expect\", got \"$result\"\n";
+}
+
 # test global destruction
 
-my $test = 59;
+my $test = 60;
 my $test1 = $test + 1;
 my $test2 = $test + 2;
 

@@ -1278,6 +1278,7 @@ $   got_sub   = "false"
 $   got_api_revision   = "false"
 $   got_api_version    = "false"
 $   got_api_subversion = "false"
+$   got_perl_patchlevel= "false"
 $   OPEN/READONLY CONFIG 'patchlevel_h' 
 $Patchlevel_h_loop:
 $   READ/END_Of_File=Close_patch/ERROR=Close_patch CONFIG line
@@ -1311,11 +1312,19 @@ $     line = F$EDIT(line,"COMPRESS, TRIM")
 $     api_subversion = F$ELEMENT(2," ",line)
 $     got_api_subversion = "true"
 $   ENDIF
+$   IF ((F$LOCATE("""DEVEL",line).NE.F$LENGTH(line)).AND.(.NOT.got_perl_patchlevel))
+$   THEN
+$     line = F$EDIT(line,"COMPRESS, TRIM")
+$     perl_patchlevel = F$ELEMENT(1,"""",line)
+$     perl_patchlevel = perl_patchlevel - "DEVEL"
+$     got_perl_patchlevel = "true"
+$   ENDIF
 $   IF (.NOT. got_patch) .OR. -
        (.NOT. got_sub) .OR. - 
        (.NOT. got_api_revision) .OR. -
        (.NOT. got_api_version) .OR. -
-       (.NOT. got_api_subversion) -
+       (.NOT. got_api_subversion) .OR. -
+       (.NOT. got_perl_patchlevel) -
       THEN GOTO Patchlevel_h_loop
 $Close_patch:
 $   CLOSE CONFIG
@@ -1325,13 +1334,14 @@ $   subversion="0"
 $   api_revision="0"
 $   api_version="0"
 $   api_subversion="0"
+$   perl_patchlevel="0"
 $ ENDIF
-$ IF (F$STRING(subversion) .NES. "0")
+$ version_patchlevel_string = "version ''patchlevel' subversion ''subversion'"
+$ IF got_perl_patchlevel .AND. perl_patchlevel .NES. "0"
 $ THEN
-$   echo "(You have ''package' revision ''revision' patchlevel ''patchlevel' subversion ''subversion'.)"
-$ ELSE
-$   echo "(You have ''package' revision ''revision' patchlevel ''patchlevel'.)"
+$   version_patchlevel_string = "''version_patchlevel_string' patch ''perl_patchlevel'"
 $ ENDIF
+$ echo "(You have ''package' ''version_patchlevel_string'.)"
 $!
 $ version = revision + "_" + patchlevel + "_" + subversion
 $!
@@ -2498,6 +2508,7 @@ $   IF F$EXTRACT(0,4,line) .EQS. "ext/" THEN -
       xxx = F$EXTRACT(4,line_len - 16,line)
 $   IF xxx .EQS. "DynaLoader" THEN goto ext_loop     ! omit
 $   IF xxx .EQS. "SDBM_File/sdbm" THEN goto ext_loop ! sub extension - omit
+$   IF xxx .EQS. "Devel/PPPort/harness" THEN goto ext_loop ! sub extension - omit
 $   IF F$EXTRACT(0,8,line) .EQS. "vms/ext/" THEN -
       xxx = "VMS/" + F$EXTRACT(8,line_len - 20,line)
 $   known_extensions = known_extensions + " ''xxx'"
@@ -2893,9 +2904,9 @@ $   lib_ext=".olb"
 $ ENDIF
 $ dlobj="dl_vms''obj_ext'"
 $!
-$ cppstdin="''perl_cc'/noobj/preprocess=sys$output sys$input"
+$ cppstdin="''perl_cc'/noobj/comments=as_is/preprocess=sys$output sys$input"
 $ cppminus=" "
-$ cpprun="''perl_cc'/noobj/preprocess=sys$output sys$input"
+$ cpprun="''perl_cc'/noobj/comments=as_is/preprocess=sys$output sys$input"
 $ cpplast=" "
 $!
 $ timetype="time_t"
@@ -4914,8 +4925,72 @@ $   WS "    }"
 $   WS "    printf(""%d\n"", i);"
 $   WS "    exit(0);"
 $   WS "}"
+$   CS
 $   GOSUB compile
 $   d_nv_preserves_uv_bits = tmp
+$ ENDIF
+$!
+$ echo4 "Checking whether your kill() uses SYS$FORCEX..."
+$ kill_by_sigprc = "undef"
+$ OS
+$ WS "#include <stdio.h>"
+$ WS "#include <signal.h>"
+$ WS "void handler(int s) { printf(""%d\n"",s); } "
+$ WS "main(){"
+$ WS "    printf(""0"");"
+$ WS "    signal(1,handler); kill(0,1);"
+$ WS "}"
+$ CS
+$ ON ERROR THEN CONTINUE
+$ GOSUB compile
+$ IF tmp .NES. "01"
+$ THEN 
+$   echo "Yes, it does." 
+$   echo4 "Checking whether we can use SYS$SIGPRC instead"
+$   OS
+$   WS "#include <stdio.h>"
+$   WS "#include <lib$routines.h>"
+$   WS "unsigned long code = 0;"
+$   WS "int handler(unsigned long *args) {"
+$   WS "    code = args[1];"
+$   WS "    return 1;"
+$   WS "}"
+$   WS "main() { "
+$   WS "    int iss, sys$sigprc();"
+$   WS "    lib$establish(handler);"
+$   WS "    iss = sys$sigprc(0,0,0x1234);"
+$   WS "    iss =  ((iss&1)==1 && code == 0x1234);" 
+$   WS "    printf(""%d\n"",iss);"
+$   WS "}"
+$   CS
+$   GOSUB compile
+$   IF tmp .EQS. "1"
+$   THEN
+$       echo "looks like we can"
+$       kill_by_sigprc = "define"
+$!
+$!      since SIGBUS and SIGSEGV indistinguishable, make them the same here.
+$!      sigusr1 and sigusr2 show up in VMS6.2 and later
+$!
+$       if  vms_ver .GES. "6.2"
+$       then
+$           sig_name="ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM ABRT USR1 USR2"",0"
+$           psnwc1="""ZERO"",""HUP"",""INT"",""QUIT"",""ILL"",""TRAP"",""IOT"",""EMT"",""FPE"",""KILL"",""BUS"",""SEGV"",""SYS"","
+$           psnwc2="""PIPE"",""ALRM"",""TERM"",""ABRT"",""USR1"",""USR2"",0"
+$           sig_name_init = psnwc1 + psnwc2
+$           sig_num="0 1 2 3 4 5 6 7 8 9 10 10 12 13 14 15 6 16 17"",0"
+$           sig_num_init="0,1,2,3,4,5,6,7,8,9,10,10,12,13,14,15,6,16,17,0"
+$           sig_size="19"
+$       else
+$           sig_name="ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM ABRT"",0"
+$           psnwc1="""ZERO"",""HUP"",""INT"",""QUIT"",""ILL"",""TRAP"",""IOT"",""EMT"",""FPE"",""KILL"",""BUS"",""SEGV"",""SYS"","
+$           psnwc2="""PIPE"",""ALRM"",""TERM"",""ABRT"",0"
+$           sig_name_init = psnwc1 + psnwc2
+$           sig_num="0 1 2 3 4 5 6 7 8 9 10 10 12 13 14 15 6"",0"
+$           sig_num_init="0,1,2,3,4,5,6,7,8,9,10,10,12,13,14,15,6,0"
+$           sig_size="17"
+$       endif
+$   ENDIF
 $ ENDIF
 $ DELETE/SYMBOL tmp
 $!
@@ -5042,6 +5117,7 @@ $ WC "d_cuserid='define'"
 $ WC "d_dbl_dig='define'"
 $ WC "d_dbminitproto='undef'"
 $ WC "d_difftime='define'"
+$ WC "d_dirfd='undef'"
 $ WC "d_dirnamlen='define'"
 $ WC "d_dlerror='undef'"
 $ WC "d_dlsymun='undef'"
@@ -5188,6 +5264,7 @@ $ WC "d_perl_otherlibdirs='undef'"
 $ WC "d_phostname='" + d_phostname + "'"
 $ WC "d_pipe='define'"
 $ WC "d_poll='undef'"
+$ WC "d_procselfexe='undef'"
 $ WC "d_pthread_atfork='undef'"
 $ WC "d_pthread_yield='" + d_pthread_yield + "'"
 $ WC "d_pthreads_created_joinable='" + d_pthreads_created_joinable + "'"
@@ -5531,6 +5608,7 @@ $! WC "prefix='" + vms_prefix + "'"
 $ WC "prefix='" + prefix + "'"
 $ WC "privlib='" + privlib + "'"
 $ WC "privlibexp='" + privlibexp + "'"
+$ WC "procselfexe=' '"
 $ WC "prototype='define'"
 $ WC "ptrsize='" + ptrsize + "'"
 $ WC "quadkind='" + quadkind + "'"
@@ -5638,6 +5716,7 @@ $ WC "vendorarchexp='" + "'"
 $ WC "vendorlib_stem='" + "'"
 $ WC "vendorlibexp='" + "'"
 $ WC "version='" + version + "'"
+$ WC "version_patchlevel_string='" + version_patchlevel_string + "'"
 $ WC "vms_cc_type='" + vms_cc_type + "'" ! VMS specific
 $ WC "vms_prefix='" + vms_prefix + "'" ! VMS specific
 $ WC "vms_ver='" + vms_ver + "'" ! VMS specific
@@ -5748,6 +5827,7 @@ $ THEN
 $! Alas this does not help to build Fcntl
 $!   WC "#define PERL_IGNORE_FPUSIG SIGFPE"
 $ ENDIF
+$ IF kill_by_sigprc .EQS. "define" then WC "#define KILL_BY_SIGPRC"
 $ CLOSE CONFIG
 $!
 $ echo4 "Doing variable substitutions on .SH files..."

@@ -101,8 +101,8 @@ Parentheses for capturing, Other regexp features
 
 =back
 
-=head2 perlfaq - frequently asked questions about Perl ($Date: 2001/10/16
-13:27:22 $)
+=head2 perlfaq - frequently asked questions about Perl ($Date: 2001/11/19
+17:09:37 $)
 
 =over 4
 
@@ -421,9 +421,9 @@ EXPR,LIST, hex EXPR, hex, import, index STR,SUBSTR,POSITION, index
 STR,SUBSTR, int EXPR, int, ioctl FILEHANDLE,FUNCTION,SCALAR, join
 EXPR,LIST, keys HASH, kill SIGNAL, LIST, last LABEL, last, lc EXPR, lc,
 lcfirst EXPR, lcfirst, length EXPR, length, link OLDFILE,NEWFILE, listen
-SOCKET,QUEUESIZE, local EXPR, localtime EXPR, lock, log EXPR, log, lstat
-EXPR, lstat, m//, map BLOCK LIST, map EXPR,LIST, mkdir FILENAME,MASK, mkdir
-FILENAME, msgctl ID,CMD,ARG, msgget KEY,FLAGS, msgrcv
+SOCKET,QUEUESIZE, local EXPR, localtime EXPR, lock THING, log EXPR, log,
+lstat EXPR, lstat, m//, map BLOCK LIST, map EXPR,LIST, mkdir FILENAME,MASK,
+mkdir FILENAME, msgctl ID,CMD,ARG, msgget KEY,FLAGS, msgrcv
 ID,VAR,SIZE,TYPE,FLAGS, msgsnd ID,MSG,FLAGS, my EXPR, my EXPR : ATTRIBUTES,
 next LABEL, next, no Module LIST, oct EXPR, oct, open FILEHANDLE,EXPR, open
 FILEHANDLE,MODE,EXPR, open FILEHANDLE,MODE,EXPR,LIST, open FILEHANDLE,
@@ -1026,11 +1026,11 @@ $PROCESS_ID, $PID, $$, $REAL_USER_ID, $UID, $<, $EFFECTIVE_USER_ID, $EUID,
 $>, $REAL_GROUP_ID, $GID, $(, $EFFECTIVE_GROUP_ID, $EGID, $),
 $PROGRAM_NAME, $0, $[, $], $COMPILING, $^C, $DEBUGGING, $^D,
 $SYSTEM_FD_MAX, $^F, $^H, %^H, $INPLACE_EDIT, $^I, $^M, $OSNAME, $^O,
-$PERLDB, $^P, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200,
-$LAST_REGEXP_CODE_RESULT, $^R, $EXCEPTIONS_BEING_CAUGHT, $^S, $BASETIME,
-$^T, ${^TAINT}, $PERL_VERSION, $^V, $WARNING, $^W, ${^WARNING_BITS},
-${^WIDE_SYSTEM_CALLS}, $EXECUTABLE_NAME, $^X, ARGV, $ARGV, @ARGV, @F, @INC,
-@_, %INC, %ENV, $ENV{expr}, %SIG, $SIG{expr}
+${^OPEN}, $PERLDB, $^P, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
+0x100, 0x200, $LAST_REGEXP_CODE_RESULT, $^R, $EXCEPTIONS_BEING_CAUGHT, $^S,
+$BASETIME, $^T, ${^TAINT}, $PERL_VERSION, $^V, $WARNING, $^W,
+${^WARNING_BITS}, ${^WIDE_SYSTEM_CALLS}, $EXECUTABLE_NAME, $^X, ARGV,
+$ARGV, @ARGV, @F, @INC, @_, %INC, %ENV, $ENV{expr}, %SIG, $SIG{expr}
 
 =item Error Indicators
 
@@ -1132,6 +1132,74 @@ ${^WIDE_SYSTEM_CALLS}, $EXECUTABLE_NAME, $^X, ARGV, $ARGV, @ARGV, @F, @INC,
 
 =back
 
+=head2 perlpacktut - tutorial on C<pack> and C<unpack>
+
+=over 4
+
+=item DESCRIPTION
+
+=item The Basic Principle
+
+=item Packing Text
+
+=item Packing Numbers
+
+=over 4
+
+=item Integers
+
+=item Unpacking a Stack Frame
+
+=item How to Eat an Egg on a Net
+
+=item Floating point Numbers
+
+=back
+
+=item Exotic Templates
+
+=over 4
+
+=item Bit Strings
+
+=item Uuencoding
+
+=item Doing Sums
+
+=item  Unicode
+
+=back
+
+=item Lengths and Widths
+
+=over 4
+
+=item String Lengths
+
+=item Dynamic Templates
+
+=item Another Portable Binary Encoding
+
+=back
+
+=item Packing and Unpacking C Structures
+
+=over 4
+
+=item The Alignment Pit
+
+=item Alignment, Take 2
+
+=item Pointers for How to Use Them
+
+=back
+
+=item Pack Recipes
+
+=item Authors
+
+=back
+
 =head2 perlretut - Perl regular expressions tutorial
 
 =over 4
@@ -1210,7 +1278,7 @@ i, m, s, x
 
 =item Regular Expressions
 
-cntrl, graph, print, punct, xdigit
+[1], [2], [3], cntrl, graph, print, punct, xdigit
 
 =item Extended Patterns
 
@@ -2153,6 +2221,8 @@ Locales?
 
 =back
 
+=item UNICODE IN OLDER PERLS
+
 =item SEE ALSO
 
 =item ACKNOWLEDGEMENTS
@@ -2417,9 +2487,9 @@ module (sometimes unnecessary), B<INSTALL> the module
 =item Pragmatic Modules
 
 attributes, attrs, autouse, base, blib, bytes, charnames, constant,
-diagnostics, fields, filetest, integer, less, locale, open, ops, overload,
-re, sigtrap, strict, subs, threads, utf8, vars, warnings,
-warnings::register
+diagnostics, encoding, fields, filetest, integer, less, locale, open, ops,
+overload, re, sigtrap, sort, strict, subs, threads, utf8, vars, vmsish,
+warnings, warnings::register
 
 =item Standard Modules
 
@@ -2443,26 +2513,26 @@ File::Spec::Mac, File::Spec::OS2, File::Spec::Unix, File::Spec::VMS,
 File::Spec::Win32, File::Temp, File::stat, FileCache, FileHandle,
 Filter::Simple, FindBin, Getopt::Long, Getopt::Std, I18N::Collate,
 I18N::LangTags, I18N::LangTags::List, IO, IPC::Open2, IPC::Open3,
-Lingua::KO::Hangul::Util, Locale::Constants, Locale::Country,
-Locale::Currency, Locale::Language, Locale::Maketext,
-Locale::Maketext::TPJ13, Math::BigFloat, Math::BigInt, Math::BigInt::Calc,
-Math::Complex, Math::Trig, Memoize, Memoize::AnyDBM_File, Memoize::Expire,
-Memoize::ExpireFile, Memoize::ExpireTest, Memoize::NDBM_File,
-Memoize::SDBM_File, Memoize::Saves, Memoize::Storable, NDBM_File, NEXT,
-Net::Cmd, Net::Config, Net::Domain, Net::FTP, Net::NNTP, Net::Netrc,
-Net::POP3, Net::Ping, Net::SMTP, Net::Time, Net::hostent, Net::libnetFAQ,
-Net::netent, Net::protoent, Net::servent, O, ODBM_File, Opcode, POSIX,
-PerlIO, Pod::Checker, Pod::Find, Pod::Html, Pod::InputObjects, Pod::LaTeX,
-Pod::Man, Pod::ParseUtils, Pod::Parser, Pod::Plainer, Pod::Select,
-Pod::Text, Pod::Text::Color, Pod::Text::Overstrike, Pod::Text::Termcap,
-Pod::Usage, SDBM_File, Safe, Search::Dict, SelectSaver, SelfLoader, Shell,
-Socket, Storable, Switch, Symbol, Term::ANSIColor, Term::Cap,
-Term::Complete, Term::ReadLine, Test, Test::Harness, Test::More,
-Test::Simple, Test::Tutorial, Text::Abbrev, Text::Balanced,
-Text::ParseWords, Text::Soundex, Text::Tabs, Text::Wrap, Tie::Array,
-Tie::Handle, Tie::Hash, Tie::RefHash, Tie::Scalar, Tie::SubstrHash,
-Time::Local, Time::gmtime, Time::localtime, Time::tm, UNIVERSAL,
-Unicode::Collate, Unicode::Normalize, Unicode::UCD, User::grent,
+Locale::Constants, Locale::Country, Locale::Currency, Locale::Language,
+Locale::Maketext, Locale::Maketext::TPJ13, Math::BigFloat, Math::BigInt,
+Math::BigInt::Calc, Math::Complex, Math::Trig, Memoize,
+Memoize::AnyDBM_File, Memoize::Expire, Memoize::ExpireFile,
+Memoize::ExpireTest, Memoize::NDBM_File, Memoize::SDBM_File,
+Memoize::Saves, Memoize::Storable, NDBM_File, NEXT, Net::Cmd, Net::Config,
+Net::Domain, Net::FTP, Net::NNTP, Net::Netrc, Net::POP3, Net::Ping,
+Net::SMTP, Net::Time, Net::hostent, Net::libnetFAQ, Net::netent,
+Net::protoent, Net::servent, O, ODBM_File, Opcode, POSIX, PerlIO,
+Pod::Checker, Pod::Find, Pod::Html, Pod::InputObjects, Pod::LaTeX,
+Pod::Man, Pod::ParseLink, Pod::ParseUtils, Pod::Parser, Pod::Plainer,
+Pod::Select, Pod::Text, Pod::Text::Color, Pod::Text::Overstrike,
+Pod::Text::Termcap, Pod::Usage, Pod::t::basic, SDBM_File, Safe,
+Search::Dict, SelectSaver, SelfLoader, Shell, Socket, Storable, Switch,
+Symbol, Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine, Test,
+Test::Builder, Test::Harness, Test::More, Test::Simple, Test::Tutorial,
+Text::Abbrev, Text::Balanced, Text::ParseWords, Text::Soundex, Text::Tabs,
+Text::Wrap, Thread, Tie::Array, Tie::Handle, Tie::Hash, Tie::RefHash,
+Tie::Scalar, Tie::SubstrHash, Time::Local, Time::gmtime, Time::localtime,
+Time::tm, UNIVERSAL, Unicode::Collate, Unicode::UCD, User::grent,
 User::pwent, Win32
 
 =item Extension Modules
@@ -2746,8 +2816,8 @@ References, Tutorials, Task-Oriented, Special Topics
 
 =back
 
-=head2 perlfaq3 - Programming Tools ($Revision: 1.9 $, $Date: 2001/11/09
-08:06:04 $)
+=head2 perlfaq3 - Programming Tools ($Revision: 1.10 $, $Date: 2001/11/19
+17:09:37 $)
 
 =over 4
 
@@ -2786,8 +2856,6 @@ MultiEdit, SlickEdit, Bash, Ksh, Tcsh, Zsh, BBEdit and BBEdit Lite, Alpha
 =item How can I use X or Tk with Perl?
 
 =item How can I generate simple menus without using CGI or Tk?
-
-=item What is undump?
 
 =item How can I make my Perl program run faster?
 
@@ -4762,9 +4830,9 @@ Does concept match the general goals of Perl?, Where is the
 implementation?, Backwards compatibility, Could it be a module instead?, Is
 the feature generic enough?, Does it potentially introduce new bugs?, Does
 it preclude other desirable features?, Is the implementation robust?, Is
-the implementation generic enough to be portable?, Is there enough
-documentation?, Is there another way to do it?, Does it create too much
-work?, Patches speak louder than words
+the implementation generic enough to be portable?, Is the implementation
+tested?, Is there enough documentation?, Is there another way to do it?,
+Does it create too much work?, Patches speak louder than words
 
 =over 4
 
@@ -4903,11 +4971,137 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =back
 
-=head2 perldelta - what will be new for perl v5.8.0
+=head2 perldelta - what is new for perl v5.8.0
 
 =over 4
 
 =item DESCRIPTION
+
+=item Incompatible Changes
+
+=over 4
+
+=item 64-bit platforms and malloc
+
+=item AIX Dynaloading
+
+=item Socket Extension Dynamic in VMS
+
+=item Different Definition of the Unicode Character Classes \p{In...}
+
+=item Perl Parser Stress Tested
+
+=item REF(...) Instead Of SCALAR(...)
+
+=item Deprecations
+
+=back
+
+=item Core Enhancements
+
+=over 4
+
+=item PerlIO is Now The Default
+
+=item Signals Are Now Safe
+
+=item Unicode Overhaul
+
+=item Understanding of Numbers
+
+=item Miscellaneous Enhancements
+
+=back
+
+=item Modules and Pragmata
+
+=over 4
+
+=item New Modules and Pragmata
+
+=item Updated And Improved Modules and Pragmata
+
+=back
+
+=item Utility Changes
+
+=item New Documentation
+
+=item Performance Enhancements
+
+=item Installation and Configuration Improvements
+
+=over 4
+
+=item Generic Improvements
+
+=item New Or Improved Platforms
+
+=back
+
+=item Selected Bug Fixes
+
+=over 4
+
+=item Platform Specific Changes and Fixes
+
+=back
+
+=item New or Changed Diagnostics
+
+=item Changed Internals
+
+=item Security Vulnerability Closed
+
+=item New Tests
+
+=item Known Problems
+
+=over 4
+
+=item AIX
+
+=item Amiga Perl Invoking Mystery
+
+=item lib/ftmp-security tests warn 'system possibly insecure'
+
+=item Cygwin intermittent failures of lib/Memoize/t/expire_file 11 and 12
+
+=item HP-UX lib/io_multihomed Fails When LP64-Configured
+
+=item  HP-UX lib/posix Subtest 9 Fails When LP64-Configured
+
+=item Linux With Sfio Fails op/misc Test 48
+
+=item OS/390
+
+=item op/sprintf tests 129 and 130
+
+=item  Failure of Thread tests
+
+=item UNICOS
+
+=item UTS
+
+=item VMS
+
+=item Localising a Tied Variable Leaks Memory
+
+=item Localising Tied Arrays and Hashes Is Broken
+
+=item Self-tying of Arrays and Hashes Is Forbidden
+
+=item Variable Attributes are not Currently Usable for Tieing
+
+=item Building Extensions Can Fail Because Of Largefiles
+
+=item Unicode Support on EBCDIC Still Spotty
+
+=item The Compiler Suite Is Still Experimental
+
+=item The Long Double Support is Still Experimental
+
+=back
 
 =item Reporting Bugs
 
@@ -7490,6 +7684,8 @@ escapes.
 
 =item charnames::viacode(code)
 
+=item charnames::vianame(code)
+
 =item BUGS
 
 =back
@@ -7816,6 +8012,16 @@ B<untrapped>, B<any>, I<signal>, I<number>
 =back
 
 =item EXAMPLES
+
+=back
+
+=head2 sort - perl pragma to control sort() behaviour
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
 
 =back
 
@@ -9319,11 +9525,11 @@ C<d_bincompat5005>, C<d_bsd>, C<d_bsdgetpgrp>, C<d_bsdsetpgrp>, C<d_bzero>,
 C<d_casti32>, C<d_castneg>, C<d_charvspr>, C<d_chown>, C<d_chroot>,
 C<d_chsize>, C<d_class>, C<d_closedir>, C<d_cmsghdr_s>, C<d_const>,
 C<d_crypt>, C<d_csh>, C<d_cuserid>, C<d_dbl_dig>, C<d_dbminitproto>,
-C<d_difftime>, C<d_dirnamlen>, C<d_dlerror>, C<d_dlopen>, C<d_dlsymun>,
-C<d_dosuid>, C<d_drand48proto>, C<d_dup2>, C<d_eaccess>, C<d_endgrent>,
-C<d_endhent>, C<d_endnent>, C<d_endpent>, C<d_endpwent>, C<d_endsent>,
-C<d_eofnblk>, C<d_eunice>, C<d_fchdir>, C<d_fchmod>, C<d_fchown>,
-C<d_fcntl>, C<d_fcntl_can_lock>, C<d_fd_macros>, C<d_fd_set>,
+C<d_difftime>, C<d_dirfd>, C<d_dirnamlen>, C<d_dlerror>, C<d_dlopen>,
+C<d_dlsymun>, C<d_dosuid>, C<d_drand48proto>, C<d_dup2>, C<d_eaccess>,
+C<d_endgrent>, C<d_endhent>, C<d_endnent>, C<d_endpent>, C<d_endpwent>,
+C<d_endsent>, C<d_eofnblk>, C<d_eunice>, C<d_fchdir>, C<d_fchmod>,
+C<d_fchown>, C<d_fcntl>, C<d_fcntl_can_lock>, C<d_fd_macros>, C<d_fd_set>,
 C<d_fds_bits>, C<d_fgetpos>, C<d_finite>, C<d_finitel>, C<d_flexfnam>,
 C<d_flock>, C<d_flockproto>, C<d_fork>, C<d_fp_class>, C<d_fpathconf>,
 C<d_fpclass>, C<d_fpclassify>, C<d_fpclassl>, C<d_fpos64_t>, C<d_frexpl>,
@@ -9355,32 +9561,32 @@ C<d_open3>, C<d_pathconf>, C<d_pause>, C<d_perl_otherlibdirs>,
 C<d_phostname>, C<d_pipe>, C<d_poll>, C<d_portable>, C<d_PRId64>,
 C<d_PRIeldbl>, C<d_PRIEUldbl>, C<d_PRIfldbl>, C<d_PRIFUldbl>,
 C<d_PRIgldbl>, C<d_PRIGUldbl>, C<d_PRIi64>, C<d_PRIo64>, C<d_PRIu64>,
-C<d_PRIx64>, C<d_PRIXU64>, C<d_pthread_atfork>, C<d_pthread_yield>,
-C<d_pwage>, C<d_pwchange>, C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>,
-C<d_pwgecos>, C<d_pwpasswd>, C<d_pwquota>, C<d_qgcvt>, C<d_quad>,
-C<d_readdir>, C<d_readlink>, C<d_readv>, C<d_recvmsg>, C<d_rename>,
-C<d_rewinddir>, C<d_rmdir>, C<d_safebcpy>, C<d_safemcpy>, C<d_sanemcmp>,
-C<d_sbrkproto>, C<d_sched_yield>, C<d_scm_rights>, C<d_SCNfldbl>,
-C<d_seekdir>, C<d_select>, C<d_sem>, C<d_semctl>, C<d_semctl_semid_ds>,
-C<d_semctl_semun>, C<d_semget>, C<d_semop>, C<d_sendmsg>, C<d_setegid>,
-C<d_seteuid>, C<d_setgrent>, C<d_setgrps>, C<d_sethent>, C<d_setitimer>,
-C<d_setlinebuf>, C<d_setlocale>, C<d_setnent>, C<d_setpent>, C<d_setpgid>,
-C<d_setpgrp2>, C<d_setpgrp>, C<d_setprior>, C<d_setproctitle>,
-C<d_setpwent>, C<d_setregid>, C<d_setresgid>, C<d_setresuid>,
-C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>, C<d_setsid>,
-C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>, C<d_shmatprototype>,
-C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>, C<d_sigprocmask>,
-C<d_sigsetjmp>, C<d_sockatmark>, C<d_sockatmarkproto>, C<d_socket>,
-C<d_socklen_t>, C<d_sockpair>, C<d_socks5_init>, C<d_sqrtl>,
-C<d_sresgproto>, C<d_sresuproto>, C<d_statblks>, C<d_statfs_f_flags>,
-C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>,
-C<d_stdio_ptr_lval_nochange_cnt>, C<d_stdio_ptr_lval_sets_cnt>,
-C<d_stdio_stream_array>, C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>,
-C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>, C<d_strerror>, C<d_strftime>,
-C<d_strtod>, C<d_strtol>, C<d_strtold>, C<d_strtoll>, C<d_strtoq>,
-C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>,
-C<d_symlink>, C<d_syscall>, C<d_syscallproto>, C<d_sysconf>,
-C<d_sysernlst>, C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>,
+C<d_PRIx64>, C<d_PRIXU64>, C<d_procselfexe>, C<d_pthread_atfork>,
+C<d_pthread_yield>, C<d_pwage>, C<d_pwchange>, C<d_pwclass>,
+C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>, C<d_pwpasswd>, C<d_pwquota>,
+C<d_qgcvt>, C<d_quad>, C<d_readdir>, C<d_readlink>, C<d_readv>,
+C<d_recvmsg>, C<d_rename>, C<d_rewinddir>, C<d_rmdir>, C<d_safebcpy>,
+C<d_safemcpy>, C<d_sanemcmp>, C<d_sbrkproto>, C<d_sched_yield>,
+C<d_scm_rights>, C<d_SCNfldbl>, C<d_seekdir>, C<d_select>, C<d_sem>,
+C<d_semctl>, C<d_semctl_semid_ds>, C<d_semctl_semun>, C<d_semget>,
+C<d_semop>, C<d_sendmsg>, C<d_setegid>, C<d_seteuid>, C<d_setgrent>,
+C<d_setgrps>, C<d_sethent>, C<d_setitimer>, C<d_setlinebuf>,
+C<d_setlocale>, C<d_setnent>, C<d_setpent>, C<d_setpgid>, C<d_setpgrp2>,
+C<d_setpgrp>, C<d_setprior>, C<d_setproctitle>, C<d_setpwent>,
+C<d_setregid>, C<d_setresgid>, C<d_setresuid>, C<d_setreuid>, C<d_setrgid>,
+C<d_setruid>, C<d_setsent>, C<d_setsid>, C<d_setvbuf>, C<d_sfio>, C<d_shm>,
+C<d_shmat>, C<d_shmatprototype>, C<d_shmctl>, C<d_shmdt>, C<d_shmget>,
+C<d_sigaction>, C<d_sigprocmask>, C<d_sigsetjmp>, C<d_sockatmark>,
+C<d_sockatmarkproto>, C<d_socket>, C<d_socklen_t>, C<d_sockpair>,
+C<d_socks5_init>, C<d_sqrtl>, C<d_sresgproto>, C<d_sresuproto>,
+C<d_statblks>, C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>,
+C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>, C<d_stdio_ptr_lval_nochange_cnt>,
+C<d_stdio_ptr_lval_sets_cnt>, C<d_stdio_stream_array>, C<d_stdiobase>,
+C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>,
+C<d_strerror>, C<d_strftime>, C<d_strtod>, C<d_strtol>, C<d_strtold>,
+C<d_strtoll>, C<d_strtoq>, C<d_strtoul>, C<d_strtoull>, C<d_strtouq>,
+C<d_strxfrm>, C<d_suidsafe>, C<d_symlink>, C<d_syscall>, C<d_syscallproto>,
+C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>,
 C<d_tcsetpgrp>, C<d_telldir>, C<d_telldirproto>, C<d_time>, C<d_times>,
 C<d_truncate>, C<d_tzname>, C<d_u32align>, C<d_ualarm>, C<d_umask>,
 C<d_uname>, C<d_union_semun>, C<d_unordered>, C<d_usleep>,
@@ -9485,7 +9691,7 @@ C<perl>, C<perl_patchlevel>
 C<PERL_REVISION>, C<PERL_SUBVERSION>, C<PERL_VERSION>, C<perladmin>,
 C<perllibs>, C<perlpath>, C<pg>, C<phostname>, C<pidtype>, C<plibpth>,
 C<pm_apiversion>, C<pmake>, C<pr>, C<prefix>, C<prefixexp>, C<privlib>,
-C<privlibexp>, C<prototype>, C<ptrsize>
+C<privlibexp>, C<procselfexe>, C<prototype>, C<ptrsize>
 
 =item q
 
@@ -9829,6 +10035,26 @@ Dumper
 =item ENVIRONMENT
 
 =item BUGS
+
+=item SEE ALSO
+
+=back
+
+=head2 Devel::PPPort, Perl/Pollution/Portability
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item WriteFile
+
+=back
+
+=item AUTHOR
 
 =item SEE ALSO
 
@@ -11624,6 +11850,8 @@ into the pieces between string literals and regexes. So the C<'code'>
 component filter behaves slightly differently from the other partial
 filters
 described in the previous section.
+
+=item Using Filter::Simple with an explicit C<import> subroutine
 
 =item Using Filter::Simple and Exporter together
 
@@ -13436,6 +13664,14 @@ C<O_RDONLY>, C<O_WRONLY>, C<O_RDWR>
 
 =item DESCRIPTION
 
+=over 4
+
+=item Enforcing redispatch
+
+=item Avoiding repetitions
+
+=back
+
 =item AUTHOR
 
 =item BUGS AND IRRITATIONS
@@ -13688,12 +13924,13 @@ new Net::SMTP [ HOST, ] [ OPTIONS ]
 
 =item METHODS
 
-banner (), domain (), hello ( DOMAIN ), etrn ( DOMAIN ), mail ( ADDRESS [,
-OPTIONS] ), send ( ADDRESS ), send_or_mail ( ADDRESS ), send_and_mail (
-ADDRESS ), reset (), recipient ( ADDRESS [, ADDRESS [ ...]] [, OPTIONS ] ),
-to ( ADDRESS [, ADDRESS [...]] ), cc ( ADDRESS [, ADDRESS [...]] ), bcc (
-ADDRESS [, ADDRESS [...]] ), data ( [ DATA ] ), expand ( ADDRESS ), verify
-( ADDRESS ), help ( [ $subject ] ), quit ()
+banner (), domain (), hello ( DOMAIN ), etrn ( DOMAIN ), auth ( USERNAME,
+PASSWORD ), mail ( ADDRESS [, OPTIONS] ), send ( ADDRESS ), send_or_mail (
+ADDRESS ), send_and_mail ( ADDRESS ), reset (), recipient ( ADDRESS [,
+ADDRESS [ ...]] [, OPTIONS ] ), to ( ADDRESS [, ADDRESS [...]] ), cc (
+ADDRESS [, ADDRESS [...]] ), bcc ( ADDRESS [, ADDRESS [...]] ), data ( [
+DATA ] ), expand ( ADDRESS ), verify ( ADDRESS ), help ( [ $subject ] ),
+quit ()
 
 =item SEE ALSO
 
@@ -14216,13 +14453,19 @@ unix, stdio, perlio, crlf, utf8, raw
 
 =item DESCRIPTION
 
-$class->PUSHED([$mode][,$fh]), $obj->POPPED([$fh]),
+$class->PUSHED([$mode[,$fh]]), $obj->POPPED([$fh]),
 $class->OPEN($path,$mode[,$fh]), $class->FDOPEN($fd),
 $class->SYSOPEN($path,$imode,$perm,$fh), $obj->FILENO($fh),
 $obj->READ($buffer,$len,$fh), $obj->WRITE($buffer,$fh), $obj->FILL($fh),
 $obj->CLOSE($fh), $obj->SEEK($posn,$whence,$fh), $obj->TELL($fh),
 $obj->UNREAD($buffer,$fh), $obj->FLUSH($fh), $obj->SETLINEBUF($fh),
 $obj->CLEARERR($fh), $obj->ERROR($fh), $obj->EOF($fh)
+
+=over 4
+
+=item Example - a Hexadecimal Handle
+
+=back
 
 =back
 
@@ -14707,11 +14950,15 @@ B<_output>
 
 B<_replace_special_chars>
 
+B<_replace_special_chars_late>
+
 B<_create_label>
 
 B<_create_index>
 
 B<_clean_latex_commands>
+
+B<_split_delimited>
 
 =over 4
 
@@ -14742,9 +14989,12 @@ release, section
 
 roff font should be 1 or 2 chars, not "%s", Invalid link %s, Invalid quote
 specification "%s", %s:%d: Unknown command paragraph "%s", %s:%d: Unknown
-escape EE<lt>%sE<gt>, %s:%d: Unknown sequence %s, %s:%d: Unmatched =back
+escape EE<lt>%sE<gt>, %s:%d: Unknown formatting code %s, %s:%d: Unmatched
+=back
 
 =item BUGS
+
+=item CAVEATS
 
 =item SEE ALSO
 
@@ -15252,7 +15502,7 @@ alt, code, indent, loose, quotes, sentence, width
 
 Bizarre space in item, Item called without tag, Can't open %s for reading:
 %s, Invalid quote specification "%s", %s:%d: Unknown command paragraph
-"%s", %s:%d: Unknown escape: %s, %s:%d: Unknown sequence: %s, %s:%d:
+"%s", %s:%d: Unknown escape: %s, %s:%d: Unknown formatting code: %s, %s:%d:
 Unmatched =back
 
 =item RESTRICTIONS
@@ -15313,6 +15563,8 @@ text with format escapes
 
 =item DESCRIPTION
 
+=item NOTES
+
 =item SEE ALSO
 
 =item AUTHOR
@@ -15348,6 +15600,44 @@ C<-pathlist>
 =item AUTHOR
 
 =item ACKNOWLEDGEMENTS
+
+=back
+
+=head2 Pod::t::basic, basic.pod - Test of various basic POD features in
+translators.
+
+=over 4
+
+=item HEADINGS
+
+=item This C<is> a "level 1" heading
+
+=over 4
+
+=item ``Level'' "2 I<heading>
+
+=back
+
+=item This C<is> a "level 1" heading
+
+=over 4
+
+=item ``Level'' 2 I<heading>
+
+=back
+
+=item LINKS
+
+=item OVER AND ITEMS
+
+This  is a test, a, b, a, b, c, d, "foo", B<bar>, C<baz>, Some longer item
+text
+
+=item FORMATTING CODES
+
+E<amp>, E<apos>, E<lt>, E<gt>, E<quot>, E<sol>
+
+=item VERBATIM
 
 =back
 
@@ -15698,7 +15988,33 @@ ANSI_COLORS_DISABLED
 
 =item DESCRIPTION
 
+=over 4
+
+=item METHODS
+
+=back
+
+=back
+
+B<Tgetent>, OSPEED, TERM
+
+B<Tpad>, B<$string>, B<$cnt>, B<$FH>
+
+B<Tputs>, B<$cap>, B<$cnt>, B<$FH>
+
+B<Tgoto>, B<$cap>, B<$col>, B<$row>, B<$FH>
+
+B<Trequire>
+
+=over 4
+
 =item EXAMPLES
+
+=item COPYRIGHT AND LICENSE
+
+=item AUTHOR
+
+=item SEE ALSO
 
 =back
 
@@ -15884,9 +16200,11 @@ B<_my_exit>
 
 =item EXAMPLES
 
-=item AUTHOR
-
 =item SEE ALSO
+
+=item AUTHORS
+
+=item COPYRIGHT
 
 =back
 
@@ -16014,7 +16332,7 @@ B<TODO: BLOCK>
 
 =over 4
 
-=item Comparision functions
+=item Comparison functions
 
 B<is_deeply>
 
@@ -16035,11 +16353,13 @@ B<eq_set>
 Making your own ok(), The eq_* family have some caveats, Test::Harness
 upgrades
 
-=item AUTHOR
-
 =item HISTORY
 
 =item SEE ALSO
+
+=item AUTHORS
+
+=item COPYRIGHT
 
 =back
 
@@ -16065,12 +16385,14 @@ B<ok>
 
 =item HISTORY
 
-=item AUTHOR
-
 =item SEE ALSO
 
-L<Test::More>, L<Test>, L<Test::Unit>, L<Pod::Tests>, L<SelfTest>,
+L<Test::More>, L<Test>, L<Test::Unit>, L<Test::Inline>, L<SelfTest>,
 L<Test::Harness>
+
+=item AUTHORS
+
+=item COPYRIGHT
 
 =back
 
@@ -16105,6 +16427,10 @@ L<Test::Harness>
 =back
 
 =item FOOTNOTES
+
+=item AUTHORS
+
+=item COPYRIGHT
 
 =back
 

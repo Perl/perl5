@@ -17,6 +17,17 @@ README.mpeix - Perl/iX for HP e3000 MPE
 This is a podified version of the above-mentioned web page,
 podified by Jarkko Hietaniemi 2001-Jan-01.
 
+=head1 Binary distribution from HP
+
+The simplest way to obtain Perl for the MPE/iX is to go either of
+these URLs and follow the instructions within.
+
+http://jazz.external.hp.com/src/hp_freeware/perl/
+http://www.bixby.org/mark/perlix.html
+
+Use which ever one is more recent.
+
+
 =head1 What's New in Perl for MPE/iX
 
 June 1, 2000
@@ -43,7 +54,7 @@ Now bundled with various add-on packages:
 
 =item *
 
-libnet (http://www.gbarr.demon.co.uk/libnet/FAQ.html)
+libnet (as seen on CPAN)
 
 =item *
 
@@ -108,7 +119,7 @@ Migrated from cccd.edu to bixby.org.
 =head1 Welcome to Perl/iX
 
 This is the official home page for the HP e3000 MPE/iX
-(http://www.businessservers.hp.com/) port of the Perl scripting
+(http://www.hp.com/go/e3000) port of the Perl scripting
 language (http://www.perl.com/) which gives you all of the power of C,
 awk, sed, and sh in a single language. Check here for the latest news,
 implemented functionality, known bugs, to-do list, etc. Status reports

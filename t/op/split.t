@@ -168,8 +168,8 @@ print "ok 32\n";
 }
 
 {
-    my $x = chr(123);
-    my @a = map ord, split(/$x/, join("", map chr, (1234, 123, 2345)));
+    my $x = 'A';
+    my @a = map ord, split(/$x/, join("", map chr, (1234, ord($x), 2345)));
     print "not " unless "@a" eq "1234 2345";
     print "ok 34\n";
 }
@@ -193,14 +193,19 @@ print "ok 32\n";
 }
 
 {
-    # bug id 20000426.003
-
     my $s = "\x20\x40\x{80}\x{100}\x{80}\x40\x20";
 
-    my ($a, $b, $c) = split(/\x40/, $s);
-    print "not "
-	unless $a eq "\x20" && $b eq "\x{80}\x{100}\x{80}" && $c eq $a;
-    print "ok 36\n";
+    if (ord('A') == 193) {
+	print "ok 36 # Skip: EBCDIC\n";
+    } else {
+	# bug id 20000426.003
+
+
+	my ($a, $b, $c) = split(/\x40/, $s);
+	print "not "
+	    unless $a eq "\x20" && $b eq "\x{80}\x{100}\x{80}" && $c eq $a;
+	print "ok 36\n";
+    }
 
     my ($a, $b) = split(/\x{100}/, $s);
     print "not " unless $a eq "\x20\x40\x{80}" && $b eq "\x{80}\x40\x20";
@@ -210,9 +215,13 @@ print "ok 32\n";
     print "not " unless $a eq "\x20\x40" && $b eq "\x40\x20";
     print "ok 38\n";
 
-    my ($a, $b) = split(/\x40\x{80}/, $s);
-    print "not " unless $a eq "\x20" && $b eq "\x{100}\x{80}\x40\x20";
-    print "ok 39\n";
+    if (ord('A') == 193) {
+	print "ok 39 # Skip: EBCDIC\n";
+    }  else {
+	my ($a, $b) = split(/\x40\x{80}/, $s);
+	print "not " unless $a eq "\x20" && $b eq "\x{100}\x{80}\x40\x20";
+	print "ok 39\n";
+    }
 
     my ($a, $b, $c) = split(/[\x40\x{80}]+/, $s);
     print "not " unless $a eq "\x20" && $b eq "\x{100}" && $c eq "\x20";

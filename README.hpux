@@ -203,7 +203,7 @@ libraries for the perl extensions/modules to work. If these libraries
 are built using the default configuration, it might happen that you run
 into an error like "invalid loader fixup" during load phase. HP is aware
 of this problem and address it at
-  http://devresource.hp.com/devresource/Docs/TechTips/cxxTips.html#tip13
+  http://h21007.www2.hp.com/dspp/tech/tech_TechDocumentDetailPage_IDX/1,,392!0!,00.html
 
 A more general approach is to intervene manually, as with an example for
 the DB_File module, which requires SleepyCat's libdb.sl:
@@ -303,7 +303,7 @@ threads library package. Two examples are the HP DCE package, available
 on "HP-UX Hardware Extensions 3.0, Install and Core OS, Release 10.20,
 April 1999 (B3920-13941)" or the Freely available PTH package, available
 though worldwide HP-UX mirrors of precompiled packages
-(e.g. http://hpux.tn.tudelft.nl/hppd/hpux/alpha.html)
+(e.g. http://hpux.tn.tudelft.nl/hppd/hpux/)
 
 =head2 64-bit Perl on HP-UX
 

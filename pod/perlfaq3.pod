@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.9 $, $Date: 2001/11/09 08:06:04 $)
+perlfaq3 - Programming Tools ($Revision: 1.10 $, $Date: 2001/11/19 17:09:37 $)
 
 =head1 DESCRIPTION
 
@@ -431,10 +431,6 @@ http://www-users.cs.umn.edu/%7Eamundson/perl/perltk/toc.html .
 
 The http://www.cpan.org/authors/id/SKUNZ/perlmenu.v4.0.tar.gz
 module, which is curses-based, can help with this.
-
-=head2 What is undump?
-
-See the next question on ``How can I make my Perl program run faster?''
 
 =head2 How can I make my Perl program run faster?
 

@@ -1333,6 +1333,7 @@ Apd	|HE*	|hv_store_ent	|HV* tb|SV* key|SV* val|U32 hash
 Apd	|void	|hv_undef	|HV* tb
 Ap	|I32	|ibcmp		|const char* a|const char* b|I32 len
 Ap	|I32	|ibcmp_locale	|const char* a|const char* b|I32 len
+Ap	|I32	|ibcmp_utf8	|const char* a|bool ua|const char* b|bool ub|I32 len
 p	|bool	|ingroup	|Gid_t testgid|Uid_t effective
 p	|void	|init_argv_symbols|int|char **
 p	|void	|init_debugger
@@ -1344,37 +1345,38 @@ p	|bool	|io_close	|IO* io|bool not_implicit
 p	|OP*	|invert		|OP* cmd
 dp	|bool	|is_gv_magical	|char *name|STRLEN len|U32 flags
 p	|I32	|is_lvalue_sub
-Ap	|bool	|is_uni_alnum	|U32 c
-Ap	|bool	|is_uni_alnumc	|U32 c
-Ap	|bool	|is_uni_idfirst	|U32 c
-Ap	|bool	|is_uni_alpha	|U32 c
-Ap	|bool	|is_uni_ascii	|U32 c
-Ap	|bool	|is_uni_space	|U32 c
-Ap	|bool	|is_uni_cntrl	|U32 c
-Ap	|bool	|is_uni_graph	|U32 c
-Ap	|bool	|is_uni_digit	|U32 c
-Ap	|bool	|is_uni_upper	|U32 c
-Ap	|bool	|is_uni_lower	|U32 c
-Ap	|bool	|is_uni_print	|U32 c
-Ap	|bool	|is_uni_punct	|U32 c
-Ap	|bool	|is_uni_xdigit	|U32 c
-Ap	|U32	|to_uni_upper	|U32 c|U8 *p|STRLEN *lenp
-Ap	|U32	|to_uni_title	|U32 c|U8 *p|STRLEN *lenp
-Ap	|U32	|to_uni_lower	|U32 c|U8 *p|STRLEN *lenp
-Ap	|bool	|is_uni_alnum_lc|U32 c
-Ap	|bool	|is_uni_alnumc_lc|U32 c
-Ap	|bool	|is_uni_idfirst_lc|U32 c
-Ap	|bool	|is_uni_alpha_lc|U32 c
-Ap	|bool	|is_uni_ascii_lc|U32 c
-Ap	|bool	|is_uni_space_lc|U32 c
-Ap	|bool	|is_uni_cntrl_lc|U32 c
-Ap	|bool	|is_uni_graph_lc|U32 c
-Ap	|bool	|is_uni_digit_lc|U32 c
-Ap	|bool	|is_uni_upper_lc|U32 c
-Ap	|bool	|is_uni_lower_lc|U32 c
-Ap	|bool	|is_uni_print_lc|U32 c
-Ap	|bool	|is_uni_punct_lc|U32 c
-Ap	|bool	|is_uni_xdigit_lc|U32 c
+Ap	|bool	|is_uni_alnum	|UV c
+Ap	|bool	|is_uni_alnumc	|UV c
+Ap	|bool	|is_uni_idfirst	|UV c
+Ap	|bool	|is_uni_alpha	|UV c
+Ap	|bool	|is_uni_ascii	|UV c
+Ap	|bool	|is_uni_space	|UV c
+Ap	|bool	|is_uni_cntrl	|UV c
+Ap	|bool	|is_uni_graph	|UV c
+Ap	|bool	|is_uni_digit	|UV c
+Ap	|bool	|is_uni_upper	|UV c
+Ap	|bool	|is_uni_lower	|UV c
+Ap	|bool	|is_uni_print	|UV c
+Ap	|bool	|is_uni_punct	|UV c
+Ap	|bool	|is_uni_xdigit	|UV c
+Ap	|UV	|to_uni_upper	|UV c|U8 *p|STRLEN *lenp
+Ap	|UV	|to_uni_title	|UV c|U8 *p|STRLEN *lenp
+Ap	|UV	|to_uni_lower	|UV c|U8 *p|STRLEN *lenp
+Ap	|UV	|to_uni_fold	|UV c|U8 *p|STRLEN *lenp
+Ap	|bool	|is_uni_alnum_lc|UV c
+Ap	|bool	|is_uni_alnumc_lc|UV c
+Ap	|bool	|is_uni_idfirst_lc|UV c
+Ap	|bool	|is_uni_alpha_lc|UV c
+Ap	|bool	|is_uni_ascii_lc|UV c
+Ap	|bool	|is_uni_space_lc|UV c
+Ap	|bool	|is_uni_cntrl_lc|UV c
+Ap	|bool	|is_uni_graph_lc|UV c
+Ap	|bool	|is_uni_digit_lc|UV c
+Ap	|bool	|is_uni_upper_lc|UV c
+Ap	|bool	|is_uni_lower_lc|UV c
+Ap	|bool	|is_uni_print_lc|UV c
+Ap	|bool	|is_uni_punct_lc|UV c
+Ap	|bool	|is_uni_xdigit_lc|UV c
 Apd	|STRLEN	|is_utf8_char	|U8 *p
 Apd	|bool	|is_utf8_string	|U8 *s|STRLEN len
 Ap	|bool	|is_utf8_alnum	|U8 *p
@@ -1471,7 +1473,7 @@ p	|char*	|mem_collxfrm	|const char* s|STRLEN len|STRLEN* xlen
 Afp	|SV*	|mess		|const char* pat|...
 Ap	|SV*	|vmess		|const char* pat|va_list* args
 p	|void	|qerror		|SV* err
-Apd    |void   |sortsv         |SV ** array|size_t num_elts|SVCOMPARE_t f
+Apd     |void   |sortsv         |SV ** array|size_t num_elts|SVCOMPARE_t cmp
 Apd	|int	|mg_clear	|SV* sv
 Apd	|int	|mg_copy	|SV* sv|SV* nsv|const char* key|I32 klen
 Apd	|MAGIC*	|mg_find	|SV* sv|int type

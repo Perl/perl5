@@ -2711,6 +2711,10 @@ value of the environment variable PERLIO.
 process which isn't a subprocess of the current process.  While this is
 fine from VMS' perspective, it's probably not what you intended.
 
+=item P must have an explicit size
+
+(F) The unpack format P must have an explicit size, not "*".
+
 =item POSIX syntax [%s] belongs inside character classes in regex;
 
 marked by <-- HERE in m/%s/

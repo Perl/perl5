@@ -21,7 +21,7 @@ sub hexNFC {
 }
 sub hexNFD {
   join " ", map sprintf("%04X", $_),
-  unpack 'U*', normalize 'D', pack 'U*', map hex(), split ' ', shift;
+  unpack 'U*', normalize 'NFD', pack 'U*', map hex(), split ' ', shift;
 }
 
 ok(hexNFC("0061 0315 0300 05AE 05C4 0062"), "00E0 05AE 05C4 0315 0062");

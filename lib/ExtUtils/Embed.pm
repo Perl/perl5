@@ -146,7 +146,6 @@ sub ldopts {
     my(@mods,@link_args,@argv);
     my($dllib,$config_libs,@potential_libs,@path);
     local($") = ' ' unless $" eq ' ';
-    my $MM = bless {} => 'MY';
     if (scalar @_) {
        @link_args = @$link_args if $link_args;
        @mods = @$mods if $mods;
@@ -178,13 +177,13 @@ sub ldopts {
     foreach $mod (@mods) {
 	@ns = split(/::|\/|\\/, $mod);
 	$sub = $ns[-1];
-	$root = $MM->catdir(@ns);
+	$root = File::Spec->catdir(@ns);
 	
 	print STDERR "searching for '$sub${lib_ext}'\n" if $Verbose;
 	foreach (@path) {
-	    next unless -e ($archive = $MM->catdir($_,"auto",$root,"$sub$lib_ext"));
+	    next unless -e ($archive = File::Spec->catdir($_,"auto",$root,"$sub$lib_ext"));
 	    push @archives, $archive;
-	    if(-e ($extra = $MM->catdir($_,"auto",$root,"extralibs.ld"))) {
+	    if(-e ($extra = File::Spec->catdir($_,"auto",$root,"extralibs.ld"))) {
 		local(*FH); 
 		if(open(FH, $extra)) {
 		    my($libs) = <FH>; chomp $libs;
@@ -210,7 +209,7 @@ sub ldopts {
     my $lpath = File::Spec->catdir($Config{archlibexp}, 'CORE');
     $lpath = qq["$lpath"] if $^O eq 'MSWin32';
     my($extralibs, $bsloadlibs, $ldloadlibs, $ld_run_path) =
-	$MM->ext(join ' ', "-L$lpath", $libperl, @potential_libs);
+	MM->ext(join ' ', "-L$lpath", $libperl, @potential_libs);
 
     my $ld_or_bs = $bsloadlibs || $ldloadlibs;
     print STDERR "bs: $bsloadlibs ** ld: $ldloadlibs" if $Verbose;

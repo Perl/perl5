@@ -3923,8 +3923,11 @@ PP(pp_fork)
 	RETSETUNDEF;
     if (!childpid) {
 	/*SUPPRESS 560*/
-	if ((tmpgv = gv_fetchpv("$", TRUE, SVt_PV)))
+	if ((tmpgv = gv_fetchpv("$", TRUE, SVt_PV))) {
+            SvREADONLY_off(GvSV(tmpgv));
 	    sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());
+            SvREADONLY_on(GvSV(tmpgv));
+        }
 	hv_clear(PL_pidstatus);	/* no kids, so don't wait for 'em */
     }
     PUSHi(childpid);
@@ -4027,6 +4030,16 @@ PP(pp_system)
 	 int status;
 	 Sigsave_t ihand,qhand;     /* place to save signals during system() */
 	 
+	 if (PL_tainting) {
+	     SV *cmd = NULL;
+	     if (PL_op->op_flags & OPf_STACKED)
+		cmd = *(MARK + 1);
+	     else if (SP - MARK != 1)
+		cmd = *SP;
+	     if (cmd && *(SvPV_nolen(cmd)) != '/')
+		TAINT_ENV();
+	 }
+
 	 if (PerlProc_pipe(pp) >= 0)
 	      did_pipes = 1;
 	 while ((childpid = PerlProc_fork()) == -1) {

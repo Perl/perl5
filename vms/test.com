@@ -2,7 +2,7 @@ $!  Test.Com - DCL driver for perl5 regression tests
 $!
 $!  Version 1.1   4-Dec-1995
 $!  Charles Bailey  bailey@newman.upenn.edu
-$
+$!
 $!  A little basic setup
 $   On Error Then Goto wrapup
 $   olddef = F$Environment("Default")
@@ -20,7 +20,7 @@ $           Exit 44
 $       EndIf
 $   EndIf
 $   Set Message /NoFacility/NoSeverity/NoIdentification/NoText
-$
+$!
 $   exe = ".Exe"
 $   If p1.nes."" Then exe = p1
 $   If F$Extract(0,1,exe) .nes. "."
@@ -94,7 +94,7 @@ $   If F$Search("Echo.Exe").nes."" Then Delete/Log/NoConfirm Echo.Exe;*
 $   Link/NoMap/NoTrace/Exe=Echo.Exe Echo.Obj;
 $   Delete/Log/NoConfirm Echo.Obj;*
 $   echo == "$" + F$Parse("Echo.Exe")
-$
+$!
 $!  And do it
 $   Show Process/Accounting
 $   testdir = "Directory/NoHead/NoTrail/Column=1"
@@ -114,9 +114,7 @@ $   Deck/Dollar=$$END-OF-TEST$$
 use Config;
 use File::Spec;
 
-@compexcl=('cpp.t');
-@opexcl=('die_exit.t','exec.t','stat.t');
-@exclist=(@compexcl,@libexcl,@opexcl);
+@exclist=('exec.t','stat.t');
 foreach $file (@exclist) { $skip{$file}++; }
 
 $| = 1;
@@ -152,6 +150,7 @@ if (@skipped) {
 
 $bad = 0;
 $good = 0;
+$extra_skip = 0;
 $total = @ARGV;
 while ($test = shift) {
     if ($test =~ /^$/) {
@@ -236,6 +235,7 @@ while ($test = shift) {
 	} else {
 	    print "${te}skipping test on this platform\n";
 	    $files -= 1;
+	    $extra_skip = $extra_skip + 1;
 	}
     } else {
 	$next += 1;
@@ -255,11 +255,21 @@ if ($bad == 0) {
 	die "FAILED--no tests were run for some reason.\n";
     }
 } else {
-    $pct = sprintf("%.2f", $good / $total * 100);
+    # $pct = sprintf("%.2f", $good / $total * 100);
+    $gtotal = $total - $extra_skip;
+    if ($gtotal <= 0) { $gtotal = $total; }
+    $pct = sprintf("%.2f", $good / $gtotal * 100);
     if ($bad == 1) {
 	warn "Failed 1 test, $pct% okay.\n";
-    } else {
-	warn "Failed $bad/$total tests, $pct% okay.\n";
+   } else {
+         if ($extra_skip > 0) {
+	     warn "Total tests: $total, Passed $good, Skipped $extra_skip.\n";
+	     warn "Failed $bad/$gtotal tests, $pct% okay.\n";
+         }
+         else {
+	     warn "Total tests: $total, Passed $good.\n";
+	     warn "Failed $bad/$gtotal tests, $pct% okay.\n";
+         }
     }
 }
 ($user,$sys,$cuser,$csys) = times;

@@ -13,10 +13,10 @@ on Cygwin.  This document also describes features of Cygwin that will
 affect how Perl behaves at runtime.
 
 B<NOTE:> There are pre-built Perl packages available for Cygwin and a
-version of Perl is provided on the Cygwin CD.  If you do not need to
-customize the configuration, consider using one of these packages:
+version of Perl is provided in the normal Cygwin install.  If you do
+not need to customize the configuration, consider using one of those
+packages.
 
-  http://cygutils.netpedia.net/
 
 =head1 PREREQUISITES FOR COMPILING PERL ON CYGWIN
 
@@ -31,15 +31,8 @@ about this project can be found at:
 
 A recent net or commercial release of Cygwin is required.
 
-At the time this document was last updated, Cygwin 1.1.5 was current.
+At the time this document was last updated, Cygwin 1.3.5 was current.
 
-B<NOTE:> At this point, minimal effort has been made to provide
-compatibility with old (beta) Cygwin releases.  The focus has been to
-provide a high quality release and not worry about working around old
-bugs.  If you wish to use Perl with Cygwin B20.1 or earlier, consider
-using perl5.005_03, which is available in source and binary form at
-C<http://cygutils.netpedia.net/>.  If there is significant demand,
-a patch kit can be developed to port back to earlier Cygwin versions.
 
 =head2 Cygwin Configuration
 
@@ -117,8 +110,8 @@ near the end of the file.
 Several Perl functions and modules depend on the existence of
 some optional libraries.  Configure will find them if they are
 installed in one of the directories listed as being used for library
-searches.  Pre-built packages for most of these are available at
-C<http://cygutils.netpedia.net/>.
+searches.  Pre-built packages for most of these are available from
+the Cygwin installer.
 
 =over 4
 
@@ -186,14 +179,15 @@ Undefining this symbol forces Perl to be compiled statically.
 By default Perl uses the malloc() included with the Perl source.  If you
 want to force Perl to build with the system malloc() undefine this symbol.
 
+=item * C<-Uuseperlio>
+
+Undefining this symbol disables the PerlIO abstraction, which is now the
+default.
+
 =item * C<-Dusemultiplicity>
 
 Multiplicity is required when embedding Perl in a C program and using
 more than one interpreter instance.  This works with the Cygwin port.
-
-=item * C<-Duseperlio>
-
-The PerlIO abstraction works with the Cygwin port.
 
 =item * C<-Duse64bitint>
 

@@ -26,6 +26,18 @@ import Time::HiRes 'ualarm'		if $have_ualarm;
 
 use Config;
 
+# Ideally, we'd like to test that the timers are rather precise.
+# However, if the system is busy, there are no guarantees on how
+# quickly we will return.  This limit used to be 10%, but that
+# was occasionally triggered falsely.  
+# Try 20%.  
+# Another possibility might be to print "ok" if the test completes fine
+# with (say) 10% slosh, "skip - system may have been busy?" if the test
+# completes fine with (say) 30% slosh, and fail otherwise.  If you do that,
+# consider changing over to test.pl at the same time.
+# --A.D., Nov 27, 2001
+my $limit = 0.20; # 20% is acceptable slosh for testing timers
+
 sub skip {
     map { print "ok $_ (skipped)\n" } @_;
 }
@@ -57,7 +69,7 @@ else {
 
     my $f = Time::HiRes::time();
     ok 5, $f > 850_000_000, "$f too small";
-    ok 6, $f - $two[0] < 2, "$f - @two >= 2";
+    ok 6, $f - $two[0] < 2, "$f - $two[0] >= 2";
 }
 
 if (!$have_usleep) {
@@ -79,7 +91,7 @@ else {
 	usleep(500_000);
         my $f2 = Time::HiRes::time();
 	my $d = $f2 - $f;
-	ok 8, $d > 0.4 && $d < 0.8, "slept $d secs $f to $f2";
+	ok 8, $d > 0.4 && $d < 0.9, "slept $d secs $f to $f2";
     }
 }
 
@@ -106,7 +118,7 @@ else {
     #jTime::HiRes::sleep 0.5;
     Time::HiRes::sleep( 0.5 );
     my $f = tv_interval $r;
-    ok 11, $f > 0.4 && $f < 0.8, "slept $f secs";
+    ok 11, $f > 0.4 && $f < 0.9, "slept $f instead of 0.5 secs.";
 }
 
 if (!$have_ualarm) {
@@ -133,28 +145,28 @@ else {
 if (!$have_time) {
     skip 14
 } else {
- my ($t1, $tf, $t2);
- for my $i (1 .. 20) {
-     $t1 = time();
-     $tf = Time::HiRes::time();
-     $t2 = 1 + time();
-     last if (($t2 - $t1) <= 1) && $t1 <= $tf;
+ my ($s, $n);
+ for my $i (1 .. 100) {
+     $s += Time::HiRes::time() - time();
+     $n++;
  }
- ok 14, (($t1 <= $tf) && ($tf <= $t2)),
-      "Time::HiRes::time $tf not bracketed by [$t1, $t2]";
-
+ # $s should be, at worst, equal to $n
+ # (time() may be rounding down, up, or closest)
+ ok 14, abs($s) / $n <= 1.0, "Time::HiRes::time() not close to time()";
+ print "# s = $s, n = $n, s/n = ", $s/$n, "\n";
 }
 
 unless (defined &Time::HiRes::gettimeofday
 	&& defined &Time::HiRes::ualarm
-	&& defined &Time::HiRes::usleep) {
+	&& defined &Time::HiRes::usleep
+	&& $Config{d_ualarm}) {
     for (15..17) {
 	print "ok $_ # skipped\n";
     }
 } else {
     use Time::HiRes qw (time alarm sleep);
 
-    my ($f, $r, $i);
+    my ($f, $r, $i, $not, $ok);
 
     $f = time; 
     print "# time...$f\n";
@@ -170,18 +182,47 @@ unless (defined &Time::HiRes::gettimeofday
     while ($i > 0)
     {
 	alarm(0.3);
-	select (undef, undef, undef, 10);
-	print "# Select returned! $i ", Time::HiRes::tv_interval ($r), "\n";
+	select (undef, undef, undef, 3);
+	my $ival = Time::HiRes::tv_interval ($r);
+	print "# Select returned! $i $ival\n";
+	print "# ", abs($ival/3 - 1), "\n";
+	# Whether select() gets restarted after signals is
+	# implementation dependent.  If it is restarted, we
+	# will get about 3.3 seconds: 3 from the select, 0.3
+	# from the alarm.  If this happens, let's just skip
+	# this particular test.  --jhi
+	if (abs($ival/3.3 - 1) < $limit) {
+	    $ok = "Skip: your select() seems to get restarted by your SIGALRM";
+	    undef $not;
+	    last;
+	}
+	my $exp = 0.3 * (5 - $i);
+	# This test is more sensitive, so impose a softer limit.
+	if (abs($ival/$exp - 1) > 3*$limit) {
+	    my $ratio = abs($ival/$exp);
+	    $not = "while: $exp sleep took $ival ratio $ratio";
+	    last;
+	}
+	$ok = $i;
     }
 
     sub tick
     {
 	$i--;
-	print "# Tick! $i ", Time::HiRes::tv_interval ($r), "\n";
+	my $ival = Time::HiRes::tv_interval ($r);
+	print "# Tick! $i $ival\n";
+	my $exp = 0.3 * (5 - $i);
+	# This test is more sensitive, so impose a softer limit.
+	if (abs($ival/$exp - 1) > 3*$limit) {
+	    my $ratio = abs($ival/$exp);
+	    $not = "tick: $exp sleep took $ival ratio $ratio";
+	    $i = 0;
+	}
     }
+
     alarm(0); # can't cancel usig %SIG
 
-    print "ok 17\n";
+    print $not ? "not ok 17 # $not\n" : "ok 17 # $ok\n";
 }
 
 unless (defined &Time::HiRes::setitimer
@@ -205,8 +246,8 @@ unless (defined &Time::HiRes::setitimer
 
     print "# setitimer: ", join(" ", setitimer(ITIMER_VIRTUAL, 0.5, 0.4)), "\n";
 
-    # Assume interval timer granularity of 0.05 seconds.  Too bold?
-    print "not " unless abs(getitimer(ITIMER_VIRTUAL) / 0.5) - 1 < 0.1;
+    # Assume interval timer granularity of $limit * 0.5 seconds.  Too bold?
+    print "not " unless abs(getitimer(ITIMER_VIRTUAL) / 0.5) - 1 < $limit;
     print "ok 18\n";
 
     print "# getitimer: ", join(" ", getitimer(ITIMER_VIRTUAL)), "\n";
@@ -227,14 +268,14 @@ if ($have_gettimeofday) {
     my ($t0, $td);
 
     my $sleep = 1.5; # seconds
-    my $limit = 0.1; # 10% is acceptable slosh for timers
     my $msg;
 
     $t0 = gettimeofday();
     $a = abs(sleep($sleep)        / $sleep         - 1.0);
     $td = gettimeofday() - $t0;
+    my $ratio = 1.0 + $a;
 
-    $msg = "$td went by while sleeping $sleep, ratio $a\n";
+    $msg = "$td went by while sleeping $sleep, ratio $ratio.\n";
 
     if ($td < $sleep * (1 + $limit)) {
 	print $a < $limit ? "ok 20 # $msg" : "not ok 20 # $msg";
@@ -245,8 +286,9 @@ if ($have_gettimeofday) {
     $t0 = gettimeofday();
     $a = abs(usleep($sleep * 1E6) / ($sleep * 1E6) - 1.0);
     $td = gettimeofday() - $t0;
+    $ratio = 1.0 + $a;
 
-    $msg = "$td went by while sleeping $sleep, ratio $a\n";
+    $msg = "$td went by while sleeping $sleep, ratio $ratio.\n";
 
     if ($td < $sleep * (1 + $limit)) {
 	print $a < $limit ? "ok 21 # $msg" : "not ok 21 # $msg";

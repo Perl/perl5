@@ -339,7 +339,7 @@ file is examined for odd characters such as strange control codes or
 characters with the high bit set.  If too many strange characters (>30%)
 are found, it's a C<-B> file, otherwise it's a C<-T> file.  Also, any file
 containing null in the first block is considered a binary file.  If C<-T>
-or C<-B> is used on a filehandle, the current stdio buffer is examined
+or C<-B> is used on a filehandle, the current IO buffer is examined
 rather than the first block.  Both C<-T> and C<-B> return true on a null
 file, or a file at EOF when testing a filehandle.  Because you have to
 read a file to do the C<-T> test, on most occasions you want to use a C<-f>
@@ -712,10 +712,10 @@ omitted, does a C<chroot> to C<$_>.
 
 =item close
 
-Closes the file or pipe associated with the file handle, returning true
-only if stdio successfully flushes buffers and closes the system file
-descriptor.  Closes the currently selected filehandle if the argument
-is omitted.
+Closes the file or pipe associated with the file handle, returning
+true only if IO buffers are successfully flushed and closes the system
+file descriptor.  Closes the currently selected filehandle if the
+argument is omitted.
 
 You don't have to close FILEHANDLE if you are immediately going to do
 another C<open> on it, because C<open> will close it for you.  (See
@@ -1075,6 +1075,12 @@ This is useful for propagating exceptions:
 
     eval { ... };
     die unless $@ =~ /Expected exception/;
+
+If LIST is empty and C<$@> contains an object reference that has a
+C<PROPAGATE> method, that method will be called with additional file
+and line number parameters.  The return value replaces the value in
+C<$@>.  ie. as if C<<$@ = eval { $@->PROPAGATE(__FILE__, __LINE__) };>> 
+were called.
 
 If C<$@> is empty then the string C<"Died"> is used.
 
@@ -2437,9 +2443,7 @@ strings, set up your locale environment variables appropriately
 Note that the C<%a> and C<%b>, the short forms of the day of the week
 and the month of the year, may not necessarily be three characters wide.
 
-=item lock
-
-    lock I<THING>
+=item lock THING
 
 This function places an advisory lock on a variable, subroutine,
 or referenced object contained in I<THING> until the lock goes out
@@ -2735,7 +2739,12 @@ and opening C<< '>-' >> opens STDOUT.
 
 You may use the three-argument form of open to specify
 I<I/O disciplines> that affect how the input and output
-are processed: see L</binmode> and L<open>.
+are processed: see L</binmode> and L<open>.  For example
+  
+  open(FH, "<:utf8", "file")
+
+will open the UTF-8 encoded file containing Unicode characters,
+see L<perluniintro>.
 
 Open returns nonzero upon success, the undefined value otherwise.  If
 the C<open> involved a pipe, the return value happens to be the pid of
@@ -2824,7 +2833,7 @@ duped and opened.  You may use C<&> after C<< > >>, C<<< >> >>>,
 C<< < >>, C<< +> >>, C<<< +>> >>>, and C<< +< >>.  The
 mode you specify should match the mode of the original filehandle.
 (Duping a filehandle does not take into account any existing contents of
-stdio buffers.) If you use the 3 arg form then you can pass either a number,
+IO buffers.) If you use the 3 arg form then you can pass either a number,
 the name of a filehandle or the normal "reference to a glob".
 
 Here is a script that saves, redirects, and restores STDOUT and
@@ -3459,7 +3468,7 @@ and classes.  See L<perlsub> for other scoping issues.
 Opens a pair of connected pipes like the corresponding system call.
 Note that if you set up a loop of piped processes, deadlock can occur
 unless you are very careful.  In addition, note that Perl's pipes use
-stdio buffering, so you may need to set C<$|> to flush your WRITEHANDLE
+IO buffering, so you may need to set C<$|> to flush your WRITEHANDLE
 after each command, depending on the application.
 
 See L<IPC::Open2>, L<IPC::Open3>, and L<perlipc/"Bidirectional Communication">
@@ -3615,14 +3624,21 @@ with the wrong number of RANDBITS.)
 
 =item read FILEHANDLE,SCALAR,LENGTH
 
-Attempts to read LENGTH bytes of data into variable SCALAR from the
-specified FILEHANDLE.  Returns the number of bytes actually read, C<0>
-at end of file, or undef if there was an error.  SCALAR will be grown
-or shrunk to the length actually read.  If SCALAR needs growing, the
-new bytes will be zero bytes.  An OFFSET may be specified to place
-the read data into some other place in SCALAR than the beginning.
-The call is actually implemented in terms of stdio's fread(3) call.
-To get a true read(2) system call, see C<sysread>.
+Attempts to read LENGTH I<characters> of data into variable SCALAR
+from the specified FILEHANDLE.  Returns the number of characters
+actually read, C<0> at end of file, or undef if there was an error.
+SCALAR will be grown or shrunk to the length actually read.  If SCALAR
+needs growing, the new bytes will be zero bytes.  An OFFSET may be
+specified to place the read data into some other place in SCALAR than
+the beginning.  The call is actually implemented in terms of either
+Perl's or system's fread() call.  To get a true read(2) system call,
+see C<sysread>.
+
+Note the I<characters>: depending on the status of the filehandle,
+either (8-bit) bytes or characters are read.  By default all
+filehandles operate on bytes, but for example if the filehandle has
+been opened with the C<:utf8> discipline (see L</open>, and the C<open>
+pragma, L<open>), the I/O will operate on characters, not bytes.
 
 =item readdir DIRHANDLE
 
@@ -3681,14 +3697,20 @@ operator is discussed in more detail in L<perlop/"I/O Operators">.
 
 =item recv SOCKET,SCALAR,LENGTH,FLAGS
 
-Receives a message on a socket.  Attempts to receive LENGTH bytes of
-data into variable SCALAR from the specified SOCKET filehandle.  SCALAR
-will be grown or shrunk to the length actually read.  Takes the same
-flags as the system call of the same name.  Returns the address of the
-sender if SOCKET's protocol supports this; returns an empty string
-otherwise.  If there's an error, returns the undefined value.  This call
-is actually implemented in terms of recvfrom(2) system call.  See
-L<perlipc/"UDP: Message Passing"> for examples.
+Receives a message on a socket.  Attempts to receive LENGTH characters
+of data into variable SCALAR from the specified SOCKET filehandle.
+SCALAR will be grown or shrunk to the length actually read.  Takes the
+same flags as the system call of the same name.  Returns the address
+of the sender if SOCKET's protocol supports this; returns an empty
+string otherwise.  If there's an error, returns the undefined value.
+This call is actually implemented in terms of recvfrom(2) system call.
+See L<perlipc/"UDP: Message Passing"> for examples.
+
+Note the I<characters>: depending on the status of the socket, either
+(8-bit) bytes or characters are received.  By default all sockets
+operate on bytes, but for example if the socket has been changed using
+binmode() to operate with the C<:utf8> discipline (see the C<open>
+pragma, L<open>), the I/O will operate on characters, not bytes.
 
 =item redo LABEL
 
@@ -4025,12 +4047,18 @@ See L<perlop> for more details on unary operators and the comma operator.
 
 Sets FILEHANDLE's position, just like the C<fseek> call of C<stdio>.
 FILEHANDLE may be an expression whose value gives the name of the
-filehandle.  The values for WHENCE are C<0> to set the new position to
-POSITION, C<1> to set it to the current position plus POSITION, and
-C<2> to set it to EOF plus POSITION (typically negative).  For WHENCE
-you may use the constants C<SEEK_SET>, C<SEEK_CUR>, and C<SEEK_END>
-(start of the file, current position, end of the file) from the Fcntl
-module.  Returns C<1> upon success, C<0> otherwise.
+filehandle.  The values for WHENCE are C<0> to set the new position
+I<in bytes> to POSITION, C<1> to set it to the current position plus
+POSITION, and C<2> to set it to EOF plus POSITION (typically
+negative).  For WHENCE you may use the constants C<SEEK_SET>,
+C<SEEK_CUR>, and C<SEEK_END> (start of the file, current position, end
+of the file) from the Fcntl module.  Returns C<1> upon success, C<0>
+otherwise.
+
+Note the I<in bytes>: even if the filehandle has been set to
+operate on characters (for example by using the C<:utf8> open
+discipline), tell() will return byte offsets, not character offsets
+(because implementing that would render seek() and tell() rather slow).
 
 If you want to position file for C<sysread> or C<syswrite>, don't use
 C<seek>--buffering makes its effect on the file's system position
@@ -4049,8 +4077,8 @@ seek() to reset things.  The C<seek> doesn't change the current position,
 but it I<does> clear the end-of-file condition on the handle, so that the
 next C<< <FILE> >> makes Perl try again to read something.  We hope.
 
-If that doesn't work (some stdios are particularly cantankerous), then
-you may need something more like this:
+If that doesn't work (some IO implementations are particularly
+cantankerous), then you may need something more like this:
 
     for (;;) {
 	for ($curpos = tell(FILE); $_ = <FILE>;
@@ -4187,12 +4215,20 @@ documentation.
 
 =item send SOCKET,MSG,FLAGS
 
-Sends a message on a socket.  Takes the same flags as the system call
-of the same name.  On unconnected sockets you must specify a
-destination to send TO, in which case it does a C C<sendto>.  Returns
-the number of characters sent, or the undefined value if there is an
-error.  The C system call sendmsg(2) is currently unimplemented.
-See L<perlipc/"UDP: Message Passing"> for examples.
+Sends a message on a socket.  Attemps to send the scalar MSG to the
+SOCKET filehandle.  Takes the same flags as the system call of the
+same name.  On unconnected sockets you must specify a destination to
+send TO, in which case it does a C C<sendto>.  Returns the number of
+characters sent, or the undefined value if there is an error.  The C
+system call sendmsg(2) is currently unimplemented.  See
+L<perlipc/"UDP: Message Passing"> for examples.
+
+Note the I<characters>: depending on the status of the socket, either
+(8-bit) bytes or characters are sent.  By default all sockets operate
+on bytes, but for example if the socket has been changed using
+binmode() to operate with the C<:utf8> discipline (see L</open>, or
+the C<open> pragma, L<open>), the I/O will operate on characters, not
+bytes.
 
 =item setpgrp PID,PGRP
 
@@ -4400,11 +4436,19 @@ loop control operators described in L<perlsyn> or with C<goto>.
 When C<use locale> is in effect, C<sort LIST> sorts LIST according to the
 current collation locale.  See L<perllocale>.
 
-Perl does B<not> guarantee that sort is stable.  (A I<stable> sort
-preserves the input order of elements that compare equal.)  5.7 and
-5.8 happen to use a stable mergesort, but 5.6 and earlier used quicksort,
-which is not stable.  Do not assume that future perls will continue to
-use a stable sort.
+Perl 5.6 and earlier used a quicksort algorithm to implement sort.
+That algorithm was not stable, and I<could> go quadratic.  (A I<stable> sort
+preserves the input order of elements that compare equal.  Although
+quicksort's run time is O(NlogN) when averaged over all arrays of
+length N, the time can be O(N**2), I<quadratic> behavior, for some
+inputs.)  In 5.7, the quicksort implementation was replaced with
+a stable mergesort algorithm whose worst case behavior is O(NlogN).
+But benchmarks indicated that for some inputs, on some platforms,
+the original quicksort was faster.  5.8 has a sort pragma for
+limited control of the sort.  Its rather blunt control of the
+underlying algorithm may not persist into future perls, but the
+ability to characterize the input or output in implementation
+independent ways quite probably will.  See L</use>.
 
 Examples:
 
@@ -4486,6 +4530,18 @@ Examples:
 
     package main;
     @new = sort other::backwards @old;
+
+    # guarantee stability, regardless of algorithm
+    use sort 'stable';
+    @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old;
+
+    # force use of quicksort (not portable outside Perl 5.8)
+    use sort '_quicksort';  # note discouraging _
+    @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old;
+
+    # similar to the previous example, but demand stability as well
+    use sort qw( _mergesort stable );
+    @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old;
 
 If you're using strict, you I<must not> declare $a
 and $b as lexicals.  They are package globals.  That means
@@ -4755,7 +4811,7 @@ There are also two Perl-specific flags:
     v       interpret string as a vector of integers, output as
             numbers separated either by dots, or by an arbitrary
 	    string received from the argument list when the flag
-	    is preceded by C<*>
+	    is preceded by "*"
 
 Where a number would appear in the flags, an asterisk (C<*>) may be
 used instead, in which case Perl uses the next item in the parameter
@@ -5216,21 +5272,27 @@ See L<perlopentut> for a kinder, gentler explanation of opening files.
 
 =item sysread FILEHANDLE,SCALAR,LENGTH
 
-Attempts to read LENGTH bytes of data into variable SCALAR from the
-specified FILEHANDLE, using the system call read(2).  It bypasses stdio,
-so mixing this with other kinds of reads, C<print>, C<write>,
-C<seek>, C<tell>, or C<eof> can cause confusion because stdio
-usually buffers data.  Returns the number of bytes actually read, C<0>
-at end of file, or undef if there was an error.  SCALAR will be grown or
-shrunk so that the last byte actually read is the last byte of the
-scalar after the read.
+Attempts to read LENGTH I<characters> of data into variable SCALAR from
+the specified FILEHANDLE, using the system call read(2).  It bypasses
+buffered IO, so mixing this with other kinds of reads, C<print>,
+C<write>, C<seek>, C<tell>, or C<eof> can cause confusion because
+stdio usually buffers data.  Returns the number of characters actually
+read, C<0> at end of file, or undef if there was an error.  SCALAR
+will be grown or shrunk so that the last byte actually read is the
+last byte of the scalar after the read.
+
+Note the I<characters>: depending on the status of the filehandle,
+either (8-bit) bytes or characters are read.  By default all
+filehandles operate on bytes, but for example if the filehandle has
+been opened with the C<:utf8> discipline (see L</open>, and the C<open>
+pragma, L<open>), the I/O will operate on characters, not bytes.
 
 An OFFSET may be specified to place the read data at some place in the
 string other than the beginning.  A negative OFFSET specifies
-placement at that many bytes counting backwards from the end of the
-string.  A positive OFFSET greater than the length of SCALAR results
-in the string being padded to the required size with C<"\0"> bytes before
-the result of the read is appended.
+placement at that many characters counting backwards from the end of
+the string.  A positive OFFSET greater than the length of SCALAR
+results in the string being padded to the required size with C<"\0">
+bytes before the result of the read is appended.
 
 There is no syseof() function, which is ok, since eof() doesn't work
 very well on device files (like ttys) anyway.  Use sysread() and check
@@ -5238,13 +5300,21 @@ for a return value for 0 to decide whether you're done.
 
 =item sysseek FILEHANDLE,POSITION,WHENCE
 
-Sets FILEHANDLE's system position using the system call lseek(2).  It
-bypasses stdio, so mixing this with reads (other than C<sysread>),
-C<print>, C<write>, C<seek>, C<tell>, or C<eof> may cause confusion.
-FILEHANDLE may be an expression whose value gives the name of the
-filehandle.  The values for WHENCE are C<0> to set the new position to
-POSITION, C<1> to set the it to the current position plus POSITION,
-and C<2> to set it to EOF plus POSITION (typically negative).
+Sets FILEHANDLE's system position I<in bytes> using the system call
+lseek(2).  FILEHANDLE may be an expression whose value gives the name
+of the filehandle.  The values for WHENCE are C<0> to set the new
+position to POSITION, C<1> to set the it to the current position plus
+POSITION, and C<2> to set it to EOF plus POSITION (typically
+negative).
+
+Note the I<in bytes>: even if the filehandle has been set to operate
+on characters (for example by using the C<:utf8> discipline), tell()
+will return byte offsets, not character offsets (because implementing
+that would render sysseek() very slow).
+
+sysseek() bypasses normal buffered io, so mixing this with reads (other
+than C<sysread>, for example &gt;&lt or read()) C<print>, C<write>,
+C<seek>, C<tell>, or C<eof> may cause confusion.
 
 For WHENCE, you may also use the constants C<SEEK_SET>, C<SEEK_CUR>,
 and C<SEEK_END> (start of the file, current position, end of the file)
@@ -5317,34 +5387,52 @@ See L<perlop/"`STRING`"> and L</exec> for details.
 
 =item syswrite FILEHANDLE,SCALAR
 
-Attempts to write LENGTH bytes of data from variable SCALAR to the
-specified FILEHANDLE, using the system call write(2).  If LENGTH
-is not specified, writes whole SCALAR.  It bypasses stdio, so mixing
-this with reads (other than C<sysread())>, C<print>, C<write>,
-C<seek>, C<tell>, or C<eof> may cause confusion because stdio
-usually buffers data.  Returns the number of bytes actually written,
-or C<undef> if there was an error.  If the LENGTH is greater than
-the available data in the SCALAR after the OFFSET, only as much
-data as is available will be written.
+Attempts to write LENGTH characters of data from variable SCALAR to
+the specified FILEHANDLE, using the system call write(2).  If LENGTH
+is not specified, writes whole SCALAR.  It bypasses buffered IO, so
+mixing this with reads (other than C<sysread())>, C<print>, C<write>,
+C<seek>, C<tell>, or C<eof> may cause confusion because stdio usually
+buffers data.  Returns the number of characters actually written, or
+C<undef> if there was an error.  If the LENGTH is greater than the
+available data in the SCALAR after the OFFSET, only as much data as is
+available will be written.
 
 An OFFSET may be specified to write the data from some part of the
 string other than the beginning.  A negative OFFSET specifies writing
-that many bytes counting backwards from the end of the string.  In the
-case the SCALAR is empty you can use OFFSET but only zero offset.
+that many characters counting backwards from the end of the string.
+In the case the SCALAR is empty you can use OFFSET but only zero offset.
+
+Note the I<characters>: depending on the status of the filehandle,
+either (8-bit) bytes or characters are written.  By default all
+filehandles operate on bytes, but for example if the filehandle has
+been opened with the C<:utf8> discipline (see L</open>, and the open
+pragma, L<open>), the I/O will operate on characters, not bytes.
 
 =item tell FILEHANDLE
 
 =item tell
 
-Returns the current position for FILEHANDLE, or -1 on error.  FILEHANDLE
-may be an expression whose value gives the name of the actual filehandle.
-If FILEHANDLE is omitted, assumes the file last read.
+Returns the current position I<in bytes> for FILEHANDLE, or -1 on
+error.  FILEHANDLE may be an expression whose value gives the name of
+the actual filehandle.  If FILEHANDLE is omitted, assumes the file
+last read.
+
+Note the I<in bytes>: even if the filehandle has been set to
+operate on characters (for example by using the C<:utf8> open
+discipline), tell() will return byte offsets, not character offsets
+(because that would render seek() and tell() rather slow).
 
 The return value of tell() for the standard streams like the STDIN
 depends on the operating system: it may return -1 or something else.
 tell() on pipes, fifos, and sockets usually returns -1.
 
 There is no C<systell> function.  Use C<sysseek(FH, 0, 1)> for that.
+
+Do not use tell() on a filehandle that has been opened using
+sysopen(), use sysseek() for that as described above.  Why?  Because
+sysopen() creates unbuffered, "raw", filehandles, while open() creates
+buffered filehandles.  sysseek() make sense only on the first kind,
+tell() only makes sense on the second kind.
 
 =item telldir DIRHANDLE
 
@@ -5736,6 +5824,7 @@ are also implemented this way.  Currently implemented pragmas are:
     use strict   qw(subs vars refs);
     use subs     qw(afunc blurfl);
     use warnings qw(all);
+    use sort     qw(stable _quicksort _mergesort);
 
 Some of these pseudo-modules import semantics into the current
 block scope (like C<strict> or C<integer>, unlike ordinary modules,

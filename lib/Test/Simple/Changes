@@ -1,5 +1,12 @@
 Revision history for Perl extension Test::Simple
 
+0.33  Mon Oct 22 21:05:47 EDT 2001
+    * It's now officially safe to redirect STDOUT and STDERR without
+      affecting test output.
+    - License and POD cleanup by Autrijus Tang
+    - Synched up Test::Tutorial with the wiki version
+    - Minor VMS test nit.
+
 0.32  Tue Oct 16 16:52:02 EDT 2001
     * Finally added a seperate plan() function
     * Adding a name field to isa_ok()
@@ -18,6 +25,7 @@ Revision history for Perl extension Test::Simple
 
 0.30  Thu Sep 27 22:10:04 EDT 2001
     * Added Test::Builder
+      (Thanks muchly to chromatic for getting this off the ground!)
     * Diagnostics are back to using STDERR *unless* it's from a todo
       test.  Those go to STDOUT.
     - Fixed it so nothing is printed if a test is run with a -c flag.

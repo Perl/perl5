@@ -22,7 +22,11 @@ print ord($c)     == 0x100 ? "ok 4\n" : "not ok 4\n";
 
 {
     use bytes;
-    print ord($c) == 0xc4 ? "ok 5\n" : "not ok 5\n";
+    if (ord('A') == 193) {
+	print ord($c) == 0x8c ? "ok 5\n" : "not ok 5\n";
+    } else {
+	print ord($c) == 0xc4 ? "ok 5\n" : "not ok 5\n";
+    }
     print length($c) == 2 ? "ok 6\n" : "not ok 6\n";
 }
 

@@ -22,7 +22,7 @@ BEGIN {
 
 use DB_File; 
 use Fcntl;
-use vars qw($dbh $Dfile $bad_ones $FA) ;
+our ($dbh, $Dfile, $bad_ones, $FA);
 
 # full tied array support started in Perl 5.004_57
 # Double check to see if it is available.
@@ -131,14 +131,14 @@ my $total_tests = 138 ;
 $total_tests += $splice_tests if $FA ;
 print "1..$total_tests\n";   
 
-my $Dfile = "recno.tmp";
+$Dfile = "recno.tmp";
 unlink $Dfile ;
 
 umask(0);
 
 # Check the interface to RECNOINFO
 
-my $dbh = new DB_File::RECNOINFO ;
+$dbh = new DB_File::RECNOINFO ;
 ok(1, ! defined $dbh->{bval}) ;
 ok(2, ! defined $dbh->{cachesize}) ;
 ok(3, ! defined $dbh->{psize}) ;
@@ -400,7 +400,7 @@ unlink $Dfile;
 
    use warnings ;
    use strict ;
-   use vars qw( @ISA @EXPORT) ;
+   our (@ISA, @EXPORT);
 
    require Exporter ;
    use DB_File;
@@ -792,7 +792,7 @@ EOM
 
     use warnings FATAL => qw(all);
     use strict ;
-    use vars qw(@h $H $file $i) ;
+    our (@h, $H, $file, $i);
     use DB_File ;
     use Fcntl ;
     

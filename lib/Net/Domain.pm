@@ -16,7 +16,7 @@ use Net::Config;
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(hostname hostdomain hostfqdn domainname);
 
-$VERSION = "2.16"; # $Id: //depot/libnet/Net/Domain.pm#18 $
+$VERSION = "2.17"; # $Id: //depot/libnet/Net/Domain.pm#19 $
 
 my($host,$domain,$fqdn) = (undef,undef,undef);
 
@@ -127,6 +127,7 @@ sub _hostdomain {
     # those on dialup systems.
 
     local *RES;
+    local($_);
 
     if(open(RES,"/etc/resolv.conf")) {
     	while(<RES>) {
@@ -143,7 +144,6 @@ sub _hostdomain {
 
     my $host = _hostname();
     my(@hosts);
-    local($_);
 
     @hosts = ($host,"localhost");
 
@@ -331,6 +331,6 @@ it under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/Domain.pm#18 $>
+I<$Id: //depot/libnet/Net/Domain.pm#19 $>
 
 =cut

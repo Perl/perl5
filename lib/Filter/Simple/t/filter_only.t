@@ -1,7 +1,7 @@
 BEGIN {
     if ($ENV{PERL_CORE}) {
         chdir('t') if -d 't';
-        @INC = qw(lib ../lib);
+        @INC = qw(lib/Filter/Simple ../lib);
     }
 }
 

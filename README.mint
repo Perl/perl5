@@ -8,6 +8,13 @@ README.mint - Perl version 5 on Atari MiNT
 
 =head1 DESCRIPTION
 
+There is a binary version of perl available from the FreeMiNT project
+http://freemint.de/  You may wish to use this instead of trying to
+compile yourself.
+
+B<The following advice is from perl 5.004_02 and is probably rather
+out of date.>
+
 If you want to build perl yourself on MiNT (or maybe on an Atari without
 MiNT) you may want to accept some advice from somebody who already did it...
 
@@ -219,6 +226,4 @@ Have fun with Perl!
 
 Guido Flohr
 
-	mailto:gufl0000@stud.uni-sb.de
-	http://stud.uni-sb.de/~gufl0000
-
+	mailto:guido@FreeMiNT.de

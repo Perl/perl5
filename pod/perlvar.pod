@@ -209,7 +209,7 @@ BLOCK).  (Mnemonic: like & in some editors.)  This variable is read-only
 and dynamically scoped to the current BLOCK.
 
 The use of this variable anywhere in a program imposes a considerable
-performance penalty on all regular expression matches.  See L<BUGS>.
+performance penalty on all regular expression matches.  See L</BUGS>.
 
 =item $PREMATCH
 
@@ -221,7 +221,7 @@ enclosed by the current BLOCK).  (Mnemonic: C<`> often precedes a quoted
 string.)  This variable is read-only.
 
 The use of this variable anywhere in a program imposes a considerable
-performance penalty on all regular expression matches.  See L<BUGS>.
+performance penalty on all regular expression matches.  See L</BUGS>.
 
 =item $POSTMATCH
 
@@ -239,7 +239,7 @@ string.)  Example:
 This variable is read-only and dynamically scoped to the current BLOCK.
 
 The use of this variable anywhere in a program imposes a considerable
-performance penalty on all regular expression matches.  See L<BUGS>.
+performance penalty on all regular expression matches.  See L</BUGS>.
 
 =item $LAST_PAREN_MATCH
 

@@ -105,8 +105,8 @@ ok(/^$_$/);
 $* = 1;	    # test 3 only tested the optimized version--this one is for real
 ok("ab\ncd\n" =~ /^cd/);
 
-if ($^O eq 'os390') {
-    # Even with the alarm() OS/390 can't manage these tests
+if ($^O eq 'os390' or $^O eq 'posix-bc') {
+    # Even with the alarm() OS/390 and BS2000 can't manage these tests
     # (Perl just goes into a busy loop, luckily an interruptable one)
     for (25..26) { print "not ok $_ # TODO compiler bug?\n" }
     $test += 2;

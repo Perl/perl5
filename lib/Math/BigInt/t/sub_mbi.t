@@ -6,14 +6,14 @@ use strict;
 BEGIN
   {
   $| = 1;
-  $| = 1;
   # to locate the testing files
   my $location = $0; $location =~ s/sub_mbi.t//i;
   if ($ENV{PERL_CORE})
     {
     # testing with the core distribution
-    @INC = qw(../lib);
+    @INC = qw(../t/lib);
     }
+  unshift @INC, qw(../lib);
   if (-d 't')
     {
     chdir 't';
@@ -26,7 +26,7 @@ BEGIN
     }
   print "# INC = @INC\n";
 
-  plan tests => 1608 + 4;	# +4 own tests
+  plan tests => 1669 + 4;	# +4 own tests
   }
 
 use Math::BigInt::Subclass;
@@ -34,7 +34,7 @@ use Math::BigInt::Subclass;
 use vars qw ($class $try $x $y $f @args $ans $ans1 $ans1_str $setup);
 $class = "Math::BigInt::Subclass";
 
-#my $version = '0.01';   # for $VERSION tests, match current release (by hand!)
+my $version = '0.01';   # for $VERSION tests, match current release (by hand!)
 
 require 'bigintpm.inc';	# perform same tests as bigfltpm
 

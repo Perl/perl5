@@ -3100,23 +3100,27 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_FILETEST_ACCESS	0x00400000
 #define HINT_UTF8		0x00800000
 
+#define HINT_SORT_SORT_BITS	0x000000FF /* allow 256 different ones */
+#define HINT_SORT_QUICKSORT	0x00000001
+#define HINT_SORT_MERGESORT	0x00000002
+#define HINT_SORT_STABLE	0x00000100 /* sort styles (currently one) */
+
 /* Various states of the input record separator SV (rs) */
 #define RsSNARF(sv)   (! SvOK(sv))
 #define RsSIMPLE(sv)  (SvOK(sv) && (! SvPOK(sv) || SvCUR(sv)))
 #define RsPARA(sv)    (SvPOK(sv) && ! SvCUR(sv))
 #define RsRECORD(sv)  (SvROK(sv) && (SvIV(SvRV(sv)) > 0))
 
-#ifdef DEBUGGING
-/* A struct for keeping various DEBUGGING related stuff
+/* A struct for keeping various DEBUGGING related stuff,
  * neatly packed.  Currently only scratch variables for
- * constructing debug output are included. */
+ * constructing debug output are included.  Needed always,
+ * not just when DEBUGGING, though, because of the re extension. c*/
 struct perl_debug_pad {
   SV pad[3];
 };
 
 #define PERL_DEBUG_PAD(i)	&(PL_debug_pad.pad[i])
 #define PERL_DEBUG_PAD_ZERO(i)	(sv_setpvn(PERL_DEBUG_PAD(i), "", 0), PERL_DEBUG_PAD(i))
-#endif
 
 /* Enable variables which are pointers to functions */
 typedef void (CPERLscope(*peep_t))(pTHX_ OP* o);
@@ -3995,6 +3999,30 @@ extern void moncontrol(int);
 #define PERL_GPROF_MONCONTROL(x)
 #endif
 
+#ifdef UNDER_CE
+#include "wince.h"
+#endif
+
+/* ISO 6429 NEL - C1 control NExt Line */
+/* See http://www.unicode.org/unicode/reports/tr13/ */
+#ifdef EBCDIC	/* In EBCDIC NEL is just an alias for LF */
+#   if '^' == 95	/* CP 1047: MVS OpenEdition - OS/390 - z/OS */
+#       define NEXT_LINE_CHAR	0x15
+#   else		/* CDRA */
+#       define NEXT_LINE_CHAR	0x25
+#   endif
+#else
+#   define NEXT_LINE_CHAR	0x85
+#endif
+
+/* The UTF-8 bytes of the Unicode LS and PS, U+2028 and U+2029 */
+#define UNICODE_LINE_SEPA_0	0xE2
+#define UNICODE_LINE_SEPA_1	0x80
+#define UNICODE_LINE_SEPA_2	0xA8
+#define UNICODE_PARA_SEPA_0	0xE2
+#define UNICODE_PARA_SEPA_1	0x80
+#define UNICODE_PARA_SEPA_2	0xA9
+
 /* and finally... */
 #define PERL_PATCHLEVEL_H_IMPLICIT
 #include "patchlevel.h"
@@ -4037,31 +4065,10 @@ extern void moncontrol(int);
    HAS_STRUCT_CMSGHDR
 
    HAS_NL_LANGINFO
+   
+   HAS_DIRFD
 
    so that Configure picks them up. */
 
-#ifdef UNDER_CE
-#include "wince.h"
-#endif
-
-/* ISO 6429 NEL - C1 control NExt Line */
-/* See http://www.unicode.org/unicode/reports/tr13/ */
-#ifdef EBCDIC	/* In EBCDIC NEL is just an alias for LF */
-#   if '^' == 95	/* CP 1047: MVS OpenEdition - OS/390 - z/OS */
-#       define NEXT_LINE_CHAR	0x15
-#   else		/* CDRA */
-#       define NEXT_LINE_CHAR	0x25
-#   endif
-#else
-#   define NEXT_LINE_CHAR	0x85
-#endif
-
-/* The UTF-8 bytes of the Unicode LS and PS, U+2028 and U+2029 */
-#define UNICODE_LINE_SEPA_0	0xE2
-#define UNICODE_LINE_SEPA_1	0x80
-#define UNICODE_LINE_SEPA_2	0xA8
-#define UNICODE_PARA_SEPA_0	0xE2
-#define UNICODE_PARA_SEPA_1	0x80
-#define UNICODE_PARA_SEPA_2	0xA9
-
 #endif /* Include guard */
+

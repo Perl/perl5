@@ -87,7 +87,7 @@ my_inet_aton(register const char *cp, struct in_addr *addr)
 	unsigned int parts[4];
 	register unsigned int *pp = parts;
 
-	if (!cp)
+       if (!cp || !*cp)
 		return 0;
 	for (;;) {
 		/*
@@ -222,7 +222,10 @@ inet_aton(host)
 	{
 	struct in_addr ip_address;
 	struct hostent * phe;
-	int ok = inet_aton(host, &ip_address);
+	int ok =
+		(host != NULL) &&
+		(*host != '\0') &&
+		inet_aton(host, &ip_address);
 
 	if (!ok && (phe = gethostbyname(host))) {
 		Copy( phe->h_addr, &ip_address, phe->h_length, char );

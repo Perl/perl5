@@ -667,8 +667,8 @@ sub abs2rel {
     my $base_dirs = ($self->splitpath( $base ))[1] ;
 
     # Now, remove all leading components that are the same
-    my @pathchunks = $self->splitdir( $path_dirs ); # expected: ('')
-    my @basechunks = $self->splitdir( $base_dirs ); # expected: (d1, d2)
+    my @pathchunks = $self->splitdir( $path_dirs );
+    my @basechunks = $self->splitdir( $base_dirs );
 	
     while ( @pathchunks &&
 	    @basechunks &&

@@ -261,6 +261,7 @@
 #define hv_undef		Perl_hv_undef
 #define ibcmp			Perl_ibcmp
 #define ibcmp_locale		Perl_ibcmp_locale
+#define ibcmp_utf8		Perl_ibcmp_utf8
 #define ingroup			Perl_ingroup
 #define init_argv_symbols	Perl_init_argv_symbols
 #define init_debugger		Perl_init_debugger
@@ -289,6 +290,7 @@
 #define to_uni_upper		Perl_to_uni_upper
 #define to_uni_title		Perl_to_uni_title
 #define to_uni_lower		Perl_to_uni_lower
+#define to_uni_fold		Perl_to_uni_fold
 #define is_uni_alnum_lc		Perl_is_uni_alnum_lc
 #define is_uni_alnumc_lc	Perl_is_uni_alnumc_lc
 #define is_uni_idfirst_lc	Perl_is_uni_idfirst_lc
@@ -1780,6 +1782,7 @@
 #define hv_undef(a)		Perl_hv_undef(aTHX_ a)
 #define ibcmp(a,b,c)		Perl_ibcmp(aTHX_ a,b,c)
 #define ibcmp_locale(a,b,c)	Perl_ibcmp_locale(aTHX_ a,b,c)
+#define ibcmp_utf8(a,b,c,d,e)	Perl_ibcmp_utf8(aTHX_ a,b,c,d,e)
 #define ingroup(a,b)		Perl_ingroup(aTHX_ a,b)
 #define init_argv_symbols(a,b)	Perl_init_argv_symbols(aTHX_ a,b)
 #define init_debugger()		Perl_init_debugger(aTHX)
@@ -1808,6 +1811,7 @@
 #define to_uni_upper(a,b,c)	Perl_to_uni_upper(aTHX_ a,b,c)
 #define to_uni_title(a,b,c)	Perl_to_uni_title(aTHX_ a,b,c)
 #define to_uni_lower(a,b,c)	Perl_to_uni_lower(aTHX_ a,b,c)
+#define to_uni_fold(a,b,c)	Perl_to_uni_fold(aTHX_ a,b,c)
 #define is_uni_alnum_lc(a)	Perl_is_uni_alnum_lc(aTHX_ a)
 #define is_uni_alnumc_lc(a)	Perl_is_uni_alnumc_lc(aTHX_ a)
 #define is_uni_idfirst_lc(a)	Perl_is_uni_idfirst_lc(aTHX_ a)

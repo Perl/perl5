@@ -1093,6 +1093,119 @@ Perl_my_sigaction (pTHX_ int sig, const struct sigaction* act,
 /*}}}*/
 #endif
 
+#ifdef KILL_BY_SIGPRC
+#include <errnodef.h>
+
+/* okay, this is some BLATENT hackery ... 
+   we use this if the kill() in the CRTL uses sys$forcex, causing the
+   target process to do a sys$exit, which usually can't be handled 
+   gracefully...certainly not by Perl and the %SIG{} mechanism.
+
+   Instead we use the (undocumented) system service sys$sigprc.
+   It has the same parameters as sys$forcex, but throws an exception
+   in the target process rather than calling sys$exit.
+
+   Note that distinguishing SIGSEGV from SIGBUS requires an extra arg
+   on the ACCVIO condition, which sys$sigprc (and sys$forcex) don't
+   provide.  On VMS 7.0+ this is taken care of by doing sys$sigprc
+   with condition codes C$_SIG0+nsig*8, catching the exception on the 
+   target process and resignaling with appropriate arguments.
+
+   But we don't have that VMS 7.0+ exception handler, so if you
+   Perl_my_kill(.., SIGSEGV) it will show up as a SIGBUS.  Oh well.
+
+   Also note that SIGTERM is listed in the docs as being "unimplemented",
+   yet always seems to be signaled with a VMS condition code of 4 (and
+   correctly handled for that code).  So we hardwire it in.
+
+   Unlike the VMS 7.0+ CRTL kill() function, we actually check the signal
+   number to see if it's valid.  So Perl_my_kill(pid,0) returns -1 rather
+   than signalling with an unrecognized (and unhandled by CRTL) code.
+*/
+
+#define _MY_SIG_MAX 17
+
+unsigned int
+Perl_sig_to_vmscondition(int sig)
+{
+    static unsigned int sig_code[_MY_SIG_MAX+1] = 
+    {
+        0,                  /*  0 ZERO     */
+        SS$_HANGUP,         /*  1 SIGHUP   */
+        SS$_CONTROLC,       /*  2 SIGINT   */
+        SS$_CONTROLY,       /*  3 SIGQUIT  */
+        SS$_RADRMOD,        /*  4 SIGILL   */
+        SS$_BREAK,          /*  5 SIGTRAP  */
+        SS$_OPCCUS,         /*  6 SIGABRT  */
+        SS$_COMPAT,         /*  7 SIGEMT   */
+#ifdef __VAX                      
+        SS$_FLTOVF,         /*  8 SIGFPE VAX */
+#else                             
+        SS$_HPARITH,        /*  8 SIGFPE AXP */
+#endif                            
+        SS$_ABORT,          /*  9 SIGKILL  */
+        SS$_ACCVIO,         /* 10 SIGBUS   */
+        SS$_ACCVIO,         /* 11 SIGSEGV  */
+        SS$_BADPARAM,       /* 12 SIGSYS   */
+        SS$_NOMBX,          /* 13 SIGPIPE  */
+        SS$_ASTFLT,         /* 14 SIGALRM  */
+        4,                  /* 15 SIGTERM  */
+        0,                  /* 16 SIGUSR1  */
+        0                   /* 17 SIGUSR2  */
+    };
+
+#if __VMS_VER >= 60200000
+    static int initted = 0;
+    if (!initted) {
+        initted = 1;
+        sig_code[16] = C$_SIGUSR1;
+        sig_code[17] = C$_SIGUSR2;
+    }
+#endif
+
+    if (sig < _SIG_MIN) return 0;
+    if (sig > _MY_SIG_MAX) return 0;
+    return sig_code[sig];
+}
+
+
+int
+Perl_my_kill(int pid, int sig)
+{
+    int iss;
+    unsigned int code;
+    int sys$sigprc(unsigned int *pidadr,
+                     struct dsc$descriptor_s *prcname,
+                     unsigned int code);
+
+    code = Perl_sig_to_vmscondition(sig);
+
+    if (!pid || !code) {
+        return -1;
+    }
+
+    iss = sys$sigprc((unsigned int *)&pid,0,code);
+    if (iss&1) return 0;
+
+    switch (iss) {
+      case SS$_NOPRIV:
+        set_errno(EPERM);  break;
+      case SS$_NONEXPR:  
+      case SS$_NOSUCHNODE:
+      case SS$_UNREACHABLE:
+        set_errno(ESRCH);  break;
+      case SS$_INSFMEM:
+        set_errno(ENOMEM); break;
+      default:
+        _ckvmssts(iss);
+        set_errno(EVMSERR);
+    } 
+    set_vaxc_errno(iss);
+ 
+    return -1;
+}
+#endif
+
 /* default piping mailbox size */
 #define PERL_BUFSIZ        512
 
@@ -2039,7 +2152,10 @@ vmspipe_tempfile(pTHX)
     fprintf(fp,"$ perl_del/symbol/global perl_popen_in\n");
     fprintf(fp,"$ perl_del/symbol/global perl_popen_err\n");
     fprintf(fp,"$ perl_del/symbol/global perl_popen_out\n");
-    fprintf(fp,"$ perl_del/symbol/global perl_popen_cmd\n");
+    fprintf(fp,"$ perl_del/symbol/global perl_popen_cmd0\n");
+    fprintf(fp,"$ perl_del/symbol/global perl_popen_cmd1\n");
+    fprintf(fp,"$ perl_del/symbol/global perl_popen_cmd2\n");
+    fprintf(fp,"$ perl_del/symbol/global perl_popen_cmd3\n");
     fprintf(fp,"$ perl_on\n");
     fprintf(fp,"$ 'c\n");
     fprintf(fp,"$ perl_status = $STATUS\n");
@@ -2091,6 +2207,8 @@ safe_popen(pTHX_ char *cmd, char *in_mode, int *psts)
     $DESCRIPTOR(d_sym_out,"PERL_POPEN_OUT");
     $DESCRIPTOR(d_sym_err,"PERL_POPEN_ERR");
                             
+    if (!head_PLOC) store_pipelocs(aTHX);   /* at least TRY to use a static vmspipe file */
+
     /* once-per-program initialization...
        note that the SETAST calls and the dual test of pipe_ef
        makes sure that only the FIRST thread through here does
@@ -4206,7 +4324,6 @@ pipe_and_fork(pTHX_ char **cmargv)
     }
     *p = '\0';
 
-    store_pipelocs();                   /* gets redone later */
     fp = safe_popen(subcmd,"wbF",&sts);
     if (fp == Nullfp) {
         PerlIO_printf(Perl_debug_log,"Can't open output pipe (status %d)",sts);
@@ -4282,6 +4399,10 @@ vms_image_init(int *argcp, char ***argvp)
                                  {sizeof rlst,  JPI$_RIGHTSLIST, rlst,  &rlen},
                                  { sizeof rsz, JPI$_RIGHTS_SIZE, &rsz, &dummy},
                                  {          0,                0,    0,      0} };
+
+#ifdef KILL_BY_SIGPRC
+    (void) Perl_csighandler_init();
+#endif
 
   _ckvmssts_noperl(sys$getjpiw(0,NULL,NULL,jpilist,iosb,NULL,NULL));
   _ckvmssts_noperl(iosb[0]);
@@ -7145,7 +7266,7 @@ init_os_extras()
   newXS("File::Copy::rmscopy",rmscopy_fromperl,file);
   newXSproto("vmsish::hushed",hushexit_fromperl,file,";$");
 
-  store_pipelocs(aTHX);
+  store_pipelocs(aTHX);         /* will redo any earlier attempts */
 
   return;
 }

@@ -72,6 +72,14 @@ typedef IV IV64;
 	}						\
     } STMT_END
 
+#if IVSIZE == 4
+#   define BGET_IV(arg) BGET_I32(arg)
+#else
+#   if IVSIZE == 8
+#       define BGET_IV(arg) BGET_IV64(arg)
+#   endif
+#endif
+
 #define BGET_op_tr_array(arg) do {			\
 	unsigned short *ary;				\
 	New(666, ary, 256, unsigned short);		\

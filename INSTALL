@@ -186,10 +186,10 @@ does not work with some C++ compilers.
 
 =head1 Space Requirements
 
-The complete perl5 source tree takes up about 35 MB of disk space.
-After completing make, it takes up roughly 50 MB, though the actual
+The complete perl5 source tree takes up about 40 MB of disk space.
+After completing make, it takes up roughly 60 MB, though the actual
 total is likely to be quite system-dependent.  The installation
-directories need something on the order of 30 MB, though again that
+directories need something on the order of 35 MB, though again that
 value is system-dependent.
 
 =head1 Start with a Fresh Distribution
@@ -1924,6 +1924,14 @@ shown above and see whether you can locate the program.  Look for
 things like:  exec, `backquoted command`, system, open("|...") or
 open("...|").  All these mean that Perl is trying to run some
 external program.
+
+=item Timing problems
+
+Several tests in the test suite check timing functions, such as sleep(),
+and see if they return in a reasonable amount of time.  If your system is
+quite busy and doesn't return quickly enough, these tests might fail.
+If possible, try running the tests again with the system under a
+lighter load.
 
 =item Out of memory
 

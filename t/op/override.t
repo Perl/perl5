@@ -6,7 +6,7 @@ BEGIN {
     push @INC, '../lib';
 }
 
-print "1..10\n";
+print "1..11\n";
 
 #
 # This file tries to test builtin override using CORE::GLOBAL
@@ -61,3 +61,12 @@ print "ok 9\n";
 eval "use 5.6";
 print "not " unless $r eq "5.6";
 print "ok 10\n";
+
+# localizing *CORE::GLOBAL::foo should revert to finding CORE::foo
+{
+    local(*CORE::GLOBAL::require);
+    $r = '';
+    eval "require NoNeXiSt;";
+    print "not " if $r or $@ !~ /^Can't locate NoNeXiSt/i;
+    print "ok 11\n";
+}

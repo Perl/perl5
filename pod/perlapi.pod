@@ -2045,10 +2045,10 @@ Sort an array. Here is an example:
 
     sortsv(AvARRAY(av), av_len(av)+1, Perl_sv_cmp_locale); 
 
-	void	sortsv(SV ** array, size_t num_elts, SVCOMPARE_t f)
+	void	sortsv(SV ** array, size_t num_elts, SVCOMPARE_t cmp)
 
 =for hackers
-Found in file pp_ctl.c
+Found in file pp_sort.c
 
 =item SP
 

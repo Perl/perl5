@@ -1,8 +1,8 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (Paul.Marquess@btinternet.com)
-# last modified 22nc Oct 2001
-# version 1.79
+# last modified 26th Nov 2001
+# version 1.801
 #
 #     Copyright (c) 1995-2001 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -145,13 +145,12 @@ package DB_File ;
 
 use warnings;
 use strict;
-use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO 
-            $db_version $use_XSLoader
-           ) ;
+our ($VERSION, @ISA, @EXPORT, $AUTOLOAD, $DB_BTREE, $DB_HASH, $DB_RECNO);
+our ($db_version, $use_XSLoader);
 use Carp;
 
 
-$VERSION = "1.79" ;
+$VERSION = "1.801" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -210,22 +209,12 @@ push @ISA, qw(Tie::Hash Exporter);
 sub AUTOLOAD {
     my($constname);
     ($constname = $AUTOLOAD) =~ s/.*:://;
-    my $val = constant($constname, @_ ? $_[0] : 0);
-    if ($! != 0) {
-	if ($! =~ /Invalid/ || $!{EINVAL}) {
-	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
-	    goto &AutoLoader::AUTOLOAD;
-	}
-	else {
-	    my($pack,$file,$line) = caller;
-	    croak "Your vendor has not defined DB macro $constname, used at $file line $line.
-";
-	}
-    }
+    my ($error, $val) = constant($constname);
+    Carp::croak $error if $error;
     no strict 'refs';
     *{$AUTOLOAD} = sub { $val };
     goto &{$AUTOLOAD};
-}
+}           
 
 
 eval {
@@ -839,7 +828,7 @@ contents of the database.
     use warnings ;
     use strict ;
     use DB_File ;
-    use vars qw( %h $k $v ) ;
+    our (%h, $k, $v) ;
 
     unlink "fruit" ;
     tie %h, "DB_File", "fruit", O_RDWR|O_CREAT, 0666, $DB_HASH 
@@ -989,7 +978,7 @@ code:
     use strict ;
     use DB_File ;
 
-    use vars qw($filename %h ) ;
+    our ($filename, %h) ;
 
     $filename = "tree" ;
     unlink $filename ;
@@ -1044,7 +1033,7 @@ Here is the script above rewritten using the C<seq> API method.
     use strict ;
     use DB_File ;
 
-    use vars qw($filename $x %h $status $key $value) ;
+    our ($filename, $x, %h, $status, $key, $value) ;
 
     $filename = "tree" ;
     unlink $filename ;
@@ -1116,7 +1105,7 @@ this:
     use strict ;
     use DB_File ;
 
-    use vars qw($filename $x %h ) ;
+    our ($filename, $x, %h) ;
 
     $filename = "tree" ;
 
@@ -1166,9 +1155,9 @@ Assuming the database from the previous example:
     use strict ;
     use DB_File ;
 
-    use vars qw($filename $x %h $found) ;
+    our ($filename, $x, %h, $found) ;
 
-    my $filename = "tree" ;
+    $filename = "tree" ;
 
     # Enable duplicate records
     $DB_BTREE->{'flags'} = R_DUP ;
@@ -1205,9 +1194,9 @@ Again assuming the existence of the C<tree> database
     use strict ;
     use DB_File ;
 
-    use vars qw($filename $x %h $found) ;
+    our ($filename, $x, %h, $found) ;
 
-    my $filename = "tree" ;
+    $filename = "tree" ;
 
     # Enable duplicate records
     $DB_BTREE->{'flags'} = R_DUP ;
@@ -1251,7 +1240,7 @@ and print the first matching key/value pair given a partial key.
     use DB_File ;
     use Fcntl ;
 
-    use vars qw($filename $x %h $st $key $value) ;
+    our ($filename, $x, %h, $st, $key, $value) ;
 
     sub match
     {
@@ -1450,7 +1439,7 @@ L<THE API INTERFACE>).
 
     use warnings ;
     use strict ;
-    use vars qw(@h $H $file $i) ;
+    our (@h, $H, $file, $i) ;
     use DB_File ;
     use Fcntl ;
 
@@ -2015,7 +2004,7 @@ F<authors/id/TOMC/scripts/nshist.gz>).
     use DB_File ;
     use Fcntl ;
 
-    use vars qw( $dotdir $HISTORY %hist_db $href $binary_time $date ) ;
+    our ($dotdir, $HISTORY, %hist_db, $href, $binary_time, $date) ;
     $dotdir = $ENV{HOME} || $ENV{LOGNAME};
 
     $HISTORY = "$dotdir/.netscape/history.db";
@@ -2170,7 +2159,7 @@ Consider this script:
     use warnings ;
     use strict ;
     use DB_File ;
-    use vars qw(%x) ;
+    my %x ;
     tie %x, DB_File, "filename" ;
 
 Running it produces the error in question:

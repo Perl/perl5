@@ -194,7 +194,7 @@ so we can try to work around them.
 =head2 Wildcard expansion
 
 File specifications containing wildcards are allowed both on 
-the command line and within Perl globs (e.g. <CE<lt>*.cE<gt>>).  If
+the command line and within Perl globs (e.g. C<E<lt>*.cE<gt>>).  If
 the wildcard filespec uses VMS syntax, the resultant 
 filespecs will follow VMS syntax; if a Unix-style filespec is 
 passed in, Unix-style filespecs will be returned.
@@ -244,11 +244,29 @@ directory specifications may use either VMS or Unix syntax.
 Perl for VMS supports redirection of input and output on the 
 command line, using a subset of Bourne shell syntax:
 
-    <F<file> reads stdin from F<file>,
-    >F<file> writes stdout to F<file>,
-    >>F<file> appends stdout to F<file>,
-    2>F<file> writes stderr to F<file>, and
-    2>>F<file> appends stderr to F<file>. 
+=over
+
+=item *
+
+C<E<lt>file> reads stdin from C<file>,
+
+=item *
+
+C<E<gt>file> writes stdout to C<file>,
+
+=item *
+
+C<E<gt>E<gt>file> appends stdout to C<file>,
+
+=item *
+
+C<2E<gt>file> writes stderr to C<file>, and
+
+=item *
+
+C<2E<gt>E<gt>file> appends stderr to C<file>. 
+
+=back
 
 In addition, output may be piped to a subprocess, using the  
 character '|'.  Anything after this character on the command 

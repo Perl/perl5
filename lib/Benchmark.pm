@@ -6,6 +6,8 @@ Benchmark - benchmark running times of Perl code
 
 =head1 SYNOPSIS
 
+    use Benchmark qw(:all) ;
+
     timethis ($count, "code");
 
     # Use Perl code in strings...
@@ -402,8 +404,9 @@ use Exporter;
 @EXPORT=qw(timeit timethis timethese timediff timestr);
 @EXPORT_OK=qw(timesum cmpthese countit
 	      clearcache clearallcache disablecache enablecache);
+%EXPORT_TAGS=( all => [ @EXPORT, @EXPORT_OK ] ) ;
 
-$VERSION = 1.02;
+$VERSION = 1.03;
 
 &init;
 

@@ -34,9 +34,9 @@ believe) from the use of the term in "sfio", which in turn borrowed it
 from "line disciplines" on Unix terminals. However, this document (and
 the C code) uses the term "layer".
 
-This is, I hope, a natural term given the implementation, and should avoid
-connotations that are inherent in earlier uses of "discipline" for things
-which are rather different.
+This is, I hope, a natural term given the implementation, and should
+avoid connotations that are inherent in earlier uses of "discipline"
+for things which are rather different.
 
 =head2 Data Structures
 
@@ -53,13 +53,14 @@ The basic data structure is a PerlIOl:
 	 IV		flags;      /* Various flags for state */
 	};
 
-A C<PerlIOl *> is a pointer to the struct, and the I<application> level
-C<PerlIO *> is a pointer to a C<PerlIOl *> - i.e. a pointer to a pointer to
-the struct. This allows the application level C<PerlIO *> to remain
-constant while the actual C<PerlIOl *> underneath changes. (Compare perl's
-C<SV *> which remains constant while its C<sv_any> field changes as the
-scalar's type changes.) An IO stream is then in general represented as a
-pointer to this linked-list of "layers".
+A C<PerlIOl *> is a pointer to the struct, and the I<application>
+level C<PerlIO *> is a pointer to a C<PerlIOl *> - i.e. a pointer
+to a pointer to the struct. This allows the application level C<PerlIO *>
+to remain constant while the actual C<PerlIOl *> underneath
+changes. (Compare perl's C<SV *> which remains constant while its
+C<sv_any> field changes as the scalar's type changes.) An IO stream is
+then in general represented as a pointer to this linked-list of
+"layers".
 
 It should be noted that because of the double indirection in a C<PerlIO *>,
 a C<< &(perlio-E<gt>next) >> "is" a C<PerlIO *>, and so to some degree
@@ -150,17 +151,18 @@ Functions to support Perl's traditional "fast" access to the buffer.
 
 =back
 
-A layer does not have to implement all the functions, but the whole table has
-to be present. Unimplemented slots can be NULL (which will result in an error
-when called) or can be filled in with stubs to "inherit" behaviour from
-a "base class". This "inheritance" is fixed for all instances of the layer,
-but as the layer chooses which stubs to populate the table, limited
-"multiple inheritance" is possible.
+A layer does not have to implement all the functions, but the whole
+table has to be present. Unimplemented slots can be NULL (which will
+result in an error when called) or can be filled in with stubs to
+"inherit" behaviour from a "base class". This "inheritance" is fixed
+for all instances of the layer, but as the layer chooses which stubs
+to populate the table, limited "multiple inheritance" is possible.
 
 =head2 Per-instance Data
 
-The per-instance data are held in memory beyond the basic PerlIOl struct,
-by making a PerlIOl the first member of the layer's struct thus:
+The per-instance data are held in memory beyond the basic PerlIOl
+struct, by making a PerlIOl the first member of the layer's struct
+thus:
 
 	typedef struct
 	{
@@ -173,8 +175,8 @@ by making a PerlIOl the first member of the layer's struct thus:
 	 IV		oneword;    /* Emergency buffer */
 	} PerlIOBuf;
 
-In this way (as for perl's scalars) a pointer to a PerlIOBuf can be treated
-as a pointer to a PerlIOl.
+In this way (as for perl's scalars) a pointer to a PerlIOBuf can be
+treated as a pointer to a PerlIOl.
 
 =head2 Layers in action.
 
@@ -209,10 +211,10 @@ dynamically) with a "socket" layer.
 
 =item *
 
-Different handles can have different buffering schemes. The "top" layer
-could be the "mmap" layer if reading disk files was quicker using C<mmap>
-than C<read>. An "unbuffered" stream can be implemented simply by
-not having a buffer layer.
+Different handles can have different buffering schemes. The "top"
+layer could be the "mmap" layer if reading disk files was quicker
+using C<mmap> than C<read>. An "unbuffered" stream can be implemented
+simply by not having a buffer layer.
 
 =item *
 
@@ -225,16 +227,17 @@ internal encoding (conceptually at least Unicode as UTF-8), and the
 
 =item *
 
-A layer can be added that does "\n" to CRLF translation. This layer can be used
-on any platform, not just those that normally do such things.
+A layer can be added that does "\n" to CRLF translation. This layer
+can be used on any platform, not just those that normally do such
+things.
 
 =back
 
 =head2 Per-instance flag bits
 
-The generic flag bits are a hybrid of C<O_XXXXX> style flags deduced from
-the mode string passed to C<PerlIO_open()>, and state bits for typical buffer
-layers.
+The generic flag bits are a hybrid of C<O_XXXXX> style flags deduced
+from the mode string passed to C<PerlIO_open()>, and state bits for
+typical buffer layers.
 
 =over 4
 
@@ -324,30 +327,33 @@ to change during one "get".)
 
 =item  IV		(*Pushed)(PerlIO *f,const char *mode, SV *arg);
 
-The only absolutely mandatory method. Called when the layer is pushed onto the stack.
-The C<mode> argument may  be NULL if this occurs post-open. The C<arg> will be non-C<NULL>
-if an argument string was passed. In most cases this should call
-C<PerlIOBase_pushed()> to convert C<mode> into the appropriate
-C<PERLIO_F_XXXXX> flags in addition to any actions the layer itself takes.
-If a layer is not expecting an argument it need neither save the one passed to it, nor
-provide C<Getarg()> (it could perhaps C<Perl_warn> that the argument was un-expected).
+The only absolutely mandatory method. Called when the layer is pushed
+onto the stack.  The C<mode> argument may be NULL if this occurs
+post-open. The C<arg> will be non-C<NULL> if an argument string was
+passed. In most cases this should call C<PerlIOBase_pushed()> to
+convert C<mode> into the appropriate C<PERLIO_F_XXXXX> flags in
+addition to any actions the layer itself takes.  If a layer is not
+expecting an argument it need neither save the one passed to it, nor
+provide C<Getarg()> (it could perhaps C<Perl_warn> that the argument
+was un-expected).
 
 =item  IV		(*Popped)(PerlIO *f);
 
-Called when the layer is popped from the stack. A layer will normally be
-popped after C<Close()> is called. But a layer can be popped without being
-closed if the program is dynamically managing layers on the stream. In
-such cases C<Popped()> should free any resources (buffers, translation
-tables, ...) not held directly in the layer's struct.
-It should also C<Unread()> any unconsumed data that has been read and buffered
-from the layer below back to that layer, so that it can be re-provided to what
-ever is now above.
+Called when the layer is popped from the stack. A layer will normally
+be popped after C<Close()> is called. But a layer can be popped
+without being closed if the program is dynamically managing layers on
+the stream. In such cases C<Popped()> should free any resources
+(buffers, translation tables, ...) not held directly in the layer's
+struct.  It should also C<Unread()> any unconsumed data that has been
+read and buffered from the layer below back to that layer, so that it
+can be re-provided to what ever is now above.
 
 =item  PerlIO *	(*Open)(...);
 
-The C<Open()> method has lots of arguments because it combines the functions
-of perl's C<open>, C<PerlIO_open>, perl's C<sysopen>, C<PerlIO_fdopen> and C<PerlIO_reopen>.
-The full prototype is as follows:
+The C<Open()> method has lots of arguments because it combines the
+functions of perl's C<open>, C<PerlIO_open>, perl's C<sysopen>,
+C<PerlIO_fdopen> and C<PerlIO_reopen>.  The full prototype is as
+follows:
 
  PerlIO *	(*Open)(pTHX_ PerlIO_funcs *tab,
 			AV *layers, IV n,
@@ -356,39 +362,45 @@ The full prototype is as follows:
 			PerlIO *old,
 			int narg, SV **args);
 
-Open should (perhaps indirectly) call C<PerlIO_allocate()> to allocate a slot in the table and
-associate it with the layers information for the opened file, by calling C<PerlIO_push>.
-The I<layers> AV is an array of all the layers destined for the C<PerlIO *>,
-and any arguments passed to them,  I<n> is the index into that array of the
-layer being called. The macro C<PerlIOArg> will return a (possibly C<NULL>) SV *
-for the argument passed to the layer.
+Open should (perhaps indirectly) call C<PerlIO_allocate()> to allocate
+a slot in the table and associate it with the layers information for
+the opened file, by calling C<PerlIO_push>.  The I<layers> AV is an
+array of all the layers destined for the C<PerlIO *>, and any
+arguments passed to them, I<n> is the index into that array of the
+layer being called. The macro C<PerlIOArg> will return a (possibly
+C<NULL>) SV * for the argument passed to the layer.
 
-The I<mode> string is an "C<fopen()>-like" string which would match the regular
-expression C</^[I#]?[rwa]\+?[bt]?$/>.
+The I<mode> string is an "C<fopen()>-like" string which would match
+the regular expression C</^[I#]?[rwa]\+?[bt]?$/>.
 
-The C<'I'> prefix is used during creation of C<stdin>..C<stderr> via special
-C<PerlIO_fdopen> calls; the C<'#'> prefix means that this is C<sysopen> and that I<imode> and
-I<perm> should be passed to C<PerlLIO_open3>; C<'r'> means B<r>ead, C<'w'> means B<w>rite
-and C<'a'> means B<a>ppend. The C<'+'> suffix means that both reading and writing/appending
-are permitted. The C<'b'> suffix means file should be binary, and C<'t'> means it
-is text. (Binary/Text should be ignored by almost all layers and binary IO done,
-with PerlIO. The C<:crlf> layer should be pushed to handle the distinction.)
+The C<'I'> prefix is used during creation of C<stdin>..C<stderr> via
+special C<PerlIO_fdopen> calls; the C<'#'> prefix means that this is
+C<sysopen> and that I<imode> and I<perm> should be passed to
+C<PerlLIO_open3>; C<'r'> means B<r>ead, C<'w'> means B<w>rite and
+C<'a'> means B<a>ppend. The C<'+'> suffix means that both reading and
+writing/appending are permitted. The C<'b'> suffix means file should
+be binary, and C<'t'> means it is text. (Binary/Text should be ignored
+by almost all layers and binary IO done, with PerlIO. The C<:crlf>
+layer should be pushed to handle the distinction.)
 
-If I<old> is not C<NULL> then this is a C<PerlIO_reopen>. Perl itself does not use
-this (yet?) and semantics are a little vague.
+If I<old> is not C<NULL> then this is a C<PerlIO_reopen>. Perl itself
+does not use this (yet?) and semantics are a little vague.
 
-If I<fd> not negative then it is the numeric file descriptor I<fd>, which will
-be open in a manner compatible with the supplied mode string, the call is
-thus equivalent to C<PerlIO_fdopen>. In this case I<nargs> will be zero.
+If I<fd> not negative then it is the numeric file descriptor I<fd>,
+which will be open in a manner compatible with the supplied mode
+string, the call is thus equivalent to C<PerlIO_fdopen>. In this case
+I<nargs> will be zero.
 
-If I<nargs> is greater than zero then it gives the number of arguments passed
-to C<open>, otherwise it will be 1 if for example C<PerlIO_open> was called.
-In simple cases SvPV(*args) is the pathname to open.
+If I<nargs> is greater than zero then it gives the number of arguments
+passed to C<open>, otherwise it will be 1 if for example
+C<PerlIO_open> was called.  In simple cases SvPV_nolen(*args) is the
+pathname to open.
 
-Having said all that translation-only layers do not need to provide C<Open()> at all,
-but rather leave the opening to a lower level layer and wait to be "pushed".
-If a layer does provide C<Open()> it should normally call the C<Open()> method
-of next layer down (if any) and then push itself on top if that succeeds.
+Having said all that translation-only layers do not need to provide
+C<Open()> at all, but rather leave the opening to a lower level layer
+and wait to be "pushed".  If a layer does provide C<Open()> it should
+normally call the C<Open()> method of next layer down (if any) and
+then push itself on top if that succeeds.
 
 =item SV *		(*Getarg)(PerlIO *f);
 
@@ -422,8 +434,8 @@ Basic write operation. Returns bytes written or -1 on an error.
 
 =item  IV		(*Seek)(PerlIO *f, Off_t offset, int whence);
 
-Position the file pointer. Should normally call its own C<Flush> method and
-then the C<Seek> method of next layer down.
+Position the file pointer. Should normally call its own C<Flush>
+method and then the C<Seek> method of next layer down.
 
 =item  Off_t		(*Tell)(PerlIO *f);
 
@@ -508,13 +520,13 @@ between O_TEXT and O_BINARY this layer is always O_BINARY.
 
 A very complete generic buffering layer which provides the whole of
 PerlIO API. It is also intended to be used as a "base class" for other
-layers. (For example its C<Read()> method is implemented in terms of the
-C<Get_cnt()>/C<Get_ptr()>/C<Set_ptrcnt()> methods).
+layers. (For example its C<Read()> method is implemented in terms of
+the C<Get_cnt()>/C<Get_ptr()>/C<Set_ptrcnt()> methods).
 
 "perlio" over "unix" provides a complete replacement for stdio as seen
 via PerlIO API. This is the default for USE_PERLIO when system's stdio
-does not permit perl's "fast gets" access, and which do not distinguish
-between C<O_TEXT> and C<O_BINARY>.
+does not permit perl's "fast gets" access, and which do not
+distinguish between C<O_TEXT> and C<O_BINARY>.
 
 =item "stdio"
 
@@ -545,9 +557,9 @@ minimalist "derived" layer.
 =item "pending"
 
 An "internal" derivative of "perlio" which can be used to provide
-Unread() function for layers which have no buffer or cannot be bothered.
-(Basically this layer's C<Fill()> pops itself off the stack and so resumes
-reading from layer below.)
+Unread() function for layers which have no buffer or cannot be
+bothered.  (Basically this layer's C<Fill()> pops itself off the stack
+and so resumes reading from layer below.)
 
 =item "raw"
 
@@ -558,8 +570,8 @@ layers until it reaches a layer with the class C<PERLIO_K_RAW> bit set.
 =item "utf8"
 
 Another dummy layer. When pushed it pops itself and sets the
-C<PERLIO_F_UTF8> flag on the layer which was (and now is once more) the top
-of the stack.
+C<PERLIO_F_UTF8> flag on the layer which was (and now is once more)
+the top of the stack.
 
 =back
 
@@ -569,16 +581,17 @@ which do not need to do anything special for a particular method.
 
 =head2 Extension Layers
 
-Layers can made available by extension modules. When an unknown layer is encountered
-the PerlIO code will perform the equivalent of :
+Layers can made available by extension modules. When an unknown layer
+is encountered the PerlIO code will perform the equivalent of :
 
    use PerlIO 'layer';
 
-Where I<layer> is the unknown layer. F<PerlIO.pm> will then attempt to :
+Where I<layer> is the unknown layer. F<PerlIO.pm> will then attempt to:
 
    require PerlIO::layer;
 
-If after that process the layer is still not defined then the C<open> will fail.
+If after that process the layer is still not defined then the C<open>
+will fail.
 
 The following extension layers are bundled with perl:
 
@@ -588,8 +601,9 @@ The following extension layers are bundled with perl:
 
    use Encoding;
 
-makes this layer available, although F<PerlIO.pm> "knows" where to find it.
-It is an example of a layer which takes an argument as it is called thus:
+makes this layer available, although F<PerlIO.pm> "knows" where to
+find it.  It is an example of a layer which takes an argument as it is
+called thus:
 
    open($fh,"<:encoding(iso-8859-7)",$pathname)
 
@@ -599,14 +613,15 @@ Provides support for
 
    open($fh,"...",\$scalar)
 
-When a handle is so opened, then reads get bytes from the string value of I<$scalar>,
-and writes change the value. In both cases the position in I<$scalar> starts as zero
-but can be altered via C<seek>, and determined via C<tell>.
+When a handle is so opened, then reads get bytes from the string value
+of I<$scalar>, and writes change the value. In both cases the position
+in I<$scalar> starts as zero but can be altered via C<seek>, and
+determined via C<tell>.
 
 =item ":Object" or ":Perl"
 
-May be provided to allow layers to be implemented as perl code - implementation
-is being investigated.
+May be provided to allow layers to be implemented as perl code -
+implementation is being investigated.
 
 =back
 

@@ -6,12 +6,12 @@ use Test;
 BEGIN 
   {
   $| = 1;
-  # chdir 't' if -d 't';
+  chdir 't' if -d 't';
   unshift @INC, '../lib'; # for running manually
   plan tests => 56;
   }
 
-# testing of Math::BigInt::BitVect, primarily for interface/api and not for the
+# testing of Math::BigInt::Calc, primarily for interface/api and not for the
 # math functionality
 
 use Math::BigInt::Calc;
@@ -23,7 +23,6 @@ my $x = $C->_new(\"123"); my $y = $C->_new(\"321");
 ok (ref($x),'ARRAY'); ok (${$C->_str($x)},123); ok (${$C->_str($y)},321);
 
 # _add, _sub, _mul, _div
-
 ok (${$C->_str($C->_add($x,$y))},444);
 ok (${$C->_str($C->_sub($x,$y))},123);
 ok (${$C->_str($C->_mul($x,$y))},39483);

@@ -129,11 +129,25 @@ sub utf8len {
   croak "$PACKAGE: illegal char in the composite. utf-8 max is 0x10ffff.";
 }
 
+sub utfebcdiclen {
+  my $uv = shift;
+  return $uv < 0xA0 ? 1 :
+        $uv < 0x400 ? 2 :
+       $uv < 0x4000 ? 3 :
+      $uv < 0x40000 ? 4 :
+     $uv < 0x110000 ? 5 :
+  croak "$PACKAGE: illegal char in the composite. utf-8 max is 0x10ffff.";
+}
+
 my $prefix = "UNF_";
 
 my $structname = "${prefix}complist";
 
 our (%Comp1st, %CompList);
+
+my $errExpand = "$PACKAGE: A composable pair in %s "
+	. "is longer than the composite in bytes!\n"
+	. "%d + %d => %d\nQuit. Please inform the author...";
 
 foreach(sort keys %Compos) {
   my @a = unpack('U*', $_);
@@ -143,9 +157,10 @@ foreach(sort keys %Compos) {
   $CompList{ $name }{ $a[1] } = $val;
 
   if( utf8len($a[0]) + utf8len($a[1]) < utf8len($val) ) {
-    croak "$PACKAGE: "
-      . "composable pair is longer than the composite in bytes!\n"
-      . sprintf("%d + %d => %d", $a[0], $a[1], $val);
+    croak sprintf($errExpand, "utf-8", $a[0], $a[1], $val);
+  }
+  if( utfebcdiclen($a[0]) + utfebcdiclen($a[1]) < utfebcdiclen($val)) {
+    croak sprintf($errExpand, "utf-ebcdic", $a[0], $a[1], $val);
   }
 }
 
@@ -168,7 +183,7 @@ my $file = "unfexc.h";
 open FH, ">$file" or croak "$PACKAGE: $file can't be made";
 binmode FH; select FH;
 
-print "bool getExclusion (UV uv) \n{\nreturn\n\t";
+print "bool isExclusion (UV uv) \n{\nreturn\n\t";
 
 while(@Exclus) {
   my $cur = shift @Exclus;
@@ -194,7 +209,7 @@ my @tripletable = (
   {
     file => "unfcmb",
     name => "combin",
-    type => "char",
+    type => "STDCHAR",
     hash => \%Combin,
     null =>  0,
   },

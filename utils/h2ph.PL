@@ -240,7 +240,7 @@ while (defined (my $file = next_file())) {
 	    }
 	} elsif(/^\s*(typedef\s*)?enum\s*(\s+[a-zA-Z_]\w*\s*)?/) {
 	    until(/\{[^}]*\}.*;/ || /;/) {
-		last unless defined ($next = <IN>);
+		last unless defined ($next = next_line());
 		chomp $next;
 		# drop "#define FOO FOO" in enums
 		$next =~ s/^\s*#\s*define\s+(\w+)\s+\1\s*$//;
@@ -438,7 +438,7 @@ sub next_line
             } elsif ($in =~ s/^("(\\.|[^"\\])*")//) {       # "...
                 $out    .= $1;
             } elsif ($in =~ s/^\/\/.*//) {                  # //...
-                last READ;
+                # fall through
             } elsif ($in =~ m/^\/\*/) {                     # /*...
                 # C comment removal adapted from perlfaq6:
                 if ($in =~ s/^\/\*[^*]*\*+([^\/*][^*]*\*+)*\///) {
@@ -455,7 +455,7 @@ sub next_line
             }
         }
 
-        last READ;
+        last READ if $out =~ /\S/;
     }
 
     return $out;

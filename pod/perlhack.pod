@@ -157,13 +157,22 @@ The worst patches make use of a system-specific features.  It's highly
 unlikely that nonportable additions to the Perl language will be
 accepted.
 
+=item Is the implementation tested?
+
+Patches which change behaviour (fixing bugs or introducing new features)
+must include regression tests to verify that everything works as expected.
+Without tests provided by the original author, how can anyone else changing
+perl in the future be sure that they haven't unwittingly broken the behaviour
+the patch implements? And without tests, how can the patch's author be
+confident that his/her hard work put into the patch won't be accidentally
+thrown away by someone in the future?
+
 =item Is there enough documentation?
 
 Patches without documentation are probably ill-thought out or
 incomplete.  Nothing can be added without documentation, so submitting
 a patch for the appropriate manpages as well as the source code is
-always a good idea.  If appropriate, patches should add to the test
-suite as well.
+always a good idea.
 
 =item Is there another way to do it?
 

@@ -20,8 +20,6 @@ BEGIN {
     }
 }
 
-use strict;
-use warnings;
 use DB_File; 
 use Fcntl;
 
@@ -409,7 +407,7 @@ untie %h ;
 
    use warnings ;
    use strict ;
-   use vars qw( @ISA @EXPORT) ;
+   our (@ISA, @EXPORT);
 
    require Exporter ;
    use DB_File;
@@ -689,7 +687,7 @@ EOM
     use warnings FATAL => qw(all);
     use strict ;
     use DB_File ;
-    use vars qw( %h $k $v ) ;
+    our (%h, $k, $v);
 
     unlink "fruit" ;
     tie %h, "DB_File", "fruit", O_RDWR|O_CREAT, 0640, $DB_HASH 

@@ -922,6 +922,8 @@ PP(pp_unpack)
 	    }
 	    break;
 	case 'P':
+	    if (star)
+	        DIE(aTHX_ "P must have an explicit size");
 	    EXTEND(SP, 1);
 	    if (sizeof(char*) > strend - s)
 		break;
@@ -1386,7 +1388,7 @@ PP(pp_pack)
 	case 'a':
 	    fromstr = NEXTFROM;
 	    aptr = SvPV(fromstr, fromlen);
-	    if (pat[-1] == '*') {
+	    if (pat[lengthcode ? -2 : -1] == '*') { /* -2 after '/' */  
 		len = fromlen;
 		if (datumtype == 'Z')
 		    ++len;

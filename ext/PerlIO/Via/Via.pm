@@ -24,18 +24,19 @@ It refers to the layer below. I<$fh> is not passed if the layer
 is at the bottom of the stack, for this reason and to maintain
 some level of "compatibility" with TIEHANDLE classes it is passed last.
 
-As an example, in Perl release 5.8.0 the MIME::QuotedPrint module
-defines the required TIEHANDLE methods so that you can say
+As an example, in Perl release 5.8.0 the included MIME::QuotedPrint
+module defines the required TIEHANDLE methods so that you can say
 
 	use MIME::QuotedPrint;
 	open(my $fh, ">Via(MIME::QuotedPrint)", "qp");
 
 =over 4
 
-=item $class->PUSHED([$mode][,$fh])
+=item $class->PUSHED([$mode[,$fh]])
 
-Should return an object or the class. (Compare TIEHANDLE.)
-Mandatory.
+Should return an object or the class, or -1 on failure.  (Compare
+TIEHANDLE.)  The arguments are an optional mode string ("r", "w",
+"w+", ...) and a filehandle for the PerlIO layer below.  Mandatory.
 
 =item $obj->POPPED([$fh])
 
@@ -81,17 +82,18 @@ Optional.
 =item $obj->SEEK($posn,$whence,$fh)
 
 Should return 0 on success, -1 on error.
-Optional. Default is to fail, but that is likely to be changed.
+Optional.  Default is to fail, but that is likely to be changed
+in future.
 
 =item $obj->TELL($fh)
 
 Returns file postion.
-Optional. Default to be determined.
+Optional.  Default to be determined.
 
 =item $obj->UNREAD($buffer,$fh)
 
 Returns the number of octets from buffer that have been sucessfully
-saved to be returned on future FILL/READ calls.  Optional. Default is
+saved to be returned on future FILL/READ calls.  Optional.  Default is
 to push data into a temporary layer above this one.
 
 =item $obj->FLUSH($fh)
@@ -118,6 +120,57 @@ Optional. Returns end-of-file state. Default is function of return
 value of FILL or READ.
 
 =back
+
+=head2 Example - a Hexadecimal Handle
+
+Given the following module, Hex.pm:
+
+    package Hex;
+
+    sub PUSHED
+    {
+     my ($class,$mode,$fh) = @_;
+     # When writing we buffer the data
+     my $buf = '';
+     return bless \$buf,$class;
+    }
+
+    sub FILL
+    {
+     my ($obj,$fh) = @_;
+     my $line = <$fh>;
+     return (defined $line) ? pack("H*", $line) : undef;
+    }
+
+    sub WRITE
+    {
+     my ($obj,$buf,$fh) = @_;
+     $$obj .= unpack("H*", $buf);
+     return length($buf);
+    }
+
+    sub FLUSH
+    {
+     my ($obj,$fh) = @_;
+     print $fh $$obj or return -1;
+     $$obj = '';
+     return 0;
+    }
+
+    1;
+
+the following code opens up an output handle that will convert any
+output to hexadecimal dump of the output bytes: for example "A" will
+be converted to "41" (on ASCII-based machines, on EBCDIC platforms
+the "A" will become "c1")
+
+    use Hex;
+    open(my $fh, ">:Via(Hex)", "foo.hex");
+
+and the following code will read the hexdump in and convert it
+on the fly back into bytes:
+
+    open(my $fh, "<:Via(Hex)", "foo.hex");
 
 =cut
 

@@ -4,7 +4,7 @@ use Text::Balanced ':ALL';
 
 use vars qw{ $VERSION @EXPORT };
 
-$VERSION = '0.70';
+$VERSION = '0.77';
 
 use Filter::Util::Call;
 use Carp;
@@ -22,7 +22,7 @@ sub FILTER (&;$) {
 	my ($filter, $terminator) = @_;
 	no warnings 'redefine';
 	*{"${caller}::import"} = gen_filter_import($caller,$filter,$terminator);
-	*{"${caller}::unimport"} = \*filter_unimport;
+	*{"${caller}::unimport"} = gen_filter_unimport($caller);
 }
 
 sub fail {
@@ -115,7 +115,6 @@ sub gen_std_filter_for {
 			s/$extractor/${$pieces[unpack('N',$1)]}/g;
 		     }
 		     else {
-			$DB::single=1;
 		        my $selector = $selector_for{$type}->($transform);
 		        $_ = join "", map $selector->(@_), @pieces;
 		     }
@@ -123,7 +122,6 @@ sub gen_std_filter_for {
 };
 
 sub FILTER_ONLY {
-	$DB::single = 1;
 	my $caller = caller;
 	while (@_ > 1) {
 		my ($what, $how) = splice(@_, 0, 2);
@@ -143,28 +141,30 @@ sub FILTER_ONLY {
 	no warnings 'redefine';
 	*{"${caller}::import"} =
 		gen_filter_import($caller,$multitransform,$terminator);
-	*{"${caller}::unimport"} = \*filter_unimport;
+	*{"${caller}::unimport"} = gen_filter_unimport($caller);
 }
 
 my $ows    = qr/(?:[ \t]+|#[^\n]*)*/;
 
 sub gen_filter_import {
     my ($class, $filter, $terminator) = @_;
+    my %terminator;
+    my $prev_import = *{$class."::import"}{CODE};
     return sub {
 	my ($imported_class, @args) = @_;
 	my $def_terminator =
 		qr/^(?:\s*no\s+$imported_class\s*;$ows|__(?:END|DATA)__)$/;
 	if (!defined $terminator) {
-	    $terminator->{terminator} = $def_terminator;
+	    $terminator{terminator} = $def_terminator;
 	}
-	elsif (!ref $terminator) {
-	    $terminator->{terminator} = $terminator;
+	elsif (!ref $terminator || ref $terminator eq 'Regexp') {
+	    $terminator{terminator} = $terminator;
 	}
 	elsif (ref $terminator ne 'HASH') {
 	    croak "Terminator must be specified as scalar or hash ref"
 	}
 	elsif (!exists $terminator->{terminator}) {
-	    $terminator->{terminator} = $def_terminator;
+	    $terminator{terminator} = $def_terminator;
 	}
 	filter_add(
 		sub {
@@ -173,8 +173,8 @@ sub gen_filter_import {
 			my $data = "";
 			while ($status = filter_read()) {
 				return $status if $status < 0;
-				if ($terminator->{terminator} &&
-				    m/$terminator->{terminator}/) {
+				if ($terminator{terminator} &&
+				    m/$terminator{terminator}/) {
 					$lastline = $_;
 					last;
 				}
@@ -182,12 +182,11 @@ sub gen_filter_import {
 				$count++;
 				$_ = "";
 			}
-			$DB::single=1;
 			$_ = $data;
 			$filter->($imported_class, @args) unless $status < 0;
 			if (defined $lastline) {
-				if (defined $terminator->{becomes}) {
-					$_ .= $terminator->{becomes};
+				if (defined $terminator{becomes}) {
+					$_ .= $terminator{becomes};
 				}
 				elsif ($lastline =~ $def_terminator) {
 					$_ .= $lastline;
@@ -196,11 +195,22 @@ sub gen_filter_import {
 			return $count;
 		}
 	);
+	if ($prev_import) {
+		goto &$prev_import;
+	}
+	elsif ($class->isa('Exporter')) {
+		$class->export_to_level(1,@_);
+	}
     }
 }
 
-sub filter_unimport {
-	filter_del();
+sub gen_filter_unimport {
+	my ($class) = @_;
+	my $prev_unimport = *{$class."::unimport"}{CODE};
+	return sub {
+		filter_del();
+		goto &$prev_unimport if $prev_unimport;
+	}
 }
 
 1;
@@ -633,35 +643,62 @@ and hence print:
         defabc
 
 
+=head2 Using Filter::Simple with an explicit C<import> subroutine
+
+Filter::Simple generates a special C<import> subroutine for
+your module (see L<"How it works">) which would normally replace any
+C<import> subroutine you might have explicitly declared.
+
+However, Filter::Simple is smart enough to notice your existing
+C<import> and Do The Right Thing with it.
+That is, if you explcitly define an C<import> subroutine in a package
+that's using Filter::Simple, that C<import> subroutine will still
+be invoked immediately after any filter you install.
+
+The only thing you have to remember is that the C<import> subroutine
+I<must> be declared I<before> the filter is installed. If you use C<FILTER>
+to install the filter:
+
+	package Filter::TurnItUpTo11;
+
+	use Filter::Simple;
+
+	FILTER { s/(\w+)/\U$1/ };
+	
+that will almost never be a problem, but if you install a filtering
+subroutine by passing it directly to the C<use Filter::Simple>
+statement:
+
+        package Filter::TurnItUpTo11;
+
+        use Filter::Simple sub{ s/(\w+)/\U$1/ };
+
+then you must make sure that your C<import> subroutine appears before
+that C<use> statement.
+
+
 =head2 Using Filter::Simple and Exporter together
 
-You can't directly use Exporter when Filter::Simple.
+Likewise, Filter::Simple is also smart enough
+to Do The Right Thing if you use Exporter:
 
-Filter::Simple generates an C<import> subroutine for your module
-(which hides the one inherited from Exporter).
+	package Switch;
+	use base Exporter;
+	use Filter::Simple;
 
-The C<FILTER> code you specify will, however, receive the C<import>'s 
-complete argument list (including the package name in $_[0]),
-so you can use that filter block as your C<import> subroutine.
+	@EXPORT    = qw(switch case);
+	@EXPORT_OK = qw(given  when);
 
-You'll need to call C<Exporter::export_to_level> from your C<FILTER> code
-to make it work correctly.
+	FILTER { $_ = magic_Perl_filter($_) }
 
-For example:
+Immediately after the filter has been applied to the source,
+Filter::Simple will pass control to Exporter, so it can do its magic too.
 
-        use Filter::Simple;
-
-        use base Exporter;
-        @EXPORT    = qw(foo);
-        @EXPORT_OK = qw(bar);
-
-        sub foo { print "foo\n" }
-        sub bar { print "bar\n" }
-
-        FILTER {
-                # Your filtering code here
-                __PACKAGE__->export_to_level(2,@_);
-        }
+Of course, here too, Filter::Simple has to know you're using Exporter
+before it applies the filter. That's almost never a problem, but if you're
+nervous about it, you can guarantee that things will work correctly by
+ensuring that your C<use base Exporter> always precedes your
+C<use Filter::Simple>.
 
 
 =head2 How it works

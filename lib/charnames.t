@@ -8,7 +8,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..16\n";
+print "1..20\n";
 
 use charnames ':full';
 
@@ -129,3 +129,20 @@ sub to_bytes {
   }
 }
 
+{
+    print "not " unless charnames::viacode(0x1234) eq "ETHIOPIC SYLLABLE SEE";
+    print "ok 17\n";
+
+    print "not " if defined charnames::viacode(0x0590); # unused Hebrew
+    print "ok 18\n";
+}
+
+{
+    print "not " unless
+	sprintf "%04X\n", charnames::vianame("GOTHIC LETTER AHSA") eq "10330";
+    print "ok 19\n";
+
+    print "not " if
+	defined charnames::vianame("NONE SUCH");
+    print "ok 20\n";
+}

@@ -13,7 +13,7 @@ use Net::Cmd;
 use Carp;
 use Net::Config;
 
-$VERSION = "2.22"; # $Id: //depot/libnet/Net/POP3.pm#19 $
+$VERSION = "2.22"; # $Id: //depot/libnet/Net/POP3.pm#20 $
 
 @ISA = qw(Net::Cmd IO::Socket::INET);
 
@@ -520,6 +520,6 @@ it under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/POP3.pm#19 $>
+I<$Id: //depot/libnet/Net/POP3.pm#20 $>
 
 =cut

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq - frequently asked questions about Perl ($Date: 2001/10/16 13:27:22 $)
+perlfaq - frequently asked questions about Perl ($Date: 2001/11/19 17:09:37 $)
 
 =head1 DESCRIPTION
 
@@ -223,10 +223,6 @@ How can I use X or Tk with Perl?
 =item *
 
 How can I generate simple menus without using CGI or Tk?
-
-=item *
-
-What is undump?
 
 =item *
 

@@ -50,7 +50,7 @@ in a future version.
 
 Some new keywords have been introduced.  These are generally expected to
 have very little impact on compatibility.  See L<New C<INIT> keyword>,
-L<New C<lock> keyword>, and L<New C<qr//> operator>.
+L<New C<lock> keyword>, and L<New C<qrE<sol>E<sol>> operator>.
 
 Certain barewords are now reserved.  Use of these will provoke a warning
 if you have asked for them with the C<-w> switch.
@@ -255,7 +255,7 @@ The following new syntax elements are supported:
 
 =item New operator for precompiled regular expressions
 
-See L<New C<qr//> operator>.
+See L<New C<qrE<sol>E<sol>> operator>.
 
 =item Other improvements
 

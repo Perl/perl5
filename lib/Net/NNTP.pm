@@ -14,7 +14,7 @@ use Carp;
 use Time::Local;
 use Net::Config;
 
-$VERSION = "2.20"; # $Id: //depot/libnet/Net/NNTP.pm#13 $
+$VERSION = "2.20"; # $Id: //depot/libnet/Net/NNTP.pm#14 $
 @ISA     = qw(Net::Cmd IO::Socket::INET);
 
 sub new
@@ -1064,6 +1064,6 @@ it under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/NNTP.pm#13 $>
+I<$Id: //depot/libnet/Net/NNTP.pm#14 $>
 
 =cut

@@ -44,3 +44,23 @@ Revision history for Perl extension Filter::Simple
 	  (thanks, Christian) and to handle __DATA__ and __END__
 
 	- Fixed handling of __DATA__ and *DATA
+
+
+0.75	Fri Nov 16 14:36:07 2001
+
+	- Corified tests (thanks Jarkko)
+
+	- Added automatic preservation of existing &import subroutines
+
+	- Added automatic preservation of Exporter semantics 
+
+
+0.76	Fri Nov 16 15:08:42 2001
+
+	- Modified call to explicit &import so as to be invoked in original 
+	  call context
+
+
+0.77	Sat Nov 24 06:48:47 2001
+
+	- Re-allowed user-defined terminators to be regexes

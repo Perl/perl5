@@ -17,9 +17,9 @@ print "1..9\n";
 my $cc = $Config{'cc'};
 my $cl  = ($^O eq 'MSWin32' && $cc eq 'cl');
 my $exe = 'embed_test' . $Config{'exe_ext'};
-my $obj = 'embed_test' . $Config{'obj_ext'} if $^O eq 'VMS';
-my $inc = File::Spec->catdir($INC[0],"..");
-my $lib = File::Spec->catdir($INC[0],"..");
+my $obj = 'embed_test' . $Config{'obj_ext'};
+my $inc = File::Spec->updir;
+my $lib = File::Spec->updir;
 my @cmd;
 my (@cmd2) if $^O eq 'VMS';
 
@@ -77,6 +77,8 @@ if ($^O eq 'VMS') {
     for (@cmd) {
         s!-bE:(\S+)!-bE:$perl_exp!;
     }
+   } elsif ($^O eq 'cygwin') { # Cygwin needs the libperl copied
+     system("cp ../$Config{'libperl'} ../libperl.dll");    # for test 1
    }
 }
 my $status;
@@ -90,13 +92,14 @@ if ($^O eq 'VMS' && !$status) {
 }
 print (($status? 'not ': '')."ok 1\n");
 
-my $embed_test = File::Spec->catfile(File::Spec->curdir, "embed_test");
+my $embed_test = File::Spec->catfile(File::Spec->curdir, $exe);
 $embed_test = "run/nodebug $exe" if $^O eq 'VMS';
-
+print "# embed_test = $embed_test\n";
 $status = system($embed_test);
-print (($status? 'not ':'')."ok 9\n");
-unlink($exe,"embed_test.c");
-unlink($obj,"embed_test.map","embed_test.lis") if $^O eq 'VMS'
+print (($status? 'not ':'')."ok 9 # $status\n");
+unlink($exe,"embed_test.c",$obj);
+unlink("embed_test.map","embed_test.lis") if $^O eq 'VMS';
+unlink("../libperl.dll") if $^O eq 'cygwin';
 
 # gcc -g -I.. -L../ -o perl_test perl_test.c -lperl `../perl -I../lib -MExtUtils::Embed -I../ -e ccopts -e ldopts`
 

@@ -36,6 +36,7 @@ undef $out;
 open(IN, 'foo') or die $!;
 chomp(my $line = <IN>);
 close IN;
+
 ok($line eq 'hi!');
 
 open(FOO, ">>foo") or die $!;

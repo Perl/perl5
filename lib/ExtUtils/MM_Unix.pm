@@ -399,7 +399,7 @@ sub cflags {
     }
 
     $self->{CCFLAGS}  = quote_paren($self->{CCFLAGS});
-    $self->{OPTIMIZE} = quote_paren($self->{CCFLAGS});
+    $self->{OPTIMIZE} = quote_paren($self->{OPTIMIZE});
 
     return $self->{CFLAGS} = qq{
 CCFLAGS = $self->{CCFLAGS}
@@ -459,7 +459,7 @@ EOT
 			 *$(OBJ_EXT) *$(LIB_EXT) perl.exe perl perl$(EXE_EXT)
 			 $(BOOTSTRAP) $(BASEEXT).bso
 			 $(BASEEXT).def lib$(BASEEXT).def
-			 $(BASEEXT).exp
+			 $(BASEEXT).exp $(BASEEXT).x
 			]);
     push @m, "\t-$self->{RM_RF} @otherfiles\n";
     # See realclean and ext/utils/make_ext for usage of Makefile.old
@@ -3069,15 +3069,36 @@ destination and autosplits them. See L<ExtUtils::Install/DESCRIPTION>
 
 =cut
 
+sub _pm_to_blib_flush {
+    my ($self, $autodir, $rr, $ra, $rl) = @_;
+    $$rr .= 
+q{	}.$self->{NOECHO}.q[$(PERLRUNINST) -MExtUtils::Install \
+	-e "pm_to_blib({qw{].qq[@$ra].q[}},'].$autodir.q{','$(PM_FILTER)')"
+};
+    @$ra = ();
+    $$rl = 0;
+}
+
 sub pm_to_blib {
     my $self = shift;
     my($autodir) = $self->catdir('$(INST_LIB)','auto');
-    return q{
+    my $r = q{
 pm_to_blib: $(TO_INST_PM)
-	}.$self->{NOECHO}.q{$(PERLRUNINST) -MExtUtils::Install \
-        -e "pm_to_blib({qw{$(PM_TO_BLIB)}},'}.$autodir.q{','$(PM_FILTER)')"
-	}.$self->{NOECHO}.q{$(TOUCH) $@
 };
+    my %pm_to_blib = %{$self->{PM}};
+    my @a;
+    my $l;
+    while (my ($pm, $blib) = each %pm_to_blib) {
+	my $la = length $pm;
+	my $lb = length $blib;
+	if ($l + $la + $lb + @a / 2 > 200) { # limit line length
+	    _pm_to_blib_flush($self, $autodir, \$r, \@a, \$l);
+        }
+        push @a, $pm, $blib;
+	$l += $la + $lb;
+    }
+    _pm_to_blib_flush($self, $autodir, \$r, \@a, \$l);
+    return $r.q{	}.$self->{NOECHO}.q{$(TOUCH) $@};
 }
 
 =item post_constants (o)

@@ -959,17 +959,28 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 
 	    if (do_utf8) {
 		STRLEN len;
+		/* The ibcmp_utf8() uses to_uni_fold() which is more
+		 * correct folding for Unicode than using lowercase.
+		 * However, it doesn't work quite fully since the folding
+		 * is a one-to-many mapping and the regex optimizer is
+		 * unaware of this, so it may throw out good matches.
+		 * Fortunately, not getting this right is allowed
+		 * for Unicode Regular Expression Support level 1,
+		 * only one-to-one matching is required. --jhi */
 		if (c1 == c2)
 		    while (s <= e) {
 			if ( utf8_to_uvchr((U8*)s, &len) == c1
-			     && regtry(prog, s) )
+			     && (ln == 1 ||
+				 ibcmp_utf8(s, do_utf8, m, UTF, ln)) )
 			    goto got_it;
 			s += len;
 		    }
 		else
 		    while (s <= e) {
 			UV c = utf8_to_uvchr((U8*)s, &len);
-			if ( (c == c1 || c == c2) && regtry(prog, s) )
+			if ( (c == c1 || c == c2)
+			     && (ln == 1 ||
+				 ibcmp_utf8(s, do_utf8, m, UTF, ln)) )
 			    goto got_it;
 			s += len;
 		    }
@@ -1942,6 +1953,12 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
         else
             New(22,PL_reg_start_tmp, PL_reg_start_tmpl, char*);
     }
+
+#ifdef DEBUGGING
+    sv_setpvn(PERL_DEBUG_PAD(0), "", 0);
+    sv_setpvn(PERL_DEBUG_PAD(1), "", 0);
+    sv_setpvn(PERL_DEBUG_PAD(2), "", 0);
+#endif
 
     /* XXXX What this code is doing here?!!!  There should be no need
        to do this again and again, PL_reglastparen should take care of

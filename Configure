@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Nov 19 22:50:26 GMT 2001 [metaconfig 3.0 PL70]
+# Generated on Sun Nov 25 08:58:37 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -141,6 +141,7 @@ EOM
 esac
 case "$changesh" in
 true)
+	export newsh
 	echo "(Feeding myself to $newsh $reason.)"
 	case "$0" in
 	Configure|*/Configure) exec $newsh $0 "$@";;
@@ -344,6 +345,7 @@ d_cuserid=''
 d_dbl_dig=''
 d_dbminitproto=''
 d_difftime=''
+d_dirfd=''
 d_dlerror=''
 d_dlopen=''
 d_dlsymun=''
@@ -487,6 +489,8 @@ d_pause=''
 d_pipe=''
 d_poll=''
 d_portable=''
+d_procselfexe=''
+procselfexe=''
 d_old_pthread_create_joinable=''
 old_pthread_create_joinable=''
 d_pthread_atfork=''
@@ -899,7 +903,6 @@ prefixexp=''
 installprivlib=''
 privlib=''
 privlibexp=''
-d_procselfexe=''
 prototype=''
 ptrsize=''
 d_PRIXU64=''
@@ -1031,6 +1034,18 @@ if test -f /etc/unixtovms.exe; then
 fi
 
 i_whoami=''
+ccname=''
+ccversion=''
+perllibs=''
+: set useposix=false in your hint file to disable the POSIX extension.
+useposix=true
+: set useopcode=false in your hint file to disable the Opcode extension.
+useopcode=true
+: Trailing extension.  Override this in a hint file, if needed.
+_exe=''
+: Extra object files, if any, needed on this platform.
+archobjs=''
+archname=''
 : Possible local include directories to search.
 : Set locincpth to "" in a hint file to defeat local include searches.
 locincpth="/usr/local/include /opt/local/include /usr/gnu/include"
@@ -1039,10 +1054,6 @@ locincpth="$locincpth /opt/gnu/include /usr/GNU/include /opt/GNU/include"
 : no include file wanted by default
 inclwanted=''
 
-: Trailing extension.  Override this in a hint file, if needed.
-_exe=''
-: Extra object files, if any, needed on this platform.
-archobjs=''
 groupstype=''
 libnames=''
 : change the next line if compiling for Xenix/286 on Xenix/386
@@ -1066,25 +1077,17 @@ plibpth=''
 libswanted=''
 : some systems want to use only the non-versioned libso:s
 ignore_versioned_solibs=''
-: full support for void wanted by default
-defvoidused=15
-
-ccname=''
-ccversion=''
-perllibs=''
-: set useposix=false in your hint file to disable the POSIX extension.
-useposix=true
-: set useopcode=false in your hint file to disable the Opcode extension.
-useopcode=true
 archname64=''
 ccflags_uselargefiles=''
 ldflags_uselargefiles=''
 libswanted_uselargefiles=''
 : set usemultiplicity on the Configure command line to enable multiplicity.
 : set usesocks on the Configure command line to enable socks.
-archname=''
 : set usethreads on the Configure command line to enable threads.
 usereentrant='undef'
+: full support for void wanted by default
+defvoidused=15
+
 : List of libraries we want.
 : If anyone needs -lnet, put it in a hint file.
 libswanted='sfio socket bind inet nsl nm ndbm gdbm dbm db malloc dl'
@@ -1129,7 +1132,7 @@ case "$sh" in
 esac
 
 case "$sh" in
-'')	cat <<EOM >&2
+'')	cat >&2 <<EOM
 $me:  Fatal Error:  I can't find a Bourne Shell anywhere.  
 
 Usually it's in /bin/sh.  How did you even get this far?
@@ -2262,20 +2265,43 @@ case "$lns" in
 	echo "Checking how to test for symbolic links..." >&4
 	$lns blurfl sym
 	if $test "X$issymlink" = X; then
-		sh -c "PATH= test -h sym" >/dev/null 2>&1
+		case "$newsh" in
+		'') sh     -c "PATH= test -h sym" >/dev/null 2>&1 ;;
+		*)  $newsh -c "PATH= test -h sym" >/dev/null 2>&1 ;;
+		esac
 		if test $? = 0; then
 			issymlink="test -h"
-		fi		
-	fi
-	if $test "X$issymlink" = X; then
-		if  $test -h >/dev/null 2>&1; then
-			issymlink="$test -h"
-			echo "Your builtin 'test -h' may be broken, I'm using external '$test -h'." >&4
+		else
+			echo "Your builtin 'test -h' may be broken." >&4
+			case "$test" in
+			/*)	;;
+			*)	pth=`echo $PATH | sed -e "s/$p_/ /g"`
+				for p in $pth
+				do
+					if test -f "$p/$test"; then
+						test="$p/$test"
+						break
+					fi
+				done
+				;;
+			esac
+			case "$test" in
+			/*)
+				echo "Trying external '$test -h'." >&4
+				issymlink="$test -h"
+				if $test ! -h sym >/dev/null 2>&1; then
+					echo "External '$test -h' is broken, too." >& 4
+					issymlink=''
+				fi
+				;;
+			*)	issymlink='' ;;
+			esac
 		fi		
 	fi
 	if $test "X$issymlink" = X; then
 		if $test -L sym 2>/dev/null; then
 			issymlink="$test -L"
+			echo "The builtin '$test -L' worked." >&4
 		fi
 	fi
 	if $test "X$issymlink" != X; then
@@ -9493,6 +9519,63 @@ set d_dirnamlen
 eval $setvar
 $rm -f try.c
 
+: see if this is an sysdir system
+set sys/dir.h i_sysdir
+eval $inhdr
+
+: see if this is an sysndir system
+set sys/ndir.h i_sysndir
+eval $inhdr
+
+: Look for dirfd
+echo " "
+$cat >dirfd.c <<EOM
+#include <stdio.h>
+#$i_dirent I_DIRENT		/**/
+#$i_sysdir I_SYS_DIR		/**/
+#$i_sysndir I_SYS_NDIR		/**/
+#$i_systypes I_SYS_TYPES	/**/
+#if defined(I_SYS_TYPES)
+#include <sys/types.h>
+#endif
+#if defined(I_DIRENT)
+#include <dirent.h>
+#if defined(NeXT) && defined(I_SYS_DIR) /* NeXT needs dirent + sys/dir.h */
+#include <sys/dir.h>
+#endif
+#else
+#ifdef I_SYS_NDIR
+#include <sys/ndir.h>
+#else
+#ifdef I_SYS_DIR
+#ifdef hp9000s500
+#include <ndir.h>	/* may be wrong in the future */
+#else
+#include <sys/dir.h>
+#endif
+#endif
+#endif
+#endif 
+int main() {
+	DIR *dirp = opendir(".");
+	if (dirfd(dirp) >= 0)
+		exit(0);
+	else
+		exit(1);
+}
+EOM
+set dirfd
+if eval $compile; then
+	val="$define"
+fi
+case "$val" in
+$define)	echo "dirfd() found." >&4	;;
+*)		echo "dirfd() NOT found." >&4	;;
+esac
+set d_dirfd
+eval $setvar
+$rm -f dirfd*
+
 : see if dlerror exists
 xxx_runnm="$runnm"
 runnm=false
@@ -11430,21 +11513,31 @@ set readlink d_readlink
 eval $inlibc
 
 echo " "
-echo "Checking for /proc/self/exe ..." >&4
+procselfexe=''
 val="$undef"
-if $test "$d_readlink" = "$define" ; then
+case "$d_readlink" in
+"$define")
 	if $issymlink /proc/self/exe ; then
 		$ls -l /proc/self/exe > reflect
-		if $contains $ls reflect >/dev/null; then
+		if $contains /`basename $ls` reflect >/dev/null 2>&1; then
+			echo "You have Linux-like /proc/self/exe."
+			procselfexe='"/proc/self/exe"'
 			val="$define"
-			echo "You have linux-like /proc/self/exe"
 		fi
-		$rm reflect
 	fi
-fi
+	if $issymlink /proc/curproc/file ; then
+		$ls -l /proc/curproc/file > reflect
+		if $contains /`basename $ls` reflect >/dev/null 2>&1; then
+			echo "You have BSD-like /proc/curproc/file."
+			procselfexe='"/proc/curproc/file"'
+			val="$define"
+		fi
+	fi
+	;;
+esac
+$rm -f reflect
 set d_procselfexe
 eval $setvar
-
 
 : see if pthread_atfork exists
 set pthread_atfork d_pthread_atfork
@@ -13417,14 +13510,6 @@ case "$d_vfork" in
 $define) usevfork='true';;
 *) usevfork='false';;
 esac
-
-: see if this is an sysdir system
-set sys/dir.h i_sysdir
-eval $inhdr
-
-: see if this is an sysndir system
-set sys/ndir.h i_sysndir
-eval $inhdr
 
 : see if closedir exists
 set closedir d_closedir
@@ -16807,6 +16892,7 @@ d_cuserid='$d_cuserid'
 d_dbl_dig='$d_dbl_dig'
 d_dbminitproto='$d_dbminitproto'
 d_difftime='$d_difftime'
+d_dirfd='$d_dirfd'
 d_dirnamlen='$d_dirnamlen'
 d_dlerror='$d_dlerror'
 d_dlopen='$d_dlopen'
@@ -17377,6 +17463,7 @@ prefix='$prefix'
 prefixexp='$prefixexp'
 privlib='$privlib'
 privlibexp='$privlibexp'
+procselfexe='$procselfexe'
 prototype='$prototype'
 ptrsize='$ptrsize'
 quadkind='$quadkind'

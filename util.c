@@ -1957,6 +1957,7 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
 	did_pipes = 0;
 	if (n) {			/* Error */
 	    int pid2, status;
+	    PerlLIO_close(p[This]);
 	    if (n != sizeof(int))
 		Perl_croak(aTHX_ "panic: kid popen errno read");
 	    do {
@@ -2057,8 +2058,11 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 	}
 #endif	/* defined OS2 */
 	/*SUPPRESS 560*/
-	if ((tmpgv = gv_fetchpv("$",TRUE, SVt_PV)))
+	if ((tmpgv = gv_fetchpv("$",TRUE, SVt_PV))) {
+        SvREADONLY_off(GvSV(tmpgv));
 	    sv_setiv(GvSV(tmpgv), PerlProc_getpid());
+        SvREADONLY_on(GvSV(tmpgv));
+    }
 	PL_forkprocess = 0;
 	hv_clear(PL_pidstatus);	/* we have no children */
 	return Nullfp;
@@ -2096,6 +2100,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 	did_pipes = 0;
 	if (n) {			/* Error */
 	    int pid2, status;
+	    PerlLIO_close(p[This]);
 	    if (n != sizeof(int))
 		Perl_croak(aTHX_ "panic: kid popen errno read");
 	    do {

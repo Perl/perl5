@@ -11,7 +11,7 @@ BEGIN
   if ($ENV{PERL_CORE})
     {
     # testing with the core distribution
-    @INC = qw(../lib);
+    @INC = qw(../t/lib);
     }
   unshift @INC, '../lib';
   if (-d 't')
@@ -26,7 +26,7 @@ BEGIN
     }
   print "# INC = @INC\n"; 
   
-  plan tests => 1299 + 4;	# + 4 own tests
+  plan tests => 1325 + 4;	# + 4 own tests
   }
 
 use Math::BigFloat::Subclass;

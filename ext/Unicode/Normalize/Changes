@@ -1,5 +1,14 @@
 Revision history for Perl extension Unicode::Normalize.
 
+0.12  Wed Nov 29 22:49:02 2001
+	- documentation in .pod is appended to .pm and the .pod is removed.
+	 (only POD in NON-XS refers to Lingua::KO::Hangul::Util.)
+
+0.11  Sat Nov 24 10:18:38 2001
+	- documentation of some functions for character data.
+	- Change 12909: by Jarkko Hietaniemi.
+	- Change 13228: by Peter Prymmer.
+
 0.10  Sat Nov 03 16:30:20 2001
 	- The XS version is now independent of Lingua::KO::Hangul::Util.
 	  (though the Non-XS version still requires that.)

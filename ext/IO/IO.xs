@@ -4,6 +4,8 @@
  * modify it under the same terms as Perl itself.
  */
 
+#define PERL_EXT_IO
+
 #define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #define PERLIO_NOT_STDIO 1
@@ -444,11 +446,11 @@ sockatmark (sock)
      {
        int flag = 0;
 #   ifdef SIOCATMARK
-	#ifdef NETWARE
+#     if defined(NETWARE) || defined(WIN32)
        if (ioctl(fd, SIOCATMARK, (void*)&flag) != 0)
-	#else
-	   if (ioctl(fd, SIOCATMARK, &flag) != 0)
-	#endif
+#     else
+       if (ioctl(fd, SIOCATMARK, &flag) != 0)
+#     endif
 	 XSRETURN_UNDEF;
 #   else
        not_here("IO::Socket::atmark");

@@ -1,3 +1,5 @@
+#define PERL_EXT_POSIX
+
 #ifdef WIN32
 #define _POSIX_
 #endif
@@ -168,6 +170,8 @@ char *tzname[] = { "" , "" };
 #  define sigfillset(a)		not_here("sigfillset")
 #  define sigismember(a,b)	not_here("sigismember")
 #ifndef NETWARE
+#  undef setuid
+#  undef setgid
 #  define setuid(a)		not_here("setuid")
 #  define setgid(a)		not_here("setgid")
 #endif	/* NETWARE */
@@ -226,9 +230,11 @@ typedef struct termios* POSIX__Termios;
 
 /* Possibly needed prototypes */
 char *cuserid (char *);
+#ifndef WIN32
 double strtod (const char *, char **);
 long strtol (const char *, char **, int);
 unsigned long strtoul (const char *, char **, int);
+#endif
 
 #ifndef HAS_CUSERID
 #define cuserid(a) (char *) not_here("cuserid")

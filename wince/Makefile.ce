@@ -510,6 +510,8 @@ MICROCORE_SRC	=		\
 		..\pp.c		\
 		..\pp_ctl.c	\
 		..\pp_hot.c	\
+		..\pp_pack.c	\
+		..\pp_sort.c	\
 		..\pp_sys.c	\
 		..\regcomp.c	\
 		..\regexec.c	\
@@ -958,6 +960,7 @@ $(DLLDIR)\pp.obj \
 $(DLLDIR)\pp_ctl.obj \
 $(DLLDIR)\pp_hot.obj \
 $(DLLDIR)\pp_pack.obj \
+$(DLLDIR)\pp_sort.obj \
 $(DLLDIR)\pp_sys.obj \
 $(DLLDIR)\regcomp.obj \
 $(DLLDIR)\regexec.obj \

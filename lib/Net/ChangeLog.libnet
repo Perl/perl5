@@ -1,3 +1,75 @@
+Change 683 on 2001/11/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Various doc cleanups
+
+Change 675 on 2001/11/20 by <gbarr@pobox.com> (Graham Barr)
+
+	t/hostname.t
+	- Add test to check that hostname() does not modify $_
+
+Change 674 on 2001/11/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::Config
+	- Dont treat "test_hosts" as an array of host names
+
+Change 673 on 2001/11/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Added test for Net::Netrc
+	patch from chromatic
+
+Change 672 on 2001/11/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP
+	- Dont send QUIT on DESTROY. Causes problems when fork() is used.
+
+Change 671 on 2001/11/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::Domain
+	- Fix bug causing $_ to be modified
+
+Change 670 on 2001/11/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP
+	- Send -anonymous@ as the password for the anonymous user, not
+	  the real username. Patch from Eduardo P?rez Ureta
+
+Change 669 on 2001/11/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Add VERSION numbers to Net::FTP::L and Net::FTP::E
+
+Change 668 on 2001/11/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::Config
+	- Read some default values using Mac::InternetConfig if we are on the Mac
+	  patch from Chris Nandor
+
+Change 667 on 2001/11/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::SMTP
+	- Add support for SASL AUTH (only PLAIN right now)
+	  patch from Meng Weng Wong <mengwong@dumbo.pobox.com>
+
+Change 666 on 2001/11/20 by <gbarr@pobox.com> (Graham Barr)
+
+	t/config.t
+	- Use a fake inet_aton so we know that it will fail when expected
+
+Change 665 on 2001/11/02 by <gbarr@pobox.com> (Graham Barr)
+
+	Release 1.09
+
+Change 664 on 2001/10/29 by <gbarr@pobox.com> (Graham Barr)
+
+	Added test for Net::Config from chromatic
+
+Change 663 on 2001/10/26 by <gbarr@pobox.com> (Graham Barr)
+
+	More fixes from the core for undefs
+
+Change 662 on 2001/10/26 by <gbarr@pobox.com> (Graham Barr)
+
+	Make tests compatable with the perl core distribution
+
 Change 661 on 2001/10/26 by <gbarr@pobox.com> (Graham Barr)
 
 	Add install-nomake to install libnet on machines that do not

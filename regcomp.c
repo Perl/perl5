@@ -522,11 +522,8 @@ S_scan_commit(pTHX_ RExC_state_t *pRExC_state, scan_data_t *data)
 STATIC void
 S_cl_anything(pTHX_ RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
 {
-    int value;
-
     ANYOF_CLASS_ZERO(cl);
-    for (value = 0; value < 256; ++value)
-	ANYOF_BITMAP_SET(cl, value);
+    ANYOF_BITMAP_SETALL(cl);
     cl->flags = ANYOF_EOS|ANYOF_UNICODE_ALL;
     if (LOC)
 	cl->flags |= ANYOF_LOCALE;
@@ -543,9 +540,8 @@ S_cl_is_anything(pTHX_ struct regnode_charclass_class *cl)
 	    return 1;
     if (!(cl->flags & ANYOF_UNICODE_ALL))
 	return 0;
-    for (value = 0; value < 256; ++value)
-	if (!ANYOF_BITMAP_TEST(cl, value))
-	    return 0;
+    if (!ANYOF_BITMAP_TESTALLSET(cl))
+	return 0;
     return 1;
 }
 
@@ -2795,6 +2791,7 @@ tryagain:
 	case 'Z':
 	    ret = reg_node(pRExC_state, SEOL);
 	    *flagp |= SIMPLE;
+	    RExC_seen_zerolen++;		/* Do not optimize RE away */
 	    nextchar(pRExC_state);
 	    break;
 	case 'z':

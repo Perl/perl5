@@ -9,15 +9,24 @@ README.vos - Perl for Stratus VOS
 =head1 SYNOPSIS
 
 This is a port of Perl version 5 to VOS.  Perl is a scripting or
-macro language that is popular on many systems.  See your local
-computer bookstore for a number of good books on Perl.
+macro language that is popular on many systems.  See L<perlbook>
+for a number of good books on Perl.
+
+These are instructions for building Perl from source.  Most people can
+simply download a pre-compiled distribution from the VOS anonymous FTP
+site.  If you are running VOS Release 14.2.0 or earlier, download Perl
+from ftp://ftp.stratus.com/pub/vos/posix/alpha/alpha.html.  If you are
+running VOS Release 14.3.0 or later, download Perl from
+ftp://ftp.stratus.com/pub/vos/posix/ga/ga.html.  Instructions for
+unbundling the Perl distribution file are at
+ftp://ftp.stratus.com/pub/vos/utility/utility.html.
 
 =head2 Stratus POSIX Support
 
 Note that there are two different implementations of POSIX.1
 support on VOS.  There is an alpha version of POSIX that is
 available from the Stratus anonymous ftp site
-(ftp://ftp.stratus.com/pub/vos/posix/alpha/alpha.html).  There is
+(ftp://ftp.stratus.com/pub/vos/posix/).  There is
 a generally-available version of POSIX that comes with the VOS
 Standard C Compiler or VOS C runtime in VOS Release 14.3.0 or
 higher.  This port of perl will compile and bind with either
@@ -70,7 +79,7 @@ Stratus FTP site.  Login anonymously to ftp.stratus.com and
 get the file /pub/vos/posix/alpha/posix.save.evf.gz in
 binary file-transfer mode.  Or use the Uniform Resource
 Locator (URL)
-ftp://ftp.stratus.com/pub/vos/alpha/posix.save.evf.gz from
+ftp://ftp.stratus.com/pub/vos/posix/alpha/posix.save.evf.gz from
 your web browser.  Instructions for unbundling this file
 are at ftp://ftp.stratus.com/pub/vos/utility/utility.html.
 This is not a standard Stratus product.
@@ -233,10 +242,10 @@ seller.
 
 =head1 AUTHOR
 
-Paul Green (Paul_Green@stratus.com)
+Paul Green (Paul.Green@stratus.com)
 
 =head1 LAST UPDATE
 
-July 4, 2001
+November 29, 2001
 
 =cut

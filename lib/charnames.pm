@@ -126,7 +126,7 @@ sub import
 sub viacode
 {
     if (@_ != 1) {
-        carp "charnames::viacode() expects one numeric value";
+        carp "charnames::viacode() expects one numeric argument";
         return ()
     }
     my $arg = shift;
@@ -136,7 +136,7 @@ sub viacode
         $hex = sprintf "%04X", $arg;
     } else {
         carp("unexpected arg \"$arg\" to charnames::viacode()");
-        return ();
+        return;
     }
 
     $txt = do "unicore/Name.pl" unless $txt;
@@ -144,7 +144,25 @@ sub viacode
     if ($txt =~ m/^$hex\t\t(.+)/m) {
         return $1;
     } else {
-        return ();
+        return;
+    }
+}
+
+sub vianame
+{
+    if (@_ != 1) {
+        carp "charnames::vianame() expects one name argument";
+        return ()
+    }
+
+    my $arg = shift;
+
+    $txt = do "unicore/Name.pl" unless $txt;
+
+    if ($txt =~ m/^([0-9A-F]+)\t\t($arg)/m) {
+        return hex $1;
+    } else {
+        return;
     }
 }
 
@@ -168,6 +186,7 @@ charnames - define character names for C<\N{named}> string literal escapes.
   print "\N{sigma} is Greek sigma, and \N{be} is Cyrillic b.\n";
 
   print charname::viacode(0x1234); # prints "ETHIOPIC SYLLABLE SEE"
+  printf "%04X", charname::vianame("GOTHIC LETTER AHSA"); # prints "10330"
 
 =head1 DESCRIPTION
 
@@ -189,8 +208,13 @@ this pragma looks for the names
   SCRIPTNAME LETTER CHARNAME
 
 in the table of standard Unicode names.  If C<CHARNAME> is lowercase,
-then the C<CAPITAL> variant is ignored, otherwise the C<SMALL> variant is
-ignored.
+then the C<CAPITAL> variant is ignored, otherwise the C<SMALL> variant
+is ignored.
+
+Note that C<\N{...}> is compile-time, it's a special form of string
+constant used inside double-quoted strings: in other words, you cannot
+used variables inside the C<\N{...}>.  If you want similar run-time
+functionality, use charnames::vianame().
 
 =head1 CUSTOM TRANSLATORS
 
@@ -231,7 +255,21 @@ The example
 
 prints "FOUR TEARDROP-SPOKED ASTERISK".
 
-Returns nothing if no name is known for the code.
+Returns undef if no name is known for the code.
+
+This works only for the standard names, and does not yet aply 
+to custom translators.
+
+=head1 charnames::vianame(code)
+
+Returns the code point indicated by the name.
+The example
+
+    printf "%04X", charnames::vianame("FOUR TEARDROP-SPOKED ASTERISK");
+
+prints "2722".
+
+Returns undef if no name is known for the name.
 
 This works only for the standard names, and does not yet aply 
 to custom translators.

@@ -1,6 +1,6 @@
 #!./perl -w
 
-print "1..613\n";
+print "1..615\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -675,4 +675,32 @@ foreach (
     # 613: "w/a*" should be seen as one unit
 
     ok(scalar unpack("w/a*", "\x02abc") eq "ab");
+}
+
+{
+    # 614
+    
+    # from Wolfgang Laun: fix in change #13163
+
+    my $s = 'ABC' x 10;
+    my $x = 42;
+    my $buf = pack( 'Z*/A* C',  $s, $x );
+    my $y;
+
+    my $h = $buf;
+    $h =~ s/[^[:print:]]/./g;
+    ( $s, $y ) = unpack( "Z*/A* C", $buf );
+    ok($h eq "30.ABCABCABCABCABCABCABCABCABCABC*" &&
+       length $buf == 34 &&
+       $s eq "ABCABCABCABCABCABCABCABCABCABC" &
+       $y == 42);
+}
+
+{
+    # 615
+
+    # from Wolfgang Laun: fix in change #13288
+
+    eval { my $t=unpack("P*", "abc") };
+    ok($@ =~ /P must have an explicit size/);
 }

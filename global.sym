@@ -153,6 +153,7 @@ Perl_hv_store_ent
 Perl_hv_undef
 Perl_ibcmp
 Perl_ibcmp_locale
+Perl_ibcmp_utf8
 Perl_init_stacks
 Perl_init_tm
 Perl_instr
