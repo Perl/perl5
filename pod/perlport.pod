@@ -423,7 +423,7 @@ simple, platform-independent mailing.
 The Unix System V IPC (C<msg*(), sem*(), shm*()>) is not available
 even on all Unix platforms.
 
-Do not use either the bare result of C<pack("N", 10, 20, 30, 40)
+Do not use either the bare result of C<pack("N", 10, 20, 30, 40)>
 or bare v-strings (such as C<v10.20.30.40>) or the to represent
 IPv4 addresses: both forms just pack the four bytes into network order.
 That this would be equal to the C language C<in_addr> struct (which is
