@@ -95,7 +95,7 @@ for (@prgs){
 	    $Is_MSWin32 ?
 		`.\\perl -I../lib $switch $tmpfile 2>&1` :
 		    $Is_MacOS ?
-			`$^X -I::lib $switch $tmpfile` :
+			`$^X -I::lib $switch -MMac::err=unix $tmpfile` :
 			    `./perl -I../lib $switch $tmpfile 2>&1`;
     my $status = $?;
     $results =~ s/\n+$//;
