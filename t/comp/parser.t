@@ -9,7 +9,7 @@ BEGIN {
 }
 
 require "./test.pl";
-plan( tests => 43 );
+plan( tests => 44 );
 
 eval '%@x=0;';
 like( $@, qr/^Can't modify hash dereference in repeat \(x\)/, '%@x=0' );
@@ -146,4 +146,12 @@ EOF
 {
     eval q{ sub f { @a=@b=@c;  {use} } };
     like( $@, qr/syntax error/, "use without body" );
+}
+
+# Bug #27024
+{
+    # this used to segfault (because $[=1 is optimized away to a null block)
+    my $x;
+    $[ = 1 while $x;
+    pass();
 }

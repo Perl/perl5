@@ -3577,6 +3577,10 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
 	}
     }
 
+    /* if block is null, the next append_elem() would put UNSTACK, a scalar
+     * op, in listop. This is wrong. [perl #27024] */
+    if (!block)
+	block = newOP(OP_NULL, 0);
     listop = append_elem(OP_LINESEQ, block, newOP(OP_UNSTACK, 0));
     o = new_logop(OP_AND, 0, &expr, &listop);
 
