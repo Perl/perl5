@@ -723,6 +723,35 @@ Here's a much better web-page hit counter:
 
 If the count doesn't impress your friends, then the code might.  :-)
 
+=head2 All I want to do is append a small amount of text to the end of a
+file. Do I *still* have to use locking?
+
+If you are on a system that correctly implements flock() and you use the
+example appending code from "perldoc -f flock" everything will be OK
+even if the OS you are on doesn't implement append mode correctly (if
+such a system exists.) So if you are happy to restrict yourself to OSs
+that implement flock() (and that's not really much of a restriction)
+then that is what you should do.
+
+If you know you are only going to use a system that does correctly
+implement appending (i.e. not Win32) then you can omit the seek() from
+the above code.
+
+If you know you are only writing code to run on an OS and filesystem that
+does implement append mode correctly (a local filesystem on a modern
+Unix for example), and you keep the file in block-buffered mode and you
+write less than one buffer-full of output between each manual flushing
+of the buffer then each bufferload is almost garanteed to be written to
+the end of the file in one chunk without getting intermingled with
+anyone else's output. You can also use the syswrite() function which is
+simply a wrapper around your systems write(2) system call.
+
+There is still a small theoretical chance that a signal will interrupt
+the system level write() operation before completion.  There is also a
+possibility that some STDIO implementations may call multiple system
+level write()s even if the buffer was empty to start.  There may be some
+systems where this probability is reduced to zero.
+
 =head2 How do I randomly update a binary file?
 
 If you're just trying to patch a binary, in many cases something as

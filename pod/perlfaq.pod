@@ -692,6 +692,11 @@ I still don't get locking.  I just want to increment the number in the file.  Ho
 
 =item *
 
+All I want to do is append a small amount of text to the end of a
+file. Do I *still* have to use locking?
+
+=item *
+
 How do I randomly update a binary file?
 
 =item *
