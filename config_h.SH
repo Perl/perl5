@@ -2462,6 +2462,17 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_frexpl HAS_FREXPL		/**/
 
+/* HAS_ILOGBL
+ *	This symbol, if defined, indicates that the ilogbl function is
+ *	available. If scalbnl is also present we can emulate frexpl
+ */
+/* HAS_SCALBNL
+ *	This symbol, if defined, indicates that the scalbnl function is
+ *	available. If ilogbl is also present we can emulate frexpl
+ */
+#$d_ilogbl HAS_ILOGBL		/**/
+#$d_scalbnl HAS_SCALBNL		/**/
+
 /* HAS_STRUCT_FS_DATA:
  *	This symbol, if defined, indicates that the struct fs_data
  *	to do statfs() is supported.
@@ -2625,6 +2636,17 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_modfl HAS_MODFL		/**/
 #$d_modflproto HAS_MODFL_PROTO		/**/
 #$d_modfl_pow32_bug HAS_MODFL_POW32_BUG		/**/
+
+/* HAS_AINTL
+ *	This symbol, if defined, indicates that the aintl function is
+ *	available. If copysignl is also present we can emulate modfl
+ */
+/* HAS_COPYSIGNL
+ *	This symbol, if defined, indicates that the copysignl function is
+ *	available. If aintl is also present we can emulate modfl
+ */
+#$d_aintl HAS_AINTL		/**/
+#$d_copysignl HAS_COPYSIGNL	/**/
 
 /* HAS_MPROTECT:
  *	This symbol, if defined, indicates that the mprotect system call is

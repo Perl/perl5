@@ -334,6 +334,7 @@ cppstdin=''
 d__fwalk=''
 d_access=''
 d_accessx=''
+d_aintl=''
 d_alarm=''
 asctime_r_proto=''
 d_asctime_r=''
@@ -352,6 +353,7 @@ d_closedir=''
 d_void_closedir=''
 d_cmsghdr_s=''
 d_const=''
+d_copysign=''
 cryptlib=''
 d_crypt=''
 crypt_r_proto=''
@@ -510,6 +512,7 @@ d_gnulibc=''
 gnulibc_version=''
 d_hasmntopt=''
 d_htonl=''
+d_ilogbl=''
 d_inetaton=''
 d_int64_t=''
 d_isascii=''
@@ -599,6 +602,7 @@ d_safebcpy=''
 d_safemcpy=''
 d_sanemcmp=''
 d_sbrkproto=''
+d_scalbnl=''
 d_select=''
 d_sem=''
 d_semctl=''
@@ -4512,6 +4516,50 @@ case "$firstmakefile" in
 '') firstmakefile='makefile';;
 esac
 
+case "$ccflags" in
+*-DUSE_LONG_DOUBLE*|*-DUSE_MORE_BITS*) uselongdouble="$define" ;;
+esac
+
+case "$uselongdouble" in
+$define|true|[yY]*)	dflt='y';;
+*) dflt='n';;
+esac
+cat <<EOM
+
+Perl can be built to take advantage of long doubles which
+(if available) may give more accuracy and range for floating point numbers.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
+EOM
+rp='Try to use long doubles if available?'
+. ./myread
+case "$ans" in
+y|Y) 	val="$define"	;;
+*)      val="$undef"	;;
+esac
+set uselongdouble
+eval $setvar
+
+case "$uselongdouble" in
+true|[yY]*) uselongdouble="$define" ;;
+esac
+
+case "$uselongdouble" in
+$define)
+: Look for a hint-file generated 'call-back-unit'.  If the
+: user has specified that long doubles should be used,
+: we may need to set or change some other defaults.
+	if $test -f uselongdouble.cbu; then
+		echo "Your platform has some specific hints for long doubles, using them..."
+		. ./uselongdouble.cbu
+	else
+		$cat <<EOM
+(Your platform doesn't have any specific hints for long doubles.)
+EOM
+	fi
+	;;
+esac
+
 : Looking for optional libraries
 echo " "
 echo "Checking for optional libraries..." >&4
@@ -4859,7 +4907,7 @@ echo " "
 echo "Checking your choice of C compiler and flags for coherency..." >&4
 $cat > try.c <<'EOF'
 #include <stdio.h>
-int main() { printf("Ok\n"); exit(0); }
+int main() { printf("Ok\n"); return(0); }
 EOF
 set X $cc -o try $optimize $ccflags $ldflags try.c $libs
 shift
@@ -6137,6 +6185,14 @@ esac
 set modfl d_modfl
 eval $inlibc
 
+: see if aintl exists - used along with copysignl if modfl is missing
+set aintl d_aintl
+eval $inlibc
+
+: see if copysignl exists - used along with aintl if modfl is missing
+set copysign d_copysignl
+eval $inlibc
+
 : see if prototype for modfl is available
 echo " "
 set d_modflproto modfl math.h
@@ -6205,67 +6261,28 @@ EOCP
 	;;
 esac
 
-case "$ccflags" in
-*-DUSE_LONG_DOUBLE*|*-DUSE_MORE_BITS*) uselongdouble="$define" ;;
-esac
-
-case "$uselongdouble" in
-$define|true|[yY]*)	dflt='y';;
-*) dflt='n';;
-esac
-cat <<EOM
-
-Perl can be built to take advantage of long doubles which
-(if available) may give more accuracy and range for floating point numbers.
-
-If this doesn't make any sense to you, just accept the default '$dflt'.
-EOM
-rp='Try to use long doubles if available?'
-. ./myread
-case "$ans" in
-y|Y) 	val="$define"	;;
-*)      val="$undef"	;;
-esac
-set uselongdouble
-eval $setvar
-
-case "$uselongdouble" in
-true|[yY]*) uselongdouble="$define" ;;
-esac
-
-case "$uselongdouble" in
-$define)
-: Look for a hint-file generated 'call-back-unit'.  If the
-: user has specified that long doubles should be used,
-: we may need to set or change some other defaults.
-	if $test -f uselongdouble.cbu; then
-		echo "Your platform has some specific hints for long doubles, using them..."
-		. ./uselongdouble.cbu
-	else
-		$cat <<EOM
-(Your platform doesn't have any specific hints for long doubles.)
-EOM
-	fi
-	;;
-esac
-
-message=X
-case "$uselongdouble:$d_sqrtl:$d_modfl" in
-$define:$define:$define)
+if $test "$uselongdouble" = "$define"; then
+    message=X
+    case "$d_sqrtl:$d_modfl" in
+    $define:$define)
 	: You have both
 	;;
-$define:$define:$undef)
-	message="I could not find modfl"
+    $define:$undef)
+	if $test "$d_aintl:$d_copysignl" = "$define:$define"; then
+	    echo "You have both aintl and copysignl, so I can emulate modfl"
+	else
+	    message="I could not find modfl"
+	fi
 	;;
-$define:$undef:$define)
+    $undef:$define)
 	message="I could not find sqrtl"
 	;;
-$define:$undef:$undef)
+    $undef:$undef)
 	message="I found neither sqrtl nor modfl"
 	;;
-esac
+    esac
 
-if $test "$message" != X; then
+    if $test "$message" != X; then
 	$cat <<EOM >&4
 
 *** You requested the use of long doubles but you do not seem to have
@@ -6276,6 +6293,7 @@ if $test "$message" != X; then
 EOM
 
 	uselongdouble=$undef
+    fi
 fi
 
 : determine the architecture name
@@ -7290,7 +7308,11 @@ eval $setvar
 : Cruising for prototypes
 echo " "
 echo "Checking out function prototypes..." >&4
-$cat >prototype.c <<'EOCP'
+$cat >prototype.c <<EOCP
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 int main(int argc, char *argv[]) {
 	exit(0);}
 EOCP
@@ -7726,10 +7748,13 @@ while other systems (such as those using ELF) use $cc.
 
 EOM
 	case "$ld" in
-	'')	$cat >try.c <<'EOM'
+	'')	$cat >try.c <<EOM
 /* Test for whether ELF binaries are produced */
 #include <fcntl.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
 #include <stdlib.h>
+#endif
 int main() {
 	char b[4];
 	int i = open("a.out",O_RDONLY);
@@ -8993,8 +9018,6 @@ else
 	fpossize="$ans"
 fi
 
-
-
 # Backward compatibility (uselfs is deprecated).
 case "$uselfs" in
 "$define"|true|[yY]*)
@@ -9072,6 +9095,10 @@ EOCP
 		$cat > try.c <<EOCP
 #include <sys/types.h>
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 int main() {
     printf("%d\n", (int)sizeof($fpostype));
     return(0);
@@ -9534,7 +9561,7 @@ eval $inlibc
 case "$d_access" in
 "$define")
 	echo " "
-	$cat >access.c <<'EOCP'
+	$cat >access.c <<EOCP
 #include <sys/types.h>
 #ifdef I_FCNTL
 #include <fcntl.h>
@@ -9544,6 +9571,10 @@ case "$d_access" in
 #endif
 #ifdef I_UNISTD
 #include <unistd.h>
+#endif
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
 #endif
 int main() {
 	exit(R_OK);
@@ -9663,7 +9694,7 @@ echo " "
 if test "X$timeincl" = X; then
 	echo "Testing to see if we should include <time.h>, <sys/time.h> or both." >&4
 	$echo $n "I'm now running the test program...$c"
-	$cat >try.c <<'EOCP'
+	$cat >try.c <<EOCP
 #include <sys/types.h>
 #ifdef I_TIME
 #include <time.h>
@@ -9676,6 +9707,10 @@ if test "X$timeincl" = X; then
 #endif
 #ifdef I_SYSSELECT
 #include <sys/select.h>
+#endif
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
 #endif
 int main()
 {
@@ -9886,6 +9921,10 @@ case "$d_getpgrp" in
 #ifdef I_UNISTD
 #  include <unistd.h>
 #endif
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 int main()
 {
 	if (getuid() == 0) {
@@ -9947,6 +9986,10 @@ case "$d_setpgrp" in
 #include <sys/types.h>
 #ifdef I_UNISTD
 #  include <unistd.h>
+#endif
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
 #endif
 int main()
 {
@@ -10211,8 +10254,12 @@ echo " "
 if set vprintf val -f d_vprintf; eval $csym; $val; then
 	echo 'vprintf() found.' >&4
 	val="$define"
-	$cat >try.c <<'EOF'
+	$cat >try.c <<EOF
 #include <varargs.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 
 int main() { xxx("foo"); }
 
@@ -10751,6 +10798,10 @@ eval $inhdr
 echo " "
 $cat >dirfd.c <<EOM
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 #$i_dirent I_DIRENT		/**/
 #$i_sysdir I_SYS_DIR		/**/
 #$i_sysndir I_SYS_NDIR		/**/
@@ -10843,6 +10894,10 @@ EOM
 $cat >fred.c<<EOM
 
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 #$i_dlfcn I_DLFCN
 #ifdef I_DLFCN
 #include <dlfcn.h>      /* the dynamic linker include file for SunOS/Solaris */
@@ -11380,13 +11435,17 @@ esac
 
 : Locate the flags for 'open()'
 echo " "
-$cat >try.c <<'EOCP'
+$cat >try.c <<EOCP
 #include <sys/types.h>
 #ifdef I_FCNTL
 #include <fcntl.h>
 #endif
 #ifdef I_SYS_FILE
 #include <sys/file.h>
+#endif
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
 #endif
 int main() {
 	if(O_RDONLY);
@@ -11520,7 +11579,10 @@ case "$o_nonblock" in
 	$cat head.c > try.c
 	$cat >>try.c <<EOCP
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
 #include <stdlib.h>
+#endif
 #$i_fcntl I_FCNTL
 #ifdef I_FCNTL
 #include <fcntl.h>
@@ -11566,7 +11628,10 @@ case "$eagain" in
 #include <sys/types.h>
 #include <signal.h>
 #include <stdio.h> 
-#include <stdlib.h> 
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 #$i_fcntl I_FCNTL
 #ifdef I_FCNTL
 #include <fcntl.h>
@@ -11726,7 +11791,10 @@ eval $inlibc
 echo " "
 : See if fcntl-based locking works.
 $cat >try.c <<EOCP
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
 #include <stdlib.h>
+#endif
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -11793,6 +11861,10 @@ $cat <<EOM
 Checking to see how well your C compiler handles fd_set and friends ...
 EOM
 $cat >try.c <<EOCP
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 #$i_systime I_SYS_TIME
 #$i_sysselct I_SYS_SELECT
 #$d_socket HAS_SOCKET
@@ -11935,6 +12007,14 @@ eval $setvar
 
 : see if frexpl exists
 set frexpl d_frexpl
+eval $inlibc
+
+: see if ilogbl exists - used along with scalbnl if frexpl is missing
+set ilogbl d_ilogbl
+eval $inlibc
+
+: see if scalbnl exists - used along with ilogbl if frexpl is missing
+set scalbnl d_scalbnl
 eval $inlibc
 
 : see if this is a sys/param system
@@ -13484,6 +13564,10 @@ echo " "
 $cat >isascii.c <<'EOCP'
 #include <stdio.h>
 #include <ctype.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 int main() {
 	int c = 'A';
 	if (isascii(c))
@@ -14077,6 +14161,10 @@ if test X"$d_volatile" = X"$define"; then
 fi
 $cat <<EOP >try.c
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 #include <sys/types.h>
 #include <signal.h>
 #ifdef SIGFPE
@@ -14714,7 +14802,7 @@ EOCP
 #  include <memory.h>
 #endif
 #ifdef I_STDLIB
-#  include <stdlib.h>
+#include <stdlib.h>
 #endif
 #ifdef I_STRING
 #  include <string.h>
@@ -15865,6 +15953,10 @@ fi
 echo "Checking how std your stdio is..." >&4
 $cat >try.c <<EOP
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 #define FILE_ptr(fp)	$stdio_ptr
 #define FILE_cnt(fp)	$stdio_cnt
 int main() {
@@ -15942,6 +16034,10 @@ $cat >try.c <<EOP
 /* Can we scream? */
 /* Eat dust sed :-) */
 /* In the buffer space, no one can hear you scream. */
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 #define FILE_ptr(fp)	$stdio_ptr
 #define FILE_cnt(fp)	$stdio_cnt
 #include <sys/types.h>
@@ -16023,6 +16119,10 @@ case "$d_stdstdio" in
 $define)
 	$cat >try.c <<EOP
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 #define FILE_base(fp)	$stdio_base
 #define FILE_bufsiz(fp)	$stdio_bufsiz
 int main() {
@@ -16682,6 +16782,10 @@ I'm now running the test program...
 EOM
 		$cat >try.c <<EOCP
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 #include <sys/types.h>
 typedef $uvtype UV;
 int main()
@@ -17099,6 +17203,10 @@ $define)
 #endif
 #include <sys/types.h>
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 #include <db.h>
 int main(int argc, char *argv[])
 {
@@ -17437,6 +17545,10 @@ sunos) $echo '#define PERL_FFLUSH_ALL_FOPEN_MAX 32' > try.c ;;
 esac
 $cat >>try.c <<EOCP
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 #$i_unistd I_UNISTD
 #ifdef I_UNISTD
 # include <unistd.h>
@@ -18467,7 +18579,11 @@ echo " "
 echo "Checking how to generate random libraries on your machine..." >&4
 echo 'int bar1() { return bar2(); }' > bar1.c
 echo 'int bar2() { return 2; }' > bar2.c
-$cat > foo.c <<'EOP'
+$cat > foo.c <<EOP
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 int main() { printf("%d\n", bar1()); exit(0); }
 EOP
 $cc $ccflags -c bar1.c >/dev/null 2>&1
@@ -18698,9 +18814,13 @@ xxx="$xxx SYS TERM THAW TRAP TSTP TTIN TTOU URG USR1 USR2"
 xxx="$xxx USR3 USR4 VTALRM WAITING WINCH WIND WINDOW XCPU XFSZ"
 
 : generate a few handy files for later
-$cat > signal.c <<'EOCP'
+$cat > signal.c <<EOCP
 #include <sys/types.h>
 #include <signal.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 #include <stdio.h>
 int main() {
 
@@ -20260,6 +20380,7 @@ d_SCNfldbl='$d_SCNfldbl'
 d__fwalk='$d__fwalk'
 d_access='$d_access'
 d_accessx='$d_accessx'
+d_aintl='$d_aintl'
 d_alarm='$d_alarm'
 d_archlib='$d_archlib'
 d_asctime_r='$d_asctime_r'
@@ -20282,6 +20403,7 @@ d_class='$d_class'
 d_closedir='$d_closedir'
 d_cmsghdr_s='$d_cmsghdr_s'
 d_const='$d_const'
+d_copysignl='$d_copysignl'
 d_crypt='$d_crypt'
 d_crypt_r='$d_crypt_r'
 d_csh='$d_csh'
@@ -20406,6 +20528,7 @@ d_gnulibc='$d_gnulibc'
 d_grpasswd='$d_grpasswd'
 d_hasmntopt='$d_hasmntopt'
 d_htonl='$d_htonl'
+d_ilogbl='$d_ilogbl'
 d_index='$d_index'
 d_inetaton='$d_inetaton'
 d_int64_t='$d_int64_t'
@@ -20502,6 +20625,7 @@ d_safebcpy='$d_safebcpy'
 d_safemcpy='$d_safemcpy'
 d_sanemcmp='$d_sanemcmp'
 d_sbrkproto='$d_sbrkproto'
+d_scalbnl='$d_scalbnl'
 d_sched_yield='$d_sched_yield'
 d_scm_rights='$d_scm_rights'
 d_seekdir='$d_seekdir'
