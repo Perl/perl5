@@ -1867,6 +1867,17 @@ which creates a binary named 'pureperl' that has been Purify'ed.
 This binary is used in place of the standard 'perl' binary
 when you want to debug Perl memory problems.
 
+To minimize the number of memory leak false alarms
+(see L</PERL_DESTRUCT_LEVEL>), set environment variable
+PERL_DESTRUCT_LEVEL to 2.
+
+    setenv PERL_DESTRUCT_LEVEL 2
+
+In Bourne-type shells:
+
+    PERL_DESTRUCT_LEVEL=2
+    export PERL_DESTRUCT_LEVEL
+
 As an example, to show any memory leaks produced during the
 standard Perl testset you would create and run the Purify'ed
 perl as:
@@ -2001,8 +2012,9 @@ There is a way to tell perl to do complete cleanup: set the
 environment variable PERL_DESTRUCT_LEVEL to a non-zero value.
 The t/TEST wrapper does set this to 2, and this is what you
 need to do too, if you don't want to see the "global leaks":
+For example, for "third-degreed" Perl:
 
-	PERL_DESTRUCT_LEVEL=2 ./perl.third t/foo/bar.t
+	env PERL_DESTRUCT_LEVEL=2 ./perl.third -Ilib t/foo/bar.t
 
 =head2 Profiling
 
