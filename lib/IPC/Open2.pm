@@ -41,7 +41,7 @@ The write filehandle will have autoflush turned on.
 If $rdrfh is a string (that is, a bareword filehandle rather than a glob
 or a reference) and it begins with C<< >& >>, then the child will send output
 directly to that file handle.  If $wtrfh is a string that begins with
-C<< <& >>", then $wtrfh will be closed in the parent, and the child will read
+C<< <& >>, then $wtrfh will be closed in the parent, and the child will read
 from it directly.  In both cases, there will be a dup(2) instead of a
 pipe(2) made.
 
