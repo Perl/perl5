@@ -2656,6 +2656,13 @@ there are in the savestack.
 (P) Failed an internal consistency check while trying to reset a weak
 reference.
 
+=item panic: Devel::DProf inconsistent subroutine return
+
+(P) Devel::DProf called a subroutine that exited using goto(LABEL),
+last(LABEL) or next(LABEL). Leaving that way a subroutine called from
+an XSUB will lead very probably to a crash of the interpreter. This is
+a bug that will hopefully one day get fixed.
+
 =item panic: die %s
 
 (P) We popped the context stack to an eval context, and then discovered

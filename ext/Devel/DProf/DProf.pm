@@ -154,6 +154,24 @@ from this subroutine.  Note that the first assignment above does not
 change the numeric slot (it will I<mark> it as invalid, but will not
 write over it).
 
+Another problem is that if a subroutine exits using goto(LABEL),
+last(LABEL) or next(LABEL) then perl may crash or Devel::DProf will die
+with the error:
+
+   panic: Devel::DProf inconsistent subroutine return
+
+For example, this code will break under Devel::DProf:
+
+   sub foo {
+     last FOO;
+   }
+   FOO: {
+     foo();
+   }
+
+A pattern like this is used by Test::More's skip() function, for
+example.  See L<perldiag> for more details.
+
 Mail bug reports and feature requests to the perl5-porters mailing list at
 F<E<lt>perl5-porters@perl.orgE<gt>>.
 

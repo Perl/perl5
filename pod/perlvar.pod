@@ -1078,6 +1078,10 @@ Provide informative "file" names for evals based on the place they were compiled
 Provide informative names to anonymous subroutines based on the place they
 were compiled.
 
+=item 0x400
+
+Debug assertion subroutines enter/exit.
+
 =back
 
 Some bits may be relevant at compile-time only, some at

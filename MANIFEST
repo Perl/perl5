@@ -2541,6 +2541,10 @@ t/lib/dprof/test5_t		Perl code profiler tests
 t/lib/dprof/test5_v		Perl code profiler tests
 t/lib/dprof/test6_t		Perl code profiler tests
 t/lib/dprof/test6_v		Perl code profiler tests
+t/lib/dprof/test7_t		Perl code profiler tests
+t/lib/dprof/test7_v		Perl code profiler tests
+t/lib/dprof/test8_t		Perl code profiler tests
+t/lib/dprof/test8_v		Perl code profiler tests
 t/lib/dprof/V.pm		Perl code profiler tests
 t/lib/filter-util.pl		See if Filter::Util::Call works
 t/lib/Filter/Simple/ExportTest.pm	Helper file for Filter::Simple tests
