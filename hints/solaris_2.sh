@@ -119,7 +119,7 @@ esac
 
 # Check that /dev/fd is mounted.  If it is not mounted, let the
 # user know that suid scripts may not work.
-/usr/bin/df /dev/fd 2>&1 > /dev/null
+df /dev/fd 2>&1 > /dev/null
 case $? in
 0) ;;
 *)
