@@ -1850,8 +1850,17 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 	    PL_reg_oldpos   = mg->mg_len;
 	    SAVEDESTRUCTOR_X(restore_pos, 0);
         }
-	if (!PL_reg_curpm)
+        if (!PL_reg_curpm) {
 	    Newz(22,PL_reg_curpm, 1, PMOP);
+#ifdef USE_ITHREADS
+            {
+                SV* repointer = newSViv(0);
+                av_push(PL_regex_padav,repointer);
+                PL_reg_curpm->op_pmoffset = av_len(PL_regex_padav);
+                PL_regex_pad = AvARRAY(PL_regex_padav);
+            }
+#endif      
+        }
 	PM_SETRE(PL_reg_curpm, prog);
 	PL_reg_oldcurpm = PL_curpm;
 	PL_curpm = PL_reg_curpm;
