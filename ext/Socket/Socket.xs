@@ -7,7 +7,7 @@
 #  include <sys/types.h>
 # endif
 # include <sys/socket.h>
-# if (defined(SOCKS) || defined(USE_SOCKS)) && defined(I_SOCKS)
+# if defined(USE_SOCKS) && defined(I_SOCKS)
 #   include <socks.h>
 # endif 
 # ifdef MPE

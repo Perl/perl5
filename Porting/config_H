@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Mon Jul  5 02:12:38 EET DST 1999
+ * Configuration time: Mon Jul  5 22:50:29 EET DST 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -2523,6 +2523,12 @@
  *	used in a fully backward compatible manner.
  */
 /*#define	USE_PERLIO		/ **/
+
+/* USE_SOCKS:
+ *	This symbol, if defined, indicates that Perl should
+ *	be built to use socks.
+ */
+/*#define	USE_SOCKS		/ **/
 
 /* HAS_DRAND48_PROTO:
  *	This symbol, if defined, indicates that the system provides

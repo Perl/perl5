@@ -2538,6 +2538,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$useperlio	USE_PERLIO		/**/
 
+/* USE_SOCKS:
+ *	This symbol, if defined, indicates that Perl should
+ *	be built to use socks.
+ */
+#$usesocks	USE_SOCKS		/**/
+
 /* HAS_DRAND48_PROTO:
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the drand48() function.  Otherwise, it is up

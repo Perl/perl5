@@ -17,7 +17,7 @@
 #
 #    - use nm in AIX 43x and above
 #    - gcc + threads now builds
-#    - added support for socks, when Dccflags=-DSOCKS specified
+#    [(added support for socks) Jul 99 SOCKS support rewritten]
 #
 # Notes:
 #
@@ -112,54 +112,6 @@ case "$osvers" in
     lddlflags="$lddlflags -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -b noentry -lc"
     ;;
 esac
-
-# Save this for backward compatibility for now.
-# Configure already (5.005_58) knows how to probe for
-# <socks.h> and libsocks.  What sucks is that the name
-# of the socks library seems to be version dependent
-# (e.g. libsocks5), bleagh.
-#
-# if $ccflags contains -DSOCKS, then add socks library support.
-#
-# It is expected that libsocks.a resides in /usr/local/lib and that
-# socks.h resides in /usr/local/include. If these files live some
-# different place then modify 
-#
-
-for arg in $ccflags ; do
-
-   if [ "$arg" = "-DSOCKS" ] ; then
-
-      sockslib=socks5
-      incpath=/usr/local/include
-      libpath=/usr/local/lib
-
-      lddlflags="$lddlflags -l$sockslib"
-
-      # setting $libs here breaks the optional libraries search
-      # for some reason, so use $libswanted instead
-      #libs="$libs -lsocks5"
-
-      libswanted="$libswanted $sockslib"
-
-      #
-      # path for include file
-      #
-
-      locincpth="$locincpath /usr/local/include"
-
-      #
-      # path for library not needed, if in /usr/local/lib as that
-      # directory is already searched.
-      #
-
-      #loclibpth="$loclibpath /usr/local/lib"
-
-      break
-
-   fi
-
-done
 
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use threads.

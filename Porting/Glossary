@@ -3022,6 +3022,10 @@ useshrplib (libperl.U):
 	This variable is set to 'yes' if the user wishes
 	to build a shared libperl, and 'no' otherwise.
 
+usesocks (usesocks.U):
+	This variable conditionally defines the USE_SOCKS symbol,
+	and indicates that Perl should be built to use SOCKS.
+
 usethreads (usethreads.U):
 	This variable conditionally defines the USE_THREADS symbol,
 	and indicates that Perl should be built to use threads.

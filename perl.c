@@ -948,6 +948,10 @@ print \"  \\@INC:\\n    @INC\\n\";");
     init_os_extras(aTHX);
 #endif
 
+#ifdef USE_SOCKS
+    SOCKSinit(argv[0]);
+#endif    
+
     init_predump_symbols();
     /* init_postdump_symbols not currently designed to be called */
     /* more than once (ENV isn't cleared first, for example)	 */

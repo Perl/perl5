@@ -46,7 +46,7 @@ extern "C" int syscall(unsigned long,...);
 
 #if defined(HAS_SOCKET) && !defined(VMS) /* VMS handles sockets via vmsish.h */
 # include <sys/socket.h>
-# if (defined(SOCKS) || defined(USE_SOCKS)) && defined(I_SOCKS)
+# if defined(USE_SOCKS) && defined(I_SOCKS)
 #   include <socks.h>
 # endif 
 # ifdef I_NETDB
