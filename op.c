@@ -3669,6 +3669,7 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 	    if (!PL_initav)
 		PL_initav = newAV();
 	    av_push(PL_initav, SvREFCNT_inc(cv));
+	    GvCV(gv) = 0;
 	}
     }
 
