@@ -597,7 +597,7 @@ usleep(useconds)
 		}
 	    } else if (useconds < 0.0)
 	        croak("Time::HiRes::usleep(%"NVgf"): negative time not invented yet", useconds);
-	    usleep((UV)useconds);
+	    usleep((U32)useconds);
 	} else
 	    PerlProc_pause();
 	gettimeofday(&Tb, NULL);
@@ -620,7 +620,7 @@ sleep(...)
 	    if (seconds >= 0.0) {
 	         UV useconds = (UV)(1E6 * (seconds - (UV)seconds));
 		 if (seconds >= 1.0)
-		     sleep((UV)seconds);
+		     sleep((U32)seconds);
 		 usleep(useconds);
 	    } else
 	        croak("Time::HiRes::sleep(%"NVgf"): negative time not invented yet", seconds);

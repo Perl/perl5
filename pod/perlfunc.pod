@@ -2626,12 +2626,22 @@ and C<IPC::SysV::Msg> documentation.
 
 =item my EXPR
 
-=item my EXPR : ATTRIBUTES
+=item my TYPE EXPR
+
+=item my EXPR : ATTRS
+
+=item my TYPE EXPR : ATTRS
 
 A C<my> declares the listed variables to be local (lexically) to the
-enclosing block, file, or C<eval>.  If
-more than one value is listed, the list must be placed in parentheses.  See
-L<perlsub/"Private Variables via my()"> for details.
+enclosing block, file, or C<eval>.  If more than one value is listed,
+the list must be placed in parentheses.
+
+The exact semantics and interface of TYPE and ATTRS are still
+evolving.  TYPE is currently bound to the use of C<fields> pragma,
+and attributes are handled using the C<attributes> pragma, or starting
+from Perl 5.8.0 also via the C<Attribute::Handlers> module.  See
+L<perlsub/"Private Variables via my()"> for details, and L<fields>,
+L<attributes>, and L<Attribute::Handlers>.
 
 =item next LABEL
 
@@ -3058,7 +3068,11 @@ See L<perlunicode> and L<encoding> for more about Unicode.
 
 =item our EXPR
 
-=item our EXPR : ATTRIBUTES
+=item our EXPR TYPE
+
+=item our EXPR : ATTRS
+
+=item our TYPE EXPR : ATTRS
 
 An C<our> declares the listed variables to be valid globals within
 the enclosing block, file, or C<eval>.  That is, it has the same
@@ -3099,15 +3113,20 @@ package, Perl will emit warnings if you have asked for them.
     our $bar;		# emits warning
 
 An C<our> declaration may also have a list of attributes associated
-with it.  B<WARNING>: This is an experimental feature that may be
-changed or removed in future releases of Perl.  It should not be
-relied upon.
+with it.
 
-The only currently recognized attribute is C<unique> which indicates
-that a single copy of the global is to be used by all interpreters
-should the program happen to be running in a multi-interpreter
-environment. (The default behaviour would be for each interpreter
-to have its own copy of the global.)  Examples:
+The exact semantics and interface of TYPE and ATTRS are still
+evolving.  TYPE is currently bound to the use of C<fields> pragma,
+and attributes are handled using the C<attributes> pragma, or starting
+from Perl 5.8.0 also via the C<Attribute::Handlers> module.  See
+L<perlsub/"Private Variables via my()"> for details, and L<fields>,
+L<attributes>, and L<Attribute::Handlers>.
+
+The only currently recognized C<our()> attribute is C<unique> which
+indicates that a single copy of the global is to be used by all
+interpreters should the program happen to be running in a
+multi-interpreter environment. (The default behaviour would be for
+each interpreter to have its own copy of the global.)  Examples:
 
     our @EXPORT : unique = qw(foo);
     our %EXPORT_TAGS : unique = (bar => [qw(aa bb cc)]);
@@ -4483,16 +4502,18 @@ sockets but not socketpair.
 
 =item sort LIST
 
-Sorts the LIST and returns the sorted list value.  If SUBNAME or BLOCK
-is omitted, C<sort>s in standard string comparison order.  If SUBNAME is
-specified, it gives the name of a subroutine that returns an integer
-less than, equal to, or greater than C<0>, depending on how the elements
-of the list are to be ordered.  (The C<< <=> >> and C<cmp>
-operators are extremely useful in such routines.)  SUBNAME may be a
-scalar variable name (unsubscripted), in which case the value provides
-the name of (or a reference to) the actual subroutine to use.  In place
-of a SUBNAME, you can provide a BLOCK as an anonymous, in-line sort
-subroutine.
+In list context, this sorts the LIST and returns the sorted list value.
+In scalar context, the behaviour of C<sort()> is undefined.
+
+If SUBNAME or BLOCK is omitted, C<sort>s in standard string comparison
+order.  If SUBNAME is specified, it gives the name of a subroutine
+that returns an integer less than, equal to, or greater than C<0>,
+depending on how the elements of the list are to be ordered.  (The C<<
+<=> >> and C<cmp> operators are extremely useful in such routines.)
+SUBNAME may be a scalar variable name (unsubscripted), in which case
+the value provides the name of (or a reference to) the actual
+subroutine to use.  In place of a SUBNAME, you can provide a BLOCK as
+an anonymous, in-line sort subroutine.
 
 If the subroutine's prototype is C<($$)>, the elements to be compared
 are passed by reference in C<@_>, as for a normal subroutine.  This is
@@ -5197,17 +5218,22 @@ out the names of those files that contain a match:
 	print $file, "\n";
     }
 
-=item sub BLOCK
-
-=item sub NAME
-
 =item sub NAME BLOCK
 
-This is subroutine definition, not a real function I<per se>.  With just a
-NAME (and possibly prototypes or attributes), it's just a forward declaration.
-Without a NAME, it's an anonymous function declaration, and does actually
-return a value: the CODE ref of the closure you just created.  See L<perlsub>
-and L<perlref> for details.
+=item sub NAME (PROTO) BLOCK
+
+=item sub NAME : ATTRS BLOCK
+
+=item sub NAME (PROTO) : ATTRS BLOCK
+
+This is subroutine definition, not a real function I<per se>.
+Without a BLOCK it's just a forward declaration.  Without a NAME,
+it's an anonymous function declaration, and does actually return
+a value: the CODE ref of the closure you just created.
+
+See L<perlsub> and L<perlref> for details about subroutines and
+references, and L<attributes> and L<Attributed::Handlers> for more
+information about attributes.
 
 =item substr EXPR,OFFSET,LENGTH,REPLACEMENT
 

@@ -129,9 +129,9 @@ The second example in the synopsis does something equivalent to this:
 
 Yes, that's a lot of expansion.
 
-B<WARNING>: attribute declarations for variables are an I<experimental>
-feature.  The semantics of such declarations could change or be removed
-in future versions.  They are present for purposes of experimentation
+B<WARNING>: attribute declarations for variables are still evolving.
+The semantics and interfaces of such declarations could change in
+future versions.  They are present for purposes of experimentation
 with what the semantics ought to be.  Do not rely on the current
 implementation of this feature.
 
@@ -151,12 +151,11 @@ before those attributes will get applied.  For example:
 will neither assign 42 to $x I<nor> will it apply the C<Bent> attribute
 to the variable.
 
-An attempt to set
-an unrecognized attribute is a fatal error.  (The error is trappable, but
-it still stops the compilation within that C<eval>.)  Setting an attribute
-with a name that's all lowercase letters that's not a built-in attribute
-(such as "foo")
-will result in a warning with B<-w> or C<use warnings 'reserved'>.
+An attempt to set an unrecognized attribute is a fatal error.  (The
+error is trappable, but it still stops the compilation within that
+C<eval>.)  Setting an attribute with a name that's all lowercase
+letters that's not a built-in attribute (such as "foo") will result in
+a warning with B<-w> or C<use warnings 'reserved'>.
 
 =head2 Built-in Attributes
 
@@ -191,10 +190,7 @@ as a scalar variable, as described in L<perlsub>.
 
 =back
 
-There are no built-in attributes for anything other than subroutines.
-
-=for hackers
-What about C<unique>?
+For global variables there is C<unique> attribute: see L<perlfunc/our>.
 
 =head2 Available Subroutines
 

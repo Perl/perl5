@@ -553,7 +553,26 @@ EOM
 EOCBU
 
 # The mysterious io_xs memory corruption in 11.00 32bit seems to get
-# fixed by not using Perl's malloc.  
+# fixed by not using Perl's malloc.  Flip side is performance loss.
+# So we want mymalloc for all situations possible
+usemymalloc='y'
+case "$usethreads" in
+    $define|true|[yY]*) usemymalloc='n' ;;
+    *)  case "$ccisgcc" in
+           $undef|false|[nN]*)
+               case "$use64bitint" in
+                   $undef|false|[nN]*)
+                       case "$ccflags" in
+                           *-DDEBUGGING*) ;;
+                           *) usemymalloc='n' ;;
+                           esac
+                       ;;
+                   esac
+               ;;
+           esac
+       ;;
+    esac
+
 usemymalloc='n'
 case "$useperlio" in
     $undef|false|[nN]*) usemymalloc='y' ;;

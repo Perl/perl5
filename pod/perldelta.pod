@@ -2580,7 +2580,8 @@ functionality and better error handling. [561]
 
 File access tests now use current process privileges rather than the
 user's default privileges, which could sometimes result in a mismatch
-between reported access and actual access.
+between reported access and actual access.  This improvement is only
+available on VMS v6.0 and later.
 
 There is a new C<kill> implementation based on C<sys$sigprc> that allows
 older VMS systems (pre-7.0) to use C<kill> to send signals rather than
@@ -3165,6 +3166,10 @@ is serious but as of yet unsolved.  It points at some problems with the
 signedness handling of the C compiler, as do the 64bitint, arith, and pow
 failures.  Most of the rest point at problems with SysV IPC.
 
+=head2 PDL failing some tests
+
+Use PDL 2.3.4 or later.
+
 =head2 Term::ReadKey not working on Win32
 
 Use Term::ReadKey 2.20 or later.
@@ -3336,6 +3341,15 @@ will now need an explicit untie to destroy a self-tied glob.  This
 behaviour may be fixed at a later date.
 
 Self-tying of scalars and IO thingies works.
+
+=head2 Tied/Magical Array/Hash Elements Do Not Autovivify
+
+For normal arrays C<$foo = \$bar[1]> will assign C<undef> to
+C<$bar[1]> (assuming that it didn't exist before), but for
+tied/magical arrays and hashes such autovivification does not happen
+because there is currently no way to catch the reference creation.
+The same problem affects slicing over non-existent indices/keys of
+a tied/magical array/hash.
 
 =head2 Building Extensions Can Fail Because Of Largefiles
 

@@ -147,7 +147,7 @@ case "$cc" in
      gccversion=`$cc --version | sed 's/.*(GCC) *//`
      fi
    ;;
-*) ccversion=`lslpp -L | grep 'C for AIX Compiler$' | awk '{print $2}'`
+*) ccversion=`lslpp -L | grep 'C for AIX Compiler$' | grep -v '\.msg\.[A-Za-z_]*\.' | awk '{print $2}'`
    case "$ccversion" in
      '') ccversion=`lslpp -L | grep 'IBM C and C++ Compilers LUM$' | awk '{print $2}'`
 	 ;;

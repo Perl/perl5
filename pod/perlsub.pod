@@ -220,9 +220,9 @@ Synopsis:
     my @oof = @bar;	# declare @oof lexical, and init it
     my $x : Foo = $y;	# similar, with an attribute applied
 
-B<WARNING>: The use of attribute lists on C<my> declarations is
-experimental.  This feature should not be relied upon.  It may
-change or disappear in future releases of Perl.  See L<attributes>.
+B<WARNING>: The use of attribute lists on C<my> declarations is still
+evolving.  The current semantics and interface are subject to change.
+See L<attributes> and L<Attribute::Handlers>.
 
 The C<my> operator declares the listed variables to be lexically
 confined to the enclosing block, conditional (C<if/unless/elsif/else>),
@@ -1360,7 +1360,7 @@ parsed and invoked:
     use attributes __PACKAGE__, \&plugh, q[Ugly('\(")], 'Bad';
 
 For further details on attribute lists and their manipulation,
-see L<attributes>.
+see L<attributes> and L<Attribute::Handlers>.
 
 =head1 SEE ALSO
 

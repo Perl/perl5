@@ -81,7 +81,7 @@ ok( $ei->_is_under('baz', @under),  '... should find file under dir' );
 
 
 my $wrotelist;
-ok(mkpath('auto/FakeMod'));
+ok(scalar mkpath('auto/FakeMod'));
 END { rmtree 'auto/FakeMod' }
 
 ok(open(PACKLIST, '>auto/FakeMod/.packlist'));

@@ -4730,7 +4730,12 @@ $   d_wctomb="define"
 $   i_locale="define"
 $   i_langinfo="define"
 $   d_locconv="define"
-$   d_nl_langinfo="define"
+$   IF vms_ver .GES. "6.2"
+$   THEN
+$     d_nl_langinfo="define"
+$   ELSE
+$     d_nl_langinfo="undef"
+$   ENDIF
 $   d_setlocale="define"
 $   vms_cc_type="decc"
 $ ELSE

@@ -2930,7 +2930,7 @@
 #define PERL_PRIfldbl	"Lf"	/**/
 #define PERL_PRIgldbl	"Lg"	/**/
 #define PERL_PRIeldbl	"Le"	/**/
-#define PERL_SCNfldbl	"f"	/**/
+#define PERL_SCNfldbl	"Lf"	/**/
 
 /* Off_t:
  *	This symbol holds the type used to declare offsets in the kernel.

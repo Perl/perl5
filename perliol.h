@@ -16,7 +16,7 @@ struct PerlIO_list_s {
 struct _PerlIO_funcs {
     char *name;
     Size_t size;
-    IV kind;
+    U32 kind;
     IV (*Pushed) (pTHX_ PerlIO *f, const char *mode, SV *arg);
     IV (*Popped) (pTHX_ PerlIO *f);
     PerlIO *(*Open) (pTHX_ PerlIO_funcs *tab,

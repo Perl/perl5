@@ -2101,7 +2101,18 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 		     afloat = _float_constants[0];   /* single prec. inf. */
 		else afloat = (float)SvNV(fromstr);
 #else
+# if defined(VMS) && !defined(__IEEE_FP)
+/* IEEE fp overflow shenanigans are unavailable on VAX and optional
+ * on Alpha; fake it if we don't have them.
+ */
+		if (SvNV(fromstr) > FLT_MAX)
+		     afloat = FLT_MAX;
+		else if (SvNV(fromstr) < -FLT_MAX)
+		     afloat = -FLT_MAX;
+		else afloat = (float)SvNV(fromstr);
+# else
 		afloat = (float)SvNV(fromstr);
+# endif
 #endif
 		sv_catpvn(cat, (char *)&afloat, sizeof (float));
 	    }
@@ -2122,7 +2133,18 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 		     adouble = _double_constants[0];   /* double prec. inf. */
 		else adouble = (double)SvNV(fromstr);
 #else
+# if defined(VMS) && !defined(__IEEE_FP)
+/* IEEE fp overflow shenanigans are unavailable on VAX and optional
+ * on Alpha; fake it if we don't have them.
+ */
+		if (SvNV(fromstr) > DBL_MAX)
+		     adouble = DBL_MAX;
+		else if (SvNV(fromstr) < -DBL_MAX)
+		     adouble = -DBL_MAX;
+		else adouble = (double)SvNV(fromstr);
+# else
 		adouble = (double)SvNV(fromstr);
+# endif
 #endif
 		sv_catpvn(cat, (char *)&adouble, sizeof (double));
 	    }

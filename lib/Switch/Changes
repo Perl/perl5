@@ -68,3 +68,8 @@ Revision history for Perl extension Switch.
 	- Updated "Perl6" syntax to reflect current design
 	  (as far as possible -- can't eliminate need to parenthesize
 	  variables, since they're ambiguous in Perl 5)
+
+
+2.09	Wed Jun 12 22:13:30 2002
+
+	- Removed spurious debugging statement

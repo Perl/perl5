@@ -110,7 +110,6 @@ Example: At the command prompt Type "nmake nwinstall".
           This will cause the binaries to be installed on the local machine.
           (Typically under the c:\perl folder)
 
-         
 =head1 Build new extensions
 
 To build extensions other than standard extensions, NetWare Perl has
@@ -140,7 +139,11 @@ Run the following command at the command prompt:
 
 Example:
 
-    perl -Ic:/perl/5.7.2/lib/NetWare-x86-multi-thread -Ic:\perl\5.7.2\lib MakeFile.pl
+    perl -Ic:/perl/5.6.1/lib/NetWare-x86-multi-thread -Ic:\perl\5.6.1\lib MakeFile.pl
+
+or
+
+    perl -Ic:/perl/5.8.0/lib/NetWare-x86-multi-thread -Ic:\perl\5.8.0\lib MakeFile.pl
 
 =item *
 
@@ -159,7 +162,12 @@ typing I<nmake install>, will copy the files onto the NetWare server.
 
 Example: You can execute the following on the command prompt.
 
-          perl -Ic:/perl/5.7.2/lib/NetWare-x86-multi-thread -Ic:\perl\5.7.2\lib MakeFile.pl
+          perl -Ic:/perl/5.6.1/lib/NetWare-x86-multi-thread -Ic:\perl\5.6.1\lib MakeFile.pl
+          INSTALLSITELIB=i:\perl\lib
+
+or
+
+          perl -Ic:/perl/5.8.0/lib/NetWare-x86-multi-thread -Ic:\perl\5.8.0\lib MakeFile.pl
           INSTALLSITELIB=i:\perl\lib
 
 =item * 
