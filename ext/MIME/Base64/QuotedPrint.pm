@@ -72,11 +72,16 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(encode_qp decode_qp);
 
+use Carp qw(croak);
+
 $VERSION = sprintf("%d.%02d", q$Revision: 2.3 $ =~ /(\d+)\.(\d+)/);
 
 sub encode_qp ($)
 {
     my $res = shift;
+    croak("The Quoted-Printable encoding is only defined for bytes")
+	if $res =~ /[^\0-\xFF]/;
+
     # Do not mention ranges such as $res =~ s/([^ \t\n!-<>-~])/sprintf("=%02X", ord($1))/eg;
     # since that will not even compile on an EBCDIC machine (where ord('!') > ord('<')).
     if (ord('A') == 193) { # EBCDIC style machine
