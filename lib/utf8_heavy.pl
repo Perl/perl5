@@ -159,6 +159,7 @@ sub SWASHNEW {
 # NOTE: utf8.c:swash_init() assumes entries are never modified once generated.
 
 sub SWASHGET {
+    # See utf8.c:Perl_swash_fetch for problems with this interface.
     my ($self, $start, $len) = @_;
     local $^D = 0 if $^D;
     my $type = $self->{TYPE};

@@ -1281,6 +1281,12 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
     return retval;
 }
 
+
+/* This API is wrong for special case conversions since we may need to
+ * return several Unicode characters for a single Unicode character
+ * (see lib/unicore/SpecCase.txt) The SWASHGET in lib/utf8_heavy.pl is
+ * the lower-level routine, and it is similarly broken for returning
+ * multiple values.  --jhi */
 UV
 Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr, bool do_utf8)
 {
