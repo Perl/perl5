@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 1.31 $, $Date: 2004/02/07 04:29:50 $)
+perlfaq5 - Files and Formats ($Revision: 1.35 $, $Date: 2005/01/21 12:26:11 $)
 
 =head1 DESCRIPTION
 
@@ -106,9 +106,31 @@ This block modifies all the C<.c> files in the current directory,
 leaving a backup of the original data from each file in a new
 C<.c.orig> file.
 
+=head2 How can I copy a file?
+
+(contributed by brian d foy)
+
+Use the File::Copy module. It comes with Perl and can do a
+true copy across file systems, and it does its magic in
+a portable fashion.
+
+	use File::Copy;
+
+	copy( $original, $new_copy ) or die "Copy failed: $!";
+
+If you can't use File::Copy, you'll have to do the work yourself:
+open the original file, open the destination file, then print
+to the destination file as you read the original.
+
 =head2 How do I make a temporary file name?
 
-Use the File::Temp module, see L<File::Temp> for more information.
+If you don't need to know the name of the file, you can use C<open()>
+with C<undef> in place of the file name.  The C<open()> function
+creates an anonymous temporary file.
+
+	open my $tmp, '+>', undef or die $!;
+	
+Otherwise, you can use the File::Temp module.
 
   use File::Temp qw/ tempfile tempdir /;
 
@@ -333,7 +355,7 @@ It is easier to see with comments:
 
    s/(
        ^[-+]?            # beginning of number.
-       \d{1,3}?          # first digits before first comma
+       \d+?              # first digits before first comma
        (?=               # followed by, (but not included in the match) :
           (?>(?:\d{3})+) # some positive multiple of three digits.
           (?!\d)         # an *exact* multiple, not x * 3 + 1 or whatever.
@@ -1047,8 +1069,8 @@ If your array contains lines, just print them:
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2002 Tom Christiansen and Nathan Torkington.
-All rights reserved.
+Copyright (c) 1997-2005 Tom Christiansen, Nathan Torkington, and
+other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it
 under the same terms as Perl itself.
