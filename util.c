@@ -2192,7 +2192,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
     return PerlIO_fdopen(p[This], mode);
 }
 #else
-#if defined(atarist)
+#if defined(atarist) || defined(EPOC)
 FILE *popen();
 PerlIO *
 Perl_my_popen(pTHX_ char *cmd, char *mode)
@@ -2577,7 +2577,7 @@ Perl_pidgone(pTHX_ Pid_t pid, int status)
     return;
 }
 
-#if defined(atarist) || defined(OS2)
+#if defined(atarist) || defined(OS2) || defined(EPOC)
 int pclose();
 #ifdef HAS_FORK
 int					/* Cannot prototype with I32
@@ -4199,7 +4199,9 @@ S_socketpair_udp (int fd[2]) {
         return -1;
     }
 }
+#endif /*  EMULATE_SOCKETPAIR_UDP */
 
+#if !defined(HAS_SOCKETPAIR) && defined(HAS_SOCKET) && defined(AF_INET) && defined(PF_INET) 
 int
 Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
     /* Stevens says that family must be AF_LOCAL, protocol 0.
@@ -4278,7 +4280,7 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
     return 0;
 
   abort_tidy_up_and_fail:
-    errno = ECONNABORTED; /* I hope this is portable and appropriate.  */
+  errno = ECONNABORTED; /* I hope this is portable and appropriate.  */
   tidy_up_and_fail:
     {
         int save_errno = errno;
@@ -4292,8 +4294,7 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
         return -1;
     }
 }
-#endif /* !defined(HAS_SOCKETPAIR) && defined(HAS_SOCKET) */
-#ifdef HAS_SOCKETPAIR
+#else
 /* In any case have a stub so that there's code corresponding
  * to the my_socketpair in global.sym. */
 int

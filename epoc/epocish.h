@@ -107,14 +107,14 @@
 
 /* these should be set in a hint file, not here */
 #ifndef PERL_SYS_INIT
-#    define PERL_SYS_INIT(c,v)  Perl_epoc_init(c,v);   MALLOC_INIT
+#    define PERL_SYS_INIT(c,v)  MALLOC_INIT
 #endif
 
 #ifndef PERL_SYS_TERM
 #define PERL_SYS_TERM()		MALLOC_TERM
 #endif
 
-#define BIT_BUCKET "NUL:"
+#define BIT_BUCKET "/dev/null"
 
 #define dXSUB_SYS
 
@@ -136,8 +136,6 @@
    atof() in ER5 stdlib depends on locale. 
 */
 
-double epoc_atof( const char *ptr);
-#define atof(a) epoc_atof(a)
 #define strtoul(a,b,c) epoc_strtoul(a,b,c)
 
 #define init_os_extras Perl_init_os_extras
@@ -145,4 +143,6 @@ double epoc_atof( const char *ptr);
 #define NO_ENVIRON_ARRAY
 
 #define ARG_MAX 4096
+
+#define ECONNABORTED 0xdead
 
