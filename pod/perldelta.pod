@@ -677,6 +677,11 @@ doing well.
 
 =head1 Platform Specific Problems
 
+=head2 EBCDIC Platforms
+
+IBM z/OS and other EBCDIC platforms continue to be problematic
+regarding Unicode support.
+
 =head2 (FreeBSD)
 
 The choice of malloc (the C-level memory management interface)
@@ -699,6 +704,21 @@ programs.  No such problems were found in other platforms, however.
 A decision was made to stick with the system malloc, regardless
 of the performance problems.
 
+=head2 (HP-UX) HP cc warnings about sendfile
+
+With certain HP C compiler releases (e.g. B.11.11.02) you will
+get many warnings like this:
+
+    cc: "/usr/include/sys/socket.h", line 504: warning 562: Redeclaration of "sendfile" with a different storage class specifier: "sendfile" will have internal linkage.
+
+This warning, however, is not serious and can be ignored.
+
+=head2 (Tru64) No threaded builds with GNU cc (gcc)
+
+In the latest Tru64 releases (e.g. v5.1B) the gcc (3.3) cannot be
+used to compile a threaded Perl (-Duseithreads) because the system
+<pthread.h> file doesn't know about gcc.
+
 =head2 (Win32) sysopen, sysread, syswrite
 
 As of the 5.8.0 release, sysopen()/sysread()/syswrite() do not behave
@@ -711,11 +731,6 @@ Windows port.  As this behavior is currently considered a bug,
 compatible behavior may be re-introduced in a future release.  Until
 then, the use of sysopen(), sysread() and syswrite() is not supported
 for "text" mode operations.
-
-=head2 EBCDIC Platforms
-
-IBM z/OS and other EBCDIC platforms continue to be problematic
-regarding Unicode support.
 
 =head1 Future Directions
 
