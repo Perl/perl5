@@ -59,7 +59,7 @@ corresponding to a byte:
 What was in this chunk of memory? Numbers, characters, or a mixture of
 both? Assuming that we're on a computer where ASCII (or some similar)
 encoding is used: hexadecimal values in the range C<0x40> - C<0x5A>
-indicate an uppercase letter, and <0x20> encodes a space. So we might
+indicate an uppercase letter, and C<0x20> encodes a space. So we might
 assume it is a piece of text, which some are able to read like a tabloid;
 but others will have to get hold of an ASCII table and relive that
 firstgrader feeling. Not caring too much about which way to read this,
@@ -382,7 +382,7 @@ tolerated for completeness' sake.
 =head2 Unpacking a Stack Frame
 
 Requesting a particular byte ordering may be necessary when you work with
-binary data coming from some specific architecture while your program could
+binary data coming from some specific architecture whereas your program could
 run on a totally different system. As an example, assume you have 24 bytes
 containing a stack frame as it happens on an Intel 8086:
 
@@ -423,10 +423,11 @@ together, we may now write:
        $si, $di, $bp, $ds, $es ) =
    unpack( 'v2' . ('vXXCC' x 5) . 'v5', $frame );
 
-We've taken some pains to get construct the template so that it matches
+We've taken some pains to construct the template so that it matches
 the contents of our frame buffer. Otherwise we'd either get undefined values,
 or C<unpack> could not unpack all. If C<pack> runs out of items, it will
-supply null strings.
+supply null strings (which are coerced into zeroes whenever the pack code
+says so).
 
 
 =head2 How to Eat an Egg on a Net
@@ -514,14 +515,14 @@ status register (a "-" stands for a "reserved" bit):
 
 Converting these two bytes to a string can be done with the unpack 
 template C<'b16'>. To obtain the individual bit values from the bit
-string we use C<split> with the "empty" separator pattern which splits
+string we use C<split> with the "empty" separator pattern which dissects
 into individual characters. Bit values from the "reserved" positions are
 simply assigned to C<undef>, a convenient notation for "I don't care where
 this goes".
 
    ($carry, undef, $parity, undef, $auxcarry, undef, $sign,
     $trace, $interrupt, $direction, $overflow) =
-      split( '', unpack( 'b16', $status ) );
+      split( //, unpack( 'b16', $status ) );
 
 We could have used an unpack template C<'b12'> just as well, since the
 last 4 bits can be ignored anyway. 
@@ -618,6 +619,22 @@ Usually you'll want to pack or unpack UTF-8 strings:
    my @hebrew = unpack( 'U*', $utf );
 
 
+=head2 Another Portable Binary Encoding
+
+The pack code C<w> has been added to support a portable binary data
+encoding scheme that goes way beyond simple integers. (Details can
+be found at L<Casbah.org>, the Scarab project.)  A BER (Binary Encoded
+Representation) compressed unsigned integer stores base 128
+digits, most significant digit first, with as few digits as possible.
+Bit eight (the high bit) is set on each byte except the last. There
+is no size limit to BER encoding, but Perl won't go to extremes.
+
+   my $berbuf = pack( 'w*', 1, 128, 128+1, 128*128+127 );
+
+A hex dump of C<$berbuf>, with spaces inserted at the right places,
+shows 01 8100 8101 81807F. Since the last byte is always less than
+128, C<unpack> knows where to stop.
+
 
 =head1 Lengths and Widths
 
@@ -703,33 +720,25 @@ strings, with C<=> between the name and the value, followed by an
 additional delimiting null byte. Here's how:
 
    my $env = pack( 'A*A*Z*' x keys( %Env ) . 'C',
-                   map{ ( $_, '=', $Env{$_} ) } keys( %Env ), 0 );
+                   map( { ( $_, '=', $Env{$_} ) } keys( %Env ) ), 0 );
+
+Let's examine the cogs of this byte mill, one by one. There's the C<map>
+call, creating the items we intend to stuff into the C<$env> buffer:
+to each key (in C<$_>) it adds the C<=> separator and the hash entry value.
+Each triplet is packed with the template code sequence C<A*A*Z*> that
+is multiplied with the number of keys. (Yes, that's what the C<keys>
+function resturns in scalar context.) To get the very last null byte,
+we add a C<0> at the end of the C<pack> list, to be packed with C<C>.
+(Attentive readers may have noticed that we could have omitted the 0.)
 
 For the reverse operation, we'll have to determine the number of items
 in the buffer before we can let C<unpack> rip it apart:
 
    my $n = $env =~ tr/\0// - 1;
-   my %env = map { split( '=', $_ ) } unpack( 'Z*' x $n, $env );
+   my %env = map( split( /=/, $_ ), unpack( 'Z*' x $n, $env ) );
 
 The C<tr> counts the null bytes. The C<unpack> call returns a list of
-name-value pairs each of which is taken apart in the C<map> block.
-
-
-=head2 Another Portable Binary Encoding
-
-The pack code C<w> has been added to support a portable binary data
-encoding scheme that goes way beyond simple integers. (Details can
-be found at L<Casbah.org>, the Scarab project.)  A BER (Binary Encoded
-Representation) compressed unsigned integer stores base 128
-digits, most significant digit first, with as few digits as possible.
-Bit eight (the high bit) is set on each byte except the last. There
-is no size limit to BER encoding, but Perl won't go to extremes.
-
-   my $berbuf = pack( 'w*', 1, 128, 128+1, 128*128+127 );
-
-A hex dump of C<$berbuf>, with spaces inserted at the right places,
-shows 01 8100 8101 81807F. Since the last byte is always less than
-128, C<unpack> knows where to stop.
+name-value pairs each of which is taken apart in the C<map> block. 
 
 
 =head1 Packing and Unpacking C Structures
@@ -1032,6 +1041,18 @@ spacing - 16 bytes to a line:
     print map { ++$i % 16 ? "$_ " : "$_\n" }
           unpack( 'H2' x length( $mem ), $mem ),
           length( $mem ) % 16 ? "\n" : '';
+
+
+=head1 Funnies Section
+
+    # Pulling digits out of nowhere...
+    print unpack( 'C', pack( 'x' ) ),
+          unpack( '%B*', pack( 'A' ) ),
+          unpack( 'H', pack( 'A' ) ),
+          unpack( 'A', unpack( 'C', pack( 'A' ) ) ), "\n";
+
+    # One for the road ;-)
+    my $advice = pack( 'all u can in a van' );
 
 
 =head1 Authors
