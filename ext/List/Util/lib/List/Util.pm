@@ -11,7 +11,7 @@ require DynaLoader;
 
 our @ISA       = qw(Exporter DynaLoader);
 our @EXPORT_OK = qw(first min max minstr maxstr reduce sum);
-our $VERSION   = "1.02";
+our $VERSION   = "1.02_00";
 
 bootstrap List::Util $VERSION;
 
