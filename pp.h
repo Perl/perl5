@@ -303,17 +303,17 @@ and C<PUSHu>.
 #define XPUSHu(u)	STMT_START { sv_setuv(TARG, (UV)(u)); XPUSHTARG; } STMT_END
 #define XPUSHundef	STMT_START { SvOK_off(TARG); XPUSHs(TARG); } STMT_END
 
-#define PUSHmortal(s)	PUSHs(sv_newmortal())
-#define mPUSHp(p,l)	STMT_START { sv_setpvn_mg(PUSHmortal, (p), (l)); } STMT_END
-#define mPUSHn(n)	STMT_START { sv_setnv_mg(PUSHmortal, (NV)(n)); } STMT_END
-#define mPUSHi(i)	STMT_START { sv_setiv_mg(PUSHmortal, (IV)(i)); } STMT_END
-#define mPUSHu(u)	STMT_START { sv_setuv_mg(PUSHmortal, (UV)(u)); } STMT_END
+#define PUSHmortal	PUSHs(sv_newmortal())
+#define mPUSHp(p,l)	sv_setpvn_mg(PUSHmortal, (p), (l))
+#define mPUSHn(n)	sv_setnv_mg(PUSHmortal, (NV)(n))
+#define mPUSHi(i)	sv_setiv_mg(PUSHmortal, (IV)(i))
+#define mPUSHu(u)	sv_setuv_mg(PUSHmortal, (UV)(u))
 
-#define XPUSHmortal(s)	STMT_START { EXTEND(sp,1); PUSHmortal; } STMT_END
-#define mXPUSHp(p,l)	STMT_START { sv_setpvn_mg(XPUSHmortal, (p), (l)); } STMT_END
-#define mXPUSHn(n)	STMT_START { sv_setnv_mg(XPUSHmortal, (NV)(n)); } STMT_END
-#define mXPUSHi(i)	STMT_START { sv_setiv_mg(XPUSHmortal, (IV)(i)); } STMT_END
-#define mXPUSHu(u)	STMT_START { sv_setuv_mg(XPUSHmortal, (UV)(u)); } STMT_END
+#define XPUSHmortal	XPUSHs(sv_newmortal())
+#define mXPUSHp(p,l)	STMT_START { EXTEND(sp,1); sv_setpvn_mg(PUSHmortal, (p), (l)); } STMT_END
+#define mXPUSHn(n)	STMT_START { EXTEND(sp,1); sv_setnv_mg(PUSHmortal, (NV)(n)); } STMT_END
+#define mXPUSHi(i)	STMT_START { EXTEND(sp,1); sv_setiv_mg(PUSHmortal, (IV)(i)); } STMT_END
+#define mXPUSHu(u)	STMT_START { EXTEND(sp,1); sv_setuv_mg(PUSHmortal, (UV)(u)); } STMT_END
 
 #define SETs(s)		(*sp = s)
 #define SETTARG		STMT_START { SvSETMAGIC(TARG); SETs(TARG); } STMT_END
