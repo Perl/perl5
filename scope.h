@@ -25,7 +25,7 @@
 #define SAVEt_AELEM     24
 #define SAVEt_HELEM     25
 #define SAVEt_OP	26
-#define SAVEt_NOHINTS	27
+#define SAVEt_HINTS	27
 
 #define SSCHECK(need) if (savestack_ix + need > savestack_max) savestack_grow()
 #define SSPUSHINT(i) (savestack[savestack_ix++].any_i32 = (I32)(i))
@@ -89,21 +89,26 @@
 	  save_destructor(SOFT_CAST(void(*)_((void*)))(FUNC_NAME_TO_PTR(f)), \
 			  SOFT_CAST(void*)(p))
 #endif
-#define SAVESTACK_POS() STMT_START {	\
-    SSCHECK(2);				\
-    SSPUSHINT(stack_sp - stack_base);	\
-    SSPUSHINT(SAVEt_STACK_POS);		\
- } STMT_END
+
+#define SAVESTACK_POS() \
+    STMT_START {				\
+	SSCHECK(2);				\
+	SSPUSHINT(stack_sp - stack_base);	\
+	SSPUSHINT(SAVEt_STACK_POS);		\
+    } STMT_END
+
 #define SAVEOP()	save_op()
-#define SAVEHINTS() STMT_START {	\
-    if (hints & HINT_LOCALIZE_HH)	\
-	save_hints();			\
-    else {				\
-	SSCHECK(2);			\
-	SSPUSHINT(hints);		\
-	SSPUSHINT(SAVEt_NOHINTS);	\
-    }					\
- } STMT_END
+
+#define SAVEHINTS() \
+    STMT_START {				\
+	if (hints & HINT_LOCALIZE_HH)		\
+	    save_hints();			\
+	else {					\
+	    SSCHECK(2);				\
+	    SSPUSHINT(hints);			\
+	    SSPUSHINT(SAVEt_HINTS);		\
+	}					\
+    } STMT_END
 
 /* A jmpenv packages the state required to perform a proper non-local jump.
  * Note that there is a start_env initialized when perl starts, and top_env

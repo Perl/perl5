@@ -899,55 +899,7 @@ magic_setsig(SV *sv, MAGIC *mg)
 int
 magic_setisa(SV *sv, MAGIC *mg)
 {
-    HV *stash;
-    SV **svp;
-    I32 fill;
-    HV *basefields = Nullhv;
-    GV **gvp;
-    GV *gv;
-    HE *he;
-    static char *FIELDS = "FIELDS";
-
     sub_generation++;
-
-    if (mg->mg_type == 'i')
-	return 0;	/* Ignore lower-case version of the magic */
-
-    stash = GvSTASH(mg->mg_obj);
-    svp = AvARRAY((AV*)sv);
-                
-    /* NOTE: No support for tied ISA */
-    for (fill = AvFILLp((AV*)sv); fill >= 0; fill--, svp++) {
-	HV *basestash = gv_stashsv(*svp, FALSE);
-
-	if (!basestash) {
-	    if (dowarn)
-		warn("No such package \"%_\" in @ISA assignment", *svp);
-	    continue;
-	}
-	gvp = (GV**)hv_fetch(basestash, FIELDS, 6, FALSE);
-	if (gvp && *gvp && GvHV(*gvp)) {
-	    if (basefields)
-		croak("Can't multiply inherit %%FIELDS");
-	    basefields = GvHV(*gvp);
-	}
-    }
-
-    if (!basefields)
-	return 0;
-    
-    gv = (GV*)*hv_fetch(stash, FIELDS, 6, TRUE);
-    if (!isGV(gv))
-	gv_init(gv, stash, FIELDS, 6, TRUE);
-    if (!GvHV(gv))
-	GvHV(gv) = newHV();
-    if (HvKEYS(GvHV(gv)))
-	croak("Inherited %%FIELDS can't override existing %%FIELDS");
-
-    hv_iterinit(GvHV(gv));
-    while ((he = hv_iternext(basefields)))
-	hv_store(GvHV(gv), HeKEY(he), HeKLEN(he), HeVAL(he), HeHASH(he));
-
     return 0;
 }
 

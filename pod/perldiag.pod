@@ -316,6 +316,11 @@ system malloc().
 
 (P) One of the internal hash routines was passed a null HV pointer.
 
+=item Bad index while coercing array into hash
+
+(F) A field name of a typed variable was looked up in the %FIELDS
+hash, but the index found was not legal, i.e. less than 1.
+
 =item Bad name after %s::
 
 (F) You started to name a symbol by using a package prefix, and then didn't
@@ -1600,6 +1605,13 @@ your system.
 
 (F) The argument to B<-I> must follow the B<-I> immediately with no
 intervening space.
+
+=item No such field "%s" in variable %s of type %s
+
+(F) You tried to access a field of a typed variable where the type
+does not know about the field name.  The field names are looked up in
+the %FIELDS hash in the type package at compile time.  The %FIELDS hash
+is usually set up with the 'fields' pragma.
 
 =item No such pipe open
 
