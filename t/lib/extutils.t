@@ -1,6 +1,6 @@
 #!./perl -w
 
-print "1..8\n";
+print "1..10\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -18,6 +18,7 @@ my $runperl = $^X;
 $| = 1;
 
 my $dir = "ext-$$";
+my @files;
 
 print "# $dir being created...\n";
 mkdir $dir, 0777 or die "mkdir: $!\n";
@@ -41,6 +42,7 @@ my @names_only = map {(ref $_) ? $_->{name} : $_} @names;
 my $package = "ExtTest";
 ################ Header
 my $header = catfile($dir, "test.h");
+push @files, "test.h";
 open FH, ">$header" or die "open >$header: $!\n";
 print FH <<'EOT';
 #define THREE 3
@@ -53,6 +55,7 @@ close FH or die "close $header: $!\n";
 
 ################ XS
 my $xs = catfile($dir, "$package.xs");
+push @files, "$package.xs";
 open FH, ">$xs" or die "open >$xs: $!\n";
 
 print FH <<'EOT';
@@ -74,6 +77,7 @@ close FH or die "close $xs: $!\n";
 
 ################ PM
 my $pm = catfile($dir, "$package.pm");
+push @files, "$package.pm";
 open FH, ">$pm" or die "open >$pm: $!\n";
 print FH "package $package;\n";
 print FH "use $];\n";
@@ -102,6 +106,7 @@ close FH or die "close $pm: $!\n";
 
 ################ test.pl
 my $testpl = catfile($dir, "test.pl");
+push @files, "test.pl";
 open FH, ">$testpl" or die "open >$testpl: $!\n";
 
 print FH "use $package qw(@names_only);\n";
@@ -142,6 +147,7 @@ close FH or die "close $testpl: $!\n";
 ################ dummy Makefile.PL
 # Keep the dependancy in the Makefile happy
 my $makefilePL = catfile($dir, "Makefile.PL");
+push @files, "Makefile.PL";
 open FH, ">$makefilePL" or die "open >$makefilePL: $!\n";
 close FH or die "close $makefilePL: $!\n";
 
@@ -162,6 +168,7 @@ if (-f "Makefile") {
 } else {
   print "not ok 1\n";
 }
+push @files, "Makefile.old"; # Renamed by make clean
 
 my $make = $Config{make};
 
@@ -178,9 +185,9 @@ if ($?) {
   print "ok 2\n";
 }
 
-$make .= ' test';
-print "# make = '$make'\n";
-$makeout = `$make`;
+my $maketest = "$make test";
+print "# make = '$maketest'\n";
+$makeout = `$maketest`;
 if ($?) {
   print "not ok 8 # $make failed: $?\n";
 } else {
@@ -192,4 +199,31 @@ if ($?) {
 
   print $makeout;
   print "ok 8\n";
+}
+
+my $makeclean = "$make clean";
+print "# make = '$makeclean'\n";
+$makeout = `$makeclean`;
+if ($?) {
+  print "not ok 9 # $make failed: $?\n";
+} else {
+  print "ok 9\n";
+}
+
+foreach (@files) {
+  unlink $_ or warn "unlink $_: $!";
+}
+
+my $fail;
+opendir DIR, "." or die "opendir '.': $!";
+while (defined (my $entry = readdir DIR)) {
+  next if $entry =~ /^\.\.?$/;
+  print "# Extra file '$entry'\n";
+  $fail = 1;
+}
+closedir DIR or warn "closedir '.': $!";
+if ($fail) {
+  print "not ok 10\n";
+} else {
+  print "ok 10\n";
 }
