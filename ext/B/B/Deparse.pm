@@ -9,7 +9,7 @@
 package B::Deparse;
 use Carp 'cluck';
 use B qw(class main_root main_start main_cv svref_2object);
-$VERSION = 0.54;
+$VERSION = 0.55;
 use strict;
 
 # Changes between 0.50 and 0.51:
@@ -33,9 +33,13 @@ use strict;
 # Changes between 0.53 and 0.54
 # - added support for new `for (1..100)' optimization,
 #   thanks to Gisle Aas
+# Changes between 0.54 and 0.55
+# - added support for new qr// construct
+# - added support for new pp_regcreset OP
 
 # Todo:
 # - {} around variables in strings ("${var}letters")
+# - left/right context
 # - associativity of &&=, ||=, ?:
 # - ',' => '=>' (auto-unquote?)
 # - break long lines ("\r" as discretionary break?)
@@ -479,6 +483,11 @@ sub pp_method { # see also entersub
 
 sub pp_regcmaybe { # see also regcomp
     cluck "unexpected OP_REGCMAYBE";
+    return "XXX";
+}
+
+sub pp_regcreset { # see also regcomp
+    cluck "unexpected OP_REGCRESET";
     return "XXX";
 }
 
@@ -2049,15 +2058,20 @@ sub balanced_delim {
 
 sub single_delim {
     my($q, $default, $str) = @_;
-    return "$default$str$default" if index($str, $default) == -1;
+    return "$default$str$default" if $default and index($str, $default) == -1;
     my($succeed, $delim);
     ($succeed, $str) = balanced_delim($str);
     return "$q$str" if $succeed;
     for $delim ('/', '"', '#') {
 	return "$q$delim" . $str . $delim if index($str, $delim) == -1;
     }
-    $str =~ s/$default/\\$default/g;
-    return "$default$str$default";
+    if ($default) {
+	$str =~ s/$default/\\$default/g;
+	return "$default$str$default";
+    } else {
+	$str =~ s[/][\\/]g;
+	return "$q/$str/";
+    }
 }
 
 sub SVf_IOK () {0x10000}
@@ -2294,6 +2308,7 @@ sub pp_regcomp {
     my($op, $cx) = @_;
     my $kid = $op->first;
     $kid = $kid->first if $kid->ppaddr eq "pp_regcmaybe";
+    $kid = $kid->first if $kid->ppaddr eq "pp_regcreset";
     return $self->re_dq($kid);
 }
 
@@ -2301,15 +2316,15 @@ sub OPp_RUNTIME () { 64 }
 
 sub PMf_ONCE () { 0x2 }
 sub PMf_SKIPWHITE () { 0x10 }
-sub PMf_FOLD () { 0x20 }
 sub PMf_CONST () { 0x40 }
 sub PMf_KEEP () { 0x80 }
 sub PMf_GLOBAL () { 0x100 }
 sub PMf_CONTINUE () { 0x200 }
 sub PMf_EVAL () { 0x400 }
+sub PMf_LOCALE () { 0x800 }
 sub PMf_MULTILINE () { 0x1000 }
 sub PMf_SINGLELINE () { 0x2000 }
-sub PMf_LOCALE () { 0x4000 }
+sub PMf_FOLD () { 0x4000 }
 sub PMf_EXTENDED () { 0x8000 }
 
 # osmic acid -- see osmium tetroxide
@@ -2319,9 +2334,9 @@ map($matchwords{join "", sort split //, $_} = $_, 'cig', 'cog', 'cos', 'cogs',
     'cox', 'go', 'is', 'ism', 'iso', 'mig', 'mix', 'osmic', 'ox', 'sic', 
     'sig', 'six', 'smog', 'so', 'soc', 'sog', 'xi'); 
 
-sub pp_match {
+sub matchop {
     my $self = shift;
-    my($op, $cx) = @_;
+    my($op, $cx, $name, $delim) = @_;
     my $kid = $op->first;
     my ($binop, $var, $re) = ("", "", "");
     if ($op->flags & OPf_STACKED) {
@@ -2347,7 +2362,7 @@ sub pp_match {
 	$re =~ s/\?/\\?/g;
 	$re = "?$re?";
     } else {
-	$re = single_delim("m", "/", $re);
+	$re = single_delim($name, $delim, $re);
     }
     $re = $re . $flags;
     if ($binop) {
@@ -2357,7 +2372,9 @@ sub pp_match {
     }
 }
 
-sub pp_pushre { pp_match(@_) }
+sub pp_match { matchop(@_, "m", "/") }
+sub pp_pushre { matchop(@_, "m", "/") }
+sub pp_qr { matchop(@_, "qr", "") }
 
 sub pp_split {
     my $self = shift;

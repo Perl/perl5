@@ -2205,7 +2205,7 @@ EXT U32 opargs[] = {
 	0x00001104,	/* regcreset */
 	0x00001304,	/* regcomp */
 	0x00000640,	/* match */
-	0x00000004,	/* qr */
+	0x00000604,	/* qr */
 	0x00001654,	/* subst */
 	0x00000354,	/* substcont */
 	0x00001914,	/* trans */
