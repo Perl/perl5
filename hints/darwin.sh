@@ -86,7 +86,7 @@ ccflags="${ccflags} -no-cpp-precomp"
 
 # Known optimizer problems.
 case "`cc -v`" in
-*"3.1 20020105"*) toke_cflags='optimize="-O"' ;;
+*"3.1 20020105"*) toke_cflags='optimize=""' ;;
 esac
 
 # Shared library extension is .dylib.
