@@ -40,6 +40,10 @@ config ::
 lint:
 	lint -abchx $(LIBSRCS)
 
+# temporary kludge
+blibdirs:
+	$(MKPATH) $(INST_ARCHAUTODIR)
+
 ';
     $r .= '
 # This is a workaround, the problem is that our old GNU make exports
