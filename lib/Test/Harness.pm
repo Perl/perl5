@@ -1,5 +1,5 @@
 # -*- Mode: cperl; cperl-indent-level: 4 -*-
-# $Id: Harness.pm,v 1.14.2.13 2002/01/07 22:34:32 schwern Exp $
+# $Id: Harness.pm,v 1.14.2.18 2002/04/25 05:04:35 schwern Exp $
 
 package Test::Harness;
 
@@ -22,7 +22,7 @@ use vars qw($VERSION $Verbose $Switches $Have_Devel_Corestack $Curtest
 
 $Have_Devel_Corestack = 0;
 
-$VERSION = '2.01';
+$VERSION = '2.03';
 
 $ENV{HARNESS_ACTIVE} = 1;
 
@@ -36,16 +36,13 @@ my $Ignore_Exitcode = $ENV{HARNESS_IGNORE_EXITCODE};
 
 my $Files_In_Dir = $ENV{HARNESS_FILELEAK_IN_DIR};
 
-my $Running_In_Perl_Tree = 0;
-++$Running_In_Perl_Tree if -d "../t" and -f "../sv.c";
-
 my $Strap = Test::Harness::Straps->new;
 
 @ISA = ('Exporter');
 @EXPORT    = qw(&runtests);
 @EXPORT_OK = qw($verbose $switches);
 
-$Verbose  = 0;
+$Verbose  = $ENV{HARNESS_VERBOSE} || 0;
 $Switches = "-w";
 $Columns  = $ENV{HARNESS_COLUMNS} || $ENV{COLUMNS} || 80;
 $Columns--;             # Some shells have trouble with a full line of text.
@@ -90,15 +87,16 @@ test program.
 
 =item B<'1..M'>
 
-This header tells how many tests there will be.  It should be the
-first line output by your test program (but it is okay if it is preceded
-by comments).
+This header tells how many tests there will be.  For example, C<1..10>
+means you plan on running 10 tests.  This is a safeguard in case your
+test dies quietly in the middle of its run.
 
-In certain instanced, you may not know how many tests you will
-ultimately be running.  In this case, it is permitted (but not
-encouraged) for the 1..M header to appear as the B<last> line output
-by your test (again, it can be followed by further comments).  But we
-strongly encourage you to put it first.
+It should be the first non-comment line output by your test program.
+
+In certain instances, you may not know how many tests you will
+ultimately be running.  In this case, it is permitted for the 1..M
+header to appear as the B<last> line output by your test (again, it
+can be followed by further comments).
 
 Under B<no> circumstances should 1..M appear in the middle of your
 output or more than once.
@@ -152,7 +150,7 @@ variations in spacing and case) after C<ok> or C<ok NUMBER>, it is
 counted as a skipped test.  If the whole testscript succeeds, the
 count of skipped tests is included in the generated output.
 C<Test::Harness> reports the text after C< # Skip\S*\s+> as a reason
-for skipping.  
+for skipping.
 
   ok 23 # skip Insufficient flogiston pressure.
 
@@ -457,6 +455,8 @@ sub _run_all_tests {
 
         my $fh = _open_test($tfile);
 
+        $tot{files}++;
+
         # state of the current test.
         my %test = (
                     ok          => 0,
@@ -602,11 +602,7 @@ sub _mk_leader {
     chomp($te);
     $te =~ s/\.\w+$/./;
 
-    if ($^O eq 'VMS') {
-	$te =~ s/^.*\.t\./\[.t./s;
-    }
-    $te =~ s,\\,/,g if $^O eq 'MSWin32';
-    $te =~ s,^\.\./,/, if $Running_In_Perl_Tree;
+    if ($^O eq 'VMS') { $te =~ s/^.*\.t\./\[.t./s; }
     my $blank = (' ' x 77);
     my $leader = "$te" . '.' x ($width - length($te));
     my $ml = "";
@@ -632,15 +628,12 @@ sub _leader_width {
     foreach (@_) {
         my $suf    = /\.(\w+)$/ ? $1 : '';
         my $len    = length;
-	$len -= 2 if $Running_In_Perl_Tree and m{^\.\.[/\\]};
         my $suflen = length $suf;
         $maxlen    = $len    if $len    > $maxlen;
         $maxsuflen = $suflen if $suflen > $maxsuflen;
     }
-    # we want three dots between the test name and the "ok" for
-    # typical lengths, and just two dots if longer than 30 characters
-    $maxlen -= $maxsuflen;
-    return $maxlen + ($maxlen >= 30 ? 2 : 3);
+    # + 3 : we want three dots between the test name and the "ok"
+    return $maxlen + 3 - $maxsuflen;
 }
 
 
@@ -703,7 +696,6 @@ sub _parse_header {
 
 
         $tot->{max} += $test->{max};
-        $tot->{files}++;
     }
     else {
         $is_header = 0;
@@ -718,11 +710,13 @@ sub _open_test {
 
     my $s = _set_switches($test);
 
+    my $perl = -x $^X ? $^X : $Config{perlpath};
+
     # XXX This is WAY too core specific!
     my $cmd = ($ENV{'HARNESS_COMPILE_TEST'})
                 ? "./perl -I../lib ../utils/perlcc $test "
                   . "-r 2>> ./compilelog |" 
-                : "$^X $s $test|";
+                : "$perl $s $test|";
     $cmd = "MCR $cmd" if $^O eq 'VMS';
 
     if( open(PERL, $cmd) ) {
@@ -756,17 +750,14 @@ sub _parse_test_line {
         }
 
         $test->{todo}{$this} = 1 if $istodo;
+        if( $test->{todo}{$this} ) {
+            $tot->{todo}++;
+            $test->{bonus}++, $tot->{bonus}++ unless $not;
+        }
 
-        $tot->{todo}++ if $test->{todo}{$this};
-
-        if( $not ) {
+        if( $not && !$test->{todo}{$this} ) {
             print "$test->{ml}NOK $this" if $test->{ml};
-            if (!$test->{todo}{$this}) {
-                push @{$test->{failed}}, $this;
-            } else {
-                $test->{ok}++;
-                $tot->{ok}++;
-            }
+            push @{$test->{failed}}, $this;
         }
         else {
             print "$test->{ml}ok $this/$test->{max}" if $test->{ml};
@@ -783,13 +774,18 @@ sub _parse_test_line {
             } elsif (defined $reason) {
                 $test->{skip_reason} = $reason;
             }
-
-            $test->{bonus}++, $tot->{bonus}++ if $test->{todo}{$this};
         }
 
         if ($this > $test->{'next'}) {
             print "Test output counter mismatch [test $this]\n";
-            push @{$test->{failed}}, $test->{'next'}..$this-1;
+
+            # Guard against resource starvation.
+            if( $this > 100000 ) {
+                print "Enourmous test number seen [test $this]\n";
+            }
+            else {
+                push @{$test->{failed}}, $test->{'next'}..$this-1;
+            }
         }
         elsif ($this < $test->{'next'}) {
             #we have seen more "ok" lines than the number suggests
@@ -971,13 +967,17 @@ sub _create_fmts {
     sub corestatus {
         my($st) = @_;
 
-        eval {require 'wait.ph'};
-        my $ret = defined &WCOREDUMP ? WCOREDUMP($st) : $st & 0200;
+        eval {
+            local $^W = 0;  # *.ph files are often *very* noisy
+            require 'wait.ph'
+        };
+        return if $@;
+        my $did_core = defined &WCOREDUMP ? WCOREDUMP($st) : $st & 0200;
 
         eval { require Devel::CoreStack; $Have_Devel_Corestack++ } 
           unless $tried_devel_corestack++;
 
-        $ret;
+        return $did_core;
     }
 }
 
@@ -1079,17 +1079,18 @@ the script dies with this message.
 
 =over 4
 
-=item C<HARNESS_IGNORE_EXITCODE>
+=item C<HARNESS_ACTIVE>
 
-Makes harness ignore the exit status of child processes when defined.
+Harness sets this before executing the individual tests.  This allows
+the tests to determine if they are being executed through the harness
+or by any other means.
 
-=item C<HARNESS_NOTTY>
+=item C<HARNESS_COLUMNS>
 
-When set to a true value, forces it to behave as though STDOUT were
-not a console.  You may need to set this if you don't want harness to
-output more frequent progress messages using carriage returns.  Some
-consoles may not handle carriage returns properly (which results in a
-somewhat messy output).
+This value will be used for the width of the terminal. If it is not
+set then it will default to C<COLUMNS>. If this is not set, it will
+default to 80. Note that users of Bourne-sh based shells will need to
+C<export COLUMNS> for this module to use that variable.
 
 =item C<HARNESS_COMPILE_TEST>
 
@@ -1110,24 +1111,28 @@ If relative, directory name is with respect to the current directory at
 the moment runtests() was called.  Putting absolute path into 
 C<HARNESS_FILELEAK_IN_DIR> may give more predictable results.
 
+=item C<HARNESS_IGNORE_EXITCODE>
+
+Makes harness ignore the exit status of child processes when defined.
+
+=item C<HARNESS_NOTTY>
+
+When set to a true value, forces it to behave as though STDOUT were
+not a console.  You may need to set this if you don't want harness to
+output more frequent progress messages using carriage returns.  Some
+consoles may not handle carriage returns properly (which results in a
+somewhat messy output).
+
 =item C<HARNESS_PERL_SWITCHES>
 
 Its value will be prepended to the switches used to invoke perl on
 each test.  For example, setting C<HARNESS_PERL_SWITCHES> to C<-W> will
 run all tests with all warnings enabled.
 
-=item C<HARNESS_COLUMNS>
+=item C<HARNESS_VERBOSE>
 
-This value will be used for the width of the terminal. If it is not
-set then it will default to C<COLUMNS>. If this is not set, it will
-default to 80. Note that users of Bourne-sh based shells will need to
-C<export COLUMNS> for this module to use that variable.
-
-=item C<HARNESS_ACTIVE>
-
-Harness sets this before executing the individual tests.  This allows
-the tests to determine if they are being executed through the harness
-or by any other means.
+If true, Test::Harness will output the verbose results of running
+its tests.  Setting $Test::Harness::verbose will override this.
 
 =back
 
@@ -1167,15 +1172,13 @@ Current maintainer is Michael G Schwern E<lt>schwern@pobox.comE<gt>
 Provide a way of running tests quietly (ie. no printing) for automated
 validation of tests.  This will probably take the form of a version
 of runtests() which rather than printing its output returns raw data
-on the state of the tests.
+on the state of the tests.  (Partially done in Test::Harness::Straps)
 
 Fix HARNESS_COMPILE_TEST without breaking its core usage.
 
 Figure a way to report test names in the failure summary.
 
 Rework the test summary so long test names are not truncated as badly.
-
-Merge back into bleadperl.
 
 Deal with VMS's "not \nok 4\n" mistake.
 
@@ -1189,13 +1192,7 @@ Clean up how the summary is printed.  Get rid of those damned formats.
 
 =head1 BUGS
 
-Test::Harness uses $^X to determine the perl binary to run the tests
-with. Test scripts running via the shebang (C<#!>) line may not be
-portable because $^X is not consistent for shebang scripts across
-platforms. This is no problem when Test::Harness is run with an
-absolute path to the perl binary or when $^X can be found in the path.
-
-HARNESS_COMPILE_TEST currently assumes it is run from the Perl source
+HARNESS_COMPILE_TEST currently assumes it's run from the Perl source
 directory.
 
 =cut

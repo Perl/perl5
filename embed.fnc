@@ -562,7 +562,7 @@ Ap	|struct perl_thread*	|new_struct_thread|struct perl_thread *t
 Ap	|void	|reentrant_size
 Ap	|void	|reentrant_init
 Ap	|void	|reentrant_free
-Afnp	|void*	|reentrant_retry|const char*|...
+Anp	|void*	|reentrant_retry|const char*|...
 #endif
 Ap	|void	|call_atexit	|ATEXIT_t fn|void *ptr
 Apd	|I32	|call_argv	|const char* sub_name|I32 flags|char** argv
@@ -587,7 +587,7 @@ Ap	|void	|set_numeric_standard
 Apd	|void	|require_pv	|const char* pv
 Apd	|void	|pack_cat	|SV *cat|char *pat|char *patend|SV **beglist|SV **endlist|SV ***next_in_list|U32 flags
 p	|void	|pidgone	|Pid_t pid|int status
-Ap	|void	|pmflag		|U16* pmfl|int ch
+Ap	|void	|pmflag		|U32* pmfl|int ch
 p	|OP*	|pmruntime	|OP* pm|OP* expr|OP* repl
 p	|OP*	|pmtrans	|OP* o|OP* expr|OP* repl
 p	|OP*	|pop_return

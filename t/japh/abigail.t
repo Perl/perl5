@@ -13,7 +13,14 @@
 # disable the test!)
 #
 # Getting everything to run well on the myriad of platforms Perl runs on
-# is unfortunally, not a trivial task.
+# is unfortunately not a trivial task.
+#
+# WARNING: these tests are obfuscated.  Do not get frustrated.
+# Ask Abigail <abigail@foad.org>, or use the Deparse or Concise
+# modules (the former parses Perl to Perl, the latter shows the
+# op syntax tree) like this:
+# ./perl -Ilib -MO=Deparse foo.pl
+# ./perl -Ilib -MO=Concise foo.pl
 #
 
 BEGIN {
@@ -216,11 +223,11 @@ plan tests => 130;
     END {unlink_all $progfile}
 
     my @programs = (<< '    --', << '    --');
-#!./perl               --    # No trailing newline after the last line!    
+#!./perl
 BEGIN{$|=$SIG{__WARN__}=sub{$_=$_[0];y-_- -;print/(.)"$/;seek _,-open(_ 
 ,"+<$0"),2;truncate _,tell _;close _;exec$0}}//rekcaH_lreP_rehtona_tsuJ
     --
-#!./perl               --   # Remove trailing newline!
+#!./perl
 BEGIN{$SIG{__WARN__}=sub{$_=pop;y-_- -;print/".*(.)"/;  
 truncate$0,-1+-s$0;exec$0;}}//rekcaH_lreP_rehtona_tsuJ
     --

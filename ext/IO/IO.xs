@@ -242,7 +242,7 @@ PPCODE:
     for(i=1, j=0  ; j < nfd ; j++) {
 	fds[j].fd = SvIV(ST(i));
 	i++;
-	fds[j].events = SvIV(ST(i));
+	fds[j].events = (short)SvIV(ST(i));
 	i++;
 	fds[j].revents = 0;
     }

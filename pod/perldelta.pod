@@ -48,18 +48,24 @@ More Extensive Regression Testing
 
 =head2 Binary Incompatibility
 
-Perl 5.8 has not been designed to be binary compatible with earlier
-releases of Perl.  While the compatibility has not been intentionally
-broken, it has not been intentionally protected, either.  The major
-reason for the discontinity is the new IO architecture called PerlIO.
-The PerlIO is the default configuration because without it many new
-features of Perl 5.8 cannot be used.  In other words: you just have
-to recompile your modules, sorry about that.
+B<Perl 5.8 is not binary compatible with earlier releases of Perl.>
 
-In future releases of Perl non-PerlIO aware XS modules may become
+B<You have to recompile your XS modules.>
+
+(Pure Perl modules should continue to work.)
+
+The major reason for the discontinity is the new IO architecture
+called PerlIO.  PerlIO is the default configuration because
+without it many new features of Perl 5.8 cannot be used.  In other
+words: you just have to recompile your modules, sorry about that.
+
+In future releases of Perl, non-PerlIO aware XS modules may become
 completely unsupported.  This shouldn't be too difficult for module
 authors, however: PerlIO has been designed as a drop-in replacement
 (at the source code level) for the stdio interface.
+
+Depending on your platform, there are also other reasons why
+we decided to break binary compatibility, please read on. 
 
 =head2 64-bit platforms and malloc
 
@@ -879,7 +885,12 @@ C<sort> is a new pragma for controlling the behaviour of sort().
 
 C<Storable> gives persistence to Perl data structures by allowing the
 storage and retrieval of Perl data to and from files in a fast and
-compact binary format, from Raphael Manfredi.  See L<Storable>.
+compact binary format.  Because in effect Storable does serialisation
+of Perl data structues, with it you can also clone deep, hierarchical
+datastructures.  Storable was created by Raphael Manfredi but it is
+now maintained by the Perl development team.  Storable has been
+enhanced to understand the two new hash features, Unicode keys and
+restricted hashes.  See L<Storable>.
 
 =item *
 
@@ -2251,6 +2262,12 @@ MPE/iX update after Perl 5.6.0.  See README.mpeix.
 
 =item *
 
+NetBSD/threads: try installing the GNU pth (should be in the
+packages collection, or http://www.gnu.org/software/pth/),
+and Configure with -Duseithreads. 
+
+=item *
+
 NetBSD/sparc
 
 Perl now works on NetBSD/sparc.
@@ -2738,6 +2755,12 @@ the ANSI C Standard, line 19ff on page 134 of ANSI X3.159 1989 to
 be exact.  (They produce something other than "1" and "-1" when
 formatting 0.6 and -0.6 using the printf format "%.0f", most often
 they produce "0" and "-0".)
+
+=head2 Solaris 2.5
+
+In case you are still using Solaris 2.5 (aka SunOS 5.5), you may
+experience failures (the test core dumping) in lib/locale.t.
+The suggested cure is to upgrade your Solaris.
 
 =head2 Failure of Thread (5.005-style) tests
 

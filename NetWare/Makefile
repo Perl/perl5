@@ -277,7 +277,7 @@ SOCKET_NLM	= $(AUTODIR)\Socket\Socket.NLM
 FCNTL_NLM	= $(AUTODIR)\Fcntl\Fcntl.NLM
 IO_NLM		= $(AUTODIR)\IO\IO.NLM
 OPCODE_NLM	= $(AUTODIR)\Opcode\Opcode.NLM
-SDBM_FILE_NLM	= $(AUTODIR)\SDBM_File\SDBM_File.NLM
+SDBM_FILE_NLM = $(AUTODIR)\SDBM_File\SDBM_File.NLM
 POSIX_NLM	= $(AUTODIR)\POSIX\POSIX.NLM
 ATTRS_NLM	= $(AUTODIR)\attrs\attrs.NLM
 THREAD_NLM	= $(AUTODIR)\Thread\Thread.NLM
@@ -297,7 +297,6 @@ XSTYPEMAP_NLM		= $(EXTDIR)\XS\Typemap\Typemap.NLM
 UNICODENORMALIZE_NLM 	= $(EXTDIR)\Unicode\Normalize\Normalize.NLM
 
 EXTENSION_NLM	= 		\
-		$(SDBM_FILE_NLM)	\
 		$(POSIX_NLM)	\
 		$(THREAD_NLM)	\
 		$(DUMPER_NLM)	\
@@ -318,8 +317,8 @@ EXTENSION_NLM	= 		\
 		$(ATTRS_NLM)	\
 		$(BYTELOADER_NLM)	\
 		$(IO_NLM)		\
-		$(UNICODENORMALIZE_NLM)
-
+		$(UNICODENORMALIZE_NLM)   \
+		$(SDBM_FILE_NLM)	
 # Begin - Following is required to build NetWare specific extensions CGI2Perl, Perl2UCS and UCSExt
 
 CGI2PERL		= CGI2Perl\CGI2Perl
@@ -922,7 +921,7 @@ $(EXTDIR)\DynaLoader\dl_netware.xs: dl_netware.xs
 
 HEADERS :
 	@echo . . . . making stdio.h and string.h
-	@copy << stdio.h >\nwnul
+	@copy << stdio.h >\nul
 
 /*
  * (C) Copyright 2002 Novell Inc. All Rights Reserved.
@@ -959,7 +958,7 @@ HEADERS :
 <<
 	@copy stdio.h $(COREDIR)
 	 
-	@copy << string.h >\nwnul
+	@copy << string.h >\nul
 
 /*
  * (C) Copyright 2002 Novell Inc. All Rights Reserved.

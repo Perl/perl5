@@ -1,6 +1,7 @@
 use 5.7.2;
 use strict;
 use ExtUtils::MakeMaker;
+use strict;
 
 my %tables = (euc_cn_t   => ['euc-cn.ucm',
 			     'cp936.ucm',
@@ -10,6 +11,20 @@ my %tables = (euc_cn_t   => ['euc-cn.ucm',
 	      '12345_t'  => ['gb12345.ucm'],
 	      ir_165_t   => ['ir-165.ucm'],
              );
+
+unless ($ENV{AGGREGATE_TABLES}){
+    my @ucm;
+    for my $k (keys %tables){
+	push @ucm, @{$tables{$k}};
+    }
+    %tables = ();
+    my $seq = 0;
+    for my $ucm (sort @ucm){
+	# 8.3 compliance !
+	my $t = sprintf ("%s_%02d_t", substr($ucm, 0, 2), $seq++);
+	$tables{$t} = [ $ucm ];
+    }
+}
 
 my $name = 'CN';
 

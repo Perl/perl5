@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 1.34 2002/04/22 20:27:30 dankogai Exp $
+ $Id: Encode.xs,v 1.41 2002/04/27 18:59:50 dankogai Exp $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -8,6 +8,8 @@
 #include "XSUB.h"
 #define U8 U8
 #include "encode.h"
+
+# define PERLIO_MODNAME  "PerlIO::encoding"
 # define PERLIO_FILENAME "PerlIO/encoding.pm"
 
 /* set 1 or more to profile.  t/encoding.t dumps core because of
@@ -141,10 +143,22 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
        			goto ENCODE_SET_SRC;
 		    }else if (check & ENCODE_PERLQQ){
 			SV* perlqq = 
-			    sv_2mortal(newSVpvf("\\x{%04x}", ch));
+			    sv_2mortal(newSVpvf("\\x{%04"UVxf"}", ch));
 			sdone += slen + clen;
 			ddone += dlen + SvCUR(perlqq);
 			sv_catsv(dst, perlqq);
+		    }else if (check & ENCODE_HTMLCREF){
+			SV* htmlcref = 
+			    sv_2mortal(newSVpvf("&#%" UVuf ";", ch));
+			sdone += slen + clen;
+			ddone += dlen + SvCUR(htmlcref);
+			sv_catsv(dst, htmlcref);
+		    }else if (check & ENCODE_XMLCREF){
+			SV* xmlcref = 
+			    sv_2mortal(newSVpvf("&#x%" UVxf ";", ch));
+			sdone += slen + clen;
+			ddone += dlen + SvCUR(xmlcref);
+			sv_catsv(dst, xmlcref);
 		    } else { 
 			/* fallback char */
 			sdone += slen + clen;
@@ -157,20 +171,23 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 	    else {           
 		if (check & ENCODE_DIE_ON_ERR){
 		    Perl_croak(
-			aTHX_ "%s \"\\x%02X\" does not map to Unicode (%d)",
+			aTHX_ "%s \"\\x%02" UVXf 
+			"\" does not map to Unicode (%d)",
 			enc->name[0], (U8) s[slen], code);
 		}else{
 		    if (check & ENCODE_RETURN_ON_ERR){
 			if (check & ENCODE_WARN_ON_ERR){
 			    Perl_warner(
 				aTHX_ packWARN(WARN_UTF8),
-				"%s \"\\x%02X\" does not map to Unicode (%d)",
+				"%s \"\\x%02" UVXf 
+				"\" does not map to Unicode (%d)",
 				enc->name[0], (U8) s[slen], code);
 			}
 			goto ENCODE_SET_SRC;
-		    }else if (check & ENCODE_PERLQQ){
+		    }else if (check & 
+			      (ENCODE_PERLQQ|ENCODE_HTMLCREF|ENCODE_XMLCREF)){
 			SV* perlqq = 
-			    sv_2mortal(newSVpvf("\\x%02X", s[slen]));
+			    sv_2mortal(newSVpvf("\\x%02" UVXf, s[slen]));
 			sdone += slen + 1;
 			ddone += dlen + SvCUR(perlqq);
 			sv_catsv(dst, perlqq);
@@ -204,9 +221,6 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 	SvCUR_set(src, sdone);
     }
     /* warn("check = 0x%X, code = 0x%d\n", check, code); */
-    if (code && !(check & ENCODE_RETURN_ON_ERR)) {
-    	return &PL_sv_undef;
-    }
     
     SvCUR_set(dst, dlen+ddone);
     SvPOK_only(dst);
@@ -281,13 +295,14 @@ SV *	obj
 CODE:
 {
     encode_t *enc = INT2PTR(encode_t *, SvIV(SvRV(obj)));
-    require_pv(PERLIO_FILENAME);
-    if (hv_exists(get_hv("INC", 0), 
-		  PERLIO_FILENAME, strlen(PERLIO_FILENAME)))
-    {
-	ST(0) = &PL_sv_yes;
-    }else{
+    /* require_pv(PERLIO_FILENAME); */
+
+    eval_pv("require PerlIO::encoding", 0);
+
+    if (SvTRUE(get_sv("@", 0))) {
 	ST(0) = &PL_sv_no;
+    }else{
+	ST(0) = &PL_sv_yes;
     }
     XSRETURN(1);
 }
@@ -441,9 +456,6 @@ CODE:
 OUTPUT:
     RETVAL
 
-PROTOTYPES: DISABLE
-
-
 int
 DIE_ON_ERR()
 CODE:
@@ -480,6 +492,20 @@ OUTPUT:
     RETVAL
 
 int
+HTMLCREF()
+CODE:
+    RETVAL = ENCODE_HTMLCREF;
+OUTPUT:
+    RETVAL
+
+int
+XMLCREF()
+CODE:
+    RETVAL = ENCODE_XMLCREF;
+OUTPUT:
+    RETVAL
+
+int
 FB_DEFAULT()
 CODE:
     RETVAL = ENCODE_FB_DEFAULT;
@@ -511,6 +537,20 @@ int
 FB_PERLQQ()
 CODE:
     RETVAL = ENCODE_FB_PERLQQ;
+OUTPUT:
+    RETVAL
+
+int
+FB_HTMLCREF()
+CODE:
+    RETVAL = ENCODE_FB_HTMLCREF;
+OUTPUT:
+    RETVAL
+
+int
+FB_XMLCREF()
+CODE:
+    RETVAL = ENCODE_FB_XMLCREF;
 OUTPUT:
     RETVAL
 

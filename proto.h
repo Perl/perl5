@@ -602,11 +602,7 @@ PERL_CALLCONV struct perl_thread*	Perl_new_struct_thread(pTHX_ struct perl_threa
 PERL_CALLCONV void	Perl_reentrant_size(pTHX);
 PERL_CALLCONV void	Perl_reentrant_init(pTHX);
 PERL_CALLCONV void	Perl_reentrant_free(pTHX);
-PERL_CALLCONV void*	Perl_reentrant_retry(const char*, ...)
-#ifdef CHECK_FORMAT
- __attribute__((format(printf,1,2)))
-#endif
-;
+PERL_CALLCONV void*	Perl_reentrant_retry(const char*, ...);
 #endif
 PERL_CALLCONV void	Perl_call_atexit(pTHX_ ATEXIT_t fn, void *ptr);
 PERL_CALLCONV I32	Perl_call_argv(pTHX_ const char* sub_name, I32 flags, char** argv);
@@ -631,7 +627,7 @@ PERL_CALLCONV void	Perl_set_numeric_standard(pTHX);
 PERL_CALLCONV void	Perl_require_pv(pTHX_ const char* pv);
 PERL_CALLCONV void	Perl_pack_cat(pTHX_ SV *cat, char *pat, char *patend, SV **beglist, SV **endlist, SV ***next_in_list, U32 flags);
 PERL_CALLCONV void	Perl_pidgone(pTHX_ Pid_t pid, int status);
-PERL_CALLCONV void	Perl_pmflag(pTHX_ U16* pmfl, int ch);
+PERL_CALLCONV void	Perl_pmflag(pTHX_ U32* pmfl, int ch);
 PERL_CALLCONV OP*	Perl_pmruntime(pTHX_ OP* pm, OP* expr, OP* repl);
 PERL_CALLCONV OP*	Perl_pmtrans(pTHX_ OP* o, OP* expr, OP* repl);
 PERL_CALLCONV OP*	Perl_pop_return(pTHX);

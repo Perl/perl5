@@ -6247,7 +6247,7 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 }
 
 void
-Perl_pmflag(pTHX_ U16 *pmfl, int ch)
+Perl_pmflag(pTHX_ U32* pmfl, int ch)
 {
     if (ch == 'i')
 	*pmfl |= PMf_FOLD;

@@ -1,5 +1,22 @@
 Revision history for Perl extension Test::Simple
 
+0.44  Thu Apr 25 00:27:27 EDT 2002
+    - names containing newlines no longer produce confusing output
+      (from chromatic)
+    - chromatic provided a fix so can_ok() honors can() overrides.
+    - Nick Ing-Simmons suggested todo_skip() be a bit clearer about
+      the skipping part.
+    - Making plan() vomit if it gets something it doesn't understand.
+    - Tatsuhiko Miyagawa fixed use_ok() with pragmata on older perls.
+    - quieting diag(undef)
+
+0.43  Thu Apr 11 22:55:23 EDT 2002
+    - Adrian Howard added TB->maybe_regex()
+    - Adding Mark Fowler's suggestion to make diag() return
+      false.
+    - TB->current_test() still not working when no tests were run via
+      TB itself.  Fixed by Dave Rolsky.
+
 0.42  Wed Mar  6 15:00:24 EST 2002
     - Setting Test::Builder->current_test() now works (see what happens
       when you forget to test things?)

@@ -9,7 +9,6 @@
  * 20-Aug-1999 revisions by Charles Bailey  bailey@newman.upenn.edu
  */
 
-#include <accdef.h>
 #include <acedef.h>
 #include <acldef.h>
 #include <armdef.h>
@@ -1341,6 +1340,18 @@ struct exit_control_block
     unsigned long int exit_status;
 }; 
 
+typedef struct _closed_pipes    Xpipe;
+typedef struct _closed_pipes*  pXpipe;
+
+struct _closed_pipes {
+    int             pid;            /* PID of subprocess */
+    unsigned long   completion;     /* termination status of subprocess */
+};
+#define NKEEPCLOSED 50
+static Xpipe closed_list[NKEEPCLOSED];
+static int   closed_index = 0;
+static int   closed_num = 0;
+
 #define RETRY_DELAY     "0 ::0.20"
 #define MAX_RETRY              50
 
@@ -1476,6 +1487,15 @@ popen_completion_ast(pInfo info)
 {
   pInfo i = open_pipes;
   int iss;
+  pXpipe x;
+
+  info->completion &= 0x0FFFFFFF; /* strip off "control" field */
+  closed_list[closed_index].pid = info->pid;
+  closed_list[closed_index].completion = info->completion;
+  closed_index++;
+  if (closed_index == NKEEPCLOSED) 
+    closed_index = 0;
+  closed_num++;
 
   while (i) {
     if (i == info) break;
@@ -1483,7 +1503,6 @@ popen_completion_ast(pInfo info)
   }
   if (!i) return;       /* unlinked, probably freed too */
 
-  info->completion &= 0x0FFFFFFF; /* strip off "control" field */
   info->done = TRUE;
 
 /*
@@ -2643,6 +2662,7 @@ Perl_my_waitpid(pTHX_ Pid_t pid, int *statusp, int flags)
     pInfo info;
     int done;
     int sts;
+    int j;
     
     if (statusp) *statusp = 0;
     
@@ -2660,9 +2680,18 @@ Perl_my_waitpid(pTHX_ Pid_t pid, int *statusp, int flags)
 
       if (statusp) *statusp = info->completion;
       return pid;
-
     }
-    else {  /* this child is not one of our own pipe children */
+
+    /* child that already terminated? */
+
+    for (j = 0; j < NKEEPCLOSED && j < closed_num; j++) {
+        if (closed_list[j].pid == pid) {
+            if (statusp) *statusp = closed_list[j].completion;
+            return pid;
+        }
+    }
+
+    /* fall through if this child is not one of our own pipe children */
 
 #if defined(__CRTL_VER) && __CRTL_VER >= 70100322
 
@@ -2685,22 +2714,16 @@ Perl_my_waitpid(pTHX_ Pid_t pid, int *statusp, int flags)
 
 #endif /* defined(__CRTL_VER) && __CRTL_VER >= 70100322 */
 
+    {
       $DESCRIPTOR(intdsc,"0 00:00:01");
       unsigned long int ownercode = JPI$_OWNER, ownerpid;
       unsigned long int pidcode = JPI$_PID, mypid;
       unsigned long int interval[2];
-      int termination_mbu = 0;
-      unsigned short qio_iosb[4];
       unsigned int jpi_iosb[2];
-      struct itmlst_3 jpilist[3] = { 
+      struct itmlst_3 jpilist[2] = { 
           {sizeof(ownerpid),        JPI$_OWNER, &ownerpid,        0},
-          {sizeof(termination_mbu), JPI$_TMBU,  &termination_mbu, 0},
           {                      0,         0,                 0, 0} 
       };
-      char trmmbx[NAM$C_DVI+1];
-      $DESCRIPTOR(trmmbxdsc,trmmbx);
-      struct accdef trmmsg;
-      unsigned short int mbxchan;
 
       if (pid <= 0) {
         /* Sorry folks, we don't presently implement rooting around for 
@@ -2711,9 +2734,9 @@ Perl_my_waitpid(pTHX_ Pid_t pid, int *statusp, int flags)
         return -1;
       }
 
-      /* Get the owner of the child so I can warn if it's not mine, plus
-       * get the termination mailbox.  If the process doesn't exist or I
-       * don't have the privs to look at it, I can go home early.
+      /* Get the owner of the child so I can warn if it's not mine. If the 
+       * process doesn't exist or I don't have the privs to look at it, 
+       * I can go home early.
        */
       sts = sys$getjpiw(0,&pid,NULL,&jpilist,&jpi_iosb,NULL,NULL);
       if (sts & 1) sts = jpi_iosb[0];
@@ -2741,58 +2764,18 @@ Perl_my_waitpid(pTHX_ Pid_t pid, int *statusp, int flags)
                       pid,mypid);
       }
 
-      /* It's possible to have a mailbox unit number but no actual mailbox; we 
-       * check for this by assigning a channel to it, which we need anyway.
-       */
-      if (termination_mbu != 0) {
-          sprintf(trmmbx, "MBA%d:", termination_mbu);
-          trmmbxdsc.dsc$w_length = strlen(trmmbx);
-          sts = sys$assign(&trmmbxdsc, &mbxchan, 0, 0);
-          if (sts == SS$_NOSUCHDEV) {
-              termination_mbu = 0; /* set up to take "no mailbox" case */
-              sts = SS$_NORMAL;
-          }
-          _ckvmssts(sts);
-      }
-      /* If the process doesn't have a termination mailbox, then simply check
-       * on it once a second until it's not there anymore.
-       */
-      if (termination_mbu == 0) {
-          _ckvmssts(sys$bintim(&intdsc,interval));
-          while ((sts=lib$getjpi(&ownercode,&pid,0,&ownerpid,0,0)) & 1) {
+      /* simply check on it once a second until it's not there anymore. */
+
+      _ckvmssts(sys$bintim(&intdsc,interval));
+      while ((sts=lib$getjpi(&ownercode,&pid,0,&ownerpid,0,0)) & 1) {
             _ckvmssts(sys$schdwk(0,0,interval,0));
             _ckvmssts(sys$hiber());
-          }
-          if (sts == SS$_NONEXPR) sts = SS$_NORMAL;
-      } 
-      else {
-        /* If we do have a termination mailbox, post reads to it until we get a
-         * termination message, discarding messages of the wrong type or for other
-         * processes.  If there is a place to put the final status, then do so.
-         */
-          sts = SS$_NORMAL;
-          while (sts & 1) {
-              memset((void *) &trmmsg, 0, sizeof(trmmsg));
-              sts = sys$qiow(0,mbxchan,IO$_READVBLK,&qio_iosb,0,0,
-                             &trmmsg,ACC$K_TERMLEN,0,0,0,0);
-              if (sts & 1) sts = qio_iosb[0];
-
-              if ( sts & 1 
-                   && trmmsg.acc$w_msgtyp == MSG$_DELPROC 
-                   && trmmsg.acc$l_pid == pid ) {
-
-                  if (statusp) *statusp = trmmsg.acc$l_finalsts;
-                  sts = sys$dassgn(mbxchan);
-                  break;
-              }
-          }
-      } /* termination_mbu ? */
+      }
+      if (sts == SS$_NONEXPR) sts = SS$_NORMAL;
 
       _ckvmssts(sts);
       return pid;
-
-    } /* else one of our own pipe children */
-                    
+    }
 }  /* end of waitpid() */
 /*}}}*/
 /*}}}*/

@@ -1024,7 +1024,7 @@
 
 /* BYTEORDER:
  *	This symbol holds the hexadecimal constant defined in byteorder,
- *	i.e. 0x1234 or 0x4321, etc...
+ *	in a UV, i.e. 0x1234 or 0x4321 or 0x12345678, etc...
  *	If the compiler supports cross-compiling or multiple-architecture
  *	binaries (eg. on NeXT systems), use compiler-defined macros to
  *	determine the byte order.
@@ -2480,12 +2480,16 @@
  */
 /*#define	HAS_TELLDIR_PROTO	/ **/
 
+/* HAS_TIME:
+ *	This symbol, if defined, indicates that the time() routine exists.
+ */
 /* Time_t:
  *	This symbol holds the type returned by time(). It can be long,
  *	or time_t on BSD sites (in which case <sys/types.h> should be
  *	included).
  */
-#define Time_t int		/* Time type */
+#define HAS_TIME		/**/
+#define Time_t time_t		/* Time type */
 
 /* HAS_TIMES:
  *	This symbol, if defined, indicates that the times() routine exists.

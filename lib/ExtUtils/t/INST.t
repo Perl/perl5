@@ -16,14 +16,14 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 17;
+use Test::More tests => 23;
 use MakeMaker::Test::Utils;
 use ExtUtils::MakeMaker;
 use File::Spec;
 use TieOut;
 use Config;
 
-$ENV{PERL_CORE} ? chdir '../lib/ExtUtils/t' : chdir 't';
+chdir 't';
 
 perl_lib;
 
@@ -33,33 +33,33 @@ my $Makefile = makefile_name;
 my $Curdir = File::Spec->curdir;
 my $Updir  = File::Spec->updir;
 
-ok( chdir 'Big-Fat-Dummy', "chdir'd to Big-Fat-Dummy" ) ||
+ok( chdir 'Big-Dummy', "chdir'd to Big-Dummy" ) ||
   diag("chdir failed: $!");
 
 my $stdout = tie *STDOUT, 'TieOut' or die;
 my $mm = WriteMakefile(
-    NAME          => 'Big::Fat::Dummy',
-    VERSION_FROM  => 'lib/Big/Fat/Dummy.pm',
+    NAME          => 'Big::Dummy',
+    VERSION_FROM  => 'lib/Big/Dummy.pm',
     PREREQ_PM     => {},
     PERL_CORE     => $ENV{PERL_CORE},
 );
 like( $stdout->read, qr{
-                        Writing\ $Makefile\ for\ Big::Fat::Liar\n
-                        Big::Fat::Liar's\ vars\n
+                        Writing\ $Makefile\ for\ Big::Liar\n
+                        Big::Liar's\ vars\n
                         INST_LIB\ =\ \S+\n
                         INST_ARCHLIB\ =\ \S+\n
-                        Writing\ $Makefile\ for\ Big::Fat::Dummy\n
+                        Writing\ $Makefile\ for\ Big::Dummy\n
 }x );
 undef $stdout;
 untie *STDOUT;
 
 isa_ok( $mm, 'ExtUtils::MakeMaker' );
 
-is( $mm->{NAME}, 'Big::Fat::Dummy',  'NAME' );
+is( $mm->{NAME}, 'Big::Dummy',  'NAME' );
 is( $mm->{VERSION}, 0.01,            'VERSION' );
 
 my $config_prefix = $^O eq 'VMS' 
-                        ? VMS::Filespec::unixify($Config{installprefixexp})
+                        ? $Config{installprefixexp} || $Config{prefix}
                         : $Config{installprefixexp};
 is( $mm->{PREFIX}, $config_prefix,   'PREFIX' );
 
@@ -67,7 +67,7 @@ is( !!$mm->{PERL_CORE}, !!$ENV{PERL_CORE}, 'PERL_CORE' );
 
 my($perl_src, $mm_perl_src);
 if( $ENV{PERL_CORE} ) {
-    $perl_src = File::Spec->catdir($Updir, $Updir, $Updir, $Updir);
+    $perl_src = File::Spec->catdir($Updir, $Updir);
     $perl_src = File::Spec->canonpath($perl_src);
     $mm_perl_src = File::Spec->canonpath($mm->{PERL_SRC});
 }
@@ -109,3 +109,34 @@ is( $mm->{INST_LIB},
 
 # INSTALL*
 is( $mm->{INSTALLDIRS}, 'site',     'INSTALLDIRS' );
+
+
+
+# Make sure the INSTALL*MAN*DIR variables work.  We forgot them
+# at one point.
+$stdout = tie *STDOUT, 'TieOut' or die;
+$mm = WriteMakefile(
+    NAME          => 'Big::Dummy',
+    VERSION_FROM  => 'lib/Big/Dummy.pm',
+    PERL_CORE     => $ENV{PERL_CORE},
+    INSTALLMAN1DIR       => 'none',
+    INSTALLSITEMAN3DIR   => 'none',
+    INSTALLVENDORMAN1DIR => 'none',
+    INST_MAN1DIR         => 'none',
+);
+like( $stdout->read, qr{
+                        Writing\ $Makefile\ for\ Big::Liar\n
+                        Big::Liar's\ vars\n
+                        INST_LIB\ =\ \S+\n
+                        INST_ARCHLIB\ =\ \S+\n
+                        Writing\ $Makefile\ for\ Big::Dummy\n
+}x );
+undef $stdout;
+untie *STDOUT;
+
+isa_ok( $mm, 'ExtUtils::MakeMaker' );
+
+is  ( $mm->{INSTALLMAN1DIR},        'none' );
+is  ( $mm->{INSTALLSITEMAN3DIR},    'none' );
+is  ( $mm->{INSTALLVENDORMAN1DIR},  'none' );
+is  ( $mm->{INST_MAN1DIR},          'none' );

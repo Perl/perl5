@@ -4241,7 +4241,7 @@ Perl_newFOROP(pTHX_ I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *blo
 {
     LOOP *loop;
     OP *wop;
-    int padoff = 0;
+    PADOFFSET padoff = 0;
     I32 iterflags = 0;
 
     if (sv) {

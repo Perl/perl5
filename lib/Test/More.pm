@@ -18,7 +18,7 @@ sub _carp {
 
 require Exporter;
 use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS $TODO);
-$VERSION = '0.42';
+$VERSION = '0.44';
 @ISA    = qw(Exporter);
 @EXPORT = qw(ok use_ok require_ok
              is isnt like unlike is_deeply
@@ -176,15 +176,17 @@ sub plan {
     my $caller = caller;
 
     $Test->exported_to($caller);
-    $Test->plan(@plan);
 
     my @imports = ();
     foreach my $idx (0..$#plan) {
         if( $plan[$idx] eq 'import' ) {
-            @imports = @{$plan[$idx+1]};
+            my($tag, $imports) = splice @plan, $idx, 2;
+            @imports = @$imports;
             last;
         }
     }
+
+    $Test->plan(@plan);
 
     __PACKAGE__->_export_to_level(1, __PACKAGE__, @imports);
 }
@@ -455,7 +457,7 @@ as one test.  If you desire otherwise, use:
 
 sub can_ok ($@) {
     my($proto, @methods) = @_;
-    my $class= ref $proto || $proto;
+    my $class = ref $proto || $proto;
 
     unless( @methods ) {
         my $ok = $Test->ok( 0, "$class->can(...)" );
@@ -465,10 +467,9 @@ sub can_ok ($@) {
 
     my @nok = ();
     foreach my $method (@methods) {
-        my $test = "'$class'->can('$method')";
         local($!, $@);  # don't interfere with caller's $@
                         # eval sometimes resets $!
-        eval $test || push @nok, $method;
+        eval { $proto->can($method) } || push @nok, $method;
     }
 
     my $name;
@@ -645,7 +646,7 @@ C<use_ok> and C<require_ok>.
    BEGIN { use_ok($module, @imports); }
 
 These simply use the given $module and test to make sure the load
-happened ok.  It is recommended that you run use_ok() inside a BEGIN
+happened ok.  It's recommended that you run use_ok() inside a BEGIN
 block so its functions are exported at compile-time and prototypes are
 properly honored.
 
@@ -670,7 +671,7 @@ sub use_ok ($;@) {
     eval <<USE;
 package $pack;
 require $module;
-$module->import(\@imports);
+'$module'->import(\@imports);
 USE
 
     my $ok = $Test->ok( !$@, "use $module;" );
@@ -764,12 +765,12 @@ easiest way to illustrate:
 
 If pigs cannot fly, the whole block of tests will be skipped
 completely.  Test::More will output special ok's which Test::Harness
-interprets as skipped tests.  It is important to include $how_many tests
+interprets as skipped tests.  It's important to include $how_many tests
 are in the block so the total number of tests comes out right (unless
 you're using C<no_plan>, in which case you can leave $how_many off if
 you like).
 
-It is perfectly safe to nest SKIP blocks.
+It's perfectly safe to nest SKIP blocks.
 
 Tests are skipped when you B<never> expect them to B<ever> pass.  Like
 an optional module is not installed or the operating system doesn't
@@ -849,7 +850,7 @@ When the block is empty, delete it.
         ...normal testing code...
     }
 
-With todo tests, it is best to have the tests actually run.  That way
+With todo tests, it's best to have the tests actually run.  That way
 you'll know when they start passing.  Sometimes this isn't possible.
 Often a failing test will cause the whole program to die or hang, even
 inside an C<eval BLOCK> with and using C<alarm>.  In these extreme
@@ -1181,7 +1182,7 @@ magic side-effects are kept to a minimum.  WYSIWYG.
 =head1 SEE ALSO
 
 L<Test::Simple> if all this confuses you and you just want to write
-some tests.  You can upgrade to Test::More later (it is forward
+some tests.  You can upgrade to Test::More later (it's forward
 compatible).
 
 L<Test::Differences> for more ways to test complex data structures.

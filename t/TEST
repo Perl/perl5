@@ -9,6 +9,9 @@ $| = 1;
 # which live dual lives on CPAN.
 $ENV{PERL_CORE} = 1;
 
+# remove empty elements due to insertion of empty symbols via "''p1'" syntax
+@ARGV = grep($_,@ARGV) if $^O eq 'VMS';
+
 # Cheesy version of Getopt::Std.  Maybe we should replace it with that.
 @argv = ();
 if ($#ARGV >= 0) {
@@ -64,11 +67,25 @@ sub _find_tests {
     foreach my $f (sort { $a cmp $b } readdir DIR) {
         next if $f eq $curdir or $f eq $updir;
 
-        my $fullpath = File::Spec->catdir($dir, $f);
+        my $fullpath = File::Spec->catfile($dir, $f);
 
         _find_tests($fullpath) if -d $fullpath;
+        $fullpath = VMS::Filespec::unixify($fullpath) if $^O eq 'VMS';
         push @ARGV, $fullpath if $f =~ /\.t$/;
     }
+}
+
+sub _quote_args {
+    my ($args) = @_;
+    my $argstring = '';
+
+    foreach (split(/\s+/,$args)) {
+       # In VMS protect with doublequotes because otherwise
+       # DCL will lowercase -- unless already doublequoted.
+       $_ = q(").$_.q(") if ($^O eq 'VMS') && !/^\"/ && length($_) > 0;
+       $argstring .= ' ' . $_;
+    }
+    return $argstring;
 }
 
 unless (@ARGV) {
@@ -76,19 +93,20 @@ unless (@ARGV) {
         _find_tests($dir);
     }
     _find_tests("lib") unless $core;
-    my $mani = File::Spec->catdir($updir, "MANIFEST");
+    my $mani = File::Spec->catfile($updir, "MANIFEST");
     if (open(MANI, $mani)) {
         while (<MANI>) { # similar code in t/harness
 	    if (m!^(ext/\S+/?([^/]+\.t|test\.pl)|lib/\S+?(\.t|test\.pl))\s!) {
 		$t = $1;
 		if (!$core || $t =~ m!^lib/[a-z]!)
 		{
-		    $path = File::Spec->catdir($updir, $t);
+		    $path = File::Spec->catfile($updir, $t);
 		    push @ARGV, $path;
 		    $name{$path} = $t;
 		}
 	    }
 	}
+	close MANI;
     } else {
         warn "$0: cannot open $mani: $!\n";
     }
@@ -139,8 +157,12 @@ EOT
     $files  = 0;
     $totmax = 0;
 
-    foreach (@tests) {
-        $name{$_} = File::Spec->catdir('t',$_) unless exists $name{$_};
+    foreach my $t (@tests) {
+      unless (exists $name{$t}) {
+        my $tname = File::Spec->catfile('t',$t);
+        $tname = VMS::Filespec::unixify($tname) if $^O eq 'VMS';
+        $name{$t} = $tname;
+      }
     }
     my $maxlen = 0;
     foreach (@name{@tests}) {
@@ -169,8 +191,12 @@ EOT
 		next;
 	    }
 	}
-	$te = $name{$test};
-	print "$te" . '.' x ($dotdotdot - length($te));
+	$te = $name{$test} . '.' x ($dotdotdot - length($name{$test}));
+
+	if ($^O ne 'VMS') {  # defer printing on VMS due to piping bug
+	    print $te;
+	    $te = '';
+	}
 
 	$test = $OVER{$test} if exists $OVER{$test};
 
@@ -208,7 +234,8 @@ EOT
 	}
 	elsif ($type eq 'perl') {
 	    my $perl = $ENV{PERL} || './perl';
-	    my $run = "$perl $testswitch $switch $utf $test |";
+	    my $redir = ($^O eq 'VMS' ? '2>&1' : '');
+	    my $run = "$perl" . _quote_args("$testswitch $switch $utf") . " $test $redir|";
 	    open(RESULTS,$run) or print "can't run '$run': $!.\n";
 	}
 	else {
@@ -227,7 +254,7 @@ EOT
 
 open HACK, '.\\perl $pl2c $test_executable |';
 # cl.exe prints the name of the .c file on stdout (\%^\$^#)
-while(<HACK>) {m/^\w+\.[cC]\$/ && next;print}
+while(<HACK>) {m/^\\w+\\.[cC]\$/ && next;print}
 open HACK, '$test_executable |';
 while(<HACK>) {print}
 EOT
@@ -246,6 +273,7 @@ EOT
         $ok = 0;
         $next = 0;
 	while (<RESULTS>) {
+	    next if /^\s*$/; # skip blank lines
 	    if ($verbose) {
 		print $_;
 	    }
@@ -304,17 +332,17 @@ EOT
         }
 	if ($ok && $next == $max ) {
 	    if ($max) {
-		print "ok\n";
+		print "${te}ok\n";
 		$good = $good + 1;
 	    }
 	    else {
-		print "skipping test on this platform\n";
+		print "${te}skipping test on this platform\n";
 		$files -= 1;
 	    }
 	}
 	else {
 	    $next += 1;
-	    print "FAILED at test $next\n";
+	    print "${te}FAILED at test $next\n";
 	    $bad = $bad + 1;
 	    $_ = $test;
 	    if (/^base/) {

@@ -80,10 +80,10 @@ extern "C" {
 #ifndef BYTESWAP
 static void u2s(U32 u, U8* s)
 {
-    *s++ = u         & 0xFF;
-    *s++ = (u >>  8) & 0xFF;
-    *s++ = (u >> 16) & 0xFF;
-    *s   = (u >> 24) & 0xFF;
+    *s++ = (U8)(u         & 0xFF);
+    *s++ = (U8)((u >>  8) & 0xFF);
+    *s++ = (U8)((u >> 16) & 0xFF);
+    *s   = (U8)((u >> 24) & 0xFF);
 }
 
 #define s2u(s,u) ((u) =  (U32)(*s)            |  \

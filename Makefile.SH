@@ -701,7 +701,7 @@ extras.install: perl$(EXE_EXT)
 	-@test -s extras.lst && $(LDLIBPTH) PATH=`pwd`:${PATH} PERL5LIB=`pwd`/lib ./perl -Ilib -MCPAN -e '@ARGV&&install(@ARGV)' `cat extras.lst`
 
 .PHONY: install install-strip install-all install-verbose install-silent \
-	no-install install.perl install.man installman install.html installhtml
+	no-install install.perl install.man install.html
 
 install-strip:
 	$(MAKE) STRIPFLAGS=-s install

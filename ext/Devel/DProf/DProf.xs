@@ -632,7 +632,7 @@ BOOT:
          * while we do this.
          */
         {
-	    I32 warn_tmp = PL_dowarn;
+	    bool warn_tmp = PL_dowarn;
 	    PL_dowarn = 0;
 	    newXS("DB::sub", XS_DB_sub, file);
 	    newXS("DB::goto", XS_DB_goto, file);

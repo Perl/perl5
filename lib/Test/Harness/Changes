@@ -1,5 +1,24 @@
 Revision history for Perl extension Test::Harness
 
+2.03  Thu Apr 25 01:01:34 EDT 2002
+    * $^X fix made safer.
+    - Noise from loading wait.ph to analyze core files supressed
+    - MJD found a situation where a test could run Test::Harness
+      out of memory.  Protecting against that specific case.
+    - Made the 1..M docs a bit clearer.
+    - Fixed TODO tests so Test::Harness does not display a NOK for
+      them.
+    - Test::Harness::Straps->analyze_file() docs were not clear as to
+      its effects
+
+2.02  Thu Mar 14 18:06:04 EST 2002
+    * Ken Williams fixed the long standing $^X bug.
+    * Added HARNESS_VERBOSE
+    * Fixed a bug where Test::Harness::Straps was considering a test that 
+      is ok but died as passing.
+    - Added the exit and wait codes of the test to the 
+      analyze_file() results.
+
 2.01  Thu Dec 27 18:54:36 EST 2001
     * Added 'passing' to the results to tell you if the test passed
     * Added Test::Harness::Straps example (examples/mini_harness.plx)

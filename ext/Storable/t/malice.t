@@ -30,14 +30,14 @@ sub BEGIN {
 }
 
 use strict;
-use vars qw($file_magic_str $other_magic $network_magic $major $minor);
-
-# header size depends on the size of the byteorder string
+use vars qw($file_magic_str $other_magic $network_magic $major $minor
+            $minor_write);
 $file_magic_str = 'pst0';
 $other_magic = 7 + length($Config{byteorder});
 $network_magic = 2;
 $major = 2;
 $minor = 5;
+$minor_write = $] > 5.007 ? 5 : 4;
 
 use Test;
 BEGIN { plan tests => 334 + length($Config{byteorder}) * 4}
@@ -63,7 +63,7 @@ sub test_header {
   my ($header, $isfile, $isnetorder) = @_;
   ok (!!$header->{file}, !!$isfile, "is file");
   ok ($header->{major}, $major, "major number");
-  ok ($header->{minor}, $minor, "minor number");
+  ok ($header->{minor}, $minor_write, "minor number");
   ok (!!$header->{netorder}, !!$isnetorder, "is network order");
   if ($isnetorder) {
     # Skip these
@@ -148,24 +148,34 @@ sub test_things {
   }
 
   $copy = $contents;
-  my $minor1 = $header->{minor} + 1;
-  substr ($copy, $file_magic + 1, 1) = chr $minor1;
+  # Needs to be more than 1, as we're already coding a spread of 1 minor version
+  # number on writes (2.5, 2.4). May increase to 2 if we figure we can do 2.3
+  # on 5.005_03 (No utf8).
+  # 4 allows for a small safety margin
+  # (Joke:
+  # Question: What is the value of pi?
+  # Mathematician answers "It's pi, isn't it"
+  # Physicist answers "3.1, within experimental error"
+  # Engineer answers "Well, allowing for a small safety margin,   18"
+  # )
+  my $minor4 = $header->{minor} + 4;
+  substr ($copy, $file_magic + 1, 1) = chr $minor4;
   test_corrupt ($copy, $sub,
-                "/^Storable binary image v$header->{major}\.$minor1 more recent than I am \\(v$header->{major}\.$header->{minor}\\)/",
+                "/^Storable binary image v$header->{major}\.$minor4 more recent than I am \\(v$header->{major}\.$minor\\)/",
                 "higher minor");
 
   $copy = $contents;
   my $major1 = $header->{major} + 1;
   substr ($copy, $file_magic, 1) = chr 2*$major1;
   test_corrupt ($copy, $sub,
-                "/^Storable binary image v$major1\.$header->{minor} more recent than I am \\(v$header->{major}\.$header->{minor}\\)/",
+                "/^Storable binary image v$major1\.$header->{minor} more recent than I am \\(v$header->{major}\.$minor\\)/",
                 "higher major");
 
   # Continue messing with the previous copy
-  $minor1 = $header->{minor} - 1;
+  my $minor1 = $header->{minor} - 1;
   substr ($copy, $file_magic + 1, 1) = chr $minor1;
   test_corrupt ($copy, $sub,
-                "/^Storable binary image v$major1\.$minor1 more recent than I am \\(v$header->{major}\.$header->{minor}\\)/",
+                "/^Storable binary image v$major1\.$minor1 more recent than I am \\(v$header->{major}\.$minor\\)/",
               "higher major, lower minor");
 
   my $where;

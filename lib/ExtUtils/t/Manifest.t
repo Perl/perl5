@@ -14,7 +14,7 @@ chdir 't';
 use strict;
 
 # these files help the test run
-use Test::More tests => 32;
+use Test::More tests => 33;
 use Cwd;
 
 # these files are needed for the module itself
@@ -103,15 +103,12 @@ add_file( 'MANIFEST.SKIP', "baz\n.SKIP" );
 ($res, $warn) = catch_warning( \&skipcheck );
 like( $warn, qr/^Skipping MANIFEST\.SKIP/i, 'got skipping warning' );
 
-# I'm not sure why this should be... shouldn't $missing be the only one?
-my ($found, $missing );
+my @skipped;
 catch_warning( sub {
-	( $found, $missing ) = skipcheck()
+	@skipped = skipcheck()
 });
 
-# nothing new should be found, bar should be skipped
-is( @$found, 0, 'no output here' );
-is( join( ' ', @$missing ), 'bar', 'listed skipped files' );
+is( join( ' ', @skipped ), 'MANIFEST.SKIP', 'listed skipped files' );
 
 {
 	local $ExtUtils::Manifest::Quiet = 1;
@@ -165,7 +162,17 @@ add_file( 'MANIFEST.SKIP' => "^moretest/q\n" );
 
 # This'll skip moretest/quux
 ($res, $warn) = catch_warning( \&skipcheck );
-like( $warn, qr{^Skipping moretest/quux}i, 'got skipping warning again' );
+like( $warn, qr{^Skipping moretest/quux$}i, 'got skipping warning again' );
+
+
+# There was a bug where entries in MANIFEST would be blotted out
+# by MANIFEST.SKIP rules.
+add_file( 'MANIFEST.SKIP' => 'foo' );
+add_file( 'MANIFEST'      => 'foobar'   );
+add_file( 'foobar'        => '123' );
+($res, $warn) = catch_warning( \&manicheck );
+is( $res,  '',      'MANIFEST overrides MANIFEST.SKIP' );
+is( $warn, undef,   'MANIFEST overrides MANIFEST.SKIP, no warnings' );
 
 
 END {

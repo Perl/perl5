@@ -542,6 +542,18 @@ even with the same keys.
 This should be allowed if the new keyset is a subset of the old
 keyset.  May require more extra code than we'd like in pp_aassign.
 
+=head2 Should overload be inheritable?
+
+Should overload be 'contagious' through @ISA so that derived classes
+would inherit their base classes' overload definitions?  What to do
+in case of overload conflicts?
+
+=head2 Taint rethink
+
+Should taint be stopped from affecting control flow, if ($tainted)?
+Should tainted symbolic method calls and subref calls be stopped?
+(Look at Ruby's $SAFE levels for inspiration?)
+
 =head1 Vague ideas
 
 Ideas which have been discussed, and which may or may not happen.

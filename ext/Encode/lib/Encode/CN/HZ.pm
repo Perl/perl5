@@ -3,18 +3,17 @@ package Encode::CN::HZ;
 use strict;
 
 use vars qw($VERSION);
-$VERSION = do { my @r = (q$Revision: 1.3 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+$VERSION = do { my @r = (q$Revision: 1.4 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode ();
-use Encode::CN;
-use base 'Encode::Encoding';
+
+use base qw(Encode::Encoding);
+__PACKAGE__->Define('hz');
 
 # HZ is only escaped GB, so we implement it with the
 # GB2312(raw) encoding here. Cf. RFCs 1842 & 1843.
 
-my $canon = 'hz';
-my $obj = bless {name => $canon}, __PACKAGE__;
-$obj->Define($canon);
+
 
 sub needs_lines  { 1 }
 

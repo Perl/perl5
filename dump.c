@@ -617,7 +617,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
     case OP_GVSV:
     case OP_GV:
 #ifdef USE_ITHREADS
-	Perl_dump_indent(aTHX_ level, file, "PADIX = %d\n", cPADOPo->op_padix);
+	Perl_dump_indent(aTHX_ level, file, "PADIX = %" IVdf "\n", (IV)cPADOPo->op_padix);
 #else
 	if (cSVOPo->op_sv) {
 	    SV *tmpsv = NEWSV(0,0);

@@ -1,7 +1,7 @@
 package Encode::Encoding;
 # Base class for classes which implement encodings
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.28 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.29 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 sub Define
 {
@@ -12,17 +12,37 @@ sub Define
     Encode::define_encoding($obj, $canonical, @_);
 }
 
-sub name { shift->{'Name'} }
+sub name         { return shift->{'Name'} }
+sub new_sequence { return $_[0] }
+
+sub needs_lines { 0 };
+
+sub perlio_ok { 
+    eval{ require PerlIO::encoding };
+    return $@ ? 0 : 1;
+}
 
 # Temporary legacy methods
 sub toUnicode    { shift->decode(@_) }
 sub fromUnicode  { shift->encode(@_) }
 
-sub new_sequence { return $_[0] }
+#
+# Needs to be overloaded or just croak
+#
 
-sub perlio_ok { 0 }
+sub encode {
+    require Carp;
+    my $obj = shift;
+    my $class = ref($obj) ? ref($obj) : $obj;
+    Carp::croak $class, "->encode() not defined!";
+}
 
-sub needs_lines  { 0 }
+sub decode{
+    require Carp;
+    my $obj = shift;
+    my $class = ref($obj) ? ref($obj) : $obj;
+    Carp::croak $class, "->encode() not defined!";
+}
 
 sub DESTROY {}
 
@@ -43,32 +63,19 @@ Encode::Encoding - Encode Implementation Base Class
 =head1 DESCRIPTION
 
 As mentioned in L<Encode>, encodings are (in the current
-implementation at least) defined by objects. The mapping of encoding
-name to object is via the C<%encodings> hash.
+implementation at least) defined as objects. The mapping of encoding
+name to object is via the C<%Encode::Encoding> hash.  Though you can
+directly manipulate this hash, it is strongly encouraged to use this
+base class module and add encode() and decode() methods.
 
-The values of the hash can currently be either strings or objects.
-The string form may go away in the future. The string form occurs
-when C<encodings()> has scanned C<@INC> for loadable encodings but has
-not actually loaded the encoding in question. This is because the
-current "loading" process is all Perl and a bit slow.
+=head2 Methods you should implement
 
-Once an encoding is loaded, the value of the hash is the object which
-implements the encoding. The object should provide the following
-interface:
+You are strongly encouraged to implement methods below, at least
+either encode() or decode().
 
 =over 4
 
-=item -E<gt>name
-
-MUST return the string representing the canonical name of the encoding.
-
-=item -E<gt>new_sequence
-
-This is a placeholder for encodings with state. It should return an
-object which implements this interface.  All current implementations
-return the original object.
-
-=item -E<gt>encode($string,$check)
+=item -E<gt>encode($string [,$check])
 
 MUST return the octet sequence representing I<$string>. 
 
@@ -94,7 +101,7 @@ convert the string - for example, by using a replacement character.
 
 =back
 
-=item -E<gt>decode($octets,$check)
+=item -E<gt>decode($octets [,$check])
 
 MUST return the string that I<$octets> represents. 
 
@@ -121,27 +128,48 @@ replacement character.
 
 =back
 
+=head2 Other methods defined in Encode::Encodings
+
+You do not have to override methods shown below unless you have to.
+
+=over 4
+
+=item -E<gt>name
+
+Predefined As:
+
+  sub name  { return shift->{'Name'} }
+
+MUST return the string representing the canonical name of the encoding.
+
+=item -E<gt>new_sequence
+
+Predefined As:
+
+  sub new_sequence { return $_[0] }
+
+This is a placeholder for encodings with state. It should return an
+object which implements this interface.  All current implementations
+return the original object.
+
 =item -E<gt>perlio_ok()
 
-If you want your encoding to work with PerlIO, you MUST define this
-method so that it returns 1 when PerlIO is enabled.  Here is an
-example;
+Predefined As:
 
- sub perlio_ok { 
-     eval { require PerlIO::encoding };
-     if ($@){
-	 return 0;
-     }else{
-	 return 1;
-     }
+  sub perlio_ok { 
+      eval{ require PerlIO::encoding };
+      return $@ ? 0 : 1;
   }
 
-
-By default, this method is defined as follows;
+If your encoding does not support PerlIO for some reasons, just;
 
  sub perlio_ok { 0 }
 
 =item -E<gt>needs_lines()
+
+Predefined As:
+
+  sub needs_lines { 0 };
 
 If your encoding can work with PerlIO but needs line buffering, you
 MUST define this method so it returns true.  7bit ISO-2022 encodings
@@ -149,6 +177,28 @@ are one example that needs this.  When this method is missing, false
 is assumed.
 
 =back
+
+=head2 Example: Encode::ROT13
+
+  package Encode::ROT13;
+  use strict;
+  use base qw(Encode::Encoding);
+
+  __PACKAGE__->Define('rot13');
+
+  sub encode($$;$){
+      my ($obj, $str, $chk) = @_;
+      $str =~ tr/A-Za-z/N-ZA-Mn-za-m/;
+      $_[1] = '' if $chk; # this is what in-place edit means
+      return $str;
+  }
+
+  # Jr pna or ynml yvxr guvf;
+  *decode = \&encode;
+
+  1;
+
+=head1 Why the heck Encode API is different?
 
 It should be noted that the I<$check> behaviour is different from the
 outer public API. The logic is that the "unchecked" case is useful
@@ -168,8 +218,7 @@ on otherwise stateless encodings) an additional parameter.
 
 It is also highly desirable that encoding classes inherit from
 C<Encode::Encoding> as a base class. This allows that class to define
-additional behaviour for all encoding objects. For example, built-in
-Unicode, UCS-2, and UTF-8 classes use
+additional behaviour for all encoding objects.
 
   package Encode::MyEncoding;
   use base qw(Encode::Encoding);

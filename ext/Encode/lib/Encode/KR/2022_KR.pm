@@ -1,19 +1,14 @@
 package Encode::KR::2022_KR;
-use Encode qw(:fallbacks);
-use base 'Encode::Encoding';
-
 use strict;
 
-our $VERSION = do { my @r = (q$Revision: 1.4 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.5 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
+use Encode qw(:fallbacks);
 
-my $canon = 'iso-2022-kr';
-my $obj = bless {name => $canon}, __PACKAGE__;
-$obj->Define($canon);
+use base qw(Encode::Encoding);
+__PACKAGE__->Define('iso-2022-kr');
 
-sub name { return $_[0]->{name}; }
-
-sub needs_lines { 1 }
+sub needs_lines  { 1 }
 
 sub perlio_ok { 
     return 0; # for the time being

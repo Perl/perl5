@@ -589,11 +589,14 @@ UTILS		=			\
 		..\utils\perlbug	\
 		..\utils\pl2pm 		\
 		..\utils\c2ph		\
+		..\utils\pstruct	\
 		..\utils\h2xs		\
 		..\utils\perldoc	\
 		..\utils\perlcc		\
 		..\utils\perlivp	\
 		..\utils\libnetcfg	\
+		..\utils\enc2xs		\
+		..\utils\piconv		\
 		..\pod\checkpods	\
 		..\pod\pod2html		\
 		..\pod\pod2latex	\
@@ -603,6 +606,7 @@ UTILS		=			\
 		..\pod\podchecker	\
 		..\pod\podselect	\
 		..\x2p\find2perl	\
+		..\x2p\psed		\
 		..\x2p\s2p		\
 		..\lib\ExtUtils\xsubpp	\
 		bin\exetype.pl		\
@@ -1179,14 +1183,14 @@ distclean: clean
 	    perlvmesa.pod perlvms.pod perlvos.pod \
 	    perlwin32.pod pod2html pod2latex pod2man pod2text pod2usage \
 	    podchecker podselect
-	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph h2xs perldoc \
-	    perlivp dprofpp *.bat
-	-cd ..\x2p && del /f find2perl s2p *.bat
+	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs \
+	    perldoc perlivp dprofpp perlcc libnetcfg enc2xs piconv *.bat
+	-cd ..\x2p && del /f find2perl s2p psed *.bat
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c config.h.new
 	-del /f $(CONFIGPM)
 	-del /f bin\*.bat
-	-cd $(EXTDIR) && del /s *$(a) *.def *.map *.pdb *.bs Makefile *$(o) \
-	    pm_to_blib
+	-cd .. && del /s *$(a) *.map *.pdb *.ilk *.bs *$(o) .exists pm_to_blib
+	-cd $(EXTDIR) && del /s *.def Makefile Makefile.old
 	-if exist $(AUTODIR) rmdir /s /q $(AUTODIR) || rmdir /s $(AUTODIR)
 	-if exist $(COREDIR) rmdir /s /q $(COREDIR) || rmdir /s $(COREDIR)
 

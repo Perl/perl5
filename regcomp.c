@@ -2149,8 +2149,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
     /* Make an OPEN node, if parenthesized. */
     if (paren) {
 	if (*RExC_parse == '?') { /* (?...) */
-	    U16 posflags = 0, negflags = 0;
-	    U16 *flagsp = &posflags;
+	    U32 posflags = 0, negflags = 0;
+	    U32 *flagsp = &posflags;
 	    int logical = 0;
 	    char *seqstart = RExC_parse;
 
@@ -4775,7 +4775,6 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 	
 	    if (lv) {
 		if (sw) {
-		    UV i;
 		    U8 s[UTF8_MAXLEN+1];
 		
 		    for (i = 0; i <= 256; i++) { /* just the first 256 */

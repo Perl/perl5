@@ -79,18 +79,7 @@ $VERSION = '1.015';
 
 eval "use Log::Agent";
 
-unless (defined @Log::Agent::EXPORT) {
-	eval q{
-		sub logcroak {
-			require Carp;
-			Carp::croak(@_);
-		}
-		sub logcarp {
-			require Carp;
-			Carp::carp(@_);
-		}
-	};
-}
+require Carp;
 
 #
 # They might miss :flock in Fcntl
@@ -107,22 +96,33 @@ BEGIN {
 	}
 }
 
-sub logcroak;
-sub logcarp;
-
 # Can't Autoload cleanly as this clashes 8.3 with &retrieve
 sub retrieve_fd { &fd_retrieve }		# Backward compatibility
 
+# By default restricted hashes are downgraded on earlier perls.
+
+$Storable::downgrade_restricted = 1;
 bootstrap Storable;
 1;
 __END__
+#
+# Use of Log::Agent is optional. If it hasn't imported these subs then
+# Autoloader will kindly supply our fallback implementation.
+#
+
+sub logcroak {
+    Carp::croak(@_);
+}
+
+sub logcarp {
+  Carp::carp(@_);
+}
 
 #
 # Determine whether locking is possible, but only when needed.
 #
 
-sub CAN_FLOCK {
-	my $CAN_FLOCK if 0;
+sub CAN_FLOCK; my $CAN_FLOCK; sub CAN_FLOCK {
 	return $CAN_FLOCK if defined $CAN_FLOCK;
 	require Config; import Config;
 	return $CAN_FLOCK =

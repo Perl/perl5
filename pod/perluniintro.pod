@@ -171,7 +171,10 @@ of course, removes the warning.
 If your locale environment variables (LANGUAGE, LC_ALL, LC_CTYPE, LANG)
 contain the strings 'UTF-8' or 'UTF8' (case-insensitive matching),
 the default encoding of your STDIN, STDOUT, and STDERR, and of
-B<any subsequent file open>, is UTF-8.
+B<any subsequent file open>, is UTF-8.  Note that this means
+that Perl expects other software to work, too: if STDIN coming
+in from another command is not UTF-8, Perl will complain about
+malformed UTF-8.
 
 =head2 Unicode and EBCDIC
 
@@ -621,13 +624,16 @@ the output string will be UTF-8-encoded "ab\x80c\x{100}\n", but note
 that C<$a> will stay single byte encoded.
 
 Sometimes you might really need to know the byte length of a string
-instead of the character length.  For that use the C<bytes> pragma
-and its only defined function C<length()>:
+instead of the character length. For that use either the
+C<Encode::encode_utf8()> function or the C<bytes> pragma and its only
+defined function C<length()>:
 
     my $unicode = chr(0x100);
     print length($unicode), "\n"; # will print 1
+    require Encode;
+    print length(Encode::encode_utf8($unicode)), "\n"; # will print 2
     use bytes;
-    print length($unicode), "\n"; # will print 2 (the 0xC4 0x80 of the UTF-8)
+    print length($unicode), "\n"; # will also print 2 (the 0xC4 0x80 of the UTF-8)
 
 =item 
 

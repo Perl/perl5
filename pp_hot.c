@@ -2117,7 +2117,14 @@ PP(pp_subst)
 		break;
 	} while (CALLREGEXEC(aTHX_ rx, s, strend, orig, s == m,
 			     TARG, NULL, r_flags));
-	sv_catpvn(dstr, s, strend - s);
+	if (doutf8 && !DO_UTF8(dstr)) {
+	    SV* nsv = sv_2mortal(newSVpvn(s, strend - s));
+	    
+	    sv_utf8_upgrade(nsv);
+	    sv_catpvn(dstr, SvPVX(nsv), SvCUR(nsv));
+	}
+	else
+	    sv_catpvn(dstr, s, strend - s);
 
 	(void)SvOOK_off(TARG);
 	Safefree(SvPVX(TARG));

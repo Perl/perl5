@@ -197,71 +197,67 @@ ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/XSLoader_pm.PL	Simple XS Loader perl module
 ext/Encode/AUTHORS		List of authors
-ext/Encode/Byte/Byte.pm	Encode extension
-ext/Encode/Byte/Makefile.PL       Encode extension
-ext/Encode/CN/CN.pm		Encode extension
-ext/Encode/CN/Makefile.PL	Encode extension
-ext/Encode/Changes		Change Log
-ext/Encode/EBCDIC/EBCDIC.pm       Encode extension
-ext/Encode/EBCDIC/Makefile.PL     Encode extension
-ext/Encode/Encode.pm	       Mother of all Encode extensions
-ext/Encode/Encode.xs		Encode extension
-ext/Encode/Encode/Changes.e2x		Skeleton file for enc2xs
-ext/Encode/Encode/ConfigLocal_PM.e2x	Skeleton file for enc2xs
-ext/Encode/Encode/Makefile_PL.e2x	Skeleton file for enc2xs
-ext/Encode/Encode/README.e2x		Skeleton file for enc2xs
-ext/Encode/Encode/_PM.e2x		Skeleton file for enc2xs
-ext/Encode/Encode/_T.e2x		Skeleton file for enc2xs
-ext/Encode/Encode/encode.h		Encode extension header file
-ext/Encode/JP/JP.pm		Encode extension
-ext/Encode/JP/Makefile.PL	Encode extension
-ext/Encode/KR/KR.pm		Encode extension
-ext/Encode/KR/Makefile.PL		Encode extension
-ext/Encode/MANIFEST		Encode extension
-ext/Encode/Makefile.PL		Encode extension makefile writer
-ext/Encode/README		Encode extension
-ext/Encode/Symbol/Makefile.PL     Encode extension
-ext/Encode/Symbol/Symbol.pm       Encode extension
-ext/Encode/TW/Makefile.PL	Encode extension
-ext/Encode/TW/TW.pm		Encode extension
-ext/Encode/Unicode/Makefile.PL	Encode extension
-ext/Encode/Unicode/Unicode.pm	Encode extension
-ext/Encode/Unicode/Unicode.xs	Encode extension
 ext/Encode/bin/enc2xs	Encode module generator
 ext/Encode/bin/piconv	iconv by perl
 ext/Encode/bin/ucm2table	Table Generator for testing
 ext/Encode/bin/ucmlint	A UCM Lint utility
 ext/Encode/bin/unidump	Unicode Dump like hexdump(1)
+ext/Encode/Byte/Byte.pm	Encode extension
+ext/Encode/Byte/Makefile.PL       Encode extension
+ext/Encode/Changes		Change Log
+ext/Encode/CN/CN.pm		Encode extension
+ext/Encode/CN/Makefile.PL	Encode extension
+ext/Encode/EBCDIC/EBCDIC.pm       Encode extension
+ext/Encode/EBCDIC/Makefile.PL     Encode extension
 ext/Encode/encengine.c		Encode extension
+ext/Encode/Encode.pm	       Mother of all Encode extensions
+ext/Encode/Encode.xs		Encode extension
+ext/Encode/Encode/Changes.e2x		Skeleton file for enc2xs
+ext/Encode/Encode/ConfigLocal_PM.e2x	Skeleton file for enc2xs
+ext/Encode/Encode/encode.h		Encode extension header file
+ext/Encode/Encode/Makefile_PL.e2x	Skeleton file for enc2xs
+ext/Encode/Encode/README.e2x		Skeleton file for enc2xs
+ext/Encode/Encode/_PM.e2x		Skeleton file for enc2xs
+ext/Encode/Encode/_T.e2x		Skeleton file for enc2xs
 ext/Encode/encoding.pm	Perl Pragmactic Module
+ext/Encode/JP/JP.pm		Encode extension
+ext/Encode/JP/Makefile.PL	Encode extension
+ext/Encode/KR/KR.pm		Encode extension
+ext/Encode/KR/Makefile.PL		Encode extension
 ext/Encode/lib/Encode/Alias.pm	        Encode extension
 ext/Encode/lib/Encode/CJKConstants.pm	Encode extension
 ext/Encode/lib/Encode/CN/HZ.pm		Encode extension
 ext/Encode/lib/Encode/Config.pm	        Encode configuration module
 ext/Encode/lib/Encode/Encoder.pm	       OO Encoder
 ext/Encode/lib/Encode/Encoding.pm	Encode extension
+ext/Encode/lib/Encode/Guess.pm	Encode Extension
 ext/Encode/lib/Encode/JP/H2Z.pm		Encode extension
 ext/Encode/lib/Encode/JP/JIS7.pm	Encode extension
 ext/Encode/lib/Encode/KR/2022_KR.pm	 Encode extension
+ext/Encode/lib/Encode/MIME/Header.pm	Encode extension
 ext/Encode/lib/Encode/PerlIO.pod	Documents for Encode & PerlIO
 ext/Encode/lib/Encode/Supported.pod	Documents for supported encodings
-ext/Encode/t/unibench.pl	benchmark script
+ext/Encode/Makefile.PL		Encode extension makefile writer
+ext/Encode/MANIFEST		Encode extension
+ext/Encode/README		Encode extension
+ext/Encode/Symbol/Makefile.PL     Encode extension
+ext/Encode/Symbol/Symbol.pm       Encode extension
 ext/Encode/t/Aliases.t	test script
-ext/Encode/t/CJKT.t	test script
-ext/Encode/t/Encode.t	test script
-ext/Encode/t/Encoder.t	test script
-ext/Encode/t/Unicode.t	test script
 ext/Encode/t/at-cn.t	test script
 ext/Encode/t/at-tw.t	test script
 ext/Encode/t/big5-eten.enc	test data
 ext/Encode/t/big5-eten.utf	test data
 ext/Encode/t/big5-hkscs.enc	test data
 ext/Encode/t/big5-hkscs.utf	test data
+ext/Encode/t/CJKT.t	test script
+ext/Encode/t/Encode.t	test script
+ext/Encode/t/Encoder.t	test script
 ext/Encode/t/encoding.t	test script
 ext/Encode/t/fallback.t	test script
 ext/Encode/t/gb2312.enc	test data
 ext/Encode/t/gb2312.utf	test data
 ext/Encode/t/grow.t	test script
+ext/Encode/t/guess.t	test script
 ext/Encode/t/jisx0201.enc	test data
 ext/Encode/t/jisx0201.utf	test data
 ext/Encode/t/jisx0208.enc	test data
@@ -271,7 +267,12 @@ ext/Encode/t/jisx0212.utf	test data
 ext/Encode/t/jperl.t	test script
 ext/Encode/t/ksc5601.enc	test data
 ext/Encode/t/ksc5601.utf	test data
+ext/Encode/t/mime-header.t	test script
 ext/Encode/t/perlio.t	test script
+ext/Encode/t/unibench.pl	benchmark script
+ext/Encode/t/Unicode.t	test script
+ext/Encode/TW/Makefile.PL	Encode extension
+ext/Encode/TW/TW.pm		Encode extension
 ext/Encode/ucm/8859-1.ucm	Unicode Character Map
 ext/Encode/ucm/8859-10.ucm	Unicode Character Map
 ext/Encode/ucm/8859-11.ucm	Unicode Character Map
@@ -360,9 +361,9 @@ ext/Encode/ucm/macHebrew.ucm	Unicode Character Map
 ext/Encode/ucm/macIceland.ucm	Unicode Character Map
 ext/Encode/ucm/macJapanese.ucm	Unicode Character Map
 ext/Encode/ucm/macKorean.ucm	Unicode Character Map
+ext/Encode/ucm/macRoman.ucm	Unicode Character Map
 ext/Encode/ucm/macROMnn.ucm	Unicode Character Map
 ext/Encode/ucm/macRUMnn.ucm	Unicode Character Map
-ext/Encode/ucm/macRoman.ucm	Unicode Character Map
 ext/Encode/ucm/macSami.ucm	Unicode Character Map
 ext/Encode/ucm/macSymbol.ucm	Unicode Character Map
 ext/Encode/ucm/macThai.ucm	Unicode Character Map
@@ -373,6 +374,9 @@ ext/Encode/ucm/posix-bc.ucm	Unicode Character Map
 ext/Encode/ucm/shiftjis.ucm	Unicode Character Map
 ext/Encode/ucm/symbol.ucm	Unicode Character Map
 ext/Encode/ucm/viscii.ucm	Unicode Character Map
+ext/Encode/Unicode/Makefile.PL	Encode extension
+ext/Encode/Unicode/Unicode.pm	Encode extension
+ext/Encode/Unicode/Unicode.xs	Encode extension
 ext/Errno/ChangeLog	See if Errno works
 ext/Errno/Errno.t	See if Errno works
 ext/Errno/Errno_pm.PL	Errno perl module create script
@@ -595,10 +599,13 @@ ext/Storable/Storable.xs	Storable extension
 ext/Storable/t/blessed.t	See if Storable works
 ext/Storable/t/canonical.t	See if Storable works
 ext/Storable/t/compat06.t	See if Storable works
+ext/Storable/t/croak.t		See if Storable works
 ext/Storable/t/dclone.t		See if Storable works
+ext/Storable/t/downgrade.t	See if Storable works
 ext/Storable/t/forgive.t	See if Storable works
 ext/Storable/t/freeze.t		See if Storable works
 ext/Storable/t/lock.t		See if Storable works
+ext/Storable/t/make_downgrade.pl	See if Storable works
 ext/Storable/t/malice.t		See if Storable copes with corrupt files
 ext/Storable/t/overload.t	See if Storable works
 ext/Storable/t/recurse.t	See if Storable works
@@ -655,6 +662,7 @@ ext/threads/shared/shared.xs    thread shared variables
 ext/threads/shared/t/0nothread.t	Tests for basic shared array functionality.
 ext/threads/shared/t/av_refs.t	Tests for arrays containing references
 ext/threads/shared/t/av_simple.t	Tests for basic shared array functionality.
+ext/threads/shared/t/cond.t	Test condition variables
 ext/threads/shared/t/hv_refs.t	Test shared hashes containing references
 ext/threads/shared/t/hv_simple.t	Tests for basic shared hash functionality.
 ext/threads/shared/t/no_share.t	Tests for disabled share on variables.
@@ -1025,11 +1033,9 @@ lib/ExtUtils/MM_Win32.pm	MakeMaker methods for Win32
 lib/ExtUtils/MM_Win95.pm        MakeMaker methods for Win95
 lib/ExtUtils/MY.pm              MakeMaker user override class
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
+lib/ExtUtils/t/00setup_dummy.t  Setup MakeMaker test module
+lib/ExtUtils/t/backwards.t      Check MakeMaker's backwards compatibility
 lib/ExtUtils/t/basic.t		See if MakeMaker can build a module
-lib/ExtUtils/t/Big-Fat-Dummy/Liar/lib/Big/Fat/Liar.pm MakeMaker dummy module
-lib/ExtUtils/t/Big-Fat-Dummy/Liar/Makefile.PL         MakeMaker dummy module
-lib/ExtUtils/t/Big-Fat-Dummy/lib/Big/Fat/Dummy.pm     MakeMaker dummy module
-lib/ExtUtils/t/Big-Fat-Dummy/Makefile.PL              MakeMaker dummy module
 lib/ExtUtils/t/Command.t	See if ExtUtils::Command works (Win32 only)
 lib/ExtUtils/t/Constant.t	See if ExtUtils::Constant works
 lib/ExtUtils/t/Embed.t		See if ExtUtils::Embed and embedding works
@@ -1047,10 +1053,10 @@ lib/ExtUtils/t/MM_VMS.t		See if ExtUtils::MM_VMS works
 lib/ExtUtils/t/MM_Win32.t	See if ExtUtils::MM_Win32 works
 lib/ExtUtils/t/Packlist.t	See if Packlist works
 lib/ExtUtils/t/prefixify.t      See if MakeMaker can apply a PREFIX
-lib/ExtUtils/t/Problem-Module/Makefile.PL           MakeMaker dummy module
-lib/ExtUtils/t/Problem-Module/subdir/Makefile.PL    MakeMaker dummy module
 lib/ExtUtils/t/problems.t       How MakeMaker reacts to build problems
 lib/ExtUtils/t/testlib.t	See if ExtUtils::testlib works
+lib/ExtUtils/t/VERSION_FROM.t   See if MakeMaker's VERSION_FROM works
+lib/ExtUtils/t/zz_cleanup_dummy.t   Cleanup MakeMaker test module
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
 lib/ExtUtils/typemap		Extension interface types
 lib/ExtUtils/xsubpp		External subroutine preprocessor
@@ -1425,6 +1431,7 @@ lib/Test/Simple/Changes		Test::Simple changes
 lib/Test/Simple/README		Test::Simple README
 lib/Test/Simple/t/buffer.t      Test::Builder buffering test
 lib/Test/Simple/t/Builder.t     Test::Builder tests
+lib/Test/Simple/t/curr_test.t   Test::Builder->curr_test tests
 lib/Test/Simple/t/diag.t        Test::More diag() test
 lib/Test/Simple/t/exit.t        Test::Simple test, exit codes
 lib/Test/Simple/t/extra.t       Test::Simple test
@@ -1434,6 +1441,7 @@ lib/Test/Simple/t/fail.t        Test::Simple test, test failures
 lib/Test/Simple/t/filehandles.t Test::Simple test, STDOUT can be played with
 lib/Test/Simple/t/import.t      Test::More test, importing functions
 lib/Test/Simple/t/is_deeply.t   Test::More test, is_deeply()
+lib/Test/Simple/t/maybe_regex.t Test::Builder->maybe_regex() tests
 lib/Test/Simple/t/missing.t     Test::Simple test, missing tests
 lib/Test/Simple/t/More.t        Test::More test, basic stuff
 lib/Test/Simple/t/no_ending.t   Test::Builder test, no_ending()
@@ -1447,6 +1455,7 @@ lib/Test/Simple/t/plan_skip_all.t       Test::More test, plan() w/skip_all
 lib/Test/Simple/t/simple.t      Test::Simple test, basic stuff
 lib/Test/Simple/t/skip.t        Test::More test, SKIP tests
 lib/Test/Simple/t/skipall.t     Test::More test, skip all tests
+lib/Test/Simple/t/strays.t      Test::Builder stray newline checks
 lib/Test/Simple/t/todo.t        Test::More test, TODO tests
 lib/Test/Simple/t/undef.t       Test::More test, undefs don't cause warnings
 lib/Test/Simple/t/useing.t      Test::More test, compile test
@@ -2338,8 +2347,12 @@ t/lib/Math/BigInt/BareCalc.pm	Bigint's simulation of Calc
 t/lib/Math/BigInt/Subclass.pm	Empty subclass of BigInt for test
 t/lib/Math/BigRat/Test.pm		Math::BigRat test helper
 t/lib/sample-tests/bailout		Test data for Test::Harness
+t/lib/sample-tests/bignum               Test data for Test::Harness
 t/lib/sample-tests/combined		Test data for Test::Harness
 t/lib/sample-tests/descriptive		Test data for Test::Harness
+t/lib/sample-tests/die                  Test data for Test::Harness
+t/lib/sample-tests/die_head_end         Test data for Test::Harness
+t/lib/sample-tests/die_last_minute      Test data for Test::Harness
 t/lib/sample-tests/duplicates		Test data for Test::Harness
 t/lib/sample-tests/head_end	        Test data for Test::Harness
 t/lib/sample-tests/head_fail	        Test data for Test::Harness
@@ -2511,7 +2524,6 @@ t/op/subst_amp.t		See if $&-related substitution works
 t/op/subst_wamp.t		See if substitution works with $& present
 t/op/sub_lval.t			See if lvalue subroutines work
 t/op/sysio.t			See if sysread and syswrite work
-t/op/system_tests		Test runner for system.t
 t/op/taint.t			See if tainting works
 t/op/tie.t			See if tie/untie functions work
 t/op/tiearray.t			See if tie for arrays works
@@ -2587,6 +2599,7 @@ t/uni/title.t			See if Unicode casing works
 t/uni/upper.t			See if Unicode casing works
 t/win32/longpath.t		Test if Win32::GetLongPathName() works
 t/win32/system.t		See if system works in Win*
+t/win32/system_tests		Test runner for system.t
 t/x2p/s2p.t			See if s2p/psed work
 taint.c				Tainting code
 thrdvar.h			Per-thread variables
