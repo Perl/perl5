@@ -280,6 +280,8 @@ Perl_sharedsv_thrcnt_dec(pTHX_ shared_sv* ssv)
 
 MGVTBL svtable;
 
+#define shared_sv_attach_sv(sv,shared) Perl_shared_sv_attach_sv(aTHX_ sv,shared)
+
 SV* Perl_shared_sv_attach_sv (pTHX_ SV* sv, shared_sv* shared) {
     HV* shared_hv = get_hv("threads::shared::shared", FALSE);
     SV* id = newSViv(PTR2IV(shared));
@@ -393,17 +395,18 @@ int shared_sv_store_mg (pTHX_ SV* sv, MAGIC *mg) {
     return 0;
 }
 
-int shared_sv_destroy_mg (pTHX_ SV* sv, MAGIC *mg) {
+int 
+shared_sv_destroy_mg (pTHX_ SV* sv, MAGIC *mg) 
+{
     shared_sv* shared = INT2PTR(shared_sv*, SvIV(mg->mg_obj));
-    if(!shared)
-        return 0;
-    {
+    if (shared) {
 	HV* shared_hv = get_hv("threads::shared::shared", FALSE);
         SV* id = newSViv(PTR2IV(shared));
         STRLEN length = sv_len(id);
         hv_delete(shared_hv, SvPV(id,length), length,0);
+	Perl_sharedsv_thrcnt_dec(aTHX_ shared);
     }
-    Perl_sharedsv_thrcnt_dec(aTHX_ shared);
+    return 0;
 }
 
 MGVTBL svtable = {MEMBER_TO_FPTR(shared_sv_fetch_mg),

@@ -81,7 +81,6 @@ void
 Perl_ithread_destruct (pTHX_ ithread* thread)
 {
 	MUTEX_LOCK(&thread->mutex);
-	Perl_warn(aTHX_ "destruct %d with count=%d",thread->tid,thread->count);
 	if (thread->count != 0) {
 		MUTEX_UNLOCK(&thread->mutex);
 		return;	
@@ -102,6 +101,10 @@ Perl_ithread_destruct (pTHX_ ithread* thread)
 	}
 	MUTEX_UNLOCK(&create_mutex);
 	/* Thread is now disowned */
+#if 0
+        Perl_warn(aTHX_ "destruct %d @ %p by %p",
+	          thread->tid,thread->interp,aTHX);
+#endif
 	if (thread->interp) {
 	    dTHXa(thread->interp);
 	    PERL_SET_CONTEXT(thread->interp);
@@ -129,7 +132,6 @@ ithread_mg_free(pTHX_ SV *sv, MAGIC *mg)
 {
     ithread *thread = (ithread *) mg->mg_ptr;
     MUTEX_LOCK(&thread->mutex);
-    Perl_warn(aTHX_ "Unmagic %d with count=%d",thread->tid,thread->count);
     thread->count--;
     MUTEX_UNLOCK(&thread->mutex);
     /* This is safe as it re-checks count */
@@ -142,7 +144,6 @@ ithread_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
 {
     ithread *thread = (ithread *) mg->mg_ptr;
     MUTEX_LOCK(&thread->mutex);
-    Perl_warn(aTHX_ "DUP %d with count=%d",thread->tid,thread->count);
     thread->count++;
     MUTEX_UNLOCK(&thread->mutex);
     return 0;
@@ -211,7 +212,6 @@ Perl_ithread_run(void * arg) {
 
 	PerlIO_flush((PerlIO*)NULL);
 	MUTEX_LOCK(&thread->mutex);
-	Perl_warn(aTHX_ "finished %d with count=%d",thread->tid,thread->count);
 	if (thread->detached == 1) {
 		MUTEX_UNLOCK(&thread->mutex);
 		Perl_ithread_destruct(aTHX_ thread);
@@ -233,7 +233,6 @@ ithread_to_SV(pTHX_ SV *obj, ithread *thread, char *classname, bool inc)
     if (inc) {
 	MUTEX_LOCK(&thread->mutex);
 	thread->count++;
-	Perl_warn(aTHX_ "SV for %d with count=%d",thread->tid,thread->count);
 	MUTEX_UNLOCK(&thread->mutex);
     }
     if (!obj)
@@ -297,18 +296,26 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 #else
 	thread->interp = perl_clone(aTHX, CLONEf_KEEP_PTR_TABLE);
 #endif
+	/* perl_clone leaves us in new interpreter's context.
+	   As it is tricky to spot implcit aTHX create a new scope
+	   with aTHX matching the context for the duration of 
+	   our work for new interpreter.
+	 */
+	{
+	    dTHXa(thread->interp);
 
-	clone_param.flags = 0;	
-	thread->init_function = Perl_sv_dup(thread->interp, init_function, &clone_param);
-	if (SvREFCNT(thread->init_function) == 0) {
-	    SvREFCNT_inc(thread->init_function);
-	}	
+            clone_param.flags = 0;	
+	    thread->init_function = sv_dup(init_function, &clone_param);
+	    if (SvREFCNT(thread->init_function) == 0) {
+		SvREFCNT_inc(thread->init_function);
+	    }	
 
-	thread->params = Perl_sv_dup(thread->interp,params, &clone_param);
-	SvREFCNT_inc(thread->params);
-	SvTEMP_off(thread->init_function);
-	ptr_table_free(PL_ptr_table);
-	PL_ptr_table = NULL;
+	    thread->params = sv_dup(params, &clone_param);
+	    SvREFCNT_inc(thread->params);
+	    SvTEMP_off(thread->init_function);
+	    ptr_table_free(PL_ptr_table);
+	    PL_ptr_table = NULL;
+	}
 	
 	PERL_SET_CONTEXT(aTHX);
 
@@ -379,7 +386,6 @@ Perl_ithread_join(pTHX_ SV *obj)
 {
     ithread *thread = SV_to_ithread(aTHX_ obj);
     MUTEX_LOCK(&thread->mutex);
-    Perl_warn(aTHX_ "joining %d with count=%d",thread->tid,thread->count);
     if (!thread->detached) {
 #ifdef WIN32
 	DWORD waitcode;
@@ -392,7 +398,6 @@ Perl_ithread_join(pTHX_ SV *obj)
 #else
 	pthread_join(thread->thr,&retval);
 #endif
-	Perl_warn(aTHX_ "joined %d with count=%d",thread->tid,thread->count);
 	/* We have finished with it */
 	MUTEX_LOCK(&thread->mutex);
 	thread->detached = 2;
@@ -426,7 +431,6 @@ void
 Perl_ithread_DESTROY(pTHX_ SV *sv)
 {
     ithread *thread = SV_to_ithread(aTHX_ sv);
-    Perl_warn(aTHX_ "DESTROY %d with count=%d",thread->tid,thread->count);
     sv_unmagic(SvRV(sv),PERL_MAGIC_shared_scalar);
 }
 
@@ -469,9 +473,6 @@ ithread_detach(ithread *thread)
 
 void
 ithread_DESTROY(SV *thread)
-
-void
-ithread_CLONE(SV *sv)
 
 BOOT:
 {
