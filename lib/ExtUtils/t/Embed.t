@@ -73,10 +73,8 @@ if ($^O eq 'VMS') {
 	push(@cmd,"-L$lib",File::Spec->catfile($lib,$Config{'libperl'}),$Config{'libc'});
     }
    }
-   else {
+   else { # Not MSWin32.
     push(@cmd,"-L$lib",'-lperl');
-   }
-   {
     local $SIG{__WARN__} = sub {
 	warn $_[0] unless $_[0] =~ /No library found for .*perl/
     };
