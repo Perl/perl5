@@ -1,7 +1,7 @@
 package bignum;
 require 5.005;
 
-$VERSION = '0.16';
+$VERSION = '0.17';
 use Exporter;
 @EXPORT_OK 	= qw( ); 
 @EXPORT 	= qw( inf NaN ); 
@@ -63,7 +63,7 @@ sub import
   my $self = shift;
 
   # some defaults
-  my $lib = 'Calc';
+  my $lib = '';
   my $upgrade = 'Math::BigFloat';
   my $downgrade = 'Math::BigInt';
 
@@ -140,9 +140,10 @@ sub import
       }
     require Math::BigInt if $_lite == 0;	# not already loaded?
     $class = 'Math::BigInt';			# regardless of MBIL or not
-    } 
+    }
+  push @import, 'lib' => $lib if $lib ne ''; 
   # Math::BigInt::Trace or plain Math::BigInt
-  $class->import(@import, upgrade => $upgrade, lib => $lib);
+  $class->import(@import, upgrade => $upgrade);
 
   if ($trace)
     {

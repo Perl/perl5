@@ -16,14 +16,13 @@ package Math::BigRat;
 require 5.005_03;
 use strict;
 
-require Exporter;
 use Math::BigFloat;
 use vars qw($VERSION @ISA $upgrade $downgrade
             $accuracy $precision $round_mode $div_scale $_trap_nan $_trap_inf);
 
-@ISA = qw(Exporter Math::BigFloat);
+@ISA = qw(Math::BigFloat);
 
-$VERSION = '0.14';
+$VERSION = '0.15';
 
 use overload;			# inherit overload from Math::BigFloat
 
@@ -61,7 +60,6 @@ my $MBI = 'Math::BigInt::Calc';
 
 my $nan = 'NaN';
 my $class = 'Math::BigRat';
-my $IMPORT = 0;
 
 sub isa
   {
@@ -201,6 +199,7 @@ sub new
       my $nf = Math::BigFloat->new($n,undef,undef);
       $self->{sign} = '+';
       return $self->bnan() if $nf->is_nan();
+
       $self->{_n} = $MBI->_copy( $nf->{_m} );	# get mantissa
 
       # now correct $self->{_n} due to $n
@@ -245,7 +244,7 @@ sub new
 	{
         $d = Math::BigInt->new($d,undef,undef) unless ref $d;
         $n = Math::BigInt->new($n,undef,undef) unless ref $n;
-	
+
         if ($n->{sign} =~ /^[+-]$/ && $d->{sign} =~ /^[+-]$/)
 	  { 
 	  # both parts are ok as integers (wierd things like ' 1e0'
@@ -448,6 +447,10 @@ sub _bnan
     {
     require Carp;
     my $class = ref($self);
+    # "$self" below will stringify the object, this blows up if $self is a
+    # partial object (happens under trap_nan), so fix it beforehand
+    $self->{_d} = $MBI->_zero() unless defined $self->{_d};
+    $self->{_n} = $MBI->_zero() unless defined $self->{_n};
     Carp::croak ("Tried to set $self to NaN in $class\::_bnan()");
     }
   $self->{_n} = $MBI->_zero();
@@ -463,6 +466,10 @@ sub _binf
     {
     require Carp;
     my $class = ref($self);
+    # "$self" below will stringify the object, this blows up if $self is a
+    # partial object (happens under trap_nan), so fix it beforehand
+    $self->{_d} = $MBI->_zero() unless defined $self->{_d};
+    $self->{_n} = $MBI->_zero() unless defined $self->{_n};
     Carp::croak ("Tried to set $self to inf in $class\::_binf()");
     }
   $self->{_n} = $MBI->_zero();
@@ -512,21 +519,25 @@ sub badd
   #  4   3                      4*3       12
 
   # we do not compute the gcd() here, but simple do:
-  #  5   7    5*3 + 7*4   41
+  #  5   7    5*3 + 7*4   43
   #  - + -  = --------- = --                 
   #  4   3       4*3      12
  
   # and bnorm() will then take care of the rest
 
+  # 5 * 3
   $x->{_n} = $MBI->_mul( $x->{_n}, $y->{_d});
 
+  # 7 * 4
   my $m = $MBI->_mul( $MBI->_copy( $y->{_n} ), $x->{_d} );
 
+  # 5 * 3 + 7 * 4
   ($x->{_n}, $x->{sign}) = _e_add( $x->{_n}, $m, $x->{sign}, $y->{sign});
 
+  # 4 * 3
   $x->{_d} = $MBI->_mul( $x->{_d}, $y->{_d});
 
-  # normalize and round
+  # normalize result, and possible round
   $x->bnorm()->round(@r);
   }
 
@@ -1305,7 +1316,6 @@ sub import
   my $self = shift;
   my $l = scalar @_;
   my $lib = ''; my @a;
-  $IMPORT++;
 
   for ( my $i = 0; $i < $l ; $i++)
     {
@@ -1333,7 +1343,8 @@ sub import
       }
     elsif ($_[$i] eq 'with')
       {
-      $MBI = $_[$i+1] || 'Math::BigInt::Calc';	# default Math::BigInt::Calc
+      # this argument is no longer used
+      #$MBI = $_[$i+1] || 'Math::BigInt::Calc';	# default Math::BigInt::Calc
       $i++;
       }
     else
@@ -1351,17 +1362,21 @@ sub import
       {
       $_ =~ tr/a-zA-Z0-9://cd;                    # limit to sane characters
       }
-    # MBI already loaded, so feed it our lib arguments
-    $MBI->import('lib' => $lib . join(",",@c), 'objectify');
+    $lib = join(",", @c);
     }
+  my @import = ('objectify');
+  push @import, lib => $lib if $lib ne '';
+
+  # MBI already loaded, so feed it our lib arguments
+  Math::BigInt->import( @import );
 
   $MBI = Math::BigFloat->config()->{lib};
 
   # register us with MBI to get notified of future lib changes
   Math::BigInt::_register_callback( $self, sub { $MBI = $_[0]; } );
   
-  # any non :constant stuff is handled by our parent, Exporter
-  # even if @_ is empty, to give it a chance
+  # any non :constant stuff is handled by our parent, Exporter (loaded
+  # by Math::BigFloat, even if @_ is empty, to give it a chance
   $self->SUPER::import(@a);             # for subclasses
   $self->export_to_level(1,$self,@a);   # need this, too
   }

@@ -1,7 +1,7 @@
 package bigrat;
 require 5.005;
 
-$VERSION = '0.07';
+$VERSION = '0.08';
 require Exporter;
 @ISA		= qw( Exporter );
 @EXPORT_OK	= qw( ); 
@@ -66,7 +66,7 @@ sub import
   # see also bignum->import() for additional comments
 
   # some defaults
-  my $lib = 'Calc'; my $upgrade = 'Math::BigFloat';
+  my $lib = ''; my $upgrade = 'Math::BigFloat';
 
   my @import = ( ':constant' );				# drive it w/ constant
   my @a = @_; my $l = scalar @_; my $j = 0;
@@ -138,8 +138,9 @@ sub import
     require Math::BigInt if $_lite == 0;        # not already loaded?
     $class = 'Math::BigInt';                    # regardless of MBIL or not
     }
+  push @import, 'lib' => $lib if $lib ne '';
   # Math::BigInt::Trace or plain Math::BigInt
-  $class->import(@import, upgrade => $upgrade, lib => $lib);
+  $class->import(@import, upgrade => $upgrade);
 
   require Math::BigFloat;
   Math::BigFloat->import( upgrade => 'Math::BigRat', ':constant' );
