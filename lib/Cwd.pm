@@ -1,5 +1,5 @@
 package Cwd;
-$VERSION = $VERSION = '2.18';
+$VERSION = $VERSION = '2.19';
 
 =head1 NAME
 

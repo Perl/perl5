@@ -1,5 +1,10 @@
 Revision history for Perl extension Cwd.
 
+2.19  Thu Jul 15 08:32:18 CDT 2004
+
+ - The abs_path($arg) fix from 2.18 didn't work for VMS, now it's
+   fixed there. [Craig Berry]
+
 2.18  Thu Jun 24 08:22:57 CDT 2004
 
  - Fixed a problem in which abs_path($arg) on some platforms could

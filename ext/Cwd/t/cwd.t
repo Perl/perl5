@@ -3,7 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     if ($ENV{PERL_CORE}) {
-	@INC = '../lib';
+        @INC = '../lib';
     }
 }
 use Cwd;
@@ -185,4 +185,3 @@ sub path_ends_with {
   my $bracketed_expect = quotemeta bracketed_form_path($expect);
   like( bracketed_form_path($dir), qr|$bracketed_expect$|i, (@_ ? shift : ()) );
 }
-
