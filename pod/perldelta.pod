@@ -360,11 +360,14 @@ The length argument of C<syswrite()> has become optional.
 
 =head2 Filehandles can be autovivified
 
-The construct C<open(my $fh, ...)> can be used to create filehandles
-more easily.  The filehandle will be automatically closed at the end
-of the scope of $fh, provided there are no other references to it.  This
-largely eliminates the need for typeglobs when opening filehandles
-that must be passed around, as in the following example:
+Similar to how constructs such as C<$x->[0]> autovivify a reference,
+open() now autovivifies a filehandle if the first argument is an
+uninitialized variable.  This allows the constructs C<open(my $fh, ...)> and
+C<open(local $fh,...)> to be used to create filehandles that will
+conveniently be closed automatically when the scope ends, provided there
+are no other references to them.  This largely eliminates the need for
+typeglobs when opening filehandles that must be passed around, as in the
+following example:
 
     sub myopen {
         open my $fh, "@_"

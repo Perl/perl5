@@ -5286,26 +5286,46 @@ Perl_ck_fun(pTHX_ OP *o)
 		    else {
 			I32 flags = OPf_SPECIAL;
 			I32 priv = 0;
+			PADOFFSET targ = 0;
+
 			/* is this op a FH constructor? */
 			if (is_handle_constructor(o,numargs)) {
-			    flags   = 0;                         
-			    /* Set a flag to tell rv2gv to vivify 
+			    char *name = Nullch;
+			    STRLEN len;
+
+			    flags = 0;
+			    /* Set a flag to tell rv2gv to vivify
 			     * need to "prove" flag does not mean something
 			     * else already - NI-S 1999/05/07
-			     */ 
-			    priv = OPpDEREF; 
-#if 0
-			    /* Helps with open($array[$n],...) 
-			       but is too simplistic - need to do selectively
-			    */
-			    mod(kid,type);
-#endif
+			     */
+			    priv = OPpDEREF;
+			    if (kid->op_type == OP_PADSV) {
+				SV **namep = av_fetch(PL_comppad_name,
+						      kid->op_targ, 4);
+				if (namep && *namep)
+				    name = SvPV(*namep, len);
+			    }
+			    else if (kid->op_type == OP_RV2SV
+				     && kUNOP->op_first->op_type == OP_GV)
+			    {
+				GV *gv = cGVOPx_gv(kUNOP->op_first);
+				name = GvNAME(gv);
+				len = GvNAMELEN(gv);
+			    }
+			    if (name) {
+				SV *namesv;
+				targ = pad_alloc(OP_RV2GV, SVs_PADTMP);
+				namesv = PL_curpad[targ];
+				SvUPGRADE(namesv, SVt_PV);
+				if (*name != '$')
+				    sv_setpvn(namesv, "$", 1);
+				sv_catpvn(namesv, name, len);
+			    }
 			}
 			kid->op_sibling = 0;
 			kid = newUNOP(OP_RV2GV, flags, scalar(kid));
-			if (priv) {
-			    kid->op_private |= priv;
-			}
+			kid->op_targ = targ;
+			kid->op_private |= priv;
 		    }
 		    kid->op_sibling = sibl;
 		    *tokid = kid;

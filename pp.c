@@ -241,26 +241,25 @@ PP(pp_rv2gv)
 		 * NI-S 1999/05/07
 		 */ 
 		if (PL_op->op_private & OPpDEREF) {
-		    GV *gv = (GV *) newSV(0);
-		    STRLEN len = 0;
-		    char *name = "";
-		    if (cUNOP->op_first->op_type == OP_PADSV) {
-			SV **namep = av_fetch(PL_comppad_name, cUNOP->op_first->op_targ, 4);
-			if (namep && *namep) {
-			    name = SvPV(*namep,len);
-			    if (!name) {
-				name = "";
-				len  = 0;
-			    }
-			}
+		    char *name;
+		    GV *gv;
+		    if (cUNOP->op_targ) {
+			STRLEN len;
+			SV *namesv = PL_curpad[cUNOP->op_targ];
+			name = SvPV(namesv, len);
+			gv = (GV*)NEWSV(0,len);
+			gv_init(gv, CopSTASH(PL_curcop), name, len, 0);
 		    }
-		    gv_init(gv, CopSTASH(PL_curcop), name, len, 0);
+		    else {
+			name = CopSTASHPV(PL_curcop);
+			gv = newGVgen(name);
+		    }
 		    sv_upgrade(sv, SVt_RV);
-		    SvRV(sv) = (SV *) gv;
+		    SvRV(sv) = (SV*)gv;
 		    SvROK_on(sv);
 		    SvSETMAGIC(sv);
 		    goto wasref;
-		}  
+		}
 		if (PL_op->op_flags & OPf_REF ||
 		    PL_op->op_private & HINT_STRICT_REFS)
 		    DIE(aTHX_ PL_no_usym, "a symbol");
