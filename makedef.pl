@@ -499,14 +499,13 @@ for my $syms (@syms) {
 # variables
 
 if ($define{'PERL_OBJECT'} || $define{'MULTIPLICITY'}) {
-    for my $f ($perlvars_h) {
+    for my $f ($perlvars_h, $intrpvar_h, $thrdvar_h) {
 	my $glob = readvar($f, sub { "Perl_" . $_[1] . $_[2] . "_ptr" });
-	emit_symbols $glob;
-	$glob = readvar($f);
 	emit_symbols $glob;
     }
-    for my $f ($intrpvar_h, $thrdvar_h) {
-	my $glob = readvar($f, sub { "Perl_" . $_[1] . $_[2] . "_ptr" });
+    # XXX AIX seems to want the perlvars.h symbols, for some reason
+    if ($PLATFORM eq 'aix') {
+	my $glob = readvar($perlvars_h);
 	emit_symbols $glob;
     }
 }
