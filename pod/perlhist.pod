@@ -2,14 +2,6 @@
 
 perlhist - the Perl history records
 
-=begin RCS
-
-#
-# $Id: perlhist.pod,v 1.2 2000/01/24 11:44:47 jhi Exp $
-#
-
-=end RCS
-
 =head1 DESCRIPTION
 
 This document aims to record the Perl source code releases.
@@ -354,6 +346,7 @@ the strings?).
           5.6.1-TRIAL3  2001-Mar-19
           5.6.1-foolish 2001-Apr-01     The "fools-gold" release.
           5.6.1         2001-Apr-08
+ Rafael	  5.6.2		2003-???-??
 
  Jarkko   5.7.0         2000-Sep-02     The 5.7 track: Development.
           5.7.1         2001-Apr-09
@@ -366,6 +359,7 @@ the strings?).
           5.8.1-RC1     2003-Jul-10
           5.8.1-RC2     2003-Jul-11
           5.8.1-RC3     2003-Jul-30
+          5.8.1-RC4     2003-Aug-01
 
 =head2 SELECTED RELEASE SIZES
 
