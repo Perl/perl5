@@ -3748,27 +3748,42 @@ Perl_sv_catpvn_mg(pTHX_ register SV *sv, register const char *ptr, register STRL
 /*
 =for apidoc sv_catsv
 
-Concatenates the string from SV C<ssv> onto the end of the string in SV
-C<dsv>.  Handles 'get' magic, but not 'set' magic.  See C<sv_catsv_mg>.
+Concatenates the string from SV C<ssv> onto the end of the string in
+SV C<dsv>.  Modifies C<dsv> but not C<ssv>.  Handles 'get' magic, but
+not 'set' magic.  See C<sv_catsv_mg>.
 
-=cut
-*/
+=cut */
 
 void
 Perl_sv_catsv(pTHX_ SV *dstr, register SV *sstr)
 {
-    char *s;
-    STRLEN len;
+    char *spv;
+    STRLEN slen;
     if (!sstr)
 	return;
-    if ((s = SvPV(sstr, len))) {
-	if (DO_UTF8(sstr)) {
-	    sv_utf8_upgrade(dstr);
-	    sv_catpvn(dstr,s,len);
-	    SvUTF8_on(dstr);
+    if ((spv = SvPV(sstr, slen))) {
+	bool dutf8 = DO_UTF8(dstr);
+	bool sutf8 = DO_UTF8(sstr);
+
+	if (dutf8 == sutf8)
+	    sv_catpvn(dstr,spv,slen);
+	else {
+	    if (dutf8) {
+		SV* cstr = newSVsv(sstr);
+		char *cpv;
+		STRLEN clen;
+
+		sv_utf8_upgrade(cstr);
+		cpv = SvPV(cstr,clen);
+		sv_catpvn(dstr,cpv,clen);
+		sv_2mortal(cstr);
+	    }
+	    else {
+		sv_utf8_upgrade(dstr);
+		sv_catpvn(dstr,spv,slen);
+		SvUTF8_on(dstr);
+	    }
 	}
-	else
-	    sv_catpvn(dstr,s,len);
     }
 }
 
