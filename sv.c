@@ -10921,6 +10921,10 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* sort() routine */
     PL_sort_RealCmp	= proto_perl->Isort_RealCmp;
 
+    /* Not really needed/useful since the reenrant_retint is "volatile",
+     * but do it for consistency's sake. */
+    PL_reentrant_retint	= proto_perl->Ireentrant_retint;
+
     /* swatch cache */
     PL_last_swash_hv	= Nullhv;	/* reinits on demand */
     PL_last_swash_klen	= 0;

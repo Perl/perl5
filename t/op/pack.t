@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 5849;
+plan tests => 5852;
 
 use strict;
 use warnings;
@@ -1100,3 +1100,10 @@ ok(pack('u2', 'AA'), "[perl #8026]"); # used to hang and eat RAM in perl 5.7.2
 
 ok(1, "fake success (change #18751, feature not present in 5.8.1)");
 
+{
+    my $a = "X\t01234567\n" x 100;
+    my @a = unpack("(a1 c/a)*", $a);
+    is(scalar @a, 200,       "[perl #15288]");
+    is($a[-1], "01234567\n", "[perl #15288]");
+    is($a[-2], "X",          "[perl #15288]");
+}

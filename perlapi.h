@@ -490,6 +490,8 @@ END_EXTERN_C
 #define PL_ptr_table		(*Perl_Iptr_table_ptr(aTHX))
 #undef  PL_reentrant_buffer
 #define PL_reentrant_buffer	(*Perl_Ireentrant_buffer_ptr(aTHX))
+#undef  PL_reentrant_retint
+#define PL_reentrant_retint	(*Perl_Ireentrant_retint_ptr(aTHX))
 #undef  PL_regex_pad
 #define PL_regex_pad		(*Perl_Iregex_pad_ptr(aTHX))
 #undef  PL_regex_padav

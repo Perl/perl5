@@ -539,6 +539,8 @@ PERLVAR(Isignals, U32)	/* Using which pre-5.8 signals */
 
 PERLVAR(Istashcache,	HV *)		/* Cache to speed up S_method_common */
 
+PERLVAR(Ireentrant_retint, int)	/* Integer return value from reentrant functions */
+
 /* Don't forget to add your variable also to perl_clone()! */
 
 /* New variables must be added to the very end, before this comment,

@@ -365,6 +365,7 @@ EOF
 EOF
         }
     }
+    return if @F == 1;
     push @define, <<EOF;
 
 /* Any of the @F using \L$n? */
@@ -678,7 +679,7 @@ EOF
 		$w = ", $w" if length $v;
 	    }
 	    my $call = "${func}_r($v$w)";
-	    $call = "((errno = $call))" if $r eq 'I' && $func ne 'random';
+	    $call = "((PL_reentrant_retint = $call))" if $r eq 'I' && $func ne 'random';
 	    push @wrap, <<EOF;
 #   if !defined($func) && ${FUNC}_R_PROTO == REENTRANT_PROTO_$p
 EOF
@@ -689,9 +690,15 @@ EOF
 	    } else {
 		if ($func =~ /^get/) {
 		    my $rv = $v ? ", $v" : "";
-		    push @wrap, <<EOF;
-#       define $func($v) ($call$test ? $true : (errno == ERANGE ? Perl_reentrant_retry("$func"$rv) : 0))
+		    if ($r eq 'I') {
+			push @wrap, <<EOF;
+#       define $func($v) ($call$test ? $true : (((PL_reentrant_retint > 0 && PL_reentrant_retint == ERANGE) || (errno == ERANGE)) ? Perl_reentrant_retry("$func"$rv) : 0))
 EOF
+		    } else {
+			push @wrap, <<EOF;
+#       define $func($v) ($call$test ? $true : ((errno == ERANGE) ? Perl_reentrant_retry("$func"$rv) : 0))
+EOF
+                    }
 		} else {
 		    push @wrap, <<EOF;
 #       define $func($v) ($call$test ? $true : 0)
@@ -722,6 +729,7 @@ typedef struct {
 /* The wrappers. */
 
 @wrap
+
 #endif /* USE_REENTRANT_API */
  
 #endif
@@ -788,7 +796,7 @@ Perl_reentrant_retry(const char *f, ...)
     dTHX;
     void *retptr = NULL;
 #ifdef USE_REENTRANT_API
-#  if defined(USE_HOSTENT_BUFFER) || defined(USE_GRENT_BUFFER) || defined(USE_NETENT_BUFFER) || defined(USE_PWENT_BUFFER) || defined(USE_PROTOENT_BUFFER) || defined(USE_SRVENT_BUFFER)
+#  if defined(USE_HOSTENT_BUFFER) || defined(USE_GRENT_BUFFER) || defined(USE_NETENT_BUFFER) || defined(USE_PWENT_BUFFER) || defined(USE_PROTOENT_BUFFER) || defined(USE_SERVENT_BUFFER)
     void *p0;
 #  endif
 #  if defined(USE_SERVENT_BUFFER)

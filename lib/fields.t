@@ -92,7 +92,9 @@ my %expect = (
 );
 
 print "1..", int(keys %expect)+21, "\n";
+
 my $testno = 0;
+
 while (my($class, $exp) = each %expect) {
    no strict 'refs';
    my $fstr = fstr(\%{$class."::FIELDS"});
@@ -239,4 +241,25 @@ package Test::Version3;
 use base qw(Has::Version_0);
 print "#$Has::Version_0::VERSION\nnot " unless $Has::Version_0::VERSION == 0;
 print "ok ", ++$testno ," # Version_0\n";
+
+package Test::FooBar;
+
+use fields qw(a b c);
+
+sub new {
+    my $self = fields::new(shift);
+    %$self = @_ if @_;
+    $self;
+}
+
+package main;
+
+{
+    my $x = Test::FooBar->new( a => 1, b => 2);
+
+    is(ref $x, 'Test::FooBar', 'x is a Test::FooBar');
+    ok(exists $x->{a}, 'x has a');
+    ok(exists $x->{b}, 'x has b');
+    is(scalar keys %$x, 2, 'x has two fields');
+}
 
