@@ -390,6 +390,14 @@ libswanted_uselargefiles="`getconf LFS_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ 
 esac
 EOCBU
 
+# This is truly a mess.
+case "$usemorebits" in
+"$define"|true|[yY]*)
+	use64bitint="$define"    
+	uselongdouble="$define"    
+	;;
+esac
+
 cat > UU/use64bitint.cbu <<'EOCBU'
 # This script UU/use64bitint.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use 64 bit integers.
