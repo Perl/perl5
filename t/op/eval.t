@@ -2,7 +2,7 @@
 
 # $RCSfile: eval.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:48 $
 
-print "1..16\n";
+print "1..22\n";
 
 eval 'print "ok 1\n";';
 
@@ -54,4 +54,21 @@ eval {
     1;
 } || print "ok 15\n$@";
 
+# check whether eval EXPR determines value of EXPR correctly
 
+{
+  my @a = qw(a b c d);
+  my @b = eval @a;
+  print "@b" eq '4' ? "ok 17\n" : "not ok 17\n";
+  print $@ ? "not ok 18\n" : "ok 18\n";
+
+  my $a = q[defined(wantarray) ? (wantarray ? ($b='A') : ($b='S')) : ($b='V')];
+  my $b;
+  @a = eval $a;
+  print "@a" eq 'A' ? "ok 19\n" : "# $b\nnot ok 19\n";
+  print   $b eq 'A' ? "ok 20\n" : "# $b\nnot ok 20\n";
+  $_ = eval $a;
+  print   $b eq 'S' ? "ok 21\n" : "# $b\nnot ok 21\n";
+  eval $a;
+  print   $b eq 'V' ? "ok 22\n" : "# $b\nnot ok 22\n";
+}

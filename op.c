@@ -3873,6 +3873,8 @@ ck_eval(OP *o)
 	    enter->op_other = o;
 	    return o;
 	}
+	else
+	    scalar(kid);
     }
     else {
 	op_free(o);
