@@ -21,9 +21,9 @@ my @prgs = () ;
 my @w_files = () ;
 
 if (@ARGV)
-  { print "ARGV = [@ARGV]\n" ; @w_files = map { s#^#./pragma/warn/#; $_ } @ARGV }
+  { print "ARGV = [@ARGV]\n" ; @w_files = map { s#^#./lib/warnings/#; $_ } @ARGV }
 else
-  { @w_files = sort glob("pragma/warn/*") }
+  { @w_files = sort glob("lib/warnings/*") }
 
 my $files = 0;
 foreach my $file (@w_files) {

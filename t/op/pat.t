@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..630\n";
+print "1..632\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1764,4 +1764,22 @@ EOT
     print "not " unless "\N{KATAKANA LETTER SMALL A}" =~ /\p{InKatakana}/;
     print "ok 630\n";
 }
+
+$_ = "foo";
+
+eval <<"EOT"; die if $@;
+  /f
+   o\r
+   o
+   \$
+  /x && print "ok 631\n";
+EOT
+
+eval <<"EOT"; die if $@;
+  /f
+   o
+   o
+   \$\r
+  /x && print "ok 632\n";
+EOT
 

@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Fri Jun 15 02:15:37 EET DST 2001
+ * Configuration time: Wed Jun 20 08:48:18 EET DST 2001
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1019,7 +1019,7 @@
  *	4 and 8. The default is eight, for safety.
  */
 #if defined(USE_CROSS_COMPILE) || defined(MULTIARCH)
-#define MEM_ALIGNBYTES 8
+#  define MEM_ALIGNBYTES 8
 #else
 #define MEM_ALIGNBYTES 8
 #endif
@@ -1362,7 +1362,7 @@
  *		d_Gconvert='sprintf((b),"%.*g",(n),(x))'
  *	The last two assume trailing zeros should not be kept.
  */
-#define Gconvert(x,n,t,b) gcvt((x),(n),(b))
+#define Gconvert(x,n,t,b) sprintf((b),"%.*g",(n),(x))
 
 /* HAS_GETCWD:
  *	This symbol, if defined, indicates that the getcwd routine is
@@ -2324,7 +2324,7 @@
  *	Note that if fflushNULL is defined, fflushall will not
  *	even be probed for and will be left undefined.
  */
-/*#define	FFLUSH_NULL 		/ **/
+#define	FFLUSH_NULL 		/**/
 /*#define	FFLUSH_ALL 		/ **/
 
 /* Fpos_t:
@@ -3371,12 +3371,6 @@
  *		extern int flock(int, int);
  */
 /*#define	HAS_FLOCK_PROTO	/ **/
-
-/* HAS_REALPATH:
- *	This symbol, if defined, indicates that the realpath routine is
- *	available to do resolve paths.
- */
-#define HAS_REALPATH		/**/
 
 /* HAS_SIGPROCMASK:
  *	This symbol, if defined, indicates that the sigprocmask

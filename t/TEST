@@ -190,7 +190,8 @@ EOT
 		or print "can't deparse '$deparse': $!.\n";
 	}
 	elsif ($type eq 'perl') {
-	    my $run = "./perl $testswitch $switch $utf $test |";
+	    my $perl = $ENV{PERL} || './perl';
+	    my $run = "$perl $testswitch $switch $utf $test |";
 	    open(RESULTS,$run) or print "can't run '$run': $!.\n";
 	}
 	else {
@@ -250,9 +251,11 @@ EOT
 	}
 	if ($ENV{PERL_3LOG}) {
 	    my $tpp = $test;
+	    $tpp =~ s:^../::;
 	    $tpp =~ s:/:_:g;
 	    $tpp =~ s:\.t$::;
-	    rename("perl.3log", "perl.3log.$tpp");
+	    rename("perl.3log", "perl.3log.$tpp") ||
+		die "rename: perl3.log to perl.3log.$tpp: $!\n";
 	}
 	$next = $next - 1;
 	if ($ok && $next == $max) {

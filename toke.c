@@ -1374,7 +1374,7 @@ S_scan_const(pTHX_ char *start)
 	else if (*s == '$') {
 	    if (!PL_lex_inpat)	/* not a regexp, so $ must be var */
 		break;
-	    if (s + 1 < send && !strchr("()| \n\t", s[1]))
+	    if (s + 1 < send && !strchr("()| \r\n\t", s[1]))
 		break;		/* in regexp, $ might be tail anchor */
 	}
 

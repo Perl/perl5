@@ -135,5 +135,8 @@ try_strftime(27, "Fri Mar 31 00:00:00 2000 091", 0,0,0, 31,2,100);
 
 $| = 0;
 # The following line assumes buffered output, which may be not true with EMX:
-print '@#!*$@(!@#$' unless ($^O eq 'os2' || $^O eq 'uwin' || $^O eq 'os390');
+print '@#!*$@(!@#$' unless ($^O eq 'os2' || $^O eq 'uwin' || $^O eq 'os390' ||
+			    (defined $ENV{PERLIO} &&
+			     $ENV{PERLIO} eq 'unix' &&
+			     $Config::Config{useperlio}));
 _exit(0);

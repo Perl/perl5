@@ -2149,10 +2149,6 @@ $   ans = F$EDIT(ans,"TRIM,COMPRESS,LOWERCASE")
 $   IF ans.eqs."decc" then Has_Dec_C_Sockets = "T"
 $   IF ans.eqs."socketshr" then Has_socketshr = "T"
 $ ENDIF
-$ IF Has_Dec_C_Sockets .or. Has_socketshr
-$ THEN
-$   static_ext = f$edit(static_ext+" "+"Socket","trim,compress")
-$ ENDIF
 $!
 $!
 $! Ask if they want to build with VMS_DEBUG perl
@@ -2485,7 +2481,10 @@ $ dflt = dflt - "GDBM_File"           ! needs porting/special library
 $ dflt = dflt - "IPC/SysV"            ! needs to be ported
 $ dflt = dflt - "NDBM_File"           ! needs porting/special library
 $ dflt = dflt - "ODBM_File"           ! needs porting/special library
-$ dflt = dflt - "Socket"              ! on VMS is optional static extension
+$ IF .NOT. Has_socketshr .AND. .NOT. Has_Dec_C_Sockets
+$ THEN
+$   dflt = dflt - "Socket"            ! optional on VMS
+$ ENDIF
 $ dflt = F$EDIT(dflt,"TRIM,COMPRESS")
 $!
 $! Ask for their default list of extensions to build

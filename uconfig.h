@@ -1015,7 +1015,7 @@
  *	4 and 8. The default is eight, for safety.
  */
 #if defined(USE_CROSS_COMPILE) || defined(MULTIARCH)
-#define MEM_ALIGNBYTES 8
+#  define MEM_ALIGNBYTES 8
 #else
 #define MEM_ALIGNBYTES 4
 #endif
@@ -3367,12 +3367,6 @@
  *		extern int flock(int, int);
  */
 /*#define	HAS_FLOCK_PROTO	/ **/
-
-/* HAS_REALPATH:
- *	This symbol, if defined, indicates that the realpath routine is
- *	available to do resolve paths.
- */
-/*#define HAS_REALPATH		/ **/
 
 /* HAS_SIGPROCMASK:
  *	This symbol, if defined, indicates that the sigprocmask

@@ -56,13 +56,13 @@ long lastxycount[MAXXCOUNT][MAXYCOUNT];
 #  define FD_CLOEXEC 1			/* NeXT needs this */
 #endif
 
-/* paranoid version of system's malloc() */
-
 /* NOTE:  Do not call the next three routines directly.  Use the macros
  * in handy.h, so that we can easily redefine everything to do tracking of
  * allocated hunks back to the original New to track down any memory leaks.
  * XXX This advice seems to be widely ignored :-(   --AD  August 1996.
  */
+
+/* paranoid version of system's malloc() */
 
 Malloc_t
 Perl_safesysmalloc(MEM_SIZE size)
@@ -742,7 +742,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
  */
 
 /* If SvTAIL is actually due to \Z or \z, this gives false positives
-   if PL_multiline.  In fact if !PL_multiline the autoritative answer
+   if PL_multiline.  In fact if !PL_multiline the authoritative answer
    is not supported yet. */
 
 char *
@@ -781,8 +781,14 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
     /* The value of pos we can stop at: */
     stop_pos = SvCUR(bigstr) - end_shift - (SvCUR(littlestr) - 1 - previous);
     if (previous + start_shift > stop_pos) {
+/*
+  stop_pos does not include SvTAIL in the count, so this check is incorrect
+  (I think) - see [ID 20010618.006] and t/op/study.t. HVDS 2001/06/19
+*/
+#if 0
 	if (previous + start_shift == stop_pos + 1) /* A fake '\n'? */
 	    goto check_tail;
+#endif
 	return Nullch;
     }
     while (pos < previous + start_shift) {
@@ -3618,6 +3624,9 @@ Perl_sv_getcwd(pTHX_ register SV *sv)
 
     SvGROW(sv, 128);
     while ((getcwd(SvPVX(sv), SvLEN(sv)-1) == NULL) && errno == ERANGE) {
+        if (SvLEN(sv) + 128 >= MAXPATHLEN) {
+            SV_CWD_RETURN_UNDEF;
+	}
         SvGROW(sv, SvLEN(sv) + 128);
     }
     SvCUR_set(sv, strlen(SvPVX(sv)));
@@ -3681,6 +3690,10 @@ Perl_sv_getcwd(pTHX_ register SV *sv)
             SV_CWD_RETURN_UNDEF;
         }
 
+        if (pathlen + namelen + 1 >= MAXPATHLEN) {
+            SV_CWD_RETURN_UNDEF;
+	}
+
         SvGROW(sv, pathlen + namelen + 1);
 
         if (pathlen) {
@@ -3731,61 +3744,43 @@ Perl_sv_getcwd(pTHX_ register SV *sv)
 /*
 =for apidoc sv_realpath
 
-Wrap or emulate realpath(3).
+Emulate realpath(3).
+
+The real realpath() is not used because it's a known can of worms.
+We may have bugs but hey, they are our very own.
 
 =cut
  */
 int
-Perl_sv_realpath(pTHX_ SV *sv, char *path, STRLEN len)
+Perl_sv_realpath(pTHX_ SV *sv, char *path, STRLEN maxlen)
 {
 #ifndef PERL_MICRO
-    char name[MAXPATHLEN] = { 0 }, *s;
+    char name[MAXPATHLEN]    = { 0 };
+    char dotdots[MAXPATHLEN] = { 0 };
+    char *s;
     STRLEN pathlen, namelen;
-
-    /* Don't use strlen() to avoid running off the end. */
-    s = memchr(path, '\0', MAXPATHLEN);
-    pathlen = s ? s - path : MAXPATHLEN;
-
-#ifdef HAS_REALPATH
-
-    /* Be paranoid about the use of realpath(),
-     * it is an infamous source of buffer overruns. */
-
-    /* Is the source buffer too long? */
-    if (pathlen == MAXPATHLEN) {
-        Perl_warn(aTHX_ "sv_realpath: realpath(\"%s\"): %c= (MAXPATHLEN = %d)",
-                  path, s ? '=' : '>', MAXPATHLEN);
-        SV_CWD_RETURN_UNDEF;
-    }
-
-    /* Here goes nothing. */
-    if (realpath(path, name) == NULL) {
-        Perl_warn(aTHX_ "sv_realpath: realpath(\"%s\"): %s",
-                  path, Strerror(errno));
-        SV_CWD_RETURN_UNDEF;
-    }
-
-    /* Is the destination buffer too long?
-     * Don't use strlen() to avoid running off the end. */
-    s = memchr(name, '\0', MAXPATHLEN);
-    namelen = s ? s - name : MAXPATHLEN;
-    if (namelen == MAXPATHLEN) {
-        Perl_warn(aTHX_ "sv_realpath: realpath(\"%s\"): %c= (MAXPATHLEN = %d)",
-                  path, s ? '=' : '>', MAXPATHLEN);
-        SV_CWD_RETURN_UNDEF;
-    }
-
-    /* The coast is clear? */
-    sv_setpvn(sv, name, namelen);
-    SvPOK_only(sv);
-
-    return TRUE;
-#else
-    {
     DIR *parent;
     Direntry_t *dp;
-    char dotdots[MAXPATHLEN] = { 0 };
     struct stat cst, pst, tst;
+
+    if (!sv || !path || !maxlen) {
+        Perl_warn(aTHX_ "sv_realpath: realpath(0x%x, 0x%x, "")",
+                  sv, path, maxlen);
+        SV_CWD_RETURN_UNDEF;
+    }
+
+    /* Is the source buffer too long?
+     * Don't use strlen() to avoid running off the end. */
+    if (maxlen >= MAXPATHLEN)
+        pathlen = maxlen;
+    else {
+        s = memchr(path, '\0', MAXPATHLEN);
+	pathlen = s ? s - path : MAXPATHLEN;
+    }
+    if (pathlen >= MAXPATHLEN) {
+        Perl_warn(aTHX_ "sv_realpath: source too large");
+        SV_CWD_RETURN_UNDEF;
+    }
 
     if (PerlLIO_stat(path, &cst) < 0) {
         Perl_warn(aTHX_ "sv_realpath: stat(\"%s\"): %s",
@@ -3795,10 +3790,9 @@ Perl_sv_realpath(pTHX_ SV *sv, char *path, STRLEN len)
 
     (void)SvUPGRADE(sv, SVt_PV);
 
-    if (!len) {
-        len = strlen(path);
-    }
-    Copy(path, dotdots, len, char);
+    Copy(path, dotdots, maxlen, char);
+
+    pathlen = 0;
 
     for (;;) {
         strcat(dotdots, "/..");
@@ -3858,6 +3852,11 @@ Perl_sv_realpath(pTHX_ SV *sv, char *path, STRLEN len)
                 SV_CWD_RETURN_UNDEF;
             }
 
+	    if (pathlen + namelen + 1 >= MAXPATHLEN) {
+	        Perl_warn(aTHX_ "sv_realpath: too long name");
+                SV_CWD_RETURN_UNDEF;
+	    }
+
             SvGROW(sv, pathlen + namelen + 1);
             if (pathlen) {
                 /* shift down */
@@ -3884,10 +3883,8 @@ Perl_sv_realpath(pTHX_ SV *sv, char *path, STRLEN len)
     SvPOK_only(sv);
 
     return TRUE;
-    }
-#endif
 #else
-    return FALSE;
+    return FALSE; /* MICROPERL */
 #endif
 }
 
