@@ -550,7 +550,6 @@ ext/Time/Piece/Piece.xs		Time::Piece extension
 ext/Time/Piece/README		Time::Piece extension
 ext/Time/Piece/Seconds.pm	Time::Piece extension
 ext/util/make_ext		Used by Makefile to execute extension Makefiles
-ext/util/mkbootstrap		Turns ext/*/*_BS into bootstrap info
 ext/XS/Typemap/Makefile.PL	XS::Typemap extension
 ext/XS/Typemap/README		XS::Typemap extension
 ext/XS/Typemap/stdio.c		XS::Typemap extension
@@ -1529,7 +1528,6 @@ NetWare/NWTInfo.c		Netware port
 NetWare/nwtinfo.h		Netware port
 NetWare/NWUtil.c		Netware port
 NetWare/nwutil.h		Netware port
-NetWare/perlsdio.h		Netware port
 NetWare/t/NWModify.pl		Netware port
 NetWare/t/NWScripts.pl		Netware port
 NetWare/t/Readme.txt		Netware port

@@ -8,11 +8,11 @@
  */
 
 /*
- * FILENAME		:	iperlhost.h
- * DESCRIPTION	:	IPerlHost class file.
- * Author		:	SGP
- * Date			:	January 2001.
- *
+ * FILENAME     :   iperlhost.h
+ * DESCRIPTION  :   IPerlHost class file.
+ * Author       :   SGP
+ * Date Created :   January 2001.
+ * Date Modified:   July 2nd 2001.
  */
 
 
@@ -34,7 +34,8 @@ public:
 	virtual int PerlParse(PerlInterpreter *my_perl,int argc, char** argv, char** env) = 0;
 	virtual int PerlRun(PerlInterpreter *my_perl) = 0;
 	virtual void PerlDestroy(PerlInterpreter *my_perl) = 0;
-
+	virtual bool RegisterWithThreadTable(void)=0;
+	virtual bool UnregisterWithThreadTable(void)=0;
 };
 
 extern "C" IPerlHost* AllocStdPerl();
