@@ -6437,8 +6437,7 @@ Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
 			     s += UTF8SKIP(s);
 		   if (s >= send)
 			s = send;
-                   if (utf8_mg_pos_init(sv, &mg, &cache, 2, lenp, s, start))
-			cache[2] += *offsetp;
+                   utf8_mg_pos_init(sv, &mg, &cache, 2, lenp, s, start);
 	      }
 	      *lenp = s - start;
 	 }
@@ -6531,6 +6530,11 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 
 			cache[0] -= ubackw;
 			*offsetp = cache[0];
+
+			/* Drop the stale "length" cache */
+			cache[2] = 0;
+			cache[3] = 0;
+
 			return;
 		    }
 		}
@@ -6568,6 +6572,9 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 
 	    cache[0] = len;
 	    cache[1] = *offsetp;
+	    /* Drop the stale "length" cache */
+	    cache[2] = 0;
+	    cache[3] = 0;
 	}
 
 	*offsetp = len;
