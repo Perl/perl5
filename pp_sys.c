@@ -4622,7 +4622,7 @@ PP(pp_gnetent)
 
     if (which == OP_GNBYNAME)
 #ifdef HAS_GETNETBYNAME
-	nent = PerlSock_getnetbyname(POPpx);
+	nent = PerlSock_getnetbyname(POPpbytex);
 #else
         DIE(aTHX_ PL_no_sock_func, "getnetbyname");
 #endif
@@ -4710,7 +4710,7 @@ PP(pp_gprotoent)
 
     if (which == OP_GPBYNAME)
 #ifdef HAS_GETPROTOBYNAME
-	pent = PerlSock_getprotobyname(POPpx);
+	pent = PerlSock_getprotobyname(POPpbytex);
 #else
 	DIE(aTHX_ PL_no_sock_func, "getprotobyname");
 #endif
@@ -4793,8 +4793,8 @@ PP(pp_gservent)
 
     if (which == OP_GSBYNAME) {
 #ifdef HAS_GETSERVBYNAME
-	char *proto = POPpx;
-	char *name = POPpx;
+	char *proto = POPpbytex;
+	char *name = POPpbytex;
 
 	if (proto && !*proto)
 	    proto = Nullch;
@@ -4806,7 +4806,7 @@ PP(pp_gservent)
     }
     else if (which == OP_GSBYPORT) {
 #ifdef HAS_GETSERVBYPORT
-	char *proto = POPpx;
+	char *proto = POPpbytex;
 	unsigned short port = POPu;
 
 #ifdef HAS_HTONS
@@ -5040,7 +5040,7 @@ PP(pp_gpwent)
 
     switch (which) {
     case OP_GPWNAM:
-	pwent  = getpwnam(POPpx);
+	pwent  = getpwnam(POPpbytex);
 	break;
     case OP_GPWUID:
 	pwent = getpwuid((Uid_t)POPi);
@@ -5241,7 +5241,7 @@ PP(pp_ggrent)
     STRLEN n_a;
 
     if (which == OP_GGRNAM)
-	grent = (struct group *)getgrnam(POPpx);
+	grent = (struct group *)getgrnam(POPpbytex);
     else if (which == OP_GGRGID)
 	grent = (struct group *)getgrgid(POPi);
     else
