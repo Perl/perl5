@@ -23,7 +23,7 @@ void XS_attributes_bootstrap(pTHXo_ CV *cv);
  *
  * The various bootstrap definitions can take care of doing
  * package-specific newXS() calls.  Since the layout of the
- * bundled lib/*.pm files is in a version-specific directory,
+ * bundled *.pm files is in a version-specific directory,
  * version checks in these bootstrap calls are optional.
  */
 
