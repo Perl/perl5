@@ -2457,16 +2457,76 @@ PP(pp_i_divide)
     }
 }
 
+STATIC
+PP(pp_i_modulo_0)
+{
+     /* This is the vanilla old i_modulo. */
+     dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
+     {
+	  dPOPTOPiirl;
+	  if (!right)
+	       DIE(aTHX_ "Illegal modulus zero");
+	  SETi( left % right );
+	  RETURN;
+     }
+}
+
+STATIC
+PP(pp_i_modulo_1)
+{
+#ifdef __GLIBC__
+     /* This is the i_modulo with the workaround for the _moddi3 bug
+      * in (at least) glibc 2.2.5 (the abs() is the workaround).
+      * See below for pp_i_modulo. */
+     dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
+     {
+	  dPOPTOPiirl;
+	  if (!right)
+	       DIE(aTHX_ "Illegal modulus zero");
+	  SETi( left % abs(right) );
+	  RETURN;
+     }
+#endif
+}
+
 PP(pp_i_modulo)
 {
-    dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
-    {
-      dPOPTOPiirl;
-      if (!right)
-	DIE(aTHX_ "Illegal modulus zero");
-      SETi( left % right );
-      RETURN;
-    }
+     dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
+     {
+	  dPOPTOPiirl;
+	  if (!right)
+	       DIE(aTHX_ "Illegal modulus zero");
+	  /* The assumption is to use hereafter the old vanilla version... */
+	  PL_op->op_ppaddr =
+	       PL_ppaddr[OP_I_MODULO] =
+	           &Perl_pp_i_modulo_0;
+	  /* .. but if we have glibc, we might have a buggy _moddi3
+	   * (at least glicb 2.2.5 is known to have this bug), in other
+	   * words our integer modulus with negative quad as the second
+	   * argument might be broken.  Test for this and re-patch the
+	   * opcode dispatch table if that is the case, remembering to
+	   * also apply the workaround so that this first round works
+	   * right, too.  See [perl #9402] for more information. */
+#if defined(__GLIBC__) && IVSIZE == 8
+	  {
+	       IV l =   3;
+	       IV r = -10;
+	       /* Cannot do this check with inlined IV constants since
+		* that seems to work correctly even with the buggy glibc. */
+	       if (l % r == -3) {
+		    /* Yikes, we have the bug.
+		     * Patch in the workaround version. */
+		    PL_op->op_ppaddr =
+			 PL_ppaddr[OP_I_MODULO] =
+			     &Perl_pp_i_modulo_1;
+		    /* Make certain we work right this time, too. */
+		    right = abs(right);
+	       }
+	  }
+#endif
+	  SETi( left % right );
+	  RETURN;
+     }
 }
 
 PP(pp_i_add)
