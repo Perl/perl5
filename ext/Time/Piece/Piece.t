@@ -82,9 +82,14 @@ print "ok 21\n";
 
 # In GMT there should be no daylight savings ever.
 
-my $dst = ( ((CORE::gmtime(0))[8] == -1) ? -1 : 0);	# OS/2 EMX bug
-my $dst_mess = ($dst ? ' # skipped: gmtime(0) thinks DST == -1' : '');
-
+my $dst      = 0;;
+my $dst_mess = '';
+if ($^O eq 'os2') {
+    # OS/2 EMX bug
+    $dst      = CORE::gmtime(0))[8];
+    $dst_mess = ' # skipped: gmtime(0) thinks DST gmtime 0 == -1';
+	     
+} 	
 print "not " unless $t->isdst == $dst;
 print "ok 22$dst_mess\n";
 
