@@ -35,7 +35,7 @@ sub ok ($;$) {
 package main;
 require Test::More;
 
-push @INC, 't', '.';
+@INC = ('../lib', 'lib/Test/More');
 require Catch;
 my($out, $err) = Catch::caught();
 

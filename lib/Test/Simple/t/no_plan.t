@@ -21,7 +21,7 @@ package main;
 
 require Test::Simple;
 
-push @INC, 't', '.';
+@INC = ('../lib', 'lib/Test/Simple');
 require Catch;
 my($out, $err) = Catch::caught();
 

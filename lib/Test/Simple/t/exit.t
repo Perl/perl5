@@ -33,8 +33,13 @@ my %Tests = (
 print "1..".keys(%Tests)."\n";
 
 chdir 't' if -d 't';
+use File::Spec;
+my $lib = File::Spec->catdir('lib', 'Test', 'Simple', 'sample_tests');
 while( my($test_name, $exit_code) = each %Tests ) {
-    my $wait_stat = system(qq{$^X -"I../blib/lib" sample_tests/$test_name});
+    my $file = File::Spec->catfile($lib, $test_name);
+    my $wait_stat = system(qq{$^X -"I../lib" -"Ilib/Test/Simple" $file});
     My::Test::ok( $wait_stat >> 8 == $exit_code, 
                   "$test_name exited with $exit_code" );
 }
+
+
