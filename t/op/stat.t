@@ -49,7 +49,7 @@ SKIP: {
 }
 
 SKIP: {
-  skip "mtime and ctime not reliable", 2 
+  skip "mtime and ctime not reliable", 2
     if $Is_MSWin32 or $Is_NetWare or $Is_Cygwin or $Is_Dos;
 
   ok( $mtime,           'mtime' );
@@ -88,19 +88,23 @@ SKIP: {
 
     SKIP: {
         my $cwd = File::Spec->rel2abs($Curdir);
-        skip "Solaris tmpfs has different mtime/ctime link semantics", 2 
-                                     if $Is_Solaris and $cwd =~ m#^/tmp# and 
+        skip "Solaris tmpfs has different mtime/ctime link semantics", 2
+                                     if $Is_Solaris and $cwd =~ m#^/tmp# and
                                         $mtime && $mtime == $ctime;
         skip "AFS has different mtime/ctime link semantics", 2
                                      if $cwd =~ m#$Config{'afsroot'}/#;
         skip "AmigaOS has different mtime/ctime link semantics", 2
                                      if $Is_Amiga;
-
+        # Win32 could pass $mtime test but as FAT and NTFS have
+        # no ctime concept $ctime is ALWAYS == $mtime
+        # expect netware to be the same ...
+        skip "No ctime concept on this OS", 2
+                                     if $Is_MSWin32;
         if( !ok($mtime, 'hard link mtime') ||
             !isnt($mtime, $ctime, 'hard link ctime != mtime') ) {
             print <<DIAG;
-# Check if you are on a tmpfs of some sort.  Building in /tmp sometimes 
-# has this problem.  Also building on the ClearCase VOBS filesystem may 
+# Check if you are on a tmpfs of some sort.  Building in /tmp sometimes
+# has this problem.  Also building on the ClearCase VOBS filesystem may
 # cause this failure.
 DIAG
         }
@@ -133,7 +137,7 @@ SKIP: {
         # Going to try to switch away from root.  Might not work.
         my $olduid = $>;
         eval { $> = 1; };
-        skip "Can't test -r or -w meaningfully if you're superuser", 2 
+        skip "Can't test -r or -w meaningfully if you're superuser", 2
           if $> == 0;
 
         SKIP: {
@@ -199,7 +203,7 @@ SKIP: {
     skip "/dev isn't available to test against", 3
       unless -d '/dev' && -r '/dev' && -x '/dev';
 
-    my $LS  = $Config{d_readlink} ? "ls -lL" : "ls -l"; 
+    my $LS  = $Config{d_readlink} ? "ls -lL" : "ls -l";
     my $CMD = "$LS /dev 2>/dev/null";
     my $DEV = qx($CMD);
 
@@ -283,7 +287,7 @@ SKIP: {
         skip "Test uses unixisms", 2 if $Is_MSWin32 || $Is_NetWare;
         skip "No TTY to test -t with", 2 unless -e $TTY;
 
-        open(TTY, $TTY) || 
+        open(TTY, $TTY) ||
           warn "Can't open $TTY--run t/TEST outside of make.\n";
         ok(-t TTY,  '-t');
         ok(-c TTY,  'tty is -c');
@@ -300,6 +304,7 @@ SKIP: {
 my $Null = File::Spec->devnull;
 SKIP: {
     skip "No null device to test with", 1 unless -e $Null;
+    skip "We know Win32 thinks '$Null' is a TTY", 1 if $Is_MSWin32;
 
     open(NULL, $Null) or DIE("Can't open $Null: $!");
     ok(! -t NULL,   'null device is not a TTY');
@@ -368,4 +373,3 @@ unlink $tmpfile or print "# unlink failed: $!\n";
 # bug id 20011101.069
 my @r = \stat(".");
 is(scalar @r, 13,   'stat returns full 13 elements');
-

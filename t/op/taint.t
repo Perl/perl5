@@ -919,7 +919,10 @@ ok( $@ =~ /^Modification of a read-only value attempted/,
     test 182, tainted $re3;
 }
 
-
+if ($Is_MSWin32) {
+    print "ok 183 # Skipped: system {} has different semantics\n"; 
+}
+else
 {
     # bug 20010221.005
     local $ENV{PATH} .= $TAINT;
