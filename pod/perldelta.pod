@@ -1947,7 +1947,7 @@ Localised tied variables no more leak memory
 =item *
 
 Localised hash elements (and %ENV) are correctly unlocalised to not to
-exist, if that's what they where.
+exist, if that's what they were.
 
 
     use Tie::Hash;
