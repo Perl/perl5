@@ -47,7 +47,7 @@ print OUT <<'!NO!SUBS!';
 
 if(@ARGV<1) {
 	die <<EOF;
-Usage: $0 [-h] [-v] [-t] [-u] [-m] PageName|ModuleName|ProgramName
+Usage: $0 [-h] [-v] [-t] [-u] [-m] [-l] PageName|ModuleName|ProgramName
 
 We suggest you use "perldoc perldoc" to get aquainted 
 with the system.
@@ -68,6 +68,7 @@ perldoc [-h] [-v] [-u] PageName|ModuleName|ProgramName...
     -t   Display pod using pod2text instead of pod2man and nroff.
     -u	 Display unformatted pod text
     -m   Display modules file in its entirety
+    -l   Display the modules file name
     -v	 Verbosely describe what's going on.
 PageName|ModuleName...
          is the name of a piece of documentation that you want to look at. You 
@@ -87,11 +88,11 @@ use Text::ParseWords;
 
 unshift(@ARGV,shellwords($ENV{"PERLDOC"}));
 
-getopts("mhtuv") || usage;
+getopts("mhtluv") || usage;
 
 usage if $opt_h || $opt_h; # avoid -w warning
 
-usage("only one of -t, -u, or -m") if $opt_t + $opt_u + $opt_m > 1;
+usage("only one of -t, -u, -m or -l") if $opt_t + $opt_u + $opt_m + $opt_l > 1;
 
 if ($opt_t) { require Pod::Text; import Pod::Text; }
 
@@ -222,6 +223,11 @@ if(!@found) {
 	exit ($Is_VMS ? 98962 : 1);
 }
 
+if ($opt_l) {
+    print join("\n", @found), "\n";
+    exit;
+}
+
 if( ! -t STDOUT ) { $opt_f = 1 }
 
 unless($Is_VMS) {
@@ -301,7 +307,7 @@ perldoc - Look up Perl documentation in pod format.
 
 =head1 SYNOPSIS
 
-B<perldoc> [B<-h>] [B<-v>] [B<-t>] [B<-u>] PageName|ModuleName|ProgramName
+B<perldoc> [B<-h>] [B<-v>] [B<-t>] [B<-u>] [B<-m>] [B<-l>] PageName|ModuleName|ProgramName
 
 =head1 DESCRIPTION
 
@@ -342,6 +348,10 @@ This may be useful if the docs don't explain a function in the detail
 you need, and you'd like to inspect the code directly; perldoc will find
 the file for you and simply hand it off for display.
 
+=item B<-l> file name only
+
+Display the file name of the module found.
+
 =item B<PageName|ModuleName|ProgramName>
 
 The item you want to look up.  Nested modules (such as C<File::Basename>)
@@ -367,10 +377,6 @@ C<perldoc> itself, are available.)
 Kenneth Albanowski <kjahds@kjahds.com>
 
 Minor updates by Andy Dougherty <doughera@lafcol.lafayette.edu>
-
-=head1 SEE ALSO
-
-=head1 DIAGNOSTICS
 
 =cut
 
