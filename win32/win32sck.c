@@ -132,8 +132,9 @@ start_sockets(void)
 
 
 #ifndef USE_SOCKETS_AS_HANDLES
+#undef fdopen
 FILE *
-myfdopen(int fd, char *mode)
+my_fdopen(int fd, char *mode)
 {
     FILE *fp;
     char sockbuf[256];

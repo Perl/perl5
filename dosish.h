@@ -94,12 +94,9 @@ void Perl_DJGPP_init();
 #ifndef WIN32
 #  define Stat(fname,bufptr) stat((fname),(bufptr))
 #else
-#  define Stat(fname,bufptr) win32_stat((fname),(bufptr))
-#  define my_getenv(var)  getenv(var)
 /*
- * the following are standard library calls (stdio in particular)
- * that is being redirected to the perl DLL. This is needed for 
- * Dynaloading any modules that called stdio functions
+ * This provides a layer of functions and macros to ensure extensions will
+ * get to use the same RTL functions as the core.
  */
 #  include <win32iop.h>
 #endif	/* WIN32 */

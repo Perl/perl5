@@ -575,25 +575,12 @@ ioctl(int i, unsigned int u, char *data)
 }
 #endif
 
-unsigned int
-sleep(unsigned int t)
+DllExport unsigned int
+win32_sleep(unsigned int t)
 {
     Sleep(t*1000);
     return 0;
 }
-
-
-#undef rename
-
-int
-myrename(char *OldFileName, char *newname)
-{
-    if(_access(newname, 0) != -1) {	/* file exists */
-	_unlink(newname);
-    }
-    return rename(OldFileName, newname);
-}
-
 
 DllExport int
 win32_stat(const char *path, struct stat *buffer)
@@ -670,9 +657,8 @@ FileTimeToClock(PFILETIME ft)
  return (long) qw;
 }
 
-#undef times
-int
-my_times(struct tms *timebuf)
+DllExport int
+win32_times(struct tms *timebuf)
 {
     FILETIME user;
     FILETIME kernel;
@@ -705,9 +691,8 @@ static VOID CALLBACK TimerProc(HWND win, UINT msg, UINT id, DWORD time)
  sighandler(14);
 }
 
-#undef alarm
-unsigned int
-my_alarm(unsigned int sec)
+DllExport unsigned int
+win32_alarm(unsigned int sec)
 {
     /* 
      * the 'obvious' implentation is SetTimer() with a callback
@@ -735,14 +720,7 @@ my_alarm(unsigned int sec)
     return 0;
 }
 
-#if defined(_DLL) || !defined(_MSC_VER)
-/* It may or may not be fixed (ok on NT), but DLL runtime
-   does not export the functions used in the workround
-*/
-#define WIN95_OSFHANDLE_FIXED
-#endif
-
-#if defined(_WIN32) && !defined(WIN95_OSFHANDLE_FIXED) && defined(_M_IX86)
+#ifdef USE_FIXED_OSFHANDLE
 
 EXTERN_C int __cdecl _alloc_osfhnd(void);
 EXTERN_C int __cdecl _set_osfhnd(int fh, long value);
@@ -841,20 +819,24 @@ my_open_osfhandle(long osfhandle, int flags)
 }
 
 #define _open_osfhandle my_open_osfhandle
-#endif	/* _M_IX86 */
+#endif	/* USE_FIXED_OSFHANDLE */
 
 /* simulate flock by locking a range on the file */
 
 #define LK_ERR(f,i)	((f) ? (i = 0) : (errno = GetLastError()))
 #define LK_LEN		0xffff0000
 
-int
-my_flock(int fd, int oper)
+DllExport int
+win32_flock(int fd, int oper)
 {
     OVERLAPPED o;
     int i = -1;
     HANDLE fh;
 
+    if (!IsWinNT()) {
+	croak("flock() unimplemented on this platform");
+	return -1;
+    }
     fh = (HANDLE)_get_osfhandle(fd);
     memset(&o, 0, sizeof(o));
 
@@ -1014,6 +996,11 @@ win32_fopen(const char *filename, const char *mode)
     return fopen(filename, mode);
 }
 
+#ifndef USE_SOCKETS_AS_HANDLES
+#undef fdopen
+#define fdopen my_fdopen
+#endif
+
 DllExport FILE *
 win32_fdopen( int handle, const char *mode)
 {
@@ -1031,7 +1018,7 @@ win32_freopen( const char *path, const char *mode, FILE *stream)
 DllExport int
 win32_fclose(FILE *pf)
 {
-    return my_fclose(pf);
+    return my_fclose(pf);	/* defined in win32sck.c */
 }
 
 DllExport int
@@ -1356,16 +1343,6 @@ win32_get_osfhandle(int fd)
  * Extras.
  */
 
-DllExport int
-win32_flock(int fd, int oper)
-{
-    if (!IsWinNT()) {
-	croak("flock() unimplemented on this platform");
-	return -1;
-    }
-    return my_flock(fd, oper);
-}
-
 static
 XS(w32_GetCwd)
 {
@@ -1617,7 +1594,7 @@ XS(w32_GetShortPathName)
 }
 
 void
-init_os_extras()
+Perl_init_os_extras()
 {
     char *file = __FILE__;
     dXSUB_SYS;

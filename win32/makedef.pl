@@ -395,7 +395,11 @@ win32_malloc
 win32_calloc
 win32_realloc
 win32_free
+win32_sleep
+win32_times
+win32_alarm
 win32_open_osfhandle
 win32_get_osfhandle
 Perl_win32_init
+Perl_init_os_extras
 RunPerl
