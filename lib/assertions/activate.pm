@@ -7,6 +7,7 @@ our $VERSION = '0.01';
 
 sub import {
     shift;
+    @_='.*' unless @_;
     push @{^ASSERTING}, ( map { qr/^$_$/ } @_) ;
 }
 

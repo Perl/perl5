@@ -7,23 +7,106 @@ our $VERSION = '0.01';
 
 my $hint=0x01000000;
 
+sub syntax_error ($$) {
+    my ($expr, $why)=@_;
+    require Carp;
+    Carp::croak("syntax error on assertion filter '$expr' ($why)");
+}
+
+sub calc_expr {
+    my $expr=shift;
+    my @tokens=split / \s*
+		       ( &&     # and
+		       | \|\|   # or
+		       | \(     # parents
+		       | \) )
+		       \s*
+		       | \s+    # spaces out
+		     /x, $expr;
+
+    # print STDERR "tokens: -", join('-',@tokens), "-\n";
+
+    my @now=1;
+    my @op='start';
+
+    for my $t (@tokens) {
+	if ($t eq '(') {
+	    unshift @now, 1;
+	    unshift @op, 'start';
+	}
+	else {
+	    if ($t eq '||') {
+		defined $op[0]
+		    and syntax_error $expr, 'consecutive operators';
+		$op[0]='||';
+	    }
+	    elsif ($t eq '&&') {
+		defined $op[0]
+		    and syntax_error $expr, 'consecutive operators';
+		$op[0]='&&';
+	    }
+	    elsif (!defined $t or $t eq '') {
+		# warn "empty token";
+	    }
+	    else {
+		if ($t eq ')') {
+		    @now==1 and
+			syntax_error $expr, 'unbalanced parens';
+		    defined $op[0] and
+			syntax_error $expr, "key missing after operator '$op[0]'";
+
+		    $t=shift @now;
+		    shift @op;
+		}
+		elsif ($t eq '_') {
+		    $t=($^H & $hint) ? 1 : 0;
+		}
+		elsif ($t ne '0' and $t ne '1') {
+		    # print STDERR "'$t' resolved as ";
+		    $t=grep ({ $t=~$_ } @{^ASSERTING}) ? 1 : 0;
+		    # print STDERR "$t\n";
+		}
+
+		defined $op[0] or
+		    syntax_error $expr, 'operator expected';
+
+		if ($op[0] eq 'start') {
+		    $now[0]=$t;
+		}
+		elsif ($op[0] eq '||') {
+		    $now[0]||=$t;
+		}
+		else {
+		    $now[0]&&=$t;
+		}
+		undef $op[0];
+	    }
+	}
+    }
+    @now==1 or syntax_error $expr, 'unbalanced parens';
+    defined $op[0] and syntax_error $expr, "expression ends on operator '$op[0]'";
+
+    return $now[0];
+}
+
+
 sub import {
+    # print STDERR "\@_=", join("|", @_), "\n";
     shift;
     @_=(scalar(caller)) unless @_;
-
-    if ($_[0] eq '&') {
-	return unless $^H & $hint;
-	shift;
-    }
-	
-    for my $tag (@_) {
-	unless (grep { $tag=~$_ } @{^ASSERTING}) {
+    foreach my $expr (@_) {
+	unless (calc_expr $expr) {
+	    # print STDERR "assertions deactived";
 	    $^H &= ~$hint;
 	    return;
 	}
     }
+    # print STDERR "assertions actived";
     $^H |= $hint;
 }
+
+
+
 
 sub unimport {
     $^H &= ~$hint;
@@ -55,8 +138,8 @@ assertions - selects assertions
   }
 
   {
-      use assertions qw( & bar );
-      assert { print "asserting 'foo' & 'bar'\n" };
+      use assertions ' _ && bar ';
+      assert { print "asserting 'foo' && 'bar'\n" };
   }
 
   assert { print "asserting 'foo' again\n" };
