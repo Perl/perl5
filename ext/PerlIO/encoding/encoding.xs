@@ -590,6 +590,7 @@ PerlIO_funcs PerlIO_encode = {
     PerlIOEncode_pushed,
     PerlIOEncode_popped,
     PerlIOBuf_open,
+    NULL, /* binmode - always pop */
     PerlIOEncode_getarg,
     PerlIOBase_fileno,
     PerlIOEncode_dup,

@@ -265,10 +265,11 @@ PerlIOScalar_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 PerlIO_funcs PerlIO_scalar = {
  "Scalar",
  sizeof(PerlIOScalar),
- PERLIO_K_BUFFERED,
+ PERLIO_K_BUFFERED|PERLIO_K_RAW,
  PerlIOScalar_pushed,
  PerlIOScalar_popped,
  PerlIOScalar_open,
+ PerlIOBase_binmode,
  PerlIOScalar_arg,
  PerlIOScalar_fileno,
  PerlIOScalar_dup,

@@ -34,6 +34,7 @@ typedef struct
  CV *CLEARERR;
  CV *mERROR;
  CV *mEOF;
+ CV *BINMODE;
 } PerlIOVia;
 
 #define MYMethod(x) #x,&s->x
@@ -318,6 +319,19 @@ PerlIOVia_fileno(pTHX_ PerlIO *f)
 }
 
 IV
+PerlIOVia_binmode(pTHX_ PerlIO *f)
+{
+ PerlIOVia *s = PerlIOSelf(f,PerlIOVia);
+ SV *result = PerlIOVia_method(aTHX_ f,MYMethod(BINMODE),G_SCALAR,Nullsv);
+ if (!result || !SvOK(result))
+  {
+   PerlIO_pop(aTHX_ f);
+   return 0;
+  }
+ return SvIV(result);
+}
+
+IV
 PerlIOVia_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
 {
  PerlIOVia *s = PerlIOSelf(f,PerlIOVia);
@@ -551,6 +565,7 @@ PerlIO_funcs PerlIO_object = {
  PerlIOVia_pushed,
  PerlIOVia_popped,
  PerlIOVia_open, /* NULL, */
+ PerlIOVia_binmode, /* NULL, */
  PerlIOVia_getarg,
  PerlIOVia_fileno,
  PerlIOVia_dup,

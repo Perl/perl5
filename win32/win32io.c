@@ -288,9 +288,9 @@ PerlIOWin32_close(pTHX_ PerlIO *f)
  PerlIOWin32 *s = PerlIOSelf(f,PerlIOWin32);
  if (s->refcnt == 1)
   {
-   IV code = 0;	  
+   IV code = 0;	
 #if 0
-   /* This does not do pipes etc. correctly */	  
+   /* This does not do pipes etc. correctly */	
    if (!CloseHandle(s->h))
     {
      s->h = INVALID_HANDLE_VALUE;
@@ -309,15 +309,15 @@ PerlIOWin32_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *params, int flags)
 {
  PerlIOWin32 *os = PerlIOSelf(f,PerlIOWin32);
  HANDLE proc = GetCurrentProcess();
- HANDLE new; 
+ HANDLE new;
  if (DuplicateHandle(proc, os->h, proc, &new, 0, FALSE,  DUPLICATE_SAME_ACCESS))
   {
    char mode[8];
    int fd = win32_open_osfhandle((intptr_t) new, PerlIOUnix_oflags(PerlIO_modestr(o,mode)));
-   if (fd >= 0) 
+   if (fd >= 0)
     {
      f = PerlIOBase_dup(aTHX_ f, o, params, flags);
-     if (f) 
+     if (f)
       {
        PerlIOWin32 *fs = PerlIOSelf(f,PerlIOWin32);
        fs->h  = new;
@@ -347,6 +347,7 @@ PerlIO_funcs PerlIO_win32 = {
  PerlIOWin32_pushed,
  PerlIOWin32_popped,
  PerlIOWin32_open,
+ PerlIOBase_binmode,
  NULL,                 /* getarg */
  PerlIOWin32_fileno,
  PerlIOWin32_dup,
