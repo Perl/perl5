@@ -9799,7 +9799,7 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS* param)
 	    SvREFCNT_inc(nmg->mg_obj = (SV*)newAV());
 	    svp = AvARRAY(av);
 	    for (i = AvFILLp(av); i >= 0; i--) {
-		if (!svp[i] || SvREFCNT(svp[i]) < 2) continue;
+		if (!svp[i]) continue;
 		av_push((AV*)nmg->mg_obj,sv_dup(svp[i],param));
 	    }
 	}
