@@ -2605,7 +2605,7 @@ C<"i_"> and C<"I_"> also work but only because of completeness;
 they are identical to C<"i"> and C<"I">.
 
 The actual sizes (in bytes) of native shorts, ints, and longs on
-the platform where Perl was built are available via L<Config>:
+the platform where Perl was built are also available via L<Config>:
 
 	use Config;
 	print $Config{shortsize}, "\n";
@@ -2643,17 +2643,17 @@ You can see your system's preference with
  	print join(" ", map { sprintf "%#02x", $_ }
                             unpack("C*",pack("L",0x12345678))), "\n";
 
-The actual byteorder on the platform where Perl was built is available
+The byteorder on the platform where Perl was built is also available
 via L<Config>:
 
 	use Config;
 	print $Config{byteorder}, "\n";
 
-Byteorders '1234' and '12345678' are little-endian, '4321' and
-'87654321' are big-endian.
+Byteorders C<'1234'> and C<'12345678'> are little-endian, C<'4321'>
+and C<'87654321'> are big-endian.
 
-If you want portable integers use the formats C<"n">, C<"N">, C<"v">, and
-"V", their byte endianness and size is known.
+If you want portable packed integers use the formats C<"n">, C<"N">,
+C<"v">, and C<"V">, their byte endianness and size is known.
 
 =item *
 
