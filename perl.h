@@ -44,13 +44,8 @@
  * repeated in makedef.pl, so be certain to update
  * both places when editing. */
 
-#ifdef PERL_IMPLICIT_SYS
-/* PERL_IMPLICIT_SYS implies PerlMemShared != PerlMem
-   so use slab allocator to avoid lots of MUTEX overhead
- */
-#  ifndef PL_OP_SLAB_ALLOC
-#    define PL_OP_SLAB_ALLOC
-#  endif
+#ifndef PL_OP_SLAB_ALLOC
+#  define PL_OP_SLAB_ALLOC
 #endif
 
 #ifdef USE_ITHREADS
