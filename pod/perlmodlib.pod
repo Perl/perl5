@@ -127,7 +127,7 @@ Use and avoid POSIX locales for built-in operations
 
 =item open
 
-Set default disciplines for input and output
+Set default PerlIO layers for input and output
 
 =item ops
 
