@@ -500,7 +500,7 @@ sub unescape {
              exists $HTML_Escapes{$1}
                 ? do { $HTML_Escapes{$1} }
                 : do {
-                    warn "Unknown escape: $& in $_";
+                    warn "Unknown escape: E<$1> in $_";
                     "E<$1>";
                 } 
          } 

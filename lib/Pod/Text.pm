@@ -1,7 +1,5 @@
 package Pod::Text;
 
-# Version 1.02
-
 =head1 NAME
 
 Pod::Text - convert POD data to formatted ASCII text
@@ -48,6 +46,9 @@ use Term::Cap;
 require Exporter;
 @ISA = Exporter;
 @EXPORT = qw(pod2text);
+
+use vars qw($VERSION);
+$VERSION = "1.0201";
 
 $termcap=0;
 
@@ -116,18 +117,18 @@ POD_DIRECTIVE: while (<IN>) {
 	next;
     }
 
-    if (/^=for\s+(\S+)\s*/s) {
+    if (/^=for\s+(\S+)\s*(.*)/s) {
         if ($1 eq "text") {
-            print STDOUT $',"";
+            print STDOUT $2,"";
         } else {
             # ignore unknown for
         }
         next;
     }
-    elsif (/^=begin\s+(\S+)\s*/s) {
+    elsif (/^=begin\s+(\S+)\s*(.*)/s) {
         $begun = $1;
         if ($1 eq "text") {
-            print STDOUT $'."";
+            print STDOUT $2."";
         }
         next;
     }
@@ -409,7 +410,7 @@ sub clear_noremap {
 	     defined $HTML_Escapes{$3}
 		? do { $HTML_Escapes{$3} }
 		: do {
-		    warn "Unknown escape: $& in $_";
+		    warn "Unknown escape: E<$1> in $_";
 		    "E<$1>";
 		}
 	 }

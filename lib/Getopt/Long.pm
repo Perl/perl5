@@ -14,7 +14,7 @@ require Exporter;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&GetOptions $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER);
-$VERSION = sprintf("%d.%02d", '$Revision: 2.6 $ ' =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", '$Revision: 2.6001 $ ' =~ /(\d+)\.(\d+)/);
 use vars qw($autoabbrev $getopt_compat $ignorecase $bundling $order
 	    $passthrough $error $debug 
 	    $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER
@@ -530,7 +530,7 @@ sub GetOptions {
 				# than once in differing environments
     $error = 0;
 
-    print STDERR ('GetOptions $Revision: 2.6 $ ',
+    print STDERR ('GetOptions $Revision: 2.6001 $ ',
 		  "[GetOpt::Long $Getopt::Long::VERSION] -- ",
 		  "called from package \"$pkg\".\n",
 		  "  (@ARGV)\n",
@@ -566,7 +566,7 @@ sub GetOptions {
 	my $opt = shift (@optionlist);
 
 	# Strip leading prefix so people can specify "--foo=i" if they like.
-	$opt = $' if $opt =~ /^($genprefix)+/;
+	$opt = $+ if $opt =~ /^($genprefix)+(.*)/s;
 
 	if ( $opt eq '<>' ) {
 	    if ( (defined $userlinkage)
@@ -854,19 +854,19 @@ sub GetOptions {
 
 sub find_option {
 
-    return 0 unless $opt =~ /^$genprefix/;
+    return 0 unless $opt =~ /^($genprefix)(.*)/s;
 
-    $opt = $';
-    my ($starter) = $&;
+    $opt = $+;
+    my ($starter) = $1;
 
     my $optarg = undef;	# value supplied with --opt=value
     my $rest = undef;	# remainder from unbundling
 
     # If it is a long option, it may include the value.
     if (($starter eq "--" || $getopt_compat)
-	&& $opt =~ /^([^=]+)=/ ) {
+	&& $opt =~ /^([^=]+)=(.*)/s ) {
 	$opt = $1;
-	$optarg = $';
+	$optarg = $2;
 	print STDERR ("=> option \"", $opt, 
 		      "\", optarg = \"$optarg\"\n") if $debug;
     }
@@ -992,7 +992,7 @@ sub find_option {
     # Get key if this is a "name=value" pair for a hash option.
     $key = undef;
     if ($hash && defined $arg) {
-	($key, $arg) = ($arg =~ /=/o) ? ($`, $') : ($arg, 1);
+	($key, $arg) = ($arg =~ /(.*?)=(.*)/s) ? ($1, $2) : ($arg, 1);
     }
 
     #### Check if the argument is valid for this option ####
