@@ -2124,7 +2124,7 @@
 #define FILE_cnt(fp)	((fp)->level)
 #define STDIO_CNT_LVALUE 		/**/
 /*#define STDIO_PTR_LVAL_SETS_CNT	/**/
-/*#define STDIO_PTR_LVAL_NOCHANGE_CNT	/**/
+#define STDIO_PTR_LVAL_NOCHANGE_CNT	/**/
 #endif
 
 /* USE_STDIO_BASE:
