@@ -2553,6 +2553,7 @@ t/uni/lower.t			See if Unicode casing works
 t/uni/sprintf.t			See if Unicode sprintf works
 t/uni/title.t			See if Unicode casing works
 t/uni/upper.t			See if Unicode casing works
+t/x2p/s2p.t			See if s2p/psed work
 taint.c				Tainting code
 thrdvar.h			Per-thread variables
 thread.h			Threading header

@@ -93,6 +93,7 @@ unless (@ARGV) {
         warn "$0: cannot open $mani: $!\n";
     }
     _find_tests('pod');
+    _find_tests('x2p');
 }
 
 # Tests known to cause infinite loops for the perlcc tests.
