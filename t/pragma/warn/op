@@ -71,13 +71,6 @@
      Constant subroutine %s redefined 
         sub fred() {1;} sub fred() {1;}
  
-     Constant subroutine %s redefined 
-        sub fred() {1;} sub fred() {1;}
- 
-     Prototype mismatch: sub main::foo () vs none
-     Constant subroutine foo redefined
-	sub foo () {1} sub foo {1}
-
      Format FRED redefined at /tmp/x line 5.
        format FRED =
        .
@@ -735,14 +728,6 @@ sub fred () { 1 }
 *fred = sub () { 2 };
 EXPECT
 Constant subroutine fred redefined at - line 4.
-########
-# op.c
-use warnings;
-sub foo () {1}
-sub foo {1}
-EXPECT
-Prototype mismatch: sub main::foo () vs none at - line 4.
-Constant subroutine foo redefined at - line 4.
 ########
 # op.c
 use warnings 'redefine' ;
