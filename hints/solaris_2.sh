@@ -252,15 +252,21 @@ END
 	    # apparently don't reveal that unless you pass in -V.
 	    # (This may all depend on local configurations too.)
 
+	    # Recompute verbose with -Wl,-v to find GNU ld if present
+	    verbose=`${cc:-cc} -v -Wl,-v -o try try.c 2>&1 | grep ld 2>&1`
+
 	    myld=`echo $verbose| grep ld | awk '/\/ld/ {print $1}'`
 	    # This assumes that gcc's output will not change, and that
 	    # /full/path/to/ld will be the first word of the output.
-	    # Thus myld is something like opt/gnu/sparc-sun-solaris2.5/bin/ld
+	    # Thus myld is something like /opt/gnu/sparc-sun-solaris2.5/bin/ld
 
-	    if $myld -V 2>&1 | grep "ld: Software Generation Utilities" >/dev/null 2>&1; then
+	    # Allow that $myld may be '', due to changes in gcc's output 
+	    if ${myld:-ld} -V 2>&1 |
+		grep "ld: Software Generation Utilities" >/dev/null 2>&1; then
 		# Ok, /usr/ccs/bin/ld eventually does get called.
 		:
 	    else
+		echo "Found GNU ld='$myld'" >&4
 		cat <<END >&2
 
 NOTE: You are using GNU ld(1).  GNU ld(1) might not build Perl.  If you

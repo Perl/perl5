@@ -472,3 +472,4 @@ esac
 
 # Now go back
 cd ../..
+cp os2/*.t t/lib

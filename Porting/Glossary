@@ -691,6 +691,10 @@ d_Gconvert (d_gconvert.U):
 	d_Gconvert='gconvert((x),(n),(t),(b))'
 	d_Gconvert='gcvt((x),(n),(b))'
 	d_Gconvert='sprintf((b),"%.*g",(n),(x))'
+	If you are not content with these choices, use gconvert_preference
+	and gconvert_ld_preference, which if present are space-separated
+	lists of functions to try with calling convention of gcvt,
+	respectively for doubles and long doubles.
 
 d_getcwd (d_getcwd.U):
 	This variable conditionally defines the HAS_GETCWD symbol, which

@@ -1,12 +1,13 @@
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    push @INC, '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bEncode\b/) {
       print "1..0 # Skip: Encode was not built\n";
       exit 0;
     }
 }
+use strict;
 use Test;
 use Encode qw(from_to encode decode
 	      encode_utf8 decode_utf8

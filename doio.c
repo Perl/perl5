@@ -600,9 +600,16 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    UNLOCK_FDPID_MUTEX;
 	    (void)SvUPGRADE(sv, SVt_IV);
 	    SvIVX(sv) = pid;
-	    if (!was_fdopen) {
-		PerlIO_close(fp);
+	    if (was_fdopen) {
+                /* need to close fp without closing underlying fd */
+                int ofd = PerlIO_fileno(fp);
+                int dupfd = PerlLIO_dup(ofd);
+                PerlIO_close(fp);
+                PerlLIO_dup2(dupfd,ofd);
+                PerlLIO_close(dupfd);
 	    }
+            else
+		PerlIO_close(fp);
 	}
 	fp = saveifp;
 	PerlIO_clearerr(fp);

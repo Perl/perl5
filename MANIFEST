@@ -194,6 +194,8 @@ ext/DynaLoader/hints/openbsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/XSLoader_pm.PL	Simple XS Loader perl module
+ext/Encode/CN/CN.pm		Encode extension
+ext/Encode/CN/Makefile.PL	Encode extension
 ext/Encode/compile		Encode extension
 ext/Encode/encengine.c		Encode extension
 ext/Encode/encode.h		Encode extension
@@ -330,11 +332,18 @@ ext/Encode/Encode/symbol.enc		Encode table
 ext/Encode/Encode/symbol.ucm		Encode table
 ext/Encode/Encode/viscii.enc		Encode table
 ext/Encode/Encode/viscii.ucm		Encode table
-ext/Encode/EUC_JP/Japanese.pm		Encode module for Japanese
-ext/Encode/EUC_JP/Makefile.PL		Encode module for Japanese
+ext/Encode/JP/JP.pm		Encode extension
+ext/Encode/JP/Makefile.PL	Encode extension
+ext/Encode/KR/KR.pm		Encode extension
+ext/Encode/KR/Makefile.PL		Encode extension
 ext/Encode/lib/Encode/Encoding.pm	Encode extension
 ext/Encode/lib/Encode/Internal.pm	Encode extension
 ext/Encode/lib/Encode/iso10646_1.pm	Encode extension
+ext/Encode/lib/Encode/JP/Constants.pm	Encode extension
+ext/Encode/lib/Encode/JP/H2Z.pm		Encode extension
+ext/Encode/lib/Encode/JP/ISO_2022_JP.pm	Encode extension
+ext/Encode/lib/Encode/JP/JIS.pm	Encode extension
+ext/Encode/lib/Encode/JP/Tr.pm	Encode extension
 ext/Encode/lib/Encode/Tcl.pm		Encode extension
 ext/Encode/lib/Encode/Tcl/Escape.pm	Encode extension
 ext/Encode/lib/Encode/Tcl/Extended.pm	Encode extension
@@ -349,10 +358,15 @@ ext/Encode/Makefile.PL		Encode extension makefile writer
 ext/Encode/MANIFEST		Encode extension
 ext/Encode/README		Encode extension
 ext/Encode/t/Encode.t		Encode extension test
-ext/Encode/t/Japanese.t		Encode extension test
+ext/Encode/t/japanese.pl	Encode extension
+ext/Encode/t/JP.t		Encode extension test
 ext/Encode/t/table.euc		Encode extension test
 ext/Encode/t/table.ref		Encode extension test
+ext/Encode/t/table.rnd		Encode extension
+ext/Encode/t/table.utf8		Encode extension
 ext/Encode/t/Tcl.t		Encode extension test
+ext/Encode/TW/Makefile.PL	Encode extension
+ext/Encode/TW/TW.pm		Encode extension
 ext/Errno/ChangeLog	Errno perl module change log
 ext/Errno/Errno.t	See if Errno works
 ext/Errno/Errno_pm.PL	Errno perl module create script
@@ -633,8 +647,8 @@ ext/threads/shared/t/sv_simple.t	thread shared variables
 ext/threads/shared/typemap	thread::shared types
 ext/threads/t/basic.t		ithreads
 ext/threads/t/end.t		Test end functions
-ext/threads/t/libc.t            testing libc functions for threadsafetyness
 ext/threads/t/join.t		Testing the join function
+ext/threads/t/libc.t            testing libc functions for threadsafetyness
 ext/threads/t/stress_cv.t	Test with multiple threads, coderef cv argument.
 ext/threads/t/stress_re.t	Test with multiple threads, string cv argument and regexes.
 ext/threads/t/stress_string.t	Test with multiple threads, string cv argument.
@@ -1838,6 +1852,9 @@ os2/OS2/Process/Makefile.PL	system() constants in a module
 os2/OS2/Process/MANIFEST	system() constants in a module
 os2/OS2/Process/Process.pm	system() constants in a module
 os2/OS2/Process/Process.xs	system() constants in a module
+os2/OS2/Process/t/os2_process.t	Tests
+os2/OS2/Process/t/os2_process_kid.t	Tests
+os2/OS2/Process/t/os2_process_text.t	Tests
 os2/OS2/REXX/Changes		DLL access module
 os2/OS2/REXX/DLL/Changes	DLL access module
 os2/OS2/REXX/DLL/DLL.pm		DLL access module

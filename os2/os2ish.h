@@ -480,15 +480,30 @@ void init_PMWIN_entries(void);
 /* INCL_DOSERRORS needed. rc should be declared outside. */
 #define CheckOSError(expr) (!(rc = (expr)) ? 0 : (FillOSError(rc), 1))
 /* INCL_WINERRORS needed. */
-#define SaveWinError(expr) ((expr) ? : (FillWinError, 0))
 #define CheckWinError(expr) ((expr) ? 0: (FillWinError, 1))
+
+/* This form propagates the return value, setting $^E if needed */
+#define SaveWinError(expr) ((expr) ? : (FillWinError, 0))
+
+/* This form propagates the return value, dieing with $^E if needed */
+#define SaveCroakWinError(expr,die,name1,name2)		\
+  ((expr) ? : (CroakWinError(die,name1 name2), 0))
+
 #define FillOSError(rc) (os2_setsyserrno(rc),				\
 			Perl_severity = SEVERITY_ERROR) 
 
+#define WinError_2_Perl_rc	\
+ (	init_PMWIN_entries(),	\
+	Perl_rc=(*PMWIN_entries.GetLastError)(perl_hab_GET()) )
+
+/* Calling WinGetLastError() resets the error code of the current thread.
+   Since for some Win* API return value 0 is normal, one needs to call
+   this before calling them to distinguish normal and anomalous returns.  */
+/*#define ResetWinError()	WinError_2_Perl_rc */
+
 /* At this moment init_PMWIN_entries() should be a nop (WinInitialize should
    be called already, right?), so we do not risk stepping over our own error */
-#define FillWinError (	init_PMWIN_entries(),				\
-			Perl_rc=(*PMWIN_entries.GetLastError)(perl_hab_GET()),\
+#define FillWinError (	WinError_2_Perl_rc,				\
 			Perl_severity = ERRORIDSEV(Perl_rc),		\
 			Perl_rc = ERRORIDERROR(Perl_rc),		\
 			os2_setsyserrno(Perl_rc))
@@ -559,6 +574,21 @@ enum entries_ordinals {
     ORD_WinWindowFromId,
     ORD_WinWindowFromPoint,
     ORD_WinPostMsg,
+    ORD_WinEnableWindow,
+    ORD_WinEnableWindowUpdate,
+    ORD_WinIsWindowEnabled,
+    ORD_WinIsWindowShowing,
+    ORD_WinIsWindowVisible,
+    ORD_WinQueryWindowPtr,
+    ORD_WinQueryWindowULong,
+    ORD_WinQueryWindowUShort,
+    ORD_WinSetWindowBits,
+    ORD_WinSetWindowPtr,
+    ORD_WinSetWindowULong,
+    ORD_WinSetWindowUShort,
+    ORD_WinQueryDesktopWindow,
+    ORD_WinSetActiveWindow,
+    ORD_DosQueryModFromEIP,
     ORD_NENTRIES
 };
 
@@ -576,6 +606,44 @@ enum entries_ordinals {
   ret name at { return SaveWinError(CallORD(ret,o,at,args)); }
 
 #define AssignFuncPByORD(p,o)	(*(Perl_PFN*)&(p) = (loadByOrdinal(o, 1)))
+
+/* This flavor caches the procedure pointer (named as p__Win#name) locally */
+#define DeclWinFuncByORD_CACHE(ret,name,o,at,args)	\
+	DeclWinFuncByORD_CACHE_r(ret,name,o,at,args,0,1)
+
+/* This flavor may reset the last error before the call (if ret=0 may be OK) */
+#define DeclWinFuncByORD_CACHE_resetError(ret,name,o,at,args)	\
+	DeclWinFuncByORD_CACHE_r(ret,name,o,at,args,1,1)
+
+/* Two flavors below do the same as above, but do not auto-croak */
+/* This flavor caches the procedure pointer (named as p__Win#name) locally */
+#define DeclWinFuncByORD_CACHE_survive(ret,name,o,at,args)	\
+	DeclWinFuncByORD_CACHE_r(ret,name,o,at,args,0,0)
+
+/* This flavor may reset the last error before the call (if ret=0 may be OK) */
+#define DeclWinFuncByORD_CACHE_resetError_survive(ret,name,o,at,args)	\
+	DeclWinFuncByORD_CACHE_r(ret,name,o,at,args,1,0)
+
+#define DeclWinFuncByORD_CACHE_r(ret,name,o,at,args,r,die)	\
+  static ret (*CAT2(p__Win,name)) at;				\
+  static ret name at {						\
+	if (!CAT2(p__Win,name))					\
+	    AssignFuncPByORD(CAT2(p__Win,name), o);		\
+	if (r) ResetWinError();					\
+	return SaveCroakWinError(CAT2(p__Win,name) args, die, "[Win]", STRINGIFY(name)); }
+
+/* These flavors additionally assume ORD is name with prepended ORD_Win  */
+#define DeclWinFunc_CACHE(ret,name,at,args)	\
+	DeclWinFuncByORD_CACHE(ret,name,CAT2(ORD_Win,name),at,args)
+#define DeclWinFunc_CACHE_resetError(ret,name,at,args)	\
+	DeclWinFuncByORD_CACHE_resetError(ret,name,CAT2(ORD_Win,name),at,args)
+#define DeclWinFunc_CACHE_survive(ret,name,at,args)	\
+	DeclWinFuncByORD_CACHE_survive(ret,name,CAT2(ORD_Win,name),at,args)
+#define DeclWinFunc_CACHE_resetError_survive(ret,name,at,args)	\
+	DeclWinFuncByORD_CACHE_resetError_survive(ret,name,CAT2(ORD_Win,name),at,args)
+
+void ResetWinError(void);
+void CroakWinError(int die, char *name);
 
 #define PERLLIB_MANGLE(s, n) perllib_mangle((s), (n))
 char *perllib_mangle(char *, unsigned int);

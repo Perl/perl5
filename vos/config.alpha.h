@@ -13,8 +13,8 @@
 /*
  * Package name      : perl5
  * Source directory  : /vos_ftp_site/pub/vos/posix/(alpha|ga)/perl
- * Configuration time: 2001-06-11 02:41 UCT
- * Configured by     : Paul_Green@stratus.com
+ * Configuration time: 2002-02-15 20:16 UCT
+ * Configured by     : Paul.Green@stratus.com
  * Target system     : VOS
  */
 
@@ -989,7 +989,7 @@
  *	where library files may be held under a private library, for
  *	instance.
  */
-#define ARCHNAME "vos"		/**/
+#define ARCHNAME ""		/**/
 
 /* HAS_ATOLF:
  *	This symbol, if defined, indicates that the atolf routine is
@@ -2959,8 +2959,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/system/ported/perl/lib/5.7"		/**/
-#define PRIVLIB_EXP "/system/ported/perl/lib/5.7"		/**/
+#define PRIVLIB "/system/ported/lib/perl5/5.8.0"		/**/
+#define PRIVLIB_EXP "/system/ported/lib/perl5/5.8.0"		/**/
 
 /* PTRSIZE:
  *	This symbol contains the size of a pointer, so that the C preprocessor
@@ -3063,8 +3063,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-/*#define SITEARCH ""		/**/
-/*#define SITEARCH_EXP ""		/**/
+/*#define SITEARCH "/system/ported/lib/perl5/site_perl/5.8.0/hppa1.1"		/**/
+/*#define SITEARCH_EXP "/system/ported/lib/perl5/site_perl/5.8.0/hppa1.1"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -3086,9 +3086,9 @@
  *	removed.  The elements in inc_version_list (inc_version_list.U) can
  *	be tacked onto this variable to generate a list of directories to search.
  */
-#define SITELIB "/system/ported/perl/lib/site/5.7"		/**/
-#define SITELIB_EXP "/system/ported/perl/lib/site/5.7"		/**/
-#define SITELIB_STEM "/system/ported/perl/lib/site"		/**/
+#define SITELIB "/system/ported/lib/perl5/site_perl/5.8.0"		/**/
+#define SITELIB_EXP "/system/ported/lib/perl5/site_perl/5.8.0"		/**/
+#define SITELIB_STEM "/system/ported/lib/perl5/site_perl"		/**/
 
 /* Size_t_size:
  *	This symbol holds the size of a Size_t in bytes.
@@ -3324,7 +3324,7 @@
 /* PERL_XS_APIVERSION:
  *	This variable contains the version of the oldest perl binary
  *	compatible with the present perl.  perl.c:incpush() and
- *	lib/lib.pm will automatically search in  for older
+ *	lib/lib.pm will automatically search in /system/ported/lib/perl5/site_perl/5.8.0/hppa1.1 for older
  *	directories across major versions back to xs_apiversion.
  *	This is only useful if you have a perl library directory tree
  *	structured like the default one.
@@ -3343,7 +3343,7 @@
  *	compatible with the present perl.  (That is, pure perl modules
  *	written for pm_apiversion will still work for the current
  *	version).  perl.c:incpush() and lib/lib.pm will automatically
- *	search in /system/ported/perl/lib/site/5.7 for older directories across major versions
+ *	search in /system/ported/lib/perl5/site_perl/5.8.0 for older directories across major versions
  *	back to pm_apiversion.  This is only useful if you have a perl
  *	library directory tree structured like the default one.  The
  *	versioned site_perl library was introduced in 5.005, so that's
@@ -3417,16 +3417,18 @@
  *	If defined, this macro indicates that the C compiler can handle
  *	function prototypes.
  */
-/* PERL_PROTO_:
+/* _:
  *	This macro is used to declare function parameters for folks who want
  *	to make declarations with prototypes using a different style than
  *	the above macros.  Use double parentheses.  For example:
  *
- *		int main PERL_PROTO_((int argc, char *argv[]));
+ *		int main _((int argc, char *argv[]));
  */
 #define	CAN_PROTOTYPE	/**/
 #ifdef CAN_PROTOTYPE
+#define	_(args) args
 #else
+#define	_(args) ()
 #endif
 
 /* SH_PATH:

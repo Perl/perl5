@@ -2,13 +2,12 @@ use 5.7.2;
 use strict;
 use ExtUtils::MakeMaker;
 
-my %tables = (EUC_JP   => ['euc-jp.ucm'],
-              JIS0208  => ['jis0208.enc'],
-              JIS0212  => ['jis0212.enc'],
-              SHIFTJIS => ['shiftjis.enc'],
+my %tables = (EUC_JP   => ['euc-jp.enc'],
+	      MACJAPAN => ['macJapan.enc'],
+	      CP932    => ['cp932.enc'],
              );
 
-my $name = 'Japanese';
+my $name = 'JP';
 
 WriteMakefile(
               INC		=> "-I..",

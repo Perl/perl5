@@ -276,10 +276,25 @@ static const struct {
   {&pmwin_handle, NULL, 875},		/* WinSetWindowPos */
   {&pmwin_handle, NULL, 877},		/* WinSetWindowText */
   {&pmwin_handle, NULL, 883},		/* WinShowWindow */
-  {&pmwin_handle, NULL, 872},		/* WinIsWindow */
+  {&pmwin_handle, NULL, 772},		/* WinIsWindow */
   {&pmwin_handle, NULL, 899},		/* WinWindowFromId */
   {&pmwin_handle, NULL, 900},		/* WinWindowFromPoint */
   {&pmwin_handle, NULL, 919},		/* WinPostMsg */
+  {&pmwin_handle, NULL, 735},		/* WinEnableWindow */
+  {&pmwin_handle, NULL, 736},		/* WinEnableWindowUpdate */
+  {&pmwin_handle, NULL, 773},		/* WinIsWindowEnabled */
+  {&pmwin_handle, NULL, 774},		/* WinIsWindowShowing */
+  {&pmwin_handle, NULL, 775},		/* WinIsWindowVisible */
+  {&pmwin_handle, NULL, 839},		/* WinQueryWindowPtr */
+  {&pmwin_handle, NULL, 843},		/* WinQueryWindowULong */
+  {&pmwin_handle, NULL, 844},		/* WinQueryWindowUShort */
+  {&pmwin_handle, NULL, 874},		/* WinSetWindowBits */
+  {&pmwin_handle, NULL, 876},		/* WinSetWindowPtr */
+  {&pmwin_handle, NULL, 878},		/* WinSetWindowULong */
+  {&pmwin_handle, NULL, 879},		/* WinSetWindowUShort */
+  {&pmwin_handle, NULL, 813},		/* WinQueryDesktopWindow */
+  {&pmwin_handle, NULL, 851},		/* WinSetActiveWindow */
+  {&doscalls_handle, NULL, 360},	/* DosQueryModFromEIP */
 };
 
 static PFN ExtFCN[C_ARR_LEN(loadOrdinals)];	/* Labeled by ord ORD_*. */
@@ -378,7 +393,7 @@ get_sysinfo(ULONG pid, ULONG flags)
     if (pDosVerifyPidTid) {	/* Warp3 or later */
 	/* Up to some fixpak QuerySysState() kills the system if a non-existent
 	   pid is used. */
-	if (!pDosVerifyPidTid(pid, 1))
+	if (CheckOSError(pDosVerifyPidTid(pid, 1)))
 	    return 0;
     }
     New(1322, pbuffer, buf_len, char);
@@ -1467,6 +1482,20 @@ os2error(int rc)
 	return buf;
 }
 
+void
+ResetWinError(void)
+{
+  WinError_2_Perl_rc;
+}
+
+void
+CroakWinError(int die, char *name)
+{
+  FillWinError;
+  if (die && Perl_rc)
+    croak("%s: %s", (name ? name : "Win* API call"), os2error(Perl_rc));
+}
+
 char *
 os2_execname(pTHX)
 {
@@ -1561,8 +1590,9 @@ Perl_Register_MQ(int serve)
     PPIB pib;
     PTIB tib;
 
-    if (Perl_os2_initial_mode++)
+    if (Perl_hmq_refcnt > 0)
 	return Perl_hmq;
+    Perl_hmq_refcnt = 0;		/* Be extra safe */
     DosGetInfoBlocks(&tib, &pib);
     Perl_os2_initial_mode = pib->pib_ultype;
     /* Try morphing into a PM application. */
@@ -2194,6 +2224,78 @@ XS(XS_Cwd_extLibpath_set)
     XSRETURN(1);
 }
 
+/* Input: Address, BufLen
+APIRET APIENTRY
+DosQueryModFromEIP (HMODULE * hmod, ULONG * obj, ULONG BufLen, PCHAR Buf,
+		    ULONG * Offset, ULONG Address);
+*/
+
+DeclOSFuncByORD(APIRET, _DosQueryModFromEIP,ORD_DosQueryModFromEIP,
+			(HMODULE * hmod, ULONG * obj, ULONG BufLen, PCHAR Buf,
+			ULONG * Offset, ULONG Address),
+			(hmod, obj, BufLen, Buf, Offset, Address))
+
+enum module_name_how { mod_name_handle, mod_name_shortname, mod_name_full};
+
+static SV*
+module_name_at(void *pp, enum module_name_how how)
+{
+    char buf[MAXPATHLEN];
+    char *p = buf;
+    HMODULE mod;
+    ULONG obj, offset, rc;
+
+    if (!_DosQueryModFromEIP(&mod, &obj, sizeof(buf), buf, &offset, (ULONG)pp))
+	return &PL_sv_undef;
+    if (how == mod_name_handle)
+	return newSVuv(mod);
+    /* Full name... */
+    if ( how == mod_name_full
+	 && CheckOSError(DosQueryModuleName(mod, sizeof(buf), buf)) )
+	return &PL_sv_undef;
+    while (*p) {
+	if (*p == '\\')
+	    *p = '/';
+	p++;
+    }
+    return newSVpv(buf, 0);
+}
+
+static SV*
+module_name_of_cv(SV *cv, enum module_name_how how)
+{
+    if (!cv || !SvROK(cv) || SvTYPE(SvRV(cv)) != SVt_PVCV || !CvXSUB(SvRV(cv)))
+	croak("Not an XSUB reference");
+    return module_name_at(CvXSUB(SvRV(cv)), how);
+}
+
+/* Find module name to which *this* subroutine is compiled */
+#define module_name(how)	module_name_at(&module_name_at, how)
+
+XS(XS_OS2_DLLname)
+{
+    dXSARGS;
+    if (items > 2)
+	Perl_croak(aTHX_ "Usage: OS2::DLLname( [ how, [\\&xsub] ] )");
+    {
+	SV *	RETVAL;
+	int	how;
+
+	if (items < 1)
+	    how = mod_name_full;
+	else {
+	    how = (int)SvIV(ST(0));
+	}
+	if (items < 2)
+	    RETVAL = module_name(how);
+	else
+	    RETVAL = module_name_of_cv(ST(1), how);
+	ST(0) = RETVAL;
+	sv_2mortal(ST(0));
+    }
+    XSRETURN(1);
+}
+
 #define get_control87()		_control87(0,0)
 #define set_control87		_control87
 
@@ -2291,6 +2393,7 @@ Xs_OS2_init(pTHX)
         newXSproto("OS2::_control87", XS_OS2__control87, file, "$$");
         newXSproto("OS2::get_control87", XS_OS2_get_control87, file, "");
         newXSproto("OS2::set_control87", XS_OS2_set_control87, file, ";$$");
+        newXSproto("OS2::DLLname", XS_OS2_DLLname, file, ";$$");
 	gv = gv_fetchpv("OS2::is_aout", TRUE, SVt_PV);
 	GvMULTI_on(gv);
 #ifdef PERL_IS_AOUT

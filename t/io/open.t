@@ -201,7 +201,6 @@ EOC
 ok( !eval { open local $f, '<&', 'afile'; 1 },  'local <& on non-filehandle');
 like( $@, qr/Bad filehandle:\s+afile/,          '       right error' );
 
-
 {
     local *F;
     for (1..2) {

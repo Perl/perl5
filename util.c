@@ -1356,6 +1356,8 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
     CV *cv;
     SV *msv;
     STRLEN msglen;
+    IO *io;
+    MAGIC *mg;
 
     msv = vmess(pat, args);
     message = SvPV(msv, msglen);
@@ -1388,6 +1390,20 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
 	    return;
 	}
     }
+
+    /* if STDERR is tied, use it instead */
+    if (PL_stderrgv && (io = GvIOp(PL_stderrgv))
+	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar))) {
+	dSP; ENTER;
+	PUSHMARK(SP);
+	XPUSHs(SvTIED_obj((SV*)io, mg));
+	XPUSHs(sv_2mortal(newSVpvn(message, msglen)));
+	PUTBACK;
+	call_method("PRINT", G_SCALAR);
+	LEAVE;
+	return;
+    }
+
     {
 	PerlIO *serr = Perl_error_log;
 

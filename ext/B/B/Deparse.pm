@@ -796,7 +796,8 @@ sub deparse_format {
 		= @$self{qw'curstash warnings hints'};
     my $op = $form->ROOT;
     my $kid;
-    return "\f." if $op->first->name eq 'stub';
+    return "\f." if $op->first->name eq 'stub'
+                || $op->first->name eq 'nextstate';
     $op = $op->first->first; # skip leavewrite, lineseq
     while (not null $op) {
 	$op = $op->sibling; # skip nextstate
@@ -1969,6 +1970,7 @@ sub listop {
     my $kid = $op->first->sibling;
     return $name if null $kid;
     my $first;
+    $name = "socketpair" if $name eq "sockpair";
     if (defined prototype("CORE::$name")
 	&& prototype("CORE::$name") =~ /^;?\*/
 	&& $kid->name eq "rv2gv") {
@@ -3056,7 +3058,8 @@ sub escape_str { # ASCII, UTF8
 sub escape_extended_re {
     my($str) = @_;
     $str =~ s/(.)/ord($1) > 255 ? sprintf("\\x{%x}", ord($1)) : $1/eg;
-    $str =~ s/([[:^print:]])/sprintf("\\%03o", ord($1))/ge;
+    $str =~ s/([[:^print:]])/
+	($1 =~ y! \t\n!!) ? $1 : sprintf("\\%03o", ord($1))/ge;
     $str =~ s/\n/\n\f/g;
     return $str;
 }

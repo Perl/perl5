@@ -841,7 +841,7 @@ bool
 Perl_is_uni_alnum(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uvchr_to_utf8(tmpbuf, (UV)c);
+    uvchr_to_utf8(tmpbuf, c);
     return is_utf8_alnum(tmpbuf);
 }
 
@@ -849,7 +849,7 @@ bool
 Perl_is_uni_alnumc(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uvchr_to_utf8(tmpbuf, (UV)c);
+    uvchr_to_utf8(tmpbuf, c);
     return is_utf8_alnumc(tmpbuf);
 }
 
@@ -857,7 +857,7 @@ bool
 Perl_is_uni_idfirst(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uvchr_to_utf8(tmpbuf, (UV)c);
+    uvchr_to_utf8(tmpbuf, c);
     return is_utf8_idfirst(tmpbuf);
 }
 
@@ -865,7 +865,7 @@ bool
 Perl_is_uni_alpha(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uvchr_to_utf8(tmpbuf, (UV)c);
+    uvchr_to_utf8(tmpbuf, c);
     return is_utf8_alpha(tmpbuf);
 }
 
@@ -873,7 +873,7 @@ bool
 Perl_is_uni_ascii(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uvchr_to_utf8(tmpbuf, (UV)c);
+    uvchr_to_utf8(tmpbuf, c);
     return is_utf8_ascii(tmpbuf);
 }
 
@@ -881,7 +881,7 @@ bool
 Perl_is_uni_space(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uvchr_to_utf8(tmpbuf, (UV)c);
+    uvchr_to_utf8(tmpbuf, c);
     return is_utf8_space(tmpbuf);
 }
 
@@ -889,7 +889,7 @@ bool
 Perl_is_uni_digit(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uvchr_to_utf8(tmpbuf, (UV)c);
+    uvchr_to_utf8(tmpbuf, c);
     return is_utf8_digit(tmpbuf);
 }
 
@@ -897,7 +897,7 @@ bool
 Perl_is_uni_upper(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uvchr_to_utf8(tmpbuf, (UV)c);
+    uvchr_to_utf8(tmpbuf, c);
     return is_utf8_upper(tmpbuf);
 }
 
@@ -905,7 +905,7 @@ bool
 Perl_is_uni_lower(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uvchr_to_utf8(tmpbuf, (UV)c);
+    uvchr_to_utf8(tmpbuf, c);
     return is_utf8_lower(tmpbuf);
 }
 
@@ -913,7 +913,7 @@ bool
 Perl_is_uni_cntrl(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uvchr_to_utf8(tmpbuf, (UV)c);
+    uvchr_to_utf8(tmpbuf, c);
     return is_utf8_cntrl(tmpbuf);
 }
 
@@ -921,7 +921,7 @@ bool
 Perl_is_uni_graph(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uvchr_to_utf8(tmpbuf, (UV)c);
+    uvchr_to_utf8(tmpbuf, c);
     return is_utf8_graph(tmpbuf);
 }
 
@@ -929,7 +929,7 @@ bool
 Perl_is_uni_print(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uvchr_to_utf8(tmpbuf, (UV)c);
+    uvchr_to_utf8(tmpbuf, c);
     return is_utf8_print(tmpbuf);
 }
 
@@ -937,7 +937,7 @@ bool
 Perl_is_uni_punct(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uvchr_to_utf8(tmpbuf, (UV)c);
+    uvchr_to_utf8(tmpbuf, c);
     return is_utf8_punct(tmpbuf);
 }
 
@@ -945,7 +945,7 @@ bool
 Perl_is_uni_xdigit(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
-    uvchr_to_utf8(tmpbuf, (UV)c);
+    uvchr_to_utf8(tmpbuf, c);
     return is_utf8_xdigit(tmpbuf);
 }
 
@@ -953,7 +953,7 @@ UV
 Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
     U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
-    uvchr_to_utf8(tmpbuf, (UV)c);
+    uvchr_to_utf8(tmpbuf, c);
     return to_utf8_upper(tmpbuf, p, lenp);
 }
 
@@ -961,7 +961,7 @@ UV
 Perl_to_uni_title(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
     U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
-    uvchr_to_utf8(tmpbuf, (UV)c);
+    uvchr_to_utf8(tmpbuf, c);
     return to_utf8_title(tmpbuf, p, lenp);
 }
 
@@ -969,7 +969,7 @@ UV
 Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
     U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
-    uvchr_to_utf8(tmpbuf, (UV)c);
+    uvchr_to_utf8(tmpbuf, c);
     return to_utf8_lower(tmpbuf, p, lenp);
 }
 
@@ -977,7 +977,7 @@ UV
 Perl_to_uni_fold(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
     U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
-    uvchr_to_utf8(tmpbuf, (UV)c);
+    uvchr_to_utf8(tmpbuf, c);
     return to_utf8_fold(tmpbuf, p, lenp);
 }
 
@@ -1287,78 +1287,85 @@ to the hash is by Perl_to_utf8_case().
 UV
 Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *normal, char *special)
 {
-    UV uv;
+    UV uv0, uv1, uv2;
+    U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
+    STRLEN len;
 
     if (!*swashp)
         *swashp = swash_init("utf8", normal, &PL_sv_undef, 4, 0);
-    uv = swash_fetch(*swashp, p, TRUE);
-    if (!uv) {
+    uv0 = utf8_to_uvchr(p, 0);
+    /* The NATIVE_TO_UNI() and UNI_TO_NATIVE() mappings
+     * are necessary in EBCDIC, they are redundant no-ops
+     * in ASCII-ish platforms, and hopefully optimized away. */
+    uv1 = NATIVE_TO_UNI(uv0);
+    uvuni_to_utf8(tmpbuf, uv1);
+    uv2 = swash_fetch(*swashp, tmpbuf, TRUE);
+    if (uv2) {
+	 /* It was "normal" (a single character mapping). */
+         UV uv3 = UNI_TO_NATIVE(uv2);
+	
+         len = uvuni_to_utf8(ustrp, uv3) - ustrp;
+    }
+    else {
+	 /* It might be "special" (sometimes, but not always,
+	  * a multicharacter mapping) */
 	 HV *hv;
 	 SV *keysv;
 	 HE *he;
-
-	 uv = utf8_to_uvchr(p, 0);
-
+	 SV *val;
+	
 	 if ((hv    = get_hv(special, FALSE)) &&
-	     (keysv = sv_2mortal(Perl_newSVpvf(aTHX_ "%04"UVXf, uv))) &&
-	     (he    = hv_fetch_ent(hv, keysv, FALSE, 0))) {
-	      SV *val = HeVAL(he);
-	      STRLEN len;
-	      char *s = SvPV(val, len);
+	     (keysv = sv_2mortal(Perl_newSVpvf(aTHX_ "%04"UVXf, uv1))) &&
+	     (he    = hv_fetch_ent(hv, keysv, FALSE, 0)) &&
+	     (val   = HeVAL(he))) {
+	     char *s;
+	     U8 *d;
 
-	      if (len > 1) {
-		   Copy(s, ustrp, len, U8);
-#ifdef EBCDIC
-		   {
-			/* If we have EBCDIC we need to remap the
-			 * characters coming in from the "special"
-			 * (usually, but not always multicharacter)
-			 * mapping, since any characters in the low 256
-			 * are in Unicode code points, not EBCDIC.
-			 * --jhi */
-
-			U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
-			U8 *d = tmpbuf;
-			U8 *t, *tend;
-			
-			if (SvUTF8(val)) {
-			     STRLEN tlen = 0;
-
-			     for (t = ustrp, tend = t + len;
-				  t < tend; t += tlen) {
-				  UV c = utf8_to_uvchr(t, &tlen);
-				  
-				  if (tlen > 0)
-				       d = uvchr_to_utf8(d, UNI_TO_NATIVE(c));
-				  else
-				       break;
-			     }
-			} else {
-			     for (t = ustrp, tend = t + len;
-				  t < tend; t++)
-				  d = uvchr_to_utf8(d, UNI_TO_NATIVE(*t));
-			}
-			len = d - tmpbuf; 
-			Copy(tmpbuf, ustrp, len, U8);
-		   }
-#endif
-	      }
+	      s = SvPV(val, len);
+	      if (len == 1)
+		   len = uvuni_to_utf8(ustrp, NATIVE_TO_UNI(*(U8*)s)) - ustrp;
 	      else {
-		   UV  c = UNI_TO_NATIVE(*(U8*)s);
-		   U8 *d = uvchr_to_utf8(ustrp, c);
-
-		   len = d - ustrp;
+#ifdef EBCDIC
+		   /* If we have EBCDIC we need to remap the characters
+		    * since any characters in the low 256 are Unicode
+		    * code points, not EBCDIC. */
+		   U8 *t = (U8*)s, *tend = t + len;
+		
+		   d = tmpbuf;
+		   if (SvUTF8(val)) {
+			STRLEN tlen = 0;
+			
+			while (t < tend) {
+			     UV c = utf8_to_uvchr(t, &tlen);
+			     if (tlen > 0) {
+				  d = uvchr_to_utf8(d, UNI_TO_NATIVE(c));
+				  t += tlen;
+			     }
+			     else
+				  break;
+			}
+		   }
+		   else {
+			while (t < tend)
+			     d = uvchr_to_utf8(d, UNI_TO_NATIVE(*t++));
+		   }
+		   len = d - tmpbuf;
+		   Copy(tmpbuf, ustrp, len, U8);
+#else
+		   Copy(s, ustrp, len, U8);
 	      }
-	      if (lenp)
-		   *lenp = len;
-	      return utf8_to_uvchr(ustrp, 0);
+#endif
 	 }
-	 uv  = NATIVE_TO_UNI(uv);
+	 else {
+	      /* It was not "special", either. */
+	      len = uvchr_to_utf8(ustrp, uv0) - ustrp;
+	 }
     }
+
     if (lenp)
-       *lenp = UNISKIP(uv);
-    uvuni_to_utf8(ustrp, uv);
-    return uv;
+	 *lenp = len;
+
+    return utf8_to_uvchr(ustrp, 0);
 }
 
 /*
@@ -1841,7 +1848,7 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const
 	       if (u1)
 		    to_utf8_fold(p1, foldbuf1, &foldlen1);
 	       else {
-		    natbuf[0] = NATIVE_TO_UNI(*p1);
+		    natbuf[0] = *p1;
 		    to_utf8_fold(natbuf, foldbuf1, &foldlen1);
 	       }
 	       q1 = foldbuf1;
@@ -1851,7 +1858,7 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const
 	       if (u2)
 		    to_utf8_fold(p2, foldbuf2, &foldlen2);
 	       else {
-		    natbuf[0] = NATIVE_TO_UNI(*p2);
+		    natbuf[0] = *p2;
 		    to_utf8_fold(natbuf, foldbuf2, &foldlen2);
 	       }
 	       q2 = foldbuf2;

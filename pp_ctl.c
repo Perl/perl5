@@ -1224,6 +1224,9 @@ OP *
 Perl_die_where(pTHX_ char *message, STRLEN msglen)
 {
     STRLEN n_a;
+    IO *io;
+    MAGIC *mg;
+
     if (PL_in_eval) {
 	I32 cxix;
 	register PERL_CONTEXT *cx;
@@ -1303,7 +1306,19 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
     }
     if (!message)
 	message = SvPVx(ERRSV, msglen);
-    {
+
+    /* if STDERR is tied, print to it instead */
+    if (PL_stderrgv && (io = GvIOp(PL_stderrgv))
+	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar))) {
+	dSP; ENTER;
+	PUSHMARK(SP);
+	XPUSHs(SvTIED_obj((SV*)io, mg));
+	XPUSHs(sv_2mortal(newSVpvn(message, msglen)));
+	PUTBACK;
+	call_method("PRINT", G_SCALAR);
+	LEAVE;
+    }
+    else {
 #ifdef USE_SFIO
 	/* SFIO can really mess with your errno */
 	int e = errno;
