@@ -40,7 +40,6 @@ typedef long long __int64;
 
 #ifdef   WIN32_LEAN_AND_MEAN		/* C file is NOT a Perl5 original. */
 #define  CONTEXT	PERL_CONTEXT	/* Avoid conflict of CONTEXT defs. */
-#define  index		strchr		/* Why 'index'? */
 #endif /*WIN32_LEAN_AND_MEAN */
 
 #include <dirent.h>
