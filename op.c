@@ -1413,7 +1413,7 @@ register OP *o;
 	for (curop = ((UNOP*)o)->op_first; curop; curop = curop->op_sibling) {
 	    if (curop->op_type == OP_CONST) {
 		if (SvIOK(((SVOP*)curop)->op_sv)) {
-		    if (SvIVX(((SVOP*)curop)->op_sv) < 0 && vars++)
+		    if (SvIVX(((SVOP*)curop)->op_sv) <= 0 && vars++)
 			return o;	/* negatives truncate wrong way, alas */
 		    continue;
 		}
