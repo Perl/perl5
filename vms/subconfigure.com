@@ -77,6 +77,7 @@ $ perl_d_sockpair="undef"
 $ perl_i_neterrno="define"
 $ perl_ldflags="/NoTrace/NoMap"
 $ perl_d_lchown="undef"
+$ perl_d_mknod="undef"
 $ perl_d_union_semun="undef"
 $ perl_d_semctl_semun="undef"
 $ perl_d_semctl_semid_ds="undef"
@@ -710,6 +711,38 @@ $   ELSE
 $     perl_gidtype = "gid_t"
 $   ENDIF
 $ WRITE_RESULT "Gid_t is ''perl_gidtype'"
+$!
+$! Check the prototype for getgid
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <types.h>
+$ WS "#include <unistd.h>
+$ WS "int main()
+$ WS "{"
+$ WS "dev_t foo;
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp
+$   teststatus = f$extract(9,1,$status)
+$   DEASSIGN SYS$OUTPUT
+$   DEASSIGN SYS$ERROR
+$   if (teststatus.nes."1")
+$   THEN
+$!   Okay, dev_t failed. Must be unsigned int
+$     perl_devtype = "unsigned int"
+$   ELSE
+$     perl_devtype = "dev_t"
+$   ENDIF
+$ WRITE_RESULT "Dev_t is ''perl_devtype'"
 $!
 $! Check the prototype for select
 $!
@@ -2217,6 +2250,8 @@ $ WC "d_union_semun='" + perl_d_union_semun + "'"
 $ WC "d_semctl_semun='" + perl_d_semctl_semun + "'"
 $ WC "d_semctl_semid_ds='" + perl_d_semctl_semid_ds + "'"
 $ WC "extensions='" + perl_extensions + "'"
+$ WC "d_mknod='" + perl_d_mknod + "'"
+$ WC "devtype='" + perl_devtype + "'"
 $!
 $ Close CONFIGSH
 $

@@ -1301,10 +1301,11 @@ for more information.
 script if C<$ENV{PATH}> contains a directory that is writable by the world.
 See L<perlsec>.
 
-=item Insecure PATH
+=item Insecure $ENV{%s} while running %s
 
 (F) You can't use system(), exec(), or a piped open in a setuid or
-setgid script if C<$ENV{PATH}> is derived from data supplied (or
+setgid script if any of C<$ENV{PATH}>, C<$ENV{IFS}>, C<$ENV{CDPATH}>,
+C<$ENV{ENV}> or C<$ENV{BASH_ENV}> are derived from data supplied (or
 potentially supplied) by the user.  The script must set the path to a
 known value, using trustworthy data.  See L<perlsec>.
 
@@ -2046,6 +2047,13 @@ last argument of the previous construct, for example:
 (S) The subroutine being declared or defined had previously been declared
 or defined with a different function prototype.
 
+=item Range iterator outside integer range
+
+(F) One (or both) of the numeric arguments to the range operator ".."
+are outside the range which can be represented by integers internally.
+One possible workaround is to force Perl to use magical string
+increment by prepending "0" to your numbers.
+
 =item Read on closed filehandle E<lt>%sE<gt>
 
 (W) The filehandle you're reading from got itself closed sometime before now.
@@ -2061,10 +2069,15 @@ Check your logic flow.
 desired output is compiled into Perl, which entails some overhead,
 which is why it's currently left out of your copy.
 
-=item Recursive inheritance detected
+=item Recursive inheritance detected in package '%s'
 
 (F) More than 100 levels of inheritance were used.  Probably indicates
 an unintended loop in your inheritance hierarchy.
+
+=item Recursive inheritance detected while looking for method '%s' in package '%s'
+
+(F) More than 100 levels of inheritance were encountered while invoking a
+method.  Probably indicates an unintended loop in your inheritance hierarchy.
 
 =item Reference found where even-sized list expected
 

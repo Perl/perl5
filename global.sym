@@ -477,6 +477,7 @@ newGVREF
 newGVgen
 newHV
 newHVREF
+newHVhv
 newIO
 newLISTOP
 newLOGOP
@@ -924,6 +925,7 @@ save_freesv
 save_gp
 save_hash
 save_helem
+save_hints
 save_hptr
 save_int
 save_item

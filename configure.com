@@ -1786,7 +1786,7 @@ $ echo "you might, for example, want to build GDBM_File instead of
 $ echo "SDBM_File if you have the GDBM library built on your machine
 $ echo "
 $ echo "Which modules do you want to build into perl?"
-$ dflt = "Fcntl IO Opcode attrs Stdio DCLsym B SDBM_File"
+$ dflt = "Fcntl Errno IO Opcode attrs Stdio DCLsym B SDBM_File"
 $ if Using_Dec_C.eqs."Yes"
 $ THEN
 $   dflt = dflt + " POSIX"

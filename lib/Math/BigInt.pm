@@ -36,6 +36,12 @@ sub stringify { "${$_[0]}" }
 sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 				# comparing to direct compilation based on
 				# stringify
+sub import {
+  shift;
+  return unless @_;
+  die "unknown import: @_" unless @_ == 1 and $_[0] eq ':constant';
+  overload::constant integer => sub {Math::BigInt->new(shift)};
+}
 
 $zero = 0;
 
@@ -383,6 +389,19 @@ are not numbers, as well as the result of dividing by zero.
    '   -123 123 123'               canonical value '-123123123'
    '1 23 456 7890'                 canonical value '+1234567890'
 
+
+=head1 Autocreating constants
+
+After C<use Math::BigInt ':constant'> all the integer decimal constants
+in the given scope are converted to C<Math::BigInt>.  This convertion
+happens at compile time.
+
+In particular
+
+  perl -MMath::BigInt=:constant -e 'print 2**100'
+
+print the integer value of C<2**100>.  Note that without convertion of 
+constants the expression 2**100 will be calculatted as floating point number.
 
 =head1 BUGS
 

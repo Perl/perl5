@@ -782,6 +782,10 @@ scalarvoid(OP *o)
     case OP_REPEAT:
 	if (o->op_flags & OPf_STACKED)
 	    break;
+	goto func_ops;
+    case OP_SUBSTR:
+	if (o->op_private == 4)
+	    break;
 	/* FALL THROUGH */
     case OP_GVSV:
     case OP_WANTARRAY:
@@ -798,7 +802,6 @@ scalarvoid(OP *o)
     case OP_HEX:
     case OP_OCT:
     case OP_LENGTH:
-    case OP_SUBSTR:
     case OP_VEC:
     case OP_INDEX:
     case OP_RINDEX:
@@ -851,6 +854,7 @@ scalarvoid(OP *o)
     case OP_GGRNAM:
     case OP_GGRGID:
     case OP_GETLOGIN:
+      func_ops:
 	if (!(o->op_private & OPpLVAL_INTRO))
 	    useless = op_desc[o->op_type];
 	break;
@@ -1206,10 +1210,14 @@ mod(OP *o, I32 type)
     case OP_KEYS:
 	if (type != OP_SASSIGN)
 	    goto nomod;
+	goto lvalue_func;
+    case OP_SUBSTR:
+	if (o->op_private == 4) /* don't allow 4 arg substr as lvalue */
+	    goto nomod;
 	/* FALL THROUGH */
     case OP_POS:
     case OP_VEC:
-    case OP_SUBSTR:
+      lvalue_func:
 	pad_free(o->op_targ);
 	o->op_targ = pad_alloc(o->op_type, SVs_PADMY);
 	assert(SvTYPE(PAD_SV(o->op_targ)) == SVt_NULL);
@@ -1510,11 +1518,21 @@ scope(OP *o)
     return o;
 }
 
+void
+save_hints(void)
+{
+    SAVEI32(hints);
+    SAVESPTR(GvHV(hintgv));
+    GvHV(hintgv) = newHVhv(GvHV(hintgv));
+    SAVEFREESV(GvHV(hintgv));
+}
+
 int
 block_start(int full)
 {
     dTHR;
     int retval = savestack_ix;
+
     SAVEI32(comppad_name_floor);
     if (full) {
 	if ((comppad_name_fill = AvFILLp(comppad_name)) > 0)
@@ -1529,7 +1547,7 @@ block_start(int full)
     SAVEI32(padix_floor);
     padix_floor = padix;
     pad_reset_pending = FALSE;
-    SAVEI32(hints);
+    SAVEHINTS();
     hints &= ~HINT_BLOCK_SCOPE;
     return retval;
 }
@@ -3024,12 +3042,44 @@ newFOROP(I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *block,OP *cont
 #endif
     }
     if (expr->op_type == OP_RV2AV || expr->op_type == OP_PADAV) {
-	expr = scalar(ref(expr, OP_ITER));
+	expr = mod(force_list(scalar(ref(expr, OP_ITER))), OP_GREPSTART);
 	iterflags |= OPf_STACKED;
     }
+    else if (expr->op_type == OP_NULL &&
+             (expr->op_flags & OPf_KIDS) &&
+             ((BINOP*)expr)->op_first->op_type == OP_FLOP)
+    {
+	/* Basically turn for($x..$y) into the same as for($x,$y), but we
+	 * set the STACKED flag to indicate that these values are to be
+	 * treated as min/max values by 'pp_iterinit'.
+	 */
+	UNOP* flip = (UNOP*)((UNOP*)((BINOP*)expr)->op_first)->op_first;
+	CONDOP* range = (CONDOP*) flip->op_first;
+	OP* left  = range->op_first;
+	OP* right = left->op_sibling;
+	LISTOP* listop;
+
+	range->op_flags &= ~OPf_KIDS;
+	range->op_first = Nullop;
+
+	listop = (LISTOP*)newLISTOP(OP_LIST, 0, left, right);
+	listop->op_first->op_next = range->op_true;
+	left->op_next = range->op_false;
+	right->op_next = (OP*)listop;
+	listop->op_next = listop->op_first;
+
+	op_free(expr);
+	expr = (OP*)(listop);
+        null(expr);
+	iterflags |= OPf_STACKED;
+    }
+    else {
+        expr = mod(force_list(expr), OP_GREPSTART);
+    }
+
+
     loop = (LOOP*)list(convert(OP_ENTERITER, iterflags,
-	append_elem(OP_LIST, mod(force_list(expr), OP_GREPSTART),
-		    scalar(sv))));
+			       append_elem(OP_LIST, expr, scalar(sv))));
     assert(!loop->op_next);
     Renew(loop, 1, LOOP);
     loop->op_targ = padoff;

@@ -210,6 +210,8 @@
 #define he_root			pPerl->Perl_he_root
 #undef  hexdigit
 #define hexdigit		pPerl->Perl_hexdigit
+#undef  hintgv
+#define hintgv			pPerl->Perl_hintgv
 #undef  hints
 #define hints			pPerl->Perl_hints
 #undef  hv_fetch_ent_mh
@@ -1333,6 +1335,8 @@
 #define newHVREF            pPerl->Perl_newHVREF
 #undef  newHV
 #define newHV               pPerl->Perl_newHV
+#undef  newHVhv
+#define newHVhv             pPerl->Perl_newHVhv
 #undef  newIO
 #define newIO               pPerl->Perl_newIO
 #undef  newLISTOP
@@ -1574,6 +1578,8 @@
 #define save_hash           pPerl->Perl_save_hash
 #undef  save_helem
 #define save_helem          pPerl->Perl_save_helem
+#undef  save_hints
+#define save_hints          pPerl->Perl_save_hints
 #undef  save_hptr
 #define save_hptr           pPerl->Perl_save_hptr
 #undef  save_I16

@@ -720,7 +720,7 @@ PP(pp_sort)
 	    SAVEOP();
 
 	    CATCH_SET(TRUE);
-	    PUSHSTACK(SI_SORT);
+	    PUSHSTACKi(SI_SORT);
 	    if (sortstash != stash) {
 		firstgv = gv_fetchpv("a", TRUE, SVt_PV);
 		secondgv = gv_fetchpv("b", TRUE, SVt_PV);
@@ -743,7 +743,7 @@ PP(pp_sort)
 	    qsortsv((myorigmark+1), max, FUNC_NAME_TO_PTR(sortcv));
 
 	    POPBLOCK(cx,curpm);
-	    POPSTACK();
+	    POPSTACK;
 	    CATCH_SET(oldcatch);
 	}
     }
@@ -815,6 +815,8 @@ PP(pp_flop)
 	if (SvNIOKp(left) || !SvPOKp(left) ||
 	  (looks_like_number(left) && *SvPVX(left) != '0') )
 	{
+	    if (SvNV(left) < IV_MIN || SvNV(right) >= IV_MAX)
+		croak("Range iterator outside integer range");
 	    i = SvIV(left);
 	    max = SvIV(right);
 	    if (max >= i) {
@@ -832,14 +834,13 @@ PP(pp_flop)
 	    char *tmps = SvPV(final, len);
 
 	    sv = sv_mortalcopy(left);
-	    while (!SvNIOKp(sv) && SvCUR(sv) <= len &&
-		strNE(SvPVX(sv),tmps) ) {
+	    while (!SvNIOKp(sv) && SvCUR(sv) <= len) {
 		XPUSHs(sv);
+	        if (strEQ(SvPVX(sv),tmps))
+	            break;
 		sv = sv_2mortal(newSVsv(sv));
 		sv_inc(sv);
 	    }
-	    if (strEQ(SvPVX(sv),tmps))
-		XPUSHs(sv);
 	}
     }
     else {
@@ -1075,7 +1076,7 @@ die_where(char *message)
 
 	while ((cxix = dopoptoeval(cxstack_ix)) < 0 && curstackinfo->si_prev) {
 	    dounwind(-1);
-	    POPSTACK();
+	    POPSTACK;
 	}
 
 	if (cxix >= 0) {
@@ -1367,8 +1368,22 @@ PP(pp_enteriter)
 
     PUSHBLOCK(cx, CXt_LOOP, SP);
     PUSHLOOP(cx, svp, MARK);
-    if (op->op_flags & OPf_STACKED)
+    if (op->op_flags & OPf_STACKED) {
 	cx->blk_loop.iterary = (AV*)SvREFCNT_inc(POPs);
+	if (SvTYPE(cx->blk_loop.iterary) != SVt_PVAV) {
+	    dPOPss;
+	    if (SvNIOKp(sv) || !SvPOKp(sv) ||
+		(looks_like_number(sv) && *SvPVX(sv) != '0')) {
+		 if (SvNV(sv) < IV_MIN ||
+		     SvNV((SV*)cx->blk_loop.iterary) >= IV_MAX)
+		     croak("Range iterator outside integer range");
+		 cx->blk_loop.iterix = SvIV(sv);
+		 cx->blk_loop.itermax = SvIV((SV*)cx->blk_loop.iterary);
+	    }
+	    else
+		cx->blk_loop.iterlval = newSVsv(sv);
+	}
+    }
     else {
 	cx->blk_loop.iterary = curstack;
 	AvFILLp(curstack) = SP - stack_base;
@@ -1762,6 +1777,20 @@ PP(pp_goto)
 		AvREAL_off(av);
 		av_clear(av);
 	    }
+	    else if (CvXSUB(cv)) {	/* put GvAV(defgv) back onto stack */
+		AV* av;
+		int i;
+#ifdef USE_THREADS
+		av = (AV*)curpad[0];
+#else
+		av = GvAV(defgv);
+#endif
+		items = AvFILLp(av) + 1;
+		stack_sp++;
+		EXTEND(stack_sp, items); /* @_ could have been extended. */
+		Copy(AvARRAY(av), stack_sp, items, SV*);
+		stack_sp += items;
+	    }
 	    if (cx->cx_type == CXt_SUB &&
 		!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth))
 		SvREFCNT_dec(cx->blk_sub.cv);
@@ -1784,8 +1813,16 @@ PP(pp_goto)
 		    SP = stack_base + items;
 		}
 		else {
+		    SV **newsp;
+		    I32 gimme;
+
 		    stack_sp--;		/* There is no cv arg. */
+		    /* Push a mark for the start of arglist */
+		    PUSHMARK(mark); 
 		    (void)(*CvXSUB(cv))(cv _PERL_OBJECT_THIS);
+		    /* Pop the current context like a decent sub should */
+		    POPBLOCK(cx, curpm);
+		    /* Do _not_ use PUTBACK, keep the XSUB's return stack! */
 		}
 		LEAVE;
 		return pop_return();
@@ -2187,7 +2224,7 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
        introduced within evals. See force_ident(). GSAR 96-10-12 */
     safestr = savepv(tmpbuf);
     SAVEDELETE(defstash, safestr, strlen(safestr));
-    SAVEI32(hints);
+    SAVEHINTS();
 #ifdef OP_IN_REGISTER
     opsave = op;
 #else
@@ -2515,7 +2552,7 @@ PP(pp_require)
     rsfp = tryrsfp;
     name = savepv(name);
     SAVEFREEPV(name);
-    SAVEI32(hints);
+    SAVEHINTS();
     hints = 0;
  
     /* switch to eval mode */
@@ -2575,7 +2612,7 @@ PP(pp_entereval)
        introduced within evals. See force_ident(). GSAR 96-10-12 */
     safestr = savepv(tmpbuf);
     SAVEDELETE(defstash, safestr, strlen(safestr));
-    SAVEI32(hints);
+    SAVEHINTS();
     hints = op->op_targ;
 
     push_return(op->op_next);

@@ -806,6 +806,13 @@ leave_scope(I32 base)
 	case SAVEt_OP:
 	    op = (OP*)SSPOPPTR;
 	    break;
+	case SAVEt_NOHINTS:
+	    if (GvHV(hintgv)) {
+		SvREFCNT_dec((SV*)GvHV(hintgv));
+		GvHV(hintgv) = NULL;
+	    }
+	    *(I32*)&hints = (I32)SSPOPINT;
+	    break;
 	default:
 	    croak("panic: leave_scope inconsistency");
 	}

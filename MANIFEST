@@ -72,11 +72,13 @@ dump.c			Debugging output
 eg/ADB			An adb wrapper to put in your crash dir
 eg/README		Intro to example perl scripts
 eg/cgi/RunMeFirst		Setup script for CGI examples
+eg/cgi/caution.xbm		CGI example
 eg/cgi/clickable_image.cgi	CGI example
 eg/cgi/cookie.cgi		CGI example
 eg/cgi/crash.cgi		CGI example
 eg/cgi/customize.cgi		CGI example
 eg/cgi/diff_upload.cgi		CGI example
+eg/cgi/dna.small.gif.uu		Small image for CGI examples
 eg/cgi/file_upload.cgi		CGI example
 eg/cgi/frameset.cgi		CGI example
 eg/cgi/index.html		Index page for CGI examples
@@ -85,6 +87,7 @@ eg/cgi/javascript.cgi		CGI example
 eg/cgi/monty.cgi		CGI example
 eg/cgi/multiple_forms.cgi	CGI example
 eg/cgi/nph-clock.cgi		CGI example
+eg/cgi/nph-multipart.cgi	CGI example
 eg/cgi/popup.cgi		CGI example
 eg/cgi/save_state.cgi		CGI example
 eg/cgi/tryit.cgi		CGI example
@@ -189,6 +192,7 @@ ext/DynaLoader/dl_next.xs	Next implementation
 ext/DynaLoader/dl_none.xs	Stub implementation
 ext/DynaLoader/dl_vms.xs	VMS implementation
 ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
+ext/Errno/ChangeLog		Errno perl module change log
 ext/Errno/Errno_pm.PL		Errno perl module create script
 ext/Errno/Makefile.PL		Errno extension makefile writer
 ext/Fcntl/Fcntl.pm		Fcntl extension Perl module
@@ -417,6 +421,7 @@ lib/Bundle/CPAN.pm	The CPAN bundle
 lib/CGI.pm		Web server interface ("Common Gateway Interface")
 lib/CGI/Apache.pm	Support for Apache's Perl module
 lib/CGI/Carp.pm		Log server errors with helpful context
+lib/CGI/Cookie.pm	Interface to Netscape Cookies
 lib/CGI/Fast.pm		Support for FastCGI (persistent server process)
 lib/CGI/Push.pm		Support for server push
 lib/CGI/Switch.pm	Simple interface for multiple server types
@@ -476,6 +481,7 @@ lib/Math/BigFloat.pm	An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm	An arbitrary precision integer arithmetic package
 lib/Math/Complex.pm	A Complex package
 lib/Math/Trig.pm	A simple interface to complex trigonometry
+lib/Math/Trig/Radial.pm	Spherical and cylindrical trigonometry
 lib/Net/Ping.pm		Hello, anybody home?
 lib/Net/hostent.pm	By-name interface to Perl's builtin gethost*
 lib/Net/netent.pm	By-name interface to Perl's builtin getnet*
@@ -629,6 +635,7 @@ perl.c			main()
 perl.h			Global declarations
 perl_exp.SH		Creates list of exported symbols for AIX
 perlio.c		C code for PerlIO abstraction
+perlio.h		compatibility stub
 perlio.sym		Symbols for PerlIO abstraction
 perlsdio.h		Fake stdio using perlio
 perlsfio.h		Prototype sfio mapping for PerlIO
@@ -775,6 +782,10 @@ t/lib/autoloader.t	See if AutoLoader works
 t/lib/basename.t	See if File::Basename works
 t/lib/bigint.t		See if bigint.pl works
 t/lib/bigintpm.t	See if BigInt.pm works
+t/lib/cgi-form.t	See if CGI.pm works
+t/lib/cgi-function.t	See if CGI.pm works
+t/lib/cgi-html.t	See if CGI.pm works
+t/lib/cgi-request.t	See if CGI.pm works
 t/lib/checktree.t	See if File::CheckTree works
 t/lib/complex.t		See if Math::Complex works
 t/lib/db-btree.t	See if DB_File works
@@ -855,6 +866,7 @@ t/op/flip.t		See if range operator works
 t/op/fork.t		See if fork works
 t/op/glob.t		See if <*> works
 t/op/goto.t		See if goto works
+t/op/goto_xs.t		See if "goto &sub" works on XSUBs
 t/op/groups.t		See if $( works
 t/op/gv.t		See if typeglobs work
 t/op/hashwarn.t		See if warnings for bad hash assignments work
@@ -892,6 +904,7 @@ t/op/repeat.t		See if x operator works
 t/op/runlevel.t		See if die() works from perl_call_*()
 t/op/sleep.t		See if sleep works
 t/op/sort.t		See if sort works
+t/op/splice.t           See if splice works
 t/op/split.t		See if split works
 t/op/sprintf.t		See if sprintf works
 t/op/stat.t		See if stat works

@@ -26,6 +26,11 @@ my @script = (
 );
 my $eps = 1e-13;
 
+if ($^O eq 'unicos') { 	# For some reason root() produces very inaccurate
+    $eps = 1e-11;	# results in Cray UNICOS, and occasionally also
+}			# cos(), sin(), cosh(), sinh().  The division
+			# of doubles is the current suspect.
+
 while (<DATA>) {
 	s/^\s+//;
 	next if $_ eq '' || /^\#/;

@@ -7,7 +7,7 @@ BEGIN {
 
 use Text::ParseWords;
 
-print "1..15\n";
+print "1..17\n";
 
 @words = shellwords(qq(foo "bar quiz" zoo));
 print "not " if $words[0] ne 'foo';
@@ -17,10 +17,15 @@ print "ok 2\n";
 print "not " if $words[2] ne 'zoo';
 print "ok 3\n";
 
+# Gonna get some undefined things back
+local($^W) = 0;
+
 # Test quotewords() with other parameters and null last field
 @words = quotewords(':+', 1, 'foo:::"bar:foo":zoo zoo:');
 print "not " unless join(";", @words) eq qq(foo;"bar:foo";zoo zoo;);
 print "ok 4\n";
+
+$^W = 1;
 
 # Test $keep eq 'delimiters' and last field zero
 @words = quotewords('\s+', 'delimiters', '4 3 2 1 0');
@@ -66,6 +71,9 @@ print "ok 11\n";
 print "not " if (@words);
 print "ok 12\n";
 
+# Gonna get some more undefined things back
+$^W = 0;
+
 @words = nested_quotewords('s+', 0, $string);
 print "not " if (@words);
 print "ok 13\n";
@@ -79,3 +87,17 @@ print "ok 14\n";
 $result = join('|', parse_line(':', 0, ':"0":'));
 print "not " unless ($result eq '|0|');
 print "ok 15\n";
+
+# Test for \001 in quoted string
+$result = join('|', parse_line(':', 0, ':"' . "\001" . '":'));
+print "not " unless ($result eq "|\1|");
+print "ok 16\n";
+
+$^W = 1;
+
+# Now test perlish single quote behavior
+$Text::ParseWords::PERL_SINGLE_QUOTE = 1;
+$string = 'aaaa"bbbbb" cc\ cc \\\\\"dddd\' eee\\\\\"\\\'ffff\' gg';
+$result = join('|', parse_line('\s+', 0, $string));
+print "not " unless $result eq 'aaaabbbbb|cc cc|\"dddd eee\\\\"\'ffff|gg';
+print "ok 17\n";

@@ -803,6 +803,8 @@
 #define newHVREF          CPerlObj::Perl_newHVREF
 #undef  newHV
 #define newHV             CPerlObj::Perl_newHV
+#undef  newHVhv
+#define newHVhv           CPerlObj::Perl_newHVhv
 #undef  newIO
 #define newIO             CPerlObj::Perl_newIO
 #undef  newLISTOP
@@ -839,6 +841,8 @@
 #define newUNOP           CPerlObj::Perl_newUNOP
 #undef  newWHILEOP
 #define newWHILEOP        CPerlObj::Perl_newWHILEOP
+#undef  new_constant
+#define new_constant      CPerlObj::new_constant
 #undef  new_logop
 #define new_logop         CPerlObj::new_logop
 #undef  new_stackinfo
@@ -1111,6 +1115,8 @@
 #define save_hek          CPerlObj::save_hek
 #undef  save_helem
 #define save_helem        CPerlObj::Perl_save_helem
+#undef  save_hints
+#define save_hints        CPerlObj::Perl_save_hints
 #undef  save_hptr
 #define save_hptr         CPerlObj::Perl_save_hptr
 #undef  save_I16

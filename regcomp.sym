@@ -11,6 +11,7 @@ SUCCEED		END,    no	Return from a subroutine, basically.
 BOL		BOL,    no	Match "" at beginning of line.
 MBOL		BOL,    no	Same, assuming multiline.
 SBOL		BOL,    no	Same, assuming singleline.
+EOS		EOL,    no	Match "" at end of string.
 EOL		EOL,    no	Match "" at end of line.
 MEOL		EOL,    no	Same, assuming multiline.
 SEOL		EOL,    no	Same, assuming singleline.

@@ -339,6 +339,7 @@ VIRTUAL GV*	newGVgen _((char* pack));
 VIRTUAL OP*	newGVREF _((I32 type, OP* o));
 VIRTUAL OP*	newHVREF _((OP* o));
 VIRTUAL HV*	newHV _((void));
+VIRTUAL HV*	newHVhv _((HV* hv));
 VIRTUAL IO*	newIO _((void));
 VIRTUAL OP*	newLISTOP _((I32 type, I32 flags, OP* first, OP* last));
 VIRTUAL OP*	newPMOP _((I32 type, I32 flags));
@@ -481,6 +482,7 @@ VIRTUAL void	save_freepv _((char* pv));
 VIRTUAL void	save_gp _((GV* gv, I32 empty));
 VIRTUAL HV*	save_hash _((GV* gv));
 VIRTUAL void	save_helem _((HV* hv, SV *key, SV **sptr));
+VIRTUAL void	save_hints _((void));
 VIRTUAL void	save_hptr _((HV** hptr));
 VIRTUAL void	save_I16 _((I16* intp));
 VIRTUAL void	save_I32 _((I32* intp));
@@ -750,6 +752,7 @@ I32 sublex_start _((void));
 int uni _((I32 f, char *s));
 #endif
 char * filter_gets _((SV *sv, PerlIO *fp, STRLEN append));
+SV *new_constant _((char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type));
 int ao _((int toketype));
 void depcom _((void));
 #ifdef WIN32

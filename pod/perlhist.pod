@@ -282,6 +282,8 @@ the strings?).
           5.004_65      1998-May-15
           5.004_66      1998-May-29
  Sarathy  5.004_67      1998-Jun-15
+          5.004_68      1998-Jun-23
+          5.004_69      1998-Jun-29
 
 =head2 SELECTED RELEASE SIZES
 

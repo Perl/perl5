@@ -29,7 +29,7 @@ INST_TOP	*= $(INST_DRV)\perl.gcc
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	*= \5.00468
+INST_VER	*= \5.00469
 
 #
 # uncomment to enable threads-capabilities
@@ -564,6 +564,7 @@ PERL95_OBJ	+= DynaLoadmt$(o)
 
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B
 STATIC_EXT	= DynaLoader
+NONXS_EXT	= Errno
 
 DYNALOADER	= $(EXTDIR)\DynaLoader\DynaLoader
 SOCKET		= $(EXTDIR)\Socket\Socket
@@ -575,6 +576,7 @@ POSIX		= $(EXTDIR)\POSIX\POSIX
 ATTRS		= $(EXTDIR)\attrs\attrs
 THREAD		= $(EXTDIR)\Thread\Thread
 B		= $(EXTDIR)\B\B
+ERRNO		= $(EXTDIR)\Errno\Errno
 
 SOCKET_DLL	= $(AUTODIR)\Socket\Socket.dll
 FCNTL_DLL	= $(AUTODIR)\Fcntl\Fcntl.dll
@@ -585,6 +587,8 @@ POSIX_DLL	= $(AUTODIR)\POSIX\POSIX.dll
 ATTRS_DLL	= $(AUTODIR)\attrs\attrs.dll
 THREAD_DLL	= $(AUTODIR)\Thread\Thread.dll
 B_DLL		= $(AUTODIR)\B\B.dll
+
+ERRNO_PM	= $(LIBDIR)\Errno.pm
 
 EXTENSION_C	=		\
 		$(SOCKET).c	\
@@ -606,6 +610,9 @@ EXTENSION_DLL	=		\
 		$(POSIX_DLL)	\
 		$(ATTRS_DLL)	\
 		$(B_DLL)
+
+EXTENSION_PM	=		\
+		$(ERRNO_PM)
 
 .IF "$(OBJECT)" == ""
 EXTENSION_DLL	+=		\
@@ -637,6 +644,7 @@ CFG_VARS	=					\
 		"_a=$(a)" "lib_ext=$(a)"		\
 		"static_ext=$(STATIC_EXT)"		\
 		"dynamic_ext=$(DYNAMIC_EXT)"		\
+		"nonxs_ext=$(NONXS_EXT)"		\
 		"usethreads=$(USE_THREADS)"		\
 		"LINK_FLAGS=$(LINK_FLAGS)"		\
 		"optimize=$(OPTIMIZE)"
@@ -646,7 +654,7 @@ CFG_VARS	=					\
 #
 
 all : .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) $(PERL95EXE) \
-	$(CAPILIB) $(X2P) $(EXTENSION_DLL)
+	$(CAPILIB) $(X2P) $(EXTENSION_DLL) $(EXTENSION_PM)
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 
@@ -923,6 +931,11 @@ $(SOCKET_DLL): $(PERLEXE) $(SOCKET).xs
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
+$(ERRNO_PM): $(PERLEXE) $(ERRNO)_pm.PL
+	cd $(EXTDIR)\$(*B) && \
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	cd $(EXTDIR)\$(*B) && $(MAKE)
+
 doc: $(PERLEXE)
 	copy ..\README.win32 ..\pod\perlwin32.pod
 	$(PERLEXE) -I..\lib ..\installhtml --podroot=.. --htmldir=./html \
@@ -938,8 +951,8 @@ distclean: clean
 	-del /f $(MINIPERL) $(PERLEXE) $(PERL95EXE) $(PERLDLL) $(GLOBEXE) \
 		$(PERLIMPLIB) ..\miniperl$(a) $(MINIMOD)
 	-del /f *.def *.map
-	-del /f $(EXTENSION_DLL)
-	-del /f $(EXTENSION_C) $(DYNALOADER).c
+	-del /f $(EXTENSION_DLL) $(EXTENSION_PM)
+	-del /f $(EXTENSION_C) $(DYNALOADER).c $(ERRNO).pm
 	-del /f $(EXTDIR)\DynaLoader\dl_win32.xs
 	-del /f $(LIBDIR)\.exists $(LIBDIR)\attrs.pm $(LIBDIR)\DynaLoader.pm
 	-del /f $(LIBDIR)\Fcntl.pm $(LIBDIR)\IO.pm $(LIBDIR)\Opcode.pm

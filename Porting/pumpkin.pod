@@ -329,7 +329,7 @@ In all, the following files should probably be executable:
 
     Configure
     configpm
-    configure
+    configure.gnu
     embed.pl
     installperl
     installman
@@ -342,7 +342,6 @@ In all, the following files should probably be executable:
     *.SH
     vms/ext/Stdio/test.pl
     vms/ext/filespec.t
-    vms/fndvers.com
     x2p/*.SH
 
 Other things ought to be readable, at least :-).

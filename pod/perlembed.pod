@@ -690,7 +690,10 @@ with my() whenever possible.
      ($stem, $leaf) = $pkg =~ m/(.*::)(\w+::)$/;
 
      my $stem_symtab = *{$stem}{HASH};
+     my $leaf_glob   = $stem_symtab->{$leaf};
+     my $leaf_symtab = *{$leaf_glob}{HASH};
 
+     %$leaf_symtab = ();
      delete $stem_symtab->{$leaf};
  }
 

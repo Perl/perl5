@@ -1816,6 +1816,13 @@ typedef enum {
 #define HINT_STRICT_VARS	0x00000400
 #define HINT_LOCALE		0x00000800
 
+#define HINT_NEW_INTEGER	0x00001000
+#define HINT_NEW_FLOAT		0x00002000
+#define HINT_NEW_BINARY		0x00004000
+#define HINT_NEW_STRING		0x00008000
+#define HINT_NEW_RE		0x00010000
+#define HINT_LOCALIZE_HH	0x00020000 /* %^H needs to be copied */
+
 /* Various states of an input record separator SV (rs, nrs) */
 #define RsSNARF(sv)   (! SvOK(sv))
 #define RsSIMPLE(sv)  (SvOK(sv) && SvCUR(sv))

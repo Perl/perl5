@@ -66,6 +66,7 @@ formtarget
 generation
 gensym
 globalstash
+hintgv
 in_clean_all
 in_clean_objs
 in_eval

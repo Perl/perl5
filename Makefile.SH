@@ -206,7 +206,7 @@ addedbyconf = UU $(shextract) $(plextract) pstruct
 h1 = EXTERN.h INTERN.h XSUB.h av.h config.h cop.h cv.h dosish.h
 h2 = embed.h form.h gv.h handy.h hv.h keywords.h mg.h op.h
 h3 = opcode.h patchlevel.h perl.h perly.h pp.h proto.h regcomp.h
-h4 = regexp.h scope.h sv.h unixish.h util.h perlio.h thread.h
+h4 = regexp.h scope.h sv.h unixish.h util.h iperlsys.h thread.h
 h5 = bytecode.h byterun.h
 h = $(h1) $(h2) $(h3) $(h4) $(h5)
 

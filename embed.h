@@ -384,6 +384,7 @@
 #define newGVgen		Perl_newGVgen
 #define newHV			Perl_newHV
 #define newHVREF		Perl_newHVREF
+#define newHVhv			Perl_newHVhv
 #define newIO			Perl_newIO
 #define newLISTOP		Perl_newLISTOP
 #define newLOGOP		Perl_newLOGOP
@@ -869,6 +870,7 @@
 #define save_gp			Perl_save_gp
 #define save_hash		Perl_save_hash
 #define save_helem		Perl_save_helem
+#define save_hints		Perl_save_hints
 #define save_hptr		Perl_save_hptr
 #define save_int		Perl_save_int
 #define save_item		Perl_save_item

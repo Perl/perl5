@@ -563,9 +563,12 @@ omitted, does a chroot to $_.
 
 =item close FILEHANDLE
 
+=item close
+
 Closes the file or pipe associated with the file handle, returning TRUE
 only if stdio successfully flushes buffers and closes the system file
-descriptor.
+descriptor. Closes the currently selected filehandle if the argument
+is omitted.
 
 You don't have to close FILEHANDLE if you are immediately going to do
 another open() on it, because open() will close it for you.  (See
@@ -3333,11 +3336,13 @@ Removes the elements designated by OFFSET and LENGTH from an array, and
 replaces them with the elements of LIST, if any.  In list context,
 returns the elements removed from the array.  In scalar context,
 returns the last element removed, or C<undef> if no elements are
-removed.  The array grows or shrinks as necessary.  If LENGTH is
-omitted, removes everything from OFFSET onward.  The following
-equivalences hold (assuming C<$[ == 0>):
+removed.  The array grows or shrinks as necessary.
+If OFFSET is negative then it start that far from the end of the array.
+If LENGTH is omitted, removes everything from OFFSET onward.
+If LENGTH is negative, leave that many elements off the end of the array.
+The following equivalences hold (assuming C<$[ == 0>):
 
-    push(@a,$x,$y)	splice(@a,$#a+1,0,$x,$y)
+    push(@a,$x,$y)	splice(@a,@a,0,$x,$y)
     pop(@a)		splice(@a,-1)
     shift(@a)		splice(@a,0,1)
     unshift(@a,$x,$y)	splice(@a,0,0,$x,$y)
@@ -3708,8 +3713,6 @@ using sprintf().
 An alternative to using substr() as an lvalue is to specify the
 replacement string as the 4th argument.  This allows you to replace
 parts of the EXPR and return what was there before in one operation.
-In this case LEN can be C<undef> if you want to affect everything to
-the end of the string.
 
 =item symlink OLDFILE,NEWFILE
 

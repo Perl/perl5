@@ -2,10 +2,10 @@ BEGIN {require 5.002;} # MakeMaker 5.17 was the last MakeMaker that was compatib
 
 package ExtUtils::MakeMaker;
 
-$Version = $VERSION = "5.42";
+$Version = $VERSION = "5.43";
 $Version_OK = "5.17";	# Makefiles older than $Version_OK will die
 			# (Will be checked from MakeMaker version 4.13 onwards)
-($Revision = substr(q$Revision: 1.216 $, 10)) =~ s/\s+$//;
+($Revision = substr(q$Revision: 1.222 $, 10)) =~ s/\s+$//;
 
 
 
@@ -244,7 +244,8 @@ sub full_setup {
     INST_MAN1DIR INST_MAN3DIR INST_SCRIPT LDFROM LIBPERL_A LIB LIBS
     LINKTYPE MAKEAPERL MAKEFILE MAN1PODS MAN3PODS MAP_TARGET MYEXTLIB
     NAME NEEDS_LINKING NOECHO NORECURS OBJECT OPTIMIZE PERL PERLMAINCC
-    PERL_ARCHLIB PERL_LIB PERL_SRC PL_FILES PM PMLIBDIRS PREFIX
+    PERL_ARCHLIB PERL_LIB PERL_SRC PERM_RW PERM_RWX
+    PL_FILES PM PMLIBDIRS PREFIX
     PREREQ_PM SKIP TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG
     XS_VERSION clean depend dist dynamic_lib linkext macro realclean
     tool_autosplit
@@ -286,8 +287,8 @@ sub full_setup {
     @Overridable = @MM_Sections;
     push @Overridable, qw[
 
- dir_target libscan makeaperl needs_linking subdir_x test_via_harness
- test_via_script
+ dir_target libscan makeaperl needs_linking perm_rw perm_rwx
+ subdir_x test_via_harness test_via_script
 
 			 ];
 
@@ -1522,6 +1523,16 @@ Directory containing the Perl library to use.
 Directory containing the Perl source code (use of this should be
 avoided, it may be undefined)
 
+=item PERM_RW
+
+Desired Permission for read/writable files. Defaults to C<644>.
+See also L<MM_Unix/perm_rw>.
+
+=item PERM_RWX
+
+Desired permission for executable files. Defaults to C<755>.
+See also L<MM_Unix/perm_rwx>.
+
 =item PL_FILES
 
 Ref to hash of files to be processed as perl programs. MakeMaker
@@ -1604,7 +1615,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    ( $VERSION ) = '$Revision: 1.216 $ ' =~ /\$Revision:\s+([^\s]+)/;
+    ( $VERSION ) = '$Revision: 1.222 $ ' =~ /\$Revision:\s+([^\s]+)/;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
 

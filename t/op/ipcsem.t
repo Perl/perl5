@@ -3,6 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    $SIG{__DIE__} = 'cleanup';
 }
 
 my @define;
@@ -123,33 +124,65 @@ print "ok 2\n";
 print "not " unless length($data);
 print "ok 3\n";
 
-semctl($sem,0,$SETALL,pack("s*",(0) x 10)) or print "not ";
+my $template;
+
+# Find the pack/unpack template capable of handling native C shorts.
+
+if      ($Config{shortsize} == 2) {
+    $template = "s";
+} elsif ($Config{shortsize} == 4) {
+    $template = "l";
+} elsif ($Config{shortsize} == 8) {
+    foreach my $t (qw(i q)) { # Try quad last because not supported everywhere.
+	# We could trap the unsupported quad template with eval
+	# but if we get this far we should have quad support anyway.
+	if (length(pack($t, 0)) == 8) {
+            $template = $t;
+            last;
+        }
+    }
+}
+
+die "$0: cannot pack native shorts\n" unless defined $template;
+
+$template .= "*";
+
+my $nsem = 10;
+
+semctl($sem,0,$SETALL,pack($template,(0) x $nsem)) or print "not ";
 print "ok 4\n";
 
 $data = "";
 semctl($sem,0,$GETALL,$data) or print "not ";
 print "ok 5\n";
 
-print "not " unless length($data);
+print "not " unless length($data) == length(pack($template,(0) x $nsem));
 print "ok 6\n";
 
-my @data = unpack("s*",$data);
+my @data = unpack($template,$data);
 
-print "not " unless join("",@data) eq "0000000000";
+my $adata = "0" x $nsem;
+
+print "not " unless @data == $nsem and join("",@data) eq $adata;
 print "ok 7\n";
 
-$data[2] = 1;
-semctl($sem,0,$SETALL,pack("s*",@data)) or print "not ";
+my $poke = 2;
+
+$data[$poke] = 1;
+semctl($sem,0,$SETALL,pack($template,@data)) or print "not ";
 print "ok 8\n";
 
 $data = "";
 semctl($sem,0,$GETALL,$data) or print "not ";
 print "ok 9\n";
 
-@data = unpack("s*",$data);
+@data = unpack($template,$data);
 
-print "not " unless join("",@data) eq "0010000000";
+my $bdata = "0" x $poke . "1" . "0" x ($nsem-$poke-1);
+
+print "not " unless join("",@data) eq $bdata;
 print "ok 10\n";
 
-semctl($sem,0,$IPC_RMID,undef);
+sub cleanup { semctl($sem,0,$IPC_RMID,undef) if defined $sem }
 
+cleanup;
