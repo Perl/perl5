@@ -339,6 +339,19 @@ Unicode::String).
 
 =item Math::BigInt
 
+A lot of bugs have been fixed since v1.60, the version included in Perl
+v5.8.0. Especially noteworthy are the bug in Calc that caused div and mod to
+fail for some large values, and the fixes to the handling of bad inputs.
+
+Some new features were added, e.g. the broot() method, you can now pass
+parameters to config() to change some settings at runtime, and it is now
+possible to trap the creation of NaN and infinity.
+
+As usual, some optimizations took place and made the math overall a tad
+faster. In some cases, quite a lot faster, actually. Especially alternative
+libraries like Math::BigInt::GMP benefit from this. In addition, a lot of the
+quite clunky routines like fsqrt() and flog() are now much much faster.
+
 =item MIME::Base64
 
 =item NEXT
