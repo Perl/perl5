@@ -601,7 +601,12 @@ PPCODE:
 }
 
 void
-ithread_yield(ithread *thread)
+yield(thread = 'threads')
+CODE:
+{
+    YIELD;
+}
+	
 
 void
 ithread_detach(ithread *thread)
