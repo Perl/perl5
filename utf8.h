@@ -80,6 +80,10 @@ END_EXTERN_C
 
 Note the A0..BF in U+0800..U+0FFF, the 80..9F in U+D000...U+D7FF,
 the 90..BF in U+10000..U+3FFFF, and the 80...8F in U+100000..U+10FFFF.
+The "gaps" are caused by legal UTF-8 avoiding non-shortest encodings:
+it is technically possible to UTF-8-encode a single code point in different
+ways, but that is explicitly forbidden, and the shortest possible encoding
+should always be used (and that is what Perl does).
 
  */
 
