@@ -47,13 +47,7 @@ Configure
 	libswanted <-> usethreads <-> use64bitint <-> use64bitall <->
   	uselargefiles <-> ...  
     make configuring+building away from source directory work (VPATH et al)
-	this is related to: cross-compilation configuring
-	host vs target: compile in the host, get the executable to the target,
-	get the possible input files to the target, execute in the target,
-	get possible output files back to to host.  this needs to work
-	both during Configure and during the build.  You cannot assume
-	shared filesystems between the host and the target, executing
-	the target executable may involve e.g. rsh
+	this is related to: cross-compilation configuring (see Todo)
     _r support (see Todo for mode detailed description)
     POSIX 1003.1 1996 Edition support--realtime stuff:
 	POSIX semaphores, message queues, shared memory, realtime clocks,
