@@ -1,3 +1,263 @@
+6.06_05
+    - Syncing into bleadperl.  Minor nits revealed...
+    - AutoSplit open filehandle bug was fixed in bleadperl.  Averted a
+      warning because of this.
+    - hint files were only being loaded if . happened to be in @INC.
+      A bug/feature of File::Spec was stripping off the current dir from
+      the front of hintfile paths causing Perl to look for them in @INC.
+      Worked around.
+    - Now checking $! for errors if a hint file returns undef
+    - compile test was testing all of perl!  Scaling back to just ExtUtils/
+
+6.06_04 Sun Mar 30 20:34:39 PST 2003
+    - Now looking for ExtUtils::xsubpp through @INC rather than just
+      the perl core directories.  This helps ExtUtils::ParseXS.
+    - Systems which don't put their libraries under their $Config{prefix}
+      (OS X, Debian) weren't putting their libraries in the spot declared
+      in Config.  It was going under $Config{prefix}.
+    - Prerequisites check now deals better with X.Y_Z style alpha versions
+    - ExtUtils::Liblist->ext() was using $Config{perllibs} which is a 5.6.1
+      thing.  Falling back to $Config{libs} if perllibs isn't there.
+    - ExtUtils::Command::MM now reads from @ARGV if called with no
+      args.  Makes the one liner a bit simpler.
+    * Restored ExtUtils::Liblist::ext() for backwards compatibility.
+      Missing since 5.6.1.
+    - Switching to relative dirs for self-building to shorten
+      command line lengths.
+    - Fixing minor test warning on VMS when compiling ExtUtils::Manifest
+    - Skipping STDIN read prompt() tests on 5.5.3.  Can't test due to
+      eof() not honor tied handles.
+    - Config.pm on 5.5.3 doesn't have any concept of vendor*.  This was
+      causing warnings when generating the Makefile.
+
+6.06_03 Sat Mar 29 19:44:53 PST 2003
+    - Added AUTHOR and ABSTRACT_FROM info for ppd generation.
+    - Added echo() method to portably echo text to a file.
+    - Worked around 5.8.0 eval 'require Foo::Bar' bug causing MakeMaker
+      to think modules weren't installed.
+    - Modernized VMS doc_*_install targets
+    - Changed some $(PERL) -e "print ..." code to use $(ECHO).
+    - Replaced uses of Delete/NoLog/NoConfirm with $(RM_F) in MM_VMS
+    - Fixed some duplicate macros making MMS happy.
+    - Fixed $ExtUtils::MM_VMS::Revision.  It was just the $VERSION before.
+    - Fixed ExtUtils::Command::MM::perllocal_install(), uninstall(),
+      warn_if_old_packlist().
+    * Pulling File::Spec::VMS::fixpath() and eliminate_macros() into MM_VMS
+      as the new cannonical location.  They never should have been in F::S
+      in the first place.
+    * ExtUtils::Command::eqtime() would truncate the file being equalized!
+      Holdover from exclusive .exists usage.
+    - Cleaned up hard coded 'echo' and '@' to $(ECHO) and $(NOECHO)
+    - $(SAY) is now $(ECHO) on VMS
+    - Moved rogue initializations from tools_other() to init_others()
+    - Normalized MM_VMS's tools_other() to mostly use its superclass.
+    - split_command() was off-by-one when calculating max command line
+      lengths causing it to run over on VMS
+    - made split_command() a bit smarter, taking into account some macro
+      expansion
+    - Fixed initialization of OBJECT, DISTNAME and LDFROM on VMS
+    - Fixed *_install target uses of File::Spec.
+    - Added ExtUtils::MakeMaker::vmsish wrapper around vmsish so MM_VMS
+      can be compiled on non-VMS machines.  For testing.
+    * Added ExtUtils::MakeMaker::Tutorial about writing modules with
+      MakeMaker.
+    - Removed "always use h2xs" dogma.
+    - Added compile & POD test
+    * 'make distdir' now generates META.yml module meta-data file.
+      Proof of concept.  Have to syncronize with Module::Build.
+    * Added maniadd() to ExtUtils::Manifest to add entries to the MANIFEST
+    * ExtUtils::Command::chmod was not interpreting file permissions as
+      octal.  Also, docs & tests slightly wrong (thanks Stas Bekman).
+    - ExtUtils::Install was hard coding blib/lib and blib/arch, unportable
+      [perl #21526]
+
+6.06_02 Mon Dec 23 20:39:57 PST 2002
+    * Lots of Win32 fixes busted between 6.05 and 6.06_01.  
+    * split_command() tests still not happy on Win32.  Problems with
+      shell vs Makefile escaping makes testing difficult.
+    * VMS still broken.  Need to convert File::Spec method calls back to
+      object method calls so the weird FS::VMS->eliminate_macros() and 
+      fixpath() work again.
+
+6.06_01 Thu Dec 19 00:14:49 PST 2002
+    - Andreas found that when building the core it is desirable for
+      MakeMaker to use a relative path to perl.
+    - File::Spec->catfile() has a bug where the resulting file may not be
+      canonicalized.  This was causing problems when generating manpaths.
+      MakeMaker now uses its own fixed override for catfile().
+    - Fixed the POD recognition regex to properly catch /=head\d/ tags.
+    * Added a PATCHING guideline document.
+    - Updated the class hierarchy in NOTES.
+    - Installed.t now cleans up after itself better.
+    - Steve Purkis rewrote the manifypods system to use Pod::Man
+      rather than pod2man.  Its now portable and manifypods() moved from 
+      MM_Unix to MM_Any.  As a result, lots of icky and redudant code went
+      away.  This also removes the POD2MAN macro, but noone should be
+      using that.  
+    - "make manifypods" now works on Win32
+    - "make manifypods" is now be faster
+    - Made MM_Unix->find_perl more portable.  Eliminated MM_Win32->find_perl
+      override.  MM_VMS->find_perl remains.
+    * find_perl() can now handle filenames with spaces in them (RT448)
+    * find_perl() on Win32 no longer produces spurious "File Creation error"
+      messages (perlbug ID 20020709.001)
+    - Removed unfinished and unused maybe_command_in_dirs()
+    - Removed dead SelfLoader cruft from MM_Unix.
+    - Fixed PPD generation when the ppd contains quotes (RT1473)
+    - Fixed PPD generation on VMS
+    - Moved Win9x specific subdir_x() code from MM_Unix to MM_Win95
+    * Craig Berry fixed hint files on VMS
+    - Added the perl_onliner() method to generate portable, safe one-liners
+    - Changing hardcoded $self->{MAKEFILE} to $(FIRST_MAKEFILE).
+    * Rafael Garcia-Suarez made MakeMaker ignore Subversion control files
+      by default.
+    - Added MAKEFILE_OLD macro.
+    * No longer generating man pages by default on VMS.
+    - Improved DISTNAME docs
+    * Documented DISTVNAME and VERSION_SYM
+    * Documented dist()
+    - Seperated dist_core() into dist, tardist, uutardist, tarfile,
+      zipdist, zipfile and shdist_target methods.  Allows elimination
+      of redundant code in MM_VMS.
+    - Replaced WARN_IF_OLD_PACKLIST, DOC_INSTALL and UNINSTALL
+      one-liners with ExtUtils::Command::MM functions
+    - Replaced VMS hand-rolled perl code for TOUCH, CHMOD, RM_F and RM_RF
+      with ExtUtils::Command functions.  Added TEST_F.
+    - Adding clean_subdirs target and clean_subdirs_target() method to
+      generate same.  This allows easier overriding of an unportable part
+      of the clean target.
+    - Defined DEV_NULL for MacOS
+    - Removed ROOTEXT from MM_MacOS, apparently unused
+    - Added $(DIRFILESEP) macro and init_DIRFILESEP to avoid
+      hardcoding / or \.  Reduces code duplication in the MM_* modules.
+    - Added init_platform() and platform_constants() for OS specific
+      macros.  Moved OS specific macros from constants() overrides there.
+    - Added init_VERSION() to setup various *VERSION* macros.
+    - Added default wraplist() to make porting easier.
+    - Added makemakerdflt_target() to guarantee 'all' is the default
+      target.
+    - Added special_targets() to handle things like .PHONY and make sure
+      they come first.
+    - Added init_linker() to initialize linker relatied macros.
+    - MM_MacOS constants() disolves
+        Moved MACPERL_SRC, MACPERL_LIB, MACPERL_INC from init_main() to 
+          init_platform().
+        Moved DEFINE and INC tweaking from constants() to init_main()
+        Moved DEFINE_VERSION & XS_DEFINE_VERSION from constants() to
+          init_VERSION().
+        Eliminated MODULES.  Unused and its the same as TO_INST_PM
+        Moved .INCLUDE from constants() to special_targets()
+
+    - MM_NW5 constants() & init_others() disolves
+        Moved LIBPTH, BASE_IMPORT, NLM_VERSION, MPKTOOL, TOOLPATH from 
+          init_others() to init_platform()
+        Moved INCLUDE and PATH definitions from constants() to 
+          init_platform()
+        Moved BOOT_SYMBOL, NLM_SHORT_NAME, PATH and INCLUDE from
+          constants() to init_platform()
+
+    - MM_Unix constants() goes on a diet
+        Moved all macro definitions to init_* methods.
+        Added MM_REVISION for completeness
+        Using wraplist() instead of manual joining
+        Moved .NO_CONFIG_REC, .SUFFIXES and .PHONY to special_targets()
+        Moved makemakerdflt: to makemakerdeflt_target()
+        Moved INST_{STATIC,DYNAMIC,BOOT} to init_INST()
+        Moved EXPORT_LIST, PERL_ARCHIVE & PERL_ARCHIVE_AFTER to init_linker().
+        Moved PERL_MALLOC_DEF to init_platform()
+
+    - MM_VMS constants() goes on a diet
+        Moved DEFINE from constants() to init_main()
+        Moved OBJECT & LDFROM from constants() to init_others()
+        Moved MM_VMS_REVISION and PERL_VMS to init_platform
+        Added MM_VMS_VERSION
+        Moved DEFINE_VERSION, XS_DEFINE_VERSION and MAKEMAKER changes to
+            init_VERSION
+        Moved .SUFFIXES changes to special_targets() override.
+        Eliminated $self->{PM_TO_BLIB}.  Its redundant with $self->{PM}.
+        constants() now consists only of fixpath() calls.
+
+    - MM_Win32 constants() goes away
+        Moved .USESHELL to special_targets() override.
+        Everything else was redundant.
+
+    - Added $(VERSION_FROM) to $(MAKEFILE) dependencies.  Helpful for
+      XS builds where the version number is very sensitive.
+    - export_list(), perl_archive() and perl_archive_after() consolodated
+      into init_linker().
+    - Added MM_NW5_VERSION, MM_Unix_VERSION, MM_Win32_VERSION, 
+      MM_VMS_VERSION.
+    - Eliminated duplicate code in constants() overrides
+    - Added all_target() for easier customization of what's run by default
+    - Eliminated duplicate top_targets() overrides
+    - Made tool_autosplit() method portable.  Moved to MM_Any.  Eliminated
+      overrides.
+    - Adding realclean_subdirs target and realclean_subdirs_target()
+      method to generate same.  This allows easier overriding of an 
+      unportable part of the realclean target.    
+    - Added oneliner() to create portable perl one-liners.
+    - Craig Berry found some typos in ExtUtils::Liblist::Kid's VMS part
+    * ExtUtils::Install did not work on MacPerl due to a hardcoded '.'
+    * prompt() will now read from STDIN.
+    - Craig Berry made sure extliblist() is always called even if LIBS
+      is explicitly set to empty.
+    * Added DESTDIR to make repacking easier.
+    * $(*PREFIX) are returned to the INSTALL* variables.
+    * Split $(PREFIX) into $(PERLPREFIX) and $(PREFIX).  The former
+      holds the location of the core libraries.  The latter is the
+      optional override prefix supplied by the user.
+    * PREFIX overrides all other *PREFIXes when set in the Makefile.PL.
+      This restores "make install PREFIX=foo".
+    - Added quote_literal() to handle some shell quoting.
+    - ExtUtils::MM_VMS now compilable on non-VMS platforms.
+    - J. D. Laub made MakeMaker honor $Config{installstyle}
+    - Renaming on OS/2 requires the target file to be removed.  
+      Partially fixed by Ilya, should be applied universally later.
+    - Default MANIFEST.SKIP not catching files in subdirs.  Fixed by Ilya.
+    - Ilya fixed ExtUtils::Liblist->ext when called outside MakeMaker.
+    - realclean was duplicating work already done by clean
+    - Adding an explicit LICENSE
+    - Cleaning up ExtUtils::Install docs.
+    - ExtUtils::Install::uninstall() now has default verbose and
+      dont_execute arguments.
+    - Added some basic ExtUtils::Install tests
+    - Fixed ExtUtils::Install::install() for relative dirs
+    - Added split_command() and max_exec_len() to deal with long
+      commands.
+    - Seperated escape_newlines() from quote_literal().  This may
+      be pointless.
+    - pm_to_blib() now generated with split_command().  3x speedup.
+    - added init_dist() to initialize distribution constants
+    - ExtUtils::Install::pm_to_blib() working around open filehandle
+      bug in AutoSplit for systems with mandatory file locking.
+
+6.05 Tue Aug 27 16:09:51 PDT 2002
+    - Output format of the hint file verbose diagnostic is now in
+      a format native to the OS, so it broke a test on non-Unixen.
+
+6.04 Mon Aug 26 18:31:11 PDT 2002 
+    - Little fix for pre-5.8 Cygwin test to get the shared library names 
+      right.
+    * disttest on Win9X broken because of forgotten tabs
+    * WriteMakefile argument verification should now be accurate
+    - Documented the LD flag.
+    * Documented prompt()
+    * vendor install was not adding to packlist or updating perllocal.
+    - Supporting $Config{vendorarchexp} and $Config{vendorlibexp}.
+    - Fixed conflict on VMS between logical names and directories 
+      (bleadperl 17488)
+    - Fixed space-vs-tab bug on Netware (bleadperl 17579)
+    - Mysterious NetWare fix from Ananth (bleadperl 17376)
+    - Support OPTIMIZE in MacOS (bleadperl 17347)
+    - Support hints in MacOS (mutation of bleadperl 17347)
+    * Default man installation directories were using $(MAN*EXT) to
+      generate the directory name.  This turned out to be wrong more
+      often than right, so we'll use man1 and man3 hard-coded.
+    - Debian folks fixed the doc_install targets so the Appending
+      diagnostic gives the correct directory for perllocal.pod
+    * Added ExtUtils::MakeMaker::FAQ
+    - Quieted some warnings on MacOS (bleadperl 17669)
+
 6.03 Wed Jun 19 17:06:14 EDT 2002
     - Documented that we're clamping down on cargo-cult MakeMaker
       programming.
@@ -289,7 +549,7 @@
 
 5.50_01 Mon Mar  4 23:44:48 EST 2002
     [[ API Changes ]]
-      htmlifypods and all HTML targets have been removed.  It didn't
+    - htmlifypods and all HTML targets have been removed.  It didn't
       work properly.  A target for HTMLifying of docs will be
       added sometime in the future (read: send a patch).
     - Deprecated ROOTEXT variable removed (its been deprecated for
