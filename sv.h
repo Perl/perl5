@@ -703,6 +703,14 @@ and leaves the UTF8 status as it was.
 #define SvVALID_on(sv)		(SvFLAGS(sv) |= SVpbm_VALID)
 #define SvVALID_off(sv)		(SvFLAGS(sv) &= ~SVpbm_VALID)
 
+#ifdef USE_ITHREADS
+/* The following uses the FAKE flag to show that a regex pointer is infact
+   it's own offset in the regexpad for ithreads */
+#define SvREPADTMP(sv)		(SvFLAGS(sv) & SVf_FAKE)
+#define SvREPADTMP_on(sv)	(SvFLAGS(sv) |= SVf_FAKE)
+#define SvREPADTMP_off(sv)	(SvFLAGS(sv) &= ~SVf_FAKE)
+#endif
+
 #define SvRV(sv) ((XRV*)  SvANY(sv))->xrv_rv
 #define SvRVx(sv) SvRV(sv)
 

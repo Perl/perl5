@@ -496,7 +496,10 @@ perl_destruct(pTHXx)
                  * flag is set in regexec.c:S_regtry
                  */
                 SvFLAGS(resv) &= ~SVf_BREAK;
-            }
+            } 
+	    else if(SvREPADTMP(resv)) {
+	      SvREPADTMP_off(resv);
+	    }
             else {
                 ReREFCNT_dec(re);
             }
