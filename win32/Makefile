@@ -936,6 +936,7 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.amiga    .\perlamiga.pod
 	copy ..\README.bs2000   .\perlbs2000.pod
 	copy ..\README.cygwin   .\perlcygwin.pod
+	copy ..\README.dgux     .\perldgux.pod
 	copy ..\README.dos      .\perldos.pod
 	copy ..\README.epoc     .\perlepoc.pod
 	copy ..\README.hpux     .\perlhpux.pod
@@ -945,6 +946,7 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.os2      .\perlos2.pod
 	copy ..\README.os390    .\perlos390.pod
 	copy ..\README.solaris  .\perlsolaris.pod
+	copy ..\README.tru64    .\perltru64.pod
 	copy ..\README.vmesa    .\perlvmesa.pod
 	copy ..\vms\perlvms.pod .\perlvms.pod
 	copy ..\README.vos      .\perlvos.pod
