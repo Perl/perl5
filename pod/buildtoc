@@ -177,10 +177,11 @@ sub podset {
 	    $inhead2 = 1;
 	    output $_; nl(); next;
 	}
-	if (s/^=item ([^=].*)\n/$1/) {
+	if (s/^=item ([^=].*)/$1/) {
 	    next if $pod eq 'perldiag';
 	    s/^\s*\*\s*$// && next;
 	    s/^\s*\*\s*//;
+	    s/\n/ /g;
 	    s/\s+$//;
 	    next if /^[\d.]+$/;
 	    next if $pod eq 'perlmodlib' && /^ftp:/;
