@@ -30,7 +30,7 @@
 # if defined(__sgi) && !defined(AF_LINK) && defined(PF_LINK) && PF_LINK == AF_LNK
 #  undef PF_LINK
 # endif
-# ifdef I_NETINET_IN
+# if defined(I_NETINET_IN) || defined(__ultrix__)
 #  include <netinet/in.h>
 # endif
 # ifdef I_NETDB

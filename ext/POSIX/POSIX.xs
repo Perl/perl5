@@ -61,7 +61,9 @@
 #ifdef I_STDLIB
 #include <stdlib.h>
 #endif
+#ifndef __ultrix__
 #include <string.h>
+#endif
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <time.h>
