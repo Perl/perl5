@@ -1,5 +1,5 @@
 # Pod::ParseLink -- Parse an L<> formatting code in POD text.
-# $Id: ParseLink.pm,v 1.4 2001/11/23 06:19:00 eagle Exp $
+# $Id: ParseLink.pm,v 1.5 2001/12/01 01:34:49 eagle Exp $
 #
 # Copyright 2001 by Russ Allbery <rra@stanford.edu>
 #
@@ -34,7 +34,7 @@ use Exporter;
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 1.04;
+$VERSION = 1.05;
 
 
 ##############################################################################
@@ -111,7 +111,7 @@ __END__
 
 =head1 NAME
 
-Pod::ParseLink -- Parse an L<> formatting code in POD text
+Pod::ParseLink -- Parse an LE<lt>E<gt> formatting code in POD text
 
 =head1 SYNOPSIS
 
