@@ -3,8 +3,8 @@
 
 #ifdef PERL_OBJECT
 #else
-#define PerlENV_putenv(str) putenv((str))
-#define PerlENV_getenv(str) getenv((str))
+#define PerlEnv_putenv(str) putenv((str))
+#define PerlEnv_getenv(str) getenv((str))
 #endif	/* PERL_OBJECT */
 
 #endif /* Include guard */

@@ -536,8 +536,8 @@ perl_init_i18nl10n(int printwarn)
 #ifdef USE_LOCALE_NUMERIC
     char *curnum     = NULL;
 #endif /* USE_LOCALE_NUMERIC */
-    char *lc_all     = PerlENV_getenv("LC_ALL");
-    char *lang       = PerlENV_getenv("LANG");
+    char *lc_all     = PerlEnv_getenv("LC_ALL");
+    char *lang       = PerlEnv_getenv("LANG");
     bool setlocale_failure = FALSE;
 
 #ifdef LOCALE_ENVIRON_REQUIRED
@@ -561,19 +561,19 @@ perl_init_i18nl10n(int printwarn)
     {
 #ifdef USE_LOCALE_CTYPE
 	if (! (curctype = setlocale(LC_CTYPE,
-				    (!done && (lang || PerlENV_getenv("LC_CTYPE")))
+				    (!done && (lang || PerlEnv_getenv("LC_CTYPE")))
 				    ? "" : Nullch)))
 	    setlocale_failure = TRUE;
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
 	if (! (curcoll = setlocale(LC_COLLATE,
-				   (!done && (lang || PerlENV_getenv("LC_COLLATE")))
+				   (!done && (lang || PerlEnv_getenv("LC_COLLATE")))
 				   ? "" : Nullch)))
 	    setlocale_failure = TRUE;
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
 	if (! (curnum = setlocale(LC_NUMERIC,
-				  (!done && (lang || PerlENV_getenv("LC_NUMERIC")))
+				  (!done && (lang || PerlEnv_getenv("LC_NUMERIC")))
 				  ? "" : Nullch)))
 	    setlocale_failure = TRUE;
 #endif /* USE_LOCALE_NUMERIC */
@@ -620,7 +620,7 @@ perl_init_i18nl10n(int printwarn)
 	char *p;
 	bool locwarn = (printwarn > 1 || 
 			printwarn &&
-			(!(p = PerlENV_getenv("PERL_BADLANG")) || atoi(p)));
+			(!(p = PerlEnv_getenv("PERL_BADLANG")) || atoi(p)));
 
 	if (locwarn) {
 #ifdef LC_ALL
@@ -1455,7 +1455,7 @@ my_setenv(char *nam,char *val)
 	vallen = strlen(val);
     New(904, envstr, namlen + vallen + 3, char);
     (void)sprintf(envstr,"%s=%s",nam,val);
-    (void)PerlENV_putenv(envstr);
+    (void)PerlEnv_putenv(envstr);
     if (oldstr)
 	Safefree(oldstr);
 #ifdef _MSC_VER

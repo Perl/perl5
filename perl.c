@@ -311,7 +311,7 @@ perl_destruct(register PerlInterpreter *sv_interp)
 #ifdef DEBUGGING
     {
 	char *s;
-	if (s = PerlENV_getenv("PERL_DESTRUCT_LEVEL")) {
+	if (s = PerlEnv_getenv("PERL_DESTRUCT_LEVEL")) {
 	    int i = atoi(s);
 	    if (destruct_level < i)
 		destruct_level = i;
@@ -821,7 +821,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     }
   switch_end:
 
-    if (!tainting && (s = PerlENV_getenv("PERL5OPT"))) {
+    if (!tainting && (s = PerlEnv_getenv("PERL5OPT"))) {
 	while (s && *s) {
 	    while (isSPACE(*s))
 		s++;
@@ -950,7 +950,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     FREETMPS;
 
 #ifdef MYMALLOC
-    if ((s=PerlENV_getenv("PERL_DEBUG_MSTATS")) && atoi(s) >= 2)
+    if ((s=PerlEnv_getenv("PERL_DEBUG_MSTATS")) && atoi(s) >= 2)
 	dump_mstats("after compilation:");
 #endif
 
@@ -987,7 +987,7 @@ perl_run(PerlInterpreter *sv_interp)
 	if (endav)
 	    call_list(oldscope, endav);
 #ifdef MYMALLOC
-	if (PerlENV_getenv("PERL_DEBUG_MSTATS"))
+	if (PerlEnv_getenv("PERL_DEBUG_MSTATS"))
 	    dump_mstats("after execution:  ");
 #endif
 	JMPENV_POP;
@@ -1903,7 +1903,7 @@ SV *sv;
 #ifdef DOSISH
 		 && !strchr(scriptname, '\\')
 #endif
-		 && (s = PerlENV_getenv("PATH"))) {
+		 && (s = PerlEnv_getenv("PATH"))) {
 	bool seen_dot = 0;
 	
 	bufend = s + strlen(s);
@@ -2618,7 +2618,7 @@ init_postdump_symbols(register int argc, register char **argv, register char **e
 	    *s = '=';
 #if defined(__BORLANDC__) && defined(USE_WIN32_RTL_ENV)
 	    /* Sins of the RTL. See note in my_setenv(). */
-	    (void)PerlENV_putenv(savepv(*env));
+	    (void)PerlEnv_putenv(savepv(*env));
 #endif
 	}
 #endif
@@ -2637,11 +2637,11 @@ init_perllib(void)
     char *s;
     if (!tainting) {
 #ifndef VMS
-	s = PerlENV_getenv("PERL5LIB");
+	s = PerlEnv_getenv("PERL5LIB");
 	if (s)
 	    incpush(s, TRUE);
 	else
-	    incpush(PerlENV_getenv("PERLLIB"), FALSE);
+	    incpush(PerlEnv_getenv("PERLLIB"), FALSE);
 #else /* VMS */
 	/* Treat PERL5?LIB as a possible search list logical name -- the
 	 * "natural" VMS idiom for a Unix path string.  We allow each

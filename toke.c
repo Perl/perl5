@@ -1064,7 +1064,7 @@ static char*
 incl_perldb(void)
 {
     if (perldb) {
-	char *pdb = PerlENV_getenv("PERL5DB");
+	char *pdb = PerlEnv_getenv("PERL5DB");
 
 	if (pdb)
 	    return pdb;

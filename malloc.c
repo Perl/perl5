@@ -508,7 +508,7 @@ free(void *mp)
 	if (OV_MAGIC(ovp, bucket) != MAGIC) {
 		static int bad_free_warn = -1;
 		if (bad_free_warn == -1) {
-		    char *pbf = PerlENV_getenv("PERL_BADFREE");
+		    char *pbf = PerlEnv_getenv("PERL_BADFREE");
 		    bad_free_warn = (pbf) ? atoi(pbf) : 1;
 		}
 		if (!bad_free_warn)
