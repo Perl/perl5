@@ -95,6 +95,86 @@ Version v5.5.670        Development release working toward v5.6
 ----------------
 
 ____________________________________________________________________________
+[  5397] By: gsar                                  on 2000/03/01  06:44:42
+        Log: consolidated VMS patches (from Craig A. Berry
+             <craig.berry@metamorgs.com>); Glob.pm patch modified to use
+             $DEFAULT_FLAGS, and iff no flags were supplied
+     Branch: perl
+	   ! configure.com ext/File/Glob/Glob.pm ext/File/Glob/bsd_glob.c
+	   ! installperl lib/ExtUtils/MM_VMS.pm lib/File/Find.pm
+	   ! lib/Pod/Checker.pm lib/Pod/Parser.pm t/io/open.t
+	   ! t/io/openpid.t t/lib/glob-basic.t t/op/goto.t t/op/runlevel.t
+	   ! t/op/split.t t/pod/testp2pt.pl t/pragma/strict.t
+	   ! t/pragma/subs.t t/pragma/warn/8signal t/pragma/warn/pp_sys
+	   ! t/pragma/warnings.t vms/descrip_mms.template
+	   ! vms/subconfigure.com vms/test.com vms/vms.c
+____________________________________________________________________________
+[  5396] By: gsar                                  on 2000/03/01  06:28:22
+        Log: integrate cfgperl changes into mainline
+     Branch: perl
+	  !> ext/Fcntl/Fcntl.pm hints/solaris_2.sh pp.c sv.c
+____________________________________________________________________________
+[  5395] By: jhi                                   on 2000/03/01  06:12:10
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  +> lib/open.pm
+	  !> MANIFEST Todo-5.6 mg.c
+____________________________________________________________________________
+[  5394] By: gsar                                  on 2000/03/01  06:07:00
+        Log: fix segfault on C<local ${^WARNING_BITS}>
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[  5393] By: jhi                                   on 2000/03/01  06:02:12
+        Log: Fcntl de-cut-and-pasto.
+             From: Doug MacEachern <dougm@pobox.com>
+             To: perl5-porters@perl.org
+             Subject: [PATCH v5.5.660] Fcntl.pm
+             Date: Tue, 29 Feb 2000 21:24:00 -0800 (PST)
+             Message-ID: <Pine.LNX.4.10.10002292120200.382-100000@mojo.itixs.com>
+     Branch: cfgperl
+	   ! ext/Fcntl/Fcntl.pm
+____________________________________________________________________________
+[  5392] By: gsar                                  on 2000/03/01  05:55:20
+        Log: update Todo-5.6, add stub open.pm
+     Branch: perl
+	   + lib/open.pm
+	   ! MANIFEST Todo-5.6
+____________________________________________________________________________
+[  5391] By: jhi                                   on 2000/03/01  05:42:25
+        Log: The 64-bitallness does require the /usr/lib/sparcv9 in loclibpth.
+     Branch: cfgperl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[  5390] By: jhi                                   on 2000/03/01  05:35:53
+        Log: Couple of math functions need to be Perl_ so that
+             they are correctly long double, especially the frexp()
+             in sv_vcatpvfn() (spotted by Spider Boardman).
+     Branch: cfgperl
+	   ! pp.c sv.c
+____________________________________________________________________________
+[  5389] By: jhi                                   on 2000/03/01  05:33:54
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  +> pod/perlnumber.pod
+	  !> Changes MANIFEST README.win32 ext/DynaLoader/DynaLoader_pm.PL
+	  !> ext/DynaLoader/Makefile.PL ext/DynaLoader/dl_dlopen.xs
+	  !> ext/DynaLoader/dlutils.c lib/File/Find.pm lib/Test/Harness.pm
+	  !> pod/Makefile pod/buildtoc pod/perl.pod pod/perldelta.pod
+	  !> pod/perlguts.pod pod/perlhack.pod pod/perlhist.pod
+	  !> pod/perlport.pod pod/perltoc.pod pod/roffitall vms/vms.c
+	  !> win32/perllib.c win32/win32.c win32/win32.h
+____________________________________________________________________________
+[  5388] By: gsar                                  on 2000/03/01  03:38:03
+        Log: Windows miscellany
+     Branch: perl
+	   ! pod/perlguts.pod win32/perllib.c win32/win32.c win32/win32.h
+____________________________________________________________________________
+[  5387] By: gsar                                  on 2000/03/01  03:13:37
+        Log: mention ftp/rsync access to repository in perlhack
+     Branch: perl
+	   ! Changes pod/perlhack.pod pod/perlhist.pod
+____________________________________________________________________________
 [  5386] By: gsar                                  on 2000/03/01  03:04:54
         Log: support kill(0,$pid) on Windows to test if process exists
      Branch: perl
