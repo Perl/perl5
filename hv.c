@@ -195,6 +195,7 @@ S_hv_fetch_flags(pTHX_ HV *hv, const char *key, I32 klen, I32 lval, int flags)
     register XPVHV* xhv;
     register U32 hash;
     register HE *entry;
+    const char* keysave = key;
     SV *sv;
 
     if (!hv)
