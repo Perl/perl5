@@ -98,6 +98,11 @@ INST_TOP	= $(INST_DRV)\perl
 # Some versions of Visual C don't define MSVCDIR in the environment,
 # so you may have to set CCHOME explicitly.
 #
+# If the path contains spaces, you can try putting it in double
+# quotes, but support for this is not well-tested, and various
+# other things may break, so you're kinda on your own if you are
+# into specious paths. :-)
+#
 #CCHOME		= f:\msvc20
 CCHOME		= $(MSVCDIR)
 CCINCDIR	= $(CCHOME)\include
