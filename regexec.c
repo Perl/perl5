@@ -730,13 +730,17 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 			  (long)(other_last - i_strpos)) );
 		goto do_other_anchored;
 	    }
-	    if (!prog->float_substr) {	/* Could have been deleted */
-		if (ml_anch) {
-		    s = t = t + 1;
-		    goto try_at_offset;
-		}
-		goto fail;
+	    /* Another way we could have checked stclass at the
+               current position only: */
+	    if (ml_anch) {
+		s = t = t + 1;
+		DEBUG_r( PerlIO_printf(Perl_debug_log,
+			  "Trying /^/m starting at offset %ld...\n",
+			  (long)(t - i_strpos)) );
+		goto try_at_offset;
 	    }
+	    if (!prog->float_substr)	/* Could have been deleted */
+		goto fail;
 	    /* Check is floating subtring. */
 	  retry_floating_check:
 	    t = check_at - start_shift;
