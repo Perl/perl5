@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq9 - Networking ($Revision: 1.5 $, $Date: 2001/11/09 08:06:04 $)
+perlfaq9 - Networking ($Revision: 1.7 $, $Date: 2002/01/28 04:17:27 $)
 
 =head1 DESCRIPTION
 
@@ -48,7 +48,12 @@ systems. CGI.pm selects an appropriate newline representation
 
 =head2 My CGI script runs from the command line but not the browser.  (500 Server Error)
 
-If you can demonstrate that you've read the FAQs and that 
+Several things could be wrong.  You can go through the "Troubleshooting
+Perl CGI scripts" guide at
+
+	http://www.perl.org/troubleshooting_CGI.html
+
+If, after that, you can demonstrate that you've read the FAQs and that 
 your problem isn't something simple that can be easily answered, you'll
 probably receive a courteous and useful reply to your question if you
 post it on comp.infosystems.www.authoring.cgi (if it's something to do
@@ -607,7 +612,7 @@ an RPC stub generator and includes an RPC::ONC module.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-1999 Tom Christiansen and Nathan Torkington.
+Copyright (c) 1997-2002 Tom Christiansen and Nathan Torkington.
 All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it

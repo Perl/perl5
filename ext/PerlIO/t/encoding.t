@@ -35,8 +35,13 @@ if (open(GRK, ">$grk")) {
 }
 
 if (open(UTF, "<$utf")) {
-    # alpha beta gamma in UTF-8 Unicode (0x3b1 0x3b2 0x3b3)
-    print "not " unless <UTF> eq "\xce\xb1\xce\xb2\xce\xb3";
+    if (ord('A') == 193) { # EBCDIC
+	# alpha beta gamma in UTF-EBCDIC Unicode (0x3b1 0x3b2 0x3b3)
+	print "not " unless <UTF> eq "\xb4\x58\xb4\x59\xb4\x62";
+    } else {
+	# alpha beta gamma in UTF-8 Unicode (0x3b1 0x3b2 0x3b3)
+	print "not " unless <UTF> eq "\xce\xb1\xce\xb2\xce\xb3";
+    }
     print "ok 4\n";
     close UTF;
 }
@@ -86,11 +91,14 @@ if (open(RUSSKI, ">$russki")) {
     my $buf2;
     read(RUSSKI, $buf2, 1);
     my $offset = tell(RUSSKI);
-    if (ord($buf1) == 0x3c && ord($buf2) == 0x3f && $offset == 2) {
+    if (ord($buf1) == 0x3c &&
+	ord($buf2) == (ord('A') == 193) ? 0x6f : 0x3f &&
+	$offset == 2) {
 	print "ok 11\n";
     } else {
-	printf "not ok 11 # %#x %#x %d\n",
-	       ord($buf1), ord($buf2), $offset;
+	printf "not ok 11 # [%s] [%s] %d\n",
+	       join(" ", unpack("H*", $buf1)),
+	       join(" ", unpack("H*", $buf2)), $offset;
     }
     close(RUSSKI);
 } else {

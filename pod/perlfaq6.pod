@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq6 - Regexes ($Revision: 1.6 $, $Date: 2002/01/01 22:26:45 $)
+perlfaq6 - Regexes ($Revision: 1.7 $, $Date: 2002/01/28 04:17:26 $)
 
 =head1 DESCRIPTION
 
@@ -728,7 +728,7 @@ in L<perlre>.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-1999 Tom Christiansen and Nathan Torkington.
+Copyright (c) 1997-2002 Tom Christiansen and Nathan Torkington.
 All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it

@@ -105,6 +105,11 @@ case "`pwd`" in
 *" "*) ldlibpth=`echo $ldlibpth|sed 's/ /\\\\ /g'` ;;
 esac
 
+case "$osname" in
+os390)	test -f /bin/env && ldlibpth="/bin/env $ldlibpth"
+	;;
+esac
+
 : Prepare dependency lists for Makefile.
 dynamic_list=' '
 for f in $dynamic_ext; do

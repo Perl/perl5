@@ -103,7 +103,7 @@ BEGIN {
 SKIP: {
 	if ($^O eq 'amigaos' || $^O eq 'os2' || $^O eq 'MSWin32' ||
 	    $^O eq 'NetWare' || $^O eq 'dos' || $^O eq 'cygwin') {
-	    skip( "different file permission semantics on $^O\n", 3);
+           skip( "different file permission semantics on $^O", 3);
 	}
 
 	# change a file to execute-only

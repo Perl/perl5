@@ -680,17 +680,18 @@ foreach (
     # from Wolfgang Laun: fix in change #13163
 
     my $s = 'ABC' x 10;
-    my $x = 42;
+    my $t = '*';
+    my $x = ord($t);
     my $buf = pack( 'Z*/A* C',  $s, $x );
     my $y;
 
     my $h = $buf;
     $h =~ s/[^[:print:]]/./g;
     ( $s, $y ) = unpack( "Z*/A* C", $buf );
-    is($h, "30.ABCABCABCABCABCABCABCABCABCABC*");
+    is($h, "30.ABCABCABCABCABCABCABCABCABCABC$t");
     is(length $buf, 34);
     is($s, "ABCABCABCABCABCABCABCABCABCABC");
-    is($y, 42);
+    is($y, $x);
 }
 
 {

@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: basic.t,v 1.3 2001/11/26 09:24:37 eagle Exp $
+# $Id: basic.t,v 1.4 2002/01/28 02:56:19 eagle Exp $
 #
 # basic.t -- Basic tests for podlators.
 #
@@ -49,7 +49,7 @@ print "ok 1\n";
 
 # Hard-code a few values to try to get reproducible results.
 $ENV{COLUMNS} = 80;
-$ENV{TERM}    = 'xterm';
+$ENV{TERM} = 'xterm';
 $ENV{TERMCAP} = 'xterm:co=80:do=^J:md=\E[1m:us=\E[4m:me=\E[m';
 
 # Map of translators to file extensions to find the formatted output to
@@ -77,7 +77,6 @@ for (sort keys %translators) {
         open (TMP, 'out.tmp') or die "Cannot open out.tmp: $!\n";
         open (OUTPUT, "> out.$translators{$_}")
             or die "Cannot create out.$translators{$_}: $!\n";
-        binmode OUTPUT;
         local $_;
         while (<TMP>) { last if /^\.TH/ }
         print OUTPUT while <TMP>;
@@ -98,16 +97,19 @@ for (sort keys %translators) {
         my $output = <OUTPUT>;
         close MASTER;
         close OUTPUT;
+
+        # OS/390 is EBCDIC, which uses a different character for ESC
+        # apparently.  Try to convert so that the test still works.
+        if ($^O eq 'os390' && $_ eq 'Pod::Text::Termcap') {
+            $output =~ tr/\033/\047/;
+        }
+
         if ($master eq $output) {
             print "ok $n\n";
             unlink "out.$translators{$_}";
         } else {
-            my @master = split m/[\r\n]+/, $master;
-            my @output = split m/[\r\n]+/, $output;
             print "not ok $n\n";
             print "# Non-matching output left in out.$translators{$_}\n";
-            "@master" eq "@output" and
-		print "# But the line-end stripped versions are equal\n";
         }
     }
     $n++;

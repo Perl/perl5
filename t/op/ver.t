@@ -32,7 +32,7 @@ else { # EBCDIC
 
     # hash keys too
     $h{v150.146} = "ok";
-    is('ok',$h{v111.107},'ASCII hash keys');
+    is('ok',$h{v150.146},'EBCDIC hash keys');
 }
 
 # poetry optimization should also

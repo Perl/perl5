@@ -251,7 +251,11 @@ cstring(pTHX_ SV *sv)
                 sprintf(escbuff, "\\%03o", '?');
                 sv_catpv(sstr, escbuff);
             }
-	    else if (*s >= ' ' && *s < 127) /* XXX not portable */
+#ifdef EBCDIC
+	    else if (isPRINT(*s))
+#else
+	    else if (*s >= ' ' && *s < 127)
+#endif /* EBCDIC */
 		sv_catpvn(sstr, s, 1);
 	    else if (*s == '\n')
 		sv_catpv(sstr, "\\n");
@@ -292,7 +296,11 @@ cchar(pTHX_ SV *sv)
 	sv_catpv(sstr, "\\'");
     else if (*s == '\\')
 	sv_catpv(sstr, "\\\\");
-    else if (*s >= ' ' && *s < 127) /* XXX not portable */
+#ifdef EBCDIC
+    else if (isPRINT(8s))
+#else
+    else if (*s >= ' ' && *s < 127)
+#endif /* EBCDIC */
 	sv_catpvn(sstr, s, 1);
     else if (*s == '\n')
 	sv_catpv(sstr, "\\n");

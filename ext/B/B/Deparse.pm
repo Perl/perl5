@@ -490,6 +490,8 @@ sub new {
 	    $self->{'files'}{$1} = 1;
 	} elsif ($arg eq "-p") {
 	    $self->{'parens'} = 1;
+	} elsif ($arg eq "-P") {
+	    $self->{'noproto'} = 1;
 	} elsif ($arg eq "-l") {
 	    $self->{'linenums'} = 1;
 	} elsif ($arg eq "-q") {
@@ -2779,6 +2781,7 @@ sub method {
 # or ("", $args_after_prototype_demunging) if it does.
 sub check_proto {
     my $self = shift;
+    return "&" if $self->{'noproto'};
     my($proto, @args) = @_;
     my($arg, $real);
     my $doneok = 0;
@@ -3071,7 +3074,7 @@ sub re_unback {
     my($str) = @_;
 
     # the insane complexity here is due to the behaviour of "\c\"
-    $str =~ s/(^|[^\\]|\\c\\)(?<!\\c)\\(\\\\)*(?=[\0-\031\177-\377])/$1$2/g;
+    $str =~ s/(^|[^\\]|\\c\\)(?<!\\c)\\(\\\\)*(?=[^[:print:]])/$1$2/g;
     return $str;
 }
 
@@ -3780,6 +3783,22 @@ C<B::Deparse,-p> will print
 
 which probably isn't what you intended (the C<'???'> is a sign that
 perl optimized away a constant value).
+
+=item B<-P>
+
+Disable prototype checking. With this option, all function calls are
+deparsed as if no prototype was defined for them. In other words,
+
+    perl -MO=Deparse,-P -e 'sub foo (\@) { 1 } foo @x'
+
+will print
+
+    sub foo (\@) {
+	1;
+    }
+    &foo(\@x);
+
+making clear how the parameters are actually passed to C<foo>.
 
 =item B<-q>
 

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.5 $, $Date: 2002/01/18 21:00:17 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.6 $, $Date: 2002/01/25 21:22:22 $)
 
 =head1 DESCRIPTION
 
@@ -197,9 +197,9 @@ including setting the Followup-To header line to NOT include alt.sources;
 see their FAQ (http://www.faqs.org/faqs/alt-sources-intro/) for details.
 
 If you're just looking for software, first use Google
-(http://www.google.com), Deja (http://www.deja.com), and
-CPAN Search (http://search.cpan.org).  This is faster and more
-productive than just posting a request.
+(http://www.google.com), Google's usenet search interface
+(http://groups.google.com),  and CPAN Search (http://search.cpan.org).  
+This is faster and more productive than just posting a request.
 
 =head2 Perl Books
 
@@ -526,7 +526,7 @@ the I<What is CPAN?> question earlier in this document.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2002 Tom Christiansen and Nathan Torkington.
+Copyright (c) 1997-2001 Tom Christiansen and Nathan Torkington.
 All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it

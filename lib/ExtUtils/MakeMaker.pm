@@ -68,7 +68,7 @@ my $Is_OS2     = $^O eq 'os2';
 my $Is_Mac     = $^O eq 'MacOS';
 my $Is_Win32   = $^O eq 'MSWin32';
 my $Is_Cygwin  = $^O eq 'cygwin';
-my $Is_NetWare = $Config{osname} eq 'NetWare';
+my $Is_NetWare = $Config{osname} eq 'NetWare'; # $Config{osname} intentional
 my $Is_BeOS    = $^O =~ /beos/i;    # XXX should this be that loose?
 
 require ExtUtils::MM_Unix;

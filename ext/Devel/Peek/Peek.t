@@ -357,7 +357,7 @@ do_test(19,
     MAX = 7
     RITER = -1
     EITER = $ADDR
-    Elt "\\\241\\\101" \[UTF8 "\\\x\{100\}"\] HASH = $ADDR
+    Elt "\\\214\\\101" \[UTF8 "\\\x\{100\}"\] HASH = $ADDR
     SV = PV\\($ADDR\\) at $ADDR
       REFCNT = 1
       FLAGS = \\(POK,pPOK,UTF8\\)

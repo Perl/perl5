@@ -88,11 +88,10 @@ if ($^O eq 'VMS') {
         s!-bE:(\S+)!-bE:$perl_exp!;
     }
    }
-   elsif ($^O eq 'cygwin') { # Cygwin needs the libperl copied
+   elsif ($^O eq 'cygwin') { # Cygwin needs the shared libperl copied
      my $v_e_r_s = $Config{version};
      $v_e_r_s =~ tr/./_/;
-     system("cp ../libperl$v_e_r_s.dll ./");    # for test 1
-     system("cp ../$Config{'libperl'} ../libperl.a");    # for test 1
+     system("cp ../cygperl$v_e_r_s.dll ./");    # for test 1
    }
    elsif ($Config{'libperl'} !~ /\Alibperl\./) {
      # Everyone needs libperl copied if it's not found by '-lperl'.
@@ -129,8 +128,7 @@ print (($status? 'not ':'')."ok 9 # $status\n");
 unlink($exe,"embed_test.c",$obj);
 unlink("$exe$Config{exe_ext}") if $skip_exe;
 unlink("embed_test.map","embed_test.lis") if $^O eq 'VMS';
-unlink(glob("./libperl*.dll")) if $^O eq 'cygwin';
-unlink("../libperl.a")         if $^O eq 'cygwin';
+unlink(glob("./*.dll")) if $^O eq 'cygwin';
 unlink($testlib)	       if $libperl_copied;
 
 # gcc -g -I.. -L../ -o perl_test perl_test.c -lperl `../perl -I../lib -MExtUtils::Embed -I../ -e ccopts -e ldopts`
