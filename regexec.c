@@ -3295,7 +3295,7 @@ S_regmatch(pTHX_ regnode *prog)
 		}
 		REGCP_SET(lastcp);
 		if (paren) {
-		    UV c;
+		    UV c = 0;
 		    while (n >= ln) {
 			if (c1 != -1000) {
 			    if (do_utf8)
@@ -3315,7 +3315,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    }
 		}
 		else {
-		    UV c;
+		    UV c = 0;
 		    while (n >= ln) {
 			if (c1 != -1000) {
 			    if (do_utf8)

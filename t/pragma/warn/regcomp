@@ -1,5 +1,16 @@
   regcomp.c	AOK
 
+  Quantifier unexpected on zero-length expression [S_study_chunk] 
+
+  (?p{}) is deprecated - use (??{})  [S_reg]
+    $a =~ /(?p{'x'})/ ;
+    
+
+  Useless (%s%c) - %suse /%c modifier [S_reg] 
+  Useless (%sc) - %suse /gc modifier [S_reg] 
+
+
+
   Strange *+?{} on zero-length expression	[S_study_chunk]
 	/(?=a)?/
 
@@ -8,6 +19,9 @@
 
   /%.127s/: Unrecognized escape \\%c passed through	[S_regatom] 
   	$x = '\m' ; /$x/
+
+  POSIX syntax [%c %c] is reserved for future extensions [S_checkposixcc] 
+
 
   Character class [:%.*s:] unknown	[S_regpposixcc]
 
@@ -20,6 +34,8 @@
   /%.127s/: Unrecognized escape \\%c in character class passed through"	[S_regclass] 
 
   /%.127s/: Unrecognized escape \\%c in character class passed through"	[S_regclassutf8] 
+
+  False [] range \"%*.*s\" [S_regclass]
 
 __END__
 # regcomp.c [S_regpiece]
@@ -165,3 +181,59 @@ $a =~ /[a\zb]/ ;
 EXPECT
 Unrecognized escape \z in character class passed through in regex; marked by <-- HERE in m/[a\z <-- HERE b]/ at - line 3.
 
+########
+# regcomp.c [S_study_chunk]
+use warnings 'deprecated' ;
+$a = "xx" ;
+$a =~ /(?p{'x'})/ ;
+no warnings ;
+use warnings 'regexp' ;
+$a =~ /(?p{'x'})/ ;
+use warnings;
+no warnings 'deprecated' ;
+no warnings 'regexp' ;
+$a =~ /(?p{'x'})/ ;
+EXPECT
+(?p{}) is deprecated - use (??{}) in regex; marked by <-- HERE in m/(?p <-- HERE {'x'})/ at - line 4.
+(?p{}) is deprecated - use (??{}) in regex; marked by <-- HERE in m/(?p <-- HERE {'x'})/ at - line 7.
+########
+# regcomp.c [S_reg]
+use warnings 'regexp' ;
+$a = qr/(?c)/;
+$a = qr/(?-c)/;
+$a = qr/(?g)/;
+$a = qr/(?-g)/;
+$a = qr/(?o)/;
+$a = qr/(?-o)/;
+$a = qr/(?g-o)/;
+$a = qr/(?g-c)/;
+$a = qr/(?o-cg)/;  # (?c) means (?g) error won't be thrown
+$a = qr/(?ogc)/;
+no warnings 'regexp' ;
+$a = qr/(?c)/;
+$a = qr/(?-c)/;
+$a = qr/(?g)/;
+$a = qr/(?-g)/;
+$a = qr/(?o)/;
+$a = qr/(?-o)/;
+$a = qr/(?g-o)/;
+$a = qr/(?g-c)/;
+$a = qr/(?o-cg)/;  # (?c) means (?g) error won't be thrown
+$a = qr/(?ogc)/;
+#EXPECT
+EXPECT
+Useless (?c) - use /gc modifier in regex; marked by <-- HERE in m/(?c <-- HERE )/ at - line 3.
+Useless (?-c) - don't use /gc modifier in regex; marked by <-- HERE in m/(?-c <-- HERE )/ at - line 4.
+Useless (?g) - use /g modifier in regex; marked by <-- HERE in m/(?g <-- HERE )/ at - line 5.
+Useless (?-g) - don't use /g modifier in regex; marked by <-- HERE in m/(?-g <-- HERE )/ at - line 6.
+Useless (?o) - use /o modifier in regex; marked by <-- HERE in m/(?o <-- HERE )/ at - line 7.
+Useless (?-o) - don't use /o modifier in regex; marked by <-- HERE in m/(?-o <-- HERE )/ at - line 8.
+Useless (?g) - use /g modifier in regex; marked by <-- HERE in m/(?g <-- HERE -o)/ at - line 9.
+Useless (?-o) - don't use /o modifier in regex; marked by <-- HERE in m/(?g-o <-- HERE )/ at - line 9.
+Useless (?g) - use /g modifier in regex; marked by <-- HERE in m/(?g <-- HERE -c)/ at - line 10.
+Useless (?-c) - don't use /gc modifier in regex; marked by <-- HERE in m/(?g-c <-- HERE )/ at - line 10.
+Useless (?o) - use /o modifier in regex; marked by <-- HERE in m/(?o <-- HERE -cg)/ at - line 11.
+Useless (?-c) - don't use /gc modifier in regex; marked by <-- HERE in m/(?o-c <-- HERE g)/ at - line 11.
+Useless (?o) - use /o modifier in regex; marked by <-- HERE in m/(?o <-- HERE gc)/ at - line 12.
+Useless (?g) - use /g modifier in regex; marked by <-- HERE in m/(?og <-- HERE c)/ at - line 12.
+Useless (?c) - use /gc modifier in regex; marked by <-- HERE in m/(?ogc <-- HERE )/ at - line 12.

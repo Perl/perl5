@@ -183,10 +183,9 @@ Perl_pad_allocmy(pTHX_ char *name)
 	if (*name != '$')
 	    yyerror(Perl_form(aTHX_ "Can't declare class for non-scalar %s in \"%s\"",
 			 name, PL_in_my == KEY_our ? "our" : "my"));
-	SvOBJECT_on(sv);
+	SvFLAGS(sv) |= SVpad_TYPED;
 	(void)SvUPGRADE(sv, SVt_PVMG);
 	SvSTASH(sv) = (HV*)SvREFCNT_inc(PL_in_my_stash);
-	PL_sv_objcount++;
     }
     if (PL_in_my == KEY_our) {
 	(void)SvUPGRADE(sv, SVt_PVGV);
@@ -223,11 +222,10 @@ S_pad_addlex(pTHX_ SV *proto_namesv)
 	(void)SvUPGRADE(namesv, SVt_PVGV);
 	GvSTASH(namesv) = (HV*)SvREFCNT_inc((SV*)GvSTASH(proto_namesv));
     }
-    if (SvOBJECT(proto_namesv)) {		/* A typed var */
-	SvOBJECT_on(namesv);
+    if (SvFLAGS(proto_namesv) & SVpad_TYPED) {	/* A typed lexical */
+	SvFLAGS(namesv) |= SVpad_TYPED;
 	(void)SvUPGRADE(namesv, SVt_PVMG);
 	SvSTASH(namesv) = (HV*)SvREFCNT_inc((SV*)SvSTASH(proto_namesv));
-	PL_sv_objcount++;
     }
     return newoff;
 }
@@ -348,15 +346,22 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
 	switch (CxTYPE(cx)) {
 	default:
 	    if (i == 0 && saweval) {
-		seq = cxstack[saweval].blk_oldcop->cop_seq;
 		return pad_findlex(name, newoff, seq, PL_main_cv, -1, saweval, 0);
 	    }
 	    break;
 	case CXt_EVAL:
 	    switch (cx->blk_eval.old_op_type) {
 	    case OP_ENTEREVAL:
-		if (CxREALEVAL(cx))
+		if (CxREALEVAL(cx)) {
+		    PADOFFSET off;
 		    saweval = i;
+		    seq = cxstack[i].blk_oldcop->cop_seq;
+		    startcv = cxstack[i].blk_eval.cv;
+		    off = pad_findlex(name, newoff, seq, startcv, i-1,
+				      saweval, 0);
+		    if (off)	/* continue looking if not found here */
+			return off;
+		}
 		break;
 	    case OP_DOFILE:
 	    case OP_REQUIRE:
@@ -373,7 +378,6 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
 		saweval = i;	/* so we know where we were called from */
 		continue;
 	    }
-	    seq = cxstack[saweval].blk_oldcop->cop_seq;
 	    return pad_findlex(name, newoff, seq, cv, i-1, saweval,FINDLEX_NOSEARCH);
 	}
     }
@@ -1963,7 +1967,8 @@ S_my_kid(pTHX_ OP *o, OP *attrs)
 
 	/* check for C<my Dog $spot> when deciding package */
 	namesvp = av_fetch(PL_comppad_name, o->op_targ, FALSE);
-	if (namesvp && *namesvp && SvOBJECT(*namesvp) && HvNAME(SvSTASH(*namesvp)))
+	if (namesvp && *namesvp && (SvFLAGS(*namesvp) & SVpad_TYPED)
+	    && HvNAME(SvSTASH(*namesvp)))
 	    stash = SvSTASH(*namesvp);
 	else
 	    stash = PL_curstash;
@@ -2268,8 +2273,8 @@ Perl_fold_constants(pTHX_ register OP *o)
     case OP_SLE:
     case OP_SGE:
     case OP_SCMP:
-
-	if (o->op_private & OPpLOCALE)
+	/* XXX what about the numeric ops? */
+	if (PL_hints & HINT_LOCALE)
 	    goto nope;
     }
 
@@ -5605,13 +5610,6 @@ Perl_ck_ftst(pTHX_ OP *o)
 	else
 	    o = newUNOP(type, 0, newDEFSVOP());
     }
-#ifdef USE_LOCALE
-    if (type == OP_FTTEXT || type == OP_FTBINARY) {
-	o->op_private = 0;
-	if (PL_hints & HINT_LOCALE)
-	    o->op_private |= OPpLOCALE;
-    }
-#endif
     return o;
 }
 
@@ -6021,29 +6019,7 @@ Perl_ck_listiob(pTHX_ OP *o)
     if (!kid)
 	append_elem(o->op_type, o, newDEFSVOP());
 
-    o = listkids(o);
-
-    o->op_private = 0;
-#ifdef USE_LOCALE
-    if (PL_hints & HINT_LOCALE)
-	o->op_private |= OPpLOCALE;
-#endif
-
-    return o;
-}
-
-OP *
-Perl_ck_fun_locale(pTHX_ OP *o)
-{
-    o = ck_fun(o);
-
-    o->op_private = 0;
-#ifdef USE_LOCALE
-    if (PL_hints & HINT_LOCALE)
-	o->op_private |= OPpLOCALE;
-#endif
-
-    return o;
+    return listkids(o);
 }
 
 OP *
@@ -6073,18 +6049,6 @@ Perl_ck_sassign(pTHX_ OP *o)
 	    return kid;
 	}
     }
-    return o;
-}
-
-OP *
-Perl_ck_scmp(pTHX_ OP *o)
-{
-    o->op_private = 0;
-#ifdef USE_LOCALE
-    if (PL_hints & HINT_LOCALE)
-	o->op_private |= OPpLOCALE;
-#endif
-
     return o;
 }
 
@@ -6285,11 +6249,6 @@ OP *
 Perl_ck_sort(pTHX_ OP *o)
 {
     OP *firstkid;
-    o->op_private = 0;
-#ifdef USE_LOCALE
-    if (PL_hints & HINT_LOCALE)
-	o->op_private |= OPpLOCALE;
-#endif
 
     if (o->op_type == OP_SORT && o->op_flags & OPf_STACKED)
 	simplify_sort(o);
@@ -6933,7 +6892,7 @@ Perl_peep(pTHX_ register OP *o)
 	    if (rop->op_type != OP_RV2HV || rop->op_first->op_type != OP_PADSV)
 		break;
 	    lexname = *av_fetch(PL_comppad_name, rop->op_first->op_targ, TRUE);
-	    if (!SvOBJECT(lexname))
+	    if (!(SvFLAGS(lexname) & SVpad_TYPED))
 		break;
 	    fields = (GV**)hv_fetch(SvSTASH(lexname), "FIELDS", 6, FALSE);
 	    if (!fields || !GvHV(*fields))
@@ -6983,7 +6942,7 @@ Perl_peep(pTHX_ register OP *o)
 	    if (rop->op_type != OP_RV2HV || rop->op_first->op_type != OP_PADSV)
 		break;
 	    lexname = *av_fetch(PL_comppad_name, rop->op_first->op_targ, TRUE);
-	    if (!SvOBJECT(lexname))
+	    if (!(SvFLAGS(lexname) & SVpad_TYPED))
 		break;
 	    fields = (GV**)hv_fetch(SvSTASH(lexname), "FIELDS", 6, FALSE);
 	    if (!fields || !GvHV(*fields))

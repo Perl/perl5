@@ -114,7 +114,7 @@ in multiple arguments.)
 
 =item *
 
-my __PACKAGE__ now works.
+my __PACKAGE__ $obj now works.
 
 =item *
 

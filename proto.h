@@ -1143,8 +1143,10 @@ STATIC void	S_regoptail(pTHX_ struct RExC_state_t*, regnode *, regnode *);
 STATIC void	S_regtail(pTHX_ struct RExC_state_t*, regnode *, regnode *);
 STATIC char*	S_regwhite(pTHX_ char *, char *);
 STATIC char*	S_nextchar(pTHX_ struct RExC_state_t*);
+#  ifdef DEBUGGING
 STATIC regnode*	S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l);
 STATIC void	S_put_byte(pTHX_ SV* sv, int c);
+#  endif
 STATIC void	S_scan_commit(pTHX_ struct RExC_state_t*, struct scan_data_t *data);
 STATIC void	S_cl_anything(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl);
 STATIC int	S_cl_is_anything(pTHX_ struct regnode_charclass_class *cl);
@@ -1177,8 +1179,10 @@ STATIC char*	S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *stre
 #endif
 
 #if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
+#   ifdef DEBUGGING
 STATIC CV*	S_deb_curcv(pTHX_ I32 ix);
 STATIC void	S_debprof(pTHX_ OP *o);
+#   endif
 #endif
 
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
@@ -1230,7 +1234,7 @@ STATIC void	S_not_a_number(pTHX_ SV *sv);
 STATIC I32	S_visit(pTHX_ SVFUNC_t f);
 STATIC void	S_sv_add_backref(pTHX_ SV *tsv, SV *sv);
 STATIC void	S_sv_del_backref(pTHX_ SV *sv);
-#  if defined(DEBUGGING)
+#  ifdef DEBUGGING
 STATIC void	S_del_sv(pTHX_ SV *p);
 #  endif
 #  if !defined(NV_PRESERVES_UV)
@@ -1277,7 +1281,9 @@ STATIC I32	S_sublex_start(pTHX);
 STATIC char *	S_filter_gets(pTHX_ SV *sv, PerlIO *fp, STRLEN append);
 STATIC HV *	S_find_in_my_stash(pTHX_ char *pkgname, I32 len);
 STATIC SV*	S_new_constant(pTHX_ char *s, STRLEN len, const char *key, SV *sv, SV *pv, const char *type);
+#  if defined(DEBUGGING)
 STATIC void	S_tokereport(pTHX_ char *thing, char *s, I32 rv);
+#  endif
 STATIC int	S_ao(pTHX_ int toketype);
 STATIC void	S_depcom(pTHX);
 STATIC char*	S_incl_perldb(pTHX);

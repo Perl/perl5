@@ -1673,7 +1673,7 @@ p	|I32	|keyword	|char* d|I32 len
 Ap	|void	|leave_scope	|I32 base
 p	|void	|lex_end
 p	|void	|lex_start	|SV* line
-p	|void	|op_null	|OP* o
+Ap |void   |op_null    |OP* o
 p	|void	|op_clear	|OP* o
 p	|OP*	|linklist	|OP* o
 p	|OP*	|list		|OP* o
@@ -1750,7 +1750,7 @@ Apd	|int	|mg_get		|SV* sv
 Apd	|U32	|mg_length	|SV* sv
 Apd	|void	|mg_magical	|SV* sv
 Apd	|int	|mg_set		|SV* sv
-Ap	|I32	|mg_size	|SV* sv
+Ap	|IV	|mg_size	|SV* sv
 Ap	|void	|mini_mktime	|struct tm *pm
 p	|OP*	|mod		|OP* o|I32 type
 p	|int	|mode_from_discipline|SV* discp
@@ -2284,7 +2284,7 @@ s	|void	|hv_magic_check	|HV *hv|bool *needs_copy|bool *needs_store
 #endif
 
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
-s	|void	|save_magic	|I32 mgs_ix|SV *sv
+s	|void	|save_magic	|IV mgs_ix|SV *sv
 s	|int	|magic_methpack	|SV *sv|MAGIC *mg|char *meth
 s	|int	|magic_methcall	|SV *sv|MAGIC *mg|char *meth|I32 f \
 				|int n|SV *val
@@ -2414,9 +2414,11 @@ s	|void	|regoptail	|struct RExC_state_t*|regnode *|regnode *
 s	|void	|regtail	|struct RExC_state_t*|regnode *|regnode *
 s	|char*|regwhite	|char *|char *
 s	|char*|nextchar	|struct RExC_state_t*
+#  ifdef DEBUGGING
 s	|regnode*|dumpuntil	|regnode *start|regnode *node \
 				|regnode *last|SV* sv|I32 l
 s	|void	|put_byte	|SV* sv|int c
+#  endif
 s	|void	|scan_commit	|struct RExC_state_t*|struct scan_data_t *data
 s	|void	|cl_anything	|struct RExC_state_t*|struct regnode_charclass_class *cl
 s	|int	|cl_is_anything	|struct regnode_charclass_class *cl
@@ -2453,8 +2455,10 @@ s	|char*	|find_byclass	|regexp * prog|regnode *c|char *s|char *strend|char *star
 #endif
 
 #if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
+#   ifdef DEBUGGING
 s	|CV*	|deb_curcv	|I32 ix
 s	|void	|debprof	|OP *o
+#   endif
 #endif
 
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
@@ -2506,7 +2510,7 @@ s	|void	|not_a_number	|SV *sv
 s	|I32	|visit		|SVFUNC_t f
 s	|void	|sv_add_backref	|SV *tsv|SV *sv
 s	|void	|sv_del_backref	|SV *sv
-#  if defined(DEBUGGING)
+#  ifdef DEBUGGING
 s	|void	|del_sv	|SV *p
 #  endif
 #  if !defined(NV_PRESERVES_UV)
@@ -2557,7 +2561,9 @@ s	|char *	|filter_gets	|SV *sv|PerlIO *fp|STRLEN append
 s	|HV *	|find_in_my_stash|char *pkgname|I32 len
 s	|SV*	|new_constant	|char *s|STRLEN len|const char *key|SV *sv \
 				|SV *pv|const char *type
+#  if defined(DEBUGGING)
 s	|void	|tokereport	|char *thing|char *s|I32 rv
+#  endif
 s	|int	|ao		|int toketype
 s	|void	|depcom
 s	|char*	|incl_perldb

@@ -1517,6 +1517,12 @@ d_sqrtl (d_sqrtl.U):
 	This variable conditionally defines the HAS_SQRTL symbol, which
 	indicates to the C program that the sqrtl() routine is available.
 
+d_sresgproto (d_sresgproto.U):
+	This variable conditionally defines the HAS_SETRESGID_PROTO symbol,
+	which indicates to the C program that the system provides
+	a prototype for the setresgid() function.  Otherwise, it is
+	up to the program to supply one.
+
 d_sresuproto (d_sresuproto.U):
 	This variable conditionally defines the HAS_SETRESUID_PROTO symbol,
 	which indicates to the C program that the system provides

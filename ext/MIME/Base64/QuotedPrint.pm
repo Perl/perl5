@@ -65,7 +65,7 @@ modify it under the same terms as Perl itself.
 use strict;
 use vars qw(@ISA @EXPORT $VERSION);
 if (ord('A') == 193) { # on EBCDIC machines we need translation help
-    use Encode ();
+    require Encode;
 }
 
 require Exporter;
@@ -73,8 +73,6 @@ require Exporter;
 @EXPORT = qw(encode_qp decode_qp);
 
 $VERSION = sprintf("%d.%02d", q$Revision: 2.3 $ =~ /(\d+)\.(\d+)/);
-
-use re 'asciirange'; # ranges in regular expressions refer to ASCII
 
 sub encode_qp ($)
 {

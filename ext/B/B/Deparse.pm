@@ -594,13 +594,13 @@ sub ambient_pragmas {
 	elsif ($name eq 're') {
 	    require re;
 	    if ($val eq 'none') {
-		$hint_bits &= ~re::bits(qw/taint eval asciirange/);
+		$hint_bits &= ~re::bits(qw/taint eval/);
 		next();
 	    }
 
 	    my @names;
 	    if ($val eq 'all') {
-		@names = qw/taint eval asciirange/;
+		@names = qw/taint eval/;
 	    }
 	    elsif (ref $val) {
 		@names = @$val;

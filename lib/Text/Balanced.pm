@@ -10,7 +10,7 @@ use Exporter;
 use SelfLoader;
 use vars qw { $VERSION @ISA %EXPORT_TAGS };
 
-$VERSION = '1.84';
+$VERSION = '1.85';
 @ISA		= qw ( Exporter );
 		     
 %EXPORT_TAGS	= ( ALL => [ qw(
@@ -455,7 +455,7 @@ sub _match_variable($$)
 	while (1)
 	{
 		next if _match_codeblock($textref,
-					 qr/\s*->\s*(?:[a-zA-Z]\w+\s*)?/,
+					 qr/\s*->\s*(?:[_a-zA-Z]\w+\s*)?/,
 					 qr/[({[]/, qr/[)}\]]/,
 					 qr/[({[]/, qr/[)}\]]/, 0);
 		next if _match_codeblock($textref,

@@ -3181,7 +3181,6 @@ sigaction(sig, optaction, oldaction = 0)
 				 PL_sig_name[sig],
 				 strlen(PL_sig_name[sig]),
 				 TRUE);
-	    STRLEN n_a;
 
 	    /* Check optaction and set action */
 	    if(SvTRUE(optaction)) {
@@ -3740,7 +3739,6 @@ getcwd()
 #ifdef HAS_GETCWD
 	char *		buf;
 	int		buflen = 128;
-	int		i;
 
 	New(0, buf, buflen, char);
 	/* Many getcwd()s know how to automatically allocate memory

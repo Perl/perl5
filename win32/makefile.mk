@@ -1071,6 +1071,9 @@ $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 Extensions : buildext.pl $(PERLDEP) $(CONFIGPM) 
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR)
 
+Extensions_clean : 
+	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) clean
+
 #----------------------------------------------------------------------------------
 
 
@@ -1085,6 +1088,7 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.amiga	..\pod\perlamiga.pod
 	copy ..\README.bs2000	..\pod\perlbs2000.pod
 	copy ..\README.cygwin	..\pod\perlcygwin.pod
+	copy ..\README.dgux	..\pod\perldgux.pod
 	copy ..\README.dos	..\pod\perldos.pod
 	copy ..\README.epoc	..\pod\perlepoc.pod
 	copy ..\README.hpux	..\pod\perlhpux.pod
@@ -1094,6 +1098,7 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.os2	..\pod\perlos2.pod
 	copy ..\README.os390	..\pod\perlos390.pod
 	copy ..\README.solaris	..\pod\perlsolaris.pod
+	copy ..\README.tru64	..\pod\perltru64.pod
 	copy ..\README.vmesa	..\pod\perlvmesa.pod
 	copy ..\vms\perlvms.pod	..\pod\perlvms.pod
 	copy ..\README.vos	..\pod\perlvos.pod
@@ -1207,7 +1212,7 @@ test-wide-notty : test-prep
 	    set HARNESS_PERL_SWITCHES=-C && \
 	    cd ..\t && $(PERLEXE) -I..\lib harness
 
-clean :
+clean : Extensions_clean
 	-@erase miniperlmain$(o)
 	-@erase $(MINIPERL)
 	-@erase perlglob$(o)

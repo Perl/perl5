@@ -217,6 +217,7 @@ perform the upgrade if necessary.  See C<svtype>.
 
 /* SVpad_OUR may be set on SVt_PV{NV,MG,GV} types */
 #define SVpad_OUR	0x80000000	/* pad name is "our" instead of "my" */
+#define SVpad_TYPED	0x40000000	/* Typed Lexical */
 
 #define SVf_IVisUV	0x80000000	/* use XPVUV instead of XPVIV */
 

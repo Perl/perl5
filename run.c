@@ -107,10 +107,11 @@ Perl_debop(pTHX_ OP *o)
     return 0;
 }
 
+#ifdef DEBUGGING
+
 STATIC CV*
 S_deb_curcv(pTHX_ I32 ix)
 {
-#ifdef DEBUGGING
     PERL_CONTEXT *cx = &cxstack[ix];
     if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT)
         return cx->blk_sub.cv;
@@ -122,10 +123,9 @@ S_deb_curcv(pTHX_ I32 ix)
         return Nullcv;
     else
         return deb_curcv(ix - 1);
-#else
-    return Nullcv;
-#endif  /* DEBUGGING */
 }
+
+#endif  /* DEBUGGING */
 
 void
 Perl_watch(pTHX_ char **addr)
@@ -138,15 +138,17 @@ Perl_watch(pTHX_ char **addr)
 #endif	/* DEBUGGING */
 }
 
+#ifdef DEBUGGING
+
 STATIC void
 S_debprof(pTHX_ OP *o)
 {
-#ifdef DEBUGGING
     if (!PL_profiledata)
 	Newz(000, PL_profiledata, MAXO, U32);
     ++PL_profiledata[o->op_type];
-#endif /* DEBUGGING */
 }
+
+#endif /* DEBUGGING */
 
 void
 Perl_debprofdump(pTHX)

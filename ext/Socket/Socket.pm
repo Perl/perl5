@@ -1,7 +1,7 @@
 package Socket;
 
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-$VERSION = "1.72";
+$VERSION = "1.73";
 
 =head1 NAME
 
@@ -329,10 +329,10 @@ sub sockaddr_un {
 sub AUTOLOAD {
     my($constname);
     ($constname = $AUTOLOAD) =~ s/.*:://;
-    my $val = constant($constname, @_ ? $_[0] : 0);
-    if ($! != 0) {
-	my ($pack,$file,$line) = caller;
-	croak "Your vendor has not defined Socket macro $constname, used";
+    croak "&Socket::constant not defined" if $constname eq 'constant';
+    my ($error, $val) = constant($constname);
+    if ($error) {
+	croak $error;
     }
     eval "sub $AUTOLOAD () { $val }";
     goto &$AUTOLOAD;

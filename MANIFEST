@@ -670,6 +670,20 @@ keywords.h		The keyword numbers
 keywords.pl		Program to write keywords.h
 lib/AnyDBM_File.pm	Perl module to emulate dbmopen
 lib/Attribute/Handlers.pm	Attribute::Handlers
+lib/Attribute/Handlers/demo/Demo.pm	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/Descriptions.pm	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/MyClass.pm	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo2.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo3.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo4.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_call.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_chain.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_cycle.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_hashdir.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_phases.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_range.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_rawdata.pl	Attribute::Handlers demo
 lib/AutoLoader.pm	Autoloader base class
 lib/AutoSplit.pm	Split up autoload functions
 lib/Benchmark.pm	Measure execution time
@@ -1751,6 +1765,7 @@ t/op/nothr5005.t	local @_ test which does not work under use5005threads
 t/op/numconvert.t	See if accessing fields does not change numeric values
 t/op/oct.t		See if oct and hex work
 t/op/ord.t		See if ord works
+t/op/override.t		See if operator overriding works
 t/op/pack.t		See if pack and unpack work
 t/op/pat.t		See if esoteric patterns work
 t/op/pos.t		See if pos works
@@ -1904,6 +1919,7 @@ utils/perlcc.PL		Front-end for compiler
 utils/perldoc.PL	A simple tool to find & display perl's documentation
 utils/pl2pm.PL		A pl to pm translator
 utils/splain.PL		Stand-alone version of diagnostics.pm
+uts/strtol_wrap.c	strtol wrapper for UTS
 vmesa/Makefile		VM/ESA Makefile
 vmesa/vmesa.c		VM/ESA-specific C code for Perl core
 vmesa/vmesaish.h	VM/ESA-specific C header for Perl core

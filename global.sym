@@ -207,6 +207,7 @@ Perl_is_utf8_punct
 Perl_is_utf8_xdigit
 Perl_is_utf8_mark
 Perl_leave_scope
+Perl_op_null
 Perl_load_module
 Perl_vload_module
 Perl_looks_like_number

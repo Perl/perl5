@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Fri Jun  1 18:23:33 EET DST 2001
+ * Configuration time: Mon Jun  4 06:13:47 EET DST 2001
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -2411,8 +2411,25 @@
  *	in the <db.h> header file.  In older versions of DB, it was
  *	int, while in newer ones it is size_t.
  */
+/* DB_VERSION_MAJOR_CFG:
+ *	This symbol, if defined, defines the major version number of
+ *	Berkeley DB found in the <db.h> header when Perl was configured.
+ */
+/* DB_VERSION_MINOR_CFG:
+ *	This symbol, if defined, defines the minor version number of
+ *	Berkeley DB found in the <db.h> header when Perl was configured.
+ *	For DB version 1 this is always 0.
+ */
+/* DB_VERSION_PATCH_CFG:
+ *	This symbol, if defined, defines the patch version number of
+ *	Berkeley DB found in the <db.h> header when Perl was configured.
+ *	For DB version 1 this is always 0.
+ */
 #define DB_Hash_t	u_int32_t		/**/
 #define DB_Prefix_t	size_t  	/**/
+#define DB_VERSION_MAJOR_CFG	1  	/**/
+#define DB_VERSION_MINOR_CFG	0  	/**/
+#define DB_VERSION_PATCH_CFG	0  	/**/
 
 /* I_GRP:
  *	This symbol, if defined, indicates to the C program that it should
@@ -3337,6 +3354,14 @@
  *	available to test whether a socket is at the out-of-band mark.
  */
 /*#define HAS_SOCKATMARK		/ **/
+
+/* HAS_SETRESGID_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the setresgid() function.  Otherwise, it is up
+ *	to the program to supply one.  Good guesses are
+ *		extern int setresgid(uid_t ruid, uid_t euid, uid_t suid);
+ */
+/*#define	HAS_SETRESGID_PROTO	/ **/
 
 /* HAS_SETRESUID_PROTO:
  *	This symbol, if defined, indicates that the system provides

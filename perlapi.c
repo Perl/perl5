@@ -1475,6 +1475,13 @@ Perl_leave_scope(pTHXo_ I32 base)
     ((CPerlObj*)pPerl)->Perl_leave_scope(base);
 }
 
+#undef  Perl_op_null
+void
+Perl_op_null(pTHXo_ OP* o)
+{
+    ((CPerlObj*)pPerl)->Perl_op_null(o);
+}
+
 #undef  Perl_load_module
 void
 Perl_load_module(pTHXo_ U32 flags, SV* name, SV* ver, ...)
@@ -4215,15 +4222,19 @@ Perl_sys_intern_init(pTHXo)
 #  endif
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)
+#  ifdef DEBUGGING
+#  endif
 #endif
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
 #endif
 #if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
+#   ifdef DEBUGGING
+#   endif
 #endif
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 #endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
-#  if defined(DEBUGGING)
+#  ifdef DEBUGGING
 #  endif
 #  if !defined(NV_PRESERVES_UV)
 #  endif
@@ -4231,6 +4242,8 @@ Perl_sys_intern_init(pTHXo)
 #  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
+#  if defined(DEBUGGING)
+#  endif
 #if 0
 #endif
 #  if defined(CRIPPLED_CC)

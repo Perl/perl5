@@ -40,12 +40,12 @@ struct magic_state {
 /* MGS is typedef'ed to struct magic_state in perl.h */
 
 STATIC void
-S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
+S_save_magic(pTHX_ IV mgs_ix, SV *sv)
 {
     MGS* mgs;
     assert(SvMAGICAL(sv));
 
-    SAVEDESTRUCTOR_X(restore_magic, (void*)mgs_ix);
+    SAVEDESTRUCTOR_X(restore_magic, INT2PTR(void*,mgs_ix));
 
     mgs = SSPTR(mgs_ix, MGS*);
     mgs->mgs_sv = sv;
@@ -93,7 +93,7 @@ Do magic after a value is retrieved from the SV.  See C<sv_magic>.
 int
 Perl_mg_get(pTHX_ SV *sv)
 {
-    I32 mgs_ix;
+    IV mgs_ix;
     MAGIC* mg;
     MAGIC** mgp;
     int mgp_valid = 0;
@@ -120,7 +120,7 @@ Perl_mg_get(pTHX_ SV *sv)
 	    mgp = &SvMAGIC(sv);	/* Re-establish pointer after sv_upgrade */
     }
 
-    restore_magic(aTHXo_ (void*)mgs_ix);
+    restore_magic(aTHXo_ INT2PTR(void*,mgs_ix));
     return 0;
 }
 
@@ -135,7 +135,7 @@ Do magic after a value is assigned to the SV.  See C<sv_magic>.
 int
 Perl_mg_set(pTHX_ SV *sv)
 {
-    I32 mgs_ix;
+    IV mgs_ix;
     MAGIC* mg;
     MAGIC* nextmg;
 
@@ -153,7 +153,7 @@ Perl_mg_set(pTHX_ SV *sv)
 	    CALL_FPTR(vtbl->svt_set)(aTHX_ sv, mg);
     }
 
-    restore_magic(aTHXo_ (void*)mgs_ix);
+    restore_magic(aTHXo_ INT2PTR(void*,mgs_ix));
     return 0;
 }
 
@@ -175,13 +175,13 @@ Perl_mg_length(pTHX_ SV *sv)
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
 	if (vtbl && vtbl->svt_len) {
-            I32 mgs_ix;
+            IV mgs_ix;
 
 	    mgs_ix = SSNEW(sizeof(MGS));
 	    save_magic(mgs_ix, sv);
 	    /* omit MGf_GSKIP -- not changed here */
 	    len = CALL_FPTR(vtbl->svt_len)(aTHX_ sv, mg);
-	    restore_magic(aTHXo_ (void*)mgs_ix);
+	    restore_magic(aTHXo_ INT2PTR(void*,mgs_ix));
 	    return len;
 	}
     }
@@ -190,7 +190,7 @@ Perl_mg_length(pTHX_ SV *sv)
     return len;
 }
 
-I32
+IV
 Perl_mg_size(pTHX_ SV *sv)
 {
     MAGIC* mg;
@@ -199,13 +199,13 @@ Perl_mg_size(pTHX_ SV *sv)
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
 	if (vtbl && vtbl->svt_len) {
-            I32 mgs_ix;
+            IV mgs_ix;
 
 	    mgs_ix = SSNEW(sizeof(MGS));
 	    save_magic(mgs_ix, sv);
 	    /* omit MGf_GSKIP -- not changed here */
 	    len = CALL_FPTR(vtbl->svt_len)(aTHX_ sv, mg);
-	    restore_magic(aTHXo_ (void*)mgs_ix);
+	    restore_magic(aTHXo_ INT2PTR(void*,mgs_ix));
 	    return len;
 	}
     }
@@ -234,7 +234,7 @@ Clear something magical that the SV represents.  See C<sv_magic>.
 int
 Perl_mg_clear(pTHX_ SV *sv)
 {
-    I32 mgs_ix;
+    IV mgs_ix;
     MAGIC* mg;
 
     mgs_ix = SSNEW(sizeof(MGS));
@@ -248,7 +248,7 @@ Perl_mg_clear(pTHX_ SV *sv)
 	    CALL_FPTR(vtbl->svt_clear)(aTHX_ sv, mg);
     }
 
-    restore_magic(aTHXo_ (void*)mgs_ix);
+    restore_magic(aTHXo_ INT2PTR(void*,mgs_ix));
     return 0;
 }
 

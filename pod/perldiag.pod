@@ -3551,6 +3551,10 @@ representative, who probably put it there in the first place.
 (F) There are no byte-swapping functions for a machine with this byte
 order.
 
+=item Unknown "re" subpragma '%s' (known ones are: %s)
+
+You tried to use an unknown subpragma of the "re" pragma.
+
 =item Unknown switch condition (?(%.2s in regex; marked by <-- HERE in m/%s/
 
 (F) The condition part of a (?(condition)if-clause|else-clause) construct

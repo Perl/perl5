@@ -202,17 +202,17 @@ okeq('foo',((chr(193) eq 'A') ? v134.150.150 : v102.111.111),"v-string ne ''");
 # Chapter 15, pp403
 
 # See if sane addr and gethostbyaddr() work
-eval { require Socket; gethostbyaddr(v127.0.0.1,Socket::AF_INET()) };
+eval { require Socket; gethostbyaddr(v127.0.0.1, Socket::AF_INET) };
 if ($@)
  {
   # No - so don't test insane fails.
-  skip("No Socket");
+  skip("No Socket::AF_INET # $@");
  }
 else
  {
   my $ip   = v2004.148.0.1;
   my $host;
-  eval { $host = gethostbyaddr($ip,Socket::AF_INET()) };
+  eval { $host = gethostbyaddr($ip,Socket::AF_INET) };
   okeq($@ =~ /Wide character/,1,"Non-bytes leak to gethostbyaddr");
  }
 

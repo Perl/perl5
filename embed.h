@@ -1017,8 +1017,10 @@
 #define regtail			S_regtail
 #define regwhite		S_regwhite
 #define nextchar		S_nextchar
+#  ifdef DEBUGGING
 #define dumpuntil		S_dumpuntil
 #define put_byte		S_put_byte
+#  endif
 #define scan_commit		S_scan_commit
 #define cl_anything		S_cl_anything
 #define cl_is_anything		S_cl_is_anything
@@ -1049,8 +1051,10 @@
 #define find_byclass		S_find_byclass
 #endif
 #if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
+#   ifdef DEBUGGING
 #define deb_curcv		S_deb_curcv
 #define debprof			S_debprof
+#   endif
 #endif
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 #define save_scalar_at		S_save_scalar_at
@@ -1100,7 +1104,7 @@
 #define visit			S_visit
 #define sv_add_backref		S_sv_add_backref
 #define sv_del_backref		S_sv_del_backref
-#  if defined(DEBUGGING)
+#  ifdef DEBUGGING
 #define del_sv			S_del_sv
 #  endif
 #  if !defined(NV_PRESERVES_UV)
@@ -1145,7 +1149,9 @@
 #define filter_gets		S_filter_gets
 #define find_in_my_stash	S_find_in_my_stash
 #define new_constant		S_new_constant
+#  if defined(DEBUGGING)
 #define tokereport		S_tokereport
+#  endif
 #define ao			S_ao
 #define depcom			S_depcom
 #define incl_perldb		S_incl_perldb
@@ -1191,7 +1197,6 @@
 #define ck_exit			Perl_ck_exit
 #define ck_ftst			Perl_ck_ftst
 #define ck_fun			Perl_ck_fun
-#define ck_fun_locale		Perl_ck_fun_locale
 #define ck_glob			Perl_ck_glob
 #define ck_grep			Perl_ck_grep
 #define ck_index		Perl_ck_index
@@ -1209,7 +1214,6 @@
 #define ck_rfun			Perl_ck_rfun
 #define ck_rvconst		Perl_ck_rvconst
 #define ck_sassign		Perl_ck_sassign
-#define ck_scmp			Perl_ck_scmp
 #define ck_select		Perl_ck_select
 #define ck_shift		Perl_ck_shift
 #define ck_sort			Perl_ck_sort
@@ -2508,8 +2512,10 @@
 #define regtail(a,b,c)		S_regtail(aTHX_ a,b,c)
 #define regwhite(a,b)		S_regwhite(aTHX_ a,b)
 #define nextchar(a)		S_nextchar(aTHX_ a)
+#  ifdef DEBUGGING
 #define dumpuntil(a,b,c,d,e)	S_dumpuntil(aTHX_ a,b,c,d,e)
 #define put_byte(a,b)		S_put_byte(aTHX_ a,b)
+#  endif
 #define scan_commit(a,b)	S_scan_commit(aTHX_ a,b)
 #define cl_anything(a,b)	S_cl_anything(aTHX_ a,b)
 #define cl_is_anything(a)	S_cl_is_anything(aTHX_ a)
@@ -2539,8 +2545,10 @@
 #define find_byclass(a,b,c,d,e,f)	S_find_byclass(aTHX_ a,b,c,d,e,f)
 #endif
 #if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
+#   ifdef DEBUGGING
 #define deb_curcv(a)		S_deb_curcv(aTHX_ a)
 #define debprof(a)		S_debprof(aTHX_ a)
+#   endif
 #endif
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 #define save_scalar_at(a)	S_save_scalar_at(aTHX_ a)
@@ -2590,7 +2598,7 @@
 #define visit(a)		S_visit(aTHX_ a)
 #define sv_add_backref(a,b)	S_sv_add_backref(aTHX_ a,b)
 #define sv_del_backref(a)	S_sv_del_backref(aTHX_ a)
-#  if defined(DEBUGGING)
+#  ifdef DEBUGGING
 #define del_sv(a)		S_del_sv(aTHX_ a)
 #  endif
 #  if !defined(NV_PRESERVES_UV)
@@ -2635,7 +2643,9 @@
 #define filter_gets(a,b,c)	S_filter_gets(aTHX_ a,b,c)
 #define find_in_my_stash(a,b)	S_find_in_my_stash(aTHX_ a,b)
 #define new_constant(a,b,c,d,e,f)	S_new_constant(aTHX_ a,b,c,d,e,f)
+#  if defined(DEBUGGING)
 #define tokereport(a,b,c)	S_tokereport(aTHX_ a,b,c)
+#  endif
 #define ao(a)			S_ao(aTHX_ a)
 #define depcom()		S_depcom(aTHX)
 #define incl_perldb()		S_incl_perldb(aTHX)
@@ -2681,7 +2691,6 @@
 #define ck_exit(a)		Perl_ck_exit(aTHX_ a)
 #define ck_ftst(a)		Perl_ck_ftst(aTHX_ a)
 #define ck_fun(a)		Perl_ck_fun(aTHX_ a)
-#define ck_fun_locale(a)	Perl_ck_fun_locale(aTHX_ a)
 #define ck_glob(a)		Perl_ck_glob(aTHX_ a)
 #define ck_grep(a)		Perl_ck_grep(aTHX_ a)
 #define ck_index(a)		Perl_ck_index(aTHX_ a)
@@ -2699,7 +2708,6 @@
 #define ck_rfun(a)		Perl_ck_rfun(aTHX_ a)
 #define ck_rvconst(a)		Perl_ck_rvconst(aTHX_ a)
 #define ck_sassign(a)		Perl_ck_sassign(aTHX_ a)
-#define ck_scmp(a)		Perl_ck_scmp(aTHX_ a)
 #define ck_select(a)		Perl_ck_select(aTHX_ a)
 #define ck_shift(a)		Perl_ck_shift(aTHX_ a)
 #define ck_sort(a)		Perl_ck_sort(aTHX_ a)
@@ -4897,10 +4905,12 @@
 #define regwhite		S_regwhite
 #define S_nextchar		CPerlObj::S_nextchar
 #define nextchar		S_nextchar
+#  ifdef DEBUGGING
 #define S_dumpuntil		CPerlObj::S_dumpuntil
 #define dumpuntil		S_dumpuntil
 #define S_put_byte		CPerlObj::S_put_byte
 #define put_byte		S_put_byte
+#  endif
 #define S_scan_commit		CPerlObj::S_scan_commit
 #define scan_commit		S_scan_commit
 #define S_cl_anything		CPerlObj::S_cl_anything
@@ -4957,10 +4967,12 @@
 #define find_byclass		S_find_byclass
 #endif
 #if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
+#   ifdef DEBUGGING
 #define S_deb_curcv		CPerlObj::S_deb_curcv
 #define deb_curcv		S_deb_curcv
 #define S_debprof		CPerlObj::S_debprof
 #define debprof			S_debprof
+#   endif
 #endif
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 #define S_save_scalar_at	CPerlObj::S_save_scalar_at
@@ -5055,7 +5067,7 @@
 #define sv_add_backref		S_sv_add_backref
 #define S_sv_del_backref	CPerlObj::S_sv_del_backref
 #define sv_del_backref		S_sv_del_backref
-#  if defined(DEBUGGING)
+#  ifdef DEBUGGING
 #define S_del_sv		CPerlObj::S_del_sv
 #define del_sv			S_del_sv
 #  endif
@@ -5137,8 +5149,10 @@
 #define find_in_my_stash	S_find_in_my_stash
 #define S_new_constant		CPerlObj::S_new_constant
 #define new_constant		S_new_constant
+#  if defined(DEBUGGING)
 #define S_tokereport		CPerlObj::S_tokereport
 #define tokereport		S_tokereport
+#  endif
 #define S_ao			CPerlObj::S_ao
 #define ao			S_ao
 #define S_depcom		CPerlObj::S_depcom
@@ -5214,8 +5228,6 @@
 #define ck_ftst			Perl_ck_ftst
 #define Perl_ck_fun		CPerlObj::Perl_ck_fun
 #define ck_fun			Perl_ck_fun
-#define Perl_ck_fun_locale	CPerlObj::Perl_ck_fun_locale
-#define ck_fun_locale		Perl_ck_fun_locale
 #define Perl_ck_glob		CPerlObj::Perl_ck_glob
 #define ck_glob			Perl_ck_glob
 #define Perl_ck_grep		CPerlObj::Perl_ck_grep
@@ -5250,8 +5262,6 @@
 #define ck_rvconst		Perl_ck_rvconst
 #define Perl_ck_sassign		CPerlObj::Perl_ck_sassign
 #define ck_sassign		Perl_ck_sassign
-#define Perl_ck_scmp		CPerlObj::Perl_ck_scmp
-#define ck_scmp			Perl_ck_scmp
 #define Perl_ck_select		CPerlObj::Perl_ck_select
 #define ck_select		Perl_ck_select
 #define Perl_ck_shift		CPerlObj::Perl_ck_shift

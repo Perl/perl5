@@ -506,6 +506,14 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #   include <unistd.h>
 #endif
 
+#if defined(HAS_SYSCALL) && !defined(HAS_SYSCALL_PROTO)
+int syscall(int, ...);
+#endif
+
+#if defined(HAS_USLEEP) && !defined(HAS_USLEEP_PROTO)
+int usleep(unsigned int);
+#endif
+
 #ifdef PERL_MICRO /* Last chance to export Perl_my_swap */
 #  define MYSWAP
 #endif
@@ -755,6 +763,12 @@ typedef struct perl_mstats perl_mstats_t;
 #   include <net/errno.h>
 #  endif
 # endif
+#endif
+
+/* sockatmark() is so new (2001) that many places might have it hidden
+ * behind some -D_BLAH_BLAH_SOURCE guard. */
+#if defined(HAS_SOCKATMARK) && !defined(HAS_SOCKATMARK_PROTO)
+int sockatmark(int);
 #endif
 
 #ifdef SETERRNO
@@ -2471,10 +2485,12 @@ I32 unlnk (char*);
 #define UNLINK PerlLIO_unlink
 #endif
 
-#ifndef HAS_SETRESUID_PROTO /* some versions of glibc */
+/* some versions of glibc are missing the setresuid() proto */
+#if defined(HAS_SETRESUID) && !defined(HAS_SETRESUID_PROTO)
 int setresuid(uid_t ruid, uid_t euid, uid_t suid);
 #endif
-#ifndef HAS_SETRESUID_PROTO /* some versions of glibc */
+/* some versions of glibc are missing the setresgid() proto */
+#if defined(HAS_SETRESGID) && !defined(HAS_SETRESGID_PROTO)
 int setresgid(gid_t rgid, gid_t egid, gid_t sgid);
 #endif
 
@@ -2886,7 +2902,8 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_PRIVATE_MASK	0x000000ff
 #define HINT_INTEGER		0x00000001
 #define HINT_STRICT_REFS	0x00000002
-/* #define HINT_notused4	0x00000004 */
+#define HINT_LOCALE		0x00000004
+#define HINT_BYTES		0x00000008
 #define HINT_BYTES		0x00000008
 /* #define HINT_notused10	0x00000010 */
 				/* Note: 20,40,80 used for NATIVE_HINTS */
@@ -2894,7 +2911,6 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_BLOCK_SCOPE	0x00000100
 #define HINT_STRICT_SUBS	0x00000200
 #define HINT_STRICT_VARS	0x00000400
-#define HINT_LOCALE		0x00000800
 
 #define HINT_NEW_INTEGER	0x00001000
 #define HINT_NEW_FLOAT		0x00002000
@@ -3428,16 +3444,24 @@ typedef struct am_table_short AMTS;
 #define SET_NUMERIC_LOCAL() \
 	set_numeric_local();
 
-#define IS_NUMERIC_RADIX(s)	\
-	((PL_hints & HINT_LOCALE) && \
-	  PL_numeric_radix_sv && memEQ(s, SvPVX(PL_numeric_radix_sv), SvCUR(PL_numeric_radix_sv)))
+#define IN_LOCALE_RUNTIME	(PL_curcop->op_private & HINT_LOCALE)
+#define IN_LOCALE_COMPILETIME	(PL_hints & HINT_LOCALE)
+
+#define IN_LOCALE \
+	(PL_curcop == &PL_compiling ? IN_LOCALE_COMPILETIME : IN_LOCALE_RUNTIME)
+
+#define IS_NUMERIC_RADIX(s, send)	\
+	(PL_numeric_radix_sv \
+	 && IN_LOCALE \
+	 && SvCUR(PL_numeric_radix_sv) <= ((send)-(s)) \
+	 && memEQ(s, SvPVX(PL_numeric_radix_sv), SvCUR(PL_numeric_radix_sv)))
 
 #define STORE_NUMERIC_LOCAL_SET_STANDARD() \
-	bool was_local = (PL_hints & HINT_LOCALE) && PL_numeric_local; \
+	bool was_local = PL_numeric_local && IN_LOCALE; \
 	if (was_local) SET_NUMERIC_STANDARD();
 
 #define STORE_NUMERIC_STANDARD_SET_LOCAL() \
-	bool was_standard = (PL_hints & HINT_LOCALE) && PL_numeric_standard; \
+	bool was_standard = PL_numeric_standard && IN_LOCALE; \
 	if (was_standard) SET_NUMERIC_LOCAL();
 
 #define RESTORE_NUMERIC_LOCAL() \
@@ -3452,7 +3476,7 @@ typedef struct am_table_short AMTS;
 
 #define SET_NUMERIC_STANDARD()  	/**/
 #define SET_NUMERIC_LOCAL()     	/**/
-#define IS_NUMERIC_RADIX(c)		(0)
+#define IS_NUMERIC_RADIX(a, b)		(0)
 #define STORE_NUMERIC_LOCAL_SET_STANDARD()	/**/
 #define STORE_NUMERIC_STANDARD_SET_LOCAL()	/**/
 #define RESTORE_NUMERIC_LOCAL()		/**/
@@ -3633,6 +3657,10 @@ typedef struct am_table_short AMTS;
 
 #ifdef I_SYS_FILE
 #  include <sys/file.h>
+#endif
+
+#if defined(HAS_FLOCK) && !defined(HAS_FLOCK_PROTO)
+int flock(int fd, int op);
 #endif
 
 #ifndef O_RDONLY

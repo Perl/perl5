@@ -61,6 +61,8 @@ delete_by_prefix('ExtUtils::MM_');	# ExtUtils::MakeMaker's domain
 delete_by_prefix('File::Spec::');	# File::Spec's domain
 add_by_name('File::Spec::Functions');	# put this back
 
+delete_by_prefix('Attribute::Handlers');# we test this, and we have demos
+
 sub using_feature {
     my $use = "use$_[0]";
     exists $Config{$use} &&
@@ -76,9 +78,8 @@ unless (using_feature('threads') && has_extension('Thread')) {
 delete_by_prefix('unicode::');
 add_by_name('unicode::distinct');	# put this back
 
-
-# Delete all modules which have their own tests.  This makes
-# this test a lot faster.
+# Delete all modules which have their own tests.
+# This makes this test a lot faster.
 foreach my $mod (<DATA>) {
     chomp $mod;
     delete_by_name($mod);

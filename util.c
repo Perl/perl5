@@ -3972,28 +3972,28 @@ Perl_my_fflush_all(pTHX)
     extern void _fwalk(int (*)(FILE *));
     _fwalk(&fflush);
     return 0;
-#   else
-    long open_max = -1;
+# else
 #  if defined(FFLUSH_ALL) && defined(HAS_STDIO_STREAM_ARRAY)
+    long open_max = -1;
 #   ifdef PERL_FFLUSH_ALL_FOPEN_MAX
     open_max = PERL_FFLUSH_ALL_FOPEN_MAX;
 #   else
-#   if defined(HAS_SYSCONF) && defined(_SC_OPEN_MAX)
+#    if defined(HAS_SYSCONF) && defined(_SC_OPEN_MAX)
     open_max = sysconf(_SC_OPEN_MAX);
-#   else
-#    ifdef FOPEN_MAX
-    open_max = FOPEN_MAX;
-#    else
-#     ifdef OPEN_MAX
-    open_max = OPEN_MAX;
 #     else
-#      ifdef _NFILE
+#      ifdef FOPEN_MAX
+    open_max = FOPEN_MAX;
+#      else
+#       ifdef OPEN_MAX
+    open_max = OPEN_MAX;
+#       else
+#        ifdef _NFILE
     open_max = _NFILE;
+#        endif
+#       endif
 #      endif
 #     endif
 #    endif
-#   endif
-#   endif
     if (open_max > 0) {
       long i;
       for (i = 0; i < open_max; i++)
@@ -4015,7 +4015,7 @@ Perl_my_atof(pTHX_ const char* s)
 {
     NV x = 0.0;
 #ifdef USE_LOCALE_NUMERIC
-    if ((PL_hints & HINT_LOCALE) && PL_numeric_local) {
+    if (PL_numeric_local && IN_LOCALE) {
 	NV y;
 
 	Perl_atof2(aTHX_ s, &x);
@@ -4033,6 +4033,30 @@ Perl_my_atof(pTHX_ const char* s)
     return x;
 }
 
+NV
+S_mulexp10(NV value, I32 exponent)
+{
+    NV result = 1.0;
+    NV power = 10.0;
+    bool negative = 0;
+    I32 bit;
+
+    if (exponent == 0)
+	return value;
+    else if (exponent < 0) {
+	negative = 1;
+	exponent = -exponent;
+    }
+    for (bit = 1; exponent; bit <<= 1) {
+	if (exponent & bit) {
+	    exponent ^= bit;
+	    result *= power;
+	}
+	power *= power;
+    }
+    return negative ? value / result : value * result;
+}
+
 char*
 Perl_my_atof2(pTHX_ const char* orig, NV* value)
 {
@@ -4042,10 +4066,26 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
     char* point = ".";	/* locale-dependent decimal point equivalent */
     STRLEN pointlen = 1;
     bool seendigit = 0;
+    I32 expextra = 0;
+    I32 exponent = 0;
+    I32 i;
+/* this is arbitrary */
+#define PARTLIM 6
+/* we want the largest integers we can usefully use */
+#if defined(HAS_QUAD) && defined(USE_64_BIT_INT)
+#   define PARTSIZE ((int)TYPE_DIGITS(U64)-1)
+    U64 part[PARTLIM];
+#else
+#   define PARTSIZE ((int)TYPE_DIGITS(U32)-1)
+    U32 part[PARTLIM];
+#endif
+    I32 ipart = 0;	/* index into part[] */
+    I32 offcount;	/* number of digits in least significant part */
 
     if (PL_numeric_radix_sv)
 	point = SvPV(PL_numeric_radix_sv, pointlen);
 
+    /* sign */
     switch (*s) {
 	case '-':
 	    negative = 1;
@@ -4053,25 +4093,77 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 	case '+':
 	    ++s;
     }
-    while (isDIGIT(*s)) {
-	result = result * 10 + (*s++ - '0');
-	seendigit = 1;
-    }
-    if (memEQ(s, point, pointlen)) {
-	NV decimal = 0.1;
 
+    part[0] = offcount = 0;
+    if (isDIGIT(*s)) {
+	seendigit = 1;	/* get this over with */
+
+	/* skip leading zeros */
+	while (*s == '0')
+	    ++s;
+    }
+
+    /* integer digits */
+    while (isDIGIT(*s)) {
+	if (++offcount > PARTSIZE) {
+	    if (++ipart < PARTLIM) {
+		part[ipart] = 0;
+		offcount = 1;	/* ++0 */
+	    }
+	    else {
+		/* limits of precision reached */
+		--ipart;
+		--offcount;
+		if (*s >= '5')
+		    ++part[ipart];
+		while (isDIGIT(*s)) {
+		    ++expextra;
+		    ++s;
+		}
+		/* warn of loss of precision? */
+		break;
+	    }
+	}
+	part[ipart] = part[ipart] * 10 + (*s++ - '0');
+    }
+
+    /* decimal point */
+    if (memEQ(s, point, pointlen)) {
 	s += pointlen;
+	if (isDIGIT(*s))
+	    seendigit = 1;	/* get this over with */
+
+	/* decimal digits */
 	while (isDIGIT(*s)) {
-	    result += (*s++ - '0') * decimal;
-	    decimal *= 0.1;
-	    seendigit = 1;
+	    if (++offcount > PARTSIZE) {
+		if (++ipart < PARTLIM) {
+		    part[ipart] = 0;
+		    offcount = 1;	/* ++0 */
+		}
+		else {
+		    /* limits of precision reached */
+		    --ipart;
+		    --offcount;
+		    if (*s >= '5')
+			++part[ipart];
+		    while (isDIGIT(*s))
+			++s;
+		    /* warn of loss of precision? */
+		    break;
+		}
+	    }
+	    --expextra;
+	    part[ipart] = part[ipart] * 10 + (*s++ - '0');
 	}
     }
+
+    /* combine components of mantissa */
+    for (i = 0; i <= ipart; ++i)
+	result += S_mulexp10((NV)part[ipart - i],
+		i ? offcount + (i - 1) * PARTSIZE : 0);
+
     if (seendigit && (*s == 'e' || *s == 'E')) {
-	I32 exponent = 0;
-	I32 expnegative = 0;
-	I32 bit;
-	NV power;
+	bool expnegative = 0;
 
 	++s;
 	switch (*s) {
@@ -4083,17 +4175,15 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 	}
 	while (isDIGIT(*s))
 	    exponent = exponent * 10 + (*s++ - '0');
-
-	/* now apply the exponent */
-	power = (expnegative) ? 0.1 : 10.0;
-	for (bit = 1; exponent; bit <<= 1) {
-	    if (exponent & bit) {
-		exponent ^= bit;
-		result *= power;
-	    }
-	    power *= power;
-	}
+	if (expnegative)
+	    exponent = -exponent;
     }
+
+    /* now apply the exponent */
+    exponent += expextra;
+    result = S_mulexp10(result, exponent);
+
+    /* now apply the sign */
     if (negative)
 	result = -result;
     *value = result;
@@ -4541,7 +4631,7 @@ Perl_sv_getcwd(pTHX_ register SV *sv)
 #else
 
     if (PerlLIO_lstat(".", &statbuf) < 0) {
-        CWDXS_RETURN_SVUNDEF(sv);
+        SV_CWD_RETURN_UNDEF;
     }
 
     orig_cdev = statbuf.st_dev;
@@ -4577,7 +4667,7 @@ Perl_sv_getcwd(pTHX_ register SV *sv)
             namelen = strlen(dp->d_name);
 #endif
             /* skip . and .. */
-            if (SV_CWD_ISDOT(dp)) {dp->d_name[0] == '.'
+            if (SV_CWD_ISDOT(dp)) {
                 continue;
             }
 

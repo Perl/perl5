@@ -2529,11 +2529,11 @@ Perl_looks_like_number(pTHX_ SV *sv)
 			   UV_MAX= 18446744073709551615) so be cautious  */
 	    numtype |= IS_NUMBER_TO_INT_BY_STRTOL | IS_NUMBER_AS_LONG_AS_IV_MAX;
 
-        if (*s == '.'
+        if (
 #ifdef USE_LOCALE_NUMERIC
-	    || (specialradix = IS_NUMERIC_RADIX(s))
+	    (specialradix = IS_NUMERIC_RADIX(s, send)) ||
 #endif
-	    ) {
+	    *s == '.') {
 #ifdef USE_LOCALE_NUMERIC
 	    if (specialradix)
 		s += SvCUR(PL_numeric_radix_sv);
@@ -2545,10 +2545,11 @@ Perl_looks_like_number(pTHX_ SV *sv)
                 s++;
         }
     }
-    else if (*s == '.'
+    else if (
 #ifdef USE_LOCALE_NUMERIC
-	    || (specialradix = IS_NUMERIC_RADIX(s))
+	     (specialradix = IS_NUMERIC_RADIX(s, send)) ||
 #endif
+	    *s == '.'
 	    ) {
 #ifdef USE_LOCALE_NUMERIC
 	if (specialradix)
@@ -4558,8 +4559,12 @@ Perl_sv_clear(pTHX_ register SV *sv)
 		--PL_sv_objcount;	/* XXX Might want something more general */
 	}
     }
-    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv))
-	mg_free(sv);
+    if (SvTYPE(sv) >= SVt_PVMG) {
+    	if (SvMAGIC(sv))
+	    mg_free(sv);
+	if (SvFLAGS(sv) & SVpad_TYPED)
+	    SvREFCNT_dec(SvSTASH(sv));
+    }
     stash = NULL;
     switch (SvTYPE(sv)) {
     case SVt_PVIO:

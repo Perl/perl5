@@ -575,6 +575,30 @@ print qw(ab a\b a\\b);
 EXPECT
 aba\ba\b
 ########
+# lexicals declared after the myeval() definition should not be visible
+# within it
+sub myeval { eval $_[0] }
+my $foo = "ok 2\n";
+myeval('sub foo { local $foo = "ok 1\n"; print $foo; }');
+die $@ if $@;
+foo();
+print $foo;
+EXPECT
+ok 1
+ok 2
+########
+# lexicals outside an eval"" should be visible inside subroutine definitions
+# within it
+eval <<'EOT'; die $@ if $@;
+{
+    my $X = "ok\n";
+    eval 'sub Y { print $X }'; die $@ if $@;
+    Y();
+}
+EOT
+EXPECT
+ok
+########
 # This test is here instead of pragma/locale.t because
 # the bug depends on in the internal state of the locale
 # settings and pragma/locale messes up that state pretty badly.
@@ -694,3 +718,24 @@ Execution of - aborted due to compilation errors.
 EXPECT
 Missing right brace on \x{} at - line 2, within string
 Execution of - aborted due to compilation errors.
+########
+my $foo = Bar->new();
+my @dst;
+END {
+    ($_ = "@dst") =~ s/\(0x.+?\)/(0x...)/;
+    print $_, "\n";
+}
+package Bar;
+sub new {
+    my Bar $self = bless [], Bar;
+    eval '$self';
+    return $self;
+}
+sub DESTROY { 
+    push @dst, "$_[0]";
+}
+EXPECT
+Bar=ARRAY(0x...)
+########
+eval "a.b.c.d.e.f;sub"
+EXPECT

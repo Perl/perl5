@@ -278,8 +278,8 @@ typedef struct stcxt {
     HV *hclass;			/* which classnames have been seen, store time */
     AV *aclass;			/* which classnames have been seen, retrieve time */
     HV *hook;			/* cache for hook methods per class name */
-    I32 tagnum;			/* incremented at store time for each seen object */
-    I32 classnum;		/* incremented at store time for each seen classname */
+    IV tagnum;			/* incremented at store time for each seen object */
+    IV classnum;		/* incremented at store time for each seen classname */
     int netorder;		/* true if network order used */
     int s_tainted;		/* true if input source is tainted, at retrieve time */
     int forgive_me;		/* whether to be forgiving... */
@@ -2136,8 +2136,8 @@ static int store_hook(
 	I32 classnum;
 	int ret;
 	int clone = cxt->optype & ST_CLONE;
-	char mtype;				/* for blessed ref to tied structures */
-	unsigned char eflags;	/* used when object type is SHT_EXTRA */
+	char mtype = 0;				/* for blessed ref to tied structures */
+	unsigned char eflags = 0;	/* used when object type is SHT_EXTRA */
 
 	TRACEME(("store_hook, class \"%s\", tagged #%d", HvNAME(pkg), cxt->tagnum));
 
@@ -4459,7 +4459,7 @@ magic_ok:
 	 * information to check.
 	 */
 
-	if (cxt->netorder = (use_network_order & 0x1))
+	if ((cxt->netorder = (use_network_order & 0x1)))
 		return &PL_sv_undef;			/* No byte ordering info */
 
 	sprintf(byteorder, "%lx", (unsigned long) BYTEORDER);
