@@ -132,7 +132,7 @@ foreach $file (@ARGV) {
                       print OUT $t,"eval 'sub $name () {",$new,";}' unless defined(\&$name);\n";
 		    }
 		    else {
-                      print OUT $t,"unless(defined(\&$name) {\nsub $name () {",$new,";}\n}\n";
+                      print OUT $t,"unless(defined(\&$name)) {\nsub $name () {",$new,";}\n}\n";
 		    }
 		}
 	    }
