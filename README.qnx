@@ -20,7 +20,7 @@ Some tests may complain under known circumstances.
 
 See below and hints/qnx.sh for more information.
 
-Under QNX 6.1.0 there are still a few tests which fail.
+Under QNX 6.2.0 there are still a few tests which fail.
 See below and hints/qnx.sh for more information.
 
 =head2 Required Software for Compiling Perl on QNX4
@@ -128,15 +128,14 @@ options that perl throws at it. This might be reasonably placed in
 
 =head2 Outstanding issues with perl under QNX6
 
-The following tests are still failing for Perl 5.7.3 under QNX 6.1.0:
+The following tests are still failing for Perl 5.8.1 under QNX 6.2.0:
 
   op/sprintf.........................FAILED at test 91
   lib/Benchmark......................FAILED at test 26
 
 This is due to a bug in the C library's printf routine.
 printf("'%e'", 0. ) produces '0.000000e+0', but ANSI requires
-'0.000000e+00'. QNX has acknowledged the bug and it should be
-fixed in 6.2.0.
+'0.000000e+00'. QNX has acknowledged the bug.
 
 =head1 AUTHOR
 

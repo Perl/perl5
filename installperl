@@ -758,16 +758,18 @@ sub installlib {
 
     my $name = $_;
 
-    # Ignore RCS and CVS directories.
-    if (($name eq 'CVS' or $name eq 'RCS') and -d $name) {
+    # Ignore version control directories.
+    if (($name eq 'CVS' or $name eq 'RCS' or $name eq '.svn') and -d $name) {
 	$File::Find::prune = 1;
 	return;
     }
 
     # ignore patch backups, RCS files, emacs backup & temp files and the
     # .exists files, .PL files, and .t files.
-    return if $name =~ m{\.orig$|~$|^#.+#$|,v$|^\.exists|\.PL$|\.t$} ||
+    return if $name =~ m{\.orig$|\.rej$|~$|^#.+#$|,v$|^\.exists|\.PL$|\.t$} ||
 	      $dir  =~ m{/t(?:/|$)};
+    # ignore the cpan script in lib/CPAN/bin (installed later with other utils)
+    return if $name eq 'cpan';
     # ignore the test extensions
     return if $dir =~ m{ext/XS/(?:APItest|Typemap)/};
 

@@ -1035,6 +1035,7 @@ lib/CPAN/t/loadme.t		See if CPAN the module works
 lib/CPAN/t/mirroredby.t		See if CPAN::Mirrored::By works
 lib/CPAN/t/Nox.t		See if CPAN::Nox works
 lib/CPAN/t/vcmp.t		See if CPAN the module works
+lib/CPAN/bin/cpan		easily interact with CPAN from the command line
 lib/ctime.pl			A ctime workalike
 lib/Cwd.pm			Various cwd routines (getcwd, fastcwd, chdir)
 lib/DB.pm			Debugger API (draft)
@@ -2742,7 +2743,7 @@ utfebcdic.h			Unicode on EBCDIC (UTF-EBCDIC, tr16) header
 util.c				Utility routines
 util.h				Dummy header
 utils.lst			Lists utilities bundled with Perl
-utils/cpan			easily interact with CPAN from the command line
+utils/cpan.PL			easily interact with CPAN from the command line
 utils/c2ph.PL			program to translate dbx stabs to perl
 utils/dprofpp.PL		Perl code profile post-processor
 utils/enc2xs.PL			Encode module generator
@@ -2754,7 +2755,7 @@ utils/perlbug.PL		A simple tool to submit a bug report
 utils/perlcc.PL			Front-end for compiler
 utils/perldoc.PL		A simple tool to find & display perl's documentation
 utils/perlivp.PL		installation verification procedure
-utils/piconv.PL			A pl to pm translator
+utils/piconv.PL			iconv(1), reinvented in perl
 utils/pl2pm.PL			A pl to pm translator
 utils/splain.PL			Stand-alone version of diagnostics.pm
 uts/sprintf_wrap.c		sprintf wrapper for UTS

@@ -477,6 +477,7 @@ UTILS		=			\
 		..\utils\libnetcfg	\
 		..\utils\enc2xs		\
 		..\utils\piconv		\
+		..\utils\cpan		\
 		..\pod\checkpods	\
 		..\pod\pod2html		\
 		..\pod\pod2latex	\
@@ -1074,7 +1075,7 @@ distclean: clean
 	    podchecker podselect
 	cd ..\utils
 	-del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs perldoc perlivp \
-	    dprofpp perlcc libnetcfg enc2xs piconv
+	    dprofpp perlcc libnetcfg enc2xs piconv cpan
 	-del /f *.bat
 	cd ..\win32
 	cd ..\x2p

@@ -184,8 +184,12 @@ sub list_eq ($$) {
     skip "Couldn't generate infinity - got error '$@'"
       unless defined $inf and $inf == $inf / 2 and $inf + 1 == $inf;
 
+    local our $TODO;
+    $TODO = "VOS needs a fix for posix-1022 to pass this test."
+      if ($^O eq 'vos');
+
     eval { $x = pack 'w', $inf };
-    like ($@, qr/^Cannot compress integer/);
+    like ($@, qr/^Cannot compress integer/, "Cannot compress integer");
   }
 
  SKIP: {

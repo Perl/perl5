@@ -1887,6 +1887,7 @@ PP(pp_return)
     }
     PL_stack_sp = newsp;
 
+    LEAVE;
     /* Stack values are safe: */
     if (popsub2) {
 	POPSUB(cx,sv);	/* release CV and @_ ... */
@@ -1895,7 +1896,6 @@ PP(pp_return)
 	sv = Nullsv;
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
-    LEAVE;
     LEAVESUB(sv);
     if (clear_errsv)
 	sv_setpv(ERRSV,"");
@@ -1971,6 +1971,7 @@ PP(pp_last)
     SP = newsp;
     PUTBACK;
 
+    LEAVE;
     /* Stack values are safe: */
     switch (pop2) {
     case CXt_LOOP:
@@ -1983,7 +1984,6 @@ PP(pp_last)
     }
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
-    LEAVE;
     LEAVESUB(sv);
     return nextop;
 }
