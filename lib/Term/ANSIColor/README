@@ -1,4 +1,4 @@
-                       Term::ANSIColor version 1.08
+                       Term::ANSIColor version 1.09
               (A simple ANSI text attribute control module)
 
   Copyright 1996, 1997, 1998, 2000, 2001, 2002
@@ -89,5 +89,11 @@ THANKS
 
   To Richard Maus for pointing out DARK was missing from the exported
   constants list and CYAN and WHITE were missing from the documentation.
+
+  To Autrijus Tang for noticing a problem with string comparisons in the
+  test suite.
+
+  To Daniel Lindsley for the information about what Mac OS X Terminal
+  supports.
 
   To Larry Wall, as always, for Perl.

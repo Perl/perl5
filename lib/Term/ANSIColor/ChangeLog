@@ -1,3 +1,14 @@
+2004-12-03  Russ Allbery  <rra@stanford.edu>
+
+	* ANSIColor.pm: Version 1.09 released.
+
+	* ANSIColor.pm: Add compatibility information for Mac OS X
+	Terminal from Daniel Lindsley.
+
+2004-02-20  Russ Allbery  <rra@stanford.edu>
+
+	* test.pl: Always use eq, not ==, for string comparisons.
+
 2004-02-19  Russ Allbery  <rra@stanford.edu>
 
 	* ANSIColor.pm: Version 1.08 released.

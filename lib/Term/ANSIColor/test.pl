@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: test.pl,v 1.3 2004/02/20 06:21:26 eagle Exp $
+# $Id: test.pl,v 1.4 2004/02/20 21:50:10 eagle Exp $
 #
 # test.pl -- Test suite for the Term::ANSIColor Perl module.
 #
@@ -91,12 +91,12 @@ if (join ('|', @names) eq 'bold|on_green|clear') {
 
 # Test ANSI_COLORS_DISABLED.
 $ENV{ANSI_COLORS_DISABLED} = 1;
-if (color ('blue') == '') {
+if (color ('blue') eq '') {
     print "ok 10\n";
 } else {
     print "not ok 10\n";
 }
-if (colored ('testing', 'blue', 'on_red') == 'testing') {
+if (colored ('testing', 'blue', 'on_red') eq 'testing') {
     print "ok 11\n";
 } else {
     print "not ok 11\n";
