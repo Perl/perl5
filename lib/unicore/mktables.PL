@@ -406,7 +406,7 @@ my %InIdPrefix;
 
 foreach my $in (@InId) {
     my $inpat = $in;
-    $inpat =~ s/([- ])/[- _]?/g;
+    $inpat =~ s/([- _])/(?:[-_]|\\s+)?/g;
     push @{$InIdPrefix{lc(substr($in, 0, 3))}}, [ $in, $inpat ];
     printf INID "%-45s => %3d,\n", "'$in'", $InId{$in};
 }
