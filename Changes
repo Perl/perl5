@@ -31,6 +31,251 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12053] By: jhi                                   on 2001/09/17  13:45:26
+        Log: Adding new files to the MANIFEST is always nice.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12052] By: jhi                                   on 2001/09/17  13:12:31
+        Log: Reindent the PerlIO files (suggested by NI-S), used
+             indent -kr -nce -psl -sc -TSV -TAV -THV -TGV -TIV -TUV -TNV -TMAGIC -TFILE -TPerlIO -TPerlIO_list_t -TPerlIO_funcs -TPerlIO_pair_t
+             (GNU indent).  Note that wholesale re-indenting might
+             be nice, but that would break nice formatting/alignment
+             of assignments, equality testing, and complex boolean
+             expressions with lots of &s and |s.
+     Branch: perl
+	   ! perlio.c perlio.h perliol.h
+____________________________________________________________________________
+[ 12051] By: jhi                                   on 2001/09/17  12:55:53
+        Log: Add a script for being 8.3-polite.
+             The found conflicts are being worked on.
+     Branch: perl
+	   + check83.pl
+	   ! MANIFEST Porting/pumpkin.pod
+____________________________________________________________________________
+[ 12050] By: sky                                   on 2001/09/17  12:44:36
+        Log: Fixes coredump introduced by 11755 and 11790. Thanks to Doug for
+             finding it.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 12049] By: jhi                                   on 2001/09/17  11:55:07
+        Log: Bump up versions because of #12041.
+     Branch: perl
+	   ! ext/Devel/DProf/DProf.pm ext/IO/lib/IO/File.pm
+	   ! ext/IO/lib/IO/Pipe.pm lib/Fatal.pm lib/Time/gmtime.pm
+	   ! lib/Time/localtime.pm
+____________________________________________________________________________
+[ 12048] By: jhi                                   on 2001/09/17  11:51:54
+        Log: Bump the version number because of #12042.
+     Branch: perl
+	   ! lib/CPAN/FirstTime.pm
+____________________________________________________________________________
+[ 12047] By: ams                                   on 2001/09/17  11:21:40
+        Log: Subject: Re: [PATCH] turn $a.=<F> into an RCATLINE
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Mon, 17 Sep 2001 17:44:12 +0530
+             Message-Id: <20010917174412.B7058@lustre.dyn.wiw.org>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 12046] By: sky                                   on 2001/09/17  07:14:17
+        Log: Subject: Re: t/op/ver.t using skip() improperly
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Mon, 17 Sep 2001 00:22:29 -0600
+             Message-ID: <20010917062713.47716.qmail@onion.perl.org>
+     Branch: perl
+	   ! t/op/ver.t
+____________________________________________________________________________
+[ 12045] By: nick                                  on 2001/09/17  07:12:14
+        Log: Integrate mainline
+     Branch: perlio
+	  +> t/op/chdir.t
+	  !> (integrate 117 files)
+____________________________________________________________________________
+[ 12044] By: ams                                   on 2001/09/17  05:49:53
+        Log: Subject: [PATCH lib/constant.pm] Major POD rewrite of constant.pm
+             From: Ilmari Karonen <iltzu@sci.fi>
+             Date: Mon, 17 Sep 2001 00:47:57 +0300 (EET DST)
+             Message-Id: <Pine.SOL.3.96.1010917002916.13210A-100000@simpukka>
+             (And $VERSION = '1.05'.)
+     Branch: perl
+	   ! lib/constant.pm
+____________________________________________________________________________
+[ 12043] By: ams                                   on 2001/09/17  05:44:50
+        Log: Subject: Re: [BUG?] chdir(undef) == chdir() probably a bug
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 17 Sep 2001 07:49:04 +0200
+             Message-Id: <20010917074904.V1588@blackrider>
+             (Applied with tweaks to chdir.t and pp_sys.c hunks.)
+     Branch: perl
+	   + t/op/chdir.t
+	   ! MANIFEST pp_sys.c
+____________________________________________________________________________
+[ 12042] By: jhi                                   on 2001/09/17  02:54:13
+        Log: Subject: Re: CPAN.pm needs some hacking 
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Sun, 16 Sep 2001 16:46:29 -0600
+             Message-ID: <20010916225113.5606.qmail@onion.perl.org>
+     Branch: perl
+	   ! lib/CPAN/FirstTime.pm
+____________________________________________________________________________
+[ 12041] By: jhi                                   on 2001/09/16  20:43:15
+        Log: Change use|require 5.005_64 to use|require 5.6.1.
+     Branch: perl
+	   ! ext/Data/Dumper/Dumper.pm ext/Devel/DProf/DProf.pm
+	   ! ext/IO/lib/IO/File.pm ext/IO/lib/IO/Handle.pm
+	   ! ext/IO/lib/IO/Pipe.pm ext/IO/lib/IO/Seekable.pm
+	   ! ext/Opcode/Opcode.pm lib/AnyDBM_File.pm lib/AutoSplit.pm
+	   ! lib/Class/Struct.pm lib/Dumpvalue.pm lib/ExtUtils/Command.pm
+	   ! lib/ExtUtils/Install.pm lib/ExtUtils/Installed.pm
+	   ! lib/ExtUtils/Liblist.pm lib/ExtUtils/Mksymlists.pm
+	   ! lib/ExtUtils/Packlist.pm lib/Fatal.pm lib/FileHandle.pm
+	   ! lib/Math/Trig.pm lib/Net/Ping.pm lib/Net/hostent.pm
+	   ! lib/Net/netent.pm lib/Net/protoent.pm lib/Net/servent.pm
+	   ! lib/Shell.pm lib/Tie/Array.pm lib/Tie/Handle.pm
+	   ! lib/Time/gmtime.pm lib/Time/localtime.pm lib/User/grent.pm
+	   ! lib/base.pm lib/fields.pm
+____________________________________________________________________________
+[ 12040] By: jhi                                   on 2001/09/16  20:36:58
+        Log: Bump up version numbers.
+             
+             TODO 1: double check that pre-5.6.1 CPAN.pm:s
+             don't try to download 5.8.0 because of the
+             version numbers.  Mainly this means using _00
+             in the core version numbers.
+             
+             TODO 2: the "use 5.005_64" in many modules
+             needs to be changed to, say, "use 5.6.1".
+     Branch: perl
+	   ! ext/B/B/Assembler.pm ext/Data/Dumper/Dumper.pm
+	   ! lib/AutoLoader.pm lib/AutoSplit.pm lib/CPAN.pm
+	   ! lib/ExtUtils/Embed.pm lib/ExtUtils/Install.pm
+	   ! lib/ExtUtils/Installed.pm lib/ExtUtils/Manifest.pm
+	   ! lib/File/Basename.pm lib/File/Copy.pm lib/File/Find.pm
+	   ! lib/File/Path.pm lib/File/Spec.pm lib/File/Spec/Functions.pm
+	   ! lib/File/Spec/Unix.pm lib/File/Spec/VMS.pm
+	   ! lib/File/Spec/Win32.pm lib/FindBin.pm lib/Pod/Checker.pm
+	   ! lib/Pod/Find.pm lib/SelfLoader.pm lib/Shell.pm
+	   ! lib/Tie/Handle.pm lib/blib.pm lib/diagnostics.pm
+	   ! vms/ext/DCLsym/DCLsym.pm vms/ext/Stdio/Stdio.pm
+____________________________________________________________________________
+[ 12039] By: jhi                                   on 2001/09/16  19:23:07
+        Log: Use UCHARAT() as suggested by Inaba Hiroto.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 12038] By: ams                                   on 2001/09/16  15:16:24
+        Log: Subject: [PATCH] Re: Core module version numbers review
+             From: Peter Scott <Peter@PSDT.com>
+             Date: Sun, 16 Sep 2001 09:09:58 -0700
+             Message-Id: <4.3.2.7.2.20010916090716.00b452a0@mail.webquarry.com>
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 12037] By: jhi                                   on 2001/09/16  14:27:54
+        Log: Supply more details on how lc/uc/lcfirst/ucfirst are
+             not yet fully implemented.
+     Branch: perl
+	   ! pod/perlfunc.pod pod/perlunicode.pod
+____________________________________________________________________________
+[ 12036] By: jhi                                   on 2001/09/15  23:13:12
+        Log: Subject: [patch] plug PL_beginav_save leak
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Sat, 15 Sep 2001 17:02:18 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0109151659060.6089-100000@mako.covalent.net>
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[ 12035] By: jhi                                   on 2001/09/15  23:12:28
+        Log: (accidentally empty checkin)
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 12034] By: jhi                                   on 2001/09/15  23:08:09
+        Log: Subject: [patch] ithreads+PL_beginav_save
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Sat, 15 Sep 2001 16:53:01 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0109151651050.6089-100000@mako.covalent.net>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 12033] By: jhi                                   on 2001/09/15  23:07:19
+        Log: Subject: [PATCH] h2xs.PL with C::Scan
+             From: Tim Jenness <t.jenness@jach.hawaii.edu>
+             Date: Sat, 15 Sep 2001 13:41:28 -1000 (HST)
+             Message-ID: <Pine.LNX.4.33.0109151338560.3075-100000@lapaki>
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[ 12032] By: jhi                                   on 2001/09/15  18:43:20
+        Log: Elaborate (well, make more vague, really) #12030.
+     Branch: perl
+	   ! pod/perltodo.pod pod/perlunicode.pod
+____________________________________________________________________________
+[ 12031] By: jhi                                   on 2001/09/15  18:37:07
+        Log: Subject: [PATCH regexec.c] adding (U8) to case insensitive matching
+             From: "Jeff 'japhy/Marillion' Pinyan" <jeffp@crusoe.net>
+             Date: Fri, 14 Sep 2001 20:58:30 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.21.0109142057490.12393-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 12030] By: jhi                                   on 2001/09/15  17:15:40
+        Log: Document that the lc(), uc(), lcfirst(), ucfirst()
+             are not yet complete.
+     Branch: perl
+	   ! pod/perltodo.pod pod/perlunicode.pod
+____________________________________________________________________________
+[ 12029] By: jhi                                   on 2001/09/15  13:53:42
+        Log: Document what's still to be done on the regular expression
+             Unicode support, based on the UTR#18.
+     Branch: perl
+	   ! pod/perltodo.pod pod/perlunicode.pod
+____________________________________________________________________________
+[ 12028] By: jhi                                   on 2001/09/15  12:37:31
+        Log: Regen headers.
+     Branch: perl
+	   ! embedvar.h perlapi.h
+____________________________________________________________________________
+[ 12027] By: jhi                                   on 2001/09/15  12:33:49
+        Log: Subject: Re: [ID 20010815.012] Unfortunate interaction between -0 cmd line arg & (??{CODE}) regex 
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Sun, 09 Sep 2001 18:41:54 +0100
+             Message-Id: <200109091741.f89HfsM18534@crypt.compulink.co.uk>
+     Branch: perl
+	   ! Porting/findvars ext/ByteLoader/bytecode.h
+	   ! ext/Thread/Thread.xs mg.c op.c perl.c perl.h pp_ctl.c sv.c
+	   ! t/run/kill_perl.t thrdvar.h toke.c util.c wince/perldll.def
+____________________________________________________________________________
+[ 12026] By: gsar                                  on 2001/09/15  04:04:04
+        Log: enable most warnings for windows build; fix the various typecasting
+             nits that showed up (no bugfixes here)
+     Branch: maint-5.6/perl
+	   ! av.c cop.h doop.c dump.c ext/Devel/Peek/Peek.xs
+	   ! ext/POSIX/POSIX.xs gv.c hv.c mg.c op.c perl.c perl.h perly.c
+	   ! perly.y pp.c pp_ctl.c pp_hot.c pp_sys.c regcomp.c regexec.c
+	   ! sv.c toke.c universal.c utf8.c util.c vms/perly_c.vms
+	   ! win32/perllib.c win32/win32.c win32/win32.h win32/win32sck.c
+	   ! x2p/walk.c
+____________________________________________________________________________
+[ 12025] By: jhi                                   on 2001/09/14  22:22:58
+        Log: Integrate change #12024 from maintperl
+             (a local() precedence bug)
+     Branch: perl
+	  !> lib/ExtUtils/Install.pm
+____________________________________________________________________________
+[ 12024] By: gsar                                  on 2001/09/14  22:11:06
+        Log: fix local() precedence bug in change#8311, came into maint-5.6 as
+             change#8642
+     Branch: maint-5.6/perl
+	   ! lib/ExtUtils/Install.pm
+____________________________________________________________________________
+[ 12023] By: jhi                                   on 2001/09/14  15:04:16
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12022] By: jhi                                   on 2001/09/14  14:49:52
         Log: Subject: Re: [ID 20010911.001] Not OK: perl v5.7.2 +DEVEL11978 on
              From: "chromatic" <chromatic@rmci.net>
