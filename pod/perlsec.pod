@@ -84,8 +84,8 @@ For example:
     exec "echo", $arg;		# Secure (doesn't use the shell)
     exec "sh", '-c', $arg;	# Considered secure, alas!
 
-    @files = <*.c>;		# Always insecure (uses csh)
-    @files = glob('*.c');	# Always insecure (uses csh)
+    @files = <*.c>;		# insecure (uses readdir() or similar)
+    @files = glob('*.c');	# insecure (uses readdir() or similar)
 
 If you try to do something insecure, you will get a fatal error saying
 something like "Insecure dependency" or "Insecure $ENV{PATH}".  Note that you

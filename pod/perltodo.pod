@@ -147,14 +147,6 @@ lexically-scoped subs, e.g. my sub
 
 =back
 
-=head2 Built-in globbing
-
-Currently the C<E<lt>*.cE<gt>> syntax calls the c shell.  This causes
-problems on sites without csh, systems where fork() is expensive, and
-setuid environments.  Decide between Glob::BSD and File::KGlob, move
-it into the core, and make Perl use it for globbing.  Ben Holzman and
-Tye McQueen have claimed the pumpkin for this.
-
 =head1 Perl Internals
 
 =head2 magic_setisa
@@ -593,19 +585,11 @@ pointed out that perllib_mangle() is good for this.
 
 =head1 Win32 Stuff
 
-=head2 Get PERL_OBJECT building under gcc
-
-B<Part done>, according to Sarathy.  It builds under egcs on win32,
-but doesn't run for occult reasons.  If anyone knows the right
-breed of chicken to sacrifice, please speak up.
-
 =head2 Rename new headers to be consistent with the rest
 
 =head2 Sort out the spawnvp() mess
 
 =head2 Work out DLL versioning
-
-=head2 Get PERL_OBJECT building on non-win32
 
 =head2 Style-check
 
@@ -853,13 +837,9 @@ Mark-Jason Dominus sent a patch which went into 5.005_56.
 
 =head2 Filenames
 
-Make filenames in the distribution and in the standard module set
+Keep filenames in the distribution and in the standard module set
 be 8.3 friendly where feasible.  Good luck changing the standard
-modules, though.  B<Done>.
-
-=head2 Proper tied array support
-
-This was B<done> in 5.005 by Nick Ing-Simmons.
+modules, though.
 
 =head2 Foreign lines
 
@@ -873,49 +853,18 @@ Mostly B<done> in 5.005.
 
     CPP-space:	  stop malloc()/free() pollution unless asked
 
-=head2 Explain tool
-
-Given a piece of Perl code, say what it does.  B::Deparse is doing
-this.  B<Done>.
-
 =head2 ISA.pm
 
 Rename and alter ISA.pm.  B<Done>.  It is now base.pm.
-
-=head2 Automate maintenance of most PERL_OBJECT code
-
-B<Done>, says Sarathy.
-
-=head2 -iprefix.
-
-Added in 5.004_70.  B<Done>
 
 =head2 gettimeofday
 
 See Time::HiRes.
 
-=head2 reference to compiled regexp
-
-B<done>  This is the qr// support in 5.005.
-
-=head2 eval qw() at compile time
-
-qw() is presently compiled as a call to split.  This means the split
-happens at runtime.  Change this so qw() is compiled as a real list
-assignment.  This also avoids surprises like:
-
-    $a = () = qw(What will $a hold?);
-
-B<Done>.  Tom Hughes submitted a patch that went into 5.005_55.
-
 =head2 autocroak?
 
-B<Done>.  This is the Fatal.pm module, so any builtin that that does
+This is the Fatal.pm module, so any builtin that that does
 not return success automatically die()s.  If you're feeling brave, tie
 this in with the unified exceptions scheme.
-
-=head2 Status variable
-
-$^C to track compiler/checker status.  B<Done> in 5.005_54.
 
 =cut

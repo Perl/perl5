@@ -1937,6 +1937,9 @@ implementing the C<E<lt>*.cE<gt>> operator, but you can use it directly.
 If EXPR is omitted, C<$_> is used.  The C<E<lt>*.cE<gt>> operator is
 discussed in more detail in L<perlop/"I/O Operators">.
 
+Beginning with v5.6.0, this operator is implemented using the standard
+C<File::Glob> extension.  See L<File::Glob> for details.
+
 =item gmtime EXPR
 
 Converts a time as returned by the time function to a 9-element list

@@ -359,6 +359,9 @@ PP(pp_glob)
     ENTER;
 
 #ifndef VMS
+    /* If we're not using an external glob, just let readdir() tainting
+     * do its thing.  Otherwise, engage paranoia mode. */
+#if defined(PERL_EXTERNAL_GLOB)
     if (PL_tainting) {
 	/*
 	 * The external globbing program may use things we can't control,
@@ -367,6 +370,7 @@ PP(pp_glob)
 	TAINT;
 	taint_proper(PL_no_security, "glob");
     }
+#endif /* PERL_EXTERNAL_GLOB */
 #endif /* !VMS */
 
     SAVESPTR(PL_last_in_gv);	/* We don't want this to be permanent. */
