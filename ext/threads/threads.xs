@@ -399,7 +399,10 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	PerlIO_flush((PerlIO*)NULL);
 	PERL_THREAD_SETSPECIFIC(self_key,thread);
 
-
+	SAVEBOOL(PL_srand_called); /* Save this so it becomes the correct
+	                              value */
+	PL_srand_called = FALSE; /* Set it to false so we can detect
+	                            if it gets set during the clone */
 
 #ifdef WIN32
 	thread->interp = perl_clone(aTHX, CLONEf_KEEP_PTR_TABLE | CLONEf_CLONE_HOST);
@@ -413,6 +416,7 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	 */
 	{
 	    dTHXa(thread->interp);
+
             /* Here we remove END blocks since they should only run
 	       in the thread they are created
             */
