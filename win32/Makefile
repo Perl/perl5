@@ -94,6 +94,7 @@ PERLDLL=..\perl.dll
 PERLEXE=..\perl.exe
 GLOBEXE=..\perlglob.exe
 CONFIGPM=..\lib\Config.pm
+MINIMOD=..\lib\ExtUtils\Miniperl.pm
 
 PL2BAT=bin\PL2BAT.BAT
 MAKE=nmake -nologo
@@ -236,7 +237,7 @@ POD2TEXT=$(PODDIR)\pod2text
 # Top targets
 #
 
-ALL: $(PERLEXE) $(GLOBEXE) $(DYNALOADMODULES) 
+ALL: $(PERLEXE) $(GLOBEXE) $(DYNALOADMODULES) $(MINIMOD)
 
 $(DYNALOADER).obj : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 
@@ -253,7 +254,7 @@ perlglob.obj  : perlglob.c
 	$(MINIPERL) -I..\lib config_sh.PL "INST_DRV=$(INST_DRV)" "INST_TOP=$(INST_TOP)"\
 	"cc=$(CC)" "ccflags=$(RUNTIME) -DWIN32" config.w32 > ..\config.sh
 
-$(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL
+$(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	cd .. && miniperl configpm
 	if exist lib\* $(XCOPY) /e lib\*.* ..\lib\$(NULL)
 	$(XCOPY) ..\*.h ..\lib\CORE\*.*
@@ -282,7 +283,10 @@ $(PERLDLL): perldll.def $(CORE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
 perl.def  : $(MINIPERL) makeperldef.pl
 	$(MINIPERL) -I..\lib makeperldef.pl $(NULL) > perl.def
 
-perlmain.c : runperl.c
+$(MINIMOD) : $(MINIPERL) ..\minimod.pl
+	cd .. && miniperl minimod.pl > lib\ExtUtils\Miniperl.pm
+
+perlmain.c : runperl.c 
 	copy runperl.c perlmain.c
 
 perlmain.obj : perlmain.c
@@ -352,7 +356,7 @@ utils: $(PERLEXE)
 
 distclean: clean
 	-del /f $(MINIPERL) $(PERLEXE) $(PERLDLL) $(GLOBEXE) \
-		$(PERLIMPLIB) ..\miniperl.lib 
+		$(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
 	-del /f *.def
 	-del /f $(SOCKET_DLL) $(IO_DLL) $(SDBM_FILE_DLL) $(FCNTL_DLL) \
 		$(OPCODE_DLL)
@@ -362,7 +366,6 @@ distclean: clean
 	-del /f $(PODDIR)\*.bat
 	-rmdir /s /q ..\lib\auto
 	-rmdir /s /q ..\lib\CORE
-	-rmdir /s /q debug
 
 install : ALL doc utils
 	if not exist $(INST_TOP) mkdir $(INST_TOP)
