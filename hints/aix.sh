@@ -183,14 +183,10 @@ EOM
 		exit 1
 		;;
 	    esac
-	    ccflags="$ccflags `getconf XBS5_LPBIG_OFFBIG_CFLAGS 2>/dev/null`"
     	    ccflags="$ccflags -DUSE_LONG_LONG"
-	    case "$cc" in
-	    *c89) ccflags="$ccflags -qlonglong" ;;
-	    # Plus AIX also requires LL prefixes for all long long constants.
-	    esac
+	    ccflags="$ccflags `getconf XBS5_ILP32_OFFBIG_CFLAGS 2>/dev/null`"
 
-	    ldflags="$ldflags `getconf XBS5_LPBIG_OFFBIG_LDFLAGS 2>/dev/null`"
+	    ldflags="$ldflags `getconf XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
 	    # _Somehow_ in AIX 4.3.1.0 the above getconf call manages to
 	    # insert(?) *something* to $ldflags so that later (in Configure) evaluating
 	    # $ldflags causes a newline after the '-b64' (the result of the getconf).
@@ -205,6 +201,16 @@ EOM
 	    # When a 64-bit cc becomes available $archname64
 	    # may need setting so that $archname gets it attached.
 	    ;;
+esac
+EOCBU
+
+# This script UU/uselongdouble.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use 64 bits.
+cat > UU/uselongdouble.cbu <<'EOCBU'
+case "$uselongdouble" in
+$define|true|[yY]*)
+	ccflags="$ccflags -qlongdouble"
+	;;
 esac
 EOCBU
 

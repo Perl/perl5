@@ -243,19 +243,9 @@ EOM
 	    *-n32*)
 		ccflags="$ccflags -DUSE_LONG_LONG"
 		archname64="-n32"
-		d_open64="$undef"
-		# In -n32 mode (ILP32LL64) we use the standard open().
-		# In -64 we will use the open64().
-		cat << 'EOM' >&2
-
-You may see a *** WHOA THERE!!! ***  message from Configure for
-d_open64.  Keep the recommended value.  See hints/irix6.sh
-for more information.
-
-EOM
 		;;
 	    esac
-	    ccflags="$ccflags -DUSE_64_BIT_FILES"
+	    ccflags="$ccflags -DUSE_64_BITS"
 	    ;;
 esac
 EOCBU

@@ -1764,7 +1764,7 @@ PP(pp_sysseek)
     djSP;
     GV *gv;
     int whence = POPi;
-    Off_t offset = POPl;
+    Off_t offset = (Off_t)SvIVx(POPs);
     MAGIC *mg;
 
     gv = PL_last_in_gv = (GV*)POPs;
@@ -5000,7 +5000,7 @@ fcntl_emulate_flock(int fd, int operation)
 	return -1;
     }
     flock.l_whence = SEEK_SET;
-    flock.l_start = flock.l_len = 0L;
+    flock.l_start = flock.l_len = (Off_t)0;
  
     return fcntl(fd, (operation & LOCK_NB) ? F_SETLK : F_SETLKW, &flock);
 }

@@ -275,7 +275,7 @@ Cannot continue, aborting.
 EOM
 		exit 1
 	    fi
-	    ccflags="$ccflags +DD64 -D_FILE_OFFSET_BITS=64"
+	    ccflags="$ccflags +DD64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 	    ldflags="$ldflags +DD64"
 	    ld=/usr/bin/ld
 	    set `echo " $libswanted " | sed -e 's@ dl @ @'`

@@ -141,7 +141,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     }
 
     if (as_raw) {
-#if defined(O_LARGEFILE)
+#if defined(USE_64_BIT_OFFSETS) && defined(O_LARGEFILE)
 	rawmode |= O_LARGEFILE;
 #endif
 
@@ -876,7 +876,7 @@ Perl_do_sysseek(pTHX_ GV *gv, Off_t pos, int whence)
 	    Perl_warner(aTHX_ WARN_UNOPENED, "sysseek() on unopened file");
     }
     SETERRNO(EBADF,RMS$_IFI);
-    return -1L;
+    return (Off_t)-1;
 }
 
 int

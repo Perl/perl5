@@ -64,6 +64,10 @@
 #define POPi		((IV)SvIVx(POPs))
 #define POPu		((UV)SvUVx(POPs))
 #define POPl		((long)SvIVx(POPs))
+#define POPul		((unsigned long)SvIVx(POPs))
+#ifdef HAS_QUAD
+#define POPq		((Quad_t)SvIVx(POPs))
+#endif
 
 #define TOPs		(*sp)
 #define TOPp		(SvPV(TOPs, PL_na))		/* deprecated */
@@ -72,6 +76,10 @@
 #define TOPi		((IV)SvIV(TOPs))
 #define TOPu		((UV)SvUV(TOPs))
 #define TOPl		((long)SvIV(TOPs))
+#define TOPul		((unsigned long)SvIV(TOPs))
+#ifdef HAS_QUAD
+#define TOPq		((Quad_t)SvIV(TOPs))
+#endif
 
 /* Go to some pains in the rare event that we must extend the stack. */
 #define EXTEND(p,n)	STMT_START { if (PL_stack_max - p < (n)) {		\

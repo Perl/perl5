@@ -385,22 +385,14 @@ PerlIO_vprintf(PerlIO *f, const char *fmt, va_list ap)
 Off_t
 PerlIO_tell(PerlIO *f)
 {
-#ifdef HAS_FTELLO
- return ftello(f);
-#else
  return ftell(f);
-#endif
 }
 
 #undef PerlIO_seek
 int
 PerlIO_seek(PerlIO *f, Off_t offset, int whence)
 {
-#ifdef HAS_FSEEKO
- return fseeko(f,offset,whence);
-#else
  return fseek(f,offset,whence);
-#endif
 }
 
 #undef PerlIO_rewind
@@ -494,7 +486,11 @@ PerlIO_setpos(PerlIO *f, const Fpos_t *pos)
 int
 PerlIO_setpos(PerlIO *f, const Fpos_t *pos)
 {
+#if defined(USE_64_BIT_STDIO) && defined(HAS_FSETPOS64)
+ return fsetpos64(f, pos);
+#else
  return fsetpos(f, pos);
+#endif
 }
 #endif
 #endif
@@ -513,7 +509,11 @@ PerlIO_getpos(PerlIO *f, Fpos_t *pos)
 int
 PerlIO_getpos(PerlIO *f, Fpos_t *pos)
 {
+#if defined(USE_64_BIT_STDIO) && defined(HAS_FSETPOS64)
+ return fgetpos64(f, pos);
+#else
  return fgetpos(f, pos);
+#endif
 }
 #endif
 #endif

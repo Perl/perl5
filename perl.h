@@ -1342,129 +1342,98 @@ typedef union any ANY;
 
 #include "handy.h"
 
-/* Some day when we have more 64-bit experience under our belts we may
- * be able to merge some of the USE_64_BIT_{FILES,OFFSETS,STDIO,DBM}. At
- * the moment (Oct 1998), though, keep them separate. --jhi
- */
 #ifdef USE_64_BITS
-#   ifdef USE_64_BIT_FILES
-#       ifndef USE_64_BIT_OFFSETS
-#          define USE_64_BIT_OFFSETS
-#       endif
-#       ifndef USE_64_BIT_STDIO
-#           define USE_64_BIT_STDIO
-#       endif
-#       ifndef USE_64_BIT_DBM
-#           define USE_64_BIT_DBM
-#       endif
+#   define USE_64_BIT_FILES
+#endif
+
+#if defined(USE_64_BIT_FILES) || defined(USE_LARGE_FILES)
+#   define USE_64_BIT_OFFSETS
+#   define USE_64_BIT_STDIO
+#endif
+
+#ifdef __sgi  /* UGLY. See below. */
+#define USE_FOPEN64
+#define USE_FSEEK64
+#define USE_FTELL64
+#define USE_FSETPOS64
+#define USE_FGETPOS64
+#define USE_TMPFILE64
+#define USE_FREOPEN64
+#endif
+
+#ifdef USE_64_BIT_OFFSETS
+#   ifdef HAS_OFF64_T
+#       undef Off_t
+#       define Off_t off64_t
+#       undef LSEEKSIZE
+#       define LSEEKSIZE 8
 #   endif
-/* Mention LSEEKSIZE here to get it included in %Config. */
-#   ifdef USE_64_BIT_OFFSETS
-#       ifdef HAS_FSTAT64
-#           define fstat fstat64
-#       endif
-#       ifdef HAS_FTRUNCATE64
-#           define ftruncate ftruncate64
-#       endif
-#       ifdef HAS_LSEEK64
-#           define lseek lseek64
-#           ifdef HAS_OFF64_T
-#               undef Off_t
-#               define Off_t off64_t
-#           endif
-#       else
-#           ifdef HAS_LLSEEK
-#               define lseek llseek
-#           endif
-#       endif
-#       ifdef HAS_LSTAT64
-#           define lstat lstat64
-#       endif
-	/* Some systems have open64() in libc but use that only
-	 * for true LP64 mode, in mixed mode (ILP32LL64, for example)
-	 * they use the vanilla open().  Such systems should undefine
-	 * d_open64 in their hints files. --jhi */
-#       if defined(HAS_OPEN64)
-#           define open open64
-#       endif
-#       ifdef HAS_OPENDIR64
-#           define opendir opendir64
-#       endif
-#       ifdef HAS_READDIR64
-#           define readdir readdir64
-#	    ifdef HAS_STRUCT_DIRENT64
-#               define dirent dirent64
-#           endif
-#       endif
-#       ifdef HAS_SEEKDIR64
-#           define seekdir seekdir64
-#       endif
-#       ifdef HAS_STAT64
-#           define stat stat64 /* Affects also struct stat, hopefully okay. */
-#       endif
-#       ifdef HAS_TELLDIR64
-#           define telldir telldir64
-#       endif
-#       ifdef HAS_TRUNCATE64
-#           define truncate truncate64
-#       endif
-        /* flock is not #defined here to be flock64 because it seems
-	   that a system may have struct flock64 but still use flock()
-	   and not flock64().  The actual flocking code in pp_sys.c
-	   must be changed.  Also lockf and lockf64 must be dealt
-	   with in pp_sys.c. --jhi */
+/* Most 64-bit environments have defines like _LARGEFILE_SOURCE that
+ * will trigger defines like the ones below.  Some 64-bit environments,
+ * however, do not. */
+#   if defined(USE_OPEN64)
+#       define open open64
 #   endif
-#   ifdef USE_64_BIT_STDIO
-#       ifdef HAS_FGETPOS64
-#           define fgetpos fgetpos64
-#       endif
-#       ifdef HAS_FOPEN64
-#           define fopen fopen64
-#       endif
-#       ifdef HAS_FREOPEN64
-#           define freopen freopen64
-#       endif
-#       ifdef HAS_FSEEK64
-#           define fseek fseek64
-#       endif
-#       ifdef HAS_FSEEKO64
-#           define fseeko fseeko64
-#       endif
-#       ifdef HAS_FSETPOS64
-#           define fsetpos fsetpos64
-#       endif
-#       ifdef HAS_FTELL64
-#           define ftell ftell64
-#       endif
-#       ifdef HAS_FTELLO64
-#           define ftello ftello64
-#       endif
-#       ifdef HAS_TMPFILE64
-#           define tmpfile tmpfile64
-#       endif
+#   if defined(USE_LSEEK64)
+#       define lseek lseek64
 #   endif
-#   ifdef USE_64_BIT_DBM
-#       ifdef HAS_DBMINIT64
-#           define dbminit dbminit64
-#       endif
-#       ifdef HAS_DBMCLOSE64
-#           define dbmclose dbmclose64
-#       endif
-#       ifdef HAS_FETCH64
-#           define fetch fetch64
-#       endif
-#       ifdef HAS_DELETE64
-#           define delete delete64
-#       endif
-#       ifdef HAS_STORE64
-#           define store store64
-#       endif
-#       ifdef HAS_FIRSTKEY64
-#           define firstkey firstkey64
-#       endif
-#       ifdef HAS_NEXTKEY64
-#           define nextkey nextkey64
-#       endif
+#   if defined(USE_LLSEEK)
+#       define lseek llseek
+#   endif
+#   if defined(USE_STAT64)
+#       define stat stat64
+#   endif
+#   if defined(USE_FSTAT64)
+#       define fstat fstat64
+#   endif
+#   if defined(USE_LSTAT64)
+#       define lstat lstat64
+#   endif
+#   if defined(USE_FLOCK64)
+#       define flock flock64
+#   endif
+#   if defined(USE_LOCKF64)
+#       define lockf lockf64
+#   endif
+#   if defined(USE_FCNTL64)
+#       define fcntl fcntl64
+#   endif
+#   if defined(USE_TRUNCATE64)
+#       define truncate truncate64
+#   endif
+#   if defined(USE_FTRUNCATE64)
+#       define ftruncate ftruncate64
+#   endif
+#endif
+
+#ifdef USE_64_BIT_STDIO
+#   ifdef HAS_FPOS64_T
+#       undef Fpos_t
+#       define Fpos_t fpos64_t
+#   endif
+/* Most 64-bit environments have defines like _LARGEFILE_SOURCE that
+ * will trigger defines like the ones below.  Some 64-bit environments,
+ * however, do not. */
+#   if defined(USE_FOPEN64)
+#       define fopen fopen64
+#   endif
+#   if defined(USE_FSEEK64)
+#       define fseek fseek64
+#   endif
+#   if defined(USE_FTELL64)
+#       define ftell ftell64
+#   endif
+#   if defined(USE_FSETPOS64)
+#       define fsetpos fsetpos64
+#   endif
+#   if defined(USE_FGETPOS64)
+#       define fgetpos fgetpos64
+#   endif
+#   if defined(USE_TMPFILE64)
+#       define tmpfile tmpfile64
+#   endif
+#   if defined(USE_FREOPEN64)
+#       define freopen freopen64
 #   endif
 #endif
 
