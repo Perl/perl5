@@ -980,6 +980,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     case SVt_PVHV:
 	if (HvSHAREKEYS(sv))	sv_catpv(d, "SHAREKEYS,");
 	if (HvLAZYDEL(sv))	sv_catpv(d, "LAZYDEL,");
+	if (HvUTF8KEYS(sv))	sv_catpv(d, "UTF8,");
 	break;
     case SVt_PVGV:
 	if (GvINTRO(sv))	sv_catpv(d, "INTRO,");

@@ -211,7 +211,7 @@ EOM
 	      fi
 	      ldflags="-pthread $ldflags"
 	      case "$osvers" in
-	      4.5*)	# 4.5 has gethostbyaddr_r but it is
+	      4.*)	# 4.x has gethostbyaddr_r but it is
 			# "Temporary function, not threadsafe"...
 			d_gethostbyaddr_r="undef"
 			d_gethostbyaddr_r_proto="undef"

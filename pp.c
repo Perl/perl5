@@ -3686,7 +3686,17 @@ PP(pp_each)
 
     EXTEND(SP, 2);
     if (entry) {
-	PUSHs(hv_iterkeysv(entry));	/* won't clobber stack_sp */
+        SV* sv = hv_iterkeysv(entry);
+	if (HvUTF8KEYS((SV*)hash) && !DO_UTF8(sv)) {
+	    STRLEN len, i;
+	    char* s = SvPV(sv, len);
+	    for (i = 0; i < len && NATIVE_IS_INVARIANT(s[i]); i++);
+	    if (i < len) {
+	        sv = newSVsv(sv);
+		sv_utf8_upgrade(sv);
+	    }
+	}
+	PUSHs(sv);	/* won't clobber stack_sp */
 	if (gimme == G_ARRAY) {
 	    SV *val;
 	    PUTBACK;

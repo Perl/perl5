@@ -347,8 +347,8 @@ do_test(19,
   RV = $ADDR
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 2
-    FLAGS = \\(SHAREKEYS\\)
-    IV = 1
+    FLAGS = \\(SHAREKEYS,UTF8\\)
+    UV = 1
     NV = $FLOAT
     ARRAY = $ADDR  \\(0:7, 1:1\\)
     hash quality = 100.0%
@@ -373,8 +373,8 @@ do_test(19,
   RV = $ADDR
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 2
-    FLAGS = \\(SHAREKEYS\\)
-    IV = 1
+    FLAGS = \\(SHAREKEYS,UTF8\\)
+    UV = 1
     NV = 0
     ARRAY = $ADDR  \\(0:7, 1:1\\)
     hash quality = 100.0%

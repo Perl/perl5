@@ -201,6 +201,11 @@ eval \$inlibc
 case "\$d_${f}_r" in
 "\$define")
 	hdrs="\$i_systypes sys/types.h define stdio.h \$i_${h} $h.h"
+	case "$h" in
+	time)
+		hdrs="\$hdrs \$i_systime sys/time.h"
+		;;
+	esac
 	case "\$d_${f}_r_proto:\$usethreads" in
 	":define")	d_${f}_r_proto=define
 		set d_${f}_r_proto ${f}_r \$hdrs
@@ -231,7 +236,7 @@ EOF
 	if ($opts{U}) {
 	    print <<EOF;
 	case "\$${f}_r_proto" in
-	'')	d_${f}_r=undef
+	''|0)	d_${f}_r=undef
  	        ${f}_r_proto=0
 		echo "Disabling ${f}_r, cannot determine prototype." >&4 ;;
 	* )	case "\$${f}_r_proto" in
@@ -244,6 +249,8 @@ EOF
 	*)	case "\$usethreads" in
 		define) echo "${f}_r has no prototype, not using it." >&4 ;;
 		esac
+		d_${f}_r=undef
+		${f}_r_proto=0
 		;;
 	esac
 	;;

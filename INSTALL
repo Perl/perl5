@@ -1612,16 +1612,6 @@ to
 then propagate your changes with B<sh Configure -S> and rebuild
 with B<make depend; make>.
 
-=item CRIPPLED_CC
-
-If you still can't compile successfully, try:
-
-	sh Configure -Accflags=-DCRIPPLED_CC
-
-This flag simplifies some complicated expressions for compilers that get
-indigestion easily.  (Just because you get no errors doesn't mean it
-compiled right!)
-
 =item Missing functions
 
 If you have missing routines, you probably need to add some library or
@@ -1735,13 +1725,11 @@ Genix may need to use libc rather than libc_s, or #undef VARARGS.
 
 NCR Tower 32 (OS 2.01.01) may need -W2,-Sl,2000 and #undef MKDIR.
 
-UTS may need one or more of -DCRIPPLED_CC, -K or -g, and undef LSTAT.
+UTS may need one or more of -K or -g, and undef LSTAT.
 
 FreeBSD can fail the lib/ipc_sysv.t test if SysV IPC has not been
 configured to the kernel.  Perl tries to detect this, though, and
 you will get a message telling what to do.
-
-If you get syntax errors on '(', try -DCRIPPLED_CC.
 
 Machines with half-implemented dbm routines will need to #undef I_ODBM
 

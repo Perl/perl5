@@ -113,8 +113,8 @@ Character semantics have the following effects:
 
 =item *
 
-Strings and patterns may contain characters that have an ordinal value
-larger than 255.
+Strings (including hash keys) and regular expression patterns may
+contain characters that have an ordinal value larger than 255.
 
 If you use a Unicode editor to edit your program, Unicode characters
 may occur directly within the literal strings in one of the various
@@ -128,18 +128,20 @@ hexadecimal, into the curlies. For instance, a smiley face is C<\x{263A}>.
 This works only for characters with a code 0x100 and above.
 
 Additionally, if you
+
    use charnames ':full';
+
 you can use the C<\N{...}> notation, putting the official Unicode character
 name within the curlies. For example, C<\N{WHITE SMILING FACE}>.
 This works for all characters that have names.
 
 =item *
 
-If an appropriate L<encoding> is specified,
-identifiers within the Perl script may contain Unicode alphanumeric
-characters, including ideographs.  (You are currently on your own when
-it comes to using the canonical forms of characters--Perl doesn't
-(yet) attempt to canonicalize variable names for you.)
+If an appropriate L<encoding> is specified, identifiers within the
+Perl script may contain Unicode alphanumeric characters, including
+ideographs.  (You are currently on your own when it comes to using the
+canonical forms of characters--Perl doesn't (yet) attempt to
+canonicalize variable names for you.)
 
 =item *
 
@@ -846,8 +848,7 @@ B<any subsequent file open>, is UTF-8.
 
 Perl tries really hard to work both with Unicode and the old byte
 oriented world: most often this is nice, but sometimes this causes
-problems.  See L</BUGS> for example how sometimes using locales
-with Unicode can help with these problems.
+problems.
 
 =back
 
@@ -959,19 +960,10 @@ Use of locales with Unicode data may lead to odd results.  Currently
 there is some attempt to apply 8-bit locale info to characters in the
 range 0..255, but this is demonstrably incorrect for locales that use
 characters above that range when mapped into Unicode.  It will also
-tend to run slower.  Avoidance of locales is strongly encouraged,
-with one known expection, see the next paragraph.
-
-If the keys of a hash are "mixed", that is, some keys are Unicode,
-while some keys are "byte", the keys may behave differently in regular
-expressions since the definition of character classes like C</\w/>
-is different for byte strings and character strings.  This problem can
-sometimes be helped by using an appropriate locale (see L<perllocale>).
-Another way is to force all the strings to be character encoded by
-using utf8::upgrade() (see L<utf8>).
+tend to run slower.  Use of locales with Unicode is discouraged.
 
 Some functions are slower when working on UTF-8 encoded strings than
-on byte encoded strings. All functions that need to hop over
+on byte encoded strings.  All functions that need to hop over
 characters such as length(), substr() or index() can work B<much>
 faster when the underlying data are byte-encoded. Witness the
 following benchmark:

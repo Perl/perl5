@@ -1,5 +1,5 @@
 package Encode::CN;
-our $VERSION = do { my @r = (q$Revision: 0.94 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.95 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use Encode::CN::HZ;
@@ -8,6 +8,10 @@ XSLoader::load('Encode::CN',$VERSION);
 
 Encode::define_alias( qr/euc.*cn$/i     => '"euc-cn"' );
 Encode::define_alias( qr/cn.*euc/i      => '"euc-cn"' );
+
+# Relocated from Encode.pm
+# CP936 doesn't have vendor-addon for GBK, so they're identical.
+Encode::define_alias( qr/^gbk$/i => '"cp936"');
 
 1;
 __END__

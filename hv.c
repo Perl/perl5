@@ -488,11 +488,13 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, register U32 has
 #endif
 	}
     }
+
     if (is_utf8) {
 	STRLEN tmplen = klen;
 	/* See the note in hv_fetch(). --jhi */
 	key = (char*)bytes_from_utf8((U8*)key, &tmplen, &is_utf8);
 	klen = tmplen;
+	HvUTF8KEYS_on((SV*)hv);
     }
 
     if (!hash)
@@ -615,8 +617,10 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
     keysave = key = SvPV(keysv, klen);
     is_utf8 = (SvUTF8(keysv) != 0);
 
-    if (is_utf8)
+    if (is_utf8) {
 	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
+	HvUTF8KEYS_on((SV*)hv);
+    }
 
     if (!hash)
 	PERL_HASH(hash, key, klen);
@@ -773,6 +777,8 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 		else
 		    hv_free_ent(hv, entry);
 		xhv->xhv_keys--; /* HvKEYS(hv)-- */
+		if (xhv->xhv_keys == 0)
+		    HvUTF8KEYS_off(hv);
 		xhv->xhv_placeholders--;
 		return Nullsv;
 	    }
@@ -810,6 +816,8 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 	    else
 		hv_free_ent(hv, entry);
 	    xhv->xhv_keys--; /* HvKEYS(hv)-- */
+	    if (xhv->xhv_keys == 0)
+	        HvUTF8KEYS_off(hv);
 	}
 	return sv;
     }
@@ -920,6 +928,8 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
            else
                hv_free_ent(hv, entry);
            xhv->xhv_keys--; /* HvKEYS(hv)-- */
+	   if (xhv->xhv_keys == 0)
+               HvUTF8KEYS_off(hv);
            xhv->xhv_placeholders--;
            return Nullsv;
 	}
@@ -956,6 +966,8 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 	    else
 		hv_free_ent(hv, entry);
 	    xhv->xhv_keys--; /* HvKEYS(hv)-- */
+	    if (xhv->xhv_keys == 0)
+	        HvUTF8KEYS_off(hv);
 	}
 	return sv;
     }
@@ -1478,6 +1490,8 @@ Perl_hv_clear(pTHX_ HV *hv)
 
     if (SvRMAGICAL(hv))
 	mg_clear((SV*)hv);
+
+    HvUTF8KEYS_off(hv);
 }
 
 STATIC void

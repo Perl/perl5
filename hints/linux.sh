@@ -264,6 +264,7 @@ $define|true|[yY]*)
 	d_ctime_r_proto="$define"
 	d_gmtime_r_proto="$define"
 	d_localtime_r_proto="$define"
+	d_random_r_proto="$define"
 
 	;;
 esac

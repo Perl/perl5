@@ -213,6 +213,7 @@ PROTOTYPES: ENABLE
 
 void
 fastcwd()
+PROTOTYPE: DISABLE
 PPCODE:
 {
     dXSTARG;

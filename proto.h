@@ -1321,9 +1321,6 @@ STATIC char*	S_incl_perldb(pTHX);
 STATIC I32	S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 STATIC I32	S_utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 #endif
-#  if defined(CRIPPLED_CC)
-STATIC int	S_uni(pTHX_ I32 f, char *s);
-#  endif
 #  if defined(PERL_CR_FILTER)
 STATIC I32	S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 #  endif
