@@ -393,8 +393,8 @@ See C<PUSHu>.
    changed SV* ref to SV* tmpRef */
 #define RvDEEPCP(rv) STMT_START { SV* tmpRef=SvRV(rv);      \
   if (SvREFCNT(tmpRef)>1) {                 \
+    SvRV(rv)=AMG_CALLun(rv,copy);	\
     SvREFCNT_dec(tmpRef);                   \
-    SvRV(rv)=AMG_CALLun(rv,copy);        \
   } } STMT_END
 
 /*
