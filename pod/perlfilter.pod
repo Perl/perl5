@@ -527,7 +527,7 @@ blocks get included.
 Once you can identify individual blocks, try allowing them to be
 nested. That isn't difficult either.
 
-Here is a interesting idea that doesn't involve the Debug filter.
+Here is an interesting idea that doesn't involve the Debug filter.
 Currently Perl subroutines have fairly limited support for formal
 parameter lists. You can specify the number of parameters and their
 type, but you still have to manually take them out of the C<@_> array
@@ -551,11 +551,30 @@ useful features from the C preprocessor and any other macro processors
 you know. The tricky bit will be choosing how much knowledge of Perl's
 syntax you want your filter to have.
 
+=head1 THINGS TO LOOK OUT FOR
+
+=over 5
+
+=item Some Filters Clobber the C<DATA> Handle
+
+Some source filters use the C<DATA> handle to read the calling program.
+When using these source filters you cannot rely on this handle, nor expect
+any particular kind of behavior when operating on it.  Filters based on
+Filter::Util::Call (and therefore Filter::Simple) do not alter the C<DATA>
+filehandle.
+
+=back
+
 =head1 REQUIREMENTS
 
 The Source Filters distribution is available on CPAN, in 
 
     CPAN/modules/by-module/Filter
+
+Starting from Perl 5.8 Filter::Util::Call (the core part of the
+Source Filters distribution) is part of the standard Perl distribution.
+Also included is a friendlier interface called Filter::Simple, by
+Damian Conway.
 
 =head1 AUTHOR
 
