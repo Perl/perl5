@@ -1,5 +1,6 @@
 package Encode::Alias;
 use strict;
+no warnings 'redefine';
 use Encode;
 our $VERSION = do { my @r = (q$Revision: 1.35 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
@@ -128,6 +129,7 @@ sub init_aliases
     define_alias( qr/^(.*)$/ => '"\L$1"' );
 
     # UTF/UCS stuff
+    define_alias( qr/^UTF-?7$/i           => '"UTF-7"');
     define_alias( qr/^UCS-?2-?LE$/i       => '"UCS-2LE"' );
     define_alias( qr/^UCS-?2-?(BE)?$/i    => '"UCS-2BE"',
                   qr/^UCS-?4-?(BE|LE)?$/i => 'uc("UTF-32$1")',

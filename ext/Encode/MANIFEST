@@ -51,6 +51,7 @@ lib/Encode/KR/2022_KR.pm	 Encode extension
 lib/Encode/MIME/Header.pm	Encode extension
 lib/Encode/PerlIO.pod	Documents for Encode & PerlIO
 lib/Encode/Supported.pod	Documents for supported encodings
+lib/Encode/Unicode/UTF7.pm Encode extension
 t/Aliases.t	test script
 t/CJKT.t	test script
 t/Encode.t	test script

@@ -287,9 +287,13 @@ for UTF-8, which is a native format in perl).
 =item L<http://www.unicode.org/glossary/> says:
 
 I<Character Encoding Scheme> A character encoding form plus byte
-serialization. There are seven character encoding schemes in Unicode:
+serialization. There are Seven character encoding schemes in Unicode:
 UTF-8, UTF-16, UTF-16BE, UTF-16LE, UTF-32 (UCS-4), UTF-32BE (UCS-4BE) and
-UTF-32LE (UCS-4LE).
+UTF-32LE (UCS-4LE), and UTF-7.
+
+Since UTF-7 is a 7-bit (re)encoded version of UTF-16BE, It is not part of
+Unicode's Character Encoding Scheme.  It is separately implemented in
+Encode::Unicode::UTF7.  For details see L<Encode::Unicode::UTF7>.
 
 =item Quick Reference
 
@@ -434,7 +438,7 @@ every one of \x{0000_0000} up to \x{ffff_ffff} (*) is I<a character>.
 
 =head1 SEE ALSO
 
-L<Encode>, L<http://www.unicode.org/glossary/>,
+L<Encode>, L<Encode::Unicode::UTF7>, L<http://www.unicode.org/glossary/>,
 L<http://www.unicode.org/unicode/faq/utf_bom.html>,
 
 RFC 2781 L<http://rfc.net/rfc2781.html>,

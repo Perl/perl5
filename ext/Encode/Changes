@@ -3,6 +3,13 @@
 # $Id: Changes,v 1.94 2003/05/10 18:13:59 dankogai Exp $
 #
 $Revision: 1.94 $ $Date: 2003/05/10 18:13:59 $
++ lib/Encode/Unicode/UTF7.pm
+! lib/Encode/Config.pm lib/Encode/Alias.pm Unicode/Unicode.pm t/Unicode.t
+  lib/Encode/Supported.pod
+  UTF-7 support is now added.  With this Encode now has all transcoding 
+  methods in Unicode::String.
+
+1.94 2003/05/10 18:13:59
 ! lib/Encode/MIME/Header.pm
   A more sophisticated solution for double-encoding by dankogai
 ! lib/Encode/MIME/Header.pm AUTHORS
