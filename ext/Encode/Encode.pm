@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.31 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.32 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 
 require DynaLoader;
@@ -10,25 +10,26 @@ our @ISA = qw(Exporter DynaLoader);
 
 # Public, encouraged API is exported by default
 our @EXPORT = qw (
-  encode
   decode
-  encode_utf8
   decode_utf8
-  find_encoding
+  encode
+  encode_utf8
   encodings
+  find_encoding
 );
 
 our @EXPORT_OK =
     qw(
+       _utf8_off
+       _utf8_on
        define_encoding
        from_to
-       is_utf8
-       is_8bit
        is_16bit
-       utf8_upgrade
+       is_8bit
+       is_utf8
+       resolve_alias
        utf8_downgrade
-       _utf8_on
-       _utf8_off
+       utf8_upgrade
       );
 
 bootstrap Encode ();
@@ -115,6 +116,12 @@ sub find_encoding
 {
     my ($name,$skip_external) = @_;
     return __PACKAGE__->getEncoding($name,$skip_external);
+}
+
+sub resolve_alias {
+    my $obj = find_encoding(shift);
+    defined $obj and return $obj->name;
+    return;
 }
 
 sub encode
@@ -443,6 +450,17 @@ To add new alias to a given encoding,  Use;
 After that, newName can be used as an alias for ENCODING.
 ENCODING may be either the name of an encoding or an
 I<encoding object>
+
+But before you do so, make sure the alias is nonexistent with
+C<resolve_alias()>, which returns the canonical name thereof.
+i.e.
+
+  Encode::resolve_alias("latin1") eq "iso-8859-1" # true
+  Encode::resolve_alias("iso-8859-12")   # false; nonexistent
+  Encode::resolve_alias($name) eq $name  # true if $name is canonical
+
+This resolve_alias() does not need C<use Encode::Alias> and is 
+exported via C<use encode qw(resolve_alias)>.
 
 See L<Encode::Alias> on details.
 

@@ -6,7 +6,7 @@
 #include "encode.h"
 #include "def_t.h"
 
-#define ENCODE_XS_PROFILE 0 /* set 1 to profile.
+#define ENCODE_XS_PROFILE 0 /* set 1 or more to profile.
 			       t/encoding.t dumps core because of
 			       Perl_warner and PerlIO don't work well */
 
@@ -520,11 +520,17 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 	    switch (code) {
 	    case ENCODE_NOSPACE:
 	    {	
-		    STRLEN more, sleft;
+		    STRLEN more = 0; /* make sure you initialize! */
+		    STRLEN sleft;
 		    sdone += slen;
 		    ddone += dlen;
 		    sleft = tlen - sdone;
-		    if (sdone) { /* has src ever been processed ? */
+#if ENCODE_XS_PROFILE >= 2
+		  Perl_warn(aTHX_ 
+		  "more=%d, sdone=%d, sleft=%d, SvLEN(dst)=%d\n",
+			    more, sdone, sleft, SvLEN(dst));
+#endif
+		    if (sdone != 0) { /* has src ever been processed ? */
 #if   ENCODE_XS_USEFP == 2
 			    more = (1.0*tlen*SvLEN(dst)+sdone-1)/sdone
 				    - SvLEN(dst);

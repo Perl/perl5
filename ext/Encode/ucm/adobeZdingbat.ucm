@@ -1,5 +1,5 @@
 #
-# $Id: adobeZdingbat.ucm,v 1.20 2002/04/04 19:50:53 dankogai Exp $
+# $Id: adobeZdingbat.ucm,v 1.21 2002/04/09 20:06:15 dankogai Exp dankogai $
 #
 # Original table can be obtained at
 # http://www.unicode.org/Public/MAPPINGS/VENDORS/ADOBE/zdingbat.txt
@@ -42,7 +42,7 @@ CHARMAP
 <U001E> \x1E |0 # <control>
 <U001F> \x1F |0 # <control>
 <U0020> \x20 |0 # SPACE # space
-<U00A0> \x20 |0 # NO-BREAK SPACE # space
+<U00A0> \x20 |1 # NO-BREAK SPACE # space
 <U2192> \xD5 |0 # RIGHTWARDS ARROW # a161
 <U2194> \xD6 |0 # LEFT RIGHT ARROW # a163
 <U2195> \xD7 |0 # UP DOWN ARROW # a164

@@ -1,7 +1,7 @@
 package Encode::Alias;
 use strict;
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 1.26 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.27 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 require Exporter;
 
@@ -9,7 +9,7 @@ our @ISA = qw(Exporter);
 
 # Public, encouraged API is exported by default
 
-our @EXPORT =
+our @EXPORT = 
     qw (
 	define_alias
 	find_alias
@@ -156,11 +156,11 @@ sub init_aliases
     #  has been redefined as the euro symbol.)
     define_alias( qr/^(.+)\@euro$/i => '"$1"' );
 
-    define_alias( qr/\b(?:iso[-_]?)?latin[-_]?(\d+)$/i
+    define_alias( qr/\b(?:iso[-_]?)?latin[-_]?(\d+)$/i 
 		  => '"iso-8859-$Encode::Alias::Latin2iso[$1]"' );
 
     define_alias( qr/\bwin(latin[12]|cyrillic|baltic|greek|turkish|
-			 hebrew|arabic|baltic|vietnamese)$/ix =>
+			 hebrew|arabic|baltic|vietnamese)$/ix => 
 		  '"cp" . $Encode::Alias::Winlatin2cp{lc($1)}' );
 
     # Common names for non-latin prefered MIME names
@@ -175,7 +175,7 @@ sub init_aliases
 
     # At least AIX has IBM-NNN (surprisingly...) instead of cpNNN.
     # And Microsoft has their own naming (again, surprisingly).
-    # And windows-* is registered in IANA!
+    # And windows-* is registered in IANA! 
     define_alias( qr/\b(?:ibm|ms|windows)[-_]?(\d\d\d\d?)$/i => '"cp$1"');
 
     # Sometimes seen with a leading zero.
@@ -187,7 +187,7 @@ sub init_aliases
     define_alias( qr/^mac_(.*)$/i => '"mac$1"');
     # Ououououou. gone.  They are differente!
     # define_alias( qr/\bmacRomanian$/i => '"macRumanian"');
-
+  
     # Standardize on the dashed versions.
     # define_alias( qr/\butf8$/i  => 'utf-8' );
     define_alias( qr/\bkoi8r$/i => 'koi8-r' );
@@ -255,7 +255,7 @@ Encode::Alias - alias definitions to encodings
 =head1 DESCRIPTION
 
 Allows newName to be used as an alias for ENCODING. ENCODING may be
-either the name of an encoding or an encoding object (as described
+either the name of an encoding or an encoding object (as described 
 in L<Encode>).
 
 Currently I<newName> can be specified in the following ways:

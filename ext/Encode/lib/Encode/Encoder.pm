@@ -1,5 +1,5 @@
 #
-# $Id: Encoder.pm,v 0.2 2002/04/08 18:08:07 dankogai Exp dankogai $
+# $Id: Encoder.pm,v 0.2 2002/04/08 18:08:07 dankogai Exp $
 #
 package Encode::Encoder;
 use strict;

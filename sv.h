@@ -407,7 +407,6 @@ struct xpvio {
 #define IOf_UNTAINT	16	/* consider this fp (and its data) "safe" */
 #define IOf_NOLINE	32	/* slurped a pseudo-line from empty file */
 #define IOf_FAKE_DIRP	64	/* xio_dirp is fake (source filters kludge) */
-#define IOf_DIR_UTF8	128	/* readdir tries to return utf8 */
 
 /* The following macros define implementation-independent predicates on SVs. */
 

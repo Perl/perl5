@@ -1,5 +1,5 @@
 ##
-# $Id: adobeStdenc.ucm,v 1.20 2002/04/04 19:50:53 dankogai Exp $
+# $Id: adobeStdenc.ucm,v 1.21 2002/04/09 20:06:15 dankogai Exp dankogai $
 #
 # Original table can be obtained at
 # http://www.unicode.org/Public/MAPPINGS/VENDORS/ADOBE/stdenc.txt
@@ -137,7 +137,7 @@ CHARMAP
 <U007C> \x7C |0 # VERTICAL LINE # bar
 <U007D> \x7D |0 # RIGHT CURLY BRACKET # braceright
 <U007E> \x7E |0 # TILDE # asciitilde
-<U00A0> \x20 |0 # NO-BREAK SPACE # space
+<U00A0> \x20 |1 # NO-BREAK SPACE # space
 <U00A1> \xA1 |0 # INVERTED EXCLAMATION MARK # exclamdown
 <U00A2> \xA2 |0 # CENT SIGN # cent
 <U00A3> \xA3 |0 # POUND SIGN # sterling
@@ -147,7 +147,7 @@ CHARMAP
 <U00A8> \xC8 |0 # DIAERESIS # dieresis
 <U00AA> \xE3 |0 # FEMININE ORDINAL INDICATOR # ordfeminine
 <U00AB> \xAB |0 # LEFT-POINTING DOUBLE ANGLE QUOTATION MARK # guillemotleft
-<U00AD> \x2D |0 # SOFT HYPHEN # hyphen
+<U00AD> \x2D |1 # SOFT HYPHEN # hyphen
 <U00AF> \xC5 |0 # MACRON # macron
 <U00B4> \xC2 |0 # ACUTE ACCENT # acute
 <U00B6> \xB6 |0 # PILCROW SIGN # paragraph
@@ -169,7 +169,7 @@ CHARMAP
 <U0192> \xA6 |0 # LATIN SMALL LETTER F WITH HOOK # florin
 <U02C6> \xC3 |0 # MODIFIER LETTER CIRCUMFLEX ACCENT # circumflex
 <U02C7> \xCF |0 # CARON # caron
-<U02C9> \xC5 |0 # MODIFIER LETTER MACRON # macron
+<U02C9> \xC5 |1 # MODIFIER LETTER MACRON # macron
 <U02D8> \xC6 |0 # BREVE # breve
 <U02D9> \xC7 |0 # DOT ABOVE # dotaccent
 <U02DA> \xCA |0 # RING ABOVE # ring
@@ -192,8 +192,8 @@ CHARMAP
 <U2039> \xAC |0 # SINGLE LEFT-POINTING ANGLE QUOTATION MARK # guilsinglleft
 <U203A> \xAD |0 # SINGLE RIGHT-POINTING ANGLE QUOTATION MARK # guilsinglright
 <U2044> \xA4 |0 # FRACTION SLASH # fraction
-<U2215> \xA4 |0 # DIVISION SLASH # fraction
-<U2219> \xB4 |0 # BULLET OPERATOR # periodcentered
+<U2215> \xA4 |1 # DIVISION SLASH # fraction
+<U2219> \xB4 |1 # BULLET OPERATOR # periodcentered
 <UFB01> \xAE |0 # LATIN SMALL LIGATURE FI # fi
 <UFB02> \xAF |0 # LATIN SMALL LIGATURE FL # fl
 END CHARMAP

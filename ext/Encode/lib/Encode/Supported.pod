@@ -592,7 +592,7 @@ Microsoft's understanding of C<Shift_JIS>.
 JIS has not endorsed the full Microsoft standard however.
 The official C<Shift_JIS> includes only JIS X 0201 and JIS X 0208
 subsets, while Microsoft has always been meaning C<Shift_JIS> to
-encode a wider character repertoire, see C<IANA> registration for
+encode a wider character repertoire. See C<IANA> registration for
 C<Windows-31J>.
 
 As a historical predecessor Microsoft's variant
@@ -600,7 +600,7 @@ probably has more rights for the name, albeit it may be objected
 that Microsoft shouldn't have used JIS as part of the name
 in the first place.
 
-Unabiguous name: C<CP932>. C<IANA> name (not used?): C<Windows-31J>.
+Unambiguous name: C<CP932>. C<IANA> name (not used?): C<Windows-31J>.
 
 Encode separately supports C<Shift_JIS> and C<cp932>.
 

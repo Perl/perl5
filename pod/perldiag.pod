@@ -3716,12 +3716,6 @@ what you are doing you can turn off this warning by C<no warnings 'utf8';>.
 (F) There are no byte-swapping functions for a machine with this byte
 order.
 
-=item Unknown discipline '%s'
-
-(F) You specified an unknown I/O discipline.  See L<open> for valid
-filehandle disciplines and L<perlfunc/opendir> for valid directory
-handle disciplines.
-
 =item Unknown "re" subpragma '%s' (known ones are: %s)
 
 You tried to use an unknown subpragma of the "re" pragma.

@@ -18,7 +18,7 @@ use File::Spec;          # used to get absolute paths
 # Will move up one level to make it easier to generate
 # reliable pathnames for testing File::CheckTree
 
-chdir('..') or die "cannot change to parent of t/ directory: $!";
+chdir(File::Spec->updir) or die "cannot change to parent of t/ directory: $!";
 
 
 #### TEST 1 -- No warnings ####
