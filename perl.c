@@ -180,6 +180,7 @@ perl_construct(pTHXx)
 #  endif /* EMULATE_ATOMIC_REFCOUNTS */
 	
 	MUTEX_INIT(&PL_cred_mutex);
+	MUTEX_INIT(&PL_sv_lock_mutex);
 
 	thr = init_main_thread();
 #endif /* USE_THREADS */

@@ -1259,6 +1259,8 @@ STATIC void	S_xstat(pTHX_ int);
 #  endif
 #endif
 
+PERL_CALLCONV SV*	Perl_lock(pTHX_ SV *sv) __attribute__((noreturn));
+
 #if defined(PERL_OBJECT)
 };
 #endif

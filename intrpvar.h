@@ -443,6 +443,10 @@ PERLVAR(IProc,		struct IPerlProc*)
 #if defined(USE_ITHREADS)
 PERLVAR(Iptr_table,	PTR_TBL_t*)
 #endif
+
+#if defined(USE_THREADS)
+PERLVAR(Isv_lock_mutex,	perl_mutex)	/* Mutex for SvLOCK macro */
+#endif
 PERLVARI(Ibeginav_save, AV*, Nullav)	/* save BEGIN{}s when compiling */
 
 PERLVAR(Inullstash,	HV *)		/* illegal symbols end up here */

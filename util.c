@@ -3492,6 +3492,38 @@ Perl_condpair_magic(pTHX_ SV *sv)
     return mg;
 }
 
+SV *
+Perl_lock(pTHX_ SV *osv)
+{
+#ifdef USE_THREADS
+    MAGIC *mg;
+    SV *sv = osv;
+
+    SvLOCK(osv);
+    if (SvROK(sv)) {
+	sv = SvRV(sv);
+	SvUNLOCK(osv);
+	SvLOCK(sv);
+    }
+
+    mg = condpair_magic(sv);
+    MUTEX_LOCK(MgMUTEXP(mg));
+    if (MgOWNER(mg) == thr)
+	MUTEX_UNLOCK(MgMUTEXP(mg));
+     else {
+	while (MgOWNER(mg))
+	    COND_WAIT(MgOWNERCONDP(mg), MgMUTEXP(mg));
+	MgOWNER(mg) = thr;
+	DEBUG_S(PerlIO_printf(Perl_debug_log, "0x%"UVxf": pp_lock lock 0x%"UVxf"\n",
+			      PTR2UV(thr), PTR2UV(sv));)
+	MUTEX_UNLOCK(MgMUTEXP(mg));
+	SAVEDESTRUCTOR_X(Perl_unlock_condpair, sv);
+    }
+#endif
+  SvUNLOCK(sv);
+  return sv;
+}
+
 /*
  * Make a new perl thread structure using t as a prototype. Some of the
  * fields for the new thread are copied from the prototype thread, t,

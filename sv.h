@@ -123,21 +123,26 @@ perform the upgrade if necessary.  See C<svtype>.
 
 #ifdef USE_THREADS
 
-#  ifdef EMULATE_ATOMIC_REFCOUNTS
-#    define ATOMIC_INC(count) STMT_START {	\
-	MUTEX_LOCK(&PL_svref_mutex);		\
-	++count;				\
-	MUTEX_UNLOCK(&PL_svref_mutex);		\
-     } STMT_END
-#    define ATOMIC_DEC_AND_TEST(res,count) STMT_START {	\
-	MUTEX_LOCK(&PL_svref_mutex);			\
-	res = (--count == 0);				\
-	MUTEX_UNLOCK(&PL_svref_mutex);			\
-     } STMT_END
-#  else
-#    define ATOMIC_INC(count) atomic_inc(&count)
-#    define ATOMIC_DEC_AND_TEST(res,count) (res = atomic_dec_and_test(&count))
-#  endif /* EMULATE_ATOMIC_REFCOUNTS */
+#  if defined(VMS)
+#    define ATOMIC_INC(count) __ATOMIC_INCREMENT_LONG(&count)
+#    define ATOMIC_DEC_AND_TEST(res,count) res=(1==__ATOMIC_DECREMENT_LONG(&count))
+ #  else
+#    ifdef EMULATE_ATOMIC_REFCOUNTS
+ #      define ATOMIC_INC(count) STMT_START {	\
+	  MUTEX_LOCK(&PL_svref_mutex);		\
+	  ++count;				\
+	  MUTEX_UNLOCK(&PL_svref_mutex);		\
+       } STMT_END
+#      define ATOMIC_DEC_AND_TEST(res,count) STMT_START {	\
+	  MUTEX_LOCK(&PL_svref_mutex);			\
+	  res = (--count == 0);				\
+	  MUTEX_UNLOCK(&PL_svref_mutex);			\
+       } STMT_END
+#    else
+#      define ATOMIC_INC(count) atomic_inc(&count)
+#      define ATOMIC_DEC_AND_TEST(res,count) (res = atomic_dec_and_test(&count))
+#    endif /* EMULATE_ATOMIC_REFCOUNTS */
+#  endif /* VMS */
 #else
 #  define ATOMIC_INC(count) (++count)
 #  define ATOMIC_DEC_AND_TEST(res, count) (res = (--count == 0))
@@ -153,7 +158,12 @@ perform the upgrade if necessary.  See C<svtype>.
     })
 #else
 #  if defined(CRIPPLED_CC) || defined(USE_THREADS)
-#    define SvREFCNT_inc(sv) sv_newref((SV*)sv)
+#    if defined(VMS) && defined(__ALPHA)
+#      define SvREFCNT_inc(sv) \
+          (PL_Sv=(SV*)(sv), (PL_Sv && __ATOMIC_INCREMENT_LONG(&(SvREFCNT(PL_Sv)))), (SV *)PL_Sv)
+#    else
+#      define SvREFCNT_inc(sv) sv_newref((SV*)sv)
+#    endif
 #  else
 #    define SvREFCNT_inc(sv)	\
 	((PL_Sv=(SV*)(sv)), (PL_Sv && ATOMIC_INC(SvREFCNT(PL_Sv))), (SV*)PL_Sv)
@@ -997,6 +1007,13 @@ indicated number of bytes (remember to reserve space for an extra trailing
 NUL character).  Calls C<sv_grow> to perform the expansion if necessary. 
 Returns a pointer to the character buffer.
 
+=for apidoc Am|void|SvLOCK|SV* sv
+Aquires an internal mutex for a SV. Used to make sure multiple threads
+don't stomp on the guts of an SV at the same time
+
+=for apidoc Am|void|SvUNLOCK|SV* sv
+Release the internal mutex for an SV.
+
 =cut
 */
 
@@ -1032,6 +1049,9 @@ Returns a pointer to the character buffer.
 		SvSetSV_nosteal_and(dst,src,SvSETMAGIC(dst))
 
 #ifdef DEBUGGING
+
+#define SvLOCK(sv)	MUTEX_LOCK(&PL_sv_lock_mutex)
+#define SvUNLOCK(sv)	MUTEX_UNLOCK(&PL_sv_lock_mutex)
 #define SvPEEK(sv) sv_peek(sv)
 #else
 #define SvPEEK(sv) ""
