@@ -12,7 +12,7 @@ BEGIN {
 no utf8; # needed for use utf8 not griping about the raw octets
 
 $| = 1;
-print "1..26\n";
+print "1..27\n";
 
 open(F,"+>:utf8",'a');
 print F chr(0x100).'£';
@@ -209,5 +209,23 @@ for (@a) {
 }
 close F;
 print "ok 26\n";
+
+open F, "<:utf8", "a";
+$a = 0;
+for (@a) {
+    unless (sysread(F, $b, 1) == 1  &&
+            length($b)        == 1  &&
+            ord($b)           == ord($_) &&
+            tell(F)           == ($a += bytes::length($b))) {
+        print '# ord($_)    == ', ord($_), "\n";
+        print '# ord($b)    == ', ord($b), "\n";
+        print '# length($b) == ', length($b), "\n";
+        print '# tell(F)    == ', tell(F), "\n";
+        print "not ";
+        last;
+    }
+}
+close F;
+print "ok 27\n";
 
 END { 1 while unlink "a" }
