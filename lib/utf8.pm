@@ -52,6 +52,11 @@ earlier than 5.6 allowed arbitrary bytes in source code, whereas
 in future we would like to standardize on the UTF-8 encoding for
 source text.
 
+B<Do not use this pragma for anything else than telling Perl that your
+script is written in UTF-8.> The utility functions described below are
+useful for their own purposes, but they are not really part of the
+"pragmatic" effect.
+
 Until UTF-8 becomes the default format for source text, either this
 pragma or the L</encoding> pragma should be used to recognize UTF-8
 in the source.  When UTF-8 becomes the standard source format, this
@@ -97,7 +102,7 @@ the same as C<use utf8;>.
 
 The following functions are defined in the C<utf8::> package by the
 Perl core.  You do not need to say C<use utf8> to use these and in fact
-you should not unless you really want to have UTF-8 source code.
+you should not say that  unless you really want to have UTF-8 source code.
 
 =over 4
 
