@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..18\n";
+print "1..23\n";
 
 print vec($foo,0,1) == 0 ? "ok 1\n" : "not ok 1\n";
 print length($foo) == 0 ? "ok 2\n" : "not ok 2\n";
@@ -31,3 +31,20 @@ $baz = $foo | $bar;
 print $foo eq "1" && $foo == 1 ? "ok 16\n" : "not ok 16\n";
 print $bar eq "2" && $bar == 2 ? "ok 17\n" : "not ok 17\n";
 print "$foo $bar $baz" eq "1 2 3" ? "ok 18\n" : "not ok 18\n";
+
+# error cases
+
+$x = eval { vec $foo, 0, 3 };
+print "not " if defined $x or $@ !~ /^Illegal number of bits in vec/;
+print "ok 19\n";
+$x = eval { vec $foo, 0, 0 };
+print "not " if defined $x or $@ !~ /^Illegal number of bits in vec/;
+print "ok 20\n";
+$x = eval { vec $foo, 0, -13 };
+print "not " if defined $x or $@ !~ /^Illegal number of bits in vec/;
+print "ok 21\n";
+$x = eval { vec($foo, -1, 4) = 2 };
+print "not " if defined $x or $@ !~ /^Assigning to negative offset in vec/;
+print "ok 22\n";
+print "not " if vec('abcd', 7, 8);
+print "ok 23\n";
