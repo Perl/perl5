@@ -2,8 +2,6 @@
 
 print "1..106\n";
 
-$ENV{PERL_DESTRUCT_LEVEL} = 0; # XXX known to leaks scalars
-
 #P = start of string  Q = start of substr  R = end of substr  S = end of string
 
 $a = 'abcdefxyz';

@@ -278,7 +278,6 @@
 #define magic_clearpack		Perl_magic_clearpack
 #define magic_clearsig		Perl_magic_clearsig
 #define magic_existspack	Perl_magic_existspack
-#define magic_freedefelem	Perl_magic_freedefelem
 #define magic_freeregexp	Perl_magic_freeregexp
 #define magic_get		Perl_magic_get
 #define magic_getarylen		Perl_magic_getarylen

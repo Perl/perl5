@@ -555,8 +555,6 @@
 #define magic_clearsig    CPerlObj::Perl_magic_clearsig
 #undef  magic_existspack
 #define magic_existspack  CPerlObj::Perl_magic_existspack
-#undef  magic_freedefelem
-#define magic_freedefelem CPerlObj::Perl_magic_freedefelem
 #undef  magic_freeregexp
 #define magic_freeregexp  CPerlObj::Perl_magic_freeregexp
 #undef  magic_get

@@ -1386,13 +1386,6 @@ magic_setdefelem(SV *sv, MAGIC *mg)
     return 0;
 }
 
-int
-magic_freedefelem(SV *sv, MAGIC *mg)
-{
-    SvREFCNT_dec(LvTARG(sv));
-    return 0;
-}
-
 void
 vivify_defelem(SV *sv)
 {

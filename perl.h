@@ -2078,7 +2078,7 @@ EXT MGVTBL vtbl_uvar =	{magic_getuvar,
 EXT MGVTBL vtbl_mutex =	{0,	0,	0,	0,	magic_mutexfree};
 #endif /* USE_THREADS */
 EXT MGVTBL vtbl_defelem = {magic_getdefelem,magic_setdefelem,
-					0,	0,	magic_freedefelem};
+					0,	0,	0};
 
 EXT MGVTBL vtbl_regexp = {0,0,0,0, magic_freeregexp};
 
