@@ -24,6 +24,7 @@ sub init_a2c{
 	    'UTF-8'    => 'utf8',
 	    'UTF-16BE' => 'UCS-2',
 	    'ucs-2le'  => 'UTF-16LE',
+	    'ucs2-le'  => 'UTF-16LE',
 	    'cyrillic' => 'iso-8859-5',
 	    'arabic'   => 'iso-8859-6',
 	    'greek'    => 'iso-8859-7',
