@@ -1096,6 +1096,8 @@ sub emit_symbol {
     $export{$symbol} = 1;
 }
 
+my $sym_ord = 0;
+
 sub output_symbol {
     my $symbol = shift;
     $symbol = $bincompat5005{$symbol}
@@ -1126,7 +1128,7 @@ sub output_symbol {
 #	}
     }
     elsif ($PLATFORM eq 'os2') {
-	print qq(    "$symbol"\n);
+	printf qq(    %-31s \@%s\n), qq("$symbol"), ++$sym_ord;
     }
     elsif ($PLATFORM eq 'aix' || $PLATFORM eq 'MacOS') {
 	print "$symbol\n";
