@@ -724,8 +724,9 @@ ithreads if -Dusethreads is specified.  However, you can select the old
 or by
 	sh Configure -Dusethreads -Uuseithreads
 
-Eventually (by perl v5.6.0) this internal confusion ought to disappear,
-and these options may disappear as well.
+Note:  5005threads have been deprecated in perl 5.8.0 and are
+scheduled from deletion in perl 5.10.0.  If you wish to use threads,
+we recommend that you consider using perl 5.8.1 with ithreads instead.
 
 =head2 64 bit support.
 
@@ -2163,7 +2164,3 @@ the same terms as perl itself, with the following additional request:
 If you are distributing a modified version of perl (perhaps as part of
 a larger package) please B<do> modify these installation instructions
 and the contact information to match your distribution.
-
-=head1 LAST MODIFIED
-
-$Id: INSTALL,v 1.58 1999/07/23 14:43:00 doughera Exp $
