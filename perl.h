@@ -1401,25 +1401,10 @@ typedef NVTYPE NV;
 
 #ifdef UV_IS_QUAD
 
-#  ifdef UQUAD_MAX
-#    define PERL_UQUAD_MAX ((UV)UQUAD_MAX)
-#  else
 #    define PERL_UQUAD_MAX	(~(UV)0)
-#  endif
-
-#  define PERL_UQUAD_MIN ((UV)0)
-
-#  ifdef QUAD_MAX
-#    define PERL_QUAD_MAX ((IV)QUAD_MAX)
-#  else
+#    define PERL_UQUAD_MIN	((UV)0)
 #    define PERL_QUAD_MAX 	((IV) (PERL_UQUAD_MAX >> 1))
-#  endif
-
-#  ifdef QUAD_MIN
-#    define PERL_QUAD_MIN ((IV)QUAD_MIN)
-#  else
 #    define PERL_QUAD_MIN 	(-PERL_QUAD_MAX - ((3 & -1) == 3))
-#  endif
 
 #endif
 
