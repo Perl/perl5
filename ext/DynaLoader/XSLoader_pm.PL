@@ -14,7 +14,7 @@ print OUT <<'EOT';
 
 package XSLoader;
 
-$VERSION = "0.02";
+$VERSION = "0.03";
 
 # enable debug/trace messages from DynaLoader perl code
 # $dl_debug = $ENV{PERL_DL_DEBUG} || 0 unless defined $dl_debug;
@@ -143,9 +143,9 @@ This module defines a standard I<simplified> interface to the dynamic
 linking mechanisms available on many platforms.  Its primary purpose is
 to implement cheap automatic dynamic loading of Perl modules.
 
-For more complicated interface see L<DynaLoader>.  Many (most)
+For a more complicated interface, see L<DynaLoader>.  Many (most)
 features of DynaLoader are not implemented in XSLoader, like for
-example the dl_load_flags is not honored by XSLoader.
+example the dl_load_flags, not honored by XSLoader.
 
 =head2 Migration from C<DynaLoader>
 
@@ -173,12 +173,12 @@ forget to quote the name of your package on the C<XSLoader::load> line,
 and add comma (C<,>) before the arguments ($VERSION above).
 
 Of course, if @ISA contained only C<DynaLoader>, there is no need to have the
-@ISA assignment at all; moreover, if instead of C<our> one uses
+@ISA assignment at all; moreover, if instead of C<our> one uses the more
 backward-compatible
 
     use vars qw($VERSION @ISA);
 
-one can remove this reference to @ISA together with the @ISA assignment
+one can remove this reference to @ISA together with the @ISA assignment.
 
 If no $VERSION was specified on the C<bootstrap> line, the last line becomes
 
@@ -216,7 +216,7 @@ an antic Perl which has no C<XSLoader>, it falls back to using C<DynaLoader>.
 I<Skip this section if the XSUB functions are supposed to be called from other
 modules only; read it only if you call your XSUBs from the code in your module,
 or have a C<BOOT:> section in your XS file (see L<perlxs/"The BOOT: Keyword">).
-What is described here is equally applicable to L<DynaLoader|DynaLoader>
+What is described here is equally applicable to the L<DynaLoader|DynaLoader>
 interface.>
 
 A sufficiently complicated module using XS would have both Perl code (defined
@@ -230,24 +230,24 @@ The call to XSLoader::load() (or bootstrap()) has three side effects:
 
 =item *
 
-if $VERSION was specified, a sanity check is done to insure that the versions
+if $VERSION was specified, a sanity check is done to ensure that the versions
 of the F<.pm> and the (compiled) F<.xs> parts are compatible;
 
 =item *
 
-The XSUBs are made accessible from Perl;
+the XSUBs are made accessible from Perl;
 
 =item *
 
-If the C<BOOT:> section was present in F<.xs> file, the code there is called.
+if a C<BOOT:> section was present in the F<.xs> file, the code there is called.
 
 =back
 
-Consequently, if the code in F<.pm> file makes calls to these XSUBs, it is
+Consequently, if the code in the F<.pm> file makes calls to these XSUBs, it is
 convenient to have XSUBs installed before the Perl code is defined; for
 example, this makes prototypes for XSUBs visible to this Perl code.
 Alternatively, if the C<BOOT:> section makes calls to Perl functions (or
-uses Perl variables) defined in F<.pm> file, they must be defined prior to
+uses Perl variables) defined in the F<.pm> file, they must be defined prior to
 the call to XSLoader::load() (or bootstrap()).
 
 The first situation being much more frequent, it makes sense to rewrite the
@@ -301,8 +301,8 @@ would put the DLL).  If not found, the search for the DLL is transparently
 delegated to C<DynaLoader>, which looks for the DLL along the @INC list.
 
 In particular, this is applicable to the structure of @INC used for testing
-not-yet-installed extensions.  This means that the overhead of running
-uninstalled extension may be much more than running the same extension after
+not-yet-installed extensions.  This means that running uninstalled extensions
+may have much more overhead than running the same extensions after
 C<make install>.
 
 =head1 AUTHOR
