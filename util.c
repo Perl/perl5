@@ -4018,17 +4018,17 @@ Perl_my_atof(pTHX_ const char* s)
     if ((PL_hints & HINT_LOCALE) && PL_numeric_local) {
 	NV y;
 
-	Perl_atof2(s, &x);
+	Perl_atof2(aTHX_ s, &x);
 	SET_NUMERIC_STANDARD();
-	Perl_atof2(s, &y);
+	Perl_atof2(aTHX_ s, &y);
 	SET_NUMERIC_LOCAL();
 	if ((y < 0.0 && y < x) || (y > 0.0 && y > x))
 	    return y;
     }
     else
-	Perl_atof2(s, &x);
+	Perl_atof2(aTHX_ s, &x);
 #else
-    Perl_atof2(s, &x);
+    Perl_atof2(aTHX_ s, &x);
 #endif
     return x;
 }
@@ -4447,7 +4447,7 @@ Perl_my_strftime(pTHX_ char *fmt, int sec, int min, int hour, int mday, int mon,
   New(0, buf, buflen, char);
   len = strftime(buf, buflen, fmt, &mytm);
   /*
-  ** The following is needed to handle to the situation where 
+  ** The following is needed to handle to the situation where
   ** tmpbuf overflows.  Basically we want to allocate a buffer
   ** and try repeatedly.  The reason why it is so complicated
   ** is that getting a return value of 0 from strftime can indicate
@@ -4466,7 +4466,7 @@ Perl_my_strftime(pTHX_ char *fmt, int sec, int min, int hour, int mday, int mon,
     /* Possibly buf overflowed - try again with a bigger buf */
     int     fmtlen = strlen(fmt);
     int	    bufsize = fmtlen + buflen;
-    
+
     New(0, buf, bufsize, char);
     while (buf) {
       buflen = strftime(buf, bufsize, fmt, &mytm);
@@ -4721,7 +4721,7 @@ Perl_sv_realpath(pTHX_ SV *sv, char *path, STRLEN len)
                       dotdots, Strerror(errno));
             SV_CWD_RETURN_UNDEF;
         }
-    
+
         if (pst.st_dev == cst.st_dev && pst.st_ino == cst.st_ino) {
             /* We've reached the root: previous is same as current */
             break;
@@ -4734,13 +4734,13 @@ Perl_sv_realpath(pTHX_ SV *sv, char *path, STRLEN len)
                           dotdots, Strerror(errno));
                 SV_CWD_RETURN_UNDEF;
             }
-    
+
             SETERRNO(0,SS$_NORMAL); /* for readdir() */
             while ((dp = PerlDir_read(parent)) != NULL) {
                 if (SV_CWD_ISDOT(dp)) {
                     continue;
                 }
-        
+
                 Copy(dotdots, name, dotdotslen, char);
                 name[dotdotslen] = '/';
 #ifdef DIRNAMLEN
@@ -4750,14 +4750,14 @@ Perl_sv_realpath(pTHX_ SV *sv, char *path, STRLEN len)
 #endif
                 Copy(dp->d_name, name + dotdotslen + 1, namelen, char);
                 name[dotdotslen + 1 + namelen] = 0;
-        
+
                 if (PerlLIO_lstat(name, &tst) < 0) {
                     PerlDir_close(parent);
                     Perl_warn(aTHX_ "sv_realpath: lstat(\"%s\"): %s",
                               name, Strerror(errno));
                     SV_CWD_RETURN_UNDEF;
                 }
-        
+
                 if (tst.st_dev == pst.st_dev && tst.st_ino == pst.st_ino)
                     break;
 
