@@ -31,6 +31,451 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11765] By: ams                                   on 2001/08/27  22:53:10
+        Log: Subject: Re: [PATCH] new tests for the coderef-in-@INC
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 27 Aug 2001 19:47:30 -0400
+             Message-Id: <20010827194730.C12582@blackrider>
+     Branch: perl
+	   ! t/op/inccode.t
+____________________________________________________________________________
+[ 11764] By: ams                                   on 2001/08/27  22:46:21
+        Log: Subject: [PATCH] new tests for the coderef-in-@INC
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Mon, 27 Aug 2001 22:36:27 +0200
+             Message-Id: <20010827223627.C690@rafael>
+             
+             Subject: Re: [PATCH] new tests for the coderef-in-@INC
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 28 Aug 2001 00:02:46 +0100
+             Message-Id: <20010828000245.R4950@plum.flirble.org>
+     Branch: perl
+	   + t/op/inccode.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11763] By: ams                                   on 2001/08/27  22:41:09
+        Log: Subject: [PATCH lib/warnings.t] Removing 2>&1 requirement  (was Re:
+             bleadperl on fire, Win95+4NT)
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 27 Aug 2001 16:54:42 -0400
+             Message-Id: <20010827165442.F9436@blackrider>
+     Branch: perl
+	   ! lib/warnings.t
+____________________________________________________________________________
+[ 11762] By: sky                                   on 2001/08/27  19:19:17
+        Log: Changed back Net/Ping.pm change #11759 since WNOHANG wasn't
+             avaible at compile time. This broke the compilation of 
+             Net/Ping.pm
+     Branch: perl
+	   ! lib/Net/Ping.pm
+____________________________________________________________________________
+[ 11761] By: sky                                   on 2001/08/27  18:34:48
+        Log: Removed tripple definitions of CUSTOM_OP functions.
+     Branch: perl
+	   ! embed.h embed.pl global.sym objXSUB.h perlapi.c proto.h
+____________________________________________________________________________
+[ 11760] By: sky                                   on 2001/08/27  18:21:27
+        Log: Regen headers
+     Branch: perl
+	   ! embed.h embedvar.h objXSUB.h opcode.h opnames.h perlapi.c
+	   ! perlapi.h proto.h
+____________________________________________________________________________
+[ 11759] By: ams                                   on 2001/08/27  16:31:53
+        Log: Subject: [PATCH] pod/perlfunc.pod, lib/Net/Ping.pm, ext/POSIX/POSIX.pod
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Mon, 27 Aug 2001 11:17:09 -0600
+             Message-Id: <20010827172111.89491.qmail@onion.perl.org>
+     Branch: perl
+	   ! ext/POSIX/POSIX.pod lib/Net/Ping.pm pod/perlfunc.pod
+____________________________________________________________________________
+[ 11758] By: sky                                   on 2001/08/27  15:16:42
+        Log: Changes USE_THREADS to USE_5005THREADS in the entire source.
+             Thanks to H. Merijn Brand for the patch.
+             Some of the comments and or guards might be removable in perl.h now.
+     Branch: perl
+	   ! NetWare/config_H.wc NetWare/nw5thread.c NetWare/nw5thread.h
+	   ! Porting/Glossary Porting/config_H README.threads config_h.SH
+	   ! cop.h cv.h deb.c dosish.h dump.c embed.h embed.pl embedvar.h
+	   ! ext/B/B.xs ext/B/B/C.pm ext/B/B/Deparse.pm
+	   ! ext/B/ramblings/runtime.porting ext/DynaLoader/dl_aix.xs
+	   ! ext/Thread/Thread.xs gv.c intrpvar.h mg.c miniperlmain.c
+	   ! objXSUB.h op.c os2/os2.c os2/os2ish.h perl.c perl.h perlapi.c
+	   ! perlvars.h pod/perlguts.pod pp.c pp.h pp_ctl.c pp_hot.c
+	   ! proto.h regexec.c scope.c sv.c sv.h thrdvar.h thread.h toke.c
+	   ! uconfig.h util.c vms/genconfig.pl vms/vms.c vos/config.alpha.h
+	   ! vos/config.ga.h win32/config_H.bc win32/config_H.gc
+	   ! win32/config_H.vc win32/perllib.c win32/win32.h
+	   ! win32/win32sck.c win32/win32thread.c win32/win32thread.h
+	   ! wince/config.h wince/config_H.ce wince/win32.h
+	   ! wince/win32thread.c wince/win32thread.h wince/wincesck.c
+____________________________________________________________________________
+[ 11757] By: sky                                   on 2001/08/27  13:39:16
+        Log: Subject: GNU ld parses arguments different
+             From: H.Merijn Brand <h.m.brand@hccnet.nl>
+             Date: Mon, 27 Aug 2001 16:25:51 +0200
+             Message-Id: <20010827162254.2EA6.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[ 11756] By: sky                                   on 2001/08/27  13:18:45
+        Log: Subject: Custom Ops
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Sat, 25 Aug 2001 17:45:09 +0100
+             Message-ID: <20010825174509.A5752@netthink.co.uk>
+             I also added a fix to Opcode.pm to quite test cases.
+     Branch: perl
+	   ! dump.c embed.pl ext/Opcode/Opcode.pm intrpvar.h op.c op.h
+	   ! opcode.pl pod/perlguts.pod pp_ctl.c pp_sys.c run.c sv.c utf8.c
+____________________________________________________________________________
+[ 11755] By: sky                                   on 2001/08/27  05:37:17
+        Log: Plugs a memory leak on destruction of regular expressions
+             introcued by #11274.
+             PL_regex_padav now has an AV as it's first entry with a list
+             of freed regex_padav slots that it will reuse on creating
+             new PMOPs.
+     Branch: perl
+	   ! op.c perl.c
+____________________________________________________________________________
+[ 11754] By: ams                                   on 2001/08/26  14:38:52
+        Log: Subject: [PATCH] t/io/binmode.t
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sun, 26 Aug 2001 12:03:05 +0100
+             Message-Id: <20010826120305.C4950@plum.flirble.org>
+             
+             (Also a nitpick in #11752 to t/op/universal.t)
+     Branch: perl
+	   ! t/io/binmode.t t/op/universal.t
+____________________________________________________________________________
+[ 11753] By: ams                                   on 2001/08/26  08:19:34
+        Log: Subject: [PATCH] op/universal.t failing
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sun, 26 Aug 2001 09:48:22 +0100
+             Message-Id: <20010826094822.B4950@plum.flirble.org>
+     Branch: perl
+	   ! t/op/universal.t
+____________________________________________________________________________
+[ 11752] By: ams                                   on 2001/08/25  22:46:13
+        Log: Subject: Re: 'can' with undefined subs
+             From: Tony Bowden <tony@kasei.com>
+             Date: Sat, 25 Aug 2001 14:58:17 +0100
+             Message-Id: <20010825145817.A11788@soto.kasei.com>
+             (Applied with minor modifications.)
+     Branch: perl
+	   ! t/op/universal.t
+____________________________________________________________________________
+[ 11751] By: ams                                   on 2001/08/25  18:28:43
+        Log: Subject: Re: 'can' with undefined subs
+             From: Tony Bowden <tony@kasei.com>
+             Date: Sat, 25 Aug 2001 15:13:14 +0100
+             Message-Id: <20010825151314.B11788@soto.kasei.com>
+     Branch: perl
+	   ! lib/UNIVERSAL.pm
+____________________________________________________________________________
+[ 11750] By: nick                                  on 2001/08/25  15:24:15
+        Log: Integrate mainline
+     Branch: perlio
+	  +> t/io/binmode.t
+	  !> (integrate 26 files)
+____________________________________________________________________________
+[ 11749] By: nick                                  on 2001/08/25  14:55:41
+        Log: Subject:  Re: [PATCH] Added wisdom to perlhack.pod
+             From:  John Peacock <jpeacock@rowman.com>
+             Date:  Wed, 22 Aug 2001 12:05:28 -0400
+             Message-Id:  <3B83D848.7FD9C6EF@rowman.com>
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[ 11748] By: nick                                  on 2001/08/25  14:53:04
+        Log: Subject:  Re: [PATCH] (was Re: PerlIO regerssion tests?)
+             From:  Michael G Schwern <schwern@pobox.com>
+             Date:  Wed, 22 Aug 2001 19:22:45 -0400
+             Message-Id:  <20010822192245.U619@blackrider>
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11747] By: nick                                  on 2001/08/25  14:52:33
+        Log: Subject:  [PATCH] (was Re: PerlIO regerssion tests?)
+             From:  Nicholas Clark <nick@ccl4.org>
+             Date:  Wed, 22 Aug 2001 23:29:06 +0100
+             Message-Id:  <20010822232906.Z82818@plum.flirble.org>
+     Branch: perl
+	   + t/io/binmode.t
+	   ! perlio.c pod/perlfunc.pod
+____________________________________________________________________________
+[ 11744] By: nick                                  on 2001/08/25  14:37:33
+        Log: Subject:  [PATCH bleadperl] quiet down VC++ warnings in a2py.c and walk.c
+             From:  Nikola Knezevic <indy@tesla.rcub.bg.ac.yu>
+             Date:  Fri, 24 Aug 2001 22:10:42 +0200
+             Message-Id:  <1065978076.20010824221042@tesla.rcub.bg.ac.yu>
+     Branch: perl
+	   ! x2p/a2py.c x2p/walk.c
+____________________________________________________________________________
+[ 11743] By: nick                                  on 2001/08/25  14:32:47
+        Log: Subject:  [DOC PATCH] The coderef-in-@INC feature
+             From:  Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date:  Fri, 24 Aug 2001 23:34:13 +0200
+             Message-Id:  <20010824233413.A1285@rafael>
+     Branch: perl
+	   ! pod/perlfunc.pod pod/perlvar.pod
+____________________________________________________________________________
+[ 11742] By: ams                                   on 2001/08/25  13:16:02
+        Log: Subject: [PATCH] Re: The coderef in @INC strikes back
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 25 Aug 2001 14:50:07 +0100
+             Message-Id: <20010825145007.L41464@plum.flirble.org>
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[ 11741] By: nick                                  on 2001/08/24  07:08:45
+        Log: When applying patch via Porting/apply fails, do p4 refresh
+             to get old files back.
+     Branch: perl
+	   ! Porting/apply
+____________________________________________________________________________
+[ 11740] By: ams                                   on 2001/08/24  04:47:24
+        Log: #11739 was incomplete.
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 11739] By: ams                                   on 2001/08/24  04:09:40
+        Log: Subject: [DOC patch bleadperl] "misspelled" misspelled
+             From: "Philip Newton" <Philip.Newton@gmx.net>
+             Date: Fri, 24 Aug 2001 07:08:34 +0200
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 11738] By: ams                                   on 2001/08/24  02:19:42
+        Log: Fixed Doug Wilson's email address.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 11737] By: ams                                   on 2001/08/24  00:10:13
+        Log: Subject: [DOC PATCH] Adding new warning in perldiag.pod
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 23 Aug 2001 22:22:58 +0200
+             Message-Id: <20010823222258.A901@rafael>
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 11736] By: ams                                   on 2001/08/24  00:05:02
+        Log: Subject: [PATCH perl@ ] add $Config('scriptdir'} on VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Thu, 23 Aug 2001 19:07:45 -0500
+             Message-Id: <a05101004b7ab4593bb24@[172.16.52.1]>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 11735] By: sky                                   on 2001/08/23  13:42:07
+        Log: Backed out 11732, it breaks lib/strict.t 
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 11734] By: sky                                   on 2001/08/23  11:45:59
+        Log: Removed toy from 17133 after Matt Sargeants request.
+     Branch: perl
+	   ! pod/perlfaq4.pod
+____________________________________________________________________________
+[ 11733] By: sky                                   on 2001/08/23  11:36:29
+        Log: Subject: [PATCH perlfaq4] Faster permutation algorithms
+             From: Robin Houston <robin@kitsite.com>
+             Date: Wed, 22 Aug 2001 23:06:16 +0100
+             Message-ID: <20010822230616.A254@robin.kitsite.com>
+     Branch: perl
+	   ! pod/perlfaq4.pod
+____________________________________________________________________________
+[ 11732] By: sky                                   on 2001/08/23  10:36:02
+        Log: Subject: Re: [ID 20010822.001] Freeing pads after parse error
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Thu, 23 Aug 2001 12:06:36 +0100
+             Message-ID: <20010823120636.A9961@netthink.co.uk>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 11731] By: gsar                                  on 2001/08/23  03:58:58
+        Log: fix broken windows build
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 11730] By: ams                                   on 2001/08/22  21:35:30
+        Log: Subject: [PATCH] io/tell.t doesn't chdir t
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 22 Aug 2001 23:25:58 +0100
+             Message-Id: <20010822232557.Y82818@plum.flirble.org>
+     Branch: perl
+	   ! t/io/tell.t
+____________________________________________________________________________
+[ 11729] By: ams                                   on 2001/08/22  20:32:21
+        Log: Subject: [PATCH] Documentation in File::Spec (was Re: minor File::Spec
+             questions)
+             From: Ronald J Kimball <rjk@linguist.Thayer.dartmouth.edu>
+             Date: Wed, 22 Aug 2001 17:09:04 -0400
+             Message-Id: <20010822170904.A76069@linguist.thayer.dartmouth.edu>
+             (Oops, forgot File::Spec::Unix in the previous patch.)
+     Branch: perl
+	   ! lib/File/Spec/Unix.pm
+____________________________________________________________________________
+[ 11728] By: ams                                   on 2001/08/22  20:25:41
+        Log: Subject: [PATCH] Documentation in File::Spec (was Re: minor File::Spec
+             questions)
+             From: Ronald J Kimball <rjk@linguist.Thayer.dartmouth.edu>
+             Date: Wed, 22 Aug 2001 17:09:04 -0400
+             Message-Id: <20010822170904.A76069@linguist.thayer.dartmouth.edu>
+     Branch: perl
+	   ! lib/File/Spec.pm
+____________________________________________________________________________
+[ 11727] By: ams                                   on 2001/08/22  19:43:30
+        Log: Subject: Re: [PATCH 1 of 3] $] is deprecated - eliminate from core tests
+             From: John Peacock <jpeacock@rowman.com>
+             Date: Wed, 22 Aug 2001 12:35:52 -0400
+             Message-Id: <3B83DF68.5D89DC81@rowman.com>
+             (Adds proper tests for $], notwithstanding Subject. +nitpick)
+     Branch: perl
+	   ! t/op/ver.t
+____________________________________________________________________________
+[ 11726] By: ams                                   on 2001/08/22  19:36:39
+        Log: Subject: [ID 20010822.007] eval STRING & diagnostics.pm not mixing
+             From: schwern@ool-18b93024.dyn.optonline.net (Michael G Schwern)
+             Date: Wed, 22 Aug 2001 16:03:00 -0400 (EDT)
+             Message-Id: <20010822200300.0D1638253@ool-18b93024.dyn.optonline.net>
+     Branch: perl
+	   ! lib/diagnostics.pm lib/diagnostics.t
+____________________________________________________________________________
+[ 11725] By: ams                                   on 2001/08/22  19:25:01
+        Log: Subject: [PATCH] 64 bit integer preserving pp_divide
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 22 Aug 2001 20:59:05 +0100
+             Message-Id: <20010822205905.U82818@plum.flirble.org>
+     Branch: perl
+	   ! pp.c t/op/64bitint.t t/op/arith.t
+____________________________________________________________________________
+[ 11724] By: ams                                   on 2001/08/22  10:02:33
+        Log: Subject: Configure blooper
+             From: H.Merijn Brand <h.m.brand@hccnet.nl>
+             Date: Wed, 22 Aug 2001 12:38:35 +0200
+             Message-Id: <20010822123750.A797.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 11723] By: ams                                   on 2001/08/21  16:17:53
+        Log: Subject: [PATCH] installperl -help
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 21 Aug 2001 17:34:23 +0100
+             Message-Id: <20010821173423.F82818@plum.flirble.org>
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[ 11722] By: ams                                   on 2001/08/20  07:46:31
+        Log: Subject: [PATCH perlvar.pod] Rewrite $. entry and switch to -> syntax
+             From: Ilmari Karonen <iltzu@sci.fi>
+             Date: Mon, 20 Aug 2001 06:42:01 +0300 (EET DST)
+             Message-Id: <Pine.SOL.3.96.1010820063126.28048A-100000@simpukka>
+     Branch: perl
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[ 11721] By: nick                                  on 2001/08/20  06:24:31
+        Log: Integrate mainline
+     Branch: perlio
+	  +> Porting/apply lib/Lingua/KO/Hangul/Util.pm
+	  +> lib/Lingua/KO/Hangul/Util/Changes
+	  +> lib/Lingua/KO/Hangul/Util/README
+	  +> lib/Lingua/KO/Hangul/Util/t/test.t lib/Unicode/Collate.pm
+	  +> lib/Unicode/Collate/Changes lib/Unicode/Collate/README
+	  +> lib/Unicode/Collate/keys.txt lib/Unicode/Collate/t/test.t
+	  +> lib/Unicode/Normalize.pm lib/Unicode/Normalize/Changes
+	  +> lib/Unicode/Normalize/README lib/Unicode/Normalize/t/norm.t
+	  +> lib/Unicode/Normalize/t/test.t
+	   - lib/Net/README.config lib/Net/demos/snpp lib/Net/libnet.ppd
+	  !> (integrate 55 files)
+____________________________________________________________________________
+[ 11720] By: pudge                                 on 2001/08/19  19:00:16
+        Log: Integrate Change #11599 from maint-5.6/perl
+     Branch: maint-5.6/macperl
+	  !> README.win32
+____________________________________________________________________________
+[ 11719] By: ams                                   on 2001/08/18  21:21:42
+        Log: Add Porting/apply to MANIFEST.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11718] By: sky                                   on 2001/08/18  14:38:01
+        Log: PL_reentrant_buffer does not exist in 5005threaded perl.
+             Better solution would be to make 5005threaded perl use
+             the same system as ithreads do
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 11717] By: jhi                                   on 2001/08/18  14:24:42
+        Log: New try for ID 20010407.006: detach the semantics
+             "was the last match target UTF8" into its own variable.
+     Branch: perl
+	   ! embedvar.h intrpvar.h mg.c perlapi.h pod/perlapi.pod pp.c
+	   ! pp_hot.c regcomp.c regexec.c sv.c t/op/pat.t thrdvar.h
+____________________________________________________________________________
+[ 11716] By: jhi                                   on 2001/08/18  12:11:14
+        Log: UTF8 flag should be meaningful only when POK.
+     Branch: perl
+	   ! dump.c
+____________________________________________________________________________
+[ 11715] By: sky                                   on 2001/08/18  11:45:16
+        Log: USE_THREADS and USE_ITHREADS are never true at the same time
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 11714] By: jhi                                   on 2001/08/18  06:03:24
+        Log: Retract #11712 for now.  The real fix would probably
+             be something like making PL_reg_sv a copy (PV + UTF8)
+             of the matched/substituted string (note: not just a SvPOK
+             string, for example the stringified form of a ROK would
+             be applicable)  Beware of leaks.
+     Branch: perl
+	   ! pp_hot.c t/op/pat.t
+____________________________________________________________________________
+[ 11713] By: jhi                                   on 2001/08/18  03:22:42
+        Log: UTF8 wasn't printing for PVMGs.
+     Branch: perl
+	   ! dump.c
+____________________________________________________________________________
+[ 11712] By: jhi                                   on 2001/08/18  03:22:24
+        Log: (Retracted by #11714)
+             
+             Okay analysis, debatable fix.  (The fix will inc
+             the refcount of all temporary match objects,
+             like for example tied(%h) =~ /^.../ from Tie/RefHash.t,
+             which will then cause griping at untie() time
+             ("inner references remain").
+             
+             Fix for ID 20010407.006: PL_reg_sv got wiped out
+             by freetemps if the match target was a temporary
+             (like function_call() =~ /.../), which in turn meant
+             that the $1 et al stopped working if they had UTF-8
+             in them.  Therefore bump up the refcount of PL_reg_sv.
+     Branch: perl
+	   ! pp_hot.c t/op/pat.t
+____________________________________________________________________________
+[ 11711] By: ams                                   on 2001/08/17  20:32:08
+        Log: Subject: [PATCH] doesn't compile, was perl@11710
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Fri, 17 Aug 2001 23:21:10 +0200
+             Message-Id: <20010817232110.C7041@rafael> 
+     Branch: perl
+	   ! sharedsv.c
+____________________________________________________________________________
+[ 11710] By: jhi                                   on 2001/08/17  14:26:57
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[ 11709] By: jhi                                   on 2001/08/17  13:47:53
+        Log: Upgrade to libnet 1.0704.
+     Branch: perl
+	   - lib/Net/README.config lib/Net/demos/snpp lib/Net/libnet.ppd
+	   ! MANIFEST lib/Net/ChangeLog.libnet lib/Net/Cmd.pm
+	   ! lib/Net/Config.pm lib/Net/Domain.pm lib/Net/FTP.pm
+	   ! lib/Net/FTP/A.pm lib/Net/FTP/I.pm lib/Net/FTP/dataconn.pm
+	   ! lib/Net/NNTP.pm lib/Net/Netrc.pm lib/Net/POP3.pm
+	   ! lib/Net/README.libnet lib/Net/SMTP.pm lib/Net/Time.pm
+	   ! lib/Net/libnetFAQ.pod lib/Net/t/ftp.t
+____________________________________________________________________________
 [ 11709] By: jhi                                   on 2001/08/17  13:47:53
         Log: Upgrade to libnet 1.0704.
      Branch: perl
