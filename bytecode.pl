@@ -382,6 +382,7 @@ xcv_file	CvFILE(bstate->bs_sv)			pvindex
 xcv_depth	CvDEPTH(bstate->bs_sv)			long
 xcv_padlist	*(SV**)&CvPADLIST(bstate->bs_sv)	svindex
 xcv_outside	*(SV**)&CvOUTSIDE(bstate->bs_sv)	svindex
+xcv_outside_seq	CvOUTSIDE_SEQ(bstate->bs_sv)		U32
 xcv_flags	CvFLAGS(bstate->bs_sv)			U16
 av_extend	bstate->bs_sv				SSize_t		x
 av_push		bstate->bs_sv				svindex		x
