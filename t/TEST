@@ -305,17 +305,12 @@ EOT
    ### Since not all tests were successful, you may want to run some
    ### of them individually and examine any diagnostic messages they
    ### produce.  See the INSTALL document's section on "make test".
-   ### If you are testing the compiler, then ignore this message
-   ### and run
-   ###      ./perl harness
-   ### in the directory ./t.
 SHRDLU
 	warn <<'SHRDLU' if $good / $total > 0.8;
-   ###
-   ### Since most tests were successful, you have a good chance to
-   ### get information with better granularity by running
+   ### Since most tests were successful you have a good chance
+   ### to get information better granularity by running
    ###     ./perl harness
-   ### in directory ./t.
+   ### in the 't' directory.
 SHRDLU
 	use Config;
 	if ($Config{ldlibpthname}) {
@@ -325,11 +320,10 @@ SHRDLU
    ### to point to the build directory before running the harness.
    ### Depending on your shell style:
    ###     setenv $Config{ldlibpthname} `pwd`; cd t; ./perl harness
-   ### (for csh-style shells) or:
    ###     $Config{ldlibpthname}=`pwd`; export $Config{ldlibpthname}; cd t; ./perl harness
-   ### (for traditional Bourne-style shells) or:
    ###     export $Config{ldlibpthname}=`pwd`; cd t; ./perl harness
-   ### (for ksh-style shells, like zsh).
+   ### for csh-style shells, like tcsh; or for traditional/modern
+   ### Bourne-style shells, like bash, ksh, and zsh, respectively.
 SHRDLU
 	}
     }
