@@ -301,9 +301,6 @@ PP(pp_backtick)
 	if (PL_curcop->cop_io) {
 	    type = SvPV_nolen(PL_curcop->cop_io);
 	}
-	else if (O_BINARY != O_TEXT) {
-	    type = ":crlf";
-	}
 	if (type && *type)
 	    PerlIO_apply_layers(aTHX_ fp,mode,type);
 
@@ -3732,9 +3729,6 @@ PP(pp_fork)
     if (childpid < 0)
 	RETSETUNDEF;
     if (!childpid) {
-#ifdef SOCKS_64BIT_BUG
-	Perl_do_s64_init_buffer();
-#endif
 	/*SUPPRESS 560*/
 	if ((tmpgv = gv_fetchpv("$", TRUE, SVt_PV)))
 	    sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());

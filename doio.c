@@ -463,13 +463,17 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 #endif
     }
     if (saveifp) {		/* must use old fp? */
+        /* If fd is less that PL_maxsysfd i.e. STDIN..STDERR
+           then dup the new fileno down
+         */
 	fd = PerlIO_fileno(saveifp);
 	if (saveofp) {
-	    PerlIO_flush(saveofp);		/* emulate PerlIO_close() */
+	    PerlIO_flush(saveofp);	/* emulate PerlIO_close() */
 	    if (saveofp != saveifp) {	/* was a socket? */
 		PerlIO_close(saveofp);
+                /* This looks very suspect - NI-S 24 Nov 2000 */
 		if (fd > 2)
-		    Safefree(saveofp);
+		    Safefree(saveofp);  /* ??? */
 	    }
 	}
 	if (fd != PerlIO_fileno(fp)) {
@@ -516,9 +520,6 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		    type = s+1;
 		}
 	    }
-	}
-	else if (O_BINARY != O_TEXT && IoTYPE(io) != IoTYPE_STD && !saveifp) {
-	    type = ":crlf";
 	}
     }
     if (type) {
@@ -2038,4 +2039,5 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 }
 
 #endif /* SYSV IPC */
+
 
