@@ -49,6 +49,7 @@ typedef struct ithread_s {
     perl_mutex mutex; 		/* mutex for updating things in this struct */
     I32 count;			/* how many SVs have a reference to us */
     signed char detached;	/* are we detached ? */
+    int gimme;			/* Context of create */
     SV* init_function;          /* Code to run */
     SV* params;                 /* args to pass function */
 #ifdef WIN32
@@ -202,20 +203,30 @@ Perl_ithread_run(void * arg) {
 		    XPUSHs(av_shift(params));
 		}
 		PUTBACK;
-		call_sv(thread->init_function, G_DISCARD|G_EVAL);
+		len = call_sv(thread->init_function, thread->gimme|G_EVAL);
 		SPAGAIN;
+		for (i=len-1; i >= 0; i--) {
+		    SV *sv = POPs;
+		    av_store(params, i, SvREFCNT_inc(sv));
+		}
+		PUTBACK;
+		if (SvTRUE(ERRSV)) {
+		    Perl_warn(aTHX_ "Died:%_",ERRSV);
+		}
 		FREETMPS;
 		LEAVE;
-		SvREFCNT_dec(thread->params);
 		SvREFCNT_dec(thread->init_function);
 	}
 
 	PerlIO_flush((PerlIO*)NULL);
 	MUTEX_LOCK(&thread->mutex);
-	if (thread->detached == 1) {
+	if (thread->detached & 1) {
 		MUTEX_UNLOCK(&thread->mutex);
+		SvREFCNT_dec(thread->params);
+		thread->params = Nullsv;
 		Perl_ithread_destruct(aTHX_ thread);
 	} else {
+		thread->detached |= 4;
 	  	MUTEX_UNLOCK(&thread->mutex);
    	}
 #ifdef WIN32
@@ -283,7 +294,8 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	thread->count = 1;
 	MUTEX_INIT(&thread->mutex);
 	thread->tid = tid_counter++;
-	thread->detached = 0;
+	thread->gimme = GIMME_V;
+	thread->detached = (thread->gimme == G_VOID) ? 1 : 0;
 
 	/* "Clone" our interpreter into the thread's interpreter
 	 * This gives thread access to "static data" and code.
@@ -298,7 +310,7 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 #endif
 	/* perl_clone leaves us in new interpreter's context.
 	   As it is tricky to spot implcit aTHX create a new scope
-	   with aTHX matching the context for the duration of 
+	   with aTHX matching the context for the duration of
 	   our work for new interpreter.
 	 */
 	{
@@ -386,7 +398,15 @@ Perl_ithread_join(pTHX_ SV *obj)
 {
     ithread *thread = SV_to_ithread(aTHX_ obj);
     MUTEX_LOCK(&thread->mutex);
-    if (!thread->detached) {
+    if (thread->detached & 1) {
+	MUTEX_UNLOCK(&thread->mutex);
+	Perl_croak(aTHX_ "Cannot join a detached thread");
+    }
+    else if (thread->detached & 2) {
+	MUTEX_UNLOCK(&thread->mutex);
+	Perl_croak(aTHX_ "Thread already joined");
+    }
+    else {
 #ifdef WIN32
 	DWORD waitcode;
 #else
@@ -398,15 +418,12 @@ Perl_ithread_join(pTHX_ SV *obj)
 #else
 	pthread_join(thread->thr,&retval);
 #endif
-	/* We have finished with it */
 	MUTEX_LOCK(&thread->mutex);
-	thread->detached = 2;
+	/* sv_dup over the args */
+	/* We have finished with it */
+	thread->detached |= 2;
 	MUTEX_UNLOCK(&thread->mutex);
 	sv_unmagic(SvRV(obj),PERL_MAGIC_shared_scalar);
-    }
-    else {
-	MUTEX_UNLOCK(&thread->mutex);
-	Perl_croak(aTHX_ "Cannot join a detached thread");
     }
 }
 

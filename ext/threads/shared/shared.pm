@@ -1,14 +1,18 @@
 package threads::shared;
-
 use strict;
 use warnings;
 use Config;
-use Scalar::Util qw(weaken);
-use attributes qw(reftype);
+
+require Exporter;
+our @ISA = qw(Exporter);
+our @EXPORT = qw(share cond_wait cond_broadcast cond_signal unlock);
+our $VERSION = '0.90';
+
+use XSLoader;
+XSLoader::load('threads::shared',$VERSION);
 
 BEGIN {
-    if ($Config{'useithreads'} && $threads::threads) {
-	*share = \&share_enabled;
+    if ($Config{'useithreads'}) {
 	*cond_wait = \&cond_wait_enabled;
 	*cond_signal = \&cond_signal_enabled;
 	*cond_broadcast = \&cond_broadcast_enabled;
@@ -22,14 +26,6 @@ BEGIN {
     }
 }
 
-require Exporter;
-require DynaLoader;
-our @ISA = qw(Exporter DynaLoader);
-
-our @EXPORT = qw(share cond_wait cond_broadcast cond_signal unlock);
-our $VERSION = '0.90';
-
-our %shared;
 
 sub cond_wait_disabled { return @_ };
 sub cond_signal_disabled { return @_};
@@ -38,58 +34,8 @@ sub unlock_disabled { 1 };
 sub lock_disabled { 1 }
 sub share_disabled { return @_}
 
-sub share_enabled (\[$@%]) { # \]
-    my $value = $_[0];
-    my $ref = reftype($value);
-    if($ref eq 'SCALAR') {
-	my $obj = \threads::shared::sv->new($$value);
-	bless $obj, 'threads::shared::sv';
-	$shared{$$obj} = $value;
-	weaken($shared{$$obj});
-    } elsif($ref eq "ARRAY") {
-	tie @$value, 'threads::shared::av', $value;
-    } elsif($ref eq "HASH") {
-	tie %$value, "threads::shared::hv", $value;
-    } else {
-	die "You cannot share ref of type $_[0]\n";
-    }
-}
-
-
-package threads::shared::sv;
-use base 'threads::shared';
-
-sub DESTROY {}
-
-package threads::shared::av;
-use base 'threads::shared';
-use Scalar::Util qw(weaken);
-sub TIEARRAY {
-	my $class = shift;
-        my $value = shift;
-	my $self = bless \threads::shared::av->new($value),'threads::shared::av';
-	$shared{$self->ptr} = $value;
-	weaken($shared{$self->ptr});
-	return $self;
-}
-
-package threads::shared::hv;
-use base 'threads::shared';
-use Scalar::Util qw(weaken);
-sub TIEHASH {
-    my $class = shift;
-    my $value = shift;
-    my $self = bless \threads::shared::hv->new($value),'threads::shared::hv';
-    $shared{$self->ptr} = $value;
-    weaken($shared{$self->ptr});
-    return $self;
-}
-
-package threads::shared;
-
 $threads::shared::threads_shared = 1;
 
-bootstrap threads::shared $VERSION;
 
 __END__
 

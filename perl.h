@@ -2540,12 +2540,21 @@ Gid_t getegid (void);
 #define YYMAXDEPTH 300
 
 #ifndef assert  /* <assert.h> might have been included somehow */
+#ifdef DEBUGGING
+#define assert(what)	DEB( {						\
+	if (!(what)) {							\
+	    Perl_croak(aTHX_ "Assertion " STRINGIFY(what) " failed: file \"%s\", line %d",	\
+		__FILE__, __LINE__);					\
+	    PerlProc_exit(1);						\
+	}})
+#else
 #define assert(what)	DEB( {						\
 	if (!(what)) {							\
 	    Perl_croak(aTHX_ "Assertion failed: file \"%s\", line %d",	\
 		__FILE__, __LINE__);					\
 	    PerlProc_exit(1);						\
 	}})
+#endif
 #endif
 
 struct ufuncs {
