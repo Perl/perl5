@@ -3424,15 +3424,16 @@ subroutine:
 	    foreach $prefix (@INC) {
 		$realfilename = "$prefix/$filename";
 		if (-f $realfilename) {
+		    $INC{$filename} = $realfilename;
 		    $result = do $realfilename;
 		    last ITER;
 		}
 	    }
 	    die "Can't find $filename in \@INC";
 	}
+	delete $INC{$filename} if $@ || !$result;
 	die $@ if $@;
 	die "$filename did not return true value" unless $result;
-	$INC{$filename} = $realfilename;
 	return $result;
     }
 
