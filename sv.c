@@ -5883,9 +5883,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    {
 		STRLEN len;
 		U8 *str = (U8*)SvPVx(argsv,len);
-		I32 vlen = len*3;
+		I32 vlen = len*3+1;
 		SV *vsv = NEWSV(73,vlen);
 		I32 ulen;
+		I32 vfree = vlen;
 		U8 *vptr = (U8*)SvPVX(vsv);
 		STRLEN vcur = 0;
 		bool utf = DO_UTF8(argsv);
@@ -5904,19 +5905,21 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    str += ulen;
 		    len -= ulen;
 		    eptr = ebuf + sizeof ebuf;
-		    if (elen >= vlen-1) {
-			STRLEN off = vptr - (U8*)SvPVX(vsv);
-			vlen *= 2;
-			SvGROW(vsv, vlen);
-			vptr = (U8*)SvPVX(vsv) + off;
-		    }
 		    do {
 			*--eptr = '0' + uv % 10;
 		    } while (uv /= 10);
 		    elen = (ebuf + sizeof ebuf) - eptr;
+		    while (elen >= vfree-1) {
+			STRLEN off = vptr - (U8*)SvPVX(vsv);
+			vfree += vlen;
+			vlen *= 2;
+			SvGROW(vsv, vlen);
+			vptr = (U8*)SvPVX(vsv) + off;
+		    }
 		    memcpy(vptr, eptr, elen);
 		    vptr += elen;
 		    *vptr++ = '.';
+		    vfree -= elen + 1;
 		    vcur += elen + 1;
 		}
 		if (vcur) {
