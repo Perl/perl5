@@ -5246,7 +5246,9 @@ scan_heredoc(register char *s)
 	bufend = SvPVX(linestr) + SvCUR(linestr);
 #ifdef TMP_CRLF_PATCH
 	if (bufend - linestart >= 2) {
-	    if (bufend[-2] == '\r' || bufend[-2] == '\n') {
+	    if ((bufend[-2] == '\r' && bufend[-1] == '\n') ||
+		(bufend[-2] == '\n' && bufend[-1] == '\r'))
+	    {
 		bufend[-2] = '\n';
 		bufend--;
 		SvCUR_set(linestr, bufend - SvPVX(linestr));
@@ -5543,7 +5545,9 @@ scan_str(char *start)
 
 #ifdef TMP_CRLF_PATCH
 	if (to - SvPVX(sv) >= 2) {
-	    if (to[-2] == '\r' || to[-2] == '\n') {
+	    if ((to[-2] == '\r' && to[-1] == '\n') ||
+		(to[-2] == '\n' && to[-1] == '\r'))
+	    {
 		to[-2] = '\n';
 		to--;
 		SvCUR_set(sv, to - SvPVX(sv));
