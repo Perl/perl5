@@ -184,10 +184,17 @@ typedef U16 line_t;
 #ifndef lint
 #ifndef LEAKTEST
 #ifndef safemalloc
+
+#  ifdef __cplusplus
+    extern "C" {
+#  endif
 Malloc_t safemalloc _((MEM_SIZE));
 Malloc_t saferealloc _((Malloc_t, MEM_SIZE));
 Free_t safefree _((Malloc_t));
 Malloc_t safecalloc _((MEM_SIZE, MEM_SIZE));
+#  ifdef __cplusplus
+    }
+#  endif
 #endif
 #ifndef MSDOS
 #define New(x,v,n,t)  (v = (t*)safemalloc((MEM_SIZE)((n) * sizeof(t))))
