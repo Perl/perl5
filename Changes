@@ -78,6 +78,42 @@ Version 5.005_04-tobe        Fourth maintenance release of 5.005
 ----------------
 
 ____________________________________________________________________________
+[ 22213] By: acme                                  on 2004/01/25  08:53:17
+        Log: Applied patch from Jarkko Hietaniemi to add support for Mac OS X
+     Branch: maint-5.005/perl
+           + ext/DynaLoader/dl_dyld.xs hints/darwin.sh
+           ! MANIFEST
+____________________________________________________________________________
+[ 22212] By: acme                                  on 2004/01/25  08:15:58
+        Log: Applied patch by Andrew Dougherty to not install into /usr
+             and use -fPIC instead of -fpic under SPARC (under Linux)
+     Branch: maint-5.005/perl
+           ! hints/linux.sh
+___________________________________________________________________________
+[ 22211] By: acme                                  on 2004/01/25  08:09:49
+        Log: Copy the Solaris 8 / Tru64 / IRIX 6 hints from blead,
+             thanks to Jarkko Hietaniemi
+     Branch: maint-5.005/perl
+           ! hints/dec_osf.sh hints/irix_6.sh hints/solaris_2.sh
+____________________________________________________________________________
+[ 22210] By: acme                                  on 2004/01/25  07:50:50
+        Log: Apply a patch from Paul Green for VOS. He writes:
+             Here is a rather trivial patch that updates one of the files
+             in the "vos" subdir.
+             I keep an old copy of config_h.SH in there so I can see what
+             changes.  (It has a funky name to prevent various clever bits
+             of Makefile trickery from recognizing it.)  This lets me
+             update my own private copy of config.h easily.  This patch
+             updates my copy of config_h.SH to be the same as the version
+             in the main directory; no changes are needed to any other
+             files.
+             I do not support the native (Configure-based) build method for
+             this release of perl. However, when perl5.005_03 is built
+             using the scripts found in the vos subdir, it builds just fine
+             on current releases of VOS.
+     Branch: maint-5.005/perl
+           ! vos/config_h.SH_orig
+____________________________________________________________________________
 [ 22178] By: acme                                  on 2004/01/19  20:30:12
         Log: Integrated the FreeBSD hints file from 5.6.2,
              thanks to Nicholas Clark
