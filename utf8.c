@@ -1581,11 +1581,11 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, bool u1, const char *s2, bool u2, register
 	  }
 	  if (ca != cb) {
 	       if (u1)
-		    to_uni_lower(NATIVE_TO_UNI(ca), tmpbuf1, &ulen1);
+		    to_uni_fold(NATIVE_TO_UNI(ca), tmpbuf1, &ulen1);
 	       else
 		    ulen1 = 1;
 	       if (u2)
-		    to_uni_lower(NATIVE_TO_UNI(cb), tmpbuf2, &ulen2);
+		    to_uni_fold(NATIVE_TO_UNI(cb), tmpbuf2, &ulen2);
 	       else
 		    ulen2 = 1;
 	       if (ulen1 != ulen2
