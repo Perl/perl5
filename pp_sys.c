@@ -45,12 +45,6 @@
 #   include <shadow.h>
 #endif
 
-#ifdef HAS_SYSCALL
-#ifdef __cplusplus
-extern "C" int syscall(unsigned long,...);
-#endif
-#endif
-
 #ifdef I_SYS_WAIT
 # include <sys/wait.h>
 #endif
