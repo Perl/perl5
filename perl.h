@@ -1027,7 +1027,7 @@ Free_t   Perl_mfree (Malloc_t where);
 #    define UV_MAX PERL_UQUAD_MAX
 #    define UV_MIN PERL_UQUAD_MIN
 #  endif
-#  define IVSIZF 8
+#  define IVSIZE 8
 #  define UVSIZE 8
 #  define IV_IS_QUAD
 #  define UV_IS_QUAD
