@@ -8,7 +8,7 @@ our $VERSION = '3.1.0';
 require Exporter;
 
 our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(charinfo charblock);
+our @EXPORT_OK = qw(charinfo charblock charscript);
 
 use Carp;
 
@@ -22,10 +22,13 @@ Unicode::UCD - Unicode character database
     # requires that level of the Unicode character database
 
     use Unicode::UCD 'charinfo';
-    my %charinfo  = charinfo($codepoint);
+    my %charinfo   = charinfo($codepoint);
 
     use Unicode::UCD 'charblock';
-    my $charblock = charblock($codepoint);
+    my $charblock  = charblock($codepoint);
+
+    use Unicode::UCD 'charscript';
+    my $charscript = charblock($codepoint);
 
 =head1 DESCRIPTION
 
@@ -36,6 +39,7 @@ Database.
 
 my $UNICODE;
 my $BLOCKS;
+my $SCRIPTS;
 
 sub openunicode {
     my ($rfh, @path) = @_;
@@ -45,9 +49,11 @@ sub openunicode {
 	    use File::Spec;
 	    $f = File::Spec->catfile($d, "unicode", @path);
 	    last if open($$rfh, $f);
+	    undef $f;
 	}
-	croak __PACKAGE__, ": failed to find ",join("/",@path)," in @INC\n"
-	    unless defined $rfh;
+	croak __PACKAGE__, ": failed to find ",
+              File::Spec->catfile(@path), " in @INC"
+	    unless defined $f;
     }
     return $f;
 }
@@ -78,20 +84,22 @@ by the Unicode standard:
     upper            uppercase equivalent mapping
     lower            lowercase equivalent mapping
     title            titlecase equivalent mapping
+
     block            block the character belongs to (used in \p{In...})
+    script           script the character belongs to 
 
 If no match is found, an empty hash is returned.
 
 The C<block> property is the same as as returned by charinfo().  It is
 not defined in the Unicode Character Database proper (Chapter 4 of the
 Unicode 3.0 Standard) but instead in an auxiliary database (Chapter 14
-of TUS3).
+of TUS3).  Similarly for the C<script> property.
 
 Note that you cannot do (de)composition and casing based solely on the
 above C<decomposition> and C<lower>, C<upper>, C<title>, properties,
-you will need also the I<Composition Exclusions> and I<SpecialCasing>
-tables, available as files F<CompExcl.txt> and F<SpecCase.txt> in the
-Perl distribution.
+you will need also the I<Composition Exclusions>, I<Case Folding>, and
+I<SpecialCasing> tables, available as files F<CompExcl.txt>,
+F<CaseFold.txt>, and F<SpecCase.txt> in the Perl distribution.
 
 =cut
 
@@ -122,6 +130,26 @@ sub charinfo {
     return;
 }
 
+sub _search { # Binary search in a [[lo,hi,prop],[...],...] table.
+    my ($table, $lo, $hi, $code) = @_;
+
+    return if $lo > $hi;
+
+    my $mid = int(($lo+$hi) / 2);
+
+    if ($table->[$mid]->[0] < $code) {
+	if ($table->[$mid]->[1] >= $code) {
+	    return $table->[$mid]->[2];
+	} else {
+	    _search($table, $mid + 1, $hi, $code);
+	}
+    } elsif ($table->[$mid]->[0] > $code) {
+	_search($table, $lo, $mid - 1, $code);
+    } else {
+	return $table->[$mid]->[2];
+    }
+}
+
 =head2 charblock
 
     use Unicode::UCD 'charblock';
@@ -130,35 +158,16 @@ sub charinfo {
 
 charblock() returns the block the character belongs to, e.g.
 C<Basic Latin>.  Note that not all the character positions within all
-block are defined.
+blocks are defined.
 
 The name is the same name that is used in the C<\p{In...}> construct,
 for example C<\p{InBasicLatin}> (spaces and dashes ('-') are squished
-away from the names for the C<\p{In...}>.
+away from the names for the C<\p{In...}>, for example C<LatinExtendedA>
+instead of C<Latin Extended-A>.
 
 =cut
 
 my @BLOCKS;
-
-sub _charblock {
-    my ($code, $lo, $hi) = @_;
-
-    return if $lo > $hi;
-
-    my $mid = int(($lo+$hi) / 2);
-
-    if ($BLOCKS[$mid]->[0] < $code) {
-	if ($BLOCKS[$mid]->[1] >= $code) {
-	    return $BLOCKS[$mid]->[2];
-	} else {
-	    _charblock($code, $mid + 1, $hi);
-	}
-    } elsif ($BLOCKS[$mid]->[0] > $code) {
-	_charblock($code, $lo, $mid - 1);
-    } else {
-	return $BLOCKS[$mid]->[2];
-    }
-}
 
 sub charblock {
     my $code = shift;
@@ -174,10 +183,54 @@ sub charblock {
 	}
     }
 
-    _charblock($code, 0, $#BLOCKS);
+    _search(\@BLOCKS, 0, $#BLOCKS, $code);
 }
 
-=head1 NOTE
+=head2 charscript
+
+    use Unicode::UCD 'charscript';
+
+    my $charscript = charscript(0x41);
+
+charscript() returns the script the character belongs to, e.g.
+C<Latin>, C<Greek>, C<Han>.  Note that not all the character positions
+within all scripts are defined.  
+
+The difference between a character block and a script is that script
+names are closer to the linguistic notion of a set of characters,
+while block is more of an artifact of the Unicode character numbering.
+For example the Latin B<script> is spread over several B<blocks>.
+
+Note also that the script names are all in uppercase, e.g. C<HEBREW>,
+while the block names are Capitalized and with intermixed spaces,
+e.g. C<Yi Syllables>.
+
+Unfortunately, currently (Perl 5.8.0) there is no regular expression
+notation for matching scripts as there is for blocks (C<\p{In...}>.
+
+=cut
+
+my @SCRIPTS;
+
+sub charscript {
+    my $code = shift;
+
+    unless (@SCRIPTS) {
+	if (openunicode(\$SCRIPTS, "Scripts.txt")) {
+	    while (<$SCRIPTS>) {
+		if (/^([0-9A-F]+)(?:\.\.([0-9A-F]+))?\s+;\s+(\w+)/) {
+		    push @SCRIPTS, [ hex($1), $2 ? hex($2) : undef, $3 ];
+		}
+	    }
+	    close($SCRIPTS);
+	    @SCRIPTS = sort { $a->[0] <=> $b->[0] } @SCRIPTS;
+	}
+    }
+
+    _search(\@SCRIPTS, 0, $#SCRIPTS, $code);
+}
+
+=head1 IMPLEMENTATION NOTE
 
 The first use of L<charinfo> opens a read-only filehandle to the Unicode
 Character Database.  The filehandle is kept open for further queries.
