@@ -1289,7 +1289,7 @@ where C<SP> is the macro that represents the local copy of the stack pointer,
 and C<num> is the number of elements the stack should be extended by.
 
 Now that there is room on the stack, values can be pushed on it using C<PUSHs>
-macro. The values pushed will often need to be "mortal" (See L</Reference Counts and Mortality).
+macro. The values pushed will often need to be "mortal" (See L</Reference Counts and Mortality>).
 
     PUSHs(sv_2mortal(newSViv(an_integer)))
     PUSHs(sv_2mortal(newSVpv("Some String",0)))
