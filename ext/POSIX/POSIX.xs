@@ -65,7 +65,7 @@
 #  include <lib$routines.h> /* prototype for lib$ediv() */
 #  include <starlet.h>      /* prototype for sys$gettim() */
 #  if DECC_VERSION < 50000000
-#    define Pid_t int       /* old versions of DECC miss this in types.h */
+#    define pid_t int       /* old versions of DECC miss this in types.h */
 #  endif
 
 #  undef mkfifo
@@ -117,7 +117,7 @@
 #  define mkfifo(a,b) not_here("mkfifo")
 #  define ttyname(a) (char*)not_here("ttyname")
 #  define sigset_t long
-#  define Pid_t long
+#  define pid_t long
 #  ifdef __BORLANDC__
 #    define tzname _tzname
 #  endif
@@ -3545,20 +3545,20 @@ read(fd, buffer, nbytes)
 
 SysRet
 setpgid(pid, pgid)
-	Pid_t		pid
-	Pid_t		pgid
+	pid_t		pid
+	pid_t		pgid
 
-Pid_t
+pid_t
 setsid()
 
-Pid_t
+pid_t
 tcgetpgrp(fd)
 	int		fd
 
 SysRet
 tcsetpgrp(fd, pgrp_id)
 	int		fd
-	Pid_t		pgrp_id
+	pid_t		pgrp_id
 
 int
 uname()
@@ -3955,5 +3955,4 @@ sysconf(name)
 char *
 ttyname(fd)
 	int		fd
-
 

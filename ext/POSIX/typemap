@@ -1,10 +1,9 @@
 Mode_t			T_NV
-Pid_t			T_NV
+pid_t			T_NV
 Uid_t			T_NV
 Time_t			T_NV
 Gid_t			T_NV
 Uid_t			T_NV
-Gid_t			T_NV
 Off_t			T_NV
 Dev_t			T_NV
 NV			T_NV
