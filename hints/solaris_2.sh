@@ -480,11 +480,6 @@ EOM
 *) xxx=/no/64-bit$xxx ;;
 esac'
 
-	    case "`$cc -E $cflags /usr/include/stdio.h | grep _ptr`" in
-	    *"unsigned char"*)	stdchar='unsigned char' ;;
-	    *) stdchar='char' ;;
-	    esac
-
 	    use64bitall_done=yes
 	    ;;
 esac
