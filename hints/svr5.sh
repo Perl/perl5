@@ -1,19 +1,24 @@
 # svr5 hints, System V Release 5.x
 # Last modified 1999/09/21 by Boyd Gerber, gerberb@zenez.com
+# with changes from Mike Hopkirk hops@sco.com
 
 # Use Configure -Dcc=gcc to use gcc.
 case "$cc" in
 '') cc='/bin/cc'
     test -f $cc || cc='/usr/ccs/bin/cc'
     ;;
-  *)
-    case "$gccversion" in
-      *2.95*) 
+*gcc*)
+    # "$gccversion" not set yet
+    vers=`gcc -v 2>&1 | sed -n -e 's@.*version \([^ ][^ ]*\) .*@\1@p'`
+    case $vers in
+    *2.95*)
         ccflags='-fno-strict-aliasing'
-      ;;
-      *);;
+        # If it coredumps when running miniperl with the above switch on
+        # try instead without optimisation.
+        # optimize=' '
+        ;;
     esac
-  ;;
+    ;;
 esac
 
 # want_ucb=''
