@@ -181,9 +181,6 @@ PerlInterpreter *
 perl_alloc(void)
 {
     PerlInterpreter *my_perl;
-#ifdef USE_5005THREADS
-    dTHX;
-#endif
 
     /* New() needs interpreter, so call malloc() instead */
     my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
@@ -353,9 +350,6 @@ perl_destruct(pTHXx)
 {
     volatile int destruct_level;  /* 0=none, 1=full, 2=full with checks */
     HV *hv;
-#ifdef USE_5005THREADS
-    dTHX;
-#endif /* USE_5005THREADS */
 
     /* wait for all pseudo-forked children to finish */
     PERL_WAIT_FOR_CHILDREN;
@@ -1021,9 +1015,6 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
     I32 oldscope;
     int ret;
     dJMPENV;
-#ifdef USE_5005THREADS
-    dTHX;
-#endif
 
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
 #ifdef IAMSUID
@@ -1718,9 +1709,6 @@ perl_run(pTHXx)
     I32 oldscope;
     int ret = 0;
     dJMPENV;
-#ifdef USE_5005THREADS
-    dTHX;
-#endif
 
     oldscope = PL_scopestack_ix;
 #ifdef VMS
