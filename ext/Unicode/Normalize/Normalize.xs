@@ -553,10 +553,10 @@ getComposite(uv, uv2)
     UV uv2
   PROTOTYPE: $$
   PREINIT:
-    UV comp;
+    UV composite;
   CODE:
-    comp = composite_uv(uv, uv2);
-    RETVAL = comp ? newSVuv(comp) : &PL_sv_undef;
+    composite = composite_uv(uv, uv2);
+    RETVAL = composite ? newSVuv(composite) : &PL_sv_undef;
   OUTPUT:
     RETVAL
 
