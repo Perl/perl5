@@ -886,7 +886,7 @@ actions depending on which function is being called.
 
     Function pointer    Action taken
     ----------------    ------------
-    svt_get             Do something after the value of the SV is retrieved.
+    svt_get             Do something before the value of the SV is retrieved.
     svt_set             Do something after the SV is assigned a value.
     svt_len             Report on the SV's length.
     svt_clear		Clear something the SV represents.
