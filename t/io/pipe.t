@@ -62,7 +62,7 @@ sub broken_pipe {
 
 print WRITER "not ok 7\n";
 close WRITER;
-
+sleep 1;
 print "ok 8\n";
 
 # VMS doesn't like spawning subprocesses that are still connected to

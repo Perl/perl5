@@ -956,7 +956,7 @@ static OP *
 doform(CV *cv, GV *gv, OP *retop)
 {
     dTHR;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     I32 gimme = GIMME_V;
     AV* padlist = CvPADLIST(cv);
     SV** svp = AvARRAY(padlist);
@@ -1024,7 +1024,7 @@ PP(pp_leavewrite)
     PerlIO *fp;
     SV **newsp;
     I32 gimme;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
 
     DEBUG_f(PerlIO_printf(Perl_debug_log, "left=%ld, todo=%ld\n",
 	  (long)IoLINES_LEFT(io), (long)FmLINES(formtarget)));
@@ -3737,8 +3737,12 @@ PP(pp_gnetent)
     I32 which = op->op_type;
     register char **elem;
     register SV *sv;
-#ifndef DONT_DECLARE_STD
+#ifdef NETDB_H_OMITS_GETNET
     struct netent *getnetbyname(const char *);
+    /*
+     * long is wrong for getnetbyadddr (e.g. on Alpha). POSIX.1g says
+     * in_addr_t but then such systems don't have broken netdb.h anyway.
+     */
     struct netent *getnetbyaddr(long int, int);
     struct netent *getnetent(void);
 #endif

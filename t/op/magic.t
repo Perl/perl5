@@ -46,9 +46,9 @@ else {
 
     $| = 1;		# command buffering
 
-    $SIG{"INT"} = "ok3";     kill "INT",$$;
-    $SIG{"INT"} = "IGNORE";  kill "INT",$$; print "ok 4\n";
-    $SIG{"INT"} = "DEFAULT"; kill "INT",$$; print "not ok\n";
+    $SIG{"INT"} = "ok3";     kill "INT",$$; sleep 1;
+    $SIG{"INT"} = "IGNORE";  kill "INT",$$; sleep 1; print "ok 4\n";
+    $SIG{"INT"} = "DEFAULT"; kill "INT",$$; sleep 1; print "not ok\n";
 
     sub ok3 {
 	if (($x = pop(@_)) eq "INT") {

@@ -105,7 +105,7 @@ PP(pp_substcont)
 {
     djSP;
     register PMOP *pm = (PMOP*) cLOGOP->op_other;
-    register CONTEXT *cx = &cxstack[cxstack_ix];
+    register PERL_CONTEXT *cx = &cxstack[cxstack_ix];
     register SV *dstr = cx->sb_dstr;
     register char *s = cx->sb_s;
     register char *m = cx->sb_m;
@@ -688,7 +688,7 @@ PP(pp_sort)
     if (sortcop) {
 	if (max > 1) {
 	    AV *oldstack;
-	    CONTEXT *cx;
+	    PERL_CONTEXT *cx;
 	    SV** newsp;
 	    bool oldcatch = CATCH_GET;
 
@@ -846,7 +846,7 @@ dopoptolabel(char *label)
 {
     dTHR;
     register I32 i;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
 
     for (i = cxstack_ix; i >= 0; i--) {
 	cx = &cxstack[i];
@@ -915,7 +915,7 @@ dopoptosub(I32 startingblock)
 {
     dTHR;
     I32 i;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     for (i = startingblock; i >= 0; i--) {
 	cx = &cxstack[i];
 	switch (cx->cx_type) {
@@ -935,7 +935,7 @@ dopoptoeval(I32 startingblock)
 {
     dTHR;
     I32 i;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     for (i = startingblock; i >= 0; i--) {
 	cx = &cxstack[i];
 	switch (cx->cx_type) {
@@ -954,7 +954,7 @@ dopoptoloop(I32 startingblock)
 {
     dTHR;
     I32 i;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     for (i = startingblock; i >= 0; i--) {
 	cx = &cxstack[i];
 	switch (cx->cx_type) {
@@ -986,7 +986,7 @@ void
 dounwind(I32 cxix)
 {
     dTHR;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     SV **newsp;
     I32 optype;
 
@@ -1021,7 +1021,7 @@ die_where(char *message)
     dTHR;
     if (in_eval) {
 	I32 cxix;
-	register CONTEXT *cx;
+	register PERL_CONTEXT *cx;
 	I32 gimme;
 	SV **newsp;
 
@@ -1110,7 +1110,7 @@ PP(pp_caller)
 {
     djSP;
     register I32 cxix = dopoptosub(cxstack_ix);
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     I32 dbcxix;
     I32 gimme;
     SV *sv;
@@ -1271,7 +1271,7 @@ PP(pp_dbstate)
     {
 	SV **sp;
 	register CV *cv;
-	register CONTEXT *cx;
+	register PERL_CONTEXT *cx;
 	I32 gimme = G_ARRAY;
 	I32 hasargs;
 	GV *gv;
@@ -1314,7 +1314,7 @@ PP(pp_scope)
 PP(pp_enteriter)
 {
     djSP; dMARK;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     I32 gimme = GIMME_V;
     SV **svp;
 
@@ -1346,7 +1346,7 @@ PP(pp_enteriter)
 PP(pp_enterloop)
 {
     djSP;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     I32 gimme = GIMME_V;
 
     ENTER;
@@ -1362,7 +1362,7 @@ PP(pp_enterloop)
 PP(pp_leaveloop)
 {
     djSP;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     struct block_loop cxloop;
     I32 gimme;
     SV **newsp;
@@ -1404,7 +1404,7 @@ PP(pp_return)
 {
     djSP; dMARK;
     I32 cxix;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     struct block_sub cxsub;
     bool popsub2 = FALSE;
     I32 gimme;
@@ -1480,7 +1480,7 @@ PP(pp_last)
 {
     djSP;
     I32 cxix;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     struct block_loop cxloop;
     struct block_sub cxsub;
     I32 pop2 = 0;
@@ -1561,7 +1561,7 @@ PP(pp_last)
 PP(pp_next)
 {
     I32 cxix;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     I32 oldsave;
 
     if (op->op_flags & OPf_SPECIAL) {
@@ -1586,7 +1586,7 @@ PP(pp_next)
 PP(pp_redo)
 {
     I32 cxix;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     I32 oldsave;
 
     if (op->op_flags & OPf_SPECIAL) {
@@ -1663,7 +1663,7 @@ PP(pp_goto)
     djSP;
     OP *retop = 0;
     I32 ix;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
 #define GOTO_DEPTH 64
     OP *enterops[GOTO_DEPTH];
     char *label;
@@ -1676,7 +1676,7 @@ PP(pp_goto)
 	/* This egregious kludge implements goto &subroutine */
 	if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVCV) {
 	    I32 cxix;
-	    register CONTEXT *cx;
+	    register PERL_CONTEXT *cx;
 	    CV* cv = (CV*)SvRV(sv);
 	    SV** mark;
 	    I32 items = 0;
@@ -2172,7 +2172,7 @@ doeval(int gimme)
     if (yyparse() || error_count || !eval_root) {
 	SV **newsp;
 	I32 gimme;
-	CONTEXT *cx;
+	PERL_CONTEXT *cx;
 	I32 optype;
 
 	op = saveop;
@@ -2243,7 +2243,7 @@ doeval(int gimme)
 PP(pp_require)
 {
     djSP;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     SV *sv;
     char *name;
     char *tryname;
@@ -2393,7 +2393,7 @@ PP(pp_dofile)
 PP(pp_entereval)
 {
     djSP;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     dPOPss;
     I32 gimme = GIMME_V, was = sub_generation;
     char tmpbuf[TYPE_DIGITS(long) + 12];
@@ -2457,7 +2457,7 @@ PP(pp_leaveeval)
     SV **newsp;
     PMOP *newpm;
     I32 gimme;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     OP *retop;
     U8 save_flags = op -> op_flags;
     I32 optype;
@@ -2549,7 +2549,7 @@ PP(pp_leaveeval)
 PP(pp_entertry)
 {
     djSP;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     I32 gimme = GIMME_V;
 
     ENTER;
@@ -2573,7 +2573,7 @@ PP(pp_leavetry)
     SV **newsp;
     PMOP *newpm;
     I32 gimme;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     I32 optype;
 
     POPBLOCK(cx,newpm);

@@ -1211,7 +1211,7 @@ do_readline(void)
 PP(pp_enter)
 {
     djSP;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     I32 gimme = OP_GIMME(op, -1);
 
     if (gimme == -1) {
@@ -1281,7 +1281,7 @@ PP(pp_helem)
 PP(pp_leave)
 {
     djSP;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     register SV **mark;
     SV **newsp;
     PMOP *newpm;
@@ -1337,7 +1337,7 @@ PP(pp_leave)
 PP(pp_iter)
 {
     djSP;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     SV* sv;
     AV* av;
 
@@ -1579,7 +1579,7 @@ PP(pp_subst)
 	sv_setpvn(dstr, m, s-m);
 	curpm = pm;
 	if (!c) {
-	    register CONTEXT *cx;
+	    register PERL_CONTEXT *cx;
 	    PUSHSUBST(cx);
 	    RETURNOP(cPMOP->op_pmreplroot);
 	}
@@ -1680,7 +1680,7 @@ PP(pp_leavesub)
     SV **newsp;
     PMOP *newpm;
     I32 gimme;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     struct block_sub cxsub;
 
     POPBLOCK(cx,newpm);
@@ -1748,7 +1748,7 @@ PP(pp_entersub)
     GV *gv;
     HV *stash;
     register CV *cv;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     I32 gimme;
     bool hasargs = (op->op_flags & OPf_STACKED) != 0;
 
@@ -1834,9 +1834,10 @@ PP(pp_entersub)
 #ifdef USE_THREADS
     /*
      * First we need to check if the sub or method requires locking.
-     * If so, we gain a lock on the CV or the first argument, as
-     * appropriate. This has to be inline because for FAKE_THREADS,
-     * COND_WAIT inlines code to reschedule by returning a new op.
+     * If so, we gain a lock on the CV, the first argument or the
+     * stash (for static methods), as appropriate. This has to be
+     * inline because for FAKE_THREADS, COND_WAIT inlines code to
+     * reschedule by returning a new op.
      */
     MUTEX_LOCK(CvMUTEXP(cv));
     if (CvFLAGS(cv) & CVf_LOCKED) {
@@ -1850,6 +1851,11 @@ PP(pp_entersub)
 	    }
 	    if (SvROK(sv))
 		sv = SvRV(sv);
+	    else {		
+		STRLEN len;
+		char *stashname = SvPV(sv, len);
+		sv = (SV*)gv_stashpvn(stashname, len, TRUE);
+	    }
 	}
 	else {
 	    sv = (SV*)cv;
