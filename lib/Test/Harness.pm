@@ -5,14 +5,13 @@ use 5.005_64;
 use Exporter;
 use Benchmark;
 use Config;
-use FileHandle;
 use strict;
 
 our($VERSION, $verbose, $switches, $have_devel_corestack, $curtest,
     $columns, @ISA, @EXPORT, @EXPORT_OK);
 $have_devel_corestack = 0;
 
-$VERSION = "1.1606";
+$VERSION = "1.1607";
 
 $ENV{HARNESS_ACTIVE} = 1;
 
@@ -74,21 +73,20 @@ sub runtests {
 	$ml = "\r$blank\r$leader"
 	    if -t STDOUT and not $ENV{HARNESS_NOTTY} and not $verbose;
 	print $leader;
-	my $fh = new FileHandle;
-	$fh->open($test) or print "can't open $test. $!\n";
+	open(my $fh, $test) or print "can't open $test. $!\n";
 	my $first = <$fh>;
 	my $s = $switches;
 	$s .= " $ENV{'HARNESS_PERL_SWITCHES'}"
 	    if exists $ENV{'HARNESS_PERL_SWITCHES'};
 	$s .= join " ", q[ "-T"], map {qq["-I$_"]} @INC
 	    if $first =~ /^#!.*\bperl.*-\w*T/;
-	$fh->close or print "can't close $test. $!\n";
+	close($fh) or print "can't close $test. $!\n";
 	my $cmd = ($ENV{'HARNESS_COMPILE_TEST'})
 		? "./perl -I../lib ../utils/perlcc $test "
 		  . "-run 2>> ./compilelog |" 
 		: "$^X $s $test|";
 	$cmd = "MCR $cmd" if $^O eq 'VMS';
-	$fh->open($cmd) or print "can't run $test. $!\n";
+	open($fh, $cmd) or print "can't run $test. $!\n";
 	$ok = $next = $max = 0;
 	@failed = ();
 	my %todo = ();
@@ -163,7 +161,7 @@ sub runtests {
                 die "FAILED--Further testing stopped" . ($1 ? ": $1\n" : ".\n");
             }
 	}
-	$fh->close; # must close to reap child resource values
+	close($fh); # must close to reap child resource values
 	my $wstatus = $ignore_exitcode ? 0 : $?;	# Can trust $? ?
 	my $estatus;
 	$estatus = ($^O eq 'VMS'
