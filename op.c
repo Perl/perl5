@@ -6003,7 +6003,7 @@ Perl_ck_state(pTHX_ OP *o)
 	&& (ckWARN(WARN_DEPRECATED)))
     {
 	Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-			    "Use of my in conditional deprecated");
+			    "Deprecated use of my() in conditional");
     }
     return o;
 }
