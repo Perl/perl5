@@ -2947,12 +2947,8 @@ tryagain:
 	loopdone:
 	    PL_regcomp_parse = p - 1;
 	    nextchar();
-	    {
-		/* len is STRLEN which is unsigned, need to copy to signed */
-		IV iv = len;
-		if (iv < 0)
-		    vFAIL("Internal disaster");
-	    }
+	    if (len < 0)
+		vFAIL("Internal disaster");
 	    if (len > 0)
 		*flagp |= HASWIDTH;
 	    if (len == 1)

@@ -1214,20 +1214,12 @@ $     line = F$EDIT(line,"COMPRESS, TRIM")
 $     api_subversion = F$ELEMENT(2," ",line)
 $     got_api_subversion = "true"
 $   ENDIF
-$   IF (.NOT. got_patch) .OR. -
-       (.NOT. got_sub) .OR. - 
-       (.NOT. got_api_revision) .OR. -
-       (.NOT. got_api_version) .OR. -
-       (.NOT. got_api_subversion) -
-      THEN GOTO Patchlevel_h_loop
+$   IF (.NOT.got_patch).OR.(.NOT.got_sub) THEN GOTO Patchlevel_h_loop
 $Close_patch:
 $   CLOSE CONFIG
 $ ELSE
 $   patchlevel="0"
 $   subversion="0"
-$   api_revision="0"
-$   api_version="0"
-$   api_subversion="0"
 $ ENDIF
 $ IF (F$STRING(subversion) .NES. "0")
 $ THEN
@@ -2376,7 +2368,7 @@ $ echo "SDBM_File if you have the GDBM library built on your machine."
 $ echo ""
 $ echo "Which modules do you want to build into perl?"
 $! dflt = "Fcntl Errno File::Glob IO Opcode Byteloader Devel::Peek Devel::DProf Data::Dumper attrs re VMS::Stdio VMS::DCLsym B SDBM_File"
-$ dflt = "re Fcntl Errno File::Glob IO Opcode Devel::Peek Devel::DProf Data::Dumper attrs VMS::Stdio VMS::DCLsym B SDBM_File Thread Sys::Hostname"
+$ dflt = "re Fcntl Errno File::Glob IO Opcode Devel::Peek Devel::DProf Data::Dumper attrs VMS::Stdio VMS::DCLsym B SDBM_File Storable Thread Sys::Hostname"
 $ IF Using_Dec_C .OR. using_cxx
 $ THEN
 $   dflt = dflt + " POSIX"
@@ -4720,11 +4712,8 @@ $ WC ""
 $ WC "CONFIG='true'"
 $ WC "Makefile_SH='" + Makefile_SH + "'"
 $ WC "Mcc='" + Mcc + "'"
-$ WC "PERL_REVISION=" + revision
-$ WC "PERL_VERSION=" + patchlevel
-$ WC "PERL_SUBVERSION=" + subversion
-$ WC "PERL_API_VERSION=" + api_version
-$ WC "PERL_API_SUBVERSION=" + api_subversion
+$! WC "PERL_SUBVERSION='" + subversion + "'" ! VMS specific to descrip_mms.template
+$ WC "PERL_VERSION='" + patchlevel + "'" ! VMS specific to descrip_mms.template
 $ WC "alignbytes='" + alignbytes + "'"
 $ WC "aphostname='" + "'"
 $ WC "ar='" + "'"
@@ -4951,7 +4940,6 @@ $ WC "d_rmdir='define'"
 $ WC "d_safebcpy='undef'"
 $ WC "d_safemcpy='define'"
 $ WC "d_sanemcmp='define'"
-$ WC "d_sbrkproto='undef'"
 $ WC "d_sched_yield='" + d_sched_yield + "'"
 $ WC "d_scm_rights='undef'"
 $ WC "d_seekdir='define'"

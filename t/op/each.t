@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..24\n";
+print "1..19\n";
 
 $h{'abc'} = 'ABC';
 $h{'def'} = 'DEF';
@@ -131,28 +131,3 @@ if ($i == 5) { print "ok 16\n" } else { print "not ok\n" }
     print "ok 19\n";
 }
 
-# Check for Unicode hash keys.
-%u = ("\x{12}", "f", "\x{123}", "fo", "\x{1234}",  "foo");
-$u{"\x{12345}"}  = "bar";
-@u{"\x{123456}"} = "zap";
-
-foreach (keys %u) {
-    unless (length() == 1) {
-	print "not ";
-	last;
-    }
-}
-print "ok 20\n";
-
-$a = "\xe3\x81\x82"; $A = "\x{3042}";
-%b = ( $a => "non-utf8");
-%u = ( $A => "utf8");
-
-print "not " if exists $b{$A};
-print "ok 21\n";
-print "not " if exists $u{$a};
-print "ok 22\n";
-print "#$b{$_}\n" for keys %b; # Used to core dump before change #8056.
-print "ok 23\n";
-print "#$u{$_}\n" for keys %u; # Used to core dump before change #8056.
-print "ok 24\n";

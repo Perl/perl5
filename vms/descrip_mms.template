@@ -337,7 +337,7 @@ CRTLOPTS =,$(CRTL)/Options
 .endif
 
 # Modules which must be installed before we can build extensions
-LIBPREREQ = $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm [.lib]XSLoader.pm [.lib]vmsish.pm [.lib.ExtUtils]XSSymSet.pm $(ARCHDIR)vmspipe.com [.lib]re.pm
+LIBPREREQ = $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm [.lib]XSLoader.pm [.lib]lib.pm [.lib]vmsish.pm [.lib.ExtUtils]XSSymSet.pm $(ARCHDIR)vmspipe.com [.lib]re.pm
 
 utils1 = [.lib.pod]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils]h2ph.com [.utils]h2xs.com [.lib]perlbug.com [.lib]perlcc.com [.utils]dprofpp.com
 utils2 = [.lib]splain.com [.utils]pl2pm.com
@@ -499,6 +499,9 @@ dynext : $(LIBPREREQ) $(DBG)perlshr$(E)
 
 [.lib]vmsish.pm : [.vms.ext]vmsish.pm
 	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
+
+[.lib]lib.pm : [.lib]lib_pm.PL
+	$(MINIPERL) $(MMS$SOURCE)
 
 [.lib.VMS]Filespec.pm : [.vms.ext]Filespec.pm
 	@ If F$Search("[.lib]VMS.Dir").eqs."" Then Create/Directory [.lib.VMS]
