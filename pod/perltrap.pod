@@ -69,13 +69,13 @@ executed.)  See L<perlvar>.
 
 =item *
 
-$<I<digit>> does not refer to fields--it refers to substrings matched by
-the last match pattern.
+$E<lt>I<digit>E<gt> does not refer to fields--it refers to substrings matched
+by the last match pattern.
 
 =item *
 
 The print() statement does not add field and record separators unless
-you set C<$,> and C<$.>.  You can set $OFS and $ORS if you're using
+you set C<$,> and C<$\>.  You can set $OFS and $ORS if you're using
 the English module.
 
 =item *
@@ -103,7 +103,7 @@ basically incompatible with C.)
 The concatenation operator is ".", not the null string.  (Using the
 null string would render C</pat/ /pat/> unparsable, since the third slash
 would be interpreted as a division operator--the tokener is in fact
-slightly context sensitive for operators like "/", "?", and ">".
+slightly context sensitive for operators like "/", "?", and "E<gt>".
 And in fact, "." itself can be the beginning of a number.)
 
 =item *
@@ -295,7 +295,7 @@ you might expect to do not.
 
 =item *
 
-The <FH> construct is not the name of the filehandle, it is a readline
+The E<lt>FHE<gt> construct is not the name of the filehandle, it is a readline
 operation on that handle.  The data read is only assigned to $_ if the
 file read is the sole condition in a while loop:
 
@@ -1176,6 +1176,9 @@ the file.
 
 =head2 Interpolation Traps
 
+Perl4-to-Perl5 traps having to do with how things get interpolated
+within certain expressions, statements, contexts, or whatever.
+
 =over 5
 
 =item * Interpolation
@@ -1189,9 +1192,6 @@ the file.
 
 =item * Interpolation
 
-Perl4-to-Perl5 traps having to do with how things get interpolated
-within certain expressions, statements, contexts, or whatever.
-
 Double-quoted strings may no longer end with an unescaped $ or @.
 
     $foo = "foo$";
@@ -1202,6 +1202,23 @@ Double-quoted strings may no longer end with an unescaped $ or @.
     # perl5 errors: Final $ should be \$ or $name
 
 Note: perl5 DOES NOT error on the terminating @ in $bar
+
+=item * Interpolation
+
+Perl now sometimes evaluates arbitrary expressions inside braces that occur
+within double quotes (usually when the opening brace is preceded by C<$>
+or C<@>).
+
+    @www = "buz";
+    $foo = "foo";
+    $bar = "bar";
+    sub foo { return "bar" };
+    print "|@{w.w.w}|${main'foo}|";
+
+    # perl4 prints: |@{w.w.w}|foo|
+    # perl5 prints: |buz|bar|
+
+Note that you can C<use strict;> to ward off such trappiness under perl5.
 
 =item * Interpolation
 
