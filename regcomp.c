@@ -64,7 +64,7 @@
  *
  ****    Alterations to Henry's code are...
  ****
- ****    Copyright (c) 1991-1997, Larry Wall
+ ****    Copyright (c) 1991-1998, Larry Wall
  ****
  ****    You may distribute under the terms of either the GNU General Public
  ****    License or the Artistic License, as specified in the README file.
@@ -132,7 +132,9 @@ static regnode *reganode _((U8, U32));
 static regnode *regatom _((I32 *));
 static regnode *regbranch _((I32 *, I32));
 static void regc _((U8, char *));
+static void reguni _((UV, char *, I32*));
 static regnode *regclass _((void));
+static regnode *regclassutf8 _((void));
 STATIC I32 regcurly _((char *));
 static regnode *reg_node _((U8));
 static regnode *regpiece _((I32 *));
@@ -150,18 +152,18 @@ static void re_croak2 _((const char* pat1,const char* pat2,...)) __attribute__((
 typedef struct {
     I32 len_min;
     I32 len_delta;
-    I32 pos_min;
-    I32 pos_delta;
+    I32 pos_min;			/* CC */
+    I32 pos_delta;			/* CC */
     SV *last_found;
     I32 last_end;			/* min value, <0 unless valid. */
-    I32 last_start_min;
-    I32 last_start_max;
+    I32 last_start_min;			/* CC */
+    I32 last_start_max;			/* CC */
     SV **longest;			/* Either &l_fixed, or &l_float. */
     SV *longest_fixed;
-    I32 offset_fixed;
+    I32 offset_fixed;			/* CC */
     SV *longest_float;
-    I32 offset_float_min;
-    I32 offset_float_max;
+    I32 offset_float_min;		/* CC */
+    I32 offset_float_max;		/* CC */
     I32 flags;
 } scan_data_t;
 #endif
@@ -193,11 +195,19 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 #define SF_HAS_EVAL		0x200
 #define SCF_DO_SUBSTR		0x400
 
+#define RF_utf8		8
+#define UTF (PL_reg_flags & RF_utf8)
+#define LOC (PL_regflags & PMf_LOCALE)
+#define FOLD (PL_regflags & PMf_FOLD)
+
+#define CHR_SVLEN(sv) (UTF ? sv_len_utf8(sv) : SvCUR(sv))
+#define CHR_DIST(a,b) (UTF ? utf8_distance(a,b) : a - b)
+
 STATIC void
 scan_commit(scan_data_t *data)
 {
-    STRLEN l = SvCUR(data->last_found);
-    STRLEN old_l = SvCUR(*data->longest);
+    STRLEN l = CHR_SVLEN(data->last_found);
+    STRLEN old_l = CHR_SVLEN(*data->longest);
     
     if ((l >= old_l) && ((l > old_l) || (data->flags & SF_BEFORE_EOL))) {
 	sv_setsv(*data->longest, data->last_found);
@@ -208,7 +218,8 @@ scan_commit(scan_data_t *data)
 		    |= ((data->flags & SF_BEFORE_EOL) << SF_FIX_SHIFT_EOL);
 	    else
 		data->flags &= ~SF_FIX_BEFORE_EOL;
-	} else {
+	}
+	else {
 	    data->offset_float_min = l ? data->last_start_min : data->pos_min;
 	    data->offset_float_max = (l 
 				      ? data->last_start_max 
@@ -269,7 +280,8 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 			stop = n;
 #endif 
 		    n = regnext(n);
-		} else {
+		}
+		else {
 		    int oldl = *OPERAND(scan);
 		    regnode *nnext = regnext(n);
 		    
@@ -368,16 +380,27 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 		}
 		min += min1;
 		delta += max1 - min1;
-	    } else if (code == BRANCHJ)	/* single branch is optimized. */
+	    }
+	    else if (code == BRANCHJ)	/* single branch is optimized. */
 		scan = NEXTOPER(NEXTOPER(scan));
 	    else			/* single branch is optimized. */
 		scan = NEXTOPER(scan);
 	    continue;
-	} else if (OP(scan) == EXACT) {
-	    min += *OPERAND(scan);
+	}
+	else if (OP(scan) == EXACT) {
+	    I32 l = *OPERAND(scan);
+	    if (UTF) {
+		unsigned char *s = (unsigned char *)(OPERAND(scan)+1);
+		unsigned char *e = s + l;
+		I32 newl = 0;
+		while (s < e) {
+		    newl++;
+		    s += UTF8SKIP(s);
+		}
+		l = newl;
+	    }
+	    min += l;
 	    if (flags & SCF_DO_SUBSTR) { /* Update longest substr. */
-		I32 l = *OPERAND(scan);
-
 		/* The code below prefers earlier match for fixed
 		   offset, later match for variable offset.  */
 		if (data->last_end == -1) { /* Update the start info. */
@@ -385,18 +408,31 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
  		    data->last_start_max = is_inf
  			? I32_MAX : data->pos_min + data->pos_delta; 
 		}
-		sv_catpvn(data->last_found, (char *)(OPERAND(scan)+1), l);
+		sv_catpvn(data->last_found, (char *)(OPERAND(scan)+1), *OPERAND(scan));
 		data->last_end = data->pos_min + l;
 		data->pos_min += l; /* As in the first entry. */
 		data->flags &= ~SF_BEFORE_EOL;
 	    }
-	} else if (regkind[(U8)OP(scan)] == EXACT) {
+	}
+	else if (regkind[(U8)OP(scan)] == EXACT) {
+	    I32 l = *OPERAND(scan);
 	    if (flags & SCF_DO_SUBSTR) 
 		scan_commit(data);
-	    min += *OPERAND(scan);
+	    if (UTF) {
+		unsigned char *s = (unsigned char *)(OPERAND(scan)+1);
+		unsigned char *e = s + l;
+		I32 newl = 0;
+		while (s < e) {
+		    newl++;
+		    s += UTF8SKIP(s);
+		}
+		l = newl;
+	    }
+	    min += l;
 	    if (data && (flags & SCF_DO_SUBSTR))
-		data->pos_min += *OPERAND(scan);
-	} else if (strchr(varies,OP(scan))) {
+		data->pos_min += l;
+	}
+	else if (strchr(varies,OP(scan))) {
 	    I32 mincount, maxcount, minnext, deltanext, pos_before, fl;
 	    regnode *oscan = scan;
 	    
@@ -540,7 +576,8 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 #endif
 			/* Optimize again: */
 			study_chunk(&nxt1, &deltanext, nxt, NULL, 0);
-		    } else
+		    }
+		    else
 			oscan->flags = 0;
 		}
 		if (data && fl & (SF_HAS_PAR|SF_IN_PAR)) 
@@ -554,10 +591,14 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 			    ? pos_before : data->last_start_min;
 			STRLEN l;
 			char *s = SvPV(data->last_found, l);
+			I32 old = b - data->last_start_min;
+
+			if (UTF)
+			    old = utf8_hop((U8*)s, old) - (U8*)s;
 			
-			l -= b - data->last_start_min;
+			l -= old;
 			/* Get the added string: */
-			last_str = newSVpv(s  +  b - data->last_start_min, l);
+			last_str = newSVpv(s  + old, l);
 			if (deltanext == 0 && pos_before == b) {
 			    /* What was added is a constant string */
 			    if (mincount > 1) {
@@ -583,11 +624,11 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 			    sv_setsv(data->last_found, last_str);
 			    data->last_end = data->pos_min;
 			    data->last_start_min = 
-				data->pos_min - SvCUR(last_str);
+				data->pos_min - CHR_SVLEN(last_str);
 			    data->last_start_max = is_inf 
 				? I32_MAX 
 				: data->pos_min + data->pos_delta
-				- SvCUR(last_str);
+				- CHR_SVLEN(last_str);
 			}
 			data->longest = &(data->longest_float);
 		    }
@@ -609,17 +650,20 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 		is_inf = 1;
 		break;
 	    }
-	} else if (strchr(simple,OP(scan))) {
+	}
+	else if (strchr(simple,OP(scan)) || regkind[(U8)OP(scan)] == ANYUTF8) {
 	    if (flags & SCF_DO_SUBSTR) {
 		scan_commit(data);
 		data->pos_min++;
 	    }
 	    min++;
-	} else if (regkind[(U8)OP(scan)] == EOL && flags & SCF_DO_SUBSTR) {
+	}
+	else if (regkind[(U8)OP(scan)] == EOL && flags & SCF_DO_SUBSTR) {
 	    data->flags |= (OP(scan) == MEOL
 			    ? SF_BEFORE_MEOL
 			    : SF_BEFORE_SEOL);
-	} else if (regkind[(U8)OP(scan)] == BRANCHJ
+	}
+	else if (regkind[(U8)OP(scan)] == BRANCHJ
 		   && (scan->flags || data)
 		   && (OP(scan) == IFMATCH || OP(scan) == UNLESSM)) {
 	    I32 deltanext, minnext;
@@ -632,7 +676,8 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 	    if (scan->flags) {
 		if (deltanext) {
 		    FAIL("variable length lookbehind not implemented");
-		} else if (minnext > U8_MAX) {
+		}
+		else if (minnext > U8_MAX) {
 		    FAIL2("lookbehind longer than %d not implemented", U8_MAX);
 		}
 		scan->flags = minnext;
@@ -641,14 +686,17 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 		pars++;
 	    if (data && (data_fake.flags & SF_HAS_EVAL))
 		data->flags |= SF_HAS_EVAL;
-	} else if (OP(scan) == OPEN) {
+	}
+	else if (OP(scan) == OPEN) {
 	    pars++;
-	} else if (OP(scan) == CLOSE && ARG(scan) == is_par) {
+	}
+	else if (OP(scan) == CLOSE && ARG(scan) == is_par) {
 	    next = regnext(scan);
 
 	    if ( next && (OP(next) != WHILEM) && next < last)
 		is_par = 0;		/* Disable optimization */
-	} else if (OP(scan) == EVAL) {
+	}
+	else if (OP(scan) == EVAL) {
 		if (data)
 		    data->flags |= SF_HAS_EVAL;
 	}
@@ -666,7 +714,8 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
     if (is_par && pars==1 && data) {
 	data->flags |= SF_IN_PAR;
 	data->flags &= ~SF_HAS_PAR;
-    } else if (pars && data) {
+    }
+    else if (pars && data) {
 	data->flags |= SF_HAS_PAR;
 	data->flags &= ~SF_IN_PAR;
     }
@@ -683,7 +732,8 @@ add_data(I32 n, char *s)
 	       char, struct reg_data);
 	Renew(PL_regcomp_rx->data->what, PL_regcomp_rx->data->count + n, U8);
 	PL_regcomp_rx->data->count += n;
-    } else {
+    }
+    else {
 	Newc(1207, PL_regcomp_rx->data, sizeof(*PL_regcomp_rx->data) + sizeof(void*) * (n - 1),
 	     char, struct reg_data);
 	New(1208, PL_regcomp_rx->data->what, n, U8);
@@ -726,6 +776,11 @@ pregcomp(char *exp, char *xend, PMOP *pm)
     if (exp == NULL)
 	FAIL("NULL regexp argument");
 
+    if (PL_curcop == &compiling ? (PL_hints & HINT_UTF8) : IN_UTF8)
+	PL_reg_flags |= RF_utf8;
+    else
+	PL_reg_flags = 0;
+
     PL_regprecomp = savepvn(exp, xend - exp);
     DEBUG_r(PerlIO_printf(Perl_debug_log, "compiling RE `%*s'\n",
 			  xend - exp, PL_regprecomp));
@@ -767,7 +822,8 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 		    *s = '\0';
 		    PL_colors[i] = ++s;
 		}
-	    } else {
+	    }
+	    else {
 		while (i < 4) 
 		    PL_colors[i++] = "";
 	    }
@@ -812,8 +868,11 @@ pregcomp(char *exp, char *xend, PMOP *pm)
     /* Dig out information for optimizations. */
     r->reganch = pm->op_pmflags & PMf_COMPILETIME;
     pm->op_pmflags = PL_regflags;
+    if (UTF)
+	r->reganch |= ROPT_UTF8;
     r->regstclass = NULL;
-    r->naughty = PL_regnaughty >= 10;	/* Probably an expensive pattern. */
+    if (PL_regnaughty >= 10)	/* Probably an expensive pattern. */
+	r->reganch |= ROPT_NAUGHTY;
     scan = r->program + 1;		/* First BRANCH. */
 
     /* XXXX To minimize changes to RE engine we always allocate
@@ -843,7 +902,7 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	/* Starting-point info. */
       again:
 	if (OP(first) == EXACT);	/* Empty, get anchored substr later. */
-	else if (strchr(simple+2,OP(first)))
+	else if (strchr(simple+4,OP(first)))
 	    r->regstclass = first;
 	else if (regkind[(U8)OP(first)] == BOUND ||
 		 regkind[(U8)OP(first)] == NBOUND)
@@ -902,12 +961,12 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	scan_commit(&data);
 	SvREFCNT_dec(data.last_found);
 
-	longest_float_length = SvCUR(data.longest_float);
+	longest_float_length = CHR_SVLEN(data.longest_float);
 	if (longest_float_length
 	    || (data.flags & SF_FL_BEFORE_EOL
 		&& (!(data.flags & SF_FL_BEFORE_MEOL)
 		    || (PL_regflags & PMf_MULTILINE)))) {
-	    if (SvCUR(data.longest_fixed) 
+	    if (SvCUR(data.longest_fixed) 			/* ok to leave SvCUR */
 		&& data.offset_fixed == data.offset_float_min)
 		goto remove;		/* Like in (a)+. */
 	    
@@ -920,14 +979,15 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 		&& (!(data.flags & SF_FL_BEFORE_MEOL)
 		    || (PL_regflags & PMf_MULTILINE))) 
 		SvTAIL_on(r->float_substr);
-	} else {
+	}
+	else {
 	  remove:
 	    r->float_substr = Nullsv;
 	    SvREFCNT_dec(data.longest_float);
 	    longest_float_length = 0;
 	}
 
-	longest_fixed_length = SvCUR(data.longest_fixed);
+	longest_fixed_length = CHR_SVLEN(data.longest_fixed);
 	if (longest_fixed_length
 	    || (data.flags & SF_FIX_BEFORE_EOL /* Cannot have SEOL and MULTI */
 		&& (!(data.flags & SF_FIX_BEFORE_MEOL)
@@ -940,7 +1000,8 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 		&& (!(data.flags & SF_FIX_BEFORE_MEOL)
 		    || (PL_regflags & PMf_MULTILINE)))
 		SvTAIL_on(r->anchored_substr);
-	} else {
+	}
+	else {
 	    r->anchored_substr = Nullsv;
 	    SvREFCNT_dec(data.longest_fixed);
 	    longest_fixed_length = 0;
@@ -952,12 +1013,14 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	    r->check_offset_min = r->check_offset_max = r->anchored_offset;
 	    if (r->reganch & ROPT_ANCH_SINGLE)
 		r->reganch |= ROPT_NOSCAN;
-	} else {
+	}
+	else {
 	    r->check_substr = r->float_substr;
 	    r->check_offset_min = data.offset_float_min;
 	    r->check_offset_max = data.offset_float_max;
 	}
-    } else {
+    }
+    else {
 	/* Several toplevels. Best we can is to set minlen. */
 	I32 fake;
 	
@@ -1076,8 +1139,9 @@ reg(I32 paren, I32 *flagp)
 		    PL_regcomp_rx->data->data[n+1] = (void*)av;
 		    PL_regcomp_rx->data->data[n+2] = (void*)sop;
 		    SvREFCNT_dec(sv);
-		} else {		/* First pass */
-		    if (PL_reginterp_cnt < ++PL_seen_evals && PL_curcop != &PL_compiling)
+		}
+		else {		/* First pass */
+		    if (PL_reginterp_cnt < ++PL_seen_evals && PL_curcop != &compiling)
 			/* No compiled RE interpolated, has runtime
 			   components ===> unsafe.  */
 			FAIL("Eval-group not allowed at runtime, use re 'eval'");
@@ -1100,7 +1164,8 @@ reg(I32 paren, I32 *flagp)
 			regtail(ret, reg(1, &flag));
 			goto insert_if;
 		    } 
-		} else if (PL_regcomp_parse[0] >= '1' && PL_regcomp_parse[0] <= '9' ) {
+		}
+		else if (PL_regcomp_parse[0] >= '1' && PL_regcomp_parse[0] <= '9' ) {
 		    parno = atoi(PL_regcomp_parse++);
 
 		    while (isDIGIT(*PL_regcomp_parse))
@@ -1121,7 +1186,8 @@ reg(I32 paren, I32 *flagp)
 			regbranch(&flags, 1);
 			regtail(ret, lastbr);
 			c = *nextchar();
-		    } else
+		    }
+		    else
 			lastbr = NULL;
 		    if (c != ')')
 			FAIL("Switch (?(condition)... contains too many branches");
@@ -1130,10 +1196,12 @@ reg(I32 paren, I32 *flagp)
 		    if (lastbr) {
 			regtail(lastbr, ender);
 			regtail(NEXTOPER(NEXTOPER(lastbr)), ender);
-		    } else
+		    }
+		    else
 			regtail(ret, ender);
 		    return ret;
-		} else {
+		}
+		else {
 		    FAIL2("Unknown condition for (?(%.2s", PL_regcomp_parse);
 		}
 	    }
@@ -1174,7 +1242,8 @@ reg(I32 paren, I32 *flagp)
 	    ret = reganode(OPEN, parno);
 	    open = 1;
 	}
-    } else
+    }
+    else
 	ret = NULL;
 
     /* Pick up the branches, linking them together. */
@@ -1184,17 +1253,20 @@ reg(I32 paren, I32 *flagp)
     if (*PL_regcomp_parse == '|') {
 	if (!SIZE_ONLY && PL_extralen) {
 	    reginsert(BRANCHJ, br);
-	} else
+	}
+	else
 	    reginsert(BRANCH, br);
 	have_branch = 1;
 	if (SIZE_ONLY)
 	    PL_extralen += 1;		/* For BRANCHJ-BRANCH. */
-    } else if (paren == ':') {
+    }
+    else if (paren == ':') {
 	*flagp |= flags&SIMPLE;
     }
     if (open) {				/* Starts with OPEN. */
 	regtail(ret, br);		/* OPEN -> first. */
-    } else if (paren != '?')		/* Not Conditional */
+    }
+    else if (paren != '?')		/* Not Conditional */
 	ret = br;
     if (flags&HASWIDTH)
 	*flagp |= HASWIDTH;
@@ -1269,10 +1341,12 @@ reg(I32 paren, I32 *flagp)
     /* Check for proper termination. */
     if (paren && (PL_regcomp_parse >= PL_regxend || *nextchar() != ')')) {
 	FAIL("unmatched () in regexp");
-    } else if (!paren && PL_regcomp_parse < PL_regxend) {
+    }
+    else if (!paren && PL_regcomp_parse < PL_regxend) {
 	if (*PL_regcomp_parse == ')') {
 	    FAIL("unmatched () in regexp");
-	} else
+	}
+	else
 	    FAIL("junk on end of regexp");	/* "Can't happen". */
 	/* NOTREACHED */
     }
@@ -1320,7 +1394,8 @@ regbranch(I32 *flagp, I32 first)
 	    if (flags & TRYAGAIN)
 		continue;
 	    return(NULL);
-	} else if (ret == NULL)
+	}
+	else if (ret == NULL)
 	    ret = latest;
 	*flagp |= flags&HASWIDTH;
 	if (chain == NULL) 	/* First piece. */
@@ -1463,7 +1538,8 @@ regpiece(I32 *flagp)
     else if (op == '*') {
 	min = 0;
 	goto do_curly;
-    } else if (op == '+' && (flags&SIMPLE)) {
+    }
+    else if (op == '+' && (flags&SIMPLE)) {
 	reginsert(PLUS, ret);
 	ret->flags = 0;
 	PL_regnaughty += 3;
@@ -1471,7 +1547,8 @@ regpiece(I32 *flagp)
     else if (op == '+') {
 	min = 1;
 	goto do_curly;
-    } else if (op == '?') {
+    }
+    else if (op == '?') {
 	min = 0; max = 1;
 	goto do_curly;
     }
@@ -1536,16 +1613,25 @@ tryagain:
 	break;
     case '.':
 	nextchar();
-	if (PL_regflags & PMf_SINGLELINE)
-	    ret = reg_node(SANY);
-	else
-	    ret = reg_node(ANY);
+	if (UTF) {
+	    if (PL_regflags & PMf_SINGLELINE)
+		ret = reg_node(SANYUTF8);
+	    else
+		ret = reg_node(ANYUTF8);
+	    *flagp |= HASWIDTH;
+	}
+	else {
+	    if (PL_regflags & PMf_SINGLELINE)
+		ret = reg_node(SANY);
+	    else
+		ret = reg_node(ANY);
+	    *flagp |= HASWIDTH|SIMPLE;
+	}
 	PL_regnaughty++;
-	*flagp |= HASWIDTH|SIMPLE;
 	break;
     case '[':
 	PL_regcomp_parse++;
-	ret = regclass();
+	ret = (UTF ? regclassutf8() : regclass());
 	*flagp |= HASWIDTH|SIMPLE;
 	break;
     case '(':
@@ -1603,47 +1689,93 @@ tryagain:
 	    PL_seen_zerolen++;		/* Do not optimize RE away */
 	    nextchar();
 	    break;
-	case 'w':
-	    ret = reg_node((PL_regflags & PMf_LOCALE) ? ALNUML : ALNUM);
+	case 'C':
+	    ret = reg_node(SANY);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
 	    break;
-	case 'W':
-	    ret = reg_node((PL_regflags & PMf_LOCALE) ? NALNUML : NALNUM);
+	case 'X':
+	    ret = reg_node(CLUMP);
+	    *flagp |= HASWIDTH;
+	    nextchar();
+	    if (UTF && !PL_utf8_mark)
+		is_utf8_mark("~");	/* preload table */
+	    break;
+	case 'w':
+	    ret = reg_node(
+		UTF
+		    ? (LOC ? ALNUMLUTF8 : ALNUMUTF8)
+		    : (LOC ? ALNUML     : ALNUM));
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
+	    if (UTF && !PL_utf8_alnum)
+		is_utf8_alnum("a");	/* preload table */
+	    break;
+	case 'W':
+	    ret = reg_node(
+		UTF
+		    ? (LOC ? NALNUMLUTF8 : NALNUMUTF8)
+		    : (LOC ? NALNUML     : NALNUM));
+	    *flagp |= HASWIDTH|SIMPLE;
+	    nextchar();
+	    if (UTF && !PL_utf8_alnum)
+		is_utf8_alnum("a");	/* preload table */
 	    break;
 	case 'b':
 	    PL_seen_zerolen++;
-	    ret = reg_node((PL_regflags & PMf_LOCALE) ? BOUNDL : BOUND);
+	    ret = reg_node(
+		UTF
+		    ? (LOC ? BOUNDLUTF8 : BOUNDUTF8)
+		    : (LOC ? BOUNDL     : BOUND));
 	    *flagp |= SIMPLE;
 	    nextchar();
+	    if (UTF && !PL_utf8_alnum)
+		is_utf8_alnum("a");	/* preload table */
 	    break;
 	case 'B':
 	    PL_seen_zerolen++;
-	    ret = reg_node((PL_regflags & PMf_LOCALE) ? NBOUNDL : NBOUND);
+	    ret = reg_node(
+		UTF
+		    ? (LOC ? NBOUNDLUTF8 : NBOUNDUTF8)
+		    : (LOC ? NBOUNDL     : NBOUND));
 	    *flagp |= SIMPLE;
 	    nextchar();
+	    if (UTF && !PL_utf8_alnum)
+		is_utf8_alnum("a");	/* preload table */
 	    break;
 	case 's':
-	    ret = reg_node((PL_regflags & PMf_LOCALE) ? SPACEL : SPACE);
+	    ret = reg_node(
+		UTF
+		    ? (LOC ? SPACELUTF8 : SPACEUTF8)
+		    : (LOC ? SPACEL     : SPACE));
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
+	    if (UTF && !PL_utf8_space)
+		is_utf8_space(" ");	/* preload table */
 	    break;
 	case 'S':
-	    ret = reg_node((PL_regflags & PMf_LOCALE) ? NSPACEL : NSPACE);
+	    ret = reg_node(
+		UTF
+		    ? (LOC ? NSPACELUTF8 : NSPACEUTF8)
+		    : (LOC ? NSPACEL     : NSPACE));
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
+	    if (UTF && !PL_utf8_space)
+		is_utf8_space(" ");	/* preload table */
 	    break;
 	case 'd':
-	    ret = reg_node(DIGIT);
+	    ret = reg_node(UTF ? DIGITUTF8 : DIGIT);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
+	    if (UTF && !PL_utf8_digit)
+		is_utf8_digit("1");	/* preload table */
 	    break;
 	case 'D':
-	    ret = reg_node(NDIGIT);
+	    ret = reg_node(UTF ? NDIGITUTF8 : NDIGIT);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
+	    if (UTF && !PL_utf8_digit)
+		is_utf8_digit("1");	/* preload table */
 	    break;
 	case 'n':
 	case 'r':
@@ -1666,8 +1798,8 @@ tryagain:
 		    if (!SIZE_ONLY && num > PL_regcomp_rx->nparens)
 			FAIL("reference to nonexistent group");
 		    PL_regsawback = 1;
-		    ret = reganode((PL_regflags & PMf_FOLD)
-				   ? ((PL_regflags & PMf_LOCALE) ? REFFL : REFF)
+		    ret = reganode(FOLD
+				   ? (LOC ? REFFL : REFF)
 				   : REF, num);
 		    *flagp |= HASWIDTH;
 		    while (isDIGIT(*PL_regcomp_parse))
@@ -1696,7 +1828,7 @@ tryagain:
 
     default: {
 	    register I32 len;
-	    register U8 ender;
+	    register UV ender;
 	    register char *p;
 	    char *oldp, *s;
 	    I32 numlen;
@@ -1704,8 +1836,8 @@ tryagain:
 	    PL_regcomp_parse++;
 
 	defchar:
-	    ret = reg_node((PL_regflags & PMf_FOLD)
-			  ? ((PL_regflags & PMf_LOCALE) ? EXACTFL : EXACTF)
+	    ret = reg_node(FOLD
+			  ? (LOC ? EXACTFL : EXACTF)
 			  : EXACT);
 	    s = (char *) OPERAND(ret);
 	    regc(0, s++);		/* save spot for len */
@@ -1767,8 +1899,26 @@ tryagain:
 			p++;
 			break;
 		    case 'x':
-			ender = scan_hex(++p, 2, &numlen);
-			p += numlen;
+			if (*++p == '{') {
+			    char* e = strchr(p, '}');
+	 
+			    if (!e)
+				FAIL("Missing right brace on \\x{}");
+			    else if (UTF) {
+				ender = scan_hex(p + 1, e - p, &numlen);
+				if (numlen + len >= 127) {	/* numlen is generous */
+				    p--;
+				    goto loopdone;
+				}
+				p = e + 1;
+			    }
+			    else
+				FAIL("Can't use \\x{} without 'use utf8' declaration");
+			}
+			else {
+			    ender = scan_hex(p, 2, &numlen);
+			    p += numlen;
+			}
 			break;
 		    case 'c':
 			p++;
@@ -1792,26 +1942,48 @@ tryagain:
 			    FAIL("trailing \\ in regexp");
 			/* FALL THROUGH */
 		    default:
-			ender = *p++;
-			break;
+			goto normal_default;
 		    }
 		    break;
 		default:
-		    ender = *p++;
+		  normal_default:
+		    if ((*p & 0xc0) == 0xc0 && UTF) {
+			ender = utf8_to_uv(p, &numlen);
+			p += numlen;
+		    }
+		    else
+			ender = *p++;
 		    break;
 		}
 		if (PL_regflags & PMf_EXTENDED)
 		    p = regwhite(p, PL_regxend);
+		if (UTF && FOLD) {
+		    if (LOC)
+			ender = toLOWER_LC_uni(ender);
+		    else
+			ender = toLOWER_uni(ender);
+		}
 		if (ISMULT2(p)) { /* Back off on ?+*. */
 		    if (len)
 			p = oldp;
+		    else if (ender >= 0x80 && UTF) {
+			reguni(ender, s, &numlen);
+			s += numlen;
+			len += numlen;
+		    }
 		    else {
 			len++;
 			regc(ender, s++);
 		    }
 		    break;
 		}
-		regc(ender, s++);
+		if (ender >= 0x80 && UTF) {
+		    reguni(ender, s, &numlen);
+		    s += numlen;
+		    len += numlen - 1;
+		}
+		else
+		    regc(ender, s++);
 	    }
 	loopdone:
 	    PL_regcomp_parse = p - 1;
@@ -1827,7 +1999,8 @@ tryagain:
 	    regc('\0', s++);
 	    if (SIZE_ONLY) {
 		PL_regsize += (len + 2 + sizeof(regnode) - 1) / sizeof(regnode);
-	    } else {
+	    }
+	    else {
 		PL_regcode += (len + 2 + sizeof(regnode) - 1) / sizeof(regnode);
 	    }
 	}
@@ -1859,8 +2032,8 @@ regclass(void)
 {
     dTHR;
     register char *opnd, *s;
-    register I32 Class;
-    register I32 lastclass = 1234;
+    register I32 value;
+    register I32 lastvalue = 1234;
     register I32 range = 0;
     register regnode *ret;
     register I32 def;
@@ -1868,7 +2041,7 @@ regclass(void)
 
     s = opnd = (char *) OPERAND(PL_regcode);
     ret = reg_node(ANYOF);
-    for (Class = 0; Class < 33; Class++)
+    for (value = 0; value < 33; value++)
 	regc(0, s++);
     if (*PL_regcomp_parse == '^') {	/* Complement of range. */
 	PL_regnaughty++;
@@ -1878,19 +2051,20 @@ regclass(void)
     }
     if (!SIZE_ONLY) {
  	PL_regcode += ANY_SKIP;
-	if (PL_regflags & PMf_FOLD)
+	if (FOLD)
 	    *opnd |= ANYOF_FOLD;
-	if (PL_regflags & PMf_LOCALE)
+	if (LOC)
 	    *opnd |= ANYOF_LOCALE;
-    } else {
+    }
+    else {
 	PL_regsize += ANY_SKIP;
     }
     if (*PL_regcomp_parse == ']' || *PL_regcomp_parse == '-')
 	goto skipcond;		/* allow 1st char to be ] or - */
     while (PL_regcomp_parse < PL_regxend && *PL_regcomp_parse != ']') {
        skipcond:
-	Class = UCHARAT(PL_regcomp_parse++);
-	if (Class == '[' && PL_regcomp_parse + 1 < PL_regxend &&
+	value = UCHARAT(PL_regcomp_parse++);
+	if (value == '[' && PL_regcomp_parse + 1 < PL_regxend &&
 	    /* I smell either [: or [= or [. -- POSIX has been here, right? */
 	    (*PL_regcomp_parse == ':' || *PL_regcomp_parse == '=' || *PL_regcomp_parse == '.')) {
 	    char  posixccc = *PL_regcomp_parse;
@@ -1908,122 +2082,122 @@ regclass(void)
 		     * (POSIX Extended Character Classes, that is)
 		     * The text between e.g. [: and :] would start
 		     * at posixccs + 1 and stop at regcomp_parse - 2. */
-		    if (PL_dowarn && !SIZE_ONLY)
+		    if (dowarn && !SIZE_ONLY)
 			warn("Character class syntax [%c %c] is reserved for future extensions", posixccc, posixccc);
 		    PL_regcomp_parse++; /* skip over the ending ] */
 		}
 	    }
 	}
-	if (Class == '\\') {
-	    Class = UCHARAT(PL_regcomp_parse++);
-	    switch (Class) {
+	if (value == '\\') {
+	    value = UCHARAT(PL_regcomp_parse++);
+	    switch (value) {
 	    case 'w':
 		if (!SIZE_ONLY) {
-		    if (PL_regflags & PMf_LOCALE)
+		    if (LOC)
 			*opnd |= ANYOF_ALNUML;
 		    else {
-			for (Class = 0; Class < 256; Class++)
-			    if (isALNUM(Class))
-				ANYOF_SET(opnd, Class);
+			for (value = 0; value < 256; value++)
+			    if (isALNUM(value))
+				ANYOF_SET(opnd, value);
 		    }
 		}
-		lastclass = 1234;
+		lastvalue = 1234;
 		continue;
 	    case 'W':
 		if (!SIZE_ONLY) {
-		    if (PL_regflags & PMf_LOCALE)
+		    if (LOC)
 			*opnd |= ANYOF_NALNUML;
 		    else {
-			for (Class = 0; Class < 256; Class++)
-			    if (!isALNUM(Class))
-				ANYOF_SET(opnd, Class);
+			for (value = 0; value < 256; value++)
+			    if (!isALNUM(value))
+				ANYOF_SET(opnd, value);
 		    }
 		}
-		lastclass = 1234;
+		lastvalue = 1234;
 		continue;
 	    case 's':
 		if (!SIZE_ONLY) {
-		    if (PL_regflags & PMf_LOCALE)
+		    if (LOC)
 			*opnd |= ANYOF_SPACEL;
 		    else {
-			for (Class = 0; Class < 256; Class++)
-			    if (isSPACE(Class))
-				ANYOF_SET(opnd, Class);
+			for (value = 0; value < 256; value++)
+			    if (isSPACE(value))
+				ANYOF_SET(opnd, value);
 		    }
 		}
-		lastclass = 1234;
+		lastvalue = 1234;
 		continue;
 	    case 'S':
 		if (!SIZE_ONLY) {
-		    if (PL_regflags & PMf_LOCALE)
+		    if (LOC)
 			*opnd |= ANYOF_NSPACEL;
 		    else {
-			for (Class = 0; Class < 256; Class++)
-			    if (!isSPACE(Class))
-				ANYOF_SET(opnd, Class);
+			for (value = 0; value < 256; value++)
+			    if (!isSPACE(value))
+				ANYOF_SET(opnd, value);
 		    }
 		}
-		lastclass = 1234;
+		lastvalue = 1234;
 		continue;
 	    case 'd':
 		if (!SIZE_ONLY) {
-		    for (Class = '0'; Class <= '9'; Class++)
-			ANYOF_SET(opnd, Class);
+		    for (value = '0'; value <= '9'; value++)
+			ANYOF_SET(opnd, value);
 		}
-		lastclass = 1234;
+		lastvalue = 1234;
 		continue;
 	    case 'D':
 		if (!SIZE_ONLY) {
-		    for (Class = 0; Class < '0'; Class++)
-			ANYOF_SET(opnd, Class);
-		    for (Class = '9' + 1; Class < 256; Class++)
-			ANYOF_SET(opnd, Class);
+		    for (value = 0; value < '0'; value++)
+			ANYOF_SET(opnd, value);
+		    for (value = '9' + 1; value < 256; value++)
+			ANYOF_SET(opnd, value);
 		}
-		lastclass = 1234;
+		lastvalue = 1234;
 		continue;
 	    case 'n':
-		Class = '\n';
+		value = '\n';
 		break;
 	    case 'r':
-		Class = '\r';
+		value = '\r';
 		break;
 	    case 't':
-		Class = '\t';
+		value = '\t';
 		break;
 	    case 'f':
-		Class = '\f';
+		value = '\f';
 		break;
 	    case 'b':
-		Class = '\b';
+		value = '\b';
 		break;
 	    case 'e':
-		Class = '\033';
+		value = '\033';
 		break;
 	    case 'a':
-		Class = '\007';
+		value = '\007';
 		break;
 	    case 'x':
-		Class = scan_hex(PL_regcomp_parse, 2, &numlen);
+		value = scan_hex(PL_regcomp_parse, 2, &numlen);
 		PL_regcomp_parse += numlen;
 		break;
 	    case 'c':
-		Class = UCHARAT(PL_regcomp_parse++);
-		Class = toCTRL(Class);
+		value = UCHARAT(PL_regcomp_parse++);
+		value = toCTRL(value);
 		break;
 	    case '0': case '1': case '2': case '3': case '4':
 	    case '5': case '6': case '7': case '8': case '9':
-		Class = scan_oct(--PL_regcomp_parse, 3, &numlen);
+		value = scan_oct(--PL_regcomp_parse, 3, &numlen);
 		PL_regcomp_parse += numlen;
 		break;
 	    }
 	}
 	if (range) {
-	    if (lastclass > Class)
+	    if (lastvalue > value)
 		FAIL("invalid [] range in regexp");
 	    range = 0;
 	}
 	else {
-	    lastclass = Class;
+	    lastvalue = value;
 	    if (*PL_regcomp_parse == '-' && PL_regcomp_parse+1 < PL_regxend &&
 	      PL_regcomp_parse[1] != ']') {
 		PL_regcomp_parse++;
@@ -2032,19 +2206,19 @@ regclass(void)
 	    }
 	}
 	if (!SIZE_ONLY) {
-	    for ( ; lastclass <= Class; lastclass++)
-		ANYOF_SET(opnd, lastclass);
+	    for ( ; lastvalue <= value; lastvalue++)
+		ANYOF_SET(opnd, lastvalue);
 	}
-	lastclass = Class;
+	lastvalue = value;
     }
     if (*PL_regcomp_parse != ']')
 	FAIL("unmatched [] in regexp");
     nextchar();
     /* optimize case-insensitive simple patterns (e.g. /[a-z]/i) */
     if (!SIZE_ONLY && (*opnd & (0xFF ^ ANYOF_INVERT)) == ANYOF_FOLD) {
-	for (Class = 0; Class < 256; ++Class) {
-	    if (ANYOF_TEST(opnd, Class)) {
-		I32 cf = fold[Class];
+	for (value = 0; value < 256; ++value) {
+	    if (ANYOF_TEST(opnd, value)) {
+		I32 cf = fold[value];
 		ANYOF_SET(opnd, cf);
 	    }
 	}
@@ -2052,10 +2226,234 @@ regclass(void)
     }
     /* optimize inverted simple patterns (e.g. [^a-z]) */
     if (!SIZE_ONLY && (*opnd & 0xFF) == ANYOF_INVERT) {
-	for (Class = 0; Class < 32; ++Class)
-	    opnd[1 + Class] ^= 0xFF;
+	for (value = 0; value < 32; ++value)
+	    opnd[1 + value] ^= 0xFF;
 	*opnd = 0;
     }
+    return ret;
+}
+
+STATIC regnode *
+regclassutf8(void)
+{
+    register char *opnd, *e;
+    register U32 value;
+    register U32 lastvalue = 123456;
+    register I32 range = 0;
+    register regnode *ret;
+    I32 numlen;
+    I32 n;
+    SV *listsv;
+    U8 flags = 0;
+
+    if (*PL_regcomp_parse == '^') {	/* Complement of range. */
+	PL_regnaughty++;
+	PL_regcomp_parse++;
+	if (!SIZE_ONLY)
+	    flags |= ANYOF_INVERT;
+    }
+    if (!SIZE_ONLY) {
+	if (FOLD)
+	    flags |= ANYOF_FOLD;
+	if (LOC)
+	    flags |= ANYOF_LOCALE;
+	listsv = newSVpv("# comment\n",0);
+    }
+
+    if (*PL_regcomp_parse == ']' || *PL_regcomp_parse == '-')
+	goto skipcond;		/* allow 1st char to be ] or - */
+
+    while (PL_regcomp_parse < PL_regxend && *PL_regcomp_parse != ']') {
+       skipcond:
+	value = utf8_to_uv(PL_regcomp_parse, &numlen);
+	PL_regcomp_parse += numlen;
+
+	if (value == '[' && PL_regcomp_parse + 1 < PL_regxend &&
+	    /* I smell either [: or [= or [. -- POSIX has been here, right? */
+	    (*PL_regcomp_parse == ':' || *PL_regcomp_parse == '=' || *PL_regcomp_parse == '.')) {
+	    char  posixccc = *PL_regcomp_parse;
+	    char* posixccs = PL_regcomp_parse++;
+	    
+	    while (PL_regcomp_parse < PL_regxend && *PL_regcomp_parse != posixccc)
+		PL_regcomp_parse++;
+	    if (PL_regcomp_parse == PL_regxend)
+		/* Grandfather lone [:, [=, [. */
+		PL_regcomp_parse = posixccs;
+	    else {
+		PL_regcomp_parse++; /* skip over the posixccc */
+		if (*PL_regcomp_parse == ']') {
+		    /* Not Implemented Yet.
+		     * (POSIX Extended Character Classes, that is)
+		     * The text between e.g. [: and :] would start
+		     * at posixccs + 1 and stop at regcomp_parse - 2. */
+		    if (dowarn && !SIZE_ONLY)
+			warn("Character class syntax [%c %c] is reserved for future extensions", posixccc, posixccc);
+		    PL_regcomp_parse++; /* skip over the ending ] */
+		}
+	    }
+	}
+
+	if (value == '\\') {
+	    value = utf8_to_uv(PL_regcomp_parse, &numlen);
+	    PL_regcomp_parse += numlen;
+	    switch (value) {
+	    case 'w':
+		if (!SIZE_ONLY) {
+		    if (LOC)
+			flags |= ANYOF_ALNUML;
+
+		    sv_catpvf(listsv, "+utf8::IsAlnum\n");
+		}
+		lastvalue = 123456;
+		continue;
+	    case 'W':
+		if (!SIZE_ONLY) {
+		    if (LOC)
+			flags |= ANYOF_NALNUML;
+
+		    sv_catpvf(listsv,
+			"-utf8::IsAlpha\n-utf8::IsDigit\n0000\t%04x\n%04x\tffff\n",
+			'_' - 1,
+			'_' + 1);
+		}
+		lastvalue = 123456;
+		continue;
+	    case 's':
+		if (!SIZE_ONLY) {
+		    if (LOC)
+			flags |= ANYOF_SPACEL;
+		    sv_catpvf(listsv, "+utf8::IsSpace\n");
+		    if (!PL_utf8_space)
+			is_utf8_space(" ");
+		}
+		lastvalue = 123456;
+		continue;
+	    case 'S':
+		if (!SIZE_ONLY) {
+		    if (LOC)
+			flags |= ANYOF_NSPACEL;
+		    sv_catpvf(listsv,
+			"!utf8::IsSpace\n");
+		    if (!PL_utf8_space)
+			is_utf8_space(" ");
+		}
+		lastvalue = 123456;
+		continue;
+	    case 'd':
+		if (!SIZE_ONLY) {
+		    sv_catpvf(listsv, "+utf8::IsDigit\n");
+		}
+		lastvalue = 123456;
+		continue;
+	    case 'D':
+		if (!SIZE_ONLY) {
+		    sv_catpvf(listsv,
+			"!utf8::IsDigit\n");
+		}
+		lastvalue = 123456;
+		continue;
+	    case 'p':
+	    case 'P':
+		if (*PL_regcomp_parse == '{') {
+		    e = strchr(PL_regcomp_parse++, '}');
+                    if (!e)
+                        FAIL("Missing right brace on \\p{}");
+		    n = e - PL_regcomp_parse;
+		}
+		else {
+		    e = PL_regcomp_parse;
+		    n = 1;
+		}
+		if (!SIZE_ONLY) {
+		    if (value == 'p')
+			sv_catpvf(listsv, "+utf8::%.*s\n", n, PL_regcomp_parse);
+		    else
+			sv_catpvf(listsv,
+			    "!utf8::%.*s\n", n, PL_regcomp_parse);
+		}
+		PL_regcomp_parse = e + 1;
+		lastvalue = 123456;
+		continue;
+	    case 'n':
+		value = '\n';
+		break;
+	    case 'r':
+		value = '\r';
+		break;
+	    case 't':
+		value = '\t';
+		break;
+	    case 'f':
+		value = '\f';
+		break;
+	    case 'b':
+		value = '\b';
+		break;
+	    case 'e':
+		value = '\033';
+		break;
+	    case 'a':
+		value = '\007';
+		break;
+	    case 'x':
+		if (*PL_regcomp_parse == '{') {
+		    e = strchr(PL_regcomp_parse++, '}');
+                    if (!e)
+                        FAIL("Missing right brace on \\x{}");
+		    value = scan_hex(PL_regcomp_parse + 1, e - PL_regcomp_parse, &numlen);
+		    PL_regcomp_parse = e + 1;
+		}
+		else {
+		    value = scan_hex(PL_regcomp_parse, 2, &numlen);
+		    PL_regcomp_parse += numlen;
+		}
+		break;
+	    case 'c':
+		value = UCHARAT(PL_regcomp_parse++);
+		value = toCTRL(value);
+		break;
+	    case '0': case '1': case '2': case '3': case '4':
+	    case '5': case '6': case '7': case '8': case '9':
+		value = scan_oct(--PL_regcomp_parse, 3, &numlen);
+		PL_regcomp_parse += numlen;
+		break;
+	    }
+	}
+	if (range) {
+	    if (lastvalue > value)
+		FAIL("invalid [] range in regexp");
+	    if (!SIZE_ONLY)
+		sv_catpvf(listsv, "%04x\t%04x\n", lastvalue, value);
+	    lastvalue = value;
+	    range = 0;
+	}
+	else {
+	    lastvalue = value;
+	    if (*PL_regcomp_parse == '-' && PL_regcomp_parse+1 < PL_regxend &&
+	      PL_regcomp_parse[1] != ']') {
+		PL_regcomp_parse++;
+		range = 1;
+		continue;	/* do it next time */
+	    }
+	    if (!SIZE_ONLY)
+		sv_catpvf(listsv, "%04x\n", value);
+	}
+    }
+    if (*PL_regcomp_parse != ']')
+	FAIL("unmatched [] in regexp");
+    nextchar();
+
+    ret = reganode(ANYOFUTF8, 0);
+
+    if (!SIZE_ONLY) {
+	SV *rv = swash_init("utf8", "", listsv, 1, 0);
+	SvREFCNT_dec(listsv);
+	n = add_data(1,"s");
+	PL_regcomp_rx->data->data[n] = (void*)rv;
+	ARG1_SET(ret, flags);
+	ARG2_SET(ret, n);
+    }
+
     return ret;
 }
 
@@ -2140,6 +2538,21 @@ reganode(U8 op, U32 arg)
 }
 
 /*
+- regc - emit (if appropriate) a Unicode character
+*/
+STATIC void
+reguni(UV uv, char* s, I32* lenp)
+{
+    if (SIZE_ONLY) {
+	char tmpbuf[10];
+	*lenp = uv_to_utf8(tmpbuf, uv) - tmpbuf;
+    }
+    else
+	*lenp = uv_to_utf8(s, uv) - s;
+
+}
+
+/*
 - regc - emit (if appropriate) a byte of code
 */
 STATIC void
@@ -2208,7 +2621,8 @@ regtail(regnode *p, regnode *val)
 
     if (reg_off_by_arg[OP(scan)]) {
 	ARG_SET(scan, val - scan);
-    } else {
+    }
+    else {
 	NEXT_OFF(scan) = val - scan;
     }
 }
@@ -2225,9 +2639,11 @@ regoptail(regnode *p, regnode *val)
 	return;
     if (regkind[(U8)OP(p)] == BRANCH) {
 	regtail(NEXTOPER(p), val);
-    } else if ( regkind[(U8)OP(p)] == BRANCHJ) {
+    }
+    else if ( regkind[(U8)OP(p)] == BRANCHJ) {
 	regtail(NEXTOPER(NEXTOPER(p)), val);
-    } else
+    }
+    else
 	return;
 }
 
@@ -2287,24 +2703,31 @@ dumpuntil(regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 	    if (last && nnode > last)
 		nnode = last;
 	    node = dumpuntil(start, NEXTOPER(NEXTOPER(node)), nnode, sv, l + 1);
-	} else if (regkind[(U8)op] == BRANCH) {
+	}
+	else if (regkind[(U8)op] == BRANCH) {
 	    node = dumpuntil(start, NEXTOPER(node), next, sv, l + 1);
-	} else if ( op == CURLY) {   /* `next' might be very big: optimizer */
+	}
+	else if ( op == CURLY) {   /* `next' might be very big: optimizer */
 	    node = dumpuntil(start, NEXTOPER(node) + EXTRA_STEP_2ARGS,
 			     NEXTOPER(node) + EXTRA_STEP_2ARGS + 1, sv, l + 1);
-	} else if (regkind[(U8)op] == CURLY && op != CURLYX) {
+	}
+	else if (regkind[(U8)op] == CURLY && op != CURLYX) {
 	    node = dumpuntil(start, NEXTOPER(node) + EXTRA_STEP_2ARGS,
 			     next, sv, l + 1);
-	} else if ( op == PLUS || op == STAR) {
+	}
+	else if ( op == PLUS || op == STAR) {
 	    node = dumpuntil(start, NEXTOPER(node), NEXTOPER(node) + 1, sv, l + 1);
-	} else if (op == ANYOF) {
+	}
+	else if (op == ANYOF) {
 	    node = NEXTOPER(node);
 	    node += ANY_SKIP;
-	} else if (regkind[(U8)op] == EXACT) {
+	}
+	else if (regkind[(U8)op] == EXACT) {
             /* Literal string, where present. */
 	    node += ((*OPERAND(node)) + 2 + sizeof(regnode) - 1) / sizeof(regnode);
 	    node = NEXTOPER(node);
-	} else {
+	}
+	else {
 	    node = NEXTOPER(node);
 	    node += regarglen[(U8)op];
 	}
@@ -2420,6 +2843,15 @@ regprop(SV *sv, regnode *o)
 	break;
     case SANY:
 	p = "SANY";
+	break;
+    case ANYUTF8:
+	p = "ANYUTF8";
+	break;
+    case SANYUTF8:
+	p = "SANYUTF8";
+	break;
+    case ANYOFUTF8:
+	p = "ANYOFUTF8";
 	break;
     case ANYOF:
 	p = "ANYOF";
@@ -2666,4 +3098,44 @@ re_croak2(const char* pat1,const char* pat2,...)
     Copy(message, buf, l1 , char);
     buf[l1] = '\0';			/* Overwrite \n */
     croak("%s", buf);
+}
+
+/* XXX Here's a total kludge.  But we need to re-enter for swash routines. */
+
+void
+save_re_context(void)
+{
+    SAVEPPTR(PL_bostr);
+    SAVEPPTR(PL_regprecomp);		/* uncompiled string. */
+    SAVEI32(PL_regnpar);		/* () count. */
+    SAVEI32(PL_regsize);		/* Code size. */
+    SAVEI16(PL_regflags);		/* are we folding, multilining? */
+    SAVEPPTR(PL_reginput);		/* String-input pointer. */
+    SAVEPPTR(PL_regbol);		/* Beginning of input, for ^ check. */
+    SAVEPPTR(PL_regeol);		/* End of input, for $ check. */
+    SAVESPTR(PL_regstartp);		/* Pointer to startp array. */
+    SAVESPTR(PL_regendp);		/* Ditto for endp. */
+    SAVESPTR(PL_reglastparen);		/* Similarly for lastparen. */
+    SAVEPPTR(PL_regtill);		/* How far we are required to go. */
+    SAVEI32(PL_regprev);		/* char before regbol, \n if none */
+    SAVESPTR(PL_reg_start_tmp);		/* from regexec.c */
+    PL_reg_start_tmp = 0;
+    SAVEFREEPV(PL_reg_start_tmp);
+    SAVEI32(PL_reg_start_tmpl);		/* from regexec.c */
+    PL_reg_start_tmpl = 0;
+    SAVESPTR(PL_regdata);
+    SAVEI32(PL_reg_flags);		/* from regexec.c */
+    SAVEI32(PL_reg_eval_set);		/* from regexec.c */
+    SAVEI32(PL_regnarrate);		/* from regexec.c */
+    SAVESPTR(PL_regprogram);		/* from regexec.c */
+    SAVEINT(PL_regindent);		/* from regexec.c */
+    SAVESPTR(PL_regcc);			/* from regexec.c */
+    SAVESPTR(PL_curcop);
+    SAVESPTR(PL_regcomp_rx);		/* from regcomp.c */
+    SAVEI32(PL_regseen);		/* from regcomp.c */
+    SAVEI32(PL_regsawback);		/* Did we see \1, ...? */
+    SAVEI32(PL_regnaughty);		/* How bad is this pattern? */
+    SAVESPTR(PL_regcode);		/* Code-emit pointer; &regdummy = don't */
+    SAVEPPTR(PL_regxend);		/* End of input for compile */
+    SAVEPPTR(PL_regcomp_parse);		/* Input-scan pointer. */
 }

@@ -194,6 +194,15 @@ VIRTUAL U32	intro_my _((void));
 VIRTUAL char*	instr _((char* big, char* little));
 VIRTUAL bool	io_close _((IO* io));
 VIRTUAL OP*	invert _((OP* cmd));
+VIRTUAL bool	is_utf8_alnum _((unsigned char *p));
+VIRTUAL bool	is_utf8_idfirst _((unsigned char *p));
+VIRTUAL bool	is_utf8_alpha _((unsigned char *p));
+VIRTUAL bool	is_utf8_space _((unsigned char *p));
+VIRTUAL bool	is_utf8_digit _((unsigned char *p));
+VIRTUAL bool	is_utf8_upper _((unsigned char *p));
+VIRTUAL bool	is_utf8_lower _((unsigned char *p));
+VIRTUAL bool	is_utf8_print _((unsigned char *p));
+VIRTUAL bool	is_utf8_mark _((unsigned char *p));
 VIRTUAL OP*	jmaybe _((OP* arg));
 VIRTUAL I32	keyword _((char* d, I32 len));
 VIRTUAL void	leave_scope _((I32 base));
@@ -487,6 +496,7 @@ VIRTUAL void	save_nogv _((GV* gv));
 VIRTUAL void	save_op _((void));
 VIRTUAL SV*	save_scalar _((GV* gv));
 VIRTUAL void	save_pptr _((char** pptr));
+VIRTUAL void	save_re_context _((void));
 VIRTUAL void	save_sptr _((SV** sptr));
 VIRTUAL SV*	save_svref _((SV** sptr));
 VIRTUAL SV**	save_threadsv _((PADOFFSET i));
@@ -557,11 +567,14 @@ VIRTUAL void	sv_insert _((SV* bigsv, STRLEN offset, STRLEN len, char* little, ST
 VIRTUAL int	sv_isa _((SV* sv, char* name));
 VIRTUAL int	sv_isobject _((SV* sv));
 VIRTUAL STRLEN	sv_len _((SV* sv));
+VIRTUAL STRLEN	sv_len_utf8 _((SV* sv));
 VIRTUAL void	sv_magic _((SV* sv, SV* obj, int how, char* name, I32 namlen));
 VIRTUAL SV*	sv_mortalcopy _((SV* oldsv));
 VIRTUAL SV*	sv_newmortal _((void));
 VIRTUAL SV*	sv_newref _((SV* sv));
 VIRTUAL char*	sv_peek _((SV* sv));
+VIRTUAL void	sv_pos_u2b _((SV* sv, I32* offsetp, I32* lenp));
+VIRTUAL void	sv_pos_b2u _((SV* sv, I32* offsetp));
 VIRTUAL char*	sv_pvn_force _((SV* sv, STRLEN* lp));
 VIRTUAL char*	sv_reftype _((SV* sv, int ob));
 VIRTUAL void	sv_replace _((SV* sv, SV* nsv));
@@ -592,8 +605,13 @@ VIRTUAL void	sv_vcatpvfn _((SV* sv, const char* pat, STRLEN patlen,
 VIRTUAL void	sv_vsetpvfn _((SV* sv, const char* pat, STRLEN patlen,
 		       va_list* args, SV** svargs, I32 svmax,
 		       bool *used_locale));
+VIRTUAL SV*	swash_init _((char* pkg, char* name, SV* listsv, I32 minbits, I32 none));
+VIRTUAL UV	swash_fetch _((SV *sv, unsigned char *ptr));
 VIRTUAL void	taint_env _((void));
 VIRTUAL void	taint_proper _((const char* f, char* s));
+VIRTUAL UV	to_utf8_lower _((unsigned char *p));
+VIRTUAL UV	to_utf8_upper _((unsigned char *p));
+VIRTUAL UV	to_utf8_title _((unsigned char *p));
 #ifdef UNLINK_ALL_VERSIONS
 VIRTUAL I32	unlnk _((char* f));
 #endif
@@ -603,6 +621,12 @@ VIRTUAL void	unlock_condpair _((void* svv));
 VIRTUAL void	unsharepvn _((char* sv, I32 len, U32 hash));
 VIRTUAL void	unshare_hek _((HEK* hek));
 VIRTUAL void	utilize _((int aver, I32 floor, OP* version, OP* id, OP* arg));
+VIRTUAL U8*	utf16_to_utf8 _((U16* p, U8 *d, I32 bytelen));
+VIRTUAL U8*	utf16_to_utf8_reversed _((U16* p, U8 *d, I32 bytelen));
+VIRTUAL I32	utf8_distance _((unsigned char *a, unsigned char *b));
+VIRTUAL U8*	utf8_hop _((unsigned char *s, I32 off));
+VIRTUAL UV	utf8_to_uv _((unsigned char *s, I32* retlen));
+VIRTUAL char*	uv_to_utf8 _((unsigned char *d, UV uv));
 VIRTUAL void	vivify_defelem _((SV* sv));
 VIRTUAL void	vivify_ref _((SV* sv, U32 to_what));
 VIRTUAL I32	wait4pid _((int pid, int* statusp, int flags));

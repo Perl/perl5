@@ -2362,18 +2362,26 @@ scan_hex(char *start, I32 len, I32 *retlen)
     register UV retval = 0;
     bool overflowed = FALSE;
     char *tmp = s;
+    register UV n;
 
-    while (len-- && *s && (tmp = strchr((char *) PL_hexdigit, *s))) {
-	register UV n = retval << 4;
+    while (len-- && *s) {
+	tmp = strchr((char *) PL_hexdigit, *s++);
+	if (!tmp) {
+	    if (*s == '_')
+		continue;
+	    else {
+		--s;
+		if (PL_dowarn)
+		    warn("Illegal hex digit ignored");
+		break;
+	    }
+	}
+	n = retval << 4;
 	if (!overflowed && (n >> 4) != retval) {
 	    warn("Integer overflow in hex number");
 	    overflowed = TRUE;
 	}
 	retval = n | ((tmp - PL_hexdigit) & 15);
-	s++;
-    }
-    if (PL_dowarn && !tmp) {
-	warn("Illegal hex digit ignored");
     }
     *retlen = s - start;
     return retval;

@@ -170,6 +170,24 @@ PERLVARI(Gnumeric_local,	bool,	TRUE)
 
 #endif /* !USE_LOCALE_NUMERIC */
 
+/* utf8 character classes */
+PERLVAR(Gutf8_alnum, SV *)
+PERLVAR(Gutf8_alpha, SV *)
+PERLVAR(Gutf8_space, SV *)
+PERLVAR(Gutf8_digit, SV *)
+PERLVAR(Gutf8_upper, SV *)
+PERLVAR(Gutf8_lower, SV *)
+PERLVAR(Gutf8_print, SV *)
+PERLVAR(Gutf8_mark, SV *)
+PERLVAR(Gutf8_toupper, SV *)
+PERLVAR(Gutf8_totitle, SV *)
+PERLVAR(Gutf8_tolower, SV *)
+PERLVAR(Glast_swash_hv, HV *)
+PERLVAR(Glast_swash_klen, U32)
+PERLVAR(Glast_swash_key[10], U8)
+PERLVAR(Glast_swash_tmps, U8 *)
+PERLVAR(Glast_swash_slen, STRLEN)
+
 /* constants (these are not literals to facilitate pointer comparisons) */
 PERLVARIC(GYes,		char *, "1")
 PERLVARIC(GNo,		char *, "")

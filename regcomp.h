@@ -204,19 +204,22 @@ EXTCONST char varies[];
 #else
 EXTCONST char varies[] = {
     BRANCH, BACK, STAR, PLUS, CURLY, CURLYX, REF, REFF, REFFL, 
-    WHILEM, CURLYM, CURLYN, BRANCHJ, IFTHEN, SUSPEND, 0
+    WHILEM, CURLYM, CURLYN, BRANCHJ, IFTHEN, SUSPEND, CLUMP, 0
 };
 #endif
 
 /* The following always have a length of 1. char* since we do strchr on it. */
+/* (Note that lenght 1 means "one character" under UTF8, not "one octet".) */
 #ifndef DOINIT
 EXTCONST char simple[];
 #else
 EXTCONST char simple[] = {
-    ANY, SANY, ANYOF,
-    ALNUM, ALNUML, NALNUM, NALNUML,
-    SPACE, SPACEL, NSPACE, NSPACEL,
-    DIGIT, NDIGIT, 0
+    ANY, ANYUTF8, SANY, SANYUTF8, ANYOF, ANYOFUTF8,
+    ALNUM, ALNUMUTF8, ALNUML, ALNUMLUTF8,
+    NALNUM, NALNUMUTF8, NALNUML, NALNUMLUTF8,
+    SPACE, SPACEUTF8, SPACEL, SPACELUTF8,
+    NSPACE, NSPACEUTF8, NSPACEL, NSPACELUTF8,
+    DIGIT, DIGITUTF8, NDIGIT, NDIGITUTF8, 0
 };
 #endif
 

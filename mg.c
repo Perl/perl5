@@ -1131,7 +1131,10 @@ magic_getpos(SV *sv, MAGIC *mg)
 	mg = mg_find(lsv, 'g');
 	if (mg && mg->mg_len >= 0) {
 	    dTHR;
-	    sv_setiv(sv, mg->mg_len + PL_curcop->cop_arybase);
+	    I32 i = mg->mg_len;
+	    if (IN_UTF8)
+		sv_pos_b2u(lsv, &i);
+	    sv_setiv(sv, i + PL_curcop->cop_arybase);
 	    return 0;
 	}
     }
@@ -1145,6 +1148,7 @@ magic_setpos(SV *sv, MAGIC *mg)
     SV* lsv = LvTARG(sv);
     SSize_t pos;
     STRLEN len;
+    STRLEN ulen;
 
     mg = 0;
     
@@ -1163,6 +1167,15 @@ magic_setpos(SV *sv, MAGIC *mg)
     len = SvPOK(lsv) ? SvCUR(lsv) : sv_len(lsv);
 
     WITH_THR(pos = SvIV(sv) - PL_curcop->cop_arybase);
+
+    if (IN_UTF8) {
+	ulen = sv_len_utf8(lsv);
+	if (ulen)
+	    len = ulen;
+	else
+	    ulen = 0;
+    }
+
     if (pos < 0) {
 	pos += len;
 	if (pos < 0)
@@ -1170,6 +1183,13 @@ magic_setpos(SV *sv, MAGIC *mg)
     }
     else if (pos > len)
 	pos = len;
+
+    if (ulen) {
+	I32 p = pos;
+	sv_pos_u2b(lsv, &p, 0);
+	pos = p;
+    }
+	
     mg->mg_len = pos;
     mg->mg_flags &= ~MGf_MINMATCH;
 

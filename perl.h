@@ -1259,6 +1259,7 @@ union any {
 #include "scope.h"
 #include "bytecode.h"
 #include "byterun.h"
+#include "utf8.h"
 
 /* Current curly descriptor */
 typedef struct curcur CURCUR;
@@ -1822,6 +1823,10 @@ typedef enum {
 				   stuffing into op->op_private */
 #define HINT_INTEGER		0x00000001
 #define HINT_STRICT_REFS	0x00000002
+/* #define HINT_notused4	0x00000004 */
+#define HINT_UTF8		0x00000008
+/* #define HINT_notused10	0x00000010 */
+				/* Note: 20,40,80 used for NATIVE_HINTS */
 
 #define HINT_BLOCK_SCOPE	0x00000100
 #define HINT_STRICT_SUBS	0x00000200

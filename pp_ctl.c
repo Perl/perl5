@@ -287,6 +287,7 @@ PP(pp_formline)
     double value;
     bool gotsome;
     STRLEN len;
+    STRLEN fudge = SvCUR(tmpForm) * (IN_UTF8 ? 3 : 1) + 1;
 
     if (!SvMAGICAL(tmpForm) || !SvCOMPILED(tmpForm)) {
 	SvREADONLY_off(tmpForm);
@@ -294,7 +295,7 @@ PP(pp_formline)
     }
 
     SvPV_force(PL_formtarget, len);
-    t = SvGROW(PL_formtarget, len + SvCUR(tmpForm) + 1);  /* XXX SvCUR bad */
+    t = SvGROW(PL_formtarget, len + fudge + 1);  /* XXX SvCUR bad */
     t += len;
     f = SvPV(tmpForm, len);
     /* need to jump to the next word */
@@ -364,6 +365,30 @@ PP(pp_formline)
 	case FF_CHECKNL:
 	    item = s = SvPV(sv, len);
 	    itemsize = len;
+	    if (IN_UTF8) {
+		itemsize = sv_len_utf8(sv);
+		if (itemsize != len) {
+		    I32 itembytes;
+		    if (itemsize > fieldsize) {
+			itemsize = fieldsize;
+			itembytes = itemsize;
+			sv_pos_u2b(sv, &itembytes, 0);
+		    }
+		    else
+			itembytes = len;
+		    send = chophere = s + itembytes;
+		    while (s < send) {
+			if (*s & ~31)
+			    gotsome = TRUE;
+			else if (*s == '\n')
+			    break;
+			s++;
+		    }
+		    itemsize = s - item;
+		    sv_pos_b2u(sv, &itemsize);
+		    break;
+		}
+	    }
 	    if (itemsize > fieldsize)
 		itemsize = fieldsize;
 	    send = chophere = s + itemsize;
@@ -380,6 +405,47 @@ PP(pp_formline)
 	case FF_CHECKCHOP:
 	    item = s = SvPV(sv, len);
 	    itemsize = len;
+	    if (IN_UTF8) {
+		itemsize = sv_len_utf8(sv);
+		if (itemsize != len) {
+		    I32 itembytes;
+		    if (itemsize <= fieldsize) {
+			send = chophere = s + itemsize;
+			while (s < send) {
+			    if (*s == '\r') {
+				itemsize = s - item;
+				break;
+			    }
+			    if (*s++ & ~31)
+				gotsome = TRUE;
+			}
+		    }
+		    else {
+			itemsize = fieldsize;
+			itembytes = itemsize;
+			sv_pos_u2b(sv, &itembytes, 0);
+			send = chophere = s + itembytes;
+			while (s < send || (s == send && isSPACE(*s))) {
+			    if (isSPACE(*s)) {
+				if (chopspace)
+				    chophere = s;
+				if (*s == '\r')
+				    break;
+			    }
+			    else {
+				if (*s & ~31)
+				    gotsome = TRUE;
+				if (strchr(PL_chopset, *s))
+				    chophere = s + 1;
+			    }
+			    s++;
+			}
+			itemsize = chophere - item;
+			sv_pos_b2u(sv, &itemsize);
+		    }
+		    break;
+		}
+	    }
 	    if (itemsize <= fieldsize) {
 		send = chophere = s + itemsize;
 		while (s < send) {
@@ -435,6 +501,26 @@ PP(pp_formline)
 	case FF_ITEM:
 	    arg = itemsize;
 	    s = item;
+	    if (IN_UTF8) {
+		while (arg--) {
+		    if (*s & 0x80) {
+			switch (UTF8SKIP(s)) {
+			case 7: *t++ = *s++;
+			case 6: *t++ = *s++;
+			case 5: *t++ = *s++;
+			case 4: *t++ = *s++;
+			case 3: *t++ = *s++;
+			case 2: *t++ = *s++;
+			case 1: *t++ = *s++;
+			}
+		    }
+		    else {
+			if ( !((*t++ = *s++) & ~31) )
+			    t[-1] = ' ';
+		    }
+		}
+		break;
+	    }
 	    while (arg--) {
 #if 'z' - 'a' != 25
 		int ch = *t++ = *s++;
@@ -473,7 +559,7 @@ PP(pp_formline)
 		}
 		SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
 		sv_catpvn(PL_formtarget, item, itemsize);
-		SvGROW(PL_formtarget, SvCUR(PL_formtarget) + SvCUR(tmpForm) + 1);
+		SvGROW(PL_formtarget, SvCUR(PL_formtarget) + fudge + 1);
 		t = SvPVX(PL_formtarget) + SvCUR(PL_formtarget);
 	    }
 	    break;
@@ -2290,6 +2376,8 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
     lex_end();
     *avp = (AV*)SvREFCNT_inc(PL_comppad);
     LEAVE;
+    if (curcop = &PL_compiling)
+	PL_compiling.op_private = PL_hints;
 #ifdef OP_IN_REGISTER
     op = PL_opsave;
 #endif

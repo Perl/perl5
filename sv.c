@@ -2388,6 +2388,7 @@ sv_usepvn(register SV *sv, register char *ptr, register STRLEN len)
 	(void)SvOK_off(sv);
 	return;
     }
+    (void)SvOOK_off(sv);
     if (SvPVX(sv))
 	Safefree(SvPVX(sv));
     Renew(ptr, len+1, char);
@@ -3058,6 +3059,85 @@ sv_len(register SV *sv)
     else
 	junk = SvPV(sv, len);
     return len;
+}
+
+STRLEN
+sv_len_utf8(register SV *sv)
+{
+    unsigned char *s;
+    unsigned char *send;
+    STRLEN len;
+
+    if (!sv)
+	return 0;
+
+#ifdef NOTYET
+    if (SvGMAGICAL(sv))
+	len = mg_length(sv);
+    else
+#endif
+	s = SvPV(sv, len);
+    send = s + len;
+    len = 0;
+    while (s < send) {
+	s += UTF8SKIP(s);
+	len++;
+    }
+    return len;
+}
+
+void
+sv_pos_u2b(register SV *sv, I32* offsetp, I32* lenp)
+{
+    unsigned char *start;
+    unsigned char *s;
+    unsigned char *send;
+    I32 uoffset = *offsetp;
+    STRLEN len;
+
+    if (!sv)
+	return;
+
+    start = s = SvPV(sv, len);
+    send = s + len;
+    while (s < send && uoffset--)
+	s += UTF8SKIP(s);
+    *offsetp = s - start;
+    if (lenp) {
+	I32 ulen = *lenp;
+	start = s;
+	while (s < send && ulen--)
+	    s += UTF8SKIP(s);
+	*lenp = s - start;
+    }
+    return;
+}
+
+void
+sv_pos_b2u(register SV *sv, I32* offsetp)
+{
+    unsigned char *s;
+    unsigned char *send;
+    STRLEN len;
+
+    if (!sv)
+	return;
+
+    s = SvPV(sv, len);
+    if (len < *offsetp)
+	croak("panic: bad byte offset");
+    send = s + *offsetp;
+    len = 0;
+    while (s < send) {
+	s += UTF8SKIP(s);
+	++len;
+    }
+    if (s != send) {
+	warn("Malformed UTF-8 character");
+	--len;
+    }
+    *offsetp = len;
+    return;
 }
 
 I32
@@ -4417,6 +4497,7 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 	STRLEN precis = 0;
 
 	char esignbuf[4];
+	char utf8buf[10];
 	STRLEN esignlen = 0;
 
 	char *eptr = Nullch;
@@ -4545,6 +4626,16 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 	    goto string;
 
 	case 'c':
+	    if (IN_UTF8) {
+		if (args)
+		    uv = va_arg(*args, int);
+		else
+		    uv = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
+
+		eptr = utf8buf;
+		elen = uv_to_utf8(eptr, uv) - utf8buf;
+		goto string;
+	    }
 	    if (args)
 		c = va_arg(*args, int);
 	    else
@@ -4563,8 +4654,19 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 		    elen = sizeof nullstr - 1;
 		}
 	    }
-	    else if (svix < svmax)
+	    else if (svix < svmax) {
 		eptr = SvPVx(svargs[svix++], elen);
+		if (IN_UTF8) {
+		    if (has_precis && precis < elen) {
+			I32 p = precis;
+			sv_pos_u2b(svargs[svix - 1], &p, 0); /* sticks at end */
+			precis = p;
+		    }
+		    if (width) { /* fudge width (can't fudge elen) */
+			width += elen - sv_len_utf8(svargs[svix - 1]);
+		    }
+		}
+	    }
 	    goto string;
 
 	case '_':

@@ -200,9 +200,9 @@
 #define COMPLEX_STATUS	1	/* We track both "POSIX" and VMS values */
 
 #define HINT_V_VMSISH		24
-#define HINT_M_VMSISH_STATUS	0x01000000 /* system, $? return VMS status */
-#define HINT_M_VMSISH_EXIT	0x02000000 /* exit(1) ==> SS$_NORMAL */
-#define HINT_M_VMSISH_TIME	0x04000000 /* times are local, not UTC */
+#define HINT_M_VMSISH_STATUS	0x20000000 /* system, $? return VMS status */
+#define HINT_M_VMSISH_EXIT	0x40000000 /* exit(1) ==> SS$_NORMAL */
+#define HINT_M_VMSISH_TIME	0x80000000 /* times are local, not UTC */
 #define NATIVE_HINTS		(PL_hints >> HINT_V_VMSISH)  /* used in op.c */
 
 #define TEST_VMSISH(h)	(PL_curcop->op_private & ((h) >> HINT_V_VMSISH))
