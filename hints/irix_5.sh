@@ -12,7 +12,12 @@ i_time='define'
 
 case "$cc" in
 *gcc*) ccflags="$ccflags -D_BSD_TYPES" ;;
-*) ccflags="$ccflags -D_POSIX_SOURCE -ansiposix -D_BSD_TYPES -Olimit 4000"
+*)
+   # The warnings turned off are:
+   # 608: Undefined the ANSI standard library defined macro stderr (nostdio.h)
+   # 658: bit-field 'th_off' type required to be int, unsigned int, or signed int. <netinet/tcp.h>
+   # 734: enum declaration must contain enum literals <sys/vnode.h>
+   ccflags="$ccflags -D_POSIX_SOURCE -ansiposix -D_BSD_TYPES -Olimit 4000 -woff 608,658,734"
 # Otherwise the cc thinks that a struct timeval * is not equivalent to
 # a struct timeval *.  Yeah, you read that right.
 pp_sys_cflags='ccflags="$ccflags -DPERL_IRIX5_SELECT_TIMEVAL_VOID_CAST"'
@@ -25,6 +30,12 @@ lddlflags="-shared"
 set `echo X "$libswanted "|sed -e 's/ socket / /' -e 's/ nsl / /' -e 's/ dl / /'`
 shift
 libswanted="$*"
+
+# Don't groan about unused libraries.
+case "$ldflags" in
+    *-Wl,-woff,84*) ;;
+    *) ldflags="$ldflags -Wl,-woff,84" ;;
+esac
 
 # Date: Fri, 22 Dec 1995 11:49:17 -0800
 # From: Matthew Black <black@csulb.edu>
