@@ -72,7 +72,9 @@ utf8 until the end the block (or file, if at top level) by C<no utf8;>.
 
 =head2 Utility functions
 
-The following functions are defined in the C<utf8::> package by the perl core.
+The following functions are defined in the C<utf8::> package by the
+Perl core.  You do not need to say C<use utf8> to use these and in fact
+you should not unless you really want to have UTF-8 source code.
 
 =over 4
 
@@ -112,13 +114,18 @@ into logical characters. Same as Encode::decode_utf8(). Note that this
 should not be used to convert Unicode back to a legacy byte encoding:
 use Encode for that.
 
+=item * $flag = utf8::is_utf8(STRING)
+
+Test whether STRING is in UTF-8.
+
 =item * $flag = utf8::valid(STRING)
 
-[INTERNAL] Test whether STRING is in a consistent state.  Will return
-true if string is held as bytes, or is well-formed UTF-8 and has the
-UTF-8 flag on.  Main reason for this routine is to allow Perl's
-testsuite to check that operations have left strings in a consistent
-state.
+[INTERNAL] Test whether STRING is in a consistent state regarding
+UTF-8.  Will return true is well-formed UTF-8 and has the UTF-8 flag
+on B<or> if string is held as bytes (both these states are 'consistent').
+Main reason for this routine is to allow Perl's testsuite to check
+that operations have left strings in a consistent state.  You most
+probably want to use utf8::is_utf8() instead.
 
 =back
 
