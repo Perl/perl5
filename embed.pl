@@ -1828,6 +1828,7 @@ p	|void	|pad_free	|PADOFFSET po
 p	|void	|pad_reset
 p	|void	|pad_swipe	|PADOFFSET po
 p	|void	|peep		|OP* o
+dopM	|PerlIO*|start_glob	|SV* pattern|IO *io
 #if defined(PERL_OBJECT)
 Aox	|void	|Perl_construct
 Aox	|void	|Perl_destruct
@@ -2530,10 +2531,6 @@ s	|SV*	|mess_alloc
 #  if defined(LEAKTEST)
 s	|void	|xstat		|int
 #  endif
-#endif
-
-#if defined(PERL_IN_DOIO_C) || defined(PERL_DECL_PROT)
-dopM	|PerlIO*|start_glob	|SV* pattern|IO *io
 #endif
 
 #if defined(PERL_OBJECT)

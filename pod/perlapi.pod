@@ -1283,7 +1283,7 @@ The idea here is that as string table is used for shared hash
 keys these strings will have SvPVX == HeKEY and hash lookup
 will avoid string compare.
 
-	SV*	newSVpvn_share(const char* s, STRLEN len, U32 hash)
+	SV*	newSVpvn_share(const char* s, I32 len, U32 hash)
 
 =for hackers
 Found in file sv.c
@@ -1443,7 +1443,7 @@ Found in file perl.c
 =item PL_DBsingle
 
 When Perl is run in debugging mode, with the B<-d> switch, this SV is a
-boolean which indicates whether subs are being single-stepped. 
+boolean which indicates whether subs are being single-stepped.
 Single-stepping is automatically turned on after every step.  This is the C
 variable which corresponds to Perl's $DB::single variable.  See
 C<PL_DBsub>.
@@ -1487,10 +1487,10 @@ Found in file intrpvar.h
 
 =item PL_modglobal
 
-C<PL_modglobal> is a general purpose, interpreter global HV for use by 
+C<PL_modglobal> is a general purpose, interpreter global HV for use by
 extensions that need to keep information on a per-interpreter basis.
-In a pinch, it can also be used as a symbol table for extensions 
-to share data among each other.  It is a good idea to use keys 
+In a pinch, it can also be used as a symbol table for extensions
+to share data among each other.  It is a good idea to use keys
 prefixed by the package name of the extension that owns the data.
 
 	HV*	PL_modglobal
@@ -3064,7 +3064,7 @@ Found in file sv.c
 Unsets the RV status of the SV, and decrements the reference count of
 whatever was being referenced by the RV.  This can almost be thought of
 as a reversal of C<newSVrv>.  This is C<sv_unref_flags> with the C<flag>
-being zero.  See C<SvROK_off>.  
+being zero.  See C<SvROK_off>.
 
 	void	sv_unref(SV* sv)
 
@@ -3079,7 +3079,7 @@ as a reversal of C<newSVrv>.  The C<cflags> argument can contain
 C<SV_IMMEDIATE_UNREF> to force the reference count to be decremented
 (otherwise the decrementing is conditional on the reference count being
 different from one or the reference being a readonly SV).
-See C<SvROK_off>.  
+See C<SvROK_off>.
 
 	void	sv_unref_flags(SV* sv, U32 flags)
 

@@ -2017,7 +2017,7 @@ Perl_newSVpvn(pTHXo_ const char* s, STRLEN len)
 
 #undef  Perl_newSVpvn_share
 SV*
-Perl_newSVpvn_share(pTHXo_ const char* s, STRLEN len, U32 hash)
+Perl_newSVpvn_share(pTHXo_ const char* s, I32 len, U32 hash)
 {
     return ((CPerlObj*)pPerl)->Perl_newSVpvn_share(s, len, hash);
 }

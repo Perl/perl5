@@ -1145,8 +1145,6 @@
 #define xstat			S_xstat
 #  endif
 #endif
-#if defined(PERL_IN_DOIO_C) || defined(PERL_DECL_PROT)
-#endif
 #if defined(PERL_OBJECT)
 #endif
 #define ck_anoncode		Perl_ck_anoncode
@@ -2605,8 +2603,6 @@
 #define xstat(a)		S_xstat(aTHX_ a)
 #  endif
 #endif
-#if defined(PERL_IN_DOIO_C) || defined(PERL_DECL_PROT)
-#endif
 #if defined(PERL_OBJECT)
 #endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
@@ -3865,6 +3861,8 @@
 #define pad_swipe		Perl_pad_swipe
 #define Perl_peep		CPerlObj::Perl_peep
 #define peep			Perl_peep
+#define Perl_start_glob		CPerlObj::Perl_start_glob
+#define start_glob		Perl_start_glob
 #if defined(PERL_OBJECT)
 #define Perl_construct		CPerlObj::Perl_construct
 #define Perl_destruct		CPerlObj::Perl_destruct
@@ -5053,10 +5051,6 @@
 #define S_xstat			CPerlObj::S_xstat
 #define xstat			S_xstat
 #  endif
-#endif
-#if defined(PERL_IN_DOIO_C) || defined(PERL_DECL_PROT)
-#define Perl_start_glob		CPerlObj::Perl_start_glob
-#define start_glob		Perl_start_glob
 #endif
 #if defined(PERL_OBJECT)
 #endif
