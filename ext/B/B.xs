@@ -533,10 +533,9 @@ hash(sv)
 	char *s;
 	STRLEN len;
 	U32 hash = 0;
-	char hexhash[11]; /* must fit "0xffffffff" plus trailing \0 */
+	char hexhash[19]; /* must fit "0xffffffff" plus trailing \0 */
 	s = SvPV(sv, len);
-	while (len--)
-	    hash = hash * 33 + *s++;
+	PERL_HASH(hash, s, len);
 	sprintf(hexhash, "0x%x", hash);
 	ST(0) = sv_2mortal(newSVpv(hexhash, 0));
 
