@@ -80,6 +80,8 @@ sub process {
     my $linenum = 0;
     my $skiplines = 0;
     my $line;
+    my $start= $Config{startperl};
+    $start= "#!perl"   unless  $start =~ /^#!.*perl/;
     open( FILE, $file ) or die "$0: Can't open $file: $!";
     @file = <FILE>;
     foreach $line ( @file ) {
@@ -109,7 +111,7 @@ sub process {
     $file .= '.bat' unless $file =~ /\.bat$/i or $file =~ /^-$/;
     open( FILE, ">$file" ) or die "Can't open $file: $!";
     print FILE $myhead;
-    print FILE $Config{startperl}, ( $OPT{'w'} ? " -w" : "" ),
+    print FILE $start, ( $OPT{'w'} ? " -w" : "" ),
 	       "\n#line ", ($headlines+1), "\n" unless $linedone;
     print FILE @file[$skiplines..$#file];
     print FILE $tail unless $taildone;
