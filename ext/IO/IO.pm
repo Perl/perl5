@@ -10,8 +10,11 @@ XSLoader::load 'IO', $VERSION;
 
 sub import {
     shift;
-    warnings::warn('all', qq|parameterless "use IO" deprecated|)
-	if defined &warnings::warn && warnings::enabled('all');
+    if (@_ == 0) {
+	require warnings;
+	warnings::warn('deprecated', qq{parameterless "use IO" deprecated})
+		if warnings::enabled('deprecated');
+    }
     my @l = @_ ? @_ : qw(Handle Seekable File Pipe Socket Dir);
 
     eval join("", map { "require IO::" . (/(\w+)/)[0] . ";\n" } @l)
