@@ -810,9 +810,8 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
     if (!io) {		/* never opened */
 	if (not_implicit) {
 	    dTHR;
-	    if (ckWARN(WARN_UNOPENED))
-		Perl_warner(aTHX_ WARN_UNOPENED, 
-		       "close() on unopened filehandle %s",GvENAME(gv));
+	    if (ckWARN(WARN_UNOPENED)) /* no check for closed here */
+		report_evil_fh(gv, io, PL_op->op_type);
 	    SETERRNO(EBADF,SS$_IVCHAN);
 	}
 	return FALSE;
@@ -878,10 +877,19 @@ Perl_do_eof(pTHX_ GV *gv)
 	     && (IoTYPE(io) == '>' || IoIFP(io) == PerlIO_stdout()
 		 || IoIFP(io) == PerlIO_stderr()))
     {
-	SV* sv = sv_newmortal();
-	gv_efullname4(sv, gv, Nullch, FALSE);
-	Perl_warner(aTHX_ WARN_IO, "Filehandle %s opened only for output",
-		    SvPV_nolen(sv));
+	/* integrate to report_evil_fh()? */
+        char *name = NULL; 
+	if (isGV(gv)) {
+	    SV* sv = sv_newmortal();
+	    gv_efullname4(sv, gv, Nullch, FALSE);
+	    name = SvPV_nolen(sv);
+	}
+	if (name && *name)
+	    Perl_warner(aTHX_ WARN_IO,
+			"Filehandle %s opened only for output", name);
+	else
+	    Perl_warner(aTHX_ WARN_IO,
+			"Filehandle opened only for output");
     }
 
     while (IoIFP(io)) {
@@ -925,8 +933,8 @@ Perl_do_tell(pTHX_ GV *gv)
     }
     {
 	dTHR;
-	if (ckWARN(WARN_UNOPENED))
-	    Perl_warner(aTHX_ WARN_UNOPENED, "tell() on unopened filehandle");
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	    report_evil_fh(gv, io, PL_op->op_type);
     }
     SETERRNO(EBADF,RMS$_IFI);
     return (Off_t)-1;
@@ -947,8 +955,8 @@ Perl_do_seek(pTHX_ GV *gv, Off_t pos, int whence)
     }
     {
 	dTHR;
-	if (ckWARN(WARN_UNOPENED))
-	    Perl_warner(aTHX_ WARN_UNOPENED, "seek() on unopened filehandle");
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	    report_evil_fh(gv, io, PL_op->op_type);
     }
     SETERRNO(EBADF,RMS$_IFI);
     return FALSE;
@@ -964,8 +972,8 @@ Perl_do_sysseek(pTHX_ GV *gv, Off_t pos, int whence)
 	return PerlLIO_lseek(PerlIO_fileno(fp), pos, whence);
     {
 	dTHR;
-	if (ckWARN(WARN_UNOPENED))
-	    Perl_warner(aTHX_ WARN_UNOPENED, "sysseek() on unopened filehandle");
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	    report_evil_fh(gv, io, PL_op->op_type);
     }
     SETERRNO(EBADF,RMS$_IFI);
     return (Off_t)-1;
@@ -1179,25 +1187,24 @@ Perl_my_stat(pTHX)
 {
     djSP;
     IO *io;
-    GV* tmpgv;
+    GV* gv;
 
     if (PL_op->op_flags & OPf_REF) {
 	EXTEND(SP,1);
-	tmpgv = cGVOP_gv;
+	gv = cGVOP_gv;
       do_fstat:
-	io = GvIO(tmpgv);
+	io = GvIO(gv);
 	if (io && IoIFP(io)) {
-	    PL_statgv = tmpgv;
+	    PL_statgv = gv;
 	    sv_setpv(PL_statname,"");
 	    PL_laststype = OP_STAT;
 	    return (PL_laststatval = PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &PL_statcache));
 	}
 	else {
-	    if (tmpgv == PL_defgv)
+	    if (gv == PL_defgv)
 		return PL_laststatval;
-	    if (ckWARN(WARN_UNOPENED))
-		Perl_warner(aTHX_ WARN_UNOPENED, "%s on unopened filehandle %s",
-			    PL_op_desc[PL_op->op_type], GvENAME(tmpgv));
+	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+		report_evil_fh(gv, io, PL_op->op_type);
 	    PL_statgv = Nullgv;
 	    sv_setpv(PL_statname,"");
 	    return (PL_laststatval = -1);
@@ -1209,11 +1216,11 @@ Perl_my_stat(pTHX)
 	STRLEN n_a;
 	PUTBACK;
 	if (SvTYPE(sv) == SVt_PVGV) {
-	    tmpgv = (GV*)sv;
+	    gv = (GV*)sv;
 	    goto do_fstat;
 	}
 	else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
-	    tmpgv = (GV*)SvRV(sv);
+	    gv = (GV*)SvRV(sv);
 	    goto do_fstat;
 	}
 

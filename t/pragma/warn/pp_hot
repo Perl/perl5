@@ -1,6 +1,6 @@
   pp_hot.c	
 
-  Filehandle %s never opened			[pp_print]
+  print() on unopened filehandle abc		[pp_print]
     $f = $a = "abc" ; print $f $a
 
   Filehandle %s opened only for input		[pp_print]
@@ -52,7 +52,7 @@ print $f $a;
 no warnings 'unopened' ;
 print $f $a;
 EXPECT
-Filehandle abc never opened at - line 4.
+print() on unopened filehandle abc at - line 4.
 ########
 # pp_hot.c [pp_print]
 use warnings 'io' ;

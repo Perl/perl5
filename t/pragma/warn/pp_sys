@@ -16,7 +16,7 @@
 
   page overflow	 				[pp_leavewrite]
 
-  Filehandle %s never opened			[pp_prtf]
+  printf() on unopened filehandle abc		[pp_prtf]
     $a = "abc"; printf $a "fred"
 
   Filehandle %s opened only for input		[pp_prtf]
@@ -79,9 +79,9 @@
 
   warn(warn_nl, "stat");			[pp_stat]
 
-  -T on unopened filehandle %s
-  stat() on unopened filehandle %s
-	close STDIN ; -T STDIN ;
+  -T on closed filehandle %s
+  stat() on closed filehandle %s
+	close STDIN ; -T STDIN ; stat(STDIN) ;
 
   warn(warn_nl, "open");			[pp_fttext]
     -T "abc\ndef" ;
@@ -158,7 +158,7 @@ printf $a "fred";
 no warnings 'unopened' ;
 printf $a "fred";
 EXPECT
-Filehandle abc never opened at - line 4.
+printf() on unopened filehandle abc at - line 4.
 ########
 # pp_sys.c [pp_prtf]
 use warnings 'closed' ;
@@ -355,16 +355,22 @@ EXPECT
 lstat() on filehandle STDIN at - line 13.
 ########
 # pp_sys.c [pp_fttext]
-use warnings 'unopened' ;
+use warnings qw(unopened closed) ;
 close STDIN ; 
 -T STDIN ;
 stat(STDIN) ;
-no warnings 'unopened' ;
+-T HOCUS;
+stat(POCUS);
+no warnings qw(unopened closed) ;
 -T STDIN ;
 stat(STDIN);
+-T HOCUS;
+stat(POCUS);
 EXPECT
--T on unopened filehandle STDIN at - line 4.
-stat() on unopened filehandle STDIN at - line 5.
+-T on closed filehandle STDIN at - line 4.
+stat() on closed filehandle STDIN at - line 5.
+-T on unopened filehandle HOCUS at - line 6.
+stat() on unopened filehandle POCUS at - line 7.
 ########
 # pp_sys.c [pp_fttext]
 use warnings 'newline' ;

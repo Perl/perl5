@@ -1360,12 +1360,6 @@ you which section of the Perl source code is distressed.
 (F) Your machine apparently doesn't implement fcntl().  What is this, a
 PDP-11 or something?
 
-=item Filehandle %s never opened
-
-(W unopened) An I/O operation was attempted on a filehandle that was
-never initialized.  You need to do an open() or a socket() call, or call
-a constructor from the FileHandle package.
-
 =item Filehandle %s opened only for input
 
 (W io) You tried to write on a read-only filehandle.  If you intended it
@@ -2257,6 +2251,12 @@ the buffer and zero pad the new area.
 
 (W unopened) You tried to invoke a file test operator on a filehandle
 that isn't open.  Check your logic.  See also L<perlfunc/-X>.
+
+=item %s() on unopened %s %s
+
+(W unopened) An I/O operation was attempted on a filehandle that was
+never initialized.  You need to do an open(), a sysopen(), or a socket()
+call, or call a constructor from the FileHandle package.
 
 =item oops: oopsAV
 

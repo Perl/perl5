@@ -1174,11 +1174,14 @@ PP(pp_enterwrite)
 
     cv = GvFORM(fgv);
     if (!cv) {
+        char *name = NULL;
 	if (fgv) {
 	    SV *tmpsv = sv_newmortal();
 	    gv_efullname4(tmpsv, fgv, Nullch, FALSE);
-	    DIE(aTHX_ "Undefined format \"%s\" called",SvPVX(tmpsv));
+	    name = SvPV_nolen(tmpsv);
 	}
+	if (name && *name)
+	    DIE(aTHX_ "Undefined format \"%s\" called", name);
 	DIE(aTHX_ "Not a format reference");
     }
     if (CvCLONE(cv))
@@ -1255,10 +1258,19 @@ PP(pp_leavewrite)
 	if (!fgv)
 	    DIE(aTHX_ "bad top format reference");
 	cv = GvFORM(fgv);
-	if (!cv) {
-	    SV *tmpsv = sv_newmortal();
-	    gv_efullname4(tmpsv, fgv, Nullch, FALSE);
-	    DIE(aTHX_ "Undefined top format \"%s\" called",SvPVX(tmpsv));
+	{
+	    char *name = NULL;
+	    if (!cv) {
+	        SV *sv = sv_newmortal();
+		gv_efullname4(sv, fgv, Nullch, FALSE);
+		name = SvPV_nolen(sv);
+	    }
+	    if (name && *name)
+	        DIE(aTHX_ "Undefined top format \"%s\" called",name);
+	    /* why no:
+	    else
+	        DIE(aTHX_ "Undefined top format called");
+	    ?*/
 	}
 	if (CvCLONE(cv))
 	    cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
@@ -1274,11 +1286,19 @@ PP(pp_leavewrite)
     if (!fp) {
 	if (ckWARN2(WARN_CLOSED,WARN_IO)) {
 	    if (IoIFP(io)) {
-		SV* sv = sv_newmortal();
-		gv_efullname4(sv, gv, Nullch, FALSE);
-		Perl_warner(aTHX_ WARN_IO,
-			    "Filehandle %s opened only for input",
-			    SvPV_nolen(sv));
+		/* integrate with report_evil_fh()? */
+	        char *name = NULL;
+		if (isGV(gv)) {
+		    SV* sv = sv_newmortal();
+		    gv_efullname4(sv, gv, Nullch, FALSE);
+		    name = SvPV_nolen(sv);
+		}
+		if (name && *name)
+		    Perl_warner(aTHX_ WARN_IO,
+				"Filehandle %s opened only for input", name);
+		else
+		    Perl_warner(aTHX_ WARN_IO,
+				"Filehandle opened only for input");
 	    }
 	    else if (ckWARN(WARN_CLOSED))
 		report_evil_fh(gv, io, PL_op->op_type);
@@ -1344,21 +1364,27 @@ PP(pp_prtf)
 
     sv = NEWSV(0,0);
     if (!(io = GvIO(gv))) {
-	if (ckWARN(WARN_UNOPENED)) {
-	    gv_efullname4(sv, gv, Nullch, FALSE);
-	    Perl_warner(aTHX_ WARN_UNOPENED,
-			"Filehandle %s never opened", SvPV(sv,n_a));
-	}
+        dTHR;
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	    report_evil_fh(gv, io, PL_op->op_type);
 	SETERRNO(EBADF,RMS$_IFI);
 	goto just_say_no;
     }
     else if (!(fp = IoOFP(io))) {
 	if (ckWARN2(WARN_CLOSED,WARN_IO))  {
+	    /* integrate with report_evil_fh()? */
 	    if (IoIFP(io)) {
-		gv_efullname4(sv, gv, Nullch, FALSE);
-		Perl_warner(aTHX_ WARN_IO,
-			    "Filehandle %s opened only for input",
-			    SvPV(sv,n_a));
+	        char *name = NULL;
+		if (isGV(gv)) {
+		    gv_efullname4(sv, gv, Nullch, FALSE);
+		    name = SvPV_nolen(sv);
+		}
+		if (name && *name)
+		    Perl_warner(aTHX_ WARN_IO,
+				"Filehandle %s opened only for input", name);
+		else
+		    Perl_warner(aTHX_ WARN_IO,
+				"Filehandle opened only for input");
 	    }
 	    else if (ckWARN(WARN_CLOSED))
 		report_evil_fh(gv, io, PL_op->op_type);
@@ -1550,10 +1576,19 @@ PP(pp_sysread)
 	if ((IoTYPE(io) == '>' || IoIFP(io) == PerlIO_stdout()
 	    || IoIFP(io) == PerlIO_stderr()) && ckWARN(WARN_IO))
 	{
-	    SV* sv = sv_newmortal();
-	    gv_efullname4(sv, gv, Nullch, FALSE);
-	    Perl_warner(aTHX_ WARN_IO, "Filehandle %s opened only for output",
-			SvPV_nolen(sv));
+	    /* integrate with report_evil_fh()? */
+	    char *name = NULL;
+	    if (isGV(gv)) {
+		SV* sv = sv_newmortal();
+		gv_efullname4(sv, gv, Nullch, FALSE);
+		name = SvPV_nolen(sv);
+	    }
+	    if (name && *name)
+		Perl_warner(aTHX_ WARN_IO,
+			    "Filehandle %s opened only for output", name);
+	    else
+		Perl_warner(aTHX_ WARN_IO,
+			    "Filehandle opened only for output");
 	}
 	goto say_undef;
     }
@@ -2484,39 +2519,39 @@ PP(pp_lstat)
 PP(pp_stat)
 {
     djSP;
-    GV *tmpgv;
+    GV *gv;
     I32 gimme;
     I32 max = 13;
     STRLEN n_a;
 
     if (PL_op->op_flags & OPf_REF) {
-	tmpgv = cGVOP_gv;
+	gv = cGVOP_gv;
 	if (PL_op->op_type == OP_LSTAT && ckWARN(WARN_IO))
 	    Perl_warner(aTHX_ WARN_IO,
-			"lstat() on filehandle %s", GvENAME(tmpgv));
+			"lstat() on filehandle %s", GvENAME(gv));
       do_fstat:
-	if (tmpgv != PL_defgv) {
+	if (gv != PL_defgv) {
 	    PL_laststype = OP_STAT;
-	    PL_statgv = tmpgv;
+	    PL_statgv = gv;
 	    sv_setpv(PL_statname, "");
-	    PL_laststatval = (GvIO(tmpgv) && IoIFP(GvIOp(tmpgv))
-		? PerlLIO_fstat(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), &PL_statcache) : -1);
+	    PL_laststatval = (GvIO(gv) && IoIFP(GvIOp(gv))
+		? PerlLIO_fstat(PerlIO_fileno(IoIFP(GvIOn(gv))), &PL_statcache) : -1);
 	}
 	if (PL_laststatval < 0) {
-	    if (ckWARN(WARN_UNOPENED))
-		Perl_warner(aTHX_ WARN_UNOPENED, "%s() on unopened filehandle %s",
-			    PL_op_desc[PL_op->op_type], GvENAME(tmpgv));
+	    dTHR;
+	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+		report_evil_fh(gv, GvIO(gv), PL_op->op_type);
 	    max = 0;
 	}
     }
     else {
 	SV* sv = POPs;
 	if (SvTYPE(sv) == SVt_PVGV) {
-	    tmpgv = (GV*)sv;
+	    gv = (GV*)sv;
 	    goto do_fstat;
 	}
 	else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
-	    tmpgv = (GV*)SvRV(sv);
+	    gv = (GV*)SvRV(sv);
 	    goto do_fstat;
 	}
 	sv_setpv(PL_statname, SvPV(sv,n_a));
@@ -3058,10 +3093,10 @@ PP(pp_fttext)
 		len = 512;
 	}
 	else {
-	    if (ckWARN(WARN_UNOPENED)) {
+	    dTHR;
+	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED)) {
 		gv = cGVOP_gv;
-		Perl_warner(aTHX_ WARN_UNOPENED, "%s on unopened filehandle %s",
-			    PL_op_desc[PL_op->op_type], GvENAME(gv));
+		report_evil_fh(gv, GvIO(gv), PL_op->op_type);
 	    }
 	    SETERRNO(EBADF,RMS$_IFI);
 	    RETPUSHUNDEF;

@@ -12,22 +12,22 @@
   warn(warn_nl, "open");		[Perl_do_open9]
     open(F, "true\ncd")
 
-  close() on unopened filehandle %s		[Perl_do_close] <<TODO
+  close() on unopened filehandle %s	[Perl_do_close]
     $a = "fred";close("$a")
 
-  tell() on unopened filehandle		[Perl_do_tell]
+  tell() on closed filehandle		[Perl_do_tell]
     $a = "fred";$a = tell($a)
 
-  seek() on unopened filehandle		[Perl_do_seek]
+  seek() on closed filehandle		[Perl_do_seek]
     $a = "fred";$a = seek($a,1,1)
 
-  sysseek() on unopened filehandle		[Perl_do_sysseek]
+  sysseek() on closed filehandle	[Perl_do_sysseek]
     $a = "fred";$a = seek($a,1,1)
 
   warn(warn_uninit);			[Perl_do_print]
     print $a ;
 
-  -x on unopened filehandle %s 		[Perl_my_stat]
+  -x on closed filehandle %s 		[Perl_my_stat]
     close STDIN ; -x STDIN ;
 
   warn(warn_nl, "stat");		[Perl_my_stat]
@@ -106,6 +106,12 @@ $a = seek(STDIN,1,1);
 $a = sysseek(STDIN,1,1);
 -x STDIN ;
 stat(STDIN) ;
+$a = "fred";
+tell($a);
+seek($a,1,1);
+sysseek($a,1,1);
+-x $a; # ok
+stat($a); # ok
 no warnings 'io' ;
 close STDIN ;
 tell(STDIN);
@@ -113,12 +119,21 @@ $a = seek(STDIN,1,1);
 $a = sysseek(STDIN,1,1);
 -x STDIN ;
 stat(STDIN) ;
+$a = "fred";
+tell($a);
+seek($a,1,1);
+sysseek($a,1,1);
+-x $a;
+stat($a);
 EXPECT
-tell() on unopened filehandle at - line 4.
-seek() on unopened filehandle at - line 5.
-sysseek() on unopened filehandle at - line 6.
--x on unopened filehandle STDIN at - line 7.
-stat() on unopened filehandle STDIN at - line 8.
+tell() on closed filehandle STDIN at - line 4.
+seek() on closed filehandle STDIN at - line 5.
+sysseek() on closed filehandle STDIN at - line 6.
+-x on closed filehandle STDIN at - line 7.
+stat() on closed filehandle STDIN at - line 8.
+tell() on unopened filehandle at - line 10.
+seek() on unopened filehandle at - line 11.
+sysseek() on unopened filehandle at - line 12.
 ########
 # doio.c [Perl_do_print]
 use warnings 'uninitialized' ;
