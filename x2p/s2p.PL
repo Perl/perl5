@@ -51,7 +51,7 @@ B<s2p [options] filename>
 
 =head1 DESCRIPTION
 
-I<S2p> takes a sed script specified on the command line (or from
+I<s2p> takes a sed script specified on the command line (or from
 standard input) and produces a comparable I<perl> script on the
 standard output.
 
@@ -93,7 +93,7 @@ $\ and chop.
 
 =head1 ENVIRONMENT
 
-S2p uses no environment variables.
+s2p uses no environment variables.
 
 =head1 AUTHOR
 
@@ -104,7 +104,7 @@ Larry Wall E<lt>F<larry@wall.org>E<gt>
 =head1 SEE ALSO
 
  perl	The perl compiler/interpreter
- 
+
  a2p	awk to perl translator
 
 =head1 DIAGNOSTICS

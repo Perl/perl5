@@ -121,9 +121,9 @@ SelfLoader - load functions only on demand
 
     package FOOBAR;
     use SelfLoader;
-    
+
     ... (initializing code)
-    
+
     __DATA__
     sub {....
 

@@ -117,6 +117,9 @@
 /* these should be set in a hint file, not here */
 #ifndef PERL_SYS_INIT
 #if defined(PERL_SCO5) || defined(__FreeBSD__)
+#  ifdef __FreeBSD__
+#    include <floatingpoint.h>
+#  endif
 #  define PERL_SYS_INIT(c,v)	fpsetmask(0); MALLOC_INIT
 #else
 #  ifdef POSIX_BC

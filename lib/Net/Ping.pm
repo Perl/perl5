@@ -422,7 +422,7 @@ Net::Ping - check a remote host for reachability
         sleep(1);
     }
     $p->close();
-    
+
     $p = Net::Ping->new("tcp", 2);
     while ($stop_time > time())
     {
@@ -431,7 +431,7 @@ Net::Ping - check a remote host for reachability
         sleep(300);
     }
     undef($p);
-    
+
     # For backward compatibility
     print "$host is alive.\n" if pingecho($host);
 

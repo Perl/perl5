@@ -5,7 +5,7 @@ specially designed to be readable as is.
 =head1 NAME
 
 perldos - Perl under DOS, W31, W95.
-                                 
+
 =head1 SYNOPSIS
 
 These are instructions for building Perl under DOS (or w??), using
@@ -103,7 +103,7 @@ Unpack the source package F<perl5.6*.tar.gz> with djtarx. If you want
 to use long file names under w95, don't forget to use
 
         set LFN=y
-        
+
 before unpacking the archive.
 
 =item *

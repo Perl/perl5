@@ -6,7 +6,6 @@
 *** WARNING: unterminated B<...> at line 35 in file pod/poderrs.t
 *** WARNING: unterminated I<...> at line 34 in file pod/poderrs.t
 *** WARNING: unterminated C<...> at line 37 in file pod/poderrs.t
-*** WARNING: line containing nothing but whitespace in paragraph at line 45 in file pod/poderrs.t
 *** ERROR: =item without previous =over at line 52 in file pod/poderrs.t
 *** ERROR: =back without previous =over at line 56 in file pod/poderrs.t
 *** ERROR: =over on line 60 without closing =back (at head2) at line 64 in file pod/poderrs.t

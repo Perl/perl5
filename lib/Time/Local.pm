@@ -157,7 +157,7 @@ rather they didn't, you can explicitly import the timelocal_nocheck()
 and timegm_nocheck() functions.
 
 	use Time::Local 'timelocal_nocheck';
-	
+
 	{
 	    # The 365th day of 1999
 	    print scalar localtime timelocal_nocheck 0,0,0,365,0,99;

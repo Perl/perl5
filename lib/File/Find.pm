@@ -18,7 +18,7 @@ finddepth - traverse a directory structure depth-first
     use File::Find;
     finddepth(\&wanted, '/foo', '/bar');
     sub wanted { ... }
-    
+
     use File::Find;
     find({ wanted => \&process, follow => 1 }, '.');
 

@@ -889,7 +889,7 @@ distribution for more examples.)
     $boo = [ 1, [], "abcd", \*foo,
              {1 => 'a', 023 => 'b', 0x45 => 'c'}, 
              \\"p\q\'r", $foo, $fuz];
-    
+
     ########
     # simple usage
     ########
@@ -910,12 +910,12 @@ distribution for more examples.)
 
     $Data::Dumper::Useqq = 1;          # print strings in double quotes
     print Dumper($boo);
-    
-    
+
+
     ########
     # recursive structures
     ########
-    
+
     @c = ('c');
     $c = \@c;
     $b = {};
@@ -924,24 +924,24 @@ distribution for more examples.)
     $b->{b} = $a->[1];
     $b->{c} = $a->[2];
     print Data::Dumper->Dump([$a,$b,$c], [qw(a b c)]);
-    
-    
+
+
     $Data::Dumper::Purity = 1;         # fill in the holes for eval
     print Data::Dumper->Dump([$a, $b], [qw(*a b)]); # print as @a
     print Data::Dumper->Dump([$b, $a], [qw(*b a)]); # print as %b
-    
-    
+
+
     $Data::Dumper::Deepcopy = 1;       # avoid cross-refs
     print Data::Dumper->Dump([$b, $a], [qw(*b a)]);
-    
-    
+
+
     $Data::Dumper::Purity = 0;         # avoid cross-refs
     print Data::Dumper->Dump([$b, $a], [qw(*b a)]);
-    
+
     ########
     # deep structures
     ########
-    
+
     $a = "pearl";
     $b = [ $a ];
     $c = { 'b' => $b };
@@ -953,23 +953,23 @@ distribution for more examples.)
     $Data::Dumper::Maxdepth = 3;       # no deeper than 3 refs down
     print Data::Dumper->Dump([$f], [qw(f)]);
 
-    
+
     ########
     # object-oriented usage
     ########
-    
+
     $d = Data::Dumper->new([$a,$b], [qw(a b)]);
     $d->Seen({'*c' => $c});            # stash a ref without printing it
     $d->Indent(3);
     print $d->Dump;
     $d->Reset->Purity(0);              # empty the seen cache
     print join "----\n", $d->Dump;
-    
-    
+
+
     ########
     # persistence
     ########
-    
+
     package Foo;
     sub new { bless { state => 'awake' }, shift }
     sub Freeze {
@@ -978,7 +978,7 @@ distribution for more examples.)
 	$s->{state} = 'asleep';
 	return bless $s, 'Foo::ZZZ';
     }
-    
+
     package Foo::ZZZ;
     sub Thaw {
         my $s = shift;
@@ -986,7 +986,7 @@ distribution for more examples.)
 	$s->{state} = 'awake';
 	return bless $s, 'Foo';
     }
-    
+
     package Foo;
     use Data::Dumper;
     $a = Foo->new;
@@ -997,12 +997,12 @@ distribution for more examples.)
     print $c;
     $d = eval $c;
     print Data::Dumper->Dump([$d], ['d']);
-    
-    
+
+
     ########
     # symbol substitution (useful for recreating CODE refs)
     ########
-    
+
     sub foo { print "foo speaking\n" }
     *other = \&foo;
     $bar = [ \&other ];

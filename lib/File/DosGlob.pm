@@ -157,16 +157,16 @@ File::DosGlob - DOS like globbing and then some
 =head1 SYNOPSIS
 
     require 5.004;
-    
+
     # override CORE::glob in current package
     use File::DosGlob 'glob';
-    
+
     # override CORE::glob in ALL packages (use with extreme caution!)
     use File::DosGlob 'GLOBAL_glob';
 
     @perlfiles = glob  "..\\pe?l/*.p?";
     print <..\\pe?l/*.p?>;
-    
+
     # from the command line (overrides only in main::)
     > perl -MFile::DosGlob=glob -e "print <../pe*/*p?>"
 

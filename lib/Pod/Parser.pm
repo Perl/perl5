@@ -1064,16 +1064,17 @@ sub parse_from_filehandle {
         next unless (($textline =~ /^(\s*)$/) && (length $paragraph));
 
         ## Issue a warning about any non-empty blank lines
-        if (length($1) > 1  and  ! $self->{_CUTTING}) {
-            my $errorsub = $self->errorsub();
-            my $file = $self->input_file();
-            $file = VMS::Filespec::unixify($file) if $^O eq 'VMS';
-            my $errmsg = "*** WARNING: line containing nothing but whitespace".
-                         " in paragraph at line $nlines in file $file\n";
-            (ref $errorsub) and &{$errorsub}($errmsg)
-                or (defined $errorsub) and $self->$errorsub($errmsg)
-                    or  warn($errmsg);
-        }
+# XXX avoid warning until Brad has a chance to make this optional --GSAR
+#        if (length($1) > 1  and  ! $self->{_CUTTING}) {
+#            my $errorsub = $self->errorsub();
+#            my $file = $self->input_file();
+#            $file = VMS::Filespec::unixify($file) if $^O eq 'VMS';
+#            my $errmsg = "*** WARNING: line containing nothing but whitespace".
+#                         " in paragraph at line $nlines in file $file\n";
+#            (ref $errorsub) and &{$errorsub}($errmsg)
+#                or (defined $errorsub) and $self->$errorsub($errmsg)
+#                    or  warn($errmsg);
+#        }
 
         ## Now process the paragraph
         parse_paragraph($self, $paragraph, ($nlines - $plines) + 1);
