@@ -22,6 +22,12 @@ See File::Spec::Unix for a documentation of the methods provided
 there. This package overrides the implementation of these methods, not
 the semantics.
 
+=item eliminate_macros
+
+Expands MM[KS]/Make macros in a text string, using the contents of
+identically named elements of C<%$self>, and returns the result
+as a file specification in Unix syntax.
+
 =cut
 
 sub eliminate_macros {
@@ -54,6 +60,22 @@ sub eliminate_macros {
     if ($complex) { $npath =~ s#\cB(.*?)\cB#\${$1}#g; }
     $npath;
 }
+
+=item fixpath
+
+Catchall routine to clean up problem MM[SK]/Make macros.  Expands macros
+in any directory specification, in order to avoid juxtaposing two
+VMS-syntax directories when MM[SK] is run.  Also expands expressions which
+are all macro, so that we can tell how long the expansion is, and avoid
+overrunning DCL's command buffer when MM[KS] is running.
+
+If optional second argument has a TRUE value, then the return string is
+a VMS-syntax directory specification, if it is FALSE, the return string
+is a VMS-syntax file specification, and if it is not specified, fixpath()
+checks to see whether it matches the name of a directory in the current
+default directory, and returns a directory or file specification accordingly.
+
+=cut
 
 sub fixpath {
     my($self,$path,$force_path) = @_;

@@ -2,8 +2,8 @@
  *
  * VMS-specific routines for perl5
  *
- * Last revised: 24-Apr-1999 by Charles Bailey  bailey@newman.upenn.edu
- * Version: 5.5.58
+ * Last revised: 15-Aug-1999 by Charles Bailey  bailey@newman.upenn.edu
+ * Version: 5.5.60
  */
 
 #include <acedef.h>
@@ -90,6 +90,10 @@ static struct dsc$descriptor_s *fildev[] = { &fildevdsc, NULL };
 static struct dsc$descriptor_s *defenv[] = { &fildevdsc, &crtlenvdsc, NULL };
 static struct dsc$descriptor_s **env_tables = defenv;
 static bool will_taint = FALSE;  /* tainting active, but no PL_curinterp yet */
+
+/* True if we shouldn't treat barewords as logicals during directory */
+/* munching */ 
+static int no_translate_barewords;
 
 /* True if we shouldn't treat barewords as logicals during directory */
 /* munching */ 

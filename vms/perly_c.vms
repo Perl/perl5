@@ -48,7 +48,7 @@ typedef union {
 #define YYLEX_PARAM (&yychar)
 #endif
 
-#line 52 "perly.c"
+#line 51 "perly.c"
 #define YYERRCODE 256
 static short yylhs[] = {                                        -1,
    50,    0,    8,    6,    9,    7,   10,   10,   10,   11,
@@ -1368,7 +1368,7 @@ static char *yyrule[] = {
 #endif
 #define yyparse() Perl_yyparse(pTHX)
 
-#line 1372 "perly.c"
+#line 1371 "perly.c"
 #define YYABORT goto yyabort
 #define YYACCEPT goto yyaccept
 #define YYERROR goto yyerrlab
@@ -2410,7 +2410,7 @@ case 193:
 #line 723 "perly.y"
 { yyval.opval = yyvsp[0].opval; }
 break;
-#line 2414 "perly.c"
+#line 2412 "perly.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

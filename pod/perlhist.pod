@@ -119,7 +119,7 @@ the strings?).
           5.000alpha4   1993-???-??
           5.000alpha5   1993-???-??
           5.000alpha6   1994-Mar-18
-          5.003alpha7   1994-Mar-25
+          5.000alpha7   1994-Mar-25
  Andy     5.000alpha8   1994-Apr-04
  Larry    5.000alpha9   1994-May-05     ext appears.
           5.000alpha10  1994-Jun-11
@@ -152,6 +152,7 @@ the strings?).
           5.000b3f      1994-Sep-30
           5.000b3g      1994-Oct-04
  Andy     5.000b3h      1994-Oct-07
+ Larry?   5.000gamma    1994-Oct-13?
 
  Larry   5.000          1994-Oct-17
 
@@ -169,6 +170,7 @@ the strings?).
           5.000l        1995-Feb-21
           5.000m        1995-Feb-28
           5.000n        1995-Mar-07
+          5.000o        1995-Mar-13?
 
  Larry   5.001          1995-Mar-13
 
