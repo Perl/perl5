@@ -1210,34 +1210,34 @@ lib/Math/Complex.t		See if Math::Complex works
 lib/Math/Trig.pm		A simple interface to complex trigonometry
 lib/Math/Trig.t			See if Math::Trig works
 lib/Memoize.pm			Memoize
-lib/Memoize/AnyDBM_File.pm	Memoize
-lib/Memoize/Expire.pm		Memoize
-lib/Memoize/ExpireFile.pm	Memoize
-lib/Memoize/ExpireTest.pm	Memoize
-lib/Memoize/NDBM_File.pm	Memoize
-lib/Memoize/README		Memoize
-lib/Memoize/SDBM_File.pm	Memoize
-lib/Memoize/Storable.pm		Memoize
-lib/Memoize/t/array.t		Memoize
-lib/Memoize/t/array_confusion.t		Memoize
-lib/Memoize/t/correctness.t	Memoize
-lib/Memoize/t/errors.t		Memoize
-lib/Memoize/t/expfile.t		Memoize
-lib/Memoize/t/expire.t		Memoize
-lib/Memoize/t/expmod_n.t	Memoize
-lib/Memoize/t/expmod_t.t	Memoize
-lib/Memoize/t/flush.t		Memoize
-lib/Memoize/t/normalize.t	Memoize
-lib/Memoize/t/prototype.t	Memoize
-lib/Memoize/t/speed.t		Memoize
-lib/Memoize/t/tie.t		Memoize
-lib/Memoize/t/tiefeatures.t	Memoize
-lib/Memoize/t/tie_gdbm.t	Memoize
-lib/Memoize/t/tie_ndbm.t	Memoize
-lib/Memoize/t/tie_sdbm.t	Memoize
-lib/Memoize/t/tie_storable.t	Memoize
-lib/Memoize/t/unmemoize.t	Memoize
-lib/Memoize/TODO		Memoize
+lib/Memoize/AnyDBM_File.pm	Memoize glue layer for AnyDBM_File
+lib/Memoize/Expire.pm		Memoize expiry manager example
+lib/Memoize/ExpireFile.pm	Memoize expiry manager test scaffold
+lib/Memoize/ExpireTest.pm	Memoize expiry manager test scaffold
+lib/Memoize/NDBM_File.pm	Memoize glue layer for NDBM_File
+lib/Memoize/README		Memoize release notes
+lib/Memoize/SDBM_File.pm	Memoize glue layer for SDBM_File
+lib/Memoize/Storable.pm		Memoize glue layer for Storable
+lib/Memoize/t/array.t		Memoize array context return tests
+lib/Memoize/t/array_confusion.t		Memoize ambiguous array return tests
+lib/Memoize/t/correctness.t	Memoize basic correctness tests
+lib/Memoize/t/errors.t		Memoize PEBKAC detection tests
+lib/Memoize/t/expfile.t		Memoize expiry manager tests
+lib/Memoize/t/expire.t		Memoize expiry manager tests
+lib/Memoize/t/expmod_n.t	Memoize expiry manager tests
+lib/Memoize/t/expmod_t.t	Memoize expiry manager (timed) tests
+lib/Memoize/t/flush.t		Memoize 'flush_cache' function tests
+lib/Memoize/t/normalize.t	Memoize 'normalizer' feature tests
+lib/Memoize/t/prototype.t	Memoize prototyped function handling tests
+lib/Memoize/t/speed.t		"Makes functions faster" advertisement test
+lib/Memoize/t/tie.t		Memoize tied file test
+lib/Memoize/t/tiefeatures.t	Memoize FAULT / MERGE / HASH options test
+lib/Memoize/t/tie_gdbm.t	Memoize GDBM interface test
+lib/Memoize/t/tie_ndbm.t	Memoize NDBM interface test
+lib/Memoize/t/tie_sdbm.t	Memoize SDBM interface test
+lib/Memoize/t/tie_storable.t	Memoize Storable interface test
+lib/Memoize/t/unmemoize.t	Memoize 'unmemoize' function test
+lib/Memoize/TODO		Memoize to-do list
 lib/Net/ChangeLog.libnet	libnet
 lib/Net/Cmd.pm			libnet
 lib/Net/Config.eg		libnet
@@ -1474,39 +1474,39 @@ lib/Tie/Array/splice.t		Test for Tie::Array::SPLICE
 lib/Tie/Array/std.t		Test for Tie::StdArray
 lib/Tie/Array/stdpush.t		Test for Tie::StdArray
 lib/Tie/File.pm                 Files as tied arrays
-lib/Tie/File/t/00_version.t     Test for Tie::File
-lib/Tie/File/t/01_gen.t         Test for Tie::File
-lib/Tie/File/t/02_fetchsize.t   Test for Tie::File
-lib/Tie/File/t/03_longfetch.t   Test for Tie::File
-lib/Tie/File/t/04_splice.t      Test for Tie::File
-lib/Tie/File/t/05_size.t        Test for Tie::File
-lib/Tie/File/t/06_fixrec.t      Test for Tie::File
-lib/Tie/File/t/07_rv_splice.t   Test for Tie::File
-lib/Tie/File/t/08_ro.t          Test for Tie::File
-lib/Tie/File/t/09_gen_rs.t      Test for Tie::File
-lib/Tie/File/t/10_splice_rs.t   Test for Tie::File
-lib/Tie/File/t/11_rv_splice_rs.t  Test for Tie::File
-lib/Tie/File/t/12_longfetch_rs.t  Test for Tie::File
-lib/Tie/File/t/13_size_rs.t     Test for Tie::File
-lib/Tie/File/t/14_lock.t        Test for Tie::File
-lib/Tie/File/t/15_pushpop.t     Test for Tie::File
-lib/Tie/File/t/16_handle.t      Test for Tie::File
-lib/Tie/File/t/17_misc_meth.t   Test for Tie::File
-lib/Tie/File/t/18_rs_fixrec.t   Test for Tie::File
-lib/Tie/File/t/19_cache.t       Test for Tie::File
-lib/Tie/File/t/20_cache_full.t  Test for Tie::File
-lib/Tie/File/t/21_win32.t       Test for Tie::File
-lib/Tie/File/t/22_autochomp.t   Test for Tie::File
-lib/Tie/File/t/23_rv_ac_splice.t  Test for Tie::File
-lib/Tie/File/t/24_cache_loop.t	Test for Tie::File
-lib/Tie/File/t/25_gen_nocache.t	Test for Tie::File
-lib/Tie/File/t/26_twrite.t	Test for Tie::File
-lib/Tie/File/t/30_defer.t       Test for Tie::File
-lib/Tie/File/t/31_autodefer.t   Test for Tie::File
-lib/Tie/File/t/32_defer_misc.t  Test for Tie::File
-lib/Tie/File/t/33_defer_vs.t	Test for Tie::File
-lib/Tie/File/t/40_abs_cache.t	Test for Tie::File
-lib/Tie/File/t/41_heap.t	Test for Tie::File
+lib/Tie/File/t/00_version.t     Trivial test for Tie::File
+lib/Tie/File/t/01_gen.t         Generic read/write tests for Tie::File
+lib/Tie/File/t/02_fetchsize.t   File length fetch test for Tie::File
+lib/Tie/File/t/03_longfetch.t   Past-the-end-of-the-array tests for Tie::File
+lib/Tie/File/t/04_splice.t      SPLICE method tests for Tie::File
+lib/Tie/File/t/05_size.t        $#a tests for Tie::File
+lib/Tie/File/t/06_fixrec.t      '_fixrec' method functional tests for Tie::File
+lib/Tie/File/t/07_rv_splice.t   SPLICE method return value tests for Tie::File
+lib/Tie/File/t/08_ro.t          read-only mode tests for Tie::File
+lib/Tie/File/t/09_gen_rs.t      Like 01_gen.t, with unusual record separator
+lib/Tie/File/t/10_splice_rs.t   Like 04_splice.t, with unusual record separator
+lib/Tie/File/t/11_rv_splice_rs.t  Like 07_rv_splice.t, with unusual record separator
+lib/Tie/File/t/12_longfetch_rs.t  Like 03_longfetch.t, with unusual record separator
+lib/Tie/File/t/13_size_rs.t     Like 05_size.t, with unusual record separator
+lib/Tie/File/t/14_lock.t        File locking method tests for Tie::File
+lib/Tie/File/t/15_pushpop.t     PUSH / POP / SHIFT / UNSHIFT for Tie::File
+lib/Tie/File/t/16_handle.t      Tying a handle instead of a file for Tie::File
+lib/Tie/File/t/17_misc_meth.t   CLEAR / EXISTS / DELETE / EXTEND for Tie::File
+lib/Tie/File/t/18_rs_fixrec.t   Like 06_fixrec.t, with unusual record separator
+lib/Tie/File/t/19_cache.t       Read cache exercises and regression for Tie::File
+lib/Tie/File/t/20_cache_full.t  LRU expiry exercises and regression for Tie::File
+lib/Tie/File/t/21_win32.t       Win32 special behavior of Tie::File
+lib/Tie/File/t/22_autochomp.t   'autochomp' option of Tie::File
+lib/Tie/File/t/23_rv_ac_splice.t  Like 07_rv_splice.t, but with autochomp
+lib/Tie/File/t/24_cache_loop.t	Regression for old Tie::File cache bug
+lib/Tie/File/t/25_gen_nocache.t	Like 01_gen.t, but with caching disabled
+lib/Tie/File/t/26_twrite.t	Unit tests for Tie::File::_twrite
+lib/Tie/File/t/30_defer.t       deferred writing feature tests for Tie::File
+lib/Tie/File/t/31_autodefer.t   'autodefer' feature tests for Tie::File
+lib/Tie/File/t/32_defer_misc.t  Like 17_misc_meth.t, but with deferred writing
+lib/Tie/File/t/33_defer_vs.t	Like 30_defer.t, but with varying-length records
+lib/Tie/File/t/40_abs_cache.t	Unit tests for Tie::File::Cache
+lib/Tie/File/t/41_heap.t	Unit tests for Tie::File::Heap
 lib/Tie/Handle.pm		Base class for tied handles
 lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
 lib/Tie/Hash.pm			Base class for tied hashes
