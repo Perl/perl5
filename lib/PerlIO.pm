@@ -33,8 +33,10 @@ PerlIO - On demand loader for PerlIO layers and root of PerlIO::* name space
 
 =head1 SYNOPSIS
 
-  open($fh,">:crlf", "my.txt")
-  open($fh,">:bytes","his.jpg")
+  open($fh,">:crlf", "my.txt"); # portably open a text file for writing
+
+  open($fh,"<","his.jpg");      # portably open a binary file for reading
+  binmode($fh);
 
   Shell:
     PERLIO=perlio perl ....
