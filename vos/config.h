@@ -1324,12 +1324,6 @@
  */
 #define HAS_ENDSERVENT		/**/
 
-/* HAS_ENDSPENT:
- *	This symbol, if defined, indicates that the endspent system call is
- *	available to finalize the scan of SysV shadow password entries.
- */
-/*#define HAS_ENDSPENT		/**/
-
 /* HAS_FD_SET:
  *	This symbol, when defined, indicates presence of the fd_set typedef
  *	in <sys/types.h>
@@ -1551,12 +1545,6 @@
  *	them.  See netdbtype.U for probing for various Netdb_xxx_t types.
  */
 #define	HAS_GETSERV_PROTOS	/**/
-
-/* HAS_GETSPENT:
- *	This symbol, if defined, indicates that the getspent system call is
- *	available to retrieve SysV shadow password entries sequentially.
- */
-/*#define HAS_GETSPENT		/**/
 
 /* HAS_GETSPNAM:
  *	This symbol, if defined, indicates that the getspnam system call is
@@ -1862,12 +1850,6 @@
  *	available.
  */
 #define HAS_SETSERVENT		/**/
-
-/* HAS_SETSPENT:
- *	This symbol, if defined, indicates that the setspent system call is
- *	available to initialize the scan of SysV shadow password entries.
- */
-/*#define HAS_SETSPENT		/**/
 
 /* HAS_SETVBUF:
  *	This symbol, if defined, indicates that the setvbuf routine is
@@ -2713,6 +2695,16 @@
  *	<sys/types.h> to get any typedef'ed information.
  */
 #define Pid_t pid_t		/* PID type */
+
+/* PERL_OTHERLIBDIRS:
+ *	This variable contains a colon-separated set of paths for the perl
+ *	binary to search for additional library files or modules.
+ *	These directories will be tacked to the end of @INC.
+ *	Perl will automatically search below each path for version-
+ *	and architecture-specific directories.  See PERL_INC_VERSION_LIST
+ *	for more details.
+ */
+/*#define PERL_OTHERLIBDIRS ""		/**/
 
 /* PRIVLIB:
  *	This symbol contains the name of the private library for this package.

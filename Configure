@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Apr 28 23:33:15 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Sun May  7 18:52:04 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -343,7 +343,6 @@ d_endnent=''
 d_endpent=''
 d_endpwent=''
 d_endsent=''
-d_endspent=''
 d_fchmod=''
 d_fchown=''
 d_fcntl=''
@@ -396,7 +395,6 @@ d_getprotoprotos=''
 d_getpwent=''
 d_getsent=''
 d_getservprotos=''
-d_getspent=''
 d_getspnam=''
 d_getsbyname=''
 d_getsbyport=''
@@ -500,7 +498,6 @@ d_setrgid=''
 d_setruid=''
 d_setsent=''
 d_setsid=''
-d_setspent=''
 d_setvbuf=''
 d_sfio=''
 usesfio=''
@@ -8524,10 +8521,6 @@ eval $inlibc
 set endservent d_endsent
 eval $inlibc
 
-: see if endspent exists
-set endspent d_endspent
-eval $inlibc
-
 : Locate the flags for 'open()'
 echo " "
 $cat >open3.c <<'EOCP'
@@ -9387,10 +9380,6 @@ eval $inlibc
 echo " "
 set d_getservprotos getservent $i_netdb netdb.h
 eval $hasproto
-
-: see if getspent exists
-set getspent d_getspent
-eval $inlibc
 
 : see if getspnam exists
 set getspnam d_getspnam
@@ -11025,10 +11014,6 @@ eval $inlibc
 
 : see if setsid exists
 set setsid d_setsid
-eval $inlibc
-
-: see if setspent exists
-set setspent d_setspent
 eval $inlibc
 
 : see if setvbuf exists
@@ -15223,7 +15208,6 @@ d_endnent='$d_endnent'
 d_endpent='$d_endpent'
 d_endpwent='$d_endpwent'
 d_endsent='$d_endsent'
-d_endspent='$d_endspent'
 d_eofnblk='$d_eofnblk'
 d_eunice='$d_eunice'
 d_fchmod='$d_fchmod'
@@ -15276,7 +15260,6 @@ d_getsbyname='$d_getsbyname'
 d_getsbyport='$d_getsbyport'
 d_getsent='$d_getsent'
 d_getservprotos='$d_getservprotos'
-d_getspent='$d_getspent'
 d_getspnam='$d_getspnam'
 d_gettimeod='$d_gettimeod'
 d_gnulibc='$d_gnulibc'
@@ -15396,7 +15379,6 @@ d_setrgid='$d_setrgid'
 d_setruid='$d_setruid'
 d_setsent='$d_setsent'
 d_setsid='$d_setsid'
-d_setspent='$d_setspent'
 d_setvbuf='$d_setvbuf'
 d_sfio='$d_sfio'
 d_shm='$d_shm'

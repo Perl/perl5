@@ -506,10 +506,6 @@ d_endsent (d_endsent.U):
 	This variable conditionally defines HAS_ENDSERVENT if endservent() is
 	available to close whatever was being used for service queries.
 
-d_endspent (d_endspent.U):
-	This variable conditionally defines HAS_ENDSPENT if endspent() is
-	available to finalize the scan of SysV shadow password entries.
-
 d_eofnblk (nblock_io.U):
 	This variable conditionally defines EOF_NONBLOCK if EOF can be seen
 	when reading from a non-blocking I/O source.
@@ -765,10 +761,6 @@ d_getservprotos (d_getservprotos.U):
 	which indicates to the C program that <netdb.h> supplies
 	prototypes for the various getserv*() functions.  
 	See also netdbtype.U for probing for various netdb types.
-
-d_getspent (d_getspent.U):
-	This variable conditionally defines HAS_GETSPENT if getspent() is
-	available to retrieve SysV shadow password entries sequentially.
 
 d_getspnam (d_getspnam.U):
 	This variable conditionally defines HAS_GETSPNAM if getspnam() is
@@ -1350,10 +1342,6 @@ d_setsent (d_setsent.U):
 d_setsid (d_setsid.U):
 	This variable conditionally defines HAS_SETSID if setsid() is
 	available to set the process group ID.
-
-d_setspent (d_setspent.U):
-	This variable conditionally defines HAS_SETSPENT if setspent() is
-	available to initialize the scan of SysV shadow password entries.
 
 d_setvbuf (d_setvbuf.U):
 	This variable conditionally defines the HAS_SETVBUF symbol, which
