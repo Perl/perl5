@@ -93,7 +93,7 @@ SKIP: {
 	    @$expected = grep { $_ ne 'crlf' } @$expected;
 	}
 	my $n = scalar @$expected;
-	is($n, scalar @$expected, "$id - layers == $n");
+	is(scalar @$result, $n, "$id - layers == $n");
 	for (my $i = 0; $i < $n; $i++) {
 	    my $j = $expected->[$i];
 	    if (ref $j eq 'CODE') {
