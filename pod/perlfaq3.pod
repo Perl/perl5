@@ -167,15 +167,6 @@ If you want an IDE, check the following:
 
 =over 4
 
-=item CodeMagicCD
-
-http://www.codemagiccd.com/
-
-Collection of various programming tools for Windows: Perl (5.005_03),
-TclTk, Python, GNU programming tools, REBOL, wxWindows toolkit, the
-MinGW GNU C/C++ compiler, DJGPP GNU C/C++ compiler, Cint C
-interpreter, YaBasic.
-
 =item Komodo
 
 ActiveState's cross-platform (as of April 2001 Windows and Linux),
@@ -185,18 +176,18 @@ debugger and remote debugging
 Perl, a Visual Studio.NET plug-in is currently (early 2001) in beta
 (http://www.ActiveState.com/Products/VisualPerl/index.html)).
 
+=item The Object System
+
+(http://www.castlelink.co.uk/object_system/) is a Perl web
+applications development IDE, apparently for any platform
+that runs Perl.
+
 =item Open Perl IDE
 
 ( http://open-perl-ide.sourceforge.net/ )
 Open Perl IDE is an integrated development environment for writing
 and debugging Perl scripts with ActiveState's ActivePerl distribution
 under Windows 95/98/NT/2000.
-
-=item The Object System
-
-(http://www.castlelink.co.uk/object_system/) is a Perl web
-applications development IDE, apparently for any platform
-that runs Perl.
 
 =item PerlBuilder
 
@@ -207,6 +198,19 @@ environment for Windows that supports Perl development.
 
 ( http://helpconsulting.net/visiperl/ )
 From Help Consulting, for Windows.
+
+=back
+
+For Windows there's also the
+
+=over 4
+
+=item CodeMagicCD
+
+( http://www.codemagiccd.com/ ) Collection of various programming
+tools for Windows: Perl (5.005_03), TclTk, Python, GNU programming
+tools, REBOL, wxWindows toolkit, the MinGW GNU C/C++ compiler, DJGPP
+GNU C/C++ compiler, Cint C interpreter, YaBasic.
 
 =back
 
