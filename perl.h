@@ -1573,8 +1573,8 @@ typedef Sighandler_t Sigsave_t;
 #endif
 
 #ifdef MYMALLOC
-#  define MALLOC_INIT MUTEX_INIT(&malloc_mutex)
-#  define MALLOC_TERM MUTEX_DESTROY(&malloc_mutex)
+#  define MALLOC_INIT MUTEX_INIT(&PL_malloc_mutex)
+#  define MALLOC_TERM MUTEX_DESTROY(&PL_malloc_mutex)
 #else
 #  define MALLOC_INIT
 #  define MALLOC_TERM

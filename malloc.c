@@ -573,7 +573,7 @@ emergency_sbrk(size)
 {
     if (size >= BIG_SIZE) {
 	/* Give the possibility to recover: */
-	MUTEX_UNLOCK(&malloc_mutex);
+	MUTEX_UNLOCK(&PL_malloc_mutex);
 	croak("Out of memory during \"large\" request for %i bytes", size);
     }
 
@@ -602,7 +602,7 @@ emergency_sbrk(size)
 	emergency_buffer_size = SvLEN(sv) + M_OVERHEAD;
 	SvPOK_off(sv);
 	SvREADONLY_on(sv);
-	MUTEX_UNLOCK(&malloc_mutex);
+	MUTEX_UNLOCK(&PL_malloc_mutex);
 	croak("Out of memory during request for %i bytes", size);
     }
     else if (emergency_buffer_size >= size) {
@@ -679,7 +679,7 @@ malloc(register size_t nbytes)
 		croak("%s", "panic: malloc");
 #endif
 
-	MUTEX_LOCK(&malloc_mutex);
+	MUTEX_LOCK(&PL_malloc_mutex);
 	/*
 	 * Convert amount of memory requested into
 	 * closest block size stored in hash buckets
@@ -718,7 +718,7 @@ malloc(register size_t nbytes)
   	if (nextf[bucket] == NULL)    
   		morecore(bucket);
   	if ((p = nextf[bucket]) == NULL) {
-		MUTEX_UNLOCK(&malloc_mutex);
+		MUTEX_UNLOCK(&PL_malloc_mutex);
 #ifdef PERL_CORE
 		if (!PL_nomemok) {
 		    PerlIO_puts(PerlIO_stderr(),"Out of memory!\n");
@@ -768,7 +768,7 @@ malloc(register size_t nbytes)
 	    *((u_int *)((caddr_t)p + nbytes - RSLOP)) = RMAGIC;
 	}
 #endif
-	MUTEX_UNLOCK(&malloc_mutex);
+	MUTEX_UNLOCK(&PL_malloc_mutex);
   	return ((Malloc_t)(p + CHUNK_SHIFT));
 }
 
@@ -953,7 +953,7 @@ getpages(int needed, int *nblksp, int bucket)
 				      "failed to fix bad sbrk()\n"));
 #ifdef PACK_MALLOC
 		if (slack) {
-		    MUTEX_UNLOCK(&malloc_mutex);
+		    MUTEX_UNLOCK(&PL_malloc_mutex);
 		    croak("%s", "panic: Off-page sbrk");
 		}
 #endif
@@ -1063,7 +1063,7 @@ morecore(register int bucket)
   	if (nextf[bucket])
   		return;
 	if (bucket == sizeof(MEM_SIZE)*8*BUCKETS_PER_POW2) {
-	    MUTEX_UNLOCK(&malloc_mutex);
+	    MUTEX_UNLOCK(&PL_malloc_mutex);
 	    croak("%s", "Out of memory during ridiculously large request");
 	}
 	if (bucket > max_bucket)
@@ -1192,7 +1192,7 @@ free(void *mp)
 #endif
 		return;				/* sanity */
 	    }
-	MUTEX_LOCK(&malloc_mutex);
+	MUTEX_LOCK(&PL_malloc_mutex);
 #ifdef RCHECK
   	ASSERT(ovp->ov_rmagic == RMAGIC, "chunk's head overwrite");
 	if (OV_INDEX(ovp) <= MAX_SHORT_BUCKET) {
@@ -1215,7 +1215,7 @@ free(void *mp)
   	size = OV_INDEX(ovp);
 	ovp->ov_next = nextf[size];
   	nextf[size] = ovp;
-	MUTEX_UNLOCK(&malloc_mutex);
+	MUTEX_UNLOCK(&PL_malloc_mutex);
 }
 
 /*
@@ -1253,7 +1253,7 @@ realloc(void *mp, size_t nbytes)
 	if (!cp)
 		return malloc(nbytes);
 
-	MUTEX_LOCK(&malloc_mutex);
+	MUTEX_LOCK(&PL_malloc_mutex);
 	ovp = (union overhead *)((caddr_t)cp 
 				- sizeof (union overhead) * CHUNK_SHIFT);
 	bucket = OV_INDEX(ovp);
@@ -1351,7 +1351,7 @@ realloc(void *mp, size_t nbytes)
 		}
 #endif
 		res = cp;
-		MUTEX_UNLOCK(&malloc_mutex);
+		MUTEX_UNLOCK(&PL_malloc_mutex);
 	} else if (incr == 1 && (cp - M_OVERHEAD == last_op) 
 		   && (onb > (1 << LOG_OF_MIN_ARENA))) {
 	    MEM_SIZE require, newarena = nbytes, pow;
@@ -1379,7 +1379,7 @@ realloc(void *mp, size_t nbytes)
 		goto hard_way;
 	} else {
 	  hard_way:
-	    MUTEX_UNLOCK(&malloc_mutex);
+	    MUTEX_UNLOCK(&PL_malloc_mutex);
 	    if ((res = (char*)malloc(nbytes)) == NULL)
 		return (NULL);
 	    if (cp != res)			/* common optimization */
