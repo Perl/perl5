@@ -109,6 +109,7 @@ if (-d "pod") {
     perldsc
     perlrequick
     perlpod
+    perlpodspec
     perlstyle
     perltrap
 

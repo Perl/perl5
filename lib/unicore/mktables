@@ -745,16 +745,32 @@ if (open(my $SpecCase, "SpecCase.txt")) {
 }
 
 # Now write out the special cases properties in their code point order.
-# The To/Spec{Lower,Title,Upper}.pl are unused for now since the swash
-# routines do not do returning multiple characters.
+# Prepend them to the To/{Upper,Lower,Title}.pl.
 
 for my $case (qw(Lower Title Upper)) {
-    my @case;
-    for my $prop (sort { $a->[0] <=> $b->[0] } @{$Case{$case}}) {
-        my ($ix, $code, $to) = @$prop;
-        append(\@case, $code, $to);
+    my $NormalCase = do "To/$case.pl";
+    if (open(my $Case, ">To/$case.pl")) {
+	header($Case);
+	print $Case <<EOT;
+
+%utf8::ToSpec$case = (
+EOT
+        for my $prop (sort { $a->[0] <=> $b->[0] } @{$Case{$case}}) {
+	    my ($ix, $code, $to) = @$prop;
+	    my $tostr =
+		join "", map { sprintf "\\x{%s}", $_ } split ' ', $to;
+	    print $Case qq['$ix' => "$tostr",\n];
+	}
+	print $Case <<EOT;
+);
+
+EOT
+	begin($Case);
+	print $Case $NormalCase;
+	end($Case);
+    } else {
+	die "$0: To/$case.txt: $!\n";
     }
-    flush(\@case, "To/Spec$case.pl");
 }
 
 # That's all, folks!

@@ -167,12 +167,10 @@ usage("") unless @ARGV;
 # See vms/descrip_mms.template -> descrip.mms for invokation.
 if ( $^O eq 'VMS' ) { @ARGV = split(/\s+/,$ARGV[0]); }
 
-use vars qw($opt_htmldir $opt_htmlroot $opt_podroot $opt_splitpod
-            $opt_verbose $opt_help $opt_podpath $opt_splithead $opt_splititem
-            $opt_libpods $opt_recurse);
+use vars qw( %Options );
 
 # parse the command-line
-my $result = GetOptions( qw(
+my $result = GetOptions( \%Options, qw(
 	help
 	podpath=s
 	podroot=s
@@ -249,7 +247,7 @@ foreach my $dir (@splithead) {
 	$_ =~ s{HREF="#(.*)">}{
 	    my $url = "$file/$1.html" ;
             $url = Pod::Html::relativize_url( $url, "$file.html" )
-                if ( ! defined $opt_htmlroot || $opt_htmlroot eq '' ) ;
+                if ( ! defined $Options{htmlroot} || $Options{htmlroot} eq '' );
             "HREF=\"$url\">" ;
         }eg;
 	push @data, $_;
@@ -273,24 +271,24 @@ sub usage {
 
 
 sub parse_command_line {
-    usage() if defined $opt_help;
-    $opt_help = ""; 	    	    # make -w shut up
+    usage() if defined $Options{help};
+    $Options{help} = ""; 	    	    # make -w shut up
 
     # list of directories
-    @podpath   = split(":", $opt_podpath) if defined $opt_podpath;
+    @podpath   = split(":", $Options{podpath}) if defined $Options{podpath};
 
     # lists of files
-    @splithead = split(",", $opt_splithead) if defined $opt_splithead;
-    @splititem = split(",", $opt_splititem) if defined $opt_splititem;
-    @libpods   = split(",", $opt_libpods) if defined $opt_libpods;
+    @splithead = split(",", $Options{splithead}) if defined $Options{splithead};
+    @splititem = split(",", $Options{splititem}) if defined $Options{splititem};
+    @libpods   = split(",", $Options{libpods}) if defined $Options{libpods};
 
-    $htmldir  = $opt_htmldir	    if defined $opt_htmldir;
-    $htmlroot = $opt_htmlroot	    if defined $opt_htmlroot;
-    $podroot  = $opt_podroot	    if defined $opt_podroot;
-    $splitpod = $opt_splitpod	    if defined $opt_splitpod;
+    $htmldir  = $Options{htmldir}	    if defined $Options{htmldir};
+    $htmlroot = $Options{htmlroot}	    if defined $Options{htmlroot};
+    $podroot  = $Options{podroot}	    if defined $Options{podroot};
+    $splitpod = $Options{splitpod}	    if defined $Options{splitpod};
 
-    $recurse  = $opt_recurse	    if defined $opt_recurse;
-    $verbose  = $opt_verbose	    if defined $opt_verbose;
+    $recurse  = $Options{recurse}	    if defined $Options{recurse};
+    $verbose  = $Options{verbose}	    if defined $Options{verbose};
 }
 
 
@@ -337,7 +335,7 @@ sub create_index {
 	   ($lcp1,$lcp2) = ($name =~ m,/H1>\s<P>\s(\S+)\s[\s-]*(.*?)\s*$,sm);
 	}
 	my $url= "$dir/$file" ;
-	if ( ! defined $opt_htmlroot || $opt_htmlroot eq '' ) {
+	if ( ! defined $Options{htmlroot} || $Options{htmlroot} eq '' ) {
 	    $url = Pod::Html::relativize_url( "$dir/$file", $html ) ;
 	}
 

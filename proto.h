@@ -797,6 +797,7 @@ PERL_CALLCONV SV*	Perl_swash_init(pTHX_ char* pkg, char* name, SV* listsv, I32 m
 PERL_CALLCONV UV	Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr, bool do_utf8);
 PERL_CALLCONV void	Perl_taint_env(pTHX);
 PERL_CALLCONV void	Perl_taint_proper(pTHX_ const char* f, const char* s);
+PERL_CALLCONV UV	Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swash, char *normal, char *special);
 PERL_CALLCONV UV	Perl_to_utf8_lower(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp);
 PERL_CALLCONV UV	Perl_to_utf8_upper(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp);
 PERL_CALLCONV UV	Perl_to_utf8_title(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp);

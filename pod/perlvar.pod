@@ -844,10 +844,9 @@ of perl in the right bracket?)  Example:
 See also the documentation of C<use VERSION> and C<require VERSION>
 for a convenient way to fail if the running Perl interpreter is too old.
 
-The use of this variable is deprecated.  The floating point representation
-can sometimes lead to inaccurate numeric comparisons.  See C<$^V> for a
-more modern representation of the Perl version that allows accurate string
-comparisons.
+The floating point representation can sometimes lead to inaccurate
+numeric comparisons.  See C<$^V> for a more modern representation of
+the Perl version that allows accurate string comparisons.
 
 =item $COMPILING
 

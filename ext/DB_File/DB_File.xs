@@ -1777,13 +1777,14 @@ db_FIRSTKEY(db)
 void
 db_NEXTKEY(db, key)
 	DB_File		db
-	DBTKEY		key
+	DBTKEY		key = NO_INIT
 	PREINIT:
 	int RETVAL;
 	CODE:
 	{
 	    DBT		value ;
 
+	    DBT_clear(key) ; 
 	    DBT_clear(value) ; 
 	    CurrentDB = db ;
 	    RETVAL = do_SEQ(db, key, value, R_NEXT) ;

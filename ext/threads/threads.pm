@@ -1,5 +1,3 @@
-
-
 package threads;
 
 use 5.7.2;
@@ -10,14 +8,12 @@ use overload
     '==' => \&equals,
     'fallback' => 1;
 
-
 #use threads::Shared;
 
 require Exporter;
 require DynaLoader;
 
 use Devel::Peek;
-
 
 our @ISA = qw(Exporter DynaLoader);
 
@@ -46,7 +42,6 @@ $Config::threads = 1;
 
 bootstrap threads $VERSION;
 
-
 # Preloaded methods go here.
 
 1;
@@ -58,13 +53,11 @@ threads - Perl extension allowing use of interpreter based threads from perl
 
 =head1 SYNOPSIS
 
-
 use threads;
 
 sub start_thread {
     print "Thread started\n";
 }
-
 
 my $thread = threads->new("start_thread","argument");
 
@@ -78,18 +71,21 @@ $thread = threads->self();
 
 thread->tid();
 
-
-
 =head1 DESCRIPTION
 
-Perl 5.6 has something called interpreter threads, interpreter threads are built on MULTIPLICITY and allows for several different perl interpreters to run in different threads. This has been used in win32 perl to fake forks, it has also been available to people embedding perl. 
+Perl 5.6 has something called interpreter threads, interpreter threads
+are built on MULTIPLICITY and allows for several different perl
+interpreters to run in different threads. This has been used in win32
+perl to fake forks, it has also been available to people embedding
+perl.
 
 =over
 
 =item new, function, LIST
 
-This will create a new thread with the entry point function and give it LIST as parameters.
-It will return the corresponding threads object.
+This will create a new thread with the entry point function and give
+it LIST as parameters.  It will return the corresponding threads
+object.
 
 =item $threads->join
 
@@ -126,21 +122,21 @@ threads->self->tid() is a quick way to get current thread id
 
 =head1 AUTHOR and COPYRIGHT
 
-Artur Bergman <lt>artur at contiller.se<gt>
+Artur Bergman E<lt>artur at contiller.seE<gt>
 
 threads is released under the same license as Perl
 
 Thanks to 
 
-Richard Soderberg <lt>rs at crystalflame.net<gt> 
-Helping me out tons, trying to find reasons for races and other wierd bugs!
+Richard Soderberg E<lt>rs at crystalflame.netE<gt> 
+Helping me out tons, trying to find reasons for races and other weird bugs!
 
-Simon Cozens <lt>simon at brecon.co.uk<gt>
-Being there to answer zillions of annoying questions 
+Simon Cozens E<lt>simon at brecon.co.ukE<gt>
+Being there to answer zillions of annoying questions
 
-Rocco Caputo <lt>troc at netrus.net<gt>
+Rocco Caputo E<lt>troc at netrus.netE<gt>
 
-Vipul Ved Prakash <lt>mail at vipul.net<gt>
+Vipul Ved Prakash E<lt>mail at vipul.netE<gt>
 Helping with debugging.
 
 please join perl-ithreads@perl.org for more information
@@ -160,7 +156,3 @@ please join perl-ithreads@perl.org for more information
 L<perl>, L<perlcall>, L<perlembed>, L<perlguts>
 
 =cut
-
-
-
-

@@ -720,6 +720,7 @@
 #define swash_fetch		Perl_swash_fetch
 #define taint_env		Perl_taint_env
 #define taint_proper		Perl_taint_proper
+#define to_utf8_case		Perl_to_utf8_case
 #define to_utf8_lower		Perl_to_utf8_lower
 #define to_utf8_upper		Perl_to_utf8_upper
 #define to_utf8_title		Perl_to_utf8_title
@@ -2230,6 +2231,7 @@
 #define swash_fetch(a,b,c)	Perl_swash_fetch(aTHX_ a,b,c)
 #define taint_env()		Perl_taint_env(aTHX)
 #define taint_proper(a,b)	Perl_taint_proper(aTHX_ a,b)
+#define to_utf8_case(a,b,c,d,e,f)	Perl_to_utf8_case(aTHX_ a,b,c,d,e,f)
 #define to_utf8_lower(a,b,c)	Perl_to_utf8_lower(aTHX_ a,b,c)
 #define to_utf8_upper(a,b,c)	Perl_to_utf8_upper(aTHX_ a,b,c)
 #define to_utf8_title(a,b,c)	Perl_to_utf8_title(aTHX_ a,b,c)

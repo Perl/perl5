@@ -580,6 +580,12 @@ ext/threads/t/stress_string.t	Test with multiple threads, string cv argument.
 ext/threads/threads.h		ithreads
 ext/threads/threads.pm          ithreads
 ext/threads/threads.xs		ithreads
+ext/threads/shared/Makefile.PL  thread shared variables
+ext/threads/shared/README       thread shared variables
+ext/threads/shared/shared.pm    thread shared variables
+ext/threads/shared/shared.xs    thread shared variables
+ext/threads/shared/t/sv_simple.t	thread shared variables
+ext/threads/shared/t/sv_refs.t	thread shared variables
 ext/Time/HiRes/Changes		Time::HiRes extension
 ext/Time/HiRes/hints/dynixptx.pl	Hint for Time::HiRes for named architecture
 ext/Time/HiRes/hints/sco.pl	Hints for Time::HiRes for named architecture
@@ -1598,9 +1604,6 @@ lib/unicore/Scripts.txt		Unicode character database
 lib/unicore/SpecCase.txt	Unicode character database
 lib/unicore/To/Digit.pl		Unicode character database
 lib/unicore/To/Lower.pl		Unicode character database
-lib/unicore/To/SpecLower.pl	Unicode character database
-lib/unicore/To/SpecTitle.pl	Unicode character database
-lib/unicore/To/SpecUpper.pl	Unicode character database
 lib/unicore/To/Title.pl		Unicode character database
 lib/unicore/To/Upper.pl		Unicode character database
 lib/unicore/UCD.html		Unicode character database
@@ -1854,6 +1857,7 @@ pod/perlop.pod			Operator info
 pod/perlopentut.pod		open() tutorial
 pod/perlothrtut.pod		Threads old tutorial
 pod/perlpod.pod			Pod info
+pod/perlpodspec.pod		Pod specification
 pod/perlport.pod		Portability guide
 pod/perlre.pod			Regular expression info
 pod/perlref.pod			References info
