@@ -541,6 +541,7 @@ hints/aix.sh		Hints for named architecture
 hints/altos486.sh	Hints for named architecture
 hints/amigaos.sh	Hints for named architecture
 hints/apollo.sh		Hints for named architecture
+hints/atheos.sh		Hints for named architecture
 hints/aux_3.sh		Hints for named architecture
 hints/beos.sh		Hints for named architecture
 hints/broken-db.msg	Warning message for systems with broken DB library
