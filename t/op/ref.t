@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..47\n";
+print "1..50\n";
 
 # Test glob operations.
 
@@ -207,12 +207,28 @@ print @baa == 3 ? "ok 42\n" : "not ok 42\n";
 print grep(ref($_), @baa) == 3 ? "ok 43\n" : "not ok 43\n";
 print @bzz == 3 ? "ok 44\n" : "not ok 44\n";
 
+# test for proper destruction of lexical objects
+
+sub larry::DESTROY { print "# larry\nok 45\n"; }
+sub curly::DESTROY { print "# curly\nok 46\n"; }
+sub moe::DESTROY   { print "# moe\nok 47\n"; }
+
+{
+    my ($joe, @curly, %larry);
+    my $moe = bless \$joe, 'moe';
+    my $curly = bless \@curly, 'curly';
+    my $larry = bless \%larry, 'larry';
+    print "# leaving block\n";
+}
+
+print "# left block\n";
+
 package FINALE;
 
 {
-    $ref3 = bless ["ok 47\n"];		# package destruction
-    my $ref2 = bless ["ok 46\n"];	# lexical destruction
-    local $ref1 = bless ["ok 45\n"];	# dynamic destruction
+    $ref3 = bless ["ok 50\n"];		# package destruction
+    my $ref2 = bless ["ok 49\n"];	# lexical destruction
+    local $ref1 = bless ["ok 48\n"];	# dynamic destruction
     1;					# flush any temp values on stack
 }
 
