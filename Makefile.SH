@@ -1233,9 +1233,9 @@ $rm -f $firstmakefile
 # Now do any special processing required before building.
 
 case "$ebcdic" in
-$define)
+define)
     xxx=''
-    echo "This is an EBCDIC system, checking if any parser files need regenerating." >&4
+    echo "This is an EBCDIC system, checking if any parser files need regenerating." >&2
 case "$osname" in
 os390|posix-bc)
     rm -f y.tab.c y.tab.h
