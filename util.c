@@ -385,16 +385,16 @@ delimcpy(register char *to, register char *toend, register char *from, register 
 /* This routine was donated by Corey Satten. */
 
 char *
-instr(register char *big, register char *little)
+instr(register const char *big, register const char *little)
 {
-    register char *s, *x;
+    register const char *s, *x;
     register I32 first;
 
     if (!little)
-	return big;
+	return (char*)big;
     first = *little++;
     if (!first)
-	return big;
+	return (char*)big;
     while (*big) {
 	if (*big++ != first)
 	    continue;
@@ -407,7 +407,7 @@ instr(register char *big, register char *little)
 	    }
 	}
 	if (!*s)
-	    return big-1;
+	    return (char*)(big-1);
     }
     return Nullch;
 }
@@ -415,14 +415,14 @@ instr(register char *big, register char *little)
 /* same as instr but allow embedded nulls */
 
 char *
-ninstr(register char *big, register char *bigend, char *little, char *lend)
+ninstr(register const char *big, register const char *bigend, const char *little, const char *lend)
 {
-    register char *s, *x;
+    register const char *s, *x;
     register I32 first = *little;
-    register char *littleend = lend;
+    register const char *littleend = lend;
 
     if (!first && little >= littleend)
-	return big;
+	return (char*)big;
     if (bigend - big < littleend - little)
 	return Nullch;
     bigend -= littleend - little++;
@@ -436,7 +436,7 @@ ninstr(register char *big, register char *bigend, char *little, char *lend)
 	    }
 	}
 	if (s >= littleend)
-	    return big-1;
+	    return (char*)(big-1);
     }
     return Nullch;
 }
@@ -444,15 +444,15 @@ ninstr(register char *big, register char *bigend, char *little, char *lend)
 /* reverse of the above--find last substring */
 
 char *
-rninstr(register char *big, char *bigend, char *little, char *lend)
+rninstr(register const char *big, const char *bigend, const char *little, const char *lend)
 {
-    register char *bigbeg;
-    register char *s, *x;
+    register const char *bigbeg;
+    register const char *s, *x;
     register I32 first = *little;
-    register char *littleend = lend;
+    register const char *littleend = lend;
 
     if (!first && little >= littleend)
-	return bigend;
+	return (char*)bigend;
     bigbeg = big;
     big = bigend - (littleend - little++);
     while (big >= bigbeg) {
@@ -465,7 +465,7 @@ rninstr(register char *big, char *bigend, char *little, char *lend)
 	    }
 	}
 	if (s >= littleend)
-	    return big+1;
+	    return (char*)(big+1);
     }
     return Nullch;
 }
@@ -474,7 +474,7 @@ rninstr(register char *big, char *bigend, char *little, char *lend)
  * Set up for a new ctype locale.
  */
 void
-perl_new_ctype(char *newctype)
+perl_new_ctype(const char *newctype)
 {
 #ifdef USE_LOCALE_CTYPE
 
@@ -496,7 +496,7 @@ perl_new_ctype(char *newctype)
  * Set up for a new collation locale.
  */
 void
-perl_new_collate(char *newcoll)
+perl_new_collate(const char *newcoll)
 {
 #ifdef USE_LOCALE_COLLATE
 
@@ -540,7 +540,7 @@ perl_new_collate(char *newcoll)
  * Set up for a new numeric locale.
  */
 void
-perl_new_numeric(char *newnum)
+perl_new_numeric(const char *newnum)
 {
 #ifdef USE_LOCALE_NUMERIC
 
@@ -1127,7 +1127,7 @@ screaminstr(SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift, I32 *old_
 }
 
 I32
-ibcmp(char *s1, char *s2, register I32 len)
+ibcmp(const char *s1, const char *s2, register I32 len)
 {
     register U8 *a = (U8 *)s1;
     register U8 *b = (U8 *)s2;
@@ -1140,7 +1140,7 @@ ibcmp(char *s1, char *s2, register I32 len)
 }
 
 I32
-ibcmp_locale(char *s1, char *s2, register I32 len)
+ibcmp_locale(const char *s1, const char *s2, register I32 len)
 {
     register U8 *a = (U8 *)s1;
     register U8 *b = (U8 *)s2;
@@ -1155,7 +1155,7 @@ ibcmp_locale(char *s1, char *s2, register I32 len)
 /* copy a string to a safe spot */
 
 char *
-savepv(char *sv)
+savepv(const char *sv)
 {
     register char *newaddr;
 
@@ -1167,7 +1167,7 @@ savepv(char *sv)
 /* same thing but with a known length */
 
 char *
-savepvn(char *sv, register I32 len)
+savepvn(const char *sv, register I32 len)
 {
     register char *newaddr;
 
@@ -1657,7 +1657,7 @@ char *f;
 
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 char *
-my_bcopy(register char *from,register char *to,register I32 len)
+my_bcopy(register const char *from,register char *to,register I32 len)
 {
     char *retval = to;
 
@@ -1677,10 +1677,7 @@ my_bcopy(register char *from,register char *to,register I32 len)
 
 #ifndef HAS_MEMSET
 void *
-my_memset(loc,ch,len)
-register char *loc;
-register I32 ch;
-register I32 len;
+my_memset(register char *loc, register I32 ch, register I32 len)
 {
     char *retval = loc;
 
@@ -1692,9 +1689,7 @@ register I32 len;
 
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
 char *
-my_bzero(loc,len)
-register char *loc;
-register I32 len;
+my_bzero(register char *loc, register I32 len)
 {
     char *retval = loc;
 
@@ -1706,10 +1701,7 @@ register I32 len;
 
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 I32
-my_memcmp(s1,s2,len)
-char *s1;
-char *s2;
-register I32 len;
+my_memcmp(const char *s1, const char *s2, register I32 len)
 {
     register U8 *a = (U8 *)s1;
     register U8 *b = (U8 *)s2;
@@ -1730,10 +1722,7 @@ char *
 #else
 int
 #endif
-vsprintf(dest, pat, args)
-char *dest;
-const char *pat;
-char *args;
+vsprintf(char *dest, const char *pat, char *args)
 {
     FILE fakebuf;
 
@@ -2293,13 +2282,13 @@ PerlIO *ptr;
 #endif
 
 void
-repeatcpy(register char *to, register char *from, I32 len, register I32 count)
+repeatcpy(register char *to, register const char *from, I32 len, register I32 count)
 {
     register I32 todo;
-    register char *frombase = from;
+    register const char *frombase = from;
 
     if (len == 1) {
-	register char c = *from;
+	register const char c = *from;
 	while (count-- > 0)
 	    *to++ = c;
 	return;

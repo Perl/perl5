@@ -1003,13 +1003,8 @@ PP(pp_select)
     }
 
     if (newdefout) {
-	if (!GvIO(newdefout)) {
-	    if (ckWARN(WARN_UNOPENED))
-		warner(WARN_UNOPENED, "select() on unopened file");
-	    if (SvTYPE(newdefout) != SVt_PVGV)
-		RETURN;
-	    gv_IOadd(newdefout);	/* XXX probably bogus */
-	}
+	if (!GvIO(newdefout))
+	    gv_IOadd(newdefout);
 	setdefout(newdefout);
     }
 

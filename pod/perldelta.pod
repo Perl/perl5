@@ -125,6 +125,30 @@ now correctly prints "3|a", instead of "2|a".
 The new format type 'Z' is useful for packing and unpacking null-terminated
 strings.  See L<perlfunc/"pack">.
 
+=head1 Significant bug fixes
+
+=head2 E<lt>HANDLEE<gt> on empty files
+
+With C<$/> set to C<undef>, slurping an empty file returns a string of
+zero length (instead of C<undef>, as it used to) for the first time the
+HANDLE is read.  Subsequent reads yield C<undef>.
+
+This means that the following will append "foo" to an empty file (it used
+to not do anything before):
+
+    perl -0777 -pi -e 's/^/foo/' empty_file
+
+Note that the behavior of:
+
+    perl -pi -e 's/^/foo/' empty_file
+
+is unchanged (it continues to leave the file empty).
+
+=head2 pack() format modifier '_' supported
+
+The new format type modifer '_' is useful for packing and unpacking
+native shorts, ints, and longs.  See L<perlfunc/"pack">.
+
 =head1 Supported Platforms
 
 =over 4
@@ -209,6 +233,12 @@ The accessors methods Re, Im, arg, abs, rho, theta, methods can
 
 A little bit of radial trigonometry (cylindrical and spherical) added,
 for example the great circle distance.
+
+=item Time::Local
+
+The timelocal() and timegm() functions used to silently return bogus
+results when the date exceeded the machine's integer range.  They
+consistently croak() if the date falls in an unsupported range.
 
 =back
 

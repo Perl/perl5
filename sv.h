@@ -313,6 +313,7 @@ struct xpvio {
 #define IOf_FLUSH 4	/* this fp wants a flush after write op */
 #define IOf_DIDTOP 8	/* just did top of form */
 #define IOf_UNTAINT 16  /* consider this fp (and its data) "safe" */
+#define IOf_NOLINE  32	/* slurped a pseudo-line from empty file */
 
 /* The following macros define implementation-independent predicates on SVs. */
 
@@ -511,6 +512,7 @@ struct xpvio {
 
 #define SvPV_force(sv, lp) sv_pvn_force(sv, &lp)
 #define SvPV(sv, lp) sv_pvn(sv, &lp)
+#define SvPV_nolen(sv) sv_pv(sv)
 #define SvIVx(sv) sv_iv(sv)
 #define SvUVx(sv) sv_uv(sv)
 #define SvNVx(sv) sv_nv(sv)
@@ -543,6 +545,10 @@ struct xpvio {
 #define SvPV_force(sv, lp) \
     ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == SVf_POK \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvn_force(sv, &lp))
+
+#undef SvPV_nolen
+#define SvPV_nolen(sv) \
+    (SvPOK(sv) ? SvPVX(sv) : sv_2pv_nolen(sv))
 
 #ifdef __GNUC__
 #  undef SvIVx

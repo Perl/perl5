@@ -640,7 +640,7 @@ Copyright (c) 1997-1999 Tom Christiansen and Nathan Torkington.
 All rights reserved.
 
 When included as an integrated part of the Standard Distribution
-of Perl or of its documentation (printed or otherwise), this works is
+of Perl or of its documentation (printed or otherwise), this work is
 covered under Perl's Artistic Licence.  For separate distributions of
 all or part of this FAQ outside of that, see L<perlfaq>.
 

@@ -516,6 +516,7 @@ sv_2iv
 sv_2mortal
 sv_2nv
 sv_2pv
+sv_2pv_nolen
 sv_2uv
 sv_add_arena
 sv_backoff
@@ -559,6 +560,7 @@ sv_newmortal
 sv_newref
 sv_nv
 sv_peek
+sv_pv
 sv_pvn
 sv_pvn_force
 sv_ref

@@ -1,14 +1,12 @@
 #!./perl
 
-# $RCSfile: pack.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:11 $
-
 BEGIN {
     chdir 't' if -d 't';
     unshift @INC, '../lib' if -d '../lib';
     require Config; import Config;
 }
 
-print "1..72\n";
+print "1..78\n";
 
 $format = "c2 x5 C C x s d i l a6";
 # Need the expression in here to force ary[5] to be numeric.  This avoids
@@ -166,6 +164,11 @@ foreach my $t (@templates) {
 
 # 57..60: uuencode/decode
 
+# Note that first uuencoding known 'text' data and then checking the
+# binary values of the uuencoded version would not be portable between
+# character sets.  Uuencoding is meant for encoding binary data, not
+# text data.
+ 
 $in = pack 'C*', 0 .. 255;
 
 # just to be anal, we do some random tr/`/ /
@@ -205,12 +208,7 @@ EOUU
 print "not " unless unpack('u', $uu) eq $in;
 print "ok ", $test++, "\n";
 
-# Note that first uuencoding known 'text' data and then checking the
-# binary values of the uuencoded version would not be portable between
-# character sets.  Uuencoding is meant for encoding binary data, not
-# text data.
-
-# test the ascii template types (A, a, Z)
+# 61..72: test the ascii template types (A, a, Z)
 
 print "not " unless pack('A*', "foo\0bar\0 ") eq "foo\0bar\0 ";
 print "ok ", $test++, "\n";
@@ -246,5 +244,25 @@ print "not " unless unpack('Z*', "foo\0bar \0") eq "foo";
 print "ok ", $test++, "\n";
 
 print "not " unless unpack('Z8', "foo\0bar \0") eq "foo";
+print "ok ", $test++, "\n";
+
+# 73..77: packing native shorts/ints/longs
+
+print "not " unless length(pack("s_", 0)) == $Config{shortsize};
+print "ok ", $test++, "\n";
+
+print "not " unless length(pack("i_", 0)) == $Config{intsize};
+print "ok ", $test++, "\n";
+
+print "not " unless length(pack("l_", 0)) == $Config{longsize};
+print "ok ", $test++, "\n";
+
+print "not " unless length(pack("s_", 0)) <= length(pack("i_", 0));
+print "ok ", $test++, "\n";
+
+print "not " unless length(pack("i_", 0)) <= length(pack("l_", 0));
+print "ok ", $test++, "\n";
+
+print "not " unless length(pack("i_", 0)) == length(pack("i", 0));
 print "ok ", $test++, "\n";
 

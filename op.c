@@ -541,7 +541,7 @@ pad_reset(void)
 #ifdef USE_THREADS
 /* find_threadsv is not reentrant */
 PADOFFSET
-find_threadsv(char *name)
+find_threadsv(const char *name)
 {
     dTHR;
     char *p;
@@ -1401,6 +1401,7 @@ is_handle_constructor(OP *o, I32 argnum)
 	/* FALL THROUGH */
     case OP_SYSOPEN:
     case OP_OPEN:
+    case OP_SELECT:		/* XXX c.f. SelectSaver.pm */
     case OP_SOCKET:
     case OP_OPEN_DIR:
     case OP_ACCEPT:

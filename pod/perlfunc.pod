@@ -908,7 +908,12 @@ Equivalent examples:
 
 If the value of EXPR does not end in a newline, the current script line
 number and input line number (if any) are also printed, and a newline
-is supplied.  Hint: sometimes appending C<", stopped"> to your message
+is supplied.  Note that the "input line number" (also known as "chunk")
+is subject to whatever notion of "line" happens to be currently in
+effect, and is also available as the special variable C<$.>.
+See L<perlvar/"$/"> and L<perlvar/"$.">.
+
+Hint: sometimes appending C<", stopped"> to your message
 will cause it to make better sense when the string C<"at foo line 123"> is
 appended.  Suppose you are running script "canasta".
 
@@ -1004,6 +1009,8 @@ file.  Manual error checking can be done this way:
     }
 
 =item dump LABEL
+
+=item dump
 
 This causes an immediate core dump.  Primarily this is so that you can
 use the B<undump> program to turn your core dump into an executable binary
@@ -1921,7 +1928,7 @@ system:
     ($retval = ioctl(...)) || ($retval = -1);
     printf "System returned %d\n", $retval;
 
-The special string "C<0> but true" is excempt from B<-w> complaints
+The special string "C<0> but true" is exempt from B<-w> complaints
 about improper numeric conversions.
 
 =item join EXPR,LIST
@@ -2584,6 +2591,58 @@ C<"P"> is C<undef>.
 
 =item *
 
+The integer types C<"s">, C<"S">, C<"l">, and C<"L"> may be
+immediately followed by a C<"_"> to signify a native short or long--as
+you can see from above for example a bare C<"l"> does mean exactly 32
+bits, the native C<long> (as seen by the local C compiler) may be
+larger.  This is an issue mainly in 64-bit platforms.
+
+C<"i_"> and C<"I_"> also work but only because of completeness;
+they are identical to C<"i"> and C<"I">.
+
+The actual size (in bytes) of native shorts, ints, and longs on
+the platform where Perl was built are available from L<Config>:
+
+	use Config;
+	print $Config{shortsize}, "\n";
+
+=item *
+
+The integer formats C<"s">, C<"S">, C<"i">, C<"I">, C<"l">, and C<"L">
+are inherently non-portable between processors and operating systems
+because they obey the native byteorder and endianness.  For example a
+4-byte integer 0x12345678 (305419896 decimal) be ordered natively
+(arranged in and handled by the CPU registers) into bytes as
+ 
+ 	0x12 0x34 0x56 0x78	# big-endian
+ 	0x78 0x56 0x34 0x12	# little-endian
+ 
+The names `big-endian' and `little-endian' are joking references to
+the classic "Gulliver's Travels" (via the paper "On Holy Wars and a
+Plea for Peace" by Danny Cohen, USC/ISI IEN 137, April 1, 1980) and
+the egg-eating habits of the lilliputs.
+ 
+Some systems may even have weird byte orders such as
+ 
+ 	0x56 0x78 0x12 0x34
+ 	0x34 0x12 0x78 0x56
+ 
+You can see your system's preference with
+
+ 	print join(" ", map { sprintf "%#02x", $_ }
+                            unpack("C*",pack("L",0x12345678))), "\n";
+
+The actual byteorder on the platform where Perl was built are available
+from L<Config>:
+
+	use Config;
+	print $Config{byteorder}, "\n";
+
+If you want portable integers use the formats C<"n">, C<"N">, C<"v">, and
+"V", their byte endianness and size is known.
+
+=item *
+
 Real numbers (floats and doubles) are in the native machine format only;
 due to the multiplicity of floating formats around, and the lack of a
 standard "network" representation, no facility for interchange has been
@@ -2839,10 +2898,17 @@ C<chdir()> there, it would have been testing the wrong file.
 
 =item readline EXPR
 
-Reads from the filehandle whose typeglob is contained in EXPR.  In scalar context, a single line
-is read and returned.  In list context, reads until end-of-file is
-reached and returns a list of lines (however you've defined lines
-with C<$/> or C<$INPUT_RECORD_SEPARATOR>).
+Reads from the filehandle whose typeglob is contained in EXPR.  In scalar
+context, each call reads and returns the next line, until end-of-file is
+reached, whereupon the subsequent call returns undef.  In list context,
+reads until end-of-file is reached and returns a list of lines.  Note that
+the notion of "line" used here is however you may have defined it
+with C<$/> or C<$INPUT_RECORD_SEPARATOR>).  See L<perlvar/"$/">.
+
+When C<$/> is set to C<undef> and when readline() is in a scalar
+context (i.e. file slurp mode), it returns C<''> the first time,
+followed by C<undef> subsequently.
+
 This is the internal function implementing the C<E<lt>EXPRE<gt>>
 operator, but you can use it directly.  The C<E<lt>EXPRE<gt>>
 operator is discussed in more detail in L<perlop/"I/O Operators">.

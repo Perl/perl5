@@ -51,6 +51,11 @@ no useful value.  See L<perlmod>.
 (F) The "use" keyword is recognized and executed at compile time, and returns
 no useful value.  See L<perlmod>.
 
+=item '_' allowed only after types %s
+
+(F) The '_' is allowed in pack() and unpack() only after certain types.
+See L<perlfunc>.
+
 =item % may only be used in unpack
 
 (F) You can't pack a string by supplying a checksum, because the
@@ -2322,11 +2327,6 @@ was either never opened or has since been closed.
 =item select not implemented
 
 (F) This machine doesn't implement the select() system call.
-
-=item select() on unopened file
-
-(W) You tried to use the select() function on a filehandle that
-was either never opened or has since been closed.
 
 =item sem%s not implemented
 

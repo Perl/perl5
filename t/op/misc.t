@@ -414,13 +414,7 @@ destroyed
 package X;
 sub any { bless {} }
 my $f = "FH000"; # just to thwart any future optimisations
-sub afh {
-    open(++$f, '>&STDOUT') or die;
-    select select $f;
-    my $r = *{$f}{IO};
-    delete $X::{$f};
-    bless $r;
-}
+sub afh { select select ++$f; my $r = *{$f}{IO}; delete $X::{$f}; bless $r }
 sub DESTROY { print "destroyed\n" }
 package main;
 $x = any X; # to bump sv_objcount. IO objs aren't counted??

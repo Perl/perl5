@@ -40,7 +40,7 @@ struct xpvhv {
 
 #define PERL_HASH(hash,str,len) \
      STMT_START	{ \
-	register char *s_PeRlHaSh = str; \
+	register const char *s_PeRlHaSh = str; \
 	register I32 i_PeRlHaSh = len; \
 	register U32 hash_PeRlHaSh = 0; \
 	while (i_PeRlHaSh--) \

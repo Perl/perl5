@@ -1390,8 +1390,11 @@ reg(I32 paren, I32 *flagp)
     }
 
     /* Check for proper termination. */
-    if (paren && (PL_regcomp_parse >= PL_regxend || *nextchar() != ')')) {
-	FAIL("unmatched () in regexp");
+    if (paren) {
+	PL_regflags = oregflags;
+	if (PL_regcomp_parse >= PL_regxend || *nextchar() != ')') {
+	    FAIL("unmatched () in regexp");
+	}
     }
     else if (!paren && PL_regcomp_parse < PL_regxend) {
 	if (*PL_regcomp_parse == ')') {
@@ -1400,9 +1403,6 @@ reg(I32 paren, I32 *flagp)
 	else
 	    FAIL("junk on end of regexp");	/* "Can't happen". */
 	/* NOTREACHED */
-    }
-    if (paren != 0) {
-	PL_regflags = oregflags;
     }
 
     return(ret);

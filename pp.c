@@ -92,11 +92,13 @@ typedef unsigned UBW;
 #  endif
 #  define COPY16(s,p)  (*(p) = 0, Copy(s, OFF16(p), SIZE16, char))
 #  define COPY32(s,p)  (*(p) = 0, Copy(s, OFF32(p), SIZE32, char))
+#  define COPYNN(s,p,n) (*(p) = 0, Copy(s, (char *)(p), n, char))
 #  define CAT16(sv,p)  sv_catpvn(sv, OFF16(p), SIZE16)
 #  define CAT32(sv,p)  sv_catpvn(sv, OFF32(p), SIZE32)
 #else
 #  define COPY16(s,p)  Copy(s, p, SIZE16, char)
 #  define COPY32(s,p)  Copy(s, p, SIZE32, char)
+#  define COPYNN(s,p,n) Copy(s, (char *)(p), n, char)
 #  define CAT16(sv,p)  sv_catpvn(sv, (char*)(p), SIZE16)
 #  define CAT32(sv,p)  sv_catpvn(sv, (char*)(p), SIZE32)
 #endif
@@ -218,7 +220,8 @@ PP(pp_rv2gv)
 	    GvIOp(gv) = (IO *)sv;
 	    (void)SvREFCNT_inc(sv);
 	    sv = (SV*) gv;
-	} else if (SvTYPE(sv) != SVt_PVGV)
+	}
+	else if (SvTYPE(sv) != SVt_PVGV)
 	    DIE("Not a GLOB reference");
     }
     else {
@@ -426,7 +429,8 @@ PP(pp_prototype)
 		    if (oa & OA_OPTIONAL) {
 			seen_question = 1;
 			str[n++] = ';';
-		    } else if (seen_question) 
+		    }
+		    else if (seen_question) 
 			goto set;	/* XXXX system, exec */
 		    if ((oa & (OA_OPTIONAL - 1)) >= OA_AVREF 
 			&& (oa & (OA_OPTIONAL - 1)) <= OA_HVREF) {
@@ -438,7 +442,8 @@ PP(pp_prototype)
 		}
 		str[n++] = '\0';
 		ret = sv_2mortal(newSVpv(str, n - 1));
-	    } else if (code)		/* Non-Overridable */
+	    }
+	    else if (code)		/* Non-Overridable */
 		goto set;
 	    else {			/* None such */
 	      nonesuch:
@@ -932,7 +937,8 @@ PP(pp_divide)
 	    (double)I_V(right) == right &&
 	    (k = I_V(left)/I_V(right))*I_V(right) == I_V(left)) {
 	    value = k;
-	} else {
+	}
+	else {
 	    value = left / right;
 	}
       }
@@ -2652,10 +2658,12 @@ PP(pp_exists)
     if (SvTYPE(hv) == SVt_PVHV) {
 	if (hv_exists_ent(hv, tmpsv, 0))
 	    RETPUSHYES;
-    } else if (SvTYPE(hv) == SVt_PVAV) {
+    }
+    else if (SvTYPE(hv) == SVt_PVAV) {
 	if (avhv_exists_ent((AV*)hv, tmpsv, 0))
 	    RETPUSHYES;
-    } else {
+    }
+    else {
 	DIE("Not a HASH reference");
     }
     RETPUSHNO;
@@ -2678,7 +2686,8 @@ PP(pp_hslice)
 	    if (realhv) {
 		HE *he = hv_fetch_ent(hv, keysv, lval, 0);
 		svp = he ? &HeVAL(he) : 0;
-	    } else {
+	    }
+	    else {
 		svp = avhv_fetch_ent((AV*)hv, keysv, lval, 0);
 	    }
 	    if (lval) {
@@ -3234,6 +3243,8 @@ PP(pp_unpack)
     register U32 culong;
     double cdouble;
     int commas = 0;
+    int natint;		/* native integer */
+    int unatint;	/* unsigned native integer */
 
     if (gimme != G_ARRAY) {		/* arrange to do first one only */
 	/*SUPPRESS 530*/
@@ -3249,8 +3260,19 @@ PP(pp_unpack)
     while (pat < patend) {
       reparse:
 	datumtype = *pat++ & 0xFF;
+	natint = 0;
 	if (isSPACE(datumtype))
 	    continue;
+	if (*pat == '_') {
+	    char *natstr = "sSiIlL";
+
+	    if (strchr(natstr, datumtype)) {
+		natint = 1;
+		pat++;
+	    }
+	    else
+		croak("'_' allowed only after types %s", natstr);
+	}
 	if (pat >= patend)
 	    len = 1;
 	else if (*pat == '*') {
@@ -3495,66 +3517,108 @@ PP(pp_unpack)
 	    }
 	    break;
 	case 's':
-	    along = (strend - s) / SIZE16;
+	    along = (strend - s) / (natint ? sizeof(short) : SIZE16);
 	    if (len > along)
 		len = along;
 	    if (checksum) {
-		while (len-- > 0) {
-		    COPY16(s, &ashort);
-		    s += SIZE16;
-		    culong += ashort;
+		if (natint) {
+		    while (len-- > 0) {
+			COPYNN(s, &ashort, sizeof(short));
+			s += sizeof(short);
+			culong += ashort;
+
+		    }
+		}
+		else {
+		    while (len-- > 0) {
+			COPY16(s, &ashort);
+			s += SIZE16;
+			culong += ashort;
+		    }
 		}
 	    }
 	    else {
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
-		while (len-- > 0) {
-		    COPY16(s, &ashort);
-		    s += SIZE16;
-		    sv = NEWSV(38, 0);
-		    sv_setiv(sv, (IV)ashort);
-		    PUSHs(sv_2mortal(sv));
+		if (natint) {
+		    while (len-- > 0) {
+			COPYNN(s, &ashort, sizeof(short));
+			s += sizeof(short);
+			sv = NEWSV(38, 0);
+			sv_setiv(sv, (IV)ashort);
+			PUSHs(sv_2mortal(sv));
+		    }
+		}
+		else {
+		    while (len-- > 0) {
+			COPY16(s, &ashort);
+			s += SIZE16;
+			sv = NEWSV(38, 0);
+			sv_setiv(sv, (IV)ashort);
+			PUSHs(sv_2mortal(sv));
+		    }
 		}
 	    }
 	    break;
 	case 'v':
 	case 'n':
 	case 'S':
-	    along = (strend - s) / SIZE16;
+	    unatint = natint && datumtype == 'S';
+	    along = (strend - s) / (unatint ? sizeof(unsigned short) : SIZE16);
 	    if (len > along)
 		len = along;
 	    if (checksum) {
-		while (len-- > 0) {
-		    COPY16(s, &aushort);
-		    s += SIZE16;
+		if (unatint) {
+		    while (len-- > 0) {
+			COPYNN(s, &aushort, sizeof(unsigned short));
+			s += sizeof(unsigned short);
+			culong += aushort;
+		    }
+		}
+		else {
+		    while (len-- > 0) {
+			COPY16(s, &aushort);
+			s += SIZE16;
 #ifdef HAS_NTOHS
-		    if (datumtype == 'n')
-			aushort = PerlSock_ntohs(aushort);
+			if (datumtype == 'n')
+			    aushort = PerlSock_ntohs(aushort);
 #endif
 #ifdef HAS_VTOHS
-		    if (datumtype == 'v')
-			aushort = vtohs(aushort);
+			if (datumtype == 'v')
+			    aushort = vtohs(aushort);
 #endif
-		    culong += aushort;
+			culong += aushort;
+		    }
 		}
 	    }
 	    else {
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
-		while (len-- > 0) {
-		    COPY16(s, &aushort);
-		    s += SIZE16;
-		    sv = NEWSV(39, 0);
+		if (unatint) {
+		    while (len-- > 0) {
+			COPYNN(s, &aushort, sizeof(unsigned short));
+			s += sizeof(unsigned short);
+			sv = NEWSV(39, 0);
+			sv_setiv(sv, (IV)aushort);
+			PUSHs(sv_2mortal(sv));
+		    }
+		}
+		else {
+		    while (len-- > 0) {
+			COPY16(s, &aushort);
+			s += SIZE16;
+			sv = NEWSV(39, 0);
 #ifdef HAS_NTOHS
-		    if (datumtype == 'n')
-			aushort = PerlSock_ntohs(aushort);
+			if (datumtype == 'n')
+			    aushort = PerlSock_ntohs(aushort);
 #endif
 #ifdef HAS_VTOHS
-		    if (datumtype == 'v')
-			aushort = vtohs(aushort);
+			if (datumtype == 'v')
+			    aushort = vtohs(aushort);
 #endif
-		    sv_setiv(sv, (IV)aushort);
-		    PUSHs(sv_2mortal(sv));
+			sv_setiv(sv, (IV)aushort);
+			PUSHs(sv_2mortal(sv));
+		    }
 		}
 	    }
 	    break;
@@ -3629,72 +3693,119 @@ PP(pp_unpack)
 	    }
 	    break;
 	case 'l':
-	    along = (strend - s) / SIZE32;
+	    along = (strend - s) / (natint ? sizeof(long) : SIZE32);
 	    if (len > along)
 		len = along;
 	    if (checksum) {
-		while (len-- > 0) {
-		    COPY32(s, &along);
-		    s += SIZE32;
-		    if (checksum > 32)
-			cdouble += (double)along;
-		    else
-			culong += along;
+		if (natint) {
+		    while (len-- > 0) {
+			COPYNN(s, &along, sizeof(long));
+			s += sizeof(long);
+			if (checksum > 32)
+			    cdouble += (double)along;
+			else
+			    culong += along;
+		    }
+		}
+		else {
+		    while (len-- > 0) {
+			COPY32(s, &along);
+			s += SIZE32;
+			if (checksum > 32)
+			    cdouble += (double)along;
+			else
+			    culong += along;
+		    }
 		}
 	    }
 	    else {
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
-		while (len-- > 0) {
-		    COPY32(s, &along);
-		    s += SIZE32;
-		    sv = NEWSV(42, 0);
-		    sv_setiv(sv, (IV)along);
-		    PUSHs(sv_2mortal(sv));
+		if (natint) {
+		    while (len-- > 0) {
+			COPYNN(s, &along, sizeof(long));
+			s += sizeof(long);
+			sv = NEWSV(42, 0);
+			sv_setiv(sv, (IV)along);
+			PUSHs(sv_2mortal(sv));
+		    }
+		}
+		else {
+		    while (len-- > 0) {
+			COPY32(s, &along);
+			s += SIZE32;
+			sv = NEWSV(42, 0);
+			sv_setiv(sv, (IV)along);
+			PUSHs(sv_2mortal(sv));
+		    }
 		}
 	    }
 	    break;
 	case 'V':
 	case 'N':
 	case 'L':
-	    along = (strend - s) / SIZE32;
+	    unatint = natint && datumtype;
+	    along = (strend - s) / (unatint ? sizeof(unsigned long) : SIZE32);
 	    if (len > along)
 		len = along;
 	    if (checksum) {
-		while (len-- > 0) {
-		    COPY32(s, &aulong);
-		    s += SIZE32;
+		if (unatint) {
+		    while (len-- > 0) {
+			COPYNN(s, &aulong, sizeof(unsigned long));
+			s += sizeof(unsigned long);
+			if (checksum > 32)
+			    cdouble += (double)aulong;
+			else
+			    culong += aulong;
+		    }
+		}
+		else {
+		    while (len-- > 0) {
+			COPY32(s, &aulong);
+			s += SIZE32;
 #ifdef HAS_NTOHL
-		    if (datumtype == 'N')
-			aulong = PerlSock_ntohl(aulong);
+			if (datumtype == 'N')
+			    aulong = PerlSock_ntohl(aulong);
 #endif
 #ifdef HAS_VTOHL
-		    if (datumtype == 'V')
-			aulong = vtohl(aulong);
+			if (datumtype == 'V')
+			    aulong = vtohl(aulong);
 #endif
-		    if (checksum > 32)
-			cdouble += (double)aulong;
-		    else
-			culong += aulong;
+			if (checksum > 32)
+			    cdouble += (double)aulong;
+			else
+			    culong += aulong;
+		    }
 		}
 	    }
 	    else {
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
-		while (len-- > 0) {
-		    COPY32(s, &aulong);
-		    s += SIZE32;
+		if (unatint) {
+		    while (len-- > 0) {
+			COPYNN(s, &aulong, sizeof(unsigned long));
+			s += sizeof(unsigned long);
+			sv = NEWSV(43, 0);
+			sv_setuv(sv, (UV)aulong);
+			PUSHs(sv_2mortal(sv));
+		    }
+		}
+		else {
+		    while (len-- > 0) {
+			COPY32(s, &aulong);
+			s += SIZE32;
 #ifdef HAS_NTOHL
-		    if (datumtype == 'N')
-			aulong = PerlSock_ntohl(aulong);
+			if (datumtype == 'N')
+			    aulong = PerlSock_ntohl(aulong);
 #endif
 #ifdef HAS_VTOHL
-		    if (datumtype == 'V')
-			aulong = vtohl(aulong);
+			if (datumtype == 'V')
+			    aulong = vtohl(aulong);
 #endif
-		    sv = NEWSV(43, 0);
-		    sv_setuv(sv, (UV)aulong);
-		    PUSHs(sv_2mortal(sv));
+			sv = NEWSV(43, 0);
+			sv_setuv(sv, (UV)aulong);
+			PUSHs(sv_2mortal(sv));
+		    }
 		}
 	    }
 	    break;
@@ -4099,6 +4210,7 @@ PP(pp_pack)
     float afloat;
     double adouble;
     int commas = 0;
+    int natint;		/* native integer */
 
     items = SP - MARK;
     MARK++;
@@ -4106,8 +4218,19 @@ PP(pp_pack)
     while (pat < patend) {
 #define NEXTFROM (items-- > 0 ? *MARK++ : &PL_sv_no)
 	datumtype = *pat++ & 0xFF;
+	natint = 0;
 	if (isSPACE(datumtype))
 	    continue;
+        if (*pat == '_') {
+	    char *natstr = "sSiIlL";
+
+	    if (strchr(natstr, datumtype)) {
+		natint = 1;
+		pat++;
+	    }
+	    else
+		croak("'_' allowed only after types %s", natstr);
+	}
 	if (*pat == '*') {
 	    len = strchr("@Xxu", datumtype) ? 0 : items;
 	    pat++;
@@ -4352,11 +4475,39 @@ PP(pp_pack)
 	    }
 	    break;
 	case 'S':
+	    if (natint) {
+		unsigned short aushort;
+
+		while (len-- > 0) {
+		    fromstr = NEXTFROM;
+		    aushort = SvUV(fromstr);
+		    sv_catpvn(cat, (char *)&aushort, sizeof(unsigned short));
+		}
+	    }
+	    else {
+		U16 aushort;
+
+		while (len-- > 0) {
+		    fromstr = NEXTFROM;
+		    aushort = (U16)SvIV(fromstr);
+		    CAT16(cat, &aushort);
+		}
+	    }
+	    break;
 	case 's':
-	    while (len-- > 0) {
-		fromstr = NEXTFROM;
-		ashort = (I16)SvIV(fromstr);
-		CAT16(cat, &ashort);
+	    if (natint) {
+		while (len-- > 0) {
+		    fromstr = NEXTFROM;
+		    ashort = SvIV(fromstr);
+		    sv_catpvn(cat, (char *)&ashort, sizeof(short));
+		}
+	    }
+	    else {
+		while (len-- > 0) {
+		    fromstr = NEXTFROM;
+		    ashort = (I16)SvIV(fromstr);
+		    CAT16(cat, &ashort);
+		}
 	    }
 	    break;
 	case 'I':
@@ -4464,17 +4615,35 @@ PP(pp_pack)
 	    }
 	    break;
 	case 'L':
-	    while (len-- > 0) {
-		fromstr = NEXTFROM;
-		aulong = SvUV(fromstr);
-		CAT32(cat, &aulong);
+	    if (natint) {
+		while (len-- > 0) {
+		    fromstr = NEXTFROM;
+		    aulong = SvUV(fromstr);
+		    sv_catpvn(cat, (char *)&aulong, sizeof(unsigned long));
+		}
+	    }
+	    else {
+		while (len-- > 0) {
+		    fromstr = NEXTFROM;
+		    aulong = SvUV(fromstr);
+		    CAT32(cat, &aulong);
+		}
 	    }
 	    break;
 	case 'l':
-	    while (len-- > 0) {
-		fromstr = NEXTFROM;
-		along = SvIV(fromstr);
-		CAT32(cat, &along);
+	    if (natint) {
+		while (len-- > 0) {
+		    fromstr = NEXTFROM;
+		    along = SvIV(fromstr);
+		    sv_catpvn(cat, (char *)&along, sizeof(long));
+		}
+	    }
+	    else {
+		while (len-- > 0) {
+		    fromstr = NEXTFROM;
+		    along = SvIV(fromstr);
+		    CAT32(cat, &along);
+		}
 	    }
 	    break;
 #ifdef HAS_QUAD

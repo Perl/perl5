@@ -1110,7 +1110,7 @@ perl_run(PerlInterpreter *sv_interp)
 }
 
 SV*
-perl_get_sv(char *name, I32 create)
+perl_get_sv(const char *name, I32 create)
 {
     GV *gv;
 #ifdef USE_THREADS
@@ -1129,7 +1129,7 @@ perl_get_sv(char *name, I32 create)
 }
 
 AV*
-perl_get_av(char *name, I32 create)
+perl_get_av(const char *name, I32 create)
 {
     GV* gv = gv_fetchpv(name, create, SVt_PVAV);
     if (create)
@@ -1140,7 +1140,7 @@ perl_get_av(char *name, I32 create)
 }
 
 HV*
-perl_get_hv(char *name, I32 create)
+perl_get_hv(const char *name, I32 create)
 {
     GV* gv = gv_fetchpv(name, create, SVt_PVHV);
     if (create)
@@ -1151,7 +1151,7 @@ perl_get_hv(char *name, I32 create)
 }
 
 CV*
-perl_get_cv(char *name, I32 create)
+perl_get_cv(const char *name, I32 create)
 {
     GV* gv = gv_fetchpv(name, create, SVt_PVCV);
     /* XXX unsafe for threads if eval_owner isn't held */
@@ -1168,7 +1168,7 @@ perl_get_cv(char *name, I32 create)
 /* Be sure to refetch the stack pointer after calling these routines. */
 
 I32
-perl_call_argv(char *sub_name, I32 flags, register char **argv)
+perl_call_argv(const char *sub_name, I32 flags, register char **argv)
               
           		/* See G_* flags in cop.h */
                      	/* null terminated arg list */
@@ -1187,7 +1187,7 @@ perl_call_argv(char *sub_name, I32 flags, register char **argv)
 }
 
 I32
-perl_call_pv(char *sub_name, I32 flags)
+perl_call_pv(const char *sub_name, I32 flags)
               		/* name of the subroutine */
           		/* See G_* flags in cop.h */
 {
@@ -1195,7 +1195,7 @@ perl_call_pv(char *sub_name, I32 flags)
 }
 
 I32
-perl_call_method(char *methname, I32 flags)
+perl_call_method(const char *methname, I32 flags)
                		/* name of the subroutine */
           		/* See G_* flags in cop.h */
 {
@@ -1444,7 +1444,7 @@ perl_eval_sv(SV *sv, I32 flags)
 }
 
 SV*
-perl_eval_pv(char *p, I32 croak_on_error)
+perl_eval_pv(const char *p, I32 croak_on_error)
 {
     dSP;
     SV* sv = newSVpv(p, 0);
@@ -1468,7 +1468,7 @@ perl_eval_pv(char *p, I32 croak_on_error)
 /* Require a module. */
 
 void
-perl_require_pv(char *pv)
+perl_require_pv(const char *pv)
 {
     SV* sv;
     dSP;

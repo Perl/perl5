@@ -381,7 +381,7 @@ unqualified and unqualifiable.
 This does not work with object methods, however; all object methods have
 to be in the symbol table of some package to be found.
 
-=head2 Peristent Private Variables
+=head2 Persistent Private Variables
 
 Just because a lexical variable is lexically (also called statically)
 scoped to its enclosing block, C<eval>, or C<do> FILE, this doesn't mean that

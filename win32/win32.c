@@ -2280,6 +2280,16 @@ XS(w32_GetLastError)
 }
 
 static
+XS(w32_SetLastError)
+{
+    dXSARGS;
+    if (items != 1)
+	croak("usage: Win32::SetLastError($error)");
+    SetLastError(SvIV(ST(0)));
+    XSRETURN_UNDEF;
+}
+
+static
 XS(w32_LoginName)
 {
     dXSARGS;
@@ -2496,6 +2506,42 @@ XS(w32_GetShortPathName)
 }
 
 static
+XS(w32_GetFullPathName)
+{
+    dXSARGS;
+    SV *filename;
+    SV *fullpath;
+    char *filepart;
+    DWORD len;
+
+    if (items != 1)
+	croak("usage: Win32::GetFullPathName($filename)");
+
+    filename = ST(0);
+    fullpath = sv_mortalcopy(filename);
+    SvUPGRADE(fullpath, SVt_PV);
+    do {
+	len = GetFullPathName(SvPVX(filename),
+			      SvLEN(fullpath),
+			      SvPVX(fullpath),
+			      &filepart);
+    } while (len >= SvLEN(fullpath) && sv_grow(fullpath,len+1));
+    if (len) {
+	if (GIMME_V == G_ARRAY) {
+	    EXTEND(SP,1);
+	    ST(1) = sv_2mortal(newSVpv(filepart,0));
+	    len = filepart - SvPVX(fullpath);
+	    items = 2;
+	}
+	SvCUR_set(fullpath,len);
+	ST(0) = fullpath;
+    }
+    else
+	ST(0) = &PL_sv_undef;
+    XSRETURN(items);
+}
+
+static
 XS(w32_Sleep)
 {
     dXSARGS;
@@ -2523,6 +2569,7 @@ Perl_init_os_extras()
     newXS("Win32::SetCwd", w32_SetCwd, file);
     newXS("Win32::GetNextAvailDrive", w32_GetNextAvailDrive, file);
     newXS("Win32::GetLastError", w32_GetLastError, file);
+    newXS("Win32::SetLastError", w32_SetLastError, file);
     newXS("Win32::LoginName", w32_LoginName, file);
     newXS("Win32::NodeName", w32_NodeName, file);
     newXS("Win32::DomainName", w32_DomainName, file);
@@ -2534,6 +2581,7 @@ Perl_init_os_extras()
     newXS("Win32::Spawn", w32_Spawn, file);
     newXS("Win32::GetTickCount", w32_GetTickCount, file);
     newXS("Win32::GetShortPathName", w32_GetShortPathName, file);
+    newXS("Win32::GetFullPathName", w32_GetFullPathName, file);
     newXS("Win32::Sleep", w32_Sleep, file);
 
     /* XXX Bloat Alert! The following Activeware preloads really
