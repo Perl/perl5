@@ -12,7 +12,7 @@ my $no_endianness = $] > 5.009 ? '' :
 my $no_signedness = $] > 5.009 ? '' :
   "Signed/unsigned pack modifiers not available on this perl";
 
-plan tests => 13857;
+plan tests => 13859;
 
 use strict;
 use warnings;
@@ -1501,4 +1501,11 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
 
     # verify that the checksum is not overflowed with C0
     is(unpack("C0%128U", "abcd"), unpack("U0%128U", "abcd"), "checksum not overflowed");
+}
+
+{
+    # U0 and C0 must be scoped
+    my (@x) = unpack("a(U0)U", "b\341\277\274");
+    is($x[0], 'b', 'before scope');
+    is($x[1], 225, 'after scope');
 }

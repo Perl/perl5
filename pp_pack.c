@@ -991,6 +991,10 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    while (len--) {
   	        symptr->patptr = savsym.grpbeg;
  	        unpack_rec(symptr, ss, strbeg, strend, &ss );
+		if (savsym.flags & FLAG_UNPACK_DO_UTF8)
+		    symptr->flags |=  FLAG_UNPACK_DO_UTF8;
+		else
+		    symptr->flags &= ~FLAG_UNPACK_DO_UTF8;
                 if (ss == strend && savsym.howlen == e_star)
 		    break; /* No way to continue */
 	    }
