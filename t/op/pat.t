@@ -1279,6 +1279,7 @@ print "ok 247\n";
     if (ord("ß") == 0337) { # Latin-1 only.
 	# bug id 20001008.001
 
+	eval <<'__EOT__';
 	my $test = 248;
 	my @x = ("stra\337e 138","stra\337e 138");
 	for (@x) {
@@ -1291,6 +1292,7 @@ print "ok 247\n";
 	    use utf8; # needed for the raw UTF-8
 	    $latin =~ s!(s)tr(?:aÃŸ|s+e)!$1tr.!; # \303\237 after the a
 	}
+__EOT__
     } else {
 	for (248..249) {
 	    print "ok $_ # Skip: only in Latin-1\n";
