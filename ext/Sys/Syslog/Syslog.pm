@@ -75,14 +75,16 @@ Sets the socket type to be used for the next call to
 C<openlog()> or C<syslog()> and returns TRUE on success,
 undef on failure.
 
-A value of 'unix' will connect to the UNIX domain socket returned by
-the C<_PATH_LOG> macro (if your system defines it) in F<syslog.ph>.  A
-value of 'stream' will connect to the stream indicated by the pathname
-provided as the optional second parameter.  A value of 'inet' will
-connect to an INET socket (either tcp or udp, tried in that order)
-returned by getservbyname(). 'tcp' and 'udp' can also be given as
-values. The value 'console' will send messages directly to the
-console, as for the 'cons' option in the logopts in openlog().
+A value of 'unix' will connect to the UNIX domain socket (in some
+systems a character special device) returned by the C<_PATH_LOG> macro
+(if your system defines it), or F</dev/log> or F</dev/conslog>,
+whatever is writable.  A value of 'stream' will connect to the stream
+indicated by the pathname provided as the optional second parameter.
+A value of 'inet' will connect to an INET socket (either tcp or udp,
+tried in that order) returned by getservbyname(). 'tcp' and 'udp' can
+also be given as values. The value 'console' will send messages
+directly to the console, as for the 'cons' option in the logopts in
+openlog().
 
 A reference to an array can also be passed as the first parameter.
 When this calling method is used, the array should contain a list of
@@ -190,7 +192,19 @@ sub setlogsock {
     if (ref $setsock eq 'ARRAY') {
 	@connectMethods = @$setsock;
     } elsif (lc($setsock) eq 'stream') {
-	$syslog_path = '/dev/log' unless($syslog_path);
+	unless (defined $syslog_path) {
+	    my @try = qw(/dev/log /dev/conslog);
+	    if (length &_PATH_LOG) {
+		unshift @try, &_PATH_LOG;
+            }
+	    for my $try (@try) {
+		if (-w $try) {
+		    $syslog_path = $try;
+		    last;
+		}
+	    }
+	    carp "stream passed to setlogsock, but could not find any device";
+        }
 	if (!-w $syslog_path) {
 	    carp "stream passed to setlogsock, but $syslog_path is not writable";
 	    return undef;

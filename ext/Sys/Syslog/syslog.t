@@ -47,8 +47,12 @@ print "1..6\n";
 
 if (Sys::Syslog::_PATH_LOG()) {
     if (-e Sys::Syslog::_PATH_LOG()) {
-        print defined(eval { setlogsock('unix') })
-		? "ok 1\n" : "not ok 1 # $!\n";
+        if ($^O =~ /^solaris$/) {
+            # we should check for stream support here, not for solaris
+            print defined(eval { setlogsock('stream') }) ? "ok 1\n" : "not ok 1 # $!\n";
+        } else { 
+            print defined(eval { setlogsock('unix') }) ? "ok 1\n" : "not ok 1 # $!\n";
+        }
         if (defined(eval { openlog('perl', 'ndelay', 'local0') })) {
 	    print "ok 2\n";
 	    print defined(eval { syslog('info', $test_string ) })
