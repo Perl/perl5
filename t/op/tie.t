@@ -3,7 +3,7 @@
 # This test harness will (eventually) test the "tie" functionality
 # without the need for a *DBM* implementation.
 
-# Currently it only tests the untie warning 
+# Currently it only tests the untie warning
 
 chdir 't' if -d 't';
 @INC = '../lib';
@@ -138,7 +138,7 @@ untie %h;
 EXPECT
 ########
 
-# strict error behaviour, with 2 extra references 
+# strict error behaviour, with 2 extra references
 use warnings 'untie';
 use Tie::Hash ;
 $a = tie %h, Tie::StdHash;
@@ -171,7 +171,7 @@ sub Self::DESTROY { $b = $_[0] + 1; }
     tie %c, 'Self', \%c;
 }
 EXPECT
-Self-ties of arrays and hashes are not supported 
+Self-ties of arrays and hashes are not supported
 ########
 # Allowed scalar self-ties
 my ($a, $b) = (0, 0);
@@ -206,8 +206,38 @@ EXPECT
 # correct unlocalisation of tied hashes (patch #16431)
 use Tie::Hash ;
 tie %tied, Tie::StdHash;
-{ local $hash{'foo'} } print "exist1\n" if exists $hash{'foo'};
-{ local $tied{'foo'} } print "exist2\n" if exists $tied{'foo'};
-{ local $ENV{'foo'}  } print "exist3\n" if exists $ENV{'foo'};
+{ local $hash{'foo'} } warn "plain hash bad unlocalize" if exists $hash{'foo'};
+{ local $tied{'foo'} } warn "tied hash bad unlocalize" if exists $tied{'foo'};
+{ local $ENV{'foo'}  } warn "%ENV bad unlocalize" if exists $ENV{'foo'};
 EXPECT
+########
+# Allowed glob self-ties
+my $destroyed = 0;
+my $printed   = 0;
+sub Self2::TIEHANDLE { bless $_[1], $_[0] }
+sub Self2::DESTROY   { $destroyed = 1; }
+sub Self2::PRINT     { $printed = 1; }
+{
+    use Symbol;
+    my $c = gensym;
+    tie *$c, 'Self2', $c;
+    print $c 'Hello';
+}
+die "self-tied glob not PRINTed" unless $printed == 1;
+die "self-tied glob not DESTROYd" unless $destroyed == 1;
+EXPECT
+########
+
+# Allowed IO self-ties
+my $destroyed = 0;
+sub Self3::TIEHANDLE { bless $_[1], $_[0] }
+sub Self3::DESTROY   { $destroyed = 1; }
+{
+    use Symbol 'geniosym';
+    my $c = geniosym;
+    tie *$c, 'Self3', $c;
+}
+die "self-tied IO not DESTROYd" unless $destroyed == 1;
+EXPECT
+########
 
