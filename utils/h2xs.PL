@@ -1842,12 +1842,12 @@ use ExtUtils::MakeMaker;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 WriteMakefile(
-    'NAME'		=> '$module',
-    'VERSION_FROM'	=> '$modfname.pm', # finds \$VERSION
-    'PREREQ_PM'		=> {$prereq_pm}, # e.g., Module::Name => 1.1
-    (\$] >= 5.005 ?    ## Add these new keywords supported since 5.005
-      (ABSTRACT_FROM => '$modfname.pm', # retrieve abstract from module
-       AUTHOR     => '$author <$email>') : ()),
+    NAME              => '$module',
+    VERSION_FROM      => '$modfname.pm', # finds \$VERSION
+    PREREQ_PM         => {$prereq_pm}, # e.g., Module::Name => 1.1
+    (\$] >= 5.005 ?     ## Add these new keywords supported since 5.005
+      (ABSTRACT_FROM  => '$modfname.pm', # retrieve abstract from module
+       AUTHOR         => '$author <$email>') : ()),
 END
 if (!$opt_X) { # print C stuff, unless XS is disabled
   $opt_F = '' unless defined $opt_F;
@@ -1858,9 +1858,9 @@ if (!$opt_X) { # print C stuff, unless XS is disabled
 EOC
 
   print PL <<END;
-    'LIBS'		=> ['$extralibs'], # e.g., '-lm'
-    'DEFINE'		=> '$opt_F', # e.g., '-DHAVE_SOMETHING'
-$Icomment    'INC'		=> '$I', # e.g., '${Ihelp}-I/usr/include/other'
+    LIBS              => ['$extralibs'], # e.g., '-lm'
+    DEFINE            => '$opt_F', # e.g., '-DHAVE_SOMETHING'
+$Icomment    INC               => '$I', # e.g., '${Ihelp}-I/usr/include/other'
 END
 
   my $C = grep {$_ ne "$modfname.c"}
@@ -1871,7 +1871,7 @@ END
 EOC
 
   print PL <<END;
-$Ccomment    $Cpre\'OBJECT'		=> '\$(O_FILES)', # link all the C files too
+$Ccomment    ${Cpre}OBJECT            => '\$(O_FILES)', # link all the C files too
 END
 } # ' # Grr
 print PL ");\n";
