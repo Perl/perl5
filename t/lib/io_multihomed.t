@@ -55,8 +55,14 @@ sub connect
 	my($port, $addr) = unpack_sockaddr_in($_[0]);
 	$addr = inet_ntoa($addr);
 	#print "connect($self, $port, $addr)\n";
-	print "ok 3\n" if $addr eq "10.250.230.10";
-	print "ok 4\n" if $addr eq "10.250.230.12";
+	if($addr eq "10.250.230.10") {
+	    print "ok 3\n";
+	    return 0;
+	}
+	if($addr eq "10.250.230.12") {
+	    print "ok 4\n";
+	    return 0;
+	}
     }
     $self->SUPER::connect(@_);
 }
