@@ -31,6 +31,140 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12717] By: jhi                                   on 2001/10/27  21:54:11
+        Log: Subject: perlhack.pod addendum for consideration (perlbug mail interface)
+             From: Richard.Foley@t-online.de (Richard Foley)            
+             Date: Sun, 28 Oct 2001 00:48:32 +0200
+             Message-ID: <15xbQQ-1BoWxsC@fwd02.sul.t-online.com>
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[ 12716] By: jhi                                   on 2001/10/27  21:41:02
+        Log: Must store pointers with the right width.
+     Branch: perl
+	   ! op.h
+____________________________________________________________________________
+[ 12715] By: jhi                                   on 2001/10/27  21:22:52
+        Log: Integrate change #12711 from perlio;
+             
+             Use ref count scheme rather than PerlLIO_dup() to do fp_dup().
+             Restores op/fork.t on Win32 (still segfault on exit of ok 2).
+     Branch: perl
+	  !> perlio.c
+____________________________________________________________________________
+[ 12714] By: jhi                                   on 2001/10/27  21:04:59
+        Log: Subject: [PATCH] make minitest
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 27 Oct 2001 22:56:16 +0100
+             Message-ID: <20011027225616.L20275@plum.flirble.org>
+     Branch: perl
+	   ! t/TEST
+____________________________________________________________________________
+[ 12713] By: jhi                                   on 2001/10/27  20:58:33
+        Log: Patch #12661 missed this.
+     Branch: perl
+	   ! ext/DB_File/DB_File.pm
+____________________________________________________________________________
+[ 12712] By: jhi                                   on 2001/10/27  20:56:38
+        Log: Subject: [PATCH perl@12696] C RTL awareness update for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sat, 27 Oct 2001 16:07:47 -0500
+             Message-Id: <5.1.0.14.2.20011027134037.01bebc60@exchi01>
+     Branch: perl
+	   ! configure.com perlio.c
+____________________________________________________________________________
+[ 12711] By: nick                                  on 2001/10/27  19:49:25
+        Log: Use ref count scheme rather than PerlLIO_dup() to do fp_dup().
+             Restores op/fork.t on Win32 (still segfault on exit of ok 2).
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
+[ 12710] By: jhi                                   on 2001/10/27  17:07:46
+        Log: Let's not replace reason if there's one already supplied.
+     Branch: perl
+	   ! t/op/regexp.t
+____________________________________________________________________________
+[ 12709] By: jhi                                   on 2001/10/27  17:02:30
+        Log: is not good.
+     Branch: perl
+	   ! t/op/regexp.t
+____________________________________________________________________________
+[ 12708] By: jhi                                   on 2001/10/27  16:54:07
+        Log: ldlibpth can exist but be unset.
+     Branch: perl
+	   ! t/TEST
+____________________________________________________________________________
+[ 12707] By: jhi                                   on 2001/10/27  16:47:07
+        Log: Unicode: property alias naming cleanup.
+     Branch: perl
+	   ! lib/unicore/Is.pl lib/unicore/mktables pod/perlunicode.pod
+____________________________________________________________________________
+[ 12706] By: jhi                                   on 2001/10/27  15:24:06
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq4.pod
+____________________________________________________________________________
+[ 12705] By: jhi                                   on 2001/10/27  15:23:15
+        Log: Integrate change #12703 from maintperl;
+             
+             typemap stuff intervenes before declaration, move it to PREINIT
+             section
+             
+             (an empty integrate, but now the files are in sync
+             between the branches)
+     Branch: perl
+	  !> ext/ODBM_File/ODBM_File.xs
+____________________________________________________________________________
+[ 12704] By: jhi                                   on 2001/10/27  15:21:17
+        Log: More PerlIO symbols.
+     Branch: perl
+	   ! makedef.pl
+____________________________________________________________________________
+[ 12703] By: gsar                                  on 2001/10/27  15:12:54
+        Log: typemap stuff intervenes before declaration, move it to PREINIT
+             section
+     Branch: maint-5.6/perl
+	   ! ext/ODBM_File/ODBM_File.xs
+____________________________________________________________________________
+[ 12702] By: nick                                  on 2001/10/27  14:09:35
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/threads/shared/t/av_simple.t
+	  +> ext/threads/shared/t/hv_refs.t
+	  +> ext/threads/shared/t/hv_simple.t lib/unicore/To/Fold.pl
+	  !> (integrate 109 files)
+____________________________________________________________________________
+[ 12700] By: ams                                   on 2001/10/26  21:22:23
+        Log: Subject: [PATCH] tweak divide
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Fri, 26 Oct 2001 22:52:17 +0100
+             Message-Id: <20011026225217.B20275@plum.flirble.org>
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[ 12699] By: pudge                                 on 2001/10/26  20:49:00
+        Log: Integrate a buncha things from maintperl.
+     Branch: maint-5.6/macperl
+	  !> (integrate 32 files)
+____________________________________________________________________________
+[ 12698] By: jhi                                   on 2001/10/26  19:13:24
+        Log: Subject: [PATCH] Re: DynaLoader problem on NCR SVR4 box
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Fri, 26 Oct 2001 14:36:29 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.10.10110261434280.23229-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! hints/svr4.sh
+____________________________________________________________________________
+[ 12697] By: jhi                                   on 2001/10/26  18:42:58
+        Log: When you're root, many things become writable.
+     Branch: perl
+	   ! lib/ExtUtils/Mkbootstrap.t lib/ExtUtils/Packlist.t
+____________________________________________________________________________
+[ 12696] By: jhi                                   on 2001/10/26  15:52:58
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12695] By: gsar                                  on 2001/10/26  15:34:31
         Log: Term/Cap.t attempts to access the floppy drive for no good reason
              on dosish systems
