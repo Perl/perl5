@@ -13,11 +13,15 @@ case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
 echo "Extracting makedir (with variable substitutions)"
+rm -f makedir
 $spitshell >makedir <<!GROK!THIS!
 $startsh
-# $Header: makedir.SH,v 4.0 91/03/20 01:27:13 lwall Locked $
+# $RCSfile: makedir.SH,v $$Revision: 4.0.1.1 $$Date: 92/06/08 14:24:55 $
 # 
 # $Log:	makedir.SH,v $
+# Revision 4.0.1.1  92/06/08  14:24:55  lwall
+# patch20: SH files didn't work well with symbolic links
+# 
 # Revision 4.0  91/03/20  01:27:13  lwall
 # 4.0 baseline.
 # 

@@ -1,4 +1,4 @@
-set `echo $libswanted | sed -e 's/ x / /' -e 's/ PW / /' -e s/ malloc / /`
+set `echo $libswanted | sed -e 's/ x / /' -e 's/ PW / /' -e 's/ malloc / /'`
 libswanted="inet malloc $*"
 doio_cflags='ccflags="$ccflags -DENOTSOCK=103"'
 tdoio_cflags='ccflags="$ccflags -DENOTSOCK=103"'

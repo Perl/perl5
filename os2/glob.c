@@ -1,18 +1,21 @@
 /*
  * Globbing for OS/2.  Relies on the expansion done by the library
- * startup code. (dds)
+ * startup code.
  */
 
-#include <stdio.h>
-#include <string.h>
+#define PERLGLOB
+#include "director.c"
 
-main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
-  register i;
+  SHORT i;
+  USHORT r;
+  CHAR *f;
 
   for (i = 1; i < argc; i++)
   {
-    fputs(IsFileSystemFAT(argv[i]) ? strlwr(argv[i]) : argv[i], stdout);
-    putchar(0);
+    f = IsFileSystemFAT(argv[i]) ? strlwr(argv[i]) : argv[i];
+    DosWrite(1, f, strlen(f) + 1, &r);
   }
+  return argc - 1;
 }

@@ -1,4 +1,4 @@
-/* $RCSfile: form.c,v $$Revision: 4.0.1.2 $$Date: 91/11/05 17:18:43 $
+/* $RCSfile: form.c,v $$Revision: 4.0.1.3 $$Date: 92/06/08 13:21:42 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	form.c,v $
+ * Revision 4.0.1.3  92/06/08  13:21:42  lwall
+ * patch20: removed implicit int declarations on funcions
+ * patch20: form feed for formats is now specifiable via $^L
+ * patch20: Perl now distinguishes overlapped copies from non-overlapped
+ * 
  * Revision 4.0.1.2  91/11/05  17:18:43  lwall
  * patch11: formats didn't fill their fields as well as they could
  * patch11: ^ fields chopped hyphens on line break
@@ -24,6 +29,8 @@
 #include "perl.h"
 
 /* Forms stuff */
+
+static int countlines();
 
 void
 form_parseargs(fcmd)
@@ -80,6 +87,7 @@ if (newsize >= curlen) { \
     curlen = orec->o_len - 2; \
 }
 
+void
 format(orec,fcmd,sp)
 register struct outrec *orec;
 register FCMD *fcmd;
@@ -219,7 +227,7 @@ int sp;
 		*d++ = ' ';
 	    }
 	    size = s - t;
-	    (void)bcopy(t,d,size);
+	    Copy(t,d,size,char);
 	    d += size;
 	    *s = tmpchar;
 	    if (fcmd->f_flags & FC_CHOP)
@@ -264,7 +272,7 @@ int sp;
 		*d++ = ' ';
 	    }
 	    size = s - t;
-	    (void)bcopy(t,d,size);
+	    Copy(t,d,size,char);
 	    d += size;
 	    *s = tmpchar;
 	    if (fcmd->f_next && fcmd->f_next->f_pre[0] == '\n')
@@ -286,7 +294,7 @@ int sp;
 	    size = str_len(str);
 	    CHKLEN(size+1);
 	    orec->o_lines += countlines(s,size) - 1;
-	    (void)bcopy(s,d,size);
+	    Copy(s,d,size,char);
 	    d += size;
 	    if (size && s[size-1] != '\n') {
 		*d++ = '\n';
@@ -325,6 +333,7 @@ int sp;
     *d++ = '\0';
 }
 
+static int
 countlines(s,size)
 register char *s;
 register int size;
@@ -338,6 +347,7 @@ register int size;
     return count;
 }
 
+void
 do_write(orec,stab,sp)
 struct outrec *orec;
 STAB *stab;
@@ -374,7 +384,7 @@ int sp;
 	    stio->top_stab = topstab;
 	}
 	if (stio->lines_left >= 0 && stio->page > 0)
-	    (void)putc('\f',ofp);
+	    fwrite(formfeed->str_ptr, formfeed->str_cur, 1, ofp);
 	stio->lines_left = stio->page_len;
 	stio->page++;
 	format(&toprec,stab_form(stio->top_stab),sp);

@@ -1,4 +1,4 @@
-/* $RCSfile: doio.c,v $$Revision: 4.0.1.4 $$Date: 91/11/05 16:51:43 $
+/* $RCSfile: doio.c,v $$Revision: 4.0.1.5 $$Date: 92/06/08 13:00:21 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,16 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	doio.c,v $
+ * Revision 4.0.1.5  92/06/08  13:00:21  lwall
+ * patch20: some machines don't define ENOTSOCK in errno.h
+ * patch20: new warnings for failed use of stat operators on filenames with \n
+ * patch20: wait failed when STDOUT or STDERR reopened to a pipe
+ * patch20: end of file latch not reset on reopen of STDIN
+ * patch20: seek(HANDLE, 0, 1) went to eof because of ancient Ultrix workaround
+ * patch20: fixed memory leak on system() for vfork() machines
+ * patch20: get*by* routines now return something useful in a scalar context
+ * patch20: h_errno now accessible via $?
+ * 
  * Revision 4.0.1.4  91/11/05  16:51:43  lwall
  * patch11: prepared for ctype implementations that don't define isascii()
  * patch11: perl mistook some streams for sockets because they return mode 0 too
@@ -41,6 +51,9 @@
 #ifdef HAS_SOCKET
 #include <sys/socket.h>
 #include <netdb.h>
+#ifndef ENOTSOCK
+#include <net/errno.h>
+#endif
 #endif
 
 #ifdef HAS_SELECT
@@ -83,6 +96,8 @@
 int laststatval = -1;
 int laststype = O_STAT;
 
+static char* warn_nl = "Unsuccessful %s on filename containing newline";
+
 bool
 do_open(stab,name,len)
 STAB *stab;
@@ -100,6 +115,7 @@ int len;
     FILE *saveofp = Nullfp;
     char savetype = ' ';
 
+    mode[0] = mode[1] = mode[2] = '\0';
     name = myname;
     forkprocess = 1;		/* assume true if no fork */
     while (len && isSPACE(name[len-1]))
@@ -130,7 +146,7 @@ int len;
 	    result = fclose(stio->ifp);
 	if (result == EOF && fd > maxsysfd)
 	    fprintf(stderr,"Warning: unable to close filehandle %s properly.\n",
-	      stab_name(stab));
+	      stab_ename(stab));
 	stio->ofp = stio->ifp = Nullfp;
     }
     if (*name == '+' && len > 1 && name[len-1] != '|') {	/* scary */
@@ -244,9 +260,13 @@ int len;
 		fp = fopen(name,"r");
 	}
     }
-    Safefree(myname);
-    if (!fp)
+    if (!fp) {
+	if (dowarn && stio->type == '<' && index(name, '\n'))
+	    warn(warn_nl, "open");
+	Safefree(myname);
 	goto say_false;
+    }
+    Safefree(myname);
     if (stio->type &&
       stio->type != '|' && stio->type != '-') {
 	if (fstat(fileno(fp),&statbuf) < 0) {
@@ -263,7 +283,9 @@ int len;
 	    !statbuf.st_mode
 #endif
 	) {
-	    if (getsockname(fileno(fp), tokenbuf, 0) >= 0 || errno != ENOTSOCK)
+	    int buflen = sizeof tokenbuf;
+	    if (getsockname(fileno(fp), tokenbuf, &buflen) >= 0
+		|| errno != ENOTSOCK)
 		stio->type = 's'; /* some OS's return 0 on fstat()ed socket */
 				/* but some return 0 for streams too, sigh */
 	}
@@ -280,10 +302,20 @@ int len;
 	    }
 	}
 	if (fd != fileno(fp)) {
+	    int pid;
+	    STR *str;
+
 	    dup2(fileno(fp), fd);
+	    str = afetch(fdpid,fileno(fp),TRUE);
+	    pid = str->str_u.str_useful;
+	    str->str_u.str_useful = 0;
+	    str = afetch(fdpid,fd,TRUE);
+	    str->str_u.str_useful = pid;
 	    fclose(fp);
+
 	}
 	fp = saveifp;
+	clearerr(fp);
     }
 #if defined(HAS_FCNTL) && defined(F_SETFD)
     fd = fileno(fp);
@@ -384,7 +416,7 @@ register STAB *stab;
 		    }
 #endif
 #ifdef HAS_RENAME
-#ifndef MSDOS
+#ifndef DOSISH
 		    if (rename(oldname,str->str_ptr) < 0) {
 			warn("Can't rename %s to %s: %s, skipping file",
 			  oldname, str->str_ptr, strerror(errno) );
@@ -411,7 +443,7 @@ register STAB *stab;
 #endif
 		}
 		else {
-#ifndef MSDOS
+#ifndef DOSISH
 		    if (UNLINK(oldname) < 0) {
 			warn("Can't rename %s to %s: %s, skipping file",
 			  oldname, str->str_ptr, strerror(errno) );
@@ -536,7 +568,7 @@ bool explicit;
     stio = stab_io(stab);
     if (!stio) {		/* never opened */
 	if (dowarn && explicit)
-	    warn("Close on unopened file <%s>",stab_name(stab));
+	    warn("Close on unopened file <%s>",stab_ename(stab));
 	return FALSE;
     }
     if (stio->ifp) {
@@ -621,8 +653,10 @@ STAB *stab;
     if (!stio || !stio->ifp)
 	goto phooey;
 
+#ifdef ULTRIX_STDIO_BOTCH
     if (feof(stio->ifp))
 	(void)fseek (stio->ifp, 0L, 2);		/* ultrix 1.2 workaround */
+#endif
 
     return ftell(stio->ifp);
 
@@ -648,8 +682,10 @@ int whence;
     if (!stio || !stio->ifp)
 	goto nuts;
 
+#ifdef ULTRIX_STDIO_BOTCH
     if (feof(stio->ifp))
 	(void)fseek (stio->ifp, 0L, 2);		/* ultrix 1.2 workaround */
+#endif
 
     return fseek(stio->ifp, pos, whence) >= 0;
 
@@ -700,7 +736,7 @@ STR *argstr;
     }
     else {
 	retval = (int)str_gnum(argstr);
-#ifdef MSDOS
+#ifdef DOSISH
 	s = (char*)(long)retval;		/* ouch */
 #else
 	s = (char*)retval;		/* ouch */
@@ -711,7 +747,7 @@ STR *argstr;
     if (optype == O_IOCTL)
 	retval = ioctl(fileno(stio->ifp), func, s);
     else
-#ifdef MSDOS
+#ifdef DOSISH
 	fatal("fcntl is not implemented");
 #else
 #ifdef HAS_FCNTL
@@ -768,8 +804,11 @@ int *arglast;
 	else
 #endif
 	    laststatval = stat(str_get(statname),&statcache);
-	if (laststatval < 0)
+	if (laststatval < 0) {
+	    if (dowarn && index(str_get(statname), '\n'))
+		warn(warn_nl, "stat");
 	    max = 0;
+	}
     }
 
     if (gimme != G_ARRAY) {
@@ -1000,7 +1039,7 @@ FILE *fp;
 	if (*tmps == 'S' && tmps[1] == 't' && tmps[2] == 'B' && tmps[3] == '\0'
 	  && str->str_cur == sizeof(STBP) && strlen(tmps) < str->str_cur) {
 	    STR *tmpstr = str_mortal(&str_undef);
-	    stab_fullname(tmpstr,((STAB*)str));/* a stab value, be nice */
+	    stab_efullname(tmpstr,((STAB*)str));/* a stab value, be nice */
 	    str = tmpstr;
 	    tmps = str->str_ptr;
 	    putc('*',fp);
@@ -1072,7 +1111,7 @@ STR *str;
 		return laststatval;
 	    if (dowarn)
 		warn("Stat on unopened file <%s>",
-		  stab_name(arg[1].arg_ptr.arg_stab));
+		  stab_ename(arg[1].arg_ptr.arg_stab));
 	    statstab = Nullstab;
 	    str_set(statname,"");
 	    return (laststatval = -1);
@@ -1082,7 +1121,10 @@ STR *str;
 	statstab = Nullstab;
 	str_set(statname,str_get(str));
 	laststype = O_STAT;
-	return (laststatval = stat(str_get(str),&statcache));
+	laststatval = stat(str_get(str),&statcache);
+	if (laststatval < 0 && dowarn && index(str_get(str), '\n'))
+	    warn(warn_nl, "stat");
+	return laststatval;
     }
 }
 
@@ -1104,10 +1146,13 @@ STR *str;
     statstab = Nullstab;
     str_set(statname,str_get(str));
 #ifdef HAS_LSTAT
-    return (laststatval = lstat(str_get(str),&statcache));
+    laststatval = lstat(str_get(str),&statcache);
 #else
-    return (laststatval = stat(str_get(str),&statcache));
+    laststatval = stat(str_get(str),&statcache);
 #endif
+    if (laststatval < 0 && dowarn && index(str_get(str), '\n'))
+	warn(warn_nl, "lstat");
+    return laststatval;
 }
 
 STR *
@@ -1137,7 +1182,7 @@ STR *str;
 	    stio = stab_io(statstab);
 	}
 	if (stio && stio->ifp) {
-#ifdef STDSTDIO
+#if defined(STDSTDIO) || defined(atarist) /* this will work with atariST */
 	    fstat(fileno(stio->ifp),&statcache);
 	    if (S_ISDIR(statcache.st_mode))	/* handle NFS glitch */
 		return arg->arg_type == O_FTTEXT ? &str_no : &str_yes;
@@ -1157,7 +1202,7 @@ STR *str;
 	else {
 	    if (dowarn)
 		warn("Test on unopened file <%s>",
-		  stab_name(arg[1].arg_ptr.arg_stab));
+		  stab_ename(arg[1].arg_ptr.arg_stab));
 	    errno = EBADF;
 	    return &str_undef;
 	}
@@ -1167,8 +1212,11 @@ STR *str;
 	str_set(statname,str_get(str));
       really_filename:
 	i = open(str_get(str),0);
-	if (i < 0)
+	if (i < 0) {
+	    if (dowarn && index(str_get(str), '\n'))
+		warn(warn_nl, "open");
 	    return &str_undef;
+	}
 	fstat(i,&statcache);
 	len = read(i,tbuf,512);
 	(void)close(i);
@@ -1201,6 +1249,9 @@ STR *str;
 	return &str_yes;
 }
 
+static char **Argv = Null(char **);
+static char *Cmd = Nullch;
+
 bool
 do_aexec(really,arglast)
 STR *really;
@@ -1210,12 +1261,11 @@ int *arglast;
     register int sp = arglast[1];
     register int items = arglast[2] - sp;
     register char **a;
-    char **argv;
     char *tmps;
 
     if (items) {
-	New(401,argv, items+1, char*);
-	a = argv;
+	New(401,Argv, items+1, char*);
+	a = Argv;
 	for (st += ++sp; items > 0; items--,st++) {
 	    if (*st)
 		*a++ = str_get(*st);
@@ -1224,20 +1274,17 @@ int *arglast;
 	}
 	*a = Nullch;
 #ifdef TAINT
-	if (*argv[0] != '/')	/* will execvp use PATH? */
+	if (*Argv[0] != '/')	/* will execvp use PATH? */
 	    taintenv();		/* testing IFS here is overkill, probably */
 #endif
 	if (really && *(tmps = str_get(really)))
-	    execvp(tmps,argv);
+	    execvp(tmps,Argv);
 	else
-	    execvp(argv[0],argv);
-	Safefree(argv);
+	    execvp(Argv[0],Argv);
     }
+    do_execfree();
     return FALSE;
 }
-
-static char **Argv = Null(char **);
-static char *Cmd = Nullch;
 
 void
 do_execfree()
@@ -1551,8 +1598,8 @@ int *arglast;
     register int sp = arglast[1];
     register STIO *stio;
     int fd;
-    int lvl;
-    int optname;
+    unsigned int lvl;
+    unsigned int optname;
 
     if (!stab)
 	goto nuts;
@@ -1562,14 +1609,15 @@ int *arglast;
 	goto nuts;
 
     fd = fileno(stio->ifp);
-    lvl = (int)str_gnum(st[sp+1]);
-    optname = (int)str_gnum(st[sp+2]);
+    lvl = (unsigned int)str_gnum(st[sp+1]);
+    optname = (unsigned int)str_gnum(st[sp+2]);
     switch (optype) {
     case O_GSOCKOPT:
 	st[sp] = str_2mortal(Str_new(22,257));
 	st[sp]->str_cur = 256;
 	st[sp]->str_pok = 1;
-	if (getsockopt(fd, lvl, optname, st[sp]->str_ptr, &st[sp]->str_cur) < 0)
+	if (getsockopt(fd, lvl, optname, st[sp]->str_ptr,
+			(int*)&st[sp]->str_cur) < 0)
 	    goto nuts;
 	break;
     case O_SSOCKOPT:
@@ -1615,11 +1663,11 @@ int *arglast;
     fd = fileno(stio->ifp);
     switch (optype) {
     case O_GETSOCKNAME:
-	if (getsockname(fd, st[sp]->str_ptr, &st[sp]->str_cur) < 0)
+	if (getsockname(fd, st[sp]->str_ptr, (int*)&st[sp]->str_cur) < 0)
 	    goto nuts2;
 	break;
     case O_GETPEERNAME:
-	if (getpeername(fd, st[sp]->str_ptr, &st[sp]->str_cur) < 0)
+	if (getpeername(fd, st[sp]->str_ptr, (int*)&st[sp]->str_cur) < 0)
 	    goto nuts2;
 	break;
     }
@@ -1654,11 +1702,6 @@ int *arglast;
     struct hostent *hent;
     unsigned long len;
 
-    if (gimme != G_ARRAY) {
-	astore(ary, ++sp, str_mortal(&str_undef));
-	return sp;
-    }
-
     if (which == O_GHBYNAME) {
 	char *name = str_get(ary->ary_array[sp+1]);
 
@@ -1677,6 +1720,28 @@ int *arglast;
 #else
 	fatal("gethostent not implemented");
 #endif
+
+#ifdef HOST_NOT_FOUND
+    if (!hent)
+	statusvalue = (unsigned short)h_errno & 0xffff;
+#endif
+
+    if (gimme != G_ARRAY) {
+	astore(ary, ++sp, str = str_mortal(&str_undef));
+	if (hent) {
+	    if (which == O_GHBYNAME) {
+#ifdef h_addr
+		str_nset(str, *hent->h_addr, hent->h_length);
+#else
+		str_nset(str, hent->h_addr, hent->h_length);
+#endif
+	    }
+	    else
+		str_set(str, hent->h_name);
+	}
+	return sp;
+    }
+
     if (hent) {
 #ifndef lint
 	(void)astore(ary, ++sp, str = str_mortal(&str_no));
@@ -1726,11 +1791,6 @@ int *arglast;
     struct netent *getnetent();
     struct netent *nent;
 
-    if (gimme != G_ARRAY) {
-	astore(ary, ++sp, str_mortal(&str_undef));
-	return sp;
-    }
-
     if (which == O_GNBYNAME) {
 	char *name = str_get(ary->ary_array[sp+1]);
 
@@ -1744,6 +1804,17 @@ int *arglast;
     }
     else
 	nent = getnetent();
+
+    if (gimme != G_ARRAY) {
+	astore(ary, ++sp, str = str_mortal(&str_undef));
+	if (nent) {
+	    if (which == O_GNBYNAME)
+		str_numset(str, (double)nent->n_net);
+	    else
+		str_set(str, nent->n_name);
+	}
+	return sp;
+    }
 
     if (nent) {
 #ifndef lint
@@ -1784,11 +1855,6 @@ int *arglast;
     struct protoent *getprotoent();
     struct protoent *pent;
 
-    if (gimme != G_ARRAY) {
-	astore(ary, ++sp, str_mortal(&str_undef));
-	return sp;
-    }
-
     if (which == O_GPBYNAME) {
 	char *name = str_get(ary->ary_array[sp+1]);
 
@@ -1801,6 +1867,17 @@ int *arglast;
     }
     else
 	pent = getprotoent();
+
+    if (gimme != G_ARRAY) {
+	astore(ary, ++sp, str = str_mortal(&str_undef));
+	if (pent) {
+	    if (which == O_GPBYNAME)
+		str_numset(str, (double)pent->p_proto);
+	    else
+		str_set(str, pent->p_name);
+	}
+	return sp;
+    }
 
     if (pent) {
 #ifndef lint
@@ -1839,11 +1916,6 @@ int *arglast;
     struct servent *getservent();
     struct servent *sent;
 
-    if (gimme != G_ARRAY) {
-	astore(ary, ++sp, str_mortal(&str_undef));
-	return sp;
-    }
-
     if (which == O_GSBYNAME) {
 	char *name = str_get(ary->ary_array[sp+1]);
 	char *proto = str_get(ary->ary_array[sp+2]);
@@ -1861,6 +1933,23 @@ int *arglast;
     }
     else
 	sent = getservent();
+
+    if (gimme != G_ARRAY) {
+	astore(ary, ++sp, str = str_mortal(&str_undef));
+	if (sent) {
+	    if (which == O_GSBYNAME) {
+#ifdef HAS_NTOHS
+		str_numset(str, (double)ntohs(sent->s_port));
+#else
+		str_numset(str, (double)(sent->s_port));
+#endif
+	    }
+	    else
+		str_set(str, sent->s_name);
+	}
+	return sp;
+    }
+
     if (sent) {
 #ifndef lint
 	(void)astore(ary, ++sp, str = str_mortal(&str_no));
@@ -2007,6 +2096,7 @@ int *arglast;
 		for (j = 0, k=ORDERBYTE; j < masksize; j++, (k >>= 4))
 		    s[(k % masksize) + offset] = fd_sets[i][j+offset];
 	    }
+	    Safefree(fd_sets[i]);
 	}
     }
 #endif
@@ -2098,11 +2188,6 @@ int *arglast;
     struct passwd *getpwent();
     struct passwd *pwent;
 
-    if (gimme != G_ARRAY) {
-	astore(ary, ++sp, str_mortal(&str_undef));
-	return sp;
-    }
-
     if (which == O_GPWNAM) {
 	char *name = str_get(ary->ary_array[sp+1]);
 
@@ -2115,6 +2200,17 @@ int *arglast;
     }
     else
 	pwent = getpwent();
+
+    if (gimme != G_ARRAY) {
+	astore(ary, ++sp, str = str_mortal(&str_undef));
+	if (pwent) {
+	    if (which == O_GPWNAM)
+		str_numset(str, (double)pwent->pw_uid);
+	    else
+		str_set(str, pwent->pw_name);
+	}
+	return sp;
+    }
 
     if (pwent) {
 	(void)astore(ary, ++sp, str = str_mortal(&str_no));
@@ -2179,11 +2275,6 @@ int *arglast;
     struct group *getgrent();
     struct group *grent;
 
-    if (gimme != G_ARRAY) {
-	astore(ary, ++sp, str_mortal(&str_undef));
-	return sp;
-    }
-
     if (which == O_GGRNAM) {
 	char *name = str_get(ary->ary_array[sp+1]);
 
@@ -2196,6 +2287,17 @@ int *arglast;
     }
     else
 	grent = getgrent();
+
+    if (gimme != G_ARRAY) {
+	astore(ary, ++sp, str = str_mortal(&str_undef));
+	if (grent) {
+	    if (which == O_GGRNAM)
+		str_numset(str, (double)grent->gr_gid);
+	    else
+		str_set(str, grent->gr_name);
+	}
+	return sp;
+    }
 
     if (grent) {
 	(void)astore(ary, ++sp, str = str_mortal(&str_no));
@@ -2231,9 +2333,6 @@ int *arglast;
     register int sp = arglast[1];
     register STIO *stio;
     long along;
-#ifndef telldir
-    long telldir();
-#endif
 #ifndef apollo
     struct DIRENT *readdir();
 #endif
@@ -2278,30 +2377,36 @@ int *arglast;
 #endif
 	}
 	break;
-#if MACH
-    case O_TELLDIR:
-    case O_SEEKDIR:
-        goto nope;
-#else
-    case O_TELLDIR:
-	st[sp] = str_mortal(&str_undef);
-	str_numset(st[sp], (double)telldir(stio->dirp));
-	break;
+#if defined(HAS_TELLDIR) || defined(telldir)
+    case O_TELLDIR: {
+#ifndef telldir
+	    long telldir();
+#endif
+	    st[sp] = str_mortal(&str_undef);
+	    str_numset(st[sp], (double)telldir(stio->dirp));
+	    break;
+	}
+#endif
+#if defined(HAS_SEEKDIR) || defined(seekdir)
     case O_SEEKDIR:
 	st[sp] = str_mortal(&str_undef);
 	along = (long)str_gnum(st[sp+1]);
 	(void)seekdir(stio->dirp,along);
 	break;
 #endif
+#if defined(HAS_REWINDDIR) || defined(rewinddir)
     case O_REWINDDIR:
 	st[sp] = str_mortal(&str_undef);
 	(void)rewinddir(stio->dirp);
 	break;
+#endif
     case O_CLOSEDIR:
 	st[sp] = str_mortal(&str_undef);
 	(void)closedir(stio->dirp);
 	stio->dirp = 0;
 	break;
+    default:
+	goto phooey;
     }
     return sp;
 
@@ -2311,11 +2416,12 @@ nope:
 	errno = EBADF;
     return sp;
 
-#else
-    fatal("Unimplemented directory operation");
 #endif
+phooey:
+    fatal("Unimplemented directory operation");
 }
 
+int
 apply(type,arglast)
 int type;
 int *arglast;
@@ -2469,7 +2575,7 @@ int bit;
 int effective;
 register struct stat *statbufp;
 {
-#ifdef MSDOS
+#ifdef DOSISH
     /* [Comments and code from Len Reed]
      * MS-DOS "user" is similar to UNIX's "superuser," but can't write
      * to write-protected files.  The execute permission bit is set
@@ -2488,6 +2594,9 @@ register struct stat *statbufp;
      *		Sun's PC-NFS.]
      */
 
+     /* Atari stat() does pretty much the same thing. we set x_bit_set_in_stat
+      * too so it will actually look into the files for magic numbers
+      */
      return (bit & statbufp->st_mode) ? TRUE : FALSE;
 
 #else /* ! MSDOS */
@@ -2658,7 +2767,7 @@ int *arglast;
     {
 #ifdef HAS_MSG
     case O_MSGCTL:
-	ret = msgctl(id, cmd, a);
+	ret = msgctl(id, cmd, (struct msqid_ds *)a);
 	break;
 #endif
 #ifdef HAS_SEM
@@ -2668,7 +2777,7 @@ int *arglast;
 #endif
 #ifdef HAS_SHM
     case O_SHMCTL:
-	ret = shmctl(id, cmd, a);
+	ret = shmctl(id, cmd, (struct shmid_ds *)a);
 	break;
 #endif
     }
@@ -2699,7 +2808,7 @@ int *arglast;
 	return -1;
     }
     errno = 0;
-    return msgsnd(id, mbuf, msize, flags);
+    return msgsnd(id, (struct msgbuf *)mbuf, msize, flags);
 #else
     fatal("msgsnd not implemented");
 #endif
@@ -2728,7 +2837,7 @@ int *arglast;
 	mbuf = str_get(mstr);
     }
     errno = 0;
-    ret = msgrcv(id, mbuf, msize, mtype, flags);
+    ret = msgrcv(id, (struct msgbuf *)mbuf, msize, mtype, flags);
     if (ret >= 0) {
 	mstr->str_cur = sizeof(long)+ret;
 	mstr->str_ptr[sizeof(long)+ret] = '\0';
@@ -2802,7 +2911,7 @@ int *arglast;
 	    STR_GROW(mstr, msize+1);
 	    mbuf = str_get(mstr);
 	}
-	bcopy(shm + mpos, mbuf, msize);
+	Copy(shm + mpos, mbuf, msize, char);
 	mstr->str_cur = msize;
 	mstr->str_ptr[msize] = '\0';
     }
@@ -2811,9 +2920,9 @@ int *arglast;
 
 	if ((n = mstr->str_cur) > msize)
 	    n = msize;
-	bcopy(mbuf, shm + mpos, n);
+	Copy(mbuf, shm + mpos, n, char);
 	if (n < msize)
-	    bzero(shm + mpos + n, msize - n);
+	    memzero(shm + mpos + n, msize - n);
     }
     return shmdt(shm);
 #else

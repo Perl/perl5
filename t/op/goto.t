@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: goto.t,v 4.0 91/03/20 01:52:52 lwall Locked $
+# $RCSfile: goto.t,v $$Revision: 4.0.1.1 $$Date: 92/06/08 15:43:25 $
 
 print "1..3\n";
 
@@ -30,5 +30,4 @@ print "#2\t:$foo: == 4\n";
 if ($foo == 4) {print "ok 2\n";} else {print "not ok 2\n";}
 
 $x = `./perl -e 'goto foo;' 2>&1`;
-print "#3\t/label/ in :$x";
 if ($x =~ /label/) {print "ok 3\n";} else {print "not ok 3\n";}

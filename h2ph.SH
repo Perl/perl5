@@ -19,6 +19,7 @@ echo "Extracting h2ph (with variable substitutions)"
 : Move anything that needs config subs from !NO!SUBS! section to !GROK!THIS!.
 : Protect any dollar signs and backticks that you do not want interpreted
 : by putting a backslash in front.  You may delete these comments.
+rm -f h2ph
 $spitshell >h2ph <<!GROK!THIS!
 #!$bin/perl
 'di';

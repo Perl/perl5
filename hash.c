@@ -1,4 +1,4 @@
-/* $RCSfile: hash.c,v $$Revision: 4.0.1.2 $$Date: 91/11/05 17:24:13 $
+/* $RCSfile: hash.c,v $$Revision: 4.0.1.3 $$Date: 92/06/08 13:26:29 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	hash.c,v $
+ * Revision 4.0.1.3  92/06/08  13:26:29  lwall
+ * patch20: removed implicit int declarations on functions
+ * patch20: delete could cause %array to give too low a count of buckets filled
+ * patch20: hash tables now split only if the memory is available to do so
+ * 
  * Revision 4.0.1.2  91/11/05  17:24:13  lwall
  * patch11: saberized perl
  * 
@@ -19,6 +24,8 @@
 
 #include "EXTERN.h"
 #include "perl.h"
+
+static void hsplit();
 
 static char coeff[] = {
 		61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
@@ -247,10 +254,10 @@ unsigned int klen;
 	if (bcmp(entry->hent_key,key,klen))	/* is this it? */
 	    continue;
 	*oentry = entry->hent_next;
+	if (i && !*oentry)
+	    tb->tbl_fill--;
 	str = str_mortal(entry->hent_val);
 	hentfree(entry);
-	if (i)
-	    tb->tbl_fill--;
 #ifdef SOME_DBM
       do_dbm_delete:
 	if (tb->tbl_dbm) {
@@ -273,6 +280,7 @@ unsigned int klen;
 #endif
 }
 
+static void
 hsplit(tb)
 HASH *tb;
 {
@@ -285,7 +293,13 @@ HASH *tb;
     register HENT **oentry;
 
     a = tb->tbl_array;
+    nomemok = TRUE;
     Renew(a, newsize, HENT*);
+    nomemok = FALSE;
+    if (!a) {
+	tb->tbl_dosplit = tb->tbl_max + 1;	/* never split again */
+	return;
+    }
     Zero(&a[oldsize], oldsize, HENT*);		/* zero 2nd half*/
     tb->tbl_max = --newsize;
     tb->tbl_dosplit = tb->tbl_max * FILLPCT / 100;
@@ -369,7 +383,7 @@ int dodbm;
     tb->tbl_fill = 0;
 #ifndef lint
     if (tb->tbl_array)
-	(void)bzero((char*)tb->tbl_array, (tb->tbl_max + 1) * sizeof(HENT*));
+	(void)memzero((char*)tb->tbl_array, (tb->tbl_max + 1) * sizeof(HENT*));
 #endif
 }
 

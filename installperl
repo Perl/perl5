@@ -1,5 +1,7 @@
 #!./perl
 
+$mainperldir = "/usr/bin";
+
 while (@ARGV) {
     $nonono = 1 if $ARGV[0] eq '-n';
     $versiononly = 1 if $ARGV[0] eq '-v';
@@ -10,10 +12,6 @@ umask 022;
 
 @scripts = ('cppstdin', 'h2ph', 'c2ph', 'pstruct', 'x2p/s2p', 'x2p/find2perl');
 @manpages = ('perl.man', 'h2ph.man', 'x2p/a2p.man', 'x2p/s2p.man');
-
-$version = sprintf("%5.3f", $]);
-$release = substr($version,0,3);
-$patchlevel = substr($version,3,2);
 
 # Read in the config file.
 
@@ -26,6 +24,19 @@ while (<CONFIG>) {
     }
     $accum .= $_;
 }
+close CONFIG;
+
+open(PERL_C, "perl.c");
+while (<PERL_C>) {
+    last if /Revision:/;
+}
+close PERL_C;
+s/.*Revision: //;
+$major = $_ + 0;
+
+$ver = sprintf("%5.3f", $major + $PATCHLEVEL / 1000);
+$release = substr($ver,0,3);
+$patchlevel = substr($ver,3,2);
 
 # Do some quick sanity checks.
 
@@ -44,8 +55,6 @@ if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
 	"  (Installing anyway.)\n";
 
 # First we install the version-numbered executables.
-
-$ver = sprintf("%5.3f", $]);
 
 &unlink("$installbin/perl$ver");
 &cmd("cp perl $installbin/perl$ver");
@@ -80,17 +89,18 @@ if ($bdev != $ddev || $bino != $dino) {
 if ($bdev != $ddev || $bino != $dino) {
     &unlink("$installbin/a2p");
     &cmd("cp x2p/a2p $installbin/a2p");
+    &chmod(0755, "$installbin/a2p");
 }
 
 # Make some enemies in the name of standardization.   :-)
 
-($udev,$uino) = stat("/usr/bin");
+($udev,$uino) = stat($mainperldir);
 
-if (-w _ && ($udev != $ddev || $uino != $dino) && !$nonono) {
-    &unlink("/usr/bin/perl");
-    eval 'symlink("$installbin/perl", "/usr/bin/perl")' ||
-    eval 'link("$installbin/perl", "/usr/bin/perl")' ||
-    &cmd("cp $installbin/perl /usr/bin");
+if (-w _ && ($udev != $bdev || $uino != $bino) && !$nonono) {
+    &unlink("$mainperldir/perl");
+    eval 'link("$installbin/perl", "$mainperldir/perl")' ||
+    eval 'symlink("$installbin/perl", "$mainperldir/perl")' ||
+    &cmd("cp $installbin/perl $mainperldir");
 }
 
 # Install scripts.
@@ -114,8 +124,8 @@ if ($mansrc ne '') {
 	    $new =~ s#.*/##;
 	    print STDERR "  Installing $mansrc/$new\n";
 	    next if $nonono;
-	    open(MI,$_);
-	    open(MO,">$mansrc/$new");
+	    open(MI,$_) || warn "Can't open $_: $!\n";
+	    open(MO,">$mansrc/$new") || warn "Can't install $mansrc/$new: $!\n";
 	    print MO ".ds RP Release $release Patchlevel $patchlevel\n";
 	    while (<MI>) {
 		print MO;
