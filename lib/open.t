@@ -171,7 +171,8 @@ EOE
        "checking syswrite() output on :utf8 streams by reading it back in");
 }
 
-{
+SKIP: {
+    skip("no perlio", 1) unless (find PerlIO::Layer 'perlio');
     use open IN => ':non-existent';
     eval {
 	require Anything;
