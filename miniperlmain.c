@@ -19,23 +19,25 @@ extern "C" {
 static void xs_init _((void));
 static PerlInterpreter *my_perl;
 
-int
+void
 i18nl14n()
 {
   char * lang = getenv("LANG");
 #if defined(HAS_SETLOCALE) && defined(LC_CTYPE)
   {
+    char * lc_all   = getenv("LC_ALL");
     char * lc_ctype = getenv("LC_CTYPE");
     int i;
 
-    if (setlocale(LC_CTYPE, "") == NULL && (lc_ctype || lang)) {
+    if (setlocale(LC_CTYPE, "") == NULL && (lc_all || lc_ctype || lang)) {
+      fprintf(stderr, "warning: setlocale(LC_CTYPE, \"\") failed.\n");
       fprintf(stderr,
-	      "warning: setlocale(LC_CTYPE, \"\") failed, LC_CTYPE = \"%s\", LANG = \"%s\",\n",
+	      "warning: LC_ALL = \"%s\", LC_CTYPE = \"%s\", LANG = \"%s\",\n",
+	      lc_all   ? lc_all   : "(null)",
 	      lc_ctype ? lc_ctype : "(null)",
 	      lang     ? lang     : "(null)"
 	      );
-      fprintf(stderr,
-	      "warning: falling back to the \"C\" locale.\n");
+      fprintf(stderr, "warning: falling back to the \"C\" locale.\n");
       setlocale(LC_CTYPE, "C");
     }
 
