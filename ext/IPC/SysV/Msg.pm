@@ -12,6 +12,7 @@ use vars qw($VERSION);
 use Carp;
 
 $VERSION = "1.00_00";
+$VERSION = eval $VERSION;
 
 {
     package IPC::Msg::stat;

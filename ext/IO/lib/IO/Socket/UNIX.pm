@@ -14,6 +14,7 @@ use Carp;
 
 @ISA = qw(IO::Socket);
 $VERSION = "1.20_00";
+$VERSION = eval $VERSION;
 
 IO::Socket::UNIX->register_domain( AF_UNIX );
 

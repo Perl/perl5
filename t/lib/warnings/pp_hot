@@ -115,6 +115,23 @@ print $fh "Shouldn't print anything, but shouldn't SEGV either\n";
 EXPECT
 print() on closed filehandle at - line 7.
 ########
+# pp_hot.c [pp_print]
+package foo;
+use warnings 'closed';
+open my $fh1, "nonexistent";
+print $fh1 42;
+open $fh2, "nonexistent";
+print $fh2 42;
+open $bar::fh3, "nonexistent";
+print $bar::fh3 42;
+open bar::FH4, "nonexistent";
+print bar::FH4 42;
+EXPECT
+print() on closed filehandle $fh1 at - line 5.
+print() on closed filehandle $fh2 at - line 7.
+print() on closed filehandle $fh3 at - line 9.
+print() on closed filehandle FH4 at - line 11.
+########
 # pp_hot.c [pp_rv2av]
 use warnings 'uninitialized' ;
 my $a = undef ;

@@ -4464,7 +4464,7 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
        avoid incrementing the object refcount.
        Note we cannot do this to avoid self-tie loops as intervening RV must
        have its REFCNT incremented to keep it in existence - instead special
-       case them in sv_free().
+       case them in mg_free().
      */
     if (!obj || obj == sv ||
 	how == PERL_MAGIC_arylen ||

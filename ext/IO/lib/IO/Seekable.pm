@@ -108,6 +108,7 @@ require Exporter;
 @ISA = qw(Exporter);
 
 $VERSION = "1.08_00";
+$VERSION = eval $VERSION;
 
 sub seek {
     @_ == 3 or croak 'usage: $io->seek(POS, WHENCE)';
