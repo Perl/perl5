@@ -68,7 +68,7 @@ case "`$cc -v 2>&1 | grep cc`" in
 *gcc*)	;; # pass
 *)	# compile something small: taint.c is fine for this.
     	# the main point is the '-v' flag of 'cc'.
-       	case "`cc -v -I. -c taint.c -o /tmp/taint$$.o 2>&1`" in
+       	case "`cc -v -I. -c taint.c -o taint$$.o 2>&1`" in
 	*/gemc_cc*)	# we have the new DEC GEM CC
 			_DEC_cc_style=new
 			;;
@@ -77,7 +77,7 @@ case "`$cc -v 2>&1 | grep cc`" in
 			;;
 	esac
 	# cleanup
-	rm -f /tmp/taint$$.o
+	rm -f taint$$.o
 	;;
 esac
 

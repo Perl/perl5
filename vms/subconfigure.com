@@ -12,12 +12,12 @@ $!   or something like that) are straightforward. Adding a new item for the
 $!   ultimately created config.sh requires adding two lines to this file.
 $!
 $!   First, a line in the format:
-$!     $ foo = "bar"
+$!     $ perl_foo = "bar"
 $!   after the line tagged ##ADD NEW CONSTANTS HERE##. Replace foo with the
 $!   variable name as it appears in config.sh.
 $!
 $!   Second, add a line in the format:
-$!     $ WC "foo='" + foo + "'"
+$!     $ WC "foo='" + perl_foo + "'"
 $!   after the line tagged ##WRITE NEW CONSTANTS HERE##. Careful of the
 $!   quoting, as it can be tricky. 
 $! 
@@ -69,6 +69,7 @@ $ myname = myhostname
 $ IF myname .EQS. "" THEN myname = F$TRNLNM("SYS$NODE")
 $!
 $! ##ADD NEW CONSTANTS HERE##
+$ perl_sizesize = "4"
 $ perl_shmattype = ""
 $ perl_mmaptype = ""
 $ perl_gidformat = "lu"
@@ -3205,6 +3206,49 @@ $
 $ perl_ptrsize=line
 $ WRITE_RESULT "ptrsize is ''perl_ptrsize'"
 $!
+$! Check for size_t size
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "int main()
+$ WS "{"
+$ WS "int foo;
+$ WS "foo = sizeof(size_t);
+$ WS "printf(""%d\n"", foo);
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   ON ERROR THEN CONTINUE
+$   ON WARNING THEN CONTINUE
+$   'Checkcc' temp.c
+$   If Needs_Opt
+$   THEN
+$     link temp.obj,temp.opt/opt
+$   else
+$     link temp.obj
+$   endif
+$   OPEN/WRITE TEMPOUT [-.uu]tempout.lis
+$   DEASSIGN SYS$OUTPUT
+$   DEASSIGN SYS$ERROR
+$   DEFINE SYS$ERROR TEMPOUT
+$   DEFINE SYS$OUTPUT TEMPOUT
+$   mcr []temp
+$   CLOSE TEMPOUT
+$   DEASSIGN SYS$OUTPUT
+$   DEASSIGN SYS$ERROR
+$   OPEN/READ TEMPOUT [-.uu]tempout.lis
+$   READ TEMPOUT line
+$   CLOSE TEMPOUT
+$ DELETE/NOLOG [-.uu]tempout.lis;
+$ 
+$ perl_sizesize=line
+$ WRITE_RESULT "sizesize is ''perl_sizesize'"
+$!
 $! Check rand48 and its ilk
 $!
 $ OS
@@ -3961,8 +4005,10 @@ $ WC "voidflags='" + perl_voidflags + "'"
 $ WC "d_eunice='" + perl_d_eunice + "'"
 $ WC "libs='" + perl_libs + "'"
 $ WC "libc='" + perl_libc + "'"
-$ WC "xs_apiversion='" + localperlver + "'"
-$ WC "pm_apiversion='" + localperlver + "'"
+$ WC "xs_apiversion='" + version + "'"
+$ WC "pm_apiversion='" + version + "'"
+$ WC "PERL_VERSION='" + patchlevel + "'"
+$ WC "PERL_SUBVERSION='" + subversion + "'"
 $ WC "pager='" + perl_pager + "'"
 $ WC "uidtype='" + perl_uidtype + "'"
 $ WC "uidformat='" + perl_uidformat + "'"
@@ -4195,6 +4241,7 @@ $ WC "uvuformat='" + perl_uvuformat + "'"
 $ WC "uvoformat='" + perl_uvoformat + "'"
 $ WC "uvxformat='" + perl_uvxformat + "'"
 $ WC "d_vms_case_sensitive_symbols='" + d_vms_be_case_sensitive + "'"
+$ WC "sizesize='" + perl_sizesize + "'"
 $!
 $! ##WRITE NEW CONSTANTS HERE##
 $!

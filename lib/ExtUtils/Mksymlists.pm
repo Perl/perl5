@@ -157,7 +157,7 @@ sub _write_vms {
     require Config; # a reminder for once we do $^O
     require ExtUtils::XSSymSet;
 
-    my($isvax) = $Config::Config{'arch'} =~ /VAX/i;
+    my($isvax) = $Config::Config{'archname'} =~ /VAX/i;
     my($set) = new ExtUtils::XSSymSet;
     my($sym);
 

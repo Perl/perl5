@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Mar 12 19:42:40 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Thu Mar 16 03:04:33 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -868,6 +868,7 @@ sitelib_stem=''
 sitelibexp=''
 siteprefix=''
 siteprefixexp=''
+sizesize=''
 sizetype=''
 so=''
 socksizetype=''
@@ -6616,46 +6617,26 @@ esac
 
 : see if we can have long filenames
 echo " "
-rmlist="$rmlist /tmp/cf$$"
-$test -d /tmp/cf$$ || mkdir /tmp/cf$$
 first=123456789abcdef
-second=/tmp/cf$$/$first
-$rm -f $first $second
+$rm -f $first
 if (echo hi >$first) 2>/dev/null; then
 	if $test -f 123456789abcde; then
 		echo 'You cannot have filenames longer than 14 characters.  Sigh.' >&4
 		val="$undef"
 	else
-		if (echo hi >$second) 2>/dev/null; then
-			if $test -f /tmp/cf$$/123456789abcde; then
-				$cat <<'EOM'
-That's peculiar... You can have filenames longer than 14 characters, but only
-on some of the filesystems.  Maybe you are using NFS.  Anyway, to avoid problems
-I shall consider your system cannot support long filenames at all.
-EOM
-				val="$undef"
-			else
-				echo 'You can have filenames longer than 14 characters.' >&4
-				val="$define"
-			fi
-		else
-			$cat <<'EOM'
-How confusing! Some of your filesystems are sane enough to allow filenames
-longer than 14 characters but some others like /tmp can't even think about them.
-So, for now on, I shall assume your kernel does not allow them at all.
-EOM
-			val="$undef"
-		fi
+ 		echo 'You can have filenames longer than 14 characters.'>&4
+ 		val="$define"
 	fi
 else
 	$cat <<'EOM'
-You can't have filenames longer than 14 chars.  You can't even think about them!
+You can't have filenames longer than 14 chars.
+You can't even think about them!
 EOM
 	val="$undef"
 fi 
 set d_flexfnam
 eval $setvar
-$rm -rf /tmp/cf$$ 123456789abcde*
+$rm -rf 123456789abcde*
 
 : determine where library module manual pages go
 set man3dir man3dir none
@@ -6688,7 +6669,7 @@ esac
 echo "If you don't want the manual sources installed, answer 'none'."
 prog=`echo $package | $sed 's/-*[0-9.]*$//'`
 case "$man3dir" in
-'')	dflt=`echo $man1dir | $sed -e 's/man1/man3/g' -e 's/man\.1/man\.3/g'`
+'')	dflt=`echo "$man1dir" | $sed -e 's/man1/man3/g' -e 's/man\.1/man\.3/g'`
 	if $test -d "$privlib/man/man3"; then
 		cat <<EOM >&4
 
@@ -6706,8 +6687,10 @@ EOM
 		esac
     fi
 	;;
-' ') dflt=none;;
 *)	dflt="$man3dir" ;;
+esac
+case "$dflt" in
+' ') dflt=none ;;
 esac
 echo " "
 fn=dn+~
@@ -6715,7 +6698,7 @@ rp="Where do the $package library man pages (source) go?"
 . ./getfile
 man3dir="$ans"
 man3direxp="$ansexp"
-case "$man1dir" in
+case "$man3dir" in
 '')	man3dir=' '
 	installman3dir='';;
 esac
@@ -13806,6 +13789,37 @@ echo $sig_name | $awk \
 }'
 $rm -f signal signal.c signal.awk signal.lst signal_cmd 
 
+echo " "
+case "$sizetype" in
+*_t) zzz="$sizetype"	;;
+*)   zzz="filesize"	;;
+esac
+echo "Checking the size of $zzz..." >&4 
+cat > try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+    printf("%d\n", (int)sizeof($sizetype));
+    exit(0);
+}
+EOCP
+set try
+if eval $compile_ok; then
+	yyy=`./try`
+	case "$yyy" in
+	'')	sizesize=4
+		echo "(I can't execute the test program--guessing $sizesize.)" >&4
+		;;
+	*)	sizesize=$yyy
+		echo "Your $zzz size is $sizesize bytes."
+		;;
+	esac
+else
+	sizesize=4
+	echo "(I can't compile the test program--guessing $sizesize.)" >&4
+fi
+
+
 : check for socklen_t
 echo " "
 echo "Checking to see if you have socklen_t..." >&4
@@ -13825,7 +13839,7 @@ else
 	val="$undef"
 	echo "You do not have socklen_t."
 	case "$sizetype" in
-	size_t) echo "(You do have size_t, that might work.)" ;;
+	size_t) echo "(You do have size_t, that might work. Some people are happy with just an int.)" ;;
 	esac
 fi
 $rm -f try try.*
@@ -15692,6 +15706,7 @@ sitelib_stem='$sitelib_stem'
 sitelibexp='$sitelibexp'
 siteprefix='$siteprefix'
 siteprefixexp='$siteprefixexp'
+sizesize='$sizesize'
 sizetype='$sizetype'
 sleep='$sleep'
 smail='$smail'

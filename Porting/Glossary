@@ -194,6 +194,8 @@ ccflags (ccflags.U):
 
 ccsymbols (Cppsym.U):
 	The variable contains the symbols defined by the C compiler alone.
+	The symbols defined by cpp or by cc when it calls cpp are not in
+	this list, see cppsymbols and cppccsymbols.
 	The list is a space-separated list of symbol=value tokens.
 
 cf_by (cf_who.U):
@@ -267,9 +269,9 @@ cpp_stuff (cpp_stuff.U):
 	used by the C preprocessor.
 
 cppccsymbols (Cppsym.U):
-	The variable contains the symbols defined by both
-	the bare C compiler and during a compilation that
-	includes stdio.h.
+	The variable contains the symbols defined by the C compiler
+	when it calls cpp.  The symbols defined by the cc alone or cpp
+	alone are not in this list, see ccsymbols and cppsymbols.
 	The list is a space-separated list of symbol=value tokens.
 
 cppflags (ccflags.U):
@@ -301,8 +303,9 @@ cppstdin (cppstdin.U):
 	preprocessor symbols.
 
 cppsymbols (Cppsym.U):
-	The variable contains the symbols during a compilation
-	that includes stdio.h.
+	The variable contains the symbols defined by the C preprocessor
+	alone.  The symbols defined by cc or by cc when it calls cpp are
+	not in this list, see ccsymbols and cppccsymbols.
 	The list is a space-separated list of symbol=value tokens.
 
 crosscompile (crosscompile.U):
@@ -3093,6 +3096,9 @@ siteprefix (siteprefix.U):
 siteprefixexp (siteprefix.U):
 	This variable holds the full absolute path of the directory below
 	which the user will install add-on packages.  Derived from siteprefix.
+
+sizesize (sizesize.U):
+	This variable contains the size of a sizetype in bytes.
 
 sizetype (sizetype.U):
 	This variable defines sizetype to be something like size_t, 
