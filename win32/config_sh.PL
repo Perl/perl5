@@ -70,6 +70,8 @@ $opt{INST_VER} =~ s|~VERSION~|$opt{VERSION}|g;
 $opt{'version_patchlevel_string'} = "version $opt{PERL_VERSION} subversion $opt{PERL_SUBVERSION}";
 $opt{'version_patchlevel_string'} .= " patchlevel $opt{PERL_PATCHLEVEL}" if exists $opt{PERL_PATCHLEVEL};
 
+$opt{'osvers'} = join '.', (Win32::GetOSVersion())[1,2];
+
 $opt{'cf_by'} = $ENV{USERNAME} unless $opt{'cf_by'};
 $opt{'cf_email'} = $opt{'cf_by'} . '@' . (gethostbyname('localhost'))[0]
 	unless $opt{'cf_email'};
