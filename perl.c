@@ -2522,7 +2522,7 @@ Perl_get_debug_opts(pTHX_ char **s)
     static char *usage_msgd[] = {
       " Debugging flag values: (see also -d)",
       "  p  Tokenizing and parsing (with v, displays parse stack)",
-      "  s  Stack snapshots. with v, displays all stacks",
+      "  s  Stack snapshots (with v, displays all stacks)",
       "  l  Context (loop) stack processing",
       "  t  Trace execution",
       "  o  Method and overloading resolution",
@@ -2532,7 +2532,7 @@ Perl_get_debug_opts(pTHX_ char **s)
       "  f  Format processing",
       "  r  Regular expression parsing and execution",
       "  x  Syntax tree dump",
-      "  u  Tainting checks (Obsolete, previously used for LEAKTEST)",
+      "  u  Tainting checks",
       "  H  Hash dump -- usurps values()",
       "  X  Scratchpad allocation",
       "  D  Cleaning up",
@@ -2543,7 +2543,7 @@ Perl_get_debug_opts(pTHX_ char **s)
       "  v  Verbose: use in conjunction with other flags",
       "  C  Copy On Write",
       "  A  Consistency checks on internal structures",
-      "  q  quiet - currently only suppressed the 'EXECUTING' message",
+      "  q  quiet - currently only suppresses the 'EXECUTING' message",
       NULL
     };
     int i = 0;
@@ -2928,7 +2928,7 @@ Perl may be copied only under the terms of either the Artistic License or the\n\
 GNU General Public License, which may be found in the Perl 5 source kit.\n\n\
 Complete documentation for Perl, including FAQ lists, should be found on\n\
 this system using `man perl' or `perldoc perl'.  If you have access to the\n\
-Internet, point your browser at http://www.perl.com/, the Perl Home Page.\n\n");
+Internet, point your browser at http://www.perl.org/, the Perl Home Page.\n\n");
 	my_exit(0);
     case 'w':
 	if (! (PL_dowarn & G_WARN_ALL_MASK))
