@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..243\n";
+print "1..245\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1183,30 +1183,47 @@ if (/(\C)/g) {
   }
 }
 
-# 241..242
-#
-# The tr is admittedly NOT a regular expression operator,
-# but this test is more of an EBCDIC test, the background is
-# that \x89 is 'i' and \x90 is 'j', and \x8e is not a letter,
-# not even a printable character.  Now for the trick:
-# if the range is specified using letters, the \x8e should most
-# probably not match, but if the range is specified using explicit
-# numeric endpoints, it probably should match.  The first case,
-# not matching if using letters, is already tested elsewhere,
-# here we test for the matching cases.
-
-$_ = qq/\x8E/;
-
-print "not " unless /[\x89-\x91]/;
-print "ok 241\n";
-
-print "not " unless tr/\x89-\x91//d == 1;
-print "ok 242\n";
-
 {
   # japhy -- added 03/03/2001
   () = (my $str = "abc") =~ /(...)/;
   $str = "def";
   print "not " if $1 ne "abc";
+  print "ok 241\n";
+}
+
+# The 242 and 243 go with the 244 and 245.
+# The trick is that in EBCDIC the explicit numeric range should match
+# (as also in non-EBCDIC) but the explicit alphabetic range should not match.
+
+if ("\x8e" =~ /[\x89-\x91]/) {
+  print "ok 242\n";
+} else {
+  print "not ok 242\n";
+}
+
+if ("\xce" =~ /[\xc9-\xd1]/) {
   print "ok 243\n";
+} else {
+  print "not ok 243\n";
+}
+
+# In most places these tests would succeed since \x8e does not
+# in most character sets match 'i' or 'j' nor would \xce match
+# 'I' or 'J', but strictly speaking these tests are here for
+# the good of EBCDIC, so let's test these only there.
+if (ord('i') == 0x89 && ord('J') == 0xd1) { # EBCDIC
+  if ("\x8e" !~ /[i-j]/) {
+    print "ok 244\n";
+  } else {
+    print "not ok 244\n";
+  }
+  if ("\xce" !~ /[I-J]/) {
+    print "ok 245\n";
+  } else {
+    print "not ok 245\n";
+  }
+} else {
+  for (244..245) {
+    print "ok $_ # Skip: not EBCDIC\n";
+  }
 }
