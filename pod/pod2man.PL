@@ -1123,7 +1123,10 @@ sub internal_lrefs {
     }
 
     $retstr .= " entr" . ( @items > 1  ? "ies" : "y" )
-	    .  " elsewhere in this document "; # terminal space to avoid words running together (pattern used strips terminal spaces)
+	    .  " elsewhere in this document";
+    # terminal space to avoid words running together (pattern used
+    # strips terminal spaces)
+    $retstr .= " " if length $trailing_and;
     $retstr .=  $trailing_and;
 
     return $retstr;
