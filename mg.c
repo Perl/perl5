@@ -26,14 +26,6 @@
 #  endif
 #endif
 
-#define TAINT_FROM_REGEX(sv,rx) \
-	if ((rx)->exec_tainted)	{	\
-	    TAINT;			\
-	    SvTAINTED_on(sv);		\
-	}				\
-	else				\
-	    SvTAINTED_off(sv);
-
 /*
  * Use the "DESTRUCTOR" scope cleanup to reinstate magic.
  */
@@ -298,15 +290,14 @@ MAGIC *mg;
     case '+':
 	if (curpm && (rx = curpm->op_pmregexp)) {
 	    paren = rx->lastparen;
-	    if (!paren)
-		return 0;
-	    goto getparen;
+	    if (paren)
+		goto getparen;
 	}
 	return 0;
 	break;
     case '`':
 	if (curpm && (rx = curpm->op_pmregexp)) {
-	    if ((s = rx->subbeg)) {
+	    if ((s = rx->subbeg) && rx->startp[0]) {
 		i = rx->startp[0] - s;
 		if (i >= 0)
 		    return i;
@@ -315,9 +306,10 @@ MAGIC *mg;
 	return 0;
     case '\'':
 	if (curpm && (rx = curpm->op_pmregexp)) {
-	    if ((s = rx->endp[0])) {
-		TAINT_IF(rx->exec_tainted);
-		return (STRLEN) (rx->subend - s);
+	    if (rx->subend && (s = rx->endp[0])) {
+		i = rx->subend - s;
+		if (i >= 0)
+		    return 0;
 	    }
 	}
 	return 0;
@@ -414,9 +406,16 @@ MAGIC *mg;
 		(t = rx->endp[paren]))
 	    {
 		i = t - s;
+	      getrx:
 		if (i >= 0) {
+		    bool was_tainted;
+		    if (tainting) {
+			was_tainted = tainted;
+			tainted = FALSE;
+		    }
 		    sv_setpvn(sv,s,i);
-		    TAINT_FROM_REGEX(sv,rx);
+		    if (tainting)
+			tainted = was_tainted || rx->exec_tainted;
 		    break;
 		}
 	    }
@@ -433,23 +432,18 @@ MAGIC *mg;
 	break;
     case '`':
 	if (curpm && (rx = curpm->op_pmregexp)) {
-	    if ((s = rx->subbeg)) {
+	    if ((s = rx->subbeg) && rx->startp[0]) {
 		i = rx->startp[0] - s;
-		if (i >= 0) {
-		    sv_setpvn(sv,s,i);
-		    TAINT_FROM_REGEX(sv,rx);
-		    break;
-		}
+		goto getrx;
 	    }
 	}
 	sv_setsv(sv,&sv_undef);
 	break;
     case '\'':
 	if (curpm && (rx = curpm->op_pmregexp)) {
-	    if ((s = rx->endp[0])) {
-		sv_setpvn(sv,s, rx->subend - s);
-		TAINT_FROM_REGEX(sv,rx);
-		break;
+	    if (rx->subend && (s = rx->endp[0])) {
+		i = rx->subend - s;
+		goto getrx;
 	    }
 	}
 	sv_setsv(sv,&sv_undef);

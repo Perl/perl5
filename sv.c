@@ -3957,7 +3957,7 @@ void
 sv_untaint(sv)
 SV *sv;
 {
-    if (SvMAGICAL(sv)) {
+    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 	MAGIC *mg = mg_find(sv, 't');
 	if (mg)
 	    mg->mg_len &= ~1;
@@ -3968,7 +3968,7 @@ bool
 sv_tainted(sv)
 SV *sv;
 {
-    if (SvMAGICAL(sv)) {
+    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 	MAGIC *mg = mg_find(sv, 't');
 	if (mg && ((mg->mg_len & 1) || (mg->mg_len & 2) && mg->mg_obj == sv))
 	    return TRUE;
