@@ -351,7 +351,7 @@ struct xpvfm {
 #endif /* USE_5005THREADS */
     cv_flags_t	xcv_flags;
 
-    I32		xfm_lines;
+    IV		xfm_lines;
 };
 
 struct xpvio {
@@ -378,10 +378,10 @@ struct xpvio {
 	DIR *	xiou_dirp;	/* for opendir, readdir, etc */
 	void *	xiou_any;	/* for alignment */
     } xio_dirpu;
-    long	xio_lines;	/* $. */
-    long	xio_page;	/* $% */
-    long	xio_page_len;	/* $= */
-    long	xio_lines_left;	/* $- */
+    IV		xio_lines;	/* $. */
+    IV		xio_page;	/* $% */
+    IV		xio_page_len;	/* $= */
+    IV		xio_lines_left;	/* $- */
     char *	xio_top_name;	/* $^ */
     GV *	xio_top_gv;	/* $^ */
     char *	xio_fmt_name;	/* $~ */

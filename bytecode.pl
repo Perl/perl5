@@ -312,11 +312,11 @@ xlv_type	LvTYPE(bstate->bs_sv)			char
 xbm_useful	BmUSEFUL(bstate->bs_sv)			I32
 xbm_previous	BmPREVIOUS(bstate->bs_sv)		U16
 xbm_rare	BmRARE(bstate->bs_sv)			U8
-xfm_lines	FmLINES(bstate->bs_sv)			I32
-xio_lines	IoLINES(bstate->bs_sv)			long
-xio_page	IoPAGE(bstate->bs_sv)			long
-xio_page_len	IoPAGE_LEN(bstate->bs_sv)		long
-xio_lines_left	IoLINES_LEFT(bstate->bs_sv)	       	long
+xfm_lines	FmLINES(bstate->bs_sv)			IV
+xio_lines	IoLINES(bstate->bs_sv)			IV
+xio_page	IoPAGE(bstate->bs_sv)			IV
+xio_page_len	IoPAGE_LEN(bstate->bs_sv)		IV
+xio_lines_left	IoLINES_LEFT(bstate->bs_sv)	       	IV
 xio_top_name	IoTOP_NAME(bstate->bs_sv)		pvcontents
 xio_top_gv	*(SV**)&IoTOP_GV(bstate->bs_sv)		svindex
 xio_fmt_name	IoFMT_NAME(bstate->bs_sv)		pvcontents

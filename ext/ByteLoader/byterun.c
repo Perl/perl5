@@ -273,36 +273,36 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	    }
 	  case INSN_XFM_LINES:		/* 30 */
 	    {
-		I32 arg;
-		BGET_I32(arg);
+		IV arg;
+		BGET_IV(arg);
 		FmLINES(bstate->bs_sv) = arg;
 		break;
 	    }
 	  case INSN_XIO_LINES:		/* 31 */
 	    {
-		long arg;
-		BGET_I32(arg);
+		IV arg;
+		BGET_IV(arg);
 		IoLINES(bstate->bs_sv) = arg;
 		break;
 	    }
 	  case INSN_XIO_PAGE:		/* 32 */
 	    {
-		long arg;
-		BGET_I32(arg);
+		IV arg;
+		BGET_IV(arg);
 		IoPAGE(bstate->bs_sv) = arg;
 		break;
 	    }
 	  case INSN_XIO_PAGE_LEN:		/* 33 */
 	    {
-		long arg;
-		BGET_I32(arg);
+		IV arg;
+		BGET_IV(arg);
 		IoPAGE_LEN(bstate->bs_sv) = arg;
 		break;
 	    }
 	  case INSN_XIO_LINES_LEFT:		/* 34 */
 	    {
-		long arg;
-		BGET_I32(arg);
+		IV arg;
+		BGET_IV(arg);
 		IoLINES_LEFT(bstate->bs_sv) = arg;
 		break;
 	    }
