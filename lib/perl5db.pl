@@ -2,7 +2,7 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
-$VERSION = 0.9801;
+$VERSION = 0.9902;
 $header = "perl5db.pl patch level $VERSION";
 
 # Enhanced by ilya@math.ohio-state.edu (Ilya Zakharevich)
@@ -24,7 +24,7 @@ $header = "perl5db.pl patch level $VERSION";
 # {require 'perl5db.pl'} before the first line.
 #
 # After each `require'd file is compiled, but before it is executed, a
-# call to DB::postponed(*{"_<$filename"}) is emulated. Here the
+# call to DB::postponed($main::{'_<'.$filename}) is emulated. Here the
 # $filename is the expanded name of the `require'd file (as found as
 # value of %INC).
 #
@@ -33,16 +33,16 @@ $header = "perl5db.pl patch level $VERSION";
 # if caller() is called from the package DB, it provides some
 # additional data.
 #
-# The array @{"_<$filename"} is the line-by-line contents of
+# The array @{$main::{'_<'.$filename} is the line-by-line contents of
 # $filename.
 #
-# The hash %{"_<$filename"} contains breakpoints and action (it is
+# The hash %{'_<'.$filename} contains breakpoints and action (it is
 # keyed by line number), and individual entries are settable (as
 # opposed to the whole hash). Only true/false is important to the
 # interpreter, though the values used by perl5db.pl have the form
 # "$break_condition\0$action". Values are magical in numeric context.
 #
-# The scalar ${"_<$filename"} contains "_<$filename".
+# The scalar ${'_<'.$filename} contains "_<$filename".
 #
 # Note that no subroutine call is possible until &DB::sub is defined
 # (for subroutines defined outside of the package DB). In fact the same is
@@ -137,6 +137,11 @@ $header = "perl5db.pl patch level $VERSION";
 #	`b compile subname' implemented.
 #	Will not use $` any more.
 #	`-' behaves sane now.
+# Changes: 0.99: Completion for `f', `m'.
+#	`m' will remove duplicate names instead of duplicate functions.
+#	`b load' strips trailing whitespace.
+#	completion ignores leading `|'; takes into account current package
+#	when completing a subroutine name (same for `l').
 
 ####################################################################
 
@@ -423,12 +428,12 @@ sub DB {
 		    $cmd .= &readline("  cont: ");
 		    redo CMD;
 		};
-		$cmd =~ /^q$/ && ($exiting = 1) && exit 0;
 		$cmd =~ /^$/ && ($cmd = $laststep);
 		push(@hist,$cmd) if length($cmd) > 1;
 	      PIPE: {
 		    ($i) = split(/\s+/,$cmd);
 		    eval "\$cmd =~ $alias{$i}", print $OUT $@ if $alias{$i};
+		    $cmd =~ /^q$/ && ($exiting = 1) && exit 0;
 		    $cmd =~ /^h$/ && do {
 			print $OUT $help;
 			next CMD; };
@@ -484,6 +489,7 @@ sub DB {
 			$onetimeDump = 'methods'; };
 		    $cmd =~ /^f\b\s*(.*)/ && do {
 			$file = $1;
+			$file =~ s/\s+$//;
 			if (!$file) {
 			    print $OUT "The old f command is now the r command.\n";
 			    print $OUT "The new f command switches filenames.\n";
@@ -491,8 +497,9 @@ sub DB {
 			}
 			if (!defined $main::{'_<' . $file}) {
 			    if (($try) = grep(m#^_<.*$file#, keys %main::)) {{
-					      $file = substr($try,2);
-					      print "\n$file:\n";
+					      $try = substr($try,2);
+					      print $OUT "Choosing $try matching `$file':\n";
+					      $file = $try;
 					  }}
 			}
 			if (!defined $main::{'_<' . $file}) {
@@ -504,12 +511,17 @@ sub DB {
 			    $filename = $file;
 			    $start = 1;
 			    $cmd = "l";
-			} };
+			  } else {
+			    print $OUT "Already in $file.\n";
+			    next CMD;
+			  }
+		      };
 		    $cmd =~ s/^l\s+-\s*$/-/;
 		    $cmd =~ /^l\b\s*([\':A-Za-z_][\':\w]*)/ && do {
 			$subname = $1;
 			$subname =~ s/\'/::/;
-			$subname = "main::".$subname unless $subname =~ /::/;
+			$subname = $package."::".$subname 
+			  unless $subname =~ /::/;
 			$subname = "main".$subname if substr($subname,0,2) eq "::";
 			@pieces = split(/:/,find_sub($subname));
 			$subrange = pop @pieces;
@@ -663,7 +675,7 @@ sub DB {
 		      }
 		      next CMD; };
 		    $cmd =~ /^b\b\s*load\b\s*(.*)/ && do {
-			my $file = $1;
+			my $file = $1; $file =~ s/\s+$//;
 			{
 			  $break_on_load{$file} = 1;
 			  $break_on_load{$::INC{$file}} = 1 if $::INC{$file};
@@ -1857,7 +1869,7 @@ sub methods_via {
   my $name;
   for $name (grep {defined &{$ {"$ {class}::"}{$_}}} 
 	     sort keys %{"$ {class}::"}) {
-    next if $seen{ \&{$ {"$ {class}::"}{$name}} }++;
+    next if $seen{ $name }++;
     print $DB::OUT "$prepend$name\n";
   }
   return unless shift;		# Recurse?
@@ -1900,13 +1912,32 @@ BEGIN {$^W = $ini_warn;}	# Switch warnings back
 #use Carp;			# This did break, left for debuggin
 
 sub db_complete {
+  # Specific code for b l V m f O, &blah, $blah, @blah, %blah
   my($text, $line, $start) = @_;
-  my ($itext, $prefix, $pack) = $text;
+  my ($itext, $search, $prefix, $pack) =
+    ($text, "^\Q$ {package}::\E([^:]+)\$");
   
+  return grep /^\Q$text/, (keys %sub), qw(postpone load compile), # subroutines
+                          (map { /$search/ ? ($1) : () } keys %sub)
+    if (substr $line, 0, $start) =~ /^\|*[bl]\s+((postpone|compile)\s+)?$/;
+  return grep /^\Q$text/, values %INC # files
+    if (substr $line, 0, $start) =~ /^\|*b\s+load\s+$/;
+  return grep /^\Q$text/, map { /^(.*)::$/ ? ($1) : ()} keys %:: # packages
+    if (substr $line, 0, $start) =~ /^\|*[Vm]\s+$/ and $text =~ /^($|\w)/;
+  if ( $line =~ /^\|*f\s+(.*)/ ) { # Loaded files
+    # We may want to complete to (eval 9), so $text may be wrong
+    $prefix = length($1) - length($text);
+    $text = $1;
+    return map {substr $_, 2 + $prefix} grep /^_<\Q$text/, (keys %main::), $0
+  }
   if ((substr $text, 0, 1) eq '&') { # subroutines
     $text = substr $text, 1;
     $prefix = "&";
-    return map "$prefix$_", grep /^\Q$text/, keys %sub;
+    return map "$prefix$_", 
+             grep /^\Q$text/, 
+               (keys %sub),
+               (map { /$search/ ? ($1) : () } 
+		  keys %sub);
   }
   if ($text =~ /^[\$@%](.*)::(.*)/) { # symbols in a package
     $pack = ($1 eq 'main' ? '' : $1) . '::';
@@ -1931,11 +1962,7 @@ sub db_complete {
     }
     return @out;
   }
-  return grep /^\Q$text/, (keys %sub), qw(postpone load compile) # subroutines
-    if (substr $line, 0, $start) =~ /^[bl]\s+((postpone|compile)\s+)?$/;
-  return grep /^\Q$text/, map { /^(.*)::$/ ? ($1) : ()} keys %:: # packages
-    if (substr $line, 0, $start) =~ /^V\s+$/;
-  if ((substr $line, 0, $start) =~ /^O\b.*\s$/) { # Options after a space
+  if ((substr $line, 0, $start) =~ /^\|*O\b.*\s$/) { # Options after a space
     my @out = grep /^\Q$text/, @options;
     my $val = option_val($out[0], undef);
     my $out = '? ';
