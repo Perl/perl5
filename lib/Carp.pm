@@ -50,7 +50,7 @@ This feature is enabled by 'importing' the non-existent symbol
 
     perl -MCarp=verbose script.pl
 
-or by including the string C<MCarp=verbose> in the L<PERL5OPT>
+or by including the string C<MCarp=verbose> in the PERL5OPT
 environment variable.
 
 =head1 BUGS
