@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..65\n";
+print "1..66\n";
 
 $_ = "abcdefghijklmnopqrstuvwxyz";
 
@@ -367,3 +367,6 @@ print "ok 64\n";
 print "not " unless $a eq "\x{100}";
 print "ok 65\n";
 
+$a = "\xfe\xff"; $a =~ tr/\xfe\xff/\x{1ff}\x{1fe}/;
+print "not " unless $a eq "\x{1ff}\x{1fe}";
+print "ok 66\n";
