@@ -15,7 +15,7 @@
 
 #define PERL_REVISION	5		/* age */
 #define PERL_VERSION	9		/* epoch */
-#define PERL_SUBVERSION	2		/* generation */
+#define PERL_SUBVERSION	3		/* generation */
 
 /* The following numbers describe the earliest compatible version of
    Perl ("compatibility" here being defined as sufficient binary/API
@@ -32,7 +32,7 @@
 */
 #define PERL_API_REVISION	5	/* Adjust manually as needed.  */
 #define PERL_API_VERSION	9	/* Adjust manually as needed.  */
-#define PERL_API_SUBVERSION	1	/* Adjust manually as needed.  */
+#define PERL_API_SUBVERSION	2	/* Adjust manually as needed.  */
 /*
    XXX Note:  The selection of non-default Configure options, such
    as -Duselonglong may invalidate these settings.  Currently, Configure
@@ -120,6 +120,7 @@ hunk.
 #if !defined(PERL_PATCHLEVEL_H_IMPLICIT) && !defined(LOCAL_PATCH_COUNT)
 static const char *local_patches[] = {
 	NULL
+	,'DEVEL24148'
 	,NULL
 };
 
