@@ -32,7 +32,7 @@ use ExtUtils::testlib;
 use strict;
 BEGIN { print "1..13\n" };
 use threads;
-use threads::shared qw(:DEFAULT _refcnt _id);
+use threads::shared;
 ok(1,1,"loaded");
 my $foo;
 share($foo);
@@ -57,9 +57,9 @@ my $gg = $foo{test};
 $$gg = "test";
 ok(7, ${$foo{test}} eq "test", "Check reference");
 my $gg2 = delete($foo{test});
-ok(8, _id($$gg) == _id($$gg2),
+ok(8, threads::shared::_id($$gg) == threads::shared::_id($$gg2),
        sprintf("Check we get the same thing (%x vs %x)",
-       _id($$gg),_id($$gg2)));
+       threads::shared::_id($$gg),threads::shared::_id($$gg2)));
 ok(9, $$gg eq $$gg2, "And check the values are the same");
 ok(10, keys %foo == 0, "And make sure we realy have deleted the values");
 {
