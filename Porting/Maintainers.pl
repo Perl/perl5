@@ -335,6 +335,13 @@
 		'CPAN'		=> 1,
 		},
 
+	'Safe' =>
+		{
+		'MAINTAINER'	=> 'abergman',
+		'FILES'		=> q[ext/Safe],
+		'CPAN'		=> 1,
+		},
+
 	'Storable' =>
 		{
 		'MAINTAINER'	=> 'ams',
