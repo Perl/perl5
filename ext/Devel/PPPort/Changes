@@ -1,3 +1,8 @@
+3.00_03 - 2004-08-20
+
+    * make sure the @INC path is kept up-to-date when changing
+      directories while running in the core test suite
+
 3.00_02 - 2004-08-19
 
     * remove PPPort.pm and PPPort.xs dependencies from Makefile.PL,

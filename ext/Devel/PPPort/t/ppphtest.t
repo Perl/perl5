@@ -47,7 +47,10 @@ mkpath($tmp) or die "mkpath $tmp: $!\n";
 chdir($tmp) or die "chdir $tmp: $!\n";
 
 if ($ENV{'PERL_CORE'}) {
-  $inc = '-I../../lib' if -d '../../lib';
+  if (-d '../../lib') {
+    $inc = '-I../../lib';
+    unshift @INC, '../../lib';
+  }
 }
 if ($perl =~ m!^\./!) {
   $perl = ".$perl";
