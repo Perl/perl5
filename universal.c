@@ -7,6 +7,12 @@
  *
  */
 
+/*
+ * "The roots of those mountains must be roots indeed; there must be
+ * great secrets buried there which have not been discovered since the
+ * beginning." --Gandalf, relating Gollum's story
+ */
+
 #include "EXTERN.h"
 #define PERL_IN_UNIVERSAL_C
 #include "perl.h"

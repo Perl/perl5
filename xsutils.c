@@ -7,6 +7,12 @@
  *
  */
 
+/*
+ * "Perilous to us all are the devices of an art deeper than we possess
+ * ourselves." --Gandalf
+ */
+
+
 #include "EXTERN.h"
 #define PERL_IN_XSUTILS_C
 #include "perl.h"

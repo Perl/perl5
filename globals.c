@@ -7,6 +7,11 @@
  *
  */
 
+/*
+ * "For the rest, they shall represent the other Free Peoples of the World:
+ * Elves, Dwarves, and Men." --Elrond
+ */
+
 #include "INTERN.h"
 #define PERL_IN_GLOBALS_C
 #include "perl.h"
