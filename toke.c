@@ -376,6 +376,15 @@ Perl_lex_start(pTHX_ SV *line)
     SAVEI32(PL_lex_state);
     SAVEVPTR(PL_lex_inpat);
     SAVEI32(PL_lex_inwhat);
+    if (PL_lex_state == LEX_KNOWNEXT) {
+	I32 toke = PL_nexttoke;
+	while (--toke >= 0) {
+	    SAVEI32(PL_nexttype[toke]);
+	    SAVEVPTR(PL_nextval[toke]);
+	}
+	SAVEI32(PL_nexttoke);
+	PL_nexttoke = 0;
+    }
     SAVECOPLINE(PL_curcop);
     SAVEPPTR(PL_bufptr);
     SAVEPPTR(PL_bufend);

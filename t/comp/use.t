@@ -44,9 +44,7 @@ unless ($@) {
 print "ok ",$i++,"\n";
 
 
-
-use lib; # I know that this module will be there.
-
+{ use lib }	# check that subparse saves pending tokens
 
 local $lib::VERSION = 1.0;
 
