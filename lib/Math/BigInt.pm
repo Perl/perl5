@@ -2146,13 +2146,16 @@ sub bsqrt
 sub broot
   {
   # calculate $y'th root of $x
-  
+ 
   # set up parameters
   my ($self,$x,$y,@r) = (ref($_[0]),@_);
+
+  $y = $self->new(2) unless defined $y;
+
   # objectify is costly, so avoid it
-  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+  if ((!ref($x)) || (ref($x) ne ref($y)))
     {
-    ($self,$x,$y,@r) = objectify(2,@_);
+    ($self,$x,$y,@r) = $self->objectify(2,@_);
     }
 
   return $x if $x->modify('broot');
@@ -2164,7 +2167,7 @@ sub broot
   return $x->round(@r)
     if $x->is_zero() || $x->is_one() || $x->is_inf() || $y->is_one();
 
-  return $upgrade->broot($x,@r) if defined $upgrade;
+  return $upgrade->new($x)->broot($upgrade->new($y),@r) if defined $upgrade;
 
   if ($CALC->can('_root'))
     {
@@ -2177,35 +2180,43 @@ sub broot
   # since we take at least a cubic root, and only 8 ** 1/3 >= 2 (==2):
   return $x->bone('+',@r) if $x < 8;		# $x=2..7 => 1
 
-  my $org = $x->copy();
-  my $l = int($x->length()/$y->numify());
-  
-  $x->bone();					# keep ref($x), but modify it
-  $x->blsft($l,10) if $l != 0;			# first guess: 1.('0' x (l/$y))
+  my $num = $x->numify();
 
-  my $last = $self->bzero();
-  my $lastlast = $self->bzero();
-  #my $lastlast = $x+$y;
-  my $divider = $self->new(2);
-  my $up = $y-1;
-  #print "start $org divider $divider up $up\n";
-  while ($last != $x && $lastlast != $x)
+  if ($num <= 1000000)
     {
-    #print "at $x ($last $lastlast)\n";
-    $lastlast = $last; $last = $x->copy(); 
-    #print "at $x ($last ",($org / ($x ** $up)),"\n";
-    $x->badd($org / ($x ** 2)); 
-    $x->bdiv($divider);
+    $x = $self->new( int($num ** (1 / $y->numify()) ));
+    return $x->round(@r);
     }
-  #print $x ** $y," org ",$org,"\n";
-  # correct overshot
-  while ($x ** $y < $org)
+
+  # if $n is a power of two, we can repeatedly take sqrt($X) and find the
+  # proper result, because sqrt(sqrt($x)) == root($x,4)
+  # See Calc.pm for more details
+  my $b = $y->as_bin();
+  if ($b =~ /0b1(0+)/)
     {
-    #print "correcting $x to ";
-    $x->binc();
-    #print "$x ( $x ** $y == ",$x ** $y,")\n";
+    my $count = CORE::length($1);	# 0b100 => len('00') => 2
+    my $cnt = $count;			# counter for loop
+    my $shift = $self->new(6);
+    $x->blsft($shift);			# add some zeros (even amount)
+    while ($cnt-- > 0)
+      {
+      # 'inflate' $X by adding more zeros
+      $x->blsft($shift);
+      # calculate sqrt($x), $x is now a bit too big, again. In the next
+      # round we make even bigger, again.
+      $x->bsqrt($x);
+      }
+    # $x is still to big, so truncate result
+    $x->brsft($shift);
     }
-  $x->round(@r);
+  else
+    {
+    # Should compute a guess of the result (by rule of thumb), then improve it
+    # via Newton's method or something similiar.
+    # XXX TODO
+    warn ('broot() not fully implemented in BigInt.');
+    }
+  return $x->round(@r);
   }
 
 sub exponent
@@ -2514,7 +2525,7 @@ sub objectify
     }
 
   my $up = ${"$a[0]::upgrade"};
-  #print "Now in objectify, my class is today $a[0]\n";
+  #print "Now in objectify, my class is today $a[0], count = $count\n";
   if ($count == 0)
     {
     while (@_)
@@ -3119,7 +3130,7 @@ appropriate information.
 	div_scale	Fallback acccuracy for div
 			40
 
-The following values can be set by passing config a reference to a hash:
+The following values can be set by passing C<config()> a reference to a hash:
 
 	trap_inf trap_nan
         upgrade downgrade precision accuracy round_mode div_scale
@@ -3308,6 +3319,8 @@ These methods are only testing the sign, and not the value.
 
 The return true when the argument satisfies the condition. C<NaN>, C<+inf>,
 C<-inf> are not integers and are neither odd nor even.
+
+In BigInt, all numbers except C<NaN>, C<+inf> and C<-inf> are integers.
 
 =head2 bcmp
 

@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _p: precision
 #   _f: flags, used to signal MBI not to touch our private parts
 
-$VERSION = '1.39';
+$VERSION = '1.40';
 require 5.005;
 use Exporter;
 @ISA =       qw(Exporter Math::BigInt);
@@ -273,48 +273,46 @@ sub bstr
   # Convert number from internal format to (non-scientific) string format.
   # internal format is always normalized (no leading zeros, "-0" => "+0")
   my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
-  #my $x = shift; my $class = ref($x) || $x;
-  #$x = $class->new(shift) unless ref($x);
 
   if ($x->{sign} !~ /^[+-]$/)
     {
     return $x->{sign} unless $x->{sign} eq '+inf';      # -inf, NaN
     return 'inf';                                       # +inf
     }
- 
+
   my $es = '0'; my $len = 1; my $cad = 0; my $dot = '.';
 
-  my $not_zero = ! $x->is_zero();
+  # $x is zero?
+  my $not_zero = !($x->{sign} eq '+' && $x->{_m}->is_zero());
   if ($not_zero)
     {
     $es = $x->{_m}->bstr();
     $len = CORE::length($es);
-    if (!$x->{_e}->is_zero())
+    my $e = $x->{_e}->numify();	
+    if ($e < 0)
       {
-      if ($x->{_e}->sign() eq '-')
+      $dot = '';
+      # if _e is bigger than a scalar, the following will blow your memory
+      if ($e <= -$len)
         {
-        $dot = '';
-        if ($x->{_e} <= -$len)
-          {
-          #print "style: 0.xxxx\n";
-          my $r = $x->{_e}->copy(); $r->babs()->bsub( CORE::length($es) );
-          $es = '0.'. ('0' x $r) . $es; $cad = -($len+$r);
-          }
-        else
-          {
-          #print "insert '.' at $x->{_e} in '$es'\n";
-          substr($es,$x->{_e},0) = '.'; $cad = $x->{_e};
-          }
+        #print "style: 0.xxxx\n";
+        my $r = abs($e) - $len;
+        $es = '0.'. ('0' x $r) . $es; $cad = -($len+$r);
         }
       else
         {
-        # expand with zeros
-        $es .= '0' x $x->{_e}; $len += $x->{_e}; $cad = 0;
+        #print "insert '.' at $e in '$es'\n";
+        substr($es,$e,0) = '.'; $cad = $x->{_e};
         }
       }
+    elsif ($e > 0)
+      {
+      # expand with zeros
+      $es .= '0' x $e; $len += $e; $cad = 0;
+      }
     } # if not zero
-  $es = $x->{sign}.$es if $x->{sign} eq '-';
-  # if set accuracy or precision, pad with zeros
+  $es = '-'.$es if $x->{sign} eq '-';
+  # if set accuracy or precision, pad with zeros on the right side
   if ((defined $x->{_a}) && ($not_zero))
     {
     # 123400 => 6, 0.1234 => 4, 0.001234 => 4
@@ -322,7 +320,7 @@ sub bstr
     $zeros = $x->{_a} - $len if $cad != $len;
     $es .= $dot.'0' x $zeros if $zeros > 0;
     }
-  elsif ($x->{_p} || 0 < 0)
+  elsif ((($x->{_p} || 0) < 0))
     {
     # 123400 => 6, 0.1234 => 4, 0.001234 => 6
     my $zeros = -$x->{_p} + $cad;
