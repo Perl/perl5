@@ -1251,12 +1251,23 @@ I.e. January is 0, not 1; Sunday is 0, not 1; January 1st is 0, not 1.  The
 year (C<year>) is given in years since 1900.  I.e., the year 1995 is 95; the
 year 2001 is 101.  Consult your system's C<strftime()> manpage for details
 about these and the other arguments.
+
 If you want your code to be portable, your format (C<fmt>) argument
 should use only the conversion specifiers defined by the ANSI C
-standard.  These are C<aAbBcdHIjmMpSUwWxXyYZ%>.
-The given arguments are made consistent
-as though by calling C<mktime()> before calling your system's
-C<strftime()> function, except that the C<isdst> value is not affected.
+standard (C89, to play safe).  These are C<aAbBcdHIjmMpSUwWxXyYZ%>.
+But even then, the B<results> of some of the conversion specifiers are
+non-portable.  For example, the specifiers C<aAbBcpZ> change according
+to the locale settings of the user, and both how to set locales (the
+locale names) and what output to expect are non-standard.
+The specifier C<c> changes according to the timezone settings of the
+user and the timezone computation rules of the operating system.
+The C<Z> specifier is notoriously unportable since the names of
+timezones are non-standard. Sticking to the numeric specifiers is the
+safest route.
+
+The given arguments are made consistent as though by calling
+C<mktime()> before calling your system's C<strftime()> function,
+except that the C<isdst> value is not affected.
 
 The string for Tuesday, December 12, 1995.
 
