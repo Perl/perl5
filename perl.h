@@ -2501,6 +2501,7 @@ Gid_t getegid (void);
 #define DEBUG_r_FLAG		0x00000200 /*    512 */
 #define DEBUG_x_FLAG		0x00000400 /*   1024 */
 #define DEBUG_u_FLAG		0x00000800 /*   2048 */
+					   /*  spare */
 #define DEBUG_H_FLAG		0x00002000 /*   8192 */
 #define DEBUG_X_FLAG		0x00004000 /*  16384 */
 #define DEBUG_D_FLAG		0x00008000 /*  32768 */
@@ -2511,7 +2512,7 @@ Gid_t getegid (void);
 #define DEBUG_v_FLAG		0x00100000 /*1048576 */
 #define DEBUG_C_FLAG		0x00200000 /*2097152 */
 #define DEBUG_A_FLAG		0x00400000 /*4194304 */
-#define DEBUG_q_FLAG		0x00800000 /8388608*/
+#define DEBUG_q_FLAG		0x00800000 /*8388608 */
 #define DEBUG_MASK		0x00FFEFFF /* mask of all the standard flags */
 
 #define DEBUG_DB_RECURSE_FLAG	0x40000000
@@ -2571,7 +2572,7 @@ Gid_t getegid (void);
 #  define DEBUG_v_TEST DEBUG_v_TEST_
 #  define DEBUG_C_TEST DEBUG_C_TEST_
 #  define DEBUG_A_TEST DEBUG_A_TEST_
-#  define DEBUG_q_TEST DEBUG_A_TEST_
+#  define DEBUG_q_TEST DEBUG_q_TEST_
 
 #  define PERL_DEB(a)                  a
 #  define PERL_DEBUG(a) if (PL_debug)  a
