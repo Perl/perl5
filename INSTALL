@@ -192,6 +192,9 @@ put (symlinks to) perl and its accompanying utilities, such as perldoc,
 into a directory typically found along a user's PATH, or in another
 obvious and convenient place.
 
+You can use "Configure -Uinstallusrbinperl" which causes installperl
+to skip installing perl also as /usr/bin/perl.
+
 By default, Configure will compile perl to use dynamic loading if
 your system supports it.  If you want to force perl to be compiled
 statically, you can either choose this when Configure prompts you or
