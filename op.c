@@ -107,27 +107,6 @@ S_no_bareword_allowed(pTHX_ OP *o)
     ++PL_error_count;
 }
 
-void
-Perl_assertref(pTHX_ OP *o)
-{
-    int type = o->op_type;
-    if (type != OP_AELEM && type != OP_HELEM && type != OP_GELEM) {
-	yyerror(Perl_form(aTHX_ "Can't use subscript on %s", PL_op_desc[type]));
-	if (type == OP_ENTERSUB || type == OP_RV2HV || type == OP_PADHV) {
-	    dTHR;
-	    SV *msg = sv_2mortal(
-			Perl_newSVpvf(aTHX_ "(Did you mean $ or @ instead of %c?)\n",
-				 type == OP_ENTERSUB ? '&' : '%'));
-	    if (PL_in_eval & EVAL_WARNONLY)
-		Perl_warn(aTHX_ "%_", msg);
-	    else if (PL_in_eval)
-		sv_catsv(GvSV(PL_errgv), msg);
-	    else
-		PerlIO_write(PerlIO_stderr(), SvPVX(msg), SvCUR(msg));
-	}
-    }
-}
-
 /* "register" allocation */
 
 PADOFFSET

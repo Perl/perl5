@@ -77,13 +77,6 @@ Perl_apply(pTHXo_ I32 type, SV** mark, SV** sp)
     return ((CPerlObj*)pPerl)->Perl_apply(type, mark, sp);
 }
 
-#undef  Perl_assertref
-void
-Perl_assertref(pTHXo_ OP* o)
-{
-    ((CPerlObj*)pPerl)->Perl_assertref(o);
-}
-
 #undef  Perl_avhv_exists_ent
 bool
 Perl_avhv_exists_ent(pTHXo_ AV *ar, SV* keysv, U32 hash)

@@ -527,7 +527,6 @@ install.html: all installhtml
 # normally shouldn't remake perly.[ch].
 
 run_byacc:	FORCE
-	@ echo 'Expect' 113 shift/reduce and 1 reduce/reduce conflict
 	$(BYACC) -d perly.y
 	chmod 664 perly.c
 	sh $(shellflags) ./perly.fixer y.tab.c perly.c

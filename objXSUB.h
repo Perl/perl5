@@ -833,10 +833,6 @@
 #define Perl_apply		pPerl->Perl_apply
 #undef  apply
 #define apply			Perl_apply
-#undef  Perl_assertref
-#define Perl_assertref		pPerl->Perl_assertref
-#undef  assertref
-#define assertref		Perl_assertref
 #undef  Perl_avhv_exists_ent
 #define Perl_avhv_exists_ent	pPerl->Perl_avhv_exists_ent
 #undef  avhv_exists_ent

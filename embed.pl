@@ -997,7 +997,6 @@ p	|bool	|Gv_AMupdate	|HV* stash
 p	|OP*	|append_elem	|I32 optype|OP* head|OP* tail
 p	|OP*	|append_list	|I32 optype|LISTOP* first|LISTOP* last
 p	|I32	|apply		|I32 type|SV** mark|SV** sp
-p	|void	|assertref	|OP* o
 p	|bool	|avhv_exists_ent|AV *ar|SV* keysv|U32 hash
 p	|SV**	|avhv_fetch_ent	|AV *ar|SV* keysv|I32 lval|U32 hash
 p	|HE*	|avhv_iternext	|AV *ar

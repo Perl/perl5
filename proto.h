@@ -12,7 +12,6 @@ VIRTUAL bool	Perl_Gv_AMupdate(pTHX_ HV* stash);
 VIRTUAL OP*	Perl_append_elem(pTHX_ I32 optype, OP* head, OP* tail);
 VIRTUAL OP*	Perl_append_list(pTHX_ I32 optype, LISTOP* first, LISTOP* last);
 VIRTUAL I32	Perl_apply(pTHX_ I32 type, SV** mark, SV** sp);
-VIRTUAL void	Perl_assertref(pTHX_ OP* o);
 VIRTUAL bool	Perl_avhv_exists_ent(pTHX_ AV *ar, SV* keysv, U32 hash);
 VIRTUAL SV**	Perl_avhv_fetch_ent(pTHX_ AV *ar, SV* keysv, I32 lval, U32 hash);
 VIRTUAL HE*	Perl_avhv_iternext(pTHX_ AV *ar);

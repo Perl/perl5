@@ -19,7 +19,6 @@
 #define append_elem		Perl_append_elem
 #define append_list		Perl_append_list
 #define apply			Perl_apply
-#define assertref		Perl_assertref
 #define avhv_exists_ent		Perl_avhv_exists_ent
 #define avhv_fetch_ent		Perl_avhv_fetch_ent
 #define avhv_iternext		Perl_avhv_iternext
@@ -1357,7 +1356,6 @@
 #define append_elem(a,b,c)	Perl_append_elem(aTHX_ a,b,c)
 #define append_list(a,b,c)	Perl_append_list(aTHX_ a,b,c)
 #define apply(a,b,c)		Perl_apply(aTHX_ a,b,c)
-#define assertref(a)		Perl_assertref(aTHX_ a)
 #define avhv_exists_ent(a,b,c)	Perl_avhv_exists_ent(aTHX_ a,b,c)
 #define avhv_fetch_ent(a,b,c,d)	Perl_avhv_fetch_ent(aTHX_ a,b,c,d)
 #define avhv_iternext(a)	Perl_avhv_iternext(aTHX_ a)
@@ -2675,8 +2673,6 @@
 #define append_list		Perl_append_list
 #define Perl_apply		CPerlObj::Perl_apply
 #define apply			Perl_apply
-#define Perl_assertref		CPerlObj::Perl_assertref
-#define assertref		Perl_assertref
 #define Perl_avhv_exists_ent	CPerlObj::Perl_avhv_exists_ent
 #define avhv_exists_ent		Perl_avhv_exists_ent
 #define Perl_avhv_fetch_ent	CPerlObj::Perl_avhv_fetch_ent
