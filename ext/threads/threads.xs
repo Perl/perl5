@@ -13,7 +13,7 @@
 #define PERL_THREAD_ALLOC_SPECIFIC(k) \
 STMT_START {\
   if((k = TlsAlloc()) == TLS_OUT_OF_INDEXES) {\
-    PerlIO_printf(PerlIO_stderr(),"panic threads.h: TlsAlloc");\
+    PerlIO_printf(PerlIO_stderr(), "panic threads.xs: TlsAlloc");\
     exit(1);\
   }\
 } STMT_END
@@ -31,7 +31,7 @@ typedef perl_os_thread pthread_t;
 #define PERL_THREAD_GETSPECIFIC(k,v) pthread_getspecific(k,&v)
 #define PERL_THREAD_ALLOC_SPECIFIC(k) STMT_START {\
   if(pthread_keycreate(&(k),0)) {\
-    PerlIO_printf(PerlIO_stderr(), "panic threads.h: pthread_key_create");\
+    PerlIO_printf(PerlIO_stderr(), "panic threads.xs: pthread_key_create");\
     exit(1);\
   }\
 } STMT_END
@@ -40,7 +40,7 @@ typedef perl_os_thread pthread_t;
 #define PERL_THREAD_GETSPECIFIC(k,v) v = pthread_getspecific(k)
 #define PERL_THREAD_ALLOC_SPECIFIC(k) STMT_START {\
   if(pthread_key_create(&(k),0)) {\
-    PerlIO_printf(PerlIO_stderr(), "panic threads.h: pthread_key_create");\
+    PerlIO_printf(PerlIO_stderr(), "panic threads.xs: pthread_key_create");\
     exit(1);\
   }\
 } STMT_END
@@ -54,16 +54,16 @@ typedef perl_os_thread pthread_t;
 #define PERL_ITHR_JOINED		2
 
 typedef struct ithread_s {
-    struct ithread_s *next;	/* next thread in the list */
-    struct ithread_s *prev;	/* prev thread in the list */
+    struct ithread_s *next;	/* Next thread in the list */
+    struct ithread_s *prev;	/* Prev thread in the list */
     PerlInterpreter *interp;	/* The threads interpreter */
-    I32 tid;              	/* threads module's thread id */
-    perl_mutex mutex; 		/* mutex for updating things in this struct */
-    I32 count;			/* how many SVs have a reference to us */
-    signed char state;		/* are we detached ? */
+    I32 tid;              	/* Threads module's thread id */
+    perl_mutex mutex; 		/* Mutex for updating things in this struct */
+    I32 count;			/* How many SVs have a reference to us */
+    signed char state;		/* Are we detached ? */
     int gimme;			/* Context of create */
     SV* init_function;          /* Code to run */
-    SV* params;                 /* args to pass function */
+    SV* params;                 /* Args to pass function */
 #ifdef WIN32
 	DWORD	thr;            /* OS's idea if thread id */
 	HANDLE handle;          /* OS's waitable handle */
@@ -370,7 +370,7 @@ SV_to_ithread(pTHX_ SV *sv)
 }
 
 /*
- * iThread->create(); ( aka iThread->new() )
+ * ithread->create(); ( aka ithread->new() )
  * Called in context of parent thread
  */
 
@@ -500,13 +500,15 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 #  endif
 #  ifdef THREAD_CREATE_NEEDS_STACK
 	    if(pthread_attr_setstacksize(&attr, THREAD_CREATE_NEEDS_STACK))
-	      croak("panic: pthread_attr_setstacksize failed");
+	      Perl_croak(aTHX_ "panic: pthread_attr_setstacksize failed");
 #  endif
 
 #ifdef OLD_PTHREADS_API
 	  pthread_create( &thread->thr, attr, Perl_ithread_run, (void *)thread);
 #else
+#  ifdef PTHREAD_SCOPE_SYSTEM
 	  pthread_attr_setscope( &attr, PTHREAD_SCOPE_SYSTEM );
+#  endif
 	  pthread_create( &thread->thr, &attr, Perl_ithread_run, (void *)thread);
 #endif
 	}
@@ -530,7 +532,10 @@ Perl_ithread_self (pTHX_ SV *obj, char* Class)
 #else
     PERL_THREAD_GETSPECIFIC(self_key,thread);
 #endif
-    return ithread_to_SV(aTHX_ obj, thread, Class, TRUE);
+   if (thread)
+	return ithread_to_SV(aTHX_ obj, thread, Class, TRUE);
+   else
+	Perl_croak(aTHX_ "panic: cannot find thread data");
 }
 
 /*
@@ -616,7 +621,7 @@ Perl_ithread_join(pTHX_ SV *obj)
 	  PL_ptr_table = NULL;
 
 	}
-	/* We have finished with it */
+	/* We are finished with it */
 	thread->state |= PERL_ITHR_JOINED;
 	MUTEX_UNLOCK(&thread->mutex);
     	
@@ -737,11 +742,11 @@ BOOT:
 	thread->next = thread;
         thread->prev = thread;
 	thread->interp = aTHX;
-	thread->count  = 1;  /* imortal */
+	thread->count  = 1;  /* Immortal. */
 	thread->tid = tid_counter++;
 	known_threads++;
 	active_threads++;
-	thread->state = 1;
+	thread->state = PERL_ITHR_DETACHED;
 #ifdef WIN32
 	thread->thr = GetCurrentThreadId();
 #else

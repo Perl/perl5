@@ -9,7 +9,9 @@
 # ifdef I_SYS_TYPES
 #  include <sys/types.h>
 # endif
-# include <sys/socket.h>
+# if !defined(ultrix)
+#   include <sys/socket.h>
+# endif
 # if defined(USE_SOCKS) && defined(I_SOCKS)
 #   include <socks.h>
 # endif
