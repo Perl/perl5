@@ -112,7 +112,7 @@ perl_construct(register PerlInterpreter *sv_interp)
 #endif
 
 #ifdef MULTIPLICITY
-    ++ninterps;
+    ++PL_ninterps;
     Zero(sv_interp, 1, PerlInterpreter);
 #endif
 
@@ -189,7 +189,7 @@ perl_construct(register PerlInterpreter *sv_interp)
     init_stacks(ARGS);
 #ifdef MULTIPLICITY
     init_interp();
-    perl_destruct_level = 1; 
+    PL_perl_destruct_level = 1; 
 #else
    if (PL_perl_destruct_level > 0)
        init_interp();
@@ -337,7 +337,7 @@ perl_destruct(register PerlInterpreter *sv_interp)
     FREETMPS;
 
 #ifdef MULTIPLICITY
-    --ninterps;
+    --PL_ninterps;
 #endif
 
     /* We must account for everything.  */
@@ -804,7 +804,7 @@ setuid perl scripts securely.\n");
 		sv_catpv(Sv," NO_EMBED");
 #  endif
 #  ifdef MULTIPLICITY
-		sv_catpv(Sv," MULTIPLICITY");
+		sv_catpv(PL_Sv," MULTIPLICITY");
 #  endif
 		sv_catpv(PL_Sv,"\\n\",");
 #endif
@@ -1841,8 +1841,8 @@ init_interp(void)
 #else
 #  ifdef MULTIPLICITY
 #    define PERLVAR(var,type)
-#    define PERLVARI(var,type,init)	curinterp->var = init;
-#    define PERLVARIC(var,type,init)	curinterp->var = init;
+#    define PERLVARI(var,type,init)	PL_curinterp->var = init;
+#    define PERLVARIC(var,type,init)	PL_curinterp->var = init;
 #    include "intrpvar.h"
 #    ifndef USE_THREADS
 #      include "thrdvar.h"

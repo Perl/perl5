@@ -98,7 +98,8 @@ sub multon ($$$) {
 }
 sub multoff ($$) {
     my ($sym,$pre) = @_;
-    hide("$pre$sym", "PL_$sym");
+#   hide("$pre$sym", "PL_$sym");
+    return '';
 }
 
 unlink 'embed.h';
@@ -171,7 +172,7 @@ print EM <<'END';
 END
 
 for $sym (sort keys %thread) {
-    print EM multon($sym,'T','curinterp->');
+    print EM multon($sym,'T','PL_curinterp->');
 }
 
 print EM <<'END';
@@ -183,7 +184,7 @@ print EM <<'END';
 END
 
 for $sym (sort keys %intrp) {
-    print EM multon($sym,'I','curinterp->');
+    print EM multon($sym,'I','PL_curinterp->');
 }
 
 print EM <<'END';

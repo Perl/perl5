@@ -453,8 +453,8 @@ uni(I32 f, char *s)
     yylval.ival = f;
     PL_expect = XTERM;
     PL_bufptr = s;
-    last_uni = oldbufptr;
-    last_lop_op = f;
+    PL_last_uni = PL_oldbufptr;
+    PL_last_lop_op = f;
     if (*s == '(')
 	return FUNC1;
     s = skipspace(s);
