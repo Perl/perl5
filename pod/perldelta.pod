@@ -731,9 +731,10 @@ See L<INSTALL> and L<README.Y2K>.
 
 =head2 E<lt>HANDLEE<gt> on empty files
 
-With C<$/> set to C<undef>, slurping an empty file returns a string of
+With C<$/> set to C<undef>, "slurping" an empty file returns a string of
 zero length (instead of C<undef>, as it used to) the first time the
-HANDLE is read.  Further reads yield C<undef>.
+HANDLE is read after C<$/> is set to C<undef>.  Further reads yield
+C<undef>.
 
 This means that the following will append "foo" to an empty file (it used
 to do nothing):
