@@ -738,64 +738,76 @@ else {
 {
     # bug id 20010519.003
 
-    use Fcntl;
+    BEGIN {
+	use vars qw($has_fcntl);
+	eval { require Fcntl; import Fcntl; };
+	unless ($@) {
+	    $has_fcntl = 1;
+	}
+    }
 
-    my $evil = "foo" . $TAINT;
+    unless ($has_fcntl) {
+	for (156..173) {
+	    print "ok $_ # Skip: no Fcntl (no dynaloading?)\n";
+	}
+    } else {
+	my $evil = "foo" . $TAINT;
 
-    eval { sysopen(my $ro, $evil, O_RDONLY) };
-    test 156, $@ !~ /^Insecure dependency/, $@;
+	eval { sysopen(my $ro, $evil, &O_RDONLY) };
+	test 156, $@ !~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $wo, $evil, &O_WRONLY) };
+	test 157, $@ =~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $rw, $evil, &O_RDWR) };
+	test 158, $@ =~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $ap, $evil, &O_APPEND) };
+	test 159, $@ =~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $cr, $evil, &O_CREAT) };
+	test 160, $@ =~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $tr, $evil, &O_TRUNC) };
+	test 161, $@ =~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $ro, "foo", &O_RDONLY | $evil) };
+	test 162, $@ !~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $wo, "foo", &O_WRONLY | $evil) };
+	test 163, $@ =~ /^Insecure dependency/, $@;
 
-    eval { sysopen(my $wo, $evil, O_WRONLY) };
-    test 157, $@ =~ /^Insecure dependency/, $@;
+	eval { sysopen(my $rw, "foo", &O_RDWR | $evil) };
+	test 164, $@ =~ /^Insecure dependency/, $@;
 
-    eval { sysopen(my $rw, $evil, O_RDWR) };
-    test 158, $@ =~ /^Insecure dependency/, $@;
+	eval { sysopen(my $ap, "foo", &O_APPEND | $evil) };
+	test 165, $@ =~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $cr, "foo", &O_CREAT | $evil) };
+	test 166, $@ =~ /^Insecure dependency/, $@;
 
-    eval { sysopen(my $ap, $evil, O_APPEND) };
-    test 159, $@ =~ /^Insecure dependency/, $@;
+	eval { sysopen(my $tr, "foo", &O_TRUNC | $evil) };
+	test 167, $@ =~ /^Insecure dependency/, $@;
 
-    eval { sysopen(my $cr, $evil, O_CREAT) };
-    test 160, $@ =~ /^Insecure dependency/, $@;
+	eval { sysopen(my $ro, "foo", &O_RDONLY, $evil) };
+	test 168, $@ !~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $wo, "foo", &O_WRONLY, $evil) };
+	test 169, $@ =~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $rw, "foo", &O_RDWR, $evil) };
+	test 170, $@ =~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $ap, "foo", &O_APPEND, $evil) };
+	test 171, $@ =~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $cr, "foo", &O_CREAT, $evil) };
+	test 172, $@ =~ /^Insecure dependency/, $@;
 
-    eval { sysopen(my $tr, $evil, O_TRUNC) };
-    test 161, $@ =~ /^Insecure dependency/, $@;
-
-    eval { sysopen(my $ro, "foo", O_RDONLY | $evil) };
-    test 162, $@ !~ /^Insecure dependency/, $@;
-
-    eval { sysopen(my $wo, "foo", O_WRONLY | $evil) };
-    test 163, $@ =~ /^Insecure dependency/, $@;
-
-    eval { sysopen(my $rw, "foo", O_RDWR | $evil) };
-    test 164, $@ =~ /^Insecure dependency/, $@;
-
-    eval { sysopen(my $ap, "foo", O_APPEND | $evil) };
-    test 165, $@ =~ /^Insecure dependency/, $@;
-
-    eval { sysopen(my $cr, "foo", O_CREAT | $evil) };
-    test 166, $@ =~ /^Insecure dependency/, $@;
-
-    eval { sysopen(my $tr, "foo", O_TRUNC | $evil) };
-    test 167, $@ =~ /^Insecure dependency/, $@;
-
-    eval { sysopen(my $ro, "foo", O_RDONLY, $evil) };
-    test 168, $@ !~ /^Insecure dependency/, $@;
-
-    eval { sysopen(my $wo, "foo", O_WRONLY, $evil) };
-    test 169, $@ =~ /^Insecure dependency/, $@;
-
-    eval { sysopen(my $rw, "foo", O_RDWR, $evil) };
-    test 170, $@ =~ /^Insecure dependency/, $@;
-
-    eval { sysopen(my $ap, "foo", O_APPEND, $evil) };
-    test 171, $@ =~ /^Insecure dependency/, $@;
-
-    eval { sysopen(my $cr, "foo", O_CREAT, $evil) };
-    test 172, $@ =~ /^Insecure dependency/, $@;
-
-    eval { sysopen(my $tr, "foo", O_TRUNC, $evil) };
-    test 173, $@ =~ /^Insecure dependency/, $@;
-
-    unlink("foo"); # not unlink($evil), because that would fail...
+	eval { sysopen(my $tr, "foo", &O_TRUNC, $evil) };
+	test 173, $@ =~ /^Insecure dependency/, $@;
+	
+	unlink("foo"); # not unlink($evil), because that would fail...
+    }
 }
 
