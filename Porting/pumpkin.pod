@@ -480,8 +480,8 @@ directories.
 =head2 make regen_perly
 
 If perly.y has been edited, it is nessary to run this target to rebuild
-perly.h, perl.act and perl.tab. In fact this target just runs the Perl
-script regen_perly.pl. Note that perl.c is I<not> rebuilt; this is just a
+perly.h, perly.act and perly.tab. In fact this target just runs the Perl
+script regen_perly.pl. Note that perly.c is I<not> rebuilt; this is just a
 plain static file now. 
 
 This target relies on you having Bison installed on your system. Running
@@ -489,7 +489,7 @@ the target will tell you if you haven't got the right version, and if so,
 where to get the right one. Or if you prefer, you could hack
 regen_perly.pl to work with your version of Bison. The important things
 are that the regexes can still extract out the right chunks of the Bison
-output into perly.act and perl.tab, and that the contents of those two
+output into perly.act and perly.tab, and that the contents of those two
 files, plus perly.h, are functionally equivalent to those produced by the
 supported version of Bison.
 
