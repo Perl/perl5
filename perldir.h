@@ -5,7 +5,7 @@
 
 #include "ipdir.h"
 
-#define PerlDir_mkdir(name, mode) piDir->MKdir((name), (mode), ErrorNo())
+#define PerlDir_mkdir(name, mode) piDir->Makedir((name), (mode), ErrorNo())
 #define PerlDir_chdir(name) piDir->Chdir((name), ErrorNo())
 #define PerlDir_rmdir(name) piDir->Rmdir((name), ErrorNo())
 #define PerlDir_close(dir) piDir->Close((dir), ErrorNo())

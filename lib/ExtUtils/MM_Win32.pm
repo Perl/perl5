@@ -449,7 +449,10 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)\.exists 
 
 sub perl_archive
 {
- return '$(PERL_INC)\perl$(LIB_EXT)';
+    if($OBJ) {
+	return '$(PERL_INC)\perlcore$(LIB_EXT)';
+    }
+    return '$(PERL_INC)\perl$(LIB_EXT)';
 }
 
 sub export_list

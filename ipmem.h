@@ -1,7 +1,7 @@
 /*
 
-	ipmem.h
-	Interface for perl memory allocation
+    ipmem.h
+    Interface for perl memory allocation
 
 */
 
@@ -11,9 +11,9 @@
 class IPerlMem
 {
 public:
-	virtual void* Malloc(size_t) = 0;
-	virtual void* Realloc(void*, size_t) = 0;
-	virtual void Free(void*) = 0;
+    virtual void* Malloc(size_t) = 0;
+    virtual void* Realloc(void*, size_t) = 0;
+    virtual void Free(void*) = 0;
 };
 
 #endif	/* __Inc__IPerlMem___ */

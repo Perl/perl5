@@ -88,11 +88,17 @@ LIB32=$(LINK32) -lib
 # Options
 #
 !IF "$(RUNTIME)" == ""
+!  IF  "$(OBJECT)" == "-DPERL_OBJECT"
+OBJECTFLAGS = -TP $(OBJECT)
+RUNTIME  = -MT
+!  ELSE
+OBJECTFLAGS =
 RUNTIME  = -MD
+!  ENDIF
 !ENDIF
 INCLUDES = -I.\include -I. -I..
 #PCHFLAGS = -Fp"$(INTDIR)/modules.pch" -YX 
-DEFINES  = -DWIN32 -D_CONSOLE $(BUILDOPT) $(CRYPT_FLAG) $(OBJECT)
+DEFINES  = -DWIN32 -D_CONSOLE $(BUILDOPT) $(CRYPT_FLAG)
 LOCDEFS  = -DPERLDLL -DPERL_CORE
 SUBSYS   = console
 
@@ -100,7 +106,7 @@ SUBSYS   = console
 LIBC = msvcrt.lib
 WINIOMAYBE =
 !ELSE
-LIBC = libcmt.lib
+LIBC =
 WINIOMAYBE =
 !ENDIF
 
@@ -126,10 +132,14 @@ LIBFILES = $(CRYPT_LIB) oldnames.lib kernel32.lib user32.lib gdi32.lib \
 	oleaut32.lib netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
 	version.lib odbc32.lib odbccp32.lib
 
-!IF  "$(OBJECT)" == "-DPERL_OBJECT"
-CFLAGS   = -nologo -Gf -W3 -TP $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
-!ELSE
 CFLAGS   = -nologo -Gf -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
+
+!IF  "$(OBJECT)" == "-DPERL_OBJECT"
+COBJFLAGS   = -nologo -Gf -W3 $(INCLUDES) $(DEFINES) $(OBJECTFLAGS) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
+DMYMALLOC   = undef
+!ELSE
+COBJFLAGS   = $(CFLAGS)
+DMYMALLOC   = define
 !ENDIF
 LINK_FLAGS  = -nologo $(LINK_DBG) -machine:$(PROCESSOR_ARCHITECTURE)
 OBJOUT_FLAG = -Fo
@@ -168,9 +178,14 @@ EXTUTILSDIR=$(LIBDIR)\extutils
 
 #
 # various targets
+!IF  "$(OBJECT)" == "-DPERL_OBJECT"
+PERLIMPLIB=..\perlcore.lib
+PERLDLL=..\perlcore.dll
+!ELSE
 PERLIMPLIB=..\perl.lib
-MINIPERL=..\miniperl.exe
 PERLDLL=..\perl.dll
+!ENDIF
+MINIPERL=..\miniperl.exe
 PERLEXE=..\perl.exe
 GLOBEXE=..\perlglob.exe
 CONFIGPM=..\lib\Config.pm
@@ -380,23 +395,25 @@ config.w32 : $(CFGSH_TMPL)
 	copy $(CFGH_TMPL) config.h
 
 ..\config.sh : config.w32 $(MINIPERL) config_sh.PL
-	$(MINIPERL) -I..\lib config_sh.PL	\
-	    "INST_DRV=$(INST_DRV)"		\
-	    "INST_TOP=$(INST_TOP)"		\
-	    "archname=$(ARCHNAME)"		\
-	    "cc=$(CC)"				\
-	    "ccflags=$(OPTIMIZE) $(DEFINES)"	\
-	    "cf_email=$(EMAIL)"			\
-	    "d_crypt=$(D_CRYPT)"		\
-	    "libs=$(LIBFILES)"			\
-	    "incpath=$(CCINCDIR)"		\
-	    "libpth=$(CCLIBDIR)"		\
-	    "libc=$(LIBC)"			\
-	    "static_ext=$(STATIC_EXT)"		\
-	    "dynamic_ext=$(DYNAMIC_EXT)"	\
-	    "LINK_FLAGS=$(LINK_FLAGS)"		\
-	    "optimize=$(OPTIMIZE)"		\
-	    config.w32				> ..\config.sh
+	$(MINIPERL) -I..\lib config_sh.PL	    \
+	    "INST_DRV=$(INST_DRV)"		    \
+	    "INST_TOP=$(INST_TOP)"		    \
+	    "archname=$(ARCHNAME)"		    \
+	    "cc=$(CC)"				    \
+	    "ccflags=$(OPTIMIZE) $(DEFINES) $(OBJECTFLAGS)"\
+	    "cf_email=$(EMAIL)"			    \
+	    "d_crypt=$(D_CRYPT)"		    \
+	    "libs=$(LIBFILES)"			    \
+	    "incpath=$(CCINCDIR)"		    \
+	    "libpth=$(CCLIBDIR)"		    \
+	    "libc=$(LIBC)"			    \
+	    "static_ext=$(STATIC_EXT)"		    \
+	    "dynamic_ext=$(DYNAMIC_EXT)"	    \
+	    "LINK_FLAGS=$(LINK_FLAGS)"		    \
+	    "optimize=$(OPTIMIZE)"		    \
+	    "libperl=$(PERLIMPLIB)"		    \
+	    "d_mymalloc=$(DMYMALLOC)"		    \
+	    config.w32				    > ..\config.sh
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	cd .. && miniperl configpm
@@ -418,9 +435,21 @@ $(DLL_OBJ)    : $(CORE_H)
 $(PERL95_OBJ) : $(CORE_H)
 $(X2P_OBJ)    : $(CORE_H)
 
+
+!IF "$(OBJECT)" == "-DPERL_OBJECT"
+perldll.def : makefile
+	echo LIBRARY PerlCore >perldll.def
+	echo DESCRIPTION 'Perl interpreter' >>perldll.def
+	echo EXPORTS >>perldll.def
+	echo         perl_alloc >>perldll.def
+
+!ELSE
 perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym makedef.pl
 	$(MINIPERL) -w makedef.pl $(OPTIMIZE) $(DEFINES) \
 	    CCTYPE=$(CCTYPE) > perldll.def
+
+!ENDIF
+
 
 $(PERLDLL): perldll.def $(CORE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
 	$(LINK32) -dll -def:perldll.def -out:$@ @<<
@@ -433,6 +462,21 @@ perl.def  : $(MINIPERL) makeperldef.pl
 
 $(MINIMOD) : $(MINIPERL) ..\minimod.pl
 	cd .. && miniperl minimod.pl > lib\ExtUtils\Miniperl.pm
+
+..\x2p\a2p$(o) : ..\x2p\a2p.c
+	$(CC) $(CFLAGS) $(OBJOUT_FLAG)$@ -c ..\x2p\a2p.c
+
+..\x2p\hash$(o) : ..\x2p\hash.c
+	$(CC) $(CFLAGS) $(OBJOUT_FLAG)$@ -c ..\x2p\hash.c
+
+..\x2p\str$(o) : ..\x2p\str.c
+	$(CC) $(CFLAGS) $(OBJOUT_FLAG)$@ -c ..\x2p\str.c
+
+..\x2p\util$(o) : ..\x2p\util.c
+	$(CC) $(CFLAGS) $(OBJOUT_FLAG)$@ -c ..\x2p\util.c
+
+..\x2p\walk$(o) : ..\x2p\walk.c
+	$(CC) $(CFLAGS) $(OBJOUT_FLAG)$@ -c ..\x2p\walk.c
 
 $(X2P) : $(X2P_OBJ)
 	$(LINK32) -subsystem:console -out:$@ @<<
