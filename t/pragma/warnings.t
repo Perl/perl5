@@ -27,7 +27,7 @@ else
 my $files = 0;
 foreach my $file (@w_files) {
 
-    next if /(~|\.orig|,v)$/;
+    next if $file =~ /(~|\.orig|,v)$/;
 
     open F, "<$file" or die "Cannot open $file: $!\n" ;
     my $line = 0;
