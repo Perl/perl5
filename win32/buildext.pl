@@ -60,7 +60,13 @@ if ($opts{'list-static-libs'} || $opts{'create-perllibst-h'}) {
     print $fh "#ifdef STATIC3\n",(map {"    newXS(\"$statics2[$_]::bootstrap\", boot_$statics1[$_], file);\n"} 0 .. $#statics),"#undef STATIC3\n#endif\n";
   }
   else {
-    print map {/([^\/]+)$/;"$_/$1.lib "} @statics;
+    my %extralibs;
+    for (@statics) {
+      open my $fh, "<..\\lib\\auto\\$_\\extralibs.ld" or die "can't open <..\\lib\\auto\\$_\\extralibs.ld: $!";
+      $extralibs{$_}++ for grep {/\S/} split /\s+/, join '', <$fh>;
+    }
+    print map {/([^\/]+)$/;"..\\lib\\auto\\$_/$1.lib "} @statics;
+    print map {"$_ "} sort keys %extralibs;
   }
   exit;
 }

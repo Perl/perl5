@@ -155,7 +155,14 @@ CRYPT_SRC	*= fcrypt.c
 # extensions if you change the default.  Currently, this cannot be enabled
 # if you ask for USE_IMP_SYS above.
 #
-#PERL_MALLOC	*= define
+PERL_MALLOC	*= define
+
+#
+# set this to enable debugging mstats
+# This must be enabled to use the Devel::Peek::mstat() function.  This cannot
+# be enabled without PERL_MALLOC as well.
+#
+DEBUG_MSTATS  = define
 
 #
 # set the install locations of the compiler include/libraries
@@ -238,6 +245,19 @@ USE_IMP_SYS	*= undef
 USE_PERLIO	*= undef
 USE_LARGE_FILES	*= undef
 USE_PERLCRT	*= undef
+
+.IF "$(PERL_MALLOC)" == "undef"
+PERL_MALLOC	= undef
+DEBUG_MSTATS   = undef
+.ENDIF
+
+.IF "$(DEBUG_MSTATS)" == "undef"
+DEBUG_MSTATS   = undef
+.ENDIF
+
+.IF "$(DEBUG_MSTATS)" == "define"
+BUILDOPT       += -DPERL_DEBUGGING_MSTATS
+.ENDIF
 
 .IF "$(USE_IMP_SYS)$(USE_MULTI)" == "defineundef"
 USE_MULTI	!= define
@@ -1035,10 +1055,9 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 		perl.exp $(LKPOST))
 .ELSE
 	$(LINK32) -dll -def:perldll.def -out:$@ \
-	    -base:0x28000000 $(BLINK_FLAGS) $(DELAYLOAD) $(LIBFILES) \
-	    $(foreach,i,$(shell $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --list-static-libs) \
-	    ..\lib\auto\$i) \
-	        $(PERLDLL_RES) $(PERLDLL_OBJ:s,\,\\)
+	    $(shell $(MINIPERL) -I..\lib buildext.pl --list-static-libs) \
+	    @$(mktmp -base:0x28000000 $(BLINK_FLAGS) $(DELAYLOAD) $(LIBFILES) \
+	        $(PERLDLL_RES) $(PERLDLL_OBJ:s,\,\\))
 .ENDIF
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
 
@@ -1121,7 +1140,7 @@ Extensions : buildext.pl $(PERLDEP) $(CONFIGPM)
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) --dynamic
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --dynamic
 
-Extensions_static : buildext.pl $(PERLDEP) $(CONFIGPM)
+Extensions_static : buildext.pl
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --static
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) --static
 
