@@ -695,35 +695,6 @@ int sockatmark(int);
 #   define SETERRNO(errcode,vmserrcode) (errno = (errcode))
 #endif
 
-/* These definitions are sneaky.
- * Their only purpose is to avoid warnings on strict ANSI (non-VMS)
- * compilers which can get huffy about dollars in identifiers,
- * which is common practise in VMS.  The definitions in the
- * non-VMS branch are not used (since the VMS error code is
- * unsurprisingly not of much use in non-VMS) -- but their only
- * point is to be something non-dollared.  Neither are all instances
- * of dollared variables hidden this way, only at the spots where
- * non-VMS platforms see them. */
-#ifdef VMS
-#define VMS_LIB_INVARGV	LIB$_INVARG
-#define VMS_RMS_DIR	RMS$_DIR
-#define VMS_RMS_FAC	RMS$_FAC
-#define VMS_RMS_IFI	RMS$_IFI
-#define VMS_RMS_ISI	RMS$_ISI
-#define VMS_SS_ACCVIO	SS$_ACCVIO
-#define VMS_SS_IVCHAN	SS$_IVCHAN
-#define VMS_SS_NORMAL	SS$_NORMAL
-#else
-#define VMS_LIB_INVARG	EINVAL
-#define VMS_RMS_DIR	EBADF
-#define VMS_RMS_FAC	0
-#define VMS_RMS_IFI	EBADF
-#define VMS_RMS_ISI	EBADF
-#define VMS_SS_ACCVIO	EFAULT
-#define VMS_SS_IVCHAN	EBADF
-#define VMS_SS_NORMAL	0
-#endif
-
 #ifdef USE_5005THREADS
 #  define ERRSV (thr->errsv)
 #  define DEFSV THREADSV(0)

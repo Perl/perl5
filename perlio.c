@@ -981,7 +981,7 @@ PerlIO__close(PerlIO *f)
     if (f && *f)
 	return (*PerlIOBase(f)->tab->Close) (f);
     else {
-	SETERRNO(EBADF, VMS_SS_IVCHAN);
+	SETERRNO(EBADF, SS$_IVCHAN);
 	return -1;
     }
 }
@@ -998,7 +998,7 @@ PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param)
 	return new;
     }
     else {
-	SETERRNO(EBADF, VMS_SS_IVCHAN);
+	SETERRNO(EBADF, SS$_IVCHAN);
 	return NULL;
     }
 }
@@ -1025,7 +1025,7 @@ PerlIO_fileno(PerlIO *f)
     if (f && *f)
 	return (*PerlIOBase(f)->tab->Fileno) (f);
     else {
-	SETERRNO(EBADF, VMS_SS_IVCHAN);
+	SETERRNO(EBADF, SS$_IVCHAN);
 	return -1;
     }
 }
@@ -1241,7 +1241,7 @@ PerlIO_read(PerlIO *f, void *vbuf, Size_t count)
     if (f && *f)
 	return (*PerlIOBase(f)->tab->Read) (f, vbuf, count);
     else {
-	SETERRNO(EBADF, VMS_SS_IVCHAN);
+	SETERRNO(EBADF, SS$_IVCHAN);
 	return -1;
     }
 }
@@ -1253,7 +1253,7 @@ PerlIO_unread(PerlIO *f, const void *vbuf, Size_t count)
     if (f && *f)
 	return (*PerlIOBase(f)->tab->Unread) (f, vbuf, count);
     else {
-	SETERRNO(EBADF, VMS_SS_IVCHAN);
+	SETERRNO(EBADF, SS$_IVCHAN);
 	return -1;
     }
 }
@@ -1265,7 +1265,7 @@ PerlIO_write(PerlIO *f, const void *vbuf, Size_t count)
     if (f && *f)
 	return (*PerlIOBase(f)->tab->Write) (f, vbuf, count);
     else {
-	SETERRNO(EBADF, VMS_SS_IVCHAN);
+	SETERRNO(EBADF, SS$_IVCHAN);
 	return -1;
     }
 }
@@ -1277,7 +1277,7 @@ PerlIO_seek(PerlIO *f, Off_t offset, int whence)
     if (f && *f)
 	return (*PerlIOBase(f)->tab->Seek) (f, offset, whence);
     else {
-	SETERRNO(EBADF, VMS_SS_IVCHAN);
+	SETERRNO(EBADF, SS$_IVCHAN);
 	return -1;
     }
 }
@@ -1289,7 +1289,7 @@ PerlIO_tell(PerlIO *f)
     if (f && *f)
 	return (*PerlIOBase(f)->tab->Tell) (f);
     else {
-	SETERRNO(EBADF, VMS_SS_IVCHAN);
+	SETERRNO(EBADF, SS$_IVCHAN);
 	return -1;
     }
 }
@@ -1306,13 +1306,13 @@ PerlIO_flush(PerlIO *f)
 	    }
 	    else {
 		PerlIO_debug("Cannot flush f=%p :%s\n", f, tab->name);
-		SETERRNO(EBADF, VMS_SS_IVCHAN);
+		SETERRNO(EBADF, SS$_IVCHAN);
 		return -1;
 	    }
 	}
 	else {
 	    PerlIO_debug("Cannot flush f=%p\n", f);
-	    SETERRNO(EBADF, VMS_SS_IVCHAN);
+	    SETERRNO(EBADF, SS$_IVCHAN);
 	    return -1;
 	}
     }
@@ -1365,7 +1365,7 @@ PerlIO_fill(PerlIO *f)
     if (f && *f)
 	return (*PerlIOBase(f)->tab->Fill) (f);
     else {
-	SETERRNO(EBADF, VMS_SS_IVCHAN);
+	SETERRNO(EBADF, SS$_IVCHAN);
 	return -1;
     }
 }
@@ -1377,7 +1377,7 @@ PerlIO_isutf8(PerlIO *f)
     if (f && *f)
 	return (PerlIOBase(f)->flags & PERLIO_F_UTF8) != 0;
     else {
-	SETERRNO(EBADF, VMS_SS_IVCHAN);
+	SETERRNO(EBADF, SS$_IVCHAN);
 	return -1;
     }
 }
@@ -1389,7 +1389,7 @@ PerlIO_eof(PerlIO *f)
     if (f && *f)
 	return (*PerlIOBase(f)->tab->Eof) (f);
     else {
-	SETERRNO(EBADF, VMS_SS_IVCHAN);
+	SETERRNO(EBADF, SS$_IVCHAN);
 	return -1;
     }
 }
@@ -1401,7 +1401,7 @@ PerlIO_error(PerlIO *f)
     if (f && *f)
 	return (*PerlIOBase(f)->tab->Error) (f);
     else {
-	SETERRNO(EBADF, VMS_SS_IVCHAN);
+	SETERRNO(EBADF, SS$_IVCHAN);
 	return -1;
     }
 }
@@ -1413,7 +1413,7 @@ PerlIO_clearerr(PerlIO *f)
     if (f && *f)
 	(*PerlIOBase(f)->tab->Clearerr) (f);
     else
-	SETERRNO(EBADF, VMS_SS_IVCHAN);
+	SETERRNO(EBADF, SS$_IVCHAN);
 }
 
 #undef PerlIO_setlinebuf
@@ -1423,7 +1423,7 @@ PerlIO_setlinebuf(PerlIO *f)
     if (f && *f)
 	(*PerlIOBase(f)->tab->Setlinebuf) (f);
     else
-	SETERRNO(EBADF, VMS_SS_IVCHAN);
+	SETERRNO(EBADF, SS$_IVCHAN);
 }
 
 #undef PerlIO_has_base
@@ -1709,7 +1709,7 @@ PerlIOBase_pushed(PerlIO *f, const char *mode, SV *arg)
 	    l->flags |= PERLIO_F_TRUNCATE | PERLIO_F_CANWRITE;
 	    break;
 	default:
-	    SETERRNO(EINVAL, VMS_LIB_INVARG);
+	    SETERRNO(EINVAL, LIB$_INVARG);
 	    return -1;
 	}
 	while (*mode) {
@@ -1724,7 +1724,7 @@ PerlIOBase_pushed(PerlIO *f, const char *mode, SV *arg)
 		l->flags |= PERLIO_F_CRLF;
 		break;
 	    default:
-		SETERRNO(EINVAL, VMS_LIB_INVARG);
+		SETERRNO(EINVAL, LIB$_INVARG);
 		return -1;
 	    }
 	}
@@ -1918,7 +1918,7 @@ PerlIOUnix_oflags(const char *mode)
      */
     oflags |= O_BINARY;
     if (*mode || oflags == -1) {
-	SETERRNO(EINVAL, VMS_LIB_INVARG);
+	SETERRNO(EINVAL, LIB$_INVARG);
 	oflags = -1;
     }
     return oflags;
@@ -3548,7 +3548,7 @@ PerlIOMmap_map(PerlIO *f)
 		if (!page_size) {
 #if defined(HAS_SYSCONF) && (defined(_SC_PAGESIZE) || defined(_SC_PAGE_SIZE))
 		    {
-			SETERRNO(0, VMS_SS_NORMAL);
+			SETERRNO(0, SS$_NORMAL);
 #   ifdef _SC_PAGESIZE
 			page_size = sysconf(_SC_PAGESIZE);
 #   else
@@ -4055,7 +4055,7 @@ PerlIO_setpos(PerlIO *f, SV *pos)
 	if (f && len == sizeof(Off_t))
 	    return PerlIO_seek(f, *posn, SEEK_SET);
     }
-    SETERRNO(EINVAL, VMS_SS_IVCHAN);
+    SETERRNO(EINVAL, SS$_IVCHAN);
     return -1;
 }
 #else
@@ -4075,7 +4075,7 @@ PerlIO_setpos(PerlIO *f, SV *pos)
 #endif
 	}
     }
-    SETERRNO(EINVAL, VMS_SS_IVCHAN);
+    SETERRNO(EINVAL, SS$_IVCHAN);
     return -1;
 }
 #endif

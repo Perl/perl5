@@ -590,7 +590,7 @@ PP(pp_print)
             goto had_magic;
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
-	SETERRNO(EBADF,VMS_RMS_IFI);
+	SETERRNO(EBADF,RMS$_IFI);
 	goto just_say_no;
     }
     else if (!(fp = IoOFP(io))) {
@@ -600,7 +600,7 @@ PP(pp_print)
 	    else if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 		report_evil_fh(gv, io, PL_op->op_type);
 	}
-	SETERRNO(EBADF,IoIFP(io)?VMS_RMS_FAC:VMS_RMS_IFI);
+	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
 	goto just_say_no;
     }
     else {

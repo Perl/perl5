@@ -3322,7 +3322,7 @@ trylocal: {
 	RETPUSHUNDEF;
     }
     else
-	SETERRNO(0, VMS_SS_NORMAL);
+	SETERRNO(0, SS$_NORMAL);
 
     /* Assume success here to prevent recursive requirement. */
     len = strlen(name);
