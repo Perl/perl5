@@ -82,7 +82,8 @@ if ($Config{d_strtod}) {
 # Using long double NVs may introduce greater accuracy than wanted.
     $n =~ s/^3.1415(8999|9000)\d*$/3.14159/
         if $Config{uselongdouble} eq 'define';
-    print (($n == 3.14159) && ($x == 6) ? "ok 14\n" : "not ok 14\n");
+    print ((abs($n - 3.14159) < 0.00001) && ($x == 6) ?
+          "ok 14\n" : "not ok 14\n");
     &POSIX::setlocale(&POSIX::LC_NUMERIC, $lc) if $Config{d_setlocale};
 } else { print "# strtod not present\n", "ok 14\n"; }
 
