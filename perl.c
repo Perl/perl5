@@ -1188,8 +1188,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     register SV *sv;
     register char *s;
     char *cddir = Nullch;
-/* PSz 18 Feb 04  fdscript now global, keep from confusion */
-    int dummy_fdscript = -1;
 
     PL_fdscript = -1;
     PL_suidscript = -1;
@@ -1499,9 +1497,9 @@ print \"  \\@INC:\\n    @INC\\n\";");
 
     init_perllib();
 
-    open_script(scriptname,dosearch,sv,&dummy_fdscript);
+    open_script(scriptname,dosearch,sv);
 
-    validate_suid(validarg, scriptname,dummy_fdscript);
+    validate_suid(validarg, scriptname);
 
 #ifndef PERL_MICRO
 #if defined(SIGCHLD) || defined(SIGCLD)
@@ -2934,7 +2932,7 @@ S_init_main_stash(pTHX)
 
 /* PSz 18 Nov 03  fdscript now global but do not change prototype */
 STATIC void
-S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv, int *dummy_fdscript)
+S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv)
 {
 #ifndef IAMSUID
     char *quote;
@@ -3232,9 +3230,8 @@ S_fd_on_nosuid_fs(pTHX_ int fd)
 }
 #endif /* IAMSUID */
 
-/* PSz 18 Nov 03  fdscript now global but do not change prototype */
 STATIC void
-S_validate_suid(pTHX_ char *validarg, char *scriptname, int dummy_fdscript)
+S_validate_suid(pTHX_ char *validarg, char *scriptname)
 {
 #ifdef IAMSUID
     /* int which; */

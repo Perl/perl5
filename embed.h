@@ -3915,13 +3915,13 @@
 #define nuke_stacks()		S_nuke_stacks(aTHX)
 #endif
 #ifdef PERL_CORE
-#define open_script(a,b,c,d)	S_open_script(aTHX_ a,b,c,d)
+#define open_script(a,b,c)	S_open_script(aTHX_ a,b,c)
 #endif
 #ifdef PERL_CORE
 #define usage(a)		S_usage(aTHX_ a)
 #endif
 #ifdef PERL_CORE
-#define validate_suid(a,b,c)	S_validate_suid(aTHX_ a,b,c)
+#define validate_suid(a,b)	S_validate_suid(aTHX_ a,b)
 #endif
 #  if defined(IAMSUID)
 #ifdef PERL_CORE
