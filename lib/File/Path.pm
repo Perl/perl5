@@ -90,10 +90,6 @@ in situations where security is an issue.
 Tim Bunce <F<Tim.Bunce@ig.co.uk>> and
 Charles Bailey <F<bailey@newman.upenn.edu>>
 
-=head1 REVISION
-
-Current $VERSION is 1.0401.
-
 =cut
 
 use Carp;
@@ -103,7 +99,7 @@ use Exporter ();
 use strict;
 
 use vars qw( $VERSION @ISA @EXPORT );
-$VERSION = "1.0401";
+$VERSION = "1.0402";
 @ISA = qw( Exporter );
 @EXPORT = qw( mkpath rmtree );
 
