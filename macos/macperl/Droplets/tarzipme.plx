@@ -197,7 +197,7 @@ sub do_dialog {
     find(sub {
         my $f = $File::Find::name;
         return if ! -f $f || $f =~ /:Icon\n$/;
-        (my $n = $f) =~ s/^$mdir//;
+        (my $n = $f) =~ s/^$mdir/:/;
         push @files, $n;
         $con{$n} = [guess($f), 0];
     }, $tdir);
