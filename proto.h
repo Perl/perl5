@@ -623,6 +623,7 @@ PERL_CALLCONV void	Perl_set_numeric_radix(pTHX);
 PERL_CALLCONV void	Perl_set_numeric_standard(pTHX);
 PERL_CALLCONV void	Perl_require_pv(pTHX_ const char* pv);
 PERL_CALLCONV void	Perl_pack_cat(pTHX_ SV *cat, char *pat, char *patend, SV **beglist, SV **endlist, SV ***next_in_list, U32 flags);
+PERL_CALLCONV void	Perl_packlist(pTHX_ SV *cat, char *pat, char *patend, SV **beglist, SV **endlist);
 PERL_CALLCONV void	Perl_pidgone(pTHX_ Pid_t pid, int status);
 PERL_CALLCONV void	Perl_pmflag(pTHX_ U32* pmfl, int ch);
 PERL_CALLCONV OP*	Perl_pmruntime(pTHX_ OP* pm, OP* expr, OP* repl);
@@ -834,6 +835,7 @@ PERL_CALLCONV UV	Perl_to_utf8_fold(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp);
 PERL_CALLCONV I32	Perl_unlnk(pTHX_ char* f);
 #endif
 PERL_CALLCONV I32	Perl_unpack_str(pTHX_ char *pat, char *patend, char *s, char *strbeg, char *strend, char **new_s, I32 ocnt, U32 flags);
+PERL_CALLCONV I32	Perl_unpackstring(pTHX_ char *pat, char *patend, char *s, char *strend, U32 flags);
 PERL_CALLCONV void	Perl_unsharepvn(pTHX_ const char* sv, I32 len, U32 hash);
 PERL_CALLCONV void	Perl_unshare_hek(pTHX_ HEK* hek);
 PERL_CALLCONV void	Perl_utilize(pTHX_ int aver, I32 floor, OP* version, OP* idop, OP* arg);
