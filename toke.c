@@ -2167,7 +2167,7 @@ Perl_yylex(pTHX)
 
     /* check if there's an identifier for us to look at */
     if (PL_pending_ident) 
-        return pending_ident(aTHX);
+        return S_pending_ident(aTHX);
 
     /* no identifier pending identification */
 
@@ -5112,7 +5112,8 @@ Perl_yylex(pTHX)
 #pragma segment Main
 #endif
 
-int S_pending_ident(pTHX)
+static int
+S_pending_ident(pTHX)
 {
     register char *d;
     register I32 tmp;
