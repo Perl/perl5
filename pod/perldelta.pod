@@ -772,6 +772,13 @@ platform-dependent.
 
 Don't panic.  Read INSTALL 'make test' section instead. 
 
+=head2 Test lib/posix Subtest 9 Fails In LP64-Configured HP-UX
+
+If perl is configured with -Duse64bitall, the successful result of the
+subtest 10 of lib/posix may arrive before the successful result of the
+subtest 9, which confuses the test harness so much that it thinks the
+subtest 9 failed.
+
 =head2 Long Doubles Still Don't Work In Solaris
 
 The experimental long double support is still very much so in Solaris.
