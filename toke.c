@@ -176,12 +176,12 @@ int yyactlevel = -1;
 #define OLDLOP(f) return(yylval.ival=f,PL_expect = XTERM,PL_bufptr = s,(int)LSTOP)
 
 void
-S_tokereport(char *thing, char* s, I32 rv)
+S_tokereport(pTHX_ char *thing, char* s, I32 rv)
 { 
     SV *report;
     DEBUG_T({
         report = newSVpv(thing, 0);
-        sv_catpvf(report, ":line %i:%i:", CopLINE(PL_curcop), rv);
+        Perl_sv_catpvf(aTHX_ report, ":line %i:%i:", CopLINE(PL_curcop), rv);
 
         if (s - PL_bufptr > 0)
             sv_catpvn(report, PL_bufptr, s - PL_bufptr);
