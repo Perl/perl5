@@ -2396,7 +2396,7 @@ $ echo "SDBM_File if you have the GDBM library built on your machine."
 $ echo ""
 $ echo "Which modules do you want to build into perl?"
 $! we need to add Byteloader to this list:
-$ dflt = "re Fcntl Encode Errno File::Glob Filter::Util::Call IO Opcode Devel::Peek Devel::DProf Data::Dumper attrs VMS::Stdio VMS::DCLsym B SDBM_File Storable Thread Sys::Hostname Digest::MD5 PerlIO::Scalar MIME::Base64 XS::Typemap"
+$ dflt = "re Fcntl Encode Errno File::Glob Filter::Util::Call IO Opcode Devel::Peek Devel::DProf Data::Dumper attrs VMS::Stdio VMS::DCLsym B SDBM_File Storable Thread Sys::Hostname Digest::MD5 PerlIO::Scalar MIME::Base64 XS::Typemap Time::HiRes"
 $ IF ccname .EQS. "DEC" .OR. ccname .EQS. "CXX"
 $ THEN
 $   dflt = dflt + " POSIX"

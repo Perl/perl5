@@ -764,7 +764,7 @@ SETARGV_OBJ	= setargv$(o)
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
 		Sys/Hostname Storable Filter/Util/Call Encode \
-		Digest/MD5 PerlIO/Scalar MIME/Base64
+		Digest/MD5 PerlIO/Scalar MIME/Base64 Time/HiRes
 STATIC_EXT	= DynaLoader
 NONXS_EXT	= Errno
 
@@ -1122,6 +1122,7 @@ distclean: clean
 	-del /f $(LIBDIR)\Digest\MD5.pm
 	-del /f $(LIBDIR)\MIME\Base64\Base64.pm
 	-del /f $(LIBDIR)\MIME\Base64\QuotedPrint.pm
+	-del /f $(LIBDIR)\Time\HiRes\HiRes.pm
 	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO || rmdir /s $(LIBDIR)\IO
 	-if exist $(LIBDIR)\Thread rmdir /s /q $(LIBDIR)\Thread || rmdir /s $(LIBDIR)\Thread
 	-if exist $(LIBDIR)\B rmdir /s /q $(LIBDIR)\B || rmdir /s $(LIBDIR)\B
@@ -1132,6 +1133,7 @@ distclean: clean
 	-if exist $(LIBDIR)\Digest rmdir /s /q $(LIBDIR)\Digest || rmdir /s $(LIBDIR)\Digest
 	-if exist $(LIBDIR)\MIME\Base64 rmdir /s /q $(LIBDIR)\MIME\Base64 || rmdir /s $(LIBDIR)\MIME\Base64
 	-if exist $(LIBDIR)\MIME rmdir /s /q $(LIBDIR)\MIME || rmdir /s $(LIBDIR)\MIME
+	-if exist $(LIBDIR)\Time\HiRes rmdir /s /q $(LIBDIR)\Time\HiRes || rmdir /s $(LIBDIR)\Time\HiRes
 	-cd $(PODDIR) && del /f *.html *.bat checkpods \
 	    perlaix.pod perlamiga.pod perlbs2000.pod perlcygwin.pod \
 	    perldos.pod perlepoc.pod perlhpux.pod perlmachten.pod \
