@@ -43,7 +43,7 @@ case $PERL_CONFIG_SH in
 esac
 
 case "X$1" in
-Xoptimize=*)
+Xoptimize=*|X"optimize=*")
 	eval "$1"
 	shift
 	;;
