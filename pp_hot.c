@@ -1457,11 +1457,20 @@ PP(pp_iter)
 	    STRLEN maxlen;
 	    char *max = SvPV((SV*)av, maxlen);
 	    if (!SvNIOK(cur) && SvCUR(cur) <= maxlen) {
-	        /* we need a fresh SV every time so that loop body sees a
-		 * completely new SV for closures/references to work as they
-		 * used to */
-		SvREFCNT_dec(*cx->blk_loop.itervar);
-		*cx->blk_loop.itervar = newSVsv(cur);
+#ifndef USE_THREADS			  /* don't risk potential race */
+		if (SvREFCNT(*cx->blk_loop.itervar) == 1) {
+		    /* safe to reuse old SV */
+		    sv_setsv(*cx->blk_loop.itervar, cur);
+		}
+		else 
+#endif
+		{
+		    /* we need a fresh SV every time so that loop body sees a
+		     * completely new SV for closures/references to work as
+		     * they used to */
+		    SvREFCNT_dec(*cx->blk_loop.itervar);
+		    *cx->blk_loop.itervar = newSVsv(cur);
+		}
 		if (strEQ(SvPVX(cur), max))
 		    sv_setiv(cur, 0); /* terminate next time */
 		else
@@ -1474,11 +1483,20 @@ PP(pp_iter)
 	if (cx->blk_loop.iterix > cx->blk_loop.itermax)
 	    RETPUSHNO;
 
-	/* we need a fresh SV every time so that loop body sees a
-	 * completely new SV for closures/references to work as they
-	 * used to */
-	SvREFCNT_dec(*cx->blk_loop.itervar);
-	*cx->blk_loop.itervar = newSViv(cx->blk_loop.iterix++);
+#ifndef USE_THREADS			  /* don't risk potential race */
+	if (SvREFCNT(*cx->blk_loop.itervar) == 1) {
+	    /* safe to reuse old SV */
+	    sv_setiv(*cx->blk_loop.itervar, cx->blk_loop.iterix++);
+	}
+	else 
+#endif
+	{
+	    /* we need a fresh SV every time so that loop body sees a
+	     * completely new SV for closures/references to work as they
+	     * used to */
+	    SvREFCNT_dec(*cx->blk_loop.itervar);
+	    *cx->blk_loop.itervar = newSViv(cx->blk_loop.iterix++);
+	}
 	RETPUSHYES;
     }
 
