@@ -170,6 +170,10 @@ for more information.
 
 F<perlcc> is the interface to the experimental Perl compiler suite.
 
+=item L<perlbc|perlbc>
+
+F<perlbc> is the interface to the experimental Perl bytecompiler suite.
+
 =back
 
 =head2 SEE ALSO
@@ -180,6 +184,6 @@ L<podchecker|podchecker>, L<splain|splain>, L<perldiag>,
 L<roffitall|roffitall>, L<a2p|a2p>, L<s2p|s2p>, L<find2perl|find2perl>,
 L<File::Find|File::Find>, L<pl2pm|pl2pm>, L<perlbug|perlbug>,
 L<h2ph|h2ph>, L<c2ph|c2ph>, L<h2xs|h2xs>, L<dprofpp|dprofpp>,
-L<Devel::Dprof>, L<perlcc|perlcc>
+L<Devel::Dprof>, L<perlcc|perlcc>, L<perlbc|perlbc>
 
 =cut

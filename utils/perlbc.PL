@@ -37,8 +37,9 @@ $Config{startperl}
 print OUT <<'!NO!SUBS!';
 
 use strict;
-use warning;
-no warning qw(once);
+use warnings;
+
+our($running_under_some_shell);
 
 use Config;
 
