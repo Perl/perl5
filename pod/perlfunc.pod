@@ -2953,7 +2953,9 @@ The following triples are more or less equivalent:
     open(FOO, '-|', "cat", '-n', $file);
 
 The last example in each block shows the pipe as "list form", which is
-not yet supported on all platforms.
+not yet supported on all platforms.  A good rule of thumb is that if
+your platform has true C<fork()> (in other words, if your platform is
+UNIX) you can use the list form.
 
 See L<perlipc/"Safe Pipe Opens"> for more examples of this.
 
