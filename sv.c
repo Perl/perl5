@@ -22,8 +22,6 @@
 #include "regcomp.h"
 
 #define FCALL *f
-#define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) sv_force_normal(sv)
-
 
 /* ============================================================================
 

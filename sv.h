@@ -1210,3 +1210,5 @@ struct clone_params {
   UV  flags;
   PerlInterpreter *proto_perl;
 };
+
+#define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) sv_force_normal(sv)

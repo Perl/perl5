@@ -1503,7 +1503,7 @@ Perl_do_readline(pTHX)
 	}
 	if (gimme == G_SCALAR) {
 	    /* undef TARG, and push that undefined value */
-	    SV_CHECK_THINKFIRST_COW_DROP(TARG);
+	    SV_CHECK_THINKFIRST(TARG);
 	    (void)SvOK_off(TARG);
 	    PUSHTARG;
 	}
@@ -1565,7 +1565,7 @@ Perl_do_readline(pTHX)
 		}
 	    }
 	    if (gimme == G_SCALAR) {
-		SV_CHECK_THINKFIRST_COW_DROP(TARG);
+		SV_CHECK_THINKFIRST(TARG);
 		(void)SvOK_off(TARG);
 		SPAGAIN;
 		PUSHTARG;
