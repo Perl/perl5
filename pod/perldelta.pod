@@ -477,6 +477,11 @@ C<require> and C<use> also support such literals:
     require v5.6.0;	# croak if $^V lt v5.6.0
     use v5.6.0;		# same, but croaks at compile-time
 
+C<sprintf> and C<printf> support the Perl-specific format type C<%v>
+to print arbitrary strings as dotted tuples.
+
+    printf "v%v", $^V;	# prints current version, such as "v5.5.650"
+
 =head2 Weak references
 
 WARNING: This is an experimental feature.
