@@ -2734,7 +2734,7 @@ $ ENDIF
 $!
 $ usedl="define"
 $ startperl="""$ perl 'f$env(\""procedure\"")' \""'"+"'p1'\"" \""'"+"'p2'\"" \""'"+"'p3'\"" \""'"+"'p4'\"" \""'"+"'p5'\"" \""'"+"'p6'\"" \""'"+"'p7'\"" \""'"+"'p8'\""!\n"
-$ startperl=startperl + "$ exit++ + ++$status!=0 and $exit=$status=undef; while($ARGV[$#ARGV] eq '"+"'){pop @ARGV;}"""
+$ startperl=startperl + "$ exit++ + ++$status!=0 and $exit=$status=undef; while($#ARGV != -1 and $ARGV[$#ARGV] eq '"+"'){pop @ARGV;}"""
 $!
 $ IF ((Use_Threads) .AND. (vms_ver .LES. "6.2"))
 $ THEN
