@@ -66,8 +66,13 @@ extern  char	*staticlinkmodules[];
 /*#define USE_WIN32_RTL_ENV */
 
 #ifndef USE_WIN32_RTL_ENV
+#include <stdlib.h>
+#ifndef EXT
+#include "EXTERN.h"
+#endif
 #undef getenv
 #define getenv win32_getenv
+EXT char *win32_getenv(const char *name);
 #endif
 
 #define USE_SOCKETS_AS_HANDLES

@@ -97,7 +97,7 @@ win32PerlLibPath(void)
 char *
 win32SiteLibPath(void)
 {
-    static char szPerlSiteLib[MAXPATH+1];
+    static char szPerlSiteLib[MAX_PATH+1];
     strcpy(szPerlSiteLib, win32PerlLibPath());
     strcat(szPerlSiteLib, "\\site");
     return (szPerlSiteLib);
