@@ -11,6 +11,8 @@
  *   "It all comes from here, the stench and the peril."  --Frodo
  */
 
+#define TMP_CRLF_PATCH
+
 #include "EXTERN.h"
 #include "perl.h"
 
@@ -1986,7 +1988,7 @@ yylex(void)
 	}
 	goto retry;
     case '\r':
-#ifdef PERL_STRICT_CR
+#ifndef TMP_CRLF_PATCH
 	warn("Illegal character \\%03o (carriage return)", '\r');
 	croak(
       "(Maybe you didn't strip carriage returns after a network transfer?)\n");
@@ -5155,6 +5157,30 @@ scan_heredoc(register char *s)
     *d++ = '\n';
     *d = '\0';
     len = d - tokenbuf;
+#ifdef TMP_CRLF_PATCH
+    d = strchr(s, '\r');
+    if (d) {
+	char *olds = s;
+	s = d;
+	while (s < bufend) {
+	    if (*s == '\r') {
+		*d++ = '\n';
+		if (*++s == '\n')
+		    s++;
+	    }
+	    else if (*s == '\n' && s[1] == '\r') {	/* \015\013 on a mac? */
+		*d++ = *s++;
+		s++;
+	    }
+	    else
+		*d++ = *s++;
+	}
+	*d = '\0';
+	bufend = d;
+	SvCUR_set(linestr, bufend - SvPVX(linestr));
+	s = olds;
+    }
+#endif
     d = "\n";
     if (outer || !(d=ninstr(s,bufend,d,d+1)))
 	herewas = newSVpv(s,bufend-s);
@@ -5206,6 +5232,20 @@ scan_heredoc(register char *s)
 	    missingterm(tokenbuf);
 	}
 	curcop->cop_line++;
+	bufend = SvPVX(linestr) + SvCUR(linestr);
+#ifdef TMP_CRLF_PATCH
+	if (bufend - linestart >= 2) {
+	    if (bufend[-2] == '\r' || bufend[-2] == '\n') {
+		bufend[-2] = '\n';
+		bufend--;
+		SvCUR_set(linestr, bufend - SvPVX(linestr));
+	    }
+	    else if (bufend[-1] == '\r')
+		bufend[-1] = '\n';
+	}
+	else if (bufend - linestart == 1 && bufend[-1] == '\r')
+	    bufend[-1] = '\n';
+#endif
 	if (PERLDB_LINE && curstash != debstash) {
 	    SV *sv = NEWSV(88,0);
 
@@ -5214,7 +5254,6 @@ scan_heredoc(register char *s)
 	    av_store(GvAV(curcop->cop_filegv),
 	      (I32)curcop->cop_line,sv);
 	}
-	bufend = SvPVX(linestr) + SvCUR(linestr);
 	if (*s == term && memEQ(s,tokenbuf,len)) {
 	    s = bufend - 1;
 	    *s = ' ';
@@ -5491,6 +5530,20 @@ scan_str(char *start)
 
   	if (s < bufend) break;	/* handle case where we are done yet :-) */
 
+#ifdef TMP_CRLF_PATCH
+	if (to - SvPVX(sv) >= 2) {
+	    if (to[-2] == '\r' || to[-2] == '\n') {
+		to[-2] = '\n';
+		to--;
+		SvCUR_set(sv, to - SvPVX(sv));
+	    }
+	    else if (to[-1] == '\r')
+		to[-1] = '\n';
+	}
+	else if (to - SvPVX(sv) == 1 && to[-1] == '\r')
+	    to[-1] = '\n';
+#endif
+	
 	/* if we're out of file, or a read fails, bail and reset the current
 	   line marker so we can report where the unterminated string began
 	*/
