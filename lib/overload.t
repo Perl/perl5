@@ -729,7 +729,7 @@ else {
   $iter = iterator->new(5);
   test scalar <${iter}>, '5';	# 176
   $acc = '';
-  $acc .= " $out" while $out = <${iter}>;
+  $acc .= " $out" while $out = <$iter>;
   test $acc, ' 4 3 2 1 0';	# 177
 }
 {
