@@ -333,6 +333,7 @@ PERL_CALLCONV I32	Perl_ibcmp_locale(pTHX_ const char* a, const char* b, I32 len)
 PERL_CALLCONV bool	Perl_ingroup(pTHX_ Gid_t testgid, Uid_t effective);
 PERL_CALLCONV void	Perl_init_debugger(pTHX);
 PERL_CALLCONV void	Perl_init_stacks(pTHX);
+PERL_CALLCONV void	Perl_init_tm(pTHX_ struct tm *ptm);
 PERL_CALLCONV U32	Perl_intro_my(pTHX);
 PERL_CALLCONV char*	Perl_instr(pTHX_ const char* big, const char* little);
 PERL_CALLCONV bool	Perl_io_close(pTHX_ IO* io, bool not_implicit);
@@ -475,6 +476,7 @@ PERL_CALLCONV U32	Perl_mg_length(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_mg_magical(pTHX_ SV* sv);
 PERL_CALLCONV int	Perl_mg_set(pTHX_ SV* sv);
 PERL_CALLCONV I32	Perl_mg_size(pTHX_ SV* sv);
+PERL_CALLCONV void	Perl_mini_mktime(pTHX_ struct tm *pm);
 PERL_CALLCONV OP*	Perl_mod(pTHX_ OP* o, I32 type);
 PERL_CALLCONV int	Perl_mode_from_discipline(pTHX_ SV* discp);
 PERL_CALLCONV char*	Perl_moreswitches(pTHX_ char* s);
