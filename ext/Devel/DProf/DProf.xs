@@ -502,7 +502,7 @@ prof_record(pTHX)
 static void
 check_depth(pTHX_ void *foo)
 {
-    U32 need_depth = (U32)foo;
+    U32 need_depth = PTR2UV(foo);
     if (need_depth != g_depth) {
 	if (need_depth > g_depth) {
 	    warn("garbled call depth when profiling");

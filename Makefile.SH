@@ -222,21 +222,24 @@ private = preplibrary lib/ExtUtils/Miniperl.pm lib/Config.pm
 # Files to be built with variable substitution before miniperl
 # is available.
 sh = Makefile.SH cflags.SH config_h.SH makeaperl.SH makedepend.SH \
-	makedir.SH myconfig.SH writemain.SH
+	makedir.SH myconfig.SH writemain.SH pod/Makefile.SH
 
-shextract = Makefile cflags config.h uconfig.h makeaperl makedepend \
-	makedir myconfig writemain
+shextract = Makefile cflags config.h makeaperl makedepend \
+	makedir myconfig writemain pod/Makefile
 
 # Files to be built with variable substitution after miniperl is
 # available.  Dependencies handled manually below (for now).
 
 pl = pod/pod2html.PL pod/pod2latex.PL pod/pod2man.PL pod/pod2text.PL \
-	pod/pod2usage.PL pod/podchecker.PL pod/podselect.PL
+	pod/pod2usage.PL pod/podchecker.PL pod/podselect.PL \
+	pod/buildtoc.PL
 
+# lib/lib.pm is not listed here because it has a rule of its own.
 plextract = pod/pod2html pod/pod2latex pod/pod2man pod/pod2text \
-	pod/pod2usage pod/podchecker pod/podselect
+	pod/pod2usage pod/podchecker pod/podselect \
+	pod/buildtoc
 
-addedbyconf = UU $(shextract) $(plextract) pstruct
+addedbyconf = UU $(shextract) $(plextract) lib/lib.pm pstruct
 
 h1 = EXTERN.h INTERN.h XSUB.h av.h config.h cop.h cv.h dosish.h
 h2 = embed.h form.h gv.h handy.h hv.h keywords.h mg.h op.h
@@ -286,7 +289,7 @@ compile: all
 translators:	miniperl lib/Config.pm FORCE
 	@echo " "; echo "	Making x2p stuff"; cd x2p; $(LDLIBPTH) $(MAKE) all
 
-utilities:	miniperl lib/Config.pm $(plextract) FORCE
+utilities:	miniperl lib/Config.pm $(plextract) lib/lib.pm FORCE
 	@echo " "; echo "	Making utilities"; cd utils; $(LDLIBPTH) $(MAKE) all
 
 
@@ -526,6 +529,9 @@ lib/re.pm: ext/re/re.pm
 $(plextract):	miniperl lib/Config.pm
 	$(LDLIBPTH) ./miniperl -Ilib $@.PL
 
+lib/lib.pm:	miniperl lib/Config.pm
+	$(LDLIBPTH) ./miniperl -Ilib lib/lib_pm.PL
+
 extra.pods: miniperl
 	-@test -f extra.pods && rm -f `cat extra.pods`
 	-@rm -f extra.pods
@@ -634,6 +640,9 @@ regen_headers:	FORCE
 	-perl bytecode.pl
 	-perl regcomp.pl
 	-perl warnings.pl
+
+regen_pods:	FORCE
+	-cd pod; $(LDLIBPTH) make regen_pods
 
 # Extensions:
 # Names added to $(dynamic_ext) or $(static_ext) or $(nonxs_ext) will

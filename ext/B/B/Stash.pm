@@ -2,6 +2,14 @@
 # vishalb@hotmail.com 
 package B::Stash;
 
+=pod
+
+=head1 NAME
+
+B::Stash - show what stashes are loaded
+
+=cut
+
 BEGIN { %Seen = %INC }
 
 CHECK {

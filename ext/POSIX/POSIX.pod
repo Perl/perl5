@@ -95,7 +95,7 @@ I<race condition>.
 =item acos
 
 This is identical to the C function C<acos()>, returning
-the arcus cosine of its numerical argument.
+the arcus cosine of its numerical argument.  See also L<Math::Trig>.
 
 =item alarm
 
@@ -121,7 +121,7 @@ default to zero (and the first two are usually ignored anyway).
 =item asin
 
 This is identical to the C function C<asin()>, returning
-the arcus sine of its numerical argument.
+the arcus sine of its numerical argument.  See also L<Math::Trig>.
 
 =item assert
 
@@ -131,13 +131,13 @@ to achieve similar things.
 =item atan
 
 This is identical to the C function C<atan()>, returning the
-arcus tangent of its numerical argument.
+arcus tangent of its numerical argument.  See also L<Math::Trig>.
 
 =item atan2
 
 This is identical to Perl's builtin C<atan2()> function, returning
 the arcus tangent defined by its two numerical arguments, the I<y>
-coordinate and the I<x> coordinate.
+coordinate and the I<x> coordinate.  See also L<Math::Trig>.
 
 =item atexit
 
@@ -220,11 +220,12 @@ a directory handle, see L<perlfunc/closedir>.
 
 This is identical to Perl's builtin C<cos()> function, for returning
 the cosine of its numerical argument, see L<perlfunc/cos>.
+See also L<Math::Trig>.
 
 =item cosh
 
 This is identical to the C function C<cosh()>, for returning
-the hyperbolic cosine of its numeric argument.
+the hyperbolic cosine of its numeric argument.  See also L<Math::Trig>.
 
 =item creat
 
@@ -334,7 +335,7 @@ the absolute value of the numerical argument, see L<perlfunc/abs>.
 
 =item fclose
 
-Use method C<IO::Handle::close()> instead.
+Use method C<IO::Handle::close()> instead, or see L<perlfunc/close>.
 
 =item fcntl
 
@@ -343,11 +344,11 @@ see L<perlfunc/fcntl>.
 
 =item fdopen
 
-Use method C<IO::Handle::new_from_fd()> instead.
+Use method C<IO::Handle::new_from_fd()> instead, or see L<perlfunc/open>.
 
 =item feof
 
-Use method C<IO::Handle::eof()> instead.
+Use method C<IO::Handle::eof()> instead, or see L<perlfunc/eof>.
 
 =item ferror
 
@@ -356,14 +357,15 @@ Use method C<IO::Handle::error()> instead.
 =item fflush
 
 Use method C<IO::Handle::flush()> instead.
+See also L<perlvar/$OUTPUT_AUTOFLUSH>.
 
 =item fgetc
 
-Use method C<IO::Handle::getc()> instead.
+Use method C<IO::Handle::getc()> instead, or see L<perlfunc/read>.
 
 =item fgetpos
 
-Use method C<IO::Seekable::getpos()> instead.
+Use method C<IO::Seekable::getpos()> instead, or see L<L/seek>.
 
 =item fgets
 
@@ -372,7 +374,7 @@ as L<perlfunc/readline>.
 
 =item fileno
 
-Use method C<IO::Handle::fileno()> instead.
+Use method C<IO::Handle::fileno()> instead, or see L<perlfunc/fileno>.
 
 =item floor
 
@@ -391,11 +393,13 @@ less than the magnitude of C<$y>.
 
 =item fopen
 
-Use method C<IO::File::open()> instead.
+Use method C<IO::File::open()> instead, or see L<perlfunc/open>.
 
 =item fork
 
-This is identical to Perl's builtin C<fork()> function.
+This is identical to Perl's builtin C<fork()> function
+for duplicating the current process, see L<perlfunc/fork>
+and L<perlfork> if you are in Windows.
 
 =item fpathconf
 
@@ -446,11 +450,11 @@ fscanf() is C-specific, use E<lt>E<gt> and regular expressions instead.
 
 =item fseek
 
-Use method C<IO::Seekable::seek()> instead.
+Use method C<IO::Seekable::seek()> instead, or see L<perlfunc/seek>.
 
 =item fsetpos
 
-Use method C<IO::Seekable::setpos()> instead.
+Use method C<IO::Seekable::setpos()> instead, or seek L<perlfunc/seek>.
 
 =item fstat
 
@@ -463,7 +467,7 @@ Perl's builtin C<stat> function.
 
 =item ftell
 
-Use method C<IO::Seekable::tell()> instead.
+Use method C<IO::Seekable::tell()> instead, or see L<perlfunc/tell>.
 
 =item fwrite
 
@@ -648,7 +652,7 @@ C</[[:isxdigit:]]/> construct instead, or simply C</[0-9a-f]/i>.
 =item kill
 
 This is identical to Perl's builtin C<kill()> function for sending
-signals to processes (oftern to terminate them), see L<perlfunc/kill>.
+signals to processes (often to terminate them), see L<perlfunc/kill>.
 
 =item labs
 
@@ -1124,12 +1128,13 @@ Returns C<undef> on failure.
 
 This is identical to Perl's builtin C<sin()> function
 for returning the sine of the numerical argument,
-see L<perlfunc/sin>.
+see L<perlfunc/sin>.  See also L<Math::Trig>.
 
 =item sinh
 
 This is identical to the C function C<sinh()>
 for returning the hyperbolic sine of the numerical argument.
+See also L<Math::Trig>.
 
 =item sleep
 
@@ -1352,12 +1357,12 @@ L<perlfunc/system>.
 =item tan
 
 This is identical to the C function C<tan()>, returning the
-tangent of the numerical argument.
+tangent of the numerical argument.  See also L<Math::Trig>.
 
 =item tanh
 
 This is identical to the C function C<tanh()>, returning the
-hyperbolic tangent of the numerical argument.
+hyperbolic tangent of the numerical argument.   See also L<Math::Trig>.
 
 =item tcdrain
 

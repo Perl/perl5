@@ -1,5 +1,13 @@
 package CGI::Util;
 
+=pod
+
+=head1 NAME
+
+CGI::Util - various utilities
+
+=cut
+
 use strict;
 use vars '$VERSION','@EXPORT_OK','@ISA','$EBCDIC','@A2E';
 require Exporter;

@@ -196,15 +196,13 @@ Christiansen maintains a list of these books, some with extensive
 reviews, at http://www.perl.com/perl/critiques/index.html.
 
 The incontestably definitive reference book on Perl, written by
-the creator of Perl, is now in its second edition:
+the creator of Perl, is now (July 2000) in its third edition:
 
     Programming Perl (the "Camel Book"):
-	by Larry Wall, Tom Christiansen, and Randal Schwartz
-        ISBN 1-56592-149-6      (English)
-        ISBN 4-89052-384-7      (Japanese)
-	URL: http://www.oreilly.com/catalog/pperl2/
-    (French, German, Italian, and Hungarian translations also
-    available)
+	by Larry Wall, Tom Christiansen, and Jon Orwant
+        0-596-00027-8		(English)
+	http://www.oreilly.com/catalog/pperl3/
+    (translations to several languages are also available)
 
 The companion volume to the Camel containing thousands
 of real-world examples, mini-tutorials, and complete programs
@@ -212,9 +210,9 @@ of real-world examples, mini-tutorials, and complete programs
 
     The Perl Cookbook (the "Ram Book"):
 	by Tom Christiansen and Nathan Torkington, 
-		    with Foreword by Larry Wall
-	ISBN: 1-56592-243-3
-	URL:  http://perl.oreilly.com/cookbook/
+	    with Foreword by Larry Wall
+	ISBN 1-56592-243-3
+	http://perl.oreilly.com/cookbook/
 
 If you're already a hard-core systems programmer, then the Camel Book
 might suffice for you to learn Perl from.  But if you're not, check
@@ -223,8 +221,8 @@ out:
     Learning Perl (the "Llama Book"):
 	by Randal Schwartz and Tom Christiansen 
 		    with Foreword by Larry Wall
-	ISBN: 1-56592-284-0
-	URL:  http://www.oreilly.com/catalog/lperl2/
+	ISBN 1-56592-284-0
+	http://www.oreilly.com/catalog/lperl2/
 
 Despite the picture at the URL above, the second edition of "Llama
 Book" really has a blue cover, and is updated for the 5.004 release
@@ -245,66 +243,106 @@ See http://www.ora.com/ on the Web.
 What follows is a list of the books that the FAQ authors found personally
 useful.  Your mileage may (but, we hope, probably won't) vary.
 
-Recommended books on (or mostly on) Perl follow; those marked with
-a star may be ordered from O'Reilly.
+Recommended books on (or mostly on) Perl follow.
 
 =over
 
 =item References
 
-    *Programming Perl
-	by Larry Wall, Tom Christiansen, and Randal L. Schwartz
+    Programming Perl
+	by Larry Wall, Tom Christiansen, and Jon Orwant
+	ISBN 0-596-00027-8[3rd edition July 2000]
+	http://www.oreilly.com/catalog/pperl3/
 
-    *Perl 5 Desktop Reference
+    Perl 5 Pocket Reference
         by Johan Vromans
+	ISBN 0-596-00032-4 [3rd edition May 2000]
+	http://www.oreilly.com/catalog/perlpr3/
 
-    *Perl in a Nutshell
+    Perl in a Nutshell
         by Ellen Siever, Stephan Spainhour, and Nathan Patwardhan
+	ISBN 1-56592-286-7 [1st edition December 1998]
+	http://www.oreilly.com/catalog/perlnut/
 
 =item Tutorials
 
-    *Learning Perl [2nd edition]
+    Elements of Programming with Perl
+	by Andrew L. Johnson
+	ISBN 1884777805 [1st edition October 1999]
+	http://www.manning.com/Johnson/
+
+    Learning Perl
 	by Randal L. Schwartz and Tom Christiansen
 	    with foreword by Larry Wall
+	ISBN 1-56592-284-0 [2nd edition July 1997]
+	http://www.oreilly.com/catalog/lperl2/
 
-    *Learning Perl on Win32 Systems
+    Learning Perl on Win32 Systems
 	by Randal L. Schwartz, Erik Olson, and Tom Christiansen,
 	    with foreword by Larry Wall
+	ISBN 1-56592-324-3 [1st edition August 1997]
+	http://www.oreilly.com/catalog/lperlwin/
 
     Perl: The Programmer's Companion
 	by Nigel Chapman
+	ISBN 0-471-97563-X  [1st edition October 1997]
+	http://catalog.wiley.com/title.cgi?isbn=047197563X
 
-    Cross-Platform Perl 
-	by Eric F. Johnson
+    Cross-Platform Perl
+	by Eric Foster-Johnson
+	ISBN 1-55851-483-X [2nd edition September 2000]
+	http://www.pconline.com/~erc/perlbook.htm
 
-    MacPerl: Power and Ease 
-	by Vicki Brown and Chris Nandor, foreword by Matthias Neeracher
+    MacPerl: Power and Ease
+	by Vicki Brown and Chris Nandor,
+	    with foreword by Matthias Neeracher
+	ISBN 1-881957-32-2 [1st edition May 1998]
+	http://www.macperl.com/ptf_book/
 
 =item Task-Oriented 
 
-    *The Perl Cookbook
+    The Perl Cookbook
 	by Tom Christiansen and Nathan Torkington
 	    with foreword by Larry Wall
+	ISBN 1-56592-243-3 [1st edition August 1998]
+	http://www.oreilly.com/catalog/cookbook/
 
-    Perl5 Interactive Course [2nd edition]
+    Perl5 Interactive Course
 	by Jon Orwant
+	ISBN 1571690646 [1st edition June 1997]
 
-    *Advanced Perl Programming 
+    Advanced Perl Programming
 	by Sriram Srinivasan
+	ISBN 1-56592-220-4 [1st edition August 1997]
+	http://www.oreilly.com/catalog/advperl/
 
     Effective Perl Programming 
 	by Joseph Hall
+	ISBN 0-201-41975-0 [1st edition 1998]
+	http://www.awl.com/
 
 =item Special Topics
 
-    *Mastering Regular Expressions
-	by Jeffrey Friedl
+    Mastering Regular Expressions
+	by Jeffrey E. F. Friedl
+	ISBN 1-56592-257-3 [1st edition January 1997]
+	http://www.oreilly.com/catalog/regex/
 
     How to Set up and Maintain a World Wide Web Site [2nd edition]
 	by Lincoln Stein
+	ISBN 0-201-63389-2 [1st edition 1995]
+	http://www.awl.com/
 
-    *Learning Perl/Tk
+    Object Oriented Perl
+	Damian Conway
+	    with foreword by Randal L. Schwartz
+	ISBN 1884777791 [1st edition August 1999]
+	http://www.manning.com/Conway/
+
+    Learning Perl/Tk
         by Nancy Walsh
+	ISBN 1-56592-314-6 [1st edition January 1999]
+	http://www.oreilly.com/catalog/lperltk/
 
 =back
 
@@ -331,14 +369,19 @@ http://www.stonehenge.com/merlyn/WebTechniques/.
 To get the best (and possibly cheapest) performance, pick a site from
 the list below and use it to grab the complete list of mirror sites.
 From there you can find the quickest site for you.  Remember, the
-following list is I<not> the complete list of CPAN mirrors.
+following list is I<not> the complete list of CPAN mirrors
+(the complete list contains 136 sites as of July 2000):
 
-  http://www.perl.com/CPAN-local
-  http://www.perl.com/CPAN	(redirects to an ftp mirror)
-  ftp://cpan.valueclick.com/pub/CPAN/
+  http://www.perl.com/CPAN/
+  http://www.cpan.org/CPAN/
+  http://download.sourceforge.net/mirrors/CPAN/
+  ftp://ftp.digital.com/pub/plan/perl/CPAN/
+  ftp://ftp.flirble.org/pub/languages/perl/CPAN/
+  ftp://ftp.uvsq.fr/pub/perl/CPAN/
   ftp://ftp.funet.fi/pub/languages/perl/CPAN/
-  http://www.cs.ruu.nl/pub/PERL/CPAN/
-  ftp://ftp.cs.colorado.edu/pub/perl/CPAN/
+  ftp://ftp.dti.ad.jp/pub/lang/CPAN/
+  ftp://mirror.aarnet.edu.au/pub/perl/CPAN/
+  ftp://cpan.if.usp.br/pub/mirror/CPAN/
 
 =head2 What mailing lists are there for Perl?
 

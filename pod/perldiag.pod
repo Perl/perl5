@@ -1081,7 +1081,7 @@ arbitrarily.  ("Simple" and "medium" situations are handled without
 recursion and are not subject to a limit.)  Try shortening the string
 under examination; looping in Perl code (e.g. with C<while>) rather than
 in the regular expression engine; or rewriting the regular expression so
-that it is simpler or backtracks less.  (See L<perlbook> for information
+that it is simpler or backtracks less.  (See L<perlfaq2> for information
 on I<Mastering Regular Expressions>.)
 
 =item connect() on closed socket %s
