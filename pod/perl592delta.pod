@@ -302,6 +302,9 @@ perl release.
 For threaded builds, F<ext/threads/shared/t/wait.t> has been reported to
 fail some tests on HP-UX 10.20.
 
+Net::Ping might fail some tests on HP-UX 11.00 with the latest OS
+upgrades.
+
 F<t/io/dup.t> and F<t/io/open.t> fail some tests on some BSD flavours.
 
 =head1 Plans for the next release
