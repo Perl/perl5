@@ -14,7 +14,16 @@ As of perl5.004_04, all tests pass under:
   Watcom 10.6 with Beta/970211.wcc.update.tar.F
   socket3r.lib Nov21 1996.
 
-Update June 2001: Perl 5.6.1 most probably also works just fine in QNX.
+Update June 2001: Perl 5.6.1 works fine in QNX4 with
+a few 'known' failures in the test suite.
+
+[ Perl 5.6.0 is shipping with QNX RTP (aka QNX6, Neutrino), but
+the build does not appear to be straightforward. If anyone has
+more data in this regard, please let me know.
+
+These notes were originally written for QNX4 and do not
+necessarily apply to Neutrino, but see hints/qnx.sh for
+more information. ] 
 
 =head2 Required Software for Compiling Perl on QNX
 
@@ -63,7 +72,21 @@ from quics for earlier versions.
 
 =head2 Outstanding Issues with Perl on QNX
 
-There is currently no support for dynamically linked libraries.
+There is no support for dynamically linked libraries in QNX4.
+
+The following tests may report errors:
+
+ext/Cwd/Cwd.t will complain if `pwd` and cwd don't give
+the same results. cwd calls `fullpath -t`, so if you
+cd `fullpath -t` before running the test, it will
+pass.
+
+lib/File/Find/taint.t will complain if '.' is in your
+PATH. The PATH test is triggered because cwd calls
+`fullpath -t`.
+
+ext/IO/lib/IO/t/io_sock.t Still investigating
+ext/POSIX/sigaction.t Still investigating
 
 =head2 QNX auxiliary files
 
