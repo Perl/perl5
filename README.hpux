@@ -134,17 +134,18 @@ contain PA-RISC 2.0 chips:
     D280, D370, D380, D390, D650, J220, J2240, J280, J282, J400, J410,
     J5000, J5500XM, J5600, J7000, J7600, K250, K260, K260-EG, K270, K360,
     K370, K380, K450, K460, K460-EG, K460-XP, K470, K570, K580, L1000,
-    L2000, L3000, N4000, R380, R390, RP2400, RP2430, RP2450, RP2470,
-    RP5400, RP5430, RP5450, RP5470, RP7400, RP7410, RP8400, SD16000,
-    SD32000, SD64000, T540, T600, V2000, V2200, V2250, V2500, V2600
+    L2000, L3000, N4000, R380, R390, RP2400, RP2405, RP2430, RP2450,
+    RP2470, RP5400, RP5405, RP5430, RP5450, RP5470, RP7400, RP7405,
+    RP7410, RP8400, SD16000, SD32000, SD64000, T540, T600, V2000, V2200,
+    V2250, V2500, V2600
 
 Just before HP took over Compaq, some systems were renamed. Visit
 http://www.hp.com/products1/servers/server_names.html to see what
 the changes are, or will be.
 
     HP 9000 A-Class servers, now renamed HP Server rp2400 series.
-    HP 9000 N-Class servers, now renamed HP Server rp7400.
     HP 9000 L-Class servers, now renamed HP Server rp5400 series.
+    HP 9000 N-Class servers, now renamed HP Server rp7400.
 
 =head2 Itanium
 
