@@ -209,6 +209,11 @@ EOM
 
 esac
 
+# Fink can install a GDBM library that claims to have the ODBM interfaces
+# but Perl dynaloader cannot for some reason use that library.  We don't
+# really need ODBM_FIle, though, so let's just hint ODBM away.
+i_dbm=undef;
+
 ##
 # Build process
 ##

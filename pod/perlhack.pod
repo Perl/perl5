@@ -1817,6 +1817,12 @@ Run all the tests through the B::Deparse.  Not all tests will succeed.
 Run F<miniperl> on F<t/base>, F<t/comp>, F<t/cmd>, F<t/run>, F<t/io>,
 F<t/op>, and F<t/uni> tests.
 
+=item test.valgrind check.valgrind utest.valgrind ucheck.valgrind
+
+(Only in Linux) Run all the tests using the memory leak + naughty
+memory access tool "valgrind".  The log files will be named
+F<testname.valgrind>.
+
 =item test.third check.third utest.third ucheck.third
 
 (Only in Tru64)  Run all the tests using the memory leak + naughty
@@ -2059,6 +2065,23 @@ patient enough :-) (This same extreme slowdown has been seen also with
 the Third Degree tool, so the said test must be doing something that
 is quite unfriendly for memory debuggers.)  It is suggested that you
 simply kill away that testing process.
+
+=head2 valgrind
+
+The excellent valgrind tool can be used to find out both memory leaks
+and illegal memory accesses.  As of August 2003 it unfortunately works
+only on x86 (ELF) Linux.  The special "test.valgrind" target can be used
+to run the tests under valgrind.  Note that in the test script (t/TEST)
+currently (as of Perl 5.8.1) only naughty memory accesses are logged,
+not memory leaks.  Found errors are logged in files named F<test.valgrind>.
+Also note that with Perl built with ithreads, the glibc (at least 2.2.5)
+seems to have a bug of its own, where a non-locked POSIX mutex is
+unlocked, and valgrind catches this, for every test-- therefore the
+test script ignores that error.
+
+To get valgrind and for more information see
+
+    http://developer.kde.org/~sewardj/
 
 =head2 Compaq's/Digital's/HP's Third Degree
 

@@ -497,18 +497,27 @@ to the public Internet.
 Don't assume that you can reach outside world through any other port
 than 80, or some web proxy.  ftp is blocked by many firewalls.
 
+Don't assume that you can send email by connecting to the local SMTP port.
+
 Don't assume that you can reach yourself or any node by the name
-'localhost'.  The same goes for '127.0.0.1'.  You will have to try
-both.
+'localhost'.  The same goes for '127.0.0.1'.  You will have to try both.
 
 Don't assume that the host has only one network card, or that it
 can't bind to many virtual IP addresses.
 
 Don't assume a particular network device name.
 
-Don't assume that any particular port (service) will respond.
+Don't assume a particular set of ioctl()s will work.
 
 Don't assume that you can ping hosts and get replies.
+
+Don't assume that any particular port (service) will respond.
+
+Don't assume that Sys::Hostname() (or any other API or command)
+returns either a fully qualified hostname or a non-qualified hostname:
+it all depends on how the system had been configured.  Also remember
+things like DHCP and NAT-- the hostname you get back might not be very
+useful.
 
 All the above "don't":s may look daunting, and they are -- but the key
 is to degrade gracefully if one cannot reach the particular network

@@ -183,6 +183,7 @@ EOT
     }
     # + 3 : we want three dots between the test name and the "ok"
     $dotdotdot = $maxlen + 3 ;
+    my $valgrind = 0;
     while ($test = shift @tests) {
 
 	if ( $infinite{$test} && $type eq 'compile' ) {
@@ -197,7 +198,7 @@ EOT
 		# Redefinition happens at compile time
 		next;
 	    }
-	    elsif ($test eq "lib/switch.t") {
+	    elsif ($test =~ m{lib/Switch/t/}) {
 		# B::Deparse doesn't support source filtering
 		next;
 	    }
@@ -262,7 +263,10 @@ EOT
 	}
 	elsif ($type eq 'perl') {
 	    my $perl = $ENV{PERL} || './perl';
-	    my $redir = ($^O eq 'VMS' ? '2>&1' : '');
+	    my $redir = ($^O eq 'VMS' || $ENV{PERL_VALGRIND} ? '2>&1' : '');
+	    if ($ENV{PERL_VALGRIND}) {
+		$perl = "valgrind --num-callers=50 --leak-check=yes $perl";
+	    }
 	    my $run = "$perl" . _quote_args("$testswitch $switch $utf") . " $test $redir|";
 	    open(RESULTS,$run) or print "can't run '$run': $!.\n";
 	}
@@ -302,10 +306,15 @@ EOT
         $next = 0;
         my $seen_leader = 0;
         my $seen_ok = 0;
+	my @valgrind;
 	while (<RESULTS>) {
 	    next if /^\s*$/; # skip blank lines
 	    if ($verbose) {
 		print $_;
+	    }
+	    if ($ENV{PERL_VALGRIND} && /^==\d+== /) {
+		push @valgrind, $_;
+		next;
 	    }
 	    unless (/^\#/) {
 		if (/^1\.\.([0-9]+)( todo ([\d ]+))?/) {
@@ -353,6 +362,38 @@ EOT
 	    }
 	}
 	close RESULTS;
+	if ($ENV{PERL_VALGRIND}) {
+	    if (@valgrind) {
+		my $skip_pthread_mutex_unlock;
+		for my $i (0..$#valgrind) {
+		    local $_ = $valgrind[$i];
+		    my $pid;
+		    if (/^==(\d+)== pthread_mutex_unlock: mutex is not locked/ &&
+			($pid = $1) &&
+			$valgrind[$i+2] =~ m{\(in .+/libc.+\.so\)}) {
+			$skip_pthread_mutex_unlock++;
+		    } elsif (/^==\d+== ERROR SUMMARY: (\d+) errors? /) {
+			$errors = $1;
+		    }
+		}
+		if (defined $errors) {
+		    $errors -= $skip_pthread_mutex_unlock;
+		    if ($errors) {
+			if (open(V, ">$test.valgrind")) {
+			    for (@valgrind) {
+				print V $_;
+			    }
+			    close V;
+			    $valgrind++;
+			} else {
+			    warn "$0: Failed to create '$test.valgrind': $!\n";
+			}
+		    }
+		}
+	    } else {
+		warn "No valgrind output?\n";
+	    }
+	}
 	if ($type eq 'deparse') {
 	    unlink "./$test.dp";
 	}
@@ -447,5 +488,9 @@ SHRDLU_5
     ($user,$sys,$cuser,$csys) = times;
     print sprintf("u=%g  s=%g  cu=%g  cs=%g  scripts=%d  tests=%d\n",
 	$user,$sys,$cuser,$csys,$files,$totmax);
+    if ($ENV{PERL_VALGRIND}) {
+	my $s = $valgrind == 1 ? '' : 's';
+	print "$valgrind valgrind report$s created.\n", ;
+    }
 }
 exit ($bad != 0);

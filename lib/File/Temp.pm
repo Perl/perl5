@@ -1858,9 +1858,9 @@ temporary file handling.
 
 =head1 AUTHOR
 
-Tim Jenness E<lt>t.jenness@jach.hawaii.eduE<gt>
+Tim Jenness E<lt>tjenness@cpan.orgE<gt>
 
-Copyright (C) 1999-2001 Tim Jenness and the UK Particle Physics and
+Copyright (C) 1999-2003 Tim Jenness and the UK Particle Physics and
 Astronomy Research Council. All Rights Reserved.  This program is free
 software; you can redistribute it and/or modify it under the same
 terms as Perl itself.

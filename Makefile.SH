@@ -603,6 +603,17 @@ purecovperl$(EXE_EXT): $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_e
 quantperl$(EXE_EXT): $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
 	$(SHRPENV) $(LDLIBPTH) quantify $(CC) -o quantperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
+# Valgrind perl (currently Linux only)
+
+perl.valgrind.config: config.sh
+	@echo "To build perl.valgrind you must Configure -Doptimize=-g -Uusemymalloc, checking..."
+	@$(MAKE) perl.config.dashg
+	@echo "Checking usemymalloc='n' in config.sh..."
+	@grep "^usemymalloc="    config.sh
+	@grep "^usemymalloc='n'" config.sh >/dev/null || exit 1
+	@echo "And of course you have to have valgrind..."
+	valgrind ./perl -e 1 2>/dev/null || exit 1
+
 # Third Degree Perl (Tru64 only)
 
 perl.config.dashg:
@@ -1104,6 +1115,20 @@ test-notty:	test_notty
 
 test.torture torturetest:	test_prep
 	PERL=./perl TEST_ARGS=-torture $(MAKE) _test
+
+# Targets for valgrind testing:
+
+test_prep.valgrind: test_prep perl.valgrind
+	PERL=./perl $(MAKE) _test_prep
+
+test.valgrind check.valgrind:	test_prep perl.valgrind.config
+	PERL=./perl PERL_DEBUG=PERL_VALGRIND=1 $(MAKE) _test
+
+utest.valgrind ucheck.valgrind: test_prep.valgrind perl.valgrind
+	PERL=./perl PERL_DEBUG=PERL_VALGRIND=1 TEST_ARGS=-utf8 $(MAKE) _test
+
+test_notty.valgrind: test_prep.valgrind perl.valgrind
+	PERL=./perl $(MAKE) PERL_DEBUG=PERL_VALGRIND=1 _test_notty
 
 # Targets for Third Degree testing.
 
