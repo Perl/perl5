@@ -8,6 +8,8 @@
 #include "XSUB.h"
 #define U8 U8
 
+#define OUR_DEFAULT_FB	"Encode::PERLQQ"
+
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
 
 /* Define an encoding "layer" in the perliol.h sense.
@@ -49,7 +51,6 @@ typedef struct {
 } PerlIOEncode;
 
 #define NEEDS_LINES	1
-#define OUR_DEFAULT_FB	"Encode::PERLQQ"
 
 SV *
 PerlIOEncode_getarg(pTHX_ PerlIO * f, CLONE_PARAMS * param, int flags)
@@ -615,7 +616,7 @@ BOOT:
      */
     PUSHSTACKi(PERLSI_MAGIC);
     SPAGAIN;
-    if (!gv_stashpvn("Encode", 6, FALSE)) {
+    if (!get_cv(OUR_DEFAULT_FB, 0)) {
 #if 0
 	/* This would just be an irritant now loading works */
 	Perl_warner(aTHX_ packWARN(WARN_IO), ":encoding without 'use Encode'");
@@ -628,7 +629,6 @@ BOOT:
 	SPAGAIN;
 	LEAVE;
     }
-#ifdef PERLIO_LAYERS
     PUSHMARK(sp);
     PUTBACK;
     if (call_pv(OUR_DEFAULT_FB, G_SCALAR) != 1) {
@@ -638,6 +638,7 @@ BOOT:
     SPAGAIN;
     sv_setsv(chk, POPs);
     PUTBACK;
+#ifdef PERLIO_LAYERS
     PerlIO_define_layer(aTHX_ &PerlIO_encode);
 #endif
     POPSTACK;
