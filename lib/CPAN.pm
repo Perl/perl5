@@ -2270,6 +2270,9 @@ sub localize {
     # where we did get a file from
     my(@reordered,$last);
     $CPAN::Config->{urllist} ||= [];
+    unless (ref $CPAN::Config->{urllist} eq 'ARRAY') {
+        warn "Malformed urllist; ignoring.  Configuration file corrupt?\n";
+    }
     $last = $#{$CPAN::Config->{urllist}};
     if ($force & 2) { # local cpans probably out of date, don't reorder
 	@reordered = (0..$last);
