@@ -106,6 +106,8 @@
      Use of "package" with no arguments is deprecated
 	package;
 
+    Package `%s' not found (did you use the incorrect case?)
+
     Mandatory Warnings 
     ------------------
     Prototype mismatch:		[cv_ckproto]
@@ -939,3 +941,12 @@ EXPECT
 Use of "package" with no arguments is deprecated at - line 3.
 Global symbol "BEGIN" requires explicit package name at - line 4.
 BEGIN not safe after errors--compilation aborted at - line 4.
+########
+# op.c [Perl_utilize]
+use warnings 'misc';
+push @INC, sub { $_[1] eq 'Joe.pm' ? *DATA : undef };
+eval "use Joe";
+__DATA__
+package joe; 1;
+EXPECT
+Package `Joe' not found (did you use the incorrect case?) at (eval 1) line 2.
