@@ -592,7 +592,7 @@ the encoding by picking the first in the following sequence:
 
 =over 4
 
-=item * The MIME name as defined in IETF RFC-2045.
+=item * The MIME name as defined in IETF RFCs.
 
 =item * The name in the IANA registry.
 
