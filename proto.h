@@ -695,7 +695,7 @@ VIRTUAL struct perl_vars *Perl_GetVars _((void));
 protected:
 void hsplit _((HV *hv));
 void hfreeentries _((HV *hv));
-HE* more_he _((void));
+void more_he _((void));
 HE* new_he _((void));
 void del_he _((HE *p));
 HEK *save_hek _((char *str, I32 len, U32 hash));
