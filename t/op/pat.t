@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..716\n";
+print "1..717\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2130,4 +2130,9 @@ sub ok ($$) {
 {
     print "not " unless "\x80" =~ /\p{in-latin1_SUPPLEMENT}/;
     print "ok 716\n";
+}
+
+{
+    print "not " unless "\x80" =~ /\P{  ^  In Latin 1 Supplement  }/;
+    print "ok 717\n";
 }

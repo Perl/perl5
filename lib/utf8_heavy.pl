@@ -26,7 +26,7 @@ sub SWASHNEW {
     while (($caller = caller($i)) eq __PACKAGE__) { $i++ }
     my $encoding = $enc{$caller} || "unicore";
     (my $file = $type) =~ s!::!/!g;
-    if ($file =~ /^In[- ]?(.+)/i) {
+    if ($file =~ /^In[- _]?(.+?)$/i) {
 	my $In = $1;
 	defined %utf8::In || do "$encoding/In.pl";
 	my $prefix = substr(lc($In), 0, 3);
