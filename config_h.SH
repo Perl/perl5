@@ -373,13 +373,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_pipe HAS_PIPE		/**/
 
-/* HAS_POLL:
- *	This symbol, if defined, indicates that the poll routine is
- *	available to poll active file descriptors. You may safely
- *	include <poll.h> when this symbol is defined.
- */
-#$d_poll HAS_POLL		/**/
-
 /* HAS_READDIR:
  *	This symbol, if defined, indicates that the readdir routine is
  *	available to read directory entries. You may have to include
@@ -3504,7 +3497,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 /* I_POLL:
  *	This symbol, if defined, indicates that <poll.h> exists and
- *	should be included.
+ *	should be included. (see also HAS_POLL)
  */
 #$i_poll	I_POLL		/**/
 
@@ -4424,6 +4417,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define void int		/* is void to be avoided? */
 #define M_VOID			/* Xenix strikes again */
 #endif
+
+/* HAS_POLL:
+ *	This symbol, if defined, indicates that the poll routine is
+ *	available to poll active file descriptors. You may safely
+ *	include <poll.h> when both this symbol *and* I_POLL are defined.
+ */
+#$d_poll HAS_POLL		/**/
 
 #endif
 !GROK!THIS!
