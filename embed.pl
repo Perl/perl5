@@ -2064,8 +2064,8 @@ Ap	|void	|unlock_condpair|void* svv
 Ap	|void	|unsharepvn	|const char* sv|I32 len|U32 hash
 p	|void	|unshare_hek	|HEK* hek
 p	|void	|utilize	|int aver|I32 floor|OP* version|OP* id|OP* arg
-Ap	|U8*	|utf16_to_utf8	|U16* p|U8 *d|I32 bytelen
-Ap	|U8*	|utf16_to_utf8_reversed|U16* p|U8 *d|I32 bytelen
+Ap	|U8*	|utf16_to_utf8	|U8* p|U8 *d|I32 bytelen|I32 *newlen
+Ap	|U8*	|utf16_to_utf8_reversed|U8* p|U8 *d|I32 bytelen|I32 *newlen
 Ap	|I32	|utf8_distance	|U8 *a|U8 *b
 Ap	|U8*	|utf8_hop	|U8 *s|I32 off
 ApM	|U8*	|utf8_to_bytes	|U8 *s|STRLEN len

@@ -2482,7 +2482,8 @@ Perl_yylex(pTHX)
 	do {
 	    bool bof;
 	    bof = PL_rsfp && (PerlIO_tell(PL_rsfp) == 0); /* *Before* read! */
-	    if ((s = filter_gets(PL_linestr, PL_rsfp, 0)) == Nullch) {
+	    s = filter_gets(PL_linestr, PL_rsfp, 0);
+	    if (s == Nullch) {
 	      fake_eof:
 		if (PL_rsfp) {
 		    if (PL_preprocess && !PL_in_eval)
@@ -2505,6 +2506,9 @@ Perl_yylex(pTHX)
 		PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 		sv_setpv(PL_linestr,"");
 		TOKEN(';');	/* not infinite loop because rsfp is NULL now */
+	    } else if (bof) {
+		PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
+		s = swallow_bom((U8*)s);
 	    }
 	    if (PL_doextract) {
 		if (*s == '#' && s[1] == '!' && instr(s,"perl"))
@@ -2518,14 +2522,6 @@ Perl_yylex(pTHX)
 		    PL_doextract = FALSE;
 		}
 	    } 
-	    if (bof)
-	    {
-		PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-		/* Shouldn't this swallow_bom() be earlier, e.g.
-		 * immediately after where bof is set?  Currently you can't
-		 * have e.g. a UTF16 sharpbang line. --Mike Guy */
-		s = swallow_bom((U8*)s);
-	    }
 	    incline(s);
 	} while (PL_doextract);
 	PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = s;
@@ -7374,26 +7370,31 @@ STATIC char*
 S_swallow_bom(pTHX_ U8 *s)
 {
     STRLEN slen;
-    U8 *olds = s;
     slen = SvCUR(PL_linestr);
     switch (*s) {
     case 0xFF:       
 	if (s[1] == 0xFE) { 
 	    /* UTF-16 little-endian */
-#ifndef PERL_NO_UTF16_FILTER
-	    U8 *news;
-#endif
 	    if (s[2] == 0 && s[3] == 0)  /* UTF-32 little-endian */
 		Perl_croak(aTHX_ "Unsupported script encoding");
 #ifndef PERL_NO_UTF16_FILTER
+	    DEBUG_p(PerlIO_printf(Perl_debug_log, "UTF-LE script encoding\n"));
 	    s += 2;
-	    filter_add(utf16rev_textfilter, NULL);
-	    New(898, news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
-	    /* See the notes on utf16_to_utf8() in utf8.c --Mike Guy */
-	    PL_bufend = (char*)utf16_to_utf8((U16*)s, news,
-					     PL_bufend - (char*)s);
-	    Safefree(olds);
-	    s = news;
+	    if (PL_bufend > (char*)s) {
+		U8 *news;
+		I32 newlen;
+
+		filter_add(utf16rev_textfilter, NULL);
+		New(898, news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
+		PL_bufend = (char*)utf16_to_utf8(s, news,
+						 PL_bufend - (char*)s,
+						 &newlen);
+		Copy(news, s, newlen, U8);
+		SvCUR_set(PL_linestr, newlen);
+		PL_bufend = SvPVX(PL_linestr) + newlen;
+		news[newlen++] = '\0';
+		Safefree(news);
+	    }
 #else
 	    Perl_croak(aTHX_ "Unsupported script encoding");
 #endif
@@ -7402,14 +7403,23 @@ S_swallow_bom(pTHX_ U8 *s)
     case 0xFE:
 	if (s[1] == 0xFF) {   /* UTF-16 big-endian */
 #ifndef PERL_NO_UTF16_FILTER
-	    U8 *news;
-	    filter_add(utf16_textfilter, NULL);
-	    New(898, news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
-	    /* See the notes on utf16_to_utf8() in utf8.c --Mike Guy */
-	    PL_bufend = (char*)utf16_to_utf8((U16*)s, news,
-					     PL_bufend - (char*)s);
-	    Safefree(olds);
-	    s = news;
+	    DEBUG_p(PerlIO_printf(Perl_debug_log, "UTF-16BE script encoding\n"));
+	    s += 2;
+	    if (PL_bufend > (char *)s) {
+		U8 *news;
+		I32 newlen;
+
+		filter_add(utf16_textfilter, NULL);
+		New(898, news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
+		PL_bufend = (char*)utf16_to_utf8(s, news,
+						 PL_bufend - (char*)s,
+						 &newlen);
+		Copy(news, s, newlen, U8);
+		SvCUR_set(PL_linestr, newlen);
+		PL_bufend = SvPVX(PL_linestr) + newlen;
+		news[newlen++] = '\0';
+		Safefree(news);
+	    }
 #else
 	    Perl_croak(aTHX_ "Unsupported script encoding");
 #endif
@@ -7417,6 +7427,7 @@ S_swallow_bom(pTHX_ U8 *s)
 	break;
     case 0xEF:
 	if (slen > 2 && s[1] == 0xBB && s[2] == 0xBF) {
+	    DEBUG_p(PerlIO_printf(Perl_debug_log, "UTF-8 script encoding\n"));
 	    s += 3;                      /* UTF-8 */
 	}
 	break;
@@ -7459,8 +7470,9 @@ utf16_textfilter(pTHXo_ int idx, SV *sv, int maxlen)
     if (count) {
 	U8* tmps;
 	U8* tend;
+	I32 newlen;
 	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, U8);
-	tend = utf16_to_utf8((U16*)SvPVX(sv), tmps, SvCUR(sv));
+	tend = utf16_to_utf8((U8*)SvPVX(sv), tmps, SvCUR(sv), &newlen);
 	sv_usepvn(sv, (char*)tmps, tend - tmps);
     }
     return count;
@@ -7473,8 +7485,9 @@ utf16rev_textfilter(pTHXo_ int idx, SV *sv, int maxlen)
     if (count) {
 	U8* tmps;
 	U8* tend;
+	I32 newlen;
 	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, U8);
-	tend = utf16_to_utf8_reversed((U16*)SvPVX(sv), tmps, SvCUR(sv));
+	tend = utf16_to_utf8_reversed((U8*)SvPVX(sv), tmps, SvCUR(sv), &newlen);
 	sv_usepvn(sv, (char*)tmps, tend - tmps);
     }
     return count;

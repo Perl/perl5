@@ -1788,6 +1788,11 @@ a builtin library search path, prefix2 is substituted.  The error may
 appear if components are not found, or are too long.  See
 "PERLLIB_PREFIX" in L<perlos2>.
 
+=item Malformed UTF-16 surrogate
+
+Perl thought it was reading UTF-16 encoded character data but while
+doing it Perl met a malformed Unicode surrogate.
+
 =item %s matches null string many times
 
 (W regexp) The pattern you've specified would be an infinite loop if the
@@ -2489,6 +2494,11 @@ was string.
 =item panic: yylex
 
 (P) The lexer got into a bad state while processing a case modifier.
+
+=item panic: utf16_to_utf8: odd bytelen
+
+(P) Something tried to call utf16_to_utf8 with an odd (as opposed
+to even) byte length. 
 
 =item Parentheses missing around "%s" list
 
