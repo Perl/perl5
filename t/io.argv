@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: io.argv,v 1.0 87/12/18 13:12:44 root Exp $
+# $Header: io.argv,v 2.0 88/06/05 00:12:55 root Exp $
 
 print "1..5\n";
 
@@ -23,7 +23,7 @@ if ($x eq "foo\n") {print "ok 3\n";} else {print "not ok 3\n";}
 @ARGV = ('Io.argv.tmp', 'Io.argv.tmp', '/dev/null', 'Io.argv.tmp');
 while (<>) {
     $y .= $. . $_;
-    if (eof) {
+    if (eof()) {
 	if ($. == 3) {print "ok 4\n";} else {print "not ok 4\n";}
     }
 }

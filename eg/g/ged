@@ -1,0 +1,21 @@
+#!/usr/bin/perl
+
+# $Header: ged,v 2.0 88/06/05 00:17:08 root Exp $
+
+# Does inplace edits on a set of files on a set of machines.
+#
+# Typical invokation:
+#
+#	ged vax+sun /etc/passwd
+#	s/Freddy/Freddie/;
+#	^D
+#
+
+$class = shift;
+$files = join(' ',@ARGV);
+
+die "Usage: ged class files <perlcmds\n" unless $files;
+
+exec "gsh", $class, "-d", "perl -pi.bak - $files";
+
+die "Couldn't execute gsh for some reason, stopped";

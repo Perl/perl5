@@ -1,8 +1,8 @@
-/* $Header: stab.h,v 1.0 87/12/18 13:06:18 root Exp $
+/* $Header: stab.h,v 2.0 88/06/05 00:11:05 root Exp $
  *
  * $Log:	stab.h,v $
- * Revision 1.0  87/12/18  13:06:18  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:11:05  root
+ * Baseline version 2.0.
  * 
  */
 
@@ -14,11 +14,12 @@ struct stab {
     FCMD	*stab_form;
     ARRAY	*stab_array;
     HASH	*stab_hash;
-    CMD		*stab_sub;
+    SUBR	*stab_sub;
     char	stab_flags;
 };
 
 #define SF_VMAGIC 1		/* call routine to dereference STR val */
+#define SF_MULTI 2		/* seen more than once */
 
 struct stio {
     FILE	*fp;
@@ -30,6 +31,7 @@ struct stio {
     STAB	*top_stab;
     char	*fmt_name;
     STAB	*fmt_stab;
+    short	subprocess;
     char	type;
     char	flags;
 };
@@ -37,6 +39,13 @@ struct stio {
 #define IOF_ARGV 1	/* this fp iterates over ARGV */
 #define IOF_START 2	/* check for null ARGV and substitute '-' */
 #define IOF_FLUSH 4	/* this fp wants a flush after write op */
+
+struct sub {
+    CMD		*cmd;
+    char	*filename;
+    long	depth;	/* >= 2 indicates recursive call */
+    ARRAY	*tosave;
+};
 
 #define Nullstab Null(STAB*)
 
@@ -51,8 +60,7 @@ EXT STAB *stab_index[128];
 EXT char *envname;	/* place for ENV name being assigned--gross cheat */
 EXT char *signame;	/* place for SIG name being assigned--gross cheat */
 
-EXT int statusvalue;
-EXT int subsvalue;
+EXT unsigned short statusvalue;
 
 STAB *aadd();
 STAB *hadd();

@@ -1,6 +1,6 @@
 #!./perl -P
 
-# $Header: comp.cpp,v 1.0 87/12/18 13:12:22 root Exp $
+# $Header: comp.cpp,v 2.0 88/06/05 00:12:37 root Exp $
 
 print "1..3\n";
 

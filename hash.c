@@ -1,16 +1,12 @@
-/* $Header: hash.c,v 1.0 87/12/18 13:05:17 root Exp $
+/* $Header: hash.c,v 2.0 88/06/05 00:09:06 root Exp $
  *
  * $Log:	hash.c,v $
- * Revision 1.0  87/12/18  13:05:17  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:09:06  root
+ * Baseline version 2.0.
  * 
  */
 
-#include <stdio.h>
 #include "EXTERN.h"
-#include "handy.h"
-#include "util.h"
-#include "search.h"
 #include "perl.h"
 
 STR *
@@ -26,7 +22,7 @@ char *key;
     if (!tb)
 	return Nullstr;
     for (s=key,		i=0,	hash = 0;
-      /* while */ *s;
+      /* while */ *s && i < COEFFSIZE;
 	 s++,		i++,	hash *= 5) {
 	hash += *s * coeff[i];
     }
@@ -56,7 +52,7 @@ STR *val;
     if (!tb)
 	return FALSE;
     for (s=key,		i=0,	hash = 0;
-      /* while */ *s;
+      /* while */ *s && i < COEFFSIZE;
 	 s++,		i++,	hash *= 5) {
 	hash += *s * coeff[i];
     }
@@ -90,8 +86,7 @@ STR *val;
     return FALSE;
 }
 
-#ifdef NOTUSED
-bool
+STR *
 hdelete(tb,key)
 register HASH *tb;
 char *key;
@@ -101,11 +96,12 @@ char *key;
     register int hash;
     register HENT *entry;
     register HENT **oentry;
+    STR *str;
 
     if (!tb)
-	return FALSE;
+	return Nullstr;
     for (s=key,		i=0,	hash = 0;
-      /* while */ *s;
+      /* while */ *s && i < COEFFSIZE;
 	 s++,		i++,	hash *= 5) {
 	hash += *s * coeff[i];
     }
@@ -113,22 +109,20 @@ char *key;
     oentry = &(tb->tbl_array[hash & tb->tbl_max]);
     entry = *oentry;
     i = 1;
-    for (; entry; i=0, oentry = &entry->hent_next, entry = entry->hent_next) {
+    for (; entry; i=0, oentry = &entry->hent_next, entry = *oentry) {
 	if (entry->hent_hash != hash)		/* strings can't be equal */
 	    continue;
 	if (strNE(entry->hent_key,key))	/* is this it? */
 	    continue;
-	safefree((char*)entry->hent_val);
-	safefree(entry->hent_key);
 	*oentry = entry->hent_next;
-	safefree((char*)entry);
+	str = str_static(entry->hent_val);
+	hentfree(entry);
 	if (i)
 	    tb->tbl_fill--;
-	return TRUE;
+	return str;
     }
-    return FALSE;
+    return Nullstr;
 }
-#endif
 
 hsplit(tb)
 HASH *tb;
@@ -179,6 +173,54 @@ hnew()
     bzero((char*)tb->tbl_array, 8 * sizeof(HENT*));
     return tb;
 }
+
+void
+hentfree(hent)
+register HENT *hent;
+{
+    if (!hent)
+	return;
+    str_free(hent->hent_val);
+    safefree(hent->hent_key);
+    safefree((char*)hent);
+}
+
+void
+hclear(tb)
+register HASH *tb;
+{
+    register HENT *hent;
+    register HENT *ohent = Null(HENT*);
+
+    if (!tb)
+	return;
+    hiterinit(tb);
+    while (hent = hiternext(tb)) {	/* concise but not very efficient */
+	hentfree(ohent);
+	ohent = hent;
+    }
+    hentfree(ohent);
+    tb->tbl_fill = 0;
+    bzero((char*)tb->tbl_array, (tb->tbl_max + 1) * sizeof(HENT*));
+}
+
+#ifdef NOTUSED
+void
+hfree(tb)
+HASH *tb;
+{
+    if (!tb)
+	return
+    hiterinit(tb);
+    while (hent = hiternext(tb)) {
+	hentfree(ohent);
+	ohent = hent;
+    }
+    hentfree(ohent);
+    safefree((char*)tb->tbl_array);
+    safefree((char*)tb);
+}
+#endif
 
 #ifdef NOTUSED
 hshow(tb)

@@ -1,0 +1,32 @@
+#!./perl
+
+# $Header: io.dup,v 2.0 88/06/05 00:12:57 root Exp $
+
+print "1..6\n";
+
+print "ok 1\n";
+
+open(dupout,">&stdout");
+open(duperr,">&stderr");
+
+open(stdout,">Io.dup") || die "Can't open stdout";
+open(stderr,">&stdout") || die "Can't open stderr";
+
+select(stderr); $| = 1;
+select(stdout); $| = 1;
+
+print stdout "ok 2\n";
+print stderr "ok 3\n";
+system 'echo ok 4';
+system 'echo ok 5 1>&2';
+
+close(stdout);
+close(stderr);
+
+open(stdout,">&dupout");
+open(stderr,">&duperr");
+
+system 'cat Io.dup';
+unlink 'Io.dup';
+
+print stdout "ok 6\n";

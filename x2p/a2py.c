@@ -1,11 +1,8 @@
-/* $Header: a2py.c,v 1.0.1.1 88/01/28 11:07:08 root Exp $
+/* $Header: a2py.c,v 2.0 88/06/05 00:15:41 root Exp $
  *
  * $Log:	a2py.c,v $
- * Revision 1.0.1.1  88/01/28  11:07:08  root
- * patch8: added support for FOO=bar switches using eval.
- * 
- * Revision 1.0  87/12/18  17:50:33  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:15:41  root
+ * Baseline version 2.0.
  * 
  */
 
@@ -13,6 +10,8 @@
 char *index();
 
 char *filename;
+
+int checkers = 0;
 
 main(argc,argv,env)
 register int argc;
@@ -116,7 +115,10 @@ register char **env;
     /* second pass to produce new program */
 
     tmpstr = walk(0,0,root,&i);
-    str = str_make("#!/bin/perl\n\n");
+    str = str_make("#!/usr/bin/perl\neval \"exec /usr/bin/perl -S $0 $*\"\n\
+    if $running_under_some_shell;\n\
+			# this emulates #! processing on NIH machines.\n\
+			# (remove #! line above if indigestible)\n\n");
     str_cat(str,
       "eval '$'.$1.'$2;' while $ARGV[0] =~ /^([A-Za-z_]+=)(.*)/ && shift;\n");
     str_cat(str,
@@ -133,6 +135,13 @@ register char **env;
 #endif
     fixup(str);
     putlines(str);
+    if (checkers) {
+	fprintf(stderr,
+	  "Please check my work on the %d line%s I've marked with \"#???\".\n",
+		checkers, checkers == 1 ? "" : "s" );
+	fprintf(stderr,
+	  "The operation I've selected may be wrong for the operand types.\n");
+    }
     exit(0);
 }
 
@@ -214,6 +223,7 @@ yylex()
 	XTERM(tmp);
     case '~':
 	s++;
+	yylval = string("~",1);
 	XTERM(MATCHOP);
     case '+':
     case '-':
@@ -284,6 +294,10 @@ yylex()
     case '>':
 	s++;
 	tmp = *s++;
+	if (tmp == '>') {
+	    yylval = string(">>",2);
+	    XTERM(GRGR);
+	}
 	if (tmp == '=') {
 	    yylval = string(">=",2);
 	    XTERM(RELOP);
@@ -537,7 +551,31 @@ register char *s;
     default:
 	fatal("Search pattern not found:\n%s",str_get(linestr));
     }
-    s = cpytill(tokenbuf,s,s[-1]);
+
+    d = tokenbuf;
+    for (; *s; s++,d++) {
+	if (*s == '\\') {
+	    if (s[1] == '/')
+		*d++ = *s++;
+	    else if (s[1] == '\\')
+		*d++ = *s++;
+	}
+	else if (*s == '[') {
+	    *d++ = *s++;
+	    do {
+		if (*s == '\\' && s[1])
+		    *d++ = *s++;
+		if (*s == '/' || (*s == '-' && s[1] == ']'))
+		    *d++ = '\\';
+		*d++ = *s++;
+	    } while (*s && *s != ']');
+	}
+	else if (*s == '/')
+	    break;
+	*d = *s;
+    }
+    *d = '\0';
+
     if (!*s)
 	fatal("Search pattern not terminated:\n%s",str_get(linestr));
     s++;
@@ -562,18 +600,22 @@ register char *s;
     case '1': case '2': case '3': case '4': case '5':
     case '6': case '7': case '8': case '9': case '0' : case '.':
 	d = tokenbuf;
-	while (isdigit(*s) || *s == '_')
+	while (isdigit(*s)) {
 	    *d++ = *s++;
-	if (*s == '.' && index("0123456789eE",s[1]))
+	}
+	if (*s == '.' && index("0123456789eE",s[1])) {
 	    *d++ = *s++;
-	while (isdigit(*s) || *s == '_')
+	    while (isdigit(*s)) {
+		*d++ = *s++;
+	    }
+	}
+	if (index("eE",*s) && index("+-0123456789",s[1])) {
 	    *d++ = *s++;
-	if (index("eE",*s) && index("+-0123456789",s[1]))
-	    *d++ = *s++;
-	if (*s == '+' || *s == '-')
-	    *d++ = *s++;
-	while (isdigit(*s))
-	    *d++ = *s++;
+	    if (*s == '+' || *s == '-')
+		*d++ = *s++;
+	    while (isdigit(*s))
+		*d++ = *s++;
+	}
 	*d = '\0';
 	yylval = string(tokenbuf,0);
 	break;
@@ -728,7 +770,7 @@ int maybe;
 	return 0;
     else if ((ops[arg].ival & 255) != OBLOCK)
 	return oper2(OBLOCK,arg,maybe);
-    else if ((ops[arg].ival >> 8) != 2)
+    else if ((ops[arg].ival >> 8) < 2)
 	return oper2(OBLOCK,ops[arg+1].ival,maybe);
     else
 	return arg;
@@ -841,11 +883,14 @@ putone()
 	if (*t == 127) {
 	    *t = ' ';
 	    strcpy(t+strlen(t)-1, "\t#???\n");
+	    checkers++;
 	}
     }
     t = tokenbuf;
     if (*t == '#') {
 	if (strnEQ(t,"#!/bin/awk",10) || strnEQ(t,"#! /bin/awk",11))
+	    return;
+	if (strnEQ(t,"#!/usr/bin/awk",14) || strnEQ(t,"#! /usr/bin/awk",15))
 	    return;
     }
     fputs(tokenbuf,stdout);

@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: op.time,v 1.0.1.1 88/01/24 03:56:09 root Exp $
+# $Header: op.time,v 2.0 88/06/05 00:14:58 root Exp $
 
 print "1..5\n";
 

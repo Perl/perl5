@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: cmd.mod,v 1.0 87/12/18 13:12:09 root Exp $
+# $Header: cmd.mod,v 2.0 88/06/05 00:12:23 root Exp $
 
 print "1..6\n";
 

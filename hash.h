@@ -1,13 +1,14 @@
-/* $Header: hash.h,v 1.0 87/12/18 13:05:20 root Exp $
+/* $Header: hash.h,v 2.0 88/06/05 00:09:08 root Exp $
  *
  * $Log:	hash.h,v $
- * Revision 1.0  87/12/18  13:05:20  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:09:08  root
+ * Baseline version 2.0.
  * 
  */
 
 #define FILLPCT 60		/* don't make greater than 99 */
 
+#define COEFFSIZE (16 * 8)	/* size of array below */
 #ifdef DOINIT
 char coeff[] = {
 		61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
@@ -41,8 +42,11 @@ struct htbl {
 
 STR *hfetch();
 bool hstore();
-bool hdelete();
+STR *hdelete();
 HASH *hnew();
+void hclear();
+void hfree();
+void hentfree();
 int hiterinit();
 HENT *hiternext();
 char *hiterkey();

@@ -1,15 +1,13 @@
 .rn '' }`
-''' $Header: perl.man.1,v 1.0.1.2 88/01/30 17:04:07 root Exp $
+''' $Header: perl.man.1,v 2.0.1.1 88/06/28 16:28:09 root Exp $
 ''' 
 ''' $Log:	perl.man.1,v $
-''' Revision 1.0.1.2  88/01/30  17:04:07  root
-''' patch 11: random cleanup
+''' Revision 2.0.1.1  88/06/28  16:28:09  root
+''' patch1: fixed some quotes
+''' patch1: clarified syntax of LIST
 ''' 
-''' Revision 1.0.1.1  88/01/28  10:24:44  root
-''' patch8: added eval operator.
-''' 
-''' Revision 1.0  87/12/18  16:18:16  root
-''' Initial revision
+''' Revision 2.0  88/06/05  00:09:23  root
+''' Baseline version 2.0.
 ''' 
 ''' 
 .de Sh
@@ -34,11 +32,11 @@
 '''     string Tr holds user defined translation string.
 '''     Bell System Logo is used as a dummy character.
 '''
-.tr \(bs-|\(bv\*(Tr
+.tr \(*W-|\(bv\*(Tr
 .ie n \{\
-.ds -- \(bs-
-.if (\n(.H=4u)&(1m=24u) .ds -- \(bs\h'-12u'\(bs\h'-12u'-\" diablo 10 pitch
-.if (\n(.H=4u)&(1m=20u) .ds -- \(bs\h'-12u'\(bs\h'-8u'-\" diablo 12 pitch
+.ds -- \(*W-
+.if (\n(.H=4u)&(1m=24u) .ds -- \(*W\h'-12u'\(*W\h'-12u'-\" diablo 10 pitch
+.if (\n(.H=4u)&(1m=20u) .ds -- \(*W\h'-12u'\(*W\h'-8u'-\" diablo 12 pitch
 .ds L" ""
 .ds R" ""
 .ds L' '
@@ -91,7 +89,9 @@ switches on the command line.
 Contained in the file specified by the first filename on the command line.
 (Note that systems supporting the #! notation invoke interpreters this way.)
 .Ip 3. 4 2
-Passed in via standard input.
+Passed in implicity via standard input.
+This only works if there are no filename arguments\*(--to pass
+arguments to a stdin script you must explicitly specify a - for the script name.
 .PP
 After locating your script,
 .I perl
@@ -107,11 +107,29 @@ only allows one argument.  Example:
 .nf
 
 .ne 2
-	#!/bin/perl -spi.bak	# same as -s -p -i.bak
+	#!/usr/bin/perl -spi.bak	# same as -s -p -i.bak
 	.\|.\|.
 
 .fi
 Options include:
+.TP 5
+.B \-a
+turns on autosplit mode when used with a \-n or \-p.
+An implicit split command to the @F array
+is done as the first thing inside the implicit while loop produced by
+the \-n or \-p.
+.nf
+
+	perl -ane 'print pop(@F),"\en";'
+
+is equivalent to
+
+	while (<>) {
+		@F = split(' ');
+		print pop(@F),"\en";
+	}
+
+.fi
 .TP 5
 .B \-D<number>
 sets debugging flags.
@@ -139,18 +157,18 @@ same name, and selecting that output file as the default for print statements.
 The extension, if supplied, is added to the name of the
 old file to make a backup copy.
 If no extension is supplied, no backup is made.
-Saying \*(L"perl -p -i.bak -e "s/foo/bar/;" ... \*(R" is the same as using
+Saying \*(L"perl -p -i.bak -e "s/foo/bar/;" .\|.\|. \*(R" is the same as using
 the script:
 .nf
 
 .ne 2
-	#!/bin/perl -pi.bak
+	#!/usr/bin/perl -pi.bak
 	s/foo/bar/;
 
 which is equivalent to
 
 .ne 14
-	#!/bin/perl
+	#!/usr/bin/perl
 	while (<>) {
 		if ($ARGV ne $oldargv) {
 			rename($ARGV,$ARGV . '.bak');
@@ -170,6 +188,9 @@ except that the \-i form doesn't need to compare $ARGV to $oldargv to know when
 the filename has changed.
 It does, however, use ARGVOUT for the selected filehandle.
 Note that stdout is restored as the default output filehandle after the loop.
+.Sp
+You can use eof to locate the end of each input file, in case you want
+to append to each file, or reset line numbering (see example under eof).
 .TP 5
 .B \-I<directory>
 may be used in conjunction with
@@ -186,7 +207,7 @@ over filename arguments somewhat like \*(L"sed -n\*(R" or \fIawk\fR:
 
 .ne 3
 	while (<>) {
-		...		# your script goes here
+		.\|.\|.		# your script goes here
 	}
 
 .fi
@@ -194,6 +215,14 @@ Note that the lines are not printed by default.
 See
 .B \-p
 to have lines printed.
+Here is an efficient way to delete all files older than a week:
+.nf
+
+	find . -mtime +7 -print | perl -ne 'chop;unlink;'
+
+.fi
+This is faster than using the -exec switch find because you don't have to
+start a process on every filename found.
 .TP 5
 .B \-p
 causes
@@ -204,7 +233,7 @@ over filename arguments somewhat like \fIsed\fR:
 
 .ne 5
 	while (<>) {
-		...		# your script goes here
+		.\|.\|.		# your script goes here
 	} continue {
 		print;
 	}
@@ -239,34 +268,70 @@ invoked with a -xyz switch.
 .nf
 
 .ne 2
-	#!/bin/perl -s
+	#!/usr/bin/perl -s
 	if ($xyz) { print "true\en"; }
 
 .fi
+.TP 5
+.B \-S
+makes perl use the PATH environment variable to search for the script
+(unless the name of the script starts with a slash).
+Typically this is used to emulate #! startup on machines that don't
+support #!, in the following manner:
+.nf
+
+	#!/usr/bin/perl
+	eval "exec /usr/bin/perl -S $0 $*"
+		if $running_under_some_shell;
+
+.fi
+The system ignores the first line and feeds the script to /bin/sh,
+which proceeds to try to execute the perl script as a shell script.
+The shell executes the second line as a normal shell command, and thus
+starts up the perl interpreter.
+On some systems $0 doesn't always contain the full pathname,
+so the -S tells perl to search for the script if necessary.
+After perl locates the script, it parses the lines and ignores them because
+the variable $running_under_some_shell is never true.
+.TP 5
+.B \-U
+allows perl to do unsafe operations.
+Currently the only \*(L"unsafe\*(R" operation is the unlinking of directories while
+running as superuser.
+.TP 5
+.B \-v
+prints the version and patchlevel of your perl executable.
+.TP 5
+.B \-w
+prints warnings about identifiers that are mentioned only once, and scalar
+variables that are used before being set.
+Also warns about redefined subroutines, and references to undefined
+subroutines and filehandles.
 .Sh "Data Types and Objects"
 .PP
-Perl has about two and a half data types: strings, arrays of strings, and
+Perl has about two and a half data types: scalars, arrays of scalars, and
 associative arrays.
-Strings and arrays of strings are first class objects, for the most part,
+Scalars and arrays of scalars are first class objects, for the most part,
 in the sense that they can be used as a whole as values in an expression.
 Associative arrays can only be accessed on an association by association basis;
 they don't have a value as a whole (at least not yet).
 .PP
-Strings are interpreted numerically as appropriate.
-A string is interpreted as TRUE in the boolean sense if it is not the null
+Scalars are interpreted as strings or numbers as appropriate.
+A scalar is interpreted as TRUE in the boolean sense if it is not the null
 string or 0.
 Booleans returned by operators are 1 for true and '0' or '' (the null
 string) for false.
 .PP
-References to string variables always begin with \*(L'$\*(R', even when referring
-to a string that is part of an array.
+References to scalar variables always begin with \*(L'$\*(R', even when referring
+to a scalar that is part of an array.
 Thus:
 .nf
 
 .ne 3
-    $days	\h'|2i'# a simple string variable
+    $days	\h'|2i'# a simple scalar variable
     $days[28]	\h'|2i'# 29th element of array @days
     $days{'Feb'}\h'|2i'# one value from an associative array
+    $#days	\h'|2i'# last index of array @days
 
 but entire arrays are denoted by \*(L'@\*(R':
 
@@ -274,22 +339,44 @@ but entire arrays are denoted by \*(L'@\*(R':
 
 .fi
 .PP
-Any of these four constructs may be assigned to (in compiler lingo, may serve
-as an lvalue).
-(Additionally, you may find the length of array @days by evaluating
+Any of these five constructs may server as an lvalue,
+that is, may be assigned to.
+(You may also use an assignment to one of these lvalues as an lvalue in
+certain contexts\*(--see s, tr and chop.)
+You may find the length of array @days by evaluating
 \*(L"$#days\*(R", as in
 .IR csh .
-[Actually, it's not the length of the array, it's the subscript of the last element, since there is (ordinarily) a 0th element.])
+(Actually, it's not the length of the array, it's the subscript of the last element, since there is (ordinarily) a 0th element.)
+Assigning to $#days changes the length of the array.
+Shortening an array by this method does not actually destroy any values.
+Lengthening an array that was previously shortened recovers the values that
+were in those elements.
+You can also gain some measure of efficiency by preextending an array that
+is going to get big.
+(You can also extend an array by assigning to an element that is off the
+end of the array.
+This differs from assigning to $#whatever in that intervening values
+are set to null rather than recovered.)
+You can truncate an array down to nothing by assigning the null list () to
+it.
+The following are exactly equivalent
+.nf
+
+	@whatever = ();
+	$#whatever = $[ \- 1;
+
+.fi
 .PP
 Every data type has its own namespace.
-You can, without fear of conflict, use the same name for a string variable,
+You can, without fear of conflict, use the same name for a scalar variable,
 an array, an associative array, a filehandle, a subroutine name, and/or
 a label.
 Since variable and array references always start with \*(L'$\*(R'
 or \*(L'@\*(R', the \*(L"reserved\*(R" words aren't in fact reserved
 with respect to variable names.
 (They ARE reserved with respect to labels and filehandles, however, which
-don't have an initial special character.)
+don't have an initial special character.
+Hint: you could say open(LOG,'logfile') rather than open(log,'logfile').)
 Case IS significant\*(--\*(L"FOO\*(R", \*(L"Foo\*(R" and \*(L"foo\*(R" are all
 different names.
 Names which start with a letter may also contain digits and underscores.
@@ -309,7 +396,7 @@ a different line than they begin.
 This is nice, but if you forget your trailing quote, the error will not be
 reported until perl finds another line containing the quote character, which
 may be much further on in the script.
-Variable substitution inside strings is limited (currently) to simple string variables.
+Variable substitution inside strings is limited (currently) to simple scalar variables.
 The following code segment prints out \*(L"The price is $100.\*(R"
 .nf
 
@@ -346,18 +433,24 @@ is an lvalue:
     ($map{'red'}, $map{'blue'}, $map{'green'}) = (0x00f, 0x0f0, 0xf00);
 
 .fi
+Array assignment returns the number of elements assigned.
 .PP
 Numeric literals are specified in any of the usual floating point or
 integer formats.
 .PP
 There are several other pseudo-literals that you should know about.
-If a string is enclosed by backticks (grave accents), it is interpreted as
-a command, and the output of that command is the value of the pseudo-literal,
-just like in any of the standard shells.
+If a string is enclosed by backticks (grave accents), it first undergoes
+variable substitution just like a double quoted string.
+It is then interpreted as a command, and the output of that command
+is the value of the pseudo-literal, like in a shell.
 The command is executed each time the pseudo-literal is evaluated.
-Unlike in \f2csh\f1, no interpretation is done on the
+The status value of the command is returned in $? (see Predefined Names
+for the interpretation of $?).
+Unlike in \f2csh\f1, no translation is done on the return
 data\*(--newlines remain newlines.
-The status value of the command is returned in $?.
+Unlike in any of the shells, single quotes do not hide variable names
+in the command from interpretation.
+To pass a $ through to the shell you need to hide it with a backslash.
 .PP
 Evaluating a filehandle in angle brackets yields the next line
 from that file (newline included, so it's never false until EOF).
@@ -389,6 +482,10 @@ are predefined.
 Additional filehandles may be created with the
 .I open
 function.
+.PP
+If a <FILEHANDLE> is used in a context that is looking for an array, an array
+consisting of all the input lines is returned, one line per array element.
+It's easy to make a LARGE data space this way, so use with care.
 .PP
 The null filehandle <> is special and can be used to emulate the behavior of
 \fIsed\fR and \fIawk\fR.
@@ -425,9 +522,10 @@ It also uses filehandle ARGV internally.
 You can modify @ARGV before the first <> as long as you leave the first
 filename at the beginning of the array.
 Line numbers ($.) continue as if the input was one big happy file.
+(But see example under eof for how to reset line numbers on each file.)
 .PP
 .ne 5
-If you want to set @ARGV to you own list of files, go right ahead.
+If you want to set @ARGV to your own list of files, go right ahead.
 If you want to pass switches into your script, you can
 put a loop on the front like this:
 .nf
@@ -448,6 +546,45 @@ put a loop on the front like this:
 The <> symbol will return FALSE only once.
 If you call it again after this it will assume you are processing another
 @ARGV list, and if you haven't set @ARGV, will input from stdin.
+.PP
+If the string inside the angle brackets is a reference to a scalar variable
+(e.g. <$foo>),
+then that variable contains the name of the filehandle to input from.
+.PP
+If the string inside angle brackets is not a filehandle, it is interpreted
+as a filename pattern to be globbed, and either an array of filenames or the
+next filename in the list is returned, depending on context.
+One level of $ interpretation is done first, but you can't say <$foo>
+because that's an indirect filehandle as explained in the previous
+paragraph.
+You could insert curly brackets to force interpretation as a
+filename glob: <${foo}>.
+Example:
+.nf
+
+.ne 3
+	while (<*.c>) {
+		chmod 0644,$_;
+	}
+
+is equivalent to
+
+.ne 5
+	open(foo,"echo *.c | tr -s ' \et\er\ef' '\e\e012\e\e012\e\e012\e\e012'|");
+	while (<foo>) {
+		chop;
+		chmod 0644,$_;
+	}
+
+.fi
+In fact, it's currently implemented that way.
+(Which means it will not work on filenames with spaces in them.)
+Of course, the shortest way to do the above is:
+.nf
+
+	chmod 0644,<*.c>;
+
+.fi
 .Sh "Syntax"
 .PP
 A
@@ -496,10 +633,11 @@ The following compound commands may be used to control flow:
 .ne 4
 	if (EXPR) BLOCK
 	if (EXPR) BLOCK else BLOCK
-	if (EXPR) BLOCK elsif (EXPR) BLOCK ... else BLOCK
+	if (EXPR) BLOCK elsif (EXPR) BLOCK .\|.\|. else BLOCK
 	LABEL while (EXPR) BLOCK
 	LABEL while (EXPR) BLOCK continue BLOCK
 	LABEL for (EXPR; EXPR; EXPR) BLOCK
+	LABEL foreach VAR (ARRAY) BLOCK
 	LABEL BLOCK continue BLOCK
 
 .fi
@@ -595,6 +733,34 @@ is the same as
 	}
 .fi
 .PP
+The foreach loop iterates over a normal array value and sets the variable
+VAR to be each element of the array in turn.
+The \*(L"foreach\*(R" keyword is actually identical to the \*(L"for\*(R" keyword,
+so you can use \*(L"foreach\*(R" for readability or \*(L"for\*(R" for brevity.
+If VAR is omitted, $_ is set to each value.
+If ARRAY is an actual array (as opposed to an expression returning an array
+value), you can modify each element of the array
+by modifying VAR inside the loop.
+Examples:
+.nf
+
+.ne 5
+	for (@ary) { s/foo/bar/; }
+
+	foreach $elem (@elements) {
+		$elem *= 2;
+	}
+
+	for ((10,9,8,7,6,5,4,3,2,1,'BOOM')) {
+	    print $_,"\en"; sleep(1);
+	}
+
+.ne 3
+	foreach $item (split(/:[\e\e\en:]*/,$ENV{'TERMCAP'}) {
+		print "Item: $item\en";
+	}
+.fi
+.PP
 The BLOCK by itself (labeled or not) is equivalent to a loop that executes
 once.
 Thus you can use any of the loop control statements in it to leave or
@@ -612,6 +778,21 @@ This construct is particularly nice for doing case structures.
 		if (/xyz/) { $xyz = 1; last foo; }
 		$nothing = 1;
 	}
+
+.fi
+It's also nice for exiting subroutines early.
+Note the double curly brackets:
+.nf
+
+.ne 8
+	sub tokenize {{
+		.\|.\|.
+		if (/foo/) {
+			23;		# return value
+			last;
+		}
+		.\|.\|.
+	}}
 
 .fi
 .Sh "Simple statements"
@@ -641,7 +822,7 @@ modifiers have the expected semantics.
 The
 .I while
 and
-.I unless
+.I until
 modifiers also have the expected semantics (conditional evaluated first),
 except when applied to a do-BLOCK command,
 in which case the block executes once before the conditional is evaluated.
@@ -724,12 +905,16 @@ number of times specified by the right operand.
 The corresponding assignment operator.
 .Ip .. 8
 The range operator, which is bistable.
-It is false as long as its left argument is false.
-Once the left argument is true, it stays true until the right argument is true,
-AFTER which it becomes false again.
-(It doesn't become false till the next time it's evaluated.
+Each .. operator maintains its own boolean state.
+It is false as long as its left operand is false.
+Once the left operand is true, the range operator stays true
+until the right operand is true,
+AFTER which the range operator becomes false again.
+(It doesn't become false till the next time the range operator evaluated.
 It can become false on the same evaluation it became true, but it still returns
 true once.)
+The right operand is not evaluated while the operator is in the \*(L"false\*(R" state,
+and the left operand is not evaluated while the operator is in the \*(L"true\*(R" state.
 The .. operator is primarily intended for doing line number ranges after
 the fashion of \fIsed\fR or \fIawk\fR.
 The precedence is a little lower than || and &&.
@@ -741,7 +926,7 @@ doesn't affect its numeric value, but gives you something to search for if you
 want to exclude the endpoint.
 You can exclude the beginning point by waiting for the sequence number to be
 greater than 1.
-If either argument to .. is static, that argument is implicitly compared to
+If either operand of .. is static, that operand is implicitly compared to
 the $. variable, the current line number.
 Examples:
 .nf
@@ -754,6 +939,77 @@ Examples:
     s/^/> / if (/^$/ .. eof());	# quote body
 
 .fi
+.Ip \-x 8
+A file test.
+This unary operator takes one argument, either a filename or a filehandle,
+and tests the associated file to see if something is true about it.
+If the argument is omitted, tests $_, except for \-t, which tests stdin.
+It returns 1 for true and '' for false.
+Precedence is higher than logical and relational operators, but lower than
+arithmetic operators.
+The operator may be any of:
+.nf
+	\-r	File is readable by effective uid.
+	\-w	File is writeable by effective uid.
+	\-x	File is executable by effective uid.
+	\-o	File is owned by effective uid.
+	\-R	File is readable by real uid.
+	\-W	File is writeable by real uid.
+	\-X	File is executable by real uid.
+	\-O	File is owned by real uid.
+	\-e	File exists.
+	\-z	File has zero size.
+	\-s	File has non-zero size.
+	\-f	File is a plain file.
+	\-d	File is a directory.
+	\-l	File is a symbolic link.
+	\-p	File is a named pipe (FIFO).
+	\-S	File is a socket.
+	\-b	File is a block special file.
+	\-c	File is a character special file.
+	\-u	File has setuid bit set.
+	\-g	File has setgid bit set.
+	\-k	File has sticky bit set.
+	\-t	Filehandle is opened to a tty.
+	\-T	File is a text file.
+	\-B	File is a binary file (opposite of \-T).
+
+.fi
+The interpretation of the file permission operators \-r, \-R, \-w, \-W, \-x and \-X
+is based solely on the mode of the file and the uids and gids of the user.
+There may be other reasons you can't actually read, write or execute the file.
+Also note that, for the superuser, \-r, \-R, \-w and \-W always return 1, and 
+\-x and \-X return 1 if any execute bit is set in the mode.
+Scripts run by the superuser may thus need to do a stat() in order to determine
+the actual mode of the file, or temporarily set the uid to something else.
+.Sp
+Example:
+.nf
+.ne 7
+	
+	while (<>) {
+		chop;
+		next unless \-f $_;	# ignore specials
+		.\|.\|.
+	}
+
+.fi
+Note that -s/a/b/ does not do a negated substitution.
+Saying -exp($foo) still works as expected, however\*(--only single letters
+following a minus are interpreted as file tests.
+.Sp
+The \-T and \-B switches work as follows.
+The first block or so of the file is examined for odd characters such as
+strange control codes or metacharacters.
+If too many odd characters (>10%) are found, it's a \-B file, otherwise it's a \-T file.
+Also, any file containing null in the first block is considered a binary file.
+If \-T or \-B is used on a filehandle, the current stdio buffer is examined
+rather than the first block.
+Since input doesn't work well on binary files you should probably test a
+filehandle before doing any input if you're unsure of the nature of the
+filehandle you've been handed (usually via stdin).
+Both \-T and \-B return TRUE on a null file, or a file at EOF when testing
+a filehandle.
 .PP
 Here is what C has that
 .I perl
@@ -762,6 +1018,8 @@ doesn't:
 Address-of operator.
 .Ip "unary *" 12
 Dereference-address operator.
+.Ip "(TYPE)" 12
+Type casting operator.
 .PP
 Like C,
 .I perl
@@ -780,9 +1038,31 @@ You can say
 .fi
 and this all reduces to one string internally.
 .PP
+The autoincrement operator has a little extra built-in magic to it.
+If you increment a variable that is numeric, or that has ever been used in
+a numeric context, you get a normal increment.
+If, however, the variable has only been used in string contexts since it
+was set, and has a value that is not null and matches the
+pattern /^[a-zA-Z]*[0-9]*$/, the increment is done
+as a string, preserving each character within its range, with carry:
+.nf
+
+	print ++($foo = '99');	# prints '100'
+	print ++($foo = 'a0');	# prints 'a1'
+	print ++($foo = 'Az');	# prints 'Ba'
+	print ++($foo = 'zz');	# prints 'aaa'
+
+.fi
+The autodecrement is not magical.
+.PP
 Along with the literals and variables mentioned earlier,
-the following operations can serve as terms in an expression:
-.Ip "/PATTERN/" 8 4
+the following operations can serve as terms in an expression.
+Some of these operations take a LIST as an argument.
+Such a list can consist of any combination of scalar arguments or arrays;
+the arrays will be included in the list as if each individual element were
+interpolated at that point in the list.
+Elements of the LIST should be separated by commas.
+.Ip "/PATTERN/i" 8 4
 Searches a string for a pattern, and returns true (1) or false ('').
 If no string is specified via the =~ or !~ operator,
 the $_ string is searched.
@@ -791,40 +1071,51 @@ See also the section on regular expressions.
 .Sp
 If you prepend an `m' you can use any pair of characters as delimiters.
 This is particularly useful for matching Unix path names that contain `/'.
+If the final delimiter is followed by the optional letter `i', the matching is
+done in a case-insensitive manner.
+.Sp
+If used in a context that requires an array value, a pattern match returns an
+array consisting of the subexpressions matched by the parens in pattern,
+i.e. ($1, $2, $3.\|.\|.).
 .Sp
 Examples:
 .nf
 
 .ne 4
     open(tty, '/dev/tty');
-    <tty> \|=~ \|/\|^[Yy]\|/ \|&& \|do foo(\|);	# do foo if desired
+    <tty> \|=~ \|/\|^y\|/i \|&& \|do foo(\|);	# do foo if desired
 
     if (/Version: \|*\|([0-9.]*\|)\|/\|) { $version = $1; }
 
     next if m#^/usr/spool/uucp#;
 
+    if (($F1,$F2,$Etc) = ($foo =~ /^(\eS+)\es+(\eS+)\es*(.*)/))
+
 .fi
+This last example splits $foo into the first two words and the remainder
+of the line, and assigns those three fields to $F1, $F2 and $Etc.
+The conditional is true if any variables were assigned, i.e. if the pattern
+matched.
 .Ip "?PATTERN?" 8 4
 This is just like the /pattern/ search, except that it matches only once between
 calls to the
 .I reset
 operator.
 This is a useful optimization when you only want to see the first occurence of
-something in each of a set of files, for instance.
+something in each file of a set of files, for instance.
 .Ip "chdir EXPR" 8 2
-Changes the working director to EXPR, if possible.
+Changes the working directory to EXPR, if possible.
 Returns 1 upon success, 0 otherwise.
 See example under die().
 .Ip "chmod LIST" 8 2
 Changes the permissions of a list of files.
 The first element of the list must be the numerical mode.
-LIST may be an array, in which case you may wish to use the unshift()
-command to put the mode on the front of the array.
 Returns the number of files successfully changed.
-Note: in order to use the value you must put the whole thing in parentheses.
 .nf
 
-	$cnt = (chmod 0755,'foo','bar');
+.ne 2
+	$cnt = chmod 0755,'foo','bar';
+	chmod 0755,@executables;
 
 .fi
 .Ip "chop(VARIABLE)" 8 5
@@ -845,30 +1136,41 @@ Example:
 	}
 
 .fi
-.Ip "chown LIST" 8 2
-Changes the owner (and group) of a list of files.
-LIST may be an array.
-The first two elements of the list must be the NUMERICAL uid and gid, in that order.
-Returns the number of files successfully changed.
-Note: in order to use the value you must put the whole thing in parentheses.
+You can actually chop anything that's an lvalue, including an assignment:
 .nf
 
-	$cnt = (chown $uid,$gid,'foo');
+	chop($cwd = `pwd`);
 
 .fi
-.ne 18
+.Ip "chown LIST" 8 2
+Changes the owner (and group) of a list of files.
+The first two elements of the list must be the NUMERICAL uid and gid,
+in that order.
+Returns the number of files successfully changed.
+.nf
+
+.ne 2
+	$cnt = chown $uid,$gid,'foo','bar';
+	chown $uid,$gid,@filenames;
+
+.fi
+.ne 23
 Here's an example of looking up non-numeric uids:
 .nf
 
 	print "User: ";
 	$user = <stdin>;
+	chop($user);
+	print "Files: "
+	$pattern = <stdin>;
+	chop($pattern);
 	open(pass,'/etc/passwd') || die "Can't open passwd";
 	while (<pass>) {
 		($login,$pass,$uid,$gid) = split(/:/);
 		$uid{$login} = $uid;
 		$gid{$login} = $gid;
 	}
-	@ary = ('foo','bar','bie','doll');
+	@ary = <$pattern>;	# get filenames
 	if ($uid{$user} eq '') {
 		die "$user not in passwd file";
 	}
@@ -896,27 +1198,62 @@ Example:
 
 .ne 4
 	open(output,'|sort >foo');	# pipe to sort
-	...	# print stuff to output
+	.\|.\|.	# print stuff to output
 	close(output);		# wait for sort to finish
 	open(input,'foo');	# get sort's results
 
 .fi
+FILEHANDLE may be an expression whose value gives the real filehandle name.
 .Ip "crypt(PLAINTEXT,SALT)" 8 6
 Encrypts a string exactly like the crypt() function in the C library.
 Useful for checking the password file for lousy passwords.
 Only the guys wearing white hats should do this.
+.Ip "delete $ASSOC{KEY}" 8 6
+Deletes the specified value from the specified associative array.
+Returns the deleted value;
+The following deletes all the values of an associative array:
+.nf
+
+.ne 3
+	foreach $key (keys(ARRAY)) {
+		delete $ARRAY{$key};
+	}
+
+.fi
+(But it would be faster to use the reset command.)
 .Ip "die EXPR" 8 6
-Prints the value of EXPR to stderr and exits with a non-zero status.
+Prints the value of EXPR to stderr and exits with the current value of $!
+(errno).
+If $! is 0, exits with the value of ($? >> 8) (`command` status).
+If ($? >> 8) is 0, exits with 255.
 Equivalent examples:
 .nf
 
 .ne 3
-	die "Can't cd to spool." unless chdir '/usr/spool/news';
+	die "Can't cd to spool.\en" unless chdir '/usr/spool/news';
 
-	(chdir '/usr/spool/news') || die "Can't cd to spool." 
+	chdir '/usr/spool/news' || die "Can't cd to spool.\en" 
 
 .fi
-Note that the parens are necessary above due to precedence.
+.Sp
+If the value of EXPR does not end in a newline, the current script line
+number and input line number (if any) are also printed, and a newline is
+supplied.
+Hint: sometimes appending \*(L", stopped\*(R" to your message will cause it to make
+better sense when the string \*(L"at foo line 123\*(R" is appended.
+Suppose you are running script \*(L"canasta\*(R".
+.nf
+
+.ne 7
+	die "/etc/games is no good";
+	die "/etc/games is no good, stopped";
+
+produce, respectively
+
+	/etc/games is no good at canasta line 123.
+	/etc/games is no good, stopped at canasta line 123.
+
+.fi
 See also
 .IR exit .
 .Ip "do BLOCK" 8 4
@@ -930,7 +1267,40 @@ Executes a SUBROUTINE declared by a
 .I sub
 declaration, and returns the value
 of the last expression evaluated in SUBROUTINE.
+If you pass arrays as part of LIST you may wish to pass the length
+of the array in front of each array.
 (See the section on subroutines later on.)
+SUBROUTINE may be a scalar variable, in which case the variable contains
+the name of the subroutine to execute.
+The parentheses are required to avoid confusion with the next form of \*(L"do\*(R".
+.Ip "do EXPR" 8 3
+Uses the value of EXPR as a filename and executes the contents of the file
+as a perl script.
+It's primary use is to include subroutines from a perl subroutine library.
+.nf
+	do 'stat.pl';
+
+is just like
+
+	eval `cat stat.pl`;
+
+.fi
+except that it's more efficient, more concise, keeps track of the current
+filename for error messages, and searches all the -I libraries if the file
+isn't in the current directory (see also the @INC array in Predefined Names).
+It's the same, however, in that it does reparse the file every time you
+call it, so if you are going to use the file inside a loop you might prefer
+to use #include, at the expense of a little more startup time.
+(The main problem with #include is that cpp doesn't grok # comments--a
+workaround is to use \*(L";#\*(R" for standalone comments.)
+Note that the following are NOT equivalent:
+.nf
+
+.ne 2
+	do $foo;	# eval a file
+	do $foo();	# call a subroutine
+
+.fi
 .Ip "each(ASSOC_ARRAY)" 8 6
 Returns a 2 element array consisting of the key and value for the next
 value of an associative array, so that you can iterate over it.
@@ -939,7 +1309,9 @@ When the array is entirely read, a null array is returned (which when
 assigned produces a FALSE (0) value).
 The next call to each() after that will start iterating again.
 The iterator can be reset only by reading all the elements from the array.
-You should not modify the array while iterating over it.
+You must not modify the array while iterating over it.
+There is a single iterator for each associative array, shared by all
+each(), keys() and values() function calls in the program.
 The following prints out your environment like the printenv program, only
 in a different order:
 .nf
@@ -955,20 +1327,31 @@ See also keys() and values().
 .Ip "eof" 8
 Returns 1 if the next read on FILEHANDLE will return end of file, or if
 FILEHANDLE is not open.
-If (FILEHANDLE) is omitted, the eof status is returned for the last file read.
-The null filehandle may be used to indicate the pseudo file formed of the
+FILEHANDLE may be an expression whose value gives the real filehandle name.
+An eof without an argument returns the eof status for the last file read.
+Empty parentheses () may be used to indicate the pseudo file formed of the
 files listed on the command line, i.e. eof() is reasonable to use inside
-a while (<>) loop.
-Example:
+a while (<>) loop to detect the end of only the last file.
+Use eof(ARGV) or eof without the parens to test EACH file in a while (<>) loop.
+Examples:
 .nf
 
 .ne 7
-	# insert dashes just before last line
+	# insert dashes just before last line of last file
 	while (<>) {
 		if (eof()) {
 			print "--------------\en";
 		}
 		print;
+	}
+
+.ne 7
+	# reset line numbering on each input file
+	while (<>) {
+		print "$.\et$_";
+		if (eof) {	# Not eof().
+			close(ARGV);
+		}
 	}
 
 .fi
@@ -981,6 +1364,7 @@ as with subroutines.
 If there is a syntax error or runtime error, a null string is returned by
 eval, and $@ is set to the error message.
 If there was no error, $@ is null.
+If EXPR is omitted, evaluates $_.
 .Ip "exec LIST" 8 6
 If there is more than one argument in LIST,
 calls execvp() with the arguments in LIST.
@@ -990,6 +1374,13 @@ If there are none, the argument is split into words and passed directly to
 execvp(), which is more efficient.
 Note: exec (and system) do not flush your output buffer, so you may need to
 set $| to avoid lost output.
+Examples:
+.nf
+
+	exec '/bin/echo', 'Your arguments are: ', @ARGV;
+	exec "sort $outfile | uniq";
+
+.fi
 .Ip "exit EXPR" 8 6
 Evaluates EXPR and exits immediately with that value.
 Example:
@@ -1020,5 +1411,7 @@ Typically used as follows:
        = gmtime(time);
 
 .fi
-All array elements are numeric.
+All array elements are numeric, and come straight out of a struct tm.
+In particular this means that $mon has the range 0..11 and $wday has the
+range 0..6.
 ''' End of part 1

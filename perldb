@@ -1,10 +1,10 @@
-#!/bin/perl
+#!/usr/bin/perl
 
-# $Header: perldb,v 1.0.1.1 88/01/28 10:27:16 root Exp $
+# $Header: perldb,v 2.0 88/06/05 00:09:45 root Exp $
 #
 # $Log:	perldb,v $
-# Revision 1.0.1.1  88/01/28  10:27:16  root
-# patch8: created this file.
+# Revision 2.0  88/06/05  00:09:45  root
+# Baseline version 2.0.
 # 
 #
 
@@ -25,7 +25,7 @@ open(script,$filename) || die "Can't find $filename";
 
 open(tmp, ">$tmp") || die "Can't make temp script";
 
-$perl = '/bin/perl';
+$perl = '/usr/bin/perl';
 $init = 1;
 $state = 'statement';
 
@@ -61,7 +61,8 @@ while (<script>) {
 	$inform++;
 	next;
     }
-    if ($state eq 'statement' && !/^[ \t]*}/) {
+    if ($state eq 'statement' &&
+      !/^[ \t]*}|^[ \t]*else|^[ \t]*continue|^[ \t]*elsif/) {
 	if (s/^([ \t]*[A-Za-z_0-9]+:)//) {
 	    $label = $1;
 	}
@@ -243,6 +244,7 @@ sub parse {
 	    do quote(ord($1),2), next	if s/^s\b(.)//;
 	    do quote(ord($1),2), next	if s/^y\b(.)//;
 	    do quote(ord($1),2), next	if s/^tr\b(.)//;
+	    do quote($ord,1), next	if s/^`//;
 	    next			if s/^[A-Za-z_][A-Za-z_0-9]*://;
 	    $state = 'term', next	if s/^eof\b//;
 	    $state = 'term', next	if s/^shift\b//;
@@ -260,7 +262,7 @@ sub parse {
 	    die "Illegal character $_";
 	}
 	elsif ($ord < 33) {
-	    next if s/[ \t\n]+//;
+	    next if s/[ \t\n\f]+//;
 	    die "Illegal character $_";
 	}
 	else {
@@ -274,7 +276,7 @@ sub parse {
 	    $state = 'term', next	if s/^<[A-Za-z_0-9]*>//;
 	    next			if s/^\+\+//;
 	    next			if s/^--//;
-	    $state = 'operator', next	if s/^[(!%&*-=+:,.<>]//;
+	    $state = 'operator', next	if s/^[-(!%&*=+:,.<>]//;
 	    $state = 'term', next	if s/^\)+//;
 	    do quote($ord,1), next	if s/^'//;
 	    do quote($ord,1), next	if s/^"//;

@@ -1,6 +1,6 @@
 #!./perl -i.bak
 
-# $Header: io.inplace,v 1.0 87/12/18 13:12:51 root Exp $
+# $Header: io.inplace,v 2.0 88/06/05 00:13:02 root Exp $
 
 print "1..2\n";
 

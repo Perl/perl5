@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: cmd.while,v 1.0 87/12/18 13:12:15 root Exp $
+# $Header: cmd.while,v 2.0 88/06/05 00:12:31 root Exp $
 
 print "1..10\n";
 

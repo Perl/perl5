@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: base.pat,v 1.0 87/12/18 13:11:56 root Exp $
+# $Header: base.pat,v 2.0 88/06/05 00:12:08 root Exp $
 
 print "1..2\n";
 

@@ -1,8 +1,8 @@
-/* $Header: form.h,v 1.0 87/12/18 13:05:10 root Exp $
+/* $Header: form.h,v 2.0 88/06/05 00:09:01 root Exp $
  *
  * $Log:	form.h,v $
- * Revision 1.0  87/12/18  13:05:10  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:09:01  root
+ * Baseline version 2.0.
  * 
  */
 

@@ -1,16 +1,12 @@
-/* $Header: array.c,v 1.0 87/12/18 13:04:42 root Exp $
+/* $Header: array.c,v 2.0 88/06/05 00:08:17 root Exp $
  *
  * $Log:	array.c,v $
- * Revision 1.0  87/12/18  13:04:42  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:08:17  root
+ * Baseline version 2.0.
  * 
  */
 
-#include <stdio.h>
 #include "EXTERN.h"
-#include "handy.h"
-#include "util.h"
-#include "search.h"
 #include "perl.h"
 
 STR *
@@ -18,7 +14,7 @@ afetch(ar,key)
 register ARRAY *ar;
 int key;
 {
-    if (key < 0 || key > ar->ary_max)
+    if (key < 0 || key > ar->ary_fill)
 	return Nullstr;
     return ar->ary_array[key];
 }
@@ -42,8 +38,12 @@ STR *val;
 	    (newmax - ar->ary_max) * sizeof(STR*));
 	ar->ary_max = newmax;
     }
-    if (key > ar->ary_fill)
-	ar->ary_fill = key;
+    while (ar->ary_fill < key) {
+	if (++ar->ary_fill < key && ar->ary_array[ar->ary_fill] != Nullstr) {
+	    str_free(ar->ary_array[ar->ary_fill]);
+	    ar->ary_array[ar->ary_fill] = Nullstr;
+	}
+    }
     retval = (ar->ary_array[key] != Nullstr);
     if (retval)
 	str_free(ar->ary_array[key]);
@@ -67,15 +67,33 @@ int key;
 }
 
 ARRAY *
-anew()
+anew(stab)
+STAB *stab;
 {
     register ARRAY *ar = (ARRAY*)safemalloc(sizeof(ARRAY));
 
     ar->ary_array = (STR**) safemalloc(5 * sizeof(STR*));
+    ar->ary_magic = str_new(0);
+    ar->ary_magic->str_link.str_magic = stab;
     ar->ary_fill = -1;
+    ar->ary_index = -1;
     ar->ary_max = 4;
     bzero((char*)ar->ary_array, 5 * sizeof(STR*));
     return ar;
+}
+
+void
+aclear(ar)
+register ARRAY *ar;
+{
+    register int key;
+
+    if (!ar)
+	return;
+    for (key = 0; key <= ar->ary_max; key++)
+	str_free(ar->ary_array[key]);
+    ar->ary_fill = -1;
+    bzero((char*)ar->ary_array, (ar->ary_max+1) * sizeof(STR*));
 }
 
 void
@@ -86,8 +104,9 @@ register ARRAY *ar;
 
     if (!ar)
 	return;
-    for (key = 0; key <= ar->ary_fill; key++)
+    for (key = 0; key <= ar->ary_max; key++)
 	str_free(ar->ary_array[key]);
+    str_free(ar->ary_magic);
     safefree((char*)ar->ary_array);
     safefree((char*)ar);
 }
@@ -123,8 +142,8 @@ register int num;
     if (num <= 0)
 	return;
     astore(ar,ar->ary_fill+num,(STR*)0);	/* maybe extend array */
-    sstr = ar->ary_array + ar->ary_fill;
-    dstr = sstr + num;
+    dstr = ar->ary_array + ar->ary_fill;
+    sstr = dstr - num;
     for (i = ar->ary_fill; i >= 0; i--) {
 	*dstr-- = *sstr--;
     }
@@ -146,11 +165,23 @@ register ARRAY *ar;
     return retval;
 }
 
-long
+int
 alen(ar)
 register ARRAY *ar;
 {
-    return (long)ar->ary_fill;
+    return ar->ary_fill;
+}
+
+afill(ar, fill)
+register ARRAY *ar;
+int fill;
+{
+    if (fill < 0)
+	fill = -1;
+    if (fill <= ar->ary_max)
+	ar->ary_fill = fill;
+    else
+	astore(ar,fill,Nullstr);
 }
 
 void

@@ -1,8 +1,8 @@
-/* $Header: util.c,v 1.0 87/12/18 13:07:34 root Exp $
+/* $Header: util.c,v 2.0 88/06/05 00:16:07 root Exp $
  *
  * $Log:	util.c,v $
- * Revision 1.0  87/12/18  13:07:34  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:16:07  root
+ * Baseline version 2.0.
  * 
  */
 
@@ -136,8 +136,12 @@ register char *to, *from;
 register int delim;
 {
     for (; *from; from++,to++) {
-	if (*from == '\\' && from[1] == delim)
-	    *to++ = *from++;
+	if (*from == '\\') {
+	    if (from[1] == delim)
+		from++;
+	    else if (from[1] == '\\')
+		*to++ = *from++;
+	}
 	else if (*from == delim)
 	    break;
 	*to = *from;
@@ -146,13 +150,14 @@ register int delim;
     return from;
 }
 
+
 char *
 cpy2(to,from,delim)
 register char *to, *from;
 register int delim;
 {
     for (; *from; from++,to++) {
-	if (*from == '\\' && from[1] == delim)
+	if (*from == '\\')
 	    *to++ = *from++;
 	else if (*from == '$')
 	    *to++ = '\\';

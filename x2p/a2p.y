@@ -1,9 +1,9 @@
 %{
-/* $Header: a2p.y,v 1.0 87/12/18 13:07:05 root Exp $
+/* $Header: a2p.y,v 2.0 88/06/05 00:15:38 root Exp $
  *
  * $Log:	a2p.y,v $
- * Revision 1.0  87/12/18  13:07:05  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:15:38  root
+ * Baseline version 2.0.
  * 
  */
 
@@ -42,14 +42,14 @@ program	: junk begin hunks end
 		{ root = oper4(OPROG,$1,$2,$3,$4); }
 	;
 
-begin	: BEGIN '{' states '}' junk
-		{ $$ = oper2(OJUNK,$3,$5); in_begin = FALSE; }
+begin	: BEGIN '{' maybe states '}' junk
+		{ $$ = oper3(OJUNK,$3,$4,$6); in_begin = FALSE; }
 	| /* NULL */
 		{ $$ = Nullop; }
 	;
 
-end	: END '{' states '}'
-		{ $$ = $3; }
+end	: END '{' maybe states '}'
+		{ $$ = oper2(OJUNK,$3,$4); }
 	| end NEWLINE
 		{ $$ = $1; }
 	| /* NULL */
@@ -64,10 +64,10 @@ hunks	: hunks hunk junk
 
 hunk	: patpat
 		{ $$ = oper1(OHUNK,$1); need_entire = TRUE; }
-	| patpat '{' states '}'
-		{ $$ = oper2(OHUNK,$1,$3); }
-	| '{' states '}'
-		{ $$ = oper2(OHUNK,Nullop,$2); }
+	| patpat '{' maybe states '}'
+		{ $$ = oper2(OHUNK,$1,oper2(OJUNK,$3,$4)); }
+	| '{' maybe states '}'
+		{ $$ = oper2(OHUNK,Nullop,oper2(OJUNK,$2,$3)); }
 	;
 
 patpat	: pat
@@ -118,7 +118,7 @@ rel	: expr RELOP expr
 	;
 
 match	: expr MATCHOP REGEX
-		{ $$ = oper3(OMATCHOP,$2,$1,$3); }
+		{ $$ = oper3(OMATCHOP,$2,$1,oper1(OREGEX,$3)); }
 	| '(' match ')'
 		{ $$ = oper1(OMPAREN,$2); }
 	;
@@ -198,14 +198,6 @@ variable: NUMBER
 		{ $$ = oper1(OVFLD,$2); }
 	;
 
-maybe	: NEWLINE
-		{ $$ = oper0(ONEWLINE); }
-	| /* NULL */
-		{ $$ = Nullop; }
-	| COMMENT
-		{ $$ = oper1(OCOMMENT,$1); }
-	;
-
 print_list
 	: expr
 	| clist
@@ -237,15 +229,27 @@ hunksep : ';'
 		{ $$ = oper1(OCOMMENT,$1); }
 	;
 
-separator
-	: ';'
-		{ $$ = oper0(OSEMICOLON); }
-	| SEMINEW
-		{ $$ = oper0(OSNEWLINE); }
-	| NEWLINE
-		{ $$ = oper0(OSNEWLINE); }
+maybe	: maybe nlstuff
+		{ $$ = oper2(OJUNK,$1,$2); }
+	| /* NULL */
+		{ $$ = Nullop; }
+	;
+
+nlstuff : NEWLINE
+		{ $$ = oper0(ONEWLINE); }
 	| COMMENT
-		{ $$ = oper1(OSCOMMENT,$1); }
+		{ $$ = oper1(OCOMMENT,$1); }
+	;
+
+separator
+	: ';' maybe
+		{ $$ = oper2(OJUNK,oper0(OSEMICOLON),$2); }
+	| SEMINEW maybe
+		{ $$ = oper2(OJUNK,oper0(OSNEWLINE),$2); }
+	| NEWLINE maybe
+		{ $$ = oper2(OJUNK,oper0(OSNEWLINE),$2); }
+	| COMMENT maybe
+		{ $$ = oper2(OJUNK,oper1(OSCOMMENT,$1),$2); }
 	;
 
 states	: states statement
@@ -255,9 +259,18 @@ states	: states statement
 	;
 
 statement
-	: simple separator
-		{ $$ = oper2(OSTATE,$1,$2); }
+	: simple separator maybe
+		{ $$ = oper2(OJUNK,oper2(OSTATE,$1,$2),$3); }
+	| ';' maybe
+		{ $$ = oper2(OSTATE,Nullop,oper2(OJUNK,oper0(OSEMICOLON),$2)); }
+	| SEMINEW maybe
+		{ $$ = oper2(OSTATE,Nullop,oper2(OJUNK,oper0(OSNEWLINE),$2)); }
 	| compound
+	;
+
+simpnull: simple
+	| /* NULL */
+		{ $$ = Nullop; }
 	;
 
 simple
@@ -292,8 +305,6 @@ simple
 		{ $$ = oper1(OEXIT,$2); }
 	| CONTINUE
 		{ $$ = oper0(OCONTINUE); }
-	| /* NULL */
-		{ $$ = Nullop; }
 	;
 
 redir	: RELOP
@@ -311,14 +322,14 @@ compound
 		{ $$ = oper3(OIF,$3,bl($6,$5),bl($9,$8)); }
 	| WHILE '(' cond ')' maybe statement
 		{ $$ = oper2(OWHILE,$3,bl($6,$5)); }
-	| FOR '(' simple ';' cond ';' simple ')' maybe statement
+	| FOR '(' simpnull ';' cond ';' simpnull ')' maybe statement
 		{ $$ = oper4(OFOR,$3,$5,$7,bl($10,$9)); }
-	| FOR '(' simple ';'  ';' simple ')' maybe statement
+	| FOR '(' simpnull ';'  ';' simpnull ')' maybe statement
 		{ $$ = oper4(OFOR,$3,string("",0),$6,bl($9,$8)); }
 	| FOR '(' VAR IN VAR ')' maybe statement
 		{ $$ = oper3(OFORIN,$3,$5,bl($8,$7)); }
-	| '{' states '}'
-		{ $$ = oper1(OBLOCK,$2); }
+	| '{' maybe states '}' maybe
+		{ $$ = oper3(OBLOCK,oper2(OJUNK,$2,$3),Nullop,$5); }
 	;
 
 %%

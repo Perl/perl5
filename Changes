@@ -1,0 +1,89 @@
+New regexp routines derived from Henry Spencer's.
+	Support for /(foo|bar)/.
+	Support for /(foo)*/ and /(foo)+/.
+	\s for whitespace, \S nonwhitespace
+	\d for digit, \D nondigit
+
+Local variables in blocks, subroutines and evals.
+
+Recursive subroutine calls are now supported.
+
+Array values may now be interpolated into lists:
+	unlink 'foo', 'bar', @trashcan, 'tmp';
+
+File globbing via <*.foo>.
+
+Use of <> in array contexts returns the whole file or glob list:
+	unlink <*.foo>;
+
+New iterator for normal arrays, foreach, that allows both read and write:
+	foreach $elem ($array) {
+		$elem =~ s/foo/bar/;
+	}
+
+Ability to open pipe to a forked off script for secure pipes in setuid scripts.
+
+File inclusion via
+	do 'foo.pl';
+
+More file tests, including -t to see if, for instance, stdin is
+a terminal.  File tests now behave in a more correct manner.  You can do
+file tests on filehandles as well as filenames.  The special filetests
+-T and -B test a file to see if it's text or binary.
+
+An eof can now be used on each file of the <> input for such purposes
+as resetting the line numbers or appending to each file of an inplace edit.
+
+Assignments can now function as lvalues, so you can say things like
+	($HOST = $host) =~ tr/a-z/A-Z/;
+	($obj = $src) =~ s/\.c$/.o/;
+
+You can now do certain file operations with a variable which holds the name
+of a filehandle, e.g. open(++$incl,$includefilename); $foo = <$incl>;
+
+You can now a subroutine indirectly through a scalar variable:
+	$which = 'xyz';
+	do $which('foo');	# calls xyz
+
+Warnings are now available (with -w) on use of uninitialized variables and on
+identifiers that are mentioned only once, and on reference to various
+undefined things.
+
+The -S switch causes perl to search the PATH for the script so that you can say
+	eval "exec /usr/bin/perl -S $0 $*"
+		if $running_under_some_shell;
+
+Reset now resets arrays and associative arrays as well as string variables.
+
+Assigning off the end of an array now nulls out any intervening values.
+
+$#foo is now an lvalue.  You can preallocate or truncate arrays, or recover
+values lost to prior truncation.
+
+$#foo is now indexed to $[ properly.
+
+s/foo/bar/i optimization bug fixed.
+
+The $x = "...$x..."; bug is fixed.
+
+The @ary = (1); bug is now fixed.  You can even say @ary = 1;
+
+$= now returns the correct value.
+
+Several of the larger files are now split into smaller pieces for easier
+compilation.
+
+Pattern matches evaluated in an array context now return ($1, $2...).
+
+There is now a wait operator.
+
+There is now a sort operator.
+
+The requirement of parens around certain expressions when taking their value
+has been lifted.  In particular, you can say
+	$x = print "foo","bar";
+	$x = unlink "foo","bar";
+	chdir "foo" || die "Can't chdir to foo\n";
+
+The manual is now not lying when it says that perl is generally faster than
+sed.  I hope.

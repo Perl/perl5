@@ -1,11 +1,8 @@
-/* $Header: cmd.h,v 1.0.1.1 88/01/28 10:23:07 root Exp $
+/* $Header: cmd.h,v 2.0 88/06/05 00:08:28 root Exp $
  *
  * $Log:	cmd.h,v $
- * Revision 1.0.1.1  88/01/28  10:23:07  root
- * patch8: added eval_root for eval operator.
- * 
- * Revision 1.0  87/12/18  13:04:59  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:08:28  root
+ * Baseline version 2.0.
  * 
  */
 
@@ -15,6 +12,7 @@
 #define C_EXPR 3
 #define C_BLOCK 4
 
+#ifdef DEBUGGING
 #ifndef DOINIT
 extern char *cmdname[];
 #else
@@ -38,11 +36,12 @@ char *cmdname[] = {
     "16"
 };
 #endif
+#endif /* DEBUGGING */
 
 #define CF_OPTIMIZE 077	/* type of optimization */
 #define CF_FIRSTNEG 0100/* conditional is ($register NE 'string') */
-#define CF_NESURE 0200	/* if first doesn't match we're sure */
-#define CF_EQSURE 0400	/* if first does match we're sure */
+#define CF_NESURE 0200	/* if short doesn't match we're sure */
+#define CF_EQSURE 0400	/* if short does match we're sure */
 #define CF_COND	01000	/* test c_expr as conditional first, if not null. */
 			/* Set for everything except do {} while currently */
 #define CF_LOOP 02000	/* loop on the c_expr conditional (loop modifiers) */
@@ -56,11 +55,15 @@ char *cmdname[] = {
 #define CFT_ANCHOR 3	/* c_expr is an anchored search /^.../ */
 #define CFT_STROP 4	/* c_expr is a string comparison */
 #define CFT_SCAN 5	/* c_expr is an unanchored search /.../ */
-#define CFT_GETS 6	/* c_expr is $reg = <filehandle> */
+#define CFT_GETS 6	/* c_expr is <filehandle> */
 #define CFT_EVAL 7	/* c_expr is not optimized, so call eval() */
 #define CFT_UNFLIP 8	/* 2nd half of range not optimized */
 #define CFT_CHOP 9	/* c_expr is a chop on a register */
+#define CFT_ARRAY 10	/* this is a foreach loop */
+#define CFT_INDGETS 11	/* c_expr is <$variable> */
+#define CFT_NUMOP 12	/* c_expr is a numeric comparison */
 
+#ifdef DEBUGGING
 #ifndef DOINIT
 extern char *cmdopt[];
 #else
@@ -75,9 +78,13 @@ char *cmdopt[] = {
     "EVAL",
     "UNFLIP",
     "CHOP",
-    "10"
+    "ARRAY",
+    "INDGETS",
+    "NUMOP",
+    "13"
 };
 #endif
+#endif /* DEBUGGING */
 
 struct acmd {
     STAB	*ac_stab;	/* a symbol table entry */
@@ -93,7 +100,7 @@ struct cmd {
     CMD		*c_next;	/* the next command at this level */
     ARG		*c_expr;	/* conditional expression */
     CMD		*c_head;	/* head of this command list */
-    STR		*c_first;	/* head of string to match as shortcut */
+    STR		*c_short;	/* string to match as shortcut */
     STAB	*c_stab;	/* a symbol table entry, mostly for fp */
     SPAT	*c_spat;	/* pattern used by optimization */
     char	*c_label;	/* label for this construct */
@@ -101,8 +108,10 @@ struct cmd {
 	struct acmd acmd;	/* normal command */
 	struct ccmd ccmd;	/* compound command */
     } ucmd;
-    short	c_flen;		/* len of c_first, if not null */
+    short	c_slen;		/* len of c_short, if not null */
     short	c_flags;	/* optimization flags--see above */
+    char	*c_file;	/* file the following line # is from */
+    line_t      c_line;         /* line # of this command */
     char	c_type;		/* what this command does */
 };
 
@@ -116,11 +125,6 @@ EXT struct compcmd {
     CMD *comp_alt;
 };
 
-#ifndef DOINIT
-extern struct compcmd Nullccmd;
-#else
-struct compcmd Nullccmd = {Nullcmd, Nullcmd};
-#endif
 void opt_arg();
 void evalstatic();
 STR *cmd_exec();

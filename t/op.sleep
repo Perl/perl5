@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: op.sleep,v 1.0 87/12/18 13:14:17 root Exp $
+# $Header: op.sleep,v 2.0 88/06/05 00:14:35 root Exp $
 
 print "1..1\n";
 

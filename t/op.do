@@ -1,6 +1,7 @@
 #!./perl
 
-# $Header: op.do,v 1.0 87/12/18 13:13:20 root Exp $
+# $Header: op.do,v 2.0 88/06/05 00:13:36 root Exp $
+
 sub foo1
 {
     print $_[0];
@@ -15,7 +16,7 @@ sub foo2
     $x;
 }
 
-print "1..8\n";
+print "1..15\n";
 
 $_[0] = "not ok 1\n";
 $result = do foo1("ok 1\n");
@@ -32,3 +33,12 @@ if ($_[0] EQ "not ok 4\n") { print "ok 6\n"; } else { print "not ok 6\n"; }
 $result = do{print "ok 7\n"; 'value';};
 print "#8\t:$result: eq :value:\n";
 if ($result EQ 'value') { print "ok 8\n"; } else { print "not ok 8\n"; }
+
+sub blather {
+    print @_;
+}
+
+do blather("ok 9\n","ok 10\n");
+@x = ("ok 11\n", "ok 12\n");
+@y = ("ok 14\n", "ok 15\n");
+do blather(@x,"ok 13\n",@y);

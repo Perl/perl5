@@ -6,7 +6,7 @@ case $CONFIG in
 	ln ../../../config.sh . || \
 	(echo "Can't find config.sh."; exit 1)
     fi
-    . config.sh
+    . ./config.sh
     ;;
 esac
 case "$0" in
@@ -15,22 +15,20 @@ esac
 echo "Extracting makedepend (with variable substitutions)"
 $spitshell >makedepend <<!GROK!THIS!
 $startsh
-# $Header: makedepend.SH,v 1.0.1.1 88/02/02 11:24:05 root Exp $
+# $Header: makedepend.SH,v 2.0 88/06/05 00:09:11 root Exp $
 #
 # $Log:	makedepend.SH,v $
-# Revision 1.0.1.1  88/02/02  11:24:05  root
-# patch13: removed spurious -I./h.
-# 
-# Revision 1.0  87/12/18  17:54:32  root
-# Initial revision
+# Revision 2.0  88/06/05  00:09:11  root
+# Baseline version 2.0.
 # 
 # 
 
 export PATH || (echo "OOPS, this isn't sh.  Desperation time.  I will feed myself to sh."; sh \$0; kill \$\$)
 
 cat='$cat'
+ccflags='$ccflags'
 cp='$cp'
-cpp='$cpp'
+cpp='$cppstdin'
 echo='$echo'
 egrep='$egrep'
 expr='$expr'
@@ -44,6 +42,19 @@ uniq='$uniq'
 !GROK!THIS!
 
 $spitshell >>makedepend <<'!NO!SUBS!'
+
+: the following weeds options from ccflags that are of no interest to cpp
+case "$ccflags" in
+'');;
+*)  set X $ccflags
+    ccflags=''
+    for flag do
+	case $flag in
+	-D*|-I*) ccflags="$ccflags $flag";;
+	esac
+    done
+    ;;
+esac
 
 $cat /dev/null >.deptmp
 $rm -f *.c.c c/*.c.c
@@ -86,7 +97,7 @@ for file in `$cat .clist`; do
 	-e 's|\\$||' \
 	-e p \
 	-e '}'
-    $cpp -I/usr/local/include -I. $file.c | \
+    $cpp -I/usr/local/include -I. $ccflags $file.c | \
     $sed \
 	-e '/^# *[0-9]/!d' \
 	-e 's/^.*"\(.*\)".*$/'$filebase'.o: \1/' \
@@ -145,7 +156,7 @@ $rm -f .deptmp `sed 's/\.c/.c.c/' .clist` .shlist .clist .hlist .hsed
 
 !NO!SUBS!
 $eunicefix makedepend
-chmod 755 makedepend
+chmod +x makedepend
 case `pwd` in
 *SH)
     $rm -f ../makedepend

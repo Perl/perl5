@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: cmd.subval,v 1.0 87/12/18 13:12:12 root Exp $
+# $Header: cmd.subval,v 2.0 88/06/05 00:12:26 root Exp $
 
 sub foo1 {
     'true1';
@@ -32,7 +32,7 @@ sub foo6 {
     'true2' unless $_[0];
 }
 
-print "1..12\n";
+print "1..22\n";
 
 if (do foo1(0) eq '') {print "ok 1\n";} else {print "not ok 1\n";}
 if (do foo1(1) eq 'true2') {print "ok 2\n";} else {print "not ok 2\n";}
@@ -48,3 +48,31 @@ if (do foo5(0) eq '') {print "ok 9\n";} else {print "not ok 9\n";}
 if (do foo5(1) eq 'true2') {print "ok 10\n";} else {print "not ok 10\n";}
 if (do foo6(0) eq 'true2') {print "ok 11\n";} else {print "not ok 11\n";}
 if (do foo6(1) eq '') {print "ok 12\n";} else {print "not ok 12\n";}
+
+# Now test to see that recursion works using a Fibonacci number generator
+
+sub fib {
+    local($arg) = @_;
+    local($foo);
+    $level++;
+    if ($arg <= 2) {
+	$foo = 1;
+    }
+    else {
+	$foo = do fib($arg-1) + do fib($arg-2);
+    }
+    $level--;
+    $foo;
+}
+
+@good = (0,1,1,2,3,5,8,13,21,34,55,89);
+
+for ($i = 1; $i <= 10; $i++) {
+    $foo = $i + 12;
+    if (do fib($i) == $good[$i]) {
+	print "ok $foo\n";
+    }
+    else {
+	print "not ok $foo\n";
+    }
+}

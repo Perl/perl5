@@ -1,15 +1,17 @@
-/* $Header: array.h,v 1.0 87/12/18 13:04:46 root Exp $
+/* $Header: array.h,v 2.0 88/06/05 00:08:21 root Exp $
  *
  * $Log:	array.h,v $
- * Revision 1.0  87/12/18  13:04:46  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:08:21  root
+ * Baseline version 2.0.
  * 
  */
 
 struct atbl {
     STR	**ary_array;
-    int	ary_max;
-    int	ary_fill;
+    STR *ary_magic;
+    int ary_max;
+    int ary_fill;
+    int ary_index;
 };
 
 STR *afetch();
@@ -17,6 +19,8 @@ bool astore();
 bool adelete();
 STR *apop();
 STR *ashift();
+void afree();
+void aclear();
 bool apush();
-long alen();
+int alen();
 ARRAY *anew();

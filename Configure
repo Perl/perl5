@@ -8,14 +8,14 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $Header: Configure,v 1.0.1.6 88/02/02 11:20:07 root Exp $
+# $Header: Configure,v 2.0.1.1 88/06/28 16:24:02 root Exp $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
 # working with this copy of Configure, you may wish to get metaconfig.)
 
 : sanity checks
-PATH='.:/bin:/usr/bin:/usr/local/bin:/usr/ucb:/usr/local:/usr/lbin:/etc'
+PATH='.:/bin:/usr/bin:/usr/local/bin:/usr/ucb:/usr/local:/usr/lbin:/etc:/usr/new:/usr/new/bin:/usr/nbin'
 export PATH || (echo "OOPS, this isn't sh.  Desperation time.  I will feed myself to sh."; sh $0; kill $$)
 
 if test ! -t 0; then
@@ -33,6 +33,10 @@ if test ! -d ../UU; then
     fi
     cd UU
 fi
+
+case "$1" in
+-d) shift; fastread='yes';;
+esac
 
 d_eunice=''
 eunicefix=''
@@ -61,24 +65,38 @@ Mcc=''
 vi=''
 mailx=''
 mail=''
+cpp=''
 Log=''
 Header=''
 bin=''
 cc=''
 contains=''
-cpp=''
+cppstdin=''
 cppminus=''
 d_bcopy=''
 d_charsprf=''
 d_crypt=''
+d_dosuid=''
+d_fchmod=''
+d_fchown=''
+d_getgrps=''
 d_index=''
+d_killpg=''
+d_memcpy=''
+d_rename=''
+d_setegid=''
+d_seteuid=''
+d_setrgid=''
+d_setruid=''
 d_statblks=''
 d_stdstdio=''
+d_strcspn=''
 d_strctcpy=''
 d_symlink=''
 d_tminsys=''
 d_vfork=''
 d_voidsig=''
+gidtype=''
 libc=''
 libnm=''
 mallocsrc=''
@@ -102,10 +120,11 @@ shsharp=''
 sharpbang=''
 startsh=''
 stdchar=''
+uidtype=''
 voidflags=''
 defvoidused=''
+privlib=''
 CONFIG=''
-
 : set package name
 package=perl
 
@@ -115,15 +134,28 @@ echo "Beginning of configuration questions for $package kit."
 echo " "
 
 define='define'
-undef='/*undef'
+undef='undef'
 libpth='/usr/lib /usr/local/lib /lib'
 smallmach='pdp11 i8086 z8000 i80286 iAPX286'
 rmlist='kit[1-9]isdone kit[1-9][0-9]isdone'
 trap 'echo " "; rm -f $rmlist; exit 1' 1 2 3
+
+: We must find out about Eunice early
+eunicefix=':'
+if test -f /etc/unixtovms; then
+    eunicefix=/etc/unixtovms
+fi
+if test -f /etc/unixtovms.exe; then
+    eunicefix=/etc/unixtovms.exe
+fi
+
 attrlist="mc68000 sun gcos unix ibm gimpel interdata tss os mert pyr"
 attrlist="$attrlist vax pdp11 i8086 z8000 u3b2 u3b5 u3b20 u3b200"
 attrlist="$attrlist ns32000 ns16000 iAPX286 mc300 mc500 mc700 sparc"
-pth="/usr/ucb /bin /usr/bin /usr/local /usr/local/bin /usr/lbin /etc /usr/lib"
+attrlist="$attrlist nsc32000 sinix xenix venix posix ansi M_XENIX"
+attrlist="$attrlist $mc68k __STDC__"
+pth="/usr/ucb /bin /usr/bin /usr/local /usr/local/bin /usr/lbin /etc /usr/lib /lib"
+d_newshome="../../NeWS"
 defvoidused=7
 
 : some greps do not return status, grrr.
@@ -144,7 +176,7 @@ contains*)
     cat >contains <<'EOSS'
 grep "$1" "$2" >.greptmp && cat .greptmp && test -s .greptmp
 EOSS
-chmod 755 contains
+chmod +x contains
 esac
 
 : first determine how to suppress newline on echo command
@@ -167,7 +199,10 @@ rm -f .echotmp
 
 : now set up to do reads with possible shell escape and default assignment
 cat <<EOSC >myread
-ans='!'
+case "\$fastread" in
+yes) ans=''; echo " " ;;
+*) ans='!';;
+esac
 while expr "X\$ans" : "X!" >/dev/null; do
     read ans
     case "\$ans" in
@@ -273,6 +308,10 @@ for dir in \$*; do
 	if test -f \$dir/\$thing; then
 	    echo \$dir/\$thing
 	    exit 0
+	elif test -f \$dir/\$thing.exe; then
+	    : on Eunice apparently
+	    echo \$dir/\$thing
+	    exit 0
 	fi
 	;;
     esac
@@ -280,7 +319,7 @@ done
 echo \$dflt
 exit 1
 EOSC
-chmod 755 loc
+chmod +x loc
 $eunicefix loc
 loclist="
 expr
@@ -300,6 +339,7 @@ trylist="
 test
 egrep
 Mcc
+cpp
 "
 for file in $loclist; do
     xxx=`loc $file $file $pth`
@@ -398,6 +438,12 @@ if test -f /lib/libc.a; then
     libc=/lib/libc.a
 else
     ans=`loc libc.a blurfl/dyick $libpth`
+    if test ! -f $ans; then
+	ans=`loc clib blurfl/dyick $libpth`
+    fi
+    if test ! -f $ans; then
+	ans=`loc libc blurfl/dyick $libpth`
+    fi
     if test -f $ans; then
 	echo "Your C library is in $ans, of all places."
 	libc=$ans
@@ -423,17 +469,31 @@ EOM
 fi
 echo " "
 $echo $n "Extracting names from $libc for later perusal...$c"
-if ar t $libc > libc.list; then
+nm $libc 2>/dev/null | sed -n -e 's/^.* T _//p' -e 's/^.* T //p' > libc.list
+if $contains '^printf$' libc.list >/dev/null 2>&1; then
     echo "done"
 else
-    echo " "
-    echo "The archiver doesn't think $libc is a reasonable library."
-    echo "Trying nm instead..."
-    if nm -g $libc > libc.list; then
-	echo "Done.  Maybe this is Unicos, or an Apollo?"
+    nm $libc 2>/dev/null | sed -n -e 's/^.* D _//p' -e 's/^.* D //p' > libc.list
+    if $contains '^printf$' libc.list >/dev/null 2>&1; then
+	echo "done"
     else
-	echo "That didn't work either.  Giving up."
-	exit 1
+	echo " "
+	echo "nm didn't seem to work right."
+	echo "Trying ar instead..."
+	rmlist="$rmlist libc.tmp"
+	if ar t $libc > libc.tmp; then
+	    sed -e 's/\.o$//' < libc.tmp > libc.list
+	    echo "Ok."
+	else
+	    echo "ar didn't seem to work right."
+	    echo "Maybe this is a Cray...trying bld instead..."
+	    if bld t $libc | sed -e 's/.*\///' -e 's/\.o:.*$//' > libc.list; then
+		echo "Ok."
+	    else
+	    	echo "That didn't work either.  Giving up."
+	    	exit 1
+	    fi
+	fi
     fi
 fi
 rmlist="$rmlist libc.list"
@@ -446,7 +506,7 @@ if $contains SIGTSTP /usr/include/signal.h >/dev/null 2>&1 ; then
     echo exit 0 >bsd
     echo exit 1 >usg
     echo exit 1 >v7
-elif $contains fcntl libc.list >/dev/null 2>&1 ; then
+elif $contains '^fcntl$' libc.list >/dev/null 2>&1 ; then
     echo "Looks kind of like a USG system, but we'll see..."
     echo exit 1 >bsd
     echo exit 0 >usg
@@ -457,7 +517,7 @@ else
     echo exit 1 >usg
     echo exit 0 >v7
 fi
-if $contains vmssystem libc.list >/dev/null 2>&1 ; then
+if $contains '^vmssystem$' libc.list >/dev/null 2>&1 ; then
     cat <<'EOI'
 There is, however, a strange, musty smell in the air that reminds me of
 something...hmm...yes...I've got it...there's a VMS nearby, or I'm a Blit.
@@ -481,7 +541,8 @@ else
     echo "It's not Xenix..."
     echo "exit 1" >xenix
 fi
-chmod 755 xenix
+chmod +x xenix
+$eunicefix xenix
 if test -f /venix; then
     echo "Actually, this looks more like a VENIX system..."
     echo "exit 0" >venix
@@ -494,8 +555,8 @@ else
     fi
     echo "exit 1" >venix
 fi
-chmod 755 bsd usg v7 eunice venix xenix
-$eunicefix bsd usg v7 eunice venix xenix
+chmod +x bsd usg v7 eunice venix
+$eunicefix bsd usg v7 eunice venix
 rmlist="$rmlist bsd usg v7 eunice venix xenix"
 
 : see if sh knows # comments
@@ -509,15 +570,15 @@ if sh -c '#' >/dev/null 2>&1 ; then
     echo "Okay, let's see if #! works on this system..."
     echo "#!/bin/echo hi" > try
     $eunicefix try
-    chmod 755 try
+    chmod +x try
     try > today
-    if test -s today; then
+    if $contains hi today >/dev/null 2>&1; then
 	echo "It does."
 	sharpbang='#!'
     else
 	echo "#! /bin/echo hi" > try
 	$eunicefix try
-	chmod 755 try
+	chmod +x try
 	try > today
 	if test -s today; then
 	    echo "It does."
@@ -531,7 +592,7 @@ else
     echo "Your sh doesn't grok # comments--I will strip them later on."
     shsharp=false
     echo "exec grep -v '^#'" >spitshell
-    chmod 755 spitshell
+    chmod +x spitshell
     $eunicefix spitshell
     spitshell=`pwd`/spitshell
     echo "I presume that if # doesn't work, #! won't work either!"
@@ -549,7 +610,7 @@ set abc
 test "$?abc" != 1
 EOSS
 
-chmod 755 try
+chmod +x try
 $eunicefix try
 if try; then
     echo "Yup, it does."
@@ -566,71 +627,71 @@ cat <<'EOT' >testcpp.c
 #define XYZ xyz
 ABC.XYZ
 EOT
-echo 'Maybe "/lib/cpp" will work...'
-/lib/cpp <testcpp.c >testcpp.out 2>&1
-if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+echo 'Maybe "'$cpp'" will work...'
+$cpp <testcpp.c >testcpp.out 2>&1
+if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
     echo "Yup, it does."
-    cpp='/lib/cpp'
+    cppstdin="$cpp"
     cppminus='';
 else
-    echo 'Nope, maybe "/lib/cpp -" will work...'
-    /lib/cpp - <testcpp.c >testcpp.out 2>&1
-    if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+    echo 'Nope, maybe "'$cpp' -" will work...'
+    $cpp - <testcpp.c >testcpp.out 2>&1
+    if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 	echo "Yup, it does."
-	cpp='/lib/cpp'
+	cppstdin="$cpp"
 	cppminus='-';
     else
 	echo 'No such luck...maybe "cc -E" will work...'
 	cc -E <testcpp.c >testcpp.out 2>&1
-	if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+	if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 	    echo "It works!"
-	    cpp='cc -E'
+	    cppstdin='cc -E'
 	    cppminus='';
 	else
 	    echo 'Nixed again...maybe "cc -E -" will work...'
 	    cc -E - <testcpp.c >testcpp.out 2>&1
-	    if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+	    if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 		echo "Hooray, it works!  I was beginning to wonder."
-		cpp='cc -E'
+		cppstdin='cc -E'
 		cppminus='-';
 	    else
 		echo 'Nope...maybe "cc -P" will work...'
 		cc -P <testcpp.c >testcpp.out 2>&1
-		if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+		if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 		    echo "Yup, that does."
-		    cpp='cc -P'
+		    cppstdin='cc -P'
 		    cppminus='';
 		else
 		    echo 'Nope...maybe "cc -P -" will work...'
 		    cc -P - <testcpp.c >testcpp.out 2>&1
-		    if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+		    if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 			echo "Yup, that does."
-			cpp='cc -P'
+			cppstdin='cc -P'
 			cppminus='-';
 		    else
 			echo 'Hmm...perhaps you already told me...'
-			case "$cpp" in
+			case "$cppstdin" in
 			'') ;;
-			*) $cpp $cppminus <testcpp.c >testcpp.out 2>&1;;
+			*) $cppstdin $cppminus <testcpp.c >testcpp.out 2>&1;;
 			esac
-			if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+			if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 			    echo "Hooray, you did!  I was beginning to wonder."
 			else
 			    echo 'Uh-uh.  Time to get fancy...'
 			    echo 'Trying (cat >/tmp/$$.c; cc -E /tmp/$$.c; rm /tmp/$$.c)'
-			    cpp='(cat >/tmp/$$.c; cc -E /tmp/$$.c; rm /tmp/$$.c)'
+			    cppstdin='(cat >/tmp/$$.c; cc -E /tmp/$$.c; rm /tmp/$$.c)'
 			    cppminus='';
-			    $cpp <testcpp.c >testcpp.out 2>&1
-			    if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+			    $cppstdin <testcpp.c >testcpp.out 2>&1
+			    if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 				echo "Eureka!."
 			    else
 				dflt=blurfl
 				$echo $n "No dice.  I can't find a C preprocessor.  Name one: $c"
 				rp='Name a C preprocessor:'
 				. myread
-				cpp="$ans"
-				$cpp <testcpp.c >testcpp.out 2>&1
-				if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+				cppstdin="$ans"
+				$cppstdin <testcpp.c >testcpp.out 2>&1
+				if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 				    echo "OK, that will do."
 				else
 				    echo "Sorry, I can't get that to work.  Go find one."
@@ -648,7 +709,7 @@ rm -f testcpp.c testcpp.out
 
 : see if bcopy exists
 echo " "
-if $contains bcopy libc.list >/dev/null 2>&1; then
+if $contains '^bcopy$' libc.list >/dev/null 2>&1; then
     echo 'bcopy() found.'
     d_bcopy="$define"
 else
@@ -658,17 +719,21 @@ fi
 
 : see if sprintf is declared as int or pointer to char
 echo " "
-if $contains 'char.*sprintf' /usr/include/stdio.h >/dev/null 2>&1 ; then
-    echo "Your sprintf() returns (char*)."
-    d_charsprf="$define"
-else
+cat >.ucbsprf.c <<'EOF'
+main() { char buf[10]; exit((unsigned long)sprintf(buf,"%s","foo") > 10L); }
+EOF
+if cc .ucbsprf.c -o .ucbsprf >/dev/null 2>&1 && .ucbsprf; then
     echo "Your sprintf() returns (int)."
     d_charsprf="$undef"
+else
+    echo "Your sprintf() returns (char*)."
+    d_charsprf="$define"
 fi
+/bin/rm -f .ucbsprf.c .ucbsprf
 
 : see if crypt exists
 echo " "
-if $contains crypt libc.list >/dev/null 2>&1; then
+if $contains '^crypt$' libc.list >/dev/null 2>&1; then
     echo 'crypt() found.'
     d_crypt="$define"
 else
@@ -676,27 +741,165 @@ else
     d_crypt="$undef"
 fi
 
+: now see if they want to do setuid emulation
+case "$d_dosuid" in
+'') if bsd; then
+	dflt=y
+    else
+	dflt=n
+    fi
+    ;;
+*undef*) dflt=n;;
+*) dflt=y;;
+esac
+cat <<EOM
+ 
+Some sites have disabled setuid #! scripts because of a bug in the kernel
+that prevents them from being secure.  If you are on such a system, the
+setuid/setgid bits on scripts are currently useless.  It is possible for
+$package to detect those bits and emulate setuid/setgid in a secure fashion
+until a better solution is devised for the kernel problem.
+
+EOM
+rp="Do you want to do setuid/setgid emulation? [$dflt]"
+echo $n "$rp $c"
+. myread
+case "$ans" in
+'') $ans="$dflt";;
+esac
+case "$ans" in
+y*)  d_dosuid="$define";;
+*) d_dosuid="$undef";;
+esac
+
+: see if fchmod exists
+echo " "
+if $contains '^fchmod$' libc.list >/dev/null 2>&1; then
+    echo 'fchmod() found.'
+    d_fchmod="$define"
+else
+    echo 'fchmod() not found.'
+    d_fchmod="$undef"
+fi
+
+: see if fchown exists
+echo " "
+if $contains '^fchown$' libc.list >/dev/null 2>&1; then
+    echo 'fchown() found.'
+    d_fchown="$define"
+else
+    echo 'fchown() not found.'
+    d_fchown="$undef"
+fi
+
+: see if getgroups exists
+echo " "
+if $contains '^getgroups$' libc.list >/dev/null 2>&1; then
+    echo 'getgroups() found.'
+    d_getgrps="$define"
+else
+    echo 'getgroups() not found.'
+    d_getgrps="$undef"
+fi
+
 : index or strcpy
 echo " "
-dflt=y
-if $contains index libc.list >/dev/null 2>&1 ; then
-    echo "Your system appears to use index() and rindex() rather than strchr()"
-    $echo $n "and strrchr().  Is this correct? [$dflt] $c"
-    rp='index() rather than strchr()? [$dflt]'
-    . myread
-    case "$ans" in
-	n*|f*) d_index="$define" ;;
-	*)     d_index="$undef" ;;
-    esac
+case "$d_index" in
+n) dflt=n;;
+*) dflt=y;;
+esac
+if $contains '^index$' libc.list >/dev/null 2>&1 ; then
+    if $contains '^strchr$' libc.list >/dev/null 2>&1 ; then
+	echo "Your system has both index() and strchr().  Shall I use"
+	rp="index() rather than strchr()? [$dflt]"
+	$echo $n "$rp $c"
+	. myread
+	case "$ans" in
+	    n*) d_index="$define" ;;
+	    *)  d_index="$undef" ;;
+	esac
+    else
+	d_index="$undef"
+	echo "index() found."
+    fi
 else
-    echo "Your system appears to use strchr() and strrchr() rather than index()"
-    $echo $n "and rindex().  Is this correct? [$dflt] $c"
-    rp='strchr() rather than index()? [$dflt]'
-    . myread
-    case "$ans" in
-	n*|f*) d_index="$undef" ;;
-	*)     d_index="$define" ;;
-    esac
+    if $contains '^strchr$' libc.list >/dev/null 2>&1 ; then
+	d_index="$define"
+	echo "strchr() found."
+    else
+	echo "No index() or strchr() found!"
+	d_index="$undef"
+    fi
+fi
+
+: see if killpg exists
+echo " "
+if $contains '^killpg$' libc.list >/dev/null 2>&1; then
+    echo 'killpg() found.'
+    d_killpg="$define"
+else
+    echo 'killpg() not found.'
+    d_killpg="$undef"
+fi
+
+: see if memcpy exists
+echo " "
+if $contains '^memcpy$' libc.list >/dev/null 2>&1; then
+    echo 'memcpy() found.'
+    d_memcpy="$define"
+else
+    echo 'memcpy() not found.'
+    d_memcpy="$undef"
+fi
+
+: see if rename exists
+echo " "
+if $contains '^rename$' libc.list >/dev/null 2>&1; then
+    echo 'rename() found.'
+    d_rename="$define"
+else
+    echo 'rename() not found.'
+    d_rename="$undef"
+fi
+
+: see if setegid exists
+echo " "
+if $contains '^setegid$' libc.list >/dev/null 2>&1; then
+    echo 'setegid() found.'
+    d_setegid="$define"
+else
+    echo 'setegid() not found.'
+    d_setegid="$undef"
+fi
+
+: see if seteuid exists
+echo " "
+if $contains '^seteuid$' libc.list >/dev/null 2>&1; then
+    echo 'seteuid() found.'
+    d_seteuid="$define"
+else
+    echo 'seteuid() not found.'
+    d_seteuid="$undef"
+fi
+
+: see if setrgid exists
+echo " "
+if $contains '^setrgid$' libc.list >/dev/null 2>&1; then
+    echo 'setrgid() found.'
+    d_setrgid="$define"
+else
+    echo 'setrgid() not found.'
+    d_setrgid="$undef"
+fi
+
+: see if setruid exists
+echo " "
+if $contains '^setruid$' libc.list >/dev/null 2>&1; then
+    echo 'setruid() found.'
+    d_setruid="$define"
+else
+    echo 'setruid() not found.'
+    d_setruid="$undef"
 fi
 
 : see if stat knows about block sizes
@@ -729,6 +932,16 @@ else
     d_stdstdio="$undef"
 fi
 
+: see if strcspn exists
+echo " "
+if $contains '^strcspn$' libc.list >/dev/null 2>&1; then
+    echo 'strcspn() found.'
+    d_strcspn="$define"
+else
+    echo 'strcspn() not found.'
+    d_strcspn="$undef"
+fi
+
 : check for structure copying
 echo " "
 echo "Checking to see if your C compiler can copy structs..."
@@ -751,6 +964,16 @@ else
 fi
 $rm -f try.*
 
+: see if symlink exists
+echo " "
+if $contains '^symlink$' libc.list >/dev/null 2>&1; then
+    echo 'symlink() found.'
+    d_symlink="$define"
+else
+    echo 'symlink() not found.'
+    d_symlink="$undef"
+fi
+
 : see if struct tm is defined in sys/time.h
 echo " "
 if $contains 'struct tm' /usr/include/time.h >/dev/null 2>&1 ; then
@@ -763,7 +986,7 @@ fi
 
 : see if there is a vfork
 echo " "
-if $contains vfork libc.list >/dev/null 2>&1 ; then
+if $contains '^vfork$' libc.list >/dev/null 2>&1 ; then
     echo "vfork() found."
     d_vfork="$undef"
 else
@@ -801,13 +1024,13 @@ void main() {
 main() {
 #endif
 	extern void *moo();
-	void (*goo)();
+	void *(*goo)();
 #if TRY & 2
 	void (*foo[10])();
 #endif
 
 #if TRY & 4
-	if(goo == moo) {
+	if(*goo == moo) {
 		exit(0);
 	}
 #endif
@@ -851,19 +1074,28 @@ $echo $n "$rp $c"
 voidflags="$ans"
 $rm -f try.* .out
 
-: see what type of char stdio uses.
+: see what type gids are declared as in the kernel
+case "$gidtype" in
+'')
+    if $contains 'gid_t;' /usr/include/sys/types.h >/dev/null 2>&1 ; then
+	dflt='gid_t';
+    else
+	set `grep 'groups\[NGROUPS\];' /usr/include/sys/user.h 2>/dev/null` unsigned short
+	case $1 in
+	unsigned) dflt="$1 $2" ;;
+	*) dflt="$1" ;;
+	esac
+    fi
+    ;;
+*)  dflt="$gidtype"
+    ;;
+esac
+cont=true
 echo " "
-if $contains 'unsigned.*char.*_ptr;' /usr/include/stdio.h >/dev/null 2>&1 ; then
-    echo "Your stdio uses unsigned chars."
-    stdchar="unsigned char"
-else
-    echo "Your stdio uses signed chars."
-    stdchar="char"
-fi
-
-: preserve RCS keywords in files with variable substitution, grrr
-Log='$Log'
-Header='$Header'
+rp="What type are group ids on this system declared as? [$dflt]"
+$echo $n "$rp $c"
+. myread
+gidtype="$ans"
 
 : set up shell script to do ~ expansion
 cat >filexp <<EOSS
@@ -900,8 +1132,64 @@ case "\$1" in
     ;;
 esac
 EOSS
-chmod 755 filexp
+chmod +x filexp
 $eunicefix filexp
+
+: determine where private executables go
+case "$privlib" in
+'')
+    dflt=/usr/lib/perl
+    test -d /usr/local/lib && dflt=/usr/local/lib/perl
+    ;;
+*)  dflt="$privlib"
+    ;;
+esac
+$cat <<EOM
+
+The perl package has some perl subroutine libraries that should be put in
+a directory that is accessible by everyone.  Where do you want to put these
+EOM
+$echo $n "libraries? [$dflt] $c"
+rp="Put perl libraries where? [$dflt]"
+. myread
+privlib=`filexp $ans`
+
+: see what type of char stdio uses.
+echo " "
+if $contains 'unsigned.*char.*_ptr;' /usr/include/stdio.h >/dev/null 2>&1 ; then
+    echo "Your stdio uses unsigned chars."
+    stdchar="unsigned char"
+else
+    echo "Your stdio uses signed chars."
+    stdchar="char"
+fi
+
+: see what type uids are declared as in the kernel
+case "$uidtype" in
+'')
+    if $contains 'uid_t;' /usr/include/sys/types.h >/dev/null 2>&1 ; then
+	dflt='uid_t';
+    else
+	set `grep '_ruid;' /usr/include/sys/user.h 2>/dev/null` unsigned short
+	case $1 in
+	unsigned) dflt="$1 $2" ;;
+	*) dflt="$1" ;;
+	esac
+    fi
+    ;;
+*)  dflt="$uidtype"
+    ;;
+esac
+cont=true
+echo " "
+rp="What type are user ids on this system declared as? [$dflt]"
+$echo $n "$rp $c"
+. myread
+uidtype="$ans"
+
+: preserve RCS keywords in files with variable substitution, grrr
+Log='$Log'
+Header='$Header'
 
 : determine where public executables go
 case "$bin" in
@@ -968,6 +1256,9 @@ case "$mansrc" in
 *n)
     manext=n
     ;;
+*C)
+    manext=C
+    ;;
 *)
     manext=1
     ;;
@@ -1008,7 +1299,7 @@ exit 0; _ _ _ _\1\\	 \1\\
 #endif\\
 /' >/tmp/Cppsym\$\$
 echo exit 1 >>/tmp/Cppsym\$\$
-$cpp $cppminus </tmp/Cppsym\$\$ >/tmp/Cppsym2\$\$
+$cppstdin $cppminus </tmp/Cppsym\$\$ >/tmp/Cppsym2\$\$
 case "\$list" in
 true) awk 'NF > 5 {print substr(\$6,2,100)}' </tmp/Cppsym2\$\$ ;;
 *)
@@ -1019,7 +1310,7 @@ esac
 $rm -f /tmp/Cppsym\$\$ /tmp/Cppsym2\$\$
 exit \$status
 EOSS
-chmod 755 Cppsym
+chmod +x Cppsym
 $eunicefix Cppsym
 echo "Your C preprocessor defines the following symbols:"
 Cppsym -l $attrlist >Cppsym.true
@@ -1082,8 +1373,8 @@ none)
 *split)
     case "$split" in
     '') 
-	if $contains '-i' $mansrc/ld.1 >/dev/null 2>&1 || \
-	   $contains '-i' $mansrc/cc.1 >/dev/null 2>&1; then
+	if $contains '\-i' $mansrc/ld.1 >/dev/null 2>&1 || \
+	   $contains '\-i' $mansrc/cc.1 >/dev/null 2>&1; then
 	    dflt='-i'
 	else
 	    dflt='none'
@@ -1245,16 +1536,6 @@ else
     cc=cc
 fi
 
-: see if symlink exists
-echo " "
-if $contains symlink libc.list >/dev/null 2>&1; then
-    echo 'symlink() found.'
-    d_symlink="$define"
-else
-    echo 'symlink() not found.'
-    d_symlink="$undef"
-fi
-
 : see if we should include -lnm
 echo " "
 if $test -r /usr/lib/libnm.a || $test -r /usr/local/lib/libnm.a ; then
@@ -1341,24 +1622,38 @@ Mcc='$Mcc'
 vi='$vi'
 mailx='$mailx'
 mail='$mail'
+cpp='$cpp'
 Log='$Log'
 Header='$Header'
 bin='$bin'
 cc='$cc'
 contains='$contains'
-cpp='$cpp'
+cppstdin='$cppstdin'
 cppminus='$cppminus'
 d_bcopy='$d_bcopy'
 d_charsprf='$d_charsprf'
 d_crypt='$d_crypt'
+d_dosuid='$d_dosuid'
+d_fchmod='$d_fchmod'
+d_fchown='$d_fchown'
+d_getgrps='$d_getgrps'
 d_index='$d_index'
+d_killpg='$d_killpg'
+d_memcpy='$d_memcpy'
+d_rename='$d_rename'
+d_setegid='$d_setegid'
+d_seteuid='$d_seteuid'
+d_setrgid='$d_setrgid'
+d_setruid='$d_setruid'
 d_statblks='$d_statblks'
 d_stdstdio='$d_stdstdio'
+d_strcspn='$d_strcspn'
 d_strctcpy='$d_strctcpy'
 d_symlink='$d_symlink'
 d_tminsys='$d_tminsys'
 d_vfork='$d_vfork'
 d_voidsig='$d_voidsig'
+gidtype='$gidtype'
 libc='$libc'
 libnm='$libnm'
 mallocsrc='$mallocsrc'
@@ -1382,15 +1677,18 @@ shsharp='$shsharp'
 sharpbang='$sharpbang'
 startsh='$startsh'
 stdchar='$stdchar'
+uidtype='$uidtype'
 voidflags='$voidflags'
 defvoidused='$defvoidused'
+privlib='$privlib'
 CONFIG=true
 EOT
- 
+
 CONFIG=true
 
 echo " "
 dflt=''
+fastread=''
 echo "If you didn't make any mistakes, then just type a carriage return here."
 rp="If you need to edit config.sh, do it as a shell escape here:"
 $echo $n "$rp $c"
@@ -1400,6 +1698,7 @@ case "$ans" in
 *) : in case they cannot read
     eval $ans;;
 esac
+. ./config.sh
 
 echo " "
 echo "Doing variable substitutions on .SH files..."
@@ -1457,5 +1756,8 @@ else
 fi
 
 $rm -f kit*isdone
+: the following is currently useless
 cd UU && $rm -f $rmlist
+: since this removes it all anyway
+cd .. && $rm -rf UU
 : end of Configure

@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: base.cond,v 1.0 87/12/18 13:11:41 root Exp $
+# $Header: base.cond,v 2.0 88/06/05 00:11:52 root Exp $
 
 # make sure conditional operators work
 

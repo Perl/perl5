@@ -1,8 +1,8 @@
 #!./perl
 
-# $Header: op.subst,v 1.0 87/12/18 13:14:30 root Exp $
+# $Header: op.subst,v 2.0 88/06/05 00:14:49 root Exp $
 
-print "1..7\n";
+print "1..13\n";
 
 $x = 'foo';
 $_ = "x";
@@ -20,9 +20,8 @@ s/x/\$x $x/;
 print "#3\t:$_: eq :\$x foo:\n";
 if ($_ eq '$x foo') {print "ok 3\n";} else {print "not ok 3\n";}
 
-$a = 'abcdef';
 $b = 'cd';
-$a =~ s'(b${b}e)'\n$1';
+($a = 'abcdef') =~ s'(b${b}e)'\n$1';
 print "#4\t:$1: eq :bcde:\n";
 print "#4\t:$a: eq :a\\n\$1f:\n";
 if ($1 eq 'bcde' && $a eq 'a\n$1f') {print "ok 4\n";} else {print "not ok 4\n";}
@@ -35,4 +34,18 @@ if (($a =~ s/a/y/g) == 0 && $a eq 'xbxcxdx')
     {print "ok 6\n";} else {print "not ok 6\n";}
 
 if (($a =~ s/b/y/g) == 1 && $a eq 'xyxcxdx')
-    {print "ok 7\n";} else {print "not ok 7\n";}
+    {print "ok 7\n";} else {print "not ok 7 $a\n";}
+
+$_ = 'ABACADA';
+if (/a/i && s///gi && $_ eq 'BCD') {print "ok 8\n";} else {print "not ok 8\n";}
+
+$_ = '\\' x 4;
+if (length($_) == 4) {print "ok 9\n";} else {print "not ok 9\n";}
+s/\\/\\\\/g;
+if ($_ eq '\\' x 8) {print "ok 10\n";} else {print "not ok 10\n";}
+
+$_ = '\/' x 4;
+if (length($_) == 8) {print "ok 11\n";} else {print "not ok 11\n";}
+s/\//\/\//g;
+if ($_ eq '\\//' x 4) {print "ok 12\n";} else {print "not ok 12\n";}
+if (length($_) == 12) {print "ok 13\n";} else {print "not ok 13\n";}

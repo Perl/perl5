@@ -7,11 +7,11 @@ case $CONFIG in
 	(echo "Can't find config.sh."; exit 1)
 	echo "Using config.sh from above..."
     fi
-    . config.sh
+    . ./config.sh
     ;;
 esac
 echo "Extracting config.h (with variable substitutions)"
-cat <<!GROK!THIS! >config.h
+sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
 /* config.h
  * This file was produced by running the config.h.SH script, which
  * gets its values from config.sh, which is generally produced by
@@ -37,7 +37,7 @@ cat <<!GROK!THIS! >config.h
 #$d_eunice	EUNICE		/**/
 #$d_eunice	VMS		/**/
 
-/* CPP:
+/* CPPSTDIN:
  *	This symbol contains the first part of the string which will invoke
  *	the C preprocessor on the standard input and produce to standard
  *	output.	 Typical value of "cc -E" or "/lib/cpp".
@@ -45,10 +45,10 @@ cat <<!GROK!THIS! >config.h
 /* CPPMINUS:
  *	This symbol contains the second part of the string which will invoke
  *	the C preprocessor on the standard input and produce to standard
- *	output.  This symbol will have the value "-" if CPP needs a minus
+ *	output.  This symbol will have the value "-" if CPPSTDIN needs a minus
  *	to specify standard input, otherwise the value is "".
  */
-#define CPP "$cpp"
+#define CPPSTDIN "$cppstdin"
 #define CPPMINUS "$cppminus"
 
 /* BCOPY:
@@ -71,6 +71,40 @@ cat <<!GROK!THIS! >config.h
  */
 #$d_crypt	CRYPT		/**/
 
+/* DOSUID:
+ *	This symbol, if defined, indicates that the C program should
+ *	check the script that it is executing for setuid/setgid bits, and
+ *	attempt to emulate setuid/setgid on systems that have disabled
+ *	setuid #! scripts because the kernel can't do it securely.
+ *	It is up to the package designer to make sure that this emulation
+ *	is done securely.  Among other things, it should do an fstat on
+ *	the script it just opened to make sure it really is a setuid/setgid
+ *	script, it should make sure the arguments passed correspond exactly
+ *	to the argument on the #! line, and it should not trust any
+ *	subprocesses to which it must pass the filename rather than the
+ *	file descriptor of the script to be executed.
+ */
+#$d_dosuid DOSUID		/**/
+
+/* FCHMOD:
+ *	This symbol, if defined, indicates that the fchmod routine is available
+ *	to change mode of opened files.  If unavailable, use chmod().
+ */
+#$d_fchmod	FCHMOD		/**/
+
+/* FCHOWN:
+ *	This symbol, if defined, indicates that the fchown routine is available
+ *	to change ownership of opened files.  If unavailable, use chown().
+ */
+#$d_fchown	FCHOWN		/**/
+
+/* GETGROUPS:
+ *	This symbol, if defined, indicates that the getgroups() routine is
+ *	available to get the list of process groups.  If unavailable, multiple
+ *	groups are probably not supported.
+ */
+#$d_getgrps	GETGROUPS		/**/
+
 /* index:
  *	This preprocessor symbol is defined, along with rindex, if the system
  *	uses the strchr and strrchr routines instead.
@@ -81,6 +115,51 @@ cat <<!GROK!THIS! >config.h
  */
 #$d_index	index strchr	/* cultural */
 #$d_index	rindex strrchr	/*  differences? */
+
+/* KILLPG:
+ *	This symbol, if defined, indicates that the killpg routine is available
+ *	to kill process groups.  If unavailable, you probably should use kill
+ *	with a negative process number.
+ */
+#$d_killpg	KILLPG		/**/
+
+/* MEMCPY:
+ *	This symbol, if defined, indicates that the memcpy routine is available
+ *	to copy blocks of memory.  Otherwise you should probably use bcopy().
+ *	If neither is defined, roll your own.
+ */
+#$d_memcpy	MEMCPY		/**/
+
+/* RENAME:
+ *	This symbol, if defined, indicates that the rename routine is available
+ *	to rename files.  Otherwise you should do the unlink(), link(), unlink()
+ *	trick.
+ */
+#$d_rename	RENAME		/**/
+
+/* SETEGID:
+ *	This symbol, if defined, indicates that the setegid routine is available
+ *	to change the effective gid of the current program.
+ */
+#$d_setegid	SETEGID		/**/
+
+/* SETEUID:
+ *	This symbol, if defined, indicates that the seteuid routine is available
+ *	to change the effective uid of the current program.
+ */
+#$d_seteuid	SETEUID		/**/
+
+/* SETRGID:
+ *	This symbol, if defined, indicates that the setrgid routine is available
+ *	to change the real gid of the current program.
+ */
+#$d_setrgid	SETRGID		/**/
+
+/* SETRUID:
+ *	This symbol, if defined, indicates that the setruid routine is available
+ *	to change the real uid of the current program.
+ */
+#$d_setruid	SETRUID		/**/
 
 /* STATBLOCKS:
  *	This symbol is defined if this system has a stat structure declaring
@@ -93,6 +172,12 @@ cat <<!GROK!THIS! >config.h
  *	_ptr and _cnt in stdio.h.
  */
 #$d_stdstdio	STDSTDIO 	/**/
+
+/* STRCSPN:
+ *	This symbol, if defined, indicates that the strcspn routine is available
+ *	to scan strings.
+ */
+#$d_strcspn	STRCSPN		/**/
 
 /* STRUCTCOPY:
  *	This symbol, if defined, indicates that this C compiler knows how
@@ -129,11 +214,23 @@ cat <<!GROK!THIS! >config.h
  */
 #$d_voidsig	VOIDSIG 	/**/
 
+/* GIDTYPE:
+ *	This symbol has a value like gid_t, int, ushort, or whatever type is
+ *	used to declare group ids in the kernel.
+ */
+#define GIDTYPE $gidtype		/**/
+
 /* STDCHAR:
  *	This symbol is defined to be the type of char used in stdio.h.
  *	It has the values "unsigned char" or "char".
  */
 #define STDCHAR $stdchar	/**/
+
+/* UIDTYPE:
+ *	This symbol has a value like uid_t, int, ushort, or whatever type is
+ *	used to declare user ids in the kernel.
+ */
+#define UIDTYPE $uidtype		/**/
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this
@@ -157,5 +254,12 @@ cat <<!GROK!THIS! >config.h
 #$define void int		/* is void to be avoided? */
 #$define M_VOID		/* Xenix strikes again */
 #endif
+
+/* PRIVLIB:
+ *	This symbol contains the name of the private library for this package.
+ *	The library is private in the sense that it needn't be in anyone's
+ *	execution path, but it should be accessible by the world.
+ */
+#define PRIVLIB "$privlib"		/**/
 
 !GROK!THIS!
