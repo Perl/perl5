@@ -104,7 +104,7 @@ sub bad_one
 	print STDERR <<EOM ;
 #
 # Some older versions of Berkeley DB version 1 will fail db-recno
-# tests 61, 63 and 65.
+# tests 61, 63, 64 and/or 65.
 EOM
         if ($^O eq 'darwin'
 	    && $Config{db_version_major} == 1
