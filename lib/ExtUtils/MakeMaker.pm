@@ -482,7 +482,7 @@ sub ExtUtils::MakeMaker::new {
 	    else {
 		$pthinks =~ s!/Config\.pm$!!; $pthinks =~ s!.*/!!;
 	    }
-	    print STDOUT <<END;
+	    print STDOUT <<END unless $self->{UNINSTALLED_PERL};
 Your perl and your Config.pm seem to have different ideas about the architecture
 they are running on.
 Perl thinks: [$pthinks]
