@@ -40,7 +40,6 @@ $ ans = ""
 $ macros = ""
 $ extra_flags = ""
 $ user_c_flags = ""
-$ use_debugging_perl = "y"
 $ use_ieee_math = "n"
 $ be_case_sensitive = "n"
 $ use_vmsdebug_perl = "n"
@@ -1722,6 +1721,24 @@ $ ELSE
 $   use_vmsdebug_perl = "N"
 $ ENDIF
 $!
+$! Ask if they want to build with DEBUGGING
+$ echo ""
+$ echo "Perl can be built with extra runtime debugging enabled. This
+$ echo "enables the -D switch, at the cost of some performance. It
+$ echo "was mandatory on perl 5.005 and before on VMS, but is now
+$ echo "optional. If you don't generally use it you should probably
+$ echo "leave this off and gain a bit of extra speed.
+$ dflt = "y"
+$ rp = "Build a DEBUGGING version of Perl? [''dflt'] "
+$ GOSUB myread
+$ IF ans.eqs."" then ans = dflt
+$ IF F$EXTRACT(0, 1, F$EDIT(ans,"COLLAPSE,UPCASE")) .eqs. "Y"
+$ THEN
+$   use_debugging_perl = "Y"
+$ ELSE
+$   use_debugging_perl = "N"
+$ ENDIF
+$!
 $! Ask if they want to build with MULTIPLICITY
 $ echo ""
 $ echo "The perl interpreter engine can be built in a way that makes it
@@ -1924,7 +1941,10 @@ $ echo "default file types, however, you can configure Perl to try default"
 $ echo "file types of nothing, .pl, and .com, in that order (e.g. typing"
 $ echo """$ perl foo"" would cause Perl to look for foo., then foo.pl, and"
 $ echo "finally foo.com)."
-$ dflt = "y"
+$ echo ""
+$ echo "This is currently broken in some configurations. Only enable it if
+$ echo "you know what you're doing. "
+$ dflt = "N"
 $ rp = "Always use default file types? [''dflt'] "
 $ GOSUB myread
 $ if ans.eqs."" then ans="''dflt'"

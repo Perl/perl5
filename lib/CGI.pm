@@ -3280,7 +3280,7 @@ my ($vol) = $MAC ? MacPerl::Volumes() =~ /:(.*)/ : "";
 unless ($TMPDIRECTORY) {
     @TEMP=("${SL}usr${SL}tmp","${SL}var${SL}tmp",
 	   "C:${SL}temp","${SL}tmp","${SL}temp",
-	   "${vol}${SL}Temporary Items",
+	   "${vol}${SL}Temporary Items","${SL}sys\$scratch",
 	   "${SL}WWW_ROOT");
     unshift(@TEMP,$ENV{'TMPDIR'}) if exists $ENV{'TMPDIR'};
 
