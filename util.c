@@ -4366,16 +4366,20 @@ Perl_memcmp_byte_utf8(pTHX_ char *sb, STRLEN lbyte, char *su, STRLEN lutf)
     while (sbyte < ebyte) {
 	if (sutf >= eutf)
 	    return 1;			/* utf one shorter */
-	if (*sbyte < 128) {
+	if (NATIVE_IS_INVARIANT(*sbyte)) {
 	    if (*sbyte != *sutf)
 		return *sbyte - *sutf;
 	    sbyte++; sutf++;	/* CONTINUE */
-	} else if ((*sutf & 0x3F) == (*sbyte >> 6)) { /* byte 0xFF: 0xC3 BF */
-	    if ((sutf[1] & 0x3F) != (*sbyte & 0x3F))
-		return (*sbyte & 0x3F) - (*sutf & 0x3F);
+	} else if ((*sutf & UTF_CONTINUATION_MASK) ==
+                   (*sbyte >> UTF_ACCUMULATION_SHIFT)) {
+	    if ((sutf[1] & UTF_CONTINUATION_MASK) !=
+                (*sbyte & UTF_CONTINUATION_MASK))
+		return (*sbyte & UTF_CONTINUATION_MASK) -
+                       (*sutf & UTF_CONTINUATION_MASK);
 	    sbyte++, sutf += 2;	/* CONTINUE */
 	} else
-	    return (*sbyte >> 6) - (*sutf & 0x3F);
+	    return (*sbyte >> UTF_ACCUMULATION_SHIFT) -
+                   (*sutf & UTF_CONTINUATION_MASK);
     }
     if (sutf >= eutf)
 	return 0;
