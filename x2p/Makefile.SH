@@ -63,12 +63,6 @@ TRNL = '$trnl'
 
 .SUFFIXES: .c \$(OBJ_EXT)
 
-# this is where the sources are
-src    = $src
-
-# nice makes grok this
-#VPATH = .:$src
-
 !GROK!THIS!
 
 cat >>Makefile <<'!NO!SUBS!'
@@ -95,9 +89,9 @@ plm   = a2p.loadmap
 
 addedbyconf = $(shextract) $(plextract)
 
-h = EXTERN.h INTERN.h ../config.h handy.h hash.h a2p.h str.h util.h
+h = EXTERN.h INTERN.h ../config.h ../handy.h hash.h a2p.h str.h util.h
 
-c = hash.c str.c util.c walk.c
+c = hash.c $(mallocsrc) str.c util.c walk.c
 
 obj = hash$(OBJ_EXT) $(mallocobj) str$(OBJ_EXT) util$(OBJ_EXT) walk$(OBJ_EXT)
 
@@ -153,7 +147,7 @@ lint:
 	lint $(lintflags) $(defs) $(c) > a2p.fuzz
 
 depend: $(mallocsrc) ../makedepend
-	sh ../makedepend MAKE=$(MAKE) src=$(src)/x2p
+	sh ../makedepend MAKE=$(MAKE)
 
 clist:
 	echo $(c) | tr ' ' $(TRNL) >.clist

@@ -24,7 +24,6 @@ echo "Extracting writemain (with variable substitutions)"
 rm -f writemain
 $spitshell >writemain <<!GROK!THIS!
 $startsh
-src=$src
 !GROK!THIS!
 
 : In the following dollars and backticks do not need the extra backslash.
@@ -56,7 +55,7 @@ for file in $orig ; do
 done
 
 
-sed '/Do not delete this line--writemain depends on it/q' $src/miniperlmain.c
+sed '/Do not delete this line--writemain depends on it/q' miniperlmain.c
 
 
 if test X"$args" != "X" ; then

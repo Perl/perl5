@@ -1,15 +1,7 @@
 #!./miniperl -w
 
-# File::Spec?
 my $config_pm = $ARGV[0] || 'lib/Config.pm';
-my $src = '.';
-# File::Dirname?  File::Spec?
-if ($0 =~ m!^(?:(.+)/)configpm$!) {
-  $src = $1;
-  unshift @INC, "$1/lib";
-}
-# File::Spec?
-my $glossary = $ARGV[1] || "$src/Porting/Glossary";
+my $glossary = $ARGV[1] || 'Porting/Glossary';
 @ARGV = "./config.sh";
 
 # list names to put first (and hence lookup fastest)
@@ -93,11 +85,7 @@ print CONFIG "\n",
 
 print CONFIG "my \$summary = <<'!END!';\n";
 
-# File::Spec?
-my $myconfigdotSH =
-	$src eq "." ? "myconfig.SH" : "$src/myconfig.SH";
-
-open(MYCONFIG,"<$myconfigdotSH") || die "open $myconfigdotSH failed: $!";
+open(MYCONFIG,"<myconfig.SH") || die "open myconfig.SH failed: $!";
 1 while defined($_ = <MYCONFIG>) && !/^Summary of/;
 do { print CONFIG $_ } until !defined($_ = <MYCONFIG>) || /^\s*$/;
 close(MYCONFIG);

@@ -194,22 +194,7 @@ SHELL = $sh
 # how to tr(anslate) newlines
 TRNL = '$trnl'
 
-# this is where the sources are
-src = $src
-# this is src quoted for use in regexen
-srcqre = `echo $src|sed -e 's@^\.$@\\\.@' -e 's@^\./$@\\\./@' -e 's@^\.\./@\\\.\\\./@g`
-
-# nice makes grok this
 !GROK!THIS!
-if $test X. != X$src; then
-$spitshell >>Makefile <<!GROK!THIS!
-VPATH = .:$src
-!GROK!THIS!
-else
-$spitshell >>Makefile <<!GROK!THIS!
-VPATH = .
-!GROK!THIS!
-fi
 
 ## In the following dollars and backticks do not need the extra backslash.
 $spitshell >>Makefile <<'!NO!SUBS!'
@@ -296,12 +281,12 @@ utilities:	miniperl lib/Config.pm FORCE
 FORCE:
 	@sh -c true
 
-miniperlmain$(OBJ_EXT): $(src)/miniperlmain.c
+miniperlmain$(OBJ_EXT): miniperlmain.c
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
-perlmain.c: $(src)/miniperlmain.c config.sh $(FIRSTMAKEFILE)
+perlmain.c: miniperlmain.c config.sh $(FIRSTMAKEFILE)
 	sh writemain $(DYNALOADER) $(static_ext) > writemain.tmp
-	sh $(src)/mv-if-diff writemain.tmp perlmain.c
+	sh mv-if-diff writemain.tmp perlmain.c
 
 perlmain$(OBJ_EXT): perlmain.c
 	$(CCCMD) $(PLDLFLAGS) $*.c
@@ -421,7 +406,7 @@ $(LIBPERL): $& perl$(OBJ_EXT) $(obj) $(LIBPERLEXPORT)
 
 miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL)
 	$(LDLIBPTH) $(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain$(OBJ_EXT) $(LLIBPERL) $(libs)
-	$(LDLIBPTH) ./miniperl -w -Ilib -I$(src)/lib -MExporter -e 0 || $(MAKE) minitest
+	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e 0 || $(MAKE) minitest
 
 perl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
 	$(SHRPENV) $(LDLIBPTH) $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
@@ -455,41 +440,32 @@ sperl$(OBJ_EXT): perl.c perly.h patchlevel.h $(h)
 	$(CCCMD) -DIAMSUID sperl.c
 	$(RMS) sperl.c
 
-lib:
-	@sh ./makedir lib
-
 # We have to call our ./makedir because Ultrix 4.3 make can't handle the line
 #	test -d lib/auto || mkdir lib/auto
 #
 preplibrary: miniperl lib/Config.pm $(plextract)
 	@sh ./makedir lib/auto
 	@echo "	AutoSplitting perl library"
-	$(LDLIBPTH) ./miniperl -Ilib -I$(src)/lib -e 'use AutoSplit; \
-		autosplit_lib_modules(@ARGV)' $(src)/lib/*.pm $(src)/lib/*/*.pm
+	$(LDLIBPTH) ./miniperl -Ilib -e 'use AutoSplit; \
+		autosplit_lib_modules(@ARGV)' lib/*.pm lib/*/*.pm
 
 # Take care to avoid modifying lib/Config.pm without reason
 # (If trying to create a new port and having problems with the configpm script, 
 # try 'make minitest' and/or commenting out the tests at the end of configpm.)
-lib/Config.pm: lib config.sh miniperl configpm
+lib/Config.pm: config.sh miniperl configpm
 	$(LDLIBPTH) ./miniperl configpm configpm.tmp
-	sh $(src)/mv-if-diff configpm.tmp $@
+	sh mv-if-diff configpm.tmp $@
 
-lib/ExtUtils: lib
-	@sh ./makedir lib/ExtUtils
-
-lib/ExtUtils/Miniperl.pm: lib/ExtUtils miniperlmain.c miniperl minimod.pl lib/Config.pm
+lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl minimod.pl lib/Config.pm
 	$(LDLIBPTH) ./miniperl minimod.pl > minimod.tmp
-	sh $(src)/mv-if-diff minimod.tmp $@
+	sh mv-if-diff minimod.tmp $@
 
-lib/re.pm: lib $(src)/ext/re/re.pm
+lib/re.pm: ext/re/re.pm
 	rm -f $@
-	cat $(src)/ext/re/re.pm > $@
+	cat ext/re/re.pm > $@
 
-pod:
-	@sh ./makedir pod
-
-$(plextract):	pod miniperl lib/Config.pm lib/re.pm
-	$(LDLIBPTH) ./miniperl -Ilib -I$(src)/lib $(src)/$@.PL
+$(plextract):	miniperl lib/Config.pm lib/re.pm
+	$(LDLIBPTH) ./miniperl -Ilib $@.PL
 	
 install: all install.perl install.man
 
@@ -537,16 +513,13 @@ run_byacc:	FORCE
 	chmod 664 vms/perly_c.vms vms/perly_h.vms
 	perl vms/vms_yfix.pl perly.c perly.h vms/perly_c.vms vms/perly_h.vms
 
-perly$(OBJ_EXT): $(src)/perly.c
-	$(CCCMD) $(PLDLFLAGS) $(src)/perly.c
-
 # We don't want to regenerate perly.c and perly.h, but they might
 # appear out-of-date after a patch is applied or a new distribution is
 # made.
-perly.c: $(src)/perly.y
+perly.c: perly.y
 	-@sh -c true
 
-perly.h: $(src)/perly.y
+perly.h: perly.y
 	-@sh -c true
 
 # No compat3.sym here since and including the 5.004_50.
@@ -590,16 +563,16 @@ regen_headers:	FORCE
 # DynaLoader may be needed for extensions that use Makefile.PL.
 
 $(DYNALOADER):	miniperl preplibrary FORCE
-	@$(LDLIBPTH) sh $(src)/ext/util/make_ext static $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	@$(LDLIBPTH) sh ext/util/make_ext static $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 d_dummy $(dynamic_ext):	miniperl preplibrary $(DYNALOADER) FORCE
-	@$(LDLIBPTH) sh $(src)/ext/util/make_ext dynamic $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	@$(LDLIBPTH) sh ext/util/make_ext dynamic $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 s_dummy $(static_ext):	miniperl preplibrary $(DYNALOADER) FORCE
-	@$(LDLIBPTH) sh $(src)/ext/util/make_ext static $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	@$(LDLIBPTH) sh ext/util/make_ext static $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 n_dummy $(nonxs_ext):	miniperl preplibrary $(DYNALOADER) FORCE
-	@$(LDLIBPTH) sh $(src)/ext/util/make_ext nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+	@$(LDLIBPTH) sh ext/util/make_ext nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 clean:		_tidy _mopup
 
@@ -676,8 +649,8 @@ depend: makedepend
 	cd x2p; $(MAKE) depend
 
 # Cannot postpone this until $firstmakefile is ready ;-)
-makedepend: $(src)/makedepend.SH config.sh
-	sh $(src)/makedepend.SH
+makedepend: makedepend.SH config.sh
+	sh ./makedepend.SH
 
 # Cannot delegate rebuilding of t/perl to make to allow interlaced
 # test and minitest
@@ -717,25 +690,25 @@ minitest: miniperl lib/re.pm
 # Please *don't* use this unless all tests pass.
 # If you want to report test failures, use "make nok" instead.
 ok:	utilities
-	$(LDLIBPTH) ./perl -Ilib -I$(src)/lib utils/perlbug -ok -s '(UNINSTALLED)'
+	$(LDLIBPTH) ./perl -Ilib utils/perlbug -ok -s '(UNINSTALLED)'
 
 okfile:	utilities
-	$(LDLIBPTH) ./perl -Ilib -I$(src)/lib utils/perlbug -ok -s '(UNINSTALLED)' -F perl.ok
+	$(LDLIBPTH) ./perl -Ilib utils/perlbug -ok -s '(UNINSTALLED)' -F perl.ok
 
 nok:	utilities
-	$(LDLIBPTH) ./perl -Ilib -I$(src)/lib utils/perlbug -nok -s '(UNINSTALLED)'
+	$(LDLIBPTH) ./perl -Ilib utils/perlbug -nok -s '(UNINSTALLED)'
 
 clist:	$(c)
-	echo $(c) | tr ' ' $(TRNL) | sed -e "s@^$(srcqre)/@@" >.clist
+	echo $(c) | tr ' ' $(TRNL) >.clist
 
 hlist:  $(h)
-	echo $(h) | tr ' ' $(TRNL) | sed -e "s@^$(srcqre)/@@" >.hlist
+	echo $(h) | tr ' ' $(TRNL) >.hlist
 
 shlist: $(sh)
-	echo $(sh) | tr ' ' $(TRNL) | sed -e "s@^$(srcqre)/@@" >.shlist
+	echo $(sh) | tr ' ' $(TRNL) >.shlist
 
 pllist: $(pl)
-	echo $(pl) | tr ' ' $(TRNL) | sed -e "s@^$(srcqre)/@@" >.pllist
+	echo $(pl) | tr ' ' $(TRNL) >.pllist
 
 Makefile: Makefile.SH ./config.sh
 	$(SHELL) Makefile.SH

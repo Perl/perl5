@@ -176,7 +176,7 @@ sub autosplit_lib_modules{
 	    $dir =~ s#[\.\]]#/#g;
 	    $_ = $dir . $name;
 	}
-        autosplit_file("$_", "lib/auto",
+	autosplit_file("lib/$_", "lib/auto",
 		       $Keep, $CheckForAutoloader, $CheckModTime);
     }
     0;
