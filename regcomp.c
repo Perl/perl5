@@ -220,9 +220,9 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  * arg. Show regex, up to a maximum length. If it's too long, chop and add
  * "...".
  */
-#define	FAIL(m)                                                              \
+#define	FAIL(msg)                                                             \
     STMT_START {                                                             \
-        char *elipises = "";                                                 \
+        char *ellipses = "";                                                 \
         unsigned len = strlen(PL_regprecomp);                                \
                                                                              \
 	if (!SIZE_ONLY)                                                      \
@@ -231,10 +231,10 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	if (len > RegexLengthToShowInErrorMessages) {                        \
             /* chop 10 shorter than the max, to ensure meaning of "..." */   \
 	    len = RegexLengthToShowInErrorMessages - 10;                     \
-	    elipises = "...";                                                \
+	    ellipses = "...";                                                \
 	}                                                                    \
 	Perl_croak(aTHX_ "%s in regex m/%.*s%s/",                            \
-		   m, len, PL_regprecomp, elipises);                         \
+		   msg, len, PL_regprecomp, ellipses);                        \
     } STMT_END
 
 /*
@@ -242,9 +242,9 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  * args. Show regex, up to a maximum length. If it's too long, chop and add
  * "...".
  */
-#define	FAIL2(pat,m)                                                         \
+#define	FAIL2(pat,msg)                                                        \
     STMT_START {                                                             \
-        char *elipises = "";                                                 \
+        char *ellipses = "";                                                 \
         unsigned len = strlen(PL_regprecomp);                                \
                                                                              \
 	if (!SIZE_ONLY)                                                      \
@@ -253,10 +253,10 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	if (len > RegexLengthToShowInErrorMessages) {                        \
             /* chop 10 shorter than the max, to ensure meaning of "..." */   \
 	    len = RegexLengthToShowInErrorMessages - 10;                     \
-	    elipises = "...";                                                \
+	    ellipses = "...";                                                \
 	}                                                                    \
 	S_re_croak2(aTHX_ pat, " in regex m/%.*s%s/",                        \
-		    m, len, PL_regprecomp, elipises);                        \
+		    msg, len, PL_regprecomp, ellipses);                     \
     } STMT_END
 
 
