@@ -32,6 +32,11 @@
 #define TRUE (1)
 #define FALSE (0)
 
+
+/* XXX Configure ought to have a test for a boolean type, if I can
+   just figure out all the headers such a test needs.
+   Andy Dougherty	August 1996
+*/
 /* bool is built-in for g++-2.6.3, which might be used for an extension.
    If the extension includes <_G_config.h> before this file then
    _G_HAVE_BOOL will be properly set.  If, however, the extension includes
@@ -67,18 +72,45 @@
 # endif
 #endif
 
+/* XXX A note on the perl source internal type system.  The
+   original intent was that I32 be *exactly* 32 bits.
+
+   Currently, we only guarantee that I32 is *at least* 32 bits.
+   Specifically, if int is 64 bits, then so is I32.  (This is the case
+   for the Cray.)  This has the advantage of meshing nicely with
+   standard library calls (where we pass an I32 and the library is
+   expecting an int), but the disadvantage that an I32 is not 32 bits.
+   Andy Dougherty	August 1996
+*/
+
 typedef char		I8;
 typedef unsigned char	U8;
+#define I8_MAX PERL_CHAR_MAX
+#define I8_MIN PERL_CHAR_MIN
+#define U8_MAX PERL_UCHAR_MAX
+#define U8_MIN PERL_UCHAR_MIN
 
 typedef short		I16;
 typedef unsigned short	U16;
+#define I16_MAX PERL_SHORT_MAX
+#define I16_MIN PERL_SHORT_MIN
+#define U16_MAX PERL_USHORT_MAX
+#define U16_MIN PERL_USHORT_MIN
 
 #if BYTEORDER > 0x4321
   typedef int		I32;
   typedef unsigned int	U32;
+# define I32_MAX PERL_INT_MAX
+# define I32_MIN PERL_INT_MIN
+# define U32_MAX PERL_UINT_MAX
+# define U32_MIN PERL_UINT_MIN
 #else
   typedef long		I32;
   typedef unsigned long	U32;
+# define I32_MAX PERL_LONG_MAX
+# define I32_MIN PERL_LONG_MIN
+# define U32_MAX PERL_ULONG_MAX
+# define U32_MIN PERL_ULONG_MIN
 #endif
 
 #define Ctl(ch) (ch & 037)
@@ -140,6 +172,15 @@ typedef U16 line_t;
 #define NOLINE ((line_t) 65535)
 #endif
 
+/* XXX LEAKTEST doesn't really work in perl5.  There are direct calls to
+   safemalloc() in the source, so LEAKTEST won't pick them up.
+   Further, if you try LEAKTEST, you'll also end up calling
+   Safefree, which might call safexfree() on some things that weren't
+   malloced with safexmalloc.  The correct "fix" to this, if anyone
+   is interested, is to ensure that all calls go through the New and
+   Renew macros.
+	--Andy Dougherty		August 1996
+*/
 #ifndef lint
 #ifndef LEAKTEST
 #ifndef safemalloc

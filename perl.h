@@ -529,6 +529,19 @@
 #undef UV
 #endif
 
+/*  XXX QUAD stuff is not currently supported on most systems.
+    Specifically, perl internals don't support long long.  Among
+    the many problems is that some compilers support long long,
+    but the underlying library functions (such as sprintf) don't.
+    Some things do work (such as quad pack/unpack on convex);
+    also some systems use long long for the fpos_t typedef.  That
+    seems to work too.
+
+    The IV type is supposed to be long enough to hold any integral
+    value or a pointer.
+    --Andy Dougherty	August 1996
+*/
+
 #ifdef HAS_QUAD
 #   ifdef cray
 #	define Quad_t int
@@ -541,9 +554,17 @@
 #   endif
     typedef Quad_t IV;
     typedef unsigned Quad_t UV;
+#   define IV_MAX PERL_QUAD_MAX
+#   define IV_MIN PERL_QUAD_MIN
+#   define UV_MAX PERL_UQUAD_MAX
+#   define UV_MIN PERL_UQUAD_MIN
 #else
     typedef long IV;
     typedef unsigned long UV;
+#   define IV_MAX PERL_LONG_MAX
+#   define IV_MIN PERL_LONG_MIN
+#   define UV_MAX PERL_ULONG_MAX
+#   define UV_MIN PERL_ULONG_MIN
 #endif
 
 /* Previously these definitions used hardcoded figures. 
@@ -565,8 +586,104 @@
 #endif
 #endif
 
+#ifdef CHAR_MAX
+#  define PERL_CHAR_MAX CHAR_MAX
+#else
+#  ifdef MAXCHAR    /* Often used in <values.h> */
+#    define PERL_CHAR_MAX MAXCHAR
+#  else
+#    define PERL_CHAR_MAX        ((char) ((~(unsigned char)0) >> 1))
+#  endif
+#endif
+
+#ifdef CHAR_MIN
+#  define PERL_CHAR_MIN CHAR_MIN
+#else
+#  ifdef MINCHAR
+#    define PERL_CHAR_MIN MINCHAR
+#  else
+#    define PERL_CHAR_MIN        (-PERL_CHAR_MAX - ((3 & -1) == 3))
+#  endif
+#endif
+
+#ifdef UCHAR_MAX
+#  define PERL_UCHAR_MAX UCHAR_MAX
+#else
+#  ifdef MAXUCHAR
+#    define PERL_UCHAR_MAX MAXUCHAR
+#  else
+#    define PERL_UCHAR_MAX       (~(unsigned char)0)
+#  endif
+#endif
+
+#define PERL_UCHAR_MIN 0
+
+#ifdef SHORT_MAX
+#  define PERL_SHORT_MAX SHORT_MAX
+#else
+#  ifdef MAXSHORT    /* Often used in <values.h> */
+#    define PERL_SHORT_MAX MAXSHORT
+#  else
+#    define PERL_SHORT_MAX        ((short) ((~(unsigned short)0) >> 1))
+#  endif
+#endif
+
+#ifdef SHORT_MIN
+#  define PERL_SHORT_MIN SHORT_MIN
+#else
+#  ifdef MINSHORT
+#    define PERL_SHORT_MIN MINSHORT
+#  else
+#    define PERL_SHORT_MIN        (-PERL_SHORT_MAX - ((3 & -1) == 3))
+#  endif
+#endif
+
+#ifdef USHORT_MAX
+#  define PERL_USHORT_MAX USHORT_MAX
+#else
+#  ifdef MAXUSHORT
+#    define PERL_USHORT_MAX MAXUSHORT
+#  else
+#    define PERL_USHORT_MAX       (~(unsigned short)0)
+#  endif
+#endif
+
+#define PERL_USHORT_MIN 0
+
+#ifdef INT_MAX
+#  define PERL_INT_MAX INT_MAX
+#else
+#  ifdef MAXINT    /* Often used in <values.h> */
+#    define PERL_INT_MAX MAXINT
+#  else
+#    define PERL_INT_MAX        ((int) ((~(unsigned int)0) >> 1))
+#  endif
+#endif
+
+#ifdef INT_MIN
+#  define PERL_INT_MIN INT_MIN
+#else
+#  ifdef MININT
+#    define PERL_INT_MIN MININT
+#  else
+#    define PERL_INT_MIN        (-PERL_INT_MAX - ((3 & -1) == 3))
+#  endif
+#endif
+
+#ifdef UINT_MAX
+#  define PERL_UINT_MAX UINT_MAX
+#else
+#  ifdef MAXUINT
+#    define PERL_UINT_MAX MAXUINT
+#  else
+#    define PERL_UINT_MAX       (~(unsigned int)0)
+#  endif
+#endif
+
+#define PERL_UINT_MIN 0
+
 #ifdef LONG_MAX
-#define PERL_LONG_MAX LONG_MAX
+#  define PERL_LONG_MAX LONG_MAX
 #else
 #  ifdef MAXLONG    /* Often used in <values.h> */
 #    define PERL_LONG_MAX MAXLONG
@@ -576,17 +693,17 @@
 #endif
 
 #ifdef LONG_MIN
-#define PERL_LONG_MIN LONG_MIN
+#  define PERL_LONG_MIN LONG_MIN
 #else
 #  ifdef MINLONG
 #    define PERL_LONG_MIN MINLONG
 #  else
-#    define PERL_LONG_MIN        (-LONG_MAX - ((3 & -1) == 3))
+#    define PERL_LONG_MIN        (-PERL_LONG_MAX - ((3 & -1) == 3))
 #  endif
 #endif
 
 #ifdef ULONG_MAX
-#define PERL_ULONG_MAX ULONG_MAX
+#  define PERL_ULONG_MAX ULONG_MAX
 #else
 #  ifdef MAXULONG
 #    define PERL_ULONG_MAX MAXULONG
@@ -595,10 +712,28 @@
 #  endif
 #endif
 
-#ifdef ULONG_MIN
-#define PERL_ULONG_MIN ULONG_MIN
-#else
-#  define ULONG_MIN	    0L
+#define PERL_ULONG_MIN 0L
+
+#ifdef HAS_QUAD
+#  ifdef QUAD_MAX
+#    define PERL_QUAD_MAX QUAD_MAX
+#  else
+#    define PERL_QUAD_MAX 	((IV) ((~(UV)0) >> 1))
+#  endif
+
+#  ifdef QUAD_MIN
+#    define PERL_QUAD_MIN QUAD_MIN
+#  else
+#    define PERL_QUAD_MIN 	(-PERL_LONG_MAX - ((3 & -1) == 3))
+#  endif
+
+#  ifdef UQUAD_MAX
+#    define PERL_UQUAD_MAX UQUAD_MAX
+#  else
+#    define PERL_UQUAD_MAX	(~(UV)0)
+#  endif
+
+#  define PERL_UQUAD_MIN 0
 #endif
 
 typedef MEM_SIZE STRLEN;
