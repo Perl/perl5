@@ -146,7 +146,7 @@ This corresponds to fseek().
 =item B<PerlIO_getpos(f,p)>, B<PerlIO_setpos(f,p)>
 
 These correspond to fgetpos() and fsetpos(). If platform does not 
-have the stdio calls then they are implemeted in terms of PerlIO_tell()
+have the stdio calls then they are implemented in terms of PerlIO_tell()
 and PerlIO_seek().
 
 =item B<PerlIO_rewind(f)>
@@ -161,9 +161,9 @@ PerlIO which will automatically be deleted when closed.
 
 =back 
 
-=head2 Co-existance with stdio
+=head2 Co-existence with stdio
 
-There is outline support for co-existance of PerlIO with stdio.
+There is outline support for co-existence of PerlIO with stdio.
 Obviously if PerlIO is implemented in terms of stdio there is 
 no problem. However if perlio is implemented on top of (say) sfio
 then mechanisms must exist to create a FILE * which can be passed 
