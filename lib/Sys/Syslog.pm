@@ -48,7 +48,7 @@ Syslog provides the functions:
 =item openlog $ident, $logopt, $facility
 
 I<$ident> is prepended to every message.
-I<$logopt> contains one or more of the words I<pid>, I<ndelay>, I<cons>, I<nowait>.
+I<$logopt> contains zero or more of the words I<pid>, I<ndelay>, I<cons>, I<nowait>.
 I<$facility> specifies the part of the system
 
 =item syslog $priority, $format, @args

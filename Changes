@@ -78,6 +78,12 @@ Version 5.005           Production release
 -------------
 
 ____________________________________________________________________________
+[  1638] By: gsar                                  on 1998/07/22  09:12:26
+        Log: up patchlevel etc (only doc patching from now on, testing in progress)
+     Branch: perl
+	   ! Changes patchlevel.h win32/Makefile win32/config_H.bc
+           ! win32/config_H.gc win32/config_H.vc win32/makefile.mk
+____________________________________________________________________________
 [  1637] By: gsar                                  on 1998/07/22  08:27:09
         Log: VMS patches from Dan Sugalski <sugalskd@osshe.edu>
              Date:    Tue, 21 Jul 1998 16:04:40 PDT
