@@ -732,6 +732,9 @@ setuid perl scripts securely.\n");
 	s = argv[0]+1;
       reswitch:
 	switch (*s) {
+#ifndef PERL_STRICT_CR
+	case '\r':
+#endif
 	case ' ':
 	case '0':
 	case 'F':
