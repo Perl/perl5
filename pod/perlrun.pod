@@ -1118,6 +1118,14 @@ Relevant only if your perl executable was built with B<-DDEBUGGING>,
 this controls the behavior of global destruction of objects and other
 references.  See L<perlhack/PERL_DESTRUCT_LEVEL> for more information.
 
+=item PERL_DL_NONLAZY
+
+Set to one to have perl resolve B<all> undefined symbols when it loads
+a dynamic library.  The default behaviour is to resolve symbols when
+they are used.  Setting this variable is useful during testing of
+extensions as it ensures that you get an error on misspelled function
+names even if the test suite doesn't call it.
+
 =item PERL_ENCODING
 
 If using the C<encoding> pragma without an explicit encoding name, the
