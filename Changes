@@ -28,6 +28,180 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 19891] By: jhi                                   on 2003/06/30  09:39:29
+        Log: Integrate:
+             [ 19857]
+             Regen Changes.
+             
+             [ 19858]
+             perlhack update, by Steve Grazzini
+             about macro support in gdb and gcc.
+             
+             [ 19859]
+             Hash/Util.t and Encode/t/Aliases.t seem to be having
+             random failures.  To make these easier to reproduce,
+             add a variable, PERL_HASH_SEED_DEBUG, to display the
+             hash seed.  E.g. in Debian/x86 Linux 3.0 PERL_HASH_SEED
+             of 82972356 makes the first one to fail.
+             
+             [ 19860]
+             Subject: Re: Change 19854: Bite the bullet and apply the hash randomisation patch.
+             From: Tim Bunce <Tim.Bunce@pobox.com>
+             Date: Thu, 26 Jun 2003 10:53:22 +0100
+             Message-ID: <20030626095322.GE97463@dansat.data-plan.com>
+             
+             [ 19861]
+             Do not obey PERL_HASH_SEED or PERL_HASH_SEED_DEBUG
+             if tainting-- but is this a good thing or a bad thing?
+             (At least it makes debugging lib/Hash/Util.t harder,
+             since it has, for no apparent good reason, -T: one must
+             make a copy of it without the -T.)
+             
+             [ 19862]
+             Make doing_taint() always available (though not
+             part of the public API).
+             
+             [ 19863]
+             Introduce (global) variable PL_earlytaint which
+             is set very early in main(), before perl_parse()
+             has been called and PL_tainting (or PL_taint_warn)
+             might have been set.
+             
+             [ 19864]
+             Use the PL_earlytaint.  (PL_earlytaint is a global,
+             not per-interp, since perl_construct() is not passed
+             the argc, argv, and therefore it can't set the per-interp
+             PL_tainting.)
+             
+             [ 19865]
+             atoi() doesn't cut the mustard if the PERL_HASH_SEED
+             is larger than INT_MAX (atoi() returns -1 in that case).
+             
+             [ 19866]
+             Some warnings about the (im)proper uses of the hash randomisation.
+             
+             [ 19867]
+             The two-for-loops is no more a valid way to walk through
+             a hash (this was the reason the Hash/Util.t intermittently
+             failed, the two-loop didn't find all the SVs of the HV).
+             
+             [ 19868]
+             Integrate mainline
+             
+             [ 19869]
+             Fix test count, by Abe Timmerman.
+             
+             [ 19870]
+             Two debugging patches.
+             The first allows to hold symbolic switches in $^D
+             and more generally fixes assignment to $^D. The
+             second one improves the information given by -Dl.
+             
+             Subject: [PATCH] allow $^D = "flags"
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Fri, 27 Jun 2003 22:26:24 +0100
+             Message-ID: <20030627212624.GB12887@fdgroup.com>
+             
+             Subject: [PATCH] make -Dl show more scope info
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Fri, 27 Jun 2003 23:00:36 +0100
+             Message-ID: <20030627220036.GC12887@fdgroup.com>
+             
+             [ 19871]
+             Subject: [Encode] pre-1.97 patches
+             From: Dan Kogai <dankogai@dan.co.jp>
+             Date: Sat, 28 Jun 2003 01:20:59 +0900
+             Message-Id: <56D5BFEE-A8BB-11D7-9092-000393AE4244@dan.co.jp>
+             
+             [ 19872]
+             Some clarification about the current semantics of CHECK and
+             INIT blocks. See bug [perl #22826].
+             
+             [ 19873]
+             Using $1 without testing success of the regexp, bad.
+             
+             [ 19874]
+             Retract #19867; the bug was really much simpler:
+             the < max must be <= max instead.
+             
+             [ 19875]
+             Duh.
+             
+             [ 19876]
+             Subject: Re: your malloc patches
+             From: Ilya Zakharevich <ilya@Math.Berkeley.EDU>
+             Date: Fri, 27 Jun 2003 06:54:06 -0700
+             Message-ID: <20030627135406.GA8914@math.berkeley.edu>
+             
+             More malloc patches: now they seem to work even in Tru64.
+             
+             [ 19877]
+             The #19842 is no more needed thanks to #19876,
+             and the #19842 was wrong anyway (it affected
+             only the threaded case.)
+             
+             [ 19878]
+             Move the PL_earlytaint initialization to the PERL_SYS_INIT()
+             as per suggestion from Sarathy.
+             
+             [ 19879]
+             Another spot where a zero $test{$max} can make things go boom.
+             
+             [ 19880]
+             argc, argv.
+             
+             [ 19881]
+             More coffee...
+             
+             [ 19882]
+             Perl_doing_taint must be public, for programs that embed perl
+             
+             [ 19883]
+             More on the macro debugging and expansion.
+             
+             [ 19884]
+             The joy of $0.  Undoing the #16399 makes Andreas'
+             tests (see [perl #22811]) pass (yes, padding with space	instead
+             of nul makes no sense, but that seems to work, maybe Linux does
+             some deep magic in ps(1)?); moving the PL_origalen computation
+             earlier makes also the threaded-first case fully pass.
+             
+             But in general modifying the argv[] is very non-portable.
+             (e.g. in Tru64 it seems to be limited to the size of the
+             original argv[0] since the argv[] are not contiguous?)
+             
+             Everybody should just have setproctitle().
+             
+             [ 19885]
+             Fix a faulty alias.
+             
+             [ 19886]
+             Misc Pod Nits.
+             
+             [ 19887]
+             $0 test tweaks from Andreas.
+             
+             [ 19888]
+             $0 doc tweakage.
+             
+             [ 19889]
+             The 'contiguous' test for argv[], envp[] was bogus
+             since those need not be in memory end-to-end, e.g.
+             in Tru64 they are aligned by eight.  Loosen the test
+             so that 'contiguousness' is fulfilled if the elements
+             are within PTRSIZE alignment.  This makes Tru64 to pass
+             the join.t, too.
+             
+             [ 19890]
+             int is not UV.
+     Branch: maint-5.8/perl
+	  !> (integrate 39 files)
+____________________________________________________________________________
+[ 19857] By: jhi                                   on 2003/06/26  08:29:59
+        Log: Regen Changes.
+     Branch: maint-5.8/perl
+	   ! Changes
+____________________________________________________________________________
 [ 19856] By: jhi                                   on 2003/06/26  05:55:24
         Log: Update Changes.
      Branch: maint-5.8/perl
