@@ -21,6 +21,34 @@ SV* shared_sv_attach_sv (SV* sv, shared_sv* shared) {
 	}
     } else {
 	switch(SvTYPE(SHAREDSvGET(shared))) {
+	    case SVt_PVAV: {
+		SV* weakref;
+		SV* obj_ref = newSViv(0);
+		SV* obj = newSVrv(obj_ref,"threads::shared::av");
+		AV* hv = newAV();
+		sv_setiv(obj,(IV)shared);
+		weakref = newRV((SV*)hv);
+		sv = newRV_noinc((SV*)hv);
+		sv_rvweaken(weakref);
+		sv_magic((SV*) hv, obj_ref, PERL_MAGIC_tied, Nullch, 0);
+		hv_store(shared_hv, SvPV(id,length), length, weakref, 0);
+	        Perl_sharedsv_thrcnt_inc(aTHX_ shared);		
+	    }
+	    break;
+	    case SVt_PVHV: {
+		SV* weakref;
+		SV* obj_ref = newSViv(0);
+		SV* obj = newSVrv(obj_ref,"threads::shared::hv");
+		HV* hv = newHV();
+		sv_setiv(obj,(IV)shared);
+		weakref = newRV((SV*)hv);
+		sv = newRV_noinc((SV*)hv);
+		sv_rvweaken(weakref);
+		sv_magic((SV*) hv, obj_ref, PERL_MAGIC_tied, Nullch, 0);
+		hv_store(shared_hv, SvPV(id,length), length, weakref, 0);
+	        Perl_sharedsv_thrcnt_inc(aTHX_ shared);		
+	    }
+	    break;
 	    default: {
 	        MAGIC* shared_magic;
 		SV* value = newSVsv(SHAREDSvGET(shared));

@@ -24,7 +24,7 @@ sub ok {
 
 use ExtUtils::testlib;
 use strict;
-BEGIN { print "1..7\n" };
+BEGIN { print "1..17\n" };
 use threads;
 use threads::shared;
 ok(1,1,"loaded");
@@ -58,5 +58,16 @@ ok(11, threads::shared::_thrcnt($gg) == 1, "Check refcount");
 ok(12, $gg == $gg2, "Check we get the same reference ($gg == $gg2)");
 ok(13, $$gg eq $$gg2, "And check the values are the same");
 ok(14, keys %foo == 0, "And make sure we realy have deleted the values");
-
+{
+    my (%hash1, %hash2);
+    share(%hash1);
+    share(%hash2);
+    $hash1{hash} = \%hash2;
+    $hash2{"bar"} = "foo";
+    ok(15, $hash1{hash}->{bar} eq "foo", "Check hash references work");
+    threads->create(sub { $hash2{"bar2"} = "foo2"})->join();
+    ok(16, $hash1{hash}->{bar2} eq "foo2", "Check hash references work");
+    threads->create(sub { my (%hash3); share(%hash3); $hash2{hash} = \%hash3; $hash3{"thread"} = "yes"})->join();
+    ok(17, $hash1{hash}->{hash}->{thread} eq "yes", "Check hash created in another thread");
+}
 
