@@ -28,6 +28,138 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20357] By: jhi                                   on 2003/07/30  18:19:52
+        Log: Integrate:
+             [ 20355]
+             Silly gcc.
+             
+             [ 20356]
+             Might as well.
+     Branch: maint-5.8/perl
+	  !> perl.c pod/perlhist.pod
+____________________________________________________________________________
+[ 20354] By: jhi                                   on 2003/07/30  17:47:10
+        Log: Don't use DSTROOT.
+     Branch: maint-5.8/perl
+	  !> hints/darwin.sh
+____________________________________________________________________________
+[ 20351] By: jhi                                   on 2003/07/30  14:27:40
+        Log: Integrate:
+             [ 20350]
+             Try again with the Mac OS X hints.  Now the three cases
+             (no -Dprefix, /usr, and something else) all install
+             into separate places.  No prefix installs to /usr/local.
+             The /usr overwrites the Apple install (modulo the version).  
+     Branch: maint-5.8/perl
+	  !> hints/darwin.sh
+____________________________________________________________________________
+[ 20349] By: jhi                                   on 2003/07/30  13:38:17
+        Log: Integrate:
+             [ 20324]
+             Revert #20301, apparently the _SOCKADDR_LEN #define is
+             important for IPv6 (Spider).  Since there is no way to
+             otherwise detect 3.X, use the hints.
+             
+             [ 20327]
+             MPE/iX fix from Mark Bixby: fcntl() on sockets on works.
+             
+             [ 20329]
+             Subject: tiny fix for WinCE (Re: maint @ 20277)
+             From: "Vadim Konovalov" <vkonovalov@peterstar.ru>
+             Date: Wed, 30 Jul 2003 02:02:41 +0400
+             Message-ID: <016701c3561d$43735ca0$195ec3d9@vad>
+             
+             [ 20330]
+             FAQ sync.
+             
+             [ 20331]
+             Subject: [PATCH] Extend Win32::GetOSVersion() to return additional information
+             From: Jan Dubois <jand@ActiveState.com>
+             Date: Tue, 29 Jul 2003 19:14:10 -0700
+             Message-ID: <i06eivs0h9khken8rloevj68iqu6n45hnq@4ax.com>
+             
+             [ 20332]
+             Modules.pl tweaks.
+             
+             [ 20333]
+             Mac OS X: tweak once again the installation directories.
+             
+             [ 20334]
+             Modules.pl: add B::Deparse.
+             
+             [ 20335]
+             More Modules.pl.
+             
+             [ 20336]
+             Strip leading ./
+             
+             [ 20337]
+             Rename Modules and Modules.pl as Maintainers and
+             Maintainers.pl since the same framework can be used
+             for more than just modules.
+             
+             [ 20338]
+             Use the CPAN id where available.
+             
+             [ 20339]
+             Arthur maintains Safe.
+             
+             [ 20340]
+             That's M. Schwern to you, earthling.
+             
+             [ 20341]
+             Upgrade to ExtUtils::MakeMaker 6.12.
+             
+             [ 20342]
+             Subject: tiny [PATCH-for-perl-5.8.1-RC2] remove one mention of UNDER_CE from perlio.c
+             From: "Konovalov, Vadim" <vkonovalov@spb.lucent.com>
+             Date: Wed, 30 Jul 2003 14:56:32 +0400
+             Message-ID: <845FCFF2D4C0FC468B485E8777C7A00C200DD3@cio-test001.spb.lucent.com>
+             
+             [ 20343]
+             Be paranoid about PL_origargv.
+             Paranoia warranted by Win32 mod_perl.
+             
+             [ 20344]
+             Adjust the list of rmdired lib directories.
+             
+             [ 20345]
+             rmdir t/lib/IO.
+             
+             [ 20346]
+             Maintainers script tweaks.
+             
+             [ 20347]
+             Match also on full name and email (though the email is
+             now less interesting than it used to be).
+             
+             [ 20348]
+             Subject: [PATCH] NEXT and Diamond Inheritance
+             From: Casey West <casey@geeknest.com>
+             Date: Tue, 29 Jul 2003 17:37:15 -0400
+             Message-ID: <20030729213715.GY76899@geeknest.com>
+             
+             (Use Damian's NEXT-0.51 once Damian and PAUSE like each other)
+     Branch: maint-5.8/perl
+	  +> Porting/Maintainers Porting/Maintainers.pl
+	   - Porting/Modules Porting/Modules.pl
+	  !> (integrate 27 files)
+____________________________________________________________________________
+[ 20321] By: jhi                                   on 2003/07/29  17:58:58
+        Log: Advertise "safe POSIX sigaction".
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20320] By: jhi                                   on 2003/07/29  15:59:22
+        Log: Make it 20320.
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 20319] By: jhi                                   on 2003/07/29  15:44:48
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20318] By: jhi                                   on 2003/07/29  15:40:24
         Log: Tell where to find 'dor' for 5.8.1.
      Branch: maint-5.8/perl
