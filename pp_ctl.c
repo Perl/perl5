@@ -866,6 +866,7 @@ PP(pp_mapstart)
 PP(pp_mapwhile)
 {
     dSP;
+    I32 gimme = GIMME_V;
     I32 items = (SP - PL_stack_base) - *PL_markstack_ptr; /* how many new items */
     I32 count;
     I32 shift;
@@ -876,7 +877,7 @@ PP(pp_mapwhile)
     ++PL_markstack_ptr[-1];
 
     /* if there are new items, push them into the destination list */
-    if (items) {
+    if (items && gimme != G_VOID) {
 	/* might need to make room back there first */
 	if (items > PL_markstack_ptr[-1] - PL_markstack_ptr[-2]) {
 	    /* XXX this implementation is very pessimal because the stack
@@ -920,7 +921,6 @@ PP(pp_mapwhile)
 
     /* All done yet? */
     if (PL_markstack_ptr[-1] > *PL_markstack_ptr) {
-	I32 gimme = GIMME_V;
 
 	(void)POPMARK;				/* pop top */
 	LEAVE;					/* exit outer scope */
