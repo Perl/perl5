@@ -37,17 +37,39 @@ echo "Archname is $archname"
 
 ### HP-UX OS specific behaviour
 
-# Initial setting of some flags
-ccflags="$ccflags -D_HPUX_SOURCE"
-ldflags="$ldflags -D_HPUX_SOURCE"
+set `echo " $ccflags " | sed -e 's/ -A[ea] / /' -e 's/ -D_HPUX_SOURCE / /'`
+cc_cppflags="$* -D_HPUX_SOURCE"
+ccflags="-Ae $cc_cppflags"
+cppflags="-Aa -D__STDC_EXT__ $cc_cppflags"
 
-# When HP-UX runs a script with "#!", it sets argv[0] to the script name.
-toke_cflags='ccflags="$ccflags -DARG_ZERO_IS_SCRIPT"'
+case "$prefix" in
+    "") prefix='/opt/perl5' ;;
+    esac
+
+# -ldbm is obsolete and should not be used
+# -lBSD contains BSD-style duplicates of SVR4 routines that cause confusion
+# -lPW is obsolete and should not be used
+# The libraries crypt, malloc, ndir, and net are empty.
+set `echo " $libswanted " | sed -e 's/ ld / /' -e 's/ dbm / /' -e 's/ BSD / /' -e 's/ PW / /'`
+libswanted="$*"
+
+# By setting the deferred flag below, this means that if you run perl
+# on a system that does not have the required shared library that you
+# linked it with, it will die when you try to access a symbol in the
+# (missing) shared library.  If you would rather know at perl startup
+# time that you are missing an important shared library, switch the
+# comments so that immediate, rather than deferred loading is
+# performed.  Even with immediate loading, you can postpone errors for
+# undefined (or multiply defined) routines until actual access by
+# adding the "nonfatal" option.
+# ccdlflags="-Wl,-E -Wl,-B,immediate $ccdlflags"
+# ccdlflags="-Wl,-E -Wl,-B,immediate,-B,nonfatal $ccdlflags"
+ccdlflags="-Wl,-E -Wl,-B,deferred $ccdlflags"
 
 cc=${cc:-cc}
 
-ar=/usr/bin/ar	# Yes, truly override.  We do not want the GNU ar.
-full_ar=$ar	# I repeat, no GNU ar.  arrr.
+ar=/usr/bin/ar # Yes, truly override.  We do not want the GNU ar.
+full_ar=$ar    # I repeat, no GNU ar.  arrr.
 
 case `$cc -v 2>&1`"" in
     *gcc*)  ccisgcc="$define" ;;
@@ -62,9 +84,8 @@ case `$cc -v 2>&1`"" in
 	    ;;
     esac
 
-set `echo X "$libswanted "| sed -e 's/ BSD//' -e 's/ PW//'`
-shift
-libswanted="$*"
+# When HP-UX runs a script with "#!", it sets argv[0] to the script name.
+toke_cflags='ccflags="$ccflags -DARG_ZERO_IS_SCRIPT"'
 
 
 ### 64 BITNESS
