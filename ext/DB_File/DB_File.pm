@@ -1,10 +1,10 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (Paul.Marquess@btinternet.com)
-# last modified 26th Nov 2001
-# version 1.801
+# last modified 6th Jan 2002
+# version 1.802
 #
-#     Copyright (c) 1995-2001 Paul Marquess. All rights reserved.
+#     Copyright (c) 1995-2002 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
 #     modify it under the same terms as Perl itself.
 
@@ -150,7 +150,7 @@ our ($db_version, $use_XSLoader);
 use Carp;
 
 
-$VERSION = "1.801" ;
+$VERSION = "1.802" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -2225,7 +2225,7 @@ compile properly on IRIX 5.3.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1995-2001 Paul Marquess. All rights reserved. This program
+Copyright (c) 1995-2002 Paul Marquess. All rights reserved. This program
 is free software; you can redistribute it and/or modify it under the
 same terms as Perl itself.
 
