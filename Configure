@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Apr 20 11:44:59 EET DST 2003 [metaconfig 3.0 PL70]
+# Generated on Mon Apr 21 10:31:53 EET DST 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -397,6 +397,7 @@ endpwent_r_proto=''
 d_endsent=''
 d_endservent_r=''
 endservent_r_proto=''
+d_faststdio=''
 d_fchdir=''
 d_fchmod=''
 d_fchown=''
@@ -1114,6 +1115,7 @@ uidtype=''
 archname64=''
 use64bitall=''
 use64bitint=''
+usefaststdio=''
 ccflags_uselargefiles=''
 ldflags_uselargefiles=''
 libswanted_uselargefiles=''
@@ -8652,6 +8654,36 @@ else
 	installsitescript="$sitescriptexp"
 fi
 
+case "$usefaststdio" in
+$define|true|[yY]*|'')
+	xversion=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $rsrc/patchlevel.h`
+	case "$xversion" in
+	[68])	dflt='y' ;;
+	*)	dflt='n' ;;
+	esac
+	;;
+*) dflt='n';;
+esac
+cat <<EOM
+
+Perl can be built to use 'fast stdio', which means using the stdio
+library but also directly manipulating the stdio buffers to enable
+faster I/O.  Using stdio is better for backward compatibility (especially
+for Perl extensions), but on the other hand since Perl 5.8 the 'perlio'
+interface has been preferred instead of stdio.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
+EOM
+rp='Use the "fast stdio" if available?'
+. ./myread
+case "$ans" in
+y|Y)	val="$define" ;;     
+*)      val="$undef" ;;
+esac
+set usefaststdio
+eval $setvar
+
+
 : define an is-a-typedef? function
 typedef='type=$1; var=$2; def=$3; shift; shift; shift; inclist=$@;
 case "$inclist" in
@@ -11676,6 +11708,291 @@ EOCP
 	;;
 esac
 $rm -f try try.* .out core head.c mtry
+
+: see if _ptr and _cnt from stdio act std
+echo " "
+
+if $contains '_lbfsize' `./findhdr stdio.h` >/dev/null 2>&1 ; then
+	echo "(Looks like you have stdio.h from BSD.)"
+	case "$stdio_ptr" in
+	'') stdio_ptr='((fp)->_p)'
+		ptr_lval=$define
+		;;
+	*)	ptr_lval=$d_stdio_ptr_lval;;
+	esac
+	case "$stdio_cnt" in
+	'') stdio_cnt='((fp)->_r)'
+		cnt_lval=$define
+		;;
+	*)	cnt_lval=$d_stdio_cnt_lval;;
+	esac
+	case "$stdio_base" in
+	'') stdio_base='((fp)->_ub._base ? (fp)->_ub._base : (fp)->_bf._base)';;
+	esac
+	case "$stdio_bufsiz" in
+	'') stdio_bufsiz='((fp)->_ub._base ? (fp)->_ub._size : (fp)->_bf._size)';;
+	esac
+elif $contains '_IO_fpos_t' `./findhdr stdio.h` `./findhdr libio.h` >/dev/null 2>&1 ; then
+	echo "(Looks like you have stdio.h from Linux.)"
+	case "$stdio_ptr" in
+	'') stdio_ptr='((fp)->_IO_read_ptr)'
+		ptr_lval=$define
+		;;
+	*)	ptr_lval=$d_stdio_ptr_lval;;
+	esac
+	case "$stdio_cnt" in
+	'') stdio_cnt='((fp)->_IO_read_end - (fp)->_IO_read_ptr)'
+		cnt_lval=$undef
+		;;
+	*)	cnt_lval=$d_stdio_cnt_lval;;
+	esac
+	case "$stdio_base" in
+	'') stdio_base='((fp)->_IO_read_base)';;
+	esac
+	case "$stdio_bufsiz" in
+	'') stdio_bufsiz='((fp)->_IO_read_end - (fp)->_IO_read_base)';;
+	esac
+else
+	case "$stdio_ptr" in
+	'') stdio_ptr='((fp)->_ptr)'
+		ptr_lval=$define
+		;;
+	*)	ptr_lval=$d_stdio_ptr_lval;;
+	esac
+	case "$stdio_cnt" in
+	'') stdio_cnt='((fp)->_cnt)'
+		cnt_lval=$define
+		;;
+	*)	cnt_lval=$d_stdio_cnt_lval;;
+	esac
+	case "$stdio_base" in
+	'') stdio_base='((fp)->_base)';;
+	esac
+	case "$stdio_bufsiz" in
+	'') stdio_bufsiz='((fp)->_cnt + (fp)->_ptr - (fp)->_base)';;
+	esac
+fi
+
+: test whether _ptr and _cnt really work
+echo "Checking how std your stdio is..." >&4
+$cat >try.c <<EOP
+#include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#define FILE_ptr(fp)	$stdio_ptr
+#define FILE_cnt(fp)	$stdio_cnt
+int main() {
+	FILE *fp = fopen("try.c", "r");
+	char c = getc(fp);
+	if (
+		18 <= FILE_cnt(fp) &&
+		strncmp(FILE_ptr(fp), "include <stdio.h>\n", 18) == 0
+	)
+		exit(0);
+	exit(1);
+}
+EOP
+val="$undef"
+set try
+if eval $compile && $to try.c; then
+	if $run ./try; then
+		echo "Your stdio acts pretty std."
+		val="$define"
+	else
+		echo "Your stdio isn't very std."
+	fi
+else
+	echo "Your stdio doesn't appear very std."
+fi
+$rm -f try.c try
+
+# glibc 2.2.90 and above apparently change stdio streams so Perl's
+# direct buffer manipulation no longer works.  The Configure tests
+# should be changed to correctly detect this, but until then,
+# the following check should at least let perl compile and run.
+# (This quick fix should be updated before 5.8.1.)
+# To be defensive, reject all unknown versions, and all versions  > 2.2.9.
+# A. Dougherty, June 3, 2002.
+case "$d_gnulibc" in
+$define)
+	case "$gnulibc_version" in
+	2.[01]*)  ;;
+	2.2) ;;
+	2.2.[0-9]) ;;
+	*)  echo "But I will not snoop inside glibc $gnulibc_version stdio buffers."
+		val="$undef"
+		;;
+	esac
+	;;
+esac
+set d_stdstdio
+eval $setvar
+
+: Can _ptr be used as an lvalue?
+case "$d_stdstdio$ptr_lval" in
+$define$define) val=$define ;;
+*) val=$undef ;;
+esac
+set d_stdio_ptr_lval
+eval $setvar
+
+: Can _cnt be used as an lvalue?
+case "$d_stdstdio$cnt_lval" in
+$define$define) val=$define ;;
+*) val=$undef ;;
+esac
+set d_stdio_cnt_lval
+eval $setvar
+
+
+: test whether setting _ptr sets _cnt as a side effect
+d_stdio_ptr_lval_sets_cnt="$undef"
+d_stdio_ptr_lval_nochange_cnt="$undef"
+case "$d_stdio_ptr_lval$d_stdstdio" in
+$define$define)
+	echo "Checking to see what happens if we set the stdio ptr..." >&4
+$cat >try.c <<EOP
+#include <stdio.h>
+/* Can we scream? */
+/* Eat dust sed :-) */
+/* In the buffer space, no one can hear you scream. */
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#define FILE_ptr(fp)	$stdio_ptr
+#define FILE_cnt(fp)	$stdio_cnt
+#include <sys/types.h>
+int main() {
+	FILE *fp = fopen("try.c", "r");
+	int c;
+	char *ptr;
+	size_t cnt;
+	if (!fp) {
+	    puts("Fail even to read");
+	    exit(1);
+	}
+	c = getc(fp); /* Read away the first # */
+	if (c == EOF) {
+	    puts("Fail even to read");
+	    exit(1);
+	}
+	if (!(
+		18 <= FILE_cnt(fp) &&
+		strncmp(FILE_ptr(fp), "include <stdio.h>\n", 18) == 0
+	)) {
+		puts("Fail even to read");
+		exit (1);
+	}
+	ptr = (char*) FILE_ptr(fp);
+	cnt = (size_t)FILE_cnt(fp);
+
+	FILE_ptr(fp) += 42;
+
+	if ((char*)FILE_ptr(fp) != (ptr + 42)) {
+		printf("Fail ptr check %p != %p", FILE_ptr(fp), (ptr + 42));
+		exit (1);
+	}
+	if (FILE_cnt(fp) <= 20) {
+		printf ("Fail (<20 chars to test)");
+		exit (1);
+	}
+	if (strncmp(FILE_ptr(fp), "Eat dust sed :-) */\n", 20) != 0) {
+		puts("Fail compare");
+		exit (1);
+	}
+	if (cnt == FILE_cnt(fp)) {
+		puts("Pass_unchanged");
+		exit (0);
+	}	
+	if (FILE_cnt(fp) == (cnt - 42)) {
+		puts("Pass_changed");
+		exit (0);
+	}
+	printf("Fail count was %d now %d\n", cnt, FILE_cnt(fp));
+	return 1;
+
+}
+EOP
+	set try
+	if eval $compile && $to try.c; then
+ 		case `$run ./try` in
+		Pass_changed)
+			echo "Increasing ptr in your stdio decreases cnt by the same amount.  Good." >&4
+			d_stdio_ptr_lval_sets_cnt="$define" ;;
+		Pass_unchanged)
+			echo "Increasing ptr in your stdio leaves cnt unchanged.  Good." >&4
+			d_stdio_ptr_lval_nochange_cnt="$define" ;;
+		Fail*)
+			echo "Increasing ptr in your stdio didn't do exactly what I expected.  We'll not be doing that then." >&4 ;;
+		*)
+			echo "It appears attempting to set ptr in your stdio is a bad plan." >&4 ;;
+	esac
+	else
+		echo "It seems we can't set ptr in your stdio.  Nevermind." >&4
+	fi
+	$rm -f try.c try
+	;;
+esac
+
+: see if _base is also standard
+val="$undef"
+case "$d_stdstdio" in
+$define)
+	$cat >try.c <<EOP
+#include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#define FILE_base(fp)	$stdio_base
+#define FILE_bufsiz(fp)	$stdio_bufsiz
+int main() {
+	FILE *fp = fopen("try.c", "r");
+	char c = getc(fp);
+	if (
+		19 <= FILE_bufsiz(fp) &&
+		strncmp(FILE_base(fp), "#include <stdio.h>\n", 19) == 0
+	)
+		exit(0);
+	exit(1);
+}
+EOP
+	set try
+	if eval $compile && $to try.c; then
+		if $run ./try; then
+			echo "And its _base field acts std."
+			val="$define"
+		else
+			echo "But its _base field isn't std."
+		fi
+	else
+		echo "However, it seems to be lacking the _base field."
+	fi
+	$rm -f try.c try
+	;;
+esac
+set d_stdiobase
+eval $setvar
+
+: see if fast_stdio exists
+val="$undef"
+case "$d_stdstdio:$d_stdio_ptr_lval" in
+"$define:$define")
+	case "$d_stdio_cnt_lval$d_stdio_ptr_lval_sets_cnt" in
+	*$define*)
+		echo "You seem to have 'fast stdio' to directly manipulate the stdio buffers." >& 4
+		val="$define"
+		;;
+	esac
+	;;
+esac
+set d_faststdio
+eval $setvar
+
+
 
 : see if fchdir exists
 set fchdir d_fchdir
@@ -15901,274 +16218,6 @@ case "$d_statfs_f_flags" in
 "$define")      echo "Yes, it does."   ;;
 *)              echo "No, it doesn't." ;;
 esac
-
-: see if _ptr and _cnt from stdio act std
-echo " "
-
-if $contains '_lbfsize' `./findhdr stdio.h` >/dev/null 2>&1 ; then
-	echo "(Looks like you have stdio.h from BSD.)"
-	case "$stdio_ptr" in
-	'') stdio_ptr='((fp)->_p)'
-		ptr_lval=$define
-		;;
-	*)	ptr_lval=$d_stdio_ptr_lval;;
-	esac
-	case "$stdio_cnt" in
-	'') stdio_cnt='((fp)->_r)'
-		cnt_lval=$define
-		;;
-	*)	cnt_lval=$d_stdio_cnt_lval;;
-	esac
-	case "$stdio_base" in
-	'') stdio_base='((fp)->_ub._base ? (fp)->_ub._base : (fp)->_bf._base)';;
-	esac
-	case "$stdio_bufsiz" in
-	'') stdio_bufsiz='((fp)->_ub._base ? (fp)->_ub._size : (fp)->_bf._size)';;
-	esac
-elif $contains '_IO_fpos_t' `./findhdr stdio.h` `./findhdr libio.h` >/dev/null 2>&1 ; then
-	echo "(Looks like you have stdio.h from Linux.)"
-	case "$stdio_ptr" in
-	'') stdio_ptr='((fp)->_IO_read_ptr)'
-		ptr_lval=$define
-		;;
-	*)	ptr_lval=$d_stdio_ptr_lval;;
-	esac
-	case "$stdio_cnt" in
-	'') stdio_cnt='((fp)->_IO_read_end - (fp)->_IO_read_ptr)'
-		cnt_lval=$undef
-		;;
-	*)	cnt_lval=$d_stdio_cnt_lval;;
-	esac
-	case "$stdio_base" in
-	'') stdio_base='((fp)->_IO_read_base)';;
-	esac
-	case "$stdio_bufsiz" in
-	'') stdio_bufsiz='((fp)->_IO_read_end - (fp)->_IO_read_base)';;
-	esac
-else
-	case "$stdio_ptr" in
-	'') stdio_ptr='((fp)->_ptr)'
-		ptr_lval=$define
-		;;
-	*)	ptr_lval=$d_stdio_ptr_lval;;
-	esac
-	case "$stdio_cnt" in
-	'') stdio_cnt='((fp)->_cnt)'
-		cnt_lval=$define
-		;;
-	*)	cnt_lval=$d_stdio_cnt_lval;;
-	esac
-	case "$stdio_base" in
-	'') stdio_base='((fp)->_base)';;
-	esac
-	case "$stdio_bufsiz" in
-	'') stdio_bufsiz='((fp)->_cnt + (fp)->_ptr - (fp)->_base)';;
-	esac
-fi
-
-: test whether _ptr and _cnt really work
-echo "Checking how std your stdio is..." >&4
-$cat >try.c <<EOP
-#include <stdio.h>
-#$i_stdlib I_STDLIB
-#ifdef I_STDLIB
-#include <stdlib.h>
-#endif
-#define FILE_ptr(fp)	$stdio_ptr
-#define FILE_cnt(fp)	$stdio_cnt
-int main() {
-	FILE *fp = fopen("try.c", "r");
-	char c = getc(fp);
-	if (
-		18 <= FILE_cnt(fp) &&
-		strncmp(FILE_ptr(fp), "include <stdio.h>\n", 18) == 0
-	)
-		exit(0);
-	exit(1);
-}
-EOP
-val="$undef"
-set try
-if eval $compile && $to try.c; then
-	if $run ./try; then
-		echo "Your stdio acts pretty std."
-		val="$define"
-	else
-		echo "Your stdio isn't very std."
-	fi
-else
-	echo "Your stdio doesn't appear very std."
-fi
-$rm -f try.c try
-
-# glibc 2.2.90 and above apparently change stdio streams so Perl's
-# direct buffer manipulation no longer works.  The Configure tests
-# should be changed to correctly detect this, but until then,
-# the following check should at least let perl compile and run.
-# (This quick fix should be updated before 5.8.1.)
-# To be defensive, reject all unknown versions, and all versions  > 2.2.9.
-# A. Dougherty, June 3, 2002.
-case "$d_gnulibc" in
-$define)
-	case "$gnulibc_version" in
-	2.[01]*)  ;;
-	2.2) ;;
-	2.2.[0-9]) ;;
-	*)  echo "But I will not snoop inside glibc $gnulibc_version stdio buffers."
-		val="$undef"
-		;;
-	esac
-	;;
-esac
-set d_stdstdio
-eval $setvar
-
-: Can _ptr be used as an lvalue?
-case "$d_stdstdio$ptr_lval" in
-$define$define) val=$define ;;
-*) val=$undef ;;
-esac
-set d_stdio_ptr_lval
-eval $setvar
-
-: Can _cnt be used as an lvalue?
-case "$d_stdstdio$cnt_lval" in
-$define$define) val=$define ;;
-*) val=$undef ;;
-esac
-set d_stdio_cnt_lval
-eval $setvar
-
-
-: test whether setting _ptr sets _cnt as a side effect
-d_stdio_ptr_lval_sets_cnt="$undef"
-d_stdio_ptr_lval_nochange_cnt="$undef"
-case "$d_stdio_ptr_lval$d_stdstdio" in
-$define$define)
-	echo "Checking to see what happens if we set the stdio ptr..." >&4
-$cat >try.c <<EOP
-#include <stdio.h>
-/* Can we scream? */
-/* Eat dust sed :-) */
-/* In the buffer space, no one can hear you scream. */
-#$i_stdlib I_STDLIB
-#ifdef I_STDLIB
-#include <stdlib.h>
-#endif
-#define FILE_ptr(fp)	$stdio_ptr
-#define FILE_cnt(fp)	$stdio_cnt
-#include <sys/types.h>
-int main() {
-	FILE *fp = fopen("try.c", "r");
-	int c;
-	char *ptr;
-	size_t cnt;
-	if (!fp) {
-	    puts("Fail even to read");
-	    exit(1);
-	}
-	c = getc(fp); /* Read away the first # */
-	if (c == EOF) {
-	    puts("Fail even to read");
-	    exit(1);
-	}
-	if (!(
-		18 <= FILE_cnt(fp) &&
-		strncmp(FILE_ptr(fp), "include <stdio.h>\n", 18) == 0
-	)) {
-		puts("Fail even to read");
-		exit (1);
-	}
-	ptr = (char*) FILE_ptr(fp);
-	cnt = (size_t)FILE_cnt(fp);
-
-	FILE_ptr(fp) += 42;
-
-	if ((char*)FILE_ptr(fp) != (ptr + 42)) {
-		printf("Fail ptr check %p != %p", FILE_ptr(fp), (ptr + 42));
-		exit (1);
-	}
-	if (FILE_cnt(fp) <= 20) {
-		printf ("Fail (<20 chars to test)");
-		exit (1);
-	}
-	if (strncmp(FILE_ptr(fp), "Eat dust sed :-) */\n", 20) != 0) {
-		puts("Fail compare");
-		exit (1);
-	}
-	if (cnt == FILE_cnt(fp)) {
-		puts("Pass_unchanged");
-		exit (0);
-	}	
-	if (FILE_cnt(fp) == (cnt - 42)) {
-		puts("Pass_changed");
-		exit (0);
-	}
-	printf("Fail count was %d now %d\n", cnt, FILE_cnt(fp));
-	return 1;
-
-}
-EOP
-	set try
-	if eval $compile && $to try.c; then
- 		case `$run ./try` in
-		Pass_changed)
-			echo "Increasing ptr in your stdio decreases cnt by the same amount.  Good." >&4
-			d_stdio_ptr_lval_sets_cnt="$define" ;;
-		Pass_unchanged)
-			echo "Increasing ptr in your stdio leaves cnt unchanged.  Good." >&4
-			d_stdio_ptr_lval_nochange_cnt="$define" ;;
-		Fail*)
-			echo "Increasing ptr in your stdio didn't do exactly what I expected.  We'll not be doing that then." >&4 ;;
-		*)
-			echo "It appears attempting to set ptr in your stdio is a bad plan." >&4 ;;
-	esac
-	else
-		echo "It seems we can't set ptr in your stdio.  Nevermind." >&4
-	fi
-	$rm -f try.c try
-	;;
-esac
-
-: see if _base is also standard
-val="$undef"
-case "$d_stdstdio" in
-$define)
-	$cat >try.c <<EOP
-#include <stdio.h>
-#$i_stdlib I_STDLIB
-#ifdef I_STDLIB
-#include <stdlib.h>
-#endif
-#define FILE_base(fp)	$stdio_base
-#define FILE_bufsiz(fp)	$stdio_bufsiz
-int main() {
-	FILE *fp = fopen("try.c", "r");
-	char c = getc(fp);
-	if (
-		19 <= FILE_bufsiz(fp) &&
-		strncmp(FILE_base(fp), "#include <stdio.h>\n", 19) == 0
-	)
-		exit(0);
-	exit(1);
-}
-EOP
-	set try
-	if eval $compile && $to try.c; then
-		if $run ./try; then
-			echo "And its _base field acts std."
-			val="$define"
-		else
-			echo "But its _base field isn't std."
-		fi
-	else
-		echo "However, it seems to be lacking the _base field."
-	fi
-	$rm -f try.c try
-	;;
-esac
-set d_stdiobase
-eval $setvar
 
 $cat >&4 <<EOM
 Checking how to access stdio streams by file descriptor number...
@@ -20499,6 +20548,7 @@ d_endsent='$d_endsent'
 d_endservent_r='$d_endservent_r'
 d_eofnblk='$d_eofnblk'
 d_eunice='$d_eunice'
+d_faststdio='$d_faststdio'
 d_fchdir='$d_fchdir'
 d_fchmod='$d_fchmod'
 d_fchown='$d_fchown'
@@ -21290,6 +21340,7 @@ use64bitall='$use64bitall'
 use64bitint='$use64bitint'
 usecrosscompile='$usecrosscompile'
 usedl='$usedl'
+usefaststdio='$usefaststdio'
 useithreads='$useithreads'
 uselargefiles='$uselargefiles'
 uselongdouble='$uselongdouble'
