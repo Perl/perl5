@@ -971,6 +971,9 @@ my_tmpfile(void)
 }
 /*}}}*/
 
+/* default piping mailbox size */
+#define PERL_BUFSIZ        256
+
 
 static void
 create_mbx(unsigned short int *chan, struct dsc$descriptor_s *namdsc)
@@ -984,12 +987,10 @@ create_mbx(unsigned short int *chan, struct dsc$descriptor_s *namdsc)
   if (!syssize) {
     unsigned long syiitm = SYI$_MAXBUF;
     /*
-     * Get the SYSGEN parameter MAXBUF, and the smaller of it and the
-     * preprocessor consant BUFSIZ from stdio.h defaults as the size of the
-     * 'pipe' mailbox.
+     * Get the SYSGEN parameter MAXBUF
      *
      * If the logical 'PERL_MBX_SIZE' is defined
-     * use the value of the logical instead of BUFSIZ, but again
+     * use the value of the logical instead of PERL_BUFSIZ, but 
      * keep the size between 128 and MAXBUF.
      *
      */
@@ -999,7 +1000,7 @@ create_mbx(unsigned short int *chan, struct dsc$descriptor_s *namdsc)
   if (vmstrnenv("PERL_MBX_SIZE", csize, 0, fildev, 0)) {
       mbxbufsiz = atoi(csize);
   } else {
-      mbxbufsiz = BUFSIZ;
+      mbxbufsiz = PERL_BUFSIZ;
   }
   if (mbxbufsiz < 128) mbxbufsiz = 128;
   if (mbxbufsiz > syssize) mbxbufsiz = syssize;
