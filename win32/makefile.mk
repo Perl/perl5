@@ -1081,23 +1081,23 @@ doc: $(PERLEXE)
 
 utils: $(PERLEXE) $(X2P)
 	cd ..\utils && $(MAKE) PERL=$(MINIPERL)
-	copy ..\README.aix ..\pod\perlaix.pod
-	copy ..\README.amiga ..\pod\perlamiga.pod
-	copy ..\README.bs2000 ..\pod\perlbs2000.pod
-	copy ..\README.cygwin ..\pod\perlcygwin.pod
-	copy ..\README.dos ..\pod\perldos.pod
-	copy ..\README.epoc ..\pod\perlepoc.pod
-	copy ..\README.hpux ..\pod\perlhpux.pod
-	copy ..\README.machten ..\pod\perlmachten.pod
-	copy ..\README.macos ..\pod\perlmacos.pod
-	copy ..\README.mpeix ..\pod\perlmpeix.pod
-	copy ..\README.os2 ..\pod\perlos2.pod
-	copy ..\README.os390 ..\pod\perlos390.pod
-	copy ..\README.solaris ..\pod\perlsolaris.pod
-	copy ..\README.vmesa ..\pod\perlvmesa.pod
-	copy ..\vms\perlvms.pod ..\pod\perlvms.pod
-	copy ..\README.vos ..\pod\perlvos.pod
-	copy ..\README.win32 ..\pod\perlwin32.pod
+	copy ..\README.aix	..\pod\perlaix.pod
+	copy ..\README.amiga	..\pod\perlamiga.pod
+	copy ..\README.bs2000	..\pod\perlbs2000.pod
+	copy ..\README.cygwin	..\pod\perlcygwin.pod
+	copy ..\README.dos	..\pod\perldos.pod
+	copy ..\README.epoc	..\pod\perlepoc.pod
+	copy ..\README.hpux	..\pod\perlhpux.pod
+	copy ..\README.machten	..\pod\perlmachten.pod
+	copy ..\README.macos	..\pod\perlmacos.pod
+	copy ..\README.mpeix	..\pod\perlmpeix.pod
+	copy ..\README.os2	..\pod\perlos2.pod
+	copy ..\README.os390	..\pod\perlos390.pod
+	copy ..\README.solaris	..\pod\perlsolaris.pod
+	copy ..\README.vmesa	..\pod\perlvmesa.pod
+	copy ..\vms\perlvms.pod	..\pod\perlvms.pod
+	copy ..\README.vos	..\pod\perlvos.pod
+	copy ..\README.win32	..\pod\perlwin32.pod
 	cd ..\pod && $(MAKE) -f ..\win32\pod.mak converters
 	cd ..\lib && $(PERLEXE) lib_pm.PL
 	$(PERLEXE) $(PL2BAT) $(UTILS)
@@ -1132,11 +1132,13 @@ distclean: clean
 	-if exist $(LIBDIR)\Digest rmdir /s /q $(LIBDIR)\Digest || rmdir /s $(LIBDIR)\Digest
 	-if exist $(LIBDIR)\MIME\Base64 rmdir /s /q $(LIBDIR)\MIME\Base64 || rmdir /s $(LIBDIR)\MIME\Base64
 	-if exist $(LIBDIR)\MIME rmdir /s /q $(LIBDIR)\MIME || rmdir /s $(LIBDIR)\MIME
-	-cd $(PODDIR) && del /f *.html *.bat checkpods perlamiga.pod \
-	    perlcygwin.pod perldos.pod perlhpux.pod perlmachten.pod \
-	    perlmacos.pod perlmpeix.pod \
-	    perlos2.pod perlvms.pod perlwin32.pod pod2html pod2latex \
-	    pod2man pod2text pod2usage podchecker podselect
+	-cd $(PODDIR) && del /f *.html *.bat checkpods \
+	    perlaix.pod perlamiga.pod perlbs2000.pod perlcygwin.pod \
+	    perldos.pod perlepoc.pod perlhpux.pod perlmachten.pod \
+	    perlmacos.pod perlmpeix.pod perlos2.pod perlos390.pod \
+	    perlsolaris.pod perlvmesa.pod perlvms.pod perlvos.pod \
+	    perlwin32.pod pod2html pod2latex pod2man pod2text pod2usage \
+	    podchecker podselect
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph h2xs perldoc \
 	    dprofpp *.bat
 	-cd ..\x2p && del /f find2perl s2p *.bat
