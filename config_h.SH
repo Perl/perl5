@@ -1,3 +1,4 @@
+#! /bin/sh
 case $CONFIG in
 '')
 	if test -f config.sh; then TOP=.;
@@ -11,10 +12,18 @@ case $CONFIG in
 	. $TOP/config.sh
 	;;
 esac
+
+case "$bin_sh" in
+'')
+	bin_sh='/bin/sh'
+	;;
+esac
+
 case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
 echo "Extracting config.h (with variable substitutions)"
+rm -f config.h
 sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
 /*
  * This file was produced by running the config_h.SH script, which
@@ -25,7 +34,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  * that running config_h.SH again will wipe out any changes you've made.
  * For a more permanent change edit config.sh and rerun config_h.SH.
  *
- * \$Id: Config_h.U,v 3.0.1.4 1995/09/25 09:10:49 ram Exp $
+ * \$Id: config_h.SH,v 1.2 1996/07/05 23:49:13 gerti Exp $
  */
 
 /* Configuration time: $cf_time
@@ -1342,7 +1351,17 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *	This symbol hold the hexadecimal constant defined in byteorder,
  *	i.e. 0x1234 or 0x4321, etc...
  */
+#ifndef NeXT
 #define BYTEORDER 0x$byteorder	/* large digits for MSB */
+#else /* NeXT */
+
+#ifdef __BIG_ENDIAN__
+#define BYTEORDER 0x4321
+#else /* __LITTLE_ENDIAN__ */
+#define BYTEORDER 0x1234
+#endif /* ENDIAN CHECK */
+
+#endif /* !NeXT */
 
 /* CSH:
  *	This symbol, if defined, indicates that the C-shell exists.
@@ -1567,6 +1586,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *	some shell.
  */
 #define STARTPERL "$startperl"		/**/
+
+/* BIN_SH:
+ *	This variable contains the path to the shell.
+ */
+#define BIN_SH "$bin_sh"		/**/
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this
