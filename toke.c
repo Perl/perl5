@@ -6974,7 +6974,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 		    goto read_more_line;
 		else {
 		    /* handle quoted delimiters */
-		    if (*(svlast-1) == '\\') {
+		    if (SvCUR(sv) > 1 && *(svlast-1) == '\\') {
 			char *t;
 			for (t = svlast-2; t >= SvPVX(sv) && *t == '\\';)
 			    t--;
