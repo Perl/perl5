@@ -79,8 +79,45 @@ sub _q {
     my $x = shift;
     return 'undef' unless defined $x;
     my $q = $x;
+    $q =~ s/\\/\\\\/;
     $q =~ s/'/\\'/;
     return "'$q'";
+}
+
+sub _qq {
+    my $x = shift;
+    return defined $x ? '"' . display ($x) . '"' : 'undef';
+};
+
+# keys are the codes \n etc map to, values are 2 char strings such as \n
+my %backslash_escape;
+foreach my $x (split //, 'nrtfa\\\'"') {
+    $backslash_escape{ord eval "\"\\$x\""} = "\\$x";
+}
+# A way to display scalars containing control characters and Unicode.
+# Trying to avoid setting $_, or relying on local $_ to work.
+sub display {
+    my @result;
+    foreach my $x (@_) {
+        if (defined $x and not ref $x) {
+            my $y = '';
+            foreach my $c (unpack("U*", $x)) {
+                if ($c > 255) {
+                    $y .= sprintf "\\x{%x}", $c;
+                } elsif ($backslash_escape{$c}) {
+                    $y .= $backslash_escape{$c};
+                } else {
+                    my $z = chr $c; # Maybe we can get away with a literal...
+                    $z = sprintf "\\%03o", $c if $z =~ /[[:^print:]]/;
+                    $y .= $z;
+                }
+            }
+            $x = $y;
+        }
+        return $x unless wantarray;
+        push @result, $x;
+    }
+    return @result;
 }
 
 sub is {
@@ -158,6 +195,33 @@ sub eq_array {
 	return 0 unless $ra->[$i] eq $rb->[$i];
     }
     return 1;
+}
+
+sub eq_hash {
+  my ($orig, $suspect) = @_;
+  my $fail;
+  while (my ($key, $value) = each %$suspect) {
+    # Force a hash recompute if this perl's internals can cache the hash key.
+    $key = "" . $key;
+    if (exists $orig->{$key}) {
+      if ($orig->{$key} ne $value) {
+        print "# key ", _qq($key), " was ", _qq($orig->{$key}),
+          " now ", _qq($value), "\n";
+        $fail = 1;
+      }
+    } else {
+      print "# key ", _qq($key), " is ", _qq($value), ", not in original.\n";
+      $fail = 1;
+    }
+  }
+  foreach (keys %$orig) {
+    # Force a hash recompute if this perl's internals can cache the hash key.
+    $_ = "" . $_;
+    next if (exists $suspect->{$_});
+    print "# key ", _qq($_), " was ", _qq($orig->{$_}), " now missing.\n";
+    $fail = 1;
+  }
+  !$fail;
 }
 
 sub require_ok {
@@ -264,13 +328,6 @@ sub BAILOUT {
     print STDOUT "Bail out! @_\n";
     exit;
 }
-
-
-# A way to display scalars containing control characters and Unicode.
-sub display {
-    map { join("", map { $_ > 255 ? sprintf("\\x{%x}", $_) : chr($_) =~ /[[:cntrl:]]/ ? sprintf("\\%03o", $_) : chr($_) } unpack("U*", $_)) } @_;
-}
-
 
 # A somewhat safer version of the sometimes wrong $^X.
 my $Perl;
