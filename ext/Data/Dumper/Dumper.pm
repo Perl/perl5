@@ -9,7 +9,7 @@
 
 package Data::Dumper;
 
-$VERSION = '2.101';
+$VERSION = '2.102';
 
 #$| = 1;
 
@@ -291,8 +291,7 @@ sub _dump {
     $s->{level}++;
     $ipad = $s->{xpad} x $s->{level};
 
-    
-    if ($realtype eq 'SCALAR') {
+    if ($realtype eq 'SCALAR' || $realtype eq 'REF') {
       if ($realpack) {
 	$out .= 'do{\\(my $o = ' . $s->_dump($$val, "\${$name}") . ')}';
       }

@@ -262,11 +262,14 @@ EOT
 ##
 $WANT = <<'EOT';
 #$VAR1 = {
-#  "abc\0'\efg" => "mno\0"
+#  "abc\0'\efg" => "mno\0",
+#  "reftest" => \\1
 #};
 EOT
 
-$foo = { "abc\000\'\efg" => "mno\000" };
+$foo = { "abc\000\'\efg" => "mno\000",
+         "reftest" => \\1,
+       };
 {
   local $Data::Dumper::Useqq = 1;
   TEST q(Dumper($foo));
@@ -274,7 +277,8 @@ $foo = { "abc\000\'\efg" => "mno\000" };
 
   $WANT = <<"EOT";
 #\$VAR1 = {
-#  'abc\0\\'\efg' => 'mno\0'
+#  'abc\0\\'\efg' => 'mno\0',
+#  'reftest' => \\\\1
 #};
 EOT
 
