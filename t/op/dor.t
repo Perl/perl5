@@ -10,7 +10,7 @@ BEGIN {
 package main;
 require './test.pl';
 
-plan( tests => 30 );
+plan( tests => 33 );
 
 my($x);
 
@@ -72,3 +72,9 @@ eval q# sub { print $fh / 2 } #;
 is( $@, '' );
 eval q# sub { print $fh /2 } #;
 like( $@, qr/^Search pattern not terminated/ );
+
+# [perl #28123] Perl optimizes // away incorrectly
+
+is(0 // 2, 0, 		'	// : left-hand operand not optimized away');
+is('' // 2, '',		'	// : left-hand operand not optimized away');
+is(undef // 2, 2, 	'	// : left-hand operand optimized away');
