@@ -234,7 +234,7 @@ EOCBU
 # terminateAndUnload() which work correctly with C++ statics while libc
 # load() and unload() do not.  See ext/DynaLoader/dl_aix.xs.
 # The C-to-C_r switch is done by usethreads.cbu, if needed.
-if test -f /lib/libC.a -a X"$gccversion" = X; then
+if test -f /lib/libC.a -a X"`$cc -v 2>&1 | grep gcc`" = X; then
     # Cify libswanted.
     set `echo X "$libswanted "| sed -e 's/ c / C c /'`
     shift
