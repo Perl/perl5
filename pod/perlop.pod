@@ -2,7 +2,24 @@
 
 perlop - Perl operators and precedence
 
-=head1 SYNOPSIS
+=head1 DESCRIPTION
+
+=head2 Operator Precedence and Associativity
+
+Operator precedence and associativity work in Perl more or less like
+they do in mathematics.
+
+I<Operator precedence> means some operators are evaluated before
+others.  For example, in C<2 + 4 * 5>, the multiplication has higher
+precedence so C<4 * 5> is evaluated first yielding C<2 + 20 ==
+22> and not C<6 * 5 == 30>.
+
+I<Operator associativity> defines what happens if a sequence of the
+same operators is used one after another: whether the evaluator will
+evaluate the left operations first or the right.  For example, in C<8
+- 4 - 2>, subtraction is left associative so Perl evaluates the
+expression left to right.  C<8 - 4> is evaluated first making the
+expression C<4 - 2 == 2> and not C<8 - 2 == 6>.
 
 Perl operators have the following associativity and precedence,
 listed from highest precedence to lowest.  Operators borrowed from
@@ -39,8 +56,6 @@ values only, not array values.
 In the following sections, these operators are covered in precedence order.
 
 Many operators can be overloaded for objects.  See L<overload>.
-
-=head1 DESCRIPTION
 
 =head2 Terms and List Operators (Leftward)
 
@@ -83,8 +98,18 @@ Also note that
 
     print ($foo & 255) + 1, "\n";
 
-probably doesn't do what you expect at first glance.  See
-L<Named Unary Operators> for more discussion of this.
+probably doesn't do what you expect at first glance.  The parentheses
+enclose the argument list for C<print> which is evaluated (printing
+the result of C<$foo & 255>).  Then one is added to the return value
+of C<print> (usually 1).  The result is something like this:
+
+    1 + 1, "\n";    # Obviously not what you meant.
+
+To do what you meant properly, you must write:
+
+    print(($foo & 255) + 1, "\n");
+
+See L<Named Unary Operators> for more discussion of this.
 
 Also parsed as terms are the C<do {}> and C<eval {}> constructs, as
 well as subroutine and method calls, and the anonymous
@@ -110,9 +135,14 @@ or a class name (that is, a package name).  See L<perlobj>.
 
 =head2 Auto-increment and Auto-decrement
 
-"++" and "--" work as in C.  That is, if placed before a variable, they
-increment or decrement the variable before returning the value, and if
-placed after, increment or decrement the variable after returning the value.
+"++" and "--" work as in C.  That is, if placed before a variable,
+they increment or decrement the variable by one before returning the
+value, and if placed after, increment or decrement after returning the
+value.
+
+    $i = 0;  $j = 0;
+    print $i++;  # prints 0
+    print ++$j;  # prints 1
 
 The auto-increment operator has a little extra builtin magic to it.  If
 you increment a variable that is numeric, or that has ever been used in
@@ -157,7 +187,7 @@ example, C<0666 & ~027> is 0640.  (See also L<Integer Arithmetic> and
 L<Bitwise String Operators>.)  Note that the width of the result is
 platform-dependent: ~0 is 32 bits wide on a 32-bit platform, but 64
 bits wide on a 64-bit platform, so if you are expecting a certain bit
-width, remember use the & operator to mask off the excess bits.
+width, remember to use the & operator to mask off the excess bits.
 
 Unary "+" has no effect whatsoever, even on strings.  It is useful
 syntactically for separating a function name from a parenthesized expression
@@ -374,9 +404,9 @@ if the left operand is true, the right operand is not even evaluated.
 Scalar or list context propagates down to the right operand if it
 is evaluated.
 
-The C<||> and C<&&> operators differ from C's in that, rather than returning
-0 or 1, they return the last value evaluated.  Thus, a reasonably portable
-way to find out the home directory (assuming it's not "0") might be:
+The C<||> and C<&&> operators return the last value evaluated
+(unlike C's C<||> and C<&&>, which return 0 or 1). Thus, a reasonably
+portable way to find out the home directory might be:
 
     $home = $ENV{'HOME'} || $ENV{'LOGDIR'} ||
 	(getpwuid($<))[7] || die "You're homeless!\n";
@@ -608,9 +638,10 @@ argument and returns that value.  This is just like C's comma operator.
 In list context, it's just the list argument separator, and inserts
 both its arguments into the list.
 
-The => digraph is mostly just a synonym for the comma operator.  It's useful for
-documenting arguments that come in pairs.  As of release 5.001, it also forces
-any word to the left of it to be interpreted as a string.
+The C<< => >> operator is a synonym for the comma, but forces any word
+to its left to be interpreted as a string (as of 5.001). It is helpful
+in documenting the correspondence between keys and values in hashes,
+and other paired elements in lists.
 
 =head2 List Operators (Rightward)
 
