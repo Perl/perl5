@@ -1106,7 +1106,7 @@ lib/lib_pm.PL			For "use lib", produces lib/lib.pm
 lib/locale.pm			For "use locale"
 lib/locale.t			See if locale support works
 lib/Locale/Codes/ChangeLog	Locale::Codes
-lib/Locale/Codes/README	Locale::Codes
+lib/Locale/Codes/README		Locale::Codes
 lib/Locale/Codes/t/all.t	See if Locale::Codes work
 lib/Locale/Codes/t/constants.t	See if Locale::Codes work
 lib/Locale/Codes/t/country.t	See if Locale::Codes work
@@ -1115,9 +1115,13 @@ lib/Locale/Codes/t/languages.t	See if Locale::Codes work
 lib/Locale/Codes/t/script.t	See if Locale::Codes work
 lib/Locale/Codes/t/uk.t		See if Locale::Codes work
 lib/Locale/Constants.pm		Locale::Codes
+lib/Locale/Constants.pod	Locale::Codes documentation
 lib/Locale/Country.pm		Locale::Codes
+lib/Locale/Country.pod		Locale::Codes documentation
 lib/Locale/Currency.pm		Locale::Codes
+lib/Locale/Currency.pod		Locale::Codes documentation
 lib/Locale/Language.pm		Locale::Codes
+lib/Locale/Language.pod		Locale::Codes documentation
 lib/Locale/Maketext.pm		Locale::Maketext
 lib/Locale/Maketext.pod		Locale::Maketext documentation
 lib/Locale/Maketext/ChangeLog	Locale::Maketext
@@ -1125,6 +1129,7 @@ lib/Locale/Maketext/README	Locale::Maketext
 lib/Locale/Maketext/test.pl	See if Locale::Maketext works
 lib/Locale/Maketext/TPJ13.pod	Locale::Maketext documentation article
 lib/Locale/Script.pm		Locale::Codes
+lib/Locale/Script.pod		Locale::Codes documentation
 lib/look.pl			A "look" equivalent
 lib/Math/BigFloat.pm		An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm		An arbitrary precision integer arithmetic package

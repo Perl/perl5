@@ -1,6 +1,6 @@
 
 			Locale-Codes Distribution
-				v2.00
+				v2.01
 
 This distribution contains four Perl modules which can be used to process
 ISO codes for identifying languages, countries, scripts,
@@ -33,7 +33,7 @@ To install these modules, you should just have to run the following:
 	% make install
 
 The modules are documented using pod. When you "make install", you
-will get three man-pages: Locale::Language, Locale::Country,
+will get four man-pages: Locale::Language, Locale::Country,
 Locale::Currency, Locale::Script.
 
 The first version of Locale::Currency was written by Michael Hennecke,

@@ -1,6 +1,12 @@
 
 		ChangeLog for Locale-Codes Distribution
 
+2.01  2002-02-18 neilb
+
+	* Split the documentation for all modules into separate pod files.
+	* Made sure all =over were =over 4; some were other values.
+	* The code2code() methods had one more shift than was needed.
+
 2.00  2002-02-17 neilb
 
 	* Created Locale::Script which provides an interface to the
