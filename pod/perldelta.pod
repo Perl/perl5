@@ -472,8 +472,7 @@ This works with both Cygwin 1.3.22 and Cygwin 1.5.3.
 
 In newer FreeBSD releases Perl 5.8.0 compilation failed because of
 trying to use F<malloc.h>, which in FreeBSD is just a dummy file, and
-a fatal error to even try to use.  Now F<malloc.h> is not used,
-but see L</"FreeBSD: malloc dilemma">.
+a fatal error to even try to use.  Now F<malloc.h> is not used.
 
 Perl is now known to build also in Hitachi HI-UXMPP.
 
@@ -917,29 +916,6 @@ failure go away).
 Perl 5.8.1 does build and work well with Cygwin 1.3: with (uname -a)
 C<CYGWIN_NT-5.0 ... 1.3.22(0.78/3/2) 2003-03-18 09:20 i686 ...>
 a 100% "make test"  was achieved with C<Configure -des -Duseithreads>.
-
-=head2 FreeBSD: malloc dilemma
-
-The choice of malloc (the C-level memory management interface)
-when building Perl is problematic in FreeBSD.
-
-Using FreeBSD's system malloc for Perl was found to be very slow:
-in some cases that was 200 times slower than using the Perl malloc.
-One such case is file input: for example
-
-    # slurping the whole compressed Perl source code into $a
-    if (open F,"perl-5.8.1.tar.gz") { local $/; $a=<F> }
-
-is about 200-250 times slower with the system malloc than with
-the Perl malloc.
-
-One could use Perl's malloc (Configure -Dusemymalloc), but that
-was found to cause random core dumps in FreeBSD with multithreaded
-programs.  No such problems were found in other multithreaded platforms,
-however.
-
-A decision was made to stick with the system malloc, regardless
-of the performance problems.
 
 =head2 HP-UX: HP cc warnings about sendfile and sendpath
 
