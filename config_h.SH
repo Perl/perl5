@@ -705,11 +705,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_umask HAS_UMASK		/**/
 
-/* HAS_VFORK:
- *	This symbol, if defined, indicates that vfork() exists.
- */
-#$d_vfork HAS_VFORK	/**/
-
 /* HASVOLATILE:
  *	This symbol, if defined, indicates that this C compiler knows about
  *	the volatile declaration.
@@ -1902,6 +1897,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_union_semun HAS_UNION_SEMUN	/**/
 #$d_semctl_semun USE_SEMCTL_SEMUN	/**/
 #$d_semctl_semid_ds USE_SEMCTL_SEMID_DS	/**/
+
+/* HAS_VFORK:
+ *	This symbol, if defined, indicates that vfork() exists.
+ */
+#$d_vfork HAS_VFORK	/**/
 
 /* Signal_t:
  *	This symbol's value is either "void" or "int", corresponding to the
