@@ -3470,6 +3470,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define SITELIB_EXP "$sitelibexp"		/**/
 #define SITELIB_STEM "$sitelib_stem"		/**/
 
+/* USE_SITECUSTOMIZE:
+ *    This symbol, if defined, indicates that sitecustomize should
+ *    be used.
+ */
+#$d_sitecustomize     USE_SITECUSTOMIZE               /**/
+
 /* Size_t_size:
  *	This symbol holds the size of a Size_t in bytes.
  */
