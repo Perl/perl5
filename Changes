@@ -79,6 +79,70 @@ Version 5.005_63        Development release working toward 5.6
 ----------------
 
 ____________________________________________________________________________
+[  4676] By: gsar                                  on 1999/12/09  10:51:43
+        Log: fix File::Find testsuite bugs in symlink-less places
+     Branch: perl
+	   ! t/lib/filefind.t
+____________________________________________________________________________
+[  4675] By: gsar                                  on 1999/12/09  10:22:31
+        Log: USE_ITHREADS tweaks and notes
+     Branch: perl
+	   ! op.c pod/perldelta.pod sv.c
+____________________________________________________________________________
+[  4674] By: gsar                                  on 1999/12/09  10:21:53
+        Log: allow new style sort subs to work under usethreads
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[  4673] By: gsar                                  on 1999/12/09  04:00:23
+        Log: document compatibility issue with literal list slices and NOTOP
+             (C<not (1,2,3)[0]> is now a syntax error)
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  4672] By: gsar                                  on 1999/12/09  01:14:46
+        Log: avoid mismatched expectation <-> int types for C++ builds
+     Branch: perl
+	   ! embed.pl intrpvar.h proto.h toke.c
+____________________________________________________________________________
+[  4671] By: gsar                                  on 1999/12/09  00:36:24
+        Log: newer version of File::Find with support for following symlinks and
+             other features, from Helmut Jarausch <jarausch@igpm.rwth-aachen.de>
+     Branch: perl
+	   ! lib/File/Find.pm pod/perldelta.pod t/lib/filefind.t
+____________________________________________________________________________
+[  4670] By: gsar                                  on 1999/12/09  00:13:06
+        Log: avoid initializing GvCV slot for autovivified filehandles
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[  4669] By: gsar                                  on 1999/12/08  19:09:27
+        Log: apply change#4618 again along with Ilya's patch to fix bugs
+             in it (see change#4622)
+     Branch: perl
+	   ! embed.h embed.pl perl.h proto.h regcomp.c regcomp.h regexec.c
+	   ! t/op/re_tests t/op/subst.t
+____________________________________________________________________________
+[  4668] By: gsar                                  on 1999/12/08  18:56:53
+        Log: patch to fix parser bug in C<${h{${a[0]}}} = 13>
+             From: Larry Wall <larry@wall.org>
+             Date: Tue, 7 Dec 1999 12:39:30 -0800 (PST)
+             Message-Id: <199912072039.MAA13257@kiev.wall.org>
+             Subject: Re: [ID 19991204.002] Inconsistency of ${hash{key}}
+     Branch: perl
+	   ! embedvar.h intrpvar.h objXSUB.h sv.c toke.c
+____________________________________________________________________________
+[  4667] By: gsar                                  on 1999/12/08  18:47:37
+        Log: patch to fix aix hints from ortmann@vnet.ibm.com
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[  4666] By: gsar                                  on 1999/12/08  18:29:02
+        Log: documentation tweaks from M. J. T. Guy, Micheal Schwern, and
+             Tim Meadowcroft
+     Branch: perl
+	   ! Changes lib/Benchmark.pm pod/perlipc.pod pod/perlre.pod
+____________________________________________________________________________
 [  4665] By: gsar                                  on 1999/12/08  02:22:31
         Log: introduce save_I8() for saving byte values
      Branch: perl
