@@ -1767,15 +1767,31 @@ PerlIO_funcs PerlIO_stdio = {
 FILE *
 PerlIO_exportFILE(PerlIO *f, int fl)
 {
+ FILE *stdio;
  PerlIO_flush(f);
- /* Should really push stdio discipline when we have them */
- return fdopen(PerlIO_fileno(f),"r+");
+ stdio = fdopen(PerlIO_fileno(f),"r+");
+ if (stdio)
+  {
+   PerlIOStdio *s = PerlIOSelf(PerlIO_push(f,&PerlIO_stdio,"r+",Nullch,0),PerlIOStdio);
+   s->stdio  = stdio;
+  }
+ return stdio;
 }
 
 #undef PerlIO_findFILE
 FILE *
 PerlIO_findFILE(PerlIO *f)
 {
+ PerlIOl *l = *f;
+ while (l)
+  {
+   if (l->tab == &PerlIO_stdio)
+    {
+     PerlIOStdio *s = PerlIOSelf(&l,PerlIOStdio);
+     return s->stdio;
+    }
+   l = *PerlIONext(&l);
+  }
  return PerlIO_exportFILE(f,0);
 }
 

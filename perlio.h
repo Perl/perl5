@@ -106,6 +106,10 @@ extern void	PerlIO_pop		(PerlIO *f);
 #ifndef PERLIO_NOT_STDIO
 #define PERLIO_NOT_STDIO 1
 #endif
+#else
+#ifndef PERLIO_NOT_STDIO
+#define PERLIO_NOT_STDIO 0
+#endif
 #endif
 
 #ifdef PERLIO_NOT_STDIO
