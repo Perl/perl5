@@ -861,9 +861,9 @@ typedef pthread_key_t perl_key;
 
 #endif
 
-/* Digital UNIX defines CONTEXT when pthreads is in use */
-#ifdef CONTEXT
-#  undef CONTEXT
+/* Digital UNIX defines a typedef CONTEXT when pthreads is in use */ 
+#if defined(__osf__)
+#  define CONTEXT PERL_CONTEXT
 #endif
 
 typedef MEM_SIZE STRLEN;

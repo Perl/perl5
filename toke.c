@@ -759,7 +759,7 @@ char *start;
     register char *d = SvPVX(sv);
     bool dorange = FALSE;
     I32 len;
-    char *leave =
+    char *leaveit =
 	lex_inpat
 	    ? "\\.^$@AGZdDwWsSbB+*?|()-nrtfeaxc0123456789[{]} \t\n\r\f\v#"
 	    : (lex_inwhat & OP_TRANS)
@@ -805,7 +805,7 @@ char *start;
 	}
 	if (*s == '\\' && s+1 < send) {
 	    s++;
-	    if (*s && strchr(leave, *s)) {
+	    if (*s && strchr(leaveit, *s)) {
 		*d++ = '\\';
 		*d++ = *s++;
 		continue;

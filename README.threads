@@ -1,3 +1,5 @@
+Background
+
 Some old globals (e.g. stack_sp, op) and some old per-interpreter
 variables (e.g. tmps_stack, cxstack) move into struct thread.
 All fields of struct thread (apart from a few only applicable to
@@ -14,6 +16,9 @@ which declares and initialises thr from thread-specific data
 via pthread_getspecific. If a function fails to compile with an
 error about "no such variable thr", it probably just needs a dTHR
 at the top.
+
+
+Fake threads
 
 For FAKE_THREADS, thr is a global variable and perl schedules threads
 by altering thr in between appropriate ops. The next and prev fields
@@ -50,3 +55,110 @@ so if the owner field already matches the current thread then
 pp_lock returns straight away. If the owner field has to be filled
 in then unlock_condpair is queued as an end-of-block destructor and
 that function zeroes out the owner field, releasing the lock.
+
+
+Building
+
+Omit the -e from your ./Configure arguments. For example, use
+    ./Configure -drs
+When it offers to let you change config.sh, do so. If you already
+have a config.sh then you can edit it and do
+    ./Configure -S
+to propagate the required changes.
+In ccflags, insert -DUSE_THREADS (and probably -DDEBUGGING since
+that's what I've been building with). Also insert any other
+arguments in there that your compiler needs to use POSIX threads.
+Change optimize to -g to give you better debugging information.
+Include any necessary explicit libraries in libs and change
+ldflags if you need any linker flags instead or as well.
+
+More explicitly, for Linux (when using the standard kernel-threads
+based LinuxThreads library):
+    Add -DUSE_THREADS -D_REENTRANT -DDEBUGGING to ccflags and cppflags
+    Add -lpthread to libs
+    Change optimize to -g
+For Digital Unix 4.x:
+    Add -pthread -DUSE_THREADS -DDEBUGGING to ccflags
+    Add -DUSE_THREADS -DDEBUGGING to cppflags
+    Add -pthread to ldflags
+    Change optimize to -g
+    Maybe add -lpthread -lc_r to lddlflags
+    For some reason, the extra includes for pthreads make Digital UNIX
+    complain fatally about the sbrk() delcaration in perl's malloc.c
+    so use the native malloc as follows:
+    Change usemymalloc to n
+    Zap mallocobj and mallocsrc (foo='')
+    Change d_mymalloc to undef
+
+
+Now you can do a
+    make perl
+For Digital UNIX, it will get as far as building miniperl and then
+bomb out buidling DynaLoader when MakeMaker tries to find where
+perl is. This seems to be a problem with backticks/system when
+threading is in. A minimal failing example is
+    perl -e 'eval q($foo = 0); system("echo foo")'
+which doesn't echo anything. The resulting ext/DynaLoader/Makefile
+will have lines
+    PERL = 0
+    FULLPERL = 0
+Change them to be the pathnames of miniperl and perl respectively
+(the ones in your perl build directory). The resume the make with
+    make perl
+This time it should manage to build perl. If not, try some cutting
+and pasting to compile and link things manually. Be careful when
+building extensions that your ordinary perl doesn't end up making
+a Makefile without the correct pthreads compiler options.
+
+Building the Thread extension
+
+Build it away from the perl tree in the usual way. Set your PATH
+environment variable to have your perl build directory first and
+set PERL5LIB to be your/build/directory/lib (without those, I had
+problems where the config information from the ordinary perl on
+the system would end up in the Makefile). Then
+    perl Makefile.PL
+    make
+On Digital UNIX, you'll probably have to fix the "PERL = 0" and
+"FULLPERL = 0" lines in the generated Makefile as for DynaLoader.
+
+Then you can try some of the tests with
+    perl -Mblib create.t
+    perl -Mblib join.t
+    perl -Mblib lock.t
+    perl -Mblib unsync.t
+    perl -Mblib unsync2.t
+    perl -Mblib unsync3.t
+    perl -Mblib io.t
+The io one leaves a thread reading from the keyboard on stdin so
+as the ping messages appear you can type lines and see them echoed.
+
+Try running the main perl test suite too. There are known
+failures for po/misc test 45 (tries to do local(@_) but @_ is
+now lexical) and some tests involving backticks/system/fork
+may or may not work. Under Linux, many tests appear to fail
+when run under the test harness but work fine when invoked
+manually.
+
+
+Bugs
+
+* cond.t hasn't been redone since condition variable changed.
+
+* FAKE_THREADS should produce a working perl but the Thread
+extension won't build with it yet.
+
+* There's a known memory leak (curstack isn't freed at the end
+of each thread because it causes refcount problems that I
+haven't tracked down yet) and there are very probably others too.
+
+* The new synchronised subs design isn't done yet. 
+
+* There are still races where bugs show up under contention.
+
+* Plenty of others
+
+
+Malcolm Beattie
+mbeattie@sable.ox.ac.uk
+13 August 1997
