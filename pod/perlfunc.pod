@@ -1578,6 +1578,7 @@ elements.  That is, modifying an element of a list returned by grep
 actually modifies the element in the original list.
 
 See also L</map> for an array composed of the results of the BLOCK or EXPR.
+
 =item hex EXPR
 
 =item hex
