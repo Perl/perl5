@@ -659,6 +659,23 @@ negligible.
 
 =back
 
+=head2 Building a debugging perl
+
+You can run perl scripts under the perl debugger at any time with
+B<perl -d>.  If, however, you want to debug perl itself,
+you probably want to do
+
+	sh Configure -Doptimize='-g'
+
+This will do two things:  First, it will force compilation to use
+B<cc -g> so that you can use your system's debugger on the executable.
+Second, it will add a C<-DDEBUGGING> to your ccflags variable in
+F<config.sh> so that you can use B<perl -D> to access perl's internal
+state.
+
+If you are using a shared libperl, see the warnings about multiple
+versions of perl under L<Building a shared libperl.so Perl library>.
+
 =head2 Other Compiler Flags
 
 For most users, all of the Configure defaults are fine.  However,
@@ -1285,4 +1302,4 @@ from the original README by Larry Wall.
 
 =head1 LAST MODIFIED
 
-$Id: INSTALL,v 1.5 1997/03/08 18:15:49 doughera Released $
+$Id: INSTALL,v 1.8 1997/03/21 16:21:53 doughera Released $
