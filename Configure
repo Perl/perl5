@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Sep 17 12:06:13 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Mon Sep 20 12:12:09 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -817,7 +817,9 @@ trnl=''
 uidtype=''
 archname64=''
 use64bits=''
+uselfs=''
 uselongdouble=''
+usemorebits=''
 usemultiplicity=''
 nm_opt=''
 nm_so_opt=''
@@ -3012,6 +3014,17 @@ fi
 $rm -f gccvers*
 case "$gccversion" in
 1*) cpp=`./loc gcc-cpp $cpp $pth` ;;
+esac
+
+
+case "$usemorebits" in
+"$define"|true|[yY]*)
+	use64bits="$define"
+	uselongdouble="$define"
+	usemorebits="$define"
+	;;
+*)	usemorebits="$undef"
+	;;
 esac
 
 cat <<EOM
@@ -6502,6 +6515,16 @@ if $test X"$prefix" != X"$installprefix"; then
 else
 	installsitearch="$sitearchexp"
 fi
+
+
+case "$uselfs" in
+"$define"|true|[yY]*)
+	uselfs="$define"
+	use64bits="$define"
+	;;
+*)	uselfs="$undef"
+	;;
+esac
 
 cat <<EOM
 
@@ -13969,7 +13992,9 @@ uname='$uname'
 uniq='$uniq'
 use64bits='$use64bits'
 usedl='$usedl'
+uselfs='$uselfs'
 uselongdouble='$uselongdouble'
+usemorebits='$usemorebits'
 usemultiplicity='$usemultiplicity'
 usemymalloc='$usemymalloc'
 usenm='$usenm'
