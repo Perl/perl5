@@ -31,6 +31,67 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11497] By: jhi                                   on 2001/07/30  03:45:32
+        Log: Now Configure -Dextras=Foo::Bar and "make install" will
+             fetch and install Foo::Bar.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 11496] By: jhi                                   on 2001/07/30  03:18:28
+        Log: Metaconfig unit change for #11495.
+     Branch: metaconfig/U/perl
+	   ! Extras.U
+____________________________________________________________________________
+[ 11495] By: jhi                                   on 2001/07/30  03:18:01
+        Log: extras.make, extras.test, and extras.install make targets.
+     Branch: perl
+	   ! Configure Makefile.SH
+____________________________________________________________________________
+[ 11494] By: jhi                                   on 2001/07/30  01:37:35
+        Log: Metaconfig unit change for #11493.
+     Branch: metaconfig/U/perl
+	   ! Extras.U
+____________________________________________________________________________
+[ 11493] By: jhi                                   on 2001/07/30  01:37:14
+        Log: Better to have the list of extras in $extras than 'define'.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 11492] By: jhi                                   on 2001/07/30  01:33:16
+        Log: The metaconfig unit change for #11490.
+     Branch: metaconfig/U/perl
+	   + Extras.U
+____________________________________________________________________________
+[ 11491] By: jhi                                   on 2001/07/30  01:32:54
+        Log: Missed from #11490 (the required dependency).
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 11490] By: jhi                                   on 2001/07/30  01:32:02
+        Log: Add the support of asking for extra modules or bundles of modules
+             to be fetched from the CPAN and installed as a part of the Perl
+             build process.  None of this installation is yet really done;
+             only the list is asked, and saved away in extras.lst for
+             the build and installation process to worry about later.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 11489] By: jhi                                   on 2001/07/29  22:15:25
+        Log: Beginnings of better Inf and NaN support.
+             At least toke.c and sv.c still need quite a bit of work.
+     Branch: perl
+	   ! numeric.c perl.h
+____________________________________________________________________________
+[ 11488] By: jhi                                   on 2001/07/29  21:18:57
+        Log: Top-level Makefile didn't honour OPTIMIZE.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 11487] By: jhi                                   on 2001/07/29  20:56:04
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11486] By: jhi                                   on 2001/07/29  20:38:09
         Log: Use Search::Dict 1.02 interface for charinfo().
      Branch: perl
