@@ -47,6 +47,13 @@ affected by this pragma.  They probably should.
 
 Also chr(), ord(), and C<\N{...}> might become affected.
 
+=head1 KNOWN PROBLEMS
+
+Cannot be combined with C<use utf8>.  Note that this is a problem
+B<only> if you would like to have Unicode identifiers in your scripts.
+You should not need C<use utf8> for anything else these days
+(since Perl 5.8.0)
+
 =head1 SEE ALSO
 
 L<perlunicode>

@@ -868,7 +868,7 @@ More examples:
 See L<PerlIO> for more information.
 
 See also L<encoding> for how to change the default encoding of the
-script itself.
+data in your script.
 
 =head1 Encoding How to ...
 
