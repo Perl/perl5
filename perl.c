@@ -771,7 +771,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     boot_core_UNIVERSAL();
     if (xsinit)
 	(*xsinit)();	/* in case linked C routines want magical variables */
-#ifdef VMS
+#if defined(VMS) || defined(WIN32)
     init_os_extras();
 #endif
 

@@ -318,3 +318,6 @@ win32_sethostent
 win32_setnetent
 win32_setprotoent
 win32_setservent
+win32_getenv
+win32_stdio
+Perl_win32_init

@@ -1511,7 +1511,7 @@
  *		d_Gconvert='sprintf((b),"%.*g",(n),(x))'
  *	The last two assume trailing zeros should not be kept.
  */
-#define Gconvert(x,n,t,b) sprintf((b),"%.*g",(n),(x))
+#define Gconvert(x,n,t,b) gcvt((x),(n),(b))
 
 /* HAS_GETPGID:
  *	This symbol, if defined, indicates to the C program that 
