@@ -48,20 +48,21 @@ EOM
 esac
 
 # Determine the architecture type of this system.
-xxuname=`uname -r`
-if echo $xxuname | $contains '10'
+# Keep leading tab below -- Configure Black Magic -- RAM, 03/02/97
+	xxuname=`uname -r`
+if echo $xxuname | $contains '10' >/dev/null 2>&1
 then
 	# This system is running 10.0
 	xxcpu1=`getconf CPU_VERSION`
 	xxcpu2=`printf %#x ${xxcpu1}`
 	xxcontext=`grep "$xxcpu2" /usr/include/sys/unistd.h`
-	if echo "$xxcontext" | $contains 'PA-RISC1.1'
+	if echo "$xxcontext" | $contains 'PA-RISC1.1' >/dev/null 2>&1
 	then
 		archname='PA-RISC1.1'
-	elif echo "$xxcontext" | $contains 'PA-RISC1.0'
+	elif echo "$xxcontext" | $contains 'PA-RISC1.0' >/dev/null 2>&1
 	then
 		archname='PA-RISC1.0'
-	elif echo "$xxcontext" | $contains 'PA-RISC2'
+	elif echo "$xxcontext" | $contains 'PA-RISC2' >/dev/null 2>&1
 	then
 		archname='PA-RISC2'
 	else
@@ -72,13 +73,13 @@ then
 else
 	# This system is not running 10.0
 	xxcontext=`/bin/getcontext`
-	if echo "$xxcontext" | $contains 'PA-RISC1.1'
+	if echo "$xxcontext" | $contains 'PA-RISC1.1' >/dev/null 2>&1
 	then
 		archname='PA-RISC1.1'
-	elif echo "$xxcontext" | $contains 'PA-RISC1.0'
+	elif echo "$xxcontext" | $contains 'PA-RISC1.0' >/dev/null 2>&1
 	then
 		archname='PA-RISC1.0'
-	elif echo "$xxcontext" | $contains 'HP-MC'
+	elif echo "$xxcontext" | $contains 'HP-MC' >/dev/null 2>&1
 	then
 		archname='HP-MC68K'
 	else
