@@ -420,7 +420,7 @@ __END__
 # logop       - |            listop   - @            pmop       - /
 # padop/svop  - $            padop    - # (unused)   loop       - {
 # baseop/unop - %            loopexop - }            filestatop - -
-# pvop/svop   - "
+# pvop/svop   - "            cop      - ;
 
 # Other options are:
 #   needs stack mark                    - m
