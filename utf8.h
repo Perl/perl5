@@ -41,11 +41,16 @@ END_EXTERN_C
  * (that is, the two high bits are set).  Otherwise we risk loading in the
  * heavy-duty SWASHINIT and SWASHGET routines unnecessarily.
  */
-#define isIDFIRST_lazy_if(p,c) ((IN_BYTE || defined(EBCDIC) || (!c || (*((U8*)p) < 0xc0))) \
+#ifdef EBCDIC
+#define isIDFIRST_lazy_if(p,c) isIDFIRST(*(p))
+#define isALNUM_lazy_if(p,c)   isALNUM(*(p))
+#else
+#define isIDFIRST_lazy_if(p,c) ((IN_BYTE || (!c || (*((U8*)p) < 0xc0))) \
 				? isIDFIRST(*(p)) \
 				: isIDFIRST_utf8((U8*)p))
-#define isALNUM_lazy_if(p,c)   ((IN_BYTE || defined(EBCDIC) || (!c || (*((U8*)p) < 0xc0))) \
+#define isALNUM_lazy_if(p,c)   ((IN_BYTE || (!c || (*((U8*)p) < 0xc0))) \
 				? isALNUM(*(p)) \
 				: isALNUM_utf8((U8*)p))
+#endif
 #define isIDFIRST_lazy(p)	isIDFIRST_lazy_if(p,1)
 #define isALNUM_lazy(p)		isALNUM_lazy_if(p,1)
