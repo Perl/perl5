@@ -428,9 +428,14 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 		gvp = (GV**)hv_fetch(stash,tmpbuf,len,add);
 		if (tmpbuf != autobuf)
 		    Safefree(tmpbuf);
-
-		if (!gv || gv == (GV*)&sv_undef)
+		if (!gvp || *gvp == (GV*)&sv_undef)
 		    return Nullgv;
+		gv = *gvp;
+
+                if (SvTYPE(gv) == SVt_PVGV)
+                    GvMULTI_on(gv);
+                else if (!add)
+                    return Nullgv;
 		else
 		    gv_init(gv, stash, nambeg, namend - nambeg, (add & 2));
 
