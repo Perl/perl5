@@ -366,14 +366,14 @@ PerlIO_pop(pTHX_ PerlIO *f)
 /* XS Interface for perl code */
 
 SV *
-PerlIO_find_layer(pTHX_ const char *name, STRLEN len)
+PerlIO_find_layer(pTHX_ const char *name, STRLEN len, int load)
 {
  SV **svp;
  SV *sv;
  if ((SSize_t) len <= 0)
   len = strlen(name);
  svp  = hv_fetch(PerlIO_layer_hv,name,len,0);
- if (!svp && PL_subname && PerlIO_layer_av && av_len(PerlIO_layer_av)+1 >= 2)
+ if (!svp && load && PL_subname && PerlIO_layer_av && av_len(PerlIO_layer_av)+1 >= 2)
   {
    SV *pkgsv  = newSVpvn("PerlIO",6);
    SV *layer  = newSVpvn(name,len);
@@ -389,7 +389,7 @@ PerlIO_find_layer(pTHX_ const char *name, STRLEN len)
    if (SvROK(sv))
     return *svp;
   }
- return NULL;
+ return Nullsv;
 }
 
 
@@ -461,7 +461,7 @@ XS(XS_io_MODIFY_SCALAR_ATTRIBUTES)
   {
    STRLEN len;
    const char *name = SvPV(ST(i),len);
-   SV *layer  = PerlIO_find_layer(aTHX_ name,len);
+   SV *layer  = PerlIO_find_layer(aTHX_ name,len,1);
    if (layer)
     {
      av_push(av,SvREFCNT_inc(layer));
@@ -560,7 +560,7 @@ PerlIO_parse_layers(pTHX_ AV *av, const char *names)
         }
        if (e > s)
         {
-         SV *layer = PerlIO_find_layer(aTHX_ s,llen);
+         SV *layer = PerlIO_find_layer(aTHX_ s,llen,1);
          if (layer)
           {
            av_push(av,SvREFCNT_inc(layer));
@@ -594,7 +594,7 @@ PerlIO_default_buffer(pTHX_ AV *av)
     }
   }
  PerlIO_debug("Pushing %s\n",tab->name);
- av_push(av,SvREFCNT_inc(PerlIO_find_layer(aTHX_ tab->name,0)));
+ av_push(av,SvREFCNT_inc(PerlIO_find_layer(aTHX_ tab->name,0,0)));
  av_push(av,&PL_sv_undef);
 }
 
@@ -641,7 +641,7 @@ PerlIO_default_layers(pTHX)
 #endif
    PerlIO_define_layer(aTHX_ &PerlIO_utf8);
    PerlIO_define_layer(aTHX_ &PerlIO_byte);
-   av_push(PerlIO_layer_av,SvREFCNT_inc(PerlIO_find_layer(aTHX_ PerlIO_unix.name,0)));
+   av_push(PerlIO_layer_av,SvREFCNT_inc(PerlIO_find_layer(aTHX_ PerlIO_unix.name,0,0)));
    av_push(PerlIO_layer_av,&PL_sv_undef);
    if (s)
     {
@@ -893,6 +893,28 @@ PerlIO_context_layers(pTHX_ const char *mode)
  return type;
 }
 
+static SV *
+PerlIO_layer_from_ref(pTHX_ SV *sv)
+{
+ /* For any scalar type load the handler which is bundled with perl */
+ if (SvTYPE(sv) < SVt_PVAV)
+  return PerlIO_find_layer(aTHX_ "Scalar",6, 1);
+
+ /* For other types allow if layer is known but don't try and load it */
+ switch (SvTYPE(sv))
+  {
+   case SVt_PVAV:
+    return PerlIO_find_layer(aTHX_ "Array",5, 0);
+   case SVt_PVHV:
+    return PerlIO_find_layer(aTHX_ "Hash",4, 0);
+   case SVt_PVCV:
+    return PerlIO_find_layer(aTHX_ "Code",4, 0);
+   case SVt_PVGV:
+    return PerlIO_find_layer(aTHX_ "Glob",4, 0);
+  }
+ return Nullsv;
+}
+
 AV *
 PerlIO_resolve_layers(pTHX_ const char *layers,const char *mode,int narg, SV **args)
 {
@@ -902,23 +924,22 @@ PerlIO_resolve_layers(pTHX_ const char *layers,const char *mode,int narg, SV **a
   PerlIO_stdstreams(aTHX);
  if (narg)
   {
-   if (SvROK(*args) && !sv_isobject(*args))
+   SV *arg = *args;
+   /* If it is a reference but not an object see if we have a handler for it */
+   if (SvROK(arg) && !sv_isobject(arg))
     {
-     if (SvTYPE(SvRV(*args)) < SVt_PVAV)
+     SV *handler = PerlIO_layer_from_ref(aTHX_ SvRV(arg));
+     if (handler)
       {
-       SV *handler = PerlIO_find_layer(aTHX_ "Scalar",6);
-       if (handler)
-        {
-         def    = newAV();
-         av_push(def,SvREFCNT_inc(handler));
-         av_push(def,&PL_sv_undef);
-         incdef = 0;
-        }
+       def = newAV();
+       av_push(def,SvREFCNT_inc(handler));
+       av_push(def,&PL_sv_undef);
+       incdef = 0;
       }
-     else
-      {
-       Perl_croak(aTHX_ "Unsupported reference arg to open()");
-      }
+     /* Don't fail if handler cannot be found
+      * :Via(...) etc. may do something sensible
+      * else we will just stringfy and open resulting string.
+      */
     }
   }
  if (!layers)
