@@ -283,9 +283,10 @@ eval <<'EOE' or $_ = $@;
   1;
 EOE
 
-print "# '$_'.\nnot "
-  unless /Can\'t return an uninitialized value from lvalue subroutine/;
-print "ok 34\n";
+# Fixed by change @10777
+#print "# '$_'.\nnot "
+#  unless /Can\'t return an uninitialized value from lvalue subroutine/;
+print "ok 34 # Skip: removed test\n";
 
 $x = '1234567';
 
