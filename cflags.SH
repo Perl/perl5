@@ -21,6 +21,7 @@ echo "Extracting cflags (with variable substitutions)"
 : Move anything that needs config subs from !NO!SUBS! section to !GROK!THIS!.
 : Protect any dollar signs and backticks that you do not want interpreted
 : by putting a backslash in front.  You may delete these comments.
+rm -f cflags
 $spitshell >cflags <<!GROK!THIS!
 $startsh
 !GROK!THIS!
