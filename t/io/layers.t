@@ -44,15 +44,15 @@ SKIP: {
 	# An interesting dance follows where we try to make the following
 	# IO layer stack setups to compare equal:
 	#
-	# PERLIO     UNIX-like       DOS-like
+	# PERLIO     UNIX-like                   DOS-like
 	#
-	# none or "" stdio [1]       unix crlf
-	# stdio      stdio [1]       stdio
-	# perlio     unix perlio     unix perlio
-	# mmap       unix mmap       unix mmap
+	# unset / "" unix perlio / stdio [1]     unix crlf
+	# stdio      unix perlio / stdio [1]     stdio
+	# perlio     unix perlio                 unix perlio
+	# mmap       unix mmap                   unix mmap
 	#
-	# [1] If Configure found how to do "fast stdio",
-	# otherwise it will be "unix perlio".
+	# [1] "stdio" if Configure found out how to do "fast stdio" (depends
+	# on the stdio implementation) and in Perl 5.8, otherwise "unix perlio"
 	#
 	if ($NONSTDIO) {
 	    # Get rid of "unix".
