@@ -2184,7 +2184,8 @@ PERLVAR(srand_called,	bool)
 PERLVAR(uudmap[256],	char)
 PERLVAR(bitcount,		char*)
 PERLVAR(filter_debug,	int)
-
+PERLVAR(super_bufptr,	char*)	/* PL_bufptr that was */
+PERLVAR(super_bufend,	char*)	/* PL_bufend that was */
 
 /*
  * The following is a buffer where new variables must
