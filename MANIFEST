@@ -2658,6 +2658,7 @@ t/run/runenv.t			Test if perl honors its environment variables.
 t/run/switcha.t			Test the -a switch
 t/run/switches.t		Tests for the other switches
 t/run/switchF.t			Test the -F switch
+t/run/switchI.t			Test the -I switch
 t/run/switchn.t			Test the -n switch
 t/run/switchp.t			Test the -p switch
 t/run/switchPx.aux		Data for switchPx.t

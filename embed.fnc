@@ -1012,7 +1012,7 @@ s      |void   |Slab_Free      |void *op
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 s	|void	|find_beginning
 s	|void	|forbid_setid	|char *
-s	|void	|incpush	|char *|int|int
+s	|void	|incpush	|char *|int|int|int
 s	|void	|init_interp
 s	|void	|init_ids
 s	|void	|init_lexer
