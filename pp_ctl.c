@@ -2694,11 +2694,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
 #else
     SAVEVPTR(PL_op);
 #endif
-#ifdef EBCDIC
-    PL_hints = HINT_BYTE;
-#else
     PL_hints = 0;
-#endif
 
     PL_op = &dummy;
     PL_op->op_type = OP_ENTEREVAL;
@@ -3244,11 +3240,7 @@ trylocal: {
 
     PL_rsfp = tryrsfp;
     SAVEHINTS();
-#ifdef EBCDIC
-    PL_hints = HINT_BYTE;
-#else
     PL_hints = 0;
-#endif
     SAVESPTR(PL_compiling.cop_warnings);
     if (PL_dowarn & G_WARN_ALL_ON)
         PL_compiling.cop_warnings = pWARN_ALL ;

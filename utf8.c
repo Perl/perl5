@@ -910,11 +910,7 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
     PUTBACK;
     ENTER;
     SAVEI32(PL_hints);
-#ifdef EBCDIC
-    PL_hints = HINT_BYTE;
-#else
     PL_hints = 0;
-#endif
     save_re_context();
     if (PL_curcop == &PL_compiling)	/* XXX ought to be handled by lex_start */
 	strncpy(tmpbuf, PL_tokenbuf, sizeof tmpbuf);

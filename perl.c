@@ -723,11 +723,7 @@ perl_destruct(pTHXx)
     Safefree(PL_psig_ptr);
     Safefree(PL_psig_name);
     nuke_stacks();
-#ifdef EBCDIC
-    PL_hints = HINT_BYTE;	/* Reset hints. Should hints be per-interpreter ? */
-#else
     PL_hints = 0;		/* Reset hints. Should hints be per-interpreter ? */
-#endif
     
     DEBUG_P(debprofdump());
 #ifdef USE_THREADS
@@ -2510,20 +2506,12 @@ S_init_main_stash(pTHX)
     HvNAME(PL_defstash) = savepv("main");
     PL_incgv = gv_HVadd(gv_AVadd(gv_fetchpv("INC",TRUE, SVt_PVAV)));
     GvMULTI_on(PL_incgv);
-#ifdef EBCDIC
     PL_hintgv = gv_fetchpv("\010",TRUE, SVt_PV); /* ^H */
-#else
-    PL_hintgv = gv_fetchpv("\010",TRUE, SVt_PV); /* ^H */
-#endif
     GvMULTI_on(PL_hintgv);
     PL_defgv = gv_fetchpv("_",TRUE, SVt_PVAV);
     PL_errgv = gv_HVadd(gv_fetchpv("@", TRUE, SVt_PV));
     GvMULTI_on(PL_errgv);
-#ifdef EBCDIC
     PL_replgv = gv_fetchpv("\022", TRUE, SVt_PV); /* ^R */
-#else
-    PL_replgv = gv_fetchpv("\022", TRUE, SVt_PV); /* ^R */
-#endif
     GvMULTI_on(PL_replgv);
     (void)Perl_form(aTHX_ "%240s","");	/* Preallocate temp - for immediate signals. */
     sv_grow(ERRSV, 240);	/* Preallocate - for immediate signals. */
