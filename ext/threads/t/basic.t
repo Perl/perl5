@@ -83,15 +83,23 @@ unless($^O eq 'MSWin32') {
 }
 
 
-my @threads;
-my $i;
 unless($^O eq 'MSWin32') {
-for(1..25) {	
-	push @threads, threads->create(sub { for(1..100000) { my $i  } threads->create(sub { sleep 2})->join() });
-}
-foreach my $thread (@threads) {
+    my @threads;
+    my $i;
+    for(1..25) {
+	push @threads,
+            threads->create(
+			    sub {
+				for(1..100000) { my $i  }
+				threads->create(
+						sub {sleep 2})
+				    ->join()
+				}
+			   );
+    }
+    foreach my $thread (@threads) {
 	$thread->join();
-}
+    }
 }
 ok(8,1,"");
 threads->create(sub { 
