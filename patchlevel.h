@@ -1,6 +1,6 @@
 #ifndef __PATCHLEVEL_H_INCLUDED__
 #define PATCHLEVEL 5
-#define SUBVERSION 0
+#define SUBVERSION 50
 
 /*
 	local_patches -- list of locally applied less-than-subversion patches.

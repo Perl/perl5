@@ -73,6 +73,209 @@ indicator:
     	    !>	    merged changes (from elsewhere)
 
 
+----------------
+Version 5.005_50        Development release working toward 5.006
+----------------
+
+____________________________________________________________________________
+[  1660] By: gsar                                  on 1998/07/26  02:43:57
+        Log: integrate utfperl
+     Branch: perl
+          +> (branch 162 files)
+          !> (integrate 29 files)
+____________________________________________________________________________
+[  1659] By: gsar                                  on 1998/07/26  02:38:22
+        Log: integrate maint-5.005 changes
+     Branch: perl
+	  !> Changes README.vms djgpp/fixpmain emacs/ptags hints/beos.sh
+	  !> lib/Math/BigInt.pm pod/perldelta.pod pod/perlmodinstall.pod
+	  !> pod/perltoc.pod pp_sys.c t/lib/bigintpm.t
+          !> vms/descrip_mms.template vms/subconfigure.com
+____________________________________________________________________________
+[  1658] By: gsar                                  on 1998/07/26  02:23:46
+        Log: VMS patches from Dan Sugalski <sugalskd@osshe.edu>
+             Date: Fri, 24 Jul 1998 11:38:25 -0700
+             Message-Id: <3.0.5.32.19980724113825.00a067b0@ous.edu>
+             Subject: [PATCH 5.005] version number problem with VMS (Corrected)
+             --
+             Date: Fri, 24 Jul 1998 12:30:36 -0700
+             Message-Id: <3.0.5.32.19980724123036.009f0390@ous.edu>
+             Subject: [PATCH 5.005]Tweaks to README.vms
+             --
+             Date: Sat, 25 Jul 1998 17:56:55 -0700 (PDT)
+             Message-ID: <Pine.GSO.3.96.980725175626.15740D-100000@netserve.ous.edu>
+             Subject: [PATCH 5.005] Final build cleanup patch
+     Branch: maint-5.005/perl
+           ! README.vms vms/descrip_mms.template vms/subconfigure.com
+____________________________________________________________________________
+[  1657] By: gsar                                  on 1998/07/26  02:19:50
+        Log: another platform where pp_sselect() needs a whole fd_set buffer
+             From: Lupe Christoph <lupe@alanya.m.isar.de>
+             Date: Sat, 25 Jul 1998 19:49:33 +0200 (MET DST)
+             Message-Id: <199807251749.TAA22347@alanya.m.isar.de>
+             Subject: Patch for Not OK: perl 5.005 on i86pc-solaris-thread 2.6
+     Branch: maint-5.005/perl
+           ! pp_sys.c
+____________________________________________________________________________
+[  1656] By: gsar                                  on 1998/07/26  02:12:46
+        Log: fix problem building modules on dos-djgpp
+             From: Laszlo Molnar <molnarl@cdata.tvnet.hu>
+             Date: Sat, 25 Jul 1998 00:53:39 +0200
+             Message-ID: <19980725005339.C222@cdata.tvnet.hu>
+             Subject: [PATCH 5.005] dos-djgpp and modules problem
+     Branch: maint-5.005/perl
+           ! djgpp/fixpmain
+____________________________________________________________________________
+[  1655] By: gsar                                  on 1998/07/26  02:11:09
+        Log: From: Tom Spindler <dogcow@home.merit.edu>
+             Date: Wed, 22 Jul 1998 16:11:07 -0400
+             Message-ID: <19980722161107.A16813@home.merit.edu>
+             Subject: [PATCH 5.005] BeOS tweak
+     Branch: maint-5.005/perl
+           ! hints/beos.sh
+____________________________________________________________________________
+[  1654] By: gsar                                  on 1998/07/26  02:09:29
+        Log: various pod tweaks
+     Branch: maint-5.005/perl
+	   ! Changes pod/perldelta.pod pod/perlmodinstall.pod
+           ! pod/perltoc.pod
+____________________________________________________________________________
+[  1653] By: gsar                                  on 1998/07/26  02:05:46
+        Log: fix emacs/ptags for PL_* changes
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Fri, 24 Jul 1998 03:12:35 -0400 (EDT)
+             Message-Id: <199807240712.DAA04204@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.004_76] Yet better ptags
+     Branch: maint-5.005/perl
+           ! emacs/ptags
+____________________________________________________________________________
+[  1652] By: gsar                                  on 1998/07/26  02:03:01
+        Log: fix behavior of <=> on bigints
+             From: "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+             Message-Id: <E0yzlfF-0004kz-00@taurus.cus.cam.ac.uk>
+             Date: Fri, 24 Jul 1998 18:29:53 +0100
+             Subject: [PATCH] Re: Math::BigInt <=> op is not correct.
+     Branch: maint-5.005/perl
+           ! lib/Math/BigInt.pm t/lib/bigintpm.t
+____________________________________________________________________________
+[  1651] By: larry                                 on 1998/07/24  05:44:33
+        Log: Here are the long-expected Unicode/UTF-8 modifications.
+     Branch: utfperl
+	   + lib/unicode/ArabLink.pl lib/unicode/ArabLnkGrp.pl
+	   + lib/unicode/Bidirectional.pl lib/unicode/Block.pl
+	   + lib/unicode/Category.pl lib/unicode/CombiningClass.pl
+	   + lib/unicode/Decomposition.pl
+	   + lib/unicode/In/AlphabeticPresentationForms.pl
+	   + lib/unicode/In/Arabic.pl
+	   + lib/unicode/In/ArabicPresentationForms-A.pl
+	   + lib/unicode/In/ArabicPresentationForms-B.pl
+	   + lib/unicode/In/Armenian.pl lib/unicode/In/Arrows.pl
+	   + lib/unicode/In/BasicLatin.pl lib/unicode/In/Bengali.pl
+	   + lib/unicode/In/BlockElements.pl lib/unicode/In/Bopomofo.pl
+	   + lib/unicode/In/BoxDrawing.pl
+	   + lib/unicode/In/CJKCompatibility.pl
+	   + lib/unicode/In/CJKCompatibilityForms.pl
+	   + lib/unicode/In/CJKCompatibilityIdeographs.pl
+	   + lib/unicode/In/CJKSymbolsandPunctuation.pl
+	   + lib/unicode/In/CJKUnifiedIdeographs.pl
+	   + lib/unicode/In/CombiningDiacriticalMarks.pl
+	   + lib/unicode/In/CombiningHalfMarks.pl
+	   + lib/unicode/In/CombiningMarksforSymbols.pl
+	   + lib/unicode/In/ControlPictures.pl
+	   + lib/unicode/In/CurrencySymbols.pl lib/unicode/In/Cyrillic.pl
+	   + lib/unicode/In/Devanagari.pl lib/unicode/In/Dingbats.pl
+	   + lib/unicode/In/EnclosedAlphanumerics.pl
+	   + lib/unicode/In/EnclosedCJKLettersandMonths.pl
+	   + lib/unicode/In/GeneralPunctuation.pl
+	   + lib/unicode/In/GeometricShapes.pl lib/unicode/In/Georgian.pl
+	   + lib/unicode/In/Greek.pl lib/unicode/In/GreekExtended.pl
+	   + lib/unicode/In/Gujarati.pl lib/unicode/In/Gurmukhi.pl
+	   + lib/unicode/In/HalfwidthandFullwidthForms.pl
+	   + lib/unicode/In/HangulCompatibilityJamo.pl
+	   + lib/unicode/In/HangulJamo.pl lib/unicode/In/HangulSyllables.pl
+	   + lib/unicode/In/Hebrew.pl
+	   + lib/unicode/In/HighPrivateUseSurrogates.pl
+	   + lib/unicode/In/HighSurrogates.pl lib/unicode/In/Hiragana.pl
+	   + lib/unicode/In/IPAExtensions.pl lib/unicode/In/Kanbun.pl
+	   + lib/unicode/In/Kannada.pl lib/unicode/In/Katakana.pl
+	   + lib/unicode/In/Lao.pl lib/unicode/In/Latin-1Supplement.pl
+	   + lib/unicode/In/LatinExtended-A.pl
+	   + lib/unicode/In/LatinExtended-B.pl
+	   + lib/unicode/In/LatinExtendedAdditional.pl
+	   + lib/unicode/In/LetterlikeSymbols.pl
+	   + lib/unicode/In/LowSurrogates.pl lib/unicode/In/Malayalam.pl
+	   + lib/unicode/In/MathematicalOperators.pl
+	   + lib/unicode/In/MiscellaneousSymbols.pl
+	   + lib/unicode/In/MiscellaneousTechnical.pl
+	   + lib/unicode/In/NumberForms.pl
+	   + lib/unicode/In/OpticalCharacterRecognition.pl
+	   + lib/unicode/In/Oriya.pl lib/unicode/In/PrivateUse.pl
+	   + lib/unicode/In/SmallFormVariants.pl
+	   + lib/unicode/In/SpacingModifierLetters.pl
+	   + lib/unicode/In/Specials.pl
+	   + lib/unicode/In/SuperscriptsandSubscripts.pl
+	   + lib/unicode/In/Tamil.pl lib/unicode/In/Telugu.pl
+	   + lib/unicode/In/Thai.pl lib/unicode/In/Tibetan.pl
+	   + lib/unicode/Is/Alnum.pl lib/unicode/Is/Alpha.pl
+	   + lib/unicode/Is/BidiAN.pl lib/unicode/Is/BidiB.pl
+	   + lib/unicode/Is/BidiCS.pl lib/unicode/Is/BidiEN.pl
+	   + lib/unicode/Is/BidiES.pl lib/unicode/Is/BidiET.pl
+	   + lib/unicode/Is/BidiL.pl lib/unicode/Is/BidiON.pl
+	   + lib/unicode/Is/BidiR.pl lib/unicode/Is/BidiS.pl
+	   + lib/unicode/Is/BidiWS.pl lib/unicode/Is/C.pl
+	   + lib/unicode/Is/Cc.pl lib/unicode/Is/Cn.pl lib/unicode/Is/Co.pl
+	   + lib/unicode/Is/DCcircle.pl lib/unicode/Is/DCcompat.pl
+	   + lib/unicode/Is/DCfinal.pl lib/unicode/Is/DCfont.pl
+	   + lib/unicode/Is/DCinital.pl lib/unicode/Is/DCinitial.pl
+	   + lib/unicode/Is/DCisolated.pl lib/unicode/Is/DCnarrow.pl
+	   + lib/unicode/Is/DCnoBreak.pl lib/unicode/Is/DCsmall.pl
+	   + lib/unicode/Is/DCsquare.pl lib/unicode/Is/DCsub.pl
+	   + lib/unicode/Is/DCsuper.pl lib/unicode/Is/DCvertical.pl
+	   + lib/unicode/Is/DCwide.pl lib/unicode/Is/DecoCanon.pl
+	   + lib/unicode/Is/DecoCompat.pl lib/unicode/Is/Digit.pl
+	   + lib/unicode/Is/L.pl lib/unicode/Is/Ll.pl lib/unicode/Is/Lm.pl
+	   + lib/unicode/Is/Lo.pl lib/unicode/Is/Lower.pl
+	   + lib/unicode/Is/Lt.pl lib/unicode/Is/Lu.pl lib/unicode/Is/M.pl
+	   + lib/unicode/Is/Mc.pl lib/unicode/Is/Mirrored.pl
+	   + lib/unicode/Is/Mn.pl lib/unicode/Is/N.pl lib/unicode/Is/Nd.pl
+	   + lib/unicode/Is/No.pl lib/unicode/Is/P.pl lib/unicode/Is/Pd.pl
+	   + lib/unicode/Is/Pe.pl lib/unicode/Is/Po.pl
+	   + lib/unicode/Is/Print.pl lib/unicode/Is/Ps.pl
+	   + lib/unicode/Is/S.pl lib/unicode/Is/Sc.pl lib/unicode/Is/Sm.pl
+	   + lib/unicode/Is/So.pl lib/unicode/Is/Space.pl
+	   + lib/unicode/Is/Upper.pl lib/unicode/Is/Z.pl
+	   + lib/unicode/Is/Zl.pl lib/unicode/Is/Zp.pl lib/unicode/Is/Zs.pl
+	   + lib/unicode/JamoShort.pl lib/unicode/Makefile
+	   + lib/unicode/Name.pl lib/unicode/Number.pl
+	   + lib/unicode/To/Digit.pl lib/unicode/To/Lower.pl
+	   + lib/unicode/To/Title.pl lib/unicode/To/Upper.pl
+	   + lib/unicode/UnicodeData-Latest.txt lib/unicode/arabshp.txt
+	   + lib/unicode/blocks.txt lib/unicode/index2.txt
+	   + lib/unicode/jamo2.txt lib/unicode/mktables.PL
+	   + lib/unicode/names2.txt lib/unicode/props2.txt
+	   + lib/unicode/readme.txt lib/utf8.pm lib/utf8_heavy.pl t/UTEST
+           + utf8.c utf8.h
+	   ! Makefile.SH doop.c embed.h embedvar.h global.sym handy.h mg.c
+	   ! op.c op.h perl.h perlvars.h pod/perlfunc.pod pod/perlop.pod
+	   ! pod/perlre.pod pp.c pp_ctl.c pp_hot.c proto.h regcomp.c
+	   ! regcomp.h regcomp.sym regexec.c regexp.h regnodes.h sv.c
+           ! t/op/vec.t toke.c util.c vms/vmsish.h
+____________________________________________________________________________
+[  1650] By: gsar                                  on 1998/07/24  04:06:48
+        Log: create utfperl branch
+     Branch: utfperl
+          +> (branch 1079 files)
+____________________________________________________________________________
+[  1649] By: gsar                                  on 1998/07/24  03:56:56
+        Log: create maint-5.005 branch
+     Branch: maint-5.005/perl
+          +> (branch 1079 files)
+____________________________________________________________________________
+[  1648] By: gsar                                  on 1998/07/24  03:36:35
+        Log: un-checked-in 5.005 Changes  (this is 5.005 *exactly*)
+     Branch: perl
+           ! Changes
+
 -------------
 Version 5.005           Production release
 -------------
