@@ -336,7 +336,7 @@ ext/Encode/JP/JP.pm		Encode extension
 ext/Encode/JP/Makefile.PL	Encode extension
 ext/Encode/KR/KR.pm		Encode extension
 ext/Encode/KR/Makefile.PL		Encode extension
-ext/Encode/lib/Encode/CN/HZ.pm		Encode table
+ext/Encode/lib/Encode/CN/HZ.pm		Encode extension
 ext/Encode/lib/Encode/Encoding.pm	Encode extension
 ext/Encode/lib/Encode/Internal.pm	Encode extension
 ext/Encode/lib/Encode/iso10646_1.pm	Encode extension
