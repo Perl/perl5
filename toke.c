@@ -1,4 +1,4 @@
-/* $RCSfile: toke.c,v $$Revision: 4.0.1.4 $$Date: 91/11/05 19:02:48 $
+/* $RCSfile: toke.c,v $$Revision: 4.0.1.5 $$Date: 91/11/11 16:45:51 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	toke.c,v $
+ * Revision 4.0.1.5  91/11/11  16:45:51  lwall
+ * patch19: default arg for shift was wrong after first subroutine definition
+ * 
  * Revision 4.0.1.4  91/11/05  19:02:48  lwall
  * patch11: \x and \c were subject to double interpretation in regexps
  * patch11: prepared for ctype implementations that don't define isascii()
@@ -1198,29 +1201,25 @@ yylex()
 		FUN2x(O_SUBSTR);
 	    if (strEQ(d,"sub")) {
 		yylval.ival = savestack->ary_fill; /* restore stuff on reduce */
-		if (perldb) {
-		    savelong(&subline);
-		    saveitem(subname);
-		}
+		savelong(&subline);
+		saveitem(subname);
 
 		subline = curcmd->c_line;
 		d = bufend;
 		while (s < d && isSPACE(*s))
 		    s++;
 		if (isALPHA(*s) || *s == '_' || *s == '\'') {
-		    if (perldb) {
-			str_sset(subname,curstname);
-			str_ncat(subname,"'",1);
-			for (d = s+1; isALNUM(*d) || *d == '\''; d++)
-			    /*SUPPRESS 530*/
-			    ;
-			if (d[-1] == '\'')
-			    d--;
-			str_ncat(subname,s,d-s);
-		    }
+		    str_sset(subname,curstname);
+		    str_ncat(subname,"'",1);
+		    for (d = s+1; isALNUM(*d) || *d == '\''; d++)
+			/*SUPPRESS 530*/
+			;
+		    if (d[-1] == '\'')
+			d--;
+		    str_ncat(subname,s,d-s);
 		    *(--s) = '\\';	/* force next ident to WORD */
 		}
-		else if (perldb)
+		else
 		    str_set(subname,"?");
 		OPERATOR(SUB);
 	    }

@@ -1,4 +1,4 @@
-/* $RCSfile: dolist.c,v $$Revision: 4.0.1.3 $$Date: 91/11/05 17:07:02 $
+/* $RCSfile: dolist.c,v $$Revision: 4.0.1.4 $$Date: 91/11/11 16:33:19 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	dolist.c,v $
+ * Revision 4.0.1.4  91/11/11  16:33:19  lwall
+ * patch19: added little-endian pack/unpack options
+ * patch19: sort $subname was busted by changes in 4.018
+ * 
  * Revision 4.0.1.3  91/11/05  17:07:02  lwall
  * patch11: prepared for ctype implementations that don't define isascii()
  * patch11: /$foo/o optimizer could access deallocated data
@@ -786,6 +790,7 @@ int *arglast;
 		}
 	    }
 	    break;
+	case 'v':
 	case 'n':
 	case 'S':
 	    along = (strend - s) / sizeof(unsigned short);
@@ -799,6 +804,10 @@ int *arglast;
 		    if (datumtype == 'n')
 			aushort = ntohs(aushort);
 #endif
+#ifdef HAS_VTOHS
+		    if (datumtype == 'v')
+			aushort = vtohs(aushort);
+#endif
 		    culong += aushort;
 		}
 	    }
@@ -810,6 +819,10 @@ int *arglast;
 #ifdef HAS_NTOHS
 		    if (datumtype == 'n')
 			aushort = ntohs(aushort);
+#endif
+#ifdef HAS_VTOHS
+		    if (datumtype == 'v')
+			aushort = vtohs(aushort);
 #endif
 		    str_numset(str,(double)aushort);
 		    (void)astore(stack, ++sp, str_2mortal(str));
@@ -888,6 +901,7 @@ int *arglast;
 		}
 	    }
 	    break;
+	case 'V':
 	case 'N':
 	case 'L':
 	    along = (strend - s) / sizeof(unsigned long);
@@ -900,6 +914,10 @@ int *arglast;
 #ifdef HAS_NTOHL
 		    if (datumtype == 'N')
 			aulong = ntohl(aulong);
+#endif
+#ifdef HAS_VTOHL
+		    if (datumtype == 'V')
+			aulong = vtohl(aulong);
 #endif
 		    if (checksum > 32)
 			cdouble += (double)aulong;
@@ -915,6 +933,10 @@ int *arglast;
 #ifdef HAS_NTOHL
 		    if (datumtype == 'N')
 			aulong = ntohl(aulong);
+#endif
+#ifdef HAS_VTOHL
+		    if (datumtype == 'V')
+			aulong = vtohl(aulong);
 #endif
 		    str_numset(str,(double)aulong);
 		    (void)astore(stack, ++sp, str_2mortal(str));
@@ -1480,6 +1502,7 @@ int *arglast;
     STR *oldsecond;
     ARRAY *oldstack;
     HASH *stash;
+    STR *sortsubvar;
     static ARRAY *sortstack = Null(ARRAY*);
 
     if (gimme != G_ARRAY) {
@@ -1489,6 +1512,7 @@ int *arglast;
 	return sp;
     }
     up = &st[sp];
+    sortsubvar = *up;
     st += sp;		/* temporarily make st point to args */
     for (i = 1; i <= max; i++) {
 	/*SUPPRESS 560*/
@@ -1514,7 +1538,7 @@ int *arglast;
 	    if ((arg[1].arg_type & A_MASK) == A_WORD)
 		stab = arg[1].arg_ptr.arg_stab;
 	    else
-		stab = stabent(str_get(st[sp+1]),TRUE);
+		stab = stabent(str_get(sortsubvar),TRUE);
 
 	    if (stab) {
 		if (!stab_sub(stab) || !(sortcmd = stab_sub(stab)->cmd))

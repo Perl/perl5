@@ -1,4 +1,4 @@
-/* $RCSfile: util.c,v $$Revision: 4.0.1.3 $$Date: 91/11/05 19:18:26 $
+/* $RCSfile: util.c,v $$Revision: 4.0.1.4 $$Date: 91/11/11 16:48:54 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	util.c,v $
+ * Revision 4.0.1.4  91/11/11  16:48:54  lwall
+ * patch19: study was busted by 4.018
+ * patch19: added little-endian pack/unpack options
+ * 
  * Revision 4.0.1.3  91/11/05  19:18:26  lwall
  * patch11: safe malloc code now integrated into Perl's malloc when possible
  * patch11: index("little", "longer string") could visit faraway places
@@ -685,12 +689,8 @@ STR *littlestr;
 #ifdef POINTERRIGOR
     if (littlestr->str_pok & SP_CASEFOLD) {	/* case insignificant? */
 	do {
-#ifndef lint
-	    while (big[pos-previous] != first && big[pos-previous] != fold[first]
-	      && (pos += screamnext[pos]) )
-		/*SUPPRESS 530*/
-		;
-#endif
+	    if (big[pos-previous] != first && big[pos-previous] != fold[first])
+		continue;
 	    for (x=big+pos+1-previous,s=little; s < littleend; /**/ ) {
 		if (x >= bigend)
 		    return Nullch;
@@ -715,11 +715,8 @@ STR *littlestr;
     }
     else {
 	do {
-#ifndef lint
-	    while (big[pos-previous] != first && (pos += screamnext[pos]))
-		/*SUPPRESS 530*/
-		;
-#endif
+	    if (big[pos-previous] != first)
+		continue;
 	    for (x=big+pos+1-previous,s=little; s < littleend; /**/ ) {
 		if (x >= bigend)
 		    return Nullch;
@@ -746,12 +743,8 @@ STR *littlestr;
     big -= previous;
     if (littlestr->str_pok & SP_CASEFOLD) {	/* case insignificant? */
 	do {
-#ifndef lint
-	    while (big[pos] != first && big[pos] != fold[first]
-	      && (pos += screamnext[pos]) )
-		/*SUPPRESS 530*/
-		;
-#endif
+	    if (big[pos] != first && big[pos] != fold[first])
+		continue;
 	    for (x=big+pos+1,s=little; s < littleend; /**/ ) {
 		if (x >= bigend)
 		    return Nullch;
@@ -776,11 +769,8 @@ STR *littlestr;
     }
     else {
 	do {
-#ifndef lint
-	    while (big[pos] != first && (pos += screamnext[pos]))
-		/*SUPPRESS 530*/
-		;
-#endif
+	    if (big[pos] != first)
+		continue;
 	    for (x=big+pos+1,s=little; s < littleend; /**/ ) {
 		if (x >= bigend)
 		    return Nullch;
@@ -1236,6 +1226,14 @@ char *pat, *args;
 #endif /* HAS_VPRINTF */
 #endif /* I_VARARGS */
 
+/*
+ * I think my_swap(), htonl() and ntohl() have never been used.
+ * perl.h contains last-chance references to my_swap(), my_htonl()
+ * and my_ntohl().  I presume these are the intended functions;
+ * but htonl() and ntohl() have the wrong names.  There are no
+ * functions my_htonl() and my_ntohl() defined anywhere.
+ * -DWS
+ */
 #ifdef MYSWAP
 #if BYTEORDER != 0x4321
 short
@@ -1315,7 +1313,64 @@ register long l;
 }
 
 #endif /* BYTEORDER != 0x4321 */
-#endif /* HAS_HTONS */
+#endif /* MYSWAP */
+
+/*
+ * Little-endian byte order functions - 'v' for 'VAX', or 'reVerse'.
+ * If these functions are defined,
+ * the BYTEORDER is neither 0x1234 nor 0x4321.
+ * However, this is not assumed.
+ * -DWS
+ */
+
+#define HTOV(name,type)						\
+	type							\
+	name (n)						\
+	register type n;					\
+	{							\
+	    union {						\
+		type value;					\
+		char c[sizeof(type)];				\
+	    } u;						\
+	    register int i;					\
+	    register int s;					\
+	    for (i = 0, s = 0; i < sizeof(u.c); i++, s += 8) {	\
+		u.c[i] = (n >> s) & 0xFF;			\
+	    }							\
+	    return u.value;					\
+	}
+
+#define VTOH(name,type)						\
+	type							\
+	name (n)						\
+	register type n;					\
+	{							\
+	    union {						\
+		type value;					\
+		char c[sizeof(type)];				\
+	    } u;						\
+	    register int i;					\
+	    register int s;					\
+	    u.value = n;					\
+	    n = 0;						\
+	    for (i = 0, s = 0; i < sizeof(u.c); i++, s += 8) {	\
+		n += (u.c[i] & 0xFF) << s;			\
+	    }							\
+	    return n;						\
+	}
+
+#if defined(HAS_HTOVS) && !defined(htovs)
+HTOV(htovs,short)
+#endif
+#if defined(HAS_HTOVL) && !defined(htovl)
+HTOV(htovl,long)
+#endif
+#if defined(HAS_VTOHS) && !defined(vtohs)
+VTOH(vtohs,short)
+#endif
+#if defined(HAS_VTOHL) && !defined(vtohl)
+VTOH(vtohl,long)
+#endif
 
 #ifndef MSDOS
 FILE *

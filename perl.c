@@ -1,4 +1,4 @@
-char rcsid[] = "$RCSfile: perl.c,v $$Revision: 4.0.1.5 $$Date: 91/11/05 18:03:32 $\nPatch level: ###\n";
+char rcsid[] = "$RCSfile: perl.c,v $$Revision: 4.0.1.6 $$Date: 91/11/11 16:38:45 $\nPatch level: ###\n";
 /*
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,10 @@ char rcsid[] = "$RCSfile: perl.c,v $$Revision: 4.0.1.5 $$Date: 91/11/05 18:03:32
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	perl.c,v $
+ * Revision 4.0.1.6  91/11/11  16:38:45  lwall
+ * patch19: default arg for shift was wrong after first subroutine definition
+ * patch19: op/regexp.t failed from missing arg to bcmp()
+ * 
  * Revision 4.0.1.5  91/11/05  18:03:32  lwall
  * patch11: random cleanup
  * patch11: $0 was being truncated at times
@@ -634,6 +638,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 
     defstab = stabent("_",TRUE);
 
+    subname = str_make("main",4);
     if (perldb) {
 	debstash = hnew(0);
 	stab_xhash(stabent("_DB",TRUE)) = debstash;
@@ -641,7 +646,6 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	dbargs = stab_xarray(aadd((tmpstab = stabent("args",TRUE))));
 	tmpstab->str_pok |= SP_MULTI;
 	dbargs->ary_flags = 0;
-	subname = str_make("main",4);
 	DBstab = stabent("DB",TRUE);
 	DBstab->str_pok |= SP_MULTI;
 	DBline = stabent("dbline",TRUE);
@@ -1030,7 +1034,7 @@ int *arglast;
 	    retval |= error_count;
 	}
 	else if (last_root && last_elen == bufend - bufptr
-	  && *bufptr == *last_eval && !bcmp(bufptr,last_eval)){
+	  && *bufptr == *last_eval && !bcmp(bufptr,last_eval,last_elen)){
 	    retval = 0;
 	    eval_root = last_root;	/* no point in reparsing */
 	}

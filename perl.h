@@ -1,4 +1,4 @@
-/* $RCSfile: perl.h,v $$Revision: 4.0.1.4 $$Date: 91/11/05 18:06:10 $
+/* $RCSfile: perl.h,v $$Revision: 4.0.1.5 $$Date: 91/11/11 16:41:07 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	perl.h,v $
+ * Revision 4.0.1.5  91/11/11  16:41:07  lwall
+ * patch19: uts wrongly defines S_ISDIR() et al
+ * patch19: too many preprocessors can't expand a macro right in #if
+ * patch19: added little-endian pack/unpack options
+ * 
  * Revision 4.0.1.4  91/11/05  18:06:10  lwall
  * patch11: various portability fixes
  * patch11: added support for dbz
@@ -165,6 +170,20 @@ extern int memcmp();
 #endif
 
 #include <sys/stat.h>
+#ifdef uts
+#undef S_ISDIR
+#undef S_ISCHR
+#undef S_ISBLK
+#undef S_ISREG
+#undef S_ISFIFO
+#undef S_ISLNK
+#define S_ISDIR(P) (((P)&S_IFMT)==S_IFDIR)
+#define S_ISCHR(P) (((P)&S_IFMT)==S_IFCHR)
+#define S_ISBLK(P) (((P)&S_IFMT)==S_IFBLK)
+#define S_ISREG(P) (((P)&S_IFMT)==S_IFREG)
+#define S_ISFIFO(P) (((P)&S_IFMT)==S_IFIFO)
+#define S_ISLNK(P) (((P)&S_IFMT)==S_IFLNK)
+#endif
 
 #ifdef I_TIME
 #   include <time.h>
@@ -344,10 +363,6 @@ EXT int dbmlen;
 #   endif
 #endif
 
-#if S_ISBLK(060000) == 060000
-	XXX Your sys/stat.h appears to be buggy.  Please fix it.
-#endif
-
 #ifndef S_ISREG
 #   define S_ISREG(m) ((m & S_IFMT) == S_IFREG)
 #endif
@@ -426,7 +441,7 @@ EXT int dbmlen;
 #   define SLOPPYDIVIDE
 #endif
 
-#if defined(cray) || defined(convex) || BYTEORDER > 0xffff
+#if defined(cray) || defined(convex) || defined (uts) || BYTEORDER > 0xffff
 #   define QUAD
 #endif
 
@@ -434,7 +449,7 @@ EXT int dbmlen;
 #   ifdef cray
 #	define quad int
 #   else
-#	ifdef convex
+#	if defined(convex) || defined (uts)
 #	    define quad long long
 #	else
 #	    define quad long
@@ -583,6 +598,27 @@ EXT STR *Str;
 #undef HAS_NTOHS
 #undef HAS_NTOHL
 #endif
+#endif
+
+/*
+ * Little-endian byte order functions - 'v' for 'VAX', or 'reVerse'.
+ * -DWS
+ */
+#if BYTEORDER != 0x1234
+# define HAS_VTOHL
+# define HAS_VTOHS
+# define HAS_HTOVL
+# define HAS_HTOVS
+# if BYTEORDER == 0x4321
+#  define vtohl(x)	((((x)&0xFF)<<24)	\
+			+(((x)>>24)&0xFF)	\
+			+(((x)&0x0000FF00)<<8)	\
+			+(((x)&0x00FF0000)>>8)	)
+#  define vtohs(x)	((((x)&0xFF)<<8) + (((x)>>8)&0xFF))
+#  define htovl(x)	vtohl(x)
+#  define htovs(x)	vtohs(x)
+# endif
+	/* otherwise default to functions in util.c */
 #endif
 
 #ifdef CASTNEGFLOAT

@@ -8,7 +8,7 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $RCSfile: Configure,v $$Revision: 4.0.1.5 $$Date: 91/11/05 23:11:32 $
+# $RCSfile: Configure,v $$Revision: 4.0.1.6 $$Date: 91/11/11 16:26:51 $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
@@ -354,7 +354,7 @@ serve_unix_tcp=""
 d_ndir=ndir
 voidwant=1
 voidwant=7
-libswanted="c_s net_s net nsl_s nsl socket nm ndir ndbm dbm PW malloc sun m bsd BSD x posix ucb"
+libswanted="c_s net_s net socket nsl_s nsl nm ndir ndbm dbm PW malloc sun m bsd BSD x posix ucb"
 inclwanted='/usr/include /usr/netinclude /usr/include/sun /usr/include/bsd /usr/include/lan /usr/ucbinclude'
 
 : Now test for existence of everything in MANIFEST
@@ -596,7 +596,9 @@ bison
 cpp
 csh
 egrep
+line
 nroff
+perl
 test
 uname
 yacc
@@ -2292,7 +2294,7 @@ eval $inlibc
 : index or strcpy
 echo " "
 case "$d_index" in
-n) dflt=n;;
+undef) dflt=n;;
 *)  if $test -f /unix; then
 	dflt=n
     else
@@ -2375,6 +2377,66 @@ else
     val="$undef"
 fi
 set d_msg
+eval $setvar
+
+: determine which malloc to compile in
+echo " "
+case "$d_mymalloc" in
+'')
+    case "$usemymalloc" in
+    '')
+	if bsd || v7; then
+	    dflt='y'
+	else
+	    dflt='n'
+	fi
+	;;
+    n*) dflt=n;;
+    *)  dflt=y;;
+    esac
+    ;;
+define)  dflt="y"
+    ;;
+*)  dflt="n"
+    ;;
+esac
+rp="Do you wish to attempt to use the malloc that comes with $package? [$dflt]"
+$echo $n "$rp $c"
+. myread
+case "$ans" in
+'') ans=$dflt;;
+esac
+case "$ans" in
+y*) mallocsrc='malloc.c'; mallocobj='malloc.o'
+    libs=`echo $libs | sed 's/-lmalloc//'`
+    val="$define"
+    case "$mallocptrtype" in
+    '')
+	cat >usemymalloc.c <<'END'
+#ifdef __STDC__
+#include <stdlib.h>
+#else
+#include <malloc.h>
+#endif
+void *malloc();
+END
+	if $cc $ccflags -c usemymalloc.c >/dev/null 2>&1; then
+	    mallocptrtype=void
+	else
+	    mallocptrtype=char
+	fi
+	;;
+    esac
+    echo " "
+    echo "Your system wants malloc to return $mallocptrtype*, it would seem."
+    ;;
+*)  mallocsrc='';
+    mallocobj='';
+    mallocptrtype=void
+    val="$define"
+    ;;
+esac
+set d_mymalloc
 eval $setvar
 
 : see if ndbm is available
@@ -3052,66 +3114,6 @@ rp="What is the size of an integer (in bytes)? [$dflt]"
 $echo $n "$rp $c"
 . myread
 intsize="$ans"
-
-: determine which malloc to compile in
-echo " "
-case "$d_mymalloc" in
-'')
-    case "$usemymalloc" in
-    '')
-	if bsd || v7; then
-	    dflt='y'
-	else
-	    dflt='n'
-	fi
-	;;
-    n*) dflt=n;;
-    *)  dflt=y;;
-    esac
-    ;;
-define)  dflt="y"
-    ;;
-*)  dflt="n"
-    ;;
-esac
-rp="Do you wish to attempt to use the malloc that comes with $package? [$dflt]"
-$echo $n "$rp $c"
-. myread
-case "$ans" in
-'') ans=$dflt;;
-esac
-case "$ans" in
-y*) mallocsrc='malloc.c'; mallocobj='malloc.o'
-    libs=`echo $libs | sed 's/-lmalloc//'`
-    val="$define"
-    case "$mallocptrtype" in
-    '')
-	cat >usemymalloc.c <<'END'
-#ifdef __STDC__
-#include <stdlib.h>
-#else
-#include <malloc.h>
-#endif
-void *malloc();
-END
-	if $cc $ccflags -c usemymalloc.c >/dev/null 2>&1; then
-	    mallocptrtype=void
-	else
-	    mallocptrtype=char
-	fi
-	;;
-    esac
-    echo " "
-    echo "Your system wants malloc to return $mallocptrtype*, it would seem."
-    ;;
-*)  mallocsrc='';
-    mallocobj='';
-    mallocptrtype=void
-    val="$define"
-    ;;
-esac
-set d_mymalloc
-eval $setvar
 
 : determine where private executables go
 case "$privlib" in

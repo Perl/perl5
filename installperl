@@ -136,8 +136,11 @@ if (chdir "lib") {
 
     if ($pdev != $ldev || $pino != $lino) {
 	foreach $file (<*.pl>) {
-	    &unlink("$installprivlib/$file");
-	    &cmd("cp $file $installprivlib");
+	    system "cmp", "-s", $file, "$privlib/$file";
+	    if ($?) {
+		&unlink("$installprivlib/$file");
+		&cmd("cp $file $installprivlib");
+	    }
 	}
     }
     chdir ".." || die "Can't cd back to source directory: $!\n";

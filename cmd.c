@@ -1,4 +1,4 @@
-/* $RCSfile: cmd.c,v $$Revision: 4.0.1.3 $$Date: 91/11/05 16:07:43 $
+/* $RCSfile: cmd.c,v $$Revision: 4.0.1.4 $$Date: 91/11/11 16:29:33 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	cmd.c,v $
+ * Revision 4.0.1.4  91/11/11  16:29:33  lwall
+ * patch19: do {$foo ne "bar";} returned wrong value
+ * patch19: some earlier patches weren't propagated to alternate 286 code
+ * 
  * Revision 4.0.1.3  91/11/05  16:07:43  lwall
  * patch11: random cleanup
  * patch11: "foo\0" eq "foo" was sometimes optimized to true
@@ -367,26 +371,31 @@ until_loop:
 		    if (cmd->c_spat)
 			lastspat = cmd->c_spat;
 		    match = !(cmdflags & CF_FIRSTNEG);
-		    retstr = &str_yes;
+		    retstr = match ? &str_yes : &str_no;
 		    goto flipmaybe;
 		}
 	    }
 	    else if (cmdflags & CF_NESURE) {
 		match = cmdflags & CF_FIRSTNEG;
-		retstr = &str_no;
+		retstr = match ? &str_yes : &str_no;
 		goto flipmaybe;
 	    }
 #else
 	    {
 		char *zap1, *zap2, zap1c, zap2c;
 		int  zaplen;
+		int lenok;
 
 		zap1 = cmd->c_short->str_ptr;
 		zap2 = str_get(retstr);
 		zap1c = *zap1;
 		zap2c = *zap2;
 		zaplen = cmd->c_slen;
-		if ((zap1c == zap2c) && (bcmp(zap1, zap2, zaplen) == 0)) {
+		if (match)
+		    lenok = (retstr->str_cur == cmd->c_slen - 1);
+		else
+		    lenok = (retstr->str_cur >= cmd->c_slen);
+		if ((zap1c == zap2c) && lenok && (bcmp(zap1, zap2, zaplen) == 0)) {
 		    if (cmdflags & CF_EQSURE) {
 			if (sawampersand &&
 			  (cmdflags & CF_OPTIMIZE) != CFT_STROP) {
@@ -403,13 +412,13 @@ until_loop:
 			if (cmd->c_spat)
 			    lastspat = cmd->c_spat;
 		 	match = !(cmdflags & CF_FIRSTNEG);
-		 	retstr = &str_yes;
+			retstr = match ? &str_yes : &str_no;
 		 	goto flipmaybe;
 		    }
 		}
 		else if (cmdflags & CF_NESURE) {
 		    match = cmdflags & CF_FIRSTNEG;
-		    retstr = &str_no;
+		    retstr = match ? &str_yes : &str_no;
 		    goto flipmaybe;
 		}
 	    }
@@ -451,7 +460,7 @@ until_loop:
 		    }
 		    lastspat = cmd->c_spat;
 		    match = !(cmdflags & CF_FIRSTNEG);
-		    retstr = &str_yes;
+		    retstr = match ? &str_yes : &str_no;
 		    goto flipmaybe;
 		}
 		else
@@ -461,7 +470,7 @@ until_loop:
 		if (cmdflags & CF_NESURE) {
 		    ++cmd->c_short->str_u.str_useful;
 		    match = cmdflags & CF_FIRSTNEG;
-		    retstr = &str_no;
+		    retstr = match ? &str_yes : &str_no;
 		    goto flipmaybe;
 		}
 	    }

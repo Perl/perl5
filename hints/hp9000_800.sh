@@ -1,1 +1,2 @@
-libswanted=`echo $libswanted | sed 's/malloc //'`
+libswanted=`echo $libswanted | sed -e 's/malloc //' -e 's/BSD //`
+optimize='+O1'

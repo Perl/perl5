@@ -1,7 +1,10 @@
 .rn '' }`
-''' $RCSfile: perl.man,v $$Revision: 4.0.1.4 $$Date: 91/11/05 18:11:05 $
+''' $RCSfile: perl.man,v $$Revision: 4.0.1.5 $$Date: 91/11/11 16:42:00 $
 ''' 
 ''' $Log:	perl.man,v $
+''' Revision 4.0.1.5  91/11/11  16:42:00  lwall
+''' patch19: added little-endian pack/unpack options
+''' 
 ''' Revision 4.0.1.4  91/11/05  18:11:05  lwall
 ''' patch11: added sort {} LIST
 ''' patch11: added eval {}
@@ -2014,7 +2017,7 @@ operators:
 	if (defined &$var) { &$var($parm); undef &$var; }
 
 .fi
-:Ip "do EXPR" 8 3
+.Ip "do EXPR" 8 3
 Uses the value of EXPR as a filename and executes the contents of the file
 as a
 .I perl
@@ -3071,6 +3074,8 @@ of values, as follows:
 	f	A single-precision float in the native format.
 	d	A double-precision float in the native format.
 	p	A pointer to a string.
+	v	A short in \*(L"VAX\*(R" (little-endian) order.
+	V	A long in \*(L"VAX\*(R" (little-endian) order.
 	x	A null byte.
 	X	Back up a byte.
 	@	Null fill to absolute position.
@@ -5893,7 +5898,10 @@ All of the $^X variables are new except for $^T.
 The default top-of-form format for FILEHANDLE is now FILEHANDLE_TOP rather
 than top.
 .PP
-The eval {} and sort {} constructs were added in version 4.011.
+The eval {} and sort {} constructs were added in version 4.018.
+.PP
+The v and V (little-endian) template options for pack and unpack were
+added in 4.019.
 .SH BUGS
 .PP
 .I Perl

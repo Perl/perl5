@@ -1,10 +1,13 @@
-/* $Header: usersub.c,v 4.0 91/03/20 01:55:56 lwall Locked $
+/* $RCSfile: usersub.c,v $$Revision: 4.0.1.1 $$Date: 91/11/11 16:47:17 $
  *
  *  This file contains stubs for routines that the user may define to
  *  set up glue routines for C libraries or to decrypt encrypted scripts
  *  for execution.
  *
  * $Log:	usersub.c,v $
+ * Revision 4.0.1.1  91/11/11  16:47:17  lwall
+ * patch19: deleted some unused functions from usersub.c
+ * 
  * Revision 4.0  91/03/20  01:55:56  lwall
  * 4.0 baseline.
  * 
@@ -19,7 +22,7 @@ userinit()
 }
 
 /*
- * The following is supplied by John MacDonald as a means of decrypting
+ * The following is supplied by John Macdonald as a means of decrypting
  * and executing (presumably proprietary) scripts that have been encrypted
  * by a (presumably secret) method.  The idea is that you supply your own
  * routine in place of cryptfilter (which is purposefully a very weak
@@ -34,6 +37,12 @@ userinit()
 #include <vfork.h>
 #endif
 
+#ifdef CRYPTLOCAL
+
+#include "cryptlocal.h"
+
+#else	/* ndef CRYPTLOCAL */
+
 #define	CRYPT_MAGIC_1	0xfb
 #define	CRYPT_MAGIC_2	0xf1
 
@@ -46,6 +55,8 @@ FILE *	fil;
 	putchar( (ch ^ 0x80) );
     }
 }
+
+#endif	/* CRYPTLOCAL */
 
 #ifndef MSDOS
 static FILE	*lastpipefile;
@@ -95,6 +106,7 @@ VOID	(*func)();
 	_exit(0);
     }
     close(p[1]);
+    close(fileno(fil));
     fclose(fil);
     str = afetch(fdpid,p[0],TRUE);
     str->str_u.str_useful = pipepid;
@@ -112,6 +124,7 @@ cryptswitch()
     ch = getc(rsfp);
     if (ch == CRYPT_MAGIC_1) {
 	if (getc(rsfp) == CRYPT_MAGIC_2) {
+	    if( perldb ) fatal("can't debug an encrypted script");
 	    rsfp = mypfiopen( rsfp, cryptfilter );
 	    preprocess = 1;	/* force call to pclose when done */
 	}
@@ -120,63 +133,6 @@ cryptswitch()
     }
     else
 	ungetc(ch,rsfp);
-}
-
-FILE *
-cryptopen(cmd)		/* open a (possibly encrypted) program for input */
-char	*cmd;
-{
-    FILE	*fil = fopen( cmd, "r" );
-
-    lastpipefile = Nullfp;
-    pipepid = 0;
-
-    if( fil ) {
-	int	ch = getc( fil );
-	int	lines = 0;
-	int	chars = 0;
-
-	/* Search for the magic cookie that starts the encrypted script,
-	** while still allowing a few lines of unencrypted text to let
-	** '#!' and the nih hack both continue to work.  (These lines
-	** will end up being ignored.)
-	*/
-	while( ch != CRYPT_MAGIC_1 && ch != EOF && lines < 5 && chars < 300 ) {
-	    if( ch == '\n' )
-		++lines;
-	    ch = getc( fil );
-	    ++chars;
-	}
-
-	if( ch == CRYPT_MAGIC_1 ) {
-	    if( (ch = getc( fil ) ) == CRYPT_MAGIC_2 ) {
-		if( perldb ) fatal("can't debug an encrypted script");
-		/* we found it, decrypt the rest of the file */
-		fil = mypfiopen( fil, cryptfilter );
-		return( lastpipefile = fil );
-	    } else
-		/* if its got MAGIC 1 without MAGIC 2, too bad */
-		fatal( "bad encryption format" );
-	}
-
-	/* this file is not encrypted - rewind and process it normally */
-	rewind( fil );
-    }
-
-    return( fil );
-}
-
-VOID
-cryptclose(fil)
-FILE	*fil;
-{
-    if( fil == Nullfp )
-	return;
-
-    if( fil == lastpipefile )
-	mypclose( fil );
-    else
-	fclose( fil );
 }
 #endif /* !MSDOS */
 

@@ -1,8 +1,8 @@
 #!./perl
 
-# $RCSfile: sort.t,v $$Revision: 4.0.1.1 $$Date: 91/11/05 18:43:47 $
+# $RCSfile: sort.t,v $$Revision: 4.0.1.2 $$Date: 91/11/11 16:43:47 $
 
-print "1..9\n";
+print "1..10\n";
 
 sub reverse { $a lt $b ? 1 : $a gt $b ? -1 : 0; }
 
@@ -41,3 +41,8 @@ print ("@b" eq "4 3 2 1" ? "ok 8\n" : "not ok 8 (@b)\n");
 @a = (10,2,3,4);
 @b = sort {$a <=> $b;} @a;
 print ("@b" eq "2 3 4 10" ? "ok 9\n" : "not ok 9 (@b)\n");
+
+$sub = 'reverse';
+$x = join('', sort $sub @harry);
+print ($x eq 'xdogcatCainAbel' ? "ok 10\n" : "not ok 10\n");
+

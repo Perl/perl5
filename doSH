@@ -4,6 +4,7 @@
 . ./config.sh
 
 rm -f x2p/config.sh
+cp cppstdin x2p
 
 echo " "
 echo "Doing variable substitutions on .SH files..."

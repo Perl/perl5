@@ -1,4 +1,4 @@
-/* $RCSfile: doarg.c,v $$Revision: 4.0.1.4 $$Date: 91/11/05 16:35:06 $
+/* $RCSfile: doarg.c,v $$Revision: 4.0.1.5 $$Date: 91/11/11 16:31:58 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	doarg.c,v $
+ * Revision 4.0.1.5  91/11/11  16:31:58  lwall
+ * patch19: added little-endian pack/unpack options
+ * 
  * Revision 4.0.1.4  91/11/05  16:35:06  lwall
  * patch11: /$foo/o optimizer could access deallocated data
  * patch11: minimum match length calculation in regexp is now cumulative
@@ -661,6 +664,16 @@ int *arglast;
 		str_ncat(str,(char*)&ashort,sizeof(short));
 	    }
 	    break;
+	case 'v':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		ashort = (short)str_gnum(fromstr);
+#ifdef HAS_HTOVS
+		ashort = htovs(ashort);
+#endif
+		str_ncat(str,(char*)&ashort,sizeof(short));
+	    }
+	    break;
 	case 'S':
 	case 's':
 	    while (len-- > 0) {
@@ -689,6 +702,16 @@ int *arglast;
 		aulong = U_L(str_gnum(fromstr));
 #ifdef HAS_HTONL
 		aulong = htonl(aulong);
+#endif
+		str_ncat(str,(char*)&aulong,sizeof(unsigned long));
+	    }
+	    break;
+	case 'V':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		aulong = U_L(str_gnum(fromstr));
+#ifdef HAS_HTOVL
+		aulong = htovl(aulong);
 #endif
 		str_ncat(str,(char*)&aulong,sizeof(unsigned long));
 	    }

@@ -109,6 +109,7 @@ hints/hp9000_400.sh
 hints/hp9000_800.sh	
 hints/hpux.sh
 hints/i386.sh
+hints/isc_3_2_2.sh
 hints/mips.sh
 hints/mpc.sh	
 hints/ncr_tower.sh
@@ -287,6 +288,7 @@ t/op/push.t		See if push and pop work
 t/op/range.t		See if .. works
 t/op/re_tests		Input file for op.regexp
 t/op/read.t		See if read() works
+t/op/readdir.t		See if readdir() works
 t/op/regexp.t		See if regular expressions work
 t/op/repeat.t		See if x operator works
 t/op/s.t		See if substitutions work

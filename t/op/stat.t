@@ -1,6 +1,6 @@
 #!./perl
 
-# $RCSfile: stat.t,v $$Revision: 4.0.1.2 $$Date: 91/11/05 18:44:44 $
+# $RCSfile: stat.t,v $$Revision: 4.0.1.3 $$Date: 91/11/11 16:44:49 $
 
 print "1..56\n";
 
@@ -10,6 +10,8 @@ $DEV = `ls -l /dev`;
 
 unlink "Op.stat.tmp";
 open(FOO, ">Op.stat.tmp");
+
+$junk = `ls Op.stat.tmp`;	# hack to make Apollo update link count
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat(FOO);
@@ -35,7 +37,8 @@ else {
 }
 print "#4	:$mtime: != :$ctime:\n";
 
-`cp /dev/null Op.stat.tmp`;
+`rm -f Op.stat.tmp`;
+`touch Op.stat.tmp`;
 
 if (-z 'Op.stat.tmp') {print "ok 5\n";} else {print "not ok 5\n";}
 if (! -s 'Op.stat.tmp') {print "ok 6\n";} else {print "not ok 6\n";}
