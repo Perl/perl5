@@ -4302,13 +4302,13 @@ $    WRITE CONFIG "#define VMS_DO_SOCKETS"
 $ ENDIF
 $! This is VMS-specific for now
 $ WRITE CONFIG "#''perl_d_setenv' HAS_SETENV"
-$ if d_alwdeftype.eqs."Y"
+$ if d_secintgenv
 $ THEN
 $    WRITE CONFIG "#define SECURE_INTERNAL_GETENV"
 $ ELSE
 $    WRITE CONFIG "#undef SECURE_INTERNAL_GETENV"
 $ ENDIF
-$ if d_secintgenv.eqs."Y"
+$ if d_alwdeftype
 $ THEN
 $    WRITE CONFIG "#define ALWAYS_DEFTYPES"
 $ ELSE
