@@ -85,7 +85,7 @@ cppflags="${cppflags} -no-cpp-precomp"
 ccflags="${ccflags} -no-cpp-precomp"
 
 # Known optimizer problems.
-case "`cc -v`" in
+case "`cc -v 2>&1`" in
 *"3.1 20020105"*) toke_cflags='optimize=""' ;;
 esac
 
