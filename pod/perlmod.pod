@@ -747,8 +747,8 @@ Generally you can delete the "eq 'FOO'" part with no harm at all.
 Let the objects look after themselves! Generally, avoid hardwired
 class names as far as possible.
 
-Avoid $r->Class::func() where using @ISA=qw(... Class ...) and
-$r->func() would work (see perlbot man page for more details).
+Avoid $r-E<gt>Class::func() where using @ISA=qw(... Class ...) and
+$r-E<gt>func() would work (see perlbot man page for more details).
 
 Use autosplit so little used or newly added functions won't be a
 burden to programs which don't use them. Add test functions to
@@ -798,7 +798,7 @@ or nature of a variable. For example:
  $no_caps_here    function scope my() or local() variables
 
 Function and method names seem to work best as all lowercase.
-E.g., $obj->as_string().
+E.g., $obj-E<gt>as_string().
 
 You can use a leading underscore to indicate that a variable or
 function should not be used outside the package that defined it.
@@ -814,7 +814,7 @@ export try to use @EXPORT_OK in preference to @EXPORT and avoid
 short or common names to reduce the risk of name clashes.
 
 Generally anything not exported is still accessible from outside the
-module using the ModuleName::item_name (or $blessed_ref->method)
+module using the ModuleName::item_name (or $blessed_ref-E<gt>method)
 syntax.  By convention you can use a leading underscore on names to
 informally indicate that they are 'internal' and not for public use.
 

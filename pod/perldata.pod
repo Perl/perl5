@@ -121,7 +121,7 @@ Scalars aren't necessarily one thing or another.  There's no place to
 declare a scalar variable to be of type "string", or of type "number", or
 type "filehandle", or anything else.  Perl is a contextually polymorphic
 language whose scalars can be strings, numbers, or references (which
-includes objects).  While strings and numbers are considered the pretty
+includes objects).  While strings and numbers are considered pretty
 much same thing for nearly all purposes, references are strongly-typed
 uncastable pointers with built-in reference-counting and destructor
 invocation.
@@ -189,7 +189,7 @@ So in general you can just assume that
 
     scalar(@whatever) == $#whatever + 1;
 
-Some programmer choose to use an explcit conversion so nothing's
+Some programmers choose to use an explicit conversion so nothing's
 left to doubt:
 
     $element_count = scalar(@whatever);
@@ -311,9 +311,8 @@ quotes you use determines the treatment of the text, just as in regular
 quoting.  An unquoted identifier works like double quotes.  There must
 be no space between the C<E<lt>E<lt>> and the identifier.  (If you put a space it
 will be treated as a null identifier, which is valid, and matches the
-first blank line--see the Merry Christmas example below.)  The terminating
-string must appear by itself (unquoted and with no surrounding
-whitespace) on the terminating line.
+first blank line.)  The terminating string must appear by itself 
+(unquoted and with no surrounding whitespace) on the terminating line.
 
 	print <<EOF;	
     The price is $Price.
@@ -334,7 +333,7 @@ whitespace) on the terminating line.
     I said bar.
     bar
 
-	myfunc(<<"THIS", 23, <<'THAT'');
+	myfunc(<<"THIS", 23, <<'THAT');
     Here's a line
     or two.
     THIS

@@ -76,8 +76,8 @@ so that your constructors may be inherited:
 	return $self;
     }
 
-Or if you expect people to call not just C<CLASS->new()> but also
-C<$obj->new()>, then use something like this.  The initialize()
+Or if you expect people to call not just C<CLASS-E<gt>new()> but also
+C<$obj-E<gt>new()>, then use something like this.  The initialize()
 method used will be of whatever $class we blessed the 
 object into:
 
@@ -203,7 +203,7 @@ indirect object slot:
 
     display {find Critter "Fred"} 'Height', 'Weight';
 
-For C++ fans, there's also a syntax using -> notation that does exactly
+For C++ fans, there's also a syntax using -E<gt> notation that does exactly
 the same thing.  The parentheses are required if there are any arguments.
 
     $fred = Critter->find("Fred");
@@ -287,7 +287,7 @@ automatically when the current object is freed.
 
 An indirect object is limited to a name, a scalar variable, or a block,
 because it would have to do too much lookahead otherwise, just like any
-other postfix dereference in the language.  The left side of -> is not so
+other postfix dereference in the language.  The left side of -E<gt> is not so
 limited, because it's an infix operator, not a postfix operator.  
 
 That means that below, A and B are equivalent to each other, and C and D

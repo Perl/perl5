@@ -384,7 +384,7 @@ As a list operator:
     @foo = @foo[$#foo-4 .. $#foo];	# slice last 5 items
 
 The range operator (in a list context) makes use of the magical
-autoincrement algorithm if the operaands are strings.  You
+autoincrement algorithm if the operands are strings.  You
 can say
 
     @alphabet = ('A' .. 'Z');
@@ -960,10 +960,10 @@ list consisting of all the input lines is returned, one line per list
 element.  It's easy to make a I<LARGE> data space this way, so use with
 care.
 
-The null filehandle <> is special and can be used to emulate the
-behavior of B<sed> and B<awk>.  Input from <> comes either from
+The null filehandle E<lt>E<gt> is special and can be used to emulate the
+behavior of B<sed> and B<awk>.  Input from E<lt>E<gt> comes either from
 standard input, or from each file listed on the command line.  Here's
-how it works: the first time <> is evaluated, the @ARGV array is
+how it works: the first time E<lt>E<gt> is evaluated, the @ARGV array is
 checked, and if it is null, C<$ARGV[0]> is set to "-", which when opened
 gives you standard input.  The @ARGV array is then processed as a list
 of filenames.  The loop
@@ -984,11 +984,11 @@ is equivalent to the following Perl-like pseudo code:
 
 except that it isn't so cumbersome to say, and will actually work.  It
 really does shift array @ARGV and put the current filename into variable
-$ARGV.  It also uses filehandle I<ARGV> internally--<> is just a synonym
+$ARGV.  It also uses filehandle I<ARGV> internally--E<lt>E<gt> is just a synonym
 for <ARGV>, which is magical.  (The pseudo code above doesn't work
 because it treats <ARGV> as non-magical.)
 
-You can modify @ARGV before the first <> as long as the array ends up
+You can modify @ARGV before the first E<lt>E<gt> as long as the array ends up
 containing the list of filenames you really want.  Line numbers (C<$.>)
 continue as if the input were one big happy file.  (But see example
 under eof() for how to reset line numbers on each file.)
@@ -1008,7 +1008,7 @@ Getopts modules or put a loop on the front like this:
 	...		# code for each line
     }
 
-The <> symbol will return FALSE only once.  If you call it again after
+The E<lt>E<gt> symbol will return FALSE only once.  If you call it again after
 this it will assume you are processing another @ARGV list, and if you
 haven't set @ARGV, will input from STDIN.
 
@@ -1027,7 +1027,7 @@ $ interpretation is done first, but you can't say C<E<lt>$fooE<gt>>
 because that's an indirect filehandle as explained in the previous
 paragraph.  In older version of Perl, programmers would insert curly
 brackets to force interpretation as a filename glob: C<E<lt>${foo}E<gt>>.
-These days, it's consdired cleaner to call the internal function directly
+These days, it's considered cleaner to call the internal function directly
 as C<glob($foo)>, which is probably the right way to have done it in the
 first place.)  Example:
 
