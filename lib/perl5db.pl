@@ -536,6 +536,9 @@ if ( not defined &get_fork_TTY and defined $ENV{TERM} and $ENV{TERM} eq 'xterm'
 } elsif ($^O eq 'os2') {
     *get_fork_TTY = \&os2_get_fork_TTY;
 }
+# untaint $^O, which may have been tainted by the last statement.
+# see bug [perl #24674]
+$^O =~ m/^(.*)\z/; $^O = $1;
 
 # Here begin the unreadable code.  It needs fixing.
 
