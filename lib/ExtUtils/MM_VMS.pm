@@ -3,9 +3,9 @@
 #   This package is inserted into @ISA of MakeMaker's MM before the
 #   built-in MM_Unix methods if MakeMaker.pm is run under VMS.
 #
-#   Version: 5.12
+#   Version: 5.16
 #   Author:  Charles Bailey  bailey@genetics.upenn.edu
-#   Revised: 12-Dec-1995
+#   Revised: 03-Jan-1996
 
 package ExtUtils::MM_VMS;
 
@@ -289,9 +289,9 @@ VERSION = $self->{VERSION}
 VERSION_SYM = $self->{VERSION_SYM}
 VERSION_MACRO = VERSION
 DEFINE_VERSION = ",'"$(VERSION_MACRO)=""$(VERSION)"""',"
-# XS_VERSION = $self->{XS_VERSION}
-# XS_VERSION_MACRO = XS_VERSION
-# XS_DEFINE_VERSION = ",'"$(XS_VERSION_MACRO)=""$(XS_VERSION)"""',"
+XS_VERSION = $self->{XS_VERSION}
+XS_VERSION_MACRO = XS_VERSION
+XS_DEFINE_VERSION = ",'"$(XS_VERSION_MACRO)=""$(XS_VERSION)"""',"
 
 # In which library should we install this extension?
 # This is typically the same as PERL_LIB.
@@ -299,6 +299,8 @@ DEFINE_VERSION = ",'"$(VERSION_MACRO)=""$(VERSION)"""',"
 INST_LIB = ",$self->fixpath($self->{INST_LIB},1),"
 INST_ARCHLIB = ",$self->fixpath($self->{INST_ARCHLIB},1),"
 INST_EXE = ",$self->fixpath($self->{INST_EXE},1),"
+
+PREFIX = $self->{PREFIX}
 
 # AFS users will want to set the installation directories for
 # the final 'make install' early without setting INST_LIB,
@@ -488,7 +490,7 @@ sub const_cccmd {
 	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
 	$self = $ExtUtils::MakeMaker::Parent[-1];
     }
-    my($cmd) = $Config{'cc'};
+    my($cmd,$quals) = ($Config{'cc'},$Config{'ccflags'});
     my($name,$sys,@m);
 
     ( $name = $self->{NAME} . "_cflags" ) =~ s/:/_/g ;
@@ -499,15 +501,13 @@ sub const_cccmd {
     # Deal with $self->{DEFINE} here since some C compilers pay attention
     # to only one /Define clause on command line, so we have to
     # conflate the ones from $Config{'cc'} and $self->{DEFINE}
-    if ($cmd =~ m:(.*)/define=\(?([^\(\/\)\s]+)\)?(.*)?:i) {
-	$cmd = "$1/Define=($2," . ($self->{DEFINE} ? "$self->{DEFINE}," : '') .
-	       "\$(DEFINE_VERSION))$3";
-#	       "\$(DEFINE_VERSION),\$(XS_DEFINE_VERSION))$3";
+    if ($quals =~ m:(.*)/define=\(?([^\(\/\)\s]+)\)?(.*)?:i) {
+	$quals = "$1/Define=($2," . ($self->{DEFINE} ? "$self->{DEFINE}," : '') .
+	         "\$(DEFINE_VERSION),\$(XS_DEFINE_VERSION))$3";
     }
     else {
-	$cmd .= '/Define=(' . ($self->{DEFINE} ? "$self->{DEFINE}," : '') .
-	        '$(DEFINE_VERSION))';
-#	        '$(DEFINE_VERSION),$(XS_DEFINE_VERSION))';
+	$quals .= '/Define=(' . ($self->{DEFINE} ? "$self->{DEFINE}," : '') .
+	          '$(DEFINE_VERSION),$(XS_DEFINE_VERSION))';
     }
 
     $libperl or $libperl = $self->{LIBPERL_A} || "libperl.olb";
@@ -516,7 +516,7 @@ sub const_cccmd {
         my(%map) = ( 'D'  => 'DEBUGGING', 'E' => 'EMBED', 'M' => 'MULTIPLICITY',
                      'DE' => 'DEBUGGING,EMBED', 'DM' => 'DEBUGGING,MULTIPLICITY',
                      'EM' => 'EMBED,MULTIPLICITY', 'DEM' => 'DEBUGGING,EMBED,MULTIPLICITY' );
-        $cmd =~ s:/define=\(([^\)]+)\):/Define=($1,$map{$type}):i
+        $quals =~ s:/define=\(([^\)]+)\):/Define=($1,$map{$type}):i
     }
 
     # Likewise with $self->{INC} and /Include
@@ -528,10 +528,10 @@ sub const_cccmd {
 	    $incstr .= ', '.$self->fixpath($_,1);
 	}
     }
-    if ($cmd =~ m:(.*)/include=\(?([^\(\/\)\s]+)\)?(.*):i) {
-	$cmd = "$1$incstr,$2)$3";
+    if ($quals =~ m:(.*)/include=\(?([^\(\/\)\s]+)\)?(.*):i) {
+	$quals = "$1$incstr,$2)$3";
     }
-    else { $cmd .= "$incstr)"; }
+    else { $quals .= "$incstr)"; }
 
 
    if ($Config{'vms_cc_type'} ne 'decc') {
@@ -543,7 +543,7 @@ sub const_cccmd {
 
 ';
    }
-   push(@m, "CCCMD = $cmd\n");
+   push(@m, "CCCMD = $cmd$quals\n");
 
    $self->{CONST_CCCMD} = join('',@m);
 }
@@ -686,7 +686,6 @@ USEMACROS = /Macro=(
 MACROEND = )
 MAKEFILE = Descrip.MMS
 SHELL = Posix
-LD = $self->{LD}
 TOUCH = $self->{TOUCH}
 CHMOD = $self->{CHMOD}
 CP = $self->{CP}
@@ -797,10 +796,13 @@ subdirs :: $(MYEXTLIB)
 	$(NOOP)
 
 config :: $(MAKEFILE) $(INST_LIBDIR).exists
+	$(NOOP)
 
 config :: $(INST_ARCHAUTODIR).exists Version_check
+	$(NOOP)
 
 config :: $(INST_AUTODIR).exists
+	$(NOOP)
 ';
 
 
@@ -808,12 +810,14 @@ config :: $(INST_AUTODIR).exists
     if (%{$self->{MAN1PODS}}) {
 	push @m, q[
 config :: $(INST_MAN1DIR)/.exists
+	$(NOOP)
 ];
 	push @m, $self->dir_target(qw[$(INST_MAN1DIR)]);
     }
     if (%{$self->{MAN3PODS}}) {
 	push @m, q[
 config :: $(INST_MAN3DIR).exists
+	$(NOOP)
 ];
 	push @m, $self->dir_target(qw[$(INST_MAN3DIR)]);
     }
@@ -844,6 +848,9 @@ sub dlsyms {
 	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
 	$self = $ExtUtils::MakeMaker::Parent[-1];
     }
+
+    return '' unless $self->needs_linking();
+
     my($funcs) = $attribs{DL_FUNCS} || $self->{DL_FUNCS} || {};
     my($vars)  = $attribs{DL_VARS} || $self->{DL_VARS} || [];
     my(@m);
@@ -869,7 +876,7 @@ $(INST_ARCHAUTODIR)$(BASEEXT).opt : $(BASEEXT).opt
 
 $(BASEEXT).opt : makefile.PL
 	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -e "use ExtUtils::MakeMaker qw(&mksymlists);" -
-		-e "MM->new()->mksymlists({DL_FUNCS => ',neatvalue($self->{DL_FUNCS}),', DL_VARS => ',neatvalue($self->{DL_VARS}),',NAME => \'',$self->{NAME},'\'})"
+		-e "MM->new({NAME => \'',$self->{NAME},'\'})->mksymlists({DL_FUNCS => ',neatvalue($self->{DL_FUNCS}),', DL_VARS => ',neatvalue($self->{DL_VARS}),'})"
 	$(PERL) -e "open OPT,\'>>$(MMS$TARGET)\'; print OPT ""$(INST_STATIC)/Include=$(BASEEXT)\n$(INST_STATIC)/Library\n"";close OPT"
 ');
 
@@ -887,11 +894,7 @@ sub dynamic_lib {
     }
     return '' unless $self->needs_linking(); #might be because of a subdir
 
-
-    return '
-$(INST_DYNAMIC) :
-	$(NOOP)
-' unless ($self->{OBJECT} or @{$self->{C} || []} or $self->{MYEXTLIB});
+    return '' unless $self->has_link_code();
 
     ($otherldflags) = $attribs{OTHERLDFLAGS} || "";
     my(@m);
@@ -917,21 +920,23 @@ sub dynamic_bs {
 	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
 	$self = $ExtUtils::MakeMaker::Parent[-1];
     }
-    return '' unless $self->needs_linking();
+    return '
+BOOTSTRAP =
+' unless $self->has_link_code();
     '
 BOOTSTRAP = '."$self->{BASEEXT}.bs".'
 
 # As MakeMaker mkbootstrap might not write a file (if none is required)
 # we use touch to prevent make continually trying to remake it.
 # The DynaLoader only reads a non-empty file.
-$(BOOTSTRAP) : $(MAKEFILE) '."$self->{BOOTDEP}".'
+$(BOOTSTRAP) : $(MAKEFILE) '."$self->{BOOTDEP}".' $(INST_ARCHAUTODIR).exists
 	@ Write Sys$Output "Running mkbootstrap for $(NAME) ($(BSLOADLIBS))"
 	@ $(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -
 	-e "use ExtUtils::Mkbootstrap; Mkbootstrap(\'$(BASEEXT)\',\'$(BSLOADLIBS)\');"
 	@ $(TOUCH) $(MMS$TARGET)
 	@ $(PERL) -e "open F,\'>>$(INST_ARCHAUTODIR).packlist\';print F qq[$(MMS$TARGET)\n];close F;"
 
-$(INST_BOOT) : $(BOOTSTRAP)
+$(INST_BOOT) : $(BOOTSTRAP) $(INST_ARCHAUTODIR).exists
 	@ $(RM_RF) $(INST_BOOT)
 	- $(CP) $(BOOTSTRAP) $(INST_BOOT)
 	@ $(PERL) -e "open F,\'>>$(INST_ARCHAUTODIR).packlist\';print F qq[$(MMS$TARGET)\n];close F;"
@@ -988,7 +993,7 @@ sub installpm_x { # called by installpm perl file
     my(@m);
 
     push(@m, "
-$inst : $dist \$(MAKEFILE) ${instdir}.exists
+$inst : $dist \$(MAKEFILE) ${instdir}.exists \$(INST_ARCHAUTODIR).exists
 ",'	@ $(RM_F) $(MMS$TARGET)
 	@ $(CP) ',"$dist $inst",'
 	$(CHMOD) 644 $(MMS$TARGET)
@@ -1033,7 +1038,7 @@ END
     push @m,
 qq[POD2MAN_EXE = $pod2man_exe\n],
 q[POD2MAN = $(PERL) -we "%m=@ARGV;for (keys %m){" -
--e "system(""$(PERL) $(POD2MAN_EXE) $_ >$m{$_}"");}"
+-e "system(""$^X $(POD2MAN_EXE) $_ >$m{$_}"");}"
 ];
     push @m, "\nmanifypods : ";
     push @m, join " ", keys %{$self->{MAN1PODS}}, keys %{$self->{MAN3PODS}};
@@ -1367,7 +1372,7 @@ doc_install ::
 	@ Write Sys$Output "Appending installation info to $(INST_ARCHLIB)perllocal.pod"
 	@ $(PERL) "-I$(PERL_LIB)" "-I$(PERL_ARCHLIB)"  \\
 		-e "use ExtUtils::MakeMaker; MY->new({})->writedoc('Module', '$(NAME)', \\
-		'LINKTYPE=$(LINKTYPE)', 'VERSION=$(VERSION)', 'EXE_FILES=$(EXE_FILES)')" \\
+		'LINKTYPE=$(LINKTYPE)', 'VERSION=$(VERSION)', 'XS_VERSION=$(XS_VERSION)', 'EXE_FILES=$(EXE_FILES)')" \\
 		>>$(INSTALLARCHLIB)perllocal.pod
 };
 
@@ -1569,7 +1574,6 @@ sub makeaperl {
     push @m, "
 # --- MakeMaker makeaperl section ---
 MAP_TARGET    = $target
-FULLPERL      = $self->{FULLPERL}
 ";
     return join '', @m if $self->{PARENT};
 
@@ -1577,16 +1581,16 @@ FULLPERL      = $self->{FULLPERL}
 
     unless ($self->{MAKEAPERL}) {
 	push @m, q{
-$(MAP_TARGET) :: $(MAKE_APERL_FILE)
-	$(MMS)$(USEMAKEFILE)$(MAKE_APERL_FILE) static $(MMS$TARGET)
-
 $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE)
 	@ Write Sys$Output "Writing ""$(MMS$TARGET)"" for this $(MAP_TARGET)"
 	@ $(PERL) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)" "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" \
 		Makefile.PL DIR=}, $dir, q{ \
 		MAKEFILE=$(MAKE_APERL_FILE) LINKTYPE=static \
-		MAKEAPERL=1 NORECURS=1};
+		MAKEAPERL=1 NORECURS=1
 
+$(MAP_TARGET) :: $(MAKE_APERL_FILE)
+	$(MMS)$(USEMAKEFILE)$(MAKE_APERL_FILE) static $(MMS$TARGET)
+};
 	push @m, map( " \\\n\t\t$_", @ARGV );
 	push @m, "\n";
 
