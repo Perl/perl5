@@ -450,7 +450,7 @@ PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
     if (f && *f) {
 	PerlIO_funcs *tab = PerlIOBase(f)->tab;
 	PerlIO *new;
-	PerlIO_debug("fdupopen f=%p param=%p\n",f,param);
+	PerlIO_debug("fdupopen f=%p param=%p\n",(void*)f,(void*)param);
         new = (*tab->Dup)(aTHX_ PerlIO_allocate(aTHX),f,param, flags);
 	return new;
     }
@@ -603,7 +603,7 @@ PerlIO_pop(pTHX_ PerlIO *f)
 {
     PerlIOl *l = *f;
     if (l) {
-	PerlIO_debug("PerlIO_pop f=%p %s\n", f, l->tab->name);
+	PerlIO_debug("PerlIO_pop f=%p %s\n", (void*)f, l->tab->name);
 	if (l->tab->Popped) {
 	    /*
 	     * If popped returns non-zero do not free its layer structure
@@ -632,7 +632,7 @@ PerlIO_find_layer(pTHX_ const char *name, STRLEN len, int load)
     for (i = 0; i < PL_known_layers->cur; i++) {
 	PerlIO_funcs *f = PL_known_layers->array[i].funcs;
 	if (memEQ(f->name, name, len)) {
-	    PerlIO_debug("%.*s => %p\n", (int) len, name, f);
+	    PerlIO_debug("%.*s => %p\n", (int) len, name, (void*)f);
 	    return f;
 	}
     }
@@ -763,7 +763,7 @@ PerlIO_define_layer(pTHX_ PerlIO_funcs *tab)
     if (!PL_known_layers)
 	PL_known_layers = PerlIO_list_alloc(aTHX);
     PerlIO_list_push(aTHX_ PL_known_layers, tab, Nullsv);
-    PerlIO_debug("define %s %p\n", tab->name, tab);
+    PerlIO_debug("define %s %p\n", tab->name, (void*)tab);
 }
 
 int
@@ -971,8 +971,8 @@ PerlIO_push(pTHX_ PerlIO *f, PerlIO_funcs *tab, const char *mode, SV *arg)
 	l->next = *f;
 	l->tab = tab;
 	*f = l;
-	PerlIO_debug("PerlIO_push f=%p %s %s %p\n", f, tab->name,
-		     (mode) ? mode : "(Null)", arg);
+	PerlIO_debug("PerlIO_push f=%p %s %s %p\n", (void*)f, tab->name,
+		     (mode) ? mode : "(Null)", (void*)arg);
 	if ((*l->tab->Pushed) (f, mode, arg) != 0) {
 	    PerlIO_pop(aTHX_ f);
 	    return NULL;
@@ -1021,7 +1021,7 @@ PerlIORaw_pushed(PerlIO *f, const char *mode, SV *arg)
 		break;
 	    }
 	}
-	PerlIO_debug(":raw f=%p :%s\n", f, PerlIOBase(f)->tab->name);
+	PerlIO_debug(":raw f=%p :%s\n", (void*)f, PerlIOBase(f)->tab->name);
 	return 0;
     }
     return -1;
@@ -1071,7 +1071,7 @@ int
 PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
 {
     PerlIO_debug("PerlIO_binmode f=%p %s %c %x %s\n",
-		 f, PerlIOBase(f)->tab->name, iotype, mode,
+		 (void*)f, PerlIOBase(f)->tab->name, iotype, mode,
 		 (names) ? names : "(Null)");
     /* Can't flush if switching encodings. */
     if (!(names && memEQ(names, ":encoding(", 10))) {
@@ -1290,8 +1290,8 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 		Perl_croak(aTHX_ "More than one argument to open(,':%s')",tab->name);
 	    }
 	    PerlIO_debug("openn(%s,'%s','%s',%d,%x,%o,%p,%d,%p)\n",
-			 tab->name, layers, mode, fd, imode, perm, f, narg,
-			 args);
+			 tab->name, layers, mode, fd, imode, perm,
+			 (void*)f, narg, (void*)args);
 	    f = (*tab->Open) (aTHX_ tab, layera, n, mode, fd, imode, perm,
 			      f, narg, args);
 	    if (f) {
@@ -1410,13 +1410,13 @@ PerlIO_flush(PerlIO *f)
 		return (*tab->Flush) (f);
 	    }
 	    else {
-		PerlIO_debug("Cannot flush f=%p :%s\n", f, tab->name);
+		PerlIO_debug("Cannot flush f=%p :%s\n", (void*)f, tab->name);
 		SETERRNO(EBADF, SS$_IVCHAN);
 		return -1;
 	    }
 	}
 	else {
-	    PerlIO_debug("Cannot flush f=%p\n", f);
+	    PerlIO_debug("Cannot flush f=%p\n", (void*)f);
 	    SETERRNO(EBADF, SS$_IVCHAN);
 	    return -1;
 	}
@@ -1993,7 +1993,8 @@ PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 	PerlIO_funcs *self = PerlIOBase(o)->tab;
 	SV *arg = Nullsv;
 	char buf[8];
-	PerlIO_debug("PerlIOBase_dup %s f=%p o=%p param=%p\n",self->name,f,o,param);
+	PerlIO_debug("PerlIOBase_dup %s f=%p o=%p param=%p\n",
+		     self->name, (void*)f, (void*)o, (void*)param);
 	if (self->Getarg) {
 	    arg = (*self->Getarg)(aTHX_ o,param,flags);
 	}

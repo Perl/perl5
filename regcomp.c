@@ -3187,7 +3187,7 @@ tryagain:
 	 STRLEN newlen = SvCUR(sv);
 	 if (!SIZE_ONLY) {
 	      DEBUG_r(PerlIO_printf(Perl_debug_log, "recode %*s to %*s\n",
-				    oldlen, STRING(ret), newlen, s));
+				    (int)oldlen, STRING(ret), (int)newlen, s));
 	      Copy(s, STRING(ret), newlen, char);
 	      STR_LEN(ret) += newlen - oldlen;
 	      RExC_emit += STR_SZ(newlen) - STR_SZ(oldlen);
