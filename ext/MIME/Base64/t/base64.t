@@ -1,8 +1,11 @@
 BEGIN {
-        chdir 't' if -d 't';
-        @INC = '../lib';
+    if ($ENV{'PERL_CORE'}){
+        chdir 't';
+        unshift @INC, '../lib';
+    }
 }
 
+use strict;
 use MIME::Base64;
 
 print "1..283\n";
@@ -10,7 +13,7 @@ print "1..283\n";
 print "# Testing MIME::Base64-", $MIME::Base64::VERSION, "\n";
 
 BEGIN {
- if (ord('A') == 41) {
+ if (ord('A') == 0x41) {
   *ASCII = sub { return $_[0] };
  }
  else {
@@ -19,7 +22,11 @@ BEGIN {
  }
 }
 
-$testno = 1;
+my $testno = 1;
+# instead of "for my $test (...)" , which is my preference.
+# Not sure which perl version has started supporting.  MIME::Base64
+# was supposed to work with very old perl5, right?
+my $test;
 
 encodeTest();
 decodeTest();
