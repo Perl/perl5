@@ -279,7 +279,7 @@ END
 END
 
     $m .= <<'END' if $self->{PERL_SRC};
-        $(NOECHO)echo "$(EXTRALIBS)" >> $(PERL_SRC)\ext.libs
+	$(NOECHO)echo "$(EXTRALIBS)" >> $(PERL_SRC)\ext.libs
     
     
 END

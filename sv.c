@@ -5884,10 +5884,23 @@ screamer2:
 	    /* Accomodate broken VAXC compiler, which applies U8 cast to
 	     * both args of ?: operator, causing EOF to change into 255
 	     */
-	    if (cnt > 0) { i = (U8)buf[cnt - 1]; } else { i = EOF; }
+#ifdef DJGPP /* This is basically undoing #17270 for DJGPP.  See below. */
+	    if (cnt)
+#else
+	    if (cnt > 0)
+#endif
+	    {
+		i = (U8)buf[cnt - 1];
+	    }
+	    else {
+		 i = EOF;
+	    }
 	}
 
-	if (cnt > 0) {
+#ifndef DJGPP /* This is basically undoing #17270 for DJGPP.  See above.*/
+	if (cnt > 0)
+#endif
+	{
 	    if (append)
 		sv_catpvn(sv, (char *) buf, cnt);
 	    else
@@ -7734,7 +7747,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
         /* large enough for "%#.#f" --chip */
 	/* what about long double NVs? --jhi */
 
-	SV *vecsv;
+	SV *vecsv = Nullsv;
 	U8 *vecstr = Null(U8*);
 	STRLEN veclen = 0;
 	char c = 0;
@@ -7774,7 +7787,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     We allow format specification elements in this order:
 	\d+\$              explicit format parameter index
 	[-+ 0#]+           flags
-	\*?(\d+\$)?v       vector with optional (optionally specified) arg
+	v|*(\d+\$)?v       vector with optional (optionally specified) arg
 	\d+|\*(\d+\$)?     width using optional (optionally specified) arg
 	\.(\d*|\*(\d+\$)?) precision using optional (optionally specified) arg
 	[hlqLV]            size
@@ -7886,7 +7899,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    q++;
 	    if (*q == '*') {
 		q++;
-		if (EXPECT_NUMBER(q, epix) && *q++ != '$') /* epix currently unused */
+		if (EXPECT_NUMBER(q, epix) && *q++ != '$')
+		    goto unknown;
+		/* XXX: todo, support specified precision parameter */
+		if (epix)
 		    goto unknown;
 		if (args)
 		    i = va_arg(*args, int);
@@ -7959,7 +7975,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    goto string;
 	}
 
-	if (!args)
+	if (vectorize)
+	    argsv = vecsv;
+	else if (!args)
 	    argsv = (efix ? efix <= svmax : svix < svmax) ?
 		    svargs[efix ? efix-1 : svix++] : &PL_sv_undef;
 
@@ -7968,7 +7986,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    /* STRINGS */
 
 	case 'c':
-	    uv = args ? va_arg(*args, int) : SvIVx(argsv);
+	    uv = (args && !vectorize) ? va_arg(*args, int) : SvIVx(argsv);
 	    if ((uv > 255 ||
 		 (!UNI_IS_INVARIANT(uv) && SvUTF8(sv)))
 		&& !IN_BYTES) {
@@ -7984,7 +8002,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    goto string;
 
 	case 's':
-	    if (args) {
+	    if (args && !vectorize) {
 		eptr = va_arg(*args, char*);
 		if (eptr)
 #ifdef MACOS_TRADITIONAL
@@ -8021,7 +8039,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	     * if ISO or ANSI decide to use '_' for something.
 	     * So we keep it hidden from users' code.
 	     */
-	    if (!args)
+	    if (!args || vectorize)
 		goto unknown;
 	    argsv = va_arg(*args, SV*);
 	    eptr = SvPVx(argsv, elen);
@@ -8037,7 +8055,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    /* INTEGERS */
 
 	case 'p':
-	    if (alt)
+	    if (alt || vectorize)
 		goto unknown;
 	    uv = PTR2UV(args ? va_arg(*args, void*) : argsv);
 	    base = 16;
@@ -8252,7 +8270,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	    /* This is evil, but floating point is even more evil */
 
-	    vectorize = FALSE;
 	    /* for SV-style calling, we can only get NV
 	       for C-style calling, we assume %f is double;
 	       for simplicity we allow any of %Lf, %llf, %qf for long double
@@ -8281,7 +8298,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    }
 
 	    /* now we need (long double) if intsize == 'q', else (double) */
-	    nv = args ?
+	    nv = (args && !vectorize) ?
 #if LONG_DOUBLESIZE > DOUBLESIZE
 		intsize == 'q' ?
 	            va_arg(*args, long double) :
@@ -8292,6 +8309,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		: SvNVx(argsv);
 
 	    need = 0;
+	    vectorize = FALSE;
 	    if (c != 'e' && c != 'E') {
 		i = PERL_INT_MIN;
 		/* FIXME: if HAS_LONG_DOUBLE but not USE_LONG_DOUBLE this
@@ -8365,9 +8383,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    /* SPECIAL */
 
 	case 'n':
-	    vectorize = FALSE;
 	    i = SvCUR(sv) - origlen;
-	    if (args) {
+	    if (args && !vectorize) {
 		switch (intsize) {
 		case 'h':	*(va_arg(*args, short*)) = i; break;
 		default:	*(va_arg(*args, int*)) = i; break;
@@ -8380,6 +8397,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    }
 	    else
 		sv_setuv_mg(argsv, (UV)i);
+	    vectorize = FALSE;
 	    continue;	/* not "break" */
 
 	    /* UNKNOWN */
@@ -10152,6 +10170,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     Copy(proto_perl->Inexttype, PL_nexttype, 5,	I32);
     PL_nexttoke		= proto_perl->Inexttoke;
 
+    /* XXX This is probably masking the deeper issue of why
+     * SvANY(proto_perl->Ilinestr) can be NULL at this point. For test case:
+     * http://archive.develooper.com/perl5-porters%40perl.org/msg83298.html
+     * (A little debugging with a watchpoint on it may help.)
+     */
     if (SvANY(proto_perl->Ilinestr)) {
 	PL_linestr		= sv_dup_inc(proto_perl->Ilinestr, param);
 	i = proto_perl->Ibufptr - SvPVX(proto_perl->Ilinestr);
@@ -10190,6 +10213,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_padix_floor		= proto_perl->Ipadix_floor;
     PL_pad_reset_pending	= proto_perl->Ipad_reset_pending;
 
+    /* XXX See comment on SvANY(proto_perl->Ilinestr) above */
     if (SvANY(proto_perl->Ilinestr)) {
 	i = proto_perl->Ilast_uni - SvPVX(proto_perl->Ilinestr);
 	PL_last_uni		= SvPVX(PL_linestr) + (i < 0 ? 0 : i);

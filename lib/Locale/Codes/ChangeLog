@@ -1,6 +1,23 @@
 
 		ChangeLog for Locale-Codes Distribution
 
+2.06  2002-07-15 neilb
+
+	* The four modules which have data after __DATA__ weren't
+	  closing the DATA filehandle after reading from it,
+	  which they should. Bug and patch from Steve Hay.
+
+2.05  2002-07-08 neilb
+
+	* Added three letter codes for the countries that were missing
+	  them. Patch from TJ Mather.
+	* Documentation bug: one of the examples used => where the
+	  lvalue was a constant, which isn't allowed, unless you
+	  put the () with the constant to force the right interpretation.
+	  Pointed out by TJ Mather and MYT.
+	* Updated the URL for the appendix in the CIA world factbook.
+	  Patch from TJ Mather.
+
 2.04  2002-05-23 neilb
 
 	* updated according to changes in ISO 3166-1 described

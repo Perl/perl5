@@ -1,5 +1,5 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
-# $Id: Man.pm,v 1.33 2002/06/23 19:16:21 eagle Exp $
+# $Id: Man.pm,v 1.34 2002/07/15 05:46:00 eagle Exp $
 #
 # Copyright 1999, 2000, 2001, 2002 by Russ Allbery <rra@stanford.edu>
 #
@@ -38,7 +38,7 @@ use vars qw(@ISA %ESCAPES $PREAMBLE $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 1.33;
+$VERSION = 1.34;
 
 
 ##############################################################################
@@ -1375,6 +1375,10 @@ The man page documenting the man macro set may be L<man(5)> instead of
 L<man(7)> on your system.  Also, please see L<pod2man(1)> for extensive
 documentation on writing manual pages if you've not done it before and
 aren't familiar with the conventions.
+
+The current version of this module is always available from its web site at
+L<http://www.eyrie.org/~eagle/software/podlators/>.  It is also part of the
+Perl core distribution as of 5.6.0.
 
 =head1 AUTHOR
 

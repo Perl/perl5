@@ -1,7 +1,7 @@
 # Term::ANSIColor -- Color screen output using ANSI escape sequences.
-# $Id: ANSIColor.pm,v 1.4 2001/07/10 08:52:05 eagle Exp $
+# $Id: ANSIColor.pm,v 1.5 2002/06/28 22:49:01 eagle Exp $
 #
-# Copyright 1996, 1997, 1998, 2000, 2001
+# Copyright 1996, 1997, 1998, 2000, 2001, 2002
 #   by Russ Allbery <rra@stanford.edu> and Zenin <zenin@bawdycaste.com>
 #
 # This program is free software; you may redistribute it and/or modify it
@@ -10,9 +10,9 @@
 # Ah, September, when the sysadmins turn colors and fall off the trees....
 #                               -- Dave Van Domelen
 
-############################################################################
+##############################################################################
 # Modules and declarations
-############################################################################
+##############################################################################
 
 package Term::ANSIColor;
 require 5.001;
@@ -32,14 +32,13 @@ use Exporter ();
                                  ON_CYAN ON_WHITE)]);
 Exporter::export_ok_tags ('constants');
 
-# Don't use the CVS revision as the version, since this module is also in
-# Perl core and too many things could munge CVS magic revision strings.
-$VERSION = 1.04;
+# Don't use the CVS revision as the version, since this module is also in Perl
+# core and too many things could munge CVS magic revision strings.
+$VERSION = 1.05;
 
-
-############################################################################
+##############################################################################
 # Internal data structures
-############################################################################
+##############################################################################
 
 %attributes = ('clear'      => 0,
                'reset'      => 0,
@@ -65,28 +64,27 @@ for (reverse sort keys %attributes) {
     $attributes_r{$attributes{$_}} = $_;
 }
 
-
-############################################################################
+##############################################################################
 # Implementation (constant form)
-############################################################################
+##############################################################################
 
-# Time to have fun!  We now want to define the constant subs, which are
-# named the same as the attributes above but in all caps.  Each constant sub
-# needs to act differently depending on whether $AUTORESET is set.  Without
+# Time to have fun!  We now want to define the constant subs, which are named
+# the same as the attributes above but in all caps.  Each constant sub needs
+# to act differently depending on whether $AUTORESET is set.  Without
 # autoreset:
 #
-#   BLUE "text\n"  ==>  "\e[34mtext\n"
+#     BLUE "text\n"  ==>  "\e[34mtext\n"
 #
 # If $AUTORESET is set, we should instead get:
 #
-#   BLUE "text\n"  ==>  "\e[34mtext\n\e[0m"
+#     BLUE "text\n"  ==>  "\e[34mtext\n\e[0m"
 #
 # The sub also needs to handle the case where it has no arguments correctly.
-# Maintaining all of this as separate subs would be a major nightmare, as
-# well as duplicate the %attributes hash, so instead we define an AUTOLOAD
-# sub to define the constant subs on demand.  To do that, we check the name
-# of the called sub against the list of attributes, and if it's an all-caps
-# version of one of them, we define the sub on the fly and then run it.
+# Maintaining all of this as separate subs would be a major nightmare, as well
+# as duplicate the %attributes hash, so instead we define an AUTOLOAD sub to
+# define the constant subs on demand.  To do that, we check the name of the
+# called sub against the list of attributes, and if it's an all-caps version
+# of one of them, we define the sub on the fly and then run it.
 #
 # If the environment variable ANSI_COLORS_DISABLED is set, turn all of the
 # generated subs into pass-through functions that don't add any escape
@@ -115,10 +113,9 @@ sub AUTOLOAD {
     }
 }
 
-
-############################################################################
+##############################################################################
 # Implementation (attribute string form)
-############################################################################
+##############################################################################
 
 # Return the escape code for a given set of color attributes.
 sub color {
@@ -138,8 +135,8 @@ sub color {
 }
 
 # Return a list of named color attributes for a given set of escape codes.
-# Escape sequences can be given with or without enclosing "\e[" and "m".
-# The empty escape sequence '' or "\e[m" gives an empty list of attrs.
+# Escape sequences can be given with or without enclosing "\e[" and "m".  The
+# empty escape sequence '' or "\e[m" gives an empty list of attrs.
 sub uncolor {
     my (@nums, @result);
     for (@_) {
@@ -167,11 +164,11 @@ sub uncolor {
 # Given a string and a set of attributes, returns the string surrounded by
 # escape codes to set those attributes and then clear them at the end of the
 # string.  The attributes can be given either as an array ref as the first
-# argument or as a list as the second and subsequent arguments.  If
-# $EACHLINE is set, insert a reset before each occurrence of the string
-# $EACHLINE and the starting attribute code after the string $EACHLINE, so
-# that no attribute crosses line delimiters (this is often desirable if the
-# output is to be piped to a pager or some other program).
+# argument or as a list as the second and subsequent arguments.  If $EACHLINE
+# is set, insert a reset before each occurrence of the string $EACHLINE and
+# the starting attribute code after the string $EACHLINE, so that no attribute
+# crosses line delimiters (this is often desirable if the output is to be
+# piped to a pager or some other program).
 sub colored {
     my ($string, @codes);
     if (ref $_[0]) {
@@ -192,10 +189,9 @@ sub colored {
     }
 }
 
-
-############################################################################
+##############################################################################
 # Module return value and documentation
-############################################################################
+##############################################################################
 
 # Ensure we evaluate to true.
 1;
@@ -408,9 +404,10 @@ control sequences for video terminals and peripherals.
 
 Note that not all displays are ISO 6429-compliant, or even X3.64-compliant
 (or are even attempting to be so).  This module will not work as expected on
-displays that do not honor these escape sequences, such as (reportedly) the
-"console" in at least some versions of Windows.  They may just be ignored,
-or they may display as an ESC character followed by some apparent garbage.
+displays that do not honor these escape sequences, such as cmd.exe, 4nt.exe,
+and command.com under either Windows NT or Windows 2000.  They may just be
+ignored, or they may display as an ESC character followed by some apparent
+garbage.
 
 Jean Delvare provided the following table of different common terminal
 emulators and their support for the various attributes:
@@ -441,23 +438,27 @@ supported by this module.
 =head1 SEE ALSO
 
 ECMA-048 is available on-line (at least at the time of this writing) at
-E<lt>http://www.ecma.ch/ecma1/STAND/ECMA-048.HTME<gt>.
+L<http://www.ecma.ch/ecma1/STAND/ECMA-048.HTM>.
 
 ISO 6429 is available from ISO for a charge; the author of this module does
 not own a copy of it.  Since the source material for ISO 6429 was ECMA-048
 and the latter is available for free, there seems little reason to obtain
 the ISO standard.
 
+The current version of this module is always available from its web site at
+L<http://www.eyrie.org/~eagle/software/ansicolor/>.  It is also part of the
+Perl core distribution as of 5.6.0.
+
 =head1 AUTHORS
 
 Original idea (using constants) by Zenin, reimplemented using subs by Russ
-Allbery E<lt>rra@stanford.eduE<gt>, and then combined with the original idea
-by Russ with input from Zenin.  Russ Allbery now maintains this module.
+Allbery <rra@stanford.edu>, and then combined with the original idea by Russ
+with input from Zenin.  Russ Allbery now maintains this module.
 
-=head1 LICENSE
+=head1 COPYRIGHT AND LICENSE
 
-Copyright 1996, 1997, 1998, 2000, 2001 Russ Allbery <rra@stanford.edu> and
-Zenin <zenin@bawdycaste.org>.  This program is free software; you may
+Copyright 1996, 1997, 1998, 2000, 2001, 2002 Russ Allbery <rra@stanford.edu>
+and Zenin <zenin@bawdycaste.org>.  This program is free software; you may
 redistribute it and/or modify it under the same terms as Perl itself.
 
 =cut

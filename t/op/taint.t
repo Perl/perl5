@@ -935,7 +935,7 @@ else
     test 183, $@ =~ /^Insecure \$ENV/;
 }
 if ($Is_VMS) {
-    for (184..203) {print "not ok $_ # TODO tainted %ENV warning occludes tainted arguments warning\n";}
+    for (184..205) {print "not ok $_ # TODO tainted %ENV warning occludes tainted arguments warning\n";}
 }
 else 
 {
@@ -970,4 +970,6 @@ else
     test 204, $@ eq '';
     eval { exec("lskdfj does not exist","with","args"); };
     test 205, $@ eq '';
+
+    # If you add tests here update also the above skip block for VMS.
 }

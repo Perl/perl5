@@ -1,5 +1,5 @@
 # Pod::Text::Termcap -- Convert POD data to ASCII text with format escapes.
-# $Id: Termcap.pm,v 1.9 2002/01/02 07:59:09 eagle Exp $
+# $Id: Termcap.pm,v 1.10 2002/07/15 05:46:00 eagle Exp $
 #
 # Copyright 1999, 2001, 2002 by Russ Allbery <rra@stanford.edu>
 #
@@ -30,7 +30,7 @@ use vars qw(@ISA $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 1.09;
+$VERSION = 1.10;
 
 
 ##############################################################################
@@ -128,7 +128,7 @@ __END__
 
 =head1 NAME
 
-Pod::Text::Color - Convert POD data to ASCII text with format escapes
+Pod::Text::Termcap - Convert POD data to ASCII text with format escapes
 
 =head1 SYNOPSIS
 
@@ -159,6 +159,10 @@ termcap information.
 =head1 SEE ALSO
 
 L<Pod::Text>, L<Pod::Parser>, L<Term::Cap>
+
+The current version of this module is always available from its web site at
+L<http://www.eyrie.org/~eagle/software/podlators/>.  It is also part of the
+Perl core distribution as of 5.6.0.
 
 =head1 AUTHOR
 

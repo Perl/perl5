@@ -1962,6 +1962,7 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
     while ((pid = PerlProc_fork()) < 0) {
 	if (errno != EAGAIN) {
 	    PerlLIO_close(p[This]);
+	    PerlLIO_close(p[that]);
 	    if (did_pipes) {
 		PerlLIO_close(pp[0]);
 		PerlLIO_close(pp[1]);
@@ -1976,8 +1977,6 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
 #undef THAT
 #define THIS that
 #define THAT This
-	/* Close parent's end of _the_ pipe */
-	PerlLIO_close(p[THAT]);
 	/* Close parent's end of error status pipe (if any) */
 	if (did_pipes) {
 	    PerlLIO_close(pp[0]);
@@ -1990,7 +1989,11 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
 	if (p[THIS] != (*mode == 'r')) {
 	    PerlLIO_dup2(p[THIS], *mode == 'r');
 	    PerlLIO_close(p[THIS]);
+	    if (p[THAT] != (*mode == 'r'))	/* if dup2() didn't close it */
+		PerlLIO_close(p[THAT]);	/* close parent's end of _the_ pipe */
 	}
+	else
+	    PerlLIO_close(p[THAT]);	/* close parent's end of _the_ pipe */
 #if !defined(HAS_FCNTL) || !defined(F_SETFD)
 	/* No automatic close - do it by hand */
 #  ifndef NOFILE
@@ -2012,8 +2015,6 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
     }
     /* Parent */
     do_execfree();	/* free any memory malloced by child on fork */
-    /* Close child's end of pipe */
-    PerlLIO_close(p[that]);
     if (did_pipes)
 	PerlLIO_close(pp[1]);
     /* Keep the lower of the two fd numbers */
@@ -2022,6 +2023,9 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
 	PerlLIO_close(p[This]);
 	p[This] = p[that];
     }
+    else
+	PerlLIO_close(p[that]);		/* close child's end of pipe */
+
     LOCK_FDPID_MUTEX;
     sv = *av_fetch(PL_fdpid,p[This],TRUE);
     UNLOCK_FDPID_MUTEX;
@@ -2345,6 +2349,12 @@ Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
 {
     struct sigaction act, oact;
 
+#ifdef USE_ITHREADS
+    /* only "parent" interpreter can diddle signals */
+    if (PL_curinterp != aTHX)
+	return SIG_ERR;
+#endif
+
     act.sa_handler = handler;
     sigemptyset(&act.sa_mask);
     act.sa_flags = 0;
@@ -2379,6 +2389,12 @@ Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 {
     struct sigaction act;
 
+#ifdef USE_ITHREADS
+    /* only "parent" interpreter can diddle signals */
+    if (PL_curinterp != aTHX)
+	return -1;
+#endif
+
     act.sa_handler = handler;
     sigemptyset(&act.sa_mask);
     act.sa_flags = 0;
@@ -2397,6 +2413,12 @@ Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 int
 Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 {
+#ifdef USE_ITHREADS
+    /* only "parent" interpreter can diddle signals */
+    if (PL_curinterp != aTHX)
+	return -1;
+#endif
+
     return sigaction(signo, save, (struct sigaction *)NULL);
 }
 
@@ -2405,6 +2427,12 @@ Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 Sighandler_t
 Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
 {
+#ifdef USE_ITHREADS
+    /* only "parent" interpreter can diddle signals */
+    if (PL_curinterp != aTHX)
+	return SIG_ERR;
+#endif
+
     return PerlProc_signal(signo, handler);
 }
 
@@ -2423,6 +2451,12 @@ Perl_rsignal_state(pTHX_ int signo)
 {
     Sighandler_t oldsig;
 
+#ifdef USE_ITHREADS
+    /* only "parent" interpreter can diddle signals */
+    if (PL_curinterp != aTHX)
+	return SIG_ERR;
+#endif
+
     sig_trapped = 0;
     oldsig = PerlProc_signal(signo, sig_trap);
     PerlProc_signal(signo, oldsig);
@@ -2434,6 +2468,11 @@ Perl_rsignal_state(pTHX_ int signo)
 int
 Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 {
+#ifdef USE_ITHREADS
+    /* only "parent" interpreter can diddle signals */
+    if (PL_curinterp != aTHX)
+	return -1;
+#endif
     *save = PerlProc_signal(signo, handler);
     return (*save == SIG_ERR) ? -1 : 0;
 }
@@ -2441,6 +2480,11 @@ Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 int
 Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 {
+#ifdef USE_ITHREADS
+    /* only "parent" interpreter can diddle signals */
+    if (PL_curinterp != aTHX)
+	return -1;
+#endif
     return (PerlProc_signal(signo, *save) == SIG_ERR) ? -1 : 0;
 }
 

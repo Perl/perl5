@@ -4886,66 +4886,146 @@ permits these unnecessary but widely-supported conversions:
    %O	a synonym for %lo
    %F	a synonym for %f
 
-Note that the number of exponent digits in the scientific notation by
-C<%e>, C<%E>, C<%g> and C<%G> for numbers with the modulus of the
+Note that the number of exponent digits in the scientific notation produced
+by C<%e>, C<%E>, C<%g> and C<%G> for numbers with the modulus of the
 exponent less than 100 is system-dependent: it may be three or less
 (zero-padded as necessary).  In other words, 1.23 times ten to the
 99th may be either "1.23e99" or "1.23e099".
 
-Perl permits the following universally-known flags between the C<%>
-and the conversion letter:
+Between the C<%> and the format letter, you may specify a number of
+additional attributes controlling the interpretation of the format.
+In order, these are:
 
+=over 4
+
+=item format parameter index
+
+An explicit format parameter index, such as C<2$>. By default sprintf
+will format the next unused argument in the list, but this allows you
+to take the arguments out of order. Eg:
+
+  printf '%2$d %1$d', 12, 34;      # prints "34 12"
+  printf '%3$d %d %1$d', 1, 2, 3;  # prints "3 1 1"
+
+=item flags
+
+one or more of:
    space   prefix positive number with a space
    +       prefix positive number with a plus sign
    -       left-justify within the field
    0       use zeros, not spaces, to right-justify
-   #       prefix non-zero octal with "0", non-zero hex with "0x"
-   number  minimum field width
-   .number "precision": digits after decimal point for
-           floating-point, max length for string, minimum length
-           for integer
-   l       interpret integer as C type "long" or "unsigned long"
-   h       interpret integer as C type "short" or "unsigned short"
-           If no flags, interpret integer as C type "int" or "unsigned"
+   #       prefix non-zero octal with "0", non-zero hex with "0x",
+           non-zero binary with "0b"
 
-Perl supports parameter ordering, in other words, fetching the
-parameters in some explicitly specified "random" ordering as opposed
-to the default implicit sequential ordering.  The syntax is, instead
-of the C<%> and C<*>, to use C<%>I<digits>C<$> and C<*>I<digits>C<$>,
-where the I<digits> is the wanted index, from one upwards.  For example:
+For example:
 
-   printf "%2\$d %1\$d\n", 12, 34;		# will print "34 12\n"
-   printf "%*2\$d\n",      12, 3;		# will print " 12\n"
+  printf '<% d>', 12;   # prints "< 12>"
+  printf '<%+d>', 12;   # prints "<+12>"
+  printf '<%6s>', 12;   # prints "<    12>"
+  printf '<%-6s>', 12;  # prints "<12    >"
+  printf '<%06s>', 12;  # prints "<000012>"
+  printf '<%#x>', 12;   # prints "<0xc>"
 
-Note that using the reordering syntax does not interfere with the usual
-implicit sequential fetching of the parameters:
+=item vector flag
 
-   printf "%2\$d %d\n",    12, 34;		# will print "34 12\n"
-   printf "%2\$d %d %d\n", 12, 34;		# will print "34 12 34\n"
-   printf "%3\$d %d %d\n", 12, 34, 56;		# will print "56 12 34\n"
-   printf "%2\$*3\$d %d\n", 12, 34, 3;		# will print " 34 12\n"
-   printf "%*3\$2\$d %d\n", 12, 34, 3;		# will print " 34 12\n"
+The vector flag C<v>, optionally specifying the join string to use.
+This flag tells perl to interpret the supplied string as a vector
+of integers, one for each character in the string, separated by
+a given string (a dot C<.> by default). This can be useful for
+displaying ordinal values of characters in arbitrary strings:
 
-There are also two Perl-specific flags:
+  printf "version is v%vd\n", $^V;     # Perl's version
 
-    V       interpret integer as Perl's standard integer type
-    v       interpret string as a vector of integers, output as
-            numbers separated either by dots, or by an arbitrary
-	    string received from the argument list when the flag
-	    is preceded by "*"
+Put an asterisk C<*> before the C<v> to override the string to
+use to separate the numbers:
 
-Where a number would appear in the flags, an asterisk (C<*>) may be
-used instead, in which case Perl uses the next item in the parameter
-list as the given number (that is, as the field width or precision).
+  printf "address is %*vX\n", ":", $addr;   # IPv6 address
+  printf "bits are %0*v8b\n", " ", $bits;   # random bitstring
+
+You can also explicitly specify the argument number to use for
+the join string using eg C<*2$v>:
+
+  printf '%*4$vX %*4$vX %*4$vX', @addr[1..3], ":";   # 3 IPv6 addresses
+
+=item (minimum) width
+
+Arguments are usually formatted to be only as wide as required to
+display the given value. You can override the width by putting
+a number here, or get the width from the next argument (with C<*>)
+or from a specified argument (with eg C<2$>):
+
+  printf '<%s>', "a";       # prints "<a>"
+  printf '<%6s>', "a";      # prints "<     a>"
+  printf '<%*s>', 6, "a";   # prints "<     a>"
+  printf '<%*2$s>', "a", 6; # prints "<     a>"
+  printf '<%2s>', "long";   # prints "<long>" (does not truncate)
+
 If a field width obtained through C<*> is negative, it has the same
 effect as the C<-> flag: left-justification.
 
-The C<v> flag is useful for displaying ordinal values of characters
-in arbitrary strings:
+=item precision, or maximum width
 
-    printf "version is v%vd\n", $^V;		# Perl's version
-    printf "address is %*vX\n", ":", $addr;	# IPv6 address
-    printf "bits are %*vb\n", " ", $bits;	# random bitstring
+You can specify a precision (for numeric converions) or a maximum
+width (for string conversions) by specifying a C<.> followed by a number.
+For floating point formats, this specifies the number of decimal places
+to show (the default being 6), eg:
+
+  # these examples are subject to system-specific variation
+  printf '<%f>', 1;    # prints "<1.000000>"
+  printf '<%.1f>', 1;  # prints "<1.0>"
+  printf '<%.0f>', 1;  # prints "<1>"
+  printf '<%e>', 10;   # prints "<1.000000e+01>"
+  printf '<%.1e>', 10; # prints "<1.0e+01>"
+
+For integer conversions, specifying a precision implies that the
+output of the number itself should be zero-padded to this width:
+
+  printf '<%.6x>', 1;      # prints "<000001>"
+  printf '<%#.6x>', 1;     # prints "<0x000001>"
+  printf '<%-10.6x>', 1;   # prints "<000001    >"
+
+For string conversions, specifying a precision truncates the string
+to fit in the specified width:
+
+  printf '<%.5s>', "truncated";   # prints "<trunc>"
+  printf '<%10.5s>', "truncated"; # prints "<     trunc>"
+
+You can also get the precision from the next argument using C<.*>:
+
+  printf '<%.6x>', 1;       # prints "<000001>"
+  printf '<%.*x>', 6, 1;    # prints "<000001>"
+
+You cannot currently get the precision from a specified number,
+but it is intended that this will be possible in the future using
+eg C<.*2$>:
+
+  printf '<%.*2$x>', 1, 6;   # INVALID, but in future will print "<000001>"
+
+=item size
+
+For numeric conversions, you can specify the size to interpret the
+number as using C<l>, C<h>, C<V>, C<q>, C<L> or C<ll>. For integer
+conversions, numbers are usually assumed to be whatever the default
+integer size is on your platform (usually 32 or 64 bits), but you
+can override this to use instead one of the standard C types, as
+supported by the compiler used to build Perl:
+
+   l           interpret integer as C type "long" or "unsigned long"
+   h           interpret integer as C type "short" or "unsigned short"
+   q, L or ll  interpret integer as C type "long long" or "unsigned long long"
+               (if your platform supports such a type, else it is an error)
+
+For floating point conversions, numbers are usually assumed to be
+the default floating point size on your platform (double or long double),
+but you can force 'long double' with C<q>, C<L> or C<ll> if your
+platform supports them.
+
+The size specifier 'V' has no effect for Perl code, but it supported
+for compatibility with XS code; it means 'use the standard size for
+a Perl integer (or floating-point number)', which is already the
+default for Perl code.
+
+=back
 
 If C<use locale> is in effect, the character used for the decimal
 point in formatted real numbers is affected by the LC_NUMERIC locale.
