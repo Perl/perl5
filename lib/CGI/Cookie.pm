@@ -13,7 +13,7 @@ package CGI::Cookie;
 # wish, but if you redistribute a modified version, please attach a note
 # listing the modifications you have made.
 
-$CGI::Cookie::VERSION='1.24_01';
+$CGI::Cookie::VERSION='1.24';
 
 use CGI::Util qw(rearrange unescape escape);
 use overload '""' => \&as_string,
@@ -407,7 +407,7 @@ same semantics as fetch(), but performs no unescaping.
 You may also retrieve cookies that were stored in some external
 form using the parse() class method:
 
-       $COOKIES = `cat /some/path/Cookie_stash`;
+       $COOKIES = `cat /usr/tmp/Cookie_stash`;
        %cookies = parse CGI::Cookie($COOKIES);
 
 If you are in a mod_perl environment, you can save some overhead by

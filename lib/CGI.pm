@@ -19,7 +19,7 @@ use Carp 'croak';
 #   http://stein.cshl.org/WWW/software/CGI/
 
 $CGI::revision = '$Id: CGI.pm,v 1.151 2004/01/13 16:28:35 lstein Exp $';
-$CGI::VERSION=3.03;
+$CGI::VERSION=3.04;
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -606,7 +606,7 @@ sub init {
     # Special case.  Erase everything if there is a field named
     # .defaults.
     if ($self->param('.defaults')) {
-	undef %{$self};
+      $self->delete_all();
     }
 
     # Associative array containing our defined fieldnames
