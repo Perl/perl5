@@ -39,6 +39,8 @@
 #ifndef CHAR_BIT
 # define CHAR_BIT	8
 #endif
+/* Maximum number of bytes to which a byte can grow due to upgrade */
+#define UTF8_EXPAND	2
 
 /*
  * Offset for integer pack/unpack.
@@ -648,7 +650,7 @@ STMT_START {						\
 #define GROWING(utf8, cat, start, cur, in_len)	\
 STMT_START {					\
     STRLEN glen = (in_len);			\
-    if (utf8) glen *= 2;			\
+    if (utf8) glen *= UTF8_EXPAND;		\
     if ((cur) + glen >= (start) + SvLEN(cat)) {	\
 	(start) = sv_exp_grow(aTHX_ cat, glen);	\
 	(cur) = (start) + SvCUR(cat);		\
@@ -659,7 +661,7 @@ STMT_START {					\
 STMT_START {					\
     STRLEN glen = (in_len);			\
     STRLEN gl = glen;				\
-    if (utf8) gl *= 2;				\
+    if (utf8) gl *= UTF8_EXPAND;		\
     if ((cur) + gl >= (start) + SvLEN(cat)) {	\
         *cur = '\0';				\
         SvCUR(cat) = (cur) - (start);		\
@@ -2335,8 +2337,7 @@ marked_upgrade(pTHX_ SV *sv, tempsym_t *sym_ptr) {
 	return;
     }
 
-    /* We assume a char translates to at most 2 UTF-8 bytes */
-    len = (from_end-from_ptr)*2+(from_ptr-from_start)+1;
+    len = (from_end-from_ptr)*UTF8_EXPAND+(from_ptr-from_start)+1;
     New('U', to_start, len, char);
     Copy(from_start, to_start, from_ptr-from_start, char);
     to_ptr = to_start + (from_ptr-from_start);
@@ -2643,9 +2644,10 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    fromlen = len;
 		    if (datumtype == 'Z' && fromlen > 0) fromlen--;
 		}
-		/* assumes a byte expands to at most 2 bytes on upgrade:
-		   expected_length <= from_len*2 + (len-from_len) */
-		GROWING(0, cat, start, cur, fromlen+len);
+		/* assumes a byte expands to at most UTF8_EXPAND bytes on 
+		   upgrade, so:
+		   expected_length <= from_len*UTF8_EXPAND + (len-from_len) */
+		GROWING(0, cat, start, cur, fromlen*(UTF8_EXPAND-1)+len);
 		len -= fromlen;
 		while (fromlen > 0) {
 		    cur = uvchr_to_utf8(cur, * (U8 *) aptr);
@@ -2921,11 +2923,12 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		      endb = uvuni_to_utf8_flags(buffer, auv,
 						     ckWARN(WARN_UTF8) ?
 						0 : UNICODE_ALLOW_ANY);
-		      if (cur >= end-(endb-buffer)*2) {
+		      if (cur+(endb-buffer)*UTF8_EXPAND >= end) {
 			  *cur = '\0';
 			  SvCUR(cat) = cur - start;
-			  GROWING(0, cat, start, cur, len+(endb-buffer)*2);
-			  end = start+SvLEN(cat)-UTF8_MAXLEN;
+			  GROWING(0, cat, start, cur, 
+				  len+(endb-buffer)*UTF8_EXPAND);
+			  end = start+SvLEN(cat);
 		      }
 		      bytes_to_uni(aTHX_ buffer, endb-buffer, &cur);
 		  } else {
