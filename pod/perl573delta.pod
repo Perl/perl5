@@ -16,11 +16,12 @@ see L<perl572delta>.)
 =head1 Changes
 
 This is just a selected list of some of the more notable changes.
-The numbers refer to the Perl repository change numbers; see L<Changes58>
-(or L<Changes> in Perl 5.8.1).  In addition to these changes, lots of
-work took place in integrating threads, PerlIO, and Unicode; and general
-code cleanup; and last but not least and porting to non-UNIX lands like
-Win32, VMS, Cygwin, DJGPP, VOS, MacOS Classic, and EBCDIC.
+The numbers refer to the Perl repository change numbers; see
+L<Changes58> (or L<Changes> in Perl 5.8.1).  In addition to these
+changes, lots of work took place in integrating threads, PerlIO, and
+Unicode; and general code cleanup; and last but not least and porting
+to non-UNIX lands like Win32, VMS, Cygwin, DJGPP, VOS, MacOS Classic,
+and EBCDIC.
 
 =over 4
 
@@ -34,11 +35,11 @@ add DEL to [:cntrl:]
 
 =item 11375
 
-make h2ph understand constants like 1234L
+make h2ph understand constants like 1234L and 5678LL
 
 =item 11405
 
-fix bugs in handling of the virtualized environment under Win32
+Win32: fix bugs in handling of the virtualized environment
 
 =item 11410
 
@@ -50,8 +51,8 @@ make perl fork() safe even on platforms that don't have pthread_atfork()
 
 =item 11459
 
-make switching optimization levels during Perl builds easier via
-the OPTIMIZE environment variable
+make switching optimization and debugging levels during Perl builds
+easier via the OPTIMIZE environment variable
 
 =item 11475
 
@@ -67,7 +68,8 @@ allow installing extra modules or bundles when building Perl
 
 =item 11516
 
-add -Wall in cflags when compiling with gcc to weed our dubious C practices
+add -Wall in cflags when compiling with gcc to weed out dubious
+C practices
 
 =item 11541
 
@@ -75,15 +77,16 @@ pluggable optimizer
 
 =item 11549
 
-integrate to WinCE port
+WinCE: integrate the port
 
 =item 11589
 
-4-arg select was broken on windows
+Win32: 4-arg select was broken
 
 =item 11594
 
-introduce the perlivp utility
+introduce the perlivp utility for verifying the Perl installation
+(IVP = Installation Verification Procedure)
 
 =item 11623
 
@@ -100,8 +103,9 @@ document that use utf8 is not the right way most of the time
 
 =item 11656
 
-allow builing perl with -DUSE_UTF8_SCRIPTS which makes UTF-8 the
-default script encoding
+allow builing perl with -DUSE_UTF8_SCRIPTS which makes UTF-8
+the default script encoding (not the default since that would
+break all scripts having legacy eight-bit data in them)
 
 =item 11725
 
@@ -113,7 +117,7 @@ document the coderef-in-@INC feature
 
 =item 11794
 
-modulu preserving 64-bit integers
+modulo (%) preserving 64-bit integers
 
 =item 11825
 
@@ -137,7 +141,7 @@ fix unpack U to be the reverse of pack U
 
 =item 12056
 
-waitpid enchancements for VMS
+VMS: waitpid enhancements
 
 =item 12180
 
