@@ -10154,6 +10154,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     Copy(proto_perl->Inexttype, PL_nexttype, 5,	I32);
     PL_nexttoke		= proto_perl->Inexttoke;
 
+    /* XXX This is probably masking the deeper issue of why
+     * SvANY(proto_perl->Ilinestr) can be NULL at this point. For test case:
+     * http://archive.develooper.com/perl5-porters%40perl.org/msg83298.html
+     * (A little debugging with a watchpoint on it may help.)
+     */
     if (SvANY(proto_perl->Ilinestr)) {
 	PL_linestr		= sv_dup_inc(proto_perl->Ilinestr, param);
 	i = proto_perl->Ibufptr - SvPVX(proto_perl->Ilinestr);
@@ -10192,6 +10197,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_padix_floor		= proto_perl->Ipadix_floor;
     PL_pad_reset_pending	= proto_perl->Ipad_reset_pending;
 
+    /* XXX See comment on SvANY(proto_perl->Ilinestr) above */
     if (SvANY(proto_perl->Ilinestr)) {
 	i = proto_perl->Ilast_uni - SvPVX(proto_perl->Ilinestr);
 	PL_last_uni		= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
