@@ -1,5 +1,5 @@
 
-# Time-stamp: "2002-02-02 20:43:03 MST"
+# Time-stamp: "2003-07-20 07:44:42 ADT"
 # Sean M. Burke <sburke@cpan.org>
 
 require 5.000;
@@ -17,7 +17,7 @@ require Exporter;
                );
 %EXPORT_TAGS = ('ALL' => \@EXPORT_OK);
 
-$VERSION = "0.27";
+$VERSION = "0.28";
 
 =head1 NAME
 
@@ -529,9 +529,16 @@ sub encode_language_tag {
   #  we can just handle them here with regexps.
   $tag =~ s/^iw\b/he/i; # Hebrew
   $tag =~ s/^in\b/id/i; # Indonesian
+  $tag =~ s/^cre\b/cr/i; # Cree
+  $tag =~ s/^jw\b/jv/i; # Javanese
   $tag =~ s/^[ix]-lux\b/lb/i;  # Luxemburger
   $tag =~ s/^[ix]-navajo\b/nv/i;  # Navajo
   $tag =~ s/^ji\b/yi/i;  # Yiddish
+  # SMB 2003 -- Hm.  There's a bunch of new XXX->YY variances now,
+  #  but maybe they're all so obscure I can ignore them.   "Obscure"
+  #  meaning either that the language is obscure, and/or that the
+  #  XXX form was extant so briefly that it's unlikely it was ever
+  #  used.  I hope.
   #
   # These go FROM the simplex to complex form, to get
   #  similarity-comparison right.  And that's okay, since
@@ -770,19 +777,16 @@ Continuations".
 * Locale::Codes, in
 C<http://www.perl.com/CPAN/modules/by-module/Locale/>
 
-* ISO 639, "Code for the representation of names of languages",
-C<http://www.indigo.ie/egt/standards/iso639/iso639-1-en.html>
-
 * ISO 639-2, "Codes for the representation of names of languages",
-including three-letter codes,
-C<http://lcweb.loc.gov/standards/iso639-2/bibcodes.html>
+including two-letter and three-letter codes,
+C<http://www.loc.gov/standards/iso639-2/langcodes.html>
 
 * The IANA list of registered languages (hopefully up-to-date),
-C<ftp://ftp.isi.edu/in-notes/iana/assignments/languages/>
+C<http://www.iana.org/assignments/language-tags>
 
 =head1 COPYRIGHT
 
-Copyright (c) 1998-2001 Sean M. Burke. All rights reserved.
+Copyright (c) 1998-2003 Sean M. Burke. All rights reserved.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
