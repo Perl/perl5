@@ -781,9 +781,9 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 {
 	I32 doevery = (prog->reganch & ROPT_SKIP) == 0;
 	char *m;
-	int ln;
-	int c1;
-	int c2;
+	STRLEN ln;
+	unsigned int c1;
+	unsigned int c2;
 	char *e;
 	register I32 tmp = 1;	/* Scratch variable? */
 
@@ -804,7 +804,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    break;
 	case ANYOF:
 	    while (s < strend) {
-		if (REGINCLASS(c, *s)) {
+		if (REGINCLASS(c, *(U8*)s)) {
 		    if (tmp && (norun || regtry(prog, s)))
 			goto got_it;
 		    else
@@ -818,13 +818,13 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	case EXACTF:
 	    m = STRING(c);
 	    ln = STR_LEN(c);
-	    c1 = *m;
+	    c1 = *(U8*)m;
 	    c2 = PL_fold[c1];
 	    goto do_exactf;
 	case EXACTFL:
 	    m = STRING(c);
 	    ln = STR_LEN(c);
-	    c1 = *m;
+	    c1 = *(U8*)m;
 	    c2 = PL_fold_locale[c1];
 	  do_exactf:
 	    e = strend - ln;
@@ -834,7 +834,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    /* Here it is NOT UTF!  */
 	    if (c1 == c2) {
 		while (s <= e) {
-		    if ( *s == c1
+		    if ( *(U8*)s == c1
 			 && (ln == 1 || !(OP(c) == EXACTF
 					  ? ibcmp(s, m, ln)
 					  : ibcmp_locale(s, m, ln)))
@@ -844,7 +844,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		}
 	    } else {
 		while (s <= e) {
-		    if ( (*s == c1 || *s == c2)
+		    if ( (*(U8*)s == c1 || *(U8*)s == c2)
 			 && (ln == 1 || !(OP(c) == EXACTF
 					  ? ibcmp(s, m, ln)
 					  : ibcmp_locale(s, m, ln)))

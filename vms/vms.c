@@ -2,7 +2,7 @@
  *
  * VMS-specific routines for perl5
  *
- * Last revised: 15-Aug-1999 by Charles Bailey  bailey@newman.upenn.edu
+ * Last revised: 24-Feb-2000 by Charles Bailey  bailey@newman.upenn.edu
  * Version: 5.5.60
  */
 
@@ -94,6 +94,9 @@ static bool will_taint = FALSE;  /* tainting active, but no PL_curinterp yet */
 /* True if we shouldn't treat barewords as logicals during directory */
 /* munching */ 
 static int no_translate_barewords;
+
+/* Temp for subprocess commands */
+static struct dsc$descriptor_s VMScmd = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,Nullch};
 
 /*{{{int vmstrnenv(const char *lnm, char *eqv, unsigned long int idx, struct dsc$descriptor_s **tabvec, unsigned long int flags) */
 int
@@ -270,6 +273,8 @@ Perl_my_getenv(pTHX_ const char *lnm, bool sys)
         idx = strtoul(cp2+1,NULL,0);
         lnm = uplnm;
       }
+      /* Impose security constraints only if tainting */
+      if (sys) sys = PL_curinterp ? PL_tainting : will_taint;
       if (vmstrnenv(lnm,eqv,idx,
                     sys ? fildev : NULL,
 #ifdef SECURE_INTERNAL_GETENV
@@ -316,6 +321,8 @@ my_getenv_len(const char *lnm, unsigned long *len, bool sys)
         idx = strtoul(cp2+1,NULL,0);
         lnm = buf;
       }
+      /* Impose security constraints only if tainting */
+      if (sys) sys = PL_curinterp ? PL_tainting : will_taint;
       if ((*len = vmstrnenv(lnm,buf,idx,
                            sys ? fildev : NULL,
 #ifdef SECURE_INTERNAL_GETENV
@@ -1025,13 +1032,16 @@ popen_completion_ast(struct pipe_details *thispipe)
   }
 }
 
+static unsigned long int setup_cmddsc(char *cmd, int check_img);
+static void vms_execfree();
+
 static PerlIO *
 safe_popen(char *cmd, char *mode)
 {
     static int handler_set_up = FALSE;
     char mbxname[64];
     unsigned short int chan;
-    unsigned long int flags=1;  /* nowait - gnu c doesn't allow &1 */
+    unsigned long int sts, flags=1;  /* nowait - gnu c doesn't allow &1 */
     dTHX;
     struct pipe_details *info;
     struct dsc$descriptor_s namdsc = {sizeof mbxname, DSC$K_DTYPE_T,
@@ -1040,13 +1050,7 @@ safe_popen(char *cmd, char *mode)
                                       DSC$K_CLASS_S, 0};
                             
 
-    cmddsc.dsc$w_length=strlen(cmd);
-    cmddsc.dsc$a_pointer=cmd;
-    if (cmddsc.dsc$w_length > 255) {
-      set_errno(E2BIG); set_vaxc_errno(CLI$_BUFOVF);
-      return Nullfp;
-    }
-
+    if (!(setup_cmddsc(cmd,0) & 1)) { set_errno(EINVAL); return Nullfp; }
     New(1301,info,1,struct pipe_details);
 
     /* create mailbox */
@@ -1066,16 +1070,17 @@ safe_popen(char *cmd, char *mode)
     info->completion=0;
         
     if (*mode == 'r') {
-      _ckvmssts(lib$spawn(&cmddsc, &nl_desc, &namdsc, &flags,
+      _ckvmssts(lib$spawn(&VMScmd, &nl_desc, &namdsc, &flags,
                      0  /* name */, &info->pid, &info->completion,
                      0, popen_completion_ast,info,0,0,0));
     }
     else {
-      _ckvmssts(lib$spawn(&cmddsc, &namdsc, 0 /* sys$output */, &flags,
+      _ckvmssts(lib$spawn(&VMScmd, &namdsc, 0 /* sys$output */, &flags,
                      0  /* name */, &info->pid, &info->completion,
                      0, popen_completion_ast,info,0,0,0));
     }
 
+    vms_execfree();
     if (!handler_set_up) {
       _ckvmssts(sys$dclexh(&pipe_exitblock));
       handler_set_up = TRUE;
@@ -2116,16 +2121,12 @@ static char *do_tovmsspec(char *path, char *buf, int ts) {
     else if (!infront && *cp2 == '.') {
       if (cp2+1 == dirend || *(cp2+1) == '\0') { cp2++; break; }
       else if (*(cp2+1) == '/') cp2++;   /* skip over "./" - it's redundant */
-      else if (*(cp2+1) == '.' && (*(cp2+2) == '/' || *(cp2+2) == '\0')) {
-        if (*(cp1-1) == '-' || *(cp1-1) == '[') *(cp1++) = '-'; /* handle "../" */
+      else if (*(cp2+1) == '.' && (*(cp2+2) == '/' || *(cp2+2) == '\0')) { /* handle "../" */
+        if (*(cp1-1) == '-' || *(cp1-1) == '[') *(cp1++) = '-'; 
         else if (*(cp1-2) == '[') *(cp1-1) = '-';
-        else {  /* back up over previous directory name */
-          cp1--;
-          while (*(cp1-1) != '.' && *(cp1-1) != '[') cp1--;
-          if (*(cp1-1) == '[') {
-            memcpy(cp1,"000000.",7);
-            cp1 += 7;
-          }
+        else {
+/*          if (*(cp1-1) != '.') *(cp1++) = '.'; */
+          *(cp1++) = '-';
         }
         cp2 += 2;
         if (cp2 == dirend) break;
@@ -3286,12 +3287,10 @@ my_vfork()
 /*}}}*/
 
 
-static struct dsc$descriptor_s VMScmd = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,Nullch};
-
 static void
 vms_execfree() {
   if (PL_Cmd) {
-    Safefree(PL_Cmd);
+    if (PL_Cmd != VMScmd.dsc$a_pointer) Safefree(PL_Cmd);
     PL_Cmd = Nullch;
   }
   if (VMScmd.dsc$a_pointer) {
@@ -3349,38 +3348,69 @@ setup_argstr(SV *really, SV **mark, SV **sp)
 static unsigned long int
 setup_cmddsc(char *cmd, int check_img)
 {
-  char resspec[NAM$C_MAXRSS+1];
+  char vmsspec[NAM$C_MAXRSS+1], resspec[NAM$C_MAXRSS+1];
   $DESCRIPTOR(defdsc,".EXE");
   $DESCRIPTOR(resdsc,resspec);
   struct dsc$descriptor_s imgdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
   unsigned long int cxt = 0, flags = 1, retsts = SS$_NORMAL;
-  register char *s, *rest, *cp;
-  register int isdcl = 0;
+  register char *s, *rest, *cp, *wordbreak;
+  register int isdcl;
   dTHX;
 
+  if (strlen(cmd) >
+      (sizeof(vmsspec) > sizeof(resspec) ? sizeof(resspec) : sizeof(vmsspec)))
+    return LIB$_INVARG;
   s = cmd;
   while (*s && isspace(*s)) s++;
-  if (check_img) {
-    if (*s == '$') { /* Check whether this is a DCL command: leading $ and */
-      isdcl = 1;     /* no dev/dir separators (i.e. not a foreign command) */
-      for (cp = s; *cp && *cp != '/' && !isspace(*cp); cp++) {
-        if (*cp == ':' || *cp == '[' || *cp == '<') {
-          isdcl = 0;
-          break;
-        }
+
+  if (*s == '@' || *s == '$') {
+    vmsspec[0] = *s;  rest = s + 1;
+    for (cp = &vmsspec[1]; *rest && isspace(*rest); rest++,cp++) *cp = *rest;
+  }
+  else { cp = vmsspec; rest = s; }
+  if (*rest == '.' || *rest == '/') {
+    char *cp2;
+    for (cp2 = resspec;
+         *rest && !isspace(*rest) && cp2 - resspec < sizeof resspec;
+         rest++, cp2++) *cp2 = *rest;
+    *cp2 = '\0';
+    if (do_tovmsspec(resspec,cp,0)) { 
+      s = vmsspec;
+      if (*rest) {
+        for (cp2 = vmsspec + strlen(vmsspec);
+             *rest && cp2 - vmsspec < sizeof vmsspec;
+             rest++, cp2++) *cp2 = *rest;
+        *cp2 = '\0';
       }
     }
   }
-  else isdcl = 1;
+  /* Intuit whether verb (first word of cmd) is a DCL command:
+   *   - if first nonspace char is '@', it's a DCL indirection
+   * otherwise
+   *   - if verb contains a filespec separator, it's not a DCL command
+   *   - if it doesn't, caller tells us whether to default to a DCL
+   *     command, or to a local image unless told it's DCL (by leading '$')
+   */
+  if (*s == '@') isdcl = 1;
+  else {
+    register char *filespec = strpbrk(s,":<[.;");
+    rest = wordbreak = strpbrk(s," \"\t/");
+    if (!wordbreak) wordbreak = s + strlen(s);
+    if (*s == '$') check_img = 0;
+    if (filespec && (filespec < wordbreak)) isdcl = 0;
+    else isdcl = !check_img;
+  }
+
   if (!isdcl) {
-    cmd = s;
-    while (*s && !isspace(*s)) s++;
-    rest = *s ? s : 0;
-    imgdsc.dsc$a_pointer = cmd;
-    imgdsc.dsc$w_length = s - cmd;
+    imgdsc.dsc$a_pointer = s;
+    imgdsc.dsc$w_length = wordbreak - s;
     retsts = lib$find_file(&imgdsc,&resdsc,&cxt,&defdsc,0,0,&flags);
-    if (retsts & 1) {
+    if (!(retsts & 1) && *s == '$') {
+      imgdsc.dsc$a_pointer++; imgdsc.dsc$w_length--;
+      retsts = lib$find_file(&imgdsc,&resdsc,&cxt,&defdsc,0,0,&flags);
       _ckvmssts(lib$find_file_end(&cxt));
+    }
+    if (retsts & 1) {
       s = resspec;
       while (*s && !isspace(*s)) s++;
       *s = '\0';
@@ -3397,10 +3427,7 @@ setup_cmddsc(char *cmd, int check_img)
   }
   /* It's either a DCL command or we couldn't find a suitable image */
   VMScmd.dsc$w_length = strlen(cmd);
-  if (cmd == PL_Cmd) {
-    VMScmd.dsc$a_pointer = PL_Cmd;
-    PL_Cmd = Nullch;  /* Don't try to free twice in vms_execfree() */
-  }
+  if (cmd == PL_Cmd) VMScmd.dsc$a_pointer = PL_Cmd;
   else VMScmd.dsc$a_pointer = savepvn(cmd,VMScmd.dsc$w_length);
   if (!(retsts & 1)) {
     /* just hand off status values likely to be due to user error */

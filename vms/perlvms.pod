@@ -194,11 +194,13 @@ so we can try to work around them.
 =head2 Wildcard expansion
 
 File specifications containing wildcards are allowed both on 
-the command line and within Perl globs (e.g. <CE<lt>*.cE<gt>>).  If 
+the command line and within Perl globs (e.g. <CE<lt>*.cE<gt>>).  If
 the wildcard filespec uses VMS syntax, the resultant 
 filespecs will follow VMS syntax; if a Unix-style filespec is 
 passed in, Unix-style filespecs will be returned.
 
+In both cases, VMS wildcard expansion is performed. (csh-style
+wildcard expansion is available if you use C<File::Glob::glob>.)
 If the wildcard filespec contains a device or directory 
 specification, then the resultant filespecs will also contain 
 a device and directory; otherwise, device and directory 
@@ -225,9 +227,9 @@ subprocesses around when Perl exits.
 
 You may also use backticks to invoke a DCL subprocess, whose 
 output is used as the return value of the expression.  The 
-string between the backticks is passed directly to lib$spawn 
-as the command to execute.  In this case, Perl will wait for 
-the subprocess to complete before continuing. 
+string between the backticks is handled as if it were the
+argument to the C<system> operator (see below).  In this case,
+Perl will wait for the subprocess to complete before continuing. 
 
 =head1 PERL5LIB and PERLLIB
 
@@ -456,7 +458,7 @@ handlers to the subprocess are limited.)
 If the call to C<exec> does not follow a call to C<fork>, it 
 will cause Perl to exit, and to invoke the command given as 
 an argument to C<exec> via C<lib$do_command>.  If the argument 
-begins with a '$' (other than as part of a filespec), then it 
+begins with '@' or '$' (other than as part of a filespec), then it 
 is executed as a DCL command.  Otherwise, the first token on 
 the command line is treated as the filespec of an image to 
 run, and an attempt is made to invoke it (using F<.Exe> and 
@@ -549,7 +551,14 @@ though, so caveat scriptor.
 The C<system> operator creates a subprocess, and passes its 
 arguments to the subprocess for execution as a DCL command.  
 Since the subprocess is created directly via C<lib$spawn()>, any 
-valid DCL command string may be specified.  If LIST consists
+valid DCL command string may be specified.  If the string begins with
+'@', it is treated as a DCL command unconditionally.  Otherwise, if
+the first token contains a character used as a delimiter in file
+specification (e.g. C<:> or C<]>), an attempt is made to expand it
+using  a default type of F<.Exe> and the process defaults, and if
+successful, the resulting file is invoked via C<MCR>. This allows you
+to invoke an image directly simply by passing the file specification
+to C<system>, a common Unixish idiom.  If LIST consists
 of the empty string, C<system> spawns an interactive DCL subprocess,
 in the same fashion as typiing B<SPAWN> at the DCL prompt.
 Perl waits for the subprocess to complete before continuing
@@ -846,11 +855,10 @@ problems.
 
 =head1 Revision date
 
-This document was last updated on 26-Feb-1998, for Perl 5, 
-patchlevel 5.
+This document was last updated on 26-Feb-2000, for Perl 5, 
+patchlevel 6.
 
 =head1 AUTHOR
 
-Charles Bailey  bailey@cor.newman.upenn.edu
-
-Last revision by Dan Sugalski  sugalskd@ous.edu
+Charles Bailey  <bailey@cor.newman.upenn.edu>
+Dan Sugalski  <dan@sidhe.org>
