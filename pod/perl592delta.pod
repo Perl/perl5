@@ -308,6 +308,10 @@ upgrades.
 F<t/io/dup.t>, F<t/io/open.t> and F<lib/ExtUtils/t/Constant.t> fail some
 tests on some BSD flavours.
 
+perl fails to compile on Win32 with MinGW, if you don't have the Cygwin
+tools installed, because the makefile currently relies on the presence of
+tr(1).
+
 =head1 Plans for the next release
 
 The current plan for perl 5.9.3 is to add CPANPLUS as a core module.
