@@ -18,10 +18,11 @@ sub run {
     return system($cmd.$quote.$code.$quote);
 }
 
-## can't use this in 'use Test::More' yet
-##my $numtests = ($^O eq 'VMS') ? 7 : 3; 
+BEGIN {
+    $numtests = ($^O eq 'VMS') ? 7 : 3; 
+}
 
-use Test::More tests => 'no_plan';
+use Test::More tests => $numtests;
 
 my $exit, $exit_arg;
 
