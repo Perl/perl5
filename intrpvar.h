@@ -301,8 +301,6 @@ PERLVAR(I, e_script,	SV *)
 
 /* magical thingies */
 PERLVAR(I, basetime,	Time_t)		/* $^T */
-PERLVAR(I, formfeed,	SV *)		/* $^L */
-
 
 PERLVARI(I, maxsysfd,	I32,	MAXSYSFD)
 					/* top fd to pass to subprocesses */

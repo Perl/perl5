@@ -1975,7 +1975,6 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 
 	case '\014':	/* $^L */
 	    sv_setpvs(GvSVn(gv),"\f");
-	    PL_formfeed = GvSV(gv);
 	    break;
 	case ';':		/* $; */
 	    sv_setpvs(GvSVn(gv),"\034");

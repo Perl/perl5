@@ -174,7 +174,6 @@
 #define PL_filemode		(vTHX->Ifilemode)
 #define PL_firstgv		(vTHX->Ifirstgv)
 #define PL_forkprocess		(vTHX->Iforkprocess)
-#define PL_formfeed		(vTHX->Iformfeed)
 #define PL_formtarget		(vTHX->Iformtarget)
 #define PL_generation		(vTHX->Igeneration)
 #define PL_gensym		(vTHX->Igensym)

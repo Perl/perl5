@@ -13161,7 +13161,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_e_script		= sv_dup_inc(proto_perl->Ie_script, param);
 
     /* magical thingies */
-    PL_formfeed		= sv_dup(proto_perl->Iformfeed, param);
 
     PL_encoding		= sv_dup(proto_perl->Iencoding, param);
 
