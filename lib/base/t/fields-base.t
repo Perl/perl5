@@ -235,7 +235,11 @@ package main;
 	my X $self = shift;
 	$self = fields::new($self) unless ref $self;
 	$self->{X1} = "x1";
-	use Devel::Peek; Dump($self);
+	# FIXME. This code is dead on blead becase the test is skipped.
+	# The test states that it's being skipped becaues restricted hashes
+	# don't support a feature. Presumably we need to make that feature
+	# supported. Bah.
+	# use Devel::Peek; Dump($self);
 	$self->{_X2} = "_x2";
 	return $self;
     }
