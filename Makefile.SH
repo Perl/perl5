@@ -505,7 +505,12 @@ purecovperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.li
 quantperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
 	$(SHRPENV) $(LDLIBPTH) quantify $(CC) -o quantperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
-perl.third: perl
+perl.third.config: config.sh
+	@echo "To build perl.third you must Configure -Doptimize=-g -Uusemymalloc, checking..."
+	@grep "^optimize='-g'" config.sh || exit 1
+	@grep "^config_args='.*-Uusemymalloc.*'" config.sh || exit 1
+
+perl.third: perl.third.config perl
 	atom -tool third -L. -all -gp -toolargs="-quiet -invalid -uninit heap+stack+partword+copy -min 0" perl
 
 # This version, if specified in Configure, does ONLY those scripts which need
