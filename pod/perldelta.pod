@@ -2656,6 +2656,10 @@ No known fix.
 
 =head2 Mac OS X
 
+Please remember to set your environment variable LC_ALL to "C"
+(setenv LC_ALL C) before running "make test" to avoid a lot of
+warnings about the broken locales of Mac OS X.
+
 The following tests are known to fail:
 
  Failed Test                 Stat Wstat Total Fail  Failed  List of Failed
