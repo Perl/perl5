@@ -8,7 +8,7 @@ use strict;
 BEGIN
   {
   $| = 1;
-  my $location = $0; $location =~ s{^(.*/).*}{$1};
+  my $location = $0; $location =~ s/bninfnan.t//;
   if ($ENV{PERL_CORE})
     {
     @INC = qw(../lib);          # testing with the core distribution
