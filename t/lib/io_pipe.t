@@ -35,7 +35,7 @@ elsif(defined $pid)
  }
 else
  {
-  die;
+  die "# error = $!";
  }
 
 $pipe = new IO::Pipe;
