@@ -142,7 +142,7 @@ lddlflags='-shared -expect_unresolved "*"'
 
 # Fancy compiler suites use optimising linker as well as compiler.
 # <spider@Orb.Nashua.NH.US>
-case "$`uname -r`" in
+case "`uname -r`" in
 *[123].*)	# old loader
 		lddlflags="$lddlflags -O3"
 		;;
@@ -160,7 +160,7 @@ esac
 # As noted above the -DDEBUGGING is added automagically by Configure if -g.
 case "$optimize" in
 	*-g*) ;; # left intentionally blank
-*)	case "$`uname -r`" in
+*)	case "`uname -r`" in
 	*[123].*)
 		case "$useshrplib" in
 		false|undef|'')	lddlflags="$lddlflags -s"	;;
