@@ -1795,6 +1795,8 @@ distribution available at http://www.perl.com/CPAN/src/index.html
 	OS/2
 	QNX
 	Rhapsody/Darwin 2)
+	SCO SV
+	SINIX
 	Solaris
 	SVR4
 	Tru64 UNIX      3)
