@@ -28,6 +28,35 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20511] By: jhi                                   on 2003/08/05  19:29:26
+        Log: Integrate:
+             [ 20510]
+             Subject: [PATCH pod/perlfaq2.pod] BETTER update Friedl book listing for 2nd edition
+             From: mjd@plover.com
+             Date: 5 Aug 2003 19:23:46 -0000
+             Message-ID: <20030805192346.25911.qmail@plover.com>
+     Branch: maint-5.8/perl
+	  !> pod/perlfaq2.pod
+____________________________________________________________________________
+[ 20509] By: jhi                                   on 2003/08/05  18:42:33
+        Log: Integrate:
+             [ 20508]
+             Continue #20506.
+     Branch: maint-5.8/perl
+	  !> lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 20507] By: jhi                                   on 2003/08/05  18:01:26
+        Log: Integrate:
+             [ 20506]
+             Try to fix the INC in PASTHRU.
+     Branch: maint-5.8/perl
+	  !> lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 20505] By: jhi                                   on 2003/08/05  16:16:28
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20504] By: jhi                                   on 2003/08/05  16:12:30
         Log: Integrate:
              [ 20494]
