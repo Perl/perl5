@@ -47,7 +47,7 @@ __END__
 
 =head1 NAME
 
-Time::HiRes - High resolution ualarm, usleep, and gettimeofday
+Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
 
 =head1 SYNOPSIS
 
@@ -80,17 +80,18 @@ Time::HiRes - High resolution ualarm, usleep, and gettimeofday
 
 =head1 DESCRIPTION
 
-The C<Time::HiRes> module implements a Perl interface to the usleep, ualarm,
-and gettimeofday system calls. See the EXAMPLES section below and the test
-scripts for usage; see your system documentation for the description of
-the underlying gettimeofday, usleep, and ualarm calls.
+The C<Time::HiRes> module implements a Perl interface to the usleep,
+ualarm, gettimeofday, and setitimer/getitimer system calls. See the
+EXAMPLES section below and the test scripts for usage; see your system
+documentation for the description of the underlying usleep, ualarm,
+gettimeofday, and setitimer/getitimer calls.
 
-If your system lacks gettimeofday(2) you don't get gettimeofday() or the
-one-arg form of tv_interval().  If you don't have usleep(3) or select(2)
-you don't get usleep() or sleep().  If your system don't have ualarm(3)
-or setitimer(2) you don't get ualarm() or alarm().
-If you try to import an unimplemented function in the C<use> statement
-it will fail at compile time.
+If your system lacks gettimeofday(2) or an emulation of it you don't
+get gettimeofday() or the one-arg form of tv_interval().
+If you don't have usleep(3) or select(2) you don't get usleep()
+or sleep().  If your system don't have ualarm(3) or setitimer(2) you
+don't get ualarm() or alarm().  If you try to import an unimplemented
+function in the C<use> statement it will fail at compile time.
 
 The following functions can be imported from this module.
 No functions are exported by default.
@@ -99,15 +100,15 @@ No functions are exported by default.
 
 =item gettimeofday ()
 
-In array context it returns a 2 element array with the seconds and
-microseconds since the epoch.  In scalar context it returns floating
+In array context returns a 2 element array with the seconds and
+microseconds since the epoch.  In scalar context returns floating
 seconds like Time::HiRes::time() (see below).
 
 =item usleep ( $useconds )
 
-Issues a usleep for the number of microseconds specified.  Returns the
-number of microseconds actually slept.  See also Time::HiRes::sleep()
-below.
+Sleeps for the number of microseconds specified.  Returns the number
+of microseconds actually slept.  Can sleep for more than one second
+unlike the usleep system call. See also Time::HiRes::sleep() below.
 
 =item ualarm ( $useconds [, $interval_useconds ] )
 
@@ -118,17 +119,23 @@ unspecified, resulting in alarm-like behaviour.
 
 S<tv_interval ( $ref_to_gettimeofday [, $ref_to_later_gettimeofday] )>
 
-Returns the floating seconds between the two times, which should have been 
-returned by gettimeofday(). If the second argument is omitted, then the
-current time is used.
+Returns the floating seconds between the two times, which should have
+been returned by gettimeofday(). If the second argument is omitted,
+then the current time is used.
 
 =item time ()
 
-Returns a floating seconds since the epoch. This function can be imported,
-resulting in a nice drop-in replacement for the C<time> provided with perl,
-see the EXAMPLES below.
+Returns a floating seconds since the epoch. This function can be
+imported, resulting in a nice drop-in replacement for the C<time>
+provided with core Perl, see the EXAMPLES below.
 
-B<NOTE>: Since Sunday, September 9th, 2001 at 01:46:40 AM GMT
+B<NOTE 1>: this higher resolution timer can return values either less or
+more than the core time(), depending on whether your platforms rounds
+the higher resolution timer values up, down, or to the nearest to get
+the core time(), but naturally the difference should be never more than
+half a second.
+
+B<NOTE 2>: Since Sunday, September 9th, 2001 at 01:46:40 AM GMT
 (when the time() seconds since epoch rolled over to 1_000_000_000),
 the default floating point format of Perl and the seconds since epoch
 have conspired to produce an apparent bug: if you print the value of
@@ -144,17 +151,16 @@ separate values.
 
 =item sleep ( $floating_seconds )
 
-Converts $floating_seconds to microseconds and issues a usleep for the
-result.  Returns the number of seconds actually slept (a floating
-point value).  This function can be imported, resulting in a nice
-drop-in replacement for the C<sleep> provided with perl, see the
-EXAMPLES below.
+Sleeps for the specified amount of seconds.  Returns the number of
+seconds actually slept (a floating point value).  This function can be
+imported, resulting in a nice drop-in replacement for the C<sleep>
+provided with perl, see the EXAMPLES below.
 
 =item alarm ( $floating_seconds [, $interval_floating_seconds ] )
 
-Converts $floating_seconds and $interval_floating_seconds and issues
-a ualarm for the results.  The $interval_floating_seconds argument
-is optional and will be 0 if unspecified, resulting in alarm-like
+The SIGALRM signal is sent after the specfified number of seconds.
+Implemented using ualarm().  The $interval_floating_seconds argument
+is optional and will be 0 if unspecified, resulting in alarm()-like
 behaviour.  This function can be imported, resulting in a nice drop-in
 replacement for the C<alarm> provided with perl, see the EXAMPLES below.
 

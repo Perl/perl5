@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-BEGIN { $| = 1; print "1..21\n"; }
+BEGIN { $| = 1; print "1..25\n"; }
 
 END {print "not ok 1\n" unless $loaded;}
 
@@ -223,9 +223,24 @@ unless (defined &Time::HiRes::setitimer
     $SIG{VTALRM} = 'DEFAULT';
 }
 
-$a = abs(sleep(1.5)                    - 1.5);
+$a = abs(sleep(1.5)        / 1.5       - 1.0);
 print $a < 0.1 ? "ok 20 # $a\n" : "not ok 20 # $a\n";
 
 $a = abs(usleep(1_500_000) / 1_500_000 - 1.0);
 print $a < 0.1 ? "ok 21 # $a\n" : "not ok 21 # $a\n";
 
+eval { sleep(-1) };
+print $@ =~ /::sleep\(-1\): negative time not invented yet/ ?
+    "ok 22\n" : "not ok 22\n";
+
+eval { usleep(-2) };
+print $@ =~ /::usleep\(-2\): negative time not invented yet/ ?
+    "ok 23\n" : "not ok 23\n";
+
+eval { alarm(-3) };
+print $@ =~ /::alarm\(-3, 0\): negative time not invented yet/ ?
+    "ok 24\n" : "not ok 24\n";
+
+eval { ualarm(-4) };
+print $@ =~ /::ualarm\(-4, 0\): negative time not invented yet/ ?
+    "ok 25\n" : "not ok 25\n";
