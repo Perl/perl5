@@ -25,6 +25,7 @@ $Is_OS2     = $^O eq 'os2';
 $Is_Solaris = $^O eq 'solaris';
 $Is_VMS     = $^O eq 'VMS';
 $Is_DGUX    = $^O eq 'dgux';
+$Is_MPRAS   = $^O =~ /svr4/ && -f '/etc/.relid';
 
 $Is_Dosish  = $Is_Dos || $Is_OS2 || $Is_MSWin32 || $Is_NetWare || $Is_Cygwin;
 
@@ -211,6 +212,8 @@ SKIP: {
       if $Is_MSWin32 || $Is_NetWare || $Is_Dos;
     skip "/dev isn't available to test against", 6
       unless -d '/dev' && -r '/dev' && -x '/dev';
+    skip "Skipping; unexpected ls output in MP-RAS", 6
+      if $Is_MPRAS;
 
     my $LS  = $Config{d_readlink} ? "ls -lL" : "ls -l";
     my $CMD = "$LS /dev 2>/dev/null";
