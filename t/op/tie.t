@@ -446,3 +446,34 @@ sub FETCH
 }
 EXPECT
 ok
+########
+
+# TODO [perl #948] cannot meaningfully tie $,
+package TieDollarComma;
+
+sub TIESCALAR {
+     my $pkg = shift;
+     return bless \my $x, $pkg;
+}
+
+sub STORE {
+    my $self = shift;
+    $$self = shift;
+    print "STORE set '$$self'\n";
+}
+
+sub FETCH {
+    my $self = shift;
+    print "FETCH\n";
+    return $$self;
+}
+package main;
+
+tie $,, 'TieDollarComma';
+$, = 'BOBBINS';
+print "join", "things", "up\n";
+EXPECT
+STORE set 'BOBBINS'
+FETCH
+FETCH
+joinBOBBINSthingsBOBBINSup

@@ -353,7 +353,7 @@ EOT
 			$seen_ok = 1;
 			if ($2 == $next) {
 			    my($not, $num, $extra) = ($1, $2, $3);
-			    my($istodo) = $extra =~ /^\s*#\s*TODO/ if $extra;
+			    my($istodo) = $extra =~ /#\s*TODO/ if $extra;
 			    $istodo = 1 if $todo{$num};
 
 			    if( $not && !$istodo ) {
