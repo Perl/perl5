@@ -1850,7 +1850,7 @@ PerlIOMmap_map(PerlIO *f)
 	       page_size = sysconf(_SC_PAGESIZE);
 #   else
 	       page_size = sysconf(_SC_PAGE_SIZE);
-#   endif 
+#   endif
 	       if ((long)page_size < 0) {
 		   if (errno) {
 		       SV *error = ERRSV;
@@ -1858,10 +1858,10 @@ PerlIOMmap_map(PerlIO *f)
 		       STRLEN n_a;
 		       (void)SvUPGRADE(error, SVt_PV);
 		       msg = SvPVx(error, n_a);
-		       Perl_croak("panic: sysconf: %s", msg);
+		       Perl_croak(aTHX_ "panic: sysconf: %s", msg);
 		   }
 		   else
-		       Perl_croak("panic: sysconf: pagesize unknown");
+		       Perl_croak(aTHX_ "panic: sysconf: pagesize unknown");
 	       }
 	   }
 #else
@@ -1874,7 +1874,7 @@ PerlIOMmap_map(PerlIO *f)
 #   endif
 #endif
 	if ((IV)page_size <= 0)
-	    Perl_croak("panic: bad pagesize %"IVdf, (IV)page_size);
+	    Perl_croak(aTHX_ "panic: bad pagesize %"IVdf, (IV)page_size);
        }
        if (b->posn < 0)
         {
