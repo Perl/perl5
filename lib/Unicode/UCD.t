@@ -5,6 +5,7 @@ BEGIN {
     }
     chdir 't' if -d 't';
     @INC = '../lib';
+    @INC = "::lib" if $^O eq 'MacOS'; # module parses @INC itself
 }
 
 use strict;

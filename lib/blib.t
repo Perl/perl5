@@ -6,10 +6,11 @@ BEGIN {
 }
 
 use strict;
+my($blib, $blib_arch, $blib_lib, @blib_dirs);
 
 sub _cleanup {
-    rmdir foreach reverse qw(blib blib/arch blib/lib);
-    unlink "stderr";
+    rmdir foreach reverse (@_);
+    unlink "stderr" unless $^O eq 'MacOS';
 }
 
 sub _mkdirs {
@@ -20,14 +21,31 @@ sub _mkdirs {
 }
     
 
-BEGIN { _cleanup }
+BEGIN {
+    if ($^O eq 'MacOS')
+    {
+	$MacPerl::Architecture = $MacPerl::Architecture; # shhhhh
+	$blib = ":blib:";
+	$blib_lib = ":blib:lib:";
+	$blib_arch = ":blib:lib:$MacPerl::Architecture:";
+	@blib_dirs = ($blib, $blib_lib, $blib_arch); # order
+    }
+    else
+    {
+	$blib = "blib";
+	$blib_arch = "blib/arch";
+	$blib_lib = "blib/lib";
+	@blib_dirs = ($blib, $blib_arch, $blib_lib);
+    }
+    _cleanup( @blib_dirs );
+}
 
 use Test::More tests => 7;
 
 eval 'use blib;';
 ok( $@ =~ /Cannot find blib/, 'Fails if blib directory not found' );
 
-_mkdirs(qw(blib blib/arch blib/lib));
+_mkdirs( @blib_dirs );
 
 {
     my $warnings = '';
@@ -39,7 +57,7 @@ _mkdirs(qw(blib blib/arch blib/lib));
 is( @INC, 3, '@INC now has 3 elements' );
 is( $INC[2],    '../lib',       'blib added to the front of @INC' );
 
-ok( grep(m|blib/lib$|, @INC[0,1])  == 1,     '  blib/lib in @INC');
-ok( grep(m|blib/arch$|, @INC[0,1]) == 1,     '  blib/arch in @INC');
+ok( grep(m|$blib_lib$|, @INC[0,1])  == 1,     '  blib/lib in @INC');
+ok( grep(m|$blib_arch$|, @INC[0,1]) == 1,     '  blib/arch in @INC');
 
-END { _cleanup(); }
+END { _cleanup( @blib_dirs ); }

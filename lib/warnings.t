@@ -8,24 +8,32 @@ BEGIN {
 }
 
 use File::Path;
+use File::Spec::Functions;
 
 $| = 1;
 
 my $Is_VMS     = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
 my $Is_NetWare = $^O eq 'NetWare';
+my $Is_MacOS   = $^O eq 'MacOS';
 my $tmpfile = "tmp0000";
 my $i = 0 ;
-1 while -f ++$tmpfile;
+1 while -e ++$tmpfile;
 END {  if ($tmpfile) { 1 while unlink $tmpfile} }
 
 my @prgs = () ;
 my @w_files = () ;
 
 if (@ARGV)
-  { print "ARGV = [@ARGV]\n" ; @w_files = map { s#^#./lib/warnings/#; $_ } @ARGV }
+  { print "ARGV = [@ARGV]\n" ;
+    if ($^O eq 'MacOS') {
+      @w_files = map { s#^#:lib:warnings:#; $_ } @ARGV
+    } else {
+      @w_files = map { s#^#./lib/warnings/#; $_ } @ARGV
+    }
+  }
 else
-  { @w_files = sort glob("lib/warnings/*") }
+  { @w_files = sort glob(catfile(curdir(), "lib", "warnings", "*")) }
 
 my $files = 0;
 foreach my $file (@w_files) {
@@ -88,6 +96,13 @@ for (@prgs){
 	shift @files ;
 	$prog = shift @files ;
     }
+
+    # fix up some paths
+    if ($^O eq 'MacOS') {
+	$prog =~ s|require "./abc(d)?";|require ":abc$1";|g;
+	$prog =~ s|"\."|":"|g;
+    }
+
     open TEST, ">$tmpfile" or die "Cannot open >$tmpfile: $!";
     print TEST q{
         BEGIN {
@@ -123,6 +138,13 @@ for (@prgs){
     $results =~ s/^(syntax|parse) error/syntax error/mig;
     # allow all tests to run when there are leaks
     $results =~ s/Scalars leaked: \d+\n//g;
+
+    # fix up some paths
+    if ($^O eq 'MacOS') {
+	$results =~ s|:abc\.pm\b|abc.pm|g;
+	$results =~ s|:abc(d)?\b|./abc$1|g;
+    }
+
     $expected =~ s/\n+$//;
     my $prefix = ($results =~ s#^PREFIX(\n|$)##) ;
     # any special options? (OPTIONS foo bar zap)

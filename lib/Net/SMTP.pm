@@ -16,7 +16,7 @@ use IO::Socket;
 use Net::Cmd;
 use Net::Config;
 
-$VERSION = "2.22"; # $Id: //depot/libnet/Net/SMTP.pm#23 $
+$VERSION = "2.24"; # $Id: //depot/libnet/Net/SMTP.pm#25 $
 
 @ISA = qw(Net::Cmd IO::Socket::INET);
 
@@ -94,29 +94,52 @@ sub etrn {
 	$self->_ETRN(@_);
 }
 
-sub auth { # auth(username, password) by mengwong 20011106.  the only supported mechanism at this time is PLAIN.
-    # 
-    # my $auth = $smtp->supports("AUTH");
-    # $smtp->auth("username", "password") or die $smtp->message;
-    # 
+sub auth {
+    my ($self, $username, $password) = @_;
 
     require MIME::Base64;
-
-    my $self = shift;
-    my ($username, $password) = @_;
-    die "auth(username, password)" if not length $username;
+    require Authen::SASL;
 
     my $mechanisms = $self->supports('AUTH',500,["Command unknown: 'AUTH'"]);
     return unless defined $mechanisms;
 
-    if (not grep { uc $_ eq "PLAIN" } split ' ', $mechanisms) {
-	$self->set_status(500, ["PLAIN mechanism not supported; server supports $mechanisms"]);
-	return;
-    }
-    my $authstring = MIME::Base64::encode_base64(join "\0", ($username)x2, $password);
-    $authstring =~ s/\n//g; # wrap long lines
+    my $sasl;
 
-    $self->_AUTH("PLAIN $authstring");
+    if (ref($username) and UNIVERSAL::isa($username,'Authen::SASL')) {
+      $sasl = $username;
+      $sasl->mechanism($mechanisms);
+    }
+    else {
+      die "auth(username, password)" if not length $username;
+      $sasl = Authen::SASL->new(mechanism=> $mechanisms,
+				callback => { user => $username,
+                                              pass => $password,
+					      authname => $username,
+                                            });
+    }
+
+    # We should probably allow the user to pass the host, but I don't
+    # currently know and SASL mechanisms that are used by smtp that need it
+    my $client = $sasl->client_new('smtp',${*$self}{'net_smtp_host'},0);
+    my $str    = $client->client_start;
+    # We dont support sasl mechanisms that encrypt the socket traffic.
+    # todo that we would really need to change the ISA hierarchy
+    # so we dont inherit from IO::Socket, but instead hold it in an attribute
+
+    my @cmd = ("AUTH", $client->mechanism, MIME::Base64::encode_base64($str,''));
+    my $code;
+
+    while (($code = $self->command(@cmd)->response()) == CMD_MORE) {
+      @cmd = (MIME::Base64::encode_base64(
+	$client->client_step(
+	  MIME::Base64::decode_base64(
+	    ($self->message)[0]
+	  )
+	), ''
+      ));
+    }
+
+    $code == CMD_OK;
 }
 
 sub hello
@@ -156,19 +179,12 @@ sub supports {
     return;
 }
 
-sub _addr
-{
- my $addr = shift || "";
-
- return $1
-    if $addr =~ /(<[^>]+>)/so;
-
- $addr =~ s/\n/ /sog;
- $addr =~ s/(\A\s+|\s+\Z)//sog;
-
- return "<" . $addr . ">";
+sub _addr {
+  my $addr = shift;
+  $addr = "" unless defined $addr;
+  $addr =~ s/^\s*<?\s*|\s*>?\s*$//sg;
+  "<$addr>";
 }
-
 
 sub mail
 {
@@ -537,9 +553,7 @@ Request a queue run for the DOMAIN given.
 
 =item auth ( USERNAME, PASSWORD )
 
-Attempt SASL authentication.  At this time only the PLAIN mechanism is supported.
-
-At some point in the future support for using Authen::SASL will be added
+Attempt SASL authentication.
 
 =item mail ( ADDRESS [, OPTIONS] )
 
@@ -631,6 +645,15 @@ Send the QUIT command to the remote SMTP server and close the socket connection.
 
 =back
 
+=head1 ADDRESSES
+
+All methods that accept addresses expect the address to be a valid rfc2821-quoted address, although
+Net::SMTP will accept accept the address surrounded by angle brackets.
+
+ funny user@domain      WRONG
+ "funny user"@domain    RIGHT, recommended
+ <"funny user"@domain>  OK
+
 =head1 SEE ALSO
 
 L<Net::Cmd>
@@ -647,6 +670,6 @@ it under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/SMTP.pm#23 $>
+I<$Id: //depot/libnet/Net/SMTP.pm#25 $>
 
 =cut

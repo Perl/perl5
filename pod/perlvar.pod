@@ -1150,8 +1150,21 @@ lexical scope.  See L<bytes>.
 
 =item $^X
 
-The name that the Perl binary itself was executed as, from C's C<argv[0]>.
+The name that the Perl binary itself was executed as, from C's
+C<argv[0]>.
+
 This may not be a full pathname, nor even necessarily in your path.
+Currently there is no universal solution for this; you may want to try:
+
+  use Config;
+  $current_perl_path = (-x $^X) ? $^X : $Config{perlpath};
+
+The security-conscious would write:
+
+  use Config;
+  use File::Spec;
+  $current_perl_path = (File::Spec->file_name_is_absolute($^X) && -x $^X)
+                     ? $^X : $Config{perlpath};
 
 =item ARGV
 

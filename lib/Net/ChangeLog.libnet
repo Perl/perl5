@@ -1,3 +1,22 @@
+Change 727 on 2002/05/28 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::SMTP
+	- Use Authen::SASL to do auth
+
+Change 724 on 2002/05/24 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::SMTP
+	- Minor change to address sanitize code, mainly to allow <>
+
+Change 723 on 2002/05/24 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP
+	- Minor change to pattern to extract unique filename from server response
+
+Change 717 on 2002/04/02 by <gbarr@pobox.com> (Graham Barr)
+
+	Release 1.11
+
 Change 716 on 2002/04/02 by <gbarr@pobox.com> (Graham Barr)
 
 	Net::FTP::dataconn

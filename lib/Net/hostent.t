@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-use Test::More tests => 7;
+use Test::More;
 
 BEGIN {
     require Config; import Config;
@@ -14,8 +14,12 @@ BEGIN {
     {
 	plan skip_all => "Test uses Socket, Socket not built";
     }
+    if ($^O eq 'MacOS') {
+	plan skip_all => "Test relies on resolution of localhost, fails on Mac OS";
+    }
 }
 
+use Test::More tests => 7;
 
 BEGIN { use_ok 'Net::hostent' }
 
