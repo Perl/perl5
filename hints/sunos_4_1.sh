@@ -82,3 +82,9 @@ fi
 # library.
 # 
 # Thanks to William Setzer <William_Setzer@ncsu.edu> for this info.
+
+# Don't use the GNU ld, that doesn't work, you'll get a lot of
+# relocation truncated to fit: BASE13 ...
+# from many extensions, like B and Data::Dumper.
+ld=/usr/bin/ld
+

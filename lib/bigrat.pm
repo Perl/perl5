@@ -155,7 +155,7 @@ __END__
 
 =head1 NAME
 
-bigrat - Transparent BigNumber/BigRationale support for Perl
+bigrat - Transparent BigNumber/BigRational support for Perl
 
 =head1 SYNOPSIS
 

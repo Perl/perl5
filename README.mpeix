@@ -130,8 +130,7 @@ machines that I administer, and I want to have the same power
 available to me on MPE.
 
 Please send your comments, questions, and bug reports directly to me,
-Mark Bixby ( http://www.bixby.org/mark/ ), by e-mailing to
-mark@bixby.org. Or just post them to HP3000-L.
+Mark Bixby ( http://www.bixby.org/mark/ ). Or just post them to HP3000-L.
 
 The platform I'm using to do this port is an HP 3000 957RX running
 MPE/iX 6.0 and using the GNU gcc C compiler
@@ -674,5 +673,5 @@ Porting begins.
 
 =head1 AUTHOR
 
-Mark Bixby, mark@bixby.org
+Mark Bixby, http://www.bixby.org/mark/
 
