@@ -26,6 +26,7 @@ sub init_a2c{
 	    'UCS2'     => 'UCS-2BE',
 	    'iso-10646-1' => 'UCS-2BE',
 	    'ucs2-le'  => 'UCS-2LE',
+	    'ucs2-be'  => 'UCS-2BE',
 	    'utf16'    => 'UTF-16',
 	    'utf32'    => 'UTF-32',
 	    'utf16-be'  => 'UTF-16BE',
@@ -112,9 +113,9 @@ use Test::More tests => (scalar keys %a2c) * 4;
 
 print "# alias test;  \$ON_EBCDIC == $ON_EBCDIC\n";
 
-foreach my $a (keys %a2c){	     
+foreach my $a (keys %a2c){	
     my $e = Encode::find_encoding($a);
-    is((defined($e) and $e->name), $a2c{$a})
+    is((defined($e) and $e->name), $a2c{$a},$a)
 	or warn "alias was $a";;
 }
 
@@ -130,18 +131,18 @@ define_alias(
 
 print "# alias test with alias overrides\n";
 
-foreach my $a (keys %a2c){	     
+foreach my $a (keys %a2c){	
     my $e = Encode::find_encoding($a);
-    is((defined($e) and $e->name), $a2c{$a})
+    is((defined($e) and $e->name), $a2c{$a}, "Override $a")
 	or warn "alias was $a";
 }
 
 print "# alias undef test\n";
 
 Encode::Alias->undef_aliases;
-foreach my $a (keys %a2c){	     
+foreach my $a (keys %a2c){	
     my $e = Encode::find_encoding($a);
-    ok(!defined($e) || $e->name =~ /-raw$/o)
+    ok(!defined($e) || $e->name =~ /-raw$/o,"Undef $a")
 	or warn "alias was $a";
 }
 
@@ -149,9 +150,9 @@ print "# alias reinit test\n";
 
 Encode::Alias->init_aliases;
 init_a2c();
-foreach my $a (keys %a2c){	     
+foreach my $a (keys %a2c){	
     my $e = Encode::find_encoding($a);
-    is((defined($e) and $e->name), $a2c{$a})
+    is((defined($e) and $e->name), $a2c{$a}, "Reinit $a")
 	or warn "alias was $a";
 }
 __END__

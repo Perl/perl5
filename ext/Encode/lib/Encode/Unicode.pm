@@ -18,7 +18,7 @@ sub valid_ucs2($){
     if ($_[0] < 0xD800){
 	return $_[0] > 0;
     }else{
-	return ($_[0] > 0xDFFFF && $_[0] <= 0xFFFF);
+	return ($_[0] > 0xDFFF && $_[0] <= 0xFFFF);
     }
 }
 
@@ -88,7 +88,7 @@ sub set_transcoder{
 	*decode = \&decode_classic;
 	*encode = \&encode_classic;
     }else{
-	require Carp; 
+	require Carp;
 	Carp::croak __PACKAGE__, "::set_transcoder(modern|classic)";
     }
 }
@@ -115,7 +115,7 @@ sub decode_modern
 	my $ord = shift @ord;
 	unless ($size == 4 or valid_ucs2($ord &= $mask)){
 	    if ($ucs2){
-		$chk and 
+		$chk and
 		    poisoned2death($obj, "no surrogates allowed", $ord);
 		shift @ord; # skip the next one as well
 		$ord = FBCHAR;
@@ -151,12 +151,12 @@ sub encode_modern
 	unless ($size == 4 or valid_ucs2($ord)) {
 	    unless(issurrogate($ord)){
 		if ($ucs2){
-		    $chk and 
+		    $chk and
 			poisoned2death($obj, "code point too high", $ord);
 
 		    push @str, FBCHAR;
 		}else{
-		 
+		
 		    push @str, ensurrogate($ord);
 		}
 	    }else{  # not supposed to happen
@@ -188,7 +188,7 @@ sub decode_classic
 	 my $ord = unpack($endian, substr($str, 0, $size, ''));
 	unless ($size == 4 or valid_ucs2($ord &= $mask)){
 	    if ($ucs2){
-		$chk and 
+		$chk and
 		    poisoned2death($obj, "no surrogates allowed", $ord);
 		substr($str,0,$size,''); # skip the next one as well
 		$ord = FBCHAR;
@@ -224,7 +224,7 @@ sub encode_classic
 	unless ($size == 4 or valid_ucs2($ord)) {
 	    unless(issurrogate($ord)){
 		if ($ucs2){
-		    $chk and 
+		    $chk and
 			poisoned2death($obj, "code point too high", $ord);
 		    $str .= pack($endian, FBCHAR);
 		}else{
@@ -244,7 +244,7 @@ sub BOMB {
     my ($size, $bom) = @_;
     my $N = $size == 2 ? 'n' : 'N';
     my $ord = unpack($N, $bom);
-    return ($ord eq BOM_BE) ? $N : 
+    return ($ord eq BOM_BE) ? $N :
 	($ord eq BOM16LE) ? 'v' : ($ord eq BOM32LE) ? 'V' : undef;
 }
 
@@ -267,7 +267,7 @@ Encode::Unicode -- Various Unicode Transform Format
 
 =head1 SYNOPSIS
 
-    use Encode qw/encode decode/; 
+    use Encode qw/encode decode/;
     $ucs2 = encode("UCS-2BE", $utf8);
     $utf8 = decode("UCS-2BE", $ucs2);
 
@@ -349,7 +349,7 @@ LE      0xFFeF 0xFFFe0000
 -------------------------
 
 =back
- 
+
 This modules handles BOM as follows.
 
 =over 4
@@ -363,7 +363,7 @@ simply treated as one of characters (ZERO WIDTH NO-BREAK SPACE).
 
 When BE or LE is omitted during decode(), it checks if BOM is in the
 beginning of the string and if found endianness is set to what BOM
-says.  if not found, dies. 
+says.  if not found, dies.
 
 =item *
 
