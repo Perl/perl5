@@ -28,8 +28,8 @@ sub main'open2 {
 
     # force unqualified filehandles into callers' package
     local($package) = caller;
-    $dad_rdr =~ s/^[^']+$/$package'$&/;
-    $dad_wtr =~ s/^[^']+$/$package'$&/;
+    $dad_rdr =~ s/^([^']+$)/$package'$1/;
+    $dad_wtr =~ s/^([^']+$)/$package'$1/;
 
     local($kid_rdr) = ++$fh;
     local($kid_wtr) = ++$fh;
