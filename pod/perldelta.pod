@@ -12,8 +12,8 @@ maintenance release since the two releases were kept closely
 coordinated (while 5.8.0 was still called 5.7.something).
 
 Changes that were integrated into the 5.6.1 release are marked C<[561]>.
-Changes that also appear in 5.6.1 but have been improved since are marked
-C<[561+]>.
+Many of these changes have been further developed since 5.6.1 was released,
+those are marked C<[561+]>.
 
 You can see the list of changes in the 5.6.1 release (both from the
 5.005_03 release and the 5.6.0 release) by reading L<perl561delta>.
@@ -227,6 +227,12 @@ since it, in a way, falsely promised that the features could be used.
 
 =item *
 
+In future releases, non-PerlIO aware XS modules may become completely
+unsupported.  Since PerlIO is a drop-in replacement for stdio, this
+shouldn't be that drastic a change.
+
+=item *
+
 The current user-visible implementation of pseudo-hashes (the weird
 use of the first array element) is deprecated starting from Perl 5.8.0
 and will be removed in Perl 5.10.0, and the feature will be
@@ -271,6 +277,11 @@ The prototypes are now checked better at compile-time for invalid
 syntax.  An optional warning is generated ("Illegal character in
 prototype...")  but this may be upgraded to a fatal error in a future
 release.
+
+=item *
+
+The C<exec LIST> and C<system LIST> operations will produce fatal
+errors on tainted data in some future release.
 
 =item *
 
@@ -493,6 +504,13 @@ in multiple arguments.)
 
 =item *
 
+C<do> followed by a bareword now ensures that this bareword isn't
+a keyword (to avoid a bug where C<do q(foo.pl)> tried to call
+subroutine called C<q>).  This means that for example instead of
+C<do format()> you must write C<do &format()>.
+
+=item *
+
 The builtin dump() now gives an optional warning
 C<dump() better written as CORE::dump()>,
 meaning that by default C<dump(...)> is resolved as the builtin
@@ -608,10 +626,10 @@ This is not a substitute for -T.>
 
 In other taint news, the C<exec LIST> and C<system LIST> have now been
 considered too risky (think C<exec @ARGV>: it can start any program
-with any arguments), and now the said forms cause a warning.
-You should carefully launder the arguments to guarantee their
-validity.  In future releases of Perl the forms will become fatal
-errors so consider starting laundering now.
+with any arguments), and now the said forms cause a warning under
+lexical warnings.  You should carefully launder the arguments to
+guarantee their validity.  In future releases of Perl the forms will
+become fatal errors so consider starting laundering now.
 
 =item *
 
@@ -669,6 +687,18 @@ C<Use of /c modifier is meaningless in s///>.
 
 Use of C</g> with C<split> elicits C<Use of /g modifier is meaningless
 in split>.
+
+=item *
+
+Support for the C<CLONE> special subroutine had been added.
+With ithreads, when a new thread is created, all Perl data is cloned,
+however non-Perl data cannot be cloned automatically.  In C<CLONE> you
+can do whatever you need to do, like for example handle the cloning of
+non-Perl data, if necessary.  C<CLONE> will be executed once for every
+package that has it defined or inherited.  It will be called in the
+context of the new thread, so all modifications are made in the new area.
+
+See L<perlmod>
 
 =back
 
@@ -1508,10 +1538,14 @@ the installation as README.I<platform>, and after the installation
 as perlI<platform>:
 
     perlaix perlamiga perlapollo perlbeos perlbs2000
-    perlce perlcygwin perldgux perldos perlepoc perlhpux
-    perlhurd perlmachten perlmacos perlmint perlmpeix
+    perlce perlcygwin perldgux perldos perlepoc perlfreebsd perlhpux
+    perlhurd perlirix perlmachten perlmacos perlmint perlmpeix
     perlnetware perlos2 perlos390 perlplan9 perlqnx perlsolaris
     perltru64 perluts perlvmesa perlvms perlvos perlwin32
+
+These documents usually detail one or more of the following subjects:
+configuring, building, testing, installing, and sometimes also using
+Perl on the said platform.
 
 Eastern Asian Perl users are now welcomed in their own languages:
 README.jp (Japanese), README.ko (Korean), README.cn (simplified
@@ -2265,10 +2299,6 @@ Sys::Syslog ignored the C<LOG_AUTH> constant.
 
 =item *
 
-All but the first argument of the IO syswrite() method are now optional.
-
-=item *
-
 $AUTOLOAD, sort(), lock(), and spawning subprocesses
 in multiple threads simultaneously are now thread-safe.
 
@@ -2496,6 +2526,9 @@ only 46 bit integers for speed.
 
 VMS
 
+See L</"Socket Extension Dynamic in VMS"> and L</"IEEE-format Floating Point
+Default on OpenVMS Alpha"> for important changes not otherwise listed here.
+
 chdir() now works better despite a CRT bug; now works with MULTIPLICITY
 (see INSTALL); now works with Perl's malloc.
 
@@ -2508,9 +2541,6 @@ the system.
 
 POSIX-style signals are now emulated much better on VMS versions prior
 to 7.0.
-
-The Socket extension is now dynamically loaded instead of being
-statically built in.
 
 The C<system> function and backticks operator have improved
 functionality and better error handling. [561]
@@ -2948,6 +2978,11 @@ detailed in here: http://sources.redhat.com/ml/cygwin/2001-12/msg00894.html
 If this test fails, it indicates that your libc (C library) is not
 threadsafe.  This particular test stress tests the localtime() call to
 find out whether it is threadsafe.  See L<perlthrtut> for more information.
+
+=head2 FreeBSD built with ithreads coredumps reading large directories
+
+This is a known bug in FreeBSD's readdir_r() (see L<perlfreebsd>
+(README.freebsd)), which hopefully will be fixed in FreeBSD 4.6.
 
 =head2 FreeBSD Failing locale Test 117 For ISO8859-15 Locales
 

@@ -472,7 +472,7 @@ EOF
       ($text ? " or another paragraph of description" : () );
   }
   s/n't/n\00t/g;		# leave can't, won't etc untouched
-  s/^\t\s+(.*)/\n\t$1\n/gm;	# Indented lines ===> paragraphs
+  s/^\t\s+(.*)/\n$1/gm;		# Indented lines ===> new paragraph
   s/^(?<!\n\n)\t(.*)/$1/gm;	# Not indented lines ===> text
   s{([\'\"])(?=[^\'\"\s]*[./][^\'\"\s]*\1)([^\'\"\s]+)\1}(F<$2>)g; # '.o'
   s{([\'\"])([^\'\"\s]+)\1}(C<$2>)g; # "date" command
@@ -500,7 +500,8 @@ EOF
 }
 
 if ($opts{glossary}) {
-  <GLOS>;				# Skip the preamble
+    <GLOS>;				# Skip the "DO NOT EDIT"
+    <GLOS>;				# Skip the preamble
   while (<GLOS>) {
     process;
     print CONFIG;

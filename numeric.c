@@ -743,7 +743,8 @@ S_mulexp10(NV value, I32 exponent)
      *
      * [1] Trying to establish a condition handler to trap floating point
      *     exceptions is not a good idea. */
-#if defined(VMS) && !defined(__IEEE_FP) && defined(NV_MAX_10_EXP)
+    /* UNICOS fp is similarly non-IEEE. */
+#if ((defined(VMS) && !defined(__IEEE_FP)) || defined(_UNICOS)) && defined(NV_MAX_10_EXP)
     if ((log10(value) + exponent) >= (NV_MAX_10_EXP))
         return negative ? 0.0 : NV_MAX;
 #endif

@@ -124,6 +124,7 @@ sub import {
 	*OSNAME
 	*LAST_REGEXP_CODE_RESULT
 	*EXCEPTIONS_BEING_CAUGHT
+	*LAST_SUBMATCH_RESULT
 	@LAST_MATCH_START
 	@LAST_MATCH_END
 );
@@ -144,6 +145,7 @@ sub import {
 # Matching.
 
 	*LAST_PAREN_MATCH			= \$+	;
+	*LAST_SUBMATCH_RESULT			= \$^N ;
 	*LAST_MATCH_START			= \@- ;
 	*LAST_MATCH_END				= \@+ ;
 

@@ -502,8 +502,6 @@ be kept as clean as possible (listing not updated yet).
 
 =head1 BUGS ON CYGWIN
 
-When I<make> starts, it warns about overriding commands for F<perlmain.o>.
-
 Support for swapping real and effective user and group IDs is incomplete.
 On WinNT Cygwin provides setuid(), seteuid(), setgid() and setegid().
 However, additional Cygwin calls for manipulating WinNT access tokens

@@ -54,7 +54,6 @@ sub share_disabled { return @_}
 
 $threads::shared::threads_shared = 1;
 
-sub _thrcnt { 42 }
 
 sub threads::shared::tie::SPLICE
 {

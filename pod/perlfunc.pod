@@ -2953,7 +2953,9 @@ The following triples are more or less equivalent:
     open(FOO, '-|', "cat", '-n', $file);
 
 The last example in each block shows the pipe as "list form", which is
-not yet supported on all platforms.
+not yet supported on all platforms.  A good rule of thumb is that if
+your platform has true C<fork()> (in other words, if your platform is
+UNIX) you can use the list form.
 
 See L<perlipc/"Safe Pipe Opens"> for more examples of this.
 
@@ -3102,14 +3104,17 @@ relied upon.
 The only currently recognized attribute is C<unique> which indicates
 that a single copy of the global is to be used by all interpreters
 should the program happen to be running in a multi-interpreter
-environment. (The default behaviour would be for each interpreter to
-have its own copy of the global.)  In such an environment, this
-attribute also has the effect of making the global readonly.
-Examples:
+environment. (The default behaviour would be for each interpreter
+to have its own copy of the global.)  Examples:
 
     our @EXPORT : unique = qw(foo);
     our %EXPORT_TAGS : unique = (bar => [qw(aa bb cc)]);
     our $VERSION : unique = "1.00";
+
+Note that this attribute also has the effect of making the global
+readonly in the main interpreter after the first new interpreter
+has been cloned (for example, after the first new thread has been
+created).
 
 Multi-interpreter environments can come to being either through the
 fork() emulation on Windows platforms, or by embedding perl in a

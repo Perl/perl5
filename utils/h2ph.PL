@@ -300,7 +300,20 @@ sub expr {
 	s/^\&\&// && do { $new .= " &&"; next;}; # handle && operator
 	s/^\&([\(a-z\)]+)/$1/i;	# hack for things that take the address of
 	s/^(\s+)//		&& do {$new .= ' '; next;};
-	s/^(0X[0-9A-F]+)[UL]*//i		&& do {$new .= lc($1); next;};
+	s/^0X([0-9A-F]+)[UL]*//i 
+	    && do {my $hex = $1;
+		   $hex =~ s/^0+//;
+		   if (length $hex > 8 && !$Config{use64bitint}) {
+		       # Croak if nv_preserves_uv_bits < 64 ?
+		       $new .=         hex(substr($hex, -8)) +
+			       2**32 * hex(substr($hex,  0, -8));
+		       # The above will produce "errorneus" code
+		       # if the hex constant was e.g. inside UINT64_C
+		       # macro, but then again, h2ph is an approximation.
+		   } else {
+		       $new .= lc("0x$hex");
+		   }
+		   next;};
 	s/^(-?\d+\.\d+E[-+]?\d+)[FL]?//i	&& do {$new .= $1; next;};
 	s/^(\d+)\s*[LU]*//i	&& do {$new .= $1; next;};
 	s/^("(\\"|[^"])*")//	&& do {$new .= $1; next;};
@@ -436,7 +449,7 @@ sub next_line
 		}
 		next READ;
 	    }
-	    if ($in =~ /^extern inline / &&
+	    if ($in =~ /^extern inline / && # Inlined assembler.
 		$^O eq 'linux' && $file =~ m!(?:^|/)asm/[^/]+\.h$!) {
  		while (<IN>) {
 		    last if /^}/; 

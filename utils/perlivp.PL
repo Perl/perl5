@@ -174,7 +174,7 @@ foreach (qw(Config.pm ExtUtils/Installed.pm)) {
         $needed_there++;
     }
     else {
-        print "# Needed module `$_' does not appear to be properly installed ($@).\n";
+        print "# Needed module `$_' does not appear to be properly installed.\n";
     }
     $@ = undef;
 }
@@ -210,7 +210,7 @@ if (defined($Config{'extensions'})) {
             $extensions_there++;
         }
         else {
-            print "# Required module `$_' does not appear to be properly installed ($@).\n";
+            print "# Required module `$_' does not appear to be properly installed.\n";
             $@ = undef;
         }
         $extensions_total++;
@@ -329,7 +329,7 @@ foreach (@ph_files) {
         $ph_there++;
     }
     else {
-        print "# Perl header `$_' does not appear to be properly installed ($@).\n";
+        print "# Perl header `$_' does not appear to be properly installed.\n";
     }
     $@ = undef;
 }
