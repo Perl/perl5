@@ -2252,6 +2252,10 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
     SAVETMPS;
     /* switch to eval mode */
 
+    if (PL_curcop == &PL_compiling) {
+	SAVESPTR(PL_compiling.cop_stash);
+	PL_compiling.cop_stash = PL_curstash;
+    }
     SAVESPTR(PL_compiling.cop_filegv);
     SAVEI16(PL_compiling.cop_line);
     sprintf(tmpbuf, "_<(%.10s_eval %lu)", code, (unsigned long)++PL_evalseq);

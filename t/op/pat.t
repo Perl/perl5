@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..139\n";
+print "1..141\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -534,6 +534,19 @@ $test++;
   print "ok $test\n";
   $test++;
 }
+
+{
+  package aa;
+  $c = 2;
+  $::c = 3;
+  '' =~ /(?{ $c = 4 })/;
+  print "not " unless $c == 4;
+}
+print "ok $test\n";
+$test++;
+print "not " unless $c == 3;
+print "ok $test\n";
+$test++;  
   
 sub must_warn_pat {
     my $warn_pat = shift;
