@@ -22,7 +22,7 @@ The English module, loaded via
     use English;
 
 allows you to refer to special variables (like C<$/>) with names (like
-C<$RS>), as though they were in B<awk>; see L<perlvar> for details.
+$RS), as though they were in B<awk>; see L<perlvar> for details.
 
 =item *
 
@@ -160,7 +160,7 @@ You must use C<elsif> rather than C<else if>.
 
 The C<break> and C<continue> keywords from C become in
 Perl C<last> and C<next>, respectively.
-Unlike in C, these do I<NOT> work within a C<do { } while> construct.
+Unlike in C, these do I<not> work within a C<do { } while> construct.
 
 =item *
 
@@ -305,7 +305,7 @@ file read is the sole condition in a while loop:
 
 =item *
 
-Remember not to use "C<=>" when you need "C<=~>";
+Remember not to use C<=> when you need C<=~>;
 these two constructs are quite different:
 
     $x =  /foo/;
@@ -1056,7 +1056,7 @@ All types of RE traps.
 =item * Regular Expression
 
 C<s'$lhs'$rhs'> now does no interpolation on either side.  It used to
-interpolate C<$lhs> but not C<$rhs>.  (And still does not match a literal
+interpolate $lhs but not $rhs.  (And still does not match a literal
 '$' in string)
 
     $a=1;$b=2;
@@ -1095,7 +1095,7 @@ the very first time in any such closure.  For instance, if you say
     }
 
 build_match() will always return a sub which matches the contents of
-C<$left> and C<$right> as they were the I<first> time that build_match()
+$left and $right as they were the I<first> time that build_match()
 was called, not as they are in the current call.
 
 This is probably a bug, and may change in future versions of Perl.
@@ -1327,7 +1327,7 @@ Note that you can C<use strict;> to ward off such trappiness under perl5.
 =item * Interpolation
 
 The construct "this is $$x" used to interpolate the pid at that
-point, but now apparently tries to dereference C<$x>.  C<$$> by itself still
+point, but now apparently tries to dereference $x.  C<$$> by itself still
 works fine, however.
 
     print "this is $$x\n";

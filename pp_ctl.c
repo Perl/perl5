@@ -172,8 +172,8 @@ PP(pp_substcont)
 	if (cx->sb_once || !CALLREGEXEC(rx, s, cx->sb_strend, orig,
 				     s == m, cx->sb_targ, NULL,
 				     ((cx->sb_rflags & REXEC_COPY_STR)
-				      ? REXEC_IGNOREPOS 
-				      : (REXEC_COPY_STR|REXEC_IGNOREPOS))))
+				      ? (REXEC_IGNOREPOS|REXEC_NOT_FIRST)
+				      : (REXEC_COPY_STR|REXEC_IGNOREPOS|REXEC_NOT_FIRST))))
 	{
 	    SV *targ = cx->sb_targ;
 	    sv_catpvn(dstr, s, cx->sb_strend - s);
@@ -201,16 +201,16 @@ PP(pp_substcont)
 	    RETURNOP(pm->op_next);
 	}
     }
-    if (rx->subbase && rx->subbase != orig) {
+    if (RX_MATCH_COPIED(rx) && rx->subbeg != orig) {
 	m = s;
 	s = orig;
-	cx->sb_orig = orig = rx->subbase;
+	cx->sb_orig = orig = rx->subbeg;
 	s = orig + (m - s);
 	cx->sb_strend = s + (cx->sb_strend - m);
     }
-    cx->sb_m = m = rx->startp[0];
+    cx->sb_m = m = rx->startp[0] + orig;
     sv_catpvn(dstr, s, m-s);
-    cx->sb_s = rx->endp[0];
+    cx->sb_s = rx->endp[0] + orig;
     cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
     rxres_save(&cx->sb_rxres, rx);
     RETURNOP(pm->op_pmreplstart);
@@ -231,13 +231,13 @@ rxres_save(void **rsp, REGEXP *rx)
 	*rsp = (void*)p;
     }
 
-    *p++ = (UV)rx->subbase;
-    rx->subbase = Nullch;
+    *p++ = (UV)(RX_MATCH_COPIED(rx) ? rx->subbeg : Nullch);
+    RX_MATCH_COPIED_off(rx);
 
     *p++ = rx->nparens;
 
     *p++ = (UV)rx->subbeg;
-    *p++ = (UV)rx->subend;
+    *p++ = (UV)rx->sublen;
     for (i = 0; i <= rx->nparens; ++i) {
 	*p++ = (UV)rx->startp[i];
 	*p++ = (UV)rx->endp[i];
@@ -250,17 +250,18 @@ rxres_restore(void **rsp, REGEXP *rx)
     UV *p = (UV*)*rsp;
     U32 i;
 
-    Safefree(rx->subbase);
-    rx->subbase = (char*)(*p);
+    if (RX_MATCH_COPIED(rx))
+	Safefree(rx->subbeg);
+    RX_MATCH_COPIED_set(rx, *p);
     *p++ = 0;
 
     rx->nparens = *p++;
 
     rx->subbeg = (char*)(*p++);
-    rx->subend = (char*)(*p++);
+    rx->sublen = (I32)(*p++);
     for (i = 0; i <= rx->nparens; ++i) {
-	rx->startp[i] = (char*)(*p++);
-	rx->endp[i] = (char*)(*p++);
+	rx->startp[i] = (I32)(*p++);
+	rx->endp[i] = (I32)(*p++);
     }
 }
 
@@ -667,7 +668,7 @@ PP(pp_grepstart)
     if (PL_stack_base + *PL_markstack_ptr == SP) {
 	(void)POPMARK;
 	if (GIMME_V == G_SCALAR)
-	    XPUSHs(&PL_sv_no);
+	    XPUSHs(sv_2mortal(newSViv(0)));
 	RETURNOP(PL_op->op_next->op_next);
     }
     PL_stack_sp = PL_stack_base + *PL_markstack_ptr + 1;
@@ -1026,7 +1027,10 @@ PP(pp_range)
 {
     if (GIMME == G_ARRAY)
 	return cCONDOP->op_true;
-    return SvTRUEx(PAD_SV(PL_op->op_targ)) ? cCONDOP->op_false : cCONDOP->op_true;
+    if (SvTRUEx(PAD_SV(PL_op->op_targ)))
+	return cCONDOP->op_false;
+    else
+	return cCONDOP->op_true;
 }
 
 PP(pp_flip)
@@ -1332,7 +1336,7 @@ die_where(char *message, STRLEN msglen)
 	SV **newsp;
 
 	if (message) {
-	    if (PL_in_eval & 4) {
+	    if (PL_in_eval & EVAL_KEEPERR) {
 		SV **svp;
 		
 		svp = hv_fetch(ERRHV, message, msglen, TRUE);
@@ -2609,7 +2613,7 @@ doeval(int gimme, OP** startop)
     AV* comppadlist;
     I32 i;
 
-    PL_in_eval = 1;
+    PL_in_eval = EVAL_INEVAL;
 
     PUSHMARK(SP);
 
@@ -2688,7 +2692,7 @@ doeval(int gimme, OP** startop)
     SvREFCNT_dec(PL_rs);
     PL_rs = newSVpvn("\n", 1);
     if (saveop && saveop->op_flags & OPf_SPECIAL)
-	PL_in_eval |= 4;
+	PL_in_eval |= EVAL_KEEPERR;
     else
 	sv_setpv(ERRSV,"");
     if (yyparse() || PL_error_count || !PL_eval_root) {
@@ -2896,23 +2900,28 @@ PP(pp_require)
     SvREFCNT_dec(namesv);
     if (!tryrsfp) {
 	if (PL_op->op_type == OP_REQUIRE) {
-	    SV *msg = sv_2mortal(newSVpvf("Can't locate %s in @INC", name));
-	    SV *dirmsgsv = NEWSV(0, 0);
-	    AV *ar = GvAVn(PL_incgv);
-	    I32 i;
-	    if (instr(SvPVX(msg), ".h "))
-		sv_catpv(msg, " (change .h to .ph maybe?)");
-	    if (instr(SvPVX(msg), ".ph "))
-		sv_catpv(msg, " (did you run h2ph?)");
-	    sv_catpv(msg, " (@INC contains:");
-	    for (i = 0; i <= AvFILL(ar); i++) {
-		char *dir = SvPVx(*av_fetch(ar, i, TRUE), n_a);
-		sv_setpvf(dirmsgsv, " %s", dir);
-	        sv_catsv(msg, dirmsgsv);
+	    char *msgstr = name;
+	    if (namesv) {			/* did we lookup @INC? */
+		SV *msg = sv_2mortal(newSVpv(msgstr,0));
+		SV *dirmsgsv = NEWSV(0, 0);
+		AV *ar = GvAVn(PL_incgv);
+		I32 i;
+		sv_catpvn(msg, " in @INC", 8);
+		if (instr(SvPVX(msg), ".h "))
+		    sv_catpv(msg, " (change .h to .ph maybe?)");
+		if (instr(SvPVX(msg), ".ph "))
+		    sv_catpv(msg, " (did you run h2ph?)");
+		sv_catpv(msg, " (@INC contains:");
+		for (i = 0; i <= AvFILL(ar); i++) {
+		    char *dir = SvPVx(*av_fetch(ar, i, TRUE), n_a);
+		    sv_setpvf(dirmsgsv, " %s", dir);
+		    sv_catsv(msg, dirmsgsv);
+		}
+		sv_catpvn(msg, ")", 1);
+		SvREFCNT_dec(dirmsgsv);
+		msgstr = SvPV_nolen(msg);
 	    }
-	    sv_catpvn(msg, ")", 1);
-    	    SvREFCNT_dec(dirmsgsv);
-	    DIE("%_", msg);
+	    DIE("Can't locate %s", msgstr);
 	}
 
 	RETPUSHUNDEF;
@@ -3142,7 +3151,7 @@ PP(pp_entertry)
     PUSHEVAL(cx, 0, 0);
     PL_eval_root = PL_op;		/* Only needed so that goto works right. */
 
-    PL_in_eval = 1;
+    PL_in_eval = EVAL_INEVAL;
     sv_setpv(ERRSV,"");
     PUTBACK;
     return DOCATCH(PL_op->op_next);

@@ -756,13 +756,15 @@ but there is no function to autoload.  Most probable causes are a misprint
 in a function/method name or a failure to C<AutoSplit> the file, say, by
 doing C<make install>.
 
-=item Can't locate %s in @INC
+=item Can't locate %s
 
-(F) You said to do (or require, or use) a file that couldn't be found
-in any of the libraries mentioned in @INC.  Perhaps you need to set the
-PERL5LIB or PERL5OPT environment variable to say where the extra library
-is, or maybe the script needs to add the library name to @INC.  Or maybe
-you just misspelled the name of the file.  See L<perlfunc/require>.
+(F) You said to C<do> (or C<require>, or C<use>) a file that couldn't be
+found. Perl looks for the file in all the locations mentioned in @INC,
+unless the file name included the full path to the file.  Perhaps you need
+to set the PERL5LIB or PERL5OPT environment variable to say where the extra
+library is, or maybe the script needs to add the library name to @INC.  Or
+maybe you just misspelled the name of the file.  See L<perlfunc/require>
+and L<lib>.
 
 =item Can't locate object method "%s" via package "%s"
 

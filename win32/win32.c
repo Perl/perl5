@@ -568,11 +568,11 @@ do_spawn2(char *cmd, int exectype)
 	strcpy(cmd2, cmd);
 	a = argv;
 	for (s = cmd2; *s;) {
-	    while (*s && isspace(*s))
+	    while (*s && isSPACE(*s))
 		s++;
 	    if (*s)
 		*(a++) = s;
-	    while (*s && !isspace(*s))
+	    while (*s && !isSPACE(*s))
 		s++;
 	    if (*s)
 		*s++ = '\0';
@@ -1708,7 +1708,7 @@ win32_str_os_error(void *sv, DWORD dwErr)
 			  |FORMAT_MESSAGE_FROM_SYSTEM, NULL,
 			   dwErr, 0, (char *)&sMsg, 1, NULL);
     if (0 < dwLen) {
-	while (0 < dwLen  &&  isspace(sMsg[--dwLen]))
+	while (0 < dwLen  &&  isSPACE(sMsg[--dwLen]))
 	    ;
 	if ('.' != sMsg[dwLen])
 	    dwLen++;

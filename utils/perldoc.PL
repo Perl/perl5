@@ -142,7 +142,10 @@ if ($opt_X) {
 if ((my $opts = do{ local $^W; $opt_t + $opt_u + $opt_m + $opt_l }) > 1) {
     usage("only one of -t, -u, -m or -l")
 }
-elsif ($Is_MSWin32 || $Is_Dos) {
+elsif ($Is_MSWin32
+       || $Is_Dos
+       || !(exists $ENV{TERM} && $ENV{TERM} !~ /dumb|emacs|none|unknown/i))
+{
     $opt_t = 1 unless $opts
 }
 

@@ -313,6 +313,7 @@ my @staticfuncs = qw(
     bad_type
     modkids
     no_fh_allowed
+    no_bareword_allowed
     scalarboolean
     too_few_arguments
     too_many_arguments

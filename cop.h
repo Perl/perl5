@@ -298,6 +298,12 @@ struct context {
 #define G_KEEPERR      16	/* Append errors to $@, don't overwrite it */
 #define G_NODEBUG      32	/* Disable debugging at toplevel.  */
 
+/* flag bits for PL_in_eval */
+#define EVAL_NULL	0	/* not in an eval */
+#define EVAL_INEVAL	1	/* some enclosing scope is an eval */
+#define EVAL_WARNONLY	2	/* used by yywarn() when calling yyerror() */
+#define EVAL_KEEPERR	4	/* set by perl_call_sv if G_KEEPERR */
+
 /* Support for switching (stack and block) contexts.
  * This ensures magic doesn't invalidate local stack and cx pointers.
  */

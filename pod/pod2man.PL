@@ -785,7 +785,7 @@ while (<>) {
 	} {I<$1>\\|$2}gx;
 
 	# convert simple variable references
-	s/(\s+)([\$\@%][\w:]+)(?!\()/${1}C<$2>/g;
+	s/(\s+)([\$\@%&*][\w:]+)(?!\()/${1}C<$2>/g;
 
 	if (m{ (
 		    [\-\w]+

@@ -834,7 +834,7 @@ destructor (DESTROY) is called, which is normal for objects that have
 no more valid references; and thus the file is closed.
 
 In the second example, however, we have stored another reference to
-the tied object in C<$x>.  That means that when untie() gets called
+the tied object in $x.  That means that when untie() gets called
 there will still be a valid reference to the object in existence, so
 the destructor is not called at that time, and thus the file is not
 closed.  The reason there is no output is because the file buffers

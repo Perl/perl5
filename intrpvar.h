@@ -119,7 +119,6 @@ PERLVAR(Ifdpid,		AV *)		/* keep fd-to-pid mappings for my_popen */
 /* internal state */
 PERLVAR(Itainting,	bool)		/* doing taint checks */
 PERLVARI(Iop_mask,	char *,	NULL)	/* masked operations for safe evals */
-PERLVAR(Ilast_proto, char *)		/* Prototype of last sub seen. */
 
 /* trace state */
 PERLVAR(Idlevel,	I32)

@@ -93,7 +93,6 @@ my @exe = qw(
     installperl
     installman
     keywords.pl
-    myconfig
     opcode.pl
     perly.fixer
     t/TEST

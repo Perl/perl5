@@ -139,7 +139,7 @@ metacharacters, nor are dot, dash, or at going to mean something special
 to the shell.  Use of C</.+/> would have been insecure in theory because
 it lets everything through, but Perl doesn't check for that.  The lesson
 is that when untainting, you must be exceedingly careful with your patterns.
-Laundering data using regular expression is the I<ONLY> mechanism for
+Laundering data using regular expression is the I<only> mechanism for
 untainting dirty data, unless you use the strategy detailed below to fork
 a child of lesser privilege.
 

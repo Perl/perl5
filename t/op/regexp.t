@@ -16,6 +16,8 @@ $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3;
 # 	y	expect a match
 # 	n	expect no match
 # 	c	expect an error
+#	B	test exposes a known bug in Perl, should be skipped
+#	b	test exposes a known bug in Perl, should be skipped if noamp
 #
 # Columns 4 and 5 are used only if column 3 contains C<y> or C<c>.
 #
@@ -62,13 +64,18 @@ while (<TESTS>) {
     $subject =~ s/\\n/\n/g;
     $expect =~ s/\\n/\n/g;
     $expect = $repl = '-' if $skip_amp and $input =~ /\$[&\`\']/;
-    for $study ("", "study \$subject") {
+    $skip = ($skip_amp ? ($result =~ s/B//i) : ($result =~ s/B//));
+    $result =~ s/B//i unless $skip;
+    for $study ('', 'study \$subject') {
  	$c = $iters;
  	eval "$study; \$match = (\$subject =~ m$pat) while \$c--; \$got = \"$repl\";";
 	chomp( $err = $@ );
 	if ($result eq 'c') {
 	    if ($err !~ m!^\Q$expect!) { print "not ok $. (compile) $input => `$err'\n"; next TEST }
 	    last;  # no need to study a syntax error
+	}
+	elsif ( $skip ) {
+	    print "ok $. # Skipped: not fixed yet\n"; next TEST;
 	}
 	elsif ($@) {
 	    print "not ok $. $input => error `$err'\n"; next TEST;

@@ -310,7 +310,7 @@ the strings?).
           5.005_03-MT3  1999-Jan-17
           5.005_03-MT4  1999-Jan-26
           5.005_03-MT5  1999-Jan-28
-          5.005_03      1999-***-**
+          5.005_03      1999-Mar-28
 
  Sarathy  5.005_50      1998-Jul-26     The 5.006 development track.
           5.005_51      1998-Aug-10
@@ -319,6 +319,7 @@ the strings?).
           5.005_54      1998-Nov-30
           5.005_55      1999-Feb-16
           5.005_56      1999-Mar-01
+          5.005_57      1999-May-25
 
 =head2 SELECTED RELEASE SIZES
 

@@ -1004,11 +1004,7 @@ my_lstat(ARGSproto)
     sv = POPs;
     PUTBACK;
     sv_setpv(PL_statname,SvPV(sv, n_a));
-#ifdef HAS_LSTAT
     PL_laststatval = PerlLIO_lstat(SvPV(sv, n_a),&PL_statcache);
-#else
-    PL_laststatval = PerlLIO_stat(SvPV(sv, n_a),&PL_statcache);
-#endif
     if (PL_laststatval < 0 && ckWARN(WARN_NEWLINE) && strchr(SvPV(sv, n_a), '\n'))
 	warner(WARN_NEWLINE, PL_warn_nl, "lstat");
     return PL_laststatval;
@@ -1317,11 +1313,7 @@ nothing in the core.
 		    tot--;
 	    }
 	    else {	/* don't let root wipe out directories without -U */
-#ifdef HAS_LSTAT
 		if (PerlLIO_lstat(s,&PL_statbuf) < 0 || S_ISDIR(PL_statbuf.st_mode))
-#else
-		if (PerlLIO_stat(s,&PL_statbuf) < 0 || S_ISDIR(PL_statbuf.st_mode))
-#endif
 		    tot--;
 		else {
 		    if (UNLINK(s))

@@ -5006,8 +5006,10 @@ PP(pp_split)
     else if (rx->check_substr && !rx->nparens
 	     && (rx->reganch & ROPT_CHECK_ALL)
 	     && !(rx->reganch & ROPT_ANCH)) {
+	int tail = SvTAIL(rx->check_substr) != 0;
+
 	i = SvCUR(rx->check_substr);
-	if (i == 1 && !SvTAIL(rx->check_substr)) {
+	if (i == 1 && !tail) {
 	    i = *SvPVX(rx->check_substr);
 	    while (--limit) {
 		/*SUPPRESS 530*/
@@ -5026,7 +5028,7 @@ PP(pp_split)
 #ifndef lint
 	    while (s < strend && --limit &&
 	      (m=fbm_instr((unsigned char*)s, (unsigned char*)strend,
-		    rx->check_substr, 0)) )
+		    rx->check_substr, PL_multiline ? FBMrf_MULTILINE : 0)) )
 #endif
 	    {
 		dstr = NEWSV(31, m-s);
@@ -5034,7 +5036,7 @@ PP(pp_split)
 		if (make_mortal)
 		    sv_2mortal(dstr);
 		XPUSHs(dstr);
-		s = m + i;
+		s = m + i - tail;	/* Fake \n at the end */
 	    }
 	}
     }
@@ -5044,15 +5046,14 @@ PP(pp_split)
 	       CALLREGEXEC(rx, s, strend, orig, 1, sv, NULL, 0))
 	{
 	    TAINT_IF(RX_MATCH_TAINTED(rx));
-	    if (rx->subbase
-	      && rx->subbase != orig) {
+	    if (RX_MATCH_COPIED(rx) && rx->subbeg != orig) {
 		m = s;
 		s = orig;
-		orig = rx->subbase;
+		orig = rx->subbeg;
 		s = orig + (m - s);
 		strend = s + (strend - m);
 	    }
-	    m = rx->startp[0];
+	    m = rx->startp[0] + orig;
 	    dstr = NEWSV(32, m-s);
 	    sv_setpvn(dstr, s, m-s);
 	    if (make_mortal)
@@ -5060,8 +5061,8 @@ PP(pp_split)
 	    XPUSHs(dstr);
 	    if (rx->nparens) {
 		for (i = 1; i <= rx->nparens; i++) {
-		    s = rx->startp[i];
-		    m = rx->endp[i];
+		    s = rx->startp[i] + orig;
+		    m = rx->endp[i] + orig;
 		    if (m && s) {
 			dstr = NEWSV(33, m-s);
 			sv_setpvn(dstr, s, m-s);
@@ -5073,7 +5074,7 @@ PP(pp_split)
 		    XPUSHs(dstr);
 		}
 	    }
-	    s = rx->endp[0];
+	    s = rx->endp[0] + orig;
 	}
     }
 

@@ -66,6 +66,7 @@ static I32 list_assignment _((OP *o));
 static void bad_type _((I32 n, char *t, char *name, OP *kid));
 static OP *modkids _((OP *o, I32 type));
 static OP *no_fh_allowed _((OP *o));
+static void no_bareword_allowed _((OP *o));
 static OP *scalarboolean _((OP *o));
 static OP *too_few_arguments _((OP *o, char* name));
 static OP *too_many_arguments _((OP *o, char* name));
@@ -116,6 +117,14 @@ bad_type(I32 n, char *t, char *name, OP *kid)
 		 (int)n, name, t, PL_op_desc[kid->op_type]));
 }
 
+STATIC void
+no_bareword_allowed(OP *o)
+{
+    warn("Bareword \"%s\" not allowed while \"strict subs\" in use",
+	  SvPV_nolen(cSVOPo->op_sv));
+    ++PL_error_count;
+}
+
 void
 assertref(OP *o)
 {
@@ -127,7 +136,7 @@ assertref(OP *o)
 	    SV *msg = sv_2mortal(
 			newSVpvf("(Did you mean $ or @ instead of %c?)\n",
 				 type == OP_ENTERSUB ? '&' : '%'));
-	    if (PL_in_eval & 2)
+	    if (PL_in_eval & EVAL_WARNONLY)
 		warn("%_", msg);
 	    else if (PL_in_eval)
 		sv_catsv(GvSV(PL_errgv), msg);
@@ -877,10 +886,19 @@ scalarvoid(OP *o)
     OP *kid;
     char* useless = 0;
     SV* sv;
+    U8 want;
+
+    if (o->op_type == OP_NEXTSTATE || o->op_type == OP_DBSTATE ||
+	(o->op_type == OP_NULL &&
+	 (o->op_targ == OP_NEXTSTATE || o->op_targ == OP_DBSTATE)))
+    {
+	dTHR;
+	PL_curcop = (COP*)o;		/* for warning below */
+    }
 
     /* assumes no premature commitment */
-    U8 want = o->op_flags & OPf_WANT;
-    if (!o || (want && want != OPf_WANT_SCALAR) || PL_error_count
+    want = o->op_flags & OPf_WANT;
+    if ((want && want != OPf_WANT_SCALAR) || PL_error_count
 	 || o->op_type == OP_RETURN)
 	return o;
 
@@ -980,14 +998,11 @@ scalarvoid(OP *o)
 	    useless = "a variable";
 	break;
 
-    case OP_NEXTSTATE:
-    case OP_DBSTATE:
-	WITH_THR(PL_curcop = ((COP*)o));		/* for warning below */
-	break;
-
     case OP_CONST:
 	sv = cSVOPo->op_sv;
-	{
+	if (cSVOPo->op_private & OPpCONST_STRICT)
+	    no_bareword_allowed(o);
+	else {
 	    dTHR;
 	    if (ckWARN(WARN_VOID)) {
 		useless = "a constant";
@@ -1023,11 +1038,11 @@ scalarvoid(OP *o)
 	break;
 
     case OP_NULL:
-	if (o->op_targ == OP_NEXTSTATE || o->op_targ == OP_DBSTATE)
-	    WITH_THR(PL_curcop = ((COP*)o));	/* for warning below */
 	if (o->op_flags & OPf_STACKED)
 	    break;
 	/* FALL THROUGH */
+    case OP_NEXTSTATE:
+    case OP_DBSTATE:
     case OP_ENTERTRY:
     case OP_ENTER:
     case OP_SCALAR:
@@ -1753,7 +1768,9 @@ newPROG(OP *o)
     if (PL_in_eval) {
 	if (PL_eval_root)
 		return;
-	PL_eval_root = newUNOP(OP_LEAVEEVAL, ((PL_in_eval & 4) ? OPf_SPECIAL : 0), o);
+	PL_eval_root = newUNOP(OP_LEAVEEVAL,
+			       ((PL_in_eval & EVAL_KEEPERR)
+				? OPf_SPECIAL : 0), o);
 	PL_eval_start = linklist(PL_eval_root);
 	PL_eval_root->op_next = 0;
 	peep(PL_eval_start);
@@ -1841,6 +1858,10 @@ fold_constants(register OP *o)
 	goto nope;
 
     switch (type) {
+    case OP_NEGATE:
+	/* XXX might want a ck_negate() for this */
+	cUNOPo->op_first->op_private &= ~OPpCONST_STRICT;
+	break;
     case OP_SPRINTF:
     case OP_UCFIRST:
     case OP_LCFIRST:
@@ -1861,10 +1882,11 @@ fold_constants(register OP *o)
 
     for (curop = LINKLIST(o); curop != o; curop = LINKLIST(curop)) {
 	if (curop->op_type != OP_CONST &&
-		curop->op_type != OP_LIST &&
-		curop->op_type != OP_SCALAR &&
-		curop->op_type != OP_NULL &&
-		curop->op_type != OP_PUSHMARK) {
+	    curop->op_type != OP_LIST &&
+	    curop->op_type != OP_SCALAR &&
+	    curop->op_type != OP_NULL &&
+	    curop->op_type != OP_PUSHMARK)
+	{
 	    goto nope;
 	}
     }
@@ -3981,7 +4003,7 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 	    if (strEQ(s, "BEGIN")) {
 		char *not_safe =
 		    "BEGIN not safe after errors--compilation aborted";
-		if (PL_in_eval & 4)
+		if (PL_in_eval & EVAL_KEEPERR)
 		    croak(not_safe);
 		else {
 		    /* force display of errors found but not reported */
@@ -5356,6 +5378,10 @@ ck_subr(OP *o)
 	    }
 	}
     }
+    else if (cvop->op_type == OP_METHOD) {
+	if (o2->op_type == OP_CONST)
+	    o2->op_private &= ~OPpCONST_STRICT;
+    }
     o->op_private |= (PL_hints & HINT_STRICT_REFS);
     if (PERLDB_SUB && PL_curstash != PL_debstash)
 	o->op_private |= OPpENTERSUB_DB;
@@ -5390,6 +5416,33 @@ ck_subr(OP *o)
 		arg++;
 		if (o2->op_type == OP_RV2GV)
 		    goto wrapref;	/* autoconvert GLOB -> GLOBref */
+		else if (o2->op_type == OP_CONST)
+		    o2->op_private &= ~OPpCONST_STRICT;
+		else if (o2->op_type == OP_ENTERSUB) {
+		    /* accidental subroutine, revert to bareword */
+		    OP *gvop = ((UNOP*)o2)->op_first;
+		    if (gvop && gvop->op_type == OP_NULL) {
+			gvop = ((UNOP*)gvop)->op_first;
+			if (gvop) {
+			    for (; gvop->op_sibling; gvop = gvop->op_sibling)
+				;
+			    if (gvop &&
+				(gvop->op_private & OPpENTERSUB_NOPAREN) &&
+				(gvop = ((UNOP*)gvop)->op_first) &&
+				gvop->op_type == OP_GV)
+			    {
+				GV *gv = (GV*)((SVOP*)gvop)->op_sv;
+				OP *sibling = o2->op_sibling;
+				op_free(o2);
+				o2 = newSVOP(OP_CONST, 0,
+					     newSVpvn(GvNAME(gv),
+						      GvNAMELEN(gv)));
+				prev->op_sibling = o2;
+				o2->op_sibling = sibling;
+			    }
+			}
+		    }
+		}
 		scalar(o2);
 		break;
 	    case '\\':
@@ -5502,8 +5555,11 @@ peep(register OP *o)
 	    o->op_seq = PL_op_seqmax++;
 	    break;
 
-	case OP_CONCAT:
 	case OP_CONST:
+	    if (cSVOPo->op_private & OPpCONST_STRICT)
+		no_bareword_allowed(o);
+	    /* FALL THROUGH */
+	case OP_CONCAT:
 	case OP_JOIN:
 	case OP_UC:
 	case OP_UCFIRST:

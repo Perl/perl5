@@ -3154,11 +3154,8 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		    PL_oldoldbufptr < PL_bufptr &&
 		    (PL_oldoldbufptr == PL_last_lop || PL_oldoldbufptr == PL_last_uni) &&
 		    /* NO SKIPSPACE BEFORE HERE! */
-		    (PL_expect == XREF 
-		     || ((PL_opargs[PL_last_lop_op] >> OASHIFT)& 7) == OA_FILEREF
-		     || (PL_last_lop_op == OP_ENTERSUB 
-			 && PL_last_proto 
-			 && PL_last_proto[PL_last_proto[0] == ';' ? 1 : 0] == '*')) )
+		    (PL_expect == XREF ||
+		     ((PL_opargs[PL_last_lop_op] >> OASHIFT)& 7) == OA_FILEREF))
 		{
 		    bool immediate_paren = *s == '(';
 
@@ -3174,8 +3171,10 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		    /* (But it's an indir obj regardless for sort.) */
 
 		    if ((PL_last_lop_op == OP_SORT ||
-                         (!immediate_paren && (!gv || !GvCVu(gv))) ) &&
-                        (PL_last_lop_op != OP_MAPSTART && PL_last_lop_op != OP_GREPSTART)){
+                         (!immediate_paren && (!gv || !GvCVu(gv)))) &&
+                        (PL_last_lop_op != OP_MAPSTART &&
+			 PL_last_lop_op != OP_GREPSTART))
+		    {
 			PL_expect = (PL_last_lop == PL_oldoldbufptr) ? XTERM : XOPERATOR;
 			goto bareword;
 		    }
@@ -3188,11 +3187,8 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		if (*s == '(') {
 		    CLINE;
 		    if (gv && GvCVu(gv)) {
-			CV *cv;
-			if ((cv = GvCV(gv)) && SvPOK(cv))
-			    PL_last_proto = SvPV((SV*)cv, n_a);
 			for (d = s + 1; *d == ' ' || *d == '\t'; d++) ;
-			if (*d == ')' && (sv = cv_const_sv(cv))) {
+			if (*d == ')' && (sv = cv_const_sv(GvCV(gv)))) {
 			    s = d + 1;
 			    goto its_constant;
 			}
@@ -3201,7 +3197,6 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		    PL_expect = XOPERATOR;
 		    force_next(WORD);
 		    yylval.ival = 0;
-		    PL_last_lop_op = OP_ENTERSUB;
 		    TOKEN('&');
 		}
 
@@ -3225,8 +3220,6 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		    if (lastchar == '-')
 			warn("Ambiguous use of -%s resolved as -&%s()",
 				PL_tokenbuf, PL_tokenbuf);
-		    PL_last_lop = PL_oldbufptr;
-		    PL_last_lop_op = OP_ENTERSUB;
 		    /* Check for a constant sub */
 		    cv = GvCV(gv);
 		    if ((sv = cv_const_sv(cv))) {
@@ -3240,52 +3233,41 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		    /* Resolve to GV now. */
 		    op_free(yylval.opval);
 		    yylval.opval = newCVREF(0, newGVOP(OP_GV, 0, gv));
+		    yylval.opval->op_private |= OPpENTERSUB_NOPAREN;
+		    PL_last_lop = PL_oldbufptr;
 		    PL_last_lop_op = OP_ENTERSUB;
 		    /* Is there a prototype? */
 		    if (SvPOK(cv)) {
 			STRLEN len;
-			PL_last_proto = SvPV((SV*)cv, len);
+			char *proto = SvPV((SV*)cv, len);
 			if (!len)
 			    TERM(FUNC0SUB);
-			if (strEQ(PL_last_proto, "$"))
+			if (strEQ(proto, "$"))
 			    OPERATOR(UNIOPSUB);
-			if (*PL_last_proto == '&' && *s == '{') {
+			if (*proto == '&' && *s == '{') {
 			    sv_setpv(PL_subname,"__ANON__");
 			    PREBLOCK(LSTOPSUB);
 			}
-		    } else
-			PL_last_proto = NULL;
+		    }
 		    PL_nextval[PL_nexttoke].opval = yylval.opval;
 		    PL_expect = XTERM;
 		    force_next(WORD);
 		    TOKEN(NOAMP);
 		}
 
-		if (PL_hints & HINT_STRICT_SUBS &&
-		    lastchar != '-' &&
-		    strnNE(s,"->",2) &&
-		    PL_last_lop_op != OP_TRUNCATE &&  /* S/F prototype in opcode.pl */
-		    PL_last_lop_op != OP_ACCEPT &&
-		    PL_last_lop_op != OP_PIPE_OP &&
-		    PL_last_lop_op != OP_SOCKPAIR &&
-		    !(PL_last_lop_op == OP_ENTERSUB 
-			 && PL_last_proto 
-			 && PL_last_proto[PL_last_proto[0] == ';' ? 1 : 0] == '*'))
-		{
-		    warn(
-		     "Bareword \"%s\" not allowed while \"strict subs\" in use",
-			PL_tokenbuf);
-		    ++PL_error_count;
-		}
-
 		/* Call it a bare word */
 
-	    bareword:
-		if (ckWARN(WARN_RESERVED)) {
-		    if (lastchar != '-') {
-			for (d = PL_tokenbuf; *d && isLOWER(*d); d++) ;
-			if (!*d)
-			    warner(WARN_RESERVED, PL_warn_reserved, PL_tokenbuf);
+		if (PL_hints & HINT_STRICT_SUBS)
+		    yylval.opval->op_private |= OPpCONST_STRICT;
+		else {
+		bareword:
+		    if (ckWARN(WARN_RESERVED)) {
+			if (lastchar != '-') {
+			    for (d = PL_tokenbuf; *d && isLOWER(*d); d++) ;
+			    if (!*d)
+				warner(WARN_RESERVED, PL_warn_reserved,
+				       PL_tokenbuf);
+			}
 		    }
 		}
 
@@ -6378,9 +6360,9 @@ yywarn(char *s)
 {
     dTHR;
     --PL_error_count;
-    PL_in_eval |= 2;
+    PL_in_eval |= EVAL_WARNONLY;
     yyerror(s);
-    PL_in_eval &= ~2;
+    PL_in_eval &= ~EVAL_WARNONLY;
     return 0;
 }
 
@@ -6443,7 +6425,7 @@ yyerror(char *s)
 		(int)PL_multi_open,(int)PL_multi_close,(long)PL_multi_start);
         PL_multi_end = 0;
     }
-    if (PL_in_eval & 2)
+    if (PL_in_eval & EVAL_WARNONLY)
 	warn("%_", msg);
     else if (PL_in_eval)
 	sv_catsv(ERRSV, msg);

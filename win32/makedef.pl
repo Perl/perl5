@@ -87,7 +87,6 @@ Perl_do_msgsnd
 Perl_do_semop
 Perl_do_shmio
 Perl_dump_fds
-Perl_dump_mstats
 Perl_init_thread_intern
 Perl_my_bzero
 Perl_my_htonl
@@ -113,6 +112,7 @@ PL_opsave
 if ($define{'MYMALLOC'})
  {
   emit_symbols [qw(
+    Perl_dump_mstats
     Perl_malloc
     Perl_mfree
     Perl_realloc

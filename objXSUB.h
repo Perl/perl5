@@ -266,8 +266,6 @@
 #define PL_last_lop		pPerl->PL_last_lop
 #undef  PL_last_lop_op
 #define PL_last_lop_op		pPerl->PL_last_lop_op
-#undef  PL_last_proto
-#define PL_last_proto		pPerl->PL_last_proto
 #undef  PL_last_swash_hv
 #define PL_last_swash_hv	pPerl->PL_last_swash_hv
 #undef  PL_last_swash_key
@@ -520,6 +518,10 @@
 #define PL_reg_oldcurpm		pPerl->PL_reg_oldcurpm
 #undef  PL_reg_oldpos
 #define PL_reg_oldpos		pPerl->PL_reg_oldpos
+#undef  PL_reg_oldsaved
+#define PL_reg_oldsaved		pPerl->PL_reg_oldsaved
+#undef  PL_reg_oldsavedlen
+#define PL_reg_oldsavedlen	pPerl->PL_reg_oldsavedlen
 #undef  PL_reg_re
 #define PL_reg_re		pPerl->PL_reg_re
 #undef  PL_reg_start_tmp
@@ -1765,6 +1767,8 @@
 #define nextchar		pPerl->Perl_nextchar
 #undef  ninstr
 #define ninstr			pPerl->Perl_ninstr
+#undef  no_bareword_allowed
+#define no_bareword_allowed	pPerl->Perl_no_bareword_allowed
 #undef  no_fh_allowed
 #define no_fh_allowed		pPerl->Perl_no_fh_allowed
 #undef  no_op

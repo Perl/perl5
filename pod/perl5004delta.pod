@@ -268,7 +268,7 @@ referenced subroutine, with the given parameters (if any).
 
 This new syntax follows the pattern of S<C<$hashref-E<gt>{FOO}>> and
 S<C<$aryref-E<gt>[$foo]>>: You may now write S<C<&$subref($foo)>> as
-S<C<$subref-E<gt>($foo)>>.  All of these arrow terms may be chained;
+S<C<$subref-E<gt>($foo)>>.  All these arrow terms may be chained;
 thus, S<C<&{$table-E<gt>{FOO}}($bar)>> may now be written
 S<C<$table-E<gt>{FOO}-E<gt>($bar)>>.
 
@@ -758,7 +758,7 @@ details on how to get started with building this port.
 
 There is also support for building perl under the Cygwin32 environment.
 Cygwin32 is a set of GNU tools that make it possible to compile and run
-many UNIX programs under Windows NT by providing a mostly UNIX-like 
+many Unix programs under Windows NT by providing a mostly Unix-like 
 interface for compilation and execution.  See F<README.cygwin32> in the
 perl distribution for more details on this port and how to obtain the
 Cygwin32 toolkit.
@@ -936,7 +936,7 @@ requested with the ":flock" tag (e.g. C<use Fcntl ':flock'>).
 
 =head2 IO
 
-The IO module provides a simple mechanism to load all of the IO modules at one
+The IO module provides a simple mechanism to load all the IO modules at one
 go.  Currently this includes:
 
      IO::Handle

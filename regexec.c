@@ -139,8 +139,8 @@ regcppush(I32 parenfloor)
 
     SSCHECK(i + 5);
     for (p = PL_regsize; p > parenfloor; p--) {
-	SSPUSHPTR(PL_regendp[p]);
-	SSPUSHPTR(PL_regstartp[p]);
+	SSPUSHINT(PL_regendp[p]);
+	SSPUSHINT(PL_regstartp[p]);
 	SSPUSHPTR(PL_reg_start_tmp[p]);
 	SSPUSHINT(p);
     }
@@ -169,7 +169,7 @@ regcppop(void)
     I32 i = SSPOPINT;
     U32 paren = 0;
     char *input;
-    char *tmps;
+    I32 tmps;
     assert(i == SAVEt_REGCONTEXT);
     i = SSPOPINT;
     input = (char *) SSPOPPTR;
@@ -178,16 +178,16 @@ regcppop(void)
     for (i -= 3; i > 0; i -= 4) {
 	paren = (U32)SSPOPINT;
 	PL_reg_start_tmp[paren] = (char *) SSPOPPTR;
-	PL_regstartp[paren] = (char *) SSPOPPTR;
-	tmps = (char*)SSPOPPTR;
+	PL_regstartp[paren] = SSPOPINT;
+	tmps = SSPOPINT;
 	if (paren <= *PL_reglastparen)
 	    PL_regendp[paren] = tmps;
 	DEBUG_r(
 	    PerlIO_printf(Perl_debug_log,
 			  "     restoring \\%d to %d(%d)..%d%s\n",
-			  paren, PL_regstartp[paren] - PL_regbol, 
-			  PL_reg_start_tmp[paren] - PL_regbol,
-			  PL_regendp[paren] - PL_regbol, 
+			  paren, PL_regstartp[paren], 
+			  PL_reg_start_tmp[paren] - PL_bostr,
+			  PL_regendp[paren], 
 			  (paren > *PL_reglastparen ? "(no)" : ""));
 	);
     }
@@ -200,8 +200,8 @@ regcppop(void)
     );
     for (paren = *PL_reglastparen + 1; paren <= PL_regnpar; paren++) {
 	if (paren > PL_regsize)
-	    PL_regstartp[paren] = Nullch;
-	PL_regendp[paren] = Nullch;
+	    PL_regstartp[paren] = -1;
+	PL_regendp[paren] = -1;
     }
     return input;
 }
@@ -266,7 +266,12 @@ STATIC void
 restore_pos(void *arg)
 {
     dTHR;
-    if (PL_reg_eval_set) {    
+    if (PL_reg_eval_set) {
+	if (PL_reg_oldsaved) {
+	    PL_reg_re->subbeg = PL_reg_oldsaved;
+	    PL_reg_re->sublen = PL_reg_oldsavedlen;
+	    RX_MATCH_COPIED_on(PL_reg_re);
+	}
 	PL_reg_magic->mg_len = PL_reg_oldpos;
 	PL_reg_eval_set = 0;
 	PL_curpm = PL_reg_oldcurpm;
@@ -363,9 +368,15 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	char *t;
 	start_shift = prog->check_offset_min;	/* okay to underestimate on CC */
 	/* Should be nonnegative! */
-	end_shift = minlen - start_shift - CHR_SVLEN(prog->check_substr);
+	end_shift = minlen - start_shift -
+	    CHR_SVLEN(prog->check_substr) + (SvTAIL(prog->check_substr) != 0);
 	if (flags & REXEC_SCREAM) {
-	    if (PL_screamfirst[BmRARE(prog->check_substr)] >= 0)
+	    SV *c = prog->check_substr;
+
+	    if (PL_screamfirst[BmRARE(c)] >= 0
+		|| ( BmRARE(c) == '\n'
+		     && (BmPREVIOUS(c) == SvCUR(c) - 1)
+		     && SvTAIL(c) ))
 		    s = screaminstr(sv, prog->check_substr, 
 				    start_shift + (stringarg - strbeg),
 				    end_shift, &scream_pos, 0);
@@ -376,7 +387,7 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	else
 	    s = fbm_instr((unsigned char*)s + start_shift,
 			  (unsigned char*)strend - end_shift,
-		prog->check_substr, 0);
+		prog->check_substr, PL_multiline ? FBMrf_MULTILINE : 0);
 	if (!s) {
 	    ++BmUSEFUL(prog->check_substr);	/* hooray */
 	    goto phooey;	/* not present */
@@ -493,7 +504,8 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	I32 back_min = 
 	    prog->anchored_substr ? prog->anchored_offset : prog->float_min_offset;
 	I32 delta = back_max - back_min;
-	char *last = HOPc(strend, 0-(CHR_SVLEN(must) + back_min)); /* Cannot start after this */
+	char *last = HOPc(strend,	/* Cannot start after this */
+			  -(CHR_SVLEN(must) - (SvTAIL(must) != 0) + back_min));
 	char *last1;		/* Last position checked before */
 
 	if (s > PL_bostr)
@@ -511,7 +523,8 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 		 ? (s = screaminstr(sv, must, HOPc(s, back_min) - strbeg,
 				    end_shift, &scream_pos, 0))
 		 : (s = fbm_instr((unsigned char*)HOP(s, back_min),
-				  (unsigned char*)strend, must, 0))) ) {
+				  (unsigned char*)strend, must, 
+				  PL_multiline ? FBMrf_MULTILINE : 0))) ) {
 	    if (HOPc(s, -back_max) > last1) {
 		last1 = HOPc(s, -back_min);
 		s = HOPc(s, -back_max);
@@ -943,17 +956,28 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	    if (flags & REXEC_SCREAM) {
 		last = screaminstr(sv, prog->float_substr, s - strbeg,
 				   end_shift, &scream_pos, 1); /* last one */
-		if (!last) {
+		if (!last)
 		    last = scream_olds; /* Only one occurence. */
-		}
 	    }
 	    else {
 		STRLEN len;
 		char *little = SvPV(prog->float_substr, len);
-		if (len) 
-		    last = rninstr(s, strend, little, little + len);
-		else
-		    last = strend;	/* matching `$' */
+
+		if (SvTAIL(prog->float_substr)) {
+		    if (memEQ(strend - len + 1, little, len - 1))
+			last = strend - len + 1;
+		    else if (!PL_multiline)
+			last = memEQ(strend - len, little, len) 
+			    ? strend - len : Nullch;
+		    else
+			goto find_last;
+		} else {
+		  find_last:
+		    if (len) 
+			last = rninstr(s, strend, little, little + len);
+		    else
+			last = strend;	/* matching `$' */
+		}
 	    }
 	    if (last == NULL) goto phooey; /* Should not happen! */
 	    dontbother = strend - last + prog->float_min_offset;
@@ -983,34 +1007,8 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
     goto phooey;
 
 got_it:
-    prog->subbeg = strbeg;
-    prog->subend = PL_regeol;	/* strend may have been modified */
     RX_MATCH_TAINTED_set(prog, PL_reg_flags & RF_tainted);
 
-    /* make sure $`, $&, $', and $digit will work later */
-    if (strbeg != prog->subbase) {	/* second+ //g match.  */
-	if (!(flags & REXEC_COPY_STR)) {
-	    if (prog->subbase) {
-		Safefree(prog->subbase);
-		prog->subbase = Nullch;
-	    }
-	}
-	else {
-	    I32 i = PL_regeol - startpos + (stringarg - strbeg);
-	    s = savepvn(strbeg, i);
-	    Safefree(prog->subbase);
-	    prog->subbase = s;
-	    prog->subbeg = prog->subbase;
-	    prog->subend = prog->subbase + i;
-	    s = prog->subbase + (stringarg - strbeg);
-	    for (i = 0; i <= prog->nparens; i++) {
-		if (prog->endp[i]) {
-		    prog->startp[i] = s + (prog->startp[i] - startpos);
-		    prog->endp[i] = s + (prog->endp[i] - startpos);
-		}
-	    }
-	}
-    }
     if (PL_reg_eval_set) {
 	/* Preserve the current value of $^R */
 	if (oreplsv != GvSV(PL_replgv))
@@ -1018,6 +1016,26 @@ got_it:
 						  restored, the value remains
 						  the same. */
 	restore_pos(0);
+    }
+
+    /* make sure $`, $&, $', and $digit will work later */
+    if ( !(flags & REXEC_NOT_FIRST) ) {
+	if (RX_MATCH_COPIED(prog)) {
+	    Safefree(prog->subbeg);
+	    RX_MATCH_COPIED_off(prog);
+	}
+	if (flags & REXEC_COPY_STR) {
+	    I32 i = PL_regeol - startpos + (stringarg - strbeg);
+
+	    s = savepvn(strbeg, i);
+	    prog->subbeg = s;
+	    prog->sublen = i;
+	    RX_MATCH_COPIED_on(prog);
+	}
+	else {
+	    prog->subbeg = strbeg;
+	    prog->sublen = PL_regeol - strbeg;	/* strend may have been modified */
+	}
     }
     
     return 1;
@@ -1036,8 +1054,8 @@ regtry(regexp *prog, char *startpos)
 {
     dTHR;
     register I32 i;
-    register char **sp;
-    register char **ep;
+    register I32 *sp;
+    register I32 *ep;
     CHECKPOINT lastcp;
 
     if ((prog->reganch & ROPT_EVAL_SEEN) && !PL_reg_eval_set) {
@@ -1080,10 +1098,20 @@ regtry(regexp *prog, char *startpos)
 	PL_reg_curpm->op_pmregexp = prog;
 	PL_reg_oldcurpm = PL_curpm;
 	PL_curpm = PL_reg_curpm;
+	if (RX_MATCH_COPIED(prog)) {
+	    /*  Here is a serious problem: we cannot rewrite subbeg,
+		since it may be needed if this match fails.  Thus
+		$` inside (?{}) could fail... */
+	    PL_reg_oldsaved = prog->subbeg;
+	    PL_reg_oldsavedlen = prog->sublen;
+	    RX_MATCH_COPIED_off(prog);
+	}
+	else
+	    PL_reg_oldsaved = Nullch;
 	prog->subbeg = PL_bostr;
-	prog->subend = PL_regeol;	/* strend may have been modified */
+	prog->sublen = PL_regeol - PL_bostr; /* strend may have been modified */
     }
-    prog->startp[0] = startpos;
+    prog->startp[0] = startpos - PL_bostr;
     PL_reginput = startpos;
     PL_regstartp = prog->startp;
     PL_regendp = prog->endp;
@@ -1106,13 +1134,13 @@ regtry(regexp *prog, char *startpos)
     ep = prog->endp;
     if (prog->nparens) {
 	for (i = prog->nparens; i >= 1; i--) {
-	    *++sp = NULL;
-	    *++ep = NULL;
+	    *++sp = -1;
+	    *++ep = -1;
 	}
     }
     REGCP_SET;
     if (regmatch(prog->program + 1)) {
-	prog->endp[0] = PL_reginput;
+	prog->endp[0] = PL_reginput - PL_bostr;
 	return 1;
     }
     REGCP_UNWIND;
@@ -1590,15 +1618,16 @@ regmatch(regnode *prog)
         case REF:
 	case REFF:
 	    n = ARG(scan);  /* which paren pair */
-	    s = PL_regstartp[n];
-	    if (*PL_reglastparen < n || !s)
+	    ln = PL_regstartp[n];
+	    if (*PL_reglastparen < n || ln == -1)
 		sayNO;			/* Do not match unless seen CLOSEn. */
-	    if (s == PL_regendp[n])
+	    if (ln == PL_regendp[n])
 		break;
 
+	    s = PL_bostr + ln;
 	    if (UTF && OP(scan) != REF) {	/* REF can do byte comparison */
 		char *l = locinput;
-		char *e = PL_regendp[n];
+		char *e = PL_bostr + PL_regendp[n];
 		/*
 		 * Note that we can't do the "other character" lookup trick as
 		 * in the 8-bit case (no pun intended) because in Unicode we
@@ -1635,7 +1664,7 @@ regmatch(regnode *prog)
 		 (UCHARAT(s) != ((OP(scan) == REFF
 				  ? PL_fold : PL_fold_locale)[nextchr]))))
 		sayNO;
-	    ln = PL_regendp[n] - s;
+	    ln = PL_regendp[n] - ln;
 	    if (locinput + ln > PL_regeol)
 		sayNO;
 	    if (ln > 1 && (OP(scan) == REF
@@ -1665,8 +1694,7 @@ regmatch(regnode *prog)
 	    PL_op = (OP_4tree*)PL_regdata->data[n];
 	    DEBUG_r( PerlIO_printf(Perl_debug_log, "  re_eval 0x%x\n", PL_op) );
 	    PL_curpad = AvARRAY((AV*)PL_regdata->data[n + 2]);
-	    PL_reg_magic->mg_len = locinput - PL_bostr;
-	    PL_regendp[0] = locinput;
+	    PL_regendp[0] = PL_reg_magic->mg_len = locinput - PL_bostr;
 
 	    CALLRUNOPS();			/* Scalar context. */
 	    SPAGAIN;
@@ -1769,14 +1797,14 @@ regmatch(regnode *prog)
 	    break;
 	case CLOSE:
 	    n = ARG(scan);  /* which paren pair */
-	    PL_regstartp[n] = PL_reg_start_tmp[n];
-	    PL_regendp[n] = locinput;
+	    PL_regstartp[n] = PL_reg_start_tmp[n] - PL_bostr;
+	    PL_regendp[n] = locinput - PL_bostr;
 	    if (n > *PL_reglastparen)
 		*PL_reglastparen = n;
 	    break;
 	case GROUPP:
 	    n = ARG(scan);  /* which paren pair */
-	    sw = (*PL_reglastparen >= n && PL_regendp[n] != NULL);
+	    sw = (*PL_reglastparen >= n && PL_regendp[n] != -1);
 	    break;
 	case IFTHEN:
 	    if (sw)
@@ -1999,7 +2027,7 @@ regmatch(regnode *prog)
 			    sayYES;
 			REGCP_UNWIND;
 			for (n = *PL_reglastparen; n > lastparen; n--)
-			    PL_regendp[n] = 0;
+			    PL_regendp[n] = -1;
 			*PL_reglastparen = n;
 			scan = next;
 			/*SUPPRESS 560*/
@@ -2073,11 +2101,12 @@ regmatch(regnode *prog)
 		    {
 			if (paren) {
 			    if (n) {
-				PL_regstartp[paren] = HOPc(PL_reginput, -l);
-				PL_regendp[paren] = PL_reginput;
+				PL_regstartp[paren] =
+				    HOPc(PL_reginput, -l) - PL_bostr;
+				PL_regendp[paren] = PL_reginput - PL_bostr;
 			    }
 			    else
-				PL_regendp[paren] = NULL;
+				PL_regendp[paren] = -1;
 			}
 			if (regmatch(next))
 			    sayYES;
@@ -2134,11 +2163,11 @@ regmatch(regnode *prog)
 			    );
 			if (paren) {
 			    if (n) {
-				PL_regstartp[paren] = HOPc(PL_reginput, -l);
-				PL_regendp[paren] = PL_reginput;
+				PL_regstartp[paren] = HOPc(PL_reginput, -l) - PL_bostr;
+				PL_regendp[paren] = PL_reginput - PL_bostr;
 			    }
 			    else
-				PL_regendp[paren] = NULL;
+				PL_regendp[paren] = -1;
 			}
 			if (regmatch(next))
 			    sayYES;
@@ -2233,11 +2262,11 @@ regmatch(regnode *prog)
 			/* PL_reginput == locinput now */
 			if (paren) {
 			    if (ln) {
-				PL_regstartp[paren] = HOPc(locinput, -1);
-				PL_regendp[paren] = locinput;
+				PL_regstartp[paren] = HOPc(locinput, -1) - PL_bostr;
+				PL_regendp[paren] = locinput - PL_bostr;
 			    }
 			    else
-				PL_regendp[paren] = NULL;
+				PL_regendp[paren] = -1;
 			}
 			if (regmatch(next))
 			    sayYES;
@@ -2256,11 +2285,11 @@ regmatch(regnode *prog)
 		    {
 			if (paren) {
 			    if (n) {
-				PL_regstartp[paren] = HOPc(PL_reginput, -1);
-				PL_regendp[paren] = PL_reginput;
+				PL_regstartp[paren] = HOPc(PL_reginput, -1) - PL_bostr;
+				PL_regendp[paren] = PL_reginput - PL_bostr;
 			    }
 			    else
-				PL_regendp[paren] = NULL;
+				PL_regendp[paren] = -1;
 			}
 			if (regmatch(next))
 			    sayYES;
@@ -2293,11 +2322,11 @@ regmatch(regnode *prog)
 			    {
 				if (paren && n) {
 				    if (n) {
-					PL_regstartp[paren] = HOPc(PL_reginput, -1);
-					PL_regendp[paren] = PL_reginput;
+					PL_regstartp[paren] = HOPc(PL_reginput, -1) - PL_bostr;
+					PL_regendp[paren] = PL_reginput - PL_bostr;
 				    }
 				    else
-					PL_regendp[paren] = NULL;
+					PL_regendp[paren] = -1;
 				}
 				if (regmatch(next))
 				    sayYES;

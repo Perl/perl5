@@ -79,6 +79,261 @@ Version 5.005_57        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3476] By: gsar                                  on 1999/05/25  09:23:43
+        Log: up patchlevel &c
+     Branch: perl
+	   ! Changes patchlevel.h pod/perlhist.pod win32/Makefile
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+           ! win32/makefile.mk
+____________________________________________________________________________
+[  3475] By: gsar                                  on 1999/05/25  09:14:51
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 25 May 1999 02:42:23 -0400 (EDT)
+             Message-Id: <199905250642.CAA06208@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_56] REx engine improvements
+     Branch: perl
+	   ! embedvar.h mg.c objXSUB.h pp.c pp_ctl.c pp_hot.c regcomp.c
+	   ! regexec.c regexp.h t/op/pat.t t/op/re_tests t/op/regexp.t
+           ! thrdvar.h util.c
+____________________________________________________________________________
+[  3474] By: gsar                                  on 1999/05/25  08:39:56
+        Log: test case for change#3470
+     Branch: perl
+           ! t/lib/bigintpm.t
+____________________________________________________________________________
+[  3473] By: gsar                                  on 1999/05/25  08:36:52
+        Log: perlport 1.43 update from Chris Nandor and Tom Christiansen
+     Branch: perl
+           ! Changes pod/perlport.pod
+____________________________________________________________________________
+[  3472] By: gsar                                  on 1999/05/25  08:28:57
+        Log: assorted tweaks
+     Branch: perl
+	   ! doio.c iperlsys.h win32/config.bc win32/config.gc
+	   ! win32/config.vc win32/config_H.bc win32/config_H.gc
+           ! win32/config_H.vc win32/makedef.pl
+____________________________________________________________________________
+[  3471] By: gsar                                  on 1999/05/25  06:06:04
+        Log: perlref update from Tom Christiansen
+     Branch: perl
+           ! pod/perlref.pod
+____________________________________________________________________________
+[  3470] By: gsar                                  on 1999/05/25  06:03:27
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 24 May 1999 17:43:56 -0400
+             Message-ID: <19990524174356.A1944@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_*] hv.c calling negative malloc()
+     Branch: perl
+           ! hv.c
+____________________________________________________________________________
+[  3469] By: gsar                                  on 1999/05/25  05:59:22
+        Log: avoid temporary files that have a constant name (from a suggestion
+             by Anthony J. Lill <ajlill@ajlc.waterloo.on.ca>)
+     Branch: perl
+           ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  3468] By: gsar                                  on 1999/05/25  05:54:29
+        Log: From: pvhp@forte.com (Peter Prymmer)
+             Date: Mon, 24 May 99 11:20:25 PDT
+             Message-Id: <9905241820.AA28071@forte.com>
+             Subject: [PATCH: _56 and _03]EBCDIC %HTML_Escapes for Pod::Text, plus sync patch.
+     Branch: perl
+           ! lib/Pod/Text.pm
+____________________________________________________________________________
+[  3467] By: gsar                                  on 1999/05/25  04:08:50
+        Log: fix glob() bug that resulted in missing symlinks that don't point
+             anywhere
+     Branch: perl
+           ! pp_hot.c
+____________________________________________________________________________
+[  3466] By: gsar                                  on 1999/05/25  03:00:00
+        Log: avoid enumerating @INC contents in diagnostic if @INC was never
+             searched
+     Branch: perl
+           ! pod/perldiag.pod pp_ctl.c
+____________________________________________________________________________
+[  3465] By: gsar                                  on 1999/05/25  02:24:08
+        Log: add caveat about close(PIPE) carelessness
+     Branch: perl
+           ! pod/perlfunc.pod
+____________________________________________________________________________
+[  3464] By: gsar                                  on 1999/05/24  23:55:53
+        Log: fix bogus line numbers for void context warnings
+             (change#2548 was overeager)
+     Branch: perl
+           ! op.c
+____________________________________________________________________________
+[  3463] By: gsar                                  on 1999/05/24  23:31:58
+        Log: change#3455 had a typo
+     Branch: perl
+           ! pp_ctl.c
+____________________________________________________________________________
+[  3462] By: gsar                                  on 1999/05/24  17:32:20
+        Log: more pod updates from Tom Christiansen; regen perltoc
+     Branch: perl
+	   ! pod/perl.pod pod/perldelta.pod pod/perlmod.pod pod/perlobj.pod
+           ! pod/perlre.pod pod/perltoc.pod pod/perlvar.pod
+____________________________________________________________________________
+[  3461] By: gsar                                  on 1999/05/24  07:41:32
+        Log: perlmod notes from Damian Conway (via Tom Christiansen)
+     Branch: perl
+           ! pod/perlmod.pod
+____________________________________________________________________________
+[  3460] By: gsar                                  on 1999/05/24  07:24:11
+        Log: major pod update from Tom Christiansen
+     Branch: perl
+           + pod/perltootc.pod
+	   ! MANIFEST lib/Pod/Functions.pm pod/Makefile pod/buildtoc
+	   ! pod/perl.pod pod/perl5004delta.pod pod/perlcall.pod
+	   ! pod/perldata.pod pod/perldebug.pod pod/perldelta.pod
+	   ! pod/perldsc.pod pod/perlfunc.pod pod/perlipc.pod
+	   ! pod/perllol.pod pod/perlmod.pod pod/perlmodinstall.pod
+	   ! pod/perlmodlib.pod pod/perlobj.pod pod/perlop.pod
+	   ! pod/perlopentut.pod pod/perlpod.pod pod/perlport.pod
+	   ! pod/perlre.pod pod/perlref.pod pod/perlrun.pod pod/perlsec.pod
+	   ! pod/perlsub.pod pod/perlsyn.pod pod/perlthrtut.pod
+	   ! pod/perltie.pod pod/perltrap.pod pod/perlvar.pod
+           ! pod/perlxs.pod pod/pod2man.PL
+____________________________________________________________________________
+[  3459] By: gsar                                  on 1999/05/24  06:26:48
+        Log: perlfaq update from Tom Christiansen
+     Branch: perl
+	   ! pod/perlfaq.pod pod/perlfaq1.pod pod/perlfaq2.pod
+	   ! pod/perlfaq3.pod pod/perlfaq4.pod pod/perlfaq5.pod
+	   ! pod/perlfaq6.pod pod/perlfaq7.pod pod/perlfaq8.pod
+           ! pod/perlfaq9.pod
+____________________________________________________________________________
+[  3458] By: gsar                                  on 1999/05/24  05:55:11
+        Log: updated to v1.50 from CPAN
+     Branch: perl
+           ! lib/CPAN.pm lib/CPAN/FirstTime.pm lib/CPAN/Nox.pm
+____________________________________________________________________________
+[  3457] By: gsar                                  on 1999/05/24  05:46:20
+        Log: From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Sun, 23 May 1999 16:35:07 +0100
+             Message-Id: <199905231535.QAA00032@crypt.compulink.co.uk>
+             Subject: [PATCH 5.005_56] name PL_in_eval bits
+     Branch: perl
+           ! cop.h op.c perl.c pp_ctl.c toke.c util.c
+____________________________________________________________________________
+[  3456] By: gsar                                  on 1999/05/24  05:18:06
+        Log: make -t mode the default on emacs/dumb terminals
+     Branch: perl
+           ! Changes utils/perldoc.PL
+____________________________________________________________________________
+[  3455] By: gsar                                  on 1999/05/24  05:05:19
+        Log: return 0 rather than "" when scalar grep has nothing to iterate
+             on (brings behavior in line with documentation)
+     Branch: perl
+           ! pp_ctl.c
+____________________________________________________________________________
+[  3454] By: gsar                                  on 1999/05/24  04:52:52
+        Log: From: Tim Jenness <t.jenness@jach.hawaii.edu>
+             Date: Thu, 20 May 1999 13:27:02 -1000
+             Message-Id: <E10kcDN-0007TA-00@lapaki>
+             Subject: Problem with MM_Unix in 5.005_03
+     Branch: perl
+           ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  3453] By: gsar                                  on 1999/05/24  04:39:49
+        Log: avoid removing duplicates in user-generated warnings
+             From: byron@omix.com (Byron Brummer)
+             Date: Thu, 20 May 1999 04:01:17 -0700 (PDT)
+             Message-Id: <199905201101.EAA91175@thrush.omix.com>
+             Subject: [PATCH] Re: warn buffers/loses output in ?? - 5.005_03
+     Branch: perl
+           ! lib/diagnostics.pm
+____________________________________________________________________________
+[  3452] By: gsar                                  on 1999/05/24  04:23:10
+        Log: straighten some code to avoid NeXT compiler bugs (from
+             Geoff Kuenning <geoff@cs.hmc.edu>)
+     Branch: perl
+           ! pp_ctl.c
+____________________________________________________________________________
+[  3451] By: gsar                                  on 1999/05/24  03:03:05
+        Log: minor logic tweak for reserved word warning
+     Branch: perl
+           ! lib/Test/Harness.pm toke.c
+____________________________________________________________________________
+[  3450] By: gsar                                  on 1999/05/24  02:34:20
+        Log: oops, some files missing in change#3449
+     Branch: perl
+           ! op.c op.h toke.c
+____________________________________________________________________________
+[  3449] By: gsar                                  on 1999/05/24  02:33:12
+        Log: allow '*' prototype to autoquote even barewords that happen to be
+             function names; parens or ampersand continue to force the other
+             interpretation; makes C<sub Foo {'bar'} CORE::GLOBAL::require Foo;>
+             do the right thing, for example
+     Branch: perl
+           ! t/comp/proto.t
+____________________________________________________________________________
+[  3448] By: gsar                                  on 1999/05/24  01:51:24
+        Log: remove vestiges of PL_last_proto
+     Branch: perl
+           ! embedvar.h intrpvar.h objXSUB.h
+____________________________________________________________________________
+[  3447] By: gsar                                  on 1999/05/24  01:49:20
+        Log: redo change#2061 and parts of change#1169 with code in the
+             parser; PL_last_proto hackery gone, strict 'subs' in now
+             implemented in the optimizer where specifying the exceptional
+             cases is much more robust; '*' (bareword) prototype now works
+             reliably when used in second and subsequent arguments
+     Branch: perl
+           ! dump.c embed.h embed.pl objXSUB.h op.c op.h proto.h toke.c
+____________________________________________________________________________
+[  3446] By: gsar                                  on 1999/05/23  05:00:55
+        Log: remove redundant part of change#1169 superceded by change#2061;
+             avoid "future reserved word" warning on prototypical bearwords
+     Branch: perl
+           ! t/lib/fatal.t toke.c
+____________________________________________________________________________
+[  3445] By: gsar                                  on 1999/05/21  23:36:49
+        Log: s/isspace/isSPACE/g and make sure the CRT version is always
+             passed an unsigned char (fixes random occurrence of spaces in
+             arguments containing high-bit chars passed to spawned children,
+             on win32)
+     Branch: perl
+           ! ext/SDBM_File/sdbm/dbe.c win32/perlhost.h win32/win32.c
+____________________________________________________________________________
+[  3444] By: gsar                                  on 1999/05/21  23:08:55
+        Log: integrate Configure changes from cfgperl
+     Branch: perl
+	  !> Configure Porting/Glossary Porting/config.sh Porting/config_H
+          !> config_h.SH
+____________________________________________________________________________
+[  3443] By: jhi                                   on 1999/05/21  22:00:56
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+	  !> Changes doop.c ext/SDBM_File/sdbm/dba.c
+	  !> ext/SDBM_File/sdbm/dbd.c ext/SDBM_File/sdbm/dbe.c os2/os2.c
+	  !> perl.h pod/perldiag.pod pod/perlport.pod pp.c t/comp/proto.t
+          !> win32/perlhost.h win32/win32.c x2p/walk.c
+____________________________________________________________________________
+[  3442] By: jhi                                   on 1999/05/21  21:59:46
+        Log: fflush.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+           ! config_h.SH
+____________________________________________________________________________
+[  3441] By: gsar                                  on 1999/05/21  17:48:55
+        Log: integrate cfgperl changes
+     Branch: perl
+	  !> Configure Porting/Glossary Porting/config.sh Porting/config_H
+          !> config_h.SH hints/sunos_4_1.sh installperl
+____________________________________________________________________________
+[  3440] By: gsar                                  on 1999/05/21  17:42:49
+        Log: test tweak
+     Branch: perl
+           ! t/comp/proto.t
+____________________________________________________________________________
+[  3439] By: gsar                                  on 1999/05/21  17:31:26
+        Log: fix breakage when neither FFLUSH_ALL nor FFLUSH_NULL are #defined.
+             (Configure fflush(NULL) detection seems broken on Solaris, which
+             is why I hit the problem)
+     Branch: perl
+           ! Changes perl.h
+____________________________________________________________________________
 [  3438] By: gsar                                  on 1999/05/20  16:41:01
         Log: perlport 1.41 update from Chris Nandor <pudge@pobox.com>
      Branch: perl
