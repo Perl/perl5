@@ -7655,6 +7655,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     I32 svix = 0;
     static char nullstr[] = "(null)";
     SV *argsv = Nullsv;
+    bool has_utf8 = FALSE; /* has the result utf8? */
 
     /* no matter what, this is a string now */
     (void)SvPV_force(sv, origlen);
@@ -7688,13 +7689,16 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	}
     }
 
+    if (!args && svix < svmax && DO_UTF8(*svargs))
+        has_utf8 = TRUE;
+
     patend = (char*)pat + patlen;
     for (p = (char*)pat; p < patend; p = q) {
 	bool alt = FALSE;
 	bool left = FALSE;
 	bool vectorize = FALSE;
 	bool vectorarg = FALSE;
-	bool vec_utf = FALSE;
+	bool vec_utf8 = FALSE;
 	char fill = ' ';
 	char plus = 0;
 	char intsize = 0;
@@ -7702,7 +7706,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	STRLEN zeros = 0;
 	bool has_precis = FALSE;
 	STRLEN precis = 0;
-	bool is_utf = FALSE;
+	bool is_utf8 = FALSE;  /* is this item utf8?   */
 	
 	char esignbuf[4];
 	U8 utf8buf[UTF8_MAXLEN+1];
@@ -7827,17 +7831,17 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 			svargs[ewix ? ewix-1 : svix++] : &PL_sv_undef;
 		dotstr = SvPVx(vecsv, dotstrlen);
 		if (DO_UTF8(vecsv))
-		    is_utf = TRUE;
+		    is_utf8 = TRUE;
 	    }
 	    if (args) {
 		vecsv = va_arg(*args, SV*);
 		vecstr = (U8*)SvPVx(vecsv,veclen);
-		vec_utf = DO_UTF8(vecsv);
+		vec_utf8 = DO_UTF8(vecsv);
 	    }
 	    else if (efix ? efix <= svmax : svix < svmax) {
 		vecsv = svargs[efix ? efix-1 : svix++];
 		vecstr = (U8*)SvPVx(vecsv,veclen);
-		vec_utf = DO_UTF8(vecsv);
+		vec_utf8 = DO_UTF8(vecsv);
 	    }
 	    else {
 		vecstr = (U8*)"";
@@ -7931,7 +7935,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		&& !IN_BYTES) {
 		eptr = (char*)utf8buf;
 		elen = uvchr_to_utf8((U8*)eptr, uv) - utf8buf;
-		is_utf = TRUE;
+		is_utf8 = TRUE;
 	    }
 	    else {
 		c = (char)uv;
@@ -7967,7 +7971,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    if (width) { /* fudge width (can't fudge elen) */
 			width += elen - sv_len_utf8(argsv);
 		    }
-		    is_utf = TRUE;
+		    is_utf8 = TRUE;
 		}
 	    }
 	    goto string;
@@ -7983,7 +7987,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    argsv = va_arg(*args, SV*);
 	    eptr = SvPVx(argsv, elen);
 	    if (DO_UTF8(argsv))
-		is_utf = TRUE;
+		is_utf8 = TRUE;
 
 	string:
 	    vectorize = FALSE;
@@ -8013,8 +8017,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		STRLEN ulen;
 		if (!veclen)
 		    continue;
-		if (vec_utf)
-		    uv = utf8n_to_uvchr(vecstr, veclen, &ulen, UTF8_ALLOW_ANYUV);
+		if (vec_utf8)
+		    uv = utf8n_to_uvchr(vecstr, veclen, &ulen,
+					UTF8_ALLOW_ANYUV);
 		else {
 		    uv = *vecstr;
 		    ulen = 1;
@@ -8098,8 +8103,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	vector:
 		if (!veclen)
 		    continue;
-		if (vec_utf)
-		    uv = utf8n_to_uvchr(vecstr, veclen, &ulen, UTF8_ALLOW_ANYUV);
+		if (vec_utf8)
+		    uv = utf8n_to_uvchr(vecstr, veclen, &ulen,
+					UTF8_ALLOW_ANYUV);
 		else {
 		    uv = *vecstr;
 		    ulen = 1;
@@ -8354,6 +8360,20 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		*p++ = '0';
 	}
 	if (elen) {
+	    if (is_utf8 != has_utf8) {
+	        if (is_utf8) {
+		    if (SvCUR(sv)) {
+		        sv_utf8_upgrade(sv);
+			p = SvEND(sv);
+		    }
+		}
+		else {
+		    SV *nsv = sv_2mortal(newSVpvn(eptr, elen));
+		    sv_utf8_upgrade(nsv);
+		    eptr = SvPVX(nsv);
+		    elen = SvCUR(nsv);
+		}
+	    }
 	    Copy(eptr, p, elen, char);
 	    p += elen;
 	}
@@ -8369,7 +8389,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    else
 		vectorize = FALSE;		/* done iterating over vecstr */
 	}
-	if (is_utf)
+	if (is_utf8)
+	    has_utf8 = TRUE;
+	if (has_utf8)
 	    SvUTF8_on(sv);
 	*p = '\0';
 	SvCUR(sv) = p - SvPVX(sv);
