@@ -118,7 +118,7 @@ PerlIOEncode_popped(pTHX_ PerlIO * f)
     }
     if (e->dataSV) {
 	SvREFCNT_dec(e->dataSV);
-	e->bufsv = Nullsv;
+	e->dataSV = Nullsv;
     }
     return 0;
 }
@@ -227,7 +227,7 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	    SvPVX(e->dataSV) = (char *) ptr;
 	    SvLEN(e->dataSV) = 0;  /* Hands off sv.c - it isn't yours */
 	    SvCUR_set(e->dataSV,use);
-	    SvPOK_on(e->dataSV);
+	    SvPOK_only(e->dataSV);
 	}
 	SvUTF8_off(e->dataSV);
 	PUSHMARK(sp);
@@ -255,7 +255,7 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	       (The copy is a pain - need a put-it-here option for decode.)
 	     */
 	    sv_setpvn(e->bufsv,s,len);
-           e->base.ptr = e->base.buf = (STDCHAR*)SvPVX(e->bufsv);
+	    e->base.ptr = e->base.buf = (STDCHAR*)SvPVX(e->bufsv);
 	    e->base.end = e->base.ptr + SvCUR(e->bufsv);
 	    PerlIOBase(f)->flags |= PERLIO_F_RDBUF;
 	    SvUTF8_on(e->bufsv);
@@ -356,6 +356,7 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 		SvPVX(str) = (char*)e->base.ptr;
 		SvLEN(str) = 0;
 		SvCUR_set(str, e->base.end - e->base.ptr);
+		SvPOK_only(str);
 		SvUTF8_on(str);
 		PUSHMARK(sp);
 		XPUSHs(e->enc);
@@ -433,7 +434,7 @@ PerlIOEncode_dup(pTHX_ PerlIO * f, PerlIO * o,
 PerlIO_funcs PerlIO_encode = {
     "encoding",
     sizeof(PerlIOEncode),
-    PERLIO_K_BUFFERED,
+    PERLIO_K_BUFFERED|PERLIO_K_DESTRUCT,
     PerlIOEncode_pushed,
     PerlIOEncode_popped,
     PerlIOBuf_open,
@@ -500,7 +501,7 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 	int code;
 	while ((code = do_encode(dir, s, &slen, d, dlen, &dlen, !check))) {
 	    SvCUR_set(dst, dlen+ddone);
-	    SvPOK_on(dst);
+	    SvPOK_only(dst);
 
 #if 0
 	    Perl_warn(aTHX_ "code=%d @ s=%d/%d/%d d=%d/%d/%d",code,slen,sdone,tlen,dlen,ddone,SvLEN(dst)-1);
@@ -569,7 +570,7 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 	    }
 	}
 	SvCUR_set(dst, dlen+ddone);
-	SvPOK_on(dst);
+	SvPOK_only(dst);
 	if (check) {
 	    sdone = SvCUR(src) - (slen+sdone);
 	    if (sdone) {
@@ -580,7 +581,7 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
     }
     else {
 	SvCUR_set(dst, 0);
-	SvPOK_on(dst);
+	SvPOK_only(dst);
     }
     *SvEND(dst) = '\0';
     return dst;
