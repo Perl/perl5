@@ -39,6 +39,12 @@ Any command not recognized by the debugger is directly executed
 (C<eval>'d) as Perl code in the current package.  (The debugger
 uses the DB package for keeping its own state information.)
 
+Note that the said C<eval> is bound by an implicit scope. As a
+result any newly introduced lexical variable or any modified
+capture buffer content is lost after the eval. The debugger is a
+nice environment to learn Perl, but if you interactively experiment using
+material which should be in the same scope, stuff it in one line.
+
 For any text entered at the debugger prompt, leading and trailing whitespace
 is first stripped before further processing.  If a debugger command
 coincides with some function in your own program, merely precede the
