@@ -2472,30 +2472,30 @@ PP(pp_stat)
     if (max) {
 	EXTEND(SP, max);
 	EXTEND_MORTAL(max);
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_dev)));
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_ino)));
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_mode)));
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_nlink)));
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_uid)));
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_gid)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_dev)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_ino)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_mode)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_nlink)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_uid)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_gid)));
 #ifdef USE_STAT_RDEV
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_rdev)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_rdev)));
 #else
 	PUSHs(sv_2mortal(newSVpvn("", 0)));
 #endif
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_size)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_size)));
 #ifdef BIG_TIME
 	PUSHs(sv_2mortal(newSVnv((U32)PL_statcache.st_atime)));
 	PUSHs(sv_2mortal(newSVnv((U32)PL_statcache.st_mtime)));
 	PUSHs(sv_2mortal(newSVnv((U32)PL_statcache.st_ctime)));
 #else
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_atime)));
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_mtime)));
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_ctime)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_atime)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_mtime)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_ctime)));
 #endif
 #ifdef USE_STAT_BLOCKS
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_blksize)));
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_blocks)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_blksize)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_blocks)));
 #else
 	PUSHs(sv_2mortal(newSVpvn("", 0)));
 	PUSHs(sv_2mortal(newSVpvn("", 0)));
