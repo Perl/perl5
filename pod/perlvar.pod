@@ -198,14 +198,15 @@ number.)
 =item $/
 
 The input record separator, newline by default.  Works like B<awk>'s RS
-variable, including treating blank lines as delimiters if set to the
-null string.  You may set it to a multicharacter string to match a
+variable, including treating empty lines as delimiters if set to the
+null string.  (Note:  An empty line can not contain any spaces or
+tabs.) You may set it to a multicharacter string to match a
 multi-character delimiter.  Note that setting it to C<"\n\n"> means
 something slightly different than setting it to C<"">, if the file
-contains consecutive blank lines.  Setting it to C<""> will treat two or
-more consecutive blank lines as a single blank line.  Setting it to
-C<"\n\n"> will blindly assume that the next input character belongs to the
-next paragraph, even if it's a newline.  (Mnemonic: / is used to
+contains consecutive empty lines.  Setting it to C<""> will treat two
+or more consecutive empty lines as a single empty line.  Setting it to
+C<"\n\n"> will blindly assume that the next input character belongs to
+the next paragraph, even if it's a newline.  (Mnemonic: / is used to
 delimit line boundaries when quoting poetry.)
 
     undef $/;
@@ -610,8 +611,8 @@ based on this value.
 
 =item $^W
 
-The current value of the warning switch, either TRUE or FALSE.  (Mnemonic: related to the
-B<-w> switch.)
+The current value of the warning switch, either TRUE or FALSE.
+(Mnemonic: related to the B<-w> switch.)
 
 =item $EXECUTABLE_NAME
 
@@ -642,7 +643,7 @@ to also get the machine-dependent library properly loaded:
 
     use lib '/mypath/libdir/';
     use SomeMod;
-  
+
 =item %INC
 
 The hash %INC contains entries for each filename that has
