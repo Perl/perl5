@@ -137,6 +137,7 @@ if (-d "pod") {
     perlretut
 
     perlre
+    perlreref
     perlref
 
     perlform
