@@ -453,7 +453,11 @@ sub _fresh_perl {
         print STDERR "# STATUS: $status\n";
     }
 
-    ($name) = $prog =~ /^(.{1,35})/ unless $name;
+    # Use the first line of the program as a name if none was given
+    unless( $name ) {
+        ($first_line, $name) = $prog =~ /^((.{1,50}).*)/;
+        $name .= '...' if length $first_line > length $name;
+    }
 
     _ok($pass, _where(), "fresh_perl - $name");
 }
