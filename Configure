@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Aug  1 20:27:06 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Wed Aug  2 03:07:08 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -625,6 +625,7 @@ i_grp=''
 i_iconv=''
 i_ieeefp=''
 i_inttypes=''
+i_libutil=''
 i_limits=''
 i_locale=''
 i_machcthr=''
@@ -14372,6 +14373,10 @@ eval $inhdr
 set ieeefp.h i_ieeefp
 eval $inhdr
 
+: see if this is a libutil.h system
+set libutil.h i_libutil
+eval $inhdr
+
 : see if locale.h is available
 set locale.h i_locale
 eval $inhdr
@@ -15681,6 +15686,7 @@ i_grp='$i_grp'
 i_iconv='$i_iconv'
 i_ieeefp='$i_ieeefp'
 i_inttypes='$i_inttypes'
+i_libutil='$i_libutil'
 i_limits='$i_limits'
 i_locale='$i_locale'
 i_machcthr='$i_machcthr'

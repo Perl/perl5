@@ -1999,6 +1999,30 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
 #ifndef MACOS_TRADITIONAL
     case '0':
+#ifdef HAS_SETPROCTITLE
+	/* The BSDs don't show the argv[] in ps(1) output, they
+	 * show a string from the process struct and provide
+	 * the setproctitle() routine to manipulate that. */
+	{
+	    s = SvPV(sv, len);
+#   if __FreeBSD_version >= 400000
+	    /* The - removes the "perl: " prefix,
+	     * but not the "(perl) suffix from the ps(1)
+	     * output, because that's what ps(1) shows if the
+	     * argv[] is modified. */
+	    setproctitle("-%s", s, len + 1);
+#   else	/* old FreeBSDs, NetBSD, OpenBSD */
+	    /* This doesn't really work if you assume that
+	     * $0 = 'foobar'; will wipe out 'perl' from the $0
+	     * because in ps(1) output the result will be like
+	     * sprintf("perl: %s (perl)", s)
+	     * I guess this is a security feature:
+	     * one (a user process) cannot get rid of the original name.
+	     * --jhi */
+	    setproctitle("%s", s);
+#   endif
+	}
+#endif
 	if (!PL_origalen) {
 	    s = PL_origargv[0];
 	    s += strlen(s);
@@ -2054,9 +2078,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    for (i = 1; i < PL_origargc; i++)
 		PL_origargv[i] = Nullch;
 	}
-#ifdef HAS_SETPROCTITLE
-	setproctitle("%s", SvPV_nolen(sv));
-#endif
 	break;
 #endif
 #ifdef USE_THREADS
