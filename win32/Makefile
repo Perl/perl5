@@ -194,7 +194,7 @@ LIB32		= $(LINK32) -lib
 #
 
 RUNTIME		= -MD
-INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
+INCLUDES	= -I.\include -I. -I..
 #PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX 
 DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT $(BUILDOPT) $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
@@ -626,7 +626,7 @@ regen_config_h:
 	perl configpm
 	cd win32
 	-del /f $(CFGH_TMPL)
-	-mkdir ..\lib\CORE
+	-mkdir $(COREDIR)
 	-perl -I..\lib config_h.PL "INST_VER=$(INST_VER)"
 	rename config.h $(CFGH_TMPL)
 
@@ -638,7 +638,7 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	$(XCOPY) ..\ext\re\re.pm $(LIBDIR)\*.*
 	$(RCOPY) include $(COREDIR)\*.*
 	$(MINIPERL) -I..\lib config_h.PL "INST_VER=$(INST_VER)" \
-	    || $(MAKE) $(MAKEFLAGS) $(CONFIGPM)
+	    || $(MAKE) /$(MAKEFLAGS) $(CONFIGPM)
 
 $(MINIPERL) : $(MINIDIR) $(MINI_OBJ)
 	$(LINK32) -subsystem:console -out:$@ @<<

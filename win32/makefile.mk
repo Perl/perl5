@@ -127,8 +127,8 @@ CCTYPE		*= BORLAND
 #CCHOME		*= f:\msdev\vc
 CCHOME		*= C:\bc5
 #CCHOME		*= D:\packages\mingw32
-CCINCDIR	*= $(CCHOME)\include
-CCLIBDIR	*= $(CCHOME)\lib
+CCINCDIR	*= '$(CCHOME)\include'
+CCLIBDIR	*= '$(CCHOME)\lib'
 
 #
 # specify space-separated list of extra directories to look for libraries
@@ -207,7 +207,7 @@ IMPLIB		= implib -c
 # Options
 #
 RUNTIME		= -D_RTLDLL
-INCLUDES	= -I$(COREDIR) -I.\include -I. -I.. -I$(CCINCDIR)
+INCLUDES	= -I.\include -I. -I.. -I$(CCINCDIR)
 #PCHFLAGS	= -H -Hc -H=c:\temp\bcmoduls.pch 
 DEFINES		= -DWIN32 $(BUILDOPT) $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
@@ -749,7 +749,7 @@ regen_config_h:
 	-cd .. && del /f perl.exe
 	cd .. && perl configpm
 	-del /f $(CFGH_TMPL)
-	-mkdir ..\lib\CORE
+	-mkdir $(COREDIR)
 	-perl -I..\lib config_h.PL "INST_VER=$(INST_VER)"
 	rename config.h $(CFGH_TMPL)
 

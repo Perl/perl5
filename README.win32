@@ -146,7 +146,12 @@ a perl interpreter that supports the Perl Object abstraction (courtesy
 ActiveState Tool Corp.)  PERL_OBJECT uses C++, and the binaries are
 therefore incompatible with the regular C build.  However, the
 PERL_OBJECT build does provide something called the C-API, for linking
-it with extensions that won't compile under PERL_OBJECT.  PERL_OBJECT
+it with extensions that won't compile under PERL_OBJECT. Using the C_API
+is typically requested through:
+
+    perl Makefile.PL CAPI=TRUE
+
+PERL_OBJECT requires VC++ 5.0 (Service Pack 3 recommended) or later. It
 is not yet supported under GCC or EGCS.  WARNING:  Binaries built with
 PERL_OBJECT enabled are B<not> compatible with binaries built without.
 Perl installs PERL_OBJECT binaries under a distinct architecture name,
@@ -461,7 +466,7 @@ all of the ActiveState extensions and most other Win32 extensions from
 CPAN in source form, along with many added bugfixes, and with MakeMaker
 support.  This bundle is available at:
 
-   http://www.perl.com/CPAN/authors/id/GSAR/libwin32-0.12.zip
+   http://www.perl.com/CPAN/authors/id/GSAR/libwin32-0.14.zip
 
 See the README in that distribution for building and installation
 instructions.  Look for later versions that may be available at the
