@@ -517,7 +517,7 @@ __END__
       if (memEQ(name, "WEXITSTATUS", 11)) {
       /*                ^                */
 #ifdef WEXITSTATUS
-        *arg_result = WEXITSTATUS(WMUNGE(*arg_result));
+        *arg_result = WEXITSTATUS(WMUNGE((int) *arg_result));
         return PERL_constant_ISIV;
 #else
         return PERL_constant_NOTDEF;
