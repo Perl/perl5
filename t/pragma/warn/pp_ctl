@@ -53,6 +53,10 @@
 	 
 	goto &fred()
 
+      (in cleanup) foo bar
+	package Foo;
+	DESTROY { die "foo bar" }
+	{ bless [], 'Foo' for 1..10 }
 
 __END__
 # pp_ctl.c
@@ -143,3 +147,11 @@ sub fred
 goto &fred()
 EXPECT
 Deep recursion on subroutine "main::fred" at - line 6.
+########
+# pp_ctl.c
+use warning 'unsafe' ;
+package Foo;
+DESTROY { die "@{$_[0]} foo bar" }
+{ bless ['A'], 'Foo' for 1..10 }
+EXPECT
+	(in cleanup) A foo bar at - line 4.
