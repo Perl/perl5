@@ -980,7 +980,8 @@ cond_wait_enabled(SV *ref)
 	/* Stealing the members of the lock object worries me - NI-S */
 	MUTEX_LOCK(&shared->lock.mutex);
 	shared->lock.owner = NULL;
-	locks = shared->lock.locks = 0;
+	locks = shared->lock.locks;
+	shared->lock.locks = 0;
 	COND_WAIT(&shared->user_cond, &shared->lock.mutex);
 	shared->lock.owner = aTHX;
 	shared->lock.locks = locks;
