@@ -14,6 +14,7 @@
 # Note that during the .obj compile you need to move the perl.dll file
 # to LIBPATH :-(
 
+# Should be done automatically by Configure now:
 bin_sh=`../UU/loc sh.exe /bin c:/bin d:/bin e:/bin f:/bin g:/bin h:/bin /bin`
 echo "####### Shell found at $bin_sh #############" >&4
 sh="$bin_sh"
@@ -40,6 +41,7 @@ exe_ext='.exe'
 i_dlfcn='define'
 
 aout_d_shrplib='undef'
+aout_useshrplib='false'
 aout_obj_ext='.o'
 aout_lib_ext='.a'
 aout_ar='ar'
@@ -54,10 +56,11 @@ aout_usedl='undef'
 aout_archobjs="os2.o dl_os2.o"
 
 # variable which have different values for aout compile
-used_aout='d_shrplib plibext lib_ext obj_ext ar plibext d_fork lddlflags ldflags ccflags use_clib usedl archobjs cppflags'
+used_aout='d_shrplib useshrplib plibext lib_ext obj_ext ar plibext d_fork lddlflags ldflags ccflags use_clib usedl archobjs cppflags'
 
 if [ "$emxaout" != "" ]; then
     d_shrplib="$aout_d_shrplib"
+    useshrplib="$aout_useshrplib"
     obj_ext="$aout_obj_ext"
     lib_ext="$aout_lib_ext"
     ar="$aout_ar"
@@ -71,6 +74,7 @@ if [ "$emxaout" != "" ]; then
     usedl="$aout_usedl"
 else
     d_shrplib='define'
+    useshrplib='true'
     obj_ext='.obj'
     lib_ext='.lib'
     ar='emxomfar'
@@ -87,6 +91,8 @@ fi
 # To get into config.sh (should start at the beginning of line)
 # or you can put it into config.over.
 plibext="$plibext"
+# plibext is not needed anymore.  Just directly set $libperl.
+libperl="libperl${plibext}"
 
 #libc="/emx/lib/st/c_import$lib_ext"
 libc="$libemx/st/$use_clib$lib_ext"
@@ -144,6 +150,7 @@ nroff='nroff.cmd'
 # above will be overwritten otherwise, indented to avoid config.sh
   _nroff='nroff.cmd'
 
+# should be handled automatically by Configure now.
 ln='cp'
 # Will be rewritten otherwise, indented to not put in config.sh
   _ln='cp'
