@@ -457,6 +457,7 @@ char **env;
     I32 oldscope;
     AV* comppadlist;
     dJMPENV;
+    int ret;
 
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
 #ifdef IAMSUID
@@ -505,7 +506,8 @@ setuid perl scripts securely.\n");
     time(&basetime);
     oldscope = scopestack_ix;
 
-    switch (JMPENV_PUSH) {
+    JMPENV_PUSH(ret);
+    switch (ret) {
     case 1:
 	STATUS_ALL_FAILURE;
 	/* FALL THROUGH */
@@ -821,15 +823,17 @@ int
 perl_run(sv_interp)
 PerlInterpreter *sv_interp;
 {
-    dJMPENV;
     I32 oldscope;
+    dJMPENV;
+    int ret;
 
     if (!(curinterp = sv_interp))
 	return 255;
 
     oldscope = scopestack_ix;
 
-    switch (JMPENV_PUSH) {
+    JMPENV_PUSH(ret);
+    switch (ret) {
     case 1:
 	cxstack_ix = -1;		/* start context stack again */
 	break;
@@ -1005,6 +1009,7 @@ I32 flags;		/* See G_* flags in cop.h */
     static CV *DBcv;
     bool oldcatch = CATCH_GET;
     dJMPENV;
+    int ret;
 
     if (flags & G_DISCARD) {
 	ENTER;
@@ -1058,7 +1063,8 @@ I32 flags;		/* See G_* flags in cop.h */
 	}
 	markstack_ptr++;
 
-	switch (JMPENV_PUSH) {
+	JMPENV_PUSH(ret);
+	switch (ret) {
 	case 0:
 	    break;
 	case 1:
@@ -1142,6 +1148,7 @@ I32 flags;		/* See G_* flags in cop.h */
     I32 retval;
     I32 oldscope;
     dJMPENV;
+    int ret;
     
     if (flags & G_DISCARD) {
 	ENTER;
@@ -1165,7 +1172,8 @@ I32 flags;		/* See G_* flags in cop.h */
     if (flags & G_KEEPERR)
 	myop.op_flags |= OPf_SPECIAL;
 
-    switch (JMPENV_PUSH) {
+    JMPENV_PUSH(ret);
+    switch (ret) {
     case 0:
 	break;
     case 1:
@@ -2467,16 +2475,18 @@ call_list(oldscope, list)
 I32 oldscope;
 AV* list;
 {
-    dJMPENV;
-    STRLEN len;
     line_t oldline = curcop->cop_line;
+    STRLEN len;
+    dJMPENV;
+    int ret;
 
     while (AvFILL(list) >= 0) {
 	CV *cv = (CV*)av_shift(list);
 
 	SAVEFREESV(cv);
 
-	switch (JMPENV_PUSH) {
+	JMPENV_PUSH(ret);
+	switch (ret) {
 	case 0: {
 		SV* atsv = GvSV(errgv);
 		PUSHMARK(stack_sp);

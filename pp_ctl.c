@@ -1972,7 +1972,8 @@ OP *o;
     assert(CATCH_GET == TRUE);
     DEBUG_l(deb("(Setting up local jumplevel, runlevel = %d)\n", runlevel+1));
 #endif
-    switch ((ret = JMPENV_PUSH)) {
+    JMPENV_PUSH(ret);
+    switch (ret) {
     default:				/* topmost level handles it */
 	JMPENV_POP;
 	runlevel = oldrunlevel;

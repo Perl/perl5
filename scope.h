@@ -96,16 +96,25 @@ struct jmpenv {
 typedef struct jmpenv JMPENV;
 
 #define dJMPENV		JMPENV cur_env
-#define JMPENV_PUSH	(cur_env.je_prev = top_env,			\
-			 cur_env.je_ret = Sigsetjmp(cur_env.je_buf,1),	\
-			 top_env = &cur_env,				\
-			 cur_env.je_mustcatch = FALSE,			\
-			 cur_env.je_ret)
-#define JMPENV_POP	(top_env = cur_env.je_prev)
-#define JMPENV_JUMP(v)	(top_env->je_prev ? Siglongjmp(top_env->je_buf, (v))	\
-			 : ((v) == 2) ? exit(STATUS_NATIVE_EXPORT)		\
-			 : (PerlIO_printf(PerlIO_stderr(), "panic: top_env\n"),	\
-			     exit(1)))
+#define JMPENV_PUSH(v) \
+    STMT_START {					\
+	cur_env.je_prev = top_env;			\
+	cur_env.je_ret = Sigsetjmp(cur_env.je_buf, 1);	\
+	top_env = &cur_env;				\
+	cur_env.je_mustcatch = FALSE;			\
+	(v) = cur_env.je_ret;				\
+    } STMT_END
+#define JMPENV_POP \
+    STMT_START { top_env = cur_env.je_prev; } STMT_END
+#define JMPENV_JUMP(v) \
+    STMT_START {						\
+	if (top_env->je_prev)					\
+	    Siglongjmp(top_env->je_buf, (v));			\
+	if ((v) == 2)						\
+	    exit(STATUS_NATIVE_EXPORT);				\
+	PerlIO_printf(PerlIO_stderr(), "panic: top_env\n");	\
+	exit(1);						\
+    } STMT_END
    
 #define CATCH_GET	(top_env->je_mustcatch)
 #define CATCH_SET(v)	(top_env->je_mustcatch = (v))
