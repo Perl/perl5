@@ -15,7 +15,7 @@ $Debug = 0;
 $Verbose = 1;
 $Is_VMS = $^O eq 'VMS';
 
-$VERSION = $VERSION = substr(q$Revision: 1.23 $,10,4);
+$VERSION = $VERSION = substr(q$Revision: 1.24 $,10,4);
 
 $Quiet = 0;
 
@@ -36,7 +36,7 @@ sub mkmanifest {
     my $matches = _maniskip();
     my $found = manifind();
     my($key,$val,$file,%all);
-    my %all = (%$found, %$read);
+    %all = (%$found, %$read);
     $all{$MANIFEST} = ($Is_VMS ? "$MANIFEST\t\t" : '') . 'This list of files'
         if $manimiss; # add new MANIFEST to known file list
     foreach $file (sort keys %all) {
@@ -138,7 +138,7 @@ sub _maniskip {
     my ($mfile) = @_;
     my $matches = sub {0};
     my @skip ;
-    my $mfile = "$MANIFEST.SKIP" unless defined $mfile;
+    $mfile = "$MANIFEST.SKIP" unless defined $mfile;
     local *M;
     return $matches unless -f $mfile;
     open M, $mfile or return $matches;
@@ -290,8 +290,10 @@ comments are seperated by one or more TAB characters in the
 output. All files that match any regular expression in a file
 C<MANIFEST.SKIP> (if such a file exists) are ignored.
 
-Manicheck() checks if all the files within a C<MANIFEST> in the current
-directory really do exist.
+Manicheck() checks if all the files within a C<MANIFEST> in the
+current directory really do exist. It only reports discrepancies and
+exits silently if MANIFEST and the tree below the current directory
+are in sync.
 
 Filecheck() finds files below the current directory that are not
 mentioned in the C<MANIFEST> file. An optional file C<MANIFEST.SKIP>

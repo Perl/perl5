@@ -2,6 +2,8 @@ package ExtUtils::Liblist;
 
 # Broken out of MakeMaker from version 4.11
 
+$ExtUtils::Liblist::VERSION = substr q$Revision: 1.19 $, 10;
+
 use Config;
 use Cwd 'cwd';
 use File::Basename;
@@ -10,7 +12,7 @@ my $Config_libext = $Config{lib_ext} || ".a";
 
 sub ext {
     my($self,$potential_libs, $Verbose) = @_;
-    if ($^O eq 'os2' and $Config{libs}) { 
+    if ($^O =~ 'os2' and $Config{libs}) { 
 	# Dynamic libraries are not transitive, so we may need including
 	# the libraries linked against perl.dll again.
 
@@ -45,9 +47,9 @@ sub ext {
 			if $Verbose;
 		next;
 	    }
-	    if ($thislib !~ m|^/|) {
+	    unless ($self->file_name_is_absolute($thislib)) {
 	      print STDOUT "Warning: $ptype$thislib changed to $ptype$pwd/$thislib\n";
-	      $thislib = "$pwd/$thislib";
+	      $thislib = $self->catdir($pwd,$thislib);
 	    }
 	    push(@searchpath, $thislib);
 	    push(@extralibs,  "$ptype$thislib");

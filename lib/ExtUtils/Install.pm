@@ -1,27 +1,30 @@
 package ExtUtils::Install;
 
-use Exporter;
-use SelfLoader;
-use Carp ();
+$VERSION = substr q$Revision: 1.12 $, 10;
+# $Id: Install.pm,v 1.12 1996/06/23 20:46:07 k Exp $
 
+use Exporter;
+use Carp ();
+use Config ();
+use vars qw(@ISA @EXPORT $VERSION);
 @ISA = ('Exporter');
 @EXPORT = ('install','uninstall','pm_to_blib');
 $Is_VMS = $^O eq 'VMS';
 
+my $splitchar = $^O eq 'VMS' ? '|' : $^O eq 'os2' ? ';' : ':';
+my @PERL_ENV_LIB = split $splitchar, defined $ENV{'PERL5LIB'} ? $ENV{'PERL5LIB'} : $ENV{'PERLLIB'};
+my $Inc_uninstall_warn_handler;
+
 #use vars qw( @EXPORT @ISA $Is_VMS );
 #use strict;
 
-1;
-
-sub ExtUtils::Install::install;
-sub ExtUtils::Install::uninstall;
-sub ExtUtils::Install::pm_to_blib;
-sub ExtUtils::Install::my_cmp;
-
-__DATA__
+sub forceunlink {
+    chmod 0666, $_[0];
+    unlink $_[0] or Carp::croak("Cannot forceunlink $_[0]: $!")
+}
 
 sub install {
-    my($hash,$verbose,$nonono) = @_;
+    my($hash,$verbose,$nonono,$inc_uninstall) = @_;
     $verbose ||= 0;
     $nonono  ||= 0;
 
@@ -31,7 +34,11 @@ sub install {
     use File::Copy qw(copy);
     use File::Find qw(find);
     use File::Path qw(mkpath);
-    # require "auto/ExtUtils/Install/my_cmp.al"; # Hairy, but for the first
+    # The following lines were needed with AutoLoader (left for the record)
+    # my $my_req = $self->catfile(qw(auto ExtUtils Install my_cmp.al));
+    # require $my_req;
+    # $my_req = $self->catfile(qw(auto ExtUtils Install forceunlink.al));
+    # require $my_req; # Hairy, but for the first
     # time use we are in a different directory when autoload happens, so
     # the relativ path to ./blib is ill.
 
@@ -47,7 +54,7 @@ sub install {
 	#Check if there are files, and if yes, look if the corresponding
 	#target directory is writable for us
 	opendir DIR, $source_dir_or_file or next;
-	while ($_ = readdir DIR) {
+	for (readdir DIR) {
 	    next if $_ eq "." || $_ eq ".." || $_ eq ".exists";
 	    if (-w $hash{$source_dir_or_file} || mkpath($hash{$source_dir_or_file})) {
 		last;
@@ -89,8 +96,8 @@ sub install {
 	    return if $_ eq ".exists";
 	    my $targetdir = $MY->catdir($hash{$source},$File::Find::dir);
 	    my $targetfile = $MY->catfile($targetdir,$_);
-	    my $diff = 0;
 
+	    my $diff = 0;
 	    if ( -f $targetfile && -s _ == $size) {
 		# We have a good chance, we can skip this one
 		$diff = my_cmp($_,$targetfile);
@@ -101,21 +108,28 @@ sub install {
 
 	    if ($diff){
 		if (-f $targetfile){
-		    unlink $targetfile or Carp::croak("Couldn't unlink $targetfile");
+		    forceunlink($targetfile) unless $nonono;
 		} else {
 		    mkpath($targetdir,0,0755) unless $nonono;
 		    print "mkpath($targetdir,0,0755)\n" if $verbose>1;
 		}
 		copy($_,$targetfile) unless $nonono;
-		print "Installing $targetfile\n" if $verbose;
+		print "Installing $targetfile\n";
 		utime($atime,$mtime + $Is_VMS,$targetfile) unless $nonono>1;
 		print "utime($atime,$mtime,$targetfile)\n" if $verbose>1;
+		$mode = 0444 | ( $mode & 0111 ? 0111 : 0 );
 		chmod $mode, $targetfile;
 		print "chmod($mode, $targetfile)\n" if $verbose>1;
 	    } else {
-		print "Skipping $targetfile (unchanged)\n";
+		print "Skipping $targetfile (unchanged)\n" if $verbose;
 	    }
-
+	    
+	    if (! defined $inc_uninstall) { # it's called 
+	    } elsif ($inc_uninstall == 0){
+		inc_uninstall($_,$File::Find::dir,$verbose,1); # nonono set to 1
+	    } else {
+		inc_uninstall($_,$File::Find::dir,$verbose,0); # nonono set to 0
+	    }
 	    $write{$targetfile}++;
 
 	}, ".");
@@ -163,15 +177,56 @@ sub my_cmp {
 sub uninstall {
     my($fil,$verbose,$nonono) = @_;
     die "no packlist file found: $fil" unless -f $fil;
+    # my $my_req = $self->catfile(qw(auto ExtUtils Install forceunlink.al));
+    # require $my_req; # Hairy, but for the first
     local *P;
     open P, $fil or Carp::croak("uninstall: Could not read packlist file $fil: $!");
     while (<P>) {
 	chomp;
 	print "unlink $_\n" if $verbose;
-	unlink($_) || Carp::carp("Couldn't unlink $_") unless $nonono;
+	forceunlink($_) unless $nonono;
     }
     print "unlink $fil\n" if $verbose;
-    unlink($fil) || Carp::carp("Couldn't unlink $fil") unless $nonono;
+    forceunlink($fil) unless $nonono;
+}
+
+sub inc_uninstall {
+    my($file,$libdir,$verbose,$nonono) = @_;
+    my($dir);
+    my $MY = {};
+    bless $MY, 'MY';
+    my %seen_dir = ();
+    foreach $dir (@INC, @PERL_ENV_LIB, @Config::Config{qw/archlibexp privlibexp sitearchexp sitelibexp/}) {
+	next if $dir eq ".";
+	next if $seen_dir{$dir}++;
+	my($targetfile) = $MY->catfile($dir,$libdir,$file);
+	next unless -f $targetfile;
+
+	# The reason why we compare file's contents is, that we cannot
+	# know, which is the file we just installed (AFS). So we leave
+	# an identical file in place
+	my $diff = 0;
+	if ( -f $targetfile && -s _ == -s $file) {
+	    # We have a good chance, we can skip this one
+	    $diff = my_cmp($file,$targetfile);
+	} else {
+	    print "#$file and $targetfile differ\n" if $verbose>1;
+	    $diff++;
+	}
+
+	next unless $diff;
+	if ($nonono) {
+	    if ($verbose) {
+		$Inc_uninstall_warn_handler ||= new ExtUtils::Install::Warn;
+		$libdir =~ s|^\./|| ; # That's just cosmetics, no need to port. It looks prettier.
+		$Inc_uninstall_warn_handler->add("$libdir/$file",$targetfile);
+	    }
+	    # if not verbose, we just say nothing
+	} else {
+	    print "Unlinking $targetfile (shadowing?)\n";
+	    forceunlink($targetfile);
+	}
+    }
 }
 
 sub pm_to_blib {
@@ -181,6 +236,8 @@ sub pm_to_blib {
     use File::Copy qw(copy);
     use File::Path qw(mkpath);
     use AutoSplit;
+    # my $my_req = $self->catfile(qw(auto ExtUtils Install forceunlink.al));
+    # require $my_req; # Hairy, but for the first
 
     my $umask = umask 0022 unless $Is_VMS;
     mkpath($autodir,0,0755);
@@ -191,17 +248,41 @@ sub pm_to_blib {
 	    next;
 	}
 	if (-f $fromto->{$_}){
-	    unlink $fromto->{$_} or Carp::carp("Couldn't unlink $fromto->{$_}");
+	    forceunlink($fromto->{$_});
 	} else {
 	    mkpath(dirname($fromto->{$_}),0,0755);
 	}
 	copy($_,$fromto->{$_});
-	chmod((stat)[2],$fromto->{$_});
+	chmod(0444 | ( (stat)[2] & 0111 ? 0111 : 0 ),$fromto->{$_});
 	print "cp $_ $fromto->{$_}\n";
 	next unless /\.pm$/;
 	autosplit($fromto->{$_},$autodir);
     }
     umask $umask unless $Is_VMS;
+}
+
+package ExtUtils::Install::Warn;
+
+sub new { bless {}, shift }
+
+sub add {
+    my($self,$file,$targetfile) = @_;
+    push @{$self->{$file}}, $targetfile;
+}
+
+sub DESTROY {
+    my $self = shift;
+    my($file,$i,$plural);
+    foreach $file (sort keys %$self) {
+	$plural = @{$self->{$file}} > 1 ? "s" : "";
+	print "## Differing version$plural of $file found. You might like to\n";
+	for (0..$#{$self->{$file}}) {
+	    print "rm ", $self->{$file}[$_], "\n";
+	    $i++;
+	}
+    }
+    $plural = $i>1 ? "all those files" : "this file";
+    print "## Running 'make install UNINST=1' will unlink $plural for you.\n";
 }
 
 1;
