@@ -12,11 +12,17 @@ $Is_EBCDIC = (defined $Config{ebcdic} && $Config{ebcdic} eq 'define');
 my $test = 1;
 sub ok {
     my($ok) = @_;
-    print "not " unless $ok;
-    print "ok $test\n";
+
+    # You have to do it this way or VMS will get confused.
+    my $out = '';
+    $out =  "not " unless $ok;
+    $out .= "ok $test\n";
+    print $out;
+
     $test++;
     return $ok;
 }
+
 
 print "1..161\n";
 
