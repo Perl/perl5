@@ -222,11 +222,6 @@ This is most probably something you do not want.
 
 =end _disabled_
 
-=item * No numeric argument for =over
-
-The C<=over> command is supposed to have a numeric argument (the
-indentation).
-
 =item * previous =item has no contents
 
 There is a list C<=item> right above the flagged line that has no
@@ -286,11 +281,6 @@ description of what the thing is good for.
 There are some warnings wrt. malformed hyperlinks.
 
 =over 4
-
-=item * collapsing newlines to blanks
-
-A hyperlink LE<lt>...E<gt> spans more than one line. This may indicate
-and error.
 
 =item * ignoring leading/trailing whitespace in link
 
@@ -822,10 +812,6 @@ sub command {
             my $indent = 4; # default
             if($arg && $arg =~ /^\s*(\d+)\s*$/) {
                 $indent = $1;
-            } else {
-                $self->poderror({ -line => $line, -file => $file,
-                     -severity => 'WARNING', 
-                     -msg => "No numeric argument for =over"});
             }
             # start a new list
             $self->_open_list($indent,$line,$file);
