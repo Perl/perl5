@@ -1,7 +1,6 @@
 package File::Spec::Win32;
 
 use strict;
-use Cwd;
 
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
@@ -93,6 +92,17 @@ sub catfile {
     return $dir.$file;
 }
 
+sub catdir {
+    my $self = shift;
+    my @args = @_;
+    foreach (@args) {
+	tr[/][\\];
+        # append a backslash to each argument unless it has one there
+        $_ .= "\\" unless m{\\$};
+    }
+    return $self->canonpath(join('', @args));
+}
+
 sub path {
     my $path = $ENV{'PATH'} || $ENV{'Path'} || $ENV{'path'};
     my @path = split(';',$path);
@@ -127,9 +137,7 @@ sub canonpath {
     return $path if $path =~ m|^\.\.|;      # skip relative paths
     return $path unless $path =~ /\.\./;    # too few .'s to cleanup
     return $path if $path =~ /\.\.\.\./;    # too many .'s to cleanup
-    return $path if $orig_path =~ m|^\Q/../\E|
-	and $orig_path =~ m|\/$|;  # don't do /../dirs/ when called
-                                   # from rel2abs() for ../dirs/
+    $path =~ s{^\\\.\.$}{\\};                      # \..    -> \
     1 while $path =~ s{^\\\.\.}{};                 # \..\xx -> \xx
 
     my ($vol,$dirs,$file) = $self->splitpath($path);
@@ -288,20 +296,20 @@ sub catpath {
 
 sub abs2rel {
     my($self,$path,$base) = @_;
-    $base = $self->cwd() unless defined $base and length $base;
+    $base = $self->_cwd() unless defined $base and length $base;
 
-    for ($path, $base) {
-      $_ = $self->canonpath($self->rel2abs($_));
-    }
-    my ($path_volume, $path_directories) = $self->splitpath($path, 1) ;
-    my ($base_volume, $base_directories) = $self->splitpath($base, 1);
+    for ($path, $base) { $_ = $self->canonpath($_) }
 
-    if ($path_volume and not $base_volume) {
-        ($base_volume) = $self->splitpath($self->cwd);
-    }
+    my ($path_volume) = $self->splitpath($path, 1);
+    my ($base_volume) = $self->splitpath($base, 1);
 
     # Can't relativize across volumes
     return $path unless $path_volume eq $base_volume;
+
+    for ($path, $base) { $_ = $self->rel2abs($_) }
+
+    my $path_directories = ($self->splitpath($path, 1))[1];
+    my $base_directories = ($self->splitpath($base, 1))[1];
 
     # Now, remove all leading components that are the same
     my @pathchunks = $self->splitdir( $path_directories );
@@ -327,7 +335,7 @@ sub rel2abs {
     if ( ! $self->file_name_is_absolute( $path ) ) {
 
         if ( !defined( $base ) || $base eq '' ) {
-            $base = $self->cwd() ;
+            $base = $self->_cwd() ;
         }
         elsif ( ! $self->file_name_is_absolute( $base ) ) {
             $base = $self->rel2abs( $base ) ;
@@ -360,7 +368,8 @@ Novell NetWare inherits its File::Spec behaviour from File::Spec::Win32.
 
 =head1 SEE ALSO
 
-L<File::Spec>
+See L<File::Spec> and L<File::Spec::Unix>.  This package overrides the
+implementation of these methods, not the semantics.
 
 =cut
 

@@ -3,7 +3,7 @@ package File::Spec;
 use strict;
 use vars qw(@ISA $VERSION);
 
-$VERSION = '0.85';
+$VERSION = '0.86';
 
 my %module = (MacOS   => 'Mac',
 	      MSWin32 => 'Win32',
@@ -164,7 +164,8 @@ Mac OS (Classic).  It does consult the working environment for VMS
 
 =item path
 
-Takes no argument, returns the environment variable PATH as an array.
+Takes no argument, returns the environment variable PATH (or the local
+platform's equivalent) as a list.
 
     @PATH = File::Spec->path();
 
@@ -220,12 +221,16 @@ from the base path to the destination path:
     $rel_path = File::Spec->abs2rel( $path ) ;
     $rel_path = File::Spec->abs2rel( $path, $base ) ;
 
-If $base is not present or '', then L<cwd()|Cwd> is used. If $base is relative, 
-then it is converted to absolute form using L</rel2abs()>. This means that it
-is taken to be relative to L<cwd()|Cwd>.
+If $base is not present or '', then L<cwd()|Cwd> is used. If $base is
+relative, then it is converted to absolute form using
+L</rel2abs()>. This means that it is taken to be relative to
+L<cwd()|Cwd>.
 
-On systems with the concept of a volume, this assumes that both paths 
-are on the $destination volume, and ignores the $base volume. 
+On systems with the concept of volume, if $path and $base appear to be
+on two different volumes, we will not attempt to resolve the two
+paths, and we will instead simply return $path.  Note that previous
+versions of this module ignored the volume of $base, which resulted in
+garbage results part of the time.
 
 On systems that have a grammar that indicates filenames, this ignores the 
 $base filename as well. Otherwise all path components are assumed to be
@@ -251,8 +256,11 @@ If $base is not present or '', then L<cwd()|Cwd> is used. If $base is relative,
 then it is converted to absolute form using L</rel2abs()>. This means that it
 is taken to be relative to L<cwd()|Cwd>.
 
-On systems with the concept of a volume, this assumes that both paths 
-are on the $base volume, and ignores the $path volume. 
+On systems with the concept of volume, if $path and $base appear to be
+on two different volumes, we will not attempt to resolve the two
+paths, and we will instead simply return $path.  Note that previous
+versions of this module ignored the volume of $base, which resulted in
+garbage results part of the time.
 
 On systems that have a grammar that indicates filenames, this ignores the 
 $base filename as well. Otherwise all path components are assumed to be
