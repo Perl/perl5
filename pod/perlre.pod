@@ -7,7 +7,7 @@ perlre - Perl regular expressions
 This page describes the syntax of regular expressions in Perl.  For a
 description of how to I<use> regular expressions in matching
 operations, plus various examples of the same, see discussion
-of C<m//>, C<s///>, and C<??> in L<perlop/Regexp Quote-Like Operators>.
+of C<m//>, C<s///>, C<qr//> and C<??> in L<perlop/Regexp Quote-Like Operators>.
 
 The matching operations can have various modifiers.  The modifiers
 that relate to the interpretation of the regular expression inside

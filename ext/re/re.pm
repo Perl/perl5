@@ -23,9 +23,9 @@ re - Perl pragma to alter regular expression behaviour
 	/foo${pat}bar/;		   # disallowed (with or without -T switch)
     }
 
-    use re 'debug';
-    /^(.*)$/s;			   # output debugging info 
-				   # during compile and run time
+    use re 'debug';		   # NOT lexically scoped (as others are)
+    /^(.*)$/s;			   # output debugging info during
+    				   #     compile and run time
 
 (We use $^X in these examples because it's tainted by default.)
 
@@ -44,12 +44,13 @@ potential security risk.  Note that this pragma is ignored when the regular
 expression is obtained from tainted data, i.e.  evaluation is always
 disallowed with tainted regular expresssions.  See L<perlre/(?{ code })>.
 
-For the purpose of this pragma, interpolation of preexisting regular 
-expressions is I<not> considered a variable interpolation, thus
+For the purpose of this pragma, interpolation of precompiled regular 
+expressions (i.e., the result of C<qr//>) is I<not> considered variable
+interpolation.  Thus:
 
     /foo${pat}bar/
 
-I<is> allowed if $pat is a preexisting regular expressions, even 
+I<is> allowed if $pat is a precompiled regular expression, even 
 if $pat contains C<(?{ ... })> assertions.
 
 When C<use re 'debug'> is in effect, perl emits debugging messages when 
@@ -59,8 +60,8 @@ B<-Dr> switch. It may be quite voluminous depending on the complexity
 of the match.
 See L<perldebug/"Debugging regular expressions"> for additional info.
 
-I<The directive C<use re 'debug'> is not lexically scoped.>  It has 
-both compile-time and run-time effects.
+The directive C<use re 'debug'> is I<not lexically scoped>, as the
+other directives are.  It has both compile-time and run-time effects.
 
 See L<perlmodlib/Pragmatic Modules>.
 

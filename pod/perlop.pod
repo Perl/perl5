@@ -913,7 +913,8 @@ A string which is (possibly) interpolated and then compiled as a
 regular expression. The result may be used as a pattern in a match
 
     $re = qr/$pattern/;
-    $string =~ /$re/;
+    $string =~ /foo${re}bar/;	# can be interpolated in other patterns
+    $string =~ $re;		# or used standalone
 
 Options are:
 
@@ -923,8 +924,9 @@ Options are:
     s	Treat string as single line.
     x	Use extended regular expressions.
 
-The benefit from this is that the pattern is compiled into an internal
-representation by the C<qr//> operator and not by the match operator.
+The benefit from this is that the pattern is precompiled into an internal
+representation, and does not need to be recompiled every time a match
+is attempted.  This makes it very efficient to do something like:
 
     foreach $pattern (@pattern_list) {
 	my $re = qr/$pattern/;
@@ -934,6 +936,9 @@ representation by the C<qr//> operator and not by the match operator.
 	    }
 	}
     }
+
+See L<perlre> for additional information on valid syntax for STRING, and
+for a detailed look at the semantics of regular expressions.
 
 =item qx/STRING/
 

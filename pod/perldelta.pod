@@ -251,9 +251,9 @@ has been seen.
 =head2 New C<qr//> operator
 
 The C<qr//> operator, which is syntactically similar to the other quote-like
-operators, is used to create compiled regular expressions.  This compiled
+operators, is used to create precompiled regular expressions.  This compiled
 form can now be explicitly passed around in variables, and interpolated in
-other regular expressions.  See L<perlop> and L<perlre>.
+other regular expressions.  See L<perlop>.
 
 =head2 C<our> is now a reserved word
 
