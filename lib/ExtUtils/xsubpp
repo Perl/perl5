@@ -418,7 +418,7 @@ sub INPUT_handler {
 	$var_init =~ s/"/\\"/g;
 
 	s/\s+/ /g;
-	my ($var_type, $var_addr, $var_name) = /^(.*?[^& ]) *(\&?) *\b(\w+)$/s
+	my ($var_type, $var_addr, $var_name) = /^(.*?[^&\s])\s*(\&?)\s*\b(\w+)$/s
 	    or blurt("Error: invalid argument declaration '$line'"), next;
 
 	# Check for duplicate definitions
@@ -444,12 +444,9 @@ sub INPUT_handler {
 
         $proto_arg[$var_num] = ProtoString($var_type) 
 	    if $var_num ;
-	if ($var_addr) {
-	    $var_addr{$var_name} = 1;
-	    $func_args =~ s/\b($var_name)\b/&$1/;
-	}
+	$func_args =~ s/\b($var_name)\b/&$1/ if $var_addr;
 	if ($var_init =~ /^[=;]\s*NO_INIT\s*;?\s*$/
-	    or $in_out{$var_name} and $in_out{$var_name} eq 'OUTLIST'
+	    or $in_out{$var_name} and $in_out{$var_name} =~ /^OUT/
 	    and $var_init !~ /\S/) {
 	  if ($name_printed) {
 	    print ";\n";
@@ -494,6 +491,8 @@ sub OUTPUT_handler {
 	} else {
 	    &generate_output($var_types{$outarg}, $var_num, $outarg, $DoSetMagic);
 	}
+	delete $in_out{$outarg} 	# No need to auto-OUTPUT 
+	  if exists $in_out{$outarg} and $in_out{$outarg} =~ /OUT$/;
     }
 }
 
@@ -1003,7 +1002,6 @@ while (fetch_para()) {
     # initialize info arrays
     undef(%args_match);
     undef(%var_types);
-    undef(%var_addr);
     undef(%defaults);
     undef($class);
     undef($static);
@@ -1015,7 +1013,7 @@ while (fetch_para()) {
     undef(@arg_with_types) ;
     undef($processing_arg_with_types) ;
     undef(%arg_types) ;
-    undef(@in_out) ;
+    undef(@outlist) ;
     undef(%in_out) ;
     undef($proto_in_this_xsub) ;
     undef($scope_in_this_xsub) ;
@@ -1081,7 +1079,7 @@ while (fetch_para()) {
 
     $orig_args =~ s/\\\s*/ /g;		# process line continuations
 
-    my %out_vars;
+    my %only_output;
     if ($process_argtypes and $orig_args =~ /\S/) {
 	my $args = "$orig_args ,";
 	if ($args =~ /^( (??{ $C_arg }) , )* $ /x) {
@@ -1096,10 +1094,10 @@ while (fetch_para()) {
 		next unless length $pre;
 		my $out_type;
 		my $inout_var;
-		if ($process_inout and s/^(IN|IN_OUTLIST|OUTLIST)\s+//) {
+		if ($process_inout and s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\s+//) {
 		    my $type = $1;
 		    $out_type = $type if $type ne 'IN';
-		    $arg =~ s/^(IN|IN_OUTLIST|OUTLIST)\s+//;
+		    $arg =~ s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\s+//;
 		}
 		if (/\W/) {	# Has a type
 		    push @arg_with_types, $arg;
@@ -1107,8 +1105,8 @@ while (fetch_para()) {
 		    $arg_types{$name} = $arg;
 		    $_ = "$name$default";
 		}
-		$out_vars{$_} = 1 if $out_type eq 'OUTLIST';
-		push @in_out, $name if $out_type;
+		$only_output{$_} = 1 if $out_type =~ /^OUT/;
+		push @outlist, $name if $out_type =~ /OUTLIST$/;
 		$in_out{$name} = $out_type if $out_type;
 	    }
 	} else {
@@ -1118,11 +1116,11 @@ while (fetch_para()) {
     } else {
 	@args = split(/\s*,\s*/, $orig_args);
 	for (@args) {
-	    if ($process_inout and s/^(IN|IN_OUTLIST|OUTLIST)\s+//) {
+	    if ($process_inout and s/^(IN|IN_OUTLIST|OUTLIST|IN_OUT|OUT)\s+//) {
 		my $out_type = $1;
 		next if $out_type eq 'IN';
-		$out_vars{$_} = 1 if $out_type eq 'OUTLIST';
-		push @in_out, $name;
+		$only_output{$_} = 1 if $out_type =~ /^OUT/;
+		push @outlist, $name if $out_type =~ /OUTLIST$/;
 		$in_out{$_} = $out_type;
 	    }
 	}
@@ -1146,7 +1144,7 @@ while (fetch_para()) {
 			last;
 		    }
 	    }
-	    if ($out_vars{$args[$i]}) {
+	    if ($only_output{$args[$i]}) {
 		push @args_num, undef;
 	    } else {
 		push @args_num, ++$num_args;
@@ -1335,6 +1333,9 @@ EOF
 	undef %outargs ;
 	process_keyword("POSTCALL|OUTPUT|ALIAS|ATTRS|PROTOTYPE"); 
 
+	&generate_output($var_types{$_}, $args_match{$_}, $_, $DoSetMagic)
+	  for grep $in_out{$_} =~ /OUT$/, keys %in_out;
+
 	# all OUTPUT done, so now push the return value on the stack
 	if ($gotRETVAL && $RETVAL_code) {
 	    print "\t$RETVAL_code\n";
@@ -1371,11 +1372,11 @@ EOF
 
 	$xsreturn = 1 if $ret_type ne "void";
 	my $num = $xsreturn;
-	my $c = @in_out;
+	my $c = @outlist;
 	print "\tXSprePUSH;" if $c and not $prepush_done;
 	print "\tEXTEND(SP,$c);\n" if $c;
 	$xsreturn += $c;
-	generate_output($var_types{$_}, $num++, $_, 0, 1) for @in_out;
+	generate_output($var_types{$_}, $num++, $_, 0, 1) for @outlist;
 
 	# do cleanup
 	process_keyword("CLEANUP|ALIAS|ATTRS|PROTOTYPE") ;
