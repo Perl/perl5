@@ -40,6 +40,8 @@ if ($^O eq 'MSWin32') {
     $pwd_cmd =~ s,/,\\,g;
     $pwd_cmd = "$pwd_cmd /c cd";
 }
+$pwd_cmd =~ s=\\=/=g if ($^O eq 'dos');
+
 print "# native pwd = '$pwd_cmd'\n";
 
 SKIP: {

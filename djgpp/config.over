@@ -25,7 +25,7 @@ repair()
      -e 's/posix/POSIX/'\
      -e 's/sdbm_fil/SDBM_File/'\
      -e 's/socket/Socket/'\
-     -e 's/thread/Thread/'\
+     -e 's=[tT]hread[/a-zA-Z]*==g'\
      -e 's/byteload/ByteLoader/'\
      -e 's=devel/peek=Devel/Peek='\
      -e 's=devel/dprof=Devel/DProf='\
@@ -45,6 +45,7 @@ repair()
      -e 's=list/util=List/Util=' \
      -e 's=cwd=Cwd=' \
      -e 's=perlio/via=PerlIO/Via=' \
+     -e 's=perlio/encoding=PerlIO/encoding=' \
      -e 's=xs/typemap=XS/Typemap=' \
      -e 's=unicode/normaliz=Unicode/Normalize=' \
      -e 's=i18n/langinfo=I18N/Langinfo=' \
