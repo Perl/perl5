@@ -3234,11 +3234,12 @@ Found in file utf8.c
 
 =item utf8_hop
 
-Move the C<s> pointing to UTF-8 data by C<off> characters, either forward
-or backward.
+Return the UTF-8 pointer C<s> displaced by C<off> characters, either
+forward or backward.
 
 WARNING: do not use the following unless you *know* C<off> is within
-the UTF-8 buffer pointed to by C<s>.
+the UTF-8 data pointed to by C<s> *and* that on entry C<s> is aligned
+on the first byte of character or just after the last byte of a character.
 
 	U8*	utf8_hop(U8 *s, I32 off)
 
@@ -3279,10 +3280,10 @@ If C<s> does not point to a well-formed UTF8 character, the behaviour
 is dependent on the value of C<flags>: if it contains UTF8_CHECK_ONLY,
 it is assumed that the caller will raise a warning, and this function
 will set C<retlen> to C<-1> and return zero.  If the C<flags> does not
-contain UTF8_CHECK_ONLY, the UNICODE_REPLACEMENT_CHARACTER (0xFFFD)
-will be returned, and C<retlen> will be set to the expected length of
-the UTF-8 character in bytes.  The C<flags> can also contain various
-flags to allow deviations from the strict UTF-8 encoding (see F<utf8.h>).
+contain UTF8_CHECK_ONLY, the UNICODE_REPLACEMENT (0xFFFD) will be
+returned, and C<retlen> will be set to the expected length of the
+UTF-8 character in bytes.  The C<flags> can also contain various flags
+to allow deviations from the strict UTF-8 encoding (see F<utf8.h>).
 
 	U8* s	utf8_to_uv(STRLEN curlen, STRLEN *retlen, U32 flags)
 

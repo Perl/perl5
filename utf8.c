@@ -137,7 +137,7 @@ Perl_is_utf8_char(pTHX_ U8 *s)
     while (slen--) {
 	if ((*s & 0xc0) != 0x80)
 	    return 0;
-	uv = (uv << 6) | (*s & 0x3f);
+	uv = UTF8_ACCUMULATE(uv, *s);
 	if (uv < ouv)
 	    return 0;
 	ouv = uv;
@@ -285,7 +285,7 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 	    goto malformed;
 	}
 	else
-	    uv = (uv << 6) | (*s & 0x3f);
+	    uv = UTF8_ACCUMULATE(uv, *s);
 	if (uv < ouv) {
 	    /* This cannot be allowed. */
 	    if (dowarn)
@@ -379,6 +379,10 @@ Perl_utf8_length(pTHX_ U8* s, U8* e)
 {
     STRLEN len = 0;
 
+    /* Note: cannot use UTF8_IS_...() too eagerly here since e.g.
+     * the bitops (especially ~) can create illegal UTF-8.
+     * In other words: in Perl UTF-8 is not just for Unicode. */
+
     if (e < s)
 	Perl_croak(aTHX_ "panic: utf8_length: unexpected end");
     while (s < e) {
@@ -409,6 +413,10 @@ Perl_utf8_distance(pTHX_ U8 *a, U8 *b)
 {
     IV off = 0;
 
+    /* Note: cannot use UTF8_IS_...() too eagerly here since  e.g.
+     * the bitops (especially ~) can create illegal UTF-8.
+     * In other words: in Perl UTF-8 is not just for Unicode. */
+
     if (a < b) {
 	while (a < b) {
 	    U8 c = UTF8SKIP(a);
@@ -436,17 +444,22 @@ Perl_utf8_distance(pTHX_ U8 *a, U8 *b)
 /*
 =for apidoc Am|U8*|utf8_hop|U8 *s|I32 off
 
-Move the C<s> pointing to UTF-8 data by C<off> characters, either forward
-or backward.
+Return the UTF-8 pointer C<s> displaced by C<off> characters, either
+forward or backward.
 
 WARNING: do not use the following unless you *know* C<off> is within
-the UTF-8 buffer pointed to by C<s>.
+the UTF-8 data pointed to by C<s> *and* that on entry C<s> is aligned
+on the first byte of character or just after the last byte of a character.
 
 =cut */
 
 U8 *
 Perl_utf8_hop(pTHX_ U8 *s, I32 off)
 {
+    /* Note: cannot use UTF8_IS_...() too eagerly here since e.g
+     * the bitops (especially ~) can create illegal UTF-8.
+     * In other words: in Perl UTF-8 is not just for Unicode. */
+
     if (off >= 0) {
 	while (off--)
 	    s += UTF8SKIP(s);
@@ -454,10 +467,8 @@ Perl_utf8_hop(pTHX_ U8 *s, I32 off)
     else {
 	while (off++) {
 	    s--;
-	    if (*s & 0x80) {
-		while ((*s & 0xc0) == 0x80)
-		    s--;
-	    }
+	    while (UTF8_IS_CONTINUATION(*s))
+		s--;
 	}
     }
     return s;

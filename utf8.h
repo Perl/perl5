@@ -65,6 +65,11 @@ END_EXTERN_C
 #define UTF8_IS_ASCII(c) 		((c) <  0x80)
 #define UTF8_IS_START(c)		((c) >= 0xc0 && ((c) <= 0xfd))
 #define UTF8_IS_CONTINUATION(c)		((c) >= 0x80 && ((c) <= 0xbf))
+#define UTF8_IS_CONTINUED(c) 		((c) &  0x80)
+
+#define UTF8_CONTINUATION_MASK		0x3f
+#define UTF8_ACCUMULATION_SHIFT		6
+#define UTF8_ACCUMULATE(old, new)	((old) << UTF8_ACCUMULATION_SHIFT | ((new) & UTF8_CONTINUATION_MASK))
 
 #ifdef HAS_QUAD
 #define UNISKIP(uv) ( (uv) < 0x80           ? 1 : \
