@@ -65,6 +65,7 @@ The following tests fail on 5.8.0 Perl in BeOS Personal 5.03:
   ext/File/Glob/t/basic...............FAILED at test 3
   ext/POSIX/t/sigaction...............FAILED at test 13
   ext/POSIX/t/waitpid.................FAILED at test 1
+  lib/Tie/File/t/16_handle............FAILED test 39
 
 The reasons for the failures are as follows: 
 
@@ -92,6 +93,10 @@ if sigaction returns early.
 The waitpid failure means that after there are no more child
 processes, waitpid is supposed to start returning -1 (and set
 errno to ECHILD).  In BeOS, it doesn't seem to.
+
+=item *
+
+The reason for Tie::File 16_handle #39 is not known.
 
 =back
 
