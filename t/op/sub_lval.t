@@ -1,4 +1,4 @@
-print "1..67\n";
+print "1..68\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -560,3 +560,15 @@ TODO: {
     is($blah, 8, "yada");
 }
 
+TODO: {
+    local $TODO = "bug #23790";
+    my @arr  = qw /one two three/;
+    my $line = "zero";
+    sub lval_array () : lvalue {@arr}
+
+    for (lval_array) {
+        $line .= $_;
+    }
+
+    is($line, "zeroonetwothree");
+}
