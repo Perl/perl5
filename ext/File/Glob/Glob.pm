@@ -331,9 +331,9 @@ Be aware that all filenames returned from File::Glob are tainted.
 =item *
 
 If you want to use multiple patterns, e.g. C<bsd_glob "a* b*">, you should
-probably throw them in a set as in C<glob "{a*,b*}">.  This is because
-the argument to glob isn't subjected to parsing by the C shell.  Remember
-that you can use a backslash to escape things.
+probably throw them in a set as in C<bsd_glob "{a*,b*}">.  This is because
+the argument to bsd_glob() isn't subjected to parsing by the C shell.
+Remember that you can use a backslash to escape things.
 
 =item *
 
