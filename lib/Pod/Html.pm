@@ -1299,7 +1299,7 @@ WARN
 
 sub html_escape {
     my $rest = $_[0];
-    $rest   =~ s/&/&amp;/g;
+    $rest   =~ s/&(?!\w+;|#)/&amp;/g;	# XXX not bulletproof
     $rest   =~ s/</&lt;/g;
     $rest   =~ s/>/&gt;/g;
     $rest   =~ s/"/&quot;/g;
