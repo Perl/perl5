@@ -2827,7 +2827,6 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
     register UV retval = 0;
     register UV n;
     register I32 d = 0;
-    register bool seeno = FALSE;
     register bool overflow = FALSE;
 
     for (; len-- && *s; s++) {
@@ -2835,9 +2834,9 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
 	    if (*s == '_')
 		continue;
 	    else {
-		/* Allow \octal to work DWIM way (that is, stop scanning
-		 * as soon as non-octal characters seen, complain only iff
-		 * someone seems to want to use the eight and nine. */
+		/* Allow \octal to work the DWIM way (that is, stop scanning
+		 * as soon as non-octal characters are seen, complain only iff
+		 * someone seems to want to use the digits eight and nine). */
 		if (*s == '8' || *s == '9') {
 		    dTHR;
 		    if (ckWARN(WARN_OCTAL))
