@@ -254,9 +254,9 @@ open(), or did it in another package.
 
 (S malloc) An internal routine called free() on something that had never
 been malloc()ed in the first place. Mandatory, but can be disabled by
-setting environment variable C<PERL_BADFREE> to 1.
+setting environment variable C<PERL_BADFREE> to 0.
 
-This message can be quite often seen with DB_File on systems with "hard"
+This message can be seen quite often with DB_File on systems with "hard"
 dynamic linking, like C<AIX> and C<OS/2>. It is a bug of C<Berkeley DB>
 which is left unnoticed if C<DB> uses I<forgiving> system malloc().
 
@@ -1024,23 +1024,23 @@ Perhaps you need to copy the value to a temporary, and repeat that.
 I<inside> character classes, the [] are part of the construct, for
 example: /[012[:alpha:]345]/.  Note that [= =] and [. .] are not
 currently implemented; they are simply placeholders for future
-extensions.
+extensions and will cause fatal errors.
 
 =item Character class syntax [. .] is reserved for future extensions
 
-(W regexp) Within regular expression character classes ([]) the syntax
+(F regexp) Within regular expression character classes ([]) the syntax
 beginning with "[." and ending with ".]" is reserved for future
-extensions.  If you need to represent those character sequences inside a
-regular expression character class, just quote the square brackets with
-the backslash: "\[." and ".\]".
+extensions.  If you need to represent those character sequences inside
+a regular expression character class, just quote the square brackets
+with the backslash: "\[." and ".\]".
 
 =item Character class syntax [= =] is reserved for future extensions
 
-(W regexp) Within regular expression character classes ([]) the syntax
+(F) Within regular expression character classes ([]) the syntax
 beginning with "[=" and ending with "=]" is reserved for future
-extensions.  If you need to represent those character sequences inside a
-regular expression character class, just quote the square brackets with
-the backslash: "\[=" and "=\]".
+extensions.  If you need to represent those character sequences inside
+a regular expression character class, just quote the square brackets
+with the backslash: "\[=" and "=\]".
 
 =item Character class [:%s:] unknown
 

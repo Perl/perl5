@@ -25,7 +25,7 @@ use File::Temp qw/ tempfile unlink0 /;
 ok(1);
 
 # The high security tests must currently be skipped on Windows
-my $skipplat = ( $^O eq 'MSWin32' ? 1 : 0 );
+my $skipplat = ( ($^O eq 'MSWin32' || $^O eq 'os2') ? 1 : 0 );
 
 # Can not run high security tests in perls before 5.6.0
 my $skipperl  = ($] < 5.006 ? 1 : 0 );
@@ -82,13 +82,13 @@ sub test_security {
   # of tests -- we dont use skip since the tempfile() commands will
   # fail with MEDIUM/HIGH security before the skip() command would be run
   if ($skip) {
-    
+
     skip($skip,1);
     skip($skip,1);
-    
+
     # plus we need an end block so the tests come out in the right order
     eval q{ END { skip($skip,1); skip($skip,1)  } 1; } || die;
-    
+
     return;
   }
 

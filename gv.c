@@ -418,6 +418,9 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 	return Nullgv;
     cv = GvCV(gv);
 
+    if (!CvROOT(cv))
+	return Nullgv;
+
     /*
      * Inheriting AUTOLOAD for non-methods works ... for now.
      */

@@ -140,6 +140,11 @@ sub import {
     } 
 }
 
+sub unimport {
+  my $callpkg = caller;
+  eval "package $callpkg; sub AUTOLOAD;";
+}
+
 1;
 
 __END__
@@ -258,6 +263,12 @@ situations as an alternative to explicitly qualifying all globals with
 the package namespace.  Variables pre-declared with this pragma will be
 visible to any autoloaded routines (but will not be invisible outside
 the package, unfortunately).
+
+=head2 Not Using AutoLoader
+
+You can stop using AutoLoader by simply
+
+	no AutoLoader;
 
 =head2 B<AutoLoader> vs. B<SelfLoader>
 

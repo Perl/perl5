@@ -19,15 +19,15 @@
 #include <signal.h>
 #endif
 
-#define HALF_UPGRADE(start,end) \
+#define HALF_UTF8_UPGRADE(start,end) \
     STMT_START {				\
 	U8* NeWsTr;				\
 	STRLEN LeN = (end) - (start);		\
 	NeWsTr = bytes_to_utf8(start, &LeN);	\
-	Copy(NeWsTr,start,LeN,U8*);		\
-	end = (start) + LeN;			\
+	Safefree(start);			\
+	(start) = NeWsTr;			\
+	(end) = (start) + LeN;			\
     } STMT_END
-
 
 STATIC I32
 S_do_trans_simple(pTHX_ SV *sv)
@@ -238,16 +238,16 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)/* SPC - OK */
 	    s += UTF8SKIP(s);
 	    matches++;
             if ((uv & 0x80) && !isutf++)
-                HALF_UPGRADE(dstart,d);
+                HALF_UTF8_UPGRADE(dstart,d);
 	    d = uv_to_utf8(d, uv);
 	}
 	else if (uv == none) {
 	    int i;
 	    i = UTF8SKIP(s);
             if (i > 1 && !isutf++)
-                HALF_UPGRADE(dstart,d);
+                HALF_UTF8_UPGRADE(dstart,d);
 	    while(i--)
-            *d++ = *s++;
+		*d++ = *s++;
 	}
 	else if (uv == extra) {
 	    int i;
@@ -255,7 +255,7 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)/* SPC - OK */
 	    s += i;
 	    matches++;
             if (i > 1 && !isutf++) 
-                HALF_UPGRADE(dstart,d);
+                HALF_UTF8_UPGRADE(dstart,d);
 	    d = uv_to_utf8(d, final);
 	}
 	else
@@ -351,11 +351,11 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 		matches++;
 		if (uv != puv) {
                     if ((uv & 0x80) && !isutf++) 
-                        HALF_UPGRADE(dst,d);
+                        HALF_UTF8_UPGRADE(dst,d);
 		    d = uv_to_utf8(d, uv);
 		    puv = uv;
 		}
-		    s += UTF8SKIP(s);
+		s += UTF8SKIP(s);
 		continue;
 	    }
 	    else if (uv == none) {	/* "none" is unmapped character */

@@ -34,8 +34,8 @@ as well.)
 =head2 Working with SVs
 
 An SV can be created and loaded with one command.  There are four types of
-values that can be loaded: an integer value (IV), a double (NV), a string,
-(PV), and another scalar (SV).
+values that can be loaded: an integer value (IV), a double (NV),
+a string (PV), and another scalar (SV).
 
 The six routines are:
 

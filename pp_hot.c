@@ -145,38 +145,72 @@ PP(pp_concat)
   {
     dPOPTOPssrl;
     STRLEN len;
-    char *s;
+    U8 *s;
     bool left_utf = DO_UTF8(left);
     bool right_utf = DO_UTF8(right);
 
+    if (left_utf != right_utf) {
+        if (TARG == right && !right_utf) {
+            sv_utf8_upgrade(TARG); /* Now straight binary copy */
+            SvUTF8_on(TARG);
+        }
+        else {
+            /* Set TARG to PV(left), then add right */
+            U8 *l, *c, *olds = NULL;
+            STRLEN targlen;
+            if (TARG == right) {
+                /* Need a safe copy elsewhere since we're just about to
+                   write onto TARG */
+		olds = (U8*)SvPV(right,len);
+                s = (U8*)savepv((char*)olds);
+	    }
+            else
+                s = (U8*)SvPV(right,len);
+            l = (U8*)SvPV(left, targlen);
+            if (TARG != left)
+                sv_setpvn(TARG, (char*)l, targlen);
+            if (!left_utf)
+                sv_utf8_upgrade(TARG);
+            /* Extend TARG to length of right (s) */
+            targlen = SvCUR(TARG) + len;
+            if (!right_utf) {
+                /* plus one for each hi-byte char if we have to upgrade */
+                for (c = s; *c; c++)  {
+                    if (*c & 0x80)
+                        targlen++;
+                }
+            }
+            SvGROW(TARG, targlen+1);
+            /* And now copy, maybe upgrading right to UTF8 on the fly */
+            for (c = (U8*)SvEND(TARG); *s; s++) {
+                 if (*s & 0x80 && !right_utf)
+                     c = uv_to_utf8(c, *s);
+                 else
+                     *c++ = *s;
+            }
+            SvCUR_set(TARG, targlen);
+            *SvEND(TARG) = '\0';
+            SvUTF8_on(TARG);
+            SETs(TARG);
+	    Safefree(olds);
+            RETURN;
+        }
+    }
+
     if (TARG != left) {
-	if (right_utf && !left_utf)
-	    sv_utf8_upgrade(left);
-	s = SvPV(left,len);
-	SvUTF8_off(TARG);
+	s = (U8*)SvPV(left,len);
 	if (TARG == right) {
-	    if (left_utf && !right_utf)
-		sv_utf8_upgrade(right);
-	    sv_insert(TARG, 0, 0, s, len);
-	    if (left_utf || right_utf)
-		SvUTF8_on(TARG);
+	    sv_insert(TARG, 0, 0, (char*)s, len);
 	    SETs(TARG);
 	    RETURN;
 	}
-	sv_setpvn(TARG,s,len);
+	sv_setpvn(TARG, (char *)s, len);
     }
-    else if (SvGMAGICAL(TARG)) {
+    else if (SvGMAGICAL(TARG))
 	mg_get(TARG);
-	if (right_utf && !left_utf)
-	    sv_utf8_upgrade(left);
-    }
-    else if (!SvOK(TARG) && SvTYPE(TARG) <= SVt_PVMG) {
+    else if (!SvOK(TARG) && SvTYPE(TARG) <= SVt_PVMG)
 	sv_setpv(TARG, "");	/* Suppress warning. */
-	s = SvPV_force(TARG, len);
-    }
-    if (left_utf && !right_utf)
-	sv_utf8_upgrade(right);
-    s = SvPV(right,len);
+    s = (U8*)SvPV(right,len);
     if (SvOK(TARG)) {
 #if defined(PERL_Y2KWARN)
 	if ((SvIOK(right) || SvNOK(right)) && ckWARN(WARN_Y2K)) {
@@ -190,11 +224,11 @@ PP(pp_concat)
 	    }
 	}
 #endif
-	sv_catpvn(TARG,s,len);
+	sv_catpvn(TARG, (char *)s, len);
     }
     else
-	sv_setpvn(TARG,s,len);	/* suppress warning */
-    if (left_utf || right_utf)
+	sv_setpvn(TARG, (char *)s, len);	/* suppress warning */
+    if (left_utf)
 	SvUTF8_on(TARG);
     SETTARG;
     RETURN;

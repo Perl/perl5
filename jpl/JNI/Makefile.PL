@@ -115,11 +115,12 @@ sub find_stuff {
 
     my ($candidates, $locations) = @_;
 
-    my $lib;
+    my ($pos,$lib);
     $wanted = sub {
         foreach my $name (@$candidates) {
-            if (/$name$/ and ! /green_threads/ and !/include-old/) {
-                    $lib = $File::Find::name;
+	    $pos = $File::Find::name;
+            if (/$name$/ && $pos !~ /green_threads/ && $pos !~ /include-old/) {
+                    $lib = $pos;
             }
         }
     };

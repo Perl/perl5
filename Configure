@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Jul 24 06:41:11 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Sat Jul 29 02:48:03 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -490,6 +490,7 @@ d_setpgrp2=''
 d_bsdsetpgrp=''
 d_setpgrp=''
 d_setprior=''
+d_setproctitle=''
 d_setpwent=''
 d_setregid=''
 d_setresgid=''
@@ -596,6 +597,7 @@ fflushNULL=''
 fflushall=''
 fpossize=''
 fpostype=''
+gccosandvers=''
 gccversion=''
 gidformat=''
 gidsign=''
@@ -1002,7 +1004,7 @@ defvoidused=15
 libswanted='sfio socket bind inet nsl nm ndbm gdbm dbm db malloc dl'
 libswanted="$libswanted dld ld sun m c cposix posix"
 libswanted="$libswanted ndir dir crypt sec"
-libswanted="$libswanted ucb bsd BSD PW x iconv"
+libswanted="$libswanted ucb bsd BSD PW x iconv util"
 : We probably want to search /usr/shlib before most other libraries.
 : This is only used by the lib/ExtUtils/MakeMaker.pm routine extliblist.
 glibpth=`echo " $glibpth " | sed -e 's! /usr/shlib ! !'`
@@ -3175,6 +3177,36 @@ $rm -f gccvers*
 case "$gccversion" in
 1*) cpp=`./loc gcc-cpp $cpp $pth` ;;
 esac
+case "$gccversion" in
+'') gccosandvers='' ;;
+*) gccosandvers=`$cc -v 2>&1|grep '/specs$'|sed 's!.*/[^-]*-[^-]*-\([^/]*\)/'$gccversion'/specs$!\1!'`
+   case "$gccosandvers" in
+   $osname$osvers) ;;
+   $osname*) cat <<EOM >&4
+
+*** WHOA THERE!!! ***
+
+    Your gcc has not been compiled for the exact release of
+    your operating system ($gccosandvers versus $osname$osvers).
+
+    In general it is a good idea to keep gcc synchronized with
+    the operating system because otherwise serious problems
+    may ensue when trying to compile software, like Perl.
+
+    I'm trying to be optimistic here, though, and will continue.
+    If later during the configuration and build icky compilation
+    problems appear, I suggest reinstalling the gcc to match
+    your operating system release.
+
+EOM
+      ;;
+   *) gccosandvers='' ;; # failed to parse, better be silent
+   esac
+   ;;
+esac
+
+
+
 
 : see how we invoke the C preprocessor
 echo " "
@@ -11093,6 +11125,10 @@ eval $inlibc
 set setpriority d_setprior
 eval $inlibc
 
+: see if setproctitle exists
+set setproctitle d_setproctitle
+eval $inlibc
+
 : see if setpwent exists
 set setpwent d_setpwent
 eval $inlibc
@@ -15492,6 +15528,7 @@ d_setpgid='$d_setpgid'
 d_setpgrp2='$d_setpgrp2'
 d_setpgrp='$d_setpgrp'
 d_setprior='$d_setprior'
+d_setproctitle='$d_setproctitle'
 d_setpwent='$d_setpwent'
 d_setregid='$d_setregid'
 d_setresgid='$d_setresgid'
@@ -15600,6 +15637,7 @@ freetype='$freetype'
 full_ar='$full_ar'
 full_csh='$full_csh'
 full_sed='$full_sed'
+gccosandvers='$gccosandvers'
 gccversion='$gccversion'
 gidformat='$gidformat'
 gidsign='$gidsign'

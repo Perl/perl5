@@ -4250,15 +4250,12 @@ Examples:
 
 If you're using strict, you I<must not> declare $a
 and $b as lexicals.  They are package globals.  That means
-if you're in the C<main> package, it's
-
-    @articles = sort {$main::b <=> $main::a} @files;
-
-or just
-
-    @articles = sort {$::b <=> $::a} @files;
-
-but if you're in the C<FooPack> package, it's
+if you're in the C<main> package and type
+  
+    @articles = sort {$b <=> $a} @files;
+  
+then C<$a> and C<$b> are C<$main::a> and C<$main::b> (or C<$::a> and C<$::b>),
+but if you're in the C<FooPack> package, it's the same as typing
 
     @articles = sort {$FooPack::b <=> $FooPack::a} @files;
 
@@ -4377,6 +4374,9 @@ will give you as many null initial fields as there are leading spaces.
 A C<split> on C</\s+/> is like a C<split(' ')> except that any leading
 whitespace produces a null first field.  A C<split> with no arguments
 really does a C<split(' ', $_)> internally.
+
+A PATTERN of C</^/> is treated as if it were C</^/m>, since it isn't
+much use otherwise.
 
 Example:
 

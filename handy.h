@@ -505,7 +505,7 @@ The XSUB-writer's interface to the C C<realloc> function.
 The XSUB-writer's interface to the C C<realloc> function, with
 cast.
 
-=for apidoc Am|void|Safefree|void* src|void* dest|int nitems|type
+=for apidoc Am|void|Safefree|void* ptr
 The XSUB-writer's interface to the C C<free> function.
 
 =for apidoc Am|void|Move|void* src|void* dest|int nitems|type

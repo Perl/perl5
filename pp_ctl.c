@@ -3158,8 +3158,8 @@ trylocal: {
 		else {
 		    char *dir = SvPVx(dirsv, n_a);
 #ifdef MACOS_TRADITIONAL
-		    /* We have ensured in incpush that library ends with ':' */
-		    Perl_sv_setpvf(aTHX_ namesv, "%s%s", dir, name+(name[0] == ':'));
+		    char buf[256];
+		    Perl_sv_setpvf(aTHX_ namesv, "%s%s", MacPerl_CanonDir(dir, buf), name+(name[0] == ':'));
 #else
 #ifdef VMS
 		    char *unixdir;
