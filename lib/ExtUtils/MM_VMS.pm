@@ -1177,7 +1177,7 @@ static :: $(INST_ARCHAUTODIR)$(BASEEXT).opt
 	$(NOECHO) $(NOOP)
 ') unless $self->{SKIPHASH}{'static'};
 
-    push(@m,'
+    push @m,'
 $(INST_ARCHAUTODIR)$(BASEEXT).opt : $(BASEEXT).opt
 	$(CP) $(MMS$SOURCE) $(MMS$TARGET)
 
@@ -1185,9 +1185,26 @@ $(BASEEXT).opt : Makefile.PL
 	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -e "use ExtUtils::Mksymlists;" -
 	',qq[-e "Mksymlists('NAME' => '$self->{NAME}', 'DL_FUNCS' => ],
 	neatvalue($funcs),q[, 'DL_VARS' => ],neatvalue($vars),
-	q[, 'FUNCLIST' => ],neatvalue($funclist),')"
-	$(PERL) -e "print ""$(INST_STATIC)/Include=$(BASEEXT)\n$(INST_STATIC)/Library\n"";" >>$(MMS$TARGET)
-');
+	q[, 'FUNCLIST' => ],neatvalue($funclist),qq[)"\n];
+
+    push @m, '	$(PERL) -e "print ""$(INST_STATIC)/Include=';
+    if ($self->{OBJECT} =~ /\bBASEEXT\b/ or
+        $self->{OBJECT} =~ /\b$self->{BASEEXT}\b/i) { push @m, '$(BASEEXT)'; }
+    else {  # We don't have a "main" object file, so pull 'em all in
+	my(@omods) = map { s/\.[^.]*$//;         # Trim off file type
+	                   s[\$\(\w+_EXT\)][];   # even as a macro
+	                   s/.*[:>\/\]]//;       # Trim off dir spec
+	                   $_; } split ' ', $self->eliminate_macros($self->{OBJECT});
+	my($tmp,@lines,$elt) = '';
+	my $tmp = shift @omods;
+	foreach $elt (@omods) {
+	    $tmp .= ",$elt";
+		if (length($tmp) > 80) { push @lines, $tmp;  $tmp = ''; }
+	}
+	push @lines, $tmp;
+	push @m, '(', join( qq[, -\\n\\t"";" >>\$(MMS\$TARGET)\n\t\$(PERL) -e "print ""], @lines),')';
+    }
+	push @m, '\n$(INST_STATIC)/Library\n"";" >>$(MMS$TARGET)',"\n";
 
     if (length $self->{LDLOADLIBS}) {
 	my($lib); my($line) = '';
