@@ -1827,6 +1827,7 @@ IEXT I32	Icxstack_ix IINIT(-1);
 IEXT I32	Icxstack_max IINIT(128);
 IEXT Sigjmp_buf	Itop_env;
 IEXT I32	Irunlevel;
+IEXT bool	Imustcatch;	/* doeval() must be caught locally */
 
 /* stack stuff */
 IEXT AV *	Icurstack;		/* THE STACK */

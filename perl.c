@@ -496,6 +496,7 @@ setuid perl scripts securely.\n");
     main_cv = Nullcv;
 
     time(&basetime);
+    mustcatch = FALSE;
 
     switch (Sigsetjmp(top_env,1)) {
     case 1:
@@ -953,7 +954,8 @@ I32 flags;		/* See G_* flags in cop.h */
     Sigjmp_buf oldtop;
     I32 oldscope;
     static CV *DBcv;
-    
+    bool oldmustcatch = mustcatch;
+
     if (flags & G_DISCARD) {
 	ENTER;
 	SAVETMPS;
@@ -1043,6 +1045,8 @@ I32 flags;		/* See G_* flags in cop.h */
 	    goto cleanup;
 	}
     }
+    else
+	mustcatch = TRUE;
 
     if (op == (OP*)&myop)
 	op = pp_entersub();
@@ -1069,6 +1073,9 @@ I32 flags;		/* See G_* flags in cop.h */
 	}
 	Copy(oldtop, top_env, 1, Sigjmp_buf);
     }
+    else
+	mustcatch = oldmustcatch;
+
     if (flags & G_DISCARD) {
 	stack_sp = stack_base + oldmark;
 	retval = 0;
