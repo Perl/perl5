@@ -11,7 +11,7 @@ require Exporter;
 require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
 
-$VERSION = "1.01" ;
+$VERSION = "1.02" ;
 
 %EXPORT_TAGS = (
 
@@ -386,7 +386,7 @@ sub kill {
 
 sub raise {
     usage "raise(sig)" if @_ != 1;
-    kill $$, $_[0];	# Is this good enough?
+    kill $_[0], $$;	# Is this good enough?
 }
 
 sub offsetof {
