@@ -908,6 +908,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
     const int bits_in_uv = 8 * sizeof(cuv);
     char* strrelbeg = s;
     bool beyond = FALSE;
+    bool explicit_length;
     bool unpack_only_one = (symptr->flags & FLAG_UNPACK_ONLY_ONE) != 0;
 
     while (next_symbol(symptr)) {
@@ -930,6 +931,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    break;
         }
 
+        explicit_length = TRUE;
       redo_switch:
         beyond = s >= strend;
 	{
@@ -1180,7 +1182,8 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	case 'C':
 	unpack_C: /* unpack U will jump here if not UTF-8 */
             if (len == 0) {
-                symptr->flags &= ~FLAG_UNPACK_DO_UTF8;
+                if (explicit_length) 
+                    symptr->flags &= ~FLAG_UNPACK_DO_UTF8;
 		break;
 	    }
 	    if (checksum) {
@@ -1202,7 +1205,8 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    break;
 	case 'U':
 	    if (len == 0) {
-                symptr->flags |= FLAG_UNPACK_DO_UTF8;
+                if (explicit_length) 
+                    symptr->flags |= FLAG_UNPACK_DO_UTF8;
 		break;
 	    }
 	    if ((symptr->flags & FLAG_UNPACK_DO_UTF8) == 0)
@@ -1753,6 +1757,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		Perl_croak(aTHX_ "Code missing after '/' in unpack" );
             }
             datumtype = symptr->code;
+            explicit_length = FALSE;
 	    goto redo_switch;
         }
     }
