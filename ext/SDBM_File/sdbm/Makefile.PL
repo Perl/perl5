@@ -10,18 +10,18 @@ if ($^O eq 'VMS') {  # Old VAXC compiler can't handle Duff's device
 
 WriteMakefile(
     NAME      => 'sdbm', # (doesn't matter what the name is here) oh yes it does
-#    LINKTYPE  => 'static',
+    LINKTYPE  => 'static',
     DEFINE    => $define,
     INC       => '-I$(PERL_INC)', # force PERL_INC dir ahead of system -I's
-    SKIP      => [qw(dynamic dynamic_lib dlsyms)],
     OBJECT    => '$(O_FILES)',
     clean     => {'FILES' => 'dbu libsdbm.a dbd dba dbe x-dbu *.dir *.pag'},
     H         => [qw(tune.h sdbm.h pair.h $(PERL_INC)/config.h)],
     C         => [qw(sdbm.c pair.c hash.c)]
 );
 
-sub MY::constants {
-    package MY;
+
+package MY;
+sub constants {
     my $self = shift;
 
     $self->{INST_STATIC} = 'libsdbm$(LIB_EXT)';
@@ -29,12 +29,10 @@ sub MY::constants {
     return $self->SUPER::constants();
 }
 
-sub MY::top_targets {
+sub top_targets {
+    my $self = shift;
     my $r = '
 all :: static
-	$(NOECHO) $(NOOP)
-
-config ::
 	$(NOECHO) $(NOOP)
 
 lint:
@@ -49,5 +47,5 @@ sdbm/libsdbm.a:
 	$(NOECHO) $(NOOP)
 ' unless $^O eq 'VMS';
 
-    return $r;
+    return $r . $self->SUPER::top_targets;
 }
