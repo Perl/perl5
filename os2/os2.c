@@ -205,18 +205,15 @@ loadByOrd(char *modname, ULONG ord)
 {
     if (ExtFCN[ord] == NULL) {
 	static HMODULE hdosc = 0;
-	BYTE buf[20];
-	PFN fcn;
+	PFN fcn = (PFN)-1;
 	APIRET rc;
 
-	
-	if (!hdosc) {
+	if (!hdosc)
 	    hdosc = loadModule(modname);
-	    if (CheckOSError(DosQueryProcAddr(hdosc, loadOrd[ord], NULL, &fcn)))
-		Perl_croak_nocontext(
+	if (CheckOSError(DosQueryProcAddr(hdosc, loadOrd[ord], NULL, &fcn)))
+	    Perl_croak_nocontext(
 			"This version of OS/2 does not support %s.%i", 
 			modname, loadOrd[ord]);	    
-	}
 	ExtFCN[ord] = fcn;
     } 
     if ((long)ExtFCN[ord] == -1) 

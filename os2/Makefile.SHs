@@ -143,8 +143,8 @@ perl_sys: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
 	$(SHRPENV) $(CC) $(SYS_CLDFLAGS) $(CCDLFLAGS) -o perl_sys perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs)
 
 installcmd : 
-	perl -e 'die qq{Give the option INSTALLCMDDIR=... to make!} if $$ARGV[0] eq ""' $(INSTALLCMDDIR)
-	perl os2/perl2cmd.pl $(INSTALLCMDDIR)
+	@perl -e 'die qq{Give the option INSTALLCMDDIR=... to make!} if $$ARGV[0] eq ""' $(INSTALLCMDDIR)
+	./miniperl -Ilib os2/perl2cmd.pl $(INSTALLCMDDIR)
 
 # Aout section:
 
