@@ -138,25 +138,16 @@ PATH environment variable to C:\PERL\BIN (or D:\FOO\PERL\BIN).
 =head2 Testing
 
 Type "nmake test".  This will run most of the tests from the
-testsuite (many tests will be skipped, and a few tests may fail).
+testsuite (many tests will be skipped, and but no test should fail).
 
-To get a more detailed breakdown of the tests that failed, 
-you may want to say:
+If some tests do fail, it may be because you are using a different command
+shell than the native "cmd.exe".  To get a more detailed breakdown of the
+tests that failed, you may want to say:
 
        cd ..\t
        .\perl harness
 
-This should produce a summary of the failed tests.  Currently, the
-only known failure is lib\findbin.t:
-
-    Failed Test  Status Wstat Total Fail  Failed  List of failed
-    ------------------------------------------------------------------------------
-    lib/findbin.t                 1    1 100.00%  1
-    Failed 1/151 test scripts, 99.34% okay. 1/3902 subtests failed, 99.97% okay.
-
-
-Check if any additional tests other than the ones shown here
-failed, and report them as described under L<BUGS AND CAVEATS>.
+Please report any failures as described under L<BUGS AND CAVEATS>.
 
 =head1 BUGS AND CAVEATS
 
@@ -164,11 +155,11 @@ This is still very much an experimental port, and should be considered
 alpha quality software.  You can expect changes in virtually all of
 these areas: build process, installation structure, supported
 utilities/modules, and supported perl functionality.  Specifically,
-functionality that supports the Win32 environment may ultimately
+functionality specific to the Win32 environment may ultimately
 be supported as either core modules or extensions.
 
-If you have had prior exposure to Perl on Unix platforms, this port
-may exhibit behavior different from what is documented.  Most of the 
+If you have had prior exposure to Perl on Unix platforms, you will notice
+this port exhibits behavior different from what is documented.  Most of the
 differences fall under one of these categories.
 
 =over 8
@@ -264,7 +255,6 @@ at the time.
 Nick Ing-Simmons and Gurusamy Sarathy have made numerous and
 sundry hacks since then.
 
-Last updated: 04 April 1997
+Last updated: 05 April 1997
 
 =cut
-

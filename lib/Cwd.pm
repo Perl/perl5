@@ -1,6 +1,7 @@
 package Cwd;
 require 5.000;
 require Exporter;
+use Carp;
 
 =head1 NAME
 
@@ -45,15 +46,16 @@ kept up to date if all packages which use chdir import it from Cwd.
 
 @ISA = qw(Exporter);
 @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
-@EXPORT_OK = qw(chdir);
+@EXPORT_OK = qw(chdir abs_path fast_abspath);
 
 # use strict;
 
-sub _backtick_pwd {  # The 'natural and safe form' for UNIX (pwd may be setuid root)
+# The 'natural and safe form' for UNIX (pwd may be setuid root)
+sub _backtick_pwd {
     my $cwd;
     chop($cwd = `pwd`);
     $cwd;
-} 
+}
 
 # Since some ports may predefine cwd internally (e.g., NT)
 # we take care not to override an existing definition for cwd().
@@ -216,14 +218,81 @@ sub chdir {
     1;
 }
 
+# Taken from Cwd.pm It is really getcwd with an optional
+# parameter instead of '.'
+#
+
+sub abs_path
+{
+    my $start = shift || '.';
+    my($dotdots, $cwd, @pst, @cst, $dir, @tst);
+
+    unless (@cst = stat( $start ))
+    {
+	carp "stat($start): $!";
+	return '';
+    }
+    $cwd = '';
+    $dotdots = $start;
+    do
+    {
+	$dotdots .= '/..';
+	@pst = @cst;
+	unless (opendir(PARENT, $dotdots))
+	{
+	    carp "opendir($dotdots): $!";
+	    return '';
+	}
+	unless (@cst = stat($dotdots))
+	{
+	    carp "stat($dotdots): $!";
+	    closedir(PARENT);
+	    return '';
+	}
+	if ($pst[0] == $cst[0] && $pst[1] == $cst[1])
+	{
+	    $dir = '';
+	}
+	else
+	{
+	    do
+	    {
+		unless (defined ($dir = readdir(PARENT)))
+	        {
+		    carp "readdir($dotdots): $!";
+		    closedir(PARENT);
+		    return '';
+		}
+		$tst[0] = $pst[0]+1 unless (@tst = lstat("$dotdots/$dir"))
+	    }
+	    while ($dir eq '.' || $dir eq '..' || $tst[0] != $pst[0] ||
+		   $tst[1] != $pst[1]);
+	}
+	$cwd = "$dir/$cwd";
+	closedir(PARENT);
+    } while ($dir);
+    chop($cwd); # drop the trailing /
+    $cwd;
+}
+
+sub fast_abspath
+{
+ my $cwd = getcwd();
+ my $path = shift || '.';
+ chdir($path) || croak "Cannot chdir to $path:$!";
+ my $realpath = getcwd();
+ chdir($cwd)  || croak "Cannot chdir back to $cwd:$!";
+ $realpath;
+}
+
 
 # --- PORTING SECTION ---
 
 # VMS: $ENV{'DEFAULT'} points to default directory at all times
 # 06-Mar-1996  Charles Bailey  bailey@genetics.upenn.edu
 # Note: Use of Cwd::chdir() causes the logical name PWD to be defined
-#   in the process logical name table as the default device and directory 
-#   seen by Perl. This may not be the same as the default device 
+#   in the process logical name table as the default device and directory
+#   seen by Perl. This may not be the same as the default device
 #   and directory seen by DCL after Perl exits, since the effects
 #   the CRTL chdir() function persist only until Perl exits.
 
@@ -238,7 +307,7 @@ sub _os2_cwd {
     return $ENV{'PWD'};
 }
 
-*_NT_cwd = \&_os2_cwd unless defined &_NT_cwd;
+*_NT_cwd     = \&_os2_cwd unless defined &_NT_cwd;
 
 sub _msdos_cwd {
     $ENV{'PWD'} = `command /c cd`;
@@ -255,13 +324,15 @@ sub _msdos_cwd {
         *getcwd     = \&_vms_cwd;
         *fastcwd    = \&_vms_cwd;
         *fastgetcwd = \&_vms_cwd;
+        *abs_path	= \&fast_abspath;
     }
     elsif ($^O eq 'NT' or $^O eq 'MSWin32') {
         # We assume that &_NT_cwd is defined as an XSUB or in the core.
-        *cwd        = \&_NT_cwd;
-        *getcwd     = \&_NT_cwd;
-        *fastcwd    = \&_NT_cwd;
-        *fastgetcwd = \&_NT_cwd;
+        *cwd         = \&_NT_cwd;
+        *getcwd      = \&_NT_cwd;
+        *fastcwd     = \&_NT_cwd;
+        *fastgetcwd  = \&_NT_cwd;
+        *abs_path    = \&fast_abspath;
     }
     elsif ($^O eq 'os2') {
         # sys_cwd may keep the builtin command
@@ -269,12 +340,14 @@ sub _msdos_cwd {
         *getcwd	 = defined &sys_cwd ? \&sys_cwd : \&_os2_cwd;
         *fastgetcwd	 = defined &sys_cwd ? \&sys_cwd : \&_os2_cwd;
         *fastcwd	 = defined &sys_cwd ? \&sys_cwd : \&_os2_cwd;
+        *abs_path	= \&fast_abspath;
     }
     elsif ($^O eq 'msdos') {
         *cwd     = \&_msdos_cwd;
         *getcwd     = \&_msdos_cwd;
         *fastgetcwd = \&_msdos_cwd;
         *fastcwd = \&_msdos_cwd;
+        *abs_path	= \&fast_abspath;
     }
 }
 

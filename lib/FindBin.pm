@@ -13,7 +13,7 @@ FindBin - Locate directory of original perl script
  use FindBin;
  use lib "$FindBin::Bin/../lib";
 
- or 
+ or
 
  use FindBin qw($Bin);
  use lib "$Bin/../lib";
@@ -74,7 +74,9 @@ package FindBin;
 use Carp;
 require 5.000;
 require Exporter;
-use Cwd qw(getcwd);
+use Cwd qw(getcwd abs_path);
+use Config;
+use File::Basename;
 
 @EXPORT_OK = qw($Bin $Script $RealBin $RealScript $Dir $RealDir);
 %EXPORT_TAGS = (ALL => [qw($Bin $Script $RealBin $RealScript $Dir $RealDir)]);
@@ -82,80 +84,23 @@ use Cwd qw(getcwd);
 
 $VERSION = $VERSION = sprintf("%d.%02d", q$Revision: 1.4 $ =~ /(\d+)\.(\d+)/);
 
-# Taken from Cwd.pm It is really getcwd with an optional
-# parameter instead of '.'
-#
-# another way would be:
-#
-#sub abs_path
-#{
-# my $cwd = getcwd();
-# chdir(shift || '.');
-# my $realpath = getcwd();
-# chdir($cwd);
-# $realpath;
-#}
-
-sub my_abs_path
+sub is_abs_path
 {
-    my $start = shift || '.';
-    my($dotdots, $cwd, @pst, @cst, $dir, @tst);
-
-    unless (@cst = stat( $start ))
-    {
-	warn "stat($start): $!";
-	return '';
-    }
-    $cwd = '';
-    $dotdots = $start;
-    do
-    {
-	$dotdots .= '/..';
-	@pst = @cst;
-	unless (opendir(PARENT, $dotdots))
-	{
-	    warn "opendir($dotdots): $!";
-	    return '';
-	}
-	unless (@cst = stat($dotdots))
-	{
-	    warn "stat($dotdots): $!";
-	    closedir(PARENT);
-	    return '';
-	}
-	if ($pst[0] == $cst[0] && $pst[1] == $cst[1])
-	{
-	    $dir = '';
-	}
-	else
-	{
-	    do
-	    {
-		unless (defined ($dir = readdir(PARENT)))
-	        {
-		    warn "readdir($dotdots): $!";
-		    closedir(PARENT);
-		    return '';
-		}
-		$tst[0] = $pst[0]+1 unless (@tst = lstat("$dotdots/$dir"))
-	    }
-	    while ($dir eq '.' || $dir eq '..' || $tst[0] != $pst[0] ||
-		   $tst[1] != $pst[1]);
-	}
-	$cwd = "$dir/$cwd";
-	closedir(PARENT);
-    } while ($dir);
-    chop($cwd); # drop the trailing /
-    $cwd;
+ local $_ = shift if (@_);
+ if ($^O eq 'MSWin32')
+  {
+   return m#^[a-z]:[\\/]#i;
+  }
+ else
+  {
+   return m#^/#;
+  }
 }
-
 
 BEGIN
 {
  *Dir = \$Bin;
  *RealDir = \$RealBin;
- if (defined &Cwd::sys_abspath) { *abs_path = \&Cwd::sys_abspath}
- else { *abs_path = \&my_abs_path}
 
  if($0 eq '-e' || $0 eq '-')
   {
@@ -175,17 +120,20 @@ BEGIN
     }
    else
     {
-     unless($script =~ m#/# && -f $script)
+     my $IsWin32 = $^O eq 'MSWin32';
+     unless(($script =~ m#/# || ($IsWin32 && $script =~ m#\\#))
+            && -f $script)
       {
        my $dir;
-       
-       foreach $dir (split(/:/,$ENV{PATH}))
+       my $pathvar = ($IsWin32) ? 'Path' : 'PATH';
+
+       foreach $dir (split(/$Config{'path_sep'}/,$ENV{$pathvar}))
 	{
-	if(-x "$dir/$script")
+	if(-r "$dir/$script" && (!$IsWin32 || -x _))
          {
           $script = "$dir/$script";
-   
-	  if (-f $0) 
+
+	  if (-f $0)
            {
 	    # $script has been found via PATH but perl could have
 	    # been invoked as 'perl file'. Do a dumb check to see
@@ -194,31 +142,31 @@ BEGIN
             # well we actually only check that it is an ASCII file
             # we know its executable so it is probably a script
             # of some sort.
-   
+
             $script = $0 unless(-T $script);
            }
           last;
          }
        }
      }
-  
+
      croak("Cannot find current script '$0'") unless(-f $script);
-  
+
      # Ensure $script contains the complete path incase we C<chdir>
-  
-     $script = getcwd() . "/" . $script unless($script =~ m,^/,);
-   
-     ($Bin,$Script) = $script =~ m,^(.*?)/+([^/]+)$,;
-  
+
+     $script = getcwd() . "/" . $script unless is_abs_path($script);
+
+     ($Script,$Bin) = fileparse($script);
+
      # Resolve $script if it is a link
      while(1)
       {
        my $linktext = readlink($script);
-  
-       ($RealBin,$RealScript) = $script =~ m,^(.*?)/+([^/]+)$,;
+
+       ($RealScript,$RealBin) = fileparse($script);
        last unless defined $linktext;
-  
-       $script = ($linktext =~ m,^/,)
+
+       $script = (is_abs_path($linktext))
                   ? $linktext
                   : $RealBin . "/" . $linktext;
       }
