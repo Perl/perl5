@@ -242,6 +242,11 @@ struct pmop {
     U16		op_pmflags;
     U16		op_pmpermflags;
     U8		op_pmdynflags;
+#ifdef USE_ITHREADS
+    char *	op_pmstashpv;
+#else
+    HV *	op_pmstash;
+#endif
 };
 
 #define PMdf_USED	0x01		/* pm has been used once already */
@@ -270,6 +275,20 @@ struct pmop {
 
 /* mask of bits stored in regexp->reganch */
 #define PMf_COMPILETIME	(PMf_MULTILINE|PMf_SINGLELINE|PMf_LOCALE|PMf_FOLD|PMf_EXTENDED)
+
+#ifdef USE_ITHREADS
+#  define PmopSTASHPV(o)	((o)->op_pmstashpv)
+#  define PmopSTASHPV_set(o,pv)	((o)->op_pmstashpv = ((pv) ? savepv(pv) : Nullch))
+#  define PmopSTASH(o)		(PmopSTASHPV(o) \
+				 ? gv_stashpv(PmopSTASHPV(o),GV_ADD) : Nullhv)
+#  define PmopSTASH_set(o,hv)	PmopSTASHPV_set(o, (hv) ? HvNAME(hv) : Nullch)
+#else
+#  define PmopSTASH(o)		((o)->op_pmstash)
+#  define PmopSTASH_set(o,hv)	((o)->op_pmstash = (hv))
+#  define PmopSTASHPV(o)	(PmopSTASH(o) ? HvNAME(PmopSTASH(o)) : Nullch)
+   /* op_pmstash is not refcounted */
+#  define PmopSTASHPV_set(o,pv)	PmopSTASH_set((o), gv_stashpv(pv,GV_ADD))
+#endif
 
 struct svop {
     BASEOP

@@ -623,3 +623,27 @@ for $lineno (1..61) {
 print "It's OK!";
 EXPECT
 It's OK!
+########
+# Inaba Hiroto
+reset;
+if (0) {
+  if ("" =~ //) {
+  }
+}
+########
+# Nicholas Clark
+$ENV{TERM} = 0;
+reset;
+// if 0;
+########
+# Vadim Konovalov
+use strict;
+sub new_pmop($) {
+    my $pm = shift;
+    return eval "sub {shift=~/$pm/}";
+}
+new_pmop "abcdef"; reset;
+new_pmop "abcdef"; reset;
+new_pmop "abcdef"; reset;
+new_pmop "abcdef"; reset;
+
