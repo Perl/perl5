@@ -1021,8 +1021,8 @@ my C program; what am I doing wrong?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.49 $, $Date: 2003/09/20
-06:37:43 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.52 $, $Date: 2003/10/02
+04:44:33 $)
 
 =over 4
 
@@ -1697,6 +1697,10 @@ CGI script to do bad things?
 
 =item Simple Statements
 
+=item Truth and Falsehood
+
+=item Statement Modifiers
+
 =item Compound Statements
 
 =item Loop Control
@@ -1751,11 +1755,11 @@ CGI script to do bad things?
 
 =over 4
 
-=item SYNOPSIS
-
 =item DESCRIPTION
 
 =over 4
+
+=item Operator Precedence and Associativity
 
 =item Terms and List Operators (Leftward)
 
@@ -4701,12 +4705,12 @@ get_sv, looks_like_number, newRV_inc, newRV_noinc, newSV, newSViv, newSVnv,
 newSVpv, newSVpvf, newSVpvn, newSVpvn_share, newSVrv, newSVsv, newSVuv,
 SvCUR, SvCUR_set, SvEND, SvGROW, SvIOK, SvIOKp, SvIOK_notUV, SvIOK_off,
 SvIOK_on, SvIOK_only, SvIOK_only_UV, SvIOK_UV, SvIsCOW,
-SvIsCOW_shared_hash, SvIV, SvIVX, SvIVx, SvLEN, SvNIOK, SvNIOKp,
-SvNIOK_off, SvNOK, SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVx,
-SvNVX, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only,
+SvIsCOW_shared_hash, SvIV, SvIVx, SvIVX, SvLEN, SvNIOK, SvNIOKp,
+SvNIOK_off, SvNOK, SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVX,
+SvNVx, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only,
 SvPOK_only_UTF8, SvPV, SvPVbyte, SvPVbytex, SvPVbytex_force,
 SvPVbyte_force, SvPVbyte_nolen, SvPVutf8, SvPVutf8x, SvPVutf8x_force,
-SvPVutf8_force, SvPVutf8_nolen, SvPVX, SvPVx, SvPV_force, SvPV_force_nomg,
+SvPVutf8_force, SvPVutf8_nolen, SvPVx, SvPVX, SvPV_force, SvPV_force_nomg,
 SvPV_nolen, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off,
 SvROK_on, SvRV, SvSTASH, SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on,
 SvTRUE, SvTYPE, SvUNLOCK, SvUOK, SvUPGRADE, SvUTF8, SvUTF8_off, SvUTF8_on,
@@ -4771,8 +4775,8 @@ CvWEAKOUTSIDE
 CX_CURPAD_SAVE, CX_CURPAD_SV, PAD_BASE_SV, PAD_CLONE_VARS,
 PAD_COMPNAME_FLAGS, PAD_COMPNAME_GEN, PAD_COMPNAME_OURSTASH,
 PAD_COMPNAME_PV, PAD_COMPNAME_TYPE, PAD_DUP, PAD_RESTORE_LOCAL,
-PAD_SAVE_LOCAL, PAD_SAVE_SETNULLPAD, PAD_SETSV, PAD_SET_CUR, PAD_SV,
-PAD_SVl, SAVECLEARSV, SAVECOMPPAD, SAVEPADSV
+PAD_SAVE_LOCAL, PAD_SAVE_SETNULLPAD, PAD_SETSV, PAD_SET_CUR,
+PAD_SET_CUR_NOSAVE, PAD_SV, PAD_SVl, SAVECLEARSV, SAVECOMPPAD, SAVEPADSV
 
 =item Functions in file pp_ctl.c
 
@@ -4996,10 +5000,10 @@ t/cmd t/run t/io t/op, t/lib ext lib
 
 =item Special Make Test Targets
 
-coretest, test.deparse, minitest, test.valgrind check.valgrind
-utest.valgrind ucheck.valgrind, test.third check.third utest.third
-ucheck.third, test.torture torturetest, utest ucheck test.utf8 check.utf8,
-test_harness
+coretest, test.deparse, test.taintwarn, minitest, test.valgrind
+check.valgrind utest.valgrind ucheck.valgrind, test.third check.third
+utest.third ucheck.third, test.torture torturetest, utest ucheck test.utf8
+check.utf8, test_harness
 
 =item Running tests by hand
 
@@ -7641,34 +7645,6 @@ R4 x86, R4 PPC
 
 =back
 
-=over 4
-
-=item Name
-
-=item Description
-
-=item Build
-
-=over 4
-
-=item Tools & SDK
-
-Microsoft Embedded Visual Tools, Microsoft Visual C++, Rainer Keuchel's
-celib-sources, Rainer Keuchel's console-sources
-
-=item Make
-
-go to ./wince subdirectory, edit file compile.bat, run	  compile.bat, run 
-  compile.bat dist
-
-=back
-
-=item Acknowledgements
-
-=item AUTHORS
-
-=back
-
 =head2 perlcygwin, README.cygwin - Perl for Cygwin
 
 =over 4
@@ -7774,50 +7750,6 @@ Source, Compiled Module Source, Perl Modules/Scripts
 =item Testing Perl on DG/UX
 
 =item Installing the built perl on DG/UX
-
-=back
-
-=item AUTHOR
-
-=item SEE ALSO
-
-=back
-
-=head2 perldos - Perl under DOS, W31, W95.
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item Prerequisites for Compiling Perl on DOS
-
-DJGPP, Pthreads
-
-=item Shortcomings of Perl under DOS
-
-=item Building Perl on DOS
-
-=item Testing Perl on DOS
-
-=item Installation of Perl on DOS
-
-=back
-
-=item BUILDING AND INSTALLING MODULES ON DOS
-
-=over 4
-
-=item Building Prerequisites for Perl on DOS
-
-=item Unpacking CPAN Modules on DOS
-
-=item Building Non-XS Modules on DOS
-
-=item Building XS Modules on DOS
 
 =back
 
@@ -8830,53 +8762,6 @@ LIST, waitpid PID,FLAGS
 =item AUTHOR
 
 =item LAST UPDATE
-
-=back
-
-=head2 perlwin32 - Perl under Windows
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item Setting Up Perl on Win32
-
-Make, Command Shell, Borland C++, Microsoft Visual C++, Microsoft Platform
-SDK 64-bit Compiler, MinGW32 with gcc, MinGW release 1
-
-=item Building
-
-=item Testing Perl on Win32
-
-=item Installation of Perl on Win32
-
-=item Usage Hints for Perl on Win32
-
-Environment Variables, File Globbing, Using perl from the command line,
-Building Extensions, Command-line Wildcard Expansion, Win32 Specific
-Extensions, Notes on 64-bit Windows
-
-=item Running Perl Scripts
-
-Miscellaneous Things
-
-=back
-
-=item BUGS AND CAVEATS
-
-=item AUTHORS
-
-Gary Ng E<lt>71564.1743@CompuServe.COME<gt>, Gurusamy Sarathy
-E<lt>gsar@activestate.comE<gt>, Nick Ing-Simmons
-E<lt>nick@ing-simmons.netE<gt>
-
-=item SEE ALSO
-
-=item HISTORY
 
 =back
 
@@ -13089,7 +12974,11 @@ all_target
 
 metafile_target
 
+signature_target
+
 metafile_addtomanifest_target
+
+signature_addtomanifest_target
 
 =over 4
 
@@ -13792,8 +13681,8 @@ OPTIMIZE, PERL, PERL_CORE, PERLMAINCC, PERL_ARCHLIB, PERL_LIB,
 PERL_MALLOC_OK, PERLPREFIX, PERLRUN, PERLRUNINST, PERL_SRC, PERM_RW,
 PERM_RWX, PL_FILES, PM, PMLIBDIRS, PM_FILTER, POLLUTE, PPM_INSTALL_EXEC,
 PPM_INSTALL_SCRIPT, PREFIX, PREREQ_FATAL, PREREQ_PM, PREREQ_PRINT,
-PRINT_PREREQ, SITEPREFIX, SKIP, TYPEMAPS, VENDORPREFIX, VERBINST, VERSION,
-VERSION_FROM, VERSION_SYM, XS, XSOPT, XSPROTOARG, XS_VERSION
+PRINT_PREREQ, SITEPREFIX, SIGN, SKIP, TYPEMAPS, VENDORPREFIX, VERBINST,
+VERSION, VERSION_FROM, VERSION_SYM, XS, XSOPT, XSPROTOARG, XS_VERSION
 
 =item Additional lowercase attributes
 
@@ -13975,6 +13864,18 @@ B<PERL_MM_MANIFEST_DEBUG>
 =item SEE ALSO
 
 =item AUTHOR
+
+=back
+
+=head2 ExtUtils::Miniperl, writemain - write the C code for perlmain.c
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
 
 =back
 
@@ -16137,6 +16038,8 @@ Premature end of base64 data, Premature padding of base64 data
 
 =item COPYRIGHT
 
+=item SEE ALSO
+
 =back
 
 =head2 MIME::Base64::QuotedPrint, MIME::QuotedPrint - Encoding and decoding
@@ -16152,6 +16055,8 @@ encode_qp($str), encode_qp($str, $eol), decode_qp($str);
 
 =item COPYRIGHT
 
+=item SEE ALSO
+
 =back
 
 =head2 MIME::QuotedPrint - Encoding and decoding of quoted-printable
@@ -16166,6 +16071,8 @@ strings
 encode_qp($str), encode_qp($str, $eol), decode_qp($str);
 
 =item COPYRIGHT
+
+=item SEE ALSO
 
 =back
 
@@ -16889,19 +16796,18 @@ new (HOST [,OPTIONS])
 =item METHODS
 
 login ([LOGIN [,PASSWORD [, ACCOUNT] ] ]), authorize ( [AUTH [, RESP]]),
-site (ARGS), type (TYPE [, ARGS]), ascii ([ARGS]) binary([ARGS])
-ebcdic([ARGS]) byte([ARGS]), rename ( OLDNAME, NEWNAME ), delete ( FILENAME
-), cwd ( [ DIR ] ), cdup (), pwd (), restart ( WHERE ), rmdir ( DIR ),
-mkdir ( DIR [, RECURSE ]), ls ( [ DIR ] ), alloc ( SIZE [, RECORD_SIZE] ),
-dir ( [ DIR ] ), get ( REMOTE_FILE [, LOCAL_FILE [, WHERE]] ), put (
-LOCAL_FILE [, REMOTE_FILE ] ), put_unique ( LOCAL_FILE [, REMOTE_FILE ] ),
-append ( LOCAL_FILE [, REMOTE_FILE ] ), unique_name (), mdtm ( FILE ), size
-( FILE ), supported ( CMD ), hash ( [FILEHANDLE_GLOB_REF],[
-BYTES_PER_HASH_MARK] ), nlst ( [ DIR ] ), list ( [ DIR ] ), retr ( FILE ),
-stor ( FILE ), stou ( FILE ), appe ( FILE ), port ( [ PORT ] ), pasv (),
-pasv_xfer ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ), pasv_xfer_unique (
-SRC_FILE, DEST_SERVER [, DEST_FILE ] ), pasv_wait ( NON_PASV_SERVER ),
-abort (), quit ()
+site (ARGS), ascii, binary, rename ( OLDNAME, NEWNAME ), delete ( FILENAME
+), cwd ( [ DIR ] ), cdup (), pwd (), restart ( WHERE ), rmdir ( DIR [,
+RECURSE ]), mkdir ( DIR [, RECURSE ]), ls ( [ DIR ] ), alloc ( SIZE [,
+RECORD_SIZE] ), dir ( [ DIR ] ), get ( REMOTE_FILE [, LOCAL_FILE [, WHERE]]
+), put ( LOCAL_FILE [, REMOTE_FILE ] ), put_unique ( LOCAL_FILE [,
+REMOTE_FILE ] ), append ( LOCAL_FILE [, REMOTE_FILE ] ), unique_name (),
+mdtm ( FILE ), size ( FILE ), supported ( CMD ), hash (
+[FILEHANDLE_GLOB_REF],[ BYTES_PER_HASH_MARK] ), nlst ( [ DIR ] ), list ( [
+DIR ] ), retr ( FILE ), stor ( FILE ), stou ( FILE ), appe ( FILE ), port (
+[ PORT ] ), pasv (), pasv_xfer ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ),
+pasv_xfer_unique ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ), pasv_wait (
+NON_PASV_SERVER ), abort (), quit ()
 
 =over 4
 
@@ -16928,7 +16834,7 @@ B<SMNT>, B<HELP>, B<MODE>, B<SYST>, B<STAT>, B<STRU>, B<REIN>
 
 =item USE EXAMPLES
 
-http://www.csh.rit.edu/~adam/Progs/autoftp-2.0.tar.gz
+http://www.csh.rit.edu/~adam/Progs/
 
 =item CREDITS
 
@@ -20526,9 +20432,10 @@ CLASS->can( METHOD ) >>, C<can( VAL, METHOD )>, C<VERSION ( [ REQUIRE ] )>
 
 =item Constructor and Tailoring
 
-UCA_Version, alternate, backwards, entry, ignoreName, ignoreChar, level,
-normalization, overrideCJK, overrideHangul, preprocess, rearrange, table,
-undefName, undefChar, katakana_before_hiragana, upper_before_lower
+UCA_Version, backwards, entry, hangul_terminator, ignoreName, ignoreChar,
+level, normalization, overrideCJK, overrideHangul, preprocess, rearrange,
+table, undefName, undefChar, katakana_before_hiragana, upper_before_lower,
+variable, alternate
 
 =item Methods for Collation
 
@@ -20552,8 +20459,8 @@ $Collator-E<gt>gsubst($string, $substring, $replacement)>
 
 =item Other Methods
 
-C<%old_tailoring = $Collator-E<gt>change(%new_tailoring)>, UCA_Version,
-Base_Unicode_Version
+C<%old_tailoring = $Collator-E<gt>change(%new_tailoring)>, C<$version =
+$Collator-E<gt>version()>, C<UCA_Version()>, C<Base_Unicode_Version()>
 
 =item EXPORT
 
@@ -20567,11 +20474,9 @@ Base_Unicode_Version
 
 =item SEE ALSO
 
-http://www.unicode.org/reports/tr10/,
-http://www.unicode.org/reports/tr10/allkeys.txt,
-http://www.unicode.org/reports/tr10/CollationTest.html
-http://www.unicode.org/reports/tr10/CollationTest.zip,
-http://www.unicode.org/reports/tr15/, L<Unicode::Normalize>
+Unicode Collation Algorithm - UTS #10, The Default Unicode Collation
+Element Table (DUCET), The conformance test for the UCA, Hangul Syllable
+Type, Unicode Normalization Forms - UAX #15, L<Unicode::Normalize>
 
 =back
 
@@ -20589,6 +20494,7 @@ http://www.unicode.org/reports/tr15/, L<Unicode::Normalize>
 
 C<$NFD_string = NFD($string)>, C<$NFC_string = NFC($string)>,
 C<$NFKD_string = NFKD($string)>, C<$NFKC_string = NFKC($string)>,
+C<$FCD_string = FCD($string)>, C<$FCC_string = FCC($string)>,
 C<$normalized_string = normalize($form_name, $string)>
 
 =item Decomposition and Composition
@@ -20601,6 +20507,7 @@ reorder($string)>, C<$composed_string	= compose($string)>
 
 C<$result = checkNFD($string)>, C<$result = checkNFC($string)>, C<$result =
 checkNFKD($string)>, C<$result = checkNFKC($string)>, C<$result =
+checkFCD($string)>, C<$result = checkFCC($string)>, C<$result =
 check($form_name, $string)>
 
 =item Character Data
@@ -20622,7 +20529,8 @@ C<$may_be_composed_with_prev_char = isComp2nd($codepoint)>
 =item SEE ALSO
 
 http://www.unicode.org/unicode/reports/tr15/,
-http://www.unicode.org/Public/UNIDATA/DerivedNormalizationProps.txt
+http://www.unicode.org/Public/UNIDATA/DerivedNormalizationProps.txt,
+http://www.unicode.org/notes/tn5/
 
 =back
 
