@@ -534,7 +534,7 @@ CFGH_TMPL	= config_H.ce
 #
 # filenames given to xsubpp must have forward slashes (since it puts
 # full pathnames in #line strings)
-XSUBPP		= $(HPERL) -I..\..\lib ..\$(EXTUTILSDIR)\xsubpp \
+XSUBPP		= $(HPERL) -I..\..\lib -MCross=$(CROSS_NAME) ...\$(EXTUTILSDIR)\xsubpp \
 		-C++ -prototypes
 
 MICROCORE_SRC	=		\
@@ -760,7 +760,7 @@ all: hostminiperl $(MINIMOD) $(CONFIGPM) $(PERLEXE)
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 
 $(CONFIGPM): .\config.h ..\config.sh ..\minimod.pl
-	cd .. && $(HPERL) configpm --cross=$(CROSS_NAME) --no-glossary
+        cd .. && $(HPERL) configpm --cross=$(CROSS_NAME) --no-glossary
 	-mkdir $(XCOREDIR)
 	$(XCOPY) ..\*.h $(XCOREDIR)\*.*
 	$(XCOPY) *.h $(XCOREDIR)\*.*
@@ -784,8 +784,8 @@ perlmain.c : runperl.c
 $(DYNALOADER).c: $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 	if not exist $(AUTODIR) mkdir $(AUTODIR)
 	cd $(EXTDIR)\$(*B)
-	$(HPERL) -I..\..\lib $(*B)_pm.PL
-	$(HPERL) -I..\..\lib XSLoader_pm.PL
+	$(HPERL) -I..\..\lib -MCross=$(CROSS_NAME) $(*B)_pm.PL
+	$(HPERL) -I..\..\lib -MCross=$(CROSS_NAME) XSLoader_pm.PL
 	cd ..\..\wince
 	$(XCOPY) $(EXTDIR)\$(*B)\$(*B).pm $(LIBDIR)\$(NULL)
 	$(XCOPY) $(EXTDIR)\$(*B)\XSLoader.pm $(LIBDIR)\$(NULL)
