@@ -7,6 +7,7 @@ BEGIN {
 use Memoize;
 use Config;
 
+$|=1;
 print "1..11\n";
 
 eval { memoize({}) };
