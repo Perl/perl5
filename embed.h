@@ -1230,9 +1230,7 @@
 #define custom_op_name		Perl_custom_op_name
 #define custom_op_desc		Perl_custom_op_desc
 #if defined(PERL_COPY_ON_WRITE)
-#ifdef PERL_CORE
 #define sv_release_IVX		Perl_sv_release_IVX
-#endif
 #endif
 #define sv_nosharing		Perl_sv_nosharing
 #define sv_nolocking		Perl_sv_nolocking
@@ -3682,9 +3680,7 @@
 #define custom_op_name(a)	Perl_custom_op_name(aTHX_ a)
 #define custom_op_desc(a)	Perl_custom_op_desc(aTHX_ a)
 #if defined(PERL_COPY_ON_WRITE)
-#ifdef PERL_CORE
 #define sv_release_IVX(a)	Perl_sv_release_IVX(aTHX_ a)
-#endif
 #endif
 #define sv_nosharing(a)		Perl_sv_nosharing(aTHX_ a)
 #define sv_nolocking(a)		Perl_sv_nolocking(aTHX_ a)

@@ -945,7 +945,7 @@ Ap |char * |custom_op_name|OP* op
 Ap |char * |custom_op_desc|OP* op
 
 #if defined(PERL_COPY_ON_WRITE)
-pM	|int	|sv_release_IVX	|SV *sv
+ApM	|int	|sv_release_IVX	|SV *sv
 #endif
 
 Adp	|void	|sv_nosharing	|SV *
