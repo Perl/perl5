@@ -52,7 +52,7 @@ foreach my $prog (@prgs) {
 
     my($prog,$expected) = split(/\nEXPECT\n/, $raw_prog);
 
-    kill_perl($prog, $expected, { switches => $switch }, $name);
+    kill_perl($prog, $expected, { switches => [$switch] }, $name);
 }
 
 __END__
