@@ -100,7 +100,7 @@ no strict 'refs';
 use warnings::register;
 our(%attr, $VERSION);
 
-$VERSION = "1.02";
+$VERSION = "1.04";
 
 use Hash::Util qw(lock_keys);
 

@@ -3,7 +3,7 @@ use warnings;
 use Carp;
 $open::hint_bits = 0x20000; # HINT_LOCALIZE_HH
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
 my $locale_encoding;
 

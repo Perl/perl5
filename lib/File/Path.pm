@@ -119,7 +119,7 @@ use Exporter ();
 use strict;
 use warnings;
 
-our $VERSION = "1.05";
+our $VERSION = "1.06";
 our @ISA = qw( Exporter );
 our @EXPORT = qw( mkpath rmtree );
 

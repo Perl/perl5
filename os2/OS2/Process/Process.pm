@@ -20,7 +20,7 @@ BEGIN {
   #require AutoLoader;
 
   our @ISA = qw(Exporter);
-  our $VERSION = "1.0";
+  our $VERSION = "1.01";
   XSLoader::load('OS2::Process', $VERSION);
 }
 

@@ -2,7 +2,7 @@ package Text::Abbrev;
 require 5.005;		# Probably works on earlier versions too.
 require Exporter;
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 =head1 NAME
 

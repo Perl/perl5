@@ -171,7 +171,7 @@ use strict;
 use 5.006;
 use Carp;
 
-our $VERSION = 1.1;
+our $VERSION = 1.11;
 our $DEBUG;
 our $VERBOSE;
 our $PRETTY;

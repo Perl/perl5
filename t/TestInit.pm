@@ -15,6 +15,8 @@
 
 package TestInit;
 
+$VERSION = 1.01;
+
 chdir 't' if -d 't';
 @INC = '../lib';
 

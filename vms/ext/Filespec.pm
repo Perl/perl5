@@ -128,7 +128,7 @@ This document was last revised 22-Feb-1996, for Perl 5.002.
 package VMS::Filespec;
 require 5.002;
 
-our $VERSION = '1.1';
+our $VERSION = '1.11';
 
 # If you want to use this package on a non-VMS system,
 # uncomment the following line.

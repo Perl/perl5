@@ -45,7 +45,7 @@ L<fields>
 package base;
 
 use 5.006_001;
-our $VERSION = "1.03";
+our $VERSION = "1.04";
 
 sub import {
     my $class = shift;

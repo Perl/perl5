@@ -9,7 +9,7 @@ our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(lock_keys unlock_keys lock_value unlock_value
                      lock_hash unlock_hash
                     );
-our $VERSION    = 0.04;
+our $VERSION    = 0.05;
 
 =head1 NAME
 
