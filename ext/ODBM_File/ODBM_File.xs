@@ -111,7 +111,7 @@ odbm_TIEHASH(dbtype, filename, flags, mode)
     	    Zero(RETVAL, 1, ODBM_File_type) ;
 	    RETVAL->dbp = dbp ;
 	    ST(0) = sv_mortalcopy(&PL_sv_undef);
-	    sv_setptrobj(ST(0), RETVAL, dbtype);
+	    sv_setptrobj(ST(0), PTR_CAST RETVAL, dbtype);
 	}
 
 void

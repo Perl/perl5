@@ -1044,8 +1044,20 @@ Free_t   Perl_mfree (Malloc_t where);
 #  define IVSIZE LONGSIZE
 #endif
 #define IV_DIG (BIT_DIGITS(IVSIZE * 8))
-#define UV_DIG (BIT_DIGITS(IVSIZE * 8))
+#define UV_DIG (BIT_DIGITS(UVSIZE * 8))
 
+#if (IVSIZE > PTRSIZE) || (UVSIZE > PTRSIZE)
+#  if PTRSIZE == LONGSIZE 
+#    define PTRV	unsigned long
+#  else
+#    define PTRV	unsigned
+#  endif
+#  define PTR_CAST	(PTRV)
+#else
+#  define PTRV      	UV
+#  define PTR_CAST 
+#endif
+  
 #ifdef USE_LONG_DOUBLE
 #  if defined(HAS_LONG_DOUBLE) && (LONG_DOUBLESIZE > DOUBLESIZE)
 #    define LDoub_t long double

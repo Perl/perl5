@@ -768,7 +768,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 #ifdef IV_IS_QUAD
     Perl_sv_setpvf(aTHX_ d,
 		   "(0x%" PERL_PRIx64") at 0x%" PERL_PRIx64 "\n%*s  REFCNT = %" PERL_PRId64 "\n%*s  FLAGS = (",
-		   (UV)SvANY(sv), (UV)sv,
+		   (UV)PTR_CAST SvANY(sv), (UV)PTR_CAST sv,
 		   PL_dumpindent*level, "", (IV)SvREFCNT(sv),
 		   PL_dumpindent*level, "");
 #else
@@ -933,7 +933,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     }
     if (SvROK(sv)) {
 #ifdef IV_IS_QUAD
-	Perl_dump_indent(aTHX_ level, file, "  RV = 0x%" PERL_PRIx64 "\n", (IV)SvRV(sv));
+	Perl_dump_indent(aTHX_ level, file, "  RV = 0x%" PERL_PRIx64 "\n", (IV)PTR_CAST SvRV(sv));
 #else
 	Perl_dump_indent(aTHX_ level, file, "  RV = 0x%lx\n", (long)SvRV(sv));
 #endif
@@ -946,7 +946,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     if (type <= SVt_PVLV) {
 	if (SvPVX(sv)) {
 #ifdef IV_IS_QUAD
-	    Perl_dump_indent(aTHX_ level, file,"  PV = 0x%" PERL_PRIx64 " ", (IV)SvPVX(sv));
+	    Perl_dump_indent(aTHX_ level, file,"  PV = 0x%" PERL_PRIx64 " ", (IV)PTR_CAST SvPVX(sv));
 #else
 	    Perl_dump_indent(aTHX_ level, file,"  PV = 0x%lx ", (long)SvPVX(sv));
 #endif
@@ -976,7 +976,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 #ifdef IV_IS_QUAD
 	Perl_dump_indent(aTHX_ level, file, "  TARGOFF = %" PERL_PRId64 "\n", (IV)LvTARGOFF(sv));
 	Perl_dump_indent(aTHX_ level, file, "  TARGLEN = %" PERL_PRId64 "\n", (IV)LvTARGLEN(sv));
-	Perl_dump_indent(aTHX_ level, file, "  TARG = 0x%" PERL_PRIx64 "\n", (IV)LvTARG(sv));
+	Perl_dump_indent(aTHX_ level, file, "  TARG = 0x%" PERL_PRIx64 "\n", (IV)PTR_CAST LvTARG(sv));
 #else
 	Perl_dump_indent(aTHX_ level, file, "  TARGOFF = %ld\n", (long)LvTARGOFF(sv));
 	Perl_dump_indent(aTHX_ level, file, "  TARGLEN = %ld\n", (long)LvTARGLEN(sv));
@@ -987,14 +987,14 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	break;
     case SVt_PVAV:
 #ifdef IV_IS_QUAD
-	Perl_dump_indent(aTHX_ level, file, "  ARRAY = 0x%" PERL_PRIx64 , (IV)AvARRAY(sv));
+	Perl_dump_indent(aTHX_ level, file, "  ARRAY = 0x%" PERL_PRIx64 , (IV)PTR_CAST AvARRAY(sv));
 #else
 	Perl_dump_indent(aTHX_ level, file, "  ARRAY = 0x%lx", (long)AvARRAY(sv));
 #endif
 	if (AvARRAY(sv) != AvALLOC(sv)) {
 	    PerlIO_printf(file, " (offset=%d)\n", (AvARRAY(sv) - AvALLOC(sv)));
 #ifdef IV_IS_QUAD
-	    Perl_dump_indent(aTHX_ level, file, "  ALLOC = 0x%" PERL_PRIx64 "\n", (IV)AvALLOC(sv));
+	    Perl_dump_indent(aTHX_ level, file, "  ALLOC = 0x%" PERL_PRIx64 "\n", (IV)PTR_CAST AvALLOC(sv));
 #else
 	    Perl_dump_indent(aTHX_ level, file, "  ALLOC = 0x%lx\n", (long)AvALLOC(sv));
 #endif
@@ -1004,7 +1004,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 #ifdef IV_IS_QUAD
 	Perl_dump_indent(aTHX_ level, file, "  FILL = %" PERL_PRId64 "\n", (IV)AvFILLp(sv));
 	Perl_dump_indent(aTHX_ level, file, "  MAX = %" PERL_PRId64 "\n", (IV)AvMAX(sv));
-	Perl_dump_indent(aTHX_ level, file, "  ARYLEN = 0x%" PERL_PRIx64 "\n", (IV)AvARYLEN(sv));
+	Perl_dump_indent(aTHX_ level, file, "  ARYLEN = 0x%" PERL_PRIx64 "\n", (IV)PTR_CAST AvARYLEN(sv));
 #else
 	Perl_dump_indent(aTHX_ level, file, "  FILL = %ld\n", (long)AvFILLp(sv));
 	Perl_dump_indent(aTHX_ level, file, "  MAX = %ld\n", (long)AvMAX(sv));
@@ -1033,7 +1033,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	break;
     case SVt_PVHV:
 #ifdef IV_IS_QUAD
-	Perl_dump_indent(aTHX_ level, file, "  ARRAY = 0x%" PERL_PRIx64,(IV)HvARRAY(sv));
+	Perl_dump_indent(aTHX_ level, file, "  ARRAY = 0x%" PERL_PRIx64,(IV)PTR_CAST HvARRAY(sv));
 #else
 	Perl_dump_indent(aTHX_ level, file, "  ARRAY = 0x%lx",(long)HvARRAY(sv));
 #endif
@@ -1086,7 +1086,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	Perl_dump_indent(aTHX_ level, file, "  FILL = %" PERL_PRId64 "\n", (IV)HvFILL(sv));
 	Perl_dump_indent(aTHX_ level, file, "  MAX = %" PERL_PRId64 "\n", (IV)HvMAX(sv));
 	Perl_dump_indent(aTHX_ level, file, "  RITER = %" PERL_PRId64 "\n", (IV)HvRITER(sv));
-	Perl_dump_indent(aTHX_ level, file, "  EITER = 0x%" PERL_PRIx64 "\n",(IV) HvEITER(sv));
+	Perl_dump_indent(aTHX_ level, file, "  EITER = 0x%" PERL_PRIx64 "\n",(IV)PTR_CAST  HvEITER(sv));
 #else
 	Perl_dump_indent(aTHX_ level, file, "  KEYS = %ld\n", (long)HvKEYS(sv));
 	Perl_dump_indent(aTHX_ level, file, "  FILL = %ld\n", (long)HvFILL(sv));
@@ -1096,7 +1096,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 #endif
 	if (HvPMROOT(sv))
 #ifdef IV_IS_QUAD
-	    Perl_dump_indent(aTHX_ level, file, "  PMROOT = 0x%" PERL_PRIx64 "\n",(IV)HvPMROOT(sv));
+	    Perl_dump_indent(aTHX_ level, file, "  PMROOT = 0x%" PERL_PRIx64 "\n",(IV)PTR_CAST HvPMROOT(sv));
 #else
 	    Perl_dump_indent(aTHX_ level, file, "  PMROOT = 0x%lx\n",(long)HvPMROOT(sv));
 #endif
@@ -1143,7 +1143,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
         if (CvROOT(sv) && dumpops)
 	    do_op_dump(level+1, file, CvROOT(sv));
 #ifdef IV_IS_QUAD
-	Perl_dump_indent(aTHX_ level, file, "  XSUB = 0x%" PERL_PRIx64 "\n", (IV)CvXSUB(sv));
+	Perl_dump_indent(aTHX_ level, file, "  XSUB = 0x%" PERL_PRIx64 "\n", (IV)PTR_CAST CvXSUB(sv));
 	Perl_dump_indent(aTHX_ level, file, "  XSUBANY = %" PERL_PRId64 "\n", (IV)CvXSUBANY(sv).any_i32);
 #else
 	Perl_dump_indent(aTHX_ level, file, "  XSUB = 0x%lx\n", (long)CvXSUB(sv));
@@ -1177,7 +1177,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    Perl_dump_indent(aTHX_ level, file, "  LINES = %ld\n", (long)FmLINES(sv));
 #endif
 #ifdef IV_IS_QUAD
-	Perl_dump_indent(aTHX_ level, file, "  PADLIST = 0x%" PERL_PRIx64 "\n", (IV)CvPADLIST(sv));
+	Perl_dump_indent(aTHX_ level, file, "  PADLIST = 0x%" PERL_PRIx64 "\n", (IV)PTR_CAST CvPADLIST(sv));
 #else
 	Perl_dump_indent(aTHX_ level, file, "  PADLIST = 0x%lx\n", (long)CvPADLIST(sv));
 #endif
@@ -1217,7 +1217,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    CV *outside = CvOUTSIDE(sv);
 #ifdef IV_IS_QUAD
 	    Perl_dump_indent(aTHX_ level, file, "  OUTSIDE = 0x%" PERL_PRIx64 " (%s)\n", 
-			(IV)outside, 
+			(IV)PTR_CAST outside, 
 			(!outside ? "null"
 			 : CvANON(outside) ? "ANON"
 			 : (outside == PL_main_cv) ? "MAIN"
@@ -1245,14 +1245,14 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 #endif
 	do_hv_dump (level, file, "  GvSTASH", GvSTASH(sv));
 #ifdef IV_IS_QUAD
-	Perl_dump_indent(aTHX_ level, file, "  GP = 0x%" PERL_PRIx64 "\n", (IV)GvGP(sv));
-	Perl_dump_indent(aTHX_ level, file, "    SV = 0x%" PERL_PRIx64 "\n", (IV)GvSV(sv));
+	Perl_dump_indent(aTHX_ level, file, "  GP = 0x%" PERL_PRIx64 "\n", (IV)PTR_CAST GvGP(sv));
+	Perl_dump_indent(aTHX_ level, file, "    SV = 0x%" PERL_PRIx64 "\n", (IV)PTR_CAST GvSV(sv));
 	Perl_dump_indent(aTHX_ level, file, "    REFCNT = %" PERL_PRId64 "\n", (IV)GvREFCNT(sv));
-	Perl_dump_indent(aTHX_ level, file, "    IO = 0x%" PERL_PRIx64 "\n", (IV)GvIOp(sv));
-	Perl_dump_indent(aTHX_ level, file, "    FORM = 0x%" PERL_PRIx64 "  \n", (IV)GvFORM(sv));
-	Perl_dump_indent(aTHX_ level, file, "    AV = 0x%" PERL_PRIx64 "\n", (IV)GvAV(sv));
-	Perl_dump_indent(aTHX_ level, file, "    HV = 0x%" PERL_PRIx64 "\n", (IV)GvHV(sv));
-	Perl_dump_indent(aTHX_ level, file, "    CV = 0x%" PERL_PRIx64 "\n", (IV)GvCV(sv));
+	Perl_dump_indent(aTHX_ level, file, "    IO = 0x%" PERL_PRIx64 "\n", (IV)PTR_CAST GvIOp(sv));
+	Perl_dump_indent(aTHX_ level, file, "    FORM = 0x%" PERL_PRIx64 "  \n", (IV)PTR_CAST GvFORM(sv));
+	Perl_dump_indent(aTHX_ level, file, "    AV = 0x%" PERL_PRIx64 "\n", (IV)PTR_CAST GvAV(sv));
+	Perl_dump_indent(aTHX_ level, file, "    HV = 0x%" PERL_PRIx64 "\n", (IV)PTR_CAST GvHV(sv));
+	Perl_dump_indent(aTHX_ level, file, "    CV = 0x%" PERL_PRIx64 "\n", (IV)PTR_CAST GvCV(sv));
 	Perl_dump_indent(aTHX_ level, file, "    CVGEN = 0x%" PERL_PRIx64 "\n", (IV)GvCVGEN(sv));
 	Perl_dump_indent(aTHX_ level, file, "    LASTEXPR = %" PERL_PRId64 "\n", (IV)GvLASTEXPR(sv));
 	Perl_dump_indent(aTHX_ level, file, "    LINE = %" PERL_PRId64 "\n", (IV)GvLINE(sv));
@@ -1275,9 +1275,9 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	break;
     case SVt_PVIO:
 #ifdef IV_IS_QUAD
-	Perl_dump_indent(aTHX_ level, file, "  IFP = 0x%" PERL_PRIx64 "\n", (IV)IoIFP(sv));
-	Perl_dump_indent(aTHX_ level, file, "  OFP = 0x%" PERL_PRIx64 "\n", (IV)IoOFP(sv));
-	Perl_dump_indent(aTHX_ level, file, "  DIRP = 0x%" PERL_PRIx64 "\n", (IV)IoDIRP(sv));
+	Perl_dump_indent(aTHX_ level, file, "  IFP = 0x%" PERL_PRIx64 "\n", (IV)PTR_CAST IoIFP(sv));
+	Perl_dump_indent(aTHX_ level, file, "  OFP = 0x%" PERL_PRIx64 "\n", (IV)PTR_CAST IoOFP(sv));
+	Perl_dump_indent(aTHX_ level, file, "  DIRP = 0x%" PERL_PRIx64 "\n", (IV)PTR_CAST IoDIRP(sv));
 	Perl_dump_indent(aTHX_ level, file, "  LINES = %" PERL_PRId64 "\n", (IV)IoLINES(sv));
 	Perl_dump_indent(aTHX_ level, file, "  PAGE = %" PERL_PRId64 "\n", (IV)IoPAGE(sv));
 	Perl_dump_indent(aTHX_ level, file, "  PAGE_LEN = %" PERL_PRId64 "\n", (IV)IoPAGE_LEN(sv));

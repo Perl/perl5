@@ -612,8 +612,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	pv	= (char*)SvRV(sv);
 	cur	= 0;
 	len	= 0;
-	iv	= (IV)pv;
-	nv	= (NV)(unsigned long)pv;
+	iv	= (IV)PTR_CAST pv;
+	nv	= (NV)(PTRV)pv;
 	del_XRV(SvANY(sv));
 	magic	= 0;
 	stash	= 0;
@@ -1077,7 +1077,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	  SV* tmpstr;
 	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv, numer)))
 	      return SvIV(tmpstr);
-	  return (IV)SvRV(sv);
+	  return (IV)PTR_CAST SvRV(sv);
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    dTHR;
@@ -1113,7 +1113,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 #ifdef IV_IS_QUAD
 	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
 				  "0x%" PERL_PRIx64 " 2iv(%" PERL_PRIu64 " => %" PERL_PRId64 ") (as unsigned)\n",
-				  (UV)sv,
+				  (UV)PTR_CAST sv,
 				  (UV)SvUVX(sv), (IV)SvUVX(sv)));
 #else
 	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
@@ -1222,7 +1222,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	  SV* tmpstr;
 	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv, numer)))
 	      return SvUV(tmpstr);
-	  return (UV)SvRV(sv);
+	  return (UV)PTR_CAST SvRV(sv);
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    dTHR;
@@ -1393,7 +1393,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	  SV* tmpstr;
 	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)))
 	      return SvNV(tmpstr);
-	  return (NV)(unsigned long)SvRV(sv);
+	  return (NV)(PTRV)SvRV(sv);
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    dTHR;
@@ -1777,7 +1777,7 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 		else
 		    sv_setpv(tsv, s);
 #ifdef IV_IS_QUAD
-		Perl_sv_catpvf(aTHX_ tsv, "(0x%" PERL_PRIx64")", (UV)sv);
+		Perl_sv_catpvf(aTHX_ tsv, "(0x%" PERL_PRIx64")", (UV)PTR_CAST sv);
 #else
 		Perl_sv_catpvf(aTHX_ tsv, "(0x%lx)", (unsigned long)sv);
 #endif
@@ -3691,7 +3691,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
 	    IV i;
 	    if (SvAMAGIC(sv) && AMG_CALLun(sv,inc))
 		return;
-	    i = (IV)SvRV(sv);
+	    i = (IV)PTR_CAST SvRV(sv);
 	    sv_unref(sv);
 	    sv_setiv(sv, i);
 	}
@@ -3791,7 +3791,7 @@ Perl_sv_dec(pTHX_ register SV *sv)
 	    IV i;
 	    if (SvAMAGIC(sv) && AMG_CALLun(sv,dec))
 		return;
-	    i = (IV)SvRV(sv);
+	    i = (IV)PTR_CAST SvRV(sv);
 	    sv_unref(sv);
 	    sv_setiv(sv, i);
 	}
@@ -4395,7 +4395,7 @@ Perl_sv_setref_pv(pTHX_ SV *rv, const char *classname, void *pv)
 	SvSETMAGIC(rv);
     }
     else
-	sv_setiv(newSVrv(rv,classname), (IV)pv);
+	sv_setiv(newSVrv(rv,classname), (IV)PTR_CAST pv);
     return rv;
 }
 
@@ -4898,9 +4898,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	case 'p':
 	    if (args)
-		uv = (UV)va_arg(*args, void*);
+		uv = (UV)PTR_CAST va_arg(*args, void*);
 	    else
-		uv = (svix < svmax) ? (UV)svargs[svix++] : 0;
+		uv = (svix < svmax) ? (UV)PTR_CAST svargs[svix++] : 0;
 	    base = 16;
 	    goto integer;
 

@@ -1898,7 +1898,7 @@ PP(pp_ioctl)
     }
     else {
 	retval = SvIV(argsv);
-	s = (char*)retval;		/* ouch */
+	s = (char*)PTR_CAST retval;		/* ouch */
     }
 
     TAINT_PROPER(optype == OP_IOCTL ? "ioctl" : "fcntl");
