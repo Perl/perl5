@@ -82,7 +82,7 @@ also read the README file specific to that system.
 
 If there is a hint file for your system (in the hints/ directory) you
 should also read that hint file for specific information for your
-system.  (Unixware users should use the svr4.sh hint file.)
+system.  (Unixware users should use the svr4.sh or the svr5.sh hint file.)
 Additional information is in the Porting/ directory.
 
 =head1 WARNING:  This version requires an extra step to build old extensions.
