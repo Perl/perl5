@@ -72,11 +72,13 @@ dump.c			Debugging output
 eg/ADB			An adb wrapper to put in your crash dir
 eg/README		Intro to example perl scripts
 eg/cgi/RunMeFirst		Setup script for CGI examples
+eg/cgi/caution.xbm		CGI example
 eg/cgi/clickable_image.cgi	CGI example
 eg/cgi/cookie.cgi		CGI example
 eg/cgi/crash.cgi		CGI example
 eg/cgi/customize.cgi		CGI example
 eg/cgi/diff_upload.cgi		CGI example
+eg/cgi/dna.small.gif.uu		Small image for CGI examples
 eg/cgi/file_upload.cgi		CGI example
 eg/cgi/frameset.cgi		CGI example
 eg/cgi/index.html		Index page for CGI examples
@@ -85,6 +87,7 @@ eg/cgi/javascript.cgi		CGI example
 eg/cgi/monty.cgi		CGI example
 eg/cgi/multiple_forms.cgi	CGI example
 eg/cgi/nph-clock.cgi		CGI example
+eg/cgi/nph-multipart.cgi	CGI example
 eg/cgi/popup.cgi		CGI example
 eg/cgi/save_state.cgi		CGI example
 eg/cgi/tryit.cgi		CGI example
@@ -418,6 +421,7 @@ lib/Bundle/CPAN.pm	The CPAN bundle
 lib/CGI.pm		Web server interface ("Common Gateway Interface")
 lib/CGI/Apache.pm	Support for Apache's Perl module
 lib/CGI/Carp.pm		Log server errors with helpful context
+lib/CGI/Cookie.pm	Interface to Netscape Cookies
 lib/CGI/Fast.pm		Support for FastCGI (persistent server process)
 lib/CGI/Push.pm		Support for server push
 lib/CGI/Switch.pm	Simple interface for multiple server types
@@ -776,6 +780,10 @@ t/lib/autoloader.t	See if AutoLoader works
 t/lib/basename.t	See if File::Basename works
 t/lib/bigint.t		See if bigint.pl works
 t/lib/bigintpm.t	See if BigInt.pm works
+t/lib/cgi-form.t	See if CGI.pm works
+t/lib/cgi-function.t	See if CGI.pm works
+t/lib/cgi-html.t	See if CGI.pm works
+t/lib/cgi-request.t	See if CGI.pm works
 t/lib/checktree.t	See if File::CheckTree works
 t/lib/complex.t		See if Math::Complex works
 t/lib/db-btree.t	See if DB_File works
