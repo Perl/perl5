@@ -179,6 +179,13 @@ the oldest perl binary-compatible (resp. source-compatible) with the
 present one, were not used, and sometimes had misleading values. They have
 been removed.
 
+=head2 Less space is used by ops
+
+The C<BASEOP> structure now uses less space. The C<op_seq> field has been
+removed and replaced by two one-bit fields, C<op_opt> and C<op_static>.
+C<opt_type> is now 9 bits long. (Consequently, the C<B::OP> class doesn't
+provide an C<seq> method anymore.)
+
 =head1 Configuration and Building
 
 C<Configure> now invokes callbacks regardless of the value of the variable
