@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Jan 28 08:37:22 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Mon Jan 31 08:35:08 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -13702,13 +13702,20 @@ $osname
 EOSH
 ./tr '[a-z]' '[A-Z]' < Cppsym.know > Cppsym.a
 ./tr '[A-Z]' '[a-z]' < Cppsym.know > Cppsym.b
-$cat Cppsym.a Cppsym.b | $tr ' ' $trnl > Cppsym.know
-$awk 'length($1) > 0 {  printf "#ifdef %s\nFound_it(\"%s\")\n#endif\n", $1, $1
-	printf "#ifdef _%s\nFound_it(\"_%s\")\n#endif\n", $1, $1
-	printf "#ifdef __%s\nFound_it(\"__%s\")\n#endif\n", $1, $1
-	printf "#ifdef __%s__\nFound_it(\"__%s__\")\n#endif\n", $1, $1 }' \
-	Cppsym.know | $cppstdin $cppminus |
-	$sed -ne '/Found_it/ s/Found_it("\(..*\)")/\1/p' > Cppsym.true
+$cat Cppsym.a Cppsym.b | $tr ' ' $trnl | sort | uniq > Cppsym.know
+cat <<'EOCP' > try.c
+#include <stdio.h>
+int main() {
+EOCP
+$awk 'length($1) > 0 {
+    printf "#ifdef %s\nprintf(\"%s\\n\");\n#endif\n", $1, $1
+    printf "#ifdef _%s\nprintf(\"_%s\\n\");\n#endif\n", $1, $1
+    printf "#ifdef __%s\nprintf(\"__%s\\n\");\n#endif\n", $1, $1
+    printf "#ifdef __%s__\nprintf(\"__%s__\\n\");\n#endif\n", $1, $1 }' \
+	Cppsym.know >> try.c
+echo '}' >> try.c
+	set try
+	eval $compile_ok && ./try$exe_ext > Cppsym.true
 : now check the C compiler for additional symbols
 postprocess_cc_v=''
 case "$osname" in
