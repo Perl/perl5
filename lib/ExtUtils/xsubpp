@@ -169,6 +169,7 @@ foreach $typemap (@tm) {
     $current = \$junk;
     while (<TYPEMAP>) {
 	next if /^\s*#/;
+        my $line_no = $. + 1; 
 	if (/^INPUT\s*$/)   { $mode = 'Input';   $current = \$junk;  next; }
 	if (/^OUTPUT\s*$/)  { $mode = 'Output';  $current = \$junk;  next; }
 	if (/^TYPEMAP\s*$/) { $mode = 'Typemap'; $current = \$junk;  next; }
@@ -228,8 +229,10 @@ sub check_keyword {
 
 
 sub print_section {
+    my $count = 0;
     $_ = shift(@line) while !/\S/ && @line;
     for (;  defined($_) && !/^$BLOCK_re/o;  $_ = shift(@line)) {
+        print line_directive() unless ($count++);
 	print "$_\n";
     }
 }
@@ -241,6 +244,7 @@ sub process_keyword($)
 
     &{"${kwd}_handler"}() 
         while $kwd = check_keyword($pattern) ;
+    print line_directive();
 }
 
 sub CASE_handler {
@@ -317,6 +321,7 @@ sub OUTPUT_handler {
 	    unless defined($args_match{$outarg});
 	blurt("Error: No input definition for OUTPUT argument '$outarg' - ignored"), next
 	    unless defined $var_types{$outarg} ;
+	print line_directive();
 	if ($outcode) {
 	    print "\t$outcode\n";
 	} else {
@@ -634,7 +639,7 @@ print <<EOM ;
  */
 
 EOM
- 
+print "#line 1 \"$filename\"\n"; 
 
 while (<$FH>) {
     last if ($Module, $Package, $Prefix) =
@@ -645,7 +650,6 @@ while (<$FH>) {
 
 $lastline    = $_;
 $lastline_no = $.;
-
 
 # Read next xsub into @line from ($lastline, <$FH>).
 sub fetch_para {
@@ -772,7 +776,7 @@ while (fetch_para()) {
 
     if (check_keyword("BOOT")) {
 	&check_cpp;
-        push (@BootCode, $_, @line, "") ;
+        push (@BootCode, $_, line_directive(), @line, "") ;
         next PARAGRAPH ;
     }
 
@@ -984,6 +988,7 @@ EOF
 	} elsif ($gotRETVAL || $wantRETVAL) {
 	    &generate_output($ret_type, 0, 'RETVAL');
 	}
+	print line_directive();
 
 	# do cleanup
 	process_keyword("CLEANUP|ALIAS|PROTOTYPE") ;
@@ -1134,6 +1139,15 @@ sub output_init {
     local($arg) = "ST(" . ($num - 1) . ")";
 
     eval qq/print " $init\\\n"/;
+}
+
+sub line_directive
+{
+    # work out the line number
+    my $line_no = $line_no[@line_no - @line -1] ;
+ 
+    return "#line $line_no \"$filename\"\n" ;
+
 }
 
 sub Warn
