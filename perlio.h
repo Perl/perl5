@@ -189,6 +189,9 @@ extern int	PerlIO_puts		(PerlIO *,const char *);
 #ifndef PerlIO_open
 extern PerlIO *	PerlIO_open		(const char *,const char *);
 #endif
+#ifndef PerlIO_open
+extern PerlIO *	PerlIO_openn		(pTHX_ const char *layers, const char *mode,int fd,int imode,int perm,PerlIO *old,int narg,SV **arg);
+#endif
 #ifndef PerlIO_close
 extern int	PerlIO_close		(PerlIO *);
 #endif
