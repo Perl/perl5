@@ -280,7 +280,7 @@ sub runperl {
     my %args = @_;
     my $runperl = $^X;
     if ($args{switches}) {
-	_quote_args(\$runperl, [$args{switches}]);
+	_quote_args(\$runperl, $args{switches});
     }
     unless ($args{nolib}) {
 	if ($is_macos) {
