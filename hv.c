@@ -299,7 +299,7 @@ S_hv_fetch_flags(pTHX_ HV *hv, const char *key, I32 klen, I32 lval, int flags)
 	if (env) {
 	    sv = newSVpvn(env,len);
 	    SvTAINTED_on(sv);
-	    if (key != keysave)
+	    if (flags & HVhek_FREEKEY)
 		Safefree(key);
 	    return hv_store(hv,key,klen,sv,hash);
 	}
