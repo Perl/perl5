@@ -852,7 +852,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    ptr = SSPOPPTR;
 	    (void)hv_delete(hv, (char*)ptr, (U32)SSPOPINT, G_DISCARD);
 	    SvREFCNT_dec(hv);
-	    Safefree(ptr);
+	    /* Safefree(ptr); */ /* Does not work with shared strings. */
 	    break;
 	case SAVEt_DESTRUCTOR:
 	    ptr = SSPOPPTR;
