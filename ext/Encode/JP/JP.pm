@@ -20,9 +20,9 @@ Encode::JP - Japanese Encodings
 
 =head1 SYNOPSIS
 
-    use Encode::JP;
-    $euc_jp = encode("euc-jp", $utf8);
-    $utf8   = encode("euc-jp", $euc_jp);
+    use Encode 'encode';
+    $euc_jp = encode("euc-jp", $utf8);   # loads Encode::JP implicitly
+    $utf8   = encode("euc-jp", $euc_jp); # ditto
 
 =head1 ABSTRACT
 
