@@ -707,6 +707,10 @@ system platform.
 The hash randomisation mentioned in L</Incompatible Changes> is definitely
 problematic: it will wake dormant bugs and shake out bad assumptions.
 
+If you want to use mod_perl 2.x with Perl 5.8.1, you will need
+mod_perl-1.99_10 or higher.  Earlier versions of mod_perl 2.x
+do not work with the randomised hashes.  mod_perl 1.x works fine.
+
 Many of the rarer platforms that worked 100% or pretty close to it
 with perl 5.8.0 have been left a little bit untended since their
 maintainers have been otherwise busy lately, and therefore there will
