@@ -741,7 +741,7 @@ sub cosh {
 	my ($x, $y) = @{$z->cartesian};
 	my $ex = exp($x);
 	my $ex_1 = 1 / $ex;
-	return ($ex + $ex_1)/2 if $real;
+	return cplx(0.5 * ($ex + $ex_1), 0) if $real;
 	return (ref $z)->make(cos($y) * ($ex + $ex_1)/2,
 			      sin($y) * ($ex - $ex_1)/2);
 }
@@ -761,7 +761,7 @@ sub sinh {
 	my ($x, $y) = @{$z->cartesian};
 	my $ex = exp($x);
 	my $ex_1 = 1 / $ex;
-	return ($ex - $ex_1)/2 if $real;
+	return cplx(0.5 * ($ex - $ex_1), 0) if $real;
 	return (ref $z)->make(cos($y) * ($ex - $ex_1)/2,
 			      sin($y) * ($ex + $ex_1)/2);
 }
@@ -1326,11 +1326,11 @@ The I<k>th root for C<z = [r,t]> is given by:
 
 	(root(z, n))[k] = r**(1/n) * exp(i * (t + 2*k*pi)/n)
 
-The I<spaceship> comparison operator is also defined. In order to
-ensure its restriction to real numbers is conform to what you would
-expect, the comparison is run on the real part of the complex number
-first, and imaginary parts are compared only when the real parts
-match.
+The I<spaceship> comparison operator, E<lt>=E<gt>, is also defined. In
+order to ensure its restriction to real numbers is conform to what you
+would expect, the comparison is run on the real part of the complex
+number first, and imaginary parts are compared only when the real
+parts match.
 
 =head1 CREATION
 
