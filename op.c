@@ -5682,7 +5682,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		if ((type == OP_PUSH || type == OP_UNSHIFT)
 		    && !kid->op_sibling && ckWARN(WARN_MISC))
 		    Perl_warner(aTHX_ WARN_MISC,
-			"Useless use of %s with no arguments",
+			"Useless use of %s with no values",
 			PL_op_desc[type]);
 		    
 		if (kid->op_type == OP_CONST &&
