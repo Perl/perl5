@@ -122,7 +122,10 @@ for my $src (sort keys %e) {
 		dump2file("$pfile.$seq", $dtext);
 	    }
 	}
-	$DEBUG or unlink ($sfile, $pfile);
+	unless ( $DEBUG ) {
+	    1 while unlink $sfile;
+	    1 while unlink $pfile;
+	}
     }
 }
 

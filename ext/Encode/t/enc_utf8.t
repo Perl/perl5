@@ -26,8 +26,9 @@ print "1.." . (scalar @c + 1) . "\n";
 my @f;
 
 for my $i (0..$#c) {
-  push @f, "f$i";
-  open(F, ">f$i") or die "$0: failed to open 'f$i' for writing: $!";
+  my $file = filename("f$i");
+  push @f, $file;
+  open(F, ">$file") or die "$0: failed to open '$file' for writing: $!";
   binmode(F, ":utf8");
   print F chr($c[$i]);
   close F;
@@ -36,7 +37,8 @@ for my $i (0..$#c) {
 my $t = 1;
 
 for my $i (0..$#c) {
-  open(F, "<f$i") or die "$0: failed to open 'f$i' for reading: $!";
+  my $file = filename("f$i");
+  open(F, "<$file") or die "$0: failed to open '$file' for reading: $!";
   binmode(F, ":utf8");
   my $c = <F>;
   my $o = ord($c);
@@ -44,7 +46,7 @@ for my $i (0..$#c) {
   $t++;
 }
 
-my $f = "f" . @f;
+my $f = filename("f" . @f);
 
 push @f, $f;
 open(F, ">$f") or die "$0: failed to open '$f' for writing: $!";
@@ -61,6 +63,14 @@ binmode(F, ":encoding(utf-8)");
 close F;
 print $a =~ qr{^utf8 "\\x80" does not map to Unicode} ?
   "ok $t - illegal utf8 input\n" : "not ok $t - illegal utf8 input: a = " . unpack("H*", $a) . "\n";
+
+# On VMS temporary file names like "f0." may be more readable than "f0" since
+# "f0" could be a logical name pointing elsewhere.
+sub filename {
+    my $name = shift;
+    $name .= '.' if $^O eq 'VMS';
+    return $name;
+}
 
 END {
   1 while unlink @f;
