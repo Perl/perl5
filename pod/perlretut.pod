@@ -1751,12 +1751,10 @@ letter, the braces can be dropped.  For instance, C<\pM> is the
 character class of Unicode 'marks', for example accent marks.
 For the full list see L<perlunicode>.
 
-The Unicode has also been separated into blocks of charaters which you
-can test with C<\p{In...}> (in) and C<\P{In...}> (not in), for example
-C<\p{InLatin}, C<\p{InGreek}>, or C<\P{InKatakana}>.  For the full list see
-L<perlunicode>.
-
-For the the full and latest information see the latest Unicode standard.
+The Unicode has also been separated into various sets of charaters
+which you can test with C<\p{In...}> (in) and C<\P{In...}> (not in),
+for example C<\p{InLatin}>, C<\p{InGreek}>, or C<\P{InKatakana}>.
+For the full list see L<perlunicode>.
 
 C<\X> is an abbreviation for a character class sequence that includes
 the Unicode 'combining character sequences'.  A 'combining character
@@ -1767,6 +1765,9 @@ character sequence with base character C<A> and combining character
 S<C<COMBINING RING> >, which translates in Danish to A with the circle
 atop it, as in the word Angstrom.  C<\X> is equivalent to C<\PM\pM*}>,
 i.e., a non-mark followed by one or more marks.
+
+For the the full and latest information about Unicode see the latest
+Unicode standard, or the Unicode Consortium's website http://www.unicode.org/
 
 As if all those classes weren't enough, Perl also defines POSIX style
 character classes.  These have the form C<[:name:]>, with C<name> the
