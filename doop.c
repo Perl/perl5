@@ -989,6 +989,7 @@ Perl_do_chomp(pTHX_ register SV *sv)
 {
     register I32 count;
     STRLEN len;
+    STRLEN n_a;
     char *s;
 
     if (RsSNARF(PL_rs))
@@ -1020,8 +1021,6 @@ Perl_do_chomp(pTHX_ register SV *sv)
     else if (SvREADONLY(sv))
 	Perl_croak(aTHX_ PL_no_modify);
     s = SvPV(sv, len);
-    if (len && !SvPOKp(sv))
-	s = SvPV_force(sv, len);
     if (s && len) {
 	s += --len;
 	if (RsPARA(PL_rs)) {
@@ -1052,12 +1051,13 @@ Perl_do_chomp(pTHX_ register SV *sv)
 		count += rslen;
 	    }
 	}
-	*s = '\0';
+	s = SvPV_force(sv, n_a);
 	SvCUR_set(sv, len);
+	*SvEND(sv) = '\0';
 	SvNIOK_off(sv);
+	SvSETMAGIC(sv);
     }
   nope:
-    SvSETMAGIC(sv);
     return count;
 }
 
