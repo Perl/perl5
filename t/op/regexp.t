@@ -1,35 +1,37 @@
 #!./perl
 
-# $RCSfile: regexp.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:20 $
-
 open(TESTS,'op/re_tests') || open(TESTS,'t/op/re_tests')
     || die "Can't open re_tests";
+
 while (<TESTS>) { }
 $numtests = $.;
-close(TESTS);
+seek(TESTS,0,0);
+$. = 0;
 
-print "1..$numtests\n";
-open(TESTS,'op/re_tests') || open(TESTS,'t/op/re_tests')
-    || die "Can't open re_tests";
 $| = 1;
+print "1..$numtests\n";
+TEST:
 while (<TESTS>) {
     ($pat, $subject, $result, $repl, $expect) = split(/[\t\n]/,$_);
     $input = join(':',$pat,$subject,$result,$repl,$expect);
     $pat = "'$pat'" unless $pat =~ /^'/;
-    eval "\$match = (\$subject =~ m$pat); \$got = \"$repl\";";
-    if ($result eq 'c') {
-	if ($@ ne '') {print "ok $.\n";} else {print "not ok $.\n";}
-    }
-    elsif ($result eq 'n') {
-	if (!$match) {print "ok $.\n";} else {print "not ok $. $input => $got\n";}
-    }
-    else {
-	if ($match && $got eq $expect) {
-	    print "ok $.\n";
+    for $study ("", "study \$match") {
+	eval "$study; \$match = (\$subject =~ m$pat); \$got = \"$repl\";";
+	if ($result eq 'c') {
+	    if ($@ eq '') { print "not ok $.\n"; next TEST }
+	    last;  # no need to study a syntax error
+	}
+	elsif ($result eq 'n') {
+	    if ($match) { print "not ok $. $input => $got\n"; next TEST }
 	}
 	else {
-	    print "not ok $. $input => $got\n";
+	    if (!$match || $got ne $expect) {
+		print "not ok $. $input => $got\n";
+		next TEST;
+	    }
 	}
     }
+    print "ok $.\n";
 }
+
 close(TESTS);
