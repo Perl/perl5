@@ -36,7 +36,10 @@ The array C<@{"_<$filename"}> holds the lines of $filename for all
 files compiled by Perl.  The same for C<eval>ed strings that contain
 subroutines, or which are currently being executed.  The $filename
 for C<eval>ed strings looks like C<(eval 34)>.   Code assertions
-in regexes look like C<(re_eval 19)>.
+in regexes look like C<(re_eval 19)>.  
+
+Values in this array are magical in numeric context: they compare
+equal to zero only if the line is not breakable.
 
 =item *
 
@@ -44,8 +47,7 @@ The hash C<%{"_<$filename"}> contains breakpoints and actions keyed
 by line number.  Individual entries (as opposed to the whole hash)
 are settable.  Perl only cares about Boolean true here, although
 the values used by F<perl5db.pl> have the form
-C<"$break_condition\0$action">.  Values in this hash are magical
-in numeric context: they are zeros if the line is not breakable.
+C<"$break_condition\0$action">.  
 
 The same holds for evaluated strings that contain subroutines, or
 which are currently being executed.  The $filename for C<eval>ed strings
