@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-BEGIN { $| = 1; print "1..19\n"; }
+BEGIN { $| = 1; print "1..21\n"; }
 
 END {print "not ok 1\n" unless $loaded;}
 
@@ -86,7 +86,7 @@ else {
 # Two-arg tv_interval() is always available.
 {
     my $f = tv_interval [5, 100_000], [10, 500_000];
-    ok 9, $f == 5.4, $f;
+    ok 9, abs($f - 5.4) < 0.001, $f;
 }
 
 if (!$have_gettimeofday) {
@@ -133,10 +133,16 @@ else {
 if (!$have_time) {
     skip 14
 } else {
- my $t = time();
- my $tf = Time::HiRes::time();
- ok 14, (abs($tf - $t) <= 1),
-  "time $t differs from Time::HiRes::time $tf";
+ my ($t1, $tf, $t2);
+ for my $i (1 .. 9) {
+     $t1 = time();
+     $tf = Time::HiRes::time();
+     $t2 = 1 + time();
+     last if (($t2 - $t1) <= 1);
+ }
+ ok 14, (($t1 <= $tf) && ($tf <= $t2)),
+      "Time::HiRes::time $tf not bracketed by $t1 - $t2";
+
 }
 
 unless (defined &Time::HiRes::gettimeofday
@@ -216,4 +222,10 @@ unless (defined &Time::HiRes::setitimer
 
     $SIG{VTALRM} = 'DEFAULT';
 }
+
+$a = abs(sleep(1.5)                    - 1.5);
+print $a < 0.1 ? "ok 20 # $a\n" : "not ok 20 # $a\n";
+
+$a = abs(usleep(1_500_000) / 1_500_000 - 1.0);
+print $a < 0.1 ? "ok 21 # $a\n" : "not ok 21 # $a\n";
 

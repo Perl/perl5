@@ -63,31 +63,38 @@ struct timeval {
 }
 */
 
+typedef union {
+    unsigned __int64	ft_i64;
+    FILETIME		ft_val;
+} FT_t;
+
+/* Number of 100 nanosecond units from 1/1/1601 to 1/1/1970 */
+#define EPOCH_BIAS  116444736000000000i64
+
+/* NOTE: This does not compute the timezone info (doing so can be expensive,
+ * and appears to be unsupported even by glibc) */
 int
-gettimeofday (struct timeval *tp, int nothing)
+gettimeofday (struct timeval *tp, void *not_used)
 {
- SYSTEMTIME st;
- time_t tt;
- struct tm tmtm;
- /* mktime converts local to UTC */
- GetLocalTime (&st);
- tmtm.tm_sec = st.wSecond;
- tmtm.tm_min = st.wMinute;
- tmtm.tm_hour = st.wHour;
- tmtm.tm_mday = st.wDay;
- tmtm.tm_mon = st.wMonth - 1;
- tmtm.tm_year = st.wYear - 1900;
- tmtm.tm_isdst = -1;
- tt = mktime (&tmtm);
- tp->tv_sec = tt;
- tp->tv_usec = st.wMilliseconds * 1000;
- return 0;
+    FT_t ft;
+
+    /* this returns time in 100-nanosecond units  (i.e. tens of usecs) */
+    GetSystemTimeAsFileTime(&ft.ft_val);
+
+    /* seconds since epoch */
+    tp->tv_sec = (long)((ft.ft_i64 - EPOCH_BIAS) / 10000000i64);
+
+    /* microseconds remaining */
+    tp->tv_usec = (long)((ft.ft_i64 / 10i64) % 1000000i64);
+
+    return 0;
 }
 #endif
 
 #if !defined(HAS_GETTIMEOFDAY) && defined(VMS)
 #define HAS_GETTIMEOFDAY
 
+#include <lnmdef.h>
 #include <time.h> /* gettimeofday */
 #include <stdlib.h> /* qdiv */
 #include <starlet.h> /* sys$gettim */
@@ -115,6 +122,90 @@ static long base_adjust[2]={0L,0L};
 #else
 static __int64 base_adjust=0;
 #endif
+
+/* 
+
+   If we don't have gettimeofday, then likely we are on a VMS machine that
+   operates on local time rather than UTC...so we have to zone-adjust.
+   This code gleefully swiped from VMS.C 
+
+*/
+/* method used to handle UTC conversions:
+ *   1 == CRTL gmtime();  2 == SYS$TIMEZONE_DIFFERENTIAL;  3 == no correction
+ */
+static int gmtime_emulation_type;
+/* number of secs to add to UTC POSIX-style time to get local time */
+static long int utc_offset_secs;
+static struct dsc$descriptor_s fildevdsc = 
+  { 12, DSC$K_DTYPE_T, DSC$K_CLASS_S, "LNM$FILE_DEV" };
+static struct dsc$descriptor_s *fildev[] = { &fildevdsc, NULL };
+
+static time_t toutc_dst(time_t loc) {
+  struct tm *rsltmp;
+
+  if ((rsltmp = localtime(&loc)) == NULL) return -1;
+  loc -= utc_offset_secs;
+  if (rsltmp->tm_isdst) loc -= 3600;
+  return loc;
+}
+
+static time_t toloc_dst(time_t utc) {
+  struct tm *rsltmp;
+
+  utc += utc_offset_secs;
+  if ((rsltmp = localtime(&utc)) == NULL) return -1;
+  if (rsltmp->tm_isdst) utc += 3600;
+  return utc;
+}
+
+#define _toutc(secs)  ((secs) == (time_t) -1 ? (time_t) -1 : \
+       ((gmtime_emulation_type || timezone_setup()), \
+       (gmtime_emulation_type == 1 ? toutc_dst(secs) : \
+       ((secs) - utc_offset_secs))))
+
+#define _toloc(secs)  ((secs) == (time_t) -1 ? (time_t) -1 : \
+       ((gmtime_emulation_type || timezone_setup()), \
+       (gmtime_emulation_type == 1 ? toloc_dst(secs) : \
+       ((secs) + utc_offset_secs))))
+
+static int
+timezone_setup(void) 
+{
+  struct tm *tm_p;
+
+  if (gmtime_emulation_type == 0) {
+    int dstnow;
+    time_t base = 15 * 86400; /* 15jan71; to avoid month/year ends between    */
+                              /* results of calls to gmtime() and localtime() */
+                              /* for same &base */
+
+    gmtime_emulation_type++;
+    if ((tm_p = gmtime(&base)) == NULL) { /* CRTL gmtime() is a fake */
+      char off[LNM$C_NAMLENGTH+1];;
+
+      gmtime_emulation_type++;
+      if (!Perl_vmstrnenv("SYS$TIMEZONE_DIFFERENTIAL",off,0,fildev,0)) {
+        gmtime_emulation_type++;
+        utc_offset_secs = 0;
+        Perl_warn(aTHX_ "no UTC offset information; assuming local time is UTC");
+      }
+      else { utc_offset_secs = atol(off); }
+    }
+    else { /* We've got a working gmtime() */
+      struct tm gmt, local;
+
+      gmt = *tm_p;
+      tm_p = localtime(&base);
+      local = *tm_p;
+      utc_offset_secs  = (local.tm_mday - gmt.tm_mday) * 86400;
+      utc_offset_secs += (local.tm_hour - gmt.tm_hour) * 3600;
+      utc_offset_secs += (local.tm_min  - gmt.tm_min)  * 60;
+      utc_offset_secs += (local.tm_sec  - gmt.tm_sec);
+    }
+  }
+  return 1;
+}
+
 
 int
 gettimeofday (struct timeval *tp, void *tpz)
@@ -175,6 +266,13 @@ gettimeofday (struct timeval *tp, void *tpz)
         tp->tv_sec = ret;
         return -1;
  }
+# ifdef VMSISH_TIME
+# ifdef RTL_USES_UTC
+  if (VMSISH_TIME) tp->tv_sec = _toloc(tp->tv_sec);
+# else
+  if (!VMSISH_TIME) tp->tv_sec = _toutc(tp->tv_sec);
+# endif
+# endif
  return 0;
 }
 #endif
@@ -269,18 +367,54 @@ constant(name, arg)
 	char *		name
 	int		arg
 
-#ifdef HAS_USLEEP
+#if defined(HAS_USLEEP) && defined(HAS_GETTIMEOFDAY)
 
-void
+NV
 usleep(useconds)
-        int useconds 
-
-void
-sleep(fseconds)
-        NV fseconds 
+        NV useconds
+	PREINIT:
+	struct timeval Ta, Tb;
 	CODE:
-	int useconds = fseconds * 1000000;
-	usleep (useconds);
+	gettimeofday(&Ta, NULL);
+	if (items > 0) {
+	    if (useconds > 1E6) {
+		IV seconds = (IV) (useconds / 1E6);
+		sleep(seconds);
+		useconds -= 1E6 * seconds;
+	    }
+	    usleep((UV)useconds);
+	} else
+	    PerlProc_pause();
+	gettimeofday(&Tb, NULL);
+#if 0
+	printf("[%ld %ld] [%ld %ld]\n", Tb.tv_sec, Tb.tv_usec, Ta.tv_sec, Ta.tv_usec);
+#endif
+	RETVAL = 1E6*(Tb.tv_sec-Ta.tv_sec)+(NV)((IV)Tb.tv_usec-(IV)Ta.tv_usec);
+
+	OUTPUT:
+	RETVAL
+
+NV
+sleep(...)
+	PREINIT:
+	struct timeval Ta, Tb;
+	CODE:
+	gettimeofday(&Ta, NULL);
+	if (items > 0) {
+	    NV seconds  = SvNV(ST(0));
+	    IV useconds = 1E6 * (seconds - (IV)seconds);
+	    sleep(seconds);
+	    usleep(useconds);
+	} else
+	    PerlProc_pause();
+	gettimeofday(&Tb, NULL);
+#if 0
+	printf("[%ld %ld] [%ld %ld]\n", Tb.tv_sec, Tb.tv_usec, Ta.tv_sec, Ta.tv_usec);
+#endif
+	RETVAL = (NV)(Tb.tv_sec-Ta.tv_sec)+0.000001*(NV)(Tb.tv_usec-Ta.tv_usec);
+
+	OUTPUT:
+	RETVAL
 
 #endif
 
