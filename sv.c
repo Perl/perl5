@@ -7574,7 +7574,9 @@ Perl_sv_newmortal(pTHX)
 
 Marks an existing SV as mortal.  The SV will be destroyed "soon", either
 by an explicit call to FREETMPS, or by an implicit call at places such as
-statement boundaries.  See also C<sv_newmortal> and C<sv_mortalcopy>.
+statement boundaries.  SvTEMP() is turned on which means that the SV's
+string buffer can be "stolen" if this SV is copied. See also C<sv_newmortal>
+and C<sv_mortalcopy>.
 
 =cut
 */
