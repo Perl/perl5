@@ -51,18 +51,35 @@ See L<perlop/"Floating-point Arithmetic">.
 =head2 Why isn't my octal data interpreted correctly?
 
 Perl only understands octal and hex numbers as such when they occur
-as literals in your program.  If they are read in from somewhere and
-assigned, no automatic conversion takes place.  You must explicitly
-use oct() or hex() if you want the values converted.  oct() interprets
+as literals in your program.  Octal literals in perl must start with 
+a leading "0" and hexadecimal literals must start with a leading "0x".
+If they are read in from somewhere and assigned, no automatic 
+conversion takes place.  You must explicitly use oct() or hex() if you 
+want the values converted to decimal.  oct() interprets
 both hex ("0x350") numbers and octal ones ("0350" or even without the
 leading "0", like "377"), while hex() only converts hexadecimal ones,
 with or without a leading "0x", like "0x255", "3A", "ff", or "deadbeef".
+The inverse mapping from decimal to octal can be done with either the
+"%o" or "%O" sprintf() formats.  To get from decimal to hex try either 
+the "%x" or the "%X" formats to sprintf().
 
 This problem shows up most often when people try using chmod(), mkdir(),
-umask(), or sysopen(), which all want permissions in octal.
+umask(), or sysopen(), which by widespread tradition typically take 
+permissions in octal.
 
-    chmod(644,  $file);	# WRONG -- perl -w catches this
+    chmod(644,  $file);	# WRONG
     chmod(0644, $file);	# right
+
+Note the mistake in the first line was specifying the decimal literal 
+644, rather than the intended octal literal 0644.  The problem can
+be seen with:
+
+    printf(0"%o",644); # prints 01204
+
+Surely you had not intended C<chmod(01204, $file);> - did you?  If you
+want to use numeric literals as arguments to chmod() et al. then please
+try to express them as octal constants, that is with a leading zero and 
+with the following digits restricted to the set 0..7.
 
 =head2 Does Perl have a round() function?  What about ceil() and floor()?  Trig functions?
 
