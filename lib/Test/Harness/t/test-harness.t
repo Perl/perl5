@@ -366,7 +366,7 @@ my %samples = (
                                  },
            );
 
-plan tests => (keys(%samples) * 4) + 1;
+plan tests => (keys(%samples) * 7) + 1;
 
 use Test::Harness;
 use_ok('Test::Harness');
@@ -377,29 +377,44 @@ tie *NULL, 'My::Dev::Null' or die $!;
 while (my($test, $expect) = each %samples) {
     # _run_all_tests() runs the tests but skips the formatting.
     my($totals, $failed);
+    my $warning;
     eval {
         select NULL;    # _run_all_tests() isn't as quiet as it should be.
+        local $SIG{__WARN__} = sub { $warning .= join '', @_; };
         ($totals, $failed) = 
           Test::Harness::_run_all_tests("$SAMPLE_TESTS/$test");
     };
     select STDOUT;
 
-    unless( $@ ) {
-        is( Test::Harness::_all_ok($totals), $expect->{all_ok},    
-                                                      "$test - all ok" );
-        ok( defined $expect->{total},                 "$test - has total" );
+    SKIP: {
+        skip "special tests for bailout", 1 unless $test eq 'bailout';
+        like( $@, '/Further testing stopped: GERONI/i' );
+    }
+
+    SKIP: {
+        skip "don't apply to a bailout", 5 if $test eq 'bailout';
+        is( $@, '' );
+        is( Test::Harness::_all_ok($totals), $expect->{all_ok},
+                                                  "$test - all ok" );
+        ok( defined $expect->{total},             "$test - has total" );
         is_deeply( {map { $_=>$totals->{$_} } keys %{$expect->{total}}},
                    $expect->{total},
-                                                         "$test - totals" );
+                                                  "$test - totals" );
         is_deeply( {map { $_=>$failed->{"$SAMPLE_TESTS/$test"}{$_} }
-                        keys %{$expect->{failed}}},
+                    keys %{$expect->{failed}}},
                    $expect->{failed},
-                                                         "$test - failed" );
+                                                  "$test - failed" );
     }
-    else {      # special case for bailout
-        is( $test, 'bailout' );
-        like( $@, '/Further testing stopped: GERONI/i', $test );
-        pass( 'skipping for bailout' );
-        pass( 'skipping for bailout' );
+
+    SKIP: {
+        skip "special tests for bignum", 1 unless $test eq 'bignum';
+        is( $warning, <<WARN );
+Enourmous test number seen [test 100001]
+Can't detailize, too big.
+Enourmous test number seen [test 136211425]
+Can't detailize, too big.
+WARN
+
     }
+
 }
