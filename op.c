@@ -977,8 +977,6 @@ Perl_scalar(pTHX_ OP *o)
 
     switch (o->op_type) {
     case OP_REPEAT:
-	if (o->op_private & OPpREPEAT_DOLIST)
-	    null(((LISTOP*)cBINOPo->op_first)->op_first);
 	scalar(cBINOPo->op_first);
 	break;
     case OP_OR:
