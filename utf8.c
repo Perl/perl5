@@ -1288,10 +1288,9 @@ UV
 Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *normal, char *special)
 {
     UV uv0, uv1, uv2;
-    U8 tmpbuf[UTF8_MAXLEN_FOLD+1], *d;
+    U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
     char *s = NULL;
     STRLEN len;
-    bool has_utf8 = FALSE;
 
     if (!*swashp)
         *swashp = swash_init("utf8", normal, &PL_sv_undef, 4, 0);
@@ -1304,8 +1303,9 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
     uv2 = swash_fetch(*swashp, tmpbuf, TRUE);
     if (uv2) {
 	 /* It was "normal" (a single character mapping). */
-         d = uvuni_to_utf8(ustrp, uv2);
-	 has_utf8 = !UNI_IS_INVARIANT(uv2);
+         UV uv3 = UNI_TO_NATIVE(uv2);
+	
+         len = uvuni_to_utf8(ustrp, uv2) - ustrp;
     }
     else {
 	 /* It might be "special" (sometimes, but not always,
@@ -1314,60 +1314,57 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 	 SV *keysv;
 	 HE *he;
 	 SV *val;
-
+	
 	 if ((hv    = get_hv(special, FALSE)) &&
 	     (keysv = sv_2mortal(Perl_newSVpvf(aTHX_ "%04"UVXf, uv1))) &&
 	     (he    = hv_fetch_ent(hv, keysv, FALSE, 0)) &&
 	     (val   = HeVAL(he))) {
-
+              U8* d;
+	
 	      s = SvPV(val, len);
-	      if (len == 1)
+	      if (len == 1) {
 		   d = uvuni_to_utf8(ustrp, NATIVE_TO_UNI(*(U8*)s));
+		   len = d - ustrp;
+              }
 	      else {
+#ifdef EBCDIC
+		   /* If we have EBCDIC we need to remap the characters
+		    * since any characters in the low 256 are Unicode
+		    * code points, not EBCDIC. */
+		   U8 *t = (U8*)s, *tend = t + len;
+		
+		   d = tmpbuf;
+		   if (SvUTF8(val)) {
+			STRLEN tlen = 0;
+			
+			while (t < tend) {
+			     UV c = utf8_to_uvchr(t, &tlen);
+			     if (tlen > 0) {
+				  d = uvchr_to_utf8(d, UNI_TO_NATIVE(c));
+				  t += tlen;
+			     }
+			     else
+				  break;
+			}
+		   }
+		   else {
+			while (t < tend) {
+			     d = uvchr_to_utf8(d, UNI_TO_NATIVE(*t));
+			     t++;
+			}
+		   }
+		   len = d - tmpbuf;
+		   Copy(tmpbuf, ustrp, len, U8);
+#else
 		   Copy(s, ustrp, len, U8);
-		   d = ustrp + len;
 	      }
-	      if (SvUTF8(val))
-		   has_utf8 = TRUE;
+#endif
 	 }
 	 else {
 	      /* It was not "special", either. */
-	      d = uvuni_to_utf8(ustrp, uv1);
-	      has_utf8 = !UNI_IS_INVARIANT(uv1);
+	      len = uvchr_to_utf8(ustrp, uv0) - ustrp;
 	 }
     }
-
-    len = d - ustrp;
-
-#ifdef EBCDIC
-    {
-	 /* If we have EBCDIC we need to remap the characters since
-	  * any characters in the low 256 are in Unicode code points,
-	  * not EBCDIC. */
-	 U8 *t, *tend;
-	 
-	 d = tmpbuf;
-	 if (has_utf8) {
-	      STRLEN tlen = 0;
-	      
-	      for (t = ustrp, tend = t + len;
-		   t < tend; t += tlen) {
-		   UV c = utf8_to_uvchr(t, &tlen);
-		   
-		   if (tlen > 0)
-			d = uvchr_to_utf8(d, UNI_TO_NATIVE(c));
-		   else
-			break;
-	      }
-	 } else {
-	      for (t = ustrp, tend = t + len;
-		   t < tend; t++)
-		   d = uvchr_to_utf8(d, UNI_TO_NATIVE(*t));
-	 }
-	 len = d - tmpbuf; 
-	 Copy(tmpbuf, ustrp, len, U8);
-    }
-#endif
 
     if (lenp)
 	 *lenp = len;
