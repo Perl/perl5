@@ -1106,21 +1106,6 @@ PP(pp_orassign)
 	RETURNOP(cLOGOP->op_other);
 }
 	
-#ifdef DEPRECATED
-PP(pp_entersubr)
-{
-    djSP;
-    SV** mark = (stack_base + *markstack_ptr + 1);
-    SV* cv = *mark;
-    while (mark < sp) {	/* emulate old interface */
-	*mark = mark[1];
-	mark++;
-    }
-    *sp = cv;
-    return pp_entersub(ARGS);
-}
-#endif
-
 PP(pp_caller)
 {
     djSP;

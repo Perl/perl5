@@ -38,9 +38,6 @@
 
 #define SAVETMPS save_int((int*)&tmps_floor), tmps_floor = tmps_ix
 #define FREETMPS if (tmps_ix > tmps_floor) free_tmps()
-#ifdef DEPRECATED
-#define FREE_TMPS() FREETMPS
-#endif
 
 #define ENTER push_scope()
 #define LEAVE pop_scope()

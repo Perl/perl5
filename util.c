@@ -1122,8 +1122,9 @@ die(pat, va_alist)
     GV *gv;
     CV *cv;
 
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "die: curstack = %p, mainstack= %p\n",
-    		    curstack, mainstack));/*debug*/
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+			  "%p: die: curstack = %p, mainstack = %p\n",
+			  thr, curstack, mainstack));
     /* We have to switch back to mainstack or die_where may try to pop
      * the eval block from the wrong stack if die is being called from a
      * signal handler.  - dkindred@cs.cmu.edu */
@@ -1140,8 +1141,9 @@ die(pat, va_alist)
     message = mess(pat, &args);
     va_end(args);
 
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "die: message = %s\ndiehook = %p\n",
-		   message, diehook));/*debug*/
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+			  "%p: die: message = %s\ndiehook = %p\n",
+			  thr, message, diehook));
     if (diehook) {
 	/* sv_2cv might call croak() */
 	SV *olddiehook = diehook;
@@ -1170,8 +1172,8 @@ die(pat, va_alist)
 
     restartop = die_where(message);
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-    		    "die: restartop = %p, was_in_eval = %d, oldrunlevel = %d\n",
-		    restartop, was_in_eval, oldrunlevel));/*debug*/
+	  "%p: die: restartop = %p, was_in_eval = %d, oldrunlevel = %d\n",
+	  thr, restartop, was_in_eval, oldrunlevel));
     if ((!restartop && was_in_eval) || oldrunlevel > 1)
 	JMPENV_JUMP(3);
     return restartop;
@@ -2385,6 +2387,99 @@ condpair_magic(SV *sv)
 	}
     }
     return mg;
+}
+
+/*
+ * Make a new perl thread structure using t as a prototype. Some of the
+ * fields for the new thread are copied from the prototype thread, t,
+ * so t should not be running in perl at the time this function is
+ * called. The use by ext/Thread/Thread.xs in core perl (where t is the
+ * thread calling new_struct_thread) clearly satisfies this constraint.
+ */
+struct thread *
+new_struct_thread(t)
+struct thread *t;
+{
+    struct thread *thr;
+    SV *sv;
+    SV **svp;
+    I32 i;
+
+    sv = newSVpv("", 0);
+    SvGROW(sv, sizeof(struct thread) + 1);
+    SvCUR_set(sv, sizeof(struct thread));
+    thr = (Thread) SvPVX(sv);
+    /* Zero(thr, 1, struct thread); */
+
+    /* debug */
+    memset(thr, 0xab, sizeof(struct thread));
+    markstack = 0;
+    scopestack = 0;
+    savestack = 0;
+    retstack = 0;
+    dirty = 0;
+    localizing = 0;
+    /* end debug */
+
+    thr->oursv = sv;
+    init_stacks(thr);
+
+    curcop = &compiling;
+    thr->cvcache = newHV();
+    thr->magicals = newAV();
+    thr->specific = newAV();
+    thr->flags = THRf_R_JOINABLE;
+    MUTEX_INIT(&thr->mutex);
+
+    curcop = t->Tcurcop;       /* XXX As good a guess as any? */
+    defstash = t->Tdefstash;   /* XXX maybe these should */
+    curstash = t->Tcurstash;   /* always be set to main? */
+    /* top_env needs to be non-zero. The particular value doesn't matter */
+    top_env = t->Ttop_env;
+    runlevel = 1;		/* XXX should be safe ? */
+    in_eval = FALSE;
+    restartop = 0;
+
+    tainted = t->Ttainted;
+    curpm = t->Tcurpm;         /* XXX No PMOP ref count */
+    nrs = newSVsv(t->Tnrs);
+    rs = newSVsv(t->Trs);
+    last_in_gv = (GV*)SvREFCNT_inc(t->Tlast_in_gv);
+    ofslen = t->Tofslen;
+    ofs = savepvn(t->Tofs, ofslen);
+    defoutgv = (GV*)SvREFCNT_inc(t->Tdefoutgv);
+    chopset = t->Tchopset;
+    formtarget = newSVsv(t->Tformtarget);
+    bodytarget = newSVsv(t->Tbodytarget);
+    toptarget = newSVsv(t->Ttoptarget);
+    
+    /* Initialise all per-thread magicals that the template thread used */
+    svp = AvARRAY(t->magicals);
+    for (i = 0; i <= AvFILL(t->magicals); i++, svp++) {
+	if (*svp && *svp != &sv_undef) {
+	    SV *sv = newSVsv(*svp);
+	    av_store(thr->magicals, i, sv);
+	    sv_magic(sv, 0, 0, &per_thread_magicals[i], 1);
+	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+				  "new_struct_thread: copied magical %d\n",i));
+	}
+    } 
+
+    MUTEX_LOCK(&threads_mutex);
+    nthreads++;
+    thr->tid = ++threadnum;
+    thr->next = t->next;
+    thr->prev = t;
+    t->next = thr;
+    thr->next->prev = thr;
+    MUTEX_UNLOCK(&threads_mutex);
+
+#ifdef HAVE_THREAD_INTERN
+    init_thread_intern(thr);
+#else
+    thr->self = pthread_self();
+#endif /* HAVE_THREAD_INTERN */
+    return thr;
 }
 #endif /* USE_THREADS */
 

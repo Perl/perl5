@@ -199,10 +199,12 @@ struct thread {
 
     /* XXX Sort stuff, firstgv, secongv and so on? */
 
-    SV *	Toursv;
-    HV *	Tcvcache;
+    SV *	oursv;
+    HV *	cvcache;
     perl_thread	self;			/* Underlying thread object */
     U32		flags;
+    AV *	magicals;		/* Per-thread magicals */
+    AV *	specific;		/* Thread-specific user data */
     perl_mutex	mutex;			/* For the fields others can change */
     U32		tid;
     struct thread *next, *prev;		/* Circular linked list of threads */
@@ -210,7 +212,7 @@ struct thread {
 #ifdef ADD_THREAD_INTERN
     struct thread_intern i;		/* Platform-dependent internals */
 #endif
-    char	trailing_nul;		/* For the sake of thrsv, t->Toursv */
+    char	trailing_nul;		/* For the sake of thrsv and oursv */
 };
 
 typedef struct thread *Thread;
@@ -286,7 +288,6 @@ typedef struct condpair {
 #undef	dirty
 #undef	localizing
 
-#define oursv		(thr->Toursv)
 #define stack_base	(thr->Tstack_base)
 #define stack_sp	(thr->Tstack_sp)
 #define stack_max	(thr->Tstack_max)
@@ -341,7 +342,6 @@ typedef struct condpair {
 #define	top_env		(thr->Ttop_env)
 #define	runlevel	(thr->Trunlevel)
 
-#define	cvcache		(thr->Tcvcache)
 #else
 /* USE_THREADS is not defined */
 #define MUTEX_LOCK(m)

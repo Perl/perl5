@@ -1225,16 +1225,23 @@ yylex(void)
 	    return PRIVATEREF;
 	}
 
-	if (!strchr(tokenbuf,':')
-	    && (tmp = pad_findmy(tokenbuf)) != NOT_IN_PAD) {
-	    if (last_lop_op == OP_SORT &&
-		tokenbuf[0] == '$' &&
-		(tokenbuf[1] == 'a' || tokenbuf[1] == 'b')
-		&& !tokenbuf[2])
+	if (!strchr(tokenbuf,':')) {
+#ifdef USE_THREADS
+	    /* Check for single character per-thread magicals */
+	    if (tokenbuf[0] == '$' && tokenbuf[2] == '\0'
+		&& !isALPHA(tokenbuf[1]) /* Rule out obvious non-magicals */
+		&& (tmp = find_thread_magical(&tokenbuf[1])) != NOT_IN_PAD)
 	    {
-		for (d = in_eval ? oldoldbufptr : linestart;
-		     d < bufend && *d != '\n';
-		     d++)
+		yylval.opval = newOP(OP_SPECIFIC, 0);
+		yylval.opval->op_targ = tmp;
+		return PRIVATEREF;
+	    }
+#endif /* USE_THREADS */
+	    if ((tmp = pad_findmy(tokenbuf)) != NOT_IN_PAD) {
+		if (last_lop_op == OP_SORT &&
+		    tokenbuf[0] == '$' &&
+		    (tokenbuf[1] == 'a' || tokenbuf[1] == 'b')
+		    && !tokenbuf[2])
 		{
 		    if (strnEQ(d,"<=>",3) || strnEQ(d,"cmp",3)) {
 			croak("Can't use \"my %s\" in sort comparison",
@@ -1360,7 +1367,13 @@ yylex(void)
 	if (lex_dojoin) {
 	    nextval[nexttoke].ival = 0;
 	    force_next(',');
+#ifdef USE_THREADS
+	    nextval[nexttoke].opval = newOP(OP_SPECIFIC, 0);
+	    nextval[nexttoke].opval->op_targ = find_thread_magical("\"");
+	    force_next(PRIVATEREF);
+#else
 	    force_ident("\"", '$');
+#endif /* USE_THREADS */
 	    nextval[nexttoke].ival = 0;
 	    force_next('$');
 	    nextval[nexttoke].ival = 0;
@@ -5269,7 +5282,7 @@ start_subparse(I32 is_format, U32 flags)
     av_store(comppadlist, 1, (SV*)comppad);
 
     CvPADLIST(compcv) = comppadlist;
-    CvOUTSIDE(compcv) = (CV*)SvREFCNT_inc((SV*)outsidecv);
+    CvOUTSIDE(compcv) = (CV*)SvREFCNT_inc(outsidecv);
 #ifdef USE_THREADS
     CvOWNER(compcv) = 0;
     New(666, CvMUTEXP(compcv), 1, perl_mutex);

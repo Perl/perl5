@@ -1349,6 +1349,8 @@ int runops_standard _((void));
 int runops_debug _((void));
 #endif
 
+#define PER_THREAD_MAGICALS "123456789&`'+/.,\\\";^-%=|~:\001\005!@"
+
 /****************/
 /* Truly global */
 /****************/
