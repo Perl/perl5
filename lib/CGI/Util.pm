@@ -140,6 +140,7 @@ sub unescape {
   my $todecode = shift;
   return undef unless defined($todecode);
   $todecode =~ tr/+/ /;       # pluses become spaces
+    $EBCDIC = "\t" ne "\011";
     if ($EBCDIC) {
       $todecode =~ s/%([0-9a-fA-F]{2})/chr $A2E[hex($1)]/ge;
     } else {
@@ -221,3 +222,37 @@ sub expire_calc {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+CGI::Util - Internal utilities used by CGI module
+
+=head1 SYNOPSIS
+
+none
+
+=head1 DESCRIPTION
+
+no public subroutines
+
+=head1 AUTHOR INFORMATION
+
+Copyright 1995-1998, Lincoln D. Stein.  All rights reserved.  
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+Address bug reports and comments to: lstein@cshl.org.  When sending
+bug reports, please provide the version of CGI.pm, the version of
+Perl, the name and version of your Web server, and the name and
+version of the operating system you are using.  If the problem is even
+remotely browser dependent, please provide information about the
+affected browers as well.
+
+=head1 SEE ALSO
+
+L<CGI>
+
+=cut
