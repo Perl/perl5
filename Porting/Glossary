@@ -467,6 +467,12 @@ d_dbl_dig (d_dbl_dig.U):
 	header files provide DBL_DIG, which is the number of significant
 	digits in a double precision number.
 
+d_dbminitproto (d_dbminitproto.U):
+	This variable conditionally defines the HAS_DBMINIT_PROTO symbol,
+	which indicates to the C program that the system provides
+	a prototype for the dbminit() function.  Otherwise, it is
+	up to the program to supply one.
+
 d_difftime (d_difftime.U):
 	This variable conditionally defines the HAS_DIFFTIME symbol, which
 	indicates to the C program that the difftime() routine is available.
@@ -587,6 +593,12 @@ d_flexfnam (d_flexfnam.U):
 d_flock (d_flock.U):
 	This variable conditionally defines HAS_FLOCK if flock() is
 	available to do file locking.
+
+d_flockproto (d_flockproto.U):
+	This variable conditionally defines the HAS_FLOCK_PROTO symbol,
+	which indicates to the C program that the system provides
+	a prototype for the flock() function.  Otherwise, it is
+	up to the program to supply one.
 
 d_fork (d_fork.U):
 	This variable conditionally defines the HAS_FORK symbol, which
@@ -1498,6 +1510,12 @@ d_sockatmark (d_sockatmark.U):
 	This variable conditionally defines the HAS_SOCKATMARK symbol, which
 	indicates to the C program that the sockatmark() routine is available.
 
+d_sockatmarkproto (d_sockatmarkproto.U):
+	This variable conditionally defines the HAS_SOCKATMARK_PROTO symbol,
+	which indicates to the C program that the system provides
+	a prototype for the sockatmark() function.  Otherwise, it is
+	up to the program to supply one.
+
 d_socket (d_socket.U):
 	This variable conditionally defines HAS_SOCKET, which indicates
 	that the BSD socket interface is supported.
@@ -1658,6 +1676,12 @@ d_syscall (d_syscall.U):
 	This variable conditionally defines HAS_SYSCALL if syscall() is
 	available call arbitrary system calls.
 
+d_syscallproto (d_syscallproto.U):
+	This variable conditionally defines the HAS_SYSCALL_PROTO symbol,
+	which indicates to the C program that the system provides
+	a prototype for the syscall() function.  Otherwise, it is
+	up to the program to supply one.
+
 d_sysconf (d_sysconf.U):
 	This variable conditionally defines the HAS_SYSCONF symbol, which
 	indicates to the C program that the sysconf() routine is available
@@ -1738,6 +1762,12 @@ d_union_semun (d_union_semun.U):
 d_usleep (d_usleep.U):
 	This variable conditionally defines HAS_USLEEP if usleep() is
 	available to do high granularity sleeps.
+
+d_usleepproto (d_usleepproto.U):
+	This variable conditionally defines the HAS_USLEEP_PROTO symbol,
+	which indicates to the C program that the system provides
+	a prototype for the usleep() function.  Otherwise, it is
+	up to the program to supply one.
 
 d_ustat (d_ustat.U):
 	This variable conditionally defines HAS_USTAT if ustat() is

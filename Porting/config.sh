@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Mon Jun  4 06:13:47 EET DST 2001
+# Configuration time: Fri Jun  8 04:49:05 EET DST 2001
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -63,7 +63,7 @@ ccsymbols='__alpha=1 __LANGUAGE_C__=1 __osf__=1 __unix__=1 _LONGLONG=1 _SYSTYPE_
 ccversion='V5.6-082'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Mon Jun  4 06:13:47 EET DST 2001'
+cf_time='Fri Jun  8 04:49:05 EET DST 2001'
 charsize='1'
 chgrp=''
 chmod=''
@@ -128,6 +128,7 @@ d_crypt='define'
 d_csh='define'
 d_cuserid='define'
 d_dbl_dig='define'
+d_dbminitproto='undef'
 d_difftime='define'
 d_dirnamlen='define'
 d_dlerror='define'
@@ -155,6 +156,7 @@ d_fds_bits='define'
 d_fgetpos='define'
 d_flexfnam='define'
 d_flock='define'
+d_flockproto='undef'
 d_fork='define'
 d_fpathconf='define'
 d_fpos64_t='undef'
@@ -240,7 +242,7 @@ d_mkstemp='define'
 d_mkstemps='undef'
 d_mktime='define'
 d_mmap='define'
-d_modfl='define'
+d_modfl='undef'
 d_mprotect='define'
 d_msg='define'
 d_msg_ctrunc='define'
@@ -341,6 +343,7 @@ d_sigaction='define'
 d_sigprocmask='define'
 d_sigsetjmp='define'
 d_sockatmark='undef'
+d_sockatmarkproto='undef'
 d_socket='define'
 d_socklen_t='undef'
 d_sockpair='define'
@@ -377,6 +380,7 @@ d_strxfrm='define'
 d_suidsafe='undef'
 d_symlink='define'
 d_syscall='define'
+d_syscallproto='undef'
 d_sysconf='define'
 d_sysernlst=''
 d_syserrlst='define'
@@ -395,6 +399,7 @@ d_umask='define'
 d_uname='define'
 d_union_semun='undef'
 d_usleep='define'
+d_usleepproto='undef'
 d_ustat='define'
 d_vendorarch='undef'
 d_vendorbin='undef'
@@ -664,7 +669,7 @@ patchlevel='7'
 path_sep=':'
 perl5='/u/vieraat/vieraat/jhi/Perl/bin/perl'
 perl=''
-perl_patchlevel='10418'
+perl_patchlevel='10438'
 perladmin='yourname@yourhost.yourplace.com'
 perllibs='-lm -liconv -lutil -lpthread -lexc'
 perlpath='/opt/perl/bin/perl'
@@ -859,7 +864,7 @@ PERL_SUBVERSION=1
 PERL_API_REVISION=5
 PERL_API_VERSION=5
 PERL_API_SUBVERSION=0
-PERL_PATCHLEVEL=10418
+PERL_PATCHLEVEL=10438
 PERL_CONFIG_SH=true
 # Variables propagated from previous config.sh file.
 pp_sys_cflags='ccflags="$ccflags -DNO_EFF_ONLY_OK"'
