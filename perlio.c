@@ -552,12 +552,6 @@ PerlIO_clone(pTHX_ PerlInterpreter *proto, CLONE_PARAMS *param)
 }
 
 void
-PerlIO_cleanup(pTHX)
-{
-    PerlIO_cleantable(aTHX_ &PL_perlio);
-}
-
-void
 PerlIO_destruct(pTHX)
 {
     PerlIO **table = &PL_perlio;
@@ -1992,18 +1986,59 @@ PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
 }
 
 #define PERLIO_MAX_REFCOUNTABLE_FD 2048
-#ifdef USE_ITHREADS
+#ifdef USE_THREADS
 perl_mutex PerlIO_mutex;
-int PerlIO_fd_refcnt[PERLIO_MAX_REFCOUNTABLE_FD] = {1,1,1};
 #endif
+int PerlIO_fd_refcnt[PERLIO_MAX_REFCOUNTABLE_FD];
 
 void
 PerlIO_init(pTHX)
 {
  /* Place holder for stdstreams call ??? */
-#ifdef USE_ITHREADS
+#ifdef USE_THREADS
  MUTEX_INIT(&PerlIO_mutex);
 #endif
+}
+
+void
+PerlIOUnix_refcnt_inc(int fd)
+{
+    if (fd >= 0 && fd < PERLIO_MAX_REFCOUNTABLE_FD) {
+#ifdef USE_THREADS
+	MUTEX_LOCK(&PerlIO_mutex);
+#endif
+	PerlIO_fd_refcnt[fd]++;
+	PerlIO_debug("fd %d refcnt=%d\n",fd,PerlIO_fd_refcnt[fd]);
+#ifdef USE_THREADS
+	MUTEX_UNLOCK(&PerlIO_mutex);
+#endif
+    }
+}
+
+void
+PerlIO_cleanup(pTHX)
+{
+    PerlIOUnix_refcnt_inc(0);
+    PerlIOUnix_refcnt_inc(1);
+    PerlIOUnix_refcnt_inc(2);
+    PerlIO_cleantable(aTHX_ &PL_perlio);
+}
+
+int
+PerlIOUnix_refcnt_dec(int fd)
+{
+    int cnt = 0;
+    if (fd >= 0 && fd < PERLIO_MAX_REFCOUNTABLE_FD) {
+#ifdef USE_THREADS
+	MUTEX_LOCK(&PerlIO_mutex);
+#endif
+	cnt = --PerlIO_fd_refcnt[fd];
+	PerlIO_debug("fd %d refcnt=%d\n",fd,cnt);
+#ifdef USE_THREADS
+	MUTEX_UNLOCK(&PerlIO_mutex);
+#endif
+    }
+    return cnt;
 }
 
 /*--------------------------------------------------------------------------------------*/
@@ -2078,20 +2113,6 @@ PerlIOUnix_fileno(PerlIO *f)
 {
     return PerlIOSelf(f, PerlIOUnix)->fd;
 }
-
-void
-PerlIOUnix_refcnt_inc(int fd)
-{
-#ifdef USE_ITHREADS
-    if (fd >= 0 && fd < PERLIO_MAX_REFCOUNTABLE_FD) {
-	MUTEX_LOCK(&PerlIO_mutex);
-	PerlIO_fd_refcnt[fd]++;
-	PerlIO_debug("fd %d refcnt=%d\n",fd,PerlIO_fd_refcnt[fd]);
-	MUTEX_UNLOCK(&PerlIO_mutex);
-    }
-#endif
-}
-
 
 IV
 PerlIOUnix_pushed(PerlIO *f, const char *mode, SV *arg)
@@ -2238,23 +2259,16 @@ PerlIOUnix_close(PerlIO *f)
     dTHX;
     int fd = PerlIOSelf(f, PerlIOUnix)->fd;
     int code = 0;
-#ifdef USE_ITHREADS
-    if ((PerlIOBase(f)->flags & PERLIO_F_OPEN) && fd >= 0 && fd < PERLIO_MAX_REFCOUNTABLE_FD) {
-	MUTEX_LOCK(&PerlIO_mutex); 
-	if (--PerlIO_fd_refcnt[fd] > 0) {
-	    PerlIO_debug("fd %d refcnt=%d\n",fd,PerlIO_fd_refcnt[fd]);
-	    MUTEX_UNLOCK(&PerlIO_mutex); 
+    if (PerlIOBase(f)->flags & PERLIO_F_OPEN) {
+	if (PerlIOUnix_refcnt_dec(fd) > 0) {
 	    PerlIOBase(f)->flags &= ~PERLIO_F_OPEN;
 	    return 0;
         }
-	PerlIO_debug("fd %d refcnt=%d\n",fd,PerlIO_fd_refcnt[fd]);
-	MUTEX_UNLOCK(&PerlIO_mutex); 
     }
     else {
 	SETERRNO(EBADF,SS$_IVCHAN);
 	return -1;
     }
-#endif
     while (PerlLIO_close(fd) != 0) {
 	if (errno != EINTR) {
 	    code = -1;
