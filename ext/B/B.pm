@@ -107,6 +107,11 @@ sub timing_info {
 }
 
 my %symtable;
+
+sub clearsym {
+    %symtable = ();
+}
+
 sub savesym {
     my ($obj, $value) = @_;
 #    warn(sprintf("savesym: sym_%x => %s\n", $$obj, $value)); # debug

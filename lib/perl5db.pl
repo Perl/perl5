@@ -350,7 +350,7 @@ if ($notty) {
     print $OUT ("Emacs support ",
 		$emacs ? "enabled" : "available",
 		".\n");
-    print $OUT "\nEnter h or `h h' for help.\n\n";
+    print $OUT "\nEnter h or `h h' for help, run `perldoc perldebug' for more help.\n\n";
   }
 }
 
@@ -1867,6 +1867,8 @@ B<R>		Pure-man-restart of debugger, some of debugger state
 		history, breakpoints and actions, debugger B<O>ptions 
 		and the following command-line options: I<-w>, I<-I>, I<-e>.
 B<h> [I<db_command>]	Get help [on a specific debugger command], enter B<|h> to page.
+		Complete description of debugger is available in B<perldebug>
+		section of Perl documention
 B<h h>		Summary of debugger commands.
 B<q> or B<^D>		Quit. Set B<\$DB::finished = 0> to debug global destruction.
 
@@ -1876,18 +1878,17 @@ I<List/search source lines:>               I<Control script execution:>
   B<l> [I<ln>|I<sub>]  List source code            B<T>           Stack trace
   B<-> or B<.>      List previous/current line  B<s> [I<expr>]    Single step [in expr]
   B<w> [I<line>]    List around line            B<n> [I<expr>]    Next, steps over subs
-  B<f> I<filename>  View source in file         <B<CR>>        Repeat last B<n> or B<s>
+  B<f> I<filename>  View source in file         <B<CR>/B<Enter>>  Repeat last B<n> or B<s>
   B</>I<pattern>B</> B<?>I<patt>B<?>   Search forw/backw    B<r>           Return from subroutine
   B<v>	      Show versions of modules    B<c> [I<ln>|I<sub>]  Continue until position
 I<Debugger controls:>                        B<L>           List break/watch/actions
   B<O> [...]     Set debugger options        B<t> [I<expr>]    Toggle trace [trace expr]
-  B<<>[B<<>] or B<{>[B<{>] [I<cmd>]   Do before prompt   B<b> [I<ln>|I<event>] [I<cnd>]  Set breakpoint
-  B<>>[B<>>] [I<cmd>]  Do after prompt             B<b> I<sub> [I<cnd>] Set breakpoint for sub
+  B<<>[B<<>]|B<{>[B<{>]|B<>>[B<>>] [I<cmd>] Do pre/post-prompt B<b> [I<ln>|I<event>|I<sub>] [I<cnd>] Set breakpoint
   B<$prc> [I<N>|I<pat>]   Redo a previous command     B<d> [I<ln>] or B<D> Delete a/all breakpoints
   B<H> [I<-num>]    Display last num commands   B<a> [I<ln>] I<cmd>  Do cmd before line
   B<=> [I<a> I<val>]   Define/list an alias        B<W> I<expr>      Add a watch expression
   B<h> [I<db_cmd>]  Get help on command         B<A> or B<W>      Delete all actions/watch
-  B<|>[B<|>]I<dbcmd>   Send output to pager        B<$psh>\[B<$psh>\] I<syscmd> Run cmd in a subprocess
+  B<|>[B<|>]I<db_cmd>  Send output to pager        B<$psh>\[B<$psh>\] I<syscmd> Run cmd in a subprocess
   B<q> or B<^D>     Quit			  B<R>	      Attempt a restart
 I<Data Examination:>	      B<expr>     Execute perl code, also see: B<s>,B<n>,B<t> I<expr>
   B<x>|B<m> I<expr>	Evals expr in array context, dumps the result or lists methods.
@@ -1895,6 +1896,7 @@ I<Data Examination:>	      B<expr>     Execute perl code, also see: B<s>,B<n>,B<
   B<S> [[B<!>]I<pat>]	List subroutine names [not] matching pattern
   B<V> [I<Pk> [I<Vars>]]	List Variables in Package.  Vars can be ~pattern or !pattern.
   B<X> [I<Vars>]	Same as \"B<V> I<current_package> [I<Vars>]\".
+I<More help for> B<db_cmd>I<:>  Type B<h> I<cmd_letter>  Run B<perldoc perldebug> for more help.
 END_SUM
 				# ')}}; # Fix balance of Emacs parsing
 }

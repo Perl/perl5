@@ -119,6 +119,10 @@ PERLVAR(Tfirstgv,	GV *)		/* $a */
 PERLVAR(Tsecondgv,	GV *)		/* $b */
 PERLVAR(Tsortcxix,	I32)		/* from pp_ctl.c */
 
+/* float buffer */
+PERLVAR(Tefloatbuf,	char*)
+PERLVAR(Tefloatsize,	STRLEN)
+
 /* regex stuff */
 
 PERLVAR(Tscreamfirst,	I32 *)

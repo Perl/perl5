@@ -164,8 +164,21 @@ PP(pp_concat)
 	s = SvPV_force(TARG, len);
     }
     s = SvPV(right,len);
-    if (SvOK(TARG))
+    if (SvOK(TARG)) {
+#if defined(PERL_Y2KWARN)
+	if ((SvIOK(right) || SvNOK(right)) && ckWARN(WARN_MISC)) {
+	    STRLEN n;
+	    char *s = SvPV(TARG,n);
+	    if (n >= 2 && s[n-2] == '1' && s[n-1] == '9'
+		&& (n == 2 || !isDIGIT(s[n-3])))
+	    {
+		Perl_warner(aTHX_ WARN_MISC, "Possible Y2K bug: %s",
+			    "about to append an integer to '19'");
+	    }
+	}
+#endif
 	sv_catpvn(TARG,s,len);
+    }
     else
 	sv_setpvn(TARG,s,len);	/* suppress warning */
     SETTARG;

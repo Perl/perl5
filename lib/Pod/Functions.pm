@@ -65,6 +65,8 @@ while (<DATA>) {
     }
 } 
 
+close DATA;
+
 unless (caller) { 
     foreach $type ( @Type_Order ) {
 	$list = join(", ", sort @{$Kinds{$type}});

@@ -17,6 +17,7 @@ sub terse {
 sub compile {
     my $order = shift;
     my @options = @_;
+    B::clearsym();
     if (@options) {
 	return sub {
 	    my $objname;

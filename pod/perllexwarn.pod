@@ -313,6 +313,10 @@ produce a fatal error.
  
 The experimental features need bottomed out.
 
+  perldiag.pod
+    Need to add warning class information and notes on
+    how to use the class info with the warnings pragma.
+
   perl5db.pl
     The debugger saves and restores C<$^W> at runtime. I haven't checked
     whether the debugger will still work with the lexical warnings

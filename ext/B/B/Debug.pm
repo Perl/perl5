@@ -247,6 +247,7 @@ sub B::SPECIAL::debug {
 
 sub compile {
     my $order = shift;
+    B::clearsym();
     if ($order eq "exec") {
         return sub { walkoptree_exec(main_start, "debug") }
     } else {

@@ -3649,24 +3649,26 @@ Like C<sv_usepvn>, but also handles 'set' magic.
 
 	void	sv_usepvn_mg (SV* sv, char* ptr, STRLEN len)
 
-=item sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
+=item sv_vcatpvfn
 
 Processes its arguments like C<vsprintf> and appends the formatted output
 to an SV.  Uses an array of SVs if the C style variable argument list is
-missing (NULL).  Indicates if locale information has been used for formatting.
+missing (NULL).  When running with taint checks enabled, indicates via
+C<maybe_tainted> if results are untrustworthy (often due to the use of
+locales).
 
 	void	sv_catpvfn (SV* sv, const char* pat, STRLEN patlen,
 			    va_list *args, SV **svargs, I32 svmax,
-			    bool *used_locale);
+			    bool *maybe_tainted);
 
-=item sv_vsetpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
+=item sv_vsetpvfn
 
 Works like C<vcatpvfn> but copies the text into the SV instead of
 appending it.
 
 	void	sv_setpvfn (SV* sv, const char* pat, STRLEN patlen,
 			    va_list *args, SV **svargs, I32 svmax,
-			    bool *used_locale);
+			    bool *maybe_tainted);
 
 =item SvUV
 

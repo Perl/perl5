@@ -130,10 +130,6 @@
 #define PL_dowarn		(*Perl_Idowarn_ptr(aTHXo))
 #undef  PL_e_script
 #define PL_e_script		(*Perl_Ie_script_ptr(aTHXo))
-#undef  PL_efloatbuf
-#define PL_efloatbuf		(*Perl_Iefloatbuf_ptr(aTHXo))
-#undef  PL_efloatsize
-#define PL_efloatsize		(*Perl_Iefloatsize_ptr(aTHXo))
 #undef  PL_egid
 #define PL_egid			(*Perl_Iegid_ptr(aTHXo))
 #undef  PL_endav
@@ -580,6 +576,10 @@
 #define PL_dirty		(*Perl_Tdirty_ptr(aTHXo))
 #undef  PL_dumpindent
 #define PL_dumpindent		(*Perl_Tdumpindent_ptr(aTHXo))
+#undef  PL_efloatbuf
+#define PL_efloatbuf		(*Perl_Tefloatbuf_ptr(aTHXo))
+#undef  PL_efloatsize
+#define PL_efloatsize		(*Perl_Tefloatsize_ptr(aTHXo))
 #undef  PL_extralen
 #define PL_extralen		(*Perl_Textralen_ptr(aTHXo))
 #undef  PL_firstgv

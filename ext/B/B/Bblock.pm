@@ -129,6 +129,7 @@ sub B::PMOP::mark_if_leader {
 
 sub compile {
     my @options = @_;
+    B::clearsym();
     if (@options) {
 	return sub {
 	    my $objname;

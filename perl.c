@@ -409,6 +409,11 @@ perl_destruct(pTHXx)
     Safefree(PL_screamnext);
     PL_screamnext  = 0;
 
+    /* float buffer */
+    Safefree(PL_efloatbuf);
+    PL_efloatbuf = Nullch;
+    PL_efloatsize = 0;
+
     /* startup and shutdown function lists */
     SvREFCNT_dec(PL_beginav);
     SvREFCNT_dec(PL_endav);

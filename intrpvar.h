@@ -353,8 +353,6 @@ PERLVAR(Iyyval,		YYSTYPE)
 PERLVAR(Iyylval,	YYSTYPE)
 
 PERLVAR(Iglob_index,	int)
-PERLVAR(Iefloatbuf,	char*)
-PERLVAR(Iefloatsize,	STRLEN)
 PERLVAR(Isrand_called,	bool)
 PERLVARA(Iuudmap,256,	char)
 PERLVAR(Ibitcount,	char *)

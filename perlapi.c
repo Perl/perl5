@@ -4134,16 +4134,16 @@ Perl_sv_usepvn(pTHXo_ SV* sv, char* ptr, STRLEN len)
 
 #undef  Perl_sv_vcatpvfn
 void
-Perl_sv_vcatpvfn(pTHXo_ SV* sv, const char* pat, STRLEN patlen, va_list* args, SV** svargs, I32 svmax, bool *used_locale)
+Perl_sv_vcatpvfn(pTHXo_ SV* sv, const char* pat, STRLEN patlen, va_list* args, SV** svargs, I32 svmax, bool *maybe_tainted)
 {
-    ((CPerlObj*)pPerl)->Perl_sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale);
+    ((CPerlObj*)pPerl)->Perl_sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, maybe_tainted);
 }
 
 #undef  Perl_sv_vsetpvfn
 void
-Perl_sv_vsetpvfn(pTHXo_ SV* sv, const char* pat, STRLEN patlen, va_list* args, SV** svargs, I32 svmax, bool *used_locale)
+Perl_sv_vsetpvfn(pTHXo_ SV* sv, const char* pat, STRLEN patlen, va_list* args, SV** svargs, I32 svmax, bool *maybe_tainted)
 {
-    ((CPerlObj*)pPerl)->Perl_sv_vsetpvfn(sv, pat, patlen, args, svargs, svmax, used_locale);
+    ((CPerlObj*)pPerl)->Perl_sv_vsetpvfn(sv, pat, patlen, args, svargs, svmax, maybe_tainted);
 }
 
 #undef  Perl_swash_init

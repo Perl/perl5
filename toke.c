@@ -213,8 +213,12 @@ S_no_op(pTHX_ char *what, char *s)
     char *oldbp = PL_bufptr;
     bool is_first = (PL_oldbufptr == PL_linestart);
 
-    assert(s >= oldbp);
-    PL_bufptr = s;
+    if (!s)
+	s = oldbp;
+    else {
+	assert(s >= oldbp);
+	PL_bufptr = s;
+    }
     yywarn(Perl_form(aTHX_ "%s found where operator expected", what));
     if (is_first)
 	Perl_warn(aTHX_ "\t(Missing semicolon on previous line?)\n");
