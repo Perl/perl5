@@ -530,6 +530,8 @@ C<REFCNT> (corresponding to the C function C<SvREFCNT>).
 
 =item XSUBANY
 
+=item CvFLAGS
+
 =back
 
 =head2 B::HV METHODS
