@@ -171,8 +171,8 @@ newline representation.  A single line of code will often suffice:
 Some of this may be confusing.  Here's a handy reference to the ASCII CR
 and LF characters.  You can print it out and stick it in your wallet.
 
-    LF  ==  \012  ==  \x0A  ==  \cJ  ==  ASCII 10
-    CR  ==  \015  ==  \x0D  ==  \cM  ==  ASCII 13
+    LF  eq  \012  eq  \x0A  eq  \cJ  eq  chr(10)  eq  ASCII 10
+    CR  eq  \015  eq  \x0D  eq  \cM  eq  chr(13)  eq  ASCII 13
 
              | Unix | DOS  | Mac  |
         ---------------------------
@@ -188,7 +188,23 @@ The Unix column assumes that you are not accessing a serial line
 "\n", and "\n" on output becomes CRLF.
 
 These are just the most common definitions of C<\n> and C<\r> in Perl.
-There may well be others.
+There may well be others.  For example, on an EBCDIC implemtation such
+as z/OS or OS/400 the above material is similar to "Unix" but the code
+numbers change:
+
+    LF  eq  \025  eq  \x15  eq           chr(21)  eq  CP-1047 21
+    LF  eq  \045  eq  \x25  eq  \cU  eq  chr(37)  eq  CP-0037 37
+    CR  eq  \015  eq  \x0D  eq  \cM  eq  chr(13)  eq  CP-1047 13
+    CR  eq  \015  eq  \x0D  eq  \cM  eq  chr(13)  eq  CP-0037 13
+
+             | z/OS | OS/400 |
+        ----------------------
+        \n   |  LF  |  LF    |
+        \r   |  CR  |  CR    |
+        \n * |  LF  |  LF    |
+        \r * |  CR  |  CR    |
+        ----------------------
+        * text-mode STDIO
 
 =head2 Numbers endianness and Width
 
@@ -262,7 +278,7 @@ timestamp (meaning that about the only portable timestamp is the
 modification timestamp), or one second granularity of any timestamps
 (e.g. the FAT filesystem limits the time granularity to two seconds).
 
-The "inode change timestamp" (the <-C> filetest) may really be the
+The "inode change timestamp" (the C<-C> filetest) may really be the
 "creation timestamp" (which it is not in UNIX).
 
 VOS perl can emulate Unix filenames with C</> as path separator.  The
@@ -1594,14 +1610,6 @@ Not implemented. (S<Mac OS>, Win32, Plan9)
 
 Not implemented. (Win32, Plan9)
 
-=item setpwent
-
-Not implemented. (S<Mac OS>, Win32, S<RISC OS>)
-
-=item setgrent
-
-Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>)
-
 =item sethostent STAYOPEN
 
 Not implemented. (S<Mac OS>, Win32, Plan9, S<RISC OS>)
@@ -1746,7 +1754,7 @@ Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
 
 =item setgrent
 
-Not implemented. (MPE/iX, Win32)
+Not implemented. (S<Mac OS>, MPE/iX, VMS, Win32, VMS, S<RISC OS>)
 
 =item setpgrp PID,PGRP
 
@@ -1758,7 +1766,7 @@ Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
 
 =item setpwent
 
-Not implemented. (MPE/iX, Win32)
+Not implemented. (S<Mac OS>, MPE/iX, Win32, S<RISC OS>)
 
 =item setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL
 
@@ -1835,8 +1843,8 @@ C<$?> right by eight to get the exit value, or that C<$? & 127>
 would give you the number of the signal that terminated the program,
 or that C<$? & 128> would test true if the program was terminated by a
 coredump.  Instead, use the POSIX W*() interfaces: for example, use
-WIFEXITED($?) an WEXITVALUE($?) to test for a normal exit and the exit
-value, and WIFSIGNALED($?) and WTERMSIG($?)  for a signal exit and the
+WIFEXITED($?) and WEXITVALUE($?) to test for a normal exit and the exit
+value, WIFSIGNALED($?) and WTERMSIG($?) for a signal exit and the
 signal.  Core dumping is not a portable concept, so there's no portable
 way to test for that.
 
