@@ -9141,12 +9141,12 @@ missing (NULL).  When running with taint checks enabled, indicates via
 C<maybe_tainted> if results are untrustworthy (often due to the use of
 locales).
 
-XXX Except that it maybe_tainted is never assigned to.
-
 Usually used via one of its frontends C<sv_vcatpvf> and C<sv_vcatpvf_mg>.
 
 =cut
 */
+
+/* XXX maybe_tainted is never assigned to, so the doc above is lying. */
 
 void
 Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *maybe_tainted)
