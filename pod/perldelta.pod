@@ -2792,13 +2792,6 @@ threads are considered fundamentally broken.
  op/numconvert.t                        1440   13   0.90%  208 509-510
  657-658 665-666 829-830 989-990 1149-1150
 
-=head2 UNICOS and UNICOS/mk
-
-The io/fs test #31 is failing because in UNICOS and UNICOS/mk the Perl
-truncate() cannot be used to grow the size of filehandles, only to
-reduce the size.  The workaround is to truncate files instead of
-filehandles.
-
 =head2 UNICOS/mk
 
 =over 4
