@@ -773,6 +773,7 @@ sub deparse_format {
 		= @$self{qw'curstash warnings hints'};
     my $op = $form->ROOT;
     my $kid;
+    return "\f." if $op->first->name eq 'stub';
     $op = $op->first->first; # skip leavewrite, lineseq
     while (not null $op) {
 	$op = $op->sibling; # skip nextstate
