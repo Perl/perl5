@@ -44,8 +44,7 @@ else {
 }
 push(@cmd,ldopts());
 
-
-print "#@cmd\n";
+print "# @cmd"; # where is the newline coming from? ldopts()?
 print "not " if system(join(' ',@cmd));
 print "ok 1\n";
 
@@ -53,9 +52,10 @@ my $embed_test = File::Spec->catfile(File::Spec->curdir, "embed_test");
 
 print "not " if system($embed_test);
 print "ok 9\n";
+
 unlink($exe,"embed_test.c");
 
-#gcc -g -I.. -L../ -o perl_test perl_test.c -lperl `../perl -I../lib -MExtUtils::Embed -I../ -e ccopts -e ldopts`
+# gcc -g -I.. -L../ -o perl_test perl_test.c -lperl `../perl -I../lib -MExtUtils::Embed -I../ -e ccopts -e ldopts`
 
 __END__
 
