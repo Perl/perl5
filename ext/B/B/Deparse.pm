@@ -3462,8 +3462,7 @@ sub matchop {
 	$kid = $kid->sibling;
     }
     if (null $kid) {
-	$re = re_unback($op->precomp);
-	$re = re_uninterp(escape_str($re)) unless $op->pmflags & PMf_EXTENDED;
+	$re = re_uninterp(escape_str(re_unback($op->precomp)));
     } else {
 	$re = $self->deparse($kid, 1);
     }
