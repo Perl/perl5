@@ -307,7 +307,7 @@ MAGIC *mg;
 	    if (rx->subend && (s = rx->endp[0])) {
 		i = rx->subend - s;
 		if (i >= 0)
-		    return 0;
+		    return i;
 	    }
 	}
 	return 0;
