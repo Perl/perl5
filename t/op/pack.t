@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 5848;
+plan tests => 5849;
 
 use strict;
 use warnings;
@@ -1093,4 +1093,6 @@ foreach my $template (qw(A Z c C s S i I l L n N v V q Q j J f d F D u U w)) {
 }
 
 ok(pack('u2', 'AA'), "[perl #8026]"); # used to hang and eat RAM in perl 5.7.2
+
+ok(1, "fake success (change #18751, feature not present in 5.8.1)");
 
