@@ -1298,9 +1298,9 @@ S_scan_const(pTHX_ char *start)
 	   (void)utf8_to_uv((U8*)s, &len);
 	   if (len == 1) {
 	       /* illegal UTF8, make it valid */
-	       /* need to grow with 1 char to be safe */
 	       char *old_pvx = SvPVX(sv);
-	       d = SvGROW(sv, SvCUR(sv)+2) + (d - old_pvx);
+	       /* need space for one extra char (NOTE: SvCUR() not set here) */
+	       d = SvGROW(sv, SvLEN(sv) + 1) + (d - old_pvx);
 	       d = (char*)uv_to_utf8((U8*)d, (U8)*s++);
 	   }
 	   else {

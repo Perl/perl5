@@ -1907,6 +1907,8 @@ S_usage(pTHX_ char *name)		/* XXX move this out into a module ? */
 "-v              print version, subversion (includes VERY IMPORTANT perl info)",
 "-V[:variable]   print configuration summary (or a single Config.pm variable)",
 "-w              enable many useful warnings (RECOMMENDED)",
+"-W              enable all warnings",
+"-X              disable all warnings",
 "-x[directory]   strip off text before #!perl line and perhaps cd to directory",
 "\n",
 NULL

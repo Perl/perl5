@@ -188,6 +188,41 @@ here and in commands:
     	    	    E<html>		Some non-numeric HTML entity, such
 					as E<Agrave>
 
+Most of the time, you will only need a single set of angle brackets to
+delimit the beginning and end of interior sequences.  However, sometimes
+you will want to put a right angle bracket (or greater-than sign '>')
+inside of a sequence.  This is particularly common when using a sequence
+to provide a different font-type for a snippet of code.  As with all
+things in Perl, there is more than one way to do it.  One way is to
+simply escape the closing bracket using an C<E> sequence:
+
+    C<$a E<lt>=E<gt> $b>
+
+This will produce: "C<$a E<lt>=E<gt> $b>"
+
+A more readable, and perhaps more "plain" way is to use an alternate set of
+delimiters that doesn't require a ">" to be escaped.  As of perl5.5.660,
+doubled angle brackets ("<<" and ">>") may be used I<if and only if there
+is whitespace immediately following the opening delimiter and immediately
+preceding the closing delimiter!> For example, the following will do the
+trick:
+
+    C<< $a <=> $b >>
+
+In fact, you can use as many repeated angle-brackets as you like so
+long as you have the same number of them in the opening and closing
+delimiters, and make sure that whitespace immediately follows the last
+'<' of the opening delimiter, and immediately precedes the first '>' of
+the closing delimiter.  So the following will also work:
+
+    C<<< $a <=> $b >>>
+    C<<<< $a <=> $b >>>>
+
+This is currently supported by pod2text (Pod::Text), pod2man (Pod::Man),
+and any other pod2xxx and Pod::Xxxx translator that uses Pod::Parser
+1.093 or later.
+
+
 =head2 The Intent
 
 That's it.  The intent is simplicity, not power.  I wanted paragraphs
