@@ -229,6 +229,15 @@ sub bootstrap {
 	"  dynamic loading or has the $module module statically linked into it.)\n")
 	unless defined(&dl_load_file);
 
+EOT
+
+print OUT <<'EOT' if $^O eq 'os2';
+    # Can dynaload, but cannot dynaload Perl modules...
+    die 'Dynaloaded Perl modules are not available in this build of Perl' if $OS2::is_static;
+
+EOT
+
+print OUT <<'EOT';
     my @modparts = split(/::/,$module);
     my $modfname = $modparts[-1];
 

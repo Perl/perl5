@@ -2875,6 +2875,10 @@ PerlIOStdio_invalidate_fileno(pTHX_ FILE *f)
      */
     f->_file = -1;
     return 1;
+#  elif defined(__EMX__)
+    /* f->_flags &= ~_IOOPEN; */	/* Will leak stream->_buffer */
+    f->_handle = -1;
+    return 1;
 #  elif defined(__CYGWIN__)
     /* There may be a better way on CYGWIN:
         - we could insert a dummy func in the _close function entry
