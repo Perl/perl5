@@ -948,7 +948,7 @@ PP(pp_mapwhile)
 	     * (we use undef here). And so we certainly don't want to do mortal
 	     * copies of meaningless values. */
 	    while (items-- > 0) {
-		POPs;
+		(void)POPs;
 		*dst-- = &PL_sv_undef;
 	    }
 	}

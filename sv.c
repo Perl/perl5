@@ -4227,7 +4227,7 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
     }
     else
 	new_SV(dstr);
-    SvUPGRADE (dstr, SVt_PVIV);
+    (void)SvUPGRADE (dstr, SVt_PVIV);
 
     assert (SvPOK(sstr));
     assert (SvPOKp(sstr));
@@ -4250,7 +4250,7 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 	SV_COW_NEXT_SV_SET(dstr, SV_COW_NEXT_SV(sstr));
     } else {
 	assert ((SvFLAGS(sstr) & CAN_COW_MASK) == CAN_COW_FLAGS);
-	SvUPGRADE (sstr, SVt_PVIV);
+	(void)SvUPGRADE (sstr, SVt_PVIV);
 	SvREADONLY_on(sstr);
 	SvFAKE_on(sstr);
 	DEBUG_C(PerlIO_printf(Perl_debug_log,
