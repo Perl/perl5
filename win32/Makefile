@@ -101,7 +101,7 @@ LIB32=$(LINK32) -lib
 RUNTIME  = -MD
 !ENDIF
 INCLUDES = -I.\include -I. -I..
-#PCHFLAGS = -Fp"$(INTDIR)/modules.pch" -YX 
+#PCHFLAGS = -Fpc:\temp\modules.pch -YX 
 DEFINES  = -DWIN32 -D_CONSOLE $(BUILDOPT) $(CRYPT_FLAG)
 LOCDEFS  = -DPERLDLL -DPERL_CORE
 SUBSYS   = console
@@ -552,7 +552,7 @@ doc: $(PERLEXE)
 	cd ..\win32
 	copy ..\README.win32 ..\pod\perlwin32.pod
 	$(PERLEXE) -I..\lib ..\installhtml --podroot=.. --htmldir=./html \
-	    --podpath=pod:lib:ext:utils --htmlroot="//$(INST_HTML::=|)" \
+	    --podpath=pod:lib:ext:utils --htmlroot="file://$(INST_HTML::=|)" \
 	    --libpod=perlfunc:perlguts:perlvar:perlrun:perlop --recurse
 
 utils: $(PERLEXE)
