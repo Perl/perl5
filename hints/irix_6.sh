@@ -63,7 +63,7 @@ case "$cc" in
 	ld=ld
 	ldflags=' -L/usr/local/lib -L/usr/lib32 -L/lib32'
 	cccdlflags=' '
-	lddlflags="-n32 -shared"
+        lddlflags="-n32 -shared -check_registry /usr/lib32/so_locations"
 	libc='/usr/lib32/libc.so'
 	plibpth='/usr/lib32 /lib32 /usr/ccs/lib'
 	nm_opt='-p'
