@@ -298,7 +298,7 @@ sub B::PADOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    $padopsect->add(sprintf("s\\_%x, s\\_%x, NULL, %u, %u, %u, 0x%x, 0x%x, Nullgv",
+    $padopsect->add(sprintf("s\\_%x, s\\_%x, NULL, %u, %u, %u, 0x%x, 0x%x, 0",
 			   ${$op->next}, ${$op->sibling},
 			   $op->targ, $op->type, $op_seq, $op->flags,
 			   $op->private));
@@ -314,7 +314,7 @@ sub B::COP::save {
     return $sym if defined $sym;
     warn sprintf("COP: line %d file %s\n", $op->line, $op->file)
 	if $debug_cops;
-    $copsect->add(sprintf("s\\_%x, s\\_%x, NULL, %u, %u, %u, 0x%x, 0x%x, %s, Nullhv, Nullgv, %u, %d, %u",
+    $copsect->add(sprintf("s\\_%x, s\\_%x, NULL, %u, %u, %u, 0x%x, 0x%x, %s, NULL, NULL, %u, %d, %u",
 			  ${$op->next}, ${$op->sibling},
 			  $op->targ, $op->type, $op_seq, $op->flags,
 			  $op->private, cstring($op->label), $op->cop_seq,
@@ -1090,6 +1090,7 @@ sub output_boilerplate {
     print <<'EOT';
 #include "EXTERN.h"
 #include "perl.h"
+#include "XSUB.h"
 
 /* Workaround for mapstart: the only op which needs a different ppaddr */
 #undef Perl_pp_mapstart
