@@ -1,5 +1,5 @@
 
-use Devel::Harness;
+use Devel::PPPort::Harness;
 
 use strict;
 
@@ -37,41 +37,41 @@ sub ok {
 } 
 
 ok "Static newCONSTSUB()", 
-   sub { Devel::Harness::test1(); Devel::Harness::test_value_1() == 1} ;
+   sub { Devel::PPPort::Harness::test1(); Devel::PPPort::Harness::test_value_1() == 1} ;
 
 ok "Global newCONSTSUB()", 
-   sub { Devel::Harness::test2(); Devel::Harness::test_value_2() == 2} ;
+   sub { Devel::PPPort::Harness::test2(); Devel::PPPort::Harness::test_value_2() == 2} ;
 
 ok "Extern newCONSTSUB()", 
-   sub { Devel::Harness::test3(); Devel::Harness::test_value_3() == 3} ;
+   sub { Devel::PPPort::Harness::test3(); Devel::PPPort::Harness::test_value_3() == 3} ;
 
-ok "newRV_inc()", sub { Devel::Harness::test4()} ;
+ok "newRV_inc()", sub { Devel::PPPort::Harness::test4()} ;
 
-ok "newRV_noinc()", sub { Devel::Harness::test5()} ;
+ok "newRV_noinc()", sub { Devel::PPPort::Harness::test5()} ;
 
-ok "PL_sv_undef", sub { not defined Devel::Harness::test6()} ;
+ok "PL_sv_undef", sub { not defined Devel::PPPort::Harness::test6()} ;
 
-ok "PL_sv_yes", sub { Devel::Harness::test7()} ;
+ok "PL_sv_yes", sub { Devel::PPPort::Harness::test7()} ;
 
-ok "PL_sv_no", sub { !Devel::Harness::test8()} ;
+ok "PL_sv_no", sub { !Devel::PPPort::Harness::test8()} ;
 
-ok "PL_na", sub { Devel::Harness::test9("abcd") == 4} ;
+ok "PL_na", sub { Devel::PPPort::Harness::test9("abcd") == 4} ;
 
-ok "boolSV 1", sub { Devel::Harness::test10(1) } ;
+ok "boolSV 1", sub { Devel::PPPort::Harness::test10(1) } ;
 
-ok "boolSV 0", sub { ! Devel::Harness::test10(0) } ;
+ok "boolSV 0", sub { ! Devel::PPPort::Harness::test10(0) } ;
 
-ok "newSVpvn", sub { Devel::Harness::test11("abcde", 3) eq "abc" } ;
+ok "newSVpvn", sub { Devel::PPPort::Harness::test11("abcde", 3) eq "abc" } ;
 
-ok "DEFSV", sub { $_ = "Fred"; Devel::Harness::test12() eq "Fred" } ;
+ok "DEFSV", sub { $_ = "Fred"; Devel::PPPort::Harness::test12() eq "Fred" } ;
 
-ok "ERRSV", sub { eval { 1; }; ! Devel::Harness::test13() };
+ok "ERRSV", sub { eval { 1; }; ! Devel::PPPort::Harness::test13() };
 
-ok "ERRSV", sub { eval { fred() }; Devel::Harness::test13() };
+ok "ERRSV", sub { eval { fred() }; Devel::PPPort::Harness::test13() };
 
-ok "CXT 1", sub { Devel::Harness::test14()} ;
+ok "CXT 1", sub { Devel::PPPort::Harness::test14()} ;
 
-ok "CXT 2", sub { Devel::Harness::test15()} ;
+ok "CXT 2", sub { Devel::PPPort::Harness::test15()} ;
 
 __END__
 # TODO

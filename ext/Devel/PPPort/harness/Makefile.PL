@@ -2,8 +2,8 @@
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-	NAME => "Devel::Harness",
-	VERSION_FROM => '../PPPort.pm',
+	NAME => "Devel::PPPort::Harness",
+	VERSION_FROM => 'Harness.pm',
 	
 	
 	XSPROTOARG => '-noprototypes',
@@ -11,36 +11,32 @@ WriteMakefile(
 	#XS => {'Harness.xs' => 'Harness.c'},
 	OBJECT => 'Harness$(OBJ_EXT) module2$(OBJ_EXT) module3$(OBJ_EXT)',
 	'dist' => { COMPRESS=>"gzip", SUFFIX=>"gz" },
+	'clean' => { FILES => 'ppport.h'},
+	'depend' => { 'Harness.c'	=> 'ppport.h',
+		      'module2.c'	=> 'ppport.h',
+		      'module3.c'	=> 'ppport.h',
+		    },
 
 );
 
 sub MY::postamble {
 
-  use File::Spec;
+    my $pmfile;
+    my $Ilibdir = '';
 
-  my $libdir = File::Spec->catdir(File::Spec->updir(), File::Spec->updir(),  
-				  File::Spec->updir(),  File::Spec->updir(),  
-                                  'lib');
-  my $blibdir = File::Spec->catdir(File::Spec->curdir(), 'blib');
-  my $pmfile = File::Spec->catfile(File::Spec->updir(), 'PPPort.pm');
-  my $retval = <<'EOM';
+    if ($^O eq 'VMS') {
+        $pmfile = '[-]PPPort.pm';
+    }
+    else {
+        $pmfile = '../PPPort.pm';
+    }
 
-sweep:
-	$(RM_F) pm_to_blib Harness.c Harness$(OBJ_EXT) module2$(OBJ_EXT) module3$(OBJ_EXT) ppport.h
+  my $retval = <<"EOM";
+
+ppport.h:	$pmfile
+	\$(PERL) "-I\$(PERL_ARCHLIB)" "-I\$(PERL_LIB)" -e "require qq{$pmfile}; Devel::PPPort::WriteFile(qq{ppport.h})"     
+
 EOM
  
-  $retval .= "\t\$(RM_RF) $blibdir\n\n";
-  $retval .= "Harness.c :      ppport.h\n\n";  
-  $retval .= "module2.c module3.c : ppport.h\n\t\$(NOECHO) \$(NOOP)\n\n";  
-  $retval .= "ppport.h: $pmfile\n";  
-
-  my $Ilibdir = $^O eq 'VMS' ? qq{"-I$libdir"} : qq{-I$libdir};
-
-  $pmfile =~ s:\\:\\\\:g;
-
-  $retval .= qq[\t\$(PERL) $Ilibdir -e "require qq{$pmfile}; Devel::PPPort::WriteFile(qq{ppport.h})"];
-
   return $retval;
 }
-
-sub MY::install { "install ::\n"  };

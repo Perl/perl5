@@ -1,30 +1,56 @@
 
-use strict ;
 
+use strict ;
+use ExtUtils::MakeMaker;
+
+$| = 1 ;
 my $verbose = 0 ;
+
+# TODO -- Get MM->new to output less MakeMaker progress guff
+my $mm = MM->new( { NAME => 'dummy' });
+
+# TODO -- determine what "make" program to run.
+my $MAKE = 'make';
+
+
+# TODO -- need to decide how far back we go.
 
 # find all version of Perl that are available
 my @PerlBinaries = qw( 
-	perl5.004        
-	perl5.00401      
-	perl5.00402      
-	perl5.00403      
-	perl5.00404      
-	perl5.00405      
-	perl5.005                         
-	perl5.00501                       
-	perl5.00502      
-	perl5.00503                     
-	perl5.6.0        
-	perl5.6.1 
-	perl5.7.0
-	perl5.7.1
-	perl5.7.2      
+	5.004        
+	5.00401      
+	5.00402      
+	5.00403      
+	5.00404      
+	5.00405      
+	5.005                         
+	5.00501                       
+	5.00502      
+	5.00503                     
+	5.6.0        
+	5.6.1 
+	5.7.0
+	5.7.1
+	5.7.2      
 	);
 
-my $maxlen = 0 ;
-foreach (@PerlBinaries)
-  { $maxlen = length $_ if length $_ > $maxlen }
+print "Searching for Perl binaries...\n" ;
+my @GoodPerls = ();
+my $maxlen = 0;
+my @path = $mm->path();
+foreach my $perl (@PerlBinaries) {
+    # TODO -- find_perl will send a warning to STDOUT if it can't find 
+    #         the requested perl, so need to temporarily close STDOUT.
+
+    if (my $abs = $mm->find_perl($perl, ["perl$perl"], [@path], 0)) {
+        push @GoodPerls, $abs ;
+        $maxlen = length $abs
+             if length $abs > $maxlen ;
+    }
+}
+print "\n\nFound ";
+foreach (@GoodPerls) { print "$_\n" }
+print "\n\n";
 $maxlen += 3 ;
 
 # run each through the test harness
@@ -33,21 +59,26 @@ my $bad = 0 ;
 my $good = 0 ;
 my $total = 0 ;
 
-foreach my $perl (@PerlBinaries)
+# prime the pump, so the first "make clean" will work.
+runit("perl Makefile.PL") || die "Cannot run perl Makefile.PL\n" ;
+
+foreach my $perl (@GoodPerls)
 {
+   my $prefix = "$perl -- " if $verbose ;
    print "Testing $perl " . ('.' x ($maxlen - length $perl)) ;
-   my $ok = runit("$perl Makefile.PL") &&
-            runit("make sweep")	&&
-            runit("make test")	;
+
+   my $ok = runit("$MAKE clean") &&
+            runit("$perl Makefile.PL") &&
+            runit("$MAKE test")	;
 
     ++ $total;
     if ($ok) {
         ++ $good ;
-        print "ok\n";
+        print "${prefix}ok\n";
     }
     else {
         ++ $bad ;
-        print "not ok\n" ;
+        print "${prefix}not ok\n" ;
     }
 
 }
@@ -58,29 +89,21 @@ exit $bad ;
 
 sub runit
 {
+    # TODO -- portability alert!!
+
     my $cmd = shift ;
-    print "Running [$cmd]\n" if $verbose ;
+    print "\n    Running [$cmd]\n" if $verbose ;
     my $file = "/tmp/abc.$$" ;
     unlink $file ;
-    system "$cmd >$file 2>&1" ;
+    my $output = `$cmd 2>&1` ;
+    $output =~ s/^/      /gm;
+    print "    Output\n$output\n" if $verbose || $? ;
     if ($?)
     {
         return 0 unless $verbose ;
-        my $output = docat_del($file) ;
-        warn "$cmd failed: $?\n$output\n" ;
+        warn "    $cmd failed: $?\n" ;
         exit ;
     }
     unlink $file ;
     return 1 ;
 }                   
-
-sub docat_del
-{
-    my $file = shift;
-    local $/ = undef;
-    open(CAT, "<$file") || die "Cannot open $file: $!";
-    my $result = <CAT>;
-    close(CAT);
-    unlink $file ;
-    return $result;
-}          

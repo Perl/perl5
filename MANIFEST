@@ -145,6 +145,7 @@ ext/Devel/PPPort/harness/Makefile.PL	Devel::PPPort::harness makefile writer
 ext/Devel/PPPort/harness/module2.c	Devel::PPPort test file
 ext/Devel/PPPort/harness/module3.c	Devel::PPPort test file
 ext/Devel/PPPort/harness/t/test.t	See if Devel::PPPort works
+ext/Devel/PPPort/MANIFEST	Devel::PPPort Manifest
 ext/Devel/PPPort/Makefile.PL	Devel::PPPort makefile writer
 ext/Devel/PPPort/PPPort.pm	Devel::PPPort
 ext/Devel/PPPort/README		Devel::PPPort Readme

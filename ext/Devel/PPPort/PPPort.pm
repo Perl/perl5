@@ -30,9 +30,9 @@ it returns FALSE.
 
 =head1 AUTHOR
 
-Version 1 of Devel::PPPort was written by Kenneth Albanowski.
+Version 1.x of Devel::PPPort was written by Kenneth Albanowski.
 
-Version 2 was ported to the Perl core by Paul Marquess.
+Version 2.x was ported to the Perl core by Paul Marquess.
 
 =head1 SEE ALSO
 
@@ -44,16 +44,16 @@ See L<h2xs>.
 use strict;
 use vars qw( $VERSION $data );
 
-$VERSION = "2.0000";
+$VERSION = "2.0001";
 
 {
     local $/ = undef;
     $data = <DATA> ;
     my $now = localtime;
     my $pkg = __PACKAGE__;
-    $data =~ s/__VERSION__/$VERSION/;
-    $data =~ s/__DATE__/$now/;
-    $data =~ s/__PKG__/$pkg/;
+    $data =~ s/__VERSION__/$VERSION/g;
+    $data =~ s/__DATE__/$now/g;
+    $data =~ s/__PKG__/$pkg/g;
 }
 
 sub WriteFile

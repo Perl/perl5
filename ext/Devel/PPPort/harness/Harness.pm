@@ -1,5 +1,5 @@
 
-package Devel::Harness;
+package Devel::PPPort::Harness;
 
 require Exporter;
 require DynaLoader;
@@ -14,8 +14,8 @@ $VERSION = "2.0000";
 # Other items we are prepared to export if requested
 @EXPORT_OK = qw( );
 
-bootstrap Devel::Harness;
+bootstrap Devel::PPPort::Harness;
 
-package Devel::Harness;
+package Devel::PPPort::Harness;
 
 1;

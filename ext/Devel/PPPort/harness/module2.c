@@ -8,5 +8,5 @@
 
 void test2(void)
 {
-	newCONSTSUB(gv_stashpv("Devel::Harness", FALSE), "test_value_2", newSViv(2));
+	newCONSTSUB(gv_stashpv("Devel::PPPort::Harness", FALSE), "test_value_2", newSViv(2));
 }
