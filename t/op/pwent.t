@@ -78,7 +78,7 @@ foreach (sort keys %seen) {
     if ($times > 1) {
 	# Multiply defined users are rarely intentional.
 	local $" = ", ";
-	warn "# User '$_' defined multiple times in $where, lines: @{$seen{$_}}.\n";
+	print "# User '$_' defined multiple times in $where, lines: @{$seen{$_}}.\n";
 	delete $suspect{$_};
     }
 }
