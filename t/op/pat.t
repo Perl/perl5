@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..928\n";
+print "1..932\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2929,4 +2929,26 @@ print(("a$x" =~ qr/a(??{$a})/ ? '' : 'not '),
       "ok $test - postponed interpolation of qr// preserves utf8 # TODO\n");
 ++$test;
 
-# last test 928
+print "# more user-defined character properties\n";
+
+sub IsSyriac1 {
+    return <<'END';
+0712	072C
+0730	074A
+END
+}
+
+print "\x{0712}" =~ /\p{IsSyriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
+print "\x{072F}" =~ /\P{IsSyriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
+
+sub Syriac1 {
+    return <<'END';
+0712	072C
+0730	074A
+END
+}
+
+print "\x{0712}" =~ /\p{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
+print "\x{072F}" =~ /\P{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
+
+# last test 932
