@@ -86,11 +86,20 @@ EOT
 print CONFIG <<'ENDOFEND';
 
 sub FETCH { 
-    # check for cached value (which maybe undef so we use exists not defined)
+    # check for cached value (which may be undef so we use exists not defined)
     return $_[0]->{$_[1]} if (exists $_[0]->{$_[1]});
- 
-    my($value); # search for the item in the big $config_sh string
-    return undef unless (($value) = $config_sh =~ m/^$_[1]='(.*)'\s*$/m);
+
+    # Search for it in the big string 
+    my($value, $start, $marker);
+    $marker = "$_[1]='";
+    # return undef unless (($value) = $config_sh =~ m/^$_[1]='(.*)'\s*$/m);
+    $start = index($config_sh, "\n$marker");
+    return undef if ( ($start == -1) &&  # in case it's first 
+        (substr($config_sh, 0, length($marker)) ne $marker) );
+    if ($start == -1) { $start = length($marker) } 
+        else { $start += length($marker) + 1 }
+    $value = substr($config_sh, $start, 
+        index($config_sh, q('), $start) - $start);
  
     $value = undef if $value eq 'undef'; # So we can say "if $Config{'foo'}".
     $_[0]->{$_[1]} = $value; # cache it
@@ -101,8 +110,9 @@ my $prevpos = 0;
 
 sub FIRSTKEY {
     $prevpos = 0;
-    my($key) = $config_sh =~ m/^(.*?)=/;
-    $key;
+    # my($key) = $config_sh =~ m/^(.*?)=/;
+    substr($config_sh, 0, index($config_sh, '=') );
+    # $key;
 }
 
 sub NEXTKEY {
@@ -113,7 +123,10 @@ sub NEXTKEY {
 }
 
 sub EXISTS { 
-     exists($_[0]->{$_[1]})  or  $config_sh =~ m/^$_[1]=/m; 
+    # exists($_[0]->{$_[1]})  or  $config_sh =~ m/^$_[1]=/m;
+    exists($_[0]->{$_[1]}) or
+    index($config_sh, "\n$_[1]='") != -1 or
+    substr($config_sh, 0, length($_[1])+2) eq "$_[1]='";
 }
 
 sub STORE  { die "\%Config::Config is read-only\n" }
