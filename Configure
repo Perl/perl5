@@ -3557,7 +3557,7 @@ $rm -f testcpp.c testcpp.out
 
 : determine optimize, if desired, or use for debug flag also
 case "$optimize" in
-' ') dflt='none';;
+' '|$undef) dflt='none';;
 '') dflt='-O';;
 *) dflt="$optimize";;
 esac
