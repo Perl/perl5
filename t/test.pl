@@ -379,9 +379,15 @@ sub _create_runperl { # Create the string to qx in runperl().
 	}
     }
     if ($args{switches}) {
+	local $Level = 2;
+	die "test.pl:runperl(): 'switches' must be an ARRAYREF " . _where()
+	    unless ref $args{switches} eq "ARRAY";
 	_quote_args(\$runperl, $args{switches});
     }
     if (defined $args{prog}) {
+	local $Level = 2;
+	die "test.pl:runperl(): 'progs' must be an ARRAYREF " . _where()
+	    unless ref $args{progs} eq "ARRAY";
         $args{progs} = [$args{prog}]
     }
     if (defined $args{progs}) {
