@@ -250,6 +250,15 @@ Llama book:
 	ISBN 0-596-00132-0 [3rd edition July 2001]
 	http://www.oreilly.com/catalog/lperl3/
 
+And for more advanced information on writing larger programs,
+presented in the same style as the Llama book, continue your education
+with the Alpaca book:
+
+    Learning Perl Objects, References, and Modules (the "Alpaca Book")
+       by Randal L. Schwartz, with Tom Phoenix (foreword by Damian Conway)
+       ISBN 0-596-00478-8 [1st edition June 2003]
+       http://www.oreilly.com/catalog/lrnperlorm/
+
 If you're not an accidental programmer, but a more serious and
 possibly even degreed computer scientist who doesn't need as much
 hand-holding as we try to provide in the Llama, please check out the
@@ -313,6 +322,11 @@ Recommended books on (or mostly on) Perl follow.
 	by Randal L. Schwartz and Tom Phoenix
 	ISBN 0-596-00132-0 [3rd edition July 2001]
 	http://www.oreilly.com/catalog/lperl3/
+
+    Learning Perl Objects, References, and Modules
+       by Randal L. Schwartz, with Tom Phoenix (foreword by Damian Conway)
+       ISBN 0-596-00478-8 [1st edition June 2003]
+       http://www.oreilly.com/catalog/lrnperlorm/
 
     Learning Perl on Win32 Systems
 	by Randal L. Schwartz, Erik Olson, and Tom Christiansen,
