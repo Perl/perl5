@@ -163,12 +163,15 @@ WriteMakefile(
                (#ABSTRACT_FROM => "$package.pm", # XXX add this
                 AUTHOR     => $0) : ())
              );
-if (-f "Makefile") {
+my $makefile = ($^O eq 'VMS' ? 'descrip' : 'Makefile');
+my $makefile_ext = ($^O eq 'VMS' ? '.mms' : '');
+if (-f "$makefile$makefile_ext") {
   print "ok 1\n";
 } else {
   print "not ok 1\n";
 }
-push @files, "Makefile.old"; # Renamed by make clean
+my $makefile_rename = ($^O eq 'VMS' ? '.mms' : '.old');
+push @files, "$makefile$makefile_rename"; # Renamed by make clean
 
 my $make = $Config{make};
 

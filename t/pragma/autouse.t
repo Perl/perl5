@@ -42,11 +42,12 @@ use autouse 'Carp' => qw(carp croak);
 
 
 # Test that autouse's lazy module loading works.  We assume that nothing
-# involved in this test uses Test::Soundex, which is pretty safe.
+# involved in this test uses Text::Soundex, which is pretty safe.
 use File::Spec;
 use autouse 'Text::Soundex' => qw(soundex);
 
 my $mod_file = File::Spec->catfile(qw(Text Soundex.pm));
+$mod_file = VMS::Filespec::unixify($mod_file) if $^O eq 'VMS';
 ok( !exists $INC{$mod_file} );
 ok( soundex('Basset'), 'B230' );
 ok( exists $INC{$mod_file} );
