@@ -950,8 +950,14 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
             do_chop(astr,hv_iterval(hv,entry));
         return;
     }
-    else if (SvREADONLY(sv))
-	Perl_croak(aTHX_ PL_no_modify);
+    else if (SvREADONLY(sv)) {
+        if (SvFAKE(sv)) {
+            /* SV is copy-on-write */
+	    sv_force_normal_flags(sv, 0);
+        }
+        if (SvREADONLY(sv))
+            Perl_croak(aTHX_ PL_no_modify);
+    }
     s = SvPV(sv, len);
     if (len && !SvPOK(sv))
 	s = SvPV_force(sv, len);
@@ -1020,8 +1026,14 @@ Perl_do_chomp(pTHX_ register SV *sv)
             count += do_chomp(hv_iterval(hv,entry));
         return count;
     }
-    else if (SvREADONLY(sv))
-	Perl_croak(aTHX_ PL_no_modify);
+    else if (SvREADONLY(sv)) {
+        if (SvFAKE(sv)) {
+            /* SV is copy-on-write */
+	    sv_force_normal_flags(sv, 0);
+        }
+        if (SvREADONLY(sv))
+            Perl_croak(aTHX_ PL_no_modify);
+    }
     s = SvPV(sv, len);
     if (s && len) {
 	s += --len;
