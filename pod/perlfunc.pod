@@ -2444,9 +2444,9 @@ and the month of the year, may not necessarily be three characters wide.
 This function places an advisory lock on a variable, subroutine,
 or referenced object contained in I<THING> until the lock goes out
 of scope.  This is a built-in function only if your version of Perl
-was built with threading enabled, and if you've said C<use Threads>.
-Otherwise a user-defined function by this name will be called.  See
-L<Thread>.
+was built with threading enabled, and if you've said C<use Thread>.
+Otherwise a user-defined function by this name will be called.
+See L<Thread>.
 
 =item log EXPR
 

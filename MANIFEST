@@ -561,7 +561,6 @@ ext/Thread/specific.tx		Test thread-specific user data
 ext/Thread/sync.tx		Test thread synchronisation
 ext/Thread/sync2.tx		Test thread synchronisation
 ext/Thread/thr5005.t		Test 5.005-style threading (skipped if no use5005threads)
-ext/Thread/Thread.pm		Thread extension Perl module
 ext/Thread/Thread.xs		Thread extension external subroutines
 ext/Thread/Thread/Queue.pm	Thread synchronised queue objects
 ext/Thread/Thread/Semaphore.pm	Thread semaphore objects
@@ -1260,6 +1259,7 @@ lib/Text/TabsWrap/t/fill.t	See if Text::Wrap::fill works
 lib/Text/TabsWrap/t/tabs.t	See if Text::Tabs works
 lib/Text/TabsWrap/t/wrap.t	See if Text::Wrap::wrap works
 lib/Text/Wrap.pm		Paragraph formatter
+lib/Thread.pm			Thread extensions frontend
 lib/Tie/Array.pm		Base class for tied arrays
 lib/Tie/Array/push.t		Test for Tie::Array
 lib/Tie/Array/splice.t		Test for Tie::Array::SPLICE
