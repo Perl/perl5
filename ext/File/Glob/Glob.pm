@@ -376,14 +376,32 @@ Win32 users should use the real slash.  If you really want to use
 backslashes, consider using Sarathy's File::DosGlob, which comes with
 the standard Perl distribution.
 
+=item *
+
+Mac OS (Classic) users should note a few differences. Since
+Mac OS is not Unix, when the glob code encounters a tilde glob (e.g.
+~user/foo) and the C<GLOB_TILDE> flag is used, it simply returns that
+pattern without doing any expansion.
+
+Glob on Mac OS is case-insensitive by default (if you don't use any
+flags). If you specify any flags at all and still want glob
+to be case-insensitive, you must include C<GLOB_NOCASE> in the flags.
+
+The path separator is ':' (aka colon), not '/' (aka slash). Mac OS users
+should be careful about specifying relative pathnames. While a full path
+always begins with a volume name, a relative pathname should always
+begin with a ':'.  If specifying a volume name only, a trailing ':' is
+required.
+
 =back
 
 =head1 AUTHOR
 
 The Perl interface was written by Nathan Torkington E<lt>gnat@frii.comE<gt>,
 and is released under the artistic license.  Further modifications were
-made by Greg Bacon E<lt>gbacon@cs.uah.eduE<gt> and Gurusamy Sarathy
-E<lt>gsar@activestate.comE<gt>.  The C glob code has the
+made by Greg Bacon E<lt>gbacon@cs.uah.eduE<gt>, Gurusamy Sarathy
+E<lt>gsar@activestate.comE<gt>, and Thomas Wegner
+E<lt>wegner_thomas@yahoo.comE<gt>.  The C glob code has the
 following copyright:
 
     Copyright (c) 1989, 1993 The Regents of the University of California.
