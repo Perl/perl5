@@ -1645,7 +1645,7 @@ typedef pthread_key_t	perl_key;
 #ifdef VMS
 #   define STATUS_NATIVE	PL_statusvalue_vms
 #   define STATUS_NATIVE_EXPORT \
-	((I32)PL_statusvalue_vms == -1 ? 44 : PL_statusvalue_vms)
+        (((I32)PL_statusvalue_vms == -1 ? 44 : PL_statusvalue_vms) | (VMSISH_HUSHED ? 0x10000000 : 0))
 #   define STATUS_NATIVE_SET(n)						\
 	STMT_START {							\
 	    PL_statusvalue_vms = (n);					\

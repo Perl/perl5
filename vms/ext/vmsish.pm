@@ -11,6 +11,7 @@ vmsish - Perl pragma to control VMS-specific language features
     use vmsish 'status';	# or '$?'
     use vmsish 'exit';
     use vmsish 'time';
+    use vmsish 'hushed';
 
     use vmsish;
     no vmsish 'time';
@@ -18,8 +19,8 @@ vmsish - Perl pragma to control VMS-specific language features
 =head1 DESCRIPTION
 
 If no import list is supplied, all possible VMS-specific features are
-assumed.  Currently, there are three VMS-specific features available:
-'status' (a.k.a '$?'), 'exit', and 'time'.
+assumed.  Currently, there are four VMS-specific features available:
+'status' (a.k.a '$?'), 'exit', 'time' and 'messages' (a.k.a 'message').
 
 =over 6
 
@@ -41,6 +42,11 @@ used directly as Perl's exit status.
 This makes all times relative to the local time zone, instead of the
 default of Universal Time (a.k.a Greenwich Mean Time, or GMT).
 
+=item C<vmsish hushed>
+
+This supresses printing of VMS status messages to SYS$OUTPUT and SYS$ERROR
+if Perl terminates with an error status.
+
 =back
 
 See L<perlmod/Pragmatic Modules>.
@@ -56,6 +62,7 @@ sub bits {
     my $bits = 0;
     my $sememe;
     foreach $sememe (@_) {
+        $bits |= 0x10000000, next if $sememe eq 'hushed';
 	$bits |= 0x20000000, next if $sememe eq 'status' || $sememe eq '$?';
 	$bits |= 0x40000000, next if $sememe eq 'exit';
 	$bits |= 0x80000000, next if $sememe eq 'time';
@@ -65,12 +72,12 @@ sub bits {
 
 sub import {
     shift;
-    $^H |= bits(@_ ? @_ : qw(status exit time));
+    $^H |= bits(@_ ? @_ : qw(status exit time hushed));
 }
 
 sub unimport {
     shift;
-    $^H &= ~ bits(@_ ? @_ : qw(status exit time));
+    $^H &= ~ bits(@_ ? @_ : qw(status exit time hushed));
 }
 
 1;
