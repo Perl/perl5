@@ -76,7 +76,7 @@ $b = <<'EOF';
 LINE: while (defined($_ = <ARGV>)) {
     chomp $_;
     @F = split(/\s+/, $_, 0);
-    '???'
+    '???';
 }
 
 EOF

@@ -3907,7 +3907,6 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *
 
     if (cont) {
 	next = LINKLIST(cont);
-	loopflags |= OPpLOOP_CONTINUE;
     }
     if (expr) {
 	OP *unstack = newOP(OP_UNSTACK, 0);
@@ -6702,8 +6701,14 @@ Perl_peep(pTHX_ register OP *o)
 
 	case OP_ENTERLOOP:
 	    o->op_seq = PL_op_seqmax++;
+	    while (cLOOP->op_redoop->op_type == OP_NULL)
+		cLOOP->op_redoop = cLOOP->op_redoop->op_next;
 	    peep(cLOOP->op_redoop);
+	    while (cLOOP->op_nextop->op_type == OP_NULL)
+		cLOOP->op_nextop = cLOOP->op_nextop->op_next;
 	    peep(cLOOP->op_nextop);
+	    while (cLOOP->op_lastop->op_type == OP_NULL)
+		cLOOP->op_lastop = cLOOP->op_lastop->op_next;
 	    peep(cLOOP->op_lastop);
 	    break;
 
@@ -6711,6 +6716,9 @@ Perl_peep(pTHX_ register OP *o)
 	case OP_MATCH:
 	case OP_SUBST:
 	    o->op_seq = PL_op_seqmax++;
+	    while (cPMOP->op_pmreplstart && 
+		   cPMOP->op_pmreplstart->op_type == OP_NULL)
+		cPMOP->op_pmreplstart = cPMOP->op_pmreplstart->op_next;
 	    peep(cPMOP->op_pmreplstart);
 	    break;
 
