@@ -60,7 +60,7 @@ PERLVARI(Gsh_path,	char *,	SH_PATH)/* full path of shell */
 PERLVAR(Gsighandlerp,	Sighandler_t)
 
 PERLVAR(Gxiv_arenaroot,	XPV*)		/* list of allocated xiv areas */
-PERLVAR(Gxiv_root,	IV **)		/* free xiv list--shared by interpreters */
+PERLVAR(Gxiv_root,	IV *)		/* free xiv list--shared by interpreters */
 PERLVAR(Gxnv_root,	double *)	/* free xnv list--shared by interpreters */
 PERLVAR(Gxrv_root,	XRV *)		/* free xrv list--shared by interpreters */
 PERLVAR(Gxpv_root,	XPV *)		/* free xpv list--shared by interpreters */

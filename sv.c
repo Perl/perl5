@@ -416,13 +416,13 @@ sv_free_arenas(void)
 STATIC XPVIV*
 new_xiv(void)
 {
-    IV** xiv;
+    IV* xiv;
     if (xiv_root) {
 	xiv = xiv_root;
 	/*
 	 * See comment in more_xiv() -- RAM.
 	 */
-	xiv_root = (IV**)*xiv;
+	xiv_root = *(IV**)xiv;
 	return (XPVIV*)((char*)xiv - sizeof(XPV));
     }
     return more_xiv();
@@ -431,30 +431,30 @@ new_xiv(void)
 STATIC void
 del_xiv(XPVIV *p)
 {
-    IV** xiv = (IV**)((char*)(p) + sizeof(XPV));
-    *xiv = (IV *)xiv_root;
+    IV* xiv = (IV*)((char*)(p) + sizeof(XPV));
+    *(IV**)xiv = xiv_root;
     xiv_root = xiv;
 }
 
 STATIC XPVIV*
 more_xiv(void)
 {
-    register IV** xiv;
-    register IV** xivend;
+    register IV* xiv;
+    register IV* xivend;
     XPV* ptr;
     New(705, ptr, 1008/sizeof(XPV), XPV);
     ptr->xpv_pv = (char*)xiv_arenaroot;		/* linked list of xiv arenas */
     xiv_arenaroot = ptr;			/* to keep Purify happy */
 
-    xiv = (IV**) ptr;
-    xivend = &xiv[1008 / sizeof(IV *) - 1];
-    xiv += (sizeof(XPV) - 1) / sizeof(IV *) + 1;   /* fudge by size of XPV */
+    xiv = (IV*) ptr;
+    xivend = &xiv[1008 / sizeof(IV) - 1];
+    xiv += (sizeof(XPV) - 1) / sizeof(IV) + 1;   /* fudge by size of XPV */
     xiv_root = xiv;
     while (xiv < xivend) {
-	*xiv = (IV *)(xiv + 1);
+	*(IV**)xiv = (IV *)(xiv + 1);
 	xiv++;
     }
-    *xiv = 0;
+    *(IV**)xiv = 0;
     return new_xiv();
 }
 
