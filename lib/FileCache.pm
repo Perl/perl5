@@ -81,33 +81,35 @@ use Carp;
 use Config;
 use strict;
 no strict 'refs';
+
 # These are not C<my> for legacy reasons.
 # Previous versions requested the user set $cacheout_maxopen by hand.
 # Some authors fiddled with %saw to overcome the clobber on initial open.
-use vars qw(%saw $cacheout_maxopen @EXPORT);
+use vars qw(%saw $cacheout_maxopen);
+$cacheout_maxopen = 16;
+
+use base 'Exporter';
+our @EXPORT = qw[cacheout cacheout_close];
+
+
 my %isopen;
 my $cacheout_seq = 0;
 
 sub import {
     my ($pkg,%args) = @_;
 
-    # Not using Exporter is naughty.
-    # Also, using caller(1) is just wrong.
-    #$pkg = caller(1);
-    #*{$pkg.'::cacheout'} = \&cacheout;
-    #*{$pkg.'::close'}    = \&cacheout_close;
-
     # Use Exporter. %args are for us, not Exporter.
     # Make sure to up export_to_level, or we will import into ourselves,
     # rather than our calling package;
-    use base 'Exporter';
-    @EXPORT = qw[cacheout cacheout_close];
 
     __PACKAGE__->export_to_level(1);
     Exporter::import( $pkg );
 
     # Truth is okay here because setting maxopen to 0 would be bad
     return $cacheout_maxopen = $args{maxopen} if $args{maxopen};
+
+    # XXX This code is crazy.  Why is it a one element foreach loop?
+    # Why is it using $param both as a filename and filehandle?
     foreach my $param ( '/usr/include/sys/param.h' ){
       if (open($param, '<', $param)) {
 	local ($_, $.);
@@ -153,7 +155,7 @@ sub cacheout {
     if( $isopen{$file} && ($mode||'>') ne $isopen{$file}->[1] ){
       &cacheout_close($file, 1);
     }
-    
+
     if( $isopen{$file}) {
       $ret = $file;
       $isopen{$file}->[0]++;
@@ -172,7 +174,7 @@ sub cacheout {
       }
       #XXX should we just return the value from cacheout_open, no croak?
       $ret = cacheout_open($mode, $file) or croak("Can't create $file: $!");
-      
+
       $isopen{$file} = [++$cacheout_seq, $mode];
     }
     return $ret;
