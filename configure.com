@@ -881,7 +881,7 @@ $   config_symbols0 ="|archlib|archlibexp|bin|binexp|builddir|cf_email|config_sh
 $   config_symbols1 ="|installprivlib|installscript|installsitearch|installsitelib|most|oldarchlib|oldarchlibexp|osname|pager|perl_symbol|perl_verb|"
 $   config_symbols2 ="|prefix|privlib|privlibexp|scriptdir|sitearch|sitearchexp|sitebin|sitelib|sitelib_stem|sitelibexp|try_cxx|use64bitall|use64bitint|"
 $   config_symbols3 ="|usecasesensitive|usedefaulttypes|usedevel|useieee|useithreads|usemultiplicity|usemymalloc|usedebugging_perl|useperlio|usesecurelog|"
-$   config_symbols4 ="|usethreads|usevmsdebug|usefaststdio|usemallocwrap|unlink_all_versions|"
+$   config_symbols4 ="|usethreads|usevmsdebug|usefaststdio|usemallocwrap|unlink_all_versions|uselargefiles|"
 $!  
 $   open/read CONFIG 'config_sh'
 $   rd_conf_loop:
@@ -2289,15 +2289,13 @@ $   THEN
 $       IF use64bitint .OR. use64bitint .eqs. "define" THEN bool_dflt = "y"
 $   ENDIF
 $   echo ""
-$   echo "You can have native 64-bit long integers."
+$   echo "You have natively 64-bit long integers."
 $   echo ""
 $   echo "Perl can be built to take advantage of 64-bit integer types"
-$   echo "on some systems, which provide a much larger range for perl's"
-$   echo "mathematical operations.  (Note that does *not* enable 64-bit"
-$   echo "fileops at the moment, as Dec C doesn't do that yet)."
+$   echo "on some systems, To do so, Configure can be run with -Duse64bitint."
 $   echo "Choosing this option will most probably introduce binary incompatibilities."
 $   echo ""
-$   echo "If this does not make any sense to you, just accept the default ''dflt'."
+$   echo "If this does not make any sense to you, just accept the default '" + bool_dflt + "'."
 $   rp = "Try to use 64-bit integers, if available? [''bool_dflt'] "
 $   GOSUB myread
 $   use64bitint = ans
@@ -2313,7 +2311,7 @@ $   echo "64-bitness as possible on the platform.  This in turn means even more"
 $   echo "binary incompatibilities.  On the other hand, your platform may not"
 $   echo "have any more 64-bitness available than what you already have chosen."
 $   echo ""
-$   echo "If this does not make any sense to you, just accept the default ''dflt'."
+$   echo "If this does not make any sense to you, just accept the default '" + bool_dflt + "'."
 $   rp = "Try to use maximal 64-bit support, if available? [''bool_dflt'] "
 $   GOSUB myread
 $   use64bitall=ans
@@ -2324,7 +2322,27 @@ $     echo "Since you have chosen a maximally 64-bit build, I'm also turning on"
 $     echo "the use of 64-bit integers."
 $     use64bitint="Y"
 $   ENDIF
-$ ENDIF ! AXP && >= 7.1
+$!
+$   bool_dflt = "n"
+$   IF F$TYPE(uselargefiles) .NES. "" 
+$   THEN
+$       IF uselargefiles .OR. uselargefiles .eqs. "define" THEN bool_dflt = "y"
+$   ENDIF
+$   echo ""
+$   echo "Perl can be built to understand large files (files larger than 2 gigabytes)"
+$   echo "on some systems.  To do so, Configure can be run with -Duselargefiles."
+$   echo ""
+$   echo "If this does not make any sense to you, just accept the default '" + bool_dflt + "'."
+$   rp = "Try to understand large files, if available? [''bool_dflt'] "
+$   GOSUB myread
+$   IF ans
+$   THEN
+$     uselargefiles="define"
+$   ELSE
+$     uselargefiles="undef"
+$   ENDIF
+$!
+$ ENDIF ! not VAX && >= 7.1
 $!
 $! Ask about threads, if appropriate
 $ IF ccname .EQS. "DEC" .OR. ccname .EQS. "CXX"
@@ -2819,7 +2837,7 @@ $! Build up the extra C flags
 $!
 $ IF use_ieee_math
 $ THEN
-$   extra_flags = "''extra_flags'" + "/float=ieee/ieee=denorm_results"
+$   extra_flags = "''extra_flags'" + "/float=ieee/ieee=denorm"
 $ ENDIF
 $ IF be_case_sensitive
 $ THEN
@@ -2960,7 +2978,6 @@ $!
 $ IF use64bitint .OR. use64bitint .EQS. "define"
 $ THEN
 $   use64bitint = "define"
-$   uselargefiles = "define"
 $   uselongdouble = "define"
 $   alignbytes="16"
 $   usemorebits = "define"
@@ -2971,7 +2988,6 @@ $   uvxformat="""Lx"""
 $   uvXUformat="""LX"""
 $ ELSE
 $   use64bitint = "undef"
-$   uselargefiles = "undef"
 $   uselongdouble = "undef"
 $   usemorebits = "undef"
 $   ivdformat="""ld"""
@@ -3667,6 +3683,36 @@ $ ELSE
 $   d_int64_t = "undef"
 $   echo "You do not have int64_t."
 $ ENDIF
+$!
+$! Check to see if fseeko exists
+$!
+$ OS
+$ WS "#include <stdio.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "FILE *f=NULL;"
+$ WS "fseeko(f,(off_t)0,SEEK_SET);"
+$ WS "return(0);"
+$ WS "}"
+$ CS
+$ tmp = "fseeko"
+$ GOSUB inlibc
+$ d_fseeko = tmp
+$!
+$! Check to see if ftello exists
+$!
+$ OS
+$ WS "#include <stdio.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "FILE *f=NULL; off_t o=0;"
+$ WS "o=ftello(f);"
+$ WS "return(0);"
+$ WS "}"
+$ CS
+$ tmp = "ftello"
+$ GOSUB inlibc
+$ d_ftello = tmp
 $!
 $!: see if this is a netdb.h system
 $ IF Has_Dec_C_Sockets
@@ -4720,6 +4766,32 @@ $ GOSUB type_size_check
 $ sizesize = tmp
 $ echo "Your ''zzz' size is ''sizesize' bytes."
 $!
+$! Check for _LARGEFILE capability.
+$!
+$ off_t_size = 4
+$ OS
+$ WS "#define _LARGEFILE"
+$ WS "#include <stdio.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "printf(""%d\n"", sizeof(off_t));"
+$ WS "return(0);"
+$ WS "}"
+$ CS
+$ GOSUB link_ok
+$ IF link_status .EQ. good_link
+$ THEN
+$   GOSUB just_mcr_it
+$   off_t_size = tmp
+$ ENDIF
+$ echo "Your off_t size is ''off_t_size' bytes when _LARGEFILE is defined."
+$ IF off_t_size .ne. 8 .AND. (uselargefiles .OR. uselargefiles .eqs. "define")
+$ THEN
+$   echo4 "You configured with -Duselargefiles but your CRTL does not support _LARGEFILE."
+$   echo4 "I'm disabling large file support."
+$   uselargefiles = "undef"
+$ ENDIF
+$!
 $! Check rand48 and its ilk
 $!
 $ echo4 "Looking for a random number function..."
@@ -5289,7 +5361,13 @@ $ WC "castflags='0'"
 $ WC "cc='" + perl_cc + "'"
 $ WC "cccdlflags='" + cccdlflags + "'"
 $ WC "ccdlflags='" + ccdlflags + "'"
-$ WC "ccflags='" + ccflags + "'"
+$ IF uselargefiles .OR. uselargefiles .EQS. "define"
+$ THEN
+$   WC "ccflags='" + ccflags + "/Define=_LARGEFILE'"
+$ ELSE
+$   WC "ccflags='" + ccflags + "'"
+$ ENDIF
+$ WC "ccflags_uselargefiles='" + "'"
 $ WC "ccname='" + ccname + "'"
 $ WC "ccversion='" + ccversion + "'"
 $ WC "cf_by='" + cf_by + "'"
@@ -5390,12 +5468,12 @@ $ WC "d_fpclassl='undef'"
 $ WC "d_fpos64_t='" + d_fpos64_t + "'"
 $ WC "d_frexpl='" + d_frexpl + "'"
 $ WC "d_fs_data_s='undef'"
-$ WC "d_fseeko='undef'"
+$ WC "d_fseeko='" + d_fseeko + "'"
 $ WC "d_fsetpos='define'"
 $ WC "d_fstatfs='undef'"
 $ WC "d_fstatvfs='undef'"
 $ WC "d_fsync='undef'"
-$ WC "d_ftello='undef'"
+$ WC "d_ftello='" + d_ftello + "'"
 $ WC "d_getcwd='define'"
 $ WC "d_getespwnam='undef'"
 $ WC "d_getfsstat='undef'"
@@ -5814,15 +5892,24 @@ $ DELETE/SYMBOL tmp
 $ WC "ld='" + ld + "'"
 $ WC "lddlflags='/Share'"
 $ WC "ldflags='" + ldflags + "'"
+$ WC "ldflags_uselargefiles='" + "'"
 $ WC "lib_ext='" + lib_ext + "'"
 $ WC "libc='" + libc + "'"
 $ WC "libpth='/sys$share /sys$library'"
 $ WC "libs='" + libs + "'"
+$ WC "libswanted='" + "'"
+$ WC "libswanted_uselargefiles='" + "'"
 $ WC "longdblsize='" + longdblsize + "'"
 $ WC "longlongsize='" + longlongsize + "'"
 $ WC "longsize='" + longsize + "'"
-$ WC "lseeksize='4'"
-$ WC "lseektype='int'"
+$ IF uselargefiles .OR. uselargefiles .EQS. "define"
+$ THEN
+$   WC "lseeksize='8'"
+$   WC "lseektype='off_t'"
+$ ELSE
+$   WC "lseeksize='4'"
+$   WC "lseektype='int'"
+$ ENDIF
 $ WC "mab='" + "'"
 $ WC "make='" + make + "'"
 $ WC "malloctype='void *'"
@@ -6275,12 +6362,17 @@ $   MALLOC_REPLACE = "MALLOC=MALLOC=1"
 $ ELSE
 $   MALLOC_REPLACE = "MALLOC="
 $ ENDIF
+$ IF uselargefiles .OR. uselargefiles .EQS. "define"
+$ THEN
+$   LARGEFILE_REPLACE = "LARGEFILE=LARGEFILE=1"
+$ ELSE
+$   LARGEFILE_REPLACE = "LARGEFILE="
+$ ENDIF
 $ echo4 "Extracting ''defmakefile' (with variable substitutions)"
 $ DEFINE/USER_MODE sys$output 'UUmakefile'
-$ mcr []munchconfig 'config_sh' 'Makefile_SH' "''DECC_REPLACE'" -
- "''DECCXX_REPLACE'" "''ARCH_TYPE'" "''GNUC_REPLACE'" "''SOCKET_REPLACE'" -
- "''THREAD_REPLACE'" "''C_Compiler_Replace'" "''MALLOC_REPLACE'" -
- "''Thread_Live_Dangerously'" "PV=''version'" "FLAGS=FLAGS=''extra_flags'"
+$ mcr []munchconfig 'config_sh' 'Makefile_SH' "''DECC_REPLACE'" "''DECCXX_REPLACE'" "''ARCH_TYPE'" "''GNUC_REPLACE'" -
+"''SOCKET_REPLACE'" "''THREAD_REPLACE'" "''C_Compiler_Replace'" "''MALLOC_REPLACE'" -
+"''Thread_Live_Dangerously'" "PV=''version'" "FLAGS=FLAGS=''extra_flags'" "''LARGEFILE_REPLACE'"
 $! Clean up after ourselves
 $ DELETE/NOLOG/NOCONFIRM []munchconfig.exe;
 $!

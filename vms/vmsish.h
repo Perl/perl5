@@ -609,6 +609,45 @@ struct passwd {
 /* Since we've got to match the size of the CRTL's stat_t, we need
  * to mimic DECC's alignment settings.
  */
+#ifdef USE_LARGE_FILES
+/* Mimic the new stat structure, filler fields, and alignment. */
+#if defined(__DECC) || defined(__DECCXX)
+#  pragma __member_alignment __save
+#  pragma member_alignment
+#endif
+
+struct mystat
+{
+        char *st_devnam;       /* pointer to device name */
+        char *st_fill_dev;
+        unsigned st_ino;        /* hack - CRTL uses unsigned short[3] for */
+        unsigned short rvn;     /* FID (num,seq,rvn) */
+        unsigned short st_fill_ino;
+        unsigned short st_mode; /* file "mode" i.e. prot, dir, reg, etc. */
+        unsigned short st_fill_mode;
+        int     st_nlink;       /* for compatibility - not really used */
+        unsigned st_uid;        /* from ACP - QIO uic field */
+        unsigned short st_gid;  /* group number extracted from st_uid */
+        unsigned short st_fill_gid;
+        dev_t   st_rdev;        /* for compatibility - always zero */
+        off_t   st_size;        /* file size in bytes */
+        unsigned st_atime;      /* file access time; always same as st_mtime */
+        unsigned st_fill_atime;
+        unsigned st_mtime;      /* last modification time */
+        unsigned st_fill_mtime;
+        unsigned st_ctime;      /* file creation time */
+        unsigned st_fill_ctime;
+        char    st_fab_rfm;     /* record format */
+        char    st_fab_rat;     /* record attributes */
+        char    st_fab_fsz;     /* fixed header size */
+        char    st_fab_fill;
+        unsigned st_fab_mrs;    /* record size */
+        int st_fill_expand[7];  /* will probably fill from beginning, so put our st_dev at end */
+        unsigned st_dev;        /* encoded device name */
+};
+
+#else /* !defined(USE_LARGE_FILES) */
+
 #if defined(__DECC) || defined(__DECCXX)
 #  pragma __member_alignment __save
 #  pragma __nomember_alignment
@@ -618,6 +657,7 @@ struct passwd {
 #  pragma __message disable (__MISALGNDSTRCT)
 #  pragma __message disable (__MISALGNDMEM)
 #endif
+
 struct mystat
 {
         char *st_devnam;  /* pointer to device name */
@@ -644,6 +684,17 @@ struct mystat
          */
         char	st_fill1[sizeof(void *) - (3*sizeof(unsigned short) + 3*sizeof(char))%sizeof(void *)];
 };
+
+#if defined(__DECC) 
+#  pragma __message __restore
+#endif
+
+#endif /* defined(USE_LARGE_FILES) */
+
+#if defined(__DECC) || defined(__DECCXX)
+#  pragma __member_alignment __restore
+#endif
+
 typedef unsigned mydev_t;
 typedef unsigned myino_t;
 
@@ -672,12 +723,6 @@ typedef unsigned myino_t;
 #  define stat mystat
 #  define dev_t mydev_t
 #  define ino_t myino_t
-#endif
-#if defined(__DECC) || defined(__DECCXX)
-#  pragma __member_alignment __restore
-#endif
-#if defined(__DECC) 
-#  pragma __message __restore
 #endif
 /* Cons up a 'delete' bit for testing access */
 #define S_IDUSR (S_IWUSR | S_IXUSR)
