@@ -36,7 +36,7 @@ if ($^O eq 'VMS') { $time[0][2]++ }
 
 my $tests = (@time * 12) + 6;
 $tests += 2 if $ENV{PERL_CORE};
-$tests += 3 if $ENV{MAINTAINER};
+$tests += 5 if $ENV{MAINTAINER};
 
 plan tests => $tests;
 
@@ -63,9 +63,9 @@ for (@time) {
     if ($^O eq 'vos' && $year == 70) {
         skip(1, "skipping 1970 test on VOS.\n") for 1..6;
     } else {
-        my $time = timelocal($sec,$min,$hour,$mday,$mon,$year);
+        my $time = timegm($sec,$min,$hour,$mday,$mon,$year);
 
-        my($s,$m,$h,$D,$M,$Y) = localtime($time);
+        my($s,$m,$h,$D,$M,$Y) = gmtime($time);
 
         ok($s, $sec, 'second');
         ok($m, $min, 'minute');
@@ -100,13 +100,13 @@ ok(timegm(0,0,0, 1, 2, 80) - timegm(0,0,0, 1, 0, 80), 60 * 24 * 3600,
 
 # round trip was broken for edge cases
 if ($^O eq "aix" && $Config{osvers} =~ m/^4\.3\./) {
-skip ("No fix expected for edge case test for $_ on AIX 4.3") for qw( timegm timelocal );
+    skip ("No fix expected for edge case test for $_ on AIX 4.3") for qw( timegm timelocal );
 } else {
-ok(sprintf('%x', timegm(gmtime(0x7fffffff))), sprintf('%x', 0x7fffffff),
-   '0x7fffffff round trip through gmtime then timegm');
+    ok(sprintf('%x', timegm(gmtime(0x7fffffff))), sprintf('%x', 0x7fffffff),
+       '0x7fffffff round trip through gmtime then timegm');
 
-ok(sprintf('%x', timelocal(localtime(0x7fffffff))), sprintf('%x', 0x7fffffff),
-   '0x7fffffff round trip through localtime then timelocal');
+    ok(sprintf('%x', timelocal(localtime(0x7fffffff))), sprintf('%x', 0x7fffffff),
+       '0x7fffffff round trip through localtime then timelocal');
 }
 
 if ($ENV{MAINTAINER}) {
@@ -127,11 +127,15 @@ if ($ENV{MAINTAINER}) {
         local $ENV{TZ} = 'America/Chicago';
         POSIX::tzset();
 
-        # Same local time in America/Chicago.  There is transition here as
-        # well.
+        # Same local time in America/Chicago.  There is a transition
+        # here as well.
         $time = timelocal(0, 30, 1, 28, 9, 101);
         ok($time, 1004250600,
            'timelocal prefers earlier epoch in the presence of a DST change');
+
+        $time = timelocal(0, 30, 2, 1, 3, 101);
+        ok($time, 986113800,
+           'timelocal for non-existent time gives you the time one hour later');
 
         local $ENV{TZ} = 'Australia/Sydney';
         POSIX::tzset();
@@ -142,12 +146,18 @@ if ($ENV{MAINTAINER}) {
         $time = timelocal(0, 30, 2, 25, 2, 101);
         ok($time, 985447800,
            'timelocal prefers earlier epoch in the presence of a DST change');
+
+        $time = timelocal(0, 30, 2, 28, 9, 101);
+        ok($time, 1004200200,
+           'timelocal for non-existent time gives you the time one hour later');
     }
 }
 
 if ($ENV{PERL_CORE}) {
   package test;
   require 'timelocal.pl';
+
+  # need to get ok() from main package
   ::ok(timegm(0,0,0,1,0,80), main::timegm(0,0,0,1,0,80),
      'timegm in timelocal.pl');
 

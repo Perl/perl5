@@ -7,7 +7,7 @@ use strict;
 use integer;
 
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK );
-$VERSION    = '1.07_94';
+$VERSION    = '1.09';
 $VERSION    = eval $VERSION;
 @ISA	= qw( Exporter );
 @EXPORT	= qw( timegm timelocal );
@@ -210,7 +210,7 @@ Time::Local - efficiently compute time from local and GMT time
 These routines are the inverse of built-in perl functions localtime()
 and gmtime().  They accept a date as a six-element array, and return
 the corresponding time(2) value in seconds since the system epoch
-(Midnight, January 1, 1970 UTC on Unix, for example).  This value can
+(Midnight, January 1, 1970 GMT on Unix, for example).  This value can
 be positive or negative, though POSIX only requires support for
 positive values, so dates before the system's epoch may not work on
 all operating systems.
@@ -253,7 +253,7 @@ values, the following conventions are followed:
 
 Years greater than 999 are interpreted as being the actual year,
 rather than the offset from 1900.  Thus, 1963 would indicate the year
-Martin Luther King won the Nobel prize, not the year 2863.
+Martin Luther King won the Nobel prize, not the year 3863.
 
 =item *
 
@@ -286,14 +286,24 @@ range.
 =head2 Ambiguous Local Times (DST)
 
 Because of DST changes, there are many time zones where the same local
-time occurs for two different UTC times on the same day.  For example,
+time occurs for two different GMT times on the same day.  For example,
 in the "Europe/Paris" time zone, the local time of 2001-10-28 02:30:00
-can represent either 2001-10-28 00:30:00 UTC, B<or> 2001-10-28
-01:30:00 UTC.
+can represent either 2001-10-28 00:30:00 GMT, B<or> 2001-10-28
+01:30:00 GMT.
 
 When given an ambiguous local time, the timelocal() function should
-always return the epoch for the I<earlier> of the two possible UTC
+always return the epoch for the I<earlier> of the two possible GMT
 times.
+
+=head2 Non-Existent Local Times (DST)
+
+When a DST change causes a locale clock to skip one hour forward,
+there will be an hour's worth of local times that don't exist.  Again,
+for the "Europe/Paris" time zone, the local clock jumped from
+2001-03-25 01:59:59 to 2001-03-25 03:00:00.
+
+If the timelocal() function is given a non-existent local time, it
+will simply return an epoch value for the time one hour later.
 
 =head2 Negative Epoch Values
 
@@ -328,11 +338,11 @@ The whole scheme for interpreting two-digit years can be considered a bug.
 
 =head1 SUPPORT
 
-Support for this module is provided via the perl5-porters@perl.org
+Support for this module is provided via the datetime@perl.org
 email list.  See http://lists.perl.org/ for more details.
 
-Please submit bugs using the RT system at bugs.perl.org, the perlbug
-script, or as a last resort, to the perl5-porters@perl.org list.
+Please submit bugs using the RT system at rt.cpan.org, or as a last
+resort, to the datetime@perl.org list.
 
 =head1 AUTHOR
 
