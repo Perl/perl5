@@ -1198,18 +1198,18 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This macro surrounds its token with double quotes.
  */
 #if $cpp_stuff == 1
-#  define CAT2(a,b)	a/**/b
-#  define STRINGIFY(a)	"a"
+#define CAT2(a,b)	a/**/b
+#define STRINGIFY(a)	"a"
 		/* If you can get stringification with catify, tell me how! */
 #endif
 #if $cpp_stuff == 42
-#  define PeRl_CaTiFy(a, b)	a ## b	
-#  define PeRl_StGiFy(a)	#a
+#define PeRl_CaTiFy(a, b)	a ## b	
+#define PeRl_StGiFy(a)	#a
 /* the additional level of indirection enables these macros to be
  * used as arguments to other macros.  See K&R 2nd ed., page 231. */
-#  define CAT2(a,b)	PeRl_CaTiFy(a,b)
-#  define StGiFy(a)	PeRl_StGiFy(a)
-#  define STRINGIFY(a)	PeRl_StGiFy(a)
+#define CAT2(a,b)	PeRl_CaTiFy(a,b)
+#define StGiFy(a)	PeRl_StGiFy(a)
+#define STRINGIFY(a)	PeRl_StGiFy(a)
 #endif
 #if $cpp_stuff != 1 && $cpp_stuff != 42
 #   include "Bletch: How does this C preprocessor catenate tokens?"
