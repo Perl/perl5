@@ -739,6 +739,15 @@ access functions and macros if they wish to use C<SV*> keys.  These
 additions also make it feasible to manipulate C<HE*>s (hash entries),
 which can be more efficient.  See L<perlguts> for details.
 
+=item Embedding improvements
+
+In older versions of Perl it was not possible to create more than one
+instance of a Perl interpreter inside the same process without leaking
+like mad and/or crashing.  The major bugs which caused this behavior
+have been fixed, however, you still must take care when embedding Perl
+in a C program.  See the updated perlembed manpage for tips on how to
+manage your interpreters.
+
 =back
 
 =head1 Documentation Changes
