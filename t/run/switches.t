@@ -66,7 +66,7 @@ is( $r, 'abc-def--ghi-jkl-mno--pq-/', '-0777 (slurp mode)' );
 
 $r = runperl(
     switches	=> [ '-066' ],
-    prog	=> 'BEGIN { print "($/)" } print "[$/]"',
+    prog	=> 'BEGIN { print qq{($/)} } print qq{[$/]}',
 );
 is( $r, "(\066)[\066]", '$/ set at compile-time' );
 
