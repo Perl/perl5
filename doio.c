@@ -1667,20 +1667,31 @@ nothing in the core.
 	    } utbuf;
 #endif
 
+           SV* accessed = *++mark;
+           SV* modified = *++mark;
+           void * utbufp = &utbuf;
+
+           /* be like C, and if both times are undefined, let the C
+              library figure out what to do.  This usually means
+              "current time" */
+
+           if ( accessed == &PL_sv_undef && modified == &PL_sv_undef )
+             utbufp = NULL;
+           
 	    Zero(&utbuf, sizeof utbuf, char);
 #ifdef BIG_TIME
-	    utbuf.actime = (Time_t)SvNVx(*++mark);	/* time accessed */
-	    utbuf.modtime = (Time_t)SvNVx(*++mark);	/* time modified */
+           utbuf.actime = (Time_t)SvNVx(accessed);     /* time accessed */
+           utbuf.modtime = (Time_t)SvNVx(modified);    /* time modified */
 #else
-	    utbuf.actime = (Time_t)SvIVx(*++mark);	/* time accessed */
-	    utbuf.modtime = (Time_t)SvIVx(*++mark);	/* time modified */
+           utbuf.actime = (Time_t)SvIVx(accessed);     /* time accessed */
+           utbuf.modtime = (Time_t)SvIVx(modified);    /* time modified */
 #endif
 	    APPLY_TAINT_PROPER();
 	    tot = sp - mark;
 	    while (++mark <= sp) {
 		char *name = SvPVx(*mark, n_a);
 		APPLY_TAINT_PROPER();
-		if (PerlLIO_utime(name, &utbuf))
+               if (PerlLIO_utime(name, utbufp))
 		    tot--;
 	    }
 	}

@@ -5622,6 +5622,13 @@ command if the files already exist:
     $now = time;
     utime $now, $now, @ARGV;
 
+If the first two elements of the list are C<undef>, then the utime(2)
+function in the C library will be called with a null second argument.
+On most systems, this will set the file's access and modification
+times to the current time.  (i.e. equivalent to the example above.)
+
+    utime undef, undef, @ARGV;
+
 =item values HASH
 
 Returns a list consisting of all the values of the named hash.  (In a
