@@ -497,3 +497,11 @@ END { print $foo }
 ';
 EXPECT
 ZZZ
+########
+-w
+if (@ARGV) { print "" }
+else {
+  if ($x == 0) { print "" } else { print $x }
+}
+EXPECT
+Use of uninitialized value at - line 4.

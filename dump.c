@@ -391,7 +391,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
     else
 	PerlIO_printf(file, "DONE\n");
     if (o->op_targ) {
-	if (o->op_type == OP_NULL)
+	if (o->op_type == OP_NULL || o->op_type == OP_SETSTATE)
 	    Perl_dump_indent(aTHX_ level, file, "  (was %s)\n", PL_op_name[o->op_targ]);
 	else
 	    Perl_dump_indent(aTHX_ level, file, "TARG = %d\n", o->op_targ);
@@ -524,6 +524,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
     case OP_CONST:
 	Perl_dump_indent(aTHX_ level, file, "SV = %s\n", SvPEEK(cSVOPo->op_sv));
 	break;
+    case OP_SETSTATE:
     case OP_NEXTSTATE:
     case OP_DBSTATE:
 	if (cCOPo->cop_line)

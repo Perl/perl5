@@ -301,6 +301,8 @@ sub tab {
 
 __END__
 
+# New ops always go at the very end
+
 # Nothing.
 
 null		null operation		ck_null		0	
@@ -559,6 +561,7 @@ redo		redo			ck_null		ds}
 dump		dump			ck_null		ds}	
 goto		goto			ck_null		ds}	
 exit		exit			ck_fun		ds%	S?
+# continued below
 
 #nswitch		numeric switch		ck_null		d	
 #cswitch		character switch	ck_null		d	
@@ -775,3 +778,6 @@ syscall		syscall			ck_fun		imst@	S L
 # For multi-threading
 lock		lock			ck_rfun		s%	S
 threadsv	per-thread variable	ck_null		ds0
+
+# Control (contd.)
+setstate	set statement info	ck_null		0

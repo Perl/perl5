@@ -685,6 +685,9 @@ Perl_op_free(pTHX_ OP *o)
     case OP_AELEMFAST:
 	SvREFCNT_dec(cGVOPo->op_gv);
 	break;
+    case OP_SETSTATE:
+	o->op_targ = 0;	/* Was holding old type. */
+	/* FALL THROUGH */
     case OP_NEXTSTATE:
     case OP_DBSTATE:
 	cop_free((COP*)o);
@@ -739,6 +742,8 @@ S_cop_free(pTHX_ COP* cop)
 STATIC void
 S_null(pTHX_ OP *o)
 {
+    if (o->op_type == OP_NEXTSTATE || o->op_type == OP_DBSTATE)
+	cop_free((COP*)o);
     if (o->op_type != OP_NULL && o->op_type != OP_THREADSV && o->op_targ > 0)
 	pad_free(o->op_targ);
     o->op_targ = o->op_type;
@@ -1685,8 +1690,11 @@ Perl_scope(pTHX_ OP *o)
 		o->op_ppaddr = PL_ppaddr[OP_SCOPE];
 		kid = ((LISTOP*)o)->op_first;
 		if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE){
-		    cop_free((COP*)kid);
-		    null(kid);
+		    if (kid->op_targ > 0)
+			pad_free(kid->op_targ);
+		    kid->op_targ = kid->op_type;
+		    kid->op_type = OP_SETSTATE;
+		    kid->op_ppaddr = PL_ppaddr[OP_SETSTATE];
 		}
 	    }
 	    else

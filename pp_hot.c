@@ -69,6 +69,12 @@ PP(pp_null)
     return NORMAL;
 }
 
+PP(pp_setstate)
+{
+    PL_curcop = (COP*)PL_op;
+    return NORMAL;
+}
+
 PP(pp_pushmark)
 {
     PUSHMARK(PL_stack_sp);

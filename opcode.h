@@ -357,10 +357,11 @@ typedef enum {
 	OP_SYSCALL,	/* 345 */
 	OP_LOCK,	/* 346 */
 	OP_THREADSV,	/* 347 */
+	OP_SETSTATE,	/* 348 */
 	OP_max		
 } opcode;
 
-#define MAXO 348
+#define MAXO 349
 
 
 START_EXTERN_C
@@ -717,6 +718,7 @@ EXT char *PL_op_name[] = {
 	"syscall",
 	"lock",
 	"threadsv",
+	"setstate",
 };
 #endif
 
@@ -1072,6 +1074,7 @@ EXT char *PL_op_desc[] = {
 	"syscall",
 	"lock",
 	"per-thread variable",
+	"set statement info",
 };
 #endif
 
@@ -1432,6 +1435,7 @@ EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX) = {
 	Perl_pp_syscall,
 	Perl_pp_lock,
 	Perl_pp_threadsv,
+	Perl_pp_setstate,
 };
 #endif
 
@@ -1787,6 +1791,7 @@ EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 	Perl_ck_fun,	/* syscall */
 	Perl_ck_rfun,	/* lock */
 	Perl_ck_null,	/* threadsv */
+	Perl_ck_null,	/* setstate */
 };
 #endif
 
@@ -2142,6 +2147,7 @@ EXT U32 PL_opargs[] = {
 	0x0004281d,	/* syscall */
 	0x00003604,	/* lock */
 	0x00000044,	/* threadsv */
+	0x00000000,	/* setstate */
 };
 #endif
 

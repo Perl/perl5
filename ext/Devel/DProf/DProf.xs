@@ -11,8 +11,8 @@
 #  define dTHR int dummy_thr
 #endif	/* dTHR */ 
 
-/*#define DBG_SUB 1     /* */
-/*#define DBG_TIMER 1   /* */
+/*#define DBG_SUB 1      */
+/*#define DBG_TIMER 1    */
 
 #ifdef DBG_SUB
 #  define DBG_SUB_NOTIFY(A,B) warn( A, B )
