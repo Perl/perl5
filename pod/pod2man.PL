@@ -331,6 +331,7 @@ sub makedate {
     my $secs = shift;
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($secs);
     my $mname = (qw{Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec})[$mon];
+    $year += 1900;
     return "$mday/$mname/$year";
 }
 
