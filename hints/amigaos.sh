@@ -8,7 +8,6 @@ cc='gcc'
 firstmakefile='GNUmakefile'
 usenm='true'
 
-usedl='n'
 usemymalloc='n'
 usevfork='true'
 useperlio='true'
@@ -23,7 +22,7 @@ libpth="$prefix/lib /local/lib"
 glibpth="$libpth"
 xlibpth="$libpth"
 
-libswanted='gdbm m'
+libswanted='gdbm m dld'
 so=' '
 
 # compiler & linker flags
@@ -31,26 +30,17 @@ so=' '
 ccflags='-DAMIGAOS -mstackextend'
 ldflags=''
 optimize='-O2 -fomit-frame-pointer'
+dlext='o'
+cccdlflags='none'
+ccdlflags='none'
+lddlflags='-oformat a.out-amiga -r'
 
 # uncomment the following settings if you are compiling for an 68020+ system
+# and want a residentable executable instead of dynamic loading
 
+# usedl='n'
 # ccflags='-DAMIGAOS -mstackextend -m68020 -resident32'
 # ldflags='-m68020 -resident32'
-
-# uncomment the following line if you want dynamic loading and
-# a working version of dld is available
-
-# usedl=''
-# ccflags='-DAMIGAOS -mstackextend'
-# ldflags=''
-# optimize='-O2 -fomit-frame-pointer'
-# dlext='o'
-# cccdlflags='none'
-# ccdlflags='none'
-# lddlflags='-oformat a.out-amiga -r'
-
-# When AmigaOS runs a script with "#!", it sets argv[0] to the script name.
-toke_cflags='ccflags="$ccflags -DARG_ZERO_IS_SCRIPT"'
 
 # Avoid telldir prototype conflict in pp_sys.c  (AmigaOS uses const DIR *)
 # Configure should test for this.  Volunteers?
