@@ -1,6 +1,6 @@
 
 #
-# "Tax the rat farms."
+# "Tax the rat farms." - Lord Vetinari
 #
 
 # The following hash values are used:
@@ -9,7 +9,7 @@
 #   _n   : numeraotr (value = _n/_d)
 #   _a   : accuracy
 #   _p   : precision
-#   _f   : flags, used by MBR to flag parts of a rational as untouchable
+#   _f   : flags, used by MBR to flag parts of a rationale as untouchable
 
 package Math::BigRat;
 
@@ -24,7 +24,7 @@ use vars qw($VERSION @ISA $PACKAGE @EXPORT_OK $upgrade $downgrade
 @ISA = qw(Exporter Math::BigFloat);
 @EXPORT_OK = qw();
 
-$VERSION = '0.07';
+$VERSION = '0.09';
 
 use overload;				# inherit from Math::BigFloat
 
@@ -51,14 +51,13 @@ sub isa
 
 sub _new_from_float
   {
-  # turn a single float input into a rational (like '0.1')
+  # turn a single float input into a rationale (like '0.1')
   my ($self,$f) = @_;
 
   return $self->bnan() if $f->is_nan();
   return $self->binf('-inf') if $f->{sign} eq '-inf';
   return $self->binf('+inf') if $f->{sign} eq '+inf';
 
-  #print "f $f caller", join(' ',caller()),"\n";
   $self->{_n} = $f->{_m}->copy();			# mantissa
   $self->{_d} = $MBI->bone();
   $self->{sign} = $f->{sign}; $self->{_n}->{sign} = '+';
@@ -102,7 +101,7 @@ sub new
       }
     if ($n->isa('Math::BigInt::Lite'))
       {
-      $self->{_n} = $MBI->new($$n);		# "mantissa" = $n
+      $self->{_n} = $MBI->new($$n,undef,undef);		# "mantissa" = $n
       $self->{_d} = $MBI->bone();
       $self->{sign} = $self->{_n}->{sign}; $self->{_n}->{sign} = '+';
       return $self->bnorm();
@@ -112,7 +111,7 @@ sub new
 
   if (!defined $n)
     {
-    $self->{_n} = $MBI->bzero();	# undef => 0
+    $self->{_n} = $MBI->bzero();			# undef => 0
     $self->{_d} = $MBI->bone();
     $self->{sign} = '+';
     return $self->bnorm();
@@ -127,9 +126,14 @@ sub new
     if (($n =~ /[\.eE]/) || ($d =~ /[\.eE]/))
       {
       # one of them looks like a float 
+      # Math::BigFloat($n,undef,undef) does not what it is supposed to do, so:
+      local $Math::BigFloat::accuracy = undef;
+      local $Math::BigFloat::precision = undef;
+      local $Math::BigInt::accuracy = undef;
+      local $Math::BigInt::precision = undef;
       $self->_new_from_float(Math::BigFloat->new($n));
       # now correct $self->{_n} due to $n
-      my $f = Math::BigFloat->new($d);
+      my $f = Math::BigFloat->new($d,undef,undef);
       if ($f->{_e}->{sign} eq '-')
         {
 	# 10 / 0.1 => 100/1
@@ -142,8 +146,9 @@ sub new
       }
     else
       {
-      $self->{_n} = $MBI->new($n);
-      $self->{_d} = $MBI->new($d);
+      # both d and n are (big)ints
+      $self->{_n} = $MBI->new($n,undef,undef);
+      $self->{_d} = $MBI->new($d,undef,undef);
       return $self->bnan() if $self->{_n}->is_nan() || $self->{_d}->is_nan();
       # inf handling is missing here
  
@@ -158,14 +163,17 @@ sub new
   # simple string input
   if (($n =~ /[\.eE]/))
     {
-    # work around bug in BigFloat that makes 1.1.2 valid
-    return $self->bnan() if $n =~ /\..*\./;
-    # looks like a float
-    $self->_new_from_float(Math::BigFloat->new($n));
+    # looks like a float, quacks like a float, so probably is a float
+    # Math::BigFloat($n,undef,undef) does not what it is supposed to do, so:
+    local $Math::BigFloat::accuracy = undef;
+    local $Math::BigFloat::precision = undef;
+    local $Math::BigInt::accuracy = undef;
+    local $Math::BigInt::precision = undef;
+    $self->_new_from_float(Math::BigFloat->new($n,undef,undef));
     }
   else
     {
-    $self->{_n} = $MBI->new($n);
+    $self->{_n} = $MBI->new($n,undef,undef);
     $self->{_d} = $MBI->bone();
     $self->{sign} = $self->{_n}->{sign}; $self->{_n}->{sign} = '+';
     return $self->bnan() if $self->{sign} eq 'NaN';
@@ -203,7 +211,7 @@ sub bsstr
     }
   
   my $s = ''; $s = $x->{sign} if $x->{sign} ne '+';	# +3 vs 3
-  return $x->{_n}->bstr() . '/' . $x->{_d}->bstr(); 
+  return $s . $x->{_n}->bstr() . '/' . $x->{_d}->bstr(); 
   }
 
 sub bnorm
@@ -242,6 +250,8 @@ sub bnorm
   # reduce other numbers
   # disable upgrade in BigInt, otherwise deep recursion
   local $Math::BigInt::upgrade = undef;
+  local $Math::BigInt::accuracy = undef;
+  local $Math::BigInt::precision = undef;
   my $gcd = $x->{_n}->bgcd($x->{_d});
 
   if (!$gcd->is_one())
@@ -265,7 +275,7 @@ sub _bnan
 
 sub _binf
   {
-  # used by parent class bone() to initialize number to 1
+  # used by parent class bone() to initialize number to +inf/-inf
   my $self = shift;
   $self->{_n} = $MBI->bzero();
   $self->{_d} = $MBI->bzero();
@@ -273,7 +283,7 @@ sub _binf
 
 sub _bone
   {
-  # used by parent class bone() to initialize number to 1
+  # used by parent class bone() to initialize number to +1/-1
   my $self = shift;
   $self->{_n} = $MBI->bone();
   $self->{_d} = $MBI->bone();
@@ -281,7 +291,7 @@ sub _bone
 
 sub _bzero
   {
-  # used by parent class bone() to initialize number to 1
+  # used by parent class bone() to initialize number to 0
   my $self = shift;
   $self->{_n} = $MBI->bzero();
   $self->{_d} = $MBI->bone();
@@ -292,46 +302,18 @@ sub _bzero
 
 sub badd
   {
-  # add two rationals
-  my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
+  # add two rationales
+
+  # set up parameters
+  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,@r) = objectify(2,@_);
+    }
 
   $x = $self->new($x) unless $x->isa($self);
   $y = $self->new($y) unless $y->isa($self);
-
-  return $x->bnan() if ($x->{sign} eq 'NaN' || $y->{sign} eq 'NaN');
-
-  #  1   1    gcd(3,4) = 1    1*3 + 1*4    7
-  #  - + -                  = --------- = --                 
-  #  4   3                      4*3       12
-
-  my $gcd = $x->{_d}->bgcd($y->{_d});
-
-  my $aa = $x->{_d}->copy();
-  my $bb = $y->{_d}->copy(); 
-  if ($gcd->is_one())
-    {
-    $bb->bdiv($gcd); $aa->bdiv($gcd);
-    }
-  $x->{_n}->bmul($bb); $x->{_n}->{sign} = $x->{sign};
-  my $m = $y->{_n}->copy()->bmul($aa);
-  $m->{sign} = $y->{sign};			# 2/1 - 2/1
-  $x->{_n}->badd($m);
-
-  $x->{_d}->bmul($y->{_d});
-
-  # calculate new sign
-  $x->{sign} = $x->{_n}->{sign}; $x->{_n}->{sign} = '+';
-
-  $x->bnorm()->round($a,$p,$r);
-  }
-
-sub bsub
-  {
-  # subtract two rationals
-  my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
-
-  $x = $class->new($x) unless $x->isa($class);
-  $y = $class->new($y) unless $y->isa($class);
 
   return $x->bnan() if ($x->{sign} eq 'NaN' || $y->{sign} eq 'NaN');
   # TODO: inf handling
@@ -340,16 +322,61 @@ sub bsub
   #  - + -                  = --------- = --                 
   #  4   3                      4*3       12
 
-  my $gcd = $x->{_d}->bgcd($y->{_d});
+  # we do not compute the gcd() here, but simple do:
+  #  5   7    5*3 + 7*4   41
+  #  - + -  = --------- = --                 
+  #  4   3       4*3      12
+ 
+  # the gcd() calculation and reducing is then done in bnorm()
 
-  my $aa = $x->{_d}->copy();
-  my $bb = $y->{_d}->copy(); 
-  if ($gcd->is_one())
+  local $Math::BigInt::accuracy = undef;
+  local $Math::BigInt::precision = undef;
+
+  $x->{_n}->bmul($y->{_d}); $x->{_n}->{sign} = $x->{sign};
+  my $m = $y->{_n}->copy()->bmul($x->{_d});
+  $m->{sign} = $y->{sign};			# 2/1 - 2/1
+  $x->{_n}->badd($m);
+
+  $x->{_d}->bmul($y->{_d});
+
+  # calculate new sign
+  $x->{sign} = $x->{_n}->{sign}; $x->{_n}->{sign} = '+';
+
+  $x->bnorm()->round(@r);
+  }
+
+sub bsub
+  {
+  # subtract two rationales
+
+  # set up parameters
+  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
     {
-    $bb->bdiv($gcd); $aa->bdiv($gcd);
+    ($self,$x,$y,@r) = objectify(2,@_);
     }
-  $x->{_n}->bmul($bb); $x->{_n}->{sign} = $x->{sign};
-  my $m = $y->{_n}->copy()->bmul($aa);
+
+  $x = $class->new($x) unless $x->isa($class);
+  $y = $class->new($y) unless $y->isa($class);
+
+  return $x->bnan() if ($x->{sign} eq 'NaN' || $y->{sign} eq 'NaN');
+  # TODO: inf handling
+
+  #  1   1    gcd(3,4) = 1    1*3 - 1*4    7
+  #  - - -                  = --------- = --                 
+  #  4   3                      4*3       12
+  
+  # we do not compute the gcd() here, but simple do:
+  #  5   7    5*3 - 7*4     13
+  #  - - -  = --------- = - --
+  #  4   3       4*3        12
+
+  local $Math::BigInt::accuracy = undef;
+  local $Math::BigInt::precision = undef;
+
+  $x->{_n}->bmul($y->{_d}); $x->{_n}->{sign} = $x->{sign};
+  my $m = $y->{_n}->copy()->bmul($x->{_d});
   $m->{sign} = $y->{sign};			# 2/1 - 2/1
   $x->{_n}->bsub($m);
 
@@ -358,13 +385,20 @@ sub bsub
   # calculate new sign
   $x->{sign} = $x->{_n}->{sign}; $x->{_n}->{sign} = '+';
 
-  $x->bnorm()->round($a,$p,$r);
+  $x->bnorm()->round(@r);
   }
 
 sub bmul
   {
-  # multiply two rationals
-  my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
+  # multiply two rationales
+  
+  # set up parameters
+  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,@r) = objectify(2,@_);
+    }
 
   $x = $class->new($x) unless $x->isa($class);
   $y = $class->new($y) unless $y->isa($class);
@@ -392,20 +426,30 @@ sub bmul
   #  1   1    2    1
   #  - * - =  -  = -
   #  4   3    12   6
+  
+  local $Math::BigInt::accuracy = undef;
+  local $Math::BigInt::precision = undef;
   $x->{_n}->bmul($y->{_n});
   $x->{_d}->bmul($y->{_d});
 
   # compute new sign
   $x->{sign} = $x->{sign} eq $y->{sign} ? '+' : '-';
 
-  $x->bnorm()->round($a,$p,$r);
+  $x->bnorm()->round(@r);
   }
 
 sub bdiv
   {
   # (dividend: BRAT or num_str, divisor: BRAT or num_str) return
   # (BRAT,BRAT) (quo,rem) or BRAT (only rem)
-  my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
+
+  # set up parameters
+  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,@r) = objectify(2,@_);
+    }
 
   $x = $class->new($x) unless $x->isa($class);
   $y = $class->new($y) unless $y->isa($class);
@@ -421,13 +465,16 @@ sub bdiv
   # 1     1    1   3
   # -  /  - == - * -
   # 4     3    4   1
+  
+#  local $Math::BigInt::accuracy = undef;
+#  local $Math::BigInt::precision = undef;
   $x->{_n}->bmul($y->{_d});
   $x->{_d}->bmul($y->{_n});
 
   # compute new sign 
   $x->{sign} = $x->{sign} eq $y->{sign} ? '+' : '-';
 
-  $x->bnorm()->round($a,$p,$r);
+  $x->bnorm()->round(@r);
   $x;
   }
 
@@ -459,8 +506,6 @@ sub bdec
       }
     }
   $x->bnorm()->round(@r);
-
-  #$x->bsub($self->bone())->round(@r);
   }
 
 sub binc
@@ -488,8 +533,6 @@ sub binc
     $x->{_n}->badd($x->{_d});	# 5/2 => 7/2
     }
   $x->bnorm()->round(@r);
-
-  #$x->badd($self->bone())->round(@r);
   }
 
 ##############################################################################
@@ -501,7 +544,7 @@ sub is_int
   my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
 
   return 1 if ($x->{sign} =~ /^[+-]$/) &&	# NaN and +-inf aren't
-    $x->{_d}->is_one();				# 1e-1 => no integer
+    $x->{_d}->is_one();				# x/y && y != 1 => no integer
   0;
   }
 
@@ -639,7 +682,15 @@ sub bfac
 
 sub bpow
   {
-  my ($self,$x,$y,@r) = objectify(2,@_);
+  # power ($x ** $y)
+
+  # set up parameters
+  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,@r) = objectify(2,@_);
+    }
 
   return $x if $x->{sign} =~ /^[+-]inf$/;       # -inf/+inf ** x
   return $x->bnan() if $x->{sign} eq $nan || $y->{sign} eq $nan;
@@ -706,8 +757,7 @@ sub bpow
   $x->bmul($pow2) unless $pow2->is_one();
   # n ** -x => 1/n ** x
   ($x->{_d},$x->{_n}) = ($x->{_n},$x->{_d}) if $y->{sign} eq '-'; 
-  $x;
-  #$x->round(@r);
+  $x->bnorm()->round(@r);
   }
 
 sub blog
@@ -812,6 +862,19 @@ sub bacmp
 ##############################################################################
 # output conversation
 
+sub numify
+  {
+  # convert 17/8 => float (aka 2.125)
+  my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
+ 
+  return $x->bstr() if $x->{sign} !~ /^[+-]$/;	# inf, NaN, etc
+
+  my $t = Math::BigFloat->new($x->{_n});
+  $t->bneg() if $x->is_negative();
+  $t->bdiv($x->{_d});
+  $t->numify();  
+  }
+
 sub as_number
   {
   my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
@@ -904,20 +967,21 @@ __END__
 
 =head1 NAME
 
-Math::BigRat - arbitrarily big rationals
+Math::BigRat - arbitrarily big rationales
 
 =head1 SYNOPSIS
 
-  use Math::BigRat;
+	use Math::BigRat;
 
-  $x = Math::BigRat->new('3/7');
+	$x = Math::BigRat->new('3/7'); $x += '5/9';
 
-  print $x->bstr(),"\n";
+	print $x->bstr(),"\n";
+  	print $x ** 2,"\n";
 
 =head1 DESCRIPTION
 
-This is just a placeholder until the real thing is up and running. Watch this
-space...
+Math::BigRat complements Math::BigInt and Math::BigFloat by providing support
+for arbitrarily big rationales.
 
 =head2 MATH LIBRARY
 
@@ -936,15 +1000,22 @@ Math::BigInt::Bar, and when this also fails, revert to Math::BigInt::Calc:
 	use Math::BigRat lib => 'Foo,Math::BigInt::Bar';
 
 Calc.pm uses as internal format an array of elements of some decimal base
-(usually 1e7, but this might be differen for some systems) with the least
+(usually 1e7, but this might be different for some systems) with the least
 significant digit first, while BitVect.pm uses a bit vector of base 2, most
 significant bit first. Other modules might use even different means of
 representing the numbers. See the respective module documentation for further
 details.
 
+Currently the following replacement libraries exist, search for them at CPAN:
+
+	Math::BigInt::BitVect
+	Math::BigInt::GMP
+	Math::BigInt::Pari
+	Math::BigInt::FastCalc
+
 =head1 METHODS
 
-Any method not listed here is dervied from Math::BigFloat (or
+Any methods not listed here are dervied from Math::BigFloat (or
 Math::BigInt), so make sure you check these two modules for further
 information.
 
@@ -954,6 +1025,8 @@ information.
 
 Create a new Math::BigRat object. Input can come in various forms:
 
+	$x = Math::BigRat->new(123);				# scalars
+	$x = Math::BigRat->new('123.3');			# float
 	$x = Math::BigRat->new('1/3');				# simple string
 	$x = Math::BigRat->new('1 / 3');			# spaced
 	$x = Math::BigRat->new('1 / 0.1');			# w/ floats
@@ -982,6 +1055,9 @@ BigInts.
 
 =head2 as_number()
 
+	$x = Math::BigRat->new('13/7');
+	print $x->as_number(),"\n";		# '1'
+
 Returns a copy of the object as BigInt by truncating it to integer.
 
 =head2 bfac()
@@ -993,7 +1069,7 @@ Calculates the factorial of $x. For instance:
 	print Math::BigRat->new('3/1')->bfac(),"\n";	# 1*2*3
 	print Math::BigRat->new('5/1')->bfac(),"\n";	# 1*2*3*4*5
 
-Only works for integers for now.
+Works currently only for integers.
 
 =head2 blog()
 
@@ -1003,10 +1079,79 @@ Is not yet implemented.
 
 Are not yet implemented.
 
+=head2 is_one()
+
+	print "$x is 1\n" if $x->is_one();
+
+Return true if $x is exactly one, otherwise false.
+
+=head2 is_zero()
+
+	print "$x is 0\n" if $x->is_zero();
+
+Return true if $x is exactly zero, otherwise false.
+
+=head2 is_positive()
+
+	print "$x is >= 0\n" if $x->is_positive();
+
+Return true if $x is positive (greater than or equal to zero), otherwise
+false. Please note that '+inf' is also positive, while 'NaN' and '-inf' aren't.
+
+=head2 is_negative()
+
+	print "$x is < 0\n" if $x->is_negative();
+
+Return true if $x is negative (smaller than zero), otherwise false. Please
+note that '-inf' is also negative, while 'NaN' and '+inf' aren't.
+
+=head2 is_int()
+
+	print "$x is an integer\n" if $x->is_int();
+
+Return true if $x has a denominator of 1 (e.g. no fraction parts), otherwise
+false. Please note that '-inf', 'inf' and 'NaN' aren't integer.
+
+=head2 is_odd()
+
+	print "$x is odd\n" if $x->is_odd();
+
+Return true if $x is odd, otherwise false.
+
+=head2 is_even()
+
+	print "$x is even\n" if $x->is_even();
+
+Return true if $x is even, otherwise false.
+
+=head2 bceil()
+
+	$x->bceil();
+
+Set $x to the next bigger integer value (e.g. truncate the number to integer
+and then increment it by one).
+
+=head2 bfloor()
+	
+	$x->bfloor();
+
+Truncate $x to an integer value.
 
 =head1 BUGS
 
-Some things are not yet implemented, or only implemented half-way.
+Some things are not yet implemented, or only implemented half-way:
+
+=over 2
+
+=item inf handling (partial)
+
+=item NaN handling (partial)
+
+=item rounding (not implemented except for bceil/bfloor)
+
+=item $x ** $y where $y is not an integer
+
+=back
 
 =head1 LICENSE
 
@@ -1018,9 +1163,11 @@ the same terms as Perl itself.
 L<Math::BigFloat> and L<Math::Big> as well as L<Math::BigInt::BitVect>,
 L<Math::BigInt::Pari> and  L<Math::BigInt::GMP>.
 
-The package at
-L<http://search.cpan.org/search?mode=module&query=Math%3A%3ABigRat> may
-contain more documentation and examples as well as testcases.
+See L<http://search.cpan.org/search?dist=bignum> for a way to use
+Math::BigRat.
+
+The package at L<http://search.cpan.org/search?dist=Math%3A%3ABigRat>
+may contain more documentation and examples as well as testcases.
 
 =head1 AUTHORS
 

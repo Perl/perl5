@@ -51,11 +51,9 @@ while (<DATA>)
       } elsif ($f eq "denominator") {
         # ->bstr() to see if an object is returned
         $try .= '$x->denominator()->bstr();';
-      } elsif ($f eq "numify") {
-        $try .= "\$x->numify();";
-      } elsif ($f eq "length") {
-        $try .= "\$x->length();";
-      # some unary ops (test the fxxx form, since that is done by AUTOLOAD)
+      } elsif ($f =~ /^(length|numify)$/) {
+        $try .= "\$x->$f();";
+      # some unary ops (can't test the fxxx form, since no AUTOLOAD in BigRat)
       } elsif ($f =~ /^f(nan|sstr|neg|floor|ceil|abs)$/) {
         $try .= "\$x->b$1();";
       # some is_xxx test function	
