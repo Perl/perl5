@@ -11,8 +11,8 @@ BEGIN {
     @INC = '../lib';
 }   
 use warnings;
-# %Config is needed to obtain archname for VAX (since @INC is now insufficient)
-use Config;
+# we do not load %Config since this test resides in op and needs
+# to run under the minitest target even without Config.pm working.
 
 # strictness
 my @tests = ();
@@ -36,10 +36,11 @@ $SIG{__WARN__} = sub {
 };
 
 my $Is_VMS_VAX = 0;
-# The redundant $^O check might help non VMS platforms avoid %Config load
-if ($^O eq 'VMS' &&
-      defined($Config{'archname'}) && $Config{'archname'} eq 'VMS_VAX') {
-    $Is_VMS_VAX = 1;
+# We use HW_MODEL since ARCH_NAME was not in VMS V5.*
+if ($^O eq 'VMS') {
+    my $hw_model;
+    chomp($hw_model = `write sys\$output f\$getsyi("HW_MODEL")`);
+    $Is_VMS_VAX = $hw_model < 1024 ? 1 : 0;
 }
 
 for ($i = 1; @tests; $i++) {
