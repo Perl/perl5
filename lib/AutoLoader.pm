@@ -1,6 +1,6 @@
 package AutoLoader;
 
-use vars qw(@EXPORT @EXPORT_OK);
+use vars qw(@EXPORT @EXPORT_OK $VERSION);
 
 my $is_dosish;
 my $is_vms;
@@ -11,6 +11,7 @@ BEGIN {
     @EXPORT_OK = qw(AUTOLOAD);
     $is_dosish = $^O eq 'dos' || $^O eq 'os2' || $^O eq 'MSWin32';
     $is_vms = $^O eq 'VMS';
+    $VERSION = '5.55';
 }
 
 AUTOLOAD {
