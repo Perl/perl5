@@ -1353,6 +1353,18 @@ $   IF (.NOT. got_patch) .OR. -
 $Close_patch:
 $   CLOSE CONFIG
 $ ENDIF
+$!
+$ IF F$SEARCH("[-].patch") .NES. ""
+$ THEN
+$   SET NOON
+$   OPEN/READ PATCH [-].patch
+$   READ PATCH line
+$   CLOSE PATCH
+$   tmp = F$EDIT(line,"COLLAPSE")
+$   SET ON
+$   IF tmp .GT. perl_patchlevel then perl_patchlevel = tmp
+$ ENDIF
+$!
 $ version_patchlevel_string = "version ''patchlevel' subversion ''subversion'"
 $ IF got_perl_patchlevel .AND. perl_patchlevel .NES. "0"
 $ THEN
@@ -5244,7 +5256,6 @@ $ WC "# Configuration time: " + cf_time
 $ WC "# Configuration by  : " + cf_by
 $ WC "# Target system     : " + myuname
 $ WC ""
-$ WC "CONFIG='true'"
 $ WC "Makefile_SH='" + Makefile_SH + "'"
 $ WC "Mcc='" + Mcc + "'"
 $ WC "PERL_REVISION='" + revision + "'"
@@ -5253,6 +5264,8 @@ $ WC "PERL_SUBVERSION='" + subversion + "'"
 $ WC "PERL_API_REVISION='" + api_revision + "'"
 $ WC "PERL_API_VERSION='" + api_version + "'" 
 $ WC "PERL_API_SUBVERSION='" + api_subversion + "'"
+$ WC "PERL_PATCHLEVEL='" + perl_patchlevel + "'"
+$ WC "PERL_CONFIG_SH='true'"
 $ WC "_a='" + lib_ext + "'"
 $ WC "_exe='" + exe_ext + "'"
 $ WC "_o='" + obj_ext + "'"
@@ -5978,7 +5991,6 @@ $ WC "vms_cc_type='" + vms_cc_type + "'" ! VMS specific
 $ WC "vms_prefix='" + vms_prefix + "'" ! VMS specific
 $ WC "vms_ver='" + vms_ver + "'" ! VMS specific
 $ WC "voidflags='15'"
-$ WC "PERL_CONFIG_SH='true'"
 $!
 $! ## The UNIXy POSIXy reentrantey thingys ##
 $! See "Appendix B, Version-Dependency Tables" in the C RTL
