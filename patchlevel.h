@@ -50,9 +50,11 @@
 	please place your applied patch line after its dependencies. This
 	will help tracking of patch dependencies.
 
-	Please edit the hunk of diff which adds your patch to this list,
-	to remove context lines which would give patch problems.  For instance,
-	if the original context diff is
+	Please either use 'diff -u --context=0' if your diff supports
+	that or edit the hunk of the diff output which adds your patch
+	to this list, to remove context lines which would give patch
+	problems. For instance, if the original context diff is
+
 	   *** patchlevel.h.orig	<date here>
 	   --- patchlevel.h	<date here>
 	   *** 38,43 ***
@@ -94,8 +96,8 @@ while (<PLIN>) {
     $seen++ if /local_patches\[\]/;
     print PLOUT;
 }
-close PLOUT or warn "Couldn't close filehandle writing to patchlevel.new : $!";
-close PLIN or warn "Couldn't close filehandle reading from patchlevel.h : $!";
+close PLOUT or die "Couldn't close filehandle writing to patchlevel.new : $!";
+close PLIN or die "Couldn't close filehandle reading from patchlevel.h : $!";
 unlink "patchlevel.bak" or warn "Couldn't unlink patchlevel.bak : $!"
   if -e "patchlevel.bak";
 rename "patchlevel.h", "patchlevel.bak" or
@@ -104,13 +106,11 @@ rename "patchlevel.new", "patchlevel.h" or
   die "Couldn't rename patchlevel.new to patchlevel.h : $!";
 __END__
 
-Please keep empty lines below so patching of this file doesn't
-interfere with the following lines.
+Please keep empty lines below so that context diffs of this file do
+not ever collect the lines belonging to local_patches() into the same
+hunk.
 
  */
-
-
-
 
 
 
@@ -121,6 +121,8 @@ static	char	*local_patches[] = {
 	,"DEVEL18374"
 	,NULL
 };
+
+
 
 /* Initial space prevents this variable from being inserted in config.sh  */
 #  define	LOCAL_PATCH_COUNT	\
