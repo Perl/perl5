@@ -967,7 +967,19 @@ do_readline()
     PerlIO *fp;
     register IO *io = GvIO(last_in_gv);
     register I32 type = op->op_type;
+    MAGIC *mg;
 
+    if (SvMAGICAL(last_in_gv) && (mg = mg_find((SV*)last_in_gv, 'q'))) {
+	PUSHMARK(SP);
+	XPUSHs(mg->mg_obj);
+	PUTBACK;
+	ENTER;
+	perl_call_method("READLINE", GIMME);
+	LEAVE;
+	SPAGAIN;
+	if (GIMME == G_SCALAR) sv_setsv(TARG, TOPs);
+	RETURN;
+    }
     fp = Nullfp;
     if (io) {
 	fp = IoIFP(io);
@@ -1225,7 +1237,6 @@ PP(pp_enter)
 PP(pp_helem)
 {
     dSP;
-    SV** svp;
     HE* he;
     SV *keysv = POPs;
     HV *hv = (HV*)POPs;
