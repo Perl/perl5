@@ -4,7 +4,7 @@ BEGIN {
 }
 use strict;
 my %alias_to = (
-    U32 => [qw(PADOFFSET STRLEN line_t)],
+    U32 => [qw(STRLEN line_t)],
     I32 => [qw(SSize_t long)],
     U16 => [qw(OPCODE short)],
     U8  => [qw(char)],

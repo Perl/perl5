@@ -142,6 +142,10 @@ sub B::Asmdata::PUT_IV {
     $Config{ivsize} == 4 ? &B::Asmdata::PUT_I32 : &B::Asmdata::PUT_IV64;
 }
 
+sub B::Asmdata::PUT_PADOFFSET {
+    $Config{ptrsize} == 8 ? &B::Asmdata::PUT_IV64 : &B::Asmdata::PUT_U32;
+}
+
 my %unesc = (n => "\n", r => "\r", t => "\t", a => "\a",
 	     b => "\b", f => "\f", v => "\013");
 

@@ -738,7 +738,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	  case INSN_OP_TARG:		/* 97 */
 	    {
 		PADOFFSET arg;
-		BGET_U32(arg);
+		BGET_PADOFFSET(arg);
 		PL_op->op_targ = arg;
 		break;
 	    }
@@ -823,7 +823,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	  case INSN_OP_PMREPLROOTPO:		/* 109 */
 	    {
 		PADOFFSET arg;
-		BGET_U32(arg);
+		BGET_PADOFFSET(arg);
 		cPMOP->op_pmreplroot = (OP*)arg;
 		break;
 	    }
@@ -881,7 +881,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	  case INSN_OP_PADIX:		/* 117 */
 	    {
 		PADOFFSET arg;
-		BGET_U32(arg);
+		BGET_PADOFFSET(arg);
 		cPADOP->op_padix = arg;
 		break;
 	    }
