@@ -1,6 +1,6 @@
 # Scalar::Util.pm
 #
-# Copyright (c) 1997-2003 Graham Barr <gbarr@pobox.com>. All rights reserved.
+# Copyright (c) 1997-2004 Graham Barr <gbarr@pobox.com>. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 
@@ -11,7 +11,7 @@ require List::Util; # List::Util loads the XS
 
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly openhandle refaddr isvstring looks_like_number set_prototype);
-$VERSION   = "1.13_02";
+$VERSION    = "1.14";
 $VERSION   = eval $VERSION;
 
 sub export_fail {
@@ -283,7 +283,7 @@ show up as tests 8 and 9 of dualvar.t failing
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997-2003 Graham Barr <gbarr@pobox.com>. All rights reserved.
+Copyright (c) 1997-2004 Graham Barr <gbarr@pobox.com>. All rights reserved.
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
