@@ -18,8 +18,10 @@ chopset
 copline
 curblock
 curcop
+curcopdb
 curcsv
 curpm
+curstack
 curstash
 curstname
 cxstack
@@ -71,6 +73,7 @@ laststype
 leftgv
 lineary
 localizing
+localpatches
 main_cv
 main_root
 main_start
@@ -101,8 +104,6 @@ origargv
 origfilename
 ors
 orslen
-pad
-padname
 parsehook
 patchlevel
 perldb
@@ -128,13 +129,13 @@ sortcop
 sortstack
 sortstash
 splitstr
-stack
 statcache
 statgv
 statname
 statusvalue
 stdingv
 strchop
+strtab
 sv_count
 sv_objcount
 sv_root
