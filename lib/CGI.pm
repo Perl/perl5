@@ -18,8 +18,8 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.112 2003/04/28 13:35:56 lstein Exp $';
-$CGI::VERSION='2.93';
+$CGI::revision = '$Id: CGI.pm,v 1.125 2003/06/16 18:54:19 lstein Exp $';
+$CGI::VERSION='2.97';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -221,7 +221,7 @@ if ($needs_binmode) {
 			   base body Link nextid title meta kbd start_html end_html
 			   input Select option comment charset escapeHTML/],
 		':html3'=>[qw/div table caption th td TR Tr sup Sub strike applet Param 
-			   embed basefont style span layer ilayer font frameset frame script small big/],
+			   embed basefont style span layer ilayer font frameset frame script small big Area Map/],
                 ':html4'=>[qw/abbr acronym bdo col colgroup del fieldset iframe
                             ins label legend noframes noscript object optgroup Q 
                             thead tbody tfoot/], 
@@ -238,7 +238,6 @@ if ($needs_binmode) {
 			 remote_user user_name header redirect import_names put 
 			 Delete Delete_all url_param cgi_error/],
 		':ssl' => [qw/https/],
-		':imagemap' => [qw/Area Map/],
 		':cgi-lib' => [qw/ReadParse PrintHeader HtmlTop HtmlBot SplitParam Vars/],
 		':html' => [qw/:html2 :html3 :html4 :netscape/],
 		':standard' => [qw/:html2 :html3 :html4 :form :cgi/],
@@ -445,6 +444,12 @@ sub init {
 
       # avoid unreasonably large postings
       if (($POST_MAX > 0) && ($content_length > $POST_MAX)) {
+	# quietly read and discard the post
+	  my $buffer;
+	  my $max = $content_length;
+	  while ($max > 0 && (my $bytes = read(STDIN,$buffer,$max < 10000 ? $max : 10000))) {
+	    $max -= $bytes;
+	  }
 	  $self->cgi_error("413 Request entity too large");
 	  last METHOD;
       }
@@ -529,7 +534,8 @@ sub init {
 # YL: Begin Change for XML handler 10/19/2001
     if ($meth eq 'POST'
         && defined($ENV{'CONTENT_TYPE'})
-        && $ENV{'CONTENT_TYPE'} !~ m|^application/x-www-form-urlencoded| ) {
+        && $ENV{'CONTENT_TYPE'} !~ m|^application/x-www-form-urlencoded|
+	&& $ENV{'CONTENT_TYPE'} !~ m|^multipart/form-data| ) {
         my($param) = 'POSTDATA' ;
         $self->add_parameter($param) ;
       push (@{$self->{$param}},$query_string);
@@ -662,7 +668,7 @@ sub _make_tag_func {
 	    my(\@attr) = make_attributes(\$a,\$q->{'escape'});
 	    \$attr = " \@attr" if \@attr;
 	  } else {
-	    unshift \@rest,\$a;
+	    unshift \@rest,\$a if defined \$a;
 	  }
 	);
     if ($tagname=~/start_(\w+)/i) {
@@ -671,8 +677,7 @@ sub _make_tag_func {
 	$func .= qq! return "<\L/$1\E>"; } !;
     } else {
 	$func .= qq#
-\#	    return \$XHTML ? "\L<$tagname\E\$attr />" : "\L<$tagname\E\$attr>" unless \@_;
-	    return \$XHTML ? "\L<$tagname\E\$attr />" : "\L<$tagname\E\$attr>" unless \@rest && defined(\$rest[0]);
+	    return \$XHTML ? "\L<$tagname\E\$attr />" : "\L<$tagname\E\$attr>" unless \@rest;
 	    my(\$tag,\$untag) = ("\L<$tagname\E\$attr>","\L</$tagname>\E");
 	    my \@result = map { "\$tag\$_\$untag" } 
                               (ref(\$rest[0]) eq 'ARRAY') ? \@{\$rest[0]} : "\@rest";
@@ -839,8 +844,8 @@ END_OF_FUNC
 ####
 sub delete {
     my($self,@p) = self_or_default(@_);
-    my($name) = rearrange([NAME],@p);
-    my @to_delete = ref($name) eq 'ARRAY' ? @$name : ($name);
+    my(@names) = rearrange([NAME],@p);
+    my @to_delete = ref($names[0]) eq 'ARRAY' ? @$names[0] : @names;
     my %to_delete;
     foreach my $name (@to_delete)
     {
@@ -1051,7 +1056,7 @@ EOF
 'delete_all' => <<'EOF',
 sub delete_all {
     my($self) = self_or_default(@_);
-    my @param = $self->param;
+    my @param = $self->param();
     $self->delete(@param);
 }
 EOF
@@ -1136,12 +1141,12 @@ sub Dump {
     push(@result,"<ul>");
     foreach $param ($self->param) {
 	my($name)=$self->escapeHTML($param);
-	push(@result,"<li><strong>$param</strong>");
+	push(@result,"<li><strong>$param</strong></li>");
 	push(@result,"<ul>");
 	foreach $value ($self->param($param)) {
 	    $value = $self->escapeHTML($value);
-            $value =~ s/\n/<br>\n/g;
-	    push(@result,"<li>$value");
+            $value =~ s/\n/<br />\n/g;
+	    push(@result,"<li>$value</li>");
 	}
 	push(@result,"</ul>");
     }
@@ -1504,32 +1509,35 @@ sub _style {
     my $cdata_end   = $XHTML ? "\n/* ]]> */-->\n" : " -->\n";
 
     if (ref($style)) {
-     my($src,$code,$verbatim,$stype,@other) =
+     my($src,$code,$verbatim,$stype,$foo,@other) =
          rearrange([SRC,CODE,VERBATIM,TYPE],
-                    '-foo'=>'bar', # a trick to allow the '-' to be omitted
+                    '-foo'=>'bar',    # trick to allow dash to be omitted
                     ref($style) eq 'ARRAY' ? @$style : %$style);
-     $type = $stype if $stype;
-     
+     $type  = $stype if $stype;
+     my $other = @other ? join ' ',@other : '';
+
      if (ref($src) eq "ARRAY") # Check to see if the $src variable is an array reference
      { # If it is, push a LINK tag for each one
          foreach $src (@$src)
        {
-         push(@result,$XHTML ? qq(<link rel="stylesheet" type="$type" href="$src" />)
-                             : qq(<link rel="stylesheet" type="$type" href="$src">)) if $src;
+         push(@result,$XHTML ? qq(<link rel="stylesheet" type="$type" href="$src" $other/>)
+                             : qq(<link rel="stylesheet" type="$type" href="$src"$other>)) if $src;
        }
      }
      else
      { # Otherwise, push the single -src, if it exists.
-       push(@result,$XHTML ? qq(<link rel="stylesheet" type="$type" href="$src" />)
-                           : qq(<link rel="stylesheet" type="$type" href="$src">)
+       push(@result,$XHTML ? qq(<link rel="stylesheet" type="$type" href="$src" $other/>)
+                           : qq(<link rel="stylesheet" type="$type" href="$src"$other>)
             ) if $src;
       }
       if ($verbatim) {
          push(@result, "<style type=\"text/css\">\n$verbatim\n</style>");
-    }      
+    }
       push(@result,style({'type'=>$type},"$cdata_start\n$code\n$cdata_end")) if $code;
     } else {
-     push(@result,style({'type'=>$type},"$cdata_start\n$style\n$cdata_end"));
+         my $src = $style;
+         push(@result,$XHTML ? qq(<link rel="stylesheet" type="$type" href="$src" $other/>)
+                             : qq(<link rel="stylesheet" type="$type" href="$src"$other>));
     }
     @result;
 }
@@ -1632,6 +1640,7 @@ sub startform {
            $action .= "?$ENV{QUERY_STRING}";
        }
     }
+    $action =~ s/\"/%22/g;  # fix cross-site scripting bug reported by obscure
     $action = qq(action="$action");
     my($other) = @other ? " @other" : '';
     $self->{'.parametersToAdd'}={};
@@ -1875,7 +1884,6 @@ END_OF_FUNC
 sub reset {
     my($self,@p) = self_or_default(@_);
     my($label,$value,@other) = rearrange(['NAME',['VALUE','LABEL']],@p);
-    warn "label = $label, value = $value";
     $label=$self->escapeHTML($label);
     $value=$self->escapeHTML($value,1);
     my ($name) = ' name=".reset"';
@@ -6460,6 +6468,26 @@ This will generate an HTML header that contains this:
    @import url("/server-common/css/main.css");
    </style>
 
+Any additional arguments passed in the -style value will be
+incorporated into the <link> tag.  For example:
+
+ start_html(-style=>{-src=>['/styles/print.css','/styles/layout.css'],
+			  -media => 'all'});
+
+This will give:
+
+ <link rel="stylesheet" type="text/css" href="/styles/print.css" media="all"/>
+ <link rel="stylesheet" type="text/css" href="/styles/layout.css" media="all"/>
+
+<p>
+
+To make more complicated <link> tags, use the Link() function
+and pass it to start_html() in the -head argument, as in:
+
+  @h = (Link({-rel=>'stylesheet',-type=>'text/css',-src=>'/ss/ss.css',-media=>'all'}),
+        Link({-rel=>'stylesheet',-type=>'text/css',-src=>'/ss/fred.css',-media=>'paper'}));
+  print start_html({-head=>\@h})
+
 =head1 DEBUGGING
 
 If you are running the script from the command line or in the perl
@@ -6595,7 +6623,6 @@ Returns either the remote host name or IP address.
 if the former is unavailable.
 
 =item B<script_name()>
-
 Return the script name as a partial URL, for self-refering
 scripts.
 
