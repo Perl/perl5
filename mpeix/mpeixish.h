@@ -153,3 +153,5 @@ extern void srand48(long int seedval);
 extern int ftruncate(int fd, long wantsize);
 extern int gettimeofday( struct timeval *tp, struct timezone *tpz );
 extern int truncate(const char *pathname, off_t length);
+
+#define fcntl mpe_fcntl

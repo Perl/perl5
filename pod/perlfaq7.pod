@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq7 - General Perl Language Issues ($Revision: 1.14 $, $Date: 2003/01/31 17:38:14 $)
+perlfaq7 - General Perl Language Issues ($Revision: 1.15 $, $Date: 2003/07/24 02:17:21 $)
 
 =head1 DESCRIPTION
 
@@ -808,7 +808,7 @@ symbolic references, you are just using the package's symbol-table hash
 (like C<%main::>) instead of a user-defined hash.  The solution is to
 use your own hash or a real reference instead.
 
-    $fred    = 23;
+    $USER_VARS{"fred"} = 23;
     $varname = "fred";
     $USER_VARS{$varname}++;  # not $$varname++
 

@@ -993,9 +993,9 @@ _cleaner2:
 	rm -f testcompile compilelog
 	-rmdir lib/B lib/Data lib/Digest
 	rm -rf lib/Encode
-	-rmdir lib/IO/Socket lib/IO
-	-rmdir lib/Filter/Util lib/List lib/MIME lib/PerlIO lib/Scalar lib/Sys
-	-rmdir lib/Thread lib/XS lib/threads/shared lib/threads
+	-rmdir lib/Filter/Util lib/IO/Socket lib/IO
+	-rmdir lib/List lib/MIME lib/Scalar lib/Sys 
+	-rmdir lib/threads lib/XS
 
 _realcleaner:
 	@$(LDLIBPTH) $(MAKE) _cleaner1 CLEAN=realclean

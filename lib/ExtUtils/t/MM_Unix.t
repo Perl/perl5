@@ -18,7 +18,7 @@ BEGIN {
         plan skip_all => 'Non-Unix platform';
     }
     else {
-        plan tests => 116;
+        plan tests => 115;
     }
 }
 
@@ -127,7 +127,6 @@ foreach ( qw /
   xs_c
   xs_cpp
   xs_o
-  xsubpp_version 
   / )
   {
       can_ok($class, $_);

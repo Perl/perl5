@@ -1,5 +1,5 @@
 package NEXT;
-$VERSION = '0.50';
+$VERSION = '0.51';
 use Carp;
 use strict;
 
@@ -43,6 +43,7 @@ sub AUTOLOAD
 		@{$NEXT::NEXT{$self,$wanted_method}} = 
 			map { (*{"${_}::AUTOLOAD"}{CODE}) ? "${_}::AUTOLOAD" : ()} @forebears
 				unless @{$NEXT::NEXT{$self,$wanted_method}||[]};
+              $NEXT::SEEN->{$self,*{$caller}{CODE}}++;
 	}
 	my $call_method = shift @{$NEXT::NEXT{$self,$wanted_method}};
 	while ($wanted_class =~ /^NEXT:.*:UNSEEN/ && defined $call_method

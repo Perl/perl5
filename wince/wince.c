@@ -604,14 +604,13 @@ win32_uname(struct utsname *name)
 void
 sig_terminate(pTHX_ int sig)
 {
-     Perl_warn(aTHX_ "Terminating on signal SIG%s(%d)\n",PL_sig_name[sig], sig);
+    Perl_warn(aTHX_ "Terminating on signal SIG%s(%d)\n",PL_sig_name[sig], sig);
     /* exit() seems to be safe, my_exit() or die() is a problem in ^C 
        thread 
      */
     exit(sig);
 }
 
-void
 DllExport int
 win32_async_check(pTHX)
 {
@@ -633,6 +632,7 @@ win32_async_check(pTHX)
 	    goto Raise;
 	    break;
 #endif
+
 	/* We use WM_USER to fake kill() with other signals */
 	case WM_USER: {
 	    sig = msg.wParam;
@@ -710,41 +710,6 @@ win32_msgwait(pTHX_ DWORD count, LPHANDLE handles, DWORD timeout, LPDWORD result
     ticks = timeout - ticks;
     /* If we are past the end say zero */
     return (ticks > 0) ? ticks : 0;
-}
-
-/* Timing related stuff */
-
-int
-do_raise(pTHX_ int sig) 
-{
-    if (sig < SIG_SIZE) {
-	Sighandler_t handler = w32_sighandler[sig];
-	if (handler == SIG_IGN) {
-	    return 0;
-	}
-	else if (handler != SIG_DFL) {
-	    (*handler)(sig);
-	    return 0;
-	}
-	else {
-	    /* Choose correct default behaviour */
-	    switch (sig) {
-#ifdef SIGCLD
-		case SIGCLD:
-#endif
-#ifdef SIGCHLD
-		case SIGCHLD:
-#endif
-		case 0:
-		    return 0;
-		case SIGTERM:
-		default:
-		    break;
-	    }
-	}
-    }
-    /* Tell caller to exit thread/process as approriate */
-    return 1;
 }
 
 /* Timing related stuff */

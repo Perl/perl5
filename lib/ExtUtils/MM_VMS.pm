@@ -20,8 +20,8 @@ BEGIN {
 
 use File::Basename;
 use vars qw($Revision @ISA $VERSION);
-($VERSION) = '5.68';
-($Revision) = q$Revision: 1.104 $ =~ /Revision:\s+(\S+)/;
+($VERSION) = '5.69';
+($Revision) = q$Revision: 1.107 $ =~ /Revision:\s+(\S+)/;
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
@@ -758,23 +758,11 @@ sub tool_xsubpp {
         (!exists($self->{XSOPT}) || $self->{XSOPT} !~ /linenumbers/)) {
         unshift(@tmargs,'-nolinenumbers');
     }
-    my $xsubpp_version = $self->xsubpp_version($self->catfile($xsdir,'xsubpp'));
 
-    # What are the correct thresholds for version 1 && 2 Paul?
-    if ( $xsubpp_version > 1.923 ){
-	$self->{XSPROTOARG} = '' unless defined $self->{XSPROTOARG};
-    } else {
-	if (defined $self->{XSPROTOARG} && $self->{XSPROTOARG} =~ /\-prototypes/) {
-	    print STDOUT qq{Warning: This extension wants to pass the switch "-prototypes" to xsubpp.
-	Your version of xsubpp is $xsubpp_version and cannot handle this.
-	Please upgrade to a more recent version of xsubpp.
-};
-	} else {
-	    $self->{XSPROTOARG} = "";
-	}
-    }
 
-    "
+    $self->{XSPROTOARG} = '' unless defined $self->{XSPROTOARG};
+
+    return "
 XSUBPPDIR = $xsdir
 XSUBPP = \$(PERLRUN) \$(XSUBPPDIR)xsubpp
 XSPROTOARG = $self->{XSPROTOARG}
@@ -783,71 +771,6 @@ XSUBPPARGS = @tmargs
 ";
 }
 
-=item xsubpp_version (override)
-
-Test xsubpp exit status according to VMS rules ($sts & 1 ==E<gt> good)
-rather than Unix rules ($sts == 0 ==E<gt> good).
-
-=cut
-
-sub xsubpp_version
-{
-    my($self,$xsubpp) = @_;
-    my ($version) ;
-    return '' unless $self->needs_linking;
-
-    # try to figure out the version number of the xsubpp on the system
-
-    # first try the -v flag, introduced in 1.921 & 2.000a2
-
-    my $command = qq{$self->{PERL} "-I$self->{PERL_LIB}" $xsubpp -v};
-    print "Running: $command\n" if $Verbose;
-    $version = `$command` ;
-    if ($?) {
-	use ExtUtils::MakeMaker::vmsish 'status';
-	warn "Running '$command' exits with status $?";
-    }
-    chop $version ;
-
-    return $1 if $version =~ /^xsubpp version (.*)/ ;
-
-    # nope, then try something else
-
-    my $counter = '000';
-    my ($file) = 'temp' ;
-    $counter++ while -e "$file$counter"; # don't overwrite anything
-    $file .= $counter;
-
-    local(*F);
-    open(F, ">$file") or die "Cannot open file '$file': $!\n" ;
-    print F <<EOM ;
-MODULE = fred PACKAGE = fred
-
-int
-fred(a)
-	int	a;
-EOM
-
-    close F ;
-
-    $command = "$self->{PERLRUN} $xsubpp $file";
-    print "Running: $command\n" if $Verbose;
-    my $text = `$command` ;
-    if ($?) {
-	use ExtUtils::MakeMaker::vmsish 'status';
-	warn "Running '$command' exits with status $?";
-    }
-    unlink $file ;
-
-    # gets 1.2 -> 1.92 and 2.000a1
-    return $1 if $text =~ /automatically by xsubpp version ([\S]+)\s*/  ;
-
-    # it is either 1.0 or 1.1
-    return 1.1 if $text =~ /^Warning: ignored semicolon/ ;
-
-    # none of the above, so 1.0
-    return "1.0" ;
-}
 
 =item tools_other (override)
 
@@ -1385,7 +1308,8 @@ realclean :: clean
     # combination of macros).  In order to stay below DCL's 255 char limit,
     # we put only 2 on a line.
     my($file,$fcnt);
-    my(@files) = qw{ $(FIRST_MAKEFILE) $(MAKEFILE_OLD) };
+    my(@files) = values %{$self->{PM}};
+    push @files, qw{ $(FIRST_MAKEFILE) $(MAKEFILE_OLD) };
     if ($self->has_link_code) {
 	push(@files,qw{ $(INST_DYNAMIC) $(INST_STATIC) $(INST_BOOT) $(OBJECT) });
     }

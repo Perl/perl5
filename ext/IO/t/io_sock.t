@@ -181,26 +181,22 @@ $server = IO::Socket->new(Domain => AF_INET,
                           LocalAddr => '127.0.0.1');
 $port = $server->sockport;
 
-if ($^O eq 'mpeix') {
-    print("ok 12 # skipped\n")
+if ($pid = fork()) {
+    my $buf;
+    $server->recv($buf, 100);
+    print $buf;
+} elsif (defined($pid)) {
+    #child
+    $sock = IO::Socket::INET->new(Proto => 'udp',
+                                  PeerAddr => "localhost:$port")
+         || IO::Socket::INET->new(Proto => 'udp',
+                                  PeerAddr => "127.0.0.1:$port");
+    $sock->send("ok 12\n");
+    sleep(1);
+    $sock->send("ok 12\n");  # send another one to be sure
+    exit;
 } else {
-    if ($pid = fork()) {
-        my $buf;
-        $server->recv($buf, 100);
-        print $buf;
-    } elsif (defined($pid)) {
-        #child
-        $sock = IO::Socket::INET->new(Proto => 'udp',
-                                      PeerAddr => "localhost:$port")
-             || IO::Socket::INET->new(Proto => 'udp',
-                                      PeerAddr => "127.0.0.1:$port");
-        $sock->send("ok 12\n");
-        sleep(1);
-        $sock->send("ok 12\n");  # send another one to be sure
-        exit;
-    } else {
-        die;
-    }
+    die;
 }
 
 print "not " unless $server->blocking;
@@ -279,9 +275,6 @@ if( $server_pid) {
     ### TESTS 19,20,21,22
     ### Try to ping-pong some Unicode.
     #
-    if ($^O eq 'mpeix') {
-	print "ok 19 # skipped: broken on MPE/iX\n";
-    } else {
     $sock = IO::Socket::INET->new("localhost:$serverport")
          || IO::Socket::INET->new("127.0.0.1:$serverport");
 
@@ -330,7 +323,6 @@ if( $server_pid) {
 	print "not ";
     }
     print "ok 23\n";
-    }
 
     ### TEST 24
     ### Stop the server

@@ -21,16 +21,29 @@ version="${perl_revision}.${perl_version}.${perl_subversion}"
 # BSD paths
 case "$prefix" in
   ''|'/usr')
-	# Default install; use non-system directories
-	prefix='/usr/local'; # Built-in perl uses /usr
-	siteprefix='/usr/local';
-	# Where to put modules.
-	sitelib="/Library/Perl/${version}"; # FIXME: Want "/Network/Perl/${version}" also
+	case "$prefix" in
+	'')	# Default install; use non-system directories
+		prefix='/usr/local';
+		siteprefix='/usr/local';
+		;;
+	'/usr')	# We are building/replacing the built-in perl
+		prefix=/;
+		siteprefix='/usr/local';
+		# The DSTROOT is used by the Apple build system.
+		installprefix="${DSTROOT}/";
+		bin='/usr/bin';
+		sitebin='/usr/bin';
+		installusrbinperl='define'; # You knew what you were doing.
+		privlib="/System/Library/Perl/${version}";
+		sitelib="/Library/Perl/${version}";
+		;;
+	esac
+	vendorlib="/Network/Library/Perl/${version}";
 	# 4BSD uses ${prefix}/share/man, not ${prefix}/man.
 	man1dir='/usr/share/man/man1';
 	man3dir='/usr/share/man/man3';
 	;;
-  *)	# Anything else; use non-system directories
+  *)	# Anything else; use non-system directories, use Configure defaults
 	;;
 esac
 
