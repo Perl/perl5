@@ -78,7 +78,7 @@ $VERSION = "1.03";
 sub AUTOLOAD {
     my($constname);
     ($constname = $AUTOLOAD) =~ s/.*:://;
-    my $val = constant($constname, @_ ? $_[0] : 0);
+    my $val = constant($constname, (@_ && (caller(0))[4]) ? $_[0] : 0);
     if ($! != 0) {
 	if ($! =~ /Invalid/) {
 	    $AutoLoader::AUTOLOAD = $AUTOLOAD;

@@ -1645,6 +1645,12 @@ fold_constants(register OP *o)
     case OP_LCFIRST:
     case OP_UC:
     case OP_LC:
+    case OP_SLT:
+    case OP_SGT:
+    case OP_SLE:
+    case OP_SGE:
+    case OP_SCMP:
+
 	if (o->op_private & OPpLOCALE)
 	    goto nope;
     }
@@ -4599,9 +4605,10 @@ ck_subr(OP *o)
 		    goto wrapref;
 		{
 		    OP* kid = o2;
-		    o2 = newUNOP(OP_RV2GV, 0, kid);
-		    o2->op_sibling = kid->op_sibling;
+		    OP* sib = kid->op_sibling;
 		    kid->op_sibling = 0;
+		    o2 = newUNOP(OP_RV2GV, 0, kid);
+		    o2->op_sibling = sib;
 		    prev->op_sibling = o;
 		}
 		goto wrapref;

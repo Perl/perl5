@@ -362,17 +362,18 @@ printf "ok %d\n",$i++;
 ##
 ##
 
-testing \&an_array_ref, '\@';
+testing \&array_ref_plus, '\@@';
 
-sub an_array_ref (\@) {
+sub array_ref_plus (\@@) {
     print "# \@_ = (",join(",",@_),")\n";
-    print "not " unless ref($_[0]) && 1 == @{$_[0]};
+    print "not " unless @_ == 2 && ref($_[0]) && 1 == @{$_[0]} && $_[1] eq 'x';
     printf "ok %d\n",$i++;
     @{$_[0]} = (qw(ok)," ",$i++,"\n");
 }
 
 @array = ('a');
-an_array_ref @array;
+{ my @more = ('x');
+  array_ref_plus @array, @more; }
 print "not " unless @array == 4;
 print @array;
 
