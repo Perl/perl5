@@ -155,7 +155,15 @@ sub export_fail {
 
 sub longmess {
     { local $@; require Carp::Heavy; }	# XXX fix require to not clear $@?
-    goto &longmess_heavy;
+    # Icky backwards compatibility wrapper. :-(
+    my $call_pack = caller();
+    if ($Internal{$call_pack} or $CarpInternal{$call_pack}) {
+      return longmess_heavy(@_);
+    }
+    else {
+      local $CarpLevel = $CarpLevel + 1;
+      return longmess_heavy(@_);
+    }
 }
 
 
@@ -167,7 +175,10 @@ sub longmess {
 
 sub shortmess {	# Short-circuit &longmess if called via multiple packages
     { local $@; require Carp::Heavy; }	# XXX fix require to not clear $@?
-    goto &shortmess_heavy;
+    # Icky backwards compatibility wrapper. :-(
+    my $call_pack = caller();
+    local @CARP_NOT = caller();
+    shortmess_heavy(@_);
 }
 
 
