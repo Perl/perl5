@@ -50,7 +50,7 @@ print "1..$last\n";
 
 use vars qw(&LC_ALL);
 
-my $a = 'abc %';
+$a = 'abc %';
 
 sub ok {
     my ($n, $result) = @_;
@@ -317,6 +317,9 @@ my @Locale;
 my $Locale;
 my @Alnum_;
 
+my @utf8locale;
+my %utf8skip;
+
 sub getalnum_ {
     sort grep /\w/, map { chr } 0..255
 }
@@ -517,6 +520,8 @@ foreach $Locale (@Locale) {
 	if (utf8locale($Locale)) {
 	    # utf8 and locales do not mix.
 	    debug "# skipping UTF-8 locale '$Locale'\n";
+	    push @utf8locale, $Locale;
+            @utf8skip{99..102} = ();
 	} else {
 	    my $word = join('', @Neoalpha);
 
@@ -575,7 +580,7 @@ foreach $Locale (@Locale) {
 		     'not      ($greater ne $lesser )', # 8
 		     '         ($greater eq $lesser )', # 9
 		     $no.'     ($greater ge $lesser )', # 10
-		     'not (($lesser cmp $greater) == -$sign)' # 12
+		     'not (($lesser cmp $greater) == -($sign))' # 11
 		     );
 		@test{@test} = 0 x @test;
 		$test = 0;
@@ -611,9 +616,9 @@ foreach $Locale (@Locale) {
 
     my ($x, $y) = (1.23, 1.23);
 
-    my $a = "$x";
+    $a = "$x";
     printf ''; # printf used to reset locale to "C"
-    my $b = "$y";
+    $b = "$y";
 
     debug "# 103..107: a = $a, b = $b, Locale = $Locale\n";
 
@@ -630,10 +635,14 @@ foreach $Locale (@Locale) {
     {
 	use warnings;
 	my $w = 0;
-	local $SIG{__WARN__} = sub { $w++ };
+	local $SIG{__WARN__} =
+	    sub {
+		print "# @_";
+		$w++;
+	    };
 
-	# the == (among other ops) used to warn for locales
-	# that had something else than "." as the radix character
+	# The == (among other ops) used to warn for locales
+	# that had something else than "." as the radix character.
 
 	tryneoalpha($Locale, 105, $c == 1.23);
 
@@ -700,6 +709,8 @@ foreach $Locale (@Locale) {
         if (utf8locale($Locale)) {
 	    # utf8 and locales do not mix.
 	    debug "# skipping UTF-8 locale '$Locale'\n";
+	    push @utf8locale, $Locale;
+            $utf8skip{116}++;
 	} else {
 	    use locale;
 	    use locale;
@@ -799,10 +810,21 @@ if ($didwarn) {
 
         warn
           "# The following locales\n#\n",
-            "#\t", $F, "\n#\n",
+          "#\t", $F, "\n#\n",
           "# had problems.\n#\n",
     } else {
         warn "# None of your locales were broken.\n";
+    }
+
+    if (@utf8locale) {
+        my $S = join(" ", @utf8locale);
+        $S =~ s/(.{50,60}) /$1\n#\t/g;
+
+        warn "# The following locales\n#\n",
+    	     "#\t", $S, "\n#\n",
+             "# were skipped for the tests ",
+                 join(" ", sort {$a<=>$b} keys %utf8skip), "\n",
+             "# because UTF-8 and locales do not work together in Perl.\n#\n";
     }
 }
 
