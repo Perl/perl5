@@ -1774,7 +1774,7 @@ Internet, point your browser at http://www.perl.com/, the Perl Home Page.\n\n");
 	break;
     case '-':
     case 0:
-#ifdef WIN32
+#if defined(WIN32) || !defined(PERL_STRICT_CR)
     case '\r':
 #endif
     case '\n':
