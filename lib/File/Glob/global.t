@@ -36,12 +36,11 @@ use File::Glob ':globally';
 $loaded = 1;
 print "ok 1\n";
 
-$_ = $^O eq "MacOS" ? ":lib:*.t" : "lib/*.t";
+$_ = $^O eq "MacOS" ? ":op:*.t" : "op/*.t";
 my @r = glob;
-print "not " if $_ ne ($^O eq "MacOS" ? ":lib:*.t" : "lib/*.t");
+print "not " if $_ ne ($^O eq "MacOS" ? ":op:*.t" : "op/*.t");
 print "ok 2\n";
 
-# we should have at least basic.t, global.t, taint.t
 print "# |@r|\nnot " if @r < 3;
 print "ok 3\n";
 

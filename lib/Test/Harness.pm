@@ -554,7 +554,7 @@ on TTY.  The width is the width of the "yada/blah..." string.
 sub _mk_leader {
     my ($te, $width) = @_;
 
-    chop($te);      # XXX chomp?
+    $te =~ s/\.\w+$/./;
 
     if ($^O eq 'VMS') { $te =~ s/^.*\.t\./\[.t./s; }
     my $blank = (' ' x 77);

@@ -15,12 +15,11 @@ print "1..10\n";
 use File::DosGlob 'glob';
 
 # test if $_ takes as the default
-$_ = "lib/a*.t";
+$_ = "op/a*.t";
 my @r = glob;
-print "not " if $_ ne 'lib/a*.t';
+print "not " if $_ ne 'op/a*.t';
 print "ok 1\n";
-# we should have at least abbrev.t, anydbm.t, autoloader.t
-print "# |@r|\nnot " if @r < 3;
+print "# |@r|\nnot " if @r < 9;
 print "ok 2\n";
 
 # check if <*/*> works

@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
     require Config; import Config;
     if (! $Config{'use5005threads'}) {
-	print "1..0 # Skip: not use5005threads\n";
+	print "1..0 # Skip: no use5005threads\n";
 	exit 0;
     }
 

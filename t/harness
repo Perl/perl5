@@ -29,7 +29,6 @@ $Test::Harness::verbose = shift if @ARGV && $ARGV[0] eq '-v';
 		op/runlevel.t		1
 		op/tie.t		1
 		op/lex_assign.t		1
-		pragma/subs.t   	1
 		);
 
 foreach (keys %datahandle) {
@@ -39,18 +38,21 @@ foreach (keys %datahandle) {
 if (@ARGV) {
     @tests = @ARGV;
 } else {
-    @tests = <base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t lib/*.t pod/*.t> unless @tests;
-    use File::Spec;
-    my $updir = File::Spec->updir;
-    my $mani  = File::Spec->catdir(File::Spec->updir, "MANIFEST");
-    if (open(MANI, $mani)) {
-        while (<MANI>) { # similar code in t/TEST
-	    if (m!^(ext/.+/([^/]+\.t|test\.pl)|lib/.+(\.t|test\.pl))\s!) {
-		push @tests, File::Spec->catdir($updir, $1);
+    unless (@tests) {
+	@tests = <base/*.t comp/*.t cmd/*.t io/*.t op/*.t lib/*.t>;
+	use File::Spec;
+	my $updir = File::Spec->updir;
+	my $mani  = File::Spec->catdir(File::Spec->updir, "MANIFEST");
+	if (open(MANI, $mani)) {
+	    while (<MANI>) { # similar code in t/TEST
+	    if (m!^(ext/\S+/([^/]+\.t|test\.pl)|lib/\S+?(\.t|test\.pl))\s!) {
+		    push @tests, File::Spec->catdir($updir, $1);
+		}
 	    }
+	} else {
+	    warn "$0: cannot open $mani: $!\n";
 	}
-    } else {
-        warn "$0: cannot open $mani: $!\n";
+	push @tests, <pod/*.t>;
     }
 }
 

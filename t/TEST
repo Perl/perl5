@@ -64,13 +64,13 @@ sub _find_tests {
 }
 
 unless (@ARGV) {
-    foreach my $dir (qw(base comp cmd run io op pragma lib pod)) {
+    foreach my $dir (qw(base comp cmd run io op lib)) {
         _find_tests($dir);
     }
     my $mani = File::Spec->catdir($updir, "MANIFEST");
     if (open(MANI, $mani)) {
         while (<MANI>) { # similar code in t/harness
-	    if (m!^(ext/.+/([^/]+\.t|test\.pl)|lib/.+(\.t|test\.pl))\s!) {
+	    if (m!^(ext/\S+/([^/]+\.t|test\.pl)|lib/\S+?(\.t|test\.pl))\s!) {
 		push @ARGV, $1;
 		$OVER{$1} = File::Spec->catdir($updir, $1);
 	    }
@@ -78,6 +78,7 @@ unless (@ARGV) {
     } else {
         warn "$0: cannot open $mani: $!\n";
     }
+    _find_tests('pod');
 }
 
 # Tests known to cause infinite loops for the perlcc tests.
@@ -146,7 +147,7 @@ EOT
 	    }
 	}
 	$te = $test;
-	chop($te);
+	$te =~ s/\.\w+$/./;
 	print "$te" . '.' x ($dotdotdot - length($te));
 
 	$test = $OVER{$test} if exists $OVER{$test};

@@ -35,10 +35,10 @@ $ENV{'PATH'} = join($sep,@path);
 
 cleanup();
 
-find({wanted => sub { print "ok 1\n" if $_ eq 'filefind.t'; },
+find({wanted => sub { print "ok 1\n" if $_ eq 'commonsense.t'; },
       untaint => 1, untaint_pattern => qr|^(.+)$|}, File::Spec->curdir);
 
-finddepth({wanted => sub { print "ok 2\n" if $_ eq 'filefind.t'; },
+finddepth({wanted => sub { print "ok 2\n" if $_ eq 'commonsense.t'; },
            untaint => 1, untaint_pattern => qr|^(.+)$|},
            File::Spec->curdir);
 

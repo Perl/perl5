@@ -694,8 +694,11 @@ sub installlib {
     }
     
     # ignore patch backups, RCS files, emacs backup & temp files and the
-    # .exists files, and .PL files.
-    return if $name =~ m{\.orig$|~$|^#.+#$|,v$|^\.exists|\.PL$};
+    # .exists files, .PL files, and .t files.
+    return if $name =~ m{\.orig$|~$|^#.+#$|,v$|^\.exists|\.PL$|\.t$};
+
+    # ignore locale, strict, and warnings test data files
+    return if $name =~ m{^lib/(locale|strict|warnings)/\w+$};
 
     $name = "$dir/$name" if $dir ne '';
 

@@ -12,8 +12,8 @@ use File::CheckTree;
 # We assume that we run from the perl "t" directory.
 
 validate q{
-    lib              -d || die
-    lib/checktree.t  -f || die
+    lib  -d || die
+    TEST -f || die
 };
 
 print "ok 1\n";
