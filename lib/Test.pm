@@ -1,7 +1,7 @@
 
 require 5.004;
 package Test;
-# Time-stamp: "2002-08-26 03:09:51 MDT"
+# Time-stamp: "2002-10-11 17:38:48 MDT"
 
 use strict;
 
@@ -21,7 +21,7 @@ sub _reset_globals {
     $planned    = 0;
 }
 
-$VERSION = '1.21';
+$VERSION = '1.23';
 require Exporter;
 @ISA=('Exporter');
 
@@ -74,7 +74,11 @@ Test - provides a simple framework for writing test scripts
   ok 'segmentation fault', '/(?i)success/';    #regex match
 
   skip(
-    $^O eq 'MSWin' ? "Not for MSWin" : 0,     # whether to skip
+    $^O eq 'MSWin' ? "Skip unless MSWin" : 0,  # whether to skip
+    $foo, $bar  # arguments just like for ok(...)
+  );
+  skip(
+    $^O eq 'MSWin' ? 0 : "Skip if MSWin",  # whether to skip
     $foo, $bar  # arguments just like for ok(...)
   );
 
@@ -184,7 +188,7 @@ sub plan {
 
     printf $TESTOUT
       "# Current time local: %s\n# Current time GMT:   %s\n",
-      scalar(   gmtime($^T)), scalar(localtime($^T));
+      scalar(localtime($^T)), scalar(gmtime($^T));
       
     print $TESTOUT "# Using Test.pm version $VERSION\n";
 
@@ -339,12 +343,16 @@ sub ok ($;$$) {
     my $context = ("$file at line $line".
 		   ($repetition > 1 ? " fail \#$repetition" : ''));
 
+    # Are we comparing two values?
+    my $compare = 0;
+
     my $ok=0;
     my $result = _to_value(shift);
     my ($expected,$diag,$isregex,$regex);
     if (@_ == 0) {
 	$ok = $result;
     } else {
+        $compare = 1;
 	$expected = _to_value(shift);
 	if (!defined $expected) {
 	    $ok = !defined $result;
@@ -384,7 +392,7 @@ sub ok ($;$$) {
             $diag =~ s/\n/\n#/g if defined $diag;
 
 	    $context .= ' *TODO*' if $todo;
-	    if (!defined $expected) {
+	    if (!$compare) {
 		if (!$diag) {
 		    print $TESTERR "# Failed test $ntest in $context\n";
 		} else {
@@ -398,9 +406,12 @@ sub ok ($;$$) {
 		if (defined $regex) {
 		    $expected = 'qr{'.$regex.'}';
 		}
-                else {
+                elsif (defined $expected) {
 		    $expected = "'$expected'";
 		}
+                else {
+                    $expected = '<UNDEF>';
+                }
 		if (!$diag) {
 		    print $TESTERR "# $prefix Expected: $expected\n";
 		} else {
@@ -460,7 +471,7 @@ Or, going the other way:
   # A test to be run EXCEPT under MSWin:
   skip($unless_MSWin, thing($foo), thing($bar) );
 
-The only tricky thing to remember is that the first parameter is true if
+The tricky thing to remember is that the first parameter is true if
 you want to I<skip> the test, not I<run> it; and it also doubles as a
 note about why it's being skipped. So in the first codeblock above, read
 the code as "skip if MSWin -- (otherwise) test whether C<thing($foo)> is
@@ -642,6 +653,64 @@ arrays -- you're comparing I<just> the number of elements of each. It's
 so easy to make that mistake in reading C<ok @foo, @bar> that you might
 want to be very explicit about it, and instead write C<ok scalar(@foo),
 scalar(@bar)>.
+
+=item *
+
+This almost definitely doesn't do what you expect:
+
+     ok $thingy->can('some_method');
+
+Why?  Because C<can> returns a coderef to mean "yes it can (and the
+method is this...)", and then C<ok> sees a coderef and thinks you're
+passing a function that you want it to call and consider the truth of
+the result of!  I.e., just like:
+
+     ok $thingy->can('some_method')->();
+
+What you probably want instead is this:
+
+     ok $thingy->can('some_method') && 1;
+
+If the C<can> returns false, then that is passed to C<ok>.  If it
+returns true, then the larger expression S<< C<<
+$thingy->can('some_method') && 1 >> >> returns 1, which C<ok> sees as
+a simple signal of success, as you would expect.
+
+
+=item *
+
+The syntax for C<skip> is about the only way it can be, but it's still
+quite confusing.  Just start with the above examples and you'll
+be okay.
+
+Moreover, users may expect this:
+
+  skip $unless_mswin, foo($bar), baz($quux);
+
+to not evaluate C<foo($bar)> and C<baz($quux)> when the test is being
+skipped.  But in reality, they I<are> evaluated, but C<skip> just won't
+bother comparing them if C<$unless_mswin> is true.
+
+You could do this:
+
+  skip $unless_mswin, sub{foo($bar)}, sub{baz($quux)};
+
+But that's not terribly pretty.  You may find it simpler or clearer in
+the long run to just do things like this:
+
+  if( $^O =~ m/MSWin/ ) {
+    print "# Yay, we're under $^O\n";
+    ok foo($bar), baz($quux);
+    ok thing($whatever), baz($stuff);
+    ok blorp($quux, $whatever);
+    ok foo($barzbarz), thang($quux);
+  } else {
+    print "# Feh, we're under $^O.  Watch me skip some tests...\n";
+    for(1 .. 4) { skip "Skip unless under MSWin" }
+  }
+
+But be quite sure that C<ok> is called exactly as many times in the
+first block as C<skip> is called in the second block.
 
 =back
 
