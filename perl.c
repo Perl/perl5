@@ -3528,6 +3528,17 @@ S_procself_val(pTHX_ SV *sv, char *arg0)
 {
     char buf[MAXPATHLEN];
     int len = readlink(PROCSELFEXE_PATH, buf, sizeof(buf) - 1);
+
+    /* On Playstation2 Linux V1.0 (kernel 2.2.1) readlink(/proc/self/exe)
+       includes a spurious NUL which will cause $^X to fail in system
+       or backticks (this will prevent extensions from being built and
+       many tests from working). readlink is not meant to add a NUL.
+       Normal readlink works fine.
+     */
+    if (len > 0 && buf[len-1] == '\0') {
+      len--;
+    }
+
     /* FreeBSD's implementation is acknowledged to be imperfect, sometimes
        returning the text "unknown" from the readlink rather than the path
        to the executable (or returning an error from the readlink).  Any valid
