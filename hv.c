@@ -439,25 +439,28 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		U32 i;
 		for (i = 0; i < klen; ++i)
 		    if (isLOWER(key[i])) {
-			const char *keysave = key;
-			/* Will need to free this, so set FREEKEY flag
-			   on call to hv_fetch_common.  */
-			key = savepvn(key,klen);
-			key = (const char*)strupr((char*)key);
-
-			if (flags & HVhek_FREEKEY)
-			    Safefree(keysave);
-
-			/* This isn't strictly the same as the old hv_fetch
-			   magic, which made a call to hv_fetch, followed
-			   by a call to hv_store if that failed and lvalue
-			   was true.
-			   Which I believe could have been done by simply
-			   passing the lvalue through to the first hv_fetch.
-			   So I will do that here.  */
-			return hv_fetch_common(hv, Nullsv, key, klen,
-					       HVhek_FREEKEY,
-					       action, Nullsv, 0);
+			/* Would be nice if we had a routine to do the
+			   copy and upercase in a single pass through.  */
+			char *nkey = strupr(savepvn(key,klen));
+			/* Note that this fetch is for nkey (the uppercased
+			   key) whereas the store is for key (the original)  */
+			entry = hv_fetch_common(hv, Nullsv, nkey, klen,
+						HVhek_FREEKEY, /* free nkey */
+						0 /* non-LVAL fetch */,
+						Nullsv /* no value */,
+						0 /* compute hash */);
+			if (!entry && (action & HV_FETCH_LVALUE)) {
+			    /* This call will free key if necessary.
+			       Do it this way to encourage compiler to tail
+			       call optimise.  */
+			    entry = hv_fetch_common(hv, keysv, key, klen,
+						    flags, HV_FETCH_ISSTORE,
+						    NEWSV(61,0), hash);
+			} else {
+			    if (flags & HVhek_FREEKEY)
+				Safefree(key);
+			}
+			return entry;
 		    }
 	    }
 #endif
