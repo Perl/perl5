@@ -43,3 +43,8 @@ struct magic {
 #define MgPV(mg,lp)		(((lp = (mg)->mg_len) == HEf_SVKEY) ?   \
 				 SvPV((SV*)((mg)->mg_ptr),lp) :		\
 				 (mg)->mg_ptr)
+
+#define SvTIED_mg(sv,how) \
+    (SvRMAGICAL(sv) ? mg_find((sv),(how)) : Null(MAGIC*))
+#define SvTIED_obj(sv,mg) \
+    ((mg)->mg_obj ? (mg)->mg_obj : sv_2mortal(newRV(sv)))
