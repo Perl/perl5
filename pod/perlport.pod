@@ -1873,6 +1873,7 @@ distribution available at http://www.perl.com/CPAN/src/index.html
 	MachTen
 	NonStop-UX
 	ReliantUNIX	(SINIX)
+	OpenBSD
 	OpenVMS		(VMS)
 	OS/2
 	OS X
@@ -1881,6 +1882,7 @@ distribution available at http://www.perl.com/CPAN/src/index.html
 	Tru64 UNIX      (DEC OSF/1, Digital UNIX)
 	UNICOS
 	UNICOS/mk
+	VOS
 	Win32/NT/2K	2)
 
         1) in DOS mode either the DOS or OS/2 ports can be used
@@ -1896,17 +1898,15 @@ There is a very good chance that these will work fine with 5.6.1.
 	MinGW
 	MPE/iX
 	NetBSD
-	OpenBSD
 	PowerMAX
 	SCO SV
 	SunOS
 	SVR4
 	Unixware
-	VOS
 	Windows 3.1
 	Windows 95
 	Windows 98
-	Windows M.e.
+	Windows Me
 
 The following platform worked for the 5.005_03 major release but not 5.6.0.
 Standardization on UTF-8 as the internal string representation

@@ -26,8 +26,9 @@ d_setruid=$undef
 #
 # Not all platforms support dynamic loading...
 #
-case `arch` in
-OpenBSD.alpha|OpenBSD.mips|OpenBSD.powerpc|OpenBSD.vax)
+ARCH=`arch|sed 's/^OpenBSD.//'`
+case "${ARCH}-${osvers}" in
+alpha-*|mips-*|vax-*|powerpc-2.[0-7]|m88k-*)
 	usedl=$undef
 	;;
 *)
@@ -68,7 +69,14 @@ d_suidsafe=$define
 
 # cc is gcc so we can do better than -O
 # Allow a command-line override, such as -Doptimize=-g
-test "$optimize" || optimize='-O2'
+case "$ARCH" in
+m88k)
+   optimize='-O0'
+   ;;
+*)
+   test "$optimize" || optimize='-O2'
+   ;;
+esac
 
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use threads.

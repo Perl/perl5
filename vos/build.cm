@@ -111,10 +111,10 @@
 & &if (command_status) ^= 0 &then &return
 &
 !cc <<perl.c -suppress_diag 2006 2053 2065 &cpu& &cflags& &+
-     -DARCHLIB="/system/ported/perl/lib/5.7&obj2&" &+
-     -DARCHLIB_EXP="/system/ported/perl/lib/5.7&obj2&" &+
-     -DSITEARCH="/system/ported/perl/lib/site/5.7&obj2&" &+
-     -DSITEARCH_EXP="/system/ported/perl/lib/site/5.7&obj2&"
+     -DARCHLIB="/system/ported/perl/lib/5.6&obj2&" &+
+     -DARCHLIB_EXP="/system/ported/perl/lib/5.6&obj2&" &+
+     -DSITEARCH="/system/ported/perl/lib/site/5.6&obj2&" &+
+     -DSITEARCH_EXP="/system/ported/perl/lib/site/5.6&obj2&"
 &if (command_status) ^= 0 &then &return
 !cc <<perlapi.c &cpu& &cflags&
 &if (command_status) ^= 0 &then &return
