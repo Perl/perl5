@@ -1026,6 +1026,22 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define STDCHAR $stdchar	/**/
 
+/* INTSIZE:
+ *	This symbol contains the value of sizeof(int) so that the C
+ *	preprocessor can make decisions based on it.
+ */
+/* LONGSIZE:
+ *	This symbol contains the value of sizeof(long) so that the C
+ *	preprocessor can make decisions based on it.
+ */
+/* SHORTSIZE:
+ *	This symbol contains the value of sizeof(short) so that the C
+ *	preprocessor can make decisions based on it.
+ */
+#define INTSIZE $intsize		/**/
+#define LONGSIZE $longsize		/**/
+#define SHORTSIZE $shortsize		/**/
+
 /* HAS_ACCESSX:
  *	This symbol, if defined, indicates that the accessx routine is
  *	available to do extended access checks.
@@ -1347,22 +1363,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$i_time I_TIME		/**/
 #$i_systime I_SYS_TIME		/**/
 #$i_systimek I_SYS_TIME_KERNEL		/**/
-
-/* INTSIZE:
- *	This symbol contains the value of sizeof(int) so that the C
- *	preprocessor can make decisions based on it.
- */
-/* LONGSIZE:
- *	This symbol contains the value of sizeof(long) so that the C
- *	preprocessor can make decisions based on it.
- */
-/* SHORTSIZE:
- *	This symbol contains the value of sizeof(short) so that the C
- *	preprocessor can make decisions based on it.
- */
-#define INTSIZE $intsize		/**/
-#define LONGSIZE $longsize		/**/
-#define SHORTSIZE $shortsize		/**/
 
 /* VAL_O_NONBLOCK:
  *	This symbol is to be used during open() or fcntl(F_SETFL) to turn on
