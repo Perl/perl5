@@ -742,7 +742,7 @@ PP(pp_mapwhile)
 	     * is repeatedly extended for every set of items.  Is possible
 	     * to do this without any stack extension or copying at all
 	     * by maintaining a separate list over which the map iterates
-	     * (like foreach does). */
+	     * (like foreach does). --gsar */
 
 	    /* everything in the stack after the destination list moves
 	     * towards the end the stack by the amount of room needed */
@@ -750,6 +750,17 @@ PP(pp_mapwhile)
 
 	    /* items to shift up (accounting for the moved source pointer) */
 	    count = (SP - PL_stack_base) - (PL_markstack_ptr[-1] - 1);
+
+	    /* This optimization is by Ben Tilly and it does
+	     * things differently from what Sarathy (gsar)
+	     * is describing.  The downside of this optimization is
+	     * that leaves "holes" (uninitialized and hopefully unused areas)
+	     * to the Perl stack, but on the other hand this
+	     * shouldn't be a problem.  If Sarathy's idea gets
+	     * implemented, this optimization should become
+	     * irrelevant.  --jhi */
+            if (shift < count)
+                shift = count; /* Avoid shifting too often --Ben Tilly */
 	    
 	    EXTEND(SP,shift);
 	    src = SP;
