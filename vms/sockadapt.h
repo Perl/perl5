@@ -140,3 +140,11 @@ void endnetent();
 #endif
 #define fileno si_fileno
 int si_fileno(FILE *);
+
+
+/* Catch erroneous results for UDP sockets -- see sockadapt.c */
+#ifdef getpeername
+#  undef getpeername
+#endif
+#define getpeername my_getpeername
+int my_getpeername _((int, struct sockaddr *, int *));
