@@ -2054,6 +2054,9 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    for (i = 1; i < PL_origargc; i++)
 		PL_origargv[i] = Nullch;
 	}
+#ifdef HAS_SETPROCTITLE
+	setproctitle("%s", SvPV_nolen(sv));
+#endif
 	break;
 #endif
 #ifdef USE_THREADS
