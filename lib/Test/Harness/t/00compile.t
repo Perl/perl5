@@ -13,6 +13,7 @@ BEGIN {
 use Test::More tests => 5;
 
 BEGIN { use_ok 'Test::Harness' }
+BEGIN { diag( "Testing Test::Harness $Test::Harness::VERSION" ) }
 
 BEGIN { use_ok 'Test::Harness::Straps' }
 
@@ -21,4 +22,5 @@ BEGIN { use_ok 'Test::Harness::Iterator' }
 BEGIN { use_ok 'Test::Harness::Assert' }
 
 # If the $VERSION is set improperly, this will spew big warnings.
-use_ok 'Test::Harness', 1.1601;
+BEGIN { use_ok 'Test::Harness', 1.1601 }
+

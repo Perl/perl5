@@ -14,7 +14,7 @@ use strict;
 
 use Test::More tests => 170;
 
-use_ok('Test::Harness::Straps');
+BEGIN { use_ok('Test::Harness::Straps'); }
 
 my $strap = Test::Harness::Straps->new;
 isa_ok( $strap, 'Test::Harness::Straps', 'new()' );

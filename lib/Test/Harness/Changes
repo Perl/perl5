@@ -1,5 +1,25 @@
 Revision history for Perl extension Test::Harness
 
+2.40	    Tue Dec 30 20:38:59 CST 2003
+    [FIXES]
+    * Test::Harness::Straps should now properly quote on VMS.
+
+    [ENHANCEMENTS]
+    * prove now takes a -l option to add lib/ to @INC.  Now when you're
+      building a module, you don't have to do a make before you run
+      the prove.  Thanks to David Wheeler for the idea.
+
+    [INTERNALS]
+    * Internal functions corestatus() and canonfailed() prepended with
+      underscores, to indicate such.
+
+    * Gratuitous text-only changes in Test::Harness::Iterator.
+    
+    * All tests now do their use_ok() in a BEGIN block.  Some of the
+      use_ok() calls were too much of a hassle to put into a BEGIN block,
+      so I changed them to regular use calls.
+
+
 2.38	    Mon Nov 24 22:36:18 CST 2003
     Released.  See changes below.
 

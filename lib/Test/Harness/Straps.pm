@@ -1,12 +1,12 @@
 # -*- Mode: cperl; cperl-indent-level: 4 -*-
-# $Id: Straps.pm,v 1.34 2003/11/23 00:02:11 andy Exp $
+# $Id: Straps.pm,v 1.35 2003/12/31 02:34:22 andy Exp $
 
 package Test::Harness::Straps;
 
 use strict;
 use vars qw($VERSION);
 use Config;
-$VERSION = '0.18';
+$VERSION = '0.19';
 
 use Test::Harness::Assert;
 use Test::Harness::Iterator;
@@ -372,9 +372,11 @@ sub _switches {
 	push @derived_switches, map { "-I$_" } @inc;
     }
 
-    # Quote all switches to prevent shell interference, or VMS downcasing
+    # Quote the argument if there's any whitespace in it, or if
+    # we're VMS, since VMS requires all parms quoted.  Also, don't quote
+    # it if it's already quoted.
     for ( @derived_switches ) {
-	$_ = qq["$_"] if /\S/ && !/^".*"$/;
+	$_ = qq["$_"] if ((/\s/ || $self->{_is_vms}) && !/^".*"$/ );
     }
     return join( " ", @existing_switches, @derived_switches );
 }
