@@ -56,13 +56,13 @@ long lastxycount[MAXXCOUNT][MAXYCOUNT];
 #  define FD_CLOEXEC 1			/* NeXT needs this */
 #endif
 
-/* paranoid version of system's malloc() */
-
 /* NOTE:  Do not call the next three routines directly.  Use the macros
  * in handy.h, so that we can easily redefine everything to do tracking of
  * allocated hunks back to the original New to track down any memory leaks.
  * XXX This advice seems to be widely ignored :-(   --AD  August 1996.
  */
+
+/* paranoid version of system's malloc() */
 
 Malloc_t
 Perl_safesysmalloc(MEM_SIZE size)
@@ -742,7 +742,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
  */
 
 /* If SvTAIL is actually due to \Z or \z, this gives false positives
-   if PL_multiline.  In fact if !PL_multiline the autoritative answer
+   if PL_multiline.  In fact if !PL_multiline the authoritative answer
    is not supported yet. */
 
 char *
