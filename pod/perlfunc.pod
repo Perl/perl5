@@ -3509,6 +3509,13 @@ than the value of EXPR.  (EXPR should be positive.)  If EXPR is
 omitted, the value C<1> is used.  Automatically calls C<srand> unless
 C<srand> has already been called.  See also C<srand>.
 
+Apply C<int()> to the value returned by C<rand()> if you want random
+integers instead of random fractional numbers.  For example,
+
+    int(rand(10))
+
+returns a random integer between C<0> and C<9>, inclusive.
+
 (Note: If your rand function consistently returns numbers that are too
 large or too small, then your version of Perl was probably compiled
 with the wrong number of RANDBITS.)
