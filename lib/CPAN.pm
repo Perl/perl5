@@ -25,6 +25,8 @@ use File::Spec;
 no lib "."; # we need to run chdir all over and we would get at wrong
             # libraries there
 
+require Mac::BuildTools if $^O eq 'MacOS';
+
 END { $End++; &cleanup; }
 
 %CPAN::DEBUG = qw[
@@ -3360,7 +3362,8 @@ sub read_metadata_cache {
                             # does initialize to some protocol
     $LAST_TIME = $cache->{last_time};
     $DATE_OF_02 = $cache->{DATE_OF_02};
-    $CPAN::Frontend->myprint("  Database was generated on $DATE_OF_02\n");
+    $CPAN::Frontend->myprint("  Database was generated on $DATE_OF_02\n")
+	if defined $DATE_OF_02; # An old cache may not contain DATE_OF_02
     return;
 }
 
@@ -3963,7 +3966,7 @@ sub look {
     my($self) = @_;
 
     if ($^O eq 'MacOS') {
-      $self->ExtUtils::MM_MacOS::look;
+      $self->Mac::BuildTools::look;
       return;
     }
 
@@ -4054,7 +4057,7 @@ sub readme {
 	or $CPAN::Frontend->mydie(qq{No $sans.readme found});;
 
     if ($^O eq 'MacOS') {
-        ExtUtils::MM_MacOS::launch_file($local_file);
+        Mac::BuildTools::launch_file($local_file);
         return;
     }
 
@@ -4356,7 +4359,7 @@ or
     $self->debug("Changed directory to $builddir") if $CPAN::DEBUG;
 
     if ($^O eq 'MacOS') {
-        ExtUtils::MM_MacOS::make($self);
+        Mac::BuildTools::make($self);
         return;
     }
 
@@ -4417,7 +4420,7 @@ or
 	} else {
 	  $self->{writemakefile} =
 	      qq{NO Makefile.PL refused to write a Makefile.};
-	  # It's probably worth to record the reason, so let's retry
+	  # It's probably worth it to record the reason, so let's retry
 	  # local $/;
 	  # my $fh = IO::File->new("$system |"); # STDERR? STDIN?
 	  # $self->{writemakefile} .= <$fh>;
@@ -4602,7 +4605,7 @@ sub test {
 	if $CPAN::DEBUG;
 
     if ($^O eq 'MacOS') {
-        ExtUtils::MM_MacOS::make_test($self);
+        Mac::BuildTools::make_test($self);
         return;
     }
 
@@ -4633,7 +4636,7 @@ sub clean {
     $self->debug("Changed directory to $self->{'build_dir'}") if $CPAN::DEBUG;
 
     if ($^O eq 'MacOS') {
-        ExtUtils::MM_MacOS::make_clean($self);
+        Mac::BuildTools::make_clean($self);
         return;
     }
 
@@ -4708,7 +4711,7 @@ sub install {
 	if $CPAN::DEBUG;
 
     if ($^O eq 'MacOS') {
-        ExtUtils::MM_MacOS::make_install($self);
+        Mac::BuildTools::make_install($self);
         return;
     }
 
@@ -4874,7 +4877,7 @@ sub find_bundle_file {
     my $what2 = $what;
     if ($^O eq 'MacOS') {
       $what =~ s/^://;
-      $what2 =~ tr|:|/|;
+      $what =~ tr|:|/|;
       $what2 =~ s/:Bundle://;
       $what2 =~ tr|:|/|;
     } else {
@@ -5721,7 +5724,7 @@ is available. Can\'t continue.
         $tar->extract(@af);
     }
 
-    ExtUtils::MM_MacOS::convert_files([$tar->list_files], 1)
+    Mac::BuildTools::convert_files([$tar->list_files], 1)
         if ($^O eq 'MacOS');
 
     return 1;
@@ -6063,10 +6066,11 @@ separated):
 Modules know their associated Distribution objects. They always refer
 to the most recent official release. Developers may mark their releases
 as unstable development versions (by inserting an underbar into the
-visible version number), so the really hottest and newest distribution
-file is not always the default.  If a module Foo circulates on CPAN in
-both version 1.23 and 1.23_90, CPAN.pm offers a convenient way to
-install version 1.23 by saying
+module version number which will also be reflected in the distribution
+name when you run 'make dist'), so the really hottest and newest 
+distribution is not always the default.  If a module Foo circulates 
+on CPAN in both version 1.23 and 1.23_90, CPAN.pm offers a convenient 
+way to install version 1.23 by saying
 
     install Foo
 
@@ -6181,7 +6185,7 @@ beta and partially even alpha. In the following paragraphs only those
 methods are documented that have proven useful over a longer time and
 thus are unlikely to change.
 
-=over
+=over 4
 
 =item CPAN::Author::as_glimpse()
 
@@ -6746,7 +6750,7 @@ that you can configure ncftp so that it works for your firewall.
 
 Firewalls can be categorized into three basic types.
 
-=over
+=over 4
 
 =item http firewall
 
@@ -6780,7 +6784,7 @@ FTP connections need to be done in a passive mode.
 
 There are two that I can think off.
 
-=over
+=over 4
 
 =item SOCKS
 
@@ -6819,7 +6823,7 @@ Your milage may vary...
 
 =head1 FAQ
 
-=over
+=over 4
 
 =item 1)
 
