@@ -2783,7 +2783,7 @@ new_struct_thread(struct perl_thread *t)
     tainted = t->Ttainted;
     curpm = t->Tcurpm;         /* XXX No PMOP ref count */
     nrs = newSVsv(t->Tnrs);
-    rs = newSVsv(t->Trs);
+    rs = SvREFCNT_inc(nrs);
     last_in_gv = (GV*)SvREFCNT_inc(t->Tlast_in_gv);
     ofslen = t->Tofslen;
     ofs = savepvn(t->Tofs, ofslen);
