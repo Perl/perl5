@@ -7,6 +7,7 @@ typedef struct {
     perl_cond           user_cond;      /* For user-level conditions */
     IV                  locks;          /* Number of locks held */
     PerlInterpreter    *owner;          /* Who owns the lock? */
+    U16                 index;          /* Update index */
 } shared_sv;
 
 #define SHAREDSvGET(a)      (a->sv)

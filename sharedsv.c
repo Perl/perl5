@@ -68,6 +68,7 @@ Perl_sharedsv_new(pTHX)
     COND_INIT(&ssv->user_cond);
     ssv->owner = 0;
     ssv->locks = 0;
+    ssv->index = 0;
     return ssv;
 }
 

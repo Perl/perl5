@@ -24,11 +24,14 @@ void shared_sv_attach_sv (SV* sv, shared_sv* shared) {
 int shared_sv_fetch_mg (pTHX_ SV* sv, MAGIC *mg) {
     shared_sv* shared = (shared_sv*) SvIV(mg->mg_obj);
     SHAREDSvLOCK(shared);
-    if(SvROK(SHAREDSvGET(shared))) {
-        shared_sv* target = (shared_sv*) SvIV(SvRV(SHAREDSvGET(shared)));
-	shared_sv_attach_sv(sv, target);
-    } else {
-        sv_setsv(sv, SHAREDSvGET(shared));
+    if(mg->mg_private != shared->index) {
+        if(SvROK(SHAREDSvGET(shared))) {
+            shared_sv* target = (shared_sv*) SvIV(SvRV(SHAREDSvGET(shared)));
+	    shared_sv_attach_sv(sv, target);
+        } else {
+            sv_setsv(sv, SHAREDSvGET(shared));
+        }
+        mg->mg_private = shared->index;
     }
     SHAREDSvUNLOCK(shared);
 
@@ -51,10 +54,11 @@ int shared_sv_store_mg (pTHX_ SV* sv, MAGIC *mg) {
         }
         Perl_sv_free(PL_sharedsv_space,SHAREDSvGET(shared));
         SHAREDSvGET(shared) = newRV_noinc(newSViv((IV)target));
-        SvROK_off(sv);
     } else {
         sv_setsv(SHAREDSvGET(shared), sv);
     }
+    shared->index++;
+    mg->mg_private = shared->index;
     SHAREDSvRELEASE(shared);
     if(SvROK(SHAREDSvGET(shared)))
        Perl_sharedsv_thrcnt_inc(aTHX_ (shared_sv*) SvIV(SvRV(SHAREDSvGET(shared))));       
@@ -136,6 +140,7 @@ new(class, value)
         shared_magic->mg_virtual = &svtable;
         shared_magic->mg_obj = newSViv((IV)shared);
         shared_magic->mg_flags |= MGf_REFCOUNTED;
+        shared_magic->mg_private = 0;
         SvMAGICAL_on(value);
         RETVAL = obj;
         OUTPUT:        	
