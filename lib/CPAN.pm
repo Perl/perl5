@@ -5,13 +5,13 @@ use vars qw{$Try_autoload $Revision
 	    $Frontend  $Defaultsite
 	   };
 
-$VERSION = '1.40';
+$VERSION = '1.44';
 
-# $Id: CPAN.pm,v 1.239 1998/07/24 16:37:04 k Exp $
+# $Id: CPAN.pm,v 1.245 1999/01/09 17:53:32 k Exp $
 
 # only used during development:
 $Revision = "";
-# $Revision = "[".substr(q$Revision: 1.239 $, 10)."]";
+# $Revision = "[".substr(q$Revision: 1.245 $, 10)."]";
 
 use Carp ();
 use Config ();
@@ -224,7 +224,7 @@ sub AUTOLOAD {
 	    $CPAN::Frontend->mywarn(qq{
 Commands starting with "w" require CPAN::WAIT to be installed.
 Please consider installing CPAN::WAIT to use the fulltext index.
-For this you just need to type 
+For this you just need to type
     install CPAN::WAIT
 });
 	}
@@ -254,7 +254,7 @@ sub try_dot_al {
 	if (defined($name=$INC{"$pkg.pm"}))
 	    {
 		$name =~ s|^(.*)$pkg\.pm$|$1auto/$pkg/$func.al|;
-		$name = undef unless (-r $name); 
+		$name = undef unless (-r $name);
 	    }
 	unless (defined $name)
 	    {
@@ -664,26 +664,36 @@ sub new {
     my $self = {
 		ID => $CPAN::Config->{'build_dir'},
 		MAX => $CPAN::Config->{'build_cache'},
+		SCAN => $CPAN::Config->{'scan_cache'} || 'atstart',
 		DU => 0
 	       };
     File::Path::mkpath($self->{ID});
     my $dh = DirHandle->new($self->{ID});
     bless $self, $class;
-    my $e;
+    $self->scan_cache;
+    $t2 = time;
+    $debug .= "timing of CacheMgr->new: ".($t2 - $time);
+    $time = $t2;
+    CPAN->debug($debug) if $CPAN::DEBUG;
+    $self;
+}
+
+#-> sub CPAN::CacheMgr::scan_cache ;
+sub scan_cache {
+    my $self = shift;
+    return if $self->{SCAN} eq 'never';
+    $CPAN::Frontend->mydie("Unknown scan_cache argument: $self->{SCAN}")
+	unless $self->{SCAN} eq 'atstart';
     $CPAN::Frontend->myprint(
 			     sprintf("Scanning cache %s for sizes\n",
 				     $self->{ID}));
+    my $e;
     for $e ($self->entries($self->{ID})) {
 	next if $e eq ".." || $e eq ".";
 	$self->disk_usage($e);
 	return if $CPAN::Signal;
     }
     $self->tidyup;
-    $t2 = time;
-    $debug .= "timing of CacheMgr->new: ".($t2 - $time);
-    $time = $t2;
-    CPAN->debug($debug) if $CPAN::DEBUG;
-    $self;
 }
 
 package CPAN::Debug;
@@ -788,6 +798,7 @@ Please specify a filename where to save the configuration or try
 EOF
     $msg ||= "\n";
     my($fh) = FileHandle->new;
+    rename $configpm, "$configpm~" if -f $configpm;
     open $fh, ">$configpm" or warn "Couldn't open >$configpm: $!";
     $fh->print(qq[$msg\$CPAN::Config = \{\n]);
     foreach (sort keys %$CPAN::Config) {
@@ -832,6 +843,7 @@ sub init {
 sub load {
     my($self) = shift;
     my(@miss);
+    use Carp;
     eval {require CPAN::Config;};       # We eval because of some
                                         # MakeMaker problems
     unless ($dot_cpan++){
@@ -896,11 +908,11 @@ sub load {
 	}
     }
     local($") = ", ";
-    $CPAN::Frontend->myprint(qq{
+    $CPAN::Frontend->myprint(<<END) if $redo && ! $theycalled;
 We have to reconfigure CPAN.pm due to following uninitialized parameters:
 
 @miss
-}) if $redo && ! $theycalled;
+END
     $CPAN::Frontend->myprint(qq{
 $configpm initialized.
 });
@@ -912,9 +924,10 @@ $configpm initialized.
 sub not_loaded {
     my(@miss);
     for (qw(
-	    cpan_home keep_source_where build_dir build_cache index_expire
-	    gzip tar unzip make pager makepl_arg make_arg make_install_arg
-	    urllist inhibit_startup_message ftp_proxy http_proxy no_proxy
+	    cpan_home keep_source_where build_dir build_cache scan_cache
+	    index_expire gzip tar unzip make pager makepl_arg make_arg
+	    make_install_arg urllist inhibit_startup_message
+	    ftp_proxy http_proxy no_proxy
 	   )) {
 	push @miss, $_ unless defined $CPAN::Config->{$_};
     }
@@ -1032,7 +1045,9 @@ sub b {
 #-> sub CPAN::Shell::d ;
 sub d { $CPAN::Frontend->myprint(shift->format_result('Distribution',@_));}
 #-> sub CPAN::Shell::m ;
-sub m { $CPAN::Frontend->myprint(shift->format_result('Module',@_));}
+sub m { # emacs confused here }; sub mimimimimi { # emacs in sync here
+    $CPAN::Frontend->myprint(shift->format_result('Module',@_));
+}
 
 #-> sub CPAN::Shell::i ;
 sub i {
@@ -1609,7 +1624,7 @@ sub ftp_get {
 }
 
 # If more accuracy is wanted/needed, Chris Leach sent me this patch...
- 
+
  # leach,> *** /install/perl/live/lib/CPAN.pm-	Wed Sep 24 13:08:48 1997
  # leach,> --- /tmp/cp	Wed Sep 24 13:26:40 1997
  # leach,> ***************
@@ -1713,7 +1728,7 @@ sub localize {
 	@reordered =
 	    sort {
 		(substr($CPAN::Config->{urllist}[$b],0,4) eq "file")
-		    <=> 
+		    <=>
 		(substr($CPAN::Config->{urllist}[$a],0,4) eq "file")
 		    or
 		defined($Thesite)
@@ -1877,7 +1892,7 @@ sub hosthard {
   # gave us a socksified (or other) ftp program...
 
   my($i);
-  my($devnull) = $CPAN::Config->{devnull} || ""; 
+  my($devnull) = $CPAN::Config->{devnull} || "";
   # < /dev/null ";
   my($aslocal_dir) = File::Basename::dirname($aslocal);
   File::Path::mkpath($aslocal_dir);
@@ -1937,9 +1952,9 @@ Trying with "$funkyftp$source_switch" to get
 		    CPAN::Tarzip->gzip($aslocal_uncompressed,
 				     "$aslocal_uncompressed.gz");
 		  }
-		  $Thesite = $i;
-		  return $aslocal;
 		}
+		$Thesite = $i;
+		return $aslocal;
 	    } elsif ($url !~ /\.gz$/) {
 	      unlink $aslocal_uncompressed if
 		  -f $aslocal_uncompressed && -s _ == 0;
@@ -2097,7 +2112,6 @@ sub talk_ftp {
 Subprocess "|$command"
   returned status $estatus (wstat $wstatus)
 }) if $wstatus;
-    
 }
 
 # find2perl needs modularization, too, all the following is stolen
@@ -2403,7 +2417,7 @@ sub rd_authindex {
     while (<FH>) {
 	chomp;
 	my($userid,$fullname,$email) =
-	    /alias\s+(\S+)\s+\"([^\"\<]+)\s+<([^\>]+)\>\"/;
+	    m/alias\s+(\S+)\s+\"([^\"\<]+)\s+\<([^\>]+)\>\"/;
 	next unless $userid && $fullname && $email;
 
 	# instantiate an author object
@@ -3244,7 +3258,8 @@ sub install {
 	if $CPAN::DEBUG;
     my $system = join(" ", $CPAN::Config->{'make'},
 		      "install", $CPAN::Config->{make_install_arg});
-    my($pipe) = FileHandle->new("$system 2>&1 |");
+    my($stderr) = $^O eq "Win32" ? "" : " 2>&1 ";
+    my($pipe) = FileHandle->new("$system $stderr |");
     my($makeout) = "";
     while (<$pipe>){
 	$CPAN::Frontend->myprint($_);
@@ -3253,7 +3268,7 @@ sub install {
     $pipe->close;
     if ($?==0) {
 	 $CPAN::Frontend->myprint("  $system -- OK\n");
-	 $self->{'install'} = "YES";
+	 return $self->{'install'} = "YES";
     } else {
 	 $self->{'install'} = "NO";
 	 $CPAN::Frontend->myprint("  $system -- NOT OK\n");
@@ -3342,7 +3357,6 @@ sub find_bundle_file {
 ### The following two lines let CPAN.pm become Bundle/CPAN.pm :-(
 ###    my $bu = MM->catfile($where,$what);
 ###    return $bu if -f $bu;
-    my $bu;
     my $manifest = MM->catfile($where,"MANIFEST");
     unless (-f $manifest) {
 	require ExtUtils::Manifest;
@@ -3355,20 +3369,22 @@ sub find_bundle_file {
     my $fh = FileHandle->new($manifest)
 	or Carp::croak("Couldn't open $manifest: $!");
     local($/) = "\n";
+    my $what2 = $what;
+    $what2 =~ s|Bundle/||;
+    my $bu;
     while (<$fh>) {
 	next if /^\s*\#/;
 	my($file) = /(\S+)/;
 	if ($file =~ m|\Q$what\E$|) {
 	    $bu = $file;
-	    return MM->catfile($where,$bu);
-	} elsif ($what =~ s|Bundle/||) { # retry if she managed to
-                                         # have no Bundle directory
-	    if ($file =~ m|\Q$what\E$|) {
-		$bu = $file;
-		return MM->catfile($where,$bu);
-	    }
+	    # return MM->catfile($where,$bu); # bad
+	    last;
 	}
+	# retry if she managed to
+	# have no Bundle directory
+	$bu = $file if $file =~ m|\Q$what2\E$|;
     }
+    return MM->catfile($where, $bu) if $bu;
     Carp::croak("Couldn't find a Bundle file in $where");
 }
 
@@ -3397,7 +3413,7 @@ sub rematein {
     my($id) = $self->id;
     Carp::croak "Can't $meth $id, don't have an associated bundle file. :-(\n"
 	unless $self->inst_file || $self->{CPAN_FILE};
-    my($s);
+    my($s,%fail);
     for $s ($self->contains) {
 	my($type) = $s =~ m|/| ? 'CPAN::Distribution' :
 	    $s =~ m|^Bundle::| ? 'CPAN::Bundle' : 'CPAN::Module';
@@ -3408,7 +3424,26 @@ explicitly a file $s.
 });
 	    sleep 3;
 	}
-	$CPAN::META->instance($type,$s)->$meth();
+	# possibly noisy action:
+	my $obj = $CPAN::META->instance($type,$s);
+	$obj->$meth();
+	my $success = $obj->can("uptodate") ? $obj->uptodate : 0;
+	$success ||= $obj->{'install'} && $obj->{'install'} eq "YES";
+	$fail{$s} = 1 unless $success;
+    }
+    # recap with less noise
+    if ( $meth eq "install") {
+	if (%fail) {
+	    $CPAN::Frontend->myprint(qq{\nBundle summary: }.
+				     qq{The following items seem to }.
+				     qq{have had installation problems:\n});
+	    for $s ($self->contains) {
+		$CPAN::Frontend->myprint( "$s " ) if $fail{$s};
+	    }
+	    $CPAN::Frontend->myprint(qq{\n});
+	} else {
+	    $self->{'install'} = 'YES';
+	}
     }
 }
 
@@ -3588,7 +3623,7 @@ sub cpan_file    {
 #-> sub CPAN::Module::cpan_version ;
 sub cpan_version {
     my $self = shift;
-    $self->{'CPAN_VERSION'} = 'undef' 
+    $self->{'CPAN_VERSION'} = 'undef'
 	unless defined $self->{'CPAN_VERSION'}; # I believe this is
                                                 # always a bug in the
                                                 # index and should be
@@ -3642,10 +3677,9 @@ sub get    { shift->rematein('get',@_); }
 sub make   { shift->rematein('make') }
 #-> sub CPAN::Module::test ;
 sub test   { shift->rematein('test') }
-#-> sub CPAN::Module::install ;
-sub install {
+#-> sub CPAN::Module::uptodate ;
+sub uptodate {
     my($self) = @_;
-    my($doit) = 0;
     my($latest) = $self->cpan_version;
     $latest ||= 0;
     my($inst_file) = $self->inst_file;
@@ -3659,13 +3693,23 @@ sub install {
 	if ($inst_file
 	    &&
 	    $have >= $latest
-	    &&
-	    not exists $self->{'force_update'}
 	   ) {
-	    $CPAN::Frontend->myprint( $self->id. " is up to date.\n");
-	} else {
-	    $doit = 1;
+	    return 1;
 	}
+    }
+    return;
+}
+#-> sub CPAN::Module::install ;
+sub install {
+    my($self) = @_;
+    my($doit) = 0;
+    if ($self->uptodate
+	&&
+	not exists $self->{'force_update'}
+       ) {
+	$CPAN::Frontend->myprint( $self->id. " is up to date.\n");
+    } else {
+	$doit = 1;
     }
     $self->rematein('install') if $doit;
     $CPAN::META->delete('CPAN::Queue',$self->id);
@@ -3731,7 +3775,7 @@ sub gzip {
     $fhw->close;
     return 1;
   } else {
-    system("$CPAN::Config->{'gzip'} -c $read > $write")==0;  
+    system("$CPAN::Config->{'gzip'} -c $read > $write")==0;
   }
 }
 
@@ -3833,9 +3877,28 @@ sub untar {
   if (MM->maybe_command($CPAN::Config->{'gzip'})
       &&
       MM->maybe_command($CPAN::Config->{'tar'})) {
-    my $system = "$CPAN::Config->{'gzip'} --decompress --stdout " .
-	"$file | $CPAN::Config->{tar} xvf -";
-    return system($system) == 0;
+    if ($^O =~ /win/i) { # irgggh
+	# people find the most curious tar binaries that cannot handle
+	# pipes
+	my $system = "$CPAN::Config->{'gzip'} --decompress $file";
+	if (system($system)==0) {
+	    $CPAN::Frontend->myprint(qq{Uncompressed $file successfully\n});
+	} else {
+	    $CPAN::Frontend->mydie(qq{Couldn't uncompress $file\n});
+	}
+	$file =~ s/\.gz$//;
+	$system = "$CPAN::Config->{tar} xvf $file";
+	if (system($system)==0) {
+	    $CPAN::Frontend->myprint(qq{Untarred $file successfully\n});
+	} else {
+	    $CPAN::Frontend->mydie(qq{Couldn't untar $file\n});
+	}
+	return 1;
+    } else {
+	my $system = "$CPAN::Config->{'gzip'} --decompress --stdout " .
+	    "< $file | $CPAN::Config->{tar} xvf -";
+	return system($system) == 0;
+    }
   } elsif ($CPAN::META->has_inst("Archive::Tar")
       &&
       $CPAN::META->has_inst("Compress::Zlib") ) {
@@ -3994,7 +4057,7 @@ Example:
     OpenGL-0.4/COPYRIGHT
     [...]
 
-A C<clean> command results in a 
+A C<clean> command results in a
 
   make clean
 
@@ -4144,7 +4207,7 @@ functionalities that are available in the shell.
 
 =back
 
-=head2 Methods in the four
+=head2 Methods in the four Classes
 
 =head2 Cache Manager
 
@@ -4250,7 +4313,7 @@ have an idea which part of the package may have a bug, it's sometimes
 worth to give it a try and send me more specific output. You should
 know that "o debug" has built-in completion support.
 
-=head2 Floppy, Zip, and all that Jazz
+=head2 Floppy, Zip, Offline Mode
 
 CPAN.pm works nicely without network too. If you maintain machines
 that are not networked at all, you should consider working with file:
@@ -4289,10 +4352,14 @@ defined:
   make_install_arg   same as make_arg for 'make install'
   makepl_arg	     arguments passed to 'perl Makefile.PL'
   pager              location of external program more (or any pager)
+  scan_cache	     controls scanning of cache ('atstart' or 'never')
   tar                location of external program tar
   unzip              location of external program unzip
   urllist	     arrayref to nearby CPAN sites (or equivalent locations)
   wait_list          arrayref to a wait server to try (See CPAN::WAIT)
+  ftp_proxy,      }  the three usual variables for configuring
+    http_proxy,   }  proxy requests. Both as CPAN::Config variables
+    no_proxy      }  and as environment variables configurable.
 
 You can set and query each of these options interactively in the cpan
 shell with the command set defined within the C<o conf> command:
@@ -4359,6 +4426,90 @@ development will go towards strong authentification.
 Most functions in package CPAN are exported per default. The reason
 for this is that the primary use is intended for the cpan shell or for
 oneliners.
+
+=head1 POPULATE AN INSTALLATION WITH LOTS OF MODULES
+
+To populate a freshly installed perl with my favorite modules is pretty
+easiest by maintaining a private bundle definition file. To get a useful
+blueprint of a bundle definition file, the command autobundle can be used
+on the CPAN shell command line. This command writes a bundle definition
+file for all modules that re installed for the currently running perl
+interpreter. It's recommended to run this command only once and from then
+on maintain the file manually under a private name, say
+Bundle/my_bundle.pm. With a clever bundle file you can then simply say
+
+    cpan> install Bundle::my_bundle
+
+then answer a few questions and then go out.
+
+Maintaining a bundle definition file means to keep track of two things:
+dependencies and interactivity. CPAN.pm (currently) does not take into
+account dependencies between distributions, so a bundle definition file
+should specify distributions that depend on others B<after> the others.
+On the other hand, it's a bit annoying that many distributions need some
+interactive configuring. So what I try to accomplish in my private bundle
+file is to have the packages that need to be configured early in the file
+and the gentle ones later, so I can go out after a few minutes and leave
+CPAN.pm unattained.
+
+=head1 WORKING WITH CPAN.pm BEHIND FIREWALLS
+
+Thanks to Graham Barr for contributing the firewall following howto.
+
+Firewalls can be categorized into threee basic types.
+
+=over
+
+=item http firewall
+
+This is where the firewall machine runs a web server and to access the
+outside world you must do it via the web server. If you set envronment
+variables like http_proxy or ftp_proxy to a values beginning with http://
+or in your web browser you have to set proxy information then you know
+you are running a http firewall.
+
+To access servers outside these types of firewalls with perl (even for
+ftp) you will need to use LWP.
+
+=item ftp firewall
+
+This where the firewall machine runs a ftp server. This kind of firewall will
+only let you access ftp serves outside the firewall. This is usually done by
+connecting to the firewall with ftp, then entering a username like
+"user@outside.host.com"
+
+To access servers outside these type of firewalls with perl you
+will need to use Net::FTP.
+
+=item One way visability
+
+I say one way visability as these firewalls try to make themselve look
+invisible to the users inside the firewall. An FTP data connection is
+normally created by sending the remote server your IP address and then
+listening for the connection. But the remote server will not be able to
+connect to you because of the firewall. So for these types of firewall
+FTP connections need to be done in a passive mode.
+
+There are two that I can think off.
+
+=over
+
+=item SOCKS
+
+If you are using a SOCKS firewall you will need to compile perl and link
+it with the SOCKS library, this is what is normally called a ``socksified''
+perl. With this executable you will be able to connect to servers outside
+the firewall as if it is not there.
+
+=item IP Masquarade
+
+This is the firewall implemented in the Linux kernel, it allows you to
+hide a complete network behind one IP address. With this firewall no
+special compiling is need as you can access hosts directly.
+
+=back
+
+=back
 
 =head1 BUGS
 

@@ -825,7 +825,8 @@ if you call it like a builtin function, then it behaves like a builtin
 function.  If you call it like an old-fashioned subroutine, then it
 behaves like an old-fashioned subroutine.  It naturally falls out from
 this rule that prototypes have no influence on subroutine references
-like C<\&foo> or on indirect subroutine calls like C<&{$subref}>.
+like C<\&foo> or on indirect subroutine calls like C<&{$subref}> or
+C<$subref-E<gt>()>. 
 
 Method calls are not influenced by prototypes either, because the
 function to be called is indeterminate at compile time, because it depends
