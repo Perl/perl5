@@ -1,6 +1,9 @@
-/* $Header: arg.c,v 1.0.1.5 88/01/30 08:53:16 root Exp $
+/* $Header: arg.c,v 1.0.1.6 88/02/01 17:32:26 root Exp $
  *
  * $Log:	arg.c,v $
+ * Revision 1.0.1.6  88/02/01  17:32:26  root
+ * patch12: made split(' ') behave like awk in ignoring leading white space.
+ * 
  * Revision 1.0.1.5  88/01/30  08:53:16  root
  * patch9: fixed some missing right parens introduced (?) by patch 2
  * 
@@ -220,6 +223,15 @@ STR ***retary;
 	char *d;
 
 	m = str_get(eval(spat->spat_runtime,Null(STR***)));
+	if (!*m || (*m == ' ' && !m[1])) {
+	    m = "[ \\t\\n]+";
+	    while (isspace(*s)) s++;
+	}
+	if (spat->spat_runtime->arg_type == O_ITEM &&
+	  spat->spat_runtime[1].arg_type == A_SINGLE) {
+	    arg_free(spat->spat_runtime);	/* it won't change, so */
+	    spat->spat_runtime = Nullarg;	/* no point compiling again */
+	}
 	if (d = compile(&spat->spat_compex,m,TRUE,FALSE)) {
 #ifdef DEBUGGING
 	    deb("/%s/: %s\n", m, d);

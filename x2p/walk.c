@@ -1,6 +1,9 @@
-/* $Header: walk.c,v 1.0.1.1 88/01/28 11:07:56 root Exp $
+/* $Header: walk.c,v 1.0.1.2 88/02/01 17:34:05 root Exp $
  *
  * $Log:	walk.c,v $
+ * Revision 1.0.1.2  88/02/01  17:34:05  root
+ * patch12: made a2p take advantage of new awk-compatible split in perl.
+ * 
  * Revision 1.0.1.1  88/01/28  11:07:56  root
  * patch8: changed some misleading comments.
  * 
@@ -71,7 +74,7 @@ int *numericptr;
 	    str_cat(str,"';\t\t# field separator from -F switch\n");
 	}
 	else if (saw_FS && !const_FS) {
-	    str_cat(str,"$FS = '[ \\t\\n]+';\t\t# set field separator\n");
+	    str_cat(str,"$FS = ' ';\t\t# set field separator\n");
 	}
 	if (saw_OFS) {
 	    str_cat(str,"$, = ' ';\t\t# set output field separator\n");
@@ -361,8 +364,6 @@ sub Pick {\n\
 	str_scat(str,fstr=walk(1,level,ops[node+3].ival,&numarg));
 	str_free(fstr);
 	numeric |= numarg;
-	if (strEQ(str->str_ptr,"$FS = '\240'"))
-	    str_set(str,"$FS = '[\240\\n\\t]+'");
 	break;
     case OADD:
 	str = walk(1,level,ops[node+1].ival,&numarg);
@@ -511,7 +512,7 @@ sub Pick {\n\
 	else if (saw_FS)
 	    str_cat(str,"$FS");
 	else
-	    str_cat(str,"/[ \\t\\n]+/");
+	    str_cat(str,"' '");
 	str_cat(str,", ");
 	str_scat(str,fstr=walk(1,level,ops[node+1].ival,&numarg));
 	str_free(fstr);
@@ -1095,7 +1096,7 @@ int level;
     else if (saw_FS)
 	str_cat(str," = split($FS);\n");
     else
-	str_cat(str," = split;\n");
+	str_cat(str," = split(' ');\n");
     tab(str,level);
 }
 

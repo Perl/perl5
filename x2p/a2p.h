@@ -1,6 +1,9 @@
-/* $Header: a2p.h,v 1.0.1.1 88/01/26 09:52:30 root Exp $
+/* $Header: a2p.h,v 1.0.1.2 88/02/01 17:33:40 root Exp $
  *
  * $Log:	a2p.h,v $
+ * Revision 1.0.1.2  88/02/01  17:33:40  root
+ * patch12: forgot to fix #define YYDEBUG; bug in a2p.
+ * 
  * Revision 1.0.1.1  88/01/26  09:52:30  root
  * patch 5: a2p didn't use config.h.
  * 
@@ -226,7 +229,7 @@ EXT int expectterm INIT(TRUE);
 #ifdef DEBUGGING
 EXT int debug INIT(0);
 EXT int dlevel INIT(0);
-#define YYDEBUG;
+#define YYDEBUG 1
 extern int yydebug;
 #endif
 

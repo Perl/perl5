@@ -1,7 +1,10 @@
 ''' Beginning of part 2
-''' $Header: perl.man.2,v 1.0.1.2 88/01/30 17:04:28 root Exp $
+''' $Header: perl.man.2,v 1.0.1.3 88/02/01 17:33:03 root Exp $
 '''
 ''' $Log:	perl.man.2,v $
+''' Revision 1.0.1.3  88/02/01  17:33:03  root
+''' patch12: documented split more adequately.
+''' 
 ''' Revision 1.0.1.2  88/01/30  17:04:28  root
 ''' patch 11: random cleanup
 ''' 
@@ -333,8 +336,25 @@ Anything matching PATTERN is taken to be a delimiter separating the fields.
 (Note that the delimiter may be longer than one character.)
 Trailing null fields are stripped, which potential users of pop() would
 do well to remember.
-A pattern matching the null string will split the value of EXPR into separate
-characters.
+A pattern matching the null string (not to be confused with a null pattern)
+will split the value of EXPR into separate characters at each point it
+matches that way.
+For example:
+.nf
+
+	print join(':',split(/ */,'hi there'));
+
+.fi
+produces the output 'h:i:t:h:e:r:e'.
+
+The pattern /PATTERN/ may be replaced with an expression to specify patterns
+that vary at runtime.
+As a special case, specifying a space ('\ ') will split on white space
+just as split with no arguments does, but leading white space does NOT
+produce a null first field.
+Thus, split('\ ') can be used to emulate awk's default behavior, whereas
+split(/\ /) will give you as many null initial fields as there are
+leading spaces.
 .sp
 Example:
 .nf
