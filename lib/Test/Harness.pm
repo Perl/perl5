@@ -53,7 +53,7 @@ sub runtests {
     my $old5lib = $ENV{PERL5LIB};
     local($ENV{'PERL5LIB'}) = join($Config{path_sep}, @INC);
 
-    if ($Is_VMS) { $switches =~ s/-(\S*[A-Z]\S*)/"-$1"/g }
+    if ($^O eq 'VMS') { $switches =~ s/-(\S*[A-Z]\S*)/"-$1"/g }
 
     my $t_start = new Benchmark;
     while ($test = shift(@tests)) {
@@ -61,8 +61,9 @@ sub runtests {
 	chop($te);
 	print "$te" . '.' x (20 - length($te));
 	my $fh = new FileHandle;
-	if ($^O eq 'VMS') { $fh->open("MCR $^X $switches $test|") || (print "can't run. $!\n"); }
-	else              { $fh->open("$^X $switches $test|")     || (print "can't run. $!\n"); }
+	my $cmd = "$^X $switches $test|";
+	$cmd = "MCR $cmd" if $^O eq 'VMS';
+	$fh->open($cmd) or print "can't run. $!\n";
 	$ok = $next = $max = 0;
 	@failed = ();
 	while (<$fh>) {
