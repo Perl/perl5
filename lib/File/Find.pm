@@ -278,13 +278,9 @@ if ($^O eq 'VMS') {
   $Is_VMS = 1;
   $dont_use_nlink = 1;
 }
-if ($^O =~ m:^mswin32:i) {
-  $Is_NT = 1;
-  $dont_use_nlink = 1;
-}
 
 $dont_use_nlink = 1
-    if $^O eq 'os2' || $^O eq 'dos' || $^O eq 'amigaos';
+    if $^O eq 'os2' || $^O eq 'dos' || $^O eq 'amigaos' || $^O eq 'MSWin32';
 
 1;
 
