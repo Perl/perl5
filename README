@@ -1,3 +1,7 @@
+See the README.threads in the main perl 5.004_xx development
+distribution (x >= 50) for details of how to build and use this.
+If all else fails, read on.
+
 If your version of patch can't create a file from scratch, then you'll
 need to create an empty thread.h manually first.  Perl itself will need
 to be built with -DUSE_THREADS yet. If you're using MIT pthreads or
