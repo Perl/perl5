@@ -230,20 +230,28 @@ use Carp;
 sub read
 {
  my ($obj,$fh,$name) = @_;
- my(%tbl, @seq, $enc, @esc);
+ my(%tbl, @seq, $enc, @esc, %grp);
  while (<$fh>)
   {
    my ($key,$val) = /^(\S+)\s+(.*)$/;
    $val =~ s/^\{(.*?)\}/$1/g;
    $val =~ s/\\x([0-9a-f]{2})/chr(hex($1))/ge;
+
    if($enc = Encode->getEncoding($key)){
      $tbl{$val} = ref($enc) eq 'Encode::Tcl' ? $enc->loadEncoding : $enc;
      push @seq, $val;
+     $grp{$val} =
+	$val =~ m|[(]|  ? 0 : # G0 : SI  eq "\cO"
+	$val =~ m|[)-]| ? 1 : # G1 : SO  eq "\cN"
+	$val =~ m|[*.]| ? 2 : # G2 : SS2 eq "\eN"
+	$val =~ m|[+/]| ? 3 : # G3 : SS3 eq "\eO"
+	                  0;  # G0
    }else{
      $obj->{$key} = $val;
    }
    if($val =~ /^\e(.*)/){ push(@esc, quotemeta $1) }
   }
+ $obj->{'Grp'} = \%grp; # graphic chars
  $obj->{'Seq'} = \@seq; # escape sequences
  $obj->{'Tbl'} = \%tbl; # encoding tables
  $obj->{'Esc'} = join('|', @esc); # regex of sequences following ESC
@@ -255,11 +263,14 @@ sub decode
  my ($obj,$str,$chk) = @_;
  my $tbl = $obj->{'Tbl'};
  my $seq = $obj->{'Seq'};
+ my $grp = $obj->{'Grp'};
  my $esc = $obj->{'Esc'};
  my $ini = $obj->{'init'};
  my $fin = $obj->{'final'};
  my $std = $seq->[0];
  my $cur = $std;
+ my @sta = ($std, undef, undef, undef); # G0 .. G3 state
+ my($g1,$g2,$g3) = (0,0,0);
  my $uni;
  while (length($str)){
    my $uch = substr($str,0,1,'');
@@ -267,9 +278,17 @@ sub decode
     if($str =~ s/^($esc)//)
      {
       my $esc = "\e$1";
-      $cur = $tbl->{$esc} ? $esc :
-             ($esc eq $ini || $esc eq $fin) ? $std :
-             $cur;
+      $sta[ $grp->{$esc} ] = $esc if $tbl->{$esc};
+     }
+    # appearance of "\eN\eO" or "\eO\eN" isn't supposed.
+    # but coincidental ON of G2 and G3 is explicitly avoided.
+    elsif($str =~ s/^N//)
+     {
+      $g2 = 1; $g3 = 0;
+     }
+    elsif($str =~ s/^O//)
+     {
+      $g3 = 1; $g2 = 0;
      }
     else
      {
@@ -278,11 +297,18 @@ sub decode
      }
     next;
    }
-   if($uch eq "\x0e" || $uch eq "\x0f"){
-    $cur = $uch and next;
+   if($uch eq "\x0e"){
+    $g1 = 1; next;
    }
+   if($uch eq "\x0f"){
+    $g1 = 0; next;
+   }
+
+   $cur = $g3 ? $sta[3] : $g2 ? $sta[2] : $g1 ? $sta[1] : $sta[0];
+
    if(ref($tbl->{$cur}) eq 'Encode::XS'){
      $uni .= $tbl->{$cur}->decode($uch);
+     $g2 = $g3 = 0;
      next;
    }
    my $ch    = ord($uch);
@@ -304,6 +330,7 @@ sub decode
      $x = '';
     }
    $uni .= $x;
+   $g2 = $g3 = 0;
   }
  $_[1] = $str if $chk;
  return $uni;
@@ -314,21 +341,30 @@ sub encode
  my ($obj,$uni,$chk) = @_;
  my $tbl = $obj->{'Tbl'};
  my $seq = $obj->{'Seq'};
+ my $grp = $obj->{'Grp'};
  my $ini = $obj->{'init'};
  my $fin = $obj->{'final'};
  my $std = $seq->[0];
  my $str = $ini;
- my $pre = $std;
- my $cur = $pre;
+ my @sta = ($std,undef,undef,undef);
+ my @pre = ($std,undef,undef,undef);
+ my $cur = $std;
+ my $pG = 0;
+ my $cG = 0;
+
+ if($ini)
+  {
+    $sta[ $grp->{$ini} ] = $pre[ $grp->{$ini} ] = $ini;
+  }
 
  while (length($uni)){
-  my $ch = chr(ord(substr($uni,0,1,'')));
+  my $ch = substr($uni,0,1,'');
   my $x;
-  foreach my $e_seq ($std, $pre, @$seq){
+  foreach my $e_seq (@$seq){
    $x = ref($tbl->{$e_seq}) eq 'Encode::XS'
     ? $tbl->{$e_seq}->encode($ch,1)
     : $tbl->{$e_seq}->{FmUni}->{$ch};
-   $cur = $e_seq and last if defined $x;
+   $cur = $e_seq, last if defined $x;
   }
   if(ref($tbl->{$cur}) ne 'Encode::XS')
    {
@@ -340,10 +376,19 @@ sub encode
     }
     $x = pack(&$rep($x),$x);
    }
-  $str .= $cur eq $pre ? $x : ($pre = $cur).$x;
+  $cG   = $grp->{$cur};
+  $str .= $pre[ $cG ] = $cur if $cur ne $pre[ $cG ];
+
+  $str .= $cG == 0 && $pG == 1 ? "\cO" :
+          $cG == 1 && $pG == 0 ? "\cN" :
+          $cG == 2 ? "\eN" :
+          $cG == 3 ? "\eO" :        "";
+  $str .= $x;
+  $pG = $cG if $cG < 2;
  }
- $str .= $std unless $cur eq $std;
- $str .= $fin;
+ $str .= $std  unless $cur eq $std;
+ $str .= "\cO" if $pG == 1; # back to G0
+ $str .= $fin; # necessary?
  $_[1] = $uni if $chk;
  return $str;
 }
