@@ -7,6 +7,16 @@ print EM <<'END';
 
 /* (Doing namespace management portably in C is really gross.) */
 
+/*  EMBED has no run-time penalty, but helps keep the Perl namespace
+    from colliding with that used by other libraries pulled in
+    by extensions or by embedding perl.  Allow a cc -DNO_EMBED
+    override, however, to keep binary compatability with previous
+    versions of perl.
+*/
+#ifndef NO_EMBED
+#  define EMBED 1 
+#endif
+
 #ifdef EMBED
 
 /* globals we need to hide from the world */
