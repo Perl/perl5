@@ -1,7 +1,7 @@
 package Unicode::Normalize;
 
 BEGIN {
-    unless ("A" eq pack('U', 0x41) || "A" eq pack('U', ord("A"))) {
+    unless ("A" eq pack('U', 0x41)) {
 	die "Unicode::Normalize cannot stringify a Unicode code point\n";
     }
 }
@@ -11,7 +11,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.21';
+our $VERSION = '0.22';
 our $PACKAGE = __PACKAGE__;
 
 require Exporter;
