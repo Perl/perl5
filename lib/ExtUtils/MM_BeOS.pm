@@ -39,7 +39,7 @@ least BeOS has one.
 
 sub perl_archive
   {
-  return '$(PERL_INC)' . "/$Config{libperl}":
+  return File::Spec->catdir('$(PERL_INC)',$Config{libperl});
   }
 
 1;
