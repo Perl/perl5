@@ -4501,6 +4501,8 @@ Efficient removal of characters from the beginning of the string buffer.
 SvPOK(sv) must be true and the C<ptr> must be a pointer to somewhere inside
 the string buffer.  The C<ptr> becomes the first character of the adjusted
 string. Uses the "OOK hack".
+Beware: after this function returns, C<ptr> and SvPVX(sv) may no longer
+refer to the same chunk of data.
 
 =cut
 */
@@ -4509,9 +4511,9 @@ void
 Perl_sv_chop(pTHX_ register SV *sv, register char *ptr)
 {
     register STRLEN delta;
-
     if (!ptr || !SvPOKp(sv))
 	return;
+    delta = ptr - SvPVX(sv);
     SV_CHECK_THINKFIRST(sv);
     if (SvTYPE(sv) < SVt_PVIV)
 	sv_upgrade(sv,SVt_PVIV);
@@ -4531,7 +4533,6 @@ Perl_sv_chop(pTHX_ register SV *sv, register char *ptr)
 	SvFLAGS(sv) |= SVf_OOK; 
     }
     SvNIOK_off(sv);
-    delta = ptr - SvPVX(sv);
     SvLEN(sv) -= delta;
     SvCUR(sv) -= delta;
     SvPVX(sv) += delta;

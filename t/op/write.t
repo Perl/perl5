@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..47\n";
+print "1..48\n";
 
 my $CAT = ($^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS') ? 'type'
 	: ($^O eq 'MacOS') ? 'catenate'
@@ -271,7 +271,19 @@ if (`$CAT Op_write.tmp` eq $right)
 else
     { print "not ok 11\n"; }
 
-# 12..47: scary format testing from Merijn H. Brand
+{
+    my $el;
+    format STDOUT =
+ok ^<<<<<<<<<<<<<<~~ # sv_chop() naze
+$el
+.
+    my %hash = (12 => 3);
+    for $el (keys %hash) {
+	write;
+    }
+}
+
+# 13..48: scary format testing from Merijn H. Brand
 
 if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'MacOS' ||
     ($^O eq 'os2' and not eval '$OS2::can_fork')) {
@@ -281,7 +293,7 @@ if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'MacOS' ||
 
 use strict;	# Amazed that this hackery can be made strict ...
 
-my $test = 12;
+my $test = 13;
 
 # Just a complete test for format, including top-, left- and bottom marging
 # and format detection through glob entries
