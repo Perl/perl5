@@ -50,14 +50,13 @@ Not yet in use.
 
 =item $obj->FILENO($fh)
 
-Returns a numeric value for Unix-like file descriptor. Return -1
-if there isn't one.
-Optional -default is fileno($fh).
+Returns a numeric value for Unix-like file descriptor. Return -1 if
+there isn't one.  Optional.  Default is fileno($fh).
 
 =item $obj->READ($buffer,$len,$fh)
 
 Returns the number of octets placed in $buffer (must be less that $len).
-Optional - default is to use FILL instead.
+Optional.  Default is to use FILL instead.
 
 =item $obj->WRITE($buffer,$fh)
 
@@ -65,9 +64,9 @@ Returns the number of octets from buffer that have been sucessfully written.
 
 =item $obj->FILL($fh)
 
-Should return a string to be placed in the buffer.
-Optional. If not provided must provide READ or reject handles open for
-reading in PUSHED.
+Should return a string to be placed in the buffer.  Optional. If not
+provided must provide READ or reject handles open for reading in
+PUSHED.
 
 =item $obj->CLOSE($fh)
 
@@ -86,15 +85,14 @@ Optional. Default to be determined.
 
 =item $obj->UNREAD($buffer,$fh)
 
-Returns the number of octets from buffer that have been sucessfully saved
-to be returned on future FILL/READ calls.
-Optional. Default is to push data into a temporary layer above this one.
+Returns the number of octets from buffer that have been sucessfully
+saved to be returned on future FILL/READ calls.  Optional. Default is
+to push data into a temporary layer above this one.
 
 =item $obj->FLUSH($fh)
 
-Flush any buffered write data.
-May possibly be called on readable handles too.
-Should return 0 on success, -1 on error.
+Flush any buffered write data.  May possibly be called on readable
+handles too.  Should return 0 on success, -1 on error.
 
 =item $obj->SETLINEBUF($fh)
 
@@ -111,8 +109,8 @@ to signal error (die?) is worked out.
 
 =item $obj->EOF($fh)
 
-Optional. Returns end-of-file state. Default is function of return value of FILL
-or READ.
+Optional. Returns end-of-file state. Default is function of return
+value of FILL or READ.
 
 =back
 
