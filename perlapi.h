@@ -140,6 +140,8 @@ START_EXTERN_C
 #define PL_bufptr		(*Perl_Ibufptr_ptr(aTHXo))
 #undef  PL_checkav
 #define PL_checkav		(*Perl_Icheckav_ptr(aTHXo))
+#undef  PL_clone_callbacks
+#define PL_clone_callbacks	(*Perl_Iclone_callbacks_ptr(aTHXo))
 #undef  PL_collation_ix
 #define PL_collation_ix		(*Perl_Icollation_ix_ptr(aTHXo))
 #undef  PL_collation_name

@@ -1108,7 +1108,6 @@
 #define del_sv			S_del_sv
 #  endif
 #  if !defined(NV_PRESERVES_UV)
-#define sv_2inuv_non_preserve	S_sv_2inuv_non_preserve
 #define sv_2iuv_non_preserve	S_sv_2iuv_non_preserve
 #  endif
 #define expect_number		S_expect_number
@@ -2603,7 +2602,6 @@
 #define del_sv(a)		S_del_sv(aTHX_ a)
 #  endif
 #  if !defined(NV_PRESERVES_UV)
-#define sv_2inuv_non_preserve(a,b)	S_sv_2inuv_non_preserve(aTHX_ a,b)
 #define sv_2iuv_non_preserve(a,b)	S_sv_2iuv_non_preserve(aTHX_ a,b)
 #  endif
 #define expect_number(a)	S_expect_number(aTHX_ a)
@@ -5074,8 +5072,6 @@
 #define del_sv			S_del_sv
 #  endif
 #  if !defined(NV_PRESERVES_UV)
-#define S_sv_2inuv_non_preserve	CPerlObj::S_sv_2inuv_non_preserve
-#define sv_2inuv_non_preserve	S_sv_2inuv_non_preserve
 #define S_sv_2iuv_non_preserve	CPerlObj::S_sv_2iuv_non_preserve
 #define sv_2iuv_non_preserve	S_sv_2iuv_non_preserve
 #  endif
