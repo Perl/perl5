@@ -829,6 +829,11 @@ while (<>) {
 	}
 	elsif ($Cmd eq 'item') {
 	    s/^\*( |$)/\\(bu$1/g;
+	    # if you know how to get ":s please do
+	    s/\\\*\(L"([^"]+?)\\\*\(R"/'$1'/g;
+	    s/\\\*\(L"([^"]+?)""/'$1'/g;
+	    s/[^"]""([^"]+?)""[^"]/'$1'/g;
+	    # here do something about the $" in perlvar?
 	    print STDOUT qq{.Ip "$_" $indent\n};
 	    print qq{.IX Item "$_"\n};
 	}
