@@ -84,8 +84,17 @@ looking at magic, or by checking if it is tied again threads::shared.
 shared_sv *
 Perl_sharedsv_find(pTHX_ SV* sv)
 {
-    /* does all it can to find a shared_sv struct, returns NULL otherwise */
-    shared_sv* ssv = NULL;
+  /* does all it can to find a shared_sv struct, returns NULL otherwise */
+    shared_sv* ssv = NULL; 
+    switch (SvTYPE(sv)) {
+        case SVt_PVMG:
+            {MAGIC* mg = mg_find(sv, PERL_MAGIC_ext);
+            
+            if(strcmp(mg->mg_ptr,"threads::shared"))
+                break;
+            ssv = (shared_sv*) SvIV(mg->mg_obj);
+	    }
+    }            
     return ssv;
 }
 
@@ -164,9 +173,9 @@ Increments the threadcount of a sharedsv.
 void
 Perl_sharedsv_thrcnt_inc(pTHX_ shared_sv* ssv)
 {
-  SHAREDSvEDIT(ssv);
+  SHAREDSvLOCK(ssv);
   SvREFCNT_inc(ssv->sv);
-  SHAREDSvRELEASE(ssv);
+  SHAREDSvUNLOCK(ssv);
 }
 
 /*
@@ -182,7 +191,7 @@ void
 Perl_sharedsv_thrcnt_dec(pTHX_ shared_sv* ssv)
 {
     SV* sv;
-    SHAREDSvEDIT(ssv);
+    SHAREDSvLOCK(ssv);
     sv = SHAREDSvGET(ssv);
     if (SvREFCNT(sv) == 1) {
         switch (SvTYPE(sv)) {
@@ -211,8 +220,8 @@ Perl_sharedsv_thrcnt_dec(pTHX_ shared_sv* ssv)
         }
         }
     }
-    SvREFCNT_dec(sv);
-    SHAREDSvRELEASE(ssv);
+    Perl_sv_free(PL_sharedsv_space,SHAREDSvGET(ssv));
+    SHAREDSvUNLOCK(ssv);
 }
 
 #endif /* USE_ITHREADS */
