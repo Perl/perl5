@@ -60,7 +60,7 @@ my @files = qw(foo bar baz quux);
 }
 
 {# Test 5: that close is overridden properly
-     cacheout local $_ = "Foo::Bar";
+     cacheout local $_ = "Foo_Bar";
      print $_ "Hello World\n";
      close($_);
      open($_, "+>$_");
@@ -74,7 +74,7 @@ q(
 {# Test close override
      package Bob;
      use FileCache;
-     cacheout local $_ = "Foo'Bar";
+     cacheout local $_ = "Foo_Bar";
      print $_ "Hello World\n";
      close($_);
      open($_, "+>$_");
@@ -85,4 +85,4 @@ q(
 }
 );
 
-unlink @files, "Foo'Bar";
+1 while unlink @files, "Foo_Bar";

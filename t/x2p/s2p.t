@@ -789,6 +789,11 @@ my $plsed  = "s2pt$$.pl";
 # various command lines for 
 my $s2p  = File::Spec->catfile( File::Spec->updir(), 'x2p', 's2p' );
 my $psed = File::Spec->catfile( File::Spec->curdir(), 'psed' );
+if ($^O eq 'VMS') {
+  # default in the .com extenson if it's not already there
+  $s2p = VMS::Filespec::rmsexpand($s2p, '.com');
+  $psed = VMS::Filespec::rmsexpand($psed, '.com');
+}
 my $sedcmd = [ $psed, '-f', $script, $stdin ];
 my $s2pcmd = [ $s2p,  '-f', $script ];
 my $plcmd  = [ $plsed, $stdin ];
@@ -829,6 +834,10 @@ for my $tc ( sort keys %testcase ){
         print IN $input{$indat};
         close( IN ) || goto FAIL_BOTH;
     }
+
+    # on VMS, runperl eats blank lines to work around 
+    # spurious newlines in pipes
+    $testcase{$tc}{expect} =~ s/\n\n/\n/ if $^O eq 'VMS';
 
     # run and compare
     #

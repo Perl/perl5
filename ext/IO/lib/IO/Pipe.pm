@@ -166,15 +166,15 @@ IO::Pipe - supply object methods for pipes
 	if($pid = fork()) { # Parent
 	    $pipe->reader();
 
-	    while(<$pipe> {
-		....
+	    while(<$pipe>) {
+		...
 	    }
 
 	}
 	elsif(defined $pid) { # Child
 	    $pipe->writer();
 
-	    print $pipe ....
+	    print $pipe ...
 	}
 
 	or
@@ -184,7 +184,7 @@ IO::Pipe - supply object methods for pipes
 	$pipe->reader(qw(ls -l));
 
 	while(<$pipe>) {
-	    ....
+	    ...
 	}
 
 =head1 DESCRIPTION

@@ -192,13 +192,19 @@ sub _apply_handler_AH_ {
 	return 1;
 }
 
-CHECK {
-	$global_phase++;
-	_resolve_lastattr;
-	_apply_handler_AH_($_,'CHECK') foreach @declarations;
-}
+{
+        no warnings 'void';
+        CHECK {
+               $global_phase++;
+               _resolve_lastattr;
+               _apply_handler_AH_($_,'CHECK') foreach @declarations;
+        }
 
-INIT { $global_phase++; _apply_handler_AH_($_,'INIT') foreach @declarations }
+        INIT {
+                $global_phase++;
+                _apply_handler_AH_($_,'INIT') foreach @declarations
+        }
+}
 
 END { $global_phase++; _apply_handler_AH_($_,'END') foreach @declarations }
 

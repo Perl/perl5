@@ -407,9 +407,16 @@ sub fast_abs_path {
     my $cwd = getcwd();
     require File::Spec;
     my $path = @_ ? shift : File::Spec->curdir;
-    CORE::chdir($path) || croak "Cannot chdir to $path:$!";
+    CORE::chdir($path) || croak "Cannot chdir to $path: $!";
     my $realpath = getcwd();
-    CORE::chdir($cwd)  || croak "Cannot chdir back to $cwd:$!";
+    # I cannot think of an untainting regular expression 
+    # that wouldn't also (a) be unportable (b) disqualify valid pathnames
+    # so just untainting all of it here and relying on -d and CORE::chdir
+    # to verify the validity.
+    # --jhi
+    my ($cwd_untainted) = ($cwd =~ /^(.+)$/);
+    -d $cwd_untainted && CORE::chdir($cwd_untainted) ||
+	croak "Cannot chdir back to $cwd: $!";
     $realpath;
 }
 

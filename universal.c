@@ -169,7 +169,7 @@ XS(XS_utf8_unicode_to_native);
 XS(XS_utf8_native_to_unicode);
 XS(XS_Internals_SvREADONLY);
 XS(XS_Internals_SvREFCNT);
-XS(XS_Internals_hv_clear_placeholders);
+XS(XS_Internals_hv_clear_placehold);
 
 void
 Perl_boot_core_UNIVERSAL(pTHX)
@@ -189,7 +189,7 @@ Perl_boot_core_UNIVERSAL(pTHX)
     newXSproto("Internals::SvREADONLY",XS_Internals_SvREADONLY, file, "\\[$%@];$");
     newXSproto("Internals::SvREFCNT",XS_Internals_SvREFCNT, file, "\\[$%@];$");
     newXSproto("Internals::hv_clear_placeholders",
-               XS_Internals_hv_clear_placeholders, file, "\\%");
+               XS_Internals_hv_clear_placehold, file, "\\%");
 }
 
 
@@ -505,7 +505,7 @@ XS(XS_Internals_SvREFCNT)	/* This is dangerous stuff. */
 
 /* Maybe this should return the number of placeholders found in scalar context,
    and a list of them in list context.  */
-XS(XS_Internals_hv_clear_placeholders)
+XS(XS_Internals_hv_clear_placehold)
 {
     dXSARGS;
     HV *hv = (HV *) SvRV(ST(0));

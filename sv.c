@@ -10312,6 +10312,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_utf8_totitle	= sv_dup_inc(proto_perl->Iutf8_totitle, param);
     PL_utf8_tolower	= sv_dup_inc(proto_perl->Iutf8_tolower, param);
     PL_utf8_tofold	= sv_dup_inc(proto_perl->Iutf8_tofold, param);
+    PL_utf8_idstart	= sv_dup_inc(proto_perl->Iutf8_idstart, param);
+    PL_utf8_idcont	= sv_dup_inc(proto_perl->Iutf8_idcont, param);
 
     /* swatch cache */
     PL_last_swash_hv	= Nullhv;	/* reinits on demand */

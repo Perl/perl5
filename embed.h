@@ -325,6 +325,7 @@
 #define is_utf8_alnum		Perl_is_utf8_alnum
 #define is_utf8_alnumc		Perl_is_utf8_alnumc
 #define is_utf8_idfirst		Perl_is_utf8_idfirst
+#define is_utf8_idcont		Perl_is_utf8_idcont
 #define is_utf8_alpha		Perl_is_utf8_alpha
 #define is_utf8_ascii		Perl_is_utf8_ascii
 #define is_utf8_space		Perl_is_utf8_space
@@ -1892,6 +1893,7 @@
 #define is_utf8_alnum(a)	Perl_is_utf8_alnum(aTHX_ a)
 #define is_utf8_alnumc(a)	Perl_is_utf8_alnumc(aTHX_ a)
 #define is_utf8_idfirst(a)	Perl_is_utf8_idfirst(aTHX_ a)
+#define is_utf8_idcont(a)	Perl_is_utf8_idcont(aTHX_ a)
 #define is_utf8_alpha(a)	Perl_is_utf8_alpha(aTHX_ a)
 #define is_utf8_ascii(a)	Perl_is_utf8_ascii(aTHX_ a)
 #define is_utf8_space(a)	Perl_is_utf8_space(aTHX_ a)

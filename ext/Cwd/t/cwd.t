@@ -1,4 +1,4 @@
-#!./perl
+#!./perl -T
 
 BEGIN {
     chdir 't' if -d 't';
@@ -41,7 +41,10 @@ print "# native pwd = '$pwd_cmd'\n";
 SKIP: {
     skip "No native pwd command found to test against", 4 unless $pwd_cmd;
 
-    chomp(my $start = `$pwd_cmd`);
+    local @ENV{qw(PATH IFS CDPATH ENV BASH_ENV)};
+    my ($pwd_cmd_untainted) = $pwd_cmd =~ /^(.+)$/; # Untaint.
+    chomp(my $start = `$pwd_cmd_untainted`);
+
     # Win32's cd returns native C:\ style
     $start =~ s,\\,/,g if ($^O eq 'MSWin32' || $^O eq "NetWare");
     # DCL SHOW DEFAULT has leading spaces

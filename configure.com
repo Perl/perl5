@@ -5656,6 +5656,7 @@ $ WC "path_sep='|'"
 $ WC "perl_root='" + perl_root + "'" ! VMS specific $trnlnm()
 $ WC "perladmin='" + perladmin + "'"
 $ WC "perllibs='" + perllibs + "'"
+$ WC "perlpath='" + "''vms_prefix':[000000]Perl''ext'" + "'"
 $ WC "perl_symbol='" + perl_symbol + "'"  ! VMS specific
 $ WC "perl_verb='" + perl_verb + "'"      ! VMS specific
 $ WC "pgflquota='" + pgflquota + "'"

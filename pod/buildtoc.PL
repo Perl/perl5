@@ -90,6 +90,13 @@ if (-d "pod") {
     perlwin32           
           );
 
+@CJKPODS = qw(
+    perlcn
+    perljp
+    perlko
+    perltw
+          );
+
 @pods = 
   (
     qw(
@@ -199,12 +206,15 @@ if (-d "pod") {
 
     ),
 
-    @ARCHPODS
+    @ARCHPODS,
 
   );
 
 for (@ARCHPODS) { s/$/.pod/ }
 @ARCHPODS{@ARCHPODS} = ();
+
+for (@CJKPODS) { s/$/.pod/ }
+@CJKPODS{@CJKPODS} = ();
 
 for (@pods) { s/$/.pod/ }
 @pods{@pods} = ();
@@ -232,6 +242,11 @@ die "$0: could not find the pod listing of perl.pod\n"
   unless @PERLPODS;
 @PERLPODS{@PERLPODS} = ();
 
+# Delete the CJK because we cannot mix their encodings.
+delete @PERLPODS{@CJKPODS};
+delete @PODS{@CJKPODS};
+delete @pods{@CJKPODS};
+
 # Cross-check against ourselves
 # Cross-check against the MANIFEST
 # Cross-check against the perl.pod
@@ -240,7 +255,7 @@ foreach my $i (sort keys %PODS) {
   warn "$0: $i exists but is unknown by buildtoc\n"
 	unless exists $pods{$i};
   warn "$0: $i exists but is unknown by ../MANIFEST\n"
-	if !exists $MANIPODS{$i} && !exists $ARCHPODS{$i};
+	if !exists $MANIPODS{$i} && !exists $ARCHPODS{$i} && !exists $CJKPODS{$i};
   warn "$0: $i exists but is unknown by perl.pod\n"
 	unless exists $PERLPODS{$i};
 }

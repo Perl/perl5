@@ -170,12 +170,11 @@ Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 =for apidoc A|STRLEN|is_utf8_char|U8 *s
 
 Tests if some arbitrary number of bytes begins in a valid UTF-8
-character.  Note that an INVARIANT (i.e. ASCII) character is a valid UTF-8 character.
-The actual number of bytes in the UTF-8 character will be returned if
-it is valid, otherwise 0.
+character.  Note that an INVARIANT (i.e. ASCII) character is a valid
+UTF-8 character.  The actual number of bytes in the UTF-8 character
+will be returned if it is valid, otherwise 0.
 
-=cut
-*/
+=cut */
 STRLEN
 Perl_is_utf8_char(pTHX_ U8 *s)
 {
@@ -1156,9 +1155,27 @@ Perl_is_utf8_alnumc(pTHX_ U8 *p)
 }
 
 bool
-Perl_is_utf8_idfirst(pTHX_ U8 *p)
+Perl_is_utf8_idfirst(pTHX_ U8 *p) /* The naming is historical. */
 {
-    return *p == '_' || is_utf8_alpha(p);
+    if (*p == '_')
+	return TRUE;
+    if (!is_utf8_char(p))
+	return FALSE;
+    if (!PL_utf8_idstart) /* is_utf8_idstart would be more logical. */
+	PL_utf8_idstart = swash_init("utf8", "IdStart", &PL_sv_undef, 0, 0);
+    return swash_fetch(PL_utf8_idstart, p, TRUE);
+}
+
+bool
+Perl_is_utf8_idcont(pTHX_ U8 *p)
+{
+    if (*p == '_')
+	return TRUE;
+    if (!is_utf8_char(p))
+	return FALSE;
+    if (!PL_utf8_idcont)
+	PL_utf8_idcont = swash_init("utf8", "IdContinue", &PL_sv_undef, 0, 0);
+    return swash_fetch(PL_utf8_idcont, p, TRUE);
 }
 
 bool
@@ -1514,9 +1531,11 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
     SAVEI32(PL_hints);
     PL_hints = 0;
     save_re_context();
-    if (PL_curcop == &PL_compiling)
+    if (PL_curcop == &PL_compiling) {
 	/* XXX ought to be handled by lex_start */
+	SAVEI32(PL_in_my);
 	sv_setpv(tokenbufsv, PL_tokenbuf);
+    }
     errsv_save = newSVsv(ERRSV);
     if (call_method("SWASHNEW", G_SCALAR))
 	retval = newSVsv(*PL_stack_sp--);
