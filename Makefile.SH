@@ -1018,7 +1018,7 @@ test-notty:	test_notty
 
 # Targets for Third Degree testing.
 
-test_prep.third: test_prep perl.third perl.third$(EXE_EXT)
+test_prep.third: test_prep perl.third
 	PERL=./perl.third $(MAKE) _test_prep
 
 test.third check.third:	test_prep.third perl.third
