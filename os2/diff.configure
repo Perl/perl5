@@ -288,25 +288,6 @@
   		cryptlib=-lcrypt
   	fi
 ***************
-*** 5198,5205 ****
-  EOM
-  	: Call the object file tmp-dyna.o in case dlext=o.
-  	if $cc $ccflags $cccdlflags -c dyna.c > /dev/null 2>&1 && 
-! 		mv dyna.o tmp-dyna.o > /dev/null 2>&1 && 
-! 		$ld $lddlflags -o dyna.$dlext tmp-dyna.o > /dev/null 2>&1 && 
-  		$cc $ccflags $ldflags $cccdlflags $ccdlflags fred.c -o fred $libs > /dev/null 2>&1; then
-  		xxx=`./fred`
-  		case $xxx in
---- 5213,5220 ----
-  EOM
-  	: Call the object file tmp-dyna.o in case dlext=o.
-  	if $cc $ccflags $cccdlflags -c dyna.c > /dev/null 2>&1 && 
-! 		mv dyna$obj_ext tmp-dyna$obj_ext > /dev/null 2>&1 && 
-! 		$ld $lddlflags -o dyna.$dlext tmp-dyna$obj_ext > /dev/null 2>&1 && 
-  		$cc $ccflags $ldflags $cccdlflags $ccdlflags fred.c -o fred $libs > /dev/null 2>&1; then
-  		xxx=`./fred`
-  		case $xxx in
-***************
 *** 5355,5361 ****
   EOCP
   : check sys/file.h first to get FREAD on Sun
@@ -414,23 +395,6 @@
   		dflt=`./try`
   	else
   		dflt='8'
-***************
-*** 7080,7086 ****
-  '') obj_ext='.o';;
-  esac
-  case "$path_sep" in
-! '') path_sep=':';;
-  esac
-  : Which makefile gets called first.  This is used by make depend.
-  case "$firstmakefile" in
---- 7095,7101 ----
-  '') obj_ext='.o';;
-  esac
-  case "$path_sep" in
-! '') path_sep="$p_";;
-  esac
-  : Which makefile gets called first.  This is used by make depend.
-  case "$firstmakefile" in
 ***************
 *** 7120,7126 ****
   }

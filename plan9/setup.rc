@@ -22,7 +22,6 @@ if (test ! -d $sourcedir) mkdir $sourcedir
 #Populate source directory
 echo Building source directories ...
 {cd $builddir ; tar c .} | { cd $sourcedir ; tar x}
-cp $builddir/plan9/config.plan9 $sourcedir/config.plan9
 cp $builddir/plan9/plan9.c $builddir/plan9/plan9ish.h $builddir/plan9/mkfile $sourcedir
 cd $sourcedir/lib ; rm -rf *
 

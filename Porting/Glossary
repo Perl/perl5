@@ -1214,7 +1214,8 @@ sh (sh.U):
 	This variable contains the full pathname of the shell used
 	on this system to execute Bourne shell scripts.  Usually, this will be
 	/bin/sh, though it's possible that some systems will have /bin/ksh,
-	/bin/pdksh, /bin/ash, /bin/bash, or even something such as D:/bin/sh.
+	/bin/pdksh, /bin/ash, /bin/bash, or even something such as
+	D:/bin/sh.exe.
 	This unit comes before Options.U, so you can't set sh with a -D
 	option, though you can override this (and startsh)
 	with -O -Dsh=/bin/whatever -Dstartsh=whatever

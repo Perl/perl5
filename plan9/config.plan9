@@ -748,6 +748,15 @@
 #define FILE_bufsiz(fp)	((fp)->_cnt + (fp)->_ptr - (fp)->_base)
 #endif
 
+/* FILE_filbuf:
+ *	This macro is used to access the internal stdio _filbuf function
+ *	(or equivalent), if STDIO_CNT_LVALUE and STDIO_PTR_LVALUE
+ *	are defined.  It is typically either _filbuf or __filbuf.
+ *	This macro will only be defined if both STDIO_CNT_LVALUE and
+ *	STDIO_PTR_LVALUE are defined.
+ */
+#undef FILE_filbuf
+
 /* HAS_STRCHR:
  *	This symbol is defined to indicate that the strchr()/strrchr()
  *	functions are available for string searching. If not, try the
@@ -1305,7 +1314,7 @@
 
 #define OSNAME "plan9"
 
-#define BIN_SH "/bin/rc"
+#define BIN_SH "/bin/rc"			/* config-skip */
 
 /* MYMALLOC:
  *	This symbol, if defined, indicates that we're using our own malloc.
@@ -1313,7 +1322,7 @@
 #undef MYMALLOC			/**/
 
 
-#undef VMS
+#undef VMS				/* config-skip */
 
 /* LOC_SED:
  *	This symbol holds the complete pathname to the sed program.
@@ -1325,6 +1334,7 @@
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define ARCHLIB_EXP "/_P9P_OBJTYPE/lib/perl/_P9P_VERSION"
+#define ARCHLIB "/_P9P_OBJTYPE/lib/perl/_P9P_VERSION"
 
 /* BYTEORDER:
  *	This symbol hold the hexadecimal constant defined in byteorder,
@@ -1488,12 +1498,14 @@
  *	run-time.
  */
 #undef OLDARCHLIB_EXP		/**/
+#undef OLDARCHLIB	/**/
 
 /* PRIVLIB_EXP:
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define PRIVLIB_EXP "/sys/lib/perl"		/* */
+#define PRIVLIB "/sys/lib/perl"		/* */
 
 /* SIG_NAME:
  *	This symbol contains a list of signal names in order of
@@ -1531,12 +1543,14 @@
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define SITELIB_EXP  "/sys/lib/perl/site_perl"	/* */
+#define SITELIB  "/sys/lib/perl/site_perl"	/* */
 
 /* SITEARCH_EXP:
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define SITEARCH_EXP  "/_P9P_OBJTYPE/lib/perl/_P9P_VERSION/site_perl"		/* */
+#define SITEARCH  "/_P9P_OBJTYPE/lib/perl/_P9P_VERSION/site_perl"		/* */
 
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl
@@ -1544,6 +1558,48 @@
  *	some shell.
  */
 #define STARTPERL "#!/bin/perl"		/**/
+
+/* SH_PATH:
+  *	Just here to shut up compiler warnings.
+*/
+#define SH_PATH	"/bin/rc"			/**/
+
+#define PERLIO_IS_STDIO			/* config-skip */
+#undef I_SFIO
+
+/* USE_PERLIO:
+ *	This symbol, if defined, indicates that the PerlIO abstraction should
+ *	be used throughout.  If not defined, stdio should be
+ *	used in a fully backward compatible manner.
+ */
+#undef	USE_PERLIO		/**/
+
+/* USE_SFIO:
+ *	This symbol, if defined, indicates that sfio should
+ *	be used.
+ */
+#undef	USE_SFIO		/**/
+
+
+/* I_SYS_RESOURCE:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/resource.h>.
+ */
+#define I_SYS_RESOURCE		/**/
+
+/* I_SYS_WAIT:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/wait.h>.
+ */
+#define I_SYS_WAIT	/**/
+
+/* I_VALUES:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <values.h> to get definition of symbols like MINFLOAT or
+ *	MAXLONG, i.e. machine dependant limitations.  Probably, you
+ *	should use <limits.h> instead, if it is available.
+ */
+#undef I_VALUES		/**/
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this

@@ -4,6 +4,7 @@ Contents:
 	Target
 	Binary Install
 	Reading the docs
+	Quieting warnings
 	Notes on build on OS/2
 	Compile summary
 	Tests which fail
@@ -13,7 +14,7 @@ Contents:
 
 Notes on the patch:
 ~~~~~~~~~~~~~~~~~~~
-patches should be applied as
+patches in ./os2 should be applied as
 	patch -p0 <.....
 All the diff.* files and POSIX.mkfifo should be applied.
 
@@ -32,7 +33,7 @@ caching DLLs.
 
 In particular, it is VERY IMPORTANT to have a correct perl.dll on
 LIBPATH during build, otherwise DLLs with wrong names will be
-created. Or have a perl.dll with the same naming convention for DLLs
+created. Either have a perl.dll with the same naming convention for DLLs
 (hopefully, it should not change any time soon), or remove it from
 LIBPATH, add . to LIBPATH, wait until the build of DynaLoader fails,
 and then move the built DLL into LIBPATH.
@@ -43,6 +44,9 @@ be multithreaded (note that the perl core is not thread-safe so far,
 so make sure you access Perl from one thread only). In particular, it
 is no longer needed to statically link X11_s.lib if you compile
 Perl/Tk/XFree.
+
+Note however, that current Perl malloc is NOT MT-safe, and your extension 
+will use Perl malloc if perl does (as the default built does).
 
 This newer port includes 
 	. numeric first argument to system(), see OS2::Process docs;
@@ -57,7 +61,7 @@ Target:
 
 This is not supposed to make a perfect Perl on OS/2. This patch is
 concerned only with perfect _build_ of Perl on OS/2. Some good
-features from Andreas Kaiser port missed this port. However, most of
+features from Andreas Kaiser port may have missed this port. However, most of
 the features are available (possibly in different form). 
 
 !!! Note that [gs]etpriority functions in this port are compatible
@@ -87,8 +91,8 @@ that a module is missing, then perl will try to scan the builtin
 directories nevertheless. If perl was intended to be installed on
 f:/perllib, but your f: is a CDROM, then you may have some trouble.
 	b2) Best: binary edit perl.dll and perl_.exe (using perl
-itself as a binary editor) to fix the paths. Note that the new paths
-should be better no longer than the old.
+itself as a binary editor) to fix the paths. Note that for best results ;-)
+the new paths should be no longer than the old.
 	b3) More convinient: set PERLLIB_PREFIX environment
 variable. It should contain two components, separated by whitespace
 and/or semicolon `;'. The first component is translated to the second
@@ -99,6 +103,14 @@ one if it is
 Say, if you install perllibrary into c:/lib/perl/ instead of
 f:/perllib/, set it to
 	set PERLLIB_PREFIX=f:/perllib/;c:/lib/perl/
+
+!!!! Note that if you have bin/sh.exe or Perl library in non-standard
+!!!! location, you need to hand-edit Config.pm. The last time I
+!!!! checked one should have scaned this file for `f:' and/or `F:' to find
+!!!! all the entries to fix.
+
+!!!!!!!!!!!!! Somebody should write an install script which would auto-edit
+!!!!!!!!!!!!! Config.pm.
 
 Reading the docs:
 ~~~~~~~~~~~~~~~~
@@ -132,6 +144,11 @@ net, as usual, .INF is available on CPAN/.../os2/ilyaz.
 
 There are also _very_ good docs in TexInfo and Adobe PDF format.
 
+Quieting warnings:
+~~~~~~~~~~~~~~~~~
+Set environment variables PERL_BADFREE and/or PERL_BADLANG to 0 to
+quiet the corresponding warnings.
+
 Notes on build on OS/2:
 ~~~~~~~~~~~~~~~~~~~~~~~
 a) Make sure your sort is not the broken OS/2 one, and that you have /tmp
@@ -148,6 +165,9 @@ or
 c) Necessary manual intervention when compiling on OS/2:
 
 	Need to put perl.dll on LIBPATH after it is created.
+	I also have seen errors building ext/OS2/*/, during
+		generation of manpages, if there is a conflict of perl.exe
+		and perl.dll. It is safe to ignore these errors.
 
 d) Compile summary:
    ~~~~~~~~~~~~~~~
@@ -179,17 +199,12 @@ make test
 	# To run finer tests, cd t && perl harness
 make install
 
-e) At the end of July 1996 GNU make was too buggy for compile.
-The maintainer has the patch (for a year now) that make it possible to
-compile perl. The binaries are included in
-	ftp://ftp.math.ohio-state.edu/pub/users/ilya/os2
-patches are available too.
-
-Note that the pdksh5.2.7 or later is required.
+e) At the end of August 1996 GNU make 3.74 is OK.
+	Note that the pdksh5.2.7 or later is required.
 
 !!!!!!!!!!!!!!!!!
 If you see that some '/' became '\' in pdksh, you use an old pdksh!
-Same with segfaults in Make 3.76 (?) - use my patched verions.
+Same with segfaults in Make 3.7? - use my patched verions.
 !!!!!!!!!!!!!!!!!
 
 f) As distributed the DB library db.a-db.lib is not suitable for
@@ -202,11 +217,14 @@ If you see:
 it means you use a wrong db.lib.
 !!!!!!!!!!!!!!!!
 
+g) Make sure your gcc is good for -Zomf linking: run `omflibs' script in
+/emx/lib directory.
+
 Problems reported: 
 
 a) one of the latest tr is broken, get an old one :-(
 	1.11 works. (On compuserver?)
-b) You need a perlglob.exe and link386.
+b) You need link386.
 c) Get rid of invalid perl.dll on your LIBPATH.
 
 
