@@ -35,6 +35,8 @@
 	 Nullop )						\
      : (CHECKCALL[type])((OP*)o))
 
+#define PAD_MAX 999999999
+
 static bool scalar_mod_type _((OP *o, I32 type));
 #ifndef PERL_OBJECT
 static I32 list_assignment _((OP *o));
@@ -131,12 +133,12 @@ pad_allocmy(char *name)
 	for (off = AvFILLp(PL_comppad_name); off > PL_comppad_name_floor; off--) {
 	    if ((sv = svp[off])
 		&& sv != &PL_sv_undef
-		&& (SvIVX(sv) == 999999999 || SvIVX(sv) == 0)
+		&& (SvIVX(sv) == PAD_MAX || SvIVX(sv) == 0)
 		&& strEQ(name, SvPVX(sv)))
 	    {
 		warner(WARN_UNSAFE,
 			"\"my\" variable %s masks earlier declaration in same %s", 
-			name, (SvIVX(sv) == 999999999 ? "scope" : "statement"));
+			name, (SvIVX(sv) == PAD_MAX ? "scope" : "statement"));
 		break;
 	    }
 	}
@@ -154,7 +156,7 @@ pad_allocmy(char *name)
 	PL_sv_objcount++;
     }
     av_store(PL_comppad_name, off, sv);
-    SvNVX(sv) = (double)999999999;
+    SvNVX(sv) = (double)PAD_MAX;
     SvIVX(sv) = 0;			/* Not yet introduced--see newSTATEOP */
     if (!PL_min_intro_pending)
 	PL_min_intro_pending = off;
@@ -216,7 +218,7 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 		    sv_setpv(namesv, name);
 		    av_store(PL_comppad_name, newoff, namesv);
 		    SvNVX(namesv) = (double)PL_curcop->cop_seq;
-		    SvIVX(namesv) = 999999999;	/* A ref, intro immediately */
+		    SvIVX(namesv) = PAD_MAX;	/* A ref, intro immediately */
 		    SvFAKE_on(namesv);		/* A ref, not a real var */
 		    if (CvANON(PL_compcv) || SvTYPE(PL_compcv) == SVt_PVFM) {
 			/* "It's closures all the way down." */
@@ -358,7 +360,7 @@ pad_leavemy(I32 fill)
     }
     /* "Deintroduce" my variables that are leaving with this scope. */
     for (off = AvFILLp(PL_comppad_name); off > fill; off--) {
-	if ((sv = svp[off]) && sv != &PL_sv_undef && SvIVX(sv) == 999999999)
+	if ((sv = svp[off]) && sv != &PL_sv_undef && SvIVX(sv) == PAD_MAX)
 	    SvIVX(sv) = PL_cop_seqmax;
     }
 }
@@ -2936,7 +2938,7 @@ intro_my(void)
     svp = AvARRAY(PL_comppad_name);
     for (i = PL_min_intro_pending; i <= PL_max_intro_pending; i++) {
 	if ((sv = svp[i]) && sv != &PL_sv_undef && !SvIVX(sv)) {
-	    SvIVX(sv) = 999999999;	/* Don't know scope end yet. */
+	    SvIVX(sv) = PAD_MAX;	/* Don't know scope end yet. */
 	    SvNVX(sv) = (double)PL_cop_seqmax;
 	}
     }
