@@ -1181,7 +1181,7 @@ S_sublex_done(pTHX)
   It stops processing as soon as it finds an embedded $ or @ variable
   and leaves it to the caller to work out what's going on.
 
-  @ in pattern could be: @foo, @{foo}, @$foo, @'foo, @:foo.
+  @ in pattern could be: @foo, @{foo}, @$foo, @'foo, @::foo.
 
   $ in pattern could be $foo or could be tail anchor.  Assumption:
   it's a tail anchor if $ is the last thing in the string, or if it's
@@ -1356,7 +1356,7 @@ S_scan_const(pTHX_ char *start)
 	}
 
 	/* check for embedded arrays
-	   (@foo, @:foo, @'foo, @{foo}, @$foo, @+, @-)
+	   (@foo, @::foo, @'foo, @{foo}, @$foo, @+, @-)
 	   */
 	else if (*s == '@' && s[1]
 		 && (isALNUM_lazy_if(s+1,UTF) || strchr(":'{$+-", s[1])))
