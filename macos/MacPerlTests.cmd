@@ -129,8 +129,8 @@ echo "::macos:perl -I::lib    :lib:class-struct.t" >> ::macos:MacPerlTests.out
 ::macos:perl -I::lib    :lib:class-struct.t >> ::macos:MacPerlTests.out
 echo "::macos:perl -I::lib    :lib:complex.t" >> ::macos:MacPerlTests.out
 ::macos:perl -I::lib    :lib:complex.t >> ::macos:MacPerlTests.out
-# echo "::macos:perl -I::lib    :lib:db-btree.t" >> ::macos:MacPerlTests.out
-# ::macos:perl -I::lib    :lib:db-btree.t >> ::macos:MacPerlTests.out
+echo "::macos:perl -I::lib    :lib:db-btree.t" >> ::macos:MacPerlTests.out
+::macos:perl -I::lib    :lib:db-btree.t >> ::macos:MacPerlTests.out
 # echo "::macos:perl -I::lib    :lib:db-hash.t" >> ::macos:MacPerlTests.out
 # ::macos:perl -I::lib    :lib:db-hash.t >> ::macos:MacPerlTests.out
 # echo "::macos:perl -I::lib    :lib:db-recno.t" >> ::macos:MacPerlTests.out
@@ -237,8 +237,8 @@ echo "::macos:perl -I::lib    :lib:io_xs.t" >> ::macos:MacPerlTests.out
 ::macos:perl -I::lib    :lib:io_xs.t >> ::macos:MacPerlTests.out
 echo "::macos:perl -I::lib    :lib:ipc_sysv.t" >> ::macos:MacPerlTests.out
 ::macos:perl -I::lib    :lib:ipc_sysv.t >> ::macos:MacPerlTests.out
-# echo "::macos:perl -I::lib    :lib:ndbm.t" >> ::macos:MacPerlTests.out
-# ::macos:perl -I::lib    :lib:ndbm.t >> ::macos:MacPerlTests.out
+echo "::macos:perl -I::lib    :lib:ndbm.t" >> ::macos:MacPerlTests.out
+::macos:perl -I::lib    :lib:ndbm.t >> ::macos:MacPerlTests.out
 echo "::macos:perl -I::lib    :lib:odbm.t" >> ::macos:MacPerlTests.out
 ::macos:perl -I::lib    :lib:odbm.t >> ::macos:MacPerlTests.out
 echo "::macos:perl -I::lib    :lib:opcode.t" >> ::macos:MacPerlTests.out
@@ -255,8 +255,8 @@ echo "::macos:perl -I::lib    :lib:peek.t" >> ::macos:MacPerlTests.out
 ::macos:perl -I::lib    :lib:peek.t >> ::macos:MacPerlTests.out
 echo "::macos:perl -I::lib    :lib:ph.t" >> ::macos:MacPerlTests.out
 ::macos:perl -I::lib    :lib:ph.t >> ::macos:MacPerlTests.out
-# echo "::macos:perl -I::lib    :lib:posix.t" >> ::macos:MacPerlTests.out
-# ::macos:perl -I::lib    :lib:posix.t >> ::macos:MacPerlTests.out
+echo "::macos:perl -I::lib    :lib:posix.t" >> ::macos:MacPerlTests.out
+::macos:perl -I::lib    :lib:posix.t >> ::macos:MacPerlTests.out
 echo "::macos:perl -I::lib    :lib:safe1.t" >> ::macos:MacPerlTests.out
 ::macos:perl -I::lib    :lib:safe1.t >> ::macos:MacPerlTests.out
 echo "::macos:perl -I::lib    :lib:safe2.t" >> ::macos:MacPerlTests.out
@@ -566,21 +566,38 @@ echo "::macos:perl -I::lib    :run:runenv.t" >> ::macos:MacPerlTests.out
 
 ::macos:perl -I::lib ::macos:MacPerlTests.plx ::macos:MacPerlTests.out >> ::macos:MacPerlTests.out
 
+echo "The following tests mostly work, but fail because of known"
+echo "IO problems.  Feel free to run them, and note the failures."
 echo "These tests are known to fail.  Run if you want to, but beware"
 echo "because crashes are possible."
-echo "::macos:perl -I::lib    :lib:db-btree.t >> ::macos:MacPerlTests.out"
+echo ""
+echo "# DB is broken in a few different ways"
 echo "::macos:perl -I::lib    :lib:db-hash.t >> ::macos:MacPerlTests.out"
 echo "::macos:perl -I::lib    :lib:db-recno.t >> ::macos:MacPerlTests.out"
+echo ""
+echo "# DOS::Glob doesn't work ... do we care?"
 echo "::macos:perl -I::lib    :lib:dosglob.t >> ::macos:MacPerlTests.out"
+echo ""
+echo "# Devel::DProf seems to work, but test needs major work :/"
 echo "::macos:perl -I::lib    :lib:dprof.t >> ::macos:MacPerlTests.out"
+echo ""
+echo "# I have no idea about these ..."
 echo "::macos:perl -I::lib    :lib:ftmp-mktemp.t >> ::macos:MacPerlTests.out"
 echo "::macos:perl -I::lib    :lib:ftmp-posix.t >> ::macos:MacPerlTests.out"
 echo "::macos:perl -I::lib    :lib:ftmp-security.t >> ::macos:MacPerlTests.out"
 echo "::macos:perl -I::lib    :lib:ftmp-tempfile.t >> ::macos:MacPerlTests.out"
-echo "::macos:perl -I::lib    :lib:ndbm.t >> ::macos:MacPerlTests.out"
-echo "::macos:perl -I::lib    :lib:posix.t >> ::macos:MacPerlTests.out"
+echo ""
+echo "# system() fails to return a good value"
 echo "::macos:perl -I::lib    :op:die_exit.t >> ::macos:MacPerlTests.out"
+echo ""
+echo "# I dunno here"
 echo "::macos:perl -I::lib    :op:magic.t >> ::macos:MacPerlTests.out"
+echo ""
+echo "# fails test  48 (known problem in IO redirection)"
 echo "::macos:perl -I::lib    :op:misc.t >> ::macos:MacPerlTests.out"
+echo ""
+echo "# fails tests 129, 130, 142, 161 (known problem in sfio)"
 echo "::macos:perl -I::lib    :op:sprintf.t >> ::macos:MacPerlTests.out"
+echo ""
+echo "# fails tests 319, 329 (known problem in IO redirection)"
 echo "::macos:perl -I::lib    :pragma:warnings.t >> ::macos:MacPerlTests.out"

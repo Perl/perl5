@@ -20,15 +20,15 @@ diff -ru :perl:lib:ExtUtils: :perl.new:lib:ExtUtils:xsubpp
      die "Can't find $typemap in $pwd\n" unless -r $typemap;
  }
 -unshift @tm, qw(../../../../lib/ExtUtils/typemap ../../../lib/ExtUtils/typemap
-+if ($Is_MacOS) {
++if ($Is_MacOS) { my @tmp;
 +    foreach (qw(:::: ::: :: :)) {
-+    	unshift @tm, "$_:lib:ExtUtils:typemap";
-+    	unshift @tm, "$_:macos:lib:ExtUtils:typemap";
-+    	unshift @tm, "$_:Mac:typemap";
-+    	unshift @tm, "$_:macos:ext:Mac:typemap";
-+    	unshift @tm, "$_:typemap";
++    	push @tmp, "$_:lib:ExtUtils:typemap";
++    	push @tmp, "$_:macos:lib:ExtUtils:typemap";
++    	push @tmp, "$_:Mac:typemap";
++    	push @tmp, "$_:macos:ext:Mac:typemap";
++    	push @tmp, "$_:typemap";
 +    }
-+    unshift @tm, "typemap";
++    unshift @tm, @tmp, "typemap";
 +} else {
 +    unshift @tm, qw(../../../../lib/ExtUtils/typemap ../../../lib/ExtUtils/typemap
                  ../../lib/ExtUtils/typemap ../../../typemap ../../typemap
