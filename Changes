@@ -29,6 +29,29 @@ Version v5.8.3		Maintenance release working toward v5.8.3
 --------------
 ____________________________________________________________________________
 ____________________________________________________________________________
+[ 22147] By: nicholas                              on 2004/01/14  16:51:39
+        Log: Update sample config to 5.8.3
+     Branch: maint-5.8/perl
+	   ! Porting/config.sh Porting/config_H
+____________________________________________________________________________
+[ 22146] By: nicholas                              on 2004/01/14  16:32:27
+        Log: Subject: arm patches to rc1
+             From: Redvers Davies <red@criticalintegration.com>
+             Message-Id: <1073949147.10300.143.camel@ragefire>
+             Date: Mon, 12 Jan 2004 18:12:27 -0500
+     Branch: maint-5.8/perl
+	   ! Cross/Makefile Cross/Makefile.SH.patch
+____________________________________________________________________________
+[ 22145] By: nicholas                              on 2004/01/14  15:14:51
+        Log: All pigs are fed, watered and ready to fly.
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 22144] By: nicholas                              on 2004/01/14  14:48:32
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 22143] By: nicholas                              on 2004/01/14  14:47:49
         Log: We're planning on making history today. Mind you, not that much -
              only 1 line.
