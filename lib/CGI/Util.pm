@@ -115,7 +115,12 @@ sub make_attributes {
     foreach (keys %{$attr}) {
 	my($key) = $_;
 	$key=~s/^\-//;     # get rid of initial - if present
-	$key=~tr/A-Z_/a-z-/; # parameters are lower case, use dashes
+
+	# old way: breaks EBCDIC!
+	# $key=~tr/A-Z_/a-z-/; # parameters are lower case, use dashes
+
+	($key="\L$key") =~ tr/_/-/; # parameters are lower case, use dashes
+
 	my $value = $escape ? simple_escape($attr->{$_}) : $attr->{$_};
 	push(@att,defined($attr->{$_}) ? qq/$key="$value"/ : qq/$key/);
     }
@@ -134,6 +139,45 @@ sub simple_escape {
   $toencode;
 }
 
+sub utf8_chr ($) {
+        my $c = shift(@_);
+
+        if ($c < 0x80) {
+                return sprintf("%c", $c);
+        } elsif ($c < 0x800) {
+                return sprintf("%c%c", 0xc0 | ($c >> 6), 0x80 | ($c & 0x3f));
+        } elsif ($c < 0x10000) {
+                return sprintf("%c%c%c",
+                                           0xe0 |  ($c >> 12),
+                                           0x80 | (($c >>  6) & 0x3f),
+                                           0x80 | ( $c          & 0x3f));
+        } elsif ($c < 0x200000) {
+                return sprintf("%c%c%c%c",
+                                           0xf0 |  ($c >> 18),
+                                           0x80 | (($c >> 12) & 0x3f),
+                                           0x80 | (($c >>  6) & 0x3f),
+                                           0x80 | ( $c          & 0x3f));
+        } elsif ($c < 0x4000000) {
+                return sprintf("%c%c%c%c%c",
+                                           0xf8 |  ($c >> 24),
+                                           0x80 | (($c >> 18) & 0x3f),
+                                           0x80 | (($c >> 12) & 0x3f),
+                                           0x80 | (($c >>  6) & 0x3f),
+                                           0x80 | ( $c          & 0x3f));
+
+        } elsif ($c < 0x80000000) {
+                return sprintf("%c%c%c%c%c%c",
+                                           0xfe |  ($c >> 30),
+                                           0x80 | (($c >> 24) & 0x3f),
+                                           0x80 | (($c >> 18) & 0x3f),
+                                           0x80 | (($c >> 12) & 0x3f),
+                                           0x80 | (($c >> 6)  & 0x3f),
+                                           0x80 | ( $c          & 0x3f));
+        } else {
+                return utf8(0xfffd);
+        }
+}
+
 # unescape URL-encoded data
 sub unescape {
   shift() if ref($_[0]) || (defined $_[1] && $_[0] eq $CGI::DefaultClass);
@@ -144,7 +188,8 @@ sub unescape {
     if ($EBCDIC) {
       $todecode =~ s/%([0-9a-fA-F]{2})/chr $A2E[hex($1)]/ge;
     } else {
-      $todecode =~ s/%([0-9a-fA-F]{2})/chr hex($1)/ge;
+      $todecode =~ s/%(?:([0-9a-fA-F]{2})|u([0-9a-fA-F]{4}))/
+	defined($1)? chr hex($1) : utf8_chr(hex($2))/ge;
     }
   return $todecode;
 }

@@ -80,7 +80,7 @@ test(15, checkbox_group(-name=>'game',-Values=>[qw/checkers chess cribbage/]) eq
 test(16, checkbox_group(-name=>'game',-values=>[qw/checkers chess cribbage/],-defaults=>['cribbage'],-override=>1) eq 
      qq(<input type="checkbox" name="game" value="checkers" />checkers <input type="checkbox" name="game" value="chess" />chess <input type="checkbox" name="game" value="cribbage" checked />cribbage),
      'checkbox_group()');
-test(17, popup_menu(-name=>'game',-values=>[qw/checkers chess cribbage/],-default=>'cribbage',-override=>1) eq <<END,'checkbox_group()');
+test(17, popup_menu(-name=>'game',-values=>[qw/checkers chess cribbage/],-default=>'cribbage',-override=>1)."\n" eq <<END,'checkbox_group()');
 <select name="game">
 <option  value="checkers">checkers</option>
 <option  value="chess">chess</option>
