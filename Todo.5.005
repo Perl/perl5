@@ -6,7 +6,6 @@ Merging
 
 Multi-threading
     without USE_THREADS, change extern variable for dTHR
-    sv_mutex initialisation and race
     consistent semantics for exit/die in threads
     pp_entersub still cloning XSUBs (broken)?
     test '~'-magic thread addresses
@@ -18,7 +17,6 @@ Multi-threading
     more Configure support
 
 Miscellaneous
-    sv_bless3 and '~'-magic to give choice on reblessing
     rename and alter ISA.pm
 
 Compiler

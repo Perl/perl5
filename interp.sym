@@ -87,10 +87,6 @@ minus_l
 minus_n
 minus_p
 multiline
-mystack_base
-mystack_mark
-mystack_max
-mystack_sp
 mystrk
 nrs
 ofmt

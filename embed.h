@@ -993,6 +993,7 @@
 #define sig_name		Perl_sig_name
 #define sig_num			Perl_sig_num
 #define sighandler		Perl_sighandler
+#define sighandlerp		Perl_sighandlerp
 #define simple			Perl_simple
 #define sin_amg			Perl_sin_amg
 #define skipspace		Perl_skipspace
@@ -1024,7 +1025,6 @@
 #define sv_add_arena		Perl_sv_add_arena
 #define sv_backoff		Perl_sv_backoff
 #define sv_bless		Perl_sv_bless
-#define sv_bless3		Perl_sv_bless3
 #define sv_catpv		Perl_sv_catpv
 #define sv_catpvf		Perl_sv_catpvf
 #define sv_catpvn		Perl_sv_catpvn
@@ -1296,10 +1296,6 @@
 #define minus_n			(curinterp->Iminus_n)
 #define minus_p			(curinterp->Iminus_p)
 #define multiline		(curinterp->Imultiline)
-#define mystack_base		(curinterp->Imystack_base)
-#define mystack_mark		(curinterp->Imystack_mark)
-#define mystack_max		(curinterp->Imystack_max)
-#define mystack_sp		(curinterp->Imystack_sp)
 #define mystrk			(curinterp->Imystrk)
 #define nrs			(curinterp->Inrs)
 #define ofmt			(curinterp->Iofmt)
@@ -1451,10 +1447,6 @@
 #define Iminus_n		minus_n
 #define Iminus_p		minus_p
 #define Imultiline		multiline
-#define Imystack_base		mystack_base
-#define Imystack_mark		mystack_mark
-#define Imystack_max		mystack_max
-#define Imystack_sp		mystack_sp
 #define Imystrk			mystrk
 #define Inrs			nrs
 #define Iofmt			ofmt
@@ -1615,10 +1607,6 @@
 #define minus_n			Perl_minus_n
 #define minus_p			Perl_minus_p
 #define multiline		Perl_multiline
-#define mystack_base		Perl_mystack_base
-#define mystack_mark		Perl_mystack_mark
-#define mystack_max		Perl_mystack_max
-#define mystack_sp		Perl_mystack_sp
 #define mystrk			Perl_mystrk
 #define nrs			Perl_nrs
 #define ofmt			Perl_ofmt

@@ -1926,11 +1926,6 @@ IEXT I32	Irunlevel;
 /* stack stuff */
 IEXT AV *	Icurstack;		/* THE STACK */
 IEXT AV *	Imainstack;	/* the stack when nothing funny is happening */
-#if 0
-IEXT SV **	Imystack_base;	/* stack->array_ary */
-IEXT SV **	Imystack_sp;	/* stack pointer now */
-IEXT SV **	Imystack_max;	/* stack->array_ary + stack->array_max */
-#endif
 
 /* format accumulators */
 IEXT SV *	Iformtarget;
