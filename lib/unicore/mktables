@@ -660,8 +660,7 @@ sub UnicodeData_Txt()
         $Cat{Title}->$op($code) if $cat eq "Lt";
         $Cat{ASCII}->$op($code) if $code <= 0x007F;
         $Cat{Cntrl}->$op($code) if $cat =~ /^C/;
-        $Cat{Graph}->$op($code) if $cat =~ /^[LMNPS]/
-                                && $cat ne "Zs";
+        $Cat{Graph}->$op($code) if $cat !~ /Zs|Cc|Cs|Cn/;
         $Cat{Print}->$op($code) if $cat =~ /^[LMNPS]/
                                 || $cat eq "Zs";
         $Cat{Punct}->$op($code) if $cat =~ /^P/;
