@@ -79,6 +79,127 @@ Version v5.5.650        Development release working toward v5.6
 ----------------
 
 ____________________________________________________________________________
+[  5021] By: gsar                                  on 2000/02/07  10:10:31
+        Log: mention threads status in pod
+     Branch: perl
+	   ! ext/Thread/Thread.pm
+____________________________________________________________________________
+[  5020] By: gsar                                  on 2000/02/07  09:57:46
+        Log: tolerate NULL SITELIB_EXP
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[  5019] By: gsar                                  on 2000/02/07  09:46:11
+        Log: NULL-terminate PERL_INC_VERSION_LIST
+     Branch: perl
+	   ! Configure perl.c win32/config.bc win32/config.gc
+	   ! win32/config.vc win32/config_H.bc win32/config_H.gc
+	   ! win32/config_H.vc
+____________________________________________________________________________
+[  5018] By: gsar                                  on 2000/02/07  09:13:10
+        Log: add compatible versions from $Config{inc_ver_list} to search
+             paths automatically (from Tom Hughes <tom@compton.nu>)
+     Branch: perl
+	   ! lib/lib.pm perl.c
+____________________________________________________________________________
+[  5017] By: gsar                                  on 2000/02/07  08:58:56
+        Log: makefiles now use exetype.pl to make wperl.exe
+     Branch: perl
+	   ! sv.c win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  5016] By: gsar                                  on 2000/02/07  08:38:25
+        Log: add exetype.pl (from Jan Dubois)
+     Branch: perl
+	   + win32/bin/exetype.pl
+	   ! MANIFEST
+____________________________________________________________________________
+[  5015] By: gsar                                  on 2000/02/07  08:29:28
+        Log: pod fixes (from Abigail and M J T Guy)
+     Branch: perl
+	   ! Changes README.os2 gv.c pod/perlapi.pod pod/perldebug.pod
+	   ! pod/perldelta.pod pod/perldiag.pod pod/perlopentut.pod
+	   ! pod/perlport.pod pod/perlvar.pod
+____________________________________________________________________________
+[  5014] By: gsar                                  on 2000/02/07  07:09:08
+        Log: clarify behavior of vec() when arguments are off the end of the
+             string (from M J T Guy)
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  5013] By: gsar                                  on 2000/02/07  07:08:15
+        Log: remove $^U dependent behaviors in runtime; chr() and sprintf('%c',...)
+             now return bytes all the way to 255, they will be transparently
+             coerced (in future) to UTF-8 when they are used in operations
+             involving other UTF-8 strings; C<use utf8> doesn't set $^U anymore
+     Branch: perl
+	   ! lib/byte.pm lib/utf8.pm pod/perlunicode.pod pod/perlvar.pod
+	   ! pp.c sv.c
+____________________________________________________________________________
+[  5012] By: gsar                                  on 2000/02/07  06:36:33
+        Log: partly revert change#4851, apparently POSIX::uname() may not be correct
+             per strict reading of standard (says Tom Christiansen)
+     Branch: perl
+	   ! lib/Sys/Hostname.pm
+____________________________________________________________________________
+[  5011] By: gsar                                  on 2000/02/07  06:26:30
+        Log: allow 64-bit utf8-encoded integers (from Ilya Zakharevich)
+     Branch: perl
+	   ! utf8.c utf8.h
+____________________________________________________________________________
+[  5010] By: gsar                                  on 2000/02/06  21:27:03
+        Log: fix debug code in Perl_malloc() (from Ilya Zakharevich)
+     Branch: perl
+	   ! malloc.c
+____________________________________________________________________________
+[  5009] By: gsar                                  on 2000/02/06  20:45:30
+        Log: set SvUTF8 on vectors only if there are chars > 127; update copyright
+             years (from Gisle Aas)
+     Branch: perl
+	   ! EXTERN.h INTERN.h README av.c av.h cop.h cv.h deb.c doio.c
+	   ! doop.c dump.c form.h gv.c gv.h handy.h hv.c hv.h mg.c mg.h
+	   ! op.c op.h perl.c perl.h perlio.c perly.y pp.c pp.h pp_ctl.c
+	   ! pp_hot.c pp_sys.c regcomp.c regexec.c run.c scope.c sv.c sv.h
+	   ! toke.c utf8.c utf8.h util.c util.h
+____________________________________________________________________________
+[  5008] By: gsar                                  on 2000/02/06  19:28:31
+        Log: use builtin __CYGWIN__ rather than -DCYGWIN (from Eric Fifer
+             <EFifer@sanwaint.com>)
+     Branch: perl
+	   ! EXTERN.h XSUB.h doio.c ext/POSIX/POSIX.xs
+	   ! ext/SDBM_File/sdbm/pair.c ext/SDBM_File/sdbm/sdbm.c
+	   ! hints/cygwin.sh lib/ExtUtils/MM_Cygwin.pm mg.c perl.h
+	   ! unixish.h util.c
+____________________________________________________________________________
+[  5007] By: gsar                                  on 2000/02/06  17:47:01
+        Log: reduce memory consumption of POSIX.pm (from Ilya Zakharevich)
+     Branch: perl
+	   ! ext/POSIX/POSIX.pm
+____________________________________________________________________________
+[  5006] By: gsar                                  on 2000/02/06  17:28:35
+        Log: integrate cfgperl contents into mainline
+     Branch: perl
+	  !> Configure config_h.SH ext/Sys/Syslog/Syslog.xs hints/hpux.sh
+	  !> perl.h pp_sys.c
+____________________________________________________________________________
+[  5005] By: gsar                                  on 2000/02/06  17:18:39
+        Log: VOS port updates (from Paul Green <Paul_Green@stratus.com>)
+     Branch: perl
+	   ! README.vos pod/perlport.pod vos/Changes vos/build.cm
+	   ! vos/compile_perl.cm vos/config.def vos/config.h vos/config.pl
+	   ! vos/config_h.SH_orig vos/perl.bind vos/test_vos_dummies.c
+	   ! vos/vos_dummies.c vos/vosish.h
+____________________________________________________________________________
+[  5004] By: gsar                                  on 2000/02/06  17:00:49
+        Log: fix parse error on C<{ use strict }> and other constructs that
+             make the parser reenter while LEX_KNOWNEXT is active
+     Branch: perl
+	   ! t/comp/use.t toke.c
+____________________________________________________________________________
+[  5003] By: gsar                                  on 2000/02/06  14:57:30
+        Log: avoid -Bforcearchive on netbsd too
+     Branch: perl
+	   ! Changes hints/netbsd.sh
+____________________________________________________________________________
 [  5002] By: gsar                                  on 2000/02/06  14:45:17
         Log: revised notes about Pod::Parser & Co.
      Branch: perl
