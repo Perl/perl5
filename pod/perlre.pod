@@ -100,12 +100,12 @@ Note that the meanings don't change, just the "gravity":
 Since patterns are processed as double quoted strings, the following
 also work:
 
-    \t		tab
-    \n		newline
-    \r		return
-    \f		form feed
-    \a		alarm (bell)
-    \e		escape (think troff)
+    \t		tab                   (HT, TAB)
+    \n		newline               (LF, NL)
+    \r		return                (CR)
+    \f		form feed             (FF)
+    \a		alarm (bell)          (BEL)
+    \e		escape (think troff)  (ESC)
     \033	octal char (think of a PDP-11)
     \x1B	hex char
     \c[		control char
@@ -148,11 +148,11 @@ C</m> modifier is used, while "^" and "$" will match at every internal line
 boundary.  To match the actual end of the string, not ignoring newline,
 you can use C<\Z(?!\n)>.
 
-When the bracketing construct C<( ... )> is used, \<digit> matches the
+When the bracketing construct C<( ... )> is used, \E<lt>digitE<gt> matches the
 digit'th substring.  Outside of the pattern, always use "$" instead of "\"
-in front of the digit.  (While the \<digit> notation can on rare occasion work
+in front of the digit.  (While the \E<lt>digitE<gt> notation can on rare occasion work
 outside the current pattern, this should not be relied upon.  See the
-WARNING below.) The scope of $<digit> (and C<$`>, C<$&>, and C<$'>)
+WARNING below.) The scope of $E<lt>digitE<gt> (and C<$`>, C<$&>, and C<$'>)
 extends to the end of the enclosing BLOCK or eval string, or to the next
 successful pattern match, whichever comes first.  If you want to use
 parentheses to delimit a subpattern (e.g. a set of alternatives) without
@@ -167,7 +167,7 @@ same as \010, a backspace, and \11 the same as \011, a tab.  And so
 on.  (\1 through \9 are always backreferences.)
 
 C<$+> returns whatever the last bracket match matched.  C<$&> returns the
-entire matched string.  ($0 used to return the same thing, but not any
+entire matched string.  (C<$0> used to return the same thing, but not any
 more.)  C<$`> returns everything before the matched string.  C<$'> returns
 everything after the matched string.  Examples:
 
@@ -182,7 +182,7 @@ everything after the matched string.  Examples:
 You will note that all backslashed metacharacters in Perl are
 alphanumeric, such as C<\b>, C<\w>, C<\n>.  Unlike some other regular expression
 languages, there are no backslashed symbols that aren't alphanumeric.
-So anything that looks like \\, \(, \), \<, \>, \{, or \} is always
+So anything that looks like \\, \(, \), \E<lt>, \E<gt>, \{, or \} is always
 interpreted as a literal character, not a metacharacter.  This makes it
 simple to quote a string that you want to use for a pattern but that
 you are afraid might contain metacharacters.  Simply quote all the
@@ -211,7 +211,7 @@ whitespace formatting, a simple C<#> will suffice.
 
 =item (?:regexp)
 
-This groups things like "()" but doesn't make backrefences like "()" does.  So
+This groups things like "()" but doesn't make backreferences like "()" does.  So
 
     split(/\b(?:a|b|c)\b/)
 
@@ -235,7 +235,7 @@ use this for lookbehind: C</(?!foo)bar/> will not find an occurrence of
 "bar" that is preceded by something which is not "foo".  That's because
 the C<(?!foo)> is just saying that the next thing cannot be "foo"--and
 it's not, it's a "bar", so "foobar" will match.  You would have to do
-something like C</(?foo)...bar/> for that.   We say "like" because there's
+something like C</(?!foo)...bar/> for that.   We say "like" because there's
 the case of your "bar" not having three characters before it.  You could
 cover that this way: C</(?:(?!foo)...|^..?)bar/>.  Sometimes it's still
 easier just to say:
@@ -476,7 +476,7 @@ Characters may be specified using a metacharacter syntax much like that
 used in C: "\n" matches a newline, "\t" a tab, "\r" a carriage return,
 "\f" a form feed, etc.  More generally, \I<nnn>, where I<nnn> is a string
 of octal digits, matches the character whose ASCII value is I<nnn>.
-Similarly, \xI<nn>, where I<nn> are hexidecimal digits, matches the
+Similarly, \xI<nn>, where I<nn> are hexadecimal digits, matches the
 character whose ASCII value is I<nn>. The expression \cI<x> matches the
 ASCII character control-I<x>.  Finally, the "." metacharacter matches any
 character except "\n" (unless you use C</s>).
