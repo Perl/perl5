@@ -1217,6 +1217,8 @@ Note that you can't run the tests in background if this disables
 opening of /dev/tty. You can use 'make test-notty' in that case but
 a few tty tests will be skipped.
 
+=head2 What if make test doesn't work?
+
 If make test bombs out, just cd to the t directory and run ./TEST
 by hand to see if it makes any difference.  If individual tests
 bomb, you can run them by hand, e.g.,
@@ -1233,6 +1235,10 @@ complicated constructs).
 
 You should also read the individual tests to see if there are any helpful
 comments that apply to your system.
+
+=over 4
+
+=item locale
 
 Note:  One possible reason for errors is that some external programs
 may be broken due to the combination of your environment and the way
@@ -1256,6 +1262,29 @@ shown above and see whether you can locate the program.  Look for
 things like:  exec, `backquoted command`, system, open("|...") or
 open("...|").  All these mean that Perl is trying to run some
 external program.
+
+=item Out of memory
+
+On some systems, particularly those with smaller amounts of RAM, some
+of the tests in t/op/pat.t may fail with an "Out of memory" message.
+Specifically, in perl5.004_64, tests 74 and 78 have been reported to
+fail on some systems.  On my SparcStation IPC with 8 MB of RAM, test 78
+will fail if the system is running any other significant tasks at the
+same time.
+
+Try stopping other jobs on the system and then running the test by itself:
+
+	cd t; ./perl op/pat.t
+
+to see if you have any better luck.  If your perl still fails this
+test, it does not necessarily mean you have a broken perl.  This test
+tries to exercise the regular expression subsystem quite thoroughly,
+and may well be far more demanding than your normal usage.
+
+You may also be able to reduce perl's memory usage by using some of
+the ideas described above in L<"Malloc Performance Flags">.
+
+=back
 
 =head1 make install
 
@@ -1535,4 +1564,4 @@ above.
 
 =head1 LAST MODIFIED
 
-$Id: INSTALL,v 1.32 1998/03/20 19:20:08 doughera Released $
+$Id: INSTALL,v 1.34 1998/04/23 18:19:41 doughera Released $

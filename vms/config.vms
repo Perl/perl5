@@ -822,6 +822,7 @@
 #undef PWCHANGE	/**/
 #undef PWCLASS	/**/
 #undef PWEXPIRE	/**/
+#define PWGECOS	/**/
 #define PWCOMMENT	/**/
 
 /* I_STDDEF:

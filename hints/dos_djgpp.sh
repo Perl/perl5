@@ -7,7 +7,7 @@
 archname='dos-djgpp'
 archobjs='djgpp.o'
 path_sep=\;
-startsh="#!sh"
+startsh="#! /bin/sh"
 
 cc='gcc'
 ld='gcc'
@@ -23,8 +23,6 @@ firstmakefile='GNUmakefile'
 exe_ext='.exe'
 
 randbits=31
-
-ln='cp'             # no REAL ln on dos
 lns='cp'
 
 usenm='true'
@@ -53,17 +51,6 @@ sitearch=$sitelib
 
 eagain='EAGAIN'
 rd_nodata='-1'
-
-: set up the translation script tr
-
-cat > UU/tr <<EOSC
-$startsh
-case "\$1\$2" in
-'[A-Z][a-z]') exec tr.exe '[:upper:]' '[:lower:]';;
-'[a-z][A-Z]') exec tr.exe '[:lower:]' '[:upper:]';;
-esac
-exec tr.exe "\$@"
-EOSC
 
 if [ "X$usethreads" = "X$define" ]; then
     set `echo X "$libswanted "| sed -e 's/ c / gthreads c /'`

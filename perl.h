@@ -91,7 +91,7 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #define SOFT_CAST(type)	(type)
 #endif
 
-#ifndef BYTEORDER
+#ifndef BYTEORDER  /* Should never happen -- byteorder is in config.h */
 #   define BYTEORDER 0x1234
 #endif
 
@@ -695,10 +695,19 @@ Free_t   Perl_free _((Malloc_t where));
 #   ifdef convex
 #	define Quad_t long long
 #   else
-#	if BYTEORDER > 0xFFFF
+#	if LONGSIZE == 8
 #	    define Quad_t long
 #	endif
 #   endif
+#endif
+
+/* XXX Experimental set-up for long long.  Just add -DUSE_LONG_LONG
+   to your ccflags.  --Andy Dougherty   4/1998
+*/
+#ifdef USE_LONG_LONG
+#  if defined(HAS_LONG_LONG) && LONGLONGSIZE == 8
+#    define Quad_t long long
+#  endif
 #endif
 
 #ifdef Quad_t

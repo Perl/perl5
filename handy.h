@@ -119,7 +119,7 @@ typedef unsigned short	U16;
 #define U16_MAX PERL_USHORT_MAX
 #define U16_MIN PERL_USHORT_MIN
 
-#if BYTEORDER > 0x4321
+#if LONGSIZE > 4
   typedef int		I32;
   typedef unsigned int	U32;
 # define I32_MAX PERL_INT_MAX

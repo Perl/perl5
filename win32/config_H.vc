@@ -924,6 +924,10 @@
  *	This symbol, if defined, indicates to the C program that struct passwd
  *	contains pw_expire.
  */
+/* PWGECOS:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_gecos.
+ */
 /* PWCOMMENT:
  *	This symbol, if defined, indicates to the C program that struct passwd
  *	contains pw_comment.
@@ -934,6 +938,7 @@
 /*#define PWCHANGE	/**/
 /*#define PWCLASS	/**/
 /*#define PWEXPIRE	/**/
+/*#define PWGECOS	/**/
 /*#define PWCOMMENT	/**/
 
 /* I_SFIO:

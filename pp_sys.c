@@ -4124,41 +4124,55 @@ PP(pp_gpwent)
     if (pwent) {
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setpv(sv, pwent->pw_name);
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setpv(sv, pwent->pw_passwd);
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setiv(sv, (IV)pwent->pw_uid);
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setiv(sv, (IV)pwent->pw_gid);
+
+	/* pw_change, pw_quota, and pw_age are mutually exclusive. */
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 #ifdef PWCHANGE
 	sv_setiv(sv, (IV)pwent->pw_change);
 #else
-#ifdef PWQUOTA
+#   ifdef PWQUOTA
 	sv_setiv(sv, (IV)pwent->pw_quota);
-#else
-#ifdef PWAGE
+#   else
+#       ifdef PWAGE
 	sv_setpv(sv, pwent->pw_age);
+#       endif
+#   endif
 #endif
-#endif
-#endif
+
+	/* pw_class and pw_comment are mutually exclusive. */
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 #ifdef PWCLASS
 	sv_setpv(sv, pwent->pw_class);
 #else
-#ifdef PWCOMMENT
+#   ifdef PWCOMMENT
 	sv_setpv(sv, pwent->pw_comment);
+#   endif
 #endif
-#endif
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
+#ifdef PWGECOS
 	sv_setpv(sv, pwent->pw_gecos);
+#endif
 #ifndef INCOMPLETE_TAINTS
+	/* pw_gecos is tainted. */
 	SvTAINTED_on(sv);
 #endif
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setpv(sv, pwent->pw_dir);
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setpv(sv, pwent->pw_shell);
+
 #ifdef PWEXPIRE
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setiv(sv, (IV)pwent->pw_expire);

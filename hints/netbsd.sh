@@ -64,3 +64,8 @@ case "$osvers" in
 	d_setruid="$undef"
 	;;
 esac
+
+# vfork is ok on NetBSD.
+case "$usevfork" in
+'') usevfork=true ;;
+esac

@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Tue Mar 31 15:51:58 EST 1998
+# Configuration time: Wed May 13 13:36:52 EDT 1998
 # Configured by     : doughera
 # Target system     : linux fractal 2.0.33 #1 tue feb 3 10:11:46 est 1998 i686 unknown 
 
@@ -28,10 +28,11 @@ _exe=''
 _o='.o'
 afs='false'
 alignbytes='4'
+ansi2knr=''
 aphostname=''
 ar='ar'
-archlib='/opt/perl/lib/i686-linux-thread/5.00463'
-archlibexp='/opt/perl/lib/i686-linux-thread/5.00463'
+archlib='/opt/perl/lib/i686-linux-thread/5.00464'
+archlibexp='/opt/perl/lib/i686-linux-thread/5.00464'
 archname='i686-linux-thread'
 archobjs=''
 awk='awk'
@@ -51,7 +52,7 @@ ccdlflags='-rdynamic'
 ccflags='-D_REENTRANT -Dbool=char -DHAS_BOOL -I/usr/local/include'
 cf_by='doughera'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Tue Mar 31 15:51:58 EST 1998'
+cf_time='Wed May 13 13:36:52 EDT 1998'
 chgrp=''
 chmod=''
 chown=''
@@ -190,6 +191,7 @@ d_pwchange='undef'
 d_pwclass='undef'
 d_pwcomment='undef'
 d_pwexpire='undef'
+d_pwgecos='define'
 d_pwquota='undef'
 d_readdir='define'
 d_readlink='define'
@@ -370,7 +372,7 @@ i_varhdr='stdarg.h'
 i_vfork='undef'
 incpath=''
 inews=''
-installarchlib='/opt/perl/lib/i686-linux-thread/5.00463'
+installarchlib='/opt/perl/lib/i686-linux-thread/5.00464'
 installbin='/opt/perl/bin'
 installman1dir='/opt/perl/man/man1'
 installman3dir='/opt/perl/man/man3'
@@ -516,7 +518,7 @@ stdio_filbuf=''
 stdio_ptr='((fp)->_IO_read_ptr)'
 strings='/usr/include/string.h'
 submit=''
-subversion='63'
+subversion='64'
 sysman='/usr/man/man1'
 tail=''
 tar=''
@@ -549,5 +551,5 @@ xlibpth='/usr/lib/386 /lib/386'
 zcat=''
 zip='zip'
 PATCHLEVEL=4
-SUBVERSION=63
+SUBVERSION=64
 CONFIG=true

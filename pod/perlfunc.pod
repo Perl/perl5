@@ -1463,6 +1463,22 @@ lookup by name, in which case you get the other thing, whatever it is.
     $name = getgrent
     etc.
 
+In I<getpw*()> the fields $quota, $comment, and $expire are special
+cases in the sense that in many systems they are unsupported.  If the
+$quota is unsupported, it is an empty scalar.  If it is supported, it
+usually encodes the disk quota.  If the $comment field is unsupported,
+it is an empty scalar.  If it is supported it usually encodes some
+administrative comment about the user.  In some systems the $quota
+field may be $change or $age, fields that have to do with password
+aging.  In some systems the $comment field may be $class.  The $expire
+field, if present, encodes the expiration period of the account or the
+password.  For the availability and the exact meaning of these fields
+in your system, please consult your getpwnam(3) documentation and your
+<pwd.h> file.  You can also find out from within Perl which meaning
+your $quota and $comment fields have and whether you have the $expire
+field by using the Config module and the values d_pwquota, d_pwage,
+d_pwchange, d_pwcomment, and d_pwexpire.
+
 The $members value returned by I<getgr*()> is a space separated list of
 the login names of the members of the group.
 

@@ -25,7 +25,7 @@ SSTAT='s=\.\(stat\.\)=_\1=g'
 STMP2='s=tmp2=tm2=g'
 SPACKLIST='s=\.\(packlist\)=_\1=g'
 
-sed -e $SCONFIG -e $SGREPTMP -e $SECHOTMP -e $SDDC -e $SOUT Configure |tr -d '\r' >s; mv -f s Configure
+sed -e $SCONFIG -e $SGREPTMP -e $SECHOTMP -e $SDDC -e $SOUT -e 's=\.\( \./\$file\)$=sh\1=g' Configure |tr -d '\r' >s; mv -f s Configure
 sed -e $SEXISTS -e $SLIST -e $SCONFIG Makefile.SH |tr -d '\r' >s; mv -f s Makefile.SH
 sed -e $SEXISTS -e $SPACKLIST lib/ExtUtils/Install.pm |tr -d '\r' >s; mv -f s lib/ExtUtils/Install.pm
 sed -e $SEXISTS -e $SPACKLIST lib/ExtUtils/MM_Unix.pm |tr -d '\r' >s; mv -f s lib/ExtUtils/MM_Unix.pm

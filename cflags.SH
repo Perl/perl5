@@ -124,6 +124,7 @@ for file do
 		optimize="$optdebug"
 	fi
 
+    : Can we perhaps use $ansi2knr here
     echo "$cc -c -DPERL_CORE $ccflags $optimize $perltype $large $split"
     eval "$also "'"$cc -DPERL_CORE -c $ccflags $optimize $perltype $large $split"'
 

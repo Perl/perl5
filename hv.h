@@ -22,11 +22,12 @@ struct hek {
     char	hek_key[1];
 };
 
+/* This structure must match the beginning of struct xpvmg in sv.h. */
 struct xpvhv {
     char *	xhv_array;	/* pointer to malloced string */
     STRLEN	xhv_fill;	/* how full xhv_array currently is */
     STRLEN	xhv_max;	/* subscript of last element of xhv_array */
-    I32		xhv_keys;	/* how many elements in the array */
+    IV		xhv_keys;	/* how many elements in the array */
     double	xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
