@@ -4649,6 +4649,7 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
 	    && how != PERL_MAGIC_bm
 	    && how != PERL_MAGIC_fm
 	    && how != PERL_MAGIC_sv
+	    && how != PERL_MAGIC_backref
 	   )
 	{
 	    Perl_croak(aTHX_ PL_no_modify);
