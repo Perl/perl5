@@ -7835,8 +7835,10 @@ instead.
 char *
 Perl_sv_pvbyten_force(pTHX_ SV *sv, STRLEN *lp)
 {
+    sv_pvn_force(sv,lp);
     sv_utf8_downgrade(sv,0);
-    return sv_pvn_force(sv,lp);
+    *lp = SvCUR(sv);
+    return SvPVX(sv);
 }
 
 /* sv_pvutf8 () is now a macro using Perl_sv_2pv_flags();
@@ -7884,8 +7886,10 @@ instead.
 char *
 Perl_sv_pvutf8n_force(pTHX_ SV *sv, STRLEN *lp)
 {
+    sv_pvn_force(sv,lp);
     sv_utf8_upgrade(sv);
-    return sv_pvn_force(sv,lp);
+    *lp = SvCUR(sv);
+    return SvPVX(sv);
 }
 
 /*
