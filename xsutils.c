@@ -72,7 +72,7 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 	case SVt_PVCV:
 	    switch ((int)len) {
 	    case 9:
-		if (strEQ(name, "assertion")) {
+		if (memEQ(name, "assertion", 9)) {
 		    if (negated)
 			CvFLAGS((CV*)sv) &= ~CVf_ASSERTION;
 		    else
@@ -81,27 +81,20 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 		}
 		break;
 	    case 6:
-		switch (*name) {
-		case 'a':
-		    if (strEQ(name, "assertion")) {
-			if (negated)
-			    CvFLAGS((CV*)sv) &= ~CVf_ASSERTION;
-			else
-			    CvFLAGS((CV*)sv) |= CVf_ASSERTION;
-			continue;
-		    }
-		    break;
+		switch (name[3]) {
 		case 'l':
 #ifdef CVf_LVALUE
-		    if (strEQ(name, "lvalue")) {
+		    if (memEQ(name, "lvalue", 6)) {
 			if (negated)
 			    CvFLAGS((CV*)sv) &= ~CVf_LVALUE;
 			else
 			    CvFLAGS((CV*)sv) |= CVf_LVALUE;
 			continue;
 		    }
+		    break;
+		case 'k':
 #endif /* defined CVf_LVALUE */
-		    if (strEQ(name, "locked")) {
+		    if (memEQ(name, "locked", 6)) {
 			if (negated)
 			    CvFLAGS((CV*)sv) &= ~CVf_LOCKED;
 			else
@@ -109,8 +102,8 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 			continue;
 		    }
 		    break;
-		case 'm':
-		    if (strEQ(name, "method")) {
+		case 'h':
+		    if (memEQ(name, "method", 6)) {
 			if (negated)
 			    CvFLAGS((CV*)sv) &= ~CVf_METHOD;
 			else
@@ -125,17 +118,17 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 	default:
 	    switch ((int)len) {
 	    case 6:
-		switch (*name) {
-		case 's':
-		    if (strEQ(name, "shared")) {
+		switch (name[5]) {
+		case 'd':
+		    if (memEQ(name, "share", 5)) {
 			if (negated)
 			    Perl_croak(aTHX_ "A variable may not be unshared");
 			SvSHARE(sv);
                         continue;
                     }
 		    break;
-		case 'u':
-		    if (strEQ(name, "unique")) {
+		case 'e':
+		    if (memEQ(name, "uniqu", 5)) {
 			if (SvTYPE(sv) == SVt_PVGV) {
 			    if (negated)
 				GvUNIQUE_off(sv);
