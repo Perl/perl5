@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Carp;
 use File::Spec;
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 
 use bytes ();		# for $bytes::hint_bits
 $charnames::hint_bits = 0x20000; # HINT_LOCALIZE_HH
