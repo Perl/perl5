@@ -144,11 +144,15 @@ sub hashkey {
     $hash = 2;
     for (unpack('C*', $key)) {
 	$hash = $hash * 33 + $_;
+	&_hashwrap if $hash >= 1e13;
     }
-    $hash = $hash - int($hash / $tsize) * $tsize
-	if $hash >= $tsize;
+    &_hashwrap if $hash >= $tsize;
     $hash = 1 unless $hash;
     $hashbase = $hash;
+}
+
+sub _hashwrap {
+    $hash -= int($hash / $tsize) * $tsize;
 }
 
 sub rehash {
