@@ -8,10 +8,11 @@
  */
 
 /*
- * FILENAME		:	nw5sck.h
- * DESCRIPTION	:	Socket related functions.
- * Author		:	SGP
- * Date			:	January 2001.
+ * FILENAME     :  nw5sck.h
+ * DESCRIPTION  :  Socket related functions.
+ * Author       :  SGP
+ * Date         :  January 2001.
+ * Date Modified:  June 26th 2001.
  *
  */
 
@@ -43,7 +44,6 @@ struct nwsockent local_context;
 # undef getnetbyname
 # undef gethostbyaddr
 # undef getprotobyname
-# undef getprotobyname
 # undef getservbyname
 # undef getservbyport
 # undef getservent
@@ -64,7 +64,6 @@ struct nwsockent local_context;
 # define gethostbyaddr(a,l,t)  NetDBgethostbyaddr(&local_context,a,l,t)
 # define getnetbyaddr(net,typ) NWgetnetbyaddr(&local_context,net,typ)
 # define getnetbyname(name)    NWgetnetbyname(&local_context,name)
-# define getprotobyname(name)  NWgetprotobyname(&local_context,name)
 # define getprotobyname(name)  NWgetprotobyname(&local_context,name)
 # define getservbyname(n,p)    NWgetservbyname(&local_context,n,p)
 # define getservbyport(n,p)    NWgetservbyport(&local_context,n,p)

@@ -342,11 +342,11 @@ NLM_DESCRIPTION = $(NLM_NAME8) for Netware
 !endif
 
 !ifndef NLM_VERSION
-NLM_VERSION    = 1.0.0
+NLM_VERSION    = 5.72.0
 !endif
 
 !ifndef NLM_EXT
-NLM_EXT         = NLM
+NLM_EXT        = NLM
 !endif
 
 !ifndef BUILT
@@ -415,7 +415,7 @@ INST_NW_TOP2 = $(INST_NW_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	= \5.7.1
+INST_VER	= \5.7.2
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -794,8 +794,9 @@ DLL_OBJ		= $(DLL_SRC:.c=.obj)
 X2P_OBJ		= $(X2P_SRC:.c=.obj)
 
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
-		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob 
-		
+		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
+		Storable/Storable List/Util MIME/Base64/Base64 XS/Typemap/Typemap
+
 STATIC_EXT	= DynaLoader
 NONXS_EXT	= Errno
 
