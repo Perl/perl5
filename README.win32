@@ -153,11 +153,16 @@ installed separately, but is included in the "Visual C++ Toolkit 2003" anyway.
 These packages can all be downloaded by searching in the Download Center at
 http://www.microsoft.com/downloads/search.aspx?displaylang=en
 
-Note that the "Platform SDK February 2003" download requires Internet Explorer
-5.0 to function.  Alternatively, the very latest version at the time of writing
-(called "Windows XP Service Pack 2 Platform SDK RC2") is now available as an
-ISO-9660 CD image file and does not require IE5 to be downloaded but will only
-work on Windows XP.
+The Platform SDK packages can also be obtained from the Platform SDK Update
+site: http://www.microsoft.com/msdownload/platformsdk/sdkupdate  Note that this
+site requires Internet Explorer 5.0 or later to function, but the site's home
+page currently gives links to two download pages for users of other browsers:
+
+For Windows XP Service Pack 2:
+http://www.microsoft.com/msdownload/platformsdk/sdkupdate/XPSP2FULLInstall.htm
+
+For Windows Server 2003:
+http://www.microsoft.com/msdownload/platformsdk/sdkupdate/psdk-full.htm
 
 According to the download pages the Toolkit and the .NET Framework SDK are only
 supported on Windows 2000/XP/2003, so trying to use these tools on Windows
@@ -188,14 +193,25 @@ Copy it from there to C:\Program Files\Microsoft SDK\Bin
 =item *
 
 lib.exe is normally used to build libraries, but link.exe with the /lib
-option also works, so create a batch file called lib.bat in
+option also works, so change win32/config.vc to use it instead:
+
+Change the line reading:
+
+	ar='lib'
+
+to:
+
+	ar='link /lib'
+
+It may also be useful to create a batch file called lib.bat in
 C:\Program Files\Microsoft Visual C++ Toolkit 2003\bin containing:
 
 	@echo off
 	link /lib %*
 
-This will work as long as "lib.exe" is invoked simply as "lib" (which it is
-during the Perl build process).
+for the benefit of any naughty C extension modules that you might want to build
+later which explicitly reference "lib" rather than taking their value from
+$Config{ar}.
 
 =item *
 
@@ -208,12 +224,18 @@ internal.h from there to some temporary location and build setargv.obj using
 
 Then copy setargv.obj to C:\Program Files\Microsoft SDK\lib
 
+Alternatively, if you don't need perlglob.exe and don't need to enable the
+USE_SETARGV option then you can safely just remove all mention of $(GLOBEXE)
+from win32/Makefile and setargv.obj won't be required anyway.
+
 =back
 
 Perl should now build using the win32/Makefile.  You will need to edit that
 file to comment-out CCTYPE = MSVC60 (since that enables delay-loading of the
 Winsock DLL which the free toolkit does not support) and to set CCHOME,
-CCINCDIR and CCLIBDIR as per the environment setup above.
+CCINCDIR and CCLIBDIR as per the environment setup above.  You may also want to
+change both mentions of the compiler's "-Gf" switch to "-GF" since the former
+is deprecated in VC7 and will be removed from future versions.
 
 =item Microsoft Platform SDK 64-bit Compiler
 
