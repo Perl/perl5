@@ -762,6 +762,7 @@ t/pragma/subs.t		See if subroutine pseudo-importation works
 t/pragma/warn-1global	Tests of global warnings for warning.t
 t/pragma/warning.t	See if warning controls work
 taint.c			Tainting code
+thread.h		Threading header
 toke.c			The tokener
 universal.c		The default UNIVERSAL package methods
 unixish.h		Defines that are assumed on Unix

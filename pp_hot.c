@@ -41,20 +41,6 @@ void *cvarg;
     MUTEX_UNLOCK(CvMUTEXP(cv));
     SvREFCNT_dec(cv);
 }
-
-#if 0
-void
-mutex_unlock(m)
-void *m;
-{
-#ifdef DEBUGGING
-    dTHR;
-    DEBUG_L((fprintf(stderr, "0x%lx unlocking mutex 0x%lx\n",
-			 (unsigned long) thr, (unsigned long) m)));
-#endif /* DEBUGGING */
-    MUTEX_UNLOCK((pthread_mutex_t *) m);
-}
-#endif
 #endif /* USE_THREADS */
 
 PP(pp_const)

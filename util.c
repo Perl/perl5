@@ -2293,6 +2293,84 @@ I32 *retlen;
 }
 
 #ifdef USE_THREADS
+#ifdef FAKE_THREADS
+/* Very simplistic scheduler for now */
+void
+schedule(void)
+{
+    thr = thr->next_run;
+}
+
+void
+perl_cond_init(cp)
+perl_cond *cp;
+{
+    *cp = 0;
+}
+
+void
+perl_cond_signal(cp)
+perl_cond *cp;
+{
+    perl_thread t;
+    perl_cond cond = *cp;
+    
+    if (!cond)
+	return;
+    t = cond->thread;
+    /* Insert t in the runnable queue just ahead of us */
+    t->next_run = thr->next_run;
+    thr->next_run->prev_run = t;
+    t->prev_run = thr;
+    thr->next_run = t;
+    thr->wait_queue = 0;
+    /* Remove from the wait queue */
+    *cp = cond->next;
+    Safefree(cond);
+}
+
+void
+perl_cond_broadcast(cp)
+perl_cond *cp;
+{
+    perl_thread t;
+    perl_cond cond, cond_next;
+    
+    for (cond = *cp; cond; cond = cond_next) {
+	t = cond->thread;
+	/* Insert t in the runnable queue just ahead of us */
+	t->next_run = thr->next_run;
+	thr->next_run->prev_run = t;
+	t->prev_run = thr;
+	thr->next_run = t;
+	thr->wait_queue = 0;
+	/* Remove from the wait queue */
+	cond_next = cond->next;
+	Safefree(cond);
+    }
+    *cp = 0;
+}
+
+void
+perl_cond_wait(cp)
+perl_cond *cp;
+{
+    perl_cond cond;
+
+    if (thr->next_run == thr)
+	croak("panic: perl_cond_wait called by last runnable thread");
+    
+    New(666, cond, 1, perl_wait_queue);
+    cond->thread = thr;
+    cond->next = *cp;
+    *cp = cond;
+    thr->wait_queue = cond;
+    /* Remove ourselves from runnable queue */
+    thr->next_run->prev_run = thr->prev_run;
+    thr->prev_run->next_run = thr->next_run;
+}
+#endif /* FAKE_THREADS */
+
 #ifdef OLD_PTHREADS_API
 struct thread *
 getTHR _((void))

@@ -13,8 +13,35 @@
 /* Rats: if dTHR is just blank then the subsequent ";" throws an error */
 #define dTHR extern int errno
 #else
-#include <pthread.h>
 
+#ifdef FAKE_THREADS
+typedef struct thread *perl_thread;
+/* With fake threads, thr is global(ish) so we don't need dTHR */
+#define dTHR extern int errno
+
+/*
+ * Note that SCHEDULE() is only callable from pp code (which
+ * must be expecting to be restarted). We'll have to do
+ * something a bit different for XS code.
+ */
+#define SCHEDULE() return schedule(), op
+
+#define MUTEX_LOCK(m)
+#define MUTEX_UNLOCK(m)
+#define MUTEX_INIT(m)
+#define MUTEX_DESTROY(m)
+#define COND_INIT(c) perl_cond_init(c)
+#define COND_SIGNAL(c) perl_cond_signal(c)
+#define COND_BROADCAST(c) perl_cond_broadcast(c)
+#define COND_WAIT(c, m) STMT_START {	\
+	perl_cond_wait(c);		\
+	SCHEDULE();			\
+    } STMT_END
+#define COND_DESTROY(c)
+
+#else
+/* POSIXish threads */
+typedef pthread_t perl_thread;
 #ifdef OLD_PTHREADS_API
 #define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
 #define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
@@ -51,9 +78,10 @@ struct thread *getTHR _((void));
 #define THR ((struct thread *) pthread_getspecific(thr_key))
 #endif /* OLD_PTHREADS_API */
 #define dTHR struct thread *thr = THR
+#endif /* FAKE_THREADS */
 
 struct thread {
-    pthread_t	Tself;
+    perl_thread	Tself;
 
     /* The fields that used to be global */
     SV **	Tstack_base;
@@ -123,9 +151,16 @@ struct thread {
 
     /* XXX Sort stuff, firstgv, secongv and so on? */
 
-    pthread_mutex_t *	Tthreadstart_mutexp;
+    perl_mutex *Tthreadstart_mutexp;
     HV *	Tcvcache;
     U32		Tthrflags;
+
+#ifdef FAKE_THREADS
+    perl_thread next, prev;		/* Linked list of all threads */
+    perl_thread next_run, prev_run;	/* Linked list of runnable threads */
+    perl_cond	wait_queue;		/* Wait queue that we are waiting on */
+    IV		private;		/* Holds data across time slices */
+#endif /* FAKE_THREADS */
 };
 
 typedef struct thread *Thread;
@@ -146,10 +181,10 @@ typedef struct thread *Thread;
     } STMT_END
 
 typedef struct condpair {
-    pthread_mutex_t	mutex;
-    pthread_cond_t	owner_cond;
-    pthread_cond_t	cond;
-    Thread		owner;
+    perl_mutex	mutex;
+    perl_cond	owner_cond;
+    perl_cond	cond;
+    Thread	owner;
 } condpair_t;
 
 #define MgMUTEXP(mg) (&((condpair_t *)(mg->mg_ptr))->mutex)

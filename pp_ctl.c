@@ -2163,9 +2163,9 @@ int gimme;
     CvUNIQUE_on(compcv);
 #ifdef USE_THREADS
     CvOWNER(compcv) = 0;
-    New(666, CvMUTEXP(compcv), 1, pthread_mutex_t);
+    New(666, CvMUTEXP(compcv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(compcv));
-    New(666, CvCONDP(compcv), 1, pthread_cond_t);
+    New(666, CvCONDP(compcv), 1, perl_cond);
     COND_INIT(CvCONDP(compcv));
 #endif /* USE_THREADS */
 

@@ -63,8 +63,14 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #define NOOP (void)0
 
 #ifdef USE_THREADS
+#ifdef FAKE_THREADS
+#include "fakethr.h"
+#else
 #include <pthread.h>
-#endif
+typedef pthread_mutex_t perl_mutex;
+typedef pthread_cond_t perl_cond;
+#endif /* FAKE_THREADS */
+#endif /* USE_THREADS */
 
 /*
  * SOFT_CAST can be used for args to prototyped functions to retain some
@@ -1318,14 +1324,14 @@ typedef Sighandler_t Sigsave_t;
 EXT PerlInterpreter *	curinterp;	/* currently running interpreter */
 #ifdef USE_THREADS
 EXT pthread_key_t	thr_key;	/* For per-thread struct thread ptr */
-EXT pthread_mutex_t	sv_mutex;	/* Mutex for allocating SVs in sv.c */
-EXT pthread_mutex_t	malloc_mutex;	/* Mutex for malloc */
-EXT pthread_mutex_t	eval_mutex;	/* Mutex for doeval */
-EXT pthread_cond_t	eval_cond;	/* Condition variable for doeval */
+EXT perl_mutex		sv_mutex;	/* Mutex for allocating SVs in sv.c */
+EXT perl_mutex		malloc_mutex;	/* Mutex for malloc */
+EXT perl_mutex		eval_mutex;	/* Mutex for doeval */
+EXT perl_cond		eval_cond;	/* Condition variable for doeval */
 EXT struct thread *	eval_owner;	/* Owner thread for doeval */
 EXT int			nthreads;	/* Number of threads currently */
-EXT pthread_mutex_t	nthreads_mutex;	/* Mutex for nthreads */
-EXT pthread_cond_t	nthreads_cond;	/* Condition variable for nthreads */
+EXT perl_mutex		nthreads_mutex;	/* Mutex for nthreads */
+EXT perl_cond		nthreads_cond;	/* Condition variable for nthreads */
 #endif /* USE_THREADS */
 
 /* VMS doesn't use environ array and NeXT has problems with crt0.o globals */

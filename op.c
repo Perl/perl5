@@ -3129,9 +3129,9 @@ CV* outside;
 	CvANON_on(cv);
 
 #ifdef USE_THREADS
-    New(666, CvMUTEXP(cv), 1, pthread_mutex_t);
+    New(666, CvMUTEXP(cv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(cv));
-    New(666, CvCONDP(cv), 1, pthread_cond_t);
+    New(666, CvCONDP(cv), 1, perl_cond);
     COND_INIT(CvCONDP(cv));
     CvOWNER(cv)		= 0;
 #endif /* USE_THREADS */
@@ -3371,9 +3371,9 @@ OP *block;
     CvSTASH(cv) = curstash;
 #ifdef USE_THREADS
     CvOWNER(cv) = 0;
-    New(666, CvMUTEXP(cv), 1, pthread_mutex_t);
+    New(666, CvMUTEXP(cv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(cv));
-    New(666, CvCONDP(cv), 1, pthread_cond_t);
+    New(666, CvCONDP(cv), 1, perl_cond);
     COND_INIT(CvCONDP(cv));
 #endif /* USE_THREADS */
 
@@ -3578,9 +3578,9 @@ char *filename;
     }
     CvGV(cv) = (GV*)SvREFCNT_inc(gv);
 #ifdef USE_THREADS
-    New(666, CvMUTEXP(cv), 1, pthread_mutex_t);
+    New(666, CvMUTEXP(cv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(cv));
-    New(666, CvCONDP(cv), 1, pthread_cond_t);
+    New(666, CvCONDP(cv), 1, perl_cond);
     COND_INIT(CvCONDP(cv));
     CvOWNER(cv) = 0;
 #endif /* USE_THREADS */

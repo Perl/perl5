@@ -258,9 +258,6 @@ void	mg_magical _((SV* sv));
 int	mg_set _((SV* sv));
 OP*	mod _((OP* o, I32 type));
 char*	moreswitches _((char* s));
-#ifdef USE_THREADS
-void	mutex_unlock _((void *m));
-#endif /* USE_THREADS */
 OP*	my _((OP* o));
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 char*	my_bcopy _((char* from, char* to, I32 len));

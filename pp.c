@@ -4157,6 +4157,5 @@ PP(pp_lock)
 	save_destructor(unlock_condpair, sv);
     }
 #endif /* USE_THREADS */
-    PUSHs(&sv_yes);
     RETURN;
 }

@@ -2489,6 +2489,6 @@ EXT U32 opargs[] = {
 	0x00000014,	/* egrent */
 	0x0000000c,	/* getlogin */
 	0x0000211d,	/* syscall */
-	0x00000114,	/* lock */
+	0x00000104,	/* lock */
 };
 #endif

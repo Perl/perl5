@@ -29,9 +29,9 @@ struct xpvcv {
     AV *	xcv_padlist;
     CV *	xcv_outside;
 #ifdef USE_THREADS
-    pthread_mutex_t *	xcv_mutexp;
-    pthread_cond_t *	xcv_condp;	/* signalled when owner leaves CV */
-    struct thread *	xcv_owner;	/* current owner thread */
+    perl_mutex *xcv_mutexp;
+    perl_cond *	xcv_condp;	/* signalled when owner leaves CV */
+    struct thread *xcv_owner;	/* current owner thread */
 #endif /* USE_THREADS */
     U8		xcv_flags;
 };

@@ -5237,9 +5237,9 @@ U32 flags;
     curpad[0] = (SV*)newAV();
     SvPADMY_on(curpad[0]);	/* XXX Needed? */
     CvOWNER(compcv) = 0;
-    New(666, CvMUTEXP(compcv), 1, pthread_mutex_t);
+    New(666, CvMUTEXP(compcv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(compcv));
-    New(666, CvCONDP(compcv), 1, pthread_cond_t);
+    New(666, CvCONDP(compcv), 1, perl_cond);
     COND_INIT(CvCONDP(compcv));
 #endif /* USE_THREADS */
 
@@ -5252,9 +5252,9 @@ U32 flags;
     CvOUTSIDE(compcv) = (CV*)SvREFCNT_inc((SV*)outsidecv);
 #ifdef USE_THREADS
     CvOWNER(compcv) = 0;
-    New(666, CvMUTEXP(compcv), 1, pthread_mutex_t);
+    New(666, CvMUTEXP(compcv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(compcv));
-    New(666, CvCONDP(compcv), 1, pthread_cond_t);
+    New(666, CvCONDP(compcv), 1, perl_cond);
     COND_INIT(CvCONDP(compcv));
 #endif /* USE_THREADS */
 
