@@ -1339,5 +1339,7 @@ STATIC SV*	S_hv_delete_common(pTHX_ HV* tb, SV* key_sv, const char* key, I32 kle
 STATIC bool	S_hv_exists_common(pTHX_ HV* tb, SV* key_sv, const char* key, I32 klen, U32 hash);
 STATIC HE*	S_hv_fetch_common(pTHX_ HV* tb, SV* key_sv, const char* key, I32 klen, int flags, int action, U32 hash);
 #endif
-END_EXTERN_C
 
+PERL_CALLCONV void	Perl_hv_clear_placeholders(pTHX_ HV* hb);
+
+END_EXTERN_C
