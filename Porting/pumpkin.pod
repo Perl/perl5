@@ -350,6 +350,9 @@ need feedback on your patch, go ahead and issue it and promise to
 incorporate that feedback quickly (e.g. within 1 week) and send out a
 second patch.
 
+If you update the subversion number, you may need to change the version
+number near the top of the F<Changes> file.
+
 =head2 run metaconfig
 
 If you need to make changes to Configure or config_h.SH, it may be best to
@@ -581,6 +584,9 @@ There are differing opinions on whether the detailed descriptions
 ought to go in the Changes file or whether they ought to be available
 separately in the patch file (or both).  There is no disagreement that
 detailed descriptions ought to be easily available somewhere.
+
+If you update the subversion number in F<patchlevel.h>, you may need
+to change the version number near the top of the F<Changes> file.
 
 =head2 Todo
 
