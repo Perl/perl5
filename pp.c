@@ -762,8 +762,11 @@ PP(pp_undef)
 	RETPUSHUNDEF;
 
     if (SvTHINKFIRST(sv)) {
-	if (SvREADONLY(sv))
-	    RETPUSHUNDEF;
+	if (SvREADONLY(sv)) {
+	    dTHR;
+	    if (PL_curcop != &PL_compiling)
+		croak(PL_no_modify);
+	}
 	if (SvROK(sv))
 	    sv_unref(sv);
     }

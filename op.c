@@ -570,6 +570,16 @@ find_threadsv(char *name)
 	case '`':
 	case '\'':
 	    PL_sawampersand = TRUE;
+	    /* FALL THROUGH */
+	case '1':
+	case '2':
+	case '3':
+	case '4':
+	case '5':
+	case '6':
+	case '7':
+	case '8':
+	case '9':
 	    SvREADONLY_on(sv);
 	    /* FALL THROUGH */
 
