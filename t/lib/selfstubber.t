@@ -10,6 +10,10 @@ use Devel::SelfStubber;
 
 my $runperl = "$^X \"-I../lib\"";
 
+# ensure correct output ordering for system() calls
+
+select STDERR; $| = 1; select STDOUT; $| = 1;
+
 print "1..12\n";
 
 my @cleanup;
