@@ -3514,8 +3514,8 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	}
     }
     if (first->op_type == OP_CONST) {
-	if (ckWARN(WARN_PRECEDENCE) && (first->op_private & OPpCONST_BARE))
-	    Perl_warner(aTHX_ WARN_PRECEDENCE, "Bareword found in conditional");
+	if (ckWARN(WARN_BAREWORD) && (first->op_private & OPpCONST_BARE))
+	    Perl_warner(aTHX_ WARN_BAREWORD, "Bareword found in conditional");
 	if ((type == OP_AND) == (SvTRUE(((SVOP*)first)->op_sv))) {
 	    op_free(first);
 	    *firstp = Nullop;
