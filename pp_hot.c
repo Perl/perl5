@@ -2504,25 +2504,46 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
 PP(pp_method)
 {
     djSP;
+    SV* sv = TOPs;
+
+    if (SvROK(sv)) {
+	SV* rsv = SvRV(rsv);
+	if (SvTYPE(rsv) == SVt_PVCV) {
+	    SETs(rsv);
+	    RETURN;
+	}
+    }
+
+    SETs(method_common(sv, Null(U32*)));
+    RETURN;
+}
+
+PP(pp_method_named)
+{
+    djSP;
+    SV* sv = cSVOP->op_sv;
+    U32 hash = SvUVX(sv);
+
+    XPUSHs(method_common(sv, &hash));
+    RETURN;
+}
+
+STATIC SV *
+S_method_common(pTHX_ SV* meth, U32* hashp)
+{
+    djSP;
     SV* sv;
     SV* ob;
     GV* gv;
     HV* stash;
     char* name;
+    STRLEN namelen;
     char* packname;
     STRLEN packlen;
 
-    if (SvROK(TOPs)) {
-	sv = SvRV(TOPs);
-	if (SvTYPE(sv) == SVt_PVCV) {
-	    SETs(sv);
-	    RETURN;
-	}
-    }
-
-    name = SvPV(TOPs, packlen);
+    name = SvPV(meth, namelen);
     sv = *(PL_stack_base + TOPMARK + 1);
-    
+
     if (SvGMAGICAL(sv))
         mg_get(sv);
     if (SvROK(sv))
@@ -2542,9 +2563,9 @@ PP(pp_method)
 		    : !isIDFIRST(*packname)
 		))
 	    {
-		DIE(aTHX_ "Can't call method \"%s\" %s", name,
-		    SvOK(sv)? "without a package or object reference"
-			    : "on an undefined value");
+		Perl_croak(aTHX_ "Can't call method \"%s\" %s", name,
+			   SvOK(sv) ? "without a package or object reference"
+				    : "on an undefined value");
 	    }
 	    stash = gv_stashpvn(packname, packlen, TRUE);
 	    goto fetch;
@@ -2553,11 +2574,23 @@ PP(pp_method)
     }
 
     if (!ob || !SvOBJECT(ob))
-	DIE(aTHX_ "Can't call method \"%s\" on unblessed reference", name);
+	Perl_croak(aTHX_ "Can't call method \"%s\" on unblessed reference",
+		   name);
 
     stash = SvSTASH(ob);
 
   fetch:
+    /* shortcut for simple names */
+    if (hashp) {
+	HE* he = hv_fetch_ent(stash, meth, 0, *hashp);
+	if (he) {
+	    gv = (GV*)HeVAL(he);
+	    if (isGV(gv) && GvCV(gv) &&
+		(!GvCVGEN(gv) || GvCVGEN(gv) == PL_sub_generation))
+		return (SV*)GvCV(gv);
+	}
+    }
+
     gv = gv_fetchmethod(stash, name);
     if (!gv) {
 	char* leaf = name;
@@ -2578,11 +2611,11 @@ PP(pp_method)
 	    packname = name;
 	    packlen = sep - name;
 	}
-	DIE(aTHX_ "Can't locate object method \"%s\" via package \"%.*s\"",
-	    leaf, (int)packlen, packname);
+	Perl_croak(aTHX_
+		   "Can't locate object method \"%s\" via package \"%s\"",
+		   leaf, packname);
     }
-    SETs(isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv);
-    RETURN;
+    return isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv;
 }
 
 #ifdef USE_THREADS

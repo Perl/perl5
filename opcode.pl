@@ -535,7 +535,7 @@ cond_expr	conditional expression	ck_null		d|
 andassign	logical and assignment	ck_null		s|	
 orassign	logical or assignment	ck_null		s|	
 
-method		method lookup		ck_null		d1
+method		method lookup		ck_method	d1
 entersub	subroutine entry	ck_subr		dmt1	L
 leavesub	subroutine exit		ck_null		1	
 caller		caller			ck_fun		t%	S?
@@ -781,3 +781,4 @@ threadsv	per-thread variable	ck_null		ds0
 
 # Control (contd.)
 setstate	set statement info	ck_null		s;
+method_named	method with known name	ck_null		d$

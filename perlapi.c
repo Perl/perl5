@@ -4958,6 +4958,13 @@ Perl_ck_match(pTHXo_ OP *o)
     return ((CPerlObj*)pPerl)->Perl_ck_match(o);
 }
 
+#undef  Perl_ck_method
+OP *
+Perl_ck_method(pTHXo_ OP *o)
+{
+    return ((CPerlObj*)pPerl)->Perl_ck_method(o);
+}
+
 #undef  Perl_ck_null
 OP *
 Perl_ck_null(pTHXo_ OP *o)
@@ -6370,6 +6377,13 @@ OP *
 Perl_pp_method(pTHXo)
 {
     return ((CPerlObj*)pPerl)->Perl_pp_method();
+}
+
+#undef  Perl_pp_method_named
+OP *
+Perl_pp_method_named(pTHXo)
+{
+    return ((CPerlObj*)pPerl)->Perl_pp_method_named();
 }
 
 #undef  Perl_pp_mkdir

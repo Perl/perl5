@@ -831,6 +831,7 @@
 #endif
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
 #define get_db_sub		S_get_db_sub
+#define method_common		S_method_common
 #endif
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 #define doform			S_doform
@@ -986,6 +987,7 @@
 #define ck_lfun			Perl_ck_lfun
 #define ck_listiob		Perl_ck_listiob
 #define ck_match		Perl_ck_match
+#define ck_method		Perl_ck_method
 #define ck_null			Perl_ck_null
 #define ck_repeat		Perl_ck_repeat
 #define ck_require		Perl_ck_require
@@ -1188,6 +1190,7 @@
 #define pp_mapwhile		Perl_pp_mapwhile
 #define pp_match		Perl_pp_match
 #define pp_method		Perl_pp_method
+#define pp_method_named		Perl_pp_method_named
 #define pp_mkdir		Perl_pp_mkdir
 #define pp_modulo		Perl_pp_modulo
 #define pp_msgctl		Perl_pp_msgctl
@@ -2143,6 +2146,7 @@
 #endif
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
 #define get_db_sub(a,b)		S_get_db_sub(aTHX_ a,b)
+#define method_common(a,b)	S_method_common(aTHX_ a,b)
 #endif
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 #define doform(a,b,c)		S_doform(aTHX_ a,b,c)
@@ -2297,6 +2301,7 @@
 #define ck_lfun(a)		Perl_ck_lfun(aTHX_ a)
 #define ck_listiob(a)		Perl_ck_listiob(aTHX_ a)
 #define ck_match(a)		Perl_ck_match(aTHX_ a)
+#define ck_method(a)		Perl_ck_method(aTHX_ a)
 #define ck_null(a)		Perl_ck_null(aTHX_ a)
 #define ck_repeat(a)		Perl_ck_repeat(aTHX_ a)
 #define ck_require(a)		Perl_ck_require(aTHX_ a)
@@ -2499,6 +2504,7 @@
 #define pp_mapwhile()		Perl_pp_mapwhile(aTHX)
 #define pp_match()		Perl_pp_match(aTHX)
 #define pp_method()		Perl_pp_method(aTHX)
+#define pp_method_named()	Perl_pp_method_named(aTHX)
 #define pp_mkdir()		Perl_pp_mkdir(aTHX)
 #define pp_modulo()		Perl_pp_modulo(aTHX)
 #define pp_msgctl()		Perl_pp_msgctl(aTHX)
@@ -4229,6 +4235,8 @@
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
 #define S_get_db_sub		CPerlObj::S_get_db_sub
 #define get_db_sub		S_get_db_sub
+#define S_method_common		CPerlObj::S_method_common
+#define method_common		S_method_common
 #endif
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 #define S_doform		CPerlObj::S_doform
@@ -4507,6 +4515,8 @@
 #define ck_listiob		Perl_ck_listiob
 #define Perl_ck_match		CPerlObj::Perl_ck_match
 #define ck_match		Perl_ck_match
+#define Perl_ck_method		CPerlObj::Perl_ck_method
+#define ck_method		Perl_ck_method
 #define Perl_ck_null		CPerlObj::Perl_ck_null
 #define ck_null			Perl_ck_null
 #define Perl_ck_repeat		CPerlObj::Perl_ck_repeat
@@ -4911,6 +4921,8 @@
 #define pp_match		Perl_pp_match
 #define Perl_pp_method		CPerlObj::Perl_pp_method
 #define pp_method		Perl_pp_method
+#define Perl_pp_method_named	CPerlObj::Perl_pp_method_named
+#define pp_method_named		Perl_pp_method_named
 #define Perl_pp_mkdir		CPerlObj::Perl_pp_mkdir
 #define pp_mkdir		Perl_pp_mkdir
 #define Perl_pp_modulo		CPerlObj::Perl_pp_modulo

@@ -358,10 +358,11 @@ typedef enum {
 	OP_LOCK,	/* 346 */
 	OP_THREADSV,	/* 347 */
 	OP_SETSTATE,	/* 348 */
+	OP_METHOD_NAMED,/* 349 */
 	OP_max		
 } opcode;
 
-#define MAXO 349
+#define MAXO 350
 
 
 START_EXTERN_C
@@ -719,6 +720,7 @@ EXT char *PL_op_name[] = {
 	"lock",
 	"threadsv",
 	"setstate",
+	"method_named",
 };
 #endif
 
@@ -1075,6 +1077,7 @@ EXT char *PL_op_desc[] = {
 	"lock",
 	"per-thread variable",
 	"set statement info",
+	"method with known name",
 };
 #endif
 
@@ -1436,6 +1439,7 @@ EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX) = {
 	Perl_pp_lock,
 	Perl_pp_threadsv,
 	Perl_pp_setstate,
+	Perl_pp_method_named,
 };
 #endif
 
@@ -1608,7 +1612,7 @@ EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 	Perl_ck_null,	/* cond_expr */
 	Perl_ck_null,	/* andassign */
 	Perl_ck_null,	/* orassign */
-	Perl_ck_null,	/* method */
+	Perl_ck_method,	/* method */
 	Perl_ck_subr,	/* entersub */
 	Perl_ck_null,	/* leavesub */
 	Perl_ck_fun,	/* caller */
@@ -1792,6 +1796,7 @@ EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 	Perl_ck_rfun,	/* lock */
 	Perl_ck_null,	/* threadsv */
 	Perl_ck_null,	/* setstate */
+	Perl_ck_null,	/* method_named */
 };
 #endif
 
@@ -2148,6 +2153,7 @@ EXT U32 PL_opargs[] = {
 	0x00003604,	/* lock */
 	0x00000044,	/* threadsv */
 	0x00001404,	/* setstate */
+	0x00000c40,	/* method_named */
 };
 #endif
 

@@ -840,6 +840,7 @@ STATIC void	S_qsortsv(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t f);
 #endif
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
 STATIC CV*	S_get_db_sub(pTHX_ SV **svp, CV *cv);
+STATIC SV*	S_method_common(pTHX_ SV* meth, U32* hashp);
 #endif
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 STATIC OP*	S_doform(pTHX_ CV *cv, GV *gv, OP *retop);

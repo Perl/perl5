@@ -2762,7 +2762,6 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 	}
 	else {
 	    OP *pack;
-	    OP *meth;
 
 	    if (version->op_type != OP_CONST || !SvNIOK(vesv))
 		Perl_croak(aTHX_ "Version number must be constant number");
@@ -2771,11 +2770,11 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 	    pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)id)->op_sv));
 
 	    /* Fake up a method call to VERSION */
-	    meth = newSVOP(OP_CONST, 0, newSVpvn("VERSION", 7));
 	    veop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
 			    append_elem(OP_LIST,
 			    prepend_elem(OP_LIST, pack, list(version)),
-			    newUNOP(OP_METHOD, 0, meth)));
+			    newSVOP(OP_METHOD_NAMED, 0,
+				    newSVpvn("VERSION", 7))));
 	}
     }
 
@@ -2788,15 +2787,12 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
     else {
 	/* Make copy of id so we don't free it twice */
 	pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)id)->op_sv));
-	meth = newSVOP(OP_CONST, 0,
-	    aver
-		? newSVpvn("import", 6)
-		: newSVpvn("unimport", 8)
-	    );
 	imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
 		    append_elem(OP_LIST,
 			prepend_elem(OP_LIST, pack, list(arg)),
-			newUNOP(OP_METHOD, 0, meth)));
+			newSVOP(OP_METHOD_NAMED, 0,
+				aver ? newSVpvn("import", 6)
+				     : newSVpvn("unimport", 8))));
     }
 
     /* Fake up a require, handle override, if any */
@@ -5168,6 +5164,26 @@ Perl_ck_match(pTHX_ OP *o)
 }
 
 OP *
+Perl_ck_method(pTHX_ OP *o)
+{
+    OP *kid = cUNOPo->op_first;
+    if (kid->op_type == OP_CONST) {
+	SV* sv = kSVOP->op_sv;
+	if (!(strchr(SvPVX(sv), ':') || strchr(SvPVX(sv), '\''))) {
+	    OP *cmop;
+	    sv_upgrade(sv, SVt_PVIV);
+	    SvIOK_on(sv);
+	    PERL_HASH(SvUVX(sv), SvPVX(sv), SvCUR(sv));
+	    cmop = newSVOP(OP_METHOD_NAMED, 0, sv);
+	    kSVOP->op_sv = Nullsv;
+	    op_free(o);
+	    return cmop;
+	}
+    }
+    return o;
+}
+
+OP *
 Perl_ck_null(pTHX_ OP *o)
 {
     return o;
@@ -5461,7 +5477,7 @@ Perl_ck_subr(pTHX_ OP *o)
 	    }
 	}
     }
-    else if (cvop->op_type == OP_METHOD) {
+    else if (cvop->op_type == OP_METHOD || cvop->op_type == OP_METHOD_NAMED) {
 	if (o2->op_type == OP_CONST)
 	    o2->op_private &= ~OPpCONST_STRICT;
 	else if (o2->op_type == OP_LIST) {

@@ -1872,6 +1872,7 @@ s	|void	|qsortsv	|SV ** array|size_t num_elts|SVCOMPARE_t f
 
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
 s	|CV*	|get_db_sub	|SV **svp|CV *cv
+s	|SV*	|method_common	|SV* meth|U32* hashp
 #endif
 
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
