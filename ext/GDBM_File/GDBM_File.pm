@@ -22,10 +22,10 @@ interface.
 
 =head1 AVAILABILITY
 
-Gdbm is available from any GNU archive.  The master site is
-C<prep.ai.mit.edu>, but your are strongly urged to use one of the many
-mirrors.   You can obtain a list of mirror sites by issuing the
-command	C<finger fsf@prep.ai.mit.edu>.
+gdbm is available from any GNU archive.  The master site is
+C<ftp.gnu.org>, but you are strongly urged to use one of the many
+mirrors.  You can obtain a list of mirror sites from
+http://www.gnu.org/order/ftp.html.
 
 =head1 BUGS
 
