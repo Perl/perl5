@@ -79,7 +79,8 @@ my $summary_expanded = 0;
 
 sub myconfig {
 	return $summary if $summary_expanded;
-	$summary =~ s/\$(\w+)/$Config{$1}/ge;
+	$summary =~ s{\$(\w+)}
+		     { my $c = $Config{$1}; defined($c) ? $c : 'undef' }ge;
 	$summary_expanded = 1;
 	$summary;
 }
