@@ -663,8 +663,11 @@ Also see L<Error Indicators>.
 
 =item ${^ENCODING}
 
-The encoding used to interpret native eight-bit encodings to Unicode,
-see L<encode>.  An opaque C<Encode::XS> object.
+The I<object reference> to Encode object used to convert the source
+code to Unicode.  Thanks to this variable your perl script does not
+have to be written in UTF-8.  Default is I<undef>.  The direct
+manipulation of this variable is highly discouraged.  see L<encoding>
+for more details.
 
 =item $OS_ERROR
 
