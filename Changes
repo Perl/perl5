@@ -78,6 +78,417 @@ Version 5.005_03        Third maintenance release of 5.005
 ----------------
 
 ____________________________________________________________________________
+[  2635] By: gbarr                                 on 1999/01/17  17:32:01
+        Log: Update to CPAN-1.44
+             
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Sat, 16 Jan 1999 17:22:06 -0500
+             Message-ID: <19990116222206.3674.qmail@plover.com>
+             Subject: Re: DOC PATCH (5.005_54 perlsub.pod)
+     Branch: maint-5.005/perl
+	   ! lib/CPAN.pm lib/CPAN/FirstTime.pm lib/CPAN/Nox.pm
+           ! pod/perlsub.pod
+____________________________________________________________________________
+[  2634] By: gbarr                                 on 1999/01/17  17:27:12
+        Log: Fix for suidperl when script is on a nosuid filesystem
+             
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Sun, 17 Jan 1999 16:27:06 +0200 (EET)
+             Message-ID: <13985.62266.324824.292401@alpha.hut.fi>
+             Subject: [PATCH] 5.005*: the "nosuid" problem: v2
+     Branch: maint-5.005/perl
+           ! Configure config_h.SH perl.c perl.h pod/perldiag.pod
+____________________________________________________________________________
+[  2618] By: gbarr                                 on 1999/01/16  19:18:26
+        Log: Added Dumpvalue.pm
+             
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 7 Dec 1998 02:44:25 -0500 (EST)
+             Message-Id: <199812070744.CAA18949@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_*] Dumpvar.pm
+     Branch: maint-5.005/perl
+           + lib/Dumpvalue.pm
+           ! MANIFEST pod/perldelta.pod
+____________________________________________________________________________
+[  2617] By: gbarr                                 on 1999/01/16  19:09:36
+        Log: Minor change to perlxstut and added perlopentut.pod
+             
+             From: Nathan Torkington <gnat@frii.com>
+             Date: Sat, 26 Dec 1998 14:28:21 +1300 (NZDT)
+             Message-ID: <13956.15285.933914.320849@localhost.frii.com>
+             Subject: [PATCH] perlxstut.pod fix
+             
+             From: Tom Christiansen <tchrist@jhereg.perl.com>
+             Date: Sat, 09 Jan 1999 08:13:18 -0700
+             Message-Id: <199901091513.IAA17512@jhereg.perl.com>
+             Subject: perlopentut.pod
+     Branch: maint-5.005/perl
+	   ! MANIFEST pod/perl.pod pod/perldelta.pod pod/perlxstut.pod
+           ! pod/roffitall
+____________________________________________________________________________
+[  2616] By: gbarr                                 on 1999/01/16  18:59:55
+        Log: Win32 changes from Jan
+             
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Fri, 15 Jan 1999 23:38:35 +0100
+             Message-ID: <36a7c10d.16311905@smtp1.ibm.net>
+             Subject: [PATCH 5.005_03m2] Win32 Makefile patches
+             
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Sat, 16 Jan 1999 13:02:45 +0100
+             Message-ID: <36a07da6.10722337@smtp1.ibm.net>
+             Subject: [PATCH 5.005_03m2] minor tweaks to README.win32
+     Branch: maint-5.005/perl
+           ! README.win32 win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  2615] By: gbarr                                 on 1999/01/16  18:48:48
+        Log: Jumbo patch from Sarathy for PERL_OBJECT & USE_THREADS
+             
+             From: Gurusamy Sarathy <gsar@engin.umich.edu>
+             Date: Thu, 07 Jan 1999 00:12:00 -0500
+             Message-Id: <199901070512.AAA23568@aatma.engin.umich.edu>
+             Subject: Re: [PATCH 5.005_03-MAINT_TRIAL2] fixes for PERL_OBJECT and USE_THREADS builds
+             
+             From: Gurusamy Sarathy <gsar@engin.umich.edu>
+             Date: Thu, 14 Jan 1999 19:21:46 -0500
+             Message-Id: <199901150021.TAA01886@aatma.engin.umich.edu>
+             Subject: Re: [PATCH 5.005_03-MAINT_TRIAL2] fixes for PERL_OBJECT and USE_THREADS builds
+     Branch: maint-5.005/perl
+	   ! embed.h global.sym lib/ExtUtils/MM_Unix.pm objXSUB.h objpp.h
+	   ! op.c perl.c perl.h perly.c perly.y perly_c.diff pp.c proto.h
+	   ! sv.c t/io/fs.t toke.c win32/GenCAPI.pl win32/config.bc
+           ! win32/makedef.pl win32/runperl.c win32/win32.c
+____________________________________________________________________________
+[  2614] By: gbarr                                 on 1999/01/16  16:48:38
+        Log: From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 15 Jan 1999 17:28:34 +0200 (EET)
+             Message-Id: <199901151528.RAA08785@alpha.hut.fi>
+             Subject: [PATCH] 5.005_03-MAINT_TRIAL_2: NetBSD patches
+             
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 15 Jan 1999 18:44:19 +0200 (EET)
+             Message-Id: <199901151644.SAA08184@alpha.hut.fi>
+             Subject: [PATCH] 5.005_03-MAINT_TRIAL_2: allow skipping the "install also as /usr/bin/perl" question of installperl
+             
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 15 Jan 1999 18:52:29 +0200 (EET)
+             Message-Id: <199901151652.SAA11259@alpha.hut.fi>
+             Subject: the promised "installusrbinperl + NetBSD" fix
+     Branch: maint-5.005/perl
+	   ! Configure Makefile.SH hints/netbsd.sh installperl
+           ! makedepend.SH unixish.h
+____________________________________________________________________________
+[  2613] By: gbarr                                 on 1999/01/16  16:28:40
+        Log: From: Laszlo Molnar <ml1050@freemail.c3.hu>
+             Date: Thu, 14 Jan 1999 22:37:26 +0100
+             Message-ID: <19990114223726.A177@beeblebrox>
+             Subject: [PATCH for 5.005_03-MAINT_TRIAL_2] dos-djgpp update
+     Branch: maint-5.005/perl
+           ! djgpp/config.over djgpp/djgpp.c
+____________________________________________________________________________
+[  2612] By: gbarr                                 on 1999/01/16  16:27:25
+        Log: Hints for sco.sh to automatically support dynamic linking
+             
+             From: Peter Wolfe <wolfe@teloseng.com>
+             Date: Mon, 11 Jan 1999 11:50:20 -0800 (PST)
+             Message-Id: <199901111950.LAA01703@titan.teloseng.com>
+             Subject: SCO 3.2v5 patch for perl5.005_03-MAINT_TRIAL_1
+     Branch: maint-5.005/perl
+           ! hints/sco.sh
+____________________________________________________________________________
+[  2610] By: gbarr                                 on 1999/01/14  03:07:33
+        Log: Fix login in installperl for pods
+             
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Mon, 4 Jan 1999 13:50:10 GMT
+             Message-Id: <199901041350.NAA19665@cyclone.cise.npl.co.uk>
+             Subject: PATCH to installperl
+     Branch: maint-5.005/perl
+           ! installperl
+____________________________________________________________________________
+[  2609] By: gbarr                                 on 1999/01/14  03:04:37
+        Log: Fix incorrect "used only once" warnings
+             
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Fri, 8 Jan 1999 04:37:10 -0500
+             Message-ID: <19990108043710.A14390@monk.mps.ohio-state.edu>
+             Subject: Re: change#965 flakiness
+     Branch: maint-5.005/perl
+           ! gv.c
+____________________________________________________________________________
+[  2608] By: gbarr                                 on 1999/01/14  02:56:46
+        Log: Fixed double GLOB de-reference
+             
+             From: Gurusamy Sarathy <gsar@engin.umich.edu>
+             Date: Sat, 09 Jan 1999 23:40:24 -0500
+             Message-Id: <199901100440.XAA12360@aatma.engin.umich.edu>
+             Subject: Re: IO::Pipe with perl -d (on HPUX)
+     Branch: maint-5.005/perl
+           ! ext/IO/lib/IO/Pipe.pm
+____________________________________________________________________________
+[  2607] By: gbarr                                 on 1999/01/14  02:53:40
+        Log: Added Carp::cluck to perldelta.pod
+     Branch: maint-5.005/perl
+           ! pod/perldelta.pod
+____________________________________________________________________________
+[  2606] By: gbarr                                 on 1999/01/14  02:44:04
+        Log: New perlfaq*.pod from Tom (private mail)
+     Branch: maint-5.005/perl
+	   ! pod/perlfaq.pod pod/perlfaq1.pod pod/perlfaq2.pod
+	   ! pod/perlfaq3.pod pod/perlfaq4.pod pod/perlfaq5.pod
+	   ! pod/perlfaq6.pod pod/perlfaq7.pod pod/perlfaq8.pod
+           ! pod/perlfaq9.pod
+____________________________________________________________________________
+[  2584] By: gbarr                                 on 1999/01/08  04:50:56
+        Log: implemented Ilya's suggested fix, and added a testcase
+             
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 5 Jan 1999 00:56:01 -0500 (EST)
+             Message-Id: <199901050556.AAA02597@monk.mps.ohio-state.edu>
+             Subject: Re: Text::ParseWords: regex fix
+     Branch: maint-5.005/perl
+           ! lib/Text/ParseWords.pm t/lib/parsewords.t
+____________________________________________________________________________
+[  2583] By: gbarr                                 on 1999/01/08  04:50:03
+        Log: From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Thu, 7 Jan 1999 12:47:38 +0200 (EET)
+             Message-Id: <199901071047.MAA24100@alpha.hut.fi>
+             Subject: [PATCH] 5.005_03-MAINT_TRIAL_2: ext/Errno_pm.PL: understand wrapper cppstdins
+     Branch: maint-5.005/perl
+           ! ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[  2582] By: gbarr                                 on 1999/01/08  03:37:55
+        Log: More doc changes from Abigail, and included change #2575 from cfgperl
+             
+             From: abigail@fnx.com
+             Message-ID: <19990107041434.22326.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRIAL2 lib/Time/gmtime.pm] Typo fix
+             Date: Wed, 6 Jan 1999 23:14:34 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990107041746.22376.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRIAL2 lib/Time/localtime.pm] Typo fix
+             Date: Wed, 6 Jan 1999 23:17:46 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990107042105.22527.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRIAL2 lib/User/grent.pm] Typo fix
+             Date: Wed, 6 Jan 1999 23:21:05 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990107042254.22624.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRIAL2 lib/User/pwent.pw] Typo fix
+             Date: Wed, 6 Jan 1999 23:22:54 -0500 (EST)
+     Branch: maint-5.005/perl
+	   ! lib/Math/Trig.pm lib/Time/gmtime.pm lib/Time/localtime.pm
+           ! lib/User/grent.pm lib/User/pwent.pm
+____________________________________________________________________________
+[  2578] By: gbarr                                 on 1999/01/07  04:30:26
+        Log: From: Dan Sugalski <sugalskd@osshe.edu>
+             Date: Wed, 06 Jan 1999 13:47:34 -0800
+             Message-Id: <3.0.6.32.19990106134734.0334d260@ous.edu>
+             Subject: [PATCH 5.005_02-MT2, 5.005_5x]VMS.C tweak for occasional system() error
+     Branch: maint-5.005/perl
+           ! vms/vms.c
+____________________________________________________________________________
+[  2577] By: gbarr                                 on 1999/01/07  04:26:28
+        Log: Another set of doc patches from Abigail
+             
+             From: abigail@fnx.com
+             Message-ID: <19990107032132.20124.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRAIL2 lib/Net/hostent.pm] Typo fix
+             Date: Wed, 6 Jan 1999 22:21:32 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990107032445.20178.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRIAL2 lib/Net/netent.pm] Typo fix
+             Date: Wed, 6 Jan 1999 22:24:45 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990107032834.20362.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRAIL2 lib/Term/Complete.pm] Typo fix
+             Date: Wed, 6 Jan 1999 22:28:34 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990107033136.20440.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRAIL2 lib/Term/ReadLine.pm] Typo fix
+             Date: Wed, 6 Jan 1999 22:31:36 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990107033351.20540.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRIAL2 lib/CGI/Apache.pm] Typo fix
+             Date: Wed, 6 Jan 1999 22:33:51 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990107033933.20707.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRIAL2 lib/CGI/Push.pm] Typo fix
+             Date: Wed, 6 Jan 1999 22:39:33 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990107034548.20936.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRIAL2 lib/File/Copy.pm] Typo fixes
+             Date: Wed, 6 Jan 1999 22:45:48 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990107034856.21056.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRIAL2 lib/File/Spec.pm] Typo fix
+             Date: Wed, 6 Jan 1999 22:48:56 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990107035113.21174.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRIAL2 lib/File/Spec/Mac.pm] Typo fixes
+             Date: Wed, 6 Jan 1999 22:51:13 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990107035612.21522.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRIAL2 lib/Math/BigFloat.pm] Typo fix
+             Date: Wed, 6 Jan 1999 22:56:12 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990107035842.21585.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRIAL2 lib/Math/BigInt.pm] Typo fixes
+             Date: Wed, 6 Jan 1999 22:58:41 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990107040644.22009.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRIAL2 lib/Text/Wrap.pm] Typo fixes
+             Date: Wed, 6 Jan 1999 23:06:44 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990107040955.22087.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRIAL2 lib/Tie/Array.pm] Typo fixes
+             Date: Wed, 6 Jan 1999 23:09:55 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990107041136.22174.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRIAL2 lib/Tie/Hash.pm] Typo fix
+             Date: Wed, 6 Jan 1999 23:11:36 -0500 (EST)
+     Branch: maint-5.005/perl
+	   ! lib/CGI/Apache.pm lib/CGI/Push.pm lib/File/Copy.pm
+	   ! lib/File/Spec.pm lib/File/Spec/Mac.pm lib/Math/BigFloat.pm
+	   ! lib/Math/BigInt.pm lib/Net/hostent.pm lib/Net/netent.pm
+	   ! lib/Term/Complete.pm lib/Term/ReadLine.pm lib/Text/Wrap.pm
+           ! lib/Tie/Array.pm lib/Tie/Hash.pm
+____________________________________________________________________________
+[  2568] By: gbarr                                 on 1999/01/06  03:13:15
+        Log: From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Wed, 06 Jan 1999 01:24:09 +0100
+             Message-ID: <3696aa85.18259325@smtp1.ibm.net>
+             Subject: [PATCH 5.005_03-MAINT_TRIAL2] fixes for PERL_OBJECT and USE_THREADS builds
+     Branch: maint-5.005/perl
+	   ! embed.h global.sym objXSUB.h objpp.h perl.c proto.h
+           ! win32/GenCAPI.pl win32/makedef.pl
+____________________________________________________________________________
+[  2567] By: gbarr                                 on 1999/01/06  02:31:28
+        Log: From: Dan Sugalski <sugalskd@osshe.edu>
+             Date: Tue, 05 Jan 1999 16:47:31 -0800
+             Message-Id: <3.0.6.32.19990105164731.00b5b2d0@ous.edu>
+             Subject: [PATCH 5.005_03-MAINT_TRIAL_2]taint.c fix for VMS
+     Branch: maint-5.005/perl
+           ! taint.c
+____________________________________________________________________________
+[  2566] By: gbarr                                 on 1999/01/06  02:29:05
+        Log: From: "W. Phillip Moore" <wpm@ms.com>
+             Date: Tue, 5 Jan 1999 12:40:27 -0500 (EST)
+             Message-ID: <13970.20107.190314.549471@zappa>
+             Subject: [PATCH] POSIX getpgrp is not -w clean
+     Branch: maint-5.005/perl
+           ! ext/POSIX/POSIX.pm
+____________________________________________________________________________
+[  2565] By: gbarr                                 on 1999/01/06  02:19:00
+        Log: From: Slaven Rezic <eserte@cs.tu-berlin.de>
+             Date: Mon, 4 Jan 1999 23:01:46 +0100 (CET)
+             Message-Id: <199901042201.XAA01875@cabulja.herceg.de>
+             Subject: FindBin.pm on Win32 systems
+     Branch: maint-5.005/perl
+           ! lib/FindBin.pm
+____________________________________________________________________________
+[  2564] By: gbarr                                 on 1999/01/06  02:13:23
+        Log: From: Mark Bixby <markb@spock.dis.cccd.edu>
+             Date: Mon, 4 Jan 1999 13:34:58 -0800 (PST)
+             Message-Id: <199901042134.NAA18852@spock.dis.cccd.edu>
+             Subject: [PATCH 5.005_03-MAINT_TRIAL_2] t/op/sysio.t for MPE/iX
+     Branch: maint-5.005/perl
+           ! t/op/sysio.t
+____________________________________________________________________________
+[  2563] By: gbarr                                 on 1999/01/06  02:03:44
+        Log: From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+             Date: Mon, 4 Jan 1999 19:25:03 +0200 (EET)
+             Message-Id: <199901041725.TAA30462@alpha.hut.fi>
+             Subject: [PATCH] 5.005_03-MAINT_TRIAL_2: undo untrue HP-UX 64-bitness (mostly harmless but misleading)
+     Branch: maint-5.005/perl
+           ! hints/hpux.sh
+____________________________________________________________________________
+[  2562] By: gbarr                                 on 1999/01/06  02:02:18
+        Log: Jumbo doc patch from Abigail
+             
+             From: abigail@fnx.com
+             Message-ID: <19990105170142.4889.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03-TRIAL2 lib/ExtUtils/Liblist.pm] pod fixes
+             Date: Tue, 5 Jan 1999 12:01:42 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990105172855.5115.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 MAINT2 lib/ExtUtils/Commands.pm] Typo fix.
+             Date: Tue, 5 Jan 1999 12:28:55 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990105173808.5260.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH perl5.005_03 MAINT3 lib/ExtUtils/Embed.pm] Typo fix
+             Date: Tue, 5 Jan 1999 12:38:08 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990105174859.5533.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 MAINT2 lib/ExtUtils/Install.pm] Typo fix
+             Date: Tue, 5 Jan 1999 12:48:59 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990105174947.5547.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 lib/ExtUtils/MM_Unix.pm] Typo fixes
+             Date: Tue, 5 Jan 1999 12:49:46 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990105182301.5966.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 lib/ExtUtils/MakeMaker.pm] Typos fixes.
+             Date: Tue, 5 Jan 1999 13:23:00 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990105183344.6065.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRIAL2 lib/ExtUtils/Manifest.pm] Typo fixes
+             Date: Tue, 5 Jan 1999 13:33:44 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990105184028.6220.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRIAL2 lib/ExtUtils/Mksymlists.pm] Typo fix
+             Date: Tue, 5 Jan 1999 13:40:28 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990106012015.9451.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRIAL2 lib/IO/Pipe.pm] Typo fixes.
+             Date: Tue, 5 Jan 1999 20:20:15 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990106012047.9459.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRAIL2 lib/IO/Seekable.pm] Typo fixes
+             Date: Tue, 5 Jan 1999 20:20:47 -0500 (EST)
+             
+             From: abigail@fnx.com
+             Message-ID: <19990106012338.9536.qmail@alexandra.wayne.fnx.com>
+             Subject: [PATCH 5.005_03 TRIAL2 lib/IO/Socket.pm] Typo fix
+             Date: Tue, 5 Jan 1999 20:23:38 -0500 (EST)
+     Branch: maint-5.005/perl
+	   ! ext/IO/lib/IO/Pipe.pm ext/IO/lib/IO/Seekable.pm
+	   ! ext/IO/lib/IO/Socket.pm lib/ExtUtils/Command.pm
+	   ! lib/ExtUtils/Embed.pm lib/ExtUtils/Install.pm
+	   ! lib/ExtUtils/Liblist.pm lib/ExtUtils/MM_Unix.pm
+	   ! lib/ExtUtils/MakeMaker.pm lib/ExtUtils/Manifest.pm
+           ! lib/ExtUtils/Mksymlists.pm
+____________________________________________________________________________
+[  2560] By: gbarr                                 on 1999/01/03  16:59:01
+        Log: Trial release 2
+     Branch: maint-5.005/perl
+           ! Changes patchlevel.h
+____________________________________________________________________________
 [  2559] By: gbarr                                 on 1999/01/02  15:37:35
         Log: From: Blair Zajac <bzajac@geostaff.com>
              Date: Wed, 23 Dec 1998 17:13:32 -0800
