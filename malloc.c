@@ -291,7 +291,7 @@
 #  ifndef warn
 #    define warn(mess, arg) fprintf(stderr, (mess), (arg))
 #  endif 
-#  ifndef warn
+#  ifndef warn2
 #    define warn2(mess, arg1) fprintf(stderr, (mess), (arg1), (arg2))
 #  endif 
 #  ifdef DEBUG_m
