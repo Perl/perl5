@@ -15,42 +15,6 @@
 
 /* NO_EMBED is no longer supported. i.e. EMBED is always active. */
 
-/* provide binary compatible (but inconsistent) names */
-#if defined(PERL_BINCOMPAT_5005)
-#  define  Perl_call_atexit		perl_atexit
-#  define  Perl_eval_sv			perl_eval_sv
-#  define  Perl_eval_pv			perl_eval_pv
-#  define  Perl_call_argv		perl_call_argv
-#  define  Perl_call_method		perl_call_method
-#  define  Perl_call_pv			perl_call_pv
-#  define  Perl_call_sv			perl_call_sv
-#  define  Perl_get_av			perl_get_av
-#  define  Perl_get_cv			perl_get_cv
-#  define  Perl_get_hv			perl_get_hv
-#  define  Perl_get_sv			perl_get_sv
-#  define  Perl_init_i18nl10n		perl_init_i18nl10n
-#  define  Perl_init_i18nl14n		perl_init_i18nl14n
-#  define  Perl_new_collate		perl_new_collate
-#  define  Perl_new_ctype		perl_new_ctype
-#  define  Perl_new_numeric		perl_new_numeric
-#  define  Perl_require_pv		perl_require_pv
-#  define  Perl_safesyscalloc		Perl_safecalloc
-#  define  Perl_safesysfree		Perl_safefree
-#  define  Perl_safesysmalloc		Perl_safemalloc
-#  define  Perl_safesysrealloc		Perl_saferealloc
-#  define  Perl_set_numeric_local	perl_set_numeric_local
-#  define  Perl_set_numeric_standard	perl_set_numeric_standard
-/* malloc() pollution was the default in earlier versions, so enable
- * it for bincompat; but not for systems that used to do prevent that,
- * or when they ask for {HIDE,EMBED}MYMALLOC */
-#  if !defined(EMBEDMYMALLOC) && !defined(HIDEMYMALLOC)
-#    if !defined(NeXT) && !defined(__NeXT) && !defined(__MACHTEN__) && \
-        !defined(__QNX__)
-#      define  PERL_POLLUTE_MALLOC
-#    endif
-#  endif
-#endif
-
 /* Hide global symbols */
 
 #if !defined(PERL_IMPLICIT_CONTEXT)
@@ -725,7 +689,6 @@
 #define sv_setpvf		Perl_sv_setpvf
 #define sv_vsetpvf		Perl_sv_vsetpvf
 #define sv_setiv		Perl_sv_setiv
-#define sv_setpviv		Perl_sv_setpviv
 #define sv_setuv		Perl_sv_setuv
 #define sv_setnv		Perl_sv_setnv
 #define sv_setref_iv		Perl_sv_setref_iv
@@ -831,7 +794,6 @@
 #define sv_setpvf_mg		Perl_sv_setpvf_mg
 #define sv_vsetpvf_mg		Perl_sv_vsetpvf_mg
 #define sv_setiv_mg		Perl_sv_setiv_mg
-#define sv_setpviv_mg		Perl_sv_setpviv_mg
 #define sv_setuv_mg		Perl_sv_setuv_mg
 #define sv_setnv_mg		Perl_sv_setnv_mg
 #define sv_setpv_mg		Perl_sv_setpv_mg
@@ -2287,7 +2249,6 @@
 #define sv_reset(a,b)		Perl_sv_reset(aTHX_ a,b)
 #define sv_vsetpvf(a,b,c)	Perl_sv_vsetpvf(aTHX_ a,b,c)
 #define sv_setiv(a,b)		Perl_sv_setiv(aTHX_ a,b)
-#define sv_setpviv(a,b)		Perl_sv_setpviv(aTHX_ a,b)
 #define sv_setuv(a,b)		Perl_sv_setuv(aTHX_ a,b)
 #define sv_setnv(a,b)		Perl_sv_setnv(aTHX_ a,b)
 #define sv_setref_iv(a,b,c)	Perl_sv_setref_iv(aTHX_ a,b,c)
@@ -2389,7 +2350,6 @@
 #define sv_catsv_mg(a,b)	Perl_sv_catsv_mg(aTHX_ a,b)
 #define sv_vsetpvf_mg(a,b,c)	Perl_sv_vsetpvf_mg(aTHX_ a,b,c)
 #define sv_setiv_mg(a,b)	Perl_sv_setiv_mg(aTHX_ a,b)
-#define sv_setpviv_mg(a,b)	Perl_sv_setpviv_mg(aTHX_ a,b)
 #define sv_setuv_mg(a,b)	Perl_sv_setuv_mg(aTHX_ a,b)
 #define sv_setnv_mg(a,b)	Perl_sv_setnv_mg(aTHX_ a,b)
 #define sv_setpv_mg(a,b)	Perl_sv_setpv_mg(aTHX_ a,b)
@@ -3207,7 +3167,7 @@
 #  define sv_setptrref(rv,ptr)		sv_setref_iv(rv,Nullch,PTR2IV(ptr))
 #endif
 
-#if !defined(PERL_CORE) && !defined(PERL_NOCOMPAT) && !defined(PERL_BINCOMPAT_5005)
+#if !defined(PERL_CORE) && !defined(PERL_NOCOMPAT)
 
 /* Compatibility for various misnamed functions.  All functions
    in the API that begin with "perl_" (not "Perl_") take an explicit

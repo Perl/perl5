@@ -186,7 +186,15 @@ PerlIO_binmode(pTHX_ PerlIO *fp, int iotype, int mode, const char *names)
 PerlIO *
 PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
 {
-#ifndef PERL_MICRO
+#ifdef PERL_MICRO
+    return NULL;
+#else
+#ifdef PERL_IMPLICIT_SYS
+    return PerlSIO_fdupopen(f); 
+#else
+#ifdef WIN32
+    return win32_fdupopen(f);
+#else
     if (f) {
 	int fd = PerlLIO_dup(PerlIO_fileno(f));
 	if (fd >= 0) {
@@ -206,6 +214,8 @@ PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
     }
 #endif
     return NULL;
+#endif
+#endif
 }
 
 
@@ -601,10 +611,6 @@ PerlIO_destruct(pTHX)
 	    f++;
 	}
     }
-    PerlIO_list_free(aTHX_ PL_known_layers);
-    PL_known_layers = NULL;
-    PerlIO_list_free(aTHX_ PL_def_layerlist);
-    PL_def_layerlist = NULL;
 }
 
 void
@@ -2071,7 +2077,9 @@ PerlIO_cleanup(pTHX)
 {
     int i;
 #ifdef USE_ITHREADS
-    PerlIO_debug("Cleanup %p\n",aTHX);
+    PerlIO_debug("Cleanup layers for %p\n",aTHX);
+#else
+    PerlIO_debug("Cleanup layers\n");
 #endif
     /* Raise STDIN..STDERR refcount so we don't close them */
     for (i=0; i < 3; i++)
@@ -2080,6 +2088,15 @@ PerlIO_cleanup(pTHX)
     /* Restore STDIN..STDERR refcount */
     for (i=0; i < 3; i++)
 	PerlIOUnix_refcnt_dec(i);
+
+    if (PL_known_layers) {
+	PerlIO_list_free(aTHX_ PL_known_layers);
+	PL_known_layers = NULL;
+    }
+    if(PL_def_layerlist) {
+	PerlIO_list_free(aTHX_ PL_def_layerlist);
+	PL_def_layerlist = NULL;
+    }
 }
 
 

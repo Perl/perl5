@@ -1,6 +1,6 @@
 package Net::Ping;
 
-# $Id: Ping.pm,v 1.31 2002/04/11 16:45:06 rob Exp $
+# $Id: Ping.pm,v 1.33 2002/05/03 21:54:59 rob Exp $
 
 require 5.002;
 require Exporter;
@@ -12,11 +12,11 @@ use FileHandle;
 use Socket qw( SOCK_DGRAM SOCK_STREAM SOCK_RAW PF_INET
                inet_aton inet_ntoa sockaddr_in );
 use Carp;
-use Errno qw(ECONNREFUSED);
+use POSIX qw(ECONNREFUSED);
 
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
-$VERSION = "2.16";
+$VERSION = "2.17";
 
 # Constants
 
@@ -25,6 +25,12 @@ $def_proto = "tcp";         # Default protocol to use for pinging
 $max_datasize = 1024;       # Maximum data bytes in a packet
 # The data we exchange with the server for the stream protocol
 $pingstring = "pingschwingping!\n";
+
+if ($^O =~ /Win32/i) {
+  # Hack to avoid this Win32 spewage:
+  # Your vendor has not defined POSIX macro ECONNREFUSED
+  *ECONNREFUSED = sub {10061;}; # "Unknown Error" Special Win32 Response?
+};
 
 # Description:  The pingecho() subroutine is provided for backward
 # compatibility with the original Net::Ping.  It accepts a host
@@ -367,8 +373,7 @@ sub ping_tcp
 
   $@ = ""; $! = 0;
   $ret = $self -> tcp_connect( $ip, $timeout);
-  $ret = 1 if $! == ECONNREFUSED  # Connection refused
-    || $@ =~ /Unknown Error/i;    # Special Win32 response?
+  $ret = 1 if $! == ECONNREFUSED;  # Connection refused
   $self->{"fh"}->close();
   return $ret;
 }
@@ -667,7 +672,7 @@ __END__
 
 Net::Ping - check a remote host for reachability
 
-$Id: Ping.pm,v 1.31 2002/04/11 16:45:06 rob Exp $
+$Id: Ping.pm,v 1.33 2002/05/03 21:54:59 rob Exp $
 
 =head1 SYNOPSIS
 

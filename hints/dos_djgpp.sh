@@ -73,3 +73,4 @@ esac
 EOCBU
 
 useperlio='undef'
+uselargefiles='undef'

@@ -18,7 +18,7 @@ use File::Basename ();
 use File::Path ();
 use File::Spec;
 use vars qw($VERSION);
-$VERSION = substr q$Revision: 1.55 $, 10;
+$VERSION = substr q$Revision: 1.56 $, 10;
 
 =head1 NAME
 
@@ -437,7 +437,7 @@ to actually use it.  But we need to know your favorite WAIT server. If
 you don\'t know a WAIT server near you, just press ENTER.
 
 };
-	$default = "wait://ls6.informatik.uni-dortmund.de:1404";
+	$default = "wait://ls6-www.informatik.uni-dortmund.de:1404";
 	$ans = prompt("Your favorite WAIT server?\n  ",$default);
 	push @{$CPAN::Config->{'wait_list'}}, $ans;
     }

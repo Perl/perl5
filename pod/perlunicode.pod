@@ -630,8 +630,8 @@ newline-separated lines.  Each line must be one of the following:
 
 =item *
 
-Two hexadecimal numbers separated by a tabulator denoting a range
-of Unicode codepoints to include.
+Two hexadecimal numbers separated by horizontal whitespace (space or
+tabulator characters) denoting a range of Unicode codepoints to include.
 
 =item *
 
@@ -916,8 +916,9 @@ needed.  The BOM signatures will be 0x00 0x00 0xFE 0xFF for BE and
 UCS-2, UCS-4
 
 Encodings defined by the ISO 10646 standard.  UCS-2 is a 16-bit
-encoding, UCS-4 is a 32-bit encoding.  Unlike UTF-16, UCS-2
-is not extensible beyond 0xFFFF, because it does not use surrogates.
+encoding.  Unlike UTF-16, UCS-2 is not extensible beyond 0xFFFF,
+because it does not use surrogates.  UCS-4 is a 32-bit encoding,
+functionally identical to UTF-32.
 
 =item *
 

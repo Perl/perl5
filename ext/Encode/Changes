@@ -1,9 +1,110 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.63 2002/04/27 18:59:50 dankogai Exp $
+# $Id: Changes,v 1.71 2002/05/07 16:22:42 dankogai Exp dankogai $
 #
 
-$Revision: 1.63 $ $Date: 2002/04/27 18:59:50 $
+$Revision: 1.71 $ $Date: 2002/05/07 16:22:42 $
+! Encode.xs
+  even more typecasts by Robin
+  Message-Id: <200205071513.QAA05846@tempest.npl.co.uk>
+! bin/enc2xs
+  A very strange bug that was causing a bugus ucm -> C table
+  generation that was revealed by a UCM file that Andreas was
+  working.  This is the king of wierdest bug I've encountered
+  in the course of Encode maintainance.
+  Message-Id: <6C04F0FA-61D4-11D6-B164-00039301D480@dan.co.jp>
+
+1.70 2002/05/06 10:26:48
+! encoding.pm
+  Made more 'module-safe' with conjunction w/ 'no encoding'.
+  Message-Id: <EAB48C16-60DA-11D6-9982-00039301D480@dan.co.jp>
+! lib/Encode/Encoding.pm
+  'require Encode' because ->Define uses Encode::define_encoding();
+  problem and solution addressed by Miyagawa-kun
+  Message-Id: <86znzdfvuh.wl@mail.edge.co.jp>
+! t/Unicode.t
+  Cuts the frill to make djgpp happier, as suggested by Laszlo
+  Message-Id: <20020506105819.H17012@libra.eth.ericsson.se>
+! bin/enc2xs
+  enc2xs no longer overwrites files w/ -M option, as suggested by Andreas
+  Message-Id: <m3bsbug48n.fsf@anima.de>
+
+1.69 2002/05/04 16:41:18 
+! lib/Encode/MIME/Header
+  Floating-point coerced for UNICOS (in integer arithmetics it folds 
+  line one character too early).  Verification by Mark is pending.
+  Message-Id: <C670F60D-5F4F-11D6-A5CA-00039301D480@dan.co.jp>
+! Unicode/Unicode.pm
+  more doc patch from Elizabeth
+  Message-Id: <4.2.0.58.20020503210946.02f4ed30@mickey.dijkmat.nl>
+! Encode/Makefile_PL.e2x
+  More platform-independent patch from Benjamin
+  Message-Id: <3CD31BE0.69F79B06@earthlink.net>
+! lib/Encode/Guess AUTHORS
+  split regex fix by Graham Barr.  Adds him to AUTHORS.
+  Message-Id: <20020504085419.E95940@valueclick.com>
+! Encode/Makefile_PL.e2x
+  enc2xs script discovery made smarter and more sensible, first cited
+  by Miyagawa-kun and further suggestions by Rafael and Andreas
+! Encode.pm lib/Encode/Guess.pm t/fallback.t t/guess.t t/mime-header.t
+  "The EBCDIC remapping of the low 256 bites again" #16372 by jhi
+
+1.68 2002/05/03 12:20:13
+! lib/Encode/Alias.pm lib/Encode/Supported.pod t/Alias.t AUTHORS
+  UCS-4 added to aliases of UTF-32 by Elizabeth Mattijsen.  Alias.t
+  and Supported.pod modified to reflect the change.  Elizabeth added
+  to Authors.  And H.M. is also added for forwarding her patch among
+  other contributions (I was rather surprised to find his name was not
+  there yet!) 
+   Message-Id: <20020503114901.D639.H.M.BRAND@hccnet.nl>
+
+1.67 2002/05/02 07:33:09
+! Encode.xs
+  Error message now consistent w/ perlqq (\N{U+} -> \x{})
+  done in perl@16308 but Philip linted me further.  Now the error
+  messages are macronized as ERR_ENCODE_NOMAP and ERR_DECODE_NOMAP
+! lib/Encode/Guess.pm
+  Sanity check for happier -w by Autrijus
+
+1.66 2002/05/01 05:41:06
+! Encode.xs t/fallback.t
+  WARN_ON_ERR no longer assumes RETURN_ON_ERR so you can issue a warning
+  while fallback is in effect.  This even came with a welcome side-effect
+  of cleaner code with less nests!  Thank you, NI-XS.  t/fallback.t is
+  also modified to test this.
+  And of course, the corresponding varialbles to UV[Xx]f are appropriately
+  cast.  This should've concluded NI-XS homework.
+! Encode.pm
+  encode(undef) does warn again!  Repented upon suggestion by NI-XS.
+  Document for unless vs. '' added
+  Message-Id: <20020430171547.3322.13@bactrian.elixent.com>
+
+1.65 2002/04/30 16:13:37
+! Encode.pm
+  encode(undef) no longer warns for C<Use of uninitialized value in 
+  subroutine entry>.  Suggested by Paul.
+  Message-Id: <AIEAJICLCBDNAAOLLOKLMEEEEJAA.Paul.Marquess@ntlworld.com>
+! lib/Encode/Supported.pod
+  Encode::MIME::Header and Encode::Guess mentioned
+  Updated for Encode::HanExtra 0.05 and Encode::JIS2K
+! lib/Encode/Guess.pm
+  POD fix by Miyagawa-kun
+  Message-Id: <86k7qqx8p7.wl@mail.edge.co.jp>
+
+1.64 2002/04/29 06:54:06
+! ucm/euc-jp.ucm
+  Now decodes euc-jisx0213 also.  CAVEAT: encode("euc-jp"...) and
+  encocde("euc-jisx0213") are still DIFFERENT.
+  Message-Id: <A5DFA5CA-5B3C-11D6-A54F-00039301D480@dan.co.jp>
+! Encode.xs
+  A few white spaces corrected by NI-XS via PerlIO integration to 
+  Mainline
+  Subject: Change 16247: Integrate perlio;
+! Encode.pm
+  Document fixes by Andreas
+  Message-Id: <m3k7qsf1we.fsf@anima.de>
+
+1.63 2002/04/27 18:59:50
 ! lib/Encode/Encoding.pm
 ! Encoding.pm Unicode/Unicode.pm lib/Encode/Guess.pm lib/Encode/CN/HZ.pm 
 ! lib/Encode/JP/JIS7.pm lib/Encode/MIME/Header.pm lib/Encode/KR/2022_KR.pm 
@@ -528,7 +629,7 @@ $Revision: 1.63 $ $Date: 2002/04/27 18:59:50 $
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/04/27 18:59:50 $
+1.11  $Date: 2002/05/07 16:22:42 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST
@@ -1004,3 +1105,5 @@ $Revision: 1.63 $ $Date: 2002/04/27 18:59:50 $
     Autrijus, you may fix Encode::HanExtra.
 + t/CJKalias.t
   + to test encode aliases added
+
+ LocalWords:  maintainance

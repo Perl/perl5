@@ -7,6 +7,7 @@ BEGIN {
         exit 0;
     }
 }
+$|++;
 print "1..5\n";
 use strict;
 

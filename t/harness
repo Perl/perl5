@@ -74,7 +74,9 @@ if (@ARGV) {
 	push @tests, <pod/*.t>;
     }
 }
-
+if ($^O eq 'MSWin32') {
+    s,\\,/,g for @tests;
+}
 Test::Harness::runtests @tests;
 exit(0) unless -e "../testcompile";
 

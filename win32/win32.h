@@ -552,7 +552,7 @@ EXTERN_C _CRTIMP ioinfo* __pioinfo[];
 #define EAFNOSUPPORT WSAEAFNOSUPPORT
 #endif
 
-DllExport PerlInterpreter *win32_signal_context(void);
+DllExport void *win32_signal_context(void);
 #define PERL_GET_SIG_CONTEXT win32_signal_context()
 
 #endif /* _INC_WIN32_PERL5 */

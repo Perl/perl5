@@ -163,7 +163,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	    }
 	  case INSN_SV_UPGRADE:		/* 14 */
 	    {
-		char arg;
+		U8 arg;
 		BGET_U8(arg);
 		BSET_sv_upgrade(bstate->bs_sv, arg);
 		break;

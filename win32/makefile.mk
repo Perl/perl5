@@ -49,26 +49,30 @@ INST_ARCH	*= \$(ARCHNAME)
 
 #
 # uncomment to enable multiple interpreters.  This is need for fork()
-# emulation.
+# emulation and for thread support.
 #
 USE_MULTI	*= define
 
 #
-# Beginnings of interpreter cloning/threads; still very incomplete.
-# This should be enabled to get the fork() emulation.  This needs
-# USE_MULTI as well.
+# Interpreter cloning/threads; now reasonably complete.
+# This should be enabled to get the fork() emulation.  
+# This needs USE_MULTI above.
 #
 USE_ITHREADS	*= define
 
 #
 # uncomment to enable the implicit "host" layer for all system calls
-# made by perl.  This needs USE_MULTI above.  This is also needed to
-# get fork().
+# made by perl.  This needs USE_MULTI above.  
+# This is also needed to get fork().
 #
 USE_IMP_SYS	*= define
 
 #
-# uncomment to enable the experimental PerlIO I/O subsystem.
+# Comment out next assign to disable perl's I/O subsystem and use compiler's 
+# stdio for IO - depending on your compiler vendor and run time library you may 
+# then get a number of fails from make test i.e. bugs - complain to them not us ;-). 
+# You will also be unable to take full advantage of perl5.8's support for multiple 
+# encodings and may see lower IO performance. You have been warned.
 USE_PERLIO	= define
 
 #
@@ -112,7 +116,7 @@ CCTYPE		*= MSVC60
 # If not enabled, we automatically try to use maximum optimization
 # with all compilers that are known to have a working optimizer.
 #
-CFG		*= Debug
+#CFG		*= Debug
 
 #
 # uncomment to enable use of PerlCRT.DLL when using the Visual C compiler.
@@ -701,9 +705,11 @@ WIN32_SRC	=		\
 		.\win32sck.c	\
 		.\win32thread.c
 
-.IF "$(USE_PERLIO)" == "define"
+# We need this for miniperl build unless we override canned 
+# config.h #define building mini\*
+#.IF "$(USE_PERLIO)" == "define"
 WIN32_SRC	+= .\win32io.c
-.ENDIF
+#.ENDIF
 
 .IF "$(CRYPT_SRC)" != ""
 WIN32_SRC	+= .\$(CRYPT_SRC)

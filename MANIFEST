@@ -169,10 +169,12 @@ ext/Digest/MD5/hints/irix_6.pl	Hints for named architecture
 ext/Digest/MD5/Makefile.PL	Digest::MD5 extension makefile writer
 ext/Digest/MD5/MD5.pm		Digest::MD5 extension
 ext/Digest/MD5/MD5.xs		Digest::MD5 extension
-ext/Digest/MD5/t/aaa.t		See if Digest::MD5 extension works
+ext/Digest/MD5/README		Digest::MD5 extension Readme
 ext/Digest/MD5/t/align.t	See if Digest::MD5 extension works
 ext/Digest/MD5/t/badfile.t	See if Digest::MD5 extension works
 ext/Digest/MD5/t/files.t	See if Digest::MD5 extension works
+ext/Digest/MD5/t/md5-aaa.t	See if Digest::MD5 extension works
+ext/Digest/MD5/t/utf8.t		See if Digest::MD5 extension works
 ext/Digest/MD5/typemap		Digest::MD5 extension
 ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
 ext/DynaLoader/dl_aix.xs	AIX implementation
@@ -657,6 +659,7 @@ ext/threads/Makefile.PL		ithreads
 ext/threads/README		ithreads
 ext/threads/shared/Makefile.PL	thread shared variables
 ext/threads/shared/queue.pm	Threadsafe queue.
+ext/threads/shared/semaphore.pm	Threadsafe semaphore
 ext/threads/shared/README	thread shared variables
 ext/threads/shared/shared.pm	thread shared variables
 ext/threads/shared/shared.xs	thread shared variables
@@ -668,6 +671,7 @@ ext/threads/shared/t/hv_refs.t	Test shared hashes containing references
 ext/threads/shared/t/hv_simple.t	Tests for basic shared hash functionality.
 ext/threads/shared/t/no_share.t Tests for disabled share on variables.
 ext/threads/shared/t/queue.t	thread shared variables
+ext/threads/shared/t/semaphore.t	test semaphore
 ext/threads/shared/t/shared_attr.t	Test :shared attribute
 ext/threads/shared/t/sv_refs.t	thread shared variables
 ext/threads/shared/t/sv_simple.t	thread shared variables
@@ -1026,6 +1030,7 @@ lib/ExtUtils/MM_Any.pm		MakeMaker methods for Any OS
 lib/ExtUtils/MM_BeOS.pm		MakeMaker methods for BeOS
 lib/ExtUtils/MM_Cygwin.pm	MakeMaker methods for Cygwin
 lib/ExtUtils/MM_DOS.pm		MakeMaker methods for DOS
+lib/ExtUtils/MM_MacOS.pm        MakeMaker methods for MacOS
 lib/ExtUtils/MM_NW5.pm		MakeMaker methods for NetWare
 lib/ExtUtils/MM_OS2.pm		MakeMaker methods for OS/2
 lib/ExtUtils/MM_Unix.pm		MakeMaker methods for Unix
@@ -1905,8 +1910,6 @@ lib/warnings.t			See if warning controls work
 lib/warnings/register.pm	For "use warnings::register"
 lib/Win32.pod			Documentation for Win32 extras
 locale.c			locale-specific utility functions
-macos/MacPerlTests.cmd	MacOS ports
-macos/xsubpp.patch	MacOS ports
 makeaperl.SH			perl script that produces a new perl binary
 makedef.pl			Create symbol export lists for linking
 makedepend.SH			Precursor to makedepend
@@ -2203,8 +2206,7 @@ Porting/fixvars		Find undeclared variables with C compiler and fix em
 Porting/genlog		Generate formatted changelogs by querying p4d
 Porting/Glossary	Glossary of config.sh variables
 Porting/makerel		Release making utility
-Porting/p4d2p		Generate standard patches from p4 diffs
-Porting/p4desc		Smarter 'p4 describe', outputs diffs for new files
+Porting/p4genpatch	Obsoletes both p4desc and p4d2p
 Porting/patching.pod	How to report changes made to Perl
 Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
@@ -2292,6 +2294,7 @@ t/comp/colon.t			See if colons are parsed correctly
 t/comp/cpp.aux			main file for cpp.t
 t/comp/cpp.t			See if C preprocessor works
 t/comp/decl.t			See if declarations work
+t/comp/hints.t			See if %^H works
 t/comp/multiline.t		See if multiline strings work
 t/comp/package.t		See if packages work
 t/comp/proto.t			See if function prototypes work
@@ -2669,17 +2672,20 @@ vms/vmsish.h			VMS-specific C header for Perl core
 vms/vmspipe.com			VMS-specific piped command helper script
 vms/vms_yfix.pl			convert Unix perly.[ch] to VMS perly_[ch].vms
 vms/writemain.pl		Generate perlmain.c from miniperlmain.c+extensions
-vos/build.cm			VOS command macro to build Perl
+vos/build.cm			VOS command macro to build "mini" Perl
 vos/Changes			Changes made to port Perl to the VOS operating system
-vos/compile_perl.cm		VOS command macro to build multiple version of Perl
+vos/compile_full_perl.cm	VOS command macro to build "full" Perl
+vos/compile_perl.cm		VOS command macro to build "mini" Perl
 vos/config.alpha.def		definitions used by config.pl
 vos/config.alpha.h		config.h for use with alpha VOS POSIX.1 support
 vos/config.ga.def		definitions used by config.pl
 vos/config.ga.h			config.h for use with generally-available VOS POSIX.1 support
 vos/config.pl			script to convert a config_h.SH to a config.h
-vos/configure_perl.cm		VOS command macro to configure perl before building
-vos/install_perl.cm		VOS command macro to install perl after building
+vos/configure_full_perl.sh	VOS shell script to configure "full" perl before building
+vos/configure_perl.cm		VOS command macro to configure "mini" perl before building
+vos/install_perl.cm		VOS command macro to install "mini" perl after building
 vos/Makefile			A helper for maintaining the config.*.* in UNIX
+vos/make_full_perl.sh	VOS shell script to build and test "full" perl
 vos/perl.bind			VOS bind control file
 vos/test_vos_dummies.c		Test program for "vos_dummies.c"
 vos/vos.c			VOS emulations for missing POSIX functions
@@ -2737,9 +2743,9 @@ wince/bin/pl2bat.pl			WinCE port
 wince/bin/runperl.pl			WinCE port
 wince/bin/search.pl			WinCE port
 wince/cecopy-lib.pl			WinCE port
+wince/compile.bat			WinCE port
 wince/comp.pl				WinCE port
 wince/config.ce				WinCE port
-wince/config.h				WinCE port
 wince/config_H.ce			WinCE port
 wince/config_h.PL			WinCE port
 wince/config_sh.PL			WinCE port
@@ -2757,7 +2763,6 @@ wince/include/time.h			WinCE port
 wince/Makefile.ce			WinCE port
 wince/makeico.pl			WinCE port
 wince/perl.rc				WinCE port
-wince/perldll.def			WinCE port
 wince/perllib.c				WinCE port
 wince/perlmain.c			WinCE port
 wince/README.compile			WinCE port
@@ -2769,6 +2774,7 @@ wince/win32.h				WinCE port
 wince/win32iop.h			WinCE port
 wince/win32thread.c			WinCE port
 wince/win32thread.h			WinCE port
+wince/win32io.c				WinCE port
 wince/wince.c				WinCE port
 wince/wince.h				WinCE port
 wince/wincesck.c			WinCE port

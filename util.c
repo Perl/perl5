@@ -1113,9 +1113,10 @@ Perl_vmess(pTHX_ const char *pat, va_list *args)
 	    bool line_mode = (RsSIMPLE(PL_rs) &&
 			      SvCUR(PL_rs) == 1 && *SvPVX(PL_rs) == '\n');
 	    Perl_sv_catpvf(aTHX_ sv, ", <%s> %s %"IVdf,
-		      PL_last_in_gv == PL_argvgv ? "" : GvNAME(PL_last_in_gv),
-		      line_mode ? "line" : "chunk",
-		      (IV)IoLINES(GvIOp(PL_last_in_gv)));
+			   PL_last_in_gv == PL_argvgv ?
+			   "" : GvNAME(PL_last_in_gv),
+			   line_mode ? "line" : "chunk",
+			   (IV)IoLINES(GvIOp(PL_last_in_gv)));
 	}
 #ifdef USE_5005THREADS
 	if (thr->tid)
@@ -1593,6 +1594,11 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 void
 Perl_my_setenv(pTHX_ char *nam, char *val)
 {
+#ifdef USE_ITHREADS
+  /* only parent thread can modify process environment */
+  if (PL_curinterp == aTHX)
+#endif
+  {
 #ifndef PERL_USE_SAFE_PUTENV
     /* most putenv()s leak, so we manipulate environ directly */
     register I32 i=setenv_getix(nam);		/* where does it go? */
@@ -1651,6 +1657,7 @@ Perl_my_setenv(pTHX_ char *nam, char *val)
     (void)putenv(new_env);
 #   endif /* __CYGWIN__ */
 #endif  /* PERL_USE_SAFE_PUTENV */
+  }
 }
 
 #else /* WIN32 || NETWARE */

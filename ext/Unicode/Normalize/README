@@ -1,7 +1,7 @@
-Unicode/Normalize version 0.16
+Unicode/Normalize version 0.17
 ===================================
 
-Unicode::Normalize - normalized forms of Unicode text
+Unicode::Normalize - Unicode Normalization Forms
 
 SYNOPSIS
 
@@ -67,8 +67,8 @@ unicore/CompositionExclusions.txt (or unicode/CompExcl.txt)
 
 CAVEAT
 
-(1) In bleadperl, unicore/CompExcl.txt is renamed
-  unicore/CompositionExclusions.txt.
+(1) In the perl-current, unicore/CompExcl.txt
+  is renamed unicore/CompositionExclusions.txt.
 
 (2) When these unicore/*.* files are updated;
 

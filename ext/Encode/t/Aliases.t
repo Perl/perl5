@@ -33,6 +33,8 @@ sub init_a2c{
 	    'utf32-be'  => 'UTF-32BE',
 	    'utf16-le'  => 'UTF-16LE',
 	    'utf32-le'  => 'UTF-32LE',
+	    'UCS4-BE'   => 'UTF-32BE',
+	    'UCS-4-LE'  => 'UTF-32LE',
 	    'cyrillic' => 'iso-8859-5',
 	    'arabic'   => 'iso-8859-6',
 	    'greek'    => 'iso-8859-7',

@@ -2,12 +2,12 @@
 
 package Getopt::Long;
 
-# RCS Status      : $Id: GetoptLong.pm,v 2.55 2002-03-13 13:06:44+01 jv Exp $
+# RCS Status      : $Id: GetoptLong.pm,v 2.57 2002-05-03 17:03:38+02 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Mar 13 12:54:01 2002
-# Update Count    : 1070
+# Last Modified On: Fri May  3 17:01:26 2002
+# Update Count    : 1080
 # Status          : Released
 
 ################ Copyright ################
@@ -35,10 +35,10 @@ use 5.004;
 use strict;
 
 use vars qw($VERSION);
-$VERSION        =  2.29;
+$VERSION        =  2.31;
 # For testing versions only.
 use vars qw($VERSION_STRING);
-$VERSION_STRING = "2.29";
+$VERSION_STRING = "2.31";
 
 use Exporter;
 
@@ -183,7 +183,7 @@ sub configure {
     my $save = Getopt::Long::Configure ($self->{settings}, @_);
 
     # Restore orig config and save the new config.
-    $self->{settings} = Configure ($save);
+    $self->{settings} = Getopt::Long::Configure ($save);
 }
 
 sub getoptions {
@@ -260,7 +260,7 @@ sub GetOptions {
     $error = '';
 
     print STDERR ("GetOpt::Long $Getopt::Long::VERSION (",
-		  '$Revision: 2.55 $', ") ",
+		  '$Revision: 2.57 $', ") ",
 		  "called from package \"$pkg\".",
 		  "\n  ",
 		  "ARGV: (@ARGV)",
@@ -482,21 +482,25 @@ sub GetOptions {
 				      $ctl->[CTL_DEST] == CTL_DEST_HASH ? ", \"$key\"" : "",
 				      ", \"$arg\")\n")
 			    if $debug;
-			local ($@);
-			eval {
+			my $eval_error = do {
+			    local $@;
 			    local $SIG{__DIE__}  = '__DEFAULT__';
-			    &{$linkage{$opt}}($opt,
-					      $ctl->[CTL_DEST] == CTL_DEST_HASH ? ($key) : (),
-					      $arg);
+			    eval {
+				&{$linkage{$opt}}($opt,
+						  $ctl->[CTL_DEST] == CTL_DEST_HASH ? ($key) : (),
+						  $arg);
+			    };
+			    $@;
 			};
-			print STDERR ("=> die($@)\n") if $debug && $@ ne '';
-			if ( $@ =~ /^!/ ) {
-			    if ( $@ =~ /^!FINISH\b/ ) {
+			print STDERR ("=> die($eval_error)\n")
+			  if $debug && $eval_error ne '';
+			if ( $eval_error =~ /^!/ ) {
+			    if ( $eval_error =~ /^!FINISH\b/ ) {
 				$goon = 0;
 			    }
 			}
-			elsif ( $@ ne '' ) {
-			    warn ($@);
+			elsif ( $eval_error ne '' ) {
+			    warn ($eval_error);
 			    $error++;
 			}
 		    }
@@ -555,21 +559,23 @@ sub GetOptions {
 	    # Try non-options call-back.
 	    my $cb;
 	    if ( (defined ($cb = $linkage{'<>'})) ) {
-		local ($@);
 		print STDERR ("=> &L{$tryopt}(\"$tryopt\")\n")
 		  if $debug;
-		eval {
+		my $eval_error = do {
+		    local $@;
 		    local $SIG{__DIE__}  = '__DEFAULT__';
-		    &$cb ($tryopt);
+		    eval { &$cb ($tryopt) };
+		    $@;
 		};
-		print STDERR ("=> die($@)\n") if $debug && $@ ne '';
-		if ( $@ =~ /^!/ ) {
-		    if ( $@ =~ /^!FINISH\b/ ) {
+		print STDERR ("=> die($eval_error)\n")
+		  if $debug && $eval_error ne '';
+		if ( $eval_error =~ /^!/ ) {
+		    if ( $eval_error =~ /^!FINISH\b/ ) {
 			$goon = 0;
 		    }
 		}
-		elsif ( $@ ne '' ) {
-		    warn ($@);
+		elsif ( $eval_error ne '' ) {
+		    warn ($eval_error);
 		    $error++;
 		}
 	    }

@@ -116,7 +116,7 @@ sub Complete {
             CASE: {
                 # (TAB) attempt completion
                 $_ eq "\t" && do {
-                    @match = grep(/^$return/, @cmp_lst);
+                    @match = grep(/^\Q$return/, @cmp_lst);
                     unless ($#match < 0) {
                         $l = length($test = shift(@match));
                         foreach $cmp (@match) {
@@ -133,7 +133,7 @@ sub Complete {
 
                 # (^D) completion list
                 $_ eq $complete && do {
-                    print(join("\r\n", '', grep(/^$return/, @cmp_lst)), "\r\n");
+                    print(join("\r\n", '', grep(/^\Q$return/, @cmp_lst)), "\r\n");
                     redo LOOP;
                 };
 

@@ -339,9 +339,9 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 #    define putenv		PerlEnv_putenv
 #    define getenv		PerlEnv_getenv
 #    define uname		PerlEnv_uname
-#    define stdin		PerlIO_stdin()
-#    define stdout		PerlIO_stdout()
-#    define stderr		PerlIO_stderr()
+#    define stdin		PerlSIO_stdin()
+#    define stdout		PerlSIO_stdout()
+#    define stderr		PerlSIO_stderr()
 #    define fopen		PerlIO_open
 #    define fclose		PerlIO_close
 #    define feof		PerlIO_eof
@@ -357,9 +357,9 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 #    define freopen		PerlIO_reopen
 #    define fread(b,s,c,f)	PerlIO_read((f),(b),(s*c))
 #    define fwrite(b,s,c,f)	PerlIO_write((f),(b),(s*c))
-#    define setbuf		PerlIO_setbuf
-#    define setvbuf		PerlIO_setvbuf
-#    define setlinebuf		PerlIO_setlinebuf
+#    define setbuf		PerlSIO_setbuf
+#    define setvbuf		PerlSIO_setvbuf
+#    define setlinebuf		PerlSIO_setlinebuf
 #    define stdoutf		PerlIO_stdoutf
 #    define vfprintf		PerlIO_vprintf
 #    define ftell		PerlIO_tell

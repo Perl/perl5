@@ -8,14 +8,17 @@ BEGIN {
       print "1..0 # Skip: Encode was not built\n";
       exit 0;
     }
+    if (ord("A") == 193) {
+	print "1..0 # Skip: EBCDIC\n";
+	exit 0;
+    }
     $| = 1;
 }
 
 use strict;
 #use Test::More qw(no_plan);
-use Test::More tests => 19;
+use Test::More tests => 22;
 use Encode q(:all);
-
 
 my $original = '';
 my $nofallback  = '';
@@ -72,6 +75,15 @@ is($src, $residue, "FB_QUIET residue");
     is($dst, $quiet,   "FB_WARN");
     is($src, $residue, "FB_WARN residue");
     like($message, qr/does not map to ascii/o, "FB_WARN message");
+
+    $message = '';
+
+    $src = $original;
+    $dst = $meth->encode($src, WARN_ON_ERR);
+
+    is($dst, $fallenback, "WARN_ON_ERR");
+    is($src, '',  "WARN_ON_ERR residue");
+    like($message, qr/does not map to ascii/o, "WARN_ON_ERR message");
 }
 
 $src = $original;

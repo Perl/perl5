@@ -544,6 +544,11 @@ errors so consider starting laundering now.
 
 =item *
 
+Tied hash interfaces are now required to have the EXISTS and DELETE
+methods (either own or inherited).
+
+=item *
+
 If tr/// is just counting characters, it doesn't attempt to
 modify its target.
 
@@ -1735,10 +1740,6 @@ long doubles support in AIX should be better now.  See L<perlaix>.
 
 =item *
 
-After a long pause, AmigaOS has been verified to be happy with Perl.
-
-=item *
-
 AtheOS ( http://www.atheos.cx/ ) is a new platform.
 
 =item *
@@ -1929,6 +1930,40 @@ Line renumbering with eval and C<#line> now works.
 =item *
 
 Fixed numerous memory leaks, especially in eval "".
+
+=item *
+
+Localised tied variables no more leak memory
+
+    use Tie::Hash;
+    tie my %tied_hash => 'Tie::StdHash';
+
+    ...
+
+    # Used to leak memory every time local() was called,
+    # in a loop this added up.
+    local($tied_hash{Foo}) = 1;
+
+=item *
+
+Localised hash elements (and %ENV) are correctly unlocalised to not to
+exist, if that's what they were.
+
+
+    use Tie::Hash;
+    tie my %tied_hash => 'Tie::StdHash';
+
+    ...
+
+    # Nothing has set the FOO element so far
+
+    { local $tied_hash{FOO} = 'Bar' }
+    
+    # Here the FOO element would have been C<undef>,
+    # but no more so. 
+
+As a side effect of this fix, tied hash interfaces B<must> define
+the EXISTS and DELETE methods.
 
 =item *
 
@@ -2705,6 +2740,14 @@ This is caused by the characters \xFF (y with diaeresis) and \xBE
 (Y with diaeresis) not behaving correctly when being matched
 case-insensitively.
 
+=head2 Modifying $_ Inside for(..)
+
+   for (1..5) { $_++ }
+
+works without complaint.  It shouldn't.  (You should be able to
+modify only lvalue elements inside the loops.)  You can see the
+correct behaviour by replacing the 1..5 with 1, 2, 3, 4, 5.
+
 =head2 mod_perl 1.26 Doesn't Build With Threaded Perl
 
 Use mod_perl 1.27 or higher.
@@ -2713,7 +2756,7 @@ Use mod_perl 1.27 or higher.
 
 Don't panic.  Read INSTALL 'make test' section instead.
 
-=head2  HP-UX lib/posix Subtest 9 Fails When LP64-Configured
+=head2 HP-UX lib/posix Subtest 9 Fails When LP64-Configured
 
 If perl is configured with -Duse64bitall, the successful result of the
 subtest 10 of lib/posix may arrive before the successful result of the
@@ -2849,18 +2892,6 @@ some output may appear twice.
 =head2 XML::Parser not working
 
 Use XML::Parser 2.31 or later.
-
-=head2 Localising a Tied Variable Leaks Memory
-
-    use Tie::Hash;
-    tie my %tie_hash => 'Tie::StdHash';
-
-    ...
-
-    local($tie_hash{Foo}) = 1; # leaks
-
-Code like the above is known to leak memory every time the local()
-is executed.
 
 =head2 z/OS (OS/390)
 

@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: ucm2table,v 1.1 2002/04/22 23:57:10 dankogai Exp $
+# $Id: ucm2table,v 1.2 2002/04/30 16:13:37 dankogai Exp $
 #
 
 use 5.006;
@@ -13,7 +13,7 @@ my $Hex = '[0-9A-Fa-f]';
 while(<>){
 	chomp;
 	my ($uni, $enc, $fb) = 
-	    /^<U($Hex+)>\s+(\S+)\s+\|(\d)$/o or next;
+	    /^<U($Hex+)>\s+(\S+)\s+\|(\d)/o or next;
 	$fb eq '0' or next;
 	my @byte = ();
 	my $ord = 0;
@@ -32,7 +32,7 @@ while(<>){
 
 my $start = $Opt{a} ? 0x20 : 0xa0;
 
-for (my $x = $start; $x <= 0xffff; $ x+= 32) {
+for (my $x = $start; $x <= 0xffff; $x += 32) {
     my $line =  '';
     for my $i (0..31){
 	my $num = $x+$i; $num eq 0x7f and next; # skip delete

@@ -2,7 +2,7 @@ package Encode::Guess;
 use strict;
 
 use Encode qw(:fallbacks find_encoding);
-our $VERSION = do { my @r = (q$Revision: 1.3 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.6 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 my $Canon = 'Guess';
 our $DEBUG = 0;
@@ -65,16 +65,20 @@ sub guess {
     my $class = shift;
     my $obj   = ref($class) ? $class : $Encode::Encoding{$Canon};
     my $octet = shift;
+
+    # sanity check
+    return unless defined $octet and length $octet;
+
     # cheat 0: utf8 flag;
     Encode::is_utf8($octet) and return find_encoding('utf8');
     # cheat 1: BOM
     use Encode::Unicode;
     my $BOM = unpack('n', $octet);
     return find_encoding('UTF-16') 
-	if ($BOM == 0xFeFF or $BOM == 0xFFFe);
+	if (defined $BOM and ($BOM == 0xFeFF or $BOM == 0xFFFe));
     $BOM = unpack('N', $octet);
     return find_encoding('UTF-32') 
-	if ($BOM == 0xFeFF or $BOM == 0xFFFe0000);
+	if (defined $BOM and ($BOM == 0xFeFF or $BOM == 0xFFFe0000));
 
     my %try =  %{$obj->{Suspects}};
     for my $c (@_){
@@ -83,7 +87,7 @@ sub guess {
 	$DEBUG and warn "Added: ", $e->name;
     }
     my $nline = 1;
-    for my $line (split /\r|\n|\r\n/, $octet){
+    for my $line (split /\r\n?|\n/, $octet){
 	# cheat 2 -- \e in the string
 	if ($line =~ /\e/o){
 	    my @keys = keys %try;
@@ -133,6 +137,7 @@ Encode::Guess -- Guesses encoding from data
 
   # if you are sure $data won't contain anything bogus
 
+  use Encode;
   use Encode::Guess qw/euc-jp shiftjis 7bit-jis/;
   my $utf8 = decode("Guess", $data);
   my $data = encode("Guess", $utf8);   # this doesn't work!
@@ -284,6 +289,10 @@ DO NOT PUT TOO MANY SUSPECTS!  Don't you try something like this!
 It is, after all, just a guess.  You should alway be explicit when it
 comes to encodings.  But there are some, especially Japanese,
 environment that guess-coding is a must.  Use this module with care. 
+
+=head1 TO DO
+
+Encode::Guess does not work on EBCDIC platforms.
 
 =head1 SEE ALSO
 

@@ -587,23 +587,39 @@ Perl_save_destructor_x(pTHX_ DESTRUCTORFUNC_t f, void* p)
 void
 Perl_save_aelem(pTHX_ AV *av, I32 idx, SV **sptr)
 {
+    SV *sv;
     SSCHECK(4);
     SSPUSHPTR(SvREFCNT_inc(av));
     SSPUSHINT(idx);
     SSPUSHPTR(SvREFCNT_inc(*sptr));
     SSPUSHINT(SAVEt_AELEM);
     save_scalar_at(sptr);
+    sv = *sptr;
+    /* If we're localizing a tied array element, this new sv
+     * won't actually be stored in the array - so it won't get
+     * reaped when the localize ends. Ensure it gets reaped by
+     * mortifying it instead. DAPM */
+    if (SvTIED_mg(sv, PERL_MAGIC_tiedelem))
+	sv_2mortal(sv);
 }
 
 void
 Perl_save_helem(pTHX_ HV *hv, SV *key, SV **sptr)
 {
+    SV *sv;
     SSCHECK(4);
     SSPUSHPTR(SvREFCNT_inc(hv));
     SSPUSHPTR(SvREFCNT_inc(key));
     SSPUSHPTR(SvREFCNT_inc(*sptr));
     SSPUSHINT(SAVEt_HELEM);
     save_scalar_at(sptr);
+    sv = *sptr;
+    /* If we're localizing a tied hash element, this new sv
+     * won't actually be stored in the hash - so it won't get
+     * reaped when the localize ends. Ensure it gets reaped by
+     * mortifying it instead. DAPM */
+    if (SvTIED_mg(sv, PERL_MAGIC_tiedelem))
+	sv_2mortal(sv);
 }
 
 void
@@ -959,6 +975,10 @@ Perl_leave_scope(pTHX_ I32 base)
 	    PL_op = (OP*)SSPOPPTR;
 	    break;
 	case SAVEt_HINTS:
+	    if ((PL_hints & HINT_LOCALIZE_HH) && GvHV(PL_hintgv)) {
+		SvREFCNT_dec((SV*)GvHV(PL_hintgv));
+		GvHV(PL_hintgv) = NULL;
+	    }
 	    *(I32*)&PL_hints = (I32)SSPOPINT;
 	    break;
 	case SAVEt_COMPPAD:

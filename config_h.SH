@@ -1038,14 +1038,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define BIN "$bin"	/**/
 #define BIN_EXP "$binexp"	/**/
 
-/* PERL_BINCOMPAT_5005:
- *	This symbol, if defined, indicates that this version of Perl should be
- *	binary-compatible with Perl 5.005.  This is impossible for builds
- *	that use features like threads and multiplicity it is always $undef
- *	for those versions.
- */
-#$d_bincompat5005 PERL_BINCOMPAT_5005			/**/
-
 /* BYTEORDER:
  *	This symbol holds the hexadecimal constant defined in byteorder,
  *	in a UV, i.e. 0x1234 or 0x4321 or 0x12345678, etc...
@@ -3604,8 +3596,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	See INSTALL for how this works.
  *	The versioned site_perl directory was introduced in 5.005,
  *	so that is the lowest possible value.
- *	Since this can depend on compile time options (such as
- *	bincompat) it is set by Configure.  Other non-default sources
+ *	Since this can depend on compile time options
+ *	it is set by Configure.  Other non-default sources
  *	of potential incompatibility, such as multiplicity, threads,
  *	debugging, 64bits, sfio, etc., are not checked for currently,
  *	though in principle we could go snooping around in old
@@ -3842,7 +3834,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates that you must access
  *	character data through U32-aligned pointers.
  */
+#ifndef U32_ALIGNMENT_REQUIRED
 #$d_u32align U32_ALIGNMENT_REQUIRED	/**/
+#endif
 
 /* HAS_USLEEP_PROTO:
  *	This symbol, if defined, indicates that the system provides

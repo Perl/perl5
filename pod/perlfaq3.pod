@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.20 $, $Date: 2002/04/23 23:35:39 $)
+perlfaq3 - Programming Tools ($Revision: 1.21 $, $Date: 2002/04/28 15:51:10 $)
 
 =head1 DESCRIPTION
 
@@ -593,7 +593,7 @@ copy, you'll have to sacrifice the memory needed to make one.
 
 For "big" data stores (i.e. ones that exceed available memory) consider
 using one of the DB modules to store it on disk instead of in RAM. This
-will incur a penalty in access time, but that's probably better that
+will incur a penalty in access time, but that's probably better than
 causing your hard disk to thrash due to massive swapping.
 
 =back

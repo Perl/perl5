@@ -19,7 +19,7 @@ my $Is_Win32 = $^O eq 'MSWin32';
 
 skip_all("Tests mostly usesless on MacOS") if $^O eq 'MacOS';
 
-plan(tests => 20);
+plan(tests => 21);
 
 my $Perl = which_perl();
 
@@ -74,6 +74,12 @@ is( $echo_out, "ok\n", 'piped echo emulation');
 
     is( scalar `$Perl -le "print 'ok'" | $Perl -e "print <STDIN>"`, 
         "ok\n", 'extra newlines on outgoing pipes');
+
+    {
+	local($/) = \2;       
+	$out = runperl(prog => 'print q{1234}');
+	is($out, "1234", 'ignore $/ when capturing output in scalar context');
+    }
 }
 
 

@@ -1,3 +1,49 @@
+2002-05-05   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.20
+
+   More synchronization with tweaks Jarkko have done to the
+   bleadperl test suite. This time various EBCDIC hacks.
+
+   Outside PERL_CORE the md5-aaa.t test loaded the wrong version of
+   the module (and would fail if no previous Digest::MD5 was installed).
+   Patch by Mike Stok <mike@stok.co.uk>
+
+
+
+2002-05-01   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.19
+
+   One more test suite update from Jarkko to sync it
+   even better with bleadperl.
+
+
+
+2002-05-01   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.18
+
+   Changes #12954 and #16173 from bleadperl.  Documentation typo fix
+   and some signed/unsigned mismatches that Microsoft's C compiler
+   complained about.
+
+   The EBCDIC-aware md5-aaa.t from bleadperl.
+
+
+
+2002-04-25   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.17
+
+   The SvPVbyte in perl-5.6.1 is buggy.  Use the one from 5.7.3
+   instead.
+
+   Give warning if the function interface is used as instance
+   methods:  $md5->md5_hex().
+
+
+
 2001-09-07   Gisle Aas <gisle@ActiveState.com>
 
    Release 2.16

@@ -1643,8 +1643,25 @@ PP(pp_helem)
     I32 preeminent = 0;
 
     if (SvTYPE(hv) == SVt_PVHV) {
-	if (PL_op->op_private & OPpLVAL_INTRO)
-	    preeminent = SvRMAGICAL(hv) ? 1 : hv_exists_ent(hv, keysv, 0);
+	if (PL_op->op_private & OPpLVAL_INTRO) {
+	    MAGIC *mg;
+	    HV *stash;
+	    /* does the element we're localizing already exist? */
+	    preeminent =  
+		/* can we determine whether it exists? */
+		(    !SvRMAGICAL(hv)
+		  || mg_find((SV*)hv, PERL_MAGIC_env)
+		  || (     (mg = mg_find((SV*)hv, PERL_MAGIC_tied))
+			/* Try to preserve the existenceness of a tied hash
+			 * element by using EXISTS and DELETE if possible.
+			 * Fallback to FETCH and STORE otherwise */
+			&& (stash = SvSTASH(SvRV(SvTIED_obj((SV*)hv, mg))))
+			&& gv_fetchmethod_autoload(stash, "EXISTS", TRUE)
+			&& gv_fetchmethod_autoload(stash, "DELETE", TRUE)
+		    )
+		) ? hv_exists_ent(hv, keysv, 0) : 1;
+
+	}
 	he = hv_fetch_ent(hv, keysv, lval && !defer, hash);
 	svp = he ? &HeVAL(he) : 0;
     }

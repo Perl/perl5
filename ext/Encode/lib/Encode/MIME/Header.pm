@@ -1,7 +1,7 @@
 package Encode::MIME::Header;
 use strict;
 # use warnings;
-our $VERSION = do { my @r = (q$Revision: 1.3 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.4 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode qw(find_encoding encode_utf8);
 use MIME::Base64;
@@ -128,7 +128,9 @@ sub _encode{
     my ($o, $str) = @_;
     my $enc = $o->{encode};
     my $llen = ($o->{bpl} - length(HEAD) - 2 - length(TAIL));
-    $llen *= $enc eq 'B' ? 3/4 : 1/3;
+    # to coerce a floating-point arithmetics, the following contains
+    # .0 in numbers -- dankogai
+    $llen *= $enc eq 'B' ? 3.0/4.0 : 1.0/3.0;
     my @result = ();
     my $chunk = '';
     while(my $chr = substr($str, 0, 1, '')){

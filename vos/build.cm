@@ -38,6 +38,12 @@
       &return 1
       &end
 &
+&if &compiler& = gcc & &cpu& = pa8000
+&then &do
+      &display_line build: "-compiler gcc" is incompatible with "-processor pa8000"
+      &return 1
+      &end
+&
 & Set up the appropriate directory suffix for each architecture.
 &
 &if &cpu& = mc68020
@@ -206,6 +212,8 @@
 &if (command_status) ^= 0 &then &return
 !&compiler& <<xsutils.c &diag& &cpu& &cflags& -o xsutils&s&
 &if (command_status) ^= 0 &then &return
+!&compiler& <vos.c &diag& &cpu& &cflags& -o vos&s&
+&if (command_status) ^= 0 &then &return
 &if &version& = alpha
 &then &do
 !&compiler& <vos_dummies.c &cpu& -O4 -o vos_dummies&s&
@@ -214,11 +222,11 @@
 &
 &if &compiler& = gcc
 &then &do
- !delete_file perl.a
+ &if (exists -file perl.a) &then !delete_file perl.a
  !ar rc perl.a av.o deb.o doio.o doop.o dump.o globals.o gv.o hv.o locale.o &+
  mg.o numeric.o op.o perl.o perlapi.o perlio.o perly.o pp.o pp_ctl.o &+
  pp_hot.o pp_pack.o pp_sort.o pp_sys.o reentr.o regcomp.o regexec.o run.o &+
- scope.o sv.o taint.o toke.o universal.o utf8.o util.o xsutils.o
+ scope.o sv.o taint.o toke.o universal.o utf8.o util.o vos.o xsutils.o
  !delete_file *.o -no_ask -brief
 &end
 &else &do

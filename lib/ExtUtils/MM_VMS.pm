@@ -14,7 +14,7 @@ use VMS::Filespec;
 use File::Basename;
 use File::Spec;
 use vars qw($Revision @ISA $VERSION);
-($VERSION) = $Revision = '5.63_01';
+($VERSION) = $Revision = '5.64_01';
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
@@ -734,11 +734,10 @@ command line to find args.
 
 sub pm_to_blib {
     my($self) = @_;
-    my($line,$from,$to,@m);
     my($autodir) = File::Spec->catdir($self->{INST_LIB},'auto');
-    my(@files) = @{$self->{PM_TO_BLIB}};
+    my(%files) = @{$self->{PM_TO_BLIB}};
 
-    push @m, q{
+    my $m = <<'MAKE_FRAG';
 
 # Dummy target to match Unix target name; we use pm_to_blib.ts as
 # timestamp file to avoid repeated invocations under VMS
@@ -747,28 +746,38 @@ pm_to_blib : pm_to_blib.ts
 
 # As always, keep under DCL's 255-char limit
 pm_to_blib.ts : $(TO_INST_PM)
-};
+MAKE_FRAG
 
-    if (scalar(@files) > 0) {  # protect ourselves from empty PM_TO_BLIB
+    if( keys %files ) {
+        $m .= <<'MAKE_FRAG';
+	$(NOECHO) $(RM_F) .MM_tmp
+MAKE_FRAG
 
-      push(@m,qq[\t\$(NOECHO) \$(RM_F) .MM_tmp\n]);
-      $line = '';  # avoid uninitialized var warning
-      while ($from = shift(@files),$to = shift(@files)) {
-	$line .= " $from $to";
-	if (length($line) > 128) {
-	    push(@m,"\t\$(NOECHO) \$(PERL) -e \"print '$line'\" >>.MM_tmp\n");
-	    $line = '';
-	}
-      }
-      push(@m,"\t\$(NOECHO) \$(PERL) -e \"print '$line'\" >>.MM_tmp\n") if $line;
+        my $line = '';
+        while (my($from, $to) = each %files) {
+            $line .= " $from $to";
+            if (length($line) > 128) {
+                $m .= sprintf <<'MAKE_FRAG', $line;
+	$(NOECHO) $(PERL) -e "print '%s'" >>.MM_tmp
+MAKE_FRAG
+                $line = '';
+            }
+        }
+        $m .= sprintf <<'MAKE_FRAG', $line if $line;
+	$(NOECHO) $(PERL) -e "print '%s'" >>.MM_tmp
+MAKE_FRAG
 
-      push(@m,q[	$(PERLRUN) "-MExtUtils::Install" -e "pm_to_blib({split(' ',<STDIN>)},'].$autodir.q[','$(PM_FILTER)')" <.MM_tmp]);
-      push(@m,qq[\n\t\$(NOECHO) \$(RM_F) .MM_tmp\n]);
+        $m .= sprintf <<'MAKE_FRAG', $autodir;
+	$(PERLRUN) "-MExtUtils::Install" -e "pm_to_blib({split(' ',<STDIN>)},'%s','$(PM_FILTER)')" <.MM_tmp
+	$(NOECHO) $(RM_F) .MM_tmp
+MAKE_FRAG
 
     }
-    push(@m,qq[\t\$(NOECHO) \$(TOUCH) pm_to_blib.ts]);
+    $m .= <<'MAKE_FRAG';
+	$(NOECHO) $(TOUCH) pm_to_blib.ts
+MAKE_FRAG
 
-    join('',@m);
+    return $m;
 }
 
 =item tool_autosplit (override)

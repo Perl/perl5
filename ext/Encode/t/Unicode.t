@@ -1,5 +1,5 @@
 #
-# $Id: Unicode.t,v 1.8 2002/04/16 23:35:00 dankogai Exp $
+# $Id: Unicode.t,v 1.9 2002/05/06 10:26:48 dankogai Exp $
 #
 # This script is written entirely in ASCII, even though quoted literals
 # do include non-BMP unicode characters -- Are you happy, jhi?
@@ -94,11 +94,10 @@ SKIP: {
 	    $j == 0 and (0xD800 <= $i && $i <= 0xDFFF) and next;
 	    $utf8 .= ord($j+$i);
 	}
-	my $len = length($utf8);
 	for my $major ('UTF-16', 'UTF-32'){
 	    for my $minor ('BE', 'LE'){
 		my $enc = $major.$minor;
-		is(decode($enc, encode($enc, $utf8)), $utf8, "$enc RT ($len)");
+		is(decode($enc, encode($enc, $utf8)), $utf8, "$enc RT");
 	    }
 	}
     }

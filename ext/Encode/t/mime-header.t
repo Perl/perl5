@@ -1,5 +1,5 @@
 #
-# $Id: mime-header.t,v 1.3 2002/04/26 03:07:59 dankogai Exp $
+# $Id: mime-header.t,v 1.4 2002/05/04 16:41:18 dankogai Exp $
 # This script is written in utf8
 #
 BEGIN {
@@ -11,6 +11,10 @@ BEGIN {
     if ($Config{'extensions'} !~ /\bEncode\b/) {
       print "1..0 # Skip: Encode was not built\n";
       exit 0;
+    }
+    if (ord("A") == 193) {
+	print "1..0 # Skip: EBCDIC\n";
+	exit 0;
     }
     $| = 1;
 }

@@ -18,9 +18,12 @@ use File::Spec::Functions;
 my @Core_Modules = grep /\S/, <DATA>;
 chomp @Core_Modules;
 
-# Two Net:: modules need the Convert::EBCDIC if in EBDCIC.
-if (ord("A") != 193 || eval { require Convert::EBCDIC }) {
-    push @Core_Modules, qw(Net::Cmd Net::POP3);
+if (eval { require Socket }) {
+  push @Core_Modules, qw(Net::Domain);
+  # Two Net:: modules need the Convert::EBCDIC if in EBDCIC.
+  if (ord("A") != 193 || eval { require Convert::EBCDIC }) {
+      push @Core_Modules, qw(Net::Cmd Net::POP3);
+  }
 }
 
 @Core_Modules = sort @Core_Modules;
@@ -74,7 +77,6 @@ ExtUtils::MM_NW5
 ExtUtils::Install
 ExtUtils::Liblist
 ExtUtils::Mksymlists
-Net::Domain
 O
 Pod::Plainer
 Test::Harness::Iterator

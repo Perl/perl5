@@ -1,5 +1,21 @@
 Revision history for Perl extension Unicode::Collate.
 
+0.12  Sun May 05 09:43:10 2002
+    - add new methods, ->UCA_Version and ->Base_Unicode_Version.
+    - test fix: removed the needless requirement of Unicode::Normalize.
+      [reported by David Hand]
+
+0.11  Fri May 03 02:28:10 2002
+    - fix: now derived collation elements can be used for Hangul Jamo
+      when their weights are not defined.
+      [reported by Andreas J. Koenig]
+    - fix: rearrangements had not worked.
+    - mentioned pleblem on index() in BUGS.
+    - more documents, more tests.
+    - tag names for 'alternate' are case-insensitive (i.e. 'SHIFTed' etc.).
+    - The <undef> value for the keys "overrideCJK", "overrideHangul",
+      "rearrange" has a special behavior (different from default).
+
 0.10  Tue Dec 11 23:26:42 2001
     - now you are allowed to use no table file.
     - fix: fetching CE with two or more combining characters.

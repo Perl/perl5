@@ -2643,6 +2643,7 @@ win32_popen(const char *command, const char *mode)
 #ifdef USE_RTL_POPEN
     return _popen(command, mode);
 #else
+    dTHX;
     int p[2];
     int parent, child;
     int stdfd, oldfd;
@@ -4020,7 +4021,7 @@ win32_free(void *block)
 }
 
 
-int
+DllExport int
 win32_open_osfhandle(intptr_t handle, int flags)
 {
 #ifdef USE_FIXED_OSFHANDLE
@@ -4030,10 +4031,62 @@ win32_open_osfhandle(intptr_t handle, int flags)
     return _open_osfhandle(handle, flags);
 }
 
-intptr_t
+DllExport intptr_t
 win32_get_osfhandle(int fd)
 {
     return (intptr_t)_get_osfhandle(fd);
+}
+
+DllExport FILE *
+win32_fdupopen(FILE *pf)
+{
+    FILE* pfdup;
+    fpos_t pos;
+    char mode[3];
+    int fileno = win32_dup(win32_fileno(pf));
+
+    /* open the file in the same mode */
+#ifdef __BORLANDC__
+    if((pf)->flags & _F_READ) {
+	mode[0] = 'r';
+	mode[1] = 0;
+    }
+    else if((pf)->flags & _F_WRIT) {
+	mode[0] = 'a';
+	mode[1] = 0;
+    }
+    else if((pf)->flags & _F_RDWR) {
+	mode[0] = 'r';
+	mode[1] = '+';
+	mode[2] = 0;
+    }
+#else
+    if((pf)->_flag & _IOREAD) {
+	mode[0] = 'r';
+	mode[1] = 0;
+    }
+    else if((pf)->_flag & _IOWRT) {
+	mode[0] = 'a';
+	mode[1] = 0;
+    }
+    else if((pf)->_flag & _IORW) {
+	mode[0] = 'r';
+	mode[1] = '+';
+	mode[2] = 0;
+    }
+#endif
+
+    /* it appears that the binmode is attached to the
+     * file descriptor so binmode files will be handled
+     * correctly
+     */
+    pfdup = win32_fdopen(fileno, mode);
+
+    /* move the file pointer to the same position */
+    if (!fgetpos(pf, &pos)) {
+	fsetpos(pfdup, &pos);
+    }
+    return pfdup;
 }
 
 DllExport void*
@@ -4601,20 +4654,25 @@ Perl_init_os_extras(void)
      */
 }
 
-#ifdef MULTIPLICITY
-
-PerlInterpreter *
+void *
 win32_signal_context(void)
 {
     dTHX;
+#ifdef MULTIPLICITY
     if (!my_perl) {
 	my_perl = PL_curinterp;
 	PERL_SET_THX(my_perl);
     }
     return my_perl;
+#else
+#ifdef USE_5005THREADS
+    return aTHX;
+#else
+    return PL_curinterp;
+#endif
+#endif
 }
 
-#endif
 
 BOOL WINAPI
 win32_ctrlhandler(DWORD dwCtrlType)
@@ -4624,6 +4682,10 @@ win32_ctrlhandler(DWORD dwCtrlType)
 
     if (!my_perl)
 	return FALSE;
+#else
+#ifdef USE_5005THREADS
+    dTHX;
+#endif
 #endif
 
     switch(dwCtrlType) {

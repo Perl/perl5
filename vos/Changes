@@ -6,6 +6,9 @@ For 5.8.0:
      "install_perl.cm" to use directory naming conventions that
      are closer to the perl standard directory names.
 
+     Added "compile_full_perl.cm", "configure_full_perl.sh" and
+     "make_full_perl.sh" for building full perl.
+
      For the first time, full perl can now be built on VOS using
      its native Configure script and makefiles.  See README.vos
      for details.

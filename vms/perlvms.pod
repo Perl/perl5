@@ -231,6 +231,20 @@ string between the backticks is handled as if it were the
 argument to the C<system> operator (see below).  In this case,
 Perl will wait for the subprocess to complete before continuing. 
 
+The mailbox (MBX) that perl can create to communicate with a pipe
+defaults to a buffer size of 512.  The default buffer size is
+adjustable via the logical name PERL_MBX_SIZE provided that the
+value falls between 128 and the SYSGEN parameter MAXBUF inclusive.
+For example, to double the MBX size from the default within
+a Perl program, use C<$ENV{'PERL_MBX_SIZE'} = 1024;> and then
+open and use pipe constructs.  An alternative would be to issue
+the command:
+
+    $ Define PERL_MBX_SIZE 1024
+
+before running your wide record pipe program.  A larger value may
+improve performance at the expense of the BYTLM UAF quota.
+
 =head1 PERL5LIB and PERLLIB
 
 The PERL5LIB and PERLLIB logical names work as documented in L<perl>,
@@ -298,10 +312,10 @@ not remain as a previous version under the original filename.)
 
 =item -S
 
-If the C<-S> switch is present I<and> the script name does
-not contain a directory, then Perl translates the logical
-name DCL$PATH as a searchlist, using each translation as
-a directory in which to look for the script.  In addition,
+If the C<"-S"> or C<-"S"> switch is present I<and> the script
+name does not contain a directory, then Perl translates the
+logical name DCL$PATH as a searchlist, using each translation
+as a directory in which to look for the script.  In addition,
 if no file type is specified, Perl looks in each directory
 for a file matching the name specified, with a blank type,
 a type of F<.pl>, and a type of F<.com>, in that order.
@@ -445,15 +459,15 @@ the UAF was generated using uppercase username and
 password strings; you'll have to upcase the arguments to
 C<crypt> to insure that you'll get the proper value:
 
-  sub validate_passwd {
-    my($user,$passwd) = @_;
-    my($pwdhash);
-    if ( !($pwdhash = (getpwnam($user))[1]) ||
-         $pwdhash ne crypt("\U$passwd","\U$name") ) {
-      intruder_alert($name);
+    sub validate_passwd {
+        my($user,$passwd) = @_;
+        my($pwdhash);
+        if ( !($pwdhash = (getpwnam($user))[1]) ||
+               $pwdhash ne crypt("\U$passwd","\U$name") ) {
+            intruder_alert($name);
+        }
+        return 1;
     }
-    return 1;
-  }
 
 =item dump
 
@@ -669,17 +683,12 @@ time of the file (VMS revision date).
 =item waitpid PID,FLAGS
 
 If PID is a subprocess started by a piped C<open()> (see L<open>), 
-C<waitpid> will wait for that subprocess, and return its final
-status value in C<$?>.  If PID is a subprocess created in some other
-way (e.g. SPAWNed before Perl was invoked), or is not a subprocess
-of the current process, C<waitpid> will attempt to read from the
-process's termination mailbox, making the final status available in
-C<$?> when the process completes.   If the process specified by PID
-has no termination  mailbox, C<waitpid> will simply check once per
-second whether the process has completed, and return when it has. 
-(If PID specifies a process that isn't a subprocess of the current
-process, and you invoked Perl with the C<-w> switch, a warning will
-be issued.)
+C<waitpid> will wait for that subprocess, and return its final status
+value in C<$?>.  If PID is a subprocess created in some other way (e.g.
+SPAWNed before Perl was invoked), C<waitpid> will simply check once per
+second whether the process has completed, and return when it has.  (If
+PID specifies a process that isn't a subprocess of the current process,
+and you invoked Perl with the C<-w> switch, a warning will be issued.)
 
 Returns PID on success, -1 on error.  The FLAGS argument is ignored
 in all cases.
@@ -808,8 +817,8 @@ process, which will then be inherited by all subprocesses,
 by saying
 
     foreach my $key (qw[C-local keys you want promoted]) {
-       my $temp = $ENV{$key}; # read from C-local array
-       $ENV{$key} = $temp;    # and define as logical name
+        my $temp = $ENV{$key}; # read from C-local array
+        $ENV{$key} = $temp;    # and define as logical name
     }
 
 (You can't just say C<$ENV{$key} = $ENV{$key}>, since the
@@ -911,11 +920,11 @@ problems.
 
 =head1 Revision date
 
-This document was last updated on 2-Oct-2001, for Perl 5, 
+This document was last updated on 01-May-2002, for Perl 5,
 patchlevel 8.
 
 =head1 AUTHOR
 
-Charles Bailey  <bailey@cor.newman.upenn.edu>
-Craig Berry  <craigberry@mac.com>
-Dan Sugalski  <dan@sidhe.org>
+Charles Bailey  bailey@cor.newman.upenn.edu
+Craig Berry  craigberry@mac.com
+Dan Sugalski  dan@sidhe.org

@@ -36,7 +36,7 @@ Summary of my $package (revision $baserev $version_patchlevel_string) configurat
     usethreads=$usethreads use5005threads=$use5005threads useithreads=$useithreads usemultiplicity=$usemultiplicity
     useperlio=$useperlio d_sfio=$d_sfio uselargefiles=$uselargefiles usesocks=$usesocks
     use64bitint=$use64bitint use64bitall=$use64bitall uselongdouble=$uselongdouble
-    usemymalloc=$usemymalloc, bincompat5005=$d_bincompat5005
+    usemymalloc=$usemymalloc, bincompat5005=undef
   Compiler:
     cc='$cc', ccflags ='$ccflags',
     optimize='$optimize',

@@ -143,7 +143,6 @@ timetype='time_t'
 #
 # Functionality.
 #
-bincompat5005="$undef"
 uselargefiles="$undef"
 #
 # Expected functionality provided in mpeix.c.

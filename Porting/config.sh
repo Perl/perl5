@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Tue Apr 23 06:32:48 EET DST 2002
+# Configuration time: Wed May  1 06:32:57 EET DST 2002
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -32,9 +32,9 @@ alignbytes='8'
 ansi2knr=''
 aphostname=''
 api_revision='5'
-api_subversion='0'
-api_version='5'
-api_versionstring='5.005'
+api_subversion='3'
+api_version='7'
+api_versionstring='5.7.3'
 ar='ar'
 archlib='/opt/perl/lib/5.7.3/alpha-dec_osf'
 archlibexp='/opt/perl/lib/5.7.3/alpha-dec_osf'
@@ -46,7 +46,6 @@ awk='awk'
 baserev='5.0'
 bash=''
 bin='/opt/perl/bin'
-bincompat5005='define'
 binexp='/opt/perl/bin'
 bison='bison'
 byacc='byacc'
@@ -64,7 +63,7 @@ ccsymbols='__alpha=1 __LANGUAGE_C__=1 __osf__=1 __unix__=1 _LONGLONG=1 _SYSTYPE_
 ccversion='V5.6-082'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Tue Apr 23 06:32:48 EET DST 2002'
+cf_time='Wed May  1 06:32:57 EET DST 2002'
 charsize='1'
 chgrp=''
 chmod='chmod'
@@ -114,7 +113,6 @@ d_atoll='undef'
 d_attribut='undef'
 d_bcmp='define'
 d_bcopy='define'
-d_bincompat5005='define'
 d_bsd='undef'
 d_bsdgetpgrp='undef'
 d_bsdsetpgrp='define'
@@ -771,7 +769,7 @@ patchlevel='7'
 path_sep=':'
 perl5='perl'
 perl=''
-perl_patchlevel='16080'
+perl_patchlevel='16266'
 perladmin='yourname@yourhost.yourplace.com'
 perllibs='-lm -lutil'
 perlpath='/opt/perl/bin/perl5.7.3'
@@ -955,12 +953,12 @@ vendorlibexp=''
 vendorprefix=''
 vendorprefixexp=''
 version='5.7.3'
-version_patchlevel_string='version 7 subversion 3 patch 16080'
+version_patchlevel_string='version 7 subversion 3 patch 16266'
 versiononly='define'
 vi=''
 voidflags='15'
 xlibpth='/usr/lib/386 /lib/386'
-xs_apiversion='5.005'
+xs_apiversion='5.7.3'
 perl5='yacc'
 yaccflags=''
 zcat=''
@@ -983,9 +981,9 @@ PERL_REVISION=5
 PERL_VERSION=7
 PERL_SUBVERSION=3
 PERL_API_REVISION=5
-PERL_API_VERSION=5
-PERL_API_SUBVERSION=0
-PERL_PATCHLEVEL=16080
+PERL_API_VERSION=7
+PERL_API_SUBVERSION=3
+PERL_PATCHLEVEL=16266
 PERL_CONFIG_SH=true
 # Variables propagated from previous config.sh file.
 pp_sys_cflags='ccflags="$ccflags -DNO_EFF_ONLY_OK"'

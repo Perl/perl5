@@ -5,7 +5,11 @@ BEGIN {
     @INC = '../lib';
     require "../t/test.pl";
     skip_all("No perlio") unless (find PerlIO::Layer 'perlio');
-    plan (8);
+    if (ord("A") == 193) {
+	print "1..0 # Skip: EBCDIC\n";
+	exit 0;
+    }
+    plan (9);
 }
 use Encode qw(:fallback_all);
 
@@ -13,12 +17,16 @@ use Encode qw(:fallback_all);
 
 my $file = "fallback$$.txt";
 
-$PerlIO::encoding::fallback = Encode::PERLQQ;
-
-ok(open(my $fh,">encoding(iso-8859-1)",$file),"opened iso-8859-1 file");
-my $str = "\x{20AC}";
-print $fh $str,"0.02\n";
-close($fh);
+{
+    my $message = '';
+    local $SIG{__WARN__} = sub { $message = $_[0] };
+    $PerlIO::encoding::fallback = Encode::PERLQQ;
+    ok(open(my $fh,">encoding(iso-8859-1)",$file),"opened iso-8859-1 file");
+    my $str = "\x{20AC}";
+    print $fh $str,"0.02\n";
+    close($fh);
+    like($message, qr/does not map to iso-8859-1/o, "FB_WARN message");
+}
 
 open($fh,$file) || die "File cannot be re-opened";
 my $line = <$fh>;

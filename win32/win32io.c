@@ -10,10 +10,14 @@
 #include <sys/stat.h>
 #include "EXTERN.h"
 #include "perl.h"
+
+#ifdef PERLIO_LAYERS
+
 #include "perliol.h"
 
 #define NO_XSLOCKS
 #include "XSUB.h"
+
 
 /* Bottom-most level for Win32 case */
 
@@ -359,5 +363,5 @@ PerlIO_funcs PerlIO_win32 = {
  NULL, /* set_ptrcnt */
 };
 
-
+#endif
 

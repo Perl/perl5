@@ -1,3 +1,10 @@
+5.92_01 Mon Apr 29 23:09:38 EDT 2002
+    - Fixing case of modules with no .pm files on VMS.
+    - LDLOADLIBS fix for NetBSD and easier overriding (bleadperl 16233)
+    * syncing in MM_MacOS from pudge.
+    - syncing in NetWare fixes (16266 & 16190)
+    - Cleaning up MM_NW5.pm somewhat.
+
 5.91_02 Wed Apr 24 01:29:56 EDT 2002
     - Adjustments to tests for inclusion in the core.
 

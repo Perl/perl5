@@ -33,10 +33,6 @@ archname='cygwin'
 cccdlflags=' '
 ld='ld2'
 
-# optional(ish)
-# - perl malloc needs to be unpolluted
-bincompat5005='undef'
-
 # Win9x problem with non-blocking read from a closed pipe
 d_eofnblk='define'
 

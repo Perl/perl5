@@ -431,7 +431,7 @@ perl_destruct(pTHXx)
     FREETMPS;
 
     /* Need to flush since END blocks can produce output */
-    PerlIO_flush((PerlIO*)NULL); 
+    PerlIO_flush((PerlIO*)NULL);
 
     if (CALL_FPTR(PL_threadhook)(aTHX)) {
         /* Threads hook has vetoed further cleanup */
@@ -498,7 +498,13 @@ perl_destruct(pTHXx)
      * so we certainly shouldn't free it here
      */
 #if defined(USE_ENVIRON_ARRAY) && !defined(PERL_USE_SAFE_PUTENV)
-    if (environ != PL_origenviron) {
+    if (environ != PL_origenviron
+#ifdef USE_ITHREADS
+	/* only main thread can free environ[0] contents */
+	&& PL_curinterp == aTHX
+#endif
+	)
+    {
 	I32 i;
 
 	for (i = 0; environ[i]; i++)
@@ -825,9 +831,6 @@ perl_destruct(pTHXx)
     SvANY(&PL_sv_no) = NULL;
     SvFLAGS(&PL_sv_no) = 0;
 
-    SvREFCNT(&PL_sv_undef) = 0;
-    SvREADONLY_off(&PL_sv_undef);
-
     {
         int i;
         for (i=0; i<=2; i++) {
@@ -845,6 +848,13 @@ perl_destruct(pTHXx)
     /* No more IO - including error messages ! */
     PerlIO_cleanup(aTHX);
 #endif
+
+    /* sv_undef needs to stay immortal until after PerlIO_cleanup
+       as currently layers use it rather than Nullsv as a marker
+       for no arg - and will try and SvREFCNT_dec it.
+     */
+    SvREFCNT(&PL_sv_undef) = 0;
+    SvREADONLY_off(&PL_sv_undef);
 
     Safefree(PL_origfilename);
     Safefree(PL_reg_start_tmp);
@@ -3572,8 +3582,14 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	*/
 	if (!env)
 	    env = environ;
-	if (env != environ)
+	if (env != environ
+#  ifdef USE_ITHREADS
+	    && PL_curinterp == aTHX
+#  endif
+	   )
+	{
 	    environ[0] = Nullch;
+	}
 	if (env)
 	  for (; *env; env++) {
 	    if (!(s = strchr(*env,'=')))

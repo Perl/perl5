@@ -786,11 +786,11 @@ PMOP_pmoffset(o)
 
 #endif
 
-U16
+U32
 PMOP_pmflags(o)
 	B::PMOP		o
 
-U16
+U32
 PMOP_pmpermflags(o)
 	B::PMOP		o
 

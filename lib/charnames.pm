@@ -229,6 +229,8 @@ sub vianame
 
     my $arg = shift;
 
+    return chr hex $1 if $arg =~ /^U\+([0-9a-fA-F]+)$/;
+
     return $vianame{$arg} if exists $vianame{$arg};
 
     $txt = do "unicore/Name.pl" unless $txt;
@@ -266,11 +268,11 @@ charnames - define character names for C<\N{named}> string literal escapes
 
 Pragma C<use charnames> supports arguments C<:full>, C<:short> and
 script names.  If C<:full> is present, for expansion of
-C<\N{CHARNAME}}> string C<CHARNAME> is first looked in the list of
+C<\N{CHARNAME}> string C<CHARNAME> is first looked in the list of
 standard Unicode names of chars.  If C<:short> is present, and
 C<CHARNAME> has the form C<SCRIPT:CNAME>, then C<CNAME> is looked up
 as a letter in script C<SCRIPT>.  If pragma C<use charnames> is used
-with script name arguments, then for C<\N{CHARNAME}}> the name
+with script name arguments, then for C<\N{CHARNAME}> the name
 C<CHARNAME> is looked up as a letter in the given scripts (in the
 specified order).
 
@@ -291,11 +293,14 @@ use variables inside the C<\N{...}>.  If you want similar run-time
 functionality, use charnames::vianame().
 
 For the C0 and C1 control characters (U+0000..U+001F, U+0080..U+009F)
-as of Unicode 3.1, there are no official Unicode names but you can
-use instead the ISO 6429 names (LINE FEED, ESCAPE, and so forth).
-In Unicode 3.2 some naming changes will happen since ISO 6429 has been
-updated.  Also note that the U+UU80, U+0081, U+0084, and U+0099
-do not have names even in ISO 6429.
+as of Unicode 3.1, there are no official Unicode names but you can use
+instead the ISO 6429 names (LINE FEED, ESCAPE, and so forth).  In
+Unicode 3.2 (as of Perl 5.8) some naming changes take place ISO 6429
+has been updated, see L</ALIASES>.  Also note that the U+UU80, U+0081,
+U+0084, and U+0099 do not have names even in ISO 6429.
+
+Since the Unicode standard uses "U+HHHH", so can you: "\N{U+263a}"
+is the Unicode smiley face, or "\N{WHITE SMILING FACE}".
 
 =head1 CUSTOM TRANSLATORS
 
