@@ -840,7 +840,6 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     case ',':
     case '\\':
     case '/':
-    case '|':
     case '\001':	/* $^A */
     case '\003':	/* $^C */
     case '\004':	/* $^D */
@@ -852,6 +851,11 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     case '\024':	/* $^T */
 	if (len > 1)
 	    break;
+	goto magicalize;
+    case '|':
+	if (len > 1)
+	    break;
+	sv_setiv(GvSV(gv), (IV)(IoFLAGS(GvIOp(PL_defoutgv)) & IOf_FLUSH) != 0);
 	goto magicalize;
     case '\017':	/* $^O & $^OPEN */
 	if (len > 1 && strNE(name, "\017PEN"))
