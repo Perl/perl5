@@ -1,9 +1,17 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.74 2002/05/28 18:33:15 dankogai Exp dankogai $
+# $Id: Changes,v 1.75 2002/06/01 18:07:49 dankogai Exp dankogai $
 #
 
-$Revision: 1.74 $ $Date: 2002/05/28 18:33:15 $
+$Revision: 1.75 $ $Date: 2002/06/01 18:07:49 $
+! lib/Encode/Alias.pm t/Alias.t lib/Encode/Supported.pod TW/TW.pm
+  glibc compliance cited by Autrijus.
+  http://www.li18nux.org/docs/html/CodesetAliasTable-V10.html
+! bin/enc2xs bin/piconv
+  Subject: Re: forewarning: usedevel and versiononly
+  Message-Id: <20020529081515.D570.H.M.BRAND@hccnet.nl>
+
+1.74 2002/05/28 18:33:15
 + ucm/null.ucm ucm/ctrl.ucm
 ! Makefile.PL bin/enc2xs lib/Encode/Supported.pod
   "null" and "ascii-ctrl" encodings added upon the request of Autrijus
@@ -671,7 +679,7 @@ $Revision: 1.74 $ $Date: 2002/05/28 18:33:15 $
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/05/28 18:33:15 $
+1.11  $Date: 2002/06/01 18:07:49 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST

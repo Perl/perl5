@@ -1,5 +1,5 @@
 #!./perl
-# $Id: piconv,v 1.24 2002/04/22 02:45:50 dankogai Exp $
+# $Id: piconv,v 1.25 2002/06/01 18:07:49 dankogai Exp dankogai $
 #
 use 5.8.0;
 use strict;

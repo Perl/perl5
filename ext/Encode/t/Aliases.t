@@ -21,6 +21,7 @@ my $ON_EBCDIC;
 sub init_a2c{
     %a2c = (
 	    'US-ascii' => 'ascii',
+	    'ISO-646-US' => 'ascii',
 	    'UTF-8'    => 'utf8',
 	    'UCS-2'    => 'UCS-2BE',
 	    'UCS2'     => 'UCS-2BE',
@@ -62,7 +63,9 @@ sub init_a2c{
 	    'jis'	    => $ON_EBCDIC ? '' : '7bit-jis',
 	    'big-5'	    => $ON_EBCDIC ? '' : 'big5-eten',
 	    'zh_TW.Big5'    => $ON_EBCDIC ? '' : 'big5-eten',
+	    'tca-big5'	    => $ON_EBCDIC ? '' : 'big5-eten',
 	    'big5-hk'	    => $ON_EBCDIC ? '' : 'big5-hkscs',
+	    'hkscs-big5'    => $ON_EBCDIC ? '' : 'big5-hkscs',
 	    'GB_2312-80'    => $ON_EBCDIC ? '' : 'euc-cn',
 	    'KS_C_5601-1987'    => $ON_EBCDIC ? '' : 'cp949',
 	    #
@@ -84,6 +87,7 @@ sub init_a2c{
 	my $v = $Encode::Alias::Winlatin2cp{$k};
 	$a2c{"Win" . ucfirst($k)} = "cp" . $v;
 	$a2c{"IBM-$v"} = $a2c{"MS-$v"} = "cp" . $v;
+	$a2c{"cp-" . $v} = "cp" . $v;
     }
     my @a2c = keys %a2c;
     for my $k (@a2c){
