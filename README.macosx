@@ -23,7 +23,7 @@ somewhat buggy libdb, so some of the DB_File tests are known to fail on
 those releases.
 
 
-=head1 INSTALLATION PREFIX
+=head2 Installation Prefix
 
 The default installation location for this release uses the traditional
 UNIX directory layout under /usr/local. This is the recommended location
@@ -38,7 +38,7 @@ that mirrors that of Apple's default Perl, with core modules stored in
 on a file server and used by many Macs.
 
 
-=head1 LIBPERL AND PREBINDING
+=head2 libperl and Prebinding
 
 Mac OS X ships with a dynamically-loaded libperl, but the default for
 this release is to compile a static libperl. The reason for this is
@@ -50,12 +50,13 @@ thus has easy access to it when building Perl, but ordinary users would
 need to go to a great deal of effort to obtain the information needed
 for pre-binding.
 
-You can override the default and build a shared libperl if you wish, but
-the load time will be significantly greater than either the static
-library, or Apple's pre-bound dynamic library.
+You can override the default and build a shared libperl if you wish
+(S<Configure ... -Duseshrlib>), but the load time will be
+significantly greater than either the static library, or Apple's
+pre-bound dynamic library.
 
 
-=head1 UPDATING PANTHER
+=head2 Updating Panther
 
 As of this writing, the latest Perl release that has been tested and
 approved for inclusion in the 10.3 "Panther" release of Mac OS X is
@@ -67,7 +68,8 @@ with Panther, it is recommended that you wait for an official Apple
 update to the OS, rather than attempting to update it yourself. In most
 cases, if you need a newer Perl, it is preferable to install it in some
 other location, such as /usr/local or /opt, rather than overwriting the
-system Perl.
+system Perl.  The default location (no -Dprefix=... specified when running
+Configure) is /usr/local.
 
 If you find that you do need to update the system Perl, there is one
 potential issue. If you upgrade using the default static libperl, you
@@ -83,7 +85,34 @@ same Perl version. If you're updating from (for example) 5.8.1 to 5.8.2,
 this issue won't affect you.
 
 
-=head1 MACPERL
+=head2 Known problems
+
+If you have installed extra libraries such as GDBM through Fink
+(in other words, you have libraries under F</sw/lib>), or libdlcompat
+to F</usr/local/lib>, you may need to be extra careful when running
+Configure to not to confuse Configure and Perl about which libraries
+to use.  Being confused will show up for example as "dyld" errors about
+symbol problems, for example during "make test". The safest bet is to run
+Configure as
+
+    Configure ... -Uloclibpth -Dlibpth=/usr/lib
+
+to make Configure look only into the system libraries.  If you have some
+extra library directories that you really want to use (such as newer
+Berkeley DB libraries in pre-Panther systems), add those to the libpth:
+
+    Configure ... -Uloclibpth -Dlibpth='/usr/lib /opt/lib'
+
+The default of building Perl statically may cause problems with complex
+applications like Tk: in that case consider building shared Perl
+
+    Configure ... -Duseshrplib
+
+but remember that there's a startup cost to pay in that case (see above
+"libperl and Prebinding").
+
+
+=head2 MacPerl
 
 Quite a bit has been written about MacPerl, the Perl distribution for
 "Classic MacOS" - that is, versions 9 and earlier of MacOS. Because it
@@ -101,7 +130,7 @@ that case, the correct procedure on Mac OS X is usually to follow the
 UNIX instructions, rather than the MacPerl instructions.
 
 
-=head1 CARBON
+=head2 Carbon
 
 MacPerl ships with a number of modules that are used to access the
 classic MacOS toolbox. Many of these modules have been updated to use
@@ -109,7 +138,7 @@ Mac OS X's newer "Carbon" toolbox, and are available from CPAN in the
 "Mac::Carbon" module.
 
 
-=head1 COCOA
+=head2 Cocoa
 
 There are two ways to use Cocoa from Perl. Apple's PerlObjCBridge
 module, included with Mac OS X, can be used by standalone scripts to
@@ -127,4 +156,4 @@ This README was written by Sherm Pendley E<lt>sherm@dot-app.orgE<gt>.
 
 =head1 DATE
 
-Last modified 2003.07.31.
+Last modified 2003-08-16.
