@@ -776,13 +776,9 @@ regmatch(regnode *prog)
 			  SvPVX(prop));
 	} );
 
-#ifdef REGALIGN
 	next = scan + NEXT_OFF(scan);
 	if (next == scan)
 	    next = NULL;
-#else
-	next = regnext(scan);
-#endif
 
 	switch (OP(scan)) {
 	case BOL:
@@ -1242,15 +1238,11 @@ regmatch(regnode *prog)
 			    regendp[n] = 0;
 			*reglastparen = n;
 			scan = next;
-#ifdef REGALIGN
 			/*SUPPRESS 560*/
 			if (n = (c1 == BRANCH ? NEXT_OFF(next) : ARG(next)))
 			    next += n;
 			else
 			    next = NULL;
-#else
-			next = regnext(next);
-#endif
 			inner = NEXTOPER(scan);
 			if (c1 == BRANCHJ) {
 			    inner = NEXTOPER(inner);
@@ -1274,7 +1266,6 @@ regmatch(regnode *prog)
 	       and has no parenths to influence future backrefs. */
 	    ln = ARG1(scan);  /* min to match */
 	    n  = ARG2(scan);  /* max to match */
-#ifdef REGALIGN_STRUCT
 	    paren = scan->flags;
 	    if (paren) {
 		if (paren > regsize)
@@ -1282,7 +1273,6 @@ regmatch(regnode *prog)
 		if (paren > *reglastparen)
 		    *reglastparen = paren;
 	    }
-#endif 
 	    scan = NEXTOPER(scan) + NODE_STEP_REGNODE;
 	    if (paren)
 		scan += NEXT_OFF(scan); /* Skip former OPEN. */

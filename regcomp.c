@@ -429,7 +429,6 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 		delta += (minnext + deltanext) * maxcount - minnext * mincount;
 
 		/* Try powerful optimization CURLYX => CURLYN. */
-#ifdef REGALIGN_STRUCT
 		if (  OP(oscan) == CURLYX && data 
 		      && data->flags & SF_IN_PAR
 		      && !(data->flags & SF_HAS_EVAL)
@@ -461,16 +460,11 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 		    NEXT_OFF(nxt+ 1) = 0; /* just for consistancy. */
 #endif 
 		}
-#endif 
 	      nogo:
 
 		/* Try optimization CURLYX => CURLYM. */
 		if (  OP(oscan) == CURLYX && data 
-#ifdef REGALIGN_STRUCT
 		      && !(data->flags & SF_HAS_PAR)
-#else
-		      && !(data->flags & (SF_HAS_PAR|SF_IN_PAR))
-#endif 
 		      && !(data->flags & SF_HAS_EVAL)
 		      && !deltanext  ) {
 		    /* XXXX How to optimize if data == 0? */
@@ -483,7 +477,6 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 			    && (OP(nxt2) != WHILEM)) 
 			nxt = nxt2;
 		    OP(nxt2)  = SUCCEED; /* Whas WHILEM */
-#ifdef REGALIGN_STRUCT
 		    /* Need to optimize away parenths. */
 		    if (data->flags & SF_IN_PAR) {
 			/* Set the parenth number.  */
@@ -519,7 +512,6 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 			study_chunk(&nxt1, &deltanext, nxt, NULL, 0);
 		    } else
 			oscan->flags = 0;
-#endif 
 		}
 		if (data && fl & (SF_HAS_PAR|SF_IN_PAR)) 
 		    pars++;
@@ -573,13 +565,11 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 		if (data && (fl & SF_HAS_EVAL))
 		    data->flags |= SF_HAS_EVAL;
 	      optimize_curly_tail:
-#ifdef REGALIGN
 		if (OP(oscan) != CURLYX) {
 		    while (regkind[(U8)OP(next = regnext(oscan))] == NOTHING
 			   && NEXT_OFF(next))
 			NEXT_OFF(oscan) += NEXT_OFF(next);
 		}
-#endif
 		continue;
 	    default:			/* REF only? */
 		if (flags & SCF_DO_SUBSTR) {
@@ -624,11 +614,9 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 	} else if (OP(scan) == OPEN) {
 	    pars++;
 	} else if (OP(scan) == CLOSE && ARG(scan) == is_par) {
-#ifdef REGALIGN_STRUCT
 	    next = regnext(scan);
 
 	    if ( next && (OP(next) != WHILEM) && next < last)
-#endif 
 		is_par = 0;		/* Disable optimization */
 	} else if (OP(scan) == EVAL) {
 		if (data)
@@ -758,15 +746,10 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 
     /* Small enough for pointer-storage convention?
        If extralen==0, this means that we will not need long jumps. */
-#ifndef REGALIGN_STRUCT
-    if (regsize >= 0x10000L && extralen)
-	FAIL("regexp too big");
-#else
     if (regsize >= 0x10000L && extralen)
         regsize += extralen;
     else
 	extralen = 0;
-#endif 
 
     /* Allocate space and initialize. */
     Newc(1001, r, sizeof(regexp) + (unsigned)regsize * sizeof(regnode),
@@ -993,9 +976,6 @@ reg(I32 paren, I32 *flagp)
 	    ret = NULL;			/* For look-ahead/behind. */
 	    switch (paren) {
 	    case '<':
-#ifndef REGALIGN_STRUCT
-		FAIL("lookbehind non-implemented without REGALIGN_STRUCT");
-#endif 
 		regseen |= REG_SEEN_LOOKBEHIND;
 		if (*regcomp_parse == '!') 
 		    paren = ',';
@@ -1224,9 +1204,7 @@ reg(I32 paren, I32 *flagp)
 	    if (paren == '>')
 		node = SUSPEND, flag = 0;
 	    reginsert(node,ret);
-#ifdef REGALIGN_STRUCT
 	    ret->flags = flag;
-#endif 
 	    regtail(ret, reg_node(TAIL));
 	}
     }
@@ -1387,9 +1365,7 @@ regpiece(I32 *flagp)
 		if (SIZE_ONLY)
 		    extralen += 3;
 	    }
-#ifdef REGALIGN_STRUCT
 	    ret->flags = 0;
-#endif 
 
 	    if (min > 0)
 		*flagp = (WORST|HASWIDTH);
@@ -1420,9 +1396,7 @@ regpiece(I32 *flagp)
 
     if (op == '*' && (flags&SIMPLE)) {
 	reginsert(STAR, ret);
-#ifdef REGALIGN_STRUCT
 	ret->flags = 0;
-#endif 
 	regnaughty += 4;
     }
     else if (op == '*') {
@@ -1430,9 +1404,7 @@ regpiece(I32 *flagp)
 	goto do_curly;
     } else if (op == '+' && (flags&SIMPLE)) {
 	reginsert(PLUS, ret);
-#ifdef REGALIGN_STRUCT
 	ret->flags = 0;
-#endif 
 	regnaughty += 3;
     }
     else if (op == '+') {
@@ -1451,11 +1423,7 @@ regpiece(I32 *flagp)
     if (*regcomp_parse == '?') {
 	nextchar();
 	reginsert(MINMOD, ret);
-#ifdef REGALIGN
 	regtail(ret, ret + NODE_STEP_REGNODE);
-#else
-	regtail(ret, ret + 3);
-#endif
     }
     if (ISMULT2(regcomp_parse))
 	FAIL("nested *?+ in regexp");
@@ -1787,9 +1755,7 @@ tryagain:
 		*OPERAND(ret) = len;
 	    regc('\0', s++);
 	    if (SIZE_ONLY) {
-#ifdef REGALIGN_STRUCT
 		regsize += (len + 2 + sizeof(regnode) - 1) / sizeof(regnode);
-#endif 
 	    } else {
 		regcode += (len + 2 + sizeof(regnode) - 1) / sizeof(regnode);
 	    }
@@ -2062,11 +2028,7 @@ reg_node(U8 op)
     ret = regcode;
     if (SIZE_ONLY) {
 	SIZE_ALIGN(regsize);
-#ifdef REGALIGN_STRUCT
 	regsize += 1;
-#else
-	regsize += 3;
-#endif 
 	return(ret);
     }
 
@@ -2090,11 +2052,7 @@ reganode(U8 op, U32 arg)
     ret = regcode;
     if (SIZE_ONLY) {
 	SIZE_ALIGN(regsize);
-#ifdef REGALIGN
 	regsize += 2;
-#else
-	regsize += 5;
-#endif 
 	return(ret);
     }
 
@@ -2146,9 +2104,6 @@ reginsert(U8 op, regnode *opnd)
     src = NEXTOPER(place);
     FILL_ADVANCE_NODE(place, op);
     Zero(src, offset, regnode);
-#if defined(REGALIGN) && !defined(REGALIGN_STRUCT)
-    src[offset + 1] = '\177';
-#endif
 }
 
 /*
@@ -2173,27 +2128,11 @@ regtail(regnode *p, regnode *val)
 	scan = temp;
     }
 
-#ifdef REGALIGN
-#  ifdef REGALIGN_STRUCT
     if (reg_off_by_arg[OP(scan)]) {
 	ARG_SET(scan, val - scan);
     } else {
 	NEXT_OFF(scan) = val - scan;
     }
-#  else
-    offset = val - scan;
-#    ifndef lint
-    *(short*)(scan+1) = offset;
-#    endif
-#endif 
-#else
-    if (OP(scan) == BACK)
-	offset = scan - val;
-    else
-	offset = val - scan;
-    *(scan+1) = (offset>>8)&0377;
-    *(scan+2) = offset&0377;
-#endif
 }
 
 /*
@@ -2441,18 +2380,10 @@ regprop(SV *sv, regnode *o)
 	sv_catpvf(sv, "CURLY {%d,%d}", ARG1(o), ARG2(o));
 	break;
     case CURLYM:
-#ifdef REGALIGN_STRUCT
 	sv_catpvf(sv, "CURLYM[%d] {%d,%d}", o->flags, ARG1(o), ARG2(o));
-#else
-	sv_catpvf(sv, "CURLYM {%d,%d}", ARG1(o), ARG2(o));
-#endif 
 	break;
     case CURLYN:
-#ifdef REGALIGN_STRUCT
 	sv_catpvf(sv, "CURLYN[%d] {%d,%d}", o->flags, ARG1(o), ARG2(o));
-#else
-	sv_catpvf(sv, "CURLYN {%d,%d}", ARG1(o), ARG2(o));
-#endif 
 	break;
     case CURLYX:
 	sv_catpvf(sv, "CURLYX {%d,%d}", ARG1(o), ARG2(o));
@@ -2486,18 +2417,10 @@ regprop(SV *sv, regnode *o)
 	p = "GPOS";
 	break;
     case UNLESSM:
-#ifdef REGALIGN_STRUCT
 	sv_catpvf(sv, "UNLESSM[-%d]", o->flags);
-#else
-	p = "UNLESSM";
-#endif 
 	break;
     case IFMATCH:
-#ifdef REGALIGN_STRUCT
 	sv_catpvf(sv, "IFMATCH[-%d]", o->flags);
-#else
-	p = "IFMATCH";
-#endif 
 	break;
     case SUCCEED:
 	p = "SUCCEED";
@@ -2628,14 +2551,7 @@ regnext(register regnode *p)
     if (offset == 0)
 	return(NULL);
 
-#ifdef REGALIGN
     return(p+offset);
-#else
-    if (OP(p) == BACK)
-	return(p-offset);
-    else
-	return(p+offset);
-#endif
 }
 
 STATIC void	

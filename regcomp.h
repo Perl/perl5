@@ -33,18 +33,6 @@ typedef OP OP_4tree;			/* Will be redefined later. */
  * For instance, /[a-z].foo/ has a regmust of 'foo' and a regback of 2.]
  */
 
-/* #ifndef gould */
-/* #ifndef cray */
-/* #ifndef eta10 */
-#define REGALIGN
-/* #endif */
-/* #endif */
-/* #endif */
-
-#ifdef REGALIGN
-#  define REGALIGN_STRUCT
-#endif 
-
 /*
  * Structure for regexp "program".  This is essentially a linear encoding
  * of a nondeterministic finite-state machine (aka syntax charts or
@@ -112,8 +100,8 @@ typedef OP OP_4tree;			/* Will be redefined later. */
 #define REFF	46      /* num  Match already matched string, folded */
 #define REFFL	47      /* num  Match already matched string, folded in loc. */
 #define EVAL	48      /* evl  Execute some Perl code. */
-#define LONGJMP	49      /* off  Jump far away, requires REGALIGN_STRUCT. */
-#define BRANCHJ	50      /* off  BRANCH with long offset, requires REGALIGN_STRUCT. */
+#define LONGJMP	49      /* off  Jump far away. */
+#define BRANCHJ	50      /* off  BRANCH with long offset. */
 #define IFTHEN	51      /* off  Switch, should be preceeded by switcher . */
 #define GROUPP	52      /* num  Whether the group matched. */
 #define LOGICAL	53	/* no	Next opcode should set the flag only. */
@@ -239,13 +227,11 @@ EXTCONST char simple[] = {
  * Using two bytes for the "next" pointer is vast overkill for most things,
  * but allows patterns to get big without disasters.
  *
- * [If REGALIGN is defined, the "next" pointer is always aligned on an even
+ * [The "next" pointer is always aligned on an even
  * boundary, and reads the offset directly as a short.  Also, there is no
  * special test to reverse the sign of BACK pointers since the offset is
  * stored negative.]
  */
-
-#ifdef REGALIGN_STRUCT
 
 struct regnode_string {
     U8	flags;
@@ -269,8 +255,6 @@ struct regnode_2 {
     U16 arg2;
 };
 
-#endif 
-
 /* XXX fix this description.
    Impose a limit of REG_INFTY on various pattern matching operations
    to limit stack growth and to avoid "infinite" recursions.
@@ -293,13 +277,8 @@ struct regnode_2 {
 #  define REG_INFTY I16_MAX
 #endif
 
-#ifdef REGALIGN
-#  define ARG_VALUE(arg) (arg)
-#  define ARG__SET(arg,val) ((arg) = (val))
-#else
-#  define ARG_VALUE(arg) (((*((char*)&arg)&0377)<<8) + (*(((char*)&arg)+1)&0377))
-#  define ARG__SET(arg,val) (((char*)&arg)[0] = (val) >> 8; ((char*)&arg)[1] = (val) & 0377;)
-#endif
+#define ARG_VALUE(arg) (arg)
+#define ARG__SET(arg,val) ((arg) = (val))
 
 #define ARG(p) ARG_VALUE(ARG_LOC(p))
 #define ARG1(p) ARG_VALUE(ARG1_LOC(p))
@@ -309,69 +288,35 @@ struct regnode_2 {
 #define ARG2_SET(p, val) ARG__SET(ARG2_LOC(p), (val))
 
 #ifndef lint
-#  ifdef REGALIGN
-#    ifdef REGALIGN_STRUCT
-#      define NEXT_OFF(p) ((p)->next_off)
-#      define	NODE_ALIGN(node)
-#      define	NODE_ALIGN_FILL(node) ((node)->flags = 0xde) /* deadbeef */
-#    else
-#      define NEXT_OFF(p) (*(short*)(p+1))
-#      define	NODE_ALIGN(node)	((!((long)node & 1)) ? node++ : 0)
-#      define	NODE_ALIGN_FILL(node)	((!((long)node & 1)) ? *node++ = 127 : 0)
-#    endif 
-#  else
-#    define	NEXT_OFF(p)	(((*((p)+1)&0377)<<8) + (*((p)+2)&0377))
-#    define	NODE_ALIGN(node)
-#    define	NODE_ALIGN_FILL(node)
-#  endif
+#  define NEXT_OFF(p) ((p)->next_off)
+#  define NODE_ALIGN(node)
+#  define NODE_ALIGN_FILL(node) ((node)->flags = 0xde) /* deadbeef */
 #else /* lint */
 #  define NEXT_OFF(p) 0
-#  define	NODE_ALIGN(node)
-#  define	NODE_ALIGN_FILL(node)
+#  define NODE_ALIGN(node)
+#  define NODE_ALIGN_FILL(node)
 #endif /* lint */
 
 #define SIZE_ALIGN NODE_ALIGN
 
-#ifdef REGALIGN_STRUCT
-#  define	OP(p)	((p)->type)
-#  define	OPERAND(p)	(((struct regnode_string *)p)->string)
-#  define	NODE_ALIGN(node)
-#  define	ARG_LOC(p) (((struct regnode_1 *)p)->arg1)
-#  define	ARG1_LOC(p) (((struct regnode_2 *)p)->arg1)
-#  define	ARG2_LOC(p) (((struct regnode_2 *)p)->arg2)
-#  define NODE_STEP_REGNODE	1	/* sizeof(regnode)/sizeof(regnode) */
-#  define EXTRA_STEP_2ARGS	EXTRA_SIZE(struct regnode_2)
-#else
-#  define	OP(p)	(*(p))
-#  define	OPERAND(p)	((p) + 3)
-#  define	ARG_LOC(p) (*(unsigned short*)(p+3))
-#  define	ARG1_LOC(p) (*(unsigned short*)(p+3))
-#  define	ARG2_LOC(p) (*(unsigned short*)(p+5))
-typedef char* regnode;
-#  define NODE_STEP_REGNODE	NODE_STEP_B
-#  define EXTRA_STEP_2ARGS	4
-#endif 
+#define	OP(p)		((p)->type)
+#define	OPERAND(p)	(((struct regnode_string *)p)->string)
+#define	NODE_ALIGN(node)
+#define	ARG_LOC(p)	(((struct regnode_1 *)p)->arg1)
+#define	ARG1_LOC(p)	(((struct regnode_2 *)p)->arg1)
+#define	ARG2_LOC(p)	(((struct regnode_2 *)p)->arg2)
+#define NODE_STEP_REGNODE	1	/* sizeof(regnode)/sizeof(regnode) */
+#define EXTRA_STEP_2ARGS	EXTRA_SIZE(struct regnode_2)
 
-#ifdef REGALIGN
-#  define NODE_STEP_B	4
-#else
-#  define NODE_STEP_B	3
-#endif
+#define NODE_STEP_B	4
 
 #define	NEXTOPER(p)	((p) + NODE_STEP_REGNODE)
 #define	PREVOPER(p)	((p) - NODE_STEP_REGNODE)
 
-#ifdef REGALIGN_STRUCT
-#  define FILL_ADVANCE_NODE(ptr, op) STMT_START { \
+#define FILL_ADVANCE_NODE(ptr, op) STMT_START { \
     (ptr)->type = op;    (ptr)->next_off = 0;   (ptr)++; } STMT_END
-#  define FILL_ADVANCE_NODE_ARG(ptr, op, arg) STMT_START { \
+#define FILL_ADVANCE_NODE_ARG(ptr, op, arg) STMT_START { \
     ARG_SET(ptr, arg);  FILL_ADVANCE_NODE(ptr, op); (ptr) += 1; } STMT_END
-#else
-#  define FILL_ADVANCE_NODE(ptr, op) STMT_START { \
-    *(ptr)++ = op;    *(ptr)++ = '\0';    *(ptr)++ = '\0'; } STMT_END
-#  define FILL_ADVANCE_NODE_ARG(ptr, op, arg) STMT_START { \
-    ARG_SET(ptr, arg);  FILL_ADVANCE_NODE(ptr, op); (ptr) += 2; } STMT_END
-#endif
 
 #define MAGIC 0234
 
@@ -394,12 +339,7 @@ typedef char* regnode;
 #define ANYOF_CLEAR(p,c)    (ANYOF_BYTE(p,c) &= ~ANYOF_BIT(c))
 #define ANYOF_TEST(p,c)     (ANYOF_BYTE(p,c) &   ANYOF_BIT(c))
 
-#ifdef REGALIGN_STRUCT
 #define ANY_SKIP ((33 - 1)/sizeof(regnode) + 1)
-#else
-#define ANY_SKIP 32			/* overwrite the first byte of
-					 * the next guy.  */
-#endif 
 
 /*
  * Utility definitions.
@@ -421,7 +361,6 @@ typedef char* regnode;
 
 #ifdef REG_COMP_C
 const static U8 regarglen[] = {
-#  ifdef REGALIGN_STRUCT
     0,0,0,0,0,0,0,0,0,0,
     /*CURLY*/ EXTRA_SIZE(struct regnode_2), 
     /*CURLYX*/ EXTRA_SIZE(struct regnode_2),
@@ -446,16 +385,6 @@ const static U8 regarglen[] = {
     /*LOGICAL*/ 0,
     /*SUSPEND*/ EXTRA_SIZE(struct regnode_1),
     /*RENUM*/ EXTRA_SIZE(struct regnode_1), 0,
-#  else
-    0,0,0,0,0,0,0,0,0,0,
-    /*CURLY*/ 4, /*CURLYX*/ 4,
-    0,0,0,0,0,0,0,0,0,0,0,0,
-    /*REF*/ 2, /*OPEN*/ 2, /*CLOSE*/ 2,
-    0,0, /*IFMATCH*/ 2, /*UNLESSM*/ 2,
-    0,0,0,0,0,0,0,0,0,0,0,0,/*CURLYM*/ 4,/*CURLYN*/ 4,
-    0, /*REFF*/ 2, /*REFFL*/ 2, /*EVAL*/ 2, /*LONGJMP*/ 2, /*BRANCHJ*/ 2,
-    /*IFTHEN*/ 2, /*GROUPP*/ 2, /*LOGICAL*/ 0, /*RENUM*/ 2, /*RENUM*/ 2, 0,
-#  endif 
 };
 
 const static char reg_off_by_arg[] = {
