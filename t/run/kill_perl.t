@@ -724,8 +724,6 @@ EXPECT
 ########
 -w
 "x" =~ /(\G?x)?/;	# core dump in 20000716.007
-EXPECT
-Quantifier unexpected on zero-length expression in regex; marked by <-- HERE in m/(\G?x)? <-- HERE / at - line 2.
 ########
 # Bug 20010515.004
 my @h = 1 .. 10;

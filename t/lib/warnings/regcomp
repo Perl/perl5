@@ -47,15 +47,6 @@ $a =~ /(?=a)*/ ;
 EXPECT
 (?=a)* matches null string many times in regex; marked by <-- HERE in m/(?=a)* <-- HERE / at - line 4.
 ########
-# regcomp.c [S_study_chunk]
-use warnings 'regexp' ;
-$_ = "" ;
-/(?=a)?/;
-no warnings 'regexp' ;
-/(?=a)?/;
-EXPECT
-Quantifier unexpected on zero-length expression in regex; marked by <-- HERE in m/(?=a)? <-- HERE / at - line 4.
-########
 # regcomp.c [S_regatom]
 $x = '\m' ;
 use warnings 'regexp' ;

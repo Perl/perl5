@@ -967,6 +967,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 	    regnode *oscan = scan;
 	    struct regnode_charclass_class this_class;
 	    struct regnode_charclass_class *oclass = NULL;
+	    I32 next_is_eval = 0;
 
 	    switch (PL_regkind[(U8)OP(scan)]) {
 	    case WHILEM:		/* End of (?:...)* . */
@@ -1012,6 +1013,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		    scan->flags = ((lp <= U8_MAX) ? lp : U8_MAX);
 		}
 		scan = NEXTOPER(scan) + EXTRA_STEP_2ARGS;
+		next_is_eval = (OP(scan) == EVAL);
 	      do_curly:
 		if (flags & SCF_DO_SUBSTR) {
 		    if (mincount == 0) scan_commit(pRExC_state,data); /* Cannot extend fixed substrings */
@@ -1073,6 +1075,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		if (!scan) 		/* It was not CURLYX, but CURLY. */
 		    scan = next;
 		if (ckWARN(WARN_REGEXP)
+		       /* ? quantifier ok, except for (?{ ... }) */
+		    && (next_is_eval || !(mincount == 0 && maxcount == 1))
 		    && (minnext == 0) && (deltanext == 0)
 		    && data && !(data->flags & (SF_HAS_PAR|SF_IN_PAR))
 		    && maxcount <= REG_INFTY/3) /* Complement check for big count */
