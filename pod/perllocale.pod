@@ -330,7 +330,7 @@ Second, if using the listed commands you see something B<exactly>
 (prefix matches do not count and case usually counts) like "En_US"
 without the quotes, then you should be okay because you are using a
 locale name that should be installed and available in your system.
-In this case, see L<Fixing system locale configuration>.
+In this case, see L<Permanently fixing system locale configuration>.
 
 =head2 Permanently fixing your locale configuration
 
@@ -349,7 +349,7 @@ rules for matching locale names are a bit vague because
 standardization is weak in this area.  See again the L<Finding
 locales> about general rules.
 
-=head2 Permanently fixing system locale configuration
+=head2 Fixing system locale configuration
 
 Contact a system administrator (preferably your own) and report the exact
 error message you get, and ask them to read this same documentation you
@@ -854,7 +854,7 @@ always in force, even if the program environment suggested otherwise
 (see L<The setlocale function>).  By default, Perl still behaves this
 way for backward compatibility.  If you want a Perl application to pay
 attention to locale information, you B<must> use the S<C<use locale>>
-pragma (see L<The use locale Pragma>) to instruct it to do so.
+pragma (see L<The use locale pragma>) to instruct it to do so.
 
 Versions of Perl from 5.002 to 5.003 did use the C<LC_CTYPE>
 information if available; that is, C<\w> did understand what

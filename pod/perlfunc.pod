@@ -1478,7 +1478,7 @@ is left as an exercise to the reader.
 The C<POSIX::getattr()> function can do this more portably on systems
 purporting POSIX compliance.
 See also the C<Term::ReadKey> module from your nearest CPAN site;
-details on CPAN can be found on L<perlmod/CPAN>.
+details on CPAN can be found on L<perlmodlib/CPAN>.
 
 =item getlogin
 
@@ -2370,7 +2370,7 @@ them, and automatically close whenever and however you leave that scope:
 	$first;					# Or here.
     }
 
-See L</seek()> for some details about mixing reading and writing.
+See L</seek> for some details about mixing reading and writing.
 
 =item opendir DIRHANDLE,EXPR
 
@@ -3235,7 +3235,7 @@ busy multitasking system.
 
 For delays of finer granularity than one second, you may use Perl's
 C<syscall()> interface to access setitimer(2) if your system supports it,
-or else see L</select()> above.
+or else see L</select> above.
 
 See also the POSIX module's C<sigpause()> function.
 
@@ -4027,7 +4027,7 @@ Unlike C<dbmopen()>, the C<tie()> function will not use or require a module
 for you--you need to do that explicitly yourself.  See L<DB_File>
 or the F<Config> module for interesting C<tie()> implementations.
 
-For further details see L<perltie>, L<tied VARIABLE>.
+For further details see L<perltie>, L<"tied VARIABLE">.
 
 =item tied VARIABLE
 

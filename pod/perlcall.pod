@@ -72,7 +72,7 @@ Each of the functions will now be discussed in turn.
 
 =over 5
 
-=item B<perl_call_sv>
+=item perl_call_sv
 
 I<perl_call_sv> takes two parameters, the first, C<sv>, is an SV*.
 This allows you to specify the Perl subroutine to be called either as a
@@ -80,7 +80,7 @@ C string (which has first been converted to an SV) or a reference to a
 subroutine. The section, I<Using perl_call_sv>, shows how you can make
 use of I<perl_call_sv>.
 
-=item B<perl_call_pv>
+=item perl_call_pv
 
 The function, I<perl_call_pv>, is similar to I<perl_call_sv> except it
 expects its first parameter to be a C char* which identifies the Perl
@@ -88,7 +88,7 @@ subroutine you want to call, e.g., C<perl_call_pv("fred", 0)>.  If the
 subroutine you want to call is in another package, just include the
 package name in the string, e.g., C<"pkg::fred">.
 
-=item B<perl_call_method>
+=item perl_call_method
 
 The function I<perl_call_method> is used to call a method from a Perl
 class.  The parameter C<methname> corresponds to the name of the method
@@ -99,7 +99,7 @@ object (for a virtual method).  See L<perlobj> for more information on
 static and virtual methods and L<Using perl_call_method> for an example
 of using I<perl_call_method>.
 
-=item B<perl_call_argv>
+=item perl_call_argv
 
 I<perl_call_argv> calls the Perl subroutine specified by the C string
 stored in the C<subname> parameter. It also takes the usual C<flags>
