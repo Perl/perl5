@@ -1,9 +1,28 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.60 2002/04/24 20:06:52 dankogai Exp $
+# $Id: Changes,v 1.61 2002/04/26 03:02:04 dankogai Exp $
 #
 
-$Revision: 1.60 $ $Date: 2002/04/24 20:06:52 $
+$Revision: 1.61 $ $Date: 2002/04/26 03:02:04 $
+! t/mime-header.t
+  Now does decent tests besides use_ok()
+! lib/Encode/Guess.pm t/guess.t
+  UI streamlined, document added
+! Unicode/Unicode.xs
+  various signed/unsigned mismatch nits (#16173)
+  http://public.activestate.com/cgi-bin/perlbrowse?patch=16173
+! Encode.pm
+  POD:  utf8-flag-related caveats added.  A few sections completely 
+  rewritten.
+! Encode.xs
+! AUTHORS
+  Thou shalt not assume %d works, either!
+  Robin Baker added to AUTHORS for this
+  Message-Id: <200204251132.MAA28237@tempest.npl.co.uk>
+! t/CJKT.t	   
+  "Change 16144 by gsar@onru on 2002/04/24 18:59:05"
+
+1.60 2002/04/24 20:06:52
 ! Encode.xs
   "Thou shalt not assume %x works." -- jhi
   Message-Id: <20020424210618.E24347@alpha.hut.fi>
@@ -492,7 +511,7 @@ $Revision: 1.60 $ $Date: 2002/04/24 20:06:52 $
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/04/24 20:06:52 $
+1.11  $Date: 2002/04/26 03:02:04 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST

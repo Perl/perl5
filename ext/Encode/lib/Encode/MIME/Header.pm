@@ -1,7 +1,7 @@
 package Encode::MIME::Header;
 use strict;
 # use warnings;
-our $VERSION = do { my @r = (q$Revision: 1.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.2 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode qw(find_encoding encode_utf8);
 use MIME::Base64;
@@ -197,7 +197,7 @@ line.
 
 =head1 BUGS
 
-It would be nice to support non-UTF8 encoding, such as =?ISO-2022-JP?
+It would be nice to support encoding to non-UTF8, such as =?ISO-2022-JP?
 and =?ISO-8859-1?= but that makes the implementation too complicated.
 These days major mail agents all support =?UTF-8? so I think it is
 just good enough.

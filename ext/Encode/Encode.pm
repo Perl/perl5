@@ -1,12 +1,12 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.60 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.61 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 use XSLoader ();
 XSLoader::load 'Encode';
 
 require Exporter;
-our @ISA = qw(Exporter);
+use base qw/Exporter/;
 
 # Public, encouraged API is exported by default
 
@@ -331,7 +331,7 @@ byte has 256 possible values, it easily fits in Perl's much larger
 
 =head2 TERMINOLOGY
 
-=over 4
+=over 2
 
 =item *
 
@@ -356,7 +356,7 @@ and such details may change in future releases.
 
 =head1 PERL ENCODING API
 
-=over 4
+=over 2
 
 =item $octets  = encode(ENCODING, $string[, CHECK])
 
@@ -368,7 +368,13 @@ For CHECK, see L</"Handling Malformed Data">.
 For example, to convert (internally UTF-8 encoded) Unicode string to
 iso-8859-1 (also known as Latin1),
 
-  $octets = encode("iso-8859-1", $unicode);
+  $octets = encode("iso-8859-1", $utf8);
+
+B<CAVEAT>: When you C<$octets = encode("utf8", $utf8)>, then $octets
+B<ne> $utf8.  Though they both contain the same data, the utf8 flag
+for $octets is B<always> off.  When you encode anything, utf8 flag of
+the result is always off, even when it contains completely valid utf8
+string. See L</"The UTF-8 flag"> below.
 
 =item $string = decode(ENCODING, $octets[, CHECK])
 
@@ -382,16 +388,22 @@ For example, to convert ISO-8859-1 data to UTF-8:
 
   $utf8 = decode("iso-8859-1", $latin1);
 
-=item [$length =] from_to($string, FROM_ENCODING, TO_ENCODING [,CHECK])
+B<CAVEAT>: When you C<$utf8 = encode("utf8", $octets)>, then $utf8
+B<may not be equal to> $utf8.  Though they both contain the same data,
+the utf8 flag for $utf8 is on unless $octets entirely conststs of
+ASCII data (or EBCDIC on EBCDIC machines).  See L</"The UTF-8 flag">
+below.
 
-Converts B<in-place> data between two encodings.
-For example, to convert ISO-8859-1 data to UTF-8:
+=item [$length =] from_to($string, FROM_ENC, TO_ENC [, CHECK])
 
-	from_to($data, "iso-8859-1", "utf-8");
+Converts B<in-place> data between two encodings. For example, to
+convert ISO-8859-1 data to UTF-8:
+
+  from_to($data, "iso-8859-1", "utf8");
 
 and to convert it back:
 
-	from_to($data, "utf-8", "iso-8859-1");
+  from_to($data, "utf8", "iso-8859-1");
 
 Note that because the conversion happens in place, the data to be
 converted cannot be a string constant; it must be a scalar variable.
@@ -399,32 +411,34 @@ converted cannot be a string constant; it must be a scalar variable.
 from_to() returns the length of the converted string on success, undef
 otherwise.
 
-=back
+B<CAVEAT>: The following operations look the same but not quite so;
 
-=head2 UTF-8 / utf8
+  from_to($data, "iso-8859-1", "utf8"); #1 
+  $data = decode("iso-8859-1", $data);  #2
 
-The Unicode Consortium defines the UTF-8 transformation format as a
-way of encoding the entire Unicode repertoire as sequences of octets.
-This encoding is expected to become very widespread. Perl can use this
-form internally to represent strings, so conversions to and from this
-form are particularly efficient (as octets in memory do not have to
-change, just the meta-data that tells Perl how to treat them).
+Both #1 and #2 makes $data consists of completely valid UTF-8 string
+but only #2 turns utf8 flag on.  #1 is equivalent to
 
-=over 4
+  $data = encode("utf8", decode("iso-8859-1", $data));
+
+See L</"The UTF-8 flag"> below.
 
 =item $octets = encode_utf8($string);
 
-The characters that comprise $string are encoded in Perl's superset of
-UTF-8 and the resulting octets are returned as a sequence of bytes. All
-possible characters have a UTF-8 representation so this function cannot
-fail.
+Equivalent to C<$octets = encode("utf8", $string);> The characters
+that comprise $string are encoded in Perl's superset of UTF-8 and the
+resulting octets are returned as a sequence of bytes. All possible
+characters have a UTF-8 representation so this function cannot fail.
+
 
 =item $string = decode_utf8($octets [, CHECK]);
 
-The sequence of octets represented by $octets is decoded from UTF-8
-into a sequence of logical characters. Not all sequences of octets
-form valid UTF-8 encodings, so it is possible for this call to fail.
-For CHECK, see L</"Handling Malformed Data">.
+equivalent to C<$string = decode("utf8", $octets [, CHECK])>.
+decode_utf8($octets [, CHECK]); The sequence of octets represented by
+$octets is decoded from UTF-8 into a sequence of logical
+characters. Not all sequences of octets form valid UTF-8 encodings, so
+it is possible for this call to fail.  For CHECK, see
+L</"Handling Malformed Data">.
 
 =back
 
@@ -510,7 +524,7 @@ For gory details, see L<Encode::PerlIO>.
 
 =head1 Handling Malformed Data
 
-=over 4
+=over 2
 
 The I<CHECK> argument is used as follows.  When you omit it,
 the behaviour is the same as if you had passed a value of 0 for
@@ -524,7 +538,7 @@ E<lt>subcharE<gt> will be used.  For Unicode, "\x{FFFD}" is used.
 If the data is supposed to be UTF-8, an optional lexical warning
 (category utf8) is given.
 
-=item I<CHECK> = Encode::DIE_ON_ERROR (== 1)
+=item I<CHECK> = Encode::FB_CROAK ( == 1)
 
 If I<CHECK> is 1, methods will die immediately with an error
 message.  Therefore, when I<CHECK> is set to 1,  you should trap the
@@ -608,12 +622,84 @@ arguments are taken as aliases for I<$object>, as for C<define_alias>.
 
 See L<Encode::Encoding> for more details.
 
-=head1 Messing with Perl's Internals
+=head1 The UTF-8 flag
+
+Before the introduction of utf8 support in perl, The C<eq> operator
+just compares internal data of the scalars.  Now C<eq> means internal
+data equality AND I<the utf8 flag>.  To explain why we made it so, I
+will quote page 402 of C<Programming Perl, 3rd ed.>
+
+=over 2
+
+=item Goal #1:
+
+Old byte-oriented programs should not spontaneously break on the old
+byte-oriented data they used to work on.
+
+=item Goal #2:
+
+Old byte-oriented programs should magically start working on the new
+character-oriented data when appropriate.
+
+=item Goal #3:
+
+Programs should run just as fast in the new character-oriented mode
+as in the old byte-oriented mode.
+
+=item Goal #4:
+
+Perl should remain one language, rather than forking into a
+byte-oriented Perl and a character-oriented Perl.
+
+=back
+
+Back when C<Programming Perl, 3rd ed.> was written, not even Perl 5.6.0
+was born and many features documented in the book remained
+unimplemented.  Perl 5.8 hopefully correct this and the introduction
+of UTF-8 flag is one of them.  You can think this perl notion of
+byte-oriented mode (utf8 flag off) and character-oriented mode (utf8
+flag on).
+
+Here is how Encode takes care of the utf8 flag.
+
+=over2
+
+=item *
+
+When you encode, the resulting utf8 flag is always off.
+
+=item
+
+When you decode, the resuting utf8 flag is on unless you can
+unambiguously represent data.  Here is the definition of
+dis-ambiguity.
+
+  After C<$utf8 = decode('foo', $octet);>, 
+
+  When $octet is...   The utf8 flag in $utf8 is
+  ---------------------------------------------
+  In ASCII only (or EBCDIC only)            OFF
+  In ISO-8859-1                              ON
+  In any other Encoding                      ON
+  ---------------------------------------------
+
+As you see, there is one exception, In ASCII.  That way you can assue
+Goal #1.  And with Encode Goal #2 is assumed but you still have to be
+careful in such cases mentioned in B<CAVEAT> paragraphs.
+
+This utf8 flag is not visible in perl scripts, exactly for the same
+reason you cannot (or you I<don't have to>) see if a scalar contains a
+string, integer, or floating point number.   But you can still peek
+and poke these if you will.  See the section below.
+
+=back
+
+=head2 Messing with Perl's Internals
 
 The following API uses parts of Perl's internals in the current
 implementation.  As such, they are efficient but may change.
 
-=over 4
+=over 2
 
 =item is_utf8(STRING [, CHECK])
 
@@ -653,8 +739,8 @@ the Perl Unicode Mailing List E<lt>perl-unicode@perl.orgE<gt>
 =head1 MAINTAINER
 
 This project was originated by Nick Ing-Simmons and later maintained
-by Dan Kogai E<lt>dankogai@dan.co.jpE<gt>.  See AUTHORS for a full list
-of people involved.  For any questions, use
-E<lt>perl-unicode@perl.orgE<gt> so others can share.
+by Dan Kogai E<lt>dankogai@dan.co.jpE<gt>.  See AUTHORS for a full
+list of people involved.  For any questions, use
+E<lt>perl-unicode@perl.orgE<gt> so we can all share share.
 
 =cut

@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 1.38 2002/04/24 20:11:14 dankogai Exp dankogai $
+ $Id: Encode.xs,v 1.39 2002/04/26 03:02:04 dankogai Exp $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -147,7 +147,7 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 			sv_catsv(dst, perlqq);
 		    }else if (check & ENCODE_HTMLCREF){
 			SV* htmlcref = 
-			    sv_2mortal(newSVpvf("&#%d;", ch));
+			    sv_2mortal(newSVpvf("&#%" UVuf ";", ch));
 			sdone += slen + clen;
 			ddone += dlen + SvCUR(htmlcref);
 			sv_catsv(dst, htmlcref);
