@@ -68,7 +68,9 @@ even if available, access to a fixed interface):
     call_method
     call_pv
     call_sv
+    dAX
     DEFSV
+    dITEMS
     dMY_CXT	
     dMY_CXT_SV
     dNOOP
@@ -159,7 +161,7 @@ require DynaLoader;
 use strict;
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK $data );
 
-$VERSION = "2.010";
+$VERSION = "2.011";
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT =  qw();
@@ -448,6 +450,13 @@ __DATA__
 #    define aTHX
 #    define aTHX_
 #endif         
+
+#ifndef dAX
+#   define dAX I32 ax = MARK - PL_stack_base + 1
+#endif
+#ifndef dITEMS
+#   define dITEMS I32 items = SP - MARK
+#endif
 
 /* IV could also be a quad (say, a long long), but Perls
  * capable of those should have IVSIZE already. */
