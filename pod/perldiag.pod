@@ -2089,6 +2089,11 @@ double-quotish context.
 C<open(FH, "command |")> construction, but the command was missing or
 blank.
 
+=item Missing control char name in \c
+
+(F) A double-quoted string ended with "\c", without the required control
+character name.
+
 =item Missing name in "my sub"
 
 (F) The reserved syntax for lexically scoped subroutines requires that

@@ -9,7 +9,7 @@ BEGIN {
 }
 
 require "./test.pl";
-plan( tests => 9 );
+plan( tests => 10 );
 
 eval '%@x=0;';
 like( $@, qr/^Can't modify hash dereference in repeat \(x\)/, '%@x=0' );
@@ -47,3 +47,7 @@ like( $@, qr/^Can't modify constant item in read /,
 # This used to dump core (bug #17920)
 eval q{ sub { sub { f1(f2();); my($a,$b,$c) } } };
 like( $@, qr/error/, 'lexical block discarded by yacc' );
+
+# bug #18573, used to corrupt memory
+eval q{ "\c" };
+like( $@, qr/^Missing control char name in \\c/, q("\c" string) );
