@@ -115,7 +115,7 @@ Use of uninitialized value at - line 3.
 use warning 'uninitialized' ;
 $x = chop undef ; # g
 EXPECT
-Use of uninitialized value at - line 3.
+Modification of a read-only value attempted at - line 3.
 ########
 # sv.c
 use warning 'uninitialized' ;
