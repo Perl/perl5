@@ -137,7 +137,9 @@ that is called on behalf of the missing method.
 
 If neither a method nor an AUTOLOAD routine is found in @ISA, then one
 last try is made for the method (or an AUTOLOAD routine) in a class
-called UNIVERSAL.  If that doesn't work, Perl finally gives up and
+called UNIVERSAL.  (Several commonly used methods are automatically
+supplied in the UNIVERSAL class; see L<"Default UNIVERSAL methods"> for
+more details.)  If that doesn't work, Perl finally gives up and
 complains.
 
 Perl classes only do method inheritance.  Data inheritance is left
@@ -267,7 +269,74 @@ with a simple scalar variable containing the method name:
     $method = $fast ? "findfirst" : "findbest";
     $fred->$method(@args);
 
-=head2 Destructors
+=head2 Default UNIVERSAL methods
+
+The C<UNIVERSAL> package automatically contains the following methods that
+are inherited by all other classes:
+
+=over 4
+
+=item isa ( CLASS )
+
+C<isa> returns I<true> if its object is blessed into a sub-class of C<CLASS>
+
+C<isa> is also exportable and can be called as a sub with two arguments. This
+allows the ability to check what a reference points to. Example
+
+    use UNIVERSAL qw(isa);
+
+    if(isa($ref, 'ARRAY')) {
+    	...
+    }
+
+=item can ( METHOD )
+
+C<can> checks to see if its object has a method called C<METHOD>,
+if it does then a reference to the sub is returned, if it does not then
+I<undef> is returned.
+
+=item require_version ( VERSION )
+
+C<require_version> will check that the current version of the package
+is greater than C<VERSION>. This method is normally called as a static method.
+This method is also called when the C<VERSION> form of C<use> is used.
+
+    use A 1.2 qw(some imported subs);
+    
+    A->require_version( 1.2 );
+
+=item class ()
+
+C<class> returns the class name of its object.
+
+=item is_instance ()
+
+C<is_instance> returns true if its object is an instance of some
+class, false if its object is the class (package) itself. Example
+
+    A->is_instance();       # False
+    
+    $var = 'A';
+    $var->is_instance();    # False
+    
+    $ref = bless [], 'A';
+    $ref->is_instance();    # True
+
+=item require_version ( [ VERSION ] )
+
+C<require_version> returns the VERSION number of the class (package). If
+an argument is given then it will check that the current version is not 
+less that the given argument.
+
+=back
+
+B<NOTE:> C<can> directly uses Perl's internal code for method lookup, and
+C<isa> uses a very similar method and cache-ing strategy. This may cause
+strange effects if the Perl code dynamically changes @ISA in any package.
+
+You may add other methods to the UNIVERSAL class via Perl or XS code.
+
+=head2 Destructors        
 
 When the last reference to an object goes away, the object is
 automatically destroyed.  (This may even be after you exit, if you've
