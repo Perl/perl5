@@ -777,15 +777,15 @@ EOM
 }
 
 END {
-    unlink $filename ;
-    unlink $filenamebin ;
-    unlink "${module}.pm" ;
-    unlink "${module2}.pm" ;
-    unlink "${module3}.pm" ;
-    unlink "${module4}.pm" ;
-    unlink "${module5}.pm" ;
-    unlink $nested ;
-    unlink "${block}.pm" ;
+    1 while unlink $filename ;
+    1 while unlink $filenamebin ;
+    1 while unlink "${module}.pm" ;
+    1 while unlink "${module2}.pm" ;
+    1 while unlink "${module3}.pm" ;
+    1 while unlink "${module4}.pm" ;
+    1 while unlink "${module5}.pm" ;
+    1 while unlink $nested ;
+    1 while unlink "${block}.pm" ;
 }
 
 
