@@ -209,9 +209,9 @@ with a regular expression (as documented in L<perlre>).
 	unless /^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/;
 
 The length of an array is a scalar value.  You may find the length
-of array @days by evaluating C<$#days>, as in B<csh>.  Technically
-speaking, this isn't the length of the array; it's the subscript
-of the last element, since there is ordinarily a 0th element.
+of array @days by evaluating C<$#days>, as in B<csh>.  However, this
+isn't the length of the array; it's the subscript of the last element,
+which is a different value since there is ordinarily a 0th element.
 Assigning to C<$#days> actually changes the length of the array.
 Shortening an array this way destroys intervening values.  Lengthening
 an array that was previously shortened does not recover values
