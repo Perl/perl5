@@ -604,6 +604,12 @@ then not push return values on the stack.
           /* list is implicitly returned. */
           }
 
+Some people may be inclined to include an explicit C<return> in the above
+XSUB, rather than letting control fall through to the end.  In those
+situations C<XSRETURN_EMPTY> should be used, instead.  This will ensure that
+the XSUB stack is properly adjusted.  Consult L<perlguts/"API LISTING"> for
+other C<XSRETURN> macros.
+
 =head2 The REQUIRE: Keyword
 
 The REQUIRE: keyword is used to indicate the minimum version of the
@@ -754,8 +760,8 @@ variable (see L<"The ALIAS: Keyword">), or maybe via the C<items> variable
 B<default> case if it is not associated with a conditional.  The following
 example shows CASE switched via C<ix> with a function C<rpcb_gettime()>
 having an alias C<x_gettime()>.  When the function is called as
-C<rpcb_gettime()> it's parameters are the usual C<(char *host, time_t
-*timep)>, but when the function is called as C<x_gettime()> is parameters are
+C<rpcb_gettime()> it's parameters are the usual C<(char *host, time_t *timep)>, 
+but when the function is called as C<x_gettime()> is parameters are
 reversed, C<(time_t *timep, char *host)>.
 
     long
@@ -820,13 +826,35 @@ C<&> through, so the function call looks like C<rpcb_gettime(host, &timep)>.
 
 =head2 Inserting Comments and C Preprocessor Directives
 
-Comments and C preprocessor directives are allowed within
-CODE:, PPCODE:, BOOT:, and CLEANUP: blocks.  The compiler
-will pass the preprocessor directives through untouched and
-will remove the commented lines.  Comments can be added to
-XSUBs by placing a C<#> at the beginning of the line.  Care
-should be taken to avoid making the comment look like a C
-preprocessor directive, lest it be interpreted as such.
+C preprocessor directives are allowed within BOOT:, PREINIT: INIT:,
+CODE:, PPCODE: and CLEANUP: blocks, as well as outside the functions.
+Comments are allowed anywhere after the MODULE keyword.  The compiler
+will pass the preprocessor directives through untouched and will remove
+the commented lines.
+Comments can be added to XSUBs by placing a C<#> as the first
+non-whitespace of a line.  Care should be taken to avoid making the
+comment look like a C preprocessor directive, lest it be interpreted as
+such.  The simplest way to prevent this is to put whitespace in front of
+the C<#>.
+
+
+If you use preprocessor directives to choose one of two
+versions of a function, use
+
+    #if ... version1
+    #else /* ... version2  */
+    #endif
+
+and not
+
+    #if ... version1
+    #endif
+    #if ... version2
+    #endif
+
+because otherwise xsubpp will believe that you made a duplicate
+definition of the function.  Also, put a blank line before the
+#else/#endif so it will not be seen as part of the function body.
 
 =head2 Using XS With C++
 
@@ -840,7 +868,7 @@ typemap is shown at the end of this section.
 
 If the method is defined as static it will call the C++
 function using the class::method() syntax.  If the method is not static
-the function will be called using the THIS->method() syntax.
+the function will be called using the THIS-E<gt>method() syntax.
 
 The next examples will use the following C++ class.
 
@@ -1114,9 +1142,9 @@ File C<rpctest.pl>: Perl test program for the RPC extension.
 
 =head1 XS VERSION
 
-This document covers features supported by C<xsubpp> 1.933.
+This document covers features supported by C<xsubpp> 1.935.
 
 =head1 AUTHOR
 
 Dean Roehrich F<E<lt>roehrich@cray.comE<gt>>
-Feb 13, 1996
+Mar 12, 1996
