@@ -572,10 +572,10 @@ static char bucket_of[] =
 
 static char *emergency_buffer;
 static MEM_SIZE emergency_buffer_size;
+static Malloc_t emergency_sbrk(MEM_SIZE size);
 
 static Malloc_t
-emergency_sbrk(size)
-    MEM_SIZE size;
+emergency_sbrk(MEM_SIZE size)
 {
     MEM_SIZE rsize = (((size - 1)>>LOG_OF_MIN_ARENA) + 1)<<LOG_OF_MIN_ARENA;
 
@@ -1254,7 +1254,7 @@ free(void *mp)
  * is extern so the caller can modify it).  If that fails we just copy
  * however many bytes was given to realloc() and hope it's not huge.
  */
-int reall_srchlen = 4;	/* 4 should be plenty, -1 =>'s whole list */
+#define reall_srchlen  4	/* 4 should be plenty, -1 =>'s whole list */
 
 Malloc_t
 realloc(void *mp, size_t nbytes)
@@ -1572,11 +1572,7 @@ dump_mstats(char *s)
 
 #ifdef USE_PERL_SBRK
 
-#   ifdef NeXT
-#      define PERL_SBRK_VIA_MALLOC
-#   endif
-
-#   ifdef __MACHTEN_PPC__
+#   if defined(__MACHTEN_PPC__) || defined(__NeXT__)
 #      define PERL_SBRK_VIA_MALLOC
 /*
  * MachTen's malloc() returns a buffer aligned on a two-byte boundary.
@@ -1619,8 +1615,7 @@ static long Perl_sbrk_oldsize;
 #   define PERLSBRK_64_K (1<<16)
 
 Malloc_t
-Perl_sbrk(size)
-int size;
+Perl_sbrk(int size)
 {
     IV got;
     int small, reqsize;
