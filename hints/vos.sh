@@ -143,3 +143,7 @@ fi
 
 $rm -f t001$_o t001$_exe t001.kp
 EOCBU
+
+# VOS has a nanosleep() function but it is a dummy.
+d_nanosleep="undef"
+
