@@ -82,3 +82,12 @@ archobjs="vos.o"
 
 # Help gmake find vos.c
 test -h vos.c || ln -s vos/vos.c vos.c
+
+# VOS returns a constant 1 for st_nlink when stat'ing a
+# directory. Therefore, we must set this variable to stop
+# File::Find using the link count to determine whether there are
+# subdirectories to be searched.
+dont_use_nlink=define
+
+# Tell Configure where to find the hosts file.
+hostcat="cat /system/stcp/hosts"
