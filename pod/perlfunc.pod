@@ -1863,8 +1863,9 @@ The exact meaning of the $gcos field varies but it usually contains
 the real name of the user (as opposed to the login name) and other
 information pertaining to the user.  Beware, however, that in many
 system users are able to change this information and therefore it
-cannot be trusted and therefore the $gcos is is tainted (see L<perlsec>). 
-The $shell, user's login shell, is also tainted, because of the same reason.
+cannot be trusted and therefore the $gcos is is tainted (see
+L<perlsec>).  The $passwd and $shell, user's encrypted password and
+login shell, are also tainted, because of the same reason.
 
 In scalar context, you get the name, unless the function was a
 lookup by name, in which case you get the other thing, whatever it is.

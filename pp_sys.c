@@ -4835,6 +4835,10 @@ PP(pp_gpwent)
 	sv_setpv(sv, pwent->pw_passwd);
 #   endif
 #endif
+#ifndef INCOMPLETE_TAINTS
+	/* passwd is tainted because user himself can diddle with it. */
+	SvTAINTED_on(sv);
+#endif
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #if Uid_t_sign <= 0

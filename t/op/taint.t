@@ -547,7 +547,7 @@ else {
 	my @getpwent = getpwent();
 	die "getpwent: $!\n" unless (@getpwent);
 	test 142,(    not tainted $getpwent[0]
-	          and not tainted $getpwent[1]
+	          and     tainted $getpwent[1]
 	          and not tainted $getpwent[2]
 	          and not tainted $getpwent[3]
 	          and not tainted $getpwent[4]
