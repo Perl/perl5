@@ -2276,6 +2276,7 @@ t/run/switchp.t			Test the -p switch
 t/run/switchn.t			Test the -n switch
 t/run/switcha.t			Test the -a switch
 t/run/switchF.t			Test the -F switch
+t/run/switches.t		Tests for the other switches
 t/TEST				The regression tester
 t/test.pl			Simple testing library
 t/TestInit.pm			Preamble library for core tests
