@@ -588,9 +588,20 @@ using
 
     perl -MExtUtils::MakeMaker -le 'print MM->parse_version(shift)' 'Foo.pm'
 
-If you want to release a 'beta' or 'alpha' version of a module but don't
-want CPAN.pm to list it as most recent use an '_' after the regular
-version number followed by at least 2 digits, eg. 1.20_01
+If you want to release a 'beta' or 'alpha' version of a module but
+don't want CPAN.pm to list it as most recent use an '_' after the
+regular version number followed by at least 2 digits, eg. 1.20_01. If
+you do this, the following idiom is recommended:
+
+  $VERSION = "1.12_01";
+  $XS_VERSION = $VERSION; # only needed if you have XS code
+  $VERSION = eval $VERSION;
+
+With that trick MakeMaker will only read the first line and thus read
+the underscore, while the perl interpreter will evaluate the $VERSION
+and convert the string into a number. Later operations that treat
+$VERSION as a number will then be able to do so without provoking a
+warning about $VERSION not being a number.
 
 Never release anything (even a one-word documentation patch) without
 incrementing the number.  Even a one-word documentation patch should
