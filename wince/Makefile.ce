@@ -824,6 +824,9 @@ $(DLLDIR)\DynaLoader.obj
 !IF "$(PERL_MALLOC)" == "define"
 XDLLOBJS	= $(XDLLOBJS) $(DLLDIR)\malloc.obj
 !ENDIF
+!IF "$(CRYPT_SRC)" != ""
+XDLLOBJS	= $(XDLLOBJS) $(DLLDIR)\fcrypt.obj
+!ENDIF
 
 {$(SRCDIR)}.c{$(DLLDIR)}.obj:
     $(CC) -c $(CFLAGS) -DPERL_EXTERNAL_GLOB -Fo$(DLLDIR)\ $<
