@@ -26,7 +26,7 @@ addtopath=`pwd`
 $spitshell >>Makefile <<!GROK!THIS!
 
 # shell script feeding perlld to decent perl
-ld2: $& Makefile perlld ${src}/cygwin32/ld2.in ${src}/impure_ptr\$(OBJ_EXT)
+ld2: $& Makefile perlld ${src}/cygwin32/ld2.in
 	@echo "extracting ld2 (with variable substitutions)"
 	@$sed s,@buildpath@,$addtopath,g <${src}/cygwin32/ld2.in >ld2
 !GROK!THIS!
@@ -49,7 +49,7 @@ EXPORT_ALL = 1
 DEF_EXT = .def
 EXP_EXT = .exp
 
-perlld: $& Makefile ${src}/cygwin32/perlld.in ${src}/impure_ptr\$(OBJ_EXT)
+perlld: $& Makefile ${src}/cygwin32/perlld.in
 	@echo "extracting perlld (with variable substitutions)"
 	@$sed -e s,@CC@,\${CC}, -e s,@DLLWRAP@,\${DLLWRAP},g \\
 	-e s,@WRAPDRIVER@,\${WRAPDRIVER},g -e s,@DLLTOOL@,\${DLLTOOL},g \\
@@ -83,8 +83,7 @@ AWK = $awk
 case "$useshrplib" in
 true)
 	$spitshell >>Makefile <<'!NO!SUBS!'
-# impure pointer initialisation
-cwobj = impure_ptr$(OBJ_EXT) $(obj)
+cwobj = $(obj)
 
 # override default rule (NB: make croaks!) to force dll usage
 perlmain$(OBJ_EXT): perlmain.c
@@ -94,9 +93,6 @@ perlmain$(OBJ_EXT): perlmain.c
 # miniperl is linked against it to avoid libperl.dll locking
 $(LIBPERL)s$(LIB_EXT): $& perl$(OBJ_EXT) $(cwobj)
 	$(AR) rcu $@ perl$(OBJ_EXT) $(cwobj)
-
-impure_ptr$(OBJ_EXT): cygwin32/impure_ptr.c
-	$(CCCMD) $(PLDLFLAGS) cygwin32/impure_ptr.c
 
 # dll and import library
 $(LIBPERL)$(LIB_EXT): $& perl$(OBJ_EXT) $(cwobj) ld2

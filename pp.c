@@ -472,7 +472,7 @@ PP(pp_prototype)
 		goto set;
 	    else {			/* None such */
 	      nonesuch:
-		croak("Cannot find an opnumber for \"%s\"", s+6);
+		croak("Can't find an opnumber for \"%s\"", s+6);
 	    }
 	}
     }

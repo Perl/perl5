@@ -75,7 +75,6 @@ cv.h			Code value header
 cygwin32/Makefile.SHs	Shared library generation for Cygwin32 port
 cygwin32/ld2.in		ld wrapper template for Cygwin32 port
 cygwin32/perlld.in	dll generator template for Cygwin32 port
-cygwin32/impure_ptr.c	impure pointer stub for dlls
 cygwin32/build-instructions.charles-wilson	Cygwin32 porters notes
 cygwin32/build-instructions.READFIRST		Cygwin32 porters notes
 cygwin32/build-instructions.steven-morlock2	Cygwin32 porters notes
@@ -545,6 +544,7 @@ lib/ExtUtils/Install.pm	Handles 'make install' on extensions
 lib/ExtUtils/Installed.pm	Information on installed extensions
 lib/ExtUtils/Liblist.pm	Locates libraries
 lib/ExtUtils/MM_OS2.pm		MakeMaker methods for OS/2
+lib/ExtUtils/MM_Cygwin.pm	MakeMaker methods for Cygwin
 lib/ExtUtils/MM_Unix.pm		MakeMaker base class for Unix
 lib/ExtUtils/MM_VMS.pm		MakeMaker methods for VMS
 lib/ExtUtils/MM_Win32.pm	MakeMaker methods for Win32

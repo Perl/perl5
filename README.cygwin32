@@ -18,15 +18,11 @@ provides the UNIX system calls and environment these programs expect.
 More info about this project can be found at it's home page
 http://sourceware.cygnus.com/cygwin/
 
-   Cygnus Solutions also made the first set of notes and tools for
-building perl under Cygwin32 beta17.
+=item libperl.dll
 
-=item als
+These instructions and the default cygwin32 hints build a a shared
+libperl.dll Perl library and enables dynamically loaded extensions.
 
-no, i am not hunting the patch pumpkin.  i just wanted to have working
-non-ActiveState perl binaries for Windows NT that can load dynamic
-extensions.  after several days of internet searching i went to conclusion
-that the most promising way is to build it myself.  i was wrong.
 
 =back
 
@@ -38,50 +34,36 @@ that the most promising way is to build it myself.  i was wrong.
 
 =item Cygwin b20.1
 
-since you are willing to build things yourself, you are supposed to use
-not-so-archaic tools.  the latest stable Cygwin suite is beta20.1. it may be
+The latest stable Cygwin suite is beta20.1.  It may be
 downloaded from ftp://go.cygnus.com/pub/sourceware.cygnus.com/cygwin/latest/
 or many mirror sites around the world.
 
 =item egcs-1.1.2
 
-i've tried to build with egcs-1.1 that comes with cygwin b20.1, and
-had no luck.  maybe, if a week ago i was as experienced as now,
-things would go different...  maybe.  but this port was built with
-egcs-1.1.2 downloaded from
+This port was built with egcs-1.1.2 downloaded from
 ftp://ftp.xraylith.wisc.edu/pub/khan/gnu-win32/cygwin/egcs-1.1.2/
 
-=item my patches
+=item install executable
 
-if you are reading this, those are probably applied already.
+To make life easier, you should download
+ftp://ftp.franken.de/pub/win32/develop/gnuwin32/cygwin/porters/Humblet_Pierre_A/install-cygwin-b20.sh,
+and use it as your install "executable." Just follow the instructions
+that are embedding as comments in the .sh file.
 
 =item crypt library
 
-you do not want to see messages about excessive paranoia, do you?
-well, http://miracle.geol.msu.ru/sos/ points to two different crypt
-libraries ported to cygwin.  i used libcrypt.tgz by Andy Piper.
-his home page can be found at http://www.xemacs.freeserve.co.uk/
-
-=item environment
-
-the locations of cygwin instllation are, well, a little unusual.
-Configure will run smoother if you make more common aliases for cygwin
-directories.  it can be made either by C<mount>ing or by creating
-directory symlinks like this:
-
-ln -s /cygnus/cygwin-b20/H-i586-cygwin32/bin/ $prefix/bin
-ln -s /cygnus/cygwin-b20/H-i586-cygwin32/i586-cygwin32/include/ \
-	$prefix/include
-ln -s /cygnus/cygwin-b20/H-i586-cygwin32/i586-cygwin32/lib/ $prefix/lib
-
-$prefix may be empty (root), /usr, or /usr/local, as you preffer.
-i used /usr.  futhermore, t/io/taint.t requires cygwin1.dll to be
-present in build directory or somewhere in system path (/WINNT,
-/WINNT/System, /WINNT/System32).
+http://miracle.geol.msu.ru/sos/ points to two different crypt
+libraries ported to cygwin.  This has been tested with the libcrypt.tgz
+by Andy Piper. His home page can be found at
+http://www.xemacs.freeserve.co.uk/
 
 =back
 
 =head2 Configure
+
+Check hints/cygwin32.sh for any system specific settings.  In
+particular change libpth if Cygwin is installed somewhere other
+than /cygnus.
 
 run "sh Configure".  
 
@@ -98,22 +80,21 @@ When confronted with this prompt:
 
 =end text
 
-guess what system do you have.  (hint: select "cygwin32").
+select "cygwin32".
 
-i do not use malloc that comes with perl, but haven't put this setting
-to hints file.  perl defaults to use own malloc.
-
-Configure proposes additional -fpic flag for shared library module
-compilation.  say "none" because gcc complains that -fpic is useless.
-
-i hope that further defaults are ok.  please double-chek it.
+Do not use the malloc that comes with perl--using the perl malloc
+collides with some cygwin startup routines. 
 
 =head2 make
 
-run "make".  after that, run "make test" to see how unstable your system is.
-for me, lib/io_sock.t waits for died child that has to be killed manually.
-other test scripts seem to be more or less harmless.  the result of
-./perl harness reads:
+Run "make".  After that, run "make test" to see how stable your system is.
+For me, at io/taint.t you may see several Win32 "Unable To Locate DLL"
+messages (just click Ok) that requires cygwin1.dll to be present in the
+build directory or somewhere in system path (/WINNT, /WINNT/System,
+/WINNT/System32).  And, at lib/io_sock.t you may see several Win32
+"Application Error" messages (just click Ok) and the test waits for a
+died child that has to be killed manually.  Other test scripts seem to
+be more or less harmless.  The result of ./perl harness reads:
 
 =begin text
 
@@ -121,38 +102,37 @@ Failed Test  Status Wstat Total Fail  Failed  List of failed
 -------------------------------------------------------------------------------
 lib/anydbm.t      2   512    12    8  66.67%  5-12
 lib/findbin.t                 1    1 100.00%  1
-lib/io_sock.t     1   256     5    4  80.00%  2-5
+lib/io_sock.t     9  2304     5    4  80.00%  2-5
 lib/sdbm.t        2   512    18   15  83.33%  2, 5-18
-op/magic.t                   35    3   8.57%  1, 23, 30
-op/stat.t                    58    3   5.17%  2, 9, 26
+op/magic.t                   35    2   5.71%  23, 29
+op/split.t                   25    1   4.00%  11
+op/stat.t                    58    2   3.45%  9, 26
+op/taint.t                  149    3   2.01%  1, 3, 31
 pragma/locale.t  11  2816   102    4   3.92%  99-102
-8 tests skipped, plus 35 subtests skipped.
-Failed 7/190 test scripts, 96.32% okay. 38/6454 subtests failed, 99.41% okay.
+9 tests skipped, plus 35 subtests skipped.
+Failed 9/190 test scripts, 95.26% okay. 40/6452 subtests failed, 99.38% okay.
 
 =end text
 
 =head1 BUGS
 
-a lot of warnings about incompatible pointer types and comparison
-lacking a cast.  this is because of __declspec(dllimport).
+A lot of warnings about incompatible pointer types and comparison
+lacking a cast.  This is because of __declspec(dllimport).
 
-upon each start, make warns that a rule for perlmain.o is overrided.
-yes, it is.  in order to use libperl.dll, perlmain needs to import
-symbols from there.  i saw no better solution than adding an explicit
+Upon each start, make warns that a rule for perlmain.o is overrided.
+Yes, it is.  In order to use libperl.dll, perlmain needs to import
+symbols from there.  I saw no better solution than adding an explicit
 define to the rule.
 
-as said above, IO::Socket generates access violation.  don't know why.
-don't need IO::Socket for now.
+The lib/io_sock.t failure seems to be a problem with a forked child
+not having its DLLs remapped.
 
-make clean does not remove library .def and .exe.core files
+make clean does not remove library .def and .exe.core files.
 
-ld2 script is installed with reference to source directory.  you should
+ld2 script is installed with reference to source directory.  You should
 change this to /usr/local/bin (or whatever) after install.
 
 .bat wrappers for installed utility scripts are not made during installation.
-
-library man pages are not installed correctly due to file system limitations.
-use perldoc script to read about things like foo::bar.
 
 =head1 AUTHOR
 
@@ -160,12 +140,17 @@ alexander smishlajev <als@turnhere.com>
 
 =head1 DISCLAIMER
 
-i am not going to maintain this document or this port.  i only wanted
-to make perl porting a bit easier.  if failed, i can't be helpful for you.
+I am not going to maintain this document or this port.  I only wanted
+to make perl porting a bit easier.  If failed, I can't be helpful for you.
 
 =head1 HISTORY
 
 17..25-apr-1999.  perl 5.005_03.  cygwin b20.1  egcs 1.1.2.
                   far 1.60.  nescafe classic.
+
+efifer@sanwaint.com - Wed May 12 17:22:42 BST 1999
+
+    Removed all references to the impure_ptr hack since it is no longer
+    needed.  Some minor cleanup of Alexander's work and a few bug fixes.
 
 =cut

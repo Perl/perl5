@@ -138,7 +138,7 @@ sub runpod2man {
 	# Convert name from  File/Basename.pm to File::Basename.3 format,
 	# if necessary.
 	$manpage =~ s#\.p(m|od)$##;
-	if ($^O eq 'os2' || $^O eq 'amigaos' || $^O eq 'uwin') {
+	if ($^O eq 'os2' || $^O eq 'amigaos' || $^O eq 'uwin' || $^O =~ /cygwin/) {
 	  $manpage =~ s#/#.#g;
 	} else {
 	  $manpage =~ s#/#::#g;

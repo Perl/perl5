@@ -102,6 +102,9 @@
    }
 #  define times(t) vms_times(t)
 #else
+#if defined (CYGWIN32)
+#    define tzname _tzname
+#endif
 #if defined (WIN32)
 #  undef mkfifo
 #  define mkfifo(a,b) not_here("mkfifo")

@@ -1518,7 +1518,7 @@ warner(U32  err, const char* pat,...)
 }
 
 #ifndef VMS  /* VMS' my_setenv() is in VMS.c */
-#ifndef WIN32
+#if !defined(WIN32) && !defined(CYGWIN32)
 void
 my_setenv(char *nam, char *val)
 {

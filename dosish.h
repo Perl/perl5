@@ -24,9 +24,8 @@
 #    define BIT_BUCKET "nul"
 #  else
 #    ifdef CYGWIN32
-       extern struct _reent *__imp_reent_data; /* global impure pointer */
 #      define PERL_SYS_INIT(c,v)	\
-		MALLOC_INIT; impure_setup(__imp_reent_data);
+		MALLOC_INIT;
 #      define OP_BINARY O_BINARY
 #      define BIT_BUCKET "nul"
 #      define HAS_IOCTL
