@@ -1027,16 +1027,14 @@ Work will continue on the bytecompiler and byteloader.
 
 =item *
 
-The v-strings as such may be removed.  What will keep working is
-the v-less form (1.2.3) when used with C<use>, C<require>, and
-C<$VERSION>.  The v-ful version (v1.2.3) may become obsolete.
-The equivalence of strings and v-strings (e.g. that currently 5.8.0
-is equal to "\5\8\0") will go away, and instead the 1.2.3 will be a
-"version object", as will be the C<$^V>.  B<There is no deprecation
-warning for v-strings>, though: it is quite hard to detect when
-v-strings are being used safely, and when they are not.  Therefore
-to avoid false warnings, or miss needed ones it was decided that
-deprecation warnings will not be be given.
+v-strings as they currently exist are scheduled to be deprecated.  The
+v-less form (1.2.3) will become a "version object" when used with C<use>,
+C<require>, and C<$VERSION>.  $^V will also be a "version object" so the
+printf("%vd",...) construct will no longer be needed.  The v-ful version
+(v1.2.3) will become obsolete.  The equivalence of strings and v-strings (e.g.
+that currently 5.8.0 is equal to "\5\8\0") will go away.  B<There may be no
+deprecation warning for v-strings>, though: it is quite hard to detect when
+v-strings are being used safely, and when they are not.
 
 =item *
 
