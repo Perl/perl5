@@ -2269,7 +2269,7 @@ static int store_hash(stcxt_t *cxt, HV *hv)
 
 		/*
 		 * Storing in "random" order (in the order the keys are stored
-		 * within the the hash).  This is the default and will be faster!
+		 * within the hash).  This is the default and will be faster!
 		 */
   
 		for (i = 0; i < len; i++) {

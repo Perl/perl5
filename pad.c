@@ -46,9 +46,9 @@ The 0'th slot of a frame AV is an AV which is @_.
 other entries are storage for variables and op targets.
 
 During compilation:
-C<PL_comppad_name> is set the the the names AV.
-C<PL_comppad> is set the the frame AV for the frame CvDEPTH == 1.
-C<PL_curpad> is set the body of the frame AV (i.e. AvARRAY(PL_comppad)).
+C<PL_comppad_name> is set to the names AV.
+C<PL_comppad> is set to the frame AV for the frame CvDEPTH == 1.
+C<PL_curpad> is set to the body of the frame AV (i.e. AvARRAY(PL_comppad)).
 
 During execution, C<PL_comppad> and C<PL_curpad> refer to the live
 frame of the currently executing sub.
@@ -78,7 +78,7 @@ a REFCNT'ed references to a lexical from "outside". In this case,
 the name SV does not have a cop_seq range, since it is in scope
 throughout.
 
-If the 'name' is '&' the the corresponding entry in frame AV
+If the 'name' is '&' the corresponding entry in frame AV
 is a CV representing a possible closure.
 (SvFAKE and name of '&' is not a meaningful combination currently but could
 become so if C<my sub foo {}> is implemented.)

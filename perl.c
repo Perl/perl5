@@ -500,6 +500,9 @@ perl_destruct(pTHXx)
 
     Safefree(PL_exitlist);
 
+    PL_exitlist = NULL;
+    PL_exitlistlen = 0;
+
     if (destruct_level == 0){
 
 	DEBUG_P(debprofdump());

@@ -5038,7 +5038,7 @@ Perl_seekdir(pTHX_ DIR *dd, long count)
  *
  * vms_do_aexec() and vms_do_exec() are called in response to the
  * perl 'exec' function.  If this follows a vfork call, then they
- * call out the the regular perl routines in doio.c which do an
+ * call out the regular perl routines in doio.c which do an
  * execvp (for those who really want to try this under VMS).
  * Otherwise, they do exactly what the perl docs say exec should
  * do - terminate the current script and invoke a new command
@@ -5051,7 +5051,7 @@ Perl_seekdir(pTHX_ DIR *dd, long count)
  * in 'VMSish fashion' (i.e. not after a call to vfork) The args
  * are concatenated to form a DCL command string.  If the first arg
  * begins with '$' (i.e. the perl script had "\$ Type" or some such),
- * the the command string is handed off to DCL directly.  Otherwise,
+ * the command string is handed off to DCL directly.  Otherwise,
  * the first token of the command is taken as the filespec of an image
  * to run.  The filespec is expanded using a default type of '.EXE' and
  * the process defaults for device, directory, etc., and if found, the resultant

@@ -32,7 +32,7 @@
    "SUPER::flush.
 
    Note that "flush" is _also_ called for read mode - we still do the
-   (back)-translate so that the the base class's "flush" sees the
+   (back)-translate so that the base class's "flush" sees the
    correct number of encoded chars for positioning the seek
    pointer. (This double translation is the worst performance issue -
    particularly with all-perl encode engine.)
