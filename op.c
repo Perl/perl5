@@ -4599,9 +4599,10 @@ OP *op;
 		    goto wrapref;
 		{
 		    OP* kid = o;
-		    o = newUNOP(OP_RV2GV, 0, kid);
-		    o->op_sibling = kid->op_sibling;
+		    OP* sib = kid->op_sibling;
 		    kid->op_sibling = 0;
+		    o = newUNOP(OP_RV2GV, 0, kid);
+		    o->op_sibling = sib;
 		    prev->op_sibling = o;
 		}
 		goto wrapref;
@@ -4631,9 +4632,10 @@ OP *op;
 		  wrapref:
 		    {
 			OP* kid = o;
-			o = newUNOP(OP_REFGEN, 0, kid);
-			o->op_sibling = kid->op_sibling;
+			OP* sib = kid->op_sibling;
 			kid->op_sibling = 0;
+			o = newUNOP(OP_REFGEN, 0, kid);
+			o->op_sibling = sib;
 			prev->op_sibling = o;
 		    }
 		    break;
