@@ -2516,11 +2516,6 @@ try_autoload:
 	goto retry;
     }
 
-    if(CvDEFSTASH(cv) != PL_defstash) {
-        save_hptr(&PL_defstash);
-	PL_defstash = CvDEFSTASH(cv);
-    }
-
     gimme = GIMME_V;
     if ((PL_op->op_private & OPpENTERSUB_DB) && GvCV(PL_DBsub) && !CvNODEBUG(cv)) {
 	cv = get_db_sub(&sv, cv);

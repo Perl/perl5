@@ -34,7 +34,6 @@ struct xpvcv {
     struct perl_thread *xcv_owner;	/* current owner thread */
 #endif /* USE_THREADS */
     cv_flags_t	xcv_flags;
-    HV *	xcv_defstash;
 };
 
 /*
@@ -70,7 +69,6 @@ Returns the stash of the CV.
 #define CvOWNER(sv)	((XPVCV*)SvANY(sv))->xcv_owner
 #endif /* USE_THREADS */
 #define CvFLAGS(sv)	((XPVCV*)SvANY(sv))->xcv_flags
-#define CvDEFSTASH(sv)	((XPVCV*)SvANY(sv))->xcv_defstash
 
 #define CVf_CLONE	0x0001	/* anon CV uses external lexicals */
 #define CVf_CLONED	0x0002	/* a clone of one of those */
