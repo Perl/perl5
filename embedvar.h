@@ -208,6 +208,7 @@
 #define regstartp		(curinterp->Iregstartp)
 #define regtill			(curinterp->Iregtill)
 #define regxend			(curinterp->Iregxend)
+#define replgv			(curinterp->Ireplgv)
 #define rightgv			(curinterp->Irightgv)
 #define sawampersand		(curinterp->Isawampersand)
 #define sawstudy		(curinterp->Isawstudy)
@@ -371,6 +372,7 @@
 #define Iregstartp		regstartp
 #define Iregtill		regtill
 #define Iregxend		regxend
+#define Ireplgv			replgv
 #define Irightgv		rightgv
 #define Isawampersand		sawampersand
 #define Isawstudy		sawstudy
@@ -596,6 +598,7 @@
 #define regstartp		Perl_regstartp
 #define regtill			Perl_regtill
 #define regxend			Perl_regxend
+#define replgv			Perl_replgv
 #define rightgv			Perl_rightgv
 #define sawampersand		Perl_sawampersand
 #define sawstudy		Perl_sawstudy
