@@ -13,55 +13,6 @@ the L<perl58delta>, which describes differences between 5.6.0 and
 
 =head1 Incompatible Changes
 
-=head2 Hash Randomisation
-
-Mainly due to security reasons, the "random ordering" of hashes
-has been made even more random.  Previously while the order of hash
-elements from keys(), values(), and each() was essentially random,
-it was still repeatable.  Now, however, the order varies between
-different runs of Perl.
-
-B<Perl has never guaranteed any ordering of the hash keys>, and the
-ordering has already changed several times during the lifetime of
-Perl 5.  Also, the ordering of hash keys has always been, and
-continues to be, affected by the insertion order.
-
-The added randomness may affect applications.
-
-One possible scenario is when output of an application has included
-hash data.  For example, if you have used the Data::Dumper module to
-dump data into different files, and then compared the files to see
-whether the data has changed, now you will have false positives since
-the order in which hashes are dumped will vary.  In general the cure
-is to sort the keys (or the values); in particular for Data::Dumper to
-use the C<Sortkeys> option; or if some particular order is really
-important, use tied hashes.
-
-More subtle problem is reliance on the order of "global destruction".
-That is what happens at the end of execution: Perl destroys all data
-structures, including user data.  If your destructors (the DESTROY
-subroutines) have assumed any particular ordering to the global
-destruction, there might be problems ahead.  For example, in a
-destructor of one object you cannot assume that objects of any other
-class are still available, unless you hold a reference to them.
-If the environment variable PERL_DESTRUCT_LEVEL is set to a non-zero
-value, or if Perl is exiting a spawned thread, it will also destruct
-the ordinary references and the symbol tables that are no longer in use.
-You can't call a class method or an ordinary function on a class that
-has been collected that way.
-
-The hash randomisation is certain to reveal hidden assumptions about
-some particular ordering of hash elements, and outright bugs: it
-revealed a few bugs in the Perl core and core modules.
-
-To disable the hash randomisation in runtime, set the environment
-variable PERL_HASH_SEED to 0 (zero) before running Perl (for more
-information see L<perlrun/PERL_HASH_SEED>), or to disable the feature
-completely in compile time, compile with C<-DNO_HASH_SEED> (see F<INSTALL>).
-
-See L<perlsec/"Algorithmic Complexity Attacks"> for the original
-rationale behind this change.
-
 =head2 UTF-8 On Filehandles No Longer Activated By Locale
 
 In Perl 5.8.0 all filehandles, including the standard filehandles,
@@ -183,6 +134,63 @@ The syntaxes
 	local %{$x}
 
 now do localise variables, given that the $x is a valid variable name.
+
+=head2 Hash Randomisation
+
+A vulnerability was found in the "random ordering" of Perl hashes.
+By carefully crafting the hash keys one can cause the performance of
+hashes to degenerate considerably, enabling a denial-of-service attack.
+
+To make this malicious crafting harder, a new feature was added to
+Perl to allow randomising the hash ordering.  To activate this
+feature, set the environment variable PERL_HASH_SEED appropriately,
+see L<perlrun/PERL_HASH_SEED>.
+
+Previously while the order of hash elements from keys(), values(), and
+each() was essentially random, it was still repeatable.  Now, however,
+the order may vary between different runs of Perl.
+
+B<Perl has never guaranteed any ordering of the hash keys>, and the
+ordering has already changed several times during the lifetime of
+Perl 5.  Also, the ordering of hash keys has always been, and
+continues to be, affected by the insertion order.
+
+If the added randomness is used, existing applications may be affected.
+
+One possible scenario is when output of an application has included
+hash data.  For example, if you have used the Data::Dumper module to
+dump data into different files, and then compared the files to see
+whether the data has changed, now you will have false positives since
+the order in which hashes are dumped will vary.  In general the cure
+is to sort the keys (or the values); in particular for Data::Dumper to
+use the C<Sortkeys> option; or if some particular order is really
+important, use tied hashes.
+
+More subtle problem is reliance on the order of "global destruction".
+That is what happens at the end of execution: Perl destroys all data
+structures, including user data.  If your destructors (the DESTROY
+subroutines) have assumed any particular ordering to the global
+destruction, there might be problems ahead.  For example, in a
+destructor of one object you cannot assume that objects of any other
+class are still available, unless you hold a reference to them.
+If the environment variable PERL_DESTRUCT_LEVEL is set to a non-zero
+value, or if Perl is exiting a spawned thread, it will also destruct
+the ordinary references and the symbol tables that are no longer in use.
+You can't call a class method or an ordinary function on a class that
+has been collected that way.
+
+If the hash randomisation is used, it is certain to reveal hidden
+assumptions about some particular ordering of hash elements, and
+outright bugs: it revealed a few bugs in the Perl core and core
+modules.
+
+To disable the hash randomisation in runtime, just either don't set
+the environment variable PERL_HASH_SEED, or set it to 0 (zero) before
+running Perl (for more information see L<perlrun/PERL_HASH_SEED>),
+or to disable the feature completely in compile time, compile with
+C<-DNO_HASH_SEED> (see F<INSTALL>).
+
+See L<perlsec/"Algorithmic Complexity Attacks"> for the original rationale.
 
 =head2 Unicode Character Database 4.0.0
 
@@ -651,9 +659,6 @@ The exact numbers depend on the Perl configuration and on the operating
 system platform.
 
 =head1 Known Problems
-
-The hash randomisation mentioned in L</Incompatible Changes> is definitely
-problematic: it will wake dormant bugs and shake out bad assumptions.
 
 Many of the rarer platforms that worked 100% or pretty close to it
 with perl 5.8.0 have been left a little bit untended since their
