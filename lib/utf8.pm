@@ -1,6 +1,5 @@
 package utf8;
 
-if (ord('A') != 193) { # make things more pragmatic for EBCDIC folk
 
 $utf8::hint_bits = 0x00800000;
 
@@ -19,8 +18,6 @@ sub AUTOLOAD {
     require "utf8_heavy.pl";
     goto &$AUTOLOAD if defined &$AUTOLOAD;
     Carp::croak("Undefined subroutine $AUTOLOAD called");
-}
-
 }
 
 1;
