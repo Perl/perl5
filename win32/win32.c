@@ -379,7 +379,8 @@ do_aspawn(void* really, void** mark, void** arglast)
     }
     else {
 	argv[index++] = cmd = GetShell();
-	argv[index++] = "/x";	/* always enable command extensions */
+	if (IsWinNT())
+	    argv[index++] = "/x";   /* always enable command extensions */
 	argv[index++] = "/c";
     }
 
@@ -455,8 +456,11 @@ do_spawn2(char *cmd, int exectype)
     }
     if(needToTry) {
 	char *argv[5];
-	argv[0] = shell; argv[1] = "/x"; argv[2] = "/c";
-	argv[3] = cmd; argv[4] = Nullch;
+	int i = 0;
+	argv[i++] = shell;
+	if (IsWinNT())
+	    argv[i++] = "/x";
+	argv[i++] = "/c"; argv[i++] = cmd; argv[i] = Nullch;
 	switch (exectype) {
 	case EXECF_SPAWN:
 	    status = win32_spawnvp(P_WAIT, argv[0],
