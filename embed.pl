@@ -1247,7 +1247,7 @@ p	|bool	|do_print	|SV* sv|PerlIO* fp
 p	|OP*	|do_readline
 p	|I32	|do_chomp	|SV* sv
 p	|bool	|do_seek	|GV* gv|Off_t pos|int whence
-p	|void	|do_sprintf	|SV* sv|I32 len|SV** sarg
+Ap	|void	|do_sprintf	|SV* sv|I32 len|SV** sarg
 p	|Off_t	|do_sysseek	|GV* gv|Off_t pos|int whence
 p	|Off_t	|do_tell	|GV* gv
 p	|I32	|do_trans	|SV* sv
