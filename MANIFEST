@@ -1024,7 +1024,6 @@ lib/Config.t			See if Config works
 lib/constant.pm			For "use constant"
 lib/constant.t			See if compile-time constants work
 lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
-lib/CPAN/ChangeLog		Changes of CPAN
 lib/CPAN/README			README of CPAN
 lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
 lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
