@@ -31,6 +31,160 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 13342] By: jhi                                   on 2001/11/28  14:15:25
+        Log: In Linux if we have modern enough gcc and supported
+             enough CPU, crank up the optimization level to -O3.
+     Branch: perl
+	   ! hints/linux.sh
+____________________________________________________________________________
+[ 13341] By: jhi                                   on 2001/11/28  14:00:12
+        Log: Add perlpacktut from Wolfgang Laun; regen toc.
+     Branch: perl
+	   + pod/perlpacktut.pod
+	   ! MANIFEST pod/buildtoc.PL pod/perl.pod pod/perldelta.pod
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 13340] By: jhi                                   on 2001/11/28  13:45:00
+        Log: Subject: [PATCH: perl@13324] arithmetic fix for skipped tests on VMS      
+             From: PPrymmer@factset.com
+             Date: Wed, 28 Nov 2001 07:51:26 -0500
+             Message-ID: <OF3C405D19.04CAF18F-ON85256B12.00464B6C@55.25.11>    
+     Branch: perl
+	   ! vms/test.com
+____________________________________________________________________________
+[ 13339] By: jhi                                   on 2001/11/28  13:37:31
+        Log: Test cases for the first half of #13338.
+     Branch: perl
+	   ! t/lib/h2ph.h t/lib/h2ph.pht
+____________________________________________________________________________
+[ 13338] By: jhi                                   on 2001/11/28  13:28:08
+        Log: Subject: Re: h2ph confused by comments in an enum.
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk> 
+             Date: Wed, 28 Nov 2001 04:19:21 +0000
+             Message-Id: <200111280419.fAS4JLD17887@crypt.compulink.co.uk>        
+             
+             Subject: Re: More h2ph problems [was Re: h2ph confused by comments in an enum.]
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk> 
+             Date: Wed, 28 Nov 2001 13:36:35 +0000
+             Message-Id: <200111281336.fASDaZG30245@crypt.compulink.co.uk>
+     Branch: perl
+	   ! utils/h2ph.PL
+____________________________________________________________________________
+[ 13337] By: jhi                                   on 2001/11/28  13:15:41
+        Log: Subject: Re: [PATCH Perl@13013] Term::Cap and VMS
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Wed, 28 Nov 2001 10:39:54 +0000 (GMT)
+             Message-ID: <Pine.LNX.4.33.0111281039070.20888-100000@orpheus.gellyfish.com>
+             
+             (replace #13327)
+     Branch: perl
+	   ! lib/Term/Cap.pm
+____________________________________________________________________________
+[ 13336] By: jhi                                   on 2001/11/28  04:21:05
+        Log: Replace #13335 with
+             
+             Subject: Re: [PATCH perl@13323] Termcap.pm with no termios
+             From: Russ Allbery <rra@stanford.edu>
+             Date: 27 Nov 2001 20:42:49 -0800
+             Message-ID: <yl667vv73q.fsf@windlord.stanford.edu>
+     Branch: perl
+	   ! lib/Pod/Text/Termcap.pm
+____________________________________________________________________________
+[ 13335] By: jhi                                   on 2001/11/28  03:33:10
+        Log: (replaced by #13336)
+             
+             Subject: [PATCH perl@13323] Termcap.pm with no termios
+             From: "Craig A. Berry" <craigberry@mac.com> 
+             Date: Tue, 27 Nov 2001 22:28:50 -0600
+             Message-Id: <a05101003b82a151fda85@[192.168.56.184]>
+     Branch: perl
+	   ! lib/Pod/Text/Termcap.pm
+____________________________________________________________________________
+[ 13334] By: jhi                                   on 2001/11/28  03:31:51
+        Log: Subject: [PATCH perl@13323] solve identity crisis on VMS 
+             From: "Craig A. Berry" <craigberry@mac.com> 
+             Date: Tue, 27 Nov 2001 21:46:45 -0600
+             Message-Id: <a05101002b829f5c9824d@[192.168.56.184]>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 13333] By: jhi                                   on 2001/11/28  03:30:03
+        Log: Upgrade to podlators 1.17.
+     Branch: perl
+	   ! lib/Pod/Man.pm lib/Pod/Text/Color.pm
+	   ! lib/Pod/Text/Overstrike.pm lib/Pod/Text/Termcap.pm
+____________________________________________________________________________
+[ 13332] By: jhi                                   on 2001/11/28  03:23:04
+        Log: Fix for "a\x{100}" =~ /A/i.
+     Branch: perl
+	   ! embed.h embed.pl global.sym proto.h regexec.c t/op/pat.t
+	   ! utf8.c
+____________________________________________________________________________
+[ 13331] By: jhi                                   on 2001/11/28  00:52:19
+        Log: Subject: [PATCH perl@13324] fix lib/DB.t on VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 27 Nov 2001 17:11:49 -0600
+             Message-Id: <5.1.0.14.2.20011127164513.01bf1ec0@exchi01>
+     Branch: perl
+	   ! lib/DB.t
+____________________________________________________________________________
+[ 13330] By: jhi                                   on 2001/11/28  00:50:53
+        Log: Subject: [PATCH] unterminated C<< ... >> in perldelta
+             From: Ronald J Kimball <rjk@linguist.Thayer.dartmouth.edu>
+             Date: Tue, 27 Nov 2001 14:55:23 -0500
+             Message-ID: <20011127145523.G401767@linguist.thayer.dartmouth.edu>
+             
+             Subject: [PATCH: perl@13324] updates to perldelta.pod 
+             From: PPrymmer@factset.com
+             Date: Tue, 27 Nov 2001 18:06:04 -0500
+             Message-ID: <OF812EB439.6864B239-ON85256B11.007E73B5@55.25.11>
+             
+             plus added some known problems.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 13329] By: jhi                                   on 2001/11/28  00:35:53
+        Log: Subject: [PATCH Perl@13013] A not-so-lethal kill() for VMS pre-7.0
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date: Tue, 27 Nov 2001 15:38:02 EST 
+             Message-Id: <011127153734.62182@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! configure.com vms/vms.c vms/vmsish.h
+____________________________________________________________________________
+[ 13328] By: jhi                                   on 2001/11/28  00:34:12
+        Log: Subject: [PATCH t/run/kill_perl.t] Re: [ID 20011127.155] \ -f "file" dumps core
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Tue, 27 Nov 2001 15:31:12 -0500
+             Message-ID: <20011127153112.G20929@blackrider>
+     Branch: perl
+	   ! t/run/kill_perl.t
+____________________________________________________________________________
+[ 13327] By: jhi                                   on 2001/11/28  00:23:10
+        Log: (replaced by #13337)
+             
+             VMS can safely hardcode a termcap entry for VT100.
+     Branch: perl
+	   ! lib/Term/Cap.pm
+____________________________________________________________________________
+[ 13326] By: jhi                                   on 2001/11/27  17:47:28
+        Log: VMS piping fixes from Charles Lane (perl -P should
+             be working now).
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 13325] By: jhi                                   on 2001/11/27  17:44:31
+        Log: Subject: [PATCH] perlvar.pod fix
+             From: Ronald J Kimball <rjk@linguist.Thayer.dartmouth.edu>
+             Date: Tue, 27 Nov 2001 13:11:47 -0500
+             Message-ID: <20011127131147.E401767@linguist.thayer.dartmouth.edu>
+     Branch: perl
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[ 13324] By: jhi                                   on 2001/11/27  15:56:06
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 13323] By: jhi                                   on 2001/11/27  15:51:08
         Log: Subject: [PATCH] bring MM_VMS::perldepend into 21st century            
              From: "Craig A. Berry" <craigberry@mac.com> 
