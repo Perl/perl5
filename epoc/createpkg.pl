@@ -3,9 +3,9 @@
 use File::Find;
 use Cwd;
 
-$VERSION="5.7";
-$PATCH="0";
-$EPOC_VERSION=24;
+$VERSION="5.6";
+$PATCH="1";
+$EPOC_VERSION=26;
 $CROSSCOMPILEPATH=cwd;
 $CROSSREPLACEPATH="H:\\perl";
 
@@ -13,7 +13,7 @@ $CROSSREPLACEPATH="H:\\perl";
 sub filefound {
     my $f = $File::Find::name;
     
-    return if ( $f =~ /CVS|unicode|CPAN|ExtUtils|IPC|User|DB.pm|\.a$|\.ld$|\.exists$/i);
+    return if ( $f =~ /CVS|unicode|CPAN|ExtUtils|IPC|User|DB.pm|\.a$|\.ld$|\.exists$|\.pod$/i);
     my $back = $f;
 
     $back =~ s|$CROSSCOMPILEPATH||;

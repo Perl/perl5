@@ -37,8 +37,10 @@ http://developer.epocworld.com/downloads/progs/Eshell.zip
 
 Now you can enter: perl -de 0 in order to run the perl debugger. If
 you are leaving perl, you get into the system screen. You have to
-switch back manually to ESHELL. When perl is running, you will see
-a task with the name STDOUT in the task list.
+switch back manually to ESHELL. When perl is running, you will see a
+task with the name STDOUT in the task list. If you have a ER3 machine
+(i.e. a PSION 5), you may have to supply the full path to the perl
+executable C:\system\programs\perl.exe.
 
 =head1 USING PERL ON EPOC
 
@@ -171,7 +173,7 @@ Build a native perl from this sources...
 
       cp epoc/* .
       ./Configure -S
-      make perl.a
+      make 
       cp miniperl.native miniperl
       make perl
       make ext/Errno/pm_to_blib 
@@ -194,11 +196,11 @@ guarantee I'll be able to answer them.
 
 =head1 AUTHOR
 
-Olaf Flebbe <o.flebbe@gmx.de>
-http://members.linuxstart.com/~oflebbe/perl/perl5.html
+Olaf Flebbe <o.flebbe@science-computing.de>
+http://www.science-computing.de/o.flebbe/perl/
 
 =head1 LAST UPDATE
 
-2000-09-18
+2000-12-18
 
 =cut
