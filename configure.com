@@ -4915,8 +4915,72 @@ $   WS "    }"
 $   WS "    printf(""%d\n"", i);"
 $   WS "    exit(0);"
 $   WS "}"
+$   CS
 $   GOSUB compile
 $   d_nv_preserves_uv_bits = tmp
+$ ENDIF
+$!
+$ echo4 "Checking whether your kill() uses SYS$FORCEX..."
+$ kill_by_sigprc = "undef"
+$ OS
+$ WS "#include <stdio.h>"
+$ WS "#include <signal.h>"
+$ WS "void handler(int s) { printf(""%d\n"",s); } "
+$ WS "main(){"
+$ WS "    printf(""0"");"
+$ WS "    signal(1,handler); kill(0,1);"
+$ WS "}"
+$ CS
+$ ON ERROR THEN CONTINUE
+$ GOSUB compile
+$ IF tmp .NES. "01"
+$ THEN 
+$   echo "Yes, it does." 
+$   echo4 "Checking whether we can use SYS$SIGPRC instead"
+$   OS
+$   WS "#include <stdio.h>"
+$   WS "#include <lib$routines.h>"
+$   WS "unsigned long code = 0;"
+$   WS "int handler(unsigned long *args) {"
+$   WS "    code = args[1];"
+$   WS "    return 1;"
+$   WS "}"
+$   WS "main() { "
+$   WS "    int iss, sys$sigprc();"
+$   WS "    lib$establish(handler);"
+$   WS "    iss = sys$sigprc(0,0,0x1234);"
+$   WS "    iss =  ((iss&1)==1 && code == 0x1234);" 
+$   WS "    printf(""%d\n"",iss);"
+$   WS "}"
+$   CS
+$   GOSUB compile
+$   IF tmp .EQS. "1"
+$   THEN
+$       echo "looks like we can"
+$       kill_by_sigprc = "define"
+$!
+$!      since SIGBUS and SIGSEGV indistinguishable, make them the same here.
+$!      sigusr1 and sigusr2 show up in VMS6.2 and later
+$!
+$       if  vms_ver .GES. "6.2"
+$       then
+$           sig_name="ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM ABRT USR1 USR2"",0"
+$           psnwc1="""ZERO"",""HUP"",""INT"",""QUIT"",""ILL"",""TRAP"",""IOT"",""EMT"",""FPE"",""KILL"",""BUS"",""SEGV"",""SYS"","
+$           psnwc2="""PIPE"",""ALRM"",""TERM"",""ABRT"",""USR1"",""USR2"",0"
+$           sig_name_init = psnwc1 + psnwc2
+$           sig_num="0 1 2 3 4 5 6 7 8 9 10 10 12 13 14 15 6 16 17"",0"
+$           sig_num_init="0,1,2,3,4,5,6,7,8,9,10,10,12,13,14,15,6,16,17,0"
+$           sig_size="19"
+$       else
+$           sig_name="ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM ABRT"",0"
+$           psnwc1="""ZERO"",""HUP"",""INT"",""QUIT"",""ILL"",""TRAP"",""IOT"",""EMT"",""FPE"",""KILL"",""BUS"",""SEGV"",""SYS"","
+$           psnwc2="""PIPE"",""ALRM"",""TERM"",""ABRT"",0"
+$           sig_name_init = psnwc1 + psnwc2
+$           sig_num="0 1 2 3 4 5 6 7 8 9 10 10 12 13 14 15 6"",0"
+$           sig_num_init="0,1,2,3,4,5,6,7,8,9,10,10,12,13,14,15,6,0"
+$           sig_size="17"
+$       endif
+$   ENDIF
 $ ENDIF
 $ DELETE/SYMBOL tmp
 $!
@@ -5752,6 +5816,7 @@ $ THEN
 $! Alas this does not help to build Fcntl
 $!   WC "#define PERL_IGNORE_FPUSIG SIGFPE"
 $ ENDIF
+$ IF kill_by_sigprc .EQS. "define" then WC "#define KILL_BY_SIGPRC"
 $ CLOSE CONFIG
 $!
 $ echo4 "Doing variable substitutions on .SH files..."

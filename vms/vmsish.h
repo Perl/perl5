@@ -511,6 +511,10 @@ struct utimbuf {
 #    define sigaction(a,b,c) Perl_my_sigaction(a,b,c)
 #  endif
 #endif
+#ifdef KILL_BY_SIGPRC
+#  define kill  Perl_my_kill
+#endif
+
 
 /* VMS doesn't use a real sys_nerr, but we need this when scanning for error
  * messages in text strings . . .
@@ -767,6 +771,9 @@ int	Perl_my_chdir (pTHX_ char *);
 FILE *	Perl_my_tmpfile ();
 #ifndef HOMEGROWN_POSIX_SIGNALS
 int	Perl_my_sigaction (pTHX_ int, const struct sigaction*, struct sigaction*);
+#endif
+#ifdef KILL_BY_SIGPRC
+int	Perl_my_kill (int, int);
 #endif
 int	Perl_my_utime (pTHX_ char *, struct utimbuf *);
 void	Perl_vms_image_init (int *, char ***);
