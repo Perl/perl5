@@ -4782,6 +4782,10 @@
 #define Perl_pp_setpriority	pPerl->Perl_pp_setpriority
 #undef  pp_setpriority
 #define pp_setpriority		Perl_pp_setpriority
+#undef  Perl_pp_setstate
+#define Perl_pp_setstate	pPerl->Perl_pp_setstate
+#undef  pp_setstate
+#define pp_setstate		Perl_pp_setstate
 #undef  Perl_pp_sge
 #define Perl_pp_sge		pPerl->Perl_pp_sge
 #undef  pp_sge

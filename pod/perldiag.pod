@@ -74,6 +74,16 @@ C<'>-delimited regular expression.
 by parentheses turns into a function, with all the list operators arguments
 found inside the parentheses.  See L<perlop/Terms and List Operators (Leftward)>.
 
+=item %s() called too early to check prototype
+
+(W) You've called a function that has a prototype before the parser saw a
+definition or declaration for it, and Perl could not check that the call
+conforms to the prototype.  You need to either add an early prototype
+declaration for the subroutine in question, or move the subroutine
+definition ahead of the call to get proper prototype checking.  Alternatively,
+if you are certain that you're calling the function correctly, you may put
+an ampersand before the name to avoid the warning.  See L<perlsub>.
+
 =item %s argument is not a HASH element
 
 (F) The argument to exists() must be a hash element, such as

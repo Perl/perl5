@@ -2631,7 +2631,7 @@ PP(pp_aslice)
 
 PP(pp_each)
 {
-    djSP; dTARGET;
+    djSP;
     HV *hash = (HV*)POPs;
     HE *entry;
     I32 gimme = GIMME_V;
@@ -2646,12 +2646,13 @@ PP(pp_each)
     if (entry) {
 	PUSHs(hv_iterkeysv(entry));	/* won't clobber stack_sp */
 	if (gimme == G_ARRAY) {
+	    SV *val;
 	    PUTBACK;
 	    /* might clobber stack_sp */
-	    sv_setsv(TARG, realhv ?
-		     hv_iterval(hash, entry) : avhv_iterval((AV*)hash, entry));
+	    val = realhv ?
+		  hv_iterval(hash, entry) : avhv_iterval((AV*)hash, entry);
 	    SPAGAIN;
-	    PUSHs(TARG);
+	    PUSHs(val);
 	}
     }
     else if (gimme == G_SCALAR)

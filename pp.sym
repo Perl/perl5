@@ -382,3 +382,4 @@ Perl_pp_getlogin
 Perl_pp_syscall
 Perl_pp_lock
 Perl_pp_threadsv
+Perl_pp_setstate

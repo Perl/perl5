@@ -332,7 +332,7 @@ invert_opset function.
 
     cond_expr flip flop andassign orassign and or xor
 
-    warn die lineseq nextstate scope enter leave
+    warn die lineseq nextstate scope enter leave setstate
 
     rv2cv anoncode prototype
 

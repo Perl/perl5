@@ -11,6 +11,7 @@ BEGIN {
 }
 
 use strict;
+no utf8;
 
 my $debug = 1;
 

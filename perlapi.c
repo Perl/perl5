@@ -6981,6 +6981,13 @@ Perl_pp_setpriority(pTHXo)
     return ((CPerlObj*)pPerl)->Perl_pp_setpriority();
 }
 
+#undef  Perl_pp_setstate
+OP *
+Perl_pp_setstate(pTHXo)
+{
+    return ((CPerlObj*)pPerl)->Perl_pp_setstate();
+}
+
 #undef  Perl_pp_sge
 OP *
 Perl_pp_sge(pTHXo)

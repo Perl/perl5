@@ -764,6 +764,7 @@
 #define scalarboolean		S_scalarboolean
 #define too_few_arguments	S_too_few_arguments
 #define too_many_arguments	S_too_many_arguments
+#define op_clear		S_op_clear
 #define null			S_null
 #define pad_findlex		S_pad_findlex
 #define newDEFSVOP		S_newDEFSVOP
@@ -1274,6 +1275,7 @@
 #define pp_seq			Perl_pp_seq
 #define pp_setpgrp		Perl_pp_setpgrp
 #define pp_setpriority		Perl_pp_setpriority
+#define pp_setstate		Perl_pp_setstate
 #define pp_sge			Perl_pp_sge
 #define pp_sgrent		Perl_pp_sgrent
 #define pp_sgt			Perl_pp_sgt
@@ -2075,6 +2077,7 @@
 #define scalarboolean(a)	S_scalarboolean(aTHX_ a)
 #define too_few_arguments(a,b)	S_too_few_arguments(aTHX_ a,b)
 #define too_many_arguments(a,b)	S_too_many_arguments(aTHX_ a,b)
+#define op_clear(a)		S_op_clear(aTHX_ a)
 #define null(a)			S_null(aTHX_ a)
 #define pad_findlex(a,b,c,d,e,f,g)	S_pad_findlex(aTHX_ a,b,c,d,e,f,g)
 #define newDEFSVOP()		S_newDEFSVOP(aTHX)
@@ -2584,6 +2587,7 @@
 #define pp_seq()		Perl_pp_seq(aTHX)
 #define pp_setpgrp()		Perl_pp_setpgrp(aTHX)
 #define pp_setpriority()	Perl_pp_setpriority(aTHX)
+#define pp_setstate()		Perl_pp_setstate(aTHX)
 #define pp_sge()		Perl_pp_sge(aTHX)
 #define pp_sgrent()		Perl_pp_sgrent(aTHX)
 #define pp_sgt()		Perl_pp_sgt(aTHX)
@@ -4107,6 +4111,8 @@
 #define too_few_arguments	S_too_few_arguments
 #define S_too_many_arguments	CPerlObj::S_too_many_arguments
 #define too_many_arguments	S_too_many_arguments
+#define S_op_clear		CPerlObj::S_op_clear
+#define op_clear		S_op_clear
 #define S_null			CPerlObj::S_null
 #define null			S_null
 #define S_pad_findlex		CPerlObj::S_pad_findlex
@@ -5081,6 +5087,8 @@
 #define pp_setpgrp		Perl_pp_setpgrp
 #define Perl_pp_setpriority	CPerlObj::Perl_pp_setpriority
 #define pp_setpriority		Perl_pp_setpriority
+#define Perl_pp_setstate	CPerlObj::Perl_pp_setstate
+#define pp_setstate		Perl_pp_setstate
 #define Perl_pp_sge		CPerlObj::Perl_pp_sge
 #define pp_sge			Perl_pp_sge
 #define Perl_pp_sgrent		CPerlObj::Perl_pp_sgrent
