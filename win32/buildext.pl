@@ -60,7 +60,7 @@ foreach my $dir (sort @ext)
     if ($targ)
      {
       print "Making $targ in $dir\n$make $targ\n";
-      system($make,$targ);
+      system("$make $targ");
      }
     else
      {
