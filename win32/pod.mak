@@ -22,6 +22,7 @@ POD = \
 	perlre.pod	\
 	perlrun.pod	\
 	perlfunc.pod	\
+	perlopentut.pod	\
 	perlvar.pod	\
 	perlsub.pod	\
 	perlmod.pod	\
@@ -37,6 +38,7 @@ POD = \
 	perltie.pod	\
 	perlbot.pod	\
 	perlipc.pod	\
+	perlthrtut.pod	\
 	perldebug.pod	\
 	perldiag.pod	\
 	perlsec.pod	\
@@ -73,6 +75,7 @@ MAN = \
 	perlre.man	\
 	perlrun.man	\
 	perlfunc.man	\
+	perlopentut.man	\
 	perlvar.man	\
 	perlsub.man	\
 	perlmod.man	\
@@ -81,6 +84,7 @@ MAN = \
 	perlform.man	\
 	perllocale.man	\
 	perlref.man	\
+	perlreftut.man	\
 	perldsc.man	\
 	perllol.man	\
 	perltoot.man	\
@@ -88,6 +92,7 @@ MAN = \
 	perltie.man	\
 	perlbot.man	\
 	perlipc.man	\
+	perlthrtut.man	\
 	perldebug.man	\
 	perldiag.man	\
 	perlsec.man	\
@@ -124,6 +129,7 @@ HTML = \
 	perlre.html	\
 	perlrun.html	\
 	perlfunc.html	\
+	perlopentut.html	\
 	perlvar.html	\
 	perlsub.html	\
 	perlmod.html	\
@@ -132,6 +138,7 @@ HTML = \
 	perlform.html	\
 	perllocale.html	\
 	perlref.html	\
+	perlreftut.html	\
 	perldsc.html	\
 	perllol.html	\
 	perltoot.html	\
@@ -139,6 +146,7 @@ HTML = \
 	perltie.html	\
 	perlbot.html	\
 	perlipc.html	\
+	perlthrtut.html	\
 	perldebug.html	\
 	perldiag.html	\
 	perlsec.html	\
@@ -175,6 +183,7 @@ TEX = \
 	perlre.tex	\
 	perlrun.tex	\
 	perlfunc.tex	\
+	perlopentut.tex	\
 	perlvar.tex	\
 	perlsub.tex	\
 	perlmod.tex	\
@@ -183,6 +192,7 @@ TEX = \
 	perlform.tex	\
 	perllocale.tex	\
 	perlref.tex	\
+	perlreftut.tex	\
 	perldsc.tex	\
 	perllol.tex	\
 	perltoot.tex	\
@@ -190,6 +200,7 @@ TEX = \
 	perltie.tex	\
 	perlbot.tex	\
 	perlipc.tex	\
+	perlthrtut.tex	\
 	perldebug.tex	\
 	perldiag.tex	\
 	perlsec.tex	\

@@ -240,6 +240,9 @@ If some tests do fail, it may be because you are using a different command
 shell than the native "cmd.exe", or because you are building from a path
 that contains spaces.  So don't do that.
 
+If you are running the tests from a emacs shell window, you may see
+failures in op/stat.t.  Run "dmake test-notty" in that case.
+
 If you're using the Borland compiler, you may see a failure in op/taint.t
 arising from the inability to find the Borland Runtime DLLs on the system
 default path.  You will need to copy the DLLs reported by the messages

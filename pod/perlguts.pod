@@ -263,9 +263,9 @@ return value.
 The C<av_clear> function deletes all the elements in the AV* array, but
 does not actually delete the array itself.  The C<av_undef> function will
 delete all the elements in the array plus the array itself.  The
-C<av_extend> function extends the array so that it contains C<key>
-elements.  If C<key> is less than the current length of the array, then
-nothing is done.
+C<av_extend> function extends the array so that it contains at least C<key+1>
+elements.  If C<key+1> is less than the currently allocated length of the array,
+then nothing is done.
 
 If you know the name of an array variable, you can get a pointer to its AV
 by using the following:
