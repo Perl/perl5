@@ -28,7 +28,7 @@ DoNotify(new NMRec(nmStr=>"Thank you. Please bring MacPerl to the front again.")
 # permission.
 #
 chomp($file = `pwd`);
-$file .= ":Notification.rsrc";
+$file .= "Notification.rsrc";
 print $file, "\n";
 ($res = OpenResFile($file)) or die $^E;
 $snd = GetResource("snd ", 128);
