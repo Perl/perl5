@@ -626,7 +626,7 @@ hslice		hash slice		ck_null		m@	H L
 
 # Explosives and implosives.
 
-unpack		unpack			ck_fun		@	S S
+unpack		unpack			ck_fun		@	S S?
 pack		pack			ck_fun		mst@	S L
 split		split			ck_split	t@	S S S
 join		join or string		ck_join		mst@	S L

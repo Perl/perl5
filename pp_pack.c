@@ -1606,7 +1606,8 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 PP(pp_unpack)
 {
     dSP;
-    dPOPPOPssrl;
+    SV *right = (MAXARG > 1) ? POPs : GvSV(PL_defgv);
+    SV *left = POPs;
     I32 gimme = GIMME_V;
     STRLEN llen;
     STRLEN rlen;
