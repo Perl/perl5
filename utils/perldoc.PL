@@ -48,7 +48,7 @@ if(@ARGV<1) {
 	$me = $0;		# Editing $0 is unportable
 	$me =~ s,.*/,,;
 	die <<EOF;
-Usage: $me [-h] [-v] [-t] [-u] [-m] [-l] PageName|ModuleName|ProgramName
+Usage: $me [-h] [-v] [-t] [-u] [-m] [-l] [-F] PageName|ModuleName|ProgramName
        $me -f PerlFunc
 
 We suggest you use "perldoc perldoc" to get aquainted 
@@ -80,6 +80,7 @@ Options:
     -u	 Display unformatted pod text
     -m   Display modules file in its entirety
     -l   Display the modules file name
+    -F   Arguments are file names, not modules
     -v	 Verbosely describe what's going on
 
 PageName|ModuleName...
@@ -104,7 +105,7 @@ use Text::ParseWords;
 
 unshift(@ARGV,shellwords($ENV{"PERLDOC"}));
 
-getopts("mhtluvf:") || usage;
+getopts("mhtluvFf:") || usage;
 
 usage if $opt_h || $opt_h; # avoid -w warning
 
@@ -254,6 +255,11 @@ foreach (@pages) {
 	# We must look both in @INC for library modules and in PATH
 	# for executables, like h2xs or perldoc itself.
 	@searchdirs = @INC;
+	if ($opt_F) {
+	  next unless -r;
+	  push @found, $_ if $opt_m or containspod($_);
+	  next;
+	}
 	unless ($opt_m) { 
 	    if ($Is_VMS) {
 		my($i,$trn);
@@ -471,6 +477,10 @@ the file for you and simply hand it off for display.
 =item B<-l> file name only
 
 Display the file name of the module found.
+
+=item B<-F> file names
+
+Consider arguments as file names, no search in directories should be performed.
 
 =item B<-f> perlfunc
 
