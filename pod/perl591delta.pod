@@ -44,8 +44,8 @@ overriding the lexical declaration with C<our $_>.
 
 =head2 Tied hashes in scalar context
 
-As of perl 5.8.2, tied hashes did not return anything useful in scalar
-context, for example when used as boolean tests:
+As of perl 5.8.2/5.9.0, tied hashes did not return anything useful in
+scalar context, for example when used as boolean tests:
 
 	if (%tied_hash) { ... }
 
@@ -127,10 +127,10 @@ The documentation has been revised in places to produce more standard manpages.
 The long-existing feature of C</(?{...})/> regexps setting C<$_> and pos()
 is now documented.
 
+=head1 Performance Enhancements
+
 Sorting arrays in place (C<@a = sort @a>) is now optimized to avoid
 making a temporary copy of the array.
-
-=head1 Performance Enhancements
 
 The operations involving case mapping on UTF-8 strings (uc(), lc(),
 C<//i>, etc.) have been greatly speeded up.
@@ -170,9 +170,6 @@ C<$a .. $b> will now work as expected when either $a or $b is C<undef>.
 Reading $^E now preserves $!. Previously, the C code implementing $^E
 did not preserve C<errno>, so reading $^E could cause C<errno> and therefore
 C<$!> to change unexpectedly.
-
-Reentrant functions will (once more) work with C++. 5.8.2 introduced a bugfix
-which accidentally broke the compilation of Perl extensions written in C++.
 
 C<strict> wasn't in effect in regexp-eval blocks (C</(?{...})/>).
 
@@ -261,8 +258,10 @@ list of things to do (or nice to have) for perl 5.10.0 :
 Clean up and finish support for assertions. See L<assertions>.
 
 Reimplement the mechanism of lexical pragmas to be more extensible. Fix
-current pragmas that don't work well with lexical scopes (C<sort>, for
-example). MJD has ideas on this.
+current pragmas that don't work well with lexical scopes or in
+eval(STRING) (C<sort>, C<re> for example). MJD has ideas on this.
+
+Fix (or rewrite) the implementation of the C</(?{...})/> closures.
 
 Conversions from byte strings to UTF-8 currently map high bit characters
 to Unicode without translation (or, depending on how you look at it, by
@@ -276,7 +275,7 @@ XS coders miserable.)
 Introduce a new special block, UNITCHECK, which is run at the end of a
 compilation unit (module, file, eval(STRING) block). This will correspond to
 the Perl 6 CHECK. Perl 5's CHECK cannot be changed or removed because the
-O/B framework depends on it.
+O.pm/B.pm backend framework depends on it.
 
 Study the possibility of adding a new prototype character, C<_>, meaning
 "this argument defaults to $_".

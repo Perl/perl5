@@ -69,7 +69,7 @@ Postpone load of modules until a function is used
 
 =item base
 
-Establish IS-A relationship with base class at compile time
+Establish IS-A relationship with base classes at compile time
 
 =item bigint
 
@@ -359,7 +359,7 @@ Warn of errors (from perspective of caller)
 
 =item Carp::Heavy
 
-No user serviceable parts inside
+Heavy machinery, no user serviceable parts inside
 
 =item Class::ISA
 
@@ -380,6 +380,10 @@ Get pathname of current working directory
 =item DB
 
 Programmatic interface to the Perl debugging API (draft, subject to
+
+=item DBM_Filter
+
+Filter DBM keys/values 
 
 =item DB_File
 
@@ -917,9 +921,13 @@ Arbitrary size integer math package
 
 Pure Perl module to support Math::BigInt
 
+=item Math::BigInt::CalcEmu
+
+Emulate low-level math with BigInt code
+
 =item Math::BigRat
 
-Arbitrarily big rationals
+Arbitrarily big rational numbers
 
 =item Math::Complex
 
