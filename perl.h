@@ -506,12 +506,12 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #   include <unistd.h>
 #endif
 
-#ifndef HAS_SYSCALL_PROTO
+#if defined(HAS_SYSCALL) && !defined(HAS_SYSCALL_PROTO)
 int syscall(int, ...);
 #endif
 
-#ifndef HAS_USLEEP_PROTO
-int usleep(unsigned);
+#if defined(HAS_USLEEP) && !defined(HAS_USLEEP_PROTO)
+int usleep(unsigned int);
 #endif
 
 #ifdef PERL_MICRO /* Last chance to export Perl_my_swap */
@@ -765,9 +765,9 @@ typedef struct perl_mstats perl_mstats_t;
 # endif
 #endif
 
-/* sockatmark() is so new that many places might have it hidden
+/* sockatmark() is so new (2001) that many places might have it hidden
  * behind some -D_BLAH_BLAH_SOURCE guard. */
-#ifndef HAS_SOCKATMARK_PROTO
+#if defined(HAS_SOCKATMARK) && !defined(HAS_SOCKATMARK_PROTO)
 int sockatmark(int);
 #endif
 
@@ -2485,10 +2485,12 @@ I32 unlnk (char*);
 #define UNLINK PerlLIO_unlink
 #endif
 
-#ifndef HAS_SETRESUID_PROTO /* some versions of glibc */
+/* some versions of glibc are missing the setresuid() proto */
+#if defined(HAS_SETRESUID) && !defined(HAS_SETRESUID_PROTO)
 int setresuid(uid_t ruid, uid_t euid, uid_t suid);
 #endif
-#ifndef HAS_SETRESGID_PROTO /* some versions of glibc */
+/* some versions of glibc are missing the setresgid() proto */
+#if defined(HAS_SETRESGID) && !defined(HAS_SETRESGID_PROTO)
 int setresgid(gid_t rgid, gid_t egid, gid_t sgid);
 #endif
 
@@ -3657,7 +3659,7 @@ typedef struct am_table_short AMTS;
 #  include <sys/file.h>
 #endif
 
-#ifndef HAS_FLOCK_PROTO
+#if defined(HAS_FLOCK) && !defined(HAS_FLOCK_PROTO)
 int flock(int fd, int op);
 #endif
 
