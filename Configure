@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Jun  8 21:12:45 EET DST 2003 [metaconfig 3.0 PL70]
+# Generated on Wed Jun 11 22:38:54 EET DST 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -20150,8 +20150,8 @@ case "$noextensions" in
 *)  keepextensions=''
     echo "You have requested that certain extensions be ignored..." >&4
     for i in $avail_ext; do
-        case " $i " in
-        " $noextensions ") echo "Ignoring extension $i." ;;
+        case " $noextensions " in
+        *" $i "*) echo "Ignoring extension $i." ;;
         *) echo "Keeping extension $i.";
            keepextensions="$keepextensions $i"
            ;;
