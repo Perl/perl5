@@ -13,7 +13,7 @@ case "$cc" in
 *"cc -n32"*)
 	ld=ld
 	ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184 -OPT:fprop_limit=1500"
-	optimize='-g'  # Miniperl core dumps with -O
+	optimize='none'  # Miniperl core dumps with -O
 	pp_sys_cflags='ccflags="$ccflags -DHAS_TELLDIR_PROTOTYPE"'
 	lddlflags="-n32 -shared"
 	ldflags=' -L/usr/local/lib -L/usr/lib32 -L/lib32'
