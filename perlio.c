@@ -472,7 +472,7 @@ PerlIO_debug(const char *fmt, ...)
 	s = CopFILE(PL_curcop);
 	if (!s)
 	    s = "(none)";
-	sprintf(buffer, "%s:%" IVdf " ", s, (IV) CopLINE(PL_curcop));
+	sprintf(buffer, "%.40s:%" IVdf " ", s, (IV) CopLINE(PL_curcop));
 	len = strlen(buffer);
 	vsprintf(buffer+len, fmt, ap);
 	PerlLIO_write(dbg, buffer, strlen(buffer));
