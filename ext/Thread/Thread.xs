@@ -240,6 +240,9 @@ newthread (pTHX_ SV *startsv, AV *initargs, char *classname)
     static int attr_joinable = PTHREAD_CREATE_JOINABLE;
 #endif
 
+    if (ckWARN(WARN_DEPRECATED))	
+        Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
+		    "5.005 threads are deprecated");
     savethread = thr;
     thr = new_struct_thread(thr);
     /* temporarily pretend to be the child thread in case the

@@ -27,17 +27,24 @@ C<EXISTS>, and C<DELETE> unchanged.
 Perl 5.8.0 forgot to add some deprecation warnings.  These warnings
 have now been added.
 
-=over 4
-
-=item *
+=head2 Pseudo-hashes really are deprecated
 
 Pseudo-hashes were deprecated in Perl 5.8.0 and will be removed in Perl
-5.10, see L<perl58delta> for details.  If you really want to continue
-using pseudo-hashes but not to see the warnings, add:
+5.10.0, see L<perl58delta> for details.  Each attempt to access pseudo-hashes
+will trigger the warning C<Pseudo-hashes are deprecated>.  If you really want
+to continue using pseudo-hashes but not to see the deprecation warnings, add:
 
     no warnings 'deprecated';
 
-=back
+=head2 5.005-style threads really are deprecated
+
+5.005-style threads (activated by C<use Thread;>) were deprecated in Perl
+5.8.0 and will be removed in Perl 5.10.0, see L<perl58delta> for details.
+Each attempt to create a 5.005-style thread will trigger the warning
+C<5.005 threads are deprecated>.  If you really want to continue using
+5.005 threads but not to see the deprecation warnings, add:
+
+    no warnings 'deprecated';
 
 =head1 Modules and Pragmata
 

@@ -3667,6 +3667,12 @@ target of the change to
 
 (F) The entry point function of threads->create() failed for some reason.
 
+=item 5.005 threads are deprecated
+
+(D deprecacted)  The 5.005-style threads (activated by C<use Thread;>)
+are deprecated and one should use the new ithreads instead,
+see L<perl58delta> for more details.
+
 =item times not implemented
 
 (F) Your version of the C library apparently doesn't do times().  I
