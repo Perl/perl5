@@ -579,8 +579,8 @@ sub B::CV::save {
 	$decl->add("void $xsub _((CV*));");
     }
     else {
-	warn "No definition for sub %s::%s (unable to autoload)\n",
-	    $cvstashname, $cvname; # debug
+	warn sprintf("No definition for sub %s::%s (unable to autoload)\n",
+		     $cvstashname, $cvname); # debug
     }
     $symsect->add(sprintf("xpvcvix%d\t%s, %u, 0, %d, %s, 0, Nullhv, Nullhv, %s, s\\_%x, $xsub, $xsubany, Nullgv, Nullgv, %d, s\\_%x, (CV*)s\\_%x, 0",
 			  $xpvcv_ix, cstring($pv), length($pv), $cv->IVX,
