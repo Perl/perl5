@@ -1049,8 +1049,20 @@ Even if you do not have dynamic loading, you must still build the
 DynaLoader extension; you should just build the stub dl_none.xs
 version.  (Configure will suggest this as the default.)
 
-In summary, here are the Configure command-line variables you can set
-to turn off various extensions.  All others are included by default.
+To disable certain extensions so that they are not built, use
+the -Dnoextensions=... and -Donlyextensions=... options.  They both
+accept a space-separated list of extensions.  The extensions listed
+in C<noextensions> are removed from the list of extensions to build,
+while the C<onlyextensions> is rather more severe and builds only
+the listed extensions.  The latter should be used with extreme caution
+since certain extensions are used by many other extensions and modules:
+such modules include Fcntl and IO.  The order of processing these
+options is first C<only> (if present), then C<no> (if present).
+
+Another, older way to turn off various extensions (which is still good
+to know if you have to work with older Perl) exists.  Here are the
+Configure command-line variables you can set to turn off various
+extensions.  All others are included by default.
 
     DB_File		i_db
     DynaLoader		(Must always be included as a static extension)
