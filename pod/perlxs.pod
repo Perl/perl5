@@ -1064,8 +1064,8 @@ then not push return values on the stack.
 Some people may be inclined to include an explicit C<return> in the above
 XSUB, rather than letting control fall through to the end.  In those
 situations C<XSRETURN_EMPTY> should be used, instead.  This will ensure that
-the XSUB stack is properly adjusted.  Consult L<perlguts/"API LISTING"> for
-other C<XSRETURN> macros.
+the XSUB stack is properly adjusted.  Consult L<perlapi> for other
+C<XSRETURN> macros.
 
 Since C<XSRETURN_*> macros can be used with CODE blocks as well, one can
 rewrite this example as:

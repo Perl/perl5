@@ -1323,7 +1323,6 @@ eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
 	    warn "Can't create new $file: $!\n";
 	    next;
 	}
-	my($dev,$ino,$mode) = stat FIXIN;
 	
 	# Print out the new #! line (or equivalent).
 	local $\;

@@ -2009,6 +2009,8 @@ Perl_gen_constant_list(pTHX_ register OP *o)
 
     o->op_type = OP_RV2AV;
     o->op_ppaddr = PL_ppaddr[OP_RV2AV];
+    o->op_flags &= ~OPf_REF;	/* treat \(1..2) like an ordinary list */
+    o->op_flags |= OPf_PARENS;	/* and flatten \(1..2,3) */
     o->op_seq = 0;		/* needs to be revisited in peep() */
     curop = ((UNOP*)o)->op_first;
     ((UNOP*)o)->op_first = newSVOP(OP_CONST, 0, SvREFCNT_inc(*PL_stack_sp--));
@@ -2292,13 +2294,13 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	U8* tend = t + tlen;
 	U8* rend = r + rlen;
 	STRLEN ulen;
-	U32 tfirst = 1;
-	U32 tlast = 0;
-	I32 tdiff;
-	U32 rfirst = 1;
-	U32 rlast = 0;
-	I32 rdiff;
-	I32 diff;
+	UV tfirst = 1;
+	UV tlast = 0;
+	IV tdiff;
+	UV rfirst = 1;
+	UV rlast = 0;
+	IV rdiff;
+	IV diff;
 	I32 none = 0;
 	U32 max = 0;
 	I32 bits;

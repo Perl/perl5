@@ -3,24 +3,26 @@ package threads::shared;
 use 5.007_003;
 use strict;
 use warnings;
+BEGIN {
+    require Exporter;
+    our @ISA = qw(Exporter);
+    our @EXPORT = qw(share cond_wait cond_broadcast cond_signal);
+    our $VERSION = '0.90';
 
-require Exporter;
-our @ISA = qw(Exporter);
-our @EXPORT = qw(share cond_wait cond_broadcast cond_signal);
-our $VERSION = '0.90';
-
-if ($threads::threads) {
+    if ($threads::threads) {
 	*cond_wait = \&cond_wait_enabled;
 	*cond_signal = \&cond_signal_enabled;
 	*cond_broadcast = \&cond_broadcast_enabled;
 	require XSLoader;
 	XSLoader::load('threads::shared',$VERSION);
-}
-else {
+	push @EXPORT,'bless';
+    }
+    else {
 	*share = \&share_disabled;
 	*cond_wait = \&cond_wait_disabled;
 	*cond_signal = \&cond_signal_disabled;
 	*cond_broadcast = \&cond_broadcast_disabled;
+    }
 }
 
 

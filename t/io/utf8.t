@@ -160,13 +160,15 @@ ok( $x eq $chr );
 
 # Now we have a deformed file.
 
-if (ord('A') == 193) {
-    skip( "EBCDIC doesn't complain" );
-} else {
-    open F, "<:utf8", "a" or die $!;
-    $x = <F>; chomp $x;
-    local $SIG{__WARN__} = sub { ok( 1 ) };
-    eval { sprintf "%vd\n", $x };
+SKIP: {
+    if (ord('A') == 193) {
+	skip( "EBCDIC doesn't complain" );
+    } else {
+	open F, "<:utf8", "a" or die $!;
+	$x = <F>; chomp $x;
+	local $SIG{__WARN__} = sub { ok( 1 ) };
+	eval { sprintf "%vd\n", $x };
+    }
 }
 
 close F;

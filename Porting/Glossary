@@ -3508,6 +3508,14 @@ mips_type (usrinc.U):
 	This variable holds the environment type for the mips system.
 	Possible values are "BSD 4.3" and "System V".
 
+mistrustnm (usenm.U):
+	This variable can be used to establish a fallthrough for the cases
+	where nm fails to find a symbol.  If usenm is false or usenm is true
+	and mistrustnm is false, this variable has no effect.  If usenm is true
+	and mistrustnm is "compile", a test program will be compiled to try to
+	find any symbol that can't be located via nm lookup.  If mistrustnm is
+	"run", the test program will be run as well as being compiled.
+
 mkdir (Loc.U):
 	This variable is used internally by Configure to determine the
 	full pathname (if any) of the mkdir program.  After Configure runs,

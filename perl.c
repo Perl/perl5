@@ -2167,7 +2167,7 @@ char *
 Perl_moreswitches(pTHX_ char *s)
 {
     STRLEN numlen;
-    U32 rschar;
+    UV rschar;
 
     switch (*s) {
     case '0':

@@ -3436,10 +3436,11 @@ PerlIO_exportFILE(PerlIO *f, const char *mode)
 	stdio = PerlSIO_fdopen(PerlIO_fileno(f), mode);
 	if (stdio) {
 	    PerlIOl *l = *f;
+	    PerlIO *f2;
 	    /* De-link any lower layers so new :stdio sticks */
 	    *f = NULL;
-	    if ((f = PerlIO_push(aTHX_ f, &PerlIO_stdio, buf, Nullsv))) {
-		PerlIOStdio *s = PerlIOSelf(f, PerlIOStdio);
+	    if ((f2 = PerlIO_push(aTHX_ f, &PerlIO_stdio, buf, Nullsv))) {
+		PerlIOStdio *s = PerlIOSelf((f = f2), PerlIOStdio);
 		s->stdio = stdio;
 		/* Link previous lower layers under new one */
 		*PerlIONext(f) = l;

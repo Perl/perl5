@@ -1350,7 +1350,8 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 		/* GvSV contains the name of the method. */
 		GV *ngv = Nullgv;
 		
-		DEBUG_o( Perl_deb(aTHX_ "Resolving method `%.256"SVf"' for overloaded `%s' in package `%.256s'\n",
+		DEBUG_o( Perl_deb(aTHX_ "Resolving method `%"SVf256\
+			"' for overloaded `%s' in package `%.256s'\n",
 			     GvSV(gv), cp, HvNAME(stash)) );
 		if (!SvPOK(GvSV(gv))
 		    || !(ngv = gv_fetchmethod_autoload(stash, SvPVX(GvSV(gv)),
@@ -1359,7 +1360,8 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 		    /* Can be an import stub (created by `can'). */
 		    SV *gvsv = GvSV(gv);
 		    const char *name = SvPOK(gvsv) ?  SvPVX(gvsv) : "???";
-		    Perl_croak(aTHX_ "%s method `%.256s' overloading `%s' in package `%.256s'",
+		    Perl_croak(aTHX_ "%s method `%.256s' overloading `%s' "\
+				"in package `%.256s'",
 			       (GvCVGEN(gv) ? "Stub found while resolving"
 				: "Can't resolve"),
 			       name, cp, HvNAME(stash));

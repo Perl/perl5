@@ -418,10 +418,10 @@ Using "or" for assignment is unlikely to do what you want; see below.
 =head2 Range Operators
 
 Binary ".." is the range operator, which is really two different
-operators depending on the context.  In list context, it returns an
+operators depending on the context.  In list context, it returns a
 list of values counting (up by ones) from the left value to the right
 value.  If the left value is greater than the right value then it
-returns the empty array.  The range operator is useful for writing
+returns the empty list.  The range operator is useful for writing
 C<foreach (1..10)> loops and for doing slice operations on arrays. In
 the current implementation, no temporary array is created when the
 range operator is used as the expression in C<foreach> loops, but older

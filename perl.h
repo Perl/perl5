@@ -2111,9 +2111,16 @@ typedef pthread_key_t	perl_key;
 #ifndef SVf
 #  ifdef CHECK_FORMAT
 #    define SVf "p"
+#    ifndef SVf256
+#      define SVf256 SVf
+#    endif
 #  else
 #    define SVf "_"
 #  endif
+#endif
+
+#ifndef SVf256
+#  define SVf256 ".256"SVf
 #endif
 
 #ifndef UVf

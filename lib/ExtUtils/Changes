@@ -1,3 +1,27 @@
+6.10_06 Sat Jun  7 00:55:29 PDT 2003
+    - Whoops, Liblist.t busted on VMS after I turned strict on in
+      ExtUtils::Liblist::Kid.  Merely a test bug, not a real bug.
+    - Fixed metafile_addtomanifest failure so the proper error shows.
+    - Fixed metafile_addtomanifest failure diagnostic leaking out during
+      the basic.t test on Windows.
+
+6.10_05 Fri Jun  6 18:15:30 PDT 2003
+    * Documenting META.yml, NO_META
+    * Documenting the fact that distdir will auto generate META.yml and 
+      alter your manifest.
+    * Adding META.yml autogeneration to the FAQ
+    - Recognizing comments with leading whitespace in MANIFESTs better.
+    - Small ExtUtils::Liblist::Kid problem on VMS (Craig Berry)
+    * Fixed "make install UNINST=1".  Appears to have been broken somewhere
+      around 6.06_01.
+    - Documented the fourth argument to ExtUtils::Install::install()
+    - install() will now honor a PERL5LIB change between ExtUtils::Install
+      loading and install() running when uninstalling shadows.
+    - META.yml generation deals gracefully when the MANIFEST is read-only
+      (Slaven rt.cpan.org 2723)
+    - Fixing tests on limited dir depth VMS systems by moving the 
+      dummy-install dir one level up (Craig Berry rt.cpan.org 2747)
+
 6.10_04 Fri May 23 01:13:04 PDT 2003
     - Working around BSD threaading bug in version check. [from bleadperl]
     - Added the Makefile to the dist dependencies. (Slaven Rezic)

@@ -179,6 +179,10 @@ sub list_eq ($$) {
 
  SKIP: {
     # Is this a stupid thing to do on VMS, VOS and other unusual platforms?
+
+    skip "-- the IEEE infinity model is unavailable in this configuration."
+       if (($^O eq 'VMS') && !defined($Config{useieee}));
+
     my $inf = eval '2**10000';
 
     skip "Couldn't generate infinity - got error '$@'"
@@ -193,6 +197,10 @@ sub list_eq ($$) {
   }
 
  SKIP: {
+
+    skip "-- the full range of an IEEE double may not be available in this configuration."
+       if (($^O eq 'VMS') && !defined($Config{useieee}));
+
     # This should be about the biggest thing possible on an IEEE double
     my $big = eval '2**1023';
 

@@ -1,5 +1,7 @@
 package DB;
 
+use IO::Handle;
+
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 $VERSION = 1.20;
 $header  = "perl5db.pl version $VERSION";
@@ -1269,6 +1271,8 @@ EOP
 		$onetimeDump = undef;
                 $onetimedumpDepth = undef;
 	    } elsif ($term_pid == $$) {
+		STDOUT->flush();
+		STDERR->flush();
 		print $OUT "\n";
 	    }
 	} continue {		# CMD:

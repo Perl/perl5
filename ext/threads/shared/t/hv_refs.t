@@ -30,7 +30,7 @@ sub skip {
 
 use ExtUtils::testlib;
 use strict;
-BEGIN { print "1..14\n" };
+BEGIN { print "1..17\n" };
 use threads;
 use threads::shared;
 ok(1,1,"loaded");
@@ -84,7 +84,21 @@ ok(10, keys %foo == 0, "And make sure we realy have deleted the values");
   ok(14, 1, "lock on helems now work, this was bug 10045");
 
 }
-
+{
+    my $object : shared = &share({});
+    lock($object); # so that we can cond_wait
+    threads->new(sub {
+		     lock($object); # so that we can cond_signal
+		     bless $object, 'test1';
+		     cond_signal($object); # so that the parent thread waits
+		 });
+    cond_wait($object); # so that the child thread finishes
+    ok(15, ref($object) eq 'test1', "blessing does work");
+    my %test = (object => $object);
+    ok(16, ref($test{object}) eq 'test1', "and some more work");
+    bless $object, 'test2';
+    ok(17, ref($test{object}) eq 'test2', "reblessing works!");
+}
 
 
 

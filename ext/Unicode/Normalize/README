@@ -1,4 +1,4 @@
-Unicode/Normalize version 0.21
+Unicode/Normalize version 0.22
 ===================================
 
 Unicode::Normalize - Unicode Normalization Forms
@@ -24,7 +24,7 @@ SYNOPSIS
 
 INSTALLATION
 
-Perl 5.6 or later
+Perl 5.6.1 or later
 
 To install this module type the following:
 

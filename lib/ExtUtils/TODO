@@ -40,8 +40,6 @@ fixpath() is useful.
 Eliminate eliminate_macros() from inside FS::VMS->catfile and catdir.
 Make into MM_VMS wrappers.
 
-Add "NO_META" to stop autogeneration (and auto overwrite) of META.yml.
-
 Test ExtUtils::Command::MM
 
 Finish ExtUtils::MakeMaker::Tutorial
@@ -67,12 +65,12 @@ to use for help files these days)
 
 Add target to generate native VMS help files.
 
-Add "What's this META.yml thing?" to the FAQ.
-
 On VMS, write PM_FILTERs to a temp file and run from there avoiding command
-line lengths.
+line lengths.  Worth the trouble given the Unixy nature of PM_FILTER?
 
 Move oneliner() and friends into a seperate module for general consumption.
 
 Make out of date check on 'make dist' more useful
 http://archive.develooper.com/makemaker@perl.org/msg01075.html
+
+Make maniadd() return a tied, case-insensitive hash on VMS.

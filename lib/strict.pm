@@ -85,7 +85,7 @@ is allowed so that C<goto &$AUTOLOAD> would not break under stricture.
 =item C<strict vars>
 
 This generates a compile-time error if you access a variable that wasn't
-declared via "our" or C<use vars>,
+declared via C<our> or C<use vars>,
 localized via C<my()>, or wasn't fully qualified.  Because this is to avoid
 variable suicide problems and subtle dynamic scoping issues, a merely
 local() variable isn't good enough.  See L<perlfunc/my> and
@@ -110,18 +110,22 @@ exempted from this check.
 
 This disables the poetry optimization, generating a compile-time error if
 you try to use a bareword identifier that's not a subroutine, unless it
-appears in curly braces or on the left hand side of the "=E<gt>" symbol.
-
+is a simple identifier (no colons) and that it appears in curly braces or
+on the left hand side of the C<< => >> symbol.
 
     use strict 'subs';
     $SIG{PIPE} = Plumber;   	# blows up
     $SIG{PIPE} = "Plumber"; 	# just fine: bareword in curlies always ok
     $SIG{PIPE} = \&Plumber; 	# preferred form
 
-
-
 =back
 
 See L<perlmodlib/Pragmatic Modules>.
+
+=head1 HISTORY
+
+C<strict 'subs'>, with perl 5.6.1, erroneously permitted to use an unquoted
+compound identifier (e.g. C<Foo::Bar>) as a hash key (before C<< => >> or
+inside curlies), but without forcing it always to a literal string.
 
 =cut
