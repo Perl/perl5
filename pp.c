@@ -2598,7 +2598,16 @@ PP(pp_int)
 		  SETu(U_V(value));
 	      } else {
 #if defined(HAS_MODFL) || defined(LONG_DOUBLE_EQUALS_DOUBLE)
+#   ifdef HAS_MODFL_POW32_BUG
+/* some versions of glibc split (i + d) into (i-1, d+1) for 2^32 <= i < 2^64 */
+                { 
+                    NV offset = Perl_modf(value, &value);
+                    (void)Perl_modf(offset, &offset);
+                    value += offset;
+                }
+#   else
 		  (void)Perl_modf(value, &value);
+#   endif
 #else
 		  double tmp = (double)value;
 		  (void)Perl_modf(tmp, &tmp);
@@ -2612,7 +2621,16 @@ PP(pp_int)
 		  SETi(I_V(value));
 	      } else {
 #if defined(HAS_MODFL) || defined(LONG_DOUBLE_EQUALS_DOUBLE)
+#   ifdef HAS_MODFL_POW32_BUG
+/* some versions of glibc split (i + d) into (i-1, d+1) for 2^32 <= i < 2^64 */
+                 {
+                     NV offset = Perl_modf(-value, &value);
+                     (void)Perl_modf(offset, &offset);
+                     value += offset;
+                 }
+#   else
 		  (void)Perl_modf(-value, &value);
+#   endif
 		  value = -value;
 #else
 		  double tmp = (double)value;

@@ -103,14 +103,22 @@ deficiencies in the UNIX-emulation, most notably:
 
 =over 6
 
-=item fork()
+=item *
 
-=item some features of the UNIX filesystem regarding link count and file dates
+fork()
 
-=item inplace operation (the -i switch) without backup file
+=item * 
 
-=item umask() works, but the correct permissions are only set when the file is
-      finally close()d
+some features of the UNIX filesystem regarding link count and file dates
+
+=item *
+
+inplace operation (the -i switch) without backup file
+
+=item *
+
+umask() works, but the correct permissions are only set when the file is
+finally close()d
 
 =back
 

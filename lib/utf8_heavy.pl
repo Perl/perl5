@@ -27,9 +27,10 @@ sub SWASHNEW {
     my $encoding = $enc{$caller} || "unicode";
     (my $file = $type) =~ s!::!/!g;
     if ($file =~ /^In(.+)/) {
+	my $In = $1;
 	defined %utf8::In || do "$encoding/In.pl";
-	if (exists $utf8::In{$1}) {
-	    $file = "$enconding/In/$utf8::In{$1}";
+	if (exists $utf8::In{$In}) {
+	    $file = "$encoding/In/$utf8::In{$In}";
 	}
     } else {
 	$file =~ s#^(Is|To)([A-Z].*)#$1/$2#;

@@ -343,9 +343,16 @@ my %msg;
 	    next;
 	}
 
+	if( $for_item ) { $header = $for_item; undef $for_item } 
+	else {
+	    $header = $1;
+	    while( $header =~ /[;,]\z/ ) {
+		<POD_DIAG> =~ /^\s*(.*?)\s*\z/;
+		$header .= ' '.$1;
+	    }
+	}
+
 	# strip formatting directives in =item line
-	$header = $for_item || $1;
-	undef $for_item;	
 	$header =~ s/[A-Z]<(.*?)>/$1/g;
 
 	if ($header =~ /%[csd]/) {

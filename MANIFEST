@@ -1808,7 +1808,7 @@ t/op/utf8decode.t	See if UTF-8 decoding works
 t/op/vec.t		See if vectors work
 t/op/ver.t		See if v-strings and the %v format flag work
 t/op/wantarray.t	See if wantarray works
-t/op/write.t		See if write works
+t/op/write.t		See if write works (formats work)
 t/pod/emptycmd.t	Test empty pod directives
 t/pod/emptycmd.xr	Expected results for emptycmd.t
 t/pod/find.t		See if Pod::Find works

@@ -980,9 +980,9 @@
  *	This symbol contains the value of sizeof(short) so that the C
  *	preprocessor can make decisions based on it.
  */
-#define INTSIZE 1		/**/
+#define INTSIZE 4		/**/
 #define LONGSIZE 4		/**/
-#define SHORTSIZE 1		/**/
+#define SHORTSIZE 2		/**/
 
 /* MULTIARCH:
  *	This symbol, if defined, signifies that the build
@@ -1703,7 +1703,7 @@
  */
 /*#define HAS_LONG_DOUBLE		/ **/
 #ifdef HAS_LONG_DOUBLE
-#define LONG_DOUBLESIZE 1		/**/
+#define LONG_DOUBLESIZE 8		/**/
 #endif
 
 /* HAS_LONG_LONG:
@@ -1716,7 +1716,7 @@
  */
 /*#define HAS_LONG_LONG		/ **/
 #ifdef HAS_LONG_LONG
-#define LONGLONGSIZE 1		/**/
+#define LONGLONGSIZE 8		/**/
 #endif
 
 /* HAS_LSEEK_PROTO:
@@ -1776,7 +1776,15 @@
  *	available to split a long double x into a fractional part f and
  *	an integer part i such that |f| < 1.0 and (f + i) = x.
  */
+/* HAS_MODFL_POW32_BUG:
+ *	This symbol, if defined, indicates that the modfl routine is
+ *	broken for long doubles >= pow(2, 32).
+ *	For example from 4294967303.150000 one would get 4294967302.000000
+ *	and 1.150000.  The bug has been seen in certain versions of glibc,
+ *	release 2.2.2 is known to be okay.
+ */
 /*#define HAS_MODFL		/ **/
+/*#define HAS_MODFL_POW32_BUG		/ **/
 
 /* HAS_MPROTECT:
  *	This symbol, if defined, indicates that the mprotect system call is
@@ -2685,8 +2693,8 @@
  *	This symbol holds the number of bytes used by the Off_t.
  */
 #define Off_t int		/* <offset> type */
-#define LSEEKSIZE 1		/* <offset> size */
-#define Off_t_size 1	/* <offset> size */
+#define LSEEKSIZE 4		/* <offset> size */
+#define Off_t_size 4	/* <offset> size */
 
 /* Free_t:
  *	This variable contains the return type of free().  It is usually
@@ -3075,7 +3083,7 @@
 /* Size_t_size:
  *	This symbol holds the size of a Size_t in bytes.
  */
-#define Size_t_size 1		/* */
+#define Size_t_size 4		/* */
 
 /* Size_t:
  *	This symbol holds the type used to declare length parameters

@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..625\n";
+print "1..630\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1743,3 +1743,25 @@ EOT
     print "not " if $w !~ /^Useless \(\?o\).*\nUseless \(\?g\).*\nUseless \(\?c\)/;
     print "ok 625\n";
 }
+
+# More Unicode "class" tests
+
+{
+    use charnames ':full';
+
+    print "not " unless "\N{LATIN CAPITAL LETTER A}" =~ /\p{InBasicLatin}/;
+    print "ok 626\n";
+
+    print "not " unless "\N{LATIN CAPITAL LETTER A WITH GRAVE}" =~ /\p{InLatin1Supplement}/;
+    print "ok 627\n";
+
+    print "not " unless "\N{LATIN CAPITAL LETTER A WITH MACRON}" =~ /\p{InLatinExtendedA}/;
+    print "ok 628\n";
+
+    print "not " unless "\N{LATIN SMALL LETTER B WITH STROKE}" =~ /\p{InLatinExtendedB}/;
+    print "ok 629\n";
+
+    print "not " unless "\N{KATAKANA LETTER SMALL A}" =~ /\p{InKatakana}/;
+    print "ok 630\n";
+}
+

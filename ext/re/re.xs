@@ -1,12 +1,17 @@
 /* We need access to debugger hooks */
 #ifndef DEBUGGING
 #  define DEBUGGING
+#  define WAS_NOT_DEBUGGING
 #endif
 
 #define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+
+#ifdef WAS_NOT_DEBUGGING
+void Perl_deb(pTHX_ const char* pat, ...) { }
+#endif
 
 extern regexp*	my_regcomp (pTHX_ char* exp, char* xend, PMOP* pm);
 extern I32	my_regexec (pTHX_ regexp* prog, char* stringarg, char* strend,

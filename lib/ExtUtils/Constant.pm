@@ -294,7 +294,9 @@ sub params {
   return ($use_iv, $use_nv, $use_pv);
 }
 
-=item dump_names  PACKAGE, SUBNAME, DEFAULT_TYPE, TYPES, INDENT, ITEM...
+=item dump_names  
+
+dump_names  PACKAGE, SUBNAME, DEFAULT_TYPE, TYPES, INDENT, ITEM...
 
 An internal function to generate the embedded perl code that will regenerate
 the constant subroutines.  Parameters are the same as for C_constant, except
@@ -404,7 +406,9 @@ __END__
   $result;
 }
 
-=item C_constant PACKAGE, SUBNAME, DEFAULT_TYPE, TYPES, INDENT, NAMELEN, ITEM...
+=item C_constant 
+
+C_constant PACKAGE, SUBNAME, DEFAULT_TYPE, TYPES, INDENT, NAMELEN, ITEM...
 
 A function that returns a B<list> of C subroutine definitions that return
 the value and type of constants when passed the name by the XS wrapper.
