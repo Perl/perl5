@@ -2021,7 +2021,9 @@ PP(pp_substr)
 	    sv_pos_u2b(sv, &pos, &rem);
 	tmps += pos;
 	sv_setpvn(TARG, tmps, rem);
-	if (lvalue) {			/* it's an lvalue! */
+	if (repl)
+	    sv_insert(sv, pos, rem, repl, repl_len);
+	else if (lvalue) {		/* it's an lvalue! */
 	    if (!SvGMAGICAL(sv)) {
 		if (SvROK(sv)) {
 		    STRLEN n_a;
@@ -2050,8 +2052,6 @@ PP(pp_substr)
 	    LvTARGOFF(TARG) = pos;
 	    LvTARGLEN(TARG) = rem;
 	}
-	else if (repl)
-	    sv_insert(sv, pos, rem, repl, repl_len);
     }
     SPAGAIN;
     PUSHs(TARG);		/* avoid SvSETMAGIC here */
