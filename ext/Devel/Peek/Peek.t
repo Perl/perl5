@@ -412,6 +412,10 @@ do_test(20,
     MG_FLAGS = 0x01
       MINMATCH');
 
+#
+# TAINTEDDIR is not set on: OS2, AMIGAOS, WIN32, MSDOS
+# environment variables may be invisibly case-forced, hence the (?i:PATH)
+#
 do_test(21,
         $ENV{PATH}=@ARGV,  # scalar(@ARGV) is a handy known tainted value
 'SV = PVMG\\($ADDR\\) at $ADDR
@@ -428,7 +432,7 @@ do_test(21,
 (?:    MG_FLAGS = 0x01
       TAINTEDDIR
 )?    MG_LEN = 4
-    MG_PTR = $ADDR "PATH"
+    MG_PTR = $ADDR "(?i:PATH)"
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_taint
     MG_TYPE = PERL_MAGIC_taint\\(t\\)');
