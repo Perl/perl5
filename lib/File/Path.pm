@@ -2,15 +2,14 @@ package File::Path;
 
 =head1 NAME
 
-File::Path - create or remove a series of directories
+File::Path - create or remove directory trees
 
 =head1 SYNOPSIS
 
-C<use File::Path>
+    use File::Path;
 
-C<mkpath(['/foo/bar/baz', 'blurfl/quux'], 1, 0711);>
-
-C<rmtree(['foo/bar/baz', 'blurfl/quux'], 1, 1);>
+    mkpath(['/foo/bar/baz', 'blurfl/quux'], 1, 0711);
+    rmtree(['foo/bar/baz', 'blurfl/quux'], 1, 1);
 
 =head1 DESCRIPTION
 

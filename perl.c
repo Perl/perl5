@@ -201,6 +201,7 @@ perl_construct(pTHXx)
 
     init_i18nl10n(1);
     SET_NUMERIC_STANDARD();
+
 #if defined(PERL_SUBVERSION) && PERL_SUBVERSION > 0
     sprintf(PL_patchlevel, "%7.5f",   (double) PERL_REVISION
 				+ ((double) PERL_VERSION / (double) 1000)
@@ -941,6 +942,21 @@ print \"  \\@INC:\\n    @INC\\n\";");
     open_script(scriptname,dosearch,sv,&fdscript);
 
     validate_suid(validarg, scriptname,fdscript);
+
+#if defined(SIGCHLD) || defined(SIGCLD)
+    {
+#ifndef SIGCHLD
+#  define SIGCHLD SIGCLD
+#endif
+	Sighandler_t sigstate = rsignal_state(SIGCHLD);
+	if (sigstate == SIG_IGN) {
+	    if (ckWARN(WARN_SIGNAL))
+		Perl_warner(aTHX_ WARN_SIGNAL,
+			    "Can't ignore signal CHLD, forcing to default");
+	    (void)rsignal(SIGCHLD, (Sighandler_t)SIG_DFL);
+	}
+    }
+#endif
 
     if (PL_doextract)
 	find_beginning();
@@ -2726,7 +2742,11 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	magicname("0", "0", 1);
     }
     if (tmpgv = gv_fetchpv("\030",TRUE, SVt_PV))
+#ifdef OS2
+	sv_setpv(GvSV(tmpgv), os2_execname());
+#else
 	sv_setpv(GvSV(tmpgv),PL_origargv[0]);
+#endif
     if (PL_argvgv = gv_fetchpv("ARGV",TRUE, SVt_PVAV)) {
 	GvMULTI_on(PL_argvgv);
 	(void)gv_AVadd(PL_argvgv);

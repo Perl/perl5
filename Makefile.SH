@@ -481,8 +481,16 @@ lib/re.pm: ext/re/re.pm
 
 $(plextract):	miniperl lib/Config.pm lib/re.pm
 	$(LDLIBPTH) ./miniperl -Ilib $@.PL
-	
-install: all install.perl install.man
+
+extra.pods: perl
+	-@rm -f extra.pods
+	-@for x in `grep -l '^=[a-z]' README.*` ; do \
+	    nx=`echo $$x | sed -e "s/README\.//"`; \
+	    $(LNS) ../$$x "pod/perl"$$nx".pod" ; \
+	    echo "pod/perl"$$nx".pod" >> extra.pods ; \
+	done
+
+install: all install.perl install.man extra.pods
 
 install.perl:	all installperl
 	if [ -n "$(COMPILE)" ]; \
@@ -606,7 +614,8 @@ distclean:	clobber
 # Do not 'make _mopup' directly.
 _mopup:
 	rm -f *$(OBJ_EXT) *$(LIB_EXT) all perlmain.c
-	rm -f perl.exp ext.libs
+	-@test -f extra.pods && rm -f `cat extra.pods`
+	-rm -f perl.exp ext.libs extra.pods
 	-rm -f perl.export perl.dll perl.libexp perl.map perl.def
 	-rm -f perl.loadmap miniperl.loadmap perl.prelmap miniperl.prelmap
 	rm -f perl suidperl miniperl $(LIBPERL)

@@ -38,7 +38,7 @@ main(int argc, char **argv, char **env)
 #undef PERLVARIC
 #endif
 
-    PERL_SYS_INIT(&argc,&argv);
+    PERL_SYS_INIT3(&argc,&argv,&env);
 
     if (!PL_do_undump) {
 	my_perl = perl_alloc();

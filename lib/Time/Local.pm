@@ -3,8 +3,19 @@ require 5.000;
 require Exporter;
 use Carp;
 
-@ISA = qw(Exporter);
-@EXPORT = qw(timegm timelocal);
+@ISA		= qw( Exporter );
+@EXPORT		= qw( timegm timelocal );
+@EXPORT_OK	= qw( $no_range_check );
+
+sub import {
+    my $package = shift;
+    my @args;
+    for (@_) {
+	$no_range_check = 1, next	if $_ eq 'no_range_check';
+	push @args, $_;
+    }
+    Time::Local->export_to_level(1, $package, @args);
+}
 
 # Set up constants
     $SEC  = 1;
@@ -51,7 +62,6 @@ sub timelocal {
 
     my $tzsec = ($gt[1] - $lt[1]) * $MIN + ($gt[2] - $lt[2]) * $HR;
 
-    my($lday,$gday) = ($lt[7],$gt[7]);
     if($lt[5] > $gt[5]) {
 	$tzsec -= $DAY;
     }
@@ -73,11 +83,13 @@ sub timelocal {
 sub cheat {
     $year = $_[5];
     $month = $_[4];
-    croak "Month '$month' out of range 0..11"	if $month > 11 || $month < 0;
-    croak "Day '$_[3]' out of range 1..31"	if $_[3] > 31 || $_[3] < 1;
-    croak "Hour '$_[2]' out of range 0..23"	if $_[2] > 23 || $_[2] < 0;
-    croak "Minute '$_[1]' out of range 0..59"	if $_[1] > 59 || $_[1] < 0;
-    croak "Second '$_[0]' out of range 0..59"	if $_[0] > 59 || $_[0] < 0;
+    unless ($no_range_check) {
+	croak "Month '$month' out of range 0..11" if $month > 11 || $month < 0;
+	croak "Day '$_[3]' out of range 1..31"	  if $_[3] > 31 || $_[3] < 1;
+	croak "Hour '$_[2]' out of range 0..23"	  if $_[2] > 23 || $_[2] < 0;
+	croak "Minute '$_[1]' out of range 0..59" if $_[1] > 59 || $_[1] < 0;
+	croak "Second '$_[0]' out of range 0..59" if $_[0] > 59 || $_[0] < 0;
+    }
     $guess = $^T;
     @g = gmtime($guess);
     $lastguess = "";
@@ -136,6 +148,27 @@ It is worth drawing particular attention to the expected ranges for
 the values provided.  While the day of the month is expected to be in
 the range 1..31, the month should be in the range 0..11.  
 This is consistent with the values returned from localtime() and gmtime().
+
+Also worth noting is the ability to disable the range checking that
+would normally occur on the input $sec, $min, $hours, $mday, and $mon
+values.  You can do this by setting $Time::Local::no_range_check = 1,
+or by invoking the module with C<use Time::Local 'no_range_check'>.
+This enables you to abuse the terminology somewhat and gain the
+flexibilty to do things like:
+
+	use Time::Local qw( no_range_check );
+
+	# The 365th day of 1999
+	print scalar localtime timelocal 0,0,0,365,0,99;
+
+	# The twenty thousandth day since 1970
+	print scalar localtime timelocal 0,0,0,20000,0,70;
+
+	# And even the 10,000,000th second since 1999!
+	print scalar localtime timelocal 10000000,0,0,1,0,99;
+
+Your mileage may vary when trying this trick with minutes and hours,
+and it doesn't work at all for months.
 
 Strictly speaking, the year should also be specified in a form consistent
 with localtime(), i.e. the offset from 1900.

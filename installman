@@ -127,7 +127,8 @@ sub runpod2man {
     # of the pod.  This might be useful for pod2man someday.
     if ($script) {
 	@modpods = ($script);
-    } else {
+    }
+    else {
 	@modpods = ();
 	find(\&lsmodpods, '.');
     }
@@ -143,16 +144,20 @@ sub runpod2man {
 	$manpage =~ s#\.p(m|od)$##;
 	if ($^O eq 'os2' || $^O eq 'amigaos' || $^O eq 'uwin' || $^O =~ /cygwin/) {
 	  $manpage =~ s#/#.#g;
-	} else {
+	}
+	else {
 	  $manpage =~ s#/#::#g;
 	}
 	$tmp = "${mandir}/${manpage}.tmp";
 	$manpage = "${mandir}/${manpage}.${manext}";
 	if (&cmd("$pod2man $mod > $tmp") == 0 && !$notify && -s $tmp) {
-	    rename($tmp, $manpage) && next;
+	    if (rename($tmp, $manpage)) {
+		$packlist->{$manpage} = { type => 'file' };
+		next;
+	    }
 	}
 	unless ($notify) {
-    unlink($tmp);
+	    unlink($tmp);
 	}
     }
     chdir "$builddir" || die "Unable to cd back to $builddir directory!\n$!\n";
@@ -197,11 +202,11 @@ sub unlink {
     my $cnt = 0;
 
     foreach $name (@names) {
-next unless -e $name;
-chmod 0777, $name if $^O eq 'os2';
-print STDERR "  unlink $name\n";
-( CORE::unlink($name) and ++$cnt 
-    or warn "Couldn't unlink $name: $!\n" ) unless $notify;
+	next unless -e $name;
+	chmod 0777, $name if $^O eq 'os2';
+	print STDERR "  unlink $name\n";
+	( CORE::unlink($name) and ++$cnt 
+	    or warn "Couldn't unlink $name: $!\n" ) unless $notify;
     }
     return $cnt;
 }
@@ -218,14 +223,12 @@ sub link {
               ? die "AFS"  # okay inside eval {}
               : warn "Couldn't link $from to $to: $!\n"
           unless $notify;
-        $packlist->{$to} = { type => 'file' };
     };
     if ($@) {
         File::Copy::copy($from, $to)
             ? $success++
             : warn "Couldn't copy $from to $to: $!\n"
           unless $notify;
-        $packlist->{$to} = { type => 'file' };
     }
     $success;
 }
@@ -233,16 +236,15 @@ sub link {
 sub rename {
     local($from,$to) = @_;
     if (-f $to and not unlink($to)) {
-my($i);
-for ($i = 1; $i < 50; $i++) {
-    last if CORE::rename($to, "$to.$i");
-}
-warn("Cannot rename to `$to.$i': $!"), return 0 
-    if $i >= 50;	# Give up!
+	my($i);
+	for ($i = 1; $i < 50; $i++) {
+	    last if CORE::rename($to, "$to.$i");
+	}
+	warn("Cannot rename to `$to.$i': $!"), return 0 
+	    if $i >= 50;	# Give up!
     }
     link($from,$to) || return 0;
     unlink($from);
-    $packlist->{$to} = { type => 'file' };
 }
 
 sub chmod {
