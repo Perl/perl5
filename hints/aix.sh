@@ -560,6 +560,15 @@ EOF
 	shift
 	libswanted="$*"
 	installusrbinperl="$undef"
+
+	# V5R1 doesn't have this (V5R2 does), without knowing
+	# which one we have it's safer to be pessimistic.
+	# Cwd will work fine even without fchdir(), but if
+	# V5R1 tries to use code compiled assuming fchdir(),
+	# lots of grief will issue forth from Cwd.
+	case "$d_fchdir" in
+	'') d_fchdir="$undef" ;;
+	esac
 	;;
 esac
 
