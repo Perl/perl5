@@ -3329,7 +3329,7 @@ I32
 my_fflush_all(void)
 {
 #ifdef FFLUSH_NULL
-    return fflush(NULL);
+    return PerlIO_flush(NULL);
 #else
     long open_max = -1;
 # if defined(FFLUSH_ALL) && defined(HAS_STDIO_STREAM_ARRAY)
@@ -3351,7 +3351,7 @@ my_fflush_all(void)
     if (open_max > 0) {
       long i;
       for (i = 0; i < open_max; i++)
-         fflush(&STDIO_STREAM_ARRAY[i]);
+         PerlIO_flush(&STDIO_STREAM_ARRAY[i]);
       return 0;
     }
 # endif
