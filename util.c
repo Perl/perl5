@@ -2096,6 +2096,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
     while ((pid = PerlProc_fork()) < 0) {
 	if (errno != EAGAIN) {
 	    PerlLIO_close(p[This]);
+	    PerlLIO_close(p[that]);
 	    if (did_pipes) {
 		PerlLIO_close(pp[0]);
 		PerlLIO_close(pp[1]);
@@ -2113,7 +2114,6 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 #undef THAT
 #define THIS that
 #define THAT This
-	PerlLIO_close(p[THAT]);
 	if (did_pipes) {
 	    PerlLIO_close(pp[0]);
 #if defined(HAS_FCNTL) && defined(F_SETFD)
@@ -2123,7 +2123,11 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 	if (p[THIS] != (*mode == 'r')) {
 	    PerlLIO_dup2(p[THIS], *mode == 'r');
 	    PerlLIO_close(p[THIS]);
+	    if (p[THAT] != (*mode == 'r'))	/* if dup2() didn't close it */
+		PerlLIO_close(p[THAT]);
 	}
+	else
+	    PerlLIO_close(p[THAT]);
 #ifndef OS2
 	if (doexec) {
 #if !defined(HAS_FCNTL) || !defined(F_SETFD)
@@ -2157,8 +2161,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 #undef THIS
 #undef THAT
     }
-    do_execfree();	/* free any memory malloced by child on fork */
-    PerlLIO_close(p[that]);
+    do_execfree();	/* free any memory malloced by child on vfork */
     if (did_pipes)
 	PerlLIO_close(pp[1]);
     if (p[that] < p[This]) {
@@ -2166,6 +2169,9 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 	PerlLIO_close(p[This]);
 	p[This] = p[that];
     }
+    else
+	PerlLIO_close(p[that]);
+
     LOCK_FDPID_MUTEX;
     sv = *av_fetch(PL_fdpid,p[This],TRUE);
     UNLOCK_FDPID_MUTEX;
@@ -4216,7 +4222,7 @@ S_socketpair_udp (int fd[2]) {
 }
 #endif /*  EMULATE_SOCKETPAIR_UDP */
 
-#if !defined(HAS_SOCKETPAIR) && defined(HAS_SOCKET) && defined(AF_INET) && defined(PF_INET) 
+#if !defined(HAS_SOCKETPAIR) && defined(HAS_SOCKET) && defined(AF_INET) && defined(PF_INET)
 int
 Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
     /* Stevens says that family must be AF_LOCAL, protocol 0.
