@@ -1353,9 +1353,9 @@ Ap	|bool	|is_uni_lower	|U32 c
 Ap	|bool	|is_uni_print	|U32 c
 Ap	|bool	|is_uni_punct	|U32 c
 Ap	|bool	|is_uni_xdigit	|U32 c
-Ap	|U32	|to_uni_upper	|U32 c
-Ap	|U32	|to_uni_title	|U32 c
-Ap	|U32	|to_uni_lower	|U32 c
+Ap	|U32	|to_uni_upper	|U32 c|U8 *p|STRLEN *lenp
+Ap	|U32	|to_uni_title	|U32 c|U8 *p|STRLEN *lenp
+Ap	|U32	|to_uni_lower	|U32 c|U8 *p|STRLEN *lenp
 Ap	|bool	|is_uni_alnum_lc|U32 c
 Ap	|bool	|is_uni_alnumc_lc|U32 c
 Ap	|bool	|is_uni_idfirst_lc|U32 c
@@ -1370,9 +1370,6 @@ Ap	|bool	|is_uni_lower_lc|U32 c
 Ap	|bool	|is_uni_print_lc|U32 c
 Ap	|bool	|is_uni_punct_lc|U32 c
 Ap	|bool	|is_uni_xdigit_lc|U32 c
-Ap	|U32	|to_uni_upper_lc|U32 c
-Ap	|U32	|to_uni_title_lc|U32 c
-Ap	|U32	|to_uni_lower_lc|U32 c
 Apd	|STRLEN	|is_utf8_char	|U8 *p
 Apd	|bool	|is_utf8_string	|U8 *s|STRLEN len
 Ap	|bool	|is_utf8_alnum	|U8 *p
@@ -1817,9 +1814,9 @@ Ap	|SV*	|swash_init	|char* pkg|char* name|SV* listsv \
 Ap	|UV	|swash_fetch	|SV *sv|U8 *ptr|bool do_utf8
 Ap	|void	|taint_env
 Ap	|void	|taint_proper	|const char* f|const char* s
-Ap	|UV	|to_utf8_lower	|U8 *p
-Ap	|UV	|to_utf8_upper	|U8 *p
-Ap	|UV	|to_utf8_title	|U8 *p
+Ap	|UV	|to_utf8_lower	|U8 *p|U8* ustrp|STRLEN *lenp
+Ap	|UV	|to_utf8_upper	|U8 *p|U8* ustrp|STRLEN *lenp
+Ap	|UV	|to_utf8_title	|U8 *p|U8* ustrp|STRLEN *lenp
 #if defined(UNLINK_ALL_VERSIONS)
 Ap	|I32	|unlnk		|char* f
 #endif

@@ -425,9 +425,9 @@ Converts the specified character to lowercase.
 #define isPRINT_uni(c)		is_uni_print(c)
 #define isPUNCT_uni(c)		is_uni_punct(c)
 #define isXDIGIT_uni(c)		is_uni_xdigit(c)
-#define toUPPER_uni(c)		to_uni_upper(c)
-#define toTITLE_uni(c)		to_uni_title(c)
-#define toLOWER_uni(c)		to_uni_lower(c)
+#define toUPPER_uni(c,s,l)	to_uni_upper(c,s,l)
+#define toTITLE_uni(c,s,l)	to_uni_title(c,s,l)
+#define toLOWER_uni(c,s,l)	to_uni_lower(c,s,l)
 
 #define isPSXSPC_uni(c)		(isSPACE_uni(c) ||(c) == '\f')
 #define isBLANK_uni(c)		isBLANK(c) /* could be wrong */
@@ -444,9 +444,6 @@ Converts the specified character to lowercase.
 #define isGRAPH_LC_uvchr(c)	(c < 256 ? isGRAPH_LC(c) : is_uni_graph_lc(c))
 #define isPRINT_LC_uvchr(c)	(c < 256 ? isPRINT_LC(c) : is_uni_print_lc(c))
 #define isPUNCT_LC_uvchr(c)	(c < 256 ? isPUNCT_LC(c) : is_uni_punct_lc(c))
-#define toUPPER_LC_uvchr(c)	(c < 256 ? toUPPER_LC(c) : to_uni_upper_lc(c))
-#define toTITLE_LC_uvchr(c)	(c < 256 ? toUPPER_LC(c) : to_uni_title_lc(c))
-#define toLOWER_LC_uvchr(c)	(c < 256 ? toLOWER_LC(c) : to_uni_lower_lc(c))
 
 #define isPSXSPC_LC_uni(c)	(isSPACE_LC_uni(c) ||(c) == '\f')
 #define isBLANK_LC_uni(c)	isBLANK(c) /* could be wrong */
@@ -465,9 +462,9 @@ Converts the specified character to lowercase.
 #define isPRINT_utf8(p)		is_utf8_print(p)
 #define isPUNCT_utf8(p)		is_utf8_punct(p)
 #define isXDIGIT_utf8(p)	is_utf8_xdigit(p)
-#define toUPPER_utf8(p)		to_utf8_upper(p)
-#define toTITLE_utf8(p)		to_utf8_title(p)
-#define toLOWER_utf8(p)		to_utf8_lower(p)
+#define toUPPER_utf8(p,s,l)	to_utf8_upper(p,s,l)
+#define toTITLE_utf8(p,s,l)	to_utf8_title(p,s,l)
+#define toLOWER_utf8(p,s,l)	to_utf8_lower(p,s,l)
 
 #define isPSXSPC_utf8(c)	(isSPACE_utf8(c) ||(c) == '\f')
 #define isBLANK_utf8(c)		isBLANK(c) /* could be wrong */
@@ -484,9 +481,6 @@ Converts the specified character to lowercase.
 #define isGRAPH_LC_utf8(p)	isGRAPH_LC_uvchr(utf8_to_uvchr(p,  0))
 #define isPRINT_LC_utf8(p)	isPRINT_LC_uvchr(utf8_to_uvchr(p,  0))
 #define isPUNCT_LC_utf8(p)	isPUNCT_LC_uvchr(utf8_to_uvchr(p,  0))
-#define toUPPER_LC_utf8(p)	toUPPER_LC_uvchr(utf8_to_uvchr(p,  0))
-#define toTITLE_LC_utf8(p)	toTITLE_LC_uvchr(utf8_to_uvchr(p,  0))
-#define toLOWER_LC_utf8(p)	toLOWER_LC_uvchr(utf8_to_uvchr(p,  0))
 
 #define isPSXSPC_LC_utf8(c)	(isSPACE_LC_utf8(c) ||(c) == '\f')
 #define isBLANK_LC_utf8(c)	isBLANK(c) /* could be wrong */

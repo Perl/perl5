@@ -2962,6 +2962,8 @@ tryagain:
 	    register char *p;
 	    char *oldp, *s;
 	    STRLEN numlen;
+	    STRLEN ulen;
+	    U8 tmpbuf[UTF8_MAXLEN*2+1];
 
             parse_start = RExC_parse - 1;
 
@@ -3104,10 +3106,8 @@ tryagain:
 		if (RExC_flags16 & PMf_EXTENDED)
 		    p = regwhite(p, RExC_end);
 		if (UTF && FOLD) {
-		    if (LOC)
-			ender = toLOWER_LC_uvchr(ender);
-		    else
-			ender = toLOWER_uni(ender);
+		    toLOWER_uni(ender, tmpbuf, &ulen);
+		    ender = utf8_to_uvchr(tmpbuf, 0);
 		}
 		if (ISMULT2(p)) { /* Back off on ?+*. */
 		    if (len)
