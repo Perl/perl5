@@ -3336,11 +3336,13 @@ Removes the elements designated by OFFSET and LENGTH from an array, and
 replaces them with the elements of LIST, if any.  In list context,
 returns the elements removed from the array.  In scalar context,
 returns the last element removed, or C<undef> if no elements are
-removed.  The array grows or shrinks as necessary.  If LENGTH is
-omitted, removes everything from OFFSET onward.  The following
-equivalences hold (assuming C<$[ == 0>):
+removed.  The array grows or shrinks as necessary.
+If OFFSET is negative then it start that far from the end of the array.
+If LENGTH is omitted, removes everything from OFFSET onward.
+If LENGTH is negative, leave that many elements off the end of the array.
+The following equivalences hold (assuming C<$[ == 0>):
 
-    push(@a,$x,$y)	splice(@a,$#a+1,0,$x,$y)
+    push(@a,$x,$y)	splice(@a,@a,0,$x,$y)
     pop(@a)		splice(@a,-1)
     shift(@a)		splice(@a,0,1)
     unshift(@a,$x,$y)	splice(@a,0,0,$x,$y)

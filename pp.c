@@ -2589,8 +2589,11 @@ PP(pp_splice)
 	    DIE(no_aelem, i);
 	if (++MARK < SP) {
 	    length = SvIVx(*MARK++);
-	    if (length < 0)
-		length = 0;
+	    if (length < 0) {
+		length += AvFILLp(ary) - offset + 1;
+		if (length < 0)
+		    length = 0;
+	    }
 	}
 	else
 	    length = AvMAX(ary) + 1;		/* close enough to infinity */
