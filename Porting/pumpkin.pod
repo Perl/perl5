@@ -95,7 +95,7 @@ directories.
 
 =head2 Maintenance and Development Subversions
 
-Starting with version 5.004, subversions _01 through _49 is reserved
+Starting with version 5.004, subversions _01 through _49 are reserved
 for bug-fix maintenance releases, and subversions _50 through _99 for
 unstable development versions.
 
@@ -236,7 +236,7 @@ emulations, function stubs, build utility wrappers) you may create a
 separate subdirectory (djgpp, win32) and put the files in there.
 Remember to update C<MANIFEST> when you add files.
 
-If your system support dynamic loading but none of the existing
+If your system supports dynamic loading but none of the existing
 methods at F<ext/DynaLoader/dl_*.xs> work for you, you must write
 a new one.  Study the existing ones to see what kind of interface
 you must supply.
@@ -1123,33 +1123,6 @@ may find metaconfig's units clumsy to work with.
 
 =back
 
-=head2 @INC search order
-
-By default, the list of perl library directories in @INC is the
-following:
-
-    $archlib
-    $privlib
-    $sitearch
-    $sitelib
-
-Specifically, on my Solaris/x86 system, I run
-B<sh Configure -Dprefix=/opt/perl> and I have the following
-directories:
-
-    /opt/perl/lib/i86pc-solaris/5.00307
-    /opt/perl/lib
-    /opt/perl/lib/site_perl/i86pc-solaris
-    /opt/perl/lib/site_perl
-
-That is, perl's directories come first, followed by the site-specific
-directories.
-
-The site libraries come second to support the usage of extensions
-across perl versions.  Read the relevant section in F<INSTALL> for
-more information.  If we ever make $sitearch version-specific, this
-topic could be revisited.
-
 =head2 Why isn't there a directory to override Perl's library?
 
 Mainly because no one's gotten around to making one.  Note that
@@ -1273,18 +1246,6 @@ what I came up with off the top of my head.
 
 =over 4
 
-=item installprefix
-
-I think we ought to support
-
-    Configure -Dinstallprefix=/blah/blah
-
-Currently, we support B<-Dprefix=/blah/blah>, but the changing the install
-location has to be handled by something like the F<config.over> trick
-described in F<INSTALL>.  AFS users also are treated specially.
-We should probably duplicate the metaconfig prefix stuff for an
-install prefix.
-
 =item Configure -Dsrc=/blah/blah
 
 We should be able to emulate B<configure --srcdir>.  Tom Tromey
@@ -1292,34 +1253,6 @@ tromey@creche.cygnus.com has submitted some patches to
 the dist-users mailing list along these lines.  They have been folded
 back into the main distribution, but various parts of the perl
 Configure/build/install process still assume src='.'.
-
-=item Directory for vendor-supplied modules?
-
-If a vendor supplies perl, but wants to leave $siteperl and $sitearch
-for the local user to use, where should the vendor put vendor-supplied
-modules (such as Tk.so)?  If the vendor puts them in the default $archlib,
-then they need to be updated each time the perl version is updated.
-Perhaps we need a set of libries $vendorlib and $vendorarch that
-track $apiversion (like the $sitexxx directories do) rather than just
-$version (like the main perl directory).
-
-An alternative (and perhaps even better) plan might be for the vendor
-to select non-default $privlib and $archlib directories, perhaps using
-$apiversion instead of $version (or even just /usr/lib/perl5 with no
-version stuff at all), and put modules into those directories (with perl
-Makefile.PL INSTALLDIRS=perl).  This would be fine unless the vendor
-wanted to support different versions of perl installed at the same time.
-(How many vendors *really* want to do that?)
-
-=item Separate directories for Perl-supplied and add-on man pages
-
-Man pages supplied with the perl distribution proper ought to go in
-an appropriate man directory.  Perhaps man pages supplied with add-on
-modules ought to (at least optionally) go into a $siteman[1-9] directory.
-For example, suppose that $privlib is /usr/lib/perl5 and $man1dir
-is /usr/man/man1.  Also, suppose $sitelib is /usr/local/lib/perl5.
-In this situation, it might make sense for man pages to go into
-/usr/local/lib/man/man1.
 
 =item Hint file fixes
 
@@ -1330,47 +1263,6 @@ Configure so that most of them aren't needed.
 
 Some of the hint file information (particularly dynamic loading stuff)
 ought to be fed back into the main metaconfig distribution.
-
-=item Catch GNU Libc "Stub" functions
-
-Some functions (such as lchown()) are present in libc, but are
-unimplmented.  That is, they always fail and set errno=ENOSYS.
-
-Thomas Bushnell provided the following sample code and the explanation
-that follows:
-
-    /* System header to define __stub macros and hopefully few prototypes,
-	which can conflict with char FOO(); below.  */
-    #include <assert.h>
-    /* Override any gcc2 internal prototype to avoid an error.  */
-    /* We use char because int might match the return type of a gcc2
-	builtin and then its argument prototype would still apply.  */
-    char FOO();
-
-    int main() {
-
-    /* The GNU C library defines this for functions which it implements
-	to always fail with ENOSYS.  Some functions are actually named
-	something starting with __ and the normal name is an alias.  */
-    #if defined (__stub_FOO) || defined (__stub___FOO)
-    choke me
-    #else
-    FOO();
-    #endif
-
-    ; return 0; }
-
-The choice of <assert.h> is essentially arbitrary.  The GNU libc
-macros are found in <gnu/stubs.h>.  You can include that file instead
-of <assert.h> (which itself includes <gnu/stubs.h>) if you test for
-its existence first.  <assert.h> is assumed to exist on every system,
-which is why it's used here.  Any GNU libc header file will include
-the stubs macros.  If either __stub_NAME or __stub___NAME is defined,
-then the function doesn't actually exist.  Tests using <assert.h> work
-on every system around.
-
-The declaration of FOO is there to override builtin prototypes for
-ANSI C functions.
 
 =back
 
@@ -1453,4 +1345,4 @@ All opinions expressed herein are those of the authorZ<>(s).
 
 =head1 LAST MODIFIED
 
-$Id: pumpkin.pod,v 1.22 1998/07/22 16:33:55 doughera Released $
+$Id: pumpkin.pod,v 1.23 2000/01/13 19:45:13 doughera Released $

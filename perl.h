@@ -1089,10 +1089,16 @@ typedef NVTYPE NV;
 #   define Perl_fmod fmod
 #endif
 
-#if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE) && defined(HAS_ATOLF)
-#   define Perl_atof atolf
-#else
-#   define Perl_atof atof
+#if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE)
+#   if !defined(Perl_atof) && defined(HAS_STRTOLD)
+#       define Perl_atof(s) strtold(s, (char*)0)
+#   endif
+#   if !defined(Perl_atof) && defined(HAS_ATOLF)
+#       define Perl_atof atolf
+#   endif
+#endif
+#if !defined(Perl_atof)
+#   define Perl_atof atof /* we assume atof being available anywhere */
 #endif
 
 /* Previously these definitions used hardcoded figures. 
@@ -2979,16 +2985,24 @@ typedef struct am_table_short AMTS;
 
 #endif /* !USE_LOCALE_NUMERIC */
 
-#if defined(USE_LONG_LONG) && defined(HAS_LONG_LONG) && defined(HAS_ATOLL)
-#define Atol atoll 
-#else
-#define Atol atol
+#if !defined(Atol) && defined(USE_LONG_LONG) && defined(HAS_LONG_LONG) \
+	&& defined(HAS_ATOLL)
+#   define Atol atoll 
+#endif
+/* is there atoq() anywhere? */
+#if !defined(Atol)
+#   define Atol atol /* we assume atol being available anywhere */
 #endif
 
-#if defined(USE_LONG_LONG) && defined(HAS_LONG_LONG) && defined(HAS_STRTOULL)
-#define Strtoul strtoull
-#else
-#define Strtoul strtoul
+#if !defined(Strtoul) && defined(USE_LONG_LONG) && defined(HAS_LONG_LONG) \
+	&& defined(HAS_STRTOULL)
+#   define Strtoul strtoull
+#endif
+#if !defined(Strtoul) && defined(USE_64_BITS) && defined(HAS_STRTOUQ)
+#   define Strtoul strtouq
+#endif
+#if !defined(Strtoul)
+#   define Strtoul strtoul /* we assume strtoul being available anywhere */
 #endif
 
 #if !defined(PERLIO_IS_STDIO) && defined(HASATTRIBUTE)

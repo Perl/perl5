@@ -12,12 +12,18 @@
    compatibility to run XS code built with the older version).
    Normally this should not change across maintenance releases.
 
-   This is used by Configure et al to figure out which version libraries
-   are legal to include in @INC.  See INSTALL for how this works.
+   This is used by Configure et al to figure out 
+   PERL_INC_VERSION_LIST, which lists version libraries
+   to include in @INC.  See INSTALL for how this works.
 */
 #define PERL_API_REVISION	5	/* Adjust manually as needed.  */
 #define PERL_API_VERSION	5	/* Adjust manually as needed.  */
 #define PERL_API_SUBVERSION	640	/* Adjust manually as needed.  */
+/*
+   XXX Note:  The selection of non-default Configure options, such
+   as -Duselonglong may invalidate these settings.  Currently, Configure
+   does not adequately test for this.   A.D.  Jan 13, 2000
+*/
 
 #define __PATCHLEVEL_H_INCLUDED__
 #endif
