@@ -365,6 +365,7 @@ the strings?).
           5.8.0         2002-Jul-18
           5.8.1-RC1     2003-Jul-10
           5.8.1-RC2     2003-Jul-11
+          5.8.1-RC3     2003-Jul-30
 
 =head2 SELECTED RELEASE SIZES
 
