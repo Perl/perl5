@@ -212,8 +212,14 @@ SKIP: {
     # /dev/stdout might be either character special or a named pipe,
     # depending on which OS and how are you running the test, so let's
     # censor that one away.
-    $DEV =~ s{^[cp].+?\bstdout$}{}m;
-    @DEV = grep { ! m{\bstdout$} } @DEV;
+    $DEV =~ s{^[cp].+?\sstdout$}{}m;
+    @DEV =  grep { $_ ne 'stdout' } @DEV;
+
+    # If running as root, we will see .files in the ls result,
+    # and readdir() will see them always.  Potential for conflict,
+    # so let's weed them out.
+    $DEV =~ s{^.+?\s\..+?$}{}m;
+    @DEV =  grep { ! m{^\..+$} } @DEV;
 
     my $try = sub {
 	my @c1 = eval qq[\$DEV =~ /^$_[0].*/mg];
