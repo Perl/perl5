@@ -92,7 +92,7 @@ ok(1,"");
 }
 
 # We parse ps output so this is OS-dependent.
-if ($^O =~ /^(linux|dec_osf)$/) {
+if ($^O eq 'linux') {
   # First modify $0 in a subthread.
   print "# mainthread: \$0 = $0\n";
   threads->new( sub {
