@@ -827,6 +827,7 @@ register char *s;
     return s;
 }
 
+void
 yyerror(s)
 char *s;
 {
@@ -997,6 +998,7 @@ int arg5;
 
 int depth = 0;
 
+void
 dump(branch)
 int branch;
 {
@@ -1038,6 +1040,7 @@ int maybe;
 	return arg;
 }
 
+void
 fixup(str)
 STR *str;
 {
@@ -1063,6 +1066,7 @@ STR *str;
     }
 }
 
+void
 putlines(str)
 STR *str;
 {
@@ -1139,6 +1143,7 @@ STR *str;
     }
 }
 
+void
 putone()
 {
     register char *t;

@@ -1,7 +1,7 @@
 #!./miniperl -w
 
+$config_pm = $ARGV[0] || 'lib/Config.pm';
 @ARGV = "./config.sh";
-$config_pm = 'lib/Config.pm';
 
 # list names to put first (and hence lookup fastest)
 @fast = qw(osname osvers so libpth archlib

@@ -18,7 +18,10 @@ case "$0" in
 esac
 echo "Extracting makedepend (with variable substitutions)"
 rm -f makedepend
-$spitshell >makedepend <<'!NO!SUBS!'
+$spitshell >makedepend <<!GROK!THIS!
+$startsh
+!GROK!THIS!
+$spitshell >>makedepend <<'!NO!SUBS!'
 # makedepend.SH
 #
 
@@ -94,6 +97,7 @@ for file in `$cat .clist`; do
 	-e '}' ) >UU/$file.c
     $cppstdin $finc -I/usr/local/include -I. $cppflags $cppminus <UU/$file.c |
     $sed \
+	-e '/^#.*<stdin>/d' \
 	-e 's#\.[0-9][0-9]*\.c#'"$file.c#" \
 	-e 's/^[	 ]*#[	 ]*line/#/' \
 	-e '/^# *[0-9][0-9]* *[".\/]/!d' \

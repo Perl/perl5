@@ -226,7 +226,6 @@ OP*	newANONLIST _((OP* op));
 OP*	newANONHASH _((OP* op));
 OP*	newANONSUB _((I32 floor, OP* block));
 OP*	newASSIGNOP _((I32 flags, OP* left, I32 optype, OP* right));
-OP*	newBINOP _((I32 optype, I32 flags, OP* left, OP* right));
 OP*	newCONDOP _((I32 flags, OP* expr, OP* true, OP* false));
 void	newFORM _((I32 floor, OP* op, OP* block));
 OP*	newFOROP _((I32 flags, char* label, line_t forline, OP* scalar, OP* expr, OP*block, OP*cont));
@@ -241,7 +240,6 @@ OP*	newRANGE _((I32 flags, OP* left, OP* right));
 OP*	newSLICEOP _((I32 flags, OP* subscript, OP* list));
 OP*	newSTATEOP _((I32 flags, char* label, OP* o));
 CV*	newSUB _((I32 floor, OP* op, OP* block));
-OP*	newUNOP _((I32 optype, I32 flags, OP* child));
 CV*	newXS _((char *name, void (*subaddr)(CV* cv), char *filename));
 #ifdef DEPRECATED
 CV*	newXSUB _((char *name, I32 ix, I32 (*subaddr)(int,int,int), char *filename));

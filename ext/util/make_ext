@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # This script acts as a simple interface for building extensions.
 # It primarily used by the perl Makefile:
 #
@@ -31,24 +33,27 @@ if test "X$extspec" = X; then
 	exit 1;
 fi
 
-# canonise
-extspec=`echo "$extspec" | sed -e 's:^ext/::' -e 's:\.[^\.]*$::'`
-extspec="ext/$extspec"
-tailext=`echo "$extspec" | sed -e 's:.*/\([^/]*\)$:\1:'"`
-headext=`echo "$extspec" | sed -e 's:/[^/]*$::'"`
-if test -d "$headext/$tailext"; then
-    extspec="$headext/$tailext"
-fi
-if test -f "$extspec/$tailext.xs"; then
-    extspec="$extspec/$tailext"
-fi
+# The Perl Makefile.SH will expand all extensions to
+#	lib/auto/X/X.a  (or lib/auto/X/Y/Y.a is nested)
+# A user wishing to run make_ext might use
+#	X (or X/Y or X::Y is nested)
 
-# get extension directory path, module name and depth
-pname=`echo "$extspec" | sed -e 's:^ext/::' -e 's:/[^/]*$::'`
+# canonise into X/Y form (pname)
+case "$extspec" in
+lib*)	# Remove lib/auto prefix and /*.* suffix
+	pname=`echo "$extspec" | sed -e 's:^lib/auto/::' -e 's:/[^/]*\.[^/]*$::' ` ;;
+*::*)	# Convert :: to /
+	pname=`echo "$extspec" | sed -e 's/::/\//g' ` ;;
+*)	pname="$extspec" ;;
+esac
+# echo "Converted $extspec to $pname"
+
 mname=`echo "$pname"   | sed -e 's!/!::!g'`
 depth=`echo "$pname"   | sed -e 's![^/][^/]*!..!g'`
 make=${altmake-make}
+makefile=Makefile
 makeargs=''
+makeopts=''
 
 if test ! -d "ext/$pname"; then
     echo "	Skipping $extspec (directory does not exist)"
@@ -62,28 +67,51 @@ cd ext/$pname
 
 # check link type and do any preliminaries
 case "$target" in
-	# convert 'static' or 'dynamic' into 'all LINKTYPE=XXX'
-static)  makeargs="LINKTYPE=static CCCDLFLAGS="; target=all ;;
-dynamic) makeargs="LINKTYPE=dynamic";            target=all ;;
-*clean)	;;
+	    # convert 'static' or 'dynamic' into 'all LINKTYPE=XXX'
+static)     makeargs="LINKTYPE=static CCCDLFLAGS="
+	    target=all
+	    ;;
+dynamic)    makeargs="LINKTYPE=dynamic";
+	    target=all
+	    ;;
+
+*clean) # If Makefile has been moved to Makefile.old by a make clean
+	    # then use Makefile.old for realclean rather than rebuild it
+	    if test ! -f $makefile -a -f Makefile.old; then
+		makefile=Makefile.old
+		makeopts="-f $makefile"
+		echo "Note: Using Makefile.old"
+	    fi
+	    ;;
+
 *)	# for the time being we are strict about what make_ext is used for
-	echo "make_ext: unknown make target '$target'"; exit 1;;
-'')	echo "make_ext: no make target specified (eg static or dynamic)"; exit 1;;
+	echo "make_ext: unknown make target '$target'"; exit 1
+	;;
+'')	echo "make_ext: no make target specified (eg static or dynamic)"; exit 1
+	;;
 esac
 
-if test ! -f Makefile ; then
+if test ! -f $makefile ; then
 	test -f Makefile.PL && ../$depth/miniperl -I../$depth/lib Makefile.PL
 fi
-if test ! -f Makefile ; then
-	test -f Makefile.SH && sh Makefile.SH
+if test ! -f $makefile ; then
+	if test -f Makefile.SH; then
+		echo "Warning: Writing $makefile from old-style Makefile.SH!"
+		sh Makefile.SH
+	else
+		echo "Warning: No Makefile!"
+	fi
 fi
 
 case "$target" in
 clean)		;;
 realclean)	;;
-*)		$make config $passthru;;
+*)	# Give makefile an opportunity to rewrite itself.
+	# reassure users that life goes on...
+	$make config $passthru || echo "$make config failed, continuing anyway..."
+	;;
 esac
 
-$make $target $makeargs $passthru || exit
+$make $makeopts $target $makeargs $passthru || exit
 
 exit $?

@@ -768,11 +768,13 @@ char *strcpy(), *strcat();
 #   endif
 #endif
 
-#if !defined(HAS_FMOD) && defined(HAS_DREM)
-#define fmod(x,y) drem((x),(y))
-#else
-#define USE_MY_FMOD
-#define fmod(x,y) my_fmod(x,y)
+#ifndef HAS_FMOD
+#   ifdef HAS_DREM
+#	define fmod(x,y) drem((x),(y))
+#   else
+#	define USE_MY_FMOD
+#	define fmod(x,y) my_fmod(x,y)
+#   endif
 #endif
 
 #ifndef __cplusplus

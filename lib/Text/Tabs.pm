@@ -8,7 +8,7 @@
 # David Muir Sharnoff <muir@idiom.com>
 # 
 
-package Tabs;
+package Text::Tabs;
 
 require Exporter;
 

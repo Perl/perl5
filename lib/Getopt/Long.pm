@@ -203,6 +203,7 @@ require Exporter;
     $REQUIRE_ORDER = 0;
     $PERMUTE = 1;
     $RETURN_IN_ORDER = 2;
+    $RETURN_IN_ORDER = 2; # avoid typo warning with -w
 
     # Handle POSIX compliancy.
     if ( defined $ENV{"POSIXLY_CORRECT"} ) {
@@ -234,7 +235,7 @@ sub GetOptions {
     local ($genprefix) = $option_start;
     local ($argend) = $argv_end;
     local ($error) = 0;
-    local ($opt, $optx, $arg, $type, $mand, %opctl);
+    local ($opt, $arg, $type, $mand, %opctl);
     local ($pkg) = (caller)[0];
     local ($optarg);
     local (%aliases);

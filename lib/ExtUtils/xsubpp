@@ -1,8 +1,60 @@
 #!./miniperl
-'di ';
-'ds 00 \"';
-'ig 00 ';
-# $Header$ 
+
+=head1 NAME
+
+xsubpp - compiler to convert Perl XS code into C code
+
+=head1 SYNOPSIS
+
+B<xsubpp> [B<-C++>] [B<-except>] [B<-typemap typemap>] file.xs
+
+=head1 DESCRIPTION
+
+I<xsubpp> will compile XS code into C code by embedding the constructs
+necessary to let C functions manipulate Perl values and creates the glue
+necessary to let Perl access those functions.  The compiler uses typemaps to
+determine how to map C function parameters and variables to Perl values.
+
+The compiler will search for typemap files called I<typemap>.  It will use
+the following search path to find default typemaps, with the rightmost
+typemap taking precedence.
+
+	../../../typemap:../../typemap:../typemap:typemap
+
+=head1 OPTIONS
+
+=over 5
+
+=item B<-C++>
+
+Adds ``extern "C"'' to the C code.
+
+
+=item B<-except>
+
+Adds exception handling stubs to the C code.
+
+=item B<-typemap typemap>
+
+Indicates that a user-supplied typemap should take precedence over the
+default typemaps.  This option may be used multiple times, with the last
+typemap having the highest precedence.
+
+=back
+
+=head1 ENVIRONMENT
+
+No environment variables are used.
+
+=head1 AUTHOR
+
+Larry Wall
+
+=head1 SEE ALSO
+
+perl(1)
+
+=cut
 
 $usage = "Usage: xsubpp [-C++] [-except] [-typemap typemap] file.xs\n";
 
@@ -562,55 +614,3 @@ sub map_type {
 }
 
 exit $errors;
-
-##############################################################################
-
-	# These next few lines are legal in both Perl and nroff.
-
-.00 ;			# finish .ig
- 
-'di			\" finish diversion--previous line must be blank
-.nr nl 0-1		\" fake up transition to first page again
-.nr % 0			\" start at page 1
-'; __END__ ############# From here on it's a standard manual page ############
-.TH XSUBPP 1 "August 9, 1994"
-.AT 3
-.SH NAME
-xsubpp \- compiler to convert Perl XS code into C code
-.SH SYNOPSIS
-.B xsubpp [-C++] [-except] [-typemap typemap] file.xs
-.SH DESCRIPTION
-.I xsubpp
-will compile XS code into C code by embedding the constructs necessary to
-let C functions manipulate Perl values and creates the glue necessary to let
-Perl access those functions.  The compiler uses typemaps to determine how
-to map C function parameters and variables to Perl values.
-.PP
-The compiler will search for typemap files called
-.I typemap.
-It will use the following search path to find default typemaps, with the
-rightmost typemap taking precedence.
-.br
-.nf
-	../../../typemap:../../typemap:../typemap:typemap
-.fi
-.SH OPTIONS
-.TP
-.B \-C++
-.br
-Adds ``extern "C"'' to the C code.
-.TP
-.B \-except
-Adds exception handling stubs to the C code.
-.TP
-.B \-typemap typemap
-Indicates that a user-supplied typemap should take precedence over the
-default typemaps.  This option may be used multiple times, with the last
-typemap having the highest precedence.
-.SH ENVIRONMENT
-No environment variables are used.
-.SH AUTHOR
-Larry Wall
-.SH "SEE ALSO"
-perl(1)
-.ex

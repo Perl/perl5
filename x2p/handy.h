@@ -114,8 +114,8 @@ typedef U16 line_t;
 #ifndef lint
 #ifndef LEAKTEST
 #ifndef safemalloc
-char *safemalloc _((MEM_SIZE));
-char *saferealloc _((char *, MEM_SIZE));
+Malloc_t safemalloc _((MEM_SIZE));
+Malloc_t saferealloc _((char *, MEM_SIZE));
 void safefree _((char *));
 #endif
 #ifndef MSDOS

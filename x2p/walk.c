@@ -1765,7 +1765,7 @@ int *numericptr;
 	prewalk(0,level,ops[node+2].ival,&numarg);
 	prewalk(0,level,ops[node+1].ival,&numarg);
 	prewalk(0,level,ops[node+3].ival,&numarg);
-	if (numarg || strlen(ops[ops[node+1].ival+1].cval) > 1) {
+	if (numarg || strlen(ops[ops[node+1].ival+1].cval) > (Size_t)1) {
 	    numericize(ops[node+2].ival);
 	    if (!numarg)
 		numericize(ops[node+3].ival);

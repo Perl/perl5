@@ -1,5 +1,6 @@
 /*
  * Author: Jeff Okamoto (okamoto@corp.hp.com)
+ * Version: 2.1, 1995/1/25
  */
 
 #ifdef __hp9000s300
@@ -38,13 +39,35 @@ dl_load_file(filename)
     char *		filename
     CODE:
     shl_t obj = NULL;
+    int	i, max;
+    GV	*gv;
+    AV	*av;
+
+    gv = gv_fetchpv("DynaLoader::dl_resolve_using", FALSE, SVt_PVAV);
+    if (gv) {
+	av  = GvAV(gv);
+	max = AvFILL(av);
+	for (i = 0; i <= max; i++) {
+	    char *sym = SvPVX(*av_fetch(av, i, 0));
+	    DLDEBUG(1,fprintf(stderr, "dl_load_file(%s) (dependent)\n", sym));
+	    obj = shl_load(sym,
+		BIND_IMMEDIATE | BIND_NONFATAL | BIND_NOSTART | BIND_VERBOSE,
+		0L);
+	    if (obj == NULL) {
+		goto end;
+	    }
+	}
+    }
+
     DLDEBUG(1,fprintf(stderr,"dl_load_file(%s): ", filename));
     obj = shl_load(filename,
 	BIND_IMMEDIATE | BIND_NONFATAL | BIND_NOSTART | BIND_VERBOSE, 0L);
+
     DLDEBUG(2,fprintf(stderr," libref=%x\n", obj));
+end:
     ST(0) = sv_newmortal() ;
     if (obj == NULL)
-        SaveError("%s",Strerror(errno)) ;
+        SaveError("%s",Strerror(errno));
     else
         sv_setiv( ST(0), (IV)obj);
 
@@ -64,12 +87,23 @@ dl_find_symbol(libhandle, symbolname)
     DLDEBUG(2,fprintf(stderr,"dl_find_symbol(handle=%x, symbol=%s)\n",
 		libhandle, symbolname));
     status = shl_findsym(&obj, symbolname, TYPE_PROCEDURE, &symaddr);
-    DLDEBUG(2,fprintf(stderr,"  symbolref = %x\n", symaddr));
+    DLDEBUG(2,fprintf(stderr,"  symbolref(PROCEDURE) = %x\n", symaddr));
     ST(0) = sv_newmortal() ;
-    if (status == -1)
-	SaveError("%s",(errno) ? Strerror(errno) : "Symbol not found") ;
-    else
+    if (status == -1) {
+	if (errno == 0) {
+	    status = shl_findsym(&obj, symbolname, TYPE_DATA, &symaddr);
+	    DLDEBUG(2,fprintf(stderr,"  symbolref(DATA) = %x\n", symaddr));
+	    if (status == -1) {
+		SaveError("%s",(errno) ? Strerror(errno) : "Symbol not found") ;
+	    } else {
+		sv_setiv( ST(0), (IV)symaddr);
+	    }
+	} else {
+	    SaveError("%s", Strerror(errno));
+	}
+    } else {
 	sv_setiv( ST(0), (IV)symaddr);
+    }
 
 
 int

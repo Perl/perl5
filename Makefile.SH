@@ -51,14 +51,14 @@ dynamic_list=' '
 for f in $dynamic_ext; do
     : the dependency named here will never exist
       base=`echo "$f" | sed 's/.*\///'`
-    dynamic_list="$dynamic_list ext/$f/$base.$dlext"
+    dynamic_list="$dynamic_list lib/auto/$f/$base.$dlext"
 done
 
 static_list=' '
 static_ai_list=' '
 for f in $static_ext; do
 	base=`echo "$f" | sed 's/.*\///'`
-	static_list="$static_list ext/$f/$base.a"
+	static_list="$static_list lib/auto/$f/$base.a"
 	if test -f ext/$f/AutoInit.c; then
 	    static_ai_list="$static_ai_list ext/$f/AutoInit.c"
 	fi
@@ -102,7 +102,6 @@ ranlib = $ranlib
 # dynamic loading.
 LDDLFLAGS = $lddlflags
 CCDLFLAGS = $ccdlflags
-CCCDLFLAGS = $cccdlflags
 DLSUFFIX = .$dlext
 PLDLFLAGS = $pldlflags
 PLIBSUF = $plibsuf
@@ -112,7 +111,8 @@ dynamic_ext = $dynamic_list
 static_ext = $static_list
 ext = \$(dynamic_ext) \$(static_ext)
 static_ext_autoinit = $static_ai_list
-DYNALOADER = ext/DynaLoader/DynaLoader.a
+DYNALOADER = lib/auto/DynaLoader/DynaLoader.a
+
 
 libs = $libs $cryptlib
 
@@ -265,8 +265,10 @@ preplibrary: miniperl lib/Config.pm
 	@./miniperl -Ilib -e 'use AutoSplit; \
 		autosplit_lib_modules(@ARGV)' lib/*.pm lib/*/*.pm
 
+# Take care to avoid modifying lib/Config.pm without reason
 lib/Config.pm: config.sh miniperl
-	./miniperl configpm
+	./miniperl configpm tmp
+	sh mv-if-diff tmp lib/Config.pm
 
 install: all
 	./perl installperl
@@ -330,7 +332,7 @@ clean:
 	rm -f perl.exp ext.libs ext/util/extlibist
 	-cd x2p; $(MAKE) clean
 	-cd pod; $(MAKE) clean
-	@for x in $(dynamic_ext) $(static_ext) ; do \
+	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) ; do \
 	sh ext/util/make_ext clean $$x ; \
 	done
 	rm -f perl suidperl miniperl $(perllib)
@@ -348,6 +350,7 @@ realclean: clean
 	rm -rf lib/auto
 	rm -f h2ph h2ph.man c2ph pstruct
 	rm -rf .config
+	@echo "Note that make realclean does not delete config.sh"
 
 clobber:	realclean
 	rm -f config.sh cppstdin
@@ -364,6 +367,9 @@ lint: perly.c $(c)
 
 makefile:	Makefile
 	make depend
+
+config.h: config.sh
+	/bin/sh config_h.SH
 
 # When done, touch perlmain.c so that it doesn't get remade each time.
 depend: makedepend

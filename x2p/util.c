@@ -20,14 +20,14 @@ static char nomem[] = "Out of memory!\n";
 /* paranoid version of malloc */
 
 
-char *
+Malloc_t
 safemalloc(size)
 MEM_SIZE size;
 {
     char *ptr;
-    char *malloc();
+    Malloc_t malloc();
 
-    ptr = malloc(size?size:1);	/* malloc(0) is NASTY on our system */
+    ptr = (char *) malloc(size?size:1);	/* malloc(0) is NASTY on our system */
 #ifdef DEBUGGING
     if (debug & 128)
 	fprintf(stderr,"0x%x: (%05d) malloc %d bytes\n",ptr,an++,size);
@@ -43,15 +43,16 @@ MEM_SIZE size;
 
 /* paranoid version of realloc */
 
-char *
+Malloc_t
 saferealloc(where,size)
 char *where;
 MEM_SIZE size;
 {
     char *ptr;
-    char *realloc();
+    Malloc_t realloc();
 
-    ptr = realloc(where,size?size:1);	/* realloc(0) is NASTY on our system */
+    ptr = (char *)
+		realloc(where,size?size:1);	/* realloc(0) is NASTY on our system */
 #ifdef DEBUGGING
     if (debug & 128) {
 	fprintf(stderr,"0x%x: (%05d) rfree\n",where,an++);

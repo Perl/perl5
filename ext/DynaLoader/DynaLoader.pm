@@ -54,15 +54,13 @@ push(@dl_library_path, split(/:/, $ENV{'LD_LIBRARY_PATH'}))
 
 
 # No prizes for guessing why we don't say 'bootstrap DynaLoader;' here.
-&boot_DynaLoader if defined &boot_DynaLoader;
+boot_DynaLoader() if defined(&boot_DynaLoader);
 
-print STDERR "DynaLoader.pm loaded (@dl_library_path)\n"
-    if ($dl_debug >= 2);
 
-# Temporary interface checks for recent changes (Aug 1994)
-if (defined(&dl_load_file)){
-die "dl_error not defined" unless defined (&dl_error);
-die "dl_undef_symbols not defined" unless defined (&dl_undef_symbols);
+if ($dl_debug){
+	print STDERR "DynaLoader.pm loaded (@dl_library_path)\n";
+	print STDERR "DynaLoader not linked into this perl\n"
+		unless defined(&boot_DynaLoader);
 }
 
 1; # End of main code
@@ -120,8 +118,15 @@ sub bootstrap {
         warn "$bs: $@\n" if $@;
     }
 
-    my $libref = DynaLoader::dl_load_file($file) or
-	croak "Can't load '$file' for module $module: ".&dl_error."\n";
+    # Many dynamic extension loading problems will appear to come from
+    # this section of code: XYZ failed at line 123 of DynaLoader.pm.
+    # Often these errors are actually occurring in the initialisation
+    # C code of the extension XS file. Perl reports the error as being
+    # in this perl code simply because this was the last perl code
+    # it executed.
+
+    my $libref = dl_load_file($file) or
+	croak "Can't load '$file' for module $module: ".dl_error()."\n";
 
     my(@unresolved) = dl_undef_symbols();
     carp "Undefined symbols present after loading $file: @unresolved\n"
@@ -131,6 +136,8 @@ sub bootstrap {
          croak "Can't find '$bootname' symbol in $file\n";
 
     dl_install_xsub("${module}::bootstrap", $boot_symbol_ref, $file);
+
+    # See comment block above
     &{"${module}::bootstrap"}(@args);
 }
 

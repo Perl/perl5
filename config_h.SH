@@ -1417,8 +1417,8 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *	in the <db.h> header file.  In older versions of DB, it was
  *	int, while in newer ones it is size_t.
  */
-#define DB_Hash_t	"$db_hashtype"		/**/
-#define DB_Prefix_t	"$db_prefixtype"  	/**/
+#define DB_Hash_t	$db_hashtype		/**/
+#define DB_Prefix_t	$db_prefixtype  	/**/
 
 /* I_NDBM:
  *	This symbol, if defined, indicates that ndbm.h exists and should

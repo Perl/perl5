@@ -1403,8 +1403,8 @@
  *	in the <db.h> header file.  In older versions of DB, it was
  *	int, while in newer ones it is size_t.
  */
-#define DB_Hash_t	"int"		/**/
-#define DB_Prefix_t	"int"  	/**/
+#define DB_Hash_t	int		/**/
+#define DB_Prefix_t	int  	/**/
 
 /* I_NDBM:
  *	This symbol, if defined, indicates that ndbm.h exists and should

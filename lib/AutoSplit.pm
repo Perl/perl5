@@ -24,8 +24,14 @@ $vms = ($Config{'osname'} eq 'VMS');
 
 
 sub autosplit{
-    my($file, $autodir) = @_;
-    autosplit_file($file, $autodir, $Keep, $CheckForAutoloader, $CheckModTime);
+    my($file, $autodir,  $k, $ckal, $ckmt) = @_;
+    # $file    - the perl source file to be split (after __END__)
+    # $autodir - the ".../auto" dir below which to write split subs
+    # Handle optional flags:
+    $keep = $Keep unless defined $k;
+    $ckal = $CheckForAutoloader unless defined $ckal;
+    $ckmt = $CheckModTime unless defined $ckmt;
+    autosplit_file($file, $autodir, $keep, $ckal, $ckmt);
 }
 
 

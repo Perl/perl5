@@ -1,4 +1,8 @@
-ccflags='-D_POSIX_SOURCE -DUSE_NEXT_CTYPE'
+# This file has been put together by Anno Siegel <siegel@zrz.TU-Berlin.DE>
+# and Andreas Koenig <k@franz.ww.TU-Berlin.DE>. Comments, questions, and
+# improvements welcome!
+ccflags='-DUSE_NEXT_CTYPE'
+POSIX_cflags='ccflags="-posix $ccflags"'
 ldflags='-u libsys_s'
 libswanted='dbm gdbm db'
 lddlflags='-r'

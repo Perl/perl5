@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Written: Nov 1994 Wayne Scott (wscott@ichips.intel.com)
+
 # Create the export list for perl.
 # Needed by AIX to do dynamic linking.
 
@@ -13,6 +15,12 @@ echo "#!" > perl.exp
 
 sed -n "/^[A-Za-z]/ p" global.sym >> perl.exp
 
+# also add symbols from interp.sym
+# They are only needed if -DMULTIPLICITY is not set but it
+# doesn't hurt to include them anyway.
+sed -n "/^[A-Za-z]/ p" interp.sym >> perl.exp
+
+# extra globals not included above.
 cat <<END >> perl.exp
 perl_init_ext
 perl_alloc

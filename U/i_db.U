@@ -45,8 +45,8 @@
 ?C:	int, while in newer ones it is size_t.
 ?C:.
 ?H:#$i_db I_DB		/**/
-?H:#define DB_Hash_t	"$db_hashtype"		/**/
-?H:#define DB_Prefix_t	"$db_prefixtype"  	/**/
+?H:#define DB_Hash_t	$db_hashtype		/**/
+?H:#define DB_Prefix_t	$db_prefixtype  	/**/
 ?H:.
 ?F:!try.c !try.o
 ?LINT:set i_db

@@ -1,6 +1,6 @@
 #!./perl
 BEGIN { @INC=('./lib', '../lib') }
-
+use Config;
 use File::Find;
 
 $mainperldir = "/usr/bin";
@@ -139,10 +139,14 @@ else {
     warn "Can't cd to lib to install lib files: $!\n";
 }
 
-# Install header files
+# Install header files and libraries
 makedir("$installarchlib/CORE");
-foreach $file (<*.h libperl*.a>) {
+foreach $file (<*.h libperl*.*>) {
     cp_if_diff($file,"$installarchlib/CORE/$file");
+    if ($file =~ /\.a$/ && $Config{'osname'} eq 'next') { 
+       #on NeXTs we have to rerun ranlib after copying libraries
+       &cmd("$Config{'ranlib'} $installarchlib/CORE/$file");
+    }
 }
 
 # Offer to install perl in a "standard" location
@@ -267,7 +271,7 @@ sub samepath {
     local($p1, $p2) = @_;
     local($dev1, $ino1, $dev2, $ino2);
 
-    if ($p1 ne p2) {
+    if ($p1 ne $p2) {
 	($dev1, $ino1) = stat($p1);
 	($dev2, $ino2) = stat($p2);
 	($dev1 == $dev2 && $ino1 == $ino2);
@@ -298,6 +302,7 @@ sub installlib {
 	    #We're installing *.al and *.ix files into $installprivlib,
 	    #but we have to delete old *.al and *.ix files from the 5.000
 	    #distribution:
+	    #This might not work because $archname might have changed.
 	    &unlink("$installarchlib/$name");
 	}
 	system "cmp", "-s", $_, "$installlib/$name";
@@ -305,7 +310,14 @@ sub installlib {
 	    &unlink("$installlib/$name");
 	    &makedir("$installlib/$dir");
 	    &cmd("cp $_ $installlib/$dir");
-	    &chmod(0644, "$installlib/$name");
+	    if (/\.a$/ && $Config{'osname'} eq 'next') { 
+		#on NeXTs we have to rerun ranlib after copying libraries
+		&cmd("$Config{'ranlib'} $installlib/$dir/$_");
+	    }
+	    # HP-UX (at least) needs to maintain execute permissions
+	    # on dynamically-loaded libraries.
+	    &chmod(0644, "$installlib/$name") 
+		unless (/\.$so$/ || /\.$dlext$/);
 	}
     } elsif (-d $_) {
 	&makedir("$installlib/$name");
