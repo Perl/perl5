@@ -779,8 +779,8 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 		     */
 		    char q = ((*s == '\'') ? '"' : '\'');
 		    Perl_warn(aTHX_
-			      "perlio: invalid separator character %c%c%c in layer specification list",
-			      q, *s, q);
+			      "perlio: invalid separator character %c%c%c in layer specification list %s",
+			      q, *s, q, s);
 		    return -1;
 		}
 		do {

@@ -5,7 +5,7 @@ BEGIN {
 	@INC = '../lib';
 }
 
-use Test::More tests => 12;
+use Test::More tests => 13;
 
 # open::import expects 'open' as its first argument, but it clashes with open()
 sub import {
@@ -44,7 +44,7 @@ like( $warn, qr/Unknown discipline layer/,
 # now load a real-looking locale
 $ENV{LC_ALL} = ' .utf8';
 import( 'IN', 'locale' );
-is( ${^OPEN}, ':utf8\0', 
+is( ${^OPEN}, ":utf8\0", 
 	'should set a valid locale layer' );
 
 # and see if it sets the magic variables appropriately
@@ -57,19 +57,39 @@ is( $^H{'open_IN'}, 'crlf', 'should have set crlf layer' );
 import( 'IN', ':raw' );
 is( $^H{'open_IN'}, 'raw', 'should have reset to raw layer' );
 
-# it dies if you don't set IN, OUT, or INOUT
+# it dies if you don't set IN, OUT, or IO
 eval { import( 'sideways', ':raw' ) };
 like( $@, qr/Unknown discipline class/, 'should croak with unknown class' );
 
 # but it handles them all so well together
-import( 'INOUT', ':raw :crlf' );
-is( ${^OPEN}, ':raw :crlf\0:raw :crlf', 
+import( 'IO', ':raw :crlf' );
+is( ${^OPEN}, ":raw :crlf\0:raw :crlf",
 	'should set multi types, multi disciplines' );
-is( $^H{'open_INOUT'}, 'crlf', 'should record last layer set in %^H' );
+is( $^H{'open_IO'}, 'crlf', 'should record last layer set in %^H' );
 
-__END__
-# this one won't run as $locale_encoding is already set
-# perhaps qx{} it, if it's important to run
+# the special :utf8 layer
+use open ':utf8';
+open(O, ">utf8");
+print O chr(0x100);
+close O;
+open(I, "<utf8");
+is(ord(<I>), 0x100, ":utf8");
+close I;
+
+# the test cases beyond __DATA__ need to be executed separately
+
+__DATA__
 $ENV{LC_ALL} = 'nonexistent.euc';
 eval { open::_get_locale_encoding() };
 like( $@, qr/too ambiguous/, 'should die with ambiguous locale encoding' );
+%%%
+# the special :locale layer
+$ENV{LANG} = 'ru_RU.KOI8-R';
+use open ':locale';
+open(O, ">koi8");
+print O chr(0x430); # Unicode CYRILLIC SMALL LETTER A = KOI8-R 0xC1
+close O;
+open(I, "<koi8");
+is(ord(<I>), 0xC1, ":locale");
+close I;
+%%%

@@ -69,6 +69,7 @@ sub findAlias
 {
  my $class = shift;
  local $_ = shift;
+ # print "# findAlias $_\n";
  unless (exists $alias{$_})
   {
    for (my $i=0; $i < @alias; $i += 2)
@@ -193,14 +194,21 @@ sub getEncoding
   {
    return $name;
   }
+ my $lc = lc $name;
  if (exists $encoding{$name})
   {
    return $encoding{$name};
   }
- else
+ if (exists $encoding{$lc})
   {
-   return $class->findAlias($name);
+   return $encoding{$lc};
   }
+
+  my $oc = $class->findAlias($name);
+  return $oc if defined $oc;
+  return $class->findAlias($lc) if $lc ne $name;
+
+  return;
 }
 
 sub find_encoding
