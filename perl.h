@@ -23,6 +23,9 @@
 #define VOIDUSED 1
 #include "config.h"
 
+/* See L<perlguts/"The Perl API"> for detailed notes on
+ * PERL_IMPLICIT_CONTEXT and PERL_IMPLICIT_SYS */
+
 /* XXXXXX testing threads via implicit pointer */
 #ifdef USE_THREADS
 #  ifndef PERL_IMPLICIT_CONTEXT

@@ -1506,6 +1506,259 @@ additional complications for conditionals).  These optimizations are
 done in the subroutine peep().  Optimizations performed at this stage
 are subject to the same restrictions as in the pass 2.
 
+=head1 The Perl API
+
+WARNING: This information is subject to radical changes prior to
+the Perl 5.6 release.  Use with caution.
+
+=head2 Background and PERL_IMPLICIT_CONTEXT
+
+The Perl interpreter can be regarded as a closed box: it has an API
+for feeding it code or otherwise making it do things, but it also has
+functions for its own use.  This smells a lot like an object, and
+there are ways for you to build Perl so that you can have multiple
+interpreters, with one interpreter represented either as a C++ object,
+a C structure, or inside a thread.  The thread, the C structure, or
+the C++ object will contain all the context, the state of that
+interpreter.
+
+Four macros control the way Perl is built: PERL_IMPLICIT_CONTEXT
+(build for multiple interpreters?), MULTIPLICITY (we pass around an
+C interpreter structure as the first argument), USE_THREADS (we pass
+around a thread as the first argument), and PERL_OBJECT (we build a
+C++ class for the interpreter so the Perl API implementation has a
+C<this> object).  If PERL_IMPLICIT_CONTEXT is not defined, then
+subroutines take no first argument.
+
+This obviously requires a way for the Perl internal functions to be
+C++ methods, subroutines taking some kind of structure as the first
+argument, or subroutines taking nothing as the first argument.  To
+enable these three very different ways of building the interpreter,
+the Perl source (as it does in so many other situations) makes heavy
+use of macros and subroutine naming conventions.
+
+First problem: deciding which functions will be C++ public methods and
+which will be private.  Those functions whose names begin C<Perl_> are
+public, and those whose names begin C<S_> are protected (think "S" for
+"Secret").  You can't call them from C++, and should not call them
+from C.  If you find yourself calling an C<S_> function, consider your
+code broken (even though it works, it may not do so forever).
+
+Some functions have no prefix (e.g., restore_rsfp in toke.c).  These
+are not parts of the object or pseudo-structure because you need to
+pass pointers to them to other subroutines.
+
+Second problem: there must be a syntax so that the same subroutine
+declarations and calls can pass a structure as their first argument,
+or pass nothing.  To solve this, the subroutines are named and
+declared in a particular way.  Here's a typical start of a static
+function used within the Perl guts:
+
+  STATIC void
+  S_incline(pTHX_ char *s)
+
+STATIC becomes "static" in C, and is #define'd to nothing in C++.
+
+A public function (i.e. part of the API) begins like this:
+
+  void
+  Perl_sv_setsv(pTHX_ SV* dsv, SV* ssv)
+
+C<pTHX_> is one of a number of macros (in perl.h) that hide the
+details of the interpreter's context.  THX stands for "thread", "this",
+or "thingy", as the case may be.  (And no, George Lucas is not involved. :-)
+The first character could be 'p' for a B<p>rototype, 'a' for B<a>rgument,
+or 'd' for B<d>eclaration.
+
+When Perl is built without PERL_IMPLICIT_CONTEXT, there is no first
+argument containing the interpreter's context.  The trailing underscore
+in the pTHX_ macro indicates that the macro expansion needs a comma
+after the context argument because other arguments follow it.  If
+PERL_IMPLICIT_CONTEXT is not defined, pTHX_ will be ignored, and the
+subroutine is not prototyped to take an argument.  The form of the
+macro without the trailing underscore is used when there are no
+explicit arguments.
+
+When an core function calls another, it must pass the context.  This
+is normally hidden via macros.  Consider C<sv_setsv>.  It expands
+something like this:
+
+    ifdef PERL_IMPLICIT_CONTEXT
+      define sv_setsv(a,b)	Perl_sv_setsv(aTHX_ a, b)
+      /* can't do this for vararg functions, see below */
+    else
+      define sv_setsv		Perl_sv_setsv
+    endif
+
+This works well, and means that XS authors can gleefully write:
+
+    sv_setsv(foo, bar);
+
+and still have it work under all the modes Perl could have been
+compiled with.
+
+Under PERL_OBJECT in the core, that will translate to either:
+
+    CPerlObj::Perl_sv_setsv(foo,bar);  # in CPerlObj functions,
+                                       # C++ takes care of 'this'
+  or
+
+    pPerl->Perl_sv_setsv(foo,bar);     # in truly static functions,
+                                       # see objXSUB.h
+
+Under PERL_OBJECT in extensions (aka PERL_CAPI), or under
+MULTIPLICITY/USE_THREADS w/ PERL_IMPLICIT_CONTEXT in both core
+and extensions, it will be:
+
+    Perl_sv_setsv(aTHX_ foo, bar);     # the canonical Perl "API"
+                                       # for all build flavors
+
+This doesn't work so cleanly for varargs functions, though, as macros
+imply that the number of arguments is known in advance.  Instead we
+either need to spell them out fully, passing C<aTHX_> as the first
+argument (the Perl core tends to do this with functions like
+Perl_warner), or use a context-free version.
+
+The context-free version of Perl_warner is called
+Perl_warner_nocontext, and does not take the extra argument.  Instead
+it does dTHX; to get the context from thread-local storage.  We
+C<#define warner Perl_warner_nocontext> so that extensions get source
+compatibility at the expense of performance.  (Passing an arg is
+cheaper than grabbing it from thread-local storage.)
+
+You can ignore [pad]THX[xo] when browsing the Perl headers/sources.
+Those are strictly for use within the core.  Extensions and embedders
+need only be aware of [pad]THX.
+
+=head2 How do I use all this in extensions?
+
+When Perl is built with PERL_IMPLICIT_CONTEXT, extensions that call
+any functions in the Perl API will need to pass the initial context
+argument somehow.  The kicker is that you will need to write it in
+such a way that the extension still compiles when Perl hasn't been
+built with PERL_IMPLICIT_CONTEXT enabled.
+
+There are three ways to do this.  First, the easy but inefficient way,
+which is also the default, in order to maintain source compatibility
+with extensions: whenever XSUB.h is #included, it redefines the aTHX
+and aTHX_ macros to call a function that will return the context.
+Thus, something like:
+
+        sv_setsv(asv, bsv);
+
+in your extesion will translate to this:
+
+        Perl_sv_setsv(GetPerlInterpreter(), asv, bsv);
+
+when PERL_IMPLICIT_CONTEXT is in effect, or to this otherwise:
+
+        Perl_sv_setsv(asv, bsv);
+
+You have to do nothing new in your extension to get this; since
+the Perl library provides GetPerlInterpreter(), it will all just
+work.
+
+The second, more efficient way is to use the following template for
+your Foo.xs:
+
+	#define PERL_NO_GET_CONTEXT	/* we want efficiency */
+	#include "EXTERN.h"
+	#include "perl.h"
+	#include "XSUB.h"
+
+        static my_private_function(int arg1, int arg2);
+
+	static SV *
+	my_private_function(pTHX_ int arg1, int arg2)
+	{
+	    dTHX;	/* fetch context */
+	    ... call many Perl API functions ...
+	}
+
+        [... etc ...]
+
+	MODULE = Foo		PACKAGE = Foo
+
+	/* typical XSUB */
+
+	void
+	my_xsub(arg)
+		int arg
+	    CODE:
+		my_private_function(arg, 10);
+
+Note that the only two changes from the normal way of writing an
+extension is the addition of a C<#define PERL_NO_GET_CONTEXT> before
+including the Perl headers, followed by a C<dTHX;> declaration at
+the start of every function that will call the Perl API.  (You'll
+know which functions need this, because the C compiler will complain
+that there's an undeclared identifier in those functions.)  No changes
+are needed for the XSUBs themselves, because the XS() macro is
+correctly defined to pass in the implicit context if needed.
+
+The third, even more efficient way is to ape how it is done within
+the Perl guts:
+
+
+	#define PERL_NO_GET_CONTEXT	/* we want efficiency */
+	#include "EXTERN.h"
+	#include "perl.h"
+	#include "XSUB.h"
+
+        /* pTHX_ only needed for functions that call Perl API */
+        static my_private_function(pTHX_ int arg1, int arg2);
+
+	static SV *
+	my_private_function(pTHX_ int arg1, int arg2)
+	{
+	    /* dTHX; not needed here, because THX is an argument */
+	    ... call Perl API functions ...
+	}
+
+        [... etc ...]
+
+	MODULE = Foo		PACKAGE = Foo
+
+	/* typical XSUB */
+
+	void
+	my_xsub(arg)
+		int arg
+	    CODE:
+		my_private_function(aTHX_ arg, 10);
+
+This implementation never has to fetch the context using a function
+call, since it is always passed as an extra argument.  Depending on
+your needs for simplicity or efficiency, you may mix the previous
+two approaches freely.
+
+Never say C<pTHX,> yourself--always use the form of the macro with the
+underscore for functions that take explicit arguments, or the form
+without the argument for functions with no explicit arguments.
+
+=head2 Future Plans and PERL_IMPLICIT_SYS
+
+Just as PERL_IMPLICIT_CONTEXT provides a way to bundle up everything
+that the interpreter knows about itself and pass it around, so too are
+there plans to allow the interpreter to bundle up everything it knows
+about the environment it's running on.  This is enabled with the
+PERL_IMPLICIT_SYS macro.  Currently it only works with PERL_OBJECT,
+but is mostly there for MULTIPLICITY and USE_THREADS (see inside
+iperlsys.h).
+
+This allows the ability to provide an extra pointer (called the "host"
+environment) for all the system calls.  This makes it possible for
+all the system stuff to maintain their own state, broken down into
+seven C structures.  These are thin wrappers around the usual system
+calls (see win32/perllib.c) for the default perl executable, but for a
+more ambitious host (like the one that would do fork() emulation) all
+the extra work needed to pretend that different interpreters are
+actually different "processes", would be done here.
+
+The Perl engine/interpreter and the host are orthogonal entities.
+There could be one or more interpreters in a process, and one or
+more "hosts", with free association between them.
+
 =head1 API LISTING
 
 This is a listing of functions, macros, flags, and variables that may be
@@ -1514,10 +1767,7 @@ extensions.
 
 Note that all Perl API global variables must be referenced with the C<PL_>
 prefix.  Some macros are provided for compatibility with the older,
-unadorned names, but this support will be removed in a future release.
-
-It is strongly recommended that all Perl API functions that don't begin
-with C<perl> be referenced with an explicit C<Perl_> prefix.
+unadorned names, but this support may be disabled in a future release.
 
 The sort order of the listing is case insensitive, with any
 occurrences of '_' ignored for the purpose of sorting.
