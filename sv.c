@@ -1569,22 +1569,13 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 		goto ret_iv_max;
 	    }
 	}
-	else if (numtype) {
-	    /* The NV may be reconstructed from IV - safe to cache IV,
-	       which may be calculated by atol(). */
-	    if (SvTYPE(sv) == SVt_PV)
-		sv_upgrade(sv, SVt_PVIV);
-	    (void)SvIOK_on(sv);
-	    SvIVX(sv) = Atol(SvPVX(sv));
-	}
-	else {				/* Not a number.  Cache 0. */
-	    dTHR;
-
+	else {	/* The NV may be reconstructed from IV - safe to cache IV,
+		   which may be calculated by atol(). */
 	    if (SvTYPE(sv) < SVt_PVIV)
 		sv_upgrade(sv, SVt_PVIV);
 	    (void)SvIOK_on(sv);
-	    SvIVX(sv) = 0;
-	    if (ckWARN(WARN_NUMERIC))
+	    SvIVX(sv) = Atol(SvPVX(sv));
+	    if (! numtype && ckWARN(WARN_NUMERIC))
 		not_a_number(sv);
 	}
     }
