@@ -1093,7 +1093,8 @@ Perl_gv_fullname4(pTHX_ SV *sv, GV *gv, const char *prefix, bool keepmain)
 	name = "__ANON__";
 	
     if (keepmain || strNE(name, "main")) {
-	Perl_sv_catpvf(aTHX_ sv,"%s::", name);
+	sv_catpv(sv,name);
+	sv_catpvn(sv,"::", 2);
     }
     sv_catpvn(sv,GvNAME(gv),GvNAMELEN(gv));
 }
