@@ -39,7 +39,7 @@ sub import {
 
 	my $closure_import_func = $func;	# Full name
 	my $closure_func = $func;		# Name inside package
-	my $index = rindex($func, '::');
+	my $index = index($func, '::');
 	if ($index == -1) {
 	    $closure_import_func = "${callpkg}::$func";
 	} else {
@@ -54,6 +54,7 @@ sub import {
 		die if $@;
 		vet_import $module;
 	    }
+            no warnings 'redefine';
 	    *$closure_import_func = \&{"${module}::$closure_func"};
 	    print "autousing $module; "
 		  ."imported $closure_func as $closure_import_func\n"

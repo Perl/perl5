@@ -111,6 +111,19 @@ test.  Outside a C<while> test, this will not happen.
 
 =over 8
 
+=item $a
+
+=item $b
+
+Special package variables when using sort(), see L<perlfunc/sort>.
+Because of this specialness $a and $b don't need to be declared
+(using local(), use vars, or our()) even when using the strict
+vars pragma.
+
+=back
+
+=over 8
+
 =item $<I<digits>>
 
 Contains the subpattern from the corresponding set of capturing
@@ -996,6 +1009,13 @@ The array @ARGV contains the command-line arguments intended for
 the script.  C<$#ARGV> is generally the number of arguments minus
 one, because C<$ARGV[0]> is the first argument, I<not> the program's
 command name itself.  See C<$0> for the command name.
+
+=item @F
+
+The array @F contains the fields of each line read in when autosplit
+mode is turned on.  See L<perlrun> for the B<-a> switch.  This array
+is package-specific, and must be declared or given a full package name
+if not in package main when running under C<strict 'vars'>.
 
 =item @INC
 

@@ -108,6 +108,10 @@ exe_ext='.exe'
 # We provide it
 i_dlfcn='define'
 
+# -Zomf build has a problem with _exit() *flushing*, so the test
+# gets confused:
+fflushNULL="define"
+
 aout_d_shrplib='undef'
 aout_useshrplib='false'
 aout_obj_ext='.o'

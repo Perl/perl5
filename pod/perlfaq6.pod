@@ -212,6 +212,21 @@ This prints:
 
     this is a SUcCESS case
 
+As an alternative, to keep the case of the replacement word if it is
+longer than the original, you can use this code, by Jeff Pinyan:
+
+  sub preserve_case {
+    my ($from, $to) = @_;
+    my ($lf, $lt) = map length, @_;
+    
+    if ($lt < $lf) { $from = substr $from, 0, $lt }
+    else { $from .= substr $to, $lf }
+    
+    return uc $to | ($from ^ uc $from);
+  }
+
+This changes the sentence to "this is a SUcCess case."
+
 Just to show that C programmers can write C in any programming language,
 if you prefer a more C-like solution, the following script makes the
 substitution have the same case, letter by letter, as the original.

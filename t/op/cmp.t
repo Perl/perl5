@@ -37,6 +37,12 @@ $uv_bigi |= 0x0;
 $expect = 6 * ($#FOO+2) * ($#FOO+1);
 print "1..$expect\n";
 
+sub nok {
+  my ($test, $left, $threeway, $right, $result, $i, $j, $boolean) = @_;
+  $result = defined $result ? "'$result'" : 'undef';
+  print "not ok $test # ($left <=> $right) gives: $result \$i=$i \$j=$j, $boolean disagrees\n";
+}
+
 my $ok = 0;
 for my $i (0..$#FOO) {
     for my $j ($i..$#FOO) {
@@ -62,7 +68,7 @@ for my $i (0..$#FOO) {
 	    print "ok $ok\n";
 	}
 	else {
-	    print "not ok $ok # ($i3 <=> $j3) gives: '$cmp' \$i=$i \$j=$j, < disagrees\n";
+	    nok ($ok, $i3, '<=>', $j3, $cmp, $i, $j, '<');
 	}
 	$ok++;
 	if (!defined($cmp) ? !($i4 == $j4)
@@ -73,7 +79,7 @@ for my $i (0..$#FOO) {
 	    print "ok $ok\n";
 	}
 	else {
-	    print "not ok $ok # ($i3 <=> $j3) gives: '$cmp' \$i=$i \$j=$j, == disagrees\n";
+	    nok ($ok, $i3. '<=>', $j3, $cmp, $i, $j, '==');
 	}
 	$ok++;
 	if (!defined($cmp) ? !($i5 > $j5)
@@ -84,7 +90,7 @@ for my $i (0..$#FOO) {
 	    print "ok $ok\n";
 	}
 	else {
-	    print "not ok $ok # ($i3 <=> $j3) gives: '$cmp' \$i=$i \$j=$j, > disagrees\n";
+	    nok ($ok, $i3. '<=>', $j3, $cmp, $i, $j, '>');
 	}
 	$ok++;
 	if (!defined($cmp) ? !($i6 >= $j6)
@@ -95,7 +101,7 @@ for my $i (0..$#FOO) {
 	    print "ok $ok\n";
 	}
 	else {
-	    print "not ok $ok # ($i3 <=> $j3) gives: '$cmp' \$i=$i \$j=$j, >= disagrees\n";
+	    nok ($ok, $i3. '<=>', $j3, $cmp, $i, $j, '>=');
 	}
 	$ok++;
 	# OK, so the docs are wrong it seems. NaN != NaN
@@ -107,7 +113,7 @@ for my $i (0..$#FOO) {
 	    print "ok $ok\n";
 	}
 	else {
-	    print "not ok $ok # ($i3 <=> $j3) gives: '$cmp' \$i=$i \$j=$j, != disagrees\n";
+	    nok ($ok, $i3. '<=>', $j3, $cmp, $i, $j, '!=');
 	}
 	$ok++;
 	if (!defined($cmp) ? !($i8 <= $j8)
@@ -118,7 +124,7 @@ for my $i (0..$#FOO) {
 	    print "ok $ok\n";
 	}
 	else {
-	    print "not ok $ok # ($i3 <=> $j3) gives: '$cmp' \$i=$i \$j=$j, <= disagrees\n";
+	    nok ($ok, $i3. '<=>', $j3, $cmp, $i, $j, '<=');
 	}
 	$ok++;
 	$cmp = $i9 cmp $j9;
@@ -129,7 +135,7 @@ for my $i (0..$#FOO) {
 	    print "ok $ok\n";
 	}
 	else {
-	    print "not ok $ok # ($i3 cmp $j3) gives '$cmp' \$i=$i \$j=$j, lt disagrees\n";
+	    nok ($ok, $i3, 'cmp', $j3, $cmp, $i, $j, 'lt');
 	}
 	$ok++;
 	if ($cmp == -1 && !($i11 eq $j11) ||
@@ -139,7 +145,7 @@ for my $i (0..$#FOO) {
 	    print "ok $ok\n";
 	}
 	else {
-	    print "not ok $ok # ($i3 cmp $j3) gives '$cmp' \$i=$i \$j=$j, eq disagrees\n";
+	    nok ($ok, $i3, 'cmp', $j3, $cmp, $i, $j, 'eq');
 	}
 	$ok++;
 	if ($cmp == -1 && !($i12 gt $j12) ||
@@ -149,7 +155,7 @@ for my $i (0..$#FOO) {
 	    print "ok $ok\n";
 	}
 	else {
-	    print "not ok $ok # ($i3 cmp $j3) gives '$cmp' \$i=$i \$j=$j, gt disagrees\n";
+	    nok ($ok, $i3, 'cmp', $j3, $cmp, $i, $j, 'gt');
 	}
 	$ok++;
 	if ($cmp == -1 && $i13 le $j13 ||
@@ -159,7 +165,7 @@ for my $i (0..$#FOO) {
 	    print "ok $ok\n";
 	}
 	else {
-	    print "not ok $ok # ($i3 cmp $j3) gives '$cmp' \$i=$i \$j=$j, le disagrees\n";
+	    nok ($ok, $i3, 'cmp', $j3, $cmp, $i, $j, 'le');
 	}
 	$ok++;
 	if ($cmp == -1 && ($i14 ne $j14) ||
@@ -169,7 +175,7 @@ for my $i (0..$#FOO) {
 	    print "ok $ok\n";
 	}
 	else {
-	    print "not ok $ok # ($i3 cmp $j3) gives '$cmp' \$i=$i \$j=$j, ne disagrees\n";
+	    nok ($ok, $i3, 'cmp', $j3, $cmp, $i, $j, 'ne');
 	}
 	$ok++;
 	if ($cmp == -1 && !($i15 ge $j15) ||
@@ -179,7 +185,7 @@ for my $i (0..$#FOO) {
 	    print "ok $ok\n";
 	}
 	else {
-	    print "not ok $ok # ($i3 cmp $j3) gives '$cmp' \$i=$i \$j=$j, ge disagrees\n";
+	    nok ($ok, $i3, 'cmp', $j3, $cmp, $i, $j, 'ge');
 	}
     }
 }
