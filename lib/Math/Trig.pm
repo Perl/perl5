@@ -36,8 +36,8 @@ my @rdlcnv = qw(cartesian_to_cylindrical
 
 %EXPORT_TAGS = ('radial' => [ @rdlcnv ]);
 
-use constant pi2  => 2 * pi;
-use constant pip2 => pi / 2;
+sub pi2 () { 2 * pi }		# use constant generates warning
+sub pip2 () { pi / 2 }		# use constant generates warning
 use constant DR   => pi2/360;
 use constant RD   => 360/pi2;
 use constant DG   => 400/360;
