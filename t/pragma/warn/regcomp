@@ -46,10 +46,13 @@ Strange *+?{} on zero-length expression at - line 4.
 ########
 # regcomp.c [S_regatom]
 $x = '\m' ;
+$y = '\_' ;
 use warnings 'regexp' ;
 $a =~ /a$x/ ;
+$b =~ /b$y/ ;
 no warnings 'regexp' ;
 $a =~ /a$x/ ;
+$b =~ /b$y/ ;
 EXPECT
 /a\m/: Unrecognized escape \m passed through at - line 4.
 ########
@@ -159,7 +162,9 @@ EXPECT
 # regcomp.c [S_regclass S_regclassutf8]
 use warnings 'regexp' ;
 $a =~ /[a\zb]/ ;
+$b =~ /[a\_b]/ ;
 no warnings 'regexp' ;
 $a =~ /[a\zb]/ ;
+$b =~ /[a\_b]/ ;
 EXPECT
 /[a\zb]/: Unrecognized escape \z in character class passed through at - line 3.

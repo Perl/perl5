@@ -529,8 +529,10 @@ Ambiguous use of * resolved as operator * at - line 10.
 # toke.c
 use warnings 'misc' ;
 my $a = "\m" ;
+my $b = "\_" ;
 no warnings 'misc' ;
 $a = "\m" ;
+$b = "\_" ;
 EXPECT
 Unrecognized escape \m passed through at - line 3.
 ########

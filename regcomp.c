@@ -2646,7 +2646,8 @@ tryagain:
 			    FAIL("trailing \\ in regexp");
 			/* FALL THROUGH */
 		    default:
-			if (!SIZE_ONLY && ckWARN(WARN_REGEXP) && isALPHA(*p))
+			if (!SIZE_ONLY && ckWARN(WARN_REGEXP) &&
+			    isALPHA(*p) && *p != '_')
 			    Perl_warner(aTHX_ WARN_REGEXP, 
 					"/%.127s/: Unrecognized escape \\%c passed through",
 					PL_regprecomp,
@@ -2959,7 +2960,8 @@ S_regclass(pTHX)
 		PL_regcomp_parse += numlen;
 		break;
 	    default:
-		if (!SIZE_ONLY && ckWARN(WARN_REGEXP) && isALPHA(value))
+		if (!SIZE_ONLY && ckWARN(WARN_REGEXP) &&
+		    isALPHA(value) && value != (UV)'_')
 		    Perl_warner(aTHX_ WARN_REGEXP, 
 				"/%.127s/: Unrecognized escape \\%c in character class passed through",
 				PL_regprecomp,
@@ -3443,7 +3445,8 @@ S_regclassutf8(pTHX)
 		PL_regcomp_parse += numlen;
 		break;
 	    default:
-		if (!SIZE_ONLY && ckWARN(WARN_REGEXP) && isALPHA(value))
+		if (!SIZE_ONLY && ckWARN(WARN_REGEXP) &&
+		    isALPHA(value) && value != (U32)'_')
 		    Perl_warner(aTHX_ WARN_REGEXP, 
 				"/%.127s/: Unrecognized escape \\%c in character class passed through",
 				PL_regprecomp,
