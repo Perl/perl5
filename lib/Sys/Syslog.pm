@@ -7,7 +7,6 @@ use Carp;
 @EXPORT = qw(openlog closelog setlogmask syslog);
 
 use Socket;
-use Sys::Hostname;
 
 # adapted from syslog.pl
 #
@@ -200,6 +199,10 @@ sub xlate {
 }
 
 sub connect {
+    unless ($host) {
+	require Sys::Hostname;
+	$host = Sys::Hostname::hostname();
+    }
     my $udp = getprotobyname('udp');
     my $syslog = getservbyname('syslog','udp');
     my $this = sockaddr_in($syslog, INADDR_ANY);
