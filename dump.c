@@ -1047,7 +1047,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    theoret = HvKEYS(sv);
 	    theoret += theoret * theoret/pow2;
 	    PerlIO_putc(file, '\n');
-	    Perl_dump_indent(aTHX_ level, file, "  hash quality = %.1f%%", theoret/sum*100);
+	    Perl_dump_indent(aTHX_ level, file, "  hash quality = %.1"NVff"%%", theoret/sum*100);
 	}
 	PerlIO_putc(file, '\n');
 	Perl_dump_indent(aTHX_ level, file, "  KEYS = %"IVdf"\n", (IV)HvKEYS(sv));

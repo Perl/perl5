@@ -3369,6 +3369,10 @@ typedef struct am_table_short AMTS;
    I_SYSMMAN
    Mmap_t
 
+   NVef
+   NVff
+   NVgf
+
    so that Configure picks them up. */
 
 #endif /* Include guard */

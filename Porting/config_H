@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : /m/fs/work/work/permanent/perl/pp4/perl
- * Configuration time: Thu Aug 17 02:55:55 EET DST 2000
+ * Configuration time: Fri Aug 18 04:57:25 EET DST 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -2732,12 +2732,27 @@
  */
 /* UVxf:
  *	This symbol defines the format string used for printing a Perl UV
- *	as an unsigned hexadecimal integer.
+ *	as an unsigned hexadecimal integer in lowercase abcdef.
+ */
+/* NVef:
+ *	This symbol defines the format string used for printing a Perl NV
+ *	using %e-ish floating point format.
+ */
+/* NVff:
+ *	This symbol defines the format string used for printing a Perl NV
+ *	using %f-ish floating point format.
+ */
+/* NVgf:
+ *	This symbol defines the format string used for printing a Perl NV
+ *	using %g-ish floating point format.
  */
 #define	IVdf		"ld"		/**/
 #define	UVuf		"lu"		/**/
 #define	UVof		"lo"		/**/
 #define	UVxf		"lx"		/**/
+#define	NVef		"e"		/**/
+#define	NVff		"f"		/**/
+#define	NVgf		"g"		/**/
 
 /* Pid_t:
  *	This symbol holds the type used to declare process ids in the kernel.
