@@ -1,12 +1,22 @@
 #!/usr/local/bin/perl
 
-# Check whether there are naming conflicts when names are truncated
-# to the DOSish case-ignoring 8.3 format
+# Check whether there are naming conflicts when names are truncated to
+# the DOSish case-ignoring 8.3 format, plus other portability no-nos.
 
 sub eight_dot_three {
     my ($dir, $base, $ext) = ($_[0] =~ m!^(?:(.+)/)?([^/.]+)(?:\.([^/.]+))?$!);
+    my $file = $base . defined $ext ? ".$ext" : "";
     $base = substr($base, 0, 8);
     $ext  = substr($ext,  0, 3) if defined $ext;
+    if ($dir =~ /\./)  {
+	warn "$dir: directory name contains '.'\n";
+    }
+    if ($file =~ /[^A-Za-z0-9\._-]/) {
+	warn "$file: filename contains non-portable characters\n";
+    }
+    if (length $file > 30) {
+	warn "$file: filename longer than 30 characters\n";
+    }
     if (defined $dir) {
 	return ($dir, defined $ext ? "$dir/$base.$ext" : "$dir/$base");
     } else {
