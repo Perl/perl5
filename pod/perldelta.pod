@@ -594,6 +594,11 @@ Various pragmata to control behavior of regular expressions.
 You can now run tests for I<x> seconds instead of guessing the right
 number of tests to run.
 
+=item Carp
+
+Carp has a new function cluck(). cluck() warns, like carp(), but also adds
+a stack backtrace to the error message, like confess().
+
 =item CGI
 
 CGI has been updated to version 2.42.
