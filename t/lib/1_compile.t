@@ -95,5 +95,5 @@ foreach my $module (@Core_Modules) {
 sub compile_module {
     my ($module) = $_[0];
     
-    return scalar `./perl -Ilib t/lib/compmod.pl $module` =~ /^ok/;
+    return scalar `$^X "-Ilib" t/lib/compmod.pl $module` =~ /^ok/;
 }
