@@ -114,6 +114,10 @@ Restrict unsafe operations when compiling
 
 Package for overloading perl operations
 
+=item perlio
+
+Configure C level IO
+
 =item re
 
 Alter regular expression behaviour
@@ -288,10 +292,6 @@ Wrapper around CPAN.pm without using any XS module
 
 Warn of errors (from perspective of caller)
 
-=item Carp::Heavy
-
-Carp guts
-
 =item Class::Struct
 
 Declare struct-like datatypes as Perl classes
@@ -444,6 +444,10 @@ Create or remove directory trees
 
 Portably perform operations on file names
 
+=item File::Spec::Epoc
+
+Methods for Epoc file specs
+
 =item File::Spec::Functions
 
 Portably perform operations on file names
@@ -483,6 +487,10 @@ Keep more files open than the system permits
 =item FileHandle
 
 Supply object methods for filehandles
+
+=item Filter::Simple
+
+Simplified source filtering
 
 =item FindBin
 
@@ -791,7 +799,7 @@ Most importantly, CPAN includes around a thousand unbundled modules,
 some of which require a C compiler to build.  Major categories of
 modules are:
 
-=over 4
+=over
 
 =item *
 Language Extensions and Documentation Tools
@@ -861,7 +869,7 @@ Miscellaneous Modules
 Registered CPAN sites as of this writing include the following.
 You should try to choose one close to you:
 
-=over 4
+=over
 
 =item Africa
 
@@ -1216,6 +1224,12 @@ Xyz::Model etc. Use the modules in this list as a naming guide.
 If adding a new module to a set, follow the original author's
 standards for naming modules and the interface to methods in
 those modules.
+
+If developing modules for private internal or project specific use,
+that will never be released to the public, then you should ensure
+that their names will not clash with any future public module. You
+can do this either by using the reserved Local::* category or by
+using a category name that includes an underscore like Foo_Corp::*.
 
 To be portable each component of a module name should be limited to
 11 characters. If it might be used on MS-DOS then try to ensure each is

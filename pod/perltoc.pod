@@ -62,8 +62,8 @@ compare with other languages like Java, Python, REXX, Scheme, or Tcl?, Can
 I do [task] in Perl?, When shouldn't I program in Perl?, What's the
 difference between "perl" and "Perl"?, Is it a Perl program or a Perl
 script?, What is a JAPH?, Where can I get a list of Larry Wall witticisms?,
-How can I convince my sysadmin/supervisor/employees to use (version
-5/5.005/Perl) instead of some other language?, L<perlfaq2>: Obtaining and
+How can I convince my sysadmin/supervisor/employees to use version
+5/5.005/Perl instead of some other language?, L<perlfaq2>: Obtaining and
 Learning about Perl, What machines support Perl?  Where do I get it?, How
 can I get a binary version of Perl?, I don't have a C compiler on my
 system.  How can I compile perl?, I copied the Perl binary from one machine
@@ -72,80 +72,81 @@ compile but gdbm/dynamic loading/malloc/linking/... failed.  How do I make
 it work?, What modules and extensions are available for Perl?  What is
 CPAN?  What does CPAN/src/... mean?, Is there an ISO or ANSI certified
 version of Perl?, Where can I get information on Perl?, What are the Perl
-newsgroups on USENET?  Where do I post questions?, Where should I post
+newsgroups on Usenet?  Where do I post questions?, Where should I post
 source code?, Perl Books, Perl in Magazines, Perl on the Net: FTP and WWW
-Access, What mailing lists are there for perl?, Archives of
+Access, What mailing lists are there for Perl?, Archives of
 comp.lang.perl.misc, Where can I buy a commercial version of Perl?, Where
-do I send bug reports?, What is perl.com?, L<perlfaq3>: Programming Tools,
-How do I do (anything)?, How can I use Perl interactively?, Is there a Perl
-shell?, How do I debug my Perl programs?, How do I profile my Perl
-programs?, How do I cross-reference my Perl programs?, Is there a
-pretty-printer (formatter) for Perl?, Is there a ctags for Perl?, Is there
-an IDE or Windows Perl Editor?, Where can I get Perl macros for vi?, Where
-can I get perl-mode for emacs?, How can I use curses with Perl?, How can I
-use X or Tk with Perl?, How can I generate simple menus without using CGI
-or Tk?, What is undump?, How can I make my Perl program run faster?, How
-can I make my Perl program take less memory?, Is it unsafe to return a
-pointer to local data?, How can I free an array or hash so my program
-shrinks?, How can I make my CGI script more efficient?, How can I hide the
-source for my Perl program?, How can I compile my Perl program into byte
-code or C?, How can I compile Perl into Java?, How can I get C<#!perl> to
-work on [MS-DOS,NT,...]?, Can I write useful perl programs on the command
-line?, Why don't perl one-liners work on my DOS/Mac/VMS system?, Where can
-I learn about CGI or Web programming in Perl?, Where can I learn about
-object-oriented Perl programming?, Where can I learn about linking C with
-Perl? [h2xs, xsubpp], I've read perlembed, perlguts, etc., but I can't
-embed perl in my C program; what am I doing wrong?, When I tried to run my
-script, I got this message. What does it mean?, What's MakeMaker?,
-L<perlfaq4>: Data Manipulation, Why am I getting long decimals (eg,
-19.9499999999999) instead of the numbers I should be getting (eg, 19.95)?,
-Why isn't my octal data interpreted correctly?, Does Perl have a round()
-function?  What about ceil() and floor()?  Trig functions?, How do I
-convert bits into ints?, Why doesn't & work the way I want it to?, How do I
-multiply matrices?, How do I perform an operation on a series of integers?,
-How can I output Roman numerals?, Why aren't my random numbers random?, How
-do I find the week-of-the-year/day-of-the-year?, How do I find the current
-century or millennium?, How can I compare two dates and find the
-difference?, How can I take a string and turn it into epoch seconds?, How
-can I find the Julian Day?, How do I find yesterday's date?, Does Perl have
-a year 2000 problem?  Is Perl Y2K compliant?, How do I validate input?, How
-do I unescape a string?, How do I remove consecutive pairs of characters?,
-How do I expand function calls in a string?, How do I find matching/nesting
-anything?, How do I reverse a string?, How do I expand tabs in a string?,
-How do I reformat a paragraph?, How can I access/change the first N letters
-of a string?, How do I change the Nth occurrence of something?, How can I
-count the number of occurrences of a substring within a string?, How do I
-capitalize all the words on one line?, How can I split a [character]
-delimited string except when inside [character]? (Comma-separated files),
-How do I strip blank space from the beginning/end of a string?, How do I
-pad a string with blanks or pad a number with zeroes?, How do I extract
-selected columns from a string?, How do I find the soundex value of a
-string?, How can I expand variables in text strings?, What's wrong with
-always quoting "$vars"?, Why don't my <<HERE documents work?, What is the
-difference between a list and an array?, What is the difference between
-$array[1] and @array[1]?, How can I remove duplicate elements from a list
-or array?, How can I tell whether a list or array contains a certain
-element?, How do I compute the difference of two arrays?  How do I compute
-the intersection of two arrays?, How do I test whether two arrays or hashes
-are equal?, How do I find the first array element for which a condition is
-true?, How do I handle linked lists?, How do I handle circular lists?, How
-do I shuffle an array randomly?, How do I process/modify each element of an
-array?, How do I select a random element from an array?, How do I permute N
-elements of a list?, How do I sort an array by (anything)?, How do I
-manipulate arrays of bits?, Why does defined() return true on empty arrays
-and hashes?, How do I process an entire hash?, What happens if I add or
-remove keys from a hash while iterating over it?, How do I look up a hash
-element by value?, How can I know how many entries are in a hash?, How do I
-sort a hash (optionally by value instead of key)?, How can I always keep my
-hash sorted?, What's the difference between "delete" and "undef" with
-hashes?, Why don't my tied hashes make the defined/exists distinction?, How
-do I reset an each() operation part-way through?, How can I get the unique
-keys from two hashes?, How can I store a multidimensional array in a DBM
-file?, How can I make my hash remember the order I put elements into it?,
-Why does passing a subroutine an undefined element in a hash create it?,
-How can I make the Perl equivalent of a C structure/C++ class/hash or array
-of hashes or arrays?, How can I use a reference as a hash key?, How do I
-handle binary data correctly?, How do I determine whether a scalar is a
+do I send bug reports?, What is perl.com? Perl Mongers? pm.org? perl.org?,
+L<perlfaq3>: Programming Tools, How do I do (anything)?, How can I use Perl
+interactively?, Is there a Perl shell?, How do I debug my Perl programs?,
+How do I profile my Perl programs?, How do I cross-reference my Perl
+programs?, Is there a pretty-printer (formatter) for Perl?, Is there a
+ctags for Perl?, Is there an IDE or Windows Perl Editor?, Where can I get
+Perl macros for vi?, Where can I get perl-mode for emacs?, How can I use
+curses with Perl?, How can I use X or Tk with Perl?, How can I generate
+simple menus without using CGI or Tk?, What is undump?, How can I make my
+Perl program run faster?, How can I make my Perl program take less memory?,
+Is it unsafe to return a pointer to local data?, How can I free an array or
+hash so my program shrinks?, How can I make my CGI script more efficient?,
+How can I hide the source for my Perl program?, How can I compile my Perl
+program into byte code or C?, How can I compile Perl into Java?, How can I
+get C<#!perl> to work on [MS-DOS,NT,...]?, Can I write useful Perl programs
+on the command line?, Why don't Perl one-liners work on my DOS/Mac/VMS
+system?, Where can I learn about CGI or Web programming in Perl?, Where can
+I learn about object-oriented Perl programming?, Where can I learn about
+linking C with Perl? [h2xs, xsubpp], I've read perlembed, perlguts, etc.,
+but I can't embed perl in my C program; what am I doing wrong?, When I
+tried to run my script, I got this message. What does it mean?, What's
+MakeMaker?, L<perlfaq4>: Data Manipulation, Why am I getting long decimals
+(eg, 19.9499999999999) instead of the numbers I should be getting (eg,
+19.95)?, Why isn't my octal data interpreted correctly?, Does Perl have a
+round() function?  What about ceil() and floor()?  Trig functions?, How do
+I convert bits into ints?, Why doesn't & work the way I want it to?, How do
+I multiply matrices?, How do I perform an operation on a series of
+integers?, How can I output Roman numerals?, Why aren't my random numbers
+random?, How do I find the week-of-the-year/day-of-the-year?, How do I find
+the current century or millennium?, How can I compare two dates and find
+the difference?, How can I take a string and turn it into epoch seconds?,
+How can I find the Julian Day?, How do I find yesterday's date?, Does Perl
+have a Year 2000 problem?  Is Perl Y2K compliant?, How do I validate
+input?, How do I unescape a string?, How do I remove consecutive pairs of
+characters?, How do I expand function calls in a string?, How do I find
+matching/nesting anything?, How do I reverse a string?, How do I expand
+tabs in a string?, How do I reformat a paragraph?, How can I access/change
+the first N letters of a string?, How do I change the Nth occurrence of
+something?, How can I count the number of occurrences of a substring within
+a string?, How do I capitalize all the words on one line?, How can I split
+a [character] delimited string except when inside [character]?
+(Comma-separated files), How do I strip blank space from the beginning/end
+of a string?, How do I pad a string with blanks or pad a number with
+zeroes?, How do I extract selected columns from a string?, How do I find
+the soundex value of a string?, How can I expand variables in text
+strings?, What's wrong with always quoting "$vars"?, Why don't my <<HERE
+documents work?, What is the difference between a list and an array?, What
+is the difference between $array[1] and @array[1]?, How can I remove
+duplicate elements from a list or array?, How can I tell whether a list or
+array contains a certain element?, How do I compute the difference of two
+arrays?  How do I compute the intersection of two arrays?, How do I test
+whether two arrays or hashes are equal?, How do I find the first array
+element for which a condition is true?, How do I handle linked lists?, How
+do I handle circular lists?, How do I shuffle an array randomly?, How do I
+process/modify each element of an array?, How do I select a random element
+from an array?, How do I permute N elements of a list?, How do I sort an
+array by (anything)?, How do I manipulate arrays of bits?, Why does
+defined() return true on empty arrays and hashes?, How do I process an
+entire hash?, What happens if I add or remove keys from a hash while
+iterating over it?, How do I look up a hash element by value?, How can I
+know how many entries are in a hash?, How do I sort a hash (optionally by
+value instead of key)?, How can I always keep my hash sorted?, What's the
+difference between "delete" and "undef" with hashes?, Why don't my tied
+hashes make the defined/exists distinction?, How do I reset an each()
+operation part-way through?, How can I get the unique keys from two
+hashes?, How can I store a multidimensional array in a DBM file?, How can I
+make my hash remember the order I put elements into it?, Why does passing a
+subroutine an undefined element in a hash create it?, How can I make the
+Perl equivalent of a C structure/C++ class/hash or array of hashes or
+arrays?, How can I use a reference as a hash key?, How do I handle binary
+data correctly?, How do I determine whether a scalar is a
 number/whole/integer/float?, How do I keep persistent data across program
 calls?, How do I print out or copy a recursive data structure?, How do I
 define methods for every class/object?, How do I verify a credit card
@@ -245,31 +246,30 @@ command line from programs such as "ps"?, I {changed directory, modified my
 environment} in a perl script.	How come the change disappeared when I
 exited the script?  How do I get my changes to be visible?, How do I close
 a process's filehandle without waiting for it to complete?, How do I fork a
-daemon process?, How do I make my program run with sh and csh?, How do I
-find out if I'm running interactively or not?, How do I timeout a slow
-event?, How do I set CPU limits?, How do I avoid zombies on a Unix system?,
-How do I use an SQL database?, How do I make a system() exit on control-C?,
-How do I open a file without blocking?, How do I install a module from
-CPAN?, What's the difference between require and use?, How do I keep my own
-module/library directory?, How do I add the directory my program lives in
-to the module/library search path?, How do I add a directory to my include
-path at runtime?, What is socket.ph and where do I get it?, L<perlfaq9>:
-Networking, My CGI script runs from the command line but not the browser. 
-(500 Server Error), How can I get better error messages from a CGI
-program?, How do I remove HTML from a string?, How do I extract URLs?, How
-do I download a file from the user's machine?  How do I open a file on
-another machine?, How do I make a pop-up menu in HTML?, How do I fetch an
-HTML file?, How do I automate an HTML form submission?, How do I decode or
-create those %-encodings on the web?, How do I redirect to another page?,
-How do I put a password on my web pages?, How do I edit my .htpasswd and
-.htgroup files with Perl?, How do I make sure users can't enter values into
-a form that cause my CGI script to do bad things?, How do I parse a mail
-header?, How do I decode a CGI form?, How do I check a valid mail address?,
-How do I decode a MIME/BASE64 string?, How do I return the user's mail
-address?, How do I send mail?, How do I read mail?, How do I find out my
-hostname/domainname/IP address?, How do I fetch a news article or the
-active newsgroups?, How do I fetch/put an FTP file?, How can I do RPC in
-Perl?
+daemon process?, How do I find out if I'm running interactively or not?,
+How do I timeout a slow event?, How do I set CPU limits?, How do I avoid
+zombies on a Unix system?, How do I use an SQL database?, How do I make a
+system() exit on control-C?, How do I open a file without blocking?, How do
+I install a module from CPAN?, What's the difference between require and
+use?, How do I keep my own module/library directory?, How do I add the
+directory my program lives in to the module/library search path?, How do I
+add a directory to my include path at runtime?, What is socket.ph and where
+do I get it?, L<perlfaq9>: Networking, My CGI script runs from the command
+line but not the browser.  (500 Server Error), How can I get better error
+messages from a CGI program?, How do I remove HTML from a string?, How do I
+extract URLs?, How do I download a file from the user's machine?  How do I
+open a file on another machine?, How do I make a pop-up menu in HTML?, How
+do I fetch an HTML file?, How do I automate an HTML form submission?, How
+do I decode or create those %-encodings on the web?, How do I redirect to
+another page?, How do I put a password on my web pages?, How do I edit my
+.htpasswd and .htgroup files with Perl?, How do I make sure users can't
+enter values into a form that cause my CGI script to do bad things?, How do
+I parse a mail header?, How do I decode a CGI form?, How do I check a valid
+mail address?, How do I decode a MIME/BASE64 string?, How do I return the
+user's mail address?, How do I send mail?, How do I read mail?, How do I
+find out my hostname/domainname/IP address?, How do I fetch a news article
+or the active newsgroups?, How do I fetch/put an FTP file?, How can I do
+RPC in Perl?
 
 =over 4
 
@@ -1786,7 +1786,10 @@ DESTROY this
 =item Tying Arrays
 
 TIEARRAY classname, LIST, FETCH this, index, STORE this, index, value,
-UNTIE this, DESTROY this
+FETCHSIZE this, STORESIZE this, count, EXTEND this, count, EXISTS this,
+key, DELETE this, key, CLEAR this, PUSH this, LIST, POP this, SHIFT this,
+UNSHIFT this, LIST, SPLICE this, offset, length, LIST, UNTIE this, DESTROY
+this
 
 =item Tying Hashes
 
@@ -2503,7 +2506,7 @@ chcp, dataset access, OS/390 iconv, locales
 
 attributes, attrs, autouse, base, blib, bytes, charnames, constant,
 diagnostics, fields, filetest, integer, less, locale, open, ops, overload,
-re, sigtrap, strict, subs, utf8, vars, warnings, warnings::register
+perlio, re, sigtrap, strict, subs, utf8, vars, warnings, warnings::register
 
 =item Standard Modules
 
@@ -2512,29 +2515,30 @@ B::Bytecode, B::C, B::CC, B::Debug, B::Deparse, B::Disassembler, B::Lint,
 B::Showlex, B::Stackobj, B::Stash, B::Terse, B::Xref, Benchmark,
 ByteLoader, CGI, CGI::Apache, CGI::Carp, CGI::Cookie, CGI::Fast,
 CGI::Pretty, CGI::Push, CGI::Switch, CPAN, CPAN::FirstTime, CPAN::Nox,
-Carp, Carp::Heavy, Class::Struct, Cwd, DB, DB_File, Devel::SelfStubber,
-DirHandle, Dumpvalue, Encode, English, Env, Exporter, Exporter::Heavy,
+Carp, Class::Struct, Cwd, DB, DB_File, Devel::SelfStubber, DirHandle,
+Dumpvalue, Encode, English, Env, Exporter, Exporter::Heavy,
 ExtUtils::Command, ExtUtils::Embed, ExtUtils::Install, ExtUtils::Installed,
 ExtUtils::Liblist, ExtUtils::MM_Cygwin, ExtUtils::MM_OS2,
 ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_Win32,
 ExtUtils::MakeMaker, ExtUtils::Manifest, ExtUtils::Mkbootstrap,
 ExtUtils::Mksymlists, ExtUtils::Packlist, ExtUtils::testlib, Fatal, Fcntl,
 File::Basename, File::CheckTree, File::Compare, File::Copy, File::DosGlob,
-File::Find, File::Path, File::Spec, File::Spec::Functions, File::Spec::Mac,
-File::Spec::OS2, File::Spec::Unix, File::Spec::VMS, File::Spec::Win32,
-File::Temp, File::stat, FileCache, FileHandle, FindBin, Getopt::Long,
-Getopt::Std, I18N::Collate, IO, IPC::Open2, IPC::Open3, Math::BigFloat,
-Math::BigInt, Math::Complex, Math::Trig, NDBM_File, Net::Ping,
-Net::hostent, Net::netent, Net::protoent, Net::servent, O, ODBM_File,
-Opcode, Pod::Checker, Pod::Find, Pod::Html, Pod::InputObjects, Pod::LaTeX,
-Pod::Man, Pod::ParseUtils, Pod::Parser, Pod::Plainer, Pod::Select,
-Pod::Text, Pod::Text::Color, Pod::Text::Termcap, Pod::Usage, SDBM_File,
-Safe, Search::Dict, SelectSaver, SelfLoader, Shell, Socket, Storable,
-Symbol, Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine, Test,
-Test::Harness, Text::Abbrev, Text::ParseWords, Text::Soundex, Text::Wrap,
-Tie::Array, Tie::Handle, Tie::Hash, Tie::RefHash, Tie::Scalar,
-Tie::SubstrHash, Time::Local, Time::gmtime, Time::localtime, Time::tm,
-UNIVERSAL, User::grent, User::pwent
+File::Find, File::Path, File::Spec, File::Spec::Epoc,
+File::Spec::Functions, File::Spec::Mac, File::Spec::OS2, File::Spec::Unix,
+File::Spec::VMS, File::Spec::Win32, File::Temp, File::stat, FileCache,
+FileHandle, Filter::Simple, FindBin, Getopt::Long, Getopt::Std,
+I18N::Collate, IO, IPC::Open2, IPC::Open3, Math::BigFloat, Math::BigInt,
+Math::Complex, Math::Trig, NDBM_File, Net::Ping, Net::hostent, Net::netent,
+Net::protoent, Net::servent, O, ODBM_File, Opcode, Pod::Checker, Pod::Find,
+Pod::Html, Pod::InputObjects, Pod::LaTeX, Pod::Man, Pod::ParseUtils,
+Pod::Parser, Pod::Plainer, Pod::Select, Pod::Text, Pod::Text::Color,
+Pod::Text::Termcap, Pod::Usage, SDBM_File, Safe, Search::Dict, SelectSaver,
+SelfLoader, Shell, Socket, Storable, Symbol, Term::ANSIColor, Term::Cap,
+Term::Complete, Term::ReadLine, Test, Test::Harness, Text::Abbrev,
+Text::ParseWords, Text::Soundex, Text::Wrap, Tie::Array, Tie::Handle,
+Tie::Hash, Tie::RefHash, Tie::Scalar, Tie::SubstrHash, Time::Local,
+Time::gmtime, Time::localtime, Time::tm, UNIVERSAL, User::grent,
+User::pwent
 
 =item Extension Modules
 
@@ -2694,8 +2698,8 @@ Scheme, or Tcl?
 
 =item Where can I get a list of Larry Wall witticisms?
 
-=item How can I convince my sysadmin/supervisor/employees to use (version
-5/5.005/Perl) instead of some other language?
+=item How can I convince my sysadmin/supervisor/employees to use version
+5/5.005/Perl instead of some other language?
 
 =back
 
@@ -3181,7 +3185,7 @@ file?
 
 =item What does it mean that regexes are greedy?  How can I get around it?
 
-=item  How do I process each word on each line?
+=item How do I process each word on each line?
 
 =item How can I print out a word-frequency or line-frequency summary?
 
@@ -3773,7 +3777,7 @@ C<!!!>, C<!!>, C<!>
 
 =item The INPUT: Keyword
 
-=item The IN/OUTLIST/IN_OUTLIST Keywords
+=item The IN/OUTLIST/IN_OUTLIST/OUT/IN_OUT Keywords
 
 =item Variable-length Parameter Lists
 
@@ -3928,6 +3932,8 @@ C<void save_hptr(HV **hptr)>
 =item Compile pass 3: peephole optimization
 
 =back
+
+=item Examining internal data structures with the C<dump> functions
 
 =item How multiple interpreters and concurrency are supported
 
@@ -4190,9 +4196,9 @@ SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVX, SvOK, SvOOK, SvPOK, SvPOKp,
 SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV, SvPVX, SvPV_force,
 SvPV_nolen, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off,
 SvROK_on, SvRV, SvSETMAGIC, SvSetSV, SvSetSV_nosteal, SvSTASH, SvTAINT,
-SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, SvTYPE, svtype, SVt_IV,
-SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUPGRADE, SvUTF8,
-SvUTF8_off, SvUTF8_on, SvUV, SvUVX, sv_2mortal, sv_bless, sv_catpv,
+SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, svtype, SvTYPE, SVt_IV,
+SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUOK, SvUPGRADE,
+SvUTF8, SvUTF8_off, SvUTF8_on, SvUV, SvUVX, sv_2mortal, sv_bless, sv_catpv,
 sv_catpvf, sv_catpvf_mg, sv_catpvn, sv_catpvn_mg, sv_catpv_mg, sv_catsv,
 sv_catsv_mg, sv_chop, sv_clear, sv_cmp, sv_cmp_locale, sv_dec,
 sv_derived_from, sv_eq, sv_free, sv_gets, sv_grow, sv_inc, sv_insert,
@@ -4202,13 +4208,14 @@ sv_rvweaken, sv_setiv, sv_setiv_mg, sv_setnv, sv_setnv_mg, sv_setpv,
 sv_setpvf, sv_setpvf_mg, sv_setpviv, sv_setpviv_mg, sv_setpvn,
 sv_setpvn_mg, sv_setpv_mg, sv_setref_iv, sv_setref_nv, sv_setref_pv,
 sv_setref_pvn, sv_setsv, sv_setsv_mg, sv_setuv, sv_setuv_mg, sv_true,
-sv_unmagic, sv_unref, sv_upgrade, sv_usepvn, sv_usepvn_mg,
+sv_unmagic, sv_unref, sv_unref_flags, sv_upgrade, sv_usepvn, sv_usepvn_mg,
 sv_utf8_downgrade, sv_utf8_encode, sv_utf8_upgrade, sv_vcatpvfn,
-sv_vsetpvfn, THIS, toLOWER, toUPPER, U8 *s, utf8_to_bytes, utf8_to_uv,
-utf8_to_uv_simple, warn, XPUSHi, XPUSHn, XPUSHp, XPUSHs, XPUSHu, XS,
-XSRETURN, XSRETURN_EMPTY, XSRETURN_IV, XSRETURN_NO, XSRETURN_NV,
-XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_YES, XST_mIV, XST_mNO, XST_mNV,
-XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION, XS_VERSION_BOOTCHECK, Zero
+sv_vsetpvfn, THIS, toLOWER, toUPPER, U8 *s, utf8_distance, utf8_hop,
+utf8_length, utf8_to_bytes, utf8_to_uv, utf8_to_uv_simple, warn, XPUSHi,
+XPUSHn, XPUSHp, XPUSHs, XPUSHu, XS, XSRETURN, XSRETURN_EMPTY, XSRETURN_IV,
+XSRETURN_NO, XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_YES,
+XST_mIV, XST_mNO, XST_mNV, XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION,
+XS_VERSION_BOOTCHECK, Zero
 
 =item AUTHORS
 
@@ -4223,7 +4230,7 @@ XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION, XS_VERSION_BOOTCHECK, Zero
 
 =item DESCRIPTION
 
-is_gv_magical
+djSP, is_gv_magical, start_glob
 
 =item AUTHORS
 
@@ -4761,6 +4768,8 @@ accidentally using the context of the sort() itself)
 =item Long Doubles Still Don't Work In Solaris
 
 =item Linux With Sfio Fails op/misc Test 48
+
+=item sprintf tests 129 and 130
 
 =item Storable tests fail in some platforms
 
@@ -5578,7 +5587,7 @@ PERL_SH_DIR too long, Process terminated by SIG%s
 
 =back
 
-=head2 perlamiga - Perl under Amiga OS (possibly very outdated information)
+=head2 perlamiga - Perl under Amiga OS
 
 =over 4
 
@@ -5633,13 +5642,15 @@ finally close()d
 
 =item Making
 
+sh Configure -Dprefix=/ade -Dloclibpth=/ade/lib
+
 =item Testing
 
 =item Installing the built perl
 
 =back
 
-=item AUTHOR
+=item AUTHORS
 
 =item SEE ALSO
 
@@ -7893,9 +7904,36 @@ distribution, Signals
 
 =item Programmer's interface
 
-expand($type,@things), Programming Examples
+expand($type,@things), expandany(@things), Programming Examples
 
-=item Methods in the four Classes
+=item Methods in the other Classes
+
+CPAN::Author::as_glimpse(), CPAN::Author::as_string(),
+CPAN::Author::email(), CPAN::Author::fullname(), CPAN::Author::name(),
+CPAN::Bundle::as_glimpse(), CPAN::Bundle::as_string(),
+CPAN::Bundle::clean(), CPAN::Bundle::contains(),
+CPAN::Bundle::force($method,@args), CPAN::Bundle::get(),
+CPAN::Bundle::inst_file(), CPAN::Bundle::inst_version(),
+CPAN::Bundle::uptodate(), CPAN::Bundle::install(), CPAN::Bundle::make(),
+CPAN::Bundle::readme(), CPAN::Bundle::test(),
+CPAN::Distribution::as_glimpse(), CPAN::Distribution::as_string(),
+CPAN::Distribution::clean(), CPAN::Distribution::containsmods(),
+CPAN::Distribution::cvs_import(), CPAN::Distribution::dir(),
+CPAN::Distribution::force($method,@args), CPAN::Distribution::get(),
+CPAN::Distribution::install(), CPAN::Distribution::isa_perl(),
+CPAN::Distribution::look(), CPAN::Distribution::make(),
+CPAN::Distribution::prereq_pm(), CPAN::Distribution::readme(),
+CPAN::Distribution::test(), CPAN::Distribution::uptodate(),
+CPAN::Index::force_reload(), CPAN::Index::reload(), CPAN::InfoObj::dump(),
+CPAN::Module::as_glimpse(), CPAN::Module::as_string(),
+CPAN::Module::clean(), CPAN::Module::cpan_file(),
+CPAN::Module::cpan_version(), CPAN::Module::cvs_import(),
+CPAN::Module::description(), CPAN::Module::force($method,@args),
+CPAN::Module::get(), CPAN::Module::inst_file(),
+CPAN::Module::inst_version(), CPAN::Module::install(),
+CPAN::Module::look(), CPAN::Module::make(),
+CPAN::Module::manpage_headline(), CPAN::Module::readme(),
+CPAN::Module::test(), CPAN::Module::uptodate(), CPAN::Module::userid()
 
 =item Cache Manager
 
@@ -8007,16 +8045,6 @@ module
 =back
 
 =item BUGS
-
-=back
-
-=head2 Carp::Heavy - Carp guts
-
-=over 4
-
-=item SYNOPIS
-
-=item DESCRIPTION
 
 =back
 
@@ -8157,17 +8185,17 @@ C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>,
 C<d_stdio_ptr_lval_nochange_cnt>, C<d_stdio_ptr_lval_sets_cnt>,
 C<d_stdio_stream_array>, C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>,
 C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>, C<d_strerror>, C<d_strtod>,
-C<d_strtol>, C<d_strtold>, C<d_strtoll>, C<d_strtoul>, C<d_strtoull>,
-C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>, C<d_symlink>, C<d_syscall>,
-C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>,
-C<d_tcsetpgrp>, C<d_telldir>, C<d_telldirproto>, C<d_time>, C<d_times>,
-C<d_truncate>, C<d_tzname>, C<d_umask>, C<d_uname>, C<d_union_semun>,
-C<d_ustat>, C<d_vendorarch>, C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>,
-C<d_void_closedir>, C<d_voidsig>, C<d_voidtty>, C<d_volatile>,
-C<d_vprintf>, C<d_wait4>, C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>,
-C<d_xenix>, C<date>, C<db_hashtype>, C<db_prefixtype>, C<defvoidused>,
-C<direntrytype>, C<dlext>, C<dlsrc>, C<doublesize>, C<drand01>,
-C<dynamic_ext>
+C<d_strtol>, C<d_strtold>, C<d_strtoll>, C<d_strtoq>, C<d_strtoul>,
+C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>, C<d_symlink>,
+C<d_syscall>, C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>, C<d_system>,
+C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>, C<d_telldirproto>, C<d_time>,
+C<d_times>, C<d_truncate>, C<d_tzname>, C<d_umask>, C<d_uname>,
+C<d_union_semun>, C<d_ustat>, C<d_vendorarch>, C<d_vendorbin>,
+C<d_vendorlib>, C<d_vfork>, C<d_void_closedir>, C<d_voidsig>, C<d_voidtty>,
+C<d_volatile>, C<d_vprintf>, C<d_wait4>, C<d_waitpid>, C<d_wcstombs>,
+C<d_wctomb>, C<d_xenix>, C<date>, C<db_hashtype>, C<db_prefixtype>,
+C<defvoidused>, C<direntrytype>, C<dlext>, C<dlsrc>, C<doublesize>,
+C<drand01>, C<dynamic_ext>
 
 =item e
 
@@ -8240,10 +8268,10 @@ C<multiarch>, C<mv>, C<myarchname>, C<mydomain>, C<myhostname>, C<myuname>
 
 =item n
 
-C<n>, C<netdb_hlen_type>, C<netdb_host_type>, C<netdb_name_type>,
-C<netdb_net_type>, C<nm>, C<nm_opt>, C<nm_so_opt>, C<nonxs_ext>, C<nroff>,
-C<nveformat>, C<nvEUformat>, C<nvfformat>, C<nvFUformat>, C<nvgformat>,
-C<nvGUformat>, C<nvsize>, C<nvtype>
+C<n>, C<need_va_copy>, C<netdb_hlen_type>, C<netdb_host_type>,
+C<netdb_name_type>, C<netdb_net_type>, C<nm>, C<nm_opt>, C<nm_so_opt>,
+C<nonxs_ext>, C<nroff>, C<nveformat>, C<nvEUformat>, C<nvfformat>,
+C<nvFUformat>, C<nvgformat>, C<nvGUformat>, C<nvsize>, C<nvtype>
 
 =item o
 
@@ -8726,6 +8754,35 @@ Perl code
 =item UTF-16 and UTF-32 Encodings
 
 =item Handling Malformed Data
+
+=back
+
+=head2 Encode::EncodeFormat, EncodeFormat - the format of encoding tables
+of the Encode extension
+
+=over 4
+
+=item DESCRIPTION
+
+[1]   B<S>, [2]   B<D>, [3]   B<M>, [4]   B<E>
+
+=item KEYWORDS
+
+=item COPYRIGHT
+
+=back
+
+=head2 EncodeFormat - the format of encoding tables of the Encode extension
+
+=over 4
+
+=item DESCRIPTION
+
+[1]   B<S>, [2]   B<D>, [3]   B<M>, [4]   B<E>
+
+=item KEYWORDS
+
+=item COPYRIGHT
 
 =back
 
@@ -9428,6 +9485,10 @@ PERL_MM_OPT
 C<Not in MANIFEST:> I<file>, C<No such file:> I<file>, C<MANIFEST:> I<$!>,
 C<Added to MANIFEST:> I<file>
 
+=item ENVIRONMENT
+
+B<PERL_MM_MANIFEST_DEBUG>
+
 =item SEE ALSO
 
 =item AUTHOR
@@ -10002,6 +10063,12 @@ TopSystemUID
 
 =item WARNING
 
+=over 4
+
+=item Temporary files and NFS
+
+=back
+
 =item HISTORY
 
 =item SEE ALSO
@@ -10047,6 +10114,68 @@ TopSystemUID
 $fh->print, $fh->printf, $fh->getline, $fh->getlines
 
 =item SEE ALSO
+
+=back
+
+=head2 Filter::Simple - Simplified source filtering
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item The Problem
+
+=item A Solution
+
+=item How it works
+
+=back
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Filter::Util::Call - Perl Source Filter Utility Module
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item B<use Filter::Util::Call>
+
+=item B<import()>
+
+=item B<filter() and anonymous sub>
+
+B<$_>, B<$status>, B<filter_read> and B<filter_read_exact>, B<filter_del>
+
+=back
+
+=item EXAMPLES
+
+=over 4
+
+=item Example 1: A simple filter.
+
+=item Example 2: Using the context
+
+=item Example 3: Using the context within the filter
+
+=item Example 4: Using filter_del
+
+=back
+
+=item AUTHOR
+
+=item DATE
 
 =back
 
@@ -12766,7 +12895,7 @@ NORMAL TESTS, SKIPPED TESTS, TODO TESTS
 C<All tests successful.\nFiles=%d,  Tests=%d, %s>, C<FAILED tests
 %s\n\tFailed %d/%d tests, %.2f%% okay.>, C<Test returned status %d (wstat
 %d)>, C<Failed 1 test, %.2f%% okay. %s>, C<Failed %d/%d tests, %.2f%% okay.
-%s>
+%s>, C<FAILED--Further testing stopped%s>
 
 =item ENVIRONMENT
 
