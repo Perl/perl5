@@ -975,7 +975,7 @@ on byte encoded strings. All functions that need to hop over
 characters such as length(), substr() or index() can work B<much>
 faster when the underlying data are byte-encoded. Witness the
 following benchmark:
-  
+
   % perl -e '
   use Benchmark;
   use strict;
@@ -994,7 +994,7 @@ following benchmark:
     LENGTH_U:  2 wallclock secs ( 2.11 usr +  0.00 sys =  2.11 CPU) @ 12155.45/s (n=25648)
     SUBSTR_B:  3 wallclock secs ( 2.16 usr +  0.00 sys =  2.16 CPU) @ 374480.09/s (n=808877)
     SUBSTR_U:  2 wallclock secs ( 2.11 usr +  0.00 sys =  2.11 CPU) @ 6791.00/s (n=14329)
-  
+
 The numbers show an incredible slowness on long UTF-8 strings and you
 should carefully avoid to use these functions within tight loops. For
 example if you want to iterate over characters, it is infinitely
@@ -1022,7 +1022,7 @@ benchmark shows:
 
 You see, the algorithm based on substr() was faster with byte encoded
 data but it is pathologically slow with UTF-8 data.
-  
+
 =head1 SEE ALSO
 
 L<perluniintro>, L<encoding>, L<Encode>, L<open>, L<utf8>, L<bytes>,

@@ -111,15 +111,15 @@ calls are not possible, even though C<&DB::sub> exists.
 =head2 Writing Your Own Debugger
 
 =head3 Environment Variables
- 
+
 The C<PERL5DB> environment variable can be used to define a debugger.
 For example, the minimal "working" debugger (it actually doesn't do anything)
 consists of one line:
-  
+
   sub DB::DB {}
 
 It can easily be defined like this:
-  
+
   $ PERL5DB="sub DB::DB {}" perl -d your-script
 
 Another brief debugger, slightly more useful, can be created
@@ -130,9 +130,9 @@ with only the line:
 This debugger prints a number which increments for each statement
 encountered and waits for you to hit a newline before continuing
 to the next statement.
-  
+
 The following debugger is actually useful:
-  
+
   {
     package DB;
     sub DB  {}
