@@ -176,9 +176,23 @@ For gory details, see L<http://czyborra.com/charsets/cyrillic.html>
 
 GSM0338 is for GSM handsets. Though it shares alphanumerals with
 ASCII, control character ranges and other parts are mapped very
-differently, presumably to store Greek and Cyrillic alphabets.
-This is also covered in Encode::Byte even though it is not an
-"extended ASCII" encoding.
+differently, mainly to store Greek characters.  There are also escape
+sequences (starting with 0x1B) to cover e.g. the Euro sign.  Some
+special cases like a trailing 0x00 byte or a lone 0x1B byte are not
+well-defined and decode() will return an empty string for them.
+One possible workaround is
+
+   $gsm =~ s/\x00\z/\x00\x00/;
+   $uni = decode("gsm0338", $gsm);
+   $uni .= "\xA0" if $gsm =~ /\x1B\z/;
+
+Note that the Encode implementation of GSM0338 does not implement the
+reuse of Latin capital letters as Greek capital letters (for example,
+the 0x5A is U+005A (LATIN CAPITAL LETTER Z), not U+0396 (GREEK CAPITAL
+LETTER ZETA).
+
+The GSM0338 is also covered in Encode::Byte even though it is not
+an "extended ASCII" encoding.
 
 =back
 

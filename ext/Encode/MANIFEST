@@ -74,6 +74,7 @@ t/fallback.t	test script
 t/gb2312.enc	test data
 t/gb2312.utf	test data
 t/grow.t	test script
+t/gsm0338.t	test script
 t/guess.t	test script
 t/jisx0201.enc	test data
 t/jisx0201.utf	test data
