@@ -7,16 +7,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-BEGIN { 
-    use Test::More; 
-
-    if( $^O =~ /^VMS|os2|MacOS|MSWin32|cygwin$/ ) {
-        plan skip_all => 'Non-Unix platform';
-    }
-    else {
-        plan tests => 90; 
-    }
-}
+BEGIN { use Test::More; plan tests => 90; }
 
 BEGIN { use_ok( 'ExtUtils::MM_Unix' ); }
 
