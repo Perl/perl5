@@ -52,9 +52,8 @@ typedef struct
 } PerlIOEncode;
 
 SV *
-PerlIOEncode_getarg(PerlIO *f)
+PerlIOEncode_getarg(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
 {
- dTHX;
  PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
  SV *sv = &PL_sv_undef;
  if (e->enc)
@@ -329,9 +328,9 @@ PerlIOEncode_tell(PerlIO *f)
 }
 
 PerlIO *
-PerlIOEncode_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *params)
+PerlIOEncode_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *params, int flags)
 {
- if ((f = PerlIOBase_dup(aTHX_ f, o, params)))
+ if ((f = PerlIOBase_dup(aTHX_ f, o, params, flags)))
   {
    PerlIOEncode *fe = PerlIOSelf(f,PerlIOEncode);
    PerlIOEncode *oe = PerlIOSelf(o,PerlIOEncode);

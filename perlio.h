@@ -178,6 +178,9 @@ extern void PerlIO_clone(pTHX_ PerlInterpreter *proto, CLONE_PARAMS *param);
 #define SEEK_END 2
 #endif
 
+#define PERLIO_DUP_CLONE	1
+#define PERLIO_DUP_FD		2
+
 /* --------------------- Now prototypes for functions --------------- */
 
 START_EXTERN_C
@@ -330,7 +333,7 @@ extern int PerlIO_getpos(PerlIO *, SV *);
 extern int PerlIO_setpos(PerlIO *, SV *);
 #endif
 #ifndef PerlIO_fdupopen
-extern PerlIO *PerlIO_fdupopen(pTHX_ PerlIO *, CLONE_PARAMS *);
+extern PerlIO *PerlIO_fdupopen(pTHX_ PerlIO *, CLONE_PARAMS *, int);
 #endif
 #if !defined(PerlIO_modestr) && !defined(PERLIO_IS_STDIO)
 extern char *PerlIO_modestr(PerlIO *, char *buf);

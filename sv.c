@@ -1768,7 +1768,7 @@ S_not_a_number(pTHX_ SV *sv)
 	  char *limit = tmpbuf + sizeof(tmpbuf) - 8;
 	  /* each *s can expand to 4 chars + "...\0",
 	     i.e. need room for 8 chars */
-	  
+	
 	  char *s, *end;
 	  for (s = SvPVX(sv), end = s + SvCUR(sv); s < end && d < limit; s++) {
 	       int ch = *s & 0xFF;
@@ -3326,7 +3326,7 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
 	 }
 	 if (hibit) {
 	      STRLEN len;
-	      
+	
 	      len = SvCUR(sv) + 1; /* Plus the \0 */
 	      SvPVX(sv) = (char*)bytes_to_utf8((U8*)s, &len);
 	      SvCUR(sv) = len - 1;
@@ -7234,7 +7234,7 @@ Perl_sv_bless(pTHX_ SV *sv, HV *stash)
             mg_set(tmpRef);
 
 
- 
+
     return sv;
 }
 
@@ -8522,7 +8522,7 @@ Perl_fp_dup(pTHX_ PerlIO *fp, char type, CLONE_PARAMS *param)
 	return ret;
 
     /* create anew and remember what it is */
-    ret = PerlIO_fdupopen(aTHX_ fp, param);
+    ret = PerlIO_fdupopen(aTHX_ fp, param, PERLIO_DUP_CLONE);
     ptr_table_store(PL_ptr_table, fp, ret);
     return ret;
 }
