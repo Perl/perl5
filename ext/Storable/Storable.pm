@@ -894,11 +894,6 @@ C<Storable::drop_utf8> is a blunt tool.  There is no facility either to
 return B<all> strings as utf8 sequences, or to attempt to convert utf8
 data back to 8 bit and C<croak()> if the conversion fails.
 
-In EBCDIC platforms, restoring restricted hashes (a new perl 5.8
-feature) does not work (the contents of the hashes are restored 
-but the read-onlyness of either the whole hash or particular
-elements is lost).
-
 =head1 CREDITS
 
 Thank you to (in chronological order):
