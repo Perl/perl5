@@ -1,0 +1,39 @@
+Notes on Perl on the Hurd
+Last Updated: Fri, 12 Feb 1999 21:11:14 +0100
+Written by: Mark Kettenis <kettenis@gnu.org>
+
+* Known Problems
+
+There are several problems with Perl on the Hurd.  Most of them are
+related to bugs in the OS, some might be actual bugs in Perl.
+
+The database code has problems that make Perl crash.  When running the
+test-suite one of the tests will crash.  Note that on the Hurd when a
+program crashes, the crash server suspends the program.  Continuing
+the program will cause it to exit.
+
+The socket tests may fail if the network is not configured.  You have
+to make `/hurd/pfinet' the translator for `/servers/socket/2', giving
+it the right arguments.  Try `/hurd/pfinet --help' for more
+information.  It seems that it is currently not possible to do this
+right when you do not have a supported network device.  Therefore all
+tests that use INET sockets fail on my system, suggesting that the
+`localhost' address may not be defined.
+
+Here are the statistics for Perl 5.005_03 on my system:
+
+Failed Test  Status Wstat Total Fail  Failed  List of failed
+-------------------------------------------------------------------------------
+lib/anydbm.t                 12    3  25.00%  1, 4, 9
+lib/db-btree.t    0    11    ??   ??       %  ??
+lib/db-hash.t   255 65280    62   42  67.74%  15, 22-62
+lib/db-recno.t    2   512    78   61  78.21%  17, 19-78
+lib/io_pipe.t                10   ??       %  ??
+lib/io_sock.t    46 11776     5    5 100.00%  1-5
+lib/io_udp.t     46 11776     3    3 100.00%  1-3
+lib/socket.t                  6    6 100.00%  1-6
+op/stat.t                    58    1   1.72%  4
+op/time.t                     5    1  20.00%  2
+5 tests skipped, plus 14 subtests skipped.
+Failed 10/188 test scripts, 94.68% okay. 121/6467 subtests failed, 98.13% okay.
+
