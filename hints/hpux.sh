@@ -45,7 +45,7 @@ ldflags="$ldflags -D_HPUX_SOURCE"
 toke_cflags='ccflags="$ccflags -DARG_ZERO_IS_SCRIPT"'
 
 cc=${cc:-cc}
-ar=/usr/bin/ar
+ar=${ar:-/usr/bin/ar}
 
 case `$cc -v 2>&1`"" in
     *gcc*)  ccisgcc="$define" ;;
