@@ -18,7 +18,8 @@ This is for them.
 
 First of all, there's a few things you can do to make your life a lot more
 straightforward when it comes to debugging perl programs, without using the
-debugger at all.  To demonstrate, here's a simple script with a problem:
+debugger at all.  To demonstrate, here's a simple script, named "hello", with
+a problem:
 
 	#!/usr/bin/perl
 
@@ -35,9 +36,9 @@ is, it will print out a newline character, and you'll get what looks like a
 blank line.  It looks like there's 2 variables when (because of the typo)
 there's really 3:
 
-	$var1 = 'Hello World'
-	$varl = undef
-	$var2 = "\n"
+	$var1 = 'Hello World';
+	$varl = undef;
+	$var2 = "\n";
 
 To catch this kind of problem, we can force each variable to be declared
 before use by pulling in the strict module, by putting 'use strict;' after the
@@ -59,7 +60,7 @@ script looks like this:
 	use strict;
 
 	my $var1 = 'Hello World';
-	my $varl = '';
+	my $varl = undef;
 	my $var2 = "$varl\n";
 
 	print $var2; 
@@ -150,14 +151,15 @@ help list, 'B<|h>' (pipe-h) will pipe the help through your pager (which is
 the entire help screen.  Here is the summary page:
 
 DB<1>h
-List/search source lines:               Control script execution:
+
+ List/search source lines:               Control script execution:
   l [ln|sub]  List source code            T           Stack trace
   - or .      List previous/current line  s [expr]    Single step [in expr]
   v [line]    View around line            n [expr]    Next, steps over subs
   f filename  View source in file         <CR/Enter>  Repeat last n or s
   /pattern/ ?patt?   Search forw/backw    r           Return from subroutine
   M           Show module versions        c [ln|sub]  Continue until position
-Debugger controls:                        L           List break/watch/actions
+ Debugger controls:                        L           List break/watch/actions
   o [...]     Set debugger options        t [expr]    Toggle trace [trace expr]
   <[<]|{[{]|>[>] [cmd] Do pre/post-prompt b [ln|event|sub] [cnd] Set breakpoint
   ! [N|pat]   Redo a previous command     B ln|*      Delete a/all breakpoints
@@ -167,13 +169,13 @@ Debugger controls:                        L           List break/watch/actions
   h h         Complete help page          W expr|*    Delete a/all watch expressions
   |[|]db_cmd  Send output to pager        ![!] syscmd Run cmd in a subprocess
   q or ^D     Quit                        R           Attempt a restart
-Data Examination:     expr     Execute perl code, also see: s,n,t expr
+ Data Examination:     expr     Execute perl code, also see: s,n,t expr
   x|m expr       Evals expr in list context, dumps the result or lists methods.
   p expr         Print expression (uses script's current package).
   S [[!]pat]     List subroutine names [not] matching pattern
   V [Pk [Vars]]  List Variables in Package.  Vars can be ~pattern or !pattern.
   X [Vars]       Same as "V current_package [Vars]".
-For more help, type h cmd_letter, or run man perldebug for all docs. 
+ For more help, type h cmd_letter, or run man perldebug for all docs. 
 
 More confusing options than you can shake a big stick at!  It's not as bad as
 it looks and it's very useful to know more about all of it, and fun too!
