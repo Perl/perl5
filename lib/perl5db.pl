@@ -3,7 +3,7 @@ package DB;
 use IO::Handle;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
-$VERSION = 1.21_01;
+$VERSION = 1.21_02;
 $header  = "perl5db.pl version $VERSION";
 
 # It is crucial that there is no lexicals in scope of `eval ""' down below
@@ -326,7 +326,10 @@ sub eval {
 #   + watch val joined out of eval()
 # Changes: 1.21: Dec 21, 2003 Dominique Quatravaux
 #   + Fix a side-effect of bug #24674 in the perl debugger ("odd taint bug")
-# 
+# Changes: 1.24: Mar 03, 2004 Richard Foley <richard.foley@rfi.net>
+#   + Added command to save all debugger commands for sourcing later.
+#   + Added command to display parent inheritence tree of given class.
+#   + Fixed minor newline in history bug.
 ####################################################################
 
 # Needed for the statement after exec():
@@ -718,7 +721,7 @@ sub DB {
       for (my $n = 0; $n <= $#to_watch; $n++) {
 		$evalarg = $to_watch[$n];
 		local $onetimeDump;	# Do not output results
-		my ($val) = join("', '", &eval);	# Fix context (&eval is doing array)? - rjsf
+		my ($val) = join("', '", &eval);	# Fix context (&eval is doing array)
 		$val = ( (defined $val) ? "'$val'" : 'undef' );
 		if ($val ne $old_watch[$n]) {
 		  $signal = 1;
@@ -807,7 +810,9 @@ EOP
 		    redo CMD;
 		};
 		$cmd =~ /^$/ && ($cmd = $laststep);
+		chomp($cmd); # get rid of the annoying extra newline
 		push(@hist,$cmd) if length($cmd) > 1;
+        push (@truehist, $cmd);
 	      PIPE: {
 		    $cmd =~ s/^\s+//s;   # trim annoying leading whitespace
 		    $cmd =~ s/\s+$//s;   # trim annoying trailing whitespace
@@ -921,12 +926,10 @@ EOP
 			$start = 1 if $start <= 0;
 			$incr = $window - 1;
 			$cmd = 'l ' . ($start) . '+'; };
-			# rjsf     ->
-		  $cmd =~ /^([aAbBhlLMoOPvwW]\b|[<>\{]{1,2})\s*(.*)/so && do { 
+		  $cmd =~ /^([aAbBhilLMoOPvwW]\b|[<>\{]{1,2})\s*(.*)/so && do { 
 				&cmd_wrapper($1, $2, $line); 
 				next CMD; 
 			};
-			# rjsf <- pre|post commands stripped out
                    $cmd =~ /^y(?:\s+(\d*)\s*(.*))?$/ && do {
                        eval { require PadWalker; PadWalker->VERSION(0.08) }
                          or &warn($@ =~ /locate/
@@ -1236,6 +1239,30 @@ EOP
 			&warn("Can't execute `$1': $!\n");
 		      }
 		      next CMD; };
+
+=head4 C<save> - send current history to a file
+
+Takes the complete history, (not the shrunken version you see with C<H>),
+and saves it to the given filename, so it can be replayed using C<source>.
+
+Note that all C<^(save|source)>'s are commented out with a view to minimise recursion.
+
+=cut
+
+				# save source - write commands to a file for later use
+                $cmd =~ /^save\s*(.*)$/ && do {
+					my $file = $1 || '.perl5dbrc'; # default?
+                    if (open my $fh, "> $file") {
+						# chomp to remove extraneous newlines from source'd files 
+						chomp(my @truelist = map { m/^\s*(save|source)/ ? "#$_": $_ } @truehist);
+						print $fh join("\n", @truelist); 
+						print "commands saved in $file\n";
+                    } else {
+                        &warn("Can't save debugger commands in '$1': $!\n");
+                    }
+                    next CMD;
+                };
+
 		    $cmd =~ /^\|\|?\s*[^|]/ && do {
 			if ($pager =~ /^\|/) {
 			    open(SAVEOUT,">&STDOUT") || &warn("Can't save STDOUT");
@@ -1732,6 +1759,30 @@ sub cmd_h {
 			print_help($summary);
 	}
 }
+
+=head3 C<cmd_i> - inheritance display
+
+Display the (nested) parentage of the module or object given.
+
+=cut
+
+sub cmd_i {
+    my $cmd  = shift;
+    my $line = shift;
+	eval { require Class::ISA };
+	if ($@) { 
+		&warn($@ =~ /locate/ ? "Class::ISA module not found - please install\n" : $@);
+	} else {
+		ISA:
+		foreach my $isa (split(/\s+/, $line)) {
+		  no strict 'refs'; 
+		  print join(', ', map { # snaffled unceremoniously from Class::ISA
+				"$_".(defined(${"$_\::VERSION"}) ? ' '.${"$_\::VERSION"} : undef)
+			  } Class::ISA::self_and_super_path($isa));
+		  print "\n";
+		}
+	}
+} ## end sub cmd_i
 
 sub cmd_l {
 	my $current_line = $line;
@@ -2802,6 +2853,7 @@ B<m> I<expr>		Evals expression in list context, prints methods callable
 		on the first element of the result.
 B<m> I<class>		Prints methods callable via the given class.
 B<M>		Show versions of loaded modules.
+B<i> I<class>       Prints nested parents of given class.
 B<y> [I<n> [I<vars>]]	List lexical variables I<n> levels up from current sub
 
 B<<> ?			List Perl commands to run before each prompt.
@@ -2825,6 +2877,7 @@ B<$psh$psh> I<cmd>  	Run cmd in a subprocess (reads from DB::IN, writes to DB::O
 B<$psh> [I<cmd>] 	Run I<cmd> in subshell (forces \"\$SHELL -c 'cmd'\")." ) . "
 		See 'B<O> I<shellBang>' too.
 B<source> I<file>		Execute I<file> containing debugger commands (may nest).
+B<save> I<file>       Save current debugger session (actual history) to I<file>.
 B<H> I<-number>	Display last number commands (default all).
 B<p> I<expr>		Same as \"I<print {DB::OUT} expr>\" in current package.
 B<|>I<dbcmd>		Run debugger command, piping DB::OUT to current pager.
@@ -2907,7 +2960,7 @@ I<Data Examination:>     B<expr>     Execute perl code, also see: B<s>,B<n>,B<t>
   B<p> I<expr>         Print expression (uses script's current package).
   B<S> [[B<!>]I<pat>]     List subroutine names [not] matching pattern
   B<V> [I<Pk> [I<Vars>]]  List Variables in Package.  Vars can be ~pattern or !pattern.
-  B<X> [I<Vars>]       Same as \"B<V> I<current_package> [I<Vars>]\".
+  B<X> [I<Vars>]       Same as \"B<V> I<current_package> [I<Vars>]\".  B<i> I<class> inheritance tree.
   B<y> [I<n> [I<Vars>]]   List lexicals in higher scope <n>.  Vars same as B<V>.
 For more help, type B<h> I<cmd_letter>, or run B<$doccmd perldebug> for all docs.
 END_SUM
@@ -3399,6 +3452,7 @@ BEGIN {			# This does not compile, alas.
   $sh = '!';
   $rc = ',';
   @hist = ('?');
+  @truehist=();           # Can be saved for replay (per session)
   $deep = 100;			# warning if stack gets this deep
   $window = 10;
   $preview = 3;
