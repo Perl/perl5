@@ -966,6 +966,8 @@ win32_stat(const char *path, struct stat *buffer)
     int		l = strlen(path);
     int		res;
     WCHAR	wbuffer[MAX_PATH];
+    HANDLE      handle;
+    int         nlink = 1;
 
     if (l > 1) {
 	switch(path[l - 1]) {
@@ -987,13 +989,30 @@ win32_stat(const char *path, struct stat *buffer)
 	    break;
 	}
     }
+
+    /* We *must* open & close the file once; otherwise file attribute changes */
+    /* might not yet have propagated to "other" hard links of the same file.  */
+    /* This also gives us an opportunity to determine the number of links.    */
     if (USING_WIDE()) {
 	A2WHELPER(path, wbuffer, sizeof(wbuffer));
-	res = _wstat(wbuffer, (struct _stat *)buffer);
+	handle = CreateFileW(wbuffer, 0, 0, NULL, OPEN_EXISTING, 0, NULL);
     }
     else {
-	res = stat(path, buffer);
+	handle = CreateFileA(path, 0, 0, NULL, OPEN_EXISTING, 0, NULL);
     }
+    if (handle != INVALID_HANDLE_VALUE) {
+	BY_HANDLE_FILE_INFORMATION bhi;
+	if (GetFileInformationByHandle(handle, &bhi))
+	    nlink = bhi.nNumberOfLinks;
+	CloseHandle(handle);
+    }
+
+    if (USING_WIDE())
+	res = _wstat(wbuffer, (struct _stat *)buffer);
+    else
+	res = stat(path, buffer);
+    buffer->st_nlink = nlink;
+
     if (res < 0) {
 	/* CRT is buggy on sharenames, so make sure it really isn't.
 	 * XXX using GetFileAttributesEx() will enable us to set
@@ -2152,6 +2171,85 @@ win32_pclose(FILE *pf)
     return status;
 
 #endif /* USE_RTL_POPEN */
+}
+
+static BOOL WINAPI
+Nt4CreateHardLinkW(
+    LPCWSTR lpFileName,
+    LPCWSTR lpExistingFileName,
+    LPSECURITY_ATTRIBUTES lpSecurityAttributes)
+{
+    HANDLE handle;
+    WCHAR wFullName[MAX_PATH+1];
+    LPVOID lpContext = NULL;
+    WIN32_STREAM_ID StreamId;
+    DWORD dwSize = (char*)&StreamId.cStreamName - (char*)&StreamId;
+    DWORD dwWritten;
+    DWORD dwLen;
+    BOOL bSuccess;
+
+    BOOL (__stdcall *pfnBackupWrite)(HANDLE, LPBYTE, DWORD, LPDWORD,
+				     BOOL, BOOL, LPVOID*) =
+	(BOOL (__stdcall *)(HANDLE, LPBYTE, DWORD, LPDWORD,
+			    BOOL, BOOL, LPVOID*))
+	GetProcAddress(GetModuleHandle("kernel32.dll"), "BackupWrite");
+    if (pfnBackupWrite == NULL)
+	return 0;
+
+    dwLen = GetFullPathNameW(lpFileName, MAX_PATH, wFullName, NULL);
+    if (dwLen == 0)
+	return 0;
+    dwLen = (dwLen+1)*sizeof(WCHAR);
+
+    handle = CreateFileW(lpExistingFileName, FILE_WRITE_ATTRIBUTES,
+			 FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+			 NULL, OPEN_EXISTING, 0, NULL);
+    if (handle == INVALID_HANDLE_VALUE)
+	return 0;
+
+    StreamId.dwStreamId = BACKUP_LINK;
+    StreamId.dwStreamAttributes = 0;
+    StreamId.dwStreamNameSize = 0;
+    StreamId.Size.HighPart = 0;
+    StreamId.Size.LowPart = dwLen;
+
+    bSuccess = pfnBackupWrite(handle, (LPBYTE)&StreamId, dwSize, &dwWritten,
+			      FALSE, FALSE, &lpContext);
+    if (bSuccess) {
+	bSuccess = pfnBackupWrite(handle, (LPBYTE)wFullName, dwLen, &dwWritten,
+				  FALSE, FALSE, &lpContext);
+	pfnBackupWrite(handle, NULL, 0, &dwWritten, TRUE, FALSE, &lpContext);
+    }
+
+    CloseHandle(handle);
+    return bSuccess;
+}
+
+DllExport int
+win32_link(const char *oldname, const char *newname)
+{
+    dTHXo;
+    BOOL (__stdcall *pfnCreateHardLinkW)(LPCWSTR,LPCWSTR,LPSECURITY_ATTRIBUTES);
+    WCHAR wOldName[MAX_PATH];
+    WCHAR wNewName[MAX_PATH];
+
+    if (IsWin95())
+	Perl_die(aTHX_ PL_no_func, "link");
+
+    pfnCreateHardLinkW =
+	(BOOL (__stdcall *)(LPCWSTR, LPCWSTR, LPSECURITY_ATTRIBUTES))
+	GetProcAddress(GetModuleHandle("kernel32.dll"), "CreateHardLinkW");
+    if (pfnCreateHardLinkW == NULL)
+	pfnCreateHardLinkW = Nt4CreateHardLinkW;
+
+    if ((A2WHELPER(oldname, wOldName, sizeof(wOldName))) &&
+	(A2WHELPER(newname, wNewName, sizeof(wNewName))) &&
+	pfnCreateHardLinkW(wNewName, wOldName, NULL))
+    {
+	return 0;
+    }
+    errno = (GetLastError() == ERROR_FILE_NOT_FOUND) ? ENOENT : EINVAL;
+    return -1;
 }
 
 DllExport int

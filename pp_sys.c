@@ -3200,7 +3200,7 @@ PP(pp_link)
     char *tmps2 = POPpx;
     char *tmps = SvPV(TOPs, n_a);
     TAINT_PROPER("link");
-    SETi( link(tmps, tmps2) >= 0 );
+    SETi( PerlLIO_link(tmps, tmps2) >= 0 );
 #else
     DIE(aTHX_ PL_no_func, "Unsupported function link");
 #endif
