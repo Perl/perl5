@@ -7,7 +7,7 @@ use Scalar::Util qw(weaken);
 use attributes qw(reftype);
 
 BEGIN {
-    if($Config{'useithreads'} && $threads::threads) {
+    if ($Config{'useithreads'} && $threads::threads) {
 	*share = \&share_enabled;
 	*cond_wait = \&cond_wait_enabled;
 	*cond_signal = \&cond_signal_enabled;
@@ -38,7 +38,7 @@ sub unlock_disabled { 1 };
 sub lock_disabled { 1 }
 sub share_disabled { return @_}
 
-sub share_enabled (\[$@%]) { # \]     
+sub share_enabled (\[$@%]) { # \]
     my $value = $_[0];
     my $ref = reftype($value);
     if($ref eq 'SCALAR') {
@@ -55,20 +55,6 @@ sub share_enabled (\[$@%]) { # \]
     }
 }
 
-sub CLONE {
-    return unless($_[0] eq "threads::shared");
-	foreach my $ptr (keys %shared) {
-	    if($ptr) {
-		thrcnt_inc($shared{$ptr},$threads::origthread);
-	    }
-	}
-}
-
-sub DESTROY {
-    my $self = shift;
-    _thrcnt_dec($$self);
-    delete($shared{$$self});
-}
 
 package threads::shared::sv;
 use base 'threads::shared';
@@ -156,7 +142,7 @@ C<lock> places a lock on a variable until the lock goes out of scope.  If
 the variable is locked by another thread, the C<lock> call will block until
 it's available. C<lock> is recursive, so multiple calls to C<lock> are
 safe--the variable will remain locked until the outermost lock on the
-variable goes out of scope or C<unlock> is called enough times to match 
+variable goes out of scope or C<unlock> is called enough times to match
 the number of calls to <lock>.
 
 If a container object, such as a hash or array, is locked, all the elements

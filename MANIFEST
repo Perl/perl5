@@ -610,6 +610,7 @@ ext/threads/shared/t/hv_simple.t	Tests for basic shared hash functionality.
 ext/threads/shared/t/no_share.t	Tests for disabled share on variables.
 ext/threads/shared/t/sv_refs.t	thread shared variables
 ext/threads/shared/t/sv_simple.t	thread shared variables
+ext/threads/shared/typemap	thread::shared types
 ext/threads/t/basic.t		ithreads
 ext/threads/t/stress_cv.t	Test with multiple threads, coderef cv argument.
 ext/threads/t/stress_re.t	Test with multiple threads, string cv argument and regexes.
