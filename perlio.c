@@ -476,8 +476,14 @@ PerlIO_pop(pTHX_ PerlIO *f)
   {
    PerlIO_debug("PerlIO_pop f=%p %s\n",f,l->tab->name);
    if (l->tab->Popped)
-    (*l->tab->Popped)(f);
-   *f = l->next;
+    {
+     /* If popped returns non-zero do not free its layer structure
+        it has either done so itself, or it is shared and still in use
+      */
+     if ((*l->tab->Popped)(f) != 0)
+      return;
+    }
+   *f = l->next;;
    PerlMemShared_free(l);
   }
 }
@@ -758,10 +764,16 @@ PerlIO_default_layers(pTHX)
  if (!PerlIO_def_layerlist)
   {
    const char *s  = (PL_tainting) ? Nullch : PerlEnv_getenv("PERLIO");
-   PerlIO_def_layerlist = PerlIO_list_alloc();
-
-   PerlIO_define_layer(aTHX_ &PerlIO_raw);
+   PerlIO_funcs *osLayer = &PerlIO_unix;
+   PerlIO_def_layerlist  = PerlIO_list_alloc();
    PerlIO_define_layer(aTHX_ &PerlIO_unix);
+#ifdef WIN32
+   PerlIO_define_layer(aTHX_ &PerlIO_win32);
+#if 0
+   osLayer = &PerlIO_win32;
+#endif
+#endif
+   PerlIO_define_layer(aTHX_ &PerlIO_raw);
    PerlIO_define_layer(aTHX_ &PerlIO_perlio);
    PerlIO_define_layer(aTHX_ &PerlIO_stdio);
    PerlIO_define_layer(aTHX_ &PerlIO_crlf);
@@ -770,7 +782,7 @@ PerlIO_default_layers(pTHX)
 #endif
    PerlIO_define_layer(aTHX_ &PerlIO_utf8);
    PerlIO_define_layer(aTHX_ &PerlIO_byte);
-   PerlIO_list_push(PerlIO_def_layerlist,PerlIO_find_layer(aTHX_ PerlIO_unix.name,0,0),&PL_sv_undef);
+   PerlIO_list_push(PerlIO_def_layerlist,PerlIO_find_layer(aTHX_ osLayer->name,0,0),&PL_sv_undef);
    if (s)
     {
      PerlIO_parse_layers(aTHX_ PerlIO_def_layerlist,s);
@@ -1881,6 +1893,8 @@ int
 PerlIOUnix_oflags(const char *mode)
 {
  int oflags = -1;
+ if (*mode == 'I' || *mode == '#')
+  mode++;
  switch(*mode)
   {
    case 'r':
@@ -2611,7 +2625,7 @@ PerlIOBuf_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers, IV n, const char
    if (*mode == 'I')
     {
      init = 1;
-     mode++;
+     /* mode++; */
     }
    f = (*tab->Open)(aTHX_ tab, layers, n-1, mode,fd,imode,perm,NULL,narg,args);
    if (f)

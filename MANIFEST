@@ -2013,6 +2013,7 @@ win32/vmem.h		Perl "host" memory manager
 win32/win32.c		Win32 port
 win32/win32.h		Win32 port
 win32/win32iop.h	Win32 port
+win32/win32io.c		Win32 PerlIO layer support
 win32/win32sck.c	Win32 port
 win32/win32thread.c	Win32 functions for threads
 win32/win32thread.h	Win32 port mapping to threads

@@ -107,7 +107,9 @@ EXT PerlIO_funcs PerlIO_pending;
 #ifdef HAS_MMAP
 EXT PerlIO_funcs PerlIO_mmap;
 #endif
-
+#ifdef WIN32
+EXT PerlIO_funcs PerlIO_win32;
+#endif
 extern PerlIO *PerlIO_allocate(pTHX);
 extern SV *PerlIO_arg_fetch(PerlIO_list_t *av,IV n);
 #define PerlIOArg PerlIO_arg_fetch(layers,n)
@@ -168,6 +170,8 @@ extern Size_t	PerlIOBuf_bufsiz     (PerlIO *f);
 extern STDCHAR *PerlIOBuf_get_ptr    (PerlIO *f);
 extern SSize_t	PerlIOBuf_get_cnt    (PerlIO *f);
 extern void	PerlIOBuf_set_ptrcnt (PerlIO *f, STDCHAR *ptr, SSize_t cnt);
+
+extern int	PerlIOUnix_oflags    (const char *mode);
 
 /*--------------------------------------------------------------------------------------*/
 
