@@ -737,7 +737,8 @@ See L<perlmod>
 
 =item *
 
-C<Attribute::Handlers> allows a class to define attribute handlers.
+C<Attribute::Handlers>, originally by Damian Conway and now maintained
+by Arthur Bergman, allows a class to define attribute handlers.
 
     package MyPack;
     use Attribute::Handlers;
