@@ -3763,6 +3763,8 @@ PP(pp_delete)
 	else if (SvTYPE(hv) == SVt_PVAV) {
 	    if (PL_op->op_flags & OPf_SPECIAL)
 		sv = av_delete((AV*)hv, SvIV(keysv), discard);
+	    else
+		DIE(aTHX_ "panic: avhv_delete no longer supported");
 	}
 	else
 	    DIE(aTHX_ "Not a HASH reference");
