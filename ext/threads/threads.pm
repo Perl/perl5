@@ -13,8 +13,6 @@ use overload
 require Exporter;
 require DynaLoader;
 
-use Devel::Peek;
-
 our @ISA = qw(Exporter DynaLoader);
 
 our %EXPORT_TAGS = ( all => [qw()]);
@@ -28,7 +26,6 @@ our $VERSION = '0.05';
 
 sub new {
     my $class = shift;
-    print (Dump($_[0]));
     return $class->create(@_);
 }
 
