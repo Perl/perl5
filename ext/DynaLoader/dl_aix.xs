@@ -193,6 +193,10 @@ char *strerrorcat(char *str, int err) {
       strcat(str, msg);
     free(buf);
 #else
+# ifdef USE_ITHREADS
+    dTHX;
+# endif
+
     if ((msg = strerror(err)) == 0)
       msg = strerror_failed;
     msgsiz = strlen(msg);		/* Note msg = buf and free() above. */
@@ -221,6 +225,10 @@ char *strerrorcpy(char *str, int err) {
       strcpy(str, msg);
     free(buf);
 #else
+# ifdef USE_ITHREADS
+    dTHX;
+#endif
+
     if ((msg = strerror(err)) == 0)
       msg = strerror_failed;
     msgsiz = strlen(msg);	/* Note msg = buf and free() above. */
