@@ -575,9 +575,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    if (PL_lex_state != LEX_NOTPARSING)
 		(void)SvOK_off(sv);
 	    else if (PL_in_eval)
-		sv_setiv(sv, 1);
-	    else
-		sv_setiv(sv, 0);
+ 		sv_setiv(sv, PL_in_eval & ~(EVAL_INREQUIRE));
 	}
 	break;
     case '\024':		/* ^T */

@@ -3606,7 +3606,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
 
     JMPENV_BOOTSTRAP;
 
-    PL_in_eval = EVAL_NULL;	/* ~(EVAL_INEVAL|EVAL_WARNONLY|EVAL_KEEPERR) */
+    PL_in_eval = EVAL_NULL;	/* ~(EVAL_INEVAL|EVAL_WARNONLY|EVAL_KEEPERR|EVAL_INREQUIRE) */
     PL_restartop = 0;
 
     PL_statname = NEWSV(66,0);

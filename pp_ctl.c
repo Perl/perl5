@@ -2728,7 +2728,9 @@ S_doeval(pTHX_ int gimme, OP** startop)
     AV* comppadlist;
     I32 i;
 
-    PL_in_eval = EVAL_INEVAL;
+    PL_in_eval = ((saveop && saveop->op_type == OP_REQUIRE)
+		  ? (EVAL_INREQUIRE | (PL_in_eval & EVAL_INEVAL))
+		  : EVAL_INEVAL);
 
     PUSHMARK(SP);
 
@@ -2891,6 +2893,7 @@ S_doeval(pTHX_ int gimme, OP** startop)
     CvDEPTH(PL_compcv) = 1;
     SP = PL_stack_base + POPMARK;		/* pop original mark */
     PL_op = saveop;			/* The caller may need it. */
+    PL_lex_state = LEX_NOTPARSING;	/* $^S needs this. */
 #ifdef USE_THREADS
     MUTEX_LOCK(&PL_eval_mutex);
     PL_eval_owner = 0;
