@@ -622,7 +622,7 @@ Level 1 - Basic Unicode Support
         2.2 Categories                          - done          [3][4]
         2.3 Subtraction                         - MISSING       [5][6]
         2.4 Simple Word Boundaries              - done          [7]
-        2.5 Simple Loose Matches                - MISSING       [8]
+        2.5 Simple Loose Matches                - done          [8]
         2.6 End of Line                         - MISSING       [9][10]
 
         [ 1] \x{...}
@@ -632,7 +632,7 @@ Level 1 - Basic Unicode Support
         [ 5] have negation
         [ 6] can use look-ahead to emulate subtracion
         [ 7] include Letters in word characters
-        [ 8] see UTR#21 Case Mappings
+        [ 8] see UTR#21 Case Mappings: Perl implements 1:1 mappings
         [ 9] see UTR#13 Unicode Newline Guidelines
         [10] should do ^ and $ also on \x{2028} and \x{2029}
 
