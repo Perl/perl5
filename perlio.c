@@ -1016,6 +1016,8 @@ PerlIO_push(pTHX_ PerlIO *f, PerlIO_funcs *tab, const char *mode, SV *arg)
     }
     else if (f) {
 	/* Pseudo-layer where push does its own stack adjust */
+	PerlIO_debug("PerlIO_push f=%p %s %s %p\n", (void*)f, tab->name,
+		     (mode) ? mode : "(Null)", (void*)arg);
 	if ((*tab->Pushed) (aTHX_ f, mode, arg, tab) != 0) {
 	    return NULL;
 	}
@@ -1697,7 +1699,7 @@ Perl_PerlIO_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, int cnt)
 IV
 PerlIOUtf8_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 {
-    if (*PerlIONext(f)) {
+    if (PerlIOValid(f)) {
 	if (tab->kind & PERLIO_K_UTF8)
 	    PerlIOBase(f)->flags |= PERLIO_F_UTF8;
 	else
