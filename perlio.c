@@ -1040,9 +1040,8 @@ PerlIORaw_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg)
 
 int
 PerlIO_apply_layera(pTHX_ PerlIO *f, const char *mode,
-		    PerlIO_list_t *layers, IV n)
+		    PerlIO_list_t *layers, IV n, IV max)
 {
-    IV max = layers->cur;
     int code = 0;
     while (n < max) {
 	PerlIO_funcs *tab = PerlIO_layer_fetch(aTHX_ layers, n, NULL);
@@ -1065,7 +1064,7 @@ PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
 	PerlIO_list_t *layers = PerlIO_list_alloc(aTHX);
 	code = PerlIO_parse_layers(aTHX_ layers, names);
 	if (code == 0) {
-	    code = PerlIO_apply_layera(aTHX_ f, mode, layers, 0);
+	    code = PerlIO_apply_layera(aTHX_ f, mode, layers, 0, layers->cur);
 	}
 	PerlIO_list_free(aTHX_ layers);
     }
@@ -1356,8 +1355,9 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 		     * More layers above the one that we used to open -
 		     * apply them now
 		     */
-		    if (PerlIO_apply_layera(aTHX_ f, mode, layera, n + 1)
-			!= 0) {
+		    if (PerlIO_apply_layera(aTHX_ f, mode, layera, n + 1, layera->cur) != 0) {
+			/* If pushing layers fails close the file */
+			PerlIO_close(f);
 			f = NULL;
 		    }
 		}
@@ -2182,7 +2182,7 @@ PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 		IV n, const char *mode, int fd, int imode,
 		int perm, PerlIO *f, int narg, SV **args)
 {
-    if (f) {
+    if (PerlIOValid(f)) {
 	if (PerlIOBase(f)->flags & PERLIO_F_OPEN)
 	    (*PerlIOBase(f)->tab->Close)(aTHX_ f);
     }
@@ -2204,11 +2204,14 @@ PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 	    mode++;
 	if (!f) {
 	    f = PerlIO_allocate(aTHX);
+	}
+	if (!PerlIOValid(f)) {
 	    s = PerlIOSelf(PerlIO_push(aTHX_ f, self, mode, PerlIOArg),
 			   PerlIOUnix);
 	}
-	else
+	else {
 	    s = PerlIOSelf(f, PerlIOUnix);
+	}
 	s->fd = fd;
 	s->oflags = imode;
 	PerlIOBase(f)->flags |= PERLIO_F_OPEN;
@@ -2428,7 +2431,7 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 		 int perm, PerlIO *f, int narg, SV **args)
 {
     char tmode[8];
-    if (f) {
+    if (PerlIOValid(f)) {
 	char *path = SvPV_nolen(*args);
 	PerlIOStdio *s = PerlIOSelf(f, PerlIOStdio);
 	FILE *stdio;
@@ -2451,9 +2454,11 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 	    else {
 		FILE *stdio = PerlSIO_fopen(path, mode);
 		if (stdio) {
-		    PerlIOStdio *s =
-			PerlIOSelf(PerlIO_push
-				   (aTHX_(f = PerlIO_allocate(aTHX)), self,
+		    PerlIOStdio *s;
+		    if (!f) {
+			f = PerlIO_allocate(aTHX);
+		    }
+		    s = PerlIOSelf(PerlIO_push(aTHX_ f, self,
 				    (mode = PerlIOStdio_mode(mode, tmode)),
 				    PerlIOArg),
 				   PerlIOStdio);
@@ -2488,10 +2493,11 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 				       PerlIOStdio_mode(mode, tmode));
 	    }
 	    if (stdio) {
-		PerlIOStdio *s =
-		    PerlIOSelf(PerlIO_push
-			       (aTHX_(f = PerlIO_allocate(aTHX)), self,
-				mode, PerlIOArg), PerlIOStdio);
+		PerlIOStdio *s;
+		if (!f) {
+		    f = PerlIO_allocate(aTHX);
+		}
+		s = PerlIOSelf(PerlIO_push(aTHX_ f, self, mode, PerlIOArg), PerlIOStdio);
 		s->stdio = stdio;
 		PerlIOUnix_refcnt_inc(fileno(s->stdio));
 		return f;
@@ -2880,7 +2886,7 @@ PerlIOBuf_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 	     */
 	}
 	f = (*tab->Open) (aTHX_ tab, layers, n - 1, mode, fd, imode, perm,
-			  NULL, narg, args);
+			  f, narg, args);
 	if (f) {
             if (PerlIO_push(aTHX_ f, self, mode, PerlIOArg) == 0) {
 		/*
