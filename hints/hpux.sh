@@ -217,7 +217,6 @@ else
 
 NOTE: You are using HP cc(1) but GNU ar(1).  This might lead into trouble
 later on, I'm switching to HP ar to play safe.
-
 END
 		ar=/usr/bin/ar
 	    fi
@@ -226,13 +225,6 @@ END
 fi
 
 EOSH
-
-case "`getconf KERNEL_BITS 2>/dev/null`" in
-*64*) ldflags="$ldflags +vnocompatwarnings"
-      lddlflags="$lddlflags +vnocompatwarnings"
-      ;;
-esac
-
 
 # Date: Fri, 6 Sep 96 23:15:31 CDT
 # From: "Daniel S. Lewart" <d-lewart@uiuc.edu>
