@@ -182,11 +182,14 @@ EOM
             # instead of fd_set * (just like 9.X)
             selecttype='int *'
             ;;
-        11 | 12) # 12 may want upping the _POSIX_C_SOURCE
-            ccflags="$ccflags -D_POSIX_C_SOURCE=199506L"
-            libswanted="$libswanted pthread"
+        11 | 12) # 12 may want upping the _POSIX_C_SOURCE datestamp...
+            ccflags=" -D_POSIX_C_SOURCE=199506L $ccflags"
+            set `echo X "$libswanted "| sed -e 's/ c / pthread c /'`
+            shift
+            libswanted="$*"
 	    ;;
         esac
+	usemymalloc='n'
 	;;
 esac
 EOCBU
