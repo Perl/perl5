@@ -3,349 +3,349 @@
 # Any changes made here will be lost!
 return <<'END';
 0000	0040	Common	# In/136.pl
-005B	0060	Common	# In/136.pl
-007B	00A9	Common	# In/136.pl
-00AB	00B4	Common	# In/136.pl
-00B6	00B9	Common	# In/136.pl
-00BB	00BF	Common	# In/136.pl
-00D7		Common	# In/136.pl
-00F7		Common	# In/136.pl
+005b	0060	Common	# In/136.pl
+007b	00a9	Common	# In/136.pl
+00ab	00b4	Common	# In/136.pl
+00b6	00b9	Common	# In/136.pl
+00bb	00bf	Common	# In/136.pl
+00d7		Common	# In/136.pl
+00f7		Common	# In/136.pl
 0220	0221	Common	# In/136.pl
-0234	024F	Common	# In/136.pl
-02AE	02AF	Common	# In/136.pl
-02B9	02DF	Common	# In/136.pl
-02E5	02FF	Common	# In/136.pl
-034F	035F	Common	# In/136.pl
+0234	024f	Common	# In/136.pl
+02ae	02af	Common	# In/136.pl
+02b9	02df	Common	# In/136.pl
+02e5	02ff	Common	# In/136.pl
+034f	035f	Common	# In/136.pl
 0363	0379	Common	# In/136.pl
-037B	0385	Common	# In/136.pl
+037b	0385	Common	# In/136.pl
 0387		Common	# In/136.pl
-038B		Common	# In/136.pl
-038D		Common	# In/136.pl
-03A2		Common	# In/136.pl
-03CF		Common	# In/136.pl
-03D8	03D9	Common	# In/136.pl
-03F6	03FF	Common	# In/136.pl
+038b		Common	# In/136.pl
+038d		Common	# In/136.pl
+03a2		Common	# In/136.pl
+03cf		Common	# In/136.pl
+03d8	03d9	Common	# In/136.pl
+03f6	03ff	Common	# In/136.pl
 0482		Common	# In/136.pl
 0487		Common	# In/136.pl
-048A	048B	Common	# In/136.pl
-04C5	04C6	Common	# In/136.pl
-04C9	04CA	Common	# In/136.pl
-04CD	04CF	Common	# In/136.pl
-04F6	04F7	Common	# In/136.pl
-04FA	0530	Common	# In/136.pl
+048a	048b	Common	# In/136.pl
+04c5	04c6	Common	# In/136.pl
+04c9	04ca	Common	# In/136.pl
+04cd	04cf	Common	# In/136.pl
+04f6	04f7	Common	# In/136.pl
+04fa	0530	Common	# In/136.pl
 0557	0558	Common	# In/136.pl
-055A	0560	Common	# In/136.pl
+055a	0560	Common	# In/136.pl
 0588	0590	Common	# In/136.pl
-05A2		Common	# In/136.pl
-05BA		Common	# In/136.pl
-05BE		Common	# In/136.pl
-05C0		Common	# In/136.pl
-05C3		Common	# In/136.pl
-05C5	05CF	Common	# In/136.pl
-05EB	05EF	Common	# In/136.pl
-05F3	0620	Common	# In/136.pl
-063B	0640	Common	# In/136.pl
-0656	066F	Common	# In/136.pl
-06D4		Common	# In/136.pl
-06E9		Common	# In/136.pl
-06EE	06F9	Common	# In/136.pl
-06FD	070F	Common	# In/136.pl
-072D	072F	Common	# In/136.pl
-074B	077F	Common	# In/136.pl
-07B1	0900	Common	# In/136.pl
+05a2		Common	# In/136.pl
+05ba		Common	# In/136.pl
+05be		Common	# In/136.pl
+05c0		Common	# In/136.pl
+05c3		Common	# In/136.pl
+05c5	05cf	Common	# In/136.pl
+05eb	05ef	Common	# In/136.pl
+05f3	0620	Common	# In/136.pl
+063b	0640	Common	# In/136.pl
+0656	066f	Common	# In/136.pl
+06d4		Common	# In/136.pl
+06e9		Common	# In/136.pl
+06ee	06f9	Common	# In/136.pl
+06fd	070f	Common	# In/136.pl
+072d	072f	Common	# In/136.pl
+074b	077f	Common	# In/136.pl
+07b1	0900	Common	# In/136.pl
 0904		Common	# In/136.pl
-093A	093B	Common	# In/136.pl
-094E	094F	Common	# In/136.pl
+093a	093b	Common	# In/136.pl
+094e	094f	Common	# In/136.pl
 0955	0957	Common	# In/136.pl
 0964	0965	Common	# In/136.pl
 0970	0980	Common	# In/136.pl
 0982	0984	Common	# In/136.pl
-098D	098E	Common	# In/136.pl
+098d	098e	Common	# In/136.pl
 0991	0992	Common	# In/136.pl
-09A9		Common	# In/136.pl
-09B1		Common	# In/136.pl
-09B3	09B5	Common	# In/136.pl
-09BA	09BB	Common	# In/136.pl
-09BD		Common	# In/136.pl
-09C5	09C6	Common	# In/136.pl
-09C9	09CA	Common	# In/136.pl
-09CE	09D6	Common	# In/136.pl
-09D8	09DB	Common	# In/136.pl
-09DE		Common	# In/136.pl
-09E4	09E5	Common	# In/136.pl
-09F2	0A01	Common	# In/136.pl
-0A03	0A04	Common	# In/136.pl
-0A0B	0A0E	Common	# In/136.pl
-0A11	0A12	Common	# In/136.pl
-0A29		Common	# In/136.pl
-0A31		Common	# In/136.pl
-0A34		Common	# In/136.pl
-0A37		Common	# In/136.pl
-0A3A	0A3B	Common	# In/136.pl
-0A3D		Common	# In/136.pl
-0A43	0A46	Common	# In/136.pl
-0A49	0A4A	Common	# In/136.pl
-0A4E	0A58	Common	# In/136.pl
-0A5D		Common	# In/136.pl
-0A5F	0A65	Common	# In/136.pl
-0A75	0A80	Common	# In/136.pl
-0A84		Common	# In/136.pl
-0A8C		Common	# In/136.pl
-0A8E		Common	# In/136.pl
-0A92		Common	# In/136.pl
-0AA9		Common	# In/136.pl
-0AB1		Common	# In/136.pl
-0AB4		Common	# In/136.pl
-0ABA	0ABB	Common	# In/136.pl
-0AC6		Common	# In/136.pl
-0ACA		Common	# In/136.pl
-0ACE	0ACF	Common	# In/136.pl
-0AD1	0ADF	Common	# In/136.pl
-0AE1	0AE5	Common	# In/136.pl
-0AF0	0B00	Common	# In/136.pl
-0B04		Common	# In/136.pl
-0B0D	0B0E	Common	# In/136.pl
-0B11	0B12	Common	# In/136.pl
-0B29		Common	# In/136.pl
-0B31		Common	# In/136.pl
-0B34	0B35	Common	# In/136.pl
-0B3A	0B3B	Common	# In/136.pl
-0B44	0B46	Common	# In/136.pl
-0B49	0B4A	Common	# In/136.pl
-0B4E	0B55	Common	# In/136.pl
-0B58	0B5B	Common	# In/136.pl
-0B5E		Common	# In/136.pl
-0B62	0B65	Common	# In/136.pl
-0B70	0B81	Common	# In/136.pl
-0B84		Common	# In/136.pl
-0B8B	0B8D	Common	# In/136.pl
-0B91		Common	# In/136.pl
-0B96	0B98	Common	# In/136.pl
-0B9B		Common	# In/136.pl
-0B9D		Common	# In/136.pl
-0BA0	0BA2	Common	# In/136.pl
-0BA5	0BA7	Common	# In/136.pl
-0BAB	0BAD	Common	# In/136.pl
-0BB6		Common	# In/136.pl
-0BBA	0BBD	Common	# In/136.pl
-0BC3	0BC5	Common	# In/136.pl
-0BC9		Common	# In/136.pl
-0BCE	0BD6	Common	# In/136.pl
-0BD8	0BE6	Common	# In/136.pl
-0BF3	0C00	Common	# In/136.pl
-0C04		Common	# In/136.pl
-0C0D		Common	# In/136.pl
-0C11		Common	# In/136.pl
-0C29		Common	# In/136.pl
-0C34		Common	# In/136.pl
-0C3A	0C3D	Common	# In/136.pl
-0C45		Common	# In/136.pl
-0C49		Common	# In/136.pl
-0C4E	0C54	Common	# In/136.pl
-0C57	0C5F	Common	# In/136.pl
-0C62	0C65	Common	# In/136.pl
-0C70	0C81	Common	# In/136.pl
-0C84		Common	# In/136.pl
-0C8D		Common	# In/136.pl
-0C91		Common	# In/136.pl
-0CA9		Common	# In/136.pl
-0CB4		Common	# In/136.pl
-0CBA	0CBD	Common	# In/136.pl
-0CC5		Common	# In/136.pl
-0CC9		Common	# In/136.pl
-0CCE	0CD4	Common	# In/136.pl
-0CD7	0CDD	Common	# In/136.pl
-0CDF		Common	# In/136.pl
-0CE2	0CE5	Common	# In/136.pl
-0CF0	0D01	Common	# In/136.pl
-0D04		Common	# In/136.pl
-0D0D		Common	# In/136.pl
-0D11		Common	# In/136.pl
-0D29		Common	# In/136.pl
-0D3A	0D3D	Common	# In/136.pl
-0D44	0D45	Common	# In/136.pl
-0D49		Common	# In/136.pl
-0D4E	0D56	Common	# In/136.pl
-0D58	0D5F	Common	# In/136.pl
-0D62	0D65	Common	# In/136.pl
-0D70	0D81	Common	# In/136.pl
-0D84		Common	# In/136.pl
-0D97	0D99	Common	# In/136.pl
-0DB2		Common	# In/136.pl
-0DBC		Common	# In/136.pl
-0DBE	0DBF	Common	# In/136.pl
-0DC7	0DC9	Common	# In/136.pl
-0DCB	0DCE	Common	# In/136.pl
-0DD5		Common	# In/136.pl
-0DD7		Common	# In/136.pl
-0DE0	0DF1	Common	# In/136.pl
-0DF4	0E00	Common	# In/136.pl
-0E3B	0E3F	Common	# In/136.pl
-0E4F		Common	# In/136.pl
-0E5A	0E80	Common	# In/136.pl
-0E83		Common	# In/136.pl
-0E85	0E86	Common	# In/136.pl
-0E89		Common	# In/136.pl
-0E8B	0E8C	Common	# In/136.pl
-0E8E	0E93	Common	# In/136.pl
-0E98		Common	# In/136.pl
-0EA0		Common	# In/136.pl
-0EA4		Common	# In/136.pl
-0EA6		Common	# In/136.pl
-0EA8	0EA9	Common	# In/136.pl
-0EAC		Common	# In/136.pl
-0EBA		Common	# In/136.pl
-0EBE	0EBF	Common	# In/136.pl
-0EC5		Common	# In/136.pl
-0EC7		Common	# In/136.pl
-0ECE	0ECF	Common	# In/136.pl
-0EDA	0EDB	Common	# In/136.pl
-0EDE	0EFF	Common	# In/136.pl
-0F01	0F17	Common	# In/136.pl
-0F1A	0F1F	Common	# In/136.pl
-0F34		Common	# In/136.pl
-0F36		Common	# In/136.pl
-0F38		Common	# In/136.pl
-0F3A	0F3F	Common	# In/136.pl
-0F48		Common	# In/136.pl
-0F6B	0F70	Common	# In/136.pl
-0F85		Common	# In/136.pl
-0F8C	0F8F	Common	# In/136.pl
-0F98		Common	# In/136.pl
-0FBD	0FC5	Common	# In/136.pl
-0FC7	0FFF	Common	# In/136.pl
+09a9		Common	# In/136.pl
+09b1		Common	# In/136.pl
+09b3	09b5	Common	# In/136.pl
+09ba	09bb	Common	# In/136.pl
+09bd		Common	# In/136.pl
+09c5	09c6	Common	# In/136.pl
+09c9	09ca	Common	# In/136.pl
+09ce	09d6	Common	# In/136.pl
+09d8	09db	Common	# In/136.pl
+09de		Common	# In/136.pl
+09e4	09e5	Common	# In/136.pl
+09f2	0a01	Common	# In/136.pl
+0a03	0a04	Common	# In/136.pl
+0a0b	0a0e	Common	# In/136.pl
+0a11	0a12	Common	# In/136.pl
+0a29		Common	# In/136.pl
+0a31		Common	# In/136.pl
+0a34		Common	# In/136.pl
+0a37		Common	# In/136.pl
+0a3a	0a3b	Common	# In/136.pl
+0a3d		Common	# In/136.pl
+0a43	0a46	Common	# In/136.pl
+0a49	0a4a	Common	# In/136.pl
+0a4e	0a58	Common	# In/136.pl
+0a5d		Common	# In/136.pl
+0a5f	0a65	Common	# In/136.pl
+0a75	0a80	Common	# In/136.pl
+0a84		Common	# In/136.pl
+0a8c		Common	# In/136.pl
+0a8e		Common	# In/136.pl
+0a92		Common	# In/136.pl
+0aa9		Common	# In/136.pl
+0ab1		Common	# In/136.pl
+0ab4		Common	# In/136.pl
+0aba	0abb	Common	# In/136.pl
+0ac6		Common	# In/136.pl
+0aca		Common	# In/136.pl
+0ace	0acf	Common	# In/136.pl
+0ad1	0adf	Common	# In/136.pl
+0ae1	0ae5	Common	# In/136.pl
+0af0	0b00	Common	# In/136.pl
+0b04		Common	# In/136.pl
+0b0d	0b0e	Common	# In/136.pl
+0b11	0b12	Common	# In/136.pl
+0b29		Common	# In/136.pl
+0b31		Common	# In/136.pl
+0b34	0b35	Common	# In/136.pl
+0b3a	0b3b	Common	# In/136.pl
+0b44	0b46	Common	# In/136.pl
+0b49	0b4a	Common	# In/136.pl
+0b4e	0b55	Common	# In/136.pl
+0b58	0b5b	Common	# In/136.pl
+0b5e		Common	# In/136.pl
+0b62	0b65	Common	# In/136.pl
+0b70	0b81	Common	# In/136.pl
+0b84		Common	# In/136.pl
+0b8b	0b8d	Common	# In/136.pl
+0b91		Common	# In/136.pl
+0b96	0b98	Common	# In/136.pl
+0b9b		Common	# In/136.pl
+0b9d		Common	# In/136.pl
+0ba0	0ba2	Common	# In/136.pl
+0ba5	0ba7	Common	# In/136.pl
+0bab	0bad	Common	# In/136.pl
+0bb6		Common	# In/136.pl
+0bba	0bbd	Common	# In/136.pl
+0bc3	0bc5	Common	# In/136.pl
+0bc9		Common	# In/136.pl
+0bce	0bd6	Common	# In/136.pl
+0bd8	0be6	Common	# In/136.pl
+0bf3	0c00	Common	# In/136.pl
+0c04		Common	# In/136.pl
+0c0d		Common	# In/136.pl
+0c11		Common	# In/136.pl
+0c29		Common	# In/136.pl
+0c34		Common	# In/136.pl
+0c3a	0c3d	Common	# In/136.pl
+0c45		Common	# In/136.pl
+0c49		Common	# In/136.pl
+0c4e	0c54	Common	# In/136.pl
+0c57	0c5f	Common	# In/136.pl
+0c62	0c65	Common	# In/136.pl
+0c70	0c81	Common	# In/136.pl
+0c84		Common	# In/136.pl
+0c8d		Common	# In/136.pl
+0c91		Common	# In/136.pl
+0ca9		Common	# In/136.pl
+0cb4		Common	# In/136.pl
+0cba	0cbd	Common	# In/136.pl
+0cc5		Common	# In/136.pl
+0cc9		Common	# In/136.pl
+0cce	0cd4	Common	# In/136.pl
+0cd7	0cdd	Common	# In/136.pl
+0cdf		Common	# In/136.pl
+0ce2	0ce5	Common	# In/136.pl
+0cf0	0d01	Common	# In/136.pl
+0d04		Common	# In/136.pl
+0d0d		Common	# In/136.pl
+0d11		Common	# In/136.pl
+0d29		Common	# In/136.pl
+0d3a	0d3d	Common	# In/136.pl
+0d44	0d45	Common	# In/136.pl
+0d49		Common	# In/136.pl
+0d4e	0d56	Common	# In/136.pl
+0d58	0d5f	Common	# In/136.pl
+0d62	0d65	Common	# In/136.pl
+0d70	0d81	Common	# In/136.pl
+0d84		Common	# In/136.pl
+0d97	0d99	Common	# In/136.pl
+0db2		Common	# In/136.pl
+0dbc		Common	# In/136.pl
+0dbe	0dbf	Common	# In/136.pl
+0dc7	0dc9	Common	# In/136.pl
+0dcb	0dce	Common	# In/136.pl
+0dd5		Common	# In/136.pl
+0dd7		Common	# In/136.pl
+0de0	0df1	Common	# In/136.pl
+0df4	0e00	Common	# In/136.pl
+0e3b	0e3f	Common	# In/136.pl
+0e4f		Common	# In/136.pl
+0e5a	0e80	Common	# In/136.pl
+0e83		Common	# In/136.pl
+0e85	0e86	Common	# In/136.pl
+0e89		Common	# In/136.pl
+0e8b	0e8c	Common	# In/136.pl
+0e8e	0e93	Common	# In/136.pl
+0e98		Common	# In/136.pl
+0ea0		Common	# In/136.pl
+0ea4		Common	# In/136.pl
+0ea6		Common	# In/136.pl
+0ea8	0ea9	Common	# In/136.pl
+0eac		Common	# In/136.pl
+0eba		Common	# In/136.pl
+0ebe	0ebf	Common	# In/136.pl
+0ec5		Common	# In/136.pl
+0ec7		Common	# In/136.pl
+0ece	0ecf	Common	# In/136.pl
+0eda	0edb	Common	# In/136.pl
+0ede	0eff	Common	# In/136.pl
+0f01	0f17	Common	# In/136.pl
+0f1a	0f1f	Common	# In/136.pl
+0f34		Common	# In/136.pl
+0f36		Common	# In/136.pl
+0f38		Common	# In/136.pl
+0f3a	0f3f	Common	# In/136.pl
+0f48		Common	# In/136.pl
+0f6b	0f70	Common	# In/136.pl
+0f85		Common	# In/136.pl
+0f8c	0f8f	Common	# In/136.pl
+0f98		Common	# In/136.pl
+0fbd	0fc5	Common	# In/136.pl
+0fc7	0fff	Common	# In/136.pl
 1022		Common	# In/136.pl
 1028		Common	# In/136.pl
-102B		Common	# In/136.pl
+102b		Common	# In/136.pl
 1033	1035	Common	# In/136.pl
-103A	103F	Common	# In/136.pl
-104A	104F	Common	# In/136.pl
-105A	109F	Common	# In/136.pl
-10C6	10CF	Common	# In/136.pl
-10F7	10FF	Common	# In/136.pl
-115A	115E	Common	# In/136.pl
-11A3	11A7	Common	# In/136.pl
-11FA	11FF	Common	# In/136.pl
+103a	103f	Common	# In/136.pl
+104a	104f	Common	# In/136.pl
+105a	109f	Common	# In/136.pl
+10c6	10cf	Common	# In/136.pl
+10f7	10ff	Common	# In/136.pl
+115a	115e	Common	# In/136.pl
+11a3	11a7	Common	# In/136.pl
+11fa	11ff	Common	# In/136.pl
 1207		Common	# In/136.pl
 1247		Common	# In/136.pl
 1249		Common	# In/136.pl
-124E	124F	Common	# In/136.pl
+124e	124f	Common	# In/136.pl
 1257		Common	# In/136.pl
 1259		Common	# In/136.pl
-125E	125F	Common	# In/136.pl
+125e	125f	Common	# In/136.pl
 1287		Common	# In/136.pl
 1289		Common	# In/136.pl
-128E	128F	Common	# In/136.pl
-12AF		Common	# In/136.pl
-12B1		Common	# In/136.pl
-12B6	12B7	Common	# In/136.pl
-12BF		Common	# In/136.pl
-12C1		Common	# In/136.pl
-12C6	12C7	Common	# In/136.pl
-12CF		Common	# In/136.pl
-12D7		Common	# In/136.pl
-12EF		Common	# In/136.pl
-130F		Common	# In/136.pl
+128e	128f	Common	# In/136.pl
+12af		Common	# In/136.pl
+12b1		Common	# In/136.pl
+12b6	12b7	Common	# In/136.pl
+12bf		Common	# In/136.pl
+12c1		Common	# In/136.pl
+12c6	12c7	Common	# In/136.pl
+12cf		Common	# In/136.pl
+12d7		Common	# In/136.pl
+12ef		Common	# In/136.pl
+130f		Common	# In/136.pl
 1311		Common	# In/136.pl
 1316	1317	Common	# In/136.pl
-131F		Common	# In/136.pl
+131f		Common	# In/136.pl
 1347		Common	# In/136.pl
-135B	1368	Common	# In/136.pl
-137D	139F	Common	# In/136.pl
-13F5	1400	Common	# In/136.pl
-166D	166E	Common	# In/136.pl
+135b	1368	Common	# In/136.pl
+137d	139f	Common	# In/136.pl
+13f5	1400	Common	# In/136.pl
+166d	166e	Common	# In/136.pl
 1677	1680	Common	# In/136.pl
-169B	169F	Common	# In/136.pl
-16EB	16ED	Common	# In/136.pl
-16F1	177F	Common	# In/136.pl
-17D4	17DF	Common	# In/136.pl
-17EA	180F	Common	# In/136.pl
-181A	181F	Common	# In/136.pl
-1878	187F	Common	# In/136.pl
-18AA	1DFF	Common	# In/136.pl
-1E9C	1E9F	Common	# In/136.pl
-1EFA	1EFF	Common	# In/136.pl
-1F16	1F17	Common	# In/136.pl
-1F1E	1F1F	Common	# In/136.pl
-1F46	1F47	Common	# In/136.pl
-1F4E	1F4F	Common	# In/136.pl
-1F58		Common	# In/136.pl
-1F5A		Common	# In/136.pl
-1F5C		Common	# In/136.pl
-1F5E		Common	# In/136.pl
-1F7E	1F7F	Common	# In/136.pl
-1FB5		Common	# In/136.pl
-1FBD		Common	# In/136.pl
-1FBF	1FC1	Common	# In/136.pl
-1FC5		Common	# In/136.pl
-1FCD	1FCF	Common	# In/136.pl
-1FD4	1FD5	Common	# In/136.pl
-1FDC	1FDF	Common	# In/136.pl
-1FED	1FF1	Common	# In/136.pl
-1FF5		Common	# In/136.pl
-1FFD	207E	Common	# In/136.pl
-2080	20CF	Common	# In/136.pl
-20E4	2125	Common	# In/136.pl
+169b	169f	Common	# In/136.pl
+16eb	16ed	Common	# In/136.pl
+16f1	177f	Common	# In/136.pl
+17d4	17df	Common	# In/136.pl
+17ea	180f	Common	# In/136.pl
+181a	181f	Common	# In/136.pl
+1878	187f	Common	# In/136.pl
+18aa	1dff	Common	# In/136.pl
+1e9c	1e9f	Common	# In/136.pl
+1efa	1eff	Common	# In/136.pl
+1f16	1f17	Common	# In/136.pl
+1f1e	1f1f	Common	# In/136.pl
+1f46	1f47	Common	# In/136.pl
+1f4e	1f4f	Common	# In/136.pl
+1f58		Common	# In/136.pl
+1f5a		Common	# In/136.pl
+1f5c		Common	# In/136.pl
+1f5e		Common	# In/136.pl
+1f7e	1f7f	Common	# In/136.pl
+1fb5		Common	# In/136.pl
+1fbd		Common	# In/136.pl
+1fbf	1fc1	Common	# In/136.pl
+1fc5		Common	# In/136.pl
+1fcd	1fcf	Common	# In/136.pl
+1fd4	1fd5	Common	# In/136.pl
+1fdc	1fdf	Common	# In/136.pl
+1fed	1ff1	Common	# In/136.pl
+1ff5		Common	# In/136.pl
+1ffd	207e	Common	# In/136.pl
+2080	20cf	Common	# In/136.pl
+20e4	2125	Common	# In/136.pl
 2127	2129	Common	# In/136.pl
-212C	2E7F	Common	# In/136.pl
-2E9A		Common	# In/136.pl
-2EF4	2EFF	Common	# In/136.pl
-2FD6	3004	Common	# In/136.pl
+212c	2e7f	Common	# In/136.pl
+2e9a		Common	# In/136.pl
+2ef4	2eff	Common	# In/136.pl
+2fd6	3004	Common	# In/136.pl
 3006		Common	# In/136.pl
 3008	3020	Common	# In/136.pl
 3030	3037	Common	# In/136.pl
-303B	3040	Common	# In/136.pl
+303b	3040	Common	# In/136.pl
 3095	3098	Common	# In/136.pl
-309B	309C	Common	# In/136.pl
-309F	30A0	Common	# In/136.pl
-30FB	30FC	Common	# In/136.pl
-30FF	3104	Common	# In/136.pl
-312D	3130	Common	# In/136.pl
-318F	319F	Common	# In/136.pl
-31B8	33FF	Common	# In/136.pl
-4DB6	4DFF	Common	# In/136.pl
-9FA6	9FFF	Common	# In/136.pl
-A48D	A48F	Common	# In/136.pl
-A4A2	A4A3	Common	# In/136.pl
-A4B4		Common	# In/136.pl
-A4C1		Common	# In/136.pl
-A4C5		Common	# In/136.pl
-A4C7	ABFF	Common	# In/136.pl
-D7A4	F8FF	Common	# In/136.pl
-FA2E	FAFF	Common	# In/136.pl
-FB07	FB12	Common	# In/136.pl
-FB18	FB1C	Common	# In/136.pl
-FB29		Common	# In/136.pl
-FB37		Common	# In/136.pl
-FB3D		Common	# In/136.pl
-FB3F		Common	# In/136.pl
-FB42		Common	# In/136.pl
-FB45		Common	# In/136.pl
-FBB2	FBD2	Common	# In/136.pl
-FD3E	FD4F	Common	# In/136.pl
-FD90	FD91	Common	# In/136.pl
-FDC8	FDEF	Common	# In/136.pl
-FDFC	FE1F	Common	# In/136.pl
-FE24	FE6F	Common	# In/136.pl
-FE73		Common	# In/136.pl
-FE75		Common	# In/136.pl
-FEFD	FF20	Common	# In/136.pl
-FF3B	FF40	Common	# In/136.pl
-FF5B	FF65	Common	# In/136.pl
-FF70		Common	# In/136.pl
-FF9E	FF9F	Common	# In/136.pl
-FFBF	FFC1	Common	# In/136.pl
-FFC8	FFC9	Common	# In/136.pl
-FFD0	FFD1	Common	# In/136.pl
-FFD8	FFD9	Common	# In/136.pl
-FFDD	102FF	Common	# In/136.pl
-1031F	1032F	Common	# In/136.pl
-1034B	103FF	Common	# In/136.pl
+309b	309c	Common	# In/136.pl
+309f	30a0	Common	# In/136.pl
+30fb	30fc	Common	# In/136.pl
+30ff	3104	Common	# In/136.pl
+312d	3130	Common	# In/136.pl
+318f	319f	Common	# In/136.pl
+31b8	33ff	Common	# In/136.pl
+4db6	4dff	Common	# In/136.pl
+9fa6	9fff	Common	# In/136.pl
+a48d	a48f	Common	# In/136.pl
+a4a2	a4a3	Common	# In/136.pl
+a4b4		Common	# In/136.pl
+a4c1		Common	# In/136.pl
+a4c5		Common	# In/136.pl
+a4c7	abff	Common	# In/136.pl
+d7a4	f8ff	Common	# In/136.pl
+fa2e	faff	Common	# In/136.pl
+fb07	fb12	Common	# In/136.pl
+fb18	fb1c	Common	# In/136.pl
+fb29		Common	# In/136.pl
+fb37		Common	# In/136.pl
+fb3d		Common	# In/136.pl
+fb3f		Common	# In/136.pl
+fb42		Common	# In/136.pl
+fb45		Common	# In/136.pl
+fbb2	fbd2	Common	# In/136.pl
+fd3e	fd4f	Common	# In/136.pl
+fd90	fd91	Common	# In/136.pl
+fdc8	fdef	Common	# In/136.pl
+fdfc	fe1f	Common	# In/136.pl
+fe24	fe6f	Common	# In/136.pl
+fe73		Common	# In/136.pl
+fe75		Common	# In/136.pl
+fefd	ff20	Common	# In/136.pl
+ff3b	ff40	Common	# In/136.pl
+ff5b	ff65	Common	# In/136.pl
+ff70		Common	# In/136.pl
+ff9e	ff9f	Common	# In/136.pl
+ffbf	ffc1	Common	# In/136.pl
+ffc8	ffc9	Common	# In/136.pl
+ffd0	ffd1	Common	# In/136.pl
+ffd8	ffd9	Common	# In/136.pl
+ffdd	102ff	Common	# In/136.pl
+1031f	1032f	Common	# In/136.pl
+1034b	103ff	Common	# In/136.pl
 10426	10427	Common	# In/136.pl
-1044E	1D166	Common	# In/136.pl
-1D16A	1D17A	Common	# In/136.pl
-1D183	1D184	Common	# In/136.pl
-1D18C	1D1A9	Common	# In/136.pl
-1D1AE	1FFFF	Common	# In/136.pl
-2A6D7	2F7FF	Common	# In/136.pl
+1044e	1d166	Common	# In/136.pl
+1d16a	1d17a	Common	# In/136.pl
+1d183	1d184	Common	# In/136.pl
+1d18c	1d1a9	Common	# In/136.pl
+1d1ae	1ffff	Common	# In/136.pl
+2a6d7	2f7ff	Common	# In/136.pl
 END

@@ -139,10 +139,40 @@
 'CJK Compatibility Ideographs Supplement'     => 134,
 'Tags'                                        => 135,
 'Common'                                      => 136,
+'Any'                                         => 137,
+'White_space'                                 => 138,
+'Bidi_Control'                                => 139,
+'Join_Control'                                => 140,
+'Dash'                                        => 141,
+'Hyphen'                                      => 142,
+'Quotation_Mark'                              => 143,
+'Terminal_Punctuation'                        => 144,
+'Other_Math'                                  => 145,
+'Hex_Digit'                                   => 146,
+'ASCII_Hex_Digit'                             => 147,
+'Other_Alphabetic'                            => 148,
+'Ideographic'                                 => 149,
+'Diacritic'                                   => 150,
+'Extender'                                    => 151,
+'Other_Lowercase'                             => 152,
+'Other_Uppercase'                             => 153,
+'Noncharacter_Code_Point'                     => 154,
+'Assigned'                                    => 155,
+'Alphabetic'                                  => 156,
+'Lowercase'                                   => 157,
+'Uppercase'                                   => 158,
+'Math'                                        => 159,
+'Lampersand'                                  => 160,
+'ID_Start'                                    => 161,
+'ID_Continue'                                 => 162,
 );
 %utf8::InPat = (
 'alp' => {
 	'Alphabetic(?:[-_]|\s+)?Presentation(?:[-_]|\s+)?Forms' => 'Alphabetic Presentation Forms',
+	'Alphabetic' => 'Alphabetic',
+},
+'any' => {
+	'Any' => 'Any',
 },
 'ara' => {
 	'ARABIC' => 'ARABIC',
@@ -157,12 +187,21 @@
 'arr' => {
 	'Arrows' => 'Arrows',
 },
+'asc' => {
+	'ASCII(?:[-_]|\s+)?Hex(?:[-_]|\s+)?Digit' => 'ASCII_Hex_Digit',
+},
+'ass' => {
+	'Assigned' => 'Assigned',
+},
 'bas' => {
 	'Basic(?:[-_]|\s+)?Latin' => 'Basic Latin',
 },
 'ben' => {
 	'BENGALI' => 'BENGALI',
 	'Bengali(?:[-_]|\s+)?Block' => 'Bengali Block',
+},
+'bid' => {
+	'Bidi(?:[-_]|\s+)?Control' => 'Bidi_Control',
 },
 'blo' => {
 	'Block(?:[-_]|\s+)?Elements' => 'Block Elements',
@@ -215,6 +254,9 @@
 	'CYRILLIC' => 'CYRILLIC',
 	'Cyrillic(?:[-_]|\s+)?Block' => 'Cyrillic Block',
 },
+'das' => {
+	'Dash' => 'Dash',
+},
 'des' => {
 	'DESERET' => 'DESERET',
 	'Deseret(?:[-_]|\s+)?Block' => 'Deseret Block',
@@ -222,6 +264,9 @@
 'dev' => {
 	'DEVANAGARI' => 'DEVANAGARI',
 	'Devanagari(?:[-_]|\s+)?Block' => 'Devanagari Block',
+},
+'dia' => {
+	'Diacritic' => 'Diacritic',
 },
 'din' => {
 	'Dingbats' => 'Dingbats',
@@ -233,6 +278,9 @@
 'eth' => {
 	'ETHIOPIC' => 'ETHIOPIC',
 	'Ethiopic(?:[-_]|\s+)?Block' => 'Ethiopic Block',
+},
+'ext' => {
+	'Extender' => 'Extender',
 },
 'gen' => {
 	'General(?:[-_]|\s+)?Punctuation' => 'General Punctuation',
@@ -273,6 +321,9 @@
 	'HEBREW' => 'HEBREW',
 	'Hebrew(?:[-_]|\s+)?Block' => 'Hebrew Block',
 },
+'hex' => {
+	'Hex(?:[-_]|\s+)?Digit' => 'Hex_Digit',
+},
 'hig' => {
 	'High(?:[-_]|\s+)?Surrogates' => 'High Surrogates',
 	'High(?:[-_]|\s+)?Private(?:[-_]|\s+)?Use(?:[-_]|\s+)?Surrogates' => 'High Private Use Surrogates',
@@ -281,14 +332,25 @@
 	'HIRAGANA' => 'HIRAGANA',
 	'Hiragana(?:[-_]|\s+)?Block' => 'Hiragana Block',
 },
+'hyp' => {
+	'Hyphen' => 'Hyphen',
+},
+'id_' => {
+	'ID(?:[-_]|\s+)?Start' => 'ID_Start',
+	'ID(?:[-_]|\s+)?Continue' => 'ID_Continue',
+},
 'ide' => {
 	'Ideographic(?:[-_]|\s+)?Description(?:[-_]|\s+)?Characters' => 'Ideographic Description Characters',
+	'Ideographic' => 'Ideographic',
 },
 'inh' => {
 	'INHERITED' => 'INHERITED',
 },
 'ipa' => {
 	'IPA(?:[-_]|\s+)?Extensions' => 'IPA Extensions',
+},
+'joi' => {
+	'Join(?:[-_]|\s+)?Control' => 'Join_Control',
 },
 'kan' => {
 	'KANNADA' => 'KANNADA',
@@ -303,6 +365,9 @@
 'khm' => {
 	'KHMER' => 'KHMER',
 	'Khmer(?:[-_]|\s+)?Block' => 'Khmer Block',
+},
+'lam' => {
+	'Lampersand' => 'Lampersand',
 },
 'lao' => {
 	'LAO' => 'LAO',
@@ -320,6 +385,7 @@
 },
 'low' => {
 	'Low(?:[-_]|\s+)?Surrogates' => 'Low Surrogates',
+	'Lowercase' => 'Lowercase',
 },
 'mal' => {
 	'MALAYALAM' => 'MALAYALAM',
@@ -328,6 +394,7 @@
 'mat' => {
 	'Mathematical(?:[-_]|\s+)?Operators' => 'Mathematical Operators',
 	'Mathematical(?:[-_]|\s+)?Alphanumeric(?:[-_]|\s+)?Symbols' => 'Mathematical Alphanumeric Symbols',
+	'Math' => 'Math',
 },
 'mis' => {
 	'Miscellaneous(?:[-_]|\s+)?Technical' => 'Miscellaneous Technical',
@@ -343,6 +410,9 @@
 'mya' => {
 	'MYANMAR' => 'MYANMAR',
 	'Myanmar(?:[-_]|\s+)?Block' => 'Myanmar Block',
+},
+'non' => {
+	'Noncharacter(?:[-_]|\s+)?Code(?:[-_]|\s+)?Point' => 'Noncharacter_Code_Point',
 },
 'num' => {
 	'Number(?:[-_]|\s+)?Forms' => 'Number Forms',
@@ -362,8 +432,17 @@
 	'ORIYA' => 'ORIYA',
 	'Oriya(?:[-_]|\s+)?Block' => 'Oriya Block',
 },
+'oth' => {
+	'Other(?:[-_]|\s+)?Math' => 'Other_Math',
+	'Other(?:[-_]|\s+)?Alphabetic' => 'Other_Alphabetic',
+	'Other(?:[-_]|\s+)?Lowercase' => 'Other_Lowercase',
+	'Other(?:[-_]|\s+)?Uppercase' => 'Other_Uppercase',
+},
 'pri' => {
 	'Private(?:[-_]|\s+)?Use' => 'Private Use',
+},
+'quo' => {
+	'Quotation(?:[-_]|\s+)?Mark' => 'Quotation_Mark',
 },
 'run' => {
 	'RUNIC' => 'RUNIC',
@@ -400,6 +479,9 @@
 	'TELUGU' => 'TELUGU',
 	'Telugu(?:[-_]|\s+)?Block' => 'Telugu Block',
 },
+'ter' => {
+	'Terminal(?:[-_]|\s+)?Punctuation' => 'Terminal_Punctuation',
+},
 'tha' => {
 	'THAANA' => 'THAANA',
 	'THAI' => 'THAI',
@@ -412,6 +494,12 @@
 },
 'uni' => {
 	'Unified(?:[-_]|\s+)?Canadian(?:[-_]|\s+)?Aboriginal(?:[-_]|\s+)?Syllabics' => 'Unified Canadian Aboriginal Syllabics',
+},
+'upp' => {
+	'Uppercase' => 'Uppercase',
+},
+'whi' => {
+	'White(?:[-_]|\s+)?space' => 'White_space',
 },
 'yi' => {
 	'YI' => 'YI',

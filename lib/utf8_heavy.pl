@@ -26,6 +26,8 @@ sub SWASHNEW {
 	$type =~ s/^In(?:[-_]|\s+)?(?!herited$)//i;
 	$type =~ s/\s+$//;
 
+        $type = 'Lampersand' if $type =~ /^(?:Is)?L&$/;
+
 	my $inprefix = substr(lc($type), 0, 3);
 	if (exists $utf8::InPat{$inprefix}) {
 	    my $In = $type;
@@ -43,9 +45,8 @@ sub SWASHNEW {
 
 	unless (defined $file) {
 	    # This is separate from 'To' in preparation of Is.pl (a la In.pl).
-	    if ($type =~ /^Is([A-Z][A-Za-z]*|L&)$/ || $type =~ /^(L&)$/ ) {
-		my $cat = $1 eq 'L&' ? 'L' : $1;
-		$file = "unicore/Is/$cat";
+	    if ($type =~ /^Is([A-Z][A-Za-z]*)$/) {
+		$file = "unicore/Is/$1";
 	    } elsif ((not defined $file) && $type =~ /^To([A-Z][A-Za-z]*)$/) {
 		$file = "unicore/To/$1";
 	    }
