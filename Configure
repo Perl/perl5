@@ -71,6 +71,9 @@ if test X"$trnl" = X; then
 		;;
 	esac
 fi
+if test -n "$DJGPP"; then
+	trnl='\012'
+fi
 if test X"$trnl" = X; then
 	cat <<EOM >&2
 
