@@ -1,5 +1,5 @@
 #define PATCHLEVEL 3
-#define SUBVERSION 2
+#define SUBVERSION 3
 
 /*
 	local_patches -- list of locally applied less-than-subversion patches.
