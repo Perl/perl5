@@ -770,6 +770,7 @@ static struct { char type; char *name; } magic_names[] = {
 	{ PERL_MAGIC_taint,          "taint(t)" },
 	{ PERL_MAGIC_uvar_elem,      "uvar_elem(v)" },
 	{ PERL_MAGIC_vec,            "vec(v)" },
+	{ PERL_MAGIC_vstring,        "v-string(V)" },
 	{ PERL_MAGIC_utf8,           "utf8(w)" },
 	{ PERL_MAGIC_substr,         "substr(x)" },
 	{ PERL_MAGIC_defelem,        "defelem(y)" },

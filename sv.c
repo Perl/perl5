@@ -3581,6 +3581,12 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
     dtype = SvTYPE(dstr);
 
     SvAMAGIC_off(dstr);
+    if ( SvVOK(dstr) ) 
+    {
+	/* need to nuke the magic */
+	mg_free(dstr);
+	SvRMAGICAL_off(dstr);
+    }
 
     /* There's a lot of redundancy below but we're going for speed here */
 
@@ -3962,6 +3968,12 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		SvIsUV_on(dstr);
 	    SvIVX(dstr) = SvIVX(sstr);
 	}
+	if ( SvVOK(sstr) ) {
+	    MAGIC *smg = mg_find(sstr,PERL_MAGIC_vstring);
+	    sv_magic(dstr, NULL, PERL_MAGIC_vstring,
+		     smg->mg_ptr, smg->mg_len);
+	    SvRMAGICAL_on(dstr);
+	} 
     }
     else if (sflags & SVp_IOK) {
 	if (sflags & SVf_IOK)
@@ -4649,6 +4661,9 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
 	break;
     case PERL_MAGIC_vec:
 	vtable = &PL_vtbl_vec;
+	break;
+    case PERL_MAGIC_vstring:
+	vtable = 0;
 	break;
     case PERL_MAGIC_utf8:
         vtable = &PL_vtbl_utf8;

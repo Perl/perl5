@@ -963,6 +963,7 @@ The current kinds of Magic Virtual Tables are:
     t  PERL_MAGIC_taint          vtbl_taint     Taintedness
     U  PERL_MAGIC_uvar           vtbl_uvar      Available for use by extensions
     v  PERL_MAGIC_vec            vtbl_vec       vec() lvalue
+    V  PERL_MAGIC_vstring        (none)         v-string scalars
     x  PERL_MAGIC_substr         vtbl_substr    substr() lvalue
     y  PERL_MAGIC_defelem        vtbl_defelem   Shadow "foreach" iterator
 						variable / smart parameter
@@ -974,10 +975,10 @@ The current kinds of Magic Virtual Tables are:
     ~  PERL_MAGIC_ext            (none)         Available for use by extensions
 
 When an uppercase and lowercase letter both exist in the table, then the
-uppercase letter is used to represent some kind of composite type (a list
-or a hash), and the lowercase letter is used to represent an element of
-that composite type. Some internals code makes use of this case
-relationship.
+uppercase letter is typically used to represent some kind of composite type
+(a list or a hash), and the lowercase letter is used to represent an element
+of that composite type. Some internals code makes use of this case
+relationship.  However, 'v' and 'V' (vec and v-string) are in no way related.
 
 The C<PERL_MAGIC_ext> and C<PERL_MAGIC_uvar> magic types are defined
 specifically for use by extensions and will not be used by perl itself.

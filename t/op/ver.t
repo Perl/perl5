@@ -11,7 +11,7 @@ $DOWARN = 1; # enable run-time warnings now
 use Config;
 
 require "test.pl";
-plan( tests => 47 );
+plan( tests => 50 );
 
 eval { use v5.5.640; };
 is( $@, '', "use v5.5.640; $@");
@@ -245,3 +245,12 @@ SKIP: {
     }
   }
 }
+
+# Tests for magic v-strings
+
+$v = 1.2.3;
+is( ref(\$v), 'SCALAR', 'v-strings are just scalars' );
+
+$v = v1.2_3;
+is( ref(\$v), 'SCALAR', 'v-strings with v are just scalars' );
+is( sprintf("%vd", $v), '1.23', 'v-string ignores underscores' );

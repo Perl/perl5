@@ -2655,6 +2655,7 @@ Gid_t getegid (void);
 #define PERL_MAGIC_taint	  't' /* Taintedness */
 #define PERL_MAGIC_uvar		  'U' /* Available for use by extensions */
 #define PERL_MAGIC_uvar_elem	  'u' /* Reserved for use by extensions */
+#define PERL_MAGIC_vstring	  'V' /* SV was vstring literal */
 #define PERL_MAGIC_vec		  'v' /* vec() lvalue */
 #define PERL_MAGIC_utf8		  'w' /* Cached UTF-8 information */
 #define PERL_MAGIC_substr	  'x' /* substr() lvalue */

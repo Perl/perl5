@@ -3933,6 +3933,7 @@ char *
 Perl_new_vstring(pTHX_ char *s, SV *sv)
 {
     char *pos = s;
+    char *start = s;
     if (*pos == 'v') pos++;  /* get past 'v' */
     while (isDIGIT(*pos) || *pos == '_')
     pos++;
@@ -3951,11 +3952,10 @@ Perl_new_vstring(pTHX_ char *s, SV *sv)
 		 /* this is atoi() that tolerates underscores */
 		 char *end = pos;
 		 UV mult = 1;
-		 if ( s > pos && *(s-1) == '_') {
-		      mult = 10;
-		 }
 		 while (--end >= s) {
 		      UV orev;
+		      if (*end == '_' )
+			   continue;
 		      orev = rev;
 		      rev += (*end - '0') * mult;
 		      mult *= 10;
@@ -3973,17 +3973,18 @@ Perl_new_vstring(pTHX_ char *s, SV *sv)
 	    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
 	    if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(rev)))
 		 SvUTF8_on(sv);
-	    if ( (*pos == '.' || *pos == '_') && isDIGIT(pos[1]))
+	    if ( *pos == '.' && isDIGIT(pos[1]) )
 		 s = ++pos;
 	    else {
 		 s = pos;
 		 break;
 	    }
-	    while (isDIGIT(*pos) )
+	    while ( isDIGIT(*pos) || *pos == '_' ) 
 		 pos++;
 	}
 	SvPOK_on(sv);
-	SvREADONLY_on(sv);
+	sv_magic(sv,NULL,PERL_MAGIC_vstring,(const char*)start, pos-start);
+	SvRMAGICAL_on(sv);
     }
     return s;
 }

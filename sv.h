@@ -577,6 +577,7 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 #define SvIOK_notUV(sv)		((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV))	\
 				 == SVf_IOK)
 
+#define SvVOK(sv)		(SvMAGICAL(sv) && mg_find(sv,'V'))
 #define SvIsUV(sv)		(SvFLAGS(sv) & SVf_IVisUV)
 #define SvIsUV_on(sv)		(SvFLAGS(sv) |= SVf_IVisUV)
 #define SvIsUV_off(sv)		(SvFLAGS(sv) &= ~SVf_IVisUV)
