@@ -163,20 +163,15 @@ Perl_is_utf8_char(pTHX_ U8 *s)
 
     slen = len - 1;
     s++;
-    /* The initial value is dubious */
+    u &= UTF_START_MASK(len);
     uv  = u;
     ouv = uv;
     while (slen--) {
 	if (!UTF8_IS_CONTINUATION(*s))
 	    return 0;
 	uv = UTF8_ACCUMULATE(uv, *s);
-#if 0
-	/* Depending on the compiler the wrap of the value takig pladve
-	 * between 5 and 6 bytes of UTF-8 encoding either works or not.
-	 * See similar spot in utf8_to_uvuni(). --jhi */
 	if (uv < ouv) 
 	    return 0;
-#endif
 	ouv = uv;
 	s++;
     }
@@ -347,14 +342,9 @@ Perl_utf8n_to_uvuni(pTHX_ U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 		}
 	    }
 	    else { /* uv < ouv */
-#if 0
-	/* Depending on the compiler the wrap of the value takig pladve
-	 * between 5 and 6 bytes of UTF-8 encoding either works or not.
-	 * See similar spot in is_utf8_char(). --jhi */
 		/* This cannot be allowed. */
 		warning = UTF8_WARN_OVERFLOW;
 		goto malformed;
-#endif
 	    }
 	}
 	s++;
