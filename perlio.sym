@@ -26,3 +26,4 @@ PerlIO_setpos
 PerlIO_getpos
 PerlIO_vsprintf
 PerlIO_sprintf
+PerlIO_modestr

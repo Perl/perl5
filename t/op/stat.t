@@ -380,7 +380,7 @@ my @r = \stat(".");
 is(scalar @r, 13,   'stat returns full 13 elements');
 
 SKIP: {
-    skip "No lstat", 2 unless $Config{d_lstat};
+    skip "No lstat", 4 unless $Config{d_lstat};
 
     stat $0;
     eval { lstat _ };

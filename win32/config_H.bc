@@ -13,7 +13,7 @@
 /*
  * Package name      : perl5
  * Source directory  : 
- * Configuration time: Sat Jan 26 22:15:41 2002
+ * Configuration time: Tue Jan 29 08:04:05 2002
  * Configured by     : nick
  * Target system     : 
  */
@@ -1114,7 +1114,7 @@
  *	This symbol is intended to be used along with CPPRUN in the same manner
  *	symbol CPPMINUS is used with CPPSTDIN. It contains either "-" or "".
  */
-#define CPPSTDIN "cpp32 -oCON"
+#define CPPSTDIN "cppstdin"
 #define CPPMINUS ""
 #define CPPRUN "cpp32 -oCON"
 #define CPPLAST ""
