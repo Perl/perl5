@@ -4369,8 +4369,8 @@ point in formatted real numbers is affected by the LC_NUMERIC locale.
 See L<perllocale>.
 
 If Perl understands "quads" (64-bit integers) (this requires
-either that the platform natively supports quads or that Perl
-has been specifically compiled to support quads), the characters
+either that the platform natively support quads or that Perl
+be specifically compiled to support quads), the characters
 
 	d u o x X b i D U O
 
@@ -4389,7 +4389,7 @@ You can find out whether your Perl supports quads via L<Config>:
 		print "quads\n";
 
 If Perl understands "long doubles" (this requires that the platform
-supports long doubles), the flags
+support long doubles), the flags
 
 	e f g E F G
 
