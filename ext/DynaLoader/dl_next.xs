@@ -208,7 +208,7 @@ char *symbol;
     NXStream	*nxerr = OpenError();
     unsigned long	symref = 0;
 
-    if (!rld_lookup(nxerr, form("_%s", symbuf), &symref))
+    if (!rld_lookup(nxerr, form("_%s", symbol), &symref))
 	TransferError(nxerr);
     CloseError(nxerr);
     return (void*) symref;
