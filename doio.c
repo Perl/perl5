@@ -1321,7 +1321,7 @@ Perl_my_stat(pTHX)
     else {
 	SV* sv = POPs;
 	char *s;
-	STRLEN n_a;
+	STRLEN len;
 	PUTBACK;
 	if (SvTYPE(sv) == SVt_PVGV) {
 	    gv = (GV*)sv;
@@ -1332,9 +1332,10 @@ Perl_my_stat(pTHX)
 	    goto do_fstat;
 	}
 
-	s = SvPV(sv, n_a);
+	s = SvPV(sv, len);
 	PL_statgv = Nullgv;
-	sv_setpv(PL_statname, s);
+	sv_setpvn(PL_statname, s, len);
+	s = SvPVX(PL_statname);		/* s now NUL-terminated */
 	PL_laststype = OP_STAT;
 	PL_laststatval = PerlLIO_stat(s, &PL_statcache);
 	if (PL_laststatval < 0 && ckWARN(WARN_NEWLINE) && strchr(s, '\n'))

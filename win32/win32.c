@@ -4647,6 +4647,7 @@ XS(w32_GetShortPathName)
     } while (len >= SvLEN(shortpath) && sv_grow(shortpath,len+1));
     if (len) {
 	SvCUR_set(shortpath,len);
+	*SvEND(shortpath) = '\0';
 	ST(0) = shortpath;
 	XSRETURN(1);
     }
@@ -4690,6 +4691,7 @@ XS(w32_GetFullPathName)
 	    items = 2;
 	}
 	SvCUR_set(fullpath,len);
+	*SvEND(fullpath) = '\0';
 	ST(0) = fullpath;
 	XSRETURN(items);
     }
