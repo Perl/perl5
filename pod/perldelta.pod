@@ -249,8 +249,10 @@ the deprecation warnings, use:
 =head2 Miscellaneous Enhancements
 
 If an input filehandle is marked C<:utf8> and Perl sees illegal UTF-8
-coming in, a warning is immediately given about it - instead of being
-silent about it and Perl being unhappy about the broken data later.
+coming in when doing C<< <FH> >, if warnings are enabled a warning is
+immediately given - instead of being silent about it and Perl being
+unhappy about the broken data later.  (The C<:encoding(utf8)> layer
+now works the same way.)
 
 If a socket gets closed by the server while printing to it, the client
 now gets a SIGPIPE.  While this new feature was not planned, it fell
