@@ -750,15 +750,14 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	    HV *hv;
 	    I32 i;
 	    if (!PL_psig_ptr) {
-		int sig_num[] = { SIG_NUM };
-		New(73, PL_psig_ptr, sizeof(sig_num)/sizeof(*sig_num), SV*);
-		New(73, PL_psig_name, sizeof(sig_num)/sizeof(*sig_num), SV*);
-		New(73, PL_psig_pend, sizeof(sig_num)/sizeof(*sig_num), int);
+		New(73, PL_psig_ptr,  SIG_SIZE, SV*);
+		New(73, PL_psig_name, SIG_SIZE, SV*);
+		New(73, PL_psig_pend, SIG_SIZE, int);
 	    }
 	    GvMULTI_on(gv);
 	    hv = GvHVn(gv);
 	    hv_magic(hv, Nullgv, 'S');
-	    for (i = 1; PL_sig_name[i]; i++) {
+	    for (i = 1; i < SIG_SIZE; i++) {
 	    	SV ** init;
 	    	init = hv_fetch(hv, PL_sig_name[i], strlen(PL_sig_name[i]), 1);
 	    	if (init)

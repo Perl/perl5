@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Jan 12 22:28:01 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Wed Jan 17 05:17:19 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -884,6 +884,7 @@ sig_name=''
 sig_name_init=''
 sig_num=''
 sig_num_init=''
+sig_size=''
 installsitearch=''
 sitearch=''
 sitearchexp=''
@@ -2062,7 +2063,6 @@ test)
 	;;
 *)
 	if `sh -c "PATH= test true" >/dev/null 2>&1`; then
-		echo "Using the test built into your sh."
 		echo "Using the test built into your sh."
 		test=test
 		_test=test
@@ -14570,6 +14570,7 @@ echo $sig_name | $awk \
 	}
 	printf "\n"
 }'
+sig_size=`echo $sig_name | awk '{print NF}'`
 $rm -f signal signal.c signal.awk signal.lst signal_cmd 
 
 echo " "
@@ -16460,6 +16461,7 @@ sig_name='$sig_name'
 sig_name_init='$sig_name_init'
 sig_num='$sig_num'
 sig_num_init='$sig_num_init'
+sig_size='$sig_size'
 signal_t='$signal_t'
 sitearch='$sitearch'
 sitearchexp='$sitearchexp'

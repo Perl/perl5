@@ -3188,6 +3188,10 @@ sig_num_init (sig_name.U):
 	below.  A "ZERO" is prepended to the list, and the list is 
 	terminated with a plain 0.
 
+sig_size (sig_name.U):
+	This variable contains the number of elements of the sig_name
+	and sig_num arrays, including the final NULL entry.
+
 signal_t (d_voidsig.U):
 	This variable holds the type of the signal handler (void or int).
 

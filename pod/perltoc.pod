@@ -3823,27 +3823,28 @@ HeSVKEY, HeSVKEY_force, HeSVKEY_set, HeVAL, HvNAME, hv_clear, hv_delete,
 hv_delete_ent, hv_exists, hv_exists_ent, hv_fetch, hv_fetch_ent,
 hv_iterinit, hv_iterkey, hv_iterkeysv, hv_iternext, hv_iternextsv,
 hv_iterval, hv_magic, hv_store, hv_store_ent, hv_undef, isALNUM, isALPHA,
-isDIGIT, isLOWER, isSPACE, isUPPER, items, ix, LEAVE, looks_like_number,
-MARK, mg_clear, mg_copy, mg_find, mg_free, mg_get, mg_length, mg_magical,
-mg_set, Move, New, newAV, Newc, newCONSTSUB, newHV, newRV_inc, newRV_noinc,
-NEWSV, newSViv, newSVnv, newSVpv, newSVpvf, newSVpvn, newSVpvn_share,
-newSVrv, newSVsv, newSVuv, newXS, newXSproto, Newz, Nullav, Nullch, Nullcv,
-Nullhv, Nullsv, ORIGMARK, perl_alloc, perl_construct, perl_destruct,
-perl_free, perl_parse, perl_run, PL_DBsingle, PL_DBsub, PL_DBtrace,
-PL_dowarn, PL_modglobal, PL_na, PL_sv_no, PL_sv_undef, PL_sv_yes, POPi,
-POPl, POPn, POPp, POPs, PUSHi, PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu,
-PUTBACK, Renew, Renewc, require_pv, RETVAL, Safefree, savepv, savepvn,
-SAVETMPS, SP, SPAGAIN, ST, strEQ, strGE, strGT, strLE, strLT, strNE,
-strnEQ, strnNE, StructCopy, SvCUR, SvCUR_set, SvEND, SvGETMAGIC, SvGROW,
-SvIOK, SvIOKp, SvIOK_notUV, SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV,
-SvIOK_UV, SvIV, SvIVX, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK, SvNOKp,
-SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVX, SvOK, SvOOK, SvPOK, SvPOKp,
-SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV, SvPVX, SvPV_force,
-SvPV_nolen, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off,
-SvROK_on, SvRV, SvSETMAGIC, SvSetSV, SvSetSV_nosteal, SvSTASH, SvTAINT,
-SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, svtype, SvTYPE, SVt_IV,
-SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUOK, SvUPGRADE,
-SvUTF8, SvUTF8_off, SvUTF8_on, SvUV, SvUVX, sv_2mortal, sv_bless, sv_catpv,
+isDIGIT, isLOWER, isSPACE, isUPPER, is_utf8_char, is_utf8_string, items,
+ix, LEAVE, looks_like_number, MARK, mg_clear, mg_copy, mg_find, mg_free,
+mg_get, mg_length, mg_magical, mg_set, Move, New, newAV, Newc, newCONSTSUB,
+newHV, newRV_inc, newRV_noinc, NEWSV, newSViv, newSVnv, newSVpv, newSVpvf,
+newSVpvn, newSVpvn_share, newSVrv, newSVsv, newSVuv, newXS, newXSproto,
+Newz, Nullav, Nullch, Nullcv, Nullhv, Nullsv, ORIGMARK, perl_alloc,
+perl_construct, perl_destruct, perl_free, perl_parse, perl_run,
+PL_DBsingle, PL_DBsub, PL_DBtrace, PL_dowarn, PL_last_in_gv, PL_modglobal,
+PL_na, PL_ofs_sv, PL_rs, PL_sv_no, PL_sv_undef, PL_sv_yes, POPi, POPl,
+POPn, POPp, POPs, PUSHi, PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu, PUTBACK,
+Renew, Renewc, require_pv, RETVAL, Safefree, savepv, savepvn, SAVETMPS, SP,
+SPAGAIN, ST, strEQ, strGE, strGT, strLE, strLT, strNE, strnEQ, strnNE,
+StructCopy, SvCUR, SvCUR_set, SvEND, SvGETMAGIC, SvGROW, SvIOK, SvIOKp,
+SvIOK_notUV, SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV, SvIOK_UV,
+SvIV, SvIVX, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK, SvNOKp, SvNOK_off,
+SvNOK_on, SvNOK_only, SvNV, SvNVX, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off,
+SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV, SvPVX, SvPV_force, SvPV_nolen,
+SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV,
+SvSETMAGIC, SvSetSV, SvSetSV_nosteal, SvSTASH, SvTAINT, SvTAINTED,
+SvTAINTED_off, SvTAINTED_on, SvTRUE, svtype, SvTYPE, SVt_IV, SVt_NV,
+SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUOK, SvUPGRADE, SvUTF8,
+SvUTF8_off, SvUTF8_on, SvUV, SvUVX, sv_2mortal, sv_bless, sv_catpv,
 sv_catpvf, sv_catpvf_mg, sv_catpvn, sv_catpvn_mg, sv_catpv_mg, sv_catsv,
 sv_catsv_mg, sv_chop, sv_clear, sv_cmp, sv_cmp_locale, sv_dec,
 sv_derived_from, sv_eq, sv_free, sv_gets, sv_grow, sv_inc, sv_insert,
@@ -3855,8 +3856,8 @@ sv_setpvn_mg, sv_setpv_mg, sv_setref_iv, sv_setref_nv, sv_setref_pv,
 sv_setref_pvn, sv_setsv, sv_setsv_mg, sv_setuv, sv_setuv_mg, sv_true,
 sv_unmagic, sv_unref, sv_unref_flags, sv_upgrade, sv_usepvn, sv_usepvn_mg,
 sv_utf8_downgrade, sv_utf8_encode, sv_utf8_upgrade, sv_vcatpvfn,
-sv_vsetpvfn, THIS, toLOWER, toUPPER, U8 *s, utf8_distance, utf8_hop,
-utf8_length, utf8_to_bytes, utf8_to_uv, utf8_to_uv_simple, warn, XPUSHi,
+sv_vsetpvfn, THIS, toLOWER, toUPPER, utf8_distance, utf8_hop, utf8_length,
+utf8_to_bytes, utf8_to_uv, utf8_to_uv_simple, uv_to_utf8, warn, XPUSHi,
 XPUSHn, XPUSHp, XPUSHs, XPUSHu, XS, XSRETURN, XSRETURN_EMPTY, XSRETURN_IV,
 XSRETURN_NO, XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_YES,
 XST_mIV, XST_mNO, XST_mNV, XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION,
@@ -5363,50 +5364,6 @@ Source, Compiled Module Source, Perl Modules/Scripts
 
 =back
 
-=head2 perldos - Perl under DOS, W31, W95.
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item Prerequisites
-
-DJGPP, Pthreads
-
-=item Shortcomings of Perl under DOS
-
-=item Building
-
-=item Testing
-
-=item Installation
-
-=back
-
-=item BUILDING AND INSTALLING MODULES
-
-=over 4
-
-=item Prerequisites
-
-=item Unpacking CPAN Modules
-
-=item Building Non-XS Modules
-
-=item Building XS Modules
-
-=back
-
-=item AUTHOR
-
-=item SEE ALSO
-
-=back
-
 =head2 perlepoc, README.epoc - Perl for EPOC
 
 =over 4
@@ -6044,48 +6001,6 @@ LIST, waitpid PID,FLAGS
 =item AUTHOR
 
 =item LAST UPDATE
-
-=back
-
-=head2 perlwin32 - Perl under Win32
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item Setting Up
-
-Make, Command Shell, Borland C++, Microsoft Visual C++, Mingw32 with GCC
-
-=item Building
-
-=item Testing
-
-=item Installation
-
-=item Usage Hints
-
-Environment Variables, File Globbing, Using perl from the command line,
-Building Extensions, Command-line Wildcard Expansion, Win32 Specific
-Extensions, Running Perl Scripts, Miscellaneous Things
-
-=back
-
-=item BUGS AND CAVEATS
-
-=item AUTHORS
-
-Gary Ng E<lt>71564.1743@CompuServe.COME<gt>, Gurusamy Sarathy
-E<lt>gsar@activestate.comE<gt>, Nick Ing-Simmons
-E<lt>nick@ing-simmons.netE<gt>
-
-=item SEE ALSO
-
-=item HISTORY
 
 =back
 
@@ -6948,6 +6863,45 @@ B<-ffreetmps-each-bblock>, B<-ffreetmps-each-loop>, B<-fomit-taint>, B<-On>
 =item Arithmetic
 
 =item Deprecated features
+
+=back
+
+=item AUTHOR
+
+=back
+
+=head2 B::Concise - Walk Perl syntax tree, printing concise info about ops
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item OPTIONS
+
+B<-basic>, B<-exec>, B<-tree>, B<-compact>, B<-loose>, B<-vt>, B<-ascii>,
+B<-main>, B<-base>I<n>, B<-bigendian>, B<-littleendian>, B<-concise>,
+B<-terse>, B<-linenoise>, B<-debug>, B<-env>
+
+=item FORMATTING SPECIFICATIONS
+
+B<(x(>I<exec_text>B<;>I<basic_text>B<)x)>, B<(*(>I<text>B<)*)>,
+B<(*(>I<text1>B<;>I<text2>B<)*)>, B<(?(>I<text1>B<#>I<var>I<Text2>B<)?)>,
+B<#>I<var>, B<#>I<var>I<N>, B<~>, B<#addr>, B<#arg>, B<#class>,
+B<#classym>, B<#coplabel>, B<#exname>, B<#extarg>, B<#firstaddr>,
+B<#flags>, B<#flagval>, B<#hyphenseq>, B<#label>, B<#lastaddr>, B<#name>,
+B<#NAME>, B<#next>, B<#nextaddr>, B<#noise>, B<#private>, B<#privval>,
+B<#seq>, B<#seqnum>, B<#sibaddr>, B<#svaddr>, B<#svclass>, B<#svval>,
+B<#targ>, B<#targarg>, B<#targarglife>, B<#typenum>
+
+=item ABBREVIATIONS
+
+=over 4
+
+=item OP flags abbreviations
+
+=item OP class abbreviations
 
 =back
 
@@ -7907,23 +7861,23 @@ C<d_setproctitle>, C<d_setpwent>, C<d_setregid>, C<d_setresgid>,
 C<d_setresuid>, C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>,
 C<d_setsid>, C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>,
 C<d_shmatprototype>, C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>,
-C<d_sigsetjmp>, C<d_socket>, C<d_socklen_t>, C<d_sockpair>,
-C<d_socks5_init>, C<d_sqrtl>, C<d_statblks>, C<d_statfs_f_flags>,
-C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>,
-C<d_stdio_ptr_lval_nochange_cnt>, C<d_stdio_ptr_lval_sets_cnt>,
-C<d_stdio_stream_array>, C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>,
-C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>, C<d_strerror>, C<d_strtod>,
-C<d_strtol>, C<d_strtold>, C<d_strtoll>, C<d_strtoq>, C<d_strtoul>,
-C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>, C<d_symlink>,
-C<d_syscall>, C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>, C<d_system>,
-C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>, C<d_telldirproto>, C<d_time>,
-C<d_times>, C<d_truncate>, C<d_tzname>, C<d_umask>, C<d_uname>,
-C<d_union_semun>, C<d_ustat>, C<d_vendorarch>, C<d_vendorbin>,
-C<d_vendorlib>, C<d_vfork>, C<d_void_closedir>, C<d_voidsig>, C<d_voidtty>,
-C<d_volatile>, C<d_vprintf>, C<d_wait4>, C<d_waitpid>, C<d_wcstombs>,
-C<d_wctomb>, C<d_xenix>, C<date>, C<db_hashtype>, C<db_prefixtype>,
-C<defvoidused>, C<direntrytype>, C<dlext>, C<dlsrc>, C<doublesize>,
-C<drand01>, C<dynamic_ext>
+C<d_sigprocmask>, C<d_sigsetjmp>, C<d_socket>, C<d_socklen_t>,
+C<d_sockpair>, C<d_socks5_init>, C<d_sqrtl>, C<d_statblks>,
+C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>,
+C<d_stdio_ptr_lval>, C<d_stdio_ptr_lval_nochange_cnt>,
+C<d_stdio_ptr_lval_sets_cnt>, C<d_stdio_stream_array>, C<d_stdiobase>,
+C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>,
+C<d_strerror>, C<d_strtod>, C<d_strtol>, C<d_strtold>, C<d_strtoll>,
+C<d_strtoq>, C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>,
+C<d_suidsafe>, C<d_symlink>, C<d_syscall>, C<d_sysconf>, C<d_sysernlst>,
+C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
+C<d_telldirproto>, C<d_time>, C<d_times>, C<d_truncate>, C<d_tzname>,
+C<d_umask>, C<d_uname>, C<d_union_semun>, C<d_ustat>, C<d_vendorarch>,
+C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>, C<d_void_closedir>,
+C<d_voidsig>, C<d_voidtty>, C<d_volatile>, C<d_vprintf>, C<d_wait4>,
+C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>, C<d_xenix>, C<date>,
+C<db_hashtype>, C<db_prefixtype>, C<defvoidused>, C<direntrytype>,
+C<dlext>, C<dlsrc>, C<doublesize>, C<drand01>, C<dynamic_ext>
 
 =item e
 
