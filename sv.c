@@ -3883,7 +3883,16 @@ newSVrv(SV *rv, char *classname)
     SvANY(sv) = 0;
     SvREFCNT(sv) = 0;
     SvFLAGS(sv) = 0;
-    sv_upgrade(rv, SVt_RV);
+
+    sv_check_thinkfirst(rv);
+#ifdef OVERLOAD
+    SvAMAGIC_off(rv);
+#endif /* OVERLOAD */
+
+    if (SvTYPE(rv) < SVt_RV)
+      sv_upgrade(rv, SVt_RV);
+
+    (void)SvOK_off(rv);
     SvRV(rv) = SvREFCNT_inc(sv);
     SvROK_on(rv);
 
