@@ -27,14 +27,64 @@ L<perltie>).  Without a SCALAR method, perl will try to guess whether
 the hash is empty, by testing if it's inside an iteration (in this case
 it can't be empty) or by calling FIRSTKEY.
 
+=head2 Formats
+
+Formats were improved in several ways. A new field, C<^*>, can be used for
+variable-width, one-line-at-a-time text. Null characters are now handled
+correctly in picture lines. Using C<@#> and C<~~> together will now
+produce a compile-time error, as those format fields are incompatible.
+L<perlform> has been improved, and miscellaneous bugs fixed.
+
+=head2 The C<:unique> attribute is only meaningful for globals
+
+Now applying C<:unique> to lexical variables and to subroutines will
+result in a compilation error.
+
 =head1 Modules and Pragmata
+
+=over 4
+
+=item Carp
+
+The error messages produced by C<Carp> now include spaces between the
+arguments in function argument lists: this makes long error messages
+appear more nicely in browsers and other tools.
+
+=item Exporter
+
+C<Exporter> will now recognize grouping tags (such as C<:name>) anywhere
+in the import list, not only at the beginning.
+
+=item FindBin
+
+A function C<again> is provided to resolve problems where modules in different
+directories wish to use FindBin.
+
+=item List::Util
+
+You can now weaken references to read only values.
+
+=item threads::shared
+
+C<cond_wait> has a new two argument form. C<cond_timedwait> has been added.
+
+=back
 
 =head1 Utility Changes
 
 C<find2perl> now assumes C<-print> as a default action. Previously, it
 needed to be specified explicitly.
 
-=head1 New Documentation
+A new utility, C<prove>, makes it easy to run an individual regression test
+at the command line. C<prove> is part of Test::Harness, which users of earlier
+Perl versions can install from CPAN.
+
+=head1 Documentation
+
+The documentation has been revised in places to produce more standard manpages.
+
+The long-existing feature of C</(?{...})/> regexps setting C<$_> and pos()
+is now documented.
 
 =head1 Performance Enhancements
 
@@ -42,9 +92,54 @@ needed to be specified explicitly.
 
 =head1 Selected Bug Fixes
 
+=head2 UTF8 bugs
+
+Using substr() on a UTF8 string could cause subsequent accesses on that
+string to return garbage. This was due to incorrect UTF8 offsets being
+cached, and is now fixed.
+
+join() could return garbage when the same join() statement was used to
+process 8 bit data having earlier processed UTF8 data, due to the flags
+on that statement's temporary workspace not being reset correctly. This
+is now fixed.
+
+Using Unicode keys with tied hashes should now work correctly.
+
+chop() and chomp() used to mangle UTF8 strings.  This has been fixed.
+
+=head2 Threading bugs
+
+Hashes with the C<:unique> attribute weren't made read-only in new
+threads. They are now.
+
+=head2 More bugs
+
+C<$a .. $b> will now work as expected when either $a or $b is C<undef>
+
+Reading $^E now preserves $!. Previously, the C code implementing $^E
+did not preserve C<errno>, so reading $^E could cause C<errno> and therefore
+C<$!> to change unexpectedly.
+
+Reentrant functions will (once more) work with C++. 5.8.2 introduced a bugfix
+which accidentally broke the compilation of Perl extensions written in C++
+
 =head1 New or Changed Diagnostics
 
+The fatal error "DESTROY created new reference to dead object" is now
+documented in L<perldiag>.
+
+A new error, "%ENV is aliased to %s", is produced when taint checks are
+enabled and when *ENV has been aliased (and thus doesn't reflect the
+program's environment anymore.)
+
 =head1 Changed Internals
+
+=head1 Configuration and Building
+
+C<Configure> now invokes callbacks regardless of the value of the variable
+they are called for. Previously callbacks were only invoked in the
+C<case $variable $define)> branch. This change should only affect platform
+maintainers writing configuration hints files.
 
 =head1 New Tests
 
