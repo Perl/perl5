@@ -196,6 +196,7 @@
 #define PL_argvoutgv		(PERL_GET_INTERP->Iargvoutgv)
 #define PL_basetime		(PERL_GET_INTERP->Ibasetime)
 #define PL_beginav		(PERL_GET_INTERP->Ibeginav)
+#define PL_bigchar		(PERL_GET_INTERP->Ibigchar)
 #define PL_bitcount		(PERL_GET_INTERP->Ibitcount)
 #define PL_bufend		(PERL_GET_INTERP->Ibufend)
 #define PL_bufptr		(PERL_GET_INTERP->Ibufptr)
@@ -460,6 +461,7 @@
 #define PL_argvoutgv		(vTHX->Iargvoutgv)
 #define PL_basetime		(vTHX->Ibasetime)
 #define PL_beginav		(vTHX->Ibeginav)
+#define PL_bigchar		(vTHX->Ibigchar)
 #define PL_bitcount		(vTHX->Ibitcount)
 #define PL_bufend		(vTHX->Ibufend)
 #define PL_bufptr		(vTHX->Ibufptr)
@@ -861,6 +863,7 @@
 #define PL_argvoutgv		(aTHXo->interp.Iargvoutgv)
 #define PL_basetime		(aTHXo->interp.Ibasetime)
 #define PL_beginav		(aTHXo->interp.Ibeginav)
+#define PL_bigchar		(aTHXo->interp.Ibigchar)
 #define PL_bitcount		(aTHXo->interp.Ibitcount)
 #define PL_bufend		(aTHXo->interp.Ibufend)
 #define PL_bufptr		(aTHXo->interp.Ibufptr)
@@ -1126,6 +1129,7 @@
 #define PL_Iargvoutgv		PL_argvoutgv
 #define PL_Ibasetime		PL_basetime
 #define PL_Ibeginav		PL_beginav
+#define PL_Ibigchar		PL_bigchar
 #define PL_Ibitcount		PL_bitcount
 #define PL_Ibufend		PL_bufend
 #define PL_Ibufptr		PL_bufptr

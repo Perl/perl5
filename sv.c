@@ -3046,7 +3046,7 @@ Perl_sv_catpvn(pTHX_ register SV *sv, register const char *ptr, register STRLEN 
     Move(ptr,SvPVX(sv)+tlen,len,char);
     SvCUR(sv) += len;
     *SvEND(sv) = '\0';
-    (void)SvPOK_only(sv);		/* validate pointer */
+    (void)SvPOK_only_UTF8(sv);		/* validate pointer */
     SvTAINT(sv);
 }
 
@@ -3083,6 +3083,8 @@ Perl_sv_catsv(pTHX_ SV *dstr, register SV *sstr)
 	return;
     if (s = SvPV(sstr, len))
 	sv_catpvn(dstr,s,len);
+    if (SvUTF8(sstr))
+	SvUTF8_on(dstr);
 }
 
 /*
@@ -3125,7 +3127,7 @@ Perl_sv_catpv(pTHX_ register SV *sv, register const char *ptr)
 	ptr = SvPVX(sv);
     Move(ptr,SvPVX(sv)+tlen,len+1,char);
     SvCUR(sv) += len;
-    (void)SvPOK_only(sv);		/* validate pointer */
+    (void)SvPOK_only_UTF8(sv);		/* validate pointer */
     SvTAINT(sv);
 }
 
@@ -5828,7 +5830,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		uv = va_arg(*args, int);
 	    else
 		uv = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
-	    if (uv >= 128 && !IN_BYTE) {
+	    if (uv >= 128 && PL_bigchar && !IN_BYTE) {
 		eptr = (char*)utf8buf;
 		elen = uv_to_utf8((U8*)eptr, uv) - utf8buf;
 		is_utf = TRUE;

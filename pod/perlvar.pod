@@ -856,6 +856,41 @@ The time at which the program began running, in seconds since the
 epoch (beginning of 1970).  The values returned by the B<-M>, B<-A>,
 and B<-C> filetests are based on this value.
 
+=item $^U
+
+Global flag that switches on Unicode character support in the Perl
+interpreter.  The initial value is usually C<0> for compatibility
+with Perl versions earlier than 5.6, but may be automatically set
+to C<1> by Perl if the system provides a user-settable default
+(e.g., C<$ENV{LC_CTYPE}>).  It is also implicitly set to C<1>
+whenever the utf8 pragma is loaded.
+
+Setting it to C<1> has the following effects:
+
+=over
+
+=item *
+
+C<chr> produces UTF-8 encoded Unicode characters.  These are the same
+as the corresponding ASCII characters if the argument is less than 128.
+
+=item *
+
+The C<%c> format in C<sprintf> generates a UTF-8 encoded Unicode
+character.  This is the same as the corresponding ASCII character
+if the argument is less than 128.
+
+=item *
+
+Any system calls made by Perl will use wide character APIs native to
+the system, if available.  This is currently only implemented on the
+Windows platform.
+
+=back
+
+The C<byte> pragma overrides the value of this flag in the current
+lexical scope.  See L<byte>.
+
 =item $^V
 
 The revision, version, and subversion of the Perl interpreter, represented

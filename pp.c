@@ -2202,7 +2202,7 @@ PP(pp_chr)
     SvUTF8_off(TARG);				/* decontaminate */
     (void)SvUPGRADE(TARG,SVt_PV);
 
-    if (value >= 128 && !IN_BYTE) {
+    if (value >= 128 && PL_bigchar && !IN_BYTE) {
 	SvGROW(TARG,8);
 	tmps = SvPVX(TARG);
 	tmps = (char*)uv_to_utf8((U8*)tmps, (UV)value);

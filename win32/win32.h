@@ -422,12 +422,14 @@ struct interp_intern {
 /* Use CP_UTF8 when mode is UTF8 */
 
 #define A2WHELPER(lpa, lpw, nBytes)\
-    lpw[0] = 0, MultiByteToWideChar((IN_UTF8) ? CP_UTF8 : CP_ACP, 0, lpa, -1, lpw, (nBytes/sizeof(WCHAR)))
+    lpw[0] = 0, MultiByteToWideChar((IN_BYTE) ? CP_ACP : CP_UTF8, 0, \
+				    lpa, -1, lpw, (nBytes/sizeof(WCHAR)))
 
 #define W2AHELPER(lpw, lpa, nChars)\
-    lpa[0] = '\0', WideCharToMultiByte((IN_UTF8) ? CP_UTF8 : CP_ACP, 0, lpw, -1, (LPSTR)lpa, nChars, NULL, NULL)
+    lpa[0] = '\0', WideCharToMultiByte((IN_BYTE) ? CP_ACP : CP_UTF8, 0, \
+				       lpw, -1, (LPSTR)lpa, nChars, NULL, NULL)
 
-#define USING_WIDE()	(PerlEnv_os_id() == VER_PLATFORM_WIN32_NT)
+#define USING_WIDE() (PL_bigchar && PerlEnv_os_id() == VER_PLATFORM_WIN32_NT)
 
 #ifdef USE_ITHREADS
 #  define PERL_WAIT_FOR_CHILDREN \

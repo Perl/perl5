@@ -837,6 +837,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     case '\017':	/* $^O */
     case '\020':	/* $^P */
     case '\024':	/* $^T */
+    case '\025':	/* $^U */
 	if (len > 1)
 	    break;
 	goto magicalize;

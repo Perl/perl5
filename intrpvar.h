@@ -44,7 +44,8 @@ The C variable which corresponds to Perl's $^W warning variable.
 =cut
 */
 
-PERLVAR(Idowarn,	bool)
+PERLVAR(Idowarn,	U8)
+PERLVAR(Ibigchar,	bool)
 PERLVAR(Idoextract,	bool)
 PERLVAR(Isawampersand,	bool)		/* must save all match strings */
 PERLVAR(Iunsafe,	bool)

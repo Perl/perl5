@@ -29,17 +29,15 @@ sub charnames {
   }
   die "Unknown charname '$name'" unless @off;
   
-  # use caller 'encoding';	# Does not work at compile time?
-
   my $ord = hex substr $txt, $off[0] - 4, 4;
-  if ($^H & 0x8) {
-    use utf8;
-    return chr $ord;
+  if ($^H & 0x10) {	# "use byte" in effect?
+    use byte;
+    return chr $ord if $ord <= 255;
+    my $hex = sprintf '%X=0%o', $ord, $ord;
+    my $fname = substr $txt, $off[0] + 2, $off[1] - $off[0] - 2;
+    die "Character 0x$hex with name '$fname' is above 0xFF";
   }
-  return chr $ord if $ord <= 255;
-  my $hex = sprintf '%X=0%o', $ord, $ord;
-  my $fname = substr $txt, $off[0] + 2, $off[1] - $off[0] - 2;
-  die "Character 0x$hex with name '$fname' is above 0xFF";
+  return chr $ord;
 }
 
 sub import {
