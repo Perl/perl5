@@ -886,10 +886,19 @@ scalarvoid(OP *o)
     OP *kid;
     char* useless = 0;
     SV* sv;
+    U8 want;
+
+    if (o->op_type == OP_NEXTSTATE || o->op_type == OP_DBSTATE ||
+	(o->op_type == OP_NULL &&
+	 (o->op_targ == OP_NEXTSTATE || o->op_targ == OP_DBSTATE)))
+    {
+	dTHR;
+	PL_curcop = (COP*)o;		/* for warning below */
+    }
 
     /* assumes no premature commitment */
-    U8 want = o->op_flags & OPf_WANT;
-    if (!o || (want && want != OPf_WANT_SCALAR) || PL_error_count
+    want = o->op_flags & OPf_WANT;
+    if ((want && want != OPf_WANT_SCALAR) || PL_error_count
 	 || o->op_type == OP_RETURN)
 	return o;
 
@@ -989,11 +998,6 @@ scalarvoid(OP *o)
 	    useless = "a variable";
 	break;
 
-    case OP_NEXTSTATE:
-    case OP_DBSTATE:
-	WITH_THR(PL_curcop = ((COP*)o));		/* for warning below */
-	break;
-
     case OP_CONST:
 	sv = cSVOPo->op_sv;
 	if (cSVOPo->op_private & OPpCONST_STRICT)
@@ -1034,11 +1038,11 @@ scalarvoid(OP *o)
 	break;
 
     case OP_NULL:
-	if (o->op_targ == OP_NEXTSTATE || o->op_targ == OP_DBSTATE)
-	    WITH_THR(PL_curcop = ((COP*)o));	/* for warning below */
 	if (o->op_flags & OPf_STACKED)
 	    break;
 	/* FALL THROUGH */
+    case OP_NEXTSTATE:
+    case OP_DBSTATE:
     case OP_ENTERTRY:
     case OP_ENTER:
     case OP_SCALAR:
