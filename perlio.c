@@ -754,7 +754,7 @@ PerlIO_layer_fetch(pTHX_ PerlIO_list_t *av,IV n,PerlIO_funcs *def)
 {
  if (n >= 0 && n < av->cur)
   {
-   PerlIO_debug("Layer %ld is %s\n",n,av->array[n].funcs->name);
+   PerlIO_debug("Layer %"IVdf" is %s\n",n,av->array[n].funcs->name);
    return av->array[n].funcs;
   }
  if (!def)
