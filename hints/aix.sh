@@ -15,11 +15,11 @@
 d_setrgid='undef'
 d_setruid='undef'
 
-alignbytes=8
+# Neither do these functions work like Perl expects them to.
+d_setregid='undef'
+d_setreuid='undef'
 
-case "$usemymalloc" in
-'') usemymalloc='n' ;;
-esac
+alignbytes=8
 
 # Intuiting the existence of system calls under AIX is difficult, at best;
 # the safest (and slowest...) technique is to find them empirically.
@@ -50,17 +50,13 @@ case "$osvers" in
     ;;
 esac
 
-# These functions don't work like Perl expects them to.
-d_setregid='undef'
-d_setreuid='undef'
-
 # Changes for dynamic linking by Wayne Scott <wscott@ichips.intel.com>
 #
 # Tell perl which symbols to export for dynamic linking.
 case "$cc" in
-*gcc*) ccdlflags='-Xlinker -bE:perl.exp' ;;
-*) ccdlflags='-bE:perl.exp' ;;
+*gcc*) ccdlflags="$ccdlflags -Xlinker" ;;
 esac
+ccdlflags="$ccdlflags -bE:perl.exp"
 
 # The first 3 options would not be needed if dynamic libs. could be linked
 # with the compiler instead of ld.
@@ -69,10 +65,10 @@ esac
 #                           symbol: boot_$(EXP)  can it be auto-generated?
 case "$osvers" in
 3*) 
-    lddlflags='-H512 -T512 -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -e _nostart -lc'
+    lddlflags="$lddlflags -H512 -T512 -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -e _nostart -lc"
     ;;
 *) 
-    lddlflags='-bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -b noentry -lc'
+    lddlflags="$lddlflags -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -b noentry -lc"
     ;;
 esac
 
@@ -88,7 +84,7 @@ $define|true|[yY]*)
 	    echo >&4 "Switching cc to xlc_r because of POSIX threads."
 	    cc=xlc_r
             ;;
-        '' | cc_r) 
+        '' | cc_r)
 	    cc=xlc_r
             ;;
         *)
@@ -111,6 +107,12 @@ EOM
         set `echo X "$libswanted "| sed -e 's/ c / c_r c /'`
         shift
         libswanted="$*"
+
+        # Perl's malloc doesn't survive threaded AIX.
+        case "$usemymalloc" in
+        '') usemymalloc='n' ;;
+        esac
+
 	;;
 esac
 EOCBU
