@@ -636,7 +636,7 @@ exists only to generate locale-dependent results, strftime() always
 obeys the current C<LC_TIME> locale.
 
 See also L<I18N::Langinfo> and C<ABDAY_1>..C<ABDAY_7>, C<DAY_1>..C<DAY_7>,
-C<ABMON_1>..C<ABMON_12>, and C<ABMON_1>..C<ABMON_12>; and L<Time::Piece>.
+C<ABMON_1>..C<ABMON_12>, and C<ABMON_1>..C<ABMON_12>.
 
 =head2 Other categories
 

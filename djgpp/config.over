@@ -43,7 +43,6 @@ repair()
      -e 's=mime/base64=MIME/Base64=' \
      -e 's=time/hires=Time/HiRes=' \
      -e 's=list/util=List/Util=' \
-     -e 's=time/piece=Time/Piece=' \
      -e 's=cwd=Cwd=' \
      -e 's=perlio/via=PerlIO/Via=' \
      -e 's=xs/typemap=XS/Typemap='

@@ -884,32 +884,32 @@ listing
 $ARG, $_, $a, $b, $<I<digits>>, $MATCH, $&, $PREMATCH, $`, $POSTMATCH, $',
 $LAST_PAREN_MATCH, $+, $^N, @LAST_MATCH_END, @+, $MULTILINE_MATCHING, $*,
 input_line_number HANDLE EXPR, $INPUT_LINE_NUMBER, $NR, $,
-input_record_separator HANDLE EXPR, $INPUT_RECORD_SEPARATOR, $RS, $/,
-autoflush HANDLE EXPR, $OUTPUT_AUTOFLUSH, $|, output_field_separator HANDLE
-EXPR, $OUTPUT_FIELD_SEPARATOR, $OFS, $,, output_record_separator HANDLE
-EXPR, $OUTPUT_RECORD_SEPARATOR, $ORS, $\, $LIST_SEPARATOR, $",
-$SUBSCRIPT_SEPARATOR, $SUBSEP, $;, $OFMT, $#, format_page_number HANDLE
-EXPR, $FORMAT_PAGE_NUMBER, $%, format_lines_per_page HANDLE EXPR,
-$FORMAT_LINES_PER_PAGE, $=, format_lines_left HANDLE EXPR,
-$FORMAT_LINES_LEFT, $-, @LAST_MATCH_START, @-, C<$`> is the same as
-C<substr($var, 0, $-[0])>, C<$&> is the same as C<substr($var, $-[0], $+[0]
-- $-[0])>, C<$'> is the same as C<substr($var, $+[0])>, C<$1> is the same
-as C<substr($var, $-[1], $+[1] - $-[1])>, C<$2> is the same as
-C<substr($var, $-[2], $+[2] - $-[2])>, C<$3> is the same as C<substr $var,
-$-[3], $+[3] - $-[3])>, format_name HANDLE EXPR, $FORMAT_NAME, $~,
-format_top_name HANDLE EXPR, $FORMAT_TOP_NAME, $^,
-format_line_break_characters HANDLE EXPR, $FORMAT_LINE_BREAK_CHARACTERS,
-$:, format_formfeed HANDLE EXPR, $FORMAT_FORMFEED, $^L, $ACCUMULATOR, $^A,
-$CHILD_ERROR, $?, $OS_ERROR, $ERRNO, $!, $EXTENDED_OS_ERROR, $^E,
-$EVAL_ERROR, $@, $PROCESS_ID, $PID, $$, $REAL_USER_ID, $UID, $<,
-$EFFECTIVE_USER_ID, $EUID, $>, $REAL_GROUP_ID, $GID, $(,
-$EFFECTIVE_GROUP_ID, $EGID, $), $PROGRAM_NAME, $0, $[, $], $COMPILING, $^C,
-$DEBUGGING, $^D, $SYSTEM_FD_MAX, $^F, $^H, %^H, $INPLACE_EDIT, $^I, $^M,
-$OSNAME, $^O, $PERLDB, $^P, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
-0x100, 0x200, $LAST_REGEXP_CODE_RESULT, $^R, $EXCEPTIONS_BEING_CAUGHT, $^S,
-$BASETIME, $^T, $PERL_VERSION, $^V, $WARNING, $^W, ${^WARNING_BITS},
-${^WIDE_SYSTEM_CALLS}, $EXECUTABLE_NAME, $^X, $ARGV, @ARGV, @F, @INC, @_,
-%INC, %ENV, $ENV{expr}, %SIG, $SIG{expr}
+IO::Handle->input_record_separator EXPR, $INPUT_RECORD_SEPARATOR, $RS, $/,
+autoflush HANDLE EXPR, $OUTPUT_AUTOFLUSH, $|,
+IO::Handle->output_field_separator EXPR, $OUTPUT_FIELD_SEPARATOR, $OFS, $,,
+IO::Handle->output_record_separator EXPR, $OUTPUT_RECORD_SEPARATOR, $ORS,
+$\, $LIST_SEPARATOR, $", $SUBSCRIPT_SEPARATOR, $SUBSEP, $;, $OFMT, $#,
+format_page_number HANDLE EXPR, $FORMAT_PAGE_NUMBER, $%,
+format_lines_per_page HANDLE EXPR, $FORMAT_LINES_PER_PAGE, $=,
+format_lines_left HANDLE EXPR, $FORMAT_LINES_LEFT, $-, @LAST_MATCH_START,
+@-, C<$`> is the same as C<substr($var, 0, $-[0])>, C<$&> is the same as
+C<substr($var, $-[0], $+[0] - $-[0])>, C<$'> is the same as C<substr($var,
+$+[0])>, C<$1> is the same as C<substr($var, $-[1], $+[1] - $-[1])>, C<$2>
+is the same as C<substr($var, $-[2], $+[2] - $-[2])>, C<$3> is the same as
+C<substr $var, $-[3], $+[3] - $-[3])>, format_name HANDLE EXPR,
+$FORMAT_NAME, $~, format_top_name HANDLE EXPR, $FORMAT_TOP_NAME, $^,
+IO::Handle->format_line_break_characters EXPR,
+$FORMAT_LINE_BREAK_CHARACTERS, $:, IO::Handle->format_formfeed EXPR,
+$FORMAT_FORMFEED, $^L, $ACCUMULATOR, $^A, $CHILD_ERROR, $?, $OS_ERROR,
+$ERRNO, $!, $EXTENDED_OS_ERROR, $^E, $EVAL_ERROR, $@, $PROCESS_ID, $PID,
+$$, $REAL_USER_ID, $UID, $<, $EFFECTIVE_USER_ID, $EUID, $>, $REAL_GROUP_ID,
+$GID, $(, $EFFECTIVE_GROUP_ID, $EGID, $), $PROGRAM_NAME, $0, $[, $],
+$COMPILING, $^C, $DEBUGGING, $^D, $SYSTEM_FD_MAX, $^F, $^H, %^H,
+$INPLACE_EDIT, $^I, $^M, $OSNAME, $^O, $PERLDB, $^P, 0x01, 0x02, 0x04,
+0x08, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, $LAST_REGEXP_CODE_RESULT, $^R,
+$EXCEPTIONS_BEING_CAUGHT, $^S, $BASETIME, $^T, $PERL_VERSION, $^V,
+$WARNING, $^W, ${^WARNING_BITS}, ${^WIDE_SYSTEM_CALLS}, $EXECUTABLE_NAME,
+$^X, $ARGV, @ARGV, @F, @INC, @_, %INC, %ENV, $ENV{expr}, %SIG, $SIG{expr}
 
 =item Error Indicators
 
@@ -15659,90 +15659,6 @@ getitimer ( $which )
 
 =back
 
-=head2 Time::Piece - Object Oriented time objects
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item USAGE
-
-=over 4
-
-=item Local Locales
-
-=item Date Calculations
-
-=item Date Comparisons
-
-=item YYYY-MM-DDThh:mm:ss
-
-=item Week Number
-
-=item strftime method
-
-%%, %a, %A, %b, %B, %c, %C, %d, %D, %e, %h, %H, %I, %j, %m, %M, %n, %p, %r,
-%R, %S, %t, %T, %u, %U, %V, %w, %W, %x, %y, %Y, %Z
-
-=item strptime function
-
-=item Global Overriding
-
-=back
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=over 4
-
-=item License
-
-=item Bugs
-
-=back
-
-=back
-
-=head2 Time::Piece::Seconds, Time::Seconds - a simple API to convert
-seconds to other date values
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item METHODS
-
-=item AUTHOR
-
-=item LICENSE
-
-=item Bugs
-
-=back
-
-=head2 Time::Seconds - a simple API to convert seconds to other date values
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item METHODS
-
-=item AUTHOR
-
-=item LICENSE
-
-=item Bugs
-
-=back
-
 =head2 Time::gmtime - by-name interface to Perl's built-in gmtime()
 function
 
@@ -15798,7 +15714,7 @@ VAL, TYPE ), UNIVERSAL::can ( VAL, METHOD )
 
 =back
 
-=head2 UnicodeCD - Unicode character database
+=head2 Unicode::UCD - Unicode character database
 
 =over 4
 
@@ -15870,7 +15786,7 @@ VAL, TYPE ), UNIVERSAL::can ( VAL, METHOD )
 
 =over 4
 
-=item UnicodeCD::UnicodeVersion
+=item Unicode::UCD::UnicodeVersion
 
 =back
 

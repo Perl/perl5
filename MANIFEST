@@ -559,12 +559,6 @@ ext/Time/HiRes/HiRes.pm		Time::HiRes extension
 ext/Time/HiRes/HiRes.t		Test for Time::HiRes
 ext/Time/HiRes/HiRes.xs		Time::HiRes extension
 ext/Time/HiRes/Makefile.PL	Time::HiRes extension
-ext/Time/Piece/Makefile.PL	Time::Piece extension
-ext/Time/Piece/Piece.pm		Time::Piece extension
-ext/Time/Piece/Piece.t		Test for Time::Piece
-ext/Time/Piece/Piece.xs		Time::Piece extension
-ext/Time/Piece/README		Time::Piece extension
-ext/Time/Piece/Seconds.pm	Time::Piece extension
 ext/util/make_ext		Used by Makefile to execute extension Makefiles
 ext/XS/Typemap/Makefile.PL	XS::Typemap extension
 ext/XS/Typemap/README		XS::Typemap extension
