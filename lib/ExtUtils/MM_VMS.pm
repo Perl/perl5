@@ -20,8 +20,8 @@ BEGIN {
 
 use File::Basename;
 use vars qw($Revision @ISA $VERSION);
-($VERSION) = '5.71_01';
-($Revision) = q$Revision: 1.113 $ =~ /Revision:\s+(\S+)/;
+($VERSION) = '5.71';
+($Revision) = q$Revision: 1.116 $ =~ /Revision:\s+(\S+)/;
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
@@ -408,14 +408,14 @@ sub init_others {
     $self->{MAKE_APERL_FILE}    ||= 'Makeaperl.MMS';
     $self->{MAKEFILE_OLD}       ||= '$(FIRST_MAKEFILE)_old';
 
-    $self->{ECHO}     ||= '$(PERLRUN) -le "print qq{@ARGV}"';
-    $self->{ECHO_N}   ||= '$(PERLRUN) -e  "print qq{@ARGV}"';
-    $self->{TOUCH}    ||= '$(PERLRUN) "-MExtUtils::Command" -e touch';
-    $self->{CHMOD}    ||= '$(PERLRUN) "-MExtUtils::Command" -e chmod'; 
-    $self->{RM_F}     ||= '$(PERLRUN) "-MExtUtils::Command" -e rm_f';
-    $self->{RM_RF}    ||= '$(PERLRUN) "-MExtUtils::Command" -e rm_rf';
-    $self->{TEST_F}   ||= '$(PERLRUN) "-MExtUtils::Command" -e test_f';
-    $self->{EQUALIZE_TIMESTAMP} ||= '$(PERLRUN) -we "open F,qq{>>$ARGV[1]};close F;utime(0,(stat($ARGV[0]))[9]+1,$ARGV[1])"';
+    $self->{ECHO}     ||= '$(ABSPERLRUN) -le "print qq{@ARGV}"';
+    $self->{ECHO_N}   ||= '$(ABSPERLRUN) -e  "print qq{@ARGV}"';
+    $self->{TOUCH}    ||= '$(ABSPERLRUN) "-MExtUtils::Command" -e touch';
+    $self->{CHMOD}    ||= '$(ABSPERLRUN) "-MExtUtils::Command" -e chmod'; 
+    $self->{RM_F}     ||= '$(ABSPERLRUN) "-MExtUtils::Command" -e rm_f';
+    $self->{RM_RF}    ||= '$(ABSPERLRUN) "-MExtUtils::Command" -e rm_rf';
+    $self->{TEST_F}   ||= '$(ABSPERLRUN) "-MExtUtils::Command" -e test_f';
+    $self->{EQUALIZE_TIMESTAMP} ||= '$(ABSPERLRUN) -we "open F,qq{>>$ARGV[1]};close F;utime(0,(stat($ARGV[0]))[9]+1,$ARGV[1])"';
 
     $self->{MOD_INSTALL} ||= 
       $self->oneliner(<<'CODE', ['-MExtUtils::Install']);
@@ -1006,7 +1006,7 @@ INST_DYNAMIC_DEP = $inst_dynamic_dep
 
 ";
     push @m, '
-$(INST_DYNAMIC) : $(INST_STATIC) $(PERL_INC)perlshr_attr.opt blibdirs.exists $(EXPORT_LIST) $(PERL_ARCHIVE) $(INST_DYNAMIC_DEP)
+$(INST_DYNAMIC) : $(INST_STATIC) $(PERL_INC)perlshr_attr.opt blibdirs.ts $(EXPORT_LIST) $(PERL_ARCHIVE) $(INST_DYNAMIC_DEP)
 	$(NOECHO) $(MKPATH) $(INST_ARCHAUTODIR)
 	If F$TrnLNm("',$shr,'").eqs."" Then Define/NoLog/User ',"$shr Sys\$Share:$shr.$Config{'dlext'}",'
 	Link $(LDFLAGS) /Shareable=$(MMS$TARGET)$(OTHERLDFLAGS) $(BASEEXT).opt/Option,$(PERL_INC)perlshr_attr.opt/Option
@@ -1032,13 +1032,13 @@ BOOTSTRAP = '."$self->{BASEEXT}.bs".'
 # As MakeMaker mkbootstrap might not write a file (if none is required)
 # we use touch to prevent make continually trying to remake it.
 # The DynaLoader only reads a non-empty file.
-$(BOOTSTRAP) : $(FIRST_MAKEFILE) '."$self->{BOOTDEP}".' blibdirs.exists
+$(BOOTSTRAP) : $(FIRST_MAKEFILE) '."$self->{BOOTDEP}".' blibdirs.ts
 	$(NOECHO) $(ECHO) "Running mkbootstrap for $(NAME) ($(BSLOADLIBS))"
 	$(NOECHO) $(PERLRUN) -
 	-e "use ExtUtils::Mkbootstrap; Mkbootstrap(\'$(BASEEXT)\',\'$(BSLOADLIBS)\');"
 	$(NOECHO) $(TOUCH) $(MMS$TARGET)
 
-$(INST_BOOT) : $(BOOTSTRAP) blibdirs.exists
+$(INST_BOOT) : $(BOOTSTRAP) blibdirs.ts
 	$(NOECHO) $(RM_RF) $(INST_BOOT)
 	- $(CP) $(BOOTSTRAP) $(INST_BOOT)
 ';
@@ -1062,7 +1062,7 @@ $(INST_STATIC) :
     my(@m,$lib);
     push @m,'
 # Rely on suffix rule for update action
-$(OBJECT) : blibdirs.exists
+$(OBJECT) : blibdirs.ts
 
 $(INST_STATIC) : $(OBJECT) $(MYEXTLIB)
 ';
@@ -1170,7 +1170,7 @@ realclean ::
         }
 	$todir = $self->fixpath($todir,1);
 	push @m, "
-$to : $from \$(FIRST_MAKEFILE) blibdirs.exists
+$to : $from \$(FIRST_MAKEFILE) blibdirs.ts
 	\$(CP) $from $to
 
 ";
@@ -1236,7 +1236,7 @@ clean :: clean_subdirs
 	}
     }
     push(@otherfiles, qw[ blib $(MAKE_APERL_FILE) 
-                          perlmain.c blibdirs.exists pm_to_blib pm_to_blib.ts ]);
+                          perlmain.c blibdirs.ts pm_to_blib.ts ]);
     push(@otherfiles, $self->catfile('$(INST_ARCHAUTODIR)','extralibs.all'));
     push(@otherfiles, $self->catfile('$(INST_ARCHAUTODIR)','extralibs.ld'));
 
@@ -2122,7 +2122,7 @@ sub oneliner {
     # Switches must be quoted else they will be lowercased.
     $switches = join ' ', map { qq{"$_"} } @$switches;
 
-    return qq{\$(PERLRUN) $switches -e $cmd};
+    return qq{\$(ABSPERLRUN) $switches -e $cmd};
 }
 
 
@@ -2280,10 +2280,10 @@ sub fixpath {
     $self = bless {} unless ref $self;
     my($fixedpath,$prefix,$name);
 
-    if ($path =~ /\s/) {
+    if ($path =~ /[ \t]/) {
       return join ' ',
              map { $self->fixpath($_,$force_path) }
-	     split /\s+/, $path;
+	     split /[ \t]+/, $path;
     }
 
     if ($path =~ m#^\$\([^\)]+\)\Z(?!\n)#s || $path =~ m#[/:>\]]#) { 
@@ -2330,34 +2330,6 @@ VMS is VMS.
 
 sub os_flavor {
     return('VMS');
-}
-
-=item blibdirs_target (override)
-
-    my $make_frag = $mm->blibdirs_target;
-
-Creates the blibdirs.exists target which creates all the directories we use in
-blib/.  Override because older CRTLs have trouble with C<mkpath '[.foo]'> (as 
-opposed to C<mkpath 'foo.dir'>).
-
-=cut
-
-sub blibdirs_target {
-    my $self = shift;
-
-    my @dirs = map { uc "\$(INST_$_)" } qw(libdir
-                                       autodir archautodir
-                                       bin script
-                                       man1dir man3dir
-                                      );
-    
-    my $make = "\nblibdirs.exists :: \n";
-    for my $dir (@dirs) {
-        $make .= "\t" . '$(NOECHO) CREATE/DIRECTORY/PROTECTION=(O:RWE,G:RE,W:RE) ' . $dir . "\n";
-    }
-    $make .= "\t\$(NOECHO) \$(TOUCH) blibdirs.exists\n\n";
-
-    return $make;
 }
 
 =back

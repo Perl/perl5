@@ -1,12 +1,41 @@
-6.22
+6.25  Wed Dec 15 06:59:46 EST 2004
+    - Build.PL was being considered like Module_pm.PL.  Build.PL is now 
+      ignored.  [radek@karnet.pl] [rt.cpan.org 8809]
+    - Devel::Cover cover_db/ directory now ignored by MANIFEST.SKIP
+
+6.24_01 Thu Dec  9 00:44:48 EST 2004
+    - Docs encouraged possibly insecure use of /tmp [CAN-2004-0976 via Debian]
+    - Remove empty rpath from .so files [bleadperl@23183]
+    - At long last the core man page title has its apostrophe.
+    - BeOS tests fixed [Ingo Weinhold] [perlbug #32717]
+    - Putting a pm_to_blib target back (alias of pm_to_blib.ts) in case
+      anyone was depending on it being there (mod_perl was).
+
+6.24 Tue Nov 30 15:35:13 EST 2004
+    - dir_target() was accidentally named dir_targets() causing problems
+      installing some Tk modules.
+
+6.23 Fri Nov 26 16:01:50 EST 2004
+    - MM_MacOS lost its $VERSION causing some CPAN indexing problems.  Enough
+      people noticed this to warrant a quick release.
+
+6.22 Tue Nov 23 22:22:22 EST 2004
+    - Minor glitch in Command.t test on Win32 [thanks Steve Hay]
+    * Fixed MANIFEST.SKIP so it avoids all the new *.ts files.
+    - Don't spuriously define pasthru arguments
+
+6.21_03 Sat Apr 3 2004
+    - pm_to_blib and blibdirs stamp files now pm_to_blib.ts and blibdirs.ts
+      everywhere because some filesystems insist you have a dot in the 
+      filename.  This eliminates a bunch of special case code.
     - Minor potential glitch in the version check logic.
     - Making Makefile rebuild logic more resistant to inconsequential
       errors when cleaning up things that are going to be rebuilt anyway.
     - Adding SCCS to the list of directories in MANIFEST.SKIP.
-    - Fixing blibdirs so it doesn't rebuild every make run.
-    - Using a more conservative MAX_EXEC_LEN for Win98 to allow building
+    * Fixing blibdirs so it doesn't rebuild every make run.
+    * Using a more conservative MAX_EXEC_LEN for Win98 to allow building
       large modules like Encode. [Greg Matheson]
-    - test target mangled by dmake.  Doesn't seem to like q{}.
+    * test target mangled by dmake.  Doesn't seem to like q{}.
       [Greg Matheson]
     - instmodsh now using Archive::Tar to create archives if available.
       [Slaven Rezic]
@@ -14,6 +43,32 @@
       [Slaven Rezic]
     - Added FAQ entry for "How do I use a module without installing it?"
       and "How do I keep from installing man pages?" [Joe Cromie]
+    - Fixed finding the default MANIFEST.SKIP if its on a different volume
+      [Ilya Zakharevich]
+    - When building Perl, we had a chance of picking up the old installed
+      xsubpp from @INC [Andreas Koenig]
+    - makeaperl() now a bit more intellegent about ignoring perl libraries
+      not called libperl.  [Ilya Zakharevich bleadperl@22032]
+    * MacOS Classic (MacPerl) is no longer supported.  Please use
+      Module::Build instead.
+    * Restored pm_to_blib.ts so pm_to_blib generation will be quiessent on
+      VMS. [rt 4675]
+    - For simplicity, dir_target() is now a no-op.  Should not effect any
+      existing uses.
+    - Converted utility commands from using $(PERLRUN) to $(ABSPERLRUN).
+      This allows distclean to work with SDBM_File. [rt 5616]
+    - realclean was using "rm -f" instead of "rm -rf" meaning directories
+      wouldn't be properly cleaned.  Caused by bleadperl@7952. [rt 5208]
+    - fixpath() could undo wraplist() on VMS [rt 4955]
+    - ensure ExtUtils::Command::rm_f deletes all versions of a file on VMS
+      [rt 4687]
+    - hint.t generating improperly named hint files on OS's where $^O
+      contains a '.'.  They should be converted to underscores.  Test
+      mistake, not a bug.  [rt 5365]
+    - Fixed ExtUtils::Command::chmod() so it will work on directories on
+      VMS. [rt 4676]
+    - parse_version.t was using no_plan causing trouble on older T::Hs.
+      [rt 5633]
 
 6.21 Tue Nov 11 00:12:56 PST 2003
     - NetBSD was looking in INSTALLARCHLIB/CORE for libperl instead of 

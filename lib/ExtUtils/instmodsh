@@ -21,6 +21,10 @@ instmodsh - A shell to examine installed modules
 A little interface to ExtUtils::Installed to examine installed modules,
 validate your packlists and even create a tarball from an installed module.
 
+=head1 SEE ALSO
+
+ExtUtils::Installed
+
 =cut
 
 

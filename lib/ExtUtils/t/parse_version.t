@@ -11,7 +11,7 @@ BEGIN {
 }
 chdir 't';
 
-use Test::More 'no_plan';
+use Test::More tests => 10;
 use ExtUtils::MakeMaker;
 
 my %versions = ('$VERSION = 0.02'   => 0.02,

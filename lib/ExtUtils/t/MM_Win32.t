@@ -84,7 +84,7 @@ delete $ENV{PATHEXT} unless $had_pathext;
 {
     my $my_perl = $1 if $^X  =~ /(.*)/; # are we in -T or -t?
     my( $perl, $path ) = fileparse( $my_perl );
-    like( $MM->find_perl( $], [ $perl ], [ $path ], 0 ), 
+    like( $MM->find_perl( $], [ $perl ], [ $path ], 0 ),
           qr/^\Q$my_perl\E$/i, 'find_perl() finds this perl' );
 }
 

@@ -2,8 +2,9 @@ package ExtUtils::Manifest;
 
 require Exporter;
 use Config;
-use File::Find;
+use File::Basename;
 use File::Copy 'copy';
+use File::Find;
 use File::Spec;
 use Carp;
 use strict;
@@ -12,7 +13,7 @@ use vars qw($VERSION @ISA @EXPORT_OK
           $Is_MacOS $Is_VMS 
           $Debug $Verbose $Quiet $MANIFEST $DEFAULT_MSKIP);
 
-$VERSION = 1.43;
+$VERSION = 1.44;
 @ISA=('Exporter');
 @EXPORT_OK = qw(mkmanifest
                 manicheck  filecheck  fullcheck  skipcheck
@@ -29,9 +30,7 @@ $Verbose = defined $ENV{PERL_MM_MANIFEST_VERBOSE} ?
 $Quiet = 0;
 $MANIFEST = 'MANIFEST';
 
-my $Filename = __FILE__;
-$DEFAULT_MSKIP = (File::Spec->splitpath($Filename))[1].
-                 "$MANIFEST.SKIP";
+$DEFAULT_MSKIP = File::Spec->catfile( dirname(__FILE__), "$MANIFEST.SKIP" );
 
 
 =head1 NAME
@@ -513,11 +512,11 @@ sub _unmacify {
     my($file) = @_;
 
     return $file unless $Is_MacOS;
-    
+
     $file =~ s|^:||;
     $file =~ s|([/ \n])|sprintf("\\%03o", unpack("c", $1))|ge;
     $file =~ y|:|/|;
-    
+
     $file;
 }
 
@@ -572,7 +571,7 @@ sub _fix_manifest {
         close MANIFEST;
     }
 }
-        
+
 
 # UNIMPLEMENTED
 sub _normalize {
@@ -584,9 +583,17 @@ sub _normalize {
 
 =head2 MANIFEST
 
+A list of files in the distribution, one file per line.  The MANIFEST
+always uses Unix filepath conventions even if you're not on Unix.  This
+means F<foo/bar> style not F<foo\bar>.
+
 Anything between white space and an end of line within a C<MANIFEST>
-file is considered to be a comment.  Filenames and comments are
-separated by one or more TAB characters in the output. 
+file is considered to be a comment.  Any line beginning with # is also
+a comment.
+
+    # this a comment
+    some/file
+    some/other/file            comment about some/file
 
 
 =head2 MANIFEST.SKIP
@@ -595,7 +602,9 @@ The file MANIFEST.SKIP may contain regular expressions of files that
 should be ignored by mkmanifest() and filecheck(). The regular
 expressions should appear one on each line. Blank lines and lines
 which start with C<#> are skipped.  Use C<\#> if you need a regular
-expression to start with a sharp character. A typical example:
+expression to start with a C<#>.
+
+For example:
 
     # Version control files and dirs.
     \bRCS\b

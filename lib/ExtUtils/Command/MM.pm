@@ -9,7 +9,7 @@ use vars qw($VERSION @ISA @EXPORT);
 
 @EXPORT  = qw(test_harness pod2man perllocal_install uninstall 
               warn_if_old_packlist);
-$VERSION = '0.03';
+$VERSION = '0.03_01';
 
 my $Is_VMS = $^O eq 'VMS';
 
@@ -104,7 +104,7 @@ sub pod2man {
 
     # Official sets --center, but don't override things explicitly set.
     if ($options{official} && !defined $options{center}) {
-        $options{center} = 'Perl Programmers Reference Guide';
+        $options{center} = q[Perl Programmer's Reference Guide];
     }
 
     # This isn't a valid Pod::Man option and is only accepted for backwards

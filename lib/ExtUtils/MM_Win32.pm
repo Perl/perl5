@@ -29,7 +29,7 @@ use vars qw(@ISA $VERSION $BORLAND $GCC $DMAKE $NMAKE);
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
-$VERSION = '1.10_01';
+$VERSION = '1.10';
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
 
@@ -171,14 +171,14 @@ sub init_others {
     $self->{ECHO}     ||= $self->oneliner('print qq{@ARGV}', ['-l']);
     $self->{ECHO_N}   ||= $self->oneliner('print qq{@ARGV}');
 
-    $self->{TOUCH}    ||= '$(PERLRUN) -MExtUtils::Command -e touch';
-    $self->{CHMOD}    ||= '$(PERLRUN) -MExtUtils::Command -e chmod'; 
-    $self->{CP}       ||= '$(PERLRUN) -MExtUtils::Command -e cp';
-    $self->{RM_F}     ||= '$(PERLRUN) -MExtUtils::Command -e rm_f';
-    $self->{RM_RF}    ||= '$(PERLRUN) -MExtUtils::Command -e rm_rf';
-    $self->{MV}       ||= '$(PERLRUN) -MExtUtils::Command -e mv';
+    $self->{TOUCH}    ||= '$(ABSPERLRUN) -MExtUtils::Command -e touch';
+    $self->{CHMOD}    ||= '$(ABSPERLRUN) -MExtUtils::Command -e chmod'; 
+    $self->{CP}       ||= '$(ABSPERLRUN) -MExtUtils::Command -e cp';
+    $self->{RM_F}     ||= '$(ABSPERLRUN) -MExtUtils::Command -e rm_f';
+    $self->{RM_RF}    ||= '$(ABSPERLRUN) -MExtUtils::Command -e rm_rf';
+    $self->{MV}       ||= '$(ABSPERLRUN) -MExtUtils::Command -e mv';
     $self->{NOOP}     ||= 'rem';
-    $self->{TEST_F}   ||= '$(PERLRUN) -MExtUtils::Command -e test_f';
+    $self->{TEST_F}   ||= '$(ABSPERLRUN) -MExtUtils::Command -e test_f';
     $self->{DEV_NULL} ||= '> NUL';
 
     $self->{LD}     ||= $Config{ld} || 'link';
@@ -269,7 +269,7 @@ sub static_lib {
 
     my(@m);
     push(@m, <<'END');
-$(INST_STATIC): $(OBJECT) $(MYEXTLIB) blibdirs.exists
+$(INST_STATIC): $(OBJECT) $(MYEXTLIB) blibdirs.ts
 	$(RM_RF) $@
 END
 
@@ -330,7 +330,7 @@ sub dynamic_lib {
 OTHERLDFLAGS = '.$otherldflags.'
 INST_DYNAMIC_DEP = '.$inst_dynamic_dep.'
 
-$(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) blibdirs.exists $(EXPORT_LIST) $(PERL_ARCHIVE) $(INST_DYNAMIC_DEP)
+$(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) blibdirs.ts $(EXPORT_LIST) $(PERL_ARCHIVE) $(INST_DYNAMIC_DEP)
 ');
     if ($GCC) {
       push(@m,  
@@ -451,7 +451,7 @@ sub oneliner {
 
     $switches = join ' ', @$switches;
 
-    return qq{\$(PERLRUN) $switches -e $cmd};
+    return qq{\$(ABSPERLRUN) $switches -e $cmd};
 }
 
 

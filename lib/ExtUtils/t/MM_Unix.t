@@ -32,7 +32,6 @@ my $class = 'ExtUtils::MM_Unix';
 # only one of the following can be true
 # test should be removed if MM_Unix ever stops handling other OS than Unix
 my $os =  ($ExtUtils::MM_Unix::Is_OS2 	|| 0)
-	+ ($ExtUtils::MM_Unix::Is_Mac 	|| 0)
 	+ ($ExtUtils::MM_Unix::Is_Win32 || 0) 
 	+ ($ExtUtils::MM_Unix::Is_Dos 	|| 0)
 	+ ($ExtUtils::MM_Unix::Is_VMS   || 0); 

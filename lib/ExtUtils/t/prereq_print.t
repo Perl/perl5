@@ -4,11 +4,6 @@ BEGIN {
     if( $ENV{PERL_CORE} ) {
         chdir 't' if -d 't';
         @INC = ('../lib', 'lib');
-        require Config; import Config;
-        if ($Config{'extensions'} !~ /\bData\/Dumper\b/) {
-            print "1..0 # Skip: Data::Dumper was not built\n";
-		exit 0;
-        }
     }
     else {
         unshift @INC, 't/lib';
@@ -18,7 +13,15 @@ BEGIN {
 use strict;
 use Config;
 
-use Test::More tests => 11;
+use Test::More;
+
+unless( eval { require Data::Dumper } ) {
+    plan skip_all => 'Data::Dumper not available';
+}
+
+plan tests => 11;
+
+
 use MakeMaker::Test::Utils;
 use MakeMaker::Test::Setup::BFD;
 

@@ -44,9 +44,9 @@ blib/lib and blib/arch directories.
 
 The other is to install the module in a temporary location.
 
-        perl Makefile.PL PREFIX=/tmp LIB=/tmp/lib/perl
+        perl Makefile.PL PREFIX=~/tmp LIB=~/tmp/lib/perl
 
-And then set PERL5LIB to /tmp/lib/perl.  This works well when you have
+And then set PERL5LIB to F<~/tmp/lib/perl>.  This works well when you have
 multiple modules to work with.  It also ensures that the module goes
 through its full installation process which may modify it.
 

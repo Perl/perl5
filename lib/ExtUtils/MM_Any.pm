@@ -2,7 +2,7 @@ package ExtUtils::MM_Any;
 
 use strict;
 use vars qw($VERSION @ISA);
-$VERSION = 0.09_01;
+$VERSION = '0.10';
 @ISA = qw(File::Spec);
 
 use Config;
@@ -87,11 +87,26 @@ sub os_flavor_is {
     return (grep { $flavors{$_} } @_) ? 1 : 0;
 }
 
+
+=item dir_target B<DEPRECATED>
+
+    my $make_frag = $mm->dir_target(@directories);
+
+I<This function is deprecated> its use is no longer necessary and is
+I<only provided for backwards compatibility>.  It is now a no-op.
+blibdirs_target provides a much simpler mechanism and pm_to_blib() can
+create its own directories anyway.
+
+=cut
+
+sub dir_target {}
+
+
 =item blibdirs_target (o)
 
     my $make_frag = $mm->blibdirs_target;
 
-Creates the blibdirs.exists target which creates all the directories we use in
+Creates the blibdirs.ts target which creates all the directories we use in
 blib/.
 
 =cut
@@ -99,17 +114,20 @@ blib/.
 sub blibdirs_target {
     my $self = shift;
 
-    my @dirs = map { uc "\$(INST_$_)" } qw(libdir
-                                       autodir archautodir
-                                       bin script
-                                       man1dir man3dir
-                                      );
+    my @dirs = map { uc "\$(INST_$_)" } qw(libdir archlib
+                                           autodir archautodir
+                                           bin script
+                                           man1dir man3dir
+                                          );
     my @mkpath = $self->split_command('$(NOECHO) $(MKPATH)', @dirs);
     my @chmod  = $self->split_command('$(NOECHO) $(CHMOD) 755', @dirs);
 
-    my $make = "\nblibdirs.exists :: Makefile.PL \n";
+    my $make = "\nblibdirs.ts :\n";
     $make .= join "", map { "\t$_\n" } @mkpath, @chmod;
-    $make .= "\t\$(NOECHO) \$(TOUCH) blibdirs.exists\n\n";
+    $make .= <<'MAKE';
+	$(NOECHO) $(TOUCH) $@
+
+MAKE
 
     return $make;
 }
@@ -914,7 +932,7 @@ sub platform_constants {
 corresponding to the MM_*.pm file we're using.  
 
 The first element of @os_flavor is the major family (ie. Unix,
-Windows, VMS, OS/2, MacOS, etc...) and the rest are sub families.
+Windows, VMS, OS/2, etc...) and the rest are sub families.
 
 Some examples:
 
@@ -922,7 +940,6 @@ Some examples:
     Windows NT     ('Win32', 'WinNT')
     Win98          ('Win32', 'Win9x')
     Linux          ('Unix',  'Linux')
-    MacOS Classic  ('MacOS', 'MacOS Classic')
     MacOS X        ('Unix',  'Darwin', 'MacOS', 'MacOS X')
     OS/2           ('OS/2')
 

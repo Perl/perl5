@@ -10,8 +10,8 @@
 \bMakefile$
 \bblib/
 \bMakeMaker-\d
-\bpm_to_blib$
-\bblibdirs\.exists$
+\bpm_to_blib\.ts$
+\bblibdirs\.ts$
 
 # Avoid Module::Build generated and utility files.
 \bBuild$
@@ -22,3 +22,6 @@
 \.old$
 \#$
 \b\.#
+
+# Avoid Devel::Cover files.
+\bcover_db\b

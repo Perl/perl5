@@ -50,8 +50,6 @@ prefix with a space in the name.
 Using the MMS utility on VMS causes lots of extra newlines.  Unknown
 why this is so, might be a bug in MMS.  Problem not seen with MMK.
 
-MacOS Classic is likely broken.
-
 
 See TODO for details.
 

@@ -4,11 +4,6 @@ BEGIN {
     if( $ENV{PERL_CORE} ) {
         chdir 't' if -d 't';
         unshift @INC, '../lib';
-        require Config; import Config;
-        if ($Config{'extensions'} !~ /\bData\/Dumper\b/) {
-            print "1..0 # Skip: Data::Dumper was not built\n";
-		exit 0;
-        }
     }
     else {
         unshift @INC, 't/lib';
@@ -18,7 +13,7 @@ chdir 't';
 
 use strict;
 use Test::More tests => 6;
-use Data::Dumper;
+
 
 BEGIN {
     use_ok( 'ExtUtils::Liblist' );
@@ -37,5 +32,5 @@ ok( defined &ExtUtils::Liblist::ext,
     unlike( $out[2], qr/-ln0tt43r3_perl/, 'bogus library not added' );
     ok( @warn, 'had warning');
 
-    is( grep(/\QNote (probably harmless): No library found for \E(-l)?n0tt43r3_perl/, map { @$_ } @warn), 1 ) || diag Dumper @warn;
+    is( grep(/\QNote (probably harmless): No library found for \E(-l)?n0tt43r3_perl/, map { @$_ } @warn), 1 ) || diag join "\n", @warn;
 }

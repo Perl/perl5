@@ -23,7 +23,7 @@ BEGIN {
 }
 
 BEGIN {
-    use Test::More tests => 34;
+    use Test::More tests => 38;
     use File::Spec;
 }
 
@@ -141,6 +141,45 @@ BEGIN {
 
     is( ((stat($Testfile))[2] & 07777) & 0700,
         ($^O eq 'vos' ? 0700 : 0600), 'change a file to read-write' );
+
+
+    SKIP: {
+        if ($^O eq 'amigaos' || $^O eq 'os2' || $^O eq 'MSWin32' ||
+            $^O eq 'NetWare' || $^O eq 'dos' || $^O eq 'cygwin'  ||
+            $^O eq 'MacOS'
+           ) {
+            skip( "different file permission semantics on $^O", 4);
+        }
+
+        @ARGV = ('testdir');
+        mkpath;
+        ok( -e 'testdir' );
+
+        # change a dir to execute-only
+        @ARGV = ( '0100', 'testdir' );
+        ExtUtils::Command::chmod();
+
+        is( ((stat('testdir'))[2] & 07777) & 0700,
+            0100, 'change a dir to execute-only' );
+
+        # change a dir to read-only
+        @ARGV = ( '0400', 'testdir' );
+        ExtUtils::Command::chmod();
+
+        is( ((stat('testdir'))[2] & 07777) & 0700,
+            ($^O eq 'vos' ? 0500 : 0400), 'change a dir to read-only' );
+
+        # change a dir to write-only
+        @ARGV = ( '0200', 'testdir' );
+        ExtUtils::Command::chmod();
+
+        is( ((stat('testdir'))[2] & 07777) & 0700,
+            ($^O eq 'vos' ? 0700 : 0200), 'change a dir to write-only' );
+
+        @ARGV = ('testdir');
+        rm_rf;
+    }
+
 
     # mkpath
     @ARGV = ( File::Spec->join( 'ecmddir', 'temp2' ) );
