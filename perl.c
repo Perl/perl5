@@ -154,7 +154,6 @@ perl_construct(pTHXx)
    if (PL_perl_destruct_level > 0)
        init_interp();
 #endif
-
    /* Init the real globals (and main thread)? */
     if (!PL_linestr) {
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
@@ -3329,24 +3328,25 @@ S_init_ids(pTHX)
 
 /* This is used very early in the lifetime of the program,
  * before even the options are parsed, so PL_tainting has
- * not been initialized properly.*/
-int
+ * not been initialized properly.  The variable PL_earlytaint
+ * is set early in main() to the result of this function. */
+bool
 Perl_doing_taint(int argc, char *argv[], char *envp[])
 {
-    int uid = PerlProc_getuid();
+    int uid  = PerlProc_getuid();
     int euid = PerlProc_geteuid();
-    int gid = PerlProc_getgid();
+    int gid  = PerlProc_getgid();
     int egid = PerlProc_getegid();
 
 #ifdef VMS
-    uid |= gid << 16;
+    uid  |=  gid << 16;
     euid |= egid << 16;
 #endif
     if (uid && (euid != uid || egid != gid))
 	return 1;
-    /* This is a really primitive check; $ENV{PERL_MALLOC_OPT} is
-	ignored only if -T are the first chars together; otherwise one
-	gets "Too late" message. */
+    /* This is a really primitive check; environment gets ignored only
+     * if -T are the first chars together; otherwise one gets
+     *  "Too late" message. */
     if ( argc > 1 && argv[1][0] == '-'
          && (argv[1][1] == 't' || argv[1][1] == 'T') )
 	return 1;

@@ -498,9 +498,8 @@ int usleep(unsigned int);
 		if (newval) {					\
 		  panic_write2("panic: tainting with $ENV{PERL_MALLOC_OPT}\n");\
 		  exit(1); })
-extern int Perl_doing_taint(int argc, char *argv[], char *envp[]);
 #  define MALLOC_CHECK_TAINT(argc,argv,env)	STMT_START {	\
-	if (Perl_doing_taint(argc, argv, env))	{		\
+	if (Perl_doing_taint(argc,argv,env)) {			\
 		MallocCfg_ptr[MallocCfg_skip_cfg_env] = 1;	\
     }} STMT_END;
 #else  /* MYMALLOC */
