@@ -10,6 +10,9 @@
 # /sys5 includes.
 ccflags="$ccflags -A cpu,mathchip -I`pwd`/apollo -I/usr/include -I/sys5/usr/include"
 
+# When Apollo runs a script with "#!", it sets argv[0] to the script name.
+toke_cflags='ccflags="$ccflags -DARG_ZERO_IS_SCRIPT"'
+
 # These adjustments are necessary (why?) to compile malloc.c.
 freetype='void'
 i_malloc='undef'
