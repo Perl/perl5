@@ -395,16 +395,12 @@ $(DBG)libperl$(OLB) : $(obj)
 perlmain.c : miniperlmain.c $(MINIPERL_EXE) [.vms]writemain.pl
 	$(MINIPERL) [.VMS]Writemain.pl "$(EXT)"
 
-byteperl.c : [.ext.B]byteperl.c
-	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
-
 .ifdef __DEBUG__
 # Link an extra perl that doesn't invoke the debugger
-perl : $(DBG)perl$(E) $(DBG)byteperl$(E)
+perl : $(DBG)perl$(E)
 	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoCross/NoFull/Exe=N$(DBG)perl$(E) perlmain$(O), perlshr.opt/Option, perlshr_attr.opt/Option $(CRTLOPTS)
-	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoCross/NoFull/Exe=N$(DBG)byteperl$(E) byteperl$(O), perlshr.opt/Option, perlshr_attr.opt/Option $(CRTLOPTS)
 .else
-perl : $(DBG)perl$(E) $(DBG)byteperl$(E)
+perl : $(DBG)perl$(E)
 	@ Continue
 .endif
 
@@ -415,10 +411,6 @@ $(DBG)perl$(E) : perlmain$(O), $(DBG)perlshr$(E), $(MINIPERL_EXE)
 .else
 	Link $(LINKFLAGS)/Exe=$(MMS$TARGET) perlmain$(O), perlshr.opt/Option, perlshr_attr.opt/Option $(CRTLOPTS)
 .endif
-
-$(DBG)byteperl$(E) : byteperl$(O), $(DBG)perlshr$(E), $(MINIPERL_EXE)
-	@ @[.vms]genopt "PerlShr.Opt/Write" "|" "''F$Environment("Default")'$(DBG)PerlShr$(E)/Share"
-	Link $(LINKFLAGS)/Exe=$(MMS$TARGET) byteperl$(O), perlshr.opt/Option, perlshr_attr.opt/Option $(CRTLOPTS)
 
 $(DBG)perlshr$(E) : $(DBG)libperl$(OLB) $(extobj) $(DBG)perlshr_xtras.ts
 	Link $(LINKFLAGS)/Share=$(MMS$TARGET) $(extobj) []$(DBG)perlshr_bld.opt/Option, perlshr_attr.opt/Option
@@ -1109,7 +1101,6 @@ tidy : cleanlis
 	- If F$Search("VMSish.H;-1").nes."" Then Purge/NoConfirm/Log VMSish.H
 	- If F$Search("VMS.C;-1")   .nes."" Then Purge/NoConfirm/Log VMS.C
 	- If F$Search("Perlmain.C;-1")   .nes."" Then Purge/NoConfirm/Log Perlmain.C
-	- If F$Search("byteperl.C;-1")   .nes."" Then Purge/NoConfirm/Log byteperl.C
 	- If F$Search("Perlshr_Gbl*.Mar;-1")   .nes."" Then Purge/NoConfirm/Log Perlshr_Gbl*.Mar
 	- If F$Search("[.Ext.DynaLoader]DL_VMS$(O);-1").nes."" Then Purge/NoConfirm/Log [.Ext.DynaLoader]DL_VMS$(O)
 	- If F$Search("[.Ext.DynaLoader]DL_VMS.C;-1").nes."" Then Purge/NoConfirm/Log [.Ext.DynaLoader]DL_VMS.C
