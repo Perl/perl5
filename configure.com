@@ -5649,6 +5649,7 @@ $ WC "sPRIx64='" + sPRIx64 + "'"
 $ WC "sSCNfldbl='" + sSCNfldbl + "'"
 $ WC "sched_yield='" + sched_yield + "'"
 $ WC "scriptdir='" + scriptdir + "'"
+$ WC "scriptdirexp='" + scriptdir + "'"  ! use scriptdir for now
 $ WC "seedfunc='" + seedfunc + "'"
 $ WC "selectminbits='32'"
 $ WC "selecttype='" + selecttype + "'"
