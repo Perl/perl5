@@ -216,6 +216,8 @@ print "# First entry is '$first'\n";
 
 foreach my $pain ($first, @virtual) {
   # No config var is named with anything that is a regexp metachar
+  ok(exists $Config{$pain}, "\$config('$pain') exists");
+
   my @result = $Config{$pain};
   is (scalar @result, 1, "single result for \$config('$pain')");
 
