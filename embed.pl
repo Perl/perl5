@@ -2068,17 +2068,17 @@ Ap	|void	|unlock_condpair|void* svv
 Ap	|void	|unsharepvn	|const char* sv|I32 len|U32 hash
 p	|void	|unshare_hek	|HEK* hek
 p	|void	|utilize	|int aver|I32 floor|OP* version|OP* id|OP* arg
-Ap	|U8*	|utf16_to_utf8	|U8* p|U8 *d|I32 bytelen|I32 *newlen
-Ap	|U8*	|utf16_to_utf8_reversed|U8* p|U8 *d|I32 bytelen|I32 *newlen
-Adp	|STRLEN	|utf8_length	|U8* s|U8 *e
-Apd	|IV	|utf8_distance	|U8 *a|U8 *b
-Apd	|U8*	|utf8_hop	|U8 *s|I32 off
+ApM	|U8*	|utf16_to_utf8	|U8* p|U8 *d|I32 bytelen|I32 *newlen
+ApM	|U8*	|utf16_to_utf8_reversed|U8* p|U8 *d|I32 bytelen|I32 *newlen
+ApMd	|STRLEN	|utf8_length	|U8* s|U8 *e
+ApMd	|IV	|utf8_distance	|U8 *a|U8 *b
+ApMd	|U8*	|utf8_hop	|U8 *s|I32 off
 ApMd	|U8*	|utf8_to_bytes	|U8 *s|STRLEN *len
 ApMd	|U8*	|bytes_from_utf8|U8 *s|STRLEN *len|bool *is_utf8
 ApMd	|U8*	|bytes_to_utf8	|U8 *s|STRLEN *len
-Apd	|UV	|utf8_to_uv_simple|U8 *s|STRLEN* retlen
-Adp	|UV	|utf8_to_uv	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
-Apd	|U8*	|uv_to_utf8	|U8 *d|UV uv
+ApMd	|UV	|utf8_to_uv_simple|U8 *s|STRLEN* retlen
+ApMd	|UV	|utf8_to_uv	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
+ApMd	|U8*	|uv_to_utf8	|U8 *d|UV uv
 p	|void	|vivify_defelem	|SV* sv
 p	|void	|vivify_ref	|SV* sv|U32 to_what
 p	|I32	|wait4pid	|Pid_t pid|int* statusp|int flags
@@ -2165,10 +2165,10 @@ Ap	|char*	|sv_2pvbyte_nolen|SV* sv
 Ap	|char*	|sv_pv		|SV *sv
 Ap	|char*	|sv_pvutf8	|SV *sv
 Ap	|char*	|sv_pvbyte	|SV *sv
-Apd      |void   |sv_utf8_upgrade|SV *sv
-ApdM      |bool   |sv_utf8_downgrade|SV *sv|bool fail_ok
-ApdM      |void   |sv_utf8_encode |SV *sv
-Ap      |bool   |sv_utf8_decode |SV *sv
+ApMd	|void   |sv_utf8_upgrade|SV *sv
+ApMd	|bool   |sv_utf8_downgrade|SV *sv|bool fail_ok
+ApMd	|void   |sv_utf8_encode |SV *sv
+ApM	|bool   |sv_utf8_decode |SV *sv
 Ap	|void	|sv_force_normal|SV *sv
 Ap	|void	|sv_add_backref	|SV *tsv|SV *sv
 Ap	|void	|sv_del_backref	|SV *sv

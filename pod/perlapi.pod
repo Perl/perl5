@@ -3179,6 +3179,9 @@ Found in file sv.c
 
 Convert the PV of an SV to its UTF8-encoded form.
 
+NOTE: this function is experimental and may change or be
+removed without notice.
+
 	void	sv_utf8_upgrade(SV *sv)
 
 =for hackers
@@ -3244,6 +3247,9 @@ and C<b>.
 WARNING: use only if you *know* that the pointers point inside the
 same UTF-8 buffer.
 
+NOTE: this function is experimental and may change or be
+removed without notice.
+
 	IV	utf8_distance(U8 *a, U8 *b)
 
 =for hackers
@@ -3258,6 +3264,9 @@ WARNING: do not use the following unless you *know* C<off> is within
 the UTF-8 data pointed to by C<s> *and* that on entry C<s> is aligned
 on the first byte of character or just after the last byte of a character.
 
+NOTE: this function is experimental and may change or be
+removed without notice.
+
 	U8*	utf8_hop(U8 *s, I32 off)
 
 =for hackers
@@ -3268,6 +3277,9 @@ Found in file utf8.c
 Return the length of the UTF-8 char encoded string C<s> in characters.
 Stops at C<e> (inclusive).  If C<e E<lt> s> or if the scan would end
 up past C<e>, croaks.
+
+NOTE: this function is experimental and may change or be
+removed without notice.
 
 	STRLEN	utf8_length(U8* s, U8 *e)
 
@@ -3306,6 +3318,9 @@ length of the UTF-8 character in bytes, and zero will be returned.
 The C<flags> can also contain various flags to allow deviations from
 the strict UTF-8 encoding (see F<utf8.h>).
 
+NOTE: this function is experimental and may change or be
+removed without notice.
+
 	UV	utf8_to_uv(U8 *s, STRLEN curlen, STRLEN* retlen, U32 flags)
 
 =for hackers
@@ -3319,6 +3334,9 @@ length, in bytes, of that character.
 
 If C<s> does not point to a well-formed UTF8 character, zero is
 returned and retlen is set, if possible, to -1.
+
+NOTE: this function is experimental and may change or be
+removed without notice.
 
 	UV	utf8_to_uv_simple(U8 *s, STRLEN* retlen)
 
@@ -3337,6 +3355,9 @@ end of the new character. In other words,
 is the recommended Unicode-aware way of saying
 
     *(d++) = uv;
+
+NOTE: this function is experimental and may change or be
+removed without notice.
 
 	U8*	uv_to_utf8(U8 *d, UV uv)
 
