@@ -61,15 +61,27 @@ $thread->detach();
 
 $thread = threads->self();
 
-thread->tid();
+threads->tid();
+threads->self->tid();
+
+$thread->tid();
 
 =head1 DESCRIPTION
 
-Perl 5.6 has something called interpreter threads, interpreter threads
-are built on MULTIPLICITY and allows for several different perl
-interpreters to run in different threads. This has been used in win32
-perl to fake forks, it has also been available to people embedding
-perl.
+Perl 5.6 introduced something called interpreter threads. Interpreter
+threads are different from 5005 threads by creating a new perl
+interpreter per thread and not sharing any data or state between threads.
+
+Prior to perl 5.8 this has only been available to people embedding perl and
+for emulating fork() on windows.
+
+The threads API is loosly based on the old Thread.pm API. It is very important
+to note that variables are not shared between threads, all variables are per
+default thread local. To use shared variables one must use threads::shared.
+
+It is also important to note that you preferebly enable threads by doing
+C<use threads> as early as possible and it is not possible to enable threading
+by in an eval ""; 
 
 =over
 
@@ -79,12 +91,14 @@ This will create a new thread with the entry point function and give
 it LIST as parameters.  It will return the corresponding threads
 object.
 
-=item $threads->join
+create is an alias to new
+
+=item $thread->join
 
 This will wait for the corresponding thread to join. When it finishes join will return the return values of the root function.
 If a thread has been detached, join will return without wait.
 
-=item $threads->detach
+=item $thread->detach
 
 Will throw away the return value from the thread and make non joinable
 
@@ -92,7 +106,7 @@ Will throw away the return value from the thread and make non joinable
 
 This will return the object for the current thread.
 
-=item $threads->tid
+=item $thread->tid
 
 This will return the id of the thread.
 threads->self->tid() is a quick way to get current thread id
@@ -114,7 +128,7 @@ threads->self->tid() is a quick way to get current thread id
 
 =head1 AUTHOR and COPYRIGHT
 
-Artur Bergman E<lt>artur at contiller.seE<gt>
+Arthur Bergman E<lt>arthur at contiller.seE<gt>
 
 threads is released under the same license as Perl
 
@@ -141,10 +155,11 @@ please join perl-ithreads@perl.org for more information
 
 =item PERL_OLD_SIGNALS are not threadsafe, will not be.
 
+
 =back
 
 =head1 SEE ALSO
 
-L<perl>, L<perlcall>, L<perlembed>, L<perlguts>
+L<perl>, L<threads::shared>, L<perlcall>, L<perlembed>, L<perlguts>
 
 =cut
