@@ -142,7 +142,7 @@ here and in commands:
 		    L</"sec">		ditto
     F<file>	Used for filenames
     X<index>	An index entry
-    ZE<lt>E<gt>	A zero-width character
+    Z<>		A zero-width character
     E<escape>   A named character (very similar to HTML escapes)
 		    E<lt>		A literal <
 		    E<gt>		A literal >
