@@ -114,8 +114,7 @@ uses I<string> instead of file for the source of text.  Same as F<iconv>.
 
 =item -l
 
-Lists all available encodings to STDERR.  This feature is missing from
-F<iconv>.
+Lists all available encodings to STDERR.
 
 =item -h
 
