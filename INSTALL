@@ -941,7 +941,18 @@ to test your version of miniperl.
 If you have any locale-related environment variables set, try
 unsetting them.  I have some reports that some versions of IRIX hang
 while running B<./miniperl configpm> with locales other than the C
-locale.  See the discussion under L<make test> below about locales.
+locale.  See the discussion under L<"make test"> below about locales
+and the whole L<Locale problems> section in the file pod/perllocale.pod.
+The latter is especially useful if you see something like this
+
+	perl: warning: Setting locale failed.
+	perl: warning: Please check that your locale settings:
+	        LC_ALL = "En_US",
+	        LANG = (unset)
+	    are supported and installed on your system.
+	perl: warning: Falling back to the standard locale ("C").
+
+at Perl startup.
 
 =item malloc duplicates
 
