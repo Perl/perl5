@@ -377,7 +377,7 @@ sub cflags {
 
     if ($Is_PERL_OBJECT) {
         $self->{CCFLAGS} =~ s/-DPERL_OBJECT(\b|$)/-DPERL_CAPI/g;
-        if ($Is_Win32 && $Config{'cc'} =~ /^cl.exe/i) {
+        if ($Is_Win32 && $Config{'cc'} =~ /^cl/i) {
             # Turn off C++ mode of the MSC compiler
             $self->{CCFLAGS} =~ s/-TP(\s|$)//;
             $self->{OPTIMIZE} =~ s/-TP(\s|$)//;

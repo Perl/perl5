@@ -179,8 +179,7 @@ sub heavy_export_to_level
 {
       my $pkg = shift;
       my $level = shift;
-    # need to get rid of the first argument, its junk
-    shift;
+      (undef) = shift;			# XXX redundant arg
       my $callpkg = caller($level);
       $pkg->export($callpkg, @_);
 }

@@ -1977,7 +1977,6 @@ s	|void	|more_xrv
 s	|XPVIV*	|new_xiv
 s	|XPVNV*	|new_xnv
 s	|XPV*	|new_xpv
-s	|XPV*	|new_xpv
 s	|XPVIV*	|new_xpviv
 s	|XPVNV*	|new_xpvnv
 s	|XPVCV*	|new_xpvcv

@@ -949,7 +949,6 @@
 #define new_xiv			S_new_xiv
 #define new_xnv			S_new_xnv
 #define new_xpv			S_new_xpv
-#define new_xpv			S_new_xpv
 #define new_xpviv		S_new_xpviv
 #define new_xpvnv		S_new_xpvnv
 #define new_xpvcv		S_new_xpvcv
@@ -2299,7 +2298,6 @@
 #define more_xrv()		S_more_xrv(aTHX)
 #define new_xiv()		S_new_xiv(aTHX)
 #define new_xnv()		S_new_xnv(aTHX)
-#define new_xpv()		S_new_xpv(aTHX)
 #define new_xpv()		S_new_xpv(aTHX)
 #define new_xpviv()		S_new_xpviv(aTHX)
 #define new_xpvnv()		S_new_xpvnv(aTHX)
@@ -4498,8 +4496,6 @@
 #define new_xiv			S_new_xiv
 #define S_new_xnv		CPerlObj::S_new_xnv
 #define new_xnv			S_new_xnv
-#define S_new_xpv		CPerlObj::S_new_xpv
-#define new_xpv			S_new_xpv
 #define S_new_xpv		CPerlObj::S_new_xpv
 #define new_xpv			S_new_xpv
 #define S_new_xpviv		CPerlObj::S_new_xpviv
