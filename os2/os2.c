@@ -481,7 +481,7 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 	char **argsp = fargs;
 	int nargs = 4;
 	int force_shell;
- 	int new_stderr = -1, nostderr = 0
+ 	int new_stderr = -1, nostderr = 0;
 	int fl_stderr = 0;
 	STRLEN n_a;
 	

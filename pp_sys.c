@@ -3485,10 +3485,10 @@ PP(pp_link)
     char *tmps = SvPV(TOPs, n_a);
     TAINT_PROPER("link");
     SETi( PerlLIO_link(tmps, tmps2) >= 0 );
+    RETURN;
 #else
     DIE(aTHX_ PL_no_func, "link");
 #endif
-    RETURN;
 }
 
 PP(pp_symlink)
