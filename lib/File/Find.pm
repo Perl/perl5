@@ -373,7 +373,7 @@ sub _find_opt {
 
             $name = $abs_dir . $_;
 
-            &$wanted_callback;
+            { &$wanted_callback }; # protect against wild "next"
 
         }
 
@@ -429,7 +429,7 @@ sub _find_dir($$$) {
             $_= ($no_chdir ? $dir_name : $dir_rel );
 	    # prune may happen here
             $prune= 0;
-            &$wanted_callback; 
+            { &$wanted_callback }; 	# protect against wild "next"
             next if $prune;
 	}
       
@@ -472,7 +472,7 @@ sub _find_dir($$$) {
 		
 		$name = $dir_pref . $FN;
 		$_ = ($no_chdir ? $name : $FN);
-		&$wanted_callback;
+		{ &$wanted_callback }; # protect against wild "next"
 	    }
 
 	}
@@ -496,13 +496,13 @@ sub _find_dir($$$) {
 		    else {
 			$name = $dir_pref . $FN;
 			$_= ($no_chdir ? $name : $FN);
-			&$wanted_callback;
+			{ &$wanted_callback }; # protect against wild "next"
 		    }
 		}
 		else {
 		    $name = $dir_pref . $FN;
 		    $_= ($no_chdir ? $name : $FN);
-		    &$wanted_callback;
+		    { &$wanted_callback }; # protect against wild "next"
 		}
 	    }
 	}
@@ -528,7 +528,7 @@ sub _find_dir($$$) {
                 if ( substr($_,-2) eq '/.' ) {
                   s|/\.$||;
                 }
-                &$wanted_callback;
+                { &$wanted_callback }; # protect against wild "next"
             } else {
                 push @Stack,[$CdLvl,$p_dir,$dir_rel,-1]  if  $bydepth;
                 last;
@@ -602,7 +602,7 @@ sub _find_dir_symlnk($$$) {
 	    # prune may happen here
             $prune= 0;
 	    lstat($_); # make sure  file tests with '_' work
-            &$wanted_callback;
+            { &$wanted_callback }; # protect against wild "next"
             next if  $prune;
 	}
 
@@ -652,7 +652,7 @@ sub _find_dir_symlnk($$$) {
 		$fullname = $new_loc;
 		$name = $dir_pref . $FN;
 		$_ = ($no_chdir ? $name : $FN);
-		&$wanted_callback;
+		{ &$wanted_callback }; # protect against wild "next"
 	    }
 	}
 
@@ -686,7 +686,7 @@ sub _find_dir_symlnk($$$) {
                 }
 
 		lstat($_); # make sure  file tests with '_' work
-	        &$wanted_callback;
+	        { &$wanted_callback }; # protect against wild "next"
             } else {
                 push @Stack,[$dir_loc, $pdir_loc, $p_dir, $dir_rel,-1]  if  $bydepth;
                 last;
