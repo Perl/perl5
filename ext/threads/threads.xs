@@ -102,13 +102,13 @@ SV* Perl_thread_create(char* class, SV* init_function, SV* params) {
 
 	temp_store = Perl_get_sv(current_perl, "threads::paramtempstore",
 				 TRUE | GV_ADDMULTI);
-	Perl_sv_setsv(current_perl, temp_store,params);
+	Perl_sv_setsv_flags(current_perl, temp_store,params, SV_GMAGIC);
 	params = NULL;
 	temp_store = NULL;
 
 	temp_store = Perl_get_sv(current_perl, "threads::calltempstore",
 				 TRUE | GV_ADDMULTI);
-	Perl_sv_setsv(current_perl,temp_store, init_function);
+	Perl_sv_setsv_flags(current_perl,temp_store, init_function, SV_GMAGIC);
 	init_function = NULL;
 	temp_store = NULL;
 
@@ -129,18 +129,18 @@ SV* Perl_thread_create(char* class, SV* init_function, SV* params) {
 	 * inteprreter */
 
 	temp_store = Perl_get_sv(thread->interp, "threads::paramtempstore",FALSE);
-	Perl_sv_setsv(thread->interp,temp_store, &PL_sv_undef);
+	Perl_sv_setsv_flags(thread->interp,temp_store, &PL_sv_undef, SV_GMAGIC);
 
 	temp_store = Perl_get_sv(thread->interp,"threads::calltempstore",FALSE);
-	Perl_sv_setsv(thread->interp,temp_store, &PL_sv_undef);
+	Perl_sv_setsv_flags(thread->interp,temp_store, &PL_sv_undef, SV_GMAGIC);
 
 	PERL_SET_CONTEXT(current_perl);
 
 	temp_store = Perl_get_sv(current_perl,"threads::paramtempstore",FALSE);
-	Perl_sv_setsv(current_perl, temp_store, &PL_sv_undef);
+	Perl_sv_setsv_flags(current_perl, temp_store, &PL_sv_undef, SV_GMAGIC);
 
 	temp_store = Perl_get_sv(current_perl,"threads::calltempstore",FALSE);
-	Perl_sv_setsv(current_perl, temp_store, &PL_sv_undef);
+	Perl_sv_setsv_flags(current_perl, temp_store, &PL_sv_undef, SV_GMAGIC);
 
 	/* let's init the thread */
 
