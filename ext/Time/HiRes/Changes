@@ -1,5 +1,10 @@
 Revision history for Perl extension Time::HiRes.
 
+1.49
+	- UVuf for non-IVSIZE platforms (from Keiichiro Nagano)
+	- OS/2 can always mix subsecond sleeps with signals
+	  (part of perl change #19789)
+
 1.48
 	- workaround for buggy gcc 2.95.3 in openbsd/sparc64
 	  (perl change #19592)
