@@ -42,7 +42,7 @@ sub _sock_info {
 	if(defined $addr && $addr =~ s,:([\w\(\)/]+)$,,);
 
   if(defined $proto  && $proto =~ /\D/) {
-    if(@proto = getprotobyname($proto) {
+    if(@proto = getprotobyname($proto)) {
       $proto = $proto[2] || undef;
     }
     else {
