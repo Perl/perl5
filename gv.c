@@ -935,7 +935,7 @@ HV* stash;
                 /* FALL THROUGH */
             case SVt_PVHV:
             case SVt_PVAV:
-	      die("Not a subroutine reference in %%OVERLOAD");
+	      die("Not a subroutine reference in overload table");
 	      return FALSE;
             case SVt_PVCV:
                 cv = (CV*)sv;
