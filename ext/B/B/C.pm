@@ -7,7 +7,7 @@
 #
 package B::C::Section;
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 use B ();
 use base B::Section;
