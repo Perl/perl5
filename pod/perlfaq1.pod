@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq1 - General Questions About Perl ($Revision: 1.4 $, $Date: 2002/01/18 21:00:17 $)
+perlfaq1 - General Questions About Perl ($Revision: 1.5 $, $Date: 2002/01/27 20:22:52 $)
 
 =head1 DESCRIPTION
 
@@ -96,15 +96,16 @@ See L<perlhist> for a history of Perl revisions.
 At The Second O'Reilly Open Source Software Convention, Larry Wall            
 announced Perl6 development would begin in earnest. Perl6 was an oft
 used term for Chip Salzenberg's project to rewrite Perl in C++ named
-Topaz. However, Topaz should not be confused with the nisus to rewrite
-Perl while keeping the lessons learned from other software, as well as
-Perl5, in mind.
+Topaz. However, Topaz provided valuable insights to the next version
+of Perl and its implementation, but was ultimately abandoned.   
 
-If you have a desire to help in the crusade to make Perl a better place
-then peruse the Perl6 developers page at http://www.perl.org/perl6/ and 
-get involved.
+If you want to learn more about Perl6, or have a desire to help in 
+the crusade to make Perl a better place then peruse the Perl6 developers 
+page at http://dev.perl.org/perl6/ and get involved.
 
-The first alpha release is expected by Summer 2001.
+Perl6 is not scheduled for release yet, and Perl5 will still be supported
+for quite awhile after its release. Do not wait for Perl6 to do whatever
+you need to do.
 
 "We're really serious about reinventing everything that needs reinventing."
 --Larry Wall
@@ -317,8 +318,8 @@ but the most recommendable way is to upgrade to at least Perl 5.6.1.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002 Tom Christiansen and
-Nathan Torkington.  All rights reserved.
+Copyright (c) 1997, 1998, 1999, 2000, 2001 Tom Christiansen and Nathan
+Torkington.  All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it
 under the same terms as Perl itself.

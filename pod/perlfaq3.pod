@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.11 $, $Date: 2002/01/11 02:31:20 $)
+perlfaq3 - Programming Tools ($Revision: 1.12 $, $Date: 2002/01/28 04:17:26 $)
 
 =head1 DESCRIPTION
 
@@ -921,7 +921,7 @@ information, see L<ExtUtils::MakeMaker>.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-1999 Tom Christiansen and Nathan Torkington.
+Copyright (c) 1997-2002 Tom Christiansen and Nathan Torkington.
 All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it
