@@ -53,6 +53,9 @@ if ($^O eq 'VMS') {
     }
     ok($count/($#result+1)-1,$#compare);
 }
+elsif ($^O eq 'dos') {
+    ok(lc $result,lc $compare);
+}
 else {
     ok($result,$compare);
 }
