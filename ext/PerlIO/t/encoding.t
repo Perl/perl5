@@ -1,3 +1,5 @@
+print "1..8\n";
+
 my $grk = "grk$$";
 my $utf = "utf$$";
 
