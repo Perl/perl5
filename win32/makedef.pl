@@ -37,7 +37,6 @@ if ($define{PERL_OBJECT}) {
 #    output_symbol("perl_parse");
 #    output_symbol("perl_run");
 #    output_symbol("RunPerl");
-    output_symbol("GetPerlInterpreter");
 #    exit(0);
 }
 else {
@@ -188,13 +187,16 @@ Perl_unlock_condpair
 Perl_magic_mutexfree
 )];
  }
-unless ($define{'USE_THREADS'} or $define{'PERL_IMPLICIT_CONTEXT'})
- {
+unless ($define{'USE_THREADS'} or $define{'PERL_IMPLICIT_CONTEXT'}
+	or $define{'PERL_OBJECT'})
+{
   skip_symbols [qw(
 		   Perl_croak_nocontext
 		   Perl_die_nocontext
+		   Perl_deb_nocontext
 		   Perl_form_nocontext
 		   Perl_warn_nocontext
+		   Perl_warner_nocontext
 		   Perl_newSVpvf_nocontext
 		   Perl_sv_catpvf_nocontext
 		   Perl_sv_setpvf_nocontext
@@ -507,4 +509,6 @@ Perl_init_os_extras
 Perl_getTHR
 Perl_setTHR
 RunPerl
+GetPerlInterpreter
+SetPerlInterpreter
 

@@ -376,9 +376,8 @@ sub cflags {
 	$self->{uc $_} ||= $cflags{$_}
     }
 
-    if ($self->{CAPI} && $Is_PERL_OBJECT) {
-        $self->{CCFLAGS} =~ s/-DPERL_OBJECT(\s|$)//;
-        $self->{CCFLAGS} .= ' -DPERL_CAPI ';
+    if ($Is_PERL_OBJECT) {
+        $self->{CCFLAGS} =~ s/-DPERL_OBJECT(\b|$)/-DPERL_CAPI/g;
         if ($Is_Win32 && $Config{'cc'} =~ /^cl.exe/i) {
             # Turn off C++ mode of the MSC compiler
             $self->{CCFLAGS} =~ s/-TP(\s|$)//;
@@ -3415,7 +3414,7 @@ sub tool_xsubpp {
 	}
     }
 
-    my $xsubpp = $self->{CAPI} ? "xsubpp -object_capi" : "xsubpp";
+    my $xsubpp = "xsubpp";
 
     return qq{
 XSUBPPDIR = $xsdir

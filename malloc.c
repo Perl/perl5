@@ -284,6 +284,9 @@
 #     define dTHX		extern int Perl___notused
 #     define WITH_THX(s)	s
 #  endif
+#  ifndef PERL_GET_INTERP
+#     define PERL_GET_INTERP	PL_curinterp
+#  endif
 #endif
 
 #ifndef MUTEX_LOCK
@@ -308,7 +311,7 @@
 
 #ifdef DEBUGGING
 #  undef DEBUG_m
-#  define DEBUG_m(a)  if (PL_curinterp && PL_debug & 128)   a
+#  define DEBUG_m(a)  if (PERL_GET_INTERP && PL_debug & 128)   a
 #endif
 
 /*

@@ -61,10 +61,8 @@ perl_alloc(void)
 {
     PerlInterpreter *my_perl;
 
-#if !defined(PERL_IMPLICIT_CONTEXT)
-    PL_curinterp = 0;
-#endif
     New(53, my_perl, 1, PerlInterpreter);
+    PERL_SET_INTERP(my_perl);
     return my_perl;
 }
 #endif /* PERL_OBJECT */
@@ -79,11 +77,6 @@ perl_construct(pTHXx)
 #endif /* FAKE_THREADS */
 #endif /* USE_THREADS */
     
-#ifndef PERL_OBJECT
-    if (!(PL_curinterp = my_perl))
-	return;
-#endif
-
 #ifdef MULTIPLICITY
     Zero(my_perl, 1, PerlInterpreter);
 #endif
@@ -218,11 +211,6 @@ perl_destruct(pTHXx)
     Thread t;
     dTHX;
 #endif /* USE_THREADS */
-
-#if !defined(PERL_OBJECT) && !defined(PERL_IMPLICIT_CONTEXT)
-    if (!(PL_curinterp = my_perl))
-	return;
-#endif
 
 #ifdef USE_THREADS
 #ifndef FAKE_THREADS
@@ -568,14 +556,10 @@ perl_destruct(pTHXx)
 void
 perl_free(pTHXx)
 {
-#ifdef PERL_OBJECT
-	Safefree(this);
+#if defined(PERL_OBJECT)
+    Safefree(this);
 #else
-#  if !defined(PERL_IMPLICIT_CONTEXT)
-    if (!(PL_curinterp = my_perl))
-	return;
-#  endif
-    Safefree(my_perl);
+    Safefree(aTHXx);
 #endif
 }
 
@@ -604,11 +588,6 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
     Perl_croak(aTHX_ "suidperl is no longer needed since the kernel can now execute\n\
 setuid perl scripts securely.\n");
 #endif
-#endif
-
-#if !defined(PERL_OBJECT) && !defined(PERL_IMPLICIT_CONTEXT)
-    if (!(PL_curinterp = my_perl))
-	return 255;
 #endif
 
 #if defined(__DYNAMIC__) && (defined(NeXT) || defined(__NeXT__))
@@ -948,7 +927,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     if (xsinit)
 	(*xsinit)(aTHXo);	/* in case linked C routines want magical variables */
 #if defined(VMS) || defined(WIN32) || defined(DJGPP)
-    init_os_extras(aTHX);
+    init_os_extras();
 #endif
 
 #ifdef USE_SOCKS
@@ -1015,11 +994,6 @@ perl_run(pTHXx)
     int ret;
 #ifdef USE_THREADS
     dTHX;
-#endif
-
-#if !defined(PERL_OBJECT) && !defined(PERL_IMPLICIT_CONTEXT)
-    if (!(PL_curinterp = my_perl))
-	return 255;
 #endif
 
     oldscope = PL_scopestack_ix;
@@ -1907,8 +1881,8 @@ S_init_interp(pTHX)
 #      define PERLVARI(var,type,init)	my_perl->var = init;
 #      define PERLVARIC(var,type,init)	my_perl->var = init;
 #    else
-#      define PERLVARI(var,type,init)	PL_curinterp->var = init;
-#      define PERLVARIC(var,type,init)	PL_curinterp->var = init;
+#      define PERLVARI(var,type,init)	PERL_GET_INTERP->var = init;
+#      define PERLVARIC(var,type,init)	PERL_GET_INTERP->var = init;
 #    endif
 #    include "intrpvar.h"
 #    ifndef USE_THREADS
@@ -2900,13 +2874,14 @@ S_incpush(pTHX_ char *p, int addsubdirs)
 STATIC struct perl_thread *
 S_init_main_thread(pTHX)
 {
-#ifndef PERL_IMPLICIT_CONTEXT
+#if !defined(PERL_IMPLICIT_CONTEXT)
     struct perl_thread *thr;
 #endif
     XPV *xpv;
 
     Newz(53, thr, 1, struct perl_thread);
     PL_curcop = &PL_compiling;
+    thr->interp = PERL_GET_INTERP;
     thr->cvcache = newHV();
     thr->threadsv = newAV();
     /* thr->threadsvp is set when find_threadsv is called */

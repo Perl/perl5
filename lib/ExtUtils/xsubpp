@@ -6,7 +6,7 @@ xsubpp - compiler to convert Perl XS code into C code
 
 =head1 SYNOPSIS
 
-B<xsubpp> [B<-v>] [B<-C++>] [B<-except>] [B<-s pattern>] [B<-prototypes>] [B<-noversioncheck>] [B<-nolinenumbers>] [B<-typemap typemap>] [B<-object_capi>]... file.xs
+B<xsubpp> [B<-v>] [B<-C++>] [B<-except>] [B<-s pattern>] [B<-prototypes>] [B<-noversioncheck>] [B<-nolinenumbers>] [B<-typemap typemap>] ... file.xs
 
 =head1 DESCRIPTION
 
@@ -59,11 +59,7 @@ number.
 
 Prevents the inclusion of `#line' directives in the output.
 
-=item B<-object_capi>
-
-Compile code as C in a PERL_OBJECT environment.
-
-back
+=back
 
 =head1 ENVIRONMENT
 
@@ -127,6 +123,7 @@ SWITCH: while (@ARGV and $ARGV[0] =~ /^-./) {
     $WantPrototypes = 1, next SWITCH	if $flag eq 'prototypes';
     $WantVersionChk = 0, next SWITCH	if $flag eq 'noversioncheck';
     $WantVersionChk = 1, next SWITCH	if $flag eq 'versioncheck';
+    # XXX left this in for compat
     $WantCAPI = 1, next SWITCH    if $flag eq 'object_capi';
     $except = " TRY",	next SWITCH	if $flag eq 'except';
     push(@tm,shift),	next SWITCH	if $flag eq 'typemap';
@@ -1261,23 +1258,9 @@ print Q<<"EOF";
 ##endif
 EOF
 
-if ($WantCAPI) {
-print Q<<"EOF";
-##ifdef PERL_CAPI
-#XS(boot__CAPI_entry)
-##else
-EOF
-}
-
 print Q<<"EOF";
 #XS(boot_$Module_cname)
 EOF
-
-if ($WantCAPI) {
-print Q<<"EOF";
-##endif	/* PERL_CAPI */
-EOF
-}
 
 print Q<<"EOF";
 #[[
@@ -1316,22 +1299,6 @@ print Q<<"EOF";;
 #]]
 #
 EOF
-
-if ($WantCAPI) { 
-print Q<<"EOF";
-##ifdef PERL_CAPI
-##define XSCAPI(name) void name(void *pPerl, CV* cv)
-#
-##ifdef __cplusplus
-#extern "C"
-##endif
-#XSCAPI(boot_$Module_cname)
-#[[
-#    boot_CAPI_handler(cv, boot__CAPI_entry, pPerl);
-#]]
-##endif	/* PERL_CAPI */
-EOF
-}
 
 warn("Please specify prototyping behavior for $filename (see perlxs manual)\n") 
     unless $ProtoUsed ;

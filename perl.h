@@ -9,8 +9,6 @@
 #ifndef H_PERL
 #define H_PERL 1
 
-/*#define PERL_IMPLICIT_CONTEXT*/
-
 #ifdef PERL_FOR_X2P
 /*
  * This file is being used for x2p stuff. 
@@ -27,7 +25,41 @@
 
 /* XXXXXX testing threads via implicit pointer */
 #ifdef USE_THREADS
-#define PERL_IMPLICIT_CONTEXT
+#  ifndef PERL_IMPLICIT_CONTEXT
+#    define PERL_IMPLICIT_CONTEXT
+#  endif
+#  ifndef PERL_IMPLICIT_SYS
+/*#    define PERL_IMPLICIT_SYS*/		/* XXX not done yet */
+#  endif
+#endif
+
+/* XXXXXX testing multiplicity via implicit pointer */
+#if defined(MULTIPLICITY)
+#  ifndef PERL_IMPLICIT_CONTEXT
+#    define PERL_IMPLICIT_CONTEXT
+#  endif
+#  ifndef PERL_IMPLICIT_SYS
+/*#    define PERL_IMPLICIT_SYS*/		/* XXX not done yet */
+#  endif
+#endif
+
+#ifdef PERL_CAPI
+#  undef PERL_OBJECT
+#  ifndef PERL_IMPLICIT_CONTEXT
+#    define PERL_IMPLICIT_CONTEXT
+#  endif
+#  ifndef PERL_IMPLICIT_SYS
+#    define PERL_IMPLICIT_SYS
+#  endif
+#endif
+
+#ifdef PERL_OBJECT
+#  ifndef PERL_IMPLICIT_CONTEXT
+#    define PERL_IMPLICIT_CONTEXT
+#  endif
+#  ifndef PERL_IMPLICIT_SYS
+#    define PERL_IMPLICIT_SYS
+#  endif
 #endif
 
 #ifdef PERL_OBJECT
@@ -108,18 +140,20 @@ functions are now member functions of the PERL_OBJECT.
 class CPerlObj;
 
 #define STATIC
-#define CPERLscope(x) CPerlObj::x
-#define CALL_FPTR(fptr) (this->*fptr)
+#define CPERLscope(x)		CPerlObj::x
+#define CALL_FPTR(fptr)		(this->*fptr)
 
-#define pTHXo		CPerlObj *pPerl
-#define pTHXo_		pTHXo,
-#define _pTHXo		,pTHXo
-#define aTHXo		this
-#define aTHXo_		this,
-#define _aTHXo		,this
+#define pTHXo			CPerlObj *pPerl
+#define pTHXo_			pTHXo,
+#define _pTHXo			,pTHXo
+#define aTHXo			this
+#define aTHXo_			this,
+#define _aTHXo			,this
 #define PERL_OBJECT_THIS	aTHXo
 #define PERL_OBJECT_THIS_	aTHXo_
 #define _PERL_OBJECT_THIS	_aTHXo
+#define dTHXoa(a)		pTHXo = (CPerlObj *)a
+#define dTHXo			dTHXoa(PERL_GET_INTERP)
 
 #define pTHXx		void
 #define pTHXx_
@@ -129,6 +163,27 @@ class CPerlObj;
 #define _aTHXx
 
 #else /* !PERL_OBJECT */
+
+#ifdef PERL_IMPLICIT_CONTEXT
+#  ifdef USE_THREADS
+struct perl_thread;
+#    define pTHX	register struct perl_thread *thr
+#    define aTHX	thr
+#    define dTHXa(a)	pTHX = (struct perl_thread *)a
+#    define dTHX	dTHXa(THR)
+#    define dTHR	dNOOP
+#  else
+#    define MULTIPLICITY
+#    define pTHX	register PerlInterpreter *my_perl
+#    define aTHX	my_perl
+#    define dTHXa(a)	pTHX = (PerlInterpreter *)a
+#    define dTHX	dTHXa(PERL_GET_INTERP)
+#  endif
+#  define pTHX_		pTHX,
+#  define _pTHX		,pTHX
+#  define aTHX_		aTHX,
+#  define _aTHX		,aTHX
+#endif
 
 #define STATIC static
 #define CPERLscope(x) x
@@ -153,27 +208,6 @@ class CPerlObj;
 #define NOOP (void)0
 #define dNOOP extern int Perl___notused
 
-#ifdef PERL_IMPLICIT_CONTEXT
-#  ifdef USE_THREADS
-struct perl_thread;
-#    define pTHX	register struct perl_thread *thr
-#    define aTHX	thr
-#    define dTHXa(a)	pTHX = (struct perl_thread *)a
-#    define dTHX	dTHXa(SvPVX(PL_thrsv))
-#    define dTHR	dNOOP
-#  else
-#    define MULTIPLICITY
-#    define pTHX	register PerlInterpreter *my_perl
-#    define aTHX	my_perl
-#    define dTHXa(a)	pTHX = (PerlInterpreter *)a
-#    define dTHX	dTHXa(PL_curinterp)
-#  endif
-#  define pTHX_		pTHX,
-#  define _pTHX		,pTHX
-#  define aTHX_		aTHX,
-#  define _aTHX		,aTHX
-#endif
-
 #ifndef pTHX
 #  define pTHX		void
 #  define pTHX_
@@ -192,6 +226,7 @@ struct perl_thread;
 #  define aTHXo		aTHX
 #  define aTHXo_	aTHX_
 #  define _aTHXo	_aTHX
+#  define dTHXo		dTHX
 #endif
 
 #ifndef pTHXx
@@ -201,6 +236,7 @@ struct perl_thread;
 #  define aTHXx		my_perl
 #  define aTHXx_	aTHXx,
 #  define _aTHXx	,aTHXx
+#  define dTHXx		dTHX
 #endif
 
 #undef START_EXTERN_C
@@ -1503,7 +1539,11 @@ typedef pthread_key_t	perl_key;
 #    endif /* WIN32 */
 #  endif /* FAKE_THREADS */
 #endif /* USE_THREADS */
-  
+
+#ifdef WIN32
+#include "win32.h"
+#endif
+
 #ifdef VMS
 #   define STATUS_NATIVE	PL_statusvalue_vms
 #   define STATUS_NATIVE_EXPORT \
@@ -1564,9 +1604,17 @@ typedef pthread_key_t	perl_key;
 #  ifdef FFLUSH_ALL
 #   define PERL_FLUSHALL_FOR_CHILD	my_fflush_all()
 #  else
-#   define PERL_FLUSHALL_FOR_CHILD	(void)0
+#   define PERL_FLUSHALL_FOR_CHILD	NOOP
 #  endif
 # endif
+#endif
+
+#ifndef PERL_SET_INTERP
+#  define PERL_SET_INTERP(i)		(PL_curinterp = (PerlInterpreter*)(i))
+#endif
+
+#ifndef PERL_GET_INTERP
+#  define PERL_GET_INTERP		(PL_curinterp)
 #endif
 
 /* Some unistd.h's give a prototype for pause() even though
@@ -1636,10 +1684,6 @@ typedef I32 (*filter_t) (pTHXo_ int, SV *, int);
 #define FILTER_READ(idx, sv, len)  filter_read(idx, sv, len)
 #define FILTER_DATA(idx)	   (AvARRAY(PL_rsfp_filters)[idx])
 #define FILTER_ISREADER(idx)	   (idx >= AvFILLp(PL_rsfp_filters))
-
-#ifdef WIN32
-#include "win32.h"
-#endif
 
 #include "iperlsys.h"
 #include "regexp.h"
@@ -1827,7 +1871,7 @@ Gid_t getegid (void);
 #  if defined(PERL_OBJECT)
 #    define DEBUG_m(a) if (PL_debug & 128)	a
 #  else
-#    define DEBUG_m(a) if (PL_curinterp && PL_debug & 128)	a
+#    define DEBUG_m(a) if (PERL_GET_INTERP && PL_debug & 128)	a
 #  endif
 #define DEBUG_f(a) if (PL_debug & 256)	a
 #define DEBUG_r(a) if (PL_debug & 512)	a
@@ -2534,7 +2578,6 @@ public:
 #include "pp_proto.h"
 
 #ifdef PERL_OBJECT
-VIRTUAL int CPerlObj::fprintf (PerlIO *pf, const char *pat, ...);
 VIRTUAL int CPerlObj::do_aspawn (void *vreally, void **vmark, void **vsp);
 #undef PERL_DECL_PROT
 #else
@@ -2562,18 +2605,6 @@ VIRTUAL int CPerlObj::do_aspawn (void *vreally, void **vmark, void **vsp);
 #define PERLVARI(var,type,init) EXT type  PL_##var INIT(init);
 #define PERLVARIC(var,type,init) EXTCONST type PL_##var INIT(init);
 
-#ifndef PERL_GLOBAL_STRUCT
-#  ifndef PERL_OBJECT
-START_EXTERN_C
-#  endif
-
-#  include "perlvars.h"
-
-#  ifndef PERL_OBJECT
-END_EXTERN_C
-#  endif
-#endif
-
 #ifndef MULTIPLICITY
 
 #  include "intrpvar.h"
@@ -2592,6 +2623,7 @@ END_EXTERN_C
 PERLVARA(object_compatibility,30,	char)
 };
 
+
 #  include "embed.h"
 #  if defined(WIN32) && !defined(WIN32IO_IS_STDIO)
 #    define errno	CPerlObj::ErrorNo()
@@ -2607,6 +2639,14 @@ PERLVARA(object_compatibility,30,	char)
 #  include "opcode.h"
 
 #endif  /* PERL_OBJECT */
+
+#ifndef PERL_GLOBAL_STRUCT
+START_EXTERN_C
+
+#  include "perlvars.h"
+
+END_EXTERN_C
+#endif
 
 #undef PERLVAR
 #undef PERLVARA

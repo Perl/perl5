@@ -17,6 +17,10 @@
 
 /* Important ones in the first cache line (if alignment is done right) */
 
+#ifdef USE_THREADS
+PERLVAR(interp,		PerlInterpreter*)	/* thread owner */
+#endif
+
 PERLVAR(Tstack_sp,	SV **)		/* top of the stack */
 #ifdef OP_IN_REGISTER
 PERLVAR(Topsave,	OP *)

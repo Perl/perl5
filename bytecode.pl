@@ -65,6 +65,7 @@ EOT
 open(BYTERUN_C, ">ext/ByteLoader/byterun.c") or die "ext/ByteLoader/byterun.c: $!";
 print BYTERUN_C $c_header, <<'EOT';
 
+#define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #include "perl.h"
 #define NO_XSLOCKS

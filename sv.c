@@ -3949,10 +3949,8 @@ Perl_newSVpvf_nocontext(const char* pat, ...)
     dTHX;
     register SV *sv;
     va_list args;
-
-    new_SV(sv);
     va_start(args, pat);
-    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    sv = vnewSVpvf(pat, &args);
     va_end(args);
     return sv;
 }
@@ -3963,11 +3961,18 @@ Perl_newSVpvf(pTHX_ const char* pat, ...)
 {
     register SV *sv;
     va_list args;
-
-    new_SV(sv);
     va_start(args, pat);
-    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    sv = vnewSVpvf(pat, &args);
     va_end(args);
+    return sv;
+}
+
+SV *
+Perl_vnewSVpvf(pTHX_ const char* pat, va_list* args)
+{
+    register SV *sv;
+    new_SV(sv);
+    sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
     return sv;
 }
 
@@ -4579,7 +4584,7 @@ Perl_sv_setpvf_nocontext(SV *sv, const char* pat, ...)
     dTHX;
     va_list args;
     va_start(args, pat);
-    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    sv_vsetpvf(sv, pat, &args);
     va_end(args);
 }
 
@@ -4590,9 +4595,8 @@ Perl_sv_setpvf_mg_nocontext(SV *sv, const char* pat, ...)
     dTHX;
     va_list args;
     va_start(args, pat);
-    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    sv_vsetpvf_mg(sv, pat, &args);
     va_end(args);
-    SvSETMAGIC(sv);
 }
 #endif
 
@@ -4601,18 +4605,29 @@ Perl_sv_setpvf(pTHX_ SV *sv, const char* pat, ...)
 {
     va_list args;
     va_start(args, pat);
-    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    sv_vsetpvf(sv, pat, &args);
     va_end(args);
 }
 
+void
+Perl_sv_vsetpvf(pTHX_ SV *sv, const char* pat, va_list* args)
+{
+    sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
+}
 
 void
 Perl_sv_setpvf_mg(pTHX_ SV *sv, const char* pat, ...)
 {
     va_list args;
     va_start(args, pat);
-    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    sv_vsetpvf_mg(sv, pat, &args);
     va_end(args);
+}
+
+void
+Perl_sv_vsetpvf_mg(pTHX_ SV *sv, const char* pat, va_list* args)
+{
+    sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
     SvSETMAGIC(sv);
 }
 
@@ -4623,7 +4638,7 @@ Perl_sv_catpvf_nocontext(SV *sv, const char* pat, ...)
     dTHX;
     va_list args;
     va_start(args, pat);
-    sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    sv_vcatpvf(sv, pat, &args);
     va_end(args);
 }
 
@@ -4633,9 +4648,8 @@ Perl_sv_catpvf_mg_nocontext(SV *sv, const char* pat, ...)
     dTHX;
     va_list args;
     va_start(args, pat);
-    sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    sv_vcatpvf_mg(sv, pat, &args);
     va_end(args);
-    SvSETMAGIC(sv);
 }
 #endif
 
@@ -4644,8 +4658,14 @@ Perl_sv_catpvf(pTHX_ SV *sv, const char* pat, ...)
 {
     va_list args;
     va_start(args, pat);
-    sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    sv_vcatpvf(sv, pat, &args);
     va_end(args);
+}
+
+void
+Perl_sv_vcatpvf(pTHX_ SV *sv, const char* pat, va_list* args)
+{
+    sv_vcatpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
 }
 
 void
@@ -4653,8 +4673,14 @@ Perl_sv_catpvf_mg(pTHX_ SV *sv, const char* pat, ...)
 {
     va_list args;
     va_start(args, pat);
-    sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    sv_vcatpvf_mg(sv, pat, &args);
     va_end(args);
+}
+
+void
+Perl_sv_vcatpvf_mg(pTHX_ SV *sv, const char* pat, va_list* args)
+{
+    sv_vcatpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
     SvSETMAGIC(sv);
 }
 

@@ -9,17 +9,23 @@
 #ifndef  _INC_WIN32_PERL5
 #define  _INC_WIN32_PERL5
 
-#ifdef PERL_OBJECT
+#if defined(PERL_OBJECT) || defined(PERL_CAPI)
 #  define DYNAMIC_ENV_FETCH
 #  define ENV_HV_NAME "___ENV_HV_NAME___"
 #  define HAS_GETENV_LEN
 #  define prime_env_iter()
 #  define WIN32IO_IS_STDIO		/* don't pull in custom stdio layer */
+#  define WIN32SCK_IS_STDSCK		/* don't pull in custom wsock layer */
 #  ifdef PERL_GLOBAL_STRUCT
 #    error PERL_GLOBAL_STRUCT cannot be defined with PERL_OBJECT
 #  endif
 #  define win32_get_privlib PerlEnv_lib_path
 #  define win32_get_sitelib PerlEnv_sitelib_path
+#endif
+
+#if defined(PERL_IMPLICIT_CONTEXT)
+#  define PERL_GET_INTERP	((PerlInterpreter*)GetPerlInterpreter())
+#  define PERL_SET_INTERP(i)	(SetPerlInterpreter(i))
 #endif
 
 #ifdef __GNUC__
@@ -188,10 +194,7 @@ typedef long		gid_t;
 typedef unsigned short	mode_t;
 #pragma  warning(disable: 4018 4035 4101 4102 4244 4245 4761)
 
-#ifdef PERL_OBJECT
-extern CPerlObj* GetPerlInter(void);
-#define dPERLOBJ CPerlObj* pPerl = GetPerlInter()
-#else /* PERL_OBJECT */
+#ifndef PERL_OBJECT
 
 /* Visual C thinks that a pointer to a member variable is 16 bytes in size. */
 #define STRUCT_MGVTBL_DEFINITION					\
@@ -238,8 +241,6 @@ struct mgvtbl {								\
     char	handle_VC_problem[16];			\
 }
 
-
-#define dPERLOBJ dNOOP
 #endif /* PERL_OBJECT */
 
 #endif /* _MSC_VER */
@@ -299,18 +300,21 @@ extern	int	chown(const char *p, uid_t o, gid_t g);
 #define  init_os_extras Perl_init_os_extras
 
 DllExport void		Perl_win32_init(int *argcp, char ***argvp);
-DllExport void		Perl_init_os_extras(pTHX);
-DllExport void		win32_str_os_error(pTHX_ void *sv, DWORD err);
+DllExport void		Perl_init_os_extras();
+DllExport void		win32_str_os_error(void *sv, DWORD err);
+DllExport int		RunPerl(int argc, char **argv, char **env);
+DllExport bool		SetPerlInterpreter(void* interp);
+DllExport void*		GetPerlInterpreter(void);
 
 #ifndef USE_SOCKETS_AS_HANDLES
 extern FILE *		my_fdopen(int, char *);
 #endif
 extern int		my_fclose(FILE *);
-extern int		do_aspawn(pTHX_ void *really, void **mark, void **sp);
-extern int		do_spawn(pTHX_ char *cmd);
-extern int		do_spawn_nowait(pTHX_ char *cmd);
-extern char *		win32_get_privlib(pTHX_ char *pl);
-extern char *		win32_get_sitelib(pTHX_ char *pl);
+extern int		do_aspawn(void *really, void **mark, void **sp);
+extern int		do_spawn(char *cmd);
+extern int		do_spawn_nowait(char *cmd);
+extern char *		win32_get_privlib(char *pl);
+extern char *		win32_get_sitelib(char *pl);
 extern int		IsWin95(void);
 extern int		IsWinNT(void);
 
@@ -408,8 +412,8 @@ struct thread_intern {
 /* Use CP_ACP when mode is ANSI */
 /* Use CP_UTF8 when mode is UTF8 */
 
-#define A2WHELPER(lpa, lpw, nChars)\
-    lpw[0] = 0, MultiByteToWideChar((IN_UTF8) ? CP_UTF8 : CP_ACP, 0, lpa, -1, lpw, nChars)
+#define A2WHELPER(lpa, lpw, nBytes)\
+    lpw[0] = 0, MultiByteToWideChar((IN_UTF8) ? CP_UTF8 : CP_ACP, 0, lpa, -1, lpw, (nBytes/sizeof(WCHAR)))
 
 #define W2AHELPER(lpw, lpa, nChars)\
     lpa[0] = '\0', WideCharToMultiByte((IN_UTF8) ? CP_UTF8 : CP_ACP, 0, lpw, -1, (LPSTR)lpa, nChars, NULL, NULL)

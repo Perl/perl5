@@ -1363,28 +1363,36 @@ S_mess_alloc(pTHX)
     return sv;
 }
 
-#ifdef PERL_IMPLICIT_CONTEXT
+#if defined(PERL_IMPLICIT_CONTEXT)
 char *
 Perl_form_nocontext(const char* pat, ...)
 {
     dTHX;
-    SV *sv = mess_alloc();
+    char *retval;
     va_list args;
     va_start(args, pat);
-    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    retval = vform(pat, &args);
     va_end(args);
-    return SvPVX(sv);
+    return retval;
 }
-#endif
+#endif /* PERL_IMPLICIT_CONTEXT */
 
 char *
 Perl_form(pTHX_ const char* pat, ...)
 {
-    SV *sv = mess_alloc();
+    char *retval;
     va_list args;
     va_start(args, pat);
-    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    retval = vform(pat, &args);
     va_end(args);
+    return retval;
+}
+
+char *
+Perl_vform(pTHX_ const char *pat, va_list *args)
+{
+    SV *sv = mess_alloc();
+    sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
     return SvPVX(sv);
 }
 
@@ -1413,8 +1421,8 @@ Perl_mess(pTHX_ const char *pat, va_list *args)
     return sv;
 }
 
-STATIC OP *
-S_do_die(pTHX_ const char* pat, va_list *args)
+OP *
+Perl_vdie(pTHX_ const char* pat, va_list *args)
 {
     dTHR;
     char *message;
@@ -1481,7 +1489,7 @@ S_do_die(pTHX_ const char* pat, va_list *args)
     return PL_restartop;
 }
 
-#ifdef PERL_IMPLICIT_CONTEXT
+#if defined(PERL_IMPLICIT_CONTEXT)
 OP *
 Perl_die_nocontext(const char* pat, ...)
 {
@@ -1489,11 +1497,11 @@ Perl_die_nocontext(const char* pat, ...)
     OP *o;
     va_list args;
     va_start(args, pat);
-    o = do_die(pat, &args);
+    o = vdie(pat, &args);
     va_end(args);
     return o;
 }
-#endif
+#endif /* PERL_IMPLICIT_CONTEXT */
 
 OP *
 Perl_die(pTHX_ const char* pat, ...)
@@ -1501,13 +1509,13 @@ Perl_die(pTHX_ const char* pat, ...)
     OP *o;
     va_list args;
     va_start(args, pat);
-    o = do_die(pat, &args);
+    o = vdie(pat, &args);
     va_end(args);
     return o;
 }
 
-STATIC void
-S_do_croak(pTHX_ const char* pat, va_list *args)
+void
+Perl_vcroak(pTHX_ const char* pat, va_list *args)
 {
     dTHR;
     char *message;
@@ -1564,14 +1572,14 @@ S_do_croak(pTHX_ const char* pat, va_list *args)
     my_failure_exit();
 }
 
-#ifdef PERL_IMPLICIT_CONTEXT
+#if defined(PERL_IMPLICIT_CONTEXT)
 void
 Perl_croak_nocontext(const char *pat, ...)
 {
     dTHX;
     va_list args;
     va_start(args, pat);
-    do_croak(pat, &args);
+    vcroak(pat, &args);
     /* NOTREACHED */
     va_end(args);
 }
@@ -1582,13 +1590,13 @@ Perl_croak(pTHX_ const char *pat, ...)
 {
     va_list args;
     va_start(args, pat);
-    do_croak(pat, &args);
+    vcroak(pat, &args);
     /* NOTREACHED */
     va_end(args);
 }
 
-STATIC void
-S_do_warn(pTHX_ const char* pat, va_list *args)
+void
+Perl_vwarn(pTHX_ const char* pat, va_list *args)
 {
     char *message;
     HV *stash;
@@ -1640,14 +1648,14 @@ S_do_warn(pTHX_ const char* pat, va_list *args)
     (void)PerlIO_flush(PerlIO_stderr());
 }
 
-#ifdef PERL_IMPLICIT_CONTEXT
+#if defined(PERL_IMPLICIT_CONTEXT)
 void
 Perl_warn_nocontext(const char *pat, ...)
 {
     dTHX;
     va_list args;
     va_start(args, pat);
-    do_warn(pat, &args);
+    vwarn(pat, &args);
     va_end(args);
 }
 #endif /* PERL_IMPLICIT_CONTEXT */
@@ -1657,15 +1665,35 @@ Perl_warn(pTHX_ const char *pat, ...)
 {
     va_list args;
     va_start(args, pat);
-    do_warn(pat, &args);
+    vwarn(pat, &args);
     va_end(args);
 }
+
+#if defined(PERL_IMPLICIT_CONTEXT)
+void
+Perl_warner_nocontext(U32 err, const char *pat, ...)
+{
+    dTHX;
+    va_list args;
+    va_start(args, pat);
+    vwarner(err, pat, &args);
+    va_end(args);
+}
+#endif /* PERL_IMPLICIT_CONTEXT */
 
 void
 Perl_warner(pTHX_ U32  err, const char* pat,...)
 {
-    dTHR;
     va_list args;
+    va_start(args, pat);
+    vwarner(err, pat, &args);
+    va_end(args);
+}
+
+void
+Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
+{
+    dTHR;
     char *message;
     HV *stash;
     GV *gv;
@@ -1673,10 +1701,8 @@ Perl_warner(pTHX_ U32  err, const char* pat,...)
     SV *msv;
     STRLEN msglen;
 
-    va_start(args, pat);
-    msv = mess(pat, &args);
+    msv = mess(pat, args);
     message = SvPV(msv, msglen);
-    va_end(args);
 
     if (ckDEAD(err)) {
 #ifdef USE_THREADS
@@ -3183,7 +3209,7 @@ Perl_condpair_magic(pTHX_ SV *sv)
 struct perl_thread *
 Perl_new_struct_thread(pTHX_ struct perl_thread *t)
 {
-#ifndef PERL_IMPLICIT_CONTEXT
+#if !defined(PERL_IMPLICIT_CONTEXT)
     struct perl_thread *thr;
 #endif
     SV *sv;
@@ -3213,6 +3239,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     init_stacks();
 
     PL_curcop = &PL_compiling;
+    thr->interp = t->interp;
     thr->cvcache = newHV();
     thr->threadsv = newAV();
     thr->specific = newAV();

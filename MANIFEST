@@ -54,7 +54,6 @@ README.vos		Notes about Stratus VOS port
 README.win32		Notes about Win32 port
 Todo			The Wishlist
 Todo-5.005		What needs doing before 5.005 release
-XSlock.h		Include file for extensions built with PERL_OBJECT defined
 XSUB.h			Include file for extension subroutines
 apollo/netinet/in.h	Apollo DomainOS port: C header file frontend
 av.c			Array value code
@@ -1401,10 +1400,7 @@ vos/vos_dummies.c	Wrappers to soak up undefined functions
 vos/vosish.h		VOS-specific header file
 warning.h		The warning numbers
 warning.pl		Program to write warning.h and lib/warning.pm
-win32/GenCAPI.pl	Win32 port for C API with PERL_OBJECT
 win32/Makefile		Win32 makefile for NMAKE (Visual C++ build)
-win32/TEST		Win32 port
-win32/autosplit.pl	Win32 port
 win32/bin/perlglob.pl	Win32 globbing
 win32/bin/pl2bat.pl	wrap perl scripts into batch files
 win32/bin/runperl.pl	run perl script via batch file namesake
@@ -1419,15 +1415,12 @@ win32/config_h.PL	Perl code to convert Win32 config.sh to config.h
 win32/config_sh.PL	Perl code to update Win32 config.sh from Makefile 
 win32/des_fcrypt.patch	Win32 port
 win32/dl_win32.xs	Win32 port
-win32/genxsdef.pl	Win32 port
 win32/include/arpa/inet.h	Win32 port
 win32/include/dirent.h		Win32 port
 win32/include/netdb.h		Win32 port
 win32/include/sys/socket.h	Win32 port
-win32/makedef.pl	Win32 port
+win32/makedef.pl	Win32 exports definition file writer
 win32/makefile.mk	Win32 makefile for DMAKE (BC++, VC++ builds)
-win32/makemain.pl	Win32 port
-win32/makeperldef.pl	Win32 port
 win32/perlglob.c	Win32 port
 win32/perllib.c		Win32 port
 win32/pod.mak		Win32 port

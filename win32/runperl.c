@@ -16,9 +16,6 @@ int _CRT_glob = 0;
 
 #endif
 
-
-__declspec(dllimport) int RunPerl(int argc, char **argv, char **env);
-
 int
 main(int argc, char **argv, char **env)
 {

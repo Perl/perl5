@@ -382,12 +382,12 @@ PERLVAR(Icred_mutex,	perl_mutex)	/* altered credentials in effect */
 
 #endif /* USE_THREADS */
 
-#ifdef PERL_OBJECT
-PERLVARI(IMem,		IPerlMem*,  NULL)
-PERLVARI(IEnv,		IPerlEnv*,  NULL)
-PERLVARI(IStdIO,	IPerlStdIO*, NULL)
-PERLVARI(ILIO,		IPerlLIO*,  NULL)
-PERLVARI(IDir,		IPerlDir*,  NULL)
-PERLVARI(ISock,		IPerlSock*, NULL)
-PERLVARI(IProc,		IPerlProc*, NULL)
+#if defined(PERL_IMPLICIT_SYS)
+PERLVARI(IMem,		struct IPerlMem*,  NULL)
+PERLVARI(IEnv,		struct IPerlEnv*,  NULL)
+PERLVARI(IStdIO,	struct IPerlStdIO*, NULL)
+PERLVARI(ILIO,		struct IPerlLIO*,  NULL)
+PERLVARI(IDir,		struct IPerlDir*,  NULL)
+PERLVARI(ISock,		struct IPerlSock*, NULL)
+PERLVARI(IProc,		struct IPerlProc*, NULL)
 #endif

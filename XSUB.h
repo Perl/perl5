@@ -110,23 +110,22 @@
 #  define VTBL_amagicelem	&PL_vtbl_amagicelem
 #endif
 
-#ifdef PERL_OBJECT
-
+#if defined(PERL_OBJECT) || defined(PERL_CAPI)
 #  include "perlapi.h"
 #  include "objXSUB.h"
+#endif	/* PERL_OBJECT || PERL_CAPI */
 
-#  undef  aTHXo
-#  define aTHXo			pPerl
-#  undef  aTHXo_
-#  define aTHXo_		aTHXo,
-#  undef  _aTHXo
-#  define _aTHXo		,aTHXo
-
-#  ifdef WIN32
-#    undef fprintf
-#    define fprintf			pPerl->fprintf
-#  endif /* WIN32 */
-
+#if defined(PERL_CAPI)
+#  undef aTHX
+#  undef aTHX_
+#  undef _aTHX
+#  if defined(PERL_NO_GET_CONTEXT)
+#    define aTHX	 my_perl
+#  else
+#    define aTHX	 PERL_GET_INTERP
+#  endif /* PERL_NO_GET_CONTEXT */
+#  define aTHX_	aTHX,
+#  define _aTHX	,aTHX
 #  ifndef NO_XSLOCKS
 #    undef closedir
 #    undef opendir
@@ -278,9 +277,5 @@
 #    define shutdown		PerlSock_shutdown
 #    define socket		PerlSock_socket
 #    define socketpair		PerlSock_socketpair
-#    ifdef WIN32
-#      include "XSlock.h"
-#    endif
 #  endif  /* NO_XSLOCKS */
-
-#endif	/* PERL_OBJECT */
+#endif  /* PERL_CAPI */

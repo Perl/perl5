@@ -58,16 +58,20 @@
 #endif
 #define convert			Perl_convert
 #define croak			Perl_croak
+#define vcroak			Perl_vcroak
 #if defined(PERL_IMPLICIT_CONTEXT)
 #define croak_nocontext		Perl_croak_nocontext
 #define die_nocontext		Perl_die_nocontext
+#define deb_nocontext		Perl_deb_nocontext
 #define form_nocontext		Perl_form_nocontext
 #define warn_nocontext		Perl_warn_nocontext
+#define warner_nocontext	Perl_warner_nocontext
 #define newSVpvf_nocontext	Perl_newSVpvf_nocontext
 #define sv_catpvf_nocontext	Perl_sv_catpvf_nocontext
 #define sv_setpvf_nocontext	Perl_sv_setpvf_nocontext
 #define sv_catpvf_mg_nocontext	Perl_sv_catpvf_mg_nocontext
 #define sv_setpvf_mg_nocontext	Perl_sv_setpvf_mg_nocontext
+#define fprintf_nocontext	Perl_fprintf_nocontext
 #endif
 #define cv_ckproto		Perl_cv_ckproto
 #define cv_clone		Perl_cv_clone
@@ -85,6 +89,7 @@
 #define get_ppaddr		Perl_get_ppaddr
 #define cxinc			Perl_cxinc
 #define deb			Perl_deb
+#define vdeb			Perl_vdeb
 #define deb_growlevel		Perl_deb_growlevel
 #define debprofdump		Perl_debprofdump
 #define debop			Perl_debop
@@ -93,6 +98,7 @@
 #define delimcpy		Perl_delimcpy
 #define deprecate		Perl_deprecate
 #define die			Perl_die
+#define vdie			Perl_vdie
 #define die_where		Perl_die_where
 #define dounwind		Perl_dounwind
 #define do_aexec		Perl_do_aexec
@@ -149,6 +155,7 @@
 #define force_list		Perl_force_list
 #define fold_constants		Perl_fold_constants
 #define form			Perl_form
+#define vform			Perl_vform
 #define free_tmps		Perl_free_tmps
 #define gen_constant_list	Perl_gen_constant_list
 #if !defined(HAS_GETENV_LEN)
@@ -404,13 +411,11 @@
 #define newSVpv			Perl_newSVpv
 #define newSVpvn		Perl_newSVpvn
 #define newSVpvf		Perl_newSVpvf
+#define vnewSVpvf		Perl_vnewSVpvf
 #define newSVrv			Perl_newSVrv
 #define newSVsv			Perl_newSVsv
 #define newUNOP			Perl_newUNOP
 #define newWHILEOP		Perl_newWHILEOP
-#if defined(USE_THREADS)
-#define new_struct_thread	Perl_new_struct_thread
-#endif
 #define new_stackinfo		Perl_new_stackinfo
 #define nextargv		Perl_nextargv
 #define ninstr			Perl_ninstr
@@ -430,6 +435,9 @@
 #define peep			Perl_peep
 #if defined(PERL_OBJECT)
 #else
+#if defined(USE_THREADS)
+#define new_struct_thread	Perl_new_struct_thread
+#endif
 #endif
 #define call_atexit		Perl_call_atexit
 #define call_argv		Perl_call_argv
@@ -555,6 +563,7 @@
 #define sv_backoff		Perl_sv_backoff
 #define sv_bless		Perl_sv_bless
 #define sv_catpvf		Perl_sv_catpvf
+#define sv_vcatpvf		Perl_sv_vcatpvf
 #define sv_catpv		Perl_sv_catpv
 #define sv_catpvn		Perl_sv_catpvn
 #define sv_catsv		Perl_sv_catsv
@@ -595,6 +604,7 @@
 #define sv_report_used		Perl_sv_report_used
 #define sv_reset		Perl_sv_reset
 #define sv_setpvf		Perl_sv_setpvf
+#define sv_vsetpvf		Perl_sv_vsetpvf
 #define sv_setiv		Perl_sv_setiv
 #define sv_setpviv		Perl_sv_setpviv
 #define sv_setuv		Perl_sv_setuv
@@ -641,7 +651,9 @@
 #define vivify_ref		Perl_vivify_ref
 #define wait4pid		Perl_wait4pid
 #define warn			Perl_warn
+#define vwarn			Perl_vwarn
 #define warner			Perl_warner
+#define vwarner			Perl_vwarner
 #define watch			Perl_watch
 #define whichsig		Perl_whichsig
 #define yyerror			Perl_yyerror
@@ -671,10 +683,12 @@
 #define runops_standard		Perl_runops_standard
 #define runops_debug		Perl_runops_debug
 #define sv_catpvf_mg		Perl_sv_catpvf_mg
+#define sv_vcatpvf_mg		Perl_sv_vcatpvf_mg
 #define sv_catpv_mg		Perl_sv_catpv_mg
 #define sv_catpvn_mg		Perl_sv_catpvn_mg
 #define sv_catsv_mg		Perl_sv_catsv_mg
 #define sv_setpvf_mg		Perl_sv_setpvf_mg
+#define sv_vsetpvf_mg		Perl_sv_vsetpvf_mg
 #define sv_setiv_mg		Perl_sv_setiv_mg
 #define sv_setpviv_mg		Perl_sv_setpviv_mg
 #define sv_setuv_mg		Perl_sv_setuv_mg
@@ -686,6 +700,7 @@
 #define get_vtbl		Perl_get_vtbl
 #define pv_display		Perl_pv_display
 #define dump_indent		Perl_dump_indent
+#define dump_vindent		Perl_dump_vindent
 #define do_gv_dump		Perl_do_gv_dump
 #define do_gvgv_dump		Perl_do_gvgv_dump
 #define do_hv_dump		Perl_do_hv_dump
@@ -695,6 +710,7 @@
 #define do_sv_dump		Perl_do_sv_dump
 #define magic_dump		Perl_magic_dump
 #define default_protect		Perl_default_protect
+#define vdefault_protect	Perl_vdefault_protect
 #define reginitcolors		Perl_reginitcolors
 #define sv_2pv_nolen		Perl_sv_2pv_nolen
 #define sv_pv			Perl_sv_pv
@@ -946,9 +962,6 @@
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #define mess_alloc		S_mess_alloc
-#define do_croak		S_do_croak
-#define do_warn			S_do_warn
-#define do_die			S_do_die
 #  if defined(LEAKTEST)
 #define xstat			S_xstat
 #  endif
@@ -1379,6 +1392,7 @@
 #define condpair_magic(a)	Perl_condpair_magic(aTHX_ a)
 #endif
 #define convert(a,b,c)		Perl_convert(aTHX_ a,b,c)
+#define vcroak(a,b)		Perl_vcroak(aTHX_ a,b)
 #if defined(PERL_IMPLICIT_CONTEXT)
 #endif
 #define cv_ckproto(a,b,c)	Perl_cv_ckproto(aTHX_ a,b,c)
@@ -1396,6 +1410,7 @@
 #define get_opargs()		Perl_get_opargs(aTHX)
 #define get_ppaddr()		Perl_get_ppaddr(aTHX)
 #define cxinc()			Perl_cxinc(aTHX)
+#define vdeb(a,b)		Perl_vdeb(aTHX_ a,b)
 #define deb_growlevel()		Perl_deb_growlevel(aTHX)
 #define debprofdump()		Perl_debprofdump(aTHX)
 #define debop(a)		Perl_debop(aTHX_ a)
@@ -1403,6 +1418,7 @@
 #define debstackptrs()		Perl_debstackptrs(aTHX)
 #define delimcpy(a,b,c,d,e,f)	Perl_delimcpy(aTHX_ a,b,c,d,e,f)
 #define deprecate(a)		Perl_deprecate(aTHX_ a)
+#define vdie(a,b)		Perl_vdie(aTHX_ a,b)
 #define die_where(a,b)		Perl_die_where(aTHX_ a,b)
 #define dounwind(a)		Perl_dounwind(aTHX_ a)
 #define do_aexec(a,b,c)		Perl_do_aexec(aTHX_ a,b,c)
@@ -1458,6 +1474,7 @@
 #endif
 #define force_list(a)		Perl_force_list(aTHX_ a)
 #define fold_constants(a)	Perl_fold_constants(aTHX_ a)
+#define vform(a,b)		Perl_vform(aTHX_ a,b)
 #define free_tmps()		Perl_free_tmps(aTHX)
 #define gen_constant_list(a)	Perl_gen_constant_list(aTHX_ a)
 #if !defined(HAS_GETENV_LEN)
@@ -1712,13 +1729,11 @@
 #define newSVnv(a)		Perl_newSVnv(aTHX_ a)
 #define newSVpv(a,b)		Perl_newSVpv(aTHX_ a,b)
 #define newSVpvn(a,b)		Perl_newSVpvn(aTHX_ a,b)
+#define vnewSVpvf(a,b)		Perl_vnewSVpvf(aTHX_ a,b)
 #define newSVrv(a,b)		Perl_newSVrv(aTHX_ a,b)
 #define newSVsv(a)		Perl_newSVsv(aTHX_ a)
 #define newUNOP(a,b,c)		Perl_newUNOP(aTHX_ a,b,c)
 #define newWHILEOP(a,b,c,d,e,f,g)	Perl_newWHILEOP(aTHX_ a,b,c,d,e,f,g)
-#if defined(USE_THREADS)
-#define new_struct_thread(a)	Perl_new_struct_thread(aTHX_ a)
-#endif
 #define new_stackinfo(a,b)	Perl_new_stackinfo(aTHX_ a,b)
 #define nextargv(a)		Perl_nextargv(aTHX_ a)
 #define ninstr(a,b,c,d)		Perl_ninstr(aTHX_ a,b,c,d)
@@ -1738,6 +1753,9 @@
 #define peep(a)			Perl_peep(aTHX_ a)
 #if defined(PERL_OBJECT)
 #else
+#if defined(USE_THREADS)
+#define new_struct_thread(a)	Perl_new_struct_thread(aTHX_ a)
+#endif
 #endif
 #define call_atexit(a,b)	Perl_call_atexit(aTHX_ a,b)
 #define call_argv(a,b,c)	Perl_call_argv(aTHX_ a,b,c)
@@ -1862,6 +1880,7 @@
 #define sv_add_arena(a,b,c)	Perl_sv_add_arena(aTHX_ a,b,c)
 #define sv_backoff(a)		Perl_sv_backoff(aTHX_ a)
 #define sv_bless(a,b)		Perl_sv_bless(aTHX_ a,b)
+#define sv_vcatpvf(a,b,c)	Perl_sv_vcatpvf(aTHX_ a,b,c)
 #define sv_catpv(a,b)		Perl_sv_catpv(aTHX_ a,b)
 #define sv_catpvn(a,b,c)	Perl_sv_catpvn(aTHX_ a,b,c)
 #define sv_catsv(a,b)		Perl_sv_catsv(aTHX_ a,b)
@@ -1901,6 +1920,7 @@
 #define sv_replace(a,b)		Perl_sv_replace(aTHX_ a,b)
 #define sv_report_used()	Perl_sv_report_used(aTHX)
 #define sv_reset(a,b)		Perl_sv_reset(aTHX_ a,b)
+#define sv_vsetpvf(a,b,c)	Perl_sv_vsetpvf(aTHX_ a,b,c)
 #define sv_setiv(a,b)		Perl_sv_setiv(aTHX_ a,b)
 #define sv_setpviv(a,b)		Perl_sv_setpviv(aTHX_ a,b)
 #define sv_setuv(a,b)		Perl_sv_setuv(aTHX_ a,b)
@@ -1946,6 +1966,8 @@
 #define vivify_defelem(a)	Perl_vivify_defelem(aTHX_ a)
 #define vivify_ref(a,b)		Perl_vivify_ref(aTHX_ a,b)
 #define wait4pid(a,b,c)		Perl_wait4pid(aTHX_ a,b,c)
+#define vwarn(a,b)		Perl_vwarn(aTHX_ a,b)
+#define vwarner(a,b,c)		Perl_vwarner(aTHX_ a,b,c)
 #define watch(a)		Perl_watch(aTHX_ a)
 #define whichsig(a)		Perl_whichsig(aTHX_ a)
 #define yyerror(a)		Perl_yyerror(aTHX_ a)
@@ -1974,9 +1996,11 @@
 #endif
 #define runops_standard()	Perl_runops_standard(aTHX)
 #define runops_debug()		Perl_runops_debug(aTHX)
+#define sv_vcatpvf_mg(a,b,c)	Perl_sv_vcatpvf_mg(aTHX_ a,b,c)
 #define sv_catpv_mg(a,b)	Perl_sv_catpv_mg(aTHX_ a,b)
 #define sv_catpvn_mg(a,b,c)	Perl_sv_catpvn_mg(aTHX_ a,b,c)
 #define sv_catsv_mg(a,b)	Perl_sv_catsv_mg(aTHX_ a,b)
+#define sv_vsetpvf_mg(a,b,c)	Perl_sv_vsetpvf_mg(aTHX_ a,b,c)
 #define sv_setiv_mg(a,b)	Perl_sv_setiv_mg(aTHX_ a,b)
 #define sv_setpviv_mg(a,b)	Perl_sv_setpviv_mg(aTHX_ a,b)
 #define sv_setuv_mg(a,b)	Perl_sv_setuv_mg(aTHX_ a,b)
@@ -1987,6 +2011,7 @@
 #define sv_usepvn_mg(a,b,c)	Perl_sv_usepvn_mg(aTHX_ a,b,c)
 #define get_vtbl(a)		Perl_get_vtbl(aTHX_ a)
 #define pv_display(a,b,c,d,e)	Perl_pv_display(aTHX_ a,b,c,d,e)
+#define dump_vindent(a,b,c,d)	Perl_dump_vindent(aTHX_ a,b,c,d)
 #define do_gv_dump(a,b,c,d)	Perl_do_gv_dump(aTHX_ a,b,c,d)
 #define do_gvgv_dump(a,b,c,d)	Perl_do_gvgv_dump(aTHX_ a,b,c,d)
 #define do_hv_dump(a,b,c,d)	Perl_do_hv_dump(aTHX_ a,b,c,d)
@@ -1995,6 +2020,7 @@
 #define do_pmop_dump(a,b,c)	Perl_do_pmop_dump(aTHX_ a,b,c)
 #define do_sv_dump(a,b,c,d,e,f,g)	Perl_do_sv_dump(aTHX_ a,b,c,d,e,f,g)
 #define magic_dump(a)		Perl_magic_dump(aTHX_ a)
+#define vdefault_protect(a,b,c)	Perl_vdefault_protect(aTHX_ a,b,c)
 #define reginitcolors()		Perl_reginitcolors(aTHX)
 #define sv_2pv_nolen(a)		Perl_sv_2pv_nolen(aTHX_ a)
 #define sv_pv(a)		Perl_sv_pv(aTHX_ a)
@@ -2245,9 +2271,6 @@
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #define mess_alloc()		S_mess_alloc(aTHX)
-#define do_croak(a,b)		S_do_croak(aTHX_ a,b)
-#define do_warn(a,b)		S_do_warn(aTHX_ a,b)
-#define do_die(a,b)		S_do_die(aTHX_ a,b)
 #  if defined(LEAKTEST)
 #define xstat(a)		S_xstat(aTHX_ a)
 #  endif
@@ -2720,15 +2743,21 @@
 #define convert			Perl_convert
 #define Perl_croak		CPerlObj::Perl_croak
 #define croak			Perl_croak
+#define Perl_vcroak		CPerlObj::Perl_vcroak
+#define vcroak			Perl_vcroak
 #if defined(PERL_IMPLICIT_CONTEXT)
 #define Perl_croak_nocontext	CPerlObj::Perl_croak_nocontext
 #define croak_nocontext		Perl_croak_nocontext
 #define Perl_die_nocontext	CPerlObj::Perl_die_nocontext
 #define die_nocontext		Perl_die_nocontext
+#define Perl_deb_nocontext	CPerlObj::Perl_deb_nocontext
+#define deb_nocontext		Perl_deb_nocontext
 #define Perl_form_nocontext	CPerlObj::Perl_form_nocontext
 #define form_nocontext		Perl_form_nocontext
 #define Perl_warn_nocontext	CPerlObj::Perl_warn_nocontext
 #define warn_nocontext		Perl_warn_nocontext
+#define Perl_warner_nocontext	CPerlObj::Perl_warner_nocontext
+#define warner_nocontext	Perl_warner_nocontext
 #define Perl_newSVpvf_nocontext	CPerlObj::Perl_newSVpvf_nocontext
 #define newSVpvf_nocontext	Perl_newSVpvf_nocontext
 #define Perl_sv_catpvf_nocontext	CPerlObj::Perl_sv_catpvf_nocontext
@@ -2739,6 +2768,8 @@
 #define sv_catpvf_mg_nocontext	Perl_sv_catpvf_mg_nocontext
 #define Perl_sv_setpvf_mg_nocontext	CPerlObj::Perl_sv_setpvf_mg_nocontext
 #define sv_setpvf_mg_nocontext	Perl_sv_setpvf_mg_nocontext
+#define Perl_fprintf_nocontext	CPerlObj::Perl_fprintf_nocontext
+#define fprintf_nocontext	Perl_fprintf_nocontext
 #endif
 #define Perl_cv_ckproto		CPerlObj::Perl_cv_ckproto
 #define cv_ckproto		Perl_cv_ckproto
@@ -2772,6 +2803,8 @@
 #define cxinc			Perl_cxinc
 #define Perl_deb		CPerlObj::Perl_deb
 #define deb			Perl_deb
+#define Perl_vdeb		CPerlObj::Perl_vdeb
+#define vdeb			Perl_vdeb
 #define Perl_deb_growlevel	CPerlObj::Perl_deb_growlevel
 #define deb_growlevel		Perl_deb_growlevel
 #define Perl_debprofdump	CPerlObj::Perl_debprofdump
@@ -2788,6 +2821,8 @@
 #define deprecate		Perl_deprecate
 #define Perl_die		CPerlObj::Perl_die
 #define die			Perl_die
+#define Perl_vdie		CPerlObj::Perl_vdie
+#define vdie			Perl_vdie
 #define Perl_die_where		CPerlObj::Perl_die_where
 #define die_where		Perl_die_where
 #define Perl_dounwind		CPerlObj::Perl_dounwind
@@ -2892,6 +2927,8 @@
 #define fold_constants		Perl_fold_constants
 #define Perl_form		CPerlObj::Perl_form
 #define form			Perl_form
+#define Perl_vform		CPerlObj::Perl_vform
+#define vform			Perl_vform
 #define Perl_free_tmps		CPerlObj::Perl_free_tmps
 #define free_tmps		Perl_free_tmps
 #define Perl_gen_constant_list	CPerlObj::Perl_gen_constant_list
@@ -3380,6 +3417,8 @@
 #define newSVpvn		Perl_newSVpvn
 #define Perl_newSVpvf		CPerlObj::Perl_newSVpvf
 #define newSVpvf		Perl_newSVpvf
+#define Perl_vnewSVpvf		CPerlObj::Perl_vnewSVpvf
+#define vnewSVpvf		Perl_vnewSVpvf
 #define Perl_newSVrv		CPerlObj::Perl_newSVrv
 #define newSVrv			Perl_newSVrv
 #define Perl_newSVsv		CPerlObj::Perl_newSVsv
@@ -3388,10 +3427,6 @@
 #define newUNOP			Perl_newUNOP
 #define Perl_newWHILEOP		CPerlObj::Perl_newWHILEOP
 #define newWHILEOP		Perl_newWHILEOP
-#if defined(USE_THREADS)
-#define Perl_new_struct_thread	CPerlObj::Perl_new_struct_thread
-#define new_struct_thread	Perl_new_struct_thread
-#endif
 #define Perl_new_stackinfo	CPerlObj::Perl_new_stackinfo
 #define new_stackinfo		Perl_new_stackinfo
 #define Perl_nextargv		CPerlObj::Perl_nextargv
@@ -3439,6 +3474,10 @@
 #define perl_free		CPerlObj::perl_free
 #define perl_run		CPerlObj::perl_run
 #define perl_parse		CPerlObj::perl_parse
+#if defined(USE_THREADS)
+#define Perl_new_struct_thread	CPerlObj::Perl_new_struct_thread
+#define new_struct_thread	Perl_new_struct_thread
+#endif
 #endif
 #define Perl_call_atexit	CPerlObj::Perl_call_atexit
 #define call_atexit		Perl_call_atexit
@@ -3684,6 +3723,8 @@
 #define sv_bless		Perl_sv_bless
 #define Perl_sv_catpvf		CPerlObj::Perl_sv_catpvf
 #define sv_catpvf		Perl_sv_catpvf
+#define Perl_sv_vcatpvf		CPerlObj::Perl_sv_vcatpvf
+#define sv_vcatpvf		Perl_sv_vcatpvf
 #define Perl_sv_catpv		CPerlObj::Perl_sv_catpv
 #define sv_catpv		Perl_sv_catpv
 #define Perl_sv_catpvn		CPerlObj::Perl_sv_catpvn
@@ -3762,6 +3803,8 @@
 #define sv_reset		Perl_sv_reset
 #define Perl_sv_setpvf		CPerlObj::Perl_sv_setpvf
 #define sv_setpvf		Perl_sv_setpvf
+#define Perl_sv_vsetpvf		CPerlObj::Perl_sv_vsetpvf
+#define sv_vsetpvf		Perl_sv_vsetpvf
 #define Perl_sv_setiv		CPerlObj::Perl_sv_setiv
 #define sv_setiv		Perl_sv_setiv
 #define Perl_sv_setpviv		CPerlObj::Perl_sv_setpviv
@@ -3850,8 +3893,12 @@
 #define wait4pid		Perl_wait4pid
 #define Perl_warn		CPerlObj::Perl_warn
 #define warn			Perl_warn
+#define Perl_vwarn		CPerlObj::Perl_vwarn
+#define vwarn			Perl_vwarn
 #define Perl_warner		CPerlObj::Perl_warner
 #define warner			Perl_warner
+#define Perl_vwarner		CPerlObj::Perl_vwarner
+#define vwarner			Perl_vwarner
 #define Perl_watch		CPerlObj::Perl_watch
 #define watch			Perl_watch
 #define Perl_whichsig		CPerlObj::Perl_whichsig
@@ -3909,6 +3956,8 @@
 #define runops_debug		Perl_runops_debug
 #define Perl_sv_catpvf_mg	CPerlObj::Perl_sv_catpvf_mg
 #define sv_catpvf_mg		Perl_sv_catpvf_mg
+#define Perl_sv_vcatpvf_mg	CPerlObj::Perl_sv_vcatpvf_mg
+#define sv_vcatpvf_mg		Perl_sv_vcatpvf_mg
 #define Perl_sv_catpv_mg	CPerlObj::Perl_sv_catpv_mg
 #define sv_catpv_mg		Perl_sv_catpv_mg
 #define Perl_sv_catpvn_mg	CPerlObj::Perl_sv_catpvn_mg
@@ -3917,6 +3966,8 @@
 #define sv_catsv_mg		Perl_sv_catsv_mg
 #define Perl_sv_setpvf_mg	CPerlObj::Perl_sv_setpvf_mg
 #define sv_setpvf_mg		Perl_sv_setpvf_mg
+#define Perl_sv_vsetpvf_mg	CPerlObj::Perl_sv_vsetpvf_mg
+#define sv_vsetpvf_mg		Perl_sv_vsetpvf_mg
 #define Perl_sv_setiv_mg	CPerlObj::Perl_sv_setiv_mg
 #define sv_setiv_mg		Perl_sv_setiv_mg
 #define Perl_sv_setpviv_mg	CPerlObj::Perl_sv_setpviv_mg
@@ -3939,6 +3990,8 @@
 #define pv_display		Perl_pv_display
 #define Perl_dump_indent	CPerlObj::Perl_dump_indent
 #define dump_indent		Perl_dump_indent
+#define Perl_dump_vindent	CPerlObj::Perl_dump_vindent
+#define dump_vindent		Perl_dump_vindent
 #define Perl_do_gv_dump		CPerlObj::Perl_do_gv_dump
 #define do_gv_dump		Perl_do_gv_dump
 #define Perl_do_gvgv_dump	CPerlObj::Perl_do_gvgv_dump
@@ -3957,6 +4010,8 @@
 #define magic_dump		Perl_magic_dump
 #define Perl_default_protect	CPerlObj::Perl_default_protect
 #define default_protect		Perl_default_protect
+#define Perl_vdefault_protect	CPerlObj::Perl_vdefault_protect
+#define vdefault_protect	Perl_vdefault_protect
 #define Perl_reginitcolors	CPerlObj::Perl_reginitcolors
 #define reginitcolors		Perl_reginitcolors
 #define Perl_sv_2pv_nolen	CPerlObj::Perl_sv_2pv_nolen
@@ -4403,12 +4458,6 @@
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #define S_mess_alloc		CPerlObj::S_mess_alloc
 #define mess_alloc		S_mess_alloc
-#define S_do_croak		CPerlObj::S_do_croak
-#define do_croak		S_do_croak
-#define S_do_warn		CPerlObj::S_do_warn
-#define do_warn			S_do_warn
-#define S_do_die		CPerlObj::S_do_die
-#define do_die			S_do_die
 #  if defined(LEAKTEST)
 #define S_xstat			CPerlObj::S_xstat
 #define xstat			S_xstat
@@ -5212,14 +5261,16 @@
    an extra argument but grab the context pointer using the macro
    dTHX.
  */
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_OBJECT)
 #  define croak				Perl_croak_nocontext
+#  define deb				Perl_deb_nocontext
 #  define die				Perl_die_nocontext
 #  define form				Perl_form_nocontext
 #  define newSVpvf			Perl_newSVpvf_nocontext
 #  define sv_catpvf			Perl_sv_catpvf_nocontext
 #  define sv_setpvf			Perl_sv_setpvf_nocontext
 #  define warn				Perl_warn_nocontext
+#  define warner			Perl_warner_nocontext
 #  define sv_catpvf_mg			Perl_sv_catpvf_mg_nocontext
 #  define sv_setpvf_mg			Perl_sv_setpvf_mg_nocontext
 #endif
@@ -5230,11 +5281,13 @@
 /* undefined symbols, point them back at the usual ones */
 #  define Perl_croak_nocontext		Perl_croak
 #  define Perl_die_nocontext		Perl_die
+#  define Perl_deb_nocontext		Perl_deb
 #  define Perl_form_nocontext		Perl_form
-#  define Perl_newSVpvf_nocontext		Perl_newSVpvf
-#  define Perl_sv_catpvf_nocontext		Perl_sv_catpvf
-#  define Perl_sv_setpvf_nocontext		Perl_sv_setpvf
+#  define Perl_newSVpvf_nocontext	Perl_newSVpvf
+#  define Perl_sv_catpvf_nocontext	Perl_sv_catpvf
+#  define Perl_sv_setpvf_nocontext	Perl_sv_setpvf
 #  define Perl_warn_nocontext		Perl_warn
+#  define Perl_warner_nocontext		Perl_warner
 #  define Perl_sv_catpvf_mg_nocontext	Perl_sv_catpvf_mg
 #  define Perl_sv_setpvf_mg_nocontext	Perl_sv_setpvf_mg
 #endif

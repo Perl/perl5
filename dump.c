@@ -24,13 +24,18 @@
 void
 Perl_dump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
 {
-    dTHR;
     va_list args;
-    
     va_start(args, pat);
-    PerlIO_printf(file, "%*s", level*PL_dumpindent, "");
-    PerlIO_vprintf(file, pat, args);
+    dump_vindent(level, file, pat, &args);
     va_end(args);
+}
+
+void
+Perl_dump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args)
+{
+    dTHR;
+    PerlIO_printf(file, "%*s", level*PL_dumpindent, "");
+    PerlIO_vprintf(file, pat, *args);
 }
 
 void

@@ -2357,7 +2357,7 @@
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define PRIVLIB "c:\\perl\\5.00557\\lib"		/**/
-#define PRIVLIB_EXP (win32_get_privlib(aTHX_ "5.00557"))	/**/
+#define PRIVLIB_EXP (win32_get_privlib("5.00557"))	/**/
 
 /* SELECT_MIN_BITS:
  *	This symbol holds the minimum number of bits operated by select.
@@ -2398,7 +2398,7 @@
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define SITELIB "c:\\perl\\site\\5.00557\\lib"		/**/
-#define SITELIB_EXP (win32_get_sitelib(aTHX_ "5.00557"))	/**/
+#define SITELIB_EXP (win32_get_sitelib("5.00557"))	/**/
 
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl

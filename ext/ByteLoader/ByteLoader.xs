@@ -1,3 +1,4 @@
+#define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -6,6 +7,7 @@
 static void
 freadpv(U32 len, void *data, XPV *pv)
 {
+    dTHX;
     New(666, pv->xpv_pv, len, char);
     PerlIO_read((PerlIO*)data, (void*)pv->xpv_pv, len);
     pv->xpv_len = len;

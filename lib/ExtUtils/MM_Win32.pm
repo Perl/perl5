@@ -479,11 +479,6 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)\.exists 
 sub perl_archive
 {
     my ($self) = @_;
-    if($OBJ) {
-        if ($self->{CAPI}) {
-            return '$(PERL_INC)\perlCAPI$(LIB_EXT)';
-        }
-    }
     return '$(PERL_INC)\\'.$Config{'libperl'};
 }
 

@@ -253,7 +253,8 @@ sub hide ($$) {
 
 sub objxsub_var ($$) {
     my ($pfx, $sym) = @_;
-    undefine("PL_$sym") . hide("PL_$sym", "(*Perl_${pfx}${sym}_ptr(pPerl))");
+    my $arg = ($pfx eq 'G' ? 'NULL' : 'aTHXo');
+    undefine("PL_$sym") . hide("PL_$sym", "(*Perl_${pfx}${sym}_ptr($arg))");
 }
 
 sub embedvar ($) {
@@ -456,14 +457,16 @@ print EM <<'END';
    an extra argument but grab the context pointer using the macro
    dTHX.
  */
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_OBJECT)
 #  define croak				Perl_croak_nocontext
+#  define deb				Perl_deb_nocontext
 #  define die				Perl_die_nocontext
 #  define form				Perl_form_nocontext
 #  define newSVpvf			Perl_newSVpvf_nocontext
 #  define sv_catpvf			Perl_sv_catpvf_nocontext
 #  define sv_setpvf			Perl_sv_setpvf_nocontext
 #  define warn				Perl_warn_nocontext
+#  define warner			Perl_warner_nocontext
 #  define sv_catpvf_mg			Perl_sv_catpvf_mg_nocontext
 #  define sv_setpvf_mg			Perl_sv_setpvf_mg_nocontext
 #endif
@@ -474,11 +477,13 @@ print EM <<'END';
 /* undefined symbols, point them back at the usual ones */
 #  define Perl_croak_nocontext		Perl_croak
 #  define Perl_die_nocontext		Perl_die
+#  define Perl_deb_nocontext		Perl_deb
 #  define Perl_form_nocontext		Perl_form
-#  define Perl_newSVpvf_nocontext		Perl_newSVpvf
-#  define Perl_sv_catpvf_nocontext		Perl_sv_catpvf
-#  define Perl_sv_setpvf_nocontext		Perl_sv_setpvf
+#  define Perl_newSVpvf_nocontext	Perl_newSVpvf
+#  define Perl_sv_catpvf_nocontext	Perl_sv_catpvf
+#  define Perl_sv_setpvf_nocontext	Perl_sv_setpvf
 #  define Perl_warn_nocontext		Perl_warn
+#  define Perl_warner_nocontext		Perl_warner
 #  define Perl_sv_catpvf_mg_nocontext	Perl_sv_catpvf_mg
 #  define Perl_sv_setpvf_mg_nocontext	Perl_sv_setpvf_mg
 #endif
@@ -526,7 +531,7 @@ END
 
 
 for $sym (sort keys %thread) {
-    print EM multon($sym,'T','PL_curinterp->');
+    print EM multon($sym,'T','PERL_GET_INTERP->');
 }
 
 print EM <<'END';
@@ -539,7 +544,7 @@ print EM <<'END';
 END
 
 for $sym (sort keys %intrp) {
-    print EM multon($sym,'I','PL_curinterp->');
+    print EM multon($sym,'I','PERL_GET_INTERP->');
 }
 
 print EM <<'END';
@@ -686,6 +691,10 @@ print OBX <<'EOT';
 
 /* Functions */
 
+#if defined(PERL_OBJECT)
+
+/* XXX soon to be eliminated, only a few things in PERLCORE need these now */
+
 EOT
 
 walk_table {
@@ -717,6 +726,7 @@ for $sym (sort keys %ppsym) {
 
 print OBX <<'EOT';
 
+#endif  /* PERL_OBJECT */
 #endif	/* __objXSUB_h__ */
 EOT
 
@@ -733,9 +743,18 @@ print CAPIH <<'EOT';
    perlvars.h and thrdvar.h.  Any changes made here will be lost!
 */
 
-#if defined(PERL_OBJECT)
-
 /* declare accessor functions for Perl variables */
+
+#if defined(PERL_OBJECT) || defined (PERL_CAPI)
+
+#if defined(PERL_OBJECT)
+#  undef  aTHXo
+#  define aTHXo			pPerl
+#  undef  aTHXo_
+#  define aTHXo_		aTHXo,
+#  undef  _aTHXo
+#  define _aTHXo		,aTHXo
+#endif /* PERL_OBJECT */
 
 START_EXTERN_C
 
@@ -743,11 +762,11 @@ START_EXTERN_C
 #undef PERLVARA
 #undef PERLVARI
 #undef PERLVARIC
-#define PERLVAR(v,t)	EXTERN_C t* Perl_##v##_ptr(void *p);
+#define PERLVAR(v,t)	EXTERN_C t* Perl_##v##_ptr(pTHXo);
 #define PERLVARA(v,n,t)	typedef t PL_##v##_t[n];			\
-			EXTERN_C PL_##v##_t* Perl_##v##_ptr(void *p);
+			EXTERN_C PL_##v##_t* Perl_##v##_ptr(pTHXo);
 #define PERLVARI(v,t,i)	PERLVAR(v,t)
-#define PERLVARIC(v,t,i) PERLVAR(v,t)
+#define PERLVARIC(v,t,i) PERLVAR(v, const t)
 
 #include "thrdvar.h"
 #include "intrpvar.h"
@@ -760,7 +779,7 @@ START_EXTERN_C
 
 END_EXTERN_C
 
-#endif /* PERL_OBJECT */
+#endif /* PERL_OBJECT || PERL_CAPI */
 
 EOT
 
@@ -784,15 +803,22 @@ START_EXTERN_C
 #undef PERLVARA
 #undef PERLVARI
 #undef PERLVARIC
-#define PERLVAR(v,t)	t* Perl_##v##_ptr(void *p)			\
-			{ return &(((CPerlObj*)p)->PL_##v); }
-#define PERLVARA(v,n,t)	PL_##v##_t* Perl_##v##_ptr(void *p)		\
-			{ return &(((CPerlObj*)p)->PL_##v); }
+#define PERLVAR(v,t)	t* Perl_##v##_ptr(pTHXo)			\
+			{ return &(aTHXo->PL_##v); }
+#define PERLVARA(v,n,t)	PL_##v##_t* Perl_##v##_ptr(pTHXo)		\
+			{ return &(aTHXo->PL_##v); }
 #define PERLVARI(v,t,i)	PERLVAR(v,t)
-#define PERLVARIC(v,t,i) PERLVAR(v,t)
+#define PERLVARIC(v,t,i) PERLVAR(v, const t)
 
 #include "thrdvar.h"
 #include "intrpvar.h"
+
+#undef PERLVAR
+#undef PERLVARA
+#define PERLVAR(v,t)	t* Perl_##v##_ptr(pTHXo)			\
+			{ return &(PL_##v); }
+#define PERLVARA(v,n,t)	PL_##v##_t* Perl_##v##_ptr(pTHXo)		\
+			{ return &(PL_##v); }
 #include "perlvars.h"
 
 #undef PERLVAR
@@ -802,21 +828,73 @@ START_EXTERN_C
 
 EOT
 
+# functions that take va_list* for implementing vararg functions
+my %vfuncs = qw(
+    Perl_croak			Perl_vcroak
+    Perl_warn			Perl_vwarn
+    Perl_warner			Perl_vwarner
+    Perl_die			Perl_vdie
+    Perl_form			Perl_vform
+    Perl_deb			Perl_vdeb
+    Perl_newSVpvf		Perl_vnewSVpvf
+    Perl_sv_setpvf		Perl_sv_vsetpvf
+    Perl_sv_setpvf_mg		Perl_sv_vsetpvf_mg
+    Perl_sv_catpvf		Perl_sv_vcatpvf
+    Perl_sv_catpvf_mg		Perl_sv_vcatpvf_mg
+    Perl_dump_indent		Perl_dump_vindent
+    Perl_default_protect	Perl_vdefault_protect
+);
+
 sub emit_func {
-    my ($retval,$func,@args) = @_;
+    my ($addcontext, $rettype,$func,@args) = @_;
     my @aargs = @args;
     for my $a (@aargs) { $a =~ s/^.*\b(\w+)$/$1/ }
-    unshift @args, 'void *pPerl';
+    my $ctxarg = '';
+    if (not $addcontext) {
+	$ctxarg = 'pTHXo';
+	$ctxarg .= '_ ' if @args;
+    }
+    my $decl = '';
+    if ($addcontext) {
+	$decl .= "    dTHXo;\n";
+    }
     local $" = ', ';
-    my $return = ($retval =~ /^\s*(void|Free_t|Signal_t)\s*$/ ? '' : 'return ');
-    return <<EOT
-$retval
-$func(@args)
+    my $return = ($rettype =~ /^\s*(void|Free_t|Signal_t)\s*$/
+		  ? '' : 'return ');
+    my $emitval = '';
+    if (@args and $args[$#args] =~ /\.\.\./) {
+	pop @args;
+	pop @aargs;
+	my $retarg = '';
+	my $ctxfunc = $func;
+	$ctxfunc =~ s/_nocontext$//;
+	return $emitval unless exists $vfuncs{$ctxfunc};
+	if (length $return) {
+	    $decl .= "    $rettype retval;\n";
+	    $retarg .= "retval = ";
+	    $return = "\n    ${return}retval;\n";
+	}
+	$emitval .= <<EOT
+$rettype
+$func($ctxarg@args)
 {
-    $return((CPerlObj*)pPerl)->$func(@aargs);
+$decl    va_list args;
+    va_start(args, $aargs[$#aargs]);
+    $retarg((CPerlObj*)pPerl)->$vfuncs{$ctxfunc}(@aargs, &args);
+    va_end(args);$return
 }
 EOT
-
+    }
+    else {
+	$emitval .= <<EOT
+$rettype
+$func($ctxarg@args)
+{
+$decl    $return((CPerlObj*)pPerl)->$func(@aargs);
+}
+EOT
+    }
+    $emitval;
 }
 
 # XXXX temporary hack
@@ -840,17 +918,16 @@ walk_table {
     else {
 	my ($flags,$retval,$func,@args) = @_;
 	return $ret if exists $skipapi_funcs{$func};
-	unless (@args and $args[$#args] =~ /\.\.\./) {
-	    unless ($flags =~ /s/) {
-		$ret .= "\n";
-		if ($flags =~ /p/) {
-		    $ret .= undefine("Perl_$func");
-		    $ret .= emit_func($retval,"Perl_$func",@args);
-		}
-		else {
-		    $ret .= undefine($func);
-		    $ret .= emit_func($retval,$func,@args);
-		}
+	unless ($flags =~ /s/) {
+	    $ret .= "\n";
+	    my $addctx = 1 if $flags =~ /n/;
+	    if ($flags =~ /p/) {
+		$ret .= undefine("Perl_$func");
+		$ret .= emit_func($addctx,$retval,"Perl_$func",@args);
+	    }
+	    else {
+		$ret .= undefine($func);
+		$ret .= emit_func($addctx,$retval,$func,@args);
 	    }
 	}
     }
@@ -862,14 +939,24 @@ for $sym (sort keys %ppsym) {
     print CAPI "\n";
     print CAPI undefine("Perl_$sym");
     if ($sym =~ /^ck_/) {
-	print CAPI emit_func('OP *',"Perl_$sym",'OP *o');
+	print CAPI emit_func(0, 'OP *',"Perl_$sym",'OP *o');
     }
     else {					# pp_foo
-	print CAPI emit_func('OP *',"Perl_$sym");
+	print CAPI emit_func(0, 'OP *',"Perl_$sym");
     }
 }
 
 print CAPI <<'EOT';
+
+#undef Perl_fprintf_nocontext
+int
+Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...)
+{
+    dTHXo;
+    va_list(arglist);
+    va_start(arglist, format);
+    return (*pPerl->PL_StdIO->pVprintf)(pPerl->PL_StdIO, stream, format, arglist);
+}
 
 END_EXTERN_C
 
@@ -949,16 +1036,20 @@ p	|MAGIC*	|condpair_magic	|SV *sv
 #endif
 p	|OP*	|convert	|I32 optype|I32 flags|OP* o
 pr	|void	|croak		|const char* pat|...
+pr	|void	|vcroak		|const char* pat|va_list* args
 #if defined(PERL_IMPLICIT_CONTEXT)
 npr	|void	|croak_nocontext|const char* pat|...
 np	|OP*	|die_nocontext	|const char* pat|...
+np	|void	|deb_nocontext	|const char* pat|...
 np	|char*	|form_nocontext	|const char* pat|...
 np	|void	|warn_nocontext	|const char* pat|...
+np	|void	|warner_nocontext|U32 err|const char* pat|...
 np	|SV*	|newSVpvf_nocontext|const char* pat|...
 np	|void	|sv_catpvf_nocontext|SV* sv|const char* pat|...
 np	|void	|sv_setpvf_nocontext|SV* sv|const char* pat|...
 np	|void	|sv_catpvf_mg_nocontext|SV* sv|const char* pat|...
 np	|void	|sv_setpvf_mg_nocontext|SV* sv|const char* pat|...
+np	|int	|fprintf_nocontext|PerlIO* stream|const char* fmt|...
 #endif
 p	|void	|cv_ckproto	|CV* cv|GV* gv|char* p
 p	|CV*	|cv_clone	|CV* proto
@@ -976,6 +1067,7 @@ p	|U32*	|get_opargs
 p	|PPADDR_t*|get_ppaddr
 p	|I32	|cxinc
 p	|void	|deb		|const char* pat|...
+p	|void	|vdeb		|const char* pat|va_list* args
 p	|void	|deb_growlevel
 p	|void	|debprofdump
 p	|I32	|debop		|OP* o
@@ -985,6 +1077,7 @@ p	|char*	|delimcpy	|char* to|char* toend|char* from \
 				|char* fromend|int delim|I32* retlen
 p	|void	|deprecate	|char* s
 p	|OP*	|die		|const char* pat|...
+p	|OP*	|vdie		|const char* pat|va_list* args
 p	|OP*	|die_where	|char* message|STRLEN msglen
 p	|void	|dounwind	|I32 cxix
 p	|bool	|do_aexec	|SV* really|SV** mark|SV** sp
@@ -1044,6 +1137,7 @@ p	|PADOFFSET|find_threadsv|const char *name
 p	|OP*	|force_list	|OP* arg
 p	|OP*	|fold_constants	|OP* arg
 p	|char*	|form		|const char* pat|...
+p	|char*	|vform		|const char* pat|va_list* args
 p	|void	|free_tmps
 p	|OP*	|gen_constant_list|OP* o
 #if !defined(HAS_GETENV_LEN)
@@ -1305,14 +1399,13 @@ p	|SV*	|newSVnv	|NV n
 p	|SV*	|newSVpv	|const char* s|STRLEN len
 p	|SV*	|newSVpvn	|const char* s|STRLEN len
 p	|SV*	|newSVpvf	|const char* pat|...
+p	|SV*	|vnewSVpvf	|const char* pat|va_list* args
 p	|SV*	|newSVrv	|SV* rv|const char* classname
 p	|SV*	|newSVsv	|SV* old
 p	|OP*	|newUNOP	|I32 type|I32 flags|OP* first
 p	|OP*	|newWHILEOP	|I32 flags|I32 debuggable|LOOP* loop \
 				|I32 whileline|OP* expr|OP* block|OP* cont
-#if defined(USE_THREADS)
-p	|struct perl_thread*|new_struct_thread|struct perl_thread *t
-#endif
+
 p	|PERL_SI*|new_stackinfo|I32 stitems|I32 cxitems
 p	|PerlIO*|nextargv	|GV* gv
 p	|char*	|ninstr		|const char* big|const char* bigend \
@@ -1346,6 +1439,9 @@ no	|void	|perl_free	|PerlInterpreter* sv_interp
 no	|int	|perl_run	|PerlInterpreter* sv_interp
 no	|int	|perl_parse	|PerlInterpreter* sv_interp|XSINIT_t xsinit \
 				|int argc|char** argv|char** env
+#if defined(USE_THREADS)
+p	|struct perl_thread*	|new_struct_thread|struct perl_thread *t
+#endif
 #endif
 p	|void	|call_atexit	|ATEXIT_t fn|void *ptr
 p	|I32	|call_argv	|const char* sub_name|I32 flags|char** argv
@@ -1479,6 +1575,7 @@ p	|void	|sv_add_arena	|char* ptr|U32 size|U32 flags
 p	|int	|sv_backoff	|SV* sv
 p	|SV*	|sv_bless	|SV* sv|HV* stash
 p	|void	|sv_catpvf	|SV* sv|const char* pat|...
+p	|void	|sv_vcatpvf	|SV* sv|const char* pat|va_list* args
 p	|void	|sv_catpv	|SV* sv|const char* ptr
 p	|void	|sv_catpvn	|SV* sv|const char* ptr|STRLEN len
 p	|void	|sv_catsv	|SV* dsv|SV* ssv
@@ -1521,6 +1618,7 @@ p	|void	|sv_replace	|SV* sv|SV* nsv
 p	|void	|sv_report_used
 p	|void	|sv_reset	|char* s|HV* stash
 p	|void	|sv_setpvf	|SV* sv|const char* pat|...
+p	|void	|sv_vsetpvf	|SV* sv|const char* pat|va_list* args
 p	|void	|sv_setiv	|SV* sv|IV num
 p	|void	|sv_setpviv	|SV* sv|IV num
 p	|void	|sv_setuv	|SV* sv|UV num
@@ -1573,7 +1671,9 @@ p	|void	|vivify_defelem	|SV* sv
 p	|void	|vivify_ref	|SV* sv|U32 to_what
 p	|I32	|wait4pid	|int pid|int* statusp|int flags
 p	|void	|warn		|const char* pat|...
+p	|void	|vwarn		|const char* pat|va_list* args
 p	|void	|warner		|U32 err|const char* pat|...
+p	|void	|vwarner	|U32 err|const char* pat|va_list* args
 p	|void	|watch		|char** addr
 p	|I32	|whichsig	|char* sig
 p	|int	|yyerror	|char* s
@@ -1607,10 +1707,12 @@ p	|struct perl_vars *|GetVars
 p	|int	|runops_standard
 p	|int	|runops_debug
 p	|void	|sv_catpvf_mg	|SV *sv|const char* pat|...
+p	|void	|sv_vcatpvf_mg	|SV* sv|const char* pat|va_list* args
 p	|void	|sv_catpv_mg	|SV *sv|const char *ptr
 p	|void	|sv_catpvn_mg	|SV *sv|const char *ptr|STRLEN len
 p	|void	|sv_catsv_mg	|SV *dstr|SV *sstr
 p	|void	|sv_setpvf_mg	|SV *sv|const char* pat|...
+p	|void	|sv_vsetpvf_mg	|SV* sv|const char* pat|va_list* args
 p	|void	|sv_setiv_mg	|SV *sv|IV i
 p	|void	|sv_setpviv_mg	|SV *sv|IV iv
 p	|void	|sv_setuv_mg	|SV *sv|UV u
@@ -1623,6 +1725,8 @@ p	|MGVTBL*|get_vtbl	|int vtbl_id
 p	|char*	|pv_display	|SV *sv|char *pv|STRLEN cur|STRLEN len \
 				|STRLEN pvlim
 p	|void	|dump_indent	|I32 level|PerlIO *file|const char* pat|...
+p	|void	|dump_vindent	|I32 level|PerlIO *file|const char* pat \
+				|va_list *args
 p	|void	|do_gv_dump	|I32 level|PerlIO *file|char *name|GV *sv
 p	|void	|do_gvgv_dump	|I32 level|PerlIO *file|char *name|GV *sv
 p	|void	|do_hv_dump	|I32 level|PerlIO *file|char *name|HV *sv
@@ -1634,6 +1738,7 @@ p	|void	|do_sv_dump	|I32 level|PerlIO *file|SV *sv|I32 nest \
 				|I32 maxnest|bool dumpops|STRLEN pvlim
 p	|void	|magic_dump	|MAGIC *mg
 p	|void*	|default_protect|int *excpt|protect_body_t body|...
+p	|void*	|vdefault_protect|int *excpt|protect_body_t body|va_list *args
 p	|void	|reginitcolors
 p	|char*	|sv_2pv_nolen	|SV* sv
 p	|char*	|sv_pv		|SV *sv
@@ -1913,9 +2018,6 @@ s	|SV*|isa_lookup	|HV *stash|const char *name|int len|int level
 
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 s	|SV*	|mess_alloc
-rs	|void	|do_croak	|const char *pat|va_list *args
-s	|void	|do_warn	|const char *pat|va_list *args
-s	|OP*	|do_die		|const char *pat|va_list *args
 #  if defined(LEAKTEST)
 s	|void	|xstat		|int
 #  endif

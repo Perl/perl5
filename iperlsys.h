@@ -74,7 +74,7 @@
 extern void PerlIO_init (void);
 #endif
 
-#ifdef PERL_OBJECT
+#if defined(PERL_IMPLICIT_SYS)
 
 #ifndef PerlIO
 typedef struct _PerlIO PerlIO;
@@ -258,7 +258,7 @@ struct IPerlStdIOInfo
 	(*PL_StdIO->pSetPtrCnt)(PL_StdIO, (f), (p), (c))
 #define PerlIO_setlinebuf(f)						\
 	(*PL_StdIO->pSetlinebuf)(PL_StdIO, (f))
-#define PerlIO_printf		fprintf
+#define PerlIO_printf		Perl_fprintf_nocontext
 #define PerlIO_stdoutf		*PL_StdIO->pPrintf
 #define PerlIO_vprintf(f,fmt,a)						\
 	(*PL_StdIO->pVprintf)(PL_StdIO, (f),(fmt),a)          
@@ -277,14 +277,14 @@ struct IPerlStdIOInfo
 #define PerlIO_init()							\
 	(*PL_StdIO->pInit)(PL_StdIO)
 #undef 	init_os_extras
-#define init_os_extras(x)						\
+#define init_os_extras()						\
 	(*PL_StdIO->pInitOSExtras)(PL_StdIO)
 
-#else	/* PERL_OBJECT */
+#else	/* PERL_IMPLICIT_SYS */
 
 #include "perlsdio.h"
 
-#endif	/* PERL_OBJECT */
+#endif	/* PERL_IMPLICIT_SYS */
 
 #ifndef PERLIO_IS_STDIO
 #ifdef USE_SFIO
@@ -466,7 +466,7 @@ extern int	PerlIO_setpos		(PerlIO *,const Fpos_t *);
  *   Interface for directory functions
  */
 
-#ifdef PERL_OBJECT
+#if defined(PERL_IMPLICIT_SYS)
 
 /* IPerlDir		*/
 struct IPerlDir;
@@ -518,7 +518,7 @@ struct IPerlDirInfo
 #define PerlDir_tell(dir)					\
 	(*PL_Dir->pTell)(PL_Dir, (dir))
 
-#else	/* PERL_OBJECT */
+#else	/* PERL_IMPLICIT_SYS */
 
 #define PerlDir_mkdir(name, mode)	Mkdir((name), (mode))
 #ifdef VMS
@@ -534,13 +534,13 @@ struct IPerlDirInfo
 #define PerlDir_seek(dir, loc)		seekdir((dir), (loc))
 #define PerlDir_tell(dir)		telldir((dir))
 
-#endif	/* PERL_OBJECT */
+#endif	/* PERL_IMPLICIT_SYS */
 
 /*
     Interface for perl environment functions
 */
 
-#ifdef PERL_OBJECT
+#if defined(PERL_IMPLICIT_SYS)
 
 /* IPerlEnv		*/
 struct IPerlEnv;
@@ -617,7 +617,7 @@ struct IPerlEnvInfo
 	(*PL_Env->pSiteLibPath)(PL_Env,(str))
 #endif
 
-#else	/* PERL_OBJECT */
+#else	/* PERL_IMPLICIT_SYS */
 
 #define PerlEnv_putenv(str)		putenv((str))
 #define PerlEnv_getenv(str)		getenv((str))
@@ -635,13 +635,13 @@ struct IPerlEnvInfo
 #define PerlEnv_os_id()			win32_os_id()
 #endif
 
-#endif	/* PERL_OBJECT */
+#endif	/* PERL_IMPLICIT_SYS */
 
 /*
     Interface for perl low-level IO functions
 */
 
-#ifdef PERL_OBJECT
+#if defined(PERL_IMPLICIT_SYS)
 
 /* IPerlLIO		*/
 struct IPerlLIO;
@@ -763,7 +763,7 @@ struct IPerlLIOInfo
 #define PerlLIO_write(fd, buf, count)					\
 	(*PL_LIO->pWrite)(PL_LIO, (fd), (buf), (count))
 
-#else	/* PERL_OBJECT */
+#else	/* PERL_IMPLICIT_SYS */
 
 #define PerlLIO_access(file, mode)	access((file), (mode))
 #define PerlLIO_chmod(file, mode)	chmod((file), (mode))
@@ -796,13 +796,13 @@ struct IPerlLIOInfo
 #define PerlLIO_utime(file, time)	utime((file), (time))
 #define PerlLIO_write(fd, buf, count)	write((fd), (buf), (count))
 
-#endif	/* PERL_OBJECT */
+#endif	/* PERL_IMPLICIT_SYS */
 
 /*
     Interface for perl memory allocation
 */
 
-#ifdef PERL_OBJECT
+#if defined(PERL_IMPLICIT_SYS)
 
 /* IPerlMem		*/
 struct IPerlMem;
@@ -830,20 +830,20 @@ struct IPerlMemInfo
 #define PerlMem_free(buf)				    \
 	(*PL_Mem->pFree)(PL_Mem, (buf))
 
-#else	/* PERL_OBJECT */
+#else	/* PERL_IMPLICIT_SYS */
 
 #define PerlMem_malloc(size)		malloc((size))
 #define PerlMem_realloc(buf, size)	realloc((buf), (size))
 #define PerlMem_free(buf)		free((buf))
 
-#endif	/* PERL_OBJECT */
+#endif	/* PERL_IMPLICIT_SYS */
 
 /*
     Interface for perl process functions
 */
 
 
-#ifdef PERL_OBJECT
+#if defined(PERL_IMPLICIT_SYS)
 
 #ifndef Sighandler_t
 typedef Signal_t (*Sighandler_t) (int);
@@ -1008,7 +1008,7 @@ struct IPerlProcInfo
 	(*PL_Proc->pASpawn)(PL_Proc, (m), (c), (a))
 #endif
 
-#else	/* PERL_OBJECT */
+#else	/* PERL_IMPLICIT_SYS */
 
 #define PerlProc_abort()	abort()
 #define PerlProc_crypt(c,s)	crypt((c), (s))
@@ -1041,17 +1041,17 @@ struct IPerlProcInfo
 
 #ifdef WIN32
 #define PerlProc_DynaLoad(f)						\
-	win32_dynaload(aTHX_ (f))
+	win32_dynaload((f))
 #define PerlProc_GetOSError(s,e)					\
-	win32_str_os_error(aTHX_ (s), (e))
+	win32_str_os_error((s), (e))
 #endif
-#endif	/* PERL_OBJECT */
+#endif	/* PERL_IMPLICIT_SYS */
 
 /*
     Interface for perl socket functions
 */
 
-#ifdef PERL_OBJECT
+#if defined(PERL_IMPLICIT_SYS)
 
 /* PerlSock		*/
 struct IPerlSock;
@@ -1265,7 +1265,7 @@ struct IPerlSockInfo
 	(*PL_Sock->pClosesocket)(PL_Sock, s)
 #endif
 
-#else	/* PERL_OBJECT */
+#else	/* PERL_IMPLICIT_SYS */
 
 #define PerlSock_htonl(x)		htonl(x)
 #define PerlSock_htons(x)		htons(x)
@@ -1323,7 +1323,7 @@ struct IPerlSockInfo
 #define PerlSock_closesocket(s)		closesocket(s)
 #endif
 
-#endif	/* PERL_OBJECT */
+#endif	/* PERL_IMPLICIT_SYS */
 
 /* Mention
 
