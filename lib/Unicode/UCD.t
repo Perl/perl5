@@ -1,7 +1,15 @@
 use Unicode::UCD;
 
-use Test;
 use strict;
+
+BEGIN {
+    if (ord("A") == 193) {
+	print "1..0 # Skip: EBCDIC\n";
+	exit 0;
+    }
+}
+
+use Test;
 
 BEGIN { plan tests => 162 };
 

@@ -50,8 +50,8 @@ Unicode::UCD - Unicode character database
 
 =head1 DESCRIPTION
 
-The Unicode::UCD module offers a simple interface to the Unicode Character
-Database.
+The Unicode::UCD module offers a simple interface to the Unicode
+Character Database.
 
 =cut
 
@@ -732,6 +732,10 @@ The first use of charinfo() opens a read-only filehandle to the Unicode
 Character Database (the database is included in the Perl distribution).
 The filehandle is then kept open for further queries.  In other words,
 if you are wondering where one of your filehandles went, that's where.
+
+=head1 BUGS
+
+Does not yet support EBCDIC platforms.
 
 =head1 AUTHOR
 
