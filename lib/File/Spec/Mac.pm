@@ -8,7 +8,6 @@ $VERSION = '1.4';
 
 @ISA = qw(File::Spec::Unix);
 
-use Cwd;
 my $macfiles;
 if ($^O eq 'MacOS') {
 	$macfiles = eval { require Mac::Files };
@@ -657,7 +656,7 @@ sub abs2rel {
 
     # Figure out the effective $base and clean it up.
     if ( !defined( $base ) || $base eq '' ) {
-	$base = cwd();
+	$base = $self->cwd();
     }
     elsif ( ! $self->file_name_is_absolute( $base ) ) {
         $base = $self->rel2abs( $base ) ;
@@ -725,7 +724,7 @@ sub rel2abs {
     if ( ! $self->file_name_is_absolute($path) ) {
         # Figure out the effective $base and clean it up.
         if ( !defined( $base ) || $base eq '' ) {
-	    $base = cwd();
+	    $base = $self->cwd();
         }
         elsif ( ! $self->file_name_is_absolute($base) ) {
             $base = $self->rel2abs($base) ;
@@ -757,10 +756,10 @@ sub rel2abs {
 See the authors list in I<File::Spec>. Mac OS support by Paul Schinder
 <schinder@pobox.com> and Thomas Wegner <wegner_thomas@yahoo.com>.
 
-
 =head1 SEE ALSO
 
-L<File::Spec>
+See L<File::Spec> and L<File::Spec::Unix>.  This package overrides the
+implementation of these methods, not the semantics.
 
 =cut
 

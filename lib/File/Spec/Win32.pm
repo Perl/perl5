@@ -1,7 +1,6 @@
 package File::Spec::Win32;
 
 use strict;
-use Cwd;
 
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
@@ -360,7 +359,8 @@ Novell NetWare inherits its File::Spec behaviour from File::Spec::Win32.
 
 =head1 SEE ALSO
 
-L<File::Spec>
+See L<File::Spec> and L<File::Spec::Unix>.  This package overrides the
+implementation of these methods, not the semantics.
 
 =cut
 

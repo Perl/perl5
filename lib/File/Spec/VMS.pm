@@ -8,7 +8,6 @@ $VERSION = '1.4';
 
 @ISA = qw(File::Spec::Unix);
 
-use Cwd;
 use File::Basename;
 use VMS::Filespec;
 
@@ -404,7 +403,8 @@ sub abs2rel {
 
     # Figure out the effective $base and clean it up.
     if ( !defined( $base ) || $base eq '' ) {
-        $base = cwd() ;
+        require Cwd;
+        $base = Cwd::cwd() ;
         $base = $self->canonpath( $base ) ;
     }
     elsif ( ! $self->file_name_is_absolute( $base ) ) {
@@ -464,7 +464,8 @@ sub rel2abs {
     if ( ! $self->file_name_is_absolute( $path ) ) {
         # Figure out the effective $base and clean it up.
         if ( !defined( $base ) || $base eq '' ) {
-            $base = cwd() ;
+	    require Cwd;
+            $base = Cwd::cwd() ;
         }
         elsif ( ! $self->file_name_is_absolute( $base ) ) {
             $base = $self->rel2abs( $base ) ;
@@ -501,7 +502,8 @@ sub rel2abs {
 
 =head1 SEE ALSO
 
-L<File::Spec>
+See L<File::Spec> and L<File::Spec::Unix>.  This package overrides the
+implementation of these methods, not the semantics.
 
 =cut
 
