@@ -28,7 +28,7 @@ int
 do_aspawn (pTHX_ SV *really,SV **mark,SV **sp);
 
 int
-do_spawn2 (pTHX_ char *cmd,int execf)
+do_spawn2 (pTHX_ char *cmd,int execf);
 
 int
 do_spawn (pTHX_ char *cmd);
