@@ -11,12 +11,12 @@ FindBin - Locate directory of original perl script
 =head1 SYNOPSIS
 
  use FindBin;
- BEGIN { unshift(@INC,"$FindBin::Bin/../lib") }
+ use lib "$FindBin::Bin/../lib";
 
  or 
 
  use FindBin qw($Bin);
- BEGIN { unshift(@INC,"$Bin/../lib") }
+ use lib "$Bin/../lib";
 
 =head1 DESCRIPTION
 
