@@ -12,9 +12,11 @@ use warnings;
 use Carp;
 use File::Spec;
 
+no warnings 'utf8';
+
 require Exporter;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 our $PACKAGE = __PACKAGE__;
 
 our @ISA = qw(Exporter);
@@ -206,7 +208,7 @@ sub checkCollator {
 	or croak "Illegal UCA version (passed $self->{UCA_Version}).";
 
     $self->{variable} ||= $self->{alternate} || $self->{variableTable} ||
-		$self->{alternateTable} || $self->{alternate} || 'shifted';
+				$self->{alternateTable} || 'shifted';
     $self->{variable} = $self->{alternate} = lc($self->{variable});
     exists $VariableOK{ $self->{variable} }
 	or croak "$PACKAGE unknown variable tag name: $self->{variable}";
@@ -499,7 +501,7 @@ sub splitEnt
     }
 
     for (my $i = 0; $i < @src; $i++) {
-	next if _isNonCharacter($src[$i]);
+	next if _isIllegal($src[$i]);
 
 	my $i_orig = $i;
 	my $jcps = $src[$i];
@@ -801,7 +803,7 @@ sub _decompHangul {
     );
 }
 
-sub _isNonCharacter {
+sub _isIllegal {
     my $code = shift;
     return ! defined $code                      # removed
 	|| ($code < 0 || 0x10FFFF < $code)      # out of range
@@ -1344,11 +1346,10 @@ but it is not warned at present.>
 
 You can use another collation element table if desired.
 The table file must be put into a directory
-where F<Unicode/Collate.pm> is installed.
-E.g. in F<perl/lib/Unicode/Collate> directory
-when you have F<perl/lib/Unicode/Collate.pm>.
+where F<Unicode/Collate.pm> is installed; e.g. into
+F<perl/lib/Unicode/Collate/> if you have F<perl/lib/Unicode/Collate.pm>.
 
-By default, the filename F<"allkeys.txt"> is used.
+By default, the filename F<allkeys.txt> is used.
 
 If C<undef> is passed explicitly as the value for this key,
 no file is read (but you can define collation elements via C<entry>).
@@ -1680,9 +1681,8 @@ assign C<normalization =E<gt> undef> explicitly.
 
 =head2 Conformance Test
 
-The Conformance Test for the UCA is provided
-in L<http://www.unicode.org/reports/tr10/CollationTest.html>
-and L<http://www.unicode.org/reports/tr10/CollationTest.zip>
+The Conformance Test for the UCA is available
+under L<http://www.unicode.org/Public/UCA/>.
 
 For F<CollationTest_SHIFTED.txt>,
 a collator via C<Unicode::Collate-E<gt>new( )> should be used;
@@ -1693,7 +1693,7 @@ B<Unicode::Normalize is required to try The Conformance Test.>
 
 =head1 AUTHOR
 
-SADAHIRO Tomoyuki, <SADAHIRO@cpan.org>
+SADAHIRO Tomoyuki <SADAHIRO@cpan.org>
 
   http://homepage1.nifty.com/nomenclator/perl/
 
@@ -1712,17 +1712,17 @@ L<http://www.unicode.org/reports/tr10/>
 
 =item The Default Unicode Collation Element Table (DUCET)
 
-L<http://www.unicode.org/reports/tr10/allkeys.txt>
+L<http://www.unicode.org/Public/UCA/latest/allkeys.txt>
 
 =item The conformance test for the UCA
 
-L<http://www.unicode.org/reports/tr10/CollationTest.html>
+L<http://www.unicode.org/Public/UCA/latest/CollationTest.html>
 
-L<http://www.unicode.org/reports/tr10/CollationTest.zip>
+L<http://www.unicode.org/Public/UCA/latest/CollationTest.zip>
 
 =item Hangul Syllable Type
 
-http://www.unicode.org/Public/UNIDATA/HangulSyllableType.txt
+L<http://www.unicode.org/Public/UNIDATA/HangulSyllableType.txt>
 
 =item Unicode Normalization Forms - UAX #15
 

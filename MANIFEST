@@ -763,8 +763,11 @@ ext/Unicode/Normalize/README	Unicode::Normalize
 ext/Unicode/Normalize/t/fcdc.t	Unicode::Normalize
 ext/Unicode/Normalize/t/form.t	Unicode::Normalize
 ext/Unicode/Normalize/t/func.t	Unicode::Normalize
+ext/Unicode/Normalize/t/illegal.t	Unicode::Normalize
 ext/Unicode/Normalize/t/norm.t	Unicode::Normalize
+ext/Unicode/Normalize/t/null.t	Unicode::Normalize
 ext/Unicode/Normalize/t/proto.t	Unicode::Normalize
+ext/Unicode/Normalize/t/short.t	Unicode::Normalize
 ext/Unicode/Normalize/t/split.t	Unicode::Normalize
 ext/Unicode/Normalize/t/test.t	Unicode::Normalize
 ext/util/make_ext		Used by Makefile to execute extension Makefiles
@@ -1746,6 +1749,8 @@ lib/Unicode/Collate/README	Unicode::Collate
 lib/Unicode/Collate/t/contract.t	Unicode::Collate
 lib/Unicode/Collate/t/hangtype.t	Unicode::Collate
 lib/Unicode/Collate/t/hangul.t	Unicode::Collate
+lib/Unicode/Collate/t/illegal.t	Unicode::Collate
+lib/Unicode/Collate/t/illegalp.t	Unicode::Collate
 lib/Unicode/Collate/t/index.t	Unicode::Collate
 lib/Unicode/Collate/t/normal.t	Unicode::Collate
 lib/Unicode/Collate/t/test.t	Unicode::Collate
