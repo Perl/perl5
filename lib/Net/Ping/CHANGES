@@ -1,0 +1,17 @@
+CHANGES
+-------
+
+2.05  Nov 18 20:00 2001
+	- Added test suite
+
+2.04  Nov 16 16:00 2001
+	- Added CHANGES and README to tarball.
+	- No functional changes.
+
+2.03  Nov 15 12:00 2001
+	- Portability adjustments to ping_tcp()
+	  made by Rob Brown to work with most
+	  default systems.
+
+2.02  Sep 27 12:00 1996
+	- Magic version by Russell Mosemann from CPAN
