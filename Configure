@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Mar  7 23:32:54 EET 2003 [metaconfig 3.0 PL70]
+# Generated on Tue Mar 11 23:24:13 EET 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -5938,7 +5938,7 @@ echo " "
 case "$doublesize" in
 '')
 	echo "Checking to see how big your double precision numbers are..." >&4
-	$cat >try.c <<'EOCP'
+	$cat >try.c <<EOCP
 #include <stdio.h>
 #$i_stdlib I_STDLIB
 #ifdef I_STDLIB
@@ -6892,7 +6892,7 @@ case "$ptrsize" in
 	else
 		echo '#define VOID_PTR void *' > try.c
 	fi
-	$cat >>try.c <<'EOCP'
+	$cat >>try.c <<EOCP
 #include <stdio.h>
 #$i_stdlib I_STDLIB
 #ifdef I_STDLIB
@@ -13827,7 +13827,7 @@ echo " "
 case "$charsize" in
 '')
 	echo "Checking to see how big your characters are (hey, you never know)..." >&4
-	$cat >try.c <<'EOCP'
+	$cat >try.c <<EOCP
 #include <stdio.h>
 #$i_stdlib I_STDLIB
 #ifdef I_STDLIB
