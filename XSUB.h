@@ -50,10 +50,7 @@
 		Sv = perl_get_sv(vn, FALSE);   /* XXX GV_ADDWARN */	\
 	    }								\
 	}								\
-	if (!Sv || !SvOK(Sv))						\
-	    croak("%s object can't find $%s::XS_VERSION or $%s::VERSION", \
-		  module, module, module);				\
-	else if (strNE(XS_VERSION, SvPV(Sv, na)))			\
+	if (Sv && (!SvOK(Sv) || strNE(XS_VERSION, SvPV(Sv, na))))	\
 	    croak("%s object version %s does not match $%s %s",		\
 		  module, XS_VERSION, vn, SvPV(Sv, na));		\
     } STMT_END
