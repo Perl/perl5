@@ -4,7 +4,7 @@ BEGIN {
 	die "Encode::CN not supported on EBCDIC\n";
     }
 }
-our $VERSION = do { my @r = (q$Revision: 0.97 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.98 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use Encode::CN::HZ;
@@ -58,7 +58,7 @@ also contains extra Taiwan-based encodings.
 ASCII part (0x00-0x7f) is preserved for all encodings, even though it
 conflicts with mappings by the Unicode Consortium.  See
 
-F<http://www.debian.or.jp/~kubota/unicode-symbols.html.en>
+L<http://www.debian.or.jp/~kubota/unicode-symbols.html.en>
 
 to find why it is implemented that way.
 

@@ -1,6 +1,6 @@
 =head1 NAME
 
-EncodeFormat - the format of encoding tables of the Encode extension
+Encode::EncFormat - the format of encoding tables of the Encode/*.enc files
 
 =head1 DESCRIPTION
 

@@ -169,6 +169,7 @@ lib/Encode/Internal.pm	Encode extension
 lib/Encode/JP/Constants.pm	Encode extension
 lib/Encode/JP/H2Z.pm		Encode extension
 lib/Encode/JP/ISO_2022_JP.pm	Encode extension
+lib/Encode/JP/ISO_2022_JP_1.pm	Encode extension
 lib/Encode/JP/JIS.pm	Encode extension
 lib/Encode/Supported.pod	Documents supported encodings
 lib/Encode/Tcl.pm		Encode extension
@@ -179,7 +180,7 @@ lib/Encode/XS.pm		Encode extension
 lib/Encode/iso10646_1.pm	Encode extension
 lib/Encode/ucs2_le.pm	Encode extension
 lib/Encode/utf8.pm		Encode extension
-lib/EncodeFormat.pod		Encode extension
+lib/Encode/EncFormat.pod		Encode extension
 t/Aliases.t	Encode extension test
 t/CN.t		Encode extension test
 t/Encode.t		Encode extension test

@@ -355,12 +355,14 @@ ext/Encode/KR/Makefile.PL		Encode extension
 ext/Encode/lib/Encode/Alias.pm	Encode extension
 ext/Encode/lib/Encode/CN/HZ.pm		Encode extension
 ext/Encode/lib/Encode/Details.pod	Encode extension
+ext/Encode/lib/Encode/EncFormat.pod	Encode extension
 ext/Encode/lib/Encode/Encoding.pm	Encode extension
 ext/Encode/lib/Encode/Internal.pm	Encode extension
 ext/Encode/lib/Encode/iso10646_1.pm	Encode extension
 ext/Encode/lib/Encode/JP/Constants.pm	Encode extension
 ext/Encode/lib/Encode/JP/H2Z.pm		Encode extension
 ext/Encode/lib/Encode/JP/ISO_2022_JP.pm	Encode extension
+ext/Encode/lib/Encode/JP/ISO_2022_JP_1.pm	Encode extension
 ext/Encode/lib/Encode/JP/JIS.pm	Encode extension
 ext/Encode/lib/Encode/Supported.pod	Encode extension
 ext/Encode/lib/Encode/Tcl.pm		Encode extension
@@ -370,7 +372,6 @@ ext/Encode/lib/Encode/ucs2_le.pm	Encode extension
 ext/Encode/lib/Encode/Unicode.pm	Encode extension
 ext/Encode/lib/Encode/utf8.pm		Encode extension
 ext/Encode/lib/Encode/XS.pm		Encode extension
-ext/Encode/lib/EncodeFormat.pod		Encode extension
 ext/Encode/Makefile.PL		Encode extension makefile writer
 ext/Encode/MANIFEST		Encode extension
 ext/Encode/README		Encode extension

@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 0.97 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.98 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 
 require DynaLoader;
@@ -37,6 +37,7 @@ bootstrap Encode ();
 
 use Carp;
 
+our $ON_EBCDIC = (ord("A") == 193);
 use Encode::Alias;
 
 # Make a %Encoding package variable to allow a certain amount of cheating
@@ -51,27 +52,6 @@ our %ExtModule =
      'posix-bc'         => 'Encode/EBCDIC.pm',
      symbol             => 'Encode/Symbol.pm',
      dingbats           => 'Encode/Symbol.pm',
-     'euc-cn'           => 'Encode/CN.pm',
-     gb2312		=> 'Encode/CN.pm',
-     gb12345		=> 'Encode/CN.pm',
-     gbk		=> 'Encode/CN.pm',
-     cp936		=> 'Encode/CN.pm',
-     'iso-ir-165'	=> 'Encode/CN.pm',
-     'euc-jp'	        => 'Encode/JP.pm',
-     'iso-2022-jp'	=> 'Encode/JP.pm',
-     '7bit-jis'         => 'Encode/JP.pm',
-     shiftjis	        => 'Encode/JP.pm',
-     macjapan	        => 'Encode/JP.pm',
-     cp932		=> 'Encode/JP.pm',
-     'euc-kr'       	=> 'Encode/KR.pm',
-     ksc5601		=> 'Encode/KR.pm',
-     cp949		=> 'Encode/KR.pm',
-     big5		=> 'Encode/TW.pm',
-     'big5-hkscs'	=> 'Encode/TW.pm',
-     cp950		=> 'Encode/TW.pm',
-     gb18030		=> 'Encode/HanExtra.pm',
-     big5plus     	=> 'Encode/HanExtra.pm',
-     'euc-tw'   	=> 'Encode/HanExtra.pm',
     );
 
 for my $k (2..11,13..16){
@@ -80,6 +60,34 @@ for my $k (2..11,13..16){
 
 for my $k (1250..1258){
     $ExtModule{"cp$k"} = 'Encode/Byte.pm';
+}
+
+unless ($ON_EBCDIC) { # CJK added to autoload unless EBCDIC env
+%ExtModule =(
+	     %ExtModule,
+	     'euc-cn'           => 'Encode/CN.pm',
+	     gb2312		=> 'Encode/CN.pm',
+	     gb12345		=> 'Encode/CN.pm',
+	     gbk		=> 'Encode/CN.pm',
+	     cp936		=> 'Encode/CN.pm',
+	     'iso-ir-165'	=> 'Encode/CN.pm',
+	     'euc-jp'	        => 'Encode/JP.pm',
+	     'iso-2022-jp'	=> 'Encode/JP.pm',
+	     'iso-2022-jp-1'	=> 'Encode/JP.pm',
+	     '7bit-jis'         => 'Encode/JP.pm',
+	     shiftjis	        => 'Encode/JP.pm',
+	     macjapan	        => 'Encode/JP.pm',
+	     cp932		=> 'Encode/JP.pm',
+	     'euc-kr'       	=> 'Encode/KR.pm',
+	     ksc5601		=> 'Encode/KR.pm',
+	     cp949		=> 'Encode/KR.pm',
+	     big5		=> 'Encode/TW.pm',
+	     'big5-hkscs'	=> 'Encode/TW.pm',
+	     cp950		=> 'Encode/TW.pm',
+	     gb18030		=> 'Encode/HanExtra.pm',
+	     big5plus     	=> 'Encode/HanExtra.pm',
+	     'euc-tw'   	=> 'Encode/HanExtra.pm',
+	     );
 }
 
 for my $k (qw(centeuro croatian cyrillic dingbats greek
@@ -234,7 +242,7 @@ The C<Encode> module provides the interfaces between Perl's strings
 and the rest of the system.  Perl strings are sequences of B<characters>.
 
 To find more about character encodings, please consult
-L<Encode::Details> . This document focuses on programming references.
+L<Encode::Details>. This document focuses on programming references.
 
 =head1 PERL ENCODING API
 
@@ -242,9 +250,7 @@ L<Encode::Details> . This document focuses on programming references.
 
 =over 4
 
-=item *
-
-        $bytes  = encode(ENCODING, $string[, CHECK])
+=item $bytes  = encode(ENCODING, $string[, CHECK])
 
 Encodes string from Perl's internal form into I<ENCODING> and returns
 a sequence of octets.  For CHECK see L</"Handling Malformed Data">.
@@ -254,9 +260,7 @@ to octets:
 
 	$octets = encode("utf8", $unicode);
 
-=item *
-
-        $string = decode(ENCODING, $bytes[, CHECK])
+=item $string = decode(ENCODING, $bytes[, CHECK])
 
 Decode sequence of octets assumed to be in I<ENCODING> into Perl's
 internal form and returns the resulting string.  For CHECK see
@@ -266,9 +270,7 @@ For example to convert ISO-8859-1 data to UTF-8:
 
 	$utf8 = decode("latin1", $latin1);
 
-=item *
-
-	from_to($string, FROM_ENCODING, TO_ENCODING[, CHECK])
+=item from_to($string, FROM_ENCODING, TO_ENCODING[, CHECK])
 
 Convert B<in-place> the data between two encodings.  How did the data
 in $string originally get to be in FROM_ENCODING?  Either using
@@ -342,32 +344,28 @@ Hybrids of above.
 
 Multiple return values rather than in-place modifications.
 
-Index into the string could be pos($str) allowing s/\G...//.
+Index into the string could be C<pos($str)> allowing C<s/\G...//>.
 
 =back
 
 =head2 UTF-8 / utf8
 
 The Unicode consortium defines the UTF-8 standard as a way of encoding
-the entire Unicode repertiore as sequences of octets.  This encoding is
-expected to become very widespread. Perl can use this form internaly
+the entire Unicode repertoire as sequences of octets.  This encoding is
+expected to become very widespread. Perl can use this form internally
 to represent strings, so conversions to and from this form are
 particularly efficient (as octets in memory do not have to change,
 just the meta-data that tells Perl how to treat them).
 
 =over 4
 
-=item *
-
-        $bytes = encode_utf8($string);
+=item $bytes = encode_utf8($string);
 
 The characters that comprise string are encoded in Perl's superset of UTF-8
 and the resulting octets returned as a sequence of bytes. All possible
 characters have a UTF-8 representation so this function cannot fail.
 
-=item *
-
-        $string = decode_utf8($bytes [,CHECK]);
+=item $string = decode_utf8($bytes [, CHECK]);
 
 The sequence of octets represented by $bytes is decoded from UTF-8
 into a sequence of logical characters. Not all sequences of octets
@@ -391,16 +389,17 @@ Or you can give the name of specific module.
 
   @with_jp = Encode->encodings("Encode/JP.pm");
 
-Note in this case you have to say "Encode/JP.pm instead of Encode::JP.
+Note in this case you have to say C<"Encode/JP.pm"> instead of
+C<"Encode::JP">.
 
-To find which encodings are suppoted by this package in details, 
+To find which encodings are supported by this package in details, 
 see L<Encode::Supported>.
 
 =head2 Defining Aliases
 
   use Encode;
   use Encode::Alias;
-  define_alias( newName => ENCODING);
+  define_alias(newName => ENCODING);
 
 Allows newName to be used as am alias for ENCODING. ENCODING may be
 either the name of an encoding or and encoding object (as above).
@@ -410,7 +409,7 @@ See L<Encode::Alias> on details.
 =head1 Defining Encodings
 
     use Encode qw(define_alias);
-    define_encoding( $object, 'canonicalName' [,alias...]);
+    define_encoding($object, 'canonicalName' [, alias...]);
 
 Causes I<canonicalName> to be associated with I<$object>.  The object
 should provide the interface described in L<Encode::Encoding>
@@ -490,15 +489,13 @@ implementation.  As such they are efficient, but may change.
 
 =over 4
 
-=item * is_utf8(STRING [, CHECK])
+=item is_utf8(STRING [, CHECK])
 
 [INTERNAL] Test whether the UTF-8 flag is turned on in the STRING.
 If CHECK is true, also checks the data in STRING for being well-formed
 UTF-8.  Returns true if successful, false otherwise.
 
-=item *
-
-        _utf8_on(STRING)
+=item _utf8_on(STRING)
 
 [INTERNAL] Turn on the UTF-8 flag in STRING.  The data in STRING is
 B<not> checked for being well-formed UTF-8.  Do not use unless you
@@ -506,9 +503,7 @@ B<know> that the STRING is well-formed UTF-8.  Returns the previous
 state of the UTF-8 flag (so please don't test the return value as
 I<not> success or failure), or C<undef> if STRING is not a string.
 
-=item *
-
-        _utf8_off(STRING)
+=item _utf8_off(STRING)
 
 [INTERNAL] Turn off the UTF-8 flag in STRING.  Do not use frivolously.
 Returns the previous state of the UTF-8 flag (so please don't test the

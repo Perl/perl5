@@ -3,66 +3,72 @@
 use strict;
 use Encode;
 use Encode::Alias;
+my %a2c;
+my $ON_EBCDIC;
 
 BEGIN {
-    if (ord("A") == 193) {
-	print "1..0 # Skip: EBCDIC\n";
-	exit 0;
+    $ON_EBCDIC = ord("A") == 193;
+    @ARGV and $ON_EBCDIC = $ARGV[0] eq 'EBCDIC';
+    $Encode::ON_EBCDIC = $ON_EBCDIC;
+
+    %a2c = (
+	    'ascii'    => 'US-ascii',
+	    'cyrillic' => 'iso-8859-5',
+	    'arabic'   => 'iso-8859-6',
+	    'greek'    => 'iso-8859-7',
+	    'hebrew'   => 'iso-8859-8',
+	    'thai'     => 'iso-8859-11',
+	    'tis620'   => 'iso-8859-11',
+	    'WinLatin1'     => 'cp1252',
+	    'WinLatin2'     => 'cp1250',
+	    'WinCyrillic'   => 'cp1251',
+	    'WinGreek'      => 'cp1253',
+	    'WinTurkish'    => 'cp1254',
+	    'WinHebrew'     => 'cp1255',
+	    'WinArabic'     => 'cp1256',
+	    'WinBaltic'     => 'cp1257',
+	    'WinVietnamese' => 'cp1258',
+	    'ja_JP.euc'	    => $ON_EBCDIC ? '' : 'euc-jp',
+	    'x-euc-jp'	    => $ON_EBCDIC ? '' : 'euc-jp',
+	    'zh_CN.euc'	    => $ON_EBCDIC ? '' : 'euc-cn',
+	    'x-euc-cn'	    => $ON_EBCDIC ? '' : 'euc-cn',
+	    'ko_KR.euc'	    => $ON_EBCDIC ? '' : 'euc-kr',
+	    'x-euc-kr'	    => $ON_EBCDIC ? '' : 'euc-kr',
+	    'ujis'	    => $ON_EBCDIC ? '' : 'euc-jp',
+	    'Shift_JIS'	    => $ON_EBCDIC ? '' : 'shiftjis',
+	    'x-sjis'	    => $ON_EBCDIC ? '' : 'shiftjis',
+	    'jis'	    => $ON_EBCDIC ? '' : '7bit-jis',
+	    'big-5'	    => $ON_EBCDIC ? '' : 'big5',
+	    'zh_TW.Big5'    => $ON_EBCDIC ? '' : 'big5',
+	    'big5-hk'	    => $ON_EBCDIC ? '' : 'big5-hkscs',
+	    );
+
+    for my $i (1..11,13..16){
+	$a2c{"ISO 8859 $i"} = "iso-8859-$i";
+    }
+    for my $i (1..10){
+	$a2c{"ISO Latin $i"} = "iso-8859-$Encode::Alias::Latin2iso[$i]";
+    }
+    for my $k (keys %Encode::Alias::Winlatin2cp){
+	my $v = $Encode::Alias::Winlatin2cp{$k};
+	$a2c{"Win" . ucfirst($k)} = "cp" . $v;
+	$a2c{"IBM-$v"} = $a2c{"MS-$v"} = "cp" . $v;
     }
 }
 
-my %a2c;
-
-BEGIN {
-	%a2c = (
-		'ascii'    => 'US-ascii',
-		'cyrillic' => 'iso-8859-5',
-		'arabic'   => 'iso-8859-6',
-		'greek'    => 'iso-8859-7',
-		'hebrew'   => 'iso-8859-8',
-		'thai'     => 'iso-8859-11',
-		'tis620'   => 'iso-8859-11',
-		'ja_JP.euc'	=> 'euc-jp',
-		'x-euc-jp'	=> 'euc-jp',
-		'zh_CN.euc'	=> 'euc-cn',
-		'x-euc-cn'	=> 'euc-cn',
-		'ko_KR.euc'	=> 'euc-kr',
-		'x-euc-kr'	=> 'euc-kr',
-		'ujis'		=> 'euc-jp',
-		'Shift_JIS'	=> 'shiftjis',
-		'x-sjis'	=> 'shiftjis',
-		'jis'		=> '7bit-jis',
-		'big-5'		=> 'big5',
-		'zh_TW.Big5'	=> 'big5',
-		'big5-hk'	=> 'big5-hkscs',
-		'WinLatin1'     => 'cp1252',
-		'WinLatin2'     => 'cp1250',
-		'WinCyrillic'   => 'cp1251',
-		'WinGreek'      => 'cp1253',
-		'WinTurkish'    => 'cp1254',
-		'WinHebrew'     => 'cp1255',
-		'WinArabic'     => 'cp1256',
-		'WinBaltic'     => 'cp1257',
-		'WinVietnamese' => 'cp1258',
-		);
-
-	for my $i (1..11,13..16){
-	    $a2c{"ISO 8859 $i"} = "iso-8859-$i";
-	}
-	for my $i (1..10){
-	    $a2c{"ISO Latin $i"} = "iso-8859-$Encode::Alias::Latin2iso[$i]";
-	}
-	for my $k (keys %Encode::Alias::Winlatin2cp){
-	    my $v = $Encode::Alias::Winlatin2cp{$k};
-	    $a2c{"Win" . ucfirst($k)} = "cp" . $v;
-	    $a2c{"IBM-$v"} = "cp" . $v;
-	    $a2c{"MS-$v"} = "cp" . $v;
-	}
+if ($ON_EBCDIC){
+    delete @Encode::ExtModule{
+	qw(euc-cn gb2312 gb12345 gbk cp936 iso-ir-165
+	   euc-jp iso-2022-jp 7bit-jis shiftjis macjapan cp932
+	   euc-kr ksc5601 cp949
+	   big5	big5-hkscs cp950
+	   gb18030 big5plus euc-tw)
+	};
 }
 
 use Test::More tests => (scalar keys %a2c) * 3;
 
-print "# alias test\n";
+print "# alias test;  \$ON_EBCDIC == $ON_EBCDIC\n";
 
 foreach my $a (keys %a2c){	     
     my $e = Encode::find_encoding($a);
@@ -71,10 +77,20 @@ foreach my $a (keys %a2c){
 
 # now we override some of the aliases and see if it works fine
 
-define_alias( qr/shift.*jis$/i  => '"macjapan"' );
-define_alias( qr/sjis$/i        => '"cp932"' );
+define_alias(ascii    => 'WinLatin1',
+	     cyrillic => 'WinCyrillic',
+	     arabic   => 'WinArabic',
+	     greek    => 'WinGreek',
+	     hebrew   => 'WinHebrew');
 
-@a2c{qw(Shift_JIS x-sjis)} = qw(macjapan cp932);
+@a2c{qw(ascii cyrillic arabic greek hebrew)} =
+    qw(cp1252 cp1251 cp1256 cp1253 cp1255);
+
+unless ($ON_EBCDIC){
+    define_alias( qr/shift.*jis$/i  => '"macjapan"',
+		  qr/sjis$/i        => '"cp932"' );
+    @a2c{qw(Shift_JIS x-sjis)} = qw(macjapan cp932);
+}
 
 print "# alias test with alias overrides\n";
 

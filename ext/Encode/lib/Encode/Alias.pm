@@ -1,7 +1,7 @@
 package Encode::Alias;
 use strict;
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 0.96 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.98 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 require Exporter;
 
@@ -31,11 +31,13 @@ sub find_alias
 	    my $new;
 	    if (ref($alias) eq 'Regexp' && $_ =~ $alias)
 	    {
+		$DEBUG and warn "eval $val";
 		$new = eval $val;
 		# $@ and warn "$val, $@";
 	    }
 	    elsif (ref($alias) eq 'CODE')
 	    {
+		$DEBUG and warn "$alias", "->", "($val)";
 		$new = $alias->($val);
 	    }
 	    elsif (lc($_) eq lc($alias))
@@ -45,6 +47,7 @@ sub find_alias
 	    if (defined($new))
 	    {
 		next if $new eq $_; # avoid (direct) recursion on bugs
+		$DEBUG and warn "$alias, $new";
 		my $enc = (ref($new)) ? $new : Encode::find_encoding($new);
 		if ($enc)
 		{
@@ -53,6 +56,15 @@ sub find_alias
 		}
 	    }
 	}
+    }
+    if ($DEBUG){
+	my $name;
+	if (my $e = $Alias{$_}){
+	    $name = $e->name;
+	}else{
+	    $name = "";
+	}
+	warn "find_alias($class, $_)->name = $name";
     }
     return $Alias{$_};
 }
@@ -69,15 +81,17 @@ sub define_alias
 	    for my $k (@a){
 		if (ref($alias) eq 'Regexp' && $k =~ $alias)
 		{
-		    $DEBUG and warn $k;
+		    $DEBUG and warn "delete \$Alias\{$k\}";
 		    delete $Alias{$k};
 		}
 		elsif (ref($alias) eq 'CODE')
 		{
+		    $DEBUG and warn "delete \$Alias\{$k\}";
 		    delete $Alias{$alias->($name)};
 		}
 	    }
 	}else{
+	    $DEBUG and warn "delete \$Alias\{$alias\}";
 	    delete $Alias{$alias};
 	}
     }
@@ -154,29 +168,29 @@ sub init_aliases
     define_alias( qr/^macRomanian$/i => '"macRumanian"');
 
 # Standardize on the dashed versions.
-    define_alias( qr/^utf8$/i  => 'utf-8' );
+    # define_alias( qr/^utf8$/i  => 'utf-8' );
     define_alias( qr/^koi8r$/i => 'koi8-r' );
     define_alias( qr/^koi8u$/i => 'koi8-u' );
 
-# for Encode::CN
-    define_alias( qr/euc.*cn$/i     => '"euc-cn"' );
-    define_alias( qr/cn.*euc/i      => '"euc-cn"' );
-
-# for Encode::JP
-    define_alias( qr/euc.*jp$/i     => '"euc-jp"' );
-    define_alias( qr/jp.*euc/i      => '"euc-jp"' );
-    define_alias( qr/ujis$/i        => '"euc-jp"' );
-    define_alias( qr/shift.*jis$/i  => '"shiftjis"' );
-    define_alias( qr/sjis$/i        => '"shiftjis"' );
-    define_alias( qr/^jis$/i        => '"7bit-jis"' );
-
-# for Encode::KR
-    define_alias( qr/euc.*kr$/i     => '"euc-kr"' );
-    define_alias( qr/kr.*euc/i      => '"euc-kr"' );
-
-# for Encode::TW
-    define_alias( qr/big-?5$/i		=> '"big5"' );
-    define_alias( qr/big5-hk(?:scs)?/i	=> '"big5-hkscs"' );
+    unless ($Encode::ON_EBCDIC){
+        # for Encode::CN
+	define_alias( qr/euc.*cn$/i     => '"euc-cn"' );
+	define_alias( qr/cn.*euc/i      => '"euc-cn"' );
+	define_alias( qr/^GB[- ]?(\d+)$/i => '"gb$1"' );
+        # for Encode::JP
+	define_alias( qr/euc.*jp$/i     => '"euc-jp"' );
+	define_alias( qr/jp.*euc/i      => '"euc-jp"' );
+	define_alias( qr/ujis$/i        => '"euc-jp"' );
+	define_alias( qr/shift.*jis$/i  => '"shiftjis"' );
+	define_alias( qr/sjis$/i        => '"shiftjis"' );
+	define_alias( qr/^jis$/i        => '"7bit-jis"' );
+        # for Encode::KR
+	define_alias( qr/euc.*kr$/i     => '"euc-kr"' );
+	define_alias( qr/kr.*euc/i      => '"euc-kr"' );
+        # for Encode::TW
+	define_alias( qr/big-?5$/i		=> '"big5"' );
+	define_alias( qr/big5-hk(?:scs)?/i	=> '"big5-hkscs"' );
+    }
 
 # At last, Map white space and _ to '-'
     define_alias( qr/^(\S+)[\s_]+(.*)$/i => '"$1-$2"' );
