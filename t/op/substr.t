@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..189\n";
+print "1..190\n";
 
 #P = start of string  Q = start of substr  R = end of substr  S = end of string
 
@@ -650,4 +650,11 @@ ok 174, $x eq "\x{100}\x{200}\xFFb";
     my $a = substr($text, $pos, $pos);
     ok 189, substr($text,$pos,1) eq $pos;
 
+}
+
+# [perl #23765]
+{
+    my $a = pack("C", 0xbf);
+    substr($a, -1) &= chr(0xfeff);
+    ok 190, $a eq "\xbf";
 }
