@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
-$VERSION = '1.70_01';
+$VERSION = '1.71';
 use Exporter;
 @ISA =       qw( Exporter );
 @EXPORT_OK = qw( objectify bgcd blcm); 
@@ -1140,6 +1140,13 @@ sub bsub
     return $x;
     }
 
+  if (overload::StrVal($x) eq overload::StrVal($y))
+    {
+    # if we get the same variable twice, the result must be zero (the code
+    # below fails in that case)
+    return $x->bzero(@r) if $x->{sign} =~ /^[+-]$/;
+    return $x->bnan();          # NaN, -inf, +inf
+    }
   $y->{sign} =~ tr/+\-/-+/; 	# does nothing for NaN
   $x->badd($y,@r); 		# badd does not leave internal zeros
   $y->{sign} =~ tr/+\-/-+/; 	# refix $y (does nothing for NaN)

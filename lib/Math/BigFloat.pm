@@ -12,14 +12,14 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.44';
+$VERSION = '1.45';
 require 5.005;
 
 require Exporter;
 @ISA =       qw(Exporter Math::BigInt);
 
 use strict;
-# $_trap_inf and $_trap_nan are internal and should never be accessed from the outside
+# $_trap_inf/$_trap_nan are internal and should never be accessed from outside
 use vars qw/$AUTOLOAD $accuracy $precision $div_scale $round_mode $rnd_mode
 	    $upgrade $downgrade $_trap_nan $_trap_inf/;
 my $class = "Math::BigFloat";
@@ -626,30 +626,7 @@ sub badd
   $x->bnorm()->round($a,$p,$r,$y);
   }
 
-sub bsub 
-  {
-  # (BigFloat or num_str, BigFloat or num_str) return BigFloat
-  # subtract second arg from first, modify first
-
-  # set up parameters
-  my ($self,$x,$y,$a,$p,$r) = (ref($_[0]),@_);
-  # objectify is costly, so avoid it
-  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
-    {
-    ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
-    }
-
-  if ($y->is_zero())		# still round for not adding zero
-    {
-    return $x->round($a,$p,$r);
-    }
- 
-  # $x - $y = -$x + $y 
-  $y->{sign} =~ tr/+-/-+/;	# does nothing for NaN
-  $x->badd($y,$a,$p,$r);	# badd does not leave internal zeros
-  $y->{sign} =~ tr/+-/-+/;	# refix $y (does nothing for NaN)
-  $x;				# already rounded by badd()
-  }
+# sub bsub is inherited from Math::BigInt!
 
 sub binc
   {
@@ -1293,39 +1270,52 @@ sub bdiv
     # enough...
     $scale = abs($params[0] || $params[1]) + 4;	# take whatever is defined
     }
+
+  my $rem; $rem = $self->bzero() if wantarray;
+
+  $y = $self->new($y) unless $y->isa('Math::BigFloat');
+
   my $lx = $MBI->_len($x->{_m}); my $ly = $MBI->_len($y->{_m});
   $scale = $lx if $lx > $scale;
   $scale = $ly if $ly > $scale;
   my $diff = $ly - $lx;
   $scale += $diff if $diff > 0;		# if lx << ly, but not if ly << lx!
-    
-  # make copy of $x in case of list context for later reminder calculation
-  my $rem;
-  if (wantarray && !$y->is_one())
+  
+  # cases like $x /= $x (but not $x /= $y!) were wrong due to modifying $x
+  # twice below)
+  if (overload::StrVal($x) eq overload::StrVal($y)) 
     {
-    $rem = $x->copy();
+    $x->bone();				# x/x => 1, rem 0
     }
-
-  $x->{sign} = $x->{sign} ne $y->sign() ? '-' : '+'; 
-
-  # check for / +-1 ( +/- 1E0)
-  if (!$y->is_one())
+  else
     {
-    # promote BigInts and it's subclasses (except when already a BigFloat)
-    $y = $self->new($y) unless $y->isa('Math::BigFloat'); 
+ 
+    # make copy of $x in case of list context for later reminder calculation
+    if (wantarray && !$y->is_one())
+      {
+      $rem = $x->copy();
+      }
 
-    # calculate the result to $scale digits and then round it
-    # a * 10 ** b / c * 10 ** d => a/c * 10 ** (b-d)
-    $MBI->_lsft($x->{_m},$MBI->_new($scale),10);
-    $MBI->_div ($x->{_m},$y->{_m} );	# a/c
+    $x->{sign} = $x->{sign} ne $y->sign() ? '-' : '+'; 
 
-    ($x->{_e},$x->{_es}) = 
-     _e_sub($x->{_e}, $y->{_e}, $x->{_es}, $y->{_es});
-    # correct for 10**scale
-    ($x->{_e},$x->{_es}) = 
-      _e_sub($x->{_e}, $MBI->_new($scale), $x->{_es}, '+');
-    $x->bnorm();		# remove trailing 0's
-    }
+    # check for / +-1 ( +/- 1E0)
+    if (!$y->is_one())
+      {
+      # promote BigInts and it's subclasses (except when already a BigFloat)
+      $y = $self->new($y) unless $y->isa('Math::BigFloat'); 
+
+      # calculate the result to $scale digits and then round it
+      # a * 10 ** b / c * 10 ** d => a/c * 10 ** (b-d)
+      $MBI->_lsft($x->{_m},$MBI->_new($scale),10);
+      $MBI->_div ($x->{_m},$y->{_m});	# a/c
+
+      # correct exponent of $x
+      ($x->{_e},$x->{_es}) = _e_sub($x->{_e}, $y->{_e}, $x->{_es}, $y->{_es});
+      # correct for 10**scale
+      ($x->{_e},$x->{_es}) = _e_sub($x->{_e}, $MBI->_new($scale), $x->{_es}, '+');
+      $x->bnorm();		# remove trailing 0's
+      }
+    } # ende else $x != $y
 
   # shortcut to not run through _find_round_parameters again
   if (defined $params[0])
@@ -1343,16 +1333,12 @@ sub bdiv
     # clear a/p after round, since user did not request it
     delete $x->{_a}; delete $x->{_p};
     }
-  
+
   if (wantarray)
     {
     if (!$y->is_one())
       {
       $rem->bmod($y,@params);			# copy already done
-      }
-    else
-      {
-      $rem = $self->bzero();
       }
     if ($fallback)
       {
