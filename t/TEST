@@ -31,6 +31,7 @@ while (<CONFIG>) {
 	last;
     }
 }
+$sharpbang = 0 if $ENV{OS2_SHELL};		# OS/2
 $bad = 0;
 $good = 0;
 $total = @ARGV;
