@@ -1065,22 +1065,25 @@ PP(pp_flop)
 
     if (GIMME == G_ARRAY) {
 	dPOPPOPssrl;
-	register I32 i;
+	register I32 i, j;
 	register SV *sv;
 	I32 max;
 
 	if (SvNIOKp(left) || !SvPOKp(left) ||
 	  (looks_like_number(left) && *SvPVX(left) != '0') )
 	{
-	    if (SvNV(left) < IV_MIN || SvNV(right) >= IV_MAX)
+	    if (SvNV(left) < IV_MIN || SvNV(right) > IV_MAX)
 		croak("Range iterator outside integer range");
 	    i = SvIV(left);
 	    max = SvIV(right);
 	    if (max >= i) {
-		EXTEND_MORTAL(max - i + 1);
-		EXTEND(SP, max - i + 1);
+		j = max - i + 1;
+		EXTEND_MORTAL(j);
+		EXTEND(SP, j);
 	    }
-	    while (i <= max) {
+	    else
+		j = 0;
+	    while (j--) {
 		sv = sv_2mortal(newSViv(i++));
 		PUSHs(sv);
 	    }
