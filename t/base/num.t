@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..49\n";
+print "1..50\n";
 
 # First test whether the number stringification works okay.
 # (Testing with == would exercize the IV/NV part, not the PV.)
@@ -179,3 +179,9 @@ print $a == 80000.0 ? "ok 48\n" : "not ok 48\n";
 
 $a = 1.0000000000000000000000000000000000000000000000000000000000000000000e1;
 print $a == 10.0 ? "ok 49\n" : "not ok 49\n";
+
+# From Math/Trig - number has to be long enough to exceed at least DBL_DIG
+
+$a = 57.295779513082320876798154814169;
+print ok($a*10,572.95779513082320876798154814169,1e-10) ? "ok 50\n" :
+  "not ok 50 # $a\n";

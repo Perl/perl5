@@ -1186,6 +1186,27 @@ typedef UVTYPE UV;
 # endif
 #endif
 
+/*
+ * This is for making sure we have a good DBL_MAX value, if possible,
+ * either for usage as NV_MAX or for usage in figuring out if we can
+ * fit a given long double into a double, if bug-fixing makes it
+ * necessary to do so. - Allen <allens@cpan.org>
+ */
+
+#if defined(I_VALUES)
+# if !defined(USE_LONG_DOUBLE) || defined(HAS_LDBL_SPRINTF_BUG)
+#  if (!defined(DBL_MIN) || !defined(DBL_MAX))
+#   include <values.h>
+#   if defined(MAXDOUBLE) && !defined(DBL_MAX)
+#    define DBL_MAX MAXDOUBLE
+#   endif
+#   if defined(MINDOUBLE) && !defined(DBL_MIN)
+#    define DBL_MIN MINDOUBLE
+#   endif
+#  endif
+# endif
+#endif
+
 typedef NVTYPE NV;
 
 #ifdef I_IEEEFP
@@ -1217,7 +1238,7 @@ typedef NVTYPE NV;
 #   endif
 #   ifdef LDBL_MAX
 #       define NV_MAX LDBL_MAX
-#       define NV_MIN LDBL_MIN
+/* Having LDBL_MAX doesn't necessarily mean that we have LDBL_MIN... -Allen */
 #   else
 #       ifdef HUGE_VALL
 #           define NV_MAX HUGE_VALL

@@ -236,6 +236,8 @@ __END__
 >%#e<       >-1234.875<   >-1.234875e+03<
 >%.0e<      >1234.875<    >1e+03<
 >%#.0e<     >1234.875<    >1.e+03<
+>%.0e<      >1.875<       >2e+00<
+>%.0e<      >0.875<       >9e-01<
 >%.*e<      >[0, 1234.875]< >1e+03<
 >%.1e<      >1234.875<    >1.2e+03<
 >%-12.4e<   >1234.875<    >1.2349e+03  <
@@ -265,8 +267,10 @@ __END__
 >%.0f<      >0<           >0<
 >%.0f<      >2**38<       >274877906944<   >Should have exact int'l rep'n<
 >%.0f<      >0.1<         >0<
->%.0f<      >0.6<         >1<              >Known to fail with sfio and (irix|nonstop-ux|powerux)<
->%.0f<      >-0.6<        >-1<             >Known to fail with sfio and (irix|nonstop-ux|powerux)<
+>%.0f<      >0.6<         >1<              >Known to fail with sfio, (irix|nonstop-ux|powerux); -DHAS_LDBL_SPRINTF_BUG may fix<
+>%.0f<      >-0.6<        >-1<             >Known to fail with sfio, (irix|nonstop-ux|powerux); -DHAS_LDBL_SPRINTF_BUG may fix<
+>%.0f<      >1.6<         >2<
+>%.0f<      >-1.6<        >-2<
 >%.0f<      >1<           >1<
 >%#.0f<     >1<           >1.<
 >%g<        >12345.6789<  >12345.7<

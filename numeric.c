@@ -727,6 +727,8 @@ S_mulexp10(NV value, I32 exponent)
 
     if (exponent == 0)
 	return value;
+    if (value == 0)
+	return 0;
 
     /* On OpenVMS VAX we by default use the D_FLOAT double format,
      * and that format does not have *easy* capabilities [1] for
@@ -811,18 +813,20 @@ Perl_my_atof(pTHX_ const char* s)
 char*
 Perl_my_atof2(pTHX_ const char* orig, NV* value)
 {
-    NV result = 0.0;
+    NV result[3] = {0.0, 0.0, 0.0};
     char* s = (char*)orig;
 #ifdef USE_PERL_ATOF
-    UV accumulator = 0;
+    UV accumulator[2] = {0,0};	/* before/after dp */
     bool negative = 0;
     char* send = s + strlen(orig) - 1;
     bool seen_digit = 0;
-    I32 exp_adjust = 0;
-    I32 exp_acc = 0; 	/* the current exponent adjust for the accumulator */
+    I32 exp_adjust[2] = {0,0};
+    I32 exp_acc[2] = {-1, -1};
+    /* the current exponent adjust for the accumulators */
     I32 exponent = 0;
     I32	seen_dp  = 0;
-    I32 digit;
+    I32 digit = 0;
+    I32 old_digit = 0;
     I32 sig_digits = 0; /* noof significant digits seen so far */
 
 /* There is no point in processing more significant digits
@@ -866,8 +870,10 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
     while (1) {
 	if (isDIGIT(*s)) {
 	    seen_digit = 1;
+	    old_digit = digit;
 	    digit = *s++ - '0';
-	    exp_adjust -= seen_dp;
+	    if (seen_dp)
+		exp_adjust[1]++;
 
 	    /* don't start counting until we see the first significant
 	     * digit, eg the 5 in 0.00005... */
@@ -876,36 +882,59 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 
 	    if (++sig_digits > MAX_SIG_DIGITS) {
 		/* limits of precision reached */
-		if (digit >= 5)
-		    ++accumulator;
-		++exp_adjust;
+	        if (digit > 5) {
+		    ++accumulator[seen_dp];
+		} else if (digit == 5) {
+		    if (old_digit % 2) { /* round to even - Allen */
+			++accumulator[seen_dp];
+		    }
+		}
+		if (seen_dp) {
+		    exp_adjust[1]--;
+		} else {
+		    exp_adjust[0]++;
+		}
 		/* skip remaining digits */
 		while (isDIGIT(*s)) {
 		    ++s;
-		    exp_adjust += 1 - seen_dp;
+		    if (! seen_dp) {
+			exp_adjust[0]++;
+		    }
 		}
 		/* warn of loss of precision? */
 	    }
 	    else {
-		if (accumulator > MAX_ACCUMULATE) {
+		if (accumulator[seen_dp] > MAX_ACCUMULATE) {
 		    /* add accumulator to result and start again */
-		    result = S_mulexp10(result, exp_acc) + (NV)accumulator;
-		    accumulator = 0;
-		    exp_acc = 0;
+		    result[seen_dp] = S_mulexp10(result[seen_dp],
+						 exp_acc[seen_dp])
+			+ (NV)accumulator[seen_dp];
+		    accumulator[seen_dp] = 0;
+		    exp_acc[seen_dp] = 0;
 		}
-		accumulator = accumulator * 10 + digit;
-		++exp_acc;
+		accumulator[seen_dp] = accumulator[seen_dp] * 10 + digit;
+		++exp_acc[seen_dp];
 	    }
 	}
 	else if (!seen_dp && GROK_NUMERIC_RADIX((const char **)&s, send)) {
 	    seen_dp = 1;
+	    if (sig_digits > MAX_SIG_DIGITS) {
+		++s;
+		while (isDIGIT(*s)) {
+		    ++s;
+		}
+		break;
+	    }
 	}
 	else {
 	    break;
 	}
     }
 
-    result = S_mulexp10(result, exp_acc) + (NV)accumulator;
+    result[0] = S_mulexp10(result[0], exp_acc[0]) + (NV)accumulator[0];
+    if (seen_dp) {
+	result[1] = S_mulexp10(result[1], exp_acc[1]) + (NV)accumulator[1];
+    }
 
     if (seen_digit && (*s == 'e' || *s == 'E')) {
 	bool expnegative = 0;
@@ -924,15 +953,22 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 	    exponent = -exponent;
     }
 
+
+
     /* now apply the exponent */
-    exponent += exp_adjust;
-    result = S_mulexp10(result, exponent);
+
+    if (seen_dp) {
+	result[2] = S_mulexp10(result[0],exponent+exp_adjust[0])
+		+ S_mulexp10(result[1],exponent-exp_adjust[1]);
+    } else {
+	result[2] = S_mulexp10(result[0],exponent+exp_adjust[0]);
+    }
 
     /* now apply the sign */
     if (negative)
-	result = -result;
+	result[2] = -result[2];
 #endif /* USE_PERL_ATOF */
-    *value = result;
+    *value = result[2];
     return s;
 }
 
