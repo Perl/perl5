@@ -22,6 +22,7 @@
 #endif
 #include <winnt.h>
 #include <io.h>
+#include <signal.h>
 
 /* #include "config.h" */
 
@@ -1083,6 +1084,7 @@ win32_kill(int pid, int sig)
 	    hProcess = w32_pseudo_child_handles[child];
 	    switch (sig) {
 	    case 0:
+		/* "Does process exist?" use of kill */
 		return 0;
 	    case 9:
                 /* kill -9 style un-graceful exit */
@@ -1092,7 +1094,7 @@ win32_kill(int pid, int sig)
 	    	}
 		break;
 	    default:
-		/* We fake signals to pseudo-processes using message queue */
+		/* We fake signals to pseudo-processes using Win32 message queue */
 		if (PostThreadMessage(-pid,WM_USER,sig,0)) {
 		    /* It might be us ... */ 
 		    PERL_ASYNC_CHECK();
@@ -1114,11 +1116,13 @@ win32_kill(int pid, int sig)
             hProcess = w32_child_handles[child];
 	    switch(sig) {
 	    case 0:
+		/* "Does process exist?" use of kill */
 		return 0;
 	    case 2:
 		if (GenerateConsoleCtrlEvent(CTRL_C_EVENT,pid))
 		    return 0;
 		break;
+	    default: /* For now be backwards compatible with perl5.6 */
 	    case 9:
 	        if (TerminateProcess(hProcess, sig)) {
 		    remove_dead_process(child);
@@ -1134,11 +1138,13 @@ alien_process:
 	    if (hProcess) {
 		switch(sig) {
 		case 0:
+		    /* "Does process exist?" use of kill */
 		    return 0;
 		case 2:
 		    if (GenerateConsoleCtrlEvent(CTRL_C_EVENT,pid))
 			return 0;
 		    break;
+		default: /* For now be backwards compatible with perl5.6 */
                 case 9:
 		    if (TerminateProcess(hProcess, sig)) {
 			CloseHandle(hProcess);
@@ -1728,8 +1734,9 @@ win32_async_check(pTHX)
 	    break;
 #endif
 
-	/* plan to use WM_USER to fake kill() with other signals */
+	/* We use WM_USER to fake kill() with other signals */
 	case WM_USER: {
+	    CALL_FPTR(PL_sighandlerp)(msg.wParam);
 	    break;
 	}
 	
@@ -4440,6 +4447,59 @@ Perl_init_os_extras(void)
      */
 }
 
+static PerlInterpreter* win32_process_perl = NULL;
+
+BOOL WINAPI 
+win32_ctrlhandler(DWORD dwCtrlType)
+{
+    dTHX;
+    if (!my_perl) {
+	my_perl = win32_process_perl;
+	if (!my_perl) {
+	    return FALSE;
+	}
+	PERL_SET_THX(my_perl);
+    }
+
+    switch(dwCtrlType) {
+    case CTRL_CLOSE_EVENT:
+     /*  A signal that the system sends to all processes attached to a console when 
+         the user closes the console (either by choosing the Close command from the 
+         console window's System menu, or by choosing the End Task command from the 
+         Task List
+      */
+	CALL_FPTR(PL_sighandlerp)(1); /* SIGHUP */
+	return TRUE;	
+
+    case CTRL_C_EVENT:
+	/*  A CTRL+c signal was received */
+	CALL_FPTR(PL_sighandlerp)(2); /* SIGINT */
+	return TRUE;	
+
+    case CTRL_BREAK_EVENT:
+	/*  A CTRL+BREAK signal was received */
+	CALL_FPTR(PL_sighandlerp)(3); /* SIGQUIT */
+	return TRUE;	
+
+    case CTRL_LOGOFF_EVENT:
+      /*  A signal that the system sends to all console processes when a user is logging 
+          off. This signal does not indicate which user is logging off, so no 
+          assumptions can be made. 
+       */
+	break;	
+    case CTRL_SHUTDOWN_EVENT:
+      /*  A signal that the system sends to all console processes when the system is 
+          shutting down. 
+       */
+	break;	
+    default:
+	break;	
+    }
+    return FALSE;
+}
+ 
+
+
 void
 Perl_win32_init(int *argcp, char ***argvp)
 {
@@ -4465,6 +4525,8 @@ win32_get_child_IO(child_IO_table* ptbl)
 
 #ifdef HAVE_INTERP_INTERN
 
+
+
 void
 Perl_sys_intern_init(pTHX)
 {
@@ -4480,6 +4542,13 @@ Perl_sys_intern_init(pTHX)
     w32_num_pseudo_children	= 0;
 #  endif
     w32_init_socktype		= 0;
+    if (!win32_process_perl) {
+	win32_process_perl = my_perl;
+        /* Force C runtime signal stuff to set its console handler */
+	signal(SIGINT,SIG_DFL);
+        /* Push our handler on top */
+	SetConsoleCtrlHandler(win32_ctrlhandler,TRUE);
+    }
 }
 
 void
@@ -4489,6 +4558,10 @@ Perl_sys_intern_clear(pTHX)
     Safefree(w32_perlshell_vec);
     /* NOTE: w32_fdpid is freed by sv_clean_all() */
     Safefree(w32_children);
+    if (my_perl == win32_process_perl) {
+	SetConsoleCtrlHandler(win32_ctrlhandler,FALSE);
+	win32_process_perl = NULL;
+    }
 #  ifdef USE_ITHREADS
     Safefree(w32_pseudo_children);
 #  endif
