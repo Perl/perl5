@@ -342,10 +342,10 @@ You should try to choose one close to you.
 
                       ftp://ftp.u-aizu.ac.jp/pub/CPAN
                       ftp://ftp.kddlabs.co.jp/CPAN/
-                      http://mirror.nucba.ac.jp/mirror/Perl/
-                      ftp://mirror.nucba.ac.jp/mirror/Perl/
                       ftp://ftp.ayamura.org/pub/CPAN/
                       ftp://ftp.jaist.ac.jp/pub/lang/perl/CPAN/
+                      http://ftp.cpan.jp/
+                      ftp://ftp.cpan.jp/CPAN/
                       ftp://ftp.dti.ad.jp/pub/lang/CPAN/
                       ftp://ftp.ring.gr.jp/pub/lang/perl/CPAN/
 
@@ -358,7 +358,7 @@ You should try to choose one close to you.
 =item Russian Federation
 
                       http://cpan.tomsk.ru
-                      ftp://cpan.tomsk.ru/pub/CPAN
+                      ftp://cpan.tomsk.ru/
 
 =item Saudi Arabia
 
@@ -390,6 +390,7 @@ You should try to choose one close to you.
                       ftp://ftp1.sinica.edu.tw/pub1/perl/CPAN/
                       http://ftp.tku.edu.tw/pub/CPAN/
                       ftp://ftp.tku.edu.tw/pub/CPAN/
+
 =item Thailand
 
                       ftp://ftp.loxinfo.co.th/pub/cpan/
@@ -424,6 +425,10 @@ You should try to choose one close to you.
                       ftp://ftp.cpan.skynet.be/pub/CPAN
                       ftp://ftp.kulnet.kuleuven.ac.be/pub/mirror/CPAN/
 
+=item Bosnia and Herzegovina
+
+                      http://cpan.blic.net/
+
 =item Bulgaria
 
                       http://cpan.online.bg
@@ -440,7 +445,6 @@ You should try to choose one close to you.
 
 =item Czech Republic
 
-                      http://ftp.fi.muni.cz/pub/CPAN/
                       ftp://ftp.fi.muni.cz/pub/CPAN/
                       ftp://sunsite.mff.cuni.cz/MIRRORS/ftp.funet.fi/pub/languages/perl/CPAN/
 
@@ -479,7 +483,6 @@ You should try to choose one close to you.
                       ftp://ftp.crihan.fr/mirrors/ftp.cpan.org/
                       http://ftp.u-strasbg.fr/CPAN
                       ftp://ftp.u-strasbg.fr/CPAN
-                      http://cpan.cict.fr/
                       ftp://cpan.cict.fr/pub/CPAN/
                       ftp://ftp.uvsq.fr/pub/perl/CPAN/
 
@@ -568,6 +571,7 @@ You should try to choose one close to you.
 
 =item Poland
 
+                      ftp.mega.net.pl/CPAN
                       ftp://ftp.man.torun.pl/pub/doc/CPAN/
                       ftp://sunsite.icm.edu.pl/pub/CPAN/
 
@@ -589,6 +593,7 @@ You should try to choose one close to you.
 
                       ftp://ftp.bio-net.ro/pub/CPAN
                       ftp://ftp.kappa.ro/pub/mirrors/ftp.perl.org/pub/CPAN/
+                      ftp://ftp.lug.ro/CPAN
                       ftp://ftp.roedu.net/pub/CPAN/
                       ftp://ftp.dntis.ro/pub/cpan/
                       ftp://ftp.iasi.roedu.net/pub/mirrors/ftp.cpan.org/
@@ -604,6 +609,7 @@ You should try to choose one close to you.
                       http://cpan.rinet.ru/
                       ftp://cpan.rinet.ru/pub/mirror/CPAN/
                       ftp://ftp.aha.ru/pub/CPAN/
+                      ftp://ftp.corbina.ru/pub/CPAN/
                       http://cpan.sai.msu.ru/
                       ftp://ftp.sai.msu.su/pub/lang/perl/CPAN/
 
@@ -619,7 +625,7 @@ You should try to choose one close to you.
 
                       http://cpan.imasd.elmundo.es/
                       ftp://ftp.rediris.es/mirror/CPAN/
-                      ftp.ri.telefonica-data.net
+                      ftp://ftp.ri.telefonica-data.net/
                       ftp://ftp.etse.urv.es/pub/perl/
 
 =item Sweden
@@ -632,6 +638,8 @@ You should try to choose one close to you.
 
 =item Switzerland
 
+                      http://cpan.mirror.solnet.ch/
+                      ftp://ftp.solnet.ch/mirror/CPAN/
                       ftp://ftp.danyk.ch/CPAN/
                       ftp://sunsite.cnlab-switch.ch/mirror/CPAN/
 
@@ -657,6 +665,8 @@ You should try to choose one close to you.
                       ftp://cpan.teleglobe.net/pub/CPAN
                       http://cpan.mirror.anlx.net/
                       ftp://ftp.mirror.anlx.net/CPAN/
+                      http://cpan.etla.org/
+                      ftp://cpan.etla.org/pub/CPAN
                       ftp://ftp.demon.co.uk/pub/CPAN/
                       http://cpan.m.flirble.org/
                       ftp://ftp.flirble.org/pub/languages/perl/CPAN/
@@ -674,7 +684,7 @@ You should try to choose one close to you.
 
 =item Canada
 
-=over 4
+=over 8
 
 =item Alberta
 
@@ -694,20 +704,20 @@ You should try to choose one close to you.
 
                       ftp://ftp.nrc.ca/pub/CPAN/
 
+=back
+
 =item Mexico
 
                       http://cpan.azc.uam.mx
                       ftp://cpan.azc.uam.mx/mirrors/CPAN
-                      http://cpan.unam.mx/
-                      ftp://cpan.unam.mx/pub/CPAN
+                      http://www.cpan.unam.mx/
+                      ftp://ftp.unam.mx/pub/CPAN
                       http://www.msg.com.mx/CPAN/
                       ftp://ftp.msg.com.mx/pub/CPAN/
 
-=back
-
 =item United States
 
-=over 4
+=over 8
 
 =item Alabama
 
@@ -719,17 +729,23 @@ You should try to choose one close to you.
                       http://cpan.develooper.com/
                       http://www.cpan.org/
                       ftp://cpan.valueclick.com/pub/CPAN/
+                      http://www.mednor.net/ftp/pub/mirrors/CPAN/
+                      ftp://ftp.mednor.net/pub/mirrors/CPAN/
                       http://mirrors.gossamer-threads.com/CPAN
                       ftp://cpan.nas.nasa.gov/pub/perl/CPAN/
                       http://mirrors.kernel.org/cpan/
                       ftp://mirrors.kernel.org/pub/CPAN
+                      http://cpan-sj.viaverio.com/
+                      ftp://cpan-sj.viaverio.com/pub/CPAN/
                       http://cpan.digisle.net/
                       ftp://cpan.digisle.net/pub/CPAN
                       http://www.perl.com/CPAN/
+                      http://www.uberlan.net/CPAN
 
 =item Colorado
 
                       ftp://ftp.cs.colorado.edu/pub/perl/CPAN/
+                      http://cpan.four10.com
 
 =item Delaware
 
@@ -746,11 +762,6 @@ You should try to choose one close to you.
                       http://mirror.csit.fsu.edu/pub/CPAN/
                       ftp://mirror.csit.fsu.edu/pub/CPAN/
                       http://cpan.mirrors.nks.net/
-
-=item Illinois
-
-                      http://uiarchive.uiuc.edu/mirrors/ftp/cpan.cse.msu.edu/
-                      ftp://uiarchive.uiuc.edu/mirrors/ftp/cpan.cse.msu.edu/
 
 =item Indiana
 
@@ -806,6 +817,8 @@ You should try to choose one close to you.
 
 =item North Carolina
 
+                      http://www.ibiblio.org/pub/languages/perl/CPAN
+                      ftp://ftp.ibiblio.org/pub/languages/perl/CPAN
                       ftp://ftp.duke.edu/pub/perl/
                       ftp://ftp.ncsu.edu/pub/mirror/CPAN/
 
@@ -844,6 +857,8 @@ You should try to choose one close to you.
 
 =item Virginia
 
+                      http://cpan-du.viaverio.com/
+                      ftp://cpan-du.viaverio.com/pub/CPAN/
                       http://mirrors.rcn.net/pub/lang/CPAN/
                       ftp://mirrors.rcn.net/pub/lang/CPAN/
                       http://perl.secsup.org/
@@ -862,6 +877,8 @@ You should try to choose one close to you.
 
                       http://mirror.sit.wisc.edu/pub/CPAN/
                       ftp://mirror.sit.wisc.edu/pub/CPAN/
+                      http://mirror.aphix.com/CPAN
+                      ftp://mirror.aphix.com/pub/CPAN
 
 =back
 
@@ -877,6 +894,7 @@ You should try to choose one close to you.
                       ftp://ftp.planetmirror.com/pub/CPAN/
                       ftp://mirror.aarnet.edu.au/pub/perl/CPAN/
                       ftp://cpan.topend.com.au/pub/CPAN/
+                      http://cpan.mirrors.ilisys.com.au
 
 =item New Zealand
 
@@ -915,39 +933,45 @@ You should try to choose one close to you.
 
 =head2 RSYNC Mirrors
 
-		      ftp.shellhung.org::CPAN
-		      ftp.cbn.net.id::CPAN
-		      ftp.iglu.org.il::CPAN
-		      ftp.kddlabs.co.jp::cpan
-		      ftp.ayamura.org::pub/CPAN/
-		      mirror.leafbug.org::CPAN
-		      rsync.en.com.sg::CPAN
-		      mirror.averse.net::cpan
-		      rsync.oss.eznetsols.org
-		      ftp.kr.FreeBSD.org::CPAN
-		      cpan.cdpa.nsysu.edu.tw::CPAN
-		      rsync.nic.funet.fi::CPAN
-		      ftp.u-paris10.fr::CPAN
-		      mir1.ovh.net::CPAN
-		      ftp.crihan.fr::CPAN
-		      ftp.gwdg.de::FTP/languages/perl/CPAN/
-		      ftp.leo.org::CPAN
-		      ftp.heanet.ie/mirrors/ftp.perl.org/pub/CPAN
-		      gusp.dyndns.org::cpan
-		      cpan.teleglobe.net::CPAN
-		      rsync://rsync.mirror.anlx.net::CPAN
-		      theoryx5.uwinnipeg.ca::CPAN
-		      ftp.sedl.org::cpan
-		      archive.progeny.com::CPAN
-		      slugsite.louisville.edu::CPAN
-		      cpan.teleglobe.net::CPAN
-		      ftp.lug.udel.edu::cpan
-		      mirrors.kernel.org::mirrors/CPAN
-		      mirrors.phenominet.com::CPAN
-		      mirror.csit.fsu.edu::CPAN
-		      csociety-ftp.ecn.purdue.edu::CPAN
-		      aniani.ifa.hawaii.edu::CPAN
-		      www.linux.org.ar::cpan
+                      www.linux.org.ar::cpan
+                      theoryx5.uwinnipeg.ca::CPAN
+                      ftp.shellhung.org::CPAN
+                      rsync.nic.funet.fi::CPAN
+                      ftp.u-paris10.fr::CPAN
+                      mir1.ovh.net::CPAN
+                      rsync://ftp.crihan.fr::CPAN
+                      ftp.gwdg.de::FTP/languages/perl/CPAN/
+                      ftp.leo.org::CPAN
+                      ftp.cbn.net.id::CPAN
+                      rsync://ftp.heanet.ie/mirrors/ftp.perl.org/pub/CPAN
+                      ftp.iglu.org.il::CPAN
+                      gusp.dyndns.org::cpan
+                      ftp.kddlabs.co.jp::cpan
+                      ftp.ayamura.org::pub/CPAN/
+                      mirror.leafbug.org::CPAN
+                      rsync.en.com.sg::CPAN
+                      mirror.averse.net::cpan
+                      rsync.oss.eznetsols.org
+                      ftp.kr.FreeBSD.org::CPAN
+                      ftp.solnet.ch::CPAN
+                      cpan.cdpa.nsysu.edu.tw::CPAN
+                      cpan.teleglobe.net::CPAN
+                      rsync://rsync.mirror.anlx.net::CPAN
+                      ftp.sedl.org::cpan
+                      ibiblio.org::CPAN
+                      cpan-du.viaverio.com::CPAN
+                      aniani.ifa.hawaii.edu::CPAN
+                      archive.progeny.com::CPAN
+                      rsync://slugsite.louisville.edu::CPAN
+                      mirror.aphix.com::CPAN
+                      cpan.teleglobe.net::CPAN
+                      ftp.lug.udel.edu::cpan
+                      mirrors.kernel.org::mirrors/CPAN
+                      mirrors.phenominet.com::CPAN
+                      cpan.pair.com::CPAN
+                      cpan-sj.viaverio.com::CPAN
+                      mirror.csit.fsu.edu::CPAN
+                      csociety-ftp.ecn.purdue.edu::CPAN
 
 For an up-to-date listing of CPAN sites,
 see http://www.cpan.org/SITES or ftp://www.cpan.org/SITES .
