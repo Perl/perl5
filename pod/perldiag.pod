@@ -2120,7 +2120,7 @@ think so.
 
 =item setruid() not implemented
 
-(F) You tried to assign to C<$<lt>>, and your operating system doesn't support
+(F) You tried to assign to C<$E<lt>>, and your operating system doesn't support
 the setruid() system call (or equivalent), or at least Configure didn't
 think so.
 
