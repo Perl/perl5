@@ -836,7 +836,7 @@ PP(pp_mapwhile)
 	}
 	/* copy the new items down to the destination list */
 	dst = PL_stack_base + (PL_markstack_ptr[-2] += items) - 1;
-	while (items--)
+	while (items-- > 0)
 	    *dst-- = SvTEMP(TOPs) ? POPs : sv_mortalcopy(POPs);
     }
     LEAVE;					/* exit inner scope */
