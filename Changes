@@ -31,6 +31,267 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11919] By: jhi                                   on 2001/09/06  14:20:10
+        Log: Document the bad assumptions currently breaking
+             the Socket.t tests 10, 11, and 13 in UNICOS.
+     Branch: perl
+	   ! ext/Socket/Socket.xs
+____________________________________________________________________________
+[ 11918] By: jhi                                   on 2001/09/06  14:07:45
+        Log: Subject: [PATCH x2p] make OPTIMIZE=...
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Thu, 6 Sep 2001 13:31:37 +0100 (BST)
+             Message-Id: <200109061231.NAA25265@tempest.npl.co.uk>
+     Branch: perl
+	   ! x2p/Makefile.SH x2p/cflags.SH
+____________________________________________________________________________
+[ 11917] By: jhi                                   on 2001/09/06  14:01:45
+        Log: Subject: [PATCH] for perlhack.pod - no p5p archive on deja/google
+             From: Ian Phillipps <Ian_Phillipps@yahoo.co.uk>
+             Date: Thu, 6 Sep 2001 11:09:40 +0100
+             Message-ID: <20010906110939.A914@homer.diplex.co.uk>
+             
+             Subject: Re: [PATCH] for perlhack.pod - no p5p archive on deja/google    
+             From: rgarciasuarez@free.fr (Rafael Garcia-Suarez)
+             Date: 6 Sep 2001 10:14:38 -0000
+             Message-Id: <slrn9pej4m.1j8.rgarciasuarez@rafael.kazibao.net>   
+     Branch: perl
+	   ! pod/perlfaq1.pod pod/perlhack.pod
+____________________________________________________________________________
+[ 11916] By: jhi                                   on 2001/09/06  13:56:19
+        Log: Subject: Extra NUL is Data::Dumper output - patch
+             From: Tony Cook <tony@develop-help.com>
+             Date: Thu, 6 Sep 2001 12:35:49 +1000 (EST)
+             Message-ID: <Pine.LNX.4.10.10109061157210.9366-100000@develop-help.com>
+     Branch: perl
+	   ! ext/Data/Dumper/Dumper.xs ext/Data/Dumper/t/dumper.t
+____________________________________________________________________________
+[ 11915] By: jhi                                   on 2001/09/06  13:51:16
+        Log: Avoid redefinition warning
+             Subroutine Cwd::fastcwd redefined at lib/XSLoader.pm line 97.
+             from
+             perl -w -Ilib -MCwd -e ''
+     Branch: perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[ 11914] By: jhi                                   on 2001/09/06  13:30:32
+        Log: Update the is_tainted() example implementation.
+     Branch: perl
+	   ! pod/perlsec.pod
+____________________________________________________________________________
+[ 11913] By: jhi                                   on 2001/09/06  13:15:59
+        Log: Missing) in #11912.
+     Branch: perl
+	   ! lib/Test/Simple/t/fail.t
+____________________________________________________________________________
+[ 11912] By: jhi                                   on 2001/09/06  13:08:48
+        Log: Rewhack Test-Simple into core harness.
+     Branch: perl
+	   ! lib/Test/Simple/t/exit.t lib/Test/Simple/t/extra.t
+	   ! lib/Test/Simple/t/fail-like.t lib/Test/Simple/t/fail-more.t
+	   ! lib/Test/Simple/t/fail.t lib/Test/Simple/t/missing.t
+	   ! lib/Test/Simple/t/no_plan.t lib/Test/Simple/t/plan_is_noplan.t
+	   ! lib/Test/Simple/t/skipall.t
+____________________________________________________________________________
+[ 11911] By: jhi                                   on 2001/09/06  11:54:06
+        Log: Workaround for the new Exporter 'feature'.
+     Branch: perl
+	   ! lib/Test/More.pm
+____________________________________________________________________________
+[ 11910] By: jhi                                   on 2001/09/06  11:52:56
+        Log: Re-introduce pure-Perl fall-back for abs_path,
+             re-introduce #11898.
+     Branch: perl
+	   ! lib/Cwd.pm lib/File/Find.pm
+____________________________________________________________________________
+[ 11909] By: jhi                                   on 2001/09/06  03:49:13
+        Log: More tests.
+     Branch: perl
+	   ! lib/Exporter.t
+____________________________________________________________________________
+[ 11908] By: jhi                                   on 2001/09/06  03:38:22
+        Log: Retract #11898 for now because it introduces
+             a rather nasty depencency: when B is being built,
+             MakeMaker is used.  MakeMaker uses File::Find.
+             File::Find uses Cwd::getcwd()...which doesn't
+             exist yet.
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[ 11907] By: jhi                                   on 2001/09/06  03:20:02
+        Log: New test welcome.
+     Branch: perl
+	   + lib/Test/Simple/t/simple.t
+____________________________________________________________________________
+[ 11906] By: jhi                                   on 2001/09/06  03:08:01
+        Log: Old test begone.
+     Branch: perl
+	   - lib/Attribute/Handlers/test.pl
+____________________________________________________________________________
+[ 11905] By: jhi                                   on 2001/09/06  01:41:03
+        Log: Test-Simple syncup from Schwern.
+     Branch: perl
+	   + lib/Test/Simple/t/More.t lib/Test/Simple/t/fail-like.t
+	   + lib/Test/Simple/t/fail-more.t lib/Test/Simple/t/skip.t
+	   + lib/Test/Simple/t/skipall.t lib/Test/Simple/t/todo.t
+	   + lib/Test/Simple/t/undef.t lib/Test/Simple/t/useing.t
+	   + lib/Test/Utils.pm t/lib/Test/Simple/Catch/More.pm
+	   - lib/Test/More/Changes lib/Test/More/t/More.t
+	   - lib/Test/More/t/fail-like.t lib/Test/More/t/fail.t
+	   - lib/Test/More/t/plan_is_noplan.t lib/Test/More/t/skipall.t
+	   - lib/Test/Simple/t/simple.t t/lib/Test/More/Catch.pm
+	   ! MANIFEST lib/Test/More.pm lib/Test/Simple.pm
+	   ! lib/Test/Simple/Changes lib/Test/Simple/t/exit.t
+	   ! lib/Test/Simple/t/extra.t lib/Test/Simple/t/fail.t
+	   ! lib/Test/Simple/t/missing.t lib/Test/Simple/t/no_plan.t
+	   ! lib/Test/Simple/t/plan_is_noplan.t t/lib/Test/Simple/Catch.pm
+	   ! t/lib/Test/Simple/sample_tests/death.plx
+	   ! t/lib/Test/Simple/sample_tests/death_in_eval.plx
+	   ! t/lib/Test/Simple/sample_tests/extras.plx
+	   ! t/lib/Test/Simple/sample_tests/five_fail.plx
+	   ! t/lib/Test/Simple/sample_tests/last_minute_death.plx
+	   ! t/lib/Test/Simple/sample_tests/one_fail.plx
+	   ! t/lib/Test/Simple/sample_tests/require.plx
+	   ! t/lib/Test/Simple/sample_tests/success.plx
+	   ! t/lib/Test/Simple/sample_tests/too_few.plx
+	   ! t/lib/Test/Simple/sample_tests/two_fail.plx
+____________________________________________________________________________
+[ 11904] By: pudge                                 on 2001/09/06  00:28:01
+        Log: Integrate File::Find changes from bleadperl
+     Branch: maint-5.6/macperl
+	   ! lib/File/Find.pm t/lib/filefind-taint.t
+____________________________________________________________________________
+[ 11903] By: pudge                                 on 2001/09/06  00:22:29
+        Log: Integrate 11847 from maint-5.6/perl
+     Branch: maint-5.6/macperl
+	  !> sv.c
+____________________________________________________________________________
+[ 11902] By: jhi                                   on 2001/09/05  23:27:57
+        Log: In UNICOS division yada yada.
+     Branch: perl
+	   ! t/op/override.t
+____________________________________________________________________________
+[ 11901] By: jhi                                   on 2001/09/05  23:26:23
+        Log: In UNICOS division is really lossy, better use
+             a tolerance test.
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.t
+____________________________________________________________________________
+[ 11900] By: jhi                                   on 2001/09/05  23:22:38
+        Log: In UNICOS sigaction() sets an extra flag
+             ("the signal has been registered for all the processes in
+             a multitasking group.")
+     Branch: perl
+	   ! ext/POSIX/sigaction.t
+____________________________________________________________________________
+[ 11899] By: jhi                                   on 2001/09/05  23:18:48
+        Log: Documentation micropatch from Damian.
+     Branch: perl
+	   ! lib/Attribute/Handlers.pm
+____________________________________________________________________________
+[ 11898] By: jhi                                   on 2001/09/05  23:16:50
+        Log: (Retracted by #11908)
+             Subject: [PATCH] Re: [PATCH lib/File/Find.pm lib/File/Find/taint.t] Fixing those damned taint tests
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Wed, 5 Sep 2001 15:58:21 -0400
+             Message-ID: <20010905155821.I632@blackrider>
+     Branch: perl
+	   ! lib/File/Find.pm lib/File/Find/taint.t
+____________________________________________________________________________
+[ 11897] By: jhi                                   on 2001/09/05  23:14:43
+        Log: Subject: [PATCH lib/CGI/t/carp.t] Tests for CGI::Carp               
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Wed, 5 Sep 2001 19:16:31 -0400
+             Message-ID: <20010905191631.E11386@blackrider>
+     Branch: perl
+	   + lib/CGI/t/carp.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11896] By: jhi                                   on 2001/09/05  23:14:11
+        Log: Subject: Re: [PATCH] Re: English.pm should do *PREMATCH = \$`       
+             From: chromatic <chromatic@rmci.net>
+             Date: Wed, 5 Sep 2001 18:08:07 -0600
+             Message-Id: <01090518080700.19590@firewheel>
+     Branch: perl
+	   ! lib/English.pm
+____________________________________________________________________________
+[ 11895] By: jhi                                   on 2001/09/05  22:52:01
+        Log: Fix a typo #11889 and add a test for the same.
+     Branch: perl
+	   ! ext/Socket/Socket.t ext/Socket/Socket.xs
+____________________________________________________________________________
+[ 11894] By: jhi                                   on 2001/09/05  22:43:26
+        Log: Subject: [PATCH bleadperl] tweak warnings.t and kill_perl.t for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Wed, 05 Sep 2001 17:48:54 -0500
+             Message-Id: <5.1.0.14.0.20010905145002.02b45218@exchi01>
+     Branch: perl
+	   ! lib/warnings.t t/run/kill_perl.t
+____________________________________________________________________________
+[ 11893] By: jhi                                   on 2001/09/05  22:36:35
+        Log: Subject: [PATCH t/run/kill_perl.t] tying a bareword causes a segfault in 5.6.1
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Wed, 5 Sep 2001 17:22:25 -0400
+             Message-ID: <20010905172225.C11386@blackrider>
+     Branch: perl
+	   ! t/run/kill_perl.t
+____________________________________________________________________________
+[ 11892] By: jhi                                   on 2001/09/05  22:34:55
+        Log: Subject: [PATCH] Re: [ID 20010825.006] -DCRIPPLED_CC is broken
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 5 Sep 2001 20:54:24 +0100
+             Message-ID: <20010905205424.C25120@plum.flirble.org>
+     Branch: perl
+	   ! embed.h embed.pl global.sym pod/perlapi.pod proto.h sv.c sv.h
+____________________________________________________________________________
+[ 11891] By: jhi                                   on 2001/09/05  22:34:16
+        Log: Forgotten thing.
+     Branch: perl
+	   ! uconfig.h
+____________________________________________________________________________
+[ 11890] By: jhi                                   on 2001/09/05  22:27:42
+        Log: Subject: Re: [PATCH] Re: English.pm should do *PREMATCH = \$`
+             From: chromatic <chromatic@rmci.net>               
+             Date: Wed, 5 Sep 2001 13:22:08 -0600
+             Message-Id: <01090513220807.10587@firewheel> 
+     Branch: perl
+	   ! lib/English.pm
+____________________________________________________________________________
+[ 11889] By: jhi                                   on 2001/09/05  22:23:06
+        Log: inet_ntoa() tweaks:
+             - don't allow addresses with > 255 characters
+             - indent the HP-UX workaround
+             - don't leak memory
+     Branch: perl
+	   ! ext/Socket/Socket.xs
+____________________________________________________________________________
+[ 11888] By: jhi                                   on 2001/09/05  16:26:17
+        Log: Clear up a documentation confusion noticed by Xiaoyun Wu
+             <xwu@theeducationcenter.com>
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[ 11887] By: jhi                                   on 2001/09/05  15:40:03
+        Log: Typo nits.
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[ 11886] By: jhi                                   on 2001/09/05  15:30:11
+        Log: -Wall nit.
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 11885] By: gbarr                                 on 2001/09/05  15:26:18
+        Log: Update to Scalar-List-Utils 1.05
+     Branch: perl
+	   ! ext/List/Util/ChangeLog ext/List/Util/README
+	   ! ext/List/Util/Util.xs ext/List/Util/lib/List/Util.pm
+____________________________________________________________________________
+[ 11884] By: jhi                                   on 2001/09/05  13:05:14
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11883] By: gbarr                                 on 2001/09/05  12:51:35
         Log: Update to Scalar-List-Utils 1.04
      Branch: perl
@@ -134,7 +395,7 @@ ____________________________________________________________________________
 	   ! intrpvar.h
 ____________________________________________________________________________
 [ 11869] By: jhi                                   on 2001/09/04  17:43:31
-        Log: Quench a -Wall gripe noticed by Robin Houston.
+        Log: Quench a -Wall gripe noticed by Robin Barker.
      Branch: perl
 	   ! op.c
 ____________________________________________________________________________
