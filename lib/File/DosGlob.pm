@@ -130,10 +130,10 @@ sub glob {
 
 sub import {
     my $pkg = shift;
-    my $callpkg = caller(0);
+    return unless @_;
     my $sym = shift;
-    *{$callpkg.'::'.$sym} = \&{$pkg.'::'.$sym}
-	if defined($sym) and $sym eq 'glob';
+    my $callpkg = ($sym =~ s/^GLOBAL_// ? 'CORE::GLOBAL' : caller(0));
+    *{$callpkg.'::'.$sym} = \&{$pkg.'::'.$sym} if $sym eq 'glob';
 }
 
 1;
@@ -151,6 +151,9 @@ File::DosGlob - DOS like globbing and then some
     # override CORE::glob in current package
     use File::DosGlob 'glob';
     
+    # override CORE::glob in ALL packages (use with extreme caution!)
+    use File::DosGlob 'GLOBAL_glob';
+
     @perlfiles = glob  "..\\pe?l/*.p?";
     print <..\\pe?l/*.p?>;
     
@@ -189,6 +192,10 @@ Gurusamy Sarathy <gsar@umich.edu>
 =head1 HISTORY
 
 =over 4
+
+=item *
+
+Support for globally overriding glob() (GSAR 3-JUN-98)
 
 =item *
 
