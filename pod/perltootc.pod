@@ -74,6 +74,15 @@ you can elect to permit access to them from anywhere in the entire file
 scope, or you can limit direct data access exclusively to the methods
 implementing those attributes.
 
+=head1 Class Data in a Can
+
+One of the easiest ways to solve a hard problem is to let someone else
+do it for you!  In this case, Class::Data::Inheritable (available on a
+CPAN near you) offers a canned solution to the class data problem
+using closures.  So before you wade into this document, consider
+having a look at that module.
+
+
 =head1 Class Data as Package Variables
 
 Because a class in Perl is really just a package, using package variables
@@ -1302,7 +1311,8 @@ would just confuse the examples.
 
 L<perltoot>, L<perlobj>, L<perlmod>, and L<perlbot>.
 
-The Tie::SecureHash module from CPAN is worth checking out.
+The Tie::SecureHash and Class::Data::Inheritable modules from CPAN are
+worth checking out.
 
 =head1 AUTHOR AND COPYRIGHT
 
@@ -1334,4 +1344,4 @@ object-oriented languages enforce.
 
 =head1 HISTORY
 
-Last edit: Fri May 21 15:47:56 MDT 1999
+Last edit: Sun Feb  4 20:50:28 EST 2001
