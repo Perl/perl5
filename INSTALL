@@ -996,7 +996,7 @@ This flag enables debugging mstats, which is required to use the
 Devel::Peek::mstat() function. You cannot enable this unless you are
 using Perl's malloc, so a typical Configure command would be
 
-       sh Configure -DPERL_DEBUGGING_MSTATS -Dusemymalloc='y'
+       sh Configure -Accflags=-DPERL_DEBUGGING_MSTATS -Dusemymalloc='y'
 
 to enable this option.
 

@@ -1,3 +1,20 @@
+Change 818 on 2003/06/13 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP
+	- Fix merge error spotted by Slaven Rezic
+
+Change 817 on 2003/06/13 by <gbarr@pobox.com> (Graham Barr)
+
+	Set INSTALLDIRS to 'perl' for perl >= 5.008
+
+Change 816 on 2003/06/13 by <gbarr@pobox.com> (Graham Barr)
+
+	Add SIGNATURE
+
+Change 806 on 2003/06/02 by <gbarr@pobox.com> (Graham Barr)
+
+	Release 1.14
+
 Change 805 on 2003/06/02 by <gbarr@pobox.com> (Graham Barr)
 
 	Net::Cmd

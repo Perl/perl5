@@ -3325,7 +3325,7 @@ PP(pp_fttext)
 	PL_laststype = OP_STAT;
 	sv_setpv(PL_statname, SvPV(sv, n_a));
 	if (!(fp = PerlIO_open(SvPVX(PL_statname), "r"))) {
-	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV(sv, n_a), '\n'))
+	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV(PL_statname, n_a), '\n'))
 		Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "open");
 	    RETPUSHUNDEF;
 	}

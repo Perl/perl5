@@ -9036,6 +9036,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	     p = SvEND(sv);
 	     *p = '\0';
 	}
+	if (left && ckWARN(WARN_PRINTF) && strchr(eptr, '\n') && 
+	    (PL_op->op_type == OP_PRTF || PL_op->op_type == OP_SPRINTF)) 
+	    Perl_warner(aTHX_ packWARN(WARN_PRINTF),
+		"Newline in left-justified string for %sprintf",
+			(PL_op->op_type == OP_PRTF) ? "" : "s");
 	
 	have = esignlen + zeros + elen;
 	need = (have > width ? have : width);

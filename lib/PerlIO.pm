@@ -115,11 +115,11 @@ to a such a stream.
 =item raw
 
 The C<:raw> layer is I<defined> as being identical to calling
-C<binmode($fh)> - the stream is made suitable for passing binary
-data i.e. each byte is passed as-is. The stream will still be
-buffered. Unlike earlier versions of perl C<:raw> is I<not> just the
-inverse of C<:crlf> - other layers which would affect the binary nature of
-the stream are also removed or disabled.
+C<binmode($fh)> - the stream is made suitable for passing binary data
+i.e. each byte is passed as-is. The stream will still be
+buffered. Unlike in the earlier versions of Perl C<:raw> is I<not>
+just the inverse of C<:crlf> - other layers which would affect the
+binary nature of the stream are also removed or disabled.
 
 The implementation of C<:raw> is as a pseudo-layer which when "pushed"
 pops itself and then any layers which do not declare themselves as suitable

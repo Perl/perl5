@@ -20150,8 +20150,8 @@ case "$noextensions" in
 *)  keepextensions=''
     echo "You have requested that certain extensions be ignored..." >&4
     for i in $avail_ext; do
-        case " $i " in
-        " $noextensions ") echo "Ignoring extension $i." ;;
+        case " $noextensions " in
+        *" $i "*) echo "Ignoring extension $i." ;;
         *) echo "Keeping extension $i.";
            keepextensions="$keepextensions $i"
            ;;
