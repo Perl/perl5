@@ -4000,6 +4000,13 @@ for no value (void context).
 Produces a message on STDERR just like die(), but doesn't exit or throw
 an exception.
 
+If LIST is empty and $@ already contains a value (typically from a
+previous eval) that value is used after appending "\t...caught"
+to $@. This is useful for staying almost, but not entirely similar to
+die().
+
+If $@ is empty then the string "Warning: Something's wrong" is used.
+
 No message is printed if there is a C<$SIG{__WARN__}> handler
 installed.  It is the handler's responsibility to deal with the message
 as it sees fit (like, for instance, converting it into a die()).  Most
