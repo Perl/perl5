@@ -150,7 +150,7 @@ MEM_SIZE size;
 
 /* safe version of free */
 
-void
+Free_t
 safefree(where)
 Malloc_t where;
 {
