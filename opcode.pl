@@ -451,7 +451,7 @@ backtick	quoted execution (``, qx)	ck_open		t%
 # glob defaults its first arg to $_
 glob		glob			ck_glob		t@	S?
 readline	<HANDLE>		ck_null		t%	F?
-rcatline	append I/O operator	ck_null		t%	
+rcatline	append I/O operator	ck_null		t$
 
 # Bindable operators.
 
