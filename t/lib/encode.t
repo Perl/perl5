@@ -104,9 +104,9 @@ for my $i (256,128,129,256)
  {
   my $c = chr($i);
   my $s = "$c\n".sprintf("%02X",$i);
-  ok(Encode::valid_utf8($s),1,"concat of $i botched");
-  Encode::utf8_upgrade($s);
-  ok(Encode::valid_utf8($s),1,"concat of $i botched");
+  ok(utf8::valid($s),1,"concat of $i botched");
+  utf8::upgrade($s);
+  ok(utf8::valid($s),1,"concat of $i botched");
  }
 
 # Spot check a few points in/out of utf8

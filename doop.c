@@ -317,7 +317,7 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)/* SPC - OK */
     if (!isutf8) {
 	U8 *t = s, *e = s + len;
 	while (t < e)
-	    if ((hibit = UTF8_IS_CONTINUED(*t++)))
+	    if ((hibit = !UTF8_IS_INVARIANT(*t++)))
 		break;
 	if (hibit)
 	    s = bytes_to_utf8(s, &len);

@@ -37,7 +37,7 @@ static I32 utf16rev_textfilter(pTHXo_ int idx, SV *sv, int maxlen);
 #define XENUMMASK 127
 
 /*#define UTF (SvUTF8(PL_linestr) && !(PL_hints & HINT_BYTE))*/
-#define UTF (PL_hints & HINT_UTF8)
+#define UTF ((PL_linestr && DO_UTF8(PL_linestr)) || PL_hints & HINT_UTF8)
 
 /* In variables name $^X, these are the legal values for X.
  * 1999-02-27 mjd-perl-patch@plover.com */
@@ -917,8 +917,11 @@ S_tokeq(pTHX_ SV *sv)
     if (s == send)
 	goto finish;
     d = s;
-    if ( PL_hints & HINT_NEW_STRING )
+    if ( PL_hints & HINT_NEW_STRING ) {
 	pv = sv_2mortal(newSVpvn(SvPVX(pv), len));
+	if (SvUTF8(sv))
+	    SvUTF8_on(pv);
+    }
     while (s < send) {
 	if (*s == '\\') {
 	    if (s + 1 < send && (s[1] == '\\'))
@@ -1454,7 +1457,7 @@ S_scan_const(pTHX_ char *start)
 		/* We need to map to chars to ASCII before doing the tests
 		   to cover EBCDIC
 		*/
-		if (NATIVE_TO_UNI(uv) > 127) {
+		if (!UTF8_IS_INVARIANT(uv)) {
 		    if (!has_utf8 && uv > 255) {
 		        /* Might need to recode whatever we have
 			 * accumulated so far if it contains any
@@ -1464,13 +1467,13 @@ S_scan_const(pTHX_ char *start)
 			 *  this rescan? --jhi)
 			 */
 			int hicount = 0;
-			char *c;
-			for (c = SvPVX(sv); c < d; c++) {
-			    if (UTF8_IS_CONTINUED(NATIVE_TO_ASCII(*c))) {
+			U8 *c;
+			for (c = (U8 *) SvPVX(sv); c < (U8 *)d; c++) {
+			    if (!UTF8_IS_INVARIANT(*c)) {
 			        hicount++;
 			    }
 			}
-			if (hicount || NATIVE_TO_ASCII('A') != 'A') {
+			if (hicount) {
 			    STRLEN offset = d - SvPVX(sv);
 			    U8 *src, *dst;
 			    d = SvGROW(sv, SvLEN(sv) + hicount + 1) + offset;
@@ -1478,13 +1481,13 @@ S_scan_const(pTHX_ char *start)
 			    dst = src+hicount;
 			    d  += hicount;
 			    while (src >= (U8 *)SvPVX(sv)) {
-				U8 ch = NATIVE_TO_ASCII(*src);
-			        if (UTF8_IS_CONTINUED(ch)) {
+			        if (!UTF8_IS_INVARIANT(*src)) {
+				    U8 ch = NATIVE_TO_ASCII(*src);
 				    *dst-- = UTF8_EIGHT_BIT_LO(ch);
 				    *dst-- = UTF8_EIGHT_BIT_HI(ch);
 			        }
 			        else {
-				    *dst-- = ch;
+				    *dst-- = *src;
 			        }
 				src--;
 			    }
@@ -1600,9 +1603,8 @@ S_scan_const(pTHX_ char *start)
 	} /* end if (backslash) */
 
     default_action:
-#ifndef EBCDIC
        /* The 'has_utf8' here is very dubious */
-       if (UTF8_IS_CONTINUED(NATIVE_TO_ASCII(*s)) && (this_utf8 || has_utf8)) {
+       if (!UTF8_IS_INVARIANT((U8)(*s)) && (this_utf8 || has_utf8)) {
            STRLEN len = (STRLEN) -1;
            UV uv;
            if (this_utf8) {
@@ -1627,7 +1629,6 @@ S_scan_const(pTHX_ char *start)
 	   }
            continue;
        }
-#endif
        *d++ = NATIVE_TO_NEED(has_utf8,*s++);
     } /* while loop to process each character */
 
@@ -3723,7 +3724,7 @@ Perl_yylex(pTHX)
 	    missingterm((char*)0);
 	yylval.ival = OP_CONST;
 	for (d = SvPV(PL_lex_stuff, len); len; len--, d++) {
-	    if (*d == '$' || *d == '@' || *d == '\\' || UTF8_IS_CONTINUED(*d)) {
+	    if (*d == '$' || *d == '@' || *d == '\\' || !UTF8_IS_INVARIANT((U8)*d)) {
 		yylval.ival = OP_STRINGIFY;
 		break;
 	    }
@@ -6695,7 +6696,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
     /* after skipping whitespace, the next character is the terminator */
     term = *s;
-    if (UTF8_IS_CONTINUED(term) && UTF)
+    if (!UTF8_IS_INVARIANT((U8)term) && UTF)
 	has_utf8 = TRUE;
 
     /* mark where we are */
@@ -6742,7 +6743,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 		   have found the terminator */
 		else if (*s == term)
 		    break;
-		else if (!has_utf8 && UTF8_IS_CONTINUED(*s) && UTF)
+		else if (!has_utf8 && !UTF8_IS_INVARIANT((U8)*s) && UTF)
 		    has_utf8 = TRUE;
 		*to = *s;
 	    }
@@ -6771,7 +6772,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 		    break;
 		else if (*s == PL_multi_open)
 		    brackets++;
-		else if (!has_utf8 && UTF8_IS_CONTINUED(*s) && UTF)
+		else if (!has_utf8 && !UTF8_IS_INVARIANT((U8)*s) && UTF)
 		    has_utf8 = TRUE;
 		*to = *s;
 	    }

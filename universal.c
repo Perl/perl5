@@ -130,9 +130,18 @@ Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
         : FALSE ;
 }
 
+#include "XSUB.h"
+
 void XS_UNIVERSAL_isa(pTHXo_ CV *cv);
 void XS_UNIVERSAL_can(pTHXo_ CV *cv);
 void XS_UNIVERSAL_VERSION(pTHXo_ CV *cv);
+XS(XS_utf8_valid);
+XS(XS_utf8_encode);
+XS(XS_utf8_decode);
+XS(XS_utf8_upgrade);
+XS(XS_utf8_downgrade);
+XS(XS_utf8_unicode_to_native);
+XS(XS_utf8_native_to_unicode);
 
 void
 Perl_boot_core_UNIVERSAL(pTHX)
@@ -142,9 +151,15 @@ Perl_boot_core_UNIVERSAL(pTHX)
     newXS("UNIVERSAL::isa",             XS_UNIVERSAL_isa,         file);
     newXS("UNIVERSAL::can",             XS_UNIVERSAL_can,         file);
     newXS("UNIVERSAL::VERSION", 	XS_UNIVERSAL_VERSION, 	  file);
+    newXS("utf8::valid", XS_utf8_valid, file);
+    newXS("utf8::encode", XS_utf8_encode, file);
+    newXS("utf8::decode", XS_utf8_decode, file);
+    newXS("utf8::upgrade", XS_utf8_upgrade, file);
+    newXS("utf8::downgrade", XS_utf8_downgrade, file);
+    newXS("utf8::native_to_unicode", XS_utf8_native_to_unicode, file);
+    newXS("utf8::unicode_to_native", XS_utf8_unicode_to_native, file);
 }
 
-#include "XSUB.h"
 
 XS(XS_UNIVERSAL_isa)
 {
@@ -298,4 +313,108 @@ finish:
 
     XSRETURN(1);
 }
+
+XS(XS_utf8_valid)
+{
+    dXSARGS;
+    if (items != 1)
+	Perl_croak(aTHX_ "Usage: utf8::valid(sv)");
+    {
+	SV *	sv = ST(0);
+ {
+  STRLEN len;
+  char *s = SvPV(sv,len);
+  if (!SvUTF8(sv) || is_utf8_string((U8*)s,len))
+   XSRETURN_YES;
+  else
+   XSRETURN_NO;
+ }
+    }
+    XSRETURN_EMPTY;
+}
+
+XS(XS_utf8_encode)
+{
+    dXSARGS;
+    if (items != 1)
+	Perl_croak(aTHX_ "Usage: utf8::encode(sv)");
+    {
+	SV *	sv = ST(0);
+
+	sv_utf8_encode(sv);
+    }
+    XSRETURN_EMPTY;
+}
+
+XS(XS_utf8_decode)
+{
+    dXSARGS;
+    if (items != 1)
+	Perl_croak(aTHX_ "Usage: utf8::decode(sv)");
+    {
+	SV *	sv = ST(0);
+	bool	RETVAL;
+
+	RETVAL = sv_utf8_decode(sv);
+	ST(0) = boolSV(RETVAL);
+	sv_2mortal(ST(0));
+    }
+    XSRETURN(1);
+}
+
+XS(XS_utf8_upgrade)
+{
+    dXSARGS;
+    if (items != 1)
+	Perl_croak(aTHX_ "Usage: utf8::upgrade(sv)");
+    {
+	SV *	sv = ST(0);
+	STRLEN	RETVAL;
+	dXSTARG;
+
+	RETVAL = sv_utf8_upgrade(sv);
+	XSprePUSH; PUSHi((IV)RETVAL);
+    }
+    XSRETURN(1);
+}
+
+XS(XS_utf8_downgrade)
+{
+    dXSARGS;
+    if (items < 1 || items > 2)
+	Perl_croak(aTHX_ "Usage: utf8::downgrade(sv, failok=0)");
+    {
+	SV *	sv = ST(0);
+	bool	failok;
+	bool	RETVAL;
+
+	if (items < 2)
+	    failok = 0;
+	else {
+	    failok = (int)SvIV(ST(1));
+	}
+
+	RETVAL = sv_utf8_downgrade(sv, failok);
+	ST(0) = boolSV(RETVAL);
+	sv_2mortal(ST(0));
+    }
+    XSRETURN(1);
+}
+
+XS(XS_utf8_native_to_unicode)
+{
+ dXSARGS;
+ UV uv = SvUV(ST(0));
+ ST(0) = sv_2mortal(newSViv(NATIVE_TO_UNI(uv)));
+ XSRETURN(1);
+}
+
+XS(XS_utf8_unicode_to_native)
+{
+ dXSARGS;
+ UV uv = SvUV(ST(0));
+ ST(0) = sv_2mortal(newSViv(UNI_TO_NATIVE(uv)));
+ XSRETURN(1);
+}
+
 
