@@ -1296,14 +1296,13 @@ win32_times(struct tms *timebuf)
     return 0;
 }
 
-/* fix utime() so it works on directories in NT
- * thanks to Jan Dubois <jan.dubois@ibm.net>
- */
+/* fix utime() so it works on directories in NT */
 static BOOL
 filetime_from_time(PFILETIME pFileTime, time_t Time)
 {
-    struct tm *pTM = gmtime(&Time);
+    struct tm *pTM = localtime(&Time);
     SYSTEMTIME SystemTime;
+    FILETIME LocalTime;
 
     if (pTM == NULL)
 	return FALSE;
@@ -1316,7 +1315,8 @@ filetime_from_time(PFILETIME pFileTime, time_t Time)
     SystemTime.wSecond = pTM->tm_sec;
     SystemTime.wMilliseconds = 0;
 
-    return SystemTimeToFileTime(&SystemTime, pFileTime);
+    return SystemTimeToFileTime(&SystemTime, &LocalTime) &&
+           LocalFileTimeToFileTime(&LocalTime, pFileTime);
 }
 
 DllExport int

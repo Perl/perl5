@@ -5139,6 +5139,13 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	/* SIZE */
 
 	switch (*q) {
+#ifdef HAS_QUAD
+	case 'L':			/* Ld */
+	case 'q':			/* qd */
+	    intsize = 'q';
+	    q++;
+	    break;
+#endif
 	case 'l':
 #ifdef HAS_QUAD
              if (*(q + 1) == 'l') {	/* lld */
@@ -5146,12 +5153,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		q += 2;
 		break;
 	     }
-	case 'L':			/* Ld */
-	case 'q':			/* qd */
-	    intsize = 'q';
-	    q++;
-	    break;
 #endif
+	    /* FALL THROUGH */
 	case 'h':
 	    /* FALL THROUGH */
 	case 'V':
