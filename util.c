@@ -1465,7 +1465,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
 #else /* WIN32 || NETWARE */
 
 void
-Perl_my_setenv(pTHX_ const char *nam, char *val)
+Perl_my_setenv(pTHX_ const char *nam, const char *val)
 {
     register char *envstr;
     const int nlen = strlen(nam);
