@@ -708,7 +708,7 @@ prime_env_iter(void)
 /*}}}*/
 
 
-/*{{{ int  vmssetenv(char *lnm, char *eqv)*/
+/*{{{ int  vmssetenv(const char *lnm, const char *eqv)*/
 /* Define or delete an element in the same "environment" as
  * vmstrnenv().  If an element is to be deleted, it's removed from
  * the first place it's found.  If it's to be set, it's set in the
@@ -716,7 +716,7 @@ prime_env_iter(void)
  * Like setenv() returns 0 for success, non-zero on error.
  */
 int
-Perl_vmssetenv(pTHX_ char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
+Perl_vmssetenv(pTHX_ const char *lnm, const char *eqv, struct dsc$descriptor_s **tabvec)
 {
     char uplnm[LNM$C_NAMLENGTH], *cp1, *cp2, *c;
     unsigned short int curtab, ivlnm = 0, ivsym = 0, ivenv = 0;
@@ -734,7 +734,7 @@ Perl_vmssetenv(pTHX_ char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
         return SS$_IVLOGNAM;
     }
 
-    for (cp1 = lnm, cp2 = uplnm; *cp1; cp1++, cp2++) {
+    for (cp1 = (char *)lnm, cp2 = uplnm; *cp1; cp1++, cp2++) {
       *cp2 = _toupper(*cp1);
       if (cp1 - lnm > LNM$C_NAMLENGTH) {
         set_errno(EINVAL); set_vaxc_errno(SS$_IVLOGNAM);
@@ -799,7 +799,7 @@ Perl_vmssetenv(pTHX_ char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
 #endif
       }
       else {
-        eqvdsc.dsc$a_pointer = eqv;
+        eqvdsc.dsc$a_pointer = (char *)eqv;
         eqvdsc.dsc$w_length  = strlen(eqv);
         if ((tmpdsc.dsc$a_pointer = tabvec[0]->dsc$a_pointer) &&
             !str$case_blind_compare(&tmpdsc,&clisym)) {
@@ -886,10 +886,10 @@ Perl_vmssetenv(pTHX_ char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
 }  /* end of vmssetenv() */
 /*}}}*/
 
-/*{{{ void  my_setenv(char *lnm, char *eqv)*/
+/*{{{ void  my_setenv(const char *lnm, const char *eqv)*/
 /* This has to be a function since there's a prototype for it in proto.h */
 void
-Perl_my_setenv(pTHX_ char *lnm,char *eqv)
+Perl_my_setenv(pTHX_ const char *lnm, const char *eqv)
 {
     if (lnm && *lnm) {
       int len = strlen(lnm);

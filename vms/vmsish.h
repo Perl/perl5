@@ -812,7 +812,7 @@ int	Perl_my_mkdir (pTHX_ char *, Mode_t);
 bool	Perl_vms_do_aexec (pTHX_ SV *, SV **, SV **);
 #endif
 char *	Perl_my_getenv_len (pTHX_ const char *, unsigned long *, bool);
-int	Perl_vmssetenv (pTHX_ char *, char *, struct dsc$descriptor_s **);
+int	Perl_vmssetenv (pTHX_ const char *, const char *, struct dsc$descriptor_s **);
 void	Perl_vmssetuserlnm(pTHX_ char *name, char *eqv);
 char *	Perl_my_crypt (pTHX_ const char *, const char *);
 Pid_t	Perl_my_waitpid (pTHX_ Pid_t, int *, int);
