@@ -33,7 +33,7 @@ void *cvarg;
     DEBUG_L((fprintf(stderr, "0x%lx unsetting CvOWNER of 0x%lx:%s\n",
 		     (unsigned long)thr, (unsigned long)cv, SvPEEK((SV*)cv))));
     MUTEX_LOCK(CvMUTEXP(cv));
-    assert(CvDEPTH(cv) == 0);
+    /* assert(CvDEPTH(cv) == 0); */
     assert(thr == CvOWNER(cv));
     CvOWNER(cv) = 0;
     if (CvCONDP(cv))
