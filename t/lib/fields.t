@@ -90,7 +90,7 @@ my %expect = (
     'Foo::Bar::Baz' => 'b1:1,b2:2,b3:3,foo:4,bar:5,baz:6',
 );
 
-print "1..", int(keys %expect)+14, "\n";
+print "1..", int(keys %expect)+15, "\n";
 my $testno = 0;
 while (my($class, $exp) = each %expect) {
    no strict 'refs';
@@ -183,3 +183,15 @@ package Test::Version;
 use base qw(No::Version);
 print "not " unless $No::Version::VERSION =~ /set by base\.pm/;
 print "ok ", ++$testno ,"\n";
+
+# Test Inverse of $VERSION bug base.pm should not clobber existing $VERSION
+package Has::Version;
+
+BEGIN { $Has::Version::VERSION = '42' };
+
+package Test::Version2;
+
+use base qw(Has::Version);
+print "#$Has::Version::VERSION\nnot " unless $Has::Version::VERSION eq '42';
+print "ok ", ++$testno ,"\n";
+
