@@ -6,7 +6,7 @@ BEGIN {
     require Config; import Config;
 }
 
-print "1..78\n";
+print "1..98\n";
 
 $format = "c2 x5 C C x s d i l a6";
 # Need the expression in here to force ary[5] to be numeric.  This avoids
@@ -246,7 +246,7 @@ print "ok ", $test++, "\n";
 print "not " unless unpack('Z8', "foo\0bar \0") eq "foo";
 print "ok ", $test++, "\n";
 
-# 73..77: packing native shorts/ints/longs
+# 73..78: packing native shorts/ints/longs
 
 print "not " unless length(pack("s_", 0)) == $Config{shortsize};
 print "ok ", $test++, "\n";
@@ -265,4 +265,78 @@ print "ok ", $test++, "\n";
 
 print "not " unless length(pack("i_", 0)) == length(pack("i", 0));
 print "ok ", $test++, "\n";
+
+# 79..94: test the limits
+
+print "not " unless unpack("c", pack("c",  127)) ==  127;
+print "ok ", $test++, "\n";
+
+print "not " unless unpack("c", pack("c", -128)) == -128;
+print "ok ", $test++, "\n";
+
+print "not " unless unpack("C", pack("C",  255)) ==  255;
+print "ok ", $test++, "\n";
+
+print "not " unless unpack("s", pack("s",  32767)) ==  32767;
+print "ok ", $test++, "\n";
+
+print "not " unless unpack("s", pack("s", -32768)) == -32768;
+print "ok ", $test++, "\n";
+
+print "not " unless unpack("S", pack("S",  65535)) ==  65535;
+print "ok ", $test++, "\n";
+
+print "not " unless unpack("i", pack("i",  2147483647)) ==  2147483647;
+print "ok ", $test++, "\n";
+
+print "not " unless unpack("i", pack("i", -2147483648)) == -2147483648;
+print "ok ", $test++, "\n";
+
+print "not " unless unpack("I", pack("I",  4294967295)) ==  4294967295;
+print "ok ", $test++, "\n";
+
+print "not " unless unpack("l", pack("l",  2147483647)) ==  2147483647;
+print "ok ", $test++, "\n";
+
+print "not " unless unpack("l", pack("l", -2147483648)) == -2147483648;
+print "ok ", $test++, "\n";
+
+print "not " unless unpack("L", pack("L",  4294967295)) ==  4294967295;
+print "ok ", $test++, "\n";
+
+print "not " unless unpack("n", pack("n",  65535)) == 65535;
+print "ok ", $test++, "\n";
+
+print "not " unless unpack("n", pack("v",  65535)) == 65535;
+print "ok ", $test++, "\n";
+
+print "not " unless unpack("N", pack("N",  4294967295)) ==  4294967295;
+print "ok ", $test++, "\n";
+
+print "not " unless unpack("V", pack("V",  4294967295)) ==  4294967295;
+print "ok ", $test++, "\n";
+
+# 95..98 test the n/v/N/V byteorder
+
+if ($Config{byteorder} =~ /^1234(5678)?$/ ||
+    $Config{byteorder} =~ /^(8765)?4321$/) {
+
+print "not " unless pack("n", 0xdead) eq "\xde\xad";
+print "ok ", $test++, "\n";
+
+print "not " unless pack("v", 0xdead) eq "\xad\xde";
+print "ok ", $test++, "\n";
+
+print "not " unless pack("N", 0xdeadbeef) eq "\xde\xad\xbe\xef";
+print "ok ", $test++, "\n";
+
+print "not " unless pack("V", 0xdeadbeef) eq "\xef\xbe\xad\xde";
+print "ok ", $test++, "\n";
+
+} else {
+   # weird byteorders require more thought 
+   foreach (95..98) {
+       print "ok ", $test++, " # skipped\n";
+   }
+}
 
