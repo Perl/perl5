@@ -119,7 +119,7 @@ AV *initargs;
     XPUSHs(SvREFCNT_inc(startsv));
     PUTBACK;
 
-    New(53, threadstart_mutexp, 1, pthread_mutex_t);
+    New(53, threadstart_mutexp, 1, perl_mutex);
     /* On your marks... */
     MUTEX_INIT(threadstart_mutexp);
     MUTEX_LOCK(threadstart_mutexp);
@@ -242,13 +242,9 @@ cond_wait(sv)
 	SV *	sv
 	MAGIC *	mg = NO_INIT
 CODE:
-	if (SvROK(sv)) {
-	    /*
-	     * Kludge to allow lock of real objects without requiring
-	     * to pass in every type of argument by explicit reference.
-	     */
+	if (SvROK(sv))
 	    sv = SvRV(sv);
-	}
+
 	mg = condpair_magic(sv);
 	DEBUG_L(fprintf(stderr, "0x%lx: cond_wait 0x%lx\n",
 			(unsigned long)thr, (unsigned long)sv));
