@@ -30,3 +30,7 @@ PERLVARIC(Gpatleave,	char *, "\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}")
 
 /* XXX does anyone even use this? */
 PERLVARI(Gdo_undump,	bool,	FALSE)	/* -u or dump seen? */
+
+#ifdef MYMALLOC
+PERLVAR(Gmalloc_mutex,	perl_mutex)	/* Mutex for malloc */
+#endif

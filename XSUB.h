@@ -128,7 +128,7 @@
 #  define aTHX_		aTHX,
 #endif
 
-#if defined(PERL_CAPI)
+#if (defined(PERL_CAPI) || defined(PERL_IMPLICIT_SYS)) && !defined(PERL_CORE)
 #  ifndef NO_XSLOCKS
 #    undef closedir
 #    undef opendir

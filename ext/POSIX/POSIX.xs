@@ -8,7 +8,7 @@
 #define PERLIO_NOT_STDIO 1
 #include "perl.h"
 #include "XSUB.h"
-#if defined(PERL_OBJECT) || defined(PERL_CAPI)
+#if defined(PERL_OBJECT) || defined(PERL_CAPI) || defined(PERL_IMPLICIT_SYS)
 #  undef signal
 #  undef open
 #  undef setmode

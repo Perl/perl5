@@ -992,7 +992,7 @@ Pod::Man is a module to convert documentation in the POD format (the
 preferred language for documenting Perl) into *roff input using the man
 macro set.  The resulting *roff code is suitable for display on a terminal
 using nroff(1), normally via man(1), or printing using troff(1).  It is
-conventionally invoked using the driver script B<pod2roff>, but it can also
+conventionally invoked using the driver script B<pod2man>, but it can also
 be used directly.
 
 As a derived class from Pod::Parser, Pod::Man supports the same methods and
@@ -1172,7 +1172,7 @@ B<pod2man> in Perl core.
 
 =head1 SEE ALSO
 
-L<Pod::Parser|Pod::Parser>, perlpod(1), pod2roff(1), nroff(1), troff(1),
+L<Pod::Parser|Pod::Parser>, perlpod(1), pod2man(1), nroff(1), troff(1),
 man(1), man(7)
 
 Ossanna, Joseph F., and Brian W. Kernighan.  "Troff User's Manual,"
@@ -1181,7 +1181,7 @@ the best documentation of standard nroff(1) and troff(1).  At the time of
 this writing, it's available at http://www.cs.bell-labs.com/cm/cs/cstr.html.
 
 The man page documenting the man macro set may be man(5) instead of man(7)
-on your system.  Also, please see pod2roff(1) for extensive documentation on
+on your system.  Also, please see pod2man(1) for extensive documentation on
 writing manual pages if you've not done it before and aren't familiar with
 the conventions.
 

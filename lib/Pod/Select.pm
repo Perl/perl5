@@ -62,7 +62,7 @@ or
 
 =head1 REQUIRES
 
-perl5.004, Pod::Parser, Exporter, FileHandle, Carp
+perl5.004, Pod::Parser, Exporter, Carp
 
 =head1 EXPORTS
 

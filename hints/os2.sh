@@ -124,8 +124,8 @@ fi
 aout_ldflags="$aout_ldflags"
 
 aout_d_fork='define'
-aout_ccflags='-DPERL_CORE -DDOSISH -DPERL_IS_AOUT -DOS2=2 -DEMBED -I.'
-aout_cppflags='-DPERL_CORE -DDOSISH -DPERL_IS_AOUT -DOS2=2 -DEMBED -I.'
+aout_ccflags='-DDOSISH -DPERL_IS_AOUT -DOS2=2 -DEMBED -I.'
+aout_cppflags='-DDOSISH -DPERL_IS_AOUT -DOS2=2 -DEMBED -I.'
 aout_use_clib='c'
 aout_usedl='undef'
 aout_archobjs="os2.o dl_os2.o"

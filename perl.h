@@ -31,7 +31,9 @@
 #    define PERL_IMPLICIT_CONTEXT
 #  endif
 #  ifndef PERL_IMPLICIT_SYS
-/*#    define PERL_IMPLICIT_SYS*/		/* XXX not done yet */
+#    ifdef WIN32
+#      define PERL_IMPLICIT_SYS		/* XXX not implemented everywhere yet */
+#    endif
 #  endif
 #endif
 
@@ -40,7 +42,9 @@
 #    define PERL_IMPLICIT_CONTEXT
 #  endif
 #  ifndef PERL_IMPLICIT_SYS
-/*#    define PERL_IMPLICIT_SYS*/		/* XXX not done yet */
+#    ifdef WIN32
+#      define PERL_IMPLICIT_SYS		/* XXX not implemented everywhere yet */
+#    endif
 #  endif
 #endif
 
@@ -86,8 +90,8 @@ the perl interpreter.
 | Perl Host |
 +-----------+
       ^
-	  |
-	  v
+      |
+      v
 +-----------+   +-----------+
 | Perl Core |<->| Extension |
 +-----------+   +-----------+ ...
@@ -1388,9 +1392,6 @@ typedef struct loop LOOP;
 
 typedef struct Outrec Outrec;
 typedef struct interpreter PerlInterpreter;
-#ifndef __BORLANDC__
-typedef struct ff FF;		/* XXX not defined anywhere, should go? */
-#endif
 typedef struct sv SV;
 typedef struct av AV;
 typedef struct hv HV;
@@ -1684,7 +1685,6 @@ typedef pthread_key_t	perl_key;
 
 /* This defines a way to flush all output buffers.  This may be a
  * performance issue, so we allow people to disable it.
- * XXX the default needs a Configure test, as it may not work everywhere.
  */
 #ifndef PERL_FLUSHALL_FOR_CHILD
 # if defined(FFLUSH_NULL) || defined(USE_SFIO)
