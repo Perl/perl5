@@ -112,9 +112,9 @@ DllExport  char*	win32_getenv(const char *name);
 DllExport  unsigned 	win32_sleep(unsigned int);
 DllExport  int		win32_times(struct tms *timebuf);
 DllExport  unsigned 	win32_alarm(unsigned int sec);
-DllExport  int		win32_flock(int fd, int oper);
 DllExport  int		win32_stat(const char *path, struct stat *buf);
 DllExport  int		win32_ioctl(int i, unsigned int u, char *data);
+DllExport  int		win32_wait(int *status);
 
 #ifdef HAVE_DES_FCRYPT
 DllExport char *	win32_crypt(const char *txt, const char *salt);
@@ -140,6 +140,7 @@ END_EXTERN_C
 #undef times
 #undef alarm
 #undef ioctl
+#undef wait
 
 #ifdef __BORLANDC__
 #undef ungetc
@@ -239,6 +240,7 @@ END_EXTERN_C
 #define times			win32_times
 #define alarm			win32_alarm
 #define ioctl			win32_ioctl
+#define wait			win32_wait
 
 #ifdef HAVE_DES_FCRYPT
 #undef crypt

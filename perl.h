@@ -1666,14 +1666,16 @@ struct perl_thread {
 #include "thrdvar.h"
 };
 
+typedef struct perl_thread *Thread;
+
+#else
+typedef void *Thread;
 #endif
 
 /* Done with PERLVAR macros for now ... */
 #undef PERLVAR
 #undef PERLVARI
 #undef PERLVARIC
-
-typedef struct perl_thread *Thread;
 
 #include "thread.h"
 #include "pp.h"

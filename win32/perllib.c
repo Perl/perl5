@@ -47,7 +47,7 @@ RunPerl(int argc, char **argv, char **env, void *iosubsystem)
     return (exitstatus);
 }
 
-extern HANDLE PerlDllHandle;
+extern HANDLE w32_perldll_handle;
 
 BOOL APIENTRY
 DllMain(HANDLE hModule,		/* DLL module handle */
@@ -66,7 +66,7 @@ DllMain(HANDLE hModule,		/* DLL module handle */
 	setmode( fileno( stderr ), O_BINARY );
 	_fmode = O_BINARY;
 #endif
-	PerlDllHandle = hModule;
+	w32_perldll_handle = hModule;
 	break;
 
 	/* The DLL is detaching from a process due to

@@ -503,9 +503,9 @@ The following functions are currently unavailable: C<fork()>,
 C<dump()>, C<chown()>, C<link()>, C<symlink()>, C<chroot()>,
 C<setpgrp()> and related security functions, C<setpriority()>,
 C<getpriority()>, C<syscall()>, C<fcntl()>, C<getpw*()>,
-C<wait*()>, C<msg*()>, C<shm*()>, C<sem*()>, C<alarm()>,
-C<socketpair()>, C<*netent()>, C<*protoent()>, C<*servent()>,
-C<*hostent()>, C<getnetby*()>.
+C<msg*()>, C<shm*()>, C<sem*()>, C<alarm()>, C<socketpair()>,
+C<*netent()>, C<*protoent()>, C<*servent()>, C<*hostent()>,
+C<getnetby*()>.
 This list is possibly incomplete.
 
 =item *
@@ -524,9 +524,9 @@ functionality of ioctlsocket() in the Winsock API).
 
 =item *
 
-C<$?> is set in a way compatible with Unix, so the exitstatus of the
-subprocess is actually obtained by "$? >> 8".  Failure to spawn() the
-subprocess is indicated by setting $? to "255 << 8".
+Failure to spawn() a subprocess is indicated by setting $? to "255 << 8".
+C<$?> is set in a way compatible with Unix (i.e. the exitstatus of the
+subprocess is obtained by "$? >> 8", as described in the documentation).
 
 =item *
 
@@ -598,7 +598,7 @@ sundry hacks since then.
 
 Borland support was added in 5.004_01 (Gurusamy Sarathy).
 
-Last updated: 23 December 1997
+Last updated: 3 January 1998
 
 =cut
 
