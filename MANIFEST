@@ -20,6 +20,7 @@ Porting/config.sh	Sample config.sh
 Porting/config_H	Sample config.h
 Porting/genlog		Generate formatted changelogs by querying p4d
 Porting/makerel		Release making utility
+Porting/p4d2p		Generate standard patches from p4 diffs
 Porting/patching.pod	How to report changes made to Perl
 Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
