@@ -55,6 +55,7 @@ static void xstat _((void));
 /* NOTE:  Do not call the next three routines directly.  Use the macros
  * in handy.h, so that we can easily redefine everything to do tracking of
  * allocated hunks back to the original New to track down any memory leaks.
+ * XXX This advice seems to be widely ignored :-(   --AD  August 1996.
  */
 
 Malloc_t
@@ -421,7 +422,10 @@ perl_init_i18nl10n(printwarn)
     int i;
 
     if (setlocale(LC_CTYPE, "") == NULL && (lc_all || lc_ctype || lang)) {
-	if (printwarn) {
+	char *doit;
+
+	if (printwarn > 1 || 
+	      printwarn && (!(doit = getenv("PERL_BADLANG")) || atoi(doit))) {
 	    PerlIO_printf(PerlIO_stderr(), "warning: setlocale(LC_CTYPE, \"\") failed.\n");
 	    PerlIO_printf(PerlIO_stderr(),
 	      "warning: LC_ALL = \"%s\", LC_CTYPE = \"%s\", LANG = \"%s\",\n",
@@ -860,14 +864,20 @@ long a1, a2, a3, a4;
     CV *cv;
 
     message = mess(pat,a1,a2,a3,a4);
-    if (diehook && (cv = sv_2cv(diehook, &stash, &gv, 0)) && !CvDEPTH(cv)) {
-	dSP;
+    if (diehook) {
+	SV *olddiehook = diehook;
+	diehook = Nullsv;			/* sv_2cv might call croak() */
+	cv = sv_2cv(olddiehook, &stash, &gv, 0);
+	diehook = olddiehook;
+	if (cv && !CvDEPTH(cv)) {
+	    dSP;
 
-	PUSHMARK(sp);
-	EXTEND(sp, 1);
-	PUSHs(sv_2mortal(newSVpv(message,0)));
-	PUTBACK;
-	perl_call_sv((SV*)cv, G_DISCARD);
+	    PUSHMARK(sp);
+	    EXTEND(sp, 1);
+	    PUSHs(sv_2mortal(newSVpv(message,0)));
+	    PUTBACK;
+	    perl_call_sv((SV*)cv, G_DISCARD);
+	}
     }
     if (in_eval) {
 	restartop = die_where(message);
@@ -904,22 +914,27 @@ long a1, a2, a3, a4;
     CV *cv;
 
     message = mess(pat,a1,a2,a3,a4);
-    if (warnhook && (cv = sv_2cv(warnhook, &stash, &gv, 0)) && !CvDEPTH(cv)) {
-	dSP;
-
-	PUSHMARK(sp);
-	EXTEND(sp, 1);
-	PUSHs(sv_2mortal(newSVpv(message,0)));
-	PUTBACK;
-	perl_call_sv((SV*)cv, G_DISCARD);
+    if (warnhook) {
+	SV *oldwarnhook = warnhook;
+	warnhook = Nullsv;	/* sv_2cv might end up calling warn() */
+	cv = sv_2cv(oldwarnhook, &stash, &gv, 0);
+	warnhook = oldwarnhook;
+	if (cv && !CvDEPTH(cv)) {
+	    dSP;
+	    
+	    PUSHMARK(sp);
+	    EXTEND(sp, 1);
+	    PUSHs(sv_2mortal(newSVpv(message,0)));
+	    PUTBACK;
+	    perl_call_sv((SV*)cv, G_DISCARD);
+	    return;
+	}
     }
-    else {
-	PerlIO_puts(PerlIO_stderr(),message);
+    PerlIO_puts(PerlIO_stderr(),message);
 #ifdef LEAKTEST
-	DEBUG_L(xstat());
+    DEBUG_L(xstat());
 #endif
-	(void)Fflush(PerlIO_stderr());
-    }
+    (void)PerlIO_flush(PerlIO_stderr());
 }
 
 #else /* !defined(I_STDARG) && !defined(I_VARARGS) */
@@ -1023,14 +1038,20 @@ croak(pat, va_alist)
 #endif
     message = mess(pat, &args);
     va_end(args);
-    if (diehook && (cv = sv_2cv(diehook, &stash, &gv, 0)) && !CvDEPTH(cv)) {
-	dSP;
+    if (diehook) {
+	SV *olddiehook = diehook;
+	diehook = Nullsv;                 /* sv_2cv might call croak() */
+	cv = sv_2cv(olddiehook, &stash, &gv, 0);
+	diehook = olddiehook;
+	if (cv && !CvDEPTH(cv)) {
+	    dSP;
 
-	PUSHMARK(sp);
-	EXTEND(sp, 1);
-	PUSHs(sv_2mortal(newSVpv(message,0)));
-	PUTBACK;
-	perl_call_sv((SV*)cv, G_DISCARD);
+	    PUSHMARK(sp);
+	    EXTEND(sp, 1);
+	    PUSHs(sv_2mortal(newSVpv(message,0)));
+	    PUTBACK;
+	    perl_call_sv((SV*)cv, G_DISCARD);
+	}
     }
     if (in_eval) {
 	restartop = die_where(message);
@@ -1079,22 +1100,27 @@ warn(pat,va_alist)
     message = mess(pat, &args);
     va_end(args);
 
-    if (warnhook && (cv = sv_2cv(warnhook, &stash, &gv, 0)) && !CvDEPTH(cv)) {
-	dSP;
+    if (warnhook) {
+	SV *oldwarnhook = warnhook;
+	warnhook = Nullsv;	/* sv_2cv might end up calling warn() */
+	cv = sv_2cv(oldwarnhook, &stash, &gv, 0);
+	warnhook = oldwarnhook;
+	if (cv && !CvDEPTH(cv)) {
+	    dSP;
 
-	PUSHMARK(sp);
-	EXTEND(sp, 1);
-	PUSHs(sv_2mortal(newSVpv(message,0)));
-	PUTBACK;
-	perl_call_sv((SV*)cv, G_DISCARD);
+	    PUSHMARK(sp);
+	    EXTEND(sp, 1);
+	    PUSHs(sv_2mortal(newSVpv(message,0)));
+	    PUTBACK;
+	    perl_call_sv((SV*)cv, G_DISCARD);
+	    return;
+	}
     }
-    else {
-	PerlIO_puts(PerlIO_stderr(),message);
+    PerlIO_puts(PerlIO_stderr(),message);
 #ifdef LEAKTEST
-	DEBUG_L(xstat());
+    DEBUG_L(xstat());
 #endif
-	(void)PerlIO_flush(PerlIO_stderr());
-    }
+    (void)PerlIO_flush(PerlIO_stderr());
 }
 #endif /* !defined(I_STDARG) && !defined(I_VARARGS) */
 
@@ -1717,18 +1743,18 @@ double f;
    ccflags.
 	       --Andy Dougherty      <doughera@lafcol.lafayette.edu>
 */
-#ifndef MY_ULONG_MAX
-#  define MY_ULONG_MAX ((UV)PERL_LONG_MAX * (UV)2 + (UV)1)
+#ifndef MY_UV_MAX
+#  define MY_UV_MAX ((UV)IV_MAX * (UV)2 + (UV)1)
 #endif
 
 I32
 cast_i32(f)
 double f;
 {
-    if (f >= PERL_LONG_MAX)
-	return (I32) PERL_LONG_MAX;
-    if (f <= PERL_LONG_MIN)
-	return (I32) PERL_LONG_MIN;
+    if (f >= I32_MAX)
+	return (I32) I32_MAX;
+    if (f <= I32_MIN)
+	return (I32) I32_MIN;
     return (I32) f;
 }
 
@@ -1736,10 +1762,10 @@ IV
 cast_iv(f)
 double f;
 {
-    if (f >= PERL_LONG_MAX)
-	return (IV) PERL_LONG_MAX;
-    if (f <= PERL_LONG_MIN)
-	return (IV) PERL_LONG_MIN;
+    if (f >= IV_MAX)
+	return (IV) IV_MAX;
+    if (f <= IV_MIN)
+	return (IV) IV_MIN;
     return (IV) f;
 }
 
@@ -1747,8 +1773,8 @@ UV
 cast_uv(f)
 double f;
 {
-    if (f >= MY_ULONG_MAX)
-	return (UV) MY_ULONG_MAX;
+    if (f >= MY_UV_MAX)
+	return (UV) MY_UV_MAX;
     return (UV) f;
 }
 
