@@ -30,7 +30,7 @@ void *cvarg;
     dTHR;
 #endif /* DEBUGGING */
 
-    DEBUG_L((fprintf(stderr, "0x%lx unsetting CvOWNER of 0x%lx:%s\n",
+    DEBUG_L((PerlIO_printf(PerlIO_stderr(), "0x%lx unsetting CvOWNER of 0x%lx:%s\n",
 		     (unsigned long)thr, (unsigned long)cv, SvPEEK((SV*)cv))));
     MUTEX_LOCK(CvMUTEXP(cv));
     DEBUG_L(if (CvDEPTH(cv) != 0)
@@ -1945,7 +1945,7 @@ PP(pp_entersub)
 		/* We already have a clone to use */
 		MUTEX_UNLOCK(CvMUTEXP(cv));
 		cv = *(CV**)svp;
-		DEBUG_L(fprintf(stderr,
+		DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 				"entersub: 0x%lx already has clone 0x%lx:%s\n",
 				(unsigned long) thr, (unsigned long) cv,
 				SvPEEK((SV*)cv)));
@@ -1960,7 +1960,7 @@ PP(pp_entersub)
 		    CvOWNER(cv) = thr;
 		    SvREFCNT_inc(cv);
 		    MUTEX_UNLOCK(CvMUTEXP(cv));
-		    DEBUG_L(fprintf(stderr,
+		    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 				    "entersub: 0x%lx grabbing 0x%lx:%s in stash %s\n",
 				    (unsigned long) thr, (unsigned long) cv,
 				    SvPEEK((SV*)cv), CvSTASH(cv) ?
@@ -1970,7 +1970,7 @@ PP(pp_entersub)
 		    CV *clonecv;
 		    SvREFCNT_inc(cv); /* don't let it vanish from under us */
 		    MUTEX_UNLOCK(CvMUTEXP(cv));
-		    DEBUG_L((fprintf(stderr,
+		    DEBUG_L((PerlIO_printf(PerlIO_stderr(),
 				     "entersub: 0x%lx cloning 0x%lx:%s\n",
 				     (unsigned long) thr, (unsigned long) cv,
 				     SvPEEK((SV*)cv))));

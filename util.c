@@ -1172,7 +1172,7 @@ die(pat, va_alist)
     GV *gv;
     CV *cv;
 
-    DEBUG_L(fprintf(stderr, "die: curstack = %p, mainstack= %p\n",
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "die: curstack = %p, mainstack= %p\n",
     		    curstack, mainstack));/*debug*/
     /* We have to switch back to mainstack or die_where may try to pop
      * the eval block from the wrong stack if die is being called from a
@@ -1190,7 +1190,7 @@ die(pat, va_alist)
     message = mess(pat, &args);
     va_end(args);
 
-    DEBUG_L(fprintf(stderr, "die: message = %s\ndiehook = %p\n",
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "die: message = %s\ndiehook = %p\n",
 		   message, diehook));/*debug*/
     if (diehook) {
 	/* sv_2cv might call croak() */
@@ -1219,7 +1219,7 @@ die(pat, va_alist)
     }
 
     restartop = die_where(message);
-    DEBUG_L(fprintf(stderr,
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
     		    "die: restartop = %p, was_in_eval = %d, oldrunlevel = %d\n",
 		    restartop, was_in_eval, oldrunlevel));/*debug*/
     if ((!restartop && was_in_eval) || oldrunlevel > 1)
@@ -1253,7 +1253,7 @@ croak(pat, va_alist)
     message = mess(pat, &args);
     va_end(args);
 #ifdef USE_THREADS
-    DEBUG_L(fprintf(stderr, "croak: 0x%lx %s", (unsigned long) thr, message));
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "croak: 0x%lx %s", (unsigned long) thr, message));
 #endif /* USE_THREADS */
     if (diehook) {
 	/* sv_2cv might call croak() */

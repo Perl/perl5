@@ -238,7 +238,7 @@ void *arg;
      * in perl_destruct. It waits until it's the only thread and then
      * performs END blocks and other process clean-ups.
      */
-    DEBUG_L(fprintf(stderr, "thread_destruct: 0x%lx\n", (unsigned long) thr));
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "thread_destruct: 0x%lx\n", (unsigned long) thr));
 
     Safefree(thr);
     MUTEX_LOCK(&nthreads_mutex);
@@ -266,13 +266,13 @@ register PerlInterpreter *sv_interp;
     MUTEX_LOCK(&nthreads_mutex);
     while (nthreads > 1)
     {
-	DEBUG_L(fprintf(stderr, "perl_destruct: waiting for %d threads\n",
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "perl_destruct: waiting for %d threads\n",
 			nthreads - 1));
 	COND_WAIT(&nthreads_cond, &nthreads_mutex);
     }
     /* At this point, we're the last thread */
     MUTEX_UNLOCK(&nthreads_mutex);
-    DEBUG_L(fprintf(stderr, "perl_destruct: armageddon has arrived\n"));
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "perl_destruct: armageddon has arrived\n"));
     MUTEX_DESTROY(&nthreads_mutex);
     COND_DESTROY(&nthreads_cond);
 #endif /* !defined(FAKE_THREADS) */
