@@ -28,6 +28,111 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7540] By: jhi                                   on 2000/11/04  20:42:38
+        Log: Locale tweakery.  Add test case for bug id 20000809.003 to op/misc,
+             create a "fast path" for locale name probing using "locale -a"
+             if available, squash finally hopefully the s?printf resetting
+             the numeric locale (since, IIUC perllocale, it never shouldn't). 
+     Branch: perl
+	   ! sv.c t/op/misc.t t/pragma/locale.t
+____________________________________________________________________________
+[  7534] By: jhi                                   on 2000/11/03  15:16:02
+        Log: Subject: Re: README.aix
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Fri, 03 Nov 2000 16:03:15 +0100
+             Message-Id: <20001103151040.95C6.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! README.aix
+____________________________________________________________________________
+[  7533] By: jhi                                   on 2000/11/03  03:59:02
+        Log: Subject: [PATCH 5.7.0] better messages from malloc()
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Wed, 1 Nov 2000 23:39:56 -0500
+             Message-ID: <20001101233956.A520@monk.mps.ohio-state.edu>
+     Branch: perl
+	   ! malloc.c pod/perldiag.pod
+____________________________________________________________________________
+[  7532] By: jhi                                   on 2000/11/03  00:11:56
+        Log: The #7521 touched things it shouldn't have.
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs ext/POSIX/typemap
+____________________________________________________________________________
+[  7531] By: jhi                                   on 2000/11/02  22:32:33
+        Log: Subject:  [PATCH] Perl@7504, vms/gen_shrfls.pl
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date:     Thu, 2 Nov 2000 16:58:36 EST
+             Message-Id: <001102165758.31020@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! vms/gen_shrfls.pl
+____________________________________________________________________________
+[  7530] By: jhi                                   on 2000/11/02  22:08:49
+        Log: Fix the problem discussed in
+             
+             Subject: [ID 20001015.004] Fwd: Tie::SubstrHash -- bug & fix (all Perl versions)
+             Date: Mon, 16 Oct 2000 04:48:59 +0300 (EET DST) 
+             Message-Id: <200010160148.EAA14523@alpha.hut.fi> 
+             
+             originally from Linc Madison.  Also Andreas König's comments
+             taken into account.  Some other problems with Tie::SubstrHash
+             fixed: didn't croak when the table exceeded the requested number
+             of entries (as documented) but instead when the number of entries
+             exceeded the size of the table, a croak() had an unnecessary \n,
+             didn't have a CLEAR method, documented that there is no exists().
+             Didn't fix to be strict-proof because the module uses &foo; and
+             dynamic scope.  Added a test script exercizing both first tamely 
+             the basic functionality, and then the failure cases reported by
+             Linc Madison.
+     Branch: perl
+	   + t/lib/tie-substrhash.t
+	   ! MANIFEST lib/Tie/SubstrHash.pm
+____________________________________________________________________________
+[  7529] By: jhi                                   on 2000/11/02  17:58:08
+        Log: recv() can fail and return undef.
+             
+             Subject: [ID 20001102.003] Net::Ping patch: "Bad arg lenght" error appears if host is unreachable    
+             From: "Alexey V. Barantsev" <barancev@kazbek.ispras.ru>
+             Date: Thu, 2 Nov 2000 20:12:20 +0300
+             Message-Id: <200011021712.UAA07919@dallas.kazbek.ispras.ru>
+     Branch: perl
+	   ! lib/Net/Ping.pm
+____________________________________________________________________________
+[  7528] By: jhi                                   on 2000/11/02  17:49:09
+        Log: Detpyo.
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[  7527] By: jhi                                   on 2000/11/02  15:48:37
+        Log: Add Tie::RefHash::Nestable (lives in Tie/RefHash.pm),
+             fix a autovivification bug in Tie::RefHash, add tests for both.
+             
+             Subject: Re: Tie::RefHash: use hash refs as keys in nested hashes
+             From: Edward Avis <epa98@doc.ic.ac.uk>
+             Date: Thu, 2 Nov 2000 15:24:30 +0000 (GMT)
+             Message-ID: <Pine.LNX.4.21.0011021516010.8344-100000@texel03.doc.ic.ac.uk>
+     Branch: perl
+	   + t/lib/tie-refhash.t
+	   ! MANIFEST lib/Tie/RefHash.pm
+____________________________________________________________________________
+[  7526] By: jhi                                   on 2000/11/02  13:56:26
+        Log: Test::Harness revealed buglets in the new DynaLoader.
+             
+             Subject: [ID 20001102.001] Not OK: perl v5.7.0 +DEVEL7523 on i686-linux 2.2.16a (UNINSTALLED)
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 02 Nov 2000 11:26:48 +0100 
+             Message-Id: <m3vgu6k6tz.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! ext/DynaLoader/DynaLoader_pm.PL
+____________________________________________________________________________
+[  7525] By: jhi                                   on 2000/11/01  23:52:08
+        Log: The entry for #7503 was missing.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
+[  7524] By: jhi                                   on 2000/11/01  23:40:52
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7523] By: jhi                                   on 2000/11/01  22:57:09
         Log: More tweaking on the #7522 theme.
      Branch: perl
@@ -157,20 +262,6 @@ ____________________________________________________________________________
         Log: Update Changes.
      Branch: perl
 	   ! Changes patchlevel.h
-____________________________________________________________________________
-[  7503] By: jhi                                   on 2000/10/31  14:30:50
-        Log: Whitespace style tweak.  Was originally going to see to
-             
-             Subject: PATCH (Re: PerlIO - Configure tweak for Linux/glibc?)
-             From: Joe Smith <jms@inwap.com>
-             Date: Mon, 30 Oct 2000 18:47:57 -0800
-             Message-Id: <39FE32DD.24AAC4D@inwap.com>
-             
-             but that had already been taken care of.
-     Branch: metaconfig
-	   ! U/compline/d_stdstdio.U
-     Branch: perl
-	   ! Configure config_h.SH
 ____________________________________________________________________________
 [  7502] By: jhi                                   on 2000/10/31  14:25:02
         Log: AUTHORS tweaks.
@@ -869,7 +960,8 @@ ____________________________________________________________________________
 	   ! pod/perldelta.pod pod/perlfunc.pod sv.c t/op/sprintf.t
 ____________________________________________________________________________
 [  7401] By: jhi                                   on 2000/10/22  19:19:14
-        Log: Expand Config variables only if explicitly so requested.
+        Log: Expand %Config variables only if explicitly so requested
+             during build time by PERL_BUILD_EXPAND_CONFIG_VARS.
              
              Subject: Re: PATCH $Config::Config{ldlibpthname} in ext/DynaLoader/DynaLoader_pm.PL
              From: Gurusamy Sarathy <gsar@ActiveState.com>
@@ -1530,16 +1622,6 @@ ____________________________________________________________________________
      Branch: perl
 	   ! lib/CPAN.pm lib/CPAN/FirstTime.pm
 ____________________________________________________________________________
-[  7205] By: jhi                                   on 2000/10/12  23:29:08
-        Log: Introduce the man[24-8] variables, from Andy Dougherty.
-     Branch: metaconfig/U/perl
-	   + mandirs.U mandirstyle.U
-     Branch: perl
-	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
-	   ! config_h.SH epoc/config.sh uconfig.h uconfig.sh vos/config.def
-	   ! vos/config.h vos/config.pl vos/config_h.SH_orig
-	   ! win32/config.bc win32/config.gc win32/config.vc
-____________________________________________________________________________
 [  7204] By: gsar                                  on 2000/10/12  18:11:24
         Log: restore change#7202
      Branch: perl
@@ -1617,13 +1699,6 @@ ____________________________________________________________________________
              Message-ID: <Pine.OSF.4.10.10010101355140.441897-100000@aspara.forte.com>
      Branch: perl
 	   ! t/op/tr.t
-____________________________________________________________________________
-[  7192] By: jhi                                   on 2000/10/10  20:57:30
-        Log: Add versiononly, delete installscripts, from Andy Dougherty.
-     Branch: metaconfig
-	   - U/installdirs/installscripts.U
-     Branch: metaconfig/U/perl
-	   + versiononly.U
 ____________________________________________________________________________
 [  7191] By: jhi                                   on 2000/10/10  19:41:21
         Log: Subject: [PATCH: perl@7181] perlebcdic.pod updates and corrections
@@ -1729,13 +1804,6 @@ ____________________________________________________________________________
      Branch: perl
 	   ! lib/charnames.pm
 ____________________________________________________________________________
-[  7177] By: jhi                                   on 2000/10/09  19:13:27
-        Log: Change #7160 had a nasty typo.
-     Branch: metaconfig
-	   ! U/compline/Compile.U
-     Branch: perl
-	   ! Configure config_h.SH
-____________________________________________________________________________
 [  7176] By: gsar                                  on 2000/10/09  18:59:33
         Log: pod nit
      Branch: perl
@@ -1840,20 +1908,6 @@ ____________________________________________________________________________
      Branch: perl
 	   ! lib/Tie/Handle.pm
 ____________________________________________________________________________
-[  7160] By: jhi                                   on 2000/10/06  18:20:35
-        Log: Fix bug in #7157 (s/cflags/ccflags); moved the -o foo
-             as the first option of cc/ld because of ultrapicky compilers
-             (e.g. OS/390 R2.5)
-     Branch: metaconfig
-	   + U/modified/d_getpgrp.U U/modified/d_setpgrp.U
-	   ! U/compline/Compile.U U/compline/Csym.U U/compline/ccflags.U
-	   ! U/compline/orderlib.U U/modified/Cppsym.U
-	   ! U/modified/d_access.U
-     Branch: metaconfig/U/perl
-	   ! Checkcc.U d_dlsymun.U gccvers.U
-     Branch: perl
-	   ! Configure config_h.SH
-____________________________________________________________________________
 [  7159] By: jhi                                   on 2000/10/06  13:56:39
         Log: Update Changes.
      Branch: perl
@@ -1868,18 +1922,6 @@ ____________________________________________________________________________
              Date:     Thu, 5 Oct 2000 07:46:33 EDT
      Branch: perl
 	   ! t/lib/b.t
-____________________________________________________________________________
-[  7157] By: jhi                                   on 2000/10/06  12:47:13
-        Log: Also the $ccflags is needed for the C compiler check.
-             
-             Subject: Configure (check for C-compiler)
-             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
-             Date: Fri, 06 Oct 2000 08:47:15 +0200
-             Message-Id: <20001006084120.C52B.H.M.BRAND@hccnet.nl>
-     Branch: metaconfig/U/perl
-	   ! Checkcc.U
-     Branch: perl
-	   ! Configure config_h.SH
 ____________________________________________________________________________
 [  7156] By: jhi                                   on 2000/10/06  11:45:15
         Log: The HINT_BYTE patch is apparently unnecessary, retracted.
@@ -1942,11 +1984,6 @@ ____________________________________________________________________________
              break non-broken platforms (tested on LinuxPPC). 
      Branch: perl
 	   ! doio.c
-____________________________________________________________________________
-[  7147] By: jhi                                   on 2000/10/04  23:26:34
-        Log: The one that got away from 7146.
-     Branch: metaconfig
-	   + U/installdirs/installscripts.U
 ____________________________________________________________________________
 [  7146] By: jhi                                   on 2000/10/04  23:25:04
         Log: Enable disabling scripts installation by Configure -Uinstallscripts,
@@ -2012,18 +2049,6 @@ ____________________________________________________________________________
      Branch: perl
 	   ! installman installperl op.c t/pragma/subs.t
 ____________________________________________________________________________
-[  7139] By: jhi                                   on 2000/10/03  22:09:41
-        Log: It is possible to have no hosts database at all.  Pointed out in
-             
-             Subject: [PATCH: 7131] PWPASSWD problem for passwd less pwd's
-             From: Peter Prymmer <pvhp@forte.com>
-             Date: Tue, 3 Oct 2000 12:05:59 -0700 (PDT)
-             Message-ID: <Pine.OSF.4.10.10010031203470.388222-100000@aspara.forte.com>
-     Branch: metaconfig
-	   ! U/modified/myhostname.U
-     Branch: perl
-	   ! Configure config_h.SH
-____________________________________________________________________________
 [  7138] By: jhi                                   on 2000/10/03  21:49:49
         Log: Subject: [PATCH: 7131] PWPASSWD problem for passwd less pwd's
              From: Peter Prymmer <pvhp@forte.com>
@@ -2083,23 +2108,6 @@ ____________________________________________________________________________
      Branch: perl
 	   ! Changes patchlevel.h
 ____________________________________________________________________________
-[  7129] By: jhi                                   on 2000/10/03  02:24:02
-        Log: Misplaced else.
-     Branch: metaconfig/U/perl
-	   ! d_strtoll.U
-     Branch: perl
-	   ! Configure config_h.SH
-____________________________________________________________________________
-[  7128] By: jhi                                   on 2000/10/03  02:08:29
-        Log: Subject: [ID 20000915.007] Not OK: perl v5.7.0 +DEVEL7092 on os2-64int-ld 2.30 '(UNINSTALLED)'
-             From: sthoenna@efn.org
-             Date: Fri, 15 Sep 2000 07:19:57 -0700 (PDT)
-             Message-Id: <200009151419.e8FEJvE19796@garcia.efn.org>
-     Branch: metaconfig/U/perl
-	   ! d_strtoll.U
-     Branch: perl
-	   ! Configure config_h.SH hints/os2.sh os2/os2ish.h
-____________________________________________________________________________
 [  7127] By: jhi                                   on 2000/10/03  01:13:14
         Log: Update Changes.
      Branch: perl
@@ -2116,6 +2124,8 @@ ____________________________________________________________________________
              From: Nick Clark <nick@plum.flirble.org>
              Date: Mon, 2 Oct 2000 11:03:24 +0100
              Message-Id: <20001002110324.D20073@plum.flirble.org>
+             
+             Also fixes bug ID 20001002.005.
      Branch: perl
 	   ! t/lib/encode.t
 ____________________________________________________________________________
@@ -2641,13 +2651,6 @@ ____________________________________________________________________________
      Branch: perl
 	   ! t/TEST t/harness
 ____________________________________________________________________________
-[  7063] By: jhi                                   on 2000/09/12  14:25:41
-        Log: The #7054 truncated Configure badly.
-     Branch: metaconfig/U/perl
-	   ! End.U
-     Branch: perl
-	   ! Configure config_h.SH
-____________________________________________________________________________
 [  7062] By: jhi                                   on 2000/09/12  14:08:32
         Log: Subject: [ID 20000911.009] t/pod/*.t tests not run by harness or make test
              From: sthoenna@efn.org
@@ -2712,17 +2715,6 @@ ____________________________________________________________________________
         Log: Do in VMS as the #7054 does.
      Branch: perl
 	   ! configure.com
-____________________________________________________________________________
-[  7054] By: jhi                                   on 2000/09/12  13:50:31
-        Log: Subject: RE: [Patch 5.7.0] Removing -ldb from the core build
-             From: "Paul Marquess" <paul_marquess@yahoo.co.uk>
-             Date: Mon, 11 Sep 2000 08:33:09 +0100
-             Message-ID: <000e01c01bc2$88b2d2c0$0e14140a@bfs.phone.com>
-     Branch: metaconfig/U/perl
-	   ! End.U
-     Branch: perl
-	   ! Configure Makefile.SH config_h.SH lib/ExtUtils/Embed.pm
-	   ! lib/ExtUtils/Liblist.pm lib/ExtUtils/MM_Unix.pm
 ____________________________________________________________________________
 [  7053] By: jhi                                   on 2000/09/12  13:29:19
         Log: Subject:  [PATCH] Perl 5.6.0, 5.7.0 ... vms/test.com to eliminate spurious NL's in test output
@@ -2800,17 +2792,6 @@ ____________________________________________________________________________
         Log: Continue #7041.
      Branch: perl
 	   ! cygwin/Makefile.SHs os2/Makefile.SHs
-____________________________________________________________________________
-[  7041] By: jhi                                   on 2000/09/08  21:18:10
-        Log: Do away with memory models cruft.  Sorry, PDP users.
-     Branch: metaconfig
-	   ! U/modified/cc.U U/modified/libpth.U
-     Branch: perl
-	   ! Configure Makefile.SH Porting/Glossary Porting/config.sh
-	   ! Porting/config_H cflags.SH config_h.SH configure.com
-	   ! epoc/config.sh hints/mint.sh hints/titanos.sh hints/vmesa.sh
-	   ! lib/ExtUtils/MM_Unix.pm win32/config.bc win32/config.gc
-	   ! win32/config.vc x2p/Makefile.SH x2p/cflags.SH
 ____________________________________________________________________________
 [  7040] By: jhi                                   on 2000/09/08  14:34:18
         Log: Major rewrite of s2p.  And I mean really major, it is
@@ -3077,17 +3058,6 @@ ____________________________________________________________________________
      Branch: perl
 	   ! pod/perldelta.pod
 ____________________________________________________________________________
-[  7005] By: jhi                                   on 2000/09/02  15:42:11
-        Log: Various Configure nits by Philip Newton,
-             plus the ebcdic one by me.
-     Branch: metaconfig
-	   + U/modified/pager.U
-	   ! U/ebcdic/ebcdic.U U/modified/Finish.U U/modified/Guess.U
-     Branch: metaconfig/U/perl
-	   ! Devel.U quadfio.U
-     Branch: perl
-	   ! Configure config_h.SH
-____________________________________________________________________________
 [  7004] By: jhi                                   on 2000/09/02  15:06:14
         Log: Apparently avoiding the swapping is too costly.
              
@@ -3235,20 +3205,6 @@ ____________________________________________________________________________
      Branch: perl
 	   ! t/pragma/overload.t
 ____________________________________________________________________________
-[  6982] By: jhi                                   on 2000/09/01  18:17:54
-        Log: Rename the PRIElfbl, PRIX64, etc, to be PRIEUfldbl, PRIXU64,
-             so that case-ignoring systems like DCL can tell them from
-             PRIefldbl and PRIx64.  Apply Merijn's ccversion patches.
-     Branch: metaconfig/U/perl
-	   ! Checkcc.U gccvers.U longdblfio.U perlxvf.U quadfio.U
-     Branch: perl
-	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
-	   ! config_h.SH configure.com epoc/config.sh hints/aix.sh
-	   ! hints/dec_osf.sh hints/hpux.sh hints/irix_6.sh
-	   ! hints/solaris_2.sh myconfig.SH uconfig.h uconfig.sh
-	   ! vos/config.def vos/config.h vos/config_h.SH_orig
-	   ! win32/config.bc win32/config.gc win32/config.vc
-____________________________________________________________________________
 [  6981] By: nick                                  on 2000/09/01  17:21:57
         Log: Document UNTIE. Also tweak implementation to suppress the 'inner references'
              warning when UNTIE exists and instead pass the cound of extra references to
@@ -3276,16 +3232,6 @@ ____________________________________________________________________________
         Log: Update to PodParser 1.18, from Brad Appleton.
      Branch: perl
 	   ! lib/Pod/Checker.pm t/pod/find.t
-____________________________________________________________________________
-[  6977] By: jhi                                   on 2000/09/01  14:48:58
-        Log: Subject: Nit in Configure (bleadperl@6961)
-             From: Lupe Christoph <lupe@lupe-christoph.de>
-             Date: Fri, 1 Sep 2000 16:34:29 +0200
-             Message-ID: <20000901163429.K13547@alanya.lupe-christoph.de>
-     Branch: metaconfig
-	   ! U/compline/ccflags.U
-     Branch: perl
-	   ! Configure config_h.SH
 ____________________________________________________________________________
 [  6976] By: jhi                                   on 2000/09/01  14:39:52
         Log: Update Changes.
@@ -3398,13 +3344,6 @@ ____________________________________________________________________________
      Branch: perl
 	   ! Changes patchlevel.h
 ____________________________________________________________________________
-[  6961] By: jhi                                   on 2000/08/31  23:20:04
-        Log: Small tweaks all over.
-     Branch: metaconfig
-	   ! U/compline/d_gconvert.U
-     Branch: perl
-	   ! AUTHORS Configure config_h.SH pp_ctl.c
-____________________________________________________________________________
 [  6960] By: jhi                                   on 2000/08/31  22:39:36
         Log: Further rewording.
      Branch: perl
@@ -3447,26 +3386,6 @@ ____________________________________________________________________________
      Branch: perl
 	   ! hints/solaris_2.sh
 ____________________________________________________________________________
-[  6953] By: jhi                                   on 2000/08/31  18:09:20
-        Log: Forget about NV_MAX (#6951).  Various floating point tweaks,
-             ideas from Eric Fifer, Yitzchak, Alan, and Spider.
-     Branch: metaconfig
-	   ! U/compline/d_gconvert.U U/threads/archname.U
-     Branch: metaconfig/U/perl
-	   ! perlxv.U
-     Branch: perl
-	   ! Configure config_h.SH sv.c
-____________________________________________________________________________
-[  6952] By: jhi                                   on 2000/08/31  17:42:24
-        Log: :: not allowed in pathnames, change to .
-             
-             Subject: [PATCH perl@6938] cygwin port
-             From: "Fifer, Eric" <EFifer@sanwaint.com>
-             Date: Thu, 31 Aug 2000 16:32:59 +0100
-             Message-ID: <779F20BCCE5AD31186A50008C75D997917179A@silldn_mail1.sanwaint.com>
-     Branch: metaconfig/U/perl
-	   ! perlxv.U
-____________________________________________________________________________
 [  6951] By: jhi                                   on 2000/08/31  17:02:05
         Log: Try to deduce NV_MAX.  Really should be Configure fodder.
      Branch: perl
@@ -3485,6 +3404,11 @@ ____________________________________________________________________________
 [  6949] By: jhi                                   on 2000/08/31  16:04:49
         Log: POSIX doesn't report long double values under -Duselongdouble
              when the long doubles are "real" (bigger than doubles).
+             
+             Subject: [ID 20000831.014] Not OK: perl v5.7.0 +DEVEL6919 on alpha-dec_osf-ld 5.1
+             From: Spider Boardman <spider@peano.zk3.dec.com>
+             Date: Thu, 31 Aug 2000 11:48:48 -0400 (EDT)
+             Message-Id: <200008311548.LAA0000161952@peano.zk3.dec.com>
      Branch: perl
 	   ! ext/POSIX/POSIX.xs
 ____________________________________________________________________________
@@ -3502,13 +3426,6 @@ ____________________________________________________________________________
         Log: Document known failures.
      Branch: perl
 	   ! pod/perldelta.pod
-____________________________________________________________________________
-[  6945] By: jhi                                   on 2000/08/31  15:07:00
-        Log: Don't attach -ld to the archname if pointless.
-     Branch: metaconfig
-	   ! U/threads/archname.U
-     Branch: perl
-	   ! Configure config_h.SH
 ____________________________________________________________________________
 [  6944] By: jhi                                   on 2000/08/31  14:37:42
         Log: Wrap the test in eval.
@@ -3562,13 +3479,6 @@ ____________________________________________________________________________
         Log: Update Changes.
      Branch: perl
 	   ! Changes patchlevel.h
-____________________________________________________________________________
-[  6937] By: jhi                                   on 2000/08/31  04:26:23
-        Log: sscanf() may be the only way to read long doubles from strings.
-     Branch: metaconfig/U/perl
-	   ! longdblfio.U
-     Branch: perl
-	   ! Configure config_h.SH perl.h util.c
 ____________________________________________________________________________
 [  6936] By: jhi                                   on 2000/08/31  04:18:19
         Log: The #6929 was too skimpy.
@@ -3741,18 +3651,6 @@ ____________________________________________________________________________
      Branch: perl
 	   ! perl.c
 ____________________________________________________________________________
-[  6912] By: jhi                                   on 2000/08/30  13:51:24
-        Log: Reset archname and archname64 always, forcing them be
-             recomputed at each Configure run, make Configure and
-             the hints files agree on the naming of largefiles variables.
-     Branch: metaconfig
-	   ! U/threads/archname.U
-     Branch: metaconfig/U/perl
-	   ! use64bits.U
-     Branch: perl
-	   ! Configure config_h.SH configpm hints/aix.sh hints/hpux.sh
-	   ! hints/linux.sh hints/solaris_2.sh
-____________________________________________________________________________
 [  6911] By: jhi                                   on 2000/08/30  13:30:13
         Log: Put back the slice accidentally removed by #6907.
      Branch: perl
@@ -3780,13 +3678,6 @@ ____________________________________________________________________________
         Log: Update Changes.
      Branch: perl
 	   ! Changes patchlevel.h
-____________________________________________________________________________
-[  6907] By: jhi                                   on 2000/08/30  00:57:22
-        Log: Introduce ccname to keep track of what compiler kind of we have.
-     Branch: metaconfig/U/perl
-	   ! Checkcc.U gccvers.U
-     Branch: perl
-	   ! Configure config_h.SH hints/solaris_2.sh
 ____________________________________________________________________________
 [  6906] By: jhi                                   on 2000/08/30  00:25:47
         Log: Put back the flags dump as reasoned in
@@ -3874,20 +3765,6 @@ ____________________________________________________________________________
              Message-ID: <Pine.OSF.4.10.10008291327500.502507-100000@aspara.forte.com>
      Branch: perl
 	   ! pod/perlebcdic.pod
-____________________________________________________________________________
-[  6896] By: jhi                                   on 2000/08/29  20:40:57
-        Log: There's no point repeating the 'revision' (5) of perl5.
-     Branch: metaconfig/U/perl
-	   ! Devel.U patchlevel.U
-     Branch: perl
-	   ! Configure config_h.SH
-____________________________________________________________________________
-[  6895] By: jhi                                   on 2000/08/29  20:16:58
-        Log: Regen Configure for #6894.
-     Branch: metaconfig/U/perl
-	   ! perladmin.U
-     Branch: perl
-	   ! Configure config_h.SH
 ____________________________________________________________________________
 [  6894] By: jhi                                   on 2000/08/29  19:59:52
         Log: Subject: [ID 20000829.023] [PATCH 6868] perlbug@perl.com --> perlbug@perl.org
@@ -4098,13 +3975,6 @@ ____________________________________________________________________________
      Branch: perl
 	   ! hv.h
 ____________________________________________________________________________
-[  6865] By: jhi                                   on 2000/08/28  21:02:15
-        Log: Add -ld to archname on long tr...double platforms.
-     Branch: metaconfig
-	   ! U/threads/archname.U
-     Branch: perl
-	   ! Configure config_h.SH
-____________________________________________________________________________
 [  6864] By: jhi                                   on 2000/08/28  20:38:59
         Log: An attempt to fix the problem reported in
              
@@ -4222,19 +4092,6 @@ ____________________________________________________________________________
         Log: Test nit.
      Branch: perl
 	   ! t/pragma/warn/pp_sys
-____________________________________________________________________________
-[  6846] By: jhi                                   on 2000/08/27  15:19:02
-        Log: Passing -R in ldflags makes now it to appear in the default
-             for lddlflags, just like with -L.
-             
-             Subject: Re: MM_Unix.pm LD_RUN_PATH niggles on Solaris
-             From: Lupe Christoph <lupe@lupe-christoph.de>
-             Date: Sun, 27 Aug 2000 10:28:21 +0200
-             Message-ID: <20000827102821.B4437@alanya.lupe-christoph.de>
-     Branch: metaconfig/U/perl
-	   ! dlsrc.U
-     Branch: perl
-	   ! Configure
 ____________________________________________________________________________
 [  6845] By: jhi                                   on 2000/08/27  15:08:54
         Log: Subject: MM_Unix.pm LD_RUN_PATH niggles on Solaris
@@ -4420,18 +4277,6 @@ ____________________________________________________________________________
      Branch: perl
 	   ! Changes patchlevel.h
 ____________________________________________________________________________
-[  6818] By: jhi                                   on 2000/08/25  18:47:45
-        Log: Tweak the sfio/useperlio logic, hopefully as wished in
-             
-             Subject: [ID 20000825.004] Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6804 on i586-linux 2.2.12 (UNINSTALLED)
-             From: Nicholas Clark <nick@babyhippo.co.uk>
-             Date: Fri, 25 Aug 2000 12:01:45 +0100
-             Message-Id: <E13SHF3-0005I9-00@fruitbat.babyhippo.co.uk>
-     Branch: metaconfig/U/perl
-	   ! d_sfio.U
-     Branch: perl
-	   ! Configure
-____________________________________________________________________________
 [  6817] By: jhi                                   on 2000/08/25  18:32:51
         Log: Allow microperl to assume <math.h>, without it the math
              functions like floor() are assumed to return int, which makes
@@ -4439,22 +4284,6 @@ ____________________________________________________________________________
              don't mix.
      Branch: perl
 	   ! uconfig.h uconfig.sh
-____________________________________________________________________________
-[  6816] By: jhi                                   on 2000/08/25  18:27:17
-        Log: AIX 4.3.3 has SOCKS in libc with a differently named init routine,
-             the problem reported in
-             
-             Subject: [ID 20000825.007] Building stable 5.6.0 on AIX 4.3.3 using SOCKS
-             From: danhale@us.ibm.com
-             Date: Fri, 25 Aug 2000 10:58:06 -0400
-             Message-Id: <85256946.005238A3.00@d54mta02.raleigh.ibm.com>
-     Branch: metaconfig/U/perl
-	   + d_socks5_init.U
-     Branch: perl
-	   ! Configure INSTALL config_h.SH configure.com epoc/config.sh
-	   ! perl.c uconfig.h uconfig.sh vos/config.def vos/config.h
-	   ! vos/config.pl vos/config_h.SH_orig win32/config.bc
-	   ! win32/config.gc win32/config.vc
 ____________________________________________________________________________
 [  6815] By: jhi                                   on 2000/08/25  17:43:31
         Log: A solution for the retrieve_fd autosplit warning,
@@ -4745,13 +4574,6 @@ ____________________________________________________________________________
      Branch: perl
 	   ! ext/B/B.xs
 ____________________________________________________________________________
-[  6775] By: jhi                                   on 2000/08/22  18:18:37
-        Log: Make the selection of NVff et al stricter.
-     Branch: metaconfig/U/perl
-	   ! perlxvf.U
-     Branch: perl
-	   ! Configure config_h.SH
-____________________________________________________________________________
 [  6774] By: jhi                                   on 2000/08/22  17:19:42
         Log: perldelta nits.
      Branch: perl
@@ -4789,14 +4611,6 @@ ____________________________________________________________________________
         Log: Add Yitzchak, reformat.
      Branch: perl
 	   ! Changes config_h.SH
-____________________________________________________________________________
-[  6768] By: jhi                                   on 2000/08/22  14:21:35
-        Log: Long double Gconvert fixes from Yitzchak Scott-Thoennes
-             and Spider Boardman.
-     Branch: metaconfig
-	   ! U/compline/d_gconvert.U
-     Branch: perl
-	   ! Configure
 ____________________________________________________________________________
 [  6767] By: jhi                                   on 2000/08/22  14:11:24
         Log: Subject: Re: [PATCH] [ID 20000820.012] Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6735 on
@@ -4921,13 +4735,6 @@ ____________________________________________________________________________
         Log: Also under djgpp the timestamps are funky.
      Branch: perl
 	   ! t/op/stat.t
-____________________________________________________________________________
-[  6751] By: jhi                                   on 2000/08/21  17:55:56
-        Log: Tweak the floating point output routine preferences.
-     Branch: metaconfig
-	   ! U/compline/d_gconvert.U
-     Branch: perl
-	   ! Configure
 ____________________________________________________________________________
 [  6750] By: jhi                                   on 2000/08/21  17:51:29
         Log: Unicos/mk requires elaborate paranoia.
@@ -5421,22 +5228,6 @@ ____________________________________________________________________________
      Branch: perl
 	   ! ext/POSIX/POSIX.xs ext/POSIX/typemap
 ____________________________________________________________________________
-[  6685] By: jhi                                   on 2000/08/18  02:02:12
-        Log: Introduce NVef, NVff, and NVgf, use the middle one.
-             (helps for lib/peek + Linux + long doubles)  Reported in
-             
-             From: abigail@foad.org
-             Subject: [ID 20000814.005] Not OK: perl v5.6.0 on i686-linux-64int 2.2.13       
-             Date: 15 Aug 2000 04:06:38 -0000
-             Message-Id: <20000815040638.8524.qmail@foad.org> 
-             
-             (note: the lib/complex failure has not yet been addressed)
-     Branch: metaconfig/U/perl
-	   ! perlxvf.U
-     Branch: perl
-	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
-	   ! config_h.SH dump.c perl.h pod/perlguts.pod
-____________________________________________________________________________
 [  6684] By: jhi                                   on 2000/08/17  23:22:19
         Log: Add byteorder to the myconfig output.
      Branch: perl
@@ -5461,19 +5252,6 @@ ____________________________________________________________________________
              Message-Id: <20000817205556.24270.qmail@foad.org>
      Branch: perl
 	   ! ext/Devel/Peek/Makefile.PL
-____________________________________________________________________________
-[  6680] By: jhi                                   on 2000/08/17  19:46:43
-        Log: Don't propose using modules built for 5.005 if no binary
-             compatibility with 5.005 is attempted.
-             
-             From: Jeff Okamoto <okamoto@xfiles.intercon.hp.com>
-             Subject: Minor nit with 5.7.0 (6655)
-             Date: Wed, 16 Aug 2000 15:56:14 -0700 (PDT)
-             Message-Id: <200008162256.PAA06964@xfiles.intercon.hp.com>
-     Branch: metaconfig
-	   ! U/installdirs/inc_version_list.U
-     Branch: perl
-	   ! Configure config_h.SH
 ____________________________________________________________________________
 [  6679] By: jhi                                   on 2000/08/17  19:16:39
         Log: Microperl config update.
@@ -5715,7 +5493,7 @@ ____________________________________________________________________________
              No test since adding the failing example to locale.t
              does not fail -- probably because the locale settings are so
              thoroughly tweaked by that time.  Running the example standalone
-             does fail, though.
+             does fail, though.  UPDATE: test case added at change #7540.
      Branch: perl
 	   ! dump.c perl.h pp.c pp_ctl.c sv.c
 ____________________________________________________________________________
@@ -5723,16 +5501,6 @@ ____________________________________________________________________________
         Log: Update Changes and test semi-automatic patchlevel updating.
      Branch: perl
 	   ! Changes patchlevel.h
-____________________________________________________________________________
-[  6646] By: jhi                                   on 2000/08/15  23:35:07
-        Log: Fix a dependency problem.
-             
-             Subject: [PATCH: 6640] VMS Makefile.SH update
-             From: Peter Prymmer <pvhp@forte.com>
-             Date: Tue, 15 Aug 2000 16:31:34 -0700 (PDT)
-             Message-ID: <Pine.OSF.4.10.10008151613140.141017-100000@aspara.forte.com>
-     Branch: perl
-	   ! vms/descrip_mms.template
 ____________________________________________________________________________
 [  6645] By: jhi                                   on 2000/08/15  23:33:23
         Log: (Retracted by #6660)
