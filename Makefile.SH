@@ -1186,7 +1186,7 @@ minitest: miniperl$(EXE_EXT) lib/re.pm
 	@echo "to build lib/Config.pm or lib/lib.pm."
 	@echo " "
 	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../miniperl$(EXE_EXT) perl$(EXE_EXT)) \
-		&& $(LDLIBPTH) ./perl TEST base/*.t comp/*.t cmd/*.t run/*.t io/*.t op/*.t uni/*.t </dev/tty
+		&& $(LDLIBPTH) ./perl TEST -minitest base/*.t comp/*.t cmd/*.t run/*.t io/*.t op/*.t uni/*.t </dev/tty
 
 # Test via harness
 
