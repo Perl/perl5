@@ -201,7 +201,7 @@ sub connect {
     unless ($host) {
 	require Sys::Hostname;
 	my($host_uniq) = Sys::Hostname::hostname();
-	($host) = $host_uniq =~ /(\w+)/;
+	($host) = $host_uniq =~ /([\w\-]+)/;
     }
     my $udp = getprotobyname('udp');
     my $syslog = getservbyname('syslog','udp');
