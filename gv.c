@@ -654,7 +654,6 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 	    }
 	}
 	break;
-#ifdef OVERLOAD
     case 'O':
         if (strEQ(name, "OVERLOAD")) {
             HV* hv = GvHVn(gv);
@@ -662,7 +661,6 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
             hv_magic(hv, gv, 'A');
         }
         break;
-#endif /* OVERLOAD */
     case 'S':
 	if (strEQ(name, "SIG")) {
 	    HV *hv;
@@ -1005,7 +1003,6 @@ register GV *gv;
 }
 #endif			/* Microport 2.4 hack */
 
-#ifdef OVERLOAD
 /* Updates and caches the CV's */
 
 bool
@@ -1483,5 +1480,3 @@ amagic_call(SV *left, SV *right, int method, int flags)
     }
   }
 }
-#endif /* OVERLOAD */
-

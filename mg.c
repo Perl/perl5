@@ -1040,8 +1040,6 @@ magic_setisa(SV *sv, MAGIC *mg)
     return 0;
 }
 
-#ifdef OVERLOAD
-
 int
 magic_setamagic(SV *sv, MAGIC *mg)
 {
@@ -1050,7 +1048,6 @@ magic_setamagic(SV *sv, MAGIC *mg)
 
     return 0;
 }
-#endif /* OVERLOAD */
 
 int
 magic_getnkeys(SV *sv, MAGIC *mg)

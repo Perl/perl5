@@ -1361,9 +1361,7 @@ PP(pp_negate)
 
 PP(pp_not)
 {
-#ifdef OVERLOAD
     djSP; tryAMAGICunSET(not);
-#endif /* OVERLOAD */
     *PL_stack_sp = boolSV(!SvTRUE(*PL_stack_sp));
     return NORMAL;
 }

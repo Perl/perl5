@@ -22,10 +22,8 @@ START_EXTERN_C
 #define __attribute__(attr)
 #endif
 #endif
-#ifdef OVERLOAD
 VIRTUAL SV*	amagic_call _((SV* left,SV* right,int method,int dir));
 VIRTUAL bool	Gv_AMupdate _((HV* stash));
-#endif /* OVERLOAD */
 VIRTUAL OP*	append_elem _((I32 optype, OP* head, OP* tail));
 VIRTUAL OP*	append_list _((I32 optype, LISTOP* first, LISTOP* last));
 VIRTUAL I32	apply _((I32 type, SV** mark, SV** sp));
@@ -271,9 +269,7 @@ VIRTUAL int	magic_nextpack	_((SV* sv, MAGIC* mg, SV* key));
 VIRTUAL U32	magic_regdata_cnt	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_regdatum_get	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_set	_((SV* sv, MAGIC* mg));
-#ifdef OVERLOAD
 VIRTUAL int	magic_setamagic	_((SV* sv, MAGIC* mg));
-#endif /* OVERLOAD */
 VIRTUAL int	magic_setarylen	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_setbm	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_setdbline	_((SV* sv, MAGIC* mg));

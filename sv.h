@@ -147,11 +147,7 @@ struct io {
 #define SVf_OK		(SVf_IOK|SVf_NOK|SVf_POK|SVf_ROK| \
 			 SVp_IOK|SVp_NOK|SVp_POK)
 
-#ifdef OVERLOAD
-#define SVf_AMAGIC    0x10000000      /* has magical overloaded methods */
-#else
-#define SVf_AMAGIC    0               /* can be or-ed without effect */
-#endif /* OVERLOAD */
+#define SVf_AMAGIC	0x10000000      /* has magical overloaded methods */
 
 #define PRIVSHIFT 8
 
@@ -384,10 +380,9 @@ struct xpvio {
 #define SvRMAGICAL_on(sv)	(SvFLAGS(sv) |= SVs_RMG)
 #define SvRMAGICAL_off(sv)	(SvFLAGS(sv) &= ~SVs_RMG)
 
-#ifdef OVERLOAD
-#define SvAMAGIC(sv)         (SvFLAGS(sv) & SVf_AMAGIC)
-#define SvAMAGIC_on(sv)      (SvFLAGS(sv) |= SVf_AMAGIC)
-#define SvAMAGIC_off(sv)     (SvFLAGS(sv) &= ~SVf_AMAGIC)
+#define SvAMAGIC(sv)		(SvFLAGS(sv) & SVf_AMAGIC)
+#define SvAMAGIC_on(sv)		(SvFLAGS(sv) |= SVf_AMAGIC)
+#define SvAMAGIC_off(sv)	(SvFLAGS(sv) &= ~SVf_AMAGIC)
 
 /*
 #define Gv_AMG(stash) \
@@ -395,7 +390,6 @@ struct xpvio {
          ((!HV_AMAGICbad(stash) && HV_AMAGIC(stash)) || Gv_AMupdate(stash)))
 */
 #define Gv_AMG(stash)           (PL_amagic_generation && Gv_AMupdate(stash))
-#endif /* OVERLOAD */
 
 #define SvTHINKFIRST(sv)	(SvFLAGS(sv) & SVf_THINKFIRST)
 

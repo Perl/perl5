@@ -108,10 +108,8 @@
 #  ifdef USE_LOCALE_COLLATE
 #    define VTBL_collxfrm	get_vtbl(want_vtbl_collxfrm)
 #  endif
-#  ifdef OVERLOAD
-#    define VTBL_amagic		get_vtbl(want_vtbl_amagic)
-#    define VTBL_amagicelem	get_vtbl(want_vtbl_amagicelem)
-#  endif
+#  define VTBL_amagic		get_vtbl(want_vtbl_amagic)
+#  define VTBL_amagicelem	get_vtbl(want_vtbl_amagicelem)
 #else
 #  define VTBL_sv		&PL_vtbl_sv
 #  define VTBL_env		&PL_vtbl_env
@@ -141,10 +139,8 @@
 #  ifdef USE_LOCALE_COLLATE
 #    define VTBL_collxfrm	&PL_vtbl_collxfrm
 #  endif
-#  ifdef OVERLOAD
-#    define VTBL_amagic		&PL_vtbl_amagic
-#    define VTBL_amagicelem	&PL_vtbl_amagicelem
-#  endif
+#  define VTBL_amagic		&PL_vtbl_amagic
+#  define VTBL_amagicelem	&PL_vtbl_amagicelem
 #endif
 
 #ifdef PERL_OBJECT
