@@ -88,7 +88,7 @@ test program.
 =item B<'1..M'>
 
 This header tells how many tests there will be.  It should be the
-first line output by your test program (but its okay if its preceded
+first line output by your test program (but it is okay if it is preceded
 by comments).
 
 In certain instanced, you may not know how many tests you will
@@ -1185,7 +1185,7 @@ portable because $^X is not consistent for shebang scripts across
 platforms. This is no problem when Test::Harness is run with an
 absolute path to the perl binary or when $^X can be found in the path.
 
-HARNESS_COMPILE_TEST currently assumes its run from the Perl source
+HARNESS_COMPILE_TEST currently assumes it is run from the Perl source
 directory.
 
 =cut
