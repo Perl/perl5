@@ -204,7 +204,7 @@ translation for text files then the default layers are :
 level layer.)
 
 Otherwise if C<Configure> found out how to do "fast" IO using system's
-stdio, then the default layers are :
+stdio, then the default layers are:
 
   unix stdio
 
@@ -243,10 +243,13 @@ DOS-like platforms and depending on the setting of the C<$ENV{PERLIO}>:
 
  PERLIO     UNIX-like       DOS-like
  
- none or "" stdio           unix crlf
- stdio      stdio           stdio
+ none or "" stdio [1]       unix crlf
+ stdio      stdio [1]       stdio
  perlio     unix perlio     unix perlio
  mmap       unix mmap       unix mmap
+
+ # [1] If Configure found how to do "fast stdio",
+ # otherwise it will be "unix perlio".
 
 By default the layers from the input side of the filehandle is
 returned, to get the output side use the optional C<output> argument:

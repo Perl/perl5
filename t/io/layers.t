@@ -1,5 +1,7 @@
 #!./perl
 
+my $PERLIO;
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
@@ -15,14 +17,27 @@ BEGIN {
 	print "1..0 # PERLIO='$ENV{PERLIO}' unknown\n";
 	exit 0;
     }
+    $PERLIO = exists $ENV{PERLIO} ? $ENV{PERLIO} : "(undef)";
 }
 
 plan tests => 43;
 
 use Config;
 
-my $DOSISH   = $^O =~ /^(?:MSWin32|cygwin|os2|dos|NetWare|mint)$/;
-my $NONSTDIO = exists $ENV{PERLIO} && $ENV{PERLIO} ne 'stdio';
+my $DOSISH    = $^O =~ /^(?:MSWin32|cygwin|os2|dos|NetWare|mint)$/ ? 1 : 0;
+my $NONSTDIO  = exists $ENV{PERLIO} && $ENV{PERLIO} ne 'stdio' ? 1 : 0;
+my $FASTSTDIO =
+    $Config{d_stdstdio} &&
+    $Config{d_stdio_ptr_lval} &&
+    ($Config{d_stdio_cnt_lval} ||
+     $Config{d_stdio_ptr_lval_sets_cnt}) ? 1 : 0;
+
+print <<__EOH__;
+# PERLIO    = $PERLIO
+# DOSISH    = $DOSISH
+# NONSTDIO  = $NONSTDIO
+# FASTSTDIO = $FASTSTDIO
+__EOH__
 
 SKIP: {
     skip("This perl does not have Encode", 43)
@@ -35,19 +50,32 @@ SKIP: {
 	#
 	# PERLIO     UNIX-like       DOS-like
 	#
-	# none or "" stdio           unix crlf
-	# stdio      stdio           stdio
+	# none or "" stdio [1]       unix crlf
+	# stdio      stdio [1]       stdio
 	# perlio     unix perlio     unix perlio
 	# mmap       unix mmap       unix mmap
+	#
+	# [1] If Configure found how to do "fast stdio",
+	# otherwise it will be "unix perlio".
 	#
 	if ($NONSTDIO) {
 	    # Get rid of "unix".
 	    shift @$result if $result->[0] eq "unix";
 	    # Change expectations.
-	    $expected->[0] = $ENV{PERLIO} if $expected->[0] eq "stdio";
+	    if ($FASTSTDIO) {
+		$expected->[0] = $ENV{PERLIO};
+	    } else {
+		$expected->[0] = $ENV{PERLIO} if $expected->[0] eq "stdio";
+	    }
+	} elsif (!$FASTSTDIO) {
+	    splice(@$result, 0, 2, "stdio")
+		if @$result >= 2 &&
+		   $result->[0] eq "unix" &&
+		   $result->[1] eq "perlio";
 	} elsif ($DOSISH) {
 	    splice(@$result, 0, 2, "stdio")
-		if $result->[0] eq "unix" &&
+		if @$result >= 2 &&
+		   $result->[0] eq "unix" &&
 		   $result->[1] eq "crlf";
 	}
 	my $n = scalar @$expected;
@@ -120,7 +148,7 @@ SKIP: {
     binmode(F, ":raw :encoding(latin1)"); # "latin1" will be canonized
 
     SKIP: {
-	skip("too complex layer coreography", 7) if $DOSISH;
+	skip("too complex layer coreography", 7) if $DOSISH || !$FASTSTDIO;
 
 	my @results = PerlIO::get_layers(F, details => 1);
 
