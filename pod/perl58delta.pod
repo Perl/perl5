@@ -2903,11 +2903,11 @@ Using negative offset for vec() in lvalue context is now a warnable offense.
 
 =item *
 
-Odd number of arguments to oveload::constant now elicits a warning.
+Odd number of arguments to overload::constant now elicits a warning.
 
 =item *
 
-Odd number of elements to in anonymous hash now elicits a warning.
+Odd number of elements in anonymous hash now elicits a warning.
 
 =item *
 
