@@ -1,0 +1,7 @@
+sub foo {
+	print "in sub foo\n";
+}
+
+foo();
+$^P -= 0x40;
+foo();

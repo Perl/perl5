@@ -168,7 +168,7 @@ sub new
       $self->{sign} = '+';
       return $self->bnan() if $self->{_n}->{sign} eq $nan ||
                               $self->{_d}->{sign} eq $nan;
-      # inf handling is missing here
+      # handle inf and NAN cases:
       if ($self->{_n}->is_inf() || $self->{_d}->is_inf())
         {
         # inf/inf => NaN
@@ -570,12 +570,13 @@ sub bmod
 
   # compute $x - $y * floor($x/$y), keeping the sign of $x
 
+  # locally disable these, since they would interfere
   local $Math::BigInt::upgrade = undef;
   local $Math::BigInt::accuracy = undef;
   local $Math::BigInt::precision = undef;
 
   my $u = $x->copy()->babs();
-  # do a "normal" division ($x/$y)
+  # first, do a "normal" division ($x/$y)
   $u->{_d}->bmul($y->{_n});
   $u->{_n}->bmul($y->{_d});
 
@@ -597,7 +598,6 @@ sub bmod
   $x->{sign} = $xsign;				# put sign back
 
   $x->bnorm()->round(@r);
-  $x;
   }
 
 ##############################################################################
@@ -908,8 +908,8 @@ sub bsqrt
   local $Math::BigInt::upgrade = undef;
   local $Math::BigInt::precision = undef;
   local $Math::BigInt::accuracy = undef;
-  $x->{_d} = Math::BigFloat->new($x->{_d})->bsqrt(@r);
-  $x->{_n} = Math::BigFloat->new($x->{_n})->bsqrt(@r);
+  $x->{_d} = Math::BigFloat->new($x->{_d})->bsqrt();
+  $x->{_n} = Math::BigFloat->new($x->{_n})->bsqrt();
 
   # if sqrt(D) was not integer
   if ($x->{_d}->{_e}->{sign} ne '+')
@@ -921,7 +921,7 @@ sub bsqrt
   if ($x->{_n}->{_e}->{sign} ne '+')
     {
     $x->{_d}->blsft($x->{_n}->{_e}->babs(),10);		# 71/45.1 => 710/45.1
-    $x->{_n} = $x->{_n}->{_n};				# 710/45.1 => 710/451
+    $x->{_n} = $x->{_n}->{_m};				# 710/45.1 => 710/451
     }
  
   # convert parts to $MBI again 
@@ -1024,10 +1024,12 @@ sub numify
  
   return $x->bstr() if $x->{sign} !~ /^[+-]$/;	# inf, NaN, etc
 
-  my $t = Math::BigFloat->new($x->{_n});
-  $t->bneg() if $x->is_negative();
-  $t->bdiv($x->{_d});
-  $t->numify();  
+  # N/1 => N
+  return $x->{_n}->numify() if $x->{_d}->is_one();
+
+  # N/D
+  my $neg = 1; $neg = -1 if $x->{sign} ne '+';
+  $neg * $x->{_n}->numify() / $x->{_d}->numify();	# return sign * N/D
   }
 
 sub as_number
@@ -1113,7 +1115,10 @@ sub import
       eval $rc;
       }
     }
-  die ("Couldn't load $MBI: $! $@") if $@;
+  if ($@)
+    {
+    require Carp; Carp::croak ("Couldn't load $MBI: $! $@");
+    }
 
   # any non :constant stuff is handled by our parent, Exporter
   # even if @_ is empty, to give it a chance

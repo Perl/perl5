@@ -8,7 +8,7 @@ require Exporter;
 use vars qw/@ISA $VERSION/;
 @ISA = qw(Exporter);
 
-$VERSION = '0.34';
+$VERSION = '0.35';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -27,7 +27,7 @@ $VERSION = '0.34';
 
 # Beware of things like:
 # $i = $i * $y + $car; $car = int($i / $MBASE); $i = $i % $MBASE;
-# This works on x86, but fails on ARM (SA1100, iPAQ) due to whoeknows what
+# This works on x86, but fails on ARM (SA1100, iPAQ) due to whoknows what
 # reasons. So, use this instead (slower, but correct):
 # $i = $i * $y + $car; $car = int($i / $MBASE); $i -= $MBASE * $car;
 

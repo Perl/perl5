@@ -2296,7 +2296,10 @@ PP(pp_goto)
 		    CV *gotocv;
 		
 		    if (PERLDB_SUB_NN) {
-			SvIVX(sv) = PTR2IV(cv); /* Already upgraded, saved */
+			(void)SvUPGRADE(sv, SVt_PVIV);
+			(void)SvIOK_on(sv);
+			SAVEIV(SvIVX(sv));
+			SvIVX(sv) = PTR2IV(cv); /* Do it the quickest way */
 		    } else {
 			save_item(sv);
 			gv_efullname3(sv, CvGV(cv), Nullch);

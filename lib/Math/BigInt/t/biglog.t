@@ -96,9 +96,7 @@ ok ($cl->new('1.2')->bpow('0.3',10),  '1.056219968');
 ok ($cl->new('10')->bpow('0.6',10),   '3.981071706');
 
 # blog should handle bigint input
-# TODO: should be 2
-#ok (Math::BigFloat::blog(Math::BigInt->new(100),10), 2);
-ok (Math::BigFloat::blog(Math::BigInt->new(100),10), 'NaN');
+ok (Math::BigFloat::blog(Math::BigInt->new(100),10), 2);
 ok (Math::BigInt->new(100)->blog(10), 'NaN');
 
 # test for bug in bsqrt() not taking negative _e into account
