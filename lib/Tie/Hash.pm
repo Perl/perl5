@@ -65,11 +65,11 @@ Retrieve the datum in I<key> for the tied hash I<this>.
 
 =item FIRSTKEY this
 
-Return the (key, value) pair for the first key in the hash.
+Return the first key in the hash.
 
 =item NEXTKEY this, lastkey
 
-Return the next key for the hash.
+Return the next key in the hash.
 
 =item EXISTS this, key
 
