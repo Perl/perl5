@@ -3618,7 +3618,8 @@ root of C<$_>.
 =item srand
 
 Sets the random number seed for the C<rand()> operator.  If EXPR is
-omitted, uses a semi-random value based on the current time and process
+omitted, uses a semi-random value supplied by the kernel (if it supports
+the F</dev/urandom> device) or based on the current time and process
 ID, among other things.  In versions of Perl prior to 5.004 the default
 seed was just the current C<time()>.  This isn't a particularly good seed,
 so many old programs supply their own seed value (often C<time ^ $$> or
