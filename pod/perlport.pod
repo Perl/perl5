@@ -352,6 +352,25 @@ file already tied or opened; C<untie> or C<close> it first.
 Don't open the same file more than once at a time for writing, as some
 operating systems put mandatory locks on such files.
 
+Don't assume that write/modify permission on a directory gives the
+right to add or delete files/directories in that directory.  That is
+filesystem specific: in some filesystems you need write/modify
+permission also (or even just) in the file/directory itself.  In some
+filesystems (AFS, DFS) the permission to add/delete directory entries
+is a completely separate permission.
+
+Don't assume that a single C<unlink> completely gets rid of the file:
+some filesystems (most notably the ones in VMS) have versioned
+filesystems, and unlink() removes only the most recent one (it doesn't
+remove all the versions because by default the native tools on those
+platforms remove just the most recent version, too).  The portable
+idiom to remove all the versions of a file is
+
+    1 while unlink "file" or die $!;
+
+This will terminate if the file is undeleteable for some reason
+(protected, not there, and so on).
+
 Don't count on a specific environment variable existing in C<%ENV>.
 Don't count on C<%ENV> entries being case-sensitive, or even
 case-preserving.  Don't try to clear %ENV by saying C<%ENV = ();>, or,
@@ -1701,6 +1720,9 @@ inode are not necessarily reliable.  (S<RISC OS>)
 
 dev, rdev, blksize, and blocks are not available.  inode is not
 meaningful and will differ between stat calls on the same file.  (os2)
+
+some versions of cygwin when doing a stat("foo") and if not finding it
+may then attempt to stat("foo.exe") (Cygwin)
 
 =item symlink OLDFILE,NEWFILE
 
