@@ -902,25 +902,20 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		    }		
 		    return Nullsv;		/* element cannot be deleted */
 		}
-	    }
 #ifdef ENV_IS_CASELESS
-	    if (mg_find((SV*)hv, PERL_MAGIC_env)) {
-		/* XXX This code isn't UTF8 clean.  */
-		keysv = sv_2mortal(newSVpvn(key,klen));
-		key = strupr(SvPVX(keysv));
-
-#if 0
-		/* keysave not in scope - don't understand - NI-S */
-                if (k_flags & HVhek_FREEKEY) {
-                    Safefree(keysave);
+		else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
+		    /* XXX This code isn't UTF8 clean.  */
+		    keysv = sv_2mortal(newSVpvn(key,klen));
+		    if (k_flags & HVhek_FREEKEY) {
+			Safefree(key);
+		    }
+		    key = strupr(SvPVX(keysv));
+		    is_utf8 = 0;
+		    k_flags = 0;
+		    hash = 0;
 		}
 #endif
-
-		is_utf8 = 0;
-		k_flags = 0;
-		hash = 0;
 	    }
-#endif
 	}
     }
     xhv = (XPVHV*)SvANY(hv);
