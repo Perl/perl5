@@ -1,4 +1,4 @@
-/* $Header: perl.h,v 3.0.1.10 90/11/10 01:44:13 lwall Locked $
+/* $Header: perl.h,v 3.0.1.11 91/01/11 18:10:57 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.h,v $
+ * Revision 3.0.1.11  91/01/11  18:10:57  lwall
+ * patch42: ANSIfied the stat mode checking
+ * 
  * Revision 3.0.1.10  90/11/10  01:44:13  lwall
  * patch38: more msdos/os2 upgrades
  * 
@@ -286,6 +289,98 @@ EXT int dbmlen;
 #	    define DIRENT direct
 #	endif
 #   endif
+#endif
+
+/*
+ * The following gobbledygook brought to you on behalf of __STDC__.
+ * (I could just use #ifndef __STDC__, but this is more bulletproof
+ * in the face of half-implementations.)
+ */
+
+#ifndef S_IFMT
+#   ifdef _S_IFMT
+#	define S_IFMT _S_IFMT
+#   else
+#	define S_IFMT 0170000
+#   endif
+#endif
+
+#ifndef S_ISDIR
+#   define S_ISDIR(m) ((m & S_IFMT) == S_IFDIR)
+#endif
+
+#ifndef S_ISCHR
+#   define S_ISCHR(m) ((m & S_IFMT) == S_IFCHR)
+#endif
+
+#ifndef S_ISBLK
+#   define S_ISBLK(m) ((m & S_IFMT) == S_IFBLK)
+#endif
+
+#ifndef S_ISREG
+#   define S_ISREG(m) ((m & S_IFMT) == S_IFREG)
+#endif
+
+#ifndef S_ISFIFO
+#   define S_ISFIFO(m) ((m & S_IFMT) == S_IFIFO)
+#endif
+
+#ifndef S_ISLNK
+#   ifdef _S_ISLNK
+#	define S_ISLNK(m) _S_ISLNK(m)
+#   else
+#	ifdef _S_IFLNK
+#	    define S_ISLNK(m) ((m & S_IFMT) == _S_IFLNK)
+#	else
+#	    ifdef S_IFLNK
+#		define S_ISLNK(m) ((m & S_IFMT) == S_IFLNK)
+#	    else
+#		define S_ISLNK(m) (0)
+#	    endif
+#	endif
+#   endif
+#endif
+
+#ifndef S_ISSOCK
+#   ifdef _S_ISSOCK
+#	define S_ISSOCK(m) _S_ISSOCK(m)
+#   else
+#	ifdef _S_IFSOCK
+#	    define S_ISSOCK(m) ((m & S_IFMT) == _S_IFSOCK)
+#	else
+#	    ifdef S_IFSOCK
+#		define S_ISSOCK(m) ((m & S_IFMT) == S_IFSOCK)
+#	    else
+#		define S_ISSOCK(m) (0)
+#	    endif
+#	endif
+#   endif
+#endif
+
+#ifndef S_IRUSR
+#   ifdef S_IREAD
+#	define S_IRUSR S_IREAD
+#	define S_IWUSR S_IWRITE
+#	define S_IXUSR S_IEXEC
+#   else
+#	define S_IRUSR 0400
+#	define S_IWUSR 0200
+#	define S_IXUSR 0100
+#   endif
+#   define S_IRGRP (S_IRUSR>>3)
+#   define S_IWGRP (S_IWUSR>>3)
+#   define S_IXGRP (S_IXUSR>>3)
+#   define S_IROTH (S_IRUSR>>6)
+#   define S_IWOTH (S_IWUSR>>6)
+#   define S_IXOTH (S_IXUSR>>6)
+#endif
+
+#ifndef S_ISUID
+#   define S_ISUID 04000
+#endif
+
+#ifndef S_ISGID
+#   define S_ISGID 02000
 #endif
 
 typedef unsigned int STRLEN;

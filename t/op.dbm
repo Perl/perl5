@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: op.dbm,v 3.0.1.1 90/03/27 16:25:57 lwall Locked $
+# $Header: op.dbm,v 3.0.1.2 91/01/11 18:29:12 lwall Locked $
 
 if (!-r '/usr/include/dbm.h' && !-r '/usr/include/ndbm.h') {
     print "1..0\n";
@@ -9,7 +9,7 @@ if (!-r '/usr/include/dbm.h' && !-r '/usr/include/ndbm.h') {
 
 print "1..10\n";
 
-unlink 'Op.dbmx.dir', 'Op.dbmx.pag';
+unlink <Op.dbmx.*>;
 umask(0);
 print (dbmopen(h,'Op.dbmx',0640) ? "ok 1\n" : "not ok 1\n");
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,

@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: op.mkdir,v 3.0.1.3 90/03/12 17:03:57 lwall Locked $
+# $Header: op.mkdir,v 3.0.1.4 91/01/11 18:30:00 lwall Locked $
 
 print "1..7\n";
 
@@ -8,7 +8,7 @@ print "1..7\n";
 
 print (mkdir('blurfl',0777) ? "ok 1\n" : "not ok 1\n");
 print (mkdir('blurfl',0777) ? "not ok 2\n" : "ok 2\n");
-print ($! =~ /exists/ ? "ok 3\n" : "not ok 3\n");
+print ($! =~ /exist/ ? "ok 3\n" : "not ok 3\n");
 print (-d 'blurfl' ? "ok 4\n" : "not ok 4\n");
 print (rmdir('blurfl') ? "ok 5\n" : "not ok 5\n");
 print (rmdir('blurfl') ? "not ok 6\n" : "ok 6\n");

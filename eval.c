@@ -1,4 +1,4 @@
-/* $Header: eval.c,v 3.0.1.10 90/11/10 01:33:22 lwall Locked $
+/* $Header: eval.c,v 3.0.1.11 91/01/11 17:58:30 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	eval.c,v $
+ * Revision 3.0.1.11  91/01/11  17:58:30  lwall
+ * patch42: ANSIfied the stat mode checking
+ * patch42: perl -D14 crashed on ..
+ * patch42: waitpid() emulation was useless because of #ifdef WAITPID
+ * 
  * Revision 3.0.1.10  90/11/10  01:33:22  lwall
  * patch38: random cleanup
  * patch38: couldn't return from sort routine
@@ -1408,9 +1413,11 @@ register int sp;
 		stab = arg[1].arg_ptr.arg_stab = aadd(genstab());
 		ary = stab_array(stab);
 		afill(ary,maxarg - 1);
+		anum = maxarg;
 		st += arglast[0]+1;
 		while (maxarg-- > 0)
 		    ary->ary_array[maxarg] = str_smake(st[maxarg]);
+		st -= arglast[0]+1;
 		goto array_return;
 	    }
 	    arg->arg_type = optype = O_RANGE;
@@ -1488,7 +1495,7 @@ register int sp;
 	break;
 #endif
     case O_WAITPID:
-#ifdef WAITPID
+#ifdef WAIT
 #ifndef lint
 	anum = (int)str_gnum(st[1]);
 	optype = (int)str_gnum(st[2]);
@@ -1703,8 +1710,7 @@ register int sp;
 	if (same_dirent(tmps2, tmps))	/* can always rename to same name */
 	    anum = 1;
 	else {
-	    if (euid || stat(tmps2,&statbuf) < 0 ||
-	      (statbuf.st_mode & S_IFMT) != S_IFDIR )
+	    if (euid || stat(tmps2,&statbuf) < 0 || !S_ISDIR(statbuf.st_mode))
 		(void)UNLINK(tmps2);
 	    if (!(anum = link(tmps,tmps2)))
 		anum = UNLINK(tmps);
@@ -1955,27 +1961,27 @@ register int sp;
 
     case O_FTRREAD:
 	argtype = 0;
-	anum = S_IREAD;
+	anum = S_IRUSR;
 	goto check_perm;
     case O_FTRWRITE:
 	argtype = 0;
-	anum = S_IWRITE;
+	anum = S_IWUSR;
 	goto check_perm;
     case O_FTREXEC:
 	argtype = 0;
-	anum = S_IEXEC;
+	anum = S_IXUSR;
 	goto check_perm;
     case O_FTEREAD:
 	argtype = 1;
-	anum = S_IREAD;
+	anum = S_IRUSR;
 	goto check_perm;
     case O_FTEWRITE:
 	argtype = 1;
-	anum = S_IWRITE;
+	anum = S_IWUSR;
 	goto check_perm;
     case O_FTEEXEC:
 	argtype = 1;
-	anum = S_IEXEC;
+	anum = S_IXUSR;
       check_perm:
 	if (mystat(arg,st[1]) < 0)
 	    goto say_undef;
@@ -2023,49 +2029,46 @@ register int sp;
 	goto donumset;
 
     case O_FTSOCK:
-#ifdef S_IFSOCK
-	anum = S_IFSOCK;
-	goto check_file_type;
-#else
-	goto say_no;
-#endif
-    case O_FTCHR:
-	anum = S_IFCHR;
-	goto check_file_type;
-    case O_FTBLK:
-#ifdef S_IFBLK
-	anum = S_IFBLK;
-	goto check_file_type;
-#else
-	goto say_no;
-#endif
-    case O_FTFILE:
-	anum = S_IFREG;
-	goto check_file_type;
-    case O_FTDIR:
-	anum = S_IFDIR;
-      check_file_type:
 	if (mystat(arg,st[1]) < 0)
 	    goto say_undef;
-	if ((statcache.st_mode & S_IFMT) == anum )
+	if (S_ISSOCK(statcache.st_mode))
+	    goto say_yes;
+	goto say_no;
+    case O_FTCHR:
+	if (mystat(arg,st[1]) < 0)
+	    goto say_undef;
+	if (S_ISCHR(statcache.st_mode))
+	    goto say_yes;
+	goto say_no;
+    case O_FTBLK:
+	if (mystat(arg,st[1]) < 0)
+	    goto say_undef;
+	if (S_ISBLK(statcache.st_mode))
+	    goto say_yes;
+	goto say_no;
+    case O_FTFILE:
+	if (mystat(arg,st[1]) < 0)
+	    goto say_undef;
+	if (S_ISREG(statcache.st_mode))
+	    goto say_yes;
+	goto say_no;
+    case O_FTDIR:
+	if (mystat(arg,st[1]) < 0)
+	    goto say_undef;
+	if (S_ISDIR(statcache.st_mode))
 	    goto say_yes;
 	goto say_no;
     case O_FTPIPE:
-#ifdef S_IFIFO
-	anum = S_IFIFO;
-	goto check_file_type;
-#else
-	goto say_no;
-#endif
-    case O_FTLINK:
-	if (arg[1].arg_type & A_DONT)
-	    fatal("You must supply explicit filename with -l");
-#ifdef LSTAT
-	if (lstat(str_get(st[1]),&statcache) < 0)
+	if (mystat(arg,st[1]) < 0)
 	    goto say_undef;
-	if ((statcache.st_mode & S_IFMT) == S_IFLNK )
+	if (S_ISFIFO(statcache.st_mode))
 	    goto say_yes;
-#endif
+	goto say_no;
+    case O_FTLINK:
+	if (mylstat(arg,st[1]) < 0)
+	    goto say_undef;
+	if (S_ISLNK(statcache.st_mode))
+	    goto say_yes;
 	goto say_no;
     case O_SYMLINK:
 #ifdef SYMLINK

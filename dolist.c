@@ -1,4 +1,4 @@
-/* $Header: dolist.c,v 3.0.1.11 90/11/10 01:29:49 lwall Locked $
+/* $Header: dolist.c,v 3.0.1.12 91/01/11 17:54:58 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	dolist.c,v $
+ * Revision 3.0.1.12  91/01/11  17:54:58  lwall
+ * patch42: added binary and hex pack/unpack options
+ * patch42: sort subroutines didn't allow copying $a or $b to other variables.
+ * patch42: caller() coredumped when called outside the debugger.
+ * 
  * Revision 3.0.1.11  90/11/10  01:29:49  lwall
  * patch38: temp string values are now copied less often
  * patch38: sort parameters are now in the right package
@@ -549,6 +554,8 @@ int *arglast;
     register char *patend = pat + st[sp]->str_cur;
     int datumtype;
     register int len;
+    register int bits;
+    static char hexchar[] = "0123456789abcdef";
 
     /* These must not be in registers: */
     short ashort;
@@ -566,7 +573,7 @@ int *arglast;
 
     if (gimme != G_ARRAY) {		/* arrange to do first one only */
 	for (patend = pat; !isalpha(*patend); patend++);
-	if (*patend == 'a' || *patend == 'A' || *pat == '%') {
+	if (index("aAbBhH", *patend) || *pat == '%') {
 	    patend++;
 	    while (isdigit(*patend) || *patend == '*')
 		patend++;
@@ -580,8 +587,10 @@ int *arglast;
 	datumtype = *pat++;
 	if (pat >= patend)
 	    len = 1;
-	else if (*pat == '*')
+	else if (*pat == '*') {
 	    len = strend - strbeg;	/* long enough */
+	    pat++;
+	}
 	else if (isdigit(*pat)) {
 	    len = *pat++ - '0';
 	    while (isdigit(*pat))
@@ -634,6 +643,72 @@ int *arglast;
 		str->str_cur = s - str->str_ptr;
 		s = aptr;	/* unborrow register */
 	    }
+	    (void)astore(stack, ++sp, str_2static(str));
+	    break;
+	case 'B':
+	case 'b':
+	    if (pat[-1] == '*' || len > (strend - s) * 8)
+		len = (strend - s) * 8;
+	    str = Str_new(35, len + 1);
+	    str->str_cur = len;
+	    str->str_pok = 1;
+	    aptr = pat;			/* borrow register */
+	    pat = str->str_ptr;
+	    if (datumtype == 'b') {
+		aint = len;
+		for (len = 0; len < aint; len++) {
+		    if (len & 7)
+			bits >>= 1;
+		    else
+			bits = *s++;
+		    *pat++ = '0' + (bits & 1);
+		}
+	    }
+	    else {
+		aint = len;
+		for (len = 0; len < aint; len++) {
+		    if (len & 7)
+			bits <<= 1;
+		    else
+			bits = *s++;
+		    *pat++ = '0' + ((bits & 128) != 0);
+		}
+	    }
+	    *pat = '\0';
+	    pat = aptr;			/* unborrow register */
+	    (void)astore(stack, ++sp, str_2static(str));
+	    break;
+	case 'H':
+	case 'h':
+	    if (pat[-1] == '*' || len > (strend - s) * 2)
+		len = (strend - s) * 2;
+	    str = Str_new(35, len);
+	    str->str_cur = len;
+	    str->str_pok = 1;
+	    aptr = pat;			/* borrow register */
+	    pat = str->str_ptr;
+	    if (datumtype == 'h') {
+		aint = len;
+		for (len = 0; len < aint; len++) {
+		    if (len & 1)
+			bits >>= 4;
+		    else
+			bits = *s++;
+		    *pat++ = hexchar[bits & 15];
+		}
+	    }
+	    else {
+		aint = len;
+		for (len = 0; len < aint; len++) {
+		    if (len & 1)
+			bits <<= 4;
+		    else
+			bits = *s++;
+		    *pat++ = hexchar[(bits >> 4) & 15];
+		}
+	    }
+	    *pat = '\0';
+	    pat = aptr;			/* unborrow register */
 	    (void)astore(stack, ++sp, str_2static(str));
 	    break;
 	case 'c':
@@ -1260,8 +1335,10 @@ int *arglast;
     register int i = sp - arglast[1];
     int oldsave = savestack->ary_fill;
     SPAT *oldspat = curspat;
+    int oldtmps_base = tmps_base;
 
     savesptr(&stab_val(defstab));
+    tmps_base = tmps_max;
     if ((arg[1].arg_type & A_MASK) != A_EXPR) {
 	arg[1].arg_type &= A_MASK;
 	dehoist(arg,1);
@@ -1281,6 +1358,7 @@ int *arglast;
 	curspat = oldspat;
     }
     restorelist(oldsave);
+    tmps_base = oldtmps_base;
     if (gimme != G_ARRAY) {
 	str_numset(str,(double)(dst - arglast[1]));
 	STABSET(str);
@@ -1370,6 +1448,8 @@ int *arglast;
 	if (*up = st[i]) {
 	    if (!(*up)->str_pok)
 		(void)str_2ptr(*up);
+	    else
+		(*up)->str_pok &= ~SP_TEMP;
 	    up++;
 	}
     }
@@ -1510,7 +1590,7 @@ int *arglast;
     for (;;) {
 	if (!csv)
 	    return sp;
-	if (csv->curcsv && csv->curcsv->sub == stab_sub(DBsub))
+	if (DBsub && csv->curcsv && csv->curcsv->sub == stab_sub(DBsub))
 	    count++;
 	if (!count--)
 	    break;

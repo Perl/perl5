@@ -1,0 +1,162 @@
+#!./perl
+
+while (@ARGV) {
+    $nonono = 1 if $ARGV[0] eq '-n';
+    $versiononly = 1 if $ARGV[0] eq '-v';
+    shift;
+}
+
+@scripts = 'h2ph';
+@manpages = ('perl.man', 'h2ph.man');
+
+# Read in the config file.
+
+open(CONFIG, "config.sh") || die "You haven't run Configure yet!\n";
+while (<CONFIG>) {
+    if (s/^(\w+=)/\$$1/) {
+	$accum =~ s/'undef'/undef/g;
+	eval $accum;
+	$accum = '';
+    }
+    $accum .= $_;
+}
+
+# Do some quick sanity checks.
+
+if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
+
+   $bin		|| die "No bin directory in config.sh\n";
+-d $bin		|| die "$bin is not a directory\n";
+-w $bin		|| die "$bin is not writable by you\n";
+
+-x 'perl'	|| die "perl isn't executable!\n";
+-x 'taintperl'	|| die "taintperl isn't executable!\n";
+-x 'suidperl'	|| die "suidperl isn't executable!\n" if $d_dosuid;
+
+-x 't/TEST'	|| die "You've never run 'make test'!\n";
+
+# First we install the version-numbered executables.
+
+$ver = sprintf("%5.3f", $]);
+
+&unlink("$bin/perl$ver");
+&cmd("cp perl $bin/perl$ver");
+
+&unlink("$bin/tperl$ver");
+&cmd("cp taintperl $bin/tperl$ver");
+&chmod(0755, "$bin/tperl$ver");		# force non-suid for security
+
+&unlink("$bin/sperl$ver");
+if ($d_dosuid) {
+    &cmd("cp suidperl $bin/sperl$ver");
+    &chmod(04711, "$bin/sperl$ver");
+}
+
+exit 0 if $versiononly;
+
+# Make links to ordinary names if bin directory isn't current directory.
+
+($bdev,$bino) = stat($bin);
+($ddev,$dino) = stat('.');
+
+if ($bdev != $ddev || $bino != $dino) {
+    &unlink("$bin/perl", "$bin/taintperl", "$bin/suidperl");
+    &link("$bin/perl$ver", "$bin/perl");
+    &link("$bin/tperl$ver", "$bin/taintperl");
+    &link("$bin/sperl$ver", "$bin/suidperl") if $d_dosuid;
+}
+
+# Make some enemies in the name of standardization.   :-)
+
+($udev,$uino) = stat("/usr/bin");
+
+if (($udev != $ddev || $uino != $dino) && !$nonono) {
+    unlink "/usr/bin/perl";
+    eval 'symlink("$bin/perl", "/usr/bin/perl")' ||
+    eval 'link("$bin/perl", "/usr/bin/perl")' ||
+    &cmd("cp $bin/perl /usr/bin");
+}
+
+# Install scripts.
+
+&makedir($scriptdir);
+
+for (@scripts) {
+    &chmod(0755, $_);
+    &cmd("cp $_ $scriptdir");
+}
+
+# Install library files.
+
+&makedir($privlib);
+
+($pdev,$pino) = stat($privlib);
+
+if ($pdev != $ddev || $pino != $dino) {
+    &cmd("cd lib && cp *.pl $privlib");
+}
+
+# Install man pages.
+
+&makedir($mansrc);
+
+($mdev,$mino) = stat($mansrc);
+if ($mdev != $ddev || $mino != $dino) {
+    for (@manpages) {
+	($new = $_) =~ s/man$/$manext/;
+	&cmd("cp $_ $mansrc/$new");
+    }
+}
+
+print STDERR "  Installation complete\n";
+
+exit 0;
+
+###############################################################################
+
+sub unlink {
+    local(@names) = @_;
+
+    foreach $name (@names) {
+	next unless -e $name;
+	print STDERR "  unlink $name\n";
+	unlink($name) || warn "Couldn't unlink $name: $!\n" unless $nonono;
+    }
+}
+
+sub cmd {
+    local($cmd) = @_;
+    print STDERR "  $cmd\n";
+    unless ($nonono) {
+	system $cmd;
+	warn "Command failed!!!\n" if $?;
+    }
+}
+
+sub link {
+    local($from,$to) = @_;
+
+    print STDERR "  ln $from $to\n";
+    link($from,$to) || warn "Couldn't link $from to $to: $!\n" unless $nonono;
+}
+
+sub chmod {
+    local($mode,$name) = @_;
+
+    printf STDERR "  chmod %o %s\n", $mode, $name;
+    chmod($mode,$name) || warn "Couldn't chmod $mode $name: $!\n"
+	unless $nonono;
+}
+
+sub makedir {
+    local($dir) = @_;
+    unless (-d $dir) {
+	local($shortdir) = $dir;
+
+	$shortdir =~ s#(.*)/.*#$1#;
+	&makedir($shortdir);
+
+	print STDERR "  mkdir $dir\n";
+	mkdir($dir, 0777) || warn "Couldn't create $dir: $!\n" unless $nonono;
+    }
+}

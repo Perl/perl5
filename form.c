@@ -1,4 +1,4 @@
-/* $Header: form.c,v 3.0.1.3 90/10/15 17:26:24 lwall Locked $
+/* $Header: form.c,v 3.0.1.4 91/01/11 18:04:07 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	form.c,v $
+ * Revision 3.0.1.4  91/01/11  18:04:07  lwall
+ * patch42: the @* format counted lines wrong
+ * patch42: the @* format didn't handle lines with nulls or without newline
+ * 
  * Revision 3.0.1.3  90/10/15  17:26:24  lwall
  * patch29: added @###.## fields to format
  * 
@@ -278,10 +282,14 @@ int sp;
 	    str = stack->ary_array[sp+1];
 	    s = str_get(str);
 	    size = str_len(str);
-	    CHKLEN(size);
-	    orec->o_lines += countlines(s);
+	    CHKLEN(size+1);
+	    orec->o_lines += countlines(s,size) - 1;
 	    (void)bcopy(s,d,size);
 	    d += size;
+	    if (size && s[size-1] != '\n') {
+		*d++ = '\n';
+		orec->o_lines++;
+	    }
 	    linebeg = fcmd->f_next;
 	    break;
 	case F_DECIMAL: {
@@ -289,6 +297,8 @@ int sp;
 
 	    (void)eval(fcmd->f_expr,G_SCALAR,sp);
 	    str = stack->ary_array[sp+1];
+	    size = fcmd->f_size;
+	    CHKLEN(size);
 	    /* If the field is marked with ^ and the value is undefined,
 	       blank it out. */
 	    if ((fcmd->f_flags & FC_CHOP) && !str->str_pok && !str->str_nok) {
@@ -299,8 +309,6 @@ int sp;
 		break;
 	    }
 	    value = str_gnum(str);
-	    size = fcmd->f_size;
-	    CHKLEN(size);
 	    if (fcmd->f_flags & FC_DP) {
 		sprintf(d, "%#*.*f", size, fcmd->f_decimals, value);
 	    } else {
@@ -315,12 +323,13 @@ int sp;
     *d++ = '\0';
 }
 
-countlines(s)
+countlines(s,size)
 register char *s;
+register int size;
 {
     register int count = 0;
 
-    while (*s) {
+    while (size--) {
 	if (*s++ == '\n')
 	    count++;
     }

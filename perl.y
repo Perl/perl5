@@ -1,4 +1,4 @@
-/* $Header: perl.y,v 3.0.1.9 90/10/15 18:01:45 lwall Locked $
+/* $Header: perl.y,v 3.0.1.10 91/01/11 18:14:28 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.y,v $
+ * Revision 3.0.1.10  91/01/11  18:14:28  lwall
+ * patch42: package didn't create symbol tables that could be reset
+ * patch42: split with no arguments could wipe out next operator
+ * 
  * Revision 3.0.1.9  90/10/15  18:01:45  lwall
  * patch29: added SysV IPC
  * patch29: package behavior is now more consistent
@@ -349,7 +353,9 @@ package :	PACKAGE WORD ';'
 			  saveitem(curstname);
 			  str_set(curstname,$2);
 			  sprintf(tmpbuf,"'_%s",$2);
-			  tmpstab = hadd(stabent(tmpbuf,TRUE));
+			  tmpstab = stabent(tmpbuf,TRUE);
+			  if (!stab_xhash(tmpstab))
+			      stab_xhash(tmpstab) = hnew(0);
 			  curstash = stab_xhash(tmpstab);
 			  if (!curstash->tbl_name)
 			      curstash->tbl_name = savestr($2);
@@ -664,8 +670,15 @@ term	:	'-' term %prec UMINUS
 			      aadd(stabent(subline ? "_" : "ARGV", TRUE))),
 			    Nullarg, Nullarg); }
 	|	SPLIT	%prec '('
-{static char p[]="/\\s+/";char*o=bufend;bufend=p+5;(void)scanpat(p);bufend=o;
-			    $$ = make_split(defstab,yylval.arg,Nullarg); }
+			{   static char p[]="/\\s+/";
+			    char *oldend = bufend;
+			    int oldarg = yylval.arg;
+			    
+			    bufend=p+5;
+			    (void)scanpat(p);
+			    bufend=oldend;
+			    $$ = make_split(defstab,yylval.arg,Nullarg);
+			    yylval.arg = oldarg; }
 	|	SPLIT '(' sexpr csexpr csexpr ')'
 			{ $$ = mod_match(O_MATCH, $4,
 			  make_split(defstab,$3,$5));}

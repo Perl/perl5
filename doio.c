@@ -1,4 +1,4 @@
-/* $Header: doio.c,v 3.0.1.13 90/11/10 01:17:37 lwall Locked $
+/* $Header: doio.c,v 3.0.1.14 91/01/11 17:51:04 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,13 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doio.c,v $
+ * Revision 3.0.1.14  91/01/11  17:51:04  lwall
+ * patch42: ANSIfied the stat mode checking
+ * patch42: the -i switch is now much more robust and informative
+ * patch42: close on a pipe didn't return failure correctly
+ * patch42: stat on temp values could wipe them out prematurely, i.e. grep(-d,<*>)
+ * patch42: -l didn't work right with _
+ * 
  * Revision 3.0.1.13  90/11/10  01:17:37  lwall
  * patch38: -e _ was wrong if last stat failed
  * patch38: more msdos/os2 upgrades
@@ -270,10 +277,11 @@ int len;
 	    (void)fclose(fp);
 	    return FALSE;
 	}
-	result = (statbuf.st_mode & S_IFMT);
-#ifdef S_IFSOCK
-	if (result == S_IFSOCK || result == 0)
+	if (S_ISSOCK(statbuf.st_mode))
 	    stio->type = 's';	/* in case a socket was passed in to us */
+#ifdef S_IFMT
+	else if (!(statbuf.st_mode & S_IFMT))
+	    stio->type = 's';	/* some OS's return 0 on fstat()ed socket */
 #endif
     }
 #if defined(FCNTL) && defined(F_SETFD)
@@ -296,7 +304,11 @@ register STAB *stab;
 {
     register STR *str;
     char *oldname;
-    int filemode,fileuid,filegid;
+    int filedev;
+    int fileino;
+    int filemode;
+    int fileuid;
+    int filegid;
 
     while (alen(stab_xarray(stab)) >= 0) {
 	str = ashift(stab_xarray(stab));
@@ -308,18 +320,49 @@ register STAB *stab;
 #ifdef TAINT
 		taintproper("Insecure dependency in inplace open");
 #endif
+		if (strEQ(oldname,"-")) {
+		    str_free(str);
+		    defoutstab = stabent("STDOUT",TRUE);
+		    return stab_io(stab)->ifp;
+		}
+		filedev = statbuf.st_dev;
+		fileino = statbuf.st_ino;
 		filemode = statbuf.st_mode;
 		fileuid = statbuf.st_uid;
 		filegid = statbuf.st_gid;
+		if (!S_ISREG(filemode)) {
+		    warn("Can't do inplace edit: %s is not a regular file",
+		      oldname );
+		    do_close(stab,FALSE);
+		    str_free(str);
+		    continue;
+		}
 		if (*inplace) {
 #ifdef SUFFIX
 		    add_suffix(str,inplace);
 #else
 		    str_cat(str,inplace);
 #endif
+#ifndef FLEXFILENAMES
+		    if (stat(str->str_ptr,&statbuf) >= 0
+		      && statbuf.st_dev == filedev
+		      && statbuf.st_ino == fileino ) {
+			warn("Can't do inplace edit: %s > 14 characters",
+			  str->str_ptr );
+			do_close(stab,FALSE);
+			str_free(str);
+			continue;
+		    }
+#endif
 #ifdef RENAME
 #ifndef MSDOS
-		    (void)rename(oldname,str->str_ptr);
+		    if (rename(oldname,str->str_ptr) < 0) {
+			warn("Can't rename %s to %s: %s, skipping file",
+			  oldname, str->str_ptr, strerror(errno) );
+			do_close(stab,FALSE);
+			str_free(str);
+			continue;
+		    }
 #else
 		    do_close(stab,FALSE);
 		    (void)unlink(str->str_ptr);
@@ -328,7 +371,13 @@ register STAB *stab;
 #endif /* MSDOS */
 #else
 		    (void)UNLINK(str->str_ptr);
-		    (void)link(oldname,str->str_ptr);
+		    if (link(oldname,str->str_ptr) < 0) {
+			warn("Can't rename %s to %s: %s, skipping file",
+			  oldname, str->str_ptr, strerror(errno) );
+			do_close(stab,FALSE);
+			str_free(str);
+			continue;
+		    }
 		    (void)UNLINK(oldname);
 #endif
 		}
@@ -344,7 +393,8 @@ register STAB *stab;
 		str_cat(str,oldname);
 		errno = 0;		/* in case sprintf set errno */
 		if (!do_open(argvoutstab,str->str_ptr,str->str_cur))
-		    fatal("Can't do inplace edit");
+		    warn("Can't do inplace edit on %s: %s",
+		      oldname, strerror(errno) );
 		defoutstab = argvoutstab;
 #ifdef FCHMOD
 		(void)fchmod(fileno(stab_io(argvoutstab)->ifp),filemode);
@@ -363,7 +413,7 @@ register STAB *stab;
 	    return stab_io(stab)->ifp;
 	}
 	else
-	    fprintf(stderr,"Can't open %s\n",str_get(str));
+	    fprintf(stderr,"Can't open %s: %s\n",str_get(str), strerror(errno));
 	str_free(str);
     }
     if (inplace) {
@@ -440,7 +490,7 @@ bool explicit;
     if (stio->ifp) {
 	if (stio->type == '|') {
 	    status = mypclose(stio->ifp);
-	    retval = (status >= 0);
+	    retval = (status == 0);
 	    statusvalue = (unsigned short)status & 0xffff;
 	}
 	else if (stio->type == '-')
@@ -651,7 +701,7 @@ int *arglast;
 	    max = 0;
     }
     else {
-	str_sset(statname,ary->ary_array[sp]);
+	str_set(statname,str_get(ary->ary_array[sp]));
 	statstab = Nullstab;
 #ifdef LSTAT
 	if (arg->arg_type == O_LSTAT)
@@ -968,9 +1018,26 @@ STR *str;
     }
     else {
 	statstab = Nullstab;
-	str_sset(statname,str);
+	str_set(statname,str_get(str));
 	return (laststatval = stat(str_get(str),&statcache));
     }
+}
+
+int
+mylstat(arg,str)
+ARG *arg;
+STR *str;
+{
+    if (arg[1].arg_type & A_DONT)
+	fatal("You must supply explicit filename with -l");
+
+    statstab = Nullstab;
+    str_set(statname,str_get(str));
+#ifdef LSTAT
+    return (laststatval = lstat(str_get(str),&statcache));
+#else
+    return (laststatval = stat(str_get(str),&statcache));
+#endif
 }
 
 STR *
@@ -1024,7 +1091,7 @@ STR *str;
     }
     else {
 	statstab = Nullstab;
-	str_sset(statname,str);
+	str_set(statname,str_get(str));
       really_filename:
 	i = open(str_get(str),0);
 	if (i < 0)
@@ -2243,11 +2310,10 @@ int *arglast;
 	    }
 	    else {	/* don't let root wipe out directories without -U */
 #ifdef LSTAT
-		if (lstat(s,&statbuf) < 0 ||
+		if (lstat(s,&statbuf) < 0 || S_ISDIR(statbuf.st_mode))
 #else
-		if (stat(s,&statbuf) < 0 ||
+		if (stat(s,&statbuf) < 0 || S_ISDIR(statbuf.st_mode))
 #endif
-		  (statbuf.st_mode & S_IFMT) == S_IFDIR )
 		    tot--;
 		else {
 		    if (UNLINK(s))
@@ -2298,9 +2364,8 @@ int effective;
 register struct stat *statbufp;
 {
     if ((effective ? euid : uid) == 0) {	/* root is special */
-	if (bit == S_IEXEC) {
-	    if (statbufp->st_mode & 0111 ||
-	      (statbufp->st_mode & S_IFMT) == S_IFDIR )
+	if (bit == S_IXUSR) {
+	    if (statbufp->st_mode & 0111 || S_ISDIR(statbufp->st_mode))
 		return TRUE;
 	}
 	else

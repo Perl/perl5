@@ -20,3 +20,4 @@ sub printflush {
     select($old);
 }
 
+1;

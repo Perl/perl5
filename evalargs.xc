@@ -2,9 +2,12 @@
  * kit sizes from getting too big.
  */
 
-/* $Header: evalargs.xc,v 3.0.1.8 90/11/10 01:35:49 lwall Locked $
+/* $Header: evalargs.xc,v 3.0.1.9 91/01/11 18:00:18 lwall Locked $
  *
  * $Log:	evalargs.xc,v $
+ * Revision 3.0.1.9  91/01/11  18:00:18  lwall
+ * patch42: <> input to individual array elements was suboptimal
+ * 
  * Revision 3.0.1.8  90/11/10  01:35:49  lwall
  * patch38: array slurps are now faster and take less memory
  * 
@@ -358,6 +361,9 @@
 	    }
 	    if (!fp && dowarn)
 		warn("Read on closed filehandle <%s>",stab_name(last_in_stab));
+	    when = str->str_len;	/* remember if already alloced */
+	    if (!when)
+		Str_Grow(str,80);	/* try short-buffering it */
 	  keepgoing:
 	    if (!fp)
 		st[sp] = &str_undef;
@@ -414,6 +420,14 @@
 		    }
 		    str = Str_new(58,80);
 		    goto keepgoing;
+		}
+		else if (!when && str->str_len - str->str_cur > 80) {
+		    /* try to reclaim a bit of scalar space on 1st alloc */
+		    if (str->str_cur < 60)
+			str->str_len = 80;
+		    else
+			str->str_len = str->str_cur+40;	/* allow some slop */
+		    Renew(str->str_ptr, str->str_len, char);
 		}
 	    }
 	    record_separator = old_record_separator;
