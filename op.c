@@ -2597,6 +2597,7 @@ package(OP *o)
 	sv_setpv(PL_curstname,"<none>");
 	PL_curstash = Nullhv;
     }
+    PL_hints |= HINT_BLOCK_SCOPE;
     PL_copline = NOLINE;
     PL_expect = XSTATE;
 }

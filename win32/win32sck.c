@@ -287,8 +287,15 @@ int
 win32_recvfrom(SOCKET s, char *buf, int len, int flags, struct sockaddr *from, int *fromlen)
 {
     int r;
+    int frombufsize = *fromlen;
 
     SOCKET_TEST_ERROR(r = recvfrom(TO_SOCKET(s), buf, len, flags, from, fromlen));
+    /* Winsock's recvfrom() only returns a valid 'from' when the socket
+     * is connectionless.  Perl expects a valid 'from' for all types
+     * of sockets, so go the extra mile.
+     */
+    if (r != SOCKET_ERROR && frombufsize == *fromlen)
+	(void)win32_getpeername(s, from, fromlen);
     return r;
 }
 

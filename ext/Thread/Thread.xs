@@ -115,6 +115,8 @@ threadstart(void *arg)
 
     sv = POPs;
     PUTBACK;
+    ENTER;
+    SAVETMPS;
     perl_call_sv(sv, G_ARRAY|G_EVAL);
     SPAGAIN;
     retval = SP - (PL_stack_base + oldmark);
@@ -138,6 +140,8 @@ threadstart(void *arg)
 	for (i = 1; i <= retval; i++, SP++)
 	    sv_setsv(*av_fetch(av, i, TRUE), SvREFCNT_inc(*SP));
     }
+    FREETMPS;
+    LEAVE;
 
   finishoff:
 #if 0    
@@ -174,7 +178,7 @@ threadstart(void *arg)
     Safefree(PL_screamnext);
     Safefree(PL_reg_start_tmp);
     SvREFCNT_dec(PL_lastscream);
-    /*SvREFCNT_dec(PL_defoutgv);*/
+    SvREFCNT_dec(PL_defoutgv);
 
     MUTEX_LOCK(&thr->mutex);
     DEBUG_S(PerlIO_printf(PerlIO_stderr(),

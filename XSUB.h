@@ -1,13 +1,13 @@
 #define ST(off) PL_stack_base[ax + (off)]
 
 #ifdef CAN_PROTOTYPE
-#ifdef PERL_OBJECT
-#define XS(name) void name(CV* cv, CPerlObj* pPerl)
+#  ifdef PERL_OBJECT
+#    define XS(name) void name(CV* cv, CPerlObj* pPerl)
+#  else
+#    define XS(name) void name(CV* cv)
+#  endif
 #else
-#define XS(name) void name(CV* cv)
-#endif
-#else
-#define XS(name) void name(cv) CV* cv;
+#  define XS(name) void name(cv) CV* cv;
 #endif
 
 #define dXSARGS				\
@@ -55,7 +55,7 @@
 #define newXSproto(a,b,c,d)	sv_setpv((SV*)newXS(a,b,c), d)
 
 #ifdef XS_VERSION
-# define XS_VERSION_BOOTCHECK \
+#  define XS_VERSION_BOOTCHECK \
     STMT_START {							\
 	SV *tmpsv;							\
 	char *vn = Nullch, *module = SvPV(ST(0),PL_na);			\
@@ -76,7 +76,7 @@
 		  vn ? vn : "bootstrap parameter", tmpsv);		\
     } STMT_END
 #else
-# define XS_VERSION_BOOTCHECK
+#  define XS_VERSION_BOOTCHECK
 #endif
 
 #ifdef PERL_CAPI
@@ -148,14 +148,195 @@
 #endif
 
 #ifdef PERL_OBJECT
-#include "objXSUB.h"
-#ifndef NO_XSLOCKS
-#ifdef WIN32
-#include "XSlock.h"
-#endif  /* WIN32 */
-#endif  /* NO_XSLOCKS */
+#  include "objXSUB.h"
+
+#  undef  PERL_OBJECT_THIS
+#  define PERL_OBJECT_THIS pPerl
+#  undef  PERL_OBJECT_THIS_
+#  define PERL_OBJECT_THIS_ pPerl,
+
+#  undef  SAVEDESTRUCTOR
+#  define SAVEDESTRUCTOR(f,p) \
+	pPerl->Perl_save_destructor((FUNC_NAME_TO_PTR(f)),(p))
+
+#  ifdef WIN32
+#    ifndef WIN32IO_IS_STDIO
+#      undef	errno
+#      define	errno			ErrorNo()
+#    endif
+#    undef  ErrorNo
+#    define ErrorNo			pPerl->ErrorNo
+#    undef  NtCrypt
+#    define NtCrypt			pPerl->NtCrypt
+#    undef  NtGetLib
+#    define NtGetLib			pPerl->NtGetLib
+#    undef  NtGetArchLib
+#    define NtGetArchLib		pPerl->NtGetArchLib
+#    undef  NtGetSiteLib
+#    define NtGetSiteLib		pPerl->NtGetSiteLib
+#    undef  NtGetBin
+#    define NtGetBin			pPerl->NtGetBin
+#    undef  NtGetDebugScriptStr
+#    define NtGetDebugScriptStr		pPerl->NtGetDebugScriptStr
+#  endif /* WIN32 */
+
+#  ifndef NO_XSLOCKS
+#    undef closedir
+#    undef opendir
+#    undef stdin
+#    undef stdout
+#    undef stderr
+#    undef feof
+#    undef ferror
+#    undef fgetpos
+#    undef ioctl
+#    undef getlogin
+#    undef setjmp
+#    undef getc
+#    undef ungetc
+#    undef fileno
+
+#    define mkdir		PerlDir_mkdir
+#    define chdir		PerlDir_chdir
+#    define rmdir		PerlDir_rmdir
+#    define closedir		PerlDir_close
+#    define opendir		PerlDir_open
+#    define readdir		PerlDir_read
+#    define rewinddir		PerlDir_rewind
+#    define seekdir		PerlDir_seek
+#    define telldir		PerlDir_tell
+#    define putenv		PerlEnv_putenv
+#    define getenv		PerlEnv_getenv
+#    define stdin		PerlIO_stdin()
+#    define stdout		PerlIO_stdout()
+#    define stderr		PerlIO_stderr()
+#    define fopen		PerlIO_open
+#    define fclose		PerlIO_close
+#    define feof		PerlIO_eof
+#    define ferror		PerlIO_error
+#    define fclearerr		PerlIO_clearerr
+#    define getc		PerlIO_getc
+#    define fputc(c, f)		PerlIO_putc(f,c)
+#    define fputs(s, f)		PerlIO_puts(f,s)
+#    define fflush		PerlIO_flush
+#    define ungetc(c, f)	PerlIO_ungetc((f),(c))
+#    define fileno		PerlIO_fileno
+#    define fdopen		PerlIO_fdopen
+#    define freopen		PerlIO_reopen
+#    define fread(b,s,c,f)	PerlIO_read((f),(b),(s*c))
+#    define fwrite(b,s,c,f)	PerlIO_write((f),(b),(s*c))
+#    define setbuf		PerlIO_setbuf
+#    define setvbuf		PerlIO_setvbuf
+#    define setlinebuf		PerlIO_setlinebuf
+#    define stdoutf		PerlIO_stdoutf
+#    define vfprintf		PerlIO_vprintf
+#    define ftell		PerlIO_tell
+#    define fseek		PerlIO_seek
+#    define fgetpos		PerlIO_getpos
+#    define fsetpos		PerlIO_setpos
+#    define frewind		PerlIO_rewind
+#    define tmpfile		PerlIO_tmpfile
+#    define access		PerlLIO_access
+#    define chmod		PerlLIO_chmod
+#    define chsize		PerlLIO_chsize
+#    define close		PerlLIO_close
+#    define dup			PerlLIO_dup
+#    define dup2		PerlLIO_dup2
+#    define flock		PerlLIO_flock
+#    define fstat		PerlLIO_fstat
+#    define ioctl		PerlLIO_ioctl
+#    define isatty		PerlLIO_isatty
+#    define lseek		PerlLIO_lseek
+#    define lstat		PerlLIO_lstat
+#    define mktemp		PerlLIO_mktemp
+#    define open		PerlLIO_open
+#    define read		PerlLIO_read
+#    define rename		PerlLIO_rename
+#    define setmode		PerlLIO_setmode
+#    define stat		PerlLIO_stat
+#    define tmpnam		PerlLIO_tmpnam
+#    define umask		PerlLIO_umask
+#    define unlink		PerlLIO_unlink
+#    define utime		PerlLIO_utime
+#    define write		PerlLIO_write
+#    define malloc		PerlMem_malloc
+#    define realloc		PerlMem_realloc
+#    define free		PerlMem_free
+#    define abort		PerlProc_abort
+#    define exit		PerlProc_exit
+#    define _exit		PerlProc__exit
+#    define execl		PerlProc_execl
+#    define execv		PerlProc_execv
+#    define execvp		PerlProc_execvp
+#    define getuid		PerlProc_getuid
+#    define geteuid		PerlProc_geteuid
+#    define getgid		PerlProc_getgid
+#    define getegid		PerlProc_getegid
+#    define getlogin		PerlProc_getlogin
+#    define kill		PerlProc_kill
+#    define killpg		PerlProc_killpg
+#    define pause		PerlProc_pause
+#    define popen		PerlProc_popen
+#    define pclose		PerlProc_pclose
+#    define pipe		PerlProc_pipe
+#    define setuid		PerlProc_setuid
+#    define setgid		PerlProc_setgid
+#    define sleep		PerlProc_sleep
+#    define times		PerlProc_times
+#    define wait		PerlProc_wait
+#    define setjmp		PerlProc_setjmp
+#    define longjmp		PerlProc_longjmp
+#    define signal		PerlProc_signal
+#    define htonl		PerlSock_htonl
+#    define htons		PerlSock_htons
+#    define ntohl		PerlSock_ntohl
+#    define ntohs		PerlSock_ntohs
+#    define accept		PerlSock_accept
+#    define bind		PerlSock_bind
+#    define connect		PerlSock_connect
+#    define endhostent		PerlSock_endhostent
+#    define endnetent		PerlSock_endnetent
+#    define endprotoent		PerlSock_endprotoent
+#    define endservent		PerlSock_endservent
+#    define gethostbyaddr	PerlSock_gethostbyaddr
+#    define gethostbyname	PerlSock_gethostbyname
+#    define gethostent		PerlSock_gethostent
+#    define gethostname		PerlSock_gethostname
+#    define getnetbyaddr	PerlSock_getnetbyaddr
+#    define getnetbyname	PerlSock_getnetbyname
+#    define getnetent		PerlSock_getnetent
+#    define getpeername		PerlSock_getpeername
+#    define getprotobyname	PerlSock_getprotobyname
+#    define getprotobynumber	PerlSock_getprotobynumber
+#    define getprotoent		PerlSock_getprotoent
+#    define getservbyname	PerlSock_getservbyname
+#    define getservbyport	PerlSock_getservbyport
+#    define getservent		PerlSock_getservent
+#    define getsockname		PerlSock_getsockname
+#    define getsockopt		PerlSock_getsockopt
+#    define inet_addr		PerlSock_inet_addr
+#    define inet_ntoa		PerlSock_inet_ntoa
+#    define listen		PerlSock_listen
+#    define recv		PerlSock_recv
+#    define recvfrom		PerlSock_recvfrom
+#    define select		PerlSock_select
+#    define send		PerlSock_send
+#    define sendto		PerlSock_sendto
+#    define sethostent		PerlSock_sethostent
+#    define setnetent		PerlSock_setnetent
+#    define setprotoent		PerlSock_setprotoent
+#    define setservent		PerlSock_setservent
+#    define setsockopt		PerlSock_setsockopt
+#    define shutdown		PerlSock_shutdown
+#    define socket		PerlSock_socket
+#    define socketpair		PerlSock_socketpair
+
+#    ifdef WIN32
+#      include "XSlock.h"
+#    endif  /* WIN32 */
+#  endif  /* NO_XSLOCKS */
 #else
-#ifdef PERL_CAPI
-#include "perlCAPI.h"
-#endif
+#  ifdef PERL_CAPI
+#    include "perlCAPI.h"
+#  endif
 #endif	/* PERL_OBJECT */

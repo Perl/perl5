@@ -153,5 +153,7 @@ use warning 'unsafe' ;
 package Foo;
 DESTROY { die "@{$_[0]} foo bar" }
 { bless ['A'], 'Foo' for 1..10 }
+{ bless ['B'], 'Foo' for 1..10 }
 EXPECT
 	(in cleanup) A foo bar at - line 4.
+	(in cleanup) B foo bar at - line 4.
