@@ -422,6 +422,8 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		    fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
 		}
 	    } /* !& */
+	    if (!fp && type && *type && *type != ':' && !isIDFIRST(*type))
+	       goto unknown_open_mode;
 	} /* IoTYPE_WRONLY */
 	else if (*type == IoTYPE_RDONLY) {
 	    /*SUPPRESS 530*/
@@ -453,6 +455,8 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		}
 		fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
 	    }
+	    if (!fp && type && *type && *type != ':' && !isIDFIRST(*type))
+	       goto unknown_open_mode;
 	} /* IoTYPE_RDONLY */
 	else if ((num_svs && /* '-|...' or '...|' */
 		  type[0] == IoTYPE_STD && type[1] == IoTYPE_PIPE) ||
