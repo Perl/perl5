@@ -1214,7 +1214,9 @@ lib/CGI/Util.pm			Utility functions
 lib/charnames.pm		Character names
 lib/charnames.t			See if character names work
 lib/Class/ISA.pm		Class::ISA
-lib/Class/ISA/test.pl		See if Class::ISA works
+lib/Class/ISA/ChangeLog		Changes for Class::ISA
+lib/Class/ISA/t/00_about_verbose.t	Tests for Class::ISA
+lib/Class/ISA/t/01_old_junk.t	Tests for Class::ISA
 lib/Class/Struct.pm		Declare struct-like datatypes as Perl classes
 lib/Class/Struct.t		See if Class::Struct works
 lib/complete.pl			A command completion subroutine
