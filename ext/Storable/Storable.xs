@@ -762,7 +762,7 @@ static const char magicstr[] = "pst0";		 /* Used as a magic number */
 #if BYTEORDER == 0x4321
 #define BYTEORDER_BYTES  '4','3','2','1'
 #else
-#error Unknown byteoder. Please append your byteorder to Storable.xs
+#error Unknown byteorder. Please append your byteorder to Storable.xs
 #endif
 #endif
 #endif
