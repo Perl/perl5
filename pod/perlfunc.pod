@@ -180,6 +180,20 @@ setnetent, setprotoent, setservent
 
 gmtime, localtime, time, times
 
+=item Functions new in perl5
+
+abs, bless, chomp, chr, exists, formline, glob, import, lc,
+lcfirst, map, my, no, qx, qw, ref, sub*, sysopen, tie, tied, uc,
+ucfirst, untie, use
+
+* - C<sub> was a keyword in perl4, but in perl5 it is an
+operator which can be used in expressions.
+
+=item Functions obsoleted in perl5
+
+dbmclose, dbmopen
+
+
 =back
 
 =head2 Alphabetical Listing of Perl Functions
@@ -797,9 +811,9 @@ as terminals may lose the end-of-file condition if you do.
 An C<eof> without an argument uses the last file read as argument.
 Empty parentheses () may be used to indicate
 the pseudofile formed of the files listed on the command line, i.e.
-C<eof()> is reasonable to use inside a while (<>) loop to detect the end
+C<eof()> is reasonable to use inside a while (E<lt>E<gt>) loop to detect the end
 of only the last file.  Use C<eof(ARGV)> or eof without the parentheses to
-test I<EACH> file in a while (<>) loop.  Examples:
+test I<EACH> file in a while (E<lt>E<gt>) loop.  Examples:
 
     # reset line numbering on each input file
     while (<>) {
@@ -818,7 +832,7 @@ test I<EACH> file in a while (<>) loop.  Examples:
     }
 
 Practical hint: you almost never need to use C<eof> in Perl, because the
-input operators return undef when they run out of data.  Testing C<eof>
+input operators return undef when they run out of data.  
 
 =item eval EXPR
 
@@ -890,7 +904,7 @@ there is only one scalar argument, the argument is checked for shell
 metacharacters.  If there are any, the entire argument is passed to
 C</bin/sh -c> for parsing.  If there are none, the argument is split
 into words and passed directly to execvp(), which is more efficient.
-Note: exec() (and system(0) do not flush your output buffer, so you may
+Note: exec() and system() do not flush your output buffer, so you may
 need to set C<$|> to avoid lost output.  Examples:
 
     exec '/bin/echo', 'Your arguments are: ', @ARGV;
@@ -1512,7 +1526,7 @@ In a scalar context, prints out the ctime(3) value:
 
     $now_string = localtime;  # e.g. "Thu Oct 13 04:54:34 1994"
 
-See also L<perlmod/timelocal> and the strftime(3) function available
+Also see the F<timelocal.pl> library, and the strftime(3) function available
 via the POSIX modulie.
 
 =item log EXPR
@@ -2280,7 +2294,7 @@ EOF on your read, and then sleep for a while, you might have to stick in a
 seek() to reset things.  First the simple trick listed above to clear the
 filepointer.  The seek() doesn't change the current position, but it
 I<does> clear the end-of-file condition on the handle, so that the next
-C<E<lt>FILE<E<gt>> makes Perl try again to read something.  Hopefully.
+C<E<lt>FILEE<gt>> makes Perl try again to read something.  Hopefully.
 
 If that doesn't work (some stdios are particularly cantankerous), then
 you may need something more like this:
@@ -3327,6 +3341,6 @@ Note that write is I<NOT> the opposite of read.  Unfortunately.
 
 =item y///
 
-The translation operator.  See L<perlop/tr///>.
+The translation operator.  See L<perlop>.
 
 =back
