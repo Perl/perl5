@@ -92,6 +92,9 @@ static int dooneliner _((char *cmd, char *filename));
 #endif
 
 #ifdef HAS_CHSIZE
+# ifdef my_chsize  /* Probably #defined to Perl_my_chsize in embed.h */
+#   undef my_chsize
+# endif
 # define my_chsize chsize
 #endif
 
@@ -1095,7 +1098,11 @@ PP(pp_sysread)
     if (op->op_type == OP_RECV)
 	DIE(no_sock_func, "recv");
 #endif
+    bufsize = SvCUR(bufsv);
     buffer = SvGROW(bufsv, length+offset+1);
+    if (offset > bufsize) { /* Zero any newly allocated space */
+    	Zero(buffer+bufsize, offset-bufsize, char);
+    }
     if (op->op_type == OP_SYSREAD) {
 	length = read(PerlIO_fileno(IoIFP(io)), buffer+offset, length);
     }
@@ -3053,8 +3060,20 @@ PP(pp_time)
     RETURN;
 }
 
+/* XXX The POSIX name is CLK_TCK; it is to be preferred
+   to HZ.  Probably.  For now, assume that if the system
+   defines HZ, it does so correctly.  (Will this break
+   on VMS?)
+   Probably we ought to use _sysconf(_SC_CLK_TCK), if
+   it's supported.    --AD  9/96.
+*/
+
 #ifndef HZ
-#define HZ 60
+#  ifdef CLK_TCK
+#    define HZ CLK_TCK
+#  else
+#    define HZ 60
+#  endif
 #endif
 
 PP(pp_tms)
@@ -3072,8 +3091,6 @@ PP(pp_tms)
     (void)times((tbuffer_t *)&timesbuf);  /* time.h uses different name for */
                                           /* struct tms, though same data   */
                                           /* is returned.                   */
-#undef HZ
-#define HZ CLK_TCK
 #endif
 
     PUSHs(sv_2mortal(newSVnv(((double)timesbuf.tms_utime)/HZ)));
