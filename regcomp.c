@@ -3823,6 +3823,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	        IV ceilvalue = value < 256 ? value : 255;
 
 #ifdef EBCDIC
+		if (PL_hints & HINT_RE_ASCIIR) {
 		    /* New style scheme for ranges:
 		     * use re 'asciir';
 		     * do ranges in ASCII/Unicode space
