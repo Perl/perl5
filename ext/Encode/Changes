@@ -1,9 +1,16 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.0 2004/05/16 20:55:15 dankogai Exp $
+# $Id: Changes,v 2.1 2004/05/25 16:27:14 dankogai Exp dankogai $
 #
 
-$Revision: 2.0 $ $Date: 2004/05/16 20:55:15 $
+$Revision: 2.1 $ $Date: 2004/05/25 16:27:14 $
+! lib/Encode/CN/HZ.pm lib/Encode/Unicode/UTF7.pm
+  "If someone thinks utf8::upgrade($1) should be croaked like 
+  chom?p($1),please try the following patch for Encode.pm."
+  -- sadahiro-san
+  <20040522212704.C068.BQW10602@nifty.com>
+
+2.0 2004/05/16 20:55:15
 * version updated to 2.00
    -- sorry, no big feature change.  I just hate version 1.100 :)
 ! lib/Encode/Guess.pm
