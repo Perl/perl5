@@ -78,6 +78,91 @@ Version 5.005_52        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  1871] By: gsar                                  on 1998/09/24  07:26:37
+        Log: correct FSF address in various places
+     Branch: perl
+           ! Copying README ext/B/README lib/Getopt/Long.pm
+____________________________________________________________________________
+[  1870] By: gsar                                  on 1998/09/24  07:11:56
+        Log: From:    Dan Sugalski <sugalskd@osshe.edu>
+             Date:    Fri, 14 Aug 1998 09:20:16 PDT
+             Message-Id: <3.0.5.32.19980814092016.00b37dc0@ous.edu>
+             Subject: [PATCH 5.005_02] (and _5x I expect) VMS config procedure patch
+     Branch: perl
+           ! configure.com
+____________________________________________________________________________
+[  1869] By: gsar                                  on 1998/09/24  06:55:59
+        Log: use STRICT_ALIGNMENT on IRIX to allow usemymalloc=y again
+             From:    Scott Henry <scotth@sgi.com>
+             Date:    13 Aug 1998 09:52:15 PDT
+             Message-Id: <yd8pve46czk.fsf@hoshi.engr.sgi.com>
+             Subject: [PATCH] Irix USE_LONG_LONG/malloc.c incompatibility (was...)
+     Branch: perl
+           ! hints/irix_6.sh
+____________________________________________________________________________
+[  1868] By: gsar                                  on 1998/09/24  06:51:23
+        Log: From:    Nathan Torkington <gnat@frii.com>
+             Date:    Thu, 13 Aug 1998 10:59:48 MDT
+             Message-Id: <199808131659.KAA06179@prometheus.frii.com>
+             Subject: [PATCH] 5.005_02 perlfunc.pod, improve umask entry
+     Branch: perl
+           ! pod/perlfunc.pod
+____________________________________________________________________________
+[  1867] By: gsar                                  on 1998/09/24  06:45:13
+        Log: make C<goto &sub> AUTOLOAD-aware (autouse now works for modules
+             that are autoloaded)
+     Branch: perl
+           ! pp_ctl.c
+____________________________________________________________________________
+[  1866] By: gsar                                  on 1998/09/24  05:21:19
+        Log: grandfather deprecated "$$<digit>" no more
+     Branch: perl
+           ! pod/perldiag.pod toke.c
+____________________________________________________________________________
+[  1865] By: gsar                                  on 1998/09/24  04:52:48
+        Log: tweak PERL_HASH() to h=h+(h>>5) in order to improve distribution of
+             low bits (suggested by Ilya Zakharevich)
+     Branch: perl
+           ! hv.h
+____________________________________________________________________________
+[  1864] By: gsar                                  on 1998/09/24  04:29:14
+        Log: move yyglobal decls from perly.c to perlvars.h, regen headers, tweak
+             perly_c.diff
+     Branch: perl
+	   ! embed.h embedvar.h global.sym perlvars.h perly.c perly.h
+           ! perly_c.diff toke.c
+____________________________________________________________________________
+[  1863] By: gsar                                  on 1998/09/24  03:36:30
+        Log: provide locked access to string table for USE_THREADS
+     Branch: perl
+           ! embedvar.h hv.c intrpvar.h objXSUB.h perl.c thread.h
+____________________________________________________________________________
+[  1862] By: gsar                                  on 1998/09/24  03:30:32
+        Log: remove bogus warn()
+     Branch: perl
+           ! embed.pl
+____________________________________________________________________________
+[  1861] By: gsar                                  on 1998/09/24  02:58:51
+        Log: applied suggested patch, adapted for all platforms
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Sun, 20 Sep 1998 12:56:38 +0200
+             Message-ID: <3604de0c.12319885@smtp1.ibm.net>
+             Subject: [New PATCH 5.005_02] Support Mksymlists FUNCLIST argument in MakeMaker
+     Branch: perl
+	   ! lib/ExtUtils/MM_OS2.pm lib/ExtUtils/MM_Unix.pm
+	   ! lib/ExtUtils/MM_VMS.pm lib/ExtUtils/MM_Win32.pm
+           ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[  1860] By: gsar                                  on 1998/09/24  02:16:14
+        Log: upgrade to CPAN-1.40
+     Branch: perl
+           ! Changes lib/CPAN.pm lib/CPAN/FirstTime.pm
+____________________________________________________________________________
+[  1859] By: gsar                                  on 1998/09/24  02:08:59
+        Log: use $ENV{MAKEMAKEROPT} to set default command line args
+     Branch: perl
+           ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
 [  1857] By: gsar                                  on 1998/09/23  10:58:36
         Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
              Date: Tue, 22 Sep 1998 17:30:16 -0400 (EDT)

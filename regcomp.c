@@ -1210,10 +1210,14 @@ reg(I32 paren, I32 *flagp)
 		    else
 			regtail(br, reganode(LONGJMP, 0));
 		    c = *nextchar();
+		    if (flags&HASWIDTH)
+			*flagp |= HASWIDTH;
 		    if (c == '|') {
 			lastbr = reganode(IFTHEN, 0); /* Fake one for optimizer. */
 			regbranch(&flags, 1);
 			regtail(ret, lastbr);
+		 	if (flags&HASWIDTH)
+			    *flagp |= HASWIDTH;
 			c = *nextchar();
 		    }
 		    else
