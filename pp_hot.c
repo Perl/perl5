@@ -1274,11 +1274,6 @@ PP(pp_match)
     if (SvSCREAM(TARG))
 	r_flags |= REXEC_SCREAM;
 
-    if ((int)(pm->op_pmflags & PMf_MULTILINE) != PL_multiline) {
-	SAVEINT(PL_multiline);
-	PL_multiline = pm->op_pmflags & PMf_MULTILINE;
-    }
-
 play_it_again:
     if (global && rx->startp[0] != -1) {
 	t = s = rx->endp[0] + truebase;
@@ -2056,10 +2051,7 @@ PP(pp_subst)
 	       ? REXEC_COPY_STR : 0;
     if (SvSCREAM(TARG))
 	r_flags |= REXEC_SCREAM;
-    if ((int)(pm->op_pmflags & PMf_MULTILINE) != PL_multiline) {
-	SAVEINT(PL_multiline);
-	PL_multiline = pm->op_pmflags & PMf_MULTILINE;
-    }
+
     orig = m = s;
     if (rx->reganch & RE_USE_INTUIT) {
 	PL_bostr = orig;

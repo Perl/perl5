@@ -4454,6 +4454,7 @@ PP(pp_split)
     I32 gimme = GIMME_V;
     I32 oldsave = PL_savestack_ix;
     I32 make_mortal = 1;
+    bool multiline = 0;
     MAGIC *mg = (MAGIC *) NULL;
 
 #ifdef DEBUGGING
@@ -4515,9 +4516,8 @@ PP(pp_split)
 		s++;
 	}
     }
-    if ((int)(pm->op_pmflags & PMf_MULTILINE) != PL_multiline) {
-	SAVEINT(PL_multiline);
-	PL_multiline = pm->op_pmflags & PMf_MULTILINE;
+    if (pm->op_pmflags & PMf_MULTILINE) {
+	multiline = 1;
     }
 
     if (!limit)
@@ -4599,7 +4599,7 @@ PP(pp_split)
 #ifndef lint
 	    while (s < strend && --limit &&
 	      (m = fbm_instr((unsigned char*)s, (unsigned char*)strend,
-			     csv, PL_multiline ? FBMrf_MULTILINE : 0)) )
+			     csv, multiline ? FBMrf_MULTILINE : 0)) )
 #endif
 	    {
 		dstr = NEWSV(31, m-s);
