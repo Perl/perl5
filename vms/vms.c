@@ -2518,6 +2518,9 @@ getredirection(int *ac, char ***av)
 	exit(vaxc$errno);
 	}
     if (err != NULL) {
+        if (strcmp(err,"&1") == 0) {
+            dup2(fileno(stdout), fileno(Perl_debug_log));
+        } else {
 	FILE *tmperr;
 	if (NULL == (tmperr = fopen(err, errmode, "mbc=32", "mbf=2")))
 	    {
@@ -2530,6 +2533,7 @@ getredirection(int *ac, char ***av)
 		exit(vaxc$errno);
 		}
 	}
+        }
 #ifdef ARGPROC_DEBUG
     PerlIO_printf(Perl_debug_log, "Arglist:\n");
     for (j = 0; j < *ac;  ++j)
