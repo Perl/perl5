@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.21 $, $Date: 2002/05/06 13:08:46 $)
+perlfaq4 - Data Manipulation ($Revision: 1.22 $, $Date: 2002/05/16 12:44:24 $)
 
 =head1 DESCRIPTION
 
@@ -1396,13 +1396,20 @@ Here's another; let's compute spherical volumes:
 	$_ *= (4/3) * 3.14159;  # this will be constant folded
     }
 
-If you want to do the same thing to modify the values of the hash,
-you may not use the C<values> function, oddly enough.  You need a slice:
+If you want to do the same thing to modify the values of the
+hash, you can use the C<values> function.  As of Perl 5.6
+the values are not copied, so if you modify $orbit (in this
+case), you modify the value.
 
-    for $orbit ( @orbits{keys %orbits} ) {
+    for $orbit ( values %orbits ) {
 	($orbit **= 3) *= (4/3) * 3.14159; 
     }
-
+    
+Prior to perl 5.6 C<values> returned copies of the values,
+so older perl code often contains constructions such as
+C<@orbits{keys %orbits}> instead of C<values %orbits> where
+the hash is to be modified.
+    
 =head2 How do I select a random element from an array?
 
 Use the rand() function (see L<perlfunc/rand>):
@@ -1539,6 +1546,13 @@ get those bits into your @ints array:
 
 This method gets faster the more sparse the bit vector is.
 (Courtesy of Tim Bunce and Winfried Koenig.)
+
+You can make the while loop a lot shorter with this suggestion
+from Benjamin Goldberg:
+
+	while($vec =~ /[^\0]+/g ) {
+	   push @ints, grep vec($vec, $_, 1), $-[0] * 8 .. $+[0] * 8;
+	}
 
 Or use the CPAN module Bit::Vector:
 

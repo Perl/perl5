@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq8 - System Interaction ($Revision: 1.7 $, $Date: 2002/04/18 14:23:15 $)
+perlfaq8 - System Interaction ($Revision: 1.8 $, $Date: 2002/05/16 12:41:42 $)
 
 =head1 DESCRIPTION
 
@@ -968,9 +968,17 @@ sysopen():
 =head2 How do I install a module from CPAN?
 
 The easiest way is to have a module also named CPAN do it for you.
-This module comes with perl version 5.004 and later.  To manually install
-the CPAN module, or any well-behaved CPAN module for that matter, follow
-these steps:
+This module comes with perl version 5.004 and later.  
+
+    $ perl -MCPAN -e shell
+
+    cpan shell -- CPAN exploration and modules installation (v1.59_54)
+    ReadLine support enabled
+
+    cpan> install Some::Module 
+
+To manually install the CPAN module, or any well-behaved CPAN module 
+for that matter, follow these steps:
 
 =over 4
 
