@@ -28,6 +28,8 @@ _strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1
     CODE:
 	{
 	    char *buf = my_strftime(fmt, sec, min, hour, mday, mon, year, wday, yday, isdst);
-	    ST(0) = sv_2mortal(newSVpv(buf, 0));
-	    free(buf);
+	    if (buf) {
+		ST(0) = sv_2mortal(newSVpv(buf, 0));
+		free(buf);
+	    }
 	}

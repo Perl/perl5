@@ -26,8 +26,8 @@ bootstrap Time::Piece $VERSION;
 
 my $DATE_SEP = '-';
 my $TIME_SEP = ':';
-my @MON_LIST;
-my @DAY_LIST;
+my @MON_LIST = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+my @DAY_LIST = qw(Sun Mon Tue Wed Thu Fri Sat);
 
 use constant 'c_sec' => 0;
 use constant 'c_min' => 1;
@@ -235,7 +235,7 @@ sub epoch {
 
 sub hms {
     my $time = shift;
-    my $sep = shift || $TIME_SEP;
+    my $sep = @_ ? shift(@_) : $TIME_SEP;
     sprintf("%02d$sep%02d$sep%02d", $time->[c_hour], $time->[c_min], $time->[c_sec]);
 }
 
@@ -243,7 +243,7 @@ sub hms {
 
 sub ymd {
     my $time = shift;
-    my $sep = shift || $DATE_SEP;
+    my $sep = @_ ? shift(@_) : $DATE_SEP;
     sprintf("%d$sep%02d$sep%02d", $time->year, $time->mon, $time->[c_mday]);
 }
 
@@ -251,21 +251,20 @@ sub ymd {
 
 sub mdy {
     my $time = shift;
-    my $sep = shift || $DATE_SEP;
+    my $sep = @_ ? shift(@_) : $DATE_SEP;
     sprintf("%02d$sep%02d$sep%d", $time->mon, $time->[c_mday], $time->year);
 }
 
 sub dmy {
     my $time = shift;
-    my $sep = shift || $DATE_SEP;
+    my $sep = @_ ? shift(@_) : $DATE_SEP;
     sprintf("%02d$sep%02d$sep%d", $time->[c_mday], $time->mon, $time->year);
 }
 
 sub datetime {
     my $time = shift;
-    my $dsep = shift || $DATE_SEP;
-    my $tsep = shift || $TIME_SEP;
-    return join('T', $time->date($dsep), $time->time($tsep));
+    my %seps = (date => $DATE_SEP, T => 'T', time => $TIME_SEP, @_);
+    return join($seps{T}, $time->date($seps{date}), $time->time($seps{time}));
 }
 
 # taken from Time::JulianDay
@@ -283,15 +282,45 @@ sub julian_day {
     return $tmp;
 }
 
-# Hi Mark Jason!
+# Hi Mark-Jason!
 sub mjd {
-    # taken from the Calendar FAQ
     return shift->julian_day - 2_400_000.5;
+}
+
+sub week {
+    # taken from the Calendar FAQ
+    use integer;
+    my $J  = shift->julian_day;
+    my $d4 = ((($J + 31741 - ($J % 7)) % 146097) % 36524) % 1461;
+    my $L  = $d4 / 1460;
+    my $d1 = (($d4 - $L) % 365) + $L;
+    return $d1 / 7 + 1;
+}
+
+sub _is_leap_year {
+    my $year = shift;
+    return (($year %4 == 0) && !($year % 100 == 0)) || ($year % 400 == 0)
+               ? 1 : 0;
+}
+
+sub is_leap_year {
+    my $time = shift;
+    my $year = $time->year;
+    return _is_leap_year($year);
+}
+
+my @MON_LAST = qw(31 28 31 30 31 30 31 31 30 31 30 31);
+
+sub month_last_day {
+    my $time = shift;
+    my $year = $time->year;
+    my $_mon = $time->_mon;
+    return $MON_LAST[$_mon] + ($_mon == 1 ? _is_leap_year($year) : 0);
 }
 
 sub strftime {
     my $time = shift;
-    my $format = shift || "%a, %d %b %Y %H:%M:%S %Z";
+    my $format = @_ ? shift(@_) : "%a, %d %b %Y %H:%M:%S %Z";
     return _strftime($format, (@$time)[c_sec..c_isdst]);
 }
 
@@ -426,42 +455,64 @@ also a new() constructor provided, which is the same as localtime(), except
 when passed a Time::Piece object, in which case it's a copy constructor. The
 following methods are available on the object:
 
-    $t->sec               # also available as $t->second
-    $t->min               # also available as $t->minute
-    $t->hour
-    $t->mday              # also available as $t->day_of_month
-    $t->mon               # based at 1
-    $t->_mon              # based at 0
-    $t->monname           # February
-    $t->month             # same as $t->monname
-    $t->year              # based at 0 (year 0 AD is, of course 1 BC).
-    $t->_year             # year minus 1900
-    $t->wday              # based at 1 = Sunday
-    $t->_wday             # based at 0 = Sunday
-    $t->day_of_week       # based at 0 = Sunday
-    $t->wdayname          # Tuesday
-    $t->day               # same as wdayname
-    $t->yday              # also available as $t->day_of_year
-    $t->isdst             # also available as $t->daylight_savings
-    $t->hms               # 01:23:45
-    $t->time              # same as $t->hms
-    $t->ymd               # 2000-02-29
-    $t->date              # same as $t->ymd
-    $t->mdy               # 02-29-2000
-    $t->dmy               # 29-02-2000
-    $t->cdate             # Tue Feb 29 01:23:45 2000
-    "$t"                  # same as $t->cdate
-    $t->epoch             # seconds since the epoch
-    $t->tzoffset          # timezone offset in a Time::Seconds object
-    $t->julian_day        # number of days since julian calendar began
-    $t->mjd               # modified julian day
-    $t->strftime(FORMAT)  # same as POSIX::strftime (without POSIX.pm)
+    $t->sec                 # also available as $t->second
+    $t->min                 # also available as $t->minute
+    $t->hour                # 24 hour
+    $t->mday                # also available as $t->day_of_month
+    $t->mon                 # 1 = January
+    $t->_mon                # 0 = January
+    $t->monname             # February
+    $t->month               # same as $t->monname
+    $t->year                # based at 0 (year 0 AD is, of course 1 BC)
+    $t->_year               # year minus 1900
+    $t->wday                # 1 = Sunday
+    $t->_wday               # 0 = Sunday
+    $t->day_of_week         # 0 = Sunday
+    $t->wdayname            # Tuesday
+    $t->day                 # same as wdayname
+    $t->yday                # also available as $t->day_of_year, 0 = Jan 01
+    $t->isdst               # also available as $t->daylight_savings
+
+    $t->hms                 # 12:34:56
+    $t->hms(".")            # 12.34.56
+    $t->time                # same as $t->hms
+
+    $t->ymd                 # 2000-02-29
+    $t->date                # same as $t->ymd
+    $t->mdy                 # 02-29-2000
+    $t->mdy("/")            # 02/29/2000
+    $t->dmy                 # 29-02-2000
+    $t->dmy(".")            # 29.02.2000
+    $t->datetime            # 2000-02-29T12:34:56 (ISO 8601)
+    $t->cdate               # Tue Feb 29 12:34:56 2000
+    "$t"                    # same as $t->cdate
+   
+    $t->epoch               # seconds since the epoch
+    $t->tzoffset            # timezone offset in a Time::Seconds object
+
+    $t->julian_day          # number of days since Julian period began
+    $t->mjd                 # modified Julian day
+
+    $t->week                # week number (ISO 8601)
+
+    $t->is_leap_year        # true if it its
+    $t->month_last_day      # 28-31
+
+    $t->time_separator($s)  # set the default separator (default ":")
+    $t->date_separator($s)  # set the default separator (default "-")
+    $t->day_list(@days)     # set the default weekdays
+    $t->mon_list(@days)     # set the default months
+
+    $t->strftime(FORMAT)    # same as POSIX::strftime (without the overhead
+                            # of the full POSIX extension)
+    $t->strftime()          # "Tue, 29 Feb 2000 12:34:56 GMT"
 
 =head2 Local Locales
 
-Both wdayname (day) and monname (month) allow passing in a list to use to
-index the name of the days against. This can be useful if you need to
-implement some form of localisation without actually installing locales.
+Both wdayname (day) and monname (month) allow passing in a list to use
+to index the name of the days against. This can be useful if you need
+to implement some form of localisation without actually installing or
+using locales.
 
   my @days = qw( Dimanche Lundi Merdi Mercredi Jeudi Vendredi Samedi );
   
@@ -507,6 +558,22 @@ days, weeks and years in that delta, using the Time::Seconds API.
 Date comparisons are also possible, using the full suite of "<", ">",
 "<=", ">=", "<=>", "==" and "!=".
 
+=head2 YYYY-MM-DDThh:mm:ss
+
+The ISO 8601 standard defines the date format to be YYYY-MM-DD, and
+the time format to be hh:mm:ss (24 hour clock), and if combined, they
+should be concatenated with date first and with a capital 'T' in front
+of the time.
+
+=head2 Week Number
+
+The I<week number> may be an unknown concept to some readers.  The ISO
+8601 standard defines that weeks begin on a Monday and week 1 of the
+year is the week that includes both January 4th and the first Thursday
+of the year.  In other words, if the first Monday of January is the
+2nd, 3rd, or 4th, the preceding days of the January are part of the
+last week of the preceding year.  Week numbers range from 1 to 53.
+
 =head2 Global Overriding
 
 Finally, it's possible to override localtime and gmtime everywhere, by
@@ -514,11 +581,15 @@ including the ':override' tag in the import list:
 
     use Time::Piece ':override';
 
+=head1 SEE ALSO
+
+The excellent Calendar FAQ at http://www.tondering.dk/claus/calendar.html
+
 =head1 AUTHOR
 
 Matt Sergeant, matt@sergeant.org
 
-This module is based on Time::Piece, with changes suggested by Jarkko
+This module is based on Time::Object, with changes suggested by Jarkko
 Hietaniemi before including in core perl.
 
 =head2 License
