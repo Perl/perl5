@@ -2925,7 +2925,7 @@ tryagain:
 		    break;
 		default:
 		  normal_default:
-		    if ((*p & 0xc0) == 0xc0 && UTF) {
+		    if (UTF8_IS_START(*p) && UTF) {
 			ender = utf8_to_uv((U8*)p, RExC_end - p,
 					       &numlen, 0);
 			p += numlen;
@@ -2945,6 +2945,8 @@ tryagain:
 		if (ISMULT2(p)) { /* Back off on ?+*. */
 		    if (len)
 			p = oldp;
+		    /* ender is a Unicode value so it can be > 0xff --
+		     * in other words, do not use UTF8_IS_CONTINUED(). */
 		    else if (ender >= 0x80 && UTF) {
 			reguni(pRExC_state, ender, s, &numlen);
 			s += numlen;
@@ -2956,6 +2958,8 @@ tryagain:
 		    }
 		    break;
 		}
+		/* ender is a Unicode value so it can be > 0xff --
+		 * in other words, do not use UTF8_IS_CONTINUED(). */
 		if (ender >= 0x80 && UTF) {
 		    reguni(pRExC_state, ender, s, &numlen);
 		    s += numlen;

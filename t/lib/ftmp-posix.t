@@ -11,6 +11,8 @@ BEGIN {
 use strict;
 
 use File::Temp qw/ :POSIX unlink0 /;
+use FileHandle;
+
 ok(1);
 
 # TMPNAM - scalar

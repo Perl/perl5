@@ -200,7 +200,8 @@ sub full_setup {
     PERL_MALLOC_OK
     NAME NEEDS_LINKING NOECHO NORECURS NO_VC OBJECT OPTIMIZE PERL PERLMAINCC
     PERL_ARCHLIB PERL_LIB PERL_SRC PERM_RW PERM_RWX
-    PL_FILES PM PMLIBDIRS POLLUTE PPM_INSTALL_EXEC PPM_INSTALL_SCRIPT PREFIX
+    PL_FILES PM PM_FILTER PMLIBDIRS POLLUTE PPM_INSTALL_EXEC
+	PPM_INSTALL_SCRIPT PREFIX
     PREREQ_PM SKIP TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG
     XS_VERSION clean depend dist dynamic_lib linkext macro realclean
     tool_autosplit
@@ -239,7 +240,6 @@ sub full_setup {
 
  dir_target libscan makeaperl needs_linking perm_rw perm_rwx
  subdir_x test_via_harness test_via_script
-
 			 ];
 
     push @MM_Sections, qw[
@@ -1672,6 +1672,29 @@ library.  A libscan() method can be used to alter the behaviour.
 Defining PM in the Makefile.PL will override PMLIBDIRS.
 
 (Where BASEEXT is the last component of NAME.)
+
+=item PM_FILTER
+
+A filter program, in the traditional Unix sense (input from stdin, output
+to stdout) that is passed on each .pm file during the build (in the
+pm_to_blib() phase).  It is empty by default, meaning no filtering is done.
+
+Great care is necessary when defining the command if quoting needs to be
+done.  For instance, you would need to say:
+
+  {'PM_FILTER' => 'grep -v \\"^\\#\\"'}
+
+to remove all the leading coments on the fly during the build.  The
+extra \\ are necessary, unfortunately, because this variable is interpolated
+within the context of a Perl program built on the command line, and double
+quotes are what is used with the -e switch to build that command line.  The
+# is escaped for the Makefile, since what is going to be generated will then
+be:
+
+  PM_FILTER = grep -v \"^\#\"
+
+Without the \\ before the #, we'd have the start of a Makefile comment,
+and the macro would be incorrectly defined.
 
 =item POLLUTE
 

@@ -545,7 +545,7 @@ PP(pp_formline)
 	    s = item;
 	    if (item_is_utf) {
 		while (arg--) {
-		    if (*s & 0x80) {
+		    if (UTF8_IS_CONTINUED(*s)) {
 			switch (UTF8SKIP(s)) {
 			case 7: *t++ = *s++;
 			case 6: *t++ = *s++;

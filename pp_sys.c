@@ -3278,12 +3278,12 @@ PP(pp_fttext)
 		continue;
 #endif
 	    /* utf8 characters don't count as odd */
-	    if (*s & 0x40) {
+	    if (UTF8_IS_START(*s)) {
 		int ulen = UTF8SKIP(s);
 		if (ulen < len - i) {
 		    int j;
 		    for (j = 1; j < ulen; j++) {
-			if ((s[j] & 0xc0) != 0x80)
+			if (!UTF8_IS_CONTINUATION(s[j]))
 			    goto not_utf8;
 		    }
 		    --ulen;	/* loop does extra increment */

@@ -2945,7 +2945,7 @@ Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
     e = SvEND(sv);
     t = s;
     while (t < e) {
-	if ((hibit = *t++ & 0x80))
+	if ((hibit = UTF8_IS_CONTINUED(*t++)))
 	    break;
     }
 
@@ -3037,7 +3037,7 @@ Perl_sv_utf8_decode(pTHX_ register SV *sv)
 	    return FALSE;
         e = SvEND(sv);
         while (c < e) {
-            if (*c++ & 0x80) {
+            if (UTF8_IS_CONTINUED(*c++)) {
 		SvUTF8_on(sv);
 		break;
 	    }
@@ -4606,17 +4606,18 @@ Perl_sv_pos_b2u(pTHX_ register SV *sv, I32* offsetp)
 
     s = (U8*)SvPV(sv, len);
     if (len < *offsetp)
-	Perl_croak(aTHX_ "panic: bad byte offset");
+	Perl_croak(aTHX_ "panic: sv_pos_b2u: bad byte offset");
     send = s + *offsetp;
     len = 0;
     while (s < send) {
-	s += UTF8SKIP(s);
-	++len;
-    }
-    if (s != send) {
-	if (ckWARN_d(WARN_UTF8))
-	    Perl_warner(aTHX_ WARN_UTF8, "Malformed UTF-8 character");
-	--len;
+	STRLEN n;
+
+	if (utf8_to_uv(s, UTF8SKIP(s), &n, 0)) {
+	    s += n;
+	    len++;
+	}
+	else
+	    break;
     }
     *offsetp = len;
     return;

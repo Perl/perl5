@@ -139,9 +139,6 @@ Deprecated.  Use C<GIMME_V> instead.
 /* Private for OP_REPEAT */
 #define OPpREPEAT_DOLIST	64	/* List replication. */
 
-/* Private for OP_LEAVELOOP */
-#define OPpLOOP_CONTINUE	64	/* a continue block is present */
-
 /* Private for OP_RV2?V, OP_?ELEM */
 #define OPpDEREF		(32|64)	/* Want ref to something: */
 #define OPpDEREF_AV		32	/*   Want ref to AV. */

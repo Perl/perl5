@@ -322,7 +322,7 @@ extern int	PerlIO_binmode		(pTHX_ PerlIO *f, int iotype, int omode, const char *
 
 #ifndef PERLIO_IS_STDIO
 
-extern void PerlIO_cleanup();
+extern void PerlIO_cleanup(void);
 
 extern void PerlIO_debug(const char *fmt,...);
 

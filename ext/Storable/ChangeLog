@@ -1,3 +1,21 @@
+Wed Jan  3 10:43:18 MET 2001   Raphael Manfredi <Raphael_Manfredi@pobox.com>
+
+. Description:
+
+	Removed spurious 'clean' entry in Makefile.PL.
+
+	Added CAN_FLOCK to determine whether we can flock() or not,
+	by inspecting Perl's configuration parameters, as determined
+	by Configure.
+
+	Trace offending package when overloading cannot be restored
+	on a scalar.
+
+	Made context cleanup safer to avoid dup freeing, mostly in the
+	presence of repeated exceptions during store/retrieve (which can
+	cause memory leaks anyway, so it's just additional safety, not a
+	definite fix).
+
 Sun Nov  5 18:23:48 MET 2000   Raphael Manfredi <Raphael_Manfredi@pobox.com>
 
 . Description:

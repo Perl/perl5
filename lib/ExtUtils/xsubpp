@@ -1183,6 +1183,7 @@ while (fetch_para()) {
 
     # print function header
     print Q<<"EOF";
+#XS(XS_${Full_func_name}); /* prototype to pass -Wmissing-prototypes */
 #XS(XS_${Full_func_name})
 #[[
 #    dXSARGS;
@@ -1502,6 +1503,7 @@ print Q<<"EOF";
 EOF
 
 print Q<<"EOF";
+#XS(boot_$Module_cname); /* prototype to pass -Wmissing-prototypes */
 #XS(boot_$Module_cname)
 EOF
 

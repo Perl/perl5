@@ -15,6 +15,7 @@ use strict;
 use File::Spec;
 use File::Path;
 use File::Temp qw/ :mktemp unlink0 /;
+use FileHandle;
 
 ok(1);
 

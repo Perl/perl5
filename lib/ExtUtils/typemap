@@ -55,22 +55,22 @@ T_SVREF
 	if (sv_isa($arg, \"${ntype}\"))
 	    $var = (SV*)SvRV($arg);
 	else
-	    croak(\"$var is not of type ${ntype}\")
+	    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 T_AVREF
 	if (sv_isa($arg, \"${ntype}\"))
 	    $var = (AV*)SvRV($arg);
 	else
-	    croak(\"$var is not of type ${ntype}\")
+	    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 T_HVREF
 	if (sv_isa($arg, \"${ntype}\"))
 	    $var = (HV*)SvRV($arg);
 	else
-	    croak(\"$var is not of type ${ntype}\")
+	    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 T_CVREF
 	if (sv_isa($arg, \"${ntype}\"))
 	    $var = (CV*)SvRV($arg);
 	else
-	    croak(\"$var is not of type ${ntype}\")
+	    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 T_SYSRET
 	$var NOT IMPLEMENTED
 T_UV
@@ -113,28 +113,28 @@ T_PTRREF
 	    $var = INT2PTR($type,tmp);
 	}
 	else
-	    croak(\"$var is not a reference\")
+	    Perl_croak(aTHX_ \"$var is not a reference\")
 T_REF_IV_REF
 	if (sv_isa($arg, \"${type}\")) {
 	    IV tmp = SvIV((SV*)SvRV($arg));
 	    $var = *($type *) tmp;
 	}
 	else
-	    croak(\"$var is not of type ${ntype}\")
+	    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 T_REF_IV_PTR
 	if (sv_isa($arg, \"${type}\")) {
 	    IV tmp = SvIV((SV*)SvRV($arg));
 	    $var = ($type) tmp;
 	}
 	else
-	    croak(\"$var is not of type ${ntype}\")
+	    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 T_PTROBJ
 	if (sv_derived_from($arg, \"${ntype}\")) {
 	    IV tmp = SvIV((SV*)SvRV($arg));
 	    $var = INT2PTR($type,tmp);
 	}
 	else
-	    croak(\"$var is not of type ${ntype}\")
+	    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 T_PTRDESC
 	if (sv_isa($arg, \"${ntype}\")) {
 	    IV tmp = SvIV((SV*)SvRV($arg));
@@ -142,21 +142,21 @@ T_PTRDESC
 	    $var = ${type}_desc->ptr;
 	}
 	else
-	    croak(\"$var is not of type ${ntype}\")
+	    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 T_REFREF
 	if (SvROK($arg)) {
 	    IV tmp = SvIV((SV*)SvRV($arg));
 	    $var = *INT2PTR($type,tmp);
 	}
 	else
-	    croak(\"$var is not a reference\")
+	    Perl_croak(aTHX_ \"$var is not a reference\")
 T_REFOBJ
 	if (sv_isa($arg, \"${ntype}\")) {
 	    IV tmp = SvIV((SV*)SvRV($arg));
 	    $var = *INT2PTR($type,tmp);
 	}
 	else
-	    croak(\"$var is not of type ${ntype}\")
+	    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 T_OPAQUE
 	$var NOT IMPLEMENTED
 T_OPAQUEPTR

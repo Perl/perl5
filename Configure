@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Dec 21 18:12:08 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Fri Jan  5 20:11:52 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1434,6 +1434,7 @@ case "$src" in
     */*) src=`echo $0 | sed -e 's%/[^/][^/]*$%%'`
          case "$src" in
 	 /*)	;;
+	 .)	;;
          *)	src=`cd ../$src && pwd` ;;
 	 esac
          ;;
@@ -2061,6 +2062,7 @@ test)
 *)
 	if `sh -c "PATH= test true" >/dev/null 2>&1`; then
 		echo "Using the test built into your sh."
+		echo "Using the test built into your sh."
 		test=test
 		_test=test
 	fi
@@ -2176,17 +2178,24 @@ case "$lns" in
 	echo "Checking how to test for symbolic links..." >&4
 	$lns blurfl sym
 	if $test "X$issymlink" = X; then
-		if $test -h sym 2>/dev/null; then
-			issymlink=-h
-		fi
+		sh -c "PATH= test -h sym" >/dev/null 2>&1
+		if test $? = 0; then
+			issymlink="test -h"
+		fi		
+	fi
+	if $test "X$issymlink" = X; then
+		if  $test -h >/dev/null 2>&1; then
+			issymlink="$test -h"
+			echo "Your builtin 'test -h' may be broken, I'm using external '$test -h'." >&4
+		fi		
 	fi
 	if $test "X$issymlink" = X; then
 		if $test -L sym 2>/dev/null; then
-			issymlink=-L
+			issymlink="$test -L"
 		fi
 	fi
 	if $test "X$issymlink" != X; then
-		echo "You can test for symbolic links with $issymlink." >&4
+		echo "You can test for symbolic links with '$issymlink'." >&4
 	else
 		echo "I do not know how you can test for symbolic links." >&4
 	fi
@@ -2205,7 +2214,7 @@ $define|true|[yY]*)
 		exit 1
 		;;
 	*)	case "$lns:$issymlink" in
-		*"ln -s:-"?)
+		*"ln -s:"*"test -"?)
 			echo "Creating the symbolic links..." >&4
 			echo "(First creating the subdirectories...)" >&4
 			cd ..
@@ -2224,7 +2233,7 @@ $define|true|[yY]*)
 				read filename
 				test -z "$filename" && break
 				if test -f $filename; then
-					if test $issymlink $filename; then
+					if $issymlink $filename; then
 						rm -f $filename
 					fi
 				fi
@@ -4138,8 +4147,8 @@ and I got the following output:
 
 EOM
 dflt=y
-if sh -c "$cc -o try $optimize $ccflags $ldflags try.c $libs" >>try.msg 2>&1; then
-	if sh -c './try' >>try.msg 2>&1; then
+if $sh -c "$cc -o try $optimize $ccflags $ldflags try.c $libs" >>try.msg 2>&1; then
+	if $sh -c './try' >>try.msg 2>&1; then
 		xxx=`./try`
 		case "$xxx" in
 		"Ok") dflt=n ;;
