@@ -2114,6 +2114,9 @@ EOM
 		bsd386) osname=bsd386
 			osvers=`$uname -r`
 			;;
+                POSIX-BC | posix-bc ) osname=posix-bc
+                        osvers="$3"
+                        ;;
 		powerux | power_ux | powermax_os | powermaxos | \
 		powerunix | power_unix) osname=powerux
 			osvers="$3"

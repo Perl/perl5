@@ -1752,6 +1752,9 @@ moreswitches(char *s)
 #ifdef __OPEN_VM
 	printf("VM/ESA port by Neale Ferguson, 1998\n");
 #endif
+#ifdef POSIX_BC
+	printf("BS2000 (POSIX) port by Start Amadeus GmbH, 1998\n");
+#endif
 #ifdef BINARY_BUILD_NOTICE
 	BINARY_BUILD_NOTICE;
 #endif
