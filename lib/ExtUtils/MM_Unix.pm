@@ -305,8 +305,8 @@ sub cflags {
     $libperl ||= $self->{LIBPERL_A} || "libperl$self->{LIB_EXT}" ;
     $libperl =~ s/\.\$\(A\)$/$self->{LIB_EXT}/;
 
-    @cflags{qw(cc ccflags optimize large split shellflags)}
-	= @Config{qw(cc ccflags optimize large split shellflags)};
+    @cflags{qw(cc ccflags optimize shellflags)}
+	= @Config{qw(cc ccflags optimize shellflags)};
     my($optdebug) = "";
 
     $cflags{shellflags} ||= '';
@@ -341,16 +341,12 @@ sub cflags {
 	  optimize=\"$cflags{optimize}\"
 	  perltype=\"$cflags{perltype}\"
 	  optdebug=\"$cflags{optdebug}\"
-	  large=\"$cflags{large}\"
-	  split=\"$cflags{'split'}\"
 	  eval '$prog'
 	  echo cc=\$cc
 	  echo ccflags=\$ccflags
 	  echo optimize=\$optimize
 	  echo perltype=\$perltype
 	  echo optdebug=\$optdebug
-	  echo large=\$large
-	  echo split=\$split
 	  `;
 	my($line);
 	foreach $line (@o){
@@ -368,7 +364,7 @@ sub cflags {
 	$cflags{optimize} = $optdebug;
     }
 
-    for (qw(ccflags optimize perltype large split)) {
+    for (qw(ccflags optimize perltype)) {
 	$cflags{$_} =~ s/^\s+//;
 	$cflags{$_} =~ s/\s+/ /g;
 	$cflags{$_} =~ s/\s+$//;
@@ -411,8 +407,6 @@ sub cflags {
 CCFLAGS = $self->{CCFLAGS}
 OPTIMIZE = $self->{OPTIMIZE}
 PERLTYPE = $self->{PERLTYPE}
-LARGE = $self->{LARGE}
-SPLIT = $self->{SPLIT}
 MPOLLUTE = $pollute
 };
 
@@ -483,7 +477,7 @@ sub const_cccmd {
     return '' unless $self->needs_linking();
     return $self->{CONST_CCCMD} =
 	q{CCCMD = $(CC) -c $(INC) $(CCFLAGS) $(OPTIMIZE) \\
-	$(PERLTYPE) $(LARGE) $(SPLIT) $(MPOLLUTE) $(DEFINE_VERSION) \\
+	$(PERLTYPE) $(MPOLLUTE) $(DEFINE_VERSION) \\
 	$(XS_DEFINE_VERSION)};
 }
 
@@ -2370,7 +2364,7 @@ $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE)
 
     # The front matter of the linkcommand...
     $linkcmd = join ' ', "\$(CC)",
-	    grep($_, @Config{qw(large split ldflags ccdlflags)});
+	    grep($_, @Config{qw(ldflags ccdlflags)});
     $linkcmd =~ s/\s+/ /g;
     $linkcmd =~ s,(perl\.exp),\$(PERL_INC)/$1,;
 

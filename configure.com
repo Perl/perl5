@@ -743,7 +743,7 @@ $ sharpbang = "$ "
 $!: figure out how to guarantee sh startup !sfn
 $!: find out where common programs are     !sfn
 $!loclist="awk/cat/comm/cp/echo/expr/find/grep/ln/ls/mkdir/rm/sed/sort/touch/tr/uniq"
-$!trylist="Mcc/byacc/cpp/csh/date/egrep/less/line/more/nroff/perl/pg/sendmail/test/uname"
+$!trylist="byacc/cpp/csh/date/egrep/less/line/more/nroff/perl/pg/sendmail/test/uname"
 $! echo "I don't know where '$file' is, and my life depends on it."
 $! echo "Go find a public domain implementation or fix your PATH setting!"
 $! echo ""

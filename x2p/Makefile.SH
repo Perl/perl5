@@ -34,10 +34,7 @@ cat >Makefile <<!GROK!THIS!
 CC = $cc
 BYACC = $byacc
 LDFLAGS = $ldflags
-SMALL = $small
-LARGE = $large $split
-# XXX Perl malloc temporarily unusable (declaration collisions with
-# stdlib.h)
+# XXX Perl malloc temporarily unusable (declaration collisions with stdlib.h)
 #mallocsrc = $mallocsrc
 #mallocobj = $mallocobj
 shellflags = $shellflags
@@ -129,7 +126,7 @@ a2p.c: a2p.y
 
 a2p$(OBJ_EXT): a2p.c a2py.c a2p.h EXTERN.h util.h INTERN.h \
 		../handy.h ../config.h str.h hash.h
-	$(CCCMD) $(LARGE) a2p.c
+	$(CCCMD) a2p.c
 
 clean:
 	rm -f a2p *$(OBJ_EXT) $(plexe) $(plc) $(plm)

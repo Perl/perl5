@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Sep  2 18:40:07 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Fri Sep  8 23:42:12 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -761,12 +761,6 @@ installman3dir=''
 man3dir=''
 man3direxp=''
 man3ext=''
-huge=''
-large=''
-medium=''
-models=''
-small=''
-split=''
 modetype=''
 multiarch=''
 mydomain=''
@@ -997,8 +991,7 @@ loclibpth="/usr/local/lib /opt/local/lib /usr/gnu/lib"
 loclibpth="$loclibpth /opt/gnu/lib /usr/GNU/lib /opt/GNU/lib"
 
 : general looking path for locating libraries
-glibpth="/usr/lib/large /lib /usr/lib $xlibpth"
-glibpth="$glibpth /lib/large /usr/lib/small /lib/small"
+glibpth="/lib /usr/lib $xlibpth"
 glibpth="$glibpth /usr/ccs/lib /usr/ucblib /usr/local/lib"
 test -f /usr/shlib/libc.so && glibpth="/usr/shlib $glibpth"
 test -f /shlib/libc.so     && glibpth="/shlib $glibpth"
@@ -2888,174 +2881,6 @@ esac
 set usemultiplicity
 eval $setvar
 
-: determine where manual pages are on this system
-echo " "
-case "$sysman" in
-'') 
-	syspath='/usr/man/man1 /usr/man/mann /usr/man/manl /usr/man/local/man1'
-	syspath="$syspath /usr/man/u_man/man1 /usr/share/man/man1"
-	syspath="$syspath /usr/catman/u_man/man1 /usr/man/l_man/man1"
-	syspath="$syspath /usr/local/man/u_man/man1 /usr/local/man/l_man/man1"
-	syspath="$syspath /usr/man/man.L /local/man/man1 /usr/local/man/man1"
-	sysman=`./loc . /usr/man/man1 $syspath`
-	;;
-esac
-if $test -d "$sysman"; then
-	echo "System manual is in $sysman." >&4
-else
-	echo "Could not find manual pages in source form." >&4
-fi
-
-: see what memory models we can support
-case "$models" in
-'')
-	$cat >pdp11.c <<'EOP'
-int main() {
-#ifdef pdp11
-	exit(0);
-#else
-	exit(1);
-#endif
-}
-EOP
-	case "$cc" in
-	'') modelcc="$cc" ;;
-	*) modelcc="cc" ;;
-	esac
-	( $modelcc -o pdp11 pdp11.c ) >/dev/null 2>&1
-	if $test -f pdp11 && ./pdp11 2>/dev/null; then
-		dflt='unsplit split'
-	else
-		tans=`./loc . X /lib/small /lib/large /usr/lib/small /usr/lib/large /lib/medium /usr/lib/medium /lib/huge`
-		case "$tans" in
-		X) dflt='none';;
-		*) if $test -d /lib/small || $test -d /usr/lib/small; then
-				dflt='small'
-			else
-				dflt=''
-			fi
-			if $test -d /lib/medium || $test -d /usr/lib/medium; then
-				dflt="$dflt medium"
-			fi
-			if $test -d /lib/large || $test -d /usr/lib/large; then
-				dflt="$dflt large"
-			fi
-			if $test -d /lib/huge || $test -d /usr/lib/huge; then
-				dflt="$dflt huge"
-			fi
-		esac
-	fi;;
-*) dflt="$models";;
-esac
-$cat <<EOM
- 
-Some systems have different model sizes.  On most systems they are called
-small, medium, large, and huge.  On the PDP11 they are called unsplit and
-split.  If your system doesn't support different memory models, say "none".
-If you wish to force everything to one memory model, say "none" here and
-put the appropriate flags later when it asks you for other cc and ld flags.
-Venix systems may wish to put "none" and let the compiler figure things out.
-(In the following question multiple model names should be space separated.)
-
-The default for most systems is "none".
-
-EOM
-rp="Which memory models are supported?"
-. ./myread
-models="$ans"
-
-case "$models" in
-none)
-	small=''
-	medium=''
-	large=''
-	huge=''
-	unsplit=''
-	split=''
-	;;
-*split)
-	case "$split" in
-	'') if $contains '\-i' $sysman/ld.1 >/dev/null 2>&1 || \
-			 $contains '\-i' $sysman/cc.1 >/dev/null 2>&1; then
-			dflt='-i'
-		else
-			dflt='none'
-		fi;;
-	*) dflt="$split";;
-	esac
-	rp="What flag indicates separate I and D space?"
-	. ./myread
-	tans="$ans"
-	case "$tans" in
-	none) tans='';;
-	esac
-	split="$tans"
-	unsplit='';;
-*large*|*small*|*medium*|*huge*)
-	case "$models" in
-	*large*)
-		case "$large" in
-		'') dflt='-Ml';;
-		*) dflt="$large";;
-		esac
-	rp="What flag indicates large model?"
-	. ./myread
-	tans="$ans"
-	case "$tans" in
-	none) tans='';
-	esac
-	large="$tans";;
-	*) large='';;
-	esac
-	case "$models" in
-	*huge*) case "$huge" in
-		'') dflt='-Mh';;
-		*) dflt="$huge";;
-		esac
-		rp="What flag indicates huge model?"
-		. ./myread
-		tans="$ans"
-		case "$tans" in
-		none) tans='';
-		esac
-		huge="$tans";;
-	*) huge="$large";;
-	esac
-	case "$models" in
-	*medium*) case "$medium" in
-		'') dflt='-Mm';;
-		*) dflt="$medium";;
-		esac
-		rp="What flag indicates medium model?"
-		. ./myread
-		tans="$ans"
-		case "$tans" in
-		none) tans='';
-		esac
-		medium="$tans";;
-	*) medium="$large";;
-	esac
-	case "$models" in
-	*small*) case "$small" in
-		'') dflt='none';;
-		*) dflt="$small";;
-		esac
-		rp="What flag indicates small model?"
-		. ./myread
-		tans="$ans"
-		case "$tans" in
-		none) tans='';
-		esac
-		small="$tans";;
-	*) small='';;
-	esac
-	;;
-*)
-	echo "Unrecognized memory models--you may have to edit Makefile.SH" >&4
-	;;
-esac
-$rm -f pdp11.* pdp11
-
 : make some quick guesses about what we are up against
 echo " "
 $echo $n "Hmm...  $c"
@@ -3151,51 +2976,13 @@ chmod +x bsd usg v7 osf1 eunice xenix venix os2
 $eunicefix bsd usg v7 osf1 eunice xenix venix os2
 $rm -f foo
 
-: see if we need a special compiler
-echo " "
-if ./usg; then
-	case "$cc" in
-	'') case "$Mcc" in
-		/*) dflt='Mcc';;
-		*) case "$large" in
-			-M*) dflt='cc';;
-			*)	if $contains '\-M' $sysman/cc.1 >/dev/null 2>&1 ; then
-					if $contains '\-M' $sysman/cpp.1 >/dev/null 2>&1; then
-						dflt='cc'
-					else
-						dflt='cc -M'
-					fi
-				else
-					dflt='cc'
-				fi;;
-			esac;;
-		esac;;
-	*)  dflt="$cc";;
-	esac
-	case "$dflt" in
-	*M*)	$cat <<'EOM'
-On some older systems the default C compiler will not resolve multiple global
-references that happen to have the same name.  On some such systems the "Mcc"
-command may be used to force these to be resolved.  On other systems a "cc -M"
-command is required.  (Note that the -M flag on other systems indicates a
-memory model to use!) If you have the Gnu C compiler, you might wish to use
-that instead.
-
-EOM
-	;;
-	esac
-	rp="Use which C compiler?"
-	. ./myread
-	cc="$ans"
-else
-	case "$cc" in
-	'') dflt=cc;;
-	*) dflt="$cc";;
-	esac
-	rp="Use which C compiler?"
-	. ./myread
-	cc="$ans"
-fi
+case "$cc" in
+'') dflt=cc;;
+*) dflt="$cc";;
+esac
+rp="Use which C compiler?"
+. ./myread
+cc="$ans"
 : Look for a hint-file generated 'call-back-unit'.  Now that the
 : user has specified the compiler, we may need to set or change some
 : other defaults.
@@ -6942,6 +6729,24 @@ case "$ldlibpthname" in
 '')	ldlibpthname=LD_LIBRARY_PATH ;;
 none)	ldlibpthname='' ;;
 esac
+
+: determine where manual pages are on this system
+echo " "
+case "$sysman" in
+'') 
+	syspath='/usr/man/man1 /usr/man/mann /usr/man/manl /usr/man/local/man1'
+	syspath="$syspath /usr/man/u_man/man1 /usr/share/man/man1"
+	syspath="$syspath /usr/catman/u_man/man1 /usr/man/l_man/man1"
+	syspath="$syspath /usr/local/man/u_man/man1 /usr/local/man/l_man/man1"
+	syspath="$syspath /usr/man/man.L /local/man/man1 /usr/local/man/man1"
+	sysman=`./loc . /usr/man/man1 $syspath`
+	;;
+esac
+if $test -d "$sysman"; then
+	echo "System manual is in $sysman." >&4
+else
+	echo "Could not find manual pages in source form." >&4
+fi
 
 : determine where manual pages go
 set man1dir man1dir none
@@ -15811,7 +15616,6 @@ h_fcntl='$h_fcntl'
 h_sysfile='$h_sysfile'
 hint='$hint'
 hostcat='$hostcat'
-huge='$huge'
 i16size='$i16size'
 i16type='$i16type'
 i32size='$i32size'
@@ -15926,7 +15730,6 @@ ivsize='$ivsize'
 ivtype='$ivtype'
 known_extensions='$known_extensions'
 ksh='$ksh'
-large='$large'
 ld='$ld'
 lddlflags='$lddlflags'
 ldflags='$ldflags'
@@ -15972,11 +15775,9 @@ man1ext='$man1ext'
 man3dir='$man3dir'
 man3direxp='$man3direxp'
 man3ext='$man3ext'
-medium='$medium'
 mips_type='$mips_type'
 mkdir='$mkdir'
 mmaptype='$mmaptype'
-models='$models'
 modetype='$modetype'
 more='$more'
 multiarch='$multiarch'
@@ -16091,7 +15892,6 @@ sizesize='$sizesize'
 sizetype='$sizetype'
 sleep='$sleep'
 smail='$smail'
-small='$small'
 so='$so'
 sockethdr='$sockethdr'
 socketlib='$socketlib'
@@ -16099,7 +15899,6 @@ socksizetype='$socksizetype'
 sort='$sort'
 spackage='$spackage'
 spitshell='$spitshell'
-split='$split'
 src='$src'
 ssizetype='$ssizetype'
 startperl='$startperl'
