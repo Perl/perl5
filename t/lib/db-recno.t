@@ -21,6 +21,24 @@ sub ok
 
     print "not " unless $result ;
     print "ok $no\n" ;
+
+    return $result ;
+}
+
+sub bad_one
+{
+    print <<EOM unless $bad_ones++ ;
+# 
+# Some older versions of Berkeley DB will fail tests 51, 53 and 55.
+#
+# You can safely ignore the errors if you're never going to use the
+# broken functionality (recno databases with a modified bval). 
+# Otherwise you'll have to upgrade your DB library.
+#
+# If you want to upgrade Berkeley DB, the most recent version is 1.85.
+# Check out http://www.bostic.com/db for more details.
+#
+EOM
 }
 
 print "1..55\n";
@@ -190,8 +208,8 @@ unlink $Dfile;
     $h[3] = "ghi" ;
     untie @h ;
     my $x = `cat $Dfile` ;
-    ok(49, $x eq "abc\ndef\n\nghi\n") ;
     unlink $Dfile;
+    ok(49, $x eq "abc\ndef\n\nghi\n") ;
 }
 
 {
@@ -206,8 +224,10 @@ unlink $Dfile;
     $h[3] = "ghi" ;
     untie @h ;
     my $x = `cat $Dfile` ;
-    ok(51, $x eq "abc-def--ghi-") ;
     unlink $Dfile;
+    my $ok = ($x eq "abc-def--ghi-") ;
+    bad_one() unless $ok ;
+    ok(51, $ok) ;
 }
 
 {
@@ -223,8 +243,10 @@ unlink $Dfile;
     $h[3] = "ghi" ;
     untie @h ;
     my $x = `cat $Dfile` ;
-    ok(53, $x eq "abc  def       ghi  ") ;
     unlink $Dfile;
+    my $ok = ($x eq "abc  def       ghi  ") ;
+    bad_one() unless $ok ;
+    ok(53, $ok) ;
 }
 
 {
@@ -241,8 +263,10 @@ unlink $Dfile;
     $h[3] = "ghi" ;
     untie @h ;
     my $x = `cat $Dfile` ;
-    ok(55, $x eq "abc--def-------ghi--") ;
     unlink $Dfile;
+    my $ok = ($x eq "abc--def-------ghi--") ;
+    bad_one() unless $ok ;
+    ok(55, $ok) ;
 }
 
 exit ;
