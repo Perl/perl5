@@ -4017,18 +4017,20 @@ Demands a version of Perl specified by VERSION, or demands some semantics
 specified by EXPR or by C<$_> if EXPR is not supplied.
 
 VERSION may be either a numeric argument such as 5.006, which will be
-compared to C<$]>, or a literal of the form 5.6.1, which will be compared
-to C<$^V> (aka $PERL_VERSION).  A fatal error is produced at run time if
-VERSION is greater than the version of the current Perl interpreter.
-Compare with L</use>, which can do a similar check at compile time.
+compared to C<$]>, or a literal of the form v5.6.1 or 5.6.1, which
+will be compared to C<$^V> (aka $PERL_VERSION).  A fatal error is
+produced at run time if VERSION is greater than the version of the
+current Perl interpreter.  Compare with L</use>, which can do a
+similar check at compile time.
 
-Specifying VERSION as a literal of the form 5.6.1 is bad for backwards
-compatibility, because it leads to misleading error messages under
-earlier versions of Perl which do not support this syntax.
-The equivalent numeric version should be used instead if compatibility
+Specifying VERSION as a literal of the form v5.6.1 or 5.6.1 is bad for
+backwards compatibility, because it leads to misleading error messages
+under earlier versions of Perl which do not support this syntax.  The
+equivalent numeric version should be used instead if compatibility
 with Perl versions lower than 5.6.0 is required.
 
-    require 5.6.1;	# run time version check
+    require v5.6.1;	# run time version check
+    require 5.6.1;	# ditto
     require 5.006_001;	# ditto; preferred for backwards compatibility
 
 Otherwise, demands that a library file be included if it hasn't already
@@ -6132,19 +6134,20 @@ package.  It is exactly equivalent to
 except that Module I<must> be a bareword.
 
 VERSION may be either a numeric argument such as 5.006, which will be
-compared to C<$]>, or a literal of the form 5.6.1, which will be compared
-to C<$^V> (aka $PERL_VERSION.  A fatal error is produced if VERSION is
-greater than the version of the current Perl interpreter; Perl will not
-attempt to parse the rest of the file.  Compare with L</require>, which can
-do a similar check at run time.
+compared to C<$]>, or a literal of the form v5.6.1 or 5.6.1, which
+will be compared to C<$^V> (aka $PERL_VERSION.  A fatal error is
+produced if VERSION is greater than the version of the current Perl
+interpreter; Perl will not attempt to parse the rest of the file.
+Compare with L</require>, which can do a similar check at run time.
 
-Specifying VERSION as a literal of the form 5.6.1 is bad for backwards
-compatibility, because it leads to misleading error messages under
-earlier versions of Perl which do not support this syntax.
-The equivalent numeric version should be used instead if compatibility
+Specifying VERSION as a literal of the form v5.6.1 or 5.6.1 is bad for
+backwards compatibility, because it leads to misleading error messages
+under earlier versions of Perl which do not support this syntax.  The
+equivalent numeric version should be used instead if compatibility
 with Perl versions lower than 5.6.0 is required.
 
-    use 5.6.1;		# compile time version check
+    use v5.6.1;		# compile time version check
+    use 5.6.1;		# ditto
     use 5.006_001;	# ditto; preferred for backwards compatibility
 
 This is often useful if you need to check the current Perl version before

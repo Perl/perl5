@@ -4428,11 +4428,6 @@ and these are called "Version Objects".  See L<perldata/"Version
 Strings">, L<perlfunc/use>, and L<perlfunc/require> for more
 information.
 
-=item v-strings are deprecated (especially those beginning with 'v')
-
-(D deprecated) v-strings are deprecated.  Their semantics and use were
-overly confusing.
-
 =item Warning: something's wrong
 
 (W) You passed warn() an empty string (the equivalent of C<warn "">) or

@@ -7986,10 +7986,6 @@ Perl_scan_vstring(pTHX_ char *s, SV *sv)
 	}
     }
 
-    if (*start == 'v' && ckWARN(WARN_DEPRECATED))
-	 Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-		     "v-strings are deprecated (especially those starting with 'v')");
-
     if (!isALPHA(*pos)) {
 	UV rev;
 	U8 tmpbuf[UTF8_MAXLEN+1];

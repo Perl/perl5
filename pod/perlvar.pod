@@ -1160,13 +1160,13 @@ and is thereafter read-only.
 
 The revision, version, and subversion of the Perl interpreter,
 represented as a version object (see L<perldata/"Version Objects").
-For example in Perl v5.6.0 C<$^V eq 5.6.0> will return true.
+For example in Perl v5.6.0 C<$^V eq v5.6.0> will return true.
 
 This can be used to determine whether the Perl interpreter executing a
 script is in the right range of versions.  (Mnemonic: use ^V for Version
 Control.)  Example:
 
-    warn "No \"our\" declarations!\n" if $^V and $^V lt 5.6.0;
+    warn "No \"our\" declarations!\n" if $^V and $^V lt v5.6.0;
 
 To convert C<$^V> into its string representation use sprintf()'s
 C<"%vd"> conversion:
