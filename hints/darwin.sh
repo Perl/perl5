@@ -88,7 +88,13 @@ so='dylib';
 dlext='bundle';
 dlsrc='dl_dyld.xs'; usedl='define';
 cccdlflags=' '; # space, not empty, because otherwise we get -fpic
-ldflags="${ldflags} -flat_namespace"
+# ldflag: -flat_namespace is only available since OS X 10.1 (Darwin 1.4.1)
+#    - but not in 10.0.x (Darwin 1.3.x)
+# -- Kay Roepke
+case "$osvers" in
+1.[0-3].*)	;;
+*)		ldflags="${ldflags} -flat_namespace" ;;
+esac
 lddlflags="${ldflags} -bundle -undefined suppress";
 ldlibpthname='DYLD_LIBRARY_PATH';
 useshrplib='true';
