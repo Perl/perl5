@@ -2691,41 +2691,55 @@ PP(pp_substr)
     SV *sv;
     I32 len;
     STRLEN curlen;
-    STRLEN utfcurlen;
+    STRLEN utf8_curlen;
     I32 pos;
     I32 rem;
     I32 fail;
     I32 lvalue = PL_op->op_flags & OPf_MOD || LVRET;
     char *tmps;
     I32 arybase = PL_curcop->cop_arybase;
+    SV *repl_sv = NULL;
+    SV *repl_sv_copy = NULL;
     char *repl = 0;
     STRLEN repl_len;
     int num_args = PL_op->op_private & 7;
-    bool utfrepllen = FALSE;
+    bool repl_is_utf8 = FALSE;
 
     SvTAINTED_off(TARG);			/* decontaminate */
     SvUTF8_off(TARG);				/* decontaminate */
     if (num_args > 2) {
 	if (num_args > 3) {
-	    sv = POPs;
-	    repl = SvPV(sv, repl_len);
-	    utfrepllen = DO_UTF8(sv) && SvCUR(sv);
+	    repl_sv = POPs;
+	    repl = SvPV(repl_sv, repl_len);
+	    repl_is_utf8 = DO_UTF8(repl_sv) && SvCUR(repl_sv);
 	}
 	len = POPi;
     }
     pos = POPi;
     sv = POPs;
     PUTBACK;
+    if (repl_sv) {
+	if (repl_is_utf8) {
+	    if (!DO_UTF8(sv))
+		sv_utf8_upgrade(sv);
+	}
+	else if (DO_UTF8(sv)) {
+	    repl_sv_copy = newSVsv(repl_sv);
+	    sv_utf8_upgrade(repl_sv_copy);
+	    repl = SvPV(repl_sv_copy, repl_len);
+	    repl_is_utf8 = DO_UTF8(repl_sv_copy) && SvCUR(sv);
+	}
+    }
     tmps = SvPV(sv, curlen);
     if (DO_UTF8(sv)) {
-        utfcurlen = sv_len_utf8(sv);
-	if (utfcurlen == curlen)
-	    utfcurlen = 0;
+        utf8_curlen = sv_len_utf8(sv);
+	if (utf8_curlen == curlen)
+	    utf8_curlen = 0;
 	else
-	    curlen = utfcurlen;
+	    curlen = utf8_curlen;
     }
     else
-	utfcurlen = 0;
+	utf8_curlen = 0;
 
     if (pos >= arybase) {
 	pos -= arybase;
@@ -2770,16 +2784,18 @@ PP(pp_substr)
     else {
 	I32 upos = pos;
 	I32 urem = rem;
-	if (utfcurlen)
+	if (utf8_curlen)
 	    sv_pos_u2b(sv, &pos, &rem);
 	tmps += pos;
 	sv_setpvn(TARG, tmps, rem);
-	if (utfcurlen)
+	if (utf8_curlen)
 	    SvUTF8_on(TARG);
 	if (repl) {
 	    sv_insert(sv, pos, rem, repl, repl_len);
-	    if (utfrepllen)
+	    if (repl_is_utf8)
 		SvUTF8_on(sv);
+	    if (repl_sv_copy)
+		SvREFCNT_dec(repl_sv_copy);
 	}
 	else if (lvalue) {		/* it's an lvalue! */
 	    if (!SvGMAGICAL(sv)) {
