@@ -90,7 +90,7 @@ my %expect = (
     'Foo::Bar::Baz' => 'b1:1,b2:2,b3:3,foo:4,bar:5,baz:6',
 );
 
-print "1..", int(keys %expect)+5, "\n";
+print "1..", int(keys %expect)+7, "\n";
 my $testno = 0;
 while (my($class, $exp) = each %expect) {
    no strict 'refs';
@@ -115,6 +115,14 @@ print "ok ", ++$testno, "\n";
 # We should get compile time failures field name typos
 eval q(my D3 $obj3 = $obj2; $obj3->{notthere} = "");
 print "not " unless $@ && $@ =~ /^No such pseudo-hash field "notthere"/;
+print "ok ", ++$testno, "\n";
+
+# Slices
+@$obj1{"_b1", "b1"} = (17, 29);
+print "not " unless "@$obj1[1,2]" eq "17 29";
+print "ok ", ++$testno, "\n";
+@$obj1[1,2] = (44,28);
+print "not " unless "@$obj1{'b1','_b1','b1'}" eq "28 44 28";
 print "ok ", ++$testno, "\n";
 
 #fields::_dump();
