@@ -2210,9 +2210,14 @@ Perl_localize(pTHX_ OP *o, I32 lex)
     if (o->op_flags & OPf_PARENS)
 	list(o);
     else {
-	if (ckWARN(WARN_PARENTHESIS) && PL_bufptr > PL_oldbufptr && PL_bufptr[-1] == ',') {
-	    char *s;
-	    for (s = PL_bufptr; *s && (isALNUM(*s) || UTF8_IS_CONTINUED(*s) || strchr("@$%, ",*s)); s++) ;
+	if (ckWARN(WARN_PARENTHESIS)
+	    && PL_bufptr > PL_oldbufptr && PL_bufptr[-1] == ',')
+	{
+	    char *s = PL_bufptr;
+
+	    while (*s && (isALNUM(*s) || UTF8_IS_CONTINUED(*s) || strchr("@$%, ", *s)))
+		s++;
+
 	    if (*s == ';' || *s == '=')
 		Perl_warner(aTHX_ WARN_PARENTHESIS,
 			    "Parentheses missing around \"%s\" list",
