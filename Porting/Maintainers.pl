@@ -299,6 +299,13 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'Math::BigInt::FastCalc' =>
+		{
+		'MAINTAINER'	=> 'tels',
+		'FILES'		=> q[ext/Math/BigInt/FastCalc],
+		'CPAN'		=> 1,
+		},
+
 	'Math::BigRat' =>
 		{
 		'MAINTAINER'	=> 'tels',
