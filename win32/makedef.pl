@@ -236,6 +236,12 @@ if ($define{'MULTIPLICITY'})
   close(THREAD); 
  } 
 
+unless ($define{'DEBUGGING'})
+ {
+  $skip_sym .= "Perl_runops_debug\n";
+  $skip_sym .= "Perl_sv_peek\n";
+ }
+
 # All symbols have a Perl_ prefix because that's what embed.h
 # sticks in front of them.
 
