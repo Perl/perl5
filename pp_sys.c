@@ -1347,7 +1347,7 @@ PP(pp_leavewrite)
 	    }
 	    topgv = gv_fetchpv(IoTOP_NAME(io),FALSE, SVt_PVFM);
 	    if (!topgv || !GvFORM(topgv)) {
-		IoLINES_LEFT(io) = 100000000;
+		IoLINES_LEFT(io) = IoPAGE_LEN(io);
 		goto forget_top;
 	    }
 	    IoTOP_GV(io) = topgv;
