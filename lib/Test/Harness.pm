@@ -1,9 +1,11 @@
 # -*- Mode: cperl; cperl-indent-level: 4 -*-
-# $Id: Harness.pm,v 1.17 2001/09/07 06:20:29 schwern Exp $
+# $Id: Harness.pm,v 1.14.2.13 2002/01/07 22:34:32 schwern Exp $
 
 package Test::Harness;
 
 require 5.004;
+use Test::Harness::Straps;
+use Test::Harness::Assert;
 use Exporter;
 use Benchmark;
 use Config;
@@ -20,15 +22,21 @@ use vars qw($VERSION $Verbose $Switches $Have_Devel_Corestack $Curtest
 
 $Have_Devel_Corestack = 0;
 
-$VERSION = 1.26;
+$VERSION = '2.01';
 
 $ENV{HARNESS_ACTIVE} = 1;
+
+END {
+    # For VMS.
+    delete $ENV{HARNESS_ACTIVE};
+}
 
 # Some experimental versions of OS/2 build have broken $?
 my $Ignore_Exitcode = $ENV{HARNESS_IGNORE_EXITCODE};
 
 my $Files_In_Dir = $ENV{HARNESS_FILELEAK_IN_DIR};
 
+my $Strap = Test::Harness::Straps->new;
 
 @ISA = ('Exporter');
 @EXPORT    = qw(&runtests);
@@ -125,18 +133,14 @@ will generate
     FAILED tests 1, 3, 6
     Failed 3/6 tests, 50.00% okay
 
+=item B<test names>
 
-=item B<$Test::Harness::verbose>
+Anything after the test number but before the # is considered to be
+the name of the test.
 
-The global variable $Test::Harness::verbose is exportable and can be
-used to let runtests() display the standard output of the script
-without altering the behavior otherwise.
+  ok 42 this is the name of the test
 
-=item B<$Test::Harness::switches>
-
-The global variable $Test::Harness::switches is exportable and can be
-used to set perl command line options used for running the test
-script(s). The default value is C<-w>.
+Currently, Test::Harness does nothing with this information.
 
 =item B<Skipping tests>
 
@@ -162,6 +166,19 @@ afterwards is the thing that has to be done before this test will
 succeed.
 
   not ok 13 # TODO harness the power of the atom
+
+=begin _deprecated
+
+Alternatively, you can specify a list of what tests are todo as part
+of the test header.
+
+  1..23 todo 5 12 23
+
+This only works if the header appears at the beginning of the test.
+
+This style is B<deprecated>.
+
+=end _deprecated
 
 These tests represent a feature to be implemented or a bug to be fixed
 and act as something of an executable "thing to do" list.  They are
@@ -197,6 +214,38 @@ ignore them.
 Any other output Test::Harness sees it will silently ignore B<BUT WE
 PLAN TO CHANGE THIS!> If you wish to place additional output in your
 test script, please use a comment.
+
+=back
+
+
+=head2 Taint mode
+
+Test::Harness will honor the C<-T> in the #! line on your test files.  So
+if you begin a test with:
+
+    #!perl -T
+
+the test will be run with taint mode on.
+
+
+=head2 Configuration variables.
+
+These variables can be used to configure the behavior of
+Test::Harness.  They are exported on request.
+
+=over 4
+
+=item B<$Test::Harness::verbose>
+
+The global variable $Test::Harness::verbose is exportable and can be
+used to let runtests() display the standard output of the script
+without altering the behavior otherwise.
+
+=item B<$Test::Harness::switches>
+
+The global variable $Test::Harness::switches is exportable and can be
+used to set perl command line options used for running the test
+script(s). The default value is C<-w>.
 
 =back
 
@@ -291,8 +340,8 @@ sub runtests {
 
     my $ok = _all_ok($tot);
 
-    die q{Assert '$ok xor keys %$failedtests' failed!}
-      unless $ok xor keys %$failedtests;
+    assert(($ok xor keys %$failedtests), 
+           q{ok status jives with $failedtests});
 
     return $ok;
 }
@@ -391,39 +440,15 @@ sub _run_all_tests {
                 bench    => 0,
                );
 
-    # pass -I flags to children
-    my $old5lib = $ENV{PERL5LIB};
-
-    # VMS has a 255-byte limit on the length of %ENV entries, so
-    # toss the ones that involve perl_root, the install location
-    # for VMS
-    my $new5lib;
-    if ($^O eq 'VMS') {
-        $new5lib = join($Config{path_sep}, grep {!/perl_root/i;} @INC);
-        $Switches =~ s/-(\S*[A-Z]\S*)/"-$1"/g;
-    }
-    else {
-        $new5lib = join($Config{path_sep}, @INC);
-    }
-
-    local($ENV{'PERL5LIB'}) = $new5lib;
+    local($ENV{'PERL5LIB'}) = $Strap->_INC2PERL5LIB;
 
     my @dir_files = _globdir $Files_In_Dir if defined $Files_In_Dir;
     my $t_start = new Benchmark;
 
-    my $maxlen = 0;
-    my $maxsuflen = 0;
-    foreach (@tests) { # The same code in t/TEST
-       my $suf    = /\.(\w+)$/ ? $1 : '';
-       my $len    = length;
-       my $suflen = length $suf;
-       $maxlen    = $len    if $len    > $maxlen;
-       $maxsuflen = $suflen if $suflen > $maxsuflen;
-    }
-    # + 3 : we want three dots between the test name and the "ok"
-    my $width = $maxlen + 3 - $maxsuflen;
-
+    my $width = _leader_width(@tests);
     foreach my $tfile (@tests) {
+        $Strap->_reset_file_state;
+
         my($leader, $ml) = _mk_leader($tfile, $width);
         print $leader;
 
@@ -444,6 +469,9 @@ sub _run_all_tests {
 
         my($seen_header, $tests_seen) = (0,0);
         while (<$fh>) {
+            print if $Verbose;
+
+            $Strap->{line}++;
             if( _parse_header($_, \%test, \%tot) ) {
                 warn "Test header seen twice!\n" if $seen_header;
 
@@ -543,16 +571,12 @@ sub _run_all_tests {
                 @dir_files = @new_dir_files;
             }
         }
+
+        close $fh;
     }
     $tot{bench} = timediff(new Benchmark, $t_start);
 
-    if ($^O eq 'VMS') {
-        if (defined $old5lib) {
-            $ENV{PERL5LIB} = $old5lib;
-        } else {
-            delete $ENV{PERL5LIB};
-        }
-    }
+    $Strap->_restore_PERL5LIB;
 
     return(\%tot, \%failedtests);
 }
@@ -584,6 +608,29 @@ sub _mk_leader {
       if -t STDOUT and not $ENV{HARNESS_NOTTY} and not $Verbose;
 
     return($leader, $ml);
+}
+
+=item B<_leader_width>
+
+  my($width) = _leader_width(@test_files);
+
+Calculates how wide the leader should be based on the length of the
+longest test name.
+
+=cut
+
+sub _leader_width {
+    my $maxlen = 0;
+    my $maxsuflen = 0;
+    foreach (@_) {
+        my $suf    = /\.(\w+)$/ ? $1 : '';
+        my $len    = length;
+        my $suflen = length $suf;
+        $maxlen    = $len    if $len    > $maxlen;
+        $maxsuflen = $suflen if $suflen > $maxsuflen;
+    }
+    # + 3 : we want three dots between the test name and the "ok"
+    return $maxlen + 3 - $maxsuflen;
 }
 
 
@@ -633,32 +680,20 @@ sub _parse_header {
 
     my $is_header = 0;
 
-    print $line if $Verbose;
-
-    # 1..10 todo 4 7 10;
-    if ($line =~ /^1\.\.([0-9]+) todo([\d\s]+);?/i) {
-        $test->{max} = $1;
-        for (split(/\s+/, $2)) { $test->{todo}{$_} = 1; }
-
-        $tot->{max} += $test->{max};
-        $tot->{files}++;
-
+    if( $Strap->_is_header($line) ) {
         $is_header = 1;
-    }
-    # 1..10
-    # 1..0 # skip  Why?  Because I said so!
-    elsif ($line =~ /^1\.\.([0-9]+)
-                      (\s*\#\s*[Ss]kip\S*\s* (.+))?
-                    /x
-          )
-    {
-        $test->{max} = $1;
-        $tot->{max} += $test->{max};
-        $tot->{files}++;
+
+        $test->{max} = $Strap->{max};
+        for ( keys %{$Strap->{todo}} ) { $test->{todo}{$_} = 1; }
+
+        $test->{skip_reason} = $Strap->{skip_all} 
+          if not $test->{max} and defined $Strap->{skip_all};
+
         $test->{'next'} = 1 unless $test->{'next'};
-        $test->{skip_reason} = $3 if not $test->{max} and defined $3;
 
-        $is_header = 1;
+
+        $tot->{max} += $test->{max};
+        $tot->{files}++;
     }
     else {
         $is_header = 0;
@@ -689,77 +724,57 @@ sub _open_test {
     }
 }
 
-sub _run_one_test {
-    my($test) = @_;
-
-    
-}
-
 
 sub _parse_test_line {
     my($line, $test, $tot) = @_;
 
-    if ($line =~ /^(not\s+)?ok\b/i) {
+    my %result;
+    if ( $Strap->_is_test($line, \%result) ) {
         $test->{'next'} ||= 1;
         my $this = $test->{'next'};
-        # "not ok 23"
-        if ($line =~ /^(not )?ok\s*(\d*)[^#]*(\s*#.*)?/) {
-            my($not, $tnum, $extra) = ($1, $2, $3);
 
-            $this = $tnum if $tnum;
+        my($not, $tnum) = (!$result{ok}, $result{number});
 
-            my($type, $reason) = $extra =~ /^\s*#\s*([Ss]kip\S*|TODO)(\s+.+)?/
-              if defined $extra;
+        $this = $tnum if $tnum;
 
-            my($istodo, $isskip);
-            if( defined $type ) {
-                $istodo = 1 if $type =~ /TODO/;
-                $isskip = 1 if $type =~ /skip/i;
-            }
+        my($type, $reason) = ($result{type}, $result{reason});
 
-            $test->{todo}{$this} = 1 if $istodo;
+        my($istodo, $isskip);
+        if( defined $type ) {
+            $istodo = 1 if $type eq 'todo';
+            $isskip = 1 if $type eq 'skip';
+        }
 
-            $tot->{todo}++ if $test->{todo}{$this};
+        $test->{todo}{$this} = 1 if $istodo;
 
-            if( $not ) {
-                print "$test->{ml}NOK $this" if $test->{ml};
-                if (!$test->{todo}{$this}) {
-                    push @{$test->{failed}}, $this;
-                } else {
-                    $test->{ok}++;
-                    $tot->{ok}++;
-                }
-            }
-            else {
-                print "$test->{ml}ok $this/$test->{max}" if $test->{ml};
+        $tot->{todo}++ if $test->{todo}{$this};
+
+        if( $not ) {
+            print "$test->{ml}NOK $this" if $test->{ml};
+            if (!$test->{todo}{$this}) {
+                push @{$test->{failed}}, $this;
+            } else {
                 $test->{ok}++;
                 $tot->{ok}++;
-                $test->{skipped}++ if $isskip;
-
-                $reason = '[no reason given]'
-                    if $isskip and not defined $reason;
-                if (defined $reason and defined $test->{skip_reason}) {
-                    # print "was: '$skip_reason' new '$reason'\n";
-                    $test->{skip_reason} = 'various reasons'
-                      if $test->{skip_reason} ne $reason;
-                } elsif (defined $reason) {
-                    $test->{skip_reason} = $reason;
-                }
-
-                $test->{bonus}++, $tot->{bonus}++ if $test->{todo}{$this};
             }
         }
-        # XXX ummm... dunno
-        elsif ($line =~ /^ok\s*(\d*)\s*\#([^\r]*)$/) { # XXX multiline ok?
-            $this = $1 if $1 > 0;
+        else {
             print "$test->{ml}ok $this/$test->{max}" if $test->{ml};
             $test->{ok}++;
             $tot->{ok}++;
-        }
-        else {
-            # an ok or not ok not matching the 3 cases above...
-            # just ignore it for compatibility with TEST
-            next;
+            $test->{skipped}++ if $isskip;
+
+            $reason = '[no reason given]'
+              if $isskip and not defined $reason;
+            if (defined $reason and defined $test->{skip_reason}) {
+                # print "was: '$skip_reason' new '$reason'\n";
+                $test->{skip_reason} = 'various reasons'
+                  if $test->{skip_reason} ne $reason;
+            } elsif (defined $reason) {
+                $test->{skip_reason} = $reason;
+            }
+
+            $test->{bonus}++, $tot->{bonus}++ if $test->{todo}{$this};
         }
 
         if ($this > $test->{'next'}) {
@@ -775,9 +790,12 @@ sub _parse_test_line {
         $test->{'next'} = $this + 1;
 
     }
-    elsif ($line =~ /^Bail out!\s*(.*)/i) { # magic words
-        die "FAILED--Further testing stopped" .
-            ($1 ? ": $1\n" : ".\n");
+    else {
+        my $bail_reason;
+        if( $Strap->_is_bail_out($line, \$bail_reason) ) { # bail out!
+            die "FAILED--Further testing stopped" .
+              ($bail_reason ? ": $bail_reason\n" : ".\n");
+        }
     }
 }
 
@@ -828,16 +846,8 @@ sub _close_fh {
 sub _set_switches {
     my($test) = shift;
 
-    local *TEST;
-    open(TEST, $test) or print "can't open $test. $!\n";
-    my $first = <TEST>;
     my $s = $Switches;
-    $s .= " $ENV{'HARNESS_PERL_SWITCHES'}"
-      if exists $ENV{'HARNESS_PERL_SWITCHES'};
-    $s .= join " ", qq[ "-$1"], map {qq["-I$_"]} @INC
-      if $first =~ /^#!.*\bperl.*-\w*([tT])/;
-
-    close(TEST) or print "can't close $test. $!\n";
+    $s .= $Strap->_switches($test);
 
     return $s;
 }
@@ -1088,7 +1098,7 @@ test whether new files appeared in that directory, and report them as
 
 If relative, directory name is with respect to the current directory at
 the moment runtests() was called.  Putting absolute path into 
-C<HARNESS_FILELEAK_IN_DIR> may give more predicatable results.
+C<HARNESS_FILELEAK_IN_DIR> may give more predictable results.
 
 =item C<HARNESS_PERL_SWITCHES>
 

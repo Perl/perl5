@@ -1,0 +1,55 @@
+#!/usr/bin/perl -w
+
+BEGIN {
+    if( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = ('../lib', 'lib');
+    }
+    else {
+        unshift @INC, 't/lib';
+    }
+}
+
+my $SAMPLE_TESTS = $ENV{PERL_CORE} ? 'lib/sample-tests' : 't/sample-tests';
+
+use Test::More;
+
+%samples = (
+            bailout     => [qw( header test test test bailout )],
+            combined    => ['header', ('test') x 10],
+            descriptive => ['header', ('test') x 5 ],
+            duplicates  => ['header', ('test') x 11 ],
+            head_end    => [qw( other test test test test 
+                                other header other other )],
+            head_fail   => [qw( other test test test test
+                                other header other other )],
+            no_nums     => ['header', ('test') x 5 ],
+            out_of_order=> [('test') x 10, 'header', ('test') x 5],
+            simple      => [qw( header test test test test test )],
+            simple_fail => [qw( header test test test test test )],
+            'skip'      => [qw( header test test test test test )],
+            skip_all    => [qw( header )],
+            skip_no_msg => [qw( header test )],
+            taint       => [qw( header test )],
+            'todo'      => [qw( header test test test test test )],
+            todo_inline => [qw( header test test test )],
+            vms_nit     => [qw( header other test test )],
+            with_comments => [qw( other header other test other test test
+                                  test other other test other )],
+           );
+
+plan tests => scalar keys %samples;
+
+use Test::Harness::Straps;
+my $strap = Test::Harness::Straps->new;
+$strap->{callback} = sub {
+    my($self, $line, $type, $totals) = @_;
+    push @out, $type;
+};
+                            
+while( my($test, $expect) = each %samples ) {
+    local @out = ();
+    $strap->analyze_file("$SAMPLE_TESTS/$test");
+
+    is_deeply(\@out, $expect,   "$test callback");
+}
