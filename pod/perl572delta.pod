@@ -1,6 +1,6 @@
 =head1 NAME
 
-perl571delta - what's new for perl v5.7.2
+perl572delta - what's new for perl v5.7.2
 
 =head1 DESCRIPTION
 
@@ -314,6 +314,7 @@ less lossy (it uses integers for integer constant, as opposed to the
 old code that used floating point numbers even for integer constants),
 and slightly faster, you might want to consider regenerating your
 extension code (the new scheme makes regenerating easy).
+L<h2xs> now also supports C trigraphs.
 
 =item *
 
@@ -374,6 +375,10 @@ AtheOS (http://www.atheos.cx/) is a new platform.
 =item *
 
 DG/UX platform now supports the 5.005-style threads.  See L<perldgux>.
+
+=item *
+
+DYNIX/ptx platform (a.k.a. dynixptx) is supported at or near osvers 4.5.2.
 
 =item *
 
@@ -635,7 +640,7 @@ The op/sprintf tests 129 and 130 are known to fail on some platforms.
 Examples include any platform using sfio, and Compaq/Tandem's NonStop-UX.
 The failing platforms do not comply with the ANSI C Standard, line
 19ff on page 134 of ANSI X3.159 1989 to be exact.  (They produce
-something else than "1" and "-1" when formatting 0.6 and -0.6 using
+something other than "1" and "-1" when formatting 0.6 and -0.6 using
 the printf format "%.0f", most often they produce "0" and "-0".)
 
 =head2  Failure of Thread tests
@@ -700,7 +705,8 @@ DEC C V5.3-006 on OpenVMS VAX V6.2
   [.op]sprintf............................FAILED on test 12
   Failed 8/399 tests, 91.23% okay.
 
-DEC C V6.0-001 on OpenVMS Alpha V7.2-1 
+DEC C V6.0-001 on OpenVMS Alpha V7.2-1 and
+Compaq C V6.2-008 on OpenVMS Alpha V7.1
 
   [-.ext.list.util.t]tainted..............FAILED on test 3 
   [-.lib.file.find]taint..................FAILED on test 17
