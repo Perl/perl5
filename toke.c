@@ -2523,9 +2523,15 @@ Perl_yylex(pTHX)
 	    bool bof = PL_rsfp ? TRUE : FALSE;
 	    if (bof) {
 #ifdef PERLIO_IS_STDIO
-#  ifdef __GLIBC__
-#    if __GLIBC__ == 1 /* Linux glibc5 */
+#  ifdef __GNU_LIBRARY__
+#    if __GNU_LIBRARY__ == 1 /* Linux glibc5 */
 #      define FTELL_FOR_PIPE_IS_BROKEN
+#    endif
+#  else
+#    ifdef __GLIBC__
+#      if __GLIBC__ == 1 /* maybe some glibc5 release had it like this? */
+#        define FTELL_FOR_PIPE_IS_BROKEN
+#      endif
 #    endif
 #  endif
 #endif
