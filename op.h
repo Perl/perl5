@@ -23,7 +23,7 @@
  *			which may or may not check number of children).
  */
 
-typedef UV PADOFFSET;
+typedef U32 PADOFFSET;
 #define NOT_IN_PAD ((PADOFFSET) -1)
 
 #ifdef DEBUGGING_OPS
