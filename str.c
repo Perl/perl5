@@ -1,4 +1,4 @@
-/* $RCSfile: str.c,v $$Revision: 4.0.1.3 $$Date: 91/06/10 01:27:54 $
+/* $RCSfile: str.c,v $$Revision: 4.0.1.4 $$Date: 91/11/05 18:40:51 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	str.c,v $
+ * Revision 4.0.1.4  91/11/05  18:40:51  lwall
+ * patch11: $foo .= <BAR> could overrun malloced memory
+ * patch11: \$ didn't always make it through double-quoter to regexp routines
+ * patch11: prepared for ctype implementations that don't define isascii()
+ * 
  * Revision 4.0.1.3  91/06/10  01:27:54  lwall
  * patch10: $) and $| incorrectly handled in run-time patterns
  * 
@@ -255,6 +260,7 @@ register STR *sstr;
 	    }
 	    str_nset(dstr,sstr->str_ptr,sstr->str_cur);
 	}
+	/*SUPPRESS 560*/
 	if (dstr->str_nok = sstr->str_nok)
 	    dstr->str_u.str_nval = sstr->str_u.str_nval;
 	else {
@@ -556,6 +562,7 @@ STRLEN littlelen;
 	*mid = '\0';
 	bigstr->str_cur = mid - big;
     }
+    /*SUPPRESS 560*/
     else if (i = mid - big) {	/* faster from front */
 	midend -= littlelen;
 	mid = midend;
@@ -709,11 +716,13 @@ register STR *str2;
 	(void)str_2ptr(str2);
 
     if (str1->str_cur < str2->str_cur) {
+	/*SUPPRESS 560*/
 	if (retval = memcmp(str1->str_ptr, str2->str_ptr, str1->str_cur))
 	    return retval < 0 ? -1 : 1;
 	else
 	    return -1;
     }
+    /*SUPPRESS 560*/
     else if (retval = memcmp(str1->str_ptr, str2->str_ptr, str2->str_cur))
 	return retval < 0 ? -1 : 1;
     else if (str1->str_cur == str2->str_cur)
@@ -742,7 +751,7 @@ int append;
     cnt = fp->_cnt;			/* get count into register */
     str->str_nok = 0;			/* invalidate number */
     str->str_pok = 1;			/* validate pointer */
-    if (str->str_len <= cnt + 1) {	/* make sure we have the room */
+    if (str->str_len - append <= cnt + 1) { /* make sure we have the room */
 	if (cnt > 80 && str->str_len > append) {
 	    shortbuffered = cnt - str->str_len + append + 1;
 	    cnt -= shortbuffered;
@@ -928,14 +937,21 @@ STR *src;
 	if (*s == '\\' && s[1] && index("$@[{\\]}lLuUE",s[1])) {
 	    str_ncat(str, t, s - t);
 	    ++s;
-	    if (isalpha(*s)) {
+	    if (isALPHA(*s)) {
 		str_ncat(str, "$c", 2);
 		sawcase = (*s != 'E');
 	    }
 	    else {
-		if (*nointrp && s+1 < send)
-		    if (*s != '@' && (*s != '$' || index(nointrp,s[1])))
+		if (*nointrp) {		/* in a regular expression */
+		    if (*s == '@')	/* always strip \@ */ /*SUPPRESS 530*/
+			;
+		    else if (*s == '$') {
+			if (s+1 >= send || index(nointrp, s[1]))
+			    str_ncat(str,s-1,1); /* only strip \$ for vars */
+		    }
+		    else		/* don't strip \\, \[, \{ etc. */
 			str_ncat(str,s-1,1);
+		}
 		str_ncat(str, "$b", 2);
 	    }
 	    str_ncat(str, s, 1);
@@ -952,7 +968,7 @@ STR *src;
 	else if ((*s == '@' || *s == '$') && s+1 < send) {
 	    str_ncat(str,t,s-t);
 	    t = s;
-	    if (*s == '$' && s[1] == '#' && (isalpha(s[2]) || s[2] == '_'))
+	    if (*s == '$' && s[1] == '#' && (isALPHA(s[2]) || s[2] == '_'))
 		s++;
 	    s = scanident(s,send,tokenbuf);
 	    if (*t == '@' &&
@@ -988,6 +1004,7 @@ STR *src;
 		    case '\'':
 		    case '"':
 			if (s[-1] != '$') {
+			    /*SUPPRESS 68*/
 			    s = cpytill(tokenbuf,s+1,send,*s,&len);
 			    if (s >= send)
 				fatal("Unterminated string");
@@ -1002,10 +1019,10 @@ STR *src;
 		    d = checkpoint;
 		    if (*d == '{' && s[-1] == '}') {	/* maybe {n,m} */
 			++d;
-			if (isdigit(*d)) {	/* matches /^{\d,?\d*}$/ */
+			if (isDIGIT(*d)) {	/* matches /^{\d,?\d*}$/ */
 			    if (*++d == ',')
 				++d;
-			    while (isdigit(*d))
+			    while (isDIGIT(*d))
 				d++;
 			    if (d == s - 1)
 				s = checkpoint;		/* Is {n,m}! Backoff! */
@@ -1022,9 +1039,9 @@ STR *src;
 			    weight += 150;
 			else if (d[1] == '$')
 			    weight -= 3;
-			if (isdigit(d[1])) {
+			if (isDIGIT(d[1])) {
 			    if (d[2]) {
-				if (isdigit(d[2]) && !d[3])
+				if (isDIGIT(d[2]) && !d[3])
 				    weight -= 10;
 			    }
 			    else
@@ -1037,8 +1054,7 @@ STR *src;
 			    case '&':
 			    case '$':
 				weight -= seen[un_char] * 10;
-				if (isalpha(d[1]) || isdigit(d[1]) ||
-				  d[1] == '_') {
+				if (isALNUM(d[1])) {
 				    d = scanident(d,s,tokenbuf);
 				    if (stabent(tokenbuf,FALSE))
 					weight -= 100;
@@ -1062,9 +1078,9 @@ STR *src;
 					weight += 1;
 				    else if (index("rnftb",d[1]))
 					weight += 40;
-				    else if (isdigit(d[1])) {
+				    else if (isDIGIT(d[1])) {
 					weight += 40;
-					while (d[1] && isdigit(d[1]))
+					while (d[1] && isDIGIT(d[1]))
 					    d++;
 				    }
 				}
@@ -1082,7 +1098,7 @@ STR *src;
 				else
 				    weight -= 1;
 			    default:
-				if (isalpha(*d) && d[1] && isalpha(d[1])) {
+				if (isALPHA(*d) && d[1] && isALPHA(d[1])) {
 				    bufptr = d;
 				    if (yylex() != WORD)
 					weight -= 150;
@@ -1243,7 +1259,7 @@ register char *s;
 register char *send;
 {
     while (s < send) {
-	if (isascii(*s) && islower(*s))
+	if (isLOWER(*s))
 	    *s = toupper(*s);
 	s++;
     }
@@ -1254,7 +1270,7 @@ register char *s;
 register char *send;
 {
     while (s < send) {
-	if (isascii(*s) && isupper(*s))
+	if (isUPPER(*s))
 	    *s = tolower(*s);
 	s++;
     }
@@ -1280,22 +1296,22 @@ register STR *str;
 	return;
     }
     d = str->str_ptr;
-    while (isalpha(*d)) d++;
-    while (isdigit(*d)) d++;
+    while (isALPHA(*d)) d++;
+    while (isDIGIT(*d)) d++;
     if (*d) {
         str_numset(str,atof(str->str_ptr) + 1.0);  /* punt */
 	return;
     }
     d--;
     while (d >= str->str_ptr) {
-	if (isdigit(*d)) {
+	if (isDIGIT(*d)) {
 	    if (++*d <= '9')
 		return;
 	    *(d--) = '0';
 	}
 	else {
 	    ++*d;
-	    if (isalpha(*d))
+	    if (isALPHA(*d))
 		return;
 	    *(d--) -= 'z' - 'a' + 1;
 	}
@@ -1305,7 +1321,7 @@ register STR *str;
     str->str_cur++;
     for (d = str->str_ptr + str->str_cur; d > str->str_ptr; d--)
 	*d = d[-1];
-    if (isdigit(d[1]))
+    if (isDIGIT(d[1]))
 	*d = '1';
     else
 	*d = d[1];

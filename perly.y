@@ -1,4 +1,4 @@
-/* $RCSfile: perly.y,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:42:34 $
+/* $RCSfile: perly.y,v $$Revision: 4.0.1.2 $$Date: 91/11/05 18:17:38 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	perly.y,v $
+ * Revision 4.0.1.2  91/11/05  18:17:38  lwall
+ * patch11: extra comma at end of list is now allowed in more places (Hi, Felix!)
+ * patch11: once-thru blocks didn't display right in the debugger
+ * patch11: debugger got confused over nested subroutine definitions
+ * 
  * Revision 4.0.1.1  91/06/07  11:42:34  lwall
  * patch4: new copyright notice
  * 
@@ -17,6 +22,10 @@
 %{
 #include "INTERN.h"
 #include "perl.h"
+
+/*SUPPRESS 530*/
+/*SUPPRESS 593*/
+/*SUPPRESS 595*/
 
 STAB *scrstab;
 ARG *arg4;	/* rarely used arguments to make_op() */
@@ -36,6 +45,8 @@ ARG *arg5;
     FCMD *formval;
 }
 
+%token <ival> '{' ')'
+
 %token <cval> WORD
 %token <ival> APPEND OPEN SSELECT LOOPEX
 %token <ival> USING FORMAT DO SHIFT PUSH POP LVALFUN
@@ -49,7 +60,7 @@ ARG *arg5;
 %token <arg> SUBST PATTERN
 %token <arg> RSTRING TRANS
 
-%type <ival> prog decl format remember
+%type <ival> prog decl format remember crp
 %type <cmdval> block lineseq line loop cond sideff nexpr else
 %type <arg> expr sexpr cexpr csexpr term handle aryword hshword
 %type <arg> texpr listop bareword
@@ -110,6 +121,8 @@ else	:	/* NULL */
 
 block	:	'{' remember lineseq '}'
 			{ $$ = block_head($3);
+			  if (cmdline > $1)
+			      cmdline = $1;
 			  if (savestack->ary_fill > $2)
 			    restorelist($2); }
 	;
@@ -190,7 +203,7 @@ loop	:	label WHILE '(' texpr ')' compblock
 			{ cmdline = $2;
 			    $$ = wopt(add_label($1,
 			    invert(make_ccmd(C_WHILE, cmd_to_arg($3),$4)) )); }
-	|	label FOR REG '(' expr ')' compblock
+	|	label FOR REG '(' expr crp compblock
 			{ cmdline = $2;
 			    /*
 			     * The following gobbledygook catches EXPRs that
@@ -229,7 +242,7 @@ loop	:	label WHILE '(' texpr ')' compblock
 				make_ccmd(C_WHILE,$5,$7) )));
 			    }
 			}
-	|	label FOR '(' expr ')' compblock
+	|	label FOR '(' expr crp compblock
 			{ cmdline = $2;
 			    if ($4->arg_type != O_ARRAY) {
 				scrstab = aadd(genstab());
@@ -303,7 +316,10 @@ format	:	FORMAT WORD '=' FORMLIST
 	;
 
 subrout	:	SUB WORD block
-			{ make_sub($2,$3); }
+			{ make_sub($2,$3);
+			  cmdline = NOLINE;
+			  if (savestack->ary_fill > $1)
+			    restorelist($1); }
 	;
 
 package :	PACKAGE WORD ';'
@@ -443,13 +459,11 @@ term	:	'-' term %prec UMINUS
 				stab2arg(A_STAB,
 				  $1 == O_FTTTY?stabent("STDIN",TRUE):defstab),
 				Nullarg, Nullarg); }
-	|	LOCAL '(' expr ')'
+	|	LOCAL '(' expr crp
 			{ $$ = l(localize(make_op(O_ASSIGN, 1,
 				localize(listish(make_list($3))),
 				Nullarg,Nullarg))); }
-	|	'(' expr ',' ')'
-			{ $$ = make_list($2); }
-	|	'(' expr ')'
+	|	'(' expr crp
 			{ $$ = make_list($2); }
 	|	'(' ')'
 			{ $$ = make_list(Nullarg); }
@@ -478,7 +492,7 @@ term	:	'-' term %prec UMINUS
 				stab2arg(A_STAB,hadd($1)),
 				jmaybe($3),
 				Nullarg); }
-	|	'(' expr ')' '[' expr ']'	%prec '('
+	|	'(' expr crp '[' expr ']'	%prec '('
 			{ $$ = make_op(O_LSLICE, 3,
 				Nullarg,
 				listish(make_list($5)),
@@ -513,40 +527,40 @@ term	:	'-' term %prec UMINUS
 			{ $$ = $1; }
 	|	TRANS	%prec '('
 			{ $$ = $1; }
-	|	DO WORD '(' expr ')'
+	|	DO WORD '(' expr crp
 			{ $$ = make_op((perldb ? O_DBSUBR : O_SUBR), 2,
-				stab2arg(A_WORD,stabent($2,TRUE)),
+				stab2arg(A_WORD,stabent($2,MULTI)),
 				make_list($4),
 				Nullarg); Safefree($2); $2 = Nullch;
 			    $$->arg_flags |= AF_DEPR; }
-	|	AMPER WORD '(' expr ')'
+	|	AMPER WORD '(' expr crp
 			{ $$ = make_op((perldb ? O_DBSUBR : O_SUBR), 2,
-				stab2arg(A_WORD,stabent($2,TRUE)),
+				stab2arg(A_WORD,stabent($2,MULTI)),
 				make_list($4),
 				Nullarg); Safefree($2); $2 = Nullch; }
 	|	DO WORD '(' ')'
 			{ $$ = make_op((perldb ? O_DBSUBR : O_SUBR), 2,
-				stab2arg(A_WORD,stabent($2,TRUE)),
+				stab2arg(A_WORD,stabent($2,MULTI)),
 				make_list(Nullarg),
 				Nullarg);
 			    $$->arg_flags |= AF_DEPR; }
 	|	AMPER WORD '(' ')'
 			{ $$ = make_op((perldb ? O_DBSUBR : O_SUBR), 2,
-				stab2arg(A_WORD,stabent($2,TRUE)),
+				stab2arg(A_WORD,stabent($2,MULTI)),
 				make_list(Nullarg),
 				Nullarg); }
 	|	AMPER WORD
 			{ $$ = make_op((perldb ? O_DBSUBR : O_SUBR), 2,
-				stab2arg(A_WORD,stabent($2,TRUE)),
+				stab2arg(A_WORD,stabent($2,MULTI)),
 				Nullarg,
 				Nullarg); }
-	|	DO REG '(' expr ')'
+	|	DO REG '(' expr crp
 			{ $$ = make_op((perldb ? O_DBSUBR : O_SUBR), 2,
 				stab2arg(A_STAB,$2),
 				make_list($4),
 				Nullarg);
 			    $$->arg_flags |= AF_DEPR; }
-	|	AMPER REG '(' expr ')'
+	|	AMPER REG '(' expr crp
 			{ $$ = make_op((perldb ? O_DBSUBR : O_SUBR), 2,
 				stab2arg(A_STAB,$2),
 				make_list($4),
@@ -574,10 +588,18 @@ term	:	'-' term %prec UMINUS
 			    Nullarg,Nullarg); }
 	|	UNIOP
 			{ $$ = make_op($1,0,Nullarg,Nullarg,Nullarg); }
+	|	UNIOP block
+			{ $$ = make_op($1,1,cmd_to_arg($2),Nullarg,Nullarg); }
 	|	UNIOP sexpr
 			{ $$ = make_op($1,1,$2,Nullarg,Nullarg); }
 	|	SSELECT
 			{ $$ = make_op(O_SELECT, 0, Nullarg, Nullarg, Nullarg);}
+	|	SSELECT  WORD
+			{ $$ = make_op(O_SELECT, 1,
+			    stab2arg(A_WORD,stabent($2,TRUE)),
+			    Nullarg,
+			    Nullarg);
+			    Safefree($2); $2 = Nullch; }
 	|	SSELECT '(' handle ')'
 			{ $$ = make_op(O_SELECT, 1, $3, Nullarg, Nullarg); }
 	|	SSELECT '(' sexpr csexpr csexpr csexpr ')'
@@ -628,10 +650,10 @@ term	:	'-' term %prec UMINUS
 	|	FILOP25 '(' handle ',' handle csexpr csexpr cexpr ')'
 			{ arg4 = $7; arg5 = $8;
 			  $$ = make_op($1, 5, $3, $5, $6); }
-	|	PUSH '(' aryword cexpr ')'
+	|	PUSH '(' aryword ',' expr crp
 			{ $$ = make_op($1, 2,
 			    $3,
-			    make_list($4),
+			    make_list($5),
 			    Nullarg); }
 	|	POP aryword	%prec '('
 			{ $$ = make_op(O_POP, 1, $2, Nullarg, Nullarg); }
@@ -671,7 +693,7 @@ term	:	'-' term %prec UMINUS
 			    $3,
 			    listish(make_list($4)),
 			    Nullarg); }
-	|	FLIST '(' expr ')'
+	|	FLIST '(' expr crp
 			{ $$ = make_op($1, 1,
 			    make_list($3),
 			    Nullarg,
@@ -752,6 +774,11 @@ listop	:	LISTOP
 				stab2arg(A_STAB,$2),
 				maybelistish($1,make_list($3)),
 				Nullarg); }
+	|	LISTOP block expr
+			{ $$ = make_op($1,2,
+				cmd_to_arg($2),
+				maybelistish($1,make_list($3)),
+				Nullarg); }
 	;
 
 handle	:	WORD
@@ -774,6 +801,12 @@ hshword	:	WORD
 			{ $$ = stab2arg(A_STAB,$1); }
 	;
 
+crp	:	',' ')'
+			{ $$ = 1; }
+	|	')'
+			{ $$ = 0; }
+	;
+
 /*
  * NOTE:  The following entry must stay at the end of the file so that
  * reduce/reduce conflicts resolve to it only if it's the only option.
@@ -785,7 +818,7 @@ bareword:	WORD
 			    $$->arg_type = O_ITEM;
 			    $$[1].arg_type = A_SINGLE;
 			    $$[1].arg_ptr.arg_str = str_make($1,0);
-			    for (s = $1; *s && islower(*s); s++) ;
+			    for (s = $1; *s && isLOWER(*s); s++) ;
 			    if (dowarn && !*s)
 				warn(
 				  "\"%s\" may clash with future reserved word",

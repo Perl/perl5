@@ -7,9 +7,13 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $RCSfile: regexec.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 11:50:33 $
+/* $RCSfile: regexec.c,v $$Revision: 4.0.1.3 $$Date: 91/11/05 18:23:55 $
  *
  * $Log:	regexec.c,v $
+ * Revision 4.0.1.3  91/11/05  18:23:55  lwall
+ * patch11: prepared for ctype implementations that don't define isascii()
+ * patch11: initial .* in pattern had dependency on value of $*
+ * 
  * Revision 4.0.1.2  91/06/07  11:50:33  lwall
  * patch4: new copyright notice
  * patch4: // wouldn't use previous pattern if it started with a null character
@@ -21,7 +25,7 @@
  * 4.0 baseline.
  * 
  */
-
+/*SUPPRESS 112*/
 /*
  * regcomp and regexec -- regsub and regerror are not used in perl
  *
@@ -64,11 +68,6 @@
 #ifdef DEBUGGING
 int regnarrate = 0;
 #endif
-
-#define isALNUM(c) (isascii(c) && (isalpha(c) || isdigit(c) || c == '_'))
-#define isSPACE(c) (isascii(c) && isspace(c))
-#define isDIGIT(c) (isascii(c) && isdigit(c))
-#define isUPPER(c) (isascii(c) && isupper(c))
 
 /*
  * regexec and friends
@@ -221,7 +220,7 @@ int safebase;	/* no need to remember string in subbase */
 	if (prog->reganch & ROPT_ANCH) {
 		if (regtry(prog, string))
 			goto got_it;
-		else if (multiline) {
+		else if (multiline || (prog->reganch & ROPT_IMPLICIT)) {
 			if (minlen)
 			    dontbother = minlen - 1;
 			strend -= dontbother;
@@ -279,6 +278,7 @@ int safebase;	/* no need to remember string in subbase */
 		}
 		goto phooey;
 	}
+	/*SUPPRESS 560*/
 	if (c = prog->regstclass) {
 		int doevery = (prog->reganch & ROPT_SKIP) == 0;
 
@@ -721,6 +721,7 @@ char *prog;
 						if (regmatch(NEXTOPER(scan)))
 							return(1);
 #ifdef REGALIGN
+						/*SUPPRESS 560*/
 						if (n = NEXT(scan))
 						    scan += n;
 						else

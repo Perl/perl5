@@ -1,4 +1,4 @@
-/* $RCSfile: stab.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 11:55:53 $
+/* $RCSfile: stab.c,v $$Revision: 4.0.1.3 $$Date: 91/11/05 18:35:33 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,13 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	stab.c,v $
+ * Revision 4.0.1.3  91/11/05  18:35:33  lwall
+ * patch11: length($x) was sometimes wrong for numeric $x
+ * patch11: perl now issues warning if $SIG{'ALARM'} is referenced
+ * patch11: *foo = undef coredumped
+ * patch11: solitary subroutine references no longer trigger typo warnings
+ * patch11: local(*FILEHANDLE) had a memory leak
+ * 
  * Revision 4.0.1.2  91/06/07  11:55:53  lwall
  * patch4: new copyright notice
  * patch4: added $^P variable to control calling of perldb routines
@@ -247,7 +254,7 @@ STR *str;
     char *s;
 
     if (str->str_rare)
-	return stab_val(stab)->str_cur;
+	return str_len(stab_val(stab));
 
     switch (*stab->str_magic->str_ptr) {
     case '1': case '2': case '3': case '4':
@@ -303,7 +310,7 @@ STR *str;
     case '\\':
 	return (STRLEN)orslen;
     default:
-	return stab_str(str)->str_cur;
+	return str_len(stab_str(str));
     }
 }
 
@@ -311,7 +318,7 @@ stabset(mstr,str)
 register STR *mstr;
 STR *str;
 {
-    STAB *stab = mstr->str_u.str_stab;
+    STAB *stab;
     register char *s;
     int i;
 
@@ -338,6 +345,8 @@ STR *str;
     case 'S':
 	s = str_get(str);
 	i = whichsig(mstr->str_ptr);	/* ...no, a brick */
+	if (!i && (dowarn || strEQ(mstr->str_ptr,"ALARM")))
+	    warn("No such signal: SIG%s", mstr->str_ptr);
 	if (strEQ(s,"IGNORE"))
 #ifndef lint
 	    (void)signal(i,SIG_IGN);
@@ -356,6 +365,7 @@ STR *str;
 	break;
 #ifdef SOME_DBM
     case 'D':
+	stab = mstr->str_u.str_stab;
 	hdbmstore(stab_hash(stab),mstr->str_ptr,mstr->str_cur,str);
 	break;
 #endif
@@ -363,6 +373,7 @@ STR *str;
 	{
 	    CMD *cmd;
 
+	    stab = mstr->str_u.str_stab;
 	    i = str_true(str);
 	    str = afetch(stab_xarray(stab),atoi(mstr->str_ptr), FALSE);
 	    cmd = str->str_magic->str_u.str_cmd;
@@ -371,16 +382,19 @@ STR *str;
 	}
 	break;
     case '#':
+	stab = mstr->str_u.str_stab;
 	afill(stab_array(stab), (int)str_gnum(str) - arybase);
 	break;
     case 'X':	/* merely a copy of a * string */
 	break;
     case '*':
-	s = str_get(str);
+	s = str->str_pok ? str_get(str) : "";
 	if (strNE(s,"StB") || str->str_cur != sizeof(STBP)) {
+	    stab = mstr->str_u.str_stab;
 	    if (!*s) {
 		STBP *stbp;
 
+		/*SUPPRESS 701*/
 		(void)savenostab(stab);	/* schedule a free of this stab */
 		if (stab->str_len)
 		    Safefree(stab->str_ptr);
@@ -402,7 +416,7 @@ STR *str;
 		if (!stab_io(stab))
 		    stab_io(stab) = stio_new();
 	    }
-	    str_sset(str,stab);
+	    str_sset(str, (STR*) stab);
 	}
 	break;
     case 's': {
@@ -422,6 +436,9 @@ STR *str;
 	break;
 
     case 0:
+	/*SUPPRESS 560*/
+	if (!(stab = mstr->str_u.str_stab))
+	    break;
 	switch (*stab->str_magic->str_ptr) {
 	case '\004':	/* ^D */
 #ifdef DEBUGGING
@@ -711,6 +728,7 @@ int sig;
 		sig_name[sig], stab_name(stab) );
 	return;
     }
+    /*SUPPRESS 701*/
     saveaptr(&stack);
     str = Str_new(15, sizeof(CSV));
     str->str_state = SS_SCSV;
@@ -791,7 +809,7 @@ int add;
     char *prevquote = Nullch;
     bool global = FALSE;
 
-    if (isascii(*name) && isupper(*name)) {
+    if (isUPPER(*name)) {
 	if (*name > 'I') {
 	    if (*name == 'S' && (
 	      strEQ(name, "SIG") ||
@@ -822,9 +840,9 @@ int add;
 	sawquote = Nullch;
 	name++;
     }
-    else if (!isalpha(*name) || global)
+    else if (!isALPHA(*name) || global)
 	stash = defstash;
-    else if (curcmd == &compiling)
+    else if ((CMD*)curcmd == &compiling)
 	stash = curstash;
     else
 	stash = curcmd->c_stash;
@@ -833,6 +851,7 @@ int add;
 	char *s, *d;
 
 	*sawquote = '\0';
+	/*SUPPRESS 560*/
 	if (s = prevquote) {
 	    strncpy(tmpbuf,name,s-name+1);
 	    d = tmpbuf+(s-name+1);
@@ -869,12 +888,14 @@ int add;
 	strcpy(stab_magic(stab),"StB");
 	stab_val(stab) = Str_new(72,0);
 	stab_line(stab) = curcmd->c_line;
-	str_magic(stab,stab,'*',name,len);
+	str_magic((STR*)stab, stab, '*', name, len);
 	stab_stash(stab) = stash;
-	if (isdigit(*name) && *name != '0') {
+	if (isDIGIT(*name) && *name != '0') {
 	    stab_flags(stab) = SF_VMAGIC;
 	    str_magic(stab_val(stab), stab, 0, Nullch, 0);
 	}
+	if (add & 2)
+	    stab->str_pok |= SP_MULTI;
 	return stab;
     }
 }
@@ -945,11 +966,14 @@ register STAB *stab;
     stab_xhash(stab) = Null(HASH*);
     str_free(stab_val(stab));
     stab_val(stab) = Nullstr;
+    /*SUPPRESS 560*/
     if (stio = stab_io(stab)) {
 	do_close(stab,FALSE);
 	Safefree(stio->top_name);
 	Safefree(stio->fmt_name);
+	Safefree(stio);
     }
+    /*SUPPRESS 560*/
     if (sub = stab_sub(stab)) {
 	afree(sub->tosave);
 	cmd_free(sub->cmd);

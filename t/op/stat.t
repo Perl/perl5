@@ -1,6 +1,6 @@
 #!./perl
 
-# $RCSfile: stat.t,v $$Revision: 4.0.1.1 $$Date: 91/06/07 12:02:42 $
+# $RCSfile: stat.t,v $$Revision: 4.0.1.2 $$Date: 91/11/05 18:44:44 $
 
 print "1..56\n";
 
@@ -9,15 +9,15 @@ chop($cwd = `pwd`);
 $DEV = `ls -l /dev`;
 
 unlink "Op.stat.tmp";
-open(foo, ">Op.stat.tmp");
+open(FOO, ">Op.stat.tmp");
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
-    $blksize,$blocks) = stat(foo);
+    $blksize,$blocks) = stat(FOO);
 if ($nlink == 1) {print "ok 1\n";} else {print "not ok 1\n";}
 if ($mtime && $mtime == $ctime) {print "ok 2\n";} else {print "not ok 2\n";}
 
-print foo "Now is the time for all good men to come to.\n";
-close(foo);
+print FOO "Now is the time for all good men to come to.\n";
+close(FOO);
 
 sleep 2;
 
@@ -141,24 +141,33 @@ if (! -B 'op/stat.t') {print "ok 42\n";} else {print "not ok 42\n";}
 if (-B './perl') {print "ok 43\n";} else {print "not ok 43\n";}
 if (! -T './perl') {print "ok 44\n";} else {print "not ok 44\n";}
 
-open(foo,'op/stat.t');
-if (-T foo) {print "ok 45\n";} else {print "not ok 45\n";}
-if (! -B foo) {print "ok 46\n";} else {print "not ok 46\n";}
-$_ = <foo>;
-if (/perl/) {print "ok 47\n";} else {print "not ok 47\n";}
-if (-T foo) {print "ok 48\n";} else {print "not ok 48\n";}
-if (! -B foo) {print "ok 49\n";} else {print "not ok 49\n";}
-close(foo);
+open(FOO,'op/stat.t');
+eval { -T FOO; };
+if ($@ =~ /not implemented/) {
+    print "# $@";
+    for (45 .. 54) {
+	print "ok $_\n";
+    }
+}
+else {
+    if (-T FOO) {print "ok 45\n";} else {print "not ok 45\n";}
+    if (! -B FOO) {print "ok 46\n";} else {print "not ok 46\n";}
+    $_ = <FOO>;
+    if (/perl/) {print "ok 47\n";} else {print "not ok 47\n";}
+    if (-T FOO) {print "ok 48\n";} else {print "not ok 48\n";}
+    if (! -B FOO) {print "ok 49\n";} else {print "not ok 49\n";}
+    close(FOO);
 
-open(foo,'op/stat.t');
-$_ = <foo>;
-if (/perl/) {print "ok 50\n";} else {print "not ok 50\n";}
-if (-T foo) {print "ok 51\n";} else {print "not ok 51\n";}
-if (! -B foo) {print "ok 52\n";} else {print "not ok 52\n";}
-seek(foo,0,0);
-if (-T foo) {print "ok 53\n";} else {print "not ok 53\n";}
-if (! -B foo) {print "ok 54\n";} else {print "not ok 54\n";}
-close(foo);
+    open(FOO,'op/stat.t');
+    $_ = <FOO>;
+    if (/perl/) {print "ok 50\n";} else {print "not ok 50\n";}
+    if (-T FOO) {print "ok 51\n";} else {print "not ok 51\n";}
+    if (! -B FOO) {print "ok 52\n";} else {print "not ok 52\n";}
+    seek(FOO,0,0);
+    if (-T FOO) {print "ok 53\n";} else {print "not ok 53\n";}
+    if (! -B FOO) {print "ok 54\n";} else {print "not ok 54\n";}
+}
+close(FOO);
 
 if (-T '/dev/null') {print "ok 55\n";} else {print "not ok 55\n";}
 if (-B '/dev/null') {print "ok 56\n";} else {print "not ok 56\n";}

@@ -1,4 +1,4 @@
-/* $RCSfile: stab.h,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:56:35 $
+/* $RCSfile: stab.h,v $$Revision: 4.0.1.2 $$Date: 91/11/05 18:36:15 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	stab.h,v $
+ * Revision 4.0.1.2  91/11/05  18:36:15  lwall
+ * patch11: length($x) was sometimes wrong for numeric $x
+ * 
  * Revision 4.0.1.1  91/06/07  11:56:35  lwall
  * patch4: new copyright notice
  * patch4: length($`), length($&), length($') now optimized to avoid string copy
@@ -100,7 +103,7 @@ struct sub {
 STRLEN stab_len();
 
 #define STAB_STR(s) (tmpstab = (s), stab_flags(tmpstab) & SF_VMAGIC ? stab_str(stab_val(tmpstab)->str_magic) : stab_val(tmpstab))
-#define STAB_LEN(s) (tmpstab = (s), stab_flags(tmpstab) & SF_VMAGIC ? stab_len(stab_val(tmpstab)->str_magic) : stab_val(tmpstab)->str_cur)
+#define STAB_LEN(s) (tmpstab = (s), stab_flags(tmpstab) & SF_VMAGIC ? stab_len(stab_val(tmpstab)->str_magic) : str_len(stab_val(tmpstab)))
 #define STAB_GET(s) (tmpstab = (s), str_get(stab_flags(tmpstab) & SF_VMAGIC ? stab_str(tmpstab->str_magic) : stab_val(tmpstab)))
 #define STAB_GNUM(s) (tmpstab = (s), str_gnum(stab_flags(tmpstab) & SF_VMAGIC ? stab_str(tmpstab->str_magic) : stab_val(tmpstab)))
 

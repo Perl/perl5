@@ -7,9 +7,15 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $RCSfile: regcomp.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 11:48:24 $
+/* $RCSfile: regcomp.c,v $$Revision: 4.0.1.3 $$Date: 91/11/05 18:22:28 $
  *
  * $Log:	regcomp.c,v $
+ * Revision 4.0.1.3  91/11/05  18:22:28  lwall
+ * patch11: minimum match length calculation in regexp is now cumulative
+ * patch11: initial .* in pattern had dependency on value of $*
+ * patch11: certain patterns made use of garbage pointers from uncleared memory
+ * patch11: prepared for ctype implementations that don't define isascii()
+ * 
  * Revision 4.0.1.2  91/06/07  11:48:24  lwall
  * patch4: new copyright notice
  * patch4: /(x+) \1/ incorrectly optimized to not match "xxx xx"
@@ -22,7 +28,7 @@
  * 4.0 baseline.
  * 
  */
-
+/*SUPPRESS 112*/
 /*
  * regcomp and regexec -- regsub and regerror are not used in perl
  *
@@ -150,6 +156,7 @@ int fold;
 	int backish;
 	int backest;
 	int curback;
+	int minlen;
 	extern char *safemalloc();
 	extern char *savestr();
 	int sawplus = 0;
@@ -168,7 +175,7 @@ int fold;
 	regnpar = 1;
 	regsize = 0L;
 	regcode = &regdummy;
-	regc(MAGIC);
+	regc((char)MAGIC);
 	if (reg(0, &flags) == NULL) {
 		Safefree(regprecomp);
 		regprecomp = Nullch;
@@ -193,7 +200,7 @@ int fold;
 	regparse = exp;
 	regnpar = 1;
 	regcode = r->program;
-	regc(MAGIC);
+	regc((char)MAGIC);
 	if (reg(0, &flags) == NULL)
 		return(NULL);
 
@@ -233,7 +240,8 @@ int fold;
 			r->regstclass = first;
 		else if (OP(first) == BOL ||
 		    (OP(first) == STAR && OP(NEXTOPER(first)) == ANY) ) {
-			r->reganch = ROPT_ANCH;	/* kinda turn .* into ^.* */
+			/* kinda turn .* into ^.* */
+			r->reganch = ROPT_ANCH | ROPT_IMPLICIT;
 			first = NEXTOPER(first);
 		    	goto again;
 		}
@@ -259,6 +267,7 @@ int fold;
 		longish = str_make("",0);
 		longest = str_make("",0);
 		len = 0;
+		minlen = 0;
 		curback = 0;
 		backish = 0;
 		backest = 0;
@@ -278,6 +287,7 @@ int fold;
 			    first = scan;
 			    while (OP(t = regnext(scan)) == CLOSE)
 				scan = t;
+			    minlen += *OPERAND(first);
 			    if (curback - backish == len) {
 				str_ncat(longish, OPERAND(first)+1,
 				    *OPERAND(first));
@@ -303,9 +313,16 @@ int fold;
 				backest = backish;
 			    }
 			    str_nset(longish,"",0);
+			    if (OP(scan) == PLUS &&
+			      index(simple,OP(NEXTOPER(scan))))
+				minlen++;
+			    else if (OP(scan) == CURLY &&
+			      index(simple,OP(NEXTOPER(scan)+4)))
+				minlen += ARG1(scan);
 			}
 			else if (index(simple,OP(scan))) {
 			    curback++;
+			    minlen++;
 			    len = 0;
 			    if (longish->str_cur > longest->str_cur) {
 				str_sset(longest,longish);
@@ -328,8 +345,9 @@ int fold;
 		    &&
 		    (!r->regstart
 		     ||
-		     !fbminstr(r->regstart->str_ptr,
-			  r->regstart->str_ptr + r->regstart->str_cur,
+		     !fbminstr((unsigned char*) r->regstart->str_ptr,
+			  (unsigned char *) r->regstart->str_ptr
+			    + r->regstart->str_cur,
 			  longest)
 		    )
 		   )
@@ -354,8 +372,9 @@ int fold;
 
 	r->do_folding = fold;
 	r->nparens = regnpar - 1;
-	New(1002, r->startp, regnpar, char*);
-	New(1002, r->endp, regnpar, char*);
+	r->minlen = minlen;
+	Newz(1002, r->startp, regnpar, char*);
+	Newz(1002, r->endp, regnpar, char*);
 #ifdef DEBUGGING
 	if (debug & 512)
 		regdump(r);
@@ -515,7 +534,7 @@ int *flagp;
 	if (op == '{' && regcurly(regparse)) {
 	    next = regparse + 1;
 	    max = Nullch;
-	    while (isdigit(*next) || *next == ',') {
+	    while (isDIGIT(*next) || *next == ',') {
 		if (*next == ',') {
 		    if (max)
 			break;
@@ -758,7 +777,7 @@ int *flagp;
 			    else {
 				regsawback = 1;
 				ret = reganode(REF, num);
-				while (isascii(*regparse) && isdigit(*regparse))
+				while (isDIGIT(*regparse))
 				    regparse++;
 				*flagp |= SIMPLE;
 			    }
@@ -839,14 +858,14 @@ int *flagp;
 				case 'c':
 				    p++;
 				    ender = *p++;
-				    if (islower(ender))
+				    if (isLOWER(ender))
 					ender = toupper(ender);
 				    ender ^= 64;
 				    break;
 				case '0': case '1': case '2': case '3':case '4':
 				case '5': case '6': case '7': case '8':case '9':
 				    if (*p == '0' ||
-				      (isdigit(p[1]) && atoi(p) >= regnpar) ) {
+				      (isDIGIT(p[1]) && atoi(p) >= regnpar) ) {
 					ender = scanoct(p, 3, &numlen);
 					p += numlen;
 				    }
@@ -868,7 +887,7 @@ int *flagp;
 				ender = *p++;
 				break;
 			    }
-			    if (regfold && isupper(ender))
+			    if (regfold && isUPPER(ender))
 				    ender = tolower(ender);
 			    if (ISMULT2(p)) { /* Back off on ?+*. */
 				if (len)
@@ -992,7 +1011,7 @@ regclass()
 				break;
 			case 'c':
 				class = *regparse++;
-				if (islower(class))
+				if (isLOWER(class))
 				    class = toupper(class);
 				class ^= 64;
 				break;
@@ -1019,7 +1038,7 @@ regclass()
 		}
 		for ( ; lastclass <= class; lastclass++) {
 			regset(bits,def,lastclass);
-			if (regfold && isupper(lastclass))
+			if (regfold && isUPPER(lastclass))
 				regset(bits,def,tolower(lastclass));
 		}
 		lastclass = class;
@@ -1226,13 +1245,13 @@ register char *s;
 {
     if (*s++ != '{')
 	return FALSE;
-    if (!isdigit(*s))
+    if (!isDIGIT(*s))
 	return FALSE;
-    while (isdigit(*s))
+    while (isDIGIT(*s))
 	s++;
     if (*s == ',')
 	s++;
-    while (isdigit(*s))
+    while (isDIGIT(*s))
 	s++;
     if (*s != '}')
 	return FALSE;
@@ -1292,9 +1311,12 @@ regexp *r;
 		fprintf(stderr,"anchored ");
 	if (r->reganch & ROPT_SKIP)
 		fprintf(stderr,"plus ");
+	if (r->reganch & ROPT_IMPLICIT)
+		fprintf(stderr,"implicit ");
 	if (r->regmust != NULL)
 		fprintf(stderr,"must have \"%s\" back %d ", r->regmust->str_ptr,
 		  r->regback);
+	fprintf(stderr, "minlen %d ", r->minlen);
 	fprintf(stderr,"\n");
 }
 
