@@ -57,7 +57,10 @@
 
 #define RF_tainted	1		/* tainted information used? */
 #define RF_warned	2		/* warned about big count? */
-#define RF_evaled	4		/* Did an EVAL? */
+#define RF_evaled	4		/* Did an EVAL with setting? */
+
+#define RS_init		1		/* eval environment created */
+#define RS_set		2		/* replsv value is set */
 
 #ifndef STATIC
 #define	STATIC	static
@@ -194,6 +197,7 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend, cha
     I32 end_shift = 0;			/* Same for the end. */
     I32 scream_pos = -1;		/* Internal iterator of scream. */
     char *scream_olds;
+    SV* oreplsv = GvSV(replgv);
 
     cc.cur = 0;
     cc.oldcc = 0;
@@ -632,6 +636,12 @@ got_it:
 	    }
 	}
     }
+    /* Preserve the current value of $^R */
+    if (oreplsv != GvSV(replgv)) {
+	sv_setsv(oreplsv, GvSV(replgv));/* So that when GvSV(replgv) is
+					   restored, the value remains
+					   the same. */
+    }
     return 1;
 
 phooey:
@@ -650,6 +660,19 @@ regtry(regexp *prog, char *startpos)
     register char **ep;
     CHECKPOINT lastcp;
 
+    if ((prog->reganch & ROPT_EVAL_SEEN) && !reg_eval_set) {
+	reg_eval_set = RS_init;
+	DEBUG_r(DEBUG_s(
+	    PerlIO_printf(Perl_debug_log, "  setting stack tmpbase at %i\n", stack_sp - stack_base);
+	    ));
+	SAVEINT(cxstack[cxstack_ix].blk_oldsp);
+	cxstack[cxstack_ix].blk_oldsp = stack_sp - stack_base;
+	/* Otherwise OP_NEXTSTATE will free whatever on stack now.  */
+	SAVETMPS;
+	/* Apparently this is not needed, judging by wantarray. */
+	/* SAVEINT(cxstack[cxstack_ix].blk_gimme);
+	   cxstack[cxstack_ix].blk_gimme = G_SCALAR; */
+    }
     reginput = startpos;
     regstartp = prog->startp;
     regendp = prog->endp;
@@ -980,22 +1003,6 @@ regmatch(regnode *prog)
 	    op = (OP_4tree*)regdata->data[n];
 	    DEBUG_r( PerlIO_printf(Perl_debug_log, "  re_eval 0x%x\n", op) );
 	    curpad = AvARRAY((AV*)regdata->data[n + 1]);
-	    if (!reg_eval_set) {
-		/* Preserve whatever is on stack now, otherwise
-		   OP_NEXTSTATE will overwrite it. */
-		SAVEINT(reg_eval_set);	/* Protect against unwinding. */
-		reg_eval_set = 1;
-		DEBUG_r(DEBUG_s(
-		    PerlIO_printf(Perl_debug_log, "  setting stack tmpbase at %i\n", stack_sp - stack_base);
-		    ));
-		SAVEINT(cxstack[cxstack_ix].blk_oldsp);
-		cxstack[cxstack_ix].blk_oldsp = stack_sp - stack_base;
-		/* Otherwise OP_NEXTSTATE will free whatever on stack now.  */
-		SAVETMPS;
-		/* Apparently this is not needed, judging by wantarray. */
-		/* SAVEINT(cxstack[cxstack_ix].blk_gimme);
-		   cxstack[cxstack_ix].blk_gimme = G_SCALAR; */
-	    }
 
 	    CALLRUNOPS();			/* Scalar context. */
 	    SPAGAIN;
@@ -1005,7 +1012,8 @@ regmatch(regnode *prog)
 	    if (logical) {
 		logical = 0;
 		sw = SvTRUE(ret);
-	    }
+	    } else
+		sv_setsv(save_scalar(replgv), ret);
 	    op = oop;
 	    curpad = ocurpad;
 	    curcop = ocurcop;

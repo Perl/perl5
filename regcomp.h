@@ -452,4 +452,5 @@ const static char reg_off_by_arg[] = {
 #define REG_SEEN_ZERO_LEN	1
 #define REG_SEEN_LOOKBEHIND	2
 #define REG_SEEN_GPOS		4
+#define REG_SEEN_EVAL		8
 

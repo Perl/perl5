@@ -68,6 +68,7 @@ PERLVAR(Iscreamfirst,	I32 *)
 PERLVAR(Iscreamnext,	I32 *)		
 PERLVARI(Imaxscream,	I32,	-1)	
 PERLVAR(Ilastscream,	SV *)		
+PERLVAR(Ireplgv,	GV *)		
 
 /* shortcuts to misc objects */
 PERLVAR(Ierrgv,		GV *)		

@@ -476,6 +476,7 @@ perl_destruct(register PerlInterpreter *sv_interp)
     argvoutgv = Nullgv;
     stdingv = Nullgv;
     last_in_gv = Nullgv;
+    replgv = Nullgv;
 
     /* reset so print() ends up where we expect */
     setdefout(Nullgv);
@@ -1818,6 +1819,8 @@ init_main_stash(void)
     defgv = gv_fetchpv("_",TRUE, SVt_PVAV);
     errgv = gv_HVadd(gv_fetchpv("@", TRUE, SVt_PV));
     GvMULTI_on(errgv);
+    replgv = gv_HVadd(gv_fetchpv("\022", TRUE, SVt_PV)); /* ^R */
+    GvMULTI_on(replgv);
     (void)form("%240s","");	/* Preallocate temp - for immediate signals. */
     sv_grow(ERRSV, 240);	/* Preallocate - for immediate signals. */
     sv_setpvn(ERRSV, "", 0);

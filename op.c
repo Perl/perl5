@@ -2099,6 +2099,7 @@ pmruntime(OP *o, OP *expr, OP *repl)
 {
     PMOP *pm;
     LOGOP *rcop;
+    I32 repl_has_vars = 0;
 
     if (o->op_type == OP_TRANS)
 	return pmtrans(o, expr, repl);
@@ -2165,13 +2166,15 @@ pmruntime(OP *o, OP *expr, OP *repl)
 	    for (curop = LINKLIST(repl); curop!=repl; curop = LINKLIST(curop)) {
 		if (opargs[curop->op_type] & OA_DANGEROUS) {
 #ifdef USE_THREADS
-		    if (curop->op_type == OP_THREADSV
-			&& strchr("&`'123456789+", curop->op_private)) {
-			break;
+		    if (curop->op_type == OP_THREADSV) {
+			repl_has_vars = 1;
+			if (strchr("&`'123456789+", curop->op_private)) {
+			    break;
 		    }
 #else
 		    if (curop->op_type == OP_GV) {
 			GV *gv = ((GVOP*)curop)->op_gv;
+			repl_has_vars = 1;
 			if (strchr("&`'123456789+", *GvENAME(gv)))
 			    break;
 		    }
@@ -2189,7 +2192,7 @@ pmruntime(OP *o, OP *expr, OP *repl)
 			     curop->op_type == OP_PADAV ||
 			     curop->op_type == OP_PADHV ||
 			     curop->op_type == OP_PADANY) {
-			     /* is okay */
+			repl_has_vars = 1;
 		    }
 		    else
 			break;
@@ -2197,12 +2200,19 @@ pmruntime(OP *o, OP *expr, OP *repl)
 		lastop = curop;
 	    }
 	}
-	if (curop == repl) {
+	if (curop == repl
+	    && !(repl_has_vars 
+		 && (!pm->op_pmregexp 
+		     || pm->op_pmregexp->reganch & ROPT_EVAL_SEEN))) {
 	    pm->op_pmflags |= PMf_CONST;	/* const for long enough */
 	    pm->op_pmpermflags |= PMf_CONST;	/* const for long enough */
 	    prepend_elem(o->op_type, scalar(repl), o);
 	}
 	else {
+	    if (curop == repl && !pm->op_pmregexp) { /* Has variables. */
+		pm->op_pmflags |= PMf_MAYBE_CONST;
+		pm->op_pmpermflags |= PMf_MAYBE_CONST;
+	    }
 	    Newz(1101, rcop, 1, LOGOP);
 	    rcop->op_type = OP_SUBSTCONT;
 	    rcop->op_ppaddr = ppaddr[OP_SUBSTCONT];

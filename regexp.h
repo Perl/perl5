@@ -85,6 +85,7 @@ typedef struct regexp {
 #define ROPT_GPOS_SEEN		0x40
 #define ROPT_CHECK_ALL		0x80
 #define ROPT_LOOKBEHIND_SEEN	0x100
+#define ROPT_EVAL_SEEN		0x200
 
 #define ROPT_TAINTED_SEEN	0x8000
 

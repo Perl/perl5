@@ -954,6 +954,8 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	r->reganch |= ROPT_GPOS_SEEN;
     if (regseen & REG_SEEN_LOOKBEHIND)
 	r->reganch |= ROPT_LOOKBEHIND_SEEN;
+    if (regseen & REG_SEEN_EVAL)
+	r->reganch |= ROPT_EVAL_SEEN;
     Newz(1002, r->startp, regnpar, char*);
     Newz(1002, r->endp, regnpar, char*);
     DEBUG_r(regdump(r));
@@ -1028,6 +1030,7 @@ reg(I32 paren, I32 *flagp)
 		OP_4tree *sop, *rop;
 
 		seen_zerolen++;
+		regseen |= REG_SEEN_EVAL;
 		while (count && (c = *regcomp_parse)) {
 		    if (c == '\\' && regcomp_parse[1])
 			regcomp_parse++;
@@ -2354,6 +2357,8 @@ regdump(regexp *r)
     if (r->reganch & ROPT_IMPLICIT)
 	PerlIO_printf(Perl_debug_log, "implicit ");
     PerlIO_printf(Perl_debug_log, "minlen %ld ", (long) r->minlen);
+    if (r->reganch & ROPT_EVAL_SEEN)
+	PerlIO_printf(Perl_debug_log, "with eval ");
     PerlIO_printf(Perl_debug_log, "\n");
 #endif	/* DEBUGGING */
 }

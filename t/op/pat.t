@@ -2,7 +2,7 @@
 
 # $RCSfile: pat.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:12 $
 
-print "1..104\n";
+print "1..107\n";
 
 $x = "abc\ndef\n";
 
@@ -352,6 +352,24 @@ sub f {
 
 $x =~ /.a/g;
 print "not " unless f(pos($x)) == 4;
+print "ok $test\n";
+$test++;
+
+$x = $^R = 67;
+'foot' =~ /foo(?{$x = 12; 75})[t]/;
+print "not " unless $^R eq '75';
+print "ok $test\n";
+$test++;
+
+$x = $^R = 67;
+'foot' =~ /foo(?{$x = 12; 75})[xy]/;
+print "not " unless $^R eq '67' and $x eq '12';
+print "ok $test\n";
+$test++;
+
+$x = $^R = 67;
+'foot' =~ /foo(?{ $^R + 12 })((?{ $x = 12; $^R + 17 })[xy])?/;
+print "not " unless $^R eq '79' and $x eq '12';
 print "ok $test\n";
 $test++;
 
