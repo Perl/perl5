@@ -6514,7 +6514,6 @@ const_sv_xsub(pTHX_ CV* cv)
 PerlIO*
 Perl_my_tmpfp(pTHX)
 {
-     dTHX;
      PerlIO *f = NULL;
      int fd = -1;
 #ifdef PERL_EXTERNAL_GLOB
