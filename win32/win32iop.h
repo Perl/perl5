@@ -74,7 +74,7 @@ DllExport  int  	win32_stat(const char *name,struct stat *sbufptr);
 DllExport  int		win32_pipe( int *phandles, unsigned int psize, int textmode );
 DllExport  FILE*	win32_popen( const char *command, const char *mode );
 DllExport  int		win32_pclose( FILE *pf);
-DllExport  int		win32_rename( const char *oldname, const char *newname);
+DllExport  int		win32_rename( const char *oname, const char *newname);
 DllExport  int		win32_setmode( int fd, int mode);
 DllExport  long		win32_lseek( int fd, long offset, int origin);
 DllExport  long		win32_tell( int fd);

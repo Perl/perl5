@@ -1732,18 +1732,18 @@ win32_pclose(FILE *pf)
 }
 
 DllExport int
-win32_rename(const char *oldname, const char *newname)
+win32_rename(const char *oname, const char *newname)
 {
     char szNewWorkName[MAX_PATH+1];
     WIN32_FIND_DATA fdOldFile, fdNewFile;
     HANDLE handle;
     char *ptr;
 
-    if ((strchr(oldname, '\\') || strchr(oldname, '/'))
+    if ((strchr(oname, '\\') || strchr(oname, '/'))
 	&& strchr(newname, '\\') == NULL
 	&& strchr(newname, '/') == NULL)
     {
-	strcpy(szNewWorkName, oldname);
+	strcpy(szNewWorkName, oname);
 	if ((ptr = strrchr(szNewWorkName, '\\')) == NULL)
 	    ptr = strrchr(szNewWorkName, '/');
 	strcpy(++ptr, newname);
@@ -1751,14 +1751,14 @@ win32_rename(const char *oldname, const char *newname)
     else
 	strcpy(szNewWorkName, newname);
 
-    if (stricmp(oldname, szNewWorkName) != 0) {
+    if (stricmp(oname, szNewWorkName) != 0) {
 	// check that we're not being fooled by relative paths
 	// and only delete the new file
 	//  1) if it exists
 	//  2) it is not the same file as the old file
 	//  3) old file exist
 	// GetFullPathName does not return the long file name on some systems
-	handle = FindFirstFile(oldname, &fdOldFile);
+	handle = FindFirstFile(oname, &fdOldFile);
 	if (handle != INVALID_HANDLE_VALUE) {
 	    FindClose(handle);
     
@@ -1778,7 +1778,7 @@ win32_rename(const char *oldname, const char *newname)
 	    }
 	}
     }
-    return rename(oldname, newname);
+    return rename(oname, newname);
 }
 
 DllExport int

@@ -870,9 +870,9 @@ int          _win32_stat(const char *name,struct stat *sbufptr)
     return pPerl->piLIO->NameStat(name, sbufptr, ErrorNo());
 }
 
-int          _win32_rename(const char *oldname, const char *newname)
+int          _win32_rename(const char *oname, const char *newname)
 {
-    return pPerl->piLIO->Rename(oldname, newname, ErrorNo());
+    return pPerl->piLIO->Rename(oname, newname, ErrorNo());
 }
 
 int          _win32_setmode(int fd, int mode)

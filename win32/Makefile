@@ -66,8 +66,8 @@ INST_VER	= \5.00471
 
 #
 # if you have the source for des_fcrypt(), uncomment this and make sure the
-# file exists (see README.win32).  File should be located at the perl
-# top level directory.
+# file exists (see README.win32).  File should be located in the same
+# directory as this file.
 #
 #CRYPT_SRC	= des_fcrypt.c
 
@@ -351,10 +351,6 @@ MICROCORE_SRC	=		\
 		..\universal.c	\
 		..\util.c
 
-!IF "$(CRYPT_SRC)" != ""
-MICROCORE_SRC	= $(MICROCORE_SRC) ..\$(CRYPT_SRC)
-!ENDIF
-
 !IF "$(PERL_MALLOC)" == "define"
 EXTRACORE_SRC	= $(EXTRACORE_SRC) ..\malloc.c
 !ENDIF
@@ -371,13 +367,17 @@ WIN32_SRC	=		\
 WIN32_SRC	= $(WIN32_SRC) .\win32thread.c 
 !ENDIF
 
+!IF "$(CRYPT_SRC)" != ""
+WIN32_SRC	= $(WIN32_SRC) .\$(CRYPT_SRC)
+!ENDIF
+
 PERL95_SRC	=		\
 		perl95.c	\
 		win32mt.c	\
 		win32sckmt.c
 
 !IF "$(CRYPT_SRC)" != ""
-PERL95_SRC	= $(PERL95_SRC) ..\$(CRYPT_SRC)
+PERL95_SRC	= $(PERL95_SRC) .\$(CRYPT_SRC)
 !ENDIF
 
 DLL_SRC		= $(DYNALOADER).c

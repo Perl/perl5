@@ -727,6 +727,7 @@ OP * (CPERLscope(*check)[]) _((OP *op)) = {
 	ck_null,	/* readline */
 	ck_null,	/* rcatline */
 	ck_fun,		/* regcmaybe */
+	ck_fun,		/* regcreset */
 	ck_null,	/* regcomp */
 	ck_match,	/* match */
 	ck_null,	/* subst */
@@ -1076,6 +1077,7 @@ OP * (CPERLscope(*ppaddr)[])(ARGSproto) = {
 	pp_readline,
 	pp_rcatline,
 	pp_regcmaybe,
+	pp_regcreset,
 	pp_regcomp,
 	pp_match,
 	pp_subst,
