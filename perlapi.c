@@ -1963,6 +1963,13 @@ Perl_newSViv(pTHXo_ IV i)
     return ((CPerlObj*)pPerl)->Perl_newSViv(i);
 }
 
+#undef  Perl_newSVuv
+SV*
+Perl_newSVuv(pTHXo_ UV u)
+{
+    return ((CPerlObj*)pPerl)->Perl_newSVuv(u);
+}
+
 #undef  Perl_newSVnv
 SV*
 Perl_newSVnv(pTHXo_ NV n)

@@ -4743,6 +4743,25 @@ Perl_newSViv(pTHX_ IV i)
 }
 
 /*
+=for apidoc newSVuv
+
+Creates a new SV and copies an unsigned integer into it.
+The reference count for the SV is set to 1.
+
+=cut
+*/
+
+SV *
+Perl_newSVuv(pTHX_ UV u)
+{
+    register SV *sv;
+
+    new_SV(sv);
+    sv_setuv(sv,u);
+    return sv;
+}
+
+/*
 =for apidoc newRV_noinc
 
 Creates an RV wrapper for an SV.  The reference count for the original

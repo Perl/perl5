@@ -272,6 +272,7 @@ Perl_newSV
 Perl_newSVREF
 Perl_newSVOP
 Perl_newSViv
+Perl_newSVuv
 Perl_newSVnv
 Perl_newSVpv
 Perl_newSVpvn

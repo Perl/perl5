@@ -897,6 +897,13 @@ Creates a new SV which is an exact duplicate of the original SV.
 
 	SV*	newSVsv(SV* old)
 
+=item newSVuv
+
+Creates a new SV and copies an unsigned integer into it.
+The reference count for the SV is set to 1.
+
+	SV*	newSVuv(UV u)
+
 =item newXS
 
 Used by C<xsubpp> to hook up XSUBs as Perl subs.
@@ -1590,16 +1597,16 @@ false, defined or undefined.  Does not handle 'get' magic.
 
 	bool	SvTRUE(SV* sv)
 
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
+
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
-
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =item SVt_IV
 

@@ -1769,6 +1769,7 @@ Ap	|SV*	|newSV		|STRLEN len
 Ap	|OP*	|newSVREF	|OP* o
 Ap	|OP*	|newSVOP	|I32 type|I32 flags|SV* sv
 Apd	|SV*	|newSViv	|IV i
+Apd	|SV*	|newSVuv	|UV u
 Apd	|SV*	|newSVnv	|NV n
 Apd	|SV*	|newSVpv	|const char* s|STRLEN len
 Apd	|SV*	|newSVpvn	|const char* s|STRLEN len

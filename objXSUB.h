@@ -1073,6 +1073,10 @@
 #define Perl_newSViv		pPerl->Perl_newSViv
 #undef  newSViv
 #define newSViv			Perl_newSViv
+#undef  Perl_newSVuv
+#define Perl_newSVuv		pPerl->Perl_newSVuv
+#undef  newSVuv
+#define newSVuv			Perl_newSVuv
 #undef  Perl_newSVnv
 #define Perl_newSVnv		pPerl->Perl_newSVnv
 #undef  newSVnv
