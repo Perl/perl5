@@ -3385,8 +3385,10 @@ PP(pp_chdir)
 	{
 	    tmps = SvPV(*svp, n_a);
 	}
-	else
-	    tmps = Nullch;
+       else {            
+            PUSHi(0);
+            RETURN;
+        }
     }
     else
 	tmps = POPpx;
