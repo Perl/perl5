@@ -94,7 +94,7 @@ print PROG 'print "@ARGV\n"', "\n";
 close PROG;
 my $echo = "$Invoke_Perl $ECHO";
 
-print "1..150\n";
+print "1..151\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -614,11 +614,11 @@ else {
 	my $sent = "foobar";
 	my $rcvd;
 	my $size = 2000;
-	my $key = shmget(IPC_PRIVATE, $size, S_IRWXU|S_IRWXG|S_IRWXO) ||
+	my $id = shmget(IPC_PRIVATE, $size, S_IRWXU|S_IRWXG|S_IRWXO) ||
 	    warn "# shmget failed: $!\n";
-	if ($key >= 0) {
-	    if (shmwrite($key, $sent, 0, 60)) {
-		if (shmread($key, $rcvd, 0, 60)) {
+	if (defined $id) {
+	    if (shmwrite($id, $sent, 0, 60)) {
+		if (shmread($id, $rcvd, 0, 60)) {
 		    substr($rcvd, index($rcvd, "\0")) = '';
 		} else {
 		    warn "# shmread failed: $!\n";
@@ -626,7 +626,9 @@ else {
 	    } else {
 		warn "# shmwrite failed: $!\n";
 	    }
-	    shmctl($key, IPC_RMID, 0) || warn "# shmctl failed: $!\n";
+	    shmctl($id, IPC_RMID, 0) || warn "# shmctl failed: $!\n";
+	} else {
+	    warn "# shmget failed: $!\n";
 	}
 
 	if ($rcvd eq $sent) {
@@ -635,6 +637,44 @@ else {
 	    print "ok 150 # Skipped: SysV shared memory operation failed\n";
 	}
     } else {
-	for (150) { print "ok $_ # Skipped: SysV shared memory is not available\n"; }
+	print "ok 150 # Skipped: SysV shared memory is not available\n";
     }
 }
+
+# test msgrcv
+{
+    if ($Config{d_msg}) {
+	use IPC::SysV qw(IPC_PRIVATE IPC_RMID IPC_CREAT S_IRWXU);
+
+	my $id = msgget(IPC_PRIVATE, IPC_CREAT | S_IRWXU);
+
+	my $sent      = "message";
+	my $type_sent = 1234;
+	my $rcvd;
+	my $type_rcvd;
+
+	if (defined $id) {
+	    if (msgsnd($id, pack("l! a*", $type_sent, $sent), 0)) {
+		if (msgrcv($id, $rcvd, 60, 0, 0)) {
+		    ($type_rcvd, $rcvd) = unpack("l! a*", $rcvd);
+		} else {
+		    warn "# msgrcv failed\n";
+		}
+	    } else {
+		warn "# msgsnd failed\n";
+	    }
+	    msgctl($id, IPC_RMID, 0) || warn "# msgctl failed: $!\n";
+	} else {
+	    warn "# msgget failed\n";
+	}
+
+	if ($rcvd eq $sent && $type_sent == $type_rcvd) {
+	    test 151, tainted $rcvd;
+	} else {
+	    print "ok 151 # Skipped: SysV message queue operation failed\n";
+	}
+    } else {
+	print "ok 151 # Skipped: SysV message queues are not available\n";
+    }
+}
+

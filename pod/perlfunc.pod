@@ -2497,22 +2497,25 @@ Calls the System V IPC function msgget(2).  Returns the message queue
 id, or the undefined value if there is an error.  See also C<IPC::SysV>
 and C<IPC::Msg> documentation.
 
-=item msgsnd ID,MSG,FLAGS
-
-Calls the System V IPC function msgsnd to send the message MSG to the
-message queue ID.  MSG must begin with the native long integer message
-type, which may be created with C<pack("l!", $type)>.  Returns true if
-successful, or false if there is an error.  See also C<IPC::SysV> and
-C<IPC::SysV::Msg> documentation.
-
 =item msgrcv ID,VAR,SIZE,TYPE,FLAGS
 
 Calls the System V IPC function msgrcv to receive a message from
 message queue ID into variable VAR with a maximum message size of
-SIZE.  Note that if a message is received, the message type will be
-the first thing in VAR, and the maximum length of VAR is SIZE plus the
-size of the message type.  Returns true if successful, or false if
-there is an error.  See also C<IPC::SysV> and C<IPC::SysV::Msg> documentation.
+SIZE.  Note that when a message is received, the message type as a
+native long integer will be the first thing in VAR, followed by the
+actual message.  This packing may be opened with C<unpack("l! a*")>.
+Taints the variable.  Returns true if successful, or false if there is
+an error.  See also C<IPC::SysV> and C<IPC::SysV::Msg> documentation.
+
+=item msgsnd ID,MSG,FLAGS
+
+Calls the System V IPC function msgsnd to send the message MSG to the
+message queue ID.  MSG must begin with the native long integer message
+type, and be followed by the length of the actual message, and finally
+the message itself.  This kind of packing can be achieved with
+C<pack("l! a*", $type, $message)>.  Returns true if successful,
+or false if there is an error.  See also C<IPC::SysV>
+and C<IPC::SysV::Msg> documentation.
 
 =item my EXPR
 

@@ -212,11 +212,12 @@ Because the user can affect her own encrypted password and login shell
 the password and shell returned by the getpwent(), getpwnam(), and
 getpwuid() functions are tainted.
 
-=head2 The shmread() now taints its variable
+=head2 The msgrcv() and shmread() now taint
 
-Because other (untrusted) processes can modify shared memory segments
-for their own nefarious purposes, the variable modified by shmread()
-becomes tainted.
+Because other (untrusted) processes can modify messages and shared
+memory segments for their own nefarious purposes, the messages
+returned by msgrcv() (and its object-oriented interface,
+IPC::SysV::Msg::rcv) and the variable modified by shmread() are tainted.
 
 =back
 

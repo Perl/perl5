@@ -1926,6 +1926,10 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
     if (ret >= 0) {
 	SvCUR_set(mstr, sizeof(long)+ret);
 	*SvEND(mstr) = '\0';
+#ifndef INCOMPLETE_TAINTS
+	/* who knows who has been playing with this message? */
+	SvTAINTED_on(mstr);
+#endif
     }
     return ret;
 #else

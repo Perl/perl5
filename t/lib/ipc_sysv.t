@@ -23,8 +23,7 @@ BEGIN {
 # These constants are common to all tests.
 # Later the sem* tests will import more for themselves.
 
-use IPC::SysV qw(IPC_PRIVATE IPC_NOWAIT IPC_STAT IPC_RMID
-		 S_IRWXU S_IRWXG S_IRWXO S_IWGRP S_IROTH S_IWOTH);
+use IPC::SysV qw(IPC_PRIVATE IPC_NOWAIT IPC_STAT IPC_RMID S_IRWXU);
 use strict;
 
 print "1..16\n";
@@ -55,12 +54,7 @@ EOM
     exit(1);
 };
 
-my $perm;
-
-$perm = S_IRWXU | S_IRWXG | S_IRWXO | S_IWGRP | S_IROTH | S_IWOTH
-    if $^O eq 'vmesa';
-
-$perm = S_IRWXU | S_IRWXG | S_IRWXO unless defined $perm;
+my $perm = S_IRWXU;
 
 if ($Config{'d_msgget'} eq 'define' &&
     $Config{'d_msgctl'} eq 'define' &&
