@@ -35,6 +35,7 @@
 #	Your mileage will vary.
 #
 
+_DEC_cc_style=
 case "$optimize" in
 '')	case "$cc" in 
 	*gcc*)	
@@ -47,10 +48,12 @@ case "$optimize" in
 		*/gemc_cc*)
 			# we have the new DEC GEM CC
 			optimize='-O4'
+			_DEC_cc_style=new
 			;;
 		*)
 			# we have the old MIPS CC
 			optimize='-O2 -Olimit 3200'
+			_DEC_cc_style=old
 			;;
 		esac
 		# cleanup
@@ -61,6 +64,17 @@ esac
 
 # all compilers are ANSI
 ccflags="$ccflags -DSTANDARD_C"
+
+# be nauseatingly ANSI
+case "$cc" in
+gcc)	ccflags="$ccflags -ansi"
+	;;
+*)	ccflags="$ccflags -std1"
+	# -vaxc not to get warnings about stuff like$this for VMS.
+	# -vaxc is available only in newer DEC compilers.
+	test X"$_DEC_cc_style"Y = XnewY && ccflags="$ccflags -vaxc"
+	;;
+esac
 
 # dlopen() is in libc
 libswanted="`echo $libswanted | sed -e 's/ dl / /'`"
@@ -92,6 +106,13 @@ esac
 
 #
 # History:
+#
+# perl5.003_26:
+#
+#	15-Feb-1997 Jarkko Hietaniemi <jhi@iki.fi>
+#
+#	* -std1 and -ansi.
+#
 #
 # perl5.003_24:
 #
