@@ -188,7 +188,7 @@ sub scan_func {
   my($line) = @_;
 
   print "\tchecking for global routine\n" if $debug > 1;
-  if ( $line =~ /(\w+)\s+\(/ ) {
+  if ( $line =~ /(\w+)\s*\(/ ) {
     print "\troutine name is \\$1\\\n" if $debug > 1;
     if ($1 eq 'main' || $1 eq 'perl_init_ext') {
       print "\tskipped\n" if $debug > 1;
