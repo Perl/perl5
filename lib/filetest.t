@@ -57,8 +57,8 @@ SKIP: {
     my $tstfile = "filetest.tst";
     skip("No $chflags available", 4) if !-x $chflags;
 
-    skip("Test does not work on OpenBSD and BSD/OS", 4)
-	if $^O =~ /^(?:openbsd|bsdos)$/;
+    skip("Test does not work on OpenBSD, BSD/OS, and Darwin", 4)
+	if $^O =~ /^(?:openbsd|bsdos|darwin)$/;
 
   SKIP: {
 	eval {
