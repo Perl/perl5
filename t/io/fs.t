@@ -1,7 +1,5 @@
 #!./perl
 
-# $RCSfile: fs.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:28 $
-
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
@@ -12,26 +10,6 @@ use Config;
 
 my $Is_VMSish = ($^O eq 'VMS');
 
-my $has_link            = $Config{d_link};
-my $accurate_timestamps =
-    !($^O eq 'MSWin32' || $^O eq 'NetWare' ||
-      $^O eq 'dos'     || $^O eq 'os2'     ||
-      $^O eq 'mint'    || $^O eq 'cygwin');
-
-if (defined &Win32::IsWinNT && Win32::IsWinNT()) {
-    if (Win32::FsType() eq 'NTFS') {
-	$has_link            = 1;
-	$accurate_timestamps = 1;
-    }
-}
-
-my $needs_fh_reopen =
-    $^O eq 'dos'
-    # Not needed on HPFS, but needed on HPFS386 ?!
-    || $^O eq 'os2';
-
-plan tests => 31;
-
 if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
     $wd = `cd`;
 } elsif ($^O eq 'VMS') {
@@ -40,6 +18,29 @@ if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
     $wd = `pwd`;
 }
 chomp($wd);
+
+my $has_link            = $Config{d_link};
+my $accurate_timestamps =
+    !($^O eq 'MSWin32' || $^O eq 'NetWare' ||
+      $^O eq 'dos'     || $^O eq 'os2'     ||
+      $^O eq 'mint'    || $^O eq 'cygwin'  ||
+      $^O eq 'amigaos' || $wd =~ m#$Config{afsroot}/#
+     );
+
+if (defined &Win32::IsWinNT && Win32::IsWinNT()) {
+    if (Win32::FsType() eq 'NTFS') {
+        $has_link            = 1;
+        $accurate_timestamps = 1;
+    }
+}
+
+my $needs_fh_reopen =
+    $^O eq 'dos'
+    # Not needed on HPFS, but needed on HPFS386 ?!
+    || $^O eq 'os2';
+
+plan tests => 32;
+
 
 if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
     `rmdir /s /q tmp 2>nul`;
@@ -59,12 +60,10 @@ chdir './tmp';
 
 umask(022);
 
-if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
-    pass("Skip - bogus umask");
-} elsif ((umask(0)&0777) == 022) {
-    pass("umask");
-} else {
-    fail("umask");
+SKIP: {
+    skip "bogus umask", 1 if ($^O eq 'MSWin32') || ($^O eq 'NetWare');
+
+    is((umask(0)&0777), 022, 'umask'),
 }
 
 open(fh,'>x') || die "Can't create x";
@@ -84,16 +83,16 @@ SKIP: {
     ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
      $blksize,$blocks) = stat('c');
 
-    if ($Config{dont_use_nlink}) {
-	pass("Skip - dont_use_nlink");
-    } else {
-	is($nlink, 3, "link count of triply-linked file");
+    SKIP: {
+        skip "no nlink", 1 if $Config{dont_use_nlink};
+
+        is($nlink, 3, "link count of triply-linked file");
     }
 
-    if ($^O eq 'amigaos') {
-	pass("Skip - hard links are not that hard in $^O");
-    } else {
-	is($mode & 0777, 0666, "mode of triply-linked file");
+    SKIP: {
+        skip "hard links not that hard in $^O", 1 if $^O eq 'amigaos';
+
+        is($mode & 0777, 0666, "mode of triply-linked file");
     }
 }
 
@@ -154,43 +153,49 @@ is($foo, 1, "utime");
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('b');
 
-if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
-    pass("Skip - bogus (stat)[1]\n");
-} elsif ($ino) {
-    pass("non-zero ino $ino");
-} else {
-    fail("zero ino");
+SKIP: {
+    skip "bogus inode num", 1 if ($^O eq 'MSWin32') || ($^O eq 'NetWare');
+
+    ok($ino,    'non-zero inode num');
 }
 
-if ($wd =~ m#$Config{'afsroot'}/# ||
-    $^O eq 'amigaos' ||
-    $^O eq 'dos' || $^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'cygwin') {
-    pass("Skip - granularity of the atime/mtime");
-} elsif ($atime == 500000000 && $mtime == 500000000 + $delta) {
-    pass("atime/mtime");
-} elsif ($^O =~ /\blinux\b/i) {
-    # Maybe stat() cannot get the correct atime, as happens via NFS on linux?
-    $foo = (utime 400000000,500000000 + 2*$delta,'b');
-    my ($new_atime, $new_mtime) = (stat('b'))[8,9];
-    if ($new_atime == $atime && $new_mtime - $mtime == $delta) {
-	pass("atime/mtime - accounted for possible NFS/glibc2.2 bug on linux");
-    } else {
-	fail("atime mtime - $atime/$new_atime $mtime/$new_mtime");
+SKIP: {
+    skip "filesystem atime/mtime granularity too low", 2 
+      unless $accurate_timestamps;
+
+    print "# atime - $atime  mtime - $mtime  delta - $delta\n";
+    if($atime == 500000000 && $mtime == 500000000 + $delta) {
+        pass('atime');
+        pass('mtime');
     }
-} elsif ($^O eq 'VMS') {
-    if ($atime == 500000001 && $mtime == 500000000 + $delta) {
-        pass("atime/mtime");
-    } else {
-	fail("atime $atime mtime $mtime");
+    else {
+        if ($^O =~ /\blinux\b/i) {
+            print "# Maybe stat() cannot get the correct atime, ".
+                  "as happens via NFS on linux?\n";
+            $foo = (utime 400000000,500000000 + 2*$delta,'b');
+            my ($new_atime, $new_mtime) = (stat('b'))[8,9];
+            print "# newatime - $new_atime  nemtime - $new_mtime\n";
+            if ($new_atime == $atime && $new_mtime - $mtime == $delta) {
+                pass("atime/mtime - accounted for possible NFS/glibc2.2 bug on linux");
+            } 
+            else {
+                fail("atime mtime - $atime/$new_atime $mtime/$new_mtime");
+            }
+        } 
+        elsif ($^O eq 'VMS') {
+            # why is this 1 second off?
+            is( $atime, 500000001,          'atime' );
+            is( $mtime, 500000000 + $delta, 'mtime' );
+        } 
+        elsif ($^O eq 'beos') {
+            SKIP: { skip "atime not updated", 1; }
+            is($mtime, 500000001, 'mtime');
+        } 
+        else {
+            fail("atime");
+            fail("mtime");
+        }
     }
-} elsif ($^O eq 'beos') {
-    if ($mtime == 500000001) {
-        pass("mtime (atime not updated)");
-    } else {
-	fail("mtime $mtime (atime not updated)");
-    }
-} else {
-    fail("atime/mtime");
 }
 
 is(unlink('b'), 1, "unlink b");
@@ -206,9 +211,12 @@ chdir $wd || die "Can't cd back to $wd";
 # created by perl?).  Hopefully there is an ls utility in your
 # %PATH%. N.B. that $^O is 'cygwin' on Cygwin.
 
-if ((($^O eq 'MSWin32') || ($^O eq 'NetWare')) &&
-    `ls -l perl 2>nul` =~ /^l.*->/) {
-    # we have symbolic links
+SKIP: {
+    skip "Win32/Netware specific test", 2
+      unless ($^O eq 'MSWin32') || ($^O eq 'NetWare');
+    skip "No symbolic links found to test with", 2 
+      unless  `ls -l perl 2>nul` =~ /^l.*->/;
+
     system("cp TEST TEST$$");
     # we have to copy because e.g. GNU grep gets huffy if we have
     # a symlink forest to another disk (it complains about too many
@@ -218,14 +226,6 @@ if ((($^O eq 'MSWin32') || ($^O eq 'NetWare')) &&
     ok($foo, "found perl in c");
     unlink 'c';
     unlink("TEST$$");
-}
-else {
-    if ( ($^O eq 'MSWin32') || ($^O eq 'NetWare') ) {
-        pass("Skip - no symbolic links") for 1..2;
-    }
-    else {
-        pass("Skip - '$^O' is neither 'MSWin32' nor 'NetWare'") for 1..2;
-    }
 }
 
 unlink "Iofs.tmp";
@@ -278,9 +278,10 @@ SKIP: {
 }
 
 # check if rename() can be used to just change case of filename
-if ($^O eq 'cygwin') {
-    pass("Skip - works in $^O only if check_case is set to relaxed");
-} else { 
+SKIP: {
+    skip "Works in Cygwin only if check_case is set to relaxed", 1
+      if $^O eq 'cygwin';
+
     chdir './tmp';
     open(fh,'>x') || die "Can't create x";
     close(fh);
@@ -289,7 +290,7 @@ if ($^O eq 'cygwin') {
     # this works on win32 only, because fs isn't casesensitive
     ok(-e 'X', "rename working");
 
-    unlink 'X';
+    1 while unlink 'X';
     chdir $wd || die "Can't cd back to $wd";
 }
 
@@ -297,7 +298,8 @@ if ($^O eq 'cygwin') {
 if ($^O eq 'VMS') {
     # must have delete access to rename a directory
     `set file tmp.dir/protection=o:d`;
-    ok(rename('tmp.dir', 'tmp1.dir'), "rename on directories");
+    ok(rename('tmp.dir', 'tmp1.dir'), "rename on directories") ||
+      print "# errno: $!\n";
 } else {
     ok(rename('tmp', 'tmp1'), "rename on directories");
 }
