@@ -137,7 +137,7 @@ runs the script under the Perl debugger.  See L<perldebug>.
 =item B<-d:foo>
 
 runs the script under the control of a debugging or tracing module
-installed as Devel::foo. E.g., -d:DProf executes the script using the
+installed as Devel::foo. E.g., B<-d:DProf> executes the script using the
 Devel::DProf profiler.  See L<perldebug>.
 
 =item B<-D>I<number>
@@ -263,7 +263,7 @@ e.g., C<-M'module qw(foo bar)'>.
 A little built-in syntactic sugar means you can also say
 C<-mmodule=foo> or C<-Mmodule=foo> as a shortcut for
 C<-M'module qw(foo)'>.  Note that using the C<=> form
-removes the distinction between -m and -M.
+removes the distinction between C<-m> and C<-M>.
 
 =item B<-n>
 
