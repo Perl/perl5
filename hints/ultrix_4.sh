@@ -4,9 +4,9 @@
 #
 # Use   Configure -Dcc=gcc   to use gcc.
 #
-# I don't know if -g is really needed.  (AD)
+# This used to use -g, but that pulls in -DDEBUGGING by default.
 case "$optimize" in
-'') optimize=-g ;;
+'') optimize='none' ;;
 esac
 
 # Some users have reported Configure runs *much* faster if you 
