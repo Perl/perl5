@@ -62,7 +62,7 @@ PP(pp_padav)
 	EXTEND(SP, maxarg);
 	if (SvMAGICAL(TARG)) {
 	    U32 i;
-	    for (i=0; i < maxarg; i++) {
+	    for (i=0; i < (U32)maxarg; i++) {
 		SV **svp = av_fetch((AV*)TARG, i, FALSE);
 		SP[i+1] = (svp) ? *svp : &PL_sv_undef;
 	    }
@@ -3161,7 +3161,7 @@ PP(pp_index)
 	sv_pos_u2b(big, &offset, 0);
     if (offset < 0)
 	offset = 0;
-    else if (offset > biglen)
+    else if (offset > (I32)biglen)
 	offset = biglen;
     if (!(tmps2 = fbm_instr((unsigned char*)tmps + offset,
       (unsigned char*)tmps + biglen, little, 0)))
@@ -3202,7 +3202,7 @@ PP(pp_rindex)
     }
     if (offset < 0)
 	offset = 0;
-    else if (offset > blen)
+    else if (offset > (I32)blen)
 	offset = blen;
     if (!(tmps2 = rninstr(tmps,  tmps  + offset,
 			  tmps2, tmps2 + llen)))
@@ -3257,7 +3257,7 @@ PP(pp_chr)
     (void)SvUPGRADE(TARG,SVt_PV);
 
     if (value > 255 && !IN_BYTES) {
-	SvGROW(TARG, UNISKIP(value)+1);
+	SvGROW(TARG, (STRLEN)UNISKIP(value)+1);
 	tmps = (char*)uvchr_to_utf8_flags((U8*)SvPVX(TARG), value, 0);
 	SvCUR_set(TARG, tmps - SvPVX(TARG));
 	*tmps = '\0';
@@ -3270,7 +3270,7 @@ PP(pp_chr)
     SvGROW(TARG,2);
     SvCUR_set(TARG, 1);
     tmps = SvPVX(TARG);
-    *tmps++ = value;
+    *tmps++ = (char)value;
     *tmps = '\0';
     (void)SvPOK_only(TARG);
     if (PL_encoding)
@@ -3383,7 +3383,7 @@ PP(pp_lcfirst)
 	
 	tend = uvchr_to_utf8(tmpbuf, uv);
 
-	if (!SvPADTMP(sv) || tend - tmpbuf != ulen || SvREADONLY(sv)) {
+	if (!SvPADTMP(sv) || (STRLEN)(tend - tmpbuf) != ulen || SvREADONLY(sv)) {
 	    dTARGET;
 	    sv_setpvn(TARG, (char*)tmpbuf, tend - tmpbuf);
 	    sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
@@ -4304,7 +4304,7 @@ PP(pp_reverse)
 			while (down > up) {
 			    tmp = *up;
 			    *up++ = *down;
-			    *down-- = tmp;
+			    *down-- = (char)tmp;
 			}
 		    }
 		}
@@ -4314,7 +4314,7 @@ PP(pp_reverse)
 	    while (down > up) {
 		tmp = *up;
 		*up++ = *down;
-		*down-- = tmp;
+		*down-- = (char)tmp;
 	    }
 	    (void)SvPOK_only_UTF8(TARG);
 	}
@@ -4544,7 +4544,7 @@ PP(pp_split)
 		(void)SvUTF8_on(dstr);
 	    XPUSHs(dstr);
 	    if (rx->nparens) {
-		for (i = 1; i <= rx->nparens; i++) {
+		for (i = 1; i <= (I32)rx->nparens; i++) {
 		    s = rx->startp[i] + orig;
 		    m = rx->endp[i] + orig;
 

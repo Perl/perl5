@@ -227,9 +227,9 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 #define SCF_DO_STCLASS		(SCF_DO_STCLASS_AND|SCF_DO_STCLASS_OR)
 #define SCF_WHILEM_VISITED_POS	0x2000
 
-#define UTF RExC_utf8
-#define LOC (RExC_flags16 & PMf_LOCALE)
-#define FOLD (RExC_flags16 & PMf_FOLD)
+#define UTF (RExC_utf8 != 0)
+#define LOC ((RExC_flags16 & PMf_LOCALE) != 0)
+#define FOLD ((RExC_flags16 & PMf_FOLD) != 0)
 
 #define OOB_UNICODE		12345678
 #define OOB_NAMEDCLASS		-1
@@ -1171,7 +1171,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		    if (OP(nxt) != CLOSE)
 			goto nogo;
 		    /* Now we know that nxt2 is the only contents: */
-		    oscan->flags = ARG(nxt);
+		    oscan->flags = (U8)ARG(nxt);
 		    OP(oscan) = CURLYN;
 		    OP(nxt1) = NOTHING;	/* was OPEN. */
 #ifdef DEBUGGING
@@ -1207,7 +1207,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 
 			if (OP(nxt) != CLOSE)
 			    FAIL("Panic opt close");
-			oscan->flags = ARG(nxt);
+			oscan->flags = (U8)ARG(nxt);
 			OP(nxt1) = OPTIMIZED;	/* was OPEN. */
 			OP(nxt) = OPTIMIZED;	/* was CLOSE. */
 #ifdef DEBUGGING
@@ -1251,8 +1251,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 
 		    if (OP(PREVOPER(nxt)) == NOTHING) /* LONGJMP */
 			nxt += ARG(nxt);
-		    PREVOPER(nxt)->flags = data->whilem_c
-			| (RExC_whilem_seen << 4); /* On WHILEM */
+		    PREVOPER(nxt)->flags = (U8)(data->whilem_c
+			| (RExC_whilem_seen << 4)); /* On WHILEM */
 		}
 		if (data && fl & (SF_HAS_PAR|SF_IN_PAR))
 		    pars++;
@@ -1593,7 +1593,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		else if (minnext > U8_MAX) {
 		    vFAIL2("Lookbehind longer than %"UVuf" not implemented", (UV)U8_MAX);
 		}
-		scan->flags = minnext;
+		scan->flags = (U8)minnext;
 	    }
 	    if (data && data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
 		pars++;
@@ -1613,7 +1613,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 	    pars++;
 	}
 	else if (OP(scan) == CLOSE) {
-	    if (ARG(scan) == is_par) {
+	    if ((I32)ARG(scan) == is_par) {
 		next = regnext(scan);
 
 		if ( next && (OP(next) != WHILEM) && next < last)
@@ -1823,7 +1823,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     RExC_emit_start = r->program;
     RExC_emit = r->program;
     /* Store the count of eval-groups for security checks: */
-    RExC_emit->next_off = ((RExC_seen_evals > U16_MAX) ? U16_MAX : RExC_seen_evals);
+    RExC_emit->next_off = (U16)((RExC_seen_evals > U16_MAX) ? U16_MAX : RExC_seen_evals);
     REGC((U8)REG_MAGIC, (char*) RExC_emit++);
     r->data = 0;
     if (reg(pRExC_state, 0, &flags) == NULL)
@@ -2019,7 +2019,8 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	if ((!(r->anchored_substr || r->anchored_utf8) || r->anchored_offset)
 	    && stclass_flag
 	    && !(data.start_class->flags & ANYOF_EOS)
-	    && !cl_is_anything(data.start_class)) {
+	    && !cl_is_anything(data.start_class))
+	{
 	    I32 n = add_data(pRExC_state, 1, "f");
 
 	    New(1006, RExC_rx->data->data[n], 1,
@@ -2074,7 +2075,8 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	r->check_substr = r->check_utf8 = r->anchored_substr = r->anchored_utf8
 		= r->float_substr = r->float_utf8 = Nullsv;
 	if (!(data.start_class->flags & ANYOF_EOS)
-	    && !cl_is_anything(data.start_class)) {
+	    && !cl_is_anything(data.start_class))
+	{
 	    I32 n = add_data(pRExC_state, 1, "f");
 
 	    New(1006, RExC_rx->data->data[n], 1,
@@ -2486,7 +2488,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 	static char parens[] = "=!<,>";
 
 	if (paren && (p = strchr(parens, paren))) {
-	    int node = ((p - parens) % 2) ? UNLESSM : IFMATCH;
+	    U8 node = ((p - parens) % 2) ? UNLESSM : IFMATCH;
 	    int flag = (p - parens) > 1;
 
 	    if (paren == '>')
@@ -2499,7 +2501,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 
     /* Check for proper termination. */
     if (paren) {
-	RExC_flags16 = oregflags;
+	RExC_flags16 = (U16)oregflags;
 	if (RExC_parse >= RExC_end || *nextchar(pRExC_state) != ')') {
 	    RExC_parse = oregcomp_parse;
 	    vFAIL("Unmatched (");
@@ -2681,8 +2683,8 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp)
 	    if (max && max < min)
 		vFAIL("Can't do {n,m} with n > m");
 	    if (!SIZE_ONLY) {
-		ARG1_SET(ret, min);
-		ARG2_SET(ret, max);
+		ARG1_SET(ret, (U16)min);
+		ARG2_SET(ret, (U16)max);
 	    }
 
 	    goto nest_check;
@@ -2904,13 +2906,13 @@ tryagain:
             Set_Node_Length(ret, 2); /* MJD */
 	    break;
 	case 'w':
-	    ret = reg_node(pRExC_state, LOC ? ALNUML     : ALNUM);
+	    ret = reg_node(pRExC_state, (U8)(LOC ? ALNUML     : ALNUM));
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar(pRExC_state);
             Set_Node_Length(ret, 2); /* MJD */
 	    break;
 	case 'W':
-	    ret = reg_node(pRExC_state, LOC ? NALNUML     : NALNUM);
+	    ret = reg_node(pRExC_state, (U8)(LOC ? NALNUML    : NALNUM));
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar(pRExC_state);
             Set_Node_Length(ret, 2); /* MJD */
@@ -2918,7 +2920,7 @@ tryagain:
 	case 'b':
 	    RExC_seen_zerolen++;
 	    RExC_seen |= REG_SEEN_LOOKBEHIND;
-	    ret = reg_node(pRExC_state, LOC ? BOUNDL     : BOUND);
+	    ret = reg_node(pRExC_state, (U8)(LOC ? BOUNDL     : BOUND));
 	    *flagp |= SIMPLE;
 	    nextchar(pRExC_state);
             Set_Node_Length(ret, 2); /* MJD */
@@ -2926,19 +2928,19 @@ tryagain:
 	case 'B':
 	    RExC_seen_zerolen++;
 	    RExC_seen |= REG_SEEN_LOOKBEHIND;
-	    ret = reg_node(pRExC_state, LOC ? NBOUNDL     : NBOUND);
+	    ret = reg_node(pRExC_state, (U8)(LOC ? NBOUNDL    : NBOUND));
 	    *flagp |= SIMPLE;
 	    nextchar(pRExC_state);
             Set_Node_Length(ret, 2); /* MJD */
 	    break;
 	case 's':
-	    ret = reg_node(pRExC_state, LOC ? SPACEL     : SPACE);
+	    ret = reg_node(pRExC_state, (U8)(LOC ? SPACEL     : SPACE));
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar(pRExC_state);
             Set_Node_Length(ret, 2); /* MJD */
 	    break;
 	case 'S':
-	    ret = reg_node(pRExC_state, LOC ? NSPACEL     : NSPACE);
+	    ret = reg_node(pRExC_state, (U8)(LOC ? NSPACEL    : NSPACE));
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar(pRExC_state);
             Set_Node_Length(ret, 2); /* MJD */
@@ -3010,12 +3012,12 @@ tryagain:
 		    while (isDIGIT(*RExC_parse))
 			RExC_parse++;
 
-		    if (!SIZE_ONLY && num > RExC_rx->nparens)
+		    if (!SIZE_ONLY && num > (I32)RExC_rx->nparens)
 			vFAIL("Reference to nonexistent group");
 		    RExC_sawback = 1;
-		    ret = reganode(pRExC_state, FOLD
-				   ? (LOC ? REFFL : REFF)
-				   : REF, num);
+		    ret = reganode(pRExC_state,
+				   (U8)(FOLD ? (LOC ? REFFL : REFF) : REF),
+				   num);
 		    *flagp |= HASWIDTH;
                     
                     /* override incorrect value set in reganode MJD */
@@ -3060,9 +3062,8 @@ tryagain:
 
 	defchar:
 	    ender = 0;
-	    ret = reg_node(pRExC_state, FOLD
-			  ? (LOC ? EXACTFL : EXACTF)
-			  : EXACT);
+	    ret = reg_node(pRExC_state,
+			   (U8)(FOLD ? (LOC ? EXACTFL : EXACTF) : EXACT));
 	    s = STRING(ret);
 	    for (len = 0, p = RExC_parse - 1;
 	      len < 127 && p < RExC_end;
@@ -3237,7 +3238,7 @@ tryagain:
 		    }
 		    else {
 			len++;
-			REGC(ender, s++);
+			REGC((char)ender, s++);
 		    }
 		    break;
 		}
@@ -3274,7 +3275,7 @@ tryagain:
 		     len--;
 		}
 		else
-		    REGC(ender, s++);
+		    REGC((char)ender, s++);
 	    }
 	loopdone:
 	    RExC_parse = p - 1;
@@ -4048,7 +4049,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	} /* end of namedclass \blah */
 
 	if (range) {
-	    if (prevvalue > value) /* b-a */ {
+	    if (prevvalue > (IV)value) /* b-a */ {
 		Simple_vFAIL4("Invalid [] range \"%*.*s\"",
 			      RExC_parse - rangebegin,
 			      RExC_parse - rangebegin,
@@ -4124,7 +4125,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			  * character, insert also the folded version
 			  * to the charclass. */
 			 if (f != value) {
-			      if (foldlen == UNISKIP(f))
+			      if (foldlen == (STRLEN)UNISKIP(f))
 				  Perl_sv_catpvf(aTHX_ listsv,
 						 "%04"UVxf"\n", f);
 			      else {
@@ -4187,7 +4188,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
        ) {
 	for (value = 0; value < 256; ++value) {
 	    if (ANYOF_BITMAP_TEST(ret, value)) {
-		IV fold = PL_fold[value];
+		UV fold = PL_fold[value];
 
 		if (fold != value)
 		    ANYOF_BITMAP_SET(ret, fold);

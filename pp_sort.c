@@ -753,7 +753,7 @@ S_qsortsvu(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
       register size_t n, j;
       register SV **q;
       for (n = num_elts, q = array; n > 1; ) {
-         j = n-- * Drand01();
+         j = (size_t)(n-- * Drand01());
          temp = q[j];
          q[j] = q[n];
          q[n] = temp;

@@ -2867,7 +2867,7 @@ uiv_2buf(char *buf, IV iv, UV uv, int is_uv, char **peob)
 	sign = 1;
     }
     do {
-	*--ptr = '0' + (uv % 10);
+	*--ptr = '0' + (char)(uv % 10);
     } while (uv /= 10);
     if (sign)
 	*--ptr = '-';
@@ -2967,7 +2967,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 			    int left = 0;
 			    int right = 4;
                             char need_newline = 0;
- 			    U16 reganch = (re->reganch & PMf_COMPILETIME) >> 12;
+ 			    U16 reganch = (U16)((re->reganch & PMf_COMPILETIME) >> 12);
 
  			    while((ch = *fptr++)) {
  				if(reganch & 1) {
@@ -3090,7 +3090,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	    ptr = uiv_2buf(buf, 0, SvUVX(sv), 1, &ebuf);
 	else
 	    ptr = uiv_2buf(buf, SvIVX(sv), 0, 0, &ebuf);
-	SvGROW(sv, ebuf - ptr + 1);	/* inlined from sv_setpvn */
+	SvGROW(sv, (STRLEN)(ebuf - ptr + 1));	/* inlined from sv_setpvn */
 	Move(ptr,SvPVX(sv),ebuf - ptr,char);
 	SvCUR_set(sv, ebuf - ptr);
 	s = SvEND(sv);
@@ -3746,7 +3746,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
     default:
 	if (SvGMAGICAL(sstr) && (flags & SV_GMAGIC)) {
 	    mg_get(sstr);
-	    if (SvTYPE(sstr) != stype) {
+	    if ((int)SvTYPE(sstr) != stype) {
 		stype = SvTYPE(sstr);
 		if (stype == SVt_PVGV && dtype <= SVt_PVGV)
 		    goto glob_assign;
@@ -3755,7 +3755,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	if (stype == SVt_PVLV)
 	    (void)SvUPGRADE(dstr, SVt_PVNV);
 	else
-	    (void)SvUPGRADE(dstr, stype);
+	    (void)SvUPGRADE(dstr, (U32)stype);
     }
 
     sflags = SvFLAGS(sstr);
@@ -5367,7 +5367,7 @@ Perl_sv_pos_b2u(pTHX_ register SV *sv, I32* offsetp)
 	return;
 
     s = (U8*)SvPV(sv, len);
-    if (len < *offsetp)
+    if ((I32)len < *offsetp)
 	Perl_croak(aTHX_ "panic: sv_pos_b2u: bad byte offset");
     send = s + *offsetp;
     len = 0;
@@ -5721,7 +5721,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
       /* Grab the size of the record we're getting */
       recsize = SvIV(SvRV(PL_rs));
       (void)SvPOK_only(sv);    /* Validate pointer */
-      buffer = SvGROW(sv, recsize + 1);
+      buffer = SvGROW(sv, (STRLEN)(recsize + 1));
       /* Go yank in */
 #ifdef VMS
       /* VMS wants read instead of fread, because fread doesn't respect */
@@ -5807,15 +5807,15 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 
     cnt = PerlIO_get_cnt(fp);			/* get count into register */
     (void)SvPOK_only(sv);		/* validate pointer */
-    if (SvLEN(sv) - append <= cnt + 1) { /* make sure we have the room */
-	if (cnt > 80 && SvLEN(sv) > append) {
+    if ((I32)(SvLEN(sv) - append) <= cnt + 1) { /* make sure we have the room */
+	if (cnt > 80 && (I32)SvLEN(sv) > append) {
 	    shortbuffered = cnt - SvLEN(sv) + append + 1;
 	    cnt -= shortbuffered;
 	}
 	else {
 	    shortbuffered = 0;
 	    /* remember that cnt can be negative */
-	    SvGROW(sv, append + (cnt <= 0 ? 2 : (cnt + 1)));
+	    SvGROW(sv, (STRLEN)(append + (cnt <= 0 ? 2 : (cnt + 1))));
 	}
     }
     else
@@ -5889,14 +5889,14 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 	SvGROW(sv, bpx + cnt + 2);
 	bp = (STDCHAR*)SvPVX(sv) + bpx;	/* unbox after relocation */
 
-	*bp++ = i;			/* store character from PerlIO_getc */
+	*bp++ = (STDCHAR)i;		/* store character from PerlIO_getc */
 
 	if (rslen && (STDCHAR)i == rslast)  /* all done for now? */
 	    goto thats_all_folks;
     }
 
 thats_all_folks:
-    if ((rslen > 1 && (bp - (STDCHAR*)SvPVX(sv) < rslen)) ||
+    if ((rslen > 1 && (STRLEN)(bp - (STDCHAR*)SvPVX(sv)) < rslen) ||
 	  memNE((char*)bp - rslen, rsptr, rslen))
 	goto screamer;				/* go back to the fray */
 thats_really_all_folks:
@@ -5932,7 +5932,7 @@ screamer2:
 	if (rslen) {
 	    register STDCHAR *bpe = buf + sizeof(buf);
 	    bp = buf;
-	    while ((i = PerlIO_getc(fp)) != EOF && (*bp++ = i) != rslast && bp < bpe)
+	    while ((i = PerlIO_getc(fp)) != EOF && (*bp++ = (STDCHAR)i) != rslast && bp < bpe)
 		; /* keep reading */
 	    cnt = bp - buf;
 	}
@@ -8547,7 +8547,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	SvGROW(sv, SvCUR(sv) + need + dotstrlen + 1);
 	p = SvEND(sv);
 	if (esignlen && fill == '0') {
-	    for (i = 0; i < esignlen; i++)
+	    for (i = 0; i < (int)esignlen; i++)
 		*p++ = esignbuf[i];
 	}
 	if (gap && !left) {
@@ -8555,7 +8555,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    p += gap;
 	}
 	if (esignlen && fill != '0') {
-	    for (i = 0; i < esignlen; i++)
+	    for (i = 0; i < (int)esignlen; i++)
 		*p++ = esignbuf[i];
 	}
 	if (zeros) {
@@ -9324,10 +9324,12 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 		 PERL_HV_ARRAY_ALLOC_BYTES(dxhv->xhv_max+1), char);
 	    while (i <= sxhv->xhv_max) {
 		((HE**)dxhv->xhv_array)[i] = he_dup(((HE**)sxhv->xhv_array)[i],
-						    !!HvSHAREKEYS(sstr), param);
+						    (bool)!!HvSHAREKEYS(sstr),
+						    param);
 		++i;
 	    }
-	    dxhv->xhv_eiter = he_dup(sxhv->xhv_eiter, !!HvSHAREKEYS(sstr), param);
+	    dxhv->xhv_eiter = he_dup(sxhv->xhv_eiter,
+				     (bool)!!HvSHAREKEYS(sstr), param);
 	}
 	else {
 	    SvPVX(dstr)		= Nullch;

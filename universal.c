@@ -49,7 +49,7 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
     if (gvp && (gv = *gvp) != (GV*)&PL_sv_undef && (subgen = GvSV(gv))
 	&& (hv = GvHV(gv)))
     {
-	if (SvIV(subgen) == PL_sub_generation) {
+	if (SvIV(subgen) == (IV)PL_sub_generation) {
 	    SV* sv;
 	    SV** svp = (SV**)hv_fetch(hv, name, len, FALSE);
 	    if (svp && (sv = *svp) != (SV*)&PL_sv_undef) {
@@ -513,7 +513,7 @@ XS(XS_Internals_hv_clear_placehold)
     /* I don't care how many parameters were passed in, but I want to avoid
        the unused variable warning. */
 
-    items = HvPLACEHOLDERS(hv);
+    items = (I32)HvPLACEHOLDERS(hv);
 
     if (items) {
         HE *entry;

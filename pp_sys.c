@@ -785,7 +785,7 @@ PP(pp_tie)
 	ENTER;
 	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
-	EXTEND(SP,items);
+	EXTEND(SP,(I32)items);
 	while (items--)
 	    PUSHs(*MARK++);
 	PUTBACK;
@@ -803,7 +803,7 @@ PP(pp_tie)
 	ENTER;
 	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
-	EXTEND(SP,items);
+	EXTEND(SP,(I32)items);
 	while (items--)
 	    PUSHs(*MARK++);
 	PUTBACK;
@@ -1593,7 +1593,7 @@ PP(pp_sysread)
 	if (bufsize >= 256)
 	    bufsize = 255;
 #endif
-	buffer = SvGROW(bufsv, length+1);
+	buffer = SvGROW(bufsv, (STRLEN)(length+1));
 	/* 'offset' means 'flags' here */
 	count = PerlSock_recvfrom(PerlIO_fileno(IoIFP(io)), buffer, length, offset,
 			  (struct sockaddr *)namebuf, &bufsize);
@@ -1626,7 +1626,7 @@ PP(pp_sysread)
 	blen = sv_len_utf8(bufsv);
     }
     if (offset < 0) {
-	if (-offset > blen)
+	if (-offset > (int)blen)
 	    DIE(aTHX_ "Offset outside string");
 	offset += blen;
     }
@@ -1636,7 +1636,7 @@ PP(pp_sysread)
     }
  more_bytes:
     bufsize = SvCUR(bufsv);
-    buffer  = SvGROW(bufsv, length+offset+1);
+    buffer  = SvGROW(bufsv, (STRLEN)(length+offset+1));
     if (offset > bufsize) { /* Zero any newly allocated space */
     	Zero(buffer+bufsize, offset-bufsize, char);
     }
@@ -1826,10 +1826,10 @@ PP(pp_send)
 	if (MARK < SP) {
 	    offset = SvIVx(*++MARK);
 	    if (offset < 0) {
-		if (-offset > blen)
+		if (-offset > (IV)blen)
 		    DIE(aTHX_ "Offset outside string");
 		offset += blen;
-	    } else if (offset >= blen && blen > 0)
+	    } else if (offset >= (IV)blen && blen > 0)
 		DIE(aTHX_ "Offset outside string");
 	} else
 	    offset = 0;
@@ -4034,7 +4034,6 @@ PP(pp_system)
     I32 value;
     STRLEN n_a;
     int result;
-    int pp[2];
     I32 did_pipes = 0;
 
     if (PL_tainting) {
@@ -4057,71 +4056,73 @@ PP(pp_system)
     PERL_FLUSHALL_FOR_CHILD;
 #if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2) || defined(PERL_MICRO)
     {
-	 Pid_t childpid;
-	 int status;
-	 Sigsave_t ihand,qhand;     /* place to save signals during system() */
+	Pid_t childpid;
+	int pp[2];
 
-	 if (PerlProc_pipe(pp) >= 0)
-	      did_pipes = 1;
-	 while ((childpid = PerlProc_fork()) == -1) {
-	      if (errno != EAGAIN) {
-		   value = -1;
-		   SP = ORIGMARK;
-		   PUSHi(value);
-		   if (did_pipes) {
-			PerlLIO_close(pp[0]);
-			PerlLIO_close(pp[1]);
-		   }
-		   RETURN;
-	      }
-	      sleep(5);
-	 }
-	 if (childpid > 0) {
-	      if (did_pipes)
-		   PerlLIO_close(pp[1]);
+	if (PerlProc_pipe(pp) >= 0)
+	    did_pipes = 1;
+	while ((childpid = PerlProc_fork()) == -1) {
+	    if (errno != EAGAIN) {
+		value = -1;
+		SP = ORIGMARK;
+		PUSHi(value);
+		if (did_pipes) {
+		    PerlLIO_close(pp[0]);
+		    PerlLIO_close(pp[1]);
+		}
+		RETURN;
+	    }
+	    sleep(5);
+	}
+	if (childpid > 0) {
+	    Sigsave_t ihand,qhand; /* place to save signals during system() */
+	    int status;
+
+	    if (did_pipes)
+		PerlLIO_close(pp[1]);
 #ifndef PERL_MICRO
-	      rsignal_save(SIGINT, SIG_IGN, &ihand);
-	      rsignal_save(SIGQUIT, SIG_IGN, &qhand);
+	    rsignal_save(SIGINT, SIG_IGN, &ihand);
+	    rsignal_save(SIGQUIT, SIG_IGN, &qhand);
 #endif
-	      do {
-		   result = wait4pid(childpid, &status, 0);
-	      } while (result == -1 && errno == EINTR);
+	    do {
+		result = wait4pid(childpid, &status, 0);
+	    } while (result == -1 && errno == EINTR);
 #ifndef PERL_MICRO
-	      (void)rsignal_restore(SIGINT, &ihand);
-	      (void)rsignal_restore(SIGQUIT, &qhand);
+	    (void)rsignal_restore(SIGINT, &ihand);
+	    (void)rsignal_restore(SIGQUIT, &qhand);
 #endif
-	      STATUS_NATIVE_SET(result == -1 ? -1 : status);
-	      do_execfree();	/* free any memory child malloced on fork */
-	      SP = ORIGMARK;
-	      if (did_pipes) {
-		   int errkid;
-		   int n = 0, n1;
-		
-		   while (n < sizeof(int)) {
-			n1 = PerlLIO_read(pp[0],
-					  (void*)(((char*)&errkid)+n),
-					  (sizeof(int)) - n);
-			if (n1 <= 0)
-			     break;
-			n += n1;
-		   }
-		   PerlLIO_close(pp[0]);
-		   if (n) {			/* Error */
-			if (n != sizeof(int))
-			     DIE(aTHX_ "panic: kid popen errno read");
-			errno = errkid;		/* Propagate errno from kid */
-			STATUS_CURRENT = -1;
-		   }
-	      }
-	      PUSHi(STATUS_CURRENT);
-	      RETURN;
-	 }
-	 if (did_pipes) {
-	      PerlLIO_close(pp[0]);
+	    STATUS_NATIVE_SET(result == -1 ? -1 : status);
+	    do_execfree();	/* free any memory child malloced on fork */
+	    SP = ORIGMARK;
+	    if (did_pipes) {
+		int errkid;
+		int n = 0, n1;
+
+		while (n < sizeof(int)) {
+		    n1 = PerlLIO_read(pp[0],
+				      (void*)(((char*)&errkid)+n),
+				      (sizeof(int)) - n);
+		    if (n1 <= 0)
+			break;
+		    n += n1;
+		}
+		PerlLIO_close(pp[0]);
+		if (n) {			/* Error */
+		    if (n != sizeof(int))
+			DIE(aTHX_ "panic: kid popen errno read");
+		    errno = errkid;		/* Propagate errno from kid */
+		    STATUS_CURRENT = -1;
+		}
+	    }
+	    PUSHi(STATUS_CURRENT);
+	    RETURN;
+	}
+	if (did_pipes) {
+	    PerlLIO_close(pp[0]);
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-	      fcntl(pp[1], F_SETFD, FD_CLOEXEC);
+	    fcntl(pp[1], F_SETFD, FD_CLOEXEC);
 #endif
-	 }
+	}
     }
     if (PL_op->op_flags & OPf_STACKED) {
 	SV *really = *++MARK;
@@ -4952,7 +4953,7 @@ PP(pp_gservent)
     else if (which == OP_GSBYPORT) {
 #ifdef HAS_GETSERVBYPORT
 	char *proto = POPpbytex;
-	unsigned short port = POPu;
+	unsigned short port = (unsigned short)POPu;
 
 #ifdef HAS_HTONS
 	port = PerlSock_htons(port);
