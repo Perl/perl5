@@ -80,6 +80,7 @@ if (-d "pod") {
     perlrun
     perldiag
     perllexwarn
+    perldebtut
     perldebug
 
     perlvar
