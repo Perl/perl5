@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..3\n";
+print "1..5\n";
 
 $| = 1;
 
@@ -31,4 +31,13 @@ print "ok 2\n";
 copy "copy-$$", \*STDOUT;
 
 unlink "file-$$";
-unlink "copy-$$";
+
+print "not " if move("file-$$", "copy-$$") or not -e "copy-$$";
+print "ok 4\n";
+
+move "copy-$$", "file-$$";
+
+print "not " unless -e "file-$$" and not -e "copy-$$";
+print "ok 5\n";
+
+unlink "file-$$";

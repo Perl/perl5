@@ -5,20 +5,22 @@
 
 package File::Copy;
 
-require Exporter;
+use Exporter;
 use Carp;
 use UNIVERSAL qw(isa);
+use vars qw( @ISA @EXPORT @EXPORT_OK $VERSION $Too_Big);
+use strict;
 
 @ISA=qw(Exporter);
-@EXPORT=qw(copy);
-@EXPORT_OK=qw(copy cp);
+@EXPORT=qw(copy move);
+@EXPORT_OK=qw(cp mv);
 
-$File::Copy::VERSION = '1.5';
-$File::Copy::Too_Big = 1024 * 1024 * 2;
+$VERSION = '1.6';
+$Too_Big = 1024 * 1024 * 2;
 
 sub VERSION {
     # Version of File::Copy
-    return $File::Copy::VERSION;
+    return $VERSION;
 }
 
 sub copy {
@@ -39,26 +41,22 @@ sub copy {
     local(*FROM, *TO);
     local($\) = '';
 
-    if (ref(\$from) eq 'GLOB') {
-	*FROM = $from;
-    } elsif (defined ref $from and
-	     (ref($from) eq 'GLOB' || ref($from) eq 'FileHandle' ||
-	      ref($from) eq 'VMS::Stdio')) {
+    if (ref($from) && (isa($from,'GLOB') || isa($from,'IO::Handle'))) {
 	*FROM = *$from;
+    } elsif (ref(\$from) eq 'GLOB') {
+	*FROM = $from;
     } else {
-	open(FROM,"<$from")||goto(fail_open1);
+	open(FROM,"<$from") or goto fail_open1;
 	binmode FROM;
 	$closefrom = 1;
     }
 
-    if (ref(\$to) eq 'GLOB') {
-	*TO = $to;
-    } elsif (defined ref $to and
-	     (ref($to) eq 'GLOB' || ref($to) eq 'FileHandle' ||
-	      ref($to) eq 'VMS::Stdio')) {
+    if (ref($to) && (isa($to,'GLOB') || isa($to,'IO::Handle'))) {
 	*TO = *$to;
+    } elsif (ref(\$to) eq 'GLOB') {
+	*TO = $to;
     } else {
-	open(TO,">$to")||goto(fail_open2);
+	open(TO,">$to") or goto fail_open2;
 	binmode TO;
 	$closeto=1;
     }
@@ -69,7 +67,7 @@ sub copy {
     } else {
 	$size = -s FROM;
 	$size = 1024 if ($size < 512);
-	$size = $File::Copy::Too_Big if ($size > $File::Copy::Too_Big);
+	$size = $Too_Big if ($size > $Too_Big);
     }
 
     $buf = '';
@@ -78,7 +76,7 @@ sub copy {
 	    goto fail_inner;    
 	}
     }
-    goto fail_inner unless(defined($r));
+    goto fail_inner unless defined($r);
     close(TO) || goto fail_open2 if $closeto;
     close(FROM) || goto fail_open1 if $closefrom;
     # Use this idiom to avoid uninitialized value warning.
@@ -103,10 +101,29 @@ sub copy {
     return 0;
 }
 
+sub move {
+  my($from,$to) = @_;
+  my($copied,$tosz1,$tomt1,$tosz2,$tomt2,$sts,$ossts);
 
-*cp = \&copy;
+  return 1 if rename $from, $to;
+ 
+  ($tosz1,$tomt1) = (stat($to))[7,9];
+  return 1 if ($copied = copy($from,$to)) && unlink($from);
+  
+  ($sts,$ossts) = ($! + 0, $^E + 0);
+  ($tosz2,$tomt2) = ((stat($to))[7,9],0,0) if defined $tomt1;
+  unlink($to) if !defined($tomt1) || $tomt1 != $tomt2 || $tosz1 != $tosz2;
+  ($!,$^E) = ($sts,$ossts);
+  return 0;
+}
+
+{
+  local($^W) = 0;  # Hush up used-once warning
+  *cp = \&copy;
+  *mv = \&move;
+}
 # &syscopy is an XSUB under OS/2
-*syscopy = ($^O eq 'VMS' ? \&rmscopy : \&copy) unless $^O eq 'os2';
+*syscopy = ($^O eq 'VMS' ? \&rmscopy : \&copy) unless defined &syscopy;
 
 1;
 
@@ -122,6 +139,7 @@ File::Copy - Copy files or filehandles
 
 	copy("file1","file2");
   	copy("Copy.pm",\*STDOUT);'
+	move("/dev1/fileA","/dev2/fileB");
 
   	use POSIX;
 	use File::Copy cp;
@@ -131,7 +149,15 @@ File::Copy - Copy files or filehandles
 
 =head1 DESCRIPTION
 
-The File::Copy module provides a basic function C<copy> which takes two
+The File::Copy module provides two basic functions, C<copy> and
+C<move>, which are useful for getting the contents of a file from
+one place to another.
+
+=over 4
+
+=item *
+
+The C<copy> function takes two
 parameters: a file to copy from and a file to copy to. Either
 argument may be a string, a FileHandle reference or a FileHandle
 glob. Obviously, if the first argument is a filehandle of some
@@ -152,6 +178,20 @@ upon the file, but will generally be the whole file (up to 2Mb), or
 You may use the syntax C<use File::Copy "cp"> to get at the
 "cp" alias for this function. The syntax is I<exactly> the same.
 
+=item *
+
+The C<move> function also takes two parameters: the current name
+and the intended name of the file to be moved.  If possible, it
+will simply rename the file.  Otherwise, it copies the file to
+the new location and deletes the original.  If an error occurs during
+this copy-and-delete process, you may be left with a (possibly partial)
+copy of the file under the destination name.
+
+You may use the "mv" alias for this function in the same way that
+you may use the "cp" alias for C<copy>.
+
+=back
+
 File::Copy also provides the C<syscopy> routine, which copies the
 file specified in the first parameter to the file specified in the
 second parameter, preserving OS-specific attributes and file
@@ -163,7 +203,7 @@ XSUB directly.
 =head2 Special behavior if C<syscopy> is defined (VMS and OS/2)
 
 If the second argument to C<copy> is not a file handle for an
-already opened file, then C<copy> will perform an "system copy" of
+already opened file, then C<copy> will perform a "system copy" of
 the input file to a new output file, in order to preserve file
 attributes, indexed file structure, I<etc.>  The buffer size
 parameter is ignored.  If the second argument to C<copy> is a
@@ -175,7 +215,7 @@ The system copy routine may also be called directly under VMS and OS/2
 as C<File::Copy::syscopy> (or under VMS as C<File::Copy::rmscopy>, which
 is just an alias for this routine).
 
-=over
+=over 4
 
 =item rmscopy($from,$to[,$date_flag])
 
@@ -215,13 +255,13 @@ it sets C<$!>, deletes the output file, and returns 0.
 
 =head1 RETURN
 
-Returns 1 on success, 0 on failure. $! will be set if an error was
-encountered.
+All functions return 1 on success, 0 on failure.
+$! will be set if an error was encountered.
 
 =head1 AUTHOR
 
-File::Copy was written by Aaron Sherman I<E<lt>ajs@ajs.comE<gt>> in 1995.
-The VMS-specific code was added by Charles Bailey
-I<E<lt>bailey@genetics.upenn.eduE<gt>> in March 1996.
+File::Copy was written by Aaron Sherman I<E<lt>ajs@ajs.comE<gt>> in 1995,
+and updated by Charles Bailey I<E<lt>bailey@genetics.upenn.eduE<gt>> in 1996.
 
 =cut
+
