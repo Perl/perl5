@@ -4705,13 +4705,16 @@ Perl_opendir(pTHX_ char *name)
     if (do_tovmspath(name,dir,0) == NULL) {
       return NULL;
     }
+    /* Check access before stat; otherwise stat does not
+     * accurately report whether it's a directory.
+     */
+    if (!cando_by_name(S_IRUSR,0,dir)) {
+      set_errno(EACCES); set_vaxc_errno(RMS$_PRV);
+      return NULL;
+    }
     if (flex_stat(dir,&sb) == -1) return NULL;
     if (!S_ISDIR(sb.st_mode)) {
       set_errno(ENOTDIR);  set_vaxc_errno(RMS$_DIR);
-      return NULL;
-    }
-    if (!cando_by_name(S_IRUSR,0,dir)) {
-      set_errno(EACCES); set_vaxc_errno(RMS$_PRV);
       return NULL;
     }
     /* Get memory for the handle, and the pattern. */
@@ -6579,8 +6582,12 @@ Perl_cando_by_name(pTHX_ I32 bit, Uid_t effective, char *fname)
   union prvdef curprv;
   struct itmlst_3 armlst[3] = {{sizeof access, CHP$_ACCESS, &access, &retlen},
          {sizeof privused, CHP$_PRIVUSED, &privused, &retlen},{0,0,0,0}};
-  struct itmlst_3 jpilst[2] = {{sizeof curprv, JPI$_CURPRIV, &curprv, &retlen},
+  struct itmlst_3 jpilst[3] = {{sizeof curprv, JPI$_CURPRIV, &curprv, &retlen},
+         {sizeof usrname, JPI$_USERNAME, &usrname, &usrdsc.dsc$w_length},
          {0,0,0,0}};
+  struct itmlst_3 usrprolst[2] = {{sizeof curprv, CHP$_PRIV, &curprv, &retlen},
+         {0,0,0,0}};
+  struct dsc$descriptor_s usrprodsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
 
   if (!fname || !*fname) return FALSE;
   /* Make sure we expand logical names, since sys$check_access doesn't */
@@ -6599,11 +6606,6 @@ Perl_cando_by_name(pTHX_ I32 bit, Uid_t effective, char *fname)
     namdsc.dsc$a_pointer = fileified;
   }
 
-  if (!usrdsc.dsc$w_length) {
-    cuserid(usrname);
-    usrdsc.dsc$w_length = strlen(usrname);
-  }
-
   switch (bit) {
     case S_IXUSR: case S_IXGRP: case S_IXOTH:
       access = ARM$M_EXECUTE; break;
@@ -6617,7 +6619,28 @@ Perl_cando_by_name(pTHX_ I32 bit, Uid_t effective, char *fname)
       return FALSE;
   }
 
-  retsts = sys$check_access(&objtyp,&namdsc,&usrdsc,armlst);
+  /* Before we call $check_access, create a user profile with the current
+   * process privs since otherwise it just uses the default privs from the
+   * UAF and might give false positives or negatives.
+   */
+
+  /* get current process privs and username */
+  _ckvmssts(sys$getjpiw(0,0,0,jpilst,iosb,0,0));
+  _ckvmssts(iosb[0]);
+
+  /* find out the space required for the profile */
+  _ckvmssts(sys$create_user_profile(&usrdsc,&usrprolst,0,0,
+                                    &usrprodsc.dsc$w_length,0));
+
+  /* allocate space for the profile and get it filled in */
+  New(1330,usrprodsc.dsc$a_pointer,usrprodsc.dsc$w_length,char);
+  _ckvmssts(sys$create_user_profile(&usrdsc,&usrprolst,0,usrprodsc.dsc$a_pointer,
+                                    &usrprodsc.dsc$w_length,0));
+
+  /* use the profile to check access to the file; free profile & analyze results */
+  retsts = sys$check_access(&objtyp,&namdsc,0,armlst,0,0,0,&usrprodsc);
+  Safefree(usrprodsc.dsc$a_pointer);
+  if (retsts == SS$_NOCALLPRIV) retsts = SS$_NOPRIV; /* not really 3rd party */
   if (retsts == SS$_NOPRIV      || retsts == SS$_NOSUCHOBJECT ||
       retsts == SS$_INVFILFOROP || retsts == RMS$_FNF || retsts == RMS$_SYN ||
       retsts == RMS$_DIR        || retsts == RMS$_DEV || retsts == RMS$_DNF) {
@@ -6627,20 +6650,7 @@ Perl_cando_by_name(pTHX_ I32 bit, Uid_t effective, char *fname)
     else set_errno(ENOENT);
     return FALSE;
   }
-  if (retsts == SS$_NORMAL) {
-    if (!privused) return TRUE;
-    /* We can get access, but only by using privs.  Do we have the
-       necessary privs currently enabled? */
-    _ckvmssts(sys$getjpiw(0,0,0,jpilst,iosb,0,0));
-    if ((privused & CHP$M_BYPASS) &&  !curprv.prv$v_bypass)  return FALSE;
-    if ((privused & CHP$M_SYSPRV) &&  !curprv.prv$v_sysprv &&
-                                      !curprv.prv$v_bypass)  return FALSE;
-    if ((privused & CHP$M_GRPPRV) &&  !curprv.prv$v_grpprv &&
-         !curprv.prv$v_sysprv &&      !curprv.prv$v_bypass)  return FALSE;
-    if ((privused & CHP$M_READALL) && !curprv.prv$v_readall) return FALSE;
-    return TRUE;
-  }
-  if (retsts == SS$_ACCONFLICT) {
+  if (retsts == SS$_NORMAL || retsts == SS$_ACCONFLICT) {
     return TRUE;
   }
   _ckvmssts(retsts);
