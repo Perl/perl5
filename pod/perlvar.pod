@@ -1344,6 +1344,10 @@ this:
 
 See L<POSIX>.
 
+The delivery policy of signals changed in Perl 5.8.0 from immediate
+(also known as "unsafe") to deferred, also known as "safe signals".
+See L<perlipc> for more information.
+
 Certain internal hooks can be also set using the %SIG hash.  The
 routine indicated by C<$SIG{__WARN__}> is called when a warning message is
 about to be printed.  The warning message is passed as the first
