@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.7 1995/03/21 08:46:15 ram Exp $
 #
-# Generated on Mon Jun  5 12:18:53 EDT 1995 [metaconfig 3.0 PL55]
+# Generated on Tue Jun  6 12:25:20 EDT 1995 [metaconfig 3.0 PL55]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -5180,54 +5180,75 @@ eval $inlibc
 set pipe d_pipe
 eval $inlibc
 
-: see if this is a pwd system
-echo " "
-xxx=`./findhdr pwd.h`
-if $test "$xxx"; then
-	i_pwd="$define"
-	echo "<pwd.h> found." >&4
+: see if this is a pwd.h system
+set pwd.h i_pwd
+eval $inhdr
+
+case "$i_pwd" in
+$define)
+	xxx=`./findhdr pwd.h`
 	$cppstdin $cppflags $cppminus < $xxx >$$.h
+
 	if $contains 'pw_quota' $$.h >/dev/null 2>&1; then
-		d_pwquota="$define"
+		val="$define"
 	else
-		d_pwquota="$undef"
+		val="$undef"
 	fi
+	set d_pwquota
+	eval $setvar
+
 	if $contains 'pw_age' $$.h >/dev/null 2>&1; then
-		d_pwage="$define"
+		val="$define"
 	else
-		d_pwage="$undef"
+		val="$undef"
 	fi
+	set d_pwage
+	eval $setvar
+
 	if $contains 'pw_change' $$.h >/dev/null 2>&1; then
-		d_pwchange="$define"
+		val="$define"
 	else
-		d_pwchange="$undef"
+		val="$undef"
 	fi
+	set d_pwchange
+	eval $setvar
+
 	if $contains 'pw_class' $$.h >/dev/null 2>&1; then
-		d_pwclass="$define"
+		val="$define"
 	else
-		d_pwclass="$undef"
+		val="$undef"
 	fi
+	set d_pwclass
+	eval $setvar
+
 	if $contains 'pw_expire' $$.h >/dev/null 2>&1; then
-		d_pwexpire="$define"
+		val="$define"
 	else
-		d_pwexpire="$undef"
+		val="$undef"
 	fi
+	set d_pwexpire
+	eval $setvar
+
 	if $contains 'pw_comment' $$.h >/dev/null 2>&1; then
-		d_pwcomment="$define"
+		val="$define"
 	else
-		d_pwcomment="$undef"
+		val="$undef"
 	fi
+	set d_pwcomment
+	eval $setvar
+
 	$rm -f $$.h
-else
-	i_pwd="$undef"
-	d_pwquota="$undef"
-	d_pwage="$undef"
-	d_pwchange="$undef"
-	d_pwclass="$undef"
-	d_pwexpire="$undef"
-	d_pwcomment="$undef"
-	echo "<pwd.h> NOT found." >&4
-fi
+	;;
+*)
+	val="$undef"; 
+	set d_pwquota; eval $setvar
+	set d_pwage; eval $setvar
+	set d_pwchange; eval $setvar
+	set d_pwclass; eval $setvar
+	set d_pwexpire; eval $setvar
+	set d_pwcomment; eval $setvar
+	;;
+esac
 
 : see if readdir and friends exist
 set readdir d_readdir
@@ -5615,10 +5636,14 @@ if $contains '_IO_fpos_t' `./findhdr stdio.h` >/dev/null 2>&1 ; then
 	'') stdio_ptr='((fp)->_IO_read_ptr)'
 		ptr_lval=$define
 		;;
+	*)	ptr_lval=$d_stdio_ptr_lval
+		;;
 	esac
 	case "$stdio_cnt" in
 	'') stdio_cnt='((fp)->_IO_read_end - (fp)->_IO_read_ptr)'
 		cnt_lval=$undef
+		;;
+	*)	cnt_lval=$d_stdio_cnt_lval
 		;;
 	esac
 	case "$stdio_base" in
@@ -5632,10 +5657,14 @@ else
 	'') stdio_ptr='((fp)->_ptr)'
 		ptr_lval=$define
 		;;
+	*)	ptr_lval=$d_stdio_ptr_lval
+		;;
 	esac
 	case "$stdio_cnt" in
 	'') stdio_cnt='((fp)->_cnt)'
 		cnt_lval=$define
+		;;
+	*)	cnt_lval=$d_stdio_cnt_lval
 		;;
 	esac
 	case "$stdio_base" in
@@ -6384,11 +6413,15 @@ define)
 	: Check the return type needed for hash 
 	echo " "
 	echo "Checking return type needed for hash for Berkeley DB ..." >&4
-	$cat >try.c <<'EOCP'
+	$cat >try.c <<EOCP
+#$d_const HASCONST
+#ifndef HASCONST
+#define const
+#endif
 #include <sys/types.h>
 #include <db.h>
 u_int32_t hash_cb (ptr, size)
-void *ptr;
+const void *ptr;
 size_t size;
 {
 }
@@ -6420,12 +6453,16 @@ define)
 	: Check the return type needed for prefix 
 	echo " "
 	echo "Checking return type needed for prefix for Berkeley DB ..." >&4
-	cat >try.c <<'EOCP'
+	cat >try.c <<EOCP
+#$d_const HASCONST
+#ifndef HASCONST
+#define const
+#endif
 #include <sys/types.h>
 #include <db.h>
 size_t prefix_cb (key1, key2)
-DBT *key1;
-DBT *key2;
+const DBT *key1;
+const DBT *key2;
 {
 }
 BTREEINFO info;

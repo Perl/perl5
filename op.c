@@ -2627,7 +2627,7 @@ CV *cv;
 	SAVESPTR(curpad);
 	curpad = 0;
 
-	if (!SvFLAGS(cv) & SVpcv_CLONED)
+	if (!(SvFLAGS(cv) & SVpcv_CLONED))
 	    op_free(CvROOT(cv));
 	CvROOT(cv) = Nullop;
 	if (CvPADLIST(cv)) {
@@ -2761,6 +2761,7 @@ OP *block;
 	CvOUTSIDE(cv) = CvOUTSIDE(compcv);
 	CvOUTSIDE(compcv) = 0;
 	CvPADLIST(cv) = CvPADLIST(compcv);
+	CvPADLIST(compcv) = 0;
 	SvREFCNT_dec(compcv);
     }
     else {

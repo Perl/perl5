@@ -787,9 +787,9 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #ifdef USE_STDIO_PTR
 #define FILE_ptr(fp)	$stdio_ptr
-#$d_stdio_ptr_lval STDIO_PTR_LVALUE
+#$d_stdio_ptr_lval STDIO_PTR_LVALUE 		/**/
 #define FILE_cnt(fp)	$stdio_cnt
-#$d_stdio_cnt_lval STDIO_CNT_LVALUE
+#$d_stdio_cnt_lval STDIO_CNT_LVALUE 		/**/
 #endif
 
 /* FILE_base:

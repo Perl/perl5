@@ -242,6 +242,7 @@ September 8th, 1994; by Tim Bunce.
 # Last updated:	Sept 8th 94 by Tim Bunce
 #
 
+use Carp;
 use Exporter;
 @ISA=(Exporter);
 @EXPORT=qw(timeit timethis timethese timediff timestr);
@@ -315,6 +316,10 @@ sub timedebug{
 
 sub runloop {
     my($n, $c) = @_;
+
+    $n+=0; # force numeric now, so garbage won't creep into the eval
+    croak "negativ loopcount $n" if $n<0;
+    confess "Usage: runloop(number, string)" unless defined $c;
     my($t0, $t1, $td); # before, after, difference
 
     # find package of caller so we can execute code there
@@ -326,7 +331,7 @@ sub runloop {
 
     my $subcode = "sub { package $pack; my(\$_i)=$n; while (\$_i--){$c;} }";
     my $subref  = eval $subcode;
-    die "runloop unable to compile '$c': $@\ncode: $subcode\n" if $@;
+    croak "runloop unable to compile '$c': $@\ncode: $subcode\n" if $@;
     print STDERR "runloop $n '$subcode'\n" if ($debug);
 
     $t0 = &new;

@@ -75,30 +75,10 @@ ccdlflags='-Zelf -Zlink=dynamic -Wl,-Bexport -u sigaction'
 lddlflags='-Zlink=so'
 
 # Configure imagines that it sees a pw_quota field, but it is really in a
-# different structure than the one it thinks it is looking at.  WARNING:
-# Setting this here in the hints file doesn't help. You need to fix this by
-# editing config.sh after Configure asks you to fix things with a shell
-# escape! (Maybe Configure should actually try to compile a routine to
-# test each field, but what a pain that would be...).
-#
-# Perhaps I should create a config.over file and add this to it now?
-#
+# different structure than the one it thinks it is looking at.
 d_pwquota='undef'
-echo ''
-echo ''
-echo WARNING: Edit config.sh when Configure offers to let you do so at the
-echo end of the configuration process and manually change d_pwquota from
-echo define to undef \(or you may want to create a config.over file now\).
-echo ''
-echo ''
 
-# The following silly shell variable is set just so it will be printed out
-# immediately prior to asking the user to edit config.sh :-).
-#
-dont_forget_to_fix_d_pwquota_in_config_to_be_undef="really"
-
-
-# Configure sometime finds what it believes to be ndbm header files on the
+# Configure sometimes finds what it believes to be ndbm header files on the
 # system and imagines that we have the NDBM library, but we really don't.
 # There is something there that once resembled ndbm, but it is purely
 # for internal use in some tool and has been hacked beyond recognition
@@ -110,3 +90,12 @@ i_ndbm='undef'
 #
 d_mymalloc='undef'
 usemymalloc='n'
+
+cat <<'EOM'
+
+You will get a failure on lib/posix.t test 16 because ungetc() on
+stdin does not work if no characters have been read from stdin.
+If you type a character at the terminal where you are running
+the tests, you can fool it into thinking it worked.
+
+EOM

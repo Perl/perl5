@@ -61,6 +61,8 @@ if [ -r /usr/ucblib/libucb.a ]; then	# If using BSD-compat. library:
 fi
 
 lddlflags="-G $ldflags"	# Probably needed for dynamic loading
+# We _do_ want the -L paths in ldflags, but we don't want the -non_shared.
+lddlflags=`echo $lddlflags | sed 's/-non_shared//'`
 
 cat <<'EOM' >&4
 

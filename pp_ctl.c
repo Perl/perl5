@@ -1533,6 +1533,15 @@ PP(pp_goto)
 	    I32 items = 0;
 	    I32 oldsave;
 
+	    if (!CvROOT(cv) && !CvXSUB(cv)) {
+		if (CvGV(cv)) {
+		    SV *tmpstr = sv_newmortal();
+		    gv_efullname(tmpstr, CvGV(cv));
+		    DIE("Goto undefined subroutine &%s",SvPVX(tmpstr));
+		}
+		DIE("Goto undefined subroutine");
+	    }
+
 	    /* First do some returnish stuff. */
 	    cxix = dopoptosub(cxstack_ix);
 	    if (cxix < 0)
@@ -1591,7 +1600,7 @@ PP(pp_goto)
 			    GvENAME(CvGV(cv)));
 		    if (CvDEPTH(cv) > AvFILL(padlist)) {
 			AV *newpad = newAV();
-			AV *oldpad = (AV*)AvARRAY(svp[CvDEPTH(cv)-1]);
+			SV **oldpad = AvARRAY(svp[CvDEPTH(cv)-1]);
 			I32 ix = AvFILL((AV*)svp[1]);
 			svp = AvARRAY(svp[0]);
 			for ( ;ix > 0; ix--) {
@@ -1600,7 +1609,7 @@ PP(pp_goto)
 				if (SvFLAGS(svp[ix]) & SVf_FAKE) {
 				    /* outer lexical? */
 				    av_store(newpad, ix,
-					SvREFCNT_inc(AvARRAY(oldpad)[ix]) );
+					SvREFCNT_inc(oldpad[ix]) );
 				}
 				else {		/* our own lexical */
 				    if (*name == '@')

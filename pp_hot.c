@@ -1687,7 +1687,7 @@ PP(pp_entersub)
 	    if (CvDEPTH(cv) > AvFILL(padlist)) {
 		AV *av;
 		AV *newpad = newAV();
-		AV *oldpad = (AV*)AvARRAY(svp[CvDEPTH(cv)-1]);
+		SV **oldpad = AvARRAY(svp[CvDEPTH(cv)-1]);
 		I32 ix = AvFILL((AV*)svp[1]);
 		svp = AvARRAY(svp[0]);
 		for ( ;ix > 0; ix--) {
@@ -1695,7 +1695,7 @@ PP(pp_entersub)
 			char *name = SvPVX(svp[ix]);
 			if (SvFLAGS(svp[ix]) & SVf_FAKE) { /* outer lexical? */
 			    av_store(newpad, ix,
-				SvREFCNT_inc(AvARRAY(oldpad)[ix]) );
+				SvREFCNT_inc(oldpad[ix]) );
 			}
 			else {				/* our own lexical */
 			    if (*name == '@')

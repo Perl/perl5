@@ -1,6 +1,10 @@
 # This file has been put together by Anno Siegel <siegel@zrz.TU-Berlin.DE>
 # and Andreas Koenig <k@franz.ww.TU-Berlin.DE>. Comments, questions, and
 # improvements welcome!
+#
+# These hints work for NeXT 3.2 and 3.3.  3.0 has it's own
+# special hint file.
+
 ccflags='-DUSE_NEXT_CTYPE'
 POSIX_cflags='ccflags="-posix $ccflags"'
 ldflags='-u libsys_s'
@@ -35,4 +39,3 @@ ranlib='sleep 5; /bin/ranlib'
 if [ `arch` = "hppa" ]; then
 pp_cflags='optimize="-g"'
 fi
-

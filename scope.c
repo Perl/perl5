@@ -276,7 +276,7 @@ save_iv(ivp)
 IV *ivp;
 {
     SSCHECK(3);
-    SSPUSHINT(*ivp);
+    SSPUSHIV(*ivp);
     SSPUSHPTR(ivp);
     SSPUSHINT(SAVEt_IV);
 }
@@ -365,7 +365,7 @@ save_clearsv(svp)
 SV** svp;
 {
     SSCHECK(2);
-    SSPUSHPTR(svp);
+    SSPUSHLONG((long)(svp-curpad));
     SSPUSHINT(SAVEt_CLEARSV);
 }
 
@@ -540,7 +540,7 @@ I32 base;
 	    Safefree((char*)ptr);
 	    break;
 	case SAVEt_CLEARSV:
-	    ptr = SSPOPPTR;
+	    ptr = (void*)&curpad[SSPOPLONG];
 	    sv = *(SV**)ptr;
 	    if (SvREFCNT(sv) <= 1) { /* Can clear pad variable in place. */
 		if (SvTHINKFIRST(sv)) {
@@ -573,12 +573,14 @@ I32 base;
 		}
 	    }
 	    else {	/* Someone has a claim on this, so abandon it. */
+		U32 padflags = SvFLAGS(sv) & (SVs_PADBUSY|SVs_PADMY|SVs_PADTMP);
 		SvREFCNT_dec(sv);	/* Cast current value to the winds. */
 		switch (SvTYPE(sv)) {	/* Console ourselves with a new value */
 		case SVt_PVAV:	*(SV**)ptr = (SV*)newAV();	break;
 		case SVt_PVHV:	*(SV**)ptr = (SV*)newHV();	break;
 		default:	*(SV**)ptr = NEWSV(0,0);	break;
 		}
+		SvFLAGS(*(SV**)ptr) |= padflags; /* preserve pad nature */
 	    }
 	    break;
 	case SAVEt_DELETE:
