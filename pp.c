@@ -604,8 +604,11 @@ PP(pp_study)
     if(unop->op_first && unop->op_first->op_type == OP_PUSHRE) {
 	PMOP *pm = (PMOP *)unop->op_first;
 	SV *rv = sv_newmortal();
+	REGEXP *re = pm->op_pmregexp;
+
 	sv = newSVrv(rv, "Regexp");
-	sv_magic(sv,(SV*)ReREFCNT_inc(pm->op_pmregexp),'r',0,0);
+	sv_setpvn(sv,re->precomp,re->prelen);
+	sv_magic(sv,(SV*)ReREFCNT_inc(re),'r',0,0);
 	RETURNX(PUSHs(rv));
     }
 
