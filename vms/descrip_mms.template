@@ -347,7 +347,7 @@ libmods : $(LIBPREREQ)
 	@ $(NOOP)
 utils : $(utils1) $(utils2)
 	@ $(NOOP)
-podxform : [.lib.pod]pod2text.com [.lib.pod]pod2html.com [.lib.pod]pod2latex.com [.lib.pod]pod2man.com [.lib.pod]podchecker.com
+podxform : [.lib.pod]pod2text.com [.lib.pod]pod2html.com [.lib.pod]pod2latex.com [.lib.pod]pod2man.com [.lib.pod]podchecker.com [.lib.pod]pod2usage.com [.lib.pod]podselect.com
 	@ $(NOOP)
 x2p : [.x2p]a2p$(E) [.x2p]s2p.com [.x2p]find2perl.com 
 	@ $(NOOP)
@@ -581,6 +581,16 @@ dynext : $(LIBPREREQ) $(DBG)perlshr$(E)
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	$(MINIPERL) $(MMS$SOURCE)
 	Copy/Log [.pod]podchecker.com $(MMS$TARGET)
+
+[.lib.pod]pod2usage.com : [.pod]pod2usage.PL $(ARCHDIR)Config.pm
+	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+	$(MINIPERL) $(MMS$SOURCE)
+	Copy/Log [.pod]pod2usage.com $(MMS$TARGET)
+
+[.lib.pod]podselect.com : [.pod]podselect.PL $(ARCHDIR)Config.pm
+	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+	$(MINIPERL) $(MMS$SOURCE)
+	Copy/Log [.pod]podselect.com $(MMS$TARGET)
 
 preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) $(SOCKPM)
 	@ Write Sys$Output "Autosplitting Perl library . . ."
