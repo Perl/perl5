@@ -31,7 +31,8 @@ sub do_test {
 	    print $pattern, "\n" if $DEBUG;
 	    my $dump = <IN>;
 	    print $dump, "\n"    if $DEBUG;
-	    print "[$dump] vs [$pattern]\nnot " unless $dump =~ /\A$pattern\Z/ms;
+	    print "got:\n[\n$dump\n]\nexpected:\n[\n$pattern\n]\nnot "
+		unless $dump =~ /\A$pattern\Z/ms;
 	    print "ok $_[0]\n";
 	    close(IN);
             return $1;
