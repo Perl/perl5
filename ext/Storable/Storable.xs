@@ -3917,8 +3917,12 @@ static SV *retrieve_scalar(stcxt_t *cxt, char *cname)
 		/*
 		 * newSV did not upgrade to SVt_PV so the scalar is undefined.
 		 * To make it defined with an empty length, upgrade it now...
+		 * Don't upgrade to a PV if the original type contains more
+		 * information than a scalar.
 		 */
-		sv_upgrade(sv, SVt_PV);
+		if (SvTYPE(sv) <= SVt_PV) {
+			sv_upgrade(sv, SVt_PV);
+		}
 		SvGROW(sv, 1);
 		*SvEND(sv) = '\0';			/* Ensure it's null terminated anyway */
 		TRACEME(("ok (retrieve_scalar empty at 0x%"UVxf")", PTR2UV(sv)));

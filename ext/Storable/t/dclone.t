@@ -27,7 +27,7 @@ sub BEGIN {
 
 use Storable qw(dclone);
 
-print "1..9\n";
+print "1..10\n";
 
 $a = 'toto';
 $b = \$a;
@@ -79,4 +79,18 @@ print "ok 8\n";
 $$cloned{a} = "blah";
 print "not " unless $$cloned{''}[0] == \$$cloned{a};
 print "ok 9\n";
+
+# [ID 20020221.007] SEGV in Storable with empty string scalar object
+package TestString;
+sub new {
+    my ($type, $string) = @_;
+    return bless(\$string, $type);
+}
+package main;
+my $empty_string_obj = TestString->new('');
+my $clone = dclone($empty_string_obj);
+# If still here after the dclone the fix (#17543) worked.
+print ref $clone eq ref $empty_string_obj &&
+      $$clone eq $$empty_string_obj &&
+      $$clone eq '' ? "ok 10\n" : "not ok 10\n";
 
