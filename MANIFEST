@@ -1031,7 +1031,6 @@ lib/Net/SMTP.pm			libnet
 lib/Net/t/ftp.t			libnet
 lib/Net/t/hostname.t		libnet
 lib/Net/t/nntp.t		libnet
-lib/Net/t/ph.t			libnet
 lib/Net/t/require.t		libnet
 lib/Net/t/smtp.t		libnet
 lib/Net/Time.pm			libnet
