@@ -1583,7 +1583,7 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 	# Remove "Configure.pm" and similar, if it's not the only pod listed
 	# To force inclusion, just name it "Configure.pod", or override MAN3PODS
 	foreach $name (keys %manifypods) {
-	    if ($name =~ /(config|setup).*\.pm/is) {
+           if ($self->{PERL_CORE} and $name =~ /(config|setup).*\.pm/is) {
 		delete $manifypods{$name};
 		next;
 	    }
