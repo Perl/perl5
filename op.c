@@ -129,7 +129,21 @@ pad_allocmy(char *name)
 	name[1] == '_' && (int)strlen(name) > 2))
     {
 	if (!isPRINT(name[1])) {
-	    name[3] = '\0';
+	    /* 1999-02-27 mjd@plover.com */
+	    char *p;
+	    p = strchr(name, '\0');
+	    /* The next block assumes the buffer is at least 205 chars
+	       long.  At present, it's always at least 256 chars. */
+	    if (p-name > 200) {
+		strcpy(name+200, "...");
+		p = name+199;
+	    }
+	    else {
+		p[1] = '\0';
+	    }
+	    /* Move everything else down one character */
+	    for (; p-name > 2; p--)
+		*p = *(p-1);
 	    name[2] = toCTRL(name[1]);
 	    name[1] = '^';
 	}

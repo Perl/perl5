@@ -117,11 +117,6 @@ Verify complete 64 bit support so that the value of sysseek, or C<-s>, or
 stat(), or tell can fit into a perl number without losing precision.
 Work with the perl-64bit mailing list on perl.org.
 
-=head2 Figure a way out of $^(capital letter)
-
-Figure out a clean way to extend $^(capital letter) beyond
-the 26 alphabets.  (${^WORD} maybe?)
-
 =head2 Prototypes
 
 =over 4
@@ -841,6 +836,13 @@ from where newASSIGNOP steals the field).
 Can we install modules as bytecode?
 
 =head1 Recently Finished Tasks
+
+=head2 Figure a way out of $^(capital letter)
+
+Figure out a clean way to extend $^(capital letter) beyond
+the 26 alphabets.  (${^WORD} maybe?)
+
+Mark-Jason Dominus sent a patch which went into 5.005_56.
 
 =head2 Filenames
 

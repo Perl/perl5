@@ -74,6 +74,10 @@ static char ident_too_long[] = "Identifier too long";
 				? isALNUM(*(p)) \
 				: isALNUM_utf8((U8*)p))
 
+/* In variables name $^X, these are the legal values for X.  
+ * 1999-02-27 mjd-perl-patch@plover.com */
+#define isCONTROLVAR(x) (isUPPER(x) || strchr("[\\]^_?", (x)))
+
 /* The following are arranged oddly so that the guard on the switch statement
  * can get by with a single comparison (if the compiler is smart enough).
  */
@@ -5160,7 +5164,7 @@ scan_ident(register char *s, register char *send, char *dest, STRLEN destlen, I3
     if (s < send)
 	*d = *s++;
     d[1] = '\0';
-    if (*d == '^' && *s && (isUPPER(*s) || strchr("[\\]^_?", *s))) {
+    if (*d == '^' && *s && isCONTROLVAR(*s)) {
 	*d = toCTRL(*s);
 	s++;
     }
@@ -5188,8 +5192,10 @@ scan_ident(register char *s, register char *send, char *dest, STRLEN destlen, I3
 		s = e;
 	    }
 	    else {
-		while (isALNUM(*s) || *s == ':')
+		while ((isALNUM(*s) || *s == ':') && d < e)
 		    *d++ = *s++;
+		if (d >= e)
+		    croak(ident_too_long);
 	    }
 	    *d = '\0';
 	    while (s < send && (*s == ' ' || *s == '\t')) s++;
@@ -5206,6 +5212,19 @@ scan_ident(register char *s, register char *send, char *dest, STRLEN destlen, I3
 		PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
 		return s;
 	    }
+	} 
+	/* Handle extended ${^Foo} variables 
+	 * 1999-02-27 mjd-perl-patch@plover.com */
+	else if (!isALNUM(*d) && !isPRINT(*d) /* isCTRL(d) */
+		 && isALNUM(*s))
+	{
+	    d++;
+	    while (isALNUM(*s) && d < e) {
+		*d++ = *s++;
+	    }
+	    if (d >= e)
+		croak(ident_too_long);
+	    *d = '\0';
 	}
 	if (*s == '}') {
 	    s++;
