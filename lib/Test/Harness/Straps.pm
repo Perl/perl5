@@ -1,12 +1,12 @@
 # -*- Mode: cperl; cperl-indent-level: 4 -*-
-# $Id: Straps.pm,v 1.11 2002/06/16 06:55:10 schwern Exp $
+# $Id: Straps.pm,v 1.13 2002/06/19 21:01:04 schwern Exp $
 
 package Test::Harness::Straps;
 
 use strict;
 use vars qw($VERSION);
 use Config;
-$VERSION = '0.13';
+$VERSION = '0.14';
 
 use Test::Harness::Assert;
 use Test::Harness::Iterator;
@@ -326,10 +326,15 @@ sub _switches {
     $s .= " $ENV{'HARNESS_PERL_SWITCHES'}"
       if exists $ENV{'HARNESS_PERL_SWITCHES'};
 
-    # When taint mode is on, PERL5LIB is ignored.  So we need to put
-    # all that on the command line as -Is.
-    $s .= join " ", qq[ "-$1"], map {qq["-I$_"]} $self->_filtered_INC
-      if $first =~ /^#!.*\bperl.*\s-\w*([Tt]+)/;
+    if ($first =~ /^#!.*\bperl.*\s-\w*([Tt]+)/) {
+        # When taint mode is on, PERL5LIB is ignored.  So we need to put
+        # all that on the command line as -Is.
+        $s .= join " ", qq[ "-$1"], map {qq["-I$_"]} $self->_filtered_INC;
+    }
+    elsif ($^O eq 'MacOS') {
+        # MacPerl's putenv is broken, so it will not see PERL5LIB.
+        $s .= join " ", map {qq["-I$_"]} $self->_filtered_INC;
+    }
 
     close(TEST) or print "can't close $file. $!\n";
 

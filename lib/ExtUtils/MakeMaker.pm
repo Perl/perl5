@@ -2,10 +2,10 @@ package ExtUtils::MakeMaker;
 
 BEGIN {require 5.005_03;}
 
-$VERSION = "6.02";
+$VERSION = "6.03";
 $Version_OK = "5.49";   # Makefiles older than $Version_OK will die
                         # (Will be checked from MakeMaker version 4.13 onwards)
-($Revision = substr(q$Revision: 1.61 $, 10)) =~ s/\s+$//;
+($Revision = substr(q$Revision: 1.63 $, 10)) =~ s/\s+$//;
 
 require Exporter;
 use Config;
@@ -107,6 +107,7 @@ my %Att_Sigs =
  INST_MAN3DIR       => '',
  INST_SCRIPT        => '',
  _KEEP_AFTER_FLUSH  => '',
+ LDDLFLAGS          => '',
  LDFROM             => '',
  LIB                => '',
  LIBPERL_A          => '',
@@ -171,12 +172,6 @@ my %Att_Sigs =
  tool_autosplit => 'hash',
 );
 
-my %Default_Att = (
-                   ''     => '',
-                   hash   => {},
-                   array  => [],
-                   code   => sub {},
-                  );
 
 sub _verify_att {
     my($att) = @_;
@@ -198,7 +193,6 @@ sub _verify_att {
                                      : "string/number";
             warn "WARNING: $key takes a $takes not a $has.\n".
                  "         Please inform the author.\n";
-            $att->{$key} = $Default_Att{$sigs[0]};
         }
     }
 }
@@ -1290,8 +1284,8 @@ recommends it (or you know what you're doing).
 
 =head2 Using Attributes and Parameters
 
-The following attributes can be specified as arguments to WriteMakefile()
-or as NAME=VALUE pairs on the command line:
+The following attributes may be specified as arguments to WriteMakefile()
+or as NAME=VALUE pairs on the command line.
 
 =over 2
 
@@ -1581,6 +1575,14 @@ Directory, where executable files should be installed during
 'make'. Defaults to "./blib/script", just to have a dummy location during
 testing. make install will copy the files in INST_SCRIPT to
 INSTALLSCRIPT.
+
+=item LDDLFLAGS
+
+Any special flags that might need to be passed to ld to create a
+shared library suitable for dynamic loading.  It is up to the makefile
+to use it.  (See L<Config/lddlflags>)
+
+Defaults to $Config{lddlflags}.
 
 =item LDFROM
 
@@ -1975,7 +1977,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    ( $VERSION ) = '$Revision: 1.61 $ ' =~ /\$Revision:\s+([^\s]+)/;
+    ( $VERSION ) = '$Revision: 1.63 $ ' =~ /\$Revision:\s+([^\s]+)/;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 
@@ -2132,6 +2134,27 @@ Makefile:
 
     MAKE_FRAG
     }
+
+=head2 The End Of Cargo Cult Programming
+
+WriteMakefile() now does some basic sanity checks on its parameters to
+protect against typos and malformatted values.  This means some things
+which happened to work in the past will now throw warnings and
+possibly produce internal errors.
+
+Some of the most common mistakes:
+
+=over 2
+
+=item C<<MAN3PODS => ' '>>
+
+This is commonly used to supress the creation of man pages.  MAN3PODS
+takes a hash ref not a string, but the above worked by accident in old
+versions of MakeMaker.
+
+The correct code is C<<MAN3PODS => { }>>.
+
+=back
 
 
 =head2 Hintsfile support

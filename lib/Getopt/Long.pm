@@ -132,6 +132,21 @@ ConfigDefaults();
 
 package Getopt::Long::Parser;
 
+# Make Getopt::Long thread-safe for ithreads.
+BEGIN {
+    use Config;
+    if( $] >= 5.008 && $Config{useithreads} ) {
+        require threads;
+        require threads::shared;
+        threads::shared->import;
+        share(\$Getopt::Long::error);
+    }
+    else {
+        *lock = sub { 0 };
+    }
+}
+
+
 # NOTE: The object oriented routines use $error for thread locking.
 my $_lock = sub {
     lock ($Getopt::Long::error) if $] >= 5.005

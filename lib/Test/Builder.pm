@@ -8,7 +8,7 @@ $^C ||= 0;
 
 use strict;
 use vars qw($VERSION $CLASS);
-$VERSION = '0.14';
+$VERSION = '0.15';
 $CLASS = __PACKAGE__;
 
 my $IsVMS = $^O eq 'VMS';
@@ -19,6 +19,22 @@ my @Test_Details = ();
 my($Test_Died) = 0;
 my($Have_Plan) = 0;
 my $Curr_Test = 0;
+
+# Make Test::Builder thread-safe for ithreads.
+BEGIN {
+    use Config;
+    if( $] >= 5.008 && $Config{useithreads} ) {
+        require threads;
+        require threads::shared;
+        threads::shared->import;
+        share(\$Curr_Test);
+        share(\@Test_Details);
+        share(\@Test_Results);
+    }
+    else {
+        *lock = sub { 0 };
+    }
+}
 
 
 =head1 NAME
@@ -131,6 +147,11 @@ sub plan {
 
     return unless $cmd;
 
+    if( $Have_Plan ) {
+        die sprintf "You tried to plan twice!  Second plan at %s line %d\n",
+          ($self->caller)[1,2];
+    }
+
     if( $cmd eq 'no_plan' ) {
         $self->no_plan;
     }
@@ -154,7 +175,8 @@ sub plan {
         my @args = grep { defined } ($cmd, $arg);
         Carp::croak("plan() doesn't understand @args");
     }
-        
+
+    return 1;
 }
 
 =item B<expected_tests>
@@ -246,8 +268,9 @@ sub ok {
         Carp::croak("You tried to run a test without a plan!  Gotta have a plan.");
     }
 
+    lock $Curr_Test;
     $Curr_Test++;
-    
+
     $self->diag(<<ERR) if defined $name and $name =~ /^[\d\s]+$/;
     You named your test '$name'.  You shouldn't use numbers for your test names.
     Very confusing.
@@ -604,6 +627,7 @@ sub skip {
         Carp::croak("You tried to run tests without a plan!  Gotta have a plan.");
     }
 
+    lock($Curr_Test);
     $Curr_Test++;
 
     $Test_Results[$Curr_Test-1] = 1;
@@ -639,6 +663,7 @@ sub todo_skip {
         Carp::croak("You tried to run tests without a plan!  Gotta have a plan.");
     }
 
+    lock($Curr_Test);
     $Curr_Test++;
 
     $Test_Results[$Curr_Test-1] = 1;
@@ -990,8 +1015,8 @@ You usually shouldn't have to set this.
 sub current_test {
     my($self, $num) = @_;
 
+    lock($Curr_Test);
     if( defined $num ) {
-
         unless( $Have_Plan ) {
             require Carp;
             Carp::croak("Can't change the current test number without a plan!");
@@ -1083,7 +1108,7 @@ Like the normal caller(), except it reports according to your level().
 sub caller {
     my($self, $height) = @_;
     $height ||= 0;
-    
+
     my @caller = CORE::caller($self->level + $height + 1);
     return wantarray ? @caller : $caller[0];
 }
@@ -1188,6 +1213,11 @@ sub _ending {
             $Expected_Tests = $Curr_Test;
         }
 
+        # 5.8.0 threads bug.  Shared arrays will not be auto-extended 
+        # by a slice.
+        $Test_Results[$Expected_Tests-1] = undef
+          unless defined $Test_Results[$Expected_Tests-1];
+
         my $num_failed = grep !$_, @Test_Results[0..$Expected_Tests-1];
         $num_failed += abs($Expected_Tests - @Test_Results);
 
@@ -1231,9 +1261,16 @@ END {
     $Test->_ending if defined $Test and !$Test->no_ending;
 }
 
+=head1 THREADS
+
+In perl 5.8.0 and later, Test::Builder is thread-safe.  The test
+number is shared amongst all threads.  This means if one thread sets
+the test number using current_test() they will all be effected.
+
 =head1 EXAMPLES
 
-At this point, Test::Simple and Test::More are your best examples.
+CPAN can provide the best examples.  Test::Simple, Test::More,
+Test::Exception and Test::Differences all use Test::Builder.
 
 =head1 SEE ALSO
 

@@ -4,7 +4,7 @@ use 5.004;
 
 use strict 'vars';
 use vars qw($VERSION);
-$VERSION = '0.44';
+$VERSION = '0.45';
 
 
 use Test::Builder;
@@ -171,6 +171,7 @@ Unfortunately, I can't differentiate any further.
 
 Test::Simple is B<explicitly> tested all the way back to perl 5.004.
 
+Test::Simple is thread-safe in perl 5.8.0 and up.
 
 =head1 HISTORY
 

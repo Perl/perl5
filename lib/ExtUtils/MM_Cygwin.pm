@@ -10,7 +10,7 @@ require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
 
-$VERSION = 1.03;
+$VERSION = 1.04;
 
 sub cflags {
     my($self,$libperl)=@_;
@@ -79,7 +79,9 @@ q[-e 'next if -e $$m{$$_} && -M $$m{$$_} < -M $$_ && -M $$m{$$_} < -M "],
 sub perl_archive {
     if ($Config{useshrplib} eq 'true') {
         my $libperl = '$(PERL_INC)' .'/'. "$Config{libperl}";
-        $libperl =~ s/a$/dll.a/;
+        if( $] >= 5.007 ) {
+            $libperl =~ s/a$/dll.a/;
+        }
         return $libperl;
     } else {
         return '$(PERL_INC)' .'/'. ("$Config{libperl}" or "libperl.a");

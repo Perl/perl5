@@ -91,7 +91,7 @@ sub AddrRef {
 }
 
 sub StrVal {
-  (OverloadedStringify($_[0]) or ref($_[0]) eq 'Regexp') ?
+  (ref $_[0] && OverloadedStringify($_[0]) or ref($_[0]) eq 'Regexp') ?
     (AddrRef(shift)) :
     "$_[0]";
 }
@@ -403,6 +403,9 @@ If not overloaded, the argument will be converted to a filehandle or
 glob (which may require a stringification).  The same overloading
 happens both for the I<read-filehandle> syntax C<E<lt>$varE<gt>> and
 I<globbing> syntax C<E<lt>${var}E<gt>>.
+
+B<BUGS> Even in list context, the iterator is currently called only
+once and with scalar context.
 
 =item * I<Dereferencing>
 
