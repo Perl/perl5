@@ -28,6 +28,90 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20072] By: jhi                                   on 2003/07/08  09:24:42
+        Log: Integrate:
+             [ 20068]
+             Subject: [PATCH: maint @ 20046] warnings, line numbers & windows
+             From: Marcus Holland-Moritz <mhx-perl@gmx.net>
+             Date: Tue, 8 Jul 2003 11:14:05 +0200 (MEST)
+             Message-ID: <12022.1057655645@www59.gmx.net>
+             
+             [ 20069]
+             Subject: [PATCH] format 'botched' in malloc.c
+             From: Enache Adrian <enache@rdslink.ro>
+             Date: Mon, 7 Jul 2003 21:57:06 +0300
+             Message-ID: <20030707185706.GB7017@ratsnest.hole>
+             
+             [ 20070]
+             A note on hash randomisation vs global destruction.
+             
+             [ 20071]
+             In 5.8.x, fast stdio places still do use stdio.
+     Branch: maint-5.8/perl
+	  !> ext/B/B.xs ext/Digest/MD5/t/badfile.t lib/Pod/Text/Termcap.pm
+	  !> malloc.c mg.c op.c
+____________________________________________________________________________
+[ 20070] By: jhi                                   on 2003/07/08  09:14:24
+        Log: A note on hash randomisation vs global destruction.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20067] By: jhi                                   on 2003/07/08  05:39:14
+        Log: Integrate:
+             [ 20049]
+             Linewrapping.
+             
+             [ 20051]
+             Be more explicit than just 'characters'.
+             
+             [ 20053]
+             Subject: Patch to README.solaris
+             From: Alan Burlison <Alan.Burlison@sun.com>
+             Date: Mon, 07 Jul 2003 14:15:57 +0100
+             Message-ID: <3F09728D.1070408@sun.com>
+             
+             [ 20054]
+             AUTHORS tweak.
+             
+             [ 20058]
+             Refashioned #20055: we cannot trust stdio to fail here.
+             
+             [ 20059]
+             Good catch from Gisle.
+             
+             [ 20061]
+             The nanosleep() probe was kaputt, fixed by Mark Bixby. 
+             
+             [ 20062]
+             Mark Bixby ++.
+             
+             [ 20063]
+             Regexp bug in the docs, spotted by Enache's eagle eyes.
+             
+             [ 20064]
+             v-string API tweak from John Peacock to synchronize
+             5.8.1-to-be as much as possible with 5.9.0-to-be.
+     Branch: maint-5.8/perl
+	  !> AUTHORS README.solaris ext/Digest/MD5/t/badfile.t
+	  !> ext/Time/HiRes/Makefile.PL perl.c pod/perlapio.pod
+	  !> pod/perlfunc.pod pod/perlsyn.pod
+____________________________________________________________________________
+[ 20064] By: jhi                                   on 2003/07/08  05:01:15
+        Log: v-string API tweak from John Peacock to synchronize
+             5.8.1-to-be as much as possible with 5.9.0-to-be.
+     Branch: maint-5.8/perl
+	   ! embed.fnc embed.h global.sym proto.h toke.c util.c
+____________________________________________________________________________
+[ 20047] By: jhi                                   on 2003/07/07  08:09:52
+        Log: MPE/iX is actually doing rather well.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20046] By: jhi                                   on 2003/07/07  06:13:32
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20045] By: jhi                                   on 2003/07/07  05:00:40
         Log: Integrate:
              [ 20030]
