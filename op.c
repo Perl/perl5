@@ -27,7 +27,7 @@
  */
 #define CHECKOP(type,op) \
     ((op_mask && op_mask[type]) \
-     ? (croak("%s trapped by operation mask", op_desc[type]), (OP*)op) \
+     ? (op_free((OP*)op), croak("%s trapped by operation mask", op_desc[type]), (OP*)op=Nullop) \
      : (*check[type])((OP*)op))
 #else
 #define CHECKOP(type,op) (*check[type])(op)
