@@ -2814,8 +2814,10 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	    }
 	} 
         result = PerlSIO_fclose(stdio);
-	/* We treat EBADF from stdio as success if we invalidated */
-	if (invalidate && result != 0 && errno == EBADF) {
+	/* We treat error from stdio as success if we invalidated 
+	   errno may NOT be expected EBADF 
+	 */
+	if (invalidate && result != 0) {
 	    errno = saveerr;
 	    result = 0;
 	} 
