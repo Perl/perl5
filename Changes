@@ -28,6 +28,189 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20844] By: jhi                                   on 2003/08/22  15:07:15
+        Log: Integrate:
+             [ 20842]
+             Try to dodge getspnam() in AIX.
+             
+             [ 20843]
+             Oops.  Why can't C comments nest?
+     Branch: maint-5.8/perl
+	  !> pp_sys.c
+____________________________________________________________________________
+[ 20841] By: jhi                                   on 2003/08/22  13:53:37
+        Log: Integrate:
+             [ 20839]
+             Subject: [PATCH] for File::Temp::tempdir(CLEANUP => 1)
+             From: Slaven Rezic <slaven@rezic.de>
+             Date: Sun, 17 Aug 2003 12:52:47 +0200 (CEST)
+             Message-Id: <200308171052.h7HAqlfo026317@vran.herceg.de>
+             
+             [ 20840]
+             Subject: Re: mysterious bytecode.t failure
+             From: Enache Adrian <enache@rdslink.ro>
+             Date: Fri, 22 Aug 2003 11:49:34 +0300
+             Message-ID: <20030822084934.GA1257@ratsnest.hole>
+     Branch: maint-5.8/perl
+	  !> lib/File/Temp.pm lib/File/Temp/t/tempfile.t t/base/lex.t
+____________________________________________________________________________
+[ 20838] By: jhi                                   on 2003/08/22  13:43:19
+        Log: Integrate:
+             [ 20837]
+             Just #.
+     Branch: maint-5.8/perl
+	  !> pod/buildtoc pod/perltoc.pod
+____________________________________________________________________________
+[ 20836] By: jhi                                   on 2003/08/22  13:34:08
+        Log: Integrate:
+             [ 20831]
+             Rafael spotted that vms/perlvms.pod was still referred to.
+             
+             [ 20832]
+             Retract #20826 and #20831; things are done differently
+             in VMS, it seems.  Maybe the vms/descrip_mms.template
+             needs to be changed?
+             
+             [ 20833]
+             In the vms/descrip_mms.template	the perlvms.pod must
+             be copied from vms/, err, [.vms], not [.pod].
+             
+             [ 20834]
+             Also MANIFEST the vms/perlvms restoration.
+             
+             [ 20835]
+             Regen toc.
+     Branch: maint-5.8/perl
+	  +> vms/perlvms.pod
+	   - pod/perlvms.pod
+	  !> MANIFEST Makefile.SH pod/buildtoc pod/perltoc.pod
+	  !> vms/descrip_mms.template
+____________________________________________________________________________
+[ 20830] By: jhi                                   on 2003/08/22  12:28:15
+        Log: Integrate:
+             [ 20819]
+             Subject: [PATCH] grok_* symbols missing in Devel::PPPort (2nd attempt)
+             From: Tassilo von Parseval <tassilo.parseval@post.rwth-aachen.de>
+             Date: Fri, 22 Aug 2003 09:01:09 +0200
+             Message-id: <20030822070109.GA1029@ethan>
+             
+             [ 20820]
+             Advertise the encoding pragma at the utf8 pragma.
+             
+             [ 20821]
+             Put the tests of the change #19064 back, but disable them.
+             
+             [ 20822]
+             Try to make the use of utf8 as clear as possible.
+             
+             [ 20823]
+             Subject: Re: [perl #23463]: compiler version on sparc/netbsd
+             From: alian@cpan.org (Alian)
+             Date: Wed, 20 Aug 2003 20:39:17 +0200
+             Message-ID: <3F43C055.6030709@jupiter.alianet>
+             
+             [ 20824]
+             Subject: [PATCH] Re: [perl #23463] compiler version on sparc/netbsd
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Thu, 21 Aug 2003 22:26:18 +0100
+             Message-ID: <20030821222618.T558@plum.flirble.org>
+             
+             [ 20825]
+             Lower Storable.xs optimization to -O2 on certain
+             known platforms.
+             
+             [ 20826]
+             perlvms moving day, from Craig Berry.
+             
+             [ 20828]
+             Subject: [PATCH: lib/File/Path.t] Re: maint @ 20803
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Fri, 22 Aug 2003 14:57:09 +0200
+             Message-ID: <00dd01c368ac$e69146d0$0c2f1fac@R2D2>
+             
+             [ 20829]
+             The change #20809 opened up a code path that might leave s unset.
+     Branch: maint-5.8/perl
+	  +> ext/Storable/hints/linux.pl pod/perlvms.pod
+	   - vms/perlvms.pod
+	  !> MANIFEST ext/Devel/PPPort/Changes ext/Devel/PPPort/PPPort.pm
+	  !> ext/Devel/PPPort/t/test.t lib/File/Path.t lib/utf8.pm mg.c
+	  !> t/op/args.t t/op/pack.t
+____________________________________________________________________________
+[ 20818] By: jhi                                   on 2003/08/22  05:54:24
+        Log: Integrate:
+             [ 20804]
+             Fix the syswrite downgrade bug of
+             [perl #23428] Somethings rotten in unicode semantics
+             
+             [ 20805]
+             Subject: [PATCH] utf8 variable names scrambled in error messages
+             From: Enache Adrian <enache@rdslink.ro>
+             Date: Thu, 21 Aug 2003 21:17:26 +0300
+             Message-ID: <20030821181726.GA1241@ratsnest.hole>
+             
+             [ 20806]
+             Subject: [perluniintro.pod] pod markup fix
+             From: Stas Bekman <stas@stason.org>
+             Date: Thu, 21 Aug 2003 11:41:01 -0700
+             Message-ID: <3F45123D.8020805@stason.org>
+             
+             [ 20807]
+             Must close so that unlink works portably.
+             
+             [ 20808]
+             Mention the Unicode UTR #18 version referenced.
+             
+             [ 20809]
+             The magic variables that alter STDOUT have a tendancy to segfault
+             when accessed if STDOUT is undefined. Protect them.
+             
+             [ 20811]
+             No need to E<gt>.
+             
+             [ 20812]
+             Somehow missed 0.14 from the maint.
+             
+             [ 20813]
+             Subject: [PATCH] Re: pod cleanup
+             From: Ronald J Kimball <rjk@linguist.thayer.dartmouth.edu>
+             Date: Thu, 21 Aug 2003 17:09:17 -0400
+             Message-ID: <20030821210917.GB164965@linguist.thayer.dartmouth.edu>
+             
+             (the pod part)
+             
+             [ 20814]
+             Do not edit perltoc since it is autogenerated.
+             
+             [ 20815]
+             Subject: Re: pod cleanup
+             From: Ken Williams <ken@mathforum.org>
+             Date: Thu, 21 Aug 2003 21:24:57 -0500
+             Message-Id: <D2C0AA31-D447-11D7-8495-003065F6D85A@mathforum.org>
+             
+             [ 20817]
+             Subject: [PATCH] perl-5.8.0, langinfo.h and YESSTR
+             From: insecure <insecure@mail.od.ua>
+             Date: Thu, 21 Aug 2003 21:37:56 +0300
+             Message-Id: <200308212137.57016.insecure@mail.od.ua>
+     Branch: maint-5.8/perl
+	  !> ext/I18N/Langinfo/Langinfo.xs gv.c lib/File/Spec/Cygwin.pm
+	  !> lib/File/Spec/OS2.pm mg.c pod/buildtoc pod/perl5005delta.pod
+	  !> pod/perlfaq4.pod pod/perlhack.pod pod/perlipc.pod
+	  !> pod/perlpacktut.pod pod/perlunicode.pod pod/perluniintro.pod
+	  !> pp_sys.c t/io/utf8.t t/op/die.t
+____________________________________________________________________________
+[ 20812] By: jhi                                   on 2003/08/22  04:49:11
+        Log: Somehow missed 0.14 from the maint.
+     Branch: maint-5.8/perl
+	  +> lib/File/Temp/t/object.t
+	  !> MANIFEST lib/File/Temp.pm
+____________________________________________________________________________
+[ 20803] By: jhi                                   on 2003/08/21  15:34:44
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20802] By: jhi                                   on 2003/08/21  15:07:17
         Log: Integrate:
              [ 20801]
