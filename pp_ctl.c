@@ -119,8 +119,8 @@ PP(pp_substcont)
 	if (cx->sb_iters > cx->sb_maxiters)
 	    DIE("Substitution loop");
 
-	if (!cx->sb_rxtainted)
-	    cx->sb_rxtainted = SvTAINTED(TOPs);
+	if (!(cx->sb_rxtainted & 2) && SvTAINTED(TOPs))
+	    cx->sb_rxtainted |= 2;
 	sv_catsv(dstr, POPs);
 
 	/* Are we done */
@@ -129,8 +129,7 @@ PP(pp_substcont)
 	{
 	    SV *targ = cx->sb_targ;
 	    sv_catpvn(dstr, s, cx->sb_strend - s);
-
-	    TAINT_IF(cx->sb_rxtainted || rx->exec_tainted);
+	    cx->sb_rxtainted |= rx->exec_tainted;
 
 	    (void)SvOOK_off(targ);
 	    Safefree(SvPVX(targ));
@@ -139,11 +138,15 @@ PP(pp_substcont)
 	    SvLEN_set(targ, SvLEN(dstr));
 	    SvPVX(dstr) = 0;
 	    sv_free(dstr);
+
+	    TAINT_IF(cx->sb_rxtainted & 1);
+	    PUSHs(sv_2mortal(newSViv((I32)cx->sb_iters - 1)));
+
 	    (void)SvPOK_only(targ);
+	    TAINT_IF(cx->sb_rxtainted);
 	    SvSETMAGIC(targ);
 	    SvTAINT(targ);
 
-	    PUSHs(sv_2mortal(newSViv((I32)cx->sb_iters - 1)));
 	    LEAVE_SCOPE(cx->sb_oldsave);
 	    POPSUBST(cx);
 	    RETURNOP(pm->op_next);
