@@ -44,8 +44,10 @@ static I32 sublex_start _((void));
 #ifdef CRIPPLED_CC
 static int uni _((I32 f, char *s));
 #endif
-static char * filter_gets _((SV *sv, PerlIO *fp));
+static char * filter_gets _((SV *sv, PerlIO *fp, STRLEN append));
 static void restore_rsfp _((void *f));
+
+static char *linestart;		/* beg. of most recently read line */
 
 /* The following are arranged oddly so that the guard on the switch statement
  * can get by with a single comparison (if the compiler is smart enough).
@@ -147,7 +149,7 @@ char *s;
 {
     char tmpbuf[128];
     char *oldbp = bufptr;
-    bool is_first = (oldbufptr == SvPVX(linestr));
+    bool is_first = (oldbufptr == linestart);
     bufptr = s;
     sprintf(tmpbuf, "%s found where operator expected", what);
     yywarn(tmpbuf);
@@ -227,6 +229,7 @@ SV *line;
     SAVEPPTR(bufend);
     SAVEPPTR(oldbufptr);
     SAVEPPTR(oldoldbufptr);
+    SAVEPPTR(linestart);
     SAVESPTR(linestr);
     SAVEPPTR(lex_brackstack);
     SAVEPPTR(lex_casestack);
@@ -263,7 +266,7 @@ SV *line;
 	sv_catpvn(linestr, "\n;", 2);
     }
     SvTEMP_off(linestr);
-    oldoldbufptr = oldbufptr = bufptr = SvPVX(linestr);
+    oldoldbufptr = oldbufptr = bufptr = linestart = SvPVX(linestr);
     bufend = bufptr + SvCUR(linestr);
     SvREFCNT_dec(rs);
     rs = newSVpv("\n", 1);
@@ -339,6 +342,7 @@ register char *s;
 	return s;
     }
     for (;;) {
+	STRLEN prevlen;
 	while (s < bufend && isSPACE(*s))
 	    s++;
 	if (s < bufend && *s == '#') {
@@ -349,7 +353,7 @@ register char *s;
 	}
 	if (s < bufend || !rsfp || lex_state != LEX_NORMAL)
 	    return s;
-	if ((s = filter_gets(linestr, rsfp)) == Nullch) {
+	if ((s = filter_gets(linestr, rsfp, (prevlen = SvCUR(linestr)))) == Nullch) {
 	    if (minus_n || minus_p) {
 		sv_setpv(linestr,minus_p ? ";}continue{print" : "");
 		sv_catpv(linestr,";}");
@@ -357,7 +361,7 @@ register char *s;
 	    }
 	    else
 		sv_setpv(linestr,";");
-	    oldoldbufptr = oldbufptr = bufptr = s = SvPVX(linestr);
+	    oldoldbufptr = oldbufptr = bufptr = s = linestart = SvPVX(linestr);
 	    bufend = SvPVX(linestr) + SvCUR(linestr);
 	    if (preprocess && !in_eval)
 		(void)my_pclose(rsfp);
@@ -368,14 +372,15 @@ register char *s;
 	    rsfp = Nullfp;
 	    return s;
 	}
-	oldoldbufptr = oldbufptr = bufptr = s;
-	bufend = bufptr + SvCUR(linestr);
+	linestart = bufptr = s + prevlen;
+	bufend = s + SvCUR(linestr);
+	s = bufptr;
 	incline(s);
 	if (perldb && curstash != debstash) {
 	    SV *sv = NEWSV(85,0);
 
 	    sv_upgrade(sv, SVt_PVMG);
-	    sv_setsv(sv,linestr);
+	    sv_setpvn(sv,bufptr,bufend-bufptr);
 	    av_store(GvAV(curcop->cop_filegv),(I32)curcop->cop_line,sv);
 	}
     }
@@ -613,6 +618,7 @@ sublex_start()
     SAVEPPTR(bufptr);
     SAVEPPTR(oldbufptr);
     SAVEPPTR(oldoldbufptr);
+    SAVEPPTR(linestart);
     SAVESPTR(linestr);
     SAVEPPTR(lex_brackstack);
     SAVEPPTR(lex_casestack);
@@ -620,7 +626,7 @@ sublex_start()
     linestr = lex_stuff;
     lex_stuff = Nullsv;
 
-    bufend = bufptr = oldbufptr = oldoldbufptr = SvPVX(linestr);
+    bufend = bufptr = oldbufptr = oldoldbufptr = linestart = SvPVX(linestr);
     bufend += SvCUR(linestr);
     SAVEFREESV(linestr);
 
@@ -672,7 +678,7 @@ sublex_done()
     if (lex_repl && (lex_inwhat == OP_SUBST || lex_inwhat == OP_TRANS)) {
 	linestr = lex_repl;
 	lex_inpat = 0;
-	bufend = bufptr = oldbufptr = oldoldbufptr = SvPVX(linestr);
+	bufend = bufptr = oldbufptr = oldoldbufptr = linestart = SvPVX(linestr);
 	bufend += SvCUR(linestr);
 	SAVEFREESV(linestr);
 	lex_dojoin = FALSE;
@@ -1152,9 +1158,10 @@ filter_read(idx, buf_sv, maxlen)
 }
 
 static char *
-filter_gets(sv,fp)
+filter_gets(sv,fp, append)
 register SV *sv;
 register PerlIO *fp;
+STRLEN append;
 {
     if (rsfp_filters) {
 
@@ -1165,7 +1172,7 @@ register PerlIO *fp;
 	    return Nullch ;
     }
     else 
-        return (sv_gets(sv, fp, 0)) ;
+        return (sv_gets(sv, fp, append));
     
 }
 
@@ -1411,7 +1418,7 @@ yylex()
 		}
 	    }
 	    sv_catpv(linestr, "\n");
-	    oldoldbufptr = oldbufptr = s = SvPVX(linestr);
+	    oldoldbufptr = oldbufptr = s = linestart = SvPVX(linestr);
 	    bufend = SvPVX(linestr) + SvCUR(linestr);
 	    if (perldb && curstash != debstash) {
 		SV *sv = NEWSV(85,0);
@@ -1423,7 +1430,7 @@ yylex()
 	    goto retry;
 	}
 	do {
-	    if ((s = filter_gets(linestr, rsfp)) == Nullch) {
+	    if ((s = filter_gets(linestr, rsfp, 0)) == Nullch) {
 	      fake_eof:
 		if (rsfp) {
 		    if (preprocess && !in_eval)
@@ -1437,12 +1444,12 @@ yylex()
 		if (!in_eval && (minus_n || minus_p)) {
 		    sv_setpv(linestr,minus_p ? ";}continue{print" : "");
 		    sv_catpv(linestr,";}");
-		    oldoldbufptr = oldbufptr = s = SvPVX(linestr);
+		    oldoldbufptr = oldbufptr = s = linestart = SvPVX(linestr);
 		    bufend = SvPVX(linestr) + SvCUR(linestr);
 		    minus_n = minus_p = 0;
 		    goto retry;
 		}
-		oldoldbufptr = oldbufptr = s = SvPVX(linestr);
+		oldoldbufptr = oldbufptr = s = linestart = SvPVX(linestr);
 		sv_setpv(linestr,"");
 		TOKEN(';');	/* not infinite loop because rsfp is NULL now */
 	    }
@@ -1453,14 +1460,14 @@ yylex()
 		/* Incest with pod. */
 		if (*s == '=' && strnEQ(s, "=cut", 4)) {
 		    sv_setpv(linestr, "");
-		    oldoldbufptr = oldbufptr = s = SvPVX(linestr);
+		    oldoldbufptr = oldbufptr = s = linestart = SvPVX(linestr);
 		    bufend = SvPVX(linestr) + SvCUR(linestr);
 		    doextract = FALSE;
 		}
 	    }
 	    incline(s);
 	} while (doextract);
-	oldoldbufptr = oldbufptr = bufptr = s;
+	oldoldbufptr = oldbufptr = bufptr = linestart = s;
 	if (perldb && curstash != debstash) {
 	    SV *sv = NEWSV(85,0);
 
@@ -1525,7 +1532,7 @@ yylex()
 			         we must not do it again */
 			{
 			    sv_setpv(linestr, "");
-			    oldoldbufptr = oldbufptr = s = SvPVX(linestr);
+			    oldoldbufptr = oldbufptr = s = linestart = SvPVX(linestr);
 			    bufend = SvPVX(linestr) + SvCUR(linestr);
 			    preambled = FALSE;
 			    if (perldb)
@@ -1873,7 +1880,7 @@ yylex()
 	    AOPERATOR(ANDAND);
 	s--;
 	if (expect == XOPERATOR) {
-	    if (dowarn && isALPHA(*s) && bufptr == SvPVX(linestr)) {
+	    if (dowarn && isALPHA(*s) && bufptr == linestart) {
 		curcop->cop_line--;
 		warn(warn_nosemi);
 		curcop->cop_line++;
@@ -1911,7 +1918,7 @@ yylex()
 	    warn("Reversed %c= operator",tmp);
 	s--;
 	if (expect == XSTATE && isALPHA(tmp) &&
-		(s == SvPVX(linestr)+1 || s[-2] == '\n') )
+		(s == linestart+1 || s[-2] == '\n') )
 	{
 	    if (in_eval && !rsfp) {
 		d = bufend;
@@ -2096,10 +2103,11 @@ yylex()
 		    }
 		}
 		if (tmp = pad_findmy(tokenbuf)) {
-		    if (!tokenbuf[2] && *tokenbuf =='$' &&
+		    if (last_lop_op == OP_SORT &&
+			!tokenbuf[2] && *tokenbuf =='$' &&
 			tokenbuf[1] <= 'b' && tokenbuf[1] >= 'a')
 		    {
-			for (d = in_eval ? oldoldbufptr : SvPVX(linestr);
+			for (d = in_eval ? oldoldbufptr : linestart;
 			    d < bufend && *d != '\n';
 			    d++)
 			{
@@ -2205,7 +2213,7 @@ yylex()
 
     case '.':
 	if (lex_formbrack && lex_brackets == lex_formbrack && s[1] == '\n' &&
-		(s == SvPVX(linestr) || s[-1] == '\n') ) {
+		(s == linestart || s[-1] == '\n') ) {
 	    lex_formbrack = 0;
 	    expect = XSTATE;
 	    goto rightbracket;
@@ -2389,7 +2397,7 @@ yylex()
 		    }
 		}
 		else if (expect == XOPERATOR) {
-		    if (bufptr == SvPVX(linestr)) {
+		    if (bufptr == linestart) {
 			curcop->cop_line--;
 			warn(warn_nosemi);
 			curcop->cop_line++;
@@ -2578,6 +2586,8 @@ yylex()
 		    fcntl(fd,F_SETFD,fd >= 3);
 		}
 #endif
+		/* Mark this internal pseudo-handle as clean */
+		IoFLAGS(GvIOp(gv)) |= IOf_UNTAINT;
 		if (preprocess)
 		    IoTYPE(GvIOp(gv)) = '|';
 		else if ((PerlIO*)rsfp == PerlIO_stdin())
@@ -4558,14 +4568,14 @@ register char *s;
 	s += len - 1;
 	sv_catpvn(herewas,s,bufend-s);
 	sv_setsv(linestr,herewas);
-	oldoldbufptr = oldbufptr = bufptr = s = SvPVX(linestr);
+	oldoldbufptr = oldbufptr = bufptr = s = linestart = SvPVX(linestr);
 	bufend = SvPVX(linestr) + SvCUR(linestr);
     }
     else
 	sv_setpvn(tmpstr,"",0);   /* avoid "uninitialized" warning */
     while (s >= bufend) {	/* multiple line string? */
 	if (!rsfp ||
-	 !(oldoldbufptr = oldbufptr = s = filter_gets(linestr, rsfp))) {
+	 !(oldoldbufptr = oldbufptr = s = linestart = filter_gets(linestr, rsfp, 0))) {
 	    curcop->cop_line = multi_start;
 	    missingterm(tokenbuf);
 	}
@@ -4724,7 +4734,7 @@ char *start;
     if (s < bufend) break;	/* string ends on this line? */
 
 	if (!rsfp ||
-	 !(oldoldbufptr = oldbufptr = s = filter_gets(linestr, rsfp))) {
+	 !(oldoldbufptr = oldbufptr = s = linestart = filter_gets(linestr, rsfp, 0))) {
 	    sv_free(sv);
 	    curcop->cop_line = multi_start;
 	    return Nullch;
@@ -4903,8 +4913,8 @@ register char *s;
 	}
 	s = eol;
 	if (rsfp) {
-	    s = filter_gets(linestr, rsfp);
-	    oldoldbufptr = oldbufptr = bufptr = SvPVX(linestr);
+	    s = filter_gets(linestr, rsfp, 0);
+	    oldoldbufptr = oldbufptr = bufptr = linestart = SvPVX(linestr);
 	    bufend = bufptr + SvCUR(linestr);
 	    if (!s) {
 		s = bufptr;
