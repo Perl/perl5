@@ -2118,7 +2118,8 @@ See also C<each>, C<values> and C<sort>.
 
 Sends a signal to a list of processes.  The first element of
 the list must be the signal to send.  Returns the number of
-processes successfully signaled.
+processes successfully signaled (which is not necessarily the
+same as the number actually killed).
 
     $cnt = kill 1, $child1, $child2;
     kill 9, @goners;
