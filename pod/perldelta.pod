@@ -36,7 +36,7 @@ variable as if its contents had appeared on a "#!perl" line at the
 beginning of your script, except that hyphens are optional.  PERL5OPT
 may only be used to set the following switches: B<-[DIMUdmw]>.
 
-=head2 Limitations on B<-M>, and C<-m>, and B<-T> options
+=head2 Limitations on B<-M>, and B<-m>, and B<-T> options
 
 The C<-M> and C<-m> options are no longer allowed on the C<#!> line of
 a script.  If a script needs a module, it should invoke it with the
@@ -72,7 +72,7 @@ your scripts.
 Before Perl 5.004, C<AUTOLOAD> functions were looked up as methods
 (using the C<@ISA> hierarchy), even when the function to be autoloaded
 was called as a plain function (e.g. C<Foo::bar()>), not a method
-(e.g. C<Foo->bar()> or C<$obj->bar()>).
+(e.g. C<Foo-E<gt>bar()> or C<$obj-E<gt>bar()>).
 
 Perl 5.005 will use method lookup only for methods' C<AUTOLOAD>s.
 However, there is a significant base of existing code that may be using
@@ -183,7 +183,7 @@ IO::Handle, IO::Seekable, and IO::File.  We suggest, but do not
 require, that you use the IO::* modules in new code.
 
 In harmony with this change, C<*GLOB{FILEHANDLE}> is now a
-backward-compatible synonym for C<*STDOUT{IO}>.
+backward-compatible synonym for C<*GLOB{IO}>.
 
 =head2 Internal change: PerlIO abstraction interface
 

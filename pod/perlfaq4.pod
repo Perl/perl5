@@ -325,9 +325,9 @@ To make the first letter of each word upper case:
 
         $line =~ s/\b(\w)/\U$1/g;
 
-This has the strange effect of turning "C<don't do it>" into "C<Don'T
-Do It>".  Sometimes you might want this, instead (Suggested by Brian
-Foy E<lt>comdog@computerdog.comE<gt>):
+This has the strange effect of turning "C<don't do it>" into
+"C<Don'T Do It>".  Sometimes you might want this, instead
+(Suggested by Brian Foy E<lt>comdog@computerdog.comE<gt>):
 
     $string =~ s/ (
                  (^\w)    #at the beginning of the line
