@@ -1076,6 +1076,12 @@ This is useful for propagating exceptions:
     eval { ... };
     die unless $@ =~ /Expected exception/;
 
+If LIST is empty and C<$@> contains an object reference that has a
+C<PROPAGATE> method, that method will be called with additional file
+and line number parameters.  The return value replaces the value in
+C<$@>.  ie. as if C<<$@ = eval { $@->PROPAGATE(__FILE__, __LINE__) };>> 
+were called.
+
 If C<$@> is empty then the string C<"Died"> is used.
 
 die() can also be called with a reference argument.  If this happens to be
