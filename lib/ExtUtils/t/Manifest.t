@@ -189,8 +189,8 @@ $files = maniread;
 is( $files->{wibble}, '',    'maniadd() with undef comment' );
 is( $files->{yarrow}, 'hock','          with comment' );
 is( $files->{foobar}, '',    '          preserved old entries' );
-maniadd({ foo  => 'bar' });
 add_file('MANIFEST'   => 'Makefile.PL');
+maniadd({ foo  => 'bar' });
 
 $files = maniread;
 # VMS downcases the MANIFEST.  We normalize it here to match.
