@@ -276,7 +276,6 @@ Perl_sv_add_arena(pTHX_ char *ptr, U32 size, U32 flags)
     SV* sva = (SV*)ptr;
     register SV* sv;
     register SV* svend;
-    Zero(ptr, size, char);
 
     /* The first SV in an arena isn't an SV. */
     SvANY(sva) = (void *) PL_sv_arenaroot;		/* ptr to next arena */
@@ -290,6 +289,7 @@ Perl_sv_add_arena(pTHX_ char *ptr, U32 size, U32 flags)
     sv = sva + 1;
     while (sv < svend) {
 	SvANY(sv) = (void *)(SV*)(sv + 1);
+	SvREFCNT(sv) = 0;
 	SvFLAGS(sv) = SVTYPEMASK;
 	sv++;
     }

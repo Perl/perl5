@@ -2250,7 +2250,7 @@ PP(pp_goto)
 		else {
 		    if (CvDEPTH(cv) == 100 && ckWARN(WARN_RECURSION))
 			sub_crush_depth(cv);
-		    pad_push(padlist, CvDEPTH(cv), cx->blk_sub.hasargs);
+		    pad_push(padlist, CvDEPTH(cv), 1);
 		}
 #ifdef USE_5005THREADS
 		if (!cx->blk_sub.hasargs) {

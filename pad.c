@@ -1488,6 +1488,9 @@ If has_args is true, give the new pad an @_ in slot zero.
 =cut
 */
 
+/* XXX pad_push is now always called with has_args == 1. Get rid of
+ * this arg at some point */
+
 void
 Perl_pad_push(pTHX_ PADLIST *padlist, int depth, int has_args)
 {

@@ -1843,7 +1843,7 @@ PP(pp_iter)
 {
     dSP;
     register PERL_CONTEXT *cx;
-    SV* sv;
+    SV *sv, *oldsv;
     AV* av;
     SV **itersvp;
 
@@ -1873,8 +1873,9 @@ PP(pp_iter)
 		    /* we need a fresh SV every time so that loop body sees a
 		     * completely new SV for closures/references to work as
 		     * they used to */
-		    SvREFCNT_dec(*itersvp);
+		    oldsv = *itersvp;
 		    *itersvp = newSVsv(cur);
+		    SvREFCNT_dec(oldsv);
 		}
 		if (strEQ(SvPVX(cur), max))
 		    sv_setiv(cur, 0); /* terminate next time */
@@ -1899,8 +1900,9 @@ PP(pp_iter)
 	    /* we need a fresh SV every time so that loop body sees a
 	     * completely new SV for closures/references to work as they
 	     * used to */
-	    SvREFCNT_dec(*itersvp);
+	    oldsv = *itersvp;
 	    *itersvp = newSViv(cx->blk_loop.iterix++);
+	    SvREFCNT_dec(oldsv);
 	}
 	RETPUSHYES;
     }
@@ -1908,8 +1910,6 @@ PP(pp_iter)
     /* iterate array */
     if (cx->blk_loop.iterix >= (av == PL_curstack ? cx->blk_oldsp : AvFILL(av)))
 	RETPUSHNO;
-
-    SvREFCNT_dec(*itersvp);
 
     if (SvMAGICAL(av) || AvREIFY(av)) {
 	SV **svp = av_fetch(av, ++cx->blk_loop.iterix, FALSE);
@@ -1950,7 +1950,10 @@ PP(pp_iter)
 	sv = (SV*)lv;
     }
 
+    oldsv = *itersvp;
     *itersvp = SvREFCNT_inc(sv);
+    SvREFCNT_dec(oldsv);
+
     RETPUSHYES;
 }
 
