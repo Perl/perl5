@@ -100,3 +100,20 @@ do_eval('eval q[print "ok $x\n"]');
 $x++;
 do_eval('sub { eval q[print "ok $x\n"] }->()');
 $x++;
+
+# can recursive subroutine-call inside eval'' see its own lexicals?
+sub recurse {
+  my $l = shift;
+  if ($l < $x) {
+     ++$l;
+     eval 'print "# level $l\n"; recurse($l);';
+     die if $@;
+  }
+  else {
+    print "ok $l\n";
+  }
+}
+{
+  local $SIG{__WARN__} = sub { die "not ok $x\n" if $_[0] =~ /^Deep recurs/ };
+  recurse($x-5);
+}

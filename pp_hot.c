@@ -1465,7 +1465,7 @@ PP(pp_iter)
 
     EXTEND(SP, 1);
     cx = &cxstack[cxstack_ix];
-    if (cx->cx_type != CXt_LOOP)
+    if (CxTYPE(cx) != CXt_LOOP)
 	DIE("panic: pp_iter");
 
     av = cx->blk_loop.iterary;
@@ -2273,6 +2273,11 @@ PP(pp_entersub)
 	PUSHBLOCK(cx, CXt_SUB, MARK);
 	PUSHSUB(cx);
 	CvDEPTH(cv)++;
+	/* XXX This would be a natural place to set C<PL_compcv = cv> so
+	 * that eval'' ops within this sub know the correct lexical space.
+	 * Owing the speed considerations, we choose to search for the cv
+	 * in doeval() instead.
+	 */
 	if (CvDEPTH(cv) < 2)
 	    (void)SvREFCNT_inc(cv);
 	else {	/* save temporaries on recursion? */
