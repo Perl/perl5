@@ -1261,11 +1261,11 @@ a mail message from Larry:
 Given that it's already there, you can use it to override distribution modules.
 One way to do that is to add
 
-	ccflags="$ccflags -DAPPLLIB_EXP='"/my/override"'"
+	ccflags="$ccflags -DAPPLLIB_EXP=\"/my/override\""
 	
 to your config.over file.  (You have to be particularly careful to get the
-double quotes in.  It might actually be easier to just #define it
-yourself in perl.c.)
+double quotes in.  APPLLIB_EXP must be a valid C string.  It might
+actually be easier to just #define it yourself in perl.c.)
 
 Then perl.c will put /my/override ahead of ARCHLIB and PRIVLIB.  Perl will
 also search architecture-specific and version-specific subdirectories of
