@@ -3404,8 +3404,10 @@ C<$::sail> is equivalent to C<$main::sail> (as well as to C<$main'sail>,
 still seen in older code).
 
 If NAMESPACE is omitted, then there is no current package, and all
-identifiers must be fully qualified or lexicals.  This is stricter
-than C<use strict>, since it also extends to function names.
+identifiers must be fully qualified or lexicals.  However, you are
+strongly advised not to make use of this feature. Its use can cause
+unexpected behaviour, even crashing some versions of Perl. It is
+deprecated, and will be removed from a future release.
 
 See L<perlmod/"Packages"> for more information about packages, modules,
 and classes.  See L<perlsub> for other scoping issues.

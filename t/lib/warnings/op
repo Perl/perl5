@@ -108,6 +108,9 @@
 	mkdir "foo", 777;
 	umask 222;
 
+     Use of "package" with no arguments is deprecated
+	package;
+
     Mandatory Warnings 
     ------------------
     Prototype mismatch:		[cv_ckproto]
@@ -958,3 +961,11 @@ mkdir "", 777;
 EXPECT
 Non-octal literal mode (777) specified at - line 3.
 	(Did you mean 0777 instead?)
+########
+# op.c
+use warnings 'deprecated' ;
+package;
+no warnings 'deprecated' ;
+package;
+EXPECT
+Use of "package" with no arguments is deprecated at - line 3.

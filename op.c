@@ -3197,6 +3197,7 @@ Perl_package(pTHX_ OP *o)
 	op_free(o);
     }
     else {
+	deprecate("\"package\" with no arguments");
 	sv_setpv(PL_curstname,"<none>");
 	PL_curstash = Nullhv;
     }

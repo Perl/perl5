@@ -3868,6 +3868,13 @@ In code that currently says C<use AutoLoader; @ISA = qw(AutoLoader);>
 you should remove AutoLoader from @ISA and change C<use AutoLoader;> to
 C<use AutoLoader 'AUTOLOAD';>.
 
+=item Use of "package" with no arguments is deprecated
+
+(D deprecated) You used the C<package> keyword without specifying a package
+name. So no namespace is current at all. Using this can cause many
+otherwise reasonable constructs to fail in baffling ways. C<use strict;>
+instead.
+
 =item Use of %s in printf format not supported
 
 (F) You attempted to use a feature of printf that is accessible from
