@@ -2306,10 +2306,20 @@ PP(pp_require)
     if (!tryrsfp) {
 	if (op->op_type == OP_REQUIRE) {
 	    SV *msg = sv_2mortal(newSVpvf("Can't locate %s in @INC", name));
+	    SV *dirmsgsv = NEWSV(0, 0);
+	    AV *ar = GvAVn(incgv);
+	    I32 i;
 	    if (instr(SvPVX(msg), ".h "))
 		sv_catpv(msg, " (change .h to .ph maybe?)");
 	    if (instr(SvPVX(msg), ".ph "))
 		sv_catpv(msg, " (did you run h2ph?)");
+	    sv_catpv(msg, "\n@INC contains:\n ");
+	    for (i = 0; i <= AvFILL(ar); i++) {
+		char *dir = SvPVx(*av_fetch(ar, i, TRUE), na);
+		sv_setpvf(dirmsgsv, "   %s\n ", dir);
+	        sv_catsv(msg, dirmsgsv);
+	    }
+    	    SvREFCNT_dec(dirmsgsv);
 	    DIE("%_", msg);
 	}
 
