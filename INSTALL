@@ -677,9 +677,24 @@ You can elect to build a shared libperl by
 
 	sh Configure -Duseshrplib
 
-To actually build perl, you must add the current working directory to your
-LD_LIBRARY_PATH environment variable before running make.  You can do
-this with
+To build a shared libperl, the environment variable controlling shared
+library search (LD_LIBRARY_PATH in most systems, DYLD_LIBRARY_PATH for
+NeXTSTEP/OPENSTEP, LIBRARY_PATH for BeOS) must be set up to include
+the Perl build directory because that's where the shared libperl will
+be created.   Configure arranges Makefile to have the correct shared
+library search settings.
+
+However, there are some special cases where manually setting the
+shared library path might be required.  For example, if you want to run
+something like the following with the newly-built but not-yet-installed
+./perl:
+
+        cd t; ./perl misc/failing_test.t
+or
+        ./perl -Ilib ~/my_mission_critical_test
+
+then you need to set up the shared library path explicitly.
+You can do this with
 
    LD_LIBRARY_PATH=`pwd`:$LD_LIBRARY_PATH; export LD_LIBRARY_PATH
 
@@ -687,9 +702,13 @@ for Bourne-style shells, or
 
    setenv LD_LIBRARY_PATH `pwd`
 
-for Csh-style shells.  You *MUST* do this before running make.
-Folks running NeXT OPENSTEP must substitute DYLD_LIBRARY_PATH for
-LD_LIBRARY_PATH above.
+for Csh-style shells.  (This procedure may also be needed if for some
+unexpected reason Configure fails to set up Makefile correctly.)
+
+You can often recognize failures to build/use a shared libperl from error
+messages complaining about a missing libperl.so (or libperl.sl in HP-UX),
+for example:
+18126:./miniperl: /sbin/loader: Fatal Error: cannot map libperl.so
 
 There is also an potential problem with the shared perl library if you
 want to have more than one "flavor" of the same version of perl (e.g.
