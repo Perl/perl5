@@ -870,7 +870,10 @@ different strings.
 
 When choosing a new salt create a random two character string whose
 characters come from the set C<[./0-9A-Za-z]> (like C<join '', ('.',
-'/', 0..9, 'A'..'Z', 'a'..'z')[rand 64, rand 64]>).
+'/', 0..9, 'A'..'Z', 'a'..'z')[rand 64, rand 64]>).  This set of
+characters is just a recommendation; the characters allowed in
+the salt depend solely on your system's crypt library, and Perl can't
+restrict what salts C<crypt()> accepts.
 
 Here's an example that makes sure that whoever runs this program knows
 their own password:
