@@ -1166,9 +1166,11 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
     local(%pm); #the sub in find() has to see this hash
     $ignore{'test.pl'} = 1;
     $ignore{'makefile.pl'} = 1 if $Is_VMS;
+  FILE:
     foreach $name ($self->lsdir($self->curdir)){
 	next if $name eq $self->curdir or $name eq $self->updir or $ignore{$name};
 	next unless $self->libscan($name);
+      next FILE if $name =~ /\#/;
 	if (-d $name){
 	    next if -l $name; # We do not support symlinks at all
 	    $dir{$name} = $name if (-f $self->catfile($name,"Makefile.PL"));
@@ -1242,6 +1244,7 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 		}
 		return;
 	    }
+          return if /\#/;
 	    my($path, $prefix) = ($File::Find::name, '$(INST_LIBDIR)');
 	    my($striplibpath,$striplibname);
 	    $prefix =  '$(INST_LIB)' if (($striplibpath = $path) =~ s:^(\W*)lib\W:$1:i);
