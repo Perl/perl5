@@ -530,10 +530,11 @@ class.  SV is returned.
 
 	SV* newSVrv(SV* rv, const char* classname);
 
-Copies integer or double into an SV whose reference is C<rv>.  SV is blessed
+Copies integer, unsigned integer or double into an SV whose reference is C<rv>.  SV is blessed
 if C<classname> is non-null.
 
 	SV* sv_setref_iv(SV* rv, const char* classname, IV iv);
+	SV* sv_setref_uv(SV* rv, const char* classname, UV uv);
 	SV* sv_setref_nv(SV* rv, const char* classname, NV iv);
 
 Copies the pointer value (I<the address, not the string!>) into an SV whose

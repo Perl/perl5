@@ -437,6 +437,7 @@ Perl_sv_setpviv
 Perl_sv_setuv
 Perl_sv_setnv
 Perl_sv_setref_iv
+Perl_sv_setref_uv
 Perl_sv_setref_nv
 Perl_sv_setref_pv
 Perl_sv_setref_pvn

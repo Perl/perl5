@@ -2045,6 +2045,7 @@ Apd	|void	|sv_setpviv	|SV* sv|IV num
 Apd	|void	|sv_setuv	|SV* sv|UV num
 Apd	|void	|sv_setnv	|SV* sv|NV num
 Apd	|SV*	|sv_setref_iv	|SV* rv|const char* classname|IV iv
+Apd	|SV*	|sv_setref_uv	|SV* rv|const char* classname|UV uv
 Apd	|SV*	|sv_setref_nv	|SV* rv|const char* classname|NV nv
 Apd	|SV*	|sv_setref_pv	|SV* rv|const char* classname|void* pv
 Apd	|SV*	|sv_setref_pvn	|SV* rv|const char* classname|char* pv \

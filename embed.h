@@ -698,6 +698,7 @@
 #define sv_setuv		Perl_sv_setuv
 #define sv_setnv		Perl_sv_setnv
 #define sv_setref_iv		Perl_sv_setref_iv
+#define sv_setref_uv		Perl_sv_setref_uv
 #define sv_setref_nv		Perl_sv_setref_nv
 #define sv_setref_pv		Perl_sv_setref_pv
 #define sv_setref_pvn		Perl_sv_setref_pvn
@@ -2186,6 +2187,7 @@
 #define sv_setuv(a,b)		Perl_sv_setuv(aTHX_ a,b)
 #define sv_setnv(a,b)		Perl_sv_setnv(aTHX_ a,b)
 #define sv_setref_iv(a,b,c)	Perl_sv_setref_iv(aTHX_ a,b,c)
+#define sv_setref_uv(a,b,c)	Perl_sv_setref_uv(aTHX_ a,b,c)
 #define sv_setref_nv(a,b,c)	Perl_sv_setref_nv(aTHX_ a,b,c)
 #define sv_setref_pv(a,b,c)	Perl_sv_setref_pv(aTHX_ a,b,c)
 #define sv_setref_pvn(a,b,c,d)	Perl_sv_setref_pvn(aTHX_ a,b,c,d)
@@ -4290,6 +4292,8 @@
 #define sv_setnv		Perl_sv_setnv
 #define Perl_sv_setref_iv	CPerlObj::Perl_sv_setref_iv
 #define sv_setref_iv		Perl_sv_setref_iv
+#define Perl_sv_setref_uv	CPerlObj::Perl_sv_setref_uv
+#define sv_setref_uv		Perl_sv_setref_uv
 #define Perl_sv_setref_nv	CPerlObj::Perl_sv_setref_nv
 #define sv_setref_nv		Perl_sv_setref_nv
 #define Perl_sv_setref_pv	CPerlObj::Perl_sv_setref_pv
