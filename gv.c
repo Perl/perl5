@@ -1313,7 +1313,6 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 CV*
 Perl_gv_handler(pTHX_ HV *stash, I32 id)
 {
-    dTHR;
     MAGIC *mg;
     AMT *amtp;
 
