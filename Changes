@@ -79,6 +79,119 @@ Version 5.005_58        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3690] By: gsar                                  on 1999/07/18  01:16:59
+        Log: mention the -Minteger effect on modulus (from Nathan Torkington)
+     Branch: perl
+           ! lib/integer.pm
+____________________________________________________________________________
+[  3689] By: gsar                                  on 1999/07/18  00:47:17
+        Log: ensure __END__ appears on a line by itself in wrapped
+             scripts (thanks to Steve Tolkin <tolkin@mediaone.net>);
+             mention caveat about successfull kill()
+     Branch: perl
+           ! pod/perlfunc.pod win32/bin/pl2bat.pl
+____________________________________________________________________________
+[  3688] By: gsar                                  on 1999/07/17  20:47:44
+        Log: noecho noops (from Nicholas Clark <nick@flirble.org>)
+     Branch: perl
+           ! ext/SDBM_File/sdbm/Makefile.PL
+____________________________________________________________________________
+[  3687] By: gsar                                  on 1999/07/17  20:43:27
+        Log: make CC.pm use a distinct CCPP() macro rather than PP()
+             (suggested by Vishal Bhatia <vishalb@my-deja.com>)
+     Branch: perl
+           ! cc_runtime.h ext/B/B/CC.pm
+____________________________________________________________________________
+[  3686] By: gsar                                  on 1999/07/17  20:39:08
+        Log: tiny bug in vars.pm (from John Dlugosz)
+     Branch: perl
+           ! lib/vars.pm
+____________________________________________________________________________
+[  3685] By: gsar                                  on 1999/07/17  20:37:27
+        Log: applied suggested patch, along with later tweak
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Wed, 14 Jul 1999 23:53:43 +0200
+             Message-ID: <37a902e7.15977234@smtp1.ibm.net>
+             Subject: Merge ActivePerl Stylesheet support etc into Pod::Html.pm
+     Branch: perl
+           ! lib/Pod/Html.pm
+____________________________________________________________________________
+[  3684] By: gsar                                  on 1999/07/17  20:24:32
+        Log: avoid #ifdef DEBUGGING in thrdvar.h (from Dominic Dunlop <domo@vo.lu>)
+     Branch: perl
+           ! thrdvar.h
+____________________________________________________________________________
+[  3683] By: gsar                                  on 1999/07/17  20:21:01
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 13 Jul 1999 05:44:28 -0400 (EDT)
+             Message-Id: <199907130944.FAA04473@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_57] Segfaults if $^P
+     Branch: perl
+	   ! embed.h embed.pl global.sym mg.c objXSUB.h perl.c perlapi.c
+           ! proto.h
+____________________________________________________________________________
+[  3682] By: gsar                                  on 1999/07/17  20:04:17
+        Log: use a better prefixify() heuristic than m/perl/ (prefix/lib/perl5
+             and prefix/lib/perl5/man are ass_u_med only if those directories
+             actually exist; else prefix/{lib,man} are used)
+     Branch: perl
+           ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  3681] By: gsar                                  on 1999/07/17  19:12:33
+        Log: allow $foo{$x} and $bar[$i] for (\$) prototype
+     Branch: perl
+           ! op.c t/comp/proto.t
+____________________________________________________________________________
+[  3680] By: gsar                                  on 1999/07/17  18:23:55
+        Log: fix vec() on magic values
+             From: Ian Phillipps <ian@dial.pipex.com>
+             Date: Mon, 12 Jul 1999 12:30:05 +0100
+             Message-ID: <19990712123005.A11355@homer.diplex.co.uk>
+             Subject: [PATCH 5.005_57] Re: do_vecset is broken.  Re: [ID 19990703.003].
+     Branch: perl
+           ! doop.c t/op/tie.t
+____________________________________________________________________________
+[  3679] By: gsar                                  on 1999/07/17  18:10:44
+        Log: make system() return -1 and set $! if exec of child failed
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Fri, 9 Jul 1999 05:21:13 -0400
+             Message-ID: <19990709052113.A6201@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_57] system()==-1 and $! from failing fork/exec
+     Branch: perl
+	   ! doio.c embed.h embed.pl global.sym objXSUB.h perlapi.c
+           ! pod/perlfunc.pod pp_sys.c proto.h t/op/exec.t
+____________________________________________________________________________
+[  3678] By: gsar                                  on 1999/07/17  17:54:01
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Fri, 9 Jul 1999 04:27:51 -0400 (EDT)
+             Message-Id: <199907090827.EAA03321@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_57] File descriptor leak in do_exec3
+     Branch: perl
+           ! util.c
+____________________________________________________________________________
+[  3677] By: gsar                                  on 1999/07/17  17:34:38
+        Log: a modernized version of find2perl from Ken Pizzini <ken@halcyon.com>;
+             converted Ken's documentation outline into pod
+     Branch: perl
+           ! x2p/find2perl.PL
+____________________________________________________________________________
+[  3676] By: gsar                                  on 1999/07/17  16:34:09
+        Log: pod fixes (with minor edits) from Abigail, Ronald Kimball, Jon
+             Waddington, Tuomas Lukka, Steven Tolkin, Ian Phillipps, and
+             Steve Lidie
+     Branch: perl
+	   ! pod/Win32.pod pod/perldelta.pod pod/perlfaq.pod
+	   ! pod/perlfaq1.pod pod/perlfaq2.pod pod/perlfaq3.pod
+	   ! pod/perlfaq4.pod pod/perlfaq5.pod pod/perlfunc.pod
+	   ! pod/perlguts.pod pod/perlhist.pod pod/perlop.pod
+	   ! pod/perlport.pod pod/perltoc.pod pod/perltodo.pod
+           ! pod/perltoot.pod pod/perltootc.pod pod/perlvar.pod
+____________________________________________________________________________
+[  3675] By: gsar                                  on 1999/07/17  00:16:53
+        Log: backout redundant change#3628
+     Branch: perl
+           ! Changes hints/bsdos.sh
+____________________________________________________________________________
 [  3674] By: jhi                                   on 1999/07/15  14:26:03
         Log: Fix the bin/oct/hex constant overflow tests for
              long long platforms.

@@ -1053,7 +1053,8 @@ Perl_do_aexec(pTHX_ SV *really, register SV **mark, register SV **sp)
 }
 
 bool
-do_aexec5(SV *really, register SV **mark, register SV **sp, int fd, int do_report)
+Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
+	       int fd, int do_report)
 {
     register char **a;
     char *tmps;
