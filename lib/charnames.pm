@@ -349,7 +349,7 @@ to custom translators.
 Notice that the name returned for of U+FEFF is "ZERO WIDTH NO-BREAK
 SPACE", not "BYTE ORDER MARK".
 
-=head1 charnames::vianame(code)
+=head1 charnames::vianame(name)
 
 Returns the code point indicated by the name.
 The example
@@ -358,9 +358,9 @@ The example
 
 prints "2722".
 
-Returns undef if no name is known for the name.
+Returns undef if the name is unknown.
 
-This works only for the standard names, and does not yet aply 
+This works only for the standard names, and does not yet apply 
 to custom translators.
 
 =head1 ALIASES
