@@ -31,6 +31,188 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9741] By: jhi                                   on 2001/04/18  20:23:02
+        Log: Declare hints only if needed.
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9740] By: jhi                                   on 2001/04/18  19:06:05
+        Log: Workaround for the "\x{12345678}" plus s/(.)/$1/g plus ord/length
+             bug noticed by Robin Houston; basically the code of detecting
+             value wraparound was acting differently under different compilers
+             and platforms.  The workaround is to remove the overflow check
+             for now, a real fix would be to do the overflow (portably) right.
+     Branch: perl
+	   ! t/op/pat.t utf8.c
+____________________________________________________________________________
+[  9739] By: jhi                                   on 2001/04/18  19:01:23
+        Log: Subject: [PATCH B::Deparse] some pragma support
+             From: Robin Houston <robin@kitsite.com>
+             Date: Wed, 18 Apr 2001 19:32:12 +0100
+             Message-ID: <20010418193212.A9184@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9738] By: jhi                                   on 2001/04/18  15:16:37
+        Log: Subject: [PATCH] Test case for C<undef %File::Glob::>
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Wed, 18 Apr 2001 10:53:44 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0104181047010.2368-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! t/op/glob.t
+____________________________________________________________________________
+[  9737] By: jhi                                   on 2001/04/18  13:24:50
+        Log: Subject: [PATCH] XS::Typemap - T_OPAQUE
+             From: Tim Jenness <t.jenness@jach.hawaii.edu>
+             Date: Tue, 17 Apr 2001 22:49:25 -1000 (HST)
+             Message-ID: <Pine.LNX.4.30.0104172247440.28672-100000@lapaki.jach.hawaii.edu>
+     Branch: perl
+	   ! ext/XS/Typemap/Typemap.pm ext/XS/Typemap/Typemap.xs
+	   ! ext/XS/Typemap/typemap lib/ExtUtils/typemap t/lib/xs-typemap.t
+____________________________________________________________________________
+[  9736] By: jhi                                   on 2001/04/18  04:15:14
+        Log: The #9735 also changes the subtest 12.
+     Branch: perl
+	   ! t/lib/b.t
+____________________________________________________________________________
+[  9735] By: jhi                                   on 2001/04/18  03:55:17
+        Log: Subject: Deparse.pm of split(" ") decodes as /\s+/ (with PATCH)
+             From: David Dyck <dcd@tc.fluke.com>
+             Date: Tue, 17 Apr 2001 17:12:58 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.33.0104171508210.23062-100000@dd.tc.fluke.com>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9734] By: jhi                                   on 2001/04/18  03:54:11
+        Log: Subject: [PATCH] foreach defelem magic should only be applied to PL_sv_undef
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 17 Apr 2001 19:06:45 -0700
+             Message-ID: <lrae5f9d1m.fsf@caliper.ActiveState.com>
+     Branch: perl
+	   ! pp_hot.c t/op/misc.t
+____________________________________________________________________________
+[  9733] By: jhi                                   on 2001/04/17  22:25:22
+        Log: Subject: [PATCH: ext/Cwd/Cwd.xs & ext/PerlIO/Scalar/Scalar.xs] Missing prototype behaviour
+             From: "Abigail" <abigail@foad.org>
+             Date: Wed, 18 Apr 2001 01:17:46 +0200
+             Message-ID: <20010417231746.21657.qmail@foad.org>
+     Branch: perl
+	   ! ext/Cwd/Cwd.xs ext/PerlIO/Scalar/Scalar.xs
+____________________________________________________________________________
+[  9732] By: jhi                                   on 2001/04/17  20:47:56
+        Log: Subject: Re: Deparse - parenthesise args to undeclared subs
+             From: Robin Houston <robin@kitsite.com>
+             Date: Tue, 17 Apr 2001 22:37:42 +0100
+             Message-ID: <20010417223742.A6681@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9731] By: nick                                  on 2001/04/17  20:46:35
+        Log: Re-sync for t/lib/b.t fix
+     Branch: perlio
+	  !> ext/B/B/Deparse.pm t/lib/b.t t/lib/cwd.t
+____________________________________________________________________________
+[  9730] By: jhi                                   on 2001/04/17  20:45:29
+        Log: Subject: [PATCH B::Deparse] utf8 literal strings (and possibly a unicode/regex bug)
+             From: Robin Houston <robin@kitsite.com>
+             Date: Tue, 17 Apr 2001 22:29:36 +0100
+             Message-ID: <20010417222936.A6644@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B.xs ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9729] By: jhi                                   on 2001/04/17  20:43:11
+        Log: Subject: Deparse - parenthesise args to undeclared subs
+             From: Robin Houston <robin@kitsite.com>
+             Date: Tue, 17 Apr 2001 21:31:05 +0100
+             Message-ID: <20010417213104.A6586@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9728] By: jhi                                   on 2001/04/17  18:57:30
+        Log: Subject: Re: [PATCH] Fix cwd.t when libpth contains symlinks
+             From: Benjamin Sugars <ben.sugars@home.com>
+             Date: Tue, 17 Apr 2001 15:27:28 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0104171516090.22410-100000@localhost.localdomain>
+     Branch: perl
+	   ! t/lib/cwd.t
+____________________________________________________________________________
+[  9727] By: jhi                                   on 2001/04/17  18:20:20
+        Log: Subject: [PATCH B::Deparse] ambient pragmas
+             From: Robin Houston <robin@kitsite.com>
+             Date: Tue, 17 Apr 2001 20:01:59 +0100
+             Message-ID: <20010417200159.A4882@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm t/lib/b.t
+____________________________________________________________________________
+[  9726] By: nick                                  on 2001/04/17  16:33:51
+        Log: Integrate mainline (t/lib/b.t fails test 2...)
+     Branch: perlio
+	  +> ext/List/Util/ChangeLog ext/List/Util/Makefile.PL
+	  +> ext/List/Util/README ext/List/Util/Util.xs
+	  +> ext/List/Util/lib/List/Util.pm
+	  +> ext/List/Util/lib/Scalar/Util.pm t/lib/exporter.t
+	  +> t/lib/u-blessed.t t/lib/u-dualvar.t t/lib/u-first.t
+	  +> t/lib/u-max.t t/lib/u-maxstr.t t/lib/u-min.t t/lib/u-minstr.t
+	  +> t/lib/u-readonly.t t/lib/u-reduce.t t/lib/u-reftype.t
+	  +> t/lib/u-sum.t t/lib/u-tainted.t t/lib/u-weak.t
+	  !> (integrate 31 files)
+____________________________________________________________________________
+[  9725] By: jhi                                   on 2001/04/17  12:14:24
+        Log: Subject: multiple B::* changes
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 12 Apr 2001 20:12:27 +0100
+             Message-ID: <20010412201226.A30940@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B.pm ext/B/B/Concise.pm ext/B/B/Deparse.pm ext/B/O.pm
+____________________________________________________________________________
+[  9724] By: jhi                                   on 2001/04/17  11:59:05
+        Log: Thread-awareness from Doug MacEachern.
+     Branch: perl
+	   ! ext/List/Util/Util.xs
+____________________________________________________________________________
+[  9723] By: jhi                                   on 2001/04/17  11:57:41
+        Log: Make the test more portable.
+     Branch: perl
+	   ! t/lib/cwd.t
+____________________________________________________________________________
+[  9722] By: jhi                                   on 2001/04/17  11:53:50
+        Log: Subject: [PATCH] Fix cwd.t when libpth contains symlinks
+             From: Benjamin Sugars <ben.sugars@home.com>
+             Date: Mon, 16 Apr 2001 22:43:29 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0104162234030.17949-100000@localhost.localdomain>
+     Branch: perl
+	   ! t/lib/cwd.t
+____________________________________________________________________________
+[  9721] By: jhi                                   on 2001/04/17  11:52:17
+        Log: Subject: [PATCH] Fix core dump from undef %File::Glob::
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Mon, 16 Apr 2001 13:23:59 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0104161313160.1676-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  9720] By: jhi                                   on 2001/04/17  11:35:42
+        Log: Subject: [MacPerl-Porters] [PATCH] bsd_glob.c, gv.c fixes for Mac OS
+             From: Chris Nandor <pudge@pobox.com>
+             Date: Tue, 17 Apr 2001 00:30:49 -0400
+             Message-Id: <p05100207b701768712de@[10.0.1.177]>
+     Branch: perl
+	   ! ext/File/Glob/bsd_glob.c gv.c
+____________________________________________________________________________
+[  9719] By: jhi                                   on 2001/04/17  11:32:13
+        Log: Subject: [PATCH] Tweten->West
+             From: Casey West <casey@geeknest.com>
+             Date: Mon, 16 Apr 2001 12:11:22 -0400
+             Message-ID: <20010416121122.B14554@stupid.geeknest.com>
+     Branch: perl
+	   ! AUTHORS lib/Class/Struct.pm lib/Shell.pm lib/constant.pm
+	   ! pod/perltie.pod
+____________________________________________________________________________
+[  9718] By: jhi                                   on 2001/04/16  03:22:52
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9717] By: jhi                                   on 2001/04/16  03:06:28
         Log: Regen toc.
      Branch: perl
