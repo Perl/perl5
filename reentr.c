@@ -351,7 +351,7 @@ Perl_reentrant_retry(const char *f, ...)
 		    retptr = gethostbyaddr(p0, asize, anint); break;
 	        case OP_GHBYNAME:
 		    p0 = va_arg(ap, void *);
-		    retptr = gethostbyname(p0); break;
+		    retptr = gethostbyname((char *)p0); break;
 	        case OP_GHOSTENT:
 		    retptr = gethostent(); break;
 	        default:
@@ -379,7 +379,7 @@ Perl_reentrant_retry(const char *f, ...)
 		switch (PL_op->op_type) {
 	        case OP_GGRNAM:
 		    p0 = va_arg(ap, void *);
-		    retptr = getgrnam(p0); break;
+		    retptr = getgrnam((char *)p0); break;
 	        case OP_GGRGID:
 #if Gid_t_size < INTSIZE
 		    gid = (Gid_t)va_arg(ap, int);
@@ -418,7 +418,7 @@ Perl_reentrant_retry(const char *f, ...)
 		    retptr = getnetbyaddr(net, anint); break;
 	        case OP_GNBYNAME:
 		    p0 = va_arg(ap, void *);
-		    retptr = getnetbyname(p0); break;
+		    retptr = getnetbyname((char *)p0); break;
 	        case OP_GNETENT:
 		    retptr = getnetent(); break;
 	        default:
@@ -446,7 +446,7 @@ Perl_reentrant_retry(const char *f, ...)
 		switch (PL_op->op_type) {
 	        case OP_GPWNAM:
 		    p0 = va_arg(ap, void *);
-		    retptr = getpwnam(p0); break;
+		    retptr = getpwnam((char *)p0); break;
 	        case OP_GPWUID:
 #if Uid_t_size < INTSIZE
 		    uid = (Uid_t)va_arg(ap, int);
@@ -480,7 +480,7 @@ Perl_reentrant_retry(const char *f, ...)
 		switch (PL_op->op_type) {
 	        case OP_GPBYNAME:
 		    p0 = va_arg(ap, void *);
-		    retptr = getprotobyname(p0); break;
+		    retptr = getprotobyname((char *)p0); break;
 	        case OP_GPBYNUMBER:
 		    anint = va_arg(ap, int);
 		    retptr = getprotobynumber(anint); break;
@@ -511,11 +511,11 @@ Perl_reentrant_retry(const char *f, ...)
 	        case OP_GSBYNAME:
 		    p0 = va_arg(ap, void *);
 		    p1 = va_arg(ap, void *);
-		    retptr = getservbyname(p0, p1); break;
+		    retptr = getservbyname((char *)p0, (char *)p1); break;
 	        case OP_GSBYPORT:
 		    anint = va_arg(ap, int);
 		    p0 = va_arg(ap, void *);
-		    retptr = getservbyport(anint, p0); break;
+		    retptr = getservbyport(anint, (char *)p0); break;
 	        case OP_GSERVENT:
 		    retptr = getservent(); break;
 	        default:
