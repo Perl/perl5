@@ -12,6 +12,7 @@ $leak[ 0] =~ s/.* were found:\n\n//m; # Snip off totals.
 @accv = grep { ! /-- [rw][ui]s --.+_doprnt_dis/s }                 @accv;
 @accv = grep { ! /-- (?:fon|ris) --.+__strxfrm/s }                 @accv;
 @accv = grep { ! /-- rus --.+__catgets/s }                         @accv;
+@accv = grep { ! /-- rus --.+__execvp/s }                          @accv;
 @accv = grep { ! /-- rus --.+tmpnam.+tmpfile/s }                   @accv;
 @accv = grep { ! /-- rus --.+__gethostbyname/s }                   @accv;
 @accv = grep { ! /-- ris --.+__actual_atof/s }                     @accv;
@@ -22,6 +23,9 @@ $leak[ 0] =~ s/.* were found:\n\n//m; # Snip off totals.
 @accv = grep { ! /-- r[ui][hs] --.+proc_at_/s }                    @accv;
 @accv = grep { ! /-- r[ui][hs] --.+pc = 0x/s }                     @accv;
 
+# The following look like being caused by the intrinsic inlined
+# string handling functions reading one or few bytes beyond the
+# actual length.
 @accv = grep { ! /-- rih --.+(?:memmove|strcpy).+moreswitches/s }  @accv;
 @accv = grep { ! /-- (?:rih|rus) --.+strcpy.+gv_fetchfile/s }      @accv;
 @accv = grep { ! /-- rih --.+strcmp.+doopen_pmc/s }                @accv;
@@ -42,12 +46,12 @@ $leak[ 0] =~ s/.* were found:\n\n//m; # Snip off totals.
 @leak = grep { ! /__localtime/s }                     @leak;
 @leak = grep { ! /__get_libc_context/s }              @leak;
 @leak = grep { ! /__sia_init/s }                      @leak;
-@leak = grep { ! /pc = 0x/s }                         @leak;
-@leak = grep { ! /_pc_range_table/s }                 @leak;
-@leak = grep { ! /_add_gp_range/s }                   @leak;
 
 # Weed out untraceable memory leaks.
 @leak = grep { ! / ----- /s }                         @leak;
+@leak = grep { ! /pc = 0x/s }                         @leak;
+@leak = grep { ! /_pc_range_table/s }                 @leak;
+@leak = grep { ! /_add_gp_range/s }                   @leak;
 
 # yyparse.
 @leak = grep { ! /Perl_yyparse/s }                    @leak;
