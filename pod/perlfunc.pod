@@ -2127,8 +2127,9 @@ to open.)
 
 If the filename begins with '<' or nothing, the file is opened for input.
 If the filename begins with '>', the file is truncated and opened for
-output.  If the filename begins with '>>', the file is opened for
-appending.  You can put a '+' in front of the '>' or '<' to indicate that
+output, being created if necessary. If the filename begins with '>>',
+the file is opened for appending, again being created if necessary. 
+You can put a '+' in front of the '>' or '<' to indicate that
 you want both read and write access to the file; thus '+<' is almost
 always preferred for read/write updates--the '+>' mode would clobber the
 file first.  You can't usually use either read-write mode for updating
