@@ -50,6 +50,7 @@ if(@ARGV<1) {
 	die <<EOF;
 Usage: $me [-h] [-v] [-t] [-u] [-m] [-l] [-F] [-X] PageName|ModuleName|ProgramName
        $me -f PerlFunc
+       $me -q FAQKeywords
 
 The -h option prints more help.  Also try "perldoc perldoc" to get
 aquainted with the system.
@@ -72,6 +73,7 @@ sub usage{
     die <<EOF;
 perldoc [options] PageName|ModuleName|ProgramName...
 perldoc [options] -f BuiltinFunction
+perldoc [options] -q FAQRegex
 
 Options:
     -h   Display this help message
@@ -84,6 +86,7 @@ Options:
     -v	 Verbosely describe what's going on
     -X	 use index if present (looks for pod.idx at $Config{archlib})
 
+
 PageName|ModuleName...
          is the name of a piece of documentation that you want to look at. You 
          may either give a descriptive name of the page (as in the case of
@@ -94,7 +97,11 @@ PageName|ModuleName...
 BuiltinFunction
          is the name of a perl function.  Will extract documentation from
          `perlfunc'.
-         
+
+FAQRegex
+         is a regex. Will search perlfaq[1-9] for and extract any
+         questions that match.
+
 Any switches in the PERLDOC environment variable will be used before the 
 command line arguments.  The optional pod index file contains a list of
 filenames, one per line.
@@ -107,7 +114,7 @@ use Text::ParseWords;
 
 unshift(@ARGV,shellwords($ENV{"PERLDOC"}));
 
-getopts("mhtluvFf:X") || usage;
+getopts("mhtluvFf:Xq:") || usage;
 
 usage if $opt_h || $opt_h; # avoid -w warning
 
@@ -124,6 +131,8 @@ if ($opt_t) { require Pod::Text; import Pod::Text; }
 
 if ($opt_f) {
    @pages = ("perlfunc");
+} elsif ($opt_q) {
+   @pages = ("perlfaq1" .. "perlfaq9");
 } else {
    @pages = @ARGV;
 }
@@ -205,11 +214,11 @@ sub minus_f_nocase {
 
 sub check_file {
     my($file) = @_;
-    if ($opt_m) {
-       return ($file = minus_f_nocase($file)) ? $file : "";
-    } else {
-       return ($file = minus_f_nocase($file)) && containspod($file) ? $file : "";
-    }
+    $file = minus_f_nocase($file);
+	return "" unless $file;
+	return $file if $::opt_m;
+    return $file if containspod($file);
+    return "";
 }
 
 
@@ -408,6 +417,39 @@ if ($opt_f) {
    exit;
 }
 
+if ($opt_q) {
+   local @ARGV = @found;	# I'm lazy, sue me.
+   my $found = 0;
+   my %found_in;
+   my @pod;
+
+   while (<>) {
+      if (/^=head2\s+.*$opt_q/oi) {
+	 $found = 1;
+	 push @pod, "=head1 Found in $ARGV\n\n" unless $found_in{$ARGV}++;
+      } elsif (/^=head2/) {
+	 $found = 0;
+      }
+      next unless $found;
+      push @pod, $_;
+   }
+   
+   if (@pod) {
+      if ($opt_t) {
+	 open(FORMATTER, "| pod2text") || die "Can't start filter";
+	 print FORMATTER "=over 8\n\n";
+	 print FORMATTER @pod;
+	 print FORMATTER "=back\n";
+	 close(FORMATTER);
+      } else {
+	 print @pod;
+      }
+   } else {
+      die "No documentation for perl function `$opt_f' found\n";
+   }
+   exit;
+}
+
 foreach (@found) {
 
 	if($opt_t) {
@@ -541,7 +583,10 @@ command line arguments.  C<perldoc> also searches directories
 specified by the C<PERL5LIB> (or C<PERLLIB> if C<PERL5LIB> is not
 defined) and C<PATH> environment variables.
 (The latter is so that embedded pods for executables, such as
-C<perldoc> itself, are available.)
+C<perldoc> itself, are available.)  C<perldoc> will use, in order of
+preference, the pager defined in C<PERLDOC_PAGER>, C<MANPAGER>, or
+C<PAGER> before trying to find a pager on its own.  (C<MANPAGER> is not
+used if C<perldoc> was told to display plain text or unformatted pod.)
 
 =head1 AUTHOR
 

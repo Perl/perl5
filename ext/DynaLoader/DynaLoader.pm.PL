@@ -382,7 +382,7 @@ etc and also allow pseudo-dynamic linking (using C<ld -A> at runtime).
 It must be stressed that the DynaLoader, by itself, is practically
 useless for accessing non-Perl libraries because it provides almost no
 Perl-to-C 'glue'.  There is, for example, no mechanism for calling a C
-library function or supplying arguments.  A ExtUtils::DynaLib module
+library function or supplying arguments.  A C::DynaLib module
 is available from CPAN sites which performs that function for some
 common system types.
 

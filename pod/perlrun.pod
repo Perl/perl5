@@ -73,7 +73,7 @@ The sequences "-*" and "- " are specifically ignored so that you could,
 if you were so inclined, say
 
     #!/bin/sh -- # -*- perl -*- -p
-    eval 'exec /usr/bin/perl $0 -S ${1+"$@"}'
+    eval 'exec /usr/bin/perl -wS $0 ${1+"$@"}'
         if $running_under_some_shell;
 
 to let Perl see the B<-p> switch.
@@ -473,7 +473,7 @@ don't support #!.  This example works on many platforms that
 have a shell compatible with Bourne shell:
 
     #!/usr/bin/perl
-    eval 'exec /usr/bin/perl -S $0 ${1+"$@"}'
+    eval 'exec /usr/bin/perl -wS $0 ${1+"$@"}'
 	    if $running_under_some_shell;
 
 The system ignores the first line and feeds the script to /bin/sh,
@@ -491,8 +491,8 @@ containing just a colon, which will be politely ignored by Perl.  Other
 systems can't control that, and need a totally devious construct that
 will work under any of csh, sh, or Perl, such as the following:
 
-	eval '(exit $?0)' && eval 'exec /usr/bin/perl -S $0 ${1+"$@"}'
-	& eval 'exec /usr/bin/perl -S $0 $argv:q'
+	eval '(exit $?0)' && eval 'exec /usr/bin/perl -wS $0 ${1+"$@"}'
+	& eval 'exec /usr/bin/perl -wS $0 $argv:q'
 		if $running_under_some_shell;
 
 =item B<-T>
