@@ -1569,15 +1569,30 @@ fffc	fffd	So
 1d670	1d689	Lu
 1d68a	1d6a3	Ll
 1d6a8	1d6c0	Lu
-1d6c1	1d6e1	Ll
+1d6c1		Sm
+1d6c2	1d6da	Ll
+1d6db		Sm
+1d6dc	1d6e1	Ll
 1d6e2	1d6fa	Lu
-1d6fb	1d71b	Ll
+1d6fb		Sm
+1d6fc	1d714	Ll
+1d715		Sm
+1d716	1d71b	Ll
 1d71c	1d734	Lu
-1d735	1d755	Ll
+1d735		Sm
+1d736	1d74e	Ll
+1d74f		Sm
+1d750	1d755	Ll
 1d756	1d76e	Lu
-1d76f	1d78f	Ll
+1d76f		Sm
+1d770	1d788	Ll
+1d789		Sm
+1d78a	1d78f	Ll
 1d790	1d7a8	Lu
-1d7a9	1d7c9	Ll
+1d7a9		Sm
+1d7aa	1d7c2	Ll
+1d7c3		Sm
+1d7c4	1d7c9	Ll
 1d7ce	1d7ff	Nd
 20000	2a6d6	Lo
 2f800	2fa1d	Lo

@@ -1089,6 +1089,7 @@ lib/unicode/README.Ethiopic			Unicode character database
 lib/unicode/README.perl				Unicode character database
 lib/unicode/ReadMe.txt				Unicode character database info
 lib/unicode/SpecCase.txt			Unicode character database
+lib/unicode/Script.txt				Unicode character database
 lib/unicode/To/Digit.pl				Unicode character database
 lib/unicode/To/Lower.pl				Unicode character database
 lib/unicode/To/Title.pl				Unicode character database

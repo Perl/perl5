@@ -273,7 +273,7 @@ while (<UD>) {
     next if /^#/;
     next if /^$/;
     chomp;
-    ($code, $last, $name) = split(/; */);
+    ($code, $last, $name) = /^([0-9a-f]+)\.\.([0-9a-f]); (.+)/i;
     if ($name) {
 	print OUT "$code	$last	$name\n";
 	$name =~ s/\s+//g;
@@ -323,7 +323,7 @@ sub proplist {
     elsif ($table =~ /^IsLbrk/) {
 	open(UD, "LineBrk.txt") or warn "Can't open $table: $!";
 
-	$split = '($code, $brk, $name) = split(/;/);';
+	$split = '($code, $brk, $name) = /^([0-9a-f]+);(\w+) # (.+)/i;';
     }
     else {
 	open(UD, $UnicodeData) or warn "Can't open $UnicodeData: $!";

@@ -135,4 +135,14 @@ fffc	fffd
 1d183	1d184
 1d18c	1d1a9
 1d1ae	1d1dd
+1d6c1	
+1d6db	
+1d6fb	
+1d715	
+1d735	
+1d74f	
+1d76f	
+1d789	
+1d7a9	
+1d7c3	
 END

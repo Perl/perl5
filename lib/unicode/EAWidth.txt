@@ -9,11 +9,8 @@
 # Field 2: East Asian Width property, consisting of one of the following values:
 #         "N", "A", "H", "W", "F", "Na"
 #  - Assigned characters that are not listed explicitly are given the value "N".
-#  - Characters within ranges marked by "First>" and "Last>" are omitted,
-#    as in UnicodeData.txt. For example, the following means that
-#    all characters between 3400 and 4DB5 have the value "W"
-#     3400;W;<CJK Ideograph Extension A, First>
-#     4DB5;W;<CJK Ideograph Extension A, Last>
+#  - Characters ranges are specified as for other property files in
+#         the Unicode Character Database.
 #
 # The Unicode name of each character is provided in a comment for help
 # in identifying the characters.
@@ -7180,12 +7177,12 @@
 3011;W # RIGHT BLACK LENTICULAR BRACKET
 3012;W # POSTAL MARK
 3013;W # GETA MARK
-3014;W # LEFT TORTOISE SHELL BRACKET
-3015;W # RIGHT TORTOISE SHELL BRACKET
+3014;A # LEFT TORTOISE SHELL BRACKET
+3015;A # RIGHT TORTOISE SHELL BRACKET
 3016;W # LEFT WHITE LENTICULAR BRACKET
 3017;W # RIGHT WHITE LENTICULAR BRACKET
-3018;W # LEFT WHITE TORTOISE SHELL BRACKET
-3019;W # RIGHT WHITE TORTOISE SHELL BRACKET
+3018;A # LEFT WHITE TORTOISE SHELL BRACKET
+3019;A # RIGHT WHITE TORTOISE SHELL BRACKET
 301A;A # LEFT WHITE SQUARE BRACKET
 301B;A # RIGHT WHITE SQUARE BRACKET
 301C;W # WAVE DASH
@@ -8030,10 +8027,8 @@
 33FC;W # IDEOGRAPHIC TELEGRAPH SYMBOL FOR DAY TWENTY-NINE
 33FD;W # IDEOGRAPHIC TELEGRAPH SYMBOL FOR DAY THIRTY
 33FE;W # IDEOGRAPHIC TELEGRAPH SYMBOL FOR DAY THIRTY-ONE
-3400;W # <CJK Ideograph Extension A, First>
-4DB5;W # <CJK Ideograph Extension A, Last>
-4E00;W # <CJK Ideograph, First>
-9FA5;W # <CJK Ideograph, Last>
+3400..4DB5;W # <CJK Ideograph Extension A, First>..<CJK Ideograph Extension A, Last>
+4E00..9FA5;W # <CJK Ideograph, First>..<CJK Ideograph, Last>
 A000;W # YI SYLLABLE IT
 A001;W # YI SYLLABLE IX
 A002;W # YI SYLLABLE I
@@ -9249,16 +9244,11 @@ A4C2;W # YI RADICAL SHOP
 A4C3;W # YI RADICAL CHE
 A4C4;W # YI RADICAL ZZIET
 A4C6;W # YI RADICAL KE
-AC00;W # <Hangul Syllable, First>
-D7A3;W # <Hangul Syllable, Last>
-D800;N # <Non Private Use High Surrogate, First>
-DB7F;N # <Non Private Use High Surrogate, Last>
-DB80;N # <Private Use High Surrogate, First>
-DBFF;N # <Private Use High Surrogate, Last>
-DC00;N # <Low Surrogate, First>
-DFFF;N # <Low Surrogate, Last>
-E000;A # <Private Use, First>
-F8FF;A # <Private Use, Last>
+AC00..D7A3;W # <Hangul Syllable, First>..<Hangul Syllable, Last>
+D800..DB7F;N # <Non Private Use High Surrogate, First>..<Non Private Use High Surrogate, Last>
+DB80..DBFF;N # <Private Use High Surrogate, First>..<Private Use High Surrogate, Last>
+DC00..DFFF;N # <Low Surrogate, First>..<Low Surrogate, Last>
+E000..F8FF;A # <Private Use, First>..<Private Use, Last>
 F900;W # CJK COMPATIBILITY IDEOGRAPH-F900
 F901;W # CJK COMPATIBILITY IDEOGRAPH-F901
 F902;W # CJK COMPATIBILITY IDEOGRAPH-F902
@@ -12232,8 +12222,7 @@ FFFD;A # REPLACEMENT CHARACTER
 1D7FD;N # MATHEMATICAL MONOSPACE DIGIT SEVEN
 1D7FE;N # MATHEMATICAL MONOSPACE DIGIT EIGHT
 1D7FF;N # MATHEMATICAL MONOSPACE DIGIT NINE
-20000;W # <CJK Ideograph Extension B, First>
-2A6D6;W # <CJK Ideograph Extension B, Last>
+20000..2A6D6;W # <CJK Ideograph Extension B, First>..<CJK Ideograph Extension B, Last>
 2F800;W # CJK COMPATIBILITY IDEOGRAPH-2F800
 2F801;W # CJK COMPATIBILITY IDEOGRAPH-2F801
 2F802;W # CJK COMPATIBILITY IDEOGRAPH-2F802
@@ -12873,3 +12862,5 @@ E007C;N # TAG VERTICAL LINE
 E007D;N # TAG RIGHT CURLY BRACKET
 E007E;N # TAG TILDE
 E007F;N # CANCEL TAG
+F0000..FFFFD;A # <Plane 15 Private Use, First>..<Plane 15 Private Use, Last>
+100000..10FFFD;A # <Plane 16 Private Use, First>..<Plane 16 Private Use, Last>
