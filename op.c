@@ -3724,7 +3724,6 @@ Perl_newFOROP(pTHX_ I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *blo
 	}
 	else {
 	    padoff = offset;
-	    iterpflags = OPpLVAL_INTRO; /* my $_; for () */
 	}
     }
     if (expr->op_type == OP_RV2AV || expr->op_type == OP_PADAV) {
