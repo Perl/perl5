@@ -49,9 +49,10 @@ INST_VER	= \5.00475
 #CFG		= Debug
 
 #
-# uncomment to enable use of PerlCRT.DLL.  Highly recommended.  It has
-# patches that fix known bugs in MSCVRT.DLL.  You will need to download it
-# from: <TBD> and follow the directions in the package to install.
+# uncomment to enable use of PerlCRT.DLL when using the Visual C compiler.
+# Highly recommended.  It has patches that fix known bugs in MSCVRT.DLL.
+# You will need to download it from: http://www.activestate.com/<TBD>
+# and follow the directions in the package to install.
 #
 #USE_PERLCRT	= define
 
@@ -810,7 +811,6 @@ $(ERRNO_PM): $(PERLEXE) $(ERRNO)_pm.PL
 	cd ..\..\win32
 
 doc: $(PERLEXE)
-	copy ..\README.win32 ..\pod\perlwin32.pod
 	$(PERLEXE) -I..\lib ..\installhtml --podroot=.. --htmldir=./html \
 	    --podpath=pod:lib:ext:utils --htmlroot="file://$(INST_HTML::=|)" \
 	    --libpod=perlfunc:perlguts:perlvar:perlrun:perlop --recurse
@@ -819,6 +819,7 @@ utils: $(PERLEXE) $(X2P)
 	cd ..\utils
 	$(MAKE) PERL=$(MINIPERL)
 	cd ..\pod
+	copy ..\README.win32 .\perlwin32.pod
 	$(MAKE) -f ..\win32\pod.mak converters
 	cd ..\win32
 	$(PERLEXE) $(PL2BAT) $(UTILS)

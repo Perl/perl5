@@ -57,9 +57,11 @@ CCTYPE		*= BORLAND
 #CFG		*= Debug
 
 #
-# uncomment to enable use of PerlCRT.DLL.  Highly recommended.  It has
-# patches that fix known bugs in MSCVRT.DLL.  You will need to download it
-# from: <TBD> and follow the directions in the package to install.
+# uncomment to enable linking with setargv.obj under the Visual C
+# compiler. Setting this options enables perl to expand wildcards in
+# arguments, but it may be harder to use alternate methods like
+# File::DosGlob that are more powerful.  This option is supported only with
+# Visual C.
 #
 #USE_PERLCRT	*= define
 
@@ -973,13 +975,13 @@ $(ERRNO_PM): $(PERLEXE) $(ERRNO)_pm.PL
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
 doc: $(PERLEXE)
-	copy ..\README.win32 ..\pod\perlwin32.pod
 	$(PERLEXE) -I..\lib ..\installhtml --podroot=.. --htmldir=./html \
 	    --podpath=pod:lib:ext:utils --htmlroot="file://$(INST_HTML:s,:,|,)"\
 	    --libpod=perlfunc:perlguts:perlvar:perlrun:perlop --recurse
 
 utils: $(PERLEXE) $(X2P)
 	cd ..\utils && $(MAKE) PERL=$(MINIPERL)
+	copy ..\README.win32 ..\pod\perlwin32.pod
 	cd ..\pod && $(MAKE) -f ..\win32\pod.mak converters
 	$(PERLEXE) $(PL2BAT) $(UTILS)
 

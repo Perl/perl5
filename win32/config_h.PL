@@ -12,8 +12,8 @@ while (@ARGV && $ARGV[0] =~ /^([\w_]+)=(.*)$/)
   shift(@ARGV);
  }
 my $patchlevel = $opt{INST_VER};
-$patchlevel = s|^[\\/]||;
-$patchlevel = s|~VERSION~|$]|g;
+$patchlevel =~ s|^[\\/]||;
+$patchlevel =~ s|~VERSION~|$]|g;
 $patchlevel ||= $];
 $patchlevel = qq["$patchlevel"];
 
