@@ -9,6 +9,12 @@ Apple Developer Support UK
 Language	:	MPW C
 
 $Log: MacPerl.r,v $
+Revision 1.8  2001/09/24 04:31:55  neeri
+Include cursors in build (MacPerl Bug #432129)
+
+Revision 1.7  2001/09/02 00:41:01  pudge
+Sync with perforce
+
 Revision 1.6  2001/04/17 03:59:58  pudge
 Minor version/config changes
 
@@ -185,6 +191,18 @@ include "MacPerl.rsrc" 'icm#'(264);
 include "MacPerl.rsrc" 'icm#'(265);
 include "MacPerl.rsrc" 'icm#'(266);
 
+include "Perl.rsrc" 'CURS' (146);
+include "Perl.rsrc" 'CURS' (144);
+include "Perl.rsrc" 'CURS' (145);
+include "Perl.rsrc" 'CURS' (147);
+include "Perl.rsrc" 'CURS' (148);
+include "Perl.rsrc" 'CURS' (160);
+include "Perl.rsrc" 'CURS' (161);
+include "Perl.rsrc" 'CURS' (162);
+include "Perl.rsrc" 'CURS' (163);
+include "Perl.rsrc" 'acur' (0);
+include "Perl.rsrc" 'acur' (128);
+
 #include "MPVersion.r";
 
 resource 'vers' (1) {
@@ -275,7 +293,7 @@ resource 'SIZE' (-1) {
 	reserved,
 /*	3840 * 1024,
 	1536 * 1024 */
-	10 * 1024 * 1024,
+	15 * 1024 * 1024,
 	2  * 1024 * 1024
 };
 
@@ -479,8 +497,8 @@ resource 'ALRT' (SaveAlert, "", purgeable) {
 
 resource 'DITL' (SaveAlert) {
 	{	{ 74, 303,  94, 362}, Button 		{ enabled, "Save"},
-		{ 74,  65,  94, 150}, Button 		{ enabled, "Don’t Save"},
 		{ 74, 231,  94, 290}, Button 		{ enabled, "Cancel"},
+		{ 74,  65,  94, 150}, Button 		{ enabled, "Don’t Save"},
 		{ 10,  65,  59, 363}, StaticText {disabled, "Save changes to “^0”?"},
 		{ 10,  20,  42,  52}, Icon 		{disabled, 2},
 		{  0,   0,   0,   0}, HelpItem 	{disabled, HMScanhdlg { SaveAlert } },

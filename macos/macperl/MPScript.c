@@ -5,6 +5,9 @@ Author	:	Matthias Neeracher
 Language	:	MPW C
 
 $Log: MPScript.c,v $
+Revision 1.5  2001/09/13 07:28:10  neeri
+Fix signal handling (MacPerlBug #422129)
+
 Revision 1.4  2001/04/16 02:42:43  neeri
 run_perl no longer longjmps (MacPerl bug #232703)
 
@@ -281,9 +284,8 @@ void MP_Exit(int status)
 {
 	if (gRunningPerl)
 		longjmp(gExitPerl, -status-1);
-	else {
+	else 
 		ExitToShell();
-	}
 }
 
 static atexitfn 	PerlExitFn[20];
@@ -293,9 +295,8 @@ int MP_AtExit(atexitfn func)
 {
 	if (gRunningPerl)
 		PerlExitFn[PerlExitCnt++] = func;
-	else {
+	else 
 		return atexit(func);
-	}
 		
 	return 0;
 }
@@ -318,10 +319,6 @@ char * MP_GetEnv(const char * var)
 
 pascal void InitPerlEnviron()
 {
-	/* gDebugLogName 	= "Dev:Console:Debug Log";
-	gExit				= MP_Exit;
-	gAtExit			= MP_AtExit;
-	 */
 	gMacPerl_AlwaysExtract	= true;
 	gMacPerl_HandleEvent		= HandleEvent;
 }
@@ -617,7 +614,6 @@ pascal Boolean RunScript(ArgExtractor extractor, void * data)
 	
 	ShowWindowStatus();
 	
-	signal(SIGINT, exit);
 	setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
 	setvbuf(stderr, NULL, _IOLBF, BUFSIZ);
 	
@@ -1011,18 +1007,16 @@ pascal OSErr DoScript(const AppleEvent *event, AppleEvent *reply, long refCon)
 
 pascal Boolean DoRuntime()
 {
-#if 0
 	FSSpec	spec;
 	
 	if (gRuntimeScript = Get1NamedResource('TEXT', (StringPtr) "\p!")) {
 		spec.vRefNum 	= 	gAppVol;
-		spec.parID		=	gAppDir;
+		spec.parID	=	gAppDir;
 		PLstrcpy(spec.name, LMGetCurApName());
 		strcpy(gMacPerl_PseudoFileName, GUSIFSp2FullPath(&spec));
-		
+
 		DetachResource(gRuntimeScript);
 	}
-#endif
 
 	return false;
 }

@@ -206,6 +206,19 @@ void MacPerl_WriteMsg(void * io, const char * msg, size_t len);
 #define PERL_SYS_TERM()		MALLOC_TERM
 #endif
 
+MP_EXT Boolean			gMacPerl_HasAsyncTasks;
+void MacPerl_DoAsyncTasks();
+#define PERL_ASYNC_CHECK() while (gMacPerl_HasAsyncTasks) MacPerl_DoAsyncTasks()
+typedef struct MacPerl_AsyncTask {
+	void	*	qLink;		/* Don't set */
+	short    qType;		/* Queue type. Ignore */
+	Boolean  fPending;   /* Is element queued already? */
+	Boolean  fill;
+	void     (*fProc)(struct MacPerl_AsyncTask * task); /* Procedure to call */
+} MacPerl_AsyncTask;
+Boolean MacPerl_QueueAsyncTask(MacPerl_AsyncTask * task);
+Boolean	MacPerl_QueueAsyncExit();
+
 #define PERL_WRITE_MSG_TO_CONSOLE(io, msg, len) MacPerl_WriteMsg(io, msg, len)
 
 #define BIT_BUCKET "Dev:Null"

@@ -163,9 +163,9 @@ Compiles correctly
 	Save Changes Dialog Items
 */
 
-#define  aaSave 		 	1
-#define  aaDiscard 	 	2
-#define  aaCancel 		3
+#define  aaSave 	 	1
+#define  aaCancel 		2
+#define  aaDiscard 	 	3
 
 #define  kOSEvent			   		app4Evt	/*event used by MultiFinder*/
 #define  kSuspendResumeMessage		1		/*high byte of suspend/resume event message*/

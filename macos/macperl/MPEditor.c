@@ -6,6 +6,9 @@ Author	:	Matthias Neeracher
 Language	:	MPW C
 
 $Log: MPEditor.c,v $
+Revision 1.2  2001/09/10 07:39:03  neeri
+External editor would sometimes corrupt files (MacPerl Bug #456329)
+
 Revision 1.1  2000/11/30 08:37:29  neeri
 Sources & Resources
 
@@ -475,7 +478,7 @@ static void UpdateList()
 	HLock((Handle) gExternalFiles);
 	mycell.h = mycell.v = 0;
 	for (; mycell.v<gExternalFileCount; ++mycell.v)	{
-		StringPtr	name = gExternalFiles[0][mycell.v].name;
+		StringPtr	name = gExternalFiles[0][mycell.v << 1].name;
 		LSetCell(name+1, *name, mycell, gPickList);
 	}
 	HUnlock((Handle) gExternalFiles);
@@ -666,7 +669,7 @@ pascal OSErr DoExternalEditor(const AppleEvent * event, AppleEvent * reply, long
 		}
 		HSetState((Handle) gExternalFiles, state);
 		if (refCon != 2) {
-			Munger((Handle) gExternalFiles, i*sizeof(FSSpec), nil, 2*sizeof(FSSpec), nil, 0);
+			Munger((Handle) gExternalFiles, (i<<1)*sizeof(FSSpec), nil, 2*sizeof(FSSpec), nil, 0);
 			if (!--gExternalFileCount) {
 				DisposeHandle((Handle) gExternalFiles);
 				gExternalFiles = 0;
