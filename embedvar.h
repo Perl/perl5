@@ -199,7 +199,6 @@
 #define PL_incgv		(PL_curinterp->Iincgv)
 #define PL_initav		(PL_curinterp->Iinitav)
 #define PL_inplace		(PL_curinterp->Iinplace)
-#define PL_last_proto		(PL_curinterp->Ilast_proto)
 #define PL_lastfd		(PL_curinterp->Ilastfd)
 #define PL_lastsize		(PL_curinterp->Ilastsize)
 #define PL_lastspbase		(PL_curinterp->Ilastspbase)
@@ -333,7 +332,6 @@
 #define PL_Iincgv		PL_incgv
 #define PL_Iinitav		PL_initav
 #define PL_Iinplace		PL_inplace
-#define PL_Ilast_proto		PL_last_proto
 #define PL_Ilastfd		PL_lastfd
 #define PL_Ilastsize		PL_lastsize
 #define PL_Ilastspbase		PL_lastspbase

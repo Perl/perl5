@@ -266,8 +266,6 @@
 #define PL_last_lop		pPerl->PL_last_lop
 #undef  PL_last_lop_op
 #define PL_last_lop_op		pPerl->PL_last_lop_op
-#undef  PL_last_proto
-#define PL_last_proto		pPerl->PL_last_proto
 #undef  PL_last_swash_hv
 #define PL_last_swash_hv	pPerl->PL_last_swash_hv
 #undef  PL_last_swash_key
