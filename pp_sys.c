@@ -1555,6 +1555,8 @@ PP(pp_sysread)
     STRLEN blen;
     MAGIC *mg;
     int fp_utf8;
+    int buffer_utf8;
+    SV *read_target;
     Size_t got = 0;
     Size_t wanted;
     bool charstart = FALSE;
@@ -1605,6 +1607,7 @@ PP(pp_sysread)
     }
     else {
 	buffer = SvPV_force(bufsv, blen);
+	buffer_utf8 = !IN_BYTES && SvUTF8(bufsv);
     }
     if (length < 0)
 	DIE(aTHX_ "Negative length");
@@ -1672,11 +1675,30 @@ PP(pp_sysread)
     }
  more_bytes:
     bufsize = SvCUR(bufsv);
+    /* Allocating length + offset + 1 isn't perfect in the case of reading
+       bytes from a byte file handle into a UTF8 buffer, but it won't harm us
+       unduly.
+       (should be 2 * length + offset + 1, or possibly something longer if
+       PL_encoding is true) */
     buffer  = SvGROW(bufsv, (STRLEN)(length+offset+1));
     if (offset > bufsize) { /* Zero any newly allocated space */
     	Zero(buffer+bufsize, offset-bufsize, char);
     }
     buffer = buffer + offset;
+    if (!buffer_utf8) {
+	read_target = bufsv;
+    } else {
+	/* Best to read the bytes into a new SV, upgrade that to UTF8, then
+	   concatenate it to the current buffer.  */
+
+	/* Truncate the existing buffer to the start of where we will be
+	   reading to:  */
+	SvCUR_set(bufsv, offset);
+
+	read_target = sv_newmortal();
+	SvUPGRADE(read_target, SVt_PV);
+	buffer = SvGROW(read_target, length + 1);
+    }
 
     if (PL_op->op_type == OP_SYSREAD) {
 #ifdef PERL_SOCK_SYSREAD_IS_RECV
@@ -1716,9 +1738,9 @@ PP(pp_sysread)
 		report_evil_fh(gv, io, OP_phoney_OUTPUT_ONLY);
 	goto say_undef;
     }
-    SvCUR_set(bufsv, count+(buffer - SvPVX(bufsv)));
-    *SvEND(bufsv) = '\0';
-    (void)SvPOK_only(bufsv);
+    SvCUR_set(read_target, count+(buffer - SvPVX(read_target)));
+    *SvEND(read_target) = '\0';
+    (void)SvPOK_only(read_target);
     if (fp_utf8 && !IN_BYTES) {
 	/* Look at utf8 we got back and count the characters */
 	char *bend = buffer + count;
@@ -1753,6 +1775,11 @@ PP(pp_sysread)
 	/* return value is character count */
 	count = got;
 	SvUTF8_on(bufsv);
+    }
+    else if (buffer_utf8) {
+	/* Let svcatsv upgrade the bytes we read in to utf8.
+	   The buffer is a mortal so will be freed soon.  */
+	sv_catsv_nomg(bufsv, read_target);
     }
     SvSETMAGIC(bufsv);
     /* This should not be marked tainted if the fp is marked clean */
