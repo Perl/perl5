@@ -1101,7 +1101,6 @@ EXT char *	oldbufptr;
 EXT char *	oldoldbufptr;
 EXT char *	bufend;
 EXT expectation expect INIT(XSTATE);	/* how to interpret ambiguous tokens */
-EXT char *	autoboot_preamble INIT(Nullch);
 EXT AV * 	rsfp_filters;
 
 EXT I32		multi_start;	/* 1st line of multi-line string */
@@ -1366,6 +1365,7 @@ IEXT I32	Idumplvl;	/* indentation level on syntax tree dump */
 IEXT PMOP *	Ioldlastpm;	/* for saving regexp context during debugger */
 IEXT I32	Igensym;	/* next symbol for getsym() to define */
 IEXT bool	Ipreambled;
+IEXT AV *	Ipreambleav;
 IEXT int	Ilaststatval IINIT(-1);
 IEXT I32	Ilaststype IINIT(OP_STAT);
 

@@ -131,6 +131,12 @@ your program.
 
 runs the script under the Perl debugger.  See L<perldebug>.
 
+=item B<-d:foo>
+
+runs the script under the control of a debugging or tracing module
+installed as Devel::foo. E.g., -d:DProf executes the script using the
+Devel::DProf profiler.  See L<perldebug>.
+
 =item B<-D>I<number>
 
 =item B<-D>I<list>
@@ -239,6 +245,15 @@ separator if the B<-l> switch is followed by a B<-0> switch:
     gnufind / -print0 | perl -ln0e 'print "found $_" if -p'
 
 This sets $\ to newline and then sets $/ to the null character.
+
+=item B<-M>I<module>
+
+executes C<use> I<module> C<;> before executing your script. You can
+also do C<-M'Foo qw(Bar Baz)'>.
+
+=item B<-m>I<module>
+
+executes C<use> I<module> C<();> before executing your script.
 
 =item B<-n>
 
@@ -357,6 +372,15 @@ warnings.
 =item B<-v>
 
 prints the version and patchlevel of your Perl executable.
+
+=item B<-V>
+
+prints summary of the major perl configuration values and the current
+value of @INC.
+
+=item B<-V:name>
+
+Prints to STDOUT the value of the named configuration variable.
 
 =item B<-w>
 

@@ -17,7 +17,6 @@
 #define amagic_generation	Perl_amagic_generation
 #define an		Perl_an
 #define atan2_amg	Perl_atan2_amg
-#define autoboot_preamble	Perl_autoboot_preamble
 #define band_amg	Perl_band_amg
 #define bool__amg	Perl_bool__amg
 #define bor_amg		Perl_bor_amg
@@ -1109,6 +1108,7 @@
 #define perl_destruct_level	(curinterp->Iperl_destruct_level)
 #define pidstatus	(curinterp->Ipidstatus)
 #define preambled	(curinterp->Ipreambled)
+#define preambleav	(curinterp->Ipreambleav)
 #define preprocess	(curinterp->Ipreprocess)
 #define restartop	(curinterp->Irestartop)
 #define rightgv		(curinterp->Irightgv)
@@ -1267,6 +1267,7 @@
 #define Iperl_destruct_level	perl_destruct_level
 #define Ipidstatus	pidstatus
 #define Ipreambled	preambled
+#define Ipreambleav	preambleav
 #define Ipreprocess	preprocess
 #define Irestartop	restartop
 #define Irightgv	rightgv

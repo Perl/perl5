@@ -90,21 +90,8 @@ if test X"$args" != "X" ; then
 	else
 	    echo "        newXS(\"${mname}::bootstrap\", boot_${cname}, file);"
 	fi
-	# does this extension wish to supply automatic booting code?
-    for aifile in ext/$ext/AutoInit.* ; do
-		case $aifile in
-		*.c)echo "	/* autoinit code from $aifile follows: */"
-			echo "	{"; cat $aifile; echo "	}"
-			;;
-		*.pl) ai="$ai `cat $aifile | tr '\012' ' '`;"
-			;;
-		esac
-	done
 	echo "    }"
     done
-    if test "X$ai" != "X"; then
-	echo "    autoboot_preamble = \"BEGIN { $ai }\";"
-    fi
 fi
 
 cat << 'EOP'

@@ -14,28 +14,30 @@ else
 fi
 . $TOP/config.sh
 
+# Note that the text lines /^Summary of/ .. /^\s*$/ are copied into Config.pm.
+# XXX Add d_sigaction (?) once it's defined.
+
 $spitshell <<!GROK!THIS!
 
-Summary of my $package (patchlevel $PATCHLEVEL) configuration:
+Summary of my $package ($baserev patchlevel $PATCHLEVEL) configuration:
   Platform:
     osname=$osname, osver=$osvers, archname=$archname
     uname='$myuname'
-    hint=$hint
+    hint=$hint, useposix=$useposix 
   Compiler:
-    cc='$cc', optimize='$optimize', ld='$ld'
+    cc='$cc', optimize='$optimize', gccversion=$gccversion
     cppflags='$cppflags'
     ccflags ='$ccflags'
-    ldflags ='$ldflags'
     stdchar='$stdchar', d_stdstdio=$d_stdstdio, usevfork=$usevfork
     voidflags=$voidflags, castflags=$castflags, d_casti32=$d_casti32, d_castneg=$d_castneg
     intsize=$intsize, alignbytes=$alignbytes, usemymalloc=$usemymalloc, randbits=$randbits
-  Libraries:
-    so=$so
+  Linker and Libraries:
+    ld='$ld', ldflags ='$ldflags'
     libpth=$libpth
     libs=$libs
-    libc=$libc
+    libc=$libc, so=$so
   Dynamic Linking:
-    dlsrc=$dlsrc, dlext=$dlext, d_dlsymun=$d_dlsymun
-    cccdlflags='$cccdlflags', ccdlflags='$ccdlflags', lddlflags='$lddlflags'
+    dlsrc=$dlsrc, dlext=$dlext, d_dlsymun=$d_dlsymun, ccdlflags='$ccdlflags'
+    cccdlflags='$cccdlflags', lddlflags='$lddlflags'
 
 !GROK!THIS!
