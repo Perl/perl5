@@ -1,3 +1,23 @@
+Mon Oct  7 21:56:38 BST 2002   Nicholas Clark  <nick@ccl4.org>
+
+    Version 2.06
+
+	Remove qr// from t/downgrade.t so that it will run on 5.004
+	Mention $File::Spec::VERSION a second time in t/forgive.t so that it
+	runs without warnings in 5.004 (this may be a 5.00405 bug I'm working
+	round)
+	Fix t/integer.t initialisation to actually generate 64 bits of 9c
+	Fix comparison tests to use eval to get around 64 bit IV conversion
+	issues on 5.6.x, following my t/integer.t ^ precedence bug found by
+	Rafael Garcia-Suarez
+	Alter t/malice.t to work with Test/More.pm in t/, and skip individual
+	subtests that use $Config{ptrsize}, so that the rest of the test can
+	now be run with 5.004
+	Change t/malice.t and the error message in check_magic in Storable.xs
+	from "Pointer integer size" to "Pointer size"
+	Remove prerequisite of Test::More from Makefile.PL
+	Ship Test::Builder, Test::Simple and Test::More in t
+
 Thu Oct  3 08:57:22 IST 2002   Abhijit Menon-Sen <ams@wiw.org>
 
     Version 2.05

@@ -9,13 +9,6 @@
 # I ought to keep this test easily backwards compatible to 5.004, so no
 # qr//;
 
-BEGIN {
-    if ($] < 5.005) {
-	print "1..0 # Skip: usage of qr//\n";
-	exit 0;
-    }
-}
-
 # This test checks downgrade behaviour on pre-5.8 perls when new 5.8 features
 # are encountered.
 
@@ -67,8 +60,8 @@ if ($] > 5.007002) {
   plan tests => 67;
 }
 
-$UTF8_CROAK = qr/^Cannot retrieve UTF8 data in non-UTF8 perl/;
-$RESTRICTED_CROAK = qr/^Cannot retrieve restricted hash/;
+$UTF8_CROAK = "/^Cannot retrieve UTF8 data in non-UTF8 perl/";
+$RESTRICTED_CROAK = "/^Cannot retrieve restricted hash/";
 
 my %tests;
 {
@@ -128,11 +121,11 @@ sub test_locked_hash {
   my @keys = keys %$hash;
   my ($key, $value) = each %$hash;
   eval {$hash->{$key} = reverse $value};
-  like( $@, qr/^Modification of a read-only value attempted/,
+  like( $@, "/^Modification of a read-only value attempted/",
         'trying to change a locked key' );
   is ($hash->{$key}, $value, "hash should not change?");
   eval {$hash->{use} = 'perl'};
-  like( $@, qr/^Attempt to access disallowed key 'use' in a restricted hash/,
+  like( $@, "/^Attempt to access disallowed key 'use' in a restricted hash/",
         'trying to add another key' );
   ok (eq_array([keys %$hash], \@keys), "Still the same keys?");
 }
@@ -146,7 +139,7 @@ sub test_restricted_hash {
         'trying to change a restricted key' );
   is ($hash->{$key}, reverse ($value), "hash should change");
   eval {$hash->{use} = 'perl'};
-  like( $@, qr/^Attempt to access disallowed key 'use' in a restricted hash/,
+  like( $@, "/^Attempt to access disallowed key 'use' in a restricted hash/",
         'trying to add another key' );
   ok (eq_array([keys %$hash], \@keys), "Still the same keys?");
 }

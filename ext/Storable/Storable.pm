@@ -21,7 +21,7 @@ package Storable; @ISA = qw(Exporter DynaLoader);
 use AutoLoader;
 use vars qw($canonical $forgive_me $VERSION);
 
-$VERSION = '2.05';
+$VERSION = '2.06';
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;		# Grrr...
 
 #
@@ -360,6 +360,9 @@ sub thaw {
 	$@ = $da;
 	return $self;
 }
+
+1;
+__END__
 
 =head1 NAME
 
