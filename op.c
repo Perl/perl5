@@ -5870,6 +5870,7 @@ Perl_ck_glob(pTHX_ OP *o)
 	gv = gv_fetchpv("CORE::GLOBAL::glob", FALSE, SVt_PVCV);
 	glob_gv = gv_fetchpv("File::Glob::csh_glob", FALSE, SVt_PVCV);
 	GvCV(gv) = GvCV(glob_gv);
+	SvREFCNT_inc((SV*)GvCV(gv));
 	GvIMPORTED_CV_on(gv);
 	LEAVE;
     }
