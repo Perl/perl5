@@ -14,13 +14,13 @@ write your own simple scripts.
 This introductory document does not aim to be complete.  It does not
 even aim to be entirely accurate.  In some cases perfection has been
 sacrificed in the goal of getting the general idea across.  You are
-B<strongly> advised to follow this introduction with more information
+I<strongly> advised to follow this introduction with more information
 from the full Perl manual, the table of contents to which can be found
 in L<perltoc>.
 
 Throughout this document you'll see references to other parts of the 
 Perl documentation.  You can read that documentation using the C<perldoc>
-command or using whatever method you're using to read this document.
+command or whatever method you're using to read this document.
 
 =head2 What is Perl?
 
@@ -29,12 +29,12 @@ text manipulation and now used for a wide range of tasks including
 system administration, web development, network programming, GUI 
 development, and more.
 
-The language is intended to be practical (easy to use, efficient, 
-complete) rather than beautiful (tiny, elegant, minimal).  Its major 
-features are that it's easy to use, supports both procedural and OO
-programming, has powerful built-in support for text processing, and 
-has one of the world's most impressive collections of third-party 
-modules.
+The language is intended to be practical (easy to use, efficient,
+complete) rather than beautiful (tiny, elegant, minimal).  Its major
+features are that it's easy to use, supports both procedural and
+object-oriented (OO) programming, has powerful built-in support for text
+processing, and has one of the world's most impressive collections of
+third-party modules.
 
 Different definitions of Perl are given in L<perl>, L<perlfaq1> and 
 no doubt other places.  From this we can determine that Perl is different 
@@ -61,8 +61,8 @@ Windows and MacOS, read L<perlrun>.
 
 A Perl script or program consists of one or more statements.  These
 statements are simply written in the script in a straightforward
-fashion.  There is no need to have a main() function or anything of that
-kind.
+fashion.  There is no need to have a C<main()> function or anything of
+that kind.
 
 Perl statements end in a semi-colon:
 
@@ -285,9 +285,9 @@ running the program.  Using C<strict> is highly recommended.
 =head2 Conditional and looping constructs
 
 Perl has most of the usual conditional and looping constructs except for
-case/switch (but you can find a Switch module on CPAN, if you really
-want one -- see the section on modules, below, for more information 
-about modules and CPAN).
+case/switch (but if you really want it, there is a Switch module in Perl
+5.8 and newer, and on CPAN. See the section on modules, below, for more
+information about modules and CPAN).
 
 The conditions can be any Perl expression.  See the list of operators in
 the next section for information on comparison and boolean logic operators, 
