@@ -14,7 +14,7 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(struct);
 
-$VERSION = '0.60';
+$VERSION = '0.61';
 
 ## Tested on 5.002 and 5.003 without class membership tests:
 my $CHECK_CLASS_MEMBERSHIP = ($] >= 5.003_95);
@@ -163,10 +163,10 @@ sub struct {
             $out .= "    \$r->$elem = $init undef;$cmt\n";
         }
         elsif( $type =~ /^\w+(?:::\w+)*$/ ){
-            $init = "defined(\$init{'$name'}) ? \%{\$init{'$name'}} : ()";
-            $out .= "    croak 'Initializer for $name must be hash reference'\n";
-            $out .= "        if defined(\$init{'$name'}) && ref(\$init{'$name'}) ne 'HASH';\n";
-            $out .= "    \$r->$elem = '${type}'->new($init);$cmt\n";
+            $init = "defined(\$init{'$name'}) ? \$init{'$name'} : undef";
+            $out .= "    croak 'Initializer for $name must be $type reference'\n";
+            $out .= "        if defined(\$init{'$name'}) && !UNIVERSAL::isa(\$init{'$name'}, '$type');\n";
+            $out .= "    \$r->$elem = $init;$cmt\n";
             $classes{$name} = $type;
             $got_class = 1;
         }
@@ -440,8 +440,8 @@ The initializer value for a scalar element is just a scalar value. The
 initializer for an array element is an array reference. The initializer
 for a hash is a hash reference.
 
-The initializer for a class element is also a hash reference, and the
-contents of that hash are passed to the element's own constructor.
+The initializer for a class element is an object of the corresponding class,
+(or of one of its subclasses).
 
 See Example 3 below for an example of initialization.
 
@@ -545,7 +545,7 @@ struct's constructor.
     my $cat = Cat->new( name     => 'Socks',
                         kittens  => ['Monica', 'Kenneth'],
                         markings => { socks=>1, blaze=>"white" },
-                        breed    => { name=>'short-hair', cross=>1 },
+                        breed    => Breed->new(name=>'short-hair', cross=>1),
                       );
 
     print "Once a cat called ", $cat->name, "\n";
@@ -555,6 +555,19 @@ struct's constructor.
 =back
 
 =head1 Author and Modification History
+
+Modified by Damian Conway, 2001-09-04, v0.61.
+
+   Removed implicit construction of nested objects.
+   This helpfulness was fraught with problems:
+       * the class's constructor might not be called 'new'
+       * the class might not have a no-argument constructor
+       * "recursive" data structures don't work well:
+                 package Person;
+                 struct { mother => 'Person', father => 'Person'};
+   It is now necessary to pass an object reference to initialize a
+   nested object.
+
 
 Modified by Casey West, 2000-11-08, v0.59.
 
