@@ -69,6 +69,7 @@ typedef union prof_any PROFANY;
 
 typedef struct {
     U32		dprof_ticks;
+    char*	out_file_name;	/* output file (defaults to tmon.out) */
     PerlIO*	fp;		/* pointer to tmon.out file */
     long	TIMES_LOCATION;	/* Where in the file to store the time totals */
     int		SAVE_STACK;	/* How much data to buffer until end of run */
@@ -105,6 +106,7 @@ typedef struct {
 prof_state_t g_prof_state;
 
 #define g_dprof_ticks		g_prof_state.dprof_ticks
+#define g_out_file_name		g_prof_state.out_file_name
 #define g_fp			g_prof_state.fp
 #define g_TIMES_LOCATION	g_prof_state.TIMES_LOCATION
 #define g_SAVE_STACK		g_prof_state.SAVE_STACK
@@ -663,10 +665,14 @@ BOOT:
 	    else {
 		g_dprof_ticks = HZ;
 	    }
+
+	    buffer = getenv("PERL_DPROF_OUT_FILE_NAME");
+	    g_out_file_name = savepv(buffer ? buffer : "tmon.out");
 	}
 
-        if ((g_fp = PerlIO_open("tmon.out", "w")) == NULL)
-	    croak("DProf: unable to write tmon.out, errno = %d\n", errno);
+        if ((g_fp = PerlIO_open(g_out_file_name, "w")) == NULL)
+	    croak("DProf: unable to write '%s', errno = %d\n",
+		  g_out_file_name, errno);
 
 	g_default_perldb = PERLDBf_NONAME | PERLDBf_SUB | PERLDBf_GOTO;
 	g_cv_hash = newHV();
