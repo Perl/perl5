@@ -1,5 +1,26 @@
 package ExtUtils::Liblist;
 
+@ISA = qw(ExtUtils::Liblist::Kid File::Spec);
+
+sub lsdir {
+  shift;
+  my $rex = qr/$_[1]/;
+  opendir my $dir, $_[0];
+  grep /$rex/, readdir $dir;
+}
+
+sub file_name_is_absolute {
+  require File::Spec;
+  shift;
+  'File::Spec'->file_name_is_absolute(@_);
+}
+
+
+package ExtUtils::Liblist::Kid;
+
+# This kid package is to be used by MakeMaker.  It will not work if
+# $self is not a Makemaker.
+
 use 5.005_64;
 # Broken out of MakeMaker from version 4.11
 
