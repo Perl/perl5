@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Jul  2 19:35:08 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Tue Jul  3 03:03:36 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -5576,7 +5576,7 @@ nm_extract="$com"
 if $test -f /lib/syscalls.exp; then
 	echo " "
 	echo "Also extracting names from /lib/syscalls.exp for good ole AIX..." >&4
-	$sed -n 's/^\([^ 	]*\)[ 	]*syscall[0-9]*$/\1/p' /lib/syscalls.exp >>libc.list
+	$sed -n 's/^\([^ 	]*\)[ 	]*syscall[0-9]*[ 	]*$/\1/p' /lib/syscalls.exp >>libc.list
 fi
 ;;
 esac
