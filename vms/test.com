@@ -49,7 +49,7 @@ $   If F$Search("VMSPIPE.COM").nes."" then Delete/Log/Noconfirm VMSPIPE.COM;*
 $   Copy/Log/NoConfirm [-]VMSPIPE.COM []
 $!
 $!  This may be set for the C compiler in descrip.mms, but it confuses the File::Find tests
-$   DeAssign sys
+$   if f$trnlnm("sys") .nes. "" then DeAssign sys
 $!
 $!  And do it
 $   Show Process/Accounting
