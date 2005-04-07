@@ -49,7 +49,6 @@ my $tree = {
        	'misc'		=> [ 5.008, DEFAULT_OFF],
        	'regexp'	=> [ 5.008, DEFAULT_OFF],
        	'glob'		=> [ 5.008, DEFAULT_OFF],
-       	'y2k'		=> [ 5.008, DEFAULT_OFF],
        	'untie'		=> [ 5.008, DEFAULT_OFF],
 	'substr'	=> [ 5.008, DEFAULT_OFF],
 	'taint'		=> [ 5.008, DEFAULT_OFF],

@@ -298,8 +298,6 @@ The current hierarchy is:
        +- utf8
        |
        +- void
-       |
-       +- y2k
 
 Just like the "strict" pragma any of these categories can be combined
 

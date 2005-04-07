@@ -3188,11 +3188,6 @@ but there was no array C<@foo> in scope at the time. If you wanted a
 literal @foo, then write it as \@foo; otherwise find out what happened
 to the array you apparently lost track of.
 
-=item Possible Y2K bug: %s
-
-(W y2k) You are concatenating the number 19 with another number, which
-could be a potential Year 2000 problem.
-
 =item pragma "attrs" is deprecated, use "sub NAME : ATTRS" instead
 
 (D deprecated) You have written something like this:

@@ -67,21 +67,23 @@ ok( $c[4], "hasargs true with unknown sub" );
 
 sub testwarn {
     my $w = shift;
-    is( (caller(0))[9], $w, "warnings");
+    is( (caller(0))[9], $w, "warnings match caller");
 }
 
 # NB : extend the warning mask values below when new warnings are added
 {
     no warnings;
-    BEGIN { is( ${^WARNING_BITS}, "\0" x 12, 'warning bits' ) }
+    BEGIN { is( ${^WARNING_BITS}, "\0" x 12, 'all bits off via "no warnings"' ) }
     testwarn("\0" x 12);
+
     use warnings;
-    BEGIN { is( ${^WARNING_BITS}, "U" x 12, 'warning bits' ) }
-    BEGIN { testwarn("U" x 12); }
+    BEGIN { is( ${^WARNING_BITS}, "UUUUUUUUUUU\025", 'default bits on via "use warnings"' ); }
+    BEGIN { testwarn("UUUUUUUUUUU\025", "#1"); }
     # run-time :
     # the warning mask has been extended by warnings::register
-    testwarn("UUUUUUUUUUUU\001");
+    testwarn("UUUUUUUUUUUU");
+
     use warnings::register;
-    BEGIN { is( ${^WARNING_BITS}, "UUUUUUUUUUUU\001", 'warning bits' ) }
-    testwarn("UUUUUUUUUUUU\001");
+    BEGIN { is( ${^WARNING_BITS}, "UUUUUUUUUUUU", 'warning bits on via "use warnings::register"' ) }
+    testwarn("UUUUUUUUUUUU","#3");
 }

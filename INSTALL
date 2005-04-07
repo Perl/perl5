@@ -332,7 +332,7 @@ after the platform hints have been run by using Configure's -A switch.
 For example, here's how to add a couple of extra flags to C compiler
 invocations:
 
-	sh Configure -Accflags="-DPERL_Y2KWARN -DPERL_POLLUTE_MALLOC"
+	sh Configure -Accflags="-DPERL_EXTERNAL_GLOB -DPERL_POLLUTE_MALLOC"
 
 For more help on Configure switches, run
 

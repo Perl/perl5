@@ -9822,19 +9822,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		}
 		break;
 	    default:		/* it had better be ten or less */
-#if defined(PERL_Y2KWARN)
-		if (ckWARN(WARN_Y2K)) {
-		    STRLEN n;
-		    char *s = SvPV(sv,n);
-		    if (n >= 2 && s[n-2] == '1' && s[n-1] == '9'
-			&& (n == 2 || !isDIGIT(s[n-3])))
-		    {
-			Perl_warner(aTHX_ packWARN(WARN_Y2K),
-				    "Possible Y2K bug: %%%c %s",
-				    c, "format string following '19'");
-		    }
-		}
-#endif
 		do {
 		    dig = uv % base;
 		    *--eptr = '0' + dig;

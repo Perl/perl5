@@ -178,17 +178,6 @@ PP(pp_concat)
 	    SvUTF8_off(TARG);
     }
 
-#if defined(PERL_Y2KWARN)
-    if ((SvIOK(right) || SvNOK(right)) && ckWARN(WARN_Y2K) && SvOK(TARG)) {
-	if (llen >= 2 && lpv[llen - 2] == '1' && lpv[llen - 1] == '9'
-	    && (llen == 2 || !isDIGIT(lpv[llen - 3])))
-	{
-	    Perl_warner(aTHX_ packWARN(WARN_Y2K), "Possible Y2K bug: %s",
-			"about to append an integer to '19'");
-	}
-    }
-#endif
-
     if (lbyte != rbyte) {
 	if (lbyte)
 	    sv_utf8_upgrade_nomg(TARG);
