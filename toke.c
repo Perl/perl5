@@ -775,7 +775,7 @@ S_skipspace(pTHX_ register char *s)
 	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setpvn(sv,PL_bufptr,PL_bufend-PL_bufptr);
             (void)SvIOK_on(sv);
-            SvIVX(sv) = 0;
+            SvIV_set(sv, 0);
 	    av_store(CopFILEAV(PL_curcop),(I32)CopLINE(PL_curcop),sv);
 	}
     }
@@ -2631,7 +2631,7 @@ Perl_yylex(pTHX)
 		sv_upgrade(sv, SVt_PVMG);
 		sv_setsv(sv,PL_linestr);
                 (void)SvIOK_on(sv);
-                SvIVX(sv) = 0;
+                SvIV_set(sv, 0);
 		av_store(CopFILEAV(PL_curcop),(I32)CopLINE(PL_curcop),sv);
 	    }
 	    goto retry;
@@ -2718,7 +2718,7 @@ Perl_yylex(pTHX)
 	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setsv(sv,PL_linestr);
             (void)SvIOK_on(sv);
-            SvIVX(sv) = 0;
+            SvIV_set(sv, 0);
 	    av_store(CopFILEAV(PL_curcop),(I32)CopLINE(PL_curcop),sv);
 	}
 	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
@@ -4990,7 +4990,7 @@ Perl_yylex(pTHX)
 		missingterm((char*)0);
 	    yylval.ival = OP_STRINGIFY;
 	    if (SvIVX(PL_lex_stuff) == '\'')
-		SvIVX(PL_lex_stuff) = 0;	/* qq'$foo' should intepolate */
+		SvIV_set(PL_lex_stuff, 0);	/* qq'$foo' should intepolate */
 	    TERM(sublex_start());
 
 	case KEY_qr:
@@ -9494,11 +9494,11 @@ S_scan_heredoc(pTHX_ register char *s)
     sv_upgrade(tmpstr, SVt_PVIV);
     if (term == '\'') {
 	op_type = OP_CONST;
-	SvIVX(tmpstr) = -1;
+	SvIV_set(tmpstr, -1);
     }
     else if (term == '`') {
 	op_type = OP_BACKTICK;
-	SvIVX(tmpstr) = '\\';
+	SvIV_set(tmpstr, '\\');
     }
 
     CLINE;
@@ -9584,7 +9584,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setsv(sv,PL_linestr);
             (void)SvIOK_on(sv);
-            SvIVX(sv) = 0;
+            SvIV_set(sv, 0);
 	    av_store(CopFILEAV(PL_curcop), (I32)CopLINE(PL_curcop),sv);
 	}
 	if (*s == term && memEQ(s,PL_tokenbuf,len)) {
@@ -9870,7 +9870,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
        assuming.  79 is the SV's initial length.  What a random number. */
     sv = NEWSV(87,79);
     sv_upgrade(sv, SVt_PVIV);
-    SvIVX(sv) = termcode;
+    SvIV_set(sv, termcode);
     (void)SvPOK_only(sv);		/* validate pointer */
 
     /* move past delimiter and try to read a complete string */
@@ -10056,7 +10056,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setsv(sv,PL_linestr);
             (void)SvIOK_on(sv);
-            SvIVX(sv) = 0;
+            SvIV_set(sv, 0);
 	    av_store(CopFILEAV(PL_curcop), (I32)CopLINE(PL_curcop), sv);
 	}
 

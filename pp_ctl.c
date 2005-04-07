@@ -2430,7 +2430,7 @@ PP(pp_goto)
 			(void)SvUPGRADE(sv, SVt_PVIV);
 			(void)SvIOK_on(sv);
 			SAVEIV(SvIVX(sv));
-			SvIVX(sv) = PTR2IV(cv); /* Do it the quickest way */
+			SvIV_set(sv, PTR2IV(cv)); /* Do it the quickest way */
 		    } else {
 			save_item(sv);
 			gv_efullname3(sv, CvGV(cv), Nullch);

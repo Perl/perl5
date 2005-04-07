@@ -3444,7 +3444,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 	SV **svp = av_fetch(CopFILEAV(PL_curcop), (I32)CopLINE(cop), FALSE);
         if (svp && *svp != &PL_sv_undef ) {
            (void)SvIOK_on(*svp);
-	    SvIVX(*svp) = PTR2IV(cop);
+	    SvIV_set(*svp, PTR2IV(cop));
 	}
     }
 

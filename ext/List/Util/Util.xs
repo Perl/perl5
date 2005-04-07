@@ -364,7 +364,7 @@ CODE:
     }
 #endif
     else {
-	SvIVX(ST(0)) = SvIV(num);
+	SvIV_set(ST(0), SvIV(num));
 	SvIOK_on(ST(0));
     }
     if(PL_tainting && (SvTAINTED(num) || SvTAINTED(str)))

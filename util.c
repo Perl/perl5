@@ -2026,7 +2026,7 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
     sv = *av_fetch(PL_fdpid,p[This],TRUE);
     UNLOCK_FDPID_MUTEX;
     (void)SvUPGRADE(sv,SVt_IV);
-    SvIVX(sv) = pid;
+    SvIV_set(sv, pid);
     PL_forkprocess = pid;
     /* If we managed to get status pipe check for exec fail */
     if (did_pipes && pid > 0) {
@@ -2179,7 +2179,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
     sv = *av_fetch(PL_fdpid,p[This],TRUE);
     UNLOCK_FDPID_MUTEX;
     (void)SvUPGRADE(sv,SVt_IV);
-    SvIVX(sv) = pid;
+    SvIV_set(sv, pid);
     PL_forkprocess = pid;
     if (did_pipes && pid > 0) {
 	int errkid;
@@ -2636,7 +2636,7 @@ Perl_pidgone(pTHX_ Pid_t pid, int status)
     sprintf(spid, "%"IVdf, (IV)pid);
     sv = *hv_fetch(PL_pidstatus,spid,strlen(spid),TRUE);
     (void)SvUPGRADE(sv,SVt_IV);
-    SvIVX(sv) = status;
+    SvIV_set(sv, status);
     return;
 }
 
