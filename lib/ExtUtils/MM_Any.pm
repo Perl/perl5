@@ -2,7 +2,7 @@ package ExtUtils::MM_Any;
 
 use strict;
 use vars qw($VERSION @ISA);
-$VERSION = '0.12';
+$VERSION = '0.12_01';
 
 use File::Spec;
 BEGIN { @ISA = qw(File::Spec); }
@@ -524,7 +524,7 @@ sub dir_target {
     my $make = '';
     foreach my $dir (@dirs) {
         $make .= sprintf <<'MAKE', ($dir) x 7;
-%s$(DFSEP).exists :
+%s$(DFSEP).exists :: Makefile.PL
 	$(NOECHO) $(MKPATH) %s
 	$(NOECHO) $(CHMOD) 755 %s
 	$(NOECHO) $(TOUCH) %s$(DFSEP).exists
