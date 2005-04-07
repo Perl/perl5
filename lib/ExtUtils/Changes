@@ -1,3 +1,108 @@
+6.27  Mon Apr  4 16:36:14 PDT 2005
+    * Added _darcs to the list of revision control administrative 
+      directories skipped both in libscan and in MANIFEST.SKIP.
+
+6.26_01 Mon Mar 28 21:34:39 PST 2005
+    * PL_FILES was broken in the last release.  The .PL files were not being
+      passed the file they were to generate.
+    * How PL_FILES runs the programs and what it does with the value is 
+      now documented.
+    * The default behavior of PL_FILES is now documented.
+
+6.26  Mon Mar 21 20:36:22 PST 2005
+
+6.25_12 Fri Mar 18 16:15:35 PST 2005
+    - Use the generic dmake search.cpan.org URL in the README so the newest
+      version is found.
+    - Fixed pm_to_blib trouble on VMS introduced in 6.25_10.
+
+6.25_11 Tue Mar 15 02:00:20 PST 2005
+    - Fixed minor parent class dependency loop in ExtUtils::MM_Any.
+    - Fixed a circular dependency on processed PL files introduced as part
+      of RT 6460 in 6.25_02.
+
+6.25_10 Sun Mar 13 16:14:04 PST 2005
+    - pm_to_blib.ts is gone, back to pm_to_blib (except on VMS).  I 
+      couldn't make it work and still retain backwards compatibility.
+      This fixes the recompilation problems that plagued _09 and various
+      previous alpha releases.
+
+6.25_09  Sat Mar 12 10:10:34 PST 2005
+    - Stubbing out PASTHRU on VMS.  $(MMSQUALIFIERS) should do the equivalent
+      and better.
+    - Added test to check for the existence of a compiler so XS tests are
+      now possible.
+
+6.25_08  Tue Feb  8 09:04:36 EST 2005
+    - Fixing xsubpp on VMS.  Had a foo/bar path in it.
+    - Turning XSUBPP into a runable command by the addition of PERLRUN
+      made it unusable as a dependency.  Added XSUBPPRUN for that and left
+      XSUBPP alone.
+    - Removed DESTDIR from PASTHRU as install is not recursive and it can
+      make commands too long on VMS.
+    - Older versions of MMS cannot handle directory targets at all.  Using
+      .exists files everywhere.
+    - Restore missing *.Opt clean on VMS.
+    - Fix .exists files accidentally getting caught in static builds.
+    - Older versions of MMS cannot handle directory targets at all.
+    - Add Interix support (bleadperl@33892)
+    - distsign target changed to distsignature to avoid clash with
+      Module::Install
+
+6.25_07  Fri Dec 31 03:47:20 EST 2004
+    - perllocal on VMS was inserting executables twice.
+    - No longer using $(IGNORE) macro.  Turns out MMS/K was not honoring
+      it.  Using "-$(NOECHO) command" which seems to make everybody happy.
+    - Executables with no extension weren't getting installed on VMS due to 
+      a bug in rename().  Broken sometime in this series of alphas.
+
+6.25_06  Sun Dec 26 17:21:37 EST 2004
+    - Forgot to define BOOTDEP macro.
+    - .exists files are back.  Directories cannot be used directly as 
+      targets as their mod time changes too frequently.
+    * Added INSTALLBASE as an alternative to PREFIX but haven't documented
+      it yet.  I'll do that next release.
+
+6.25_05  Wed Dec 22 07:59:02 EST 2004
+    - One of the 6.25 alphas broke BSD make.  It doesn't like "- @ command".
+      Fixed by adding an $(IGNORE) macro.
+    - 6.25 alphas caused a Makefile to be added to the dist.  Fixed.
+    - The new cd() code needed to be dependent on dmake or nmake for
+      Windows.  Not Win9x vs WinNT/XP.
+
+6.25_04  Tue Dec 21 00:53:06 EST 2004
+    - 6.25_03 was always rebuilding XS modules.
+
+6.25_03  Mon Dec 20 23:04:22 EST 2004
+    - dir_target() is back.  Now each directory to be created has its own 
+      target like before, but no more .exists or blibdirs.ts files.  This
+      ensures that each blib directory is created as necessary and fixes
+      things like SVN's perl bindings.
+
+6.25_02  Mon Dec 20 03:31:49 EST 2004
+    - Set PM_FILTER as late as possible so it can see all the earlier
+      macro definitions.  Necessary for challenged make implementations
+      like nmake.  Should fix Mail::SpamAssassin installs on Win32.
+      [rt.cpan.org 4545]
+    - clean and realclean are now more careful about accidentally deleting
+      directories instead of files.  [rt.cpan.org 6851]
+    - small fix for parallel builds, make sure pm_to_blib has run before
+      we try to use stuff in blib. [rt.cpan.org 6460]
+    - MAKEFILE=foo appears to have been broken for recursive builds and
+      several other things.  I think this was broken by 6.18.
+
+6.25_01  Fri Dec 17 21:29:04 EST 2004
+    * *.bak added to the default MANIFEST.SKIP.
+    * META.yml will no longer be generated in the build directory.  It will
+      only appear in the distdir.  This should make it easier on developers,
+      they don't have to worry about checking the file in all the time.
+    * Similarly, the SIGNATURE file will not be updated in the build 
+      directory.  It will only be generated in the distdir.
+    - A bunch of redundant Win9x and VMS code removed.
+    - 'make test' on Windows no longer pre-expands its list of test files.
+      This caused problems on large distributions like bioperl.  Thanks to
+      Tim Bunce for suggesting the obvious fix.
+
 6.25  Wed Dec 15 06:59:46 EST 2004
     - Build.PL was being considered like Module_pm.PL.  Build.PL is now 
       ignored.  [radek@karnet.pl] [rt.cpan.org 8809]

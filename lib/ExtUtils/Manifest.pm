@@ -13,7 +13,7 @@ use vars qw($VERSION @ISA @EXPORT_OK
           $Is_MacOS $Is_VMS 
           $Debug $Verbose $Quiet $MANIFEST $DEFAULT_MSKIP);
 
-$VERSION = 1.44;
+$VERSION = '1.45';
 @ISA=('Exporter');
 @EXPORT_OK = qw(mkmanifest
                 manicheck  filecheck  fullcheck  skipcheck
@@ -432,7 +432,7 @@ sub cp_if_diff {
 	if (-e $to) {
 	    unlink($to) or confess "unlink $to: $!";
 	}
-      STRICT_SWITCH: {
+        STRICT_SWITCH: {
 	    best($from,$to), last STRICT_SWITCH if $how eq 'best';
 	    cp($from,$to), last STRICT_SWITCH if $how eq 'cp';
 	    ln($from,$to), last STRICT_SWITCH if $how eq 'ln';
@@ -475,9 +475,13 @@ sub _manicopy_chmod {
     chmod( $perm | ( $perm & 0100 ? 0111 : 0 ), $file );
 }
 
+# Files that are often modified in the distdir.  Don't hard link them.
+my @Exceptions = qw(MANIFEST META.yml SIGNATURE);
 sub best {
     my ($srcFile, $dstFile) = @_;
-    if (!$Config{d_link} or -l $srcFile) {
+
+    my $is_exception = grep $srcFile =~ /$_/, @Exceptions;
+    if ($is_exception or !$Config{d_link} or -l $srcFile) {
 	cp($srcFile, $dstFile);
     } else {
 	ln($srcFile, $dstFile) or cp($srcFile, $dstFile);

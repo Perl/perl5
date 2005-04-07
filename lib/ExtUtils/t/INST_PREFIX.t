@@ -22,7 +22,7 @@ use MakeMaker::Test::Setup::BFD;
 use ExtUtils::MakeMaker;
 use File::Spec;
 use TieOut;
-use Config;
+use ExtUtils::MakeMaker::Config;
 
 my $Is_VMS = $^O eq 'VMS';
 
@@ -149,11 +149,6 @@ while( my($type, $vars) = each %Install_Vars) {
 # Check that when installman*dir isn't set in Config no man pages
 # are generated.
 {
-    undef *ExtUtils::MM_Unix::Config;
-    undef *ExtUtils::MM_Unix::Config_Override;
-    %ExtUtils::MM_Unix::Config = %Config;
-    *ExtUtils::MM_VMS::Config = \%ExtUtils::MM_Unix::Config;
-
     _set_config(installman1dir => '');
     _set_config(installman3dir => '');
 
@@ -175,13 +170,6 @@ while( my($type, $vars) = each %Install_Vars) {
 # Check that when installvendorman*dir is set in Config it is honored
 # [rt.cpan.org 2949]
 {
-    undef *ExtUtils::MM_Unix::Config;
-    undef *ExtUtils::MM_Unix::Config_Override;
-    undef *ExtUtils::MM_VMS::Config;
-
-    %ExtUtils::MM_Unix::Config = %Config;
-    *ExtUtils::MM_VMS::Config = \%ExtUtils::MM_Unix::Config;
-
     _set_config(installvendorman1dir => File::Spec->catdir('foo','bar') );
     _set_config(installvendorman3dir => '' );
     _set_config(usevendorprefix => 1 );
@@ -208,11 +196,6 @@ while( my($type, $vars) = each %Install_Vars) {
 # Check that when installsiteman*dir isn't set in Config it falls back
 # to installman*dir
 {
-    undef *ExtUtils::MM_Unix::Config;
-    undef *ExtUtils::MM_Unix::Config_Override;
-    %ExtUtils::MM_Unix::Config = %Config;
-    *ExtUtils::MM_VMS::Config = \%ExtUtils::MM_Unix::Config;
-
     _set_config(installman1dir => File::Spec->catdir('foo', 'bar') );
     _set_config(installman3dir => File::Spec->catdir('foo', 'baz') );
     _set_config(installsiteman1dir => '' );
@@ -246,11 +229,6 @@ while( my($type, $vars) = each %Install_Vars) {
 # Check that when usevendoprefix and installvendorman*dir aren't set in 
 # Config it leaves them unset.
 {
-    undef *ExtUtils::MM_Unix::Config;
-    undef *ExtUtils::MM_Unix::Config_Override;
-    %ExtUtils::MM_Unix::Config = %Config;
-    *ExtUtils::MM_VMS::Config = \%ExtUtils::MM_Unix::Config;
-
     _set_config(installman1dir => File::Spec->catdir('foo', 'bar') );
     _set_config(installman3dir => File::Spec->catdir('foo', 'baz') );
     _set_config(installsiteman1dir => '' );
@@ -283,10 +261,10 @@ while( my($type, $vars) = each %Install_Vars) {
 sub _set_config {
     my($k,$v) = @_;
     (my $k_no_install = $k) =~ s/^install//i;
-    $ExtUtils::MM_Unix::Config{$k} = $v;
+    $Config{$k} = $v;
 
     # Because VMS's config has traditionally been underpopulated, it will
     # fall back to the install-less versions in desperation.
-    $ExtUtils::MM_Unix::Config{$k_no_install} = $v if $Is_VMS;
+    $Config{$k_no_install} = $v if $Is_VMS;
     return;
 }

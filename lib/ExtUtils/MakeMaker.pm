@@ -1,23 +1,28 @@
+# $Id:  $
 package ExtUtils::MakeMaker;
 
 BEGIN {require 5.005_03;}
 
-$VERSION = '6.25';
-($Revision) = q$Revision: 1.147 $ =~ /Revision:\s+(\S+)/;
-
 require Exporter;
-use Config;
+use ExtUtils::MakeMaker::Config;
 use Carp ();
 use File::Path;
 
 use vars qw(
             @ISA @EXPORT @EXPORT_OK
-            $Revision $VERSION $Verbose %Config 
+            $VERSION $Verbose %Config 
             @Prepend_parent @Parent
             %Recognized_Att_Keys @Get_from_Config @MM_Sections @Overridable 
             $Filename
            );
+
+# Has to be on its own line with no $ after it to avoid being noticed by
+# the version control system
+use vars qw($Revision);
 use strict;
+
+$VERSION = '6.27';
+($Revision = q$Revision: 4357 $) =~ /Revision:\s+(\S+)/;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&WriteMakefile &writeMakefile $Verbose &prompt);
@@ -209,7 +214,7 @@ sub full_setup {
 
     INST_ARCHLIB INST_SCRIPT INST_BIN INST_LIB INST_MAN1DIR INST_MAN3DIR
     INSTALLDIRS
-    DESTDIR PREFIX
+    DESTDIR PREFIX INSTALLBASE
     PERLPREFIX      SITEPREFIX      VENDORPREFIX
     INSTALLPRIVLIB  INSTALLSITELIB  INSTALLVENDORLIB
     INSTALLARCHLIB  INSTALLSITEARCH INSTALLVENDORARCH
@@ -266,9 +271,8 @@ sub full_setup {
  dynamic_lib static static_lib manifypods processPL
  installbin subdirs
  clean_subdirs clean realclean_subdirs realclean 
- metafile metafile_addtomanifest
- signature signature_addtomanifest
- dist_basics dist_core distdir dist_test dist_ci
+ metafile signature
+ dist_basics dist_core distdir dist_test dist_ci distmeta distsignature
  install force perldepend makefile staticmake test ppd
 
           ); # loses section ordering
@@ -1868,18 +1872,32 @@ See also L<MM_Unix/perm_rwx>.
 
 =item PL_FILES
 
-Ref to hash of files to be processed as perl programs. MakeMaker
-will default to any found *.PL file (except Makefile.PL) being keys
-and the basename of the file being the value. E.g.
+MakeMaker can run programs to generate files for you at build time.
+By default any file named *.PL (except Makefile.PL and Build.PL) in
+the top level directory will be assumed to be a Perl program and run
+passing its own basename in as an argument.  For example...
 
-  {'foobar.PL' => 'foobar'}
+    perl foo.PL foo
 
-The *.PL files are expected to produce output to the target files
-themselves. If multiple files can be generated from the same *.PL
-file then the value in the hash can be a reference to an array of
-target file names. E.g.
+This behavior can be overridden by supplying your own set of files to
+search.  PL_FILES accepts a hash ref, the key being the file to run
+and the value is passed in as the first argument when the PL file is run.
 
-  {'foobar.PL' => ['foobar1','foobar2']}
+  PL_FILES => {'bin/foobar.PL' => 'bin/foobar'}
+
+Would run bin/foobar.PL like this:
+
+    perl bin/foobar.PL bin/foobar
+
+If multiple files from one program are desired an array ref can be used.
+
+  PL_FILES => {'bin/foobar.PL' => [qw(bin/foobar1 bin/foobar2)]}
+
+In this case the program will be run multiple times using each target file.
+
+    perl bin/foobar.PL bin/foobar1
+    perl bin/foobar.PL bin/foobar2
+
 
 =item PM
 
@@ -2007,8 +2025,9 @@ Overridable by PREFIX
 
 =item SIGN
 
-When true, perform the generation and addition to the MANIFEST of
-the SIGNATURE file during 'make distdir', via 'cpansign -s'.
+When true, perform the generation and addition to the MANIFEST of the
+SIGNATURE file in the distdir during 'make distdir', via 'cpansign
+-s'.
 
 Note that you need to install the Module::Signature module to
 perform this operation.
@@ -2064,7 +2083,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    $VERSION = sprintf "%d.%03d", q$Revision: 1.147 $ =~ /(\d+)/g;
+    $VERSION = sprintf "%d.%03d", q$Revision: 4357 $ =~ /(\d+)/g;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 
@@ -2309,9 +2328,9 @@ Copies all the files that are in the MANIFEST file to a newly created
 directory with the name C<$(DISTNAME)-$(VERSION)>. If that directory
 exists, it will be removed first.
 
-Additionally, it will create a META.yml module meta-data file and add
-this to your MANFIEST.  You can shut this behavior off with the NO_META
-flag.
+Additionally, it will create a META.yml module meta-data file in the
+distdir and add this to the distdir's MANFIEST.  You can shut this
+behavior off with the NO_META flag.
 
 =item   make disttest
 

@@ -19,7 +19,7 @@ if( $^O eq 'VMS' ) {
 else {
     plan tests => 3;
 }
-use Config;
+use ExtUtils::MakeMaker::Config;
 use File::Spec;
 use ExtUtils::MM;
 
@@ -41,8 +41,7 @@ is( $mm->{INSTALLBIN}, File::Spec->catdir('something', $default),
 SKIP: {
     skip "Test for DOSish prefixification", 1 unless $Is_Dosish;
 
-    undef *ExtUtils::MM_Unix::Config;
-    $ExtUtils::MM_Unix::Config{wibble} = 'C:\opt\perl\wibble';
+    $Config{wibble} = 'C:\opt\perl\wibble';
     $mm->prefixify('wibble', 'C:\opt\perl', 'C:\yarrow');
 
     is( $mm->{WIBBLE}, 'C:\yarrow\wibble',  'prefixify Win32 paths' );

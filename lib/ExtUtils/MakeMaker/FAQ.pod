@@ -1,6 +1,7 @@
 package ExtUtils::MakeMaker::FAQ;
 
-(our $VERSION) = sprintf "%03d", q$Revision: 1.10 $ =~ /Revision:\s+(\S+)/;
+use vars qw($VERSION);
+$VERSION = '1.11';
 
 1;
 __END__
@@ -114,22 +115,23 @@ by hand is a pain and you often forget.
 Simplest way to do it automatically is to use your version control
 system's revision number (you are using version control, right?).
 
-In CVS and RCS you use $Z<>Revision$ writing it like so:
+In CVS, RCS and SVN you use $Revision$ (see the documentation of your
+version control system for details) writing it like so:
 
-    $VERSION = sprintf "%d.%03d", q$Revision: 1.10 $ =~ /(\d+)/g;
+    $VERSION = sprintf "%d.%03d", q$Revision$ =~ /(\d+)/g;
 
-Every time the file is checked in the $Z<>Revision$ will be updated,
+Every time the file is checked in the $Revision$ will be updated,
 updating your $VERSION.
 
 In CVS version 1.9 is followed by 1.10.  Since CPAN compares version
 numbers numerically we use a sprintf() to convert 1.9 to 1.009 and
 1.10 to 1.010 which compare properly.
 
-If branches are involved (ie. $Z<>Revision: 1.5.3.4) its a little more
+If branches are involved (ie. $Revision: 1.5.3.4$) its a little more
 complicated.
 
     # must be all on one line or MakeMaker will get confused.
-    $VERSION = do { my @r = (q$Revision: 1.10 $ =~ /\d+/g); sprintf "%d."."%03d" x $#r, @r };
+    $VERSION = do { my @r = (q$Revision$ =~ /\d+/g); sprintf "%d."."%03d" x $#r, @r };
 
 =item What's this F<META.yml> thing and how did it get in my F<MANIFEST>?!
 

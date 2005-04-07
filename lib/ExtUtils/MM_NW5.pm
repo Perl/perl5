@@ -19,11 +19,11 @@ the semantics.
 =cut 
 
 use strict;
-use Config;
+use ExtUtils::MakeMaker::Config;
 use File::Basename;
 
 use vars qw(@ISA $VERSION);
-$VERSION = '2.07';
+$VERSION = '2.08';
 
 require ExtUtils::MM_Win32;
 @ISA = qw(ExtUtils::MM_Win32);
@@ -48,7 +48,7 @@ sub os_flavor {
     return ($self->SUPER::os_flavor, 'Netware');
 }
 
-=item init_platform (o)
+=item init_platform
 
 Add Netware macros.
 
@@ -125,7 +125,7 @@ sub platform_constants {
 }
 
 
-=item const_cccmd (o)
+=item const_cccmd
 
 =cut
 
@@ -142,7 +142,7 @@ MAKE_FRAG
 }
 
 
-=item static_lib (o)
+=item static_lib
 
 =cut
 
@@ -152,7 +152,7 @@ sub static_lib {
     return '' unless $self->has_link_code;
 
     my $m = <<'END';
-$(INST_STATIC): $(OBJECT) $(MYEXTLIB) blibdirs.ts
+$(INST_STATIC): $(OBJECT) $(MYEXTLIB) $(INST_ARCHAUTODIR)$(DFSEP).exists
 	$(RM_RF) $@
 END
 
@@ -187,7 +187,7 @@ END
     return $m;
 }
 
-=item dynamic_lib (o)
+=item dynamic_lib
 
 Defines how to produce the *.so (or equivalent) files.
 
@@ -212,7 +212,7 @@ OTHERLDFLAGS = '.$otherldflags.'
 INST_DYNAMIC_DEP = '.$inst_dynamic_dep.'
 
 # Create xdc data for an MT safe NLM in case of mpk build
-$(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP)
+$(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)$(DFSEP).exists
 	$(NOECHO) $(ECHO) Export boot_$(BOOT_SYMBOL) > $(BASEEXT).def
 	$(NOECHO) $(ECHO) $(BASE_IMPORT) >> $(BASEEXT).def
 	$(NOECHO) $(ECHO) Import @$(PERL_INC)\perl.imp >> $(BASEEXT).def

@@ -16,7 +16,7 @@ use Test::More;
 
 BEGIN {
 	if ($^O =~ /MSWin32/i) {
-		plan tests => 42;
+		plan tests => 41;
 	} else {
 		plan skip_all => 'This is not Win32';
 	}
@@ -176,13 +176,6 @@ delete $ENV{PATH} unless $had_path;
 # static_lib() should look into that
 # dynamic_bs() should look into that
 # dynamic_lib() should look into that
-
-# clean()
-{
-    my $clean = $Config{cc} =~ /^gcc/i ? 'dll.base dll.exp' : '*.pdb';
-    like( $MM->clean(), qr/^clean ::\s+\Q-$(RM_F) $clean\E\s+$/m,
-          'clean() Makefile target' );
-}
 
 # init_linker
 {

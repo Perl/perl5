@@ -1,9 +1,9 @@
 package ExtUtils::MM;
 
 use strict;
-use Config;
+use ExtUtils::MakeMaker::Config;
 use vars qw(@ISA $VERSION);
-$VERSION = 0.04;
+$VERSION = '0.05';
 
 require ExtUtils::Liblist;
 require ExtUtils::MakeMaker;
@@ -59,6 +59,10 @@ if( $Is{NW5} ) {
     $^O = 'NetWare';
     delete $Is{Win32};
 }
+$Is{VOS}    = $^O eq 'vos';
+$Is{QNX}    = $^O eq 'qnx';
+$Is{AIX}    = $^O eq 'aix';
+
 $Is{Unix}   = !grep { $_ } values %Is;
 
 map { delete $Is{$_} unless $Is{$_} } keys %Is;

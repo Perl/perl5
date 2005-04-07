@@ -14,5 +14,5 @@ chdir 't';
 use Test::More tests => 1;
 use ExtUtils::MakeMaker;
 
-# For backwards compat with some Tk modules, dir_target() has to be there.
+# dir_target() was typo'd as dir_targets()
 can_ok('MM', 'dir_target');

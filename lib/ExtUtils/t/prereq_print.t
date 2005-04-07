@@ -33,7 +33,7 @@ my $Perl = which_perl();
 my $Makefile = makefile_name();
 my $Is_VMS = $^O eq 'VMS';
 
-chdir($Is_VMS ? 'BFD_TEST_ROOT:[t]' : 't');
+chdir 't';
 perl_lib;
 
 $| = 1;

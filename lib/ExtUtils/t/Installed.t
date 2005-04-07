@@ -9,10 +9,9 @@ BEGIN {
         unshift @INC, 't/lib/';
     }
 }
+chdir 't';
 
 my $Is_VMS = $^O eq 'VMS';
-chdir($Is_VMS ? 'BFD_TEST_ROOT:[t]' : 't');
-
 
 use strict;
 
