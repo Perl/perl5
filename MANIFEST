@@ -1309,7 +1309,7 @@ lib/ExtUtils/instmodsh		Give information about installed extensions
 lib/ExtUtils/Liblist/Kid.pm	Does the real work of the above
 lib/ExtUtils/Liblist.pm		Locates libraries
 lib/ExtUtils/MakeMaker/bytes.pm	Version agnostic bytes.pm
-lib/ExtUtils/MakeMaker/Config.pm    MakeMaker wrapper for Config
+lib/ExtUtils/MakeMaker/Config.pm	MakeMaker wrapper for Config
 lib/ExtUtils/MakeMaker/FAQ.pod	MakeMaker FAQ
 lib/ExtUtils/MakeMaker.pm	Write Makefiles for extensions
 lib/ExtUtils/MakeMaker/Tutorial.pod	Writing a module with MakeMaker
