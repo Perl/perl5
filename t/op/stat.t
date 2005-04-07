@@ -9,7 +9,7 @@ BEGIN {
 use Config;
 use File::Spec;
 
-plan tests => 80;
+plan tests => 82;
 
 my $Perl = which_perl();
 
@@ -452,6 +452,18 @@ ok( (-M _) < 0, 'negative -M works');
 ok( (-A _) < 0, 'negative -A works');
 ok( (-C _) < 0, 'negative -C works');
 ok(unlink($f), 'unlink tmp file');
+
+{
+    ok(open(F, ">", $tmpfile), 'can create temp file');
+    close F;
+    chmod 0077, $tmpfile;
+    my @a = stat($tmpfile);
+    my $s1 = -s _;
+    -T _;
+    my $s2 = -s _;
+    is($s1, $s2, q(-T _ doesn't break the statbuffer));
+    unlink $file;
+}
 
 END {
     1 while unlink $tmpfile;

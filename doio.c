@@ -219,7 +219,6 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 
 	if (num_svs) {
 	    /* New style explicit name, type is just mode and layer info */
-	    STRLEN l = 0;
 #ifdef USE_STDIO
 	    if (SvROK(*svp) && !strchr(name,'&')) {
 		if (ckWARN(WARN_IO))
@@ -229,9 +228,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		goto say_false;
 	    }
 #endif /* USE_STDIO */
-	    name = SvOK(*svp) ? SvPV(*svp, l) : "";
-	    len = (I32)l;
-	    name = savepvn(name, len);
+	    name = SvOK(*svp) ? savesvpv (*svp) : savepvn ("", 0);
 	    SAVEFREEPV(name);
 	}
 	else {
@@ -1059,11 +1056,14 @@ Perl_io_close(pTHX_ IO *io, bool not_implicit)
 	    retval = TRUE;
 	else {
 	    if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {		/* a socket */
-		retval = (PerlIO_close(IoOFP(io)) != EOF);
+		bool prev_err = PerlIO_error(IoOFP(io));
+		retval = (PerlIO_close(IoOFP(io)) != EOF && !prev_err);
 		PerlIO_close(IoIFP(io));	/* clear stdio, fd already closed */
 	    }
-	    else
-		retval = (PerlIO_close(IoIFP(io)) != EOF);
+	    else {
+		bool prev_err = PerlIO_error(IoIFP(io));
+		retval = (PerlIO_close(IoIFP(io)) != EOF && !prev_err);
+	    }
 	}
 	IoOFP(io) = IoIFP(io) = Nullfp;
     }
@@ -1240,14 +1240,15 @@ Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode)
  return PerlIO_binmode(aTHX_ fp, iotype, mode, name);
 }
 
-#if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
-	/* code courtesy of William Kucharski */
-#define HAS_CHSIZE
-
+#if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE)
 I32 my_chsize(fd, length)
 I32 fd;			/* file descriptor */
 Off_t length;		/* length to set file to */
 {
+#ifdef F_FREESP
+	/* code courtesy of William Kucharski */
+#define HAS_CHSIZE
+
     struct flock fl;
     Stat_t filebuf;
 
@@ -1288,8 +1289,12 @@ Off_t length;		/* length to set file to */
     }
 
     return 0;
-}
+#else
+    dTHX;
+    DIE(aTHX_ "truncate not implemented");
 #endif /* F_FREESP */
+}
+#endif /* !HAS_TRUNCATE && !HAS_CHSIZE */
 
 bool
 Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)

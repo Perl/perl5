@@ -1347,7 +1347,7 @@ PP(pp_leavewrite)
 	    }
 	    topgv = gv_fetchpv(IoTOP_NAME(io),FALSE, SVt_PVFM);
 	    if (!topgv || !GvFORM(topgv)) {
-		IoLINES_LEFT(io) = 100000000;
+		IoLINES_LEFT(io) = IoPAGE_LEN(io);
 		goto forget_top;
 	    }
 	    IoTOP_GV(io) = topgv;
@@ -2110,7 +2110,6 @@ PP(pp_truncate)
      * might not be signed: if it is not, clever compilers will moan. */
     /* XXX Configure probe for the signedness of the length type of *truncate() needed? XXX */
     SETERRNO(0,0);
-#if defined(HAS_TRUNCATE) || defined(HAS_CHSIZE) || defined(F_FREESP)
     {
         STRLEN n_a;
 	int result = 1;
@@ -2185,9 +2184,6 @@ PP(pp_truncate)
 	    SETERRNO(EBADF,RMS_IFI);
 	RETPUSHUNDEF;
     }
-#else
-    DIE(aTHX_ "truncate not implemented");
-#endif
 }
 
 PP(pp_fcntl)
@@ -3395,7 +3391,6 @@ PP(pp_fttext)
 	sv = POPs;
       really_filename:
 	PL_statgv = Nullgv;
-	PL_laststatval = -1;
 	PL_laststype = OP_STAT;
 	sv_setpv(PL_statname, SvPV(sv, n_a));
 	if (!(fp = PerlIO_open(SvPVX(PL_statname), "r"))) {
