@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Mar 30 16:17:23 CEST 2005 [metaconfig 3.0 PL70]
+# Generated on Fri Apr  8 16:30:10 CEST 2005 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -663,7 +663,6 @@ d_shmget=''
 d_sigaction=''
 d_sigprocmask=''
 d_sigsetjmp=''
-d_sitecustomize=''
 usesitecustomize=''
 d_sockatmark=''
 d_sockatmarkproto=''
@@ -14102,6 +14101,10 @@ esac
 
 
 
+: see if this is a math.h system
+set math.h i_math
+eval $inhdr
+
 : see if sqrtl exists
 set sqrtl d_sqrtl
 eval $inlibc
@@ -14113,10 +14116,6 @@ eval $inlibc
 : see if modfl exists
 set modfl d_modfl
 eval $inlibc
-
-: see if this is a math.h system
-set math.h i_math
-eval $inhdr
 
 : see if prototype for modfl is available
 echo " "
@@ -16136,17 +16135,6 @@ esac
 set d_sigsetjmp
 eval $setvar
 $rm -f try.c try
-
-
-d_sitecustomize="$undef"
-case "$usesitecustomize" in
-    $define|true|[Yy]*)
-	usesitecustomize="$define"
-	d_sitecustomize="$define"
-	;;
-    *)
-	usesitecustomize="$undef"
-    esac
 
 : see if sockatmark exists
 set sockatmark d_sockatmark
@@ -19500,6 +19488,16 @@ case "$uidsign" in
 	;;
 esac
 
+
+case "$usesitecustomize" in
+    $define|true|[Yy]*)
+	usesitecustomize="$define"
+	;;
+    *)
+	usesitecustomize="$undef"
+	;;
+    esac
+
 : determine compiler compiler
 case "$yacc" in
 '')
@@ -20884,7 +20882,6 @@ d_shmget='$d_shmget'
 d_sigaction='$d_sigaction'
 d_sigprocmask='$d_sigprocmask'
 d_sigsetjmp='$d_sigsetjmp'
-d_sitecustomize='$d_sitecustomize'
 d_sockatmark='$d_sockatmark'
 d_sockatmarkproto='$d_sockatmarkproto'
 d_socket='$d_socket'
