@@ -737,17 +737,22 @@ in gv.h: */
 #define SvRVx(sv) SvRV(sv)
 
 #define SvIVX(sv) ((XPVIV*)  SvANY(sv))->xiv_iv
-#define SvIVXx(sv) SvIVX(sv)
 #define SvUVX(sv) ((XPVUV*)  SvANY(sv))->xuv_uv
-#define SvUVXx(sv) SvUVX(sv)
+#ifdef PERL_DEBUG_COW
+#define SvNVX(sv)  (0.0 + ((XPVNV*)SvANY(sv))->xnv_nv)
+#else
 #define SvNVX(sv)  ((XPVNV*)SvANY(sv))->xnv_nv
-#define SvNVXx(sv) SvNVX(sv)
+#endif
 #define SvPVX(sv)  ((XPV*)  SvANY(sv))->xpv_pv
-#define SvPVXx(sv) SvPVX(sv)
 #define SvCUR(sv) ((XPV*)  SvANY(sv))->xpv_cur
 #define SvLEN(sv) ((XPV*)  SvANY(sv))->xpv_len
-#define SvLENx(sv) SvLEN(sv)
 #define SvEND(sv)(((XPV*)  SvANY(sv))->xpv_pv + ((XPV*)SvANY(sv))->xpv_cur)
+
+#define SvIVXx(sv) SvIVX(sv)
+#define SvUVXx(sv) SvUVX(sv)
+#define SvNVXx(sv) SvNVX(sv)
+#define SvPVXx(sv) SvPVX(sv)
+#define SvLENx(sv) SvLEN(sv)
 #define SvENDx(sv) ((PL_Sv = (sv)), SvEND(PL_Sv))
 
 #ifdef DEBUGGING
@@ -769,7 +774,7 @@ in gv.h: */
 		(SvIVX(sv) = (val)); } STMT_END
 #define SvNV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) == SVt_NV || SvTYPE(sv) >= SVt_PVNV); \
-		(SvNVX(sv) = (val)); } STMT_END
+		(((XPVNV*)SvANY(sv))->xnv_nv = (val)); } STMT_END
 #define SvPV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
 		(SvPVX(sv) = (val)); } STMT_END

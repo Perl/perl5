@@ -7518,7 +7518,7 @@ Perl_sv_dec(pTHX_ register SV *sv)
     if (!(flags & SVp_POK)) {
 	if ((flags & SVTYPEMASK) < SVt_PVNV)
 	    sv_upgrade(sv, SVt_NV);
-	SvNVX(sv) = -1.0;
+	SvNV_set(sv, 1.0);
 	(void)SvNOK_only(sv);
 	return;
     }
