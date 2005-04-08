@@ -2822,7 +2822,7 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 f
     if (strEQ(scriptname, "-"))
  	dosearch = 0;
     if (dosearch) {		/* Look in '.' first. */
-	char *cur = scriptname;
+	const char *cur = scriptname;
 #ifdef SEARCH_EXTS
 	if ((curext = strrchr(scriptname,'.')))	/* possible current ext */
 	    while (ext[i])

@@ -45,12 +45,6 @@
 #   include <shadow.h>
 #endif
 
-#ifdef HAS_SYSCALL
-#ifdef __cplusplus
-extern "C" int syscall(unsigned long,...);
-#endif
-#endif
-
 #ifdef I_SYS_WAIT
 # include <sys/wait.h>
 #endif
@@ -1699,7 +1693,7 @@ PP(pp_sysread)
 
 	read_target = sv_newmortal();
 	SvUPGRADE(read_target, SVt_PV);
-	buffer = SvGROW(read_target, length + 1);
+	buffer = SvGROW(read_target, (STRLEN)(length + 1));
     }
 
     if (PL_op->op_type == OP_SYSREAD) {
