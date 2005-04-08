@@ -4605,6 +4605,12 @@ portability of C<select>.
 
 On error, C<select> returns C<undef> and sets C<$!>.
 
+Note: on some Unixes, the select(2) system call may report a socket file
+descriptor as "ready for reading", when actually no data is available,
+thus a subsequent read blocks. It can be avoided using always the
+O_NONBLOCK flag on the socket. See select(2) and fcntl(2) for further
+details.
+
 B<WARNING>: One should not attempt to mix buffered I/O (like C<read>
 or <FH>) with C<select>, except as permitted by POSIX, and even
 then only on POSIX systems.  You have to use C<sysread> instead.
