@@ -2,6 +2,7 @@ package ExtUtils::MM_AIX;
 
 use strict;
 use vars qw($VERSION @ISA);
+use ExtUtils::MakeMaker qw(neatvalue);
 $VERSION = '0.02';
 
 require ExtUtils::MM_Unix;
