@@ -49,6 +49,7 @@ $ use_vmsdebug_perl = "n"
 $ use64bitall = "n"
 $ use64bitint = "n"
 $ uselargefiles = "n"
+$ usesitecustomize = "n"
 $ C_Compiler_Replace = "CC="
 $ Thread_Live_Dangerously = "MT="
 $ use_two_pot_malloc = "N"
@@ -882,7 +883,7 @@ $   config_symbols0 ="|archlib|archlibexp|bin|binexp|builddir|cf_email|config_sh
 $   config_symbols1 ="|installprivlib|installscript|installsitearch|installsitelib|most|oldarchlib|oldarchlibexp|osname|pager|perl_symbol|perl_verb|"
 $   config_symbols2 ="|prefix|privlib|privlibexp|scriptdir|sitearch|sitearchexp|sitebin|sitelib|sitelib_stem|sitelibexp|try_cxx|use64bitall|use64bitint|"
 $   config_symbols3 ="|usecasesensitive|usedefaulttypes|usedevel|useieee|useithreads|usemultiplicity|usemymalloc|usedebugging_perl|useperlio|usesecurelog|"
-$   config_symbols4 ="|usethreads|usevmsdebug|usefaststdio|usemallocwrap|unlink_all_versions|uselargefiles|"
+$   config_symbols4 ="|usethreads|usevmsdebug|usefaststdio|usemallocwrap|unlink_all_versions|uselargefiles|usesitecustomize|"
 $!  
 $   open/read CONFIG 'config_sh'
 $   rd_conf_loop:
@@ -2339,6 +2340,13 @@ $   GOSUB myread
 $   uselargefiles=ans
 $!
 $ ENDIF ! not VAX && >= 7.1
+$!
+$ IF usesitecustomize .OR. usesitecustomize .eqs. "define" 
+$ THEN 
+$       usesitecustomize = "define"
+$ ELSE
+$       usesitecustomize = "undef"
+$ ENDIF
 $!
 $! Ask about threads, if appropriate
 $ IF ccname .EQS. "DEC" .OR. ccname .EQS. "CXX"
@@ -6061,6 +6069,7 @@ $ WC "useposix='false'"
 $ WC "usereentrant='undef'"
 $ WC "userelocatableinc='undef'"
 $ WC "usesecurelog='" + usesecurelog + "'"  ! VMS-specific
+$ WC "usesitecustomize='" + usesitecustomize + "'"
 $ WC "usesocks='undef'"
 $ WC "usethreads='" + usethreads + "'"
 $ WC "usevendorprefix='" + "'" ! try to say no, though we'll be ignored as of MM 5.90_01
