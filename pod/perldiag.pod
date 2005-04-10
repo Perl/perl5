@@ -2428,22 +2428,21 @@ doesn't know where you want to pipe the output from this command.
 =item No DB::DB routine defined
 
 (F) The currently executing code was compiled with the B<-d> switch, but
-for some reason the perl5db.pl file (or some facsimile thereof) didn't
-define a routine to be called at the beginning of each statement.  Which
-is odd, because the file should have been required automatically, and
-should have blown up the require if it didn't parse right.
+for some reason the  current debugger (e.g. F<perl5db.pl> or a C<Devel::>
+module) didn't define a routine to be called at the beginning of each
+statement.
 
 =item No dbm on this machine
 
 (P) This is counted as an internal error, because every machine should
 supply dbm nowadays, because Perl comes with SDBM.  See L<SDBM_File>.
 
-=item No DBsub routine
+=item No DB::sub routine defined
 
-(F) The currently executing code was compiled with the B<-d> switch,
-but for some reason the perl5db.pl file (or some facsimile thereof)
-didn't define a DB::sub routine to be called at the beginning of each
-ordinary subroutine call.
+(F) The currently executing code was compiled with the B<-d> switch, but
+for some reason the current debugger (e.g. F<perl5db.pl> or a C<Devel::>
+module) didn't define a C<DB::sub> routine to be called at the beginning
+of each ordinary subroutine call.
 
 =item No B<-e> allowed in setuid scripts
 

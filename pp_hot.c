@@ -2672,8 +2672,8 @@ PP(pp_entersub)
 	    sv_setiv(PL_DBassertion, 1);
 	
 	cv = get_db_sub(&sv, cv);
-	if (!cv)
-	    DIE(aTHX_ "No DBsub routine");
+	if (!cv || (!CvXSUB(cv) && !CvSTART(cv)))
+	    DIE(aTHX_ "No DB::sub routine defined");
     }
 
     if (!(CvXSUB(cv))) {
