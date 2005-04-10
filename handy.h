@@ -160,7 +160,7 @@ typedef U64TYPE U64;
 #endif
 
 /* HMB H.Merijn Brand - a placeholder for preparing Configure patches */
-#if defined(USE_SITECUSTOMIZE) || defined(LIBM_VERSION_TYPE)
+#if defined(LIBM_LIB_VERSION)
 /* Not (yet) used at top level, but mention them for metaconfig */
 #endif
 

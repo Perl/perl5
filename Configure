@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Apr  8 16:30:10 CEST 2005 [metaconfig 3.0 PL70]
+# Generated on Sun Apr 10 19:26:39 CEST 2005 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -525,6 +525,7 @@ d_isnanl=''
 d_killpg=''
 d_lchown=''
 d_ldbl_dig=''
+d_libm_lib_version=''
 d_link=''
 d_localtime_r=''
 localtime_r_proto=''
@@ -663,6 +664,7 @@ d_shmget=''
 d_sigaction=''
 d_sigprocmask=''
 d_sigsetjmp=''
+d_sitecustomize=''
 usesitecustomize=''
 d_sockatmark=''
 d_sockatmarkproto=''
@@ -13948,6 +13950,38 @@ $rm -f ldbl_dig.?
 set d_ldbl_dig
 eval $setvar
 
+: see if this is a math.h system
+set math.h i_math
+eval $inhdr
+
+d_libm_lib_version="$undef"
+case $i_math in
+    $define)
+	: check to see if math.h defines _LIB_VERSION
+	echo " "
+	echo "Checking to see if your libm supports _LIB_VERSION..." >&4
+	$cat >try.c <<EOCP
+#include <unistd.h>
+#include <math.h>
+int main (int argc, char *argv[])
+{
+    printf ("%d\n", _LIB_VERSION);
+    return (0);
+    } /* main */
+EOCP
+	set try
+	if eval $compile; then
+	    foo=`$run ./try`
+	    echo "Yes, it does ($foo)" >&4
+	    d_libm_lib_version="$define"
+	else
+	    echo "No, it does not (probably harmless)\n" >&4
+	    fi
+	$rm -f try.* try core core.try.*
+	;;
+
+    esac
+
 : see if link exists
 set link d_link
 eval $inlibc
@@ -14100,10 +14134,6 @@ END
 esac
 
 
-
-: see if this is a math.h system
-set math.h i_math
-eval $inhdr
 
 : see if sqrtl exists
 set sqrtl d_sqrtl
@@ -16135,6 +16165,17 @@ esac
 set d_sigsetjmp
 eval $setvar
 $rm -f try.c try
+
+
+d_sitecustomize="$undef"
+case "$usesitecustomize" in
+    $define|true|[Yy]*)
+	usesitecustomize="$define"
+	d_sitecustomize="$define"
+	;;
+    *)
+	usesitecustomize="$undef"
+    esac
 
 : see if sockatmark exists
 set sockatmark d_sockatmark
@@ -19488,16 +19529,6 @@ case "$uidsign" in
 	;;
 esac
 
-
-case "$usesitecustomize" in
-    $define|true|[Yy]*)
-	usesitecustomize="$define"
-	;;
-    *)
-	usesitecustomize="$undef"
-	;;
-    esac
-
 : determine compiler compiler
 case "$yacc" in
 '')
@@ -20743,6 +20774,7 @@ d_isnanl='$d_isnanl'
 d_killpg='$d_killpg'
 d_lchown='$d_lchown'
 d_ldbl_dig='$d_ldbl_dig'
+d_libm_lib_version='$d_libm_lib_version'
 d_link='$d_link'
 d_localtime_r='$d_localtime_r'
 d_locconv='$d_locconv'
@@ -20882,6 +20914,7 @@ d_shmget='$d_shmget'
 d_sigaction='$d_sigaction'
 d_sigprocmask='$d_sigprocmask'
 d_sigsetjmp='$d_sigsetjmp'
+d_sitecustomize='$d_sitecustomize'
 d_sockatmark='$d_sockatmark'
 d_sockatmarkproto='$d_sockatmarkproto'
 d_socket='$d_socket'
