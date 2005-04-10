@@ -728,6 +728,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_math I_MATH		/**/
 
+/* LIBM_LIB_VERSION:
+ *    This symbol, if defined, indicates that libm exports _LIB_VERSION
+ *    and that math.h defines the enum to manipulate it.
+ */
+#$d_libm_lib_version LIBM_LIB_VERSION         /**/
+
 /* I_MEMORY:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <memory.h>.
@@ -3468,7 +3474,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *    This symbol, if defined, indicates that sitecustomize should
  *    be used.
  */
-#$d_sitecustomize     USE_SITECUSTOMIZE               /**/
+#$usesitecustomize     USE_SITECUSTOMIZE               /**/
 
 /* Size_t_size:
  *	This symbol holds the size of a Size_t in bytes.

@@ -704,6 +704,12 @@
  */
 #define I_MATH		/**/
 
+/* LIBM_LIB_VERSION:
+ *    This symbol, if defined, indicates that libm exports _LIB_VERSION
+ *    and that math.h defines the enum to manipulate it.
+ */
+#undef LIBM_LIB_VERSION         /**/
+
 /* I_MEMORY:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <memory.h>.
