@@ -1,7 +1,7 @@
 package Module::CoreList;
 use strict;
 use vars qw/$VERSION %released %version %families/;
-$VERSION = '1.99';
+$VERSION = '2.00';
 
 =head1 NAME
 
@@ -37,20 +37,23 @@ clusters known perl releases by their major versions.
 
 =head1 CAVEATS
 
-Module::CoreList currently only covers the 5.003_07, 5.004, 5.004_05,
-5.005, 5.005_03, 5.005_04, 5.6.0, 5.6.1, 5.6.2, 5.7.3, 5.8.0, 5.8.1,
-5.8.2, 5.8.3, 5.8.4, 5.8.5, 5.8.6, 5.9.0, and 5.9.1 releases of perl.
+Module::CoreList currently only covers the 5.000, 5.001, 5.002, 5.003_07,
+5.004, 5.004_05, 5.005, 5.005_03, 5.005_04, 5.6.0, 5.6.1, 5.6.2, 5.7.3, 5.8.0,
+5.8.1, 5.8.2, 5.8.3, 5.8.4, 5.8.5, 5.8.6, 5.9.0, 5.9.1 and 5.9.2 releases of
+perl.
 
 Producing this information can be rather time consuming so patches are
 welcomed for other versions.
 
 =head1 HISTORY
 
-Moved to Changes file
+Moved to Changes file.
 
 =head1 AUTHOR
 
 Richard Clamp E<lt>richardc@unixbeard.netE<gt>
+
+Currently maintained by the perl 5 porters E<lt>perl5-porters@perl.orgR<gt>.
 
 =head1 COPYRIGHT
 
@@ -95,6 +98,9 @@ sub first_release {
 
 # when things escaped
 %released = (
+    5.000    => '1994-10-17',
+    5.001    => '1995-03-14',
+    5.002    => '1996-02-96',
     5.00307  => '1996-10-10',
     5.004    => '1997-05-15',
     5.005    => '1998-07-22',
@@ -124,6 +130,195 @@ for my $version ( sort { $a <=> $b } keys %released ) {
 
 
 %version = (
+    5.000 => {
+        'AnyDBM_File'           => undef,  # lib/AnyDBM_File.pm
+        'AutoLoader'            => undef,  # lib/AutoLoader.pm
+        'AutoSplit'             => undef,  # lib/AutoSplit.pm
+        'Benchmark'             => undef,  # lib/Benchmark.pm
+        'Carp'                  => undef,  # lib/Carp.pm
+        'Cwd'                   => undef,  # lib/Cwd.pm
+        'DB_File'               => undef,  # ext/DB_File/DB_File.pm
+        'DynaLoader'            => undef,  # ext/DynaLoader/DynaLoader.pm
+        'English'               => undef,  # lib/English.pm
+        'Env'                   => undef,  # lib/Env.pm
+        'Exporter'              => undef,  # lib/Exporter.pm
+        'ExtUtils::MakeMaker'   => undef,  # lib/ExtUtils/MakeMaker.pm
+        'Fcntl'                 => undef,  # ext/Fcntl/Fcntl.pm
+        'File::Basename'        => undef,  # lib/File/Basename.pm
+        'File::CheckTree'       => undef,  # lib/File/CheckTree.pm
+        'File::Find'            => undef,  # lib/File/Find.pm
+        'FileHandle'            => undef,  # lib/FileHandle.pm
+        'GDBM_File'             => undef,  # ext/GDBM_File/GDBM_File.pm
+        'Getopt::Long'          => undef,  # lib/Getopt/Long.pm
+        'Getopt::Std'           => undef,  # lib/Getopt/Std.pm
+        'I18N::Collate'         => undef,  # lib/I18N/Collate.pm
+        'IPC::Open2'            => undef,  # lib/IPC/Open2.pm
+        'IPC::Open3'            => undef,  # lib/IPC/Open3.pm
+        'Math::BigFloat'        => undef,  # lib/Math/BigFloat.pm
+        'Math::BigInt'          => undef,  # lib/Math/BigInt.pm
+        'Math::Complex'         => undef,  # lib/Math/Complex.pm
+        'NDBM_File'             => undef,  # ext/NDBM_File/NDBM_File.pm
+        'Net::Ping'             => undef,  # lib/Net/Ping.pm
+        'ODBM_File'             => undef,  # ext/ODBM_File/ODBM_File.pm
+        'POSIX'                 => undef,  # ext/POSIX/POSIX.pm
+        'SDBM_File'             => undef,  # ext/SDBM_File/SDBM_File.pm
+        'Search::Dict'          => undef,  # lib/Search/Dict.pm
+        'Shell'                 => undef,  # lib/Shell.pm
+        'Socket'                => undef,  # ext/Socket/Socket.pm
+        'Sys::Hostname'         => undef,  # lib/Sys/Hostname.pm
+        'Sys::Syslog'           => undef,  # lib/Sys/Syslog.pm
+        'Term::Cap'             => undef,  # lib/Term/Cap.pm
+        'Term::Complete'        => undef,  # lib/Term/Complete.pm
+        'Test::Harness'         => undef,  # lib/Test/Harness.pm
+        'Text::Abbrev'          => undef,  # lib/Text/Abbrev.pm
+        'Text::ParseWords'      => undef,  # lib/Text/ParseWords.pm
+        'Text::Soundex'         => undef,  # lib/Text/Soundex.pm
+        'Text::Tabs'            => undef,  # lib/Text/Tabs.pm
+        'TieHash'               => undef,  # lib/TieHash.pm
+        'Time::Local'           => undef,  # lib/Time/Local.pm
+        'integer'               => undef,  # lib/integer.pm
+        'less'                  => undef,  # lib/less.pm
+        'sigtrap'               => undef,  # lib/sigtrap.pm
+        'strict'                => undef,  # lib/strict.pm
+        'subs'                  => undef,  # lib/subs.pm
+    },
+    5.001 => {
+        'AnyDBM_File'           => undef,  # lib/AnyDBM_File.pm
+        'AutoLoader'            => undef,  # lib/AutoLoader.pm
+        'AutoSplit'             => undef,  # lib/AutoSplit.pm
+        'Benchmark'             => undef,  # lib/Benchmark.pm
+        'Carp'                  => undef,  # lib/Carp.pm
+        'Cwd'                   => undef,  # lib/Cwd.pm
+        'DB_File'               => undef,  # ext/DB_File/DB_File.pm
+        'DynaLoader'            => undef,  # ext/DynaLoader/DynaLoader.pm
+        'English'               => undef,  # lib/English.pm
+        'Env'                   => undef,  # lib/Env.pm
+        'Exporter'              => undef,  # lib/Exporter.pm
+        'ExtUtils::Liblist'     => undef,  # lib/ExtUtils/Liblist.pm
+        'ExtUtils::MakeMaker'   => undef,  # lib/ExtUtils/MakeMaker.pm
+        'ExtUtils::Manifest'    => undef,  # lib/ExtUtils/Manifest.pm
+        'ExtUtils::Mkbootstrap' => undef,  # lib/ExtUtils/Mkbootstrap.pm
+        'Fcntl'                 => undef,  # ext/Fcntl/Fcntl.pm
+        'File::Basename'        => undef,  # lib/File/Basename.pm
+        'File::CheckTree'       => undef,  # lib/File/CheckTree.pm
+        'File::Find'            => undef,  # lib/File/Find.pm
+        'File::Path'            => undef,  # lib/File/Path.pm
+        'FileHandle'            => undef,  # lib/FileHandle.pm
+        'GDBM_File'             => undef,  # ext/GDBM_File/GDBM_File.pm
+        'Getopt::Long'          => undef,  # lib/Getopt/Long.pm
+        'Getopt::Std'           => undef,  # lib/Getopt/Std.pm
+        'I18N::Collate'         => undef,  # lib/I18N/Collate.pm
+        'IPC::Open2'            => undef,  # lib/IPC/Open2.pm
+        'IPC::Open3'            => undef,  # lib/IPC/Open3.pm
+        'Math::BigFloat'        => undef,  # lib/Math/BigFloat.pm
+        'Math::BigInt'          => undef,  # lib/Math/BigInt.pm
+        'Math::Complex'         => undef,  # lib/Math/Complex.pm
+        'NDBM_File'             => undef,  # ext/NDBM_File/NDBM_File.pm
+        'Net::Ping'             => undef,  # lib/Net/Ping.pm
+        'ODBM_File'             => undef,  # ext/ODBM_File/ODBM_File.pm
+        'POSIX'                 => undef,  # ext/POSIX/POSIX.pm
+        'SDBM_File'             => undef,  # ext/SDBM_File/SDBM_File.pm
+        'Search::Dict'          => undef,  # lib/Search/Dict.pm
+        'Shell'                 => undef,  # lib/Shell.pm
+        'Socket'                => undef,  # ext/Socket/Socket.pm
+        'SubstrHash'            => undef,  # lib/SubstrHash.pm
+        'Sys::Hostname'         => undef,  # lib/Sys/Hostname.pm
+        'Sys::Syslog'           => undef,  # lib/Sys/Syslog.pm
+        'Term::Cap'             => undef,  # lib/Term/Cap.pm
+        'Term::Complete'        => undef,  # lib/Term/Complete.pm
+        'Test::Harness'         => undef,  # lib/Test/Harness.pm
+        'Text::Abbrev'          => undef,  # lib/Text/Abbrev.pm
+        'Text::ParseWords'      => undef,  # lib/Text/ParseWords.pm
+        'Text::Soundex'         => undef,  # lib/Text/Soundex.pm
+        'Text::Tabs'            => undef,  # lib/Text/Tabs.pm
+        'TieHash'               => undef,  # lib/TieHash.pm
+        'Time::Local'           => undef,  # lib/Time/Local.pm
+        'integer'               => undef,  # lib/integer.pm
+        'less'                  => undef,  # lib/less.pm
+        'lib'                   => undef,  # lib/lib.pm
+        'sigtrap'               => undef,  # lib/sigtrap.pm
+        'strict'                => undef,  # lib/strict.pm
+        'subs'                  => undef,  # lib/subs.pm
+    },
+    5.002 => {
+        'AnyDBM_File'           => undef,  # lib/AnyDBM_File.pm
+        'AutoLoader'            => undef,  # lib/AutoLoader.pm
+        'AutoSplit'             => undef,  # lib/AutoSplit.pm
+        'Benchmark'             => undef,  # lib/Benchmark.pm
+        'Carp'                  => undef,  # lib/Carp.pm
+        'Cwd'                   => undef,  # lib/Cwd.pm
+        'DB_File'               => '1.01',  # ext/DB_File/DB_File.pm
+        'Devel::SelfStubber'    => '1.01',  # lib/Devel/SelfStubber.pm
+        'DirHandle'             => undef,  # lib/DirHandle.pm
+        'DynaLoader'            => '1.00',  # ext/DynaLoader/DynaLoader.pm
+        'English'               => undef,  # lib/English.pm
+        'Env'                   => undef,  # lib/Env.pm
+        'Exporter'              => undef,  # lib/Exporter.pm
+        'ExtUtils::Install'     => undef,  # lib/ExtUtils/Install.pm
+        'ExtUtils::Liblist'     => undef,  # lib/ExtUtils/Liblist.pm
+        'ExtUtils::MM_OS2'      => undef,  # lib/ExtUtils/MM_OS2.pm
+        'ExtUtils::MM_Unix'     => undef,  # lib/ExtUtils/MM_Unix.pm
+        'ExtUtils::MM_VMS'      => undef,  # lib/ExtUtils/MM_VMS.pm
+        'ExtUtils::MakeMaker'   => '5.21',  # lib/ExtUtils/MakeMaker.pm
+        'ExtUtils::Manifest'    => '1.22',  # lib/ExtUtils/Manifest.pm
+        'ExtUtils::Mkbootstrap' => undef,  # lib/ExtUtils/Mkbootstrap.pm
+        'ExtUtils::Mksymlists'  => '1.00',  # lib/ExtUtils/Mksymlists.pm
+        'Fcntl'                 => '1.00',  # ext/Fcntl/Fcntl.pm
+        'File::Basename'        => undef,  # lib/File/Basename.pm
+        'File::CheckTree'       => undef,  # lib/File/CheckTree.pm
+        'File::Copy'            => '1.5',  # lib/File/Copy.pm
+        'File::Find'            => undef,  # lib/File/Find.pm
+        'File::Path'            => '1.01',  # lib/File/Path.pm
+        'FileCache'             => undef,  # lib/FileCache.pm
+        'FileHandle'            => '1.00',  # ext/FileHandle/FileHandle.pm
+        'GDBM_File'             => '1.00',  # ext/GDBM_File/GDBM_File.pm
+        'Getopt::Long'          => '2.01',  # lib/Getopt/Long.pm
+        'Getopt::Std'           => undef,  # lib/Getopt/Std.pm
+        'I18N::Collate'         => undef,  # lib/I18N/Collate.pm
+        'IPC::Open2'            => undef,  # lib/IPC/Open2.pm
+        'IPC::Open3'            => undef,  # lib/IPC/Open3.pm
+        'Math::BigFloat'        => undef,  # lib/Math/BigFloat.pm
+        'Math::BigInt'          => undef,  # lib/Math/BigInt.pm
+        'Math::Complex'         => undef,  # lib/Math/Complex.pm
+        'NDBM_File'             => '1.00',  # ext/NDBM_File/NDBM_File.pm
+        'Net::Ping'             => '1',  # lib/Net/Ping.pm
+        'ODBM_File'             => '1.00',  # ext/ODBM_File/ODBM_File.pm
+        'POSIX'                 => '1.00',  # ext/POSIX/POSIX.pm
+        'Pod::Functions'        => undef,  # lib/Pod/Functions.pm
+        'Pod::Text'             => undef,  # lib/Pod/Text.pm
+        'SDBM_File'             => '1.00',  # ext/SDBM_File/SDBM_File.pm
+        'Safe'                  => '1.00',  # ext/Safe/Safe.pm
+        'Search::Dict'          => undef,  # lib/Search/Dict.pm
+        'SelectSaver'           => undef,  # lib/SelectSaver.pm
+        'SelfLoader'            => '1.06',  # lib/SelfLoader.pm
+        'Shell'                 => undef,  # lib/Shell.pm
+        'Socket'                => '1.5',  # ext/Socket/Socket.pm
+        'Symbol'                => undef,  # lib/Symbol.pm
+        'Sys::Hostname'         => undef,  # lib/Sys/Hostname.pm
+        'Sys::Syslog'           => undef,  # lib/Sys/Syslog.pm
+        'Term::Cap'             => undef,  # lib/Term/Cap.pm
+        'Term::Complete'        => undef,  # lib/Term/Complete.pm
+        'Term::ReadLine'        => undef,  # lib/Term/ReadLine.pm
+        'Test::Harness'         => '1.07',  # lib/Test/Harness.pm
+        'Text::Abbrev'          => undef,  # lib/Text/Abbrev.pm
+        'Text::ParseWords'      => undef,  # lib/Text/ParseWords.pm
+        'Text::Soundex'         => undef,  # lib/Text/Soundex.pm
+        'Text::Tabs'            => undef,  # lib/Text/Tabs.pm
+        'Text::Wrap'            => undef,  # lib/Text/Wrap.pm
+        'Tie::Hash'             => undef,  # lib/Tie/Hash.pm
+        'Tie::Scalar'           => undef,  # lib/Tie/Scalar.pm
+        'Tie::SubstrHash'       => undef,  # lib/Tie/SubstrHash.pm
+        'Time::Local'           => undef,  # lib/Time/Local.pm
+        'diagnostics'           => undef,  # lib/diagnostics.pm
+        'integer'               => undef,  # lib/integer.pm
+        'less'                  => undef,  # lib/less.pm
+        'lib'                   => undef,  # lib/lib.pm
+        'overload'              => undef,  # lib/overload.pm
+        'sigtrap'               => undef,  # lib/sigtrap.pm
+        'strict'                => undef,  # lib/strict.pm
+        'subs'                  => undef,  # lib/subs.pm
+        'vars'                  => undef,  # lib/vars.pm
+    },
     5.00307 => {
         'AnyDBM_File'           => undef, #./lib/AnyDBM_File.pm
         'AutoLoader'            => undef, #./lib/AutoLoader.pm
