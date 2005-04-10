@@ -49,7 +49,7 @@
 
 #ifdef PERL_COPY_ON_WRITE
 #define SV_COW_NEXT_SV(sv)	INT2PTR(SV *,SvUVX(sv))
-#define SV_COW_NEXT_SV_SET(current,next)	SvUVX(current) = PTR2UV(next)
+#define SV_COW_NEXT_SV_SET(current,next)	SvUV_set(current, PTR2UV(next))
 /* This is a pessimistic view. Scalar must be purely a read-write PV to copy-
    on-write.  */
 #endif
@@ -2226,7 +2226,7 @@ Perl_sv_setuv(pTHX_ register SV *sv, UV u)
     }
     sv_setiv(sv, 0);
     SvIsUV_on(sv);
-    SvUVX(sv) = u;
+    SvUV_set(sv, u);
 }
 
 /*
@@ -2509,7 +2509,7 @@ S_sv_2iuv_non_preserve(pTHX_ register SV *sv, I32 numtype)
 	(void)SvIOKp_on(sv);
 	(void)SvNOK_on(sv);
 	SvIsUV_on(sv);
-	SvUVX(sv) = UV_MAX;
+	SvUV_set(sv, UV_MAX);
 	return IS_NUMBER_OVERFLOW_UV;
     }
     (void)SvIOKp_on(sv);
@@ -2526,7 +2526,7 @@ S_sv_2iuv_non_preserve(pTHX_ register SV *sv, I32 numtype)
         return SvNVX(sv) < 0 ? IS_NUMBER_UNDERFLOW_UV : IS_NUMBER_IV_AND_UV;
     }
     SvIsUV_on(sv);
-    SvUVX(sv) = U_V(SvNVX(sv));
+    SvUV_set(sv, U_V(SvNVX(sv)));
     if ((NV)(SvUVX(sv)) == SvNVX(sv)) {
         if (SvUVX(sv) == UV_MAX) {
             /* As we know that NVs don't preserve UVs, UV_MAX cannot
@@ -2663,7 +2663,7 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
 	       0x8000000000000000 which will be exact. NWC */
 	}
 	else {
-	    SvUVX(sv) = U_V(SvNVX(sv));
+	    SvUV_set(sv, U_V(SvNVX(sv)));
 	    if (
 		(SvNVX(sv) == (NV) SvUVX(sv))
 #ifndef  NV_PRESERVES_UV
@@ -2728,7 +2728,7 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
 		if (value <= (UV)IV_MAX) {
 		    SvIV_set(sv, (IV)value);
 		} else {
-		    SvUVX(sv) = value;
+		    SvUV_set(sv, value);
 		    SvIsUV_on(sv);
 		}
 	    } else {
@@ -2784,10 +2784,10 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
 		if (SvNVX(sv) > (NV)UV_MAX) {
 		    SvIsUV_on(sv);
 		    /* Integer is inaccurate. NOK, IOKp, is UV */
-		    SvUVX(sv) = UV_MAX;
+		    SvUV_set(sv, UV_MAX);
 		    SvIsUV_on(sv);
 		} else {
-		    SvUVX(sv) = U_V(SvNVX(sv));
+		    SvUV_set(sv, U_V(SvNVX(sv)));
 		    /* 0xFFFFFFFFFFFFFFFF not an issue in here */
 		    if ((NV)(SvUVX(sv)) == SvNVX(sv)) {
 			SvIOK_on(sv);
@@ -2968,7 +2968,7 @@ Perl_sv_2uv_flags(pTHX_ register SV *sv, I32 flags)
 	       0x8000000000000000 which will be exact. NWC */
 	}
 	else {
-	    SvUVX(sv) = U_V(SvNVX(sv));
+	    SvUV_set(sv, U_V(SvNVX(sv)));
 	    if (
 		(SvNVX(sv) == (NV) SvUVX(sv))
 #ifndef  NV_PRESERVES_UV
@@ -3030,7 +3030,7 @@ Perl_sv_2uv_flags(pTHX_ register SV *sv, I32 flags)
 		    SvIV_set(sv, (IV)value);
 		} else {
 		    /* it didn't overflow, and it was positive. */
-		    SvUVX(sv) = value;
+		    SvUV_set(sv, value);
 		    SvIsUV_on(sv);
 		}
 	    } else {
@@ -3082,10 +3082,10 @@ Perl_sv_2uv_flags(pTHX_ register SV *sv, I32 flags)
                 if (SvNVX(sv) > (NV)UV_MAX) {
                     SvIsUV_on(sv);
                     /* Integer is inaccurate. NOK, IOKp, is UV */
-                    SvUVX(sv) = UV_MAX;
+                    SvUV_set(sv, UV_MAX);
                     SvIsUV_on(sv);
                 } else {
-                    SvUVX(sv) = U_V(SvNVX(sv));
+                    SvUV_set(sv, U_V(SvNVX(sv)));
                     /* 0xFFFFFFFFFFFFFFFF not an issue in here, NVs
                        NV preservse UV so can do correct comparison.  */
                     if ((NV)(SvUVX(sv)) == SvNVX(sv)) {
@@ -3281,7 +3281,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
                 } else if (value <= (UV)IV_MAX) {
 		    SvIV_set(sv, (IV)value);
 		} else {
-		    SvUVX(sv) = value;
+		    SvUV_set(sv, value);
 		    SvIsUV_on(sv);
 		}
 
@@ -4610,7 +4610,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
                     SvPV_set(dstr,
                              sharepvn(SvPVX(sstr),
                                       (sflags & SVf_UTF8?-cur:cur), hash));
-                    SvUVX(dstr) = hash;
+                    SvUV_set(dstr, hash);
                 }
                 SvLEN(dstr) = len;
                 SvCUR(dstr) = cur;
@@ -4752,7 +4752,7 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 	    UV hash = SvUVX(sstr);
 	    DEBUG_C(PerlIO_printf(Perl_debug_log,
 				  "Fast copy on write: Sharing hash\n"));
-	    SvUVX(dstr) = hash;
+	    SvUV_set(dstr, hash);
 	    new_pv = sharepvn(SvPVX(sstr), (SvUTF8(sstr)?-cur:cur), hash);
 	    goto common_exit;
 	}
@@ -7344,7 +7344,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
 		sv_setnv(sv, UV_MAX_P1);
 	    else
 		(void)SvIOK_only_UV(sv);
-		++SvUVX(sv);
+		SvUV_set(sv, SvUVX(sv) + 1);
 	} else {
 	    if (SvIVX(sv) == IV_MAX)
 		sv_setuv(sv, (UV)IV_MAX + 1);
@@ -7498,7 +7498,7 @@ Perl_sv_dec(pTHX_ register SV *sv)
 	    }
 	    else {
 		(void)SvIOK_only_UV(sv);
-		--SvUVX(sv);
+		SvUV_set(sv, SvUVX(sv) + 1);
 	    }	
 	} else {
 	    if (SvIVX(sv) == IV_MIN)
@@ -7711,7 +7711,7 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
     sv_upgrade(sv, SVt_PVIV);
     SvPVX(sv) = sharepvn(src, is_utf8?-len:len, hash);
     SvCUR(sv) = len;
-    SvUVX(sv) = hash;
+    SvUV_set(sv, hash);
     SvLEN(sv) = 0;
     SvREADONLY_on(sv);
     SvFAKE_on(sv);
@@ -10699,7 +10699,7 @@ Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
 
                     SvPVX(dstr) = sharepvn(SvPVX(sstr), SvCUR(sstr),
                                            SvUVX(sstr));
-                    SvUVX(dstr) = SvUVX(sstr);
+                    SvUV_set(dstr, SvUVX(sstr));
                 } else {
 
                     SvPVX(dstr) = SAVEPVN(SvPVX(sstr), SvCUR(sstr));

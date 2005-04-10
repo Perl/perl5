@@ -780,6 +780,9 @@ in gv.h: */
 #define SvPV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
 		(SvPVX(sv) = (val)); } STMT_END
+#define SvUV_set(sv, val) \
+	STMT_START { assert(SvTYPE(sv) == SVt_IV || SvTYPE(sv) >= SVt_PVIV); \
+		(((XPVUV*)SvANY(sv))->xuv_uv = (val)); } STMT_END
 #define SvCUR_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
 		(SvCUR(sv) = (val)); } STMT_END

@@ -358,7 +358,7 @@ CODE:
     }
 #ifdef SVf_IVisUV
     else if (SvUOK(num)) {
-	SvUVX(ST(0)) = SvUV(num);
+	SvUV_set(ST(0), SvUV(num));
 	SvIOK_on(ST(0));
 	SvIsUV_on(ST(0));
     }
