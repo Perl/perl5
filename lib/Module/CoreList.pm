@@ -53,7 +53,7 @@ Moved to Changes file.
 
 Richard Clamp E<lt>richardc@unixbeard.netE<gt>
 
-Currently maintained by the perl 5 porters E<lt>perl5-porters@perl.orgR<gt>.
+Currently maintained by the perl 5 porters E<lt>perl5-porters@perl.orgE<gt>.
 
 =head1 COPYRIGHT
 
