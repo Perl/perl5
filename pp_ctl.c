@@ -2426,13 +2426,14 @@ PP(pp_goto)
 		    SV *sv = GvSV(PL_DBsub);
 		    CV *gotocv;
 
+		    save_item(sv);
 		    if (PERLDB_SUB_NN) {
-			(void)SvUPGRADE(sv, SVt_PVIV);
+			int type = SvTYPE(sv);
+			if (type < SVt_PVIV && type != SVt_IV)
+			    sv_upgrade(sv, SVt_PVIV);
 			(void)SvIOK_on(sv);
-			SAVEIV(SvIVX(sv));
 			SvIV_set(sv, PTR2IV(cv)); /* Do it the quickest way */
 		    } else {
-			save_item(sv);
 			gv_efullname3(sv, CvGV(cv), Nullch);
 		    }
 		    if (  PERLDB_GOTO

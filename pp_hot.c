@@ -2560,10 +2560,10 @@ S_get_db_sub(pTHX_ SV **svp, CV *cv)
 {
     SV *dbsv = GvSV(PL_DBsub);
 
+    save_item(dbsv);
     if (!PERLDB_SUB_NN) {
 	GV *gv = CvGV(cv);
 
-	save_item(dbsv);
 	if ( (CvFLAGS(cv) & (CVf_ANON | CVf_CLONED))
 	     || strEQ(GvNAME(gv), "END")
 	     || ((GvCV(gv) != cv) && /* Could be imported, and old sub redefined. */
@@ -2580,9 +2580,10 @@ S_get_db_sub(pTHX_ SV **svp, CV *cv)
 	}
     }
     else {
-	(void)SvUPGRADE(dbsv, SVt_PVIV);
+	int type = SvTYPE(dbsv);
+	if (type < SVt_PVIV && type != SVt_IV)
+	    sv_upgrade(dbsv, SVt_PVIV);
 	(void)SvIOK_on(dbsv);
-	SAVEIV(SvIVX(dbsv));
 	SvIV_set(dbsv, PTR2IV(cv));	/* Do it the quickest way  */
     }
 

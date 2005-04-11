@@ -3906,7 +3906,6 @@ Perl_init_debugger(pTHX)
     PL_DBgv = gv_fetchpv("DB::DB", GV_ADDMULTI, SVt_PVGV);
     PL_DBline = gv_fetchpv("DB::dbline", GV_ADDMULTI, SVt_PVAV);
     PL_DBsub = gv_HVadd(gv_fetchpv("DB::sub", GV_ADDMULTI, SVt_PVHV));
-    sv_upgrade(GvSV(PL_DBsub), SVt_IV);	/* IVX accessed if PERLDB_SUB_NN */
     PL_DBsingle = GvSV((gv_fetchpv("DB::single", GV_ADDMULTI, SVt_PV)));
     sv_setiv(PL_DBsingle, 0);
     PL_DBtrace = GvSV((gv_fetchpv("DB::trace", GV_ADDMULTI, SVt_PV)));
