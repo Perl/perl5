@@ -4603,8 +4603,7 @@ Note that whether C<select> gets restarted after signals (say, SIGALRM)
 is implementation-dependent.  See also L<perlport> for notes on the
 portability of C<select>.
 
-On error, C<select> behaves like the select(2) system call : it returns
--1 and sets C<$!>.
+On error, C<select> returns C<undef> and sets C<$!>.
 
 B<WARNING>: One should not attempt to mix buffered I/O (like C<read>
 or <FH>) with C<select>, except as permitted by POSIX, and even
