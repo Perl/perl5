@@ -855,7 +855,7 @@ DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
 		Sys/Hostname Storable Filter/Util/Call Encode \
 		Digest/MD5 PerlIO/scalar MIME/Base64 Time/HiRes \
-		Unicode/Normalize I18N/Langinfo Math/BigInt/FastCalc Win32
+		Unicode/Normalize Math/BigInt/FastCalc Win32
 STATIC_EXT	= 
 NONXS_EXT	= Errno
 
@@ -1286,7 +1286,6 @@ distclean: realclean
 	-del /f $(LIBDIR)\threads\shared.pm
 	-del /f $(LIBDIR)\Time\HiRes.pm
 	-del /f $(LIBDIR)\Unicode\Normalize.pm
-	-del /f $(LIBDIR)\I18N\Langinfo.pm
 	-del /f $(LIBDIR)\Math\BigInt\FastCalc.pm
 	-del /f $(LIBDIR)\Win32.pm
 	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO

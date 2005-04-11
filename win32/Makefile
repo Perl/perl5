@@ -726,7 +726,6 @@ PERLIOVIA		= $(EXTDIR)\PerlIO\via\via
 XSAPITEST		= $(EXTDIR)\XS\APItest\APItest
 XSTYPEMAP		= $(EXTDIR)\XS\Typemap\Typemap
 UNICODENORMALIZE	= $(EXTDIR)\Unicode\Normalize\Normalize
-I18NLANGINFO		= $(EXTDIR)\I18N\Langinfo\Langinfo
 MATHBIGINTFASTCALC	= $(EXTDIR)\Math\BigInt\FastCalc\FastCalc
 WIN32_DIR		= ext\Win32
 
@@ -759,7 +758,6 @@ PERLIOVIA_DLL		= $(AUTODIR)\PerlIO\via\via.dll
 XSAPITEST_DLL		= $(AUTODIR)\XS\APItest\APItest.dll
 XSTYPEMAP_DLL		= $(AUTODIR)\XS\Typemap\Typemap.dll
 UNICODENORMALIZE_DLL	= $(AUTODIR)\Unicode\Normalize\Normalize.dll
-I18NLANGINFO_DLL	= $(AUTODIR)\I18N\Langinfo\Langinfo.dll
 MATHBIGINTFASTCALC_DLL	= $(AUTODIR)\Math\BigInt\FastCalc\FastCalc.dll
 WIN32_DLL		= $(AUTODIR)\Win32\Win32.dll
 
@@ -793,7 +791,6 @@ EXTENSION_C	= 		\
 		$(XSAPITEST).c	\
 		$(XSTYPEMAP).c	\
 		$(UNICODENORMALIZE).c	\
-		$(I18NLANGINFO).c	\
 		$(MATHBIGINTFASTCALC).c	\
 		$(WIN32_DIR).c
 
@@ -827,7 +824,6 @@ EXTENSION_DLL	= 		\
 		$(XSAPITEST_DLL)	\
 		$(XSTYPEMAP_DLL)	\
 		$(UNICODENORMALIZE_DLL)	\
-		$(I18NLANGINFO_DLL)	\
 		$(MATHBIGINTFASTCALC_DLL)	\
 		$(WIN32_DLL)
 
@@ -1131,7 +1127,6 @@ distclean: realclean
 	-del /f $(LIBDIR)\threads\shared.pm
 	-del /f $(LIBDIR)\Time\HiRes.pm
 	-del /f $(LIBDIR)\Unicode\Normalize.pm
-	-del /f $(LIBDIR)\I18N\Langinfo.pm
 	-del /f $(LIBDIR)\Math\BigInt\FastCalc.pm
 	-del /f $(LIBDIR)\Win32.pm
 	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO
