@@ -3,7 +3,8 @@
 #
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 2.9 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+# our $VERSION = do { my @r = (q$Revision: 2.9 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = '2.0902';
 sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load(__PACKAGE__, $VERSION);
@@ -148,7 +149,7 @@ sub encode($$;$)
 	Carp::croak("Unknown encoding '$name'");
     }
     my $octets = $enc->encode($string,$check);
-    $_[1] = $string if $check;
+    $_[1] = $string if $check and !($check & LEAVE_SRC());
     return $octets;
 }
 
@@ -164,7 +165,7 @@ sub decode($$;$)
 	Carp::croak("Unknown encoding '$name'");
     }
     my $string = $enc->decode($octets,$check);
-    $_[1] = $octets if $check;
+    $_[1] = $octets if $check and !($check & LEAVE_SRC());
     return $string;
 }
 
@@ -300,6 +301,8 @@ sub predefine_encodings{
 	};
 	$Encode::Encoding{utf8} =
 	    bless {Name => "utf8"} => "Encode::utf8";
+	$Encode::Encoding{"utf-8-strict"} =
+	    bless {Name => "utf-8-strict", strict_utf8 => 1 } => "Encode::utf8";
     }
 }
 
@@ -401,7 +404,7 @@ for $octets is B<always> off.  When you encode anything, utf8 flag of
 the result is always off, even when it contains completely valid utf8
 string. See L</"The UTF-8 flag"> below.
 
-If the $string is C<undef> or a reference then C<undef> is returned.
+If the $string is C<undef> then C<undef> is returned.
 
 =item $string = decode(ENCODING, $octets [, CHECK])
 
@@ -421,7 +424,7 @@ the utf8 flag for $string is on unless $octets entirely consists of
 ASCII data (or EBCDIC on EBCDIC machines).  See L</"The UTF-8 flag">
 below.
 
-If the $string is C<undef> or a reference then C<undef> is returned.
+If the $string is C<undef> then C<undef> is returned.
 
 =item [$length =] from_to($octets, FROM_ENC, TO_ENC [, CHECK])
 
@@ -626,6 +629,8 @@ HTML/XML character reference modes are about the same, in place of
 C<\x{I<HHHH>}>, HTML uses C<&#I<NNN>;> where I<NNN> is a decimal number and
 XML uses C<&#xI<HHHH>;> where I<HHHH> is the hexadecimal number.
 
+In Encode 2.10 or later, C<LEAVE_SRC> is also implied.
+
 =item The bitmask
 
 These modes are actually set via a bitmask.  Here is how the FB_XX
@@ -637,7 +642,7 @@ constants via C<use Encode qw(:fallback_all)>.
  DIE_ON_ERR    0x0001             X
  WARN_ON_ERR   0x0002                               X
  RETURN_ON_ERR 0x0004                      X        X
- LEAVE_SRC     0x0008
+ LEAVE_SRC     0x0008                                        X
  PERLQQ        0x0100                                        X
  HTMLCREF      0x0200
  XMLCREF       0x0400
@@ -769,6 +774,54 @@ return value as indicating success or failure), or C<undef> if STRING is
 not a string.
 
 =back
+
+=head1 UTF-8 vs. utf8
+
+  ....We now view strings not as sequences of bytes, but as sequences
+  of numbers in the range 0 .. 2**32-1 (or in the case of 64-bit
+  computers, 0 .. 2**64-1) -- Programming Perl, 3rd ed.
+
+That has been the perl's notion of UTF-8 but official UTF-8 is more
+strict; Its ranges is much narrower (0 .. 10FFFF), some sequences are
+not allowed (i.e. Those used in the surrogate pair, 0xFFFE, et al).
+
+Now that is overruled by Larry Wall himself.
+
+  From: Larry Wall <larry@wall.org>
+  Date: December 04, 2004 11:51:58 JST
+  To: perl-unicode@perl.org
+  Subject: Re: Make Encode.pm support the real UTF-8
+  Message-Id: <20041204025158.GA28754@wall.org>
+  
+  On Fri, Dec 03, 2004 at 10:12:12PM +0000, Tim Bunce wrote:
+  : I've no problem with 'utf8' being perl's unrestricted uft8 encoding,
+  : but "UTF-8" is the name of the standard and should give the
+  : corresponding behaviour.
+  
+  For what it's worth, that's how I've always kept them straight in my
+  head.
+
+  Also for what it's worth, Perl 6 will mostly default to strict but
+  make it easy to switch back to lax.
+  
+  Larry
+
+Do you copy?  As of Perl 5.8.7, B<UTF-8> means strict, official UTF-8
+while B<utf8> means liberal, lax, version thereof.  And Encode version
+2.10 or later thus groks the difference between C<UTF-8> and C"utf8".
+
+  encode("utf8",  "\x{FFFF_FFFF}", 1); # okay
+  encode("UTF-8", "\x{FFFF_FFFF}", 1); # croaks
+
+C<UTF-8> in Encode is actually a canonical name for C<utf-8-strict>.
+Yes, the hyphen between "UTF" and "8" is important.  Without it Encode
+goes "liberal"
+
+  find_encoding("UTF-8")->name # is 'utf-8-strict'
+  find_encoding("utf-8")->name # ditto. names are case insensitive
+  find_encoding("utf8")->name  # ditto. "_" are treated as "-"
+  find_encoding("UTF8")->name  # is 'utf8'.
+
 
 =head1 SEE ALSO
 

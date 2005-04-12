@@ -3,6 +3,29 @@
 # $Id: Changes,v 2.9 2004/12/03 19:16:53 dankogai Exp dankogai $
 #
 $Revision: 2.9 $ $Date: 2004/12/03 19:16:53 $
+! Encode.pm
+  New Pod section: "UTF-8 vs utf8"; explains utf-8-strict
++ t/utf8strict.t
+  Tests utf-8-strict, accordingly to 
+  UTF-8 decoder capability and stress test" by Markus Kuhn
+  http://smontagu.damowmow.com/utf8test.html
+  Note that malformed and overlong sequences are not test here
+  because perl already does that for you, utf-8-strict or not.
+! Encode.pm Encode/encode.h t/fallback.t
+  Addressed "encode(..., Encode::LEAVE_SRC) does not work".
+  Now FB_(PERLQQ|HTMLCREF|XMLCREF) implies LEAVE_SRC so
+  you can (en|de)code constant strings with these fallbacks.
+  http://rt.cpan.org/NoAuth/Bug.html?id=8736  
+! Encode.pm Encode.xs lib/Encode/Alias.pm t/Aliases.t
+  Make Encode.pm support the real UTF-8, by GAAS
+  Message-Id: <lrfz2mcngd.fsf@caliper.activestate.com>
+  Message-Id: <lr4qizbvvm.fsf@caliper.activestate.com>
+! Encode.pm Encode.xs
+  post-2.09 comment patches from GAAS applied.
+  Message-Id: <lroehacz6q.fsf@caliper.activestate.com>
+  Message-Id: <lrk6rycymu.fsf@caliper.activestate.com>
+
+2.09 2004/12/03 19:16:53 
 ! Encode.pm Encode.xs
   Addressed " :encoding(utf8) broken in perl-5.8.6".
   Message-Id: <lrllcfeank.fsf_-_@caliper.activestate.com>

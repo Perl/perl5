@@ -125,29 +125,29 @@ is($src, $residue, "FB_QUIET residue utf8");
 $src = $uo;
 $dst = $ascii->encode($src, FB_PERLQQ);
 is($dst, $ap,   "FB_PERLQQ ascii");
-is($src, '', "FB_PERLQQ residue ascii");
+is($src, $uo, "FB_PERLQQ residue ascii");
 
 $src = $ao;
 $dst = $utf8->decode($src, FB_PERLQQ);
 is($dst, $up,   "FB_PERLQQ utf8");
-is($src, '', "FB_PERLQQ residue utf8");
+is($src, $ao, "FB_PERLQQ residue utf8");
 
 $src = $uo;
 $dst = $ascii->encode($src, FB_HTMLCREF);
 is($dst, $ah,   "FB_HTMLCREF ascii");
-is($src, '', "FB_HTMLCREF residue ascii");
+is($src, $uo, "FB_HTMLCREF residue ascii");
 
 $src = $ao;
 $dst = $utf8->decode($src, FB_HTMLCREF);
 is($dst, $uh,   "FB_HTMLCREF utf8");
-is($src, '', "FB_HTMLCREF residue utf8");
+is($src, $ao, "FB_HTMLCREF residue utf8");
 
 $src = $uo;
 $dst = $ascii->encode($src, FB_XMLCREF);
 is($dst, $ax,   "FB_XMLCREF ascii");
-is($src, '', "FB_XMLCREF residue ascii");
+is($src, $uo, "FB_XMLCREF residue ascii");
 
 $src = $ao;
 $dst = $utf8->decode($src, FB_XMLCREF);
 is($dst, $ax,   "FB_XMLCREF utf8");
-is($src, '', "FB_XMLCREF residue utf8");
+is($src, $ao, "FB_XMLCREF residue utf8");

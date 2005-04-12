@@ -29,6 +29,12 @@
 UNIMPLEMENTED(_encoded_utf8_to_bytes, I32)
 UNIMPLEMENTED(_encoded_bytes_to_utf8, I32)
 
+#define UTF8_ALLOW_STRICT 0
+#define UTF8_ALLOW_NONSTRICT (UTF8_ALLOW_ANY &                    \
+                              ~(UTF8_ALLOW_CONTINUATION |         \
+                                UTF8_ALLOW_NON_CONTINUATION |     \
+                                UTF8_ALLOW_LONG))
+
 void
 Encode_XSEncoding(pTHX_ encode_t * enc)
 {
@@ -247,6 +253,115 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
     return dst;
 }
 
+static bool
+strict_utf8(pTHX_ SV* sv)
+{
+    HV* hv;
+    SV** svp;
+    sv = SvRV(sv);
+    if (!sv || SvTYPE(sv) != SVt_PVHV)
+        return 0;
+    hv = (HV*)sv;
+    svp = hv_fetch(hv, "strict_utf8", 11, 0);
+    if (!svp)
+        return 0;
+    return SvTRUE(*svp);
+}
+
+static U8*
+process_utf8(pTHX_ SV* dst, U8* s, U8* e, int check,
+             bool encode, bool strict, bool stop_at_partial)
+{
+    UV uv;
+    STRLEN ulen;
+
+    SvPOK_only(dst);
+    SvCUR_set(dst,0);
+
+    while (s < e) {
+        if (UTF8_IS_INVARIANT(*s)) {
+            sv_catpvn(dst, (char *)s, 1);
+            s++;
+            continue;
+        }
+
+        if (UTF8_IS_START(*s)) {
+            U8 skip = UTF8SKIP(s);
+            if ((s + skip) > e) {
+                /* Partial character */
+                /* XXX could check that rest of bytes are UTF8_IS_CONTINUATION(ch) */
+                if (stop_at_partial)
+                    break;
+
+                goto malformed_byte;
+            }
+
+            uv = utf8n_to_uvuni(s, e - s, &ulen,
+                                UTF8_CHECK_ONLY | (strict ? UTF8_ALLOW_STRICT :
+                                                            UTF8_ALLOW_NONSTRICT)
+                               );
+#if 1 /* perl-5.8.6 and older do not check UTF8_ALLOW_LONG */
+	    if (strict && uv > PERL_UNICODE_MAX)
+		ulen = -1;
+#endif
+            if (ulen == -1) {
+                if (strict) {
+                    uv = utf8n_to_uvuni(s, e - s, &ulen,
+                                        UTF8_CHECK_ONLY | UTF8_ALLOW_NONSTRICT);
+                    if (ulen == -1)
+                        goto malformed_byte;
+                    goto malformed;
+                }
+                goto malformed_byte;
+            }
+
+
+             /* Whole char is good */
+             sv_catpvn(dst,(char *)s,skip);
+             s += skip;
+             continue;
+        }
+
+        /* If we get here there is something wrong with alleged UTF-8 */
+    malformed_byte:
+        uv = (UV)*s;
+        ulen = 1;
+
+    malformed:
+        if (check & ENCODE_DIE_ON_ERR){
+            if (encode)
+                Perl_croak(aTHX_ ERR_ENCODE_NOMAP, uv, "utf8");
+            else
+                Perl_croak(aTHX_ ERR_DECODE_NOMAP, "utf8", uv);
+        }
+        if (check & ENCODE_WARN_ON_ERR){
+            if (encode)
+                Perl_warner(aTHX_ packWARN(WARN_UTF8),
+                            ERR_ENCODE_NOMAP, uv, "utf8");
+            else
+                Perl_warner(aTHX_ packWARN(WARN_UTF8),
+                            ERR_DECODE_NOMAP, "utf8", uv);
+        }
+        if (check & ENCODE_RETURN_ON_ERR) {
+                break;
+        }
+        if (check & (ENCODE_PERLQQ|ENCODE_HTMLCREF|ENCODE_XMLCREF)){
+            SV* subchar = newSVpvf(check & ENCODE_PERLQQ ? (ulen == 1 ? "\\x%02" UVXf : "\\x{%04" UVXf "}"):
+                                   check & ENCODE_HTMLCREF ? "&#%" UVuf ";" :
+                                   "&#x%" UVxf ";", uv);
+            sv_catsv(dst, subchar);
+            SvREFCNT_dec(subchar);
+        } else {
+            sv_catpv(dst, FBCHAR_UTF8);
+        }
+        s += ulen;
+    }
+    *SvEND(dst) = '\0';
+
+    return s;
+}
+
+
 MODULE = Encode		PACKAGE = Encode::utf8	PREFIX = Method_
 
 PROTOTYPES: DISABLE
@@ -264,8 +379,7 @@ CODE:
     SV *dst = newSV(slen>0?slen:1); /* newSV() abhors 0 -- inaba */
 
     /* 
-     * PerlO check -- we assume the object is of PerlIO if renewed 
-     * and if so, we set RETURN_ON_ERR for partial character
+     * PerlIO check -- we assume the object is of PerlIO if renewed
      */
     int renewed = 0;
     dSP; ENTER; SAVETMPS;
@@ -283,8 +397,6 @@ CODE:
     FREETMPS; LEAVE;
     /* end PerlIO check */
 
-    SvPOK_only(dst);
-    SvCUR_set(dst,0);
     if (SvUTF8(src)) {
 	s = utf8_to_bytes(s,&slen);
 	if (s) {
@@ -296,53 +408,8 @@ CODE:
 	    croak("Cannot decode string with wide characters");
 	}
     }
-    while (s < e) {
-    	if (UTF8_IS_INVARIANT(*s) || UTF8_IS_START(*s)) {
-	    U8 skip = UTF8SKIP(s);
-	    if ((s + skip) > e) {
-	    	/* Partial character - done */
-	        if (renewed)
-		    break;
-	    	goto decode_utf8_fallback;
-	    }
-	    else if (is_utf8_char(s)) {
-	    	/* Whole char is good */
-		sv_catpvn(dst,(char *)s,skip);
-		s += skip;
-		continue;
-	    }
-	    else {
-	    	/* starts ok but isn't "good" */
-	    }
-	}
-	else {
-	    /* Invalid start byte */
-	}
-	/* If we get here there is something wrong with alleged UTF-8 */
-    decode_utf8_fallback:
-	if (check & ENCODE_DIE_ON_ERR){
-	    Perl_croak(aTHX_ ERR_DECODE_NOMAP, "utf8", (UV)*s);
-	    XSRETURN(0);
-	}
-	if (check & ENCODE_WARN_ON_ERR){
-	    Perl_warner(aTHX_ packWARN(WARN_UTF8),
-			ERR_DECODE_NOMAP, "utf8", (UV)*s);
-        }
-    	if (check & ENCODE_RETURN_ON_ERR) {
-		break;
-    	}
-        if (check & (ENCODE_PERLQQ|ENCODE_HTMLCREF|ENCODE_XMLCREF)){
-	    SV* subchar = newSVpvf(check & ENCODE_PERLQQ ? "\\x%02" UVXf :
-				   check & ENCODE_HTMLCREF ? "&#%" UVuf ";" :
-				   "&#x%" UVxf ";", (UV)*s);
-    	    sv_catsv(dst, subchar);
-	    SvREFCNT_dec(subchar);
-	} else {
-	    sv_catpv(dst, FBCHAR_UTF8);
-	}
-	s++;
-    }
-    *SvEND(dst) = '\0';
+
+    s = process_utf8(aTHX_ dst, s, e, check, 0, strict_utf8(aTHX_ obj), renewed);
 
     /* Clear out translated part of source unless asked not to */
     if (check && !(check & ENCODE_LEAVE_SRC)){
@@ -369,9 +436,15 @@ CODE:
     U8 *e = (U8 *) SvEND(src);
     SV *dst = newSV(slen>0?slen:1); /* newSV() abhors 0 -- inaba */
     if (SvUTF8(src)) {
-        /* Already encoded - trust it and just copy the octets */
-    	sv_setpvn(dst,(char *)s,(e-s));
-	s = e;
+	/* Already encoded */
+	if (strict_utf8(aTHX_ obj)) {
+	    s = process_utf8(aTHX_ dst, s, e, check, 1, 1, 0);
+	}
+        else {
+            /* trust it and just copy the octets */
+    	    sv_setpvn(dst,(char *)s,(e-s));
+	    s = e;
+        }
     }
     else {
     	/* Native bytes - can always encode */
