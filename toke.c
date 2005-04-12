@@ -297,7 +297,7 @@ S_tokereport(pTHX_ const char* s, I32 rv)
 	case TOKENTYPE_GVVAL: /* doesn't appear to be used */
 	    break;
 	case TOKENTYPE_IVAL:
-	    Perl_sv_catpvf(aTHX_ report, "(ival=%"IVdf")", yylval.ival);
+	    Perl_sv_catpvf(aTHX_ report, "(ival=%"IVdf")", (IV)yylval.ival);
 	    break;
 	case TOKENTYPE_OPNUM:
 	    Perl_sv_catpvf(aTHX_ report, "(ival=op_%s)",
@@ -314,7 +314,7 @@ S_tokereport(pTHX_ const char* s, I32 rv)
 		Perl_sv_catpv(aTHX_ report, "(opval=null)");
 	    break;
 	}
-        Perl_sv_catpvf(aTHX_ report, " at line %d [", CopLINE(PL_curcop));
+        Perl_sv_catpvf(aTHX_ report, " at line %"IVdf" [", (IV)CopLINE(PL_curcop));
         if (s - PL_bufptr > 0)
             sv_catpvn(report, PL_bufptr, s - PL_bufptr);
         else {

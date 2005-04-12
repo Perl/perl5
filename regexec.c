@@ -439,7 +439,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 				   "UTF-8 target...\n"));
 	 PerlIO_printf(Perl_debug_log,
 		       "%sGuessing start of match, REx%s `%s%.60s%s%s' against `%s%.*s%s%s'...\n",
-		       PL_colors[4],PL_colors[5],PL_colors[0],
+		       PL_colors[4], PL_colors[5], PL_colors[0],
 		       prog->precomp,
 		       PL_colors[1],
 		       (strlen(prog->precomp) > 60 ? "..." : ""),
@@ -764,33 +764,33 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 			     */
 			    strpos = t + 1;			
 			    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Found /%s^%s/m at offset %ld, rescanning for anchored from offset %ld...\n",
-				PL_colors[0],PL_colors[1], (long)(strpos - i_strpos), (long)(strpos - i_strpos + prog->anchored_offset)));
+				PL_colors[0], PL_colors[1], (long)(strpos - i_strpos), (long)(strpos - i_strpos + prog->anchored_offset)));
 			    goto do_other_anchored;
 			}
 			/* We don't contradict the found floating substring. */
 			/* XXXX Why not check for STCLASS? */
 			s = t + 1;
 			DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Found /%s^%s/m at offset %ld...\n",
-			    PL_colors[0],PL_colors[1], (long)(s - i_strpos)));
+			    PL_colors[0], PL_colors[1], (long)(s - i_strpos)));
 			goto set_useful;
 		    }
 		    /* Position contradicts check-string */
 		    /* XXXX probably better to look for check-string
 		       than for "\n", so one should lower the limit for t? */
 		    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Found /%s^%s/m, restarting lookup for check-string at offset %ld...\n",
-			PL_colors[0],PL_colors[1], (long)(t + 1 - i_strpos)));
+			PL_colors[0], PL_colors[1], (long)(t + 1 - i_strpos)));
 		    other_last = strpos = s = t + 1;
 		    goto restart;
 		}
 		t++;
 	    }
 	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Did not find /%s^%s/m...\n",
-			PL_colors[0],PL_colors[1]));
+			PL_colors[0], PL_colors[1]));
 	    goto fail_finish;
 	}
 	else {
 	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Starting position does not contradict /%s^%s/m...\n",
-			PL_colors[0],PL_colors[1]));
+			PL_colors[0], PL_colors[1]));
 	}
 	s = t;
       set_useful:
@@ -814,7 +814,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	}
 	DEBUG_EXECUTE_r( if (ml_anch)
 	    PerlIO_printf(Perl_debug_log, "Position at offset %ld does not contradict /%s^%s/m...\n",
-			(long)(strpos - i_strpos), PL_colors[0],PL_colors[1]);
+			(long)(strpos - i_strpos), PL_colors[0], PL_colors[1]);
 	);
       success_at_start:
 	if (!(prog->reganch & ROPT_NAUGHTY)	/* XXXX If strpos moved? */
@@ -923,7 +923,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		    goto giveup;
 		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
 			  "Looking for /%s^%s/m starting at offset %ld...\n",
-			  PL_colors[0],PL_colors[1], (long)(t - i_strpos)) );
+			  PL_colors[0], PL_colors[1], (long)(t - i_strpos)) );
 		goto try_at_offset;
 	    }
 	    if (!(do_utf8 ? prog->float_utf8 : prog->float_substr))	/* Could have been deleted */
@@ -957,7 +957,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	BmUSEFUL(do_utf8 ? prog->check_utf8 : prog->check_substr) += 5; /* hooray */
   fail:
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%sMatch rejected by optimizer%s\n",
-			  PL_colors[4],PL_colors[5]));
+			  PL_colors[4], PL_colors[5]));
     return Nullch;
 }
 
@@ -1742,7 +1742,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	     reginitcolors();
 	 PerlIO_printf(Perl_debug_log,
 		       "%sMatching REx%s `%s%*.*s%s%s' against `%s%.*s%s%s'\n",
-		       PL_colors[4],PL_colors[5],PL_colors[0],
+		       PL_colors[4], PL_colors[5], PL_colors[0],
 		       len0, len0, s0,
 		       PL_colors[1],
 		       len0 > 60 ? "..." : "",
@@ -2009,7 +2009,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    if (last == NULL) {
 		DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 				      "%sCan't trim the tail, match fails (should not happen)%s\n",
-				      PL_colors[4],PL_colors[5]));
+				      PL_colors[4], PL_colors[5]));
 		goto phooey; /* Should not happen! */
 	    }
 	    dontbother = strend - last + prog->float_min_offset;
@@ -2085,7 +2085,7 @@ got_it:
 
 phooey:
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%sMatch failed%s\n",
-			  PL_colors[4],PL_colors[5]));
+			  PL_colors[4], PL_colors[5]));
     if (PL_reg_eval_set)
 	restore_pos(aTHX_ 0);
     return 0;
@@ -2142,7 +2142,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 	    SAVEDESTRUCTOR_X(restore_pos, 0);
         }
         if (!PL_reg_curpm) {
-	    Newz(22,PL_reg_curpm, 1, PMOP);
+	    Newz(22, PL_reg_curpm, 1, PMOP);
 #ifdef USE_ITHREADS
             {
                 SV* repointer = newSViv(0);
@@ -2188,7 +2188,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
         if(PL_reg_start_tmp)
             Renew(PL_reg_start_tmp, PL_reg_start_tmpl, char*);
         else
-            New(22,PL_reg_start_tmp, PL_reg_start_tmpl, char*);
+            New(22, PL_reg_start_tmp, PL_reg_start_tmpl, char*);
     }
 
     /* XXXX What this code is doing here?!!!  There should be no need
@@ -2601,9 +2601,9 @@ S_regmatch(pTHX_ regnode *prog)
 
 		    DEBUG_TRIE_EXECUTE_r(
 			        PerlIO_printf( Perl_debug_log,
-			            "%*s  %sState: %4x, Base: %4x Accepted: %4x ",
+			            "%*s  %sState: %4"UVxf", Base: %4"UVxf", Accepted: %4"UVxf" ",
 			            REPORT_CODE_OFF + PL_regindent * 2, "", PL_colors[4],
-			            state, base, accepted );
+			            (UV)state, (UV)base, (UV)accepted );
 		    );
 
 		    if ( base ) {
@@ -2621,7 +2621,7 @@ S_regmatch(pTHX_ regnode *prog)
 				uscan = foldbuf + UNISKIP( uvc );
 			    }
 			} else {
-			    uvc = (U32)*uc;
+			    uvc = (UV)*uc;
 			    len = 1;
 			}
 
@@ -2631,9 +2631,9 @@ S_regmatch(pTHX_ regnode *prog)
 			state = 0;
 		    }
 		    DEBUG_TRIE_EXECUTE_r(
-			        PerlIO_printf( Perl_debug_log,
-			            "Charid:%3x CV:%4x After State: %4x%s\n",
-			            charid, uvc, state, PL_colors[5] );
+		        PerlIO_printf( Perl_debug_log,
+		            "Charid:%3x CV:%4"UVxf" After State: %4"UVxf"%s\n",
+		            charid, uvc, (UV)state, PL_colors[5] );
 		    );
 		}
 		if ( !accepted ) {
@@ -2666,9 +2666,9 @@ S_regmatch(pTHX_ regnode *prog)
 
 		    DEBUG_TRIE_EXECUTE_r(
 			    PerlIO_printf( Perl_debug_log,
-			        "%*s  %sState: %4x, Base: %4x Accepted: %4x ",
+			        "%*s  %sState: %4"UVxf", Base: %4"UVxf", Accepted: %4"UVxf" ",
 			        REPORT_CODE_OFF + PL_regindent * 2, "", PL_colors[4],
-			        state, base, accepted );
+			        (UV)state, (UV)base, (UV)accepted );
 		    );
 
 		    if ( base ) {
@@ -2687,8 +2687,8 @@ S_regmatch(pTHX_ regnode *prog)
 		    }
 		    DEBUG_TRIE_EXECUTE_r(
 			    PerlIO_printf( Perl_debug_log,
-			        "Charid:%3x CV:%4x After State: %4x%s\n",
-			        charid, uvc, state, PL_colors[5] );
+			        "Charid:%3x CV:%4"UVxf" After State: %4"UVxf"%s\n",
+			        charid, uvc, (UV)state, PL_colors[5] );
 		    );
 		}
 		if ( !accepted ) {
@@ -2718,7 +2718,7 @@ S_regmatch(pTHX_ regnode *prog)
                         SV **tmp = av_fetch( trie->words, accept_buff[ 0 ].wordnum-1, 0 );
        	                PerlIO_printf( Perl_debug_log,
 			    "%*s  %sonly one match : #%d <%s>%s\n",
-			    REPORT_CODE_OFF+PL_regindent*2, "",PL_colors[4],
+			    REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4],
         		    accept_buff[ 0 ].wordnum,
         		    tmp ? SvPV_nolen( *tmp ) : "not compiled under -Dr",
         		    PL_colors[5] );
@@ -2731,21 +2731,21 @@ S_regmatch(pTHX_ regnode *prog)
 		    gotit = regmatch( scan + NEXT_OFF( scan ) );
 		} else {
                     DEBUG_EXECUTE_r(
-                        PerlIO_printf( Perl_debug_log,"%*s  %sgot %d possible matches%s\n",
-                            REPORT_CODE_OFF + PL_regindent * 2, "",PL_colors[4], accepted,
+                        PerlIO_printf( Perl_debug_log,"%*s  %sgot %"IVdf" possible matches%s\n",
+                            REPORT_CODE_OFF + PL_regindent * 2, "", PL_colors[4], (IV)accepted,
                             PL_colors[5] );
                     );
 		    while ( !gotit && accepted-- ) {
 			U32 best = 0;
 			U32 cur;
 			for( cur = 1 ; cur <= accepted ; cur++ ) {
-			     DEBUG_TRIE_EXECUTE_r(
-				        PerlIO_printf( Perl_debug_log,
-				            "%*s  %sgot %d (%d) as best, looking at %d (%d)%s\n",
-				            REPORT_CODE_OFF + PL_regindent * 2, "", PL_colors[4],
-				            best, accept_buff[ best ].wordnum, cur,
-				            accept_buff[ cur ].wordnum, PL_colors[5] );
-			     );
+			    DEBUG_TRIE_EXECUTE_r(
+			        PerlIO_printf( Perl_debug_log,
+			            "%*s  %sgot %"IVdf" (%d) as best, looking at %"IVdf" (%d)%s\n",
+			            REPORT_CODE_OFF + PL_regindent * 2, "", PL_colors[4],
+			            (IV)best, accept_buff[ best ].wordnum, (IV)cur,
+			            accept_buff[ cur ].wordnum, PL_colors[5] );
+			    );
 
 			    if ( accept_buff[ cur ].wordnum < accept_buff[ best ].wordnum )
 				    best = cur;
@@ -2753,7 +2753,7 @@ S_regmatch(pTHX_ regnode *prog)
 			DEBUG_EXECUTE_r({
 		            SV **tmp = av_fetch( trie->words, accept_buff[ best ].wordnum - 1, 0 );
     			    PerlIO_printf( Perl_debug_log, "%*s  %strying alternation #%d <%s> at 0x%p%s\n",
-    			        REPORT_CODE_OFF+PL_regindent*2, "",PL_colors[4],
+    			        REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4],
     			        accept_buff[best].wordnum,
         		        tmp ? SvPV_nolen( *tmp ) : "not compiled under -Dr",scan,
         		        PL_colors[5] );
@@ -4267,12 +4267,12 @@ yes_loud:
     DEBUG_EXECUTE_r(
 	PerlIO_printf(Perl_debug_log,
 		      "%*s  %scould match...%s\n",
-		      REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4],PL_colors[5])
+		      REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4], PL_colors[5])
 	);
     goto yes;
 yes_final:
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%sMatch successful!%s\n",
-			  PL_colors[4],PL_colors[5]));
+			  PL_colors[4], PL_colors[5]));
 yes:
 #ifdef DEBUGGING
     PL_regindent--;
@@ -4288,7 +4288,7 @@ no:
     DEBUG_EXECUTE_r(
 	PerlIO_printf(Perl_debug_log,
 		      "%*s  %sfailed...%s\n",
-		      REPORT_CODE_OFF+PL_regindent*2, "",PL_colors[4],PL_colors[5])
+		      REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4], PL_colors[5])
 	);
     goto do_no;
 no_final:

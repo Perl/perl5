@@ -119,7 +119,7 @@ yysymprint (pTHX_ PerlIO *yyoutput, int yytype, YYSTYPE *yyvaluep)
 #   ifdef YYPRINT
 	YYPRINT (yyoutput, yytoknum[yytype], *yyvaluep);
 #   else
-	YYFPRINTF (yyoutput, "0x%x", yyvaluep->ival);
+	YYFPRINTF (yyoutput, "0x%"UVxf, (UV)yyvaluep->ival);
 #   endif
     }
     else
@@ -160,7 +160,7 @@ yy_stack_print (pTHX_ short *yyss, short *yyssp, YYSTYPE *yyvs, const char**yyns
 	PerlIO_printf(Perl_debug_log, " %8.8s", *yyns);
     PerlIO_printf(Perl_debug_log, "\nvalue:");
     for (i=0, yyvs += start; i < count; i++, yyvs++)
-	PerlIO_printf(Perl_debug_log, " %8x", yyvs->ival);
+	PerlIO_printf(Perl_debug_log, " %8"UVxf, (UV)yyvs->ival);
     PerlIO_printf(Perl_debug_log, "\n\n");
 }
 
