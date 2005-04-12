@@ -5575,6 +5575,8 @@ Perl_ck_grep(pTHX_ OP *o)
 	OP* k;
 	o = ck_sort(o);
         kid = cLISTOPo->op_first->op_sibling;
+	if (!cUNOPx(kid)->op_next)
+	    Perl_croak(aTHX_ "panic: ck_grep");
 	for (k = cUNOPx(kid)->op_first; k; k = k->op_next) {
 	    kid = k;
 	}
