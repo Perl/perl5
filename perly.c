@@ -109,11 +109,8 @@ do {								\
 `--------------------------------*/
 
 static void
-yysymprint (pTHX_ PerlIO *yyoutput, int yytype, YYSTYPE *yyvaluep)
+yysymprint (pTHX_ PerlIO *yyoutput, int yytype, const YYSTYPE *yyvaluep)
 {
-    /* Pacify ``unused variable'' warnings.  */
-    (void) yyvaluep;
-
     if (yytype < YYNTOKENS) {
 	YYFPRINTF (yyoutput, "token %s (", yytname[yytype]);
 #   ifdef YYPRINT
@@ -125,10 +122,6 @@ yysymprint (pTHX_ PerlIO *yyoutput, int yytype, YYSTYPE *yyvaluep)
     else
 	YYFPRINTF (yyoutput, "nterm %s (", yytname[yytype]);
 
-    switch (yytype) {
-	default:
-	    break;
-    }
     YYFPRINTF (yyoutput, ")");
 }
 
@@ -138,7 +131,7 @@ yysymprint (pTHX_ PerlIO *yyoutput, int yytype, YYSTYPE *yyvaluep)
  *  meanings as the local vars in yyparse() of the same name */
 
 static void
-yy_stack_print (pTHX_ short *yyss, short *yyssp, YYSTYPE *yyvs, const char**yyns)
+yy_stack_print (pTHX_ const short *yyss, const short *yyssp, const YYSTYPE *yyvs, const char**yyns)
 {
     int i;
     int start = 1;
@@ -179,7 +172,7 @@ static void
 yy_reduce_print (pTHX_ int yyrule)
 {
     int yyi;
-    unsigned int yylineno = yyrline[yyrule];
+    const unsigned int yylineno = yyrline[yyrule];
     YYFPRINTF (Perl_debug_log, "Reducing stack by rule %d (line %u), ",
 			  yyrule - 1, yylineno);
     /* Print the symbols being reduced, and their result.  */
@@ -249,26 +242,6 @@ yystpcpy (pTHX_ char *yydest, const char *yysrc)
 #  endif
 
 #endif /* !YYERROR_VERBOSE */
-
-
-/*-----------------------------------------------.
-| Release the memory associated to this symbol.  |
-`-----------------------------------------------*/
-
-static void
-yydestruct (int yytype, YYSTYPE *yyvaluep)
-{
-    /* Pacify ``unused variable'' warnings.  */
-    (void) yyvaluep;
-
-    switch (yytype) {
-	default:
-	    break;
-    }
-}
-
-
-
 
 /*----------.
 | yyparse.  |
@@ -378,7 +351,7 @@ Perl_yyparse (pTHX)
 
     if (yyss + yystacksize - 1 <= yyssp) {
 	 /* Get the current used size of the three stacks, in elements.  */
-	 YYSIZE_T yysize = yyssp - yyss + 1;
+	 const YYSIZE_T yysize = yyssp - yyss + 1;
 
 	 /* Extend the stack our own way.  */
 	 if (YYMAXDEPTH <= yystacksize)
@@ -579,7 +552,7 @@ Perl_yyparse (pTHX)
 
 	if (YYPACT_NINF < yyn && yyn < YYLAST) {
 	    YYSIZE_T yysize = 0;
-	    int yytype = YYTRANSLATE (yychar);
+	    const int yytype = YYTRANSLATE (yychar);
 	    char *yymsg;
 	    int yyx, yycount;
 
@@ -594,7 +567,7 @@ Perl_yyparse (pTHX)
 	    yysize += yystrlen (yytname[yytype]);
 	    New(yymsg, yysize, char *);
 	    if (yymsg != 0) {
-		char *yyp = yystpcpy (yymsg, "syntax error, unexpected ");
+		const char *yyp = yystpcpy (yymsg, "syntax error, unexpected ");
 		yyp = yystpcpy (yyp, yytname[yytype]);
 
 		if (yycount < 5) {
@@ -635,14 +608,12 @@ Perl_yyparse (pTHX)
 	    /* Pop the rest of the stack.  */
 	    while (yyss < yyssp) {
 		YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp);
-		yydestruct (yystos[*yyssp], yyvsp);
 		YYPOPSTACK;
 	    }
 	    YYABORT;
 	}
 
 	YYDSYMPRINTF ("Error: discarding", yytoken, &yylval);
-	yydestruct (yytoken, &yylval);
 	yychar = YYEMPTY;
 
     }
@@ -674,7 +645,6 @@ Perl_yyparse (pTHX)
 	    YYABORT;
 
 	YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp);
-	yydestruct (yystos[yystate], yyvsp);
 	yyvsp--;
 #ifdef DEBUGGING
 	yynsp--;
