@@ -4,7 +4,7 @@
 \bSCCS\b
 ,v$
 \B\.svn\b
-^_darcs$
+\b_darcs\b
 
 # Avoid Makemaker generated and utility files.
 \bMANIFEST\.bak

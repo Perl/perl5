@@ -2,7 +2,7 @@ package ExtUtils::MM_Any;
 
 use strict;
 use vars qw($VERSION @ISA);
-$VERSION = '0.12_01';
+$VERSION = '0.13';
 
 use File::Spec;
 BEGIN { @ISA = qw(File::Spec); }
@@ -771,9 +771,11 @@ sub realclean {
     my @dirs  = qw($(DISTVNAME));
     my @files = qw($(FIRST_MAKEFILE) $(MAKEFILE_OLD));
 
-    if ($self->{PERL_CORE}) {
+    # Special exception for the perl core where INST_* is not in blib.
+    # This cleans up the files built from the ext/ directory (all XS).
+    if( $self->{PERL_CORE} ) {
 	push @dirs, qw($(INST_AUTODIR) $(INST_ARCHAUTODIR));
-	push @files, values %{$self->{PM}};
+        push @files, values %{$self->{PM}};
     }
 
     if( $self->has_link_code ){

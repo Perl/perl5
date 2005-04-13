@@ -21,8 +21,8 @@ use vars qw(
 use vars qw($Revision);
 use strict;
 
-$VERSION = '6.27';
-($Revision = q$Revision: 4357 $) =~ /Revision:\s+(\S+)/;
+$VERSION = '6.28';
+($Revision = q$Revision: 4409 $) =~ /Revision:\s+(\S+)/;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&WriteMakefile &writeMakefile $Verbose &prompt);
@@ -2083,7 +2083,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    $VERSION = sprintf "%d.%03d", q$Revision: 4357 $ =~ /(\d+)/g;
+    $VERSION = sprintf "%d.%03d", q$Revision: 4409 $ =~ /(\d+)/g;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 
@@ -2262,13 +2262,13 @@ Some of the most common mistakes:
 
 =over 2
 
-=item C<<MAN3PODS => ' '>>
+=item C<< MAN3PODS => ' ' >>
 
 This is commonly used to supress the creation of man pages.  MAN3PODS
 takes a hash ref not a string, but the above worked by accident in old
 versions of MakeMaker.
 
-The correct code is C<<MAN3PODS => { }>>.
+The correct code is C<< MAN3PODS => { } >>.
 
 =back
 
