@@ -145,12 +145,11 @@ PP(pp_concat)
   dSP; dATARGET; tryAMAGICbin(concat,opASSIGN);
   {
     dPOPTOPssrl;
-    STRLEN llen;
-    char* lpv;
     bool lbyte;
     STRLEN rlen;
-    char* rpv = SvPV(right, rlen);	/* mg_get(right) happens here */
-    bool rbyte = !DO_UTF8(right), rcopied = FALSE;
+    const char *rpv = SvPV(right, rlen);	/* mg_get(right) happens here */
+    const bool rbyte = !DO_UTF8(right);
+    bool rcopied = FALSE;
 
     if (TARG == right && right != left) {
 	right = sv_2mortal(newSVpvn(rpv, rlen));
@@ -159,7 +158,8 @@ PP(pp_concat)
     }
 
     if (TARG != left) {
-	lpv = SvPV(left, llen);		/* mg_get(left) may happen here */
+        STRLEN llen;
+        const char* const lpv = SvPV(left, llen);	/* mg_get(left) may happen here */
 	lbyte = !DO_UTF8(left);
 	sv_setpvn(TARG, lpv, llen);
 	if (!lbyte)
@@ -168,11 +168,12 @@ PP(pp_concat)
 	    SvUTF8_off(TARG);
     }
     else { /* TARG == left */
+        STRLEN llen;
 	if (SvGMAGICAL(left))
 	    mg_get(left);		/* or mg_get(left) may happen here */
 	if (!SvOK(TARG))
 	    sv_setpv(left, "");
-	lpv = SvPV_nomg(left, llen);
+	(void)SvPV_nomg(left, llen);    /* Needed to set UTF8 flag */
 	lbyte = !DO_UTF8(left);
 	if (IN_BYTES)
 	    SvUTF8_off(TARG);
@@ -2577,7 +2578,7 @@ S_get_db_sub(pTHX_ SV **svp, CV *cv)
 	}
     }
     else {
-	int type = SvTYPE(dbsv);
+	const int type = SvTYPE(dbsv);
 	if (type < SVt_PVIV && type != SVt_IV)
 	    sv_upgrade(dbsv, SVt_PVIV);
 	(void)SvIOK_on(dbsv);
@@ -2598,7 +2599,7 @@ PP(pp_entersub)
     register CV *cv;
     register PERL_CONTEXT *cx;
     I32 gimme;
-    bool hasargs = (PL_op->op_flags & OPf_STACKED) != 0;
+    const bool hasargs = (PL_op->op_flags & OPf_STACKED) != 0;
 
     if (!sv)
 	DIE(aTHX_ "Not a CODE reference");
@@ -2615,9 +2616,7 @@ PP(pp_entersub)
 	break;
     default:
 	if (!SvROK(sv)) {
-	    char *sym;
-	    STRLEN n_a;
-
+	    const char *sym;
 	    if (sv == &PL_sv_yes) {		/* unfound import, ignore */
 		if (hasargs)
 		    SP = PL_stack_base + POPMARK;
@@ -2629,8 +2628,10 @@ PP(pp_entersub)
 		    goto got_rv;
 		sym = SvPOKp(sv) ? SvPVX(sv) : Nullch;
 	    }
-	    else
+	    else {
+                STRLEN n_a;
 		sym = SvPV(sv, n_a);
+            }
 	    if (!sym)
 		DIE(aTHX_ PL_no_usym, "a subroutine");
 	    if (PL_op->op_private & HINT_STRICT_REFS)
@@ -2888,7 +2889,7 @@ PP(pp_aelem)
 	 static const char oom_array_extend[] =
 	      "Out of memory during array extend"; /* Duplicated in av.c */
 	 if (SvUOK(elemsv)) {
-	      UV uv = SvUV(elemsv);
+	      const UV uv = SvUV(elemsv);
 	      elem = uv > IV_MAX ? IV_MAX : uv;
 	 }
 	 else if (SvNOK(elemsv))
@@ -2988,13 +2989,12 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     SV* ob;
     GV* gv;
     HV* stash;
-    char* name;
     STRLEN namelen;
-    char* packname = 0;
+    const char* packname = 0;
     SV *packsv = Nullsv;
     STRLEN packlen;
+    const char *name = SvPV(meth, namelen);
 
-    name = SvPV(meth, namelen);
     sv = *(PL_stack_base + TOPMARK + 1);
 
     if (!sv)
@@ -3085,9 +3085,9 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	   cause UNIVERSAL->can("NoSuchPackage::foo") to croak, and we
 	   don't want that.
 	*/
-	char* leaf = name;
-	char* sep = Nullch;
-	char* p;
+	const char* leaf = name;
+	const char* sep = Nullch;
+	const char* p;
 
 	for (p = name; *p; p++) {
 	    if (*p == '\'')
