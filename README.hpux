@@ -571,7 +571,7 @@ the same bug also affects Solaris.
 =head1 AUTHOR
 
 Jeff Okamoto <okamoto@corp.hp.com>
-H.Merijn Brand <h.m.brand@hccnet.nl>
+H.Merijn Brand <h.m.brand@xs4all.nl>
 
 With much assistance regarding shared libraries from Marc Sabatella.
 
