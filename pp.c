@@ -4258,7 +4258,7 @@ PP(pp_splice)
 		    *dst-- = *src--;
 	    }
 	    dst = AvARRAY(ary);
-	    SvPVX(ary) = (char*)(AvARRAY(ary) - diff); /* diff is negative */
+	    SvPV_set(ary, (char*)(AvARRAY(ary) - diff)); /* diff is negative */
 	    AvMAX(ary) += diff;
 	}
 	else {
@@ -4295,7 +4295,7 @@ PP(pp_splice)
 		    dst = src - diff;
 		    Move(src, dst, offset, SV*);
 		}
-		SvPVX(ary) = (char*)(AvARRAY(ary) - diff);/* diff is positive */
+		SvPV_set(ary, (char*)(AvARRAY(ary) - diff));/* diff is positive */
 		AvMAX(ary) += diff;
 		AvFILLp(ary) += diff;
 	    }

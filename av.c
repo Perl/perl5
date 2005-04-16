@@ -88,7 +88,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 	    tmp = AvARRAY(av) - AvALLOC(av);
 	    Move(AvARRAY(av), AvALLOC(av), AvFILLp(av)+1, SV*);
 	    AvMAX(av) += tmp;
-	    SvPVX(av) = (char*)AvALLOC(av);
+	    SvPV_set(av, (char*)AvALLOC(av));
 	    if (AvREAL(av)) {
 		while (tmp)
 		    ary[--tmp] = &PL_sv_undef;
@@ -165,7 +165,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 		    ary[--tmp] = &PL_sv_undef;
 	    }
 	    
-	    SvPVX(av) = (char*)AvALLOC(av);
+	    SvPV_set(av, (char*)AvALLOC(av));
 	    AvMAX(av) = newmax;
 	}
     }
@@ -361,7 +361,7 @@ Perl_newAV(pTHX)
     sv_upgrade((SV *)av, SVt_PVAV);
     AvREAL_on(av);
     AvALLOC(av) = 0;
-    SvPVX(av) = 0;
+    SvPV_set(av, (char*)0);
     AvMAX(av) = AvFILLp(av) = -1;
     return av;
 }
@@ -389,7 +389,7 @@ Perl_av_make(pTHX_ register I32 size, register SV **strp)
         register I32 i;
 	New(4,ary,size,SV*);
 	AvALLOC(av) = ary;
-	SvPVX(av) = (char*)ary;
+	SvPV_set(av, (char*)ary);
 	AvFILLp(av) = size - 1;
 	AvMAX(av) = size - 1;
 	for (i = 0; i < size; i++) {
@@ -414,7 +414,7 @@ Perl_av_fake(pTHX_ register I32 size, register SV **strp)
     AvALLOC(av) = ary;
     Copy(strp,ary,size,SV*);
     AvFLAGS(av) = AVf_REIFY;
-    SvPVX(av) = (char*)ary;
+    SvPV_set(av, (char*)ary);
     AvFILLp(av) = size - 1;
     AvMAX(av) = size - 1;
     while (size--) {
@@ -471,7 +471,7 @@ Perl_av_clear(pTHX_ register AV *av)
     }
     if ((key = AvARRAY(av) - AvALLOC(av))) {
 	AvMAX(av) += key;
-	SvPVX(av) = (char*)AvALLOC(av);
+	SvPV_set(av, (char*)AvALLOC(av));
     }
     AvFILLp(av) = -1;
 
@@ -505,7 +505,7 @@ Perl_av_undef(pTHX_ register AV *av)
     }
     Safefree(AvALLOC(av));
     AvALLOC(av) = 0;
-    SvPVX(av) = 0;
+    SvPV_set(av, (char*)0);
     AvMAX(av) = AvFILLp(av) = -1;
     if (AvARYLEN(av)) {
 	SvREFCNT_dec(AvARYLEN(av));
@@ -644,7 +644,7 @@ Perl_av_unshift(pTHX_ register AV *av, register I32 num)
     
 	AvMAX(av) += i;
 	AvFILLp(av) += i;
-	SvPVX(av) = (char*)(AvARRAY(av) - i);
+	SvPV_set(av, (char*)(AvARRAY(av) - i));
     }
     if (num) {
 	i = AvFILLp(av);
@@ -661,7 +661,7 @@ Perl_av_unshift(pTHX_ register AV *av, register I32 num)
 	/* Make extra elements into a buffer */
 	AvMAX(av) -= slide;
 	AvFILLp(av) -= slide;
-	SvPVX(av) = (char*)(AvARRAY(av) + slide);
+	SvPV_set(av, (char*)(AvARRAY(av) + slide));
     }
 }
 
@@ -704,7 +704,7 @@ Perl_av_shift(pTHX_ register AV *av)
     retval = *AvARRAY(av);
     if (AvREAL(av))
 	*AvARRAY(av) = &PL_sv_undef;
-    SvPVX(av) = (char*)(AvARRAY(av) + 1);
+    SvPV_set(av, (char*)(AvARRAY(av) + 1));
     AvMAX(av)--;
     AvFILLp(av)--;
     if (SvSMAGICAL(av))

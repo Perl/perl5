@@ -5885,7 +5885,7 @@ static SV *do_retrieve(
 				   bytes_from_utf8 returned us.  */
 				SvUPGRADE(in, SVt_PV);
 				SvPOK_on(in);
-				SvPVX(in) = asbytes;
+				SvPV_set(in, asbytes);
 				SvLEN(in) = klen_tmp;
 				SvCUR(in) = klen_tmp - 1;
 			}

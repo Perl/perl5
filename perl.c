@@ -4550,7 +4550,7 @@ S_init_main_thread(pTHX)
     SvFLAGS(PL_thrsv) = SVt_PV;
     SvANY(PL_thrsv) = (void*)xpv;
     SvREFCNT(PL_thrsv) = 1 << 30;	/* practically infinite */
-    SvPVX(PL_thrsv) = (char*)thr;
+    SvPV_set(PL_thrsvr, (char*)thr);
     SvCUR_set(PL_thrsv, sizeof(thr));
     SvLEN_set(PL_thrsv, sizeof(thr));
     *SvEND(PL_thrsv) = '\0';	/* in the trailing_nul field */

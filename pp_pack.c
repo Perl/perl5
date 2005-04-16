@@ -2452,7 +2452,7 @@ marked_upgrade(pTHX_ SV *sv, tempsym_t *sym_ptr) {
     }
     if (SvLEN(sv) != 0)
 	Safefree(from_start);
-    SvPVX(sv) = to_start;
+    SvPV_set(sv, to_start);
     SvCUR(sv) = to_ptr - to_start;
     SvLEN(sv) = len;
     SvUTF8_on(sv);

@@ -112,7 +112,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     sv_upgrade((SV*)gv, SVt_PVGV);
     if (SvLEN(gv)) {
 	if (proto) {
-	    SvPVX(gv) = NULL;
+	    SvPV_set(gv, NULL);
 	    SvLEN(gv) = 0;
 	    SvPOK_off(gv);
 	} else
@@ -525,7 +525,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
          * pass along the same data via some unused fields in the CV
          */
         CvSTASH(cv) = stash;
-        SvPVX(cv) = (char *)name; /* cast to lose constness warning */
+        SvPV_set(cv, (char *)name); /* cast to lose constness warning */
         SvCUR(cv) = len;
         return gv;
     }

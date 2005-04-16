@@ -2257,11 +2257,11 @@ PP(pp_subst)
 	    if (SvLEN(TARG))
 		Safefree(SvPVX(TARG));
 	}
-	SvPVX(TARG) = SvPVX(dstr);
+	SvPV_set(TARG, SvPVX(dstr));
 	SvCUR_set(TARG, SvCUR(dstr));
 	SvLEN_set(TARG, SvLEN(dstr));
 	doutf8 |= DO_UTF8(dstr);
-	SvPVX(dstr) = 0;
+	SvPV_set(dstr, (char*)0);
 	sv_free(dstr);
 
 	TAINT_IF(rxtainted & 1);
@@ -2723,13 +2723,13 @@ PP(pp_entersub)
 		ary = AvALLOC(av);
 		if (AvARRAY(av) != ary) {
 		    AvMAX(av) += AvARRAY(av) - AvALLOC(av);
-		    SvPVX(av) = (char*)ary;
+		    SvPV_set(av, (char*)ary);
 		}
 		if (items > AvMAX(av) + 1) {
 		    AvMAX(av) = items - 1;
 		    Renew(ary,items,SV*);
 		    AvALLOC(av) = ary;
-		    SvPVX(av) = (char*)ary;
+		    SvPV_set(av, (char*)ary);
 		}
 	    }
 	    Copy(MARK,AvARRAY(av),items,SV*);

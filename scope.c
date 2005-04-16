@@ -845,7 +845,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    if (SvPVX(gv) && SvLEN(gv) > 0) {
 		Safefree(SvPVX(gv));
 	    }
-	    SvPVX(gv) = (char *)SSPOPPTR;
+	    SvPV_set(gv, (char *)SSPOPPTR);
 	    SvCUR(gv) = (STRLEN)SSPOPIV;
 	    SvLEN(gv) = (STRLEN)SSPOPIV;
 	    gp_free(gv);
