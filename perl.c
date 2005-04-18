@@ -396,7 +396,9 @@ perl_construct(pTHXx)
 
     /* Use sysconf(_SC_CLK_TCK) if available, if not
      * available or if the sysconf() fails, use the HZ.
-     * BeOS has those, but returns the wrong value. */
+     * BeOS has those, but returns the wrong value.
+     * The HZ if not originally defined has been by now
+     * been defined as CLK_TCK, if available. */
 #if defined(HAS_SYSCONF) && defined(_SC_CLK_TCK) && !defined(__BEOS__)
     PL_clocktick = sysconf(_SC_CLK_TCK);
     if (PL_clocktick <= 0)
@@ -630,8 +632,7 @@ perl_destruct(pTHXx)
     }
 #endif
 
-
-    if(PL_exit_flags & PERL_EXIT_DESTRUCT_END) {
+    if (PL_exit_flags & PERL_EXIT_DESTRUCT_END) {
         dJMPENV;
         int x = 0;
 
@@ -2124,10 +2125,13 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     if (!PL_do_undump)
 	init_postdump_symbols(argc,argv,env);
 
-    /* PL_unicode is turned on by -C or by $ENV{PERL_UNICODE}.
-     * PL_utf8locale is conditionally turned on by
+    /* PL_unicode is turned on by -C, or by $ENV{PERL_UNICODE},
+     * or explicitly in some platforms.
      * locale.c:Perl_init_i18nl10n() if the environment
      * look like the user wants to use UTF-8. */
+#if defined(SYMBIAN)
+    PL_unicode = PERL_UNICODE_STD_FLAG; /* See PERL_SYMBIAN_CONSOLE_UTF8. */
+#endif
     if (PL_unicode) {
 	 /* Requires init_predump_symbols(). */
 	 if (!(PL_unicode & PERL_UNICODE_LOCALE_FLAG) || PL_utf8locale) {
@@ -2351,7 +2355,6 @@ S_run_body(pTHX_ I32 oldscope)
 	PL_op = PL_main_start;
 	CALLRUNOPS(aTHX);
     }
-
     my_exit(0);
     /* NOTREACHED */
 }
@@ -2891,7 +2894,7 @@ S_usage(pTHX_ const char *name)		/* XXX move this out into a module ? */
     /* This message really ought to be max 23 lines.
      * Removed -h because the user already knows that option. Others? */
 
-    static const char *usage_msg[] = {
+    static const char * const usage_msg[] = {
 "-0[octal]       specify record separator (\\0, if no argument)",
 "-a              autosplit mode with -n or -p (splits $_ into @F)",
 "-C[number/list] enables the listed Unicode features",
@@ -2923,7 +2926,7 @@ S_usage(pTHX_ const char *name)		/* XXX move this out into a module ? */
 "\n",
 NULL
 };
-    const char **p = usage_msg;
+    const char * const *p = usage_msg;
 
     PerlIO_printf(PerlIO_stdout(),
 		  "\nUsage: %s [switches] [--] [programfile] [arguments]",
@@ -2945,7 +2948,7 @@ Perl_get_debug_opts(pTHX_ char **s)
 int
 Perl_get_debug_opts_flags(pTHX_ char **s, int flags)
 {
-    static const char *usage_msgd[] = {
+    static const char * const usage_msgd[] = {
       " Debugging flag values: (see also -d)",
       "  p  Tokenizing and parsing (with v, displays parse stack)",
       "  s  Stack snapshots (with v, displays all stacks)",
@@ -3453,7 +3456,7 @@ S_init_interp(pTHX)
 #  if defined(PERL_IMPLICIT_CONTEXT)
 #    if defined(USE_5005THREADS)
 #      define PERLVARI(var,type,init)		PERL_GET_INTERP->var = init;
-#      define PERLVARIC(var,type,init)	PERL_GET_INTERP->var = init;
+#      define PERLVARIC(var,type,init)		PERL_GET_INTERP->var = init;
 #    else /* !USE_5005THREADS */
 #      define PERLVARI(var,type,init)		aTHX->var = init;
 #      define PERLVARIC(var,type,init)	aTHX->var = init;
@@ -4627,8 +4630,6 @@ S_set_caret_X(pTHX) {
 STATIC void
 S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register char **env)
 {
-    char *s;
-    SV *sv;
     GV* tmpgv;
 
     PL_toptarget = NEWSV(0,0);
@@ -4677,6 +4678,8 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	}
 	if (env) {
           char** origenv = environ;
+	  char *s;
+	  SV *sv;
 	  for (; *env; env++) {
 	    if (!(s = strchr(*env,'=')) || s == *env)
 		continue;
@@ -4833,7 +4836,7 @@ S_init_perllib(pTHX)
 #endif /* MACOS_TRADITIONAL */
 }
 
-#if defined(DOSISH) || defined(EPOC)
+#if defined(DOSISH) || defined(EPOC) || defined(SYMBIAN)
 #    define PERLLIB_SEP ';'
 #else
 #  if defined(VMS)

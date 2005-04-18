@@ -1129,7 +1129,7 @@ PP(pp_flop)
 
 /* Control. */
 
-static const char *context_name[] = {
+static const char * const context_name[] = {
     "pseudo-block",
     "subroutine",
     "eval",
@@ -1330,7 +1330,6 @@ Perl_qerror(pTHX_ SV *err)
 OP *
 Perl_die_where(pTHX_ char *message, STRLEN msglen)
 {
-
     if (PL_in_eval) {
 	I32 cxix;
 	I32 gimme;
@@ -3256,15 +3255,29 @@ PP(pp_require)
 		    MacPerl_CanonDir(name, buf2, 1);
 		    Perl_sv_setpvf(aTHX_ namesv, "%s%s", MacPerl_CanonDir(dir, buf1, 0), buf2+(buf2[0] == ':'));
 #else
-#ifdef VMS
+#  ifdef VMS
 		    char *unixdir;
 		    if ((unixdir = tounixpath(dir, Nullch)) == Nullch)
 			continue;
 		    sv_setpv(namesv, unixdir);
 		    sv_catpv(namesv, unixname);
-#else
+#  else
+#    ifdef SYMBIAN
+		    if (PL_origfilename[0] &&
+			PL_origfilename[1] == ':' &&
+			!(dir[0] && dir[1] == ':'))
+		        Perl_sv_setpvf(aTHX_ namesv,
+				       "%c:%s\\%s",
+				       PL_origfilename[0],
+				       dir, name);
+		    else
+		        Perl_sv_setpvf(aTHX_ namesv,
+				       "%s\\%s",
+				       dir, name);
+#    else
 		    Perl_sv_setpvf(aTHX_ namesv, "%s/%s", dir, name);
-#endif
+#    endif
+#  endif
 #endif
 		    TAINT_PROPER("require");
 		    tryname = SvPVX_const(namesv);

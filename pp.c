@@ -3361,8 +3361,8 @@ PP(pp_chr)
 
 PP(pp_crypt)
 {
-    dSP; dTARGET;
 #ifdef HAS_CRYPT
+    dSP; dTARGET;
     dPOPTOPssrl;
     STRLEN len;
     const char *tmps = SvPV_const(left, len);

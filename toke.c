@@ -26,9 +26,12 @@
 #define yychar	PL_yychar
 #define yylval	PL_yylval
 
-static char const ident_too_long[] = "Identifier too long";
-static char const c_without_g[] = "Use of /c modifier is meaningless without /g";
-static char const c_in_subst[] = "Use of /c modifier is meaningless in s///";
+static const char ident_too_long[] =
+  "Identifier too long";
+static const char c_without_g[] =
+  "Use of /c modifier is meaningless without /g";
+static const char c_in_subst[] =
+  "Use of /c modifier is meaningless in s///";
 
 static void restore_rsfp(pTHX_ void *f);
 #ifndef PERL_NO_UTF16_FILTER
@@ -76,7 +79,7 @@ static I32 utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 #define LEX_KNOWNEXT		 0
 
 #ifdef DEBUGGING
-static char const* lex_state_names[] = {
+static const char* const lex_state_names[] = {
     "KNOWNEXT",
     "FORMLINE",
     "INTERPCONST",
@@ -215,7 +218,8 @@ enum token_type {
     TOKENTYPE_GVVAL
 };
 
-static struct debug_tokens { const int token, type; const char *name; } debug_tokens[] =
+static struct debug_tokens { const int token, type; const char *name; }
+  const debug_tokens[] =
 {
     { ADDOP,		TOKENTYPE_OPNUM,	"ADDOP" },
     { ANDAND,		TOKENTYPE_NONE,		"ANDAND" },
@@ -2270,7 +2274,7 @@ S_find_in_my_stash(pTHX_ const char *pkgname, I32 len)
 }
 
 #ifdef DEBUGGING
-    static char const* exp_name[] =
+    static const char* const exp_name[] =
 	{ "OPERATOR", "TERM", "REF", "STATE", "BLOCK", "ATTRBLOCK",
 	  "ATTRTERM", "TERMBLOCK"
 	};
@@ -2841,7 +2845,7 @@ Perl_yylex(pTHX)
 		    !instr(s,"indir") &&
 		    instr(PL_origargv[0],"perl"))
 		{
-		    char **newargv;
+				    char **newargv;
 
 		    *ipathend = '\0';
 		    s = ipathend + 1;
@@ -10109,16 +10113,17 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	    I32 shift;
 	    bool overflowed = FALSE;
 	    bool just_zero  = TRUE;	/* just plain 0 or binary number? */
-	    static NV nvshift[5] = { 1.0, 2.0, 4.0, 8.0, 16.0 };
-	    static char const* bases[5] = { "", "binary", "", "octal",
-				      "hexadecimal" };
-	    static char const* Bases[5] = { "", "Binary", "", "Octal",
-				      "Hexadecimal" };
-	    static char const *maxima[5] = { "",
-				       "0b11111111111111111111111111111111",
-				       "",
-				       "037777777777",
-				       "0xffffffff" };
+	    static const NV nvshift[5] = { 1.0, 2.0, 4.0, 8.0, 16.0 };
+	    static const char* const bases[5] =
+	      { "", "binary", "", "octal", "hexadecimal" };
+	    static const char* const Bases[5] =
+	      { "", "Binary", "", "Octal", "Hexadecimal" };
+	    static const char* const maxima[5] =
+	      { "",
+		"0b11111111111111111111111111111111",
+		"",
+		"037777777777",
+		"0xffffffff" };
 	    const char *base, *Base, *max;
 
 	    /* check for hex */

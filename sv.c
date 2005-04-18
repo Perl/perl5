@@ -661,7 +661,6 @@ Perl_report_uninit(pTHX)
 	Perl_warner(aTHX_ packWARN(WARN_UNINITIALIZED), PL_warn_uninit, "", "");
 }
 
-
 /* allocate another arena's worth of struct xrv */
 
 STATIC void
@@ -774,8 +773,7 @@ S_more_xpviv(pTHX)
 /* allocate another arena's worth of struct xpvnv */
 
 STATIC void
-S_more_xpvnv(pTHX)
-{
+S_more_xpvnv(pTHX) {
     XPVNV* xpvnv;
     XPVNV* xpvnvend;
     New(715, xpvnv, PERL_ARENA_SIZE/sizeof(XPVNV), XPVNV);
@@ -3339,7 +3337,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	return SvPVX(tsv);
     }
     else {
-	STRLEN len;
+    	STRLEN len;
         const char *t;
 
 	if (tsv) {
@@ -4918,7 +4916,7 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     }
 
     /* Rest of work is done else where */
-    mg = sv_magicext(sv,obj,how,(MGVTBL *)vtable,name,namlen);
+    mg = sv_magicext(sv,obj,how,(MGVTBL*)vtable,name,namlen);
 
     switch (how) {
     case PERL_MAGIC_taint:
@@ -5587,7 +5585,7 @@ S_utf8_mg_pos_init(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i,
 
     if (SvMAGICAL(sv) && !SvREADONLY(sv)) {
 	if (!*mgp)
-	    *mgp = sv_magicext(sv, 0, PERL_MAGIC_utf8, &PL_vtbl_utf8, 0, 0);
+	    *mgp = sv_magicext(sv, 0, PERL_MAGIC_utf8, (MGVTBL*)&PL_vtbl_utf8, 0, 0);
 	assert(*mgp);
 
 	if ((*mgp)->mg_ptr)
@@ -6512,17 +6510,7 @@ thats_really_all_folks:
    else
     {
        /*The big, slow, and stupid way. */
-
-      /* Any stack-challenged places. */
-#if defined(EPOC)
-      /* EPOC: need to work around SDK features.         *
-       * On WINS: MS VC5 generates calls to _chkstk,     *
-       * if a "large" stack frame is allocated.          *
-       * gcc on MARM does not generate calls like these. */
-#   define USEHEAPINSTEADOFSTACK
-#endif
-
-#ifdef USEHEAPINSTEADOFSTACK
+#ifdef USE_HEAP_INSTEAD_OF_STACK	/* Even slower way. */
 	STDCHAR *buf = 0;
 	Newx(buf, 8192, STDCHAR);
 	assert(buf);
@@ -6577,7 +6565,7 @@ screamer2:
 		goto screamer2;
 	}
 
-#ifdef USEHEAPINSTEADOFSTACK
+#ifdef USE_HEAP_INSTEAD_OF_STACK
 	Safefree(buf);
 #endif
     }
@@ -8558,7 +8546,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     const char *patend;
     STRLEN origlen;
     I32 svix = 0;
-    static char nullstr[] = "(null)";
+    static const char nullstr[] = "(null)";
     SV *argsv = Nullsv;
     bool has_utf8 = DO_UTF8(sv);    /* has the result utf8? */
     const bool pat_utf8 = has_utf8; /* the pattern is in utf8? */
@@ -8952,7 +8940,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 #endif
 		    elen = strlen(eptr);
 		else {
-		    eptr = nullstr;
+		    eptr = (char *)nullstr;
 		    elen = sizeof nullstr - 1;
 		}
 	    }

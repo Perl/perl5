@@ -119,6 +119,12 @@ extern int h_errno;
 #   undef my_chsize
 # endif
 # define my_chsize PerlLIO_chsize
+#else
+# ifdef HAS_TRUNCATE
+#   define my_chsize PerlLIO_chsize
+# else
+I32 my_chsize(int fd, Off_t length);
+# endif
 #endif
 
 #ifdef HAS_FLOCK
@@ -167,7 +173,7 @@ extern int h_errno;
 #endif /* no flock() */
 
 #define ZBTLEN 10
-static char zero_but_true[ZBTLEN + 1] = "0 but true";
+static const char zero_but_true[ZBTLEN + 1] = "0 but true";
 
 #if defined(I_SYS_ACCESS) && !defined(R_OK)
 #  include <sys/access.h>
@@ -700,8 +706,9 @@ PP(pp_fileno)
 
 PP(pp_umask)
 {
-    dSP; dTARGET;
+    dSP;
 #ifdef HAS_UMASK
+    dTARGET;
     Mode_t anum;
 
     if (MAXARG < 1) {
@@ -785,8 +792,7 @@ PP(pp_binmode)
 
 PP(pp_tie)
 {
-    dSP;
-    dMARK;
+    dSP; dMARK;
     SV *varsv;
     HV* stash;
     GV *gv;
@@ -1677,7 +1683,7 @@ PP(pp_sysread)
        (should be 2 * length + offset + 1, or possibly something longer if
        PL_encoding is true) */
     buffer  = SvGROW(bufsv, (STRLEN)(length+offset+1));
-    if (offset > bufsize) { /* Zero any newly allocated space */
+    if (offset > 0 && (Sock_size_t)offset > bufsize) { /* Zero any newly allocated space */
     	Zero(buffer+bufsize, offset-bufsize, char);
     }
     buffer = buffer + offset;
@@ -4084,7 +4090,6 @@ PP(pp_system)
     dSP; dMARK; dORIGMARK; dTARGET;
     I32 value;
     int result;
-    I32 did_pipes = 0;
 
     if (PL_tainting) {
 	TAINT_ENV();
@@ -4101,6 +4106,7 @@ PP(pp_system)
     {
 	Pid_t childpid;
 	int pp[2];
+	I32 did_pipes = 0;
 
 	if (PerlProc_pipe(pp) >= 0)
 	    did_pipes = 1;
@@ -4182,14 +4188,14 @@ PP(pp_system)
     result = 0;
     if (PL_op->op_flags & OPf_STACKED) {
 	SV *really = *++MARK;
-#  if defined(WIN32) || defined(OS2)
+#  if defined(WIN32) || defined(OS2) || defined(SYMBIAN)
 	value = (I32)do_aspawn(really, MARK, SP);
 #  else
 	value = (I32)do_aspawn(really, (void **)MARK, (void **)SP);
 #  endif
     }
     else if (SP - MARK != 1) {
-#  if defined(WIN32) || defined(OS2)
+#  if defined(WIN32) || defined(OS2) || defined(SYMBIAN)
 	value = (I32)do_aspawn(Nullsv, MARK, SP);
 #  else
 	value = (I32)do_aspawn(Nullsv, (void **)MARK, (void **)SP);
@@ -4476,9 +4482,11 @@ PP(pp_gmtime)
     dSP;
     Time_t when;
     const struct tm *tmbuf;
-    static const char *dayname[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-    static const char *monname[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-			      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+    static const char * const dayname[] =
+	{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+    static const char * const monname[] =
+	{"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+	 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
     if (MAXARG < 1)
 	(void)time(&when);

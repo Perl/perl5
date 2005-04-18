@@ -771,7 +771,7 @@ Perl_gv_dump(pTHX_ GV *gv)
  * (with the PERL_MAGIC_ prefixed stripped)
  */
 
-static struct { const char type; const char *name; } magic_names[] = {
+static const struct { const char type; const char *name; } magic_names[] = {
 	{ PERL_MAGIC_sv,             "sv(\\0)" },
 	{ PERL_MAGIC_arylen,         "arylen(#)" },
 	{ PERL_MAGIC_glob,           "glob(*)" },
@@ -866,7 +866,7 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, MAGIC *mg, I32 nest, I32 maxne
 	{
 	    int n;
 	    const char *name = 0;
-	    for (n=0; magic_names[n].name; n++) {
+	    for (n = 0; magic_names[n].name; n++) {
 		if (mg->mg_type == magic_names[n].type) {
 		    name = magic_names[n].name;
 		    break;

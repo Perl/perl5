@@ -447,7 +447,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	     && ((STRLEN)(bigend - big) == littlelen - 1)
 	     && (littlelen == 1
 		 || (*big == *little &&
-		     memEQ(big, little, littlelen - 1))))
+		     memEQ((char *)big, (char *)little, littlelen - 1))))
 	    return (char*)big;
 	return Nullch;
     }
@@ -983,7 +983,7 @@ SV *
 Perl_vmess(pTHX_ const char *pat, va_list *args)
 {
     SV *sv = mess_alloc();
-    static char dgd[] = " during global destruction.\n";
+    static const char dgd[] = " during global destruction.\n";
 
     sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
     if (!SvCUR(sv) || *(SvEND(sv) - 1) != '\n') {
@@ -1338,7 +1338,7 @@ Perl_warn(pTHX_ const char *pat, ...)
 void
 Perl_warner_nocontext(U32 err, const char *pat, ...)
 {
-    dTHX;
+    dTHX; 
     va_list args;
     va_start(args, pat);
     vwarner(err, pat, &args);
@@ -1448,7 +1448,7 @@ Perl_my_setenv(pTHX_ char *nam, char *val)
     my_setenv_format(environ[i], nam, nlen, val, vlen);
     } else {
 # endif
-#   if defined(__CYGWIN__) || defined( EPOC)
+#   if defined(__CYGWIN__) || defined(EPOC) || defined(SYMBIAN) 
     setenv(nam, val, 1);
 #   else
     char *new_env;
@@ -1581,7 +1581,7 @@ Perl_my_memcmp(const char *s1, const char *s2, register I32 len)
     register I32 tmp;
 
     while (len--) {
-	if (tmp = *a++ - *b++)
+        if ((tmp = *a++ - *b++))
 	    return tmp;
     }
     return 0;
@@ -2139,8 +2139,6 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 #ifndef OS2
 	if (doexec) {
 #if !defined(HAS_FCNTL) || !defined(F_SETFD)
-	    int fd;
-
 #ifndef NOFILE
 #define NOFILE 20
 #endif
@@ -2310,6 +2308,7 @@ Perl_dump_fds(pTHX_ char *s)
 	    PerlIO_printf(Perl_debug_log," %d",fd);
     }
     PerlIO_printf(Perl_debug_log,"\n");
+    return;
 }
 #endif	/* DUMP_FDS */
 
@@ -2445,14 +2444,11 @@ Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
     return PerlProc_signal(signo, handler);
 }
 
-static int sig_trapped;	/* XXX signals are process-wide anyway, so we
-			   ignore the implications of this for threading */
-
 static
 Signal_t
 sig_trap(int signo)
 {
-    sig_trapped++;
+    PL_sig_trapped++;
 }
 
 Sighandler_t
@@ -2466,10 +2462,10 @@ Perl_rsignal_state(pTHX_ int signo)
 	return SIG_ERR;
 #endif
 
-    sig_trapped = 0;
+    PL_sig_trapped = 0;
     oldsig = PerlProc_signal(signo, sig_trap);
     PerlProc_signal(signo, oldsig);
-    if (sig_trapped)
+    if (PL_sig_trapped)
 	PerlProc_kill(PerlProc_getpid(), signo);
     return oldsig;
 }
@@ -2567,16 +2563,15 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 I32
 Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 {
-    I32 result;
+    I32 result = 0;
     if (!pid)
 	return -1;
 #if !defined(HAS_WAITPID) && !defined(HAS_WAIT4) || defined(HAS_WAITPID_RUNTIME)
     {
-	SV *sv;
-	SV** svp;
 	char spid[TYPE_CHARS(IV)];
 
 	if (pid > 0) {
+	    SV** svp;
 	    sprintf(spid, "%"IVdf, (IV)pid);
 	    svp = hv_fetch(PL_pidstatus,spid,strlen(spid),FALSE);
 	    if (svp && *svp != &PL_sv_undef) {
@@ -2590,8 +2585,9 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 
 	    hv_iterinit(PL_pidstatus);
 	    if ((entry = hv_iternext(PL_pidstatus))) {
+		SV *sv = hv_iterval(PL_pidstatus,entry);
+
 		pid = atoi(hv_iterkey(entry,(I32*)statusp));
-		sv = hv_iterval(PL_pidstatus,entry);
 		*statusp = SvIVX(sv);
 		sprintf(spid, "%"IVdf, (IV)pid);
 		(void)hv_delete(PL_pidstatus,spid,strlen(spid),G_DISCARD);
@@ -2613,7 +2609,9 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
     goto finish;
 #endif
 #if !defined(HAS_WAITPID) && !defined(HAS_WAIT4) || defined(HAS_WAITPID_RUNTIME)
+#if defined(HAS_WAITPID) && defined(HAS_WAITPID_RUNTIME)
   hard_way:
+#endif
     {
 	if (flags)
 	    Perl_croak(aTHX_ "Can't do waitpid with flags");
@@ -2625,7 +2623,9 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 	}
     }
 #endif
+#if defined(HAS_WAITPID) || defined(HAS_WAIT4)
   finish:
+#endif
     if (result < 0 && errno == EINTR) {
 	PERL_ASYNC_CHECK();
     }
@@ -3291,7 +3291,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
 }
 #endif /* USE_5005THREADS */
 
-#ifdef PERL_GLOBAL_STRUCT
+#if defined(PERL_GLOBAL_STRUCT) && !defined(PERL_GLOBAL_STRUCT_PRIVATE)
 struct perl_vars *
 Perl_GetVars(pTHX)
 {
@@ -3302,13 +3302,13 @@ Perl_GetVars(pTHX)
 char **
 Perl_get_op_names(pTHX)
 {
- return PL_op_name;
+ return (char **)PL_op_name;
 }
 
 char **
 Perl_get_op_descs(pTHX)
 {
- return PL_op_desc;
+ return (char **)PL_op_desc;
 }
 
 char *
@@ -3321,7 +3321,7 @@ Perl_get_no_modify(pTHX)
 U32 *
 Perl_get_opargs(pTHX)
 {
- return PL_opargs;
+ return (U32 *)PL_opargs;
 }
 
 PPADDR_t*
@@ -3345,7 +3345,7 @@ Perl_getenv_len(pTHX_ const char *env_elem, unsigned long *len)
 MGVTBL*
 Perl_get_vtbl(pTHX_ int vtbl_id)
 {
-    MGVTBL* result = Null(MGVTBL*);
+    const MGVTBL* result = Null(MGVTBL*);
 
     switch(vtbl_id) {
     case want_vtbl_sv:
@@ -3446,7 +3446,7 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
 	result = &PL_vtbl_utf8;
 	break;
     }
-    return result;
+    return (MGVTBL*)result;
 }
 
 I32
@@ -3911,6 +3911,7 @@ Perl_my_strftime(pTHX_ char *fmt, int sec, int min, int hour, int mday, int mon,
   }
 #else
   Perl_croak(aTHX_ "panic: no strftime");
+  return NULL;
 #endif
 }
 
@@ -4314,7 +4315,15 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
     return 0;
 
   abort_tidy_up_and_fail:
-  errno = ECONNABORTED; /* I hope this is portable and appropriate.  */
+#ifdef ECONNABORTED
+  errno = ECONNABORTED;	/* This would be the standard thing to do. */
+#else
+#  ifdef ECONNREFUSED
+  errno = ECONNREFUSED;	/* E.g. Symbian does not have ECONNABORTED. */
+#  else
+  errno = ETIMEDOUT;	/* Desperation time. */
+#  endif
+#endif
   tidy_up_and_fail:
     {
 	int save_errno = errno;
@@ -4499,7 +4508,7 @@ Perl_seed(pTHX)
 #endif
     fd = PerlLIO_open(PERL_RANDOM_DEVICE, 0);
     if (fd != -1) {
-    	if (PerlLIO_read(fd, &u, sizeof u) != sizeof u)
+    	if (PerlLIO_read(fd, (void*)&u, sizeof u) != sizeof u)
 	    u = 0;
 	PerlLIO_close(fd);
 	if (u)

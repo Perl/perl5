@@ -23,12 +23,12 @@
  */
 
 /* package attributes; */
-void XS_attributes__warn_reserved(pTHX_ CV *cv);
-void XS_attributes_reftype(pTHX_ CV *cv);
-void XS_attributes__modify_attrs(pTHX_ CV *cv);
-void XS_attributes__guess_stash(pTHX_ CV *cv);
-void XS_attributes__fetch_attrs(pTHX_ CV *cv);
-void XS_attributes_bootstrap(pTHX_ CV *cv);
+PERL_XS_EXPORT_C void XS_attributes__warn_reserved(pTHX_ CV *cv);
+PERL_XS_EXPORT_C void XS_attributes_reftype(pTHX_ CV *cv);
+PERL_XS_EXPORT_C void XS_attributes__modify_attrs(pTHX_ CV *cv);
+PERL_XS_EXPORT_C void XS_attributes__guess_stash(pTHX_ CV *cv);
+PERL_XS_EXPORT_C void XS_attributes__fetch_attrs(pTHX_ CV *cv);
+PERL_XS_EXPORT_C void XS_attributes_bootstrap(pTHX_ CV *cv);
 
 
 /*

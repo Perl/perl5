@@ -7060,13 +7060,13 @@ Perl_custom_op_name(pTHX_ OP* o)
     HE* he;
 
     if (!PL_custom_op_names) /* This probably shouldn't happen */
-        return PL_op_name[OP_CUSTOM];
+        return (char *)PL_op_name[OP_CUSTOM];
 
     keysv = sv_2mortal(newSViv(index));
 
     he = hv_fetch_ent(PL_custom_op_names, keysv, 0, 0);
     if (!he)
-        return PL_op_name[OP_CUSTOM]; /* Don't know who you are */
+        return (char *)PL_op_name[OP_CUSTOM]; /* Don't know who you are */
 
     return SvPV_nolen(HeVAL(he));
 }
@@ -7079,13 +7079,13 @@ Perl_custom_op_desc(pTHX_ OP* o)
     HE* he;
 
     if (!PL_custom_op_descs)
-        return PL_op_desc[OP_CUSTOM];
+        return (char *)PL_op_desc[OP_CUSTOM];
 
     keysv = sv_2mortal(newSViv(index));
 
     he = hv_fetch_ent(PL_custom_op_descs, keysv, 0, 0);
     if (!he)
-        return PL_op_desc[OP_CUSTOM];
+        return (char *)PL_op_desc[OP_CUSTOM];
 
     return SvPV_nolen(HeVAL(he));
 }

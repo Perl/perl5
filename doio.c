@@ -1235,9 +1235,8 @@ Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode)
 }
 
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE)
-I32 my_chsize(fd, length)
-I32 fd;			/* file descriptor */
-Off_t length;		/* length to set file to */
+I32
+my_chsize(int fd, Off_t length)
 {
 #ifdef F_FREESP
 	/* code courtesy of William Kucharski */
@@ -1281,12 +1280,11 @@ Off_t length;		/* length to set file to */
 	    return -1;
 
     }
-
     return 0;
 #else
-    dTHX;
-    DIE(aTHX_ "truncate not implemented");
+    Perl_croak_nocontext("truncate not implemented");
 #endif /* F_FREESP */
+    return -1;
 }
 #endif /* !HAS_TRUNCATE && !HAS_CHSIZE */
 
@@ -1409,6 +1407,8 @@ Perl_my_stat(pTHX)
     }
 }
 
+static const char no_prev_lstat[] = "The stat preceding -l _ wasn't an lstat";
+
 I32
 Perl_my_lstat(pTHX)
 {
@@ -1418,7 +1418,7 @@ Perl_my_lstat(pTHX)
 	EXTEND(SP,1);
 	if (cGVOP_gv == PL_defgv) {
 	    if (PL_laststype != OP_LSTAT)
-		Perl_croak(aTHX_ "The stat preceding -l _ wasn't an lstat");
+		Perl_croak(aTHX_ no_prev_lstat);
 	    return PL_laststatval;
 	}
 	if (ckWARN(WARN_IO)) {
@@ -1457,7 +1457,7 @@ bool
 Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 	       int fd, int do_report)
 {
-#ifdef MACOS_TRADITIONAL
+#if defined(MACOS_TRADITIONAL) || defined(SYMBIAN)
     Perl_croak(aTHX_ "exec? I'm not *that* kind of operating system");
 #else
     if (sp > mark) {
@@ -1508,7 +1508,7 @@ Perl_do_execfree(pTHX)
     PL_Cmd = Nullch;
 }
 
-#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC) && !defined(MACOS_TRADITIONAL)
+#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC) && !defined(SYMBIAN) && !defined(MACOS_TRADITIONAL)
 
 bool
 Perl_do_exec(pTHX_ char *cmd)
