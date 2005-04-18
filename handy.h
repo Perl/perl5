@@ -609,63 +609,42 @@ hopefully catches attempts to access uninitialized memory.
 	(void)((n)>((MEM_SIZE)~0)/sizeof(t)?(Perl_croak_nocontext(a),0):0)
 #define MEM_WRAP_CHECK_2(n,t,a,b) \
 	(void)((n)>((MEM_SIZE)~0)/sizeof(t)?(Perl_croak_nocontext(a,b),0):0)
-
-#define New(x,v,n,t)	(v = (MEM_WRAP_CHECK(n,t), (t*)safemalloc((MEM_SIZE)((n)*sizeof(t)))))
-#define Newc(x,v,n,t,c)	(v = (MEM_WRAP_CHECK(n,t), (c*)safemalloc((MEM_SIZE)((n)*sizeof(t)))))
-#define Newz(x,v,n,t)	(v = (MEM_WRAP_CHECK(n,t), (t*)safemalloc((MEM_SIZE)((n)*sizeof(t))))), \
-			memzero((char*)(v), (n)*sizeof(t))
-#define Renew(v,n,t) \
-	  (v = (MEM_WRAP_CHECK(n,t), (t*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t)))))
-#define Renewc(v,n,t,c) \
-	  (v = (MEM_WRAP_CHECK(n,t), (c*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t)))))
-#define Safefree(d)	safefree((Malloc_t)(d))
-
-#define Move(s,d,n,t)	(MEM_WRAP_CHECK(n,t), (void)memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
-#define Copy(s,d,n,t)	(MEM_WRAP_CHECK(n,t), (void)memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)))
-#define Zero(d,n,t)	(MEM_WRAP_CHECK(n,t), (void)memzero((char*)(d), (n) * sizeof(t)))
-
-#define MoveD(s,d,n,t)	(MEM_WRAP_CHECK(n,t), memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
-#define CopyD(s,d,n,t)	(MEM_WRAP_CHECK(n,t), memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)))
-#ifdef HAS_MEMSET
-#define ZeroD(d,n,t)	(MEM_WRAP_CHECK(n,t), memzero((char*)(d), (n) * sizeof(t)))
-#else
-/* Using bzero(), which returns void.  */
-#define ZeroD(d,n,t)	(MEM_WRAP_CHECK(n,t), memzero((char*)(d), (n) * sizeof(t)),d)
-#endif
-
-#define Poison(d,n,t)	(MEM_WRAP_CHECK(n,t), (void)memset((char*)(d), 0xAB, (n) * sizeof(t)))
+#define MEM_WRAP_CHECK_(n,t) MEM_WRAP_CHECK(n,t),
 
 #else
 
 #define MEM_WRAP_CHECK(n,t)
 #define MEM_WRAP_CHECK_1(n,t,a)
 #define MEM_WRAP_CHECK_2(n,t,a,b)
+#define MEM_WRAP_CHECK_(n,t)
 
-#define New(x,v,n,t)	(v = (t*)safemalloc((MEM_SIZE)((n)*sizeof(t))))
-#define Newc(x,v,n,t,c)	(v = (c*)safemalloc((MEM_SIZE)((n)*sizeof(t))))
-#define Newz(x,v,n,t)	(v = (t*)safemalloc((MEM_SIZE)((n)*sizeof(t)))), \
+#endif
+
+
+#define New(x,v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) (t*)safemalloc((MEM_SIZE)((n)*sizeof(t)))))
+#define Newc(x,v,n,t,c)	(v = (MEM_WRAP_CHECK_(n,t) (c*)safemalloc((MEM_SIZE)((n)*sizeof(t)))))
+#define Newz(x,v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) (t*)safemalloc((MEM_SIZE)((n)*sizeof(t))))), \
 			memzero((char*)(v), (n)*sizeof(t))
 #define Renew(v,n,t) \
-	  (v = (t*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))
+	  (v = (MEM_WRAP_CHECK_(n,t) (t*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t)))))
 #define Renewc(v,n,t,c) \
-	  (v = (c*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))
+	  (v = (MEM_WRAP_CHECK_(n,t) (c*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t)))))
 #define Safefree(d)	safefree((Malloc_t)(d))
 
-#define Move(s,d,n,t)	(void)memmove((char*)(d),(const char*)(s), (n) * sizeof(t))
-#define Copy(s,d,n,t)	(void)memcpy((char*)(d),(const char*)(s), (n) * sizeof(t))
-#define Zero(d,n,t)	(void)memzero((char*)(d), (n) * sizeof(t))
+#define Move(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) (void)memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
+#define Copy(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) (void)memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)))
+#define Zero(d,n,t)	(MEM_WRAP_CHECK_(n,t) (void)memzero((char*)(d), (n) * sizeof(t)))
 
-#define MoveD(s,d,n,t)	memmove((char*)(d),(const char*)(s), (n) * sizeof(t))
-#define CopyD(s,d,n,t)	memcpy((char*)(d),(const char*)(s), (n) * sizeof(t))
+#define MoveD(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
+#define CopyD(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)))
 #ifdef HAS_MEMSET
-#define ZeroD(d,n,t)	memzero((char*)(d), (n) * sizeof(t))
+#define ZeroD(d,n,t)	(MEM_WRAP_CHECK_(n,t) memzero((char*)(d), (n) * sizeof(t)))
 #else
-#define ZeroD(d,n,t)	((void)memzero((char*)(d), (n) * sizeof(t)),d)
+/* Using bzero(), which returns void.  */
+#define ZeroD(d,n,t)	(MEM_WRAP_CHECK_(n,t) memzero((char*)(d), (n) * sizeof(t)),d)
 #endif
 
-#define Poison(d,n,t)	(void)memset((char*)(d), 0xAB, (n) * sizeof(t))
-
-#endif
+#define Poison(d,n,t)	(MEM_WRAP_CHECK_(n,t) (void)memset((char*)(d), 0xAB, (n) * sizeof(t)))
 
 #else /* lint */
 
