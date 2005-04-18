@@ -217,6 +217,18 @@ struct perl_thread;
 #  define EXTERN_C extern
 #endif
 
+/* Some platforms require marking function declarations
+ * for them to be exportable.  Used in perlio.h, proto.h
+ * is handled either by the makedef.pl or by defining the
+ * PERL_CALLCONV to be something special.  See also the
+ * definition of XS() in XSUB.h. */
+#ifndef PERL_EXPORT_C
+#  define PERL_EXPORT_C extern
+#endif
+#ifndef PERL_XS_EXPORT_C
+#  define PERL_XS_EXPORT_C
+#endif
+
 #ifdef OP_IN_REGISTER
 #  ifdef __GNUC__
 #    define stringify_immed(s) #s
@@ -785,7 +797,7 @@ int usleep(unsigned int);
 #  define MALLOC_CHECK_TAINT(argc,argv,env)
 #endif /* MYMALLOC */
 
-#define TOO_LATE_FOR_(ch,s)	Perl_croak(aTHX_ "\"-%c\" is on the #! line, it must also be used on the command line%s", (char)(ch), s)
+#define TOO_LATE_FOR_(ch,what)	Perl_croak(aTHX_ "\"-%c\" is on the #! line, it must also be used on the command line%s", (char)(ch), what)
 #define TOO_LATE_FOR(ch)	TOO_LATE_FOR_(ch, "")
 #define MALLOC_TOO_LATE_FOR(ch)	TOO_LATE_FOR_(ch, " with $ENV{PERL_MALLOC_OPT}")
 #define MALLOC_CHECK_TAINT2(argc,argv)	MALLOC_CHECK_TAINT(argc,argv,NULL)

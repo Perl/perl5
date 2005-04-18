@@ -96,23 +96,29 @@ struct _PerlIO {
 #define PerlIOValid(f)     ((f) && *(f))
 
 /*--------------------------------------------------------------------------------------*/
-/* Data exports - EXT rather than extern is needed for Cygwin */
-EXT PerlIO_funcs PerlIO_unix;
-EXT PerlIO_funcs PerlIO_perlio;
-EXT PerlIO_funcs PerlIO_stdio;
-EXT PerlIO_funcs PerlIO_crlf;
-EXT PerlIO_funcs PerlIO_utf8;
-EXT PerlIO_funcs PerlIO_byte;
-EXT PerlIO_funcs PerlIO_raw;
-EXT PerlIO_funcs PerlIO_pending;
+/* Data exports - EXTCONST rather than extern is needed for Cygwin */
+#undef EXTPERLIO 
+#ifdef PERLIO_FUNCS_CONST
+#define EXTPERLIO EXTCONST
+#else
+#define EXTPERLIO EXT
+#endif
+EXTPERLIO PerlIO_funcs PerlIO_unix;
+EXTPERLIO PerlIO_funcs PerlIO_perlio;
+EXTPERLIO PerlIO_funcs PerlIO_stdio;
+EXTPERLIO PerlIO_funcs PerlIO_crlf;
+EXTPERLIO PerlIO_funcs PerlIO_utf8;
+EXTPERLIO PerlIO_funcs PerlIO_byte;
+EXTPERLIO PerlIO_funcs PerlIO_raw;
+EXTPERLIO PerlIO_funcs PerlIO_pending;
 #ifdef HAS_MMAP
-EXT PerlIO_funcs PerlIO_mmap;
+EXTPERLIO PerlIO_funcs PerlIO_mmap;
 #endif
 #ifdef WIN32
-EXT PerlIO_funcs PerlIO_win32;
+EXTPERLIO PerlIO_funcs PerlIO_win32;
 #endif
-extern PerlIO *PerlIO_allocate(pTHX);
-extern SV *PerlIO_arg_fetch(PerlIO_list_t *av, IV n);
+PERL_EXPORT_C PerlIO *PerlIO_allocate(pTHX);
+PERL_EXPORT_C SV *PerlIO_arg_fetch(PerlIO_list_t *av, IV n);
 #define PerlIOArg PerlIO_arg_fetch(layers,n)
 
 #ifdef PERLIO_USING_CRLF
@@ -124,23 +130,24 @@ extern SV *PerlIO_arg_fetch(PerlIO_list_t *av, IV n);
 /*--------------------------------------------------------------------------------------*/
 /* Generic, or stub layer functions */
 
-extern IV PerlIOBase_fileno(pTHX_ PerlIO *f);
-extern PerlIO *PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags);
-extern IV PerlIOBase_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab);
-extern IV PerlIOBase_popped(pTHX_ PerlIO *f);
-extern IV PerlIOBase_binmode(pTHX_ PerlIO *f);
-extern SSize_t PerlIOBase_read(pTHX_ PerlIO *f, void *vbuf, Size_t count);
-extern SSize_t PerlIOBase_unread(pTHX_ PerlIO *f, const void *vbuf,
-				 Size_t count);
-extern IV PerlIOBase_eof(pTHX_ PerlIO *f);
-extern IV PerlIOBase_error(pTHX_ PerlIO *f);
-extern void PerlIOBase_clearerr(pTHX_ PerlIO *f);
-extern IV PerlIOBase_close(pTHX_ PerlIO *f);
-extern void PerlIOBase_setlinebuf(pTHX_ PerlIO *f);
-extern void PerlIOBase_flush_linebuf(pTHX);
+PERL_EXPORT_C IV PerlIOBase_fileno(pTHX_ PerlIO *f);
+PERL_EXPORT_C PerlIO *PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags);
+PERL_EXPORT_C IV PerlIOBase_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab);
+PERL_EXPORT_C IV PerlIOBase_popped(pTHX_ PerlIO *f);
+PERL_EXPORT_C IV PerlIOBase_binmode(pTHX_ PerlIO *f);
+PERL_EXPORT_C SSize_t PerlIOBase_read(pTHX_ PerlIO *f,
+                                      void *vbuf, Size_t count);
+PERL_EXPORT_C SSize_t PerlIOBase_unread(pTHX_ PerlIO *f,
+                                        const void *vbuf, Size_t count);
+PERL_EXPORT_C IV PerlIOBase_eof(pTHX_ PerlIO *f);
+PERL_EXPORT_C IV PerlIOBase_error(pTHX_ PerlIO *f);
+PERL_EXPORT_C void PerlIOBase_clearerr(pTHX_ PerlIO *f);
+PERL_EXPORT_C IV PerlIOBase_close(pTHX_ PerlIO *f);
+PERL_EXPORT_C void PerlIOBase_setlinebuf(pTHX_ PerlIO *f);
+PERL_EXPORT_C void PerlIOBase_flush_linebuf(pTHX);
 
-extern IV PerlIOBase_noop_ok(pTHX_ PerlIO *f);
-extern IV PerlIOBase_noop_fail(pTHX_ PerlIO *f);
+PERL_EXPORT_C IV PerlIOBase_noop_ok(pTHX_ PerlIO *f);
+PERL_EXPORT_C IV PerlIOBase_noop_fail(pTHX_ PerlIO *f);
 
 /*--------------------------------------------------------------------------------------*/
 /* perlio buffer layer
@@ -158,36 +165,36 @@ typedef struct {
     IV oneword;			/* Emergency buffer */
 } PerlIOBuf;
 
-extern int PerlIO_apply_layera(pTHX_ PerlIO *f, const char *mode,
+PERL_EXPORT_C int PerlIO_apply_layera(pTHX_ PerlIO *f, const char *mode,
 		    PerlIO_list_t *layers, IV n, IV max);
-extern int PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names);
-extern void PerlIO_list_free(pTHX_ PerlIO_list_t *list);
-extern PerlIO_funcs *PerlIO_layer_fetch(pTHX_ PerlIO_list_t *av, IV n, PerlIO_funcs *def);
+PERL_EXPORT_C int PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names);
+PERL_EXPORT_C void PerlIO_list_free(pTHX_ PerlIO_list_t *list);
+PERL_EXPORT_C PerlIO_funcs *PerlIO_layer_fetch(pTHX_ PerlIO_list_t *av, IV n, PerlIO_funcs *def);
 
 
-extern SV *PerlIO_sv_dup(pTHX_ SV *arg, CLONE_PARAMS *param);
-extern PerlIO *PerlIOBuf_open(pTHX_ PerlIO_funcs *self,
+PERL_EXPORT_C SV *PerlIO_sv_dup(pTHX_ SV *arg, CLONE_PARAMS *param);
+PERL_EXPORT_C PerlIO *PerlIOBuf_open(pTHX_ PerlIO_funcs *self,
 			      PerlIO_list_t *layers, IV n,
 			      const char *mode, int fd, int imode,
 			      int perm, PerlIO *old, int narg, SV **args);
-extern IV PerlIOBuf_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab);
-extern IV PerlIOBuf_popped(pTHX_ PerlIO *f);
-extern PerlIO *PerlIOBuf_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags);
-extern SSize_t PerlIOBuf_read(pTHX_ PerlIO *f, void *vbuf, Size_t count);
-extern SSize_t PerlIOBuf_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count);
-extern SSize_t PerlIOBuf_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count);
-extern IV PerlIOBuf_seek(pTHX_ PerlIO *f, Off_t offset, int whence);
-extern Off_t PerlIOBuf_tell(pTHX_ PerlIO *f);
-extern IV PerlIOBuf_close(pTHX_ PerlIO *f);
-extern IV PerlIOBuf_flush(pTHX_ PerlIO *f);
-extern IV PerlIOBuf_fill(pTHX_ PerlIO *f);
-extern STDCHAR *PerlIOBuf_get_base(pTHX_ PerlIO *f);
-extern Size_t PerlIOBuf_bufsiz(pTHX_ PerlIO *f);
-extern STDCHAR *PerlIOBuf_get_ptr(pTHX_ PerlIO *f);
-extern SSize_t PerlIOBuf_get_cnt(pTHX_ PerlIO *f);
-extern void PerlIOBuf_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt);
+PERL_EXPORT_C IV PerlIOBuf_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab);
+PERL_EXPORT_C IV PerlIOBuf_popped(pTHX_ PerlIO *f);
+PERL_EXPORT_C PerlIO *PerlIOBuf_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags);
+PERL_EXPORT_C SSize_t PerlIOBuf_read(pTHX_ PerlIO *f, void *vbuf, Size_t count);
+PERL_EXPORT_C SSize_t PerlIOBuf_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count);
+PERL_EXPORT_C SSize_t PerlIOBuf_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count);
+PERL_EXPORT_C IV PerlIOBuf_seek(pTHX_ PerlIO *f, Off_t offset, int whence);
+PERL_EXPORT_C Off_t PerlIOBuf_tell(pTHX_ PerlIO *f);
+PERL_EXPORT_C IV PerlIOBuf_close(pTHX_ PerlIO *f);
+PERL_EXPORT_C IV PerlIOBuf_flush(pTHX_ PerlIO *f);
+PERL_EXPORT_C IV PerlIOBuf_fill(pTHX_ PerlIO *f);
+PERL_EXPORT_C STDCHAR *PerlIOBuf_get_base(pTHX_ PerlIO *f);
+PERL_EXPORT_C Size_t PerlIOBuf_bufsiz(pTHX_ PerlIO *f);
+PERL_EXPORT_C STDCHAR *PerlIOBuf_get_ptr(pTHX_ PerlIO *f);
+PERL_EXPORT_C SSize_t PerlIOBuf_get_cnt(pTHX_ PerlIO *f);
+PERL_EXPORT_C void PerlIOBuf_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt);
 
-extern int PerlIOUnix_oflags(const char *mode);
+PERL_EXPORT_C int PerlIOUnix_oflags(const char *mode);
 
 /*--------------------------------------------------------------------------------------*/
 
