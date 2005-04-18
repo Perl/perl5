@@ -738,14 +738,15 @@ in gv.h: */
 
 #ifdef PERL_DEBUG_COW
 #define SvIVX(sv) (0 + ((XPVIV*)  SvANY(sv))->xiv_iv)
-#define SvUVX(sv) ((XPVUV*)  SvANY(sv))->xuv_uv
+#define SvUVX(sv) (0 + (XPVUV*)  SvANY(sv))->xuv_uv
 #define SvNVX(sv) (0.0 + ((XPVNV*)SvANY(sv))->xnv_nv)
+#define SvPVX(sv) (0 + ((XPV*)  SvANY(sv))->xpv_pv)
 #else
 #define SvIVX(sv) ((XPVIV*)  SvANY(sv))->xiv_iv
 #define SvUVX(sv) ((XPVUV*)  SvANY(sv))->xuv_uv
 #define SvNVX(sv) ((XPVNV*)SvANY(sv))->xnv_nv
+#define SvPVX(sv) ((XPV*)  SvANY(sv))->xpv_pv
 #endif
-#define SvPVX(sv)  ((XPV*)  SvANY(sv))->xpv_pv
 #define SvCUR(sv) ((XPV*)  SvANY(sv))->xpv_cur
 #define SvLEN(sv) ((XPV*)  SvANY(sv))->xpv_len
 #define SvEND(sv)(((XPV*)  SvANY(sv))->xpv_pv + ((XPV*)SvANY(sv))->xpv_cur)
@@ -779,7 +780,7 @@ in gv.h: */
 		(((XPVNV*)SvANY(sv))->xnv_nv = (val)); } STMT_END
 #define SvPV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
-		(SvPVX(sv) = (val)); } STMT_END
+		(((XPV*)  SvANY(sv))->xpv_pv = (val)); } STMT_END
 #define SvUV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) == SVt_IV || SvTYPE(sv) >= SVt_PVIV); \
 		(((XPVUV*)SvANY(sv))->xuv_uv = (val)); } STMT_END
