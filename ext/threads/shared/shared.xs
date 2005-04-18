@@ -361,7 +361,7 @@ Perl_sharedsv_associate(pTHX_ SV **psv, SV *ssv, shared_sv *data)
 		  char* stash_ptr = SvPV((SV*) SvSTASH(ssv), len);
 		  HV* stash = gv_stashpvn(stash_ptr, len, TRUE);
 		  SvOBJECT_on(sv);
-		  SvSTASH(sv) = (HV*)SvREFCNT_inc(stash);
+		  SvSTASH_set(sv, (HV*)SvREFCNT_inc(stash));
 		}
 	    }
 	    break;
@@ -503,7 +503,7 @@ sharedsv_scalar_mg_get(pTHX_ SV *sv, MAGIC *mg)
 	    SV *obj = Nullsv;
 	    Perl_sharedsv_associate(aTHX_ &obj, SvRV(SHAREDSvPTR(shared)), NULL);
 	    sv_setsv_nomg(sv, &PL_sv_undef);
-	    SvRV(sv) = obj;
+	    SvRV_set(sv, obj);
 	    SvROK_on(sv);
 	    
 	}
@@ -531,7 +531,7 @@ sharedsv_scalar_store(pTHX_ SV *sv, shared_sv *shared)
 	    if(SvOBJECT(SvRV(sv))) {
 	      SV* fake_stash = newSVpv(HvNAME(SvSTASH(SvRV(sv))),0);
 	      SvOBJECT_on(SHAREDSvPTR(target));
-	      SvSTASH(SHAREDSvPTR(target)) = (HV*)fake_stash;
+	      SvSTASH_set(SHAREDSvPTR(target), (HV*)fake_stash);
 	    }
 	    CALLER_CONTEXT;
 	}
@@ -546,7 +546,7 @@ sharedsv_scalar_store(pTHX_ SV *sv, shared_sv *shared)
 	if(SvOBJECT(sv)) {
 	  SV* fake_stash = newSVpv(HvNAME(SvSTASH(sv)),0);
 	  SvOBJECT_on(SHAREDSvPTR(shared));
-	  SvSTASH(SHAREDSvPTR(shared)) = (HV*)fake_stash;
+	  SvSTASH_set(SHAREDSvPTR(shared), (HV*)fake_stash);
 	}
 	CALLER_CONTEXT;
     }
@@ -643,7 +643,7 @@ sharedsv_elem_mg_FETCH(pTHX_ SV *sv, MAGIC *mg)
 	    SV *obj = Nullsv;
 	    Perl_sharedsv_associate(aTHX_ &obj, SvRV(*svp), NULL);
 	    sv_setsv_nomg(sv, &PL_sv_undef);
-	    SvRV(sv) = obj;
+	    SvRV_set(sv, obj);
 	    SvROK_on(sv);
 	    SvSETMAGIC(sv);
 	}

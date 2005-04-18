@@ -396,10 +396,10 @@ do_clean_objs(pTHX_ SV *sv)
 	if (SvWEAKREF(sv)) {
 	    sv_del_backref(sv);
 	    SvWEAKREF_off(sv);
-	    SvRV(sv) = 0;
+	    SvRV_set(sv, NULL);
 	} else {
 	    SvROK_off(sv);
-	    SvRV(sv) = 0;
+	    SvRV_set(sv, NULL);
 	    SvREFCNT_dec(rv);
 	}
     }
@@ -1408,19 +1408,19 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	break;
     case SVt_RV:
 	SvANY(sv) = new_XRV();
-	SvRV(sv) = (SV*)pv;
+	SvRV_set(sv, (SV*)pv);
 	break;
     case SVt_PV:
 	SvANY(sv) = new_XPV();
 	SvPV_set(sv, pv);
-	SvCUR(sv)	= cur;
-	SvLEN(sv)	= len;
+	SvCUR_set(sv, cur);
+	SvLEN_set(sv, len);
 	break;
     case SVt_PVIV:
 	SvANY(sv) = new_XPVIV();
 	SvPV_set(sv, pv);
-	SvCUR(sv)	= cur;
-	SvLEN(sv)	= len;
+	SvCUR_set(sv, cur);
+	SvLEN_set(sv, len);
 	SvIV_set(sv, iv);
 	if (SvNIOK(sv))
 	    (void)SvIOK_on(sv);
@@ -1429,30 +1429,30 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     case SVt_PVNV:
 	SvANY(sv) = new_XPVNV();
 	SvPV_set(sv, pv);
-	SvCUR(sv)	= cur;
-	SvLEN(sv)	= len;
+	SvCUR_set(sv, cur);
+	SvLEN_set(sv, len);
 	SvIV_set(sv, iv);
 	SvNV_set(sv, nv);
 	break;
     case SVt_PVMG:
 	SvANY(sv) = new_XPVMG();
 	SvPV_set(sv, pv);
-	SvCUR(sv)	= cur;
-	SvLEN(sv)	= len;
+	SvCUR_set(sv, cur);
+	SvLEN_set(sv, len);
 	SvIV_set(sv, iv);
 	SvNV_set(sv, nv);
-	SvMAGIC(sv)	= magic;
-	SvSTASH(sv)	= stash;
+	SvMAGIC_set(sv, magic);
+	SvSTASH_set(sv, stash);
 	break;
     case SVt_PVLV:
 	SvANY(sv) = new_XPVLV();
 	SvPV_set(sv, pv);
-	SvCUR(sv)	= cur;
-	SvLEN(sv)	= len;
+	SvCUR_set(sv, cur);
+	SvLEN_set(sv, len);
 	SvIV_set(sv, iv);
 	SvNV_set(sv, nv);
-	SvMAGIC(sv)	= magic;
-	SvSTASH(sv)	= stash;
+	SvMAGIC_set(sv, magic);
+	SvSTASH_set(sv, stash);
 	LvTARGOFF(sv)	= 0;
 	LvTARGLEN(sv)	= 0;
 	LvTARG(sv)	= 0;
@@ -1467,8 +1467,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	AvFILLp(sv)	= -1;
 	SvIV_set(sv, 0);
 	SvNV_set(sv, 0.0);
-	SvMAGIC(sv)	= magic;
-	SvSTASH(sv)	= stash;
+	SvMAGIC_set(sv, magic);
+	SvSTASH_set(sv, stash);
 	AvALLOC(sv)	= 0;
 	AvARYLEN(sv)	= 0;
 	AvFLAGS(sv)	= AVf_REAL;
@@ -1482,8 +1482,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	HvMAX(sv)	= 0;
 	HvTOTALKEYS(sv)	= 0;
 	HvPLACEHOLDERS(sv) = 0;
-	SvMAGIC(sv)	= magic;
-	SvSTASH(sv)	= stash;
+	SvMAGIC_set(sv, magic);
+	SvSTASH_set(sv, stash);
 	HvRITER(sv)	= 0;
 	HvEITER(sv)	= 0;
 	HvPMROOT(sv)	= 0;
@@ -1493,22 +1493,22 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	SvANY(sv) = new_XPVCV();
 	Zero(SvANY(sv), 1, XPVCV);
 	SvPV_set(sv, pv);
-	SvCUR(sv)	= cur;
-	SvLEN(sv)	= len;
+	SvCUR_set(sv, cur);
+	SvLEN_set(sv, len);
 	SvIV_set(sv, iv);
 	SvNV_set(sv, nv);
-	SvMAGIC(sv)	= magic;
-	SvSTASH(sv)	= stash;
+	SvMAGIC_set(sv, magic);
+	SvSTASH_set(sv, stash);
 	break;
     case SVt_PVGV:
 	SvANY(sv) = new_XPVGV();
 	SvPV_set(sv, pv);
-	SvCUR(sv)	= cur;
-	SvLEN(sv)	= len;
+	SvCUR_set(sv, cur);
+	SvLEN_set(sv, len);
 	SvIV_set(sv, iv);
 	SvNV_set(sv, nv);
-	SvMAGIC(sv)	= magic;
-	SvSTASH(sv)	= stash;
+	SvMAGIC_set(sv, magic);
+	SvSTASH_set(sv, stash);
 	GvGP(sv)	= 0;
 	GvNAME(sv)	= 0;
 	GvNAMELEN(sv)	= 0;
@@ -1518,12 +1518,12 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     case SVt_PVBM:
 	SvANY(sv) = new_XPVBM();
 	SvPV_set(sv, pv);
-	SvCUR(sv)	= cur;
-	SvLEN(sv)	= len;
+	SvCUR_set(sv, cur);
+	SvLEN_set(sv, len);
 	SvIV_set(sv, iv);
 	SvNV_set(sv, nv);
-	SvMAGIC(sv)	= magic;
-	SvSTASH(sv)	= stash;
+	SvMAGIC_set(sv, magic);
+	SvSTASH_set(sv, stash);
 	BmRARE(sv)	= 0;
 	BmUSEFUL(sv)	= 0;
 	BmPREVIOUS(sv)	= 0;
@@ -1532,23 +1532,23 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	SvANY(sv) = new_XPVFM();
 	Zero(SvANY(sv), 1, XPVFM);
 	SvPV_set(sv, pv);
-	SvCUR(sv)	= cur;
-	SvLEN(sv)	= len;
+	SvCUR_set(sv, cur);
+	SvLEN_set(sv, len);
 	SvIV_set(sv, iv);
 	SvNV_set(sv, nv);
-	SvMAGIC(sv)	= magic;
-	SvSTASH(sv)	= stash;
+	SvMAGIC_set(sv, magic);
+	SvSTASH_set(sv, stash);
 	break;
     case SVt_PVIO:
 	SvANY(sv) = new_XPVIO();
 	Zero(SvANY(sv), 1, XPVIO);
 	SvPV_set(sv, pv);
-	SvCUR(sv)	= cur;
-	SvLEN(sv)	= len;
+	SvCUR_set(sv, cur);
+	SvLEN_set(sv, len);
 	SvIV_set(sv, iv);
 	SvNV_set(sv, nv);
-	SvMAGIC(sv)	= magic;
-	SvSTASH(sv)	= stash;
+	SvMAGIC_set(sv, magic);
+	SvSTASH_set(sv, stash);
 	IoPAGE_LEN(sv)	= 60;
 	break;
     }
@@ -1570,7 +1570,7 @@ Perl_sv_backoff(pTHX_ register SV *sv)
     assert(SvOOK(sv));
     if (SvIVX(sv)) {
 	char *s = SvPVX(sv);
-	SvLEN(sv) += SvIVX(sv);
+	SvLEN_set(sv, SvLEN(sv) + SvIVX(sv));
 	SvPV_set(sv, SvPVX(sv) - SvIVX(sv));
 	SvIV_set(sv, 0);
 	Move(s, SvPVX(sv), SvCUR(sv)+1, char);
@@ -3480,10 +3480,10 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
 	      s = (U8*)SvPVX(sv);
 	      len = SvCUR(sv) + 1; /* Plus the \0 */
 	      SvPV_set(sv, (char*)bytes_to_utf8((U8*)s, &len));
-	      SvCUR(sv) = len - 1;
+	      SvCUR_set(sv, len - 1);
 	      if (SvLEN(sv) != 0)
 		   Safefree(s); /* No longer using what was there before. */
-	      SvLEN(sv) = len; /* No longer know the real size. */
+	      SvLEN_set(sv, len); /* No longer know the real size. */
 	 }
 	 /* Mark as UTF-8 even if no hibit - saves scanning loop */
 	 SvUTF8_on(sv);
@@ -3527,7 +3527,7 @@ Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
 		        Perl_croak(aTHX_ "Wide character");
 		}
 	    }
-	    SvCUR(sv) = len;
+	    SvCUR_set(sv, len);
 	}
     }
     SvUTF8_off(sv);
@@ -3966,11 +3966,12 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		    }
 		    Safefree(pv);
 		}
-		SvLEN(dstr)=SvCUR(dstr)=0;
+		SvLEN_set(dstr, 0);
+                SvCUR_set(dstr, 0);
 	    }
 	}
 	(void)SvOK_off(dstr);
-	SvRV(dstr) = SvREFCNT_inc(SvRV(sstr));
+	SvRV_set(dstr, SvREFCNT_inc(SvRV(sstr)));
 	SvROK_on(dstr);
 	if (sflags & SVp_NOK) {
 	    SvNOKp_on(dstr);
@@ -4351,8 +4352,8 @@ Perl_sv_chop(pTHX_ register SV *sv, register char *ptr)
 	SvFLAGS(sv) |= SVf_OOK; 
     }
     SvNIOK_off(sv);
-    SvLEN(sv) -= delta;
-    SvCUR(sv) -= delta;
+    SvLEN_set(sv, SvLEN(sv) - delta);
+    SvCUR_set(sv, SvCUR(sv) - delta);
     SvPV_set(sv, SvPVX(sv) + delta);
     SvIV_set(sv, SvIVX(sv) + delta);
 }
@@ -4398,7 +4399,7 @@ Perl_sv_catpvn_flags(pTHX_ register SV *dsv, register const char *sstr, register
     if (sstr == dstr)
 	sstr = SvPVX(dsv);
     Move(sstr, SvPVX(dsv) + dlen, slen, char);
-    SvCUR(dsv) += slen;
+    SvCUR_set(dsv, SvCUR(dsv) + slen);
     *SvEND(dsv) = '\0';
     (void)SvPOK_only_UTF8(dsv);		/* validate pointer */
     SvTAINT(dsv);
@@ -4521,7 +4522,7 @@ Perl_sv_catpv(pTHX_ register SV *sv, register const char *ptr)
     if (ptr == junk)
 	ptr = SvPVX(sv);
     Move(ptr,SvPVX(sv)+tlen,len+1,char);
-    SvCUR(sv) += len;
+    SvCUR_set(sv, SvCUR(sv) + len);
     (void)SvPOK_only_UTF8(sv);		/* validate pointer */
     SvTAINT(sv);
 }
@@ -4593,7 +4594,7 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
     }
     Newz(702,mg, 1, MAGIC);
     mg->mg_moremagic = SvMAGIC(sv);
-    SvMAGIC(sv) = mg;
+    SvMAGIC_set(sv, mg);
 
     /* Sometimes a magic contains a reference loop, where the sv and
        object refer to each other.  To prevent a reference loop that
@@ -4995,7 +4996,7 @@ Perl_sv_insert(pTHX_ SV *bigstr, STRLEN offset, STRLEN len, char *little, STRLEN
 	while (midend > mid)		/* shove everything down */
 	    *--bigend = *--midend;
 	Move(little,big+offset,littlelen,char);
-	SvCUR(bigstr) += i;
+	SvCUR_set(bigstr, SvCUR(bigstr) + i);
 	SvSETMAGIC(bigstr);
 	return;
     }
@@ -5073,10 +5074,10 @@ Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
 	    mg_free(nsv);
 	else
 	    sv_upgrade(nsv, SVt_PVMG);
-	SvMAGIC(nsv) = SvMAGIC(sv);
+	SvMAGIC_set(nsv, SvMAGIC(sv));
 	SvFLAGS(nsv) |= SvMAGICAL(sv);
 	SvMAGICAL_off(sv);
-	SvMAGIC(sv) = 0;
+	SvMAGIC_set(sv, NULL);
     }
     SvREFCNT(sv) = 0;
     sv_clear(sv);
@@ -5137,7 +5138,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 		    if(SvREFCNT(tmpref) < 2) {
 		        /* tmpref is not kept alive! */
 		        SvREFCNT(sv)--;
-			SvRV(tmpref) = 0;
+			SvRV_set(tmpref, NULL);
 			SvROK_off(tmpref);
 		    }
 		    SvREFCNT_dec(tmpref);
@@ -6629,7 +6630,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
     }
     /* oh,oh, the number grew */
     SvGROW(sv, SvCUR(sv) + 2);
-    SvCUR(sv)++;
+    SvCUR_set(sv, SvCUR(sv) + 1);
     for (d = SvPVX(sv) + SvCUR(sv); d > SvPVX(sv); d--)
 	*d = d[-1];
     if (isDIGIT(d[1]))
@@ -6897,9 +6898,9 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
     new_SV(sv);
     sv_upgrade(sv, SVt_PVIV);
     SvPV_set(sv, sharepvn(src, is_utf8?-len:len, hash));
-    SvCUR(sv) = len;
+    SvCUR_set(sv, len);
     SvUV_set(sv, hash);
-    SvLEN(sv) = 0;
+    SvLEN_set(sv, 0);
     SvREADONLY_on(sv);
     SvFAKE_on(sv);
     SvPOK_on(sv);
@@ -7034,7 +7035,7 @@ Perl_newRV_noinc(pTHX_ SV *tmpRef)
     new_SV(sv);
     sv_upgrade(sv, SVt_RV);
     SvTEMP_off(tmpRef);
-    SvRV(sv) = tmpRef;
+    SvRV_set(sv, tmpRef);
     SvROK_on(sv);
     return sv;
 }
@@ -7745,7 +7746,7 @@ Perl_newSVrv(pTHX_ SV *rv, const char *classname)
     }
 
     SvOK_off(rv);
-    SvRV(rv) = sv;
+    SvRV_set(rv, sv);
     SvROK_on(rv);
 
     if (classname) {
@@ -7894,7 +7895,7 @@ Perl_sv_bless(pTHX_ SV *sv, HV *stash)
     if (SvTYPE(tmpRef) != SVt_PVIO)
 	++PL_sv_objcount;
     (void)SvUPGRADE(tmpRef, SVt_PVMG);
-    SvSTASH(tmpRef) = (HV*)SvREFCNT_inc(stash);
+    SvSTASH_set(tmpRef, (HV*)SvREFCNT_inc(stash));
 
     if (Gv_AMG(stash))
 	SvAMAGIC_on(sv);
@@ -7962,10 +7963,10 @@ Perl_sv_unref_flags(pTHX_ SV *sv, U32 flags)
     if (SvWEAKREF(sv)) {
     	sv_del_backref(sv);
 	SvWEAKREF_off(sv);
-	SvRV(sv) = 0;
+	SvRV_set(sv, NULL);
 	return;
     }
-    SvRV(sv) = 0;
+    SvRV_set(sv, NULL);
     SvROK_off(sv);
     /* You can't have a || SvREADONLY(rv) here, as $a = $$a, where $a was
        assigned to as BEGIN {$a = \"Foo"} will fail.  */
@@ -9292,7 +9293,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    Copy(eptr, p, elen, char);
 	    p += elen;
 	    *p = '\0';
-	    SvCUR(sv) = p - SvPVX(sv);
+	    SvCUR_set(sv, p - SvPVX(sv));
 	    svix = osvix;
 	    continue;	/* not "break" */
 	}
@@ -9365,7 +9366,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	if (has_utf8)
 	    SvUTF8_on(sv);
 	*p = '\0';
-	SvCUR(sv) = p - SvPVX(sv);
+	SvCUR_set(sv, p - SvPVX(sv));
 	if (vectorize) {
 	    esignlen = 0;
 	    goto vector;
@@ -9906,9 +9907,9 @@ void
 Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
 {
     if (SvROK(sstr)) {
-        SvRV(dstr) = SvWEAKREF(sstr)
-		     ? sv_dup(SvRV(sstr), param)
-		     : sv_dup_inc(SvRV(sstr), param);
+	SvRV_set(dstr, SvWEAKREF(sstr)
+		       ? sv_dup(SvRV(sstr), param)
+		       : sv_dup_inc(SvRV(sstr), param));
 
     }
     else if (SvPVX(sstr)) {
@@ -9945,7 +9946,7 @@ Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
     else {
 	/* Copy the Null */
 	if (SvTYPE(dstr) == SVt_RV)
-	    SvRV(dstr) = 0;
+	    SvRV_set(dstr, NULL);
 	else
 	    SvPV_set(dstr, 0);
     }
@@ -10015,43 +10016,43 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	break;
     case SVt_PV:
 	SvANY(dstr)	= new_XPV();
-	SvCUR(dstr)	= SvCUR(sstr);
-	SvLEN(dstr)	= SvLEN(sstr);
+	SvCUR_set(dstr, SvCUR(sstr));
+	SvLEN_set(dstr, SvLEN(sstr));
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	break;
     case SVt_PVIV:
 	SvANY(dstr)	= new_XPVIV();
-	SvCUR(dstr)	= SvCUR(sstr);
-	SvLEN(dstr)	= SvLEN(sstr);
+	SvCUR_set(dstr, SvCUR(sstr));
+	SvLEN_set(dstr, SvLEN(sstr));
 	SvIV_set(dstr, SvIVX(sstr));
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	break;
     case SVt_PVNV:
 	SvANY(dstr)	= new_XPVNV();
-	SvCUR(dstr)	= SvCUR(sstr);
-	SvLEN(dstr)	= SvLEN(sstr);
+	SvCUR_set(dstr, SvCUR(sstr));
+	SvLEN_set(dstr, SvLEN(sstr));
 	SvIV_set(dstr, SvIVX(sstr));
 	SvNV_set(dstr, SvNVX(sstr));
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	break;
     case SVt_PVMG:
 	SvANY(dstr)	= new_XPVMG();
-	SvCUR(dstr)	= SvCUR(sstr);
-	SvLEN(dstr)	= SvLEN(sstr);
+	SvCUR_set(dstr, SvCUR(sstr));
+	SvLEN_set(dstr, SvLEN(sstr));
 	SvIV_set(dstr, SvIVX(sstr));
 	SvNV_set(dstr, SvNVX(sstr));
-	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
-	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
+	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
+	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	break;
     case SVt_PVBM:
 	SvANY(dstr)	= new_XPVBM();
-	SvCUR(dstr)	= SvCUR(sstr);
-	SvLEN(dstr)	= SvLEN(sstr);
+	SvCUR_set(dstr, SvCUR(sstr));
+	SvLEN_set(dstr, SvLEN(sstr));
 	SvIV_set(dstr, SvIVX(sstr));
 	SvNV_set(dstr, SvNVX(sstr));
-	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
-	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
+	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
+	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	BmRARE(dstr)	= BmRARE(sstr);
 	BmUSEFUL(dstr)	= BmUSEFUL(sstr);
@@ -10059,12 +10060,12 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	break;
     case SVt_PVLV:
 	SvANY(dstr)	= new_XPVLV();
-	SvCUR(dstr)	= SvCUR(sstr);
-	SvLEN(dstr)	= SvLEN(sstr);
+	SvCUR_set(dstr, SvCUR(sstr));
+	SvLEN_set(dstr, SvLEN(sstr));
 	SvIV_set(dstr, SvIVX(sstr));
 	SvNV_set(dstr, SvNVX(sstr));
-	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
-	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
+	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
+	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	LvTARGOFF(dstr)	= LvTARGOFF(sstr);	/* XXX sometimes holds PMOP* when DEBUGGING */
 	LvTARGLEN(dstr)	= LvTARGLEN(sstr);
@@ -10091,12 +10092,12 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
             }
 	}
 	SvANY(dstr)	= new_XPVGV();
-	SvCUR(dstr)	= SvCUR(sstr);
-	SvLEN(dstr)	= SvLEN(sstr);
+	SvCUR_set(dstr, SvCUR(sstr));
+	SvLEN_set(dstr, SvLEN(sstr));
 	SvIV_set(dstr, SvIVX(sstr));
 	SvNV_set(dstr, SvNVX(sstr));
-	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
-	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
+	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
+	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	GvNAMELEN(dstr)	= GvNAMELEN(sstr);
 	GvNAME(dstr)	= SAVEPVN(GvNAME(sstr), GvNAMELEN(sstr));
@@ -10107,12 +10108,12 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	break;
     case SVt_PVIO:
 	SvANY(dstr)	= new_XPVIO();
-	SvCUR(dstr)	= SvCUR(sstr);
-	SvLEN(dstr)	= SvLEN(sstr);
+	SvCUR_set(dstr, SvCUR(sstr));
+	SvLEN_set(dstr, SvLEN(sstr));
 	SvIV_set(dstr, SvIVX(sstr));
 	SvNV_set(dstr, SvNVX(sstr));
-	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
-	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
+	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
+	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	IoIFP(dstr)	= fp_dup(IoIFP(sstr), IoTYPE(sstr), param);
 	if (IoOFP(sstr) == IoIFP(sstr))
@@ -10149,12 +10150,12 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	break;
     case SVt_PVAV:
 	SvANY(dstr)	= new_XPVAV();
-	SvCUR(dstr)	= SvCUR(sstr);
-	SvLEN(dstr)	= SvLEN(sstr);
+	SvCUR_set(dstr, SvCUR(sstr));
+	SvLEN_set(dstr, SvLEN(sstr));
 	SvIV_set(dstr, SvIVX(sstr));
 	SvNV_set(dstr, SvNVX(sstr));
-	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
-	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
+	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
+	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
 	AvARYLEN((AV*)dstr) = sv_dup_inc(AvARYLEN((AV*)sstr), param);
 	AvFLAGS((AV*)dstr) = AvFLAGS((AV*)sstr);
 	if (AvARRAY((AV*)sstr)) {
@@ -10186,12 +10187,12 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	break;
     case SVt_PVHV:
 	SvANY(dstr)	= new_XPVHV();
-	SvCUR(dstr)	= SvCUR(sstr);
-	SvLEN(dstr)	= SvLEN(sstr);
+	SvCUR_set(dstr, SvCUR(sstr));
+	SvLEN_set(dstr, SvLEN(sstr));
 	SvIV_set(dstr, SvIVX(sstr));
 	SvNV_set(dstr, SvNVX(sstr));
-	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
-	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
+	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
+	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
 	HvRITER((HV*)dstr)	= HvRITER((HV*)sstr);
 	if (HvARRAY((HV*)sstr)) {
 	    STRLEN i = 0;
@@ -10226,12 +10227,12 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
     case SVt_PVCV:
 	SvANY(dstr)	= new_XPVCV();
         dup_pvcv:
-	SvCUR(dstr)	= SvCUR(sstr);
-	SvLEN(dstr)	= SvLEN(sstr);
+	SvCUR_set(dstr, SvCUR(sstr));
+	SvLEN_set(dstr, SvLEN(sstr));
 	SvIV_set(dstr, SvIVX(sstr));
 	SvNV_set(dstr, SvNVX(sstr));
-	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
-	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
+	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
+	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	CvSTASH(dstr)	= hv_dup(CvSTASH(sstr), param); /* NOTE: not refcounted */
 	CvSTART(dstr)	= CvSTART(sstr);
@@ -10933,8 +10934,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     SvFLAGS(&PL_sv_no)		= SVp_IOK|SVf_IOK|SVp_NOK|SVf_NOK
 				  |SVp_POK|SVf_POK|SVf_READONLY|SVt_PVNV;
     SvPV_set(&PL_sv_no, SAVEPVN(PL_No, 0));
-    SvCUR(&PL_sv_no)		= 0;
-    SvLEN(&PL_sv_no)		= 1;
+    SvCUR_set(&PL_sv_no, 0);
+    SvLEN_set(&PL_sv_no, 1);
     SvIV_set(&PL_sv_no, 0);
     SvNV_set(&PL_sv_no, 0);
     ptr_table_store(PL_ptr_table, &proto_perl->Isv_no, &PL_sv_no);
@@ -10944,8 +10945,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     SvFLAGS(&PL_sv_yes)		= SVp_IOK|SVf_IOK|SVp_NOK|SVf_NOK
 				  |SVp_POK|SVf_POK|SVf_READONLY|SVt_PVNV;
     SvPV_set(&PL_sv_yes, SAVEPVN(PL_Yes, 1));
-    SvCUR(&PL_sv_yes)		= 1;
-    SvLEN(&PL_sv_yes)		= 2;
+    SvCUR_set(&PL_sv_yes, 1);
+    SvLEN_set(&PL_sv_yes, 2);
     SvIV_set(&PL_sv_yes, 1);
     SvNV_set(&PL_sv_yes, 1);
     ptr_table_store(PL_ptr_table, &proto_perl->Isv_yes, &PL_sv_yes);

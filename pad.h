@@ -205,7 +205,12 @@ Assumes the slot entry is a valid C<our> lexical.
 The generation number of the name at offset C<po> in the current
 compiling pad (lvalue). Note that C<SvCUR> is hijacked for this purpose.
 
+=for apidoc m|STRLEN|PAD_COMPNAME_GEN_set|PADOFFSET po|int gen
+Sets the generation number of the name at offset C<po> in the current
+ling pad (lvalue) to C<gen>.  Note that C<SvCUR_set> is hijacked for this purpose.
+
 =cut
+
 */
 
 #define PAD_COMPNAME_FLAGS(po) SvFLAGS(*av_fetch(PL_comppad_name, (po), FALSE))
@@ -221,7 +226,7 @@ compiling pad (lvalue). Note that C<SvCUR> is hijacked for this purpose.
 
 #define PAD_COMPNAME_GEN(po) SvCUR(AvARRAY(PL_comppad_name)[po])
 
-
+#define PAD_COMPNAME_GEN_set(po, gen) SvCUR_set(AvARRAY(PL_comppad_name)[po], gen)
 
 
 /*

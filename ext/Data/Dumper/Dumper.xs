@@ -215,7 +215,7 @@ sv_x(pTHX_ SV *sv, register char *str, STRLEN len, I32 n)
 	SvGROW(sv, len*n + SvCUR(sv) + 1);
 	if (len == 1) {
 	    char *start = SvPVX(sv) + SvCUR(sv);
-	    SvCUR(sv) += n;
+	    SvCUR_set(sv, SvCUR(sv) + n);
 	    start[n] = '\0';
 	    while (n > 0)
 		start[--n] = str[0];
@@ -855,7 +855,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 			av_push(postav, postentry);
 			e = newRV_inc(e);
 			
-			SvCUR(newapad) = 0;
+			SvCUR_set(newapad, 0);
 			if (indent >= 2)
 			    (void)sv_x(aTHX_ newapad, " ", 1, SvCUR(postentry));
 			

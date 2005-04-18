@@ -40,7 +40,7 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
     SvUPGRADE(s->var, SVt_PV);
     code = PerlIOBase_pushed(aTHX_ f, mode, Nullsv, tab);
     if (!SvOK(s->var) || (PerlIOBase(f)->flags) & PERLIO_F_TRUNCATE)
-	SvCUR(s->var) = 0;
+	SvCUR_set(s->var, 0);
     if ((PerlIOBase(f)->flags) & PERLIO_F_APPEND)
 	s->posn = SvCUR(s->var);
     else

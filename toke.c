@@ -5086,7 +5086,7 @@ Perl_yylex(pTHX)
 			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 				    "Illegal character in prototype for %"SVf" : %s",
 				    PL_subname, d);
-		    SvCUR(PL_lex_stuff) = tmp;
+		    SvCUR_set(PL_lex_stuff, tmp);
 		    have_proto = TRUE;
 
 		    s = skipspace(s);
@@ -10357,7 +10357,7 @@ S_scan_formline(pTHX_ register char *s)
 		    char *end = SvPVX(stuff) + SvCUR(stuff);
 		    end[-2] = '\n';
 		    end[-1] = '\0';
-		    SvCUR(stuff)--;
+		    SvCUR_set(stuff, SvCUR(stuff) - 1);
 		}
 #endif
 	    }

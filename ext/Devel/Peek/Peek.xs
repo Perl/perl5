@@ -240,7 +240,7 @@ _mstats_to_hv(HV *hv, struct mstats_buffer *b, int level)
 	if (!SvOK(*svp)) {
 	    av = newAV();
 	    (void)SvUPGRADE(*svp, SVt_RV);
-	    SvRV(*svp) = (SV*)av;
+	    SvRV_set(*svp, (SV*)av);
 	    SvROK_on(*svp);
 	} else
 	    av = (AV*)SvRV(*svp);

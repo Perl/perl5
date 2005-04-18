@@ -761,24 +761,42 @@ and leaves the UTF-8 status as it was.
 #define SvIV_please(sv) \
 	STMT_START {if (!SvIOKp(sv) && (SvNOK(sv) || SvPOK(sv))) \
 		(void) SvIV(sv); } STMT_END
+/* Put the asserts back at some point and figure out where they reveal bugs
+*/
 #define SvIV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) == SVt_IV || SvTYPE(sv) >= SVt_PVIV); \
 		(((XPVIV*)  SvANY(sv))->xiv_iv = (val)); } STMT_END
 #define SvNV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) == SVt_NV || SvTYPE(sv) >= SVt_PVNV); \
 		(SvNVX(sv) = (val)); } STMT_END
+/* assert(SvTYPE(sv) >= SVt_PV); */
 #define SvPV_set(sv, val) \
-	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
+	STMT_START { \
 		(((XPV*)  SvANY(sv))->xpv_pv = (val)); } STMT_END
+/* assert(SvTYPE(sv) == SVt_IV || SvTYPE(sv) >= SVt_PVIV); */
 #define SvUV_set(sv, val) \
-	STMT_START { assert(SvTYPE(sv) == SVt_IV || SvTYPE(sv) >= SVt_PVIV); \
+	STMT_START { \
 		(((XPVUV*)SvANY(sv))->xuv_uv = (val)); } STMT_END
+/* assert(SvTYPE(sv) >=  SVt_RV); */
+#define SvRV_set(sv, val) \
+        STMT_START { \
+                (((XRV*)SvANY(sv))->xrv_rv = (val)); } STMT_END
+/* assert(SvTYPE(sv) >= SVt_PVMG); */
+#define SvMAGIC_set(sv, val) \
+        STMT_START {  \
+                (((XPVMG*)SvANY(sv))->xmg_magic = (val)); } STMT_END
+/* assert(SvTYPE(sv) >= SVt_PVMG); */
+#define SvSTASH_set(sv, val) \
+        STMT_START { \
+                (((XPVMG*)  SvANY(sv))->xmg_stash = (val)); } STMT_END
+/* assert(SvTYPE(sv) >= SVt_PV); */
 #define SvCUR_set(sv, val) \
-	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
-		(SvCUR(sv) = (val)); } STMT_END
+	STMT_START { \
+		(((XPV*)  SvANY(sv))->xpv_cur = (val)); } STMT_END
+/* assert(SvTYPE(sv) >= SVt_PV); */
 #define SvLEN_set(sv, val) \
-	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
-		(SvLEN(sv) = (val)); } STMT_END
+	STMT_START { \
+		(((XPV*)  SvANY(sv))->xpv_len = (val)); } STMT_END
 #define SvEND_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
 		(SvCUR(sv) = (val) - SvPVX(sv)); } STMT_END
