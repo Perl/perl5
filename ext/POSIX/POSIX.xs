@@ -209,7 +209,9 @@ char *tzname[] = { "" , "" };
 #    define ttyname(a) (char*)not_here("ttyname")
 #    define tzset() not_here("tzset")
 #  else
-#    include <grp.h>
+#    ifdef I_GRP
+#      include <grp.h>
+#    endif
 #    include <sys/times.h>
 #    ifdef HAS_UNAME
 #      include <sys/utsname.h>
@@ -620,7 +622,6 @@ int
 sigismember(sigset, sig)
 	POSIX::SigSet	sigset
 	int		sig
-
 
 MODULE = Termios	PACKAGE = POSIX::Termios	PREFIX = cf
 

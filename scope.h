@@ -233,3 +233,4 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 
 #define SSPTR(off,type)         ((type)  ((char*)PL_savestack + off))
 #define SSPTRt(off,type)        ((type*) ((char*)PL_savestack + off))
+
