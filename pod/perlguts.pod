@@ -1871,6 +1871,26 @@ PERL_IMPLICIT_CONTEXT is also normally defined, and enables the
 support for passing in a "hidden" first argument that represents all three
 data structures.
 
+Two other "encapsulation" macros are the PERL_GLOBAL_STRUCT and
+PERL_GLOBAL_STRUCT_PRIVATE (the latter turns on the former, and the
+former turns on MULTIPLICITY.)  The PERL_GLOBAL_STRUCT causes all the
+internal variables of Perl to be wrapped inside a single global struct,
+struct perl_vars, accessible as (globals) &PL_Vars or PL_VarsPtr or
+the function  Perl_GetVars().  The PERL_GLOBAL_STRUCT_PRIVATE goes
+one step further, there is still a single struct (allocated in main()
+either from heap or from stack) but there are no global data symbols
+pointing to it.  In either case the global struct should be initialised
+as the very first thing in main() using Perl_init_global_struct() and
+correspondingly tear it down after perl_free() using Perl_free_global_struct(),
+please see F<miniperlmain.c> for usage details.  You may also need
+to use C<dVAR> in your coding to "declare the global variables"
+when you are using them.  dTHX does this for you automatically.
+
+For backward compatibility reasons defining just PERL_GLOBAL_STRUCT
+doesn't actually hide all symbols inside a big global struct: some
+PerlIO_xxx vtables are left visible.  The PERL_GLOBAL_STRUCT_PRIVATE
+then hides everything (see how the PERLIO_FUNCS_DECL is used).
+
 All this obviously requires a way for the Perl internal functions to be
 either subroutines taking some kind of structure as the first
 argument, or subroutines taking nothing as the first argument.  To
@@ -2071,6 +2091,13 @@ two approaches freely.
 Never add a comma after C<pTHX> yourself--always use the form of the
 macro with the underscore for functions that take explicit arguments,
 or the form without the argument for functions with no explicit arguments.
+
+If one is compiling Perl with the C<-DPERL_GLOBAL_STRUCT> the C<dVAR>
+definition is needed if the Perl global variables (see F<perlvars.h>
+or F<globvar.sym>) are accessed in the function and C<dTHX> is not
+used (the C<dTHX> includes the C<dVAR> if necessary).  One notices
+the need for C<dVAR> only with the said compile-time define, because
+otherwise the Perl global variables are visible as-is.
 
 =head2 Should I do anything special if I call perl from multiple threads?
 

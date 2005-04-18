@@ -2524,7 +2524,7 @@ STATIC
 PP(pp_i_modulo_0)
 {
      /* This is the vanilla old i_modulo. */
-     dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
+     dVAR; dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
      {
 	  dPOPTOPiirl;
 	  if (!right)
@@ -2541,7 +2541,7 @@ PP(pp_i_modulo_1)
      /* This is the i_modulo with the workaround for the _moddi3 bug
       * in (at least) glibc 2.2.5 (the PERL_ABS() the workaround).
       * See below for pp_i_modulo. */
-     dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
+     dVAR; dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
      {
 	  dPOPTOPiirl;
 	  if (!right)
@@ -2554,7 +2554,7 @@ PP(pp_i_modulo_1)
 
 PP(pp_i_modulo)
 {
-     dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
+     dVAR; dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
      {
 	  dPOPTOPiirl;
 	  if (!right)
@@ -3396,8 +3396,8 @@ PP(pp_chr)
 
 PP(pp_crypt)
 {
-    dSP; dTARGET;
 #ifdef HAS_CRYPT
+    dSP; dTARGET;
     dPOPTOPssrl;
     STRLEN n_a;
     STRLEN len;
@@ -4145,7 +4145,7 @@ PP(pp_anonhash)
 
 PP(pp_splice)
 {
-    dSP; dMARK; dORIGMARK;
+    dVAR; dSP; dMARK; dORIGMARK;
     register AV *ary = (AV*)*++MARK;
     register SV **src;
     register SV **dst;
@@ -4352,7 +4352,7 @@ PP(pp_splice)
 
 PP(pp_push)
 {
-    dSP; dMARK; dORIGMARK; dTARGET;
+    dVAR; dSP; dMARK; dORIGMARK; dTARGET;
     register AV *ary = (AV*)*++MARK;
     register SV *sv = &PL_sv_undef;
     MAGIC *mg;
@@ -4407,7 +4407,7 @@ PP(pp_shift)
 
 PP(pp_unshift)
 {
-    dSP; dMARK; dORIGMARK; dTARGET;
+    dVAR; dSP; dMARK; dORIGMARK; dTARGET;
     register AV *ary = (AV*)*++MARK;
     register SV *sv;
     register I32 i = 0;
@@ -4509,7 +4509,7 @@ PP(pp_reverse)
 
 PP(pp_split)
 {
-    dSP; dTARG;
+    dVAR; dSP; dTARG;
     AV *ary;
     register IV limit = POPi;			/* note, negative is forever */
     SV *sv = POPs;

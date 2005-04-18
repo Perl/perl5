@@ -26,6 +26,10 @@ sub to_string {
 #   
 #  -- added by VKON, 03-10-2004 to separate $^O-specific between OSes
 #     (so that Win32 never checks for $^O eq 'VMS' for example)
+#
+# The $^O tests test both for $^O and for $Config{osname}.
+# The latter is better for some for cross-compilation setups.
+#
 sub expand_os_specific {
     my $s = shift;
     for ($s) {
@@ -36,7 +40,7 @@ sub expand_os_specific {
 	  if ($expr =~ m[^(.*?)<<\|\$\^O-$op-$os>>(.*?)$]s) {
 	      # #if;#else;#endif
 	      my ($if,$el) = ($1,$2);
-	      if (($op eq 'eq' and $^O eq $os) || ($op eq 'ne' and $^O ne $os)) {
+	      if (($op eq 'eq' and ($^O eq $os || $Config{osname} eq $os)) || ($op eq 'ne' and ($^O ne $os || $Config{osname} ne $os))) {
 		  $if
 	      }
 	      else {
@@ -45,7 +49,7 @@ sub expand_os_specific {
 	  }
 	  else {
 	      # #if;#endif
-	      if (($op eq 'eq' and $^O eq $os) || ($op eq 'ne' and $^O ne $os)) {
+	      if (($op eq 'eq' and ($^O eq $os || $Config{osname} eq $os)) || ($op eq 'ne' and ($^O ne $os || $Config{osname} ne $os))) {
 		  $expr
 	      }
 	      else {
@@ -496,13 +500,22 @@ sub dl_findfile {
             push(@names,"$_.a")          if !m/\.a$/ and $dlsrc eq "dl_dld.xs";
             push(@names, $_);
         }
+	my $dirsep = '/';
+	<<$^O-eq-symbian>>
+	$dirsep = '\\';
+	if ($0 =~ /^([a-z]):/i) {
+	    my $drive = $1;
+	    @dirs = map { "$drive:$_" } @dirs;
+	    @dl_library_path = map { "$drive:$_" } @dl_library_path;
+	}
+	<</$^O-eq-symbian>>
         foreach $dir (@dirs, @dl_library_path) {
             next unless -d $dir;
 	    <<$^O-eq-VMS>>
             chop($dir = VMS::Filespec::unixpath($dir));
 	    <</$^O-eq-VMS>>
             foreach $name (@names) {
-		my($file) = "$dir/$name";
+		my($file) = "$dir$dirsep$name";
                 print STDERR " checking in $dir for $name\n" if $dl_debug;
 		$file = ($do_expand) ? dl_expandspec($file) : (-f $file && $file);
 		#$file = _check_file($file);

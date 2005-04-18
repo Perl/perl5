@@ -105,6 +105,7 @@ Perl_gv_fetchfile(pTHX_ const char *name)
 void
 Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 {
+    dVAR;
     register GP *gp;
     const bool doproto = SvTYPE(gv) > SVt_NULL;
     char *proto = (doproto && SvPOK(gv)) ? SvPVX(gv) : NULL;
@@ -482,6 +483,7 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 GV*
 Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 {
+    dVAR;
     char autoload[] = "AUTOLOAD";
     STRLEN autolen = sizeof(autoload)-1;
     GV* gv;
@@ -557,6 +559,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 STATIC void
 S_require_errno(pTHX_ GV *gv)
 {
+    dVAR;
     HV* stash = gv_stashpvn("Errno",5,FALSE);
 
     if (!stash || !(gv_fetchmethod(stash, "TIEHASH"))) { 
@@ -1497,6 +1500,7 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
 SV*
 Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 {
+  dVAR;
   MAGIC *mg;
   CV *cv=NULL;
   CV **cvp=NULL, **ocvp=NULL;

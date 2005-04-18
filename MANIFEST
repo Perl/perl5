@@ -329,6 +329,7 @@ ext/DynaLoader/dl_mac.xs	MacOS implementation
 ext/DynaLoader/dl_mpeix.xs	MPE/iX implementation
 ext/DynaLoader/dl_next.xs	NeXT implementation
 ext/DynaLoader/dl_none.xs	Stub implementation
+ext/DynaLoader/dl_symbian.xs	Symbian implementation
 ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
 ext/DynaLoader/dl_vmesa.xs	VM/ESA implementation
 ext/DynaLoader/dl_vms.xs	VMS implementation
@@ -2445,6 +2446,7 @@ README.os400			Perl notes for OS/400
 README.plan9			Perl notes for Plan 9
 README.qnx			Perl notes for QNX
 README.solaris			Perl notes for Solaris
+README.symbian			Perl notes for Symbian
 README.tru64			Perl notes for Tru64
 README.tw			Perl for Traditional Chinese (in Big5)
 README.uts			Perl notes for UTS
@@ -2470,6 +2472,37 @@ scope.c				Scope entry and exit code
 scope.h				Scope entry and exit header
 sv.c				Scalar value code
 sv.h				Scalar value header
+symbian/bld.inf			Symbian sample app build config
+symbian/config.pl		Configuration script for Symbian
+symbian/config.sh		Configuration data for Symbian
+symbian/cwd.pl			Helper code for config.pl
+symbian/demo_pl			"Archive" of demo code
+symbian/install.cfg		Installation instructions
+symbian/makesis.pl		Installation file creator
+symbian/PerlApp.cpp		Symbian sample app code
+symbian/PerlApp.h		Symbian sample app header
+symbian/PerlApp.hrh		Symbian sample app resource header
+symbian/PerlApp.rss		Symbian sample app resource definition
+symbian/PerlAppAif.rss		Symbian sample app code
+symbian/PerlBase.cpp		Symbian Perl base class
+symbian/PerlBase.h		Symbian Perl base class header
+symbian/PerlBase.pod		Symbian Perl base class documentation
+symbian/PerlRecog.cpp		Symbian recognizer code
+symbian/PerlRecog.mmp		Symbian recognizer build
+symbian/port.pl			Helper code for config.pl
+symbian/README			ReadMe for the Symbian files
+symbian/sanity.pl		Helper code for config.pl
+symbian/sdk.pl			Helper code for config.pl
+symbian/symbian_dll.cpp		The DLL stub for Symbian
+symbian/symbianish.h		Header for Symbian	
+symbian/symbian_proto.h		Prototypes for Symbian
+symbian/symbian_stubs.c		Stub routines for Symbian
+symbian/symbian_stubs.h		Stub headers for Symbian
+symbian/symbian_utils.cpp	Helper routines for Symbian
+symbian/TODO			Symbian things to do
+symbian/uid.pl			Helper code for config.pl
+symbian/version.pl		Helper code for config.pl
+symbian/xsbuild.pl		Building extensions
 taint.c				Tainting code
 t/base/cond.t			See if conditionals work
 t/base/if.t			See if if works

@@ -118,7 +118,12 @@ extern int h_errno;
 # ifdef my_chsize  /* Probably #defined to Perl_my_chsize in embed.h */
 #   undef my_chsize
 # endif
-# define my_chsize PerlLIO_chsize
+#else
+# ifdef HAS_TRUNCATE
+#   define my_chsize PerlLIO_chsize
+# else
+I32 my_chsize(int fd, Off_t length);
+# endif
 #endif
 
 #ifdef HAS_FLOCK
@@ -167,7 +172,7 @@ extern int h_errno;
 #endif /* no flock() */
 
 #define ZBTLEN 10
-static char zero_but_true[ZBTLEN + 1] = "0 but true";
+static const char zero_but_true[ZBTLEN + 1] = "0 but true";
 
 #if defined(I_SYS_ACCESS) && !defined(R_OK)
 #  include <sys/access.h>
@@ -380,6 +385,7 @@ PP(pp_backtick)
 
 PP(pp_glob)
 {
+    dVAR;
     OP *result;
     tryAMAGICunTARGET(iter, -1);
 
@@ -517,7 +523,7 @@ PP(pp_die)
 
 PP(pp_open)
 {
-    dSP;
+    dVAR; dSP;
     dMARK; dORIGMARK;
     dTARGET;
     GV *gv;
@@ -568,7 +574,7 @@ PP(pp_open)
 
 PP(pp_close)
 {
-    dSP;
+    dVAR; dSP;
     GV *gv;
     IO *io;
     MAGIC *mg;
@@ -653,7 +659,7 @@ badexit:
 
 PP(pp_fileno)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     GV *gv;
     IO *io;
     PerlIO *fp;
@@ -691,8 +697,9 @@ PP(pp_fileno)
 
 PP(pp_umask)
 {
-    dSP; dTARGET;
+    dSP;
 #ifdef HAS_UMASK
+    dTARGET;
     Mode_t anum;
 
     if (MAXARG < 1) {
@@ -716,7 +723,7 @@ PP(pp_umask)
 
 PP(pp_binmode)
 {
-    dSP;
+    dVAR; dSP;
     GV *gv;
     IO *io;
     PerlIO *fp;
@@ -776,8 +783,7 @@ PP(pp_binmode)
 
 PP(pp_tie)
 {
-    dSP;
-    dMARK;
+    dVAR; dSP; dMARK;
     SV *varsv;
     HV* stash;
     GV *gv;
@@ -866,7 +872,7 @@ PP(pp_tie)
 
 PP(pp_untie)
 {
-    dSP;
+    dVAR; dSP;
     MAGIC *mg;
     SV *sv = POPs;
     char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
@@ -926,7 +932,7 @@ PP(pp_tied)
 
 PP(pp_dbmopen)
 {
-    dSP;
+    dVAR; dSP;
     HV *hv;
     dPOPPOPssrl;
     HV* stash;
@@ -1190,7 +1196,7 @@ PP(pp_select)
 
 PP(pp_getc)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     GV *gv;
     IO *io = NULL;
     MAGIC *mg;
@@ -1247,6 +1253,7 @@ PP(pp_read)
 STATIC OP *
 S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 {
+    dVAR;
     register PERL_CONTEXT *cx;
     I32 gimme = GIMME_V;
 
@@ -1308,7 +1315,7 @@ PP(pp_enterwrite)
 
 PP(pp_leavewrite)
 {
-    dSP;
+    dVAR; dSP;
     GV *gv = cxstack[cxstack_ix].blk_sub.gv;
     register IO *io = GvIOp(gv);
     PerlIO *ofp = IoOFP(io);
@@ -1436,7 +1443,7 @@ PP(pp_leavewrite)
 
 PP(pp_prtf)
 {
-    dSP; dMARK; dORIGMARK;
+    dVAR; dSP; dMARK; dORIGMARK;
     GV *gv;
     IO *io;
     PerlIO *fp;
@@ -1540,7 +1547,7 @@ PP(pp_sysopen)
 
 PP(pp_sysread)
 {
-    dSP; dMARK; dORIGMARK; dTARGET;
+    dVAR; dSP; dMARK; dORIGMARK; dTARGET;
     int offset;
     GV *gv;
     IO *io;
@@ -1679,7 +1686,7 @@ PP(pp_sysread)
        (should be 2 * length + offset + 1, or possibly something longer if
        PL_encoding is true) */
     buffer  = SvGROW(bufsv, (STRLEN)(length+offset+1));
-    if (offset > bufsize) { /* Zero any newly allocated space */
+    if (offset > 0 && (Sock_size_t)offset > bufsize) { /* Zero any newly allocated space */
     	Zero(buffer+bufsize, offset-bufsize, char);
     }
     buffer = buffer + offset;
@@ -1794,7 +1801,7 @@ PP(pp_sysread)
 
 PP(pp_syswrite)
 {
-    dSP;
+    dVAR; dSP;
     int items = (SP - PL_stack_base) - TOPMARK;
     if (items == 2) {
 	SV *sv;
@@ -1808,7 +1815,7 @@ PP(pp_syswrite)
 
 PP(pp_send)
 {
-    dSP; dMARK; dORIGMARK; dTARGET;
+    dVAR; dSP; dMARK; dORIGMARK; dTARGET;
     GV *gv;
     IO *io;
     SV *bufsv;
@@ -1950,7 +1957,7 @@ PP(pp_recv)
 
 PP(pp_eof)
 {
-    dSP;
+    dVAR; dSP;
     GV *gv;
     IO *io;
     MAGIC *mg;
@@ -1997,7 +2004,7 @@ PP(pp_eof)
 
 PP(pp_tell)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     GV *gv;
     IO *io;
     MAGIC *mg;
@@ -2035,7 +2042,7 @@ PP(pp_seek)
 
 PP(pp_sysseek)
 {
-    dSP;
+    dVAR; dSP;
     GV *gv;
     IO *io;
     int whence = POPi;
@@ -3963,7 +3970,7 @@ nope:
 PP(pp_telldir)
 {
 #if defined(HAS_TELLDIR) || defined(telldir)
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
  /* XXX does _anyone_ need this? --AD 2/20/1998 */
  /* XXX netbsd still seemed to.
     XXX HAS_TELLDIR_PROTO is new style, NEED_TELLDIR_PROTO is old style.
@@ -4174,7 +4181,6 @@ PP(pp_system)
     I32 value;
     STRLEN n_a;
     int result;
-    I32 did_pipes = 0;
 
     if (PL_tainting) {
 	TAINT_ENV();
@@ -4191,6 +4197,7 @@ PP(pp_system)
     {
 	Pid_t childpid;
 	int pp[2];
+	I32 did_pipes = 0;
 
 	if (PerlProc_pipe(pp) >= 0)
 	    did_pipes = 1;
@@ -4272,14 +4279,14 @@ PP(pp_system)
     result = 0;
     if (PL_op->op_flags & OPf_STACKED) {
 	SV *really = *++MARK;
-#  if defined(WIN32) || defined(OS2)
+#  if defined(WIN32) || defined(OS2) || defined(SYMBIAN)
 	value = (I32)do_aspawn(really, MARK, SP);
 #  else
 	value = (I32)do_aspawn(really, (void **)MARK, (void **)SP);
 #  endif
     }
     else if (SP - MARK != 1) {
-#  if defined(WIN32) || defined(OS2)
+#  if defined(WIN32) || defined(OS2) || defined(SYMBIAN)
 	value = (I32)do_aspawn(Nullsv, MARK, SP);
 #  else
 	value = (I32)do_aspawn(Nullsv, (void **)MARK, (void **)SP);
@@ -4524,9 +4531,11 @@ PP(pp_gmtime)
     dSP;
     Time_t when;
     const struct tm *tmbuf;
-    static const char *dayname[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-    static const char *monname[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-			      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+    static const char * const dayname[] =
+	{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+    static const char * const monname[] =
+	{"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+	 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
     if (MAXARG < 1)
 	(void)time(&when);

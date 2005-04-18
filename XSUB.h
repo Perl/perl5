@@ -80,9 +80,14 @@ is a lexical $_ in scope.
 
 #define ST(off) PL_stack_base[ax + (off)]
 
+#undef XS
 #if defined(__CYGWIN__) && defined(USE_DYNAMIC_LOADING)
 #  define XS(name) __declspec(dllexport) void name(pTHX_ CV* cv)
-#else
+#endif
+#if defined(SYMBIAN)
+#  define XS(name) EXPORT_C void name(pTHX_ CV* cv)
+#endif
+#ifndef XS
 #  define XS(name) void name(pTHX_ CV* cv)
 #endif
 

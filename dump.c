@@ -25,7 +25,7 @@
 #include "perl.h"
 #include "regcomp.h"
 
-static HV *Sequence;
+#define Sequence PL_op_sequence
 
 void
 Perl_dump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
@@ -153,6 +153,7 @@ Perl_pv_display(pTHX_ SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRLEN pv
 char *
 Perl_sv_peek(pTHX_ SV *sv)
 {
+    dVAR;
     SV *t = sv_newmortal();
     STRLEN n_a;
     int unref = 0;
@@ -404,15 +405,12 @@ Perl_pmop_dump(pTHX_ PMOP *pm)
 STATIC void
 sequence(pTHX_ register const OP *o)
 {
+    dVAR;
     SV      *op;
     char    *key;
     STRLEN   len;
-    static   UV seq;
     const OP *oldop = 0;
     OP      *l;
-
-    if (!Sequence)
-	Sequence = newHV();
 
     if (!o)
 	return;
@@ -431,7 +429,7 @@ sequence(pTHX_ register const OP *o)
 	switch (o->op_type) {
 	case OP_STUB:
 	    if ((o->op_flags & OPf_WANT) != OPf_WANT_LIST) {
-		hv_store(Sequence, key, len, newSVuv(++seq), 0);
+		hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
 		break;
 	    }
 	    goto nothin;
@@ -445,7 +443,7 @@ sequence(pTHX_ register const OP *o)
 	  nothin:
 	    if (oldop && o->op_next)
 		continue;
-	    hv_store(Sequence, key, len, newSVuv(++seq), 0);
+	    hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
 	    break;
 
 	case OP_MAPWHILE:
@@ -458,7 +456,7 @@ sequence(pTHX_ register const OP *o)
 	case OP_DORASSIGN:
 	case OP_COND_EXPR:
 	case OP_RANGE:
-	    hv_store(Sequence, key, len, newSVuv(++seq), 0);
+	    hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
 	    for (l = cLOGOPo->op_other; l && l->op_type == OP_NULL; l = l->op_next)
 		;
 	    sequence(aTHX_ l);
@@ -466,7 +464,7 @@ sequence(pTHX_ register const OP *o)
 
 	case OP_ENTERLOOP:
 	case OP_ENTERITER:
-	    hv_store(Sequence, key, len, newSVuv(++seq), 0);
+	    hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
 	    for (l = cLOOPo->op_redoop; l && l->op_type == OP_NULL; l = l->op_next)
 		;
 	    sequence(aTHX_ l);
@@ -481,7 +479,7 @@ sequence(pTHX_ register const OP *o)
 	case OP_QR:
 	case OP_MATCH:
 	case OP_SUBST:
-	    hv_store(Sequence, key, len, newSVuv(++seq), 0);
+	    hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
 	    for (l = cPMOPo->op_pmreplstart; l && l->op_type == OP_NULL; l = l->op_next)
 		;
 	    sequence(aTHX_ l);
@@ -491,7 +489,7 @@ sequence(pTHX_ register const OP *o)
 	    break;
 
 	default:
-	    hv_store(Sequence, key, len, newSVuv(++seq), 0);
+	    hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
 	    break;
 	}
 	oldop = o;
@@ -501,6 +499,7 @@ sequence(pTHX_ register const OP *o)
 STATIC UV
 sequence_num(pTHX_ const OP *o)
 {
+    dVAR;
     SV     *op,
           **seq;
     char   *key;
@@ -515,6 +514,7 @@ sequence_num(pTHX_ const OP *o)
 void
 Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 {
+    dVAR;
     UV      seq;
     sequence(aTHX_ o);
     Perl_dump_indent(aTHX_ level, file, "{\n");
@@ -887,7 +887,7 @@ Perl_gv_dump(pTHX_ GV *gv)
  * (with the PERL_MAGIC_ prefixed stripped)
  */
 
-static struct { const char type; const char *name; } magic_names[] = {
+static const struct { const char type; const char *name; } magic_names[] = {
 	{ PERL_MAGIC_sv,             "sv(\\0)" },
 	{ PERL_MAGIC_arylen,         "arylen(#)" },
 	{ PERL_MAGIC_glob,           "glob(*)" },
@@ -982,7 +982,7 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
 	{
 	    int n;
 	    const char *name = 0;
-	    for (n=0; magic_names[n].name; n++) {
+	    for (n = 0; magic_names[n].name; n++) {
 		if (mg->mg_type == magic_names[n].type) {
 		    name = magic_names[n].name;
 		    break;

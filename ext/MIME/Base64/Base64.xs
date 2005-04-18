@@ -56,14 +56,14 @@ extern "C" {
 
 #define MAX_LINE  76 /* size of encoded lines */
 
-static char basis_64[] =
+static const char basis_64[] =
    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 #define XX      255	/* illegal base64 char */
 #define EQ      254	/* padding */
 #define INVALID XX
 
-static unsigned char index_64[256] = {
+static const unsigned char index_64[256] = {
     XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX,
     XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX,
     XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,62, XX,XX,XX,63,

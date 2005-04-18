@@ -25,7 +25,8 @@
 #define PERL_IN_UTF8_C
 #include "perl.h"
 
-static char unees[] = "Malformed UTF-8 character (unexpected end of string)";
+static const char unees[] =
+    "Malformed UTF-8 character (unexpected end of string)";
 
 /* 
 =head1 Unicode Support
@@ -1570,6 +1571,7 @@ Perl_to_utf8_fold(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
 SV*
 Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits, I32 none)
 {
+    dVAR;
     SV* retval;
     SV* tokenbufsv = sv_newmortal();
     dSP;
@@ -1643,6 +1645,7 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
 UV
 Perl_swash_fetch(pTHX_ SV *sv, const U8 *ptr, bool do_utf8)
 {
+    dVAR;
     HV* hv = (HV*)SvRV(sv);
     U32 klen;
     U32 off;
@@ -1693,7 +1696,7 @@ Perl_swash_fetch(pTHX_ SV *sv, const U8 *ptr, bool do_utf8)
 
     if (hv   == PL_last_swash_hv &&
 	klen == PL_last_swash_klen &&
-	(!klen || memEQ(ptr, PL_last_swash_key, klen)) )
+	(!klen || memEQ((char *)ptr, (char *)PL_last_swash_key, klen)) )
     {
 	tmps = PL_last_swash_tmps;
 	slen = PL_last_swash_slen;

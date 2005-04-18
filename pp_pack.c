@@ -1177,7 +1177,7 @@ STATIC
 I32
 S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char **new_s )
 {
-    dSP;
+    dVAR; dSP;
     SV *sv;
     I32 start_sp_offset = SP - PL_stack_base;
     howlen_t howlen;

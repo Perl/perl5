@@ -1,0 +1,150 @@
+=head1 BASE PORT
+
+=head2 Console
+
+- The Console only does "ASCII" input: e.g. pressing the "2"
+  key five times, "aaaaa", does not produce "ä" ("a diaeresis"),
+  but instead the "2" key rotates through "abc2abc2...".
+  This is a pity because the Console is actually capable of full
+  Unicode input and output (if you have the fonts, that is).  You
+  can verify this by entering e.g. the euro character, which is
+  U+20AC, well beyond U+00FF.  I don't know why the full repertoire
+  of the keyboard is not available.
+- Enhance the console? (line editing, full x-y movement, history)
+- The role of the console needs to be rethought: the best way
+  would be to have the console visible in the same screen as
+  the GUI elements (an "embedded console"?)
+
+=head2 Core Language
+
+- the $^E does not work
+- select() does not work (not our fault)
+- starting external application: what now (0.1.0) works is:
+  - system("app");
+  - system("app&");
+  - and those with arguments:
+    - system("app arg1 arg2")
+    - system("app arg1 arg2 &")
+    but remember that a Symbian process does get only argv[0]
+    and argv[1]: all the arguments of the application are passed
+    in as a single argument ("arg1 arg2" in the above)
+  What does not work:
+  - piped open, in either direction
+  - qx/backtick/`
+  - fork/wait (these unlikely to ever work as in POSIX)
+  - IO redirection or filename globbing in system()
+    (since there is no POSIX shell beneath)
+  What might work in future:
+  - exec() might be made to work
+  - Symbian::spawn("cmd args") returning a process id (what does Win32 do?) 
+  - Symbian::waitpid($spawned_pid)
+
+=head2 Platform
+
+- in S60 1.2 (at least in 3650 Nokia 3650 v3.11) setjmp/longjmp is
+  fragile (see Symbian FAQ-0929), intensive debugging and fix needed
+- in S60 2.x (at least in Nokia 6630 v4.03.11) launching scripts via
+  FExplorer does not open up the console
+
+=head2 Unicode
+
+- Symbian has Unicode filenames, and Unicode all over the place.
+- Encode and the use of Symbian Unicode in general
+  tie into the overall usefulness of PerlIO.
+
+=head2 Portability
+
+- Slash versus Backslash: where does one need to use "\\"?
+  writing Perl applications, where can one get away with using "/" ?
+
+=head2 Build
+
+- make xsbuild.pl much more robust (for building external extensions)
+- MakeMaker?  Pure PM, PM + XS?
+- currently the PerlApp UID is in both config.pl (hardwired) and
+  in makesis.pl (computed), this is quite error prone
+- Enable building also under Cygwin?
+
+=head1 PACKAGING
+
+- subdivide perlext.sis?
+- pm-stripper: strip pod and comments, while inserting the appropriate
+  #line commands to keep linenumbers in sync.  Shaves off easily 50%
+  of the code, making install packages smaller.
+- Get MakeMaker to create SIS packages?  In non-Win32?
+- Symbian has APIs for opening .zip files
+- Investigate Autrijus Tang's PAR format
+  http://www.autrijus.org/par-intro/
+- "makeplsis" to wrap a script.pl or dir/script.pl as a stand-alone
+  application (and SIS): unshift the "application home" to @INC and
+  chdir to that, then run the script.pl (renamed as default.pl)
+
+=head1 PerlBase
+
+- review for proper Symbian coding practices
+
+=head1 PerlApp
+
+- In "Run" see how one could show also the file extensions.
+- when autostarting also offer to display the file (via Notes?)
+  instead of installing/running it?
+- Allow passing command line options to scripts being run?
+- Add "OneLiner" menu item? (-e, -M) (requires a UI form)
+- Terminate/Pause menu entries?
+- review for proper Symbian coding practices
+
+=head1 CORE LIBRARIES
+
+- Fix Devel::PPPort (worth it?) (Note that there is D::PPP 3.x out by now)
+- Fix Encode to not to have writeable data: seems to be tricky indeed
+  because of copious global non-const data.
+- Verify that the modified File::Spec::Win32 does work in Symbian.
+  (File::Spec::Epoc does not seem to be relevant?)
+- What does Cwd really do since the concept of cwd is a bit fuzzy in Symbian.
+- What should Sys::Hostname return?  GPRS? BT? WLAN?
+- ByteLoader problem: byterun.c does not see VERSION and XS_VERSION.
+- POSIX problem: STDLIB POSIX is not that POSIX.
+
+=head1 REGRESSION SUITE
+
+- how to run the standard test suite on a Symbian device?
+
+=head1 CPAN LIBRARIES
+
+- Include/Package more modules (or work harder on getting CPAN.pm working?)
+  (but note that lib/**/*.pm is 3.5 megabytes, probably not worth including
+   all of it, even after pm-stripping):
+	- libnet
+	- Bundle::CPAN
+		- Archive::Tar
+		- Compress::Zlib (zlib?) (there is builtin gz support)
+		- Term::ReadKey (useless?)
+		- Term::ReadLine (useless?)
+	- Bundle::LWP
+		- URI
+		- HTML::TagSet
+		- HTML::Parser
+			- HTML::Entities
+		- HTML::HeadParser
+		- LWP
+	- Crypt::SSLeay? (ssl?)
+	- IO::Zlib? (zlib?)
+	- IMAP?
+	- Net::Telnet?
+	- Archive::Zip?
+	- Mail::Send?
+	- Date::Calc?
+	- XML? XML::Simple? (expat?) (there is builtin xml support)
+	- RSS?
+	- DBI
+	- DBD::SQLite? (sqlite?)
+	- SOAP? XML-RPC?
+
+=head1 FUTURE POSSIBILITIES
+
+- Remote console (Bluetooth/IR)
+- S60 GUI support
+- S60 PDA support
+- Phone APIs
+- S80
+- UIQ

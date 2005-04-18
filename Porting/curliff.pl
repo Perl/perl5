@@ -10,13 +10,20 @@ use strict;
 
 use vars qw($r);
 
+# This list is also in makerel.
 my @FILES = qw(
 	       djgpp/configure.bat
 	       README.ce
 	       README.dos
+	       README.symbian
 	       README.win32
+	       symbian/config.pl
+	       symbian/makesis.pl
+	       symbian/README
+	       symbian/xsbuild.pl
 	       win32/Makefile
 	       win32/makefile.mk
+	       wince/Makefile.ce
 	       wince/compile-all.bat
 	       wince/README.perlce
 	       wince/registry.bat

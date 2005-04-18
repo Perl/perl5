@@ -206,8 +206,8 @@ typedef struct scan_data_t {
  * Forward declarations for pregcomp()'s friends.
  */
 
-static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-				      0, 0, 0, 0, 0, 0};
+static const scan_data_t zero_scan_data =
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 #define SF_BEFORE_EOL		(SF_BEFORE_SEOL|SF_BEFORE_MEOL)
 #define SF_BEFORE_SEOL		0x1
@@ -834,6 +834,7 @@ and would end up looking like:
 STATIC I32
 S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *first, regnode *last, regnode *tail, U32 flags)
 {
+    dVAR;
     /* first pass, loop through and scan words */
     reg_trie_data *trie;
     regnode *cur;
@@ -3227,6 +3228,7 @@ STATIC regnode *
 S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
     /* paren: Parenthesized? 0=top, 1=(, inside: changed to letter. */
 {
+    dVAR;
     register regnode *ret;		/* Will be the head of the group. */
     register regnode *br;
     register regnode *lastbr;
@@ -6123,6 +6125,7 @@ Perl_re_intuit_string(pTHX_ regexp *prog)
 void
 Perl_pregfree(pTHX_ struct regexp *r)
 {
+    dVAR;
 #ifdef DEBUGGING
     SV *dsv = PERL_DEBUG_PAD_ZERO(0);
     SV *re_debug_flags=get_sv(RE_DEBUG_FLAGS,0);

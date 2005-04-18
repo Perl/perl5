@@ -74,8 +74,8 @@ Perl_taint_env(pTHX)
 {
     SV** svp;
     MAGIC* mg;
-    const char** e;
-    static const char* misc_env[] = {
+    const char* const *e;
+    static const char* const misc_env[] = {
 	"IFS",		/* most shells' inter-field separators */
 	"CDPATH",	/* ksh dain bramage #1 */
 	"ENV",		/* ksh dain bramage #2 */

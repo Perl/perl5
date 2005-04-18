@@ -965,6 +965,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 STATIC char *
 S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, I32 norun)
 {
+	dVAR;
 	I32 doevery = (prog->reganch & ROPT_SKIP) == 0;
 	char *m;
 	STRLEN ln;
@@ -2380,6 +2381,7 @@ typedef union re_unwind_t {
 STATIC I32			/* 0 failure, 1 success */
 S_regmatch(pTHX_ regnode *prog)
 {
+    dVAR;
     register regnode *scan;	/* Current node. */
     regnode *next;		/* Next node. */
     regnode *inner;		/* Next node in internal branch. */
@@ -4359,6 +4361,7 @@ do_no:
 STATIC I32
 S_regrepeat(pTHX_ regnode *p, I32 max)
 {
+    dVAR;
     register char *scan;
     register I32 c;
     register char *loceol = PL_regeol;
@@ -4706,6 +4709,7 @@ Perl_regclass_swash(pTHX_ register regnode* node, bool doinit, SV** listsvp, SV 
 STATIC bool
 S_reginclass(pTHX_ register regnode *n, register U8* p, STRLEN* lenp, register bool do_utf8)
 {
+    dVAR;
     char flags = ANYOF_FLAGS(n);
     bool match = FALSE;
     UV c = *p;

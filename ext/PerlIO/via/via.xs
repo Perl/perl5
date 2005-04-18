@@ -590,7 +590,7 @@ PerlIOVia_dup(pTHX_ PerlIO * f, PerlIO * o, CLONE_PARAMS * param,
 
 
 
-PerlIO_funcs PerlIO_object = {
+PERLIO_FUNCS_DECL(PerlIO_object) = {
  sizeof(PerlIO_funcs),
  "via",
  sizeof(PerlIOVia),
@@ -630,7 +630,7 @@ PROTOTYPES: ENABLE;
 BOOT:
 {
 #ifdef PERLIO_LAYERS
- PerlIO_define_layer(aTHX_ &PerlIO_object);
+ PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_object));
 #endif
 }
 

@@ -571,7 +571,7 @@ PP(pp_pushre)
 
 PP(pp_print)
 {
-    dSP; dMARK; dORIGMARK;
+    dVAR; dSP; dMARK; dORIGMARK;
     GV *gv;
     IO *io;
     register PerlIO *fp;
@@ -943,7 +943,7 @@ S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem)
 
 PP(pp_aassign)
 {
-    dSP;
+    dVAR; dSP;
     SV **lastlelem = PL_stack_sp;
     SV **lastrelem = PL_stack_base + POPMARK;
     SV **firstrelem = PL_stack_base + POPMARK + 1;
@@ -1444,7 +1444,7 @@ ret_no:
 OP *
 Perl_do_readline(pTHX)
 {
-    dSP; dTARGETSTACKED;
+    dVAR; dSP; dTARGETSTACKED;
     register SV *sv;
     STRLEN tmplen = 0;
     STRLEN offset;
@@ -1642,7 +1642,7 @@ Perl_do_readline(pTHX)
 
 PP(pp_enter)
 {
-    dSP;
+    dVAR; dSP;
     register PERL_CONTEXT *cx;
     I32 gimme = OP_GIMME(PL_op, -1);
 
@@ -1752,7 +1752,7 @@ PP(pp_helem)
 
 PP(pp_leave)
 {
-    dSP;
+    dVAR; dSP;
     register PERL_CONTEXT *cx;
     register SV **mark;
     SV **newsp;
@@ -2287,7 +2287,7 @@ ret_no:
 
 PP(pp_grepwhile)
 {
-    dSP;
+    dVAR; dSP;
 
     if (SvTRUEx(POPs))
 	PL_stack_base[PL_markstack_ptr[-1]++] = PL_stack_base[*PL_markstack_ptr];
@@ -2338,7 +2338,7 @@ PP(pp_grepwhile)
 
 PP(pp_leavesub)
 {
-    dSP;
+    dVAR; dSP;
     SV **mark;
     SV **newsp;
     PMOP *newpm;
@@ -2398,7 +2398,7 @@ PP(pp_leavesub)
  * get any slower by more conditions */
 PP(pp_leavesublv)
 {
-    dSP;
+    dVAR; dSP;
     SV **mark;
     SV **newsp;
     PMOP *newpm;
@@ -2593,7 +2593,7 @@ S_get_db_sub(pTHX_ SV **svp, CV *cv)
 
 PP(pp_entersub)
 {
-    dSP; dPOPss;
+    dVAR; dSP; dPOPss;
     GV *gv;
     HV *stash;
     register CV *cv;

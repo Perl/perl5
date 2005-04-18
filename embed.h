@@ -188,7 +188,7 @@
 #ifdef PERL_CORE
 #define do_exec			Perl_do_exec
 #endif
-#if defined(WIN32)
+#if defined(WIN32) || defined(SYMBIAN)
 #define do_aspawn		Perl_do_aspawn
 #define do_spawn		Perl_do_spawn
 #define do_spawn_nowait		Perl_do_spawn_nowait
@@ -1995,8 +1995,10 @@
 #endif
 #endif
 #if defined(PERL_IN_LOCALE_C) || defined(PERL_DECL_PROT)
+#if defined(USE_LOCALE_NUMERIC) || defined(USE_LOCALE_COLLATE)
 #ifdef PERL_CORE
 #define stdize_locale		S_stdize_locale
+#endif
 #endif
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
@@ -2265,6 +2267,8 @@
 #define is_gv_magical_sv	Perl_is_gv_magical_sv
 #endif
 #define savesvpv		Perl_savesvpv
+#define init_global_struct	Perl_init_global_struct
+#define free_global_struct	Perl_free_global_struct
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_concat		Perl_ck_concat
@@ -2800,7 +2804,7 @@
 #ifdef PERL_CORE
 #define do_exec(a)		Perl_do_exec(aTHX_ a)
 #endif
-#if defined(WIN32)
+#if defined(WIN32) || defined(SYMBIAN)
 #define do_aspawn(a,b,c)	Perl_do_aspawn(aTHX_ a,b,c)
 #define do_spawn(a)		Perl_do_spawn(aTHX_ a)
 #define do_spawn_nowait(a)	Perl_do_spawn_nowait(aTHX_ a)
@@ -4598,8 +4602,10 @@
 #endif
 #endif
 #if defined(PERL_IN_LOCALE_C) || defined(PERL_DECL_PROT)
+#if defined(USE_LOCALE_NUMERIC) || defined(USE_LOCALE_COLLATE)
 #ifdef PERL_CORE
 #define stdize_locale(a)	S_stdize_locale(aTHX_ a)
+#endif
 #endif
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
@@ -4868,6 +4874,8 @@
 #define is_gv_magical_sv(a,b)	Perl_is_gv_magical_sv(aTHX_ a,b)
 #endif
 #define savesvpv(a)		Perl_savesvpv(aTHX_ a)
+#define init_global_struct()	Perl_init_global_struct(aTHX)
+#define free_global_struct(a)	Perl_free_global_struct(aTHX_ a)
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
 #define ck_concat(a)		Perl_ck_concat(aTHX_ a)

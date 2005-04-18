@@ -135,6 +135,16 @@ compiling pad (lvalue). Note that C<SvCUR> is hijacked for this purpose.
 =for hackers
 Found in file pad.h
 
+=item PAD_COMPNAME_GEN_set
+
+Sets the generation number of the name at offset C<po> in the current
+ling pad (lvalue) to C<gen>.  Note that C<SvCUR_set> is hijacked for this purpose.
+
+	STRLEN	PAD_COMPNAME_GEN_set(PADOFFSET po, int gen)
+
+=for hackers
+Found in file pad.h
+
 =item PAD_COMPNAME_OURSTASH
 
 Return the stash associated with an C<our> variable.

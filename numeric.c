@@ -261,6 +261,7 @@ number may use '_' characters to separate digits.
 
 UV
 Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result) {
+    dVAR;
     const char *s = start;
     STRLEN len = *len_p;
     UV value = 0;

@@ -93,6 +93,24 @@ typedef double NV;			/* Older perls lack the NV type */
 #endif
 #endif
 
+#ifdef HASATTRIBUTE
+#  if (defined(__GNUC__) && defined(__cplusplus)) || defined(__INTEL_COMPILER)
+#    define PERL_UNUSED_DECL
+#  else
+#    define PERL_UNUSED_DECL __attribute__((unused))
+#  endif
+#else
+#  define PERL_UNUSED_DECL
+#endif
+
+#ifndef dNOOP
+#define dNOOP extern int Perl___notused PERL_UNUSED_DECL
+#endif
+
+#ifndef dVAR
+#define dVAR dNOOP
+#endif
+
 #ifdef DEBUGME
 
 #ifndef DASSERT
@@ -1024,15 +1042,17 @@ static int store_code(pTHX_ stcxt_t *cxt, CV *cv);
 static int store_other(pTHX_ stcxt_t *cxt, SV *sv);
 static int store_blessed(pTHX_ stcxt_t *cxt, SV *sv, int type, HV *pkg);
 
-static int (*sv_store[])(pTHX_ stcxt_t *cxt, SV *sv) = {
-	store_ref,										/* svis_REF */
-	store_scalar,									/* svis_SCALAR */
-	(int (*)(pTHX_ stcxt_t *cxt, SV *sv)) store_array,	/* svis_ARRAY */
-	(int (*)(pTHX_ stcxt_t *cxt, SV *sv)) store_hash,		/* svis_HASH */
-	store_tied,										/* svis_TIED */
-	store_tied_item,								/* svis_TIED_ITEM */
-	(int (*)(pTHX_ stcxt_t *cxt, SV *sv)) store_code,		/* svis_CODE */
-	store_other,									/* svis_OTHER */
+#define SV_STORE_TYPE	(const int (* const)(pTHX_ stcxt_t *cxt, SV *sv))
+
+static const int (* const sv_store[])(pTHX_ stcxt_t *cxt, SV *sv) = {
+	SV_STORE_TYPE store_ref,	/* svis_REF */
+	SV_STORE_TYPE store_scalar,	/* svis_SCALAR */
+	SV_STORE_TYPE store_array,	/* svis_ARRAY */
+	SV_STORE_TYPE store_hash,	/* svis_HASH */
+	SV_STORE_TYPE store_tied,	/* svis_TIED */
+	SV_STORE_TYPE store_tied_item,	/* svis_TIED_ITEM */
+	SV_STORE_TYPE store_code,	/* svis_CODE */
+	SV_STORE_TYPE store_other,	/* svis_OTHER */
 };
 
 #define SV_STORE(x)	(*sv_store[x])
@@ -1058,37 +1078,39 @@ static SV *retrieve_tied_hash(pTHX_ stcxt_t *cxt, char *cname);
 static SV *retrieve_tied_scalar(pTHX_ stcxt_t *cxt, char *cname);
 static SV *retrieve_other(pTHX_ stcxt_t *cxt, char *cname);
 
-static SV *(*sv_old_retrieve[])(pTHX_ stcxt_t *cxt, char *cname) = {
-	0,			/* SX_OBJECT -- entry unused dynamically */
-	retrieve_lscalar,		/* SX_LSCALAR */
-	old_retrieve_array,		/* SX_ARRAY -- for pre-0.6 binaries */
-	old_retrieve_hash,		/* SX_HASH -- for pre-0.6 binaries */
-	retrieve_ref,			/* SX_REF */
-	retrieve_undef,			/* SX_UNDEF */
-	retrieve_integer,		/* SX_INTEGER */
-	retrieve_double,		/* SX_DOUBLE */
-	retrieve_byte,			/* SX_BYTE */
-	retrieve_netint,		/* SX_NETINT */
-	retrieve_scalar,		/* SX_SCALAR */
-	retrieve_tied_array,	/* SX_ARRAY */
-	retrieve_tied_hash,		/* SX_HASH */
-	retrieve_tied_scalar,	/* SX_SCALAR */
-	retrieve_other,			/* SX_SV_UNDEF not supported */
-	retrieve_other,			/* SX_SV_YES not supported */
-	retrieve_other,			/* SX_SV_NO not supported */
-	retrieve_other,			/* SX_BLESS not supported */
-	retrieve_other,			/* SX_IX_BLESS not supported */
-	retrieve_other,			/* SX_HOOK not supported */
-	retrieve_other,			/* SX_OVERLOADED not supported */
-	retrieve_other,			/* SX_TIED_KEY not supported */
-	retrieve_other,			/* SX_TIED_IDX not supported */
-	retrieve_other,			/* SX_UTF8STR not supported */
-	retrieve_other,			/* SX_LUTF8STR not supported */
-	retrieve_other,			/* SX_FLAG_HASH not supported */
-	retrieve_other,			/* SX_CODE not supported */
-	retrieve_other,			/* SX_WEAKREF not supported */
-	retrieve_other,			/* SX_WEAKOVERLOAD not supported */
-	retrieve_other,			/* SX_ERROR */
+#define SV_RETRIEVE_TYPE (const SV* (* const)(pTHX_ stcxt_t *cxt, char *cname))
+
+static const SV *(* const sv_old_retrieve[])(pTHX_ stcxt_t *cxt, char *cname) = {
+	0,					/* SX_OBJECT -- entry unused dynamically */
+	SV_RETRIEVE_TYPE retrieve_lscalar,	/* SX_LSCALAR */
+	SV_RETRIEVE_TYPE old_retrieve_array,	/* SX_ARRAY -- for pre-0.6 binaries */
+	SV_RETRIEVE_TYPE old_retrieve_hash,	/* SX_HASH -- for pre-0.6 binaries */
+	SV_RETRIEVE_TYPE retrieve_ref,		/* SX_REF */
+	SV_RETRIEVE_TYPE retrieve_undef,	/* SX_UNDEF */
+	SV_RETRIEVE_TYPE retrieve_integer,	/* SX_INTEGER */
+	SV_RETRIEVE_TYPE retrieve_double,	/* SX_DOUBLE */
+	SV_RETRIEVE_TYPE retrieve_byte,		/* SX_BYTE */
+	SV_RETRIEVE_TYPE retrieve_netint,	/* SX_NETINT */
+	SV_RETRIEVE_TYPE retrieve_scalar,	/* SX_SCALAR */
+	SV_RETRIEVE_TYPE retrieve_tied_array,	/* SX_ARRAY */
+	SV_RETRIEVE_TYPE retrieve_tied_hash,	/* SX_HASH */
+	SV_RETRIEVE_TYPE retrieve_tied_scalar,	/* SX_SCALAR */
+	SV_RETRIEVE_TYPE retrieve_other,	/* SX_SV_UNDEF not supported */
+	SV_RETRIEVE_TYPE retrieve_other,	/* SX_SV_YES not supported */
+	SV_RETRIEVE_TYPE retrieve_other,	/* SX_SV_NO not supported */
+	SV_RETRIEVE_TYPE retrieve_other,	/* SX_BLESS not supported */
+	SV_RETRIEVE_TYPE retrieve_other,	/* SX_IX_BLESS not supported */
+	SV_RETRIEVE_TYPE retrieve_other,	/* SX_HOOK not supported */
+	SV_RETRIEVE_TYPE retrieve_other,	/* SX_OVERLOADED not supported */
+	SV_RETRIEVE_TYPE retrieve_other,	/* SX_TIED_KEY not supported */
+	SV_RETRIEVE_TYPE retrieve_other,	/* SX_TIED_IDX not supported */
+	SV_RETRIEVE_TYPE retrieve_other,	/* SX_UTF8STR not supported */
+	SV_RETRIEVE_TYPE retrieve_other,	/* SX_LUTF8STR not supported */
+	SV_RETRIEVE_TYPE retrieve_other,	/* SX_FLAG_HASH not supported */
+	SV_RETRIEVE_TYPE retrieve_other,	/* SX_CODE not supported */
+	SV_RETRIEVE_TYPE retrieve_other,	/* SX_WEAKREF not supported */
+	SV_RETRIEVE_TYPE retrieve_other,	/* SX_WEAKOVERLOAD not supported */
+	SV_RETRIEVE_TYPE retrieve_other,	/* SX_ERROR */
 };
 
 static SV *retrieve_array(pTHX_ stcxt_t *cxt, char *cname);
@@ -1107,37 +1129,37 @@ static SV *retrieve_code(pTHX_ stcxt_t *cxt, char *cname);
 static SV *retrieve_weakref(pTHX_ stcxt_t *cxt, char *cname);
 static SV *retrieve_weakoverloaded(pTHX_ stcxt_t *cxt, char *cname);
 
-static SV *(*sv_retrieve[])(pTHX_ stcxt_t *cxt, char *cname) = {
+static const SV *(* const sv_retrieve[])(pTHX_ stcxt_t *cxt, char *cname) = {
 	0,			/* SX_OBJECT -- entry unused dynamically */
-	retrieve_lscalar,		/* SX_LSCALAR */
-	retrieve_array,			/* SX_ARRAY */
-	retrieve_hash,			/* SX_HASH */
-	retrieve_ref,			/* SX_REF */
-	retrieve_undef,			/* SX_UNDEF */
-	retrieve_integer,		/* SX_INTEGER */
-	retrieve_double,		/* SX_DOUBLE */
-	retrieve_byte,			/* SX_BYTE */
-	retrieve_netint,		/* SX_NETINT */
-	retrieve_scalar,		/* SX_SCALAR */
-	retrieve_tied_array,	/* SX_ARRAY */
-	retrieve_tied_hash,		/* SX_HASH */
-	retrieve_tied_scalar,	/* SX_SCALAR */
-	retrieve_sv_undef,		/* SX_SV_UNDEF */
-	retrieve_sv_yes,		/* SX_SV_YES */
-	retrieve_sv_no,			/* SX_SV_NO */
-	retrieve_blessed,		/* SX_BLESS */
-	retrieve_idx_blessed,	/* SX_IX_BLESS */
-	retrieve_hook,			/* SX_HOOK */
-	retrieve_overloaded,	/* SX_OVERLOAD */
-	retrieve_tied_key,		/* SX_TIED_KEY */
-	retrieve_tied_idx,		/* SX_TIED_IDX */
-	retrieve_utf8str,		/* SX_UTF8STR  */
-	retrieve_lutf8str,		/* SX_LUTF8STR */
-	retrieve_flag_hash,		/* SX_HASH */
-	retrieve_code,			/* SX_CODE */
-	retrieve_weakref,		/* SX_WEAKREF */
-	retrieve_weakoverloaded,	/* SX_WEAKOVERLOAD */
-	retrieve_other,			/* SX_ERROR */
+	SV_RETRIEVE_TYPE retrieve_lscalar,	/* SX_LSCALAR */
+	SV_RETRIEVE_TYPE retrieve_array,	/* SX_ARRAY */
+	SV_RETRIEVE_TYPE retrieve_hash,		/* SX_HASH */
+	SV_RETRIEVE_TYPE retrieve_ref,		/* SX_REF */
+	SV_RETRIEVE_TYPE retrieve_undef,	/* SX_UNDEF */
+	SV_RETRIEVE_TYPE retrieve_integer,	/* SX_INTEGER */
+	SV_RETRIEVE_TYPE retrieve_double,	/* SX_DOUBLE */
+	SV_RETRIEVE_TYPE retrieve_byte,		/* SX_BYTE */
+	SV_RETRIEVE_TYPE retrieve_netint,	/* SX_NETINT */
+	SV_RETRIEVE_TYPE retrieve_scalar,	/* SX_SCALAR */
+	SV_RETRIEVE_TYPE retrieve_tied_array,	/* SX_ARRAY */
+	SV_RETRIEVE_TYPE retrieve_tied_hash,	/* SX_HASH */
+	SV_RETRIEVE_TYPE retrieve_tied_scalar,	/* SX_SCALAR */
+	SV_RETRIEVE_TYPE retrieve_sv_undef,	/* SX_SV_UNDEF */
+	SV_RETRIEVE_TYPE retrieve_sv_yes,	/* SX_SV_YES */
+	SV_RETRIEVE_TYPE retrieve_sv_no,	/* SX_SV_NO */
+	SV_RETRIEVE_TYPE retrieve_blessed,	/* SX_BLESS */
+	SV_RETRIEVE_TYPE retrieve_idx_blessed,	/* SX_IX_BLESS */
+	SV_RETRIEVE_TYPE retrieve_hook,		/* SX_HOOK */
+	SV_RETRIEVE_TYPE retrieve_overloaded,	/* SX_OVERLOAD */
+	SV_RETRIEVE_TYPE retrieve_tied_key,	/* SX_TIED_KEY */
+	SV_RETRIEVE_TYPE retrieve_tied_idx,	/* SX_TIED_IDX */
+	SV_RETRIEVE_TYPE retrieve_utf8str,	/* SX_UTF8STR  */
+	SV_RETRIEVE_TYPE retrieve_lutf8str,	/* SX_LUTF8STR */
+	SV_RETRIEVE_TYPE retrieve_flag_hash,	/* SX_HASH */
+	SV_RETRIEVE_TYPE retrieve_code,		/* SX_CODE */
+	SV_RETRIEVE_TYPE retrieve_weakref,	/* SX_WEAKREF */
+	SV_RETRIEVE_TYPE retrieve_weakoverloaded,	/* SX_WEAKOVERLOAD */
+	SV_RETRIEVE_TYPE retrieve_other,	/* SX_ERROR */
 };
 
 #define RETRIEVE(c,x) (*(c)->retrieve_vtbl[(x) >= SX_ERROR ? SX_ERROR : (x)])
@@ -2161,6 +2183,7 @@ sortcmp(const void *a, const void *b)
  */
 static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 {
+	dVAR;
 	I32 len = 
 #ifdef HAS_RESTRICTED_HASHES
             HvTOTALKEYS(hv);
@@ -2250,7 +2273,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 
 		for (i = 0; i < len; i++) {
 #ifdef HAS_RESTRICTED_HASHES
-			int placeholders = HvPLACEHOLDERS(hv);
+			int placeholders = (int)HvPLACEHOLDERS(hv);
 #endif
                         unsigned char flags = 0;
 			char *keyval;
@@ -3235,7 +3258,7 @@ static int store_blessed(
 static int store_other(pTHX_ stcxt_t *cxt, SV *sv)
 {
 	I32 len;
-	static char buf[80];
+	char buf[80];
 
 	TRACEME(("store_other"));
 
@@ -5050,6 +5073,7 @@ static SV *retrieve_hash(pTHX_ stcxt_t *cxt, char *cname)
  */
 static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, char *cname)
 {
+    dVAR;
     I32 len;
     I32 size;
     I32 i;
@@ -5373,7 +5397,7 @@ static SV *old_retrieve_hash(pTHX_ stcxt_t *cxt, char *cname)
 	HV *hv;
 	SV *sv = (SV *) 0;
 	int c;
-	static SV *sv_h_undef = (SV *) 0;		/* hv_store() bug */
+	SV *sv_h_undef = (SV *) 0;		/* hv_store() bug */
 
 	TRACEME(("old_retrieve_hash (#%d)", cxt->tagnum));
 
@@ -5524,7 +5548,7 @@ static SV *magic_check(pTHX_ stcxt_t *cxt)
      */
 
     version_major = use_network_order >> 1;
-    cxt->retrieve_vtbl = version_major ? sv_retrieve : sv_old_retrieve;
+    cxt->retrieve_vtbl = (SV*(**)()) (version_major ? sv_retrieve : sv_old_retrieve);
 
     TRACEME(("magic_check: netorder = 0x%x", use_network_order));
 

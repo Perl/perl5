@@ -1119,6 +1119,7 @@ Tidy up a pad after we've finished compiling it:
 void
 Perl_pad_tidy(pTHX_ padtidy_type type)
 {
+    dVAR;
     PADOFFSET ix;
 
     ASSERT_CURPAD_ACTIVE("pad_tidy");
@@ -1368,6 +1369,7 @@ any outer lexicals.
 CV *
 Perl_cv_clone(pTHX_ CV *proto)
 {
+    dVAR;
     I32 ix;
     AV* protopadlist = CvPADLIST(proto);
     const AV* protopad_name = (AV*)*av_fetch(protopadlist, 0, FALSE);

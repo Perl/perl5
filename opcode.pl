@@ -51,6 +51,8 @@ print <<"END";
  *  will be lost!
  */
 
+#ifndef PERL_GLOBAL_STRUCT_INIT
+
 #define Perl_pp_i_preinc Perl_pp_preinc
 #define Perl_pp_i_predec Perl_pp_predec
 #define Perl_pp_i_postinc Perl_pp_postinc
@@ -88,9 +90,7 @@ print ON "#define OP_phoney_OUTPUT_ONLY -2\n\n";
 # Emit op names and descriptions.
 
 print <<END;
-
 START_EXTERN_C
-
 
 #define OP_NAME(o) ((o)->op_type == OP_CUSTOM ? custom_op_name(o) : \\
                     PL_op_name[(o)->op_type])
@@ -98,9 +98,9 @@ START_EXTERN_C
                     PL_op_desc[(o)->op_type])
 
 #ifndef DOINIT
-EXT char *PL_op_name[];
+EXTCONST char* const PL_op_name[];
 #else
-EXT char *PL_op_name[] = {
+EXTCONST char* const PL_op_name[] = {
 END
 
 for (@ops) {
@@ -115,9 +115,9 @@ END
 
 print <<END;
 #ifndef DOINIT
-EXT char *PL_op_desc[];
+EXTCONST char* const PL_op_desc[];
 #else
-EXT char *PL_op_desc[] = {
+EXTCONST char* const PL_op_desc[] = {
 END
 
 for (@ops) {
@@ -134,6 +134,8 @@ print <<END;
 #endif
 
 END_EXTERN_C
+
+#endif /* !PERL_GLOBAL_STRUCT_INIT */
 
 END
 
@@ -155,10 +157,15 @@ print <<END;
 
 START_EXTERN_C
 
-#ifndef DOINIT
-EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX);
+#ifdef PERL_GLOBAL_STRUCT_INIT
+static const Perl_ppaddr_t Gppaddr[]
 #else
-EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX) = {
+#  ifndef PERL_GLOBAL_STRUCT
+EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
+#  endif
+#endif /* PERL_GLOBAL_STRUCT */
+#if (defined(DOINIT) && !defined(PERL_GLOBAL_STRUCT)) || defined(PERL_GLOBAL_STRUCT_INIT)
+= {
 END
 
 for (@ops) {
@@ -166,18 +173,24 @@ for (@ops) {
 }
 
 print <<END;
-};
+}
 #endif
+;
 
 END
 
 # Emit check routines.
 
 print <<END;
-#ifndef DOINIT
-EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op);
+#ifdef PERL_GLOBAL_STRUCT_INIT
+static const Perl_check_t Gcheck[]
 #else
-EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
+#  ifndef PERL_GLOBAL_STRUCT
+EXT Perl_check_t PL_check[] /* or perlvars.h */
+#  endif
+#endif
+#if (defined(DOINIT) && !defined(PERL_GLOBAL_STRUCT)) || defined(PERL_GLOBAL_STRUCT_INIT)
+= {
 END
 
 for (@ops) {
@@ -185,18 +198,21 @@ for (@ops) {
 }
 
 print <<END;
-};
+}
 #endif
+;
 
 END
 
 # Emit allowed argument types.
 
 print <<END;
+#ifndef PERL_GLOBAL_STRUCT_INIT
+
 #ifndef DOINIT
-EXT U32 PL_opargs[];
+EXT const U32 PL_opargs[];
 #else
-EXT U32 PL_opargs[] = {
+EXT const U32 PL_opargs[] = {
 END
 
 %argnum = (
@@ -266,6 +282,8 @@ print <<END;
 #endif
 
 END_EXTERN_C
+
+#endif /* !PERL_GLOBAL_STRUCT_INIT */
 END
 
 if (keys %OP_IS_SOCKET) {

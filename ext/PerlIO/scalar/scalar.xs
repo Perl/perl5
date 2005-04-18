@@ -254,7 +254,7 @@ PerlIOScalar_dup(pTHX_ PerlIO * f, PerlIO * o, CLONE_PARAMS * param,
     return f;
 }
 
-PerlIO_funcs PerlIO_scalar = {
+PERLIO_FUNCS_DECL(PerlIO_scalar) = {
     sizeof(PerlIO_funcs),
     "scalar",
     sizeof(PerlIOScalar),
@@ -295,7 +295,7 @@ PROTOTYPES: ENABLE
 BOOT:
 {
 #ifdef PERLIO_LAYERS
- PerlIO_define_layer(aTHX_ &PerlIO_scalar);
+ PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_scalar));
 #endif
 }
 

@@ -331,3 +331,4 @@ typedef struct jmpenv JMPENV;
 
 #define CATCH_GET		(PL_top_env->je_mustcatch)
 #define CATCH_SET(v)		(PL_top_env->je_mustcatch = (v))
+

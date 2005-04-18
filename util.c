@@ -141,6 +141,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 Free_t
 Perl_safesysfree(Malloc_t where)
 {
+    dVAR;
 #ifdef PERL_IMPLICIT_SYS
     dTHX;
 #endif
@@ -446,7 +447,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	     && ((STRLEN)(bigend - big) == littlelen - 1)
 	     && (littlelen == 1
 		 || (*big == *little &&
-		     memEQ(big, little, littlelen - 1))))
+		     memEQ((char *)big, (char *)little, littlelen - 1))))
 	    return (char*)big;
 	return Nullch;
     }
@@ -729,6 +730,7 @@ Perl_ibcmp(pTHX_ const char *s1, const char *s2, register I32 len)
 I32
 Perl_ibcmp_locale(pTHX_ const char *s1, const char *s2, register I32 len)
 {
+    dVAR;
     register const U8 *a = (const U8 *)s1;
     register const U8 *b = (const U8 *)s2;
     while (len--) {
@@ -986,7 +988,7 @@ SV *
 Perl_vmess(pTHX_ const char *pat, va_list *args)
 {
     SV *sv = mess_alloc();
-    static char dgd[] = " during global destruction.\n";
+    static const char dgd[] = " during global destruction.\n";
 
     sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
     if (!SvCUR(sv) || *(SvEND(sv) - 1) != '\n') {
@@ -1021,6 +1023,7 @@ Perl_vmess(pTHX_ const char *pat, va_list *args)
 void
 Perl_write_to_stderr(pTHX_ const char* message, int msglen)
 {
+    dVAR;
     IO *io;
     MAGIC *mg;
 
@@ -1072,6 +1075,7 @@ STATIC char *
 S_vdie_croak_common(pTHX_ const char* pat, va_list* args, STRLEN* msglen,
 		    I32* utf8)
 {
+    dVAR;
     char *message;
 
     if (pat) {
@@ -1255,6 +1259,7 @@ Perl_croak(pTHX_ const char *pat, ...)
 void
 Perl_vwarn(pTHX_ const char* pat, va_list *args)
 {
+    dVAR;
     char *message;
     HV *stash;
     GV *gv;
@@ -1334,7 +1339,7 @@ Perl_warn(pTHX_ const char *pat, ...)
 void
 Perl_warner_nocontext(U32 err, const char *pat, ...)
 {
-    dTHX;
+    dTHX; 
     va_list args;
     va_start(args, pat);
     vwarner(err, pat, &args);
@@ -1354,6 +1359,7 @@ Perl_warner(pTHX_ U32  err, const char* pat,...)
 void
 Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 {
+    dVAR;
     if (ckDEAD(err)) {
 	SV *msv = vmess(pat, args);
 	STRLEN msglen;
@@ -1393,6 +1399,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 void
 Perl_my_setenv(pTHX_ const char *nam, const char *val)
 {
+  dVAR;
 #ifdef USE_ITHREADS
   /* only parent thread can modify process environment */
   if (PL_curinterp == aTHX)
@@ -1442,7 +1449,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
     my_setenv_format(environ[i], nam, nlen, val, vlen);
     } else {
 # endif
-#   if defined(__CYGWIN__) || defined( EPOC)
+#   if defined(__CYGWIN__) || defined(EPOC) || defined(SYMBIAN) 
     setenv(nam, val, 1);
 #   else
     char *new_env;
@@ -1467,6 +1474,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
 void
 Perl_my_setenv(pTHX_ const char *nam, const char *val)
 {
+    dVAR;
     register char *envstr;
     const int nlen = strlen(nam);
     int vlen;
@@ -1573,7 +1581,7 @@ Perl_my_memcmp(const char *s1, const char *s2, register I32 len)
     register I32 tmp;
 
     while (len--) {
-	if (tmp = *a++ - *b++)
+        if ((tmp = *a++ - *b++))
 	    return tmp;
     }
     return 0;
@@ -2131,8 +2139,6 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 #ifndef OS2
 	if (doexec) {
 #if !defined(HAS_FCNTL) || !defined(F_SETFD)
-	    int fd;
-
 #ifndef NOFILE
 #define NOFILE 20
 #endif
@@ -2246,6 +2252,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 void
 Perl_atfork_lock(void)
 {
+   dVAR;
 #if defined(USE_ITHREADS)
     /* locks must be held in locking order (if any) */
 #  ifdef MYMALLOC
@@ -2259,6 +2266,7 @@ Perl_atfork_lock(void)
 void
 Perl_atfork_unlock(void)
 {
+    dVAR;
 #if defined(USE_ITHREADS)
     /* locks must be released in same order as in atfork_lock() */
 #  ifdef MYMALLOC
@@ -2303,6 +2311,7 @@ Perl_dump_fds(pTHX_ char *s)
 	    PerlIO_printf(Perl_debug_log," %d",fd);
     }
     PerlIO_printf(Perl_debug_log,"\n");
+    return;
 }
 #endif	/* DUMP_FDS */
 
@@ -2351,6 +2360,7 @@ dup2(int oldfd, int newfd)
 Sighandler_t
 Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
 {
+    dVAR;
     struct sigaction act, oact;
 
 #ifdef USE_ITHREADS
@@ -2390,6 +2400,7 @@ Perl_rsignal_state(pTHX_ int signo)
 int
 Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 {
+    dVAR;
     struct sigaction act;
 
 #ifdef USE_ITHREADS
@@ -2415,6 +2426,7 @@ Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 int
 Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 {
+    dVAR;
 #ifdef USE_ITHREADS
     /* only "parent" interpreter can diddle signals */
     if (PL_curinterp != aTHX)
@@ -2438,19 +2450,18 @@ Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
     return PerlProc_signal(signo, handler);
 }
 
-static int sig_trapped;	/* XXX signals are process-wide anyway, so we
-			   ignore the implications of this for threading */
-
 static
 Signal_t
 sig_trap(int signo)
 {
-    sig_trapped++;
+    dVAR;
+    PL_sig_trapped++;
 }
 
 Sighandler_t
 Perl_rsignal_state(pTHX_ int signo)
 {
+    dVAR;
     Sighandler_t oldsig;
 
 #if defined(USE_ITHREADS) && !defined(WIN32)
@@ -2459,10 +2470,10 @@ Perl_rsignal_state(pTHX_ int signo)
 	return SIG_ERR;
 #endif
 
-    sig_trapped = 0;
+    PL_sig_trapped = 0;
     oldsig = PerlProc_signal(signo, sig_trap);
     PerlProc_signal(signo, oldsig);
-    if (sig_trapped)
+    if (PL_sig_trapped)
 	PerlProc_kill(PerlProc_getpid(), signo);
     return oldsig;
 }
@@ -2560,16 +2571,15 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 I32
 Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 {
-    I32 result;
+    I32 result = 0;
     if (!pid)
 	return -1;
 #if !defined(HAS_WAITPID) && !defined(HAS_WAIT4) || defined(HAS_WAITPID_RUNTIME)
     {
-	SV *sv;
-	SV** svp;
 	char spid[TYPE_CHARS(IV)];
 
 	if (pid > 0) {
+	    SV** svp;
 	    sprintf(spid, "%"IVdf, (IV)pid);
 	    svp = hv_fetch(PL_pidstatus,spid,strlen(spid),FALSE);
 	    if (svp && *svp != &PL_sv_undef) {
@@ -2583,8 +2593,9 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 
 	    hv_iterinit(PL_pidstatus);
 	    if ((entry = hv_iternext(PL_pidstatus))) {
+		SV *sv = hv_iterval(PL_pidstatus,entry);
+
 		pid = atoi(hv_iterkey(entry,(I32*)statusp));
-		sv = hv_iterval(PL_pidstatus,entry);
 		*statusp = SvIVX(sv);
 		sprintf(spid, "%"IVdf, (IV)pid);
 		(void)hv_delete(PL_pidstatus,spid,strlen(spid),G_DISCARD);
@@ -2606,7 +2617,9 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
     goto finish;
 #endif
 #if !defined(HAS_WAITPID) && !defined(HAS_WAIT4) || defined(HAS_WAITPID_RUNTIME)
+#if defined(HAS_WAITPID) && defined(HAS_WAITPID_RUNTIME)
   hard_way:
+#endif
     {
 	if (flags)
 	    Perl_croak(aTHX_ "Can't do waitpid with flags");
@@ -2618,7 +2631,9 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 	}
     }
 #endif
+#if defined(HAS_WAITPID) || defined(HAS_WAIT4)
   finish:
+#endif
     if (result < 0 && errno == EINTR) {
 	PERL_ASYNC_CHECK();
     }
@@ -2967,6 +2982,7 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch, const char **searc
 void *
 Perl_get_context(void)
 {
+    dVAR;
 #if defined(USE_ITHREADS)
 #  ifdef OLD_PTHREADS_API
     pthread_addr_t t;
@@ -2988,6 +3004,7 @@ Perl_get_context(void)
 void
 Perl_set_context(void *t)
 {
+   dVAR;
 #if defined(USE_ITHREADS)
 #  ifdef I_MACH_CTHREADS
     cthread_set_data(cthread_self(), t);
@@ -3000,7 +3017,7 @@ Perl_set_context(void *t)
 
 #endif /* !PERL_GET_CONTEXT_DEFINED */
 
-#ifdef PERL_GLOBAL_STRUCT
+#if defined(PERL_GLOBAL_STRUCT) && !defined(PERL_GLOBAL_STRUCT_PRIVATE)
 struct perl_vars *
 Perl_GetVars(pTHX)
 {
@@ -3011,13 +3028,13 @@ Perl_GetVars(pTHX)
 char **
 Perl_get_op_names(pTHX)
 {
- return PL_op_name;
+ return (char **)PL_op_name;
 }
 
 char **
 Perl_get_op_descs(pTHX)
 {
- return PL_op_desc;
+ return (char **)PL_op_desc;
 }
 
 const char *
@@ -3029,12 +3046,13 @@ Perl_get_no_modify(pTHX)
 U32 *
 Perl_get_opargs(pTHX)
 {
- return PL_opargs;
+ return (U32 *)PL_opargs;
 }
 
 PPADDR_t*
 Perl_get_ppaddr(pTHX)
 {
+ dVAR;
  return (PPADDR_t*)PL_ppaddr;
 }
 
@@ -3053,7 +3071,7 @@ Perl_getenv_len(pTHX_ const char *env_elem, unsigned long *len)
 MGVTBL*
 Perl_get_vtbl(pTHX_ int vtbl_id)
 {
-    MGVTBL* result = Null(MGVTBL*);
+    const MGVTBL* result = Null(MGVTBL*);
 
     switch(vtbl_id) {
     case want_vtbl_sv:
@@ -3149,7 +3167,7 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
 	result = &PL_vtbl_utf8;
 	break;
     }
-    return result;
+    return (MGVTBL*)result;
 }
 
 I32
@@ -3613,6 +3631,7 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour, int mday, in
   }
 #else
   Perl_croak(aTHX_ "panic: no strftime");
+  return NULL;
 #endif
 }
 
@@ -4425,7 +4444,15 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
     return 0;
 
   abort_tidy_up_and_fail:
-  errno = ECONNABORTED; /* I hope this is portable and appropriate.  */
+#ifdef ECONNABORTED
+  errno = ECONNABORTED;	/* This would be the standard thing to do. */
+#else
+#  ifdef ECONNREFUSED
+  errno = ECONNREFUSED;	/* E.g. Symbian does not have ECONNABORTED. */
+#  else
+  errno = ETIMEDOUT;	/* Desperation time. */
+#  endif
+#endif
   tidy_up_and_fail:
     {
 	int save_errno = errno;
@@ -4609,7 +4636,7 @@ Perl_seed(pTHX)
 #endif
     fd = PerlLIO_open(PERL_RANDOM_DEVICE, 0);
     if (fd != -1) {
-    	if (PerlLIO_read(fd, &u, sizeof u) != sizeof u)
+    	if (PerlLIO_read(fd, (void*)&u, sizeof u) != sizeof u)
 	    u = 0;
 	PerlLIO_close(fd);
 	if (u)
@@ -4673,3 +4700,73 @@ Perl_get_hash_seed(pTHX)
 
      return myseed;
 }
+
+#ifdef PERL_GLOBAL_STRUCT
+
+struct perl_vars *
+Perl_init_global_struct(pTHX)
+{
+    struct perl_vars *plvarsp = NULL;
+#ifdef PERL_GLOBAL_STRUCT
+#  define PERL_GLOBAL_STRUCT_INIT
+#  include "opcode.h" /* the ppaddr and check */
+    IV nppaddr = sizeof(Gppaddr)/sizeof(Perl_ppaddr_t);
+    IV ncheck  = sizeof(Gcheck) /sizeof(Perl_check_t);
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
+    /* PerlMem_malloc() because can't use even safesysmalloc() this early. */
+    plvarsp = (struct perl_vars*)PerlMem_malloc(sizeof(struct perl_vars));
+    if (!plvarsp)
+        exit(1);
+#  else
+    plvarsp = PL_VarsPtr;
+#  endif /* PERL_GLOBAL_STRUCT_PRIVATE */
+#  define PERLVAR(var,type) /**/
+#  define PERLVARA(var,n,type) /**/
+#  define PERLVARI(var,type,init) plvarsp->var = init;
+#  define PERLVARIC(var,type,init) plvarsp->var = init;
+#  define PERLVARISC(var,init) Copy(init, plvarsp->var, sizeof(init), char);
+#  include "perlvars.h"
+#  undef PERLVAR
+#  undef PERLVARA
+#  undef PERLVARI
+#  undef PERLVARIC
+#  undef PERLVARISC
+#  ifdef PERL_GLOBAL_STRUCT
+    plvarsp->Gppaddr = PerlMem_malloc(nppaddr * sizeof(Perl_ppaddr_t));
+    if (!plvarsp->Gppaddr)
+        exit(1);
+    plvarsp->Gcheck  = PerlMem_malloc(ncheck  * sizeof(Perl_check_t));
+    if (!plvarsp->Gcheck)
+        exit(1);
+    Copy(Gppaddr, plvarsp->Gppaddr, nppaddr, Perl_ppaddr_t); 
+    Copy(Gcheck,  plvarsp->Gcheck,  ncheck,  Perl_check_t); 
+#  endif
+#  ifdef PERL_SET_VARS
+    PERL_SET_VARS(plvarsp);
+#  endif
+#  undef PERL_GLOBAL_STRUCT_INIT
+#endif
+    return plvarsp;
+}
+
+#endif /* PERL_GLOBAL_STRUCT */
+
+#ifdef PERL_GLOBAL_STRUCT
+
+void
+Perl_free_global_struct(pTHX_ struct perl_vars *plvarsp)
+{
+#ifdef PERL_GLOBAL_STRUCT
+#  ifdef PERL_UNSET_VARS
+    PERL_UNSET_VARS(plvarsp);
+#  endif
+    free(plvarsp->Gppaddr);
+    free(plvarsp->Gcheck);
+#    ifdef PERL_GLOBAL_STRUCT_PRIVATE
+    free(plvarsp);
+#    endif
+#endif
+}
+
+#endif /* PERL_GLOBAL_STRUCT */
+

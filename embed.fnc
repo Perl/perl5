@@ -170,7 +170,7 @@ p	|void	|do_chop	|SV* asv|SV* sv
 Ap	|bool	|do_close	|GV* gv|bool not_implicit
 p	|bool	|do_eof		|GV* gv
 p	|bool	|do_exec	|char* cmd
-#if defined(WIN32)
+#if defined(WIN32) || defined(SYMBIAN)
 Ap	|int	|do_aspawn	|SV* really|SV** mark|SV** sp
 Ap	|int	|do_spawn	|char* cmd
 Ap	|int	|do_spawn_nowait|char* cmd
@@ -245,7 +245,7 @@ Ap	|GV*	|gv_autoload4	|HV* stash|const char* name|STRLEN len \
 				|I32 method
 Ap	|void	|gv_check	|HV* stash
 Ap	|void	|gv_efullname	|SV* sv|const GV* gv
-Amb	|void	|gv_efullname3	|SV* sv|const GV* gv|const char* prefix
+Apmb	|void	|gv_efullname3	|SV* sv|const GV* gv|const char* prefix
 Ap	|void	|gv_efullname4	|SV* sv|const GV* gv|const char* prefix|bool keepmain
 Ap	|GV*	|gv_fetchfile	|const char* name
 Apd	|GV*	|gv_fetchmeth	|HV* stash|const char* name|STRLEN len \
@@ -257,7 +257,7 @@ Apd	|GV*	|gv_fetchmethod_autoload|HV* stash|const char* name \
 				|I32 autoload
 Ap	|GV*	|gv_fetchpv	|const char* name|I32 add|I32 sv_type
 Ap	|void	|gv_fullname	|SV* sv|const GV* gv
-Amb	|void	|gv_fullname3	|SV* sv|const GV* gv|const char* prefix
+Apmb	|void	|gv_fullname3	|SV* sv|const GV* gv|const char* prefix
 Ap	|void	|gv_fullname4	|SV* sv|const GV* gv|const char* prefix|bool keepmain
 Ap	|void	|gv_init	|GV* gv|HV* stash|const char* name \
 				|STRLEN len|int multi
@@ -1290,7 +1290,9 @@ s	|SV*|isa_lookup	|HV *stash|const char *name|HV *name_stash|int len|int level
 #endif
 
 #if defined(PERL_IN_LOCALE_C) || defined(PERL_DECL_PROT)
+#if defined(USE_LOCALE_NUMERIC) || defined(USE_LOCALE_COLLATE)
 s	|char*	|stdize_locale	|char* locs
+#endif
 #endif
 
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
@@ -1479,5 +1481,8 @@ Ap	|GV*	|gv_fetchsv|SV *name|I32 flags|I32 sv_type
 dp	|bool	|is_gv_magical_sv|SV *name|U32 flags
 
 Apd	|char*	|savesvpv	|SV* sv
+
+Ap	|struct perl_vars*|init_global_struct
+Ap	|void	|free_global_struct|struct perl_vars*
 
 END_EXTERN_C

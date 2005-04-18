@@ -1490,7 +1490,7 @@ S_sortsv_desc(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
 
 PP(pp_sort)
 {
-    dSP; dMARK; dORIGMARK;
+    dVAR; dSP; dMARK; dORIGMARK;
     register SV **p1 = ORIGMARK+1, **p2;
     register I32 max, i;
     AV* av = Nullav;
@@ -1714,6 +1714,7 @@ PP(pp_sort)
 static I32
 sortcv(pTHX_ SV *a, SV *b)
 {
+    dVAR;
     I32 oldsaveix = PL_savestack_ix;
     I32 oldscopeix = PL_scopestack_ix;
     I32 result;
@@ -1737,6 +1738,7 @@ sortcv(pTHX_ SV *a, SV *b)
 static I32
 sortcv_stacked(pTHX_ SV *a, SV *b)
 {
+    dVAR;
     I32 oldsaveix = PL_savestack_ix;
     I32 oldscopeix = PL_scopestack_ix;
     I32 result;
@@ -1778,7 +1780,7 @@ sortcv_stacked(pTHX_ SV *a, SV *b)
 static I32
 sortcv_xsub(pTHX_ SV *a, SV *b)
 {
-    dSP;
+    dVAR; dSP;
     I32 oldsaveix = PL_savestack_ix;
     I32 oldscopeix = PL_scopestack_ix;
     I32 result;

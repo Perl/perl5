@@ -81,6 +81,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	      int rawmode, int rawperm, PerlIO *supplied_fp, SV **svp,
 	      I32 num_svs)
 {
+    dVAR;
     register IO *io = GvIOn(gv);
     PerlIO *saveifp = Nullfp;
     PerlIO *saveofp = Nullfp;
@@ -1241,9 +1242,8 @@ Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode)
 }
 
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE)
-I32 my_chsize(fd, length)
-I32 fd;			/* file descriptor */
-Off_t length;		/* length to set file to */
+I32
+my_chsize(int fd, Off_t length)
 {
 #ifdef F_FREESP
 	/* code courtesy of William Kucharski */
@@ -1287,12 +1287,11 @@ Off_t length;		/* length to set file to */
 	    return -1;
 
     }
-
     return 0;
 #else
-    dTHX;
-    DIE(aTHX_ "truncate not implemented");
+    Perl_croak_nocontext("truncate not implemented");
 #endif /* F_FREESP */
+    return -1;
 }
 #endif /* !HAS_TRUNCATE && !HAS_CHSIZE */
 
@@ -1418,7 +1417,7 @@ Perl_my_stat(pTHX)
     }
 }
 
-static char no_prev_lstat[] = "The stat preceding -l _ wasn't an lstat";
+static const char no_prev_lstat[] = "The stat preceding -l _ wasn't an lstat";
 
 I32
 Perl_my_lstat(pTHX)
@@ -1471,7 +1470,8 @@ bool
 Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 	       int fd, int do_report)
 {
-#ifdef MACOS_TRADITIONAL
+    dVAR;
+#if defined(MACOS_TRADITIONAL) || defined(SYMBIAN)
     Perl_croak(aTHX_ "exec? I'm not *that* kind of operating system");
 #else
     register char **a;
@@ -1527,7 +1527,7 @@ Perl_do_execfree(pTHX)
     }
 }
 
-#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC) && !defined(MACOS_TRADITIONAL)
+#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC) && !defined(SYMBIAN) && !defined(MACOS_TRADITIONAL)
 
 bool
 Perl_do_exec(pTHX_ char *cmd)
@@ -1538,6 +1538,7 @@ Perl_do_exec(pTHX_ char *cmd)
 bool
 Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
 {
+    dVAR;
     register char **a;
     register char *s;
 
@@ -2306,6 +2307,7 @@ Moving it away shrinks pp_hot.c; shrinking pp_hot.c helps speed perl up.
 PerlIO *
 Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 {
+    dVAR;
     SV *tmpcmd = NEWSV(55, 0);
     PerlIO *fp;
     ENTER;

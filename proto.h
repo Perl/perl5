@@ -160,7 +160,7 @@ PERL_CALLCONV void	Perl_do_chop(pTHX_ SV* asv, SV* sv);
 PERL_CALLCONV bool	Perl_do_close(pTHX_ GV* gv, bool not_implicit);
 PERL_CALLCONV bool	Perl_do_eof(pTHX_ GV* gv);
 PERL_CALLCONV bool	Perl_do_exec(pTHX_ char* cmd);
-#if defined(WIN32)
+#if defined(WIN32) || defined(SYMBIAN)
 PERL_CALLCONV int	Perl_do_aspawn(pTHX_ SV* really, SV** mark, SV** sp);
 PERL_CALLCONV int	Perl_do_spawn(pTHX_ char* cmd);
 PERL_CALLCONV int	Perl_do_spawn_nowait(pTHX_ char* cmd);
@@ -228,7 +228,7 @@ PERL_CALLCONV GV*	Perl_gv_IOadd(pTHX_ GV* gv);
 PERL_CALLCONV GV*	Perl_gv_autoload4(pTHX_ HV* stash, const char* name, STRLEN len, I32 method);
 PERL_CALLCONV void	Perl_gv_check(pTHX_ HV* stash);
 PERL_CALLCONV void	Perl_gv_efullname(pTHX_ SV* sv, const GV* gv);
-/* PERL_CALLCONV void	gv_efullname3(pTHX_ SV* sv, const GV* gv, const char* prefix); */
+/* PERL_CALLCONV void	Perl_gv_efullname3(pTHX_ SV* sv, const GV* gv, const char* prefix); */
 PERL_CALLCONV void	Perl_gv_efullname4(pTHX_ SV* sv, const GV* gv, const char* prefix, bool keepmain);
 PERL_CALLCONV GV*	Perl_gv_fetchfile(pTHX_ const char* name);
 PERL_CALLCONV GV*	Perl_gv_fetchmeth(pTHX_ HV* stash, const char* name, STRLEN len, I32 level);
@@ -237,7 +237,7 @@ PERL_CALLCONV GV*	Perl_gv_fetchmethod(pTHX_ HV* stash, const char* name);
 PERL_CALLCONV GV*	Perl_gv_fetchmethod_autoload(pTHX_ HV* stash, const char* name, I32 autoload);
 PERL_CALLCONV GV*	Perl_gv_fetchpv(pTHX_ const char* name, I32 add, I32 sv_type);
 PERL_CALLCONV void	Perl_gv_fullname(pTHX_ SV* sv, const GV* gv);
-/* PERL_CALLCONV void	gv_fullname3(pTHX_ SV* sv, const GV* gv, const char* prefix); */
+/* PERL_CALLCONV void	Perl_gv_fullname3(pTHX_ SV* sv, const GV* gv, const char* prefix); */
 PERL_CALLCONV void	Perl_gv_fullname4(pTHX_ SV* sv, const GV* gv, const char* prefix, bool keepmain);
 PERL_CALLCONV void	Perl_gv_init(pTHX_ GV* gv, HV* stash, const char* name, STRLEN len, int multi);
 PERL_CALLCONV HV*	Perl_gv_stashpv(pTHX_ const char* name, I32 create);
@@ -1237,7 +1237,9 @@ STATIC SV*	S_isa_lookup(pTHX_ HV *stash, const char *name, HV *name_stash, int l
 #endif
 
 #if defined(PERL_IN_LOCALE_C) || defined(PERL_DECL_PROT)
+#if defined(USE_LOCALE_NUMERIC) || defined(USE_LOCALE_COLLATE)
 STATIC char*	S_stdize_locale(pTHX_ char* locs);
+#endif
 #endif
 
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
@@ -1420,5 +1422,8 @@ PERL_CALLCONV GV*	Perl_gv_fetchsv(pTHX_ SV *name, I32 flags, I32 sv_type);
 PERL_CALLCONV bool	Perl_is_gv_magical_sv(pTHX_ SV *name, U32 flags);
 
 PERL_CALLCONV char*	Perl_savesvpv(pTHX_ SV* sv);
+
+PERL_CALLCONV struct perl_vars*	Perl_init_global_struct(pTHX);
+PERL_CALLCONV void	Perl_free_global_struct(pTHX_ struct perl_vars*);
 
 END_EXTERN_C

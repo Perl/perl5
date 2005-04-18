@@ -675,3 +675,5 @@ Perl_hv_scalar
 Perl_gv_fetchpvn_flags
 Perl_gv_fetchsv
 Perl_savesvpv
+Perl_init_global_struct
+Perl_free_global_struct

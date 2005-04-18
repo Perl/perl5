@@ -27,11 +27,14 @@ START_EXTERN_C
 #undef PERLVARA
 #undef PERLVARI
 #undef PERLVARIC
+#undef PERLVARISC
 #define PERLVAR(v,t)	EXTERN_C t* Perl_##v##_ptr(pTHX);
 #define PERLVARA(v,n,t)	typedef t PL_##v##_t[n];			\
 			EXTERN_C PL_##v##_t* Perl_##v##_ptr(pTHX);
 #define PERLVARI(v,t,i)	PERLVAR(v,t)
 #define PERLVARIC(v,t,i) PERLVAR(v, const t)
+#define PERLVARISC(v,i)	typedef const char PL_##v##_t[sizeof(i)];	\
+			EXTERN_C PL_##v##_t* Perl_##v##_ptr(pTHX);
 
 #include "thrdvar.h"
 #include "intrpvar.h"
@@ -41,6 +44,16 @@ START_EXTERN_C
 #undef PERLVARA
 #undef PERLVARI
 #undef PERLVARIC
+#undef PERLVARISC
+
+#ifndef PERL_GLOBAL_STRUCT
+EXTERN_C Perl_ppaddr_t** Perl_Gppaddr_ptr(pTHX);
+EXTERN_C Perl_check_t**  Perl_Gcheck_ptr(pTHX);
+EXTERN_C unsigned char** Perl_Gfold_locale_ptr(pTHX);
+#define Perl_ppaddr_ptr      Perl_Gppaddr_ptr
+#define Perl_check_ptr       Perl_Gcheck_ptr
+#define Perl_fold_locale_ptr Perl_Gfold_locale_ptr
+#endif
 
 END_EXTERN_C
 
@@ -56,9 +69,9 @@ END_EXTERN_C
 START_EXTERN_C
 
 #ifndef DOINIT
-EXT void *PL_force_link_funcs[];
+EXTCONST void * const PL_force_link_funcs[];
 #else
-EXT void *PL_force_link_funcs[] = {
+EXTCONST void * const PL_force_link_funcs[] = {
 #undef PERLVAR
 #undef PERLVARA
 #undef PERLVARI
@@ -67,6 +80,7 @@ EXT void *PL_force_link_funcs[] = {
 #define PERLVARA(v,n,t)	PERLVAR(v,t)
 #define PERLVARI(v,t,i)	PERLVAR(v,t)
 #define PERLVARIC(v,t,i) PERLVAR(v,t)
+#define PERLVARISC(v,i) PERLVAR(v,char)
 
 #include "thrdvar.h"
 #include "intrpvar.h"
@@ -76,6 +90,7 @@ EXT void *PL_force_link_funcs[] = {
 #undef PERLVARA
 #undef PERLVARI
 #undef PERLVARIC
+#undef PERLVARISC
 };
 #endif	/* DOINIT */
 
@@ -921,6 +936,10 @@ END_EXTERN_C
 #define PL_No			(*Perl_GNo_ptr(NULL))
 #undef  PL_Yes
 #define PL_Yes			(*Perl_GYes_ptr(NULL))
+#undef  PL_appctx
+#define PL_appctx		(*Perl_Gappctx_ptr(NULL))
+#undef  PL_check
+#define PL_check		(*Perl_Gcheck_ptr(NULL))
 #undef  PL_csighandlerp
 #define PL_csighandlerp		(*Perl_Gcsighandlerp_ptr(NULL))
 #undef  PL_curinterp
@@ -929,24 +948,52 @@ END_EXTERN_C
 #define PL_do_undump		(*Perl_Gdo_undump_ptr(NULL))
 #undef  PL_dollarzero_mutex
 #define PL_dollarzero_mutex	(*Perl_Gdollarzero_mutex_ptr(NULL))
+#undef  PL_fold_locale
+#define PL_fold_locale		(*Perl_Gfold_locale_ptr(NULL))
 #undef  PL_hexdigit
 #define PL_hexdigit		(*Perl_Ghexdigit_ptr(NULL))
 #undef  PL_malloc_mutex
 #define PL_malloc_mutex		(*Perl_Gmalloc_mutex_ptr(NULL))
+#undef  PL_mmap_page_size
+#define PL_mmap_page_size	(*Perl_Gmmap_page_size_ptr(NULL))
 #undef  PL_op_mutex
 #define PL_op_mutex		(*Perl_Gop_mutex_ptr(NULL))
+#undef  PL_op_seq
+#define PL_op_seq		(*Perl_Gop_seq_ptr(NULL))
+#undef  PL_op_sequence
+#define PL_op_sequence		(*Perl_Gop_sequence_ptr(NULL))
 #undef  PL_patleave
 #define PL_patleave		(*Perl_Gpatleave_ptr(NULL))
+#undef  PL_perlio_debug_fd
+#define PL_perlio_debug_fd	(*Perl_Gperlio_debug_fd_ptr(NULL))
+#undef  PL_perlio_fd_refcnt
+#define PL_perlio_fd_refcnt	(*Perl_Gperlio_fd_refcnt_ptr(NULL))
+#undef  PL_ppaddr
+#define PL_ppaddr		(*Perl_Gppaddr_ptr(NULL))
 #undef  PL_sh_path
 #define PL_sh_path		(*Perl_Gsh_path_ptr(NULL))
+#undef  PL_sig_defaulting
+#define PL_sig_defaulting	(*Perl_Gsig_defaulting_ptr(NULL))
+#undef  PL_sig_handlers_initted
+#define PL_sig_handlers_initted	(*Perl_Gsig_handlers_initted_ptr(NULL))
+#undef  PL_sig_ignoring
+#define PL_sig_ignoring		(*Perl_Gsig_ignoring_ptr(NULL))
+#undef  PL_sig_sv
+#define PL_sig_sv		(*Perl_Gsig_sv_ptr(NULL))
+#undef  PL_sig_trapped
+#define PL_sig_trapped		(*Perl_Gsig_trapped_ptr(NULL))
 #undef  PL_sigfpe_saved
 #define PL_sigfpe_saved		(*Perl_Gsigfpe_saved_ptr(NULL))
 #undef  PL_sv_placeholder
 #define PL_sv_placeholder	(*Perl_Gsv_placeholder_ptr(NULL))
 #undef  PL_thr_key
 #define PL_thr_key		(*Perl_Gthr_key_ptr(NULL))
+#undef  PL_timesbase
+#define PL_timesbase		(*Perl_Gtimesbase_ptr(NULL))
 #undef  PL_use_safe_putenv
 #define PL_use_safe_putenv	(*Perl_Guse_safe_putenv_ptr(NULL))
+#undef  PL_watch_pvx
+#define PL_watch_pvx		(*Perl_Gwatch_pvx_ptr(NULL))
 
 #endif /* !PERL_CORE */
 #endif /* MULTIPLICITY */

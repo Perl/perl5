@@ -645,6 +645,7 @@ Perl_sv_free_arenas(pTHX)
 STATIC SV*
 S_find_hash_subscript(pTHX_ HV *hv, SV* val)
 {
+    dVAR;
     register HE **array;
     register HE *entry;
     I32 i;
@@ -790,6 +791,7 @@ PL_comppad/PL_curpad points to the currently executing pad.
 STATIC SV *
 S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 {
+    dVAR;
     SV *sv;
     AV *av;
     SV **svp;
@@ -3666,6 +3668,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	return SvPVX(tsv);
     }
     else {
+        dVAR;
 	STRLEN len;
         const char *t;
 
@@ -5506,7 +5509,7 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     }
 
     /* Rest of work is done else where */
-    mg = sv_magicext(sv,obj,how,vtable,name,namlen);
+    mg = sv_magicext(sv,obj,how,(MGVTBL*)vtable,name,namlen);
 
     switch (how) {
     case PERL_MAGIC_taint:
@@ -5826,6 +5829,7 @@ instead.
 void
 Perl_sv_clear(pTHX_ register SV *sv)
 {
+    dVAR;
     HV* stash;
     assert(sv);
     assert(SvREFCNT(sv) == 0);
@@ -6075,6 +6079,7 @@ Normally called via a wrapper macro C<SvREFCNT_dec>.
 void
 Perl_sv_free(pTHX_ SV *sv)
 {
+    dVAR;
     if (!sv)
 	return;
     if (SvREFCNT(sv) == 0) {
@@ -6103,6 +6108,7 @@ Perl_sv_free(pTHX_ SV *sv)
 void
 Perl_sv_free2(pTHX_ SV *sv)
 {
+    dVAR;
 #ifdef DEBUGGING
     if (SvTEMP(sv)) {
 	if (ckWARN_d(WARN_DEBUGGING))
@@ -6213,7 +6219,7 @@ S_utf8_mg_pos_init(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offse
 
     if (SvMAGICAL(sv) && !SvREADONLY(sv)) {
 	if (!*mgp)
-	    *mgp = sv_magicext(sv, 0, PERL_MAGIC_utf8, &PL_vtbl_utf8, 0, 0);
+	    *mgp = sv_magicext(sv, 0, PERL_MAGIC_utf8, (MGVTBL*)&PL_vtbl_utf8, 0, 0);
 	assert(*mgp);
 
 	if ((*mgp)->mg_ptr)
@@ -7137,17 +7143,7 @@ thats_really_all_folks:
    else
     {
        /*The big, slow, and stupid way. */
-
-      /* Any stack-challenged places. */
-#if defined(EPOC)
-      /* EPOC: need to work around SDK features.         *
-       * On WINS: MS VC5 generates calls to _chkstk,     *
-       * if a "large" stack frame is allocated.          *
-       * gcc on MARM does not generate calls like these. */
-#   define USEHEAPINSTEADOFSTACK
-#endif
-
-#ifdef USEHEAPINSTEADOFSTACK
+#ifdef USE_HEAP_INSTEAD_OF_STACK	/* Even slower way. */
 	STDCHAR *buf = 0;
 	New(0, buf, 8192, STDCHAR);
 	assert(buf);
@@ -7202,7 +7198,7 @@ screamer2:
 		goto screamer2;
 	}
 
-#ifdef USEHEAPINSTEADOFSTACK
+#ifdef USE_HEAP_INSTEAD_OF_STACK
 	Safefree(buf);
 #endif
     }
@@ -7555,6 +7551,7 @@ and C<sv_mortalcopy>.
 SV *
 Perl_sv_2mortal(pTHX_ register SV *sv)
 {
+    dVAR;
     if (!sv)
 	return sv;
     if (SvREADONLY(sv) && SvIMMORTAL(sv))
@@ -7832,6 +7829,7 @@ Note that the perl-level function is vaguely deprecated.
 void
 Perl_sv_reset(pTHX_ register const char *s, HV *stash)
 {
+    dVAR;
     register HE *entry;
     register GV *gv;
     register SV *sv;
@@ -7964,6 +7962,7 @@ possible to set C<*st> and C<*gvp> to the stash and GV associated with it.
 CV *
 Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 {
+    dVAR;
     GV *gv = Nullgv;
     CV *cv = Nullcv;
 
@@ -9116,7 +9115,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     char *patend;
     STRLEN origlen;
     I32 svix = 0;
-    static char nullstr[] = "(null)";
+    static const char nullstr[] = "(null)";
     SV *argsv = Nullsv;
     bool has_utf8; /* has the result utf8? */
     bool pat_utf8; /* the pattern is in utf8? */
@@ -9519,7 +9518,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 #endif
 		    elen = strlen(eptr);
 		else {
-		    eptr = nullstr;
+		    eptr = (char *)nullstr;
 		    elen = sizeof nullstr - 1;
 		}
 	    }
@@ -10142,6 +10141,7 @@ ptr_table_* functions.
 REGEXP *
 Perl_re_dup(pTHX_ REGEXP *r, CLONE_PARAMS *param)
 {
+    dVAR;
     REGEXP *ret;
     int i, len, npar;
     struct reg_substr_datum *s;
@@ -10534,10 +10534,6 @@ Perl_ptr_table_free(pTHX_ PTR_TBL_t *tbl)
     Safefree(tbl);
 }
 
-#ifdef DEBUGGING
-char *PL_watch_pvx;
-#endif
-
 /* attempt to make everything in the typeglob readonly */
 
 STATIC SV *
@@ -10655,6 +10651,7 @@ Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
 SV *
 Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 {
+    dVAR;
     SV *dstr;
 
     if (!sstr || SvTYPE(sstr) == SVTYPEMASK)
@@ -11504,6 +11501,7 @@ perl_clone_host(PerlInterpreter* proto_perl, UV flags);
 PerlInterpreter *
 perl_clone(PerlInterpreter *proto_perl, UV flags)
 {
+   dVAR;
 #ifdef PERL_IMPLICIT_SYS
 
    /* perlhost.h so we need to call into it
@@ -12322,6 +12320,7 @@ The PV of the sv is returned.
 char *
 Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 {
+    dVAR;
     if (SvPOK(sv) && !SvUTF8(sv) && !IN_BYTES && SvROK(encoding)) {
 	SV *uni;
 	STRLEN len;
@@ -12383,6 +12382,7 @@ bool
 Perl_sv_cat_decode(pTHX_ SV *dsv, SV *encoding,
 		   SV *ssv, int *offset, char *tstr, int tlen)
 {
+    dVAR;
     bool ret = FALSE;
     if (SvPOK(ssv) && SvPOK(dsv) && SvROK(encoding) && offset) {
 	SV *offsv;

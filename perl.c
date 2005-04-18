@@ -125,6 +125,7 @@ static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 static void
 S_init_tls_and_interp(PerlInterpreter *my_perl)
 {
+    dVAR;
     if (!PL_curinterp) {			
 	PERL_SET_INTERP(my_perl);
 #if defined(USE_ITHREADS)
@@ -201,6 +202,7 @@ Initializes a new Perl interpreter.  See L<perlembed>.
 void
 perl_construct(pTHXx)
 {
+    dVAR;
 #ifdef MULTIPLICITY
     init_interp();
     PL_perl_destruct_level = 1;
@@ -303,7 +305,9 @@ perl_construct(pTHXx)
 
     /* Use sysconf(_SC_CLK_TCK) if available, if not
      * available or if the sysconf() fails, use the HZ.
-     * BeOS has those, but returns the wrong value. */
+     * BeOS has those, but returns the wrong value.
+     * The HZ if not originally defined has been by now
+     * been defined as CLK_TCK, if available. */
 #if defined(HAS_SYSCONF) && defined(_SC_CLK_TCK) && !defined(__BEOS__)
     PL_clocktick = sysconf(_SC_CLK_TCK);
     if (PL_clocktick <= 0)
@@ -318,6 +322,51 @@ perl_construct(pTHXx)
 	    (int)PERL_VERSION,
 	    (int)PERL_SUBVERSION ), 0
     );
+
+#ifdef HAS_MMAP
+    if (!PL_mmap_page_size) {
+#if defined(HAS_SYSCONF) && (defined(_SC_PAGESIZE) || defined(_SC_MMAP_PAGE_SIZE))
+      {
+	SETERRNO(0, SS_NORMAL);
+#   ifdef _SC_PAGESIZE
+	PL_mmap_page_size = sysconf(_SC_PAGESIZE);
+#   else
+	PL_mmap_page_size = sysconf(_SC_MMAP_PAGE_SIZE);
+#   endif
+	if ((long) PL_mmap_page_size < 0) {
+	  if (errno) {
+	    SV *error = ERRSV;
+	    char *msg;
+	    STRLEN n_a;
+	    (void) SvUPGRADE(error, SVt_PV);
+	    msg = SvPVx(error, n_a);
+	    Perl_croak(aTHX_ "panic: sysconf: %s", msg);
+	  }
+	  else
+	    Perl_croak(aTHX_ "panic: sysconf: pagesize unknown");
+	}
+      }
+#else
+#   ifdef HAS_GETPAGESIZE
+      PL_mmap_page_size = getpagesize();
+#   else
+#       if defined(I_SYS_PARAM) && defined(PAGESIZE)
+      PL_mmap_page_size = PAGESIZE;       /* compiletime, bad */
+#       endif
+#   endif
+#endif
+      if (PL_mmap_page_size <= 0)
+	Perl_croak(aTHX_ "panic: bad pagesize %" IVdf,
+		   (IV) PL_mmap_page_size);
+    }
+#endif /* HAS_MMAP */
+
+#if defined(HAS_TIMES) && defined(PERL_NEED_TIMESBASE)
+    PL_timesbase.tms_utime  = 0;
+    PL_timesbase.tms_stime  = 0;
+    PL_timesbase.tms_cutime = 0;
+    PL_timesbase.tms_cstime = 0;
+#endif
 
     ENTER;
 }
@@ -348,6 +397,7 @@ Shuts down a Perl interpreter.  See L<perlembed>.
 int
 perl_destruct(pTHXx)
 {
+    dVAR;
     volatile int destruct_level;  /* 0=none, 1=full, 2=full with checks */
     HV *hv;
 
@@ -366,8 +416,7 @@ perl_destruct(pTHXx)
     }
 #endif
 
-
-    if(PL_exit_flags & PERL_EXIT_DESTRUCT_END) {
+    if (PL_exit_flags & PERL_EXIT_DESTRUCT_END) {
         dJMPENV;
         int x = 0;
 
@@ -967,6 +1016,7 @@ perl_free(pTHXx)
 static void __attribute__((destructor))
 perl_fini()
 {
+    dVAR;
     if (PL_curinterp)
 	FREE_THREAD_KEY;
 }
@@ -1045,6 +1095,7 @@ Tells a Perl interpreter to parse a Perl script.  See L<perlembed>.
 int
 perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 {
+    dVAR;
     I32 oldscope;
     int ret;
     dJMPENV;
@@ -1229,6 +1280,7 @@ setuid perl scripts securely.\n");
 STATIC void *
 S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 {
+    dVAR;
     int argc = PL_origargc;
     char **argv = PL_origargv;
     const char *scriptname = NULL;
@@ -1663,10 +1715,13 @@ print \"  \\@INC:\\n    @INC\\n\";");
     if (!PL_do_undump)
 	init_postdump_symbols(argc,argv,env);
 
-    /* PL_unicode is turned on by -C or by $ENV{PERL_UNICODE}.
-     * PL_utf8locale is conditionally turned on by
+    /* PL_unicode is turned on by -C, or by $ENV{PERL_UNICODE},
+     * or explicitly in some platforms.
      * locale.c:Perl_init_i18nl10n() if the environment
      * look like the user wants to use UTF-8. */
+#if defined(SYMBIAN)
+    PL_unicode = PERL_UNICODE_STD_FLAG; /* See PERL_SYMBIAN_CONSOLE_UTF8. */
+#endif
     if (PL_unicode) {
 	 /* Requires init_predump_symbols(). */
 	 if (!(PL_unicode & PERL_UNICODE_LOCALE_FLAG) || PL_utf8locale) {
@@ -1869,7 +1924,6 @@ S_run_body(pTHX_ I32 oldscope)
 	PL_op = PL_main_start;
 	CALLRUNOPS(aTHX);
     }
-
     my_exit(0);
     /* NOTREACHED */
 }
@@ -2059,7 +2113,7 @@ I32
 Perl_call_sv(pTHX_ SV *sv, I32 flags)
           		/* See G_* flags in cop.h */
 {
-    dSP;
+    dVAR; dSP;
     LOGOP myop;		/* fake syntax tree node */
     UNOP method_op;
     I32 oldmark;
@@ -2382,7 +2436,7 @@ S_usage(pTHX_ const char *name)		/* XXX move this out into a module ? */
     /* This message really ought to be max 23 lines.
      * Removed -h because the user already knows that option. Others? */
 
-    static const char *usage_msg[] = {
+    static const char * const usage_msg[] = {
 "-0[octal]       specify record separator (\\0, if no argument)",
 "-a              autosplit mode with -n or -p (splits $_ into @F)",
 "-C[number/list] enables the listed Unicode features",
@@ -2414,7 +2468,7 @@ S_usage(pTHX_ const char *name)		/* XXX move this out into a module ? */
 "\n",
 NULL
 };
-    const char **p = usage_msg;
+    const char * const *p = usage_msg;
 
     PerlIO_printf(PerlIO_stdout(),
 		  "\nUsage: %s [switches] [--] [programfile] [arguments]",
@@ -2430,7 +2484,7 @@ NULL
 int
 Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
 {
-    static const char *usage_msgd[] = {
+    static const char * const usage_msgd[] = {
       " Debugging flag values: (see also -d)",
       "  p  Tokenizing and parsing (with v, displays parse stack)",
       "  s  Stack snapshots (with v, displays all stacks)",
@@ -2493,6 +2547,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
 char *
 Perl_moreswitches(pTHX_ char *s)
 {
+    dVAR;
     STRLEN numlen;
     UV rschar;
 
@@ -2856,6 +2911,10 @@ Perl_moreswitches(pTHX_ char *s)
 	PerlIO_printf(PerlIO_stdout(),"Built on " __DATE__ " " __TIME__ "\n\n");
 	wce_hitreturn();
 #endif
+#ifdef SYMBIAN
+	PerlIO_printf(PerlIO_stdout(),
+		      "Symbian port by Nokia, 2004-2005\n");
+#endif
 #ifdef BINARY_BUILD_NOTICE
 	BINARY_BUILD_NOTICE;
 #endif
@@ -2956,7 +3015,7 @@ S_init_interp(pTHX)
 #  if defined(PERL_IMPLICIT_CONTEXT)
 #    if defined(USE_5005THREADS)
 #      define PERLVARI(var,type,init)		PERL_GET_INTERP->var = init;
-#      define PERLVARIC(var,type,init)	PERL_GET_INTERP->var = init;
+#      define PERLVARIC(var,type,init)		PERL_GET_INTERP->var = init;
 #    else /* !USE_5005THREADS */
 #      define PERLVARI(var,type,init)		aTHX->var = init;
 #      define PERLVARIC(var,type,init)	aTHX->var = init;
@@ -3032,6 +3091,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
     const char *cpp_discard_flag;
     const char *perl;
 #endif
+    dVAR;
 
     PL_fdscript = -1;
     PL_suidscript = -1;
@@ -3328,6 +3388,7 @@ S_fd_on_nosuid_fs(pTHX_ int fd)
 STATIC void
 S_validate_suid(pTHX_ const char *validarg, const char *scriptname)
 {
+    dVAR;
 #ifdef IAMSUID
     /* int which; */
 #endif /* IAMSUID */
@@ -4071,8 +4132,7 @@ Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
 STATIC void
 S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register char **env)
 {
-    char *s;
-    SV *sv;
+    dVAR;
     GV* tmpgv;
 
     PL_toptarget = NEWSV(0,0);
@@ -4120,6 +4180,8 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	}
 	if (env) {
           char** origenv = environ;
+	  char *s;
+	  SV *sv;
 	  for (; *env; env++) {
 	    if (!(s = strchr(*env,'=')) || s == *env)
 		continue;
@@ -4276,7 +4338,7 @@ S_init_perllib(pTHX)
 #endif /* MACOS_TRADITIONAL */
 }
 
-#if defined(DOSISH) || defined(EPOC)
+#if defined(DOSISH) || defined(EPOC) || defined(SYMBIAN)
 #    define PERLLIB_SEP ';'
 #else
 #  if defined(VMS)
@@ -4609,6 +4671,7 @@ S_init_main_thread(pTHX)
 void
 Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 {
+    dVAR;
     SV *atsv;
     const line_t oldline = CopLINE(PL_curcop);
     CV *cv;
@@ -4753,6 +4816,7 @@ Perl_my_failure_exit(pTHX)
 STATIC void
 S_my_exit_jump(pTHX)
 {
+    dVAR;
     register PERL_CONTEXT *cx;
     I32 gimme;
     SV **newsp;

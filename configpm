@@ -424,12 +424,16 @@ EOT
 foreach my $prefix (qw(ccflags ldflags)) {
     my $value = fetch_string ({}, $prefix);
     my $withlargefiles = fetch_string ({}, $prefix . "_uselargefiles");
-    $value =~ s/\Q$withlargefiles\E\b//;
-    print CONFIG_HEAVY "${prefix}_nolargefiles='$value'\n";
+    if (defined $withlargefiles) {
+        $value =~ s/\Q$withlargefiles\E\b//;
+        print CONFIG_HEAVY "${prefix}_nolargefiles='$value'\n";
+    }
 }
 
 foreach my $prefix (qw(libs libswanted)) {
     my $value = fetch_string ({}, $prefix);
+    my $withlf = fetch_string ({}, 'libswanted_uselargefiles');
+    next unless defined $withlf;
     my @lflibswanted
        = split(' ', fetch_string ({}, 'libswanted_uselargefiles'));
     if (@lflibswanted) {
@@ -861,6 +865,7 @@ EOS
 
 # Now do some simple tests on the Config.pm file we have created
 unshift(@INC,'lib');
+unshift(@INC,'xlib/symbian') if $Opts{cross};
 require $Config_PM;
 import Config;
 

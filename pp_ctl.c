@@ -890,7 +890,7 @@ PP(pp_formline)
 
 PP(pp_grepstart)
 {
-    dSP;
+    dVAR; dSP;
     SV *src;
 
     if (PL_stack_base + *PL_markstack_ptr == SP) {
@@ -932,7 +932,7 @@ PP(pp_mapstart)
 
 PP(pp_mapwhile)
 {
-    dSP;
+    dVAR; dSP;
     I32 gimme = GIMME_V;
     I32 items = (SP - PL_stack_base) - *PL_markstack_ptr; /* how many new items */
     I32 count;
@@ -1184,7 +1184,7 @@ PP(pp_flop)
 
 /* Control. */
 
-static const char *context_name[] = {
+static const char * const context_name[] = {
     "pseudo-block",
     "subroutine",
     "eval",
@@ -1385,6 +1385,7 @@ Perl_qerror(pTHX_ SV *err)
 OP *
 Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 {
+    dVAR;
     STRLEN n_a;
 
     if (PL_in_eval) {
@@ -1728,6 +1729,7 @@ PP(pp_lineseq)
 
 PP(pp_dbstate)
 {
+    dVAR;
     PL_curcop = (COP*)PL_op;
     TAINT_NOT;		/* Each statement is presumed innocent */
     PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
@@ -1779,7 +1781,7 @@ PP(pp_scope)
 
 PP(pp_enteriter)
 {
-    dSP; dMARK;
+    dVAR; dSP; dMARK;
     register PERL_CONTEXT *cx;
     I32 gimme = GIMME_V;
     SV **svp;
@@ -1866,7 +1868,7 @@ PP(pp_enteriter)
 
 PP(pp_enterloop)
 {
-    dSP;
+    dVAR; dSP;
     register PERL_CONTEXT *cx;
     I32 gimme = GIMME_V;
 
@@ -1882,7 +1884,7 @@ PP(pp_enterloop)
 
 PP(pp_leaveloop)
 {
-    dSP;
+    dVAR; dSP;
     register PERL_CONTEXT *cx;
     I32 gimme;
     SV **newsp;
@@ -1922,7 +1924,7 @@ PP(pp_leaveloop)
 
 PP(pp_return)
 {
-    dSP; dMARK;
+    dVAR; dSP; dMARK;
     I32 cxix;
     register PERL_CONTEXT *cx;
     bool popsub2 = FALSE;
@@ -2037,7 +2039,7 @@ PP(pp_return)
 
 PP(pp_last)
 {
-    dSP;
+    dVAR; dSP;
     I32 cxix;
     register PERL_CONTEXT *cx;
     I32 pop2 = 0;
@@ -2125,6 +2127,7 @@ PP(pp_last)
 
 PP(pp_next)
 {
+    dVAR;
     I32 cxix;
     register PERL_CONTEXT *cx;
     I32 inner;
@@ -2153,6 +2156,7 @@ PP(pp_next)
 
 PP(pp_redo)
 {
+    dVAR;
     I32 cxix;
     register PERL_CONTEXT *cx;
     I32 oldsave;
@@ -2232,7 +2236,7 @@ PP(pp_dump)
 
 PP(pp_goto)
 {
-    dSP;
+    dVAR; dSP;
     OP *retop = 0;
     I32 ix;
     register PERL_CONTEXT *cx;
@@ -2732,7 +2736,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
 /* startop op_free() this to undo. */
 /* code Short string id of the caller. */
 {
-    dSP;				/* Make POPBLOCK work. */
+    dVAR; dSP;				/* Make POPBLOCK work. */
     PERL_CONTEXT *cx;
     SV **newsp;
     I32 gimme = 0;   /* SUSPECT - INITIALZE TO WHAT?  NI-S */
@@ -2864,7 +2868,7 @@ Perl_find_runcv(pTHX_ U32 *db_seqp)
 STATIC OP *
 S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 {
-    dSP;
+    dVAR; dSP;
     OP *saveop = PL_op;
 
     PL_in_eval = ((saveop && saveop->op_type == OP_REQUIRE)
@@ -3036,7 +3040,7 @@ S_doopen_pm(pTHX_ const char *name, const char *mode)
 
 PP(pp_require)
 {
-    dSP;
+    dVAR; dSP;
     register PERL_CONTEXT *cx;
     SV *sv;
     char *name;
@@ -3239,15 +3243,29 @@ PP(pp_require)
 		    MacPerl_CanonDir(name, buf2, 1);
 		    Perl_sv_setpvf(aTHX_ namesv, "%s%s", MacPerl_CanonDir(dir, buf1, 0), buf2+(buf2[0] == ':'));
 #else
-#ifdef VMS
+#  ifdef VMS
 		    char *unixdir;
 		    if ((unixdir = tounixpath(dir, Nullch)) == Nullch)
 			continue;
 		    sv_setpv(namesv, unixdir);
 		    sv_catpv(namesv, unixname);
-#else
+#  else
+#    ifdef SYMBIAN
+		    if (PL_origfilename[0] &&
+			PL_origfilename[1] == ':' &&
+			!(dir[0] && dir[1] == ':'))
+		        Perl_sv_setpvf(aTHX_ namesv,
+				       "%c:%s\\%s",
+				       PL_origfilename[0],
+				       dir, name);
+		    else
+		        Perl_sv_setpvf(aTHX_ namesv,
+				       "%s\\%s",
+				       dir, name);
+#    else
 		    Perl_sv_setpvf(aTHX_ namesv, "%s/%s", dir, name);
-#endif
+#    endif
+#  endif
 #endif
 		    TAINT_PROPER("require");
 		    tryname = SvPVX(namesv);
@@ -3364,7 +3382,7 @@ PP(pp_dofile)
 
 PP(pp_entereval)
 {
-    dSP;
+    dVAR; dSP;
     register PERL_CONTEXT *cx;
     dPOPss;
     I32 gimme = GIMME_V, was = PL_sub_generation;
@@ -3448,7 +3466,7 @@ PP(pp_entereval)
 
 PP(pp_leaveeval)
 {
-    dSP;
+    dVAR; dSP;
     register SV **mark;
     SV **newsp;
     PMOP *newpm;
@@ -3516,7 +3534,7 @@ PP(pp_leaveeval)
 
 PP(pp_entertry)
 {
-    dSP;
+    dVAR; dSP;
     register PERL_CONTEXT *cx;
     I32 gimme = GIMME_V;
 
@@ -3535,7 +3553,7 @@ PP(pp_entertry)
 
 PP(pp_leavetry)
 {
-    dSP;
+    dVAR; dSP;
     register SV **mark;
     SV **newsp;
     PMOP *newpm;
@@ -3829,6 +3847,7 @@ S_num_overflow(NV value, I32 fldsize, I32 frcsize)
 static I32
 run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 {
+    dVAR;
     SV *datasv = FILTER_DATA(idx);
     int filter_has_file = IoLINES(datasv);
     GV *filter_child_proc = (GV *)IoFMT_GV(datasv);

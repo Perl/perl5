@@ -65,13 +65,45 @@
 #  endif
 #endif
 
+#ifdef PERL_GLOBAL_STRUCT_PRIVATE
+#  ifndef PERL_GLOBAL_STRUCT
+#    define PERL_GLOBAL_STRUCT
+#  endif
+#endif
+#ifdef PERL_GLOBAL_STRUCT
+#  ifndef MULTIPLICITY
+#    define MULTIPLICITY
+#  endif
+#endif
+
 /* undef WIN32 when building on Cygwin (for libwin32) - gph */
 #ifdef __CYGWIN__
 #   undef WIN32
 #   undef _WIN32
 #endif
 
-/* Use the reentrant APIs like localtime_r and getpwent_r */
+#if defined(__SYMBIAN32__) || (defined(__VC32__) && defined(WINS))
+#   ifndef SYMBIAN
+#       define SYMBIAN
+#   endif
+#endif
+
+#ifdef SYMBIAN
+#  include "symbian/symbian_proto.h"
+#endif
+
+/* Any stack-challenged places.  The limit varies (and often
+ * is configurable), but using more than a kilobyte of stack
+ * is usually dubious in these systems. */
+#if defined(EPOC) || defined(SYMBIAN)
+/* EPOC/Symbian: need to work around the SDK features. *
+ * On WINS: MS VC5 generates calls to _chkstk,         *
+ * if a "large" stack frame is allocated.              *
+ * gcc on MARM does not generate calls like these.     */
+#   define USE_HEAP_INSTEAD_OF_STACK
+#endif
+
+#/* Use the reentrant APIs like localtime_r and getpwent_r */
 /* Win32 has naturally threadsafe libraries, no need to use any _r variants. */
 #if defined(USE_ITHREADS) && !defined(USE_REENTRANT_API) && !defined(NETWARE) && !defined(WIN32) && !defined(PERL_DARWIN)
 #   define USE_REENTRANT_API
@@ -90,14 +122,44 @@
 #   endif
 #endif
 
+#ifdef PERL_GLOBAL_STRUCT
+#  ifndef PERL_GET_VARS
+#    ifdef PERL_GLOBAL_STRUCT_PRIVATE
+       extern struct perl_vars* Perl_GetVarsPrivate();
+#      define PERL_GET_VARS() Perl_GetVarsPrivate() /* see miniperlmain.c */
+#      ifndef PERLIO_FUNCS_CONST
+#        define PERLIO_FUNCS_CONST /* Can't have these lying around. */
+#      endif
+#    else
+#      define PERL_GET_VARS() PL_VarsPtr
+#    endif
+#  endif
+#endif
+
+#define pVAR    register struct perl_vars* my_vars PERL_UNUSED_DECL
+
+#ifdef PERL_GLOBAL_STRUCT
+#  define dVAR		pVAR    = (struct perl_vars*)PERL_GET_VARS()
+#else
+#  define dVAR		dNOOP
+#endif
+
 #ifdef PERL_IMPLICIT_CONTEXT
 #  ifndef MULTIPLICITY
 #    define MULTIPLICITY
 #  endif
 #  define pTHX	register PerlInterpreter *my_perl PERL_UNUSED_DECL
 #  define aTHX	my_perl
-#  define dTHXa(a)	pTHX = (PerlInterpreter*)a
-#  define dTHX		pTHX = PERL_GET_THX
+#  ifdef PERL_GLOBAL_STRUCT
+#    define dTHXa(a)	dVAR; pTHX = (PerlInterpreter*)a
+#  else
+#    define dTHXa(a)	pTHX = (PerlInterpreter*)a
+#  endif
+#  ifdef PERL_GLOBAL_STRUCT
+#    define dTHX		dVAR; pTHX = PERL_GET_THX
+#  else
+#    define dTHX		pTHX = PERL_GET_THX
+#  endif
 #  define pTHX_		pTHX,
 #  define aTHX_		aTHX,
 #  define pTHX_1	2	
@@ -123,6 +185,12 @@
 #define CALLREG_INTUIT_STRING CALL_FPTR(PL_regint_string)
 #define CALLREGFREE CALL_FPTR(PL_regfree)
 
+#if defined(SYMBIAN) && defined(__GNUC__)
+#  undef __attribute__
+#  undef __attribute__(_arg_)
+#  define HASATTRIBUTE
+#endif
+
 #ifdef HASATTRIBUTE
 #  if (defined(__GNUC__) && defined(__cplusplus)) || defined(__INTEL_COMPILER)
 #    define PERL_UNUSED_DECL
@@ -131,6 +199,12 @@
 #  endif
 #else
 #  define PERL_UNUSED_DECL
+#endif
+ 
+#if defined(SYMBIAN) && defined(__GNUC__)
+#  undef __attribute__
+#  undef __attribute__(_arg_)
+#  define HASATTRIBUTE
 #endif
 
 /* gcc -Wall:
@@ -155,6 +229,10 @@
 #  define pTHX_4	4
 #endif
 
+#ifndef dVAR
+#  define dVAR		dNOOP
+#endif
+
 /* these are only defined for compatibility; should not be used internally */
 #if !defined(pTHXo) && !defined(PERL_CORE)
 #  define pTHXo		pTHX
@@ -177,9 +255,17 @@
  * PerlIO_foo() expands to PL_StdIO->pFOO(PL_StdIO, ...).
  * dTHXs is therefore needed for all functions using PerlIO_foo(). */
 #ifdef PERL_IMPLICIT_SYS
-#  define dTHXs		dTHX
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
+#    define dTHXs		dVAR; dTHX
+#  else
+#    define dTHXs		dTHX
+#  endif
 #else
-#  define dTHXs		dNOOP
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
+#    define dTHXs		dVAR
+#  else
+#    define dTHXs		dNOOP
+#  endif
 #endif
 
 #undef START_EXTERN_C
@@ -193,6 +279,18 @@
 #  define START_EXTERN_C
 #  define END_EXTERN_C
 #  define EXTERN_C extern
+#endif
+
+/* Some platforms require marking function declarations
+ * for them to be exportable.  Used in perlio.h, proto.h
+ * is handled either by the makedef.pl or by defining the
+ * PERL_CALLCONV to be something special.  See also the
+ * definition of XS() in XSUB.h. */
+#ifndef PERL_EXPORT_C
+#  define PERL_EXPORT_C extern
+#endif
+#ifndef PERL_XS_EXPORT_C
+#  define PERL_XS_EXPORT_C
 #endif
 
 #ifdef OP_IN_REGISTER
@@ -273,7 +371,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #define DOSISH 1
 #endif
 
-#if defined(__STDC__) || defined(vax11c) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus) || defined( EPOC) || defined(NETWARE)
+#if defined(__STDC__) || defined(vax11c) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus) || defined( EPOC) || defined(NETWARE) || defined(SYMBIAN)
 # define STANDARD_C 1
 #endif
 
@@ -433,6 +531,10 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 /* If this causes problems, set i_unistd=undef in the hint file.  */
 #ifdef I_UNISTD
 #   include <unistd.h>
+#endif
+
+#ifdef SYMBIAN
+#   undef _SC_ARG_MAX /* Symbian has _SC_ARG_MAX but no sysconf() */
 #endif
 
 #if defined(HAS_SYSCALL) && !defined(HAS_SYSCALL_PROTO) && !defined(PERL_MICRO)
@@ -698,10 +800,12 @@ int usleep(unsigned int);
 #   define STRUCT_OFFSET(s,m)  (Size_t)(&(((s *)0)->m))
 #endif
 
-#if defined(I_STRING) || defined(__cplusplus)
-#   include <string.h>
-#else
-#   include <strings.h>
+#ifndef SYMBIAN
+#  if defined(I_STRING) || defined(__cplusplus)
+#     include <string.h>
+#  else
+#     include <strings.h>
+#  endif
 #endif
 
 /* This comes after <stdlib.h> so we don't try to change the standard
@@ -749,7 +853,7 @@ int usleep(unsigned int);
 #  define MALLOC_CHECK_TAINT(argc,argv,env)
 #endif /* MYMALLOC */
 
-#define TOO_LATE_FOR_(ch,s)	Perl_croak(aTHX_ "\"-%c\" is on the #! line, it must also be used on the command line%s", (char)(ch), s)
+#define TOO_LATE_FOR_(ch,what)	Perl_croak(aTHX_ "\"-%c\" is on the #! line, it must also be used on the command line%s", (char)(ch), what)
 #define TOO_LATE_FOR(ch)	TOO_LATE_FOR_(ch, "")
 #define MALLOC_TOO_LATE_FOR(ch)	TOO_LATE_FOR_(ch, " with $ENV{PERL_MALLOC_OPT}")
 #define MALLOC_CHECK_TAINT2(argc,argv)	MALLOC_CHECK_TAINT(argc,argv,NULL)
@@ -2157,6 +2261,12 @@ typedef struct clone_params CLONE_PARAMS;
 #   define ISHISH "epoc"
 #endif
 
+#ifdef SYMBIAN
+#   include "symbian/symbianish.h"
+#   include "embed.h"
+#   define ISHISH "symbian"
+#endif
+
 #if defined(MACOS_TRADITIONAL)
 #   include "macos/macish.h"
 #   ifndef NO_ENVIRON_ARRAY
@@ -2703,7 +2813,7 @@ long vtohl(long n);
 #endif
 
 #ifndef __cplusplus
-#ifndef UNDER_CE
+#if !(defined(UNDER_CE) || defined(SYMBIAN))
 Uid_t getuid (void);
 Uid_t geteuid (void);
 Gid_t getgid (void);
@@ -3268,18 +3378,18 @@ EXTCONST char PL_uuemap[65]
 
 
 #ifdef DOINIT
-EXT const char *PL_sig_name[] = { SIG_NAME };
-EXT int   PL_sig_num[]  = { SIG_NUM };
+EXTCONST char* const PL_sig_name[] = { SIG_NAME };
+EXTCONST int         PL_sig_num[]  = { SIG_NUM };
 #else
-EXT const char *PL_sig_name[];
-EXT int   PL_sig_num[];
+EXTCONST char* const PL_sig_name[];
+EXTCONST int         PL_sig_num[];
 #endif
 
 /* fast conversion and case folding tables */
 
 #ifdef DOINIT
 #ifdef EBCDIC
-EXT unsigned char PL_fold[] = { /* fast EBCDIC case folding table */
+EXTCONST unsigned char PL_fold[] = { /* fast EBCDIC case folding table */
     0,      1,      2,      3,      4,      5,      6,      7,
     8,      9,      10,     11,     12,     13,     14,     15,
     16,     17,     18,     19,     20,     21,     22,     23,
@@ -3353,8 +3463,9 @@ EXTCONST  unsigned char PL_fold[] = {
 EXTCONST unsigned char PL_fold[];
 #endif
 
+#ifndef PERL_GLOBAL_STRUCT /* or perlvars.h */
 #ifdef DOINIT
-EXT unsigned char PL_fold_locale[] = {
+EXT unsigned char PL_fold_locale[] = { /* Unfortunately not EXTCONST. */
 	0,	1,	2,	3,	4,	5,	6,	7,
 	8,	9,	10,	11,	12,	13,	14,	15,
 	16,	17,	18,	19,	20,	21,	22,	23,
@@ -3389,12 +3500,13 @@ EXT unsigned char PL_fold_locale[] = {
 	248,	249,	250,	251,	252,	253,	254,	255
 };
 #else
-EXT unsigned char PL_fold_locale[];
+EXT unsigned char PL_fold_locale[]; /* Unfortunately not EXTCONST. */
 #endif
+#endif /* !PERL_GLOBAL_STRUCT */
 
 #ifdef DOINIT
 #ifdef EBCDIC
-EXT unsigned char PL_freq[] = {/* EBCDIC frequencies for mixed English/C */
+EXTCONST unsigned char PL_freq[] = {/* EBCDIC frequencies for mixed English/C */
     1,      2,      84,     151,    154,    155,    156,    157,
     165,    246,    250,    3,      158,    7,      18,     29,
     40,     51,     62,     73,     85,     96,     107,    118,
@@ -3470,7 +3582,7 @@ EXTCONST unsigned char PL_freq[];
 
 #ifdef DEBUGGING
 #ifdef DOINIT
-EXTCONST char* PL_block_type[] = {
+EXTCONST char* const PL_block_type[] = {
 	"NULL",
 	"SUB",
 	"EVAL",
@@ -3641,6 +3753,10 @@ typedef void (*XSUBADDR_t) (pTHX_ CV *);
 #define PERLVARA(var,n,type) type var[n];
 #define PERLVARI(var,type,init) type var;
 #define PERLVARIC(var,type,init) type var;
+#define PERLVARISC(var,init) const char var[sizeof(init)];
+
+typedef OP* (CPERLscope(*Perl_ppaddr_t))(pTHX);
+typedef OP* (CPERLscope(*Perl_check_t)) (pTHX_ OP*);
 
 /* Interpreter exitlist entry */
 typedef struct exitlistentry {
@@ -3654,8 +3770,12 @@ struct perl_vars {
 };
 
 #  ifdef PERL_CORE
+#    ifndef PERL_GLOBAL_STRUCT_PRIVATE
 EXT struct perl_vars PL_Vars;
 EXT struct perl_vars *PL_VarsPtr INIT(&PL_Vars);
+#      undef PERL_GET_VARS
+#      define PERL_GET_VARS() PL_VarsPtr
+#    endif /* !PERL_GLOBAL_STRUCT_PRIVATE */
 #  else /* PERL_CORE */
 #    if !defined(__GNUC__) || !defined(WIN32)
 EXT
@@ -3696,6 +3816,7 @@ typedef void *Thread;
 #undef PERLVARA
 #undef PERLVARI
 #undef PERLVARIC
+#undef PERLVARISC
 
 /* Types used by pack/unpack */ 
 typedef enum {
@@ -3760,6 +3881,7 @@ typedef struct tempsym {
 #define PERLVARA(var,n,type) EXT type PL_##var[n];
 #define PERLVARI(var,type,init) EXT type  PL_##var INIT(init);
 #define PERLVARIC(var,type,init) EXTCONST type PL_##var INIT(init);
+#define PERLVARISC(var,init) EXTCONST char PL_##var[sizeof(init)] INIT(init);
 
 #if !defined(MULTIPLICITY)
 START_EXTERN_C
@@ -3789,9 +3911,9 @@ END_EXTERN_C
 START_EXTERN_C
 
 #ifdef DOINIT
-#  define MGVTBL_SET(var,a,b,c,d,e,f,g) EXT MGVTBL var = {a,b,c,d,e,f,g}
+#  define MGVTBL_SET(var,a,b,c,d,e,f,g) EXTCONST MGVTBL var = {a,b,c,d,e,f,g}
 #else
-#  define MGVTBL_SET(var,a,b,c,d,e,f,g) EXT MGVTBL var
+#  define MGVTBL_SET(var,a,b,c,d,e,f,g) EXTCONST MGVTBL var
 #endif
 
 MGVTBL_SET(
@@ -4187,7 +4309,7 @@ enum {
 #define AMG_id2name(id) (PL_AMG_names[id]+1)
 
 #ifdef DOINIT
-EXTCONST char * PL_AMG_names[NofAMmeth] = {
+EXTCONST char * const PL_AMG_names[NofAMmeth] = {
   /* Names kept in the symbol table.  fallback => "()", the rest has
      "(" prepended.  The only other place in perl which knows about
      this convention is AMG_id2name (used for debugging output and

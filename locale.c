@@ -36,6 +36,7 @@
 
 #include "reentr.h"
 
+#if defined(USE_LOCALE_NUMERIC) || defined(USE_LOCALE_COLLATE)
 /*
  * Standardize the locale name from a string returned by 'setlocale'.
  *
@@ -79,6 +80,7 @@ S_stdize_locale(pTHX_ char *locs)
 
     return locs;
 }
+#endif
 
 void
 Perl_set_numeric_radix(pTHX)
@@ -173,7 +175,7 @@ void
 Perl_new_ctype(pTHX_ char *newctype)
 {
 #ifdef USE_LOCALE_CTYPE
-
+    dVAR;
     int i;
 
     for (i = 0; i < 256; i++) {

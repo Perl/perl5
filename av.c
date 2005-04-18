@@ -525,6 +525,7 @@ to accommodate the addition.
 void
 Perl_av_push(pTHX_ register AV *av, SV *val)
 {             
+    dVAR;
     MAGIC *mg;
     if (!av)
 	return;
@@ -560,6 +561,7 @@ is empty.
 SV *
 Perl_av_pop(pTHX_ register AV *av)
 {
+    dVAR;
     SV *retval;
     MAGIC* mg;
 
@@ -605,6 +607,7 @@ must then use C<av_store> to assign values to these new elements.
 void
 Perl_av_unshift(pTHX_ register AV *av, register I32 num)
 {
+    dVAR;
     register I32 i;
     register SV **ary;
     MAGIC* mg;
@@ -676,6 +679,7 @@ Shifts an SV off the beginning of the array.
 SV *
 Perl_av_shift(pTHX_ register AV *av)
 {
+    dVAR;
     SV *retval;
     MAGIC* mg;
 
@@ -738,6 +742,7 @@ Perl's C<$#array = $fill;>.
 void
 Perl_av_fill(pTHX_ register AV *av, I32 fill)
 {
+    dVAR;
     MAGIC *mg;
     if (!av)
 	Perl_croak(aTHX_ "panic: null array");

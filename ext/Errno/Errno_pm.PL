@@ -7,6 +7,11 @@ our $VERSION = "1.09_01";
 my %err = ();
 my %wsa = ();
 
+# Symbian cross-compiling environment.
+my $IsSymbian = exists $ENV{SDK} && -d "$ENV{SDK}\\epoc32";
+
+my $IsMSWin32 = $^O eq 'MSWin32' && !$IsSymbian;
+
 unlink "Errno.pm" if -f "Errno.pm";
 open OUT, ">Errno.pm" or die "Cannot open Errno.pm: $!";
 select OUT;
@@ -27,7 +32,7 @@ sub process_file {
     }
 
     return unless defined $file and -f $file;
-#   warn "Processing $file\n";
+#    warn "Processing $file\n";
 
     local *FH;
     if (($^O eq 'VMS') && ($Config{vms_cc_type} ne 'gnuc')) {
@@ -53,7 +58,7 @@ sub process_file {
             return;
 	}
     }
-
+    
     if ($^O eq 'MacOS') {
 	while(<FH>) {
 	    $err{$1} = $2
@@ -63,12 +68,13 @@ sub process_file {
 	while(<FH>) {
 	    $err{$1} = 1
 		if /^\s*#\s*define\s+(E\w+)\s+/;
-            if ($^O eq 'MSWin32') {
+            if ($IsMSWin32) {
 	        $wsa{$1} = 1
 	    	    if /^\s*#\s*define\s+WSA(E\w+)\s+/;
             }
 	}
     }
+
     close(FH);
 }
 
@@ -130,6 +136,10 @@ sub get_files {
     } elsif ($^O eq 'vos') {
 	# avoid problem where cpp returns non-POSIX pathnames
 	$file{'/system/include_library/errno.h'} = 1;
+    } elsif ($IsSymbian) {
+        my $SDK = $ENV{SDK};
+        $SDK =~ s!\\!/!g;
+	$file{"$SDK/epoc32/include/libc/sys/errno.h"} = 1;
     } else {
 	open(CPPI,"> errno.c") or
 	    die "Cannot open errno.c";
@@ -138,7 +148,7 @@ sub get_files {
 	    print CPPI "#include <nwerrno.h>\n";
 	} else {
 	    print CPPI "#include <errno.h>\n";
-	    if ($^O eq 'MSWin32') {
+	    if ($IsMSWin32) {
 		print CPPI "#define _WINSOCKAPI_\n"; # don't drag in everything
 		print CPPI "#include <winsock.h>\n";
 	    }
@@ -147,7 +157,7 @@ sub get_files {
 	close(CPPI);
 
 	# invoke CPP and read the output
-	if ($^O eq 'MSWin32' || $^O eq 'NetWare') {
+	if ($IsMSWin32 || $^O eq 'NetWare') {
 	    open(CPPO,"$Config{cpprun} $Config{cppflags} errno.c |") or
 		die "Cannot run '$Config{cpprun} $Config{cppflags} errno.c'";
 	} else {
@@ -157,14 +167,14 @@ sub get_files {
 	}
 
 	my $pat;
-	if (($^O eq 'MSWin32' || $^O eq 'NetWare') and $Config{cc} =~ /^bcc/i) {
+	if (($IsMSWin32 || $^O eq 'NetWare') and $Config{cc} =~ /^bcc/i) {
 	    $pat = '^/\*\s+(.+)\s+\d+\s*:\s+\*/';
 	}
 	else {
 	    $pat = '^#\s*(?:line)?\s*\d+\s+"([^"]+)"';
 	}
 	while(<CPPO>) {
-	    if ($^O eq 'os2' or $^O eq 'MSWin32' or $^O eq 'NetWare') {
+	    if ($^O eq 'os2' or $IsMSWin32 or $^O eq 'NetWare') {
 		if (/$pat/o) {
 		   my $f = $1;
 		   $f =~ s,\\\\,/,g;
@@ -198,7 +208,7 @@ sub write_errno_pm {
     else {
 	print CPPI "#include <errno.h>\n";
     }
-    if ($^O eq 'MSWin32') {
+    if ($IsMSWin32) {
 	print CPPI "#include <winsock.h>\n";
 	foreach $err (keys %wsa) {
 	    print CPPI "#ifndef $err\n";
@@ -222,10 +232,14 @@ sub write_errno_pm {
 	    $cpp =~ s/sys\$input//i;
 	    open(CPPO,"$cpp  errno.c |") or
 		die "Cannot exec $Config{cppstdin}";
-	} elsif ($^O eq 'MSWin32' || $^O eq 'NetWare') {
+	} elsif ($IsMSWin32 || $^O eq 'NetWare') {
 	    open(CPPO,"$Config{cpprun} $Config{cppflags} errno.c |") or
 		die "Cannot run '$Config{cpprun} $Config{cppflags} errno.c'";
-	} else {
+	} elsif ($IsSymbian) {
+            my $cpp = "gcc -E -I$ENV{SDK}\\epoc32\\include\\libc -";
+	    open(CPPO,"$cpp < errno.c |")
+		or die "Cannot exec $cpp";
+        } else {
 	    my $cpp = default_cpp();
 	    open(CPPO,"$cpp < errno.c |")
 		or die "Cannot exec $cpp";

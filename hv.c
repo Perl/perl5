@@ -383,6 +383,7 @@ STATIC HE *
 S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		  int flags, int action, SV *val, register U32 hash)
 {
+    dVAR;
     XPVHV* xhv;
     U32 n_links;
     HE *entry;
@@ -882,6 +883,7 @@ STATIC SV *
 S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		   int k_flags, I32 d_flags, U32 hash)
 {
+    dVAR;
     register XPVHV* xhv;
     register I32 i;
     register HE *entry;
@@ -1442,6 +1444,7 @@ Clears a hash, making it empty.
 void
 Perl_hv_clear(pTHX_ HV *hv)
 {
+    dVAR;
     register XPVHV* xhv;
     if (!hv)
 	return;
@@ -1506,6 +1509,7 @@ See Hash::Util::lock_keys() for an example of its use.
 void
 Perl_hv_clear_placeholders(pTHX_ HV *hv)
 {
+    dVAR;
     I32 items = (I32)HvPLACEHOLDERS(hv);
     I32 i = HvMAX(hv);
 
@@ -1696,6 +1700,7 @@ insufficiently abstracted for any change to be tidy.
 HE *
 Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 {
+    dVAR;
     register XPVHV* xhv;
     register HE *entry;
     HE *oldentry;
@@ -2137,6 +2142,7 @@ Check that a hash is in an internally consistent state.
 void
 Perl_hv_assert(pTHX_ HV *hv)
 {
+  dVAR;
   HE* entry;
   int withflags = 0;
   int placeholders = 0;

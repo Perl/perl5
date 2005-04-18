@@ -42,7 +42,7 @@ EXTCONST unsigned char PL_utf8skip[];
 #endif
 
 END_EXTERN_C
-#define UTF8SKIP(s) PL_utf8skip[*(const U8*)s]
+#define UTF8SKIP(s) PL_utf8skip[*(const U8*)(s)]
 
 /* Native character to iso-8859-1 */
 #define NATIVE_TO_ASCII(ch)      (ch)

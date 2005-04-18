@@ -830,8 +830,8 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    SvCUR_set(retval, SvCUR(retval)+i);
 
 	    if (purity) {
-		static char *entries[] = { "{SCALAR}", "{ARRAY}", "{HASH}" };
-		static STRLEN sizes[] = { 8, 7, 6 };
+		static const char* const entries[] = { "{SCALAR}", "{ARRAY}", "{HASH}" };
+		static const STRLEN sizes[] = { 8, 7, 6 };
 		SV *e;
 		SV *nname = newSVpvn("", 0);
 		SV *newapad = newSVpvn("", 0);

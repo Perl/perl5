@@ -31,11 +31,12 @@ PERLVAR(Gcurinterp,	PerlInterpreter *)
 PERLVAR(Gthr_key,	perl_key)	/* key to retrieve per-thread struct */
 #endif
 
-/* constants (these are not literals to facilitate pointer comparisons) */
-PERLVARIC(GYes,		char *, "1")
-PERLVARIC(GNo,		char *, "")
-PERLVARIC(Ghexdigit,	char *, "0123456789abcdef0123456789ABCDEF")
-PERLVARIC(Gpatleave,	char *, "\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}")
+/* constants (these are not literals to facilitate pointer comparisons)
+ * (PERLVARISC really does create variables, despite its looks) */
+PERLVARISC(GYes,	"1")
+PERLVARISC(GNo,		"")
+PERLVARISC(Ghexdigit,	"0123456789abcdef0123456789ABCDEF")
+PERLVARISC(Gpatleave,	"\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}")
 
 /* XXX does anyone even use this? */
 PERLVARI(Gdo_undump,	bool,	FALSE)	/* -u or dump seen? */
@@ -72,3 +73,55 @@ PERLVARI(Gcsighandlerp,	Sighandler_t, &Perl_csighandler)	/* Pointer to C-level s
 #ifndef PERL_USE_SAFE_PUTENV
 PERLVARI(Guse_safe_putenv, int, 1)
 #endif
+
+#ifdef USE_PERLIO
+PERLVARA(Gperlio_fd_refcnt, 2048, int) /* PERLIO_MAX_REFCOUNTABLE_FD */
+PERLVARI(Gperlio_debug_fd, int, 0) /* the fd to write perlio debug into, 0 means not set yet */
+#endif
+
+#ifdef HAS_MMAP
+PERLVARI(Gmmap_page_size, IV, 0)
+#endif
+
+#if defined(FAKE_PERSISTENT_SIGNAL_HANDLERS)||defined(FAKE_DEFAULT_SIGNAL_HANDLERS)
+PERLVARI(Gsig_handlers_initted, int, 0)
+#endif
+#ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
+PERLVARA(Gsig_ignoring, SIG_SIZE, int)	/* which signals we are ignoring */
+#endif
+#ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
+PERLVAR(Gsig_defaulting, SIG_SIZE, int)
+#endif
+
+#ifndef PERL_IMPLICIT_CONTEXT
+PERLVAR(Gsig_sv, SV*)
+#endif
+
+/* XXX signals are process-wide anyway, so we
+ * ignore the implications of this for threading */
+#ifndef HAS_SIGACTION
+PERLVARI(Gsig_trapped, int, 0)
+#endif
+
+#ifdef DEBUGGING
+PERLVAR(Gwatch_pvx, char*)
+#endif
+
+#ifdef PERL_GLOBAL_STRUCT 
+PERLVAR(Gppaddr, Perl_ppaddr_t*) /* or opcode.h */
+PERLVAR(Gcheck,  Perl_check_t *) /* or opcode.h */
+PERLVARA(Gfold_locale, 256, unsigned char) /* or perl.h */
+#endif
+
+#ifdef PERL_NEED_APPCTX
+PERLVAR(Gappctx, void*) /* the application context */
+#endif
+
+PERLVAR(Gop_sequence, HV*) /* dump.c */
+PERLVARI(Gop_seq, UV, 0) /* dump.c */
+
+#if defined(HAS_TIMES) && defined(PERL_NEED_TIMESBASE)
+PERLVAR(Gtimesbase, struct tms)
+#endif
+
+

@@ -31,6 +31,7 @@ extern "C" {
 #ifdef HAS_PAUSE
 #   define Pause   pause
 #else
+#   undef Pause /* In case perl.h did it already. */
 #   define Pause() sleep(~0) /* Zzz for a long time. */
 #endif
 

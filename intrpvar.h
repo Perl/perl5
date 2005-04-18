@@ -29,7 +29,7 @@ PERLVAR(Iwarnhook,	SV *)
 /* switches */
 PERLVAR(Iminus_c,	bool)
 PERLVAR(Ipatchlevel,	SV *)
-PERLVAR(Ilocalpatches,	const char **)
+PERLVAR(Ilocalpatches,	const char * const *)
 PERLVARI(Isplitstr,	const char *, " ")
 PERLVAR(Ipreprocess,	bool)
 PERLVAR(Iminus_n,	bool)

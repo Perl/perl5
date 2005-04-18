@@ -189,6 +189,7 @@ For ease of access, the Perl manual has been split up into several sections.
     perlplan9		Perl notes for Plan 9
     perlqnx		Perl notes for QNX
     perlsolaris 	Perl notes for Solaris
+    perlsymbian 	Perl notes for Symbian
     perltru64		Perl notes for Tru64
     perluts		Perl notes for UTS
     perlvmesa		Perl notes for VM/ESA
