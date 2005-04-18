@@ -794,8 +794,16 @@ in gv.h: */
 		(SvCUR(sv) = (val) - SvPVX(sv)); } STMT_END
 
 #define SvPV_renew(sv,n) \
-  (SvPV_set((sv), (MEM_WRAP_CHECK_(n,char) \
-		   (char*)saferealloc((Malloc_t)SvPVX(sv),(MEM_SIZE)((n))))))
+	STMT_START { SvLEN_set(sv, n); \
+		SvPV_set((sv), (MEM_WRAP_CHECK_(n,char)			\
+				(char*)saferealloc((Malloc_t)SvPVX(sv), \
+						   (MEM_SIZE)((n)))));  \
+		 } STMT_END
+
+#define SvPV_shrink_to_cur(sv) STMT_START { \
+		   const STRLEN _lEnGtH = SvCUR(sv) + 1; \
+		   SvPV_renew(sv, _lEnGtH); \
+		 } STMT_END
 
 #define BmRARE(sv)	((XPVBM*)  SvANY(sv))->xbm_rare
 #define BmUSEFUL(sv)	((XPVBM*)  SvANY(sv))->xbm_useful
