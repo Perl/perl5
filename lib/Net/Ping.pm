@@ -16,7 +16,7 @@ use Carp;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
-$VERSION = "2.31";
+$VERSION = "2.31_01";
 
 sub SOL_IP { 0; };
 sub IP_TOS { 1; };
