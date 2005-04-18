@@ -426,7 +426,8 @@ open_ifs_socket(int af, int type, int protocol)
 
                 if ((af != AF_UNSPEC && af != proto_buffers[i].iAddressFamily)
                     || (type != proto_buffers[i].iSocketType)
-                    || (protocol != 0 && protocol != proto_buffers[i].iProtocol))
+                    || (protocol != 0 && proto_buffers[i].iProtocol != 0 &&
+                        protocol != proto_buffers[i].iProtocol))
                     continue;
 
                 if ((proto_buffers[i].dwServiceFlags1 & XP1_IFS_HANDLES) == 0)
