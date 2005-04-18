@@ -793,6 +793,10 @@ in gv.h: */
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
 		(SvCUR(sv) = (val) - SvPVX(sv)); } STMT_END
 
+#define SvPV_renew(sv,n) \
+  (SvPV_set((sv), (MEM_WRAP_CHECK_(n,char) \
+		   (char*)saferealloc((Malloc_t)SvPVX(sv),(MEM_SIZE)((n))))))
+
 #define BmRARE(sv)	((XPVBM*)  SvANY(sv))->xbm_rare
 #define BmUSEFUL(sv)	((XPVBM*)  SvANY(sv))->xbm_useful
 #define BmPREVIOUS(sv)	((XPVBM*)  SvANY(sv))->xbm_previous

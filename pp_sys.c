@@ -362,7 +362,7 @@ PP(pp_backtick)
 		XPUSHs(sv_2mortal(sv));
 		if (SvLEN(sv) - SvCUR(sv) > 20) {
 		    SvLEN_set(sv, SvCUR(sv)+1);
-		    Renew(SvPVX(sv), SvLEN(sv), char);
+		    SvPV_renew(sv, SvLEN(sv));
 		}
 		SvTAINTED_on(sv);
 	    }

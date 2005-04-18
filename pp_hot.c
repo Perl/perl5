@@ -1625,7 +1625,7 @@ Perl_do_readline(pTHX)
 	if (gimme == G_ARRAY) {
 	    if (SvLEN(sv) - SvCUR(sv) > 20) {
 		SvLEN_set(sv, SvCUR(sv)+1);
-		Renew(SvPVX(sv), SvLEN(sv), char);
+		SvPV_renew(sv, SvLEN(sv));
 	    }
 	    sv = sv_2mortal(NEWSV(58, 80));
 	    continue;
@@ -1635,7 +1635,7 @@ Perl_do_readline(pTHX)
 	    const STRLEN new_len
 		= SvCUR(sv) < 60 ? 80 : SvCUR(sv)+40; /* allow some slop */
 	    SvLEN_set(sv, new_len);
-	    Renew(SvPVX(sv), SvLEN(sv), char);
+	    SvPV_renew(sv, SvLEN(sv));
 	}
 	RETURN;
     }
