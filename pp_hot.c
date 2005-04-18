@@ -1632,10 +1632,9 @@ Perl_do_readline(pTHX)
 	}
 	else if (gimme == G_SCALAR && !tmplen && SvLEN(sv) - SvCUR(sv) > 80) {
 	    /* try to reclaim a bit of scalar space (only on 1st alloc) */
-	    if (SvCUR(sv) < 60)
-		SvLEN_set(sv, 80);
-	    else
-		SvLEN_set(sv, SvCUR(sv)+40);	/* allow some slop */
+	    const STRLEN new_len
+		= SvCUR(sv) < 60 ? 80 : SvCUR(sv)+40; /* allow some slop */
+	    SvLEN_set(sv, new_len);
 	    Renew(SvPVX(sv), SvLEN(sv), char);
 	}
 	RETURN;
