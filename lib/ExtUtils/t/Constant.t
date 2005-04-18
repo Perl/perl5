@@ -508,7 +508,7 @@ EOT
                {name=>"RFC1149", type=>"SV", value=>"sv_2mortal(temp_sv)",
                 pre=>"SV *temp_sv = newSVpv(RFC1149, 0); "
                 . "(void) SvUPGRADE(temp_sv,SVt_PVIV); SvIOK_on(temp_sv); "
-                . "SvIVX(temp_sv) = 1149;"},
+                . "SvIV_set(temp_sv, 1149);"},
               );
 
   push @items, $_ foreach keys %compass;

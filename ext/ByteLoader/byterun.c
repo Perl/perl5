@@ -242,7 +242,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	    {
 		IV arg;
 		BGET_IV(arg);
-		SvIVX(bstate->bs_sv) = arg;
+		SvIV_set(bstate->bs_sv, arg);
 		break;
 	    }
 	  case INSN_XNV:		/* 26 */
