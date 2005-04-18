@@ -229,7 +229,7 @@ Perl_sv_peek(pTHX_ SV *sv)
     if (SvROK(sv)) {
 	sv_catpv(t, "\\");
 	if (SvCUR(t) + unref > 10) {
-	    SvCUR(t) = unref + 3;
+	    SvCUR_set(t, unref + 3);
 	    *SvEND(t) = '\0';
 	    sv_catpv(t, "...");
 	    goto finish;
@@ -1200,8 +1200,10 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     if ((type != SVt_PVHV) && SvUTF8(sv))
         sv_catpv(d, "UTF8");
 
-    if (*(SvEND(d) - 1) == ',')
-	SvPVX(d)[--SvCUR(d)] = '\0';
+    if (*(SvEND(d) - 1) == ',') {
+        SvCUR_set(d, SvCUR(d) - 1);
+	SvPVX(d)[SvCUR(d)] = '\0';
+    }
     sv_catpv(d, ")");
     s = SvPVX(d);
 

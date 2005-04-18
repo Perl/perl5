@@ -178,9 +178,10 @@ PP(pp_rv2gv)
 			SvOOK_off(sv);		/* backoff */
 			if (SvLEN(sv))
 			    Safefree(SvPVX(sv));
-			SvLEN(sv)=SvCUR(sv)=0;
+			SvLEN_set(sv, 0);
+                        SvCUR_set(sv, 0);
 		    }
-		    SvRV(sv) = (SV*)gv;
+		    SvRV_set(sv, (SV*)gv);
 		    SvROK_on(sv);
 		    SvSETMAGIC(sv);
 		    goto wasref;
@@ -493,7 +494,7 @@ S_refto(pTHX_ SV *sv)
     }
     rv = sv_newmortal();
     sv_upgrade(rv, SVt_RV);
-    SvRV(rv) = sv;
+    SvRV_set(rv, sv);
     SvROK_on(rv);
     return rv;
 }
@@ -1494,7 +1495,7 @@ PP(pp_repeat)
 	        MEM_WRAP_CHECK_1(max, char, oom_string_extend);
 		SvGROW(TARG, (count * len) + 1);
 		repeatcpy(SvPVX(TARG) + len, SvPVX(TARG), len, count - 1);
-		SvCUR(TARG) *= count;
+		SvCUR_set(TARG, SvCUR(TARG) * count);
 	    }
 	    *SvEND(TARG) = '\0';
 	}

@@ -2386,7 +2386,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 				SvGROW(last_str, (mincount * l) + 1);
 				repeatcpy(SvPVX(last_str) + l,
 					  SvPVX(last_str), l, mincount - 1);
-				SvCUR(last_str) *= mincount;
+				SvCUR_set(last_str, SvCUR(last_str) * mincount);
 				/* Add additional parts. */
 				SvCUR_set(data->last_found,
 					  SvCUR(data->last_found) - l);

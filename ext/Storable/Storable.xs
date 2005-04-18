@@ -973,7 +973,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 	stash = gv_stashpv((p), TRUE);			\
 	ref = newRV_noinc(s);					\
 	(void) sv_bless(ref, stash);			\
-	SvRV(ref) = 0;							\
+	SvRV_set(ref, NULL);						\
 	SvREFCNT_dec(ref);						\
   } STMT_END
 /*
@@ -2849,7 +2849,7 @@ static int store_hook(
 
 	ref = newRV_noinc(sv);				/* Temporary reference */
 	av = array_call(aTHX_ ref, hook, clone);	/* @a = $object->STORABLE_freeze($c) */
-	SvRV(ref) = 0;
+	SvRV_set(ref, NULL);
 	SvREFCNT_dec(ref);					/* Reclaim temporary reference */
 
 	count = AvFILLp(av) + 1;
@@ -4303,7 +4303,7 @@ static SV *retrieve_ref(pTHX_ stcxt_t *cxt, char *cname)
 		sv_upgrade(rv, SVt_RV);
 	}
 
-	SvRV(rv) = sv;				/* $rv = \$sv */
+	SvRV_set(rv, sv);				/* $rv = \$sv */
 	SvROK_on(rv);
 
 	TRACEME(("ok (retrieve_ref at 0x%"UVxf")", PTR2UV(rv)));
@@ -4363,7 +4363,7 @@ static SV *retrieve_overloaded(pTHX_ stcxt_t *cxt, char *cname)
 	 */
 
 	sv_upgrade(rv, SVt_RV);
-	SvRV(rv) = sv;				/* $rv = \$sv */
+	SvRV_set(rv, sv);				/* $rv = \$sv */
 	SvROK_on(rv);
 
 	/*
@@ -5886,8 +5886,8 @@ static SV *do_retrieve(
 				SvUPGRADE(in, SVt_PV);
 				SvPOK_on(in);
 				SvPV_set(in, asbytes);
-				SvLEN(in) = klen_tmp;
-				SvCUR(in) = klen_tmp - 1;
+				SvLEN_set(in, klen_tmp);
+				SvCUR_set(in, klen_tmp - 1);
 			}
 		}
 #endif

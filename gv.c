@@ -113,7 +113,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     if (SvLEN(gv)) {
 	if (proto) {
 	    SvPV_set(gv, NULL);
-	    SvLEN(gv) = 0;
+	    SvLEN_set(gv, 0);
 	    SvPOK_off(gv);
 	} else
 	    Safefree(SvPVX(gv));
@@ -526,7 +526,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
          */
         CvSTASH(cv) = stash;
         SvPV_set(cv, (char *)name); /* cast to lose constness warning */
-        SvCUR(cv) = len;
+        SvCUR_set(cv, len);
         return gv;
     }
 
@@ -1190,7 +1190,7 @@ Perl_newIO(pTHX)
     /* unless exists($main::{FileHandle}) and defined(%main::FileHandle::) */
     if (!(iogv && GvHV(iogv) && HvARRAY(GvHV(iogv))))
       iogv = gv_fetchpv("IO::Handle::", TRUE, SVt_PVHV);
-    SvSTASH(io) = (HV*)SvREFCNT_inc(GvHV(iogv));
+    SvSTASH_set(io, (HV*)SvREFCNT_inc(GvHV(iogv)));
     return io;
 }
 
@@ -1572,7 +1572,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 		 */
 		SV* newref = newSVsv(tmpRef);
 		SvOBJECT_on(newref);
-		SvSTASH(newref) = (HV*)SvREFCNT_inc(SvSTASH(tmpRef));
+		SvSTASH_set(newref, (HV*)SvREFCNT_inc(SvSTASH(tmpRef)));
 		return newref;
 	     }
 	   }

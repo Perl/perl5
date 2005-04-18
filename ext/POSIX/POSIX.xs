@@ -1476,7 +1476,7 @@ read(fd, buffer, nbytes)
         char *          buffer = sv_grow( sv_buffer, nbytes+1 );
     CLEANUP:
         if (RETVAL >= 0) {
-            SvCUR(sv_buffer) = RETVAL;
+            SvCUR_set(sv_buffer, RETVAL);
             SvPOK_only(sv_buffer);
             *SvEND(sv_buffer) = '\0';
             SvTAINTED_on(sv_buffer);
@@ -1652,7 +1652,7 @@ strxfrm(src)
               strxfrm(SvPVX(ST(0)), p, (size_t)dstlen);
               dstlen--;
           }
-          SvCUR(ST(0)) = dstlen;
+          SvCUR_set(ST(0), dstlen);
 	    SvPOK_only(ST(0));
 	}
 

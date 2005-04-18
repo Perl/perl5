@@ -3293,7 +3293,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 			GV *gv = cGVOPx_gv(curop);
 			if (gv == PL_defgv || (int)SvCUR(gv) == PL_generation)
 			    break;
-			SvCUR(gv) = PL_generation;
+			SvCUR_set(gv, PL_generation);
 		    }
 		    else if (curop->op_type == OP_PADSV ||
 			     curop->op_type == OP_PADAV ||
@@ -3303,8 +3303,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 			if (PAD_COMPNAME_GEN(curop->op_targ)
 						    == (STRLEN)PL_generation)
 			    break;
-			PAD_COMPNAME_GEN(curop->op_targ)
-			    				= PL_generation;
+			PAD_COMPNAME_GEN_set(curop->op_targ, PL_generation);
 
 		    }
 		    else if (curop->op_type == OP_RV2CV)
@@ -3326,7 +3325,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 #endif
 			    if (gv == PL_defgv || (int)SvCUR(gv) == PL_generation)
 				break;
-			    SvCUR(gv) = PL_generation;
+			    SvCUR_set(gv, PL_generation);
 			}
 		    }
 		    else
@@ -5884,7 +5883,7 @@ Perl_ck_require(pTHX_ OP *o)
 		if (*s == ':' && s[1] == ':') {
 		    *s = '/';
 		    Move(s+2, s+1, strlen(s+2)+1, char);
-		    --SvCUR(kid->op_sv);
+		    SvCUR_set(kid->op_sv, SvCUR(kid->op_sv) - 1);
 		}
 	    }
 	    if (SvREADONLY(kid->op_sv)) {

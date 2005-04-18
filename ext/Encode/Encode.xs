@@ -524,7 +524,7 @@ CODE:
     }
     sv_catsv(dst, encode_method(aTHX_ enc, enc->t_utf8, src, check,
 				&offset, term, &code));
-    SvIVX(off) = (IV)offset;
+    SvIV_set(off, (IV)offset);
     if (code == ENCODE_FOUND_TERM) {
 	ST(0) = &PL_sv_yes;
     }else{

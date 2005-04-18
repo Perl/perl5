@@ -170,7 +170,7 @@ S_save_scalar_at(pTHX_ SV **sptr)
 	       (SVp_NOK|SVp_POK)) >> PRIVSHIFT;
 	    PL_tainted = oldtainted;
 	}
-	SvMAGIC(sv) = SvMAGIC(osv);
+	SvMAGIC_set(sv, SvMAGIC(osv));
 	/* if it's a special scalar or if it has no 'set' magic,
 	 * propagate the SvREADONLY flag. --rgs 20030922 */
 	for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
@@ -265,7 +265,7 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
 {
     SSGROW(6);
     SSPUSHIV((IV)SvLEN(gv));
-    SvLEN(gv) = 0; /* forget that anything was allocated here */
+    SvLEN_set(gv, 0); /* forget that anything was allocated here */
     SSPUSHIV((IV)SvCUR(gv));
     SSPUSHPTR(SvPVX(gv));
     SvPOK_off(gv);
@@ -314,10 +314,10 @@ Perl_save_ary(pTHX_ GV *gv)
     GvAV(gv) = Null(AV*);
     av = GvAVn(gv);
     if (SvMAGIC(oav)) {
-	SvMAGIC(av) = SvMAGIC(oav);
+	SvMAGIC_set(av, SvMAGIC(oav));
 	SvFLAGS((SV*)av) |= SvMAGICAL(oav);
 	SvMAGICAL_off(oav);
-	SvMAGIC(oav) = 0;
+	SvMAGIC_set(oav, NULL);
 	PL_localizing = 1;
 	SvSETMAGIC((SV*)av);
 	PL_localizing = 0;
@@ -338,10 +338,10 @@ Perl_save_hash(pTHX_ GV *gv)
     GvHV(gv) = Null(HV*);
     hv = GvHVn(gv);
     if (SvMAGIC(ohv)) {
-	SvMAGIC(hv) = SvMAGIC(ohv);
+	SvMAGIC_set(hv, SvMAGIC(ohv));
 	SvFLAGS((SV*)hv) |= SvMAGICAL(ohv);
 	SvMAGICAL_off(ohv);
-	SvMAGIC(ohv) = 0;
+	SvMAGIC_set(ohv, NULL);
 	PL_localizing = 1;
 	SvSETMAGIC((SV*)hv);
 	PL_localizing = 0;
@@ -725,10 +725,10 @@ Perl_leave_scope(pTHX_ I32 base)
 		SvTYPE(sv) != SVt_PVGV)
 	    {
 		(void)SvUPGRADE(value, SvTYPE(sv));
-		SvMAGIC(value) = SvMAGIC(sv);
+		SvMAGIC_set(value, SvMAGIC(sv));
 		SvFLAGS(value) |= SvMAGICAL(sv);
 		SvMAGICAL_off(sv);
-		SvMAGIC(sv) = 0;
+		SvMAGIC_set(sv, 0);
 	    }
 	    /* XXX This branch is pretty bogus.  This code irretrievably
 	     * clears(!) the magic on the SV (either to avoid further
@@ -743,7 +743,7 @@ Perl_leave_scope(pTHX_ I32 base)
 		SvMAGICAL_off(value);
 		/* XXX this is a leak when we get here because the
 		 * mg_get() in save_scalar_at() croaked */
-		SvMAGIC(value) = 0;
+		SvMAGIC_set(value, NULL);
 	    }
 	    *(SV**)ptr = value;
 	    SvREFCNT_dec(sv);
@@ -759,10 +759,10 @@ Perl_leave_scope(pTHX_ I32 base)
 	    gv = (GV*)SSPOPPTR;
 	    if (GvAV(gv)) {
 		AV * const goner = GvAV(gv);
-		SvMAGIC(av) = SvMAGIC(goner);
+		SvMAGIC_set(av, SvMAGIC(goner));
 		SvFLAGS((SV*)av) |= SvMAGICAL(goner);
 		SvMAGICAL_off(goner);
-		SvMAGIC(goner) = 0;
+		SvMAGIC_set(goner, NULL);
 		SvREFCNT_dec(goner);
 	    }
 	    GvAV(gv) = av;
@@ -777,10 +777,10 @@ Perl_leave_scope(pTHX_ I32 base)
 	    gv = (GV*)SSPOPPTR;
 	    if (GvHV(gv)) {
 		HV * const goner = GvHV(gv);
-		SvMAGIC(hv) = SvMAGIC(goner);
+		SvMAGIC_set(hv, SvMAGIC(goner));
 		SvFLAGS(hv) |= SvMAGICAL(goner);
 		SvMAGICAL_off(goner);
-		SvMAGIC(goner) = 0;
+		SvMAGIC_set(goner, NULL);
 		SvREFCNT_dec(goner);
 	    }
 	    GvHV(gv) = hv;
@@ -846,8 +846,8 @@ Perl_leave_scope(pTHX_ I32 base)
 		Safefree(SvPVX(gv));
 	    }
 	    SvPV_set(gv, (char *)SSPOPPTR);
-	    SvCUR(gv) = (STRLEN)SSPOPIV;
-	    SvLEN(gv) = (STRLEN)SSPOPIV;
+	    SvCUR_set(gv, (STRLEN)SSPOPIV);
+	    SvLEN_set(gv, (STRLEN)SSPOPIV);
 	    gp_free(gv);
 	    GvGP(gv) = (GP*)ptr;
 	    if (GvCVu(gv))

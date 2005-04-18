@@ -337,7 +337,7 @@ Perl_pad_add_name(pTHX_ const char *name, HV* typestash, HV* ourstash, bool fake
 
     if (typestash) {
 	SvFLAGS(namesv) |= SVpad_TYPED;
-	SvSTASH(namesv) = (HV*)SvREFCNT_inc((SV*) typestash);
+	SvSTASH_set(namesv, (HV*)SvREFCNT_inc((SV*) typestash));
     }
     if (ourstash) {
 	SvFLAGS(namesv) |= SVpad_OUR;

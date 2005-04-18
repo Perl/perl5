@@ -417,7 +417,7 @@ Perl_mg_free(pTHX_ SV *sv)
 	    SvREFCNT_dec(mg->mg_obj);
 	Safefree(mg);
     }
-    SvMAGIC(sv) = 0;
+    SvMAGIC_set(sv, NULL);
     return 0;
 }
 
@@ -777,11 +777,11 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 			    MAGIC* mg = SvMAGIC(sv);
 			    MAGIC* mgt;
 			    PL_tainted = 1;
-			    SvMAGIC(sv) = mg->mg_moremagic;
+			    SvMAGIC_set(sv, mg->mg_moremagic);
 			    SvTAINT(sv);
 			    if ((mgt = SvMAGIC(sv))) {
 				mg->mg_moremagic = mgt;
-				SvMAGIC(sv) = mg;
+				SvMAGIC_set(sv, mg);
 			    }
 			} else
 			    SvTAINTED_off(sv);
@@ -1980,7 +1980,7 @@ Perl_magic_killbackrefs(pTHX_ SV *sv, MAGIC *mg)
 	    if (!SvWEAKREF(svp[i]))
 		Perl_croak(aTHX_ "panic: magic_killbackrefs");
 	    /* XXX Should we check that it hasn't changed? */
-	    SvRV(svp[i]) = 0;
+	    SvRV_set(svp[i], 0);
 	    SvOK_off(svp[i]);
 	    SvWEAKREF_off(svp[i]);
 	    svp[i] = Nullsv;

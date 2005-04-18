@@ -1599,7 +1599,7 @@ Perl_do_readline(pTHX)
 		tmps = SvEND(sv) - 1;
 		if (*tmps == *SvPVX(PL_rs)) {
 		    *tmps = '\0';
-		    SvCUR(sv)--;
+		    SvCUR_set(sv, SvCUR(sv) - 1);
 		}
 	    }
 	    for (tmps = SvPVX(sv); *tmps; tmps++)
@@ -2935,17 +2935,18 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
 	else if (SvTYPE(sv) >= SVt_PV) {
 	    SvOOK_off(sv);
 	    Safefree(SvPVX(sv));
-	    SvLEN(sv) = SvCUR(sv) = 0;
+            SvLEN_set(sv, 0);
+	    SvCUR_set(sv, 0);
 	}
 	switch (to_what) {
 	case OPpDEREF_SV:
-	    SvRV(sv) = NEWSV(355,0);
+	    SvRV_set(sv, NEWSV(355,0));
 	    break;
 	case OPpDEREF_AV:
-	    SvRV(sv) = (SV*)newAV();
+	    SvRV_set(sv, (SV*)newAV());
 	    break;
 	case OPpDEREF_HV:
-	    SvRV(sv) = (SV*)newHV();
+	    SvRV_set(sv, (SV*)newHV());
 	    break;
 	}
 	SvROK_on(sv);

@@ -708,7 +708,7 @@ STMT_START {					\
     if (utf8) gl *= UTF8_EXPAND;		\
     if ((cur) + gl >= (start) + SvLEN(cat)) {	\
         *cur = '\0';				\
-        SvCUR(cat) = (cur) - (start);		\
+        SvCUR_set((cat), (cur) - (start));	\
 	(start) = sv_exp_grow(aTHX_ cat, gl);	\
 	(cur) = (start) + SvCUR(cat);		\
     }						\
@@ -2444,7 +2444,7 @@ marked_upgrade(pTHX_ SV *sv, tempsym_t *sym_ptr) {
 
     if (SvOOK(sv)) {
 	if (SvIVX(sv)) {
-	    SvLEN(sv)  += SvIVX(sv);
+	    SvLEN_set(sv, SvLEN(sv) + SvIVX(sv));
 	    from_start -= SvIVX(sv);
 	    SvIV_set(sv, 0);
 	}
@@ -2453,8 +2453,8 @@ marked_upgrade(pTHX_ SV *sv, tempsym_t *sym_ptr) {
     if (SvLEN(sv) != 0)
 	Safefree(from_start);
     SvPV_set(sv, to_start);
-    SvCUR(sv) = to_ptr - to_start;
-    SvLEN(sv) = len;
+    SvCUR_set(sv, to_ptr - to_start);
+    SvLEN_set(sv, len);
     SvUTF8_on(sv);
 }
 
@@ -2980,7 +2980,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		  W_utf8:
 		    if (cur > end) {
 			*cur = '\0';
-			SvCUR(cat) = cur - start;
+			SvCUR_set(cat, cur - start);
 
 			GROWING(0, cat, start, cur, len+UTF8_MAXLEN);
 			end = start+SvLEN(cat)-UTF8_MAXLEN;
@@ -2993,7 +2993,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    if (auv >= 0x100) {
 			if (!SvUTF8(cat)) {
 			    *cur = '\0';
-			    SvCUR(cat) = cur - start;
+			    SvCUR_set(cat, cur - start);
 			    marked_upgrade(aTHX_ cat, symptr);
 			    lookahead.flags |= FLAG_DO_UTF8;
 			    lookahead.strbeg = symptr->strbeg;
@@ -3010,7 +3010,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    }
 		    if (cur >= end) {
 			*cur = '\0';
-			SvCUR(cat) = cur - start;
+			SvCUR_set(cat, cur - start);
 			GROWING(0, cat, start, cur, len+1);
 			end = start+SvLEN(cat)-1;
 		    }
@@ -3045,7 +3045,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 					       0 : UNICODE_ALLOW_ANY);
 		    if (cur+(endb-buffer)*UTF8_EXPAND >= end) {
 			*cur = '\0';
-			SvCUR(cat) = cur - start;
+			SvCUR_set(cat, cur - start);
 			GROWING(0, cat, start, cur,
 				len+(endb-buffer)*UTF8_EXPAND);
 			end = start+SvLEN(cat);
@@ -3054,7 +3054,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		} else {
 		    if (cur >= end) {
 			*cur = '\0';
-			SvCUR(cat) = cur - start;
+			SvCUR_set(cat, cur - start);
 			GROWING(0, cat, start, cur, len+UTF8_MAXLEN);
 			end = start+SvLEN(cat)-UTF8_MAXLEN;
 		    }
@@ -3287,7 +3287,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 
 		if (anv < 0) {
 		    *cur = '\0';
-		    SvCUR(cat) = cur - start;
+		    SvCUR_set(cat, cur - start);
 		    Perl_croak(aTHX_ "Cannot compress negative numbers in pack");
 		}
 
@@ -3533,7 +3533,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    if (!uni_to_bytes(aTHX_ &aptr, aend, buffer, todo,
 				      'u' | TYPE_IS_PACK)) {
 			*cur = '\0';
-			SvCUR(cat) = cur - start;
+			SvCUR_set(cat, cur - start);
 			Perl_croak(aTHX_ "Assertion: string is shorter than advertised");
 		    }
 		    end = doencodes(hunk, buffer, todo);
@@ -3548,7 +3548,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	}
 	}
 	*cur = '\0';
-	SvCUR(cat) = cur - start;
+	SvCUR_set(cat, cur - start);
       no_change:
 	*symptr = lookahead;
     }

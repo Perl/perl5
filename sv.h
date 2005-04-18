@@ -734,23 +734,30 @@ in gv.h: */
 #define SvREPADTMP_off(sv)	(SvFLAGS(sv) &= ~SVf_FAKE)
 #endif
 
+#ifdef PERL_DEBUG_COW
+#define SvRV(sv) (0 + ((XRV*)  SvANY(sv))->xrv_rv)
+#else
 #define SvRV(sv) ((XRV*)  SvANY(sv))->xrv_rv
+#endif
 #define SvRVx(sv) SvRV(sv)
 
 #ifdef PERL_DEBUG_COW
 #define SvIVX(sv) (0 + ((XPVIV*)  SvANY(sv))->xiv_iv)
-#define SvUVX(sv) (0 + (XPVUV*)  SvANY(sv))->xuv_uv
-#define SvNVX(sv) (0.0 + ((XPVNV*)SvANY(sv))->xnv_nv)
+#define SvUVX(sv) (0 + ((XPVUV*)  SvANY(sv))->xuv_uv)
+#define SvNVX(sv) (0 + ((XPVNV*)SvANY(sv))->xnv_nv)
 #define SvPVX(sv) (0 + ((XPV*)  SvANY(sv))->xpv_pv)
+#define SvCUR(sv) (0 + ((XPV*)  SvANY(sv))->xpv_cur)
+#define SvLEN(sv) (0 + ((XPV*)  SvANY(sv))->xpv_len)
+#define SvEND(sv) (0 + (((XPV*)  SvANY(sv))->xpv_pv + ((XPV*)SvANY(sv))->xpv_cur))
 #else
 #define SvIVX(sv) ((XPVIV*)  SvANY(sv))->xiv_iv
 #define SvUVX(sv) ((XPVUV*)  SvANY(sv))->xuv_uv
 #define SvNVX(sv) ((XPVNV*)SvANY(sv))->xnv_nv
-#define SvPVX(sv) ((XPV*)  SvANY(sv))->xpv_pv
-#endif
+#define SvPVX(sv)  ((XPV*)  SvANY(sv))->xpv_pv
 #define SvCUR(sv) ((XPV*)  SvANY(sv))->xpv_cur
 #define SvLEN(sv) ((XPV*)  SvANY(sv))->xpv_len
 #define SvEND(sv)(((XPV*)  SvANY(sv))->xpv_pv + ((XPV*)SvANY(sv))->xpv_cur)
+#endif
 
 #define SvIVXx(sv) SvIVX(sv)
 #define SvUVXx(sv) SvUVX(sv)
@@ -785,15 +792,21 @@ in gv.h: */
 #define SvUV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) == SVt_IV || SvTYPE(sv) >= SVt_PVIV); \
 		(((XPVUV*)SvANY(sv))->xuv_uv = (val)); } STMT_END
+#define SvRV_set(sv, val) \
+        STMT_START { assert(SvTYPE(sv) >=  SVt_RV); \
+                (((XRV*)SvANY(sv))->xrv_rv = (val)); } STMT_END
+#define SvMAGIC_set(sv, val) \
+        STMT_START { assert(SvTYPE(sv) >= SVt_PVMG); \
+                (((XPVMG*)SvANY(sv))->xmg_magic = (val)); } STMT_END
+#define SvSTASH_set(sv, val) \
+        STMT_START { assert(SvTYPE(sv) >= SVt_PVMG); \
+                (((XPVMG*)  SvANY(sv))->xmg_stash = (val)); } STMT_END
 #define SvCUR_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
-		(SvCUR(sv) = (val)); } STMT_END
+		(((XPV*)  SvANY(sv))->xpv_cur = (val)); } STMT_END
 #define SvLEN_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
-		(SvLEN(sv) = (val)); } STMT_END
-#define SvEND_set(sv, val) \
-	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
-		(SvCUR(sv) = (val) - SvPVX(sv)); } STMT_END
+		(((XPV*)  SvANY(sv))->xpv_len = (val)); } STMT_END
 
 #define SvPV_renew(sv,n) \
 	STMT_START { SvLEN_set(sv, n); \
