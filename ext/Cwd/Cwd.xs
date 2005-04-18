@@ -70,9 +70,7 @@ static char *rcsid = "$OpenBSD: realpath.c,v 1.4 1998/05/18 09:55:19 deraadt Exp
  */
 static
 char *
-bsd_realpath(path, resolved)
-	const char *path;
-	char *resolved;
+bsd_realpath(const char *path, char *resolved)
 {
 #ifdef VMS
        dTHX;
@@ -270,7 +268,7 @@ int Perl_getcwd_sv(pTHX_ register SV *sv)
     }
 
 #else
-
+  {
     Stat_t statbuf;
     int orig_cdev, orig_cino, cdev, cino, odev, oino, tdev, tino;
     int namelen, pathlen=0;
@@ -382,6 +380,7 @@ int Perl_getcwd_sv(pTHX_ register SV *sv)
     }
 
     return TRUE;
+  }
 #endif
 
 #else
@@ -419,7 +418,7 @@ PPCODE:
     char *path;
     char buf[MAXPATHLEN];
 
-    path = pathsv ? SvPV_nolen(pathsv) : ".";
+    path = pathsv ? SvPV_nolen(pathsv) : (char *)".";
 
     if (bsd_realpath(path, buf)) {
         sv_setpvn(TARG, buf, strlen(buf));

@@ -18,7 +18,7 @@ use lib File::Spec->catdir('t', 'lib');
 use Test::More;
 require VMS::Filespec if $^O eq 'VMS';
 
-my $tests = 28;
+my $tests = 29;
 # _perl_abs_path() currently only works when the directory separator
 # is '/', so don't test it when it won't work.
 my $EXTRA_ABSPATH_TESTS = ($Config{prefix} =~ m/\//) && $^O ne 'cygwin';
@@ -39,6 +39,13 @@ ok( !defined(&chdir),           'chdir() not exported by default' );
 ok( !defined(&abs_path),        '  nor abs_path()' );
 ok( !defined(&fast_abs_path),   '  nor fast_abs_path()');
 
+{
+  my @fields = qw(PATH IFS CDPATH ENV BASH_ENV);
+  my $before = grep exists $ENV{$_}, @fields;
+  cwd();
+  my $after = grep exists $ENV{$_}, @fields;
+  is($before, $after, "cwd() shouldn't create spurious entries in %ENV");
+}
 
 # XXX force Cwd to bootsrap its XSUBs since we have set @INC = "../lib"
 # XXX and subsequent chdir()s can make them impossible to find
