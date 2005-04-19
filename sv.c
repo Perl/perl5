@@ -10775,6 +10775,13 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 		      PL_watch_pvx, SvPVX(sstr));
 #endif
 
+    /* don't clone objects whose class has asked us not to */
+    if (SvOBJECT(sstr) && ! (SvFLAGS(SvSTASH(sstr)) & SVphv_CLONEABLE)) {
+	SvFLAGS(dstr) &= ~SVTYPEMASK;
+	SvOBJECT_off(dstr);
+	return dstr;
+    }
+
     switch (SvTYPE(sstr)) {
     case SVt_NULL:
 	SvANY(dstr)	= NULL;
@@ -11490,6 +11497,40 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
     return nss;
 }
 
+
+/* if sv is a stash, call $class->CLONE_SKIP(), and set the SVphv_CLONEABLE
+ * flag to the result. This is done for each stash before cloning starts,
+ * so we know which stashes want their objects cloned */
+
+static void
+do_mark_cloneable_stash(pTHX_ SV *sv)
+{
+    if (HvNAME((HV*)sv)) {
+	GV* cloner = gv_fetchmethod_autoload((HV*)sv, "CLONE_SKIP", 0);
+	SvFLAGS(sv) |= SVphv_CLONEABLE; /* clone objects by default */
+	if (cloner && GvCV(cloner)) {
+	    dSP;
+	    UV status;
+
+	    ENTER;
+	    SAVETMPS;
+	    PUSHMARK(SP);
+	    XPUSHs(sv_2mortal(newSVpv(HvNAME((HV*)sv), 0)));
+	    PUTBACK;
+	    call_sv((SV*)GvCV(cloner), G_SCALAR);
+	    SPAGAIN;
+	    status = POPu;
+	    PUTBACK;
+	    FREETMPS;
+	    LEAVE;
+	    if (status)
+		SvFLAGS(sv) &= ~SVphv_CLONEABLE;
+	}
+    }
+}
+
+
+
 /*
 =for apidoc perl_clone
 
@@ -11571,6 +11612,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     CLONE_PARAMS* param = &clone_params;
 
     PerlInterpreter *my_perl = (PerlInterpreter*)(*ipM->pMalloc)(ipM, sizeof(PerlInterpreter));
+    /* for each stash, determine whether its objects should be cloned */
+    S_visit(proto_perl, do_mark_cloneable_stash, SVt_PVHV, SVTYPEMASK);
     PERL_SET_THX(my_perl);
 
 #  ifdef DEBUGGING
@@ -11603,9 +11646,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     CLONE_PARAMS clone_params;
     CLONE_PARAMS* param = &clone_params;
     PerlInterpreter *my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
+    /* for each stash, determine whether its objects should be cloned */
+    S_visit(proto_perl, do_mark_cloneable_stash, SVt_PVHV, SVTYPEMASK);
     PERL_SET_THX(my_perl);
-
-
 
 #    ifdef DEBUGGING
     Poison(my_perl, 1, PerlInterpreter);
@@ -12314,7 +12357,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	    ENTER;
 	    SAVETMPS;
 	    PUSHMARK(SP);
-           XPUSHs(sv_2mortal(newSVpv(HvNAME(stash), 0)));
+	    XPUSHs(sv_2mortal(newSVpv(HvNAME(stash), 0)));
 	    PUTBACK;
 	    call_sv((SV*)GvCV(cloner), G_DISCARD);
 	    FREETMPS;

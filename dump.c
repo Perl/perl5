@@ -1136,7 +1136,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     if (flags & SVp_IOK)	sv_catpv(d, "pIOK,");
     if (flags & SVp_NOK)	sv_catpv(d, "pNOK,");
     if (flags & SVp_POK)	sv_catpv(d, "pPOK,");
-    if (flags & SVp_SCREAM)	sv_catpv(d, "SCREAM,");
+    if (flags & SVp_SCREAM && type != SVt_PVHV)
+				sv_catpv(d, "SCREAM,");
 
     switch (type) {
     case SVt_PVCV:
@@ -1159,6 +1160,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (HvLAZYDEL(sv))	sv_catpv(d, "LAZYDEL,");
 	if (HvHASKFLAGS(sv))	sv_catpv(d, "HASKFLAGS,");
 	if (HvREHASH(sv))	sv_catpv(d, "REHASH,");
+	if (flags & SVphv_CLONEABLE) sv_catpv(d, "CLONEABLE,");
 	break;
     case SVt_PVGV: case SVt_PVLV:
 	if (GvINTRO(sv))	sv_catpv(d, "INTRO,");
