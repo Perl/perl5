@@ -3611,7 +3611,9 @@ struct perl_debug_pad {
 };
 
 #define PERL_DEBUG_PAD(i)	&(PL_debug_pad.pad[i])
-#define PERL_DEBUG_PAD_ZERO(i)	(SvPVX(PERL_DEBUG_PAD(i))[0] = 0, SvCUR_set(PERL_DEBUG_PAD(i), 0), PERL_DEBUG_PAD(i))
+#define PERL_DEBUG_PAD_ZERO(i)	(SvPVX(PERL_DEBUG_PAD(i))[0] = 0, \
+	(((XPV*) SvANY(PERL_DEBUG_PAD(i)))->xpv_cur = 0), \
+	PERL_DEBUG_PAD(i))
 
 /* Enable variables which are pointers to functions */
 typedef void (CPERLscope(*peep_t))(pTHX_ OP* o);
