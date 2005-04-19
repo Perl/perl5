@@ -742,21 +742,39 @@ in gv.h: */
 #define SvRVx(sv) SvRV(sv)
 
 #ifdef PERL_DEBUG_COW
-#define SvIVX(sv) (0 + ((XPVIV*)  SvANY(sv))->xiv_iv)
-#define SvUVX(sv) (0 + ((XPVUV*)  SvANY(sv))->xuv_uv)
-#define SvNVX(sv) (0 + ((XPVNV*)SvANY(sv))->xnv_nv)
-#define SvPVX(sv) (0 + ((XPV*)  SvANY(sv))->xpv_pv)
-#define SvCUR(sv) (0 + ((XPV*)  SvANY(sv))->xpv_cur)
-#define SvLEN(sv) (0 + ((XPV*)  SvANY(sv))->xpv_len)
-#define SvEND(sv) (0 + (((XPV*)  SvANY(sv))->xpv_pv + ((XPV*)SvANY(sv))->xpv_cur))
+#define SvIVX(sv) (0 + ((XPVIV*) SvANY(sv))->xiv_iv)
+#define SvUVX(sv) (0 + ((XPVUV*) SvANY(sv))->xuv_uv)
+#define SvNVX(sv) (0 + ((XPVNV*) SvANY(sv))->xnv_nv)
+#define SvPVX(sv) (0 + ((XPV*) SvANY(sv))->xpv_pv)
+#define SvCUR(sv) (0 + ((XPV*) SvANY(sv))->xpv_cur)
+#define SvLEN(sv) (0 + ((XPV*) SvANY(sv))->xpv_len)
+#define SvEND(sv) (((XPV*)  SvANY(sv))->xpv_pv + ((XPV*)SvANY(sv))->xpv_cur)
+
+#ifdef PERL_IN_SV_C
+/* Can't make this RVALUE because of Perl_sv_unmagic.  */
+#define SvMAGIC(sv)	(*(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_magic))
 #else
-#define SvIVX(sv) ((XPVIV*)  SvANY(sv))->xiv_iv
-#define SvUVX(sv) ((XPVUV*)  SvANY(sv))->xuv_uv
-#define SvNVX(sv) ((XPVNV*)SvANY(sv))->xnv_nv
-#define SvPVX(sv)  ((XPV*)  SvANY(sv))->xpv_pv
-#define SvCUR(sv) ((XPV*)  SvANY(sv))->xpv_cur
-#define SvLEN(sv) ((XPV*)  SvANY(sv))->xpv_len
-#define SvEND(sv)(((XPV*)  SvANY(sv))->xpv_pv + ((XPV*)SvANY(sv))->xpv_cur)
+#define SvMAGIC(sv)	(0 + *(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_magic))
+#endif
+#define SvSTASH(sv)	(0 + *(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_stash))
+
+#else
+#define SvIVX(sv) ((XPVIV*) SvANY(sv))->xiv_iv
+#define SvUVX(sv) ((XPVUV*) SvANY(sv))->xuv_uv
+#define SvNVX(sv) ((XPVNV*) SvANY(sv))->xnv_nv
+#define SvPVX(sv) ((XPV*) SvANY(sv))->xpv_pv
+#define SvCUR(sv) ((XPV*) SvANY(sv))->xpv_cur
+#define SvLEN(sv) ((XPV*) SvANY(sv))->xpv_len
+#define SvEND(sv) (((XPV*) SvANY(sv))->xpv_pv + ((XPV*)SvANY(sv))->xpv_cur)
+
+#ifdef DEBUGGING
+#define SvMAGIC(sv)	(*(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_magic))
+#define SvSTASH(sv)	(*(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_stash))
+#else
+#define SvMAGIC(sv)	((XPVMG*)  SvANY(sv))->xmg_magic
+#define SvSTASH(sv)	((XPVMG*)  SvANY(sv))->xmg_stash
+#endif
+
 #endif
 
 #define SvIVXx(sv) SvIVX(sv)
@@ -766,13 +784,6 @@ in gv.h: */
 #define SvLENx(sv) SvLEN(sv)
 #define SvENDx(sv) ((PL_Sv = (sv)), SvEND(PL_Sv))
 
-#ifdef DEBUGGING
-#define SvMAGIC(sv)	(*(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_magic))
-#define SvSTASH(sv)	(*(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_stash))
-#else
-#define SvMAGIC(sv)	((XPVMG*)  SvANY(sv))->xmg_magic
-#define SvSTASH(sv)	((XPVMG*)  SvANY(sv))->xmg_stash
-#endif
 
 /* Ask a scalar nicely to try to become an IV, if possible.
    Not guaranteed to stay returning void */
