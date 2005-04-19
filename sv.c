@@ -1777,13 +1777,13 @@ bool
 Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 {
 
-    char*	pv = NULL;
-    U32		cur = 0;
-    U32		len = 0;
-    IV		iv = 0;
-    NV		nv = 0.0;
-    MAGIC*	magic = NULL;
-    HV*		stash = Nullhv;
+    char*	pv;
+    U32		cur;
+    U32		len;
+    IV		iv;
+    NV		nv;
+    MAGIC*	magic;
+    HV*		stash;
 
     if (mt != SVt_PV && SvIsCOW(sv)) {
 	sv_force_normal_flags(sv, 0);
@@ -1795,61 +1795,39 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     if (mt < SVt_PVIV)
 	(void)SvOOK_off(sv);
 
+    pv = NULL;
+    cur = 0;
+    len = 0;
+    iv = 0;
+    nv = 0.0;
+    magic = NULL;
+    stash = Nullhv;
+
     switch (SvTYPE(sv)) {
     case SVt_NULL:
-	pv	= 0;
-	cur	= 0;
-	len	= 0;
-	iv	= 0;
-	nv	= 0.0;
-	magic	= 0;
-	stash	= 0;
 	break;
     case SVt_IV:
-	pv	= 0;
-	cur	= 0;
-	len	= 0;
 	iv	= SvIVX(sv);
-	nv	= (NV)SvIVX(sv);
 	del_XIV(SvANY(sv));
-	magic	= 0;
-	stash	= 0;
 	if (mt == SVt_NV)
 	    mt = SVt_PVNV;
 	else if (mt < SVt_PVIV)
 	    mt = SVt_PVIV;
 	break;
     case SVt_NV:
-	pv	= 0;
-	cur	= 0;
-	len	= 0;
 	nv	= SvNVX(sv);
-	iv	= I_V(nv);
-	magic	= 0;
-	stash	= 0;
 	del_XNV(SvANY(sv));
-	SvANY(sv) = 0;
 	if (mt < SVt_PVNV)
 	    mt = SVt_PVNV;
 	break;
     case SVt_RV:
 	pv	= (char*)SvRV(sv);
-	cur	= 0;
-	len	= 0;
-	iv	= PTR2IV(pv);
-	nv	= PTR2NV(pv);
 	del_XRV(SvANY(sv));
-	magic	= 0;
-	stash	= 0;
 	break;
     case SVt_PV:
 	pv	= SvPVX(sv);
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
-	iv	= 0;
-	nv	= 0.0;
-	magic	= 0;
-	stash	= 0;
 	del_XPV(SvANY(sv));
 	if (mt <= SVt_IV)
 	    mt = SVt_PVIV;
@@ -1861,9 +1839,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
 	iv	= SvIVX(sv);
-	nv	= 0.0;
-	magic	= 0;
-	stash	= 0;
 	del_XPVIV(SvANY(sv));
 	break;
     case SVt_PVNV:
@@ -1872,8 +1847,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	len	= SvLEN(sv);
 	iv	= SvIVX(sv);
 	nv	= SvNVX(sv);
-	magic	= 0;
-	stash	= 0;
 	del_XPVNV(SvANY(sv));
 	break;
     case SVt_PVMG:
