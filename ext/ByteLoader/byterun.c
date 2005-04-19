@@ -216,7 +216,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		SvRV_set(bstate->bs_sv, arg);
+		SvRV(bstate->bs_sv) = arg;
 		break;
 	    }
 	  case INSN_XPV:		/* 22 */
@@ -224,32 +224,32 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 		BSET_xpv(bstate->bs_sv);
 		break;
 	    }
-	case INSN_XPV_CUR:		/* 23 */
+	  case INSN_XPV_CUR:		/* 23 */
 	    {
 		STRLEN arg;
 		BGET_PADOFFSET(arg);
-		SvCUR_set(bstate->bs_sv, arg);
+		SvCUR(bstate->bs_sv) = arg;
 		break;
 	    }
 	  case INSN_XPV_LEN:		/* 24 */
 	    {
 		STRLEN arg;
 		BGET_PADOFFSET(arg);
-		SvLEN_set(bstate->bs_sv, arg);
+		SvLEN(bstate->bs_sv) = arg;
 		break;
 	    }
 	  case INSN_XIV:		/* 25 */
 	    {
 		IV arg;
 		BGET_IV(arg);
-		SvIV_set(bstate->bs_sv, arg);
+		SvIVX(bstate->bs_sv) = arg;
 		break;
 	    }
 	  case INSN_XNV:		/* 26 */
 	    {
 		NV arg;
 		BGET_NV(arg);
-		SvNV_set(bstate->bs_sv, arg);
+		SvNVX(bstate->bs_sv) = arg;
 		break;
 	    }
 	  case INSN_XLV_TARGOFF:		/* 27 */
@@ -592,7 +592,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		SvSTASH_set(bstate->bs_sv, arg);
+		*(SV**)&SvSTASH(bstate->bs_sv) = arg;
 		break;
 	    }
 	  case INSN_GV_FETCHPV:		/* 77 */
