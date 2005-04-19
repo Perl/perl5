@@ -1599,3 +1599,14 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 	AvFILLp(padlist) = depth;
     }
 }
+
+
+HV *
+Perl_pad_compname_type(pTHX_ const PADOFFSET po)
+{
+    SV** const av = av_fetch(PL_comppad_name, po, FALSE);
+    if ( SvFLAGS(*av) & SVpad_TYPED ) {
+        return SvSTASH(*av);
+    }
+    return Nullhv;
+}

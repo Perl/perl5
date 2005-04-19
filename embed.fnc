@@ -1367,6 +1367,7 @@ pd 	|void	|do_dump_pad	|I32 level|PerlIO *file \
 pd	|void	|pad_fixup_inner_anons|PADLIST *padlist|CV *old_cv|CV *new_cv
 
 pd	|void	|pad_push	|PADLIST *padlist|int depth
+p	|HV*	|pad_compname_type|PADOFFSET po
 
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
 sd	|PADOFFSET|pad_findlex	|const char *name|const CV* cv|U32 seq|int warn \
