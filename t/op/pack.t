@@ -13,7 +13,7 @@ my $no_endianness = $] > 5.009 ? '' :
 my $no_signedness = $] > 5.009 ? '' :
   "Signed/unsigned pack modifiers not available on this perl";
 
-plan tests => 13855;
+plan tests => 13864;
 
 use strict;
 # use warnings;
@@ -1493,4 +1493,37 @@ like ($@, qr/Not enough arguments for unpack/,
     is(scalar @a, 200,       "[perl #15288]");
     is($a[-1], "01234567\n", "[perl #15288]");
     is($a[-2], "X",          "[perl #15288]");
+}
+
+# checksums
+{
+    # verify that unpack advances correctly wrt a checksum
+    my (@x) = unpack("b10a", "abcd");
+    my (@y) = unpack("%b10a", "abcd");
+    is($x[1], $y[1], "checksum advance ok");
+
+    # verify that the checksum is not overflowed with C0
+    is(unpack("C0%128U", "abcd"), unpack("U0%128U", "abcd"), "checksum not overflowed");
+}
+
+{
+    # U0 and C0 must be scoped
+    my (@x) = unpack("a(U0)U", "b\341\277\274");
+    is($x[0], 'b', 'before scope');
+    is($x[1], 225, 'after scope');
+}
+
+{
+    # counted length prefixes shouldn't change C0/U0 mode
+    # (note the length is actually 0 in this test)
+    is(join(',', unpack("aC/UU",   "b\0\341\277\274")), 'b,225');
+    is(join(',', unpack("aC/CU",   "b\0\341\277\274")), 'b,225');
+    is(join(',', unpack("aU0C/UU", "b\0\341\277\274")), 'b,8188');
+    is(join(',', unpack("aU0C/CU", "b\0\341\277\274")), 'b,8188');
+}
+
+{
+    # "Z0" (bug #34062)
+    my (@x) = unpack("C*", pack("CZ0", 1, "b"));
+    is(join(',', @x), '1', 'pack Z0 doesn\'t destroy the character before');
 }

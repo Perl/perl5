@@ -908,6 +908,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
     const int bits_in_uv = 8 * sizeof(cuv);
     char* strrelbeg = s;
     bool beyond = FALSE;
+    bool explicit_length;
     bool unpack_only_one = (symptr->flags & FLAG_UNPACK_ONLY_ONE) != 0;
 
     while (next_symbol(symptr)) {
@@ -930,6 +931,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    break;
         }
 
+        explicit_length = TRUE;
       redo_switch:
         beyond = s >= strend;
 	{
@@ -991,6 +993,10 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    while (len--) {
   	        symptr->patptr = savsym.grpbeg;
  	        unpack_rec(symptr, ss, strbeg, strend, &ss );
+		if (savsym.flags & FLAG_UNPACK_DO_UTF8)
+		    symptr->flags |=  FLAG_UNPACK_DO_UTF8;
+		else
+		    symptr->flags &= ~FLAG_UNPACK_DO_UTF8;
                 if (ss == strend && savsym.howlen == e_star)
 		    break; /* No way to continue */
 	    }
@@ -1085,7 +1091,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		    len -= 8;
 		}
 		if (len) {
-		    bits = *s;
+		    bits = *s++;
 		    if (datumtype == 'b') {
 			while (len-- > 0) {
 			    if (bits & 1) cuv++;
@@ -1176,14 +1182,18 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	case 'C':
 	unpack_C: /* unpack U will jump here if not UTF-8 */
             if (len == 0) {
-                symptr->flags &= ~FLAG_UNPACK_DO_UTF8;
+                if (explicit_length) 
+                    symptr->flags &= ~FLAG_UNPACK_DO_UTF8;
 		break;
 	    }
 	    if (checksum) {
 	      uchar_checksum:
 		while (len-- > 0) {
 		    auint = *s++ & 255;
-		    cuv += auint;
+		    if (checksum > bits_in_uv)
+			cdouble += (NV)auint;
+		    else
+			cuv += auint;
 		}
 	    }
 	    else {
@@ -1195,7 +1205,8 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    break;
 	case 'U':
 	    if (len == 0) {
-                symptr->flags |= FLAG_UNPACK_DO_UTF8;
+                if (explicit_length) 
+                    symptr->flags |= FLAG_UNPACK_DO_UTF8;
 		break;
 	    }
 	    if ((symptr->flags & FLAG_UNPACK_DO_UTF8) == 0)
@@ -1703,7 +1714,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	if (checksum) {
 	    if (strchr("fFdD", TYPE_NO_MODIFIERS(datumtype)) ||
 	      (checksum > bits_in_uv &&
-	       strchr("csSiIlLnNUvVqQjJ", TYPE_NO_MODIFIERS(datumtype))) ) {
+	       strchr("cCsSiIlLnNUvVqQjJ", TYPE_NO_MODIFIERS(datumtype))) ) {
 		NV trouble;
 
                 adouble = (NV) (1 << (checksum & 15));
@@ -1746,6 +1757,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		Perl_croak(aTHX_ "Code missing after '/' in unpack" );
             }
             datumtype = symptr->code;
+            explicit_length = FALSE;
 	    goto redo_switch;
         }
     }
@@ -2095,7 +2107,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	    }
 	    if ((I32)fromlen >= len) {
 		sv_catpvn(cat, aptr, len);
-		if (datumtype == 'Z')
+		if (datumtype == 'Z' && len > 0)
 		    *(SvEND(cat)-1) = '\0';
 	    }
 	    else {
@@ -2673,8 +2685,8 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	case 'p':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		if (fromstr == &PL_sv_undef)
-		    aptr = NULL;
+		SvGETMAGIC(fromstr);
+		if (!SvOK(fromstr)) aptr = NULL;
 		else {
 		    STRLEN n_a;
 		    /* XXX better yet, could spirit away the string to
@@ -2690,9 +2702,9 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 				"Attempt to pack pointer to temporary value");
 		    }
 		    if (SvPOK(fromstr) || SvNIOK(fromstr))
-			aptr = SvPV(fromstr,n_a);
+			aptr = SvPV_flags(fromstr, n_a, 0);
 		    else
-			aptr = SvPV_force(fromstr,n_a);
+			aptr = SvPV_force_flags(fromstr, n_a, 0);
 		}
 		DO_BO_PACK_P(aptr);
 		sv_catpvn(cat, (char*)&aptr, sizeof(char*));
