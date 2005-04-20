@@ -3789,142 +3789,357 @@ END_EXTERN_C
 START_EXTERN_C
 
 #ifdef DOINIT
-
-EXT MGVTBL PL_vtbl_sv =		{MEMBER_TO_FPTR(Perl_magic_get),
-				MEMBER_TO_FPTR(Perl_magic_set),
-					MEMBER_TO_FPTR(Perl_magic_len),
-						0,	0};
-EXT MGVTBL PL_vtbl_env =	{0,	MEMBER_TO_FPTR(Perl_magic_set_all_env),
-				0,	MEMBER_TO_FPTR(Perl_magic_clear_all_env),
-							0};
-EXT MGVTBL PL_vtbl_envelem =	{0,	MEMBER_TO_FPTR(Perl_magic_setenv),
-					0,	MEMBER_TO_FPTR(Perl_magic_clearenv),
-							0};
-EXT MGVTBL PL_vtbl_sig =	{0,	0,		 0, 0, 0};
-#ifdef PERL_MICRO
-EXT MGVTBL PL_vtbl_sigelem =	{0,	0,		 0, 0, 0};
+#  define MGVTBL_SET(var,a,b,c,d,e,f,g) EXT MGVTBL var = {a,b,c,d,e,f,g};
 #else
-EXT MGVTBL PL_vtbl_sigelem =	{MEMBER_TO_FPTR(Perl_magic_getsig),
-					MEMBER_TO_FPTR(Perl_magic_setsig),
-					0,	MEMBER_TO_FPTR(Perl_magic_clearsig),
-							0};
+#  define MGVTBL_SET(var,a,b,c,d,e,f,g) EXT MGVTBL var;
 #endif
-EXT MGVTBL PL_vtbl_pack =	{0,	0,	
-    				MEMBER_TO_FPTR(Perl_magic_sizepack),	
-				MEMBER_TO_FPTR(Perl_magic_wipepack),
-							0};
-EXT MGVTBL PL_vtbl_packelem =	{MEMBER_TO_FPTR(Perl_magic_getpack),
-					MEMBER_TO_FPTR(Perl_magic_setpack),
-					0,	MEMBER_TO_FPTR(Perl_magic_clearpack),
-							0};
-EXT MGVTBL PL_vtbl_dbline =	{0,	MEMBER_TO_FPTR(Perl_magic_setdbline),
-					0,	0,	0};
-EXT MGVTBL PL_vtbl_isa =	{0,	MEMBER_TO_FPTR(Perl_magic_setisa),
-					0,	MEMBER_TO_FPTR(Perl_magic_setisa),
-							0};
-EXT MGVTBL PL_vtbl_isaelem =	{0,	MEMBER_TO_FPTR(Perl_magic_setisa),
-					0,	0,	0};
-EXT MGVTBL PL_vtbl_arylen =	{MEMBER_TO_FPTR(Perl_magic_getarylen),
-				MEMBER_TO_FPTR(Perl_magic_setarylen),
-					0,	0,	0};
-EXT MGVTBL PL_vtbl_glob =	{MEMBER_TO_FPTR(Perl_magic_getglob),
-				MEMBER_TO_FPTR(Perl_magic_setglob),
-					0,	0,	0};
-EXT MGVTBL PL_vtbl_mglob =	{0,	MEMBER_TO_FPTR(Perl_magic_setmglob),
-					0,	0,	0};
-EXT MGVTBL PL_vtbl_nkeys =	{MEMBER_TO_FPTR(Perl_magic_getnkeys),
-				MEMBER_TO_FPTR(Perl_magic_setnkeys),
-					0,	0,	0};
-EXT MGVTBL PL_vtbl_taint =	{MEMBER_TO_FPTR(Perl_magic_gettaint),
-    					MEMBER_TO_FPTR(Perl_magic_settaint),
-					0,	0,	0};
-EXT MGVTBL PL_vtbl_substr =	{MEMBER_TO_FPTR(Perl_magic_getsubstr),
-    					MEMBER_TO_FPTR(Perl_magic_setsubstr),
-					0,	0,	0};
-EXT MGVTBL PL_vtbl_vec =	{MEMBER_TO_FPTR(Perl_magic_getvec),
-					MEMBER_TO_FPTR(Perl_magic_setvec),
-					0,	0,	0};
-EXT MGVTBL PL_vtbl_pos =	{MEMBER_TO_FPTR(Perl_magic_getpos),
-				MEMBER_TO_FPTR(Perl_magic_setpos),
-					0,	0,	0};
-EXT MGVTBL PL_vtbl_bm =	{0,	MEMBER_TO_FPTR(Perl_magic_setbm),
-					0,	0,	0};
-EXT MGVTBL PL_vtbl_fm =	{0,	MEMBER_TO_FPTR(Perl_magic_setfm),
-					0,	0,	0};
-EXT MGVTBL PL_vtbl_uvar =	{MEMBER_TO_FPTR(Perl_magic_getuvar),
-				MEMBER_TO_FPTR(Perl_magic_setuvar),
-					0,	0,	0};
-EXT MGVTBL PL_vtbl_defelem = {MEMBER_TO_FPTR(Perl_magic_getdefelem),
-    					MEMBER_TO_FPTR(Perl_magic_setdefelem),
-					0,	0,	0};
 
-EXT MGVTBL PL_vtbl_regexp = {0, MEMBER_TO_FPTR(Perl_magic_setregexp),0,0, MEMBER_TO_FPTR(Perl_magic_freeregexp)};
-EXT MGVTBL PL_vtbl_regdata = {0, 0, MEMBER_TO_FPTR(Perl_magic_regdata_cnt), 0, 0};
-EXT MGVTBL PL_vtbl_regdatum = {MEMBER_TO_FPTR(Perl_magic_regdatum_get),
-			       MEMBER_TO_FPTR(Perl_magic_regdatum_set), 0, 0, 0};
+MGVTBL_SET(
+    PL_vtbl_sv,
+    MEMBER_TO_FPTR(Perl_magic_get),
+    MEMBER_TO_FPTR(Perl_magic_set),
+    MEMBER_TO_FPTR(Perl_magic_len),
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
 
+MGVTBL_SET(
+    PL_vtbl_env,
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_set_all_env),
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_clear_all_env),
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_envelem,
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_setenv),
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_clearenv),
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_sig,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_sigelem,
+#ifdef PERL_MICRO
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL
+#else
+    MEMBER_TO_FPTR(Perl_magic_getsig),
+    MEMBER_TO_FPTR(Perl_magic_setsig),
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_clearsig),
+    NULL,
+    NULL,
+    NULL
+#endif
+);
+
+MGVTBL_SET(
+    PL_vtbl_pack,
+    NULL,
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_sizepack),
+    MEMBER_TO_FPTR(Perl_magic_wipepack),
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_packelem,
+    MEMBER_TO_FPTR(Perl_magic_getpack),
+    MEMBER_TO_FPTR(Perl_magic_setpack),
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_clearpack),
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_dbline,
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_setdbline),
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_isa,
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_setisa),
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_setisa),
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_isaelem,
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_setisa),
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_arylen,
+    MEMBER_TO_FPTR(Perl_magic_getarylen),
+    MEMBER_TO_FPTR(Perl_magic_setarylen),
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_glob,
+    MEMBER_TO_FPTR(Perl_magic_getglob),
+    MEMBER_TO_FPTR(Perl_magic_setglob),
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_mglob,
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_setmglob),
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_nkeys,
+    MEMBER_TO_FPTR(Perl_magic_getnkeys),
+    MEMBER_TO_FPTR(Perl_magic_setnkeys),
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_taint,
+    MEMBER_TO_FPTR(Perl_magic_gettaint),
+    MEMBER_TO_FPTR(Perl_magic_settaint),
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_substr,
+    MEMBER_TO_FPTR(Perl_magic_getsubstr),
+    MEMBER_TO_FPTR(Perl_magic_setsubstr),
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_vec,
+    MEMBER_TO_FPTR(Perl_magic_getvec),
+    MEMBER_TO_FPTR(Perl_magic_setvec),
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_pos,
+    MEMBER_TO_FPTR(Perl_magic_getpos),
+    MEMBER_TO_FPTR(Perl_magic_setpos),
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_bm,
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_setbm),
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_fm,
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_setfm),
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_uvar,
+    MEMBER_TO_FPTR(Perl_magic_getuvar),
+    MEMBER_TO_FPTR(Perl_magic_setuvar),
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_defelem,
+    MEMBER_TO_FPTR(Perl_magic_getdefelem),
+    MEMBER_TO_FPTR(Perl_magic_setdefelem),
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_regexp,
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_setregexp),
+    NULL,
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_freeregexp),
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_regdata,
+    NULL,
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_regdata_cnt),
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_regdatum,
+    MEMBER_TO_FPTR(Perl_magic_regdatum_get),
+    MEMBER_TO_FPTR(Perl_magic_regdatum_set),
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_amagic,
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_setamagic),
+    NULL,
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_setamagic),
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_amagicelem,
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_setamagic),
+    NULL,
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_setamagic),
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_backref,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_killbackrefs),
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_ovrld,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_freeovrld),
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_utf8,
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_setutf8),
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
 #ifdef USE_LOCALE_COLLATE
-EXT MGVTBL PL_vtbl_collxfrm = {0,
-				MEMBER_TO_FPTR(Perl_magic_setcollxfrm),
-					0,	0,	0};
+MGVTBL_SET(
+    PL_vtbl_collxfrm,
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_setcollxfrm),
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
 #endif
 
-EXT MGVTBL PL_vtbl_amagic =       {0,     MEMBER_TO_FPTR(Perl_magic_setamagic),
-                                        0,      0,      MEMBER_TO_FPTR(Perl_magic_setamagic)};
-EXT MGVTBL PL_vtbl_amagicelem =   {0,     MEMBER_TO_FPTR(Perl_magic_setamagic),
-                                        0,      0,      MEMBER_TO_FPTR(Perl_magic_setamagic)};
-
-EXT MGVTBL PL_vtbl_backref = 	  {0,	0,
-					0,	0,	MEMBER_TO_FPTR(Perl_magic_killbackrefs)};
-
-EXT MGVTBL PL_vtbl_ovrld   = 	  {0,	0,
-					0,	0,	MEMBER_TO_FPTR(Perl_magic_freeovrld)};
-
-EXT MGVTBL PL_vtbl_utf8 = {0,
-				MEMBER_TO_FPTR(Perl_magic_setutf8),
-					0,	0,	0};
-
-#else /* !DOINIT */
-
-EXT MGVTBL PL_vtbl_sv;
-EXT MGVTBL PL_vtbl_env;
-EXT MGVTBL PL_vtbl_envelem;
-EXT MGVTBL PL_vtbl_sig;
-EXT MGVTBL PL_vtbl_sigelem;
-EXT MGVTBL PL_vtbl_pack;
-EXT MGVTBL PL_vtbl_packelem;
-EXT MGVTBL PL_vtbl_dbline;
-EXT MGVTBL PL_vtbl_isa;
-EXT MGVTBL PL_vtbl_isaelem;
-EXT MGVTBL PL_vtbl_arylen;
-EXT MGVTBL PL_vtbl_glob;
-EXT MGVTBL PL_vtbl_mglob;
-EXT MGVTBL PL_vtbl_nkeys;
-EXT MGVTBL PL_vtbl_taint;
-EXT MGVTBL PL_vtbl_substr;
-EXT MGVTBL PL_vtbl_vec;
-EXT MGVTBL PL_vtbl_pos;
-EXT MGVTBL PL_vtbl_bm;
-EXT MGVTBL PL_vtbl_fm;
-EXT MGVTBL PL_vtbl_uvar;
-EXT MGVTBL PL_vtbl_ovrld;
-
-EXT MGVTBL PL_vtbl_defelem;
-EXT MGVTBL PL_vtbl_regexp;
-EXT MGVTBL PL_vtbl_regdata;
-EXT MGVTBL PL_vtbl_regdatum;
-
-#ifdef USE_LOCALE_COLLATE
-EXT MGVTBL PL_vtbl_collxfrm;
-#endif
-
-EXT MGVTBL PL_vtbl_amagic;
-EXT MGVTBL PL_vtbl_amagicelem;
-
-EXT MGVTBL PL_vtbl_backref;
-EXT MGVTBL PL_vtbl_utf8;
-
-#endif /* !DOINIT */
 
 enum {
   fallback_amg,        abs_amg,
