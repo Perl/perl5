@@ -3789,9 +3789,9 @@ END_EXTERN_C
 START_EXTERN_C
 
 #ifdef DOINIT
-#  define MGVTBL_SET(var,a,b,c,d,e,f,g) EXT MGVTBL var = {a,b,c,d,e,f,g};
+#  define MGVTBL_SET(var,a,b,c,d,e,f,g) EXT MGVTBL var = {a,b,c,d,e,f,g}
 #else
-#  define MGVTBL_SET(var,a,b,c,d,e,f,g) EXT MGVTBL var;
+#  define MGVTBL_SET(var,a,b,c,d,e,f,g) EXT MGVTBL var
 #endif
 
 MGVTBL_SET(
@@ -3838,11 +3838,15 @@ MGVTBL_SET(
     NULL
 );
 
+#ifdef PERL_MICRO
 MGVTBL_SET(
     PL_vtbl_sigelem,
-#ifdef PERL_MICRO
     NULL, NULL, NULL, NULL, NULL, NULL, NULL
+);
+
 #else
+MGVTBL_SET(
+    PL_vtbl_sigelem,
     MEMBER_TO_FPTR(Perl_magic_getsig),
     MEMBER_TO_FPTR(Perl_magic_setsig),
     NULL,
@@ -3850,8 +3854,8 @@ MGVTBL_SET(
     NULL,
     NULL,
     NULL
-#endif
 );
+#endif
 
 MGVTBL_SET(
     PL_vtbl_pack,
