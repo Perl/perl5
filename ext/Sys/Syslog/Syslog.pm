@@ -115,7 +115,7 @@ Note that C<openlog> now takes three arguments, just like C<openlog(3)>.
 =head1 EXAMPLES
 
     openlog($program, 'cons,pid', 'user');
-    syslog('info', 'this is another test');
+    syslog('info', '%s', 'this is another test');
     syslog('mail|warning', 'this is a better test: %d', time);
     closelog();
 
