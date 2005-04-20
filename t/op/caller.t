@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 27 );
+    plan( tests => 31 );
 }
 
 my @c;
@@ -87,3 +87,32 @@ sub testwarn {
     BEGIN { is( ${^WARNING_BITS}, "UUUUUUUUUUUU", 'warning bits on via "use warnings::register"' ) }
     testwarn("UUUUUUUUUUUU","#3");
 }
+
+
+# The next two cases test for a bug where caller ignored evals if
+# the DB::sub glob existed but &DB::sub did not (for example, if 
+# $^P had been set but no debugger has been loaded).  The tests
+# thus assume that there is no &DB::sub: if there is one, they 
+# should both pass  no matter whether or not this bug has been
+# fixed.
+
+my $debugger_test =  q<
+    my @stackinfo = caller(0);
+    return scalar @stackinfo;
+>;
+
+sub pb { return (caller(0))[3] }
+
+my $i = eval $debugger_test;
+is( $i, 10, "do not skip over eval (and caller returns 10 elements)" );
+
+is( eval 'pb()', 'main::pb', "actually return the right function name" );
+
+my $saved_perldb = $^P;
+$^P = 16;
+$^P = $saved_perldb;
+
+$i = eval $debugger_test;
+is( $i, 10, 'do not skip over eval even if $^P had been on at some point' );
+is( eval 'pb()', 'main::pb', 'actually return the right function name even if $^P had been on at some point' );
+

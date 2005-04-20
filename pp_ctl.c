@@ -1567,7 +1567,8 @@ PP(pp_caller)
             }
 	    RETURN;
 	}
-	if (PL_DBsub && cxix >= 0 &&
+	/* caller() should not report the automatic calls to &DB::sub */
+	if (PL_DBsub && GvCV(PL_DBsub) && cxix >= 0 &&
 		ccstack[cxix].blk_sub.cv == GvCV(PL_DBsub))
 	    count++;
 	if (!count--)
@@ -1580,7 +1581,8 @@ PP(pp_caller)
         dbcxix = dopoptosub_at(ccstack, cxix - 1);
 	/* We expect that ccstack[dbcxix] is CXt_SUB, anyway, the
 	   field below is defined for any cx. */
-	if (PL_DBsub && dbcxix >= 0 && ccstack[dbcxix].blk_sub.cv == GvCV(PL_DBsub))
+	/* caller() should not report the automatic calls to &DB::sub */
+	if (PL_DBsub && GvCV(PL_DBsub) && dbcxix >= 0 && ccstack[dbcxix].blk_sub.cv == GvCV(PL_DBsub))
 	    cx = &ccstack[dbcxix];
     }
 
