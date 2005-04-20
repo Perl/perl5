@@ -368,12 +368,12 @@ sv_upgrade	bstate->bs_sv				U8		x
 sv_refcnt	SvREFCNT(bstate->bs_sv)			U32
 sv_refcnt_add	SvREFCNT(bstate->bs_sv)			I32		x
 sv_flags	SvFLAGS(bstate->bs_sv)			U32
-xrv		SvRV(bstate->bs_sv)			svindex
+xrv		bstate->bs_sv				svindex		x
 xpv		bstate->bs_sv				none		x
-xpv_cur		SvCUR(bstate->bs_sv)			STRLEN
-xpv_len		SvLEN(bstate->bs_sv)			STRLEN
-xiv		SvIVX(bstate->bs_sv)			IV
-xnv		SvNVX(bstate->bs_sv)			NV
+xpv_cur		bstate->bs_sv	 			STRLEN		x
+xpv_len		bstate->bs_sv				STRLEN		x
+xiv		bstate->bs_sv				IV		x
+xnv		bstate->bs_sv				NV		x
 xlv_targoff	LvTARGOFF(bstate->bs_sv)		STRLEN
 xlv_targlen	LvTARGLEN(bstate->bs_sv)		STRLEN
 xlv_targ	LvTARG(bstate->bs_sv)			svindex
@@ -422,7 +422,7 @@ mg_private	SvMAGIC(bstate->bs_sv)->mg_private	U16
 mg_flags	SvMAGIC(bstate->bs_sv)->mg_flags	U8
 mg_name		SvMAGIC(bstate->bs_sv)			pvcontents	x
 mg_namex	SvMAGIC(bstate->bs_sv)			svindex		x
-xmg_stash	*(SV**)&SvSTASH(bstate->bs_sv)		svindex
+xmg_stash	bstate->bs_sv				svindex		X
 gv_fetchpv	bstate->bs_sv				strconst	x
 gv_fetchpvx	bstate->bs_sv				strconst	x
 gv_stashpv	bstate->bs_sv				strconst	x
