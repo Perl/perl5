@@ -1881,49 +1881,66 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	SvANY(sv) = new_XRV();
 	SvRV_set(sv, (SV*)pv);
 	break;
-    case SVt_PV:
-	SvANY(sv) = new_XPV();
-	SvPV_set(sv, pv);
-	SvCUR_set(sv, cur);
-	SvLEN_set(sv, len);
-	break;
-    case SVt_PVIV:
-	SvANY(sv) = new_XPVIV();
-	SvPV_set(sv, pv);
-	SvCUR_set(sv, cur);
-	SvLEN_set(sv, len);
-	SvIV_set(sv, iv);
-	if (SvNIOK(sv))
-	    (void)SvIOK_on(sv);
-	SvNOK_off(sv);
-	break;
-    case SVt_PVNV:
-	SvANY(sv) = new_XPVNV();
-	SvPV_set(sv, pv);
-	SvCUR_set(sv, cur);
-	SvLEN_set(sv, len);
-	SvIV_set(sv, iv);
-	SvNV_set(sv, nv);
-	break;
-    case SVt_PVMG:
-	SvANY(sv) = new_XPVMG();
-	SvPV_set(sv, pv);
-	SvCUR_set(sv, cur);
-	SvLEN_set(sv, len);
-	SvIV_set(sv, iv);
-	SvNV_set(sv, nv);
+    case SVt_PVHV:
+	SvANY(sv) = new_XPVHV();
+	HvRITER(sv)	= 0;
+	HvEITER(sv)	= 0;
+	HvPMROOT(sv)	= 0;
+	HvNAME(sv)	= 0;
+	HvFILL(sv)	= 0;
+	HvMAX(sv)	= 0;
+	HvTOTALKEYS(sv)	= 0;
+	HvPLACEHOLDERS(sv) = 0;
+
+	/* Fall through...  */
+	if (0) {
+	case SVt_PVAV:
+	    SvANY(sv) = new_XPVAV();
+	    AvMAX(sv)	= -1;
+	    AvFILLp(sv)	= -1;
+	    AvALLOC(sv)	= 0;
+	    AvARYLEN(sv)= 0;
+	    AvFLAGS(sv)	= AVf_REAL;
+	    SvIV_set(sv, 0);
+	    SvNV_set(sv, 0.0);
+	}
+	/* to here.  */
+	if (pv)
+	    Safefree(pv);
+	SvPV_set(sv, (char*)0);
 	SvMAGIC_set(sv, magic);
 	SvSTASH_set(sv, stash);
 	break;
+
+    case SVt_PVIO:
+	SvANY(sv) = new_XPVIO();
+	Zero(SvANY(sv), 1, XPVIO);
+	IoPAGE_LEN(sv)	= 60;
+	goto set_magic_common;
+    case SVt_PVFM:
+	SvANY(sv) = new_XPVFM();
+	Zero(SvANY(sv), 1, XPVFM);
+	goto set_magic_common;
+    case SVt_PVBM:
+	SvANY(sv) = new_XPVBM();
+	BmRARE(sv)	= 0;
+	BmUSEFUL(sv)	= 0;
+	BmPREVIOUS(sv)	= 0;
+	goto set_magic_common;
+    case SVt_PVGV:
+	SvANY(sv) = new_XPVGV();
+	GvGP(sv)	= 0;
+	GvNAME(sv)	= 0;
+	GvNAMELEN(sv)	= 0;
+	GvSTASH(sv)	= 0;
+	GvFLAGS(sv)	= 0;
+	goto set_magic_common;
+    case SVt_PVCV:
+	SvANY(sv) = new_XPVCV();
+	Zero(SvANY(sv), 1, XPVCV);
+	goto set_magic_common;
     case SVt_PVLV:
 	SvANY(sv) = new_XPVLV();
-	SvPV_set(sv, pv);
-	SvCUR_set(sv, cur);
-	SvLEN_set(sv, len);
-	SvIV_set(sv, iv);
-	SvNV_set(sv, nv);
-	SvMAGIC_set(sv, magic);
-	SvSTASH_set(sv, stash);
 	LvTARGOFF(sv)	= 0;
 	LvTARGLEN(sv)	= 0;
 	LvTARG(sv)	= 0;
@@ -1933,99 +1950,37 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	GvNAMELEN(sv)	= 0;
 	GvSTASH(sv)	= 0;
 	GvFLAGS(sv)	= 0;
-	break;
-    case SVt_PVAV:
-	SvANY(sv) = new_XPVAV();
-	if (pv)
-	    Safefree(pv);
-	SvPV_set(sv, (char*)0);
-	AvMAX(sv)	= -1;
-	AvFILLp(sv)	= -1;
-	SvIV_set(sv, 0);
-	SvNV_set(sv, 0.0);
+	/* Fall through.  */
+	if (0) {
+	case SVt_PVMG:
+	    SvANY(sv) = new_XPVMG();
+	}
+    set_magic_common:
 	SvMAGIC_set(sv, magic);
 	SvSTASH_set(sv, stash);
-	AvALLOC(sv)	= 0;
-	AvARYLEN(sv)	= 0;
-	AvFLAGS(sv)	= AVf_REAL;
-	break;
-    case SVt_PVHV:
-	SvANY(sv) = new_XPVHV();
-	if (pv)
-	    Safefree(pv);
-	SvPV_set(sv, (char*)0);
-	HvFILL(sv)	= 0;
-	HvMAX(sv)	= 0;
-	HvTOTALKEYS(sv)	= 0;
-	HvPLACEHOLDERS(sv) = 0;
-	SvMAGIC_set(sv, magic);
-	SvSTASH_set(sv, stash);
-	HvRITER(sv)	= 0;
-	HvEITER(sv)	= 0;
-	HvPMROOT(sv)	= 0;
-	HvNAME(sv)	= 0;
-	break;
-    case SVt_PVCV:
-	SvANY(sv) = new_XPVCV();
-	Zero(SvANY(sv), 1, XPVCV);
+	/* Fall through.  */
+	if (0) {
+	case SVt_PVNV:
+	    SvANY(sv) = new_XPVNV();
+	}
+	SvNV_set(sv, nv);
+	/* Fall through.  */
+	if (0) {
+	case SVt_PVIV:
+	    SvANY(sv) = new_XPVIV();
+	    if (SvNIOK(sv))
+		(void)SvIOK_on(sv);
+	    SvNOK_off(sv);
+	}
+	SvIV_set(sv, iv);
+	/* Fall through.  */
+	if (0) {
+	case SVt_PV:
+	    SvANY(sv) = new_XPV();
+	}
 	SvPV_set(sv, pv);
 	SvCUR_set(sv, cur);
 	SvLEN_set(sv, len);
-	SvIV_set(sv, iv);
-	SvNV_set(sv, nv);
-	SvMAGIC_set(sv, magic);
-	SvSTASH_set(sv, stash);
-	break;
-    case SVt_PVGV:
-	SvANY(sv) = new_XPVGV();
-	SvPV_set(sv, pv);
-	SvCUR_set(sv, cur);
-	SvLEN_set(sv, len);
-	SvIV_set(sv, iv);
-	SvNV_set(sv, nv);
-	SvMAGIC_set(sv, magic);
-	SvSTASH_set(sv, stash);
-	GvGP(sv)	= 0;
-	GvNAME(sv)	= 0;
-	GvNAMELEN(sv)	= 0;
-	GvSTASH(sv)	= 0;
-	GvFLAGS(sv)	= 0;
-	break;
-    case SVt_PVBM:
-	SvANY(sv) = new_XPVBM();
-	SvPV_set(sv, pv);
-	SvCUR_set(sv, cur);
-	SvLEN_set(sv, len);
-	SvIV_set(sv, iv);
-	SvNV_set(sv, nv);
-	SvMAGIC_set(sv, magic);
-	SvSTASH_set(sv, stash);
-	BmRARE(sv)	= 0;
-	BmUSEFUL(sv)	= 0;
-	BmPREVIOUS(sv)	= 0;
-	break;
-    case SVt_PVFM:
-	SvANY(sv) = new_XPVFM();
-	Zero(SvANY(sv), 1, XPVFM);
-	SvPV_set(sv, pv);
-	SvCUR_set(sv, cur);
-	SvLEN_set(sv, len);
-	SvIV_set(sv, iv);
-	SvNV_set(sv, nv);
-	SvMAGIC_set(sv, magic);
-	SvSTASH_set(sv, stash);
-	break;
-    case SVt_PVIO:
-	SvANY(sv) = new_XPVIO();
-	Zero(SvANY(sv), 1, XPVIO);
-	SvPV_set(sv, pv);
-	SvCUR_set(sv, cur);
-	SvLEN_set(sv, len);
-	SvIV_set(sv, iv);
-	SvNV_set(sv, nv);
-	SvMAGIC_set(sv, magic);
-	SvSTASH_set(sv, stash);
-	IoPAGE_LEN(sv)	= 60;
 	break;
     }
     return TRUE;
