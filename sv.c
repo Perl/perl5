@@ -4541,8 +4541,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
                                       (sflags & SVf_UTF8?-cur:cur), hash));
                     SvUV_set(dstr, hash);
                 }
-                SvLEN(dstr) = len;
-                SvCUR(dstr) = cur;
+                SvLEN_set(dstr, len);
+                SvCUR_set(dstr, cur);
                 SvREADONLY_on(dstr);
                 SvFAKE_on(dstr);
                 /* Relesase a global SV mutex.  */
@@ -4703,8 +4703,8 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
     SvFLAGS(dstr) = (SVt_PVIV|SVf_POK|SVp_POK|SVf_FAKE|SVf_READONLY);
     if (SvUTF8(sstr))
 	SvUTF8_on(dstr);
-    SvLEN(dstr) = len;
-    SvCUR(dstr) = cur;
+    SvLEN_set(dstr, len);
+    SvCUR_set(dstr, cur);
     if (DEBUG_C_TEST) {
 	sv_dump(dstr);
     }
@@ -4944,14 +4944,14 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
             SvREADONLY_off(sv);
             /* This SV doesn't own the buffer, so need to New() a new one:  */
             SvPV_set(sv, (char*)0);
-            SvLEN(sv) = 0;
+            SvLEN_set(sv, 0);
             if (flags & SV_COW_DROP_PV) {
                 /* OK, so we don't need to copy our buffer.  */
                 SvPOK_off(sv);
             } else {
                 SvGROW(sv, cur + 1);
                 Move(pvx,SvPVX(sv),cur,char);
-                SvCUR(sv) = cur;
+                SvCUR_set(sv, cur);
                 *SvEND(sv) = '\0';
             }
             sv_release_COW(sv, pvx, cur, len, hash, next);

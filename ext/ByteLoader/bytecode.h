@@ -126,12 +126,19 @@ typedef char *pvindex;
 #define BSET_mg_namex(mg, arg)			\
 	(mg->mg_ptr = (char*)SvREFCNT_inc((SV*)arg),	\
 	 mg->mg_len = HEf_SVKEY)
+#define BSET_xmg_stash(sv, arg) SvSTASH_set(sv, arg)
 #define BSET_sv_upgrade(sv, arg)	(void)SvUPGRADE(sv, arg)
+#define BSET_xrv(sv, arg) SvRV_set(sv, arg)
 #define BSET_xpv(sv)	do {	\
 	SvPV_set(sv, bstate->bs_pv.xpv_pv);	\
 	SvCUR_set(sv, bstate->bs_pv.xpv_cur);	\
 	SvLEN_set(sv, bstate->bs_pv.xpv_len);	\
     } while (0)
+#define BSET_xpv_cur(sv, arg) SvCUR_set(sv, arg)
+#define BSET_xpv_len(sv, arg) SvLEN_set(sv, arg)
+#define BSET_xiv(sv, arg) SvIV_set(sv, arg)
+#define BSET_xnv(sv, arg) SvNV_set(sv, arg)
+
 #define BSET_av_extend(sv, arg)	av_extend((AV*)sv, arg)
 
 #define BSET_av_push(sv, arg)	av_push((AV*)sv, arg)
