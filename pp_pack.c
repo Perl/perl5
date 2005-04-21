@@ -623,7 +623,7 @@ uni_to_bytes(pTHX_ char **s, char *end, char *buf, int buf_len, I32 datumtype)
 	if (bad & 1) {
 	    /* Rewalk the string fragment while warning */
 	    char *ptr;
-	    flags = ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY;
+	    const int flags = ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY;
 	    for (ptr = *s; ptr < from; ptr += UTF8SKIP(ptr)) {
 		if (ptr >= end) break;
 		utf8n_to_uvuni((U8 *) ptr, end-ptr, &retlen, flags);
@@ -1115,7 +1115,10 @@ and ocnt are not used. This call should not be used, use unpackstring instead.
 I32
 Perl_unpack_str(pTHX_ char *pat, char *patend, char *s, char *strbeg, char *strend, char **new_s, I32 ocnt, U32 flags)
 {
-    tempsym_t sym = { 0 };
+    tempsym_t sym = { NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL };
+    (void)strbeg;
+    (void)new_s;
+    (void)ocnt;
 
     if (flags & FLAG_DO_UTF8) flags |= FLAG_WAS_UTF8;
     else if (need_utf8(pat, patend)) {
@@ -1150,7 +1153,7 @@ Issue C<PUTBACK> before and C<SPAGAIN> after the call to this function.
 I32
 Perl_unpackstring(pTHX_ char *pat, char *patend, char *s, char *strend, U32 flags)
 {
-    tempsym_t sym = { 0 };
+    tempsym_t sym = { NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL };
 
     if (flags & FLAG_DO_UTF8) flags |= FLAG_WAS_UTF8;
     else if (need_utf8(pat, patend)) {
@@ -1188,13 +1191,13 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char 
     const int bits_in_uv = CHAR_BIT * sizeof(cuv);
     bool beyond = FALSE;
     bool explicit_length;
-    bool unpack_only_one = (symptr->flags & FLAG_UNPACK_ONLY_ONE) != 0;
+    const bool unpack_only_one = (symptr->flags & FLAG_UNPACK_ONLY_ONE) != 0;
     bool utf8 = (symptr->flags & FLAG_PARSE_UTF8) ? 1 : 0;
     symptr->strbeg = s - strbeg;
 
     while (next_symbol(symptr)) {
 	packprops_t props;
-	I32 len, ai32;
+	I32 len;
         I32 datumtype = symptr->code;
 	/* do first one only unless in list context
 	   / is implemented by unpacking the count, then popping it from the
@@ -1221,8 +1224,8 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char 
 	props = packprops[TYPE_NO_ENDIANNESS(datumtype)];
 	if (props) {
 	    /* props nonzero means we can process this letter. */
-	    long size = props & PACK_SIZE_MASK;
-	    long howmany = (strend - s) / size;
+            const long size = props & PACK_SIZE_MASK;
+            const long howmany = (strend - s) / size;
 	    if (len > howmany)
 		len = howmany;
 
@@ -1248,7 +1251,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char 
 	case '(':
 	{
             tempsym_t savsym = *symptr;
-	    U32 group_modifiers = TYPE_MODIFIERS(datumtype & ~symptr->flags);
+            const U32 group_modifiers = TYPE_MODIFIERS(datumtype & ~symptr->flags);
 	    symptr->flags |= group_modifiers;
             symptr->patend = savsym.grpend;
 	    symptr->previous = &savsym;
@@ -1271,12 +1274,12 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char 
 	case '.' | TYPE_IS_SHRIEKING:
 #endif
 	case '.': {
-	    char *from;
+	    const char *from;
 	    SV *sv;
 #ifdef PERL_PACK_CAN_SHRIEKSIGN
-	    bool u8 = utf8 && !(datumtype & TYPE_IS_SHRIEKING);
+	    const bool u8 = utf8 && !(datumtype & TYPE_IS_SHRIEKING);
 #else /* PERL_PACK_CAN_SHRIEKSIGN */
-	    bool u8 = utf8;
+	    const bool u8 = utf8;
 #endif
 	    if (howlen == e_star) from = strbeg;
 	    else if (len <= 0) from = s;
@@ -1355,13 +1358,15 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char 
 		s -= len;
 	    }
 	    break;
- 	case 'x' | TYPE_IS_SHRIEKING:
+ 	case 'x' | TYPE_IS_SHRIEKING: {
+            I32 ai32;
  	    if (!len)			/* Avoid division by 0 */
  		len = 1;
 	    if (utf8) ai32 = utf8_length((U8 *) strbeg, (U8 *) s) % len;
 	    else      ai32 = (s - strbeg)                         % len;
 	    if (ai32 == 0) break;
 	    len -= ai32;
+            }
  	    /* FALL THROUGH */
 	case 'x':
 	    if (utf8) {
@@ -1492,7 +1497,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char 
 	    str = SvPVX(sv);
 	    if (datumtype == 'b') {
 		U8 bits = 0;
-		ai32 = len;
+		I32 ai32 = len;
 		for (len = 0; len < ai32; len++) {
 		    if (len & 7) bits >>= 1;
 		    else if (utf8) {
@@ -1503,7 +1508,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char 
 		}
 	    } else {
 		U8 bits = 0;
-		ai32 = len;
+		I32 ai32 = len;
 		for (len = 0; len < ai32; len++) {
 		    if (len & 7) bits <<= 1;
 		    else if (utf8) {
@@ -1529,7 +1534,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char 
 	    str = SvPVX(sv);
 	    if (datumtype == 'h') {
 		U8 bits = 0;
-		ai32 = len;
+		I32 ai32 = len;
 		for (len = 0; len < ai32; len++) {
 		    if (len & 1) bits >>= 4;
 		    else if (utf8) {
@@ -1540,7 +1545,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char 
 		}
 	    } else {
 		U8 bits = 0;
-		ai32 = len;
+		I32 ai32 = len;
 		for (len = 0; len < ai32; len++) {
 		    if (len & 1) bits <<= 4;
 		    else if (utf8) {
@@ -2360,10 +2365,9 @@ flags are not used. This call should not be used; use packlist instead.
 void
 Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beglist, SV **endlist, SV ***next_in_list, U32 flags)
 {
-    tempsym_t sym = { 0 };
-    sym.patptr = pat;
-    sym.patend = patend;
-    sym.flags  = FLAG_PACK;
+    tempsym_t sym = { pat, patend, NULL, NULL, 0, 0, 0, 0, FLAG_PACK, 0, NULL };
+    (void)next_in_list;
+    (void)flags;
 
     (void)pack_rec( cat, &sym, beglist, endlist );
 }
@@ -2381,11 +2385,7 @@ void
 Perl_packlist(pTHX_ SV *cat, char *pat, register char *patend, register SV **beglist, SV **endlist )
 {
     STRLEN no_len;
-    tempsym_t sym = { 0 };
-
-    sym.patptr = pat;
-    sym.patend = patend;
-    sym.flags  = FLAG_PACK;
+    tempsym_t sym = { pat, patend, NULL, NULL, 0, 0, 0, 0, FLAG_PACK, 0, NULL };
 
     /* We're going to do changes through SvPVX(cat). Make sure it's valid.
        Also make sure any UTF8 flag is loaded */
@@ -2684,7 +2684,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    if (cur < start+symptr->strbeg) {
 		/* Make sure group starts don't point into the void */
 		tempsym_t *group;
-		STRLEN length = cur-start;
+		const STRLEN length = cur-start;
 		for (group = symptr;
 		     group && length < group->strbeg;
 		     group = group->previous) group->strbeg = length;
