@@ -593,7 +593,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		bstate->bs_sv = arg;
+		BSET_xmg_stash(bstate->bs_sv, arg);
 		break;
 	    }
 	  case INSN_GV_FETCHPV:		/* 77 */

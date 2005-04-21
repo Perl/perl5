@@ -423,7 +423,7 @@ mg_private	SvMAGIC(bstate->bs_sv)->mg_private	U16
 mg_flags	SvMAGIC(bstate->bs_sv)->mg_flags	U8
 mg_name		SvMAGIC(bstate->bs_sv)			pvcontents	x
 mg_namex	SvMAGIC(bstate->bs_sv)			svindex		x
-xmg_stash	bstate->bs_sv				svindex		X
+xmg_stash	bstate->bs_sv				svindex		x
 gv_fetchpv	bstate->bs_sv				strconst	x
 gv_fetchpvx	bstate->bs_sv				strconst	x
 gv_stashpv	bstate->bs_sv				strconst	x

@@ -750,14 +750,22 @@ in gv.h: */
 #define SvLEN(sv) (0 + ((XPV*) SvANY(sv))->xpv_len)
 #define SvEND(sv) (((XPV*)  SvANY(sv))->xpv_pv + ((XPV*)SvANY(sv))->xpv_cur)
 
-#ifdef PERL_IN_SV_C
+#ifdef DEBUGGING
+#  ifdef PERL_IN_SV_C
 /* Can't make this RVALUE because of Perl_sv_unmagic.  */
-#define SvMAGIC(sv)	(*(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_magic))
-#else
-#define SvMAGIC(sv)	(0 + *(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_magic))
-#endif
+#    define SvMAGIC(sv)	(*(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_magic))
+#  else
+#    define SvMAGIC(sv)	(0 + *(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_magic))
+#  endif
 #define SvSTASH(sv)	(0 + *(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_stash))
-
+#else
+#  ifdef PERL_IN_SV_C
+#    define SvMAGIC(sv) ((XPVMG*)  SvANY(sv))->xmg_magic
+#  else
+#    define SvMAGIC(sv) (0 + ((XPVMG*)  SvANY(sv))->xmg_magic)
+#  endif
+#define SvSTASH(sv)     (0 + ((XPVMG*)  SvANY(sv))->xmg_stash)
+#endif
 #else
 #define SvIVX(sv) ((XPVIV*) SvANY(sv))->xiv_iv
 #define SvUVX(sv) ((XPVUV*) SvANY(sv))->xuv_uv
