@@ -6,7 +6,7 @@ require Exporter;
 @EXPORT = qw(wrap fill);
 @EXPORT_OK = qw($columns $break $huge);
 
-$VERSION = 2001.09292;
+$VERSION = 2001.09293;
 
 use vars qw($VERSION $columns $debug $break $huge $unexpand $tabstop
 	$separator);
