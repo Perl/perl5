@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..190\n";
+print "1..192\n";
 
 #P = start of string  Q = start of substr  R = end of substr  S = end of string
 
@@ -657,4 +657,11 @@ ok 174, $x eq "\x{100}\x{200}\xFFb";
     my $a = pack("C", 0xbf);
     substr($a, -1) &= chr(0xfeff);
     ok 190, $a eq "\xbf";
+}
+
+# [perl #34976] incorrect caching of utf8 substr length
+{
+    my  $a = "abcd\x{100}";
+    ok 191, substr($a,1,2) eq 'bc';
+    ok 192, substr($a,1,1) eq 'b';
 }

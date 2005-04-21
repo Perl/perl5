@@ -6402,7 +6402,7 @@ Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
 	 if (lenp) {
 	      found = FALSE;
 	      start = s;
-              if (utf8_mg_pos(sv, &mg, &cache, 2, lenp, *lenp + *offsetp, &s, start, send)) {
+              if (utf8_mg_pos(sv, &mg, &cache, 2, lenp, *lenp, &s, start, send)) {
                   *lenp -= boffset;
                   found = TRUE;
               }
