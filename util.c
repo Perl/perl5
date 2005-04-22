@@ -3355,7 +3355,9 @@ Perl_init_tm(pTHX_ struct tm *ptm)	/* see mktime, strftime and asctime */
 #ifdef HAS_TM_TM_ZONE
     Time_t now;
     (void)time(&now);
-    Copy(localtime(&now), ptm, 1, struct tm);
+    struct tm* my_tm = localtime(&now);
+    if (my_tm)
+        Copy(my_tm, ptm, 1, struct tm);
 #endif
 }
 
