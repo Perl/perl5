@@ -2438,6 +2438,7 @@ S_usage(pTHX_ const char *name)		/* XXX move this out into a module ? */
 
     static const char * const usage_msg[] = {
 "-0[octal]       specify record separator (\\0, if no argument)",
+"-A[name]        activate all/given assertions",
 "-a              autosplit mode with -n or -p (splits $_ into @F)",
 "-C[number/list] enables the listed Unicode features",
 "-c              check syntax only (runs BEGIN and CHECK blocks)",
