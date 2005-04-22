@@ -41,9 +41,17 @@ my $out = runperl(
 my $src = q[our ($beg, $chk, $init, $end) = qq{'foo'}; BEGIN { $beg++ } CHECK { $chk++ } INIT { $init++ } END { $end++ }];
 
 
+my @warnings_todo;
+@warnings_todo = (todo =>
+   "Change 23768 (Remove Carp from warnings.pm) alters expected output, not"
+   . "propagated to 5.8.x")
+    if $] < 5.009;
+
+
 checkOptree ( name	=> 'BEGIN',
 	      bcopts	=> 'BEGIN',
 	      prog	=> $src,
+	      @warnings_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # BEGIN 1:
 # b  <1> leavesub[1 ref] K/REFC,1 ->(end)
@@ -160,8 +168,8 @@ EONT_EONT
 
 checkOptree ( name	=> 'all of BEGIN END INIT CHECK -exec',
 	      bcopts	=> [qw/ BEGIN END INIT CHECK -exec /],
-	      #todo	=> 'get working',
 	      prog	=> $src,
+	      @warnings_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # BEGIN 1:
 # 1  <;> nextstate(B::Concise -234 Concise.pm:328) v/2
