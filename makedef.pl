@@ -806,7 +806,7 @@ sub readvar {
     while (<VARS>) {
 	# All symbols have a Perl_ prefix because that's what embed.h
 	# sticks in front of them.
-	push(@syms, &$proc($1,$2,$3)) if (/\bPERLVAR(A?I?C?)\(([IGT])(\w+)/);
+	push(@syms, &$proc($1,$2,$3)) if (/\bPERLVAR(A?I?S?C?)\(([IGT])(\w+)/);
     }
     close(VARS);
     return \@syms;
