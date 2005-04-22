@@ -565,6 +565,7 @@ unless ($define{'DEBUGGING'}) {
 		    PL_block_type
 		    PL_watchaddr
 		    PL_watchok
+		    PL_watch_pvx
 		    )];
 }
 
@@ -636,6 +637,24 @@ else {
 if ($define{'PERL_MALLOC_WRAP'}) {
     emit_symbols [qw(
 		    PL_memory_wrap
+		    )];
+}
+
+unless ($define{'HAS_MMAP'}) {
+    skip_symbols [qw(
+		    PL_mmap_page_size
+		    )];
+}
+
+unless ($define{'HAS_TIMES'} || $define{'PERL_NEED_TIMESBASE'}) {
+    skip_symbols [qw(
+		    PL_timesbase
+		    )];
+}
+
+unless ($define{'PERL_NEED_APPCTX'}) {
+    skip_symbols [qw(
+		    PL_appctx
 		    )];
 }
 
@@ -733,6 +752,12 @@ unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
 		    )];
 }
 
+if ($define{'PERL_IMPLICIT_CONTEXT'}) {
+    skip_symbols [qw(
+		    PL_sig_sv
+		    )];
+}
+
 unless ($define{'PERL_IMPLICIT_SYS'}) {
     skip_symbols [qw(
 		    perl_alloc_using
@@ -742,6 +767,26 @@ unless ($define{'PERL_IMPLICIT_SYS'}) {
 
 unless ($define{'FAKE_THREADS'}) {
     skip_symbols [qw(PL_curthr)];
+}
+
+unless ($define{'FAKE_DEFAULT_SIGNAL_HANDLERS'}) {
+    skip_symbols [qw(
+		    PL_sig_defaulting
+		    )];
+}
+
+unless ($define{'FAKE_PERSISTENT_SIGNAL_HANDLERS'}) {
+    skip_symbols [qw(
+		    PL_sig_ignoring
+		    )];
+}
+
+unless ($define{'FAKE_DEFAULT_SIGNAL_HANDLERS'} ||
+        $define{'FAKE_PERSISTENT_SIGNAL_HANDLERS'})
+{
+    skip_symbols [qw(
+		    PL_sig_handlers_initted
+		    )];
 }
 
 unless ($define{'PL_OP_SLAB_ALLOC'}) {
