@@ -868,6 +868,8 @@ Anp	|Malloc_t|safesysrealloc|Malloc_t where|MEM_SIZE nbytes
 Anp	|Free_t	|safesysfree	|Malloc_t where
 #if defined(PERL_GLOBAL_STRUCT)
 Ap	|struct perl_vars *|GetVars
+Ap	|struct perl_vars*|init_global_struct
+Ap	|void	|free_global_struct|struct perl_vars*
 #endif
 Ap	|int	|runops_standard
 Ap	|int	|runops_debug
@@ -1481,8 +1483,5 @@ Ap	|GV*	|gv_fetchsv|SV *name|I32 flags|I32 sv_type
 dp	|bool	|is_gv_magical_sv|SV *name|U32 flags
 
 Apd	|char*	|savesvpv	|SV* sv
-
-Ap	|struct perl_vars*|init_global_struct
-Ap	|void	|free_global_struct|struct perl_vars*
 
 END_EXTERN_C

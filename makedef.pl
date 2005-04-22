@@ -233,7 +233,6 @@ if ($PLATFORM eq 'win32') {
 		     PL_timesbuf
 		     main
 		     Perl_ErrorNo
-		     Perl_GetVars
 		     Perl_do_exec3
 		     Perl_do_ipcctl
 		     Perl_do_ipcget
@@ -310,7 +309,6 @@ if ($PLATFORM eq 'wince') {
 		     win32_spawnvp
 		     main
 		     Perl_ErrorNo
-		     Perl_GetVars
 		     Perl_do_exec3
 		     Perl_do_ipcctl
 		     Perl_do_ipcget
@@ -349,7 +347,6 @@ elsif ($PLATFORM eq 'aix') {
     skip_symbols([qw(
 		     Perl_dump_fds
 		     Perl_ErrorNo
-		     Perl_GetVars
 		     Perl_my_bcopy
 		     Perl_my_bzero
 		     Perl_my_chsize
@@ -450,7 +447,6 @@ elsif ($PLATFORM eq 'os2') {
 }
 elsif ($PLATFORM eq 'MacOS') {
     skip_symbols [qw(
-		    Perl_GetVars
 		    PL_cryptseen
 		    PL_cshlen
 		    PL_cshname
@@ -492,7 +488,6 @@ elsif ($PLATFORM eq 'netware') {
 			PL_timesbuf
 			main
 			Perl_ErrorNo
-			Perl_GetVars
 			Perl_do_exec3
 			Perl_do_ipcctl
 			Perl_do_ipcget
@@ -815,6 +810,14 @@ sub readvar {
     }
     close(VARS);
     return \@syms;
+}
+
+unless ($define{'PERL_GLOBAL_STRUCT'}) {
+    skip_symbols [qw(
+		     Perl_GetVars
+		     Perl_free_global_struct
+		     Perl_init_global_struct
+                    )];
 }
 
 if ($define{'PERL_GLOBAL_STRUCT'}) {

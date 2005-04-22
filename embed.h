@@ -1153,6 +1153,8 @@
 #define safesysfree		Perl_safesysfree
 #if defined(PERL_GLOBAL_STRUCT)
 #define GetVars			Perl_GetVars
+#define init_global_struct	Perl_init_global_struct
+#define free_global_struct	Perl_free_global_struct
 #endif
 #define runops_standard		Perl_runops_standard
 #define runops_debug		Perl_runops_debug
@@ -2267,8 +2269,6 @@
 #define is_gv_magical_sv	Perl_is_gv_magical_sv
 #endif
 #define savesvpv		Perl_savesvpv
-#define init_global_struct	Perl_init_global_struct
-#define free_global_struct	Perl_free_global_struct
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_concat		Perl_ck_concat
@@ -3764,6 +3764,8 @@
 #define safesysfree		Perl_safesysfree
 #if defined(PERL_GLOBAL_STRUCT)
 #define GetVars()		Perl_GetVars(aTHX)
+#define init_global_struct()	Perl_init_global_struct(aTHX)
+#define free_global_struct(a)	Perl_free_global_struct(aTHX_ a)
 #endif
 #define runops_standard()	Perl_runops_standard(aTHX)
 #define runops_debug()		Perl_runops_debug(aTHX)
@@ -4874,8 +4876,6 @@
 #define is_gv_magical_sv(a,b)	Perl_is_gv_magical_sv(aTHX_ a,b)
 #endif
 #define savesvpv(a)		Perl_savesvpv(aTHX_ a)
-#define init_global_struct()	Perl_init_global_struct(aTHX)
-#define free_global_struct(a)	Perl_free_global_struct(aTHX_ a)
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
 #define ck_concat(a)		Perl_ck_concat(aTHX_ a)

@@ -830,6 +830,8 @@ PERL_CALLCONV Malloc_t	Perl_safesysrealloc(Malloc_t where, MEM_SIZE nbytes);
 PERL_CALLCONV Free_t	Perl_safesysfree(Malloc_t where);
 #if defined(PERL_GLOBAL_STRUCT)
 PERL_CALLCONV struct perl_vars *	Perl_GetVars(pTHX);
+PERL_CALLCONV struct perl_vars*	Perl_init_global_struct(pTHX);
+PERL_CALLCONV void	Perl_free_global_struct(pTHX_ struct perl_vars*);
 #endif
 PERL_CALLCONV int	Perl_runops_standard(pTHX);
 PERL_CALLCONV int	Perl_runops_debug(pTHX);
@@ -1422,8 +1424,5 @@ PERL_CALLCONV GV*	Perl_gv_fetchsv(pTHX_ SV *name, I32 flags, I32 sv_type);
 PERL_CALLCONV bool	Perl_is_gv_magical_sv(pTHX_ SV *name, U32 flags);
 
 PERL_CALLCONV char*	Perl_savesvpv(pTHX_ SV* sv);
-
-PERL_CALLCONV struct perl_vars*	Perl_init_global_struct(pTHX);
-PERL_CALLCONV void	Perl_free_global_struct(pTHX_ struct perl_vars*);
 
 END_EXTERN_C

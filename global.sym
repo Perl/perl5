@@ -559,6 +559,8 @@ Perl_safesyscalloc
 Perl_safesysrealloc
 Perl_safesysfree
 Perl_GetVars
+Perl_init_global_struct
+Perl_free_global_struct
 Perl_runops_standard
 Perl_runops_debug
 Perl_sv_catpvf_mg
@@ -675,5 +677,3 @@ Perl_hv_scalar
 Perl_gv_fetchpvn_flags
 Perl_gv_fetchsv
 Perl_savesvpv
-Perl_init_global_struct
-Perl_free_global_struct
