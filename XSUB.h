@@ -88,7 +88,11 @@ is a lexical $_ in scope.
 #  define XS(name) EXPORT_C void name(pTHX_ CV* cv)
 #endif
 #ifndef XS
-#  define XS(name) void name(pTHX_ CV* cv)
+#  if defined(HASATTRIBUTE)
+#    define XS(name) void name(pTHX_ CV* cv __attribute__((unused)))
+#  else
+#    define XS(name) void name(pTHX_ CV* cv)
+#  endif
 #endif
 
 #define dAX I32 ax = MARK - PL_stack_base + 1
