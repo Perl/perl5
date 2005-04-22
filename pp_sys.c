@@ -118,6 +118,7 @@ extern int h_errno;
 # ifdef my_chsize  /* Probably #defined to Perl_my_chsize in embed.h */
 #   undef my_chsize
 # endif
+# define my_chsize PerlLIO_chsize
 #else
 # ifdef HAS_TRUNCATE
 #   define my_chsize PerlLIO_chsize
