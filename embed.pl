@@ -344,8 +344,19 @@ print EM do_not_edit ("embed.h"), <<'END';
 
 END
 
+# Try to elimiate lots of repeated
+# #ifdef PERL_CORE
+# foo
+# #endif
+# #ifdef PERL_CORE
+# bar
+# #endif
+# by tracking state and merging foo and bar into one block.
+my $ifdef_state = '';
+
 walk_table {
     my $ret = "";
+    my $new_ifdef_state = '';
     if (@_ == 1) {
 	my $arg = shift;
 	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifn?def|else|endif)\b/;
@@ -362,14 +373,30 @@ walk_table {
 	}
 	if ($ret ne '' && $flags !~ /A/) {
 	    if ($flags =~ /E/) {
-		$ret = "#if defined(PERL_CORE) || defined(PERL_EXT)\n$ret#endif\n";
-	    } else {
-		$ret = "#ifdef PERL_CORE\n$ret#endif\n";
+		$new_ifdef_state
+		    = "#if defined(PERL_CORE) || defined(PERL_EXT)\n";
+	    }
+	    else {
+		$new_ifdef_state = "#ifdef PERL_CORE\n";
+	    }
+
+	    if ($new_ifdef_state ne $ifdef_state) {
+		$ret = $new_ifdef_state . $ret;
 	    }
         }
     }
+    if ($ifdef_state && $new_ifdef_state ne $ifdef_state) {
+	# Close the old one ahead of opening the new one.
+	$ret = "#endif\n$ret";
+    }
+    # Remember the new state.
+    $ifdef_state = $new_ifdef_state;
     $ret;
 } \*EM, "";
+
+if ($ifdef_state) {
+    print EM "#endif\n";
+}
 
 for $sym (sort keys %ppsym) {
     $sym =~ s/^Perl_//;
@@ -384,8 +411,10 @@ END
 
 my @az = ('a'..'z');
 
+$ifdef_state = '';
 walk_table {
     my $ret = "";
+    my $new_ifdef_state = '';
     if (@_ == 1) {
 	my $arg = shift;
 	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifn?def|else|endif)\b/;
@@ -420,16 +449,32 @@ walk_table {
 		$ret .= $alist . ")\n";
 	    }
 	}
-         unless ($flags =~ /A/) {
+	unless ($flags =~ /A/) {
 	    if ($flags =~ /E/) {
-		$ret = "#if defined(PERL_CORE) || defined(PERL_EXT)\n$ret#endif\n";
-	    } else {
-		$ret = "#ifdef PERL_CORE\n$ret#endif\n";
+		$new_ifdef_state
+		    = "#if defined(PERL_CORE) || defined(PERL_EXT)\n";
+	    }
+	    else {
+		$new_ifdef_state = "#ifdef PERL_CORE\n";
+	    }
+
+	    if ($new_ifdef_state ne $ifdef_state) {
+		$ret = $new_ifdef_state . $ret;
 	    }
         }
     }
+    if ($ifdef_state && $new_ifdef_state ne $ifdef_state) {
+	# Close the old one ahead of opening the new one.
+	$ret = "#endif\n$ret";
+    }
+    # Remember the new state.
+    $ifdef_state = $new_ifdef_state;
     $ret;
 } \*EM, "";
+
+if ($ifdef_state) {
+    print EM "#endif\n";
+}
 
 for $sym (sort keys %ppsym) {
     $sym =~ s/^Perl_//;
