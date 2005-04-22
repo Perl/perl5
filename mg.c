@@ -729,7 +729,16 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	        sv_setpvn(sv, WARN_NONEstring, WARNsize) ;
             }
             else if (PL_compiling.cop_warnings == pWARN_ALL) {
-	        sv_setpvn(sv, WARN_ALLstring, WARNsize) ;
+		/* Get the bit mask for $warnings::Bits{all}, because
+		 * it could have been extended by warnings::register */
+		SV **bits_all;
+		HV *bits=get_hv("warnings::Bits", FALSE);
+		if (bits && (bits_all=hv_fetch(bits, "all", 3, FALSE))) {
+		    sv_setsv(sv, *bits_all);
+		}
+	        else {
+		    sv_setpvn(sv, WARN_ALLstring, WARNsize) ;
+		}
 	    }
             else {
 	        sv_setsv(sv, PL_compiling.cop_warnings);
@@ -2152,8 +2161,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '\020':	/* ^P */
 	PL_perldb = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
-	if ((PERLDB_SUB || PERLDB_LINE || PERLDB_SUBLINE)
-		&& !PL_DBsingle)
+	if (PL_perldb && !PL_DBsingle)
 	    init_debugger();
 	break;
     case '\024':	/* ^T */
