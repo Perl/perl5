@@ -2445,7 +2445,9 @@ S_usage(pTHX_ const char *name)		/* XXX move this out into a module ? */
 "-d[:debugger]   run program under debugger",
 "-D[number/list] set debugging flags (argument is a bit mask or alphabets)",
 "-e program      one line of program (several -e's allowed, omit programfile)",
+#ifdef USE_SITECUSTOMIZE
 "-f              don't do $sitelib/sitecustomize.pl at startup",
+#endif
 "-F/pattern/     split() pattern for -a switch (//'s are optional)",
 "-i[extension]   edit <> files in place (makes backup if extension supplied)",
 "-Idirectory     specify @INC/#include directory (several -I's allowed)",
