@@ -844,12 +844,12 @@ ext/Thread/README		Thread README
 ext/Thread/README.threads		Notes about multithreading
 ext/threads/Changes		ithreads
 ext/Thread/Semaphore.pmx	Threadsafe semaphore
-ext/threads/Makefile.PL		ithreads
 ext/threads/hints/linux.pl	thread shared variables
+ext/threads/Makefile.PL		ithreads
 ext/Thread/specific.tx		Test thread-specific user data
 ext/threads/README		ithreads
-ext/threads/shared/Makefile.PL	thread shared variables
 ext/threads/shared/hints/linux.pl	thread shared variables
+ext/threads/shared/Makefile.PL	thread shared variables
 ext/threads/shared/README	thread shared variables
 ext/threads/shared/shared.pm	thread shared variables
 ext/threads/shared/shared.xs	thread shared variables
@@ -1216,8 +1216,8 @@ lib/CGI/t/util.t		See if CGI.pm works
 lib/CGI/Util.pm			Utility functions
 lib/charnames.pm		Character names
 lib/charnames.t			See if character names work
-lib/Class/ISA.pm		Class::ISA
 lib/Class/ISA/ChangeLog		Changes for Class::ISA
+lib/Class/ISA.pm		Class::ISA
 lib/Class/ISA/t/00_about_verbose.t	Tests for Class::ISA
 lib/Class/ISA/t/01_old_junk.t	Tests for Class::ISA
 lib/Class/Struct.pm		Declare struct-like datatypes as Perl classes
@@ -1261,8 +1261,8 @@ lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
 lib/Devel/SelfStubber.t		See if Devel::SelfStubber works
 lib/diagnostics.pm		Print verbose diagnostics
 lib/diagnostics.t		See if diagnostics.pm works
-lib/Digest/Changes		Digest changelog
 lib/Digest/base.pm		Digest extensions
+lib/Digest/Changes		Digest changelog
 lib/Digest/file.pm		Digest extensions
 lib/Digest.pm			Digest extensions
 lib/Digest/t/base.t		See if Digest extensions work
@@ -1798,8 +1798,8 @@ lib/Test/Harness/Changes	Test::Harness
 lib/Test/Harness/Iterator.pm	Test::Harness::Iterator (internal use only)
 lib/Test/Harness.pm		A test harness
 lib/Test/Harness/Straps.pm	Test::Harness::Straps
-lib/Test/Harness/TAP.pod	Documentation for the Test Anything Protocol
 lib/Test/Harness/t/00compile.t	Test::Harness test
+lib/Test/Harness/TAP.pod	Documentation for the Test Anything Protocol
 lib/Test/Harness/t/assert.t	Test::Harness::Assert test
 lib/Test/Harness/t/base.t	Test::Harness test
 lib/Test/Harness/t/callback.t	Test::Harness test
@@ -2691,8 +2691,8 @@ t/op/method.t			See if method calls work
 t/op/mkdir.t			See if mkdir works
 t/op/my_stash.t			See if my Package works
 t/op/my.t			See if lexical scoping works
-t/op/not.t			See if not works
 t/op/nothr5005.t		local @_ test which does not work under use5005threads
+t/op/not.t			See if not works
 t/op/numconvert.t		See if accessing fields does not change numeric values
 t/op/oct.t			See if oct and hex work
 t/op/ord.t			See if ord works
