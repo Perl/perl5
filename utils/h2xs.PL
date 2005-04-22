@@ -522,8 +522,9 @@ OPTIONS:
     -O, --overwrite-ok    Allow overwriting of a pre-existing extension directory.
     -P, --omit-pod        Omit the stub POD section.
     -X, --omit-XS         Omit the XS portion (implies both -c and -f).
-    -a, --gen-accessors   Generate get/set accessors for struct and union members                           (used with -x).
-    -b, --compat-version  Specify a perl version to be backwards compatibile with
+    -a, --gen-accessors   Generate get/set accessors for struct and union members
+                          (used with -x).
+    -b, --compat-version  Specify a perl version to be backwards compatibile with.
     -c, --omit-constant   Omit the constant() function and specialised AUTOLOAD
                           from the XS file.
     -d, --debugging       Turn on debugging messages.
@@ -533,7 +534,7 @@ OPTIONS:
     -f, --force           Force creation of the extension even if the C header
                           does not exist.
     -g, --global          Include code for safely storing static data in the .xs file.
-    -h, -?, --help        Display this help message
+    -h, -?, --help        Display this help message.
     -k, --omit-const-func Omit 'const' attribute on function arguments
                           (used with -x).
     -m, --gen-tied-var    Generate tied variables for access to declared
@@ -543,14 +544,14 @@ OPTIONS:
     -p, --remove-prefix   Specify a prefix which should be removed from the
                           Perl function names.
     -s, --const-subs      Create subroutines for specified macros.
-    -t, --default-type    Default type for autoloaded constants (default is IV)
-        --use-new-tests   Use Test::More in backward compatible modules
-        --use-old-tests   Use the module Test rather than Test::More
-        --skip-exporter   Do not export symbols
-        --skip-ppport     Do not use portability layer
-        --skip-autoloader Do not use the module C<AutoLoader>
-        --skip-strict     Do not use the pragma C<strict>
-        --skip-warnings   Do not use the pragma C<warnings>
+    -t, --default-type    Default type for autoloaded constants (default is IV).
+        --use-new-tests   Use Test::More in backward compatible modules.
+        --use-old-tests   Use the module Test rather than Test::More.
+        --skip-exporter   Do not export symbols.
+        --skip-ppport     Do not use portability layer.
+        --skip-autoloader Do not use the module C<AutoLoader>.
+        --skip-strict     Do not use the pragma C<strict>.
+        --skip-warnings   Do not use the pragma C<warnings>.
     -v, --version         Specify a version number for this extension.
     -x, --autogen-xsubs   Autogenerate XSUBs using C::Scan.
 
