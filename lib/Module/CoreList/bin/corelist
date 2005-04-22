@@ -10,11 +10,13 @@ See L<Module::CoreList> for one.
 
 =head1 SYNOPSIS
 
-    corelist [-help] [-a] [-man] [-v [ version ]] [ Modulename [ version ]]
+    corelist [-help] [-a] [-man] [-v [ version ]] [ Modulename [ version ]] ...
 
 =head1 OPTIONS
 
-=head2 a
+=over
+
+=item -a modulename
 
     corelist -a utf8
 
@@ -32,22 +34,24 @@ See L<Module::CoreList> for one.
       5.008006   1.04
       5.009      1.02
       5.009001   1.02
+      5.009002   1.04
 
-=head2 -?
+=item -?
 
 help! help! help! to see more help, try --man.
 
-=head2 man
+=item -man
 
 all of the help
 
-=head2 v
+=item -v
 
 lists all of the perl release versions we got the CoreList for.
 
 If you pass a version argument (value of $], like 5.00503),
 you get a list of all the modules and their respective versions.
 
+=back
 
 =cut
 
@@ -78,8 +82,17 @@ if(exists $Opts{v} ){
         print "$_\n" for sort keys %Module::CoreList::version;
         print "\n";
     }
-}elsif(@ARGV){
-    module_version(@ARGV);
+} elsif (@ARGV) {
+    while (@ARGV) {
+	my ($mod, $ver);
+	if ($ARGV[0] =~ /=/) {
+	    ($mod, $ver) = split /=/, shift @ARGV;
+	} else {
+	    $mod = shift @ARGV;
+	    $ver = (@ARGV && $ARGV[0] =~ /^\d/) ? shift @ARGV : "";
+	}
+	module_version($mod,$ver);
+    }
 } else {
     pod2usage(0);
 }
@@ -103,10 +116,9 @@ sub module_version {
     }
 
     print "\n",$msg,"\n";
-    
+
     if(defined $ret and exists $Opts{a} and $Opts{a}){
         for my $v(
-#            grep { $ret ne $_ }
             sort keys %Module::CoreList::version ){
 
             printf "  %-10s %-10s\n",
@@ -138,10 +150,12 @@ sub module_version {
 
     File::Spec::Aliens  was not in CORE (or so I think)
 
-
 =head1 COPYRIGHT
 
-Copyright (c) 2002-2003 by D.H. aka PodMaster
+Copyright (c) 2002-2005 by D.H. aka PodMaster
+
+Current maintainer : Rafael Garcia-Suarez E<lt>rgarciasuarez at mandriva dot
+comE<gt>
 
 This program is distributed under the same terms as perl itself.
 See http://perl.com or http://cpan.org for more info on that.
