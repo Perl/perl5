@@ -642,6 +642,6 @@ ok 174, $x eq "\x{100}\x{200}\xFFb";
 # [perl #34976] incorrect caching of utf8 substr length
 {
     my  $a = "abcd\x{100}";
-    ok 191, substr($a,1,2) eq 'bc';
-    ok 192, substr($a,1,1) eq 'b';
+    ok 182, substr($a,1,2) eq 'bc';
+    ok 183, substr($a,1,1) eq 'b';
 }
