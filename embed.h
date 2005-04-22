@@ -2183,6 +2183,14 @@
 #ifdef PERL_CORE
 #define magic_scalarpack	Perl_magic_scalarpack
 #endif
+#if defined(DEBUGGING)
+#ifdef PERL_CORE
+#define get_debug_opts_flags	Perl_get_debug_opts_flags
+#endif
+#endif
+#define op_refcnt_lock		Perl_op_refcnt_lock
+#define op_refcnt_unlock	Perl_op_refcnt_unlock
+#define savesvpv		Perl_savesvpv
 #ifdef PERL_NEED_MY_HTOLE16
 #ifdef PERL_CORE
 #define my_htole16		Perl_my_htole16
@@ -2306,14 +2314,6 @@
 #ifdef PERL_CORE
 #define my_swabn		Perl_my_swabn
 #endif
-#if defined(DEBUGGING)
-#ifdef PERL_CORE
-#define get_debug_opts_flags	Perl_get_debug_opts_flags
-#endif
-#endif
-#define op_refcnt_lock		Perl_op_refcnt_lock
-#define op_refcnt_unlock	Perl_op_refcnt_unlock
-#define savesvpv		Perl_savesvpv
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_concat		Perl_ck_concat
@@ -4829,6 +4829,14 @@
 #ifdef PERL_CORE
 #define magic_scalarpack(a,b)	Perl_magic_scalarpack(aTHX_ a,b)
 #endif
+#if defined(DEBUGGING)
+#ifdef PERL_CORE
+#define get_debug_opts_flags(a,b)	Perl_get_debug_opts_flags(aTHX_ a,b)
+#endif
+#endif
+#define op_refcnt_lock()	Perl_op_refcnt_lock(aTHX)
+#define op_refcnt_unlock()	Perl_op_refcnt_unlock(aTHX)
+#define savesvpv(a)		Perl_savesvpv(aTHX_ a)
 #ifdef PERL_NEED_MY_HTOLE16
 #ifdef PERL_CORE
 #define my_htole16		Perl_my_htole16
@@ -4952,14 +4960,6 @@
 #ifdef PERL_CORE
 #define my_swabn		Perl_my_swabn
 #endif
-#if defined(DEBUGGING)
-#ifdef PERL_CORE
-#define get_debug_opts_flags(a,b)	Perl_get_debug_opts_flags(aTHX_ a,b)
-#endif
-#endif
-#define op_refcnt_lock()	Perl_op_refcnt_lock(aTHX)
-#define op_refcnt_unlock()	Perl_op_refcnt_unlock(aTHX)
-#define savesvpv(a)		Perl_savesvpv(aTHX_ a)
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
 #define ck_concat(a)		Perl_ck_concat(aTHX_ a)
