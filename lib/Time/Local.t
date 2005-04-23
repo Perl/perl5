@@ -56,7 +56,10 @@ my @neg_time =
 my $neg_epoch_ok = defined ((localtime(-3600))[0]) ? 1 : 0;
 
 # use vmsish 'time' makes for oddness around the Unix epoch
-if ($^O eq 'VMS') { $time[0][2]++ }
+if ($^O eq 'VMS') { 
+    $time[0][2]++;
+    $neg_epoch_ok = 0; # time_t is unsigned
+}
 
 my $tests = (@time * 12);
 $tests += @neg_time * 12;
