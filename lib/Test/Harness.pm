@@ -27,11 +27,11 @@ Test::Harness - Run Perl standard test scripts with statistics
 
 =head1 VERSION
 
-Version 2.46
+Version 2.48
 
 =cut
 
-$VERSION = "2.46";
+$VERSION = "2.48";
 
 # Backwards compatibility for exportable variable names.
 *verbose  = *Verbose;
@@ -39,10 +39,12 @@ $VERSION = "2.46";
 *debug    = *Debug;
 
 $ENV{HARNESS_ACTIVE} = 1;
+$ENV{HARNESS_VERSION} = $VERSION;
 
 END {
     # For VMS.
     delete $ENV{HARNESS_ACTIVE};
+    delete $ENV{HARNESS_VERSION};
 }
 
 # Some experimental versions of OS/2 build have broken $?
@@ -852,15 +854,26 @@ the script dies with this message.
 
 =back
 
-=head1 ENVIRONMENT
+=head1 ENVIRONMENT VARIABLES THAT TEST::HARNESS SETS
+
+Test::Harness sets these before executing the individual tests.
 
 =over 4
 
 =item C<HARNESS_ACTIVE>
 
-Harness sets this before executing the individual tests.  This allows
-the tests to determine if they are being executed through the harness
-or by any other means.
+This is set to a true value.  It allows the tests to determine if they
+are being executed through the harness or by any other means.
+
+=item C<HARNESS_VERSION>
+
+This is the version of Test::Harness.
+
+=back
+
+=head1 ENVIRONMENT VARIABLES THAT AFFECT TEST::HARNESS
+
+=over 4
 
 =item C<HARNESS_COLUMNS>
 

@@ -1820,6 +1820,7 @@ lib/Test/Harness/Assert.pm	Test::Harness::Assert (internal use only)
 lib/Test/Harness/bin/prove	The prove harness utility
 lib/Test/Harness/Changes	Test::Harness
 lib/Test/Harness/Iterator.pm	Test::Harness::Iterator (internal use only)
+lib/Test/Harness/Point.pm	Test::Harness::Point (internal use only)
 lib/Test/Harness.pm		A test harness
 lib/Test/Harness/Straps.pm	Test::Harness::Straps
 lib/Test/Harness/t/00compile.t	Test::Harness test
@@ -1827,16 +1828,20 @@ lib/Test/Harness/TAP.pod	Documentation for the Test Anything Protocol
 lib/Test/Harness/t/assert.t	Test::Harness::Assert test
 lib/Test/Harness/t/base.t	Test::Harness test
 lib/Test/Harness/t/callback.t	Test::Harness test
+lib/Test/Harness/t/from_line.t	Test::Harness test
 lib/Test/Harness/t/harness.t	Test::Harness test
 lib/Test/Harness/t/inc_taint.t	Test::Harness test
 lib/Test/Harness/t/nonumbers.t	Test::Harness test
 lib/Test/Harness/t/ok.t		Test::Harness test
 lib/Test/Harness/t/pod.t	Test::Harness test
+lib/Test/Harness/t/point-parse.t	Test::Harness test
+lib/Test/Harness/t/point.t	Test::Harness test
 lib/Test/Harness/t/prove-globbing.t	Test::Harness::Straps test
 lib/Test/Harness/t/prove-switches.t	Test::Harness::Straps test
 lib/Test/Harness/t/strap-analyze.t	Test::Harness::Straps test
 lib/Test/Harness/t/strap.t		Test::Harness::Straps test
 lib/Test/Harness/t/test-harness.t	Test::Harness test
+lib/Test/Harness/t/version.t	Test::Harness test
 lib/Test/More.pm		More utilities for writing tests
 lib/Test.pm			A simple framework for writing test scripts
 lib/Test/Simple/Changes		Test::Simple changes
