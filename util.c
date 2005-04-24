@@ -4723,6 +4723,11 @@ Perl_init_global_struct(pTHX)
 #  else
     plvarsp = PL_VarsPtr;
 #  endif /* PERL_GLOBAL_STRUCT_PRIVATE */
+#  undef PERLVAR
+#  undef PERLVARA
+#  undef PERLVARI
+#  undef PERLVARIC
+#  undef PERLVARISC
 #  define PERLVAR(var,type) /**/
 #  define PERLVARA(var,n,type) /**/
 #  define PERLVARI(var,type,init) plvarsp->var = init;

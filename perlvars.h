@@ -90,7 +90,7 @@ PERLVARI(Gsig_handlers_initted, int, 0)
 PERLVARA(Gsig_ignoring, SIG_SIZE, int)	/* which signals we are ignoring */
 #endif
 #ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
-PERLVAR(Gsig_defaulting, SIG_SIZE, int)
+PERLVARA(Gsig_defaulting, SIG_SIZE, int)
 #endif
 
 #ifndef PERL_IMPLICIT_CONTEXT

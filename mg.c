@@ -54,15 +54,6 @@ tie.
 
 Signal_t Perl_csighandler(int sig);
 
-/* if you only have signal() and it resets on each signal, FAKE_PERSISTENT_SIGNAL_HANDLERS fixes */
-#if !defined(HAS_SIGACTION) && defined(VMS)
-#  define  FAKE_PERSISTENT_SIGNAL_HANDLERS
-#endif
-/* if we're doing kill() with sys$sigprc on VMS, FAKE_DEFAULT_SIGNAL_HANDLERS */
-#if defined(KILL_BY_SIGPRC)
-#  define  FAKE_DEFAULT_SIGNAL_HANDLERS
-#endif
-
 static void restore_magic(pTHX_ const void *p);
 static void unwind_handler_stack(pTHX_ const void *p);
 
@@ -2519,11 +2510,11 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 I32
 Perl_whichsig(pTHX_ const char *sig)
 {
-    register const char * const *sigv;
+    register char* const* sigv;
 
-    for (sigv = PL_sig_name; *sigv; sigv++)
+    for (sigv = (char* const*)PL_sig_name; *sigv; sigv++)
 	if (strEQ(sig,*sigv))
-	    return PL_sig_num[sigv - PL_sig_name];
+	    return PL_sig_num[sigv - (char* const*)PL_sig_name];
 #ifdef SIGCLD
     if (strEQ(sig,"CHLD"))
 	return SIGCLD;

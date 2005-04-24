@@ -281,7 +281,7 @@ S_tokereport(pTHX_ const char* s, I32 rv)
 	struct debug_tokens *p;
 	SV* report = newSVpvn("<== ", 4);
 
-	for (p = debug_tokens; p->token; p++) {
+	for (p = (struct debug_tokens *)debug_tokens; p->token; p++) {
 	    if (p->token == (int)rv) {
 		name = p->name;
 		type = p->type;

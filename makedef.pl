@@ -63,13 +63,13 @@ if ($PLATFORM eq 'aix') {
 elsif ($PLATFORM =~ /^win(?:32|ce)$/ || $PLATFORM eq 'netware') {
     $CCTYPE = "MSVC" unless defined $CCTYPE;
     foreach ($thrdvar_h, $intrpvar_h, $perlvars_h, $global_sym,
-		$pp_sym, $globvar_sym, $perlio_sym) {
+	     $pp_sym, $globvar_sym, $perlio_sym) {
 	s!^!..\\!;
     }
 }
 elsif ($PLATFORM eq 'MacOS') {
     foreach ($thrdvar_h, $intrpvar_h, $perlvars_h, $global_sym,
-		$pp_sym, $globvar_sym, $perlio_sym) {
+	     $pp_sym, $globvar_sym, $perlio_sym) {
 	s!^!::!;
     }
 }
@@ -81,6 +81,9 @@ unless ($PLATFORM eq 'win32' || $PLATFORM eq 'wince' || $PLATFORM eq 'MacOS' || 
 	    $_ = $1;
 	    $define{$1} = 1 while /-D(\w+)/g;
 	}
+        if (/^(d_(?:mmap|sigaction))='(.+)'$/) {
+            $define{$1} = $2;
+        }
 	if ($PLATFORM eq 'os2') {
 	    $CONFIG_ARGS = $1 if /^config_args='(.+)'$/;
 	    $ARCHNAME =    $1 if /^archname='(.+)'$/;
@@ -233,6 +236,7 @@ if ($PLATFORM eq 'win32') {
 		     PL_timesbuf
 		     main
 		     Perl_ErrorNo
+		     Perl_GetVars
 		     Perl_do_exec3
 		     Perl_do_ipcctl
 		     Perl_do_ipcget
@@ -309,6 +313,7 @@ if ($PLATFORM eq 'wince') {
 		     win32_spawnvp
 		     main
 		     Perl_ErrorNo
+		     Perl_GetVars
 		     Perl_do_exec3
 		     Perl_do_ipcctl
 		     Perl_do_ipcget
@@ -347,6 +352,7 @@ elsif ($PLATFORM eq 'aix') {
     skip_symbols([qw(
 		     Perl_dump_fds
 		     Perl_ErrorNo
+		     Perl_GetVars
 		     Perl_my_bcopy
 		     Perl_my_bzero
 		     Perl_my_chsize
@@ -447,6 +453,7 @@ elsif ($PLATFORM eq 'os2') {
 }
 elsif ($PLATFORM eq 'MacOS') {
     skip_symbols [qw(
+		    Perl_GetVars
 		    PL_cryptseen
 		    PL_cshlen
 		    PL_cshname
@@ -488,6 +495,7 @@ elsif ($PLATFORM eq 'netware') {
 			PL_timesbuf
 			main
 			Perl_ErrorNo
+			Perl_GetVars
 			Perl_do_exec3
 			Perl_do_ipcctl
 			Perl_do_ipcget
@@ -569,6 +577,7 @@ if ($define{'PERL_IMPLICIT_SYS'}) {
 		    Perl_getenv_len
 		    Perl_my_popen
 		    Perl_my_pclose
+		    PL_sig_sv
 		    )];
 }
 else {
@@ -629,27 +638,9 @@ else {
 		    )];
 }
 
-if ($define{'PERL_MALLOC_WRAP'}) {
-    emit_symbols [qw(
+unless ($define{'PERL_MALLOC_WRAP'}) {
+    skip_symbols [qw(
 		    PL_memory_wrap
-		    )];
-}
-
-unless ($define{'HAS_MMAP'}) {
-    skip_symbols [qw(
-		    PL_mmap_page_size
-		    )];
-}
-
-unless ($define{'HAS_TIMES'} || $define{'PERL_NEED_TIMESBASE'}) {
-    skip_symbols [qw(
-		    PL_timesbase
-		    )];
-}
-
-unless ($define{'PERL_NEED_APPCTX'}) {
-    skip_symbols [qw(
-		    PL_appctx
 		    )];
 }
 
@@ -747,12 +738,6 @@ unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
 		    )];
 }
 
-if ($define{'PERL_IMPLICIT_CONTEXT'}) {
-    skip_symbols [qw(
-		    PL_sig_sv
-		    )];
-}
-
 unless ($define{'PERL_IMPLICIT_SYS'}) {
     skip_symbols [qw(
 		    perl_alloc_using
@@ -762,26 +747,6 @@ unless ($define{'PERL_IMPLICIT_SYS'}) {
 
 unless ($define{'FAKE_THREADS'}) {
     skip_symbols [qw(PL_curthr)];
-}
-
-unless ($define{'FAKE_DEFAULT_SIGNAL_HANDLERS'}) {
-    skip_symbols [qw(
-		    PL_sig_defaulting
-		    )];
-}
-
-unless ($define{'FAKE_PERSISTENT_SIGNAL_HANDLERS'}) {
-    skip_symbols [qw(
-		    PL_sig_ignoring
-		    )];
-}
-
-unless ($define{'FAKE_DEFAULT_SIGNAL_HANDLERS'} ||
-        $define{'FAKE_PERSISTENT_SIGNAL_HANDLERS'})
-{
-    skip_symbols [qw(
-		    PL_sig_handlers_initted
-		    )];
 }
 
 unless ($define{'PL_OP_SLAB_ALLOC'}) {
@@ -798,6 +763,37 @@ unless ($define{'THREADS_HAVE_PIDS'}) {
     skip_symbols [qw(PL_ppid)];
 }
 
+unless ($define{'PERL_NEED_APPCTX'}) {
+    skip_symbols [qw(
+		    PL_appctx
+		    )];
+}
+
+unless ($define{'PERL_NEED_TIMESBASE'}) {
+    skip_symbols [qw(
+		    PL_timesbase
+		    )];
+}
+
+unless ($define{'d_mmap'}) {
+    skip_symbols [qw(
+		    PL_mmap_page_size
+		    )];
+}
+
+if ($define{'d_sigaction'}) {
+    skip_symbols [qw(
+		    PL_sig_trapped
+		    )];
+}
+
+if ($^O ne 'vms') {
+    # VMS does its own thing for these symbols.
+    skip_symbols [qw(PL_sig_handlers_initted
+                     PL_sig_ignoring
+                     PL_sig_defaulting)];
+}  
+
 sub readvar {
     my $file = shift;
     my $proc = shift || sub { "PL_$_[2]" };
@@ -805,19 +801,12 @@ sub readvar {
     my @syms;
     while (<VARS>) {
 	# All symbols have a Perl_ prefix because that's what embed.h
-	# sticks in front of them.
+	# sticks in front of them.  The A?I?S?C? is strictly speaking
+	# wrong.
 	push(@syms, &$proc($1,$2,$3)) if (/\bPERLVAR(A?I?S?C?)\(([IGT])(\w+)/);
     }
     close(VARS);
     return \@syms;
-}
-
-unless ($define{'PERL_GLOBAL_STRUCT'}) {
-    skip_symbols [qw(
-		     Perl_GetVars
-		     Perl_free_global_struct
-		     Perl_init_global_struct
-                    )];
 }
 
 if ($define{'PERL_GLOBAL_STRUCT'}) {
@@ -825,6 +814,8 @@ if ($define{'PERL_GLOBAL_STRUCT'}) {
     skip_symbols $global;
     emit_symbol('Perl_GetVars');
     emit_symbols [qw(PL_Vars PL_VarsPtr)] unless $CCTYPE eq 'GCC';
+} else {
+    skip_symbols [qw(Perl_init_global_struct Perl_free_global_struct)];
 }
 
 # functions from *.sym files
@@ -999,7 +990,7 @@ if ($define{'USE_PERLIO'}) {
 } else {
 	# -Uuseperlio
 	# Skip the PerlIO layer symbols - although
-	# nothing should have exported them any way
+	# nothing should have exported them anyway.
 	skip_symbols \@layer_syms;
         skip_symbols [qw(PL_def_layerlist PL_known_layers PL_perlio)];
 

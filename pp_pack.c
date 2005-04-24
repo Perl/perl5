@@ -2351,7 +2351,21 @@ S_div128(pTHX_ SV *pnum, bool *done)
   return (m);
 }
 
-
+#define TEMPSYM_INIT(symptr, p, e) \
+    STMT_START {	\
+	(symptr)->patptr   = p;		\
+	(symptr)->patend   = e;		\
+	(symptr)->grpbeg   = NULL;	\
+	(symptr)->grpend   = NULL;	\
+	(symptr)->grpend   = NULL;	\
+	(symptr)->code     = 0;		\
+	(symptr)->length   = 0;		\
+	(symptr)->howlen   = 0;		\
+	(symptr)->level    = 0;		\
+	(symptr)->flags    = FLAG_PACK;	\
+	(symptr)->strbeg   = 0;		\
+	(symptr)->previous = NULL;	\
+   } STMT_END
 
 /*
 =for apidoc pack_cat
@@ -2365,9 +2379,11 @@ flags are not used. This call should not be used; use packlist instead.
 void
 Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beglist, SV **endlist, SV ***next_in_list, U32 flags)
 {
-    tempsym_t sym = { pat, patend, NULL, NULL, 0, 0, 0, 0, FLAG_PACK, 0, NULL };
+    tempsym_t sym;
     (void)next_in_list;
     (void)flags;
+
+    TEMPSYM_INIT(&sym, pat, patend);
 
     (void)pack_rec( cat, &sym, beglist, endlist );
 }
@@ -2385,7 +2401,9 @@ void
 Perl_packlist(pTHX_ SV *cat, char *pat, register char *patend, register SV **beglist, SV **endlist )
 {
     STRLEN no_len;
-    tempsym_t sym = { pat, patend, NULL, NULL, 0, 0, 0, 0, FLAG_PACK, 0, NULL };
+    tempsym_t sym;
+
+    TEMPSYM_INIT(&sym, pat, patend);
 
     /* We're going to do changes through SvPVX(cat). Make sure it's valid.
        Also make sure any UTF8 flag is loaded */

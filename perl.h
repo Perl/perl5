@@ -3764,6 +3764,16 @@ typedef struct exitlistentry {
     void *ptr;
 } PerlExitListEntry;
 
+/* if you only have signal() and it resets on each signal, FAKE_PERSISTENT_SIGNAL_HANDLERS fixes */
+/* These have to be before perlvars.h */
+#if !defined(HAS_SIGACTION) && defined(VMS)
+#  define  FAKE_PERSISTENT_SIGNAL_HANDLERS
+#endif
+/* if we're doing kill() with sys$sigprc on VMS, FAKE_DEFAULT_SIGNAL_HANDLERS */
+#if defined(KILL_BY_SIGPRC)
+#  define  FAKE_DEFAULT_SIGNAL_HANDLERS
+#endif
+
 #ifdef PERL_GLOBAL_STRUCT
 struct perl_vars {
 #  include "perlvars.h"
