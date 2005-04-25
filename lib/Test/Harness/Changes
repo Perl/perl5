@@ -1,5 +1,51 @@
 Revision history for Perl extension Test::Harness
 
+2.48    Fri Apr 22 22:41:46 CDT 2005
+    Released after weeks of non-complaint.
+
+2.47_03 Wed Mar  2 16:52:55 CST 2005
+    [THINGS THAT MIGHT BREAK YOUR CODE]
+    * Test::Harness now requires Perl 5.005_03 or above.
+
+    [FIXES]
+    * Fixed incorrect "confused by tests in wrong order" error in 2.47_02.
+
+2.47_02 Tue Mar  1 23:15:47 CST 2005
+    [THINGS THAT MIGHT BREAK YOUR CODE]
+    * Test directives for skip tests used to be anything that matches
+      /^skip/i, like the word "skipped", but now it must match
+      /^skip\s+/i.
+
+    [ENHANCEMENTS]
+    * T::H now sets environment variable HARNESS_VERSION, in case a test
+      program wants to know what version of T::H it's running under.
+
+2.47_01 Mon Feb 21 01:14:13 CST 2005
+    [FIXES]
+    * Fixed a problem submitted by Craig Berry:
+
+        Several of the Test::Harness tests now fail on VMS with the
+        following warning:
+
+        Can't find string terminator "]" anywhere before EOF at -e line 1.
+
+        The problem is that when a command is piped to the shell and that
+        command has a newline character embedded in it, the part after
+        the newline is invisible to the shell. The patch below corrects
+        that by escaping the newline so it is not subject to variable
+        interpolation until it gets to the child's Perl one-liner.
+
+    [ENHANCEMENTS]
+    * Test::Harness::Straps now has diagnostic gathering without changing
+      how tests are run.  It also adds these messages by default.
+      Note that the new method, _is_diagnostic(), is for internal
+      use only.  It may change soon.  Thanks to chromatic.
+
+    [DOCUMENTATION]
+    * Expanded Test::Harness::TAP.pod, and added examples.
+
+    * Fixed a crucial documentation typo in Test::Harness::Straps.
+
 2.46    Thu Jan 20 11:50:59 CST 2005
     Released.
 
