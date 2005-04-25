@@ -6,10 +6,14 @@ Storable.xs		    The C side of Storable
 ChangeLog		    Changes since baseline
 hints/linux.pl		    Hint file to drop gcc to -O2
 # ppport.h		    Compatibility header
+t/HAS_ATTACH.pm		    For auto-requiring of modules for STORABLE_attach
 t/HAS_HOOK.pm		    For auto-requiring of modules for STORABLE_thaw
 t/HAS_OVERLOAD.pm	    For auto-requiring of mdoules for overload
+t/attach_errors.t	    Trigger and test STORABLE_attach errors
+t/attach_singleton.t	    Test STORABLE_attach for the Singleton pattern
 t/blessed.t		    See if Storable works
 t/canonical.t		    See if Storable works
+t/circular_hook.t	    Test thaw hook called depth-first for circular refs
 t/code.t		    Test (de)serialization of code references
 t/compat06.t		    See if Storable works
 t/croak.t		    See if Storable works

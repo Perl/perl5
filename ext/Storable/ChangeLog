@@ -1,8 +1,9 @@
-Sat Jul 10 22:37:47 BST 2004   Nicholas Clark <nick@ccl4.org>
+Mon Apr 25 07:29:14 IST 2005   Abhijit Menon-Sen <ams@wiw.org>
 
     Version 2.14
 
 	1. Store weak references
+	2. Add STORABLE_attach hook.
 
 Thu Jun 17 12:26:43 BST 2004   Nicholas Clark <nick@ccl4.org>
 

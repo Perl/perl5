@@ -2910,6 +2910,16 @@ static int store_hook(
 
 	ary = AvARRAY(av);
 	pv = SvPV(ary[0], len2);
+	/* We can't use pkg_can here because it only caches one method per
+	 * package */
+	{ 
+	    GV* gv = gv_fetchmethod_autoload(pkg, "STORABLE_attach", FALSE);
+	    if (gv && isGV(gv)) {
+	        if (count > 1)
+	            CROAK(("Freeze cannot return references if %s class is using STORABLE_attach", classname));
+	        goto check_done;
+	    }
+	}
 
 	/*
 	 * If they returned more than one item, we need to serialize some
@@ -3015,6 +3025,7 @@ static int store_hook(
 	 * proposed the right fix.  -- RAM, 15/09/2000
 	 */
 
+check_done:
 	if (!known_class(aTHX_ cxt, classname, len, &classnum)) {
 		TRACEME(("first time we see class %s, ID = %d", classname, classnum));
 		classnum = -1;				/* Mark: we must store classname */
@@ -3644,7 +3655,7 @@ static int do_store(
 	 * Recursively store object...
 	 */
 
-	ASSERT(is_storing(), ("within store operation"));
+	ASSERT(is_storing(aTHX), ("within store operation"));
 
 	status = store(aTHX_ cxt, sv);		/* Just do it! */
 
@@ -3917,6 +3928,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, char *cname)
 	SV *hook;
 	SV *sv;
 	SV *rv;
+	GV *attach;
 	int obj_type;
 	int clone = cxt->optype & ST_CLONE;
 	char mtype = '\0';
@@ -4138,6 +4150,29 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, char *cname)
 	 */
 
 	BLESS(sv, classname);
+
+	/* Handle attach case; again can't use pkg_can because it only
+	 * caches one method */
+	attach = gv_fetchmethod_autoload(SvSTASH(sv), "STORABLE_attach", FALSE);
+	if (attach && isGV(attach)) {
+	    SV* attached;
+	    SV* attach_hook = newRV((SV*) GvCV(attach));
+
+	    if (av)
+	        CROAK(("STORABLE_attach called with unexpected references"));
+	    av = newAV();
+	    av_extend(av, 1);
+	    AvFILLp(av) = 0;
+	    AvARRAY(av)[0] = SvREFCNT_inc(frozen);
+	    rv = newSVpv(classname, 0);
+	    attached = scalar_call(aTHX_ rv, attach_hook, clone, av, G_SCALAR);
+	    if (attached &&
+	        SvROK(attached) && 
+	        sv_derived_from(attached, classname))
+	        return SvRV(attached);
+	    CROAK(("STORABLE_attach did not return a %s object", classname));
+	}
+
 	hook = pkg_can(aTHX_ cxt->hook, SvSTASH(sv), "STORABLE_thaw");
 	if (!hook) {
 		/*
@@ -5949,7 +5984,7 @@ static SV *do_retrieve(
 	TRACEME(("input source is %s", is_tainted ? "tainted" : "trusted"));
 	init_retrieve_context(aTHX_ cxt, optype, is_tainted);
 
-	ASSERT(is_retrieving(), ("within retrieve operation"));
+	ASSERT(is_retrieving(aTHX), ("within retrieve operation"));
 
 	sv = retrieve(aTHX_ cxt, 0);		/* Recursively retrieve object, get root SV */
 
