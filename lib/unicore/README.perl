@@ -16,6 +16,13 @@ To be 8.3-friendly, the lib/unicore/PropertyValueAliases.txt was
 renamed to be lib/unicore/PropValueAliases.txt, since otherwise
 it would have conflicted with lib/unicore/PropertyAliases.txt.
 
+NOTE: If you modify the input file set you should also run
+ 
+    mktables -makelist
+    
+which will recreate the mktables.lst file which is used to speed up
+the build process.    
+
 FOR PUMPKINS
 
 The *.pl files are generated from the *.txt files by the mktables script,
