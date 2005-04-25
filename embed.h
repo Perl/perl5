@@ -1117,11 +1117,11 @@
 #define pack_rec		S_pack_rec
 #define mul128			S_mul128
 #define measure_struct		S_measure_struct
-#define group_end		S_group_end
-#define get_num			S_get_num
 #define next_symbol		S_next_symbol
 #define is_an_int		S_is_an_int
 #define div128			S_div128
+#define group_end		S_group_end
+#define get_num			S_get_num
 #endif
 #endif
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
@@ -3077,11 +3077,11 @@
 #define pack_rec(a,b,c,d)	S_pack_rec(aTHX_ a,b,c,d)
 #define mul128(a,b)		S_mul128(aTHX_ a,b)
 #define measure_struct(a)	S_measure_struct(aTHX_ a)
-#define group_end(a,b,c)	S_group_end(aTHX_ a,b,c)
-#define get_num(a,b)		S_get_num(aTHX_ a,b)
 #define next_symbol(a)		S_next_symbol(aTHX_ a)
 #define is_an_int(a,b)		S_is_an_int(aTHX_ a,b)
 #define div128(a,b)		S_div128(aTHX_ a,b)
+#define group_end(a,b,c)	S_group_end(aTHX_ a,b,c)
+#define get_num(a,b)		S_get_num(aTHX_ a,b)
 #endif
 #endif
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)

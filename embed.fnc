@@ -592,8 +592,8 @@ Ap	|void	|set_numeric_local
 Ap	|void	|set_numeric_radix
 Ap	|void	|set_numeric_standard
 Apd	|void	|require_pv	|const char* pv
-Apd	|void	|pack_cat	|SV *cat|char *pat|char *patend|SV **beglist|SV **endlist|SV ***next_in_list|U32 flags
-Apd	|void	|packlist 	|SV *cat|char *pat|char *patend|SV **beglist|SV **endlist
+Apd	|void	|pack_cat	|SV *cat|const char *pat|const char *patend|SV **beglist|SV **endlist|SV ***next_in_list|U32 flags
+Apd	|void	|packlist 	|SV *cat|const char *pat|const char *patend|SV **beglist|SV **endlist
 p	|void	|pidgone	|Pid_t pid|int status
 Ap	|void	|pmflag		|U32* pmfl|int ch
 p	|OP*	|pmruntime	|OP* pm|OP* expr|bool isreg
@@ -815,8 +815,8 @@ Apd	|UV	|to_utf8_fold	|const U8 *p|U8* ustrp|STRLEN *lenp
 #if defined(UNLINK_ALL_VERSIONS)
 Ap	|I32	|unlnk		|char* f
 #endif
-Apd	|I32	|unpack_str	|char *pat|char *patend|char *s|char *strbeg|char *strend|char **new_s|I32 ocnt|U32 flags
-Apd	|I32	|unpackstring	|char *pat|char *patend|char *s|char *strend|U32 flags
+Apd	|I32	|unpack_str	|const char *pat|const char *patend|const char *s|const char *strbeg|const char *strend|char **new_s|I32 ocnt|U32 flags
+Apd	|I32	|unpackstring	|const char *pat|const char *patend|const char *s|const char *strend|U32 flags
 Ap	|void	|unsharepvn	|const char* sv|I32 len|U32 hash
 p	|void	|unshare_hek	|HEK* hek
 p	|void	|utilize	|int aver|I32 floor|OP* version|OP* idop|OP* arg
@@ -1058,15 +1058,15 @@ s	|SV*	|refto		|SV* sv
 #endif
 
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
-s	|I32	|unpack_rec	|tempsym_t* symptr|char *s|char *strbeg|char *strend|char **new_s
-s	|SV **	|pack_rec	|SV *cat|tempsym_t* symptr|SV **beglist|SV **endlist
+s	|I32	|unpack_rec	|struct tempsym* symptr|const char *s|const char *strbeg|const char *strend|const char **new_s
+s	|SV **	|pack_rec	|SV *cat|struct tempsym* symptr|SV **beglist|SV **endlist
 s	|SV*	|mul128		|SV *sv|U8 m
-s	|I32	|measure_struct	|tempsym_t* symptr
-s	|char *	|group_end	|char *pat|char *patend|char ender
-s	|char *	|get_num	|char *ppat|I32 *
-s	|bool	|next_symbol	|tempsym_t* symptr
-s	|SV*	|is_an_int	|char *s|STRLEN l
+s	|I32	|measure_struct	|struct tempsym* symptr
+s	|bool	|next_symbol	|struct tempsym* symptr
+s	|SV*	|is_an_int	|const char *s|STRLEN l
 s	|int	|div128		|SV *pnum|bool *done
+s	|const char *|group_end	|const char *pat|const char *patend|char ender
+s	|const char *|get_num	|const char *ppat|I32 *lenptr
 #endif
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
@@ -1371,7 +1371,7 @@ pd 	|void	|do_dump_pad	|I32 level|PerlIO *file \
 pd	|void	|pad_fixup_inner_anons|PADLIST *padlist|CV *old_cv|CV *new_cv
 
 pd	|void	|pad_push	|PADLIST *padlist|int depth
-p	|HV*	|pad_compname_type|const PADOFFSET po
+p	|HV*	|pad_compname_type|PADOFFSET po
 
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
 sd	|PADOFFSET|pad_findlex	|const char *name|const CV* cv|U32 seq|int warn \
