@@ -252,7 +252,7 @@ when taint checks are enabled and when C<*ENV> has been aliased, so that
 C<%ENV> has no env-magic anymore and hence the environment cannot be verified
 as taint-free.
 
-The internals of C<pack> and C<unpack have been updated. All legitimate
+The internals of C<pack> and C<unpack> have been updated. All legitimate
 templates should work as before, but there may be some changes in the error
 reported for complex failure cases. Any behaviour changes for non-error cases
 are bugs, and should be reported.
