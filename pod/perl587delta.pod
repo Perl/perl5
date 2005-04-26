@@ -240,7 +240,7 @@ used to result in incorrect or invalid output.
 
 =item *
 
-C<PERL_MALLOC>, C<DEBUG_MSTATS> C<PERL_HASH_SEED_EXPLICIT> and C<NO_HASH_SEED>
+C<PERL_MALLOC>, C<DEBUG_MSTATS>, C<PERL_HASH_SEED_EXPLICIT> and C<NO_HASH_SEED>
 should now work in Win32 makefiles.
 
 =back
