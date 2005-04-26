@@ -539,7 +539,8 @@ between different threads. These threads can be used by using the C<threads>
 module or by doing fork() on win32 (fake fork() support). When a
 thread is cloned all Perl data is cloned, however non-Perl data cannot
 be cloned automatically.  Perl after 5.7.2 has support for the C<CLONE>
-special subroutine.  In C<CLONE> you can do whatever you need to do,
+and C<CLONE_SKIP> special subroutines.  In C<CLONE> you can do whatever
+you need to do,
 like for example handle the cloning of non-Perl data, if necessary.
 C<CLONE> will be called once as a class method for every package that has it
 defined (or inherits it).  It will be called in the context of the new thread,
@@ -550,6 +551,21 @@ will be passed in to give more information about the state of cloning.
 
 If you want to CLONE all objects you will need to keep track of them per
 package. This is simply done using a hash and Scalar::Util::weaken().
+
+Like C<CLONE>, C<CLONE_SKIP> is called once per package; however, it is
+called just before cloning starts, and in the context of the parent
+thread. If it returns a true value, then no objects of that class will
+be cloned; or rather, they will be copied as unblessed, undef values.
+This provides a simple mechanism for making a module threadsafe; just add
+C<sub CLONE_SKIP { 1 }> at the top of the class, and C<DESTROY()> will be
+now only be called once per object. Of course, if the child thread needs
+to make use of the objects, then a more sophisticated approach is
+needed.
+
+Like C<CLONE>, C<CLONE_SKIP> is currently called with no parameters other
+than the invocant package name, although that may change. Similarly, to
+allow for future expansion, the return value should be a single C<0> or
+C<1> value.
 
 =head1 SEE ALSO
 
