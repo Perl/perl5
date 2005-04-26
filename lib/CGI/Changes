@@ -1,3 +1,7 @@
+  Version 3.08
+    1. update support for mod_perl 2.0.  versions prior to
+       mod_perl 1.999_22 (2.0.0-RC5) are no longer supported.
+
   Version 3.07
     1. Fixed typo in mod_perl detection.
 

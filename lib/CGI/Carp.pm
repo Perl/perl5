@@ -465,17 +465,20 @@ END
   ;
 
   if ($mod_perl) {
-    require mod_perl;
-    if ($mod_perl::VERSION >= 1.99) {
+    my $r;
+    if ($ENV{MOD_PERL_API_VERSION}) {
       $mod_perl = 2;
-      require Apache::RequestRec;
-      require Apache::RequestIO;
-      require Apache::RequestUtil;
+      require Apache2::RequestRec;
+      require Apache2::RequestIO;
+      require Apache2::RequestUtil;
       require APR::Pool;
       require ModPerl::Util;
-      require Apache::Response;
+      require Apache2::Response;
+      $r = Apache2::RequestUtil->request;
     }
-    my $r = Apache->request;
+    else {
+      $r = Apache->request;
+    }
     # If bytes have already been sent, then
     # we print the message out directly.
     # Otherwise we make a custom error

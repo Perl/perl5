@@ -18,8 +18,8 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.178 2005/03/14 16:30:20 lstein Exp $';
-$CGI::VERSION=3.07;
+$CGI::revision = '$Id: CGI.pm,v 1.179 2005/04/07 22:40:37 lstein Exp $';
+$CGI::VERSION=3.08;
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -177,20 +177,17 @@ $IIS++ if defined($ENV{'SERVER_SOFTWARE'}) && $ENV{'SERVER_SOFTWARE'}=~/IIS/;
 
 # Turn on special checking for Doug MacEachern's modperl
 if (exists $ENV{MOD_PERL}) {
-  eval "require mod_perl";
   # mod_perl handlers may run system() on scripts using CGI.pm;
   # Make sure so we don't get fooled by inherited $ENV{MOD_PERL}
-  if (defined $mod_perl::VERSION) {
-    if ($mod_perl::VERSION >= 1.99) {
-      $MOD_PERL = 2;
-      require Apache::Response;
-      require Apache::RequestRec;
-      require Apache::RequestUtil;
-      require APR::Pool;
-    } else {
-      $MOD_PERL = 1;
-      require Apache;
-    }
+  if ($ENV{MOD_PERL_API_VERSION} == 2) {
+    $MOD_PERL = 2;
+    require Apache2::Response;
+    require Apache2::RequestRec;
+    require Apache2::RequestUtil;
+    require APR::Pool;
+  } else {
+    $MOD_PERL = 1;
+    require Apache;
   }
 }
 
@@ -330,7 +327,7 @@ sub new {
   if (ref($initializer[0])
       && (UNIVERSAL::isa($initializer[0],'Apache')
 	  ||
-	  UNIVERSAL::isa($initializer[0],'Apache::RequestRec')
+	  UNIVERSAL::isa($initializer[0],'Apache2::RequestRec')
 	 )) {
     $self->r(shift @initializer);
   }
@@ -339,14 +336,16 @@ sub new {
     $self->upload_hook(shift @initializer, shift @initializer);
   }
   if ($MOD_PERL) {
-    $self->r(Apache->request) unless $self->r;
-    my $r = $self->r;
     if ($MOD_PERL == 1) {
+      $self->r(Apache->request) unless $self->r;
+      my $r = $self->r;
       $r->register_cleanup(\&CGI::_reset_globals);
     }
     else {
       # XXX: once we have the new API
       # will do a real PerlOptions -SetupEnv check
+      $self->r(Apache2::RequestUtil->request) unless $self->r;
+      my $r = $self->r;
       $r->subprocess_env unless exists $ENV{REQUEST_METHOD};
       $r->pool->cleanup_register(\&CGI::_reset_globals);
     }
