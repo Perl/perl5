@@ -120,7 +120,17 @@ ____________________________________________________________________________
 	  !> utils/h2xs.PL
 ____________________________________________________________________________
 [ 24297] By: nicholas                              on 2005/04/22  15:27:52
-        Log:      Branch: maint-5.8/perl
+        Log: Integrate:
+             [ 24273]
+             [perl #34902] Text::Wrap::wrap() fails with non-space separator
+     
+             [ 24274]
+             bump version number in Text::Wrap after change #24273
+     
+             [ 24275]
+             Sigh - really bump Text::Wrap version number this time.
+
+     Branch: maint-5.8/perl
 	  !> lib/Text/TabsWrap/t/wrap.t lib/Text/Wrap.pm
 ____________________________________________________________________________
 [ 24296] By: nicholas                              on 2005/04/22  15:13:08
