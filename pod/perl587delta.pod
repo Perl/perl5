@@ -13,9 +13,141 @@ There are no changes incompatible with 5.8.6.
 
 =head1 Core Enhancements
 
+=head2 Unicode Character Database 4.1.0
+
+The copy of the Unicode Character Database included in Perl 5.8 has
+been updated to 4.1.0 from 4.0.1.
+
+=head2 suidperl less insecure
+
+A pair of exploits in C<suidperl> involving debugging code have been closed.
+
+For new projects the core perl team would strongly recommend that you use
+dedicated, single purpose security tools such as C<sudo> in preference to
+C<suidperl>.
+
+=head2 Optional site customisation script
+
+The perl interpreter can be built to allow the use of a site customisation
+script. By default this is not enabled, to be consistent with previous perl
+releases. To use this, add C<-Dusesitecustomize> to the command line flags
+when running the C<Configure> script. See also L<perlrun/-f>.
+
+=head2 C<Config.pm> is now much smaller.
+
+C<Config.pm> is now about 3K rather than 32K, with the infrequently used
+code and C<%Config> values loaded on demand. This is transparent to the
+programmer, but means that most code will save parsing and loading 29K of
+script. (for example code that uses C<File::Find>)
+
 =head1 Modules and Pragmata
 
+=over 4
+
+=item *
+
+B upgraded to version 1.07
+
+=item *
+
+bignum upgraded to version 0.17
+
+=item *
+
+CGI upgraded to version 3.07
+
+=item *
+
+Class::ISA upgraded to version 0.33
+
+=item *
+
+Data::Dumper upgraded to version 2.121_02
+
+=item *
+
+DB_File upgraded to version 1.811
+
+=item *
+
+Devel::PPPort upgraded to version 3.06
+
+=item *
+
+Digest upgraded to version 1.10
+
+=item *
+
+Encode upgraded to version 2.09
+
+=item *
+
+File::Temp upgraded to version 0.16
+
+=item *
+
+overload upgraded to version 1.03
+
+=item *
+
+Math::BigInt upgraded to version 1.76
+
+=item *
+
+Math::BigRat upgraded to version 0.15
+
+=item *
+
+PathTools upgraded to version 3.05
+
+=item *
+
+Pod::Perldoc upgraded to version 3.14
+
+=item *
+
+Pod::LaTeX upgraded to version 0.58
+
+=item *
+
+Pod::Parser upgraded to version 1.30
+
+=item *
+
+Term::ANSIColor upgraded to version 1.09
+
+=item *
+
+Test::Harness upgraded to version 2.48
+
+=item *
+
+Test::Simple upgraded to version 0.54
+
+=item *
+
+Text::Wrap upgraded to version 2001.09293, to fix a bug when wrap() was
+called with a non-space separator.
+
+=item *
+
+Time::HiRes upgraded to version 1.66
+
+=item *
+
+Time::Local upgraded to version 1.11
+
+=item *
+
+Unicode::Normalize upgraded to version 0.32
+
+=back
+
 =head1 Utility Changes
+
+=head2 find2perl enhancements
+
+C<find2perl> has new options C<-iname>, C<-path> and C<-ipath>.
 
 =head1 New Documentation
 
@@ -25,13 +157,122 @@ There are no changes incompatible with 5.8.6.
 
 =head1 Selected Bug Fixes
 
+=over 4
+
+=item *
+
+Another obscure bug involving C<substr> and UTF-8 caused by bad internal
+offset caching has been identified and fixed.
+
+=item *
+
+A bug involving the loading of UTF-8 tables by the regexp engine has been
+fixed - code such as C<"\x{100}" =~ /[[:print:]]/> will no longer give
+corrupt results.
+
+=item *
+
+C<uc> of a long string could exhaust memory. This has been fixed.
+
+=item *
+
+C<index>/C<rindex> were buggy for some combinations of Unicode and
+non-Unicode data. This has been fixed.
+
+=item *
+
+C<read> (and presumably C<sysread>) would expose the UTF-8 internals when
+reading from a byte oriented file handle into a UTF-8 scalar. This has
+been fixed.
+
+=item *
+
+Several C<pack>/C<unpack> bug fixes:
+
+=over 4
+
+=item *
+
+Checksums with C<b> or C<B> formats were broken.
+
+=item *
+
+C<unpack> checksums could overflow with the C<C> format.
+
+=item *
+
+C<U0> and C<C0> are now scoped to C<()> C<pack> sub-templates.
+
+=item *
+
+Counted length prefixes now don't change C<C0>/C<U0> mode.
+
+=item *
+
+C<pack> C<Z0> used to destroy the preceding character.
+
+=item *
+
+C<P>/C<p> C<pack> formats used to only recognise literal C<undef> 
+
+=back
+
+=item *
+
+Using closures with ithreads could cause perl to crash. This was due to
+failure to correctly lock internal OP structures, and has been fixed.
+
+=item *
+
+The return value of C<close> now correctly reflects any file errors that
+occur while flushing the handle's data, instead of just giving failure if
+the actual underlying file close operation failed.
+
+=item *
+
+C<not() || 1> used to segfault. C<not()> now behaves like C<not(0)>, which was
+the pre 5.6.0 behaviour.
+
+=item *
+
+C<h2ph> has various enhancements to cope with constructs in header files that
+used to result in incorrect or invalid output.
+
+=item *
+
+C<PERL_MALLOC>, C<DEBUG_MSTATS> C<PERL_HASH_SEED_EXPLICIT> and C<NO_HASH_SEED>
+should now work in Win32 makefiles.
+
+=back
+
 =head1 New or Changed Diagnostics
 
+There is a new taint error, "%ENV is aliased to %s". This error is thrown
+when taint checks are enabled and when C<*ENV> has been aliased, so that
+C<%ENV> has no env-magic anymore and hence the environment cannot be verified
+as taint-free.
+
+The internals of C<pack> and C<unpack have been updated. All legitimate
+templates should work as before, but there may be some changes in the error
+reported for complex failure cases. Any behaviour changes for non-error cases
+are bugs, and should be reported.
+
 =head1 Changed Internals
+
+There has been a fair amount of refactoring of the C<C> source code, partly to
+make it tidier and more maintainable. The resulting object code and the
+C<perl> binary may well be smaller than 5.8.6, and hopefully faster in some
+cases, but apart from this there should be no user-detectable changes.
+
+C<${^UTF8LOCALE}> has been added to give perl space access to C<PL_utf8locale>.
 
 =head1 New Tests
 
 =head1 Known Problems
+
+Unicode strings returned from overloaded operators can be buggy. This is a
+long standing bug reported since 5.8.6 was released, but we do not yet have
+a suitable fix for it.
 
 =head1 Platform Specific Problems
 
