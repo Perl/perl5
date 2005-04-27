@@ -7,7 +7,7 @@
 #
 package B;
 
-our $VERSION = '1.07';
+our $VERSION = '1.08';
 
 use XSLoader ();
 require Exporter;
@@ -31,10 +31,10 @@ use strict;
 @B::NULL::ISA = 'B::SV';
 @B::PV::ISA = 'B::SV';
 @B::IV::ISA = 'B::SV';
-@B::NV::ISA = 'B::IV';
+@B::NV::ISA = 'B::SV';
 @B::RV::ISA = 'B::SV';
 @B::PVIV::ISA = qw(B::PV B::IV);
-@B::PVNV::ISA = qw(B::PV B::NV);
+@B::PVNV::ISA = qw(B::PVIV B::NV);
 @B::PVMG::ISA = 'B::PVNV';
 # Change in the inheritance hierarchy post 5.9.0
 @B::PVLV::ISA = $] > 5.009 ? 'B::GV' : 'B::PVMG';
@@ -543,26 +543,26 @@ and later this is:
 
                              B::SV
                                |
-                +--------------+----------------------+
-                |              |                      |
-              B::PV          B::IV                  B::RV
-                |  \        /     \
-                |   \      /       \
-                |   B::PVIV         B::NV
-                 \                 /
-                  \____         __/
-                       \       /
-                        B::PVNV
-                           |
-                           |
-                        B::PVMG
-                           |
-                +-----+----+------+-----+-----+
-                |     |    |      |     |     |
-              B::BM B::AV B::GV B::HV B::CV B::IO
-                           |            |
-                        B::PVLV         |
-                                      B::FM
+                +--------------+----------+------------+
+                |              |          |            |
+              B::PV          B::IV      B::NV        B::RV
+                  \         /          / 
+                   \       /          /
+                    B::PVIV          /
+                        \           /
+                         \         /
+                          \       /
+                           B::PVNV
+                             |
+                             |
+                          B::PVMG
+                             |
+                  +-----+----+------+-----+-----+
+                  |     |    |      |     |     |
+                B::BM B::AV B::GV B::HV B::CV B::IO
+                             |            |
+                          B::PVLV         |
+                                        B::FM
 
 
 For 5.9.0 and earlier, PVLV is a direct subclass of PVMG, so the base
