@@ -1014,7 +1014,7 @@ perl_free(pTHXx)
 #endif
 
 static void __attribute__((destructor))
-perl_fini()
+perl_fini(void)
 {
     dVAR;
     if (PL_curinterp)

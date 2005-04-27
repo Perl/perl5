@@ -383,7 +383,8 @@ PERL_EXPORT_C int PerlIO_intmode2str(int rawmode, char *mode, int *writing);
 #ifdef PERLIO_LAYERS
 PERL_EXPORT_C void PerlIO_cleanup(pTHX);
 
-PERL_EXPORT_C void PerlIO_debug(const char *fmt, ...);
+PERL_EXPORT_C void PerlIO_debug(const char *fmt, ...)
+    __attribute__format__(__printf__, 1, 2);
 typedef struct PerlIO_list_s PerlIO_list_t;
 
 
