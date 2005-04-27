@@ -79,15 +79,9 @@ and parallelability.
 
 A port of dmake for Windows is available from:
 
-    http://www.cpan.org/authors/id/GSAR/dmake-4.1pl1-win32.zip
+    http://search.cpan.org/dist/dmake/
 
-(This is a fixed version of the original dmake sources obtained from
-http://www.wticorp.com/  As of version 4.1PL1, the original
-sources did not build as shipped and had various other problems.
-A patch is included in the above fixed version.)
-
-Fetch and install dmake somewhere on your path (follow the instructions
-in the README.NOW file).
+Fetch and install dmake somewhere on your path.
 
 There exists a minor coexistence problem with dmake and Borland C++
 compilers.  Namely, if a distribution has C files named with mixed
