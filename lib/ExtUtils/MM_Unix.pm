@@ -1921,7 +1921,8 @@ sub init_PERL {
     }
 
     # Are we building the core?
-    $self->{PERL_CORE} = 0 unless exists $self->{PERL_CORE};
+    $self->{PERL_CORE} = $ENV{PERL_CORE} unless exists $self->{PERL_CORE};
+    $self->{PERL_CORE} = 0               unless defined $self->{PERL_CORE};
 
     # How do we run perl?
     foreach my $perl (qw(PERL FULLPERL ABSPERL)) {
