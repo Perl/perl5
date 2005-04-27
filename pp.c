@@ -1493,7 +1493,7 @@ PP(pp_repeat)
 		if (len > ((MEM_SIZE)~0)/count)
 		     Perl_croak(aTHX_ oom_string_extend);
 	        MEM_WRAP_CHECK_1(max, char, oom_string_extend);
-		SvGROW(TARG, (count * len) + 1);
+		SvGROW(TARG, max + 1);
 		repeatcpy(SvPVX(TARG) + len, SvPVX(TARG), len, count - 1);
 		SvCUR_set(TARG, SvCUR(TARG) * count);
 	    }
