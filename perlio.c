@@ -112,8 +112,8 @@ int mkstemp(char*);
 	else							\
 		SETERRNO(EBADF, SS_IVCHAN)
 
-#ifdef USE_SFIO
-static int
+#ifndef USE_SFIO
+int
 perlsio_binmode(FILE *fp, int iotype, int mode)
 {
     /*
