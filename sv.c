@@ -3886,9 +3886,6 @@ use the Encode extension for that.
 STRLEN
 Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
 {
-    U8 *s, *t, *e;
-    int  hibit = 0;
-
     if (sv == &PL_sv_undef)
 	return 0;
     if (!SvPOK(sv)) {
@@ -3913,31 +3910,32 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
     if (PL_encoding && !(flags & SV_UTF8_NO_ENCODING))
         sv_recode_to_utf8(sv, PL_encoding);
     else { /* Assume Latin-1/EBCDIC */
-	 /* This function could be much more efficient if we
-	  * had a FLAG in SVs to signal if there are any hibit
-	  * chars in the PV.  Given that there isn't such a flag
-	  * make the loop as fast as possible. */
-	 s = (U8 *) SvPVX(sv);
-	 e = (U8 *) SvEND(sv);
-	 t = s;
-	 while (t < e) {
-	      U8 ch = *t++;
-	      if ((hibit = !NATIVE_IS_INVARIANT(ch)))
-		   break;
-	 }
-	 if (hibit) {
-	      STRLEN len;
-	      (void)SvOOK_off(sv);
-	      s = (U8*)SvPVX(sv);
-	      len = SvCUR(sv) + 1; /* Plus the \0 */
-	      SvPV_set(sv, (char*)bytes_to_utf8((U8*)s, &len));
-	      SvCUR_set(sv, len - 1);
-	      if (SvLEN(sv) != 0)
-		   Safefree(s); /* No longer using what was there before. */
-	      SvLEN_set(sv, len); /* No longer know the real size. */
-	 }
-	 /* Mark as UTF-8 even if no hibit - saves scanning loop */
-	 SvUTF8_on(sv);
+	/* This function could be much more efficient if we
+	 * had a FLAG in SVs to signal if there are any hibit
+	 * chars in the PV.  Given that there isn't such a flag
+	 * make the loop as fast as possible. */
+	U8 *s = (U8 *) SvPVX(sv);
+	U8 *e = (U8 *) SvEND(sv);
+	U8 *t = s;
+	int hibit = 0;
+	
+	while (t < e) {
+	    U8 ch = *t++;
+	    if ((hibit = !NATIVE_IS_INVARIANT(ch)))
+		break;
+	}
+	if (hibit) {
+	    STRLEN len = SvCUR(sv) + 1; /* Plus the \0 */
+	    s = bytes_to_utf8((U8*)s, &len);
+
+	    SvPV_free(sv); /* No longer using what was there before. */
+
+	    SvPV_set(sv, (char*)s);
+	    SvCUR_set(sv, len - 1);
+	    SvLEN_set(sv, len); /* No longer know the real size. */
+	}
+	/* Mark as UTF-8 even if no hibit - saves scanning loop */
+	SvUTF8_on(sv);
     }
     return SvCUR(sv);
 }
