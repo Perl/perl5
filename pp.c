@@ -1486,7 +1486,7 @@ PP(pp_repeat)
 	    if (count < 1)
 		SvCUR_set(TARG, 0);
 	    else {
-		IV max = count * len;
+		STRLEN max = (UV)count * len;
 		if (len > ((MEM_SIZE)~0)/count)
 		     Perl_croak(aTHX_ oom_string_extend);
 	        MEM_WRAP_CHECK_1(max, char, oom_string_extend);
