@@ -1692,7 +1692,7 @@ PP(pp_sysread)
 	SvCUR_set(bufsv, offset);
 
 	read_target = sv_newmortal();
-	SvUPGRADE(read_target, SVt_PV);
+	(void)SvUPGRADE(read_target, SVt_PV);
 	buffer = SvGROW(read_target, (STRLEN)(length + 1));
     }
 
