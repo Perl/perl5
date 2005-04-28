@@ -1015,25 +1015,20 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
 
-#----------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 Extensions: buildext.pl $(PERLDEP) $(CONFIGPM)
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR)
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext
 
-# Note: The next two targets explicitly remove a "blibdirs.exists" file that
-# currerntly gets left behind, until CPAN RT Ticket #5616 is resolved.
-
 Extensions_clean: 
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) clean
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext clean
-	-if exist $(EXTDIR)\SDBM_File\sdbm\blibdirs.exists del /f $(EXTDIR)\SDBM_File\sdbm\blibdirs.exists
 
 Extensions_realclean: 
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) realclean
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext realclean
-	-if exist $(EXTDIR)\SDBM_File\sdbm\blibdirs.exists del /f $(EXTDIR)\SDBM_File\sdbm\blibdirs.exists
 
-#----------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
 doc: $(PERLEXE)
 	$(PERLEXE) -I..\lib ..\installhtml --podroot=.. --htmldir=./html \
