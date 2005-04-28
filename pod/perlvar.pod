@@ -1438,7 +1438,7 @@ C<$@> is set if the string to be C<eval>-ed did not compile (this
 may happen if C<open> or C<close> were imported with bad prototypes),
 or if Perl code executed during evaluation die()d .  In these cases
 the value of $@ is the compile error, or the argument to C<die>
-(which will interpolate C<$!> and C<$?>!).  (See also L<Fatal>,
+(which will interpolate C<$!> and C<$?>).  (See also L<Fatal>,
 though.)
 
 When the eval() expression above is executed, open(), C<< <PIPE> >>,
