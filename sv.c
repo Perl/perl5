@@ -1794,9 +1794,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     if (SvTYPE(sv) == mt)
 	return TRUE;
 
-    if (mt < SVt_PVIV)
-	(void)SvOOK_off(sv);
-
     pv = NULL;
     cur = 0;
     len = 0;
@@ -1907,6 +1904,11 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	    SvNV_set(sv, 0.0);
 	}
 	/* to here.  */
+	/* XXX? Only SVt_NULL is ever upgraded to AV or HV?  */
+	assert(!pv);
+	/* FIXME. Should be able to remove this if the above assertion is
+	   genuinely always true.  */
+	(void)SvOOK_off(sv);
 	if (pv)
 	    Safefree(pv);
 	SvPV_set(sv, (char*)0);
