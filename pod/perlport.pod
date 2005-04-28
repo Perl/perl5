@@ -67,9 +67,9 @@ The important thing is to decide where the code will run and to be
 deliberate in your decision.
 
 The material below is separated into three main sections: main issues of
-portability (L<"ISSUES">, platform-specific issues (L<"PLATFORMS">, and
+portability (L<"ISSUES">), platform-specific issues (L<"PLATFORMS">), and
 built-in perl functions that behave differently on various ports
-(L<"FUNCTION IMPLEMENTATIONS">.
+(L<"FUNCTION IMPLEMENTATIONS">).
 
 This information should not be considered complete; it includes possibly
 transient information about idiosyncrasies of some of the ports, almost
@@ -107,8 +107,8 @@ newlines:
 You can get away with this on Unix and Mac OS (they have a single
 character end-of-line), but the same program will break under DOSish
 perls because you're only chop()ing half the end-of-line.  Instead,
-chomp() should be used to trim newlines.  The Dunce::Files module can
-help audit your code for misuses of chop().
+chomp() should be used to trim newlines.  The L<Dunce::Files> module 
+can help audit your code for misuses of chop().
 
 When dealing with binary files (or text files in binary mode) be sure
 to explicitly set $/ to the appropriate value for your file format
@@ -480,12 +480,14 @@ file name.
 
 To convert $^X to a file pathname, taking account of the requirements
 of the various operating system possibilities, say:
+
   use Config;
   $thisperl = $^X;
   if ($^O ne 'VMS')
      {$thisperl .= $Config{_exe} unless $thisperl =~ m/$Config{_exe}$/i;}
 
 To convert $Config{perlpath} to a file pathname, say:
+
   use Config;
   $thisperl = $Config{perlpath};
   if ($^O ne 'VMS')
@@ -517,7 +519,7 @@ Don't assume that you can ping hosts and get replies.
 
 Don't assume that any particular port (service) will respond.
 
-Don't assume that Sys::Hostname() (or any other API or command)
+Don't assume that Sys::Hostname (or any other API or command)
 returns either a fully qualified hostname or a non-qualified hostname:
 it all depends on how the system had been configured.  Also remember
 things like DHCP and NAT-- the hostname you get back might not be very
@@ -770,11 +772,17 @@ problems in their code that crop up because of lack of testing on other
 platforms; two, to provide users with information about whether
 a given module works on a given platform.
 
+Also see: 
+
 =over 4
 
-=item Mailing list: cpan-testers@perl.org
+=item *
 
-=item Testing results: http://testers.cpan.org/
+Mailing list: cpan-testers@perl.org
+
+=item *
+
+Testing results: http://testers.cpan.org/
 
 =back
 
@@ -897,10 +905,11 @@ DOSish perls are as follows:
      Windows NT    MSWin32    MSWin32-x86       2      4 xx
      Windows NT    MSWin32    MSWin32-ALPHA     2      4 xx
      Windows NT    MSWin32    MSWin32-ppc       2      4 xx
-     Windows 2000  MSWin32    MSWin32-x86       2      5 xx
-     Windows XP    MSWin32    MSWin32-x86       2      ?
+     Windows 2000  MSWin32    MSWin32-x86       2      5 00
+     Windows XP    MSWin32    MSWin32-x86       2      5 01
+     Windows 2003  MSWin32    MSWin32-x86       2      5 02
      Windows CE    MSWin32    ?                 3           
-     Cygwin        cygwin     ?                 
+     Cygwin        cygwin     cygwin
 
 The various MSWin32 Perl's can distinguish the OS they are running on
 via the value of the fifth element of the list returned from 
@@ -1038,6 +1047,10 @@ The MacPerl Pages, http://www.macperl.com/ .
 =item *
 
 The MacPerl mailing lists, http://lists.perl.org/ .
+
+=item *
+
+MPW, ftp://ftp.apple.com/developer/Tool_Chest/Core_Mac_OS_Tools/
 
 =back
 
@@ -1288,8 +1301,6 @@ Also see:
 
 =item *
 
-*
-
 L<perlos390>, F<README.os390>, F<perlbs2000>, F<README.vmesa>,
 L<perlebcdic>.
 
@@ -1299,7 +1310,7 @@ The perl-mvs@perl.org list is for discussion of porting issues as well as
 general usage issues for all EBCDIC Perls.  Send a message body of
 "subscribe perl-mvs" to majordomo@perl.org.
 
-=item  *
+=item *
 
 AS/400 Perl information at
 http://as400.rochester.ibm.com/
