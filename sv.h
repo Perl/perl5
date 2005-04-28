@@ -842,6 +842,18 @@ in gv.h: */
 		   SvPV_renew(sv, _lEnGtH); \
 		 } STMT_END
 
+#define SvPV_free(sv) \
+	STMT_START { assert(SvTYPE(sv) >= SVt_PV);	\
+		if (SvLEN(sv)) {			\
+		    if(SvOOK(sv)) {			\
+		      Safefree(SvPVX(sv) - SvIVX(sv));	\
+		      SvFLAGS(sv) &= ~SVf_OOK;		\
+		    } else {				\
+		      Safefree(SvPVX(sv));		\
+		    }					\
+		}					\
+	} STMT_END
+
 #define BmRARE(sv)	((XPVBM*)  SvANY(sv))->xbm_rare
 #define BmUSEFUL(sv)	((XPVBM*)  SvANY(sv))->xbm_useful
 #define BmPREVIOUS(sv)	((XPVBM*)  SvANY(sv))->xbm_previous

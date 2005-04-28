@@ -2251,9 +2251,7 @@ PP(pp_subst)
 	} else
 #endif
 	{
-	    SvOOK_off(TARG);
-	    if (SvLEN(TARG))
-		Safefree(SvPVX(TARG));
+	    SvPV_free(TARG);
 	}
 	SvPV_set(TARG, SvPVX(dstr));
 	SvCUR_set(TARG, SvCUR(dstr));
@@ -2934,8 +2932,7 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
 	if (SvTYPE(sv) < SVt_RV)
 	    sv_upgrade(sv, SVt_RV);
 	else if (SvTYPE(sv) >= SVt_PV) {
-	    SvOOK_off(sv);
-	    Safefree(SvPVX(sv));
+	    SvPV_free(sv);
             SvLEN_set(sv, 0);
 	    SvCUR_set(sv, 0);
 	}

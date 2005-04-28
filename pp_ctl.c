@@ -240,9 +240,7 @@ PP(pp_substcont)
 	    } else
 #endif
 	    {
-		SvOOK_off(targ);
-		if (SvLEN(targ))
-		    Safefree(SvPVX(targ));
+		SvPV_free(targ);
 	    }
 	    SvPV_set(targ, SvPVX(dstr));
 	    SvCUR_set(targ, SvCUR(dstr));

@@ -175,9 +175,7 @@ PP(pp_rv2gv)
 		    if (SvTYPE(sv) < SVt_RV)
 			sv_upgrade(sv, SVt_RV);
 		    if (SvPVX(sv)) {
-			SvOOK_off(sv);		/* backoff */
-			if (SvLEN(sv))
-			    Safefree(SvPVX(sv));
+			SvPV_free(sv);
 			SvLEN_set(sv, 0);
                         SvCUR_set(sv, 0);
 		    }
@@ -825,8 +823,7 @@ PP(pp_undef)
 	break;
     default:
 	if (SvTYPE(sv) >= SVt_PV && SvPVX(sv) && SvLEN(sv)) {
-	    SvOOK_off(sv);
-	    Safefree(SvPVX(sv));
+	    SvPV_free(sv);
 	    SvPV_set(sv, Nullch);
 	    SvLEN_set(sv, 0);
 	}

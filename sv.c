@@ -1906,11 +1906,13 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	/* to here.  */
 	/* XXX? Only SVt_NULL is ever upgraded to AV or HV?  */
 	assert(!pv);
-	/* FIXME. Should be able to remove this if the above assertion is
-	   genuinely always true.  */
-	(void)SvOOK_off(sv);
-	if (pv)
-	    Safefree(pv);
+	/* FIXME. Should be able to remove all this if()... if the above
+	   assertion is genuinely always true.  */
+	if(SvOOK(sv)) {
+	    pv -= iv;
+	    SvFLAGS(sv) &= ~SVf_OOK;
+	}
+	Safefree(pv);
 	SvPV_set(sv, (char*)0);
 	SvMAGIC_set(sv, magic);
 	SvSTASH_set(sv, stash);
@@ -4416,16 +4418,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		return;
 	    }
 	    if (SvPVX(dstr)) {
-		if (SvLEN(dstr)) {
-		    /* Unwrap the OOK offset by hand, to save a needless
-		       memmove on memory that's about to be free()d.  */
-		    char *pv = SvPVX(dstr);
-		    if (SvOOK(dstr)) {
-			pv -= SvIVX(dstr);
-			SvFLAGS(dstr) &= ~SVf_OOK;
-		    }
-		    Safefree(pv);
-		}
+		SvPV_free(dstr);
 		SvLEN_set(dstr, 0);
                 SvCUR_set(dstr, 0);
 	    }
@@ -4843,9 +4836,8 @@ Perl_sv_usepvn(pTHX_ register SV *sv, register char *ptr, register STRLEN len)
 	(void)SvOK_off(sv);
 	return;
     }
-    (void)SvOOK_off(sv);
-    if (SvPVX(sv) && SvLEN(sv))
-	Safefree(SvPVX(sv));
+    if (SvPVX(sv))
+	SvPV_free(sv);
     Renew(ptr, len+1, char);
     SvPV_set(sv, ptr);
     SvCUR_set(sv, len);
@@ -8493,9 +8485,7 @@ Perl_newSVrv(pTHX_ SV *rv, const char *classname)
     if (SvTYPE(rv) < SVt_RV)
 	sv_upgrade(rv, SVt_RV);
     else if (SvTYPE(rv) > SVt_RV) {
-	SvOOK_off(rv);
-	if (SvPVX(rv) && SvLEN(rv))
-	    Safefree(SvPVX(rv));
+	SvPV_free(rv);
 	SvCUR_set(rv, 0);
 	SvLEN_set(rv, 0);
     }
