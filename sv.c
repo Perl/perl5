@@ -4416,9 +4416,16 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		return;
 	    }
 	    if (SvPVX(dstr)) {
-		(void)SvOOK_off(dstr);		/* backoff */
-		if (SvLEN(dstr))
-		    Safefree(SvPVX(dstr));
+		if (SvLEN(dstr)) {
+		    /* Unwrap the OOK offset by hand, to save a needless
+		       memmove on memory that's about to be free()d.  */
+		    char *pv = SvPVX(dstr);
+		    if (SvOOK(dstr)) {
+			pv -= SvIVX(dstr);
+			SvFLAGS(dstr) &= ~SVf_OOK;
+		    }
+		    Safefree(pv);
+		}
 		SvLEN_set(dstr, 0);
                 SvCUR_set(dstr, 0);
 	    }
@@ -5945,7 +5952,11 @@ Perl_sv_clear(pTHX_ register SV *sv)
     case SVt_PVNV:
     case SVt_PVIV:
       freescalar:
-	SvOOK_off(sv);
+	/* Don't bother with SvOOK_off(sv); as we're only going to free it.  */
+	if (SvOOK(sv)) {
+	    SvPV_set(sv, SvPVX(sv) - SvIVX(sv));
+	    /* Don't even bother with turning off the OOK flag.  */
+	}
 	/* FALL THROUGH */
     case SVt_PV:
     case SVt_RV:
