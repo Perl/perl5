@@ -861,7 +861,7 @@ PerlIO_tab_sv(pTHX_ PerlIO_funcs *tab)
     return sv;
 }
 
-static XS(XS_PerlIO__Layer__NoWarnings)
+XS(XS_PerlIO__Layer__NoWarnings)
 {
     /* This is used as a %SIG{__WARN__} handler to supress warnings
        during loading of layers.
@@ -872,7 +872,7 @@ static XS(XS_PerlIO__Layer__NoWarnings)
     XSRETURN(0);
 }
 
-static XS(XS_PerlIO__Layer__find)
+XS(XS_PerlIO__Layer__find)
 {
     dXSARGS;
     if (items < 2)
