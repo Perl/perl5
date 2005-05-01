@@ -407,7 +407,7 @@ perl_destruct(pTHXx)
     destruct_level = PL_perl_destruct_level;
 #ifdef DEBUGGING
     {
-	char *s;
+	const char *s;
 	if ((s = PerlEnv_getenv("PERL_DESTRUCT_LEVEL"))) {
             const int i = atoi(s);
 	    if (destruct_level < i)

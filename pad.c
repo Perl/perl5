@@ -1378,7 +1378,6 @@ Perl_cv_clone(pTHX_ CV *proto)
     SV** ppad = AvARRAY(protopad);
     const I32 fname = AvFILLp(protopad_name);
     const I32 fpad = AvFILLp(protopad);
-    AV* comppadlist;
     CV* cv;
     SV** outpad;
     CV* outside;
@@ -1425,7 +1424,7 @@ Perl_cv_clone(pTHX_ CV *proto)
     if (SvPOK(proto))
 	sv_setpvn((SV*)cv, SvPVX(proto), SvCUR(proto));
 
-    CvPADLIST(cv) = comppadlist = pad_new(padnew_CLONE|padnew_SAVE);
+    CvPADLIST(cv) = pad_new(padnew_CLONE|padnew_SAVE);
 
     av_fill(PL_comppad, fpad);
     for (ix = fname; ix >= 0; ix--)

@@ -168,7 +168,9 @@ int main(int argc, char **argv, char **env)
     my_vars = my_plvarsp = plvarsp;
 #  endif
 #endif /* PERL_GLOBAL_STRUCT */
-    
+
+    (void)argc; /* PERL_SYS_INIT3 may #define away their use */
+    (void)argv;
     PERL_SYS_INIT3(&argc,&argv,&env);
 
     my_perl = perl_alloc();

@@ -163,6 +163,9 @@ perlsio_binmode(FILE *fp, int iotype, int mode)
     else
 	return 0;
 #  else
+    (void)fp;
+    (void)iotype;
+    (void)mode;
     return 1;
 #  endif
 #endif
@@ -245,6 +248,9 @@ int
 PerlIO_binmode(pTHX_ PerlIO *fp, int iotype, int mode, const char *names)
 {
 #ifdef USE_SFIO
+    (void)iotype;
+    (void)mode;
+    (void)names;
     return 1;
 #else
     return perlsio_binmode(fp, iotype, mode);

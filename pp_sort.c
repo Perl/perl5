@@ -1463,7 +1463,7 @@ Perl_sortsv(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
 }
 
 
-void
+static void
 S_sortsv_desc(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
 {
     void (*sortsvp)(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp, U32 flags)

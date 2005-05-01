@@ -940,7 +940,6 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
 {
   const char* patptr = symptr->patptr;
   const char* patend = symptr->patend;
-  const char *allowed = "";
 
   symptr->flags &= ~FLAG_SLASH;
 
@@ -987,7 +986,8 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
 
       /* look for modifiers */
       while (patptr < patend) {
-        I32 modifier = 0;
+        const char *allowed;
+        I32 modifier;
         switch (*patptr) {
           case '!':
             modifier = TYPE_IS_SHRIEKING;
@@ -1004,6 +1004,8 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
             break;
 #endif /* PERL_PACK_CAN_BYTEORDER */
           default:
+            allowed = "";
+            modifier = 0;
             break;
         }
 
