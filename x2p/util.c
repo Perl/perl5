@@ -177,7 +177,7 @@ growstr(char **strptr, int *curlen, int newlen)
 }
 
 void
-croak(char *pat,...)
+croak(const char *pat,...)
 {
 #if defined(HAS_VPRINTF)
     va_list args;
@@ -192,7 +192,7 @@ croak(char *pat,...)
 }
 
 void
-fatal(char *pat,...)
+fatal(const char *pat,...)
 {
 #if defined(HAS_VPRINTF)
     va_list args;
@@ -210,7 +210,7 @@ fatal(char *pat,...)
 __private_extern__	/* warn() conflicts with libc */
 #endif
 void
-warn(char *pat,...)
+warn(const char *pat,...)
 {
 #if defined(HAS_VPRINTF)
     va_list args;

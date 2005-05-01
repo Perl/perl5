@@ -156,6 +156,8 @@ static char *cmds[] = { "perl","-e", "$|=1; print qq[ok 5\\n]", NULL };
 int main(int argc, char **argv, char **env)
 {
     PerlInterpreter *my_perl;
+    (void)argc; /* PERL_SYS_INIT3 may #define away their use */
+    (void)argv;
 
     PERL_SYS_INIT3(&argc,&argv,&env);
 

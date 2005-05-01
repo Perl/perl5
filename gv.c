@@ -247,7 +247,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 
     /* create and re-create @.*::SUPER::ISA on demand */
     if (!av || !SvMAGIC(av)) {
-	char* packname = HvNAME(stash);
+	const char* packname = HvNAME(stash);
 	STRLEN packlen = strlen(packname);
 
 	if (packlen >= 7 && strEQ(packname + packlen - 7, "::SUPER")) {
@@ -344,7 +344,7 @@ Perl_gv_fetchmeth_autoload(pTHX_ HV *stash, const char *name, STRLEN len, I32 le
     GV *gv = gv_fetchmeth(stash, name, len, level);
 
     if (!gv) {
-	char autoload[] = "AUTOLOAD";
+	const char autoload[] = "AUTOLOAD";
 	STRLEN autolen = sizeof(autoload)-1;
 	CV *cv;
 	GV **gvp;
@@ -489,8 +489,8 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 GV*
 Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 {
-    char autoload[] = "AUTOLOAD";
-    STRLEN autolen = sizeof(autoload)-1;
+    const char autoload[] = "AUTOLOAD";
+    const STRLEN autolen = sizeof(autoload)-1;
     GV* gv;
     CV* cv;
     HV* varstash;
@@ -659,9 +659,8 @@ valid UTF-8 string.  See C<gv_stashpv>.
 HV*
 Perl_gv_stashsv(pTHX_ SV *sv, I32 create)
 {
-    register char *ptr;
     STRLEN len;
-    ptr = SvPV(sv,len);
+    const char *ptr = SvPV(sv,len);
     return gv_stashpvn(ptr, len, create);
 }
 
@@ -1177,10 +1176,9 @@ Perl_gv_efullname(pTHX_ SV *sv, GV *gv)
 IO *
 Perl_newIO(pTHX)
 {
-    IO *io;
     GV *iogv;
+    IO * const io = (IO*)NEWSV(0,0);
 
-    io = (IO*)NEWSV(0,0);
     sv_upgrade((SV *)io,SVt_PVIO);
     SvREFCNT(io) = 1;
     SvOBJECT_on(io);
@@ -1199,14 +1197,14 @@ void
 Perl_gv_check(pTHX_ HV *stash)
 {
     register I32 i;
-    register GV *gv;
-    HV *hv;
 
     if (!HvARRAY(stash))
 	return;
     for (i = 0; i <= (I32) HvMAX(stash); i++) {
         const HE *entry;
 	for (entry = HvARRAY(stash)[i]; entry; entry = HeNEXT(entry)) {
+            register GV *gv;
+            HV *hv;
 	    if (HeKEY(entry)[HeKLEN(entry)-1] == ':' &&
 		(gv = (GV*)HeVAL(entry)) && isGV(gv) && (hv = GvHV(gv)))
 	    {
@@ -1462,7 +1460,6 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
 {
     MAGIC *mg;
     AMT *amtp;
-    CV *ret;
 
     if (!stash || !HvNAME(stash))
         return Nullcv;
@@ -1477,7 +1474,7 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
 	 || amtp->was_ok_sub != PL_sub_generation )
 	goto do_update;
     if (AMT_AMAGIC(amtp)) {
-	ret = amtp->table[id];
+	CV * const ret = amtp->table[id];
 	if (ret && isGV(ret)) {		/* Autoloading stab */
 	    /* Passing it through may have resulted in a warning
 	       "Inherited AUTOLOAD for a non-method deprecated", since
@@ -1553,12 +1550,12 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	 case string_amg:
 	   (void)((cv = cvp[off=numer_amg]) || (cv = cvp[off=bool__amg]));
 	   break;
- case not_amg:
-   (void)((cv = cvp[off=bool__amg])
-	  || (cv = cvp[off=numer_amg])
-	  || (cv = cvp[off=string_amg]));
-   postpr = 1;
-   break;
+         case not_amg:
+           (void)((cv = cvp[off=bool__amg])
+                  || (cv = cvp[off=numer_amg])
+                  || (cv = cvp[off=string_amg]));
+           postpr = 1;
+           break;
 	 case copy_amg:
 	   {
 	     /*
@@ -1761,7 +1758,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     dSP;
     BINOP myop;
     SV* res;
-    bool oldcatch = CATCH_GET;
+    const bool oldcatch = CATCH_GET;
 
     CATCH_SET(TRUE);
     Zero(&myop, 1, BINOP);
@@ -1799,7 +1796,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     CATCH_SET(oldcatch);
 
     if (postpr) {
-      int ans=0;
+      int ans;
       switch (method) {
       case le_amg:
       case sle_amg:
@@ -1824,6 +1821,8 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	SvSetSV(left,res); return left;
       case not_amg:
 	ans=!SvTRUE(res); break;
+      default:
+        ans=0; break;
       }
       return boolSV(ans);
     } else if (method==copy_amg) {

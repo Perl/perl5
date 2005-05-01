@@ -1326,7 +1326,6 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
     SV** ppad = AvARRAY(protopad);
     const I32 fname = AvFILLp(protopad_name);
     const I32 fpad = AvFILLp(protopad);
-    AV* comppadlist;
     CV* cv;
 
     assert(!CvUNIQUE(proto));
@@ -1364,7 +1363,7 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
     if (SvPOK(proto))
 	sv_setpvn((SV*)cv, SvPVX(proto), SvCUR(proto));
 
-    CvPADLIST(cv) = comppadlist = pad_new(padnew_CLONE|padnew_SAVE);
+    CvPADLIST(cv) = pad_new(padnew_CLONE|padnew_SAVE);
 
     for (ix = fname; ix >= 0; ix--)
 	av_store(PL_comppad_name, ix, SvREFCNT_inc(pname[ix]));

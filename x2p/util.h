@@ -20,18 +20,15 @@
     int		eaccess();
 #endif
 
-char	*getwd();
-int	makedir();
-
 char * cpy2 ( char *to, char *from, int delim );
 char * cpytill ( char *to, char *from, int delim );
 void growstr ( char **strptr, int *curlen, int newlen );
 char * instr ( char *big, char *little );
 char * safecpy ( char *to, char *from, int len );
 char * savestr ( char *str );
-void croak ( char *pat, ... );
-void fatal ( char *pat, ... );
-void warn  ( char *pat, ... );
+void croak ( const char *pat, ... );
+void fatal ( const char *pat, ... );
+void warn  ( const char *pat, ... );
 int prewalk ( int numit, int level, int node, int *numericptr );
 
 Malloc_t safemalloc (MEM_SIZE nbytes);

@@ -659,8 +659,8 @@ S_get_num(pTHX_ register char *patptr, I32 *lenptr )
 STATIC bool
 S_next_symbol(pTHX_ register tempsym_t* symptr )
 {
-  register char* patptr = symptr->patptr; 
-  register char* patend = symptr->patend; 
+  const char* patptr = symptr->patptr; 
+  const char* patend = symptr->patend; 
 
   symptr->flags &= ~FLAG_SLASH;
 
@@ -709,7 +709,7 @@ S_next_symbol(pTHX_ register tempsym_t* symptr )
       /* look for modifiers */
       while (patptr < patend) {
         const char *allowed;
-        I32 modifier = 0;
+        I32 modifier;
         switch (*patptr) {
           case '!':
             modifier = TYPE_IS_SHRIEKING;
@@ -726,6 +726,8 @@ S_next_symbol(pTHX_ register tempsym_t* symptr )
             break;
 #endif
           default:
+            allowed = "";
+            modifier = 0;
             break;
         }
 
