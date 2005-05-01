@@ -1849,6 +1849,10 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	del_XPVNV(SvANY(sv));
 	break;
     case SVt_PVMG:
+	/* Because the XPVMG of PL_mess_sv isn't allocated from the arena,
+	   there's no way that it can be safely upgraded, because perl.c
+	   expects to Safefree(SvANY(PL_mess_sv))  */
+	assert(sv != PL_mess_sv);
 	pv	= SvPVX(sv);
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
