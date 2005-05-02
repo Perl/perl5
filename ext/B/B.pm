@@ -546,23 +546,23 @@ and later this is:
                 +--------------+----------+------------+
                 |              |          |            |
               B::PV          B::IV      B::NV        B::RV
-                  \         /          / 
-                   \       /          /
-                    B::PVIV          /
-                        \           /
-                         \         /
-                          \       /
-                           B::PVNV
-                             |
-                             |
-                          B::PVMG
-                             |
-                  +-----+----+------+-----+-----+
-                  |     |    |      |     |     |
-                B::BM B::AV B::GV B::HV B::CV B::IO
-                             |            |
-                          B::PVLV         |
-                                        B::FM
+                   \         /          /
+                    \       /          /
+                     B::PVIV          /
+                         \           /
+                          \         /
+                           \       /
+                            B::PVNV
+                               |
+                               |
+                            B::PVMG
+                               |
+                    +-----+----+------+-----+-----+
+                    |     |    |      |     |     |
+                  B::BM B::AV B::GV B::HV B::CV B::IO
+                               |            |
+                            B::PVLV         |
+                                          B::FM
 
 
 For 5.9.0 and earlier, PVLV is a direct subclass of PVMG, so the base
