@@ -3358,10 +3358,10 @@ of values, as follows:
     U	A Unicode character number.  Encodes to UTF-8 internally
 	(or UTF-EBCDIC in EBCDIC platforms).
 
-    w	A BER compressed integer.  Its bytes represent an unsigned
-	integer in base 128, most significant digit first, with as
-        few digits as possible.  Bit eight (the high bit) is set
-        on each byte except the last.
+    w	A BER compressed integer (not an ASN.1 BER, see perlpacktut for
+	details).  Its bytes represent an unsigned integer in base 128,
+	most significant digit first, with as few digits as possible.  Bit
+	eight (the high bit) is set on each byte except the last.
 
     x	A null byte.
     X	Back up a byte.
