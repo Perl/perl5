@@ -333,6 +333,7 @@ struct block_eval {
     SV *	cur_text;
     CV *	cv;
     OP *	retop;	/* op to execute on exit from eval */
+    JMPENV *	cur_top_env; /* value of PL_top_env when eval CX created */
 };
 
 #define PUSHEVAL(cx,n,fgv)						\
@@ -344,6 +345,7 @@ struct block_eval {
 	cx->blk_eval.cur_text = PL_linestr;				\
 	cx->blk_eval.cv = Nullcv; /* set by doeval(), as applicable */	\
 	cx->blk_eval.retop = Nullop; 					\
+	cx->blk_eval.cur_top_env = PL_top_env; 				\
     } STMT_END
 
 #define POPEVAL(cx)							\
