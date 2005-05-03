@@ -162,7 +162,7 @@ sub init
 
      my $cwd = getcwd();
      defined $cwd or $cwd = cwd(); # try harder
-     $script = File::Spec->catfile(getcwd(), $script)
+     $script = File::Spec->catfile($cwd, $script)
        unless File::Spec->file_name_is_absolute($script);
 
      ($Script,$Bin) = fileparse($script);
