@@ -137,7 +137,7 @@ lstat (*)
 lt ($$)
 m undef
 map undef
-mkdir ($;$)
+mkdir ()
 msgctl ($$$)
 msgget ($$)
 msgrcv ($$$$$)

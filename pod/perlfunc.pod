@@ -2687,10 +2687,13 @@ and you get list of anonymous hashes each with only 1 entry.
 
 =item mkdir FILENAME
 
+=item mkdir
+
 Creates the directory specified by FILENAME, with permissions
 specified by MASK (as modified by C<umask>).  If it succeeds it
 returns true, otherwise it returns false and sets C<$!> (errno).
-If omitted, MASK defaults to 0777.
+If omitted, MASK defaults to 0777. If omitted, FILENAME defaults
+to C<$_>.
 
 In general, it is better to create directories with permissive MASK,
 and let the user modify that with their C<umask>, than it is to supply
