@@ -1,27 +1,31 @@
 #!./perl
 
-# $RCSfile: exp.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:50 $
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+    require './test.pl';
+}
 
-print "1..6\n";
+plan tests => 6;
 
 # compile time evaluation
 
 $s = sqrt(2);
-if (substr($s,0,5) eq '1.414') {print "ok 1\n";} else {print "not ok 1\n";}
+is(substr($s,0,5), '1.414');
 
 $s = exp(1);
-if (substr($s,0,7) eq '2.71828') {print "ok 2\n";} else {print "not ok 2\n";}
+is(substr($s,0,7), '2.71828');
 
-if (exp(log(1)) == 1) {print "ok 3\n";} else {print "not ok 3\n";}
+ok(exp(log(1)) == 1);
 
 # run time evaluation
 
 $x1 = 1;
 $x2 = 2;
 $s = sqrt($x2);
-if (substr($s,0,5) eq '1.414') {print "ok 4\n";} else {print "not ok 4\n";}
+is(substr($s,0,5), '1.414');
 
 $s = exp($x1);
-if (substr($s,0,7) eq '2.71828') {print "ok 5\n";} else {print "not ok 5\n";}
+is(substr($s,0,7), '2.71828');
 
-if (exp(log($x1)) == 1) {print "ok 6\n";} else {print "not ok 6\n";}
+ok(exp(log($x1)) == 1);
