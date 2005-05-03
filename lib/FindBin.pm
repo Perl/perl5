@@ -93,7 +93,7 @@ package FindBin;
 use Carp;
 require 5.000;
 require Exporter;
-use Cwd qw(getcwd abs_path);
+use Cwd qw(getcwd cwd abs_path);
 use Config;
 use File::Basename;
 use File::Spec;
@@ -102,7 +102,7 @@ use File::Spec;
 %EXPORT_TAGS = (ALL => [qw($Bin $Script $RealBin $RealScript $Dir $RealDir)]);
 @ISA = qw(Exporter);
 
-$VERSION = "1.44";
+$VERSION = "1.45";
 
 sub init
 {
@@ -158,8 +158,10 @@ sub init
 
      croak("Cannot find current script '$0'") unless(-f $script);
 
-     # Ensure $script contains the complete path incase we C<chdir>
+     # Ensure $script contains the complete path in case we C<chdir>
 
+     my $cwd = getcwd();
+     defined $cwd or $cwd = cwd(); # try harder
      $script = File::Spec->catfile(getcwd(), $script)
        unless File::Spec->file_name_is_absolute($script);
 
