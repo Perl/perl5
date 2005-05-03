@@ -388,7 +388,8 @@ PP(pp_prototype)
 		I32 oa;
 		char str[ MAX_ARGS_OP * 2 + 2 ]; /* One ';', one '\0' */
 
-		if (code == -KEY_chop || code == -KEY_chomp)
+		if (code == -KEY_chop || code == -KEY_chomp
+			|| code == -KEY_exec || code == -KEY_system)
 		    goto set;
 		while (i < MAXO) {	/* The slow way. */
 		    if (strEQ(s + 6, PL_op_name[i])
@@ -406,8 +407,6 @@ PP(pp_prototype)
 			seen_question = 1;
 			str[n++] = ';';
 		    }
-		    else if (n && str[0] == ';' && seen_question)
-			goto set;	/* XXXX system, exec */
 		    if ((oa & (OA_OPTIONAL - 1)) >= OA_AVREF
 			&& (oa & (OA_OPTIONAL - 1)) <= OA_SCALARREF
 			/* But globs are already references (kinda) */

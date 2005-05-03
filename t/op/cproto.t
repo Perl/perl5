@@ -137,7 +137,7 @@ lstat (*)
 lt ($$)
 m undef
 map undef
-mkdir ()
+mkdir (;$$)
 msgctl ($$$)
 msgget ($$)
 msgrcv ($$$$$)
@@ -197,7 +197,7 @@ send (*$$;$)
 setgrent ()
 sethostent ($)
 setnetent ($)
-setpgrp undef
+setpgrp (;$$)
 setpriority ($$$)
 setprotoent ($)
 setpwent ()
