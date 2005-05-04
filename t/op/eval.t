@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..91\n";
+print "1..92\n";
 
 eval 'print "ok 1\n";';
 
@@ -438,3 +438,14 @@ print "ok ",$test++," - #20798 (used to dump core)\n";
   eval $code;
   print   $c   eq 'V'  ? "ok " : "# '$c' ne 'V'\nnot ok ", $test++, "\n";
 }
+
+# [perl #34682] escaping an eval with last could coredump or dup output
+
+$got = runperl (
+    prog => 
+    'sub A::TIEARRAY { L: { eval { last L } } } tie @a, A; warn qq(ok\n)',
+stderr => 1);
+
+print "not " unless $got eq "ok\n";
+print "ok $test - eval and last\n"; $test++;
+
