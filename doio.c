@@ -926,7 +926,7 @@ Perl_nextargv(pTHX_ register GV *gv)
 	}
 	else {
 	    if (ckWARN_d(WARN_INPLACE)) {
-		int eno = errno;
+		const int eno = errno;
 		if (PerlLIO_stat(PL_oldname, &PL_statbuf) >= 0
 		    && !S_ISREG(PL_statbuf.st_mode))	
 		{
@@ -1040,11 +1040,10 @@ bool
 Perl_io_close(pTHX_ IO *io, bool not_implicit)
 {
     bool retval = FALSE;
-    int status;
 
     if (IoIFP(io)) {
 	if (IoTYPE(io) == IoTYPE_PIPE) {
-	    status = PerlProc_pclose(IoIFP(io));
+	    const int status = PerlProc_pclose(IoIFP(io));
 	    if (not_implicit) {
 		STATUS_NATIVE_SET(status);
 		retval = (STATUS_POSIX == 0);
@@ -1177,7 +1176,7 @@ Perl_mode_from_discipline(pTHX_ SV *discp)
     int mode = O_BINARY;
     if (discp) {
 	STRLEN len;
-	char *s = SvPV(discp,len);
+	const char *s = SvPV(discp,len);
 	while (*s) {
 	    if (*s == ':') {
 		switch (s[1]) {
@@ -1210,7 +1209,7 @@ Perl_mode_from_discipline(pTHX_ SV *discp)
 		--len;
 	    }
 	    else {
-		char *end;
+		const char *end;
 fail_discipline:
 		end = strchr(s+1, ':');
 		if (!end)
@@ -1393,7 +1392,7 @@ Perl_my_stat(pTHX)
     }
     else {
 	SV* sv = POPs;
-	char *s;
+	const char *s;
 	STRLEN len;
 	PUTBACK;
 	if (SvTYPE(sv) == SVt_PVGV) {
@@ -1451,6 +1450,7 @@ Perl_my_lstat(pTHX)
 		GvENAME((GV*) SvRV(sv)));
 	return (PL_laststatval = -1);
     }
+    /* XXX Do really need to be calling SvPV() all these times? */
     sv_setpv(PL_statname,SvPV(sv, n_a));
     PL_laststatval = PerlLIO_lstat(SvPV(sv, n_a),&PL_statcache);
     if (PL_laststatval < 0 && ckWARN(WARN_NEWLINE) && strchr(SvPV(sv, n_a), '\n'))
@@ -1700,7 +1700,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 	    APPLY_TAINT_PROPER();
 	    tot = sp - mark;
 	    while (++mark <= sp) {
-		char *name = SvPVx(*mark, n_a);
+		const char *name = SvPVx(*mark, n_a);
 		APPLY_TAINT_PROPER();
 		if (PerlLIO_chmod(name, val))
 		    tot--;
@@ -1718,7 +1718,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 	    APPLY_TAINT_PROPER();
 	    tot = sp - mark;
 	    while (++mark <= sp) {
-		char *name = SvPVx(*mark, n_a);
+		const char *name = SvPVx(*mark, n_a);
 		APPLY_TAINT_PROPER();
 		if (PerlLIO_chown(name, val, val2))
 		    tot--;
@@ -1859,12 +1859,13 @@ nothing in the core.
                 utbuf.modtime = (Time_t)SvIVx(modified); /* time modified */
 #endif
             }
-            APPLY_TAINT_PROPER();
+	    APPLY_TAINT_PROPER();
 	    tot = sp - mark;
 	    while (++mark <= sp) {
-		char *name = SvPVx(*mark, n_a);
+		STRLEN n_a;
+		const char *name = SvPVx(*mark, n_a);
 		APPLY_TAINT_PROPER();
-               if (PerlLIO_utime(name, utbufp))
+		if (PerlLIO_utime(name, utbufp))
 		    tot--;
 	    }
 	}
@@ -1881,7 +1882,7 @@ nothing in the core.
 /* Do the permissions allow some operation?  Assumes statcache already set. */
 #ifndef VMS /* VMS' cando is in vms.c */
 bool
-Perl_cando(pTHX_ Mode_t mode, Uid_t effective, register Stat_t *statbufp)
+Perl_cando(pTHX_ Mode_t mode, Uid_t effective, register const Stat_t *statbufp)
 /* Note: we use `effective' both for uids and gids.
  * Here we are betting on Uid_t being equal or wider than Gid_t.  */
 {
@@ -2237,7 +2238,7 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 {
 #ifdef HAS_SHM
     SV *mstr;
-    char *mbuf, *shm;
+    char *shm;
     I32 mpos, msize;
     STRLEN len;
     struct shmid_ds shmds;
@@ -2258,6 +2259,7 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
     if (shm == (char *)-1)	/* I hate System V IPC, I really do */
 	return -1;
     if (optype == OP_SHMREAD) {
+	const char *mbuf;
 	/* suppress warning when reading into undef var (tchrist 3/Mar/00) */
 	if (! SvOK(mstr))
 	    sv_setpvn(mstr, "", 0);
@@ -2276,7 +2278,7 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
     else {
 	I32 n;
 
-	mbuf = SvPV(mstr, len);
+	const char *mbuf = SvPV(mstr, len);
 	if ((n = len) > msize)
 	    n = msize;
 	Copy(mbuf, shm + mpos, n, char);

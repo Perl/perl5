@@ -18,7 +18,7 @@ BEGIN {
 sub do_not_edit ($)
 {
     my $file = shift;
-    
+
     my $years = '1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005';
 
     $years =~ s/1999,/1999,\n  / if length $years > 40;
@@ -101,8 +101,8 @@ sub walk_table (&@) {
 	else {
 	    @args = split /\s*\|\s*/, $_;
 	}
-        my @outs = &{$function}(@args);
-        print $F @outs; # $function->(@args) is not 5.003
+	my @outs = &{$function}(@args);
+	print $F @outs; # $function->(@args) is not 5.003
     }
     print $F $trailer if $trailer;
     unless (ref $filename) {
@@ -113,7 +113,7 @@ sub walk_table (&@) {
 sub munge_c_files () {
     my $functions = {};
     unless (@ARGV) {
-        warn "\@ARGV empty, nothing to do\n";
+	warn "\@ARGV empty, nothing to do\n";
 	return;
     }
     walk_table {
@@ -172,6 +172,8 @@ sub write_protos {
     }
     else {
 	my ($flags,$retval,$func,@args) = @_;
+	my @nonnull;
+	my $has_context = ( $flags !~ /n/ );
 	$ret .= '/* ' if $flags =~ /m/;
 	if ($flags =~ /s/) {
 	    $retval = "STATIC $retval";
@@ -184,23 +186,34 @@ sub write_protos {
 	    }
 	}
 	$ret .= "$retval\t$func(";
-	unless ($flags =~ /n/) {
-	    $ret .= "pTHX";
-	    $ret .= "_ " if @args;
+	if ( $has_context ) {
+	    $ret .= @args ? "pTHX_ " : "pTHX";
 	}
 	if (@args) {
+	    my $n;
+	    for my $arg ( @args ) {
+		++$n;
+		push( @nonnull, $n ) if ( $arg =~ s/\s*\bNN\b\s+// );
+	    }
 	    $ret .= join ", ", @args;
 	}
 	else {
-	    $ret .= "void" if $flags =~ /n/;
+	    $ret .= "void" if !$has_context;
 	}
 	$ret .= ")";
 	$ret .= " __attribute__((noreturn))" if $flags =~ /r/;
+	$ret .= "\n\t\t\t__attribute__((malloc)) __attribute__((warn_unused_result))" if $flags =~ /a/;
+	$ret .= "\n\t\t\t__attribute__((pure))" if $flags =~ /P/;
 	if( $flags =~ /f/ ) {
-	    my $prefix = $flags =~ /n/ ? '' : 'pTHX_';
+	    my $prefix = $has_context ? 'pTHX_' : '';
 	    my $args = scalar @args;
-	    $ret .= sprintf "\n\t__attribute__format__(__printf__,%s%d,%s%d)",
+	    $ret .= sprintf "\n\t\t\t__attribute__format__(__printf__,%s%d,%s%d)",
 				    $prefix, $args - 1, $prefix, $args;
+	}
+	$ret .= "\n\t\t\t__attribute__((nonnull))" if $flags =~ /N/;
+	if ( @nonnull ) {
+	    my @pos = map { $has_context ? "pTHX_ $_" : $_ } @nonnull;
+	    $ret .= sprintf( "\n\t\t\t__attribute__((nonnull(%s)))", join( ",", @pos ) );
 	}
 	$ret .= ";";
 	$ret .= ' */' if $flags =~ /m/;
@@ -231,12 +244,12 @@ walk_table(\&write_global_sym, "global.sym", undef);
 #       hints
 #       copline
 my @extvars = qw(sv_undef sv_yes sv_no na dowarn
-                 curcop compiling
-                 tainting tainted stack_base stack_sp sv_arenaroot
+		 curcop compiling
+		 tainting tainted stack_base stack_sp sv_arenaroot
 		 no_modify
-                 curstash DBsub DBsingle DBassertion debstash
-                 rsfp
-                 stdingv
+		 curstash DBsub DBsingle DBassertion debstash
+		 rsfp
+		 stdingv
 		 defgv
 		 errgv
 		 rsfp_filters

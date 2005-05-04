@@ -5471,7 +5471,7 @@ WARNING: do not use the following unless you *know* C<off> is within
 the UTF-8 data pointed to by C<s> *and* that on entry C<s> is aligned
 on the first byte of character or just after the last byte of a character.
 
-	U8*	utf8_hop(U8 *s, I32 off)
+	U8*	utf8_hop(const U8 *s, I32 off)
 
 =for hackers
 Found in file utf8.c

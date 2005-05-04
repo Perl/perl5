@@ -6105,7 +6105,7 @@ Perl_re_intuit_string(pTHX_ regexp *prog)
     GET_RE_DEBUG_FLAGS_DECL;
     DEBUG_COMPILE_r(
 	{   STRLEN n_a;
-	    char *s = SvPV(prog->check_substr
+	    const char *s = SvPV(prog->check_substr
 		      ? prog->check_substr : prog->check_utf8, n_a);
 
 	    if (!PL_colorset) reginitcolors();

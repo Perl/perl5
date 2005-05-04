@@ -162,10 +162,12 @@
 #  endif
 #  define pTHX_		pTHX,
 #  define aTHX_		aTHX,
-#  define pTHX_1	2	
+#  define pTHX_1	2
 #  define pTHX_2	3
 #  define pTHX_3	4
 #  define pTHX_4	5
+#  define pTHX_5	6
+#  define pTHX_6	7
 #endif
 
 #define STATIC static

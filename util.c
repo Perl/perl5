@@ -2710,7 +2710,7 @@ Perl_repeatcpy(pTHX_ register char *to, register const char *from, I32 len, regi
 
 #ifndef HAS_RENAME
 I32
-Perl_same_dirent(pTHX_ char *a, char *b)
+Perl_same_dirent(pTHX_ const char *a, const char *b)
 {
     char *fa = strrchr(a,'/');
     char *fb = strrchr(b,'/');
@@ -3682,8 +3682,7 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
 	 * size from the heap if they are given a NULL buffer pointer.
 	 * The problem is that this behaviour is not portable. */
 	if (getcwd(buf, sizeof(buf) - 1)) {
-	    STRLEN len = strlen(buf);
-	    sv_setpvn(sv, buf, len);
+	    sv_setpvn(sv, buf, strlen(buf));
 	    return TRUE;
 	}
 	else {
@@ -3696,8 +3695,7 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
 
     Stat_t statbuf;
     int orig_cdev, orig_cino, cdev, cino, odev, oino, tdev, tino;
-    int namelen, pathlen=0;
-    DIR *dir;
+    int pathlen=0;
     Direntry_t *dp;
 
     (void)SvUPGRADE(sv, SVt_PV);
@@ -3712,6 +3710,7 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
     cino = orig_cino;
 
     for (;;) {
+	DIR *dir;
 	odev = cdev;
 	oino = cino;
 
@@ -3734,9 +3733,9 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
 
 	while ((dp = PerlDir_read(dir)) != NULL) {
 #ifdef DIRNAMLEN
-	    namelen = dp->d_namlen;
+	    const int namelen = dp->d_namlen;
 #else
-	    namelen = strlen(dp->d_name);
+	    const int namelen = strlen(dp->d_name);
 #endif
 	    /* skip . and .. */
 	    if (SV_CWD_ISDOT(dp)) {
@@ -4354,7 +4353,7 @@ S_socketpair_udp (int fd[2]) {
     errno = ECONNABORTED;
   tidy_up_and_fail:
     {
-	int save_errno = errno;
+	const int save_errno = errno;
 	if (sockets[0] != -1)
 	    PerlLIO_close(sockets[0]);
 	if (sockets[1] != -1)

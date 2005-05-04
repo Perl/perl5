@@ -2366,6 +2366,7 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
     return fold_constants((OP *)binop);
 }
 
+static int uvcompare(const void *a, const void *b) __attribute__((nonnull,pure));
 static int
 uvcompare(const void *a, const void *b)
 {
