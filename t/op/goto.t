@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 53;
+plan tests => 54;
 
 our $foo;
 while ($?) {
@@ -186,7 +186,7 @@ ok($ok, 'works correctly in a nested eval string');
 
 sub f1 {
     my $x;
-    goto sub { $x=0; print "ok 28 - don't prematurely free CV\n" }
+    goto sub { $x=0; ok(1,"don't prematurely free CV\n") }
 }
 f1();
 
