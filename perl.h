@@ -2456,7 +2456,7 @@ typedef pthread_key_t	perl_key;
 
 #ifndef VDf
 #  ifdef CHECK_FORMAT
-#    define VDf "p"
+#    define VDf "-1p"
 #  else
 #    define VDf "vd"
 #  endif

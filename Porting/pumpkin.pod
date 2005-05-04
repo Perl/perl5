@@ -750,7 +750,7 @@ arguments.  Run C<Configure> with S<-Dccflags='-DCHECK_FORMAT
 is C<gcc>) and run C<make>.  The compiler will produce warnings of
 incorrect use of format arguments.  
 
-As of change 23767, CHECK_FORMAT changes perl-defined formats
+As of perl 5.8.7, CHECK_FORMAT changes perl-defined formats
 to obscure (but standard) formats, and then traps the obscure
 format.  The resulting perl executable operates properly but 
 you should not use the executable produced by this process.
