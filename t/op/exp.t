@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 22;
+plan tests => 16;
 
 # compile time evaluation
 
@@ -54,10 +54,6 @@ cmp_ok(round(cos(-1 * $pi)), '==', -1.0);
 cmp_ok(round(cos($pi_2)), '==', 0.0);
 cmp_ok(round(cos(-1 * $pi_2)), '==', 0.0);
 
-# atan2() tests
-cmp_ok(round(atan2(-0.0, 0.0)), '==', 0);
-cmp_ok(round(atan2(0.0, 0.0)), '==', 0);
-cmp_ok(round(atan2(-0.0, -0.0)), '==', round(-1 * $pi));
-cmp_ok(round(atan2(0.0, -0.0)), '==', round($pi));
-cmp_ok(round(atan2(-1.0, 0.0)), '==', round(-1 * $pi_2));
-cmp_ok(round(atan2(1.0, 0.0)), '==', round($pi_2));
+# atan2() tests were removed due to differing results from calls to
+# atan2() on various OS's and architectures.  See perlport.pod for
+# more information.
