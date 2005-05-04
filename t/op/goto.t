@@ -7,7 +7,7 @@ BEGIN {
     @INC = qw(. ../lib);
 }
 
-print "1..47\n";
+print "1..49\n";
 
 require "test.pl";
 
@@ -414,5 +414,27 @@ sub b32039 { goto &c32039; }
 sub c32039 { print $_[0] eq 'foo' ? "" : "not ", "ok 47 - chained &goto\n" }
 a32039();
 
+# [perl #35214] next and redo re-entered the loop with the wrong cop,
+# causing a subsequent goto to crash
+
+{
+    my $r = runperl(
+		stderr => 1,
+		prog =>
+'for ($_=0;$_<3;$_++){A: if($_==1){next} if($_==2){$_++;goto A}}print qq(ok)'
+    );
+    $r =~ s/\n//g;
+    print "# r=$r\nnot " unless $r eq 'ok';
+    print "ok 48 - next and goto\n";
+
+    $r = runperl(
+		stderr => 1,
+		prog =>
+'for ($_=0;$_<3;$_++){A: if($_==1){$_++;redo} if($_==2){$_++;goto A}}print qq(ok)'
+    );
+    $r =~ s/\n//g;
+    print "# r=$r\nnot " unless $r eq 'ok';
+    print "ok 49 - redo and goto\n";
+}
 
 

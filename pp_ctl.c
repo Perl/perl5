@@ -1890,6 +1890,7 @@ PP(pp_leaveloop)
     SV **mark;
 
     POPBLOCK(cx,newpm);
+    assert(CxTYPE(cx) == CXt_LOOP);
     mark = newsp;
     newsp = PL_stack_base + cx->blk_loop.resetsp;
 
@@ -2149,6 +2150,7 @@ PP(pp_next)
     TOPBLOCK(cx);
     if (PL_scopestack_ix < inner)
 	leave_scope(PL_scopestack[PL_scopestack_ix]);
+    PL_curcop = cx->blk_oldcop;
     return cx->blk_loop.next_op;
 }
 
@@ -2176,6 +2178,7 @@ PP(pp_redo)
     oldsave = PL_scopestack[PL_scopestack_ix - 1];
     LEAVE_SCOPE(oldsave);
     FREETMPS;
+    PL_curcop = cx->blk_oldcop;
     return cx->blk_loop.redo_op;
 }
 
