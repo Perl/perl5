@@ -1221,7 +1221,7 @@ executable files do not require use of the suffix when invoking
 a command.  To convert the value of $^X to a path name, use the
 following statements:
 
-# Build up a set of file names (not command names).
+  # Build up a set of file names (not command names).
   use Config;
   $this_perl = $^X;
   if ($^O ne 'VMS')
