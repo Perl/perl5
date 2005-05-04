@@ -610,7 +610,7 @@ Perl_utf8_length(pTHX_ U8 *s, U8 *e)
 	return 0;
     }
     while (s < e) {
-	U8 t = UTF8SKIP(s);
+	const U8 t = UTF8SKIP(s);
 
 	if (e - s < t) {
 	    if (ckWARN_d(WARN_UTF8)) {
@@ -670,7 +670,7 @@ Perl_utf8_distance(pTHX_ U8 *a, U8 *b)
     }
     else {
 	while (b < a) {
-	    U8 c = UTF8SKIP(b);
+	    const U8 c = UTF8SKIP(b);
 
 	    if (a - b < c) {
 	        if (ckWARN_d(WARN_UTF8)) {
@@ -721,7 +721,7 @@ Perl_utf8_hop(pTHX_ U8 *s, I32 off)
 		s--;
 	}
     }
-    return s;
+    return (U8 *)s;
 }
 
 /*

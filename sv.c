@@ -9726,7 +9726,7 @@ void *
 Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, void *sv)
 {
     PTR_TBL_ENT_t *tblent;
-    UV hash = PTR_TABLE_HASH(sv);
+    const UV hash = PTR_TABLE_HASH(sv);
     assert(tbl);
     tblent = tbl->tbl_ary[hash & tbl->tbl_max];
     for (; tblent; tblent = tblent->next) {
@@ -9745,7 +9745,7 @@ Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldv, void *newv)
     /* XXX this may be pessimal on platforms where pointers aren't good
      * hash values e.g. if they grow faster in the most significant
      * bits */
-    UV hash = PTR_TABLE_HASH(oldv);
+    const UV hash = PTR_TABLE_HASH(oldv);
     bool empty = 1;
 
     assert(tbl);
@@ -9772,7 +9772,7 @@ void
 Perl_ptr_table_split(pTHX_ PTR_TBL_t *tbl)
 {
     PTR_TBL_ENT_t **ary = tbl->tbl_ary;
-    UV oldsize = tbl->tbl_max + 1;
+    const UV oldsize = tbl->tbl_max + 1;
     UV newsize = oldsize * 2;
     UV i;
 
@@ -9805,7 +9805,6 @@ Perl_ptr_table_clear(pTHX_ PTR_TBL_t *tbl)
 {
     register PTR_TBL_ENT_t **array;
     register PTR_TBL_ENT_t *entry;
-    register PTR_TBL_ENT_t *oentry = Null(PTR_TBL_ENT_t*);
     UV riter = 0;
     UV max;
 
@@ -9819,7 +9818,7 @@ Perl_ptr_table_clear(pTHX_ PTR_TBL_t *tbl)
 
     for (;;) {
         if (entry) {
-            oentry = entry;
+            PTR_TBL_ENT_t *oentry = entry;
             entry = entry->next;
             S_del_pte(aTHX_ oentry);
         }

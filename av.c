@@ -25,7 +25,6 @@ void
 Perl_av_reify(pTHX_ AV *av)
 {
     I32 key;
-    SV* sv;
 
     if (AvREAL(av))
 	return;
@@ -37,7 +36,7 @@ Perl_av_reify(pTHX_ AV *av)
     while (key > AvFILLp(av) + 1)
 	AvARRAY(av)[--key] = &PL_sv_undef;
     while (key) {
-	sv = AvARRAY(av)[--key];
+	SV * const sv = AvARRAY(av)[--key];
 	assert(sv);
 	if (sv != &PL_sv_undef)
 	    (void)SvREFCNT_inc(sv);
