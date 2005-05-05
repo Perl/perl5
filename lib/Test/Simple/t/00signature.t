@@ -25,7 +25,9 @@ else {
 my $ret = Module::Signature::verify();
 SKIP: {
     skip "Module::Signature cannot verify", 1 
-      if $ret eq Module::Signature::CANNOT_VERIFY();
+      if $ret eq Module::Signature::CANNOT_VERIFY()   or
+         $ret eq Module::Signature::CIPHER_UNKNOWN();
 
     cmp_ok $ret, '==', Module::Signature::SIGNATURE_OK(), "Valid signature";
 }
+

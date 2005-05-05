@@ -1,3 +1,24 @@
+0.60  Tue May  3 14:20:34 PDT 2005
+
+0.59_01  Tue Apr 26 21:51:12 PDT 2005
+    * Test::Builder now has a create() method which allows you to create
+      a brand spanking new Test::Builder object.
+    * require_ok() was not working for single letter module names.
+    * is_deeply() and eq_* now work with circular scalar references
+      (Thanks Fergal)
+    * Use of eq_* now officially discouraged.
+    - Removed eq_* from the SYNOPSIS.
+    - is_deeply(undef, $not_undef); now works. [rt.cpan.org 9441]
+    - is_deeply() was mistakenly interpeting the same reference used twice
+      in a data structure as being circular causing failures.
+      [rt.cpan.org 11623]
+    - Loading Test::Builder but not using it would interfere with the
+      exit code if the code exited. [rt.cpan.org 12310]
+    - is_deeply() diagnostics now disambiguate between stringified references
+      and references. [rt.cpan.org 8865]
+    - Files opened by the output methods are now autoflushed.
+    - todo() now honors $Level when looking for $TODO.
+
 0.54  Wed Dec 15 04:18:43 EST 2004
     * $how_many is optional for skip() and todo_skip().  Thanks to 
       Devel::Cover for pointing this out.
