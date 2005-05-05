@@ -260,14 +260,17 @@ Perl_pad_undef(pTHX_ CV* cv)
 		&& *SvPVX(namesv) == '&')
 	    {
 		CV * const innercv = (CV*)curpad[ix];
+		U32 inner_rc = SvREFCNT(innercv);
+		assert(inner_rc);
 		namepad[ix] = Nullsv;
 		SvREFCNT_dec(namesv);
 
 		if (SvREFCNT(comppad) < 2) { /* allow for /(?{ sub{} })/  */
 		    curpad[ix] = Nullsv;
 		    SvREFCNT_dec(innercv);
+		    inner_rc--;
 		}
-		if (SvREFCNT(innercv) /* in use, not just a prototype */
+		if (inner_rc /* in use, not just a prototype */
 		    && CvOUTSIDE(innercv) == cv)
 		{
 		    assert(CvWEAKOUTSIDE(innercv));
