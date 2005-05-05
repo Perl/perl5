@@ -16,19 +16,21 @@ There are no changes incompatible with 5.8.6.
 =head2 Unicode Character Database 4.1.0
 
 The copy of the Unicode Character Database included in Perl 5.8 has
-been updated to 4.1.0 from 4.0.1.
+been updated to 4.1.0 from 4.0.1. See
+L<http://www.unicode.org/versions/Unicode4.1.0/#NotableChanges> for the
+notable changes.
 
 =head2 suidperl less insecure
 
 A pair of exploits in C<suidperl> involving debugging code have been closed.
 
-For new projects the core perl team would strongly recommend that you use
+For new projects the core perl team strongly recommends that you use
 dedicated, single purpose security tools such as C<sudo> in preference to
 C<suidperl>.
 
-=head2 Optional site customisation script
+=head2 Optional site customization script
 
-The perl interpreter can be built to allow the use of a site customisation
+The perl interpreter can be built to allow the use of a site customization
 script. By default this is not enabled, to be consistent with previous perl
 releases. To use this, add C<-Dusesitecustomize> to the command line flags
 when running the C<Configure> script. See also L<perlrun/-f>.
@@ -38,7 +40,7 @@ when running the C<Configure> script. See also L<perlrun/-f>.
 C<Config.pm> is now about 3K rather than 32K, with the infrequently used
 code and C<%Config> values loaded on demand. This is transparent to the
 programmer, but means that most code will save parsing and loading 29K of
-script. (for example code that uses C<File::Find>)
+script (for example, code that uses C<File::Find>).
 
 =head1 Modules and Pragmata
 
@@ -161,6 +163,18 @@ C<find2perl> has new options C<-iname>, C<-path> and C<-ipath>.
 
 =item *
 
+The socket() function on Win32 has been fixed so that it is able to use
+transport providers which specify a protocol of 0 (meaning any protocol
+is allowed) once more.  (This was broken in 5.8.6, and typically caused
+the use of ICMP sockets to fail.)
+
+=item *
+
+The Win32 "dmake" makefile.mk has been updated to make it compatible
+with the latest versions of dmake.
+
+=item *
+
 Another obscure bug involving C<substr> and UTF-8 caused by bad internal
 offset caching has been identified and fixed.
 
@@ -172,7 +186,8 @@ corrupt results.
 
 =item *
 
-C<uc> of a long string could exhaust memory. This has been fixed.
+Case conversion operations such as C<uc> on a long Unicode string could
+exhaust memory. This has been fixed.
 
 =item *
 
