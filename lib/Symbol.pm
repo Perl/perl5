@@ -85,7 +85,7 @@ require Exporter;
 @EXPORT = qw(gensym ungensym qualify qualify_to_ref);
 @EXPORT_OK = qw(delete_package geniosym);
 
-$VERSION = '1.05';
+$VERSION = '1.06';
 
 my $genpkg = "Symbol::";
 my $genseq = 0;

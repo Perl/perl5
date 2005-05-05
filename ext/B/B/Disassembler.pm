@@ -5,7 +5,7 @@
 #      You may distribute under the terms of either the GNU General Public
 #      License or the Artistic License, as specified in the README file.
 
-$B::Disassembler::VERSION = '1.03';
+$B::Disassembler::VERSION = '1.04';
 
 package B::Disassembler::BytecodeStream;
 

@@ -32,7 +32,7 @@ sub G_KEEPERR()	{  16 }
 sub G_NODEBUG()	{  32 }
 sub G_METHOD()	{  64 }
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 bootstrap XS::APItest $VERSION;
 

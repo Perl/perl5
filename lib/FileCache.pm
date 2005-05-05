@@ -1,6 +1,6 @@
 package FileCache;
 
-our $VERSION = '1.04_01';
+our $VERSION = '1.05';
 
 =head1 NAME
 
