@@ -157,6 +157,20 @@ C<find2perl> has new options C<-iname>, C<-path> and C<-ipath>.
 
 =head1 Installation and Configuration Improvements
 
+=over 4
+
+=item *
+
+The Win32 "dmake" makefile.mk has been updated to make it compatible
+with the latest versions of dmake.
+
+=item *
+
+C<PERL_MALLOC>, C<DEBUG_MSTATS>, C<PERL_HASH_SEED_EXPLICIT> and C<NO_HASH_SEED>
+should now work in Win32 makefiles.
+
+=back
+
 =head1 Selected Bug Fixes
 
 =over 4
@@ -167,11 +181,6 @@ The socket() function on Win32 has been fixed so that it is able to use
 transport providers which specify a protocol of 0 (meaning any protocol
 is allowed) once more.  (This was broken in 5.8.6, and typically caused
 the use of ICMP sockets to fail.)
-
-=item *
-
-The Win32 "dmake" makefile.mk has been updated to make it compatible
-with the latest versions of dmake.
 
 =item *
 
@@ -252,11 +261,6 @@ the pre 5.6.0 behaviour.
 
 C<h2ph> has various enhancements to cope with constructs in header files that
 used to result in incorrect or invalid output.
-
-=item *
-
-C<PERL_MALLOC>, C<DEBUG_MSTATS>, C<PERL_HASH_SEED_EXPLICIT> and C<NO_HASH_SEED>
-should now work in Win32 makefiles.
 
 =back
 
