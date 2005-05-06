@@ -37,8 +37,7 @@ sub _cwd {
 my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
-    my $self = shift;
-    $tmpdir = $self->_tmpdir( @ENV{qw(TMPDIR TEMP TMP)},
+    $tmpdir = $_[0]->_tmpdir( @ENV{qw(TMPDIR TEMP TMP)},
 			      '/tmp',
 			      '/'  );
 }

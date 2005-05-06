@@ -297,8 +297,7 @@ is tainted, it is not used.
 my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
-    my $self = shift;
-    $tmpdir = $self->_tmpdir( 'sys$scratch:', $ENV{TMPDIR} );
+    $tmpdir = $_[0]->_tmpdir( 'sys$scratch:', $ENV{TMPDIR} );
 }
 
 =item updir (override)

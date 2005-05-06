@@ -1,5 +1,30 @@
 Revision history for Perl distribution PathTools.
 
+3.07  Fri May  6 07:46:45 CDT 2005
+
+ - Fixed a bug in which the special perl variable $^O would become
+   tainted under certain versions of perl. [Michael Schwern]
+
+ - File::Spec->rootdir() was returning / on Win32.  Now it returns \ .
+   [Michael Schwern]
+
+ - We now avoid modifying @_ in tmpdir() when it's not strictly
+   necessary, which reportedly provides a modest performance
+   boost. [Richard Soderberg]
+
+ - Made a couple of slight changes to the Win32 code so that it works
+   (or works better) on Symbian OS phones.  [Jarkko Hietaniemi]
+
+3.06  Wed Apr 13 20:47:26 CDT 2005
+ 
+ (No changes in functionality)
+
+ - Added a note to the canonpath() docs about why it doesn't collapse
+   foo/../bar sections.
+
+ - The internal-only function bsd_realpath() in the XS file now uses
+   normal arg syntax instead of K&R syntax. [Nicholas Clark]
+
 3.05  Mon Feb 28 07:22:58 CST 2005
 
  - Fixed a bug in fast_abs_path() on Win32 in which forward- and

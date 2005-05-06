@@ -35,6 +35,9 @@ sub devnull {
     return "nul";
 }
 
+sub rootdir () { '\\' }
+
+
 =item tmpdir
 
 Returns a string representation of the first existing directory
@@ -60,8 +63,7 @@ variables are tainted, they are not used.
 my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
-    my $self = shift;
-    $tmpdir = $self->_tmpdir( @ENV{qw(TMPDIR TEMP TMP)},
+    $tmpdir = $_[0]->_tmpdir( @ENV{qw(TMPDIR TEMP TMP)},
 			      'SYS:/temp',
 			      'C:\system\temp',
 			      'C:/temp',

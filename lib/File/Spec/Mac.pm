@@ -373,8 +373,7 @@ directory on your startup volume.
 my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
-    my $self = shift;
-    $tmpdir = $self->_tmpdir( $ENV{TMPDIR} );
+    $tmpdir = $_[0]->_tmpdir( $ENV{TMPDIR} );
 }
 
 =item updir

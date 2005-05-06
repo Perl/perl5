@@ -118,6 +118,7 @@ if ($^O eq 'MacOS') {
 [ "Unix->rel2abs('/t1','/t1/t2/t3')",            '/t1'             ],
 
 [ "Win32->case_tolerant()",         '1'  ],
+[ "Win32->rootdir()",               '\\'  ],
 
 [ "Win32->splitpath('file')",                            ',,file'                            ],
 [ "Win32->splitpath('\\d1/d2\\d3/')",                    ',\\d1/d2\\d3/,'                    ],
