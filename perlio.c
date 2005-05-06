@@ -762,7 +762,8 @@ PerlIO_find_layer(pTHX_ const char *name, STRLEN len, int load)
     	    ENTER;
 	    SAVEINT(PL_in_load_module);
 	    if (cv) {
-	        SAVESPTR(PL_warnhook);
+		SAVEGENERICSV(PL_warnhook);
+		SvREFCNT_inc(cv);
 		PL_warnhook = (SV *) cv;
 	    }
 	    PL_in_load_module++;
@@ -5039,3 +5040,13 @@ PerlIO_sprintf(char *s, int n, const char *fmt, ...)
     return result;
 }
 #endif
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * vim: shiftwidth=4:
+*/
