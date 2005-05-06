@@ -10434,9 +10434,9 @@ S_more_pte(pTHX)
 {
     register struct ptr_tbl_ent* pte;
     register struct ptr_tbl_ent* pteend;
-    New(0, ptr, PERL_ARENA_SIZE/sizeof(struct ptr_tbl_ent), struct ptr_tbl_ent);
-    ptr->next = PL_pte_arenaroot;
-    PL_pte_arenaroot = ptr;
+    New(0, pte, PERL_ARENA_SIZE/sizeof(struct ptr_tbl_ent), struct ptr_tbl_ent);
+    pte->next = PL_pte_arenaroot;
+    PL_pte_arenaroot = pte;
 
     pteend = &pte[PERL_ARENA_SIZE / sizeof(struct ptr_tbl_ent) - 1];
     PL_pte_root = ++pte;
