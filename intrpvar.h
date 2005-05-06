@@ -437,8 +437,8 @@ PERLVAR(Ixpvhv_arenaroot,XPVHV*)	/* list of allocated xpvhv areas */
 PERLVAR(Ixpvmg_arenaroot,XPVMG*)	/* list of allocated xpvmg areas */
 PERLVAR(Ixpvlv_arenaroot,XPVLV*)	/* list of allocated xpvlv areas */
 PERLVAR(Ixpvbm_arenaroot,XPVBM*)	/* list of allocated xpvbm areas */
-PERLVAR(Ihe_arenaroot,	XPV*)		/* list of allocated he areas */
-PERLVAR(Ipte_arenaroot,	XPV*)		/* list of allocated he areas */
+PERLVAR(Ihe_arenaroot,	HE *)		/* list of allocated he areas */
+PERLVAR(Ipte_arenaroot,	struct ptr_tbl_ent *) /* list of allocated he areas */
 
      /* 5.6.0 stopped here */
 

@@ -614,16 +614,24 @@ Perl_sv_free_arenas(pTHX)
     PL_xpvbm_arenaroot = 0;
     PL_xpvbm_root = 0;
 
-    for (arena = (XPV*)PL_he_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
-	Safefree(arena);
+    {
+	HE *he;
+	HE *he_next;
+	for (he = PL_he_arenaroot; he; he = he_next) {
+	    he_next = HeNEXT(he);
+	    Safefree(he);
+	}
     }
     PL_he_arenaroot = 0;
     PL_he_root = 0;
 
-    for (arena = (XPV*)PL_pte_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
-	Safefree(arena);
+    {
+	struct ptr_tbl_ent *pte;
+	struct ptr_tbl_ent *pte_next;
+	for (pte = PL_pte_arenaroot; pte; pte = pte_next) {
+	    pte_next = pte->next;
+	    Safefree(pte);
+	}
     }
     PL_pte_arenaroot = 0;
     PL_pte_root = 0;
@@ -10426,12 +10434,10 @@ S_more_pte(pTHX)
 {
     register struct ptr_tbl_ent* pte;
     register struct ptr_tbl_ent* pteend;
-    XPV *ptr;
-    New(54, ptr, PERL_ARENA_SIZE/sizeof(XPV), XPV);
-    ptr->xpv_pv = (char*)PL_pte_arenaroot;
+    New(0, ptr, PERL_ARENA_SIZE/sizeof(struct ptr_tbl_ent), struct ptr_tbl_ent);
+    ptr->next = PL_pte_arenaroot;
     PL_pte_arenaroot = ptr;
 
-    pte = (struct ptr_tbl_ent*)ptr;
     pteend = &pte[PERL_ARENA_SIZE / sizeof(struct ptr_tbl_ent) - 1];
     PL_pte_root = ++pte;
     while (pte < pteend) {

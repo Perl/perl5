@@ -60,12 +60,10 @@ S_more_he(pTHX)
 {
     register HE* he;
     register HE* heend;
-    XPV *ptr;
-    New(54, ptr, PERL_ARENA_SIZE/sizeof(XPV), XPV);
-    ptr->xpv_pv = (char*)PL_he_arenaroot;
-    PL_he_arenaroot = ptr;
+    New(54, he, PERL_ARENA_SIZE/sizeof(HE), HE);
+    HeNEXT(he) = PL_he_arenaroot;
+    PL_he_arenaroot = he;
 
-    he = (HE*)ptr;
     heend = &he[PERL_ARENA_SIZE / sizeof(HE) - 1];
     PL_he_root = ++he;
     while (he < heend) {
