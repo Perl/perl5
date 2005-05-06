@@ -621,6 +621,13 @@ Perl_sv_free_arenas(pTHX)
     PL_he_arenaroot = 0;
     PL_he_root = 0;
 
+    for (arena = (XPV*)PL_pte_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_pte_arenaroot = 0;
+    PL_pte_root = 0;
+
     if (PL_nice_chunk)
 	Safefree(PL_nice_chunk);
     PL_nice_chunk = Nullch;
@@ -10412,6 +10419,46 @@ Perl_ptr_table_new(pTHX)
 #  define PTR_TABLE_HASH(ptr) (PTR2UV(ptr) >> 2)
 #endif
 
+
+
+STATIC void
+S_more_pte(pTHX)
+{
+    register struct ptr_tbl_ent* pte;
+    register struct ptr_tbl_ent* pteend;
+    XPV *ptr;
+    New(54, ptr, 1008/sizeof(XPV), XPV);
+    ptr->xpv_pv = (char*)PL_pte_arenaroot;
+    PL_pte_arenaroot = ptr;
+
+    pte = (struct ptr_tbl_ent*)ptr;
+    pteend = &pte[1008 / sizeof(struct ptr_tbl_ent) - 1];
+    PL_pte_root = ++pte;
+    while (pte < pteend) {
+	pte->next = pte + 1;
+	pte++;
+    }
+    pte->next = 0;
+}
+
+STATIC struct ptr_tbl_ent*
+S_new_pte(pTHX)
+{
+    struct ptr_tbl_ent* pte;
+    if (!PL_pte_root)
+	S_more_pte(aTHX);
+    pte = PL_pte_root;
+    PL_pte_root = pte->next;
+    return pte;
+}
+
+STATIC void
+S_del_pte(pTHX_ struct ptr_tbl_ent*p)
+{
+    p->next = PL_pte_root;
+    PL_pte_root = p;
+}
+
 /* map an existing pointer using a table */
 
 void *
@@ -10448,7 +10495,7 @@ Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldv, void *newv)
 	    return;
 	}
     }
-    Newz(0, tblent, 1, PTR_TBL_ENT_t);
+    tblent = S_new_pte(aTHX);
     tblent->oldval = oldv;
     tblent->newval = newv;
     tblent->next = *otblent;
@@ -10513,7 +10560,7 @@ Perl_ptr_table_clear(pTHX_ PTR_TBL_t *tbl)
         if (entry) {
             oentry = entry;
             entry = entry->next;
-            Safefree(oentry);
+            S_del_pte(aTHX_ oentry);
         }
         if (!entry) {
             if (++riter > max) {
@@ -11627,6 +11674,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_xpvbm_root	= NULL;
     PL_he_arenaroot	= NULL;
     PL_he_root		= NULL;
+    PL_pte_arenaroot	= NULL;
+    PL_pte_root		= NULL;
     PL_nice_chunk	= NULL;
     PL_nice_chunk_size	= 0;
     PL_sv_count		= 0;

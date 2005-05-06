@@ -261,6 +261,7 @@ PERLVAR(Ixpvmg_root,	XPVMG *)	/* free xpvmg list */
 PERLVAR(Ixpvlv_root,	XPVLV *)	/* free xpvlv list */
 PERLVAR(Ixpvbm_root,	XPVBM *)	/* free xpvbm list */
 PERLVAR(Ihe_root,	HE *)		/* free he list */
+PERLVAR(Ipte_root,	struct ptr_tbl_ent *)	/* free ptr_tbl_ent list */
 PERLVAR(Inice_chunk,	char *)		/* a nice chunk of memory to reuse */
 PERLVAR(Inice_chunk_size,	U32)	/* how nice the chunk of memory is */
 
@@ -437,6 +438,7 @@ PERLVAR(Ixpvmg_arenaroot,XPVMG*)	/* list of allocated xpvmg areas */
 PERLVAR(Ixpvlv_arenaroot,XPVLV*)	/* list of allocated xpvlv areas */
 PERLVAR(Ixpvbm_arenaroot,XPVBM*)	/* list of allocated xpvbm areas */
 PERLVAR(Ihe_arenaroot,	XPV*)		/* list of allocated he areas */
+PERLVAR(Ipte_arenaroot,	XPV*)		/* list of allocated he areas */
 
      /* 5.6.0 stopped here */
 
