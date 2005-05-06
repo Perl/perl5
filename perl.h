@@ -782,6 +782,12 @@ int usleep(unsigned int);
 # endif /*                     end of byte-order macros                       */
 /*----------------------------------------------------------------------------*/
 
+/* The old value was hard coded at 1008. (4096-16) seems to be a bit faster,
+   at least on FreeBSD.  YMMV, so experiment.  */
+#ifndef PERL_ARENA_SIZE
+#define PERL_ARENA_SIZE 4080
+#endif
+
 #endif /* PERL_CORE */
 
 /* Cannot include embed.h here on Win32 as win32.h has not 
