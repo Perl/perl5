@@ -3799,7 +3799,8 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
 }
 
 OP *
-Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *expr, OP *block, OP *cont)
+Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32
+whileline, OP *expr, OP *block, OP *cont, I32 has_my)
 {
     dVAR;
     OP *redo;
@@ -3836,7 +3837,7 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *
 
     if (!block)
 	block = newOP(OP_NULL, 0);
-    else if (cont) {
+    else if (cont || has_my) {
 	block = scope(block);
     }
 
@@ -3989,7 +3990,7 @@ Perl_newFOROP(pTHX_ I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *blo
     Renew(loop, 1, LOOP);
 #endif
     loop->op_targ = padoff;
-    wop = newWHILEOP(flags, 1, loop, forline, newOP(OP_ITER, 0), block, cont);
+    wop = newWHILEOP(flags, 1, loop, forline, newOP(OP_ITER, 0), block, cont, 0);
     PL_copline = forline;
     return newSTATEOP(0, label, wop);
 }

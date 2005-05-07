@@ -31,7 +31,7 @@
 #
 #  -- .robin. <robin@kitsite.com>  2001-03-13
 
-print "1..43\n";
+print "1..46\n";
 
 my $ok;
 
@@ -967,3 +967,28 @@ print ($ok ? "ok 41\n" : "not ok 41\n");
 }
 
 
+# ensure that redo doesn't clear a lexical delcared in the condition
+
+{
+    my $i = 1;
+    while (my $x = $i) {
+	$i++;
+	redo if $i == 2;
+	print $x == 1 ? "" : "not ", "ok 44 - while/redo lexical life\n";
+	last;
+    }
+    $i = 1;
+    until (! (my $x = $i)) {
+	$i++;
+	redo if $i == 2;
+	print $x == 1 ? "" : "not ", "ok 45 - until/redo lexical life\n";
+	last;
+    }
+    for ($i = 1; my $x = $i; ) {
+	$i++;
+	redo if $i == 2;
+	print $x == 1 ? "" : "not ", "ok 46 - for/redo lexical life\n";
+	last;
+    }
+
+}

@@ -535,8 +535,8 @@ Apd	|SV*	|newSVrv	|SV* rv|const char* classname
 Apd	|SV*	|newSVsv	|SV* old
 Ap	|OP*	|newUNOP	|I32 type|I32 flags|OP* first
 Ap	|OP*	|newWHILEOP	|I32 flags|I32 debuggable|LOOP* loop \
-				|I32 whileline|OP* expr|OP* block|OP* cont
-
+				|I32 whileline|OP* expr|OP* block|OP* cont \
+				|I32 has_my
 Ap	|PERL_SI*|new_stackinfo|I32 stitems|I32 cxitems
 Ap	|char*	|scan_vstring	|const char *vstr|SV *sv
 Apd	|char*	|scan_version	|const char *vstr|SV *sv|bool qv

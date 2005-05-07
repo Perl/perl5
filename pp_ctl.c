@@ -2160,6 +2160,7 @@ PP(pp_redo)
     I32 cxix;
     register PERL_CONTEXT *cx;
     I32 oldsave;
+    OP* redo_op;
 
     if (PL_op->op_flags & OPf_SPECIAL) {
 	cxix = dopoptoloop(cxstack_ix);
@@ -2174,12 +2175,20 @@ PP(pp_redo)
     if (cxix < cxstack_ix)
 	dounwind(cxix);
 
+    redo_op = cxstack[cxix].blk_loop.redo_op;
+    if (redo_op->op_type == OP_ENTER) {
+	/* pop one less context to avoid $x being freed in while (my $x..) */
+	cxstack_ix++;
+	assert(CxTYPE(&cxstack[cxstack_ix]) == CXt_BLOCK);
+	redo_op = redo_op->op_next;
+    }
+
     TOPBLOCK(cx);
     oldsave = PL_scopestack[PL_scopestack_ix - 1];
     LEAVE_SCOPE(oldsave);
     FREETMPS;
     PL_curcop = cx->blk_oldcop;
-    return cx->blk_loop.redo_op;
+    return redo_op;
 }
 
 STATIC OP *

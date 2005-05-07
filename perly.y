@@ -48,11 +48,11 @@
 %token <ival> LOCAL MY MYSUB
 %token COLONATTR
 
-%type <ival> prog decl format startsub startanonsub startformsub
+%type <ival> prog decl format startsub startanonsub startformsub mintro
 %type <ival> progstart remember mremember '&' savescope
 %type <opval> block mblock lineseq line loop cond else
 %type <opval> expr term subscripted scalar ary hsh arylen star amper sideff
-%type <opval> argexpr nexpr texpr iexpr mexpr mnexpr mtexpr miexpr
+%type <opval> argexpr nexpr texpr iexpr mexpr mnexpr miexpr
 %type <opval> listexpr listexprcom indirob listop method
 %type <opval> formname subname proto subbody cont my_scalar
 %type <opval> subattrlist myattrlist mysubrout myattrterm myterm
@@ -207,18 +207,18 @@ cont	:	/* NULL */
 	;
 
 /* Loops: while, until, for, and a bare block */
-loop	:	label WHILE '(' remember mtexpr ')' mblock cont
+loop	:	label WHILE '(' remember texpr ')' mintro mblock cont
 			{ PL_copline = (line_t)$2;
 			    $$ = block_end($4,
 				   newSTATEOP(0, $1,
 				     newWHILEOP(0, 1, (LOOP*)Nullop,
-						$2, $5, $7, $8))); }
-	|	label UNTIL '(' remember miexpr ')' mblock cont
+						$2, $5, $8, $9, $7))); }
+	|	label UNTIL '(' remember iexpr ')' mintro mblock cont
 			{ PL_copline = (line_t)$2;
 			    $$ = block_end($4,
 				   newSTATEOP(0, $1,
 				     newWHILEOP(0, 1, (LOOP*)Nullop,
-						$2, $5, $7, $8))); }
+						$2, $5, $8, $9, $7))); }
 	|	label FOR MY remember my_scalar '(' mexpr ')' mblock cont
 			{ $$ = block_end($4,
 				 newFOROP(0, $1, (line_t)$2, $5, $7, $9, $10)); }
@@ -229,14 +229,15 @@ loop	:	label WHILE '(' remember mtexpr ')' mblock cont
 	|	label FOR '(' remember mexpr ')' mblock cont
 			{ $$ = block_end($4,
 				 newFOROP(0, $1, (line_t)$2, Nullop, $5, $7, $8)); }
-	|	label FOR '(' remember mnexpr ';' mtexpr ';' mnexpr ')' mblock
+	|	label FOR '(' remember mnexpr ';' texpr ';' mintro mnexpr ')'
+	    	    mblock
 			/* basically fake up an initialize-while lineseq */
 			{ OP *forop;
 			  PL_copline = (line_t)$2;
 			  forop = newSTATEOP(0, $1,
 					    newWHILEOP(0, 1, (LOOP*)Nullop,
 						$2, scalar($7),
-						$11, $9));
+						$12, $10, $9));
 			  if ($5) {
 				forop = append_elem(OP_LINESEQ,
                                         newSTATEOP(0, ($1?savepv($1):Nullch),
@@ -248,8 +249,14 @@ loop	:	label WHILE '(' remember mtexpr ')' mblock cont
 	|	label block cont  /* a block is a loop that happens once */
 			{ $$ = newSTATEOP(0, $1,
 				 newWHILEOP(0, 1, (LOOP*)Nullop,
-					    NOLINE, Nullop, $2, $3)); }
+					    NOLINE, Nullop, $2, $3, 0)); }
 	;
+
+/* determine whether there are any new my declarations */
+mintro	:	/* NULL */
+			{ $$ = (PL_min_intro_pending &&
+			    PL_max_intro_pending >=  PL_min_intro_pending);
+			  intro_my(); }
 
 /* Normal expression */
 nexpr	:	/* NULL */
@@ -274,10 +281,6 @@ mexpr	:	expr
 	;
 
 mnexpr	:	nexpr
-			{ $$ = $1; intro_my(); }
-	;
-
-mtexpr	:	texpr
 			{ $$ = $1; intro_my(); }
 	;
 

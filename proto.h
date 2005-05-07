@@ -512,8 +512,7 @@ PERL_CALLCONV SV*	Perl_vnewSVpvf(pTHX_ const char* pat, va_list* args);
 PERL_CALLCONV SV*	Perl_newSVrv(pTHX_ SV* rv, const char* classname);
 PERL_CALLCONV SV*	Perl_newSVsv(pTHX_ SV* old);
 PERL_CALLCONV OP*	Perl_newUNOP(pTHX_ I32 type, I32 flags, OP* first);
-PERL_CALLCONV OP*	Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP* loop, I32 whileline, OP* expr, OP* block, OP* cont);
-
+PERL_CALLCONV OP*	Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP* loop, I32 whileline, OP* expr, OP* block, OP* cont, I32 has_my);
 PERL_CALLCONV PERL_SI*	Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems);
 PERL_CALLCONV char*	Perl_scan_vstring(pTHX_ const char *vstr, SV *sv);
 PERL_CALLCONV char*	Perl_scan_version(pTHX_ const char *vstr, SV *sv, bool qv);
