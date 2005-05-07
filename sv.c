@@ -625,6 +625,7 @@ Perl_sv_free_arenas(pTHX)
     PL_he_arenaroot = 0;
     PL_he_root = 0;
 
+#if defined(USE_ITHREADS)
     {
 	struct ptr_tbl_ent *pte;
 	struct ptr_tbl_ent *pte_next;
@@ -635,6 +636,7 @@ Perl_sv_free_arenas(pTHX)
     }
     PL_pte_arenaroot = 0;
     PL_pte_root = 0;
+#endif
 
     if (PL_nice_chunk)
 	Safefree(PL_nice_chunk);
@@ -11680,8 +11682,10 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_xpvbm_root	= NULL;
     PL_he_arenaroot	= NULL;
     PL_he_root		= NULL;
+#if defined(USE_ITHREADS)
     PL_pte_arenaroot	= NULL;
     PL_pte_root		= NULL;
+#endif
     PL_nice_chunk	= NULL;
     PL_nice_chunk_size	= 0;
     PL_sv_count		= 0;

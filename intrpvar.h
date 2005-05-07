@@ -261,7 +261,9 @@ PERLVAR(Ixpvmg_root,	XPVMG *)	/* free xpvmg list */
 PERLVAR(Ixpvlv_root,	XPVLV *)	/* free xpvlv list */
 PERLVAR(Ixpvbm_root,	XPVBM *)	/* free xpvbm list */
 PERLVAR(Ihe_root,	HE *)		/* free he list */
+#if defined(USE_ITHREADS)
 PERLVAR(Ipte_root,	struct ptr_tbl_ent *)	/* free ptr_tbl_ent list */
+#endif
 PERLVAR(Inice_chunk,	char *)		/* a nice chunk of memory to reuse */
 PERLVAR(Inice_chunk_size,	U32)	/* how nice the chunk of memory is */
 
@@ -438,8 +440,9 @@ PERLVAR(Ixpvmg_arenaroot,XPVMG*)	/* list of allocated xpvmg areas */
 PERLVAR(Ixpvlv_arenaroot,XPVLV*)	/* list of allocated xpvlv areas */
 PERLVAR(Ixpvbm_arenaroot,XPVBM*)	/* list of allocated xpvbm areas */
 PERLVAR(Ihe_arenaroot,	HE *)		/* list of allocated he areas */
+#if defined(USE_ITHREADS)
 PERLVAR(Ipte_arenaroot,	struct ptr_tbl_ent *) /* list of allocated he areas */
-
+#endif
      /* 5.6.0 stopped here */
 
 PERLVAR(Ipsig_pend, int *)		/* per-signal "count" of pending */
