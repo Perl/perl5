@@ -320,11 +320,18 @@ Perl_sv_add_arena(pTHX_ char *ptr, U32 size, U32 flags)
     sv = sva + 1;
     while (sv < svend) {
 	SvANY(sv) = (void *)(SV*)(sv + 1);
+#ifdef DEBUGGING
 	SvREFCNT(sv) = 0;
+#endif
+	/* Must always set typemask because it's awlays checked in on cleanup
+	   when the arenas are walked looking for objects.  */
 	SvFLAGS(sv) = SVTYPEMASK;
 	sv++;
     }
     SvANY(sv) = 0;
+#ifdef DEBUGGING
+    SvREFCNT(sv) = 0;
+#endif
     SvFLAGS(sv) = SVTYPEMASK;
 }
 
