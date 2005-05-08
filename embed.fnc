@@ -362,7 +362,7 @@ Ap	|bool	|is_utf8_punct	|NN const U8 *p
 Ap	|bool	|is_utf8_xdigit	|NN const U8 *p
 Ap	|bool	|is_utf8_mark	|NN const U8 *p
 p	|OP*	|jmaybe		|NN OP* arg
-p	|I32	|keyword	|NN char* d|I32 len
+p	|I32	|keyword	|NN const char* d|I32 len
 Ap	|void	|leave_scope	|I32 base
 p	|void	|lex_end
 p	|void	|lex_start	|SV* line

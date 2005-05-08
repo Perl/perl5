@@ -535,8 +535,32 @@ See C<SvCUR>.  Access the character as *(SvEND(sv)).
 =for apidoc Am|HV*|SvSTASH|SV* sv
 Returns the stash of the SV.
 
+=for apidoc Am|void|SvIV_set|SV* sv|IV val
+Set the value of the IV pointer in sv to val.
+
+=for apidoc Am|void|SvNV_set|SV* sv|NV val
+Set the value of the IV pointer in sv to val.
+
+=for apidoc Am|void|SvPV_set|SV* sv|char* val
+Set the value of the PV pointer in sv to val.
+
+=for apidoc Am|void|SvUV_set|SV* sv|UV val
+Set the value of the PV pointer in sv to val.
+
+=for apidoc Am|void|SvRV_set|SV* sv|SV* val
+Set the value of the RV pointer in sv to val.
+
+=for apidoc Am|void|SvMAGIC_set|SV* sv|MAGIC* val
+Set the value of the MAGIC pointer in sv to val.
+
+=for apidoc Am|void|SvSTASH_set|SV* sv|STASH* val
+Set the value of the STASH pointer in sv to val.
+
 =for apidoc Am|void|SvCUR_set|SV* sv|STRLEN len
-Set the length of the string which is in the SV.  See C<SvCUR>.
+Set the current length of the string which is in the SV.  See C<SvCUR>.
+
+=for apidoc Am|void|SvLEN_set|SV* sv|STRLEN len
+Set the actual length of the string which is in the SV.
 
 =cut
 */
@@ -853,6 +877,8 @@ in gv.h: */
 		    }					\
 		}					\
 	} STMT_END
+
+#define SvPVX_const(sv)	((const char*)SvPVX(sv))
 
 #define BmRARE(sv)	((XPVBM*)  SvANY(sv))->xbm_rare
 #define BmUSEFUL(sv)	((XPVBM*)  SvANY(sv))->xbm_useful

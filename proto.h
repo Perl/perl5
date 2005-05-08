@@ -393,7 +393,7 @@ PERL_CALLCONV bool	Perl_is_utf8_mark(pTHX_ const U8 *p)
 			__attribute__((nonnull(pTHX_1)));
 PERL_CALLCONV OP*	Perl_jmaybe(pTHX_ OP* arg)
 			__attribute__((nonnull(pTHX_1)));
-PERL_CALLCONV I32	Perl_keyword(pTHX_ char* d, I32 len)
+PERL_CALLCONV I32	Perl_keyword(pTHX_ const char* d, I32 len)
 			__attribute__((nonnull(pTHX_1)));
 PERL_CALLCONV void	Perl_leave_scope(pTHX_ I32 base);
 PERL_CALLCONV void	Perl_lex_end(pTHX);

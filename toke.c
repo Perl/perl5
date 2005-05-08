@@ -5595,7 +5595,7 @@ S_pending_ident(pTHX)
  */
 
 I32
-Perl_keyword (pTHX_ char *name, I32 len)
+Perl_keyword (pTHX_ const char *name, I32 len)
 {
   switch (len)
   {
