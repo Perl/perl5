@@ -253,7 +253,7 @@ Perl_pad_undef(pTHX_ CV* cv)
 	for (ix = AvFILLp(comppad_name); ix > 0; ix--) {
 	    SV *namesv = namepad[ix];
 	    if (namesv && namesv != &PL_sv_undef
-		&& *SvPVX(namesv) == '&')
+		&& *SvPVX_const(namesv) == '&')
 	    {
 		CV * const innercv = (CV*)curpad[ix];
 		U32 inner_rc = SvREFCNT(innercv);
@@ -518,7 +518,7 @@ Perl_pad_check_dup(pTHX_ char *name, bool is_our, HV *ourstash)
 	    && (SvIVX(sv) == PAD_MAX || SvIVX(sv) == 0)
 	    && (!is_our
 		|| ((SvFLAGS(sv) & SVpad_OUR) && GvSTASH(sv) == ourstash))
-	    && strEQ(name, SvPVX(sv)))
+	    && strEQ(name, SvPVX_const(sv)))
 	{
 	    Perl_warner(aTHX_ packWARN(WARN_MISC),
 		"\"%s\" variable %s masks earlier declaration in same %s",
@@ -537,7 +537,7 @@ Perl_pad_check_dup(pTHX_ char *name, bool is_our, HV *ourstash)
 		&& !SvFAKE(sv)
 		&& (SvIVX(sv) == PAD_MAX || SvIVX(sv) == 0)
 		&& ((SvFLAGS(sv) & SVpad_OUR) && GvSTASH(sv) == ourstash)
-		&& strEQ(name, SvPVX(sv)))
+		&& strEQ(name, SvPVX_const(sv)))
 	    {
 		Perl_warner(aTHX_ packWARN(WARN_MISC),
 		    "\"our\" variable %s redeclared", name);
@@ -592,7 +592,7 @@ Perl_pad_findmy(pTHX_ char *name)
     /* The one we're looking for is probably just before comppad_name_fill. */
     for (off = AvFILLp(PL_comppad_name); off > 0; off--) {
 	sv = svp[off];
-	if (!sv || sv == &PL_sv_undef || !strEQ(SvPVX(sv), name))
+	if (!sv || sv == &PL_sv_undef || !strEQ(SvPVX_const(sv), name))
 	    continue;
 	if (SvFAKE(sv)) {
 	    /* we'll use this later if we don't find a real entry */
@@ -684,7 +684,7 @@ S_pad_findlex(pTHX_ const char *name, PADOFFSET newoff, const CV* innercv)
 	depth = CvDEPTH(cv);
 	for (off = AvFILLp(curname); off > 0; off--) {
 	    sv = svp[off];
-	    if (!sv || sv == &PL_sv_undef || !strEQ(SvPVX(sv), name))
+	    if (!sv || sv == &PL_sv_undef || !strEQ(SvPVX_const(sv), name))
 		continue;
 	    if (SvFAKE(sv)) {
 		/* we'll use this later if we don't find a real entry */
@@ -932,7 +932,7 @@ Perl_intro_my(pTHX)
 	    SvNV_set(sv, (NV)PL_cop_seqmax);
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		"Pad intromy: %ld \"%s\", (%lu,%lu)\n",
-		(long)i, SvPVX(sv),
+		(long)i, SvPVX_const(sv),
 		(unsigned long)U_32(SvNVX(sv)), (unsigned long)SvIVX(sv))
 	    );
 	}
@@ -981,7 +981,7 @@ Perl_pad_leavemy(pTHX)
 	    SvIV_set(sv, PL_cop_seqmax);
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		"Pad leavemy: %ld \"%s\", (%lu,%lu)\n",
-		(long)off, SvPVX(sv),
+		(long)off, SvPVX_const(sv),
 		(unsigned long)U_32(SvNVX(sv)), (unsigned long)SvIVX(sv))
 	    );
 	}
@@ -1110,7 +1110,7 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 	    if (!((namesv = namep[ix]) != Nullsv &&
 		  namesv != &PL_sv_undef &&
 		  (SvFAKE(namesv) ||
-		   *SvPVX(namesv) == '&')))
+		   *SvPVX_const(namesv) == '&')))
 	    {
 		SvREFCNT_dec(PL_curpad[ix]);
 		PL_curpad[ix] = Nullsv;
@@ -1226,7 +1226,7 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
 		    (int) ix,
 		    PTR2UV(ppad[ix]),
 		    (unsigned long) (ppad[ix] ? SvREFCNT(ppad[ix]) : 0),
-		    SvPVX(namesv)
+		    SvPVX_const(namesv)
 		);
 	    else
 		Perl_dump_indent(aTHX_ level+1, file,
@@ -1236,7 +1236,7 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
 		    (unsigned long) (ppad[ix] ? SvREFCNT(ppad[ix]) : 0),
 		    (unsigned long)U_32(SvNVX(namesv)),
 		    (unsigned long)SvIVX(namesv),
-		    SvPVX(namesv)
+		    SvPVX_const(namesv)
 		);
 	}
 	else if (full) {
@@ -1364,7 +1364,7 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
     }
 
     if (SvPOK(proto))
-	sv_setpvn((SV*)cv, SvPVX(proto), SvCUR(proto));
+	sv_setpvn((SV*)cv, SvPVX_const(proto), SvCUR(proto));
 
     CvPADLIST(cv) = pad_new(padnew_CLONE|padnew_SAVE);
 
@@ -1377,7 +1377,7 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
     for (ix = fpad; ix > 0; ix--) {
 	SV* namesv = (ix <= fname) ? pname[ix] : Nullsv;
 	if (namesv && namesv != &PL_sv_undef) {
-	    char *name = SvPVX(namesv);    /* XXX */
+	    const char *name = SvPVX_const(namesv);    /* XXX */
 	    if (SvFLAGS(namesv) & SVf_FAKE) {   /* lexical from outside? */
 		I32 off = pad_findlex(name, ix, cv);
 		if (!off)
@@ -1475,7 +1475,7 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
     for (ix = AvFILLp(comppad_name); ix > 0; ix--) {
         const SV *namesv = namepad[ix];
 	if (namesv && namesv != &PL_sv_undef
-	    && *SvPVX(namesv) == '&')
+	    && *SvPVX_const(namesv) == '&')
 	{
 	    CV *innercv = (CV*)curpad[ix];
 	    assert(CvWEAKOUTSIDE(innercv));
@@ -1515,7 +1515,7 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth, int has_args)
 	SV* sv;
 	for ( ;ix > 0; ix--) {
 	    if (names_fill >= ix && names[ix] != &PL_sv_undef) {
-		char *name = SvPVX(names[ix]);
+		const char *name = SvPVX_const(names[ix]);
 		if ((SvFLAGS(names[ix]) & SVf_FAKE) || *name == '&') {
 		    /* outer lexical or anon code */
 		    av_store(newpad, ix, SvREFCNT_inc(oldpad[ix]));

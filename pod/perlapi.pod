@@ -2895,7 +2895,7 @@ Found in file sv.h
 
 =item SvCUR_set
 
-Set the length of the string which is in the SV.  See C<SvCUR>.
+Set the current length of the string which is in the SV.  See C<SvCUR>.
 
 	void	SvCUR_set(SV* sv, STRLEN len)
 
@@ -3048,12 +3048,39 @@ sv only once. Use the more efficient C<SvIV> otherwise.
 =for hackers
 Found in file sv.h
 
+=item SvIV_set
+
+Set the value of the IV pointer in sv to val.
+
+	void	SvIV_set(SV* sv, IV val)
+
+=for hackers
+Found in file sv.h
+
 =item SvLEN
 
 Returns the size of the string buffer in the SV, not including any part
 attributable to C<SvOOK>.  See C<SvCUR>.
 
 	STRLEN	SvLEN(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvLEN_set
+
+Set the actual length of the string which is in the SV.
+
+	void	SvLEN_set(SV* sv, STRLEN len)
+
+=for hackers
+Found in file sv.h
+
+=item SvMAGIC_set
+
+Set the value of the MAGIC pointer in sv to val.
+
+	void	SvMAGIC_set(SV* sv, MAGIC* val)
 
 =for hackers
 Found in file sv.h
@@ -3159,6 +3186,15 @@ Coerces the given SV to a double and returns it. Guarantees to evaluate
 sv only once. Use the more efficient C<SvNV> otherwise.
 
 	NV	SvNVx(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvNV_set
+
+Set the value of the IV pointer in sv to val.
+
+	void	SvNV_set(SV* sv, NV val)
 
 =for hackers
 Found in file sv.h
@@ -3405,6 +3441,15 @@ stringified form becoming C<SvPOK>.  Handles 'get' magic.
 =for hackers
 Found in file sv.h
 
+=item SvPV_set
+
+Set the value of the PV pointer in sv to val.
+
+	void	SvPV_set(SV* sv, char* val)
+
+=for hackers
+Found in file sv.h
+
 =item SvREFCNT
 
 Returns the value of the object's reference count.
@@ -3468,11 +3513,29 @@ Dereferences an RV to return the SV.
 =for hackers
 Found in file sv.h
 
+=item SvRV_set
+
+Set the value of the RV pointer in sv to val.
+
+	void	SvRV_set(SV* sv, SV* val)
+
+=for hackers
+Found in file sv.h
+
 =item SvSTASH
 
 Returns the stash of the SV.
 
 	HV*	SvSTASH(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvSTASH_set
+
+Set the value of the STASH pointer in sv to val.
+
+	void	SvSTASH_set(SV* sv, STASH* val)
 
 =for hackers
 Found in file sv.h

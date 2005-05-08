@@ -107,7 +107,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 {
     register GP *gp;
     const bool doproto = SvTYPE(gv) > SVt_NULL;
-    const char * const proto = (doproto && SvPOK(gv)) ? SvPVX(gv) : NULL;
+    const char * const proto = (doproto && SvPOK(gv)) ? SvPVX_const(gv) : NULL;
 
     sv_upgrade((SV*)gv, SVt_PVGV);
     if (SvLEN(gv)) {
@@ -116,7 +116,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 	    SvLEN_set(gv, 0);
 	    SvPOK_off(gv);
 	} else
-	    Safefree(SvPVX(gv));
+	    Safefree(SvPVX_const(gv));
     }
     Newz(602, gp, 1, GP);
     GvGP(gv) = gp_ref(gp);
@@ -438,7 +438,7 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 	    SV *tmpstr = sv_2mortal(Perl_newSVpvf(aTHX_ "%s::SUPER",
 						  CopSTASHPV(PL_curcop)));
 	    /* __PACKAGE__::SUPER stash should be autovivified */
-	    stash = gv_stashpvn(SvPVX(tmpstr), SvCUR(tmpstr), TRUE);
+	    stash = gv_stashpvn(SvPVX_const(tmpstr), SvCUR(tmpstr), TRUE);
 	    DEBUG_o( Perl_deb(aTHX_ "Treating %s as %s::%s\n",
 			 origname, HvNAME(stash), name) );
 	}
@@ -1411,12 +1411,12 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 			"' for overloaded `%s' in package `%.256s'\n",
 			     GvSV(gv), cp, HvNAME(stash)) );
 		if (!SvPOK(GvSV(gv))
-		    || !(ngv = gv_fetchmethod_autoload(stash, SvPVX(GvSV(gv)),
+		    || !(ngv = gv_fetchmethod_autoload(stash, SvPVX_const(GvSV(gv)),
 						       FALSE)))
 		{
 		    /* Can be an import stub (created by `can'). */
 		    SV *gvsv = GvSV(gv);
-		    const char *name = SvPOK(gvsv) ?  SvPVX(gvsv) : "???";
+		    const char *name = SvPOK(gvsv) ?  SvPVX_const(gvsv) : "???";
 		    Perl_croak(aTHX_ "%s method `%.256s' overloading `%s' "\
 				"in package `%.256s'",
 			       (GvCVGEN(gv) ? "Stub found while resolving"
@@ -1702,7 +1702,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 		        HvNAME(SvSTASH(SvRV(right))):
 		        ""));
 	if (amtp && amtp->fallback >= AMGfallYES) {
-	  DEBUG_o( Perl_deb(aTHX_ "%s", SvPVX(msg)) );
+	  DEBUG_o( Perl_deb(aTHX_ "%s", SvPVX_const(msg)) );
 	} else {
 	  Perl_croak(aTHX_ "%"SVf, msg);
 	}
