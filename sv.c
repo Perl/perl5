@@ -311,9 +311,9 @@ S_more_sv(pTHX)
         PL_nice_chunk_size = 0;
     }
     else {
-	char *chunk;                /* must use New here to match call to */
-	New(704,chunk,1008,char);   /* Safefree() in sv_free_arenas()     */
-	sv_add_arena(chunk, 1008, 0);
+	char *chunk; /* must use New here to match call to Safefree()      */
+	New(704,chunk,PERL_ARENA_SIZE,char);   /*  in sv_free_arenas()     */
+	sv_add_arena(chunk, PERL_ARENA_SIZE, 0);
     }
     uproot_SV(sv);
     return sv;
@@ -588,6 +588,15 @@ Perl_sv_free_arenas(pTHX)
     PL_he_arenaroot = 0;
     PL_he_root = 0;
 
+#if defined(USE_ITHREADS)
+    for (arena = (XPV*)PL_pte_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_pte_arenaroot = 0;
+    PL_pte_root = 0;
+#endif
+
     if (PL_nice_chunk)
 	Safefree(PL_nice_chunk);
     PL_nice_chunk = Nullch;
@@ -652,12 +661,12 @@ S_more_xiv(pTHX)
     register IV* xiv;
     register IV* xivend;
     XPV* ptr;
-    New(705, ptr, 1008/sizeof(XPV), XPV);
+    New(705, ptr, PERL_ARENA_SIZE/sizeof(XPV), XPV);
     ptr->xpv_pv = (char*)PL_xiv_arenaroot;	/* linked list of xiv arenas */
     PL_xiv_arenaroot = ptr;			/* to keep Purify happy */
 
     xiv = (IV*) ptr;
-    xivend = &xiv[1008 / sizeof(IV) - 1];
+    xivend = &xiv[PERL_ARENA_SIZE / sizeof(IV) - 1];
     xiv += (sizeof(XPV) - 1) / sizeof(IV) + 1;	/* fudge by size of XPV */
     PL_xiv_root = xiv;
     while (xiv < xivend) {
@@ -702,12 +711,12 @@ S_more_xnv(pTHX)
     register NV* xnv;
     register NV* xnvend;
     XPV *ptr;
-    New(711, ptr, 1008/sizeof(XPV), XPV);
+    New(711, ptr, PERL_ARENA_SIZE/sizeof(XPV), XPV);
     ptr->xpv_pv = (char*)PL_xnv_arenaroot;
     PL_xnv_arenaroot = ptr;
 
     xnv = (NV*) ptr;
-    xnvend = &xnv[1008 / sizeof(NV) - 1];
+    xnvend = &xnv[PERL_ARENA_SIZE / sizeof(NV) - 1];
     xnv += (sizeof(XPVIV) - 1) / sizeof(NV) + 1; /* fudge by sizeof XPVIV */
     PL_xnv_root = xnv;
     while (xnv < xnvend) {
@@ -751,12 +760,12 @@ S_more_xrv(pTHX)
     register XRV* xrv;
     register XRV* xrvend;
     XPV *ptr;
-    New(712, ptr, 1008/sizeof(XPV), XPV);
+    New(712, ptr, PERL_ARENA_SIZE/sizeof(XPV), XPV);
     ptr->xpv_pv = (char*)PL_xrv_arenaroot;
     PL_xrv_arenaroot = ptr;
 
     xrv = (XRV*) ptr;
-    xrvend = &xrv[1008 / sizeof(XRV) - 1];
+    xrvend = &xrv[PERL_ARENA_SIZE / sizeof(XRV) - 1];
     xrv += (sizeof(XPV) - 1) / sizeof(XRV) + 1;
     PL_xrv_root = xrv;
     while (xrv < xrvend) {
@@ -799,11 +808,11 @@ S_more_xpv(pTHX)
 {
     register XPV* xpv;
     register XPV* xpvend;
-    New(713, xpv, 1008/sizeof(XPV), XPV);
+    New(713, xpv, PERL_ARENA_SIZE/sizeof(XPV), XPV);
     xpv->xpv_pv = (char*)PL_xpv_arenaroot;
     PL_xpv_arenaroot = xpv;
 
-    xpvend = &xpv[1008 / sizeof(XPV) - 1];
+    xpvend = &xpv[PERL_ARENA_SIZE / sizeof(XPV) - 1];
     PL_xpv_root = ++xpv;
     while (xpv < xpvend) {
 	xpv->xpv_pv = (char*)(xpv + 1);
@@ -845,11 +854,11 @@ S_more_xpviv(pTHX)
 {
     register XPVIV* xpviv;
     register XPVIV* xpvivend;
-    New(714, xpviv, 1008/sizeof(XPVIV), XPVIV);
+    New(714, xpviv, PERL_ARENA_SIZE/sizeof(XPVIV), XPVIV);
     xpviv->xpv_pv = (char*)PL_xpviv_arenaroot;
     PL_xpviv_arenaroot = xpviv;
 
-    xpvivend = &xpviv[1008 / sizeof(XPVIV) - 1];
+    xpvivend = &xpviv[PERL_ARENA_SIZE / sizeof(XPVIV) - 1];
     PL_xpviv_root = ++xpviv;
     while (xpviv < xpvivend) {
 	xpviv->xpv_pv = (char*)(xpviv + 1);
@@ -891,11 +900,11 @@ S_more_xpvnv(pTHX)
 {
     register XPVNV* xpvnv;
     register XPVNV* xpvnvend;
-    New(715, xpvnv, 1008/sizeof(XPVNV), XPVNV);
+    New(715, xpvnv, PERL_ARENA_SIZE/sizeof(XPVNV), XPVNV);
     xpvnv->xpv_pv = (char*)PL_xpvnv_arenaroot;
     PL_xpvnv_arenaroot = xpvnv;
 
-    xpvnvend = &xpvnv[1008 / sizeof(XPVNV) - 1];
+    xpvnvend = &xpvnv[PERL_ARENA_SIZE / sizeof(XPVNV) - 1];
     PL_xpvnv_root = ++xpvnv;
     while (xpvnv < xpvnvend) {
 	xpvnv->xpv_pv = (char*)(xpvnv + 1);
@@ -937,11 +946,11 @@ S_more_xpvcv(pTHX)
 {
     register XPVCV* xpvcv;
     register XPVCV* xpvcvend;
-    New(716, xpvcv, 1008/sizeof(XPVCV), XPVCV);
+    New(716, xpvcv, PERL_ARENA_SIZE/sizeof(XPVCV), XPVCV);
     xpvcv->xpv_pv = (char*)PL_xpvcv_arenaroot;
     PL_xpvcv_arenaroot = xpvcv;
 
-    xpvcvend = &xpvcv[1008 / sizeof(XPVCV) - 1];
+    xpvcvend = &xpvcv[PERL_ARENA_SIZE / sizeof(XPVCV) - 1];
     PL_xpvcv_root = ++xpvcv;
     while (xpvcv < xpvcvend) {
 	xpvcv->xpv_pv = (char*)(xpvcv + 1);
@@ -983,11 +992,11 @@ S_more_xpvav(pTHX)
 {
     register XPVAV* xpvav;
     register XPVAV* xpvavend;
-    New(717, xpvav, 1008/sizeof(XPVAV), XPVAV);
+    New(717, xpvav, PERL_ARENA_SIZE/sizeof(XPVAV), XPVAV);
     xpvav->xav_array = (char*)PL_xpvav_arenaroot;
     PL_xpvav_arenaroot = xpvav;
 
-    xpvavend = &xpvav[1008 / sizeof(XPVAV) - 1];
+    xpvavend = &xpvav[PERL_ARENA_SIZE / sizeof(XPVAV) - 1];
     PL_xpvav_root = ++xpvav;
     while (xpvav < xpvavend) {
 	xpvav->xav_array = (char*)(xpvav + 1);
@@ -1029,11 +1038,11 @@ S_more_xpvhv(pTHX)
 {
     register XPVHV* xpvhv;
     register XPVHV* xpvhvend;
-    New(718, xpvhv, 1008/sizeof(XPVHV), XPVHV);
+    New(718, xpvhv, PERL_ARENA_SIZE/sizeof(XPVHV), XPVHV);
     xpvhv->xhv_array = (char*)PL_xpvhv_arenaroot;
     PL_xpvhv_arenaroot = xpvhv;
 
-    xpvhvend = &xpvhv[1008 / sizeof(XPVHV) - 1];
+    xpvhvend = &xpvhv[PERL_ARENA_SIZE / sizeof(XPVHV) - 1];
     PL_xpvhv_root = ++xpvhv;
     while (xpvhv < xpvhvend) {
 	xpvhv->xhv_array = (char*)(xpvhv + 1);
@@ -1075,11 +1084,11 @@ S_more_xpvmg(pTHX)
 {
     register XPVMG* xpvmg;
     register XPVMG* xpvmgend;
-    New(719, xpvmg, 1008/sizeof(XPVMG), XPVMG);
+    New(719, xpvmg, PERL_ARENA_SIZE/sizeof(XPVMG), XPVMG);
     xpvmg->xpv_pv = (char*)PL_xpvmg_arenaroot;
     PL_xpvmg_arenaroot = xpvmg;
 
-    xpvmgend = &xpvmg[1008 / sizeof(XPVMG) - 1];
+    xpvmgend = &xpvmg[PERL_ARENA_SIZE / sizeof(XPVMG) - 1];
     PL_xpvmg_root = ++xpvmg;
     while (xpvmg < xpvmgend) {
 	xpvmg->xpv_pv = (char*)(xpvmg + 1);
@@ -1121,11 +1130,11 @@ S_more_xpvlv(pTHX)
 {
     register XPVLV* xpvlv;
     register XPVLV* xpvlvend;
-    New(720, xpvlv, 1008/sizeof(XPVLV), XPVLV);
+    New(720, xpvlv, PERL_ARENA_SIZE/sizeof(XPVLV), XPVLV);
     xpvlv->xpv_pv = (char*)PL_xpvlv_arenaroot;
     PL_xpvlv_arenaroot = xpvlv;
 
-    xpvlvend = &xpvlv[1008 / sizeof(XPVLV) - 1];
+    xpvlvend = &xpvlv[PERL_ARENA_SIZE / sizeof(XPVLV) - 1];
     PL_xpvlv_root = ++xpvlv;
     while (xpvlv < xpvlvend) {
 	xpvlv->xpv_pv = (char*)(xpvlv + 1);
@@ -1167,11 +1176,11 @@ S_more_xpvbm(pTHX)
 {
     register XPVBM* xpvbm;
     register XPVBM* xpvbmend;
-    New(721, xpvbm, 1008/sizeof(XPVBM), XPVBM);
+    New(721, xpvbm, PERL_ARENA_SIZE/sizeof(XPVBM), XPVBM);
     xpvbm->xpv_pv = (char*)PL_xpvbm_arenaroot;
     PL_xpvbm_arenaroot = xpvbm;
 
-    xpvbmend = &xpvbm[1008 / sizeof(XPVBM) - 1];
+    xpvbmend = &xpvbm[PERL_ARENA_SIZE / sizeof(XPVBM) - 1];
     PL_xpvbm_root = ++xpvbm;
     while (xpvbm < xpvbmend) {
 	xpvbm->xpv_pv = (char*)(xpvbm + 1);
@@ -9638,6 +9647,46 @@ Perl_ptr_table_new(pTHX)
 #  define PTR_TABLE_HASH(ptr) (PTR2UV(ptr) >> 2)
 #endif
 
+
+
+STATIC void
+S_more_pte(pTHX)
+{
+    register struct ptr_tbl_ent* pte;
+    register struct ptr_tbl_ent* pteend;
+    XPV *ptr;
+    New(54, ptr, PERL_ARENA_SIZE/sizeof(XPV), XPV);
+    ptr->xpv_pv = (char*)PL_pte_arenaroot;
+    PL_pte_arenaroot = ptr;
+
+    pte = (struct ptr_tbl_ent*)ptr;
+    pteend = &pte[PERL_ARENA_SIZE / sizeof(struct ptr_tbl_ent) - 1];
+    PL_pte_root = ++pte;
+    while (pte < pteend) {
+	pte->next = pte + 1;
+	pte++;
+    }
+    pte->next = 0;
+}
+
+STATIC struct ptr_tbl_ent*
+S_new_pte(pTHX)
+{
+    struct ptr_tbl_ent* pte;
+    if (!PL_pte_root)
+	S_more_pte(aTHX);
+    pte = PL_pte_root;
+    PL_pte_root = pte->next;
+    return pte;
+}
+
+STATIC void
+S_del_pte(pTHX_ struct ptr_tbl_ent*p)
+{
+    p->next = PL_pte_root;
+    PL_pte_root = p;
+}
+
 /* map an existing pointer using a table */
 
 void *
@@ -9674,7 +9723,7 @@ Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldv, void *newv)
 	    return;
 	}
     }
-    Newz(0, tblent, 1, PTR_TBL_ENT_t);
+    tblent = S_new_pte(aTHX);
     tblent->oldval = oldv;
     tblent->newval = newv;
     tblent->next = *otblent;
@@ -9739,7 +9788,7 @@ Perl_ptr_table_clear(pTHX_ PTR_TBL_t *tbl)
         if (entry) {
             oentry = entry;
             entry = entry->next;
-            Safefree(oentry);
+            S_del_pte(aTHX_ oentry);
         }
         if (!entry) {
             if (++riter > max) {
@@ -10820,6 +10869,10 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_xpvbm_root	= NULL;
     PL_he_arenaroot	= NULL;
     PL_he_root		= NULL;
+#if defined(USE_ITHREADS)
+    PL_pte_arenaroot	= NULL;
+    PL_pte_root		= NULL;
+#endif
     PL_nice_chunk	= NULL;
     PL_nice_chunk_size	= 0;
     PL_sv_count		= 0;

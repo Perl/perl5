@@ -576,3 +576,7 @@ PERLVARI(Isuidscript, int, -1)	/* fd for suid script */
  * irrelevant, but not all code may be expected to #include XSUB.h.
  */
 
+#if defined(USE_ITHREADS)
+PERLVAR(Ipte_root,	struct ptr_tbl_ent *)	/* free ptr_tbl_ent list */
+PERLVAR(Ipte_arenaroot,	XPV*)		/* list of allocated he areas */
+#endif
