@@ -419,12 +419,12 @@ EOT
 	    unless (/^\#/) {
 		if ($trailing_leader) {
 		    # shouldn't be anything following a postfix 1..n
-		    $failure = 'extra output after trailing 1..n';
+		    $failure = 'FAILED--extra output after trailing 1..n';
 		    last;
 		}
 		if (/^1\.\.([0-9]+)( todo ([\d ]+))?/) {
 		    if ($seen_leader) {
-			$failure = 'seen duplicate leader';
+			$failure = 'FAILED--seen duplicate leader';
 			last;
 		    }
 		    $max = $1;
@@ -435,7 +435,7 @@ EOT
 			# 1..n appears at end of file
 			$trailing_leader = 1;
 			if ($next != $max) {
-			    $failure = "expected $max tests, saw $next";
+			    $failure = "FAILED--expected $max tests, saw $next";
 			    last;
 			}
 		    }
@@ -467,7 +467,7 @@ EOT
 			    }
 			}
 			else {
-			    $failure ="expected test $next, saw test $2";
+			    $failure ="FAILED--expected test $next, saw test $2";
 			    last;
 			}
                     }
@@ -475,7 +475,7 @@ EOT
                         die "FAILED--Further testing stopped" . ($1 ? ": $1\n" : ".\n");
 		    }
 		    else {
-			$failure = "Unexpected output at test $next";
+			$failure = "FAILED--unexpected output at test $next";
 			last;
 		    }
 		}
@@ -484,7 +484,7 @@ EOT
 	close RESULTS;
 
 	if (not defined $failure) {
-	    $failure = 'no leader found' unless $seen_leader;
+	    $failure = 'FAILED--no leader found' unless $seen_leader;
 	}
 
 	if ($ENV{PERL_VALGRIND}) {
@@ -544,7 +544,7 @@ EOT
             $failure = "Test did not compile";
         }
 	if (not defined $failure and $next != $max) {
-	    $failure="expected $max tests, saw $next";
+	    $failure="FAILED--expected $max tests, saw $next";
 	}
 
 	if (defined $failure) {
