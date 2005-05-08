@@ -267,8 +267,10 @@ S_del_sv(pTHX_ SV *p)
 	for (sva = PL_sv_arenaroot; sva; sva = (SV *) SvANY(sva)) {
 	    sv = sva + 1;
 	    svend = &sva[SvREFCNT(sva)];
-	    if (p >= sv && p < svend)
+	    if (p >= sv && p < svend) {
 		ok = 1;
+		break;
+	    }
 	}
 	if (!ok) {
 	    if (ckWARN_d(WARN_INTERNAL))	
