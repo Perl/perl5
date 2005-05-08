@@ -1709,8 +1709,7 @@ PP(pp_helem)
 	    SV* lv;
 	    SV* key2;
 	    if (!defer) {
-		STRLEN n_a;
-		DIE(aTHX_ PL_no_helem, SvPV(keysv, n_a));
+		DIE(aTHX_ PL_no_helem_sv, keysv);
 	    }
 	    lv = sv_newmortal();
 	    sv_upgrade(lv, SVt_PVLV);

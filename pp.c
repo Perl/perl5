@@ -4025,8 +4025,7 @@ PP(pp_hslice)
 
         if (lval) {
             if (!svp || *svp == &PL_sv_undef) {
-                STRLEN n_a;
-                DIE(aTHX_ PL_no_helem, SvPV(keysv, n_a));
+                DIE(aTHX_ PL_no_helem_sv, keysv);
             }
             if (localizing) {
                 if (preeminent)
