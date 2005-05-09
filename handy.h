@@ -687,10 +687,10 @@ hopefully catches attempts to access uninitialized memory.
 #ifdef USE_ITHREADS
 #define pTHX_FORMAT  "Perl interpreter: 0x%p"
 #define pTHX__FORMAT ", Perl interpreter: 0x%p"
-#define pTHX_VALUE_   (unsigned long)my_perl,
-#define pTHX_VALUE    (unsigned long)my_perl
-#define pTHX__VALUE_ ,(unsigned long)my_perl,
-#define pTHX__VALUE  ,(unsigned long)my_perl
+#define pTHX_VALUE_   (void *)my_perl,
+#define pTHX_VALUE    (void *)my_perl
+#define pTHX__VALUE_ ,(void *)my_perl,
+#define pTHX__VALUE  ,(void *)my_perl
 #else
 #define pTHX_FORMAT 
 #define pTHX__FORMAT

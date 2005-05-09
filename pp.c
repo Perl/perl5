@@ -78,7 +78,7 @@ PP(pp_padav)
     }
     gimme = GIMME_V;
     if (gimme == G_ARRAY) {
-	I32 maxarg = AvFILL((AV*)TARG) + 1;
+	const I32 maxarg = AvFILL((AV*)TARG) + 1;
 	EXTEND(SP, maxarg);
 	if (SvMAGICAL(TARG)) {
 	    U32 i;
@@ -94,7 +94,7 @@ PP(pp_padav)
     }
     else if (gimme == G_SCALAR) {
 	SV* sv = sv_newmortal();
-	I32 maxarg = AvFILL((AV*)TARG) + 1;
+	const I32 maxarg = AvFILL((AV*)TARG) + 1;
 	sv_setiv(sv, maxarg);
 	PUSHs(sv);
     }
@@ -167,17 +167,16 @@ PP(pp_rv2gv)
 		if (SvREADONLY(sv))
 		    Perl_croak(aTHX_ PL_no_modify);
 		if (PL_op->op_private & OPpDEREF) {
-		    const char *name;
 		    GV *gv;
 		    if (cUNOP->op_targ) {
 			STRLEN len;
 			SV *namesv = PAD_SV(cUNOP->op_targ);
-			name = SvPV(namesv, len);
+			const char *name = SvPV(namesv, len);
 			gv = (GV*)NEWSV(0,0);
 			gv_init(gv, CopSTASH(PL_curcop), name, len, 0);
 		    }
 		    else {
-			name = CopSTASHPV(PL_curcop);
+			const char *name = CopSTASHPV(PL_curcop);
 			gv = newGVgen(name);
 		    }
 		    if (SvTYPE(sv) < SVt_RV)
@@ -377,11 +376,9 @@ PP(pp_prototype)
 
     ret = &PL_sv_undef;
     if (SvPOK(TOPs) && SvCUR(TOPs) >= 7) {
-	char *s = SvPVX(TOPs);
+	const char *s = SvPVX(TOPs);
 	if (strnEQ(s, "CORE::", 6)) {
-	    int code;
-	
-	    code = keyword(s + 6, SvCUR(TOPs) - 6);
+	    const int code = keyword(s + 6, SvCUR(TOPs) - 6);
 	    if (code < 0) {	/* Overridable. */
 #define MAX_ARGS_OP ((sizeof(I32) - 1) * 2)
 		int i = 0, n = 0, seen_question = 0;
@@ -3855,7 +3852,7 @@ PP(pp_each)
     dSP;
     HV *hash = (HV*)POPs;
     HE *entry;
-    I32 gimme = GIMME_V;
+    const I32 gimme = GIMME_V;
 
     PUTBACK;
     /* might clobber stack_sp */
@@ -3894,8 +3891,8 @@ PP(pp_keys)
 PP(pp_delete)
 {
     dSP;
-    I32 gimme = GIMME_V;
-    I32 discard = (gimme == G_VOID) ? G_DISCARD : 0;
+    const I32 gimme = GIMME_V;
+    const I32 discard = (gimme == G_VOID) ? G_DISCARD : 0;
     SV *sv;
     HV *hv;
 
@@ -4525,15 +4522,15 @@ PP(pp_split)
     register SV *dstr;
     register char *m;
     I32 iters = 0;
-    STRLEN slen = do_utf8 ? utf8_length((U8*)s, (U8*)strend) : (strend - s);
+    const STRLEN slen = do_utf8 ? utf8_length((U8*)s, (U8*)strend) : (strend - s);
     I32 maxiters = slen + 10;
     I32 i;
     char *orig;
     I32 origlimit = limit;
     I32 realarray = 0;
     I32 base;
-    I32 gimme = GIMME_V;
-    I32 oldsave = PL_savestack_ix;
+    const I32 gimme = GIMME_V;
+    const I32 oldsave = PL_savestack_ix;
     I32 make_mortal = 1;
     bool multiline = 0;
     MAGIC *mg = (MAGIC *) NULL;

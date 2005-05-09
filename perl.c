@@ -2173,7 +2173,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	/* we're trying to emulate pp_entertry() here */
 	{
 	    register PERL_CONTEXT *cx;
-	    I32 gimme = GIMME_V;
+	    const I32 gimme = GIMME_V;
 	
 	    ENTER;
 	    SAVETMPS;

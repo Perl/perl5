@@ -4231,14 +4231,13 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 {
     dVAR;
     STRLEN n_a;
-    const char *name;
     const char *aname;
     GV *gv;
     char *ps;
     register CV *cv=0;
     SV *const_sv;
 
-    name = o ? SvPVx(cSVOPo->op_sv, n_a) : Nullch;
+    const char * const name = o ? SvPVx(cSVOPo->op_sv, n_a) : Nullch;
 
     if (proto) {
 	assert(proto->op_type == OP_CONST);

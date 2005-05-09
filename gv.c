@@ -34,8 +34,8 @@ Perl stores its global variables.
 #define PERL_IN_GV_C
 #include "perl.h"
 
-const char S_autoload[] = "AUTOLOAD";
-const STRLEN S_autolen = sizeof(S_autoload)-1;
+static const char S_autoload[] = "AUTOLOAD";
+static const STRLEN S_autolen = sizeof(S_autoload)-1;
 
 GV *
 Perl_gv_AVadd(pTHX_ register GV *gv)
@@ -111,7 +111,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     dVAR;
     register GP *gp;
     const bool doproto = SvTYPE(gv) > SVt_NULL;
-    char *proto = (doproto && SvPOK(gv)) ? SvPVX(gv) : NULL;
+    const char * const proto = (doproto && SvPOK(gv)) ? SvPVX(gv) : NULL;
 
     sv_upgrade((SV*)gv, SVt_PVGV);
     if (SvLEN(gv)) {
