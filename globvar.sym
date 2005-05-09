@@ -13,7 +13,7 @@ memory_wrap
 no_aelem
 no_dir_func
 no_func
-no_helem
+no_helem_sv
 no_localize_ref
 no_mem
 no_modify
