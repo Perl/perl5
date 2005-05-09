@@ -1,5 +1,14 @@
 Revision history for Perl module Unicode::Collate.
 
+0.50  Sun May  8 20:26:39 2005
+    - Now UCA Revision 14 (based on Unicode 4.1.0).
+    - Some tests are modified.
+    - Added cjkrange.t, ignor.t, override.t.
+    - Added META.yml.
+
+0.40  Sat Apr 24 06:54:40 2004
+    - Now a table file is searched in @INC.
+
 0.33  Sat Dec 13 14:07:27 2003
     - documentation improvement: in "entry", "overrideHangul", etc.
 
@@ -7,7 +16,8 @@ Revision history for Perl module Unicode::Collate.
     - A matching part from index(), match() etc. will include illegal
       code points (as well as ignorable characters) following a grapheme.
     - Contraction with illegal code point will be invalid.
-    - Added some tests in illegal.t; added view.t.
+    - Added view.t.
+    - Added some tests in illegal.t.
     - Some tests are separated from test.t into altern.t and rearrang.t.
     - modified XSUB internals.
 

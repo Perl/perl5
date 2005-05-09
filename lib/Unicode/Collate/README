@@ -1,4 +1,4 @@
-Unicode/Collate version 0.33
+Unicode/Collate version 0.50
 ===============================
 
 NAME
@@ -22,17 +22,23 @@ SYNOPSIS
 
 INSTALLATION
 
-Perl 5.6.1 or later
-(recommended: Perl 5.8.0 or later)
+Perl 5.6.1 or later is required.
+Perl 5.8.1 or later is recommended.
 
 To use this module, it is recommended to install a table file
 in the UCA format, by copying it into the directory
-where F<Unicode/Collate.pm> is installed;
-e.g. into F<perl/lib/Unicode/Collate/> directory
-if you have F<perl/lib/Unicode/Collate.pm>.
+where Unicode/Collate.pm is installed;
+e.g., into perl/lib/Unicode/Collate/ directory
+if you will have perl/lib/Unicode/Collate.pm.
+
+You can install such a table file by adding it
+to "Collate" directory (where "keys.txt" is placed) in this distribution
+before executing Makefile.PL.
 
 The most preferable one is "The Default Unicode Collation Element Table",
-available from the Unicode consortium's website:
+available from the Unicode Consortium's website:
+
+  http://www.unicode.org/Public/UCA/
 
   http://www.unicode.org/Public/UCA/latest/allkeys.txt (latest version)
 
@@ -72,14 +78,12 @@ DEPENDENCIES
   The conformant collation requires Unicode::Normalize (v 0.10 or later)
   although Unicode::Collate can be used without Unicode::Normalize.
 
-COPYRIGHT AND LICENCE
+COPYRIGHT AND LICENSE
 
 SADAHIRO Tomoyuki <SADAHIRO@cpan.org>
 
-  http://homepage1.nifty.com/nomenclator/perl/
+Copyright(C) 2001-2005, SADAHIRO Tomoyuki. Japan. All rights reserved.
 
-  Copyright(C) 2001-2003, SADAHIRO Tomoyuki. Japan. All rights reserved.
-
-  This library is free software; you can redistribute it
-  and/or modify it under the same terms as Perl itself.
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
 

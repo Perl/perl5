@@ -2015,14 +2015,17 @@ lib/Unicode/Collate/keys.txt	Unicode::Collate
 lib/Unicode/Collate.pm		Unicode::Collate
 lib/Unicode/Collate/README	Unicode::Collate
 lib/Unicode/Collate/t/altern.t	Unicode::Collate
+lib/Unicode/Collate/t/cjkrange.t	Unicode::Collate
 lib/Unicode/Collate/t/contract.t	Unicode::Collate
 lib/Unicode/Collate/t/hangtype.t	Unicode::Collate
 lib/Unicode/Collate/t/hangul.t	Unicode::Collate
+lib/Unicode/Collate/t/ignor.t	Unicode::Collate
 lib/Unicode/Collate/t/illegalp.t	Unicode::Collate
 lib/Unicode/Collate/t/illegal.t	Unicode::Collate
 lib/Unicode/Collate/t/index.t	Unicode::Collate
 lib/Unicode/Collate/t/normal.t	Unicode::Collate
 lib/Unicode/Collate/t/rearrang.t	Unicode::Collate
+lib/Unicode/Collate/t/override.t	Unicode::Collate
 lib/Unicode/Collate/t/test.t	Unicode::Collate
 lib/Unicode/Collate/t/trailwt.t	Unicode::Collate
 lib/Unicode/Collate/t/variable.t	Unicode::Collate
