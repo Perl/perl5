@@ -686,6 +686,8 @@ unless ($define{'USE_ITHREADS'}) {
 unless ($define{'USE_ITHREADS'}) {
     skip_symbols [qw(
 		    PL_ptr_table
+		    PL_pte_root
+		    PL_pte_arenaroot
 		    PL_op_mutex
 		    PL_regex_pad
 		    PL_regex_padav
