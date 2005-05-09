@@ -161,7 +161,7 @@ static void
 S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
 		const char *msg)
 {
-    SV *sv = sv_newmortal(), *esv = sv_newmortal();
+    SV *sv = sv_newmortal();
     if (!(flags & HVhek_FREEKEY)) {
 	sv_setpvn(sv, key, klen);
     }
@@ -173,8 +173,7 @@ S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
     if (flags & HVhek_UTF8) {
 	SvUTF8_on(sv);
     }
-    Perl_sv_setpvf(aTHX_ esv, "Attempt to %s a restricted hash", msg);
-    Perl_croak(aTHX_ SvPVX(esv), sv);
+    Perl_croak(aTHX_ msg, sv);
 }
 
 /* (klen == HEf_SVKEY) is special for MAGICAL hv entries, meaning key slot
@@ -717,8 +716,8 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     if (!entry && SvREADONLY(hv) && !(action & HV_FETCH_ISEXISTS)) {
 	S_hv_notallowed(aTHX_ flags, key, klen,
-			"access disallowed key '%"SVf"' in"
-			);
+			"Attempt to access disallowed key '%"SVf"' in"
+			" a restricted hash");
     }
     if (!(action & (HV_FETCH_LVALUE|HV_FETCH_ISSTORE))) {
 	/* Not doing some form of store, so return failure.  */
@@ -999,8 +998,8 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	}
 	else if (SvREADONLY(hv) && HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
 	    S_hv_notallowed(aTHX_ k_flags, key, klen,
-			    "delete readonly key '%"SVf"' from"
-			    );
+			    "Attempt to delete readonly key '%"SVf"' from"
+			    " a restricted hash");
 	}
         if (k_flags & HVhek_FREEKEY)
             Safefree(key);
@@ -1040,8 +1039,8 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     }
     if (SvREADONLY(hv)) {
         S_hv_notallowed(aTHX_ k_flags, key, klen,
-			"delete disallowed key '%"SVf"' from"
-			);
+			"Attempt to delete disallowed key '%"SVf"' from"
+			" a restricted hash");
     }
 
     if (k_flags & HVhek_FREEKEY)
