@@ -63,14 +63,13 @@ av, hv...) contains type and reference count information, as well as a
 pointer to the body (struct xrv, xpv, xpviv...), which contains fields
 specific to each type.
 
-Normally, this allocation is done using arenas, which are approximately
-1K chunks of memory parcelled up into N heads or bodies. The first slot
-in each arena is reserved, and is used to hold a link to the next arena.
-In the case of heads, the unused first slot also contains some flags and
-a note of the number of slots.  Snaked through each arena chain is a
+Normally, this allocation is done using arenas, which by default are
+approximately 4K chunks of memory parcelled up into N heads or bodies.  The
+first slot in each arena is reserved, and is used to hold a link to the next
+arena.  In the case of heads, the unused first slot also contains some flags
+and a note of the number of slots.  Snaked through each arena chain is a
 linked list of free items; when this becomes empty, an extra arena is
-allocated and divided up into N items which are threaded into the free
-list.
+allocated and divided up into N items which are threaded into the free list.
 
 The following global variables are associated with arenas:
 
@@ -86,7 +85,8 @@ are not allocated using arenas, but are instead just malloc()/free()ed as
 required. Also, if PURIFY is defined, arenas are abandoned altogether,
 with all items individually malloc()ed. In addition, a few SV heads are
 not allocated from an arena, but are instead directly created as static
-or auto variables, eg PL_sv_undef.
+or auto variables, eg PL_sv_undef.  The size of arenas can be changed from
+the default by setting PERL_ARENA_SIZE appropriately at compile time.
 
 The SV arena serves the secondary purpose of allowing still-live SVs
 to be located and destroyed during final cleanup.
