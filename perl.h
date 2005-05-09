@@ -229,6 +229,8 @@
 #  define pTHX_2	2
 #  define pTHX_3	3
 #  define pTHX_4	4
+#  define pTHX_5	5
+#  define pTHX_6	6
 #endif
 
 #ifndef dVAR

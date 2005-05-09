@@ -212,23 +212,8 @@ sub write_protos {
 	}
 	$ret .= "\n\t\t\t__attribute__((nonnull))" if $flags =~ /N/;
 	if ( @nonnull ) {
-	    if ($has_context) {
-		my @pos = map { $has_context ? $_ + 1 : $_ } @nonnull;
-		$ret .= sprintf( <<ATTR,
-
-#ifdef USE_ITHREADS
-			__attribute__((nonnull(%s)))
-#else
-			__attribute__((nonnull(%s)))
-#endif
-ATTR
-		    join( ",", @pos ),
-		    join( ",", @nonnull ),
-		);
-	    }
-	    else {
-		$ret .= sprintf( "\n\t\t\t__attribute__((nonnull(%s)))", join( ",", @nonnull ) );
-	    }
+	    my @pos = map { $has_context ? "pTHX_$_" : $_ } @nonnull;
+	    $ret .= sprintf( "\n\t\t\t__attribute__((nonnull(%s)))", join( ",", @pos ) );
 	}
 	$ret .= ";";
 	$ret .= ' */' if $flags =~ /m/;

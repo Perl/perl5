@@ -761,6 +761,7 @@
 #define sv_2iv_flags		Perl_sv_2iv_flags
 #define sv_2mortal		Perl_sv_2mortal
 #define sv_2nv			Perl_sv_2nv
+#define sv_2pv_flags		Perl_sv_2pv_flags
 #define sv_2pvutf8		Perl_sv_2pvutf8
 #define sv_2pvbyte		Perl_sv_2pvbyte
 #define sv_pvn_nomg		Perl_sv_pvn_nomg
@@ -1397,7 +1398,6 @@
 #define sv_catsv_flags		Perl_sv_catsv_flags
 #define sv_utf8_upgrade_flags	Perl_sv_utf8_upgrade_flags
 #define sv_pvn_force_flags	Perl_sv_pvn_force_flags
-#define sv_2pv_flags		Perl_sv_2pv_flags
 #define sv_copypv		Perl_sv_copypv
 #define my_atof2		Perl_my_atof2
 #define my_socketpair		Perl_my_socketpair
@@ -2728,6 +2728,7 @@
 #define sv_2iv_flags(a,b)	Perl_sv_2iv_flags(aTHX_ a,b)
 #define sv_2mortal(a)		Perl_sv_2mortal(aTHX_ a)
 #define sv_2nv(a)		Perl_sv_2nv(aTHX_ a)
+#define sv_2pv_flags(a,b,c)	Perl_sv_2pv_flags(aTHX_ a,b,c)
 #define sv_2pvutf8(a,b)		Perl_sv_2pvutf8(aTHX_ a,b)
 #define sv_2pvbyte(a,b)		Perl_sv_2pvbyte(aTHX_ a,b)
 #define sv_pvn_nomg(a,b)	Perl_sv_pvn_nomg(aTHX_ a,b)
@@ -3356,7 +3357,6 @@
 #define sv_catsv_flags(a,b,c)	Perl_sv_catsv_flags(aTHX_ a,b,c)
 #define sv_utf8_upgrade_flags(a,b)	Perl_sv_utf8_upgrade_flags(aTHX_ a,b)
 #define sv_pvn_force_flags(a,b,c)	Perl_sv_pvn_force_flags(aTHX_ a,b,c)
-#define sv_2pv_flags(a,b,c)	Perl_sv_2pv_flags(aTHX_ a,b,c)
 #define sv_copypv(a,b)		Perl_sv_copypv(aTHX_ a,b)
 #define my_atof2(a,b)		Perl_my_atof2(aTHX_ a,b)
 #define my_socketpair		Perl_my_socketpair
