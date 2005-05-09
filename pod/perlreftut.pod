@@ -1,4 +1,3 @@
-
 =head1 NAME
 
 perlreftut - Mark's very short tutorial about references
@@ -215,7 +214,7 @@ And then replace the hash name with the reference:
 
 =head3 B<Use Rule 2>
 
-B<Use Rule 1> is all you really need, because it tells you how to to
+B<Use Rule 1> is all you really need, because it tells you how to do
 absolutely everything you ever need to do with references.  But the
 most common thing to do with an array or a hash is to extract a single
 element, and the B<Use Rule 1> notation is cumbersome.  So there is an
