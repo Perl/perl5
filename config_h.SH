@@ -3492,7 +3492,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *    This symbol, if defined, indicates that sitecustomize should
  *    be used.
  */
+#ifndef USE_SITECUSTOMIZE
 #$usesitecustomize     USE_SITECUSTOMIZE               /**/
+#endif
 
 /* Size_t_size:
  *	This symbol holds the size of a Size_t in bytes.
