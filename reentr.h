@@ -1101,7 +1101,7 @@ typedef struct {
 #       define getprotobyname(a) (getprotobyname_r(a, &PL_reentrant_buffer->_protoent_struct, PL_reentrant_buffer->_protoent_buffer, PL_reentrant_buffer->_protoent_size) ? &PL_reentrant_buffer->_protoent_struct : ((errno == ERANGE) ? (struct protoent *) Perl_reentrant_retry("getprotobyname", a) : 0))
 #   endif
 #   if !defined(getprotobyname) && GETPROTOBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD
-#       define getprotobyname(a) ((PL_reentrant_retint = getprotobyname_r(a, &PL_reentrant_buffer->_protoent_struct, &PL_reentrant_buffer->_protoent_data)) == 0 ? &PL_reentrant_buffer->_protoent_struct : (((PL_reentrant_retint == ERANGE) || (errno == ERANGE)) ? (struct protoent *) Perl_reentrant_retry("getprotobyname", a) : 0))
+#       define getprotobyname(a) ((memzero(&PL_reentrant_buffer->_protoent_data, sizeof(PL_reentrant_buffer->_protoent_data)), PL_reentrant_retint = getprotobyname_r(a, &PL_reentrant_buffer->_protoent_struct, &PL_reentrant_buffer->_protoent_data)) == 0 ? &PL_reentrant_buffer->_protoent_struct : (((PL_reentrant_retint == ERANGE) || (errno == ERANGE)) ? (struct protoent *) Perl_reentrant_retry("getprotobyname", a) : 0))
 #   endif
 #endif /* HAS_GETPROTOBYNAME_R */
 
@@ -1197,7 +1197,7 @@ typedef struct {
 #       define getservbyname(a, b) (getservbyname_r(a, b, &PL_reentrant_buffer->_servent_struct, PL_reentrant_buffer->_servent_buffer, PL_reentrant_buffer->_servent_size) ? &PL_reentrant_buffer->_servent_struct : ((errno == ERANGE) ? (struct servent *) Perl_reentrant_retry("getservbyname", a, b) : 0))
 #   endif
 #   if !defined(getservbyname) && GETSERVBYNAME_R_PROTO == REENTRANT_PROTO_I_CCSD
-#       define getservbyname(a, b) ((PL_reentrant_retint = getservbyname_r(a, b, &PL_reentrant_buffer->_servent_struct, &PL_reentrant_buffer->_servent_data)) == 0 ? &PL_reentrant_buffer->_servent_struct : (((PL_reentrant_retint == ERANGE) || (errno == ERANGE)) ? (struct servent *) Perl_reentrant_retry("getservbyname", a, b) : 0))
+#       define getservbyname(a, b) (memzero(&PL_reentrant_buffer->_servent_data, sizeof(PL_reentrant_buffer->_servent_data)), (PL_reentrant_retint = getservbyname_r(a, b, &PL_reentrant_buffer->_servent_struct, &PL_reentrant_buffer->_servent_data)) == 0 ? &PL_reentrant_buffer->_servent_struct : (((PL_reentrant_retint == ERANGE) || (errno == ERANGE)) ? (struct servent *) Perl_reentrant_retry("getservbyname", a, b) : 0))
 #   endif
 #endif /* HAS_GETSERVBYNAME_R */
 
