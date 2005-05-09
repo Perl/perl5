@@ -1,7 +1,7 @@
 /*
  *    reentr.h
  *
- *    Copyright (C) 2002, 2003, by Larry Wall and others
+ *    Copyright (C) 2002, 2003, 2005 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -43,6 +43,17 @@
 #   undef HAS_STRERROR_R
 #   define NETDB_R_OBSOLETE
 #endif
+
+/*
+ * As of OpenBSD 3.7, reentrant functions are now working, they just are
+ * incompatible with everyone else.  To make OpenBSD happy, we have to
+ * memzero out certain structures before calling the functions.
+ */
+#if defined(__OpenBSD__)
+#    define REENTR_MEMZERO(a,b) memzero(a,b);
+#else
+#    define REENTR_MEMZERO(a,b)
+#endif 
 
 #ifdef NETDB_R_OBSOLETE
 #   undef HAS_ENDHOSTENT_R
