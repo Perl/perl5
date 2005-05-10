@@ -137,7 +137,21 @@ esac
 ld='cc';
 so='dylib';
 dlext='bundle';
-dlsrc='dl_dyld.xs'; usedl='define';
+usedl='define';
+
+# 10.4 can use dlopen.
+# 10.4 broke poll().
+case "$osvers" in
+[1-7].*)
+    dlsrc='dl_dyld.xs';
+    ;;
+*)
+    dlsrc='dl_dlopen.xs';
+    d_poll='undef';
+    i_poll='undef';
+    ;;
+esac
+
 cccdlflags=' '; # space, not empty, because otherwise we get -fpic
 # Perl bundles do not expect two-level namespace, added in Darwin 1.4.
 # But starting from perl 5.8.1/Darwin 7 the default is the two-level.
@@ -153,10 +167,11 @@ case "$osvers" in
    ldflags="${ldflags} -flat_namespace"
    lddlflags="${ldflags} -bundle -undefined suppress"
    ;;
-*) lddlflags="${ldflags} -bundle -undefined dynamic_lookup"
+*) 
+   lddlflags="${ldflags} -bundle -undefined dynamic_lookup"
    case "$ld" in
-   *MACOSX_DEVELOPMENT_TARGET*) ;;
-   *) ld="env MACOSX_DEPLOYMENT_TARGET=10.3 ${ld}" ;;
+       *MACOSX_DEVELOPMENT_TARGET*) ;;
+       *) ld="env MACOSX_DEPLOYMENT_TARGET=10.3 ${ld}" ;;
    esac
    ;;
 esac
