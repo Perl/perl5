@@ -4234,6 +4234,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     const char *aname;
     GV *gv;
     char *ps;
+    STRLEN ps_len;
     register CV *cv=0;
     SV *const_sv;
 
@@ -4241,7 +4242,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
     if (proto) {
 	assert(proto->op_type == OP_CONST);
-	ps = SvPVx(((SVOP*)proto)->op_sv, n_a);
+	ps = SvPVx(((SVOP*)proto)->op_sv, ps_len);
     }
     else
 	ps = Nullch;
@@ -4281,7 +4282,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    cv_ckproto((CV*)gv, NULL, ps);
 	}
 	if (ps)
-	    sv_setpv((SV*)gv, ps);
+	    sv_setpvn((SV*)gv, ps, ps_len);
 	else
 	    sv_setiv((SV*)gv, -1);
 	SvREFCNT_dec(PL_compcv);
@@ -4434,7 +4435,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     CvSTASH(cv) = PL_curstash;
 
     if (ps)
-	sv_setpv((SV*)cv, ps);
+	sv_setpvn((SV*)cv, ps, ps_len);
 
     if (PL_error_count) {
 	op_free(block);
