@@ -126,7 +126,7 @@ esac
 case "$isgcc" in
 gcc)	ccflags="$ccflags -ansi"
 	;;
-*)	ccflags="$ccflags -std"
+*)	ccflags="$ccflags -std1"
 	;;
 esac
 
@@ -259,7 +259,7 @@ case "`uname -r`" in
 		  esac
 		  # -msym: If using a sufficiently recent /sbin/loader,
 		  # keep the module symbols with the modules.
-                  lddlflags="$lddlflags -msym -std"
+                  lddlflags="$lddlflags -msym -std1"
               fi
 		;;
 esac
@@ -413,7 +413,7 @@ TRY
 		# Don't bother trying to work with Configure's idea of
 		# cc and the various flags.  This might not work as-is
 		# with gcc -- but we're testing libc, not the compiler.
-		if cc -o try -std try.c && ./try
+		if cc -o try -std1 try.c && ./try
 		then
 			: ok
 		else

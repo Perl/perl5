@@ -4993,6 +4993,10 @@ extern void moncontrol(int);
  * but also beware since this evaluates its argument twice, so no x++. */
 #define PERL_ABS(x) ((x) < 0 ? -(x) : (x))
 
+#ifdef __osf__
+#pragma message disable (mainparm) /* We have the envp in main(). */
+#endif
+
 /* and finally... */
 #define PERL_PATCHLEVEL_H_IMPLICIT
 #include "patchlevel.h"
