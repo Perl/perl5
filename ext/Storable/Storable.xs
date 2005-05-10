@@ -21,16 +21,9 @@
 #include "ppport.h"             /* handle old perls */
 #endif
 
-#ifndef NETWARE
 #if 0
 #define DEBUGME /* Debug mode, turns assertions on as well */
 #define DASSERT /* Assertion mode */
-#endif
-#else	/* NETWARE */
-#if 0	/* On NetWare USE_PERLIO is not used */
-#define DEBUGME /* Debug mode, turns assertions on as well */
-#define DASSERT /* Assertion mode */
-#endif
 #endif
 
 /*
