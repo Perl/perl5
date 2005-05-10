@@ -620,3 +620,12 @@ Perl_mem_collxfrm(pTHX_ const char *s, STRLEN len, STRLEN *xlen)
 
 #endif /* USE_LOCALE_COLLATE */
 
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * vim: ts=8 sts=4 sw=4 noet:
+*/

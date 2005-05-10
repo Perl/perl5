@@ -2443,3 +2443,13 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
     LEAVE;
     return fp;
 }
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * vim: ts=8 sts=4 sw=4 noet:
+*/

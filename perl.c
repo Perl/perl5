@@ -4858,3 +4858,13 @@ read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen)
     sv_chop(PL_e_script, nl);
     return 1;
 }
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * vim: ts=8 sts=4 sw=4 noet:
+*/

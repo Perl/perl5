@@ -937,3 +937,13 @@ Perl_av_exists(pTHX_ AV *av, I32 key)
     else
 	return FALSE;
 }
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * vim: ts=8 sts=4 sw=4 noet:
+*/

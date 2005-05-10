@@ -1018,3 +1018,13 @@ Perl_my_frexpl(long double x, int *e) {
 	return (scalbnl(x, -*e));
 }
 #endif
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * vim: ts=8 sts=4 sw=4 noet:
+*/
