@@ -41,7 +41,7 @@ print <<EOF;
 /*
  *    reentr.h
  *
- *    Copyright (C) 2002, 2003, by Larry Wall and others
+ *    Copyright (C) 2002, 2003, 2005 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -79,6 +79,17 @@ print <<EOF;
 #   undef HAS_STRERROR_R
 #   define NETDB_R_OBSOLETE
 #endif
+
+/*
+ * As of OpenBSD 3.7, reentrant functions are now working, they just are
+ * incompatible with everyone else.  To make OpenBSD happy, we have to
+ * memzero out certain structures before calling the functions.
+ */
+#if defined(__OpenBSD__)
+#    define REENTR_MEMZERO(a,b) memzero(a,b),
+#else
+#    define REENTR_MEMZERO(a,b)
+#endif 
 
 #ifdef NETDB_R_OBSOLETE
 #   undef HAS_ENDHOSTENT_R
@@ -679,6 +690,13 @@ EOF
 		$w = ", $w" if length $v;
 	    }
 	    my $call = "${func}_r($v$w)";
+
+            # Must make OpenBSD happy
+            my $memzero = '';
+            if($p =~ /D$/ &&
+                ($genfunc eq 'protoent' || $genfunc eq 'servent')) {
+                $memzero = 'REENTR_MEMZERO(&PL_reentrant_buffer->_' . $genfunc . '_data, sizeof(PL_reentrant_buffer->_' . $genfunc . '_data))';
+            }
 	    push @wrap, <<EOF;
 #   if !defined($func) && ${FUNC}_R_PROTO == REENTRANT_PROTO_$p
 EOF
@@ -691,7 +709,7 @@ EOF
 		    my $rv = $v ? ", $v" : "";
 		    if ($r eq 'I') {
 			push @wrap, <<EOF;
-#       define $func($v) ((PL_reentrant_retint = $call)$test ? $true : (((PL_reentrant_retint == ERANGE) || (errno == ERANGE)) ? ($seent{$func} *) Perl_reentrant_retry("$func"$rv) : 0))
+#       define $func($v) ($memzero(PL_reentrant_retint = $call)$test ? $true : (((PL_reentrant_retint == ERANGE) || (errno == ERANGE)) ? ($seent{$func} *) Perl_reentrant_retry("$func"$rv) : 0))
 EOF
 		    } else {
 			push @wrap, <<EOF;

@@ -2453,6 +2453,7 @@ README.micro			Notes about microperl
 README.mint			Perl notes for MiNT
 README.mpeix			Perl notes for MPE/iX
 README.netware			Perl notes for NetWare
+README.openbsd			Perl notes for OpenBSD
 README.os2			Perl notes for OS/2
 README.os390			Perl notes for OS/390
 README.os400			Perl notes for OS/400
