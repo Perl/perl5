@@ -172,7 +172,7 @@ PP(pp_concat)
 	if (SvGMAGICAL(left))
 	    mg_get(left);		/* or mg_get(left) may happen here */
 	if (!SvOK(TARG))
-	    sv_setpv(left, "");
+	    sv_setpvn(left, "", 0);
 	(void)SvPV_nomg(left, llen);    /* Needed to set UTF8 flag */
 	lbyte = !DO_UTF8(left);
 	if (IN_BYTES)

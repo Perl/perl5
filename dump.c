@@ -1343,7 +1343,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	Perl_dump_indent(aTHX_ level, file, "  MAX = %"IVdf"\n", (IV)AvMAX(sv));
 	Perl_dump_indent(aTHX_ level, file, "  ARYLEN = 0x%"UVxf"\n", PTR2UV(AvARYLEN(sv)));
 	flags = AvFLAGS(sv);
-	sv_setpv(d, "");
+	sv_setpvn(d, "", 0);
 	if (flags & AVf_REAL)	sv_catpv(d, ",REAL");
 	if (flags & AVf_REIFY)	sv_catpv(d, ",REIFY");
 	if (flags & AVf_REUSED)	sv_catpv(d, ",REUSED");

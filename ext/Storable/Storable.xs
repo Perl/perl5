@@ -5386,7 +5386,7 @@ static SV *retrieve_code(pTHX_ stcxt_t *cxt, char *cname)
 
 	if (SvROK(cxt->eval) && SvTYPE(SvRV(cxt->eval)) == SVt_PVCV) {
 		SV* errsv = get_sv("@", TRUE);
-		sv_setpv(errsv, "");					/* clear $@ */
+		sv_setpvn(errsv, "", 0);	/* clear $@ */
 		PUSHMARK(sp);
 		XPUSHs(sv_2mortal(newSVsv(sub)));
 		PUTBACK;

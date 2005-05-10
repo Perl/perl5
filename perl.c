@@ -2186,7 +2186,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	    if (flags & G_KEEPERR)
 		PL_in_eval |= EVAL_KEEPERR;
 	    else
-		sv_setpv(ERRSV,"");
+		sv_setpvn(ERRSV,"",0);
 	}
 	PL_markstack_ptr++;
 
@@ -2197,7 +2197,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	    call_body((OP*)&myop, FALSE);
 	    retval = PL_stack_sp - (PL_stack_base + oldmark);
 	    if (!(flags & G_KEEPERR))
-		sv_setpv(ERRSV,"");
+		sv_setpvn(ERRSV,"",0);
 	    break;
 	case 1:
 	    STATUS_ALL_FAILURE;
@@ -2322,7 +2322,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 	call_body((OP*)&myop,TRUE);
 	retval = PL_stack_sp - (PL_stack_base + oldmark);
 	if (!(flags & G_KEEPERR))
-	    sv_setpv(ERRSV,"");
+	    sv_setpvn(ERRSV,"",0);
 	break;
     case 1:
 	STATUS_ALL_FAILURE;

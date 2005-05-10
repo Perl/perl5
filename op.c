@@ -4355,7 +4355,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	(void)SvREFCNT_inc(const_sv);
 	if (cv) {
 	    assert(!CvROOT(cv) && !CvCONST(cv));
-	    sv_setpv((SV*)cv, "");  /* prototype is "" */
+	    sv_setpvn((SV*)cv, "", 0);  /* prototype is "" */
 	    CvXSUBANY(cv).any_ptr = const_sv;
 	    CvXSUB(cv) = const_sv_xsub;
 	    CvCONST_on(cv);
@@ -4609,7 +4609,7 @@ Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
     cv = newXS(name, const_sv_xsub, savepv(CopFILE(PL_curcop)));
     CvXSUBANY(cv).any_ptr = sv;
     CvCONST_on(cv);
-    sv_setpv((SV*)cv, "");  /* prototype is "" */
+    sv_setpvn((SV*)cv, "", 0);  /* prototype is "" */
 
     if (stash)
 	CopSTASH_free(PL_curcop);

@@ -257,7 +257,7 @@ cstring(pTHX_ SV *sv, bool perlstyle)
 	SV *tmpsv = sv_newmortal(); /* Temporary SV to feed sv_uni_display */
 	len = SvCUR(sv);
 	s = sv_uni_display(tmpsv, sv, 8*len, UNI_DISPLAY_QQ);
-	sv_setpv(sstr,"\"");
+	sv_setpvn(sstr,"\"",1);
 	while (*s)
 	{
 	    if (*s == '"')

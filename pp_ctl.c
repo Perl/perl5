@@ -1085,7 +1085,7 @@ PP(pp_flip)
 		RETURNOP(((LOGOP*)cUNOP->op_first)->op_other);
 	    }
 	}
-	sv_setpv(TARG, "");
+	sv_setpvn(TARG, "", 0);
 	SETs(targ);
 	RETURN;
     }
@@ -1397,7 +1397,7 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 		SV *err = ERRSV;
                 const char *e = Nullch;
 		if (!SvPOK(err))
-		    sv_setpv(err,"");
+		    sv_setpvn(err,"",0);
 		else if (SvCUR(err) >= sizeof(prefix)+msglen-1) {
 		    e = SvPV(err, n_a);
 		    e += n_a - msglen;
@@ -2030,7 +2030,7 @@ PP(pp_return)
 
     LEAVESUB(sv);
     if (clear_errsv)
-	sv_setpv(ERRSV,"");
+	sv_setpvn(ERRSV,"",0);
     return retop;
 }
 
@@ -2920,7 +2920,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     if (saveop && saveop->op_flags & OPf_SPECIAL)
 	PL_in_eval |= EVAL_KEEPERR;
     else
-	sv_setpv(ERRSV,"");
+	sv_setpvn(ERRSV,"",0);
     if (yyparse() || PL_error_count || !PL_eval_root) {
 	SV **newsp;			/* Used by POPBLOCK. */
        PERL_CONTEXT *cx = &cxstack[cxstack_ix];
@@ -3533,7 +3533,7 @@ PP(pp_leaveeval)
     else {
 	LEAVE;
 	if (!(save_flags & OPf_SPECIAL))
-	    sv_setpv(ERRSV,"");
+	    sv_setpvn(ERRSV,"",0);
     }
 
     RETURNOP(retop);
@@ -3553,7 +3553,7 @@ PP(pp_entertry)
     cx->blk_eval.retop = cLOGOP->op_other->op_next;
 
     PL_in_eval = EVAL_INEVAL;
-    sv_setpv(ERRSV,"");
+    sv_setpvn(ERRSV,"",0);
     PUTBACK;
     return DOCATCH(PL_op->op_next);
 }
@@ -3600,7 +3600,7 @@ PP(pp_leavetry)
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
     LEAVE;
-    sv_setpv(ERRSV,"");
+    sv_setpvn(ERRSV,"",0);
     RETURN;
 }
 

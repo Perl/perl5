@@ -1373,7 +1373,7 @@ Perl_my_stat(pTHX)
 	io = GvIO(gv);
 	if (io && IoIFP(io)) {
 	    PL_statgv = gv;
-	    sv_setpv(PL_statname,"");
+	    sv_setpvn(PL_statname,"", 0);
 	    PL_laststype = OP_STAT;
 	    return (PL_laststatval = PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &PL_statcache));
 	}
@@ -1383,7 +1383,7 @@ Perl_my_stat(pTHX)
 	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 		report_evil_fh(gv, io, PL_op->op_type);
 	    PL_statgv = Nullgv;
-	    sv_setpv(PL_statname,"");
+	    sv_setpvn(PL_statname,"", 0);
 	    return (PL_laststatval = -1);
 	}
     }
