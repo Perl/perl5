@@ -3215,7 +3215,7 @@ static int store_blessed(
 	len = strlen(classname);
 
 	TRACEME(("blessed 0x%"UVxf" in %s, no hook: tagged #%d",
-		 PTR2UV(sv), class, cxt->tagnum));
+		 PTR2UV(sv), classname, cxt->tagnum));
 
 	/*
 	 * Determine whether it is the first time we see that class name (in which
