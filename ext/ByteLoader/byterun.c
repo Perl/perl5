@@ -1,4 +1,5 @@
-/*
+/* -*- buffer-read-only: t -*-
+ *
  *      Copyright (c) 1996-1999 Malcolm Beattie
  *
  *      You may distribute under the terms of either the GNU General Public
@@ -1136,3 +1137,5 @@ byterun(pTHX_ register struct byteloader_state *bstate)
     }
     return 0;
 }
+
+/* ex: set ro: */

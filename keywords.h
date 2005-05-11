@@ -1,4 +1,5 @@
-/*
+/* -*- buffer-read-only: t -*-
+ *
  *    keywords.h
  *
  *    Copyright (C) 1994, 1995, 1996, 1997, 1999, 2000, 2001, 2002,
@@ -258,3 +259,5 @@
 #define KEY_x			244
 #define KEY_xor			245
 #define KEY_y			246
+
+/* ex: set ro: */

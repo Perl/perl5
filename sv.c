@@ -12489,5 +12489,5 @@ Perl_sv_cat_decode(pTHX_ SV *dsv, SV *encoding,
  * indent-tabs-mode: t
  * End:
  *
- * vim: ts=8 sts=4 sw=4 noet:
-*/
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */

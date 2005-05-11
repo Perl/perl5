@@ -38,7 +38,8 @@ my %map = (
 die "reentr.h: $!" unless open(H, ">reentr.h");
 select H;
 print <<EOF;
-/*
+/* -*- buffer-read-only: t -*-
+ *
  *    reentr.h
  *
  *    Copyright (C) 2002, 2003, 2005 by Larry Wall and others
@@ -51,7 +52,7 @@ print <<EOF;
  */
 
 #ifndef REENTR_H
-#define REENTR_H 
+#define REENTR_H
 
 #ifdef USE_REENTRANT_API
  
@@ -751,6 +752,7 @@ typedef struct {
  
 #endif
 
+/* ex: set ro: */
 EOF
 
 close(H);
@@ -760,10 +762,11 @@ close(H);
 die "reentr.c: $!" unless open(C, ">reentr.c");
 select C;
 print <<EOF;
-/*
+/* -*- buffer-read-only: t -*-
+ *
  *    reentr.c
  *
- *    Copyright (C) 2002, 2003, by Larry Wall and others
+ *    Copyright (C) 2002, 2003, 2005 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1042,6 +1045,7 @@ Perl_reentrant_retry(const char *f, ...)
     return retptr;
 }
 
+/* ex: set ro: */
 EOF
 
 __DATA__

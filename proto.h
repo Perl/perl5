@@ -1,4 +1,5 @@
-/*
+/*  -*- buffer-read-only: t -*-
+ *
  *    proto.h
  *
  *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999,
@@ -2168,3 +2169,4 @@ PERL_CALLCONV bool	Perl_is_gv_magical_sv(pTHX_ SV *name, U32 flags);
 PERL_CALLCONV char*	Perl_savesvpv(pTHX_ SV* sv);
 
 END_EXTERN_C
+/* ex: set ro: */

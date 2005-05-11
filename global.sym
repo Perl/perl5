@@ -1,3 +1,4 @@
+#  -*- buffer-read-only: t -*-
 #
 #    global.sym
 #
@@ -677,3 +678,4 @@ Perl_hv_scalar
 Perl_gv_fetchpvn_flags
 Perl_gv_fetchsv
 Perl_savesvpv
+# ex: set ro:

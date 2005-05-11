@@ -1,4 +1,5 @@
-/*
+/*  -*- buffer-read-only: t -*-
+ *
  *    embed.h
  *
  *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999,
@@ -4054,3 +4055,4 @@
 #  define Perl_sv_setpvf_mg_nocontext	Perl_sv_setpvf_mg
 #endif
 
+/* ex: set ro: */

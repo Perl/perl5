@@ -1,4 +1,5 @@
-/*
+/* -*- buffer-read-only: t -*-
+ *
  *    opcode.h
  *
  *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999,
@@ -751,7 +752,6 @@ EXTCONST char* const PL_op_desc[] = {
 END_EXTERN_C
 
 #endif /* !PERL_GLOBAL_STRUCT_INIT */
-
 
 START_EXTERN_C
 
@@ -1854,3 +1854,4 @@ EXT const U32 PL_opargs[] = {
 END_EXTERN_C
 
 #endif /* !PERL_GLOBAL_STRUCT_INIT */
+/* ex: set ro: */

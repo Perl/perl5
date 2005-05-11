@@ -10998,5 +10998,5 @@ Perl_scan_vstring(pTHX_ const char *s, SV *sv)
  * indent-tabs-mode: t
  * End:
  *
- * vim: ts=8 sts=4 sw=4 noet:
-*/
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */

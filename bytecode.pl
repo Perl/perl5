@@ -22,7 +22,8 @@ while (($from, $tos) = each %alias_to) {
 }
 
 my $c_header = <<'EOT';
-/*
+/* -*- buffer-read-only: t -*-
+ *
  *      Copyright (c) 1996-1999 Malcolm Beattie
  *
  *      You may distribute under the terms of either the GNU General Public
@@ -195,6 +196,8 @@ print BYTERUN_C <<'EOT';
     }
     return 0;
 }
+
+/* ex: set ro: */
 EOT
 
 #
@@ -250,6 +253,8 @@ for ($i = 0; $i < @optype - 1; $i++) {
     printf BYTERUN_H "    OPt_%s,\t\t/* %d */\n", $optype[$i], $i;
 }
 printf BYTERUN_H "    OPt_%s\t\t/* %d */\n};\n\n", $optype[$i], $i;
+
+print BYTERUN_H "/* ex: set ro: */\n";
 
 #
 # Finish off insn_data and create array initialisers in Asmdata.pm
@@ -326,6 +331,8 @@ or '&PL_sv_undef').
 Malcolm Beattie, C<mbeattie@sable.ox.ac.uk>
 
 =cut
+
+# ex: set ro:
 EOT
 
 

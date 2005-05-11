@@ -1927,5 +1927,5 @@ amagic_cmp_locale(pTHX_ register SV *str1, register SV *str2)
  * indent-tabs-mode: t
  * End:
  *
- * vim: ts=8 sts=4 sw=4 noet:
-*/
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */

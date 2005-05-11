@@ -1161,5 +1161,5 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
  * indent-tabs-mode: t
  * End:
  *
- * vim: ts=8 sts=4 sw=4 noet:
-*/
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */

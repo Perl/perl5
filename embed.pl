@@ -24,6 +24,7 @@ sub do_not_edit ($)
     $years =~ s/1999,/1999,\n  / if length $years > 40;
 
     my $warning = <<EOW;
+ -*- buffer-read-only: t -*-
 
    $file
 
@@ -79,7 +80,7 @@ sub walk_table (&@) {
 	$F = $filename;
     }
     else {
-	safer_unlink $filename;
+	safer_unlink $filename if $filename ne '/dev/null';
 	open F, ">$filename" or die "Can't open $filename: $!";
 	binmode F;
 	$F = \*F;
@@ -120,7 +121,7 @@ sub munge_c_files () {
 	if (@_ > 1) {
 	    $functions->{$_[2]} = \@_ if $_[@_-1] =~ /\.\.\./;
 	}
-    } '/dev/null', '';
+    } '/dev/null', '', '';
     local $^I = '.bak';
     while (<>) {
 #	if (/^#\s*include\s+"perl.h"/) {
@@ -250,8 +251,8 @@ sub write_global_sym {
     $ret;
 }
 
-walk_table(\&write_protos,     "proto.h", undef);
-walk_table(\&write_global_sym, "global.sym", undef);
+walk_table(\&write_protos,     "proto.h", undef, "/* ex: set ro: */\n");
+walk_table(\&write_global_sym, "global.sym", undef, "# ex: set ro:\n");
 
 # XXX others that may need adding
 #       warnhook
@@ -601,6 +602,7 @@ print EM <<'END';
 #  define Perl_sv_setpvf_mg_nocontext	Perl_sv_setpvf_mg
 #endif
 
+/* ex: set ro: */
 END
 
 close(EM) or die "Error closing EM: $!";
@@ -710,6 +712,8 @@ for $sym (sort @extvars) {
 print EM <<'END';
 
 #endif /* PERL_POLLUTE */
+
+/* ex: set ro: */
 END
 
 close(EM) or die "Error closing EM: $!";
@@ -829,6 +833,7 @@ print CAPIH <<'EOT';
 
 #endif /* __perlapi_h__ */
 
+/* ex: set ro: */
 EOT
 close CAPIH or die "Error closing CAPIH: $!";
 
@@ -905,6 +910,8 @@ unsigned char** Perl_Gfold_locale_ptr(pTHX) {
 END_EXTERN_C
 
 #endif /* MULTIPLICITY */
+
+/* ex: set ro: */
 EOT
 
 close(CAPI) or die "Error closing CAPI: $!";

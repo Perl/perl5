@@ -4866,5 +4866,5 @@ read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen)
  * indent-tabs-mode: t
  * End:
  *
- * vim: ts=8 sts=4 sw=4 noet:
-*/
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */

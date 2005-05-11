@@ -1997,5 +1997,5 @@ Perl_is_gv_magical(pTHX_ const char *name, STRLEN len, U32 flags)
  * indent-tabs-mode: t
  * End:
  *
- * vim: ts=8 sts=4 sw=4 noet:
-*/
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */

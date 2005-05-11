@@ -958,5 +958,5 @@ XS(XS_Internals_HvREHASH)	/* Subject to change  */
  * indent-tabs-mode: t
  * End:
  *
- * vim: ts=8 sts=4 sw=4 noet:
-*/
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */
