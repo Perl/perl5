@@ -8,7 +8,7 @@ BEGIN {
     require DynaLoader;
 
     @ISA = qw|Exporter DynaLoader|;
-    $VERSION = '0.23';
+    $VERSION = '0.24';
 
     @EXPORT = qw(
 	NULL
@@ -368,6 +368,13 @@ $ENV{PROCESSOR_ARCHITECTURE}.  This might not work on Win9X.
 does not return a UNC path, since the functionality required for such
 a feature is not available under Windows 95.
 
+=item Win32::GetFileVersion(FILENAME)
+
+[EXT] Returns the file version number from the VERSIONINFO resource of
+the executable file or DLL.  This is a tuple of four 16 bit numbers.
+In list context these four numbers will be returned.  In scalar context
+they are concatenated into a string, separated by dots.
+
 =item Win32::GetFolderPath(FOLDER [, CREATE])
 
 [EXT] Returns the full pathname of one of the Windows special folders.
@@ -555,6 +562,19 @@ function.
 system boot.  Resolution is limited to system timer ticks (about 10ms
 on WinNT and 55ms on Win9X).
 
+=item Win32::GuidGen()
+
+[EXT] Creates a globally unique 128 bit integer that can be used as a
+persistent identifier in a distributed setting. To a very high degree
+of certainty this function returns a unique value. No other
+invocation, on the same or any other system (networked or not), should
+return the same value.
+
+The return value is formatted according to OLE conventions, as groups
+of hex digits with surrounding braces.  For example:
+
+    {09531CF1-D0C7-4860-840C-1C8C8735E2AD}
+ 
 =item Win32::InitiateSystemShutdown
 
 (MACHINE, MESSAGE, TIMEOUT, FORCECLOSE, REBOOT)
