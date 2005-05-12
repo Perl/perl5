@@ -24,9 +24,9 @@ Locates the full path to the script bin directory to allow the use
 of paths relative to the bin directory.
 
 This allows a user to setup a directory tree for some software with
-directories E<lt>rootE<gt>/bin and E<lt>rootE<gt>/lib and then the above example will allow
-the use of modules in the lib directory without knowing where the software
-tree is installed.
+directories C<< <root>/bin >> and C<< <root>/lib >>, and then the above
+example will allow the use of modules in the lib directory without knowing
+where the software tree is installed.
 
 If perl is invoked using the B<-e> option or the perl script is read from
 C<STDIN> then FindBin sets both C<$Bin> and C<$RealBin> to the current
@@ -65,9 +65,10 @@ If perl is invoked as
 
    perl filename
 
-and I<filename> does not have executable rights and a program called I<filename>
-exists in the users C<$ENV{PATH}> which satisfies both B<-x> and B<-T> then FindBin
-assumes that it was invoked via the C<$ENV{PATH}>.
+and I<filename> does not have executable rights and a program called
+I<filename> exists in the users C<$ENV{PATH}> which satisfies both B<-x>
+and B<-T> then FindBin assumes that it was invoked via the
+C<$ENV{PATH}>.
 
 Workaround is to invoke perl as
 
@@ -76,7 +77,8 @@ Workaround is to invoke perl as
 =head1 AUTHORS
 
 FindBin is supported as part of the core perl distribution. Please send bug
-reports to E<lt>F<perlbug@perl.org>E<gt> using the perlbug program included with perl.
+reports to E<lt>F<perlbug@perl.org>E<gt> using the perlbug program
+included with perl.
 
 Graham Barr E<lt>F<gbarr@pobox.com>E<gt>
 Nick Ing-Simmons E<lt>F<nik@tiuk.ti.com>E<gt>
@@ -102,7 +104,15 @@ use File::Spec;
 %EXPORT_TAGS = (ALL => [qw($Bin $Script $RealBin $RealScript $Dir $RealDir)]);
 @ISA = qw(Exporter);
 
-$VERSION = "1.45";
+$VERSION = "1.46";
+
+sub cwd2 {
+   my $cwd = getcwd();
+   # getcwd might fail if it hasn't access to the current directory.
+   # try harder.
+   defined $cwd or $cwd = cwd();
+   $cwd;
+}
 
 sub init
 {
@@ -112,9 +122,8 @@ sub init
  if($0 eq '-e' || $0 eq '-')
   {
    # perl invoked with -e or script is on C<STDIN>
-
    $Script = $RealScript = $0;
-   $Bin    = $RealBin    = getcwd();
+   $Bin    = $RealBin    = cwd2();
   }
  else
   {
@@ -160,9 +169,7 @@ sub init
 
      # Ensure $script contains the complete path in case we C<chdir>
 
-     my $cwd = getcwd();
-     defined $cwd or $cwd = cwd(); # try harder
-     $script = File::Spec->catfile($cwd, $script)
+     $script = File::Spec->catfile(cwd2(), $script)
        unless File::Spec->file_name_is_absolute($script);
 
      ($Script,$Bin) = fileparse($script);
@@ -192,4 +199,3 @@ BEGIN { init }
 *again = \&init;
 
 1; # Keep require happy
-
