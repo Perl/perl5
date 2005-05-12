@@ -232,7 +232,6 @@ XS(w32_LookupAccountSID)
     char Domain[256];
     DWORD DomLen = sizeof(Domain);
     SID_NAME_USE snu;
-    long retval;
     STRLEN n_a;
     BOOL bResult;
 
@@ -242,7 +241,6 @@ XS(w32_LookupAccountSID)
     sid = SvPV(ST(1), n_a);
     if (IsValidSid(sid)) {
 	if (USING_WIDE()) {
-	    WCHAR wSID[sizeof(SID)];
 	    WCHAR wDomain[sizeof(Domain)];
 	    WCHAR wSystem[MAX_PATH+1];
 	    WCHAR wAccount[sizeof(Account)];
