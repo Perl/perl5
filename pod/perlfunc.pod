@@ -5077,15 +5077,14 @@ characters at each point it matches that way.  For example:
 
 produces the output 'h:i:t:h:e:r:e'.
 
-Using the empty pattern C<//> specifically matches the null string, and is
-not be confused with the use of C<//> to mean "the last successful pattern
-match".  So, for C<split>, the following are equivalent:
+As a special case for C<split>, using the empty pattern C<//> specifically
+matches only the null string, and is not be confused with the regular use
+of C<//> to mean "the last successful pattern match".  So, for C<split>,
+the following:
 
     print join(':', split(//, 'hi there'));
 
-    print join(':', split('', 'hi there'));
-
-and they produce the output 'h:i: :t:h:e:r:e'.
+produces the output 'h:i: :t:h:e:r:e'.
 
 Empty leading (or trailing) fields are produced when there are positive
 width matches at the beginning (or end) of the string; a zero-width match
