@@ -44,17 +44,6 @@
 #   define NETDB_R_OBSOLETE
 #endif
 
-/*
- * As of OpenBSD 3.7, reentrant functions are now working, they just are
- * incompatible with everyone else.  To make OpenBSD happy, we have to
- * memzero out certain structures before calling the functions.
- */
-#if defined(__OpenBSD__)
-#    define REENTR_MEMZERO(a,b) memzero(a,b);
-#else
-#    define REENTR_MEMZERO(a,b)
-#endif 
-
 #ifdef NETDB_R_OBSOLETE
 #   undef HAS_ENDHOSTENT_R
 #   undef HAS_ENDNETENT_R

@@ -84,17 +84,6 @@ print <<EOF;
 #   define NETDB_R_OBSOLETE
 #endif
 
-/*
- * As of OpenBSD 3.7, reentrant functions are now working, they just are
- * incompatible with everyone else.  To make OpenBSD happy, we have to
- * memzero out certain structures before calling the functions.
- */
-#if defined(__OpenBSD__)
-#    define REENTR_MEMZERO(a,b) memzero(a,b);
-#else
-#    define REENTR_MEMZERO(a,b)
-#endif 
-
 #ifdef NETDB_R_OBSOLETE
 #   undef HAS_ENDHOSTENT_R
 #   undef HAS_ENDNETENT_R
@@ -718,7 +707,7 @@ EOF
 			my $ret = $seenr{$func} eq 'V' ? "" : "return ";
 			push @wrap, <<EOF;
 #       ifdef PERL_CORE
-#           define $func($v) $call
+#           define $func($v) ($memzero$call)
 #       else
 #           if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
 #               define $func($v) ({int PL_REENTRANT_RETINT; $memzero; $call;})
@@ -831,6 +820,17 @@ print <<EOF;
 #define REENTRINC
 
 #ifdef USE_REENTRANT_API
+
+/*
+ * As of OpenBSD 3.7, reentrant functions are now working, they just are
+ * incompatible with everyone else.  To make OpenBSD happy, we have to
+ * memzero out certain structures before calling the functions.
+ */
+#if defined(__OpenBSD__)
+#    define REENTR_MEMZERO(a,b) memzero(a,b),
+#else
+#    define REENTR_MEMZERO(a,b)
+#endif
 
 /* The reentrant wrappers. */
 
