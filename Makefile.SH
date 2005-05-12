@@ -1273,13 +1273,14 @@ etags:	TAGS
 TAGS: emacs/cperl-mode.elc
 	sh emacs/ptags
 
-ctags:	tags
-
 # Let's hope make will not go into an infinite loop on case-unsensitive systems
 # This may also fail if . is in the head of the path, since perl will
 # require -Ilib
 tags:	TAGS
 	perl emacs/e2ctags.pl TAGS > tags
+
+ctags:
+	ctags -f Tags --totals --languages=c *.c *.h
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 # If this runs make out of memory, delete /usr/include lines.
