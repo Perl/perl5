@@ -2151,7 +2151,7 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
     IoANY(datasv) = u.iop; /* stash funcp into spare field */
     IoFLAGS(datasv) |= IOf_FAKE_DIRP;
     DEBUG_P(PerlIO_printf(Perl_debug_log, "filter_add func %p (%s)\n",
-			  (void*)funcp, SvPV_nolen(datasv)));
+			  (void*)u.iop, SvPV_nolen(datasv)));
     av_unshift(PL_rsfp_filters, 1);
     av_store(PL_rsfp_filters, 0, datasv) ;
     return(datasv);
@@ -2165,7 +2165,10 @@ Perl_filter_del(pTHX_ filter_t funcp)
     SV *datasv;
     xpvio_filter_u u;
 
-    DEBUG_P(PerlIO_printf(Perl_debug_log, "filter_del func %p", (void*)funcp));
+#ifdef DEBUGGING
+    u.filter = funcp;
+    DEBUG_P(PerlIO_printf(Perl_debug_log, "filter_del func %p", (void*)u.iop));
+#endif
     if (!PL_rsfp_filters || AvFILLp(PL_rsfp_filters)<0)
 	return;
     /* if filter is on top of stack (usual case) just pop it off */
@@ -2236,7 +2239,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
     funcp = u.filter;
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 			  "filter_read %d: via function %p (%s)\n",
-			  idx, (void*)funcp, SvPV_nolen(datasv)));
+			  idx, (void*)u.iop, SvPV_nolen(datasv)));
     /* Call function. The function is expected to 	*/
     /* call "FILTER_READ(idx+1, buf_sv)" first.		*/
     /* Return: <0:error, =0:eof, >0:not eof 		*/
