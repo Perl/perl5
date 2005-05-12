@@ -2146,8 +2146,7 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
 	PL_rsfp_filters = newAV();
     if (!datasv)
 	datasv = NEWSV(255,0);
-    if (!SvUPGRADE(datasv, SVt_PVIO))
-        Perl_die(aTHX_ "Can't upgrade filter_add data to SVt_PVIO");
+    (void)SvUPGRADE(datasv, SVt_PVIO);
     u.filter = funcp;
     IoANY(datasv) = u.iop; /* stash funcp into spare field */
     IoFLAGS(datasv) |= IOf_FAKE_DIRP;
