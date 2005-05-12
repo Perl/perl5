@@ -19,7 +19,7 @@
  * memzero out certain structures before calling the functions.
  */
 #if defined(__OpenBSD__)
-#    define REENTR_MEMZERO(a,b) memzero(a,b),
+#    define REENTR_MEMZERO(a,b) memzero(a,b)
 #else
 #    define REENTR_MEMZERO(a,b)
 #endif
@@ -881,16 +881,16 @@
 #   endif
 #   if !defined(getprotobyname) && GETPROTOBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD
 #       ifdef PERL_CORE
-#           define getprotobyname(a) (REENTR_MEMZERO(&PL_reentrant_buffer->_protoent_data, sizeof(PL_reentrant_buffer->_protoent_data))((PL_REENTRANT_RETINT = getprotobyname_r(a, &PL_reentrant_buffer->_protoent_struct, &PL_reentrant_buffer->_protoent_data)) == 0 ? &PL_reentrant_buffer->_protoent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct protoent*)Perl_reentrant_retry("getprotobyname", a) : 0)))
+#           define getprotobyname(a) (REENTR_MEMZERO(&PL_reentrant_buffer->_protoent_data, sizeof(PL_reentrant_buffer->_protoent_data)),((PL_REENTRANT_RETINT = getprotobyname_r(a, &PL_reentrant_buffer->_protoent_struct, &PL_reentrant_buffer->_protoent_data)) == 0 ? &PL_reentrant_buffer->_protoent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct protoent*)Perl_reentrant_retry("getprotobyname", a) : 0)))
 #       else
 #           if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
-#               define getprotobyname(a) ({int PL_REENTRANT_RETINT; REENTR_MEMZERO(&PL_reentrant_buffer->_protoent_data, sizeof(PL_reentrant_buffer->_protoent_data)); ((PL_REENTRANT_RETINT = getprotobyname_r(a, &PL_reentrant_buffer->_protoent_struct, &PL_reentrant_buffer->_protoent_data)) == 0 ? &PL_reentrant_buffer->_protoent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct protoent*)Perl_reentrant_retry("getprotobyname", a) : 0));})
+#               define getprotobyname(a) ({int PL_REENTRANT_RETINT; REENTR_MEMZERO(&PL_reentrant_buffer->_protoent_data, sizeof(PL_reentrant_buffer->_protoent_data)),; ((PL_REENTRANT_RETINT = getprotobyname_r(a, &PL_reentrant_buffer->_protoent_struct, &PL_reentrant_buffer->_protoent_data)) == 0 ? &PL_reentrant_buffer->_protoent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct protoent*)Perl_reentrant_retry("getprotobyname", a) : 0));})
 #           else
 #               define getprotobyname(a) Perl_reentr_getprotobyname(a)
                 static struct protoent* Perl_reentr_getprotobyname(const char* a) {
                     dTHX;
                     int PL_REENTRANT_RETINT;
-                    REENTR_MEMZERO(&PL_reentrant_buffer->_protoent_data, sizeof(PL_reentrant_buffer->_protoent_data));
+                    REENTR_MEMZERO(&PL_reentrant_buffer->_protoent_data, sizeof(PL_reentrant_buffer->_protoent_data)),;
 		    return ((PL_REENTRANT_RETINT = getprotobyname_r(a, &PL_reentrant_buffer->_protoent_struct, &PL_reentrant_buffer->_protoent_data)) == 0 ? &PL_reentrant_buffer->_protoent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct protoent*)Perl_reentrant_retry("getprotobyname", a) : 0));
                 }
 #           endif
@@ -922,16 +922,16 @@
 #   endif
 #   if !defined(getprotobynumber) && GETPROTOBYNUMBER_R_PROTO == REENTRANT_PROTO_I_ISD
 #       ifdef PERL_CORE
-#           define getprotobynumber(a) (REENTR_MEMZERO(&PL_reentrant_buffer->_protoent_data, sizeof(PL_reentrant_buffer->_protoent_data))((PL_REENTRANT_RETINT = getprotobynumber_r(a, &PL_reentrant_buffer->_protoent_struct, &PL_reentrant_buffer->_protoent_data)) == 0 ? &PL_reentrant_buffer->_protoent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct protoent*)Perl_reentrant_retry("getprotobynumber", a) : 0)))
+#           define getprotobynumber(a) (REENTR_MEMZERO(&PL_reentrant_buffer->_protoent_data, sizeof(PL_reentrant_buffer->_protoent_data)),((PL_REENTRANT_RETINT = getprotobynumber_r(a, &PL_reentrant_buffer->_protoent_struct, &PL_reentrant_buffer->_protoent_data)) == 0 ? &PL_reentrant_buffer->_protoent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct protoent*)Perl_reentrant_retry("getprotobynumber", a) : 0)))
 #       else
 #           if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
-#               define getprotobynumber(a) ({int PL_REENTRANT_RETINT; REENTR_MEMZERO(&PL_reentrant_buffer->_protoent_data, sizeof(PL_reentrant_buffer->_protoent_data)); ((PL_REENTRANT_RETINT = getprotobynumber_r(a, &PL_reentrant_buffer->_protoent_struct, &PL_reentrant_buffer->_protoent_data)) == 0 ? &PL_reentrant_buffer->_protoent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct protoent*)Perl_reentrant_retry("getprotobynumber", a) : 0));})
+#               define getprotobynumber(a) ({int PL_REENTRANT_RETINT; REENTR_MEMZERO(&PL_reentrant_buffer->_protoent_data, sizeof(PL_reentrant_buffer->_protoent_data)),; ((PL_REENTRANT_RETINT = getprotobynumber_r(a, &PL_reentrant_buffer->_protoent_struct, &PL_reentrant_buffer->_protoent_data)) == 0 ? &PL_reentrant_buffer->_protoent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct protoent*)Perl_reentrant_retry("getprotobynumber", a) : 0));})
 #           else
 #               define getprotobynumber(a) Perl_reentr_getprotobynumber(a)
                 static struct protoent* Perl_reentr_getprotobynumber(int a) {
                     dTHX;
                     int PL_REENTRANT_RETINT;
-                    REENTR_MEMZERO(&PL_reentrant_buffer->_protoent_data, sizeof(PL_reentrant_buffer->_protoent_data));
+                    REENTR_MEMZERO(&PL_reentrant_buffer->_protoent_data, sizeof(PL_reentrant_buffer->_protoent_data)),;
 		    return ((PL_REENTRANT_RETINT = getprotobynumber_r(a, &PL_reentrant_buffer->_protoent_struct, &PL_reentrant_buffer->_protoent_data)) == 0 ? &PL_reentrant_buffer->_protoent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct protoent*)Perl_reentrant_retry("getprotobynumber", a) : 0));
                 }
 #           endif
@@ -980,16 +980,16 @@
 #   endif
 #   if !defined(getprotoent) && GETPROTOENT_R_PROTO == REENTRANT_PROTO_I_SD
 #       ifdef PERL_CORE
-#           define getprotoent() (REENTR_MEMZERO(&PL_reentrant_buffer->_protoent_data, sizeof(PL_reentrant_buffer->_protoent_data))((PL_REENTRANT_RETINT = getprotoent_r(&PL_reentrant_buffer->_protoent_struct, &PL_reentrant_buffer->_protoent_data)) == 0 ? &PL_reentrant_buffer->_protoent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct protoent*)Perl_reentrant_retry("getprotoent") : 0)))
+#           define getprotoent() (REENTR_MEMZERO(&PL_reentrant_buffer->_protoent_data, sizeof(PL_reentrant_buffer->_protoent_data)),((PL_REENTRANT_RETINT = getprotoent_r(&PL_reentrant_buffer->_protoent_struct, &PL_reentrant_buffer->_protoent_data)) == 0 ? &PL_reentrant_buffer->_protoent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct protoent*)Perl_reentrant_retry("getprotoent") : 0)))
 #       else
 #           if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
-#               define getprotoent() ({int PL_REENTRANT_RETINT; REENTR_MEMZERO(&PL_reentrant_buffer->_protoent_data, sizeof(PL_reentrant_buffer->_protoent_data)); ((PL_REENTRANT_RETINT = getprotoent_r(&PL_reentrant_buffer->_protoent_struct, &PL_reentrant_buffer->_protoent_data)) == 0 ? &PL_reentrant_buffer->_protoent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct protoent*)Perl_reentrant_retry("getprotoent") : 0));})
+#               define getprotoent() ({int PL_REENTRANT_RETINT; REENTR_MEMZERO(&PL_reentrant_buffer->_protoent_data, sizeof(PL_reentrant_buffer->_protoent_data)),; ((PL_REENTRANT_RETINT = getprotoent_r(&PL_reentrant_buffer->_protoent_struct, &PL_reentrant_buffer->_protoent_data)) == 0 ? &PL_reentrant_buffer->_protoent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct protoent*)Perl_reentrant_retry("getprotoent") : 0));})
 #           else
 #               define getprotoent() Perl_reentr_getprotoent()
                 static struct protoent* Perl_reentr_getprotoent() {
                     dTHX;
                     int PL_REENTRANT_RETINT;
-                    REENTR_MEMZERO(&PL_reentrant_buffer->_protoent_data, sizeof(PL_reentrant_buffer->_protoent_data));
+                    REENTR_MEMZERO(&PL_reentrant_buffer->_protoent_data, sizeof(PL_reentrant_buffer->_protoent_data)),;
 		    return ((PL_REENTRANT_RETINT = getprotoent_r(&PL_reentrant_buffer->_protoent_struct, &PL_reentrant_buffer->_protoent_data)) == 0 ? &PL_reentrant_buffer->_protoent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct protoent*)Perl_reentrant_retry("getprotoent") : 0));
                 }
 #           endif
@@ -1215,16 +1215,16 @@
 #   endif
 #   if !defined(getservbyname) && GETSERVBYNAME_R_PROTO == REENTRANT_PROTO_I_CCSD
 #       ifdef PERL_CORE
-#           define getservbyname(a, b) (REENTR_MEMZERO(&PL_reentrant_buffer->_servent_data, sizeof(PL_reentrant_buffer->_servent_data))((PL_REENTRANT_RETINT = getservbyname_r(a, b, &PL_reentrant_buffer->_servent_struct, &PL_reentrant_buffer->_servent_data)) == 0 ? &PL_reentrant_buffer->_servent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct servent*)Perl_reentrant_retry("getservbyname", a, b) : 0)))
+#           define getservbyname(a, b) (REENTR_MEMZERO(&PL_reentrant_buffer->_servent_data, sizeof(PL_reentrant_buffer->_servent_data)),((PL_REENTRANT_RETINT = getservbyname_r(a, b, &PL_reentrant_buffer->_servent_struct, &PL_reentrant_buffer->_servent_data)) == 0 ? &PL_reentrant_buffer->_servent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct servent*)Perl_reentrant_retry("getservbyname", a, b) : 0)))
 #       else
 #           if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
-#               define getservbyname(a, b) ({int PL_REENTRANT_RETINT; REENTR_MEMZERO(&PL_reentrant_buffer->_servent_data, sizeof(PL_reentrant_buffer->_servent_data)); ((PL_REENTRANT_RETINT = getservbyname_r(a, b, &PL_reentrant_buffer->_servent_struct, &PL_reentrant_buffer->_servent_data)) == 0 ? &PL_reentrant_buffer->_servent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct servent*)Perl_reentrant_retry("getservbyname", a, b) : 0));})
+#               define getservbyname(a, b) ({int PL_REENTRANT_RETINT; REENTR_MEMZERO(&PL_reentrant_buffer->_servent_data, sizeof(PL_reentrant_buffer->_servent_data)),; ((PL_REENTRANT_RETINT = getservbyname_r(a, b, &PL_reentrant_buffer->_servent_struct, &PL_reentrant_buffer->_servent_data)) == 0 ? &PL_reentrant_buffer->_servent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct servent*)Perl_reentrant_retry("getservbyname", a, b) : 0));})
 #           else
 #               define getservbyname(a, b) Perl_reentr_getservbyname(a, b)
                 static struct servent* Perl_reentr_getservbyname(const char* a, const char* b) {
                     dTHX;
                     int PL_REENTRANT_RETINT;
-                    REENTR_MEMZERO(&PL_reentrant_buffer->_servent_data, sizeof(PL_reentrant_buffer->_servent_data));
+                    REENTR_MEMZERO(&PL_reentrant_buffer->_servent_data, sizeof(PL_reentrant_buffer->_servent_data)),;
 		    return ((PL_REENTRANT_RETINT = getservbyname_r(a, b, &PL_reentrant_buffer->_servent_struct, &PL_reentrant_buffer->_servent_data)) == 0 ? &PL_reentrant_buffer->_servent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct servent*)Perl_reentrant_retry("getservbyname", a, b) : 0));
                 }
 #           endif
@@ -1256,16 +1256,16 @@
 #   endif
 #   if !defined(getservbyport) && GETSERVBYPORT_R_PROTO == REENTRANT_PROTO_I_ICSD
 #       ifdef PERL_CORE
-#           define getservbyport(a, b) (REENTR_MEMZERO(&PL_reentrant_buffer->_servent_data, sizeof(PL_reentrant_buffer->_servent_data))((PL_REENTRANT_RETINT = getservbyport_r(a, b, &PL_reentrant_buffer->_servent_struct, &PL_reentrant_buffer->_servent_data)) == 0 ? &PL_reentrant_buffer->_servent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct servent*)Perl_reentrant_retry("getservbyport", a, b) : 0)))
+#           define getservbyport(a, b) (REENTR_MEMZERO(&PL_reentrant_buffer->_servent_data, sizeof(PL_reentrant_buffer->_servent_data)),((PL_REENTRANT_RETINT = getservbyport_r(a, b, &PL_reentrant_buffer->_servent_struct, &PL_reentrant_buffer->_servent_data)) == 0 ? &PL_reentrant_buffer->_servent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct servent*)Perl_reentrant_retry("getservbyport", a, b) : 0)))
 #       else
 #           if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
-#               define getservbyport(a, b) ({int PL_REENTRANT_RETINT; REENTR_MEMZERO(&PL_reentrant_buffer->_servent_data, sizeof(PL_reentrant_buffer->_servent_data)); ((PL_REENTRANT_RETINT = getservbyport_r(a, b, &PL_reentrant_buffer->_servent_struct, &PL_reentrant_buffer->_servent_data)) == 0 ? &PL_reentrant_buffer->_servent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct servent*)Perl_reentrant_retry("getservbyport", a, b) : 0));})
+#               define getservbyport(a, b) ({int PL_REENTRANT_RETINT; REENTR_MEMZERO(&PL_reentrant_buffer->_servent_data, sizeof(PL_reentrant_buffer->_servent_data)),; ((PL_REENTRANT_RETINT = getservbyport_r(a, b, &PL_reentrant_buffer->_servent_struct, &PL_reentrant_buffer->_servent_data)) == 0 ? &PL_reentrant_buffer->_servent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct servent*)Perl_reentrant_retry("getservbyport", a, b) : 0));})
 #           else
 #               define getservbyport(a, b) Perl_reentr_getservbyport(a, b)
                 static struct servent* Perl_reentr_getservbyport(int a, const char* b) {
                     dTHX;
                     int PL_REENTRANT_RETINT;
-                    REENTR_MEMZERO(&PL_reentrant_buffer->_servent_data, sizeof(PL_reentrant_buffer->_servent_data));
+                    REENTR_MEMZERO(&PL_reentrant_buffer->_servent_data, sizeof(PL_reentrant_buffer->_servent_data)),;
 		    return ((PL_REENTRANT_RETINT = getservbyport_r(a, b, &PL_reentrant_buffer->_servent_struct, &PL_reentrant_buffer->_servent_data)) == 0 ? &PL_reentrant_buffer->_servent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct servent*)Perl_reentrant_retry("getservbyport", a, b) : 0));
                 }
 #           endif
@@ -1314,16 +1314,16 @@
 #   endif
 #   if !defined(getservent) && GETSERVENT_R_PROTO == REENTRANT_PROTO_I_SD
 #       ifdef PERL_CORE
-#           define getservent() (REENTR_MEMZERO(&PL_reentrant_buffer->_servent_data, sizeof(PL_reentrant_buffer->_servent_data))((PL_REENTRANT_RETINT = getservent_r(&PL_reentrant_buffer->_servent_struct, &PL_reentrant_buffer->_servent_data)) == 0 ? &PL_reentrant_buffer->_servent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct servent*)Perl_reentrant_retry("getservent") : 0)))
+#           define getservent() (REENTR_MEMZERO(&PL_reentrant_buffer->_servent_data, sizeof(PL_reentrant_buffer->_servent_data)),((PL_REENTRANT_RETINT = getservent_r(&PL_reentrant_buffer->_servent_struct, &PL_reentrant_buffer->_servent_data)) == 0 ? &PL_reentrant_buffer->_servent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct servent*)Perl_reentrant_retry("getservent") : 0)))
 #       else
 #           if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
-#               define getservent() ({int PL_REENTRANT_RETINT; REENTR_MEMZERO(&PL_reentrant_buffer->_servent_data, sizeof(PL_reentrant_buffer->_servent_data)); ((PL_REENTRANT_RETINT = getservent_r(&PL_reentrant_buffer->_servent_struct, &PL_reentrant_buffer->_servent_data)) == 0 ? &PL_reentrant_buffer->_servent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct servent*)Perl_reentrant_retry("getservent") : 0));})
+#               define getservent() ({int PL_REENTRANT_RETINT; REENTR_MEMZERO(&PL_reentrant_buffer->_servent_data, sizeof(PL_reentrant_buffer->_servent_data)),; ((PL_REENTRANT_RETINT = getservent_r(&PL_reentrant_buffer->_servent_struct, &PL_reentrant_buffer->_servent_data)) == 0 ? &PL_reentrant_buffer->_servent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct servent*)Perl_reentrant_retry("getservent") : 0));})
 #           else
 #               define getservent() Perl_reentr_getservent()
                 static struct servent* Perl_reentr_getservent() {
                     dTHX;
                     int PL_REENTRANT_RETINT;
-                    REENTR_MEMZERO(&PL_reentrant_buffer->_servent_data, sizeof(PL_reentrant_buffer->_servent_data));
+                    REENTR_MEMZERO(&PL_reentrant_buffer->_servent_data, sizeof(PL_reentrant_buffer->_servent_data)),;
 		    return ((PL_REENTRANT_RETINT = getservent_r(&PL_reentrant_buffer->_servent_struct, &PL_reentrant_buffer->_servent_data)) == 0 ? &PL_reentrant_buffer->_servent_struct : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? (struct servent*)Perl_reentrant_retry("getservent") : 0));
                 }
 #           endif
