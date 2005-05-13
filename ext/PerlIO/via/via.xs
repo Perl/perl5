@@ -133,7 +133,7 @@ PerlIOVia_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 	}
 	else {
 	    STRLEN pkglen = 0;
-	    char *pkg = SvPV(arg, pkglen);
+	    const char *pkg = SvPV(arg, pkglen);
 	    s->obj = SvREFCNT_inc(arg);
 	    s->stash = gv_stashpvn(pkg, pkglen, FALSE);
 	    if (!s->stash) {
@@ -169,7 +169,7 @@ PerlIOVia_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
                            ? &PL_sv_yes : &PL_sv_no;
 		result = PerlIOVia_method(aTHX_ f, MYMethod(UTF8), G_SCALAR, modesv, Nullsv);
 		if (result && SvTRUE(result)) {
-		    PerlIOBase(f)->flags |= ~PERLIO_F_UTF8;
+		    PerlIOBase(f)->flags |= PERLIO_F_UTF8;
 		}
 		else {
 		    PerlIOBase(f)->flags &= ~PERLIO_F_UTF8;
@@ -247,7 +247,7 @@ PerlIOVia_open(pTHX_ PerlIO_funcs * self, PerlIO_list_t * layers,
 	else {
 	    /* Required open method not present */
 	    PerlIO_funcs *tab = NULL;
-	    IV m = n - 1;
+	    const IV m = n - 1;
 	    while (m >= 0) {
 		PerlIO_funcs *t =
 		    PerlIO_layer_fetch(aTHX_ layers, m, NULL);
@@ -456,7 +456,7 @@ PerlIOVia_fill(pTHX_ PerlIO * f)
 	}
 	if (result && SvOK(result)) {
 	    STRLEN len = 0;
-	    char *p = SvPV(result, len);
+	    const char *p = SvPV(result, len);
 	    s->var = newSVpvn(p, len);
 	    s->cnt = SvCUR(s->var);
 	    return 0;
