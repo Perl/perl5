@@ -689,7 +689,7 @@ EOF
             my $memzero = '';
             if($p =~ /D$/ &&
                 ($genfunc eq 'protoent' || $genfunc eq 'servent')) {
-                $memzero = 'REENTR_MEMZERO(&PL_reentrant_buffer->_' . $genfunc . '_data, sizeof(PL_reentrant_buffer->_' . $genfunc . '_data)),';
+                $memzero = 'REENTR_MEMZERO(&PL_reentrant_buffer->_' . $genfunc . '_data, sizeof(PL_reentrant_buffer->_' . $genfunc . '_data))';
             }
 	    push @wrap, <<EOF;
 #   if !defined($func) && ${FUNC}_R_PROTO == REENTRANT_PROTO_$p
@@ -705,9 +705,10 @@ EOF
 			$call = qq[((PL_REENTRANT_RETINT = $call)$test ? $true : (((PL_REENTRANT_RETINT == ERANGE) || (errno == ERANGE)) ? ($seenm{$func}{$seenr{$func}})Perl_reentrant_retry("$func"$rv) : 0))];
 			my $arg = join(", ", map { $seenm{$func}{substr($a,$_,1)}." ".$v[$_] } 0..$seenu{$func}-1);
 			my $ret = $seenr{$func} eq 'V' ? "" : "return ";
+			my $memzero_ = $memzero ? "$memzero, " : "";
 			push @wrap, <<EOF;
 #       ifdef PERL_CORE
-#           define $func($v) ($memzero$call)
+#           define $func($v) ($memzero_$call)
 #       else
 #           if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
 #               define $func($v) ({int PL_REENTRANT_RETINT; $memzero; $call;})
@@ -829,7 +830,7 @@ print <<EOF;
 #if defined(__OpenBSD__)
 #    define REENTR_MEMZERO(a,b) memzero(a,b)
 #else
-#    define REENTR_MEMZERO(a,b)
+#    define REENTR_MEMZERO(a,b) 0
 #endif
 
 /* The reentrant wrappers. */
