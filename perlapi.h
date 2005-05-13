@@ -673,6 +673,10 @@ END_EXTERN_C
 #define PL_xpvcv_arenaroot	(*Perl_Ixpvcv_arenaroot_ptr(aTHX))
 #undef  PL_xpvcv_root
 #define PL_xpvcv_root		(*Perl_Ixpvcv_root_ptr(aTHX))
+#undef  PL_xpvgv_arenaroot
+#define PL_xpvgv_arenaroot	(*Perl_Ixpvgv_arenaroot_ptr(aTHX))
+#undef  PL_xpvgv_root
+#define PL_xpvgv_root		(*Perl_Ixpvgv_root_ptr(aTHX))
 #undef  PL_xpvhv_arenaroot
 #define PL_xpvhv_arenaroot	(*Perl_Ixpvhv_arenaroot_ptr(aTHX))
 #undef  PL_xpvhv_root

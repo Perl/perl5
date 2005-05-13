@@ -1252,6 +1252,7 @@
 #define more_xpvav		S_more_xpvav
 #define more_xpvhv		S_more_xpvhv
 #define more_xpvmg		S_more_xpvmg
+#define more_xpvgv		S_more_xpvgv
 #define more_xpvlv		S_more_xpvlv
 #define more_xpvbm		S_more_xpvbm
 #define more_xrv		S_more_xrv
@@ -1264,6 +1265,7 @@
 #define new_xpvav		S_new_xpvav
 #define new_xpvhv		S_new_xpvhv
 #define new_xpvmg		S_new_xpvmg
+#define new_xpvgv		S_new_xpvgv
 #define new_xpvlv		S_new_xpvlv
 #define new_xpvbm		S_new_xpvbm
 #define new_xrv			S_new_xrv
@@ -1276,6 +1278,7 @@
 #define del_xpvav		S_del_xpvav
 #define del_xpvhv		S_del_xpvhv
 #define del_xpvmg		S_del_xpvmg
+#define del_xpvgv		S_del_xpvgv
 #define del_xpvlv		S_del_xpvlv
 #define del_xpvbm		S_del_xpvbm
 #define del_xrv			S_del_xrv
@@ -3211,6 +3214,7 @@
 #define more_xpvav()		S_more_xpvav(aTHX)
 #define more_xpvhv()		S_more_xpvhv(aTHX)
 #define more_xpvmg()		S_more_xpvmg(aTHX)
+#define more_xpvgv()		S_more_xpvgv(aTHX)
 #define more_xpvlv()		S_more_xpvlv(aTHX)
 #define more_xpvbm()		S_more_xpvbm(aTHX)
 #define more_xrv()		S_more_xrv(aTHX)
@@ -3223,6 +3227,7 @@
 #define new_xpvav()		S_new_xpvav(aTHX)
 #define new_xpvhv()		S_new_xpvhv(aTHX)
 #define new_xpvmg()		S_new_xpvmg(aTHX)
+#define new_xpvgv()		S_new_xpvgv(aTHX)
 #define new_xpvlv()		S_new_xpvlv(aTHX)
 #define new_xpvbm()		S_new_xpvbm(aTHX)
 #define new_xrv()		S_new_xrv(aTHX)
@@ -3235,6 +3240,7 @@
 #define del_xpvav(a)		S_del_xpvav(aTHX_ a)
 #define del_xpvhv(a)		S_del_xpvhv(aTHX_ a)
 #define del_xpvmg(a)		S_del_xpvmg(aTHX_ a)
+#define del_xpvgv(a)		S_del_xpvgv(aTHX_ a)
 #define del_xpvlv(a)		S_del_xpvlv(aTHX_ a)
 #define del_xpvbm(a)		S_del_xpvbm(aTHX_ a)
 #define del_xrv(a)		S_del_xrv(aTHX_ a)

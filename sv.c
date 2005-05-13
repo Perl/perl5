@@ -609,6 +609,13 @@ Perl_sv_free_arenas(pTHX)
     PL_xpvmg_arenaroot = 0;
     PL_xpvmg_root = 0;
 
+    for (arena = (XPV*)PL_xpvgv_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xpvgv_arenaroot = 0;
+    PL_xpvgv_root = 0;
+
     for (arena = (XPV*)PL_xpvlv_arenaroot; arena; arena = arenanext) {
 	arenanext = (XPV*)arena->xpv_pv;
 	Safefree(arena);
@@ -1609,6 +1616,52 @@ S_more_xpvmg(pTHX)
     xpvmg->xpv_pv = 0;
 }
 
+/* allocate another arena's worth of struct xpvgv */
+
+STATIC void
+S_more_xpvgv(pTHX)
+{
+    XPVGV* xpvgv;
+    XPVGV* xpvgvend;
+    New(720, xpvgv, PERL_ARENA_SIZE/sizeof(XPVGV), XPVGV);
+    xpvgv->xpv_pv = (char*)PL_xpvgv_arenaroot;
+    PL_xpvgv_arenaroot = xpvgv;
+
+    xpvgvend = &xpvgv[PERL_ARENA_SIZE / sizeof(XPVGV) - 1];
+    PL_xpvgv_root = ++xpvgv;
+    while (xpvgv < xpvgvend) {
+	xpvgv->xpv_pv = (char*)(xpvgv + 1);
+	xpvgv++;
+    }
+    xpvgv->xpv_pv = 0;
+}
+
+/* grab a new struct xpvgv from the free list, allocating more if necessary */
+
+STATIC XPVGV*
+S_new_xpvgv(pTHX)
+{
+    XPVGV* xpvgv;
+    LOCK_SV_MUTEX;
+    if (!PL_xpvgv_root)
+	more_xpvgv();
+    xpvgv = PL_xpvgv_root;
+    PL_xpvgv_root = (XPVGV*)xpvgv->xpv_pv;
+    UNLOCK_SV_MUTEX;
+    return xpvgv;
+}
+
+/* return a struct xpvgv to the free list */
+
+STATIC void
+S_del_xpvgv(pTHX_ XPVGV *p)
+{
+    LOCK_SV_MUTEX;
+    p->xpv_pv = (char*)PL_xpvgv_root;
+    PL_xpvgv_root = p;
+    UNLOCK_SV_MUTEX;
+}
+
 /* grab a new struct xpvlv from the free list, allocating more if necessary */
 
 STATIC XPVLV*
@@ -1736,6 +1789,9 @@ S_more_xpvbm(pTHX)
 #define new_XPVMG()	my_safemalloc(sizeof(XPVMG))
 #define del_XPVMG(p)	my_safefree(p)
 
+#define new_XPVGV()	my_safemalloc(sizeof(XPVGV))
+#define del_XPVGV(p)	my_safefree(p)
+
 #define new_XPVLV()	my_safemalloc(sizeof(XPVLV))
 #define del_XPVLV(p)	my_safefree(p)
 
@@ -1774,6 +1830,9 @@ S_more_xpvbm(pTHX)
 #define new_XPVMG()	(void*)new_xpvmg()
 #define del_XPVMG(p)	del_xpvmg((XPVMG *)p)
 
+#define new_XPVGV()	(void*)new_xpvgv()
+#define del_XPVGV(p)	del_xpvgv((XPVGV *)p)
+
 #define new_XPVLV()	(void*)new_xpvlv()
 #define del_XPVLV(p)	del_xpvlv((XPVLV *)p)
 
@@ -1781,9 +1840,6 @@ S_more_xpvbm(pTHX)
 #define del_XPVBM(p)	del_xpvbm((XPVBM *)p)
 
 #endif /* PURIFY */
-
-#define new_XPVGV()	my_safemalloc(sizeof(XPVGV))
-#define del_XPVGV(p)	my_safefree(p)
 
 #define new_XPVFM()	my_safemalloc(sizeof(XPVFM))
 #define del_XPVFM(p)	my_safefree(p)

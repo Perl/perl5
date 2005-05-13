@@ -447,6 +447,8 @@
 #define PL_xpvbm_root		(vTHX->Ixpvbm_root)
 #define PL_xpvcv_arenaroot	(vTHX->Ixpvcv_arenaroot)
 #define PL_xpvcv_root		(vTHX->Ixpvcv_root)
+#define PL_xpvgv_arenaroot	(vTHX->Ixpvgv_arenaroot)
+#define PL_xpvgv_root		(vTHX->Ixpvgv_root)
 #define PL_xpvhv_arenaroot	(vTHX->Ixpvhv_arenaroot)
 #define PL_xpvhv_root		(vTHX->Ixpvhv_root)
 #define PL_xpviv_arenaroot	(vTHX->Ixpviv_arenaroot)
@@ -752,6 +754,8 @@
 #define PL_Ixpvbm_root		PL_xpvbm_root
 #define PL_Ixpvcv_arenaroot	PL_xpvcv_arenaroot
 #define PL_Ixpvcv_root		PL_xpvcv_root
+#define PL_Ixpvgv_arenaroot	PL_xpvgv_arenaroot
+#define PL_Ixpvgv_root		PL_xpvgv_root
 #define PL_Ixpvhv_arenaroot	PL_xpvhv_arenaroot
 #define PL_Ixpvhv_root		PL_xpvhv_root
 #define PL_Ixpviv_arenaroot	PL_xpviv_arenaroot

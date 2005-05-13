@@ -258,6 +258,7 @@ PERLVAR(Ixpvcv_root,	XPVCV *)	/* free xpvcv list */
 PERLVAR(Ixpvav_root,	XPVAV *)	/* free xpvav list */
 PERLVAR(Ixpvhv_root,	XPVHV *)	/* free xpvhv list */
 PERLVAR(Ixpvmg_root,	XPVMG *)	/* free xpvmg list */
+PERLVAR(Ixpvgv_root,	XPVGV *)	/* free xpvgv list */
 PERLVAR(Ixpvlv_root,	XPVLV *)	/* free xpvlv list */
 PERLVAR(Ixpvbm_root,	XPVBM *)	/* free xpvbm list */
 PERLVAR(Ihe_root,	HE *)		/* free he list */
@@ -437,6 +438,7 @@ PERLVAR(Ixpvcv_arenaroot,XPVCV*)	/* list of allocated xpvcv areas */
 PERLVAR(Ixpvav_arenaroot,XPVAV*)	/* list of allocated xpvav areas */
 PERLVAR(Ixpvhv_arenaroot,XPVHV*)	/* list of allocated xpvhv areas */
 PERLVAR(Ixpvmg_arenaroot,XPVMG*)	/* list of allocated xpvmg areas */
+PERLVAR(Ixpvgv_arenaroot,XPVGV*)	/* list of allocated xpvgv areas */
 PERLVAR(Ixpvlv_arenaroot,XPVLV*)	/* list of allocated xpvlv areas */
 PERLVAR(Ixpvbm_arenaroot,XPVBM*)	/* list of allocated xpvbm areas */
 PERLVAR(Ihe_arenaroot,	HE *)		/* list of allocated he areas */
