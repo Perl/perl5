@@ -1635,7 +1635,6 @@ STATIC void	S_require_errno(pTHX_ GV *gv);
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
 STATIC void	S_hsplit(pTHX_ HV *hv);
 STATIC void	S_hfreeentries(pTHX_ HV *hv);
-STATIC void	S_more_he(pTHX);
 STATIC HE*	S_new_he(pTHX);
 STATIC void	S_del_he(pTHX_ HE *p);
 STATIC HEK*	S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags);
@@ -1841,20 +1840,6 @@ STATIC SV*	S_save_scalar_at(pTHX_ SV **sptr);
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 STATIC IV	S_asIV(pTHX_ SV* sv);
 STATIC UV	S_asUV(pTHX_ SV* sv);
-STATIC SV*	S_more_sv(pTHX);
-STATIC void	S_more_xiv(pTHX);
-STATIC void	S_more_xnv(pTHX);
-STATIC void	S_more_xpv(pTHX);
-STATIC void	S_more_xpviv(pTHX);
-STATIC void	S_more_xpvnv(pTHX);
-STATIC void	S_more_xpvcv(pTHX);
-STATIC void	S_more_xpvav(pTHX);
-STATIC void	S_more_xpvhv(pTHX);
-STATIC void	S_more_xpvmg(pTHX);
-STATIC void	S_more_xpvgv(pTHX);
-STATIC void	S_more_xpvlv(pTHX);
-STATIC void	S_more_xpvbm(pTHX);
-STATIC void	S_more_xrv(pTHX);
 STATIC XPVIV*	S_new_xiv(pTHX);
 STATIC XPVNV*	S_new_xnv(pTHX);
 STATIC XPV*	S_new_xpv(pTHX);

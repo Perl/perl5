@@ -33,13 +33,31 @@ holds the key and hash value.
 
 #define HV_MAX_LENGTH_BEFORE_SPLIT 14
 
+STATIC void
+S_more_he(pTHX)
+{
+    HE* he;
+    HE* heend;
+    New(54, he, PERL_ARENA_SIZE/sizeof(HE), HE);
+    HeNEXT(he) = PL_he_arenaroot;
+    PL_he_arenaroot = he;
+
+    heend = &he[PERL_ARENA_SIZE / sizeof(HE) - 1];
+    PL_he_root = ++he;
+    while (he < heend) {
+	HeNEXT(he) = (HE*)(he + 1);
+	he++;
+    }
+    HeNEXT(he) = 0;
+}
+
 STATIC HE*
 S_new_he(pTHX)
 {
     HE* he;
     LOCK_SV_MUTEX;
     if (!PL_he_root)
-	more_he();
+	S_more_he(aTHX);
     he = PL_he_root;
     PL_he_root = HeNEXT(he);
     UNLOCK_SV_MUTEX;
@@ -53,24 +71,6 @@ S_del_he(pTHX_ HE *p)
     HeNEXT(p) = (HE*)PL_he_root;
     PL_he_root = p;
     UNLOCK_SV_MUTEX;
-}
-
-STATIC void
-S_more_he(pTHX)
-{
-    register HE* he;
-    register HE* heend;
-    New(54, he, PERL_ARENA_SIZE/sizeof(HE), HE);
-    HeNEXT(he) = PL_he_arenaroot;
-    PL_he_arenaroot = he;
-
-    heend = &he[PERL_ARENA_SIZE / sizeof(HE) - 1];
-    PL_he_root = ++he;
-    while (he < heend) {
-	HeNEXT(he) = (HE*)(he + 1);
-	he++;
-    }
-    HeNEXT(he) = 0;
 }
 
 #ifdef PURIFY

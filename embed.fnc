@@ -993,7 +993,6 @@ s	|void	|require_errno	|GV *gv
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
 s	|void	|hsplit		|HV *hv
 s	|void	|hfreeentries	|HV *hv
-s	|void	|more_he
 s	|HE*	|new_he
 s	|void	|del_he		|HE *p
 s	|HEK*	|save_hek_flags	|const char *str|I32 len|U32 hash|int flags
@@ -1181,20 +1180,6 @@ s	|SV*	|save_scalar_at	|SV **sptr
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 s	|IV	|asIV		|SV* sv
 s	|UV	|asUV		|SV* sv
-s	|SV*	|more_sv
-s	|void	|more_xiv
-s	|void	|more_xnv
-s	|void	|more_xpv
-s	|void	|more_xpviv
-s	|void	|more_xpvnv
-s	|void	|more_xpvcv
-s	|void	|more_xpvav
-s	|void	|more_xpvhv
-s	|void	|more_xpvmg
-s	|void	|more_xpvgv
-s	|void	|more_xpvlv
-s	|void	|more_xpvbm
-s	|void	|more_xrv
 s	|XPVIV*	|new_xiv
 s	|XPVNV*	|new_xnv
 s	|XPV*	|new_xpv
