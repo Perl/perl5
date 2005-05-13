@@ -15,7 +15,7 @@
 
 #define PERL_REVISION	5		/* age */
 #define PERL_VERSION	8		/* epoch */
-#define PERL_SUBVERSION	6		/* generation */
+#define PERL_SUBVERSION	7		/* generation */
 
 /* The following numbers describe the earliest compatible version of
    Perl ("compatibility" here being defined as sufficient binary/API
