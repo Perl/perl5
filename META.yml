@@ -1,5 +1,5 @@
 name: perl
-version: 5.008005
+version: 5.008007
 abstract: Practical Extraction and Reporting Language
 author: perl5-porters@perl.org
 license: perl
@@ -69,6 +69,8 @@ private:
     - lib/CPAN.pm
     - lib/Cwd.pm
     - lib/Digest.pm
+    - lib/encoding/warnings
+    - lib/encoding/warnings.pm
     - lib/ExtUtils/Command
     - lib/ExtUtils/Command.pm
     - lib/ExtUtils/Install.pm
@@ -78,6 +80,7 @@ private:
     - lib/ExtUtils/MakeMaker
     - lib/ExtUtils/MakeMaker.pm
     - lib/ExtUtils/Manifest.pm
+    - lib/ExtUtils/MANIFEST.SKIP
     - lib/ExtUtils/Mkbootstrap.pm
     - lib/ExtUtils/Mksymlists.pm
     - lib/ExtUtils/MM.pm
@@ -140,7 +143,6 @@ private:
     - lib/PerlIO/via/t/QuotedPrint.t
     - lib/Pod/Checker.pm
     - lib/Pod/Find.pm
-    - lib/Pod/Html.pm
     - lib/Pod/InputObjects.pm
     - lib/Pod/LaTeX.pm
     - lib/Pod/Man.pm
