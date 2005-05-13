@@ -13,38 +13,36 @@ BEGIN {
     }
 }
 
+use Test::More tests => 8;
 use List::Util qw(first);
+my $v;
 
-print "1..8\n";
+ok(defined &first,	'defined');
 
-print "not " unless defined &first;
-print "ok 1\n";
+$v = first { 8 == ($_ - 1) } 9,4,5,6;
+is($v, 9, 'one more than 8');
 
-print "not " unless 9 == first { 8 == ($_ - 1) } 9,4,5,6;
-print "ok 2\n";
+$v = first { 0 } 1,2,3,4;
+is($v, undef, 'none match');
 
-print "not " if defined(first { 0 } 1,2,3,4);
-print "ok 3\n";
+$v = first { 0 };
+is($v, undef, 'no args');
 
-print "not " if defined(first { 0 });
-print "ok 4\n";
-
-my $foo = first { $_->[1] le "e" and "e" le $_->[2] }
+$v = first { $_->[1] le "e" and "e" le $_->[2] }
 		[qw(a b c)], [qw(d e f)], [qw(g h i)];
-print "not " unless $foo->[0] eq 'd';
-print "ok 5\n";
+is_deeply($v, [qw(d e f)], 'reference args');
 
 # Check that eval{} inside the block works correctly
 my $i = 0;
-print "not " unless 5 == first { eval { die }; ($i == 5, $i = $_)[0] } 0,1,2,3,4,5,5;
-print "ok 6\n";
+$v = first { eval { die }; ($i == 5, $i = $_)[0] } 0,1,2,3,4,5,5;
+is($v, 5, 'use of eval');
 
-print "not " if defined eval { first { die if $_ } 0,0,1 };
-print "ok 7\n";
-
-($x) = foobar();
-$x = '' unless defined $x;
-print "${x}ok 8\n";
+$v = eval { first { die if $_ } 0,0,1 };
+is($v, undef, 'use of die');
 
 sub foobar {  first { !defined(wantarray) || wantarray } "not ","not ","not " }
+
+($v) = foobar();
+is($v, undef, 'wantarray');
+
 

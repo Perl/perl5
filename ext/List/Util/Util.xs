@@ -103,6 +103,10 @@ sv_tainted(SV *sv)
 #  define PTR2UV(ptr) (UV)(ptr)
 #endif
 
+#ifndef SvUV_set
+#  define SvUV_set(sv, val) (((XPVUV*)SvANY(sv))->xuv_uv = (val))
+#endif
+
 #ifdef HASATTRIBUTE
 #  if (defined(__GNUC__) && defined(__cplusplus)) || defined(__INTEL_COMPILER)
 #    define PERL_UNUSED_DECL
@@ -269,7 +273,6 @@ CODE:
     }
     ST(0) = ret;
     POPBLOCK(cx,PL_curpm);
-    LEAVESUB(cv);
     CATCH_SET(oldcatch);
     XSRETURN(1);
 }
@@ -319,13 +322,11 @@ CODE:
 	if (SvTRUE(*PL_stack_sp)) {
 	  ST(0) = ST(index);
 	  POPBLOCK(cx,PL_curpm);
-	  LEAVESUB(cv);
 	  CATCH_SET(oldcatch);
 	  XSRETURN(1);
 	}
     }
     POPBLOCK(cx,PL_curpm);
-    LEAVESUB(cv);
     CATCH_SET(oldcatch);
     XSRETURN_UNDEF;
 }
