@@ -11741,6 +11741,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_xpvhv_root	= NULL;
     PL_xpvmg_arenaroot	= NULL;
     PL_xpvmg_root	= NULL;
+    PL_xpvgv_arenaroot	= NULL;
+    PL_xpvgv_root	= NULL;
     PL_xpvlv_arenaroot	= NULL;
     PL_xpvlv_root	= NULL;
     PL_xpvbm_arenaroot	= NULL;
