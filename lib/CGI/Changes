@@ -1,3 +1,10 @@
+  Version 3.10
+    1. Added Apache2::RequestIO, which is necessary for mp2 interoperability.
+
+  Version 3.09
+    1. Fixed tabindex="0" when using CGI to create forms without a prior start_html
+    2. Removed warning about non-numeric MOD_PERL_API_VERSION.
+
   Version 3.08
     1. update support for mod_perl 2.0.  versions prior to
        mod_perl 1.999_22 (2.0.0-RC5) are no longer supported.
