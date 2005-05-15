@@ -12425,6 +12425,12 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     SvREFCNT_dec(param->stashes);
 
+    /* orphaned? eg threads->new inside BEGIN or use */
+    if (PL_compcv && ! SvREFCNT(PL_compcv)) {
+	SvREFCNT_inc(PL_compcv);
+	SAVEFREESV(PL_compcv);
+    }
+
     return my_perl;
 }
 
