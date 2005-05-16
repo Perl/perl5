@@ -28,6 +28,63 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.7		Maintenance release working toward v5.8.7
 --------------
 ____________________________________________________________________________
+[ 24483] By: nicholas                              on 2005/05/16  15:19:24
+        Log: Integrate:
+             [ 24347]
+             Remove temporary clean-up from Win32 makefiles
+             
+             Change 22501 temporarily added some clean-up to the Win32 makefiles
+             which was only meant to stay until cpan rt #5616 was fixed.  It is
+             now fixed (in EU-MM 6.22, which in turn has been in blead for a
+             while now), so these hacks are no longer required.
+             
+             This change is also good for maint, which currently contains EU-MM
+             6.17, which didn't create the blibdirs.exists files in question
+             anyway.
+             
+             [ 24349]
+             Silence a compilation warning on Win32
+             
+             [ 24374]
+             Fix croak() and confess() so that they don't clobber $!
+             (plus tests to check this)
+             
+             [ 24453]
+             Subject: [PATCH] Add Win32::GetFileVersion() function
+             From: "Jan Dubois" <jand@ActiveState.com>
+             Date: Wed, 11 May 2005 22:30:37 -0700
+             Message-Id: <200505120530.j4C5UhpX031152@smtp3.ActiveState.com>
+             
+             [ 24454]
+             Remove a couple of unreferenced local variables
+             
+             [ 24482]
+             Bump the version number on Win32::Win32
+     Branch: maint-5.8/perl
+	  !> lib/Carp.pm lib/Carp.t pp.c win32/Makefile
+	  !> win32/ext/Win32/Win32.pm win32/ext/Win32/Win32.xs
+	  !> win32/makefile.mk
+____________________________________________________________________________
+[ 24481] By: nicholas                              on 2005/05/16  15:02:49
+        Log: Missed some of Steve's patches
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 24479] By: nicholas                              on 2005/05/16  14:29:35
+        Log: This is RC1, for favourable values of $fruit
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 24478] By: nicholas                              on 2005/05/16  13:43:44
+        Log: Update perldelta
+     Branch: maint-5.8/perl
+	   ! pod/perl587delta.pod
+____________________________________________________________________________
+[ 24477] By: nicholas                              on 2005/05/16  13:29:52
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 24474] By: nicholas                              on 2005/05/16  08:44:34
         Log: Integrate:
              [ 24471]
