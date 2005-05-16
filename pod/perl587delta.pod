@@ -48,7 +48,7 @@ script (for example, code that uses C<File::Find>).
 
 =item *
 
-B upgraded to version 1.07
+B upgraded to version 1.09
 
 =item *
 
@@ -56,7 +56,7 @@ bignum upgraded to version 0.17
 
 =item *
 
-CGI upgraded to version 3.07
+CGI upgraded to version 3.10
 
 =item *
 
@@ -84,11 +84,23 @@ Encode upgraded to version 2.09
 
 =item *
 
+FileCache upgraded to version 1.05
+
+=item *
+
+File::Path upgraded to version 1.07
+
+=item *
+
 File::Temp upgraded to version 0.16
 
 =item *
 
-overload upgraded to version 1.03
+IO::File upgraded to version 1.11
+
+=item *
+
+IO::Socket upgraded to version 1.28
 
 =item *
 
@@ -100,7 +112,15 @@ Math::BigRat upgraded to version 0.15
 
 =item *
 
+overload upgraded to version 1.03
+
+=item *
+
 PathTools upgraded to version 3.05
+
+=item *
+
+Pod::HTML upgraded to version 1.0503
 
 =item *
 
@@ -113,6 +133,10 @@ Pod::LaTeX upgraded to version 0.58
 =item *
 
 Pod::Parser upgraded to version 1.30
+
+=item *
+
+Symbol upgraded to version 1.06
 
 =item *
 
@@ -131,6 +155,10 @@ Test::Simple upgraded to version 0.54
 Text::Wrap upgraded to version 2001.09293, to fix a bug when wrap() was
 called with a non-space separator.
 
+item *
+
+threads::shared upgraded to version 0.93
+
 =item *
 
 Time::HiRes upgraded to version 1.66
@@ -143,6 +171,10 @@ Time::Local upgraded to version 1.11
 
 Unicode::Normalize upgraded to version 0.32
 
+=item *
+
+utf8 upgraded to version 1.05
+
 =back
 
 =head1 Utility Changes
@@ -151,9 +183,11 @@ Unicode::Normalize upgraded to version 0.32
 
 C<find2perl> has new options C<-iname>, C<-path> and C<-ipath>.
 
-=head1 New Documentation
-
 =head1 Performance Enhancements
+
+The internal pointer mapping hash used during ithreads cloning now uses an
+arena for memory allocation. In tests this reduced ithreads cloning time by
+about 10%.
 
 =head1 Installation and Configuration Improvements
 
@@ -285,15 +319,15 @@ cases, but apart from this there should be no user-detectable changes.
 
 C<${^UTF8LOCALE}> has been added to give perl space access to C<PL_utf8locale>.
 
-=head1 New Tests
+The size of the arenas used to allocate SV heads and most SV bodies can now
+be changed at compile time. The old size was 1008 bytes, the new default size
+is 4080 bytes.
 
 =head1 Known Problems
 
 Unicode strings returned from overloaded operators can be buggy. This is a
 long standing bug reported since 5.8.6 was released, but we do not yet have
 a suitable fix for it.
-
-=head1 Platform Specific Problems
 
 =head1 Reporting Bugs
 
