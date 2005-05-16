@@ -15,7 +15,7 @@ require DynaLoader;
 		 d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
 		 d_nanosleep);
 	
-$VERSION = '1.66';
+$VERSION = '1.68';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -151,7 +151,7 @@ Getting even accuracy of one thousand nanoseconds is good.
 Issues a C<ualarm> call; the C<$interval_useconds> is optional and
 will be zero if unspecified, resulting in C<alarm>-like behaviour.
 
-Note that the interaction between alarms and sleeps are unspecified.
+Note that the interaction between alarms and sleeps is unspecified.
 
 =item tv_interval 
 
@@ -194,7 +194,7 @@ seconds actually slept (a floating point value).  This function can
 be imported, resulting in a nice drop-in replacement for the C<sleep>
 provided with perl, see the L</EXAMPLES> below.
 
-Note that the interaction between alarms and sleeps are unspecified.
+Note that the interaction between alarms and sleeps is unspecified.
 
 =item alarm ( $floating_seconds [, $interval_floating_seconds ] )
 
@@ -210,7 +210,7 @@ This means that an C<alarm()> followed by a C<select()> may together
 take the sum of the times specified for the the C<alarm()> and the
 C<select()>, not just the time of the C<alarm()>.
 
-Note that the interaction between alarms and sleeps are unspecified.
+Note that the interaction between alarms and sleeps is unspecified.
 
 =item setitimer ( $which, $floating_seconds [, $interval_floating_seconds ] )
 
@@ -235,7 +235,7 @@ UNIX platforms usually have the first three, but (for example) Win32
 and Cygwin have only C<ITIMER_REAL>, and only Solaris seems to have
 C<ITIMER_REALPROF> (which is used to profile multithreaded programs).
 
-C<ITIMER_REAL> results in C<alarm()>-like behavior.  Time is counted in
+C<ITIMER_REAL> results in C<alarm()>-like behaviour.  Time is counted in
 I<real time>; that is, wallclock time.  C<SIGALRM> is delivered when
 the timer expires.
 
@@ -331,7 +331,7 @@ emulations for it.)
 
 Here is an example of using C<NVtime> from C:
 
-  double (*myNVtime)();
+  double (*myNVtime)(); /* Returns -1 on failure. */
   SV **svp = hv_fetch(PL_modglobal, "Time::NVtime", 12, 0);
   if (!svp)         croak("Time::HiRes is required");
   if (!SvIOK(*svp)) croak("Time::NVtime isn't a function pointer");

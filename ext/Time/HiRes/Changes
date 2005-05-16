@@ -1,5 +1,19 @@
 Revision history for Perl extension Time::HiRes.
 
+1.68
+	- somehow 1.67 had a lot of doubled lines (a major cut-and-paste
+	  error suspected), but miraculously it still worked since the
+	  doubling took place below the __END__ token
+	- undef Pause() before defining it to avoid redefinition warnings
+	  during compilation in case perl.h had already defined Pause()
+	  (part of perl change #24271)
+	- minor doc tweaks
+
+1.67
+	- (internal) don't ignore the return value of gettimeofday()
+	- (external) return undef or an empty if the C gettimeofday() fails
+	  (affects Time::HiRes gettimeofday() and the hires time())
+
 1.66
 	- add nanosleep()
 	- fix the 'hierachy' typo in Makefile.PL [rt.cpan.org #8492]
