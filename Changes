@@ -28,6 +28,313 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.7		Maintenance release working toward v5.8.7
 --------------
 ____________________________________________________________________________
+[ 24474] By: nicholas                              on 2005/05/16  08:44:34
+        Log: Integrate:
+             [ 24471]
+             Subject: [PATCH] Minor tweak to via
+             From: Andy Lester <andy@petdance.com>
+             Message-ID: <20050513163952.GA20167@petdance.com>
+             Date: Fri, 13 May 2005 11:39:52 -0500
+             
+             from a bug report and patch by Matt Lawrence
+     Branch: maint-5.8/perl
+	  !> ext/PerlIO/via/via.xs
+____________________________________________________________________________
+[ 24473] By: nicholas                              on 2005/05/16  08:27:52
+        Log: Integrate:
+             [ 24326]
+             Upgrade to CGI.pm 3.08
+             
+             [ 24470]
+             Upgrade to CGI.pm 3.10
+     Branch: maint-5.8/perl
+	  +> lib/CGI/t/can.t
+	  !> MANIFEST lib/CGI.pm lib/CGI/Carp.pm lib/CGI/Changes
+	  !> lib/CGI/Cookie.pm lib/CGI/Pretty.pm lib/CGI/t/form.t
+____________________________________________________________________________
+[ 24466] By: nicholas                              on 2005/05/13  21:36:27
+        Log: Update META.yml
+     Branch: maint-5.8/perl
+	   ! META.yml
+____________________________________________________________________________
+[ 24464] By: nicholas                              on 2005/05/13  19:49:02
+        Log: Subject: RE: 5.8.7-tobe fails to compile on AIX 4.3.3
+             From: "Jan Dubois" <jand@ActiveState.com>
+             Message-Id: <200505131921.j4DJLgG5007986@smtp3.ActiveState.com>
+             Date: Fri, 13 May 2005 12:21:40 -0700
+     Branch: maint-5.8/perl
+	   ! reentr.inc reentr.pl
+____________________________________________________________________________
+[ 24463] By: nicholas                              on 2005/05/13  15:32:16
+        Log: The danger of cargo cult is that you miss things.
+     Branch: maint-5.8/perl
+	   ! README.vms
+____________________________________________________________________________
+[ 24462] By: nicholas                              on 2005/05/13  14:50:56
+        Log: Cargo cult 5.8.7 upgrade
+     Branch: maint-5.8/perl
+	   ! Cross/config.sh-arm-linux META.yml NetWare/Makefile README.os2
+	   ! README.vms epoc/createpkg.pl patchlevel.h plan9/config.plan9
+	   ! pod/perl585delta.pod vos/build.cm vos/config.alpha.def
+	   ! vos/config.alpha.h vos/config.ga.def vos/config.ga.h
+	   ! vos/install_perl.cm win32/Makefile win32/config_H.bc
+	   ! win32/config_H.gc win32/config_H.vc win32/config_H.vc64
+	   ! win32/makefile.mk wince/Makefile.ce
+____________________________________________________________________________
+[ 24458] By: nicholas                              on 2005/05/12  21:34:03
+        Log: Fix from Steve Peters
+     Branch: maint-5.8/perl
+	   ! reentr.inc reentr.pl
+____________________________________________________________________________
+[ 24457] By: nicholas                              on 2005/05/12  20:04:57
+        Log: Subject: Re: [PATCH] reentr.h changes so threaded Perl's compile on OpenBSD 3.7
+             From: Steve Peters <steve@fisharerojo.org>
+             Message-ID: <20050512201532.GA30279@mccoy.peters.homeunix.org>
+             Date: Thu, 12 May 2005 15:15:32 -0500
+     Branch: maint-5.8/perl
+	   ! reentr.h reentr.inc reentr.pl
+____________________________________________________________________________
+[ 24456] By: nicholas                              on 2005/05/12  19:53:25
+        Log: Integrate:
+             [ 24446]
+             Subject: Hints changes for OS X 10.4
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 10 May 2005 18:10:47 -0700
+             Message-ID: <20050511011047.GA23955@windhund.schwern.org>
+     Branch: maint-5.8/perl
+	  !> hints/darwin.sh
+____________________________________________________________________________
+[ 24448] By: nicholas                              on 2005/05/11  14:27:57
+        Log: Integrate:
+             [ 24433]
+             Subject: [PATCH] reentr.h changes so threaded Perl's compile on OpenBSD 3.7
+             From: Steve Peters <steve@fisharerojo.org>
+             Date: Mon, 9 May 2005 21:10:49 -0500
+             Message-Id: <20050510021049.GA20147@mccoy.peters.homeunix.org>
+             
+             [ 24441]
+             Subject: Re: [PATCH] reentr.h changes so threaded Perl's compile on OpenBSD 3.7
+             From: Steve Peters <steve@fisharerojo.org>
+             Date: Tue, 10 May 2005 12:44:13 -0500
+             Message-Id: <20050510174413.GA19686@mccoy.peters.homeunix.org>
+             
+             [ 24442]
+             Regenerate reentr.[ch]
+             
+             
+             (plus some edits to cope with the maint/blead differences)
+     Branch: maint-5.8/perl
+	  +> README.openbsd
+	   ! reentr.h reentr.inc reentr.pl
+	  !> MANIFEST
+____________________________________________________________________________
+[ 24447] By: nicholas                              on 2005/05/11  13:58:12
+        Log: Integrate:
+             [ 24176]
+             cast to/from (void *) in the re-entrant code. Now watch the smoke rise.
+     Branch: maint-5.8/perl
+	   ! reentr.c reentr.h reentr.inc
+	  !> reentr.pl
+____________________________________________________________________________
+[ 24428] By: nicholas                              on 2005/05/09  13:27:16
+        Log: Integrate:
+             [ 24425]
+             Change 24413 should have updated makedef.pl with the knowledge that 2
+             symbols are ithreads only.
+     Branch: maint-5.8/perl
+	  !> makedef.pl
+____________________________________________________________________________
+[ 24415] By: nicholas                              on 2005/05/08  05:45:28
+        Log: Integrate:
+             [ 24404]
+             Allocate pointer table entries (for ithread cloning) from an arena
+             
+             [ 24405]
+             Make the arena size changeable at compile time, and up the default by
+             a factor of 4.
+             
+             [ 24413]
+             The ptr_table arena variables and code is only needed for ithreads.
+             
+             (plus move the 2 new variables to the end of intrpvar.h to preserve
+             bincompat)
+     Branch: maint-5.8/perl
+	   ! intrpvar.h
+	  !> embedvar.h hv.c perl.h perlapi.h sv.c
+____________________________________________________________________________
+[ 24400] By: nicholas                              on 2005/05/05  15:48:01
+        Log: Integrate:
+             [ 24396]
+             Bump B version numbers
+             
+             [ 24398]
+             Bump version numbers
+             
+             [ 24399]
+             Bump versions of non dual-life modules
+             
+             plus ext/threads/shared/shared.pm version number from 24248
+     Branch: maint-5.8/perl
+	  !> ext/B/B.pm ext/B/B/Concise.pm ext/B/B/Deparse.pm
+	  !> ext/B/B/Disassembler.pm ext/B/B/Terse.pm
+	  !> ext/B/t/OptreeCheck.pm ext/Devel/DProf/DProf.pm
+	  !> ext/IO/lib/IO/File.pm ext/IO/lib/IO/Socket/INET.pm
+	  !> ext/XS/APItest/APItest.pm ext/threads/shared/shared.pm
+	  !> lib/File/Path.pm lib/FileCache.pm lib/Pod/Html.pm
+	  !> lib/Symbol.pm lib/utf8.pm win32/FindExt.pm
+____________________________________________________________________________
+[ 24395] By: nicholas                              on 2005/05/05  13:17:06
+        Log: It's a good job that Steve Hay is paying attention.
+     Branch: maint-5.8/perl
+	   ! pod/perl587delta.pod
+____________________________________________________________________________
+[ 24394] By: nicholas                              on 2005/05/05  12:41:31
+        Log: Subject: [PATCH perl-5.8.7-tobe] relating to 23767
+             From: Robin Barker <Robin.Barker@npl.co.uk>
+             Message-ID: <533D273D4014D411AB1D00062938C4D90849C679@hotel.npl.co.uk>
+             Date: Wed, 4 May 2005 18:21:39 +0100
+     Branch: maint-5.8/perl
+	   ! Porting/pumpkin.pod perl.h sv.c
+____________________________________________________________________________
+[ 24391] By: nicholas                              on 2005/05/05  11:31:18
+        Log: Changes and improvements suggested by Ronald J Kimball, Dave Mitchell,
+             Steve Hay, Aaron Sherman, Hugo van der Sanden and chromatic.
+     Branch: maint-5.8/perl
+	   ! pod/perl587delta.pod
+____________________________________________________________________________
+[ 24356] By: nicholas                              on 2005/04/30  17:02:19
+        Log: Integrate:
+             [ 24355]
+             Put back INSTALL_PREFIX and INSTALL_PREFIX_EXP as they were
+             unintendedly removed by patch #23435
+     Branch: maint-5.8/perl
+	  !> config_h.SH
+____________________________________________________________________________
+[ 24346] By: nicholas                              on 2005/04/28  09:39:31
+        Log: Integrate:
+             [ 24339]
+             A couple of warning fixes by Gisle
+     Branch: maint-5.8/perl
+	  !> pp.c pp_sys.c
+____________________________________________________________________________
+[ 24337] By: nicholas                              on 2005/04/27  12:31:32
+        Log: Integrate:
+             [ 24310]
+             Subject: [PATCH] lib/Time/Local.t: time_t is unsigned on VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sat, 23 Apr 2005 18:25:52 -0500
+             Message-ID: <426AD980.2010801@mac.com>
+     Branch: maint-5.8/perl
+	  !> lib/Time/Local.t
+____________________________________________________________________________
+[ 24336] By: nicholas                              on 2005/04/27  11:02:09
+        Log: Remove a const that shouldn't have been integrated to maint
+     Branch: maint-5.8/perl
+	   ! util.c
+____________________________________________________________________________
+[ 24335] By: nicholas                              on 2005/04/27  10:32:26
+        Log: Integrate:
+             [ 24319]
+             Provide $Config{libswanted_uselargefiles} on Win32
+             
+             This fixes some test failures introduced by change 24271.
+             
+             [ 24321]
+             Update location to fetch dmake from in README.win32
+             
+             Use the generic search.cpan.org URL so that the latest version is
+             always found
+     Branch: maint-5.8/perl
+	  !> README.win32 win32/config.bc win32/config.gc win32/config.vc
+	  !> win32/config.vc64
+____________________________________________________________________________
+[ 24332] By: nicholas                              on 2005/04/26  16:02:43
+        Log: Integrate:
+             [ 24247]
+             Add CLONE_SKIP() class method to allow individual classes to skip
+             cloning objects during thread creation
+     Branch: maint-5.8/perl
+	  !> dump.c ext/threads/t/thread.t pod/perlmod.pod sv.c sv.h
+____________________________________________________________________________
+[ 24331] By: nicholas                              on 2005/04/26  15:05:07
+        Log: Missing > spotted by Rafael. That will teach me not to run podchecker.
+     Branch: maint-5.8/perl
+	   ! pod/perl587delta.pod
+____________________________________________________________________________
+[ 24330] By: nicholas                              on 2005/04/26  15:01:47
+        Log: Missing , spotted by Rafael
+     Branch: maint-5.8/perl
+	   ! pod/perl587delta.pod
+____________________________________________________________________________
+[ 24329] By: nicholas                              on 2005/04/26  14:43:44
+        Log: Stab 1 at the perl delta
+     Branch: maint-5.8/perl
+	   ! pod/perl587delta.pod
+____________________________________________________________________________
+[ 24327] By: nicholas                              on 2005/04/26  13:01:18
+        Log: Correct description of change 24297
+     Branch: maint-5.8/perl
+	   ! Changes
+____________________________________________________________________________
+[ 24324] By: nicholas                              on 2005/04/25  15:04:43
+        Log: Integrate:
+             [ 24314]
+             Upgrade to Test::Harness 2.48
+             
+             [ 24315]
+             Add files missing in 24314
+     Branch: maint-5.8/perl
+	  +> lib/Test/Harness/Point.pm lib/Test/Harness/t/from_line.t
+	  +> lib/Test/Harness/t/point-parse.t lib/Test/Harness/t/point.t
+	  +> lib/Test/Harness/t/version.t
+	  !> MANIFEST lib/Test/Harness.pm lib/Test/Harness/Changes
+	  !> lib/Test/Harness/Straps.pm lib/Test/Harness/TAP.pod
+	  !> lib/Test/Harness/t/00compile.t
+	  !> lib/Test/Harness/t/strap-analyze.t lib/Test/Harness/t/strap.t
+	  !> t/lib/sample-tests/skip
+____________________________________________________________________________
+[ 24323] By: nicholas                              on 2005/04/25  14:51:24
+        Log: Integrate:
+             [ 24307]
+             Subject:  [PATCH] Fix for warnings in util.c/Perl_init_tm()
+             From:  Steve Peters <steve@fisharerojo.org>
+             Date:  Fri, 22 Apr 2005 22:36:03 -0500
+             Message-Id:  <20050423033603.GA32547@mccoy.peters.homeunix.org>
+             
+             localtime() can return null
+             
+             [ 24308]
+             Save state when auto-generating #ifdef PERL_CORE and PERL_CORE/PERL_EXT
+             reducing embed.h by about 10%.
+             
+             [ 24309]
+             Variable declarations can't come after statements in C89.
+     Branch: maint-5.8/perl
+	   ! embed.h
+	  !> embed.pl util.c
+____________________________________________________________________________
+[ 24322] By: nicholas                              on 2005/04/25  13:25:15
+        Log: Integrate:
+             [ 24301]
+             Subject: [PATCH] t/uni/class.t -- update VMS test skippage
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Message-ID: <42692501.6090809@mac.com>
+             Date: Fri, 22 Apr 2005 11:23:29 -0500
+             
+             [ 24320]
+             Subject: [PATCH] mktables.lst and related stuff (was Re: [PATCH] Unicode 4.1.0)
+             From: demerphq <demerphq@gmail.com>
+             Message-ID: <9b18b31105042412352fcf2bc5@mail.gmail.com>
+             Date: Sun, 24 Apr 2005 21:35:35 +0200
+     Branch: maint-5.8/perl
+	  !> lib/unicore/README.perl lib/unicore/mktables
+	  !> lib/unicore/mktables.lst t/uni/class.t
+____________________________________________________________________________
+[ 24306] By: nicholas                              on 2005/04/22  22:06:04
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 24305] By: nicholas                              on 2005/04/22  21:42:56
         Log: Run  pod/buildtoc --build-all
      Branch: maint-5.8/perl
