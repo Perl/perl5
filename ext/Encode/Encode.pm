@@ -1,10 +1,9 @@
 #
-# $Id: Encode.pm,v 2.9 2004/12/03 19:16:40 dankogai Exp $
+# $Id: Encode.pm,v 2.10 2005/05/16 18:46:36 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
-# our $VERSION = do { my @r = (q$Revision: 2.9 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-our $VERSION = '2.0902_01';
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.10 $ =~ /(\d+)/g;
 sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load(__PACKAGE__, $VERSION);
@@ -204,7 +203,7 @@ sub decode_utf8($;$)
     if ($check){
 	return decode("utf8", $str, $check);
     }else{
-	return undef unless utf8::decode($str);
+	return decode("utf8", $str);
 	return $str;
     }
 }

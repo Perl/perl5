@@ -1,8 +1,16 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.9 2004/12/03 19:16:53 dankogai Exp dankogai $
+# $Id: Changes,v 2.10 2005/05/16 18:46:36 dankogai Exp dankogai $
 #
-$Revision: 2.9 $ $Date: 2004/12/03 19:16:53 $
+$Revision: 2.10 $ $Date: 2005/05/16 18:46:36 $
+! Encode.pm
+  fixed decode_utf8() accordingly to RT#8872
+  http://rt.cpan.org/NoAuth/Bug.html?id=8872
+! Encode.xs AUTHORS
+  s/SvIVX/SvIV_set/ by Steve Peters.
+  Message-Id: <2297.67.96.185.36.1114626315.squirrel@webmail3.pair.com>
+! AUTHORS
+  GAAS was missing!
 ! Encode.pm
   New Pod section: "UTF-8 vs utf8"; explains utf-8-strict
 + t/utf8strict.t
