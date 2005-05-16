@@ -914,21 +914,21 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '(':
 	sv_setiv(sv, (IV)PL_gid);
 #ifdef HAS_GETGROUPS
-	Perl_sv_setpvf(aTHX_ sv, "%"Gid_t_f, PL_gid);
+	Perl_sv_setpvf(aTHX_ sv, "%"Gid_t_f, (long unsigned int)PL_gid);
 #endif
 	goto add_groups;
     case ')':
 	sv_setiv(sv, (IV)PL_egid);
 #ifdef HAS_GETGROUPS
-	Perl_sv_setpvf(aTHX_ sv, "%"Gid_t_f, PL_egid);
+	Perl_sv_setpvf(aTHX_ sv, "%"Gid_t_f, (long unsigned int)PL_egid);
 #endif
       add_groups:
 #ifdef HAS_GETGROUPS
 	{
 	    Groups_t gary[NGROUPS];
-	    i = getgroups(NGROUPS,gary);
-	    while (--i >= 0)
-		Perl_sv_catpvf(aTHX_ sv, " %"Gid_t_f, gary[i]);
+	    I32 j = getgroups(NGROUPS,gary);
+	    while (--j >= 0)
+		Perl_sv_catpvf(aTHX_ sv, " %"Gid_t_f, (long unsigned int)gary[j]);
 	}
 #endif
 	(void)SvIOK_on(sv);	/* what a wonderful hack! */

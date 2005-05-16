@@ -168,6 +168,9 @@
 #  define pTHX_4	5
 #  define pTHX_5	6
 #  define pTHX_6	7
+#  define pTHX_7	8
+#  define pTHX_8	9
+#  define pTHX_9	10
 #endif
 
 #define STATIC static
@@ -213,7 +216,7 @@
  * for silencing unused variables that are actually used most of the time,
  * but we cannot quite get rid of, such `ax' in PPCODE+noargs xsubs
  */
-#define PERL_UNUSED_VAR(var) if (0) var = var
+#define PERL_UNUSED_VAR(var) ((void)var)
 
 #define NOOP (void)0
 #define dNOOP extern int Perl___notused PERL_UNUSED_DECL
@@ -231,6 +234,9 @@
 #  define pTHX_4	4
 #  define pTHX_5	5
 #  define pTHX_6	6
+#  define pTHX_7	7
+#  define pTHX_8	8
+#  define pTHX_9	9
 #endif
 
 #ifndef dVAR

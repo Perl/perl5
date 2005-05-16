@@ -1361,10 +1361,10 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 {
     dVAR;
     if (ckDEAD(err)) {
-	SV *msv = vmess(pat, args);
+	SV * const msv = vmess(pat, args);
 	STRLEN msglen;
 	const char *message = SvPV(msv, msglen);
-	I32 utf8 = SvUTF8(msv);
+	const I32 utf8 = SvUTF8(msv);
 
 	if (PL_diehook) {
 	    assert(message);
@@ -3969,7 +3969,7 @@ Perl_new_version(pTHX_ SV *ver)
 	AvREAL_on((AV*)sv);
 	for ( key = 0; key <= av_len(av); key++ )
 	{
-	    I32 rev = SvIV(*av_fetch(av, key, FALSE));
+	    const I32 rev = SvIV(*av_fetch(av, key, FALSE));
 	    av_push((AV *)sv, newSViv(rev));
 	}
 	return rv;

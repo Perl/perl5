@@ -68,8 +68,7 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 #define dSP		register SV **sp = PL_stack_sp
 #define djSP		dSP
 #define dMARK		register SV **mark = PL_stack_base + POPMARK
-#define dORIGMARK	I32 origmark = mark - PL_stack_base
-#define SETORIGMARK	origmark = mark - PL_stack_base
+#define dORIGMARK	const I32 origmark = mark - PL_stack_base
 #define ORIGMARK	(PL_stack_base + origmark)
 
 #define SPAGAIN		sp = PL_stack_sp

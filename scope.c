@@ -67,7 +67,7 @@ Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems)
 I32
 Perl_cxinc(pTHX)
 {
-    IV old_max = cxstack_max;
+    const IV old_max = cxstack_max;
     cxstack_max = GROW(cxstack_max);
     Renew(cxstack, cxstack_max + 1, PERL_CONTEXT);	/* XXX should fix CXINC macro */
     /* Without any kind of initialising deep enough recursion

@@ -329,9 +329,8 @@ PP(pp_dor)
 {
     /* Most of this is lifted straight from pp_defined */
     dSP;
-    register SV* sv;
+    register SV* const sv = TOPs;
 
-    sv = TOPs;
     if (!sv || !SvANY(sv)) {
 	--SP;
 	RETURNOP(cLOGOP->op_other);
@@ -434,7 +433,7 @@ PP(pp_add)
 		if ((auvok = SvUOK(TOPm1s)))
 		    auv = SvUVX(TOPm1s);
 		else {
-		    register IV aiv = SvIVX(TOPm1s);
+		    register const IV aiv = SvIVX(TOPm1s);
 		    if (aiv >= 0) {
 			auv = aiv;
 			auvok = 1;	/* Now acting as a sign flag.  */
@@ -454,7 +453,7 @@ PP(pp_add)
 	    if (buvok)
 		buv = SvUVX(TOPs);
 	    else {
-		register IV biv = SvIVX(TOPs);
+		register const IV biv = SvIVX(TOPs);
 		if (biv >= 0) {
 		    buv = biv;
 		    buvok = 1;
@@ -528,7 +527,7 @@ PP(pp_aelemfast)
     dSP;
     AV *av = PL_op->op_flags & OPf_SPECIAL ?
 		(AV*)PAD_SV(PL_op->op_targ) : GvAV(cGVOP_gv);
-    U32 lval = PL_op->op_flags & OPf_MOD;
+    const U32 lval = PL_op->op_flags & OPf_MOD;
     SV** svp = av_fetch(av, PL_op->op_private, lval);
     SV *sv = (svp ? *svp : &PL_sv_undef);
     EXTEND(SP, 1);
@@ -770,7 +769,7 @@ PP(pp_rv2av)
     }
 
     if (GIMME == G_ARRAY) {
-	I32 maxarg = AvFILL(av) + 1;
+	const I32 maxarg = AvFILL(av) + 1;
 	(void)POPs;			/* XXXX May be optimized away? */
 	EXTEND(SP, maxarg);
 	if (SvRMAGICAL(av)) {
@@ -790,7 +789,7 @@ PP(pp_rv2av)
     }
     else if (GIMME_V == G_SCALAR) {
 	dTARGET;
-	I32 maxarg = AvFILL(av) + 1;
+	const I32 maxarg = AvFILL(av) + 1;
 	SETi(maxarg);
     }
     RETURN;
@@ -800,7 +799,8 @@ PP(pp_rv2hv)
 {
     dSP; dTOPss;
     HV *hv;
-    I32 gimme = GIMME_V;
+    const I32 gimme = GIMME_V;
+    static const char return_hash_to_lvalue_scalar[] = "Can't return hash to lvalue scalar context";
 
     if (SvROK(sv)) {
       wasref:
@@ -815,7 +815,7 @@ PP(pp_rv2hv)
 	}
 	else if (LVRET) {
 	    if (gimme != G_ARRAY)
-		Perl_croak(aTHX_ "Can't return hash to lvalue scalar context");
+		Perl_croak(aTHX_ return_hash_to_lvalue_scalar );
 	    SETs((SV*)hv);
 	    RETURN;
 	}
@@ -832,8 +832,7 @@ PP(pp_rv2hv)
 	    }
 	    else if (LVRET) {
 		if (gimme != G_ARRAY)
-		    Perl_croak(aTHX_ "Can't return hash to lvalue"
-			       " scalar context");
+		    Perl_croak(aTHX_ return_hash_to_lvalue_scalar );
 		SETs((SV*)hv);
 		RETURN;
 	    }
@@ -888,8 +887,7 @@ PP(pp_rv2hv)
 	    }
 	    else if (LVRET) {
 		if (gimme != G_ARRAY)
-		    Perl_croak(aTHX_ "Can't return hash to lvalue"
-			       " scalar context");
+		    Perl_croak(aTHX_ return_hash_to_lvalue_scalar );
 		SETs((SV*)hv);
 		RETURN;
 	    }
@@ -916,17 +914,17 @@ S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem)
         HE *didstore;
 
         if (ckWARN(WARN_MISC)) {
+	    const char *err;
 	    if (relem == firstrelem &&
 		SvROK(*relem) &&
 		(SvTYPE(SvRV(*relem)) == SVt_PVAV ||
 		 SvTYPE(SvRV(*relem)) == SVt_PVHV))
 	    {
-		Perl_warner(aTHX_ packWARN(WARN_MISC),
-			    "Reference found where even-sized list expected");
+		err = "Reference found where even-sized list expected";
 	    }
 	    else
-		Perl_warner(aTHX_ packWARN(WARN_MISC),
-			    "Odd number of elements in hash assignment");
+		err = "Odd number of elements in hash assignment";
+	    Perl_warner(aTHX_ packWARN(WARN_MISC), err);
 	}
 
         tmpstr = NEWSV(29,0);
@@ -1186,10 +1184,10 @@ PP(pp_match)
     char *truebase;			/* Start of string  */
     register REGEXP *rx = PM_GETRE(pm);
     bool rxtainted;
-    I32 gimme = GIMME;
+    const I32 gimme = GIMME;
     STRLEN len;
     I32 minmatch = 0;
-    I32 oldsave = PL_savestack_ix;
+    const I32 oldsave = PL_savestack_ix;
     I32 update_minmatch = 1;
     I32 had_zerolen = 0;
 
@@ -1294,13 +1292,10 @@ play_it_again:
 	RX_MATCH_TAINTED_on(rx);
     TAINT_IF(RX_MATCH_TAINTED(rx));
     if (gimme == G_ARRAY) {
-	I32 nparens, i, len;
+	const I32 nparens = rx->nparens;
+	I32 i = (global && !nparens) ? 1 : 0;
+	I32 len;
 
-	nparens = rx->nparens;
-	if (global && !nparens)
-	    i = 1;
-	else
-	    i = 0;
 	SPAGAIN;			/* EVAL blocks could move the stack. */
 	EXTEND(SP, nparens + i);
 	EXTEND_MORTAL(nparens + i);
@@ -1449,9 +1444,9 @@ Perl_do_readline(pTHX)
     STRLEN tmplen = 0;
     STRLEN offset;
     PerlIO *fp;
-    register IO *io = GvIO(PL_last_in_gv);
-    register I32 type = PL_op->op_type;
-    I32 gimme = GIMME_V;
+    register IO * const io = GvIO(PL_last_in_gv);
+    register const I32 type = PL_op->op_type;
+    const I32 gimme = GIMME_V;
     MAGIC *mg;
 
     if (io && (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar))) {
@@ -1668,13 +1663,13 @@ PP(pp_helem)
     SV **svp;
     SV *keysv = POPs;
     HV *hv = (HV*)POPs;
-    U32 lval = PL_op->op_flags & OPf_MOD || LVRET;
-    U32 defer = PL_op->op_private & OPpLVAL_DEFER;
+    const U32 lval = PL_op->op_flags & OPf_MOD || LVRET;
+    const U32 defer = PL_op->op_private & OPpLVAL_DEFER;
     SV *sv;
 #ifdef PERL_COPY_ON_WRITE
-    U32 hash = (SvIsCOW_shared_hash(keysv)) ? SvUVX(keysv) : 0;
+    const U32 hash = (SvIsCOW_shared_hash(keysv)) ? SvUVX(keysv) : 0;
 #else
-    U32 hash = (SvFAKE(keysv) && SvREADONLY(keysv)) ? SvUVX(keysv) : 0;
+    const U32 hash = (SvFAKE(keysv) && SvREADONLY(keysv)) ? SvUVX(keysv) : 0;
 #endif
     I32 preeminent = 0;
 
@@ -1727,7 +1722,7 @@ PP(pp_helem)
 	    else {
 		if (!preeminent) {
 		    STRLEN keylen;
-		    char *key = SvPV(keysv, keylen);
+		    const char * const key = SvPV(keysv, keylen);
 		    SAVEDELETE(hv, savepvn(key,keylen), keylen);
 		} else
 		    save_helem(hv, keysv, svp);
@@ -1753,7 +1748,6 @@ PP(pp_leave)
 {
     dVAR; dSP;
     register PERL_CONTEXT *cx;
-    register SV **mark;
     SV **newsp;
     PMOP *newpm;
     I32 gimme;
@@ -1777,6 +1771,7 @@ PP(pp_leave)
     if (gimme == G_VOID)
 	SP = newsp;
     else if (gimme == G_SCALAR) {
+	register SV **mark;
 	MARK = newsp + 1;
 	if (MARK <= SP) {
 	    if (SvFLAGS(TOPs) & (SVs_PADTMP|SVs_TEMP))
@@ -1791,6 +1786,7 @@ PP(pp_leave)
     }
     else if (gimme == G_ARRAY) {
 	/* in case LEAVE wipes old return values */
+	register SV **mark;
 	for (mark = newsp + 1; mark <= SP; mark++) {
 	    if (!(SvFLAGS(*mark) & (SVs_PADTMP|SVs_TEMP))) {
 		*mark = sv_mortalcopy(*mark);
@@ -2778,10 +2774,8 @@ PP(pp_entersub)
 		/* Need to copy @_ to stack. Alternative may be to
 		 * switch stack to @_, and copy return values
 		 * back. This would allow popping @_ in XSUB, e.g.. XXXX */
-		AV* av;
-		I32 items;
-		av = GvAV(PL_defgv);
-		items = AvFILLp(av) + 1;   /* @_ is not tieable */
+		AV * const av = GvAV(PL_defgv);
+		const I32 items = AvFILLp(av) + 1;   /* @_ is not tieable */
 
 		if (items) {
 		    /* Mark is at the end of the stack. */
@@ -2867,7 +2861,7 @@ PP(pp_aelem)
 {
     dSP;
     SV** svp;
-    SV* elemsv = POPs;
+    SV* const elemsv = POPs;
     IV elem = SvIV(elemsv);
     AV* av = (AV*)POPs;
     const U32 lval = PL_op->op_flags & OPf_MOD || LVRET;
@@ -2883,16 +2877,17 @@ PP(pp_aelem)
     svp = av_fetch(av, elem, lval && !defer);
     if (lval) {
 #ifdef PERL_MALLOC_WRAP
-	 static const char oom_array_extend[] =
-	      "Out of memory during array extend"; /* Duplicated in av.c */
 	 if (SvUOK(elemsv)) {
 	      const UV uv = SvUV(elemsv);
 	      elem = uv > IV_MAX ? IV_MAX : uv;
 	 }
 	 else if (SvNOK(elemsv))
 	      elem = (IV)SvNV(elemsv);
-	 if (elem > 0)
+	 if (elem > 0) {
+	      static const char oom_array_extend[] =
+		"Out of memory during array extend"; /* Duplicated in av.c */
 	      MEM_WRAP_CHECK_1(elem,SV*,oom_array_extend);
+	 }
 #endif
 	if (!svp || *svp == &PL_sv_undef) {
 	    SV* lv;

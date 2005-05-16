@@ -270,7 +270,6 @@ Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result) {
     const UV max_div_16 = UV_MAX / 16;
     const bool allow_underscores = *flags & PERL_SCAN_ALLOW_UNDERSCORES;
     bool overflowed = FALSE;
-    const char *hexdigit;
 
     if (!(*flags & PERL_SCAN_DISALLOW_PREFIX)) {
         /* strip off leading x or 0x.
@@ -289,7 +288,7 @@ Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result) {
     }
 
     for (; len-- && *s; s++) {
-        hexdigit = strchr(PL_hexdigit, *s);
+	const char *hexdigit = strchr(PL_hexdigit, *s);
         if (hexdigit) {
             /* Write it in this wonky order with a goto to attempt to get the
                compiler to make the common case integer-only loop pretty tight.

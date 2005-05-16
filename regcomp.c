@@ -1370,7 +1370,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 
            demq
         */
-        U32 laststate = TRIE_NODENUM( next_alloc );
+        const U32 laststate = TRIE_NODENUM( next_alloc );
         U32 used , state, charid;
         U32 pos = 0, zp=0;
         trie->laststate = laststate;
@@ -1606,7 +1606,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		    n = regnext(n);
 		}
 		else if (stringok) {
-		    int oldl = STR_LEN(scan);
+		    const int oldl = STR_LEN(scan);
 		    regnode *nnext = regnext(n);
 
 		    if (oldl + STR_LEN(n) > U8_MAX)
@@ -1684,7 +1684,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 	/* Follow the next-chain of the current node and optimize
 	   away all the NOTHINGs from it.  */
 	if (OP(scan) != CURLYX) {
-	    int max = (reg_off_by_arg[OP(scan)]
+	    const int max = (reg_off_by_arg[OP(scan)]
 		       ? I32_MAX
 		       /* I32 may be smaller than U16 on CRAYs! */
 		       : (I32_MAX < U16_MAX ? I32_MAX : U16_MAX));
@@ -1999,7 +1999,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 	    I32 l = STR_LEN(scan);
 	    UV uc = *((U8*)STRING(scan));
 	    if (UTF) {
-		U8 *s = (U8*)STRING(scan);
+		const U8 * const s = (U8*)STRING(scan);
 		l = utf8_length(s, s + l);
 		uc = utf8_to_uvchr(s, NULL);
 	    }
@@ -5656,7 +5656,7 @@ S_regoptail(pTHX_ RExC_state_t *pRExC_state, regnode *p, regnode *val)
  - regcurly - a little FSA that accepts {\d+,?\d*}
  */
 STATIC I32
-S_regcurly(pTHX_ register char *s)
+S_regcurly(pTHX_ register const char *s)
 {
     if (*s++ != '{')
 	return FALSE;
@@ -5907,7 +5907,7 @@ S_put_byte(pTHX_ SV *sv, int c)
 - regprop - printable representation of opcode
 */
 void
-Perl_regprop(pTHX_ SV *sv, regnode *o)
+Perl_regprop(pTHX_ SV *sv, const regnode *o)
 {
 #ifdef DEBUGGING
     register int k;

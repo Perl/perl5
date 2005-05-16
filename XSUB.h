@@ -99,18 +99,18 @@ is a lexical $_ in scope.
 #  endif
 #endif
 
-#define dAX I32 ax = MARK - PL_stack_base + 1
+#define dAX const I32 ax = MARK - PL_stack_base + 1
 
 #define dAXMARK				\
-	I32 ax = POPMARK;		\
-	register SV **mark = PL_stack_base + ax++
+	I32 ax = POPMARK;	\
+	register SV ** const mark = PL_stack_base + ax++
 
 #define dITEMS I32 items = SP - MARK
 
 #define dXSARGS				\
 	dSP; dAXMARK; dITEMS
 
-#define dXSTARG SV * targ = ((PL_op->op_private & OPpENTERSUB_HASTARG) \
+#define dXSTARG SV * const targ = ((PL_op->op_private & OPpENTERSUB_HASTARG) \
 			     ? PAD_SV(PL_op->op_targ) : sv_newmortal())
 
 /* Should be used before final PUSHi etc. if not in PPCODE section. */

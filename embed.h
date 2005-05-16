@@ -1272,6 +1272,7 @@
 #define visit			S_visit
 #define sv_add_backref		S_sv_add_backref
 #define sv_del_backref		S_sv_del_backref
+#define varname			S_varname
 #endif
 #  ifdef DEBUGGING
 #ifdef PERL_CORE
@@ -3219,6 +3220,7 @@
 #define visit(a,b,c)		S_visit(aTHX_ a,b,c)
 #define sv_add_backref(a,b)	S_sv_add_backref(aTHX_ a,b)
 #define sv_del_backref(a)	S_sv_del_backref(aTHX_ a)
+#define varname(a,b,c,d,e,f)	S_varname(aTHX_ a,b,c,d,e,f)
 #endif
 #  ifdef DEBUGGING
 #ifdef PERL_CORE

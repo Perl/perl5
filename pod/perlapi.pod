@@ -2042,7 +2042,7 @@ C<PERL_SCAN_DISALLOW_PREFIX> is set in I<*flags> on entry. If
 C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the binary
 number may use '_' characters to separate digits.
 
-	UV	grok_bin(const char* start, STRLEN* len, I32* flags, NV *result)
+	UV	grok_bin(const char* start, STRLEN* len_p, I32* flags, NV *result)
 
 =for hackers
 Found in file numeric.c
@@ -2070,7 +2070,7 @@ C<PERL_SCAN_DISALLOW_PREFIX> is set in I<*flags> on entry. If
 C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the hex
 number may use '_' characters to separate digits.
 
-	UV	grok_hex(const char* start, STRLEN* len, I32* flags, NV *result)
+	UV	grok_hex(const char* start, STRLEN* len_p, I32* flags, NV *result)
 
 =for hackers
 Found in file numeric.c
@@ -2130,7 +2130,7 @@ is NULL).
 If C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the octal
 number may use '_' characters to separate digits.
 
-	UV	grok_oct(const char* start, STRLEN* len, I32* flags, NV *result)
+	UV	grok_oct(const char* start, STRLEN* len_p, I32* flags, NV *result)
 
 =for hackers
 Found in file numeric.c

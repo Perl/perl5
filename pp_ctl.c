@@ -208,7 +208,7 @@ PP(pp_substcont)
     RX_MATCH_UTF8_set(rx, SvUTF8(cx->sb_targ));
 
     if (cx->sb_iters++) {
-	I32 saviters = cx->sb_iters;
+	const I32 saviters = cx->sb_iters;
 	if (cx->sb_iters > cx->sb_maxiters)
 	    DIE(aTHX_ "Substitution loop");
 

@@ -2551,20 +2551,21 @@ char *
 Perl_moreswitches(pTHX_ char *s)
 {
     dVAR;
-    STRLEN numlen;
     UV rschar;
 
     switch (*s) {
     case '0':
     {
 	 I32 flags = 0;
+	 STRLEN numlen;
 
 	 SvREFCNT_dec(PL_rs);
 	 if (s[1] == 'x' && s[2]) {
-	      char *e;
+	      const char *e = s+=2;
 	      U8 *tmps;
 
-	      for (s += 2, e = s; *e; e++);
+	      while (*e)
+		e++;
 	      numlen = e - s;
 	      flags = PERL_SCAN_SILENT_ILLDIGIT;
 	      rschar = (U32)grok_hex(s, &numlen, &flags, NULL);
@@ -2719,6 +2720,7 @@ Perl_moreswitches(pTHX_ char *s)
 	}
 	if (isDIGIT(*s)) {
             I32 flags = 0;
+	    STRLEN numlen;
 	    PL_ors_sv = newSVpvn("\n",1);
 	    numlen = 3 + (*s == '0');
 	    *SvPVX(PL_ors_sv) = (char)grok_oct(s, &numlen, &flags, NULL);

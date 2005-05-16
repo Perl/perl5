@@ -238,13 +238,13 @@ Perl_is_utf8_string(pTHX_ const U8 *s, STRLEN len)
 {
     const U8* x = s;
     const U8* send;
-    STRLEN c;
 
     if (!len && s)
 	len = strlen((const char *)s);
     send = s + len;
 
     while (x < send) {
+	STRLEN c;
 	 /* Inline the easy bits of is_utf8_char() here for speed... */
 	 if (UTF8_IS_INVARIANT(*x))
 	      c = 1;
@@ -600,24 +600,16 @@ Perl_utf8_length(pTHX_ const U8 *s, const U8 *e)
      * the bitops (especially ~) can create illegal UTF-8.
      * In other words: in Perl UTF-8 is not just for Unicode. */
 
-    if (e < s) {
-        if (ckWARN_d(WARN_UTF8)) {
-	    if (PL_op)
-	        Perl_warner(aTHX_ packWARN(WARN_UTF8),
-			    "%s in %s", unees, OP_DESC(PL_op));
-	    else
-	        Perl_warner(aTHX_ packWARN(WARN_UTF8), unees);
-	}
-	return 0;
-    }
+    if (e < s)
+	goto warn_and_return;
     while (s < e) {
 	const U8 t = UTF8SKIP(s);
-
 	if (e - s < t) {
+	    warn_and_return:
 	    if (ckWARN_d(WARN_UTF8)) {
 	        if (PL_op)
 		    Perl_warner(aTHX_ packWARN(WARN_UTF8),
-				unees, OP_DESC(PL_op));
+			    "%s in %s", unees, OP_DESC(PL_op));
 		else
 		    Perl_warner(aTHX_ packWARN(WARN_UTF8), unees);
 	    }
@@ -654,17 +646,8 @@ Perl_utf8_distance(pTHX_ const U8 *a, const U8 *b)
     if (a < b) {
 	while (a < b) {
 	    const U8 c = UTF8SKIP(a);
-
-	    if (b - a < c) {
-	        if (ckWARN_d(WARN_UTF8)) {
-		    if (PL_op)
-		        Perl_warner(aTHX_ packWARN(WARN_UTF8),
-				    "%s in %s", unees, OP_DESC(PL_op));
-		    else
-		        Perl_warner(aTHX_ packWARN(WARN_UTF8), unees);
-		}
-		return off;
-	    }
+	    if (b - a < c)
+		goto warn_and_return;
 	    a += c;
 	    off--;
 	}
@@ -674,6 +657,7 @@ Perl_utf8_distance(pTHX_ const U8 *a, const U8 *b)
 	    const U8 c = UTF8SKIP(b);
 
 	    if (a - b < c) {
+		warn_and_return:
 	        if (ckWARN_d(WARN_UTF8)) {
 		    if (PL_op)
 		        Perl_warner(aTHX_ packWARN(WARN_UTF8),
@@ -1865,7 +1849,7 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim, UV f
 	 }
 	 u = utf8_to_uvchr((U8*)s, 0);
 	 if (u < 256) {
-	     unsigned char c = (unsigned char)u & 0xFF;
+	     const unsigned char c = (unsigned char)u & 0xFF;
 	     if (!ok && (flags & UNI_DISPLAY_BACKSLASH)) {
 	         switch (c) {
 		 case '\n':

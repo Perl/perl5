@@ -1592,9 +1592,6 @@ Perl_runops_debug(pTHX)
 I32
 Perl_debop(pTHX_ const OP *o)
 {
-    CV *cv;
-    SV *sv;
-
     if (CopSTASH_eq(PL_curcop, PL_debstash) && !DEBUG_J_TEST_)
 	return 0;
 
@@ -1606,7 +1603,7 @@ Perl_debop(pTHX_ const OP *o)
     case OP_GVSV:
     case OP_GV:
 	if (cGVOPo_gv) {
-	    sv = NEWSV(0,0);
+	    SV *sv = NEWSV(0,0);
 	    gv_fullname3(sv, cGVOPo_gv, Nullch);
 	    PerlIO_printf(Perl_debug_log, "(%s)", SvPV_nolen(sv));
 	    SvREFCNT_dec(sv);
@@ -1617,8 +1614,10 @@ Perl_debop(pTHX_ const OP *o)
     case OP_PADSV:
     case OP_PADAV:
     case OP_PADHV:
+	{
 	/* print the lexical's name */
-        cv = deb_curcv(cxstack_ix);
+	CV *cv = deb_curcv(cxstack_ix);
+	SV *sv;
         if (cv) {
             AV *padlist = CvPADLIST(cv);
             AV *comppad = (AV*)(*av_fetch(padlist, 0, FALSE));
@@ -1629,6 +1628,7 @@ Perl_debop(pTHX_ const OP *o)
            PerlIO_printf(Perl_debug_log, "(%s)", SvPV_nolen(sv));
         else
            PerlIO_printf(Perl_debug_log, "[%"UVuf"]", (UV)o->op_targ);
+	}
         break;
     default:
 	break;

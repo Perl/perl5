@@ -10622,7 +10622,7 @@ S_set_csh(pTHX)
 I32
 Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
 {
-    I32 oldsavestack_ix = PL_savestack_ix;
+    const I32 oldsavestack_ix = PL_savestack_ix;
     CV* outsidecv = PL_compcv;
 
     if (PL_compcv) {

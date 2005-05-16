@@ -136,7 +136,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
 #  define SvREFCNT_inc(sv)		\
     ({					\
-	SV *_sv = (SV*)(sv);		\
+	SV * const _sv = (SV*)(sv);	\
 	if (_sv)			\
 	     (SvREFCNT(_sv))++;		\
 	_sv;				\
@@ -149,7 +149,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
 #  define SvREFCNT_dec(sv)		\
     ({					\
-	SV *_sv = (SV*)(sv);		\
+	SV * const _sv = (SV*)(sv);	\
 	if (_sv) {			\
 	    if (SvREFCNT(_sv)) {	\
 		if (--(SvREFCNT(_sv)) == 0) \

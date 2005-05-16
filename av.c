@@ -487,8 +487,6 @@ Undefines the array.  Frees the memory used by the array itself.
 void
 Perl_av_undef(pTHX_ register AV *av)
 {
-    register I32 key;
-
     if (!av)
 	return;
     /*SUPPRESS 560*/
@@ -498,7 +496,7 @@ Perl_av_undef(pTHX_ register AV *av)
 	av_fill(av, -1);   /* mg_clear() ? */
 
     if (AvREAL(av)) {
-	key = AvFILLp(av) + 1;
+	register I32 key = AvFILLp(av) + 1;
 	while (key)
 	    SvREFCNT_dec(AvARRAY(av)[--key]);
     }
@@ -608,9 +606,7 @@ Perl_av_unshift(pTHX_ register AV *av, register I32 num)
 {
     dVAR;
     register I32 i;
-    register SV **ary;
     MAGIC* mg;
-    I32 slide;
 
     if (!av)
 	return;
@@ -649,6 +645,8 @@ Perl_av_unshift(pTHX_ register AV *av, register I32 num)
 	SvPV_set(av, (char*)(AvARRAY(av) - i));
     }
     if (num) {
+	register SV **ary;
+	I32 slide;
 	i = AvFILLp(av);
 	/* Create extra elements */
 	slide = i > 0 ? i : 0;
