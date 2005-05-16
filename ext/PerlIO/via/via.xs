@@ -247,7 +247,7 @@ PerlIOVia_open(pTHX_ PerlIO_funcs * self, PerlIO_list_t * layers,
 	else {
 	    /* Required open method not present */
 	    PerlIO_funcs *tab = NULL;
-	    const IV m = n - 1;
+	    IV m = n - 1;
 	    while (m >= 0) {
 		PerlIO_funcs *t =
 		    PerlIO_layer_fetch(aTHX_ layers, m, NULL);
@@ -255,7 +255,7 @@ PerlIOVia_open(pTHX_ PerlIO_funcs * self, PerlIO_list_t * layers,
 		    tab = t;
 		    break;
 		}
-		n--;
+		m--;
 	    }
 	    if (tab) {
 		if ((*tab->Open) (aTHX_ tab, layers, m, mode, fd, imode,
