@@ -1937,6 +1937,10 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	   there's no way that it can be safely upgraded, because perl.c
 	   expects to Safefree(SvANY(PL_mess_sv))  */
 	assert(sv != PL_mess_sv);
+	/* This flag bit is used to mean other things in other scalar types.
+	   Given that it only has meaning inside the pad, it shouldn't be set
+	   on anything that can get upgraded.  */
+	assert((SvFLAGS(sv) & SVpad_TYPED) == 0);
 	pv	= SvPVX(sv);
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
@@ -5975,7 +5979,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
     if (SvTYPE(sv) >= SVt_PVMG) {
     	if (SvMAGIC(sv))
 	    mg_free(sv);
-	if (SvFLAGS(sv) & SVpad_TYPED)
+	if (SvTYPE(sv) == SVt_PVMG && SvFLAGS(sv) & SVpad_TYPED)
 	    SvREFCNT_dec(SvSTASH(sv));
     }
     stash = NULL;
