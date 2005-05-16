@@ -204,17 +204,17 @@ sub write_protos {
 	$ret .= ")";
 	my @attrs;
 	if ( $flags =~ /r/ ) {
-	    push @attrs, "__attribute__((noreturn))";
+	    push @attrs, "__attribute__noreturn__";
 	}
 	if ( $flags =~ /a/ ) {
-	    push @attrs, "__attribute__((malloc))";
+	    push @attrs, "__attribute__malloc__";
 	    $flags .= "R"; # All allocing must check return value
 	}
 	if ( $flags =~ /R/ ) {
-	    push @attrs, "__attribute__((warn_unused_result))";
+	    push @attrs, "__attribute__warn_unused_result__";
 	}
 	if ( $flags =~ /P/ ) {
-	    push @attrs, "__attribute__((pure))";
+	    push @attrs, "__attribute__pure__";
 	}
 	if( $flags =~ /f/ ) {
 	    my $prefix = $has_context ? 'pTHX_' : '';
@@ -224,7 +224,7 @@ sub write_protos {
 	}
 	if ( @nonnull ) {
 	    my @pos = map { $has_context ? "pTHX_$_" : $_ } @nonnull;
-	    push @attrs, sprintf( "__attribute__((nonnull(%s)))", join( ",", @pos ) );
+	    push @attrs, map { sprintf( "__attribute__nonnull__(%s)", $_ ) } @pos;
 	}
 	if ( @attrs ) {
 	    $ret .= "\n";

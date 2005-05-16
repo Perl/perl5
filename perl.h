@@ -2558,6 +2558,24 @@ typedef pthread_key_t	perl_key;
 #  endif
 #endif
 
+#if __GNUC__ >= 3
+#  define __attribute__malloc__             __attribute__((malloc))
+#  define __attribute__nonnull__(a)         __attribute__((nonnull(a)))
+#  define __attribute__noreturn__           __attribute__((noreturn))
+#  define __attribute__pure__               __attribute__((pure))
+#  define __attribute__warn_unused_result__ __attribute__((warn_unused_result))
+#else
+#  define __attribute__malloc__
+#  define __attribute__nonnull__(a)
+#  define __attribute__noreturn__
+#  define __attribute__pure__
+#  define __attribute__warn_unused_result__
+#endif
+
+#if defined(HASATTRIBUTE) && __GNUC__ >= 3
+#  define HASATTRIBUTE_NORETURN
+#endif
+
 /* Some unistd.h's give a prototype for pause() even though
    HAS_PAUSE ends up undefined.  This causes the #define
    below to be rejected by the compiler.  Sigh.

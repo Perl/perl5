@@ -819,7 +819,7 @@ Perl_reentrant_free(pTHX) {
 void*
 Perl_reentrant_retry(const char *f, ...)
 {
-    dVAR; dTHX;
+    dTHX;
     void *retptr = NULL;
 #ifdef USE_REENTRANT_API
 #  if defined(USE_HOSTENT_BUFFER) || defined(USE_GRENT_BUFFER) || defined(USE_NETENT_BUFFER) || defined(USE_PWENT_BUFFER) || defined(USE_PROTOENT_BUFFER) || defined(USE_SERVENT_BUFFER)

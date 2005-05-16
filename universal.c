@@ -416,7 +416,7 @@ XS(XS_version_stringify)
 	  Perl_croak(aTHX_ "Usage: version::stringify(lobj, ...)");
      SP -= items;
      {
-	  SV *	lobj;
+	  SV *	lobj = Nullsv;
 
 	  if (sv_derived_from(ST(0), "version")) {
 	       SV *tmp = SvRV(ST(0));
@@ -439,7 +439,7 @@ XS(XS_version_numify)
 	  Perl_croak(aTHX_ "Usage: version::numify(lobj, ...)");
      SP -= items;
      {
-	  SV *	lobj;
+	  SV *	lobj = Nullsv;
 
 	  if (sv_derived_from(ST(0), "version")) {
 	       SV *tmp = SvRV(ST(0));
@@ -462,7 +462,7 @@ XS(XS_version_vcmp)
 	  Perl_croak(aTHX_ "Usage: version::vcmp(lobj, ...)");
      SP -= items;
      {
-	  SV *	lobj;
+	  SV *	lobj = Nullsv;
 
 	  if (sv_derived_from(ST(0), "version")) {
 	       SV *tmp = SvRV(ST(0));
@@ -507,7 +507,7 @@ XS(XS_version_boolean)
 	  Perl_croak(aTHX_ "Usage: version::boolean(lobj, ...)");
      SP -= items;
      {
-	  SV *	lobj;
+	  SV *	lobj = Nullsv;
 
 	  if (sv_derived_from(ST(0), "version")) {
                /* XXX If tmp serves a purpose, explain it. */
@@ -534,7 +534,7 @@ XS(XS_version_noop)
      if (items < 1)
 	  Perl_croak(aTHX_ "Usage: version::noop(lobj, ...)");
      {
-	  SV *	lobj;
+	  SV *	lobj = Nullsv;
 
 	  if (sv_derived_from(ST(0), "version")) {
 	       SV *tmp = SvRV(ST(0));
@@ -558,7 +558,7 @@ XS(XS_version_is_alpha)
 	Perl_croak(aTHX_ "Usage: version::is_alpha(lobj)");
     SP -= items;
     {
-	SV *lobj;
+	SV * lobj = Nullsv;
 
         if (sv_derived_from(ST(0), "version")) {
                 /* XXX If tmp serves a purpose, explain it. */

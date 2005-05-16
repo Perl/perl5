@@ -2366,9 +2366,8 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
     return fold_constants((OP *)binop);
 }
 
-static int uvcompare(const void *a, const void *b) __attribute__((nonnull,pure));
-static int
-uvcompare(const void *a, const void *b)
+static int uvcompare(const void *a, const void *b) __attribute__nonnull__(1) __attribute__nonnull__(2) __attribute__pure__;
+static int uvcompare(const void *a, const void *b)
 {
     if (*((const UV *)a) < (*(const UV *)b))
 	return -1;
@@ -4900,9 +4899,9 @@ Perl_oopsCV(pTHX_ OP *o)
     Perl_croak(aTHX_ "NOT IMPL LINE %d",__LINE__);
     /* STUB */
     (void)o;
-#ifndef HASATTRIBUTE
-    /* No __attribute__, so the compiler doesn't know that croak never returns
-     */
+#ifndef HASATTRIBUTE_NORETURN
+    /* No __attribute__((noreturn)), so the compiler doesn't know that
+     * croak never returns. */
     return 0;
 #endif
 }
