@@ -56,6 +56,10 @@ bignum upgraded to version 0.17
 
 =item *
 
+Carp upgraded to version 1.04
+
+=item *
+
 CGI upgraded to version 3.10
 
 =item *
@@ -174,6 +178,10 @@ Unicode::Normalize upgraded to version 0.32
 =item *
 
 utf8 upgraded to version 1.05
+
+=item *
+
+Win32::Win32 upgraded to version 1.24, which provides Win32::GetFileVersion
 
 =back
 
