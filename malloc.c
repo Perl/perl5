@@ -640,7 +640,7 @@ struct aligner {
 
 #ifdef BUCKETS_ROOT2
 #  define MAX_BUCKET_BY_TABLE 13
-static u_short buck_size[MAX_BUCKET_BY_TABLE + 1] = 
+static const u_short buck_size[MAX_BUCKET_BY_TABLE + 1] = 
   { 
       0, 0, 0, 0, 4, 4, 8, 12, 16, 24, 32, 48, 64, 80,
   };
@@ -804,7 +804,7 @@ static u_short buck_size[MAX_BUCKET_BY_TABLE + 1] =
 #  define N_BLKS(bucket) n_blks[bucket]
 #endif 
 
-static u_short n_blks[LOG_OF_MIN_ARENA * BUCKETS_PER_POW2] = 
+static const u_short n_blks[LOG_OF_MIN_ARENA * BUCKETS_PER_POW2] =
   {
 #  if BUCKETS_PER_POW2==1
       0, 0,
@@ -827,7 +827,7 @@ static u_short n_blks[LOG_OF_MIN_ARENA * BUCKETS_PER_POW2] =
 #  define BLK_SHIFT(bucket) blk_shift[bucket]
 #endif 
 
-static u_short blk_shift[LOG_OF_MIN_ARENA * BUCKETS_PER_POW2] = 
+static const u_short blk_shift[LOG_OF_MIN_ARENA * BUCKETS_PER_POW2] =
   { 
 #  if BUCKETS_PER_POW2==1
       0, 0,
@@ -875,7 +875,7 @@ static u_short blk_shift[LOG_OF_MIN_ARENA * BUCKETS_PER_POW2] =
 #    else
 #      define SIZE_TABLE_MAX 64
 #    endif 
-static char bucket_of[] =
+static const char bucket_of[] =
   {
 #    ifdef BUCKETS_ROOT2		/* Chunks of size 3*2^n. */
       /* 0 to 15 in 4-byte increments. */

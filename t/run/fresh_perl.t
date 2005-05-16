@@ -871,4 +871,4 @@ $t =~ s/([^a])//ge;
 $@ =~ s/ at .*/ at/;
 print $@
 EXPECT
-Malformed UTF-8 character (unexpected end of string) at
+Malformed UTF-8 character (unexpected end of string) in substitution (s///) at

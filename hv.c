@@ -527,7 +527,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    bool needs_store;
 	    hv_magic_check (hv, &needs_copy, &needs_store);
 	    if (needs_copy) {
-		bool save_taint = PL_tainted;	
+		const bool save_taint = PL_tainted;
 		if (keysv || is_utf8) {
 		    if (!keysv) {
 			keysv = newSVpvn(key, klen);
@@ -805,7 +805,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 STATIC void
 S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store)
 {
-    MAGIC *mg = SvMAGIC(hv);
+    const MAGIC *mg = SvMAGIC(hv);
     *needs_copy = FALSE;
     *needs_store = TRUE;
     while (mg) {
@@ -1073,13 +1073,11 @@ STATIC void
 S_hsplit(pTHX_ HV *hv)
 {
     register XPVHV* xhv = (XPVHV*)SvANY(hv);
-    I32 oldsize = (I32) xhv->xhv_max+1; /* HvMAX(hv)+1 (sick) */
+    const I32 oldsize = (I32) xhv->xhv_max+1; /* HvMAX(hv)+1 (sick) */
     register I32 newsize = oldsize * 2;
     register I32 i;
     register char *a = xhv->xhv_array; /* HvARRAY(hv) */
     register HE **aep;
-    register HE **bep;
-    register HE *entry;
     register HE **oentry;
     int longest_chain = 0;
     int was_shared;
@@ -1126,6 +1124,8 @@ S_hsplit(pTHX_ HV *hv)
     for (i=0; i<oldsize; i++,aep++) {
 	int left_length = 0;
 	int right_length = 0;
+	register HE *entry;
+	register HE **bep;
 
 	if (!*aep)				/* non-existent */
 	    continue;
@@ -1184,12 +1184,13 @@ S_hsplit(pTHX_ HV *hv)
     aep = (HE **) xhv->xhv_array;
 
     for (i=0; i<newsize; i++,aep++) {
-	entry = *aep;
+	register HE *entry = *aep;
 	while (entry) {
 	    /* We're going to trash this HE's next pointer when we chain it
 	       into the new hash below, so store where we go next.  */
 	    HE *next = HeNEXT(entry);
 	    UV hash;
+	    HE **bep;
 
 	    /* Rehash it */
 	    PERL_HASH_INTERNAL(hash, HeKEY(entry), HeKLEN(entry));
@@ -1227,10 +1228,9 @@ void
 Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 {
     register XPVHV* xhv = (XPVHV*)SvANY(hv);
-    I32 oldsize = (I32) xhv->xhv_max+1; /* HvMAX(hv)+1 (sick) */
+    const I32 oldsize = (I32) xhv->xhv_max+1; /* HvMAX(hv)+1 (sick) */
     register I32 newsize;
     register I32 i;
-    register I32 j;
     register char *a;
     register HE **aep;
     register HE *entry;
@@ -1286,6 +1286,7 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 	if (!*aep)				/* non-existent */
 	    continue;
 	for (oentry = aep, entry = *aep; entry; entry = *oentry) {
+	    register I32 j;
 	    if ((j = (HeHASH(entry) & newsize)) != i) {
 		j -= i;
 		*oentry = HeNEXT(entry);
@@ -1345,7 +1346,7 @@ Perl_newHVhv(pTHX_ HV *ohv)
     if (!SvMAGICAL((SV *)ohv)) {
 	/* It's an ordinary hash, so copy it fast. AMS 20010804 */
 	STRLEN i;
-	bool shared = !!HvSHAREKEYS(ohv);
+	const bool shared = !!HvSHAREKEYS(ohv);
 	HE **ents, **oents = (HE **)HvARRAY(ohv);
 	char *a;
 	New(0, a, PERL_HV_ARRAY_ALLOC_BYTES(hv_max+1), char);
@@ -1362,10 +1363,10 @@ Perl_newHVhv(pTHX_ HV *ohv)
 
 	    /* Copy the linked list of entries. */
 	    for (oent = oents[i]; oent; oent = HeNEXT(oent)) {
-		U32 hash   = HeHASH(oent);
-		char *key  = HeKEY(oent);
-		STRLEN len = HeKLEN(oent);
-                int flags  = HeKFLAGS(oent);
+		const U32 hash   = HeHASH(oent);
+		const char * const key = HeKEY(oent);
+		const STRLEN len = HeKLEN(oent);
+		const int flags  = HeKFLAGS(oent);
 
 		ent = new_HE();
 		HeVAL(ent)     = newSVsv(HeVAL(oent));
@@ -1465,9 +1466,8 @@ Perl_hv_clear(pTHX_ HV *hv)
     if (SvREADONLY(hv) && xhv->xhv_array != NULL) {
 	/* restricted hash: convert all keys to placeholders */
 	I32 i;
-	HE* entry;
 	for (i = 0; i <= (I32) xhv->xhv_max; i++) {
-	    entry = ((HE**)xhv->xhv_array)[i];
+	    HE *entry = ((HE**)xhv->xhv_array)[i];
 	    for (; entry; entry = HeNEXT(entry)) {
 		/* not already placeholder */
 		if (HeVAL(entry) != &PL_sv_placeholder) {
@@ -1526,7 +1526,7 @@ Perl_hv_clear_placeholders(pTHX_ HV *hv)
 
     do {
 	/* Loop down the linked list heads  */
-	int first = 1;
+	bool first = 1;
 	HE **oentry = &(HvARRAY(hv))[i];
 	HE *entry = *oentry;
 
@@ -1567,7 +1567,6 @@ S_hfreeentries(pTHX_ HV *hv)
 {
     register HE **array;
     register HE *entry;
-    register HE *oentry = Null(HE*);
     I32 riter;
     I32 max;
 
@@ -1588,7 +1587,7 @@ S_hfreeentries(pTHX_ HV *hv)
     entry = array[0];
     for (;;) {
 	if (entry) {
-	    oentry = entry;
+	    register HE *oentry = entry;
 	    entry = HeNEXT(entry);
 	    hv_free_ent(hv, oentry);
 	}
@@ -1847,7 +1846,7 @@ Perl_hv_iterkeysv(pTHX_ register HE *entry)
 {
     if (HeKLEN(entry) != HEf_SVKEY) {
         HEK *hek = HeKEY_hek(entry);
-        int flags = HEK_FLAGS(hek);
+        const int flags = HEK_FLAGS(hek);
         SV *sv;
 
         if (flags & HVhek_WASUTF8) {
@@ -1897,7 +1896,8 @@ Perl_hv_iterval(pTHX_ HV *hv, register HE *entry)
 	    SV* sv = sv_newmortal();
 	    if (HeKLEN(entry) == HEf_SVKEY)
 		mg_copy((SV*)hv, sv, (char*)HeKEY_sv(entry), HEf_SVKEY);
-	    else mg_copy((SV*)hv, sv, HeKEY(entry), HeKLEN(entry));
+	    else
+		mg_copy((SV*)hv, sv, HeKEY(entry), HeKLEN(entry));
 	    return sv;
 	}
     }
@@ -1974,7 +1974,7 @@ S_unshare_hek_or_pvn(pTHX_ HEK *hek, const char *str, I32 len, U32 hash)
     register HE *entry;
     register HE **oentry;
     HE **first;
-    I32 found = 0;
+    bool found = 0;
     bool is_utf8 = FALSE;
     int k_flags = 0;
     const char *save = str;

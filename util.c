@@ -1366,10 +1366,10 @@ void
 Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 {
     if (ckDEAD(err)) {
-	SV *msv = vmess(pat, args);
+	SV * const msv = vmess(pat, args);
 	STRLEN msglen;
 	const char *message = SvPV(msv, msglen);
-	I32 utf8 = SvUTF8(msv);
+	const I32 utf8 = SvUTF8(msv);
 
 #ifdef USE_5005THREADS
 	DEBUG_S(PerlIO_printf(Perl_debug_log, "croak: 0x%"UVxf" %s", PTR2UV(thr), message));

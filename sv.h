@@ -156,7 +156,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
 #  define SvREFCNT_inc(sv)		\
     ({					\
-	SV *_sv = (SV*)(sv);		\
+	SV * const _sv = (SV*)(sv);	\
 	if (_sv)			\
 	     ATOMIC_INC(SvREFCNT(_sv));	\
 	_sv;				\

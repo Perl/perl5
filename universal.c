@@ -140,12 +140,9 @@ for class names as well as for objects.
 bool
 Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
 {
-    const char *type;
-    HV *stash;
+    const char *type = Nullch;
+    HV *stash = Nullhv;
     HV *name_stash;
-
-    stash = Nullhv;
-    type = Nullch;
 
     if (SvGMAGICAL(sv))
         mg_get(sv) ;
@@ -321,7 +318,6 @@ XS(XS_UNIVERSAL_VERSION)
     }
 
     if (items > 1) {
-	STRLEN len;
 	SV *req = ST(1);
 
 	if (undef) {
@@ -331,13 +327,14 @@ XS(XS_UNIVERSAL_VERSION)
 			     "%s does not define $%s::VERSION--version check failed",
 			     name, name);
 	    } else {
-                  const char *str = SvPVx(ST(0), len);
-
-		  Perl_croak(aTHX_
-			     "%s defines neither package nor VERSION--version check failed", str);
+		STRLEN n_a;
+		const char *str = SvPVx(ST(0), n_a);
+		Perl_croak(aTHX_
+			   "%s defines neither package nor VERSION--version check failed", str);
 	     }
 	}
 	if (!SvNIOK(sv) && SvPOK(sv)) {
+	    STRLEN len;
 	    char *str = SvPVx(sv,len);
 	    while (len) {
 		--len;
