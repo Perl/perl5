@@ -23,18 +23,13 @@ use overload '""' => \&as_string,
 # Turn on special checking for Doug MacEachern's modperl
 my $MOD_PERL = 0;
 if (exists $ENV{MOD_PERL}) {
-  eval "require mod_perl";
-  if (defined $mod_perl::VERSION) {
-    my $float = $mod_perl::VERSION;
-    $float += 0;
-    if ($float >= 1.99) {
+  if ($ENV{MOD_PERL_API_VERSION} == 2) {
       $MOD_PERL = 2;
-      require Apache::RequestUtil;
-      eval "require APR::Table";  # Changing APIs? I hope not.
-    } else {
-      $MOD_PERL = 1;
-      require Apache;
-    }
+      require Apache2::RequestUtil;
+      require APR::Table;
+  } else {
+    $MOD_PERL = 1;
+    require Apache;
   }
 }
 
@@ -74,7 +69,9 @@ sub fetch {
 
 sub get_raw_cookie {
   my $r = shift;
-  $r ||= eval { Apache->request() } if $MOD_PERL;
+  $r ||= eval { $MOD_PERL == 2                    ? 
+                  Apache2::RequestUtil->request() :
+                  Apache->request } if $MOD_PERL;
   if ($r) {
     $raw_cookie = $r->headers_in->{'Cookie'};
   } else {
