@@ -280,7 +280,7 @@ integer formats:
     4_294_967_296       # underscore for legibility
     0xff                # hex
     0xdead_beef         # more hex   
-    0377                # octal
+    0377                # octal (only numbers, begins with 0)
     0b011011            # binary
 
 You are allowed to use underscores (underbars) in numeric literals
