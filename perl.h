@@ -2558,17 +2558,39 @@ typedef pthread_key_t	perl_key;
 #  endif
 #endif
 
+/* See http://www.ohse.de/uwe/articles/gcc-attributes.html, but
+ * contrary to the information warn_unused_result seems not to be in
+ * gcc 3.3.5, at least. --jhi */
+
 #if __GNUC__ >= 3
 #  define __attribute__malloc__             __attribute__((malloc))
+#endif
+#if __GNUC__ == 3 && __GNUC_MINOR__ >= 3 || __GNUC__ > 3
 #  define __attribute__nonnull__(a)         __attribute__((nonnull(a)))
+#endif
+#if __GNUC__ == 2 && __GNUC_MINOR__ >= 5 || __GNUC__ > 2
 #  define __attribute__noreturn__           __attribute__((noreturn))
+#endif
+#if __GNUC__ >= 3
 #  define __attribute__pure__               __attribute__((pure))
+#endif
+#if __GNUC__ == 3 && __GNUC_MINOR__ >= 4 || __GNUC__ > 3
 #  define __attribute__warn_unused_result__ __attribute__((warn_unused_result))
-#else
+#endif
+
+#ifndef __attribute__malloc__
 #  define __attribute__malloc__
+#endif
+#ifndef __attribute__nonnull__
 #  define __attribute__nonnull__(a)
+#endif
+#ifndef __attribute__noreturn__
 #  define __attribute__noreturn__
+#endif
+#ifndef __attribute__pure__
 #  define __attribute__pure__
+#endif
+#ifndef __attribute__warn_unused_result__
 #  define __attribute__warn_unused_result__
 #endif
 
