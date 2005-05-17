@@ -84,7 +84,7 @@ Digest upgraded to version 1.10
 
 =item *
 
-Encode upgraded to version 2.09
+Encode upgraded to version 2.10
 
 =item *
 

@@ -89,6 +89,7 @@ t/mime-header.t	test script
 t/perlio.t	test script
 t/rt.pl		even more test script
 t/unibench.pl	benchmark script
+t/utf8strict.t	test script
 ucm/8859-1.ucm	Unicode Character Map
 ucm/8859-10.ucm	Unicode Character Map
 ucm/8859-11.ucm	Unicode Character Map
