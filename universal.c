@@ -877,9 +877,9 @@ XS(XS_PerlIO_get_layers)
 
 		  if (details) {
 		       XPUSHs(namok ?
-			     newSVpv(SvPVX(*namsvp), 0) : &PL_sv_undef);
+			     newSVpv(SvPVX_const(*namsvp), 0) : &PL_sv_undef);
 		       XPUSHs(argok ?
-			     newSVpv(SvPVX(*argsvp), 0) : &PL_sv_undef);
+			     newSVpv(SvPVX_const(*argsvp), 0) : &PL_sv_undef);
 		       if (flgok)
 			    XPUSHi(SvIVX(*flgsvp));
 		       else

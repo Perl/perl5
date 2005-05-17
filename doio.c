@@ -822,7 +822,7 @@ Perl_nextargv(pTHX_ register GV *gv)
 			sv_catpv(sv,PL_inplace);
 		    }
 #ifndef FLEXFILENAMES
-		    if ((PerlLIO_stat(SvPVX(sv),&PL_statbuf) >= 0
+		    if ((PerlLIO_stat(SvPVX_const(sv),&PL_statbuf) >= 0
 			 && PL_statbuf.st_dev == filedev
 			 && PL_statbuf.st_ino == fileino)
 #ifdef DJGPP
@@ -840,7 +840,7 @@ Perl_nextargv(pTHX_ register GV *gv)
 #endif
 #ifdef HAS_RENAME
 #if !defined(DOSISH) && !defined(__CYGWIN__) && !defined(EPOC)
-		    if (PerlLIO_rename(PL_oldname,SvPVX(sv)) < 0) {
+		    if (PerlLIO_rename(PL_oldname,SvPVX_const(sv)) < 0) {
 		        if (ckWARN_d(WARN_INPLACE))	
 			    Perl_warner(aTHX_ packWARN(WARN_INPLACE),
 			      "Can't rename %s to %"SVf": %s, skipping file",
@@ -850,13 +850,13 @@ Perl_nextargv(pTHX_ register GV *gv)
 		    }
 #else
 		    do_close(gv,FALSE);
-		    (void)PerlLIO_unlink(SvPVX(sv));
-		    (void)PerlLIO_rename(PL_oldname,SvPVX(sv));
+		    (void)PerlLIO_unlink(SvPVX_const(sv));
+		    (void)PerlLIO_rename(PL_oldname,SvPVX_const(sv));
 		    do_open(gv,SvPVX(sv),SvCUR(sv),PL_inplace!=0,O_RDONLY,0,Nullfp);
 #endif /* DOSISH */
 #else
-		    (void)UNLINK(SvPVX(sv));
-		    if (link(PL_oldname,SvPVX(sv)) < 0) {
+		    (void)UNLINK(SvPVX_const(sv));
+		    if (link(PL_oldname,SvPVX_const(sv)) < 0) {
 		        if (ckWARN_d(WARN_INPLACE))	
 			    Perl_warner(aTHX_ packWARN(WARN_INPLACE),
 			      "Can't rename %s to %"SVf": %s, skipping file",
@@ -1407,7 +1407,7 @@ Perl_my_stat(pTHX)
 	s = SvPV(sv, len);
 	PL_statgv = Nullgv;
 	sv_setpvn(PL_statname, s, len);
-	s = SvPVX(PL_statname);		/* s now NUL-terminated */
+	s = SvPVX_const(PL_statname);		/* s now NUL-terminated */
 	PL_laststype = OP_STAT;
 	PL_laststatval = PerlLIO_stat(s, &PL_statcache);
 	if (PL_laststatval < 0 && ckWARN(WARN_NEWLINE) && strchr(s, '\n'))
@@ -2356,9 +2356,9 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 	}
        if ((tmpfp = PerlIO_tmpfile()) != NULL) {
 	    Stat_t st;
-	    if (!PerlLIO_stat(SvPVX(tmpglob),&st) && S_ISDIR(st.st_mode))
-		ok = ((wilddsc.dsc$a_pointer = tovmspath(SvPVX(tmpglob),vmsspec)) != NULL);
-	    else ok = ((wilddsc.dsc$a_pointer = tovmsspec(SvPVX(tmpglob),vmsspec)) != NULL);
+	    if (!PerlLIO_stat(SvPVX_const(tmpglob),&st) && S_ISDIR(st.st_mode))
+		ok = ((wilddsc.dsc$a_pointer = tovmspath(SvPVX_const(tmpglob),vmsspec)) != NULL);
+	    else ok = ((wilddsc.dsc$a_pointer = tovmsspec(SvPVX_const(tmpglob),vmsspec)) != NULL);
 	    if (ok) wilddsc.dsc$w_length = (unsigned short int) strlen(wilddsc.dsc$a_pointer);
 	    for (cp=wilddsc.dsc$a_pointer; ok && cp && *cp; cp++)
 		if (*cp == '?') *cp = '%';  /* VMS style single-char wildcard */

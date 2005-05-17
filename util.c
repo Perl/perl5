@@ -1008,7 +1008,7 @@ Perl_vmess(pTHX_ const char *pat, va_list *args)
 	    OutCopFILE(cop), (IV)CopLINE(cop));
 	if (GvIO(PL_last_in_gv) && IoLINES(GvIOp(PL_last_in_gv))) {
 	    const bool line_mode = (RsSIMPLE(PL_rs) &&
-			      SvCUR(PL_rs) == 1 && *SvPVX(PL_rs) == '\n');
+			      SvCUR(PL_rs) == 1 && *SvPVX_const(PL_rs) == '\n');
 	    Perl_sv_catpvf(aTHX_ sv, ", <%s> %s %"IVdf,
 			   PL_last_in_gv == PL_argvgv ?
 			   "" : GvNAME(PL_last_in_gv),
@@ -2732,13 +2732,13 @@ Perl_same_dirent(pTHX_ const char *a, const char *b)
 	sv_setpv(tmpsv, ".");
     else
 	sv_setpvn(tmpsv, a, fa - a);
-    if (PerlLIO_stat(SvPVX(tmpsv), &tmpstatbuf1) < 0)
+    if (PerlLIO_stat(SvPVX_const(tmpsv), &tmpstatbuf1) < 0)
 	return FALSE;
     if (fb == b)
 	sv_setpv(tmpsv, ".");
     else
 	sv_setpvn(tmpsv, b, fb - b);
-    if (PerlLIO_stat(SvPVX(tmpsv), &tmpstatbuf2) < 0)
+    if (PerlLIO_stat(SvPVX_const(tmpsv), &tmpstatbuf2) < 0)
 	return FALSE;
     return tmpstatbuf1.st_dev == tmpstatbuf2.st_dev &&
 	   tmpstatbuf1.st_ino == tmpstatbuf2.st_ino;
@@ -3765,7 +3765,7 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
 
 	if (pathlen) {
 	    /* shift down */
-	    Move(SvPVX(sv), SvPVX(sv) + namelen + 1, pathlen, char);
+	    Move(SvPVX_const(sv), SvPVX(sv) + namelen + 1, pathlen, char);
 	}
 
 	/* prepend current directory to the front */
@@ -3787,7 +3787,7 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
 	*SvEND(sv) = '\0';
 	SvPOK_only(sv);
 
-	if (PerlDir_chdir(SvPVX(sv)) < 0) {
+	if (PerlDir_chdir(SvPVX_const(sv)) < 0) {
 	    SV_CWD_RETURN_UNDEF;
 	}
     }

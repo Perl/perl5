@@ -496,7 +496,7 @@ S_depcom(pTHX)
 static void
 strip_return(SV *sv)
 {
-    register const char *s = SvPVX(sv);
+    register const char *s = SvPVX_const(sv);
     register const char *e = s + SvCUR(sv);
     /* outer loop optimized to do nothing if there are no CR-LFs */
     while (s < e) {
@@ -1069,7 +1069,7 @@ S_tokeq(pTHX_ SV *sv)
 	goto finish;
     d = s;
     if ( PL_hints & HINT_NEW_STRING ) {
-	pv = sv_2mortal(newSVpvn(SvPVX(pv), len));
+	pv = sv_2mortal(newSVpvn(SvPVX_const(pv), len));
 	if (SvUTF8(sv))
 	    SvUTF8_on(pv);
     }
@@ -1081,7 +1081,7 @@ S_tokeq(pTHX_ SV *sv)
 	*d++ = *s++;
     }
     *d = '\0';
-    SvCUR_set(sv, d - SvPVX(sv));
+    SvCUR_set(sv, d - SvPVX_const(sv));
   finish:
     if ( PL_hints & HINT_NEW_STRING )
        return new_constant(NULL, 0, "q", sv, pv, "q");
@@ -1407,7 +1407,7 @@ S_scan_const(pTHX_ char *start)
 		    continue;
 		}
 
-		i = d - SvPVX(sv);		/* remember current offset */
+		i = d - SvPVX_const(sv);		/* remember current offset */
 		SvGROW(sv, SvLEN(sv) + 256);	/* never more than 256 chars in a range */
 		d = SvPVX(sv) + i;		/* refresh d after realloc */
 		d -= 2;				/* eat the first char and the - */
@@ -1634,7 +1634,7 @@ S_scan_const(pTHX_ char *start)
 			    }
 			}
 			if (hicount) {
-			    STRLEN offset = d - SvPVX(sv);
+			    STRLEN offset = d - SvPVX_const(sv);
 			    U8 *src, *dst;
 			    d = SvGROW(sv, SvLEN(sv) + hicount + 1) + offset;
 			    src = (U8 *)d - 1;
@@ -1724,7 +1724,7 @@ S_scan_const(pTHX_ char *start)
 		    }
 #endif
 		    if (!has_utf8 && SvUTF8(res)) {
-			char *ostart = SvPVX(sv);
+			const char *ostart = SvPVX_const(sv);
 			SvCUR_set(sv, d - ostart);
 			SvPOK_on(sv);
 			*d = '\0';
@@ -1735,7 +1735,7 @@ S_scan_const(pTHX_ char *start)
 			has_utf8 = TRUE;
 		    }
 		    if (len > (STRLEN)(e - s + 4)) { /* I _guess_ 4 is \N{} --jhi */
-			char *odest = SvPVX(sv);
+			const char *odest = SvPVX_const(sv);
 
 			SvGROW(sv, (SvLEN(sv) + len - (e - s + 4)));
 			d = SvPVX(sv) + (d - odest);
@@ -1804,7 +1804,7 @@ S_scan_const(pTHX_ char *start)
 	    s += len;
 	    if (need > len) {
 		/* encoded value larger than old, need extra space (NOTE: SvCUR() not set here) */
-		STRLEN off = d - SvPVX(sv);
+		STRLEN off = d - SvPVX_const(sv);
 		d = SvGROW(sv, SvLEN(sv) + (need-len)) + off;
 	    }
 	    d = (char*)uvchr_to_utf8((U8*)d, uv);
@@ -1817,7 +1817,7 @@ S_scan_const(pTHX_ char *start)
 
     /* terminate the string and set up the sv */
     *d = '\0';
-    SvCUR_set(sv, d - SvPVX(sv));
+    SvCUR_set(sv, d - SvPVX_const(sv));
     if (SvCUR(sv) >= SvLEN(sv))
 	Perl_croak(aTHX_ "panic: constant overflowed allocated space");
 
@@ -2044,7 +2044,7 @@ S_intuit_method(pTHX_ char *start, GV *gv)
 	if (GvIO(gv))
 	    return 0;
 	if ((cv = GvCVu(gv))) {
-	    const char *proto = SvPVX(cv);
+	    const char *proto = SvPVX_const(cv);
 	    if (proto) {
 		if (*proto == ';')
 		    proto++;
@@ -4173,7 +4173,7 @@ Perl_yylex(pTHX)
 		yylval.opval->op_private = OPpCONST_BARE;
 		/* UTF-8 package name? */
 		if (UTF && !IN_BYTES &&
-		    is_utf8_string((U8*)SvPVX(sv), SvCUR(sv)))
+		    is_utf8_string((U8*)SvPVX_const(sv), SvCUR(sv)))
 		    SvUTF8_on(sv);
 
 		/* And if "Foo::", then that's what it certainly is. */
@@ -8985,7 +8985,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv,
 	msg = Perl_newSVpvf(aTHX_ "Constant(%s): %s%s%s",
 			    (type ? type: "undef"), why1, why2, why3);
     msgdone:
-	yyerror(SvPVX(msg));
+	yyerror(SvPVX_const(msg));
  	SvREFCNT_dec(msg);
   	return sv;
     }
@@ -9495,7 +9495,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	}
 	*d = '\0';
 	PL_bufend = d;
-	SvCUR_set(PL_linestr, PL_bufend - SvPVX(PL_linestr));
+	SvCUR_set(PL_linestr, PL_bufend - SvPVX_const(PL_linestr));
 	s = olds;
     }
 #endif
@@ -9544,7 +9544,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	sv_setpvn(tmpstr,d+1,s-d);
 	s += len - 1;
 	sv_catpvn(herewas,s,bufend-s);
-	Copy(SvPVX(herewas),bufptr,SvCUR(herewas) + 1,char);
+	Copy(SvPVX_const(herewas),bufptr,SvCUR(herewas) + 1,char);
 
 	s = olds;
 	goto retval;
@@ -9588,7 +9588,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	    {
 		PL_bufend[-2] = '\n';
 		PL_bufend--;
-		SvCUR_set(PL_linestr, PL_bufend - SvPVX(PL_linestr));
+		SvCUR_set(PL_linestr, PL_bufend - SvPVX_const(PL_linestr));
 	    }
 	    else if (PL_bufend[-1] == '\r')
 		PL_bufend[-1] = '\n';
@@ -9606,7 +9606,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	    av_store(CopFILEAV(PL_curcop), (I32)CopLINE(PL_curcop),sv);
 	}
 	if (*s == term && memEQ(s,PL_tokenbuf,len)) {
-	    STRLEN off = PL_bufend - 1 - SvPVX(PL_linestr);
+	    STRLEN off = PL_bufend - 1 - SvPVX_const(PL_linestr);
 	    *(SvPVX(PL_linestr) + off ) = ' ';
 	    sv_catsv(PL_linestr,herewas);
 	    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
@@ -9625,7 +9625,7 @@ retval:
     }
     SvREFCNT_dec(herewas);
     if (!IN_BYTES) {
-	if (UTF && is_utf8_string((U8*)SvPVX(tmpstr), SvCUR(tmpstr)))
+	if (UTF && is_utf8_string((U8*)SvPVX_const(tmpstr), SvCUR(tmpstr)))
 	    SvUTF8_on(tmpstr);
 	else if (PL_encoding)
 	    sv_recode_to_utf8(tmpstr, PL_encoding);
@@ -9899,10 +9899,10 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 	    bool cont = TRUE;
 
 	    while (cont) {
-		int offset = s - SvPVX(PL_linestr);
+		int offset = s - SvPVX_const(PL_linestr);
 		bool found = sv_cat_decode(sv, PL_encoding, PL_linestr,
 					   &offset, (char*)termstr, termlen);
-		char *ns = SvPVX(PL_linestr) + offset;
+		const char *ns = SvPVX_const(PL_linestr) + offset;
 		char *svlast = SvEND(sv) - 1;
 
 		for (; s < ns; s++) {
@@ -9915,7 +9915,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 		    /* handle quoted delimiters */
 		    if (SvCUR(sv) > 1 && *(svlast-1) == '\\') {
 			const char *t;
-			for (t = svlast-2; t >= SvPVX(sv) && *t == '\\';)
+			for (t = svlast-2; t >= SvPVX_const(sv) && *t == '\\';)
 			    t--;
 			if ((svlast-1 - t) % 2) {
 			    if (!keep_quoted) {
@@ -9951,7 +9951,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 			if (w < t) {
 			    *w++ = term;
 			    *w = '\0';
-			    SvCUR_set(sv, w - SvPVX(sv));
+			    SvCUR_set(sv, w - SvPVX_const(sv));
 			}
 			last = w;
 			if (--brackets <= 0)
@@ -10029,7 +10029,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 	}
 	/* terminate the copied string and update the sv's end-of-string */
 	*to = '\0';
-	SvCUR_set(sv, to - SvPVX(sv));
+	SvCUR_set(sv, to - SvPVX_const(sv));
 
 	/*
 	 * this next chunk reads more into the buffer if we're not done yet
@@ -10039,18 +10039,18 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 	    break;		/* handle case where we are done yet :-) */
 
 #ifndef PERL_STRICT_CR
-	if (to - SvPVX(sv) >= 2) {
+	if (to - SvPVX_const(sv) >= 2) {
 	    if ((to[-2] == '\r' && to[-1] == '\n') ||
 		(to[-2] == '\n' && to[-1] == '\r'))
 	    {
 		to[-2] = '\n';
 		to--;
-		SvCUR_set(sv, to - SvPVX(sv));
+		SvCUR_set(sv, to - SvPVX_const(sv));
 	    }
 	    else if (to[-1] == '\r')
 		to[-1] = '\n';
 	}
-	else if (to - SvPVX(sv) == 1 && to[-1] == '\r')
+	else if (to - SvPVX_const(sv) == 1 && to[-1] == '\r')
 	    to[-1] = '\n';
 #endif
 	
@@ -10567,7 +10567,7 @@ S_scan_formline(pTHX_ register char *s)
 	    else
 	      break;
 	}
-	s = eol;
+	s = (char*)eol;
 	if (PL_rsfp) {
 	    s = filter_gets(PL_linestr, PL_rsfp, 0);
 	    PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = SvPVX(PL_linestr);
@@ -10591,7 +10591,7 @@ S_scan_formline(pTHX_ register char *s)
 	else
 	    PL_lex_state = LEX_FORMLINE;
 	if (!IN_BYTES) {
-	    if (UTF && is_utf8_string((U8*)SvPVX(stuff), SvCUR(stuff)))
+	    if (UTF && is_utf8_string((U8*)SvPVX_const(stuff), SvCUR(stuff)))
 		SvUTF8_on(stuff);
 	    else if (PL_encoding)
 		sv_recode_to_utf8(stuff, PL_encoding);
@@ -10717,7 +10717,7 @@ Perl_yyerror(pTHX_ const char *s)
 	    Perl_sv_catpvf(aTHX_ where_sv, "%c", yychar);
 	else
 	    Perl_sv_catpvf(aTHX_ where_sv, "\\%03o", yychar & 255);
-	where = SvPVX(where_sv);
+	where = SvPVX_const(where_sv);
     }
     msg = sv_2mortal(newSVpv(s, 0));
     Perl_sv_catpvf(aTHX_ msg, " at %s line %"IVdf", ",
@@ -10876,8 +10876,8 @@ utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 	U8* tmps;
 	I32 newlen;
 	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, U8);
-	Copy(SvPVX(sv), tmps, old, char);
-	utf16_to_utf8((U8*)SvPVX(sv) + old, tmps + old,
+	Copy(SvPVX_const(sv), tmps, old, char);
+	utf16_to_utf8((U8*)SvPVX_const(sv) + old, tmps + old,
 		      SvCUR(sv) - old, &newlen);
 	sv_usepvn(sv, (char*)tmps, (STRLEN)newlen + old);
     }
@@ -10897,8 +10897,8 @@ utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 	U8* tmps;
 	I32 newlen;
 	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, U8);
-	Copy(SvPVX(sv), tmps, old, char);
-	utf16_to_utf8((U8*)SvPVX(sv) + old, tmps + old,
+	Copy(SvPVX_const(sv), tmps, old, char);
+	utf16_to_utf8((U8*)SvPVX_const(sv) + old, tmps + old,
 		      SvCUR(sv) - old, &newlen);
 	sv_usepvn(sv, (char*)tmps, (STRLEN)newlen + old);
     }
