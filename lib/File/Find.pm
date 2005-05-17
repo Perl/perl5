@@ -120,8 +120,11 @@ If either I<follow> or I<follow_fast> is in effect:
 
 =item *
 
-It is guaranteed that an I<lstat> has been called before the user's
-C<wanted()> function is called. This enables fast file checks involving S< _>.
+Previous versions of File::Find were guaranteed to call an I<lstat>
+before the user's C<wanted()> function was called, but this is no
+longer the case.  Since this depends on C<$File::Find::dont_use_nlink>, $^O,
+and other factors, fast file checks involving C<_> are not recommended
+unless C<wanted()> calls I<lstat> first.
 
 =item *
 
