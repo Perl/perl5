@@ -209,8 +209,8 @@ S_more_sv(pTHX)
     }
     else {
 	char *chunk;                /* must use New here to match call to */
-	New(704,chunk,1008,char);   /* Safefree() in sv_free_arenas()     */
-	sv_add_arena(chunk, 1008, 0);
+	New(704,chunk,PERL_ARENA_SIZE,char);   /* Safefree() in sv_free_arenas()     */
+	sv_add_arena(chunk, PERL_ARENA_SIZE, 0);
     }
     uproot_SV(sv);
     return sv;
