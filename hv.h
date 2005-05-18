@@ -305,7 +305,10 @@ C<SV*>.
 #define HEK_REHASH_on(hek)	(HEK_FLAGS(hek) |= HVhek_REHASH)
 
 /* calculate HV array allocation */
-#if defined(STRANGE_MALLOC) || defined(MYMALLOC)
+#ifndef PERL_USE_LARGE_HV_ALLOC
+/* Default to allocating the correct size - default to assuming that malloc()
+   is not broken and is efficient at allocating blocks sized at powers-of-two.
+*/   
 #  define PERL_HV_ARRAY_ALLOC_BYTES(size) ((size) * sizeof(HE*))
 #else
 #  define MALLOC_OVERHEAD 16
