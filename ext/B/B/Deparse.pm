@@ -1412,10 +1412,10 @@ sub pp_nextstate {
 
 sub declare_warnings {
     my ($from, $to) = @_;
-    if (($to & WARN_MASK) eq warnings::bits("all")) {
+    if (($to & WARN_MASK) eq (warnings::bits("all") & WARN_MASK)) {
 	return "use warnings;\n";
     }
-    elsif (($to & WARN_MASK) eq "\0"x length($to)) {
+    elsif (($to & WARN_MASK) eq ("\0"x length($to) & WARN_MASK)) {
 	return "no warnings;\n";
     }
     return "BEGIN {\${^WARNING_BITS} = ".perlstring($to)."}\n";
