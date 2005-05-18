@@ -621,7 +621,7 @@ SHRDLU_5
 	}
     }
     my ($user,$sys,$cuser,$csys) = times;
-    print sprintf("u=%g  s=%g  cu=%g  cs=%g  scripts=%d  tests=%d\n",
+    print sprintf("u=%.2f  s=%.2f  cu=%.2f  cs=%.2f  scripts=%d  tests=%d\n",
 	$user,$sys,$cuser,$csys,$tested_files,$totmax);
     if ($ENV{PERL_VALGRIND}) {
 	my $s = $valgrind == 1 ? '' : 's';
