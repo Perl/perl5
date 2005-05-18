@@ -551,6 +551,8 @@ END_EXTERN_C
 #define PL_stashcache		(*Perl_Istashcache_ptr(aTHX))
 #undef  PL_statusvalue
 #define PL_statusvalue		(*Perl_Istatusvalue_ptr(aTHX))
+#undef  PL_statusvalue_posix
+#define PL_statusvalue_posix	(*Perl_Istatusvalue_posix_ptr(aTHX))
 #undef  PL_statusvalue_vms
 #define PL_statusvalue_vms	(*Perl_Istatusvalue_vms_ptr(aTHX))
 #undef  PL_stderrgv

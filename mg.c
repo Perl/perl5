@@ -581,8 +581,13 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '\001':		/* ^A */
 	sv_setsv(sv, PL_bodytarget);
 	break;
-    case '\003':		/* ^C */
-	sv_setiv(sv, (IV)PL_minus_c);
+    case '\003':		/* ^C, ^CHILD_ERROR_NATIVE */
+	if (*(mg->mg_ptr+1) == '\0') {
+	    sv_setiv(sv, (IV)PL_minus_c);
+	}
+	else if (strEQ(mg->mg_ptr, "\003HILD_ERROR_NATIVE")) {
+	    sv_setiv(sv, (IV)STATUS_NATIVE);
+        }
 	break;
 
     case '\004':		/* ^D */
@@ -2291,7 +2296,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    STATUS_NATIVE_SET((U32)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)));
 	else
 #endif
-	    STATUS_POSIX_SET(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	    STATUS_UNIX_SET(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '!':
         {

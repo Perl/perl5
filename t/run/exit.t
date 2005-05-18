@@ -20,7 +20,7 @@ sub run {
 
 BEGIN {
     # MacOS system() doesn't have good return value
-    $numtests = ($^O eq 'VMS') ? 7 : ($^O eq 'MacOS') ? 0 : 3; 
+    $numtests = ($^O eq 'VMS') ? 10 : ($^O eq 'MacOS') ? 0 : 17;
 }
 
 require "test.pl";
@@ -31,11 +31,35 @@ my $exit, $exit_arg;
 
 $exit = run('exit');
 is( $exit >> 8, 0,              'Normal exit' );
+is( $exit, $?,                  'Normal exit $?' );
+is( ${^CHILD_ERROR_NATIVE}, 0,  'Normal exit ${^CHILD_ERROR_NATIVE}' );
 
 if ($^O ne 'VMS') {
+  my $posix_ok = eval { require POSIX; };
 
   $exit = run('exit 42');
   is( $exit >> 8, 42,             'Non-zero exit' );
+  is( $exit, $?,                  'Non-zero exit $?' );
+  isnt( !${^CHILD_ERROR_NATIVE}, 0, 'Non-zero exit ${^CHILD_ERROR_NATIVE}' );
+ SKIP: {
+      skip("No POSIX", 3) unless $posix_ok;
+      ok(POSIX::WIFEXITED(${^CHILD_ERROR_NATIVE}), "WIFEXITED");
+      ok(!POSIX::WIFSIGNALED(${^CHILD_ERROR_NATIVE}), "WIFSIGNALED");
+      is(POSIX::WEXITSTATUS(${^CHILD_ERROR_NATIVE}), 42, "WEXITSTATUS");
+  }
+
+  $exit = run('kill 15, $$; sleep(1);');
+
+  is( $exit & 127, 15,            'Term by signal' );
+  ok( !($exit & 128),             'No core dump' );
+  is( $? & 127, 15,               'Term by signal $?' );
+  isnt( ${^CHILD_ERROR_NATIVE},  0, 'Term by signal ${^CHILD_ERROR_NATIVE}' );
+ SKIP: {
+      skip("No POSIX", 3) unless $posix_ok;
+      ok(!POSIX::WIFEXITED(${^CHILD_ERROR_NATIVE}), "WIFEXITED");
+      ok(POSIX::WIFSIGNALED(${^CHILD_ERROR_NATIVE}), "WIFSIGNALED");
+      is(POSIX::WTERMSIG(${^CHILD_ERROR_NATIVE}), 15, "WTERMSIG");
+  }
 
 } else {
 
@@ -63,7 +87,7 @@ $exit = run("END { \$? = $exit_arg }");
 
 # On VMS, in the child process the actual exit status will be SS$_ABORT, 
 # which is what you get from any non-zero value of $? that has been 
-# dePOSIXified by STATUS_POSIX_SET.  In the parent process, all we'll 
+# dePOSIXified by STATUS_UNIX_SET.  In the parent process, all we'll 
 # see are the severity bits (0-2) shifted left by 8.
 $exit_arg = (44 & 7) if $^O eq 'VMS';  
 

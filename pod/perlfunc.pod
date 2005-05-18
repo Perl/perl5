@@ -782,7 +782,8 @@ program exits with non-zero status.  (If the only problem was that the
 program exited non-zero, C<$!> will be set to C<0>.)  Closing a pipe
 also waits for the process executing on the pipe to complete, in case you
 want to look at the output of the pipe afterwards, and
-implicitly puts the exit status value of that command into C<$?>.
+implicitly puts the exit status value of that command into C<$?> and
+C<${^CHILD_ERROR_NATIVE}>.
 
 Prematurely closing the read end of a pipe (i.e. before the process
 writing to it at the other end has closed it) will result in a
@@ -3126,7 +3127,8 @@ be set for the newly opened file descriptor as determined by the value
 of $^F.  See L<perlvar/$^F>.
 
 Closing any piped filehandle causes the parent process to wait for the
-child to finish, and returns the status value in C<$?>.
+child to finish, and returns the status value in C<$?> and
+C<${^CHILD_ERROR_NATIVE}>.
 
 The filename passed to 2-argument (or 1-argument) form of open() will
 have leading and trailing whitespace deleted, and the normal
@@ -5975,8 +5977,8 @@ C<$?> like this:
 	printf "child exited with value %d\n", $? >> 8;
     }
 
-or more portably by using the W*() calls of the POSIX extension;
-see L<perlport> for more information.
+Alternatively you might inspect the value of C<${^CHILD_ERROR_NATIVE}>
+with the W*() calls of the POSIX extension.
 
 When the arguments get executed via the system shell, results
 and return codes will be subject to its quirks and capabilities.
@@ -6761,7 +6763,8 @@ example should print the following table:
 
 Behaves like the wait(2) system call on your system: it waits for a child
 process to terminate and returns the pid of the deceased process, or
-C<-1> if there are no child processes.  The status is returned in C<$?>.
+C<-1> if there are no child processes.  The status is returned in C<$?>
+and C<{^CHILD_ERROR_NATIVE}.
 Note that a return value of C<-1> could mean that child processes are
 being automatically reaped, as described in L<perlipc>.
 
@@ -6770,7 +6773,7 @@ being automatically reaped, as described in L<perlipc>.
 Waits for a particular child process to terminate and returns the pid of
 the deceased process, or C<-1> if there is no such child process.  On some
 systems, a value of 0 indicates that there are processes still running.
-The status is returned in C<$?>.  If you say
+The status is returned in C<$?> and C<{^CHILD_ERROR_NATIVE}.  If you say
 
     use POSIX ":sys_wait_h";
     #...

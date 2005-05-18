@@ -617,7 +617,7 @@ L<perlfunc/formline()>.
 The status returned by the last pipe close, backtick (C<``>) command,
 successful call to wait() or waitpid(), or from the system()
 operator.  This is just the 16-bit status word returned by the
-wait() system call (or else is made up to look like it).  Thus, the
+traditional Unix wait() system call (or else is made up to look like it).  Thus, the
 exit value of the subprocess is really (C<<< $? >> 8 >>>), and
 C<$? & 127> gives which signal, if any, the process died from, and
 C<$? & 128> reports whether there was a core dump.  (Mnemonic:
@@ -642,6 +642,17 @@ actual VMS exit status, instead of the default emulation of POSIX
 status; see L<perlvms/$?> for details.
 
 Also see L<Error Indicators>.
+
+=item ${^CHILD_ERROR_NATIVE}
+
+The native status returned by the last pipe close, backtick (C<``>)
+command, successful call to wait() or waitpid(), or from the system()
+operator.  On POSIX-like systems this value can be decoded with the
+WIFEXITED, WEXITSTATUS, WIFSIGNALED, WTERMSIG, WIFSTOPPED, WSTOPSIG
+and WIFCONTINUED functions provided by the L<POSIX> module.
+
+Under VMS this reflects the actual VMS exit status; i.e. it is the same
+as $? when the pragma C<use vmsish 'status'> is in effect.
 
 =item ${^ENCODING}
 

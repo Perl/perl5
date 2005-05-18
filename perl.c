@@ -4806,13 +4806,13 @@ Perl_my_failure_exit(pTHX)
 #else
     int exitstatus;
     if (errno & 255)
-	STATUS_POSIX_SET(errno);
+	STATUS_UNIX_SET(errno);
     else {
-	exitstatus = STATUS_POSIX >> 8;
+	exitstatus = STATUS_UNIX >> 8;
 	if (exitstatus & 255)
-	    STATUS_POSIX_SET(exitstatus);
+	    STATUS_UNIX_SET(exitstatus);
 	else
-	    STATUS_POSIX_SET(255);
+	    STATUS_UNIX_SET(255);
     }
 #endif
     my_exit_jump();

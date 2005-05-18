@@ -2414,6 +2414,7 @@ typedef pthread_key_t	perl_key;
 #  include "netware.h"
 #endif
 
+#define STATUS_UNIX	PL_statusvalue
 #ifdef VMS
 #   define STATUS_NATIVE	PL_statusvalue_vms
 #   define STATUS_NATIVE_EXPORT \
@@ -2430,13 +2431,12 @@ typedef pthread_key_t	perl_key;
 	    else							\
 		PL_statusvalue = (PL_statusvalue_vms & STS$M_SEVERITY) << 8;	\
 	} STMT_END
-#   define STATUS_POSIX	PL_statusvalue
 #   ifdef VMSISH_STATUS
-#	define STATUS_CURRENT	(VMSISH_STATUS ? STATUS_NATIVE : STATUS_POSIX)
+#	define STATUS_CURRENT	(VMSISH_STATUS ? STATUS_NATIVE : STATUS_UNIX)
 #   else
-#	define STATUS_CURRENT	STATUS_POSIX
+#	define STATUS_CURRENT	STATUS_UNIX
 #   endif
-#   define STATUS_POSIX_SET(n)				\
+#   define STATUS_UNIX_SET(n)				\
 	STMT_START {					\
 	    PL_statusvalue = (n);				\
 	    if (PL_statusvalue != -1) {			\
@@ -2448,19 +2448,55 @@ typedef pthread_key_t	perl_key;
 #   define STATUS_ALL_SUCCESS	(PL_statusvalue = 0, PL_statusvalue_vms = 1)
 #   define STATUS_ALL_FAILURE	(PL_statusvalue = 1, PL_statusvalue_vms = 44)
 #else
-#   define STATUS_NATIVE	STATUS_POSIX
-#   define STATUS_NATIVE_EXPORT	STATUS_POSIX
-#   define STATUS_NATIVE_SET	STATUS_POSIX_SET
-#   define STATUS_POSIX		PL_statusvalue
-#   define STATUS_POSIX_SET(n)		\
+#   define STATUS_NATIVE	PL_statusvalue_posix
+#   define STATUS_NATIVE_EXPORT	STATUS_NATIVE
+#   if defined(WCOREDUMP)
+#       define STATUS_NATIVE_SET(n)                        \
+            STMT_START {                                   \
+                PL_statusvalue_posix = (n);                \
+                if (PL_statusvalue_posix == -1)            \
+                    PL_statusvalue = -1;                   \
+                else {                                     \
+                    PL_statusvalue =                       \
+                        (WIFEXITED(PL_statusvalue_posix) ? (WEXITSTATUS(PL_statusvalue_posix) << 8) : 0) |  \
+                        (WIFSIGNALED(PL_statusvalue_posix) ? (WTERMSIG(PL_statusvalue_posix) & 0x7F) : 0) | \
+                        (WIFSIGNALED(PL_statusvalue_posix) && WCOREDUMP(PL_statusvalue_posix) ? 0x80 : 0);  \
+                }                                          \
+            } STMT_END
+#   elif defined(WIFEXITED)
+#       define STATUS_NATIVE_SET(n)                        \
+            STMT_START {                                   \
+                PL_statusvalue_posix = (n);                \
+                if (PL_statusvalue_posix == -1)            \
+                    PL_statusvalue = -1;                   \
+                else {                                     \
+                    PL_statusvalue =                       \
+                        (WIFEXITED(PL_statusvalue_posix) ? (WEXITSTATUS(PL_statusvalue_posix) << 8) : 0) |  \
+                        (WIFSIGNALED(PL_statusvalue_posix) ? (WTERMSIG(PL_statusvalue_posix) & 0x7F) : 0);  \
+                }                                          \
+            } STMT_END
+#   else
+#       define STATUS_NATIVE_SET(n)                        \
+            STMT_START {                                   \
+                PL_statusvalue_posix = (n);                \
+                if (PL_statusvalue_posix == -1)            \
+                    PL_statusvalue = -1;                   \
+                else {                                     \
+                    PL_statusvalue =                       \
+                        PL_statusvalue_posix & 0xFFFF;     \
+                }                                          \
+            } STMT_END
+#   endif
+#   define STATUS_UNIX_SET(n)		\
 	STMT_START {			\
 	    PL_statusvalue = (n);		\
+            PL_statusvalue_posix = PL_statusvalue;       \
 	    if (PL_statusvalue != -1)	\
 		PL_statusvalue &= 0xFFFF;	\
 	} STMT_END
-#   define STATUS_CURRENT STATUS_POSIX
-#   define STATUS_ALL_SUCCESS	(PL_statusvalue = 0)
-#   define STATUS_ALL_FAILURE	(PL_statusvalue = 1)
+#   define STATUS_CURRENT STATUS_UNIX
+#   define STATUS_ALL_SUCCESS	(PL_statusvalue = 0, PL_statusvalue_posix = 0)
+#   define STATUS_ALL_FAILURE	(PL_statusvalue = 1, PL_statusvalue_posix = 1)
 #endif
 
 /* flags in PL_exit_flags for nature of exit() */

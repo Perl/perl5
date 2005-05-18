@@ -1046,7 +1046,7 @@ Perl_io_close(pTHX_ IO *io, bool not_implicit)
 	    const int status = PerlProc_pclose(IoIFP(io));
 	    if (not_implicit) {
 		STATUS_NATIVE_SET(status);
-		retval = (STATUS_POSIX == 0);
+		retval = (STATUS_UNIX == 0);
 	    }
 	    else {
 		retval = (status != -1);
