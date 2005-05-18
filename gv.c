@@ -950,6 +950,10 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		if (strEQ(name2, "ERSION"))
 		    GvMULTI_on(gv);
 		break;
+            case '\003':        /* $^CHILD_ERROR_NATIVE */
+		if (strEQ(name2, "HILD_ERROR_NATIVE"))
+		    goto magicalize;
+		break;
 	    case '\005':	/* $^ENCODING */
 		if (strEQ(name2, "NCODING"))
 		    goto magicalize;

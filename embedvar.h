@@ -418,6 +418,7 @@
 #define PL_srand_called		(PERL_GET_INTERP->Isrand_called)
 #define PL_stashcache		(PERL_GET_INTERP->Istashcache)
 #define PL_statusvalue		(PERL_GET_INTERP->Istatusvalue)
+#define PL_statusvalue_posix	(PERL_GET_INTERP->Istatusvalue_posix)
 #define PL_statusvalue_vms	(PERL_GET_INTERP->Istatusvalue_vms)
 #define PL_stderrgv		(PERL_GET_INTERP->Istderrgv)
 #define PL_stdingv		(PERL_GET_INTERP->Istdingv)
@@ -745,6 +746,7 @@
 #define PL_srand_called		(vTHX->Isrand_called)
 #define PL_stashcache		(vTHX->Istashcache)
 #define PL_statusvalue		(vTHX->Istatusvalue)
+#define PL_statusvalue_posix	(vTHX->Istatusvalue_posix)
 #define PL_statusvalue_vms	(vTHX->Istatusvalue_vms)
 #define PL_stderrgv		(vTHX->Istderrgv)
 #define PL_stdingv		(vTHX->Istdingv)
@@ -1075,6 +1077,7 @@
 #define PL_Isrand_called	PL_srand_called
 #define PL_Istashcache		PL_stashcache
 #define PL_Istatusvalue		PL_statusvalue
+#define PL_Istatusvalue_posix	PL_statusvalue_posix
 #define PL_Istatusvalue_vms	PL_statusvalue_vms
 #define PL_Istderrgv		PL_stderrgv
 #define PL_Istdingv		PL_stdingv
