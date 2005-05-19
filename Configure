@@ -339,7 +339,13 @@ d_aintl=''
 d_alarm=''
 asctime_r_proto=''
 d_asctime_r=''
-d_attribut=''
+d_attribute_format=''
+d_attribute_malloc=''
+d_attribute_nonnull=''
+d_attribute_noreturn=''
+d_attribute_pure=''
+d_attribute_unused=''
+d_attribute_warn_unused_result=''
 d_bcmp=''
 d_bcopy=''
 d_bzero=''
@@ -9878,21 +9884,21 @@ eval $inlibc
 set atoll d_atoll
 eval $inlibc
 
-: Look for GNU-cc style attribute checking
-case "$d_attribut" in
+: Look for GCC-style attribute format
+case "$d_attribute_format" in
 '')
 echo " "
-echo "Checking whether your compiler can handle __attribute__ ..." >&4
+echo "Checking whether your compiler can handle __attribute__((format)) ..." >&4
 $cat >attrib.c <<'EOCP'
 #include <stdio.h>
-void croak (char* pat,...) __attribute__((__format__(__printf__,1,2),noreturn));
+void my_special_printf(char* pat,...) __attribute__((__format__(__printf__,1,2)));
 EOCP
 if $cc $ccflags -c attrib.c >attrib.out 2>&1 ; then
 	if $contains 'warning' attrib.out >/dev/null 2>&1; then
-		echo "Your C compiler doesn't fully support __attribute__."
+		echo "Your C compiler doesn't support __attribute__((format))."
 		val="$undef"
 	else
-		echo "Your C compiler supports __attribute__."
+		echo "Your C compiler supports __attribute__((format))."
 		val="$define"
 	fi
 else
@@ -9900,9 +9906,177 @@ else
 	val="$undef"
 fi
 ;;
-*) val="$d_attribut" ;;
+*) val="$d_attribute_format" ;;
 esac
-set d_attribut
+set d_attribute_format
+eval $setvar
+$rm -f attrib*
+
+: Look for GCC-style attribute malloc
+case "$d_attribute_malloc" in
+'')
+echo " "
+echo "Checking whether your compiler can handle __attribute__((malloc)) ..." >&4
+$cat >attrib.c <<'EOCP'
+#include <stdio.h>
+char *go_get_some_memory( int how_many_bytes ) __attribute__((malloc));
+EOCP
+if $cc $ccflags -c attrib.c >attrib.out 2>&1 ; then
+	if $contains 'warning' attrib.out >/dev/null 2>&1; then
+		echo "Your C compiler doesn't support __attribute__((malloc))."
+		val="$undef"
+	else
+		echo "Your C compiler supports __attribute__((malloc))."
+		val="$define"
+	fi
+else
+	echo "Your C compiler doesn't seem to understand __attribute__ at all."
+	val="$undef"
+fi
+;;
+*) val="$d_attribute_malloc" ;;
+esac
+set d_attribute_malloc
+eval $setvar
+$rm -f attrib*
+
+: Look for GCC-style attribute nonnull
+case "$d_attribute_nonnull" in
+'')
+echo " "
+echo "Checking whether your compiler can handle __attribute__((nonnull(1))) ..." >&4
+$cat >attrib.c <<'EOCP'
+#include <stdio.h>
+void do_something (char *some_pointer,...) __attribute__((nonnull(1)));
+EOCP
+if $cc $ccflags -c attrib.c >attrib.out 2>&1 ; then
+	if $contains 'warning' attrib.out >/dev/null 2>&1; then
+		echo "Your C compiler doesn't support __attribute__((nonnull))."
+		val="$undef"
+	else
+		echo "Your C compiler supports __attribute__((nonnull))."
+		val="$define"
+	fi
+else
+	echo "Your C compiler doesn't seem to understand __attribute__ at all."
+	val="$undef"
+fi
+;;
+*) val="$d_attribute_nonnull" ;;
+esac
+set d_attribute_nonnull
+eval $setvar
+$rm -f attrib*
+
+: Look for GCC-style attribute noreturn
+case "$d_attribute_noreturn" in
+'')
+echo " "
+echo "Checking whether your compiler can handle __attribute__((noreturn)) ..." >&4
+$cat >attrib.c <<'EOCP'
+#include <stdio.h>
+void fall_over_dead( void ) __attribute__((noreturn));
+EOCP
+if $cc $ccflags -c attrib.c >attrib.out 2>&1 ; then
+	if $contains 'warning' attrib.out >/dev/null 2>&1; then
+		echo "Your C compiler doesn't support __attribute__((noreturn))."
+		val="$undef"
+	else
+		echo "Your C compiler supports __attribute__((noreturn))."
+		val="$define"
+	fi
+else
+	echo "Your C compiler doesn't seem to understand __attribute__ at all."
+	val="$undef"
+fi
+;;
+*) val="$d_attribute_noreturn" ;;
+esac
+set d_attribute_noreturn
+eval $setvar
+$rm -f attrib*
+
+: Look for GCC-style attribute pure
+case "$d_attribute_pure" in
+'')
+echo " "
+echo "Checking whether your compiler can handle __attribute__((pure)) ..." >&4
+$cat >attrib.c <<'EOCP'
+#include <stdio.h>
+int square( int n ) __attribute__((pure));
+EOCP
+if $cc $ccflags -c attrib.c >attrib.out 2>&1 ; then
+	if $contains 'warning' attrib.out >/dev/null 2>&1; then
+		echo "Your C compiler doesn't support __attribute__((pure))."
+		val="$undef"
+	else
+		echo "Your C compiler supports __attribute__((pure))."
+		val="$define"
+	fi
+else
+	echo "Your C compiler doesn't seem to understand __attribute__ at all."
+	val="$undef"
+fi
+;;
+*) val="$d_attribute_pure" ;;
+esac
+set d_attribute_pure
+eval $setvar
+$rm -f attrib*
+
+: Look for GCC-style attribute unused
+case "$d_attribute_unused" in
+'')
+echo " "
+echo "Checking whether your compiler can handle __attribute__((unused)) ..." >&4
+$cat >attrib.c <<'EOCP'
+#include <stdio.h>
+int do_something( int dummy __attribute__((unused)), int n );
+EOCP
+if $cc $ccflags -c attrib.c >attrib.out 2>&1 ; then
+	if $contains 'warning' attrib.out >/dev/null 2>&1; then
+		echo "Your C compiler doesn't support __attribute__((unused))."
+		val="$undef"
+	else
+		echo "Your C compiler supports __attribute__((unused))."
+		val="$define"
+	fi
+else
+	echo "Your C compiler doesn't seem to understand __attribute__ at all."
+	val="$undef"
+fi
+;;
+*) val="$d_attribute_unused" ;;
+esac
+set d_attribute_unused
+eval $setvar
+$rm -f attrib*
+
+: Look for GCC-style attribute warn_unused_result
+case "$d_attribute_warn_unused_result" in
+'')
+echo " "
+echo "Checking whether your compiler can handle __attribute__((warn_unused_result)) ..." >&4
+$cat >attrib.c <<'EOCP'
+#include <stdio.h>
+int I_will_not_be_ignored(void) __attribute__((warn_unused_result));
+EOCP
+if $cc $ccflags -c attrib.c >attrib.out 2>&1 ; then
+	if $contains 'warning' attrib.out >/dev/null 2>&1; then
+		echo "Your C compiler doesn't support __attribute__((warn_unused_result))."
+		val="$undef"
+	else
+		echo "Your C compiler supports __attribute__((warn_unused_result))."
+		val="$define"
+	fi
+else
+	echo "Your C compiler doesn't seem to understand __attribute__ at all."
+	val="$undef"
+fi
+;;
+*) val="$d_attribute_warn_unused_result" ;;
+esac
+set d_attribute_warn_unused_result
 eval $setvar
 $rm -f attrib*
 
@@ -20631,7 +20805,13 @@ d_archlib='$d_archlib'
 d_asctime_r='$d_asctime_r'
 d_atolf='$d_atolf'
 d_atoll='$d_atoll'
-d_attribut='$d_attribut'
+d_attribute_format='$d_attribute_format'
+d_attribute_malloc='$d_attribute_malloc'
+d_attribute_nonnull='$d_attribute_nonnull'
+d_attribute_noreturn='$d_attribute_noreturn'
+d_attribute_pure='$d_attribute_pure'
+d_attribute_unused='$d_attribute_unused'
+d_attribute_warn_unused_result='$d_attribute_warn_unused_result'
 d_bcmp='$d_bcmp'
 d_bcopy='$d_bcopy'
 d_bsd='$d_bsd'

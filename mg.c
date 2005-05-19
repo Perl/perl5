@@ -468,12 +468,7 @@ Perl_magic_regdatum_set(pTHX_ SV *sv, MAGIC *mg)
 {
     (void)sv; (void)mg;
     Perl_croak(aTHX_ PL_no_modify);
-    /* NOT REACHED */
-#ifndef HASATTRIBUTE_NORETURN
-    /* No __attribute__((noreturn)), so the compiler doesn't know that
-     * croak never returns. */
-    return 0;
-#endif
+    NORETURN_FUNCTION_END;
 }
 
 U32

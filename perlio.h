@@ -210,19 +210,7 @@ PERL_EXPORT_C void PerlIO_clone(pTHX_ PerlInterpreter *proto,
 
 START_EXTERN_C
 #ifndef __attribute__format__
-#  ifdef CHECK_FORMAT
-#    define __attribute__format__(x,y,z) __attribute__((format(x,y,z)))
-#  else
-#    define __attribute__format__(x,y,z)
-#endif
-#endif
-#ifndef NEXT30_NO_ATTRIBUTE
-#ifndef HASATTRIBUTE		/* disable GNU-cc attribute checking? */
-#ifdef  __attribute__		/* Avoid possible redefinition errors */
-#undef  __attribute__
-#endif
-#define __attribute__(attr)
-#endif
+#  define __attribute__format__(x,y,z) __attribute__((format(x,y,z)))
 #endif
 #ifndef PerlIO_init
 PERL_EXPORT_C void PerlIO_init(pTHX);

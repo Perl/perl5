@@ -406,10 +406,42 @@ d_atoll (atoll.U):
 	This variable conditionally defines the HAS_ATOLL symbol, which
 	indicates to the C program that the atoll() routine is available.
 
-d_attribut (d_attribut.U):
-	This variable conditionally defines HASATTRIBUTE, which
-	indicates the C compiler can check for function attributes,
-	such as printf formats.
+d_attribute_format (d_attribut_format.U):
+	This variable conditionally defines HASATTRIBUTE_FORMAT, which
+	indicates the C compiler can check for printf-like formats.
+
+d_attribute_malloc (d_attribute_malloc.U):
+	This variable conditionally defines HASATTRIBUTE_MALLOC, which
+	indicates the C compiler can understand functions as having
+	malloc-like semantics.
+
+d_attribute_nonnull (d_attribute_nonnull.U):
+	This variable conditionally defines HASATTRIBUTE_NONNULL, which
+	indicates that the C compiler can know that certain arguments
+	must not be NULL, and will check accordingly at compile time.
+
+d_attribute_noreturn (d_attribute_noreturn.U):
+	This variable conditionally defines HASATTRIBUTE_NORETURN, which
+	indicates that the C compiler can know that certain functions
+	are guaranteed never to return.
+
+d_attribute_pure (d_attribute_pure.U):
+	This variable conditionally defines HASATTRIBUTE_PURE, which
+	indicates that the C compiler can know that certain functions
+	are "pure" functions, meaning that they have no side effects, and
+	only rely on function input and/or global data for their results.
+
+d_attribute_unused (d_attribute_unused.U):
+	This variable conditionally defines HASATTRIBUTE_UNUSED, which
+	indicates that the C compiler can know that certain variables
+	and arguments may not always be used, and to not throw warnings
+	if they don't get used.
+
+d_attribute_warn_unused_result (d_attribute_warn_unused_result.U):
+	This variable conditionally defines
+	HASATTRIBUTE_WARN_UNUSED_RESULT, which indicates that the C
+	compiler can know that certain functions have a return values
+	that must not be ignored, such as malloc() or open().
 
 d_bcmp (d_bcmp.U):
 	This variable conditionally defines the HAS_BCMP symbol if

@@ -190,27 +190,7 @@
 #define CALLREG_INTUIT_STRING CALL_FPTR(PL_regint_string)
 #define CALLREGFREE CALL_FPTR(PL_regfree)
 
-#if defined(SYMBIAN) && defined(__GNUC__)
-#  undef __attribute__
-#  undef __attribute__(_arg_)
-#  define HASATTRIBUTE
-#endif
-
-#ifdef HASATTRIBUTE
-#  if (defined(__GNUC__) && defined(__cplusplus)) || defined(__INTEL_COMPILER)
-#    define PERL_UNUSED_DECL
-#  else
-#    define PERL_UNUSED_DECL __attribute__((unused))
-#  endif
-#else
-#  define PERL_UNUSED_DECL
-#endif
- 
-#if defined(SYMBIAN) && defined(__GNUC__)
-#  undef __attribute__
-#  undef __attribute__(_arg_)
-#  define HASATTRIBUTE
-#endif
+#define PERL_UNUSED_DECL __attribute__unused__
 
 /* gcc -Wall:
  * for silencing unused variables that are actually used most of the time,
@@ -2550,20 +2530,17 @@ typedef pthread_key_t	perl_key;
 #  define PERL_SET_THX(t)		PERL_SET_CONTEXT(t)
 #endif
 
+/*  This replaces the previous %_ "hack" by the "%-p" hack
+    All that is required is that the perl source does not
+    use "%-p" or "%-<number>p" format.  These format will
+    still work in perl code.   RMB 2005/05/17
+*/
 #ifndef SVf
-#  ifdef CHECK_FORMAT
-#    define SVf "-p"
-#  else
-#    define SVf "_"
-#  endif
+#  define SVf "-p"
 #endif
 
 #ifndef SVf_precision
-#  ifdef CHECK_FORMAT
-#    define SVf_precision(n) "-" n "p"
-#  else
-#    define SVf_precision(n) "." n "_"
-#  endif
+#  define SVf_precision(n) "-" n "p"
 #endif
 
 #ifndef SVf32
@@ -2579,41 +2556,66 @@ typedef pthread_key_t	perl_key;
 #endif
 
 #ifndef DieNull
-#  ifdef CHECK_FORMAT
-#    define DieNull Perl_vdie(aTHX_ Nullch, Null(va_list *))
-#  else
-#    define DieNull Perl_die(aTHX_ Nullch)
+#  define DieNull Perl_vdie(aTHX_ Nullch, Null(va_list *))
+#endif
+
+/* In case Configure was not used (we are using a "canned config"
+ * such as Win32, or a cross-compilation setup, for example) try going
+ * by the gcc major and minor versions.  One useful URL is
+ * http://www.ohse.de/uwe/articles/gcc-attributes.html,
+ * but contrary to this information warn_unused_result seems
+ * not to be in gcc 3.3.5, at least. --jhi */
+#if defined __GNUC__
+#  if __GNUC__ >= 3 /* 3.0 -> */ /* XXX Verify this version */
+#    define HASATTRIBUTE_FORMAT
+#  endif
+#  if __GNUC__ >= 3 /* 3.0 -> */
+#    define HASATTRIBUTE_MALLOC
+#  endif
+#  if __GNUC__ == 3 && __GNUC_MINOR__ >= 3 || __GNUC__ > 3 /* 3.3 -> */
+#    define HASATTRIBUTE_NONNULL
+#  endif
+#  if __GNUC__ == 2 && __GNUC_MINOR__ >= 5 || __GNUC__ > 2 /* 2.5 -> */
+#    define HASATTRIBUTE_NORETURN
+#  endif
+#  if __GNUC__ >= 3 /* gcc 3.0 -> */
+#    define HASATTRIBUTE_PURE
+#  endif
+#  if __GNUC__ >= 3 /* gcc 3.0 -> */ /* XXX Verify this version */
+#    define HASATTRIBUTE_UNUSED
+#  endif
+#  if __GNUC__ == 3 && __GNUC_MINOR__ >= 4 || __GNUC__ > 3 /* 3.4 -> */
+#    define HASATTRIBUTE_WARN_UNUSED_RESULT
 #  endif
 #endif
 
-#ifndef __attribute__format__
-#  ifdef CHECK_FORMAT
-#    define __attribute__format__(x,y,z) __attribute__((format(x,y,z)))
-#  else
-#    define __attribute__format__(x,y,z)
-#  endif
+
+#ifdef HASATTRIBUTE_FORMAT
+#  define __attribute__format__(x,y,z)      __attribute__((format(x,y,z)))
 #endif
-
-/* See http://www.ohse.de/uwe/articles/gcc-attributes.html, but
- * contrary to the information warn_unused_result seems not to be in
- * gcc 3.3.5, at least. --jhi */
-
-#if __GNUC__ >= 3
+#ifdef HASATTRIBUTE_MALLOC
 #  define __attribute__malloc__             __attribute__((malloc))
 #endif
-#if __GNUC__ == 3 && __GNUC_MINOR__ >= 3 || __GNUC__ > 3
+#ifdef HASATTRIBUTE_NONNULL
 #  define __attribute__nonnull__(a)         __attribute__((nonnull(a)))
 #endif
-#if __GNUC__ == 2 && __GNUC_MINOR__ >= 5 || __GNUC__ > 2
+#ifdef HASATTRIBUTE_NORETURN
 #  define __attribute__noreturn__           __attribute__((noreturn))
 #endif
-#if __GNUC__ >= 3
+#ifdef HASATTRIBUTE_PURE
 #  define __attribute__pure__               __attribute__((pure))
 #endif
-#if __GNUC__ == 3 && __GNUC_MINOR__ >= 4 || __GNUC__ > 3
+#ifdef HASATTRIBUTE_UNUSED
+#  define __attribute__unused__             __attribute__((unused))
+#endif
+#ifdef HASATTRIBUTE_WARN_UNUSED_RESULT
 #  define __attribute__warn_unused_result__ __attribute__((warn_unused_result))
 #endif
 
+/* If we haven't defined the attributes yet, define them to blank. */
+#ifndef __attribute__format__
+#  define __attribute__format__(x,y,z)
+#endif
 #ifndef __attribute__malloc__
 #  define __attribute__malloc__
 #endif
@@ -2626,12 +2628,20 @@ typedef pthread_key_t	perl_key;
 #ifndef __attribute__pure__
 #  define __attribute__pure__
 #endif
+#ifndef __attribute__unused__
+#  define __attribute__unused__
+#endif
 #ifndef __attribute__warn_unused_result__
 #  define __attribute__warn_unused_result__
 #endif
 
-#if defined(HASATTRIBUTE) && __GNUC__ >= 3
-#  define HASATTRIBUTE_NORETURN
+/* For functions that are marked as __attribute__noreturn__, it's not
+   appropriate to call return.  In either case, include the lint directive.
+ */
+#ifdef HASATTRIBUTE_NORETURN
+#  define NORETURN_FUNCTION_END /* NOT REACHED */
+#else
+#  define NORETURN_FUNCTION_END /* NOT REACHED */ return 0
 #endif
 
 /* Some unistd.h's give a prototype for pause() even though
@@ -3928,16 +3938,6 @@ struct tempsym; /* defined in pp_pack.c */
 #ifndef PERL_CALLCONV
 #  define PERL_CALLCONV
 #endif
-
-#ifndef NEXT30_NO_ATTRIBUTE
-#  ifndef HASATTRIBUTE       /* disable GNU-cc attribute checking? */
-#    ifdef  __attribute__      /* Avoid possible redefinition errors */
-#      undef  __attribute__
-#    endif
-#    define __attribute__(attr)
-#  endif
-#endif
-
 #undef PERL_CKDEF
 #undef PERL_PPDEF
 #define PERL_CKDEF(s)	OP *s (pTHX_ OP *o);

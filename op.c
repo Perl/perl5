@@ -4899,11 +4899,7 @@ Perl_oopsCV(pTHX_ OP *o)
     Perl_croak(aTHX_ "NOT IMPL LINE %d",__LINE__);
     /* STUB */
     (void)o;
-#ifndef HASATTRIBUTE_NORETURN
-    /* No __attribute__((noreturn)), so the compiler doesn't know that
-     * croak never returns. */
-    return 0;
-#endif
+    NORETURN_FUNCTION_END;
 }
 
 OP *

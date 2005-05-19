@@ -3727,17 +3727,40 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define M_VOID			/* Xenix strikes again */
 #endif
 
-/* HASATTRIBUTE:
- *	This symbol indicates the C compiler can check for function attributes,
- *	such as printf formats. This is normally only supported by GNU cc.
+/* HASATTRIBUTE_FORMAT:
+ *	Can we handle GCC attribute for checking printf-style formats
  */
-#$d_attribut HASATTRIBUTE 	/**/
-#ifndef HASATTRIBUTE
-#ifdef __attribute__
-#undef __attribute__
-#endif
-#define __attribute__(_arg_)
-#endif
+#$d_attribute_format HASATTRIBUTE_FORMAT	/**/
+
+/* HASATTRIBUTE_MALLOC:
+ *	Can we handle GCC attribute for malloc-style functions.
+ */
+#$d_attribute_malloc HASATTRIBUTE_MALLOC	/**/
+
+/* HASATTRIBUTE_NONNULL:
+ *	Can we handle GCC attribute for nonnull function parms.
+ */
+#$d_attribute_nonnull HASATTRIBUTE_NONNULL	/**/
+
+/* HASATTRIBUTE_NORETURN:
+ *	Can we handle GCC attribute for functions that do not return
+ */
+#$d_attribute_noreturn HASATTRIBUTE_NORETURN	/**/
+
+/* HASATTRIBUTE_PURE:
+ *	Can we handle GCC attribute for pure functions
+ */
+#$d_attribute_pure HASATTRIBUTE_PURE	/**/
+
+/* HASATTRIBUTE_UNUSED:
+ *	Can we handle GCC attribute for unused variables and arguments
+ */
+#$d_attribute_unused HASATTRIBUTE_UNUSED	/**/
+
+/* HASATTRIBUTE_WARN_UNUSED_RESULT:
+ *	Can we handle GCC attribute for warning on unused results
+ */
+#$d_attribute_warn_unused_result HASATTRIBUTE_WARN_UNUSED_RESULT	/**/
 
 /* HAS_CRYPT:
  *	This symbol, if defined, indicates that the crypt routine is available

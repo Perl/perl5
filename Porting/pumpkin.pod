@@ -711,45 +711,6 @@ branches.
 
 =head2 Other tests
 
-=over 4
-
-=item CHECK_FORMAT
-
-If you have gcc, you can test the correct use of printf-style
-arguments.  Run C<Configure> with S<-Dccflags='-DCHECK_FORMAT
--Wformat'> (and S<-Dcc=gcc>, if you are not on a system where C<cc>
-is C<gcc>) and run C<make>.  The compiler will produce warnings of
-incorrect use of format arguments.  
-
-As of change 23767, CHECK_FORMAT changes perl-defined formats
-to obscure (but standard) formats, and then traps the obscure
-format.  The resulting perl executable operates properly but 
-you should not use the executable produced by this process.
-
-=over 4
-
-=item *
- 
-A more accurate approach is the following commands:
-
-    make clean
-    make all OPTIMIZE='-DCHECK_FORMAT -Wformat' >& make.log  
-    perl -nwe 'print if /^\S+:/ and not /^make\b/' make.log
-
-=item *
-
-A more thorough approach to compiler warnings is
-
-    make clean
-    make miniperl OPTIMIZE=-O\ -DCHECK_FORMAT >& make.log
-    make all OPTIMIZE=-O\ -DCHECK_FORMAT\ -Wall\ -Wno-unused\
-			    -Wno-uninitialized >>& make.log
-    perl -nwe 'print if /^\S+:/ and not /^make\b/' make.log
-
-=back
-
-(-Wformat support by Robin Barker.)
-
 =item gcc -ansi -pedantic
 
 Configure -Dgccansipedantic [ -Dcc=gcc ] will enable (via the cflags script,

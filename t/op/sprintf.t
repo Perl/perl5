@@ -323,6 +323,7 @@ __END__
 >%+o<       >642<         >1202<
 >%#o<       >642<         >01202<
 >%d< >$p=sprintf('%p',$p);$p=~/^[0-9a-f]+$/< >1< >Coarse hack: hex from %p?<
+>%d< >$p=sprintf('%-8p',$p);$p=~/^[0-9a-f]+\s*$/< >1< >Coarse hack: hex from %p?<
 >%#p<       >''<          >%#p INVALID<
 >%q<        >''<          >%q INVALID<
 >%r<        >''<          >%r INVALID<

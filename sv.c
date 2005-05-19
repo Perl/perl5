@@ -9222,12 +9222,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     /* no matter what, this is a string now */
     (void)SvPV_force(sv, origlen);
 
-    /* special-case "", "%s", and "%_" */
+    /* special-case "", "%s", and "%-p" (SVf) */
     if (patlen == 0)
 	return;
-    if (patlen == 2 && pat[0] == '%') {
-	switch (pat[1]) {
-	case 's':
+    if (patlen == 2 && pat[0] == '%' && pat[1] == 's') {
 	    if (args) {
                 const char *s = va_arg(*args, char*);
 		sv_catpv(sv, s ? s : nullstr);
@@ -9238,7 +9236,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    SvUTF8_on(sv);
 	    }
 	    return;
-	case '_':
+    }
+    if (patlen == 3 && pat[0] == '%' &&
+	pat[1] == '-' && pat[2] == 'p') {
 	    if (args) {
 		argsv = va_arg(*args, SV*);
 		sv_catsv(sv, argsv);
@@ -9246,9 +9246,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    SvUTF8_on(sv);
 		return;
 	    }
-	    /* See comment on '_' below */
-	    break;
-	}
     }
 
 #ifndef USE_LONG_DOUBLE
@@ -9626,23 +9623,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    is_utf8 = TRUE;
 		}
 	    }
-	    goto string;
-
-	case '_':
-#ifdef CHECK_FORMAT
-	format_sv:
-#endif
-	    /*
-	     * The "%_" hack might have to be changed someday,
-	     * if ISO or ANSI decide to use '_' for something.
-	     * So we keep it hidden from users' code.
-	     */
-	    if (!args || vectorize)
-		goto unknown;
-	    argsv = va_arg(*args, SV*);
-	    eptr = SvPVx(argsv, elen);
-	    if (DO_UTF8(argsv))
-		is_utf8 = TRUE;
 
 	string:
 	    vectorize = FALSE;
@@ -9653,17 +9633,21 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    /* INTEGERS */
 
 	case 'p':
-#ifdef CHECK_FORMAT
-	    if (left) {
+	    if (left && args) {		/* SVf */
 		left = FALSE;
-	        if (!width)
-		    goto format_sv;	/* %-p	-> %_	*/
-		precis = width;
-		has_precis = TRUE;
-		width = 0;
-		goto format_sv;		/* %-Np	-> %.N_	*/	
+		if (width) {
+		    precis = width;
+		    has_precis = TRUE;
+		    width = 0;
+		}
+		if (vectorize)
+		    goto unknown;
+		argsv = va_arg(*args, SV*);
+		eptr = SvPVx(argsv, elen);
+		if (DO_UTF8(argsv))
+		    is_utf8 = TRUE;
+		goto string;
 	    }
-#endif
 	    if (alt || vectorize)
 		goto unknown;
 	    uv = PTR2UV(args ? va_arg(*args, void*) : argsv);
