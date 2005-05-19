@@ -20,7 +20,7 @@ sub run {
 
 BEGIN {
     # MacOS system() doesn't have good return value
-    $numtests = ($^O eq 'VMS') ? 10 : ($^O eq 'MacOS') ? 0 : 17;
+    $numtests = ($^O eq 'VMS') ? 9 : ($^O eq 'MacOS') ? 0 : 17;
 }
 
 require "test.pl";
