@@ -14,8 +14,7 @@ my $quote = $^O =~ /^(VMS|MSWin\d+)$/ ? q{"} : q{'};
 # Run some code, return its wait status.
 sub run {
     my($code) = shift;
-    my $cmd = "$^X -e ";
-    return system($cmd.$quote.$code.$quote);
+    return system($^X, "-e", $code);
 }
 
 BEGIN {
