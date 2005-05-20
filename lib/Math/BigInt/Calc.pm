@@ -6,7 +6,7 @@ use strict;
 
 use vars qw/$VERSION/;
 
-$VERSION = '0.46';
+$VERSION = '0.47';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -573,35 +573,6 @@ sub _div_use_mul
     # now calculate $x / $yorg
     if (length(int($yorg->[-1])) == length(int($x->[-1])))
       {
-
-      # We take a shortcut here, because the result must be 
-      # between 1 and MAX_VAL (e.g. one element) and rem is not wanted.
-      if (!wantarray)
-        {
-        # fit's into one Perl scalar, so result can be computed directly
-        # cannot use int() here, because it rounds wrongly on some systems
-        #$x->[0] = int($x->[-1] / $yorg->[-1]);
-
- 	# Due to chopping up the number into parts, the two first parts
-	# may have only one or two digits. So we use more from the second
-	# parts (it always has at least two parts) for more accuracy:
-        # Round to 8 digits, then truncate result to integer:
-	my $x0 = $x->[-1];
-	my $y0 = $yorg->[-1];
-	if (length ($x0) < $BASE_LEN)		# len($x0) == len($y0)!
-	  {
-          $x0 .= substr('0' x $BASE_LEN . $x->[-2], -$BASE_LEN, $BASE_LEN);
-          $x0 = substr($x0,0,$BASE_LEN);
-          $y0 .= substr('0' x $BASE_LEN . $yorg->[-2], -$BASE_LEN, $BASE_LEN);
-          $y0 = substr($y0,0,$BASE_LEN);
-	  }
-        $x->[0] = int ( sprintf ("%.8f", $x0 / $y0 ) );
-
-        splice(@$x,1);			# keep single element
-        return $x;
-        }
- 
-      # wantarray: return (x,rem)
       # same length, so make full compare
 
       my $a = 0; my $j = scalar @$x - 1;
@@ -619,7 +590,8 @@ sub _div_use_mul
         splice(@$x,1);                  # keep single element
         $x->[0] = 0;                    # if $a < 0
         $x->[0] = 1 if $a == 0;         # $x == $y
-        return ($x,$rem);
+        return ($x,$rem) if wantarray;
+        return $x;
         }
       # $x >= $y, so proceed normally
       }
@@ -788,35 +760,6 @@ sub _div_use_div
 
     if (length(int($yorg->[-1])) == length(int($x->[-1])))
       {
-
-      # We take a shortcut here, because the result must be 
-      # between 1 and MAX_VAL (e.g. one element) and rem is not wanted.
-      if (!wantarray)
-        {
-        # fit's into one Perl scalar, so result can be computed directly
-        # cannot use int() here, because it rounds wrongly on some systems
-        #$x->[0] = int($x->[-1] / $yorg->[-1]);
-
- 	# Due to chopping up the number into parts, the two first parts
-	# may have only one or two digits. So we use more from the second
-	# parts (it always has at least two parts) for more accuracy:
-        # Round to 8 digits, then truncate result to integer:
-	my $x0 = $x->[-1];
-	my $y0 = $yorg->[-1];
-	if (length ($x0) < $BASE_LEN)		# len($x0) == len($y0)!
-	  {
-          $x0 .= substr('0' x $BASE_LEN . $x->[-2], -$BASE_LEN, $BASE_LEN);
-          $x0 = substr($x0,0,$BASE_LEN);
-          $y0 .= substr('0' x $BASE_LEN . $yorg->[-2], -$BASE_LEN, $BASE_LEN);
-          $y0 = substr($y0,0,$BASE_LEN);
-	  }
-        $x->[0] = int ( sprintf ("%.8f", $x0 / $y0 ) );
-
-        splice(@$x,1);			# keep single element
-        return $x;
-        }
- 
-      # wantarray: return (x,rem)
       # same length, so make full compare
 
       my $a = 0; my $j = scalar @$x - 1;
@@ -834,7 +777,8 @@ sub _div_use_div
         splice(@$x,1);			# keep single element
         $x->[0] = 0;			# if $a < 0
         $x->[0] = 1 if $a == 0; 	# $x == $y
-        return ($x,$rem);
+        return ($x,$rem) if wantarray;	# including remainder?
+        return $x;
         }
       # $x >= $y, so proceed normally
 

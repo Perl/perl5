@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.50';
+$VERSION = '1.51';
 require 5.005;
 
 require Exporter;
@@ -197,7 +197,8 @@ sub new
         my $z = $MBI->_new($zeros);
         # turn '120e2' into '12e3'
         $MBI->_rsft ( $self->{_m}, $z, 10);
-	_e_add ( $self->{_e}, $z, $self->{_es}, '+');
+        ($self->{_e}, $self->{_es}) =
+	  _e_add ( $self->{_e}, $z, $self->{_es}, '+');
         }
       }
     $self->{sign} = $$mis;
@@ -1339,11 +1340,13 @@ sub bdiv
 
   # already handled inf/NaN/-inf above:
 
-  my $xsign = $x->{sign};
-  $y->{sign} =~ tr/+-/-+/;
-
   # check that $y is not 1 nor -1 and cache the result:
   my $y_not_one = !($MBI->_is_zero($y->{_e}) && $MBI->_is_one($y->{_m}));
+
+  # flipping the sign of $y will also flip the sign of $x for the special
+  # case of $x->bsub($x); so we can catch it below:
+  my $xsign = $x->{sign};
+  $y->{sign} =~ tr/+-/-+/;
 
   if ($xsign ne $x->{sign})
     {
@@ -1443,9 +1446,10 @@ sub bmod
     return $x;
     }
 
-  return $x->bzero() if $x->is_zero() ||
-  # check that $y == -1 or +1:
-    ($MBI->_is_zero($y->{_e}) && $MBI->_is_one($y->{_m}));
+  return $x->bzero() if $x->is_zero()
+ || ($x->is_int() &&
+  # check that $y == +1 or $y == -1:
+    ($MBI->_is_zero($y->{_e}) && $MBI->_is_one($y->{_m})));
 
   my $cmp = $x->bacmp($y);			# equal or $x < $y?
   return $x->bzero($a,$p) if $cmp == 0;		# $x == $y => result 0
