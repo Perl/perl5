@@ -28,7 +28,10 @@ $VERSION = '2.15';
 # Use of Log::Agent is optional
 #
 
-eval "use Log::Agent";
+{
+    local $SIG{__DIE__};
+    eval "use Log::Agent";
+}
 
 require Carp;
 
