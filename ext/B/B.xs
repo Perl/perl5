@@ -1684,10 +1684,6 @@ char *
 HvNAME(hv)
 	B::HV	hv
 
-B::PMOP
-HvPMROOT(hv)
-	B::HV	hv
-
 void
 HvARRAY(hv)
 	B::HV	hv

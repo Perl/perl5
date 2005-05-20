@@ -892,6 +892,7 @@ static const struct { const char type; const char *name; } magic_names[] = {
 	{ PERL_MAGIC_arylen,         "arylen(#)" },
 	{ PERL_MAGIC_glob,           "glob(*)" },
 	{ PERL_MAGIC_pos,            "pos(.)" },
+	{ PERL_MAGIC_symtab,         "symtab(:)" },
 	{ PERL_MAGIC_backref,        "backref(<)" },
 	{ PERL_MAGIC_overload,       "overload(A)" },
 	{ PERL_MAGIC_bm,             "bm(B)" },
@@ -1419,8 +1420,12 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	Perl_dump_indent(aTHX_ level, file, "  MAX = %"IVdf"\n", (IV)HvMAX(sv));
 	Perl_dump_indent(aTHX_ level, file, "  RITER = %"IVdf"\n", (IV)HvRITER(sv));
 	Perl_dump_indent(aTHX_ level, file, "  EITER = 0x%"UVxf"\n", PTR2UV(HvEITER(sv)));
-	if (HvPMROOT(sv))
-	    Perl_dump_indent(aTHX_ level, file, "  PMROOT = 0x%"UVxf"\n", PTR2UV(HvPMROOT(sv)));
+	{
+	    MAGIC *mg = mg_find(sv, PERL_MAGIC_symtab);
+	    if (mg && mg->mg_obj) {
+		Perl_dump_indent(aTHX_ level, file, "  PMROOT = 0x%"UVxf"\n", PTR2UV(mg->mg_obj));
+	    }
+	}
 	if (HvNAME(sv))
 	    Perl_dump_indent(aTHX_ level, file, "  NAME = \"%s\"\n", HvNAME(sv));
 	if (nest < maxnest && !HvEITER(sv)) { /* Try to preserve iterator */

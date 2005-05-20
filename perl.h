@@ -3169,6 +3169,7 @@ Gid_t getegid (void);
 #define PERL_MAGIC_arylen	  '#' /* Array length ($#ary) */
 #define PERL_MAGIC_pos		  '.' /* pos() lvalue */
 #define PERL_MAGIC_backref	  '<' /* for weak ref data */
+#define PERL_MAGIC_symtab	  ':' /* extra data for symbol tables */
 #define PERL_MAGIC_ext		  '~' /* Available for use by extensions */
 
 
@@ -3768,7 +3769,8 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_regdata,
     want_vtbl_regdatum,
     want_vtbl_backref,
-    want_vtbl_utf8
+    want_vtbl_utf8,
+    want_vtbl_symtab
 };
 
 				/* Note: the lowest 8 bits are reserved for

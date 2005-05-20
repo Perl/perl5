@@ -907,8 +907,6 @@ For constant subroutines, returns the constant SV returned by the subroutine.
 
 =item NAME
 
-=item PMROOT
-
 =item ARRAY
 
 =back

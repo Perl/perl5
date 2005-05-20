@@ -1972,7 +1972,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	SvANY(sv) = new_XPVHV();
 	HvRITER(sv)	= 0;
 	HvEITER(sv)	= 0;
-	HvPMROOT(sv)	= 0;
 	HvNAME(sv)	= 0;
 	HvFILL(sv)	= 0;
 	HvMAX(sv)	= 0;
@@ -5391,6 +5390,7 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, const MGVTBL *vtable,
     if (!obj || obj == sv ||
 	how == PERL_MAGIC_arylen ||
 	how == PERL_MAGIC_qr ||
+	how == PERL_MAGIC_symtab ||
 	(SvTYPE(obj) == SVt_PVGV &&
 	    (GvSV(obj) == sv || GvHV(obj) == (HV*)sv || GvAV(obj) == (AV*)sv ||
 	    GvCV(obj) == (CV*)sv || GvIOp(obj) == (IO*)sv ||
@@ -5562,6 +5562,7 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     case PERL_MAGIC_vec:
 	vtable = &PL_vtbl_vec;
 	break;
+    case PERL_MAGIC_symtab:
     case PERL_MAGIC_vstring:
 	vtable = 0;
 	break;
@@ -7926,7 +7927,6 @@ Perl_sv_reset(pTHX_ register const char *s, HV *stash)
     register GV *gv;
     register SV *sv;
     register I32 i;
-    register PMOP *pm;
     register I32 max;
     char todo[PERL_UCHAR_MAX+1];
 
@@ -7934,8 +7934,13 @@ Perl_sv_reset(pTHX_ register const char *s, HV *stash)
 	return;
 
     if (!*s) {		/* reset ?? searches */
-	for (pm = HvPMROOT(stash); pm; pm = pm->op_pmnext) {
-	    pm->op_pmdynflags &= ~PMdf_USED;
+	MAGIC *mg = mg_find((SV *)stash, PERL_MAGIC_symtab);
+	if (mg) {
+	    PMOP *pm = (PMOP *) mg->mg_obj;
+	    while (pm) {
+		pm->op_pmdynflags &= ~PMdf_USED;
+		pm = pm->op_pmnext;
+	    }
 	}
 	return;
     }
@@ -10430,6 +10435,9 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS* param)
 		av_push((AV*)nmg->mg_obj,sv_dup(svp[i],param));
 	    }
 	}
+	else if (mg->mg_type == PERL_MAGIC_symtab) {
+	    nmg->mg_obj	= mg->mg_obj;
+	}
 	else {
 	    nmg->mg_obj	= (mg->mg_flags & MGf_REFCOUNTED)
 			      ? sv_dup_inc(mg->mg_obj, param)
@@ -11033,7 +11041,6 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	    SvPV_set(dstr, Nullch);
 	    HvEITER((HV*)dstr)	= (HE*)NULL;
 	}
-	HvPMROOT((HV*)dstr)	= HvPMROOT((HV*)sstr);		/* XXX */
 	HvNAME((HV*)dstr)	= SAVEPV(HvNAME((HV*)sstr));
     /* Record stashes for possible cloning in Perl_clone(). */
 	if(HvNAME((HV*)dstr))

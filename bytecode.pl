@@ -421,7 +421,6 @@ xav_fill	AvFILLp(bstate->bs_sv)			SSize_t
 xav_max		AvMAX(bstate->bs_sv)			SSize_t
 xhv_riter	HvRITER(bstate->bs_sv)			I32
 xhv_name	HvNAME(bstate->bs_sv)			pvindex
-xhv_pmroot	*(OP**)&HvPMROOT(bstate->bs_sv)		opindex
 hv_store	bstate->bs_sv				svindex		x
 sv_magic	bstate->bs_sv				char		x
 mg_obj		SvMAGIC(bstate->bs_sv)->mg_obj		svindex

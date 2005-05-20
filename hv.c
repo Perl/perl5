@@ -1307,7 +1307,6 @@ Perl_newHV(pTHX)
 
     xhv->xhv_max    = 7;	/* HvMAX(hv) = 7 (start with 8 buckets) */
     xhv->xhv_fill   = 0;	/* HvFILL(hv) = 0 */
-    xhv->xhv_pmroot = 0;	/* HvPMROOT(hv) = 0 */
     (void)hv_iterinit(hv);	/* so each() will start off right */
     return hv;
 }

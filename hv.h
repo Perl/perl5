@@ -43,7 +43,7 @@ struct xpvhv {
 
     I32		xhv_riter;	/* current root of iterator */
     HE		*xhv_eiter;	/* current entry of iterator */
-    PMOP	*xhv_pmroot;	/* list of pm's for this package */
+    /* list of pm's for this package is now stored in symtab magic.  */
     char	*xhv_name;	/* name, if a symbol table */
 };
 
@@ -181,7 +181,6 @@ C<SV*>.
 #define HvMAX(hv)	((XPVHV*)  SvANY(hv))->xhv_max
 #define HvRITER(hv)	((XPVHV*)  SvANY(hv))->xhv_riter
 #define HvEITER(hv)	((XPVHV*)  SvANY(hv))->xhv_eiter
-#define HvPMROOT(hv)	((XPVHV*)  SvANY(hv))->xhv_pmroot
 #define HvNAME(hv)	((XPVHV*)  SvANY(hv))->xhv_name
 
 /* the number of keys (including any placeholers) */

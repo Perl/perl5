@@ -407,18 +407,21 @@ clear_pmop:
 	{
 	    HV *pmstash = PmopSTASH(cPMOPo);
 	    if (pmstash && SvREFCNT(pmstash)) {
-		PMOP *pmop = HvPMROOT(pmstash);
-		PMOP *lastpmop = NULL;
-		while (pmop) {
-		    if (cPMOPo == pmop) {
-			if (lastpmop)
-			    lastpmop->op_pmnext = pmop->op_pmnext;
-			else
-			    HvPMROOT(pmstash) = pmop->op_pmnext;
-			break;
+		MAGIC *mg = mg_find((SV*)pmstash, PERL_MAGIC_symtab);
+		if (mg) {
+		    PMOP *pmop = (PMOP*) mg->mg_obj;
+		    PMOP *lastpmop = NULL;
+		    while (pmop) {
+			if (cPMOPo == pmop) {
+			    if (lastpmop)
+				lastpmop->op_pmnext = pmop->op_pmnext;
+			    else
+				mg->mg_obj = (SV*) pmop->op_pmnext;
+			    break;
+			}
+			lastpmop = pmop;
+			pmop = pmop->op_pmnext;
 		    }
-		    lastpmop = pmop;
-		    pmop = pmop->op_pmnext;
 		}
 	    }
 	    PmopSTASH_free(cPMOPo);
@@ -2724,8 +2727,13 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
 
         /* link into pm list */
     if (type != OP_TRANS && PL_curstash) {
-	pmop->op_pmnext = HvPMROOT(PL_curstash);
-	HvPMROOT(PL_curstash) = pmop;
+	MAGIC *mg = mg_find((SV*)PL_curstash, PERL_MAGIC_symtab);
+
+	if (!mg) {
+	    mg = sv_magicext((SV*)PL_curstash, 0, PERL_MAGIC_symtab, 0, 0, 0);
+	}
+	pmop->op_pmnext = (PMOP*)mg->mg_obj;
+	mg->mg_obj = (SV*)pmop;
 	PmopSTASH_set(pmop,PL_curstash);
     }
 
