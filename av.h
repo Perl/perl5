@@ -19,7 +19,6 @@ struct xpvav {
 
     SV**	xav_alloc;	/* pointer to beginning of C array of SVs */
     SV*		xav_arylen;
-    U8		xav_flags;
 };
 
 
@@ -40,11 +39,6 @@ struct xpvav {
  * manipulations external to perl should not care about any of this.
  * GSAR 1999-09-10
  */
-#define AVf_REAL 1	/* free old entries */
-#define AVf_REIFY 2	/* can become real */
-
-/* XXX this is not used anywhere */
-#define AVf_REUSED 4	/* got undeffed--don't turn old memory into SVs now */
 
 /*
 =head1 Handy Values
@@ -67,19 +61,17 @@ Same as C<av_len()>.  Deprecated, use C<av_len()> instead.
 #define AvMAX(av)	((XPVAV*)  SvANY(av))->xav_max
 #define AvFILLp(av)	((XPVAV*)  SvANY(av))->xav_fill
 #define AvARYLEN(av)	((XPVAV*)  SvANY(av))->xav_arylen
-#define AvFLAGS(av)	((XPVAV*)  SvANY(av))->xav_flags
 
-#define AvREAL(av)	(AvFLAGS(av) & AVf_REAL)
-#define AvREAL_on(av)	(AvFLAGS(av) |= AVf_REAL)
-#define AvREAL_off(av)	(AvFLAGS(av) &= ~AVf_REAL)
-#define AvREIFY(av)	(AvFLAGS(av) & AVf_REIFY)
-#define AvREIFY_on(av)	(AvFLAGS(av) |= AVf_REIFY)
-#define AvREIFY_off(av)	(AvFLAGS(av) &= ~AVf_REIFY)
-#define AvREUSED(av)	(AvFLAGS(av) & AVf_REUSED)
-#define AvREUSED_on(av)	(AvFLAGS(av) |= AVf_REUSED)
-#define AvREUSED_off(av) (AvFLAGS(av) &= ~AVf_REUSED)
+#define AvREAL(av)	(SvFLAGS(av) & SVpav_REAL)
+#define AvREAL_on(av)	(SvFLAGS(av) |= SVpav_REAL)
+#define AvREAL_off(av)	(SvFLAGS(av) &= ~SVpav_REAL)
+#define AvREAL_only(av)	(AvREIFY_off(av), SvFLAGS(av) |= SVpav_REAL)
+#define AvREIFY(av)	(SvFLAGS(av) & SVpav_REIFY)
+#define AvREIFY_on(av)	(SvFLAGS(av) |= SVpav_REIFY)
+#define AvREIFY_off(av)	(SvFLAGS(av) &= ~SVpav_REIFY)
+#define AvREIFY_only(av)	(AvREAL_off(av), SvFLAGS(av) |= SVpav_REIFY)
 
-#define AvREALISH(av)	(AvFLAGS(av) & (AVf_REAL|AVf_REIFY))
+#define AvREALISH(av)	(SvFLAGS(av) & (SVpav_REAL|SVpav_REIFY))
                                           
 #define AvFILL(av)	((SvRMAGICAL((SV *) (av))) \
 			  ? mg_size((SV *) av) : AvFILLp(av))

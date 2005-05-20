@@ -1586,13 +1586,6 @@ AvARRAYelt(av, idx)
 	else
 	    XPUSHs(make_sv_object(aTHX_ sv_newmortal(), NULL));
 
-				   
-MODULE = B	PACKAGE = B::AV
-
-U8
-AvFLAGS(av)
-	B::AV	av
-
 MODULE = B	PACKAGE = B::FM		PREFIX = Fm
 
 IV

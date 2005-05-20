@@ -382,7 +382,7 @@ Perl_av_make(pTHX_ register I32 size, register SV **strp)
 
     av = (AV*)NEWSV(8,0);
     sv_upgrade((SV *) av,SVt_PVAV);
-    AvFLAGS(av) = AVf_REAL;
+    AvREAL_only(av);
     if (size) {		/* `defined' was returning undef for size==0 anyway. */
         register SV** ary;
         register I32 i;
@@ -412,7 +412,7 @@ Perl_av_fake(pTHX_ register I32 size, register SV **strp)
     New(4,ary,size+1,SV*);
     AvALLOC(av) = ary;
     Copy(strp,ary,size,SV*);
-    AvFLAGS(av) = AVf_REIFY;
+    AvREIFY_only(av);
     SvPV_set(av, (char*)ary);
     AvFILLp(av) = size - 1;
     AvMAX(av) = size - 1;

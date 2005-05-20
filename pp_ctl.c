@@ -2315,7 +2315,7 @@ PP(pp_goto)
 		    SvREFCNT_dec(av);
 		    av = newAV();
 		    av_extend(av, items-1);
-		    AvFLAGS(av) = AVf_REIFY;
+		    AvREIFY_only(av);
 		    PAD_SVl(0) = (SV*)(cx->blk_sub.argarray = av);
 		}
 	    }

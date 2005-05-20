@@ -169,7 +169,7 @@ our %REGEXP;
 use B qw(minus_c sv_undef walkoptree walksymtable main_root main_start peekop
 	 class cstring cchar svref_2object compile_stats comppadlist hash
 	 threadsv_names main_cv init_av end_av regex_padav opnumber amagic_generation
-	 AVf_REAL HEf_SVKEY SVf_POK SVf_ROK CVf_CONST);
+	 HEf_SVKEY SVf_POK SVf_ROK CVf_CONST);
 use B::Asmdata qw(@specialsv_name);
 
 use FileHandle;
@@ -1182,15 +1182,13 @@ sub B::AV::save {
     my ($av) = @_;
     my $sym = objsym($av);
     return $sym if defined $sym;
-    my $avflags = $av->AvFLAGS;
-    $xpvavsect->add(sprintf("0, -1, -1, 0, 0.0, 0, Nullhv, 0, 0, 0x%x",
-			    $avflags));
+    $xpvavsect->add(sprintf("0, -1, -1, 0, 0.0, 0, Nullhv, 0, 0"));
     $svsect->add(sprintf("&xpvav_list[%d], %lu, 0x%x",
 			 $xpvavsect->index, $av->REFCNT  , $av->FLAGS));
     my $sv_list_index = $svsect->index;
     my $fill = $av->FILL;
     $av->save_magic;
-    warn sprintf("saving AV 0x%x FILL=$fill AvFLAGS=0x%x", $$av, $avflags)
+    warn sprintf("saving AV 0x%x FILL=$fill", $$av)
 	if $debug_av;
     # XXX AVf_REAL is wrong test: need to save comppadlist but not stack
     #if ($fill > -1 && ($avflags & AVf_REAL)) {

@@ -857,8 +857,6 @@ IoIFP($io) == PerlIO_stdin() ).
 Like C<ARRAY>, but takes an index as an argument to get only one element,
 rather than a list of all of them.
 
-=item AvFLAGS
-
 =back
 
 =head2 B::CV Methods

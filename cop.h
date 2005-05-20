@@ -302,7 +302,7 @@ struct block_sub {
 		SvREFCNT_dec(cx->blk_sub.argarray);			\
 		cx->blk_sub.argarray = newAV();				\
 		av_extend(cx->blk_sub.argarray, fill);			\
-		AvFLAGS(cx->blk_sub.argarray) = AVf_REIFY;		\
+		AvREIFY_only(cx->blk_sub.argarray);			\
 		CX_CURPAD_SV(cx->blk_sub, 0) = (SV*)cx->blk_sub.argarray;	\
 	    }								\
 	    else {							\

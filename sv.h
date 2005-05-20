@@ -229,6 +229,9 @@ perform the upgrade if necessary.  See C<svtype>.
 
 #define SVprv_WEAKREF   0x80000000      /* Weak reference */
 
+#define SVpav_REAL	0x40000000	/* free old entries */
+#define SVpav_REIFY 	0x80000000	/* can become real */
+
 struct xrv {
     SV *	xrv_rv;		/* pointer to another SV */
 };

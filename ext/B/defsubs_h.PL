@@ -13,7 +13,6 @@ print OUT <<"END";
 END
 
 foreach my $const (qw(
-		      AVf_REAL
 		      CVf_ANON
 		      CVf_ASSERTION
 		      CVf_CLONE

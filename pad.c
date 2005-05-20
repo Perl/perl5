@@ -176,7 +176,7 @@ Perl_pad_new(pTHX_ int flags)
         AV * const a0 = newAV();			/* will be @_ */
 	av_extend(a0, 0);
 	av_store(pad, 0, (SV*)a0);
-	AvFLAGS(a0) = AVf_REIFY;
+	AvREIFY_only(a0);
     }
     else {
 	av_store(pad, 0, Nullsv);
@@ -1180,7 +1180,7 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 	AV *av = newAV();			/* Will be @_ */
 	av_extend(av, 0);
 	av_store(PL_comppad, 0, (SV*)av);
-	AvFLAGS(av) = AVf_REIFY;
+	AvREIFY_only(av);
     }
 
     /* XXX DAPM rationalise these two similar branches */
@@ -1597,7 +1597,7 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 	av = newAV();
 	av_extend(av, 0);
 	av_store(newpad, 0, (SV*)av);
-	AvFLAGS(av) = AVf_REIFY;
+	AvREIFY_only(av);
 
 	av_store(padlist, depth, (SV*)newpad);
 	AvFILLp(padlist) = depth;

@@ -361,7 +361,6 @@ sub B::AV::bsave {
     asm "av_extend", $av->MAX if $av->MAX >= 0;
     asm "av_pushx", $_ for @array;
     asm "sv_refcnt", $av->REFCNT;
-    asm "xav_flags", $av->AvFLAGS;
     asm "xmg_stash", $stashix;
 }
 

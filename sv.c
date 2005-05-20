@@ -1987,7 +1987,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	    AvFILLp(sv)	= -1;
 	    AvALLOC(sv)	= 0;
 	    AvARYLEN(sv)= 0;
-	    AvFLAGS(sv)	= AVf_REAL;
+	    AvREAL_only(sv);
 	    SvIV_set(sv, 0);
 	    SvNV_set(sv, 0.0);
 	}
@@ -10978,7 +10978,6 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
 	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
 	AvARYLEN((AV*)dstr) = sv_dup_inc(AvARYLEN((AV*)sstr), param);
-	AvFLAGS((AV*)dstr) = AvFLAGS((AV*)sstr);
 	if (AvARRAY((AV*)sstr)) {
 	    SV **dst_ary, **src_ary;
 	    SSize_t items = AvFILLp((AV*)sstr) + 1;
