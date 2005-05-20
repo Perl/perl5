@@ -807,6 +807,8 @@ ext/Storable/MANIFEST		Storable extension
 ext/Storable/README		Storable extension
 ext/Storable/Storable.pm	Storable extension
 ext/Storable/Storable.xs	Storable extension
+ext/Storable/t/attach_errors.t	Trigger and test STORABLE_attach errors
+ext/Storable/t/attach_singleton.t	Test STORABLE_attach for the Singleton pattern
 ext/Storable/t/blessed.t	See if Storable works
 ext/Storable/t/canonical.t	See if Storable works
 ext/Storable/t/circular_hook.t	Test thaw hook called depth-first for circular refs
@@ -820,8 +822,6 @@ ext/Storable/t/freeze.t		See if Storable works
 ext/Storable/t/HAS_ATTACH.pm	For auto-requiring of modules for STORABLE_attach
 ext/Storable/t/HAS_HOOK.pm	For auto-requiring of modules for STORABLE_thaw
 ext/Storable/t/HAS_OVERLOAD.pm	For auto-requiring of mdoules for overload
-ext/Storable/t/attach_errors.t	Trigger and test STORABLE_attach errors
-ext/Storable/t/attach_singleton.t	Test STORABLE_attach for the Singleton pattern
 ext/Storable/t/integer.t	See if Storable works
 ext/Storable/t/interwork56.t	Test compatibility kludge for 64bit data under 5.6.x
 ext/Storable/t/just_plain_nasty.t	See if Storable works
@@ -834,6 +834,7 @@ ext/Storable/t/overload.t	See if Storable works
 ext/Storable/t/recurse.t	See if Storable works
 ext/Storable/t/restrict.t	See if Storable works
 ext/Storable/t/retrieve.t	See if Storable works
+ext/Storable/t/sig_die.t	See if Storable works
 ext/Storable/t/st-dump.pl	See if Storable works
 ext/Storable/t/store.t		See if Storable works
 ext/Storable/t/testlib.pl	more helper routines for tests
