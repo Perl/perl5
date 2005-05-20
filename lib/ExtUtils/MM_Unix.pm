@@ -20,7 +20,7 @@ use vars qw($VERSION @ISA
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '1.48';
+$VERSION = '1.49';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -3051,8 +3051,8 @@ sub processPL {
 all :: %s
 	$(NOECHO) $(NOOP)
 
-%s :: %s
-	$(PERLRUN) %s %s
+%s :: %s pm_to_blib
+	$(PERLRUNINST) %s %s
 MAKE_FRAG
 
 	}

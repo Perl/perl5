@@ -1,4 +1,4 @@
-# $Id:  $
+# $Id: /local/schwern.org/CPAN/ExtUtils-MakeMaker/trunk/lib/ExtUtils/MakeMaker.pm 4531 2005-05-19T21:18:53.053398Z schwern  $
 package ExtUtils::MakeMaker;
 
 BEGIN {require 5.005_03;}
@@ -21,8 +21,8 @@ use vars qw(
 use vars qw($Revision);
 use strict;
 
-$VERSION = '6.28';
-($Revision = q$Revision: 4409 $) =~ /Revision:\s+(\S+)/;
+$VERSION = '6.29';
+($Revision = q$Revision: 4531 $) =~ /Revision:\s+(\S+)/;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&WriteMakefile &writeMakefile $Verbose &prompt);
@@ -1883,7 +1883,7 @@ This behavior can be overridden by supplying your own set of files to
 search.  PL_FILES accepts a hash ref, the key being the file to run
 and the value is passed in as the first argument when the PL file is run.
 
-  PL_FILES => {'bin/foobar.PL' => 'bin/foobar'}
+    PL_FILES => {'bin/foobar.PL' => 'bin/foobar'}
 
 Would run bin/foobar.PL like this:
 
@@ -1891,12 +1891,15 @@ Would run bin/foobar.PL like this:
 
 If multiple files from one program are desired an array ref can be used.
 
-  PL_FILES => {'bin/foobar.PL' => [qw(bin/foobar1 bin/foobar2)]}
+    PL_FILES => {'bin/foobar.PL' => [qw(bin/foobar1 bin/foobar2)]}
 
 In this case the program will be run multiple times using each target file.
 
     perl bin/foobar.PL bin/foobar1
     perl bin/foobar.PL bin/foobar2
+
+PL files are run B<after> pm_to_blib and include INST_LIB and INST_ARCH
+in its C<@INC> so the just built modules can be accessed.
 
 
 =item PM
@@ -2083,7 +2086,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    $VERSION = sprintf "%d.%03d", q$Revision: 4409 $ =~ /(\d+)/g;
+    $VERSION = sprintf "%d.%03d", q$Revision: 4531 $ =~ /(\d+)/g;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 
@@ -2473,6 +2476,10 @@ is processed before any actual command line arguments are processed.
 
 If set to a true value then MakeMaker's prompt function will
 always return the default without waiting for user input.
+
+=item PERL_CORE
+
+Same as the PERL_CORE parameter.  The parameter overrides this.
 
 =back
 

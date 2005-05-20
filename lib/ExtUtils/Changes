@@ -1,3 +1,11 @@
+6.29  Thu May 19 14:15:21 PDT 2005
+    * The behavior of PL_FILES is restored to its pre-6.26 behavior as several
+      CPAN modules depend on this.  PL programs run via PL_FILES have 
+      INST_LIB and INST_ARCH in their @INC and so can load any just built 
+      modules.
+    - Now honors PERL_CORE environment variable.
+    - Testing to ensure FIRST_MAKEFILE is honored.
+
 6.28  Tue Apr 12 16:17:07 PDT 2005
     - Fix realclean so it cleans up files installed from ext/ in the core
     - Fix dir_target() so it doesn't warn should any of the INST_* paths
