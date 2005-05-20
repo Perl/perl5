@@ -181,7 +181,7 @@ PP(pp_rv2gv)
 		    }
 		    if (SvTYPE(sv) < SVt_RV)
 			sv_upgrade(sv, SVt_RV);
-		    if (SvPVX(sv)) {
+		    if (SvPVX_const(sv)) {
 			SvPV_free(sv);
 			SvLEN_set(sv, 0);
                         SvCUR_set(sv, 0);
@@ -376,7 +376,7 @@ PP(pp_prototype)
 
     ret = &PL_sv_undef;
     if (SvPOK(TOPs) && SvCUR(TOPs) >= 7) {
-	const char *s = SvPVX(TOPs);
+	const char *s = SvPVX_const(TOPs);
 	if (strnEQ(s, "CORE::", 6)) {
 	    const int code = keyword(s + 6, SvCUR(TOPs) - 6);
 	    if (code < 0) {	/* Overridable. */
@@ -427,7 +427,7 @@ PP(pp_prototype)
     }
     cv = sv_2cv(TOPs, &stash, &gv, FALSE);
     if (cv && SvPOK(cv))
-	ret = sv_2mortal(newSVpvn(SvPVX(cv), SvCUR(cv)));
+	ret = sv_2mortal(newSVpvn(SvPVX_const(cv), SvCUR(cv)));
   set:
     SETs(ret);
     RETURN;
@@ -826,7 +826,7 @@ PP(pp_undef)
 	}
 	break;
     default:
-	if (SvTYPE(sv) >= SVt_PV && SvPVX(sv) && SvLEN(sv)) {
+	if (SvTYPE(sv) >= SVt_PV && SvPVX_const(sv) && SvLEN(sv)) {
 	    SvPV_free(sv);
 	    SvPV_set(sv, Nullch);
 	    SvLEN_set(sv, 0);

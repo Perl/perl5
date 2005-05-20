@@ -257,7 +257,7 @@ Perl_pad_undef(pTHX_ CV* cv)
 	for (ix = AvFILLp(comppad_name); ix > 0; ix--) {
 	    SV *namesv = namepad[ix];
 	    if (namesv && namesv != &PL_sv_undef
-		&& *SvPVX(namesv) == '&')
+		&& *SvPVX_const(namesv) == '&')
 	    {
 		CV * const innercv = (CV*)curpad[ix];
 		U32 inner_rc = SvREFCNT(innercv);
@@ -517,7 +517,7 @@ Perl_pad_check_dup(pTHX_ const char *name, bool is_our, const HV *ourstash)
 	    && (SvIVX(sv) == PAD_MAX || SvIVX(sv) == 0)
 	    && (!is_our
 		|| ((SvFLAGS(sv) & SVpad_OUR) && GvSTASH(sv) == ourstash))
-	    && strEQ(name, SvPVX(sv)))
+	    && strEQ(name, SvPVX_const(sv)))
 	{
 	    Perl_warner(aTHX_ packWARN(WARN_MISC),
 		"\"%s\" variable %s masks earlier declaration in same %s",
@@ -536,7 +536,7 @@ Perl_pad_check_dup(pTHX_ const char *name, bool is_our, const HV *ourstash)
 		&& !SvFAKE(sv)
 		&& (SvIVX(sv) == PAD_MAX || SvIVX(sv) == 0)
 		&& ((SvFLAGS(sv) & SVpad_OUR) && GvSTASH(sv) == ourstash)
-		&& strEQ(name, SvPVX(sv)))
+		&& strEQ(name, SvPVX_const(sv)))
 	    {
 		Perl_warner(aTHX_ packWARN(WARN_MISC),
 		    "\"our\" variable %s redeclared", name);
@@ -586,7 +586,7 @@ Perl_pad_findmy(pTHX_ const char *name)
 	if (namesv && namesv != &PL_sv_undef
 	    && !SvFAKE(namesv)
 	    && (SvFLAGS(namesv) & SVpad_OUR)
-	    && strEQ(SvPVX(namesv), name)
+	    && strEQ(SvPVX_const(namesv), name)
 	    && U_32(SvNVX(namesv)) == PAD_MAX /* min */
 	)
 	    return offset;
@@ -669,7 +669,7 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 	for (offset = AvFILLp(nameav); offset > 0; offset--) {
             const SV *namesv = name_svp[offset];
 	    if (namesv && namesv != &PL_sv_undef
-		    && strEQ(SvPVX(namesv), name))
+		    && strEQ(SvPVX_const(namesv), name))
 	    {
 		if (SvFAKE(namesv))
 		    fake_offset = offset; /* in case we don't find a real one */
@@ -816,7 +816,7 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 	PL_curpad = AvARRAY(PL_comppad);
 
 	new_offset = pad_add_name(
-	    SvPVX(*out_name_sv),
+	    SvPVX_const(*out_name_sv),
 	    (SvFLAGS(*out_name_sv) & SVpad_TYPED)
 		    ? SvSTASH(*out_name_sv) : Nullhv,
 	    (SvFLAGS(*out_name_sv) & SVpad_OUR)
@@ -966,7 +966,7 @@ Perl_intro_my(pTHX)
 	    SvNV_set(sv, (NV)PL_cop_seqmax);
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		"Pad intromy: %ld \"%s\", (%ld,%ld)\n",
-		(long)i, SvPVX(sv),
+		(long)i, SvPVX_const(sv),
 		(long)U_32(SvNVX(sv)), (long)SvIVX(sv))
 	    );
 	}
@@ -1015,7 +1015,7 @@ Perl_pad_leavemy(pTHX)
 	    SvIV_set(sv, PL_cop_seqmax);
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		"Pad leavemy: %ld \"%s\", (%ld,%ld)\n",
-		(long)off, SvPVX(sv),
+		(long)off, SvPVX_const(sv),
 		(long)U_32(SvNVX(sv)), (long)SvIVX(sv))
 	    );
 	}
@@ -1168,7 +1168,7 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 	     */
 	    if (!((namesv = namep[ix]) != Nullsv &&
 		  namesv != &PL_sv_undef &&
-		   *SvPVX(namesv) == '&'))
+		   *SvPVX_const(namesv) == '&'))
 	    {
 		SvREFCNT_dec(PL_curpad[ix]);
 		PL_curpad[ix] = Nullsv;
@@ -1289,7 +1289,7 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
 		    (int) ix,
 		    PTR2UV(ppad[ix]),
 		    (unsigned long) (ppad[ix] ? SvREFCNT(ppad[ix]) : 0),
-		    SvPVX(namesv),
+		    SvPVX_const(namesv),
 		    (unsigned long)SvIVX(namesv),
 		    (unsigned long)SvNVX(namesv)
 
@@ -1302,7 +1302,7 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
 		    (unsigned long) (ppad[ix] ? SvREFCNT(ppad[ix]) : 0),
 		    (long)U_32(SvNVX(namesv)),
 		    (long)SvIVX(namesv),
-		    SvPVX(namesv)
+		    SvPVX_const(namesv)
 		);
 	}
 	else if (full) {
@@ -1425,7 +1425,7 @@ Perl_cv_clone(pTHX_ CV *proto)
     CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(proto);
 
     if (SvPOK(proto))
-	sv_setpvn((SV*)cv, SvPVX(proto), SvCUR(proto));
+	sv_setpvn((SV*)cv, SvPVX_const(proto), SvCUR(proto));
 
     CvPADLIST(cv) = pad_new(padnew_CLONE|padnew_SAVE);
 
@@ -1448,7 +1448,7 @@ Perl_cv_clone(pTHX_ CV *proto)
 		if (SvTYPE(proto) == SVt_PVFM && SvPADSTALE(sv)) {
 		    if (ckWARN(WARN_CLOSURE))
 			Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
-			    "Variable \"%s\" is not available", SvPVX(namesv));
+			    "Variable \"%s\" is not available", SvPVX_const(namesv));
 		    sv = Nullsv;
 		}
 		else {
@@ -1457,7 +1457,7 @@ Perl_cv_clone(pTHX_ CV *proto)
 		}
 	    }
 	    if (!sv) {
-                const char sigil = SvPVX(namesv)[0];
+                const char sigil = SvPVX_const(namesv)[0];
                 if (sigil == '&')
 		    sv = SvREFCNT_inc(ppad[ix]);
                 else if (sigil == '@')
@@ -1529,7 +1529,7 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
     for (ix = AvFILLp(comppad_name); ix > 0; ix--) {
         const SV *namesv = namepad[ix];
 	if (namesv && namesv != &PL_sv_undef
-	    && *SvPVX(namesv) == '&')
+	    && *SvPVX_const(namesv) == '&')
 	{
 	    CV *innercv = (CV*)curpad[ix];
 	    assert(CvWEAKOUTSIDE(innercv));
@@ -1567,7 +1567,7 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 
 	for ( ;ix > 0; ix--) {
 	    if (names_fill >= ix && names[ix] != &PL_sv_undef) {
-		const char sigil = SvPVX(names[ix])[0];
+		const char sigil = SvPVX_const(names[ix])[0];
 		if ((SvFLAGS(names[ix]) & SVf_FAKE) || sigil == '&') {
 		    /* outer lexical or anon code */
 		    av_store(newpad, ix, SvREFCNT_inc(oldpad[ix]));

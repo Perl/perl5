@@ -475,14 +475,14 @@ PP(pp_formline)
 	case FF_LITERAL:
 	    arg = *fpc++;
 	    if (targ_is_utf8 && !SvUTF8(tmpForm)) {
-		SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
+		SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
 		*t = '\0';
 		sv_catpvn_utf8_upgrade(PL_formtarget, f, arg, nsv);
 		t = SvEND(PL_formtarget);
 		break;
 	    }
 	    if (!targ_is_utf8 && DO_UTF8(tmpForm)) {
-		SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
+		SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
 		*t = '\0';
 		sv_utf8_upgrade(PL_formtarget);
 		SvGROW(PL_formtarget, SvCUR(PL_formtarget) + fudge + 1);
@@ -658,7 +658,7 @@ PP(pp_formline)
 	    s = item;
 	    if (item_is_utf8) {
 		if (!targ_is_utf8) {
-		    SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
+		    SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
 		    *t = '\0';
 		    sv_utf8_upgrade(PL_formtarget);
 		    SvGROW(PL_formtarget, SvCUR(PL_formtarget) + fudge + 1);
@@ -691,7 +691,7 @@ PP(pp_formline)
 		break;
 	    }
 	    if (targ_is_utf8 && !item_is_utf8) {
-		SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
+		SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
 		*t = '\0';
 		sv_catpvn_utf8_upgrade(PL_formtarget, s, arg, nsv);
 		for (; t < SvEND(PL_formtarget); t++) {
@@ -757,7 +757,7 @@ PP(pp_formline)
 			}
 		    }
 		}
-		SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
+		SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
 		if (targ_is_utf8)
 		    SvUTF8_on(PL_formtarget);
 		if (oneline) {
@@ -829,7 +829,7 @@ PP(pp_formline)
 	    if (gotsome) {
 		if (arg) {		/* repeat until fields exhausted? */
 		    *t = '\0';
-		    SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
+		    SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
 		    lines += FmLINES(PL_formtarget);
 		    if (lines == 200) {
 			arg = t - linemark;
@@ -865,7 +865,7 @@ PP(pp_formline)
 		}
 		s = t - 3;
 		if (strnEQ(s,"   ",3)) {
-		    while (s > SvPVX(PL_formtarget) && isSPACE(s[-1]))
+		    while (s > SvPVX_const(PL_formtarget) && isSPACE(s[-1]))
 			s--;
 		}
 		*s++ = '.';
@@ -876,7 +876,7 @@ PP(pp_formline)
 
 	case FF_END:
 	    *t = '\0';
-	    SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
+	    SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
 	    if (targ_is_utf8)
 		SvUTF8_on(PL_formtarget);
 	    FmLINES(PL_formtarget) += lines;
@@ -1099,7 +1099,7 @@ PP(pp_flip)
 	SvNIOKp(left)  || (SvOK(left)  && !SvPOKp(left))  || \
 	SvNIOKp(right) || (SvOK(right) && !SvPOKp(right)) || \
 	(((!SvOK(left) && SvOK(right)) || ((!SvOK(left) || \
-          looks_like_number(left)) && SvPOKp(left) && *SvPVX(left) != '0')) \
+          looks_like_number(left)) && SvPOKp(left) && *SvPVX_const(left) != '0')) \
          && (!SvOK(right) || looks_like_number(right))))
 
 PP(pp_flop)
@@ -1144,7 +1144,7 @@ PP(pp_flop)
 	    SvPV_force(sv,n_a);
 	    while (!SvNIOKp(sv) && SvCUR(sv) <= len) {
 		XPUSHs(sv);
-	        if (strEQ(SvPVX(sv),tmps))
+	        if (strEQ(SvPVX_const(sv),tmps))
 	            break;
 		sv = sv_2mortal(newSVsv(sv));
 		sv_inc(sv);
@@ -1410,7 +1410,7 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 		    sv_catpvn(err, message, msglen);
 		    if (ckWARN(WARN_MISC)) {
 			STRLEN start = SvCUR(err)-msglen-sizeof(prefix)+1;
-			Perl_warner(aTHX_ packWARN(WARN_MISC), SvPVX(err)+start);
+			Perl_warner(aTHX_ packWARN(WARN_MISC), SvPVX_const(err)+start);
 		    }
 		}
 	    }
@@ -1458,7 +1458,7 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 	    if (optype == OP_REQUIRE) {
                 const char* msg = SvPVx(ERRSV, n_a);
                 SV *nsv = cx->blk_eval.old_namesv;
-                (void)hv_store(GvHVn(PL_incgv), SvPVX(nsv), SvCUR(nsv),
+                (void)hv_store(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv),
                                &PL_sv_undef, 0);
 		DIE(aTHX_ "%sCompilation failed in require",
 		    *msg ? msg : "Unknown error\n");
@@ -1971,7 +1971,7 @@ PP(pp_return)
 	{
 	    /* Unassume the success we assumed earlier. */
 	    SV *nsv = cx->blk_eval.old_namesv;
-	    (void)hv_delete(GvHVn(PL_incgv), SvPVX(nsv), SvCUR(nsv), G_DISCARD);
+	    (void)hv_delete(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv), G_DISCARD);
 	    DIE(aTHX_ "%"SVf" did not return a true value", nsv);
 	}
 	break;
@@ -2658,8 +2658,8 @@ PP(pp_cswitch)
 STATIC void
 S_save_lines(pTHX_ AV *array, SV *sv)
 {
-    register const char *s = SvPVX(sv);
-    register const char *send = SvPVX(sv) + SvCUR(sv);
+    register const char *s = SvPVX_const(sv);
+    register const char *send = SvPVX_const(sv) + SvCUR(sv);
     register I32 line = 1;
 
     while (s && s < send) {
@@ -2942,7 +2942,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	if (optype == OP_REQUIRE) {
             const char* msg = SvPVx(ERRSV, n_a);
            SV *nsv = cx->blk_eval.old_namesv;
-           (void)hv_store(GvHVn(PL_incgv), SvPVX(nsv), SvCUR(nsv),
+           (void)hv_store(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv),
                           &PL_sv_undef, 0);
 	    DIE(aTHX_ "%sCompilation failed in require",
 		*msg ? msg : "Unknown error\n");
@@ -3298,9 +3298,9 @@ PP(pp_require)
 		AV *ar = GvAVn(PL_incgv);
 		I32 i;
 		sv_catpvn(msg, " in @INC", 8);
-		if (instr(SvPVX(msg), ".h "))
+		if (instr(SvPVX_const(msg), ".h "))
 		    sv_catpv(msg, " (change .h to .ph maybe?)");
-		if (instr(SvPVX(msg), ".ph "))
+		if (instr(SvPVX_const(msg), ".ph "))
 		    sv_catpv(msg, " (did you run h2ph?)");
 		sv_catpv(msg, " (@INC contains:");
 		for (i = 0; i <= AvFILL(ar); i++) {
@@ -3526,7 +3526,7 @@ PP(pp_leaveeval)
     {
 	/* Unassume the success we assumed earlier. */
 	SV *nsv = cx->blk_eval.old_namesv;
-	(void)hv_delete(GvHVn(PL_incgv), SvPVX(nsv), SvCUR(nsv), G_DISCARD);
+	(void)hv_delete(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv), G_DISCARD);
 	retop = Perl_die(aTHX_ "%"SVf" did not return a true value", nsv);
 	/* die_where() did LEAVE, or we won't be here */
     }

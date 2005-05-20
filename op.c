@@ -785,9 +785,9 @@ Perl_scalarvoid(pTHX_ OP *o)
                      built upon these three nroff macros being used in
                      void context. The pink camel has the details in
                      the script wrapman near page 319. */
-		    if (strnEQ(SvPVX(sv), "di", 2) ||
-			strnEQ(SvPVX(sv), "ds", 2) ||
-			strnEQ(SvPVX(sv), "ig", 2))
+		    if (strnEQ(SvPVX_const(sv), "di", 2) ||
+			strnEQ(SvPVX_const(sv), "ds", 2) ||
+			strnEQ(SvPVX_const(sv), "ig", 2))
 			    useless = 0;
 		}
 	    }
@@ -1607,7 +1607,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
     (void)SvIOK_on(meth);
     {
 	U32 hash;
-	PERL_HASH(hash, SvPVX(meth), SvCUR(meth));
+	PERL_HASH(hash, SvPVX_const(meth), SvCUR(meth));
 	SvUV_set(meth, hash);
     }
     imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL|OPf_WANT_VOID,
@@ -3046,7 +3046,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	    (void)SvIOK_on(meth);
 	    {
 		U32 hash;
-		PERL_HASH(hash, SvPVX(meth), SvCUR(meth));
+		PERL_HASH(hash, SvPVX_const(meth), SvCUR(meth));
 		SvUV_set(meth, hash);
 	    }
 	    veop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
@@ -3074,7 +3074,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	(void)SvIOK_on(meth);
 	{
 	    U32 hash;
-	    PERL_HASH(hash, SvPVX(meth), SvCUR(meth));
+	    PERL_HASH(hash, SvPVX_const(meth), SvCUR(meth));
 	    SvUV_set(meth, hash);
 	}
 	imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
@@ -4090,7 +4090,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 void
 Perl_cv_ckproto(pTHX_ const CV *cv, const GV *gv, const char *p)
 {
-    if (((!p != !SvPOK(cv)) || (p && strNE(p, SvPVX(cv)))) && ckWARN_d(WARN_PROTOTYPE)) {
+    if (((!p != !SvPOK(cv)) || (p && strNE(p, SvPVX_const(cv)))) && ckWARN_d(WARN_PROTOTYPE)) {
 	SV* msg = sv_newmortal();
 	SV* name = Nullsv;
 
@@ -4259,7 +4259,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	Perl_sv_setpvf(aTHX_ sv, "%s[%s:%"IVdf"]",
 		       PL_curstash ? "__ANON__" : "__ANON__::__ANON__",
 		       CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
-	aname = SvPVX(sv);
+	aname = SvPVX_const(sv);
     }
     else
 	aname = Nullch;
@@ -4509,9 +4509,9 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 			   CopFILE(PL_curcop),
 			   (long)PL_subline, (long)CopLINE(PL_curcop));
 	    gv_efullname3(tmpstr, gv, Nullch);
-	    hv_store(GvHV(PL_DBsub), SvPVX(tmpstr), SvCUR(tmpstr), sv, 0);
+	    hv_store(GvHV(PL_DBsub), SvPVX_const(tmpstr), SvCUR(tmpstr), sv, 0);
 	    hv = GvHVn(db_postponed);
-	    if (HvFILL(hv) > 0 && hv_exists(hv, SvPVX(tmpstr), SvCUR(tmpstr))
+	    if (HvFILL(hv) > 0 && hv_exists(hv, SvPVX_const(tmpstr), SvCUR(tmpstr))
 		&& (pcv = GvCV(db_postponed)))
 	    {
 		dSP;
@@ -5841,10 +5841,10 @@ Perl_ck_method(pTHX_ OP *o)
     OP *kid = cUNOPo->op_first;
     if (kid->op_type == OP_CONST) {
 	SV* sv = kSVOP->op_sv;
-	if (!(strchr(SvPVX(sv), ':') || strchr(SvPVX(sv), '\''))) {
+	if (!(strchr(SvPVX_const(sv), ':') || strchr(SvPVX_const(sv), '\''))) {
 	    OP *cmop;
 	    if (!SvREADONLY(sv) || !SvFAKE(sv)) {
-		sv = newSVpvn_share(SvPVX(sv), SvCUR(sv), 0);
+		sv = newSVpvn_share(SvPVX_const(sv), SvCUR(sv), 0);
 	    }
 	    else {
 		kSVOP->op_sv = Nullsv;
@@ -5896,7 +5896,7 @@ Perl_ck_open(pTHX_ OP *o)
 	 OP *first = cLISTOPx(o)->op_first; /* The pushmark. */
 	 OP *last  = cLISTOPx(o)->op_last;  /* The bareword. */
 	 OP *oa;
-	 char *mode;
+	 const char *mode;
 
 	 if ((last->op_type == OP_CONST) &&		/* The bareword. */
 	     (last->op_private & OPpCONST_BARE) &&
@@ -5904,7 +5904,7 @@ Perl_ck_open(pTHX_ OP *o)
 	     (oa = first->op_sibling) &&		/* The fh. */
 	     (oa = oa->op_sibling) &&			/* The mode. */
 	     SvPOK(((SVOP*)oa)->op_sv) &&
-	     (mode = SvPVX(((SVOP*)oa)->op_sv)) &&
+	     (mode = SvPVX_const(((SVOP*)oa)->op_sv)) &&
 	     mode[0] == '>' && mode[1] == '&' &&	/* A dup open. */
 	     (last == oa->op_sibling))			/* The bareword. */
 	      last->op_private &= ~OPpCONST_STRICT;
@@ -6679,7 +6679,7 @@ Perl_peep(pTHX_ register OP *o)
 	    }
 	    else if ((o->op_private & OPpEARLY_CV) && ckWARN(WARN_PROTOTYPE)) {
 		GV *gv = cGVOPo_gv;
-		if (SvTYPE(gv) == SVt_PVGV && GvCV(gv) && SvPVX(GvCV(gv))) {
+		if (SvTYPE(gv) == SVt_PVGV && GvCV(gv) && SvPVX_const(GvCV(gv))) {
 		    /* XXX could check prototype here instead of just carping */
 		    SV *sv = sv_newmortal();
 		    gv_efullname3(sv, gv, Nullch);

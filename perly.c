@@ -322,7 +322,7 @@ Perl_yyparse (pTHX)
 #ifdef DEBUGGING
     yyns_sv = NEWSV(73, YYINITDEPTH * sizeof(char *));
     SAVEFREESV(yyns_sv);
-    yyns = (const char **) SvPVX(yyns_sv);
+    yyns = SvPVX_const(yyns_sv);
     yynsp = yyns;
 #endif
 
@@ -366,7 +366,7 @@ Perl_yyparse (pTHX)
 	 yyvs = (YYSTYPE *) SvPVX(yyvs_sv);
 #ifdef DEBUGGING
 	 SvGROW(yyns_sv, yystacksize * sizeof(char *));
-	 yyns = (const char **) SvPVX(yyns_sv);
+	 yyns = SvPVX_const(yyns_sv);
 	 if (! yyns)
 	       goto yyoverflowlab;
 	 yynsp = yyns + yysize - 1;

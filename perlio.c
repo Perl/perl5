@@ -4892,7 +4892,7 @@ PerlIO_tmpfile(void)
 	  f = PerlIO_fdopen(fd, "w+");
 	  if (f)
 	       PerlIOBase(f)->flags |= PERLIO_F_TEMP;
-	  PerlLIO_unlink(SvPVX(sv));
+	  PerlLIO_unlink(SvPVX_const(sv));
 	  SvREFCNT_dec(sv);
      }
 #    else	/* !HAS_MKSTEMP, fallback to stdio tmpfile(). */
