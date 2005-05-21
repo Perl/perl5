@@ -190,8 +190,18 @@
 #define CALLREG_INTUIT_STRING CALL_FPTR(PL_regint_string)
 #define CALLREGFREE CALL_FPTR(PL_regfree)
 
-#define PERL_UNUSED_DECL __attribute__unused__
+#if defined(SYMBIAN) && defined(__GNUC__)
+#  ifdef __cplusplus
+#    define PERL_UNUSED_DECL
+#  else
+#    define PERL_UNUSED_DECL __attribute__((unused))
+#  endif
+#endif
 
+#ifndef PERL_UNUSED_DECL
+#  define PERL_UNUSED_DECL __attribute__unused__
+#endif
+ 
 /* gcc -Wall:
  * for silencing unused variables that are actually used most of the time,
  * but we cannot quite get rid of, such `ax' in PPCODE+noargs xsubs
