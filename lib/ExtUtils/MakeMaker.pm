@@ -1,4 +1,4 @@
-# $Id: /local/schwern.org/CPAN/ExtUtils-MakeMaker/trunk/lib/ExtUtils/MakeMaker.pm 4531 2005-05-19T21:18:53.053398Z schwern  $
+# $Id: /local/schwern.org/CPAN/ExtUtils-MakeMaker/trunk/lib/ExtUtils/MakeMaker.pm 4535 2005-05-20T23:08:34.937906Z schwern  $
 package ExtUtils::MakeMaker;
 
 BEGIN {require 5.005_03;}
@@ -21,8 +21,8 @@ use vars qw(
 use vars qw($Revision);
 use strict;
 
-$VERSION = '6.29';
-($Revision = q$Revision: 4531 $) =~ /Revision:\s+(\S+)/;
+$VERSION = '6.30';
+($Revision = q$Revision: 4535 $) =~ /Revision:\s+(\S+)/;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&WriteMakefile &writeMakefile $Verbose &prompt);
@@ -1898,8 +1898,12 @@ In this case the program will be run multiple times using each target file.
     perl bin/foobar.PL bin/foobar1
     perl bin/foobar.PL bin/foobar2
 
-PL files are run B<after> pm_to_blib and include INST_LIB and INST_ARCH
-in its C<@INC> so the just built modules can be accessed.
+PL files are normally run B<after> pm_to_blib and include INST_LIB and
+INST_ARCH in its C<@INC> so the just built modules can be
+accessed... unless the PL file is making a module (or anything else in
+PM) in which case it is run B<before> pm_to_blib and does not include
+INST_LIB and INST_ARCH in its C<@INC>.  This apparently odd behavior
+is there for backwards compatibility (and its somewhat DWIM).
 
 
 =item PM
@@ -2086,7 +2090,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    $VERSION = sprintf "%d.%03d", q$Revision: 4531 $ =~ /(\d+)/g;
+    $VERSION = sprintf "%d.%03d", q$Revision: 4535 $ =~ /(\d+)/g;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 

@@ -20,7 +20,7 @@ use vars qw($VERSION @ISA
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '1.49';
+$VERSION = '1.50';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -3046,13 +3046,29 @@ sub processPL {
                 $target = vmsify($target);
             }
 
-            $m .= sprintf <<'MAKE_FRAG', ($target) x 2, ($plfile) x 2, $target;
+	    # Normally a .PL file runs AFTER pm_to_blib so it can have
+	    # blib in its @INC and load the just built modules.  BUT if
+	    # the generated module is something in $(TO_INST_PM) which
+	    # pm_to_blib depends on then it can't depend on pm_to_blib
+	    # else we have a dependency loop.
+	    my $pm_dep;
+	    my $perlrun;
+	    if( defined $self->{PM}{$target} ) {
+		$pm_dep  = '';
+		$perlrun = 'PERLRUN';
+	    }
+	    else {
+		$pm_dep  = 'pm_to_blib';
+		$perlrun = 'PERLRUNINST';
+	    }
 
-all :: %s
-	$(NOECHO) $(NOOP)
+            $m .= <<MAKE_FRAG;
 
-%s :: %s pm_to_blib
-	$(PERLRUNINST) %s %s
+all :: $target
+	\$(NOECHO) \$(NOOP)
+
+$target :: $plfile $pm_dep
+	\$($perlrun) $plfile $target
 MAKE_FRAG
 
 	}
