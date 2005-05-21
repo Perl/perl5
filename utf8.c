@@ -521,7 +521,7 @@ malformed:
 	}
 	
 	if (warning) {
-	    char *s = SvPVX(sv);
+	    const char *s = SvPVX_const(sv);
 
 	    if (PL_op)
 		Perl_warner(aTHX_ packWARN(WARN_UTF8),

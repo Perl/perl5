@@ -2592,7 +2592,7 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
     }
     else if (SvPOKp(sv) && SvLEN(sv)) {
 	UV value;
-	const int numtype = grok_number(SvPVX(sv), SvCUR(sv), &value);
+	const int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
 	/* We want to avoid a possible problem when we cache an IV which
 	   may be later translated to an NV, and the resulting NV is not
 	   the same as the direct translation of the initial string
@@ -2895,7 +2895,7 @@ Perl_sv_2uv_flags(pTHX_ register SV *sv, I32 flags)
     }
     else if (SvPOKp(sv) && SvLEN(sv)) {
 	UV value;
-	const int numtype = grok_number(SvPVX(sv), SvCUR(sv), &value);
+	const int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
 
 	/* We want to avoid a possible problem when we cache a UV which
 	   may be later translated to an NV, and the resulting NV is not
@@ -3067,7 +3067,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	    return SvNVX(sv);
 	if (SvPOKp(sv) && SvLEN(sv)) {
 	    if (ckWARN(WARN_NUMERIC) && !SvIOKp(sv) &&
-		!grok_number(SvPVX(sv), SvCUR(sv), NULL))
+		!grok_number(SvPVX_const(sv), SvCUR(sv), NULL))
 		not_a_number(sv);
 	    return Atof(SvPVX(sv));
 	}
@@ -3289,7 +3289,7 @@ STATIC UV
 S_asUV(pTHX_ SV *sv)
 {
     UV value;
-    int numtype = grok_number(SvPVX(sv), SvCUR(sv), &value);
+    const int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
 
     if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
 	== IS_NUMBER_IN_UV) {
@@ -7285,7 +7285,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
 	/* Got to punt this as an integer if needs be, but we don't issue
 	   warnings. Probably ought to make the sv_iv_please() that does
 	   the conversion if possible, and silently.  */
-	int numtype = grok_number(SvPVX(sv), SvCUR(sv), NULL);
+	const int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), NULL);
 	if (numtype && !(numtype & IS_NUMBER_INFINITY)) {
 	    /* Need to try really hard to see if it's an integer.
 	       9.22337203685478e+18 is an integer.
@@ -7433,7 +7433,7 @@ Perl_sv_dec(pTHX_ register SV *sv)
     }
 #ifdef PERL_PRESERVE_IVUV
     {
-	int numtype = grok_number(SvPVX(sv), SvCUR(sv), NULL);
+	const int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), NULL);
 	if (numtype && !(numtype & IS_NUMBER_INFINITY)) {
 	    /* Need to try really hard to see if it's an integer.
 	       9.22337203685478e+18 is an integer.

@@ -1379,12 +1379,12 @@ S_scalar_mod_type(pTHX_ const OP *o, I32 type)
 }
 
 STATIC bool
-S_is_handle_constructor(pTHX_ const OP *o, I32 argnum)
+S_is_handle_constructor(pTHX_ const OP *o, I32 numargs)
 {
     switch (o->op_type) {
     case OP_PIPE_OP:
     case OP_SOCKPAIR:
-	if (argnum == 2)
+	if (numargs == 2)
 	    return TRUE;
 	/* FALL THROUGH */
     case OP_SYSOPEN:
@@ -1393,7 +1393,7 @@ S_is_handle_constructor(pTHX_ const OP *o, I32 argnum)
     case OP_SOCKET:
     case OP_OPEN_DIR:
     case OP_ACCEPT:
-	if (argnum == 1)
+	if (numargs == 1)
 	    return TRUE;
 	/* FALL THROUGH */
     default:
@@ -1543,9 +1543,8 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs, bool for_my)
 #define ATTRSMODULE_PM "attributes.pm"
 
     if (for_my) {
-	SV **svp;
 	/* Don't force the C<use> if we don't need it. */
-	svp = hv_fetch(GvHVn(PL_incgv), ATTRSMODULE_PM,
+	SV **svp = hv_fetch(GvHVn(PL_incgv), ATTRSMODULE_PM,
 		       sizeof(ATTRSMODULE_PM)-1, 0);
 	if (svp && *svp != &PL_sv_undef)
 	    ; 		/* already in %INC */
@@ -3226,7 +3225,7 @@ Perl_newSLICEOP(pTHX_ I32 flags, OP *subscript, OP *listval)
 }
 
 STATIC I32
-S_list_assignment(pTHX_ register const OP *o)
+S_is_list_assignment(pTHX_ register const OP *o)
 {
     if (!o)
 	return TRUE;
@@ -3235,8 +3234,8 @@ S_list_assignment(pTHX_ register const OP *o)
 	o = cUNOPo->op_first;
 
     if (o->op_type == OP_COND_EXPR) {
-        const I32 t = list_assignment(cLOGOPo->op_first->op_sibling);
-        const I32 f = list_assignment(cLOGOPo->op_first->op_sibling->op_sibling);
+        const I32 t = is_list_assignment(cLOGOPo->op_first->op_sibling);
+        const I32 f = is_list_assignment(cLOGOPo->op_first->op_sibling->op_sibling);
 
 	if (t && f)
 	    return TRUE;
@@ -3281,7 +3280,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	}
     }
 
-    if (list_assignment(left)) {
+    if (is_list_assignment(left)) {
 	OP *curop;
 
 	PL_modcount = 0;
@@ -5162,17 +5161,6 @@ Perl_ck_exists(pTHX_ OP *o)
     return o;
 }
 
-#if 0
-OP *
-Perl_ck_gvconst(pTHX_ register OP *o)
-{
-    o = fold_constants(o);
-    if (o->op_type == OP_CONST)
-	o->op_type = OP_GV;
-    return o;
-}
-#endif
-
 OP *
 Perl_ck_rvconst(pTHX_ register OP *o)
 {
@@ -5183,12 +5171,12 @@ Perl_ck_rvconst(pTHX_ register OP *o)
     if (kid->op_type == OP_CONST) {
 	int iscv;
 	GV *gv;
-	SV *kidsv = kid->op_sv;
+	SV * const kidsv = kid->op_sv;
 
 	/* Is it a constant from cv_const_sv()? */
 	if (SvROK(kidsv) && SvREADONLY(kidsv)) {
 	    SV *rsv = SvRV(kidsv);
-	    int svtype = SvTYPE(rsv);
+	    const int svtype = SvTYPE(rsv);
             const char *badtype = Nullch;
 
 	    switch (o->op_type) {

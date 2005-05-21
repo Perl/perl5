@@ -1409,7 +1409,7 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 		    sv_catpvn(err, prefix, sizeof(prefix)-1);
 		    sv_catpvn(err, message, msglen);
 		    if (ckWARN(WARN_MISC)) {
-			STRLEN start = SvCUR(err)-msglen-sizeof(prefix)+1;
+			const STRLEN start = SvCUR(err)-msglen-sizeof(prefix)+1;
 			Perl_warner(aTHX_ packWARN(WARN_MISC), SvPVX_const(err)+start);
 		    }
 		}
@@ -2662,9 +2662,9 @@ PP(pp_cswitch)
 STATIC void
 S_save_lines(pTHX_ AV *array, SV *sv)
 {
-    register const char *s = SvPVX_const(sv);
-    register const char *send = SvPVX_const(sv) + SvCUR(sv);
-    register I32 line = 1;
+    const char *s = SvPVX_const(sv);
+    const char *send = SvPVX_const(sv) + SvCUR(sv);
+    I32 line = 1;
 
     while (s && s < send) {
 	const char *t;
@@ -2945,8 +2945,8 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	LEAVE;
 	if (optype == OP_REQUIRE) {
             const char* msg = SvPVx(ERRSV, n_a);
-           SV *nsv = cx->blk_eval.old_namesv;
-           (void)hv_store(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv),
+	    SV *nsv = cx->blk_eval.old_namesv;
+	    (void)hv_store(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv),
                           &PL_sv_undef, 0);
 	    DIE(aTHX_ "%sCompilation failed in require",
 		*msg ? msg : "Unknown error\n");
@@ -3858,7 +3858,7 @@ run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 {
     dVAR;
     SV *datasv = FILTER_DATA(idx);
-    int filter_has_file = IoLINES(datasv);
+    const int filter_has_file = IoLINES(datasv);
     GV *filter_child_proc = (GV *)IoFMT_GV(datasv);
     SV *filter_state = (SV *)IoTOP_GV(datasv);
     SV *filter_sub = (SV *)IoBOTTOM_GV(datasv);

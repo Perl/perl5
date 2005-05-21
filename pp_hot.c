@@ -2690,8 +2690,6 @@ PP(pp_entersub)
 	if (hasargs)
 	{
 	    AV* av;
-	    SV** ary;
-
 #if 0
 	    DEBUG_S(PerlIO_printf(Perl_debug_log,
 	    			  "%p entersub preparing @_\n", thr));
@@ -2711,7 +2709,7 @@ PP(pp_entersub)
 	    ++MARK;
 
 	    if (items > AvMAX(av) + 1) {
-		ary = AvALLOC(av);
+		SV **ary = AvALLOC(av);
 		if (AvARRAY(av) != ary) {
 		    AvMAX(av) += AvARRAY(av) - AvALLOC(av);
 		    SvPV_set(av, (char*)ary);

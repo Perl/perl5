@@ -4443,7 +4443,7 @@ tryagain:
 }
 
 STATIC char *
-S_regwhite(pTHX_ char *p, char *e)
+S_regwhite(pTHX_ char *p, const char *e)
 {
     while (p < e) {
 	if (isSPACE(*p))
@@ -5468,10 +5468,9 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 STATIC regnode *			/* Location. */
 S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 {
-    register regnode *ret;
     register regnode *ptr;
+    regnode * const ret = RExC_emit;
 
-    ret = RExC_emit;
     if (SIZE_ONLY) {
 	SIZE_ALIGN(RExC_size);
 	RExC_size += 1;
@@ -5504,10 +5503,9 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 STATIC regnode *			/* Location. */
 S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 {
-    register regnode *ret;
     register regnode *ptr;
+    regnode * const ret = RExC_emit;
 
-    ret = RExC_emit;
     if (SIZE_ONLY) {
 	SIZE_ALIGN(RExC_size);
 	RExC_size += 2;
@@ -5555,7 +5553,7 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd)
     register regnode *src;
     register regnode *dst;
     register regnode *place;
-    register int offset = regarglen[(U8)op];
+    const int offset = regarglen[(U8)op];
 
 /* (PL_regkind[(U8)op] == CURLY ? EXTRA_STEP_2ARGS : 0); */
 
@@ -5611,7 +5609,6 @@ STATIC void
 S_regtail(pTHX_ RExC_state_t *pRExC_state, regnode *p, regnode *val)
 {
     register regnode *scan;
-    register regnode *temp;
 
     if (SIZE_ONLY)
 	return;
@@ -5619,7 +5616,7 @@ S_regtail(pTHX_ RExC_state_t *pRExC_state, regnode *p, regnode *val)
     /* Find last node. */
     scan = p;
     for (;;) {
-	temp = regnext(scan);
+	regnode * const temp = regnext(scan);
 	if (temp == NULL)
 	    break;
 	scan = temp;

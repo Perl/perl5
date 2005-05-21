@@ -422,13 +422,6 @@
 #define magic_setarylen		Perl_magic_setarylen
 #define magic_setbm		Perl_magic_setbm
 #define magic_setdbline		Perl_magic_setdbline
-#endif
-#if defined(USE_LOCALE_COLLATE)
-#ifdef PERL_CORE
-#define magic_setcollxfrm	Perl_magic_setcollxfrm
-#endif
-#endif
-#ifdef PERL_CORE
 #define magic_setdefelem	Perl_magic_setdefelem
 #define magic_setenv		Perl_magic_setenv
 #define magic_setfm		Perl_magic_setfm
@@ -453,6 +446,7 @@
 #define markstack_grow		Perl_markstack_grow
 #if defined(USE_LOCALE_COLLATE)
 #ifdef PERL_CORE
+#define magic_setcollxfrm	Perl_magic_setcollxfrm
 #define mem_collxfrm		Perl_mem_collxfrm
 #endif
 #endif
@@ -989,19 +983,17 @@
 #define mg_dup			Perl_mg_dup
 #define sv_dup			Perl_sv_dup
 #define rvpv_dup		Perl_rvpv_dup
-#if defined(HAVE_INTERP_INTERN)
-#define sys_intern_dup		Perl_sys_intern_dup
-#endif
 #define ptr_table_new		Perl_ptr_table_new
 #define ptr_table_fetch		Perl_ptr_table_fetch
 #define ptr_table_store		Perl_ptr_table_store
 #define ptr_table_split		Perl_ptr_table_split
 #define ptr_table_clear		Perl_ptr_table_clear
 #define ptr_table_free		Perl_ptr_table_free
-#endif
-#if defined(HAVE_INTERP_INTERN)
+#  if defined(HAVE_INTERP_INTERN)
+#define sys_intern_dup		Perl_sys_intern_dup
 #define sys_intern_clear	Perl_sys_intern_clear
 #define sys_intern_init		Perl_sys_intern_init
+#  endif
 #endif
 #define custom_op_name		Perl_custom_op_name
 #define custom_op_desc		Perl_custom_op_desc
@@ -1051,26 +1043,67 @@
 #endif
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
+#define ck_anoncode		Perl_ck_anoncode
+#define ck_bitop		Perl_ck_bitop
+#define ck_concat		Perl_ck_concat
+#define ck_defined		Perl_ck_defined
+#define ck_delete		Perl_ck_delete
+#define ck_die			Perl_ck_die
+#define ck_eof			Perl_ck_eof
+#define ck_eval			Perl_ck_eval
+#define ck_exec			Perl_ck_exec
+#define ck_exists		Perl_ck_exists
+#define ck_exit			Perl_ck_exit
+#define ck_ftst			Perl_ck_ftst
+#define ck_fun			Perl_ck_fun
+#define ck_glob			Perl_ck_glob
+#define ck_grep			Perl_ck_grep
+#define ck_index		Perl_ck_index
+#define ck_join			Perl_ck_join
+#define ck_lengthconst		Perl_ck_lengthconst
+#define ck_lfun			Perl_ck_lfun
+#define ck_listiob		Perl_ck_listiob
+#define ck_match		Perl_ck_match
+#define ck_method		Perl_ck_method
+#define ck_null			Perl_ck_null
+#define ck_open			Perl_ck_open
+#define ck_repeat		Perl_ck_repeat
+#define ck_require		Perl_ck_require
+#define ck_retarget		Perl_ck_retarget
+#define ck_return		Perl_ck_return
+#define ck_rfun			Perl_ck_rfun
+#define ck_rvconst		Perl_ck_rvconst
+#define ck_sassign		Perl_ck_sassign
+#define ck_select		Perl_ck_select
+#define ck_shift		Perl_ck_shift
+#define ck_sort			Perl_ck_sort
+#define ck_spair		Perl_ck_spair
+#define ck_split		Perl_ck_split
+#define ck_subr			Perl_ck_subr
+#define ck_substr		Perl_ck_substr
+#define ck_svconst		Perl_ck_svconst
+#define ck_trunc		Perl_ck_trunc
+#define ck_unpack		Perl_ck_unpack
 #ifdef PERL_CORE
-#define list_assignment		S_list_assignment
-#define bad_type		S_bad_type
+#define is_handle_constructor	S_is_handle_constructor
+#define is_list_assignment	S_is_list_assignment
 #define cop_free		S_cop_free
 #define modkids			S_modkids
-#define no_bareword_allowed	S_no_bareword_allowed
-#define no_fh_allowed		S_no_fh_allowed
 #define scalarboolean		S_scalarboolean
-#define too_few_arguments	S_too_few_arguments
-#define too_many_arguments	S_too_many_arguments
 #define newDEFSVOP		S_newDEFSVOP
 #define new_logop		S_new_logop
 #define simplify_sort		S_simplify_sort
-#define is_handle_constructor	S_is_handle_constructor
 #define gv_ename		S_gv_ename
 #define scalar_mod_type		S_scalar_mod_type
 #define my_kid			S_my_kid
 #define dup_attrlist		S_dup_attrlist
 #define apply_attrs		S_apply_attrs
 #define apply_attrs_my		S_apply_attrs_my
+#define bad_type		S_bad_type
+#define no_bareword_allowed	S_no_bareword_allowed
+#define no_fh_allowed		S_no_fh_allowed
+#define too_few_arguments	S_too_few_arguments
+#define too_many_arguments	S_too_many_arguments
 #endif
 #endif
 #if defined(PL_OP_SLAB_ALLOC)
@@ -2377,13 +2410,6 @@
 #define magic_setarylen(a,b)	Perl_magic_setarylen(aTHX_ a,b)
 #define magic_setbm(a,b)	Perl_magic_setbm(aTHX_ a,b)
 #define magic_setdbline(a,b)	Perl_magic_setdbline(aTHX_ a,b)
-#endif
-#if defined(USE_LOCALE_COLLATE)
-#ifdef PERL_CORE
-#define magic_setcollxfrm(a,b)	Perl_magic_setcollxfrm(aTHX_ a,b)
-#endif
-#endif
-#ifdef PERL_CORE
 #define magic_setdefelem(a,b)	Perl_magic_setdefelem(aTHX_ a,b)
 #define magic_setenv(a,b)	Perl_magic_setenv(aTHX_ a,b)
 #define magic_setfm(a,b)	Perl_magic_setfm(aTHX_ a,b)
@@ -2408,6 +2434,7 @@
 #define markstack_grow()	Perl_markstack_grow(aTHX)
 #if defined(USE_LOCALE_COLLATE)
 #ifdef PERL_CORE
+#define magic_setcollxfrm(a,b)	Perl_magic_setcollxfrm(aTHX_ a,b)
 #define mem_collxfrm(a,b,c)	Perl_mem_collxfrm(aTHX_ a,b,c)
 #endif
 #endif
@@ -2934,19 +2961,17 @@
 #define mg_dup(a,b)		Perl_mg_dup(aTHX_ a,b)
 #define sv_dup(a,b)		Perl_sv_dup(aTHX_ a,b)
 #define rvpv_dup(a,b,c)		Perl_rvpv_dup(aTHX_ a,b,c)
-#if defined(HAVE_INTERP_INTERN)
-#define sys_intern_dup(a,b)	Perl_sys_intern_dup(aTHX_ a,b)
-#endif
 #define ptr_table_new()		Perl_ptr_table_new(aTHX)
 #define ptr_table_fetch(a,b)	Perl_ptr_table_fetch(aTHX_ a,b)
 #define ptr_table_store(a,b,c)	Perl_ptr_table_store(aTHX_ a,b,c)
 #define ptr_table_split(a)	Perl_ptr_table_split(aTHX_ a)
 #define ptr_table_clear(a)	Perl_ptr_table_clear(aTHX_ a)
 #define ptr_table_free(a)	Perl_ptr_table_free(aTHX_ a)
-#endif
-#if defined(HAVE_INTERP_INTERN)
+#  if defined(HAVE_INTERP_INTERN)
+#define sys_intern_dup(a,b)	Perl_sys_intern_dup(aTHX_ a,b)
 #define sys_intern_clear()	Perl_sys_intern_clear(aTHX)
 #define sys_intern_init()	Perl_sys_intern_init(aTHX)
+#  endif
 #endif
 #define custom_op_name(a)	Perl_custom_op_name(aTHX_ a)
 #define custom_op_desc(a)	Perl_custom_op_desc(aTHX_ a)
@@ -2996,26 +3021,67 @@
 #endif
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
+#define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
+#define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
+#define ck_concat(a)		Perl_ck_concat(aTHX_ a)
+#define ck_defined(a)		Perl_ck_defined(aTHX_ a)
+#define ck_delete(a)		Perl_ck_delete(aTHX_ a)
+#define ck_die(a)		Perl_ck_die(aTHX_ a)
+#define ck_eof(a)		Perl_ck_eof(aTHX_ a)
+#define ck_eval(a)		Perl_ck_eval(aTHX_ a)
+#define ck_exec(a)		Perl_ck_exec(aTHX_ a)
+#define ck_exists(a)		Perl_ck_exists(aTHX_ a)
+#define ck_exit(a)		Perl_ck_exit(aTHX_ a)
+#define ck_ftst(a)		Perl_ck_ftst(aTHX_ a)
+#define ck_fun(a)		Perl_ck_fun(aTHX_ a)
+#define ck_glob(a)		Perl_ck_glob(aTHX_ a)
+#define ck_grep(a)		Perl_ck_grep(aTHX_ a)
+#define ck_index(a)		Perl_ck_index(aTHX_ a)
+#define ck_join(a)		Perl_ck_join(aTHX_ a)
+#define ck_lengthconst(a)	Perl_ck_lengthconst(aTHX_ a)
+#define ck_lfun(a)		Perl_ck_lfun(aTHX_ a)
+#define ck_listiob(a)		Perl_ck_listiob(aTHX_ a)
+#define ck_match(a)		Perl_ck_match(aTHX_ a)
+#define ck_method(a)		Perl_ck_method(aTHX_ a)
+#define ck_null(a)		Perl_ck_null(aTHX_ a)
+#define ck_open(a)		Perl_ck_open(aTHX_ a)
+#define ck_repeat(a)		Perl_ck_repeat(aTHX_ a)
+#define ck_require(a)		Perl_ck_require(aTHX_ a)
+#define ck_retarget(a)		Perl_ck_retarget(aTHX_ a)
+#define ck_return(a)		Perl_ck_return(aTHX_ a)
+#define ck_rfun(a)		Perl_ck_rfun(aTHX_ a)
+#define ck_rvconst(a)		Perl_ck_rvconst(aTHX_ a)
+#define ck_sassign(a)		Perl_ck_sassign(aTHX_ a)
+#define ck_select(a)		Perl_ck_select(aTHX_ a)
+#define ck_shift(a)		Perl_ck_shift(aTHX_ a)
+#define ck_sort(a)		Perl_ck_sort(aTHX_ a)
+#define ck_spair(a)		Perl_ck_spair(aTHX_ a)
+#define ck_split(a)		Perl_ck_split(aTHX_ a)
+#define ck_subr(a)		Perl_ck_subr(aTHX_ a)
+#define ck_substr(a)		Perl_ck_substr(aTHX_ a)
+#define ck_svconst(a)		Perl_ck_svconst(aTHX_ a)
+#define ck_trunc(a)		Perl_ck_trunc(aTHX_ a)
+#define ck_unpack(a)		Perl_ck_unpack(aTHX_ a)
 #ifdef PERL_CORE
-#define list_assignment(a)	S_list_assignment(aTHX_ a)
-#define bad_type(a,b,c,d)	S_bad_type(aTHX_ a,b,c,d)
+#define is_handle_constructor(a,b)	S_is_handle_constructor(aTHX_ a,b)
+#define is_list_assignment(a)	S_is_list_assignment(aTHX_ a)
 #define cop_free(a)		S_cop_free(aTHX_ a)
 #define modkids(a,b)		S_modkids(aTHX_ a,b)
-#define no_bareword_allowed(a)	S_no_bareword_allowed(aTHX_ a)
-#define no_fh_allowed(a)	S_no_fh_allowed(aTHX_ a)
 #define scalarboolean(a)	S_scalarboolean(aTHX_ a)
-#define too_few_arguments(a,b)	S_too_few_arguments(aTHX_ a,b)
-#define too_many_arguments(a,b)	S_too_many_arguments(aTHX_ a,b)
 #define newDEFSVOP()		S_newDEFSVOP(aTHX)
 #define new_logop(a,b,c,d)	S_new_logop(aTHX_ a,b,c,d)
 #define simplify_sort(a)	S_simplify_sort(aTHX_ a)
-#define is_handle_constructor(a,b)	S_is_handle_constructor(aTHX_ a,b)
 #define gv_ename(a)		S_gv_ename(aTHX_ a)
 #define scalar_mod_type(a,b)	S_scalar_mod_type(aTHX_ a,b)
 #define my_kid(a,b,c)		S_my_kid(aTHX_ a,b,c)
 #define dup_attrlist(a)		S_dup_attrlist(aTHX_ a)
 #define apply_attrs(a,b,c,d)	S_apply_attrs(aTHX_ a,b,c,d)
 #define apply_attrs_my(a,b,c,d)	S_apply_attrs_my(aTHX_ a,b,c,d)
+#define bad_type(a,b,c,d)	S_bad_type(aTHX_ a,b,c,d)
+#define no_bareword_allowed(a)	S_no_bareword_allowed(aTHX_ a)
+#define no_fh_allowed(a)	S_no_fh_allowed(aTHX_ a)
+#define too_few_arguments(a,b)	S_too_few_arguments(aTHX_ a,b)
+#define too_many_arguments(a,b)	S_too_many_arguments(aTHX_ a,b)
 #endif
 #endif
 #if defined(PL_OP_SLAB_ALLOC)
