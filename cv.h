@@ -15,7 +15,16 @@ struct xpvcv {
     STRLEN	xpv_cur;	/* length of xp_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xof_off;	/* integer value */
-    NV		xnv_nv;		/* numeric value, if any */
+    union {
+	NV	xnvu_nv;	/* numeric value, if any */
+	struct {
+	    void *xnv_p1;
+	    union {
+		void *xnv_p2;
+		IV xnv_i2;
+	    }	xnv_u2;
+	}	xnv_s;
+    }		xnv_u;
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
 

@@ -295,15 +295,35 @@ struct xpvnv {
     STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
-    NV    	xnv_nv;		/* numeric value, if any */
+    union {
+	NV	xnvu_nv;	/* numeric value, if any */
+	struct {
+	    void *xnv_p1;
+	    union {
+		void *xnv_p2;
+		IV xnv_i2;
+	    }	xnv_u2;
+	}	xnv_s;
+    }		xnv_u;
 };
+
+#define xnv_nv xnv_u.xnvu_nv
 
 /* These structure must match the beginning of struct xpvhv in hv.h. */
 struct xpvmg {
     STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
-    NV    	xnv_nv;		/* numeric value, if any */
+    union {
+	NV	xnvu_nv;	/* numeric value, if any */
+	struct {
+	    void *xnv_p1;
+	    union {
+		void *xnv_p2;
+		IV xnv_i2;
+	    }	xnv_u2;
+	}	xnv_s;
+    }		xnv_u;
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
 };
@@ -312,7 +332,16 @@ struct xpvlv {
     STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
-    NV    	xnv_nv;		/* numeric value, if any */
+    union {
+	NV	xnvu_nv;	/* numeric value, if any */
+	struct {
+	    void *xnv_p1;
+	    union {
+		void *xnv_p2;
+		IV xnv_i2;
+	    }	xnv_u2;
+	}	xnv_s;
+    }		xnv_u;
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
 
@@ -334,7 +363,16 @@ struct xpvgv {
     STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
-    NV		xnv_nv;		/* numeric value, if any */
+    union {
+	NV	xnvu_nv;	/* numeric value, if any */
+	struct {
+	    void *xnv_p1;
+	    union {
+		void *xnv_p2;
+		IV xnv_i2;
+	    }	xnv_u2;
+	}	xnv_s;
+    }		xnv_u;
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
 
@@ -349,7 +387,16 @@ struct xpvbm {
     STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
-    NV		xnv_nv;		/* numeric value, if any */
+    union {
+	NV	xnvu_nv;	/* numeric value, if any */
+	struct {
+	    void *xnv_p1;
+	    union {
+		void *xnv_p2;
+		IV xnv_i2;
+	    }	xnv_u2;
+	}	xnv_s;
+    }		xnv_u;
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
 
@@ -366,7 +413,16 @@ struct xpvfm {
     STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
-    NV		xnv_nv;		/* numeric value, if any */
+    union {
+	NV	xnvu_nv;	/* numeric value, if any */
+	struct {
+	    void *xnv_p1;
+	    union {
+		void *xnv_p2;
+		IV xnv_i2;
+	    }	xnv_u2;
+	}	xnv_s;
+    }		xnv_u;
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
 
@@ -391,7 +447,16 @@ struct xpvio {
     STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
-    NV		xnv_nv;		/* numeric value, if any */
+    union {
+	NV	xnvu_nv;	/* numeric value, if any */
+	struct {
+	    void *xnv_p1;
+	    union {
+		void *xnv_p2;
+		IV xnv_i2;
+	    }	xnv_u2;
+	}	xnv_s;
+    }		xnv_u;
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
 

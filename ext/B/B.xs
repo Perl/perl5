@@ -1559,12 +1559,6 @@ SSize_t
 AvMAX(av)
 	B::AV	av
 
-#define AvOFF(av) ((XPVAV*)SvANY(av))->xof_off
-
-IV
-AvOFF(av)
-	B::AV	av
-
 void
 AvARRAY(av)
 	B::AV	av

@@ -167,8 +167,6 @@ do_test(11,
   SV = PVAV\\($ADDR\\) at $ADDR
     REFCNT = 2
     FLAGS = \\(\\)
-    IV = 0
-    NV = 0
     ARRAY = $ADDR
     FILL = 1
     MAX = 1
@@ -190,8 +188,6 @@ do_test(12,
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 2
     FLAGS = \\(SHAREKEYS\\)
-    IV = 1
-    NV = $FLOAT
     ARRAY = $ADDR  \\(0:7, 1:1\\)
     hash quality = 100.0%
     KEYS = 1
@@ -286,8 +282,6 @@ do_test(16,
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 2
     FLAGS = \\(OBJECT,SHAREKEYS\\)
-    IV = 0
-    NV = 0
     STASH = $ADDR\\t"Tac"
     ARRAY = 0x0
     KEYS = 0
@@ -355,8 +349,6 @@ do_test(19,
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 2
     FLAGS = \\(SHAREKEYS,HASKFLAGS\\)
-    UV = 1
-    NV = $FLOAT
     ARRAY = $ADDR  \\(0:7, 1:1\\)
     hash quality = 100.0%
     KEYS = 1
@@ -381,8 +373,6 @@ do_test(19,
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 2
     FLAGS = \\(SHAREKEYS,HASKFLAGS\\)
-    UV = 1
-    NV = 0
     ARRAY = $ADDR  \\(0:7, 1:1\\)
     hash quality = 100.0%
     KEYS = 1

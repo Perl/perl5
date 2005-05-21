@@ -11,15 +11,25 @@
 struct xpvav {
     SSize_t	xav_fill;       /* Index of last element present */
     SSize_t	xav_max;        /* max index for which array has space */
-    IV		xof_off;	/* ptr is incremented by offset */
-    NV		xnv_nv;		/* numeric value, if any */
+    IV		this_space;
+    union {
+	NV	xnvu_nv;
+	struct {
+	    void *xnv_p1;	/* pointer to beginning of C array of SVs */
+	    union {
+		void *xnv_p2;
+		IV xnv_i2;
+	    }	xnv_u2;
+	}	xnv_s;
+    }		xnv_u;
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
-
-    SV**	xav_alloc;	/* pointer to beginning of C array of SVs */
-    SV*		xav_arylen;
 };
 
+/* SV**	xav_alloc; */
+#define xav_alloc xnv_u.xnv_s.xnv_p1
+/* SV*	xav_arylen; */
+#define xav_arylen xnv_u.xnv_s.xnv_u2.xnv_p2
 
 /* AVf_REAL is set for all AVs whose xav_array contents are refcounted.
  * Some things like "@_" and the scratchpad list do not set this, to
@@ -56,10 +66,10 @@ Same as C<av_len()>.  Deprecated, use C<av_len()> instead.
 #define Nullav Null(AV*)
 
 #define AvARRAY(av)	((av)->sv_u.sv_array)
-#define AvALLOC(av)	((XPVAV*)  SvANY(av))->xav_alloc
+#define AvALLOC(av)	(*((SV***)&((XPVAV*)  SvANY(av))->xav_alloc))
 #define AvMAX(av)	((XPVAV*)  SvANY(av))->xav_max
 #define AvFILLp(av)	((XPVAV*)  SvANY(av))->xav_fill
-#define AvARYLEN(av)	((XPVAV*)  SvANY(av))->xav_arylen
+#define AvARYLEN(av)	(*((SV**)&((XPVAV*)  SvANY(av))->xav_arylen))
 
 #define AvREAL(av)	(SvFLAGS(av) & SVpav_REAL)
 #define AvREAL_on(av)	(SvFLAGS(av) |= SVpav_REAL)

@@ -848,8 +848,6 @@ IoIFP($io) == PerlIO_stdin() ).
 
 =item MAX
 
-=item OFF
-
 =item ARRAY
 
 =item ARRAYelt
