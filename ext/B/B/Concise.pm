@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.65";
+our $VERSION   = "0.66";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -132,12 +132,12 @@ sub walk_output { # updates $walkHandle
 }
 
 sub concise_subref {
-    my($order, $coderef) = @_;
+    my($order, $coderef, $name) = @_;
     my $codeobj = svref_2object($coderef);
 
-    return concise_stashref(@_)	
+    return concise_stashref(@_)
 	unless ref $codeobj eq 'B::CV';
-    concise_cv_obj($order, $codeobj);
+    concise_cv_obj($order, $codeobj, $name);
 }
 
 sub concise_stashref {
@@ -156,17 +156,42 @@ sub concise_stashref {
 
 # This should have been called concise_subref, but it was exported
 # under this name in versions before 0.56
-sub concise_cv { concise_subref(@_); }
+*concise_cv = \&concise_subref;
 
 sub concise_cv_obj {
-    my ($order, $cv) = @_;
+    my ($order, $cv, $name) = @_;
+    # name is either a string, or a CODE ref (copy of $cv arg??)
+
     $curcv = $cv;
-    die "err: coderef has no START\n" if class($cv->START) eq "NULL";
+    if ($cv->XSUB) {
+	print $walkHandle "$name is XS code\n";
+	return;
+    }
+    if (class($cv->START) eq "NULL") {
+	no strict 'refs';
+	if (ref $name eq 'CODE') {
+	    print $walkHandle "coderef $name has no START\n";
+	}
+	elsif (exists &$name) {
+	    print $walkHandle "subroutine $name exists\n";
+	}
+	else {
+	    print $walkHandle "$name not in symbol table\n";
+	}
+	return;
+    }
     sequence($cv->START);
     if ($order eq "exec") {
 	walk_exec($cv->START);
-    } elsif ($order eq "basic") {
-	walk_topdown($cv->ROOT, sub { $_[0]->concise($_[1]) }, 0);
+    }
+    elsif ($order eq "basic") {
+	# walk_topdown($cv->ROOT, sub { $_[0]->concise($_[1]) }, 0);
+	my $root = $cv->ROOT;
+	unless (ref $root eq 'B::NULL') {
+	    walk_topdown($root, sub { $_[0]->concise($_[1]) }, 0);
+	} else {
+	    print $walkHandle "B::NULL encountered doing ROOT on $cv. avoiding disaster\n";
+	}
     } else {
 	print $walkHandle tree($cv->ROOT, 0);
     }
@@ -193,14 +218,14 @@ sub concise_specials {
     my($name, $order, @cv_s) = @_;
     my $i = 1;
     if ($name eq "BEGIN") {
-	splice(@cv_s, 0, 7); # skip 7 BEGIN blocks in this file
+	splice(@cv_s, 0, 8); # skip 7 BEGIN blocks in this file. NOW 8 ??
     } elsif ($name eq "CHECK") {
 	pop @cv_s; # skip the CHECK block that calls us
     }
     for my $cv (@cv_s) {
 	print $walkHandle "$name $i:\n";
 	$i++;
-	concise_cv_obj($order, $cv);
+	concise_cv_obj($order, $cv, $name);
     }
 }
 
@@ -217,8 +242,11 @@ my @tree_decorations =
 
 sub compileOpts {
     # set rendering state from options and args
-    my @options = grep(/^-/, @_);
-    my @args = grep(!/^-/, @_);
+    my (@options,@args);
+    if (@_) {
+	@options = grep(/^-/, @_);
+	@args = grep(!/^-/, @_);
+    }
     for my $o (@options) {
 	# mode/order
 	if ($o eq "-basic") {
@@ -278,20 +306,20 @@ sub compile {
 
 	    if ($objname eq "BEGIN") {
 		concise_specials("BEGIN", $order,
-			       B::begin_av->isa("B::AV") ?
-			       B::begin_av->ARRAY : ());
+				 B::begin_av->isa("B::AV") ?
+				 B::begin_av->ARRAY : ());
 	    } elsif ($objname eq "INIT") {
 		concise_specials("INIT", $order,
-			       B::init_av->isa("B::AV") ?
-			       B::init_av->ARRAY : ());
+				 B::init_av->isa("B::AV") ?
+				 B::init_av->ARRAY : ());
 	    } elsif ($objname eq "CHECK") {
 		concise_specials("CHECK", $order,
-			       B::check_av->isa("B::AV") ?
-			       B::check_av->ARRAY : ());
+				 B::check_av->isa("B::AV") ?
+				 B::check_av->ARRAY : ());
 	    } elsif ($objname eq "END") {
 		concise_specials("END", $order,
-                                     B::end_av->isa("B::AV") ?
-			       B::end_av->ARRAY : ());
+				 B::end_av->isa("B::AV") ?
+				 B::end_av->ARRAY : ());
 	    }
 	    else {
 		# convert function names to subrefs
@@ -304,11 +332,13 @@ sub compile {
 		    $objname = "main::" . $objname unless $objname =~ /::/;
 		    print $walkHandle "$objname:\n";
 		    no strict 'refs';
-		    die "err: unknown function ($objname)\n"
-			unless *{$objname}{CODE};
+		    unless (exists &$objname) {
+			print $walkHandle "err: unknown function ($objname)\n";
+			return;
+		    }
 		    $objref = \&$objname;
 		}
-		concise_subref($order, $objref);
+		concise_subref($order, $objref, $objname);
 	    }
 	}
 	if (!@args or $do_main) {
@@ -394,7 +424,7 @@ sub walk_topdown {
 	    walk_topdown($kid, $sub, $level + 1);
 	}
     }
-    if (class($op) eq "PMOP") {
+    elsif (class($op) eq "PMOP") {
 	my $maybe_root = $op->pmreplroot;
 	if (ref($maybe_root) and $maybe_root->isa("B::OP")) {
 	    # It really is the root of the replacement, not something

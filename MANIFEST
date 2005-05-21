@@ -112,6 +112,7 @@ ext/B/t/bblock.t	See if B::Bblock works
 ext/B/t/b.t		See if B works
 ext/B/t/bytecode.t	See whether B::Bytecode works
 ext/B/t/concise.t	See whether B::Concise works
+ext/B/t/concise-xs.t	See whether B::Concise recognizes XS functions
 ext/B/t/debug.t		See if B::Debug works
 ext/B/t/deparse.t	See if B::Deparse works
 ext/B/TESTS		Compiler backend test data
