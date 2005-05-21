@@ -251,7 +251,7 @@ Perl_pad_undef(pTHX_ CV* cv)
 	AV *comppad = (AV*)AvARRAY(padlist)[1];
 	SV **curpad = AvARRAY(comppad);
 	for (ix = AvFILLp(comppad_name); ix > 0; ix--) {
-	    SV *namesv = namepad[ix];
+	    SV * const namesv = namepad[ix];
 	    if (namesv && namesv != &PL_sv_undef
 		&& *SvPVX_const(namesv) == '&')
 	    {
@@ -333,7 +333,7 @@ If fake, it means we're cloning an existing entry
 PADOFFSET
 Perl_pad_add_name(pTHX_ char *name, HV* typestash, HV* ourstash, bool fake)
 {
-    PADOFFSET offset = pad_alloc(OP_PADSV, SVs_PADMY);
+    const PADOFFSET offset = pad_alloc(OP_PADSV, SVs_PADMY);
     SV* namesv = NEWSV(1102, 0);
 
     ASSERT_CURPAD_ACTIVE("pad_add_name");
@@ -1088,7 +1088,6 @@ Tidy up a pad after we've finished compiling it:
 void
 Perl_pad_tidy(pTHX_ padtidy_type type)
 {
-    PADOFFSET ix;
 
     ASSERT_CURPAD_ACTIVE("pad_tidy");
     /* extend curpad to match namepad */
@@ -1097,6 +1096,7 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 
     if (type == padtidy_SUBCLONE) {
 	SV **namep = AvARRAY(PL_comppad_name);
+	PADOFFSET ix;
 	for (ix = AvFILLp(PL_comppad); ix > 0; ix--) {
 	    SV *namesv;
 
@@ -1128,6 +1128,7 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
     /* XXX DAPM rationalise these two similar branches */
 
     if (type == padtidy_SUB) {
+	PADOFFSET ix;
 	for (ix = AvFILLp(PL_comppad); ix > 0; ix--) {
 	    if (SvIMMORTAL(PL_curpad[ix]) || IS_PADGV(PL_curpad[ix]) || IS_PADCONST(PL_curpad[ix]))
 		continue;
@@ -1136,6 +1137,7 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 	}
     }
     else if (type == padtidy_FORMAT) {
+	PADOFFSET ix;
 	for (ix = AvFILLp(PL_comppad); ix > 0; ix--) {
 	    if (!SvPADMY(PL_curpad[ix]) && !SvIMMORTAL(PL_curpad[ix]))
 		SvPADTMP_on(PL_curpad[ix]);

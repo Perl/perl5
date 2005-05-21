@@ -270,7 +270,7 @@ PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
     return win32_fdupopen(f);
 #else
     if (f) {
-	int fd = PerlLIO_dup(PerlIO_fileno(f));
+	const int fd = PerlLIO_dup(PerlIO_fileno(f));
 	if (fd >= 0) {
 	    char mode[8];
 	    int omode = fcntl(fd, F_GETFL);
@@ -763,7 +763,7 @@ PerlIO_find_layer(pTHX_ const char *name, STRLEN len, int load)
 	    SAVEINT(PL_in_load_module);
 	    if (cv) {
 		SAVEGENERICSV(PL_warnhook);
-		SvREFCNT_inc(cv);
+		(void)SvREFCNT_inc(cv);
 		PL_warnhook = (SV *) cv;
 	    }
 	    PL_in_load_module++;

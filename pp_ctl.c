@@ -1339,7 +1339,7 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 		    sv_catpvn(err, prefix, sizeof(prefix)-1);
 		    sv_catpvn(err, message, msglen);
 		    if (ckWARN(WARN_MISC)) {
-			STRLEN start = SvCUR(err)-msglen-sizeof(prefix)+1;
+			const STRLEN start = SvCUR(err)-msglen-sizeof(prefix)+1;
 			Perl_warner(aTHX_ packWARN(WARN_MISC), SvPVX_const(err)+start);
 		    }
 		}
@@ -2561,9 +2561,9 @@ PP(pp_cswitch)
 STATIC void
 S_save_lines(pTHX_ AV *array, SV *sv)
 {
-    register const char *s = SvPVX_const(sv);
-    register const char *send = SvPVX_const(sv) + SvCUR(sv);
-    register I32 line = 1;
+    const char *s = SvPVX_const(sv);
+    const char *send = SvPVX_const(sv) + SvCUR(sv);
+    I32 line = 1;
 
     while (s && s < send) {
 	const char *t;
@@ -3832,7 +3832,7 @@ static I32
 run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 {
     SV *datasv = FILTER_DATA(idx);
-    int filter_has_file = IoLINES(datasv);
+    const int filter_has_file = IoLINES(datasv);
     GV *filter_child_proc = (GV *)IoFMT_GV(datasv);
     SV *filter_state = (SV *)IoTOP_GV(datasv);
     SV *filter_sub = (SV *)IoBOTTOM_GV(datasv);
