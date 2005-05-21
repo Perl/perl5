@@ -2292,7 +2292,7 @@ Perl_hv_placeholders_get(pTHX_ HV *hv)
 }
 
 void
-Perl_hv_placeholders_set(pTHX_ HV *hv, IV ph)
+Perl_hv_placeholders_set(pTHX_ HV *hv, I32 ph)
 {
     dVAR;
     MAGIC *mg = mg_find((SV*)hv, PERL_MAGIC_rhash);
