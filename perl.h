@@ -3170,6 +3170,7 @@ Gid_t getegid (void);
 #define PERL_MAGIC_pos		  '.' /* pos() lvalue */
 #define PERL_MAGIC_backref	  '<' /* for weak ref data */
 #define PERL_MAGIC_symtab	  ':' /* extra data for symbol tables */
+#define PERL_MAGIC_rhash	  '%' /* extra data for restricted hashes */
 #define PERL_MAGIC_ext		  '~' /* Available for use by extensions */
 
 

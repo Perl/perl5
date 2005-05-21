@@ -1397,6 +1397,11 @@ sM	|HE*	|hv_fetch_common|HV* tb|SV* key_sv|const char* key|STRLEN klen|int flags
 Apd	|void	|hv_clear_placeholders|HV* hb
 
 Apd	|SV*	|hv_scalar	|HV* hv|
+
+Apo	|I32*	|hv_placeholders_p	|HV* hv
+Apo	|I32	|hv_placeholders_get	|HV* hv
+Apo	|void	|hv_placeholders_set	|HV* hv|I32 ph
+
 p	|SV*	|magic_scalarpack|HV* hv|MAGIC*	mg
 #ifdef PERL_IN_SV_C
 sMd	|SV*	|find_uninit_var|OP* obase|SV* uninit_sv|bool top

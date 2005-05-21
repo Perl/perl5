@@ -2311,6 +2311,11 @@ STATIC HE*	S_hv_fetch_common(pTHX_ HV* tb, SV* key_sv, const char* key, STRLEN k
 PERL_CALLCONV void	Perl_hv_clear_placeholders(pTHX_ HV* hb);
 
 PERL_CALLCONV SV*	Perl_hv_scalar(pTHX_ HV* hv);
+
+PERL_CALLCONV I32*	Perl_hv_placeholders_p(pTHX_ HV* hv);
+PERL_CALLCONV I32	Perl_hv_placeholders_get(pTHX_ HV* hv);
+PERL_CALLCONV void	Perl_hv_placeholders_set(pTHX_ HV* hv, I32 ph);
+
 PERL_CALLCONV SV*	Perl_magic_scalarpack(pTHX_ HV* hv, MAGIC*	mg);
 #ifdef PERL_IN_SV_C
 STATIC SV*	S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool top);

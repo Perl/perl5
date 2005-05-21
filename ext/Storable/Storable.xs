@@ -107,6 +107,10 @@ typedef double NV;			/* Older perls lack the NV type */
 #define dVAR dNOOP
 #endif
 
+#ifndef HvPLACEHOLDERS_get
+#  define HvPLACEHOLDERS_get HvPLACEHOLDERS
+#endif
+
 #ifdef DEBUGME
 
 #ifndef DASSERT
@@ -2303,7 +2307,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 
 		for (i = 0; i < len; i++) {
 #ifdef HAS_RESTRICTED_HASHES
-			int placeholders = (int)HvPLACEHOLDERS(hv);
+			int placeholders = (int)HvPLACEHOLDERS_get(hv);
 #endif
                         unsigned char flags = 0;
 			char *keyval;

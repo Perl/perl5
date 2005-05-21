@@ -37,7 +37,6 @@ struct xpvhv {
     STRLEN	xhv_max;	/* subscript of last element of xhv_array */
     IV		xhv_keys;	/* how many elements in the array */
     NV		xnv_nv;		/* numeric value, if any */
-#define xhv_placeholders xnv_nv
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
 
@@ -186,21 +185,17 @@ C<SV*>.
 /* the number of keys (including any placeholers) */
 #define XHvTOTALKEYS(xhv)	((xhv)->xhv_keys)
 
-/* The number of placeholders in the enumerated-keys hash */
-#define XHvPLACEHOLDERS(xhv)	((xhv)->xhv_placeholders)
-
-/* the number of keys that exist() (i.e. excluding placeholders) */
-#define XHvUSEDKEYS(xhv)      (XHvTOTALKEYS(xhv) - (IV)XHvPLACEHOLDERS(xhv))
-
 /*
  * HvKEYS gets the number of keys that actually exist(), and is provided
  * for backwards compatibility with old XS code. The core uses HvUSEDKEYS
  * (keys, excluding placeholdes) and HvTOTALKEYS (including placeholders)
  */
-#define HvKEYS(hv)		XHvUSEDKEYS((XPVHV*)  SvANY(hv))
-#define HvUSEDKEYS(hv)		XHvUSEDKEYS((XPVHV*)  SvANY(hv))
+#define HvKEYS(hv)		HvUSEDKEYS(hv)
+#define HvUSEDKEYS(hv)		(HvTOTALKEYS(hv) - HvPLACEHOLDERS_get(hv))
 #define HvTOTALKEYS(hv)		XHvTOTALKEYS((XPVHV*)  SvANY(hv))
-#define HvPLACEHOLDERS(hv)	XHvPLACEHOLDERS((XPVHV*)  SvANY(hv))
+#define HvPLACEHOLDERS(hv)	(*Perl_hv_placeholders_p(aTHX_ (HV*)hv))
+#define HvPLACEHOLDERS_get(hv)	(SvMAGIC(hv) ? Perl_hv_placeholders_get(aTHX_ (HV*)hv) : 0)
+#define HvPLACEHOLDERS_set(hv,p)	Perl_hv_placeholders_set(aTHX_ (HV*)hv, p)
 
 #define HvSHAREKEYS(hv)		(SvFLAGS(hv) & SVphv_SHAREKEYS)
 #define HvSHAREKEYS_on(hv)	(SvFLAGS(hv) |= SVphv_SHAREKEYS)

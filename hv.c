@@ -680,11 +680,11 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		    }
 		    /* LVAL fetch which actaully needs a store.  */
 		    val = NEWSV(61,0);
-		    xhv->xhv_placeholders--;
+		    HvPLACEHOLDERS(hv)--;
 		} else {
 		    /* store */
 		    if (val != &PL_sv_placeholder)
-			xhv->xhv_placeholders--;
+			HvPLACEHOLDERS(hv)--;
 		}
 		HeVAL(entry) = val;
 	    } else if (action & HV_FETCH_ISSTORE) {
@@ -764,7 +764,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     *oentry = entry;
 
     if (val == &PL_sv_placeholder)
-	xhv->xhv_placeholders++;
+	HvPLACEHOLDERS(hv)++;
     if (masked_flags & HVhek_ENABLEHVKFLAGS)
 	HvHASKFLAGS_on(hv);
 
@@ -1022,7 +1022,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    HeVAL(entry) = &PL_sv_placeholder;
 	    /* We'll be saving this slot, so the number of allocated keys
 	     * doesn't go down, but the number placeholders goes up */
-	    xhv->xhv_placeholders++; /* HvPLACEHOLDERS(hv)++ */
+	    HvPLACEHOLDERS(hv)++;
 	} else {
 	    *oentry = HeNEXT(entry);
 	    if (i && !*oentry)
@@ -1466,7 +1466,7 @@ Perl_hv_clear(pTHX_ HV *hv)
 		    }
 		    SvREFCNT_dec(HeVAL(entry));
 		    HeVAL(entry) = &PL_sv_placeholder;
-		    xhv->xhv_placeholders++; /* HvPLACEHOLDERS(hv)++ */
+		    HvPLACEHOLDERS(hv)++;
 		}
 	    }
 	}
@@ -1474,7 +1474,7 @@ Perl_hv_clear(pTHX_ HV *hv)
     }
 
     hfreeentries(hv);
-    xhv->xhv_placeholders = 0; /* HvPLACEHOLDERS(hv) = 0 */
+    HvPLACEHOLDERS_set(hv, 0);
     if (xhv->xhv_array /* HvARRAY(hv) */)
 	(void)memzero(xhv->xhv_array /* HvARRAY(hv) */,
 		      (xhv->xhv_max+1 /* HvMAX(hv)+1 */) * sizeof(HE*));
@@ -1615,7 +1615,7 @@ Perl_hv_undef(pTHX_ HV *hv)
     }
     xhv->xhv_max   = 7;	/* HvMAX(hv) = 7 (it's a normal hash) */
     xhv->xhv_array = 0;	/* HvARRAY(hv) = 0 */
-    xhv->xhv_placeholders = 0; /* HvPLACEHOLDERS(hv) = 0 */
+    HvPLACEHOLDERS_set(hv, 0);
 
     if (SvRMAGICAL(hv))
 	mg_clear((SV*)hv);
@@ -2126,6 +2126,46 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
     return HeKEY_hek(entry);
 }
 
+I32 *
+Perl_hv_placeholders_p(pTHX_ HV *hv)
+{
+    dVAR;
+    MAGIC *mg = mg_find((SV*)hv, PERL_MAGIC_rhash);
+
+    if (!mg) {
+	mg = sv_magicext((SV*)hv, 0, PERL_MAGIC_rhash, 0, 0, 0);
+
+	if (!mg) {
+	    Perl_die(aTHX_ "panic: hv_placeholders_p");
+	}
+    }
+    return &(mg->mg_len);
+}
+
+
+I32
+Perl_hv_placeholders_get(pTHX_ HV *hv)
+{
+    dVAR;
+    MAGIC *mg = mg_find((SV*)hv, PERL_MAGIC_rhash);
+
+    return mg ? mg->mg_len : 0;
+}
+
+void
+Perl_hv_placeholders_set(pTHX_ HV *hv, IV ph)
+{
+    dVAR;
+    MAGIC *mg = mg_find((SV*)hv, PERL_MAGIC_rhash);
+
+    if (mg) {
+	mg->mg_len = ph;
+    } else if (ph) {
+	if (!sv_magicext((SV*)hv, 0, PERL_MAGIC_rhash, 0, 0, ph))
+	    Perl_die(aTHX_ "panic: hv_placeholders_set");
+    }
+    /* else we don't need to add magic to record 0 placeholders.  */
+}
 
 /*
 =for apidoc hv_assert

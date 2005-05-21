@@ -890,6 +890,7 @@ Perl_gv_dump(pTHX_ GV *gv)
 static const struct { const char type; const char *name; } magic_names[] = {
 	{ PERL_MAGIC_sv,             "sv(\\0)" },
 	{ PERL_MAGIC_arylen,         "arylen(#)" },
+	{ PERL_MAGIC_rhash,          "rhash(%)" },
 	{ PERL_MAGIC_glob,           "glob(*)" },
 	{ PERL_MAGIC_pos,            "pos(.)" },
 	{ PERL_MAGIC_symtab,         "symtab(:)" },
