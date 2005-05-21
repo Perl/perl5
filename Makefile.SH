@@ -1280,7 +1280,7 @@ tags:	TAGS
 	perl emacs/e2ctags.pl TAGS > tags
 
 ctags:
-	ctags -f Tags --totals --languages=c *.c *.h
+	ctags -f Tags --totals --languages=c --langmap=c:+.h *.c *.h
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 # If this runs make out of memory, delete /usr/include lines.
