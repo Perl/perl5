@@ -268,9 +268,9 @@ PPCODE:
    
     hv = gv_stashpv(Package, GV_ADDWARN); /* should exist already	*/
 
-    if (strNE(HvNAME(hv),"main")) {
-        Safefree(HvNAME(hv));         
-        HvNAME(hv) = savepv("main"); /* make it think it's in main:: */
+    if (strNE(HvNAME_get(hv),"main")) {
+        /* make it think it's in main:: */
+	Perl_hv_name_set(aTHX_ hv, "main", 4, 0);
         hv_store(hv,"_",1,(SV *)PL_defgv,0);  /* connect _ to global */
         SvREFCNT_inc((SV *)PL_defgv);  /* want to keep _ around! */
     }

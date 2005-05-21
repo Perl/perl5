@@ -1027,7 +1027,8 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    *oentry = HeNEXT(entry);
 	    if (i && !*oentry)
 		xhv->xhv_fill--; /* HvFILL(hv)-- */
-	    if (entry == xhv->xhv_eiter /* HvEITER(hv) */)
+	    if (xhv->xhv_aux && entry
+		== ((struct xpvhv_aux *)xhv->xhv_aux)->xhv_eiter /* HvEITER(hv) */)
 		HvLAZYDEL_on(hv);
 	    else
 		hv_free_ent(hv, entry);
@@ -1307,7 +1308,7 @@ Perl_newHV(pTHX)
 
     xhv->xhv_max    = 7;	/* HvMAX(hv) = 7 (start with 8 buckets) */
     xhv->xhv_fill   = 0;	/* HvFILL(hv) = 0 */
-    (void)hv_iterinit(hv);	/* so each() will start off right */
+    xhv->xhv_aux = 0;
     return hv;
 }
 
@@ -1368,8 +1369,8 @@ Perl_newHVhv(pTHX_ HV *ohv)
     else {
 	/* Iterate over ohv, copying keys and values one at a time. */
 	HE *entry;
-	const I32 riter = HvRITER(ohv);
-	HE * const eiter = HvEITER(ohv);
+	const I32 riter = HvRITER_get(ohv);
+	HE * const eiter = HvEITER_get(ohv);
 
 	/* Can we use fewer buckets? (hv_max is always 2^n-1) */
 	while (hv_max && hv_max + 1 >= hv_fill * 2)
@@ -1382,8 +1383,8 @@ Perl_newHVhv(pTHX_ HV *ohv)
                            newSVsv(HeVAL(entry)), HeHASH(entry),
                            HeKFLAGS(entry));
 	}
-	HvRITER(ohv) = riter;
-	HvEITER(ohv) = eiter;
+	HvRITER_set(ohv, riter);
+	HvEITER_set(ohv, eiter);
     }
 
     return hv;
@@ -1397,7 +1398,7 @@ Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
     if (!entry)
 	return;
     val = HeVAL(entry);
-    if (val && isGV(val) && GvCVu(val) && HvNAME(hv))
+    if (val && isGV(val) && GvCVu(val) && HvNAME_get(hv))
 	PL_sub_generation++;	/* may be deletion of method from stash */
     SvREFCNT_dec(val);
     if (HeKLEN(entry) == HEf_SVKEY) {
@@ -1416,7 +1417,7 @@ Perl_hv_delayfree_ent(pTHX_ HV *hv, register HE *entry)
 {
     if (!entry)
 	return;
-    if (isGV(HeVAL(entry)) && GvCVu(HeVAL(entry)) && HvNAME(hv))
+    if (isGV(HeVAL(entry)) && GvCVu(HeVAL(entry)) && HvNAME_get(hv))
 	PL_sub_generation++;	/* may be deletion of method from stash */
     sv_2mortal(HeVAL(entry));	/* free between statements */
     if (HeKLEN(entry) == HEf_SVKEY) {
@@ -1485,7 +1486,9 @@ Perl_hv_clear(pTHX_ HV *hv)
     HvHASKFLAGS_off(hv);
     HvREHASH_off(hv);
     reset:
-    HvEITER(hv) = NULL;
+    if (xhv->xhv_aux) {
+	HvEITER_set(hv, NULL);
+    }
 }
 
 /*
@@ -1526,7 +1529,7 @@ Perl_hv_clear_placeholders(pTHX_ HV *hv)
 		*oentry = HeNEXT(entry);
 		if (first && !*oentry)
 		    HvFILL(hv)--; /* This linked list is now empty.  */
-		if (HvEITER(hv))
+		if (HvEITER_get(hv))
 		    HvLAZYDEL_on(hv);
 		else
 		    hv_free_ent(hv, entry);
@@ -1557,6 +1560,7 @@ S_hfreeentries(pTHX_ HV *hv)
     register HE *entry;
     I32 riter;
     I32 max;
+    struct xpvhv_aux *iter;
 
     if (!hv)
 	return;
@@ -1586,7 +1590,17 @@ S_hfreeentries(pTHX_ HV *hv)
 	}
     }
     HvARRAY(hv) = array;
-    (void)hv_iterinit(hv);
+
+    iter = ((XPVHV*) SvANY(hv))->xhv_aux;
+    if (iter) {
+	entry = iter->xhv_eiter; /* HvEITER(hv) */
+	if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
+	    HvLAZYDEL_off(hv);
+	    hv_free_ent(hv, entry);
+	}
+	Safefree(iter);
+	((XPVHV*) SvANY(hv))->xhv_aux = 0;
+    }
 }
 
 /*
@@ -1601,17 +1615,18 @@ void
 Perl_hv_undef(pTHX_ HV *hv)
 {
     register XPVHV* xhv;
+    const char *name;
     if (!hv)
 	return;
     DEBUG_A(Perl_hv_assert(aTHX_ hv));
     xhv = (XPVHV*)SvANY(hv);
     hfreeentries(hv);
     Safefree(xhv->xhv_array /* HvARRAY(hv) */);
-    if (HvNAME(hv)) {
+    if ((name = HvNAME_get(hv))) {
+	/* FIXME - strlen HvNAME  */
         if(PL_stashcache)
-	    hv_delete(PL_stashcache, HvNAME(hv), strlen(HvNAME(hv)), G_DISCARD);
-	Safefree(HvNAME(hv));
-	HvNAME(hv) = 0;
+	    hv_delete(PL_stashcache, name, strlen(name), G_DISCARD);
+	Perl_hv_name_set(aTHX_ hv, 0, 0, 0);
     }
     xhv->xhv_max   = 7;	/* HvMAX(hv) = 7 (it's a normal hash) */
     xhv->xhv_array = 0;	/* HvARRAY(hv) = 0 */
@@ -1619,6 +1634,19 @@ Perl_hv_undef(pTHX_ HV *hv)
 
     if (SvRMAGICAL(hv))
 	mg_clear((SV*)hv);
+}
+
+struct xpvhv_aux*
+S_hv_auxinit(aTHX) {
+    struct xpvhv_aux *iter;
+
+    New(0, iter, 1, struct xpvhv_aux);
+
+    iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
+    iter->xhv_eiter = Null(HE*); /* HvEITER(hv) = Null(HE*) */
+    iter->xhv_name = 0;
+
+    return iter;
 }
 
 /*
@@ -1641,20 +1669,120 @@ Perl_hv_iterinit(pTHX_ HV *hv)
 {
     register XPVHV* xhv;
     HE *entry;
+    struct xpvhv_aux *iter;
 
     if (!hv)
 	Perl_croak(aTHX_ "Bad hash");
     xhv = (XPVHV*)SvANY(hv);
-    entry = xhv->xhv_eiter; /* HvEITER(hv) */
-    if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
-	HvLAZYDEL_off(hv);
-	hv_free_ent(hv, entry);
+
+    iter = xhv->xhv_aux;
+    if (iter) {
+	entry = iter->xhv_eiter; /* HvEITER(hv) */
+	if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
+	    HvLAZYDEL_off(hv);
+	    hv_free_ent(hv, entry);
+	}
+	iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
+	iter->xhv_eiter = Null(HE*); /* HvEITER(hv) = Null(HE*) */
+    } else {
+	xhv->xhv_aux = S_hv_auxinit(aTHX);
     }
-    xhv->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
-    xhv->xhv_eiter = Null(HE*); /* HvEITER(hv) = Null(HE*) */
+
     /* used to be xhv->xhv_fill before 5.004_65 */
     return XHvTOTALKEYS(xhv);
 }
+
+I32 *
+Perl_hv_riter_p(pTHX_ HV *hv) {
+    struct xpvhv_aux *iter;
+
+    if (!hv)
+	Perl_croak(aTHX_ "Bad hash");
+
+    iter = ((XPVHV *)SvANY(hv))->xhv_aux;
+    if (!iter) {
+	((XPVHV *)SvANY(hv))->xhv_aux = iter = S_hv_auxinit(aTHX);
+    }
+    return &(iter->xhv_riter);
+}
+
+HE **
+Perl_hv_eiter_p(pTHX_ HV *hv) {
+    struct xpvhv_aux *iter;
+
+    if (!hv)
+	Perl_croak(aTHX_ "Bad hash");
+
+    iter = ((XPVHV *)SvANY(hv))->xhv_aux;
+    if (!iter) {
+	((XPVHV *)SvANY(hv))->xhv_aux = iter = S_hv_auxinit(aTHX);
+    }
+    return &(iter->xhv_eiter);
+}
+
+void
+Perl_hv_riter_set(pTHX_ HV *hv, I32 riter) {
+    struct xpvhv_aux *iter;
+
+    if (!hv)
+	Perl_croak(aTHX_ "Bad hash");
+
+
+    iter = ((XPVHV *)SvANY(hv))->xhv_aux;
+    if (!iter) {
+	if (riter == -1)
+	    return;
+
+	((XPVHV *)SvANY(hv))->xhv_aux = iter = S_hv_auxinit(aTHX);
+    }
+    iter->xhv_riter = riter;
+}
+
+void
+Perl_hv_eiter_set(pTHX_ HV *hv, HE *eiter) {
+    struct xpvhv_aux *iter;
+
+    if (!hv)
+	Perl_croak(aTHX_ "Bad hash");
+
+    iter = ((XPVHV *)SvANY(hv))->xhv_aux;
+    if (!iter) {
+	/* 0 is the default so don't go malloc()ing a new structure just to
+	   hold 0.  */
+	if (!eiter)
+	    return;
+
+	((XPVHV *)SvANY(hv))->xhv_aux = iter = S_hv_auxinit(aTHX);
+    }
+    iter->xhv_eiter = eiter;
+}
+
+
+char **
+Perl_hv_name_p(pTHX_ HV *hv)
+{
+    struct xpvhv_aux *iter = ((XPVHV *)SvANY(hv))->xhv_aux;
+
+    if (!iter) {
+	((XPVHV *)SvANY(hv))->xhv_aux = iter = S_hv_auxinit(aTHX);
+    }
+    return &(iter->xhv_name);
+}
+
+void
+Perl_hv_name_set(pTHX_ HV *hv, const char *name, STRLEN len, int flags)
+{
+    struct xpvhv_aux *iter = ((XPVHV *)SvANY(hv))->xhv_aux;
+
+    if (!iter) {
+	if (name == 0)
+	    return;
+
+	((XPVHV *)SvANY(hv))->xhv_aux = iter = S_hv_auxinit(aTHX);
+    }
+    iter->xhv_name = savepvn(name, len);
+}
+
 /*
 =for apidoc hv_iternext
 
@@ -1700,11 +1828,22 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
     register HE *entry;
     HE *oldentry;
     MAGIC* mg;
+    struct xpvhv_aux *iter;
 
     if (!hv)
 	Perl_croak(aTHX_ "Bad hash");
     xhv = (XPVHV*)SvANY(hv);
-    oldentry = entry = xhv->xhv_eiter; /* HvEITER(hv) */
+    iter = xhv->xhv_aux;
+
+    if (!iter) {
+	/* Too many things (well, pp_each at least) merrily assume that you can
+	   call iv_iternext without calling hv_iterinit, so we'll have to deal
+	   with it.  */
+	hv_iterinit(hv);
+	iter = ((XPVHV *)SvANY(hv))->xhv_aux;
+    }
+
+    oldentry = entry = iter->xhv_eiter; /* HvEITER(hv) */
 
     if ((mg = SvTIED_mg((SV*)hv, PERL_MAGIC_tied))) {
 	SV *key = sv_newmortal();
@@ -1717,7 +1856,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	    HEK *hek;
 
 	    /* one HE per MAGICAL hash */
-	    xhv->xhv_eiter = entry = new_HE(); /* HvEITER(hv) = new_HE() */
+	    iter->xhv_eiter = entry = new_HE(); /* HvEITER(hv) = new_HE() */
 	    Zero(entry, 1, HE);
 	    Newz(54, k, HEK_BASESIZE + sizeof(SV*), char);
 	    hek = (HEK*)k;
@@ -1734,7 +1873,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	    SvREFCNT_dec(HeVAL(entry));
 	Safefree(HeKEY_hek(entry));
 	del_HE(entry);
-	xhv->xhv_eiter = Null(HE*); /* HvEITER(hv) = Null(HE*) */
+	iter->xhv_eiter = Null(HE*); /* HvEITER(hv) = Null(HE*) */
 	return Null(HE*);
     }
 #ifdef DYNAMIC_ENV_FETCH  /* set up %ENV for iteration */
@@ -1763,14 +1902,14 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
     while (!entry) {
 	/* OK. Come to the end of the current list.  Grab the next one.  */
 
-	xhv->xhv_riter++; /* HvRITER(hv)++ */
-	if (xhv->xhv_riter > (I32)xhv->xhv_max /* HvRITER(hv) > HvMAX(hv) */) {
+	iter->xhv_riter++; /* HvRITER(hv)++ */
+	if (iter->xhv_riter > (I32)xhv->xhv_max /* HvRITER(hv) > HvMAX(hv) */) {
 	    /* There is no next one.  End of the hash.  */
-	    xhv->xhv_riter = -1; /* HvRITER(hv) = -1 */
+	    iter->xhv_riter = -1; /* HvRITER(hv) = -1 */
 	    break;
 	}
 	/* entry = (HvARRAY(hv))[HvRITER(hv)]; */
-	entry = ((HE**)xhv->xhv_array)[xhv->xhv_riter];
+	entry = ((HE**)xhv->xhv_array)[iter->xhv_riter];
 
         if (!(flags & HV_ITERNEXT_WANTPLACEHOLDERS)) {
             /* If we have an entry, but it's a placeholder, don't count it.
@@ -1791,7 +1930,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
     /*if (HvREHASH(hv) && entry && !HeKREHASH(entry))
       PerlIO_printf(PerlIO_stderr(), "Awooga %p %p\n", hv, entry);*/
 
-    xhv->xhv_eiter = entry; /* HvEITER(hv) = entry */
+    iter->xhv_eiter = entry; /* HvEITER(hv) = entry */
     return entry;
 }
 
@@ -2184,8 +2323,8 @@ Perl_hv_assert(pTHX_ HV *hv)
   int placeholders = 0;
   int real = 0;
   int bad = 0;
-  const I32 riter = HvRITER(hv);
-  HE *eiter = HvEITER(hv);
+  const I32 riter = HvRITER_get(hv);
+  HE *eiter = HvEITER_get(hv);
 
   (void)hv_iterinit(hv);
 
@@ -2233,8 +2372,8 @@ Perl_hv_assert(pTHX_ HV *hv)
   if (bad) {
     sv_dump((SV *)hv);
   }
-  HvRITER(hv) = riter;		/* Restore hash iterator state */
-  HvEITER(hv) = eiter;
+  HvRITER_set(hv, riter);		/* Restore hash iterator state */
+  HvEITER_set(hv, eiter);
 }
 
 /*

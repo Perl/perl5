@@ -45,7 +45,7 @@ PerlIOVia_fetchmethod(pTHX_ PerlIOVia * s, char *method, CV ** save)
 {
     GV *gv = gv_fetchmeth(s->stash, method, strlen(method), 0);
 #if 0
-    Perl_warn(aTHX_ "Lookup %s::%s => %p", HvNAME(s->stash), method, gv);
+    Perl_warn(aTHX_ "Lookup %s::%s => %p", HvNAME_get(s->stash), method, gv);
 #endif
     if (gv) {
 	return *save = GvCV(gv);
@@ -87,7 +87,7 @@ PerlIOVia_method(pTHX_ PerlIO * f, char *method, CV ** save, int flags,
 	}
 	if (*PerlIONext(f)) {
 	    if (!s->fh) {
-		GV *gv = newGVgen(HvNAME(s->stash));
+		GV *gv = newGVgen(HvNAME_get(s->stash));
 		GvIOp(gv) = newIO();
 		s->fh = newRV_noinc((SV *) gv);
 		s->io = GvIOp(gv);

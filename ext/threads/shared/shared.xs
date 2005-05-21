@@ -529,7 +529,7 @@ sharedsv_scalar_store(pTHX_ SV *sv, shared_sv *shared)
 	    sv_setsv_nomg(SHAREDSvPTR(shared), tmp);
 	    SvREFCNT_dec(tmp);
 	    if(SvOBJECT(SvRV(sv))) {
-	      SV* fake_stash = newSVpv(HvNAME(SvSTASH(SvRV(sv))),0);
+	      SV* fake_stash = newSVpv(HvNAME_get(SvSTASH(SvRV(sv))),0);
 	      SvOBJECT_on(SHAREDSvPTR(target));
 	      SvSTASH_set(SHAREDSvPTR(target), (HV*)fake_stash);
 	    }
@@ -544,7 +544,7 @@ sharedsv_scalar_store(pTHX_ SV *sv, shared_sv *shared)
 	SHARED_CONTEXT;
 	sv_setsv_nomg(SHAREDSvPTR(shared), sv);
 	if(SvOBJECT(sv)) {
-	  SV* fake_stash = newSVpv(HvNAME(SvSTASH(sv)),0);
+	  SV* fake_stash = newSVpv(HvNAME_get(SvSTASH(sv)),0);
 	  SvOBJECT_on(SHAREDSvPTR(shared));
 	  SvSTASH_set(SHAREDSvPTR(shared), (HV*)fake_stash);
 	}
@@ -1294,7 +1294,7 @@ bless(SV* ref, ...);
 	    ENTER_LOCK;
 	    SHARED_CONTEXT;
 	    {
-	      SV* fake_stash = newSVpv(HvNAME(stash),0);
+	      SV* fake_stash = newSVpv(HvNAME_get(stash),0);
 	      (void)sv_bless(SHAREDSvPTR(shared),(HV*)fake_stash);
 	    }
 	    CALLER_CONTEXT;

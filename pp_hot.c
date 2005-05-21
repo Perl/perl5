@@ -1717,7 +1717,7 @@ PP(pp_helem)
 	    RETURN;
 	}
 	if (PL_op->op_private & OPpLVAL_INTRO) {
-	    if (HvNAME(hv) && isGV(*svp))
+	    if (HvNAME_get(hv) && isGV(*svp))
 		save_gp((GV*)*svp, !(PL_op->op_flags & OPf_SPECIAL));
 	    else {
 		if (!preeminent) {
@@ -3089,7 +3089,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	if (!sep || ((sep - name) == 5 && strnEQ(name, "SUPER", 5))) {
 	    /* the method name is unqualified or starts with SUPER:: */ 
 	    packname = sep ? CopSTASHPV(PL_curcop) :
-		stash ? HvNAME(stash) : packname;
+		stash ? HvNAME_get(stash) : packname;
 	    if (!packname)
 		Perl_croak(aTHX_
 			   "Can't use anonymous symbol table for method lookup");

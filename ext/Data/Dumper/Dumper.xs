@@ -14,6 +14,10 @@ static I32 DD_dump (pTHX_ SV *val, char *name, STRLEN namelen, SV *retval,
 		    I32 purity, I32 deepcopy, I32 quotekeys, SV *bless,
 		    I32 maxdepth, SV *sortkeys);
 
+#ifndef HvNAME_get
+#define HvNAME_get HvNAME
+#endif
+
 #if PERL_VERSION <= 6 /* Perl 5.6 and earlier */
 
 # ifdef EBCDIC
@@ -281,7 +285,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
         (void) sprintf(id, "0x%"UVxf, PTR2UV(ival));
 	idlen = strlen(id);
 	if (SvOBJECT(ival))
-	    realpack = HvNAME(SvSTASH(ival));
+	    realpack = HvNAME_get(SvSTASH(ival));
 	else
 	    realpack = Nullch;
 

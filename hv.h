@@ -29,6 +29,16 @@ struct hek {
        is UTF-8 */
 };
 
+
+/* Subject to change.
+   Don't access this directly.
+*/
+struct xpvhv_aux {
+    char	*xhv_name;	/* name, if a symbol table */
+    HE		*xhv_eiter;	/* current entry of iterator */
+    I32		xhv_riter;	/* current root of iterator */
+};
+
 /* hash structure: */
 /* This structure must match the beginning of struct xpvmg in sv.h. */
 struct xpvhv {
@@ -40,10 +50,8 @@ struct xpvhv {
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
 
-    I32		xhv_riter;	/* current root of iterator */
-    HE		*xhv_eiter;	/* current entry of iterator */
+    struct xpvhv_aux* xhv_aux;
     /* list of pm's for this package is now stored in symtab magic.  */
-    char	*xhv_name;	/* name, if a symbol table */
 };
 
 /* hash a key */
@@ -178,9 +186,19 @@ C<SV*>.
 #define HvARRAY(hv)	(*(HE***)&((XPVHV*)  SvANY(hv))->xhv_array)
 #define HvFILL(hv)	((XPVHV*)  SvANY(hv))->xhv_fill
 #define HvMAX(hv)	((XPVHV*)  SvANY(hv))->xhv_max
-#define HvRITER(hv)	((XPVHV*)  SvANY(hv))->xhv_riter
-#define HvEITER(hv)	((XPVHV*)  SvANY(hv))->xhv_eiter
-#define HvNAME(hv)	((XPVHV*)  SvANY(hv))->xhv_name
+#define HvRITER(hv)	(*Perl_hv_riter_p(aTHX_ (HV*)(hv)))
+#define HvEITER(hv)	(*Perl_hv_eiter_p(aTHX_ (HV*)(hv)))
+#define HvRITER_set(hv,r)	Perl_hv_riter_set(aTHX_ (HV*)(hv), r)
+#define HvEITER_set(hv,e)	Perl_hv_eiter_set(aTHX_ (HV*)(hv), e)
+#define HvRITER_get(hv)	(((XPVHV *)SvANY(hv))->xhv_aux ? \
+			 ((struct xpvhv_aux*)((XPVHV *)SvANY(hv))->xhv_aux)->xhv_riter : -1)
+#define HvEITER_get(hv)	(((XPVHV *)SvANY(hv))->xhv_aux ? \
+			 ((struct xpvhv_aux *)((XPVHV *)SvANY(hv))->xhv_aux)->xhv_eiter : 0)
+#define HvNAME(hv)	(*Perl_hv_name_p(aTHX_ (HV*)hv))
+/* FIXME - all of these should use a UTF8 aware API, which should also involve
+   getting the length. */
+#define HvNAME_get(hv)	(((XPVHV *)SvANY(hv))->xhv_aux ? \
+			 ((struct xpvhv_aux *)((XPVHV *)SvANY(hv))->xhv_aux)->xhv_name : 0)
 
 /* the number of keys (including any placeholers) */
 #define XHvTOTALKEYS(xhv)	((xhv)->xhv_keys)
@@ -318,3 +336,13 @@ C<SV*>.
 /* available as a function in hv.c */
 #define Perl_sharepvn(sv, len, hash) HEK_KEY(share_hek(sv, len, hash))
 #define sharepvn(sv, len, hash)	     Perl_sharepvn(sv, len, hash)
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */

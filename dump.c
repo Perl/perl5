@@ -1060,9 +1060,10 @@ Perl_magic_dump(pTHX_ const MAGIC *mg)
 void
 Perl_do_hv_dump(pTHX_ I32 level, PerlIO *file, const char *name, HV *sv)
 {
+    const char *hvname;
     Perl_dump_indent(aTHX_ level, file, "%s = 0x%"UVxf, name, PTR2UV(sv));
-    if (sv && HvNAME(sv))
-	PerlIO_printf(file, "\t\"%s\"\n", HvNAME(sv));
+    if (sv && (hvname = HvNAME_get(sv)))
+	PerlIO_printf(file, "\t\"%s\"\n", hvname);
     else
 	PerlIO_putc(file, '\n');
 }
@@ -1082,9 +1083,10 @@ Perl_do_gvgv_dump(pTHX_ I32 level, PerlIO *file, const char *name, GV *sv)
 {
     Perl_dump_indent(aTHX_ level, file, "%s = 0x%"UVxf, name, PTR2UV(sv));
     if (sv && GvNAME(sv)) {
+	const char *hvname;
 	PerlIO_printf(file, "\t\"");
-	if (GvSTASH(sv) && HvNAME(GvSTASH(sv)))
-	    PerlIO_printf(file, "%s\" :: \"", HvNAME(GvSTASH(sv)));
+	if (GvSTASH(sv) && (hvname = HvNAME_get(GvSTASH(sv))))
+	    PerlIO_printf(file, "%s\" :: \"", hvname);
 	PerlIO_printf(file, "%s\"\n", GvNAME(sv));
     }
     else
@@ -1420,17 +1422,20 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	Perl_dump_indent(aTHX_ level, file, "  KEYS = %"IVdf"\n", (IV)HvKEYS(sv));
 	Perl_dump_indent(aTHX_ level, file, "  FILL = %"IVdf"\n", (IV)HvFILL(sv));
 	Perl_dump_indent(aTHX_ level, file, "  MAX = %"IVdf"\n", (IV)HvMAX(sv));
-	Perl_dump_indent(aTHX_ level, file, "  RITER = %"IVdf"\n", (IV)HvRITER(sv));
-	Perl_dump_indent(aTHX_ level, file, "  EITER = 0x%"UVxf"\n", PTR2UV(HvEITER(sv)));
+	Perl_dump_indent(aTHX_ level, file, "  RITER = %"IVdf"\n", (IV)HvRITER_get(sv));
+	Perl_dump_indent(aTHX_ level, file, "  EITER = 0x%"UVxf"\n", PTR2UV(HvEITER_get(sv)));
 	{
 	    MAGIC *mg = mg_find(sv, PERL_MAGIC_symtab);
 	    if (mg && mg->mg_obj) {
 		Perl_dump_indent(aTHX_ level, file, "  PMROOT = 0x%"UVxf"\n", PTR2UV(mg->mg_obj));
 	    }
 	}
-	if (HvNAME(sv))
-	    Perl_dump_indent(aTHX_ level, file, "  NAME = \"%s\"\n", HvNAME(sv));
-	if (nest < maxnest && !HvEITER(sv)) { /* Try to preserve iterator */
+	{
+	    const char *hvname = HvNAME_get(sv);
+	    if (hvname)
+		Perl_dump_indent(aTHX_ level, file, "  NAME = \"%s\"\n", hvname);
+	}
+	if (nest < maxnest && !HvEITER_get(sv)) { /* Try to preserve iterator */
 	    HE *he;
 	    HV *hv = (HV*)sv;
 	    int count = maxnest - nest;

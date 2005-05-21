@@ -4346,7 +4346,7 @@ Perl_yylex(pTHX)
 	case KEY___PACKAGE__:
 	    yylval.opval = (OP*)newSVOP(OP_CONST, 0,
 					(PL_curstash
-					 ? newSVpv(HvNAME(PL_curstash), 0)
+					 ? newSVpv(HvNAME_get(PL_curstash), 0)
 					 : &PL_sv_undef));
 	    TERM(THING);
 
@@ -4358,7 +4358,7 @@ Perl_yylex(pTHX)
 	    if (PL_rsfp && (!PL_in_eval || PL_tokenbuf[2] == 'D')) {
 		const char *pname = "main";
 		if (PL_tokenbuf[2] == 'D')
-		    pname = HvNAME(PL_curstash ? PL_curstash : PL_defstash);
+		    pname = HvNAME_get(PL_curstash ? PL_curstash : PL_defstash);
 		gv = gv_fetchpv(Perl_form(aTHX_ "%s::DATA", pname), TRUE, SVt_PVIO);
 		GvMULTI_on(gv);
 		if (!GvIO(gv))
@@ -5536,7 +5536,7 @@ S_pending_ident(pTHX)
             /* might be an "our" variable" */
             if (PAD_COMPNAME_FLAGS(tmp) & SVpad_OUR) {
                 /* build ops for a bareword */
-                SV *sym = newSVpv(HvNAME(PAD_COMPNAME_OURSTASH(tmp)), 0);
+                SV *sym = newSVpv(HvNAME_get(PAD_COMPNAME_OURSTASH(tmp)), 0);
                 sv_catpvn(sym, "::", 2);
                 sv_catpv(sym, PL_tokenbuf+1);
                 yylval.opval = (OP*)newSVOP(OP_CONST, 0, sym);
@@ -9737,7 +9737,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 	    if ((tmp = pad_findmy(d)) != NOT_IN_PAD) {
 		if (PAD_COMPNAME_FLAGS(tmp) & SVpad_OUR) {
 		    SV *sym = sv_2mortal(
-			    newSVpv(HvNAME(PAD_COMPNAME_OURSTASH(tmp)),0));
+			    newSVpv(HvNAME_get(PAD_COMPNAME_OURSTASH(tmp)),0));
 		    sv_catpvn(sym, "::", 2);
 		    sv_catpv(sym, d+1);
 		    d = SvPVX(sym);

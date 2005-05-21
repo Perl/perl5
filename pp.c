@@ -600,7 +600,7 @@ PP(pp_gelem)
 	    break;
 	case 'P':
 	    if (strEQ(elem2, "ACKAGE")) {
-		const char *name = HvNAME(GvSTASH(gv));
+		const char *name = HvNAME_get(GvSTASH(gv));
 		sv = newSVpv(name ? name : "__ANON__", 0);
 	    }
 	    break;

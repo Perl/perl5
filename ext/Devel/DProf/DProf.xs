@@ -42,8 +42,8 @@ dprof_dbg_sub_notify(pTHX_ SV *Sub) {
     GV   *gv = cv ? CvGV(cv) : NULL;
     if (cv && gv) {
 	warn("XS DBsub(%s::%s)\n",
-	     ((GvSTASH(gv) && HvNAME(GvSTASH(gv))) ?
-	      HvNAME(GvSTASH(gv)) : "(null)"),
+	     ((GvSTASH(gv) && HvNAME_get(GvSTASH(gv))) ?
+	      HvNAME_get(GvSTASH(gv)) : "(null)"),
 	     GvNAME(gv));
     } else {
 	warn("XS DBsub(unknown) at %x", Sub);
@@ -371,9 +371,8 @@ prof_mark(pTHX_ opcode ptype)
 
 	cv = db_get_cv(aTHX_ Sub);
 	gv = CvGV(cv);
-	pname = ((GvSTASH(gv) && HvNAME(GvSTASH(gv))) 
-		 ? HvNAME(GvSTASH(gv)) 
-		 : (char *) "(null)");
+	pname = GvSTASH(gv) ? HvNAME_get(GvSTASH(gv)) : 0;
+	pname = pname ? pname : (char *) "(null)";
 	gname = GvNAME(gv);
 
 	set_cv_key(aTHX_ cv, pname, gname);

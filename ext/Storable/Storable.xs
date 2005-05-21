@@ -107,6 +107,24 @@ typedef double NV;			/* Older perls lack the NV type */
 #define dVAR dNOOP
 #endif
 
+#ifndef HvRITER_set
+#  define HvRITER_set(hv,r)	(*HvRITER(hv) = r)
+#endif
+#ifndef HvEITER_set
+#  define HvEITER_set(hv,r)	(*HvEITER(hv) = r)
+#endif
+
+#ifndef HvRITER_get
+#  define HvRITER_get HvRITER
+#endif
+#ifndef HvEITER_get
+#  define HvEITER_get HvEITER
+#endif
+
+#ifndef HvNAME_get
+#define HvNAME_get HvNAME
+#endif
+
 #ifndef HvPLACEHOLDERS_get
 #  define HvPLACEHOLDERS_get HvPLACEHOLDERS
 #endif
@@ -1637,6 +1655,8 @@ static SV *pkg_fetchmeth(
 {
 	GV *gv;
 	SV *sv;
+	const char *hvname = HvNAME_get(pkg);
+
 
 	/*
 	 * The following code is the same as the one performed by UNIVERSAL::can
@@ -1646,10 +1666,10 @@ static SV *pkg_fetchmeth(
 	gv = gv_fetchmethod_autoload(pkg, method, FALSE);
 	if (gv && isGV(gv)) {
 		sv = newRV((SV*) GvCV(gv));
-		TRACEME(("%s->%s: 0x%"UVxf, HvNAME(pkg), method, PTR2UV(sv)));
+		TRACEME(("%s->%s: 0x%"UVxf, hvname, method, PTR2UV(sv)));
 	} else {
 		sv = newSVsv(&PL_sv_undef);
-		TRACEME(("%s->%s: not found", HvNAME(pkg), method));
+		TRACEME(("%s->%s: not found", hvname, method));
 	}
 
 	/*
@@ -1657,7 +1677,7 @@ static SV *pkg_fetchmeth(
 	 * it just won't be cached.
 	 */
 
-	(void) hv_store(cache, HvNAME(pkg), strlen(HvNAME(pkg)), sv, 0);
+	(void) hv_store(cache, hvname, strlen(hvname), sv, 0);
 
 	return SvOK(sv) ? sv : (SV *) 0;
 }
@@ -1673,8 +1693,9 @@ static void pkg_hide(
 	HV *pkg,
 	char *method)
 {
+	const char *hvname = HvNAME_get(pkg);
 	(void) hv_store(cache,
-		HvNAME(pkg), strlen(HvNAME(pkg)), newSVsv(&PL_sv_undef), 0);
+		hvname, strlen(hvname), newSVsv(&PL_sv_undef), 0);
 }
 
 /*
@@ -1688,7 +1709,8 @@ static void pkg_uncache(
 	HV *pkg,
 	char *method)
 {
-	(void) hv_delete(cache, HvNAME(pkg), strlen(HvNAME(pkg)), G_DISCARD);
+	const char *hvname = HvNAME_get(pkg);
+	(void) hv_delete(cache, hvname, strlen(hvname), G_DISCARD);
 }
 
 /*
@@ -1707,8 +1729,9 @@ static SV *pkg_can(
 {
 	SV **svh;
 	SV *sv;
+	const char *hvname = HvNAME_get(pkg);
 
-	TRACEME(("pkg_can for %s->%s", HvNAME(pkg), method));
+	TRACEME(("pkg_can for %s->%s", hvname, method));
 
 	/*
 	 * Look into the cache to see whether we already have determined
@@ -1718,15 +1741,15 @@ static SV *pkg_can(
 	 * that only one hook (i.e. always the same) is cached in a given cache.
 	 */
 
-	svh = hv_fetch(cache, HvNAME(pkg), strlen(HvNAME(pkg)), FALSE);
+	svh = hv_fetch(cache, hvname, strlen(hvname), FALSE);
 	if (svh) {
 		sv = *svh;
 		if (!SvOK(sv)) {
-			TRACEME(("cached %s->%s: not found", HvNAME(pkg), method));
+			TRACEME(("cached %s->%s: not found", hvname, method));
 			return (SV *) 0;
 		} else {
 			TRACEME(("cached %s->%s: 0x%"UVxf,
-				HvNAME(pkg), method, PTR2UV(sv)));
+				hvname, method, PTR2UV(sv)));
 			return sv;
 		}
 	}
@@ -2260,8 +2283,8 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 	 * Save possible iteration state via each() on that table.
 	 */
 
-	riter = HvRITER(hv);
-	eiter = HvEITER(hv);
+	riter = HvRITER_get(hv);
+	eiter = HvEITER_get(hv);
 	hv_iterinit(hv);
 
 	/*
@@ -2529,8 +2552,8 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 	TRACEME(("ok (hash 0x%"UVxf")", PTR2UV(hv)));
 
 out:
-	HvRITER(hv) = riter;		/* Restore hash iterator state */
-	HvEITER(hv) = eiter;
+	HvRITER_set(hv, riter);		/* Restore hash iterator state */
+	HvEITER_set(hv, eiter);
 
 	return ret;
 }
@@ -2835,7 +2858,7 @@ static int store_hook(
 	char mtype = '\0';				/* for blessed ref to tied structures */
 	unsigned char eflags = '\0';	/* used when object type is SHT_EXTRA */
 
-	TRACEME(("store_hook, classname \"%s\", tagged #%d", HvNAME(pkg), cxt->tagnum));
+	TRACEME(("store_hook, classname \"%s\", tagged #%d", HvNAME_get(pkg), cxt->tagnum));
 
 	/*
 	 * Determine object type on 2 bits.
@@ -2886,7 +2909,7 @@ static int store_hook(
 	}
 	flags = SHF_NEED_RECURSE | obj_type;
 
-	classname = HvNAME(pkg);
+	classname = HvNAME_get(pkg);
 	len = strlen(classname);
 
 	/*
@@ -3254,7 +3277,7 @@ static int store_blessed(
 	char *classname;
 	I32 classnum;
 
-	TRACEME(("store_blessed, type %d, class \"%s\"", type, HvNAME(pkg)));
+	TRACEME(("store_blessed, type %d, class \"%s\"", type, HvNAME_get(pkg)));
 
 	/*
 	 * Look for a hook for this blessed SV and redirect to store_hook()
@@ -3269,7 +3292,7 @@ static int store_blessed(
 	 * This is a blessed SV without any serialization hook.
 	 */
 
-	classname = HvNAME(pkg);
+	classname = HvNAME_get(pkg);
 	len = strlen(classname);
 
 	TRACEME(("blessed 0x%"UVxf" in %s, no hook: tagged #%d",
@@ -4511,7 +4534,7 @@ static SV *retrieve_overloaded(pTHX_ stcxt_t *cxt, char *cname)
 	}
 	if (!Gv_AMG(stash)) {
 		SV *psv = newSVpvn("require ", 8);
-		const char *package = HvNAME(stash);
+		const char *package = HvNAME_get(stash);
 		sv_catpv(psv, package);
 
 		TRACEME(("No overloading defined for package %s", package));

@@ -40,13 +40,16 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
     GV** gvp;
     HV* hv = Nullhv;
     SV* subgen = Nullsv;
+    const char *hvname;
 
     /* A stash/class can go by many names (ie. User == main::User), so 
        we compare the stash itself just in case */
     if (name_stash && (stash == name_stash))
         return &PL_sv_yes;
 
-    if (strEQ(HvNAME(stash), name))
+    hvname = HvNAME_get(stash);
+
+    if (strEQ(hvname, name))
 	return &PL_sv_yes;
 
     if (strEQ(name, "UNIVERSAL"))
@@ -54,7 +57,7 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
 
     if (level > 100)
 	Perl_croak(aTHX_ "Recursive inheritance detected in package '%s'",
-		   HvNAME(stash));
+		   hvname);
 
     gvp = (GV**)hv_fetch(stash, "::ISA::CACHE::", 14, FALSE);
 
@@ -66,13 +69,13 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
 	    SV** svp = (SV**)hv_fetch(hv, name, len, FALSE);
 	    if (svp && (sv = *svp) != (SV*)&PL_sv_undef) {
 	        DEBUG_o( Perl_deb(aTHX_ "Using cached ISA %s for package %s\n",
-				  name, HvNAME(stash)) );
+				  name, hvname) );
 		return sv;
 	    }
 	}
 	else {
 	    DEBUG_o( Perl_deb(aTHX_ "ISA Cache in package %s is stale\n",
-			      HvNAME(stash)) );
+			      hvname) );
 	    hv_clear(hv);
 	    sv_setiv(subgen, PL_sub_generation);
 	}
@@ -106,8 +109,8 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
 		if (!basestash) {
 		    if (ckWARN(WARN_MISC))
 			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-		             "Can't locate package %"SVf" for @%s::ISA",
-			    sv, HvNAME(stash));
+				    "Can't locate package %"SVf" for @%s::ISA",
+				    sv, hvname);
 		    continue;
 		}
 		if (&PL_sv_yes == isa_lookup(basestash, name, name_stash, 
@@ -348,11 +351,12 @@ XS(XS_UNIVERSAL_VERSION)
 	SV *req = ST(1);
 
 	if (undef) {
-	    if (pkg)
+	    if (pkg) {
+		const char *name = HvNAME_get(pkg);
 		Perl_croak(aTHX_
-			     "%s does not define $%s::VERSION--version check failed",
-			     HvNAME(pkg), HvNAME(pkg));
-	    else {
+			   "%s does not define $%s::VERSION--version check failed",
+			   name, name);
+	    } else {
 		STRLEN n_a;
 		Perl_croak(aTHX_
 			     "%s defines neither package nor VERSION--version check failed",
@@ -370,7 +374,7 @@ XS(XS_UNIVERSAL_VERSION)
 
 	if ( vcmp( req, sv ) > 0 )
 	    Perl_croak(aTHX_ "%s version %"SVf" (%"SVf") required--"
-		    "this is only version %"SVf" (%"SVf")", HvNAME(pkg),
+		    "this is only version %"SVf" (%"SVf")", HvNAME_get(pkg),
 		    vnumify(req),vnormal(req),vnumify(sv),vnormal(sv));
     }
 

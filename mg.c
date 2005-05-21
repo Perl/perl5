@@ -1605,13 +1605,13 @@ Perl_magic_scalarpack(pTHX_ HV *hv, MAGIC *mg)
    
     if (!gv_fetchmethod_autoload(pkg, "SCALAR", FALSE)) {
         SV *key;
-        if (HvEITER(hv))
+        if (HvEITER_get(hv))
             /* we are in an iteration so the hash cannot be empty */
             return &PL_sv_yes;
         /* no xhv_eiter so now use FIRSTKEY */
         key = sv_newmortal();
         magic_nextpack((SV*)hv, mg, key);
-        HvEITER(hv) = NULL;     /* need to reset iterator */
+        HvEITER_set(hv, NULL);     /* need to reset iterator */
         return SvOK(key) ? &PL_sv_yes : &PL_sv_no;
     }
    
