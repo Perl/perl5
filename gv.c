@@ -721,7 +721,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		    stash = GvHV(gv) = newHV();
 
 		if (!HvNAME_get(stash))
-		    Perl_hv_name_set(aTHX stash, nambeg, namend - nambeg, 0);
+		    Perl_hv_name_set(aTHX_ stash, nambeg, namend - nambeg, 0);
 	    }
 
 	    if (*namend == ':')
