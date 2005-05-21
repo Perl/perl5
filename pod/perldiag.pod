@@ -752,11 +752,10 @@ a block, except that it isn't a proper block.  This usually occurs if
 you tried to jump out of a sort() block or subroutine, which is a no-no.
 See L<perlfunc/goto>.
 
-=item Can't goto subroutine from an eval-string
+=item Can't goto subroutine from an eval-%s
 
 (F) The "goto subroutine" call can't be used to jump out of an eval
-"string".  (You can use it to jump out of an eval {BLOCK}, but you
-probably don't want to.)
+"string" or block.
 
 =item Can't goto subroutine outside a subroutine
 
