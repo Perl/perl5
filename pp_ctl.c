@@ -2297,11 +2297,13 @@ PP(pp_goto)
 	    if (cxix < cxstack_ix)
 		dounwind(cxix);
 	    TOPBLOCK(cx);
-	    if (CxTYPE(cx) == CXt_EVAL)
+	    SPAGAIN;
+	    if (CxTYPE(cx) == CXt_EVAL) {
 		if (CxREALEVAL(cx))
 		    DIE(aTHX_ "Can't goto subroutine from an eval-string");
 		else
 		    DIE(aTHX_ "Can't goto subroutine from an eval-block");
+	    }
 	    if (CxTYPE(cx) == CXt_SUB && cx->blk_sub.hasargs) {
 		/* put @_ back onto stack */
 		AV* av = cx->blk_sub.argarray;
