@@ -333,3 +333,8 @@ exception(throw_e)
     OUTPUT:
         RETVAL
 
+void
+mycroak(pv)
+    const char* pv
+    CODE:
+    Perl_croak(aTHX_ "%s", pv);
