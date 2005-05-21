@@ -4062,6 +4062,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 
 	op_free(CvROOT(cv));
 	CvROOT(cv) = Nullop;
+	CvSTART(cv) = Nullop;
 	LEAVE;
     }
     SvPOK_off((SV*)cv);		/* forget prototype */
