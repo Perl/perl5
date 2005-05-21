@@ -15,13 +15,18 @@ struct byteloader_fdata {
     int	idx;
 };
 
+struct byteloader_pv_state {
+    char			*pvx;
+    XPV				xpv;
+};
+
 struct byteloader_state {
     struct byteloader_fdata	*bs_fdata;
     SV				*bs_sv;
     void			**bs_obj_list;
     int				bs_obj_list_fill;
     int				bs_ix;
-    XPV				bs_pv;
+    struct byteloader_pv_state	bs_pv;
     int				bs_iv_overflows;
 };
 

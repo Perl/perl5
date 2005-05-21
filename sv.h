@@ -68,6 +68,13 @@ struct STRUCT_SV {		/* struct sv { */
     void*	sv_any;		/* pointer to something */
     U32		sv_refcnt;	/* how many references to us */
     U32		sv_flags;	/* what we are */
+    union {
+	IV	sv_iv;
+	UV	sv_uv;
+	SV*	sv_rv;		/* pointer to another SV */
+	char*	sv_pv;    	/* pointer to malloced string */
+	SV**	sv_array;
+    }		sv_u;
 #ifdef DEBUG_LEAKING_SCALARS
     unsigned	sv_debug_optype:9;	/* the type of OP that allocated us */
     unsigned	sv_debug_inpad:1;	/* was allocated in a pad for an OP */
@@ -81,30 +88,65 @@ struct gv {
     XPVGV*	sv_any;		/* pointer to something */
     U32		sv_refcnt;	/* how many references to us */
     U32		sv_flags;	/* what we are */
+    union {
+	IV	sv_iv;
+	UV	sv_uv;
+	SV*	sv_rv;
+	char*	sv_pv;
+	SV**	sv_array;
+    }		sv_u;
 };
 
 struct cv {
     XPVCV*	sv_any;		/* pointer to something */
     U32		sv_refcnt;	/* how many references to us */
     U32		sv_flags;	/* what we are */
+    union {
+	IV	sv_iv;
+	UV	sv_uv;
+	SV*	sv_rv;
+	char*	sv_pv;
+	SV**	sv_array;
+    }		sv_u;
 };
 
 struct av {
     XPVAV*	sv_any;		/* pointer to something */
     U32		sv_refcnt;	/* how many references to us */
     U32		sv_flags;	/* what we are */
+    union {
+	IV	sv_iv;
+	UV	sv_uv;
+	SV*	sv_rv;
+	char*	sv_pv;		/* pointer to first array element */
+	SV**	sv_array;
+    }		sv_u;
 };
 
 struct hv {
     XPVHV*	sv_any;		/* pointer to something */
     U32		sv_refcnt;	/* how many references to us */
     U32		sv_flags;	/* what we are */
+    union {
+	IV	sv_iv;
+	UV	sv_uv;
+	SV*	sv_rv;
+	char*	sv_pv;
+	SV**	sv_array;
+    }		sv_u;
 };
 
 struct io {
     XPVIO*	sv_any;		/* pointer to something */
     U32		sv_refcnt;	/* how many references to us */
     U32		sv_flags;	/* what we are */
+    union {
+	IV	sv_iv;
+	UV	sv_uv;
+	SV*	sv_rv;
+	char*	sv_pv;
+	SV**	sv_array;
+    }		sv_u;
 };
 
 /*
@@ -232,33 +274,25 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVpav_REAL	0x40000000	/* free old entries */
 #define SVpav_REIFY 	0x80000000	/* can become real */
 
-struct xrv {
-    SV *	xrv_rv;		/* pointer to another SV */
-};
-
 struct xpv {
-    char *	xpv_pv;		/* pointer to malloced string */
-    STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
+    STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
 };
 
 struct xpviv {
-    char *	xpv_pv;		/* pointer to malloced string */
-    STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
+    STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
 };
 
 struct xpvuv {
-    char *	xpv_pv;		/* pointer to malloced string */
-    STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
+    STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     UV		xuv_uv;		/* unsigned value or pv offset */
 };
 
 struct xpvnv {
-    char *	xpv_pv;		/* pointer to malloced string */
-    STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
+    STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
     NV    	xnv_nv;		/* numeric value, if any */
@@ -266,8 +300,7 @@ struct xpvnv {
 
 /* These structure must match the beginning of struct xpvhv in hv.h. */
 struct xpvmg {
-    char *	xpv_pv;		/* pointer to malloced string */
-    STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
+    STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
     NV    	xnv_nv;		/* numeric value, if any */
@@ -276,8 +309,7 @@ struct xpvmg {
 };
 
 struct xpvlv {
-    char *	xpv_pv;		/* pointer to malloced string */
-    STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
+    STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
     NV    	xnv_nv;		/* numeric value, if any */
@@ -299,8 +331,7 @@ struct xpvlv {
 };
 
 struct xpvgv {
-    char *	xpv_pv;		/* pointer to malloced string */
-    STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
+    STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
     NV		xnv_nv;		/* numeric value, if any */
@@ -315,8 +346,7 @@ struct xpvgv {
 };
 
 struct xpvbm {
-    char *	xpv_pv;		/* pointer to malloced string */
-    STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
+    STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
     NV		xnv_nv;		/* numeric value, if any */
@@ -333,8 +363,7 @@ struct xpvbm {
 typedef U16 cv_flags_t;
 
 struct xpvfm {
-    char *	xpv_pv;		/* pointer to malloced string */
-    STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
+    STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
     NV		xnv_nv;		/* numeric value, if any */
@@ -359,8 +388,7 @@ struct xpvfm {
 };
 
 struct xpvio {
-    char *	xpv_pv;		/* pointer to malloced string */
-    STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
+    STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
     NV		xnv_nv;		/* numeric value, if any */
@@ -762,9 +790,9 @@ in gv.h: */
 #endif
 
 #ifdef PERL_DEBUG_COW
-#define SvRV(sv) (0 + ((XRV*)  SvANY(sv))->xrv_rv)
+#define SvRV(sv) (0 + (sv)->sv_u.sv_rv)
 #else
-#define SvRV(sv) ((XRV*)  SvANY(sv))->xrv_rv
+#define SvRV(sv) ((sv)->sv_u.sv_rv)
 #endif
 #define SvRVx(sv) SvRV(sv)
 
@@ -772,10 +800,10 @@ in gv.h: */
 #define SvIVX(sv) (0 + ((XPVIV*) SvANY(sv))->xiv_iv)
 #define SvUVX(sv) (0 + ((XPVUV*) SvANY(sv))->xuv_uv)
 #define SvNVX(sv) (0 + ((XPVNV*) SvANY(sv))->xnv_nv)
-#define SvPVX(sv) (0 + ((XPV*) SvANY(sv))->xpv_pv)
+#define SvPVX(sv) (0 + (sv)->sv_u.sv_pv)
 #define SvCUR(sv) (0 + ((XPV*) SvANY(sv))->xpv_cur)
 #define SvLEN(sv) (0 + ((XPV*) SvANY(sv))->xpv_len)
-#define SvEND(sv) (((XPV*)  SvANY(sv))->xpv_pv + ((XPV*)SvANY(sv))->xpv_cur)
+#define SvEND(sv) ((sv)->sv_u.sv_pv + ((XPV*)SvANY(sv))->xpv_cur)
 
 #ifdef DEBUGGING
 #  ifdef PERL_IN_SV_C
@@ -797,10 +825,10 @@ in gv.h: */
 #define SvIVX(sv) ((XPVIV*) SvANY(sv))->xiv_iv
 #define SvUVX(sv) ((XPVUV*) SvANY(sv))->xuv_uv
 #define SvNVX(sv) ((XPVNV*) SvANY(sv))->xnv_nv
-#define SvPVX(sv) ((XPV*) SvANY(sv))->xpv_pv
+#define SvPVX(sv) ((sv)->sv_u.sv_pv)
 #define SvCUR(sv) ((XPV*) SvANY(sv))->xpv_cur
 #define SvLEN(sv) ((XPV*) SvANY(sv))->xpv_len
-#define SvEND(sv) (((XPV*) SvANY(sv))->xpv_pv + ((XPV*)SvANY(sv))->xpv_cur)
+#define SvEND(sv) ((sv)->sv_u.sv_pv + ((XPV*)SvANY(sv))->xpv_cur)
 
 #ifdef DEBUGGING
 #define SvMAGIC(sv)	(*(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_magic))
@@ -834,13 +862,13 @@ in gv.h: */
 		(((XPVNV*)SvANY(sv))->xnv_nv = (val)); } STMT_END
 #define SvPV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
-		(((XPV*)  SvANY(sv))->xpv_pv = (val)); } STMT_END
+		((sv)->sv_u.sv_pv = (val)); } STMT_END
 #define SvUV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) == SVt_IV || SvTYPE(sv) >= SVt_PVIV); \
 		(((XPVUV*)SvANY(sv))->xuv_uv = (val)); } STMT_END
 #define SvRV_set(sv, val) \
         STMT_START { assert(SvTYPE(sv) >=  SVt_RV); \
-                (((XRV*)SvANY(sv))->xrv_rv = (val)); } STMT_END
+                ((sv)->sv_u.sv_rv = (val)); } STMT_END
 #define SvMAGIC_set(sv, val) \
         STMT_START { assert(SvTYPE(sv) >= SVt_PVMG); \
                 (((XPVMG*)SvANY(sv))->xmg_magic = (val)); } STMT_END
@@ -1164,7 +1192,7 @@ Like C<sv_catsv> but doesn't process magic.
 	?   (({XPV *nxpv = (XPV*)SvANY(sv);			\
 	     nxpv &&						\
 	     (nxpv->xpv_cur > 1 ||				\
-	      (nxpv->xpv_cur && *nxpv->xpv_pv != '0')); })	\
+	      (nxpv->xpv_cur && *(sv)->sv_u.sv_pv != '0')); })	\
 	     ? 1						\
 	     : 0)						\
 	:							\
@@ -1190,9 +1218,9 @@ Like C<sv_catsv> but doesn't process magic.
     !sv								\
     ? 0								\
     :    SvPOK(sv)						\
-	?   ((PL_Xpv = (XPV*)SvANY(sv)) &&			\
+	?   ((PL_Xpv = (XPV*)SvANY(PL_Sv = (sv))) &&		\
 	     (PL_Xpv->xpv_cur > 1 ||				\
-	      (PL_Xpv->xpv_cur && *PL_Xpv->xpv_pv != '0'))	\
+	      (PL_Xpv->xpv_cur && *PL_Sv->sv_u.sv_pv != '0'))	\
 	     ? 1						\
 	     : 0)						\
 	:							\

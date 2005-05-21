@@ -116,7 +116,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	    {
 		U32 arg;
 		BGET_U32(arg);
-		BSET_stpv(bstate->bs_pv.xpv_pv, arg);
+		BSET_stpv(bstate->bs_pv.pvx, arg);
 		break;
 	    }
 	  case INSN_LDSPECSV:		/* 6 */
@@ -178,12 +178,12 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	    {
 		STRLEN arg;
 		BGET_PADOFFSET(arg);
-		bstate->bs_pv.xpv_cur = arg;
+		bstate->bs_pv.xpv.xpv_cur = arg;
 		break;
 	    }
 	  case INSN_PV_FREE:		/* 16 */
 	    {
-		BSET_pv_free(bstate->bs_pv);
+		BSET_pv_free(bstate->bs_pv.pvx);
 		break;
 	    }
 	  case INSN_SV_UPGRADE:		/* 17 */

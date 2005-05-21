@@ -31,14 +31,14 @@ typedef char *pvindex;
 #define BGET_PV(arg)	STMT_START {					\
 	BGET_U32(arg);							\
 	if (arg) {							\
-	    New(666, bstate->bs_pv.xpv_pv, arg, char);			\
-	    bl_read(bstate->bs_fdata, bstate->bs_pv.xpv_pv, arg, 1);	\
-	    bstate->bs_pv.xpv_len = arg;				\
-	    bstate->bs_pv.xpv_cur = arg - 1;				\
+	    New(666, bstate->bs_pv.pvx, arg, char);			\
+	    bl_read(bstate->bs_fdata, bstate->bs_pv.pvx, arg, 1);	\
+	    bstate->bs_pv.xpv.xpv_len = arg;				\
+	    bstate->bs_pv.xpv.xpv_cur = arg - 1;			\
 	} else {							\
-	    bstate->bs_pv.xpv_pv = 0;					\
-	    bstate->bs_pv.xpv_len = 0;					\
-	    bstate->bs_pv.xpv_cur = 0;					\
+	    bstate->bs_pv.pvx = 0;					\
+	    bstate->bs_pv.xpv.xpv_len = 0;				\
+	    bstate->bs_pv.xpv.xpv_cur = 0;				\
 	}								\
     } STMT_END
 
@@ -68,7 +68,7 @@ typedef char *pvindex;
 	arg = (char *) ary;				\
     } while (0)
 
-#define BGET_pvcontents(arg)	arg = bstate->bs_pv.xpv_pv
+#define BGET_pvcontents(arg)	arg = bstate->bs_pv.pvx
 #define BGET_strconst(arg) STMT_START {	\
 	for (arg = PL_tokenbuf; (*arg = BGET_FGETC()); arg++) /* nothing */; \
 	arg = PL_tokenbuf;			\
@@ -122,7 +122,7 @@ typedef char *pvindex;
     } STMT_END
 
 #define BSET_sv_magic(sv, arg)		sv_magic(sv, Nullsv, arg, 0, 0)
-#define BSET_mg_name(mg, arg)	mg->mg_ptr = arg; mg->mg_len = bstate->bs_pv.xpv_cur
+#define BSET_mg_name(mg, arg)	mg->mg_ptr = arg; mg->mg_len = bstate->bs_pv.xpv.xpv_cur
 #define BSET_mg_namex(mg, arg)			\
 	(mg->mg_ptr = (char*)SvREFCNT_inc((SV*)arg),	\
 	 mg->mg_len = HEf_SVKEY)
@@ -130,9 +130,9 @@ typedef char *pvindex;
 #define BSET_sv_upgrade(sv, arg)	(void)SvUPGRADE(sv, arg)
 #define BSET_xrv(sv, arg) SvRV_set(sv, arg)
 #define BSET_xpv(sv)	do {	\
-	SvPV_set(sv, bstate->bs_pv.xpv_pv);	\
-	SvCUR_set(sv, bstate->bs_pv.xpv_cur);	\
-	SvLEN_set(sv, bstate->bs_pv.xpv_len);	\
+	SvPV_set(sv, bstate->bs_pv.pvx);	\
+	SvCUR_set(sv, bstate->bs_pv.xpv.xpv_cur);	\
+	SvLEN_set(sv, bstate->bs_pv.xpv.xpv_len);	\
     } while (0)
 #define BSET_xpv_cur(sv, arg) SvCUR_set(sv, arg)
 #define BSET_xpv_len(sv, arg) SvLEN_set(sv, arg)
@@ -144,8 +144,8 @@ typedef char *pvindex;
 #define BSET_av_push(sv, arg)	av_push((AV*)sv, arg)
 #define BSET_av_pushx(sv, arg)	(AvARRAY(sv)[++AvFILLp(sv)] = arg)
 #define BSET_hv_store(sv, arg)	\
-	hv_store((HV*)sv, bstate->bs_pv.xpv_pv, bstate->bs_pv.xpv_cur, arg, 0)
-#define BSET_pv_free(pv)	Safefree(pv.xpv_pv)
+	hv_store((HV*)sv, bstate->bs_pv.pvx, bstate->bs_pv.xpv.xpv_cur, arg, 0)
+#define BSET_pv_free(p)	Safefree(p)
 
 
 #ifdef USE_ITHREADS
@@ -155,7 +155,7 @@ typedef char *pvindex;
     STMT_START { \
         SV* repointer; \
 	REGEXP* rx = arg ? \
-	    CALLREGCOMP(aTHX_ arg, arg + bstate->bs_pv.xpv_cur, cPMOPx(o)) : \
+	    CALLREGCOMP(aTHX_ arg, arg + bstate->bs_pv.xpv.xpv_cur, cPMOPx(o)) : \
 	    Null(REGEXP*); \
         if(av_len((AV*) PL_regex_pad[0]) > -1) { \
             repointer = av_pop((AV*)PL_regex_pad[0]); \
@@ -174,7 +174,7 @@ typedef char *pvindex;
 #define BSET_pregcomp(o, arg) \
     STMT_START { \
 	PM_SETRE(((PMOP*)o), (arg ? \
-	     CALLREGCOMP(aTHX_ arg, arg + bstate->bs_pv.xpv_cur, cPMOPx(o)): \
+	     CALLREGCOMP(aTHX_ arg, arg + bstate->bs_pv.xpv.xpv_cur, cPMOPx(o)): \
 	     Null(REGEXP*))); \
     } STMT_END
 

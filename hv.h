@@ -42,7 +42,6 @@ struct xpvhv_aux {
 /* hash structure: */
 /* This structure must match the beginning of struct xpvmg in sv.h. */
 struct xpvhv {
-    char *	xhv_array;	/* pointer to malloced string */
     STRLEN	xhv_fill;	/* how full xhv_array currently is */
     STRLEN	xhv_max;	/* subscript of last element of xhv_array */
     IV		xhv_keys;	/* how many elements in the array */
@@ -183,7 +182,7 @@ C<SV*>.
 
 
 #define Nullhv Null(HV*)
-#define HvARRAY(hv)	(*(HE***)&((XPVHV*)  SvANY(hv))->xhv_array)
+#define HvARRAY(hv)	(*(HE***)&((hv)->sv_u.sv_array))
 #define HvFILL(hv)	((XPVHV*)  SvANY(hv))->xhv_fill
 #define HvMAX(hv)	((XPVHV*)  SvANY(hv))->xhv_max
 #define HvRITER(hv)	(*Perl_hv_riter_p(aTHX_ (HV*)(hv)))

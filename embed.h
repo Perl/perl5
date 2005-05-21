@@ -1241,7 +1241,6 @@
 #ifdef PERL_CORE
 #define asIV			S_asIV
 #define asUV			S_asUV
-#define new_xiv			S_new_xiv
 #define new_xnv			S_new_xnv
 #define new_xpv			S_new_xpv
 #define new_xpviv		S_new_xpviv
@@ -1253,8 +1252,6 @@
 #define new_xpvgv		S_new_xpvgv
 #define new_xpvlv		S_new_xpvlv
 #define new_xpvbm		S_new_xpvbm
-#define new_xrv			S_new_xrv
-#define del_xiv			S_del_xiv
 #define del_xnv			S_del_xnv
 #define del_xpv			S_del_xpv
 #define del_xpviv		S_del_xpviv
@@ -1266,7 +1263,6 @@
 #define del_xpvgv		S_del_xpvgv
 #define del_xpvlv		S_del_xpvlv
 #define del_xpvbm		S_del_xpvbm
-#define del_xrv			S_del_xrv
 #define sv_unglob		S_sv_unglob
 #define not_a_number		S_not_a_number
 #define visit			S_visit
@@ -3189,7 +3185,6 @@
 #ifdef PERL_CORE
 #define asIV(a)			S_asIV(aTHX_ a)
 #define asUV(a)			S_asUV(aTHX_ a)
-#define new_xiv()		S_new_xiv(aTHX)
 #define new_xnv()		S_new_xnv(aTHX)
 #define new_xpv()		S_new_xpv(aTHX)
 #define new_xpviv()		S_new_xpviv(aTHX)
@@ -3201,8 +3196,6 @@
 #define new_xpvgv()		S_new_xpvgv(aTHX)
 #define new_xpvlv()		S_new_xpvlv(aTHX)
 #define new_xpvbm()		S_new_xpvbm(aTHX)
-#define new_xrv()		S_new_xrv(aTHX)
-#define del_xiv(a)		S_del_xiv(aTHX_ a)
 #define del_xnv(a)		S_del_xnv(aTHX_ a)
 #define del_xpv(a)		S_del_xpv(aTHX_ a)
 #define del_xpviv(a)		S_del_xpviv(aTHX_ a)
@@ -3214,7 +3207,6 @@
 #define del_xpvgv(a)		S_del_xpvgv(aTHX_ a)
 #define del_xpvlv(a)		S_del_xpvlv(aTHX_ a)
 #define del_xpvbm(a)		S_del_xpvbm(aTHX_ a)
-#define del_xrv(a)		S_del_xrv(aTHX_ a)
 #define sv_unglob(a)		S_sv_unglob(aTHX_ a)
 #define not_a_number(a)		S_not_a_number(aTHX_ a)
 #define visit(a,b,c)		S_visit(aTHX_ a,b,c)

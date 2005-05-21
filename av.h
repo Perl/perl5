@@ -9,7 +9,6 @@
  */
 
 struct xpvav {
-    char*	xav_array;      /* pointer to first array element */
     SSize_t	xav_fill;       /* Index of last element present */
     SSize_t	xav_max;        /* max index for which array has space */
     IV		xof_off;	/* ptr is incremented by offset */
@@ -56,7 +55,7 @@ Same as C<av_len()>.  Deprecated, use C<av_len()> instead.
 
 #define Nullav Null(AV*)
 
-#define AvARRAY(av)	((SV**)((XPVAV*)  SvANY(av))->xav_array)
+#define AvARRAY(av)	((av)->sv_u.sv_array)
 #define AvALLOC(av)	((XPVAV*)  SvANY(av))->xav_alloc
 #define AvMAX(av)	((XPVAV*)  SvANY(av))->xav_max
 #define AvFILLp(av)	((XPVAV*)  SvANY(av))->xav_fill

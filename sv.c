@@ -523,7 +523,7 @@ Perl_sv_free_arenas(pTHX)
 {
     SV* sva;
     SV* svanext;
-    XPV *arena, *arenanext;
+    void *arena, *arenanext;
 
     /* Free arenas here, but be careful about fake ones.  (We assume
        contiguity of the fake ones with the corresponding real ones.) */
@@ -537,92 +537,78 @@ Perl_sv_free_arenas(pTHX)
 	    Safefree((void *)sva);
     }
 
-    for (arena = PL_xiv_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
-	Safefree(arena);
-    }
-    PL_xiv_arenaroot = 0;
-    PL_xiv_root = 0;
-
     for (arena = PL_xnv_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
+	arenanext = *(void **)arena;
 	Safefree(arena);
     }
     PL_xnv_arenaroot = 0;
     PL_xnv_root = 0;
 
-    for (arena = PL_xrv_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
-	Safefree(arena);
-    }
-    PL_xrv_arenaroot = 0;
-    PL_xrv_root = 0;
-
     for (arena = PL_xpv_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
+	arenanext = *(void **)arena;
 	Safefree(arena);
     }
     PL_xpv_arenaroot = 0;
     PL_xpv_root = 0;
 
-    for (arena = (XPV*)PL_xpviv_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
+    for (arena = PL_xpviv_arenaroot; arena; arena = arenanext) {
+	arenanext = *(void **)arena;
 	Safefree(arena);
     }
     PL_xpviv_arenaroot = 0;
     PL_xpviv_root = 0;
 
-    for (arena = (XPV*)PL_xpvnv_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
+    for (arena = PL_xpvnv_arenaroot; arena; arena = arenanext) {
+	arenanext = *(void **)arena;
 	Safefree(arena);
     }
     PL_xpvnv_arenaroot = 0;
     PL_xpvnv_root = 0;
 
-    for (arena = (XPV*)PL_xpvcv_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
+    for (arena = PL_xpvcv_arenaroot; arena; arena = arenanext) {
+	arenanext = *(void **)arena;
 	Safefree(arena);
     }
     PL_xpvcv_arenaroot = 0;
     PL_xpvcv_root = 0;
 
-    for (arena = (XPV*)PL_xpvav_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
+    for (arena = PL_xpvav_arenaroot; arena; arena = arenanext) {
+	arenanext = *(void **)arena;
 	Safefree(arena);
     }
     PL_xpvav_arenaroot = 0;
     PL_xpvav_root = 0;
 
-    for (arena = (XPV*)PL_xpvhv_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
+    for (arena = PL_xpvhv_arenaroot; arena; arena = arenanext) {
+	arenanext = *(void **)arena;
 	Safefree(arena);
     }
     PL_xpvhv_arenaroot = 0;
     PL_xpvhv_root = 0;
 
-    for (arena = (XPV*)PL_xpvmg_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
+    for (arena = PL_xpvmg_arenaroot; arena; arena = arenanext) {
+	arenanext = *(void **)arena;
 	Safefree(arena);
     }
     PL_xpvmg_arenaroot = 0;
     PL_xpvmg_root = 0;
 
-    for (arena = (XPV*)PL_xpvgv_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
+    for (arena = PL_xpvgv_arenaroot; arena; arena = arenanext) {
+	arenanext = *(void **)arena;
 	Safefree(arena);
     }
     PL_xpvgv_arenaroot = 0;
     PL_xpvgv_root = 0;
 
-    for (arena = (XPV*)PL_xpvlv_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
+    for (arena = PL_xpvlv_arenaroot; arena; arena = arenanext) {
+	arenanext = *(void **)arena;
 	Safefree(arena);
     }
     PL_xpvlv_arenaroot = 0;
     PL_xpvlv_root = 0;
 
-    for (arena = (XPV*)PL_xpvbm_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
+    for (arena = PL_xpvbm_arenaroot; arena; arena = arenanext) {
+	arenanext = *(void **)arena;
 	Safefree(arena);
     }
     PL_xpvbm_arenaroot = 0;
@@ -1139,53 +1125,6 @@ Perl_report_uninit(pTHX_ SV* uninit_sv)
 		    "", "", "");
 }
 
-
-/* allocate another arena's worth of struct xrv */
-
-STATIC void
-S_more_xrv(pTHX)
-{
-    XRV* xrv;
-    XRV* xrvend;
-    XPV *ptr;
-    New(712, ptr, PERL_ARENA_SIZE/sizeof(XPV), XPV);
-    ptr->xpv_pv = (char*)PL_xrv_arenaroot;
-    PL_xrv_arenaroot = ptr;
-
-    xrv = (XRV*) ptr;
-    xrvend = &xrv[PERL_ARENA_SIZE / sizeof(XRV) - 1];
-    xrv += (sizeof(XPV) - 1) / sizeof(XRV) + 1;
-    PL_xrv_root = xrv;
-    while (xrv < xrvend) {
-	xrv->xrv_rv = (SV*)(xrv + 1);
-	xrv++;
-    }
-    xrv->xrv_rv = 0;
-}
-
-/* allocate another arena's worth of IV bodies */
-
-STATIC void
-S_more_xiv(pTHX)
-{
-    IV* xiv;
-    IV* xivend;
-    XPV* ptr;
-    New(705, ptr, PERL_ARENA_SIZE/sizeof(XPV), XPV);
-    ptr->xpv_pv = (char*)PL_xiv_arenaroot;	/* linked list of xiv arenas */
-    PL_xiv_arenaroot = ptr;			/* to keep Purify happy */
-
-    xiv = (IV*) ptr;
-    xivend = &xiv[PERL_ARENA_SIZE / sizeof(IV) - 1];
-    xiv += (sizeof(XPV) - 1) / sizeof(IV) + 1;	/* fudge by size of XPV */
-    PL_xiv_root = xiv;
-    while (xiv < xivend) {
-	*(IV**)xiv = (IV *)(xiv + 1);
-	xiv++;
-    }
-    *(IV**)xiv = 0;
-}
-
 /* allocate another arena's worth of NV bodies */
 
 STATIC void
@@ -1193,9 +1132,9 @@ S_more_xnv(pTHX)
 {
     NV* xnv;
     NV* xnvend;
-    XPV *ptr;
-    New(711, ptr, PERL_ARENA_SIZE/sizeof(XPV), XPV);
-    ptr->xpv_pv = (char*)PL_xnv_arenaroot;
+    void *ptr;
+    New(711, ptr, PERL_ARENA_SIZE/sizeof(NV), NV);
+    *((void **) ptr) = (void *)PL_xnv_arenaroot;
     PL_xnv_arenaroot = ptr;
 
     xnv = (NV*) ptr;
@@ -1217,16 +1156,16 @@ S_more_xpv(pTHX)
     XPV* xpv;
     XPV* xpvend;
     New(713, xpv, PERL_ARENA_SIZE/sizeof(XPV), XPV);
-    xpv->xpv_pv = (char*)PL_xpv_arenaroot;
+    *((XPV**)xpv) = PL_xpv_arenaroot;
     PL_xpv_arenaroot = xpv;
 
     xpvend = &xpv[PERL_ARENA_SIZE / sizeof(XPV) - 1];
     PL_xpv_root = ++xpv;
     while (xpv < xpvend) {
-	xpv->xpv_pv = (char*)(xpv + 1);
+	*((XPV**)xpv) = xpv + 1;
 	xpv++;
     }
-    xpv->xpv_pv = 0;
+    *((XPV**)xpv) = 0;
 }
 
 /* allocate another arena's worth of struct xpviv */
@@ -1237,16 +1176,16 @@ S_more_xpviv(pTHX)
     XPVIV* xpviv;
     XPVIV* xpvivend;
     New(714, xpviv, PERL_ARENA_SIZE/sizeof(XPVIV), XPVIV);
-    xpviv->xpv_pv = (char*)PL_xpviv_arenaroot;
+    *((XPVIV**)xpviv) = PL_xpviv_arenaroot;
     PL_xpviv_arenaroot = xpviv;
 
     xpvivend = &xpviv[PERL_ARENA_SIZE / sizeof(XPVIV) - 1];
     PL_xpviv_root = ++xpviv;
     while (xpviv < xpvivend) {
-	xpviv->xpv_pv = (char*)(xpviv + 1);
+	*((XPVIV**)xpviv) = xpviv + 1;
 	xpviv++;
     }
-    xpviv->xpv_pv = 0;
+    *((XPVIV**)xpviv) = 0;
 }
 
 /* allocate another arena's worth of struct xpvnv */
@@ -1257,16 +1196,16 @@ S_more_xpvnv(pTHX)
     XPVNV* xpvnv;
     XPVNV* xpvnvend;
     New(715, xpvnv, PERL_ARENA_SIZE/sizeof(XPVNV), XPVNV);
-    xpvnv->xpv_pv = (char*)PL_xpvnv_arenaroot;
+    *((XPVNV**)xpvnv) = PL_xpvnv_arenaroot;
     PL_xpvnv_arenaroot = xpvnv;
 
     xpvnvend = &xpvnv[PERL_ARENA_SIZE / sizeof(XPVNV) - 1];
     PL_xpvnv_root = ++xpvnv;
     while (xpvnv < xpvnvend) {
-	xpvnv->xpv_pv = (char*)(xpvnv + 1);
+	*((XPVNV**)xpvnv) = xpvnv + 1;
 	xpvnv++;
     }
-    xpvnv->xpv_pv = 0;
+    *((XPVNV**)xpvnv) = 0;
 }
 
 /* allocate another arena's worth of struct xpvcv */
@@ -1277,16 +1216,16 @@ S_more_xpvcv(pTHX)
     XPVCV* xpvcv;
     XPVCV* xpvcvend;
     New(716, xpvcv, PERL_ARENA_SIZE/sizeof(XPVCV), XPVCV);
-    xpvcv->xpv_pv = (char*)PL_xpvcv_arenaroot;
+    *((XPVCV**)xpvcv) = PL_xpvcv_arenaroot;
     PL_xpvcv_arenaroot = xpvcv;
 
     xpvcvend = &xpvcv[PERL_ARENA_SIZE / sizeof(XPVCV) - 1];
     PL_xpvcv_root = ++xpvcv;
     while (xpvcv < xpvcvend) {
-	xpvcv->xpv_pv = (char*)(xpvcv + 1);
+	*((XPVCV**)xpvcv) = xpvcv + 1;
 	xpvcv++;
     }
-    xpvcv->xpv_pv = 0;
+    *((XPVCV**)xpvcv) = 0;
 }
 
 /* allocate another arena's worth of struct xpvav */
@@ -1297,16 +1236,16 @@ S_more_xpvav(pTHX)
     XPVAV* xpvav;
     XPVAV* xpvavend;
     New(717, xpvav, PERL_ARENA_SIZE/sizeof(XPVAV), XPVAV);
-    xpvav->xav_array = (char*)PL_xpvav_arenaroot;
+    *((XPVAV**)xpvav) = PL_xpvav_arenaroot;
     PL_xpvav_arenaroot = xpvav;
 
     xpvavend = &xpvav[PERL_ARENA_SIZE / sizeof(XPVAV) - 1];
     PL_xpvav_root = ++xpvav;
     while (xpvav < xpvavend) {
-	xpvav->xav_array = (char*)(xpvav + 1);
+	*((XPVAV**)xpvav) = xpvav + 1;
 	xpvav++;
     }
-    xpvav->xav_array = 0;
+    *((XPVAV**)xpvav) = 0;
 }
 
 /* allocate another arena's worth of struct xpvhv */
@@ -1317,16 +1256,16 @@ S_more_xpvhv(pTHX)
     XPVHV* xpvhv;
     XPVHV* xpvhvend;
     New(718, xpvhv, PERL_ARENA_SIZE/sizeof(XPVHV), XPVHV);
-    xpvhv->xhv_array = (char*)PL_xpvhv_arenaroot;
+    *((XPVHV**)xpvhv) = PL_xpvhv_arenaroot;
     PL_xpvhv_arenaroot = xpvhv;
 
     xpvhvend = &xpvhv[PERL_ARENA_SIZE / sizeof(XPVHV) - 1];
     PL_xpvhv_root = ++xpvhv;
     while (xpvhv < xpvhvend) {
-	xpvhv->xhv_array = (char*)(xpvhv + 1);
+	*((XPVHV**)xpvhv) = xpvhv + 1;
 	xpvhv++;
     }
-    xpvhv->xhv_array = 0;
+    *((XPVHV**)xpvhv) = 0;
 }
 
 /* allocate another arena's worth of struct xpvmg */
@@ -1337,16 +1276,16 @@ S_more_xpvmg(pTHX)
     XPVMG* xpvmg;
     XPVMG* xpvmgend;
     New(719, xpvmg, PERL_ARENA_SIZE/sizeof(XPVMG), XPVMG);
-    xpvmg->xpv_pv = (char*)PL_xpvmg_arenaroot;
+    *((XPVMG**)xpvmg) = PL_xpvmg_arenaroot;
     PL_xpvmg_arenaroot = xpvmg;
 
     xpvmgend = &xpvmg[PERL_ARENA_SIZE / sizeof(XPVMG) - 1];
     PL_xpvmg_root = ++xpvmg;
     while (xpvmg < xpvmgend) {
-	xpvmg->xpv_pv = (char*)(xpvmg + 1);
+	*((XPVMG**)xpvmg) = xpvmg + 1;
 	xpvmg++;
     }
-    xpvmg->xpv_pv = 0;
+    *((XPVMG**)xpvmg) = 0;
 }
 
 /* allocate another arena's worth of struct xpvgv */
@@ -1357,16 +1296,16 @@ S_more_xpvgv(pTHX)
     XPVGV* xpvgv;
     XPVGV* xpvgvend;
     New(720, xpvgv, PERL_ARENA_SIZE/sizeof(XPVGV), XPVGV);
-    xpvgv->xpv_pv = (char*)PL_xpvgv_arenaroot;
+    *((XPVGV**)xpvgv) = PL_xpvgv_arenaroot;
     PL_xpvgv_arenaroot = xpvgv;
 
     xpvgvend = &xpvgv[PERL_ARENA_SIZE / sizeof(XPVGV) - 1];
     PL_xpvgv_root = ++xpvgv;
     while (xpvgv < xpvgvend) {
-	xpvgv->xpv_pv = (char*)(xpvgv + 1);
+	*((XPVGV**)xpvgv) = xpvgv + 1;
 	xpvgv++;
     }
-    xpvgv->xpv_pv = 0;
+    *((XPVGV**)xpvgv) = 0;
 }
 
 /* allocate another arena's worth of struct xpvlv */
@@ -1377,16 +1316,16 @@ S_more_xpvlv(pTHX)
     XPVLV* xpvlv;
     XPVLV* xpvlvend;
     New(720, xpvlv, PERL_ARENA_SIZE/sizeof(XPVLV), XPVLV);
-    xpvlv->xpv_pv = (char*)PL_xpvlv_arenaroot;
+    *((XPVLV**)xpvlv) = PL_xpvlv_arenaroot;
     PL_xpvlv_arenaroot = xpvlv;
 
     xpvlvend = &xpvlv[PERL_ARENA_SIZE / sizeof(XPVLV) - 1];
     PL_xpvlv_root = ++xpvlv;
     while (xpvlv < xpvlvend) {
-	xpvlv->xpv_pv = (char*)(xpvlv + 1);
+	*((XPVLV**)xpvlv) = xpvlv + 1;
 	xpvlv++;
     }
-    xpvlv->xpv_pv = 0;
+    *((XPVLV**)xpvlv) = 0;
 }
 
 /* allocate another arena's worth of struct xpvbm */
@@ -1397,72 +1336,16 @@ S_more_xpvbm(pTHX)
     XPVBM* xpvbm;
     XPVBM* xpvbmend;
     New(721, xpvbm, PERL_ARENA_SIZE/sizeof(XPVBM), XPVBM);
-    xpvbm->xpv_pv = (char*)PL_xpvbm_arenaroot;
+    *((XPVBM**)xpvbm) = PL_xpvbm_arenaroot;
     PL_xpvbm_arenaroot = xpvbm;
 
     xpvbmend = &xpvbm[PERL_ARENA_SIZE / sizeof(XPVBM) - 1];
     PL_xpvbm_root = ++xpvbm;
     while (xpvbm < xpvbmend) {
-	xpvbm->xpv_pv = (char*)(xpvbm + 1);
+	*((XPVBM**)xpvbm) = xpvbm + 1;
 	xpvbm++;
     }
-    xpvbm->xpv_pv = 0;
-}
-
-/* grab a new struct xrv from the free list, allocating more if necessary */
-
-STATIC XRV*
-S_new_xrv(pTHX)
-{
-    XRV* xrv;
-    LOCK_SV_MUTEX;
-    if (!PL_xrv_root)
-	S_more_xrv(aTHX);
-    xrv = PL_xrv_root;
-    PL_xrv_root = (XRV*)xrv->xrv_rv;
-    UNLOCK_SV_MUTEX;
-    return xrv;
-}
-
-/* return a struct xrv to the free list */
-
-STATIC void
-S_del_xrv(pTHX_ XRV *p)
-{
-    LOCK_SV_MUTEX;
-    p->xrv_rv = (SV*)PL_xrv_root;
-    PL_xrv_root = p;
-    UNLOCK_SV_MUTEX;
-}
-
-/* grab a new IV body from the free list, allocating more if necessary */
-
-STATIC XPVIV*
-S_new_xiv(pTHX)
-{
-    IV* xiv;
-    LOCK_SV_MUTEX;
-    if (!PL_xiv_root)
-	S_more_xiv(aTHX);
-    xiv = PL_xiv_root;
-    /*
-     * See comment in more_xiv() -- RAM.
-     */
-    PL_xiv_root = *(IV**)xiv;
-    UNLOCK_SV_MUTEX;
-    return (XPVIV*)((char*)xiv - STRUCT_OFFSET(XPVIV, xiv_iv));
-}
-
-/* return an IV body to the free list */
-
-STATIC void
-S_del_xiv(pTHX_ XPVIV *p)
-{
-    IV* xiv = (IV*)((char*)(p) + STRUCT_OFFSET(XPVIV, xiv_iv));
-    LOCK_SV_MUTEX;
-    *(IV**)xiv = PL_xiv_root;
-    PL_xiv_root = xiv;
-    UNLOCK_SV_MUTEX;
+    *((XPVBM**)xpvbm) = 0;
 }
 
 /* grab a new NV body from the free list, allocating more if necessary */
@@ -1502,7 +1385,7 @@ S_new_xpv(pTHX)
     if (!PL_xpv_root)
 	S_more_xpv(aTHX);
     xpv = PL_xpv_root;
-    PL_xpv_root = (XPV*)xpv->xpv_pv;
+    PL_xpv_root = *(XPV**)xpv;
     UNLOCK_SV_MUTEX;
     return xpv;
 }
@@ -1513,7 +1396,7 @@ STATIC void
 S_del_xpv(pTHX_ XPV *p)
 {
     LOCK_SV_MUTEX;
-    p->xpv_pv = (char*)PL_xpv_root;
+    *(XPV**)p = PL_xpv_root;
     PL_xpv_root = p;
     UNLOCK_SV_MUTEX;
 }
@@ -1528,7 +1411,7 @@ S_new_xpviv(pTHX)
     if (!PL_xpviv_root)
 	S_more_xpviv(aTHX);
     xpviv = PL_xpviv_root;
-    PL_xpviv_root = (XPVIV*)xpviv->xpv_pv;
+    PL_xpviv_root = *(XPVIV**)xpviv;
     UNLOCK_SV_MUTEX;
     return xpviv;
 }
@@ -1539,7 +1422,7 @@ STATIC void
 S_del_xpviv(pTHX_ XPVIV *p)
 {
     LOCK_SV_MUTEX;
-    p->xpv_pv = (char*)PL_xpviv_root;
+    *(XPVIV**)p = PL_xpviv_root;
     PL_xpviv_root = p;
     UNLOCK_SV_MUTEX;
 }
@@ -1554,7 +1437,7 @@ S_new_xpvnv(pTHX)
     if (!PL_xpvnv_root)
 	S_more_xpvnv(aTHX);
     xpvnv = PL_xpvnv_root;
-    PL_xpvnv_root = (XPVNV*)xpvnv->xpv_pv;
+    PL_xpvnv_root = *(XPVNV**)xpvnv;
     UNLOCK_SV_MUTEX;
     return xpvnv;
 }
@@ -1565,7 +1448,7 @@ STATIC void
 S_del_xpvnv(pTHX_ XPVNV *p)
 {
     LOCK_SV_MUTEX;
-    p->xpv_pv = (char*)PL_xpvnv_root;
+    *(XPVNV**)p = PL_xpvnv_root;
     PL_xpvnv_root = p;
     UNLOCK_SV_MUTEX;
 }
@@ -1580,7 +1463,7 @@ S_new_xpvcv(pTHX)
     if (!PL_xpvcv_root)
 	S_more_xpvcv(aTHX);
     xpvcv = PL_xpvcv_root;
-    PL_xpvcv_root = (XPVCV*)xpvcv->xpv_pv;
+    PL_xpvcv_root = *(XPVCV**)xpvcv;
     UNLOCK_SV_MUTEX;
     return xpvcv;
 }
@@ -1591,7 +1474,7 @@ STATIC void
 S_del_xpvcv(pTHX_ XPVCV *p)
 {
     LOCK_SV_MUTEX;
-    p->xpv_pv = (char*)PL_xpvcv_root;
+    *(XPVCV**)p = PL_xpvcv_root;
     PL_xpvcv_root = p;
     UNLOCK_SV_MUTEX;
 }
@@ -1606,7 +1489,7 @@ S_new_xpvav(pTHX)
     if (!PL_xpvav_root)
 	S_more_xpvav(aTHX);
     xpvav = PL_xpvav_root;
-    PL_xpvav_root = (XPVAV*)xpvav->xav_array;
+    PL_xpvav_root = *(XPVAV**)xpvav;
     UNLOCK_SV_MUTEX;
     return xpvav;
 }
@@ -1617,7 +1500,7 @@ STATIC void
 S_del_xpvav(pTHX_ XPVAV *p)
 {
     LOCK_SV_MUTEX;
-    p->xav_array = (char*)PL_xpvav_root;
+    *(XPVAV**)p = PL_xpvav_root;
     PL_xpvav_root = p;
     UNLOCK_SV_MUTEX;
 }
@@ -1632,7 +1515,7 @@ S_new_xpvhv(pTHX)
     if (!PL_xpvhv_root)
 	S_more_xpvhv(aTHX);
     xpvhv = PL_xpvhv_root;
-    PL_xpvhv_root = (XPVHV*)xpvhv->xhv_array;
+    PL_xpvhv_root = *(XPVHV**)xpvhv;
     UNLOCK_SV_MUTEX;
     return xpvhv;
 }
@@ -1643,7 +1526,7 @@ STATIC void
 S_del_xpvhv(pTHX_ XPVHV *p)
 {
     LOCK_SV_MUTEX;
-    p->xhv_array = (char*)PL_xpvhv_root;
+    *(XPVHV**)p = PL_xpvhv_root;
     PL_xpvhv_root = p;
     UNLOCK_SV_MUTEX;
 }
@@ -1658,7 +1541,7 @@ S_new_xpvmg(pTHX)
     if (!PL_xpvmg_root)
 	S_more_xpvmg(aTHX);
     xpvmg = PL_xpvmg_root;
-    PL_xpvmg_root = (XPVMG*)xpvmg->xpv_pv;
+    PL_xpvmg_root = *(XPVMG**)xpvmg;
     UNLOCK_SV_MUTEX;
     return xpvmg;
 }
@@ -1669,7 +1552,7 @@ STATIC void
 S_del_xpvmg(pTHX_ XPVMG *p)
 {
     LOCK_SV_MUTEX;
-    p->xpv_pv = (char*)PL_xpvmg_root;
+    *(XPVMG**)p = PL_xpvmg_root;
     PL_xpvmg_root = p;
     UNLOCK_SV_MUTEX;
 }
@@ -1684,7 +1567,7 @@ S_new_xpvgv(pTHX)
     if (!PL_xpvgv_root)
 	S_more_xpvgv(aTHX);
     xpvgv = PL_xpvgv_root;
-    PL_xpvgv_root = (XPVGV*)xpvgv->xpv_pv;
+    PL_xpvgv_root = *(XPVGV**)xpvgv;
     UNLOCK_SV_MUTEX;
     return xpvgv;
 }
@@ -1695,7 +1578,7 @@ STATIC void
 S_del_xpvgv(pTHX_ XPVGV *p)
 {
     LOCK_SV_MUTEX;
-    p->xpv_pv = (char*)PL_xpvgv_root;
+    *(XPVGV**)p = PL_xpvgv_root;
     PL_xpvgv_root = p;
     UNLOCK_SV_MUTEX;
 }
@@ -1710,7 +1593,7 @@ S_new_xpvlv(pTHX)
     if (!PL_xpvlv_root)
 	S_more_xpvlv(aTHX);
     xpvlv = PL_xpvlv_root;
-    PL_xpvlv_root = (XPVLV*)xpvlv->xpv_pv;
+    PL_xpvlv_root = *(XPVLV**)xpvlv;
     UNLOCK_SV_MUTEX;
     return xpvlv;
 }
@@ -1721,7 +1604,7 @@ STATIC void
 S_del_xpvlv(pTHX_ XPVLV *p)
 {
     LOCK_SV_MUTEX;
-    p->xpv_pv = (char*)PL_xpvlv_root;
+    *(XPVLV**)p = PL_xpvlv_root;
     PL_xpvlv_root = p;
     UNLOCK_SV_MUTEX;
 }
@@ -1736,7 +1619,7 @@ S_new_xpvbm(pTHX)
     if (!PL_xpvbm_root)
 	S_more_xpvbm(aTHX);
     xpvbm = PL_xpvbm_root;
-    PL_xpvbm_root = (XPVBM*)xpvbm->xpv_pv;
+    PL_xpvbm_root = *(XPVBM**)xpvbm;
     UNLOCK_SV_MUTEX;
     return xpvbm;
 }
@@ -1747,7 +1630,7 @@ STATIC void
 S_del_xpvbm(pTHX_ XPVBM *p)
 {
     LOCK_SV_MUTEX;
-    p->xpv_pv = (char*)PL_xpvbm_root;
+    *(XPVBM**)p = PL_xpvbm_root;
     PL_xpvbm_root = p;
     UNLOCK_SV_MUTEX;
 }
@@ -1757,14 +1640,8 @@ S_del_xpvbm(pTHX_ XPVBM *p)
 
 #ifdef PURIFY
 
-#define new_XIV()	my_safemalloc(sizeof(XPVIV))
-#define del_XIV(p)	my_safefree(p)
-
 #define new_XNV()	my_safemalloc(sizeof(XPVNV))
 #define del_XNV(p)	my_safefree(p)
-
-#define new_XRV()	my_safemalloc(sizeof(XRV))
-#define del_XRV(p)	my_safefree(p)
 
 #define new_XPV()	my_safemalloc(sizeof(XPV))
 #define del_XPV(p)	my_safefree(p)
@@ -1798,14 +1675,8 @@ S_del_xpvbm(pTHX_ XPVBM *p)
 
 #else /* !PURIFY */
 
-#define new_XIV()	(void*)new_xiv()
-#define del_XIV(p)	del_xiv((XPVIV*) p)
-
 #define new_XNV()	(void*)new_xnv()
 #define del_XNV(p)	del_xnv((XPVNV*) p)
-
-#define new_XRV()	(void*)new_xrv()
-#define del_XRV(p)	del_xrv((XRV*) p)
 
 #define new_XPV()	(void*)new_xpv()
 #define del_XPV(p)	del_xpv((XPV *)p)
@@ -1887,7 +1758,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	break;
     case SVt_IV:
 	iv	= SvIVX(sv);
-	del_XIV(SvANY(sv));
 	if (mt == SVt_NV)
 	    mt = SVt_PVNV;
 	else if (mt < SVt_PVIV)
@@ -1901,7 +1771,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	break;
     case SVt_RV:
 	pv	= (char*)SvRV(sv);
-	del_XRV(SvANY(sv));
 	break;
     case SVt_PV:
 	pv	= SvPVX(sv);
@@ -1957,7 +1826,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     case SVt_NULL:
 	Perl_croak(aTHX_ "Can't upgrade to undef");
     case SVt_IV:
-	SvANY(sv) = new_XIV();
+	SvANY(sv) = (XPVIV*)((char*)&(sv->sv_u.sv_iv) - STRUCT_OFFSET(XPVIV, xiv_iv));
 	SvIV_set(sv, iv);
 	break;
     case SVt_NV:
@@ -1965,7 +1834,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	SvNV_set(sv, nv);
 	break;
     case SVt_RV:
-	SvANY(sv) = new_XRV();
+	SvANY(sv) = &sv->sv_u.sv_rv;
 	SvRV_set(sv, (SV*)pv);
 	break;
     case SVt_PVHV:
@@ -3911,9 +3780,9 @@ Perl_sv_2bool(pTHX_ register SV *sv)
     if (SvPOKp(sv)) {
 	register XPV* Xpvtmp;
 	if ((Xpvtmp = (XPV*)SvANY(sv)) &&
-		(*Xpvtmp->xpv_pv > '0' ||
+		(*sv->sv_u.sv_pv > '0' ||
 		Xpvtmp->xpv_cur > 1 ||
-		(Xpvtmp->xpv_cur && *Xpvtmp->xpv_pv != '0')))
+		(Xpvtmp->xpv_cur && *sv->sv_u.sv_pv != '0')))
 	    return 1;
 	else
 	    return 0;
@@ -5870,6 +5739,15 @@ Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
 #else
     StructCopy(nsv,sv,SV);
 #endif
+    /* Currently could join these into one piece of pointer arithmetic, but
+       it would be unclear.  */
+    if(SvTYPE(sv) == SVt_IV)
+	SvANY(sv)
+	    = (XPVIV*)((char*)&(sv->sv_u.sv_iv) - STRUCT_OFFSET(XPVIV, xiv_iv));
+    else if (SvTYPE(sv) == SVt_RV) {
+	SvANY(sv) = &sv->sv_u.sv_rv;
+    }
+	
 
 #ifdef PERL_COPY_ON_WRITE
     if (SvIsCOW_normal(nsv)) {
@@ -6084,13 +5962,11 @@ Perl_sv_clear(pTHX_ register SV *sv)
     case SVt_NULL:
 	break;
     case SVt_IV:
-	del_XIV(SvANY(sv));
 	break;
     case SVt_NV:
 	del_XNV(SvANY(sv));
 	break;
     case SVt_RV:
-	del_XRV(SvANY(sv));
 	break;
     case SVt_PV:
 	del_XPV(SvANY(sv));
@@ -8146,7 +8022,7 @@ Perl_sv_true(pTHX_ register SV *sv)
 	const register XPV* tXpv;
 	if ((tXpv = (XPV*)SvANY(sv)) &&
 		(tXpv->xpv_cur > 1 ||
-		(tXpv->xpv_cur && *tXpv->xpv_pv != '0')))
+		(tXpv->xpv_cur && *sv->sv_u.sv_pv != '0')))
 	    return 1;
 	else
 	    return 0;
@@ -10833,7 +10709,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvANY(dstr)	= NULL;
 	break;
     case SVt_IV:
-	SvANY(dstr)	= new_XIV();
+	SvANY(dstr)	= (XPVIV*)((char*)&(dstr->sv_u.sv_iv) - STRUCT_OFFSET(XPVIV, xiv_iv));
 	SvIV_set(dstr, SvIVX(sstr));
 	break;
     case SVt_NV:
@@ -10841,7 +10717,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvNV_set(dstr, SvNVX(sstr));
 	break;
     case SVt_RV:
-	SvANY(dstr)	= new_XRV();
+	SvANY(dstr)	= &(dstr->sv_u.sv_rv);
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	break;
     case SVt_PV:
@@ -11040,11 +10916,14 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 		STRLEN i = 0;
 		XPVHV *dxhv = (XPVHV*)SvANY(dstr);
 		XPVHV *sxhv = (XPVHV*)SvANY(sstr);
-		Newz(0, dxhv->xhv_array,
+		char *darray;
+		/* FIXME - surely this doesn't need to be zeroed?  */
+		Newz(0, darray,
 		     PERL_HV_ARRAY_ALLOC_BYTES(dxhv->xhv_max+1), char);
+		HvARRAY(dstr) = (HE**)darray;
 		while (i <= sxhv->xhv_max) {
-		    ((HE**)dxhv->xhv_array)[i]
-			= he_dup(((HE**)sxhv->xhv_array)[i],
+		    HvARRAY(dstr)[i]
+			= he_dup(HvARRAY(sstr)[i],
 				 (bool)!!HvSHAREKEYS(sstr), param);
 		    ++i;
 		}
@@ -11728,12 +11607,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     param->proto_perl = proto_perl;
 
     /* arena roots */
-    PL_xiv_arenaroot	= NULL;
-    PL_xiv_root		= NULL;
     PL_xnv_arenaroot	= NULL;
     PL_xnv_root		= NULL;
-    PL_xrv_arenaroot	= NULL;
-    PL_xrv_root		= NULL;
     PL_xpv_arenaroot	= NULL;
     PL_xpv_root		= NULL;
     PL_xpviv_arenaroot	= NULL;

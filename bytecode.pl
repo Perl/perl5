@@ -212,13 +212,18 @@ struct byteloader_fdata {
     int	idx;
 };
 
+struct byteloader_pv_state {
+    char			*pvx;
+    XPV				xpv;
+};
+
 struct byteloader_state {
     struct byteloader_fdata	*bs_fdata;
     SV				*bs_sv;
     void			**bs_obj_list;
     int				bs_obj_list_fill;
     int				bs_ix;
-    XPV				bs_pv;
+    struct byteloader_pv_state	bs_pv;
     int				bs_iv_overflows;
 };
 
@@ -361,7 +366,7 @@ ldsv		bstate->bs_sv				svindex
 ldop		PL_op					opindex
 stsv		bstate->bs_sv				U32		s
 stop		PL_op					U32		s
-stpv		bstate->bs_pv.xpv_pv			U32		x
+stpv		bstate->bs_pv.pvx			U32		x
 ldspecsv	bstate->bs_sv				U8		x
 ldspecsvx	bstate->bs_sv				U8		x
 newsv		bstate->bs_sv				U8		x
@@ -370,8 +375,8 @@ newop		PL_op					U8		x
 newopx		PL_op					U16		x
 newopn		PL_op					U8		x
 newpv		none					PV
-pv_cur		bstate->bs_pv.xpv_cur			STRLEN
-pv_free		bstate->bs_pv				none		x
+pv_cur		bstate->bs_pv.xpv.xpv_cur		STRLEN
+pv_free		bstate->bs_pv.pvx			none		x
 sv_upgrade	bstate->bs_sv				U8		x
 sv_refcnt	SvREFCNT(bstate->bs_sv)			U32
 sv_refcnt_add	SvREFCNT(bstate->bs_sv)			I32		x

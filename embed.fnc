@@ -1180,7 +1180,6 @@ s	|SV*	|save_scalar_at	|SV **sptr
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 s	|IV	|asIV		|SV* sv
 s	|UV	|asUV		|SV* sv
-s	|XPVIV*	|new_xiv
 s	|XPVNV*	|new_xnv
 s	|XPV*	|new_xpv
 s	|XPVIV*	|new_xpviv
@@ -1192,8 +1191,6 @@ s	|XPVMG*	|new_xpvmg
 s	|XPVGV*	|new_xpvgv
 s	|XPVLV*	|new_xpvlv
 s	|XPVBM*	|new_xpvbm
-s	|XRV*	|new_xrv
-s	|void	|del_xiv	|XPVIV* p
 s	|void	|del_xnv	|XPVNV* p
 s	|void	|del_xpv	|XPV* p
 s	|void	|del_xpviv	|XPVIV* p
@@ -1205,7 +1202,6 @@ s	|void	|del_xpvmg	|XPVMG* p
 s	|void	|del_xpvgv	|XPVGV* p
 s	|void	|del_xpvlv	|XPVLV* p
 s	|void	|del_xpvbm	|XPVBM* p
-s	|void	|del_xrv	|XRV* p
 s	|void	|sv_unglob	|SV* sv
 s	|void	|not_a_number	|SV *sv
 s	|I32	|visit		|SVFUNC_t f|U32 flags|U32 mask
