@@ -1324,6 +1324,7 @@ lib/ExtUtils/CBuilder/Base.pm	Base class for ExtUtils::CBuilder methods
 lib/ExtUtils/CBuilder/Platform/aix.pm	CBuilder methods for AIX
 lib/ExtUtils/CBuilder/Platform/cygwin.pm	CBuilder methods for cygwin
 lib/ExtUtils/CBuilder/Platform/darwin.pm	CBuilder methods for darwin
+lib/ExtUtils/CBuilder/Platform/dec_osf.pm	CBuilder methods for OSF
 lib/ExtUtils/CBuilder/Platform/os2.pm	CBuilder methods for OS/2
 lib/ExtUtils/CBuilder/Platform/Unix.pm	CBuilder methods for Unix
 lib/ExtUtils/CBuilder/Platform/VMS.pm	CBuilder methods for VMS
