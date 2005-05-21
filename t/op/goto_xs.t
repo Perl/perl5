@@ -20,7 +20,7 @@ BEGIN { $| = 1; }
 eval 'require Fcntl'
   or do { print "1..0\n# Fcntl unavailable, can't test XS goto.\n"; exit 0 };
 
-print "1..10\n";
+print "1..11\n";
 
 # We don't know what symbols are defined in platform X's system headers.
 # We don't even want to guess, because some platform out there will
@@ -96,3 +96,20 @@ sub call_goto_ref { &goto_ref; }
 
 $ret = call_goto_ref($VALID);
 print(($ret == $value) ? "ok 10\n" : "not ok 10\n# ($ret != $value)\n");
+
+
+# [perl #35878] croak in XS after goto segfaulted
+
+use XS::APItest qw(mycroak);
+
+sub goto_croak { goto &mycroak }
+
+{
+    my $e;
+    for (1..4) {
+	eval { goto_croak("boo$_\n") };
+	$e .= $@;
+    }
+    print $e eq "boo1\nboo2\nboo3\nboo4\n" ? "ok 11\n" : "not ok 11\n";
+}
+

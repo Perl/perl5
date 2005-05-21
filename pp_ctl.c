@@ -2343,6 +2343,7 @@ PP(pp_goto)
 	    SAVETMPS;
 	    SAVEFREESV(cv); /* later, undo the 'avoid premature free' hack */
 	    if (CvXSUB(cv)) {
+		OP* retop = cx->blk_sub.retop;
 		if (reified) {
 		    I32 index;
 		    for (index=0; index<items; index++)
@@ -2367,17 +2368,15 @@ PP(pp_goto)
 		    SV **newsp;
 		    I32 gimme;
 
+		    /* XS subs don't have a CxSUB, so pop it */
+		    POPBLOCK(cx, PL_curpm);
 		    /* Push a mark for the start of arglist */
 		    PUSHMARK(mark);
 		    PUTBACK;
 		    (void)(*CvXSUB(cv))(aTHX_ cv);
-		    /* Pop the current context like a decent sub should */
-		    POPBLOCK(cx, PL_curpm);
-		    /* Do _not_ use PUTBACK, keep the XSUB's return stack! */
 		}
 		LEAVE;
-		assert(CxTYPE(cx) == CXt_SUB);
-		return cx->blk_sub.retop;
+		return retop;
 	    }
 	    else {
 		AV* padlist = CvPADLIST(cv);
