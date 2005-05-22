@@ -159,7 +159,7 @@ Test::Simple upgraded to version 0.54
 Text::Wrap upgraded to version 2001.09293, to fix a bug when wrap() was
 called with a non-space separator.
 
-item *
+=item *
 
 threads::shared upgraded to version 0.93
 
