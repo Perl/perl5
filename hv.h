@@ -42,9 +42,9 @@ struct xpvhv_aux {
 /* hash structure: */
 /* This structure must match the beginning of struct xpvmg in sv.h. */
 struct xpvhv {
+    IV		for_rent;
     STRLEN	xhv_fill;	/* how full xhv_array currently is */
     STRLEN	xhv_max;	/* subscript of last element of xhv_array */
-    IV		for_rent;
     union {
 	NV	xnvu_nv;	/* numeric value, if any */
 	struct {

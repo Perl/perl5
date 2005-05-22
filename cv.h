@@ -1,7 +1,7 @@
 /*    cv.h
  *
  *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
- *    2000, 2001, 2002, 2003, 2004, by Larry Wall and others
+ *    2000, 2001, 2002, 2003, 2004, 2005, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -12,9 +12,9 @@
  * in sv.h  */
 
 struct xpvcv {
+    IV		awaiting_redevelopment;	/* integer value */
     STRLEN	xpv_cur;	/* length of xp_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
-    IV		xof_off;	/* integer value */
     union {
 	NV	xnvu_nv;	/* numeric value, if any */
 	struct {
@@ -213,3 +213,13 @@ should print 123:
 
 =cut
 */
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */

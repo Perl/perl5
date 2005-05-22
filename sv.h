@@ -275,26 +275,27 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVpav_REIFY 	0x80000000	/* can become real */
 
 struct xpv {
+    IV		xpv_dummy;	/* This isn't allocated. */
     STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
 };
 
 struct xpviv {
+    IV		xiv_iv;		/* integer value or pv offset */
     STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
-    IV		xiv_iv;		/* integer value or pv offset */
 };
 
 struct xpvuv {
+    UV		xuv_uv;		/* unsigned value or pv offset */
     STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
-    UV		xuv_uv;		/* unsigned value or pv offset */
 };
 
 struct xpvnv {
+    IV		xiv_iv;		/* integer value or pv offset */
     STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
-    IV		xiv_iv;		/* integer value or pv offset */
     union {
 	NV	xnvu_nv;	/* numeric value, if any */
 	struct {
@@ -311,9 +312,9 @@ struct xpvnv {
 
 /* These structure must match the beginning of struct xpvhv in hv.h. */
 struct xpvmg {
+    IV		xiv_iv;		/* integer value or pv offset */
     STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
-    IV		xiv_iv;		/* integer value or pv offset */
     union {
 	NV	xnvu_nv;	/* numeric value, if any */
 	struct {
@@ -329,9 +330,9 @@ struct xpvmg {
 };
 
 struct xpvlv {
+    IV		xiv_iv;		/* integer value or pv offset */
     STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
-    IV		xiv_iv;		/* integer value or pv offset */
     union {
 	NV	xnvu_nv;	/* numeric value, if any */
 	struct {
@@ -360,9 +361,9 @@ struct xpvlv {
 };
 
 struct xpvgv {
+    IV		xiv_iv;		/* integer value or pv offset */
     STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
-    IV		xiv_iv;		/* integer value or pv offset */
     union {
 	NV	xnvu_nv;	/* numeric value, if any */
 	struct {
@@ -384,9 +385,9 @@ struct xpvgv {
 };
 
 struct xpvbm {
+    IV		xiv_iv;		/* integer value or pv offset */
     STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
-    IV		xiv_iv;		/* integer value or pv offset */
     union {
 	NV	xnvu_nv;	/* numeric value, if any */
 	struct {
@@ -410,9 +411,9 @@ struct xpvbm {
 typedef U16 cv_flags_t;
 
 struct xpvfm {
+    IV		xiv_iv;		/* integer value or pv offset */
     STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
-    IV		xiv_iv;		/* integer value or pv offset */
     union {
 	NV	xnvu_nv;	/* numeric value, if any */
 	struct {
@@ -444,9 +445,9 @@ struct xpvfm {
 };
 
 struct xpvio {
+    IV		xiv_iv;		/* integer value or pv offset */
     STRLEN	xpv_cur;	/* length of sv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
-    IV		xiv_iv;		/* integer value or pv offset */
     union {
 	NV	xnvu_nv;	/* numeric value, if any */
 	struct {
@@ -1487,3 +1488,13 @@ struct clone_params {
   UV  flags;
   PerlInterpreter *proto_perl;
 };
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */
