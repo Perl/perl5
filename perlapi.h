@@ -651,10 +651,6 @@ END_EXTERN_C
 #define PL_warnhook		(*Perl_Iwarnhook_ptr(aTHX))
 #undef  PL_widesyscalls
 #define PL_widesyscalls		(*Perl_Iwidesyscalls_ptr(aTHX))
-#undef  PL_xiv_arenaroot
-#define PL_xiv_arenaroot	(*Perl_Ixiv_arenaroot_ptr(aTHX))
-#undef  PL_xiv_root
-#define PL_xiv_root		(*Perl_Ixiv_root_ptr(aTHX))
 #undef  PL_xnv_arenaroot
 #define PL_xnv_arenaroot	(*Perl_Ixnv_arenaroot_ptr(aTHX))
 #undef  PL_xnv_root
@@ -699,10 +695,6 @@ END_EXTERN_C
 #define PL_xpvnv_arenaroot	(*Perl_Ixpvnv_arenaroot_ptr(aTHX))
 #undef  PL_xpvnv_root
 #define PL_xpvnv_root		(*Perl_Ixpvnv_root_ptr(aTHX))
-#undef  PL_xrv_arenaroot
-#define PL_xrv_arenaroot	(*Perl_Ixrv_arenaroot_ptr(aTHX))
-#undef  PL_xrv_root
-#define PL_xrv_root		(*Perl_Ixrv_root_ptr(aTHX))
 #undef  PL_yycharp
 #define PL_yycharp		(*Perl_Iyycharp_ptr(aTHX))
 #undef  PL_yylvalp

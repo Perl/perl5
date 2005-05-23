@@ -1872,8 +1872,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	    AvALLOC(sv)	= 0;
 	    AvARYLEN(sv)= 0;
 	    AvREAL_only(sv);
-	    SvIV_set(sv, 0);
-	    SvNV_set(sv, 0.0);
 	}
 	/* to here.  */
 	/* XXX? Only SVt_NULL is ever upgraded to AV or HV?  */
@@ -10877,8 +10875,6 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvANY(dstr)	= new_XPVAV();
 	SvCUR_set(dstr, SvCUR(sstr));
 	SvLEN_set(dstr, SvLEN(sstr));
-	SvIV_set(dstr, SvIVX(sstr));
-	SvNV_set(dstr, SvNVX(sstr));
 	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
 	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
 	AvARYLEN((AV*)dstr) = sv_dup_inc(AvARYLEN((AV*)sstr), param);
@@ -10913,8 +10909,6 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvANY(dstr)	= new_XPVHV();
 	SvCUR_set(dstr, SvCUR(sstr));
 	SvLEN_set(dstr, SvLEN(sstr));
-	SvIV_set(dstr, SvIVX(sstr));
-	SvNV_set(dstr, SvNVX(sstr));
 	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
 	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
 	{

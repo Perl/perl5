@@ -436,8 +436,6 @@
 #define PL_uudmap		(vTHX->Iuudmap)
 #define PL_warnhook		(vTHX->Iwarnhook)
 #define PL_widesyscalls		(vTHX->Iwidesyscalls)
-#define PL_xiv_arenaroot	(vTHX->Ixiv_arenaroot)
-#define PL_xiv_root		(vTHX->Ixiv_root)
 #define PL_xnv_arenaroot	(vTHX->Ixnv_arenaroot)
 #define PL_xnv_root		(vTHX->Ixnv_root)
 #define PL_xpv_arenaroot	(vTHX->Ixpv_arenaroot)
@@ -460,8 +458,6 @@
 #define PL_xpvmg_root		(vTHX->Ixpvmg_root)
 #define PL_xpvnv_arenaroot	(vTHX->Ixpvnv_arenaroot)
 #define PL_xpvnv_root		(vTHX->Ixpvnv_root)
-#define PL_xrv_arenaroot	(vTHX->Ixrv_arenaroot)
-#define PL_xrv_root		(vTHX->Ixrv_root)
 #define PL_yycharp		(vTHX->Iyycharp)
 #define PL_yylvalp		(vTHX->Iyylvalp)
 
@@ -744,8 +740,6 @@
 #define PL_Iuudmap		PL_uudmap
 #define PL_Iwarnhook		PL_warnhook
 #define PL_Iwidesyscalls	PL_widesyscalls
-#define PL_Ixiv_arenaroot	PL_xiv_arenaroot
-#define PL_Ixiv_root		PL_xiv_root
 #define PL_Ixnv_arenaroot	PL_xnv_arenaroot
 #define PL_Ixnv_root		PL_xnv_root
 #define PL_Ixpv_arenaroot	PL_xpv_arenaroot
@@ -768,8 +762,6 @@
 #define PL_Ixpvmg_root		PL_xpvmg_root
 #define PL_Ixpvnv_arenaroot	PL_xpvnv_arenaroot
 #define PL_Ixpvnv_root		PL_xpvnv_root
-#define PL_Ixrv_arenaroot	PL_xrv_arenaroot
-#define PL_Ixrv_root		PL_xrv_root
 #define PL_Iyycharp		PL_yycharp
 #define PL_Iyylvalp		PL_yylvalp
 

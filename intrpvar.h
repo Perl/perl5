@@ -249,10 +249,7 @@ PERLVARI(Ish_path_compat,	const char *,	SH_PATH)/* full path of shell */
 
 PERLVAR(Isighandlerp,	Sighandler_t)
 
-PERLVAR(Ixiv_arenaroot,	XPV*)		/* list of allocated xiv areas */
-PERLVAR(Ixiv_root,	IV *)		/* free xiv list */
 PERLVAR(Ixnv_root,	NV *)		/* free xnv list */
-PERLVAR(Ixrv_root,	XRV *)		/* free xrv list */
 PERLVAR(Ixpv_root,	xpv_allocated *)	/* free xpv list */
 PERLVAR(Ixpviv_root,	XPVIV *)	/* free xpviv list */
 PERLVAR(Ixpvnv_root,	XPVNV *)	/* free xpvnv list */
@@ -432,7 +429,6 @@ PERLVAR(Iptr_table,	PTR_TBL_t*)
 PERLVARI(Ibeginav_save, AV*, Nullav)	/* save BEGIN{}s when compiling */
 
 PERLVAR(Ixnv_arenaroot,	XPV*)		/* list of allocated xnv areas */
-PERLVAR(Ixrv_arenaroot,	XPV*)		/* list of allocated xrv areas */
 PERLVAR(Ixpv_arenaroot,	xpv_allocated *)	/* list of allocated xpv areas */
 PERLVAR(Ixpviv_arenaroot,XPVIV*)	/* list of allocated xpviv areas */
 PERLVAR(Ixpvnv_arenaroot,XPVNV*)	/* list of allocated xpvnv areas */
