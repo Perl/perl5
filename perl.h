@@ -199,7 +199,11 @@
 #endif
 
 #ifndef PERL_UNUSED_DECL
-#  define PERL_UNUSED_DECL __attribute__unused__
+#  ifdef HASATTRIBUTE_UNUSED
+#    define PERL_UNUSED_DECL __attribute__unused__
+#  else
+#    define PERL_UNUSED_DECL
+#  endif
 #endif
  
 /* gcc -Wall:

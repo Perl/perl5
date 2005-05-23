@@ -210,7 +210,11 @@ PERL_EXPORT_C void PerlIO_clone(pTHX_ PerlInterpreter *proto,
 
 START_EXTERN_C
 #ifndef __attribute__format__
-#  define __attribute__format__(x,y,z) __attribute__((format(x,y,z)))
+#  ifdef HASATTRIBUTE_FORMAT
+#    define __attribute__format__(x,y,z) __attribute__((format(x,y,z)))
+#  else
+#    define __attribute__format__(x,y,z)
+#  endif
 #endif
 #ifndef PerlIO_init
 PERL_EXPORT_C void PerlIO_init(pTHX);
