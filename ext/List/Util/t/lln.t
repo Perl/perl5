@@ -25,6 +25,6 @@ is(!!looks_like_number("Inf"),	    $] >= 5.006001,	'Inf');
 is(!!looks_like_number("Infinity"), $] >= 5.008,	'Infinity');
 is(!!looks_like_number("NaN"),	    $] >= 5.008,	'NaN');
 is(!!looks_like_number("foo"),	    '',			'foo');
-is(!!looks_like_number(undef),	    $] < 5.009002,	'undef');
+is(!!looks_like_number(undef),	    $] < 5.008005,	'undef');
 
 # We should copy some of perl core tests like t/base/num.t here

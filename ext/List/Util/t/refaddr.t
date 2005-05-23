@@ -29,8 +29,9 @@ foreach $v (undef, 10, 'string') {
 }
 
 foreach $r ({}, \$t, [], \*F, sub {}) {
-  my $addr = $r + 0;
   my $n = "$r";
+  $n =~ /0x(\w+)/;
+  my $addr = do { local $^W; hex $1 };
   is( refaddr($r), $addr, $n);
 
   my $obj = bless $r, 'FooBar';

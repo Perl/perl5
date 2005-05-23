@@ -1,3 +1,15 @@
+1.17 -- Mon May 23 08:55:26 CDT 2005
+
+Bug Fixes
+  * Update XS code to declare PERL_UNUSED_DECL conditionally
+
+1.16 -- Fri May 20 10:22:49 CDT 2005
+
+Bug Fixes
+  * Change to refaddr.t test to avoid false errors on some 64 bit platforms
+  * Fix all perl only tests to work when in the core build environment
+  * Fix looks like number test to work for 5.8.5 and above
+ 
 1.15 -- Fri May 13 11:01:15 CDT 2005
 
 Bug Fixes
