@@ -1635,7 +1635,7 @@ Perl_hv_undef(pTHX_ HV *hv)
 }
 
 struct xpvhv_aux*
-S_hv_auxinit(aTHX) {
+S_hv_auxinit(pTHX) {
     struct xpvhv_aux *iter;
 
     New(0, iter, 1, struct xpvhv_aux);
