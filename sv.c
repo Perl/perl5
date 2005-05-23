@@ -1872,6 +1872,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	    AvALLOC(sv)	= 0;
 	    AvARYLEN(sv)= 0;
 	    AvREAL_only(sv);
+	    SvIVX(sv) = 0;
 	}
 	/* to here.  */
 	/* XXX? Only SVt_NULL is ever upgraded to AV or HV?  */
