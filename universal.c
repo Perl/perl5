@@ -176,7 +176,11 @@ XS(XS_version_stringify);
 XS(XS_version_numify);
 XS(XS_version_vcmp);
 XS(XS_version_boolean);
+#ifdef HASATTRIBUTE_NORETURN
+XS(XS_version_noop) __attribute__noreturn__;
+#else
 XS(XS_version_noop);
+#endif
 XS(XS_version_is_alpha);
 XS(XS_version_qv);
 XS(XS_utf8_is_utf8);
@@ -534,25 +538,16 @@ XS(XS_version_boolean)
 
 XS(XS_version_noop)
 {
-     dXSARGS;
-     if (items < 1)
-	  Perl_croak(aTHX_ "Usage: version::noop(lobj, ...)");
-     {
-	  SV *	lobj = Nullsv;
-
-	  if (sv_derived_from(ST(0), "version")) {
-	       SV *tmp = SvRV(ST(0));
-	       lobj = tmp;
-	  }
-	  else
-	       Perl_croak(aTHX_ "lobj is not of type version");
-
-	  {
-	       Perl_croak(aTHX_ "operation not supported with version object");
-	  }
-
-     }
-     XSRETURN_EMPTY;
+    dXSARGS;
+    if (items < 1)
+	Perl_croak(aTHX_ "Usage: version::noop(lobj, ...)");
+    if (sv_derived_from(ST(0), "version"))
+	Perl_croak(aTHX_ "operation not supported with version object");
+    else
+	Perl_croak(aTHX_ "lobj is not of type version");
+#ifndef HASATTRIBUTE_NORETURN
+    XSRETURN_EMPTY;
+#endif
 }
 
 XS(XS_version_is_alpha)
@@ -925,6 +920,7 @@ XS(XS_Internals_hash_seed)
     /* Using dXSARGS would also have dITEM and dSP,
      * which define 2 unused local variables.  */
     dAXMARK;
+    (void)mark;
     XSRETURN_UV(PERL_HASH_SEED);
 }
 
@@ -933,6 +929,7 @@ XS(XS_Internals_rehash_seed)
     /* Using dXSARGS would also have dITEM and dSP,
      * which define 2 unused local variables.  */
     dAXMARK;
+    (void)mark;
     XSRETURN_UV(PL_rehash_seed);
 }
 
