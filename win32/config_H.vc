@@ -1548,17 +1548,40 @@
  */
 #define HAS_ACCESS		/**/
 
-/* HASATTRIBUTE:
- *	This symbol indicates the C compiler can check for function attributes,
- *	such as printf formats. This is normally only supported by GNU cc.
+/* HASATTRIBUTE_FORMAT:
+ *	Can we handle GCC attribute for checking printf-style formats
  */
-/*#define HASATTRIBUTE 	/**/
-#ifndef HASATTRIBUTE
-#ifdef __attribute__
-#undef __attribute__
-#endif
-#define __attribute__(_arg_)
-#endif
+/*#define HASATTRIBUTE_FORMAT	/**/
+
+/* HASATTRIBUTE_MALLOC:
+ *	Can we handle GCC attribute for malloc-style functions.
+ */
+/*#define HASATTRIBUTE_MALLOC	/**/
+
+/* HASATTRIBUTE_NONNULL:
+ *	Can we handle GCC attribute for nonnull function parms.
+ */
+/*#define HASATTRIBUTE_NONNULL	/**/
+
+/* HASATTRIBUTE_NORETURN:
+ *	Can we handle GCC attribute for functions that do not return
+ */
+/*#define HASATTRIBUTE_NORETURN	/**/
+
+/* HASATTRIBUTE_PURE:
+ *	Can we handle GCC attribute for pure functions
+ */
+/*#define HASATTRIBUTE_PURE	/**/
+
+/* HASATTRIBUTE_UNUSED:
+ *	Can we handle GCC attribute for unused variables and arguments
+ */
+/*#define HASATTRIBUTE_UNUSED	/**/
+
+/* HASATTRIBUTE_WARN_UNUSED_RESULT:
+ *	Can we handle GCC attribute for warning on unused results
+ */
+/*#define HASATTRIBUTE_WARN_UNUSED_RESULT	/**/
 
 /* HAS_CRYPT:
  *	This symbol, if defined, indicates that the crypt routine is available
