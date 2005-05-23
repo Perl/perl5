@@ -1075,7 +1075,7 @@ static int store_blessed(pTHX_ stcxt_t *cxt, SV *sv, int type, HV *pkg);
 
 typedef int (*sv_store_t)(pTHX_ stcxt_t *cxt, SV *sv);
 
-static const sv_store_t sv_store[] = {
+static sv_store_t sv_store[] = {
 	(sv_store_t)store_ref,		/* svis_REF */
 	(sv_store_t)store_scalar,	/* svis_SCALAR */
 	(sv_store_t)store_array,	/* svis_ARRAY */
