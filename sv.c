@@ -1153,19 +1153,19 @@ S_more_xnv(pTHX)
 STATIC void
 S_more_xpv(pTHX)
 {
-    XPV* xpv;
-    XPV* xpvend;
-    New(713, xpv, PERL_ARENA_SIZE/sizeof(XPV), XPV);
-    *((XPV**)xpv) = PL_xpv_arenaroot;
+    xpv_allocated* xpv;
+    xpv_allocated* xpvend;
+    New(713, xpv, PERL_ARENA_SIZE/sizeof(xpv_allocated), xpv_allocated);
+    *((xpv_allocated**)xpv) = PL_xpv_arenaroot;
     PL_xpv_arenaroot = xpv;
 
-    xpvend = &xpv[PERL_ARENA_SIZE / sizeof(XPV) - 1];
+    xpvend = &xpv[PERL_ARENA_SIZE / sizeof(xpv_allocated) - 1];
     PL_xpv_root = ++xpv;
     while (xpv < xpvend) {
-	*((XPV**)xpv) = xpv + 1;
+	*((xpv_allocated**)xpv) = xpv + 1;
 	xpv++;
     }
-    *((XPV**)xpv) = 0;
+    *((xpv_allocated**)xpv) = 0;
 }
 
 /* allocate another arena's worth of struct xpviv */
@@ -1233,19 +1233,20 @@ S_more_xpvcv(pTHX)
 STATIC void
 S_more_xpvav(pTHX)
 {
-    XPVAV* xpvav;
-    XPVAV* xpvavend;
-    New(717, xpvav, PERL_ARENA_SIZE/sizeof(XPVAV), XPVAV);
-    *((XPVAV**)xpvav) = PL_xpvav_arenaroot;
+    xpvav_allocated* xpvav;
+     xpvav_allocated* xpvavend;
+    New(717, xpvav, PERL_ARENA_SIZE/sizeof(xpvav_allocated),
+	xpvav_allocated);
+    *((xpvav_allocated**)xpvav) = PL_xpvav_arenaroot;
     PL_xpvav_arenaroot = xpvav;
 
-    xpvavend = &xpvav[PERL_ARENA_SIZE / sizeof(XPVAV) - 1];
+    xpvavend = &xpvav[PERL_ARENA_SIZE / sizeof(xpvav_allocated) - 1];
     PL_xpvav_root = ++xpvav;
     while (xpvav < xpvavend) {
-	*((XPVAV**)xpvav) = xpvav + 1;
+	*((xpvav_allocated**)xpvav) = xpvav + 1;
 	xpvav++;
     }
-    *((XPVAV**)xpvav) = 0;
+    *((xpvav_allocated**)xpvav) = 0;
 }
 
 /* allocate another arena's worth of struct xpvhv */
@@ -1253,19 +1254,20 @@ S_more_xpvav(pTHX)
 STATIC void
 S_more_xpvhv(pTHX)
 {
-    XPVHV* xpvhv;
-    XPVHV* xpvhvend;
-    New(718, xpvhv, PERL_ARENA_SIZE/sizeof(XPVHV), XPVHV);
-    *((XPVHV**)xpvhv) = PL_xpvhv_arenaroot;
+    xpvhv_allocated* xpvhv;
+    xpvhv_allocated* xpvhvend;
+    New(718, xpvhv, PERL_ARENA_SIZE/sizeof(xpvhv_allocated),
+	xpvhv_allocated);
+    *((xpvhv_allocated**)xpvhv) = PL_xpvhv_arenaroot;
     PL_xpvhv_arenaroot = xpvhv;
 
-    xpvhvend = &xpvhv[PERL_ARENA_SIZE / sizeof(XPVHV) - 1];
+    xpvhvend = &xpvhv[PERL_ARENA_SIZE / sizeof(xpvhv_allocated) - 1];
     PL_xpvhv_root = ++xpvhv;
     while (xpvhv < xpvhvend) {
-	*((XPVHV**)xpvhv) = xpvhv + 1;
+	*((xpvhv_allocated**)xpvhv) = xpvhv + 1;
 	xpvhv++;
     }
-    *((XPVHV**)xpvhv) = 0;
+    *((xpvhv_allocated**)xpvhv) = 0;
 }
 
 /* allocate another arena's worth of struct xpvmg */
@@ -1380,14 +1382,20 @@ S_del_xnv(pTHX_ XPVNV *p)
 STATIC XPV*
 S_new_xpv(pTHX)
 {
-    XPV* xpv;
+    xpv_allocated* xpv;
     LOCK_SV_MUTEX;
     if (!PL_xpv_root)
 	S_more_xpv(aTHX);
     xpv = PL_xpv_root;
-    PL_xpv_root = *(XPV**)xpv;
+    PL_xpv_root = *(xpv_allocated**)xpv;
     UNLOCK_SV_MUTEX;
-    return xpv;
+    /* If xpv_allocated is the same structure as XPV then the two OFFSETs
+       sum to zero, and the pointer is unchanged. If the allocated structure
+       is smaller (no initial IV actually allocated) then the net effect is
+       to subtract the size of the IV from the pointer, to return a new pointer
+       as if an initial IV were actually allocated.  */
+    return (XPV*)((char*)xpv - STRUCT_OFFSET(XPV, xpv_cur)
+		  + STRUCT_OFFSET(xpv_allocated, xpv_cur));
 }
 
 /* return a struct xpv to the free list */
@@ -1395,9 +1403,12 @@ S_new_xpv(pTHX)
 STATIC void
 S_del_xpv(pTHX_ XPV *p)
 {
+    xpv_allocated* xpv
+	= (xpv_allocated*)((char*)(p) + STRUCT_OFFSET(XPV, xpv_cur)
+			   - STRUCT_OFFSET(xpv_allocated, xpv_cur));
     LOCK_SV_MUTEX;
-    *(XPV**)p = PL_xpv_root;
-    PL_xpv_root = p;
+    *(xpv_allocated**)xpv = PL_xpv_root;
+    PL_xpv_root = xpv;
     UNLOCK_SV_MUTEX;
 }
 
@@ -1484,14 +1495,15 @@ S_del_xpvcv(pTHX_ XPVCV *p)
 STATIC XPVAV*
 S_new_xpvav(pTHX)
 {
-    XPVAV* xpvav;
+    xpvav_allocated* xpvav;
     LOCK_SV_MUTEX;
     if (!PL_xpvav_root)
 	S_more_xpvav(aTHX);
     xpvav = PL_xpvav_root;
-    PL_xpvav_root = *(XPVAV**)xpvav;
+    PL_xpvav_root = *(xpvav_allocated**)xpvav;
     UNLOCK_SV_MUTEX;
-    return xpvav;
+    return (XPVAV*)((char*)xpvav - STRUCT_OFFSET(XPVAV, xav_fill)
+		    + STRUCT_OFFSET(xpvav_allocated, xav_fill));
 }
 
 /* return a struct xpvav to the free list */
@@ -1499,9 +1511,12 @@ S_new_xpvav(pTHX)
 STATIC void
 S_del_xpvav(pTHX_ XPVAV *p)
 {
+    xpvav_allocated* xpvav
+	= (xpvav_allocated*)((char*)(p) + STRUCT_OFFSET(XPVAV, xav_fill)
+			     - STRUCT_OFFSET(xpvav_allocated, xav_fill));
     LOCK_SV_MUTEX;
-    *(XPVAV**)p = PL_xpvav_root;
-    PL_xpvav_root = p;
+    *(xpvav_allocated**)xpvav = PL_xpvav_root;
+    PL_xpvav_root = xpvav;
     UNLOCK_SV_MUTEX;
 }
 
@@ -1510,14 +1525,15 @@ S_del_xpvav(pTHX_ XPVAV *p)
 STATIC XPVHV*
 S_new_xpvhv(pTHX)
 {
-    XPVHV* xpvhv;
+    xpvhv_allocated* xpvhv;
     LOCK_SV_MUTEX;
     if (!PL_xpvhv_root)
 	S_more_xpvhv(aTHX);
     xpvhv = PL_xpvhv_root;
-    PL_xpvhv_root = *(XPVHV**)xpvhv;
+    PL_xpvhv_root = *(xpvhv_allocated**)xpvhv;
     UNLOCK_SV_MUTEX;
-    return xpvhv;
+    return (XPVHV*)((char*)xpvhv - STRUCT_OFFSET(XPVHV, xhv_fill)
+		    + STRUCT_OFFSET(xpvhv_allocated, xhv_fill));
 }
 
 /* return a struct xpvhv to the free list */
@@ -1525,9 +1541,12 @@ S_new_xpvhv(pTHX)
 STATIC void
 S_del_xpvhv(pTHX_ XPVHV *p)
 {
+    xpvhv_allocated* xpvhv
+	= (xpvhv_allocated*)((char*)(p) + STRUCT_OFFSET(XPVHV, xhv_fill)
+			     - STRUCT_OFFSET(xpvhv_allocated, xhv_fill));
     LOCK_SV_MUTEX;
-    *(XPVHV**)p = PL_xpvhv_root;
-    PL_xpvhv_root = p;
+    *(xpvhv_allocated**)xpvhv = PL_xpvhv_root;
+    PL_xpvhv_root = xpvhv;
     UNLOCK_SV_MUTEX;
 }
 

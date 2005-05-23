@@ -280,6 +280,8 @@ struct xpv {
     STRLEN	xpv_len;	/* allocated size */
 };
 
+typedef struct xpv xpv_allocated;
+
 struct xpviv {
     IV		xiv_iv;		/* integer value or pv offset */
     STRLEN	xpv_cur;	/* length of sv_pv as a C string */

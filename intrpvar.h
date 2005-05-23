@@ -253,12 +253,12 @@ PERLVAR(Ixiv_arenaroot,	XPV*)		/* list of allocated xiv areas */
 PERLVAR(Ixiv_root,	IV *)		/* free xiv list */
 PERLVAR(Ixnv_root,	NV *)		/* free xnv list */
 PERLVAR(Ixrv_root,	XRV *)		/* free xrv list */
-PERLVAR(Ixpv_root,	XPV *)		/* free xpv list */
+PERLVAR(Ixpv_root,	xpv_allocated *)	/* free xpv list */
 PERLVAR(Ixpviv_root,	XPVIV *)	/* free xpviv list */
 PERLVAR(Ixpvnv_root,	XPVNV *)	/* free xpvnv list */
 PERLVAR(Ixpvcv_root,	XPVCV *)	/* free xpvcv list */
-PERLVAR(Ixpvav_root,	XPVAV *)	/* free xpvav list */
-PERLVAR(Ixpvhv_root,	XPVHV *)	/* free xpvhv list */
+PERLVAR(Ixpvav_root,	xpvav_allocated *)	/* free xpvav list */
+PERLVAR(Ixpvhv_root,	xpvhv_allocated *)	/* free xpvhv list */
 PERLVAR(Ixpvmg_root,	XPVMG *)	/* free xpvmg list */
 PERLVAR(Ixpvgv_root,	XPVGV *)	/* free xpvgv list */
 PERLVAR(Ixpvlv_root,	XPVLV *)	/* free xpvlv list */
@@ -433,12 +433,12 @@ PERLVARI(Ibeginav_save, AV*, Nullav)	/* save BEGIN{}s when compiling */
 
 PERLVAR(Ixnv_arenaroot,	XPV*)		/* list of allocated xnv areas */
 PERLVAR(Ixrv_arenaroot,	XPV*)		/* list of allocated xrv areas */
-PERLVAR(Ixpv_arenaroot,	XPV*)		/* list of allocated xpv areas */
+PERLVAR(Ixpv_arenaroot,	xpv_allocated *)	/* list of allocated xpv areas */
 PERLVAR(Ixpviv_arenaroot,XPVIV*)	/* list of allocated xpviv areas */
 PERLVAR(Ixpvnv_arenaroot,XPVNV*)	/* list of allocated xpvnv areas */
 PERLVAR(Ixpvcv_arenaroot,XPVCV*)	/* list of allocated xpvcv areas */
-PERLVAR(Ixpvav_arenaroot,XPVAV*)	/* list of allocated xpvav areas */
-PERLVAR(Ixpvhv_arenaroot,XPVHV*)	/* list of allocated xpvhv areas */
+PERLVAR(Ixpvav_arenaroot,xpvav_allocated*)	/* list of allocated xpvav areas */
+PERLVAR(Ixpvhv_arenaroot,xpvhv_allocated*)	/* list of allocated xpvhv areas */
 PERLVAR(Ixpvmg_arenaroot,XPVMG*)	/* list of allocated xpvmg areas */
 PERLVAR(Ixpvgv_arenaroot,XPVGV*)	/* list of allocated xpvgv areas */
 PERLVAR(Ixpvlv_arenaroot,XPVLV*)	/* list of allocated xpvlv areas */

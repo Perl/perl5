@@ -26,6 +26,8 @@ struct xpvav {
     HV*		xmg_stash;	/* class package */
 };
 
+typedef struct xpvav xpvav_allocated;
+
 /* SV**	xav_alloc; */
 #define xav_alloc xnv_u.xnv_s.xnv_p1
 /* SV*	xav_arylen; */

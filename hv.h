@@ -63,6 +63,7 @@ struct xpvhv {
 #define xhv_aux xnv_u.xnv_s.xnv_p1
 #define xhv_keys xnv_u.xnv_s.xnv_u2.xnv_i2
 
+typedef struct xpvhv xpvhv_allocated;
 
 /* hash a key */
 /* FYI: This is the "One-at-a-Time" algorithm by Bob Jenkins
