@@ -26,7 +26,26 @@ struct xpvav {
     HV*		xmg_stash;	/* class package */
 };
 
+#if 0
 typedef struct xpvav xpvav_allocated;
+#else
+typedef struct {
+    SSize_t	xav_fill;       /* Index of last element present */
+    SSize_t	xav_max;        /* max index for which array has space */
+    union {
+	NV	xnvu_nv;
+	struct {
+	    void *xnv_p1;	/* pointer to beginning of C array of SVs */
+	    union {
+		void *xnv_p2;
+		IV xnv_i2;
+	    }	xnv_u2;
+	}	xnv_s;
+    }		xnv_u;
+    MAGIC*	xmg_magic;	/* magic for scalar array */
+    HV*		xmg_stash;	/* class package */
+} xpvav_allocated;
+#endif
 
 /* SV**	xav_alloc; */
 #define xav_alloc xnv_u.xnv_s.xnv_p1

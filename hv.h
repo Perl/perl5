@@ -63,7 +63,26 @@ struct xpvhv {
 #define xhv_aux xnv_u.xnv_s.xnv_p1
 #define xhv_keys xnv_u.xnv_s.xnv_u2.xnv_i2
 
+#if 0
 typedef struct xpvhv xpvhv_allocated;
+#else
+typedef struct {
+    STRLEN	xhv_fill;	/* how full xhv_array currently is */
+    STRLEN	xhv_max;	/* subscript of last element of xhv_array */
+    union {
+	NV	xnvu_nv;	/* numeric value, if any */
+	struct {
+	    void *xnv_p1;
+	    union {
+		void *xnv_p2;
+		IV xnv_i2;	/* how many elements in the array */
+	    }	xnv_u2;
+	}	xnv_s;
+    }		xnv_u;
+    MAGIC*	xmg_magic;	/* magic for scalar array */
+    HV*		xmg_stash;	/* class package */
+} xpvhv_allocated;
+#endif
 
 /* hash a key */
 /* FYI: This is the "One-at-a-Time" algorithm by Bob Jenkins
