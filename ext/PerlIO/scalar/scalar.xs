@@ -106,9 +106,8 @@ PerlIOScalar_unread(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
 {
     PerlIOScalar *s = PerlIOSelf(f, PerlIOScalar);
     char *dst = SvGROW(s->var, (STRLEN)s->posn + count);
+    s->posn -= count;
     Move(vbuf, dst + s->posn, count, char);
-    s->posn += count;
-    SvCUR_set(s->var, (STRLEN)s->posn);
     SvPOK_on(s->var);
     return count;
 }

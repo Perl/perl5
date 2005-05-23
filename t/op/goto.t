@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 54;
+plan tests => 56;
 
 our $foo;
 while ($?) {
@@ -428,4 +428,11 @@ a32039();
     is($r, "ok", 'redo and goto');
 }
 
+# goto &foo not allowed in evals
 
+
+sub null { 1 };
+eval 'goto &null';
+like($@, qr/Can't goto subroutine from an eval-string/, 'eval string');
+eval { goto &null };
+like($@, qr/Can't goto subroutine from an eval-block/, 'eval block');

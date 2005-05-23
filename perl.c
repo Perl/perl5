@@ -635,7 +635,6 @@ perl_destruct(pTHXx)
 
         while (i) {
             SV *resv = ary[--i];
-            REGEXP *re = INT2PTR(REGEXP *,SvIVX(resv));
 
             if (SvFLAGS(resv) & SVf_BREAK) {
                 /* this is PL_reg_curpm, already freed
@@ -646,7 +645,8 @@ perl_destruct(pTHXx)
 	    else if(SvREPADTMP(resv)) {
 	      SvREPADTMP_off(resv);
 	    }
-            else {
+            else if(SvIOKp(resv)) {
+		REGEXP *re = INT2PTR(REGEXP *,SvIVX(resv));
                 ReREFCNT_dec(re);
             }
         }
