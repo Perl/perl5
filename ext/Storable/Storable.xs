@@ -86,6 +86,13 @@ typedef double NV;			/* Older perls lack the NV type */
 #endif
 #endif
 
+#ifndef SvRV_set
+#define SvRV_set(sv, val) \
+    STMT_START { \
+        assert(SvTYPE(sv) >=  SVt_RV); \
+        (((XRV*)SvANY(sv))->xrv_rv = (val)); \
+    } STMT_END
+#endif
 
 #ifndef PERL_UNUSED_DECL
 #  ifdef HASATTRIBUTE
@@ -108,10 +115,10 @@ typedef double NV;			/* Older perls lack the NV type */
 #endif
 
 #ifndef HvRITER_set
-#  define HvRITER_set(hv,r)	(*HvRITER(hv) = r)
+#  define HvRITER_set(hv,r)	(HvRITER(hv) = r)
 #endif
 #ifndef HvEITER_set
-#  define HvEITER_set(hv,r)	(*HvEITER(hv) = r)
+#  define HvEITER_set(hv,r)	(HvEITER(hv) = r)
 #endif
 
 #ifndef HvRITER_get
@@ -2460,7 +2467,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 		 */
   
 		for (i = 0; i < len; i++) {
-			char *key;
+			char *key = 0;
 			I32 len;
                         unsigned char flags;
 #ifdef HV_ITERNEXT_WANTPLACEHOLDERS
@@ -3017,7 +3024,7 @@ static int store_hook(
 		   failure, whereas the existing code assumes that it can
 		   safely store a tag zero. So for ptr_tables we store tag+1
 		*/
-		if (fake_tag = ptr_table_fetch(cxt->pseen, xsv))
+		if ((fake_tag = ptr_table_fetch(cxt->pseen, xsv)))
 			goto sv_seen;		/* Avoid moving code too far to the right */
 #else
 		if ((svh = hv_fetch(cxt->hseen, (char *) &xsv, sizeof(xsv), FALSE)))
