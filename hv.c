@@ -828,6 +828,7 @@ S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store)
 	    case PERL_MAGIC_tied:
 	    case PERL_MAGIC_sig:
 		*needs_store = FALSE;
+		return; /* We've set all there is to set. */
 	    }
 	}
 	mg = mg->mg_moremagic;
