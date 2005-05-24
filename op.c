@@ -4178,6 +4178,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     char *aname;
     GV *gv;
     char *ps;
+    STRLEN ps_len;
     register CV *cv=0;
     SV *const_sv;
 
@@ -4185,7 +4186,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
     if (proto) {
 	assert(proto->op_type == OP_CONST);
-	ps = SvPVx(((SVOP*)proto)->op_sv, n_a);
+	ps = SvPVx(((SVOP*)proto)->op_sv, ps_len);
     }
     else
 	ps = Nullch;
@@ -4222,7 +4223,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    cv_ckproto((CV*)gv, NULL, ps);
 	}
 	if (ps)
-	    sv_setpv((SV*)gv, ps);
+	    sv_setpvn((SV*)gv, ps, ps_len);
 	else
 	    sv_setiv((SV*)gv, -1);
 	SvREFCNT_dec(PL_compcv);
@@ -4295,7 +4296,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	SvREFCNT_inc(const_sv);
 	if (cv) {
 	    assert(!CvROOT(cv) && !CvCONST(cv));
-	    sv_setpv((SV*)cv, "");  /* prototype is "" */
+	    sv_setpvn((SV*)cv, "", 0);  /* prototype is "" */
 	    CvXSUBANY(cv).any_ptr = const_sv;
 	    CvXSUB(cv) = const_sv_xsub;
 	    CvCONST_on(cv);
@@ -4381,7 +4382,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 #endif /* USE_5005THREADS */
 
     if (ps)
-	sv_setpv((SV*)cv, ps);
+	sv_setpvn((SV*)cv, ps, ps_len);
 
     if (PL_error_count) {
 	op_free(block);
@@ -4554,7 +4555,7 @@ Perl_newCONSTSUB(pTHX_ HV *stash, char *name, SV *sv)
     cv = newXS(name, const_sv_xsub, savepv(CopFILE(PL_curcop)));
     CvXSUBANY(cv).any_ptr = sv;
     CvCONST_on(cv);
-    sv_setpv((SV*)cv, "");  /* prototype is "" */
+    sv_setpvn((SV*)cv, "", 0);  /* prototype is "" */
 
     if (stash)
 	CopSTASH_free(PL_curcop);

@@ -1048,18 +1048,19 @@ perl_destruct(pTHXx)
     /* As the absolutely last thing, free the non-arena SV for mess() */
 
     if (PL_mess_sv) {
+	/* we know that type == SVt_PVMG */
+
 	/* it could have accumulated taint magic */
-	if (SvTYPE(PL_mess_sv) >= SVt_PVMG) {
-	    MAGIC* mg;
-	    MAGIC* moremagic;
-	    for (mg = SvMAGIC(PL_mess_sv); mg; mg = moremagic) {
-		moremagic = mg->mg_moremagic;
-		if (mg->mg_ptr && mg->mg_type != PERL_MAGIC_regex_global
-						&& mg->mg_len >= 0)
-		    Safefree(mg->mg_ptr);
-		Safefree(mg);
-	    }
+	MAGIC* mg;
+	MAGIC* moremagic;
+	for (mg = SvMAGIC(PL_mess_sv); mg; mg = moremagic) {
+	    moremagic = mg->mg_moremagic;
+	    if (mg->mg_ptr && mg->mg_type != PERL_MAGIC_regex_global
+		&& mg->mg_len >= 0)
+		Safefree(mg->mg_ptr);
+	    Safefree(mg);
 	}
+
 	/* we know that type >= SVt_PV */
 	SvOOK_off(PL_mess_sv);
 	Safefree(SvPVX(PL_mess_sv));
@@ -2264,7 +2265,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	    if (flags & G_KEEPERR)
 		PL_in_eval |= EVAL_KEEPERR;
 	    else
-		sv_setpv(ERRSV,"");
+		sv_setpvn(ERRSV,"",0);
 	}
 	PL_markstack_ptr++;
 
@@ -2283,7 +2284,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 #endif
 	    retval = PL_stack_sp - (PL_stack_base + oldmark);
 	    if (!(flags & G_KEEPERR))
-		sv_setpv(ERRSV,"");
+		sv_setpvn(ERRSV,"",0);
 	    break;
 	case 1:
 	    STATUS_ALL_FAILURE;
@@ -2429,7 +2430,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 #endif
 	retval = PL_stack_sp - (PL_stack_base + oldmark);
 	if (!(flags & G_KEEPERR))
-	    sv_setpv(ERRSV,"");
+	    sv_setpvn(ERRSV,"",0);
 	break;
     case 1:
 	STATUS_ALL_FAILURE;
@@ -4054,7 +4055,6 @@ Perl_init_debugger(pTHX)
     PL_DBgv = gv_fetchpv("DB::DB", GV_ADDMULTI, SVt_PVGV);
     PL_DBline = gv_fetchpv("DB::dbline", GV_ADDMULTI, SVt_PVAV);
     PL_DBsub = gv_HVadd(gv_fetchpv("DB::sub", GV_ADDMULTI, SVt_PVHV));
-    sv_upgrade(GvSV(PL_DBsub), SVt_IV);	/* IVX accessed if PERLDB_SUB_NN */
     PL_DBsingle = GvSV((gv_fetchpv("DB::single", GV_ADDMULTI, SVt_PV)));
     sv_setiv(PL_DBsingle, 0);
     PL_DBtrace = GvSV((gv_fetchpv("DB::trace", GV_ADDMULTI, SVt_PV)));

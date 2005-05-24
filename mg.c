@@ -617,7 +617,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		  if (sys$getmsg(vaxc$errno,&msgdsc.dsc$w_length,&msgdsc,0,0) & 1)
 		       sv_setpvn(sv,msgdsc.dsc$a_pointer,msgdsc.dsc$w_length);
 		  else
-		       sv_setpv(sv,"");
+		       sv_setpvn(sv,"",0);
 	     }
 #else
 #ifdef OS2
@@ -643,7 +643,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		       PerlProc_GetOSError(sv, dwErr);
 		  }
 		  else
-		       sv_setpv(sv, "");
+		       sv_setpvn(sv, "", 0);
 		  SetLastError(dwErr);
 	     }
 #else

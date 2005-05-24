@@ -163,7 +163,7 @@ static void
 S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
 		const char *msg)
 {
-    SV *sv = sv_newmortal(), *esv = sv_newmortal();
+    SV *sv = sv_newmortal();
     if (!(flags & HVhek_FREEKEY)) {
 	sv_setpvn(sv, key, klen);
     }
@@ -175,8 +175,7 @@ S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
     if (flags & HVhek_UTF8) {
 	SvUTF8_on(sv);
     }
-    Perl_sv_setpvf(aTHX_ esv, "Attempt to %s a restricted hash", msg);
-    Perl_croak(aTHX_ SvPVX(esv), sv);
+    Perl_croak(aTHX_ msg, sv);
 }
 
 /* (klen == HEf_SVKEY) is special for MAGICAL hv entries, meaning key slot
@@ -384,7 +383,6 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		  int flags, int action, SV *val, register U32 hash)
 {
     XPVHV* xhv;
-    U32 n_links;
     HE *entry;
     HE **oentry;
     SV *sv;
@@ -629,7 +627,6 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     }
 
     masked_flags = (flags & HVhek_MASK);
-    n_links = 0;
 
 #ifdef DYNAMIC_ENV_FETCH
     if (!xhv->xhv_array /* !HvARRAY(hv) */) entry = Null(HE*);
@@ -639,7 +636,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	/* entry = (HvARRAY(hv))[hash & (I32) HvMAX(hv)]; */
 	entry = ((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     }
-    for (; entry; ++n_links, entry = HeNEXT(entry)) {
+    for (; entry; entry = HeNEXT(entry)) {
 	if (!HeKEY_hek(entry))
 	    continue;
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
@@ -724,8 +721,8 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     if (!entry && SvREADONLY(hv) && !(action & HV_FETCH_ISEXISTS)) {
 	S_hv_notallowed(aTHX_ flags, key, klen,
-			"access disallowed key '%"SVf"' in"
-			);
+			"Attempt to access disallowed key '%"SVf"' in"
+			" a restricted hash");
     }
     if (!(action & (HV_FETCH_LVALUE|HV_FETCH_ISSTORE))) {
 	/* Not doing some form of store, so return failure.  */
@@ -776,18 +773,30 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     if (masked_flags & HVhek_ENABLEHVKFLAGS)
 	HvHASKFLAGS_on(hv);
 
-    xhv->xhv_keys++; /* HvKEYS(hv)++ */
-    if (!n_links) {				/* initial entry? */
-	xhv->xhv_fill++; /* HvFILL(hv)++ */
-    } else if ((xhv->xhv_keys > (IV)xhv->xhv_max)
-	       || ((n_links > HV_MAX_LENGTH_BEFORE_SPLIT) && !HvREHASH(hv))) {
-	/* Use only the old HvKEYS(hv) > HvMAX(hv) condition to limit bucket
-	   splits on a rehashed hash, as we're not going to split it again,
-	   and if someone is lucky (evil) enough to get all the keys in one
-	   list they could exhaust our memory as we repeatedly double the
-	   number of buckets on every entry. Linear search feels a less worse
-	   thing to do.  */
-        hsplit(hv);
+    {
+	const HE *counter = HeNEXT(entry);
+
+	xhv->xhv_keys++; /* HvKEYS(hv)++ */
+	if (!counter) {				/* initial entry? */
+	    xhv->xhv_fill++; /* HvFILL(hv)++ */
+	} else if (xhv->xhv_keys > (IV)xhv->xhv_max) {
+	    hsplit(hv);
+	} else if(!HvREHASH(hv)) {
+	    U32 n_links = 1;
+
+	    while ((counter = HeNEXT(counter)))
+		n_links++;
+
+	    if (n_links > HV_MAX_LENGTH_BEFORE_SPLIT) {
+		/* Use only the old HvKEYS(hv) > HvMAX(hv) condition to limit
+		   bucket splits on a rehashed hash, as we're not going to
+		   split it again, and if someone is lucky (evil) enough to
+		   get all the keys in one list they could exhaust our memory
+		   as we repeatedly double the number of buckets on every
+		   entry. Linear search feels a less worse thing to do.  */
+		hsplit(hv);
+	    }
+	}
     }
 
     return entry;
@@ -806,6 +815,7 @@ S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store)
 	    case PERL_MAGIC_tied:
 	    case PERL_MAGIC_sig:
 		*needs_store = FALSE;
+		return; /* We've set all there is to set. */
 	    }
 	}
 	mg = mg->mg_moremagic;
@@ -889,9 +899,9 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		   int k_flags, I32 d_flags, U32 hash)
 {
     register XPVHV* xhv;
-    register I32 i;
     register HE *entry;
     register HE **oentry;
+    HE *const *first_entry;
     SV *sv;
     bool is_utf8;
     int masked_flags;
@@ -987,10 +997,9 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     masked_flags = (k_flags & HVhek_MASK);
 
     /* oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)]; */
-    oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
+    first_entry = oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     entry = *oentry;
-    i = 1;
-    for (; entry; i=0, oentry = &HeNEXT(entry), entry = *oentry) {
+    for (; entry; oentry = &HeNEXT(entry), entry = *oentry) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
 	if (HeKLEN(entry) != (I32)klen)
@@ -1009,8 +1018,8 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	}
 	else if (SvREADONLY(hv) && HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
 	    S_hv_notallowed(aTHX_ k_flags, key, klen,
-			    "delete readonly key '%"SVf"' from"
-			    );
+			    "Attempt to delete readonly key '%"SVf"' from"
+			    " a restricted hash");
 	}
         if (k_flags & HVhek_FREEKEY)
             Safefree(key);
@@ -1036,8 +1045,9 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    xhv->xhv_placeholders++; /* HvPLACEHOLDERS(hv)++ */
 	} else {
 	    *oentry = HeNEXT(entry);
-	    if (i && !*oentry)
+	    if(!*first_entry) {
 		xhv->xhv_fill--; /* HvFILL(hv)-- */
+	    }
 	    if (entry == xhv->xhv_eiter /* HvEITER(hv) */)
 		HvLAZYDEL_on(hv);
 	    else
@@ -1050,8 +1060,8 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     }
     if (SvREADONLY(hv)) {
         S_hv_notallowed(aTHX_ k_flags, key, klen,
-			"delete disallowed key '%"SVf"' from"
-			);
+			"Attempt to delete disallowed key '%"SVf"' from"
+			" a restricted hash");
     }
 
     if (k_flags & HVhek_FREEKEY)
@@ -1968,7 +1978,7 @@ S_unshare_hek_or_pvn(pTHX_ HEK *hek, const char *str, I32 len, U32 hash)
     register XPVHV* xhv;
     register HE *entry;
     register HE **oentry;
-    register I32 i = 1;
+    HE **first;
     I32 found = 0;
     bool is_utf8 = FALSE;
     int k_flags = 0;
@@ -1997,9 +2007,9 @@ S_unshare_hek_or_pvn(pTHX_ HEK *hek, const char *str, I32 len, U32 hash)
     /* assert(xhv_array != 0) */
     LOCK_STRTAB_MUTEX;
     /* oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)]; */
-    oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
+    first = oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     if (hek) {
-        for (entry = *oentry; entry; i=0, oentry = &HeNEXT(entry), entry = *oentry) {
+        for (entry = *oentry; entry; oentry = &HeNEXT(entry), entry = *oentry) {
             if (HeKEY_hek(entry) != hek)
                 continue;
             found = 1;
@@ -2007,7 +2017,7 @@ S_unshare_hek_or_pvn(pTHX_ HEK *hek, const char *str, I32 len, U32 hash)
         }
     } else {
         int flags_masked = k_flags & HVhek_MASK;
-        for (entry = *oentry; entry; i=0, oentry = &HeNEXT(entry), entry = *oentry) {
+        for (entry = *oentry; entry; oentry = &HeNEXT(entry), entry = *oentry) {
             if (HeHASH(entry) != hash)		/* strings can't be equal */
                 continue;
             if (HeKLEN(entry) != len)
@@ -2024,8 +2034,10 @@ S_unshare_hek_or_pvn(pTHX_ HEK *hek, const char *str, I32 len, U32 hash)
     if (found) {
         if (--HeVAL(entry) == Nullsv) {
             *oentry = HeNEXT(entry);
-            if (i && !*oentry)
+            if (!*first) {
+		/* There are now no entries in our slot.  */
                 xhv->xhv_fill--; /* HvFILL(hv)-- */
+	    }
             Safefree(HeKEY_hek(entry));
             del_HE(entry);
             xhv->xhv_keys--; /* HvKEYS(hv)-- */
@@ -2080,7 +2092,6 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
     register XPVHV* xhv;
     register HE *entry;
     register HE **oentry;
-    register I32 i = 1;
     I32 found = 0;
     int flags_masked = flags & HVhek_MASK;
 
@@ -2097,7 +2108,7 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
     LOCK_STRTAB_MUTEX;
     /* oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)]; */
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
-    for (entry = *oentry; entry; i=0, entry = HeNEXT(entry)) {
+    for (entry = *oentry; entry; entry = HeNEXT(entry)) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
 	if (HeKLEN(entry) != len)
@@ -2110,13 +2121,17 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 	break;
     }
     if (!found) {
+	/* What used to be head of the list.
+	   If this is NULL, then we're the first entry for this slot, which
+	   means we need to increate fill.  */
+	const HE *old_first = *oentry;
 	entry = new_HE();
 	HeKEY_hek(entry) = save_hek_flags(str, len, hash, flags_masked);
 	HeVAL(entry) = Nullsv;
 	HeNEXT(entry) = *oentry;
 	*oentry = entry;
 	xhv->xhv_keys++; /* HvKEYS(hv)++ */
-	if (i) {				/* initial entry? */
+	if (!old_first) {			/* initial entry? */
 	    xhv->xhv_fill++; /* HvFILL(hv)++ */
 	} else if (xhv->xhv_keys > (IV)xhv->xhv_max /* HvKEYS(hv) > HvMAX(hv) */) {
 		hsplit(PL_strtab);

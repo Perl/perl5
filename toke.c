@@ -2534,7 +2534,7 @@ Perl_yylex(pTHX)
 		}
 		PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 		PL_last_lop = PL_last_uni = Nullch;
-		sv_setpv(PL_linestr,"");
+		sv_setpvn(PL_linestr,"",0);
 		TOKEN(';');	/* not infinite loop because rsfp is NULL now */
 	    }
 	    /* If it looks like the start of a BOM or raw UTF-16,
@@ -2575,7 +2575,7 @@ Perl_yylex(pTHX)
 	    if (PL_doextract) {
 		/* Incest with pod. */
 		if (*s == '=' && strnEQ(s, "=cut", 4)) {
-		    sv_setpv(PL_linestr, "");
+		    sv_setpvn(PL_linestr, "", 0);
 		    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 		    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 		    PL_last_lop = PL_last_uni = Nullch;
@@ -2760,7 +2760,7 @@ Perl_yylex(pTHX)
 			      /* if we have already added "LINE: while (<>) {",
 			         we must not do it again */
 			{
-			    sv_setpv(PL_linestr, "");
+			    sv_setpvn(PL_linestr, "", 0);
 			    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 			    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 			    PL_last_lop = PL_last_uni = Nullch;
@@ -5050,7 +5050,7 @@ Perl_yylex(pTHX)
 			Perl_croak(aTHX_ "Missing name in \"my sub\"");
 		    PL_expect = XTERMBLOCK;
 		    attrful = XATTRTERM;
-		    sv_setpv(PL_subname,"?");
+		    sv_setpvn(PL_subname,"?",1);
 		    have_name = FALSE;
 		}
 

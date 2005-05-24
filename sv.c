@@ -238,8 +238,10 @@ S_del_sv(pTHX_ SV *p)
 	for (sva = PL_sv_arenaroot; sva; sva = (SV *) SvANY(sva)) {
 	    sv = sva + 1;
 	    svend = &sva[SvREFCNT(sva)];
-	    if (p >= sv && p < svend)
+	    if (p >= sv && p < svend) {
 		ok = 1;
+		break;
+	    }
 	}
 	if (!ok) {
 	    if (ckWARN_d(WARN_INTERNAL))	
@@ -289,11 +291,18 @@ Perl_sv_add_arena(pTHX_ char *ptr, U32 size, U32 flags)
     sv = sva + 1;
     while (sv < svend) {
 	SvANY(sv) = (void *)(SV*)(sv + 1);
+#ifdef DEBUGGING
 	SvREFCNT(sv) = 0;
+#endif
+	/* Must always set typemask because it's awlays checked in on cleanup
+	   when the arenas are walked looking for objects.  */
 	SvFLAGS(sv) = SVTYPEMASK;
 	sv++;
     }
     SvANY(sv) = 0;
+#ifdef DEBUGGING
+    SvREFCNT(sv) = 0;
+#endif
     SvFLAGS(sv) = SVTYPEMASK;
 }
 
@@ -1366,6 +1375,10 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	del_XPVNV(SvANY(sv));
 	break;
     case SVt_PVMG:
+	/* Because the XPVMG of PL_mess_sv isn't allocated from the arena,
+	   there's no way that it can be safely upgraded, because perl.c
+	   expects to Safefree(SvANY(PL_mess_sv))  */
+	assert(sv != PL_mess_sv);
 	pv	= SvPVX(sv);
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
@@ -3942,9 +3955,16 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		return;
 	    }
 	    if (SvPVX(dstr)) {
-		(void)SvOOK_off(dstr);		/* backoff */
-		if (SvLEN(dstr))
-		    Safefree(SvPVX(dstr));
+		if (SvLEN(dstr)) {
+		    /* Unwrap the OOK offset by hand, to save a needless
+		       memmove on memory that's about to be free()d.  */
+		    char *pv = SvPVX(dstr);
+		    if (SvOOK(dstr)) {
+			pv -= SvIVX(dstr);
+			SvFLAGS(dstr) &= ~SVf_OOK;
+		    }
+		    Safefree(pv);
+		}
 		SvLEN(dstr)=SvCUR(dstr)=0;
 	    }
 	}
@@ -5197,7 +5217,11 @@ Perl_sv_clear(pTHX_ register SV *sv)
     case SVt_PVNV:
     case SVt_PVIV:
       freescalar:
-	SvOOK_off(sv);
+	/* Don't bother with SvOOK_off(sv); as we're only going to free it.  */
+	if (SvOOK(sv)) {
+	    SvPV_set(sv, SvPVX(sv) - SvIVX(sv));
+	    /* Don't even bother with turning off the OOK flag.  */
+	}
 	/* FALL THROUGH */
     case SVt_PV:
     case SVt_RV:
@@ -6816,9 +6840,7 @@ Perl_newSVpv(pTHX_ const char *s, STRLEN len)
     register SV *sv;
 
     new_SV(sv);
-    if (!len)
-	len = strlen(s);
-    sv_setpvn(sv,s,len);
+    sv_setpvn(sv,s,len ? len : strlen(s));
     return sv;
 }
 

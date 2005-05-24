@@ -1018,7 +1018,7 @@ PP(pp_flip)
 		RETURNOP(((LOGOP*)cUNOP->op_first)->op_other);
 	    }
 	}
-	sv_setpv(TARG, "");
+	sv_setpvn(TARG, "", 0);
 	SETs(targ);
 	RETURN;
     }
@@ -1339,7 +1339,7 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 		SV *err = ERRSV;
 		char *e = Nullch;
 		if (!SvPOK(err))
-		    sv_setpv(err,"");
+		    sv_setpvn(err,"",0);
 		else if (SvCUR(err) >= sizeof(prefix)+msglen-1) {
 		    e = SvPV(err, n_a);
 		    e += n_a - msglen;
@@ -1933,7 +1933,7 @@ PP(pp_return)
 
     LEAVESUB(sv);
     if (clear_errsv)
-	sv_setpv(ERRSV,"");
+	sv_setpvn(ERRSV,"",0);
     return pop_return();
 }
 
@@ -2354,13 +2354,14 @@ PP(pp_goto)
 		    SV *sv = GvSV(PL_DBsub);
 		    CV *gotocv;
 		
+		    save_item(sv);
 		    if (PERLDB_SUB_NN) {
-			(void)SvUPGRADE(sv, SVt_PVIV);
+			int type = SvTYPE(sv);
+			if (type < SVt_PVIV && type != SVt_IV)
+			    sv_upgrade(sv, SVt_PVIV);
 			(void)SvIOK_on(sv);
-			SAVEIV(SvIVX(sv));
 			SvIVX(sv) = PTR2IV(cv); /* Do it the quickest way */
 		    } else {
-			save_item(sv);
 			gv_efullname3(sv, CvGV(cv), Nullch);
 		    }
 		    if (  PERLDB_GOTO
@@ -2855,7 +2856,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     if (saveop && saveop->op_flags & OPf_SPECIAL)
 	PL_in_eval |= EVAL_KEEPERR;
     else
-	sv_setpv(ERRSV,"");
+	sv_setpvn(ERRSV,"",0);
     if (yyparse() || PL_error_count || !PL_eval_root) {
 	SV **newsp;			/* Used by POPBLOCK. */
 	PERL_CONTEXT *cx;
@@ -3520,7 +3521,7 @@ PP(pp_leaveeval)
     else {
 	LEAVE;
 	if (!(save_flags & OPf_SPECIAL))
-	    sv_setpv(ERRSV,"");
+	    sv_setpvn(ERRSV,"",0);
     }
 
     RETURNOP(retop);
@@ -3540,7 +3541,7 @@ PP(pp_entertry)
     PUSHEVAL(cx, 0, 0);
 
     PL_in_eval = EVAL_INEVAL;
-    sv_setpv(ERRSV,"");
+    sv_setpvn(ERRSV,"",0);
     PUTBACK;
     return DOCATCH(PL_op->op_next);
 }
@@ -3589,7 +3590,7 @@ PP(pp_leavetry)
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
     LEAVE;
-    sv_setpv(ERRSV,"");
+    sv_setpvn(ERRSV,"",0);
     RETURNOP(retop);
 }
 

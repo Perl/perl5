@@ -175,7 +175,7 @@ PP(pp_concat)
 	if (SvGMAGICAL(left))
 	    mg_get(left);		/* or mg_get(left) may happen here */
 	if (!SvOK(TARG))
-	    sv_setpv(left, "");
+	    sv_setpvn(left, "", 0);
 	lpv = SvPV_nomg(left, llen);
 	lbyte = !DO_UTF8(left);
 	if (IN_BYTES)
@@ -1674,10 +1674,9 @@ Perl_do_readline(pTHX)
 	}
 	else if (gimme == G_SCALAR && !tmplen && SvLEN(sv) - SvCUR(sv) > 80) {
 	    /* try to reclaim a bit of scalar space (only on 1st alloc) */
-	    if (SvCUR(sv) < 60)
-		SvLEN_set(sv, 80);
-	    else
-		SvLEN_set(sv, SvCUR(sv)+40);	/* allow some slop */
+	    const STRLEN new_len
+		= SvCUR(sv) < 60 ? 80 : SvCUR(sv)+40; /* allow some slop */
+	    SvLEN_set(sv, new_len);
 	    Renew(SvPVX(sv), SvLEN(sv), char);
 	}
 	RETURN;
@@ -2559,10 +2558,10 @@ S_get_db_sub(pTHX_ SV **svp, CV *cv)
 {
     SV *dbsv = GvSV(PL_DBsub);
 
+    save_item(dbsv);
     if (!PERLDB_SUB_NN) {
 	GV *gv = CvGV(cv);
 
-	save_item(dbsv);
 	if ( (CvFLAGS(cv) & (CVf_ANON | CVf_CLONED))
 	     || strEQ(GvNAME(gv), "END")
 	     || ((GvCV(gv) != cv) && /* Could be imported, and old sub redefined. */
@@ -2579,9 +2578,10 @@ S_get_db_sub(pTHX_ SV **svp, CV *cv)
 	}
     }
     else {
-	(void)SvUPGRADE(dbsv, SVt_PVIV);
+	int type = SvTYPE(dbsv);
+	if (type < SVt_PVIV && type != SVt_IV)
+	    sv_upgrade(dbsv, SVt_PVIV);
 	(void)SvIOK_on(dbsv);
-	SAVEIV(SvIVX(dbsv));
 	SvIVX(dbsv) = PTR2IV(cv);	/* Do it the quickest way  */
     }
 
