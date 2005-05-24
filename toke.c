@@ -4956,6 +4956,7 @@ Perl_yylex(pTHX)
 	    s = scan_str(s,FALSE,FALSE);
 	    if (!s)
 		missingterm((char*)0);
+	    PL_expect = XOPERATOR;
 	    force_next(')');
 	    if (SvCUR(PL_lex_stuff)) {
 		OP *words = Nullop;
