@@ -791,7 +791,7 @@ PP(pp_tie)
     HV* stash;
     GV *gv;
     SV *sv;
-    I32 markoff = MARK - PL_stack_base;
+    const I32 markoff = MARK - PL_stack_base;
     const char *methname;
     int how = PERL_MAGIC_tied;
     U32 items;
@@ -878,7 +878,7 @@ PP(pp_untie)
     dVAR; dSP;
     MAGIC *mg;
     SV *sv = POPs;
-    char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
+    const char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
 		? PERL_MAGIC_tied : PERL_MAGIC_tiedscalar;
 
     if (SvTYPE(sv) == SVt_PVGV && !(sv = (SV *)GvIOp(sv)))
@@ -917,7 +917,7 @@ PP(pp_tied)
     dSP;
     MAGIC *mg;
     SV *sv = POPs;
-    char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
+    const char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
 		? PERL_MAGIC_tied : PERL_MAGIC_tiedscalar;
 
     if (SvTYPE(sv) == SVt_PVGV && !(sv = (SV *)GvIOp(sv)))
@@ -1166,10 +1166,10 @@ Perl_setdefout(pTHX_ GV *gv)
 PP(pp_select)
 {
     dSP; dTARGET;
-    GV *newdefout, *egv;
+    GV *egv;
     HV *hv;
 
-    newdefout = (PL_op->op_private > 0) ? ((GV *) POPs) : (GV *) NULL;
+    GV * const newdefout = (PL_op->op_private > 0) ? ((GV *) POPs) : (GV *) NULL;
 
     egv = GvEGV(PL_defoutgv);
     if (!egv)
@@ -1299,14 +1299,14 @@ PP(pp_enterwrite)
 
     cv = GvFORM(fgv);
     if (!cv) {
-        char *name = NULL;
 	if (fgv) {
-	    SV *tmpsv = sv_newmortal();
+	    SV * const tmpsv = sv_newmortal();
+	    char *name;
 	    gv_efullname4(tmpsv, fgv, Nullch, FALSE);
 	    name = SvPV_nolen(tmpsv);
+	    if (name && *name)
+		DIE(aTHX_ "Undefined format \"%s\" called", name);
 	}
-	if (name && *name)
-	    DIE(aTHX_ "Undefined format \"%s\" called", name);
 	DIE(aTHX_ "Not a format reference");
     }
     if (CvCLONE(cv))
@@ -1388,20 +1388,18 @@ PP(pp_leavewrite)
 	if (!fgv)
 	    DIE(aTHX_ "bad top format reference");
 	cv = GvFORM(fgv);
-	{
-	    char *name = NULL;
-	    if (!cv) {
-	        SV *sv = sv_newmortal();
-		gv_efullname4(sv, fgv, Nullch, FALSE);
-		name = SvPV_nolen(sv);
-	    }
+	if (!cv) {
+	    SV * const sv = sv_newmortal();
+	    char *name;
+	    gv_efullname4(sv, fgv, Nullch, FALSE);
+	    name = SvPV_nolen(sv);
 	    if (name && *name)
-	        DIE(aTHX_ "Undefined top format \"%s\" called",name);
-	    /* why no:
-	    else
-	        DIE(aTHX_ "Undefined top format called");
-	    ?*/
+		DIE(aTHX_ "Undefined top format \"%s\" called",name);
 	}
+	/* why no:
+	else
+	    DIE(aTHX_ "Undefined top format called");
+	?*/
 	if (CvCLONE(cv))
 	    cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
 	return doform(cv,gv,PL_op);
@@ -1525,13 +1523,9 @@ PP(pp_sysopen)
     SV *sv;
     char *tmps;
     STRLEN len;
-    int mode, perm;
+    const int perm = (MAXARG > 3) ? POPi : 0666;
+    const int mode = POPi;
 
-    if (MAXARG > 3)
-	perm = POPi;
-    else
-	perm = 0666;
-    mode = POPi;
     sv = POPs;
     gv = (GV *)POPs;
 
@@ -1751,7 +1745,7 @@ PP(pp_sysread)
     (void)SvPOK_only(read_target);
     if (fp_utf8 && !IN_BYTES) {
 	/* Look at utf8 we got back and count the characters */
-	char *bend = buffer + count;
+	const char *bend = buffer + count;
 	while (buffer < bend) {
 	    if (charstart) {
 	        skip = UTF8SKIP(buffer);
@@ -1805,7 +1799,7 @@ PP(pp_sysread)
 PP(pp_syswrite)
 {
     dVAR; dSP;
-    int items = (SP - PL_stack_base) - TOPMARK;
+    const int items = (SP - PL_stack_base) - TOPMARK;
     if (items == 2) {
 	SV *sv;
         EXTEND(SP, 1);
@@ -1922,9 +1916,8 @@ PP(pp_send)
     }
 #ifdef HAS_SOCKET
     else if (SP > MARK) {
-	char *sockbuf;
 	STRLEN mlen;
-	sockbuf = SvPVx(*++MARK, mlen);
+	char * const sockbuf = SvPVx(*++MARK, mlen);
 	/* length is really flags */
 	retval = PerlSock_sendto(PerlIO_fileno(IoIFP(io)), buffer, blen,
 				 length, (struct sockaddr *)sockbuf, mlen);
@@ -2048,7 +2041,7 @@ PP(pp_sysseek)
     dVAR; dSP;
     GV *gv;
     IO *io;
-    int whence = POPi;
+    const int whence = POPi;
 #if LSEEKSIZE > IVSIZE
     Off_t offset = (Off_t)SvNVx(POPs);
 #else
@@ -2201,7 +2194,7 @@ PP(pp_ioctl)
 {
     dSP; dTARGET;
     SV *argsv = POPs;
-    unsigned int func = POPu;
+    const unsigned int func = POPu;
     const int optype = PL_op->op_type;
     char *s;
     IV retval;

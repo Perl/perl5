@@ -348,22 +348,22 @@ ApPR	|bool	|is_uni_xdigit_lc|UV c
 Apd	|STRLEN	|is_utf8_char	|NN const U8 *p
 Apd	|bool	|is_utf8_string	|NN const U8 *s|STRLEN len
 Apd	|bool	|is_utf8_string_loc|NN const U8 *s|STRLEN len|NN const U8 **p
-Ap	|bool	|is_utf8_alnum	|NN const U8 *p
-Ap	|bool	|is_utf8_alnumc	|NN const U8 *p
-Ap	|bool	|is_utf8_idfirst|NN const U8 *p
-Ap	|bool	|is_utf8_idcont	|NN const U8 *p
-Ap	|bool	|is_utf8_alpha	|NN const U8 *p
-Ap	|bool	|is_utf8_ascii	|NN const U8 *p
-Ap	|bool	|is_utf8_space	|NN const U8 *p
-Ap	|bool	|is_utf8_cntrl	|NN const U8 *p
-Ap	|bool	|is_utf8_digit	|NN const U8 *p
-Ap	|bool	|is_utf8_graph	|NN const U8 *p
-Ap	|bool	|is_utf8_upper	|NN const U8 *p
-Ap	|bool	|is_utf8_lower	|NN const U8 *p
-Ap	|bool	|is_utf8_print	|NN const U8 *p
-Ap	|bool	|is_utf8_punct	|NN const U8 *p
-Ap	|bool	|is_utf8_xdigit	|NN const U8 *p
-Ap	|bool	|is_utf8_mark	|NN const U8 *p
+ApR	|bool	|is_utf8_alnum	|NN const U8 *p
+ApR	|bool	|is_utf8_alnumc	|NN const U8 *p
+ApR	|bool	|is_utf8_idfirst|NN const U8 *p
+ApR	|bool	|is_utf8_idcont	|NN const U8 *p
+ApR	|bool	|is_utf8_alpha	|NN const U8 *p
+ApR	|bool	|is_utf8_ascii	|NN const U8 *p
+ApR	|bool	|is_utf8_space	|NN const U8 *p
+ApR	|bool	|is_utf8_cntrl	|NN const U8 *p
+ApR	|bool	|is_utf8_digit	|NN const U8 *p
+ApR	|bool	|is_utf8_graph	|NN const U8 *p
+ApR	|bool	|is_utf8_upper	|NN const U8 *p
+ApR	|bool	|is_utf8_lower	|NN const U8 *p
+ApR	|bool	|is_utf8_print	|NN const U8 *p
+ApR	|bool	|is_utf8_punct	|NN const U8 *p
+ApR	|bool	|is_utf8_xdigit	|NN const U8 *p
+ApR	|bool	|is_utf8_mark	|NN const U8 *p
 p	|OP*	|jmaybe		|NN OP* arg
 pP	|I32	|keyword	|NN const char* d|I32 len
 Ap	|void	|leave_scope	|I32 base
@@ -562,8 +562,8 @@ pd	|PADOFFSET|pad_alloc	|I32 optype|U32 tmptype
 p	|PADOFFSET|allocmy	|NN char* name
 pd	|PADOFFSET|pad_findmy	|NN const char* name
 Ap	|PADOFFSET|find_rundefsvoffset	|
-p	|OP*	|oopsAV		|NN OP* o
-p	|OP*	|oopsHV		|NN OP* o
+pR	|OP*	|oopsAV		|NN OP* o
+pR	|OP*	|oopsHV		|NN OP* o
 pd	|void	|pad_leavemy
 Apd	|SV*	|pad_sv		|PADOFFSET po
 pd	|void	|pad_free	|PADOFFSET po
@@ -623,7 +623,7 @@ Ap	|SV*	|re_intuit_string|regexp* prog
 Ap	|I32	|regexec_flags	|NN regexp* prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg|I32 minend \
 				|SV* screamer|void* data|U32 flags
-Ap	|regnode*|regnext	|regnode* p
+ApR	|regnode*|regnext	|NN regnode* p
 Ep	|void	|regprop	|SV* sv|const regnode* o
 Ap	|void	|repeatcpy	|NN char* to|NN const char* from|I32 len|I32 count
 ApP	|char*	|rninstr	|NN const char* big|NN const char* bigend \
@@ -740,7 +740,7 @@ Apd	|void	|sv_clear	|NN SV* sv
 Apd	|I32	|sv_cmp		|NN SV* sv1|NN SV* sv2
 Apd	|I32	|sv_cmp_locale	|NN SV* sv1|NN SV* sv2
 #if defined(USE_LOCALE_COLLATE)
-Apd	|char*	|sv_collxfrm	|NN SV* sv|STRLEN* nxp
+Apd	|char*	|sv_collxfrm	|NN SV* sv|NN STRLEN* nxp
 #endif
 Ap	|OP*	|sv_compile_2op	|NN SV* sv|NN OP** startp|NN const char* code|NN PAD** padp
 Apd	|int	|getcwd_sv	|NN SV* sv
@@ -992,13 +992,13 @@ s	|void	|require_errno	|NN GV *gv
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
 s	|void	|hsplit		|HV *hv
 s	|void	|hfreeentries	|HV *hv
-s	|HE*	|new_he
-s	|void	|del_he		|HE *p
-s	|HEK*	|save_hek_flags	|const char *str|I32 len|U32 hash|int flags
-s	|void	|hv_magic_check	|HV *hv|bool *needs_copy|bool *needs_store
-s	|void	|unshare_hek_or_pvn|HEK* hek|const char* sv|I32 len|U32 hash
-s	|HE*	|share_hek_flags|const char* sv|I32 len|U32 hash|int flags
-rs	|void	|hv_notallowed	|int flags|const char *key|I32 klen|const char *msg
+sR	|HE*	|new_he
+s	|void	|del_he		|NN HE *p
+sR	|HEK*	|save_hek_flags	|NN const char *str|I32 len|U32 hash|int flags
+s	|void	|hv_magic_check	|NN HV *hv|NN bool *needs_copy|NN bool *needs_store
+s	|void	|unshare_hek_or_pvn|HEK* hek|NN const char* sv|I32 len|U32 hash
+sR	|HE*	|share_hek_flags|const char* sv|I32 len|U32 hash|int flags
+rs	|void	|hv_notallowed	|int flags|NN const char *key|I32 klen|NN const char *msg
 #endif
 
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
@@ -1110,7 +1110,7 @@ s	|SV **	|pack_rec	|SV *cat|struct tempsym* symptr|SV **beglist|SV **endlist
 s	|SV*	|mul128		|NN SV *sv|U8 m
 s	|I32	|measure_struct	|NN struct tempsym* symptr
 s	|bool	|next_symbol	|NN struct tempsym* symptr
-s	|SV*	|is_an_int	|NN const char *s|STRLEN l
+sR	|SV*	|is_an_int	|NN const char *s|STRLEN l
 s	|int	|div128		|NN SV *pnum|NN bool *done
 s	|const char *|group_end	|NN const char *pat|NN const char *patend|char ender
 s	|const char *|get_num	|NN const char *ppat|NN I32 *lenptr
@@ -1141,7 +1141,7 @@ s	|SV*	|method_common	|SV* meth|U32* hashp
 
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 s	|OP*	|doform		|CV *cv|GV *gv|OP *retop
-sr	|int	|emulate_eaccess|const char* path|Mode_t mode
+s	|int	|emulate_eaccess|const char* path|Mode_t mode
 #  if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 s	|int	|dooneliner	|char *cmd|char *filename
 #  endif
@@ -1525,8 +1525,11 @@ np	|void	|my_swabn	|void* ptr|int n
 
 Ap	|GV*	|gv_fetchpvn_flags|const char* name|STRLEN len|I32 flags|I32 sv_type
 Ap	|GV*	|gv_fetchsv|SV *name|I32 flags|I32 sv_type
-dp	|bool	|is_gv_magical_sv|SV *name|U32 flags
+dpR	|bool	|is_gv_magical_sv|SV *name|U32 flags
 
 Apd	|char*	|savesvpv	|SV* sv
 
 END_EXTERN_C
+/*
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */

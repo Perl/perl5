@@ -4652,6 +4652,7 @@ Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
 	}
 	else if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
 	    /* already defined (or promised) */
+	    /* XXX It's possible for this HvNAME_get to return null, and get passed into strEQ */
 	    if (ckWARN(WARN_REDEFINE) && !(CvGV(cv) && GvSTASH(CvGV(cv))
 			    && strEQ(HvNAME_get(GvSTASH(CvGV(cv))), "autouse"))) {
 		const line_t oldline = CopLINE(PL_curcop);
@@ -4959,8 +4960,8 @@ Perl_ck_bitop(pTHX_ OP *o)
 	     || o->op_type == OP_BIT_AND
 	     || o->op_type == OP_BIT_XOR))
     {
-	const OP * left = cBINOPo->op_first;
-	const OP * right = left->op_sibling;
+	const OP * const left = cBINOPo->op_first;
+	const OP * const right = left->op_sibling;
 	if ((OP_IS_NUMCOMPARE(left->op_type) &&
 		(left->op_flags & OPf_PARENS) == 0) ||
 	    (OP_IS_NUMCOMPARE(right->op_type) &&

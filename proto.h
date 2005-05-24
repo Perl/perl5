@@ -616,51 +616,67 @@ PERL_CALLCONV bool	Perl_is_utf8_string_loc(pTHX_ const U8 *s, STRLEN len, const 
 			__attribute__nonnull__(pTHX_3);
 
 PERL_CALLCONV bool	Perl_is_utf8_alnum(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV bool	Perl_is_utf8_alnumc(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV bool	Perl_is_utf8_idfirst(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV bool	Perl_is_utf8_idcont(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV bool	Perl_is_utf8_alpha(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV bool	Perl_is_utf8_ascii(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV bool	Perl_is_utf8_space(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV bool	Perl_is_utf8_cntrl(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV bool	Perl_is_utf8_digit(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV bool	Perl_is_utf8_graph(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV bool	Perl_is_utf8_upper(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV bool	Perl_is_utf8_lower(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV bool	Perl_is_utf8_print(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV bool	Perl_is_utf8_punct(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV bool	Perl_is_utf8_xdigit(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV bool	Perl_is_utf8_mark(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV OP*	Perl_jmaybe(pTHX_ OP* arg)
@@ -1074,9 +1090,11 @@ PERL_CALLCONV PADOFFSET	Perl_pad_findmy(pTHX_ const char* name)
 
 PERL_CALLCONV PADOFFSET	Perl_find_rundefsvoffset(pTHX);
 PERL_CALLCONV OP*	Perl_oopsAV(pTHX_ OP* o)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV OP*	Perl_oopsHV(pTHX_ OP* o)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV void	Perl_pad_leavemy(pTHX);
@@ -1180,7 +1198,10 @@ PERL_CALLCONV I32	Perl_regexec_flags(pTHX_ regexp* prog, char* stringarg, char* 
 			__attribute__nonnull__(pTHX_3)
 			__attribute__nonnull__(pTHX_4);
 
-PERL_CALLCONV regnode*	Perl_regnext(pTHX_ regnode* p);
+PERL_CALLCONV regnode*	Perl_regnext(pTHX_ regnode* p)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+
 PERL_CALLCONV void	Perl_regprop(pTHX_ SV* sv, const regnode* o);
 PERL_CALLCONV void	Perl_repeatcpy(pTHX_ char* to, const char* from, I32 len, I32 count)
 			__attribute__nonnull__(pTHX_1)
@@ -1403,7 +1424,8 @@ PERL_CALLCONV I32	Perl_sv_cmp_locale(pTHX_ SV* sv1, SV* sv2)
 
 #if defined(USE_LOCALE_COLLATE)
 PERL_CALLCONV char*	Perl_sv_collxfrm(pTHX_ SV* sv, STRLEN* nxp)
-			__attribute__nonnull__(pTHX_1);
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
 
 #endif
 PERL_CALLCONV OP*	Perl_sv_compile_2op(pTHX_ SV* sv, OP** startp, const char* code, PAD** padp)
@@ -1815,14 +1837,31 @@ STATIC void	S_require_errno(pTHX_ GV *gv)
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
 STATIC void	S_hsplit(pTHX_ HV *hv);
 STATIC void	S_hfreeentries(pTHX_ HV *hv);
-STATIC HE*	S_new_he(pTHX);
-STATIC void	S_del_he(pTHX_ HE *p);
-STATIC HEK*	S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags);
-STATIC void	S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store);
-STATIC void	S_unshare_hek_or_pvn(pTHX_ HEK* hek, const char* sv, I32 len, U32 hash);
-STATIC HE*	S_share_hek_flags(pTHX_ const char* sv, I32 len, U32 hash, int flags);
+STATIC HE*	S_new_he(pTHX)
+			__attribute__warn_unused_result__;
+
+STATIC void	S_del_he(pTHX_ HE *p)
+			__attribute__nonnull__(pTHX_1);
+
+STATIC HEK*	S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+
+STATIC void	S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+
+STATIC void	S_unshare_hek_or_pvn(pTHX_ HEK* hek, const char* sv, I32 len, U32 hash)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC HE*	S_share_hek_flags(pTHX_ const char* sv, I32 len, U32 hash, int flags)
+			__attribute__warn_unused_result__;
+
 STATIC void	S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen, const char *msg)
-			__attribute__noreturn__;
+			__attribute__noreturn__
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_4);
 
 #endif
 
@@ -2114,6 +2153,7 @@ STATIC bool	S_next_symbol(pTHX_ struct tempsym* symptr)
 			__attribute__nonnull__(pTHX_1);
 
 STATIC SV*	S_is_an_int(pTHX_ const char *s, STRLEN l)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 STATIC int	S_div128(pTHX_ SV *pnum, bool *done)
@@ -2159,9 +2199,7 @@ STATIC SV*	S_method_common(pTHX_ SV* meth, U32* hashp);
 
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 STATIC OP*	S_doform(pTHX_ CV *cv, GV *gv, OP *retop);
-STATIC int	S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
-			__attribute__noreturn__;
-
+STATIC int	S_emulate_eaccess(pTHX_ const char* path, Mode_t mode);
 #  if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 STATIC int	S_dooneliner(pTHX_ char *cmd, char *filename);
 #  endif
@@ -2622,9 +2660,14 @@ PERL_CALLCONV void	Perl_my_swabn(void* ptr, int n);
 
 PERL_CALLCONV GV*	Perl_gv_fetchpvn_flags(pTHX_ const char* name, STRLEN len, I32 flags, I32 sv_type);
 PERL_CALLCONV GV*	Perl_gv_fetchsv(pTHX_ SV *name, I32 flags, I32 sv_type);
-PERL_CALLCONV bool	Perl_is_gv_magical_sv(pTHX_ SV *name, U32 flags);
+PERL_CALLCONV bool	Perl_is_gv_magical_sv(pTHX_ SV *name, U32 flags)
+			__attribute__warn_unused_result__;
+
 
 PERL_CALLCONV char*	Perl_savesvpv(pTHX_ SV* sv);
 
 END_EXTERN_C
+/*
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */
 /* ex: set ro: */

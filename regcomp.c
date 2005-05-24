@@ -2784,21 +2784,22 @@ S_add_data(pTHX_ RExC_state_t *pRExC_state, I32 n, const char *s)
 void
 Perl_reginitcolors(pTHX)
 {
-    int i = 0;
-    char *s = PerlEnv_getenv("PERL_RE_COLORS");
-	
+    const char * const s = PerlEnv_getenv("PERL_RE_COLORS");
     if (s) {
-	PL_colors[0] = s = savepv(s);
+	char *t = savepv(s);
+	int i = 0;
+	PL_colors[0] = t;
 	while (++i < 6) {
-	    s = strchr(s, '\t');
-	    if (s) {
-		*s = '\0';
-		PL_colors[i] = ++s;
+	    t = strchr(t, '\t');
+	    if (t) {
+		*t = '\0';
+		PL_colors[i] = ++t;
 	    }
 	    else
-		PL_colors[i] = s = (char *)"";
+		PL_colors[i] = t = (char *)"";
 	}
     } else {
+	int i = 0;
 	while (i < 6)
 	    PL_colors[i++] = (char *)"";
     }
@@ -3007,13 +3008,10 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    !(r->reganch & ROPT_ANCH) )
 	{
 	    /* turn .* into ^.* with an implied $*=1 */
-	    int type = OP(NEXTOPER(first));
-
-	    if (type == REG_ANY)
-		type = ROPT_ANCH_MBOL;
-	    else
-		type = ROPT_ANCH_SBOL;
-
+	    const int type =
+		(OP(NEXTOPER(first)) == REG_ANY)
+		    ? ROPT_ANCH_MBOL
+		    : ROPT_ANCH_SBOL;
 	    r->reganch |= type | ROPT_IMPLICIT;
 	    first = NEXTOPER(first);
 	    goto again;
@@ -3128,7 +3126,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    && !(data.start_class->flags & ANYOF_EOS)
 	    && !cl_is_anything(data.start_class))
 	{
-	    I32 n = add_data(pRExC_state, 1, "f");
+	    const I32 n = add_data(pRExC_state, 1, "f");
 
 	    New(1006, RExC_rx->data->data[n], 1,
 		struct regnode_charclass_class);
@@ -3184,7 +3182,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	if (!(data.start_class->flags & ANYOF_EOS)
 	    && !cl_is_anything(data.start_class))
 	{
-	    I32 n = add_data(pRExC_state, 1, "f");
+	    const I32 n = add_data(pRExC_state, 1, "f");
 
 	    New(1006, RExC_rx->data->data[n], 1,
 		struct regnode_charclass_class);
@@ -3714,7 +3712,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp)
     register char op;
     register char *next;
     I32 flags;
-    char *origparse = RExC_parse;
+    const char * const origparse = RExC_parse;
     char *maxpos;
     I32 min;
     I32 max = REG_INFTY;
@@ -4120,7 +4118,7 @@ tryagain:
 	case '1': case '2': case '3': case '4':
 	case '5': case '6': case '7': case '8': case '9':
 	    {
-		I32 num = atoi(RExC_parse);
+		const I32 num = atoi(RExC_parse);
 
 		if (num > 9 && num >= RExC_npar)
 		    goto defchar;
@@ -4170,7 +4168,6 @@ tryagain:
 	    register UV ender;
 	    register char *p;
 	    char *oldp, *s;
-	    STRLEN numlen;
 	    STRLEN foldlen;
 	    U8 tmpbuf[UTF8_MAXBYTES_CASE+1], *foldbuf;
 
@@ -4246,7 +4243,7 @@ tryagain:
 			break;
 		    case 'x':
 			if (*++p == '{') {
-			    char* e = strchr(p, '}');
+			    char* const e = strchr(p, '}');
 	
 			    if (!e) {
 				RExC_parse = p + 1;
@@ -4255,7 +4252,7 @@ tryagain:
 			    else {
                                 I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
                                     | PERL_SCAN_DISALLOW_PREFIX;
-                                numlen = e - p - 1;
+                                STRLEN numlen = e - p - 1;
 				ender = grok_hex(p + 1, &numlen, &flags, NULL);
 				if (ender > 0xff)
 				    RExC_utf8 = 1;
@@ -4264,7 +4261,7 @@ tryagain:
 			}
 			else {
                             I32 flags = PERL_SCAN_DISALLOW_PREFIX;
-			    numlen = 2;
+			    STRLEN numlen = 2;
 			    ender = grok_hex(p, &numlen, &flags, NULL);
 			    p += numlen;
 			}
@@ -4279,7 +4276,7 @@ tryagain:
 			if (*p == '0' ||
 			  (isDIGIT(p[1]) && atoi(p) >= RExC_npar) ) {
                             I32 flags = 0;
-			    numlen = 3;
+			    STRLEN numlen = 3;
 			    ender = grok_oct(p, &numlen, &flags, NULL);
 			    p += numlen;
 			}
@@ -4301,6 +4298,7 @@ tryagain:
 		default:
 		  normal_default:
 		    if (UTF8_IS_START(*p) && UTF) {
+			STRLEN numlen;
 			ender = utf8n_to_uvchr((U8*)p, RExC_end - p,
 					       &numlen, 0);
 			p += numlen;
@@ -4323,6 +4321,7 @@ tryagain:
 
 			 if (FOLD) {
 			      /* Emit all the Unicode characters. */
+			      STRLEN numlen;
 			      for (foldbuf = tmpbuf;
 				   foldlen;
 				   foldlen -= numlen) {
@@ -4360,6 +4359,7 @@ tryagain:
 
 		     if (FOLD) {
 		          /* Emit all the Unicode characters. */
+			  STRLEN numlen;
 			  for (foldbuf = tmpbuf;
 			       foldlen;
 			       foldlen -= numlen) {
@@ -4423,8 +4423,8 @@ tryagain:
 	if (RExC_utf8)
 	    SvUTF8_on(sv);
 	if (sv_utf8_downgrade(sv, TRUE)) {
-	    char *s       = sv_recode_to_utf8(sv, PL_encoding);
-	    STRLEN newlen = SvCUR(sv);
+	    const char * const s = sv_recode_to_utf8(sv, PL_encoding);
+	    const STRLEN newlen = SvCUR(sv);
 
 	    if (SvUTF8(sv))
 		RExC_utf8 = 1;
@@ -4480,7 +4480,7 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
     if (value == '[' && RExC_parse + 1 < RExC_end &&
 	/* I smell either [: or [= or [. -- POSIX has been here, right? */
 	POSIXCC(UCHARAT(RExC_parse))) {
-	char  c = UCHARAT(RExC_parse);
+	const char c = UCHARAT(RExC_parse);
 	char* s = RExC_parse++;
 	
 	while (RExC_parse < RExC_end && UCHARAT(RExC_parse) != c)
@@ -4489,7 +4489,7 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
 	    /* Grandfather lone [:, [=, [. */
 	    RExC_parse = s;
 	else {
-	    char* t = RExC_parse++; /* skip over the c */
+	    const char* t = RExC_parse++; /* skip over the c */
 
 	    assert(*t == c);
 
@@ -4497,8 +4497,8 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
   		RExC_parse++; /* skip over the ending ] */
   		posixcc = s + 1;
 		if (*s == ':') {
-		    I32 complement = *posixcc == '^' ? *posixcc++ : 0;
-		    I32 skip = t - posixcc;
+		    const I32 complement = *posixcc == '^' ? *posixcc++ : 0;
+		    const I32 skip = t - posixcc;
 
 		    /* Initially switch on the length of the name.  */
 		    switch (skip) {
@@ -4634,8 +4634,8 @@ STATIC void
 S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
 {
     if (!SIZE_ONLY && POSIXCC(UCHARAT(RExC_parse))) {
-	char *s = RExC_parse;
- 	char  c = *s++;
+	const char *s = RExC_parse;
+	const char  c = *s++;
 
 	while(*s && isALNUM(*s))
 	    s++;
@@ -4756,7 +4756,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		if (RExC_parse >= RExC_end)
 		    vFAIL2("Empty \\%c{}", (U8)value);
 		if (*RExC_parse == '{') {
-		    U8 c = (U8)value;
+		    const U8 c = (U8)value;
 		    e = strchr(RExC_parse++, '}');
                     if (!e)
                         vFAIL2("Missing right brace on \\%c{}", c);
@@ -5283,7 +5283,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	    IV i;
 
 	    if (prevvalue < 256) {
-	        IV ceilvalue = value < 256 ? value : 255;
+	        const IV ceilvalue = value < 256 ? value : 255;
 
 #ifdef EBCDIC
 		/* In EBCDIC [\x89-\x91] should include
@@ -5308,8 +5308,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			  ANYOF_BITMAP_SET(ret, i);
 	  }
 	  if (value > 255 || UTF) {
-	        UV prevnatvalue  = NATIVE_TO_UNI(prevvalue);
-		UV natvalue      = NATIVE_TO_UNI(value);
+	        const UV prevnatvalue  = NATIVE_TO_UNI(prevvalue);
+		const UV natvalue      = NATIVE_TO_UNI(value);
 
 		ANYOF_FLAGS(ret) |= ANYOF_UNICODE;
 		if (prevnatvalue < natvalue) { /* what about > ? */
@@ -5321,7 +5321,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		    if (FOLD) {
 			 U8 foldbuf[UTF8_MAXBYTES_CASE+1];
 			 STRLEN foldlen;
-			 UV f = to_uni_fold(natvalue, foldbuf, &foldlen);
+			 const UV f = to_uni_fold(natvalue, foldbuf, &foldlen);
 
 			 /* If folding and foldable and a single
 			  * character, insert also the folded version
@@ -5873,10 +5873,10 @@ Perl_regdump(pTHX_ regexp *r)
 	PerlIO_printf(Perl_debug_log, "with eval ");
     PerlIO_printf(Perl_debug_log, "\n");
     if (r->offsets) {
-        U32 i;
         const U32 len = r->offsets[0];
         GET_RE_DEBUG_FLAGS_DECL;
         DEBUG_OFFSETS_r({
+	    U32 i;
 	    PerlIO_printf(Perl_debug_log, "Offsets: [%"UVuf"]\n\t", (UV)r->offsets[0]);
 	    for (i = 1; i <= len; i++)
 	        PerlIO_printf(Perl_debug_log, "%"UVuf"[%"UVuf"] ", 
@@ -5926,8 +5926,8 @@ Perl_regprop(pTHX_ SV *sv, const regnode *o)
 	/* Using is_utf8_string() is a crude hack but it may
 	 * be the best for now since we have no flag "this EXACTish
 	 * node was UTF-8" --jhi */
-	bool do_utf8 = is_utf8_string((U8*)STRING(o), STR_LEN(o));
-	char *s    = do_utf8 ?
+	const bool do_utf8 = is_utf8_string((U8*)STRING(o), STR_LEN(o));
+	const char *s = do_utf8 ?
 	  pv_uni_display(dsv, (U8*)STRING(o), STR_LEN(o), 60,
 			 UNI_DISPLAY_REGEX) :
 	  STRING(o);
@@ -6040,7 +6040,7 @@ Perl_regprop(pTHX_ SV *sv, const regnode *o)
 		    U8 s[UTF8_MAXBYTES_CASE+1];
 		
 		    for (i = 0; i <= 256; i++) { /* just the first 256 */
-			U8 *e = uvchr_to_utf8(s, i);
+			uvchr_to_utf8(s, i);
 			
 			if (i < 256 && swash_fetch(sw, s, TRUE)) {
 			    if (rangestart == -1)
@@ -6050,15 +6050,17 @@ Perl_regprop(pTHX_ SV *sv, const regnode *o)
 			
 			    if (i <= rangestart + 3)
 				for (; rangestart < i; rangestart++) {
+				    U8 *e;
 				    for(e = uvchr_to_utf8(s, rangestart), p = s; p < e; p++)
 					put_byte(sv, *p);
 				}
 			    else {
+				U8 *e;
 				for (e = uvchr_to_utf8(s, rangestart), p = s; p < e; p++)
 				    put_byte(sv, *p);
 				sv_catpv(sv, "-");
-				    for (e = uvchr_to_utf8(s, i - 1), p = s; p < e; p++)
-					put_byte(sv, *p);
+				for (e = uvchr_to_utf8(s, i - 1), p = s; p < e; p++)
+				    put_byte(sv, *p);
 				}
 				rangestart = -1;
 			    }
@@ -6074,7 +6076,7 @@ Perl_regprop(pTHX_ SV *sv, const regnode *o)
 		    while(*s && *s != '\n') s++;
 		
 		    if (*s == '\n') {
-			char *t = ++s;
+			const char *t = ++s;
 			
 			while (*s) {
 			    if (*s == '\n')
@@ -6354,13 +6356,13 @@ Perl_save_re_context(pTHX)
 
     {
 	/* Save $1..$n (#18107: UTF-8 s/(\w+)/uc($1)/e); AMS 20021106. */
-	U32 i;
-	GV *mgv;
 	REGEXP *rx;
-	char digits[TYPE_CHARS(long)];
 
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
+	    U32 i;
 	    for (i = 1; i <= rx->nparens; i++) {
+		GV *mgv;
+		char digits[TYPE_CHARS(long)];
 		sprintf(digits, "%lu", (long)i);
 		if ((mgv = gv_fetchpv(digits, FALSE, SVt_PV)))
 		    save_scalar(mgv);
