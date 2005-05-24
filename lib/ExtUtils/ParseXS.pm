@@ -17,7 +17,7 @@ my(@XSStack);	# Stack of conditionals and INCLUDEs
 my($XSS_work_idx, $cpp_next_tmp);
 
 use vars qw($VERSION);
-$VERSION = '2.09_01';
+$VERSION = '2.09_02';
 $VERSION = eval $VERSION;
 
 use vars qw(%input_expr %output_expr $ProtoUsed @InitFileCode $FH $proto_re $Overload $errors $Fallback
@@ -55,6 +55,7 @@ sub process_file {
 	   argtypes => 1,
 	   typemap => [],
 	   output => \*STDOUT,
+	   csuffix => '.c',
 	   %args,
 	  );
 
@@ -118,6 +119,7 @@ sub process_file {
   
   chdir($dir);
   my $pwd = cwd();
+  my $csuffix = $args{csuffix};
   
   if ($WantLineNumbers) {
     my $cfile;
@@ -125,7 +127,7 @@ sub process_file {
       $cfile = $args{outfile};
     } else {
       $cfile = $args{filename};
-      $cfile =~ s/\.xs$/.c/i or $cfile .= ".c";
+      $cfile =~ s/\.xs$/$csuffix/i or $cfile .= $csuffix;
     }
     tie(*PSEUDO_STDOUT, 'ExtUtils::ParseXS::CountLines', $cfile, $args{output});
     select PSEUDO_STDOUT;
@@ -358,7 +360,7 @@ EOF
 	   ." followed by a statement on column one?)")
       if $line[0] =~ /^\s/;
     
-    my ($class, $static, $elipsis, $wantRETVAL, $RETVAL_no_return);
+    my ($class, $externC, $static, $elipsis, $wantRETVAL, $RETVAL_no_return);
     my (@fake_INPUT_pre);	# For length(s) generated variables
     my (@fake_INPUT);
     
@@ -412,7 +414,8 @@ EOF
     blurt ("Error: Function definition too short '$ret_type'"), next PARAGRAPH
       unless @line ;
 
-    $static = 1 if $ret_type =~ s/^static\s+//;
+    $externC = 1 if $ret_type =~ s/^extern "C"\s+//;
+    $static  = 1 if $ret_type =~ s/^static\s+//;
 
     $func_header = shift(@line);
     blurt ("Error: Cannot parse function definition from '$func_header'"), next PARAGRAPH
@@ -554,8 +557,11 @@ EOF
 
     $xsreturn = 1 if $EXPLICIT_RETURN;
 
+    $externC = $externC ? qq[extern "C"] : "";
+
     # print function header
     print Q(<<"EOF");
+#$externC
 #XS(XS_${Full_func_name}); /* prototype to pass -Wmissing-prototypes */
 #XS(XS_${Full_func_name})
 #[[
