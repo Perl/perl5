@@ -13,7 +13,6 @@ struct xpvav {
     SSize_t	xav_fill;       /* Index of last element present */
     SSize_t	xav_max;        /* max index for which array has space */
     union {
-	NV	xnvu_nv;
 	struct {
 	    void *xnv_p1;	/* pointer to beginning of C array of SVs */
 	    union {
@@ -21,6 +20,7 @@ struct xpvav {
 		IV xnv_i2;
 	    }	xnv_u2;
 	}	xnv_s;
+	NV	xnvu_nv;
     }		xnv_u;
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */

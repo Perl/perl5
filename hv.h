@@ -46,7 +46,6 @@ struct xpvhv {
     STRLEN	xhv_fill;	/* how full xhv_array currently is */
     STRLEN	xhv_max;	/* subscript of last element of xhv_array */
     union {
-	NV	xnvu_nv;	/* numeric value, if any */
 	struct {
 	    void *xnv_p1;
 	    union {
@@ -54,6 +53,7 @@ struct xpvhv {
 		IV xnv_i2;	/* how many elements in the array */
 	    }	xnv_u2;
 	}	xnv_s;
+	NV	xnvu_nv;	/* numeric value, if any */
     }		xnv_u;
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
