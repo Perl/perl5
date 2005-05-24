@@ -11655,6 +11655,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_debug		= proto_perl->Idebug;
 
+    PL_hash_seed	= proto_perl->Ihash_seed;
+    PL_rehash_seed	= proto_perl->Irehash_seed;
+
 #ifdef USE_REENTRANT_API
     /* XXX: things like -Dm will segfault here in perlio, but doing
      *  PERL_SET_CONTEXT(proto_perl);
@@ -12095,8 +12098,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_glob_index	= proto_perl->Iglob_index;
     PL_srand_called	= proto_perl->Isrand_called;
-    PL_hash_seed	= proto_perl->Ihash_seed;
-    PL_rehash_seed	= proto_perl->Irehash_seed;
     PL_uudmap['M']	= 0;		/* reinits on demand */
     PL_bitcount		= Nullch;	/* reinits on demand */
 
