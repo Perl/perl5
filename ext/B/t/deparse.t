@@ -130,14 +130,14 @@ $1/ if $Is_MacOS;
 print "# [$a]\n\# vs expected\n# [$b]\nnot " if $a ne $b;
 print "ok " . $i++ . "\n";
 
-#Re: perlbug #35857, patch #24505 
+#Re: perlbug #35857, patch #24505
 #handle warnings::register-ed packages properly.
 package B::Deparse::Wrapper;
 use strict;
 use warnings;
 use warnings::register;
 sub getcode {
-   my $deparser=B::Deparse->new();
+   my $deparser = B::Deparse->new();
    return $deparser->coderef2text(shift);
 }
 
@@ -145,9 +145,9 @@ package main;
 use strict;
 use warnings;
 sub test {
-   my $val=shift;
-   my $res=B::Deparse::Wrapper::getcode($val);
-   print $res=~/use warnings/ ? '' : 'not ',"ok\n";
+   my $val = shift;
+   my $res = B::Deparse::Wrapper::getcode($val);
+   print $res =~ /use warnings/ ? '' : 'not ', 'ok ', $i++, "\n";
 }
 my ($q,$p);
 my $x=sub { ++$q,++$p };
@@ -317,6 +317,6 @@ print((reverse sort {$b <=> $a} @x));
 our @a;
 print $_ foreach (reverse @a);
 ####
-# 32
+# 33
 our @a;
 print $_ foreach (reverse 1, 2..5);
