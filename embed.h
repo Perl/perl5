@@ -1043,6 +1043,7 @@
 #endif
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_concat		Perl_ck_concat
@@ -1084,7 +1085,6 @@
 #define ck_svconst		Perl_ck_svconst
 #define ck_trunc		Perl_ck_trunc
 #define ck_unpack		Perl_ck_unpack
-#ifdef PERL_CORE
 #define is_handle_constructor	S_is_handle_constructor
 #define is_list_assignment	S_is_list_assignment
 #define cop_free		S_cop_free
@@ -3021,6 +3021,7 @@
 #endif
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
 #define ck_concat(a)		Perl_ck_concat(aTHX_ a)
@@ -3062,7 +3063,6 @@
 #define ck_svconst(a)		Perl_ck_svconst(aTHX_ a)
 #define ck_trunc(a)		Perl_ck_trunc(aTHX_ a)
 #define ck_unpack(a)		Perl_ck_unpack(aTHX_ a)
-#ifdef PERL_CORE
 #define is_handle_constructor(a,b)	S_is_handle_constructor(aTHX_ a,b)
 #define is_list_assignment(a)	S_is_list_assignment(aTHX_ a)
 #define cop_free(a)		S_cop_free(aTHX_ a)
