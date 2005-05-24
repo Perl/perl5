@@ -1596,6 +1596,7 @@ S_hfreeentries(pTHX_ HV *hv)
 	    HvLAZYDEL_off(hv);
 	    hv_free_ent(hv, entry);
 	}
+	Safefree(iter->xhv_name);
 	Safefree(iter);
 	((XPVHV*) SvANY(hv))->xhv_aux = 0;
     }
@@ -1772,7 +1773,9 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, STRLEN len, int flags)
 {
     struct xpvhv_aux *iter = ((XPVHV *)SvANY(hv))->xhv_aux;
 
-    if (!iter) {
+    if (iter) {
+	Safefree(iter->xhv_name);
+    } else {
 	if (name == 0)
 	    return;
 

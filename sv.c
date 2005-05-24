@@ -10915,15 +10915,13 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	    const char *hvname = HvNAME_get((HV*)sstr);
 	    struct xpvhv_aux *aux = ((XPVHV *)SvANY(sstr))->xhv_aux;
 
+	    ((XPVHV *)SvANY(dstr))->xhv_aux = 0;
 	    if (aux) {
-		New(0, ((XPVHV *)SvANY(dstr))->xhv_aux, 1, struct xpvhv_aux);
 		HvRITER_set((HV*)dstr, HvRITER_get((HV*)sstr));
 		/* FIXME strlen HvNAME  */
 		Perl_hv_name_set(aTHX_ (HV*) dstr, hvname,
 				 hvname ? strlen(hvname) : 0,
 				 0);
-	    } else {
-		((XPVHV *)SvANY(dstr))->xhv_aux = 0;
 	    }
 	    if (HvARRAY((HV*)sstr)) {
 		STRLEN i = 0;
