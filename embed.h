@@ -976,6 +976,7 @@
 #define ss_dup			Perl_ss_dup
 #define any_dup			Perl_any_dup
 #define he_dup			Perl_he_dup
+#define hek_dup			Perl_hek_dup
 #define re_dup			Perl_re_dup
 #define fp_dup			Perl_fp_dup
 #define dirp_dup		Perl_dirp_dup
@@ -2954,6 +2955,7 @@
 #define ss_dup(a,b)		Perl_ss_dup(aTHX_ a,b)
 #define any_dup(a,b)		Perl_any_dup(aTHX_ a,b)
 #define he_dup(a,b,c)		Perl_he_dup(aTHX_ a,b,c)
+#define hek_dup(a,b)		Perl_hek_dup(aTHX_ a,b)
 #define re_dup(a,b)		Perl_re_dup(aTHX_ a,b)
 #define fp_dup(a,b,c)		Perl_fp_dup(aTHX_ a,b,c)
 #define dirp_dup(a)		Perl_dirp_dup(aTHX_ a)

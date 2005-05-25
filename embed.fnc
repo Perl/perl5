@@ -937,6 +937,7 @@ Ap	|PERL_SI*|si_dup	|PERL_SI* si|CLONE_PARAMS* param
 Ap	|ANY*	|ss_dup		|PerlInterpreter* proto_perl|CLONE_PARAMS* param
 Ap	|void*	|any_dup	|void* v|PerlInterpreter* proto_perl
 Ap	|HE*	|he_dup		|HE* e|bool shared|CLONE_PARAMS* param
+Ap	|HEK*	|hek_dup	|HEK* e|CLONE_PARAMS* param
 Ap	|REGEXP*|re_dup		|REGEXP* r|CLONE_PARAMS* param
 Ap	|PerlIO*|fp_dup		|PerlIO* fp|char type|CLONE_PARAMS* param
 Ap	|DIR*	|dirp_dup	|DIR* dp
