@@ -146,9 +146,21 @@ Perl_he_dup(pTHX_ HE *e, bool shared, CLONE_PARAMS* param)
 	HeKEY_hek(ret) = (HEK*)k;
 	HeKEY_sv(ret) = SvREFCNT_inc(sv_dup(HeKEY_sv(e), param));
     }
-    else if (shared)
-	HeKEY_hek(ret) = share_hek_flags(HeKEY(e), HeKLEN(e), HeHASH(e),
-                                         HeKFLAGS(e));
+    else if (shared) {
+	HEK *source = HeKEY_hek(e);
+	HE *shared = (HE*)ptr_table_fetch(PL_shared_hek_table, source);
+
+	if (shared) {
+	    /* We already shared this hash key.  */
+	    ++HeVAL(shared);
+	}
+	else {
+	    shared = share_hek_flags(HEK_KEY(source), HEK_LEN(source),
+				     HEK_HASH(source), HEK_FLAGS(source));
+	    ptr_table_store(PL_shared_hek_table, source, shared);
+	}
+	HeKEY_hek(ret) = HeKEY_hek(shared);
+    }
     else
 	HeKEY_hek(ret) = save_hek_flags(HeKEY(e), HeKLEN(e), HeHASH(e),
                                         HeKFLAGS(e));
@@ -652,8 +664,8 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		    /* Need to swap the key we have for a key with the flags we
 		       need. As keys are shared we can't just write to the
 		       flag, so we share the new one, unshare the old one.  */
-		    HEK *new_hek = share_hek_flags(key, klen, hash,
-						   masked_flags);
+		    HEK *new_hek = HeKEY_hek(share_hek_flags(key, klen, hash,
+							     masked_flags));
 		    unshare_hek (HeKEY_hek(entry));
 		    HeKEY_hek(entry) = new_hek;
 		}
@@ -755,7 +767,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     /* share_hek_flags will do the free for us.  This might be considered
        bad API design.  */
     if (HvSHAREKEYS(hv))
-	HeKEY_hek(entry) = share_hek_flags(key, klen, hash, flags);
+	HeKEY_hek(entry) = HeKEY_hek(share_hek_flags(key, klen, hash, flags));
     else                                       /* gotta do the real thing */
 	HeKEY_hek(entry) = save_hek_flags(key, klen, hash, flags);
     HeVAL(entry) = val;
@@ -1348,7 +1360,7 @@ Perl_newHVhv(pTHX_ HV *ohv)
 		ent = new_HE();
 		HeVAL(ent)     = newSVsv(HeVAL(oent));
 		HeKEY_hek(ent)
-                    = shared ? share_hek_flags(key, len, hash, flags)
+                    = shared ? HeKEY_hek(share_hek_flags(key, len, hash, flags))
                              :  save_hek_flags(key, len, hash, flags);
 		if (prev)
 		    HeNEXT(prev) = ent;
@@ -2206,10 +2218,10 @@ Perl_share_hek(pTHX_ const char *str, I32 len, register U32 hash)
           flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
     }
 
-    return share_hek_flags (str, len, hash, flags);
+    return HeKEY_hek(share_hek_flags (str, len, hash, flags));
 }
 
-STATIC HEK *
+STATIC HE *
 S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 {
     register XPVHV* xhv;
@@ -2263,7 +2275,7 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
     if (flags & HVhek_FREEKEY)
 	Safefree(str);
 
-    return HeKEY_hek(entry);
+    return entry;
 }
 
 I32 *

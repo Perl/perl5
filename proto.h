@@ -1816,7 +1816,7 @@ STATIC void	S_del_he(pTHX_ HE *p);
 STATIC HEK*	S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags);
 STATIC void	S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store);
 STATIC void	S_unshare_hek_or_pvn(pTHX_ HEK* hek, const char* sv, I32 len, U32 hash);
-STATIC HEK*	S_share_hek_flags(pTHX_ const char* sv, I32 len, U32 hash, int flags);
+STATIC HE*	S_share_hek_flags(pTHX_ const char* sv, I32 len, U32 hash, int flags);
 STATIC void	S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen, const char *msg)
 			__attribute__noreturn__;
 

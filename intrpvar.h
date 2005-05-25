@@ -425,6 +425,7 @@ PERLVAR(IProc,		struct IPerlProc*)
 
 #if defined(USE_ITHREADS)
 PERLVAR(Iptr_table,	PTR_TBL_t*)
+PERLVAR(Ishared_hek_table, PTR_TBL_t*)
 #endif
 PERLVARI(Ibeginav_save, AV*, Nullav)	/* save BEGIN{}s when compiling */
 

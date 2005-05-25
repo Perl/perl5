@@ -377,6 +377,7 @@
 #define PL_savebegin		(vTHX->Isavebegin)
 #define PL_sawampersand		(vTHX->Isawampersand)
 #define PL_sh_path_compat	(vTHX->Ish_path_compat)
+#define PL_shared_hek_table	(vTHX->Ishared_hek_table)
 #define PL_sharehook		(vTHX->Isharehook)
 #define PL_sig_pending		(vTHX->Isig_pending)
 #define PL_sighandlerp		(vTHX->Isighandlerp)
@@ -681,6 +682,7 @@
 #define PL_Isavebegin		PL_savebegin
 #define PL_Isawampersand	PL_sawampersand
 #define PL_Ish_path_compat	PL_sh_path_compat
+#define PL_Ishared_hek_table	PL_shared_hek_table
 #define PL_Isharehook		PL_sharehook
 #define PL_Isig_pending		PL_sig_pending
 #define PL_Isighandlerp		PL_sighandlerp

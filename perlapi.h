@@ -533,6 +533,8 @@ END_EXTERN_C
 #define PL_sawampersand		(*Perl_Isawampersand_ptr(aTHX))
 #undef  PL_sh_path_compat
 #define PL_sh_path_compat	(*Perl_Ish_path_compat_ptr(aTHX))
+#undef  PL_shared_hek_table
+#define PL_shared_hek_table	(*Perl_Ishared_hek_table_ptr(aTHX))
 #undef  PL_sharehook
 #define PL_sharehook		(*Perl_Isharehook_ptr(aTHX))
 #undef  PL_sig_pending

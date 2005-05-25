@@ -993,7 +993,7 @@ s	|void	|del_he		|HE *p
 s	|HEK*	|save_hek_flags	|const char *str|I32 len|U32 hash|int flags
 s	|void	|hv_magic_check	|HV *hv|bool *needs_copy|bool *needs_store
 s	|void	|unshare_hek_or_pvn|HEK* hek|const char* sv|I32 len|U32 hash
-s	|HEK*	|share_hek_flags|const char* sv|I32 len|U32 hash|int flags
+s	|HE*	|share_hek_flags|const char* sv|I32 len|U32 hash|int flags
 rs	|void	|hv_notallowed	|int flags|const char *key|I32 klen|const char *msg
 #endif
 
