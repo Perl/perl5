@@ -354,7 +354,23 @@ obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) utf8$(OBJ_EXT) taint$(OBJ
 
 obj = $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
 
-lintflags = -hbvxac
+lintflags = \
+    -bh \
+    -p \
+    -s \
+    -Ncheck=%all \
+    -Nlevel=4 \
+    -errfmt=simple \
+    -errtags \
+    -erroff=E_BAD_PTR_CAST \
+    -erroff=E_BLOCK_DECL_UNUSED \
+    -erroff=E_CONSTANT_CONDITION \
+    -erroff=E_BAD_PTR_CAST_ALIGN \
+    -erroff=E_PTRDIFF_OVERFLOW \
+    -erroff=E_EXPR_NULL_EFFECT \
+    -erroff=E_BAD_PTR_INT_COMBINATION \
+    -erroff=E_LOOP_EMPTY \
+    *.c
 
 .c$(OBJ_EXT):
 	$(CCCMD) $(PLDLFLAGS) $*.c
@@ -1034,14 +1050,10 @@ _verycleaner:
 	@$(LDLIBPTH) $(MAKE) _cleaner2
 	-rm -f *~ *.orig */*~ */*.orig */*/*~ */*/*.orig
 
-# The following lint has practically everything turned on.  Unfortunately,
-# you have to wade through a lot of mumbo jumbo that can't be suppressed.
-# If the source file has a /*NOSTRICT*/ somewhere, ignore the lint message
-# for that spot.
-
 .PHONY: lint
 lint: $(c)
-	lint $(lintflags) $(defs) perly.c $(c) > perl.fuzz
+	rm -f *.ln
+	lint $(lintflags) -DPERL_CORE -D_REENTRANT -DDEBUGGING -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 $(c) perly.c
 
 # Need to unset during recursion to go out of loop.
 # The README below ensures that the dependency list is never empty and
@@ -1358,3 +1370,4 @@ esac
     ;;
 esac
 
+# ex: set ts=8 sts=4 sw=4 noet:

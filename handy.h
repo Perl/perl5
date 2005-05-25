@@ -519,11 +519,7 @@ Converts the specified character to lowercase.
 
 /* Line numbers are unsigned, 32 bits. */
 typedef U32 line_t;
-#ifdef lint
-#define NOLINE ((line_t)0)
-#else
 #define NOLINE ((line_t) 4294967295UL)
-#endif
 
 
 /*
@@ -598,8 +594,6 @@ hopefully catches attempts to access uninitialized memory.
 
 =cut */
 
-#ifndef lint
-
 #define NEWSV(x,len)	newSV(len)
 
 #ifdef PERL_MALLOC_WRAP
@@ -645,23 +639,6 @@ hopefully catches attempts to access uninitialized memory.
 #endif
 
 #define Poison(d,n,t)	(MEM_WRAP_CHECK_(n,t) (void)memset((char*)(d), 0xAB, (n) * sizeof(t)))
-
-#else /* lint */
-
-#define New(x,v,n,s)	(v = Null(s *))
-#define Newc(x,v,n,s,c)	(v = Null(s *))
-#define Newz(x,v,n,s)	(v = Null(s *))
-#define Renew(v,n,s)	(v = Null(s *))
-#define Move(s,d,n,t)
-#define Copy(s,d,n,t)
-#define Zero(d,n,t)
-#define MoveD(s,d,n,t)	d
-#define CopyD(s,d,n,t)	d
-#define ZeroD(d,n,t)	d
-#define Poison(d,n,t)
-#define Safefree(d)	(d) = (d)
-
-#endif /* lint */
 
 #ifdef USE_STRUCT_COPY
 #define StructCopy(s,d,t) (*((t*)(d)) = *((t*)(s)))

@@ -271,19 +271,18 @@
 #  define LOG_OF_MIN_ARENA 14
 #endif
 
-#ifndef lint
-#  if defined(DEBUGGING) && !defined(NO_RCHECK)
-#    define RCHECK
-#  endif
-#  if defined(DEBUGGING) && !defined(NO_RCHECK) && !defined(NO_MFILL) && !defined(MALLOC_FILL)
-#    define MALLOC_FILL
-#  endif
-#  if defined(DEBUGGING) && !defined(NO_RCHECK) && !defined(NO_FILL_CHECK) && !defined(MALLOC_FILL_CHECK)
-#    define MALLOC_FILL_CHECK
-#  endif
-#  if defined(RCHECK) && defined(IGNORE_SMALL_BAD_FREE)
-#    undef IGNORE_SMALL_BAD_FREE
-#  endif 
+#if defined(DEBUGGING) && !defined(NO_RCHECK)
+#  define RCHECK
+#endif
+#if defined(DEBUGGING) && !defined(NO_RCHECK) && !defined(NO_MFILL) && !defined(MALLOC_FILL)
+#  define MALLOC_FILL
+#endif
+#if defined(DEBUGGING) && !defined(NO_RCHECK) && !defined(NO_FILL_CHECK) && !defined(MALLOC_FILL_CHECK)
+#  define MALLOC_FILL_CHECK
+#endif
+#if defined(RCHECK) && defined(IGNORE_SMALL_BAD_FREE)
+#  undef IGNORE_SMALL_BAD_FREE
+#endif 
 /*
  * malloc.c (Caltech) 2/21/82
  * Chris Kingsley, kingsley@cit-20.
@@ -2498,7 +2497,6 @@ Perl_dump_mstats(pTHX_ char *s)
 		      buffer.total_chain, buffer.sbrked_remains);
 #endif /* DEBUGGING_MSTATS */
 }
-#endif /* lint */
 
 #ifdef USE_PERL_SBRK
 

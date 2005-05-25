@@ -154,15 +154,9 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 #undef NEXT_OFF
 #undef NODE_ALIGN
 
-#ifndef lint
-#  define NEXT_OFF(p) ((p)->next_off)
-#  define NODE_ALIGN(node)
-#  define NODE_ALIGN_FILL(node) ((node)->flags = 0xde) /* deadbeef */
-#else /* lint */
-#  define NEXT_OFF(p) 0
-#  define NODE_ALIGN(node)
-#  define NODE_ALIGN_FILL(node)
-#endif /* lint */
+#define NEXT_OFF(p) ((p)->next_off)
+#define NODE_ALIGN(node)
+#define NODE_ALIGN_FILL(node) ((node)->flags = 0xde) /* deadbeef */
 
 #define SIZE_ALIGN NODE_ALIGN
 
@@ -309,15 +303,11 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 /*
  * Utility definitions.
  */
-#ifndef lint
 #ifndef CHARMASK
-#define	UCHARAT(p)	((int)*(const U8*)(p))
+#  define UCHARAT(p)	((int)*(const U8*)(p))
 #else
-#define	UCHARAT(p)	((int)*(p)&CHARMASK)
+#  define UCHARAT(p)	((int)*(p)&CHARMASK)
 #endif
-#else /* lint */
-#define UCHARAT(p)	PL_regdummy
-#endif /* lint */
 
 #define EXTRA_SIZE(guy) ((sizeof(guy)-1)/sizeof(struct regnode))
 

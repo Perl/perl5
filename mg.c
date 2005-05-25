@@ -820,11 +820,9 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	sv_setsv(sv,&PL_sv_undef);
 	break;
     case '.':
-#ifndef lint
 	if (GvIO(PL_last_in_gv)) {
 	    sv_setiv(sv, (IV)IoLINES(GvIOp(PL_last_in_gv)));
 	}
-#endif
 	break;
     case '?':
 	{
@@ -852,7 +850,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    s = GvENAME(PL_defoutgv);
 	sv_setpv(sv,s);
 	break;
-#ifndef lint
     case '=':
 	if (GvIOp(PL_defoutgv))
 	    sv_setiv(sv, (IV)IoPAGE_LEN(GvIOp(PL_defoutgv)));
@@ -865,7 +862,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	if (GvIOp(PL_defoutgv))
 	    sv_setiv(sv, (IV)IoPAGE(GvIOp(PL_defoutgv)));
 	break;
-#endif
     case ':':
 	break;
     case '/':
