@@ -524,7 +524,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	    {
 		pvindex arg;
 		BGET_pvindex(arg);
-		HvNAME(bstate->bs_sv) = arg;
+		BSET_xhv_name(bstate->bs_sv, arg);
 		break;
 	    }
 	  case INSN_HV_STORE:		/* 67 */

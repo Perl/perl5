@@ -177,11 +177,11 @@ struct cop {
 
 #  define CopSTASH(c)		(CopSTASHPV(c) \
 				 ? gv_stashpv(CopSTASHPV(c),GV_ADD) : Nullhv)
-#  define CopSTASH_set(c,hv)	CopSTASHPV_set(c, (hv) ? HvNAME(hv) : Nullch)
+#  define CopSTASH_set(c,hv)	CopSTASHPV_set(c, (hv) ? HvNAME_get(hv) : Nullch)
 #  define CopSTASH_eq(c,hv)	((hv) 					\
-				 && (CopSTASHPV(c) == HvNAME(hv)	\
-				     || (CopSTASHPV(c) && HvNAME(hv)	\
-					 && strEQ(CopSTASHPV(c), HvNAME(hv)))))
+				 && (CopSTASHPV(c) == HvNAME_get(hv)	\
+				     || (CopSTASHPV(c) && HvNAME_get(hv)\
+					 && strEQ(CopSTASHPV(c), HvNAME_get(hv)))))
 #  ifdef NETWARE
 #    define CopSTASH_free(c) SAVECOPSTASH_FREE(c)
 #  else
@@ -202,7 +202,7 @@ struct cop {
 #  define CopFILE(c)		(CopFILESV(c) ? SvPVX(CopFILESV(c)) : Nullch)
 #  define CopSTASH(c)		((c)->cop_stash)
 #  define CopSTASH_set(c,hv)	((c)->cop_stash = (hv))
-#  define CopSTASHPV(c)		(CopSTASH(c) ? HvNAME(CopSTASH(c)) : Nullch)
+#  define CopSTASHPV(c)		(CopSTASH(c) ? HvNAME_get(CopSTASH(c)) : Nullch)
    /* cop_stash is not refcounted */
 #  define CopSTASHPV_set(c,pv)	CopSTASH_set((c), gv_stashpv(pv,GV_ADD))
 #  define CopSTASH_eq(c,hv)	(CopSTASH(c) == (hv))
