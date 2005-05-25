@@ -26,7 +26,7 @@ struct xpvav {
     HV*		xmg_stash;	/* class package */
 };
 
-#if 0
+#if !defined(PERL_EXPERIMENTAL_LAYOUT)
 typedef struct xpvav xpvav_allocated;
 #else
 typedef struct {

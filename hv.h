@@ -63,7 +63,7 @@ struct xpvhv {
 #define xhv_aux xnv_u.xnv_s.xnv_p1
 #define xhv_keys xnv_u.xnv_s.xnv_u2.xnv_i2
 
-#if 0
+#if !defined(PERL_EXPERIMENTAL_LAYOUT)
 typedef struct xpvhv xpvhv_allocated;
 #else
 typedef struct {
