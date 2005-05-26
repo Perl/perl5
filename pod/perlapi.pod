@@ -2283,8 +2283,7 @@ Found in file pp.h
 
 =item POPp
 
-Pops a string off the stack. Deprecated. New code should provide
-a STRLEN n_a and use POPpx.
+Pops a string off the stack. Deprecated. New code should use POPpx.
 
 	char*	POPp
 
@@ -2294,7 +2293,6 @@ Found in file pp.h
 =item POPpbytex
 
 Pops a string off the stack which must consist of bytes i.e. characters < 256.
-Requires a variable STRLEN n_a in scope.
 
 	char*	POPpbytex
 
@@ -2304,7 +2302,6 @@ Found in file pp.h
 =item POPpx
 
 Pops a string off the stack.
-Requires a variable STRLEN n_a in scope.
 
 	char*	POPpx
 
@@ -2784,6 +2781,17 @@ macro.
 =for hackers
 Found in file sv.c
 
+=item newSVhek
+
+Creates a new SV from the hash key structure.  It will generate scalars that
+point to the shared string table where possible. Returns a new (undefined)
+SV if the hek is NULL.
+
+	SV*	newSVhek(const HEK *hek)
+
+=for hackers
+Found in file sv.c
+
 =item newSViv
 
 Creates a new SV and copies an integer into it.  The reference count for the
@@ -2895,7 +2903,8 @@ Found in file sv.h
 
 =item SvCUR_set
 
-Set the current length of the string which is in the SV.  See C<SvCUR>.
+Set the current length of the string which is in the SV.  See C<SvCUR>
+and C<SvIV_set>.
 
 	void	SvCUR_set(SV* sv, STRLEN len)
 
@@ -3050,7 +3059,10 @@ Found in file sv.h
 
 =item SvIV_set
 
-Set the value of the IV pointer in sv to val.
+Set the value of the IV pointer in sv to val.  It is possible to perform
+the same function of this macro with an lvalue assignment to C<SvIVX>.
+With future Perls, however, it will be more efficient to use 
+C<SvIV_set> instead of the lvalue assignment to C<SvIVX>.
 
 	void	SvIV_set(SV* sv, IV val)
 
@@ -3069,7 +3081,7 @@ Found in file sv.h
 
 =item SvLEN_set
 
-Set the actual length of the string which is in the SV.
+Set the actual length of the string which is in the SV.  See C<SvIV_set>.
 
 	void	SvLEN_set(SV* sv, STRLEN len)
 
@@ -3078,7 +3090,7 @@ Found in file sv.h
 
 =item SvMAGIC_set
 
-Set the value of the MAGIC pointer in sv to val.
+Set the value of the MAGIC pointer in sv to val.  See C<SvIV_set>.
 
 	void	SvMAGIC_set(SV* sv, MAGIC* val)
 
@@ -3192,7 +3204,7 @@ Found in file sv.h
 
 =item SvNV_set
 
-Set the value of the IV pointer in sv to val.
+Set the value of the NV pointer in sv to val.  See C<SvIV_set>.
 
 	void	SvNV_set(SV* sv, NV val)
 
@@ -3443,7 +3455,7 @@ Found in file sv.h
 
 =item SvPV_set
 
-Set the value of the PV pointer in sv to val.
+Set the value of the PV pointer in sv to val.  See C<SvIV_set>.
 
 	void	SvPV_set(SV* sv, char* val)
 
@@ -3515,7 +3527,7 @@ Found in file sv.h
 
 =item SvRV_set
 
-Set the value of the RV pointer in sv to val.
+Set the value of the RV pointer in sv to val.  See C<SvIV_set>.
 
 	void	SvRV_set(SV* sv, SV* val)
 
@@ -3533,7 +3545,7 @@ Found in file sv.h
 
 =item SvSTASH_set
 
-Set the value of the STASH pointer in sv to val.
+Set the value of the STASH pointer in sv to val.  See C<SvIV_set>.
 
 	void	SvSTASH_set(SV* sv, STASH* val)
 
