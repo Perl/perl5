@@ -691,6 +691,7 @@ unless ($define{'USE_ITHREADS'}) {
 		    PL_op_mutex
 		    PL_regex_pad
 		    PL_regex_padav
+		    PL_shared_hek_table
 		    PL_sharedsv_space
 		    PL_sharedsv_space_mutex
 		    PL_dollarzero_mutex
@@ -706,6 +707,7 @@ unless ($define{'USE_ITHREADS'}) {
 		    Perl_re_dup
 		    Perl_sv_dup
 		    Perl_rvpv_dup
+		    Perl_hek_dup
 		    Perl_sys_intern_dup
 		    Perl_ptr_table_clear
 		    Perl_ptr_table_fetch

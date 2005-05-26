@@ -615,6 +615,7 @@ Perl_si_dup
 Perl_ss_dup
 Perl_any_dup
 Perl_he_dup
+Perl_hek_dup
 Perl_re_dup
 Perl_fp_dup
 Perl_dirp_dup
@@ -679,7 +680,6 @@ Perl_hv_riter_p
 Perl_hv_eiter_p
 Perl_hv_riter_set
 Perl_hv_eiter_set
-Perl_hv_name_p
 Perl_hv_name_set
 Perl_hv_placeholders_p
 Perl_hv_placeholders_get
