@@ -1773,6 +1773,10 @@ Not implemented. (S<Plan 9>)
 This operator is implemented via the File::Glob extension on most
 platforms.  See L<File::Glob> for portability information.
 
+=item gmtime
+
+Same portability caveats as L<localtime>.
+
 =item ioctl FILEHANDLE,FUNCTION,SCALAR
 
 Not implemented. (VMS)
@@ -1805,6 +1809,13 @@ Link count not updated because hard links are not quite that hard
 
 Hard links are implemented on Win32 (Windows NT and Windows 2000)
 under NTFS only.
+
+=item localtime
+
+Because Perl currently relies on the native standard C localtime()
+function, it is only safe to use times between 0 and (2**31)-1.  Times
+outside this range may result in unexpected behavior depending on your
+operating system's implementation of localtime().
 
 =item lstat
 

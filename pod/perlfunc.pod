@@ -2186,6 +2186,8 @@ This scalar value is B<not> locale dependent (see L<perllocale>), but is
 instead a Perl builtin.  To get somewhat similar but locale dependent date
 strings, see the example in L</localtime>.
 
+See L<perlport/gmtime> for portability concerns.
+
 =item goto LABEL
 
 =item goto EXPR
@@ -2582,6 +2584,8 @@ try for example:
 
 Note that the C<%a> and C<%b>, the short forms of the day of the week
 and the month of the year, may not necessarily be three characters wide.
+
+See L<perlport/localtime> for portability concerns.
 
 =item lock THING
 
