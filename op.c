@@ -1535,7 +1535,7 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs, bool for_my)
     ENTER;		/* need to protect against side-effects of 'use' */
     SAVEINT(PL_expect);
     if (stash)
-	stashsv = newSVpv(HvNAME_get(stash), 0);
+	stashsv = newSVpvn(HvNAME_get(stash), HvNAMELEN_get(stash));
     else
 	stashsv = &PL_sv_no;
 
@@ -1588,7 +1588,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
 
     /* Build up the real arg-list. */
     if (stash)
-	stashsv = newSVpv(HvNAME_get(stash), 0);
+	stashsv = newSVpvn(HvNAME_get(stash), HvNAMELEN_get(stash));
     else
 	stashsv = &PL_sv_no;
     arg = newOP(OP_PADSV, 0);

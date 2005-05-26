@@ -246,8 +246,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 
     /* create and re-create @.*::SUPER::ISA on demand */
     if (!av || !SvMAGIC(av)) {
-	/* FIXME - get this from the symtab magic.  */
-	STRLEN packlen = strlen(hvname);
+	STRLEN packlen = HvNAMELEN_get(stash);
 
 	if (packlen >= 7 && strEQ(hvname + packlen - 7, "::SUPER")) {
 	    HV* basestash;
@@ -493,16 +492,18 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
     GV* vargv;
     SV* varsv;
     const char *packname = "";
+    STRLEN packname_len;
 
     if (len == S_autolen && strnEQ(name, S_autoload, S_autolen))
 	return Nullgv;
     if (stash) {
 	if (SvTYPE(stash) < SVt_PVHV) {
-	    packname = SvPV_nolen((SV*)stash);
+	    packname = SvPV((SV*)stash, packname_len);
 	    stash = Nullhv;
 	}
 	else {
 	    packname = HvNAME_get(stash);
+	    packname_len = HvNAMELEN_get(stash);
 	}
     }
     if (!(gv = gv_fetchmeth(stash, S_autoload, S_autolen, FALSE)))
@@ -547,7 +548,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 	gv_init(vargv, varstash, S_autoload, S_autolen, FALSE);
     LEAVE;
     varsv = GvSV(vargv);
-    sv_setpv(varsv, packname);
+    sv_setpvn(varsv, packname, packname_len);
     sv_catpvn(varsv, "::", 2);
     sv_catpvn(varsv, name, len);
     SvTAINTED_off(varsv);
@@ -1126,6 +1127,7 @@ void
 Perl_gv_fullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain)
 {
     const char *name;
+    STRLEN namelen;
     const HV * const hv = GvSTASH(gv);
     if (!hv) {
 	SvOK_off(sv);
@@ -1134,11 +1136,15 @@ Perl_gv_fullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain)
     sv_setpv(sv, prefix ? prefix : "");
     
     name = HvNAME_get(hv);
-    if (!name)
+    if (name) {
+	namelen = HvNAMELEN_get(hv);
+    } else {
 	name = "__ANON__";
+	namelen = 8;
+    }
 	
     if (keepmain || strNE(name, "main")) {
-	sv_catpv(sv,name);
+	sv_catpvn(sv,name,namelen);
 	sv_catpvn(sv,"::", 2);
     }
     sv_catpvn(sv,GvNAME(gv),GvNAMELEN(gv));
@@ -1309,10 +1315,10 @@ Perl_gp_free(pTHX_ GV *gv)
     /* FIXME - another reference loop GV -> symtab -> GV ?
        Somehow gp->gp_hv can end up pointing at freed garbage.  */
     if (gp->gp_hv && SvTYPE(gp->gp_hv) == SVt_PVHV) {
-	/* FIXME strlen HvNAME  */
 	const char *hvname = HvNAME_get(gp->gp_hv);
 	if (PL_stashcache && hvname)
-	    hv_delete(PL_stashcache, hvname, strlen(hvname), G_DISCARD);
+	    hv_delete(PL_stashcache, hvname, HvNAMELEN_get(gp->gp_hv),
+		      G_DISCARD);
 	SvREFCNT_dec(gp->gp_hv);
     }
     if (gp->gp_io)   SvREFCNT_dec(gp->gp_io);

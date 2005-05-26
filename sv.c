@@ -10913,16 +10913,29 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
 	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
 	{
-	    const char *hvname = HvNAME_get((HV*)sstr);
 	    struct xpvhv_aux *aux = ((XPVHV *)SvANY(sstr))->xhv_aux;
+	    HEK *hvname = 0;
 
-	    ((XPVHV *)SvANY(dstr))->xhv_aux = 0;
 	    if (aux) {
-		HvRITER_set((HV*)dstr, HvRITER_get((HV*)sstr));
-		/* FIXME strlen HvNAME  */
-		Perl_hv_name_set(aTHX_ (HV*) dstr, hvname,
-				 hvname ? strlen(hvname) : 0,
-				 0);
+		I32 riter = aux->xhv_riter;
+
+		hvname = aux->xhv_name;
+		if (hvname || riter != -1) {
+		    struct xpvhv_aux *d_aux;
+
+		    New(0, d_aux, 1, struct xpvhv_aux);
+
+		    d_aux->xhv_riter = riter;
+		    d_aux->xhv_eiter = 0;
+		    d_aux->xhv_name = hvname ? hek_dup(hvname, param) : hvname;
+
+		    ((XPVHV *)SvANY(dstr))->xhv_aux = d_aux;
+		} else {
+		    ((XPVHV *)SvANY(dstr))->xhv_aux = 0;
+		}
+	    }
+	    else {
+		((XPVHV *)SvANY(dstr))->xhv_aux = 0;
 	    }
 	    if (HvARRAY((HV*)sstr)) {
 		STRLEN i = 0;
@@ -11456,6 +11469,7 @@ do_mark_cloneable_stash(pTHX_ SV *sv)
     const char *hvname = HvNAME_get((HV*)sv);
     if (hvname) {
 	GV* cloner = gv_fetchmethod_autoload((HV*)sv, "CLONE_SKIP", 0);
+	STRLEN len = HvNAMELEN_get((HV*)sv);
 	SvFLAGS(sv) |= SVphv_CLONEABLE; /* clone objects by default */
 	if (cloner && GvCV(cloner)) {
 	    dSP;
@@ -11464,7 +11478,7 @@ do_mark_cloneable_stash(pTHX_ SV *sv)
 	    ENTER;
 	    SAVETMPS;
 	    PUSHMARK(SP);
-	    XPUSHs(sv_2mortal(newSVpv(hvname, 0)));
+	    XPUSHs(sv_2mortal(newSVpvn(hvname, len)));
 	    PUTBACK;
 	    call_sv((SV*)GvCV(cloner), G_SCALAR);
 	    SPAGAIN;
@@ -12314,7 +12328,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	    ENTER;
 	    SAVETMPS;
 	    PUSHMARK(SP);
-	    XPUSHs(sv_2mortal(newSVpv(HvNAME_get(stash), 0)));
+	    XPUSHs(sv_2mortal(newSVpvn(HvNAME_get(stash), HvNAMELEN_get(stash))));
 	    PUTBACK;
 	    call_sv((SV*)GvCV(cloner), G_DISCARD);
 	    FREETMPS;

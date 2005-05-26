@@ -1434,8 +1434,7 @@ Apo	|I32*	|hv_riter_p	|HV* hv
 Apo	|HE**	|hv_eiter_p	|HV* hv
 Apo	|void	|hv_riter_set	|HV* hv|I32 riter
 Apo	|void	|hv_eiter_set	|HV* hv|HE* eiter
-Apo	|char**	|hv_name_p	|HV* hv
-Apo	|void	|hv_name_set	|HV* hv|const char *|STRLEN len|int flags
+Apo	|void	|hv_name_set	|HV* hv|const char *|I32 len|int flags
 Apo	|I32*	|hv_placeholders_p	|HV* hv
 Apo	|I32	|hv_placeholders_get	|HV* hv
 Apo	|void	|hv_placeholders_set	|HV* hv|I32 ph

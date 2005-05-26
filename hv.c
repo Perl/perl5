@@ -1627,7 +1627,8 @@ S_hfreeentries(pTHX_ HV *hv)
 	    HvLAZYDEL_off(hv);
 	    hv_free_ent(hv, entry);
 	}
-	Safefree(iter->xhv_name);
+	if (iter->xhv_name)
+	    unshare_hek_or_pvn(iter->xhv_name, 0, 0, 0);
 	Safefree(iter);
 	((XPVHV*) SvANY(hv))->xhv_aux = 0;
     }
@@ -1653,9 +1654,8 @@ Perl_hv_undef(pTHX_ HV *hv)
     hfreeentries(hv);
     Safefree(HvARRAY(hv));
     if ((name = HvNAME_get(hv))) {
-	/* FIXME - strlen HvNAME  */
         if(PL_stashcache)
-	    hv_delete(PL_stashcache, name, strlen(name), G_DISCARD);
+	    hv_delete(PL_stashcache, name, HvNAMELEN_get(hv), G_DISCARD);
 	Perl_hv_name_set(aTHX_ hv, 0, 0, 0);
     }
     xhv->xhv_max   = 7;	/* HvMAX(hv) = 7 (it's a normal hash) */
@@ -1787,32 +1787,24 @@ Perl_hv_eiter_set(pTHX_ HV *hv, HE *eiter) {
     iter->xhv_eiter = eiter;
 }
 
-
-char **
-Perl_hv_name_p(pTHX_ HV *hv)
-{
-    struct xpvhv_aux *iter = ((XPVHV *)SvANY(hv))->xhv_aux;
-
-    if (!iter) {
-	((XPVHV *)SvANY(hv))->xhv_aux = iter = S_hv_auxinit(aTHX);
-    }
-    return &(iter->xhv_name);
-}
-
 void
-Perl_hv_name_set(pTHX_ HV *hv, const char *name, STRLEN len, int flags)
+Perl_hv_name_set(pTHX_ HV *hv, const char *name, I32 len, int flags)
 {
     struct xpvhv_aux *iter = ((XPVHV *)SvANY(hv))->xhv_aux;
+    U32 hash;
 
     if (iter) {
-	Safefree(iter->xhv_name);
+	if (iter->xhv_name) {
+	    unshare_hek_or_pvn(iter->xhv_name, 0, 0, 0);
+	}
     } else {
 	if (name == 0)
 	    return;
 
 	((XPVHV *)SvANY(hv))->xhv_aux = iter = S_hv_auxinit(aTHX);
     }
-    iter->xhv_name = savepvn(name, len);
+    PERL_HASH(hash, name, len);
+    iter->xhv_name = name ? share_hek(name, len, hash) : 0;
 }
 
 /*

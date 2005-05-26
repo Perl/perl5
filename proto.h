@@ -2530,7 +2530,7 @@ PERL_CALLCONV HE**	Perl_hv_eiter_p(pTHX_ HV* hv);
 PERL_CALLCONV void	Perl_hv_riter_set(pTHX_ HV* hv, I32 riter);
 PERL_CALLCONV void	Perl_hv_eiter_set(pTHX_ HV* hv, HE* eiter);
 PERL_CALLCONV char**	Perl_hv_name_p(pTHX_ HV* hv);
-PERL_CALLCONV void	Perl_hv_name_set(pTHX_ HV* hv, const char *, STRLEN len, int flags);
+PERL_CALLCONV void	Perl_hv_name_set(pTHX_ HV* hv, const char *, I32 len, int flags);
 PERL_CALLCONV I32*	Perl_hv_placeholders_p(pTHX_ HV* hv);
 PERL_CALLCONV I32	Perl_hv_placeholders_get(pTHX_ HV* hv);
 PERL_CALLCONV void	Perl_hv_placeholders_set(pTHX_ HV* hv, I32 ph);

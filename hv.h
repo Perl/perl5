@@ -34,7 +34,7 @@ struct hek {
    Don't access this directly.
 */
 struct xpvhv_aux {
-    char	*xhv_name;	/* name, if a symbol table */
+    HEK		*xhv_name;	/* name, if a symbol table */
     HE		*xhv_eiter;	/* current entry of iterator */
     I32		xhv_riter;	/* current root of iterator */
 };
@@ -224,11 +224,13 @@ C<SV*>.
 			 ((struct xpvhv_aux*)((XPVHV *)SvANY(hv))->xhv_aux)->xhv_riter : -1)
 #define HvEITER_get(hv)	(((XPVHV *)SvANY(hv))->xhv_aux ? \
 			 ((struct xpvhv_aux *)((XPVHV *)SvANY(hv))->xhv_aux)->xhv_eiter : 0)
-#define HvNAME(hv)	(*Perl_hv_name_p(aTHX_ (HV*)hv))
+#define HvNAME(hv)	HvNAME_get(hv)
 /* FIXME - all of these should use a UTF8 aware API, which should also involve
    getting the length. */
 #define HvNAME_get(hv)	(((XPVHV *)SvANY(hv))->xhv_aux ? \
-			 ((struct xpvhv_aux *)((XPVHV *)SvANY(hv))->xhv_aux)->xhv_name : 0)
+			 (((struct xpvhv_aux *)((XPVHV *)SvANY(hv))->xhv_aux)->xhv_name) ? HEK_KEY(((struct xpvhv_aux *)((XPVHV *)SvANY(hv))->xhv_aux)->xhv_name) : 0 : 0)
+#define HvNAMELEN_get(hv)	(((XPVHV *)SvANY(hv))->xhv_aux ? \
+			 (((struct xpvhv_aux *)((XPVHV *)SvANY(hv))->xhv_aux)->xhv_name) ? HEK_LEN(((struct xpvhv_aux *)((XPVHV *)SvANY(hv))->xhv_aux)->xhv_name) : 0 : 0)
 
 /* the number of keys (including any placeholers) */
 #define XHvTOTALKEYS(xhv)	((xhv)->xhv_keys)
