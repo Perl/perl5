@@ -11703,7 +11703,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* create (a non-shared!) shared string table */
     PL_strtab		= newHV();
     HvSHAREKEYS_off(PL_strtab);
-    hv_ksplit(PL_strtab, 512);
+    hv_ksplit(PL_strtab, HvTOTALKEYS(proto_perl->Istrtab));
     ptr_table_store(PL_ptr_table, proto_perl->Istrtab, PL_strtab);
 
     PL_compiling = proto_perl->Icompiling;
