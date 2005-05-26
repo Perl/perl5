@@ -86,7 +86,7 @@ Same as C<av_len()>.  Deprecated, use C<av_len()> instead.
 
 #define Nullav Null(AV*)
 
-#define AvARRAY(av)	((av)->sv_u.sv_array)
+#define AvARRAY(av)	((av)->sv_u.svu_array)
 #define AvALLOC(av)	(*((SV***)&((XPVAV*)  SvANY(av))->xav_alloc))
 #define AvMAX(av)	((XPVAV*)  SvANY(av))->xav_max
 #define AvFILLp(av)	((XPVAV*)  SvANY(av))->xav_fill

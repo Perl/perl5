@@ -1845,7 +1845,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     case SVt_NULL:
 	Perl_croak(aTHX_ "Can't upgrade to undef");
     case SVt_IV:
-	SvANY(sv) = (XPVIV*)((char*)&(sv->sv_u.sv_iv) - STRUCT_OFFSET(XPVIV, xiv_iv));
+	SvANY(sv) = (XPVIV*)((char*)&(sv->sv_u.svu_iv) - STRUCT_OFFSET(XPVIV, xiv_iv));
 	SvIV_set(sv, iv);
 	break;
     case SVt_NV:
@@ -1853,7 +1853,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	SvNV_set(sv, nv);
 	break;
     case SVt_RV:
-	SvANY(sv) = &sv->sv_u.sv_rv;
+	SvANY(sv) = &sv->sv_u.svu_rv;
 	SvRV_set(sv, (SV*)pv);
 	break;
     case SVt_PVHV:
@@ -3797,9 +3797,9 @@ Perl_sv_2bool(pTHX_ register SV *sv)
     if (SvPOKp(sv)) {
 	register XPV* Xpvtmp;
 	if ((Xpvtmp = (XPV*)SvANY(sv)) &&
-		(*sv->sv_u.sv_pv > '0' ||
+		(*sv->sv_u.svu_pv > '0' ||
 		Xpvtmp->xpv_cur > 1 ||
-		(Xpvtmp->xpv_cur && *sv->sv_u.sv_pv != '0')))
+		(Xpvtmp->xpv_cur && *sv->sv_u.svu_pv != '0')))
 	    return 1;
 	else
 	    return 0;
@@ -5760,9 +5760,9 @@ Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
        it would be unclear.  */
     if(SvTYPE(sv) == SVt_IV)
 	SvANY(sv)
-	    = (XPVIV*)((char*)&(sv->sv_u.sv_iv) - STRUCT_OFFSET(XPVIV, xiv_iv));
+	    = (XPVIV*)((char*)&(sv->sv_u.svu_iv) - STRUCT_OFFSET(XPVIV, xiv_iv));
     else if (SvTYPE(sv) == SVt_RV) {
-	SvANY(sv) = &sv->sv_u.sv_rv;
+	SvANY(sv) = &sv->sv_u.svu_rv;
     }
 	
 
@@ -8039,7 +8039,7 @@ Perl_sv_true(pTHX_ register SV *sv)
 	const register XPV* tXpv;
 	if ((tXpv = (XPV*)SvANY(sv)) &&
 		(tXpv->xpv_cur > 1 ||
-		(tXpv->xpv_cur && *sv->sv_u.sv_pv != '0')))
+		(tXpv->xpv_cur && *sv->sv_u.svu_pv != '0')))
 	    return 1;
 	else
 	    return 0;
@@ -10726,7 +10726,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvANY(dstr)	= NULL;
 	break;
     case SVt_IV:
-	SvANY(dstr)	= (XPVIV*)((char*)&(dstr->sv_u.sv_iv) - STRUCT_OFFSET(XPVIV, xiv_iv));
+	SvANY(dstr)	= (XPVIV*)((char*)&(dstr->sv_u.svu_iv) - STRUCT_OFFSET(XPVIV, xiv_iv));
 	SvIV_set(dstr, SvIVX(sstr));
 	break;
     case SVt_NV:
@@ -10734,7 +10734,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvNV_set(dstr, SvNVX(sstr));
 	break;
     case SVt_RV:
-	SvANY(dstr)	= &(dstr->sv_u.sv_rv);
+	SvANY(dstr)	= &(dstr->sv_u.svu_rv);
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	break;
     case SVt_PV:

@@ -213,7 +213,7 @@ C<SV*>.
 
 
 #define Nullhv Null(HV*)
-#define HvARRAY(hv)	(*(HE***)&((hv)->sv_u.sv_array))
+#define HvARRAY(hv)	(*(HE***)&((hv)->sv_u.svu_array))
 #define HvFILL(hv)	((XPVHV*)  SvANY(hv))->xhv_fill
 #define HvMAX(hv)	((XPVHV*)  SvANY(hv))->xhv_max
 #define HvRITER(hv)	(*Perl_hv_riter_p(aTHX_ (HV*)(hv)))
