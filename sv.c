@@ -10909,6 +10909,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvANY(dstr)	= new_XPVHV();
 	SvCUR_set(dstr, SvCUR(sstr));
 	SvLEN_set(dstr, SvLEN(sstr));
+	HvTOTALKEYS(dstr) = HvTOTALKEYS(sstr);
 	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
 	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
 	{
