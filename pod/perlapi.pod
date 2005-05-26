@@ -3053,7 +3053,8 @@ Found in file sv.h
 
 =item SvCUR_set
 
-Set the current length of the string which is in the SV.  See C<SvCUR>.
+Set the current length of the string which is in the SV.  See C<SvCUR>
+and C<SvIV_set>.
 
 	void	SvCUR_set(SV* sv, STRLEN len)
 
@@ -3217,7 +3218,10 @@ Found in file sv.h
 
 =item SvIV_set
 
-Set the value of the IV pointer in sv to val.
+Set the value of the IV pointer in sv to val.  It is possible to perform
+the same function of this macro with an lvalue assignment to C<SvIVX>.
+With future Perls, however, it will be more efficient to use 
+C<SvIV_set> instead of the lvalue assignment to C<SvIVX>.
 
 	void	SvIV_set(SV* sv, IV val)
 
@@ -3236,7 +3240,7 @@ Found in file sv.h
 
 =item SvLEN_set
 
-Set the actual length of the string which is in the SV.
+Set the actual length of the string which is in the SV.  See C<SvIV_set>.
 
 	void	SvLEN_set(SV* sv, STRLEN len)
 
@@ -3245,7 +3249,7 @@ Found in file sv.h
 
 =item SvMAGIC_set
 
-Set the value of the MAGIC pointer in sv to val.
+Set the value of the MAGIC pointer in sv to val.  See C<SvIV_set>.
 
 	void	SvMAGIC_set(SV* sv, MAGIC* val)
 
@@ -3359,7 +3363,7 @@ Found in file sv.h
 
 =item SvNV_set
 
-Set the value of the IV pointer in sv to val.
+Set the value of the NV pointer in sv to val.  See C<SvIV_set>.
 
 	void	SvNV_set(SV* sv, NV val)
 
@@ -3619,7 +3623,7 @@ Found in file sv.h
 
 =item SvPV_set
 
-Set the value of the PV pointer in sv to val.
+Set the value of the PV pointer in sv to val.  See C<SvIV_set>.
 
 	void	SvPV_set(SV* sv, char* val)
 
@@ -3691,7 +3695,7 @@ Found in file sv.h
 
 =item SvRV_set
 
-Set the value of the RV pointer in sv to val.
+Set the value of the RV pointer in sv to val.  See C<SvIV_set>.
 
 	void	SvRV_set(SV* sv, SV* val)
 
@@ -3709,7 +3713,7 @@ Found in file sv.h
 
 =item SvSTASH_set
 
-Set the value of the STASH pointer in sv to val.
+Set the value of the STASH pointer in sv to val.  See C<SvIV_set>.
 
 	void	SvSTASH_set(SV* sv, STASH* val)
 
@@ -3865,7 +3869,7 @@ Found in file sv.h
 
 =item SvUV_set
 
-Set the value of the PV pointer in sv to val.
+Set the value of the UV pointer in sv to val.  See C<SvIV_set>.
 
 	void	SvUV_set(SV* sv, UV val)
 

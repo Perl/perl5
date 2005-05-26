@@ -642,31 +642,35 @@ See C<SvCUR>.  Access the character as *(SvEND(sv)).
 Returns the stash of the SV.
 
 =for apidoc Am|void|SvIV_set|SV* sv|IV val
-Set the value of the IV pointer in sv to val.
+Set the value of the IV pointer in sv to val.  It is possible to perform
+the same function of this macro with an lvalue assignment to C<SvIVX>.
+With future Perls, however, it will be more efficient to use 
+C<SvIV_set> instead of the lvalue assignment to C<SvIVX>.
 
 =for apidoc Am|void|SvNV_set|SV* sv|NV val
-Set the value of the IV pointer in sv to val.
+Set the value of the NV pointer in sv to val.  See C<SvIV_set>.
 
 =for apidoc Am|void|SvPV_set|SV* sv|char* val
-Set the value of the PV pointer in sv to val.
+Set the value of the PV pointer in sv to val.  See C<SvIV_set>.
 
 =for apidoc Am|void|SvUV_set|SV* sv|UV val
-Set the value of the PV pointer in sv to val.
+Set the value of the UV pointer in sv to val.  See C<SvIV_set>.
 
 =for apidoc Am|void|SvRV_set|SV* sv|SV* val
-Set the value of the RV pointer in sv to val.
+Set the value of the RV pointer in sv to val.  See C<SvIV_set>.
 
 =for apidoc Am|void|SvMAGIC_set|SV* sv|MAGIC* val
-Set the value of the MAGIC pointer in sv to val.
+Set the value of the MAGIC pointer in sv to val.  See C<SvIV_set>.
 
 =for apidoc Am|void|SvSTASH_set|SV* sv|STASH* val
-Set the value of the STASH pointer in sv to val.
+Set the value of the STASH pointer in sv to val.  See C<SvIV_set>.
 
 =for apidoc Am|void|SvCUR_set|SV* sv|STRLEN len
-Set the current length of the string which is in the SV.  See C<SvCUR>.
+Set the current length of the string which is in the SV.  See C<SvCUR>
+and C<SvIV_set>.
 
 =for apidoc Am|void|SvLEN_set|SV* sv|STRLEN len
-Set the actual length of the string which is in the SV.
+Set the actual length of the string which is in the SV.  See C<SvIV_set>.
 
 =cut
 */
