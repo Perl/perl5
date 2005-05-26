@@ -813,6 +813,12 @@ sub installlib {
     # ignore the test extensions
     return if $dir =~ m{ext/XS/(?:APItest|Typemap)/};
 
+    # ignore READMEs, MANIFESTs, INSTALL docs, META.ymls and change logs.
+    # Changes.e2x and README.e2x are needed by enc2xs.
+    return if $name =~ m{^(?:README|MANIFEST|META\.yml|INSTALL)$};
+    return if $name =~ m{^(?:TODO|BUGS|CREDITS))$}i;
+    return if $name =~ m{^change(?:s|log)(?:\.libnet)?$}i;
+
     $name = "$dir/$name" if $dir ne '';
 
     my $installlib = $installprivlib;
