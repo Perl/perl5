@@ -28,6 +28,202 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.7		Maintenance release working toward v5.8.7
 --------------
 ____________________________________________________________________________
+[ 24600] By: nicholas                              on 2005/05/27  11:20:03
+        Log: Integrate:
+             [ 24360]
+             Fix [perl #35162] $SIG{__DIE__} = 'IGNORE' is base.pm is illegal
+             
+             [ 24585]
+             Subject: [PATCH] bytes.pm doesn't check undefined subroutine calling
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Thu, 26 May 2005 23:46:35 +0900
+             Message-Id: <20050526234321.92F1.BQW10602@nifty.com>
+     Branch: maint-5.8/perl
+	  !> lib/base.pm lib/bytes.pm lib/bytes.t
+____________________________________________________________________________
+[ 24599] By: nicholas                              on 2005/05/27  11:04:31
+        Log: Integrate:
+             [ 24579]
+             Subject: [PATCH] MPE/iX has no lchown()
+             From: Jarkko Hietaniemi <jhietaniemi@gmail.com>
+             Date: Thu, 26 May 2005 08:36:19 +0300
+             Message-Id: <42956053.4010200@gmail.com>
+     Branch: maint-5.8/perl
+	  !> hints/mpeix.sh
+____________________________________________________________________________
+[ 24598] By: nicholas                              on 2005/05/27  10:52:16
+        Log: Integrate:
+             [ 24541]
+             Subject: Re: [PATCH 5.8.7 RC1] lib/Carp.t todo for VMS
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: May 20, 2005 10:09 PM
+             Message-ID: <20050520200900.GB13473@windhund.schwern.org>
+     Branch: maint-5.8/perl
+	  !> lib/Carp.t
+____________________________________________________________________________
+[ 24597] By: nicholas                              on 2005/05/27  10:38:37
+        Log: Integrate:
+             [ 24317]
+             Fix typo, noticed by Randal Schwartz
+             
+             [ 24345]
+             Remove confusing punctuation
+             (spotted by David Rigaudiere)
+             
+             [ 24354]
+             Subject: [PATCH] Small patch to perlport.pod
+             From: Sébastien Aperghis-Tramoni <maddingue@free.fr>
+             Date: Thu, 28 Apr 2005 02:24:04 +0200
+             Message-Id: <D38E89F3-B77B-11D9-B91D-000502F3279F@free.fr>
+             
+             [ 24368]
+             Clarify the definition of the 'w' pack format, as suggested by
+             Alexey Toptygin.
+             
+             [ 24381]
+             document the internals of exception handling
+             
+             [ 24383]
+             Subject: [PATCH] perlvar.pod verbatim paragraph first line does not start with a space
+             From: Offer Kaye <offer.kaye@gmail.com>
+             Date: Wed, 4 May 2005 15:10:37 +0300
+             Message-Id: <56942505050405101bfe678d@mail.gmail.com>
+             
+             [ 24429]
+             Update the comment describing arenas.
+             
+             [ 24430]
+             Fix typo (bug #35368)
+             
+             [ 24437]
+             Subject: [PATCH] perlop.pod nit
+             From: Steve Peters <steve@fisharerojo.org>
+             Date: Tue, 10 May 2005 09:41:01 -0500
+             Message-Id: <20050510144101.GA21362@mccoy.peters.homeunix.org>
+             
+             [ 24449]
+             Subject: [perl #33765] [PATCH] perlop: mention why 'print !!0' doesn't 
+             From: Steve Peters via RT <perlbug-followup@perl.org>
+             Date: 11 May 2005 16:58:22 -0000
+             Message-Id: <rt-3.0.11-33765-112475.14.5633321030279@perl.org>
+             
+             Subject: [perl #33766] [PATCH] perldoc -f split lacks basic null example 
+             From: Steve Peters via RT <perlbug-followup@perl.org>
+             Date: 11 May 2005 17:13:29 -0000
+             Message-Id: <rt-3.0.11-33766-112476.1.84217630998887@perl.org>
+             
+             [ 24450]
+             Rework documentation of split(//,...)
+             
+             [ 24493]
+             Clarify definition of octal literals
+             (thanks to Olivier Blin)
+             
+             [ 24496]
+             Subject: [PATCH] Eliminate radically out of date CHANGES from perlport
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 16 May 2005 15:17:05 -0700
+             Message-ID: <20050516221705.GA212@windhund.schwern.org>
+             
+             Subject: [PATCH] Eliminate function signatures from perlport
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 16 May 2005 15:24:18 -0700
+             Message-ID: <20050516222418.GA422@windhund.schwern.org>
+             
+             [ 24516]
+             Fix a typo
+             
+             [ 24563]
+             Documentation nit on @-, found by Guillaume Rousse
+             (plus POD markup simplification, for readability with pod2text)
+             
+             [ 24564]
+             Correct the description of pte_arenaroot
+             
+             [ 24593]
+             Subject: [PATCH] Re: [perl #35420] localtime corruption
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Thu, 26 May 2005 13:39:38 -0700
+             Message-ID: <20050526203938.GG11558@windhund.schwern.org>
+     Branch: maint-5.8/perl
+	  !> hv.h intrpvar.h pod/perldata.pod pod/perlfunc.pod
+	  !> pod/perlhack.pod pod/perlop.pod pod/perlport.pod
+	  !> pod/perlreftut.pod pod/perlsyn.pod pod/perlvar.pod sv.c
+____________________________________________________________________________
+[ 24589] By: nicholas                              on 2005/05/26  15:41:38
+        Log: Integrate:
+             [ 24517]
+             Upgrade to Math::BigInt 1.77
+     Branch: maint-5.8/perl
+	  !> lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	  !> lib/Math/BigInt/Calc.pm lib/Math/BigInt/t/bare_mbi.t
+	  !> lib/Math/BigInt/t/bigfltpm.inc lib/Math/BigInt/t/bigintpm.inc
+	  !> lib/Math/BigInt/t/bigintpm.t lib/Math/BigInt/t/sub_mbi.t
+____________________________________________________________________________
+[ 24587] By: nicholas                              on 2005/05/26  15:26:52
+        Log: Subject: [PATCH] perl587delta.pod - missing "=" in item
+             From: Offer Kaye <offer.kaye@gmail.com>
+             Message-ID: <5694250505220218e21b8ee@mail.gmail.com>
+             Date: Sun, 22 May 2005 12:18:34 +0300
+     Branch: maint-5.8/perl
+	   ! pod/perl587delta.pod
+____________________________________________________________________________
+[ 24586] By: nicholas                              on 2005/05/26  15:24:59
+        Log: Not the RC any more
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 24515] By: nicholas                              on 2005/05/20  16:42:19
+        Log: The dangers of cut and paste
+     Branch: maint-5.8/perl
+	   ! pod/perlhist.pod
+____________________________________________________________________________
+[ 24502] By: nicholas                              on 2005/05/18  16:08:53
+        Log: Making history (1 line at a time)
+     Branch: maint-5.8/perl
+	   ! pod/perlhist.pod
+____________________________________________________________________________
+[ 24494] By: nicholas                              on 2005/05/17  16:17:16
+        Log: Integrate:
+             [ 24231]
+             Upgrade to Encode 2.0902
+             
+             [ 24490]
+             Upgrade to Encode 2.10
+     Branch: maint-5.8/perl
+	  +> ext/Encode/t/utf8strict.t
+	   ! pod/perl587delta.pod
+	  !> MANIFEST ext/Encode/AUTHORS ext/Encode/Changes
+	  !> ext/Encode/Encode.pm ext/Encode/Encode.xs
+	  !> ext/Encode/Encode/encode.h ext/Encode/MANIFEST
+	  !> ext/Encode/META.yml ext/Encode/lib/Encode/Alias.pm
+	  !> ext/Encode/t/Aliases.t ext/Encode/t/fallback.t
+____________________________________________________________________________
+[ 24488] By: nicholas                              on 2005/05/16  16:04:43
+        Log: D'oh. Steve puts me right once more.
+     Branch: maint-5.8/perl
+	   ! pod/perl587delta.pod
+____________________________________________________________________________
+[ 24487] By: nicholas                              on 2005/05/16  15:46:10
+        Log: Summon more, different, fruit.
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 24486] By: nicholas                              on 2005/05/16  15:36:13
+        Log: Update perldelta.
+     Branch: maint-5.8/perl
+	   ! pod/perl587delta.pod
+____________________________________________________________________________
+[ 24485] By: nicholas                              on 2005/05/16  15:35:24
+        Log: ++$Carp::VERSION;
+     Branch: maint-5.8/perl
+	   ! lib/Carp.pm
+____________________________________________________________________________
+[ 24484] By: nicholas                              on 2005/05/16  15:28:58
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 24483] By: nicholas                              on 2005/05/16  15:19:24
         Log: Integrate:
              [ 24347]
