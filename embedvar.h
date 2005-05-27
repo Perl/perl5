@@ -387,6 +387,8 @@
 #define PL_psig_name		(PERL_GET_INTERP->Ipsig_name)
 #define PL_psig_pend		(PERL_GET_INTERP->Ipsig_pend)
 #define PL_psig_ptr		(PERL_GET_INTERP->Ipsig_ptr)
+#define PL_pte_arenaroot	(PERL_GET_INTERP->Ipte_arenaroot)
+#define PL_pte_root		(PERL_GET_INTERP->Ipte_root)
 #define PL_ptr_table		(PERL_GET_INTERP->Iptr_table)
 #define PL_reentrant_buffer	(PERL_GET_INTERP->Ireentrant_buffer)
 #define PL_reentrant_retint	(PERL_GET_INTERP->Ireentrant_retint)
