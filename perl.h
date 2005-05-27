@@ -3957,8 +3957,8 @@ struct tempsym; /* defined in pp_pack.c */
 #endif
 #undef PERL_CKDEF
 #undef PERL_PPDEF
-#define PERL_CKDEF(s)	OP *s (pTHX_ OP *o);
-#define PERL_PPDEF(s)	OP *s (pTHX);
+#define PERL_CKDEF(s)	PERL_CALLCONV OP *s (pTHX_ OP *o);
+#define PERL_PPDEF(s)	PERL_CALLCONV OP *s (pTHX);
 
 #include "proto.h"
 
