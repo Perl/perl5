@@ -578,5 +578,5 @@ PERLVARI(Isuidscript, int, -1)	/* fd for suid script */
 
 #if defined(USE_ITHREADS)
 PERLVAR(Ipte_root,	struct ptr_tbl_ent *)	/* free ptr_tbl_ent list */
-PERLVAR(Ipte_arenaroot,	XPV*)		/* list of allocated he areas */
+PERLVAR(Ipte_arenaroot,	XPV*)		/* list of allocated pte areas */
 #endif

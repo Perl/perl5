@@ -541,9 +541,9 @@ C<$-[>I<n>C<]> is the offset of the start of the substring matched by
 I<n>-th subpattern, or undef if the subpattern did not match.
 
 Thus after a match against $_, $& coincides with C<substr $_, $-[0],
-$+[0] - $-[0]>.  Similarly, C<$>I<n> coincides with C<substr $_, $-[>I<n>C<],
-$+[>I<n>C<] - $-[>I<n>C<]> if C<$-[>I<n>C<]> is defined, and $+ coincides with
-C<substr $_, $-[$#-], $+[$#-]>.  One can use C<$#-> to find the last
+$+[0] - $-[0]>.  Similarly, $I<n> coincides with C<substr $_, $-[n],
+$+[n] - $-[n]> if C<$-[n]> is defined, and $+ coincides with
+C<substr $_, $-[$#-], $+[$#-] - $-[$#-]>.  One can use C<$#-> to find the last
 matched subgroup in the last successful match.  Contrast with
 C<$#+>, the number of subgroups in the regular expression.  Compare
 with C<@+>.
@@ -1224,7 +1224,7 @@ executable files do not require use of the suffix when invoking
 a command.  To convert the value of $^X to a path name, use the
 following statements:
 
-# Build up a set of file names (not command names).
+  # Build up a set of file names (not command names).
   use Config;
   $this_perl = $^X;
   if ($^O ne 'VMS')
@@ -1441,7 +1441,7 @@ C<$@> is set if the string to be C<eval>-ed did not compile (this
 may happen if C<open> or C<close> were imported with bad prototypes),
 or if Perl code executed during evaluation die()d .  In these cases
 the value of $@ is the compile error, or the argument to C<die>
-(which will interpolate C<$!> and C<$?>!).  (See also L<Fatal>,
+(which will interpolate C<$!> and C<$?>).  (See also L<Fatal>,
 though.)
 
 When the eval() expression above is executed, open(), C<< <PIPE> >>,

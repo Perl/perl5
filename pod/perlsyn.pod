@@ -105,6 +105,9 @@ as the last item in a statement.
 
 The number 0, the strings C<'0'> and C<''>, the empty list C<()>, and
 C<undef> are all false in a boolean context. All other values are true.
+Negation of a true value by C<!> or C<not> returns a special false value.
+When evaluated as a string it is treated as C<''>, but as a number, it
+is treated as 0.
 
 =head2 Statement Modifiers
 
