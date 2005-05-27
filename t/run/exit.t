@@ -32,29 +32,36 @@ is( ${^CHILD_ERROR_NATIVE}, 0,  'Normal exit ${^CHILD_ERROR_NATIVE}' );
 
 if ($^O ne 'VMS') {
   my $posix_ok = eval { require POSIX; };
+  my $wait_macros_ok = defined &POSIX::WIFEXITED;
 
   $exit = run('exit 42');
   is( $exit >> 8, 42,             'Non-zero exit' );
   is( $exit, $?,                  'Non-zero exit $?' );
   isnt( !${^CHILD_ERROR_NATIVE}, 0, 'Non-zero exit ${^CHILD_ERROR_NATIVE}' );
- SKIP: {
-      skip("No POSIX", 3) unless $posix_ok;
-      ok(POSIX::WIFEXITED(${^CHILD_ERROR_NATIVE}), "WIFEXITED");
-      ok(!POSIX::WIFSIGNALED(${^CHILD_ERROR_NATIVE}), "WIFSIGNALED");
-      is(POSIX::WEXITSTATUS(${^CHILD_ERROR_NATIVE}), 42, "WEXITSTATUS");
+  SKIP: {
+    skip("No POSIX", 3) unless $posix_ok;
+    skip("No POSIX wait macros", 3) unless $wait_macros_ok;
+    ok(POSIX::WIFEXITED(${^CHILD_ERROR_NATIVE}), "WIFEXITED");
+    ok(!POSIX::WIFSIGNALED(${^CHILD_ERROR_NATIVE}), "WIFSIGNALED");
+    is(POSIX::WEXITSTATUS(${^CHILD_ERROR_NATIVE}), 42, "WEXITSTATUS");
   }
 
-  $exit = run('kill 15, $$; sleep(1);');
+  SKIP: {
+    skip("Skip signals and core dump tests on Win32", 7) if $^O eq 'MSWin32';
 
-  is( $exit & 127, 15,            'Term by signal' );
-  ok( !($exit & 128),             'No core dump' );
-  is( $? & 127, 15,               'Term by signal $?' );
-  isnt( ${^CHILD_ERROR_NATIVE},  0, 'Term by signal ${^CHILD_ERROR_NATIVE}' );
- SKIP: {
+    $exit = run('kill 15, $$; sleep(1);');
+
+    is( $exit & 127, 15,            'Term by signal' );
+    ok( !($exit & 128),             'No core dump' );
+    is( $? & 127, 15,               'Term by signal $?' );
+    isnt( ${^CHILD_ERROR_NATIVE},  0, 'Term by signal ${^CHILD_ERROR_NATIVE}' );
+    SKIP: {
       skip("No POSIX", 3) unless $posix_ok;
+      skip("No POSIX wait macros", 3) unless $wait_macros_ok;
       ok(!POSIX::WIFEXITED(${^CHILD_ERROR_NATIVE}), "WIFEXITED");
       ok(POSIX::WIFSIGNALED(${^CHILD_ERROR_NATIVE}), "WIFSIGNALED");
       is(POSIX::WTERMSIG(${^CHILD_ERROR_NATIVE}), 15, "WTERMSIG");
+    }
   }
 
 } else {
