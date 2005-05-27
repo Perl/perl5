@@ -227,6 +227,8 @@ C<SV*>.
 #define HvNAME(hv)	HvNAME_get(hv)
 /* FIXME - all of these should use a UTF8 aware API, which should also involve
    getting the length. */
+/* This macro may go away without notice.  */
+#define HvNAME_HEK(hv) (((XPVHV *)SvANY(hv))->xhv_aux && (((struct xpvhv_aux *)((XPVHV *)SvANY(hv))->xhv_aux)->xhv_name) ? ((struct xpvhv_aux *)((XPVHV *)SvANY(hv))->xhv_aux)->xhv_name: 0)
 #define HvNAME_get(hv)	(((XPVHV *)SvANY(hv))->xhv_aux ? \
 			 (((struct xpvhv_aux *)((XPVHV *)SvANY(hv))->xhv_aux)->xhv_name) ? HEK_KEY(((struct xpvhv_aux *)((XPVHV *)SvANY(hv))->xhv_aux)->xhv_name) : 0 : 0)
 #define HvNAMELEN_get(hv)	(((XPVHV *)SvANY(hv))->xhv_aux ? \
