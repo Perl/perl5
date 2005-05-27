@@ -992,9 +992,11 @@
 #define ptr_table_free		Perl_ptr_table_free
 #  if defined(HAVE_INTERP_INTERN)
 #define sys_intern_dup		Perl_sys_intern_dup
+#  endif
+#endif
+#if defined(HAVE_INTERP_INTERN)
 #define sys_intern_clear	Perl_sys_intern_clear
 #define sys_intern_init		Perl_sys_intern_init
-#  endif
 #endif
 #define custom_op_name		Perl_custom_op_name
 #define custom_op_desc		Perl_custom_op_desc
@@ -2971,9 +2973,11 @@
 #define ptr_table_free(a)	Perl_ptr_table_free(aTHX_ a)
 #  if defined(HAVE_INTERP_INTERN)
 #define sys_intern_dup(a,b)	Perl_sys_intern_dup(aTHX_ a,b)
+#  endif
+#endif
+#if defined(HAVE_INTERP_INTERN)
 #define sys_intern_clear()	Perl_sys_intern_clear(aTHX)
 #define sys_intern_init()	Perl_sys_intern_init(aTHX)
-#  endif
 #endif
 #define custom_op_name(a)	Perl_custom_op_name(aTHX_ a)
 #define custom_op_desc(a)	Perl_custom_op_desc(aTHX_ a)

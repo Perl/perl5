@@ -1758,9 +1758,11 @@ PERL_CALLCONV void	Perl_sys_intern_dup(pTHX_ struct interp_intern* src, struct i
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
+#  endif
+#endif
+#if defined(HAVE_INTERP_INTERN)
 PERL_CALLCONV void	Perl_sys_intern_clear(pTHX);
 PERL_CALLCONV void	Perl_sys_intern_init(pTHX);
-#  endif
 #endif
 
 PERL_CALLCONV char *	Perl_custom_op_name(pTHX_ const OP* op)

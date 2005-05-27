@@ -953,9 +953,11 @@ Ap	|void	|ptr_table_clear|PTR_TBL_t *tbl
 Ap	|void	|ptr_table_free|PTR_TBL_t *tbl
 #  if defined(HAVE_INTERP_INTERN)
 Ap	|void	|sys_intern_dup	|NN struct interp_intern* src|NN struct interp_intern* dst
+#  endif
+#endif
+#if defined(HAVE_INTERP_INTERN)
 Ap	|void	|sys_intern_clear
 Ap	|void	|sys_intern_init
-#  endif
 #endif
 
 Ap	|char *	|custom_op_name	|NN const OP* op
