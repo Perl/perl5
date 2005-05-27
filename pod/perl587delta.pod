@@ -52,7 +52,15 @@ B upgraded to version 1.09
 
 =item *
 
+base upgraded to version 2.07
+
+=item *
+
 bignum upgraded to version 0.17
+
+=item *
+
+bytes upgraded to version 1.02
 
 =item *
 
@@ -108,7 +116,7 @@ IO::Socket upgraded to version 1.28
 
 =item *
 
-Math::BigInt upgraded to version 1.76
+Math::BigInt upgraded to version 1.77
 
 =item *
 
