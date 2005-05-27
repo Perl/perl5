@@ -3160,9 +3160,6 @@ portable
 
 =item CPAN Testers
 
-Mailing list: cpan-testers@perl.org, Testing results:
-http://testers.cpan.org/
-
 =item PLATFORMS
 
 =over 4
@@ -3191,42 +3188,21 @@ http://testers.cpan.org/
 
 =item Alphabetical Listing of Perl Functions
 
--I<X> FILEHANDLE, -I<X> EXPR, -I<X>, binmode FILEHANDLE, chmod LIST, chown
-LIST, chroot FILENAME, chroot, crypt PLAINTEXT,SALT, dbmclose HASH, dbmopen
-HASH,DBNAME,MODE, dump LABEL, exec LIST, exit EXPR, exit, fcntl
-FILEHANDLE,FUNCTION,SCALAR, flock FILEHANDLE,OPERATION, fork, getlogin,
-getpgrp PID, getppid, getpriority WHICH,WHO, getpwnam NAME, getgrnam NAME,
-getnetbyname NAME, getpwuid UID, getgrgid GID, getnetbyaddr ADDR,ADDRTYPE,
-getprotobynumber NUMBER, getservbyport PORT,PROTO, getpwent, getgrent,
-gethostbyname, gethostent, getnetent, getprotoent, getservent, sethostent
-STAYOPEN, setnetent STAYOPEN, setprotoent STAYOPEN, setservent STAYOPEN,
-endpwent, endgrent, endhostent, endnetent, endprotoent, endservent,
-getsockopt SOCKET,LEVEL,OPTNAME, glob EXPR, glob, ioctl
-FILEHANDLE,FUNCTION,SCALAR, kill SIGNAL, LIST, link OLDFILE,NEWFILE, lstat
-FILEHANDLE, lstat EXPR, lstat, msgctl ID,CMD,ARG, msgget KEY,FLAGS, msgsnd
-ID,MSG,FLAGS, msgrcv ID,VAR,SIZE,TYPE,FLAGS, open FILEHANDLE,EXPR, open
-FILEHANDLE, pipe READHANDLE,WRITEHANDLE, readlink EXPR, readlink, rename
-OLDNAME,NEWNAME, select RBITS,WBITS,EBITS,TIMEOUT, semctl
-ID,SEMNUM,CMD,ARG, semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, setgrent,
-setpgrp PID,PGRP, setpriority WHICH,WHO,PRIORITY, setpwent, setsockopt
-SOCKET,LEVEL,OPTNAME,OPTVAL, shmctl ID,CMD,ARG, shmget KEY,SIZE,FLAGS,
-shmread ID,VAR,POS,SIZE, shmwrite ID,STRING,POS,SIZE, sockatmark SOCKET,
-socketpair SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL, stat FILEHANDLE, stat
-EXPR, stat, symlink OLDFILE,NEWFILE, syscall LIST, sysopen
-FILEHANDLE,FILENAME,MODE,PERMS, system LIST, times, truncate
-FILEHANDLE,LENGTH, truncate EXPR,LENGTH, umask EXPR, umask, utime LIST,
-wait, waitpid PID,FLAGS
+-I<X>, atan2, binmode, chmod, chown, chroot, crypt, dbmclose, dbmopen,
+dump, exec, exit, fcntl, flock, fork, getlogin, getpgrp, getppid,
+getpriority, getpwnam, getgrnam, getnetbyname, getpwuid, getgrgid,
+getnetbyaddr, getprotobynumber, getservbyport, getpwent, getgrent,
+gethostbyname, gethostent, getnetent, getprotoent, getservent, sethostent,
+setnetent, setprotoent, setservent, endpwent, endgrent, endhostent,
+endnetent, endprotoent, endservent, getsockopt SOCKET,LEVEL,OPTNAME, glob,
+gmtime, ioctl FILEHANDLE,FUNCTION,SCALAR, kill, link, localtime, lstat,
+msgctl, msgget, msgsnd, msgrcv, open, pipe, readlink, rename, select,
+semctl, semget, semop, setgrent, setpgrp, setpriority, setpwent,
+setsockopt, shmctl, shmget, shmread, shmwrite, sockatmark, socketpair,
+stat, symlink, syscall, sysopen, system, times, truncate, umask, utime,
+wait, waitpid
 
 =back
-
-=item CHANGES
-
-v1.48, 02 February 2001, v1.47, 22 March 2000, v1.46, 12 February 2000,
-v1.45, 20 December 1999, v1.44, 19 July 1999, v1.43, 24 May 1999, v1.42, 22
-May 1999, v1.41, 19 May 1999, v1.40, 11 April 1999, v1.39, 11 February
-1999, v1.38, 31 December 1998, v1.37, 19 December 1998, v1.36, 9 September
-1998, v1.35, 13 August 1998, v1.33, 06 August 1998, v1.32, 05 August 1998,
-v1.30, 03 August 1998, v1.23, 10 July 1998
 
 =item Supported Platforms
 
@@ -5025,7 +5001,7 @@ Core modules, Tests, Documentation, Configure, Interpreter
 
 =item Elements of the interpreter
 
-Startup, Parsing, Optimization, Running
+Startup, Parsing, Optimization, Running, Exception handing
 
 =item Internal Variable Types
 
@@ -5354,11 +5330,27 @@ B<-V>
 
 =item Core Enhancements
 
+=over 4
+
+=item Unicode Character Database 4.1.0
+
+=item suidperl less insecure
+
+=item Optional site customization script
+
+=item C<Config.pm> is now much smaller.
+
+=back
+
 =item Modules and Pragmata
 
 =item Utility Changes
 
-=item New Documentation
+=over 4
+
+=item find2perl enhancements
+
+=back
 
 =item Performance Enhancements
 
@@ -5370,11 +5362,7 @@ B<-V>
 
 =item Changed Internals
 
-=item New Tests
-
 =item Known Problems
-
-=item Platform Specific Problems
 
 =item Reporting Bugs
 
@@ -5392,11 +5380,27 @@ B<-V>
 
 =item Core Enhancements
 
+=over 4
+
+=item Unicode Character Database 4.1.0
+
+=item suidperl less insecure
+
+=item Optional site customization script
+
+=item C<Config.pm> is now much smaller.
+
+=back
+
 =item Modules and Pragmata
 
 =item Utility Changes
 
-=item New Documentation
+=over 4
+
+=item find2perl enhancements
+
+=back
 
 =item Performance Enhancements
 
@@ -5408,11 +5412,7 @@ B<-V>
 
 =item Changed Internals
 
-=item New Tests
-
 =item Known Problems
-
-=item Platform Specific Problems
 
 =item Reporting Bugs
 
@@ -12382,6 +12382,8 @@ Goal #1:, Goal #2:, Goal #3:, Goal #4:
 is_utf8(STRING [, CHECK]), _utf8_on(STRING), _utf8_off(STRING)
 
 =back
+
+=item UTF-8 vs. utf8
 
 =item SEE ALSO
 
@@ -20231,12 +20233,15 @@ C<All tests successful.\nFiles=%d,  Tests=%d, %s>, C<FAILED tests
 %d)>, C<Failed 1 test, %.2f%% okay. %s>, C<Failed %d/%d tests, %.2f%% okay.
 %s>, C<FAILED--Further testing stopped: %s>
 
-=item ENVIRONMENT
+=item ENVIRONMENT VARIABLES THAT TEST::HARNESS SETS
 
-C<HARNESS_ACTIVE>, C<HARNESS_COLUMNS>, C<HARNESS_COMPILE_TEST>,
-C<HARNESS_DEBUG>, C<HARNESS_FILELEAK_IN_DIR>, C<HARNESS_IGNORE_EXITCODE>,
-C<HARNESS_NOTTY>, C<HARNESS_PERL>, C<HARNESS_PERL_SWITCHES>,
-C<HARNESS_VERBOSE>
+C<HARNESS_ACTIVE>, C<HARNESS_VERSION>
+
+=item ENVIRONMENT VARIABLES THAT AFFECT TEST::HARNESS
+
+C<HARNESS_COLUMNS>, C<HARNESS_COMPILE_TEST>, C<HARNESS_DEBUG>,
+C<HARNESS_FILELEAK_IN_DIR>, C<HARNESS_IGNORE_EXITCODE>, C<HARNESS_NOTTY>,
+C<HARNESS_PERL>, C<HARNESS_PERL_SWITCHES>, C<HARNESS_VERBOSE>
 
 =item EXAMPLE
 
@@ -20296,6 +20301,36 @@ C<HARNESS_VERBOSE>
 
 =back
 
+=head2 Test::Harness::Point - object for tracking a single test point
+
+=over 4
+
+=item SYNOPSIS
+
+=item CONSTRUCTION
+
+=over 4
+
+=item new()
+
+=back
+
+=back
+
+=over 4
+
+=item from_test_line( $line )
+
+=back
+
+=over 4
+
+=item ACCESSORS
+
+ok, number
+
+=back
+
 =head2 Test::Harness::Straps - detailed analysis of test results
 
 =over 4
@@ -20304,11 +20339,11 @@ C<HARNESS_VERBOSE>
 
 =item DESCRIPTION
 
-=item Construction
+=item CONSTRUCTION
 
 =over 4
 
-=item C<new>
+=item new()
 
 =back
 
@@ -20316,13 +20351,13 @@ C<HARNESS_VERBOSE>
 
 =over 4
 
-=item C<_init>
+=item $strap->_init
 
 =back
 
 =over 4
 
-=item Analysis
+=item ANALYSIS
 
 =over 4
 
@@ -20334,55 +20369,55 @@ C<HARNESS_VERBOSE>
 
 =over 4
 
-=item C<analyze_fh>
+=item $strap->analyze_fh( $name, $test_filehandle )
 
 =back
 
 =over 4
 
-=item C<analyze_file>
+=item $strap->analyze_file( $test_file )
 
 =back
 
 =over 4
 
-=item C<_command_line( $file )>
+=item $strap->_command_line( $file )
 
 =back
 
 =over 4
 
-=item C<_command>
+=item $strap->_command()
 
 =back
 
 =over 4
 
-=item C<_switches>
+=item $strap->_switches( $file )
 
 =back
 
 =over 4
 
-=item C<_cleaned_switches>
+=item $strap->_cleaned_switches( @switches_from_user )
 
 =back
 
 =over 4
 
-=item C<_INC2PERL5LIB>
+=item $strap->_INC2PERL5LIB
 
 =back
 
 =over 4
 
-=item C<_filtered_INC>
+=item $strap->_filtered_INC()
 
 =back
 
 =over 4
 
-=item C<_restore_PERL5LIB>
+=item $strap->_restore_PERL5LIB()
 
 =back
 
@@ -20392,7 +20427,7 @@ C<HARNESS_VERBOSE>
 
 =over 4
 
-=item C<_is_comment>
+=item C<_is_diagnostic>
 
 =back
 
@@ -20401,12 +20436,6 @@ C<HARNESS_VERBOSE>
 =over 4
 
 =item C<_is_header>
-
-=back
-
-=over 4
-
-=item C<_is_test>
 
 =back
 
@@ -20440,27 +20469,71 @@ C<HARNESS_VERBOSE>
 
 =item SYNOPSIS
 
-=item TERMINOLOGY
+=item TODO
 
 =item THE TAP FORMAT
 
+=item HARNESS BEHAVIOR
+
+=item TESTS LINES AND THE PLAN
+
 =over 4
 
-=item The test script output
+=item The plan
 
-B<"1..M">, B<'ok', 'not ok'.  Ok?>, B<test numbers>, B<test labels>,
-B<Skipping tests>, B<Todo tests>, B<Bail out!>, B<Comments>, B<Anything
-else>
+=item The test line
+
+C<ok> or C<not ok>, Test number, Description, Directive, ok/not ok
+(required), Test number (recommended), Description (recommended), Directive
+(only when necessary)
 
 =back
 
-=item DESCRIPTION
+=item DIRECTIVES
 
-=item RATIONALE
+=over 4
 
-=item ACKNOWLEDGEMENTS
+=item TODO tests
+
+=item Skipping tests
+
+=back
+
+=item OTHER LINES
+
+=over 4
+
+=item Bail out!
+
+=item Diagnostics
+
+=item Anything else
+
+=back
+
+=item EXAMPLES
+
+=over 4
+
+=item Common with explanation
+
+=item Unknown amount and failures
+
+=item Giving up
+
+=item Skipping a few
+
+=item Skipping everything
+
+=item Got spare tuits?
+
+=item Creative liberties
+
+=back
 
 =item AUTHORS
+
+=item ACKNOWLEDGEMENTS
 
 =item COPYRIGHT
 

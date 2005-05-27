@@ -434,8 +434,8 @@ ext/Encode/t/Mod_EUCJP.pm	module that t/enc_module.enc uses
 ext/Encode/t/perlio.t		test script
 ext/Encode/t/rt.pl		test script
 ext/Encode/t/unibench.pl	benchmark script
-ext/Encode/t/utf8strict.t	test script
 ext/Encode/t/Unicode.t		test script
+ext/Encode/t/utf8strict.t	test script
 ext/Encode/TW/Makefile.PL	Encode extension
 ext/Encode/TW/TW.pm		Encode extension
 ext/Encode/ucm/8859-10.ucm	Unicode Character Map
@@ -1798,8 +1798,8 @@ lib/Test/Harness/Assert.pm	Test::Harness::Assert (internal use only)
 lib/Test/Harness/bin/prove	The prove harness utility
 lib/Test/Harness/Changes	Test::Harness
 lib/Test/Harness/Iterator.pm	Test::Harness::Iterator (internal use only)
-lib/Test/Harness/Point.pm	Test::Harness::Point (internal use only)
 lib/Test/Harness.pm		A test harness
+lib/Test/Harness/Point.pm	Test::Harness::Point (internal use only)
 lib/Test/Harness/Straps.pm	Test::Harness::Straps
 lib/Test/Harness/t/00compile.t	Test::Harness test
 lib/Test/Harness/TAP.pod	Documentation for the Test Anything Protocol
@@ -2417,7 +2417,6 @@ README.micro			Notes about microperl
 README.mint			Perl notes for MiNT
 README.mpeix			Perl notes for MPE/iX
 README.netware			Perl notes for NetWare
-README.openbsd			Perl notes for OpenBSD
 README.os2			Perl notes for OS/2
 README.os390			Perl notes for OS/390
 README.os400			Perl notes for OS/400
