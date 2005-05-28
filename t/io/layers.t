@@ -215,7 +215,7 @@ SKIP: {
     # Check that PL_sigwarn's reference count is correct, and that 
     # &PerlIO::Layer::NoWarnings isn't prematurely freed.
     fresh_perl_like (<<'EOT', qr/^CODE/);
-open(UTF, "<:raw:encoding(utf8)", $^X) or die $!;
+open(UTF, "<:raw:encoding(utf8)", "afile") or die $!;
 print ref *PerlIO::Layer::NoWarnings{CODE};
 EOT
 

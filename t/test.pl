@@ -390,6 +390,10 @@ sub _quote_args {
 sub _create_runperl { # Create the string to qx in runperl().
     my %args = @_;
     my $runperl = $^X =~ m/\s/ ? qq{"$^X"} : $^X;
+    #- this allows, for example, to set PERL_RUNPERL_DEBUG=/usr/bin/valgrind
+    if ($ENV{PERL_RUNPERL_DEBUG}) {
+	$runperl = "$ENV{PERL_RUNPERL_DEBUG} $runperl";
+    }
     unless ($args{nolib}) {
 	if ($is_macos) {
 	    $runperl .= ' -I::lib';

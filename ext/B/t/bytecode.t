@@ -68,9 +68,10 @@ EOT
 	}
     }
     print <<"EOT";
+not ok $cnt
 --------- SCRIPT
 $script
---------- $?
+--------- \$\? = $?
 $got
 EOT
 } continue {

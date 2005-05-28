@@ -134,6 +134,23 @@ my $TEST = catfile(curdir(), 'TEST');
 {
     $ENV{'DCL$PATH'} = '' if $Is_VMS;
 
+    if ($Is_MSWin32 && $Config{ccname} =~ /bcc32/ && ! -f 'cc3250mt.dll') {
+	my $bcc_dir;
+	foreach my $dir (split /$Config{path_sep}/, $ENV{PATH}) {
+	    if (-f "$dir/cc3250mt.dll") {
+		$bcc_dir = $dir and last;
+	    }
+	}
+	if (defined $bcc_dir) {
+	    require File::Copy;
+	    File::Copy::copy("$bcc_dir/cc3250mt.dll", '.') or
+		die "$0: failed to copy cc3250mt.dll: $!\n";
+	    eval q{
+		END { unlink "cc3250mt.dll" }
+	    };
+	}
+    }
+
     $ENV{PATH} = '';
     delete @ENV{@MoreEnv};
     $ENV{TERM} = 'dumb';

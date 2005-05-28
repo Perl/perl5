@@ -358,7 +358,7 @@ if ($Is_miniperl) {
 
 # Make sure Errno hasn't been prematurely autoloaded
 
-   ok !defined %Errno::;
+   ok !keys %Errno::;
 
 # Test auto-loading of Errno when %! is used
 
