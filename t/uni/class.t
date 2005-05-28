@@ -57,13 +57,15 @@ is(($str =~ /(\p{Script=InGreek}+)/)[0], "\x{038B}\x{038C}\x{038D}");
 is(($str =~ /(\p{sc:InGreek}+)/)[0], "\x{038B}\x{038C}\x{038D}");
 is(($str =~ /(\p{sc=InGreek}+)/)[0], "\x{038B}\x{038C}\x{038D}");
 
-
 use File::Spec;
 my $updir = File::Spec->updir;
 
-
 # the %utf8::... hashes are already in existence
 # because utf8_pva.pl was run by utf8_heavy.pl
+
+*utf8::PropertyAlias = *utf8::PropertyAlias; # thwart a warning
+
+no warnings 'utf8'; # we do not want warnings about surrogates etc
 
 # non-General Category and non-Script
 while (my ($abbrev, $files) = each %utf8::PVA_abbr_map) {
@@ -77,7 +79,7 @@ while (my ($abbrev, $files) = each %utf8::PVA_abbr_map) {
     );
 
     next unless -e $filename;
-    my ($h1, $h2) = map hex, split /\t/, (do $filename);
+    my ($h1, $h2) = map hex, (split(/\t/, (do $filename), 3))[0,1];
     my $str = join "", map chr, $h1 .. (($h2 || $h1) + 1);
 
     for my $p ($prop_name, $abbrev) {
@@ -97,7 +99,7 @@ for my $p ('gc', 'sc') {
     );
 
     next unless -e $filename;
-    my ($h1, $h2) = map hex, split /\t/, (do $filename);
+    my ($h1, $h2) = map hex, (split(/\t/, (do $filename), 3))[0,1];
     my $str = join "", map chr, $h1 .. (($h2 || $h1) + 1);
 
     for my $x ($p, { gc => 'General Category', sc => 'Script' }->{$p}) {
@@ -127,7 +129,7 @@ SKIP:
 
   my $dirname = File::Spec->catdir($updir => lib => unicore => lib => gc_sc);
   opendir D, $dirname or die $!;
-  @files{readdir D} = ();
+  @files{readdir(D)} = ();
   closedir D;
 
   for (keys %utf8::PA_reverse) {
@@ -136,7 +138,7 @@ SKIP:
 
     my $filename = File::Spec->catfile($dirname, $leafname);
 
-    my ($h1, $h2) = map hex, split /\t/, (do $filename);
+    my ($h1, $h2) = map hex, (split(/\t/, (do $filename), 3))[0,1];
     my $str = join "", map chr, $h1 .. (($h2 || $h1) + 1);
 
     for my $x ('gc', 'General Category') {
@@ -158,7 +160,7 @@ for (grep $utf8::Canonical{$_} =~ /^In/, keys %utf8::Canonical) {
   );
 
   next unless -e $filename;
-  my ($h1, $h2) = map hex, split /\t/, (do $filename);
+  my ($h1, $h2) = map hex, (split(/\t/, (do $filename), 3))[0,1];
   my $str = join "", map chr, $h1 .. (($h2 || $h1) + 1);
 
   my $blk = $_;
