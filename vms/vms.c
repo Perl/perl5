@@ -6465,8 +6465,8 @@ Perl_my_localtime(pTHX_ const time_t *timep)
  */
 static const long int utime_baseadjust[2] = { 0x4beb4000, 0x7c9567 };
 
-/*{{{int my_utime(char *path, struct utimbuf *utimes)*/
-int Perl_my_utime(pTHX_ char *file, struct utimbuf *utimes)
+/*{{{int my_utime(const char *path, const struct utimbuf *utimes)*/
+int Perl_my_utime(pTHX_ const char *file, const struct utimbuf *utimes)
 {
   register int i;
   long int bintime[2], len = 2, lowbit, unixtime,
@@ -6499,7 +6499,7 @@ int Perl_my_utime(pTHX_ char *file, struct utimbuf *utimes)
     set_vaxc_errno(LIB$_INVARG);
     return -1;
   }
-  if (do_tovmsspec(file,vmsspec,0) == NULL) return -1;
+  if (do_tovmsspec((char *)file,vmsspec,0) == NULL) return -1;
 
   if (utimes != NULL) {
     /* Convert Unix time    (seconds since 01-JAN-1970 00:00:00.00)
@@ -6721,7 +6721,7 @@ is_null_device(name)
  * subset of the applicable information.
  */
 bool
-Perl_cando(pTHX_ Mode_t bit, Uid_t effective, Stat_t *statbufp)
+Perl_cando(pTHX_ Mode_t bit, Uid_t effective, const Stat_t *statbufp)
 {
   char fname_phdev[NAM$C_MAXRSS+1];
   if (statbufp == &PL_statcache) return cando_by_name(bit,effective,namecache);

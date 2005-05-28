@@ -497,7 +497,7 @@ unidatafiles.ts : $(MINIPERL_EXE) [.lib]Config.pm [.lib.unicore]mktables
 	@ If F$Search("$(MMS$TARGET)").nes."" Then Delete/NoLog/NoConfirm $(MMS$TARGET);*
 	@ Copy/NoConfirm _NLA0: $(MMS$TARGET)
  
-[.ext.dynaloader]dl_vms.c : [.ext.dynaloader]dl_vms.xs $(ARCHDIR)Config.pm [.lib.ExtUtils]XSSymSet.pm $(MINIPERL_EXE)
+[.ext.dynaloader]dl_vms.c : [.ext.dynaloader]dl_vms.xs $(ARCHDIR)Config.pm [.lib.ExtUtils]XSSymSet.pm $(MINIPERL_EXE) [.lib.VMS]Filespec.pm 
 	$(XSUBPP) $(MMS$SOURCE) >$(MMS$TARGET)
 
 [.ext.dynaloader]dl_vms$(O) : [.ext.dynaloader]dl_vms.c
@@ -1575,7 +1575,7 @@ run$(O) : run.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 scope$(O) : scope.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
-sv$(O) : sv.c 
+sv$(O) : sv.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 taint$(O) : taint.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)

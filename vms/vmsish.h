@@ -828,7 +828,7 @@ unsigned int	Perl_sig_to_vmscondition (int);
 int	Perl_my_kill (int, int);
 void	Perl_csighandler_init (void);
 #endif
-int	Perl_my_utime (pTHX_ char *, struct utimbuf *);
+int	Perl_my_utime (pTHX_ const char *, const struct utimbuf *);
 void	Perl_vms_image_init (int *, char ***);
 struct dirent *	Perl_readdir (pTHX_ DIR *);
 int	Perl_readdir_r(pTHX_ DIR *, struct dirent *, struct dirent **);

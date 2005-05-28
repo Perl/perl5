@@ -2357,8 +2357,8 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
        if ((tmpfp = PerlIO_tmpfile()) != NULL) {
 	    Stat_t st;
 	    if (!PerlLIO_stat(SvPVX_const(tmpglob),&st) && S_ISDIR(st.st_mode))
-		ok = ((wilddsc.dsc$a_pointer = tovmspath(SvPVX_const(tmpglob),vmsspec)) != NULL);
-	    else ok = ((wilddsc.dsc$a_pointer = tovmsspec(SvPVX_const(tmpglob),vmsspec)) != NULL);
+		ok = ((wilddsc.dsc$a_pointer = tovmspath(SvPVX(tmpglob),vmsspec)) != NULL);
+	    else ok = ((wilddsc.dsc$a_pointer = tovmsspec(SvPVX(tmpglob),vmsspec)) != NULL);
 	    if (ok) wilddsc.dsc$w_length = (unsigned short int) strlen(wilddsc.dsc$a_pointer);
 	    for (cp=wilddsc.dsc$a_pointer; ok && cp && *cp; cp++)
 		if (*cp == '?') *cp = '%';  /* VMS style single-char wildcard */
