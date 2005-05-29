@@ -1609,7 +1609,7 @@ $     vms_cc_available = vms_cc_available + "cc/decc "
 $   ENDIF
 $ ELSE
 $   IF (F$LOCATE("DEC",line).NE.F$LENGTH(line)).or.(F$LOCATE("Compaq",line).NE.F$LENGTH(line)) -
-    .or.(F$LOCATE("hp",line).NE.F$LENGTH(line))
+    .or.(F$LOCATE("HP",F$EDIT(line,"UPCASE")).NE.F$LENGTH(line))
 $   THEN 
 $     vms_cc_dflt = "/decc"
 $     vms_cc_available = vms_cc_available + "cc/decc "
