@@ -8285,6 +8285,23 @@ SetNWBld.bat, Buildtype.bat
 
 =back
 
+=head2 perlopenbsd, README.openbsd - Perl version 5 on OpenBSD systems
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item OpenBSD core dumps from getprotobyname_r and getservbyname_r with
+ithreads
+
+=back
+
+=item AUTHOR
+
+=back
+
 =head2 perlos2 - Perl under OS/2, DOS, Win0.3*, Win0.95 and WinNT.
 
 =over 4
