@@ -360,22 +360,22 @@ ApPR	|bool	|is_uni_xdigit_lc|UV c
 Apd	|STRLEN	|is_utf8_char	|NN U8 *p
 Apd	|bool	|is_utf8_string	|NN U8 *s|STRLEN len
 Apd	|bool	|is_utf8_string_loc|NN U8 *s|STRLEN len|NN U8 **p
-Ap	|bool	|is_utf8_alnum	|NN U8 *p
-Ap	|bool	|is_utf8_alnumc	|NN U8 *p
-Ap	|bool	|is_utf8_idfirst|NN U8 *p
-Ap	|bool	|is_utf8_idcont	|NN U8 *p
-Ap	|bool	|is_utf8_alpha	|NN U8 *p
-Ap	|bool	|is_utf8_ascii	|NN U8 *p
-Ap	|bool	|is_utf8_space	|NN U8 *p
-Ap	|bool	|is_utf8_cntrl	|NN U8 *p
-Ap	|bool	|is_utf8_digit	|NN U8 *p
-Ap	|bool	|is_utf8_graph	|NN U8 *p
-Ap	|bool	|is_utf8_upper	|NN U8 *p
-Ap	|bool	|is_utf8_lower	|NN U8 *p
-Ap	|bool	|is_utf8_print	|NN U8 *p
-Ap	|bool	|is_utf8_punct	|NN U8 *p
-Ap	|bool	|is_utf8_xdigit	|NN U8 *p
-Ap	|bool	|is_utf8_mark	|NN U8 *p
+ApR	|bool	|is_utf8_alnum	|NN U8 *p
+ApR	|bool	|is_utf8_alnumc	|NN U8 *p
+ApR	|bool	|is_utf8_idfirst|NN U8 *p
+ApR	|bool	|is_utf8_idcont	|NN U8 *p
+ApR	|bool	|is_utf8_alpha	|NN U8 *p
+ApR	|bool	|is_utf8_ascii	|NN U8 *p
+ApR	|bool	|is_utf8_space	|NN U8 *p
+ApR	|bool	|is_utf8_cntrl	|NN U8 *p
+ApR	|bool	|is_utf8_digit	|NN U8 *p
+ApR	|bool	|is_utf8_graph	|NN U8 *p
+ApR	|bool	|is_utf8_upper	|NN U8 *p
+ApR	|bool	|is_utf8_lower	|NN U8 *p
+ApR	|bool	|is_utf8_print	|NN U8 *p
+ApR	|bool	|is_utf8_punct	|NN U8 *p
+ApR	|bool	|is_utf8_xdigit	|NN U8 *p
+ApR	|bool	|is_utf8_mark	|NN U8 *p
 p	|OP*	|jmaybe		|NN OP* arg
 pP	|I32	|keyword	|NN char* d|I32 len
 Ap	|void	|leave_scope	|I32 base
@@ -569,8 +569,8 @@ p	|void	|package	|OP* o
 pd	|PADOFFSET|pad_alloc	|I32 optype|U32 tmptype
 p	|PADOFFSET|allocmy	|NN char* name
 pd	|PADOFFSET|pad_findmy	|NN char* name
-p	|OP*	|oopsAV		|NN OP* o
-p	|OP*	|oopsHV		|NN OP* o
+pR	|OP*	|oopsAV		|NN OP* o
+pR	|OP*	|oopsHV		|NN OP* o
 pd	|void	|pad_leavemy
 Apd	|SV*	|pad_sv		|PADOFFSET po
 pd	|void	|pad_free	|PADOFFSET po
@@ -635,7 +635,7 @@ Ap	|SV*	|re_intuit_string|regexp* prog
 Ap	|I32	|regexec_flags	|NN regexp* prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg|I32 minend \
 				|SV* screamer|void* data|U32 flags
-Ap	|regnode*|regnext	|regnode* p
+ApR	|regnode*|regnext	|NN regnode* p
 Ep	|void	|regprop	|SV* sv|regnode* o
 Ap	|void	|repeatcpy	|NN char* to|NN const char* from|I32 len|I32 count
 ApP	|char*	|rninstr	|NN const char* big|NN const char* bigend \
@@ -749,7 +749,7 @@ Apd	|void	|sv_clear	|NN SV* sv
 Apd	|I32	|sv_cmp		|NN SV* sv1|NN SV* sv2
 Apd	|I32	|sv_cmp_locale	|NN SV* sv1|NN SV* sv2
 #if defined(USE_LOCALE_COLLATE)
-Apd	|char*	|sv_collxfrm	|NN SV* sv|STRLEN* nxp
+Apd	|char*	|sv_collxfrm	|NN SV* sv|NN STRLEN* nxp
 #endif
 Ap	|OP*	|sv_compile_2op	|NN SV* sv|NN OP** startp|NN char* code|NN PAD** padp
 Apd	|int	|getcwd_sv	|NN SV* sv
@@ -1016,13 +1016,13 @@ s	|void	|require_errno	|NN GV *gv
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
 s	|void	|hsplit		|HV *hv
 s	|void	|hfreeentries	|HV *hv
-s	|HE*	|new_he
-s	|void	|del_he		|HE *p
-s	|HEK*	|save_hek_flags	|const char *str|I32 len|U32 hash|int flags
-s	|void	|hv_magic_check	|HV *hv|bool *needs_copy|bool *needs_store
-s	|void	|unshare_hek_or_pvn|HEK* hek|const char* sv|I32 len|U32 hash
-s	|HEK*	|share_hek_flags|const char* sv|I32 len|U32 hash|int flags
-rs	|void	|hv_notallowed	|int flags|const char *key|I32 klen|const char *msg
+sR	|HE*	|new_he
+s	|void	|del_he		|NN HE *p
+sR	|HEK*	|save_hek_flags	|NN const char *str|I32 len|U32 hash|int flags
+s	|void	|hv_magic_check	|NN HV *hv|NN bool *needs_copy|NN bool *needs_store
+s	|void	|unshare_hek_or_pvn|HEK* hek|NN const char* sv|I32 len|U32 hash
+sR	|HEK*	|share_hek_flags|const char* sv|I32 len|U32 hash|int flags
+rs	|void	|hv_notallowed	|int flags|NN const char *key|I32 klen|NN const char *msg
 #endif
 
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
@@ -1105,7 +1105,7 @@ s	|char *	|group_end	|NN char *pat|NN char *patend|char ender
 s	|char *	|get_num	|NN char *ppat|NN I32 *
 s	|bool	|next_symbol	|NN tempsym_t* symptr
 s	|void	|doencodes	|SV* sv|char* s|I32 len
-s	|SV*	|is_an_int	|NN char *s|STRLEN l
+sR	|SV*	|is_an_int	|NN char *s|STRLEN l
 s	|int	|div128		|NN SV *pnum|NN bool *done
 #endif
 
@@ -1553,3 +1553,6 @@ ApR	|OP*	|ck_unpack	|NN OP *o
 #endif
 
 END_EXTERN_C
+/*
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */

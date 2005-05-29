@@ -501,7 +501,7 @@ Perl_sv_free_arenas(pTHX)
 	    svanext = (SV*) SvANY(svanext);
 
 	if (!SvFAKE(sva))
-	    Safefree((void *)sva);
+	    Safefree(sva);
     }
 
     for (arena = PL_xiv_arenaroot; arena; arena = arenanext) {
