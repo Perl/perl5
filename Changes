@@ -28,6 +28,41 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.7		Maintenance release working toward v5.8.7
 --------------
 ____________________________________________________________________________
+[ 24616] By: nicholas                              on 2005/05/29  14:57:28
+        Log: Integrate:
+             [ 24615]
+             Teach buildtoc about README.openbsd, and regenerate various makefiles.
+     Branch: maint-5.8/perl
+	   ! pod/perltoc.pod vms/descrip_mms.template win32/Makefile
+	   ! win32/makefile.mk
+	  !> pod.lst pod/perl.pod
+____________________________________________________________________________
+[ 24611] By: nicholas                              on 2005/05/27  22:23:55
+        Log: Due to integration ordering errors, README.openbsd was missing from
+             MANIFEST. Fixed.
+     Branch: maint-5.8/perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 24604] By: nicholas                              on 2005/05/27  14:57:31
+        Log: Update perl587delta with the updated module versions.
+     Branch: maint-5.8/perl
+	   ! pod/perl587delta.pod
+____________________________________________________________________________
+[ 24603] By: nicholas                              on 2005/05/27  14:55:04
+        Log: Update TOC and MANIFSET
+     Branch: maint-5.8/perl
+	   ! MANIFEST pod/perltoc.pod
+____________________________________________________________________________
+[ 24602] By: nicholas                              on 2005/05/27  14:53:41
+        Log: This appears to be missing.
+     Branch: maint-5.8/perl
+	   ! embedvar.h
+____________________________________________________________________________
+[ 24601] By: nicholas                              on 2005/05/27  12:35:55
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 24600] By: nicholas                              on 2005/05/27  11:20:03
         Log: Integrate:
              [ 24360]
