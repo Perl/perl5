@@ -42,26 +42,20 @@ struct xpvhv_aux {
 /* hash structure: */
 /* This structure must match the beginning of struct xpvmg in sv.h. */
 struct xpvhv {
-    IV		for_rent;
+    NV		xnv_nv;		/* numeric value, if any */
     STRLEN	xhv_fill;	/* how full xhv_array currently is */
     STRLEN	xhv_max;	/* subscript of last element of xhv_array */
     union {
-	struct {
-	    void *xnv_p1;
-	    union {
-		void *xnv_p2;
-		IV xnv_i2;	/* how many elements in the array */
-	    }	xnv_u2;
-	}	xnv_s;
-	NV	xnvu_nv;	/* numeric value, if any */
-    }		xnv_u;
+	IV	xivu_iv;	/* integer value or pv offset */
+	UV	xivu_uv;
+	void *	xivu_p1;
+    }		xiv_u;
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
-    /* list of pm's for this package is now stored in symtab magic.  */
+    struct xpvhv_aux *xhv_aux;
 };
 
-#define xhv_aux xnv_u.xnv_s.xnv_p1
-#define xhv_keys xnv_u.xnv_s.xnv_u2.xnv_i2
+#define xhv_keys xiv_u.xivu_iv
 
 #if !defined(PERL_EXPERIMENTAL_LAYOUT)
 typedef struct xpvhv xpvhv_allocated;
@@ -70,17 +64,13 @@ typedef struct {
     STRLEN	xhv_fill;	/* how full xhv_array currently is */
     STRLEN	xhv_max;	/* subscript of last element of xhv_array */
     union {
-	NV	xnvu_nv;	/* numeric value, if any */
-	struct {
-	    void *xnv_p1;
-	    union {
-		void *xnv_p2;
-		IV xnv_i2;	/* how many elements in the array */
-	    }	xnv_u2;
-	}	xnv_s;
-    }		xnv_u;
+	IV	xivu_iv;	/* integer value or pv offset */
+	UV	xivu_uv;
+	void *	xivu_p1;
+    }		xiv_u;
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
+    struct xpvhv_aux *xhv_aux;
 } xpvhv_allocated;
 #endif
 

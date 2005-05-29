@@ -12,19 +12,14 @@
  * in sv.h  */
 
 struct xpvcv {
-    IV		awaiting_redevelopment;	/* integer value */
+    NV		xnv_nv;		/* numeric value, if any */
     STRLEN	xpv_cur;	/* length of xp_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     union {
-	struct {
-	    void *xnv_p1;
-	    union {
-		void *xnv_p2;
-		IV xnv_i2;
-	    }	xnv_u2;
-	}	xnv_s;
-	NV	xnvu_nv;	/* numeric value, if any */
-    }		xnv_u;
+	IV	xivu_iv;	/* integer value or pv offset */
+	UV	xivu_uv;
+	void *	xivu_p1;
+    }		xiv_u;
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
 

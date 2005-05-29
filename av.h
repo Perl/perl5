@@ -9,21 +9,17 @@
  */
 
 struct xpvav {
-    IV		this_space;
+    NV		xnv_nv;		/* numeric value, if any */
     SSize_t	xav_fill;       /* Index of last element present */
     SSize_t	xav_max;        /* max index for which array has space */
     union {
-	struct {
-	    void *xnv_p1;	/* pointer to beginning of C array of SVs */
-	    union {
-		void *xnv_p2;
-		IV xnv_i2;
-	    }	xnv_u2;
-	}	xnv_s;
-	NV	xnvu_nv;
-    }		xnv_u;
+	IV	xivu_iv;	/* integer value or pv offset */
+	UV	xivu_uv;
+	void *	xivu_p1;
+    }		xiv_u;
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
+    SV*		xav_arylen;
 };
 
 #if !defined(PERL_EXPERIMENTAL_LAYOUT)
@@ -33,24 +29,19 @@ typedef struct {
     SSize_t	xav_fill;       /* Index of last element present */
     SSize_t	xav_max;        /* max index for which array has space */
     union {
-	NV	xnvu_nv;
-	struct {
-	    void *xnv_p1;	/* pointer to beginning of C array of SVs */
-	    union {
-		void *xnv_p2;
-		IV xnv_i2;
-	    }	xnv_u2;
-	}	xnv_s;
-    }		xnv_u;
+	IV	xivu_iv;	/* integer value or pv offset */
+	UV	xivu_uv;
+	void *	xivu_p1;
+    }		xiv_u;
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
+    SV*		xav_arylen;
 } xpvav_allocated;
 #endif
 
 /* SV**	xav_alloc; */
-#define xav_alloc xnv_u.xnv_s.xnv_p1
+#define xav_alloc xiv_u.xivu_p1
 /* SV*	xav_arylen; */
-#define xav_arylen xnv_u.xnv_s.xnv_u2.xnv_p2
 
 /* AVf_REAL is set for all AVs whose xav_array contents are refcounted.
  * Some things like "@_" and the scratchpad list do not set this, to

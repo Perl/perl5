@@ -1173,19 +1173,19 @@ S_more_xpv(pTHX)
 STATIC void
 S_more_xpviv(pTHX)
 {
-    XPVIV* xpviv;
-    XPVIV* xpvivend;
-    New(714, xpviv, PERL_ARENA_SIZE/sizeof(XPVIV), XPVIV);
-    *((XPVIV**)xpviv) = PL_xpviv_arenaroot;
+    xpviv_allocated* xpviv;
+    xpviv_allocated* xpvivend;
+    New(713, xpviv, PERL_ARENA_SIZE/sizeof(xpviv_allocated), xpviv_allocated);
+    *((xpviv_allocated**)xpviv) = PL_xpviv_arenaroot;
     PL_xpviv_arenaroot = xpviv;
 
-    xpvivend = &xpviv[PERL_ARENA_SIZE / sizeof(XPVIV) - 1];
+    xpvivend = &xpviv[PERL_ARENA_SIZE / sizeof(xpviv_allocated) - 1];
     PL_xpviv_root = ++xpviv;
     while (xpviv < xpvivend) {
-	*((XPVIV**)xpviv) = xpviv + 1;
+	*((xpviv_allocated**)xpviv) = xpviv + 1;
 	xpviv++;
     }
-    *((XPVIV**)xpviv) = 0;
+    *((xpviv_allocated**)xpviv) = 0;
 }
 
 /* allocate another arena's worth of struct xpvnv */
@@ -1417,14 +1417,20 @@ S_del_xpv(pTHX_ XPV *p)
 STATIC XPVIV*
 S_new_xpviv(pTHX)
 {
-    XPVIV* xpviv;
+    xpviv_allocated* xpviv;
     LOCK_SV_MUTEX;
     if (!PL_xpviv_root)
 	S_more_xpviv(aTHX);
     xpviv = PL_xpviv_root;
-    PL_xpviv_root = *(XPVIV**)xpviv;
+    PL_xpviv_root = *(xpviv_allocated**)xpviv;
     UNLOCK_SV_MUTEX;
-    return xpviv;
+    /* If xpviv_allocated is the same structure as XPVIV then the two OFFSETs
+       sum to zero, and the pointer is unchanged. If the allocated structure
+       is smaller (no initial IV actually allocated) then the net effect is
+       to subtract the size of the IV from the pointer, to return a new pointer
+       as if an initial IV were actually allocated.  */
+    return (XPVIV*)((char*)xpviv - STRUCT_OFFSET(XPVIV, xpv_cur)
+		  + STRUCT_OFFSET(xpviv_allocated, xpv_cur));
 }
 
 /* return a struct xpviv to the free list */
@@ -1432,9 +1438,12 @@ S_new_xpviv(pTHX)
 STATIC void
 S_del_xpviv(pTHX_ XPVIV *p)
 {
+    xpviv_allocated* xpviv
+	= (xpviv_allocated*)((char*)(p) + STRUCT_OFFSET(XPVIV, xpv_cur)
+			   - STRUCT_OFFSET(xpviv_allocated, xpv_cur));
     LOCK_SV_MUTEX;
-    *(XPVIV**)p = PL_xpviv_root;
-    PL_xpviv_root = p;
+    *(xpviv_allocated**)xpviv = PL_xpviv_root;
+    PL_xpviv_root = xpviv;
     UNLOCK_SV_MUTEX;
 }
 

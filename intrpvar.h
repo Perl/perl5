@@ -251,7 +251,7 @@ PERLVAR(Isighandlerp,	Sighandler_t)
 
 PERLVAR(Ixnv_root,	NV *)		/* free xnv list */
 PERLVAR(Ixpv_root,	xpv_allocated *)	/* free xpv list */
-PERLVAR(Ixpviv_root,	XPVIV *)	/* free xpviv list */
+PERLVAR(Ixpviv_root,	xpviv_allocated *)	/* free xpviv list */
 PERLVAR(Ixpvnv_root,	XPVNV *)	/* free xpvnv list */
 PERLVAR(Ixpvcv_root,	XPVCV *)	/* free xpvcv list */
 PERLVAR(Ixpvav_root,	xpvav_allocated *)	/* free xpvav list */
@@ -431,7 +431,7 @@ PERLVARI(Ibeginav_save, AV*, Nullav)	/* save BEGIN{}s when compiling */
 
 PERLVAR(Ixnv_arenaroot,	XPV*)		/* list of allocated xnv areas */
 PERLVAR(Ixpv_arenaroot,	xpv_allocated *)	/* list of allocated xpv areas */
-PERLVAR(Ixpviv_arenaroot,XPVIV*)	/* list of allocated xpviv areas */
+PERLVAR(Ixpviv_arenaroot,xpviv_allocated*)	/* list of allocated xpviv areas */
 PERLVAR(Ixpvnv_arenaroot,XPVNV*)	/* list of allocated xpvnv areas */
 PERLVAR(Ixpvcv_arenaroot,XPVCV*)	/* list of allocated xpvcv areas */
 PERLVAR(Ixpvav_arenaroot,xpvav_allocated*)	/* list of allocated xpvav areas */

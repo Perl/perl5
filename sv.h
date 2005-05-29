@@ -275,7 +275,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVpav_REIFY 	0x80000000	/* can become real */
 
 struct xpv {
-    IV		xpv_dummy;	/* This isn't allocated. */
+    NV		xnv_nv;		/* numeric value, if any */
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
 };
@@ -290,68 +290,79 @@ typedef struct {
 #endif
 
 struct xpviv {
-    IV		xiv_iv;		/* integer value or pv offset */
-    STRLEN	xpv_cur;	/* length of svu_pv as a C string */
-    STRLEN	xpv_len;	/* allocated size */
-};
-
-struct xpvuv {
-    UV		xuv_uv;		/* unsigned value or pv offset */
-    STRLEN	xpv_cur;	/* length of svu_pv as a C string */
-    STRLEN	xpv_len;	/* allocated size */
-};
-
-struct xpvnv {
-    IV		xiv_iv;		/* integer value or pv offset */
+    NV		xnv_nv;		/* numeric value, if any */
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     union {
-	struct {
-	    void *xnv_p1;
-	    union {
-		void *xnv_p2;
-		IV xnv_i2;
-	    }	xnv_u2;
-	}	xnv_s;
-	NV	xnvu_nv;	/* numeric value, if any */
-    }		xnv_u;
+	IV	xivu_iv;	/* integer value or pv offset */
+	UV	xivu_uv;
+	void *	xivu_p1;
+    }		xiv_u;
 };
 
-#define xnv_nv xnv_u.xnvu_nv
+#if 0
+typedef struct xpviv xpviv_allocated;
+#else
+typedef struct {
+    STRLEN	xpv_cur;	/* length of svu_pv as a C string */
+    STRLEN	xpv_len;	/* allocated size */
+    union {
+	IV	xivu_iv;	/* integer value or pv offset */
+	UV	xivu_uv;
+	void *	xivu_p1;
+    }		xiv_u;
+} xpviv_allocated;
+#endif
+
+#define xiv_iv xiv_u.xivu_iv
+
+struct xpvuv {
+    NV		xnv_nv;		/* numeric value, if any */
+    STRLEN	xpv_cur;	/* length of svu_pv as a C string */
+    STRLEN	xpv_len;	/* allocated size */
+    union {
+	IV	xuvu_iv;
+	UV	xuvu_uv;	/* unsigned value or pv offset */
+	void *	xuvu_p1;
+    }		xuv_u;
+};
+
+#define xuv_uv xuv_u.xuvu_uv
+
+struct xpvnv {
+    NV		xnv_nv;		/* numeric value, if any */
+    STRLEN	xpv_cur;	/* length of svu_pv as a C string */
+    STRLEN	xpv_len;	/* allocated size */
+    union {
+	IV	xivu_iv;	/* integer value or pv offset */
+	UV	xivu_uv;
+	void *	xivu_p1;
+    }		xiv_u;
+};
 
 /* These structure must match the beginning of struct xpvhv in hv.h. */
 struct xpvmg {
-    IV		xiv_iv;		/* integer value or pv offset */
+    NV		xnv_nv;		/* numeric value, if any */
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     union {
-	struct {
-	    void *xnv_p1;
-	    union {
-		void *xnv_p2;
-		IV xnv_i2;
-	    }	xnv_u2;
-	}	xnv_s;
-	NV	xnvu_nv;	/* numeric value, if any */
-    }		xnv_u;
+	IV	xivu_iv;	/* integer value or pv offset */
+	UV	xivu_uv;
+	void *	xivu_p1;
+    }		xiv_u;
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
 };
 
 struct xpvlv {
-    IV		xiv_iv;		/* integer value or pv offset */
+    NV		xnv_nv;		/* numeric value, if any */
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     union {
-	struct {
-	    void *xnv_p1;
-	    union {
-		void *xnv_p2;
-		IV xnv_i2;
-	    }	xnv_u2;
-	}	xnv_s;
-	NV	xnvu_nv;	/* numeric value, if any */
-    }		xnv_u;
+	IV	xivu_iv;	/* integer value or pv offset */
+	UV	xivu_uv;
+	void *	xivu_p1;
+    }		xiv_u;
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
 
@@ -370,19 +381,14 @@ struct xpvlv {
 };
 
 struct xpvgv {
-    IV		xiv_iv;		/* integer value or pv offset */
+    NV		xnv_nv;		/* numeric value, if any */
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     union {
-	struct {
-	    void *xnv_p1;
-	    union {
-		void *xnv_p2;
-		IV xnv_i2;
-	    }	xnv_u2;
-	}	xnv_s;
-	NV	xnvu_nv;	/* numeric value, if any */
-    }		xnv_u;
+	IV	xivu_iv;	/* integer value or pv offset */
+	UV	xivu_uv;
+	void *	xivu_p1;
+    }		xiv_u;
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
 
@@ -394,19 +400,14 @@ struct xpvgv {
 };
 
 struct xpvbm {
-    IV		xiv_iv;		/* integer value or pv offset */
+    NV		xnv_nv;		/* numeric value, if any */
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     union {
-	struct {
-	    void *xnv_p1;
-	    union {
-		void *xnv_p2;
-		IV xnv_i2;
-	    }	xnv_u2;
-	}	xnv_s;
-	NV	xnvu_nv;	/* numeric value, if any */
-    }		xnv_u;
+	IV	xivu_iv;	/* integer value or pv offset */
+	UV	xivu_uv;
+	void *	xivu_p1;
+    }		xiv_u;
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
 
@@ -420,19 +421,14 @@ struct xpvbm {
 typedef U16 cv_flags_t;
 
 struct xpvfm {
-    IV		xiv_iv;		/* integer value or pv offset */
+    NV		xnv_nv;		/* numeric value, if any */
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     union {
-	struct {
-	    void *xnv_p1;
-	    union {
-		void *xnv_p2;
-		IV xnv_i2;
-	    }	xnv_u2;
-	}	xnv_s;
-	NV	xnvu_nv;	/* numeric value, if any */
-    }		xnv_u;
+	IV	xivu_iv;	/* integer value or pv offset */
+	UV	xivu_uv;
+	void *	xivu_p1;
+    }		xiv_u;
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
 
@@ -454,19 +450,14 @@ struct xpvfm {
 };
 
 struct xpvio {
-    IV		xiv_iv;		/* integer value or pv offset */
+    NV		xnv_nv;		/* numeric value, if any */
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     union {
-	struct {
-	    void *xnv_p1;
-	    union {
-		void *xnv_p2;
-		IV xnv_i2;
-	    }	xnv_u2;
-	}	xnv_s;
-	NV	xnvu_nv;	/* numeric value, if any */
-    }		xnv_u;
+	IV	xivu_iv;	/* integer value or pv offset */
+	UV	xivu_uv;
+	void *	xivu_p1;
+    }		xiv_u;
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
 
