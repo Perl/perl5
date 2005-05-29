@@ -49,6 +49,7 @@ Perl_av_shift
 Perl_av_store
 Perl_av_undef
 Perl_av_unshift
+Perl_av_arylen_p
 Perl_block_gimme
 Perl_call_list
 Perl_cast_ulong

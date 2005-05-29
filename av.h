@@ -19,7 +19,6 @@ struct xpvav {
     }		xiv_u;
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
-    SV*		xav_arylen;
 };
 
 #if !defined(PERL_EXPERIMENTAL_LAYOUT)
@@ -35,7 +34,6 @@ typedef struct {
     }		xiv_u;
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
-    SV*		xav_arylen;
 } xpvav_allocated;
 #endif
 
@@ -81,7 +79,7 @@ Same as C<av_len()>.  Deprecated, use C<av_len()> instead.
 #define AvALLOC(av)	(*((SV***)&((XPVAV*)  SvANY(av))->xav_alloc))
 #define AvMAX(av)	((XPVAV*)  SvANY(av))->xav_max
 #define AvFILLp(av)	((XPVAV*)  SvANY(av))->xav_fill
-#define AvARYLEN(av)	(*((SV**)&((XPVAV*)  SvANY(av))->xav_arylen))
+#define AvARYLEN(av)	(*Perl_av_arylen_p(aTHX_ (AV*)av))
 
 #define AvREAL(av)	(SvFLAGS(av) & SVpav_REAL)
 #define AvREAL_on(av)	(SvFLAGS(av) |= SVpav_REAL)

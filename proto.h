@@ -111,6 +111,7 @@ PERL_CALLCONV SV*	Perl_av_shift(pTHX_ AV* ar)
 PERL_CALLCONV SV**	Perl_av_store(pTHX_ AV* ar, I32 key, SV* val);
 PERL_CALLCONV void	Perl_av_undef(pTHX_ AV* ar);
 PERL_CALLCONV void	Perl_av_unshift(pTHX_ AV* ar, I32 num);
+PERL_CALLCONV SV**	Perl_av_arylen_p(pTHX_ AV* av);
 PERL_CALLCONV OP*	Perl_bind_match(pTHX_ I32 type, OP* left, OP* pat)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2)

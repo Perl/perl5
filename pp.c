@@ -295,13 +295,13 @@ PP(pp_av2arylen)
 {
     dSP;
     AV *av = (AV*)TOPs;
-    SV *sv = AvARYLEN(av);
-    if (!sv) {
-	AvARYLEN(av) = sv = NEWSV(0,0);
-	sv_upgrade(sv, SVt_IV);
-	sv_magic(sv, (SV*)av, PERL_MAGIC_arylen, Nullch, 0);
+    SV **sv = Perl_av_arylen_p(aTHX_ (AV*)av);
+    if (!*sv) {
+	*sv = NEWSV(0,0);
+	sv_upgrade(*sv, SVt_PVMG);
+	sv_magic(*sv, (SV*)av, PERL_MAGIC_arylen, Nullch, 0);
     }
-    SETs(sv);
+    SETs(*sv);
     RETURN;
 }
 

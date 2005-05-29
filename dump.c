@@ -895,6 +895,7 @@ static const struct { const char type; const char *name; } magic_names[] = {
 	{ PERL_MAGIC_pos,            "pos(.)" },
 	{ PERL_MAGIC_symtab,         "symtab(:)" },
 	{ PERL_MAGIC_backref,        "backref(<)" },
+	{ PERL_MAGIC_arylen_p,       "arylen_p(@)" },
 	{ PERL_MAGIC_overload,       "overload(A)" },
 	{ PERL_MAGIC_bm,             "bm(B)" },
 	{ PERL_MAGIC_regdata,        "regdata(D)" },
@@ -1349,7 +1350,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    PerlIO_putc(file, '\n');
 	Perl_dump_indent(aTHX_ level, file, "  FILL = %"IVdf"\n", (IV)AvFILLp(sv));
 	Perl_dump_indent(aTHX_ level, file, "  MAX = %"IVdf"\n", (IV)AvMAX(sv));
-	Perl_dump_indent(aTHX_ level, file, "  ARYLEN = 0x%"UVxf"\n", PTR2UV(AvARYLEN(sv)));
+	Perl_dump_indent(aTHX_ level, file, "  ARYLEN = 0x%"UVxf"\n", SvMAGIC(sv) ? PTR2UV(AvARYLEN(sv)) : 0);
 	sv_setpvn(d, "", 0);
 	if (AvREAL(sv))	sv_catpv(d, ",REAL");
 	if (AvREIFY(sv))	sv_catpv(d, ",REIFY");

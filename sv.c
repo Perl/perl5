@@ -1879,7 +1879,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	    AvMAX(sv)	= -1;
 	    AvFILLp(sv)	= -1;
 	    AvALLOC(sv)	= 0;
-	    AvARYLEN(sv)= 0;
 	    AvREAL_only(sv);
 	}
 	/* to here.  */
@@ -5454,6 +5453,7 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     case PERL_MAGIC_vec:
 	vtable = &PL_vtbl_vec;
 	break;
+    case PERL_MAGIC_arylen_p:
     case PERL_MAGIC_rhash:
     case PERL_MAGIC_symtab:
     case PERL_MAGIC_vstring:
@@ -10886,7 +10886,6 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvLEN_set(dstr, SvLEN(sstr));
 	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
 	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
-	AvARYLEN((AV*)dstr) = sv_dup_inc(AvARYLEN((AV*)sstr), param);
 	if (AvARRAY((AV*)sstr)) {
 	    SV **dst_ary, **src_ary;
 	    SSize_t items = AvFILLp((AV*)sstr) + 1;

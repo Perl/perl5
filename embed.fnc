@@ -106,6 +106,7 @@ ApdR	|SV*	|av_shift	|AV* ar
 Apd	|SV**	|av_store	|AV* ar|I32 key|SV* val
 Apd	|void	|av_undef	|AV* ar
 Apd	|void	|av_unshift	|AV* ar|I32 num
+Apo	|SV**	|av_arylen_p	|AV* av
 pR	|OP*	|bind_match	|I32 type|NN OP* left|NN OP* pat
 pR	|OP*	|block_end	|I32 floor|OP* seq
 ApR	|I32	|block_gimme
