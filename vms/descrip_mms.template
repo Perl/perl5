@@ -390,15 +390,15 @@ pod12 = [.lib.pod]perlguts.pod [.lib.pod]perlhack.pod [.lib.pod]perlhist.pod [.l
 pod13 = [.lib.pod]perlintro.pod [.lib.pod]perliol.pod [.lib.pod]perlipc.pod [.lib.pod]perlirix.pod [.lib.pod]perljp.pod [.lib.pod]perlko.pod
 pod14 = [.lib.pod]perllexwarn.pod [.lib.pod]perllocale.pod [.lib.pod]perllol.pod [.lib.pod]perlmachten.pod [.lib.pod]perlmacos.pod [.lib.pod]perlmacosx.pod
 pod15 = [.lib.pod]perlmint.pod [.lib.pod]perlmod.pod [.lib.pod]perlmodinstall.pod [.lib.pod]perlmodlib.pod [.lib.pod]perlmodstyle.pod [.lib.pod]perlmpeix.pod
-pod16 = [.lib.pod]perlnetware.pod [.lib.pod]perlnewmod.pod [.lib.pod]perlnumber.pod [.lib.pod]perlobj.pod [.lib.pod]perlop.pod [.lib.pod]perlopentut.pod
-pod17 = [.lib.pod]perlos2.pod [.lib.pod]perlos390.pod [.lib.pod]perlos400.pod [.lib.pod]perlothrtut.pod [.lib.pod]perlpacktut.pod [.lib.pod]perlplan9.pod
-pod18 = [.lib.pod]perlpod.pod [.lib.pod]perlpodspec.pod [.lib.pod]perlport.pod [.lib.pod]perlqnx.pod [.lib.pod]perlre.pod [.lib.pod]perlref.pod
-pod19 = [.lib.pod]perlreftut.pod [.lib.pod]perlrequick.pod [.lib.pod]perlreref.pod [.lib.pod]perlretut.pod [.lib.pod]perlrun.pod [.lib.pod]perlsec.pod
-pod20 = [.lib.pod]perlsolaris.pod [.lib.pod]perlstyle.pod [.lib.pod]perlsub.pod [.lib.pod]perlsymbian.pod [.lib.pod]perlsyn.pod [.lib.pod]perlthrtut.pod
-pod21 = [.lib.pod]perltie.pod [.lib.pod]perltoc.pod [.lib.pod]perltodo.pod [.lib.pod]perltooc.pod [.lib.pod]perltoot.pod [.lib.pod]perltrap.pod
-pod22 = [.lib.pod]perltru64.pod [.lib.pod]perltw.pod [.lib.pod]perlunicode.pod [.lib.pod]perluniintro.pod [.lib.pod]perlutil.pod [.lib.pod]perluts.pod
-pod23 = [.lib.pod]perlvar.pod [.lib.pod]perlvmesa.pod [.lib.pod]perlvms.pod [.lib.pod]perlvos.pod [.lib.pod]perlwin32.pod [.lib.pod]perlxs.pod
-pod24 = [.lib.pod]perlxstut.pod
+pod16 = [.lib.pod]perlnetware.pod [.lib.pod]perlnewmod.pod [.lib.pod]perlnumber.pod [.lib.pod]perlobj.pod [.lib.pod]perlop.pod [.lib.pod]perlopenbsd.pod
+pod17 = [.lib.pod]perlopentut.pod [.lib.pod]perlos2.pod [.lib.pod]perlos390.pod [.lib.pod]perlos400.pod [.lib.pod]perlothrtut.pod [.lib.pod]perlpacktut.pod
+pod18 = [.lib.pod]perlplan9.pod [.lib.pod]perlpod.pod [.lib.pod]perlpodspec.pod [.lib.pod]perlport.pod [.lib.pod]perlqnx.pod [.lib.pod]perlre.pod
+pod19 = [.lib.pod]perlref.pod [.lib.pod]perlreftut.pod [.lib.pod]perlrequick.pod [.lib.pod]perlreref.pod [.lib.pod]perlretut.pod [.lib.pod]perlrun.pod
+pod20 = [.lib.pod]perlsec.pod [.lib.pod]perlsolaris.pod [.lib.pod]perlstyle.pod [.lib.pod]perlsub.pod [.lib.pod]perlsymbian.pod [.lib.pod]perlsyn.pod
+pod21 = [.lib.pod]perlthrtut.pod [.lib.pod]perltie.pod [.lib.pod]perltoc.pod [.lib.pod]perltodo.pod [.lib.pod]perltooc.pod [.lib.pod]perltoot.pod
+pod22 = [.lib.pod]perltrap.pod [.lib.pod]perltru64.pod [.lib.pod]perltw.pod [.lib.pod]perlunicode.pod [.lib.pod]perluniintro.pod [.lib.pod]perlutil.pod
+pod23 = [.lib.pod]perluts.pod [.lib.pod]perlvar.pod [.lib.pod]perlvmesa.pod [.lib.pod]perlvms.pod [.lib.pod]perlvos.pod [.lib.pod]perlwin32.pod
+pod24 = [.lib.pod]perlxs.pod [.lib.pod]perlxstut.pod
 pod = $(pod0) $(pod1) $(pod2) $(pod3) $(pod4) $(pod5) $(pod6) $(pod7) $(pod8) $(pod9) $(pod10) $(pod11) $(pod12) $(pod13) $(pod14) $(pod15) $(pod16) $(pod17) $(pod18) $(pod19) $(pod20) $(pod21) $(pod22) $(pod23) $(pod24)
 
 # Would be useful to automate the generation of this rule from pod/buildtoc
@@ -1057,6 +1057,10 @@ preplibrary : $(MINIPERL_EXE) $(LIBPREREQ)
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pod]
 
 [.lib.pod]perlop.pod : [.pod]perlop.pod
+	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pod]
+
+[.lib.pod]perlopenbsd.pod : [.pod]perlopenbsd.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pod]
 

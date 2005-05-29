@@ -172,6 +172,7 @@ r perlmacosx		Perl notes for Mac OS X
 r perlmint		Perl notes for MiNT
 r perlmpeix		Perl notes for MPE/iX
 r perlnetware		Perl notes for NetWare
+r perlopenbsd		Perl notes for OpenBSD
 r perlos2		Perl notes for OS/2
 r perlos390		Perl notes for OS/390
 r perlos400		Perl notes for OS/400
