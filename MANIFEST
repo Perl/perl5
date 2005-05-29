@@ -429,8 +429,8 @@ ext/Encode/t/Mod_EUCJP.pm	module that t/enc_module.enc uses
 ext/Encode/t/perlio.t		test script
 ext/Encode/t/rt.pl		test script
 ext/Encode/t/unibench.pl	benchmark script
-ext/Encode/t/utf8strict.t	test script
 ext/Encode/t/Unicode.t		test script
+ext/Encode/t/utf8strict.t	test script
 ext/Encode/TW/Makefile.PL	Encode extension
 ext/Encode/TW/TW.pm		Encode extension
 ext/Encode/ucm/8859-10.ucm	Unicode Character Map
@@ -634,27 +634,27 @@ ext/List/Util/t/dualvar.t	Scalar::Util
 ext/List/Util/t/first.t		List::Util
 ext/List/Util/t/isvstring.t	Scalar::Util
 ext/List/Util/t/lln.t		Scalar::Util
-ext/List/Util/t/max.t		List::Util
 ext/List/Util/t/maxstr.t	List::Util
-ext/List/Util/t/min.t		List::Util
+ext/List/Util/t/max.t		List::Util
 ext/List/Util/t/minstr.t	List::Util
+ext/List/Util/t/min.t		List::Util
 ext/List/Util/t/openhan.t	Scalar::Util
 ext/List/Util/t/p_blessed.t	Scalar::Util
 ext/List/Util/t/p_first.t	List::Util
 ext/List/Util/t/p_lln.t		Scalar::Util
-ext/List/Util/t/p_max.t		List::Util
 ext/List/Util/t/p_maxstr.t	List::Util
-ext/List/Util/t/p_min.t		List::Util
+ext/List/Util/t/p_max.t		List::Util
 ext/List/Util/t/p_minstr.t	List::Util
+ext/List/Util/t/p_min.t		List::Util
 ext/List/Util/t/p_openhan.t	Scalar::Util
 ext/List/Util/t/p_readonly.t	Scalar::Util
 ext/List/Util/t/p_reduce.t	List::Util
 ext/List/Util/t/p_refaddr.t	Scalar::Util
 ext/List/Util/t/p_reftype.t	Scalar::Util
+ext/List/Util/t/proto.t		Scalar::Util
 ext/List/Util/t/p_shuffle.t	List::Util
 ext/List/Util/t/p_sum.t		List::Util
 ext/List/Util/t/p_tainted.t	Scalar::Util
-ext/List/Util/t/proto.t		Scalar::Util
 ext/List/Util/t/readonly.t	Scalar::Util
 ext/List/Util/t/reduce.t	List::Util
 ext/List/Util/t/refaddr.t	Scalar::Util
@@ -1318,8 +1318,6 @@ lib/exceptions.pl		catch and throw routines
 lib/Exporter/Heavy.pm		Complicated routines for Exporter
 lib/Exporter.pm			Exporter base class
 lib/Exporter.t			See if Exporter works
-lib/ExtUtils/CBuilder/t/01-basic.t	tests for ExtUtils::CBuilder
-lib/ExtUtils/CBuilder/t/02-link.t	tests for ExtUtils::CBuilder
 lib/ExtUtils/CBuilder/Base.pm	Base class for ExtUtils::CBuilder methods
 lib/ExtUtils/CBuilder/Platform/aix.pm	CBuilder methods for AIX
 lib/ExtUtils/CBuilder/Platform/cygwin.pm	CBuilder methods for cygwin
@@ -1330,6 +1328,8 @@ lib/ExtUtils/CBuilder/Platform/Unix.pm	CBuilder methods for Unix
 lib/ExtUtils/CBuilder/Platform/VMS.pm	CBuilder methods for VMS
 lib/ExtUtils/CBuilder/Platform/Windows.pm	CBuilder methods for Windows
 lib/ExtUtils/CBuilder.pm	Compile and link C code for Perl modules
+lib/ExtUtils/CBuilder/t/01-basic.t	tests for ExtUtils::CBuilder
+lib/ExtUtils/CBuilder/t/02-link.t	tests for ExtUtils::CBuilder
 lib/ExtUtils/Changes		MakeMaker change log
 lib/ExtUtils/Command/MM.pm	Calling MM functions from the cmd line
 lib/ExtUtils/Command.pm		Utilities for Make on non-UNIX platforms
@@ -1373,10 +1373,10 @@ lib/ExtUtils/MM_Win95.pm	MakeMaker methods for Win95
 lib/ExtUtils/MY.pm		MakeMaker user override class
 lib/ExtUtils/NOTES		Notes about MakeMaker internals
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
+lib/ExtUtils/ParseXS.pm		converts Perl XS code into C code
+lib/ExtUtils/ParseXS/t/basic.t	See if ExtUtils::ParseXS works
 lib/ExtUtils/ParseXS/t/XSTest.pm	Test file for ExtUtils::ParseXS tests
 lib/ExtUtils/ParseXS/t/XSTest.xs	Test file for ExtUtils::ParseXS tests
-lib/ExtUtils/ParseXS/t/basic.t	See if ExtUtils::ParseXS works
-lib/ExtUtils/ParseXS.pm		converts Perl XS code into C code
 lib/ExtUtils/PATCHING		Suggestions for patching MakeMaker
 lib/ExtUtils/README		MakeMaker README
 lib/ExtUtils/t/00compile.t	See if MakeMaker modules compile
@@ -1858,8 +1858,8 @@ lib/Test/Harness/Assert.pm	Test::Harness::Assert (internal use only)
 lib/Test/Harness/bin/prove	The prove harness utility
 lib/Test/Harness/Changes	Test::Harness
 lib/Test/Harness/Iterator.pm	Test::Harness::Iterator (internal use only)
-lib/Test/Harness/Point.pm	Test::Harness::Point (internal use only)
 lib/Test/Harness.pm		A test harness
+lib/Test/Harness/Point.pm	Test::Harness::Point (internal use only)
 lib/Test/Harness/Straps.pm	Test::Harness::Straps
 lib/Test/Harness/t/00compile.t	Test::Harness test
 lib/Test/Harness/TAP.pod	Documentation for the Test Anything Protocol
@@ -2058,8 +2058,8 @@ lib/Unicode/Collate/t/illegalp.t	Unicode::Collate
 lib/Unicode/Collate/t/illegal.t	Unicode::Collate
 lib/Unicode/Collate/t/index.t	Unicode::Collate
 lib/Unicode/Collate/t/normal.t	Unicode::Collate
-lib/Unicode/Collate/t/rearrang.t	Unicode::Collate
 lib/Unicode/Collate/t/override.t	Unicode::Collate
+lib/Unicode/Collate/t/rearrang.t	Unicode::Collate
 lib/Unicode/Collate/t/test.t	Unicode::Collate
 lib/Unicode/Collate/t/trailwt.t	Unicode::Collate
 lib/Unicode/Collate/t/variable.t	Unicode::Collate
@@ -2528,11 +2528,11 @@ symbian/cwd.pl			Helper code for config.pl
 symbian/demo_pl			"Archive" of demo code
 symbian/install.cfg		Installation instructions
 symbian/makesis.pl		Installation file creator
+symbian/PerlAppAif.rss		Symbian sample app code
 symbian/PerlApp.cpp		Symbian sample app code
 symbian/PerlApp.h		Symbian sample app header
 symbian/PerlApp.hrh		Symbian sample app resource header
 symbian/PerlApp.rss		Symbian sample app resource definition
-symbian/PerlAppAif.rss		Symbian sample app code
 symbian/PerlBase.cpp		Symbian Perl base class
 symbian/PerlBase.h		Symbian Perl base class header
 symbian/PerlBase.pod		Symbian Perl base class documentation
