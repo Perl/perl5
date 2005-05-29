@@ -2159,7 +2159,9 @@ STATIC SV*	S_method_common(pTHX_ SV* meth, U32* hashp);
 
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 STATIC OP*	S_doform(pTHX_ CV *cv, GV *gv, OP *retop);
-STATIC int	S_emulate_eaccess(pTHX_ const char* path, Mode_t mode);
+STATIC int	S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
+			__attribute__noreturn__;
+
 #  if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 STATIC int	S_dooneliner(pTHX_ char *cmd, char *filename);
 #  endif

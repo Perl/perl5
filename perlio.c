@@ -2946,6 +2946,7 @@ PerlIOStdio_invalidate_fileno(pTHX_ FILE *f)
      */
 #    error "Don't know how to set FILE.fileno on your platform"
 #endif
+    (void)f;
     return 0;
 #  endif
 }

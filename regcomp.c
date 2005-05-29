@@ -935,7 +935,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     DEBUG_TRIE_COMPILE_r(
         PerlIO_printf( Perl_debug_log, "TRIE(%s): W:%d C:%d Uq:%d \n",
                 ( trie->widecharmap ? "UTF8" : "NATIVE" ), trie->wordcount,
-                trie->charcount, trie->uniquecharcount )
+                (int)trie->charcount, trie->uniquecharcount )
     );
 
 
@@ -1414,7 +1414,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         DEBUG_TRIE_COMPILE_MORE_r(
                 PerlIO_printf( Perl_debug_log,
 		    " Alloc: %d Orig: %"IVdf" elements, Final:%"IVdf". Savings of %%%5.2f\n",
-                    ( ( trie->charcount + 1 ) * trie->uniquecharcount + 1 ), (IV)next_alloc, (IV)pos,
+		    (int)( ( trie->charcount + 1 ) * trie->uniquecharcount + 1 ),
+		    (IV)next_alloc,
+		    (IV)pos,
                     ( ( next_alloc - pos ) * 100 ) / (double)next_alloc );
             );
 
@@ -5717,9 +5719,10 @@ S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 	    I32 word_idx;
 	    PerlIO_printf(Perl_debug_log,
 		       "%*s[Words:%d Chars Stored:%d Unique Chars:%d States:%"IVdf"%s]\n",
-		       (int)(2*(l+3)), "",
+		       (int)(2*(l+3)),
+		       "",
 		       trie->wordcount,
-		       trie->charcount,
+		       (int)trie->charcount,
 		       trie->uniquecharcount,
 		       (IV)trie->laststate-1,
 		       node->flags ? " EVAL mode" : "");

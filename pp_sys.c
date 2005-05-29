@@ -309,6 +309,8 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 STATIC int
 S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 {
+    (void)path;
+    (void)mode;
     Perl_croak(aTHX_ "switching effective uid is not implemented");
     /*NOTREACHED*/
     return -1;

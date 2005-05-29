@@ -1141,7 +1141,7 @@ s	|SV*	|method_common	|SV* meth|U32* hashp
 
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 s	|OP*	|doform		|CV *cv|GV *gv|OP *retop
-s	|int	|emulate_eaccess|const char* path|Mode_t mode
+sr	|int	|emulate_eaccess|const char* path|Mode_t mode
 #  if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 s	|int	|dooneliner	|char *cmd|char *filename
 #  endif
