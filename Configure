@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed May 25 21:03:27 CEST 2005 [metaconfig 3.0 PL70]
+# Generated on Tue May 31 08:06:05 CEST 2005 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -19865,7 +19865,7 @@ BeOS BIG_ENDIAN BIT_MSF bsd BSD bsd43 bsd4_2 bsd4_3 BSD4_3 bsd4_4
 BSD_4_3 BSD_4_4 BSD_NET2 BSD_TIME BSD_TYPES BSDCOMPAT bsdi
 bull c cadmus clipper CMU COFF COMPILER_VERSION
 concurrent convex cpu cray CRAY CRAYMPP ctix CX_UX
-CYGWIN DGUX DGUX_SOURCE DJGPP dmert DOLPHIN DPX2 DSO
+CYGWIN DECC DGUX DGUX_SOURCE DJGPP dmert DOLPHIN DPX2 DSO
 Dynix DynixPTX ELF encore EPI EXTENSIONS FAVOR_BSD
 FILE_OFFSET_BITS FreeBSD GCC_NEW_VARARGS gcos gcx gimpel
 GLIBC GLIBC_MINOR
