@@ -30,6 +30,11 @@
 #endif
 #endif
 
+#ifdef __Lynx__
+/* Missing protos on LynxOS */
+int putenv(char *);
+#endif
+
 #ifdef I_SYS_WAIT
 #  include <sys/wait.h>
 #endif
