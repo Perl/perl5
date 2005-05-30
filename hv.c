@@ -2128,7 +2128,7 @@ S_unshare_hek_or_pvn(pTHX_ HEK *hek, const char *str, I32 len, U32 hash)
     register XPVHV* xhv;
     register HE *entry;
     register HE **oentry;
-    register I32 i = 1;
+    HE **first;
     bool found = 0;
     bool is_utf8 = FALSE;
     int k_flags = 0;
@@ -2156,9 +2156,9 @@ S_unshare_hek_or_pvn(pTHX_ HEK *hek, const char *str, I32 len, U32 hash)
     xhv = (XPVHV*)SvANY(PL_strtab);
     /* assert(xhv_array != 0) */
     LOCK_STRTAB_MUTEX;
-    oentry = &(HvARRAY(PL_strtab))[hash & (I32) HvMAX(PL_strtab)];
+    first = oentry = &(HvARRAY(PL_strtab))[hash & (I32) HvMAX(PL_strtab)];
     if (hek) {
-        for (entry = *oentry; entry; i=0, oentry = &HeNEXT(entry), entry = *oentry) {
+        for (entry = *oentry; entry; oentry = &HeNEXT(entry), entry = *oentry) {
             if (HeKEY_hek(entry) != hek)
                 continue;
             found = 1;
@@ -2166,7 +2166,7 @@ S_unshare_hek_or_pvn(pTHX_ HEK *hek, const char *str, I32 len, U32 hash)
         }
     } else {
         const int flags_masked = k_flags & HVhek_MASK;
-        for (entry = *oentry; entry; i=0, oentry = &HeNEXT(entry), entry = *oentry) {
+        for (entry = *oentry; entry; oentry = &HeNEXT(entry), entry = *oentry) {
             if (HeHASH(entry) != hash)		/* strings can't be equal */
                 continue;
             if (HeKLEN(entry) != len)
@@ -2183,8 +2183,10 @@ S_unshare_hek_or_pvn(pTHX_ HEK *hek, const char *str, I32 len, U32 hash)
     if (found) {
         if (--HeVAL(entry) == Nullsv) {
             *oentry = HeNEXT(entry);
-            if (i && !*oentry)
+            if (!*first) {
+		/* There are now no entries in our slot.  */
                 xhv->xhv_fill--; /* HvFILL(hv)-- */
+	    }
             Safefree(HeKEY_hek(entry));
             del_HE(entry);
             xhv->xhv_keys--; /* HvKEYS(hv)-- */
@@ -2239,7 +2241,6 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
     register XPVHV* xhv;
     register HE *entry;
     register HE **oentry;
-    register I32 i = 1;
     I32 found = 0;
     const int flags_masked = flags & HVhek_MASK;
 
@@ -2255,7 +2256,7 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
     /* assert(xhv_array != 0) */
     LOCK_STRTAB_MUTEX;
     oentry = &(HvARRAY(PL_strtab))[hash & (I32) HvMAX(PL_strtab)];
-    for (entry = *oentry; entry; i=0, entry = HeNEXT(entry)) {
+    for (entry = *oentry; entry; entry = HeNEXT(entry)) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
 	if (HeKLEN(entry) != len)
@@ -2268,13 +2269,17 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 	break;
     }
     if (!found) {
+	/* What used to be head of the list.
+	   If this is NULL, then we're the first entry for this slot, which
+	   means we need to increate fill.  */
+	const HE *old_first = *oentry;
 	entry = new_HE();
 	HeKEY_hek(entry) = save_hek_flags(str, len, hash, flags_masked);
 	HeVAL(entry) = Nullsv;
 	HeNEXT(entry) = *oentry;
 	*oentry = entry;
 	xhv->xhv_keys++; /* HvKEYS(hv)++ */
-	if (i) {				/* initial entry? */
+	if (!old_first) {			/* initial entry? */
 	    xhv->xhv_fill++; /* HvFILL(hv)++ */
 	} else if (xhv->xhv_keys > (IV)xhv->xhv_max /* HvKEYS(hv) > HvMAX(hv) */) {
 		hsplit(PL_strtab);
