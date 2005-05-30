@@ -84,7 +84,7 @@ case `$cc -v 2>&1`"" in
 		[012]*) # HP-UX and gcc-2.* break UINT32_MAX :-(
 			ccflags="$ccflags -DUINT32_MAX_BROKEN"
 			;;
-               3*)     # GCC (both 32bit and 64bit) will define __STDC_EXT__
+		[34]*) # GCC (both 32bit and 64bit) will define __STDC_EXT__
                        # by default when using GCC 3.0 and newer versions of
                        # the compiler.
                        cppflags="$cc_cppflags"
@@ -94,7 +94,7 @@ case `$cc -v 2>&1`"" in
 		*64*)
 		    echo "main(){}">try.c
 		    case "$gccversion" in
-			3*)
+			[34]*)
 			    case "$archname" in
                                PA-RISC*)
                                    case "$ccflags" in
@@ -269,15 +269,16 @@ EOM
 		# HP-UX soon, including a user-friendly exit
 		case $gcc_64native in
 		    no) case "$gccversion" in
-			    [123]*) ccflags="$ccflags -mlp64"
-				    case "$archname" in
-					PA-RISC*)
-					    ldflags="$ldflags -Wl,+DD64"
-					    ;;
-					IA64*)
-					    ldflags="$ldflags -mlp64"
-					    ;;
-					esac
+			    [1234]*)
+				ccflags="$ccflags -mlp64"
+				case "$archname" in
+				    PA-RISC*)
+					ldflags="$ldflags -Wl,+DD64"
+					;;
+				    IA64*)
+					ldflags="$ldflags -mlp64"
+					;;
+				    esac
 				    ;;
 			    esac
 			;;
