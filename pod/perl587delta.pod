@@ -345,6 +345,13 @@ Unicode strings returned from overloaded operators can be buggy. This is a
 long standing bug reported since 5.8.6 was released, but we do not yet have
 a suitable fix for it.
 
+=head1 Platform Specific Problems
+
+On UNICOS, lib/Math/BigInt/t/bigintc.t hangs burning CPU.
+ext/B/t/bytecode.t and ext/Socket/t/socketpair.t both fail tests.
+These are unlikely to be resolved, as our valiant UNICOS porter's last
+Cray is being decommissioned.
+
 =head1 Reporting Bugs
 
 If you find what you think is a bug, you might check the articles
