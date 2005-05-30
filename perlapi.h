@@ -83,9 +83,26 @@ EXTCONST void * const PL_force_link_funcs[] = {
 #define PERLVARIC(v,t,i) PERLVAR(v,t)
 #define PERLVARISC(v,i) PERLVAR(v,char)
 
+/* In Tru64 (__DEC && __osf__) the cc option -std1 causes that one
+ * cannot cast between void pointers and function pointers without
+ * info level warnings.  The PL_force_link_funcs[] would cause a few
+ * hundred of those warnings.  In code one can circumnavigate this by using
+ * unions that overlay the different pointers, but in declarations one
+ * cannot use this trick.  Therefore we just disable the warning here
+ * for the duration of the PL_force_link_funcs[] declaration. */
+
+#if defined(__DECC) && defined(__osf__)
+#pragma message save
+#pragma message disable (nonstandcast)
+#endif
+
 #include "thrdvar.h"
 #include "intrpvar.h"
 #include "perlvars.h"
+
+#if defined(__DECC) && defined(__osf__)
+#pragma message restore
+#endif
 
 #undef PERLVAR
 #undef PERLVARA
