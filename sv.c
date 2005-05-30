@@ -10260,15 +10260,16 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
 	HvRITER_set((HV*)dstr, HvRITER_get((HV*)sstr));
 	if (HvARRAY((HV*)sstr)) {
+	    bool sharekeys = !!HvSHAREKEYS(sstr);
 	    STRLEN i = 0;
 	    XPVHV *dxhv = (XPVHV*)SvANY(dstr);
 	    XPVHV *sxhv = (XPVHV*)SvANY(sstr);
-	    Newz(0, dxhv->xhv_array,
+	    New(0, dxhv->xhv_array,
 		 PERL_HV_ARRAY_ALLOC_BYTES(dxhv->xhv_max+1), char);
 	    while (i <= sxhv->xhv_max) {
-		((HE**)dxhv->xhv_array)[i] = he_dup(((HE**)sxhv->xhv_array)[i],
-						    (bool)!!HvSHAREKEYS(sstr),
-						    param);
+		HE *source = HvARRAY(sstr)[i];
+		HvARRAY(dstr)[i]
+			= source ? he_dup(source, sharekeys, param) : 0;
 		++i;
 	    }
 	    dxhv->xhv_eiter = he_dup(sxhv->xhv_eiter,
