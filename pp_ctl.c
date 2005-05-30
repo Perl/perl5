@@ -2298,6 +2298,7 @@ PP(pp_goto)
 		dounwind(cxix);
 	    TOPBLOCK(cx);
 	    SPAGAIN;
+	    /* ban goto in eval: see <20050521150056.GC20213@iabyn.com> */
 	    if (CxTYPE(cx) == CXt_EVAL) {
 		if (CxREALEVAL(cx))
 		    DIE(aTHX_ "Can't goto subroutine from an eval-string");
