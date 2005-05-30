@@ -901,7 +901,7 @@ prints warnings about dubious constructs, such as variable names
 that are mentioned only once and scalar variables that are used
 before being set, redefined subroutines, references to undefined
 filehandles or filehandles opened read-only that you are attempting
-to write on, values used as a number that doesn't look like numbers,
+to write on, values used as a number that don't look like numbers,
 using an array as though it were a scalar, if your subroutines
 recurse more than 100 deep, and innumerable other things.
 
