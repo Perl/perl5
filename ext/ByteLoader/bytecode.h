@@ -347,7 +347,7 @@ typedef char *pvindex;
 	mg_set(*hv_store(GvHV(gv_fetchpv("SIG", TRUE, SVt_PVHV)),	\
 		name, strlen(name), cv, 0))
 
-#define BSET_xhv_name(hv, name)	Perl_hv_name_set(aTHX_ hv, name, strlen(name), 0)
+#define BSET_xhv_name(hv, name)	Perl_hv_name_set(aTHX_ (HV*)hv, name, strlen(name), 0)
 
 /* NOTE: the bytecode header only sanity-checks the bytecode. If a script cares about
  * what version of Perl it's being called under, it should do a 'use 5.006_001' or
