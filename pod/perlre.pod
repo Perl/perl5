@@ -400,7 +400,7 @@ until the end of the enclosing block or until the next successful
 match, whichever comes first.  (See L<perlsyn/"Compound Statements">.)
 
 B<NOTE>: failed matches in Perl do not reset the match variables,
-which makes easier to write code that tests for a series of more
+which makes it easier to write code that tests for a series of more
 specific cases and remembers the best match.
 
 B<WARNING>: Once Perl sees that you need one of C<$&>, C<$`>, or
