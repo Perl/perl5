@@ -141,7 +141,7 @@ PerlIOVia_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 		    newSVpvn(Perl_form(aTHX_ "PerlIO::via::%s", pkg),
 			     pkglen + 13);
 		SvREFCNT_dec(arg);
-		s->stash = gv_stashpvn(SvPVX(s->obj), pkglen + 13, FALSE);
+		s->stash = gv_stashpvn(SvPVX_const(s->obj), pkglen + 13, FALSE);
 	    }
 	    if (s->stash) {
 		char lmode[8];

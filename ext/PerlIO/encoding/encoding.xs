@@ -308,8 +308,8 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	}
 	else {
 	    /* Create a "dummy" SV to represent the available data from layer below */
-	    if (SvLEN(e->dataSV) && SvPVX(e->dataSV)) {
-		Safefree(SvPVX(e->dataSV));
+	    if (SvLEN(e->dataSV) && SvPVX_const(e->dataSV)) {
+		Safefree(SvPVX_const(e->dataSV));
 	    }
 	    if (use > (SSize_t)e->base.bufsiz) {
 		if (e->flags & NEEDS_LINES) {

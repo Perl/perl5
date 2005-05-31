@@ -1628,7 +1628,7 @@ Perl_sv_backoff(pTHX_ register SV *sv)
 {
     assert(SvOOK(sv));
     if (SvIVX(sv)) {
-	char *s = SvPVX(sv);
+	const char *s = SvPVX_const(sv);
 	SvLEN_set(sv, SvLEN(sv) + SvIVX(sv));
 	SvPV_set(sv, SvPVX(sv) - SvIVX(sv));
 	SvIV_set(sv, 0);
@@ -1701,8 +1701,8 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 		SvREADONLY_off(sv);
 	    }
 	    s = safemalloc(newlen);
-	    if (SvPVX(sv) && SvCUR(sv)) {
-	        Move(SvPVX(sv), s, (newlen < SvCUR(sv)) ? newlen : SvCUR(sv), char);
+	    if (SvPVX_const(sv) && SvCUR(sv)) {
+	        Move(SvPVX_const(sv), s, (newlen < SvCUR(sv)) ? newlen : SvCUR(sv), char);
 	    }
 	}
 	SvPV_set(sv, s);
@@ -1966,7 +1966,7 @@ Perl_looks_like_number(pTHX_ SV *sv)
     STRLEN len;
 
     if (SvPOK(sv)) {
-	sbegin = SvPVX(sv);
+	sbegin = SvPVX_const(sv);
 	len = SvCUR(sv);
     }
     else if (SvPOKp(sv))
@@ -2063,7 +2063,7 @@ Perl_looks_like_number(pTHX_ SV *sv)
 STATIC int
 S_sv_2iuv_non_preserve(pTHX_ register SV *sv, I32 numtype)
 {
-    DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_2iuv_non '%s', IV=0x%"UVxf" NV=%"NVgf" inttype=%"UVXf"\n", SvPVX(sv), SvIVX(sv), SvNVX(sv), (UV)numtype));
+    DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_2iuv_non '%s', IV=0x%"UVxf" NV=%"NVgf" inttype=%"UVXf"\n", SvPVX_const(sv), SvIVX(sv), SvNVX(sv), (UV)numtype));
     if (SvNVX(sv) < (NV)IV_MIN) {
 	(void)SvIOKp_on(sv);
 	(void)SvNOK_on(sv);
@@ -2308,7 +2308,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
 	    != IS_NUMBER_IN_UV) {
 	    /* It wasn't an (integer that doesn't overflow the UV). */
-	    SvNV_set(sv, Atof(SvPVX(sv)));
+	    SvNV_set(sv, Atof(SvPVX_const(sv)));
 
 	    if (! numtype && ckWARN(WARN_NUMERIC))
 		not_a_number(sv);
@@ -2596,7 +2596,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
 	    != IS_NUMBER_IN_UV) {
 	    /* It wasn't an integer, or it overflowed the UV. */
-	    SvNV_set(sv, Atof(SvPVX(sv)));
+	    SvNV_set(sv, Atof(SvPVX_const(sv)));
 
             if (! numtype && ckWARN(WARN_NUMERIC))
 		    not_a_number(sv);
@@ -2707,7 +2707,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	    if (ckWARN(WARN_NUMERIC) && !SvIOKp(sv) &&
 		!grok_number(SvPVX_const(sv), SvCUR(sv), NULL))
 		not_a_number(sv);
-	    return Atof(SvPVX(sv));
+	    return Atof(SvPVX_const(sv));
 	}
 	if (SvIOKp(sv)) {
 	    if (SvIsUV(sv))
@@ -2783,7 +2783,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     }
     else if (SvPOKp(sv) && SvLEN(sv)) {
 	UV value;
-	const int numtype = grok_number(SvPVX(sv), SvCUR(sv), &value);
+	const int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
 	if (ckWARN(WARN_NUMERIC) && !SvIOKp(sv) && !numtype)
 	    not_a_number(sv);
 #ifdef NV_PRESERVES_UV
@@ -2792,10 +2792,10 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	    /* It's definitely an integer */
 	    SvNV_set(sv, (numtype & IS_NUMBER_NEG) ? -(NV)value : (NV)value);
 	} else
-	    SvNV_set(sv, Atof(SvPVX(sv)));
+	    SvNV_set(sv, Atof(SvPVX_const(sv)));
 	SvNOK_on(sv);
 #else
-	SvNV_set(sv, Atof(SvPVX(sv)));
+	SvNV_set(sv, Atof(SvPVX_const(sv)));
 	/* Only set the public NV OK flag if this NV preserves the value in
 	   the PV at least as well as an IV/UV would.
 	   Not sure how to do this 100% reliably. */
@@ -2900,7 +2900,7 @@ STATIC IV
 S_asIV(pTHX_ SV *sv)
 {
     UV value;
-    int numtype = grok_number(SvPVX(sv), SvCUR(sv), &value);
+    int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
 
     if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
 	== IS_NUMBER_IN_UV) {
@@ -2917,7 +2917,7 @@ S_asIV(pTHX_ SV *sv)
 	if (ckWARN(WARN_NUMERIC))
 	    not_a_number(sv);
     }
-    return I_V(Atof(SvPVX(sv)));
+    return I_V(Atof(SvPVX_const(sv)));
 }
 
 /* asUV(): extract an unsigned integer from the string value of an SV
@@ -2939,7 +2939,7 @@ S_asUV(pTHX_ SV *sv)
 	if (ckWARN(WARN_NUMERIC))
 	    not_a_number(sv);
     }
-    return U_V(Atof(SvPVX(sv)));
+    return U_V(Atof(SvPVX_const(sv)));
 }
 
 /*
@@ -3261,11 +3261,11 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	    sv_upgrade(sv, SVt_PV);
 	return (char *)"";
     }
-    *lp = s - SvPVX(sv);
+    *lp = s - SvPVX_const(sv);
     SvCUR_set(sv, *lp);
     SvPOK_on(sv);
     DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2pv(%s)\n",
-			  PTR2UV(sv),SvPVX(sv)));
+			  PTR2UV(sv),SvPVX_const(sv)));
     return SvPVX(sv);
 
   tokensave:
@@ -3285,7 +3285,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 
 	if (tsv) {
 	    sv_2mortal(tsv);
-	    t = SvPVX(tsv);
+	    t = SvPVX_const(tsv);
 	    len = SvCUR(tsv);
 	}
 	else {
@@ -4013,7 +4013,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		    SvTAINT(dstr);
 		return;
 	    }
-	    if (SvPVX(dstr)) {
+	    if (SvPVX_const(dstr)) {
 		SvPV_free(dstr);
 		SvLEN_set(dstr, 0);
                 SvCUR_set(dstr, 0);
@@ -4046,8 +4046,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	/*
 	 * Check to see if we can just swipe the string.  If so, it's a
 	 * possible small lose on short strings, but a big win on long ones.
-	 * It might even be a win on short strings if SvPVX(dstr)
-	 * has to be allocated and SvPVX(sstr) has to be freed.
+	 * It might even be a win on short strings if SvPVX_const(dstr)
+	 * has to be allocated and SvPVX_const(sstr) has to be freed.
 	 */
 
 	if (SvTEMP(sstr) &&		/* slated for free anyway? */
@@ -4058,13 +4058,13 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    			/* and won't be needed again, potentially */
 	    !(PL_op && PL_op->op_type == OP_AASSIGN))
 	{
-	    if (SvPVX(dstr)) {		/* we know that dtype >= SVt_PV */
+	    if (SvPVX_const(dstr)) {		/* we know that dtype >= SVt_PV */
 		if (SvOOK(dstr)) {
 		    SvFLAGS(dstr) &= ~SVf_OOK;
-		    Safefree(SvPVX(dstr) - SvIVX(dstr));
+		    Safefree(SvPVX_const(dstr) - SvIVX(dstr));
 		}
 		else if (SvLEN(dstr))
-		    Safefree(SvPVX(dstr));
+		    Safefree(SvPVX_const(dstr));
 	    }
 	    (void)SvPOK_only(dstr);
 	    SvPV_set(dstr, SvPVX(sstr));
@@ -4081,7 +4081,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	else {				/* have to copy actual string */
 	    STRLEN len = SvCUR(sstr);
 	    SvGROW(dstr, len + 1);	/* inlined from sv_setpvn */
-	    Move(SvPVX(sstr),SvPVX(dstr),len,char);
+	    Move(SvPVX_const(sstr),SvPVX(dstr),len,char);
 	    SvCUR_set(dstr, len);
 	    *SvEND(dstr) = '\0';
 	    (void)SvPOK_only(dstr);
@@ -4285,7 +4285,7 @@ Perl_sv_usepvn(pTHX_ register SV *sv, register char *ptr, register STRLEN len)
 	(void)SvOK_off(sv);
 	return;
     }
-    if (SvPVX(sv))
+    if (SvPVX_const(sv))
 	SvPV_free(sv);
 
     allocate = PERL_STRLEN_ROUNDUP(len + 1);
@@ -4329,13 +4329,13 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 {
     if (SvREADONLY(sv)) {
 	if (SvFAKE(sv)) {
-	    char *pvx = SvPVX(sv);
+	    char *pvx = SvPVX_const(sv);
 	    STRLEN len = SvCUR(sv);
             U32 hash   = SvUVX(sv);
 	    SvFAKE_off(sv);
 	    SvREADONLY_off(sv);
 	    SvGROW(sv, len + 1);
-	    Move(pvx,SvPVX(sv),len,char);
+	    Move(pvx,SvPVX_const(sv),len,char);
 	    *SvEND(sv) = '\0';
 	    unsharepvn(pvx, SvUTF8(sv) ? -(I32)len : len, hash);
 	}
@@ -4371,7 +4371,7 @@ Efficient removal of characters from the beginning of the string buffer.
 SvPOK(sv) must be true and the C<ptr> must be a pointer to somewhere inside
 the string buffer.  The C<ptr> becomes the first character of the adjusted
 string. Uses the "OOK hack".
-Beware: after this function returns, C<ptr> and SvPVX(sv) may no longer
+Beware: after this function returns, C<ptr> and SvPVX_const(sv) may no longer
 refer to the same chunk of data.
 
 =cut
@@ -4383,17 +4383,17 @@ Perl_sv_chop(pTHX_ register SV *sv, register char *ptr)
     register STRLEN delta;
     if (!ptr || !SvPOKp(sv))
 	return;
-    delta = ptr - SvPVX(sv);
+    delta = ptr - SvPVX_const(sv);
     SV_CHECK_THINKFIRST(sv);
     if (SvTYPE(sv) < SVt_PVIV)
 	sv_upgrade(sv,SVt_PVIV);
 
     if (!SvOOK(sv)) {
 	if (!SvLEN(sv)) { /* make copy of shared string */
-	    const char *pvx = SvPVX(sv);
+	    const char *pvx = SvPVX_const(sv);
 	    STRLEN len = SvCUR(sv);
 	    SvGROW(sv, len + 1);
-	    Move(pvx,SvPVX(sv),len,char);
+	    Move(pvx,SvPVX_const(sv),len,char);
 	    *SvEND(sv) = '\0';
 	}
 	SvIV_set(sv, 0);
@@ -4447,7 +4447,7 @@ Perl_sv_catpvn_flags(pTHX_ register SV *dsv, register const char *sstr, register
 
     SvGROW(dsv, dlen + slen + 1);
     if (sstr == dstr)
-	sstr = SvPVX(dsv);
+	sstr = SvPVX_const(dsv);
     Move(sstr, SvPVX(dsv) + dlen, slen, char);
     SvCUR_set(dsv, SvCUR(dsv) + slen);
     *SvEND(dsv) = '\0';
@@ -4570,7 +4570,7 @@ Perl_sv_catpv(pTHX_ register SV *sv, register const char *ptr)
     len = strlen(ptr);
     SvGROW(sv, tlen + len + 1);
     if (ptr == junk)
-	ptr = SvPVX(sv);
+	ptr = SvPVX_const(sv);
     Move(ptr,SvPVX(sv)+tlen,len+1,char);
     SvCUR_set(sv, SvCUR(sv) + len);
     (void)SvPOK_only_UTF8(sv);		/* validate pointer */
@@ -5039,7 +5039,7 @@ Perl_sv_insert(pTHX_ SV *bigstr, STRLEN offset, STRLEN len, char *little, STRLEN
     (void)SvPOK_only_UTF8(bigstr);
     if (offset + len > curlen) {
 	SvGROW(bigstr, offset+len+1);
-	Zero(SvPVX(bigstr)+curlen, offset+len-curlen, char);
+	Zero(SvPVX_const(bigstr)+curlen, offset+len-curlen, char);
 	SvCUR_set(bigstr, offset+len);
     }
 
@@ -5291,10 +5291,10 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	    else
 	        SvREFCNT_dec(SvRV(sv));
 	}
-	else if (SvPVX(sv) && SvLEN(sv))
-	    Safefree(SvPVX(sv));
-	else if (SvPVX(sv) && SvREADONLY(sv) && SvFAKE(sv)) {
-	    unsharepvn(SvPVX(sv),
+	else if (SvPVX_const(sv) && SvLEN(sv))
+	    Safefree(SvPVX_const(sv));
+	else if (SvPVX_const(sv) && SvREADONLY(sv) && SvFAKE(sv)) {
+	    unsharepvn(SvPVX_const(sv),
 		       SvUTF8(sv) ? -(I32)SvCUR(sv) : SvCUR(sv),
 		       SvUVX(sv));
 	    SvFAKE_off(sv);
@@ -6359,7 +6359,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
     }
     else 
 	shortbuffered = 0;
-    bp = (STDCHAR*)SvPVX(sv) + append;  /* move these two too to registers */
+    bp = (STDCHAR*)SvPVX_const(sv) + append;  /* move these two too to registers */
     ptr = (STDCHAR*)PerlIO_get_ptr(fp);
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 	"Screamer: entering, ptr=%"UVuf", cnt=%ld\n",PTR2UV(ptr),(long)cnt));
@@ -6388,10 +6388,10 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 	if (shortbuffered) {		/* oh well, must extend */
 	    cnt = shortbuffered;
 	    shortbuffered = 0;
-	    bpx = bp - (STDCHAR*)SvPVX(sv); /* box up before relocation */
+	    bpx = bp - (STDCHAR*)SvPVX_const(sv); /* box up before relocation */
 	    SvCUR_set(sv, bpx);
 	    SvGROW(sv, SvLEN(sv) + append + cnt + 2);
-	    bp = (STDCHAR*)SvPVX(sv) + bpx; /* unbox after relocation */
+	    bp = (STDCHAR*)SvPVX_const(sv) + bpx; /* unbox after relocation */
 	    continue;
 	}
 
@@ -6423,10 +6423,10 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 	if (i == EOF)			/* all done for ever? */
 	    goto thats_really_all_folks;
 
-	bpx = bp - (STDCHAR*)SvPVX(sv);	/* box up before relocation */
+	bpx = bp - (STDCHAR*)SvPVX_const(sv);	/* box up before relocation */
 	SvCUR_set(sv, bpx);
 	SvGROW(sv, bpx + cnt + 2);
-	bp = (STDCHAR*)SvPVX(sv) + bpx;	/* unbox after relocation */
+	bp = (STDCHAR*)SvPVX_const(sv) + bpx;	/* unbox after relocation */
 
 	*bp++ = (STDCHAR)i;		/* store character from PerlIO_getc */
 
@@ -6435,7 +6435,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
     }
 
 thats_all_folks:
-    if ((rslen > 1 && (STRLEN)(bp - (STDCHAR*)SvPVX(sv)) < rslen) ||
+    if ((rslen > 1 && (STRLEN)(bp - (STDCHAR*)SvPVX_const(sv)) < rslen) ||
 	  memNE((char*)bp - rslen, rsptr, rslen))
 	goto screamer;				/* go back to the fray */
 thats_really_all_folks:
@@ -6449,10 +6449,10 @@ thats_really_all_folks:
 	PTR2UV(PerlIO_get_ptr(fp)), (long)PerlIO_get_cnt(fp),
 	PTR2UV(PerlIO_has_base (fp) ? PerlIO_get_base(fp) : 0)));
     *bp = '\0';
-    SvCUR_set(sv, bp - (STDCHAR*)SvPVX(sv));	/* set length */
+    SvCUR_set(sv, bp - (STDCHAR*)SvPVX_const(sv));	/* set length */
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 	"Screamer: done, len=%ld, string=|%.*s|\n",
-	(long)SvCUR(sv),(int)SvCUR(sv),SvPVX(sv)));
+	(long)SvCUR(sv),(int)SvCUR(sv),SvPVX_const(sv)));
     }
    else
     {
@@ -6504,7 +6504,7 @@ screamer2:
 	if (i != EOF &&			/* joy */
 	    (!rslen ||
 	     SvCUR(sv) < rslen ||
-	     memNE(SvPVX(sv) + SvCUR(sv) - rslen, rsptr, rslen)))
+	     memNE(SvPVX_const(sv) + SvCUR(sv) - rslen, rsptr, rslen)))
 	{
 	    append = -1;
 	    /*
@@ -6610,7 +6610,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
 	return;
     }
 
-    if (!(flags & SVp_POK) || !*SvPVX(sv)) {
+    if (!(flags & SVp_POK) || !*SvPVX_const(sv)) {
 	if ((flags & SVTYPEMASK) < SVt_PVIV)
 	    sv_upgrade(sv, SVt_IV);
 	(void)SvIOK_only(sv);
@@ -6649,18 +6649,18 @@ Perl_sv_inc(pTHX_ register SV *sv)
 	       Fall through. */
 #if defined(USE_LONG_DOUBLE)
 	    DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_inc punt failed to convert '%s' to IOK or NOKp, UV=0x%"UVxf" NV=%"PERL_PRIgldbl"\n",
-				  SvPVX(sv), SvIVX(sv), SvNVX(sv)));
+				  SvPVX_const(sv), SvIVX(sv), SvNVX(sv)));
 #else
 	    DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_inc punt failed to convert '%s' to IOK or NOKp, UV=0x%"UVxf" NV=%"NVgf"\n",
-				  SvPVX(sv), SvIVX(sv), SvNVX(sv)));
+				  SvPVX_const(sv), SvIVX(sv), SvNVX(sv)));
 #endif
 	}
 #endif /* PERL_PRESERVE_IVUV */
-	sv_setnv(sv,Atof(SvPVX(sv)) + 1.0);
+	sv_setnv(sv,Atof(SvPVX_const(sv)) + 1.0);
 	return;
     }
     d--;
-    while (d >= SvPVX(sv)) {
+    while (d >= SvPVX_const(sv)) {
 	if (isDIGIT(*d)) {
 	    if (++*d <= '9')
 		return;
@@ -6690,7 +6690,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
     /* oh,oh, the number grew */
     SvGROW(sv, SvCUR(sv) + 2);
     SvCUR_set(sv, SvCUR(sv) + 1);
-    for (d = SvPVX(sv) + SvCUR(sv); d > SvPVX(sv); d--)
+    for (d = SvPVX(sv) + SvCUR(sv); d > SvPVX_const(sv); d--)
 	*d = d[-1];
     if (isDIGIT(d[1]))
 	*d = '1';
@@ -6797,15 +6797,15 @@ Perl_sv_dec(pTHX_ register SV *sv)
 	       Fall through. */
 #if defined(USE_LONG_DOUBLE)
 	    DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_dec punt failed to convert '%s' to IOK or NOKp, UV=0x%"UVxf" NV=%"PERL_PRIgldbl"\n",
-				  SvPVX(sv), SvIVX(sv), SvNVX(sv)));
+				  SvPVX_const(sv), SvIVX(sv), SvNVX(sv)));
 #else
 	    DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_dec punt failed to convert '%s' to IOK or NOKp, UV=0x%"UVxf" NV=%"NVgf"\n",
-				  SvPVX(sv), SvIVX(sv), SvNVX(sv)));
+				  SvPVX_const(sv), SvIVX(sv), SvNVX(sv)));
 #endif
 	}
     }
 #endif /* PERL_PRESERVE_IVUV */
-    sv_setnv(sv,Atof(SvPVX(sv)) - 1.0);	/* punt */
+    sv_setnv(sv,Atof(SvPVX_const(sv)) - 1.0);	/* punt */
 }
 
 /*
@@ -6929,12 +6929,12 @@ Perl_newSVpvn(pTHX_ const char *s, STRLEN len)
 /*
 =for apidoc newSVpvn_share
 
-Creates a new SV with its SvPVX pointing to a shared string in the string
+Creates a new SV with its SvPVX_const pointing to a shared string in the string
 table. If the string does not already exist in the table, it is created
 first.  Turns on READONLY and FAKE.  The string's hash is stored in the UV
 slot of the SV; if the C<hash> parameter is non-zero, that value is used;
 otherwise the hash is computed.  The idea here is that as the string table
-is used for shared hash keys these strings will have SvPVX == HeKEY and
+is used for shared hash keys these strings will have SvPVX_const == HeKEY and
 hash lookup will avoid string compare.
 
 =cut
@@ -7200,7 +7200,7 @@ Perl_sv_reset(pTHX_ register char *s, HV *stash)
 		SvOK_off(sv);
 		if (SvTYPE(sv) >= SVt_PV) {
 		    SvCUR_set(sv, 0);
-		    if (SvPVX(sv) != Nullch)
+		    if (SvPVX_const(sv) != Nullch)
 			*SvPVX(sv) = '\0';
 		    SvTAINT(sv);
 		}
@@ -7542,14 +7542,14 @@ Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
 	}
 	else
 	    s = sv_2pv_flags(sv, lp, flags);
-	if (s != SvPVX(sv)) {	/* Almost, but not quite, sv_setpvn() */
+	if (s != SvPVX_const(sv)) {	/* Almost, but not quite, sv_setpvn() */
 	    const STRLEN len = *lp;
 	
 	    if (SvROK(sv))
 		sv_unref(sv);
 	    (void)SvUPGRADE(sv, SVt_PV);		/* Never FALSE */
 	    SvGROW(sv, len + 1);
-	    Move(s,SvPVX(sv),len,char);
+	    Move(s,SvPVX_const(sv),len,char);
 	    SvCUR_set(sv, len);
 	    *SvEND(sv) = '\0';
 	}
@@ -7557,7 +7557,7 @@ Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
 	    SvPOK_on(sv);		/* validate pointer */
 	    SvTAINT(sv);
 	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2pv(%s)\n",
-				  PTR2UV(sv),SvPVX(sv)));
+				  PTR2UV(sv),SvPVX_const(sv)));
 	}
     }
     return SvPVX(sv);
@@ -9356,7 +9356,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    Copy(eptr, p, elen, char);
 	    p += elen;
 	    *p = '\0';
-	    SvCUR_set(sv, p - SvPVX(sv));
+	    SvCUR_set(sv, p - SvPVX_const(sv));
 	    svix = osvix;
 	    continue;	/* not "break" */
 	}
@@ -9429,7 +9429,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	if (has_utf8)
 	    SvUTF8_on(sv);
 	*p = '\0';
-	SvCUR_set(sv, p - SvPVX(sv));
+	SvCUR_set(sv, p - SvPVX_const(sv));
 	if (vectorize) {
 	    esignlen = 0;
 	    goto vector;
@@ -9976,11 +9976,11 @@ Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
 		       : sv_dup_inc(SvRV(sstr), param));
 
     }
-    else if (SvPVX(sstr)) {
+    else if (SvPVX_const(sstr)) {
 	/* Has something there */
 	if (SvLEN(sstr)) {
 	    /* Normal PV - clone whole allocated space */
-	    SvPV_set(dstr, SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1));
+	    SvPV_set(dstr, SAVEPVN(SvPVX_const(sstr), SvLEN(sstr)-1));
 	}
 	else {
 	    /* Special case - not normally malloced for some reason */
@@ -9991,12 +9991,12 @@ Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
                        and they should not have these flags
                        turned off */
 
-                    SvPV_set(dstr, sharepvn(SvPVX(sstr), SvCUR(sstr),
+                    SvPV_set(dstr, sharepvn(SvPVX_const(sstr), SvCUR(sstr),
                                            SvUVX(sstr)));
                     SvUV_set(dstr, SvUVX(sstr));
                 } else {
 
-                    SvPV_set(dstr, SAVEPVN(SvPVX(sstr), SvCUR(sstr)));
+                    SvPV_set(dstr, SAVEPVN(SvPVX_const(sstr), SvCUR(sstr)));
                     SvFAKE_off(dstr);
                     SvREADONLY_off(dstr);
                 }
@@ -10051,9 +10051,9 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
     SvREFCNT(dstr)	= 0;			/* must be before any other dups! */
 
 #ifdef DEBUGGING
-    if (SvANY(sstr) && PL_watch_pvx && SvPVX(sstr) == PL_watch_pvx)
+    if (SvANY(sstr) && PL_watch_pvx && SvPVX_const(sstr) == PL_watch_pvx)
 	PerlIO_printf(Perl_debug_log, "watch at %p hit, found string \"%s\"\n",
-		      PL_watch_pvx, SvPVX(sstr));
+		      PL_watch_pvx, SvPVX_const(sstr));
 #endif
 
     /* don't clone objects whose class has asked us not to */
@@ -11299,13 +11299,13 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
      */
     if (SvANY(proto_perl->Ilinestr)) {
 	PL_linestr		= sv_dup_inc(proto_perl->Ilinestr, param);
-	i = proto_perl->Ibufptr - SvPVX(proto_perl->Ilinestr);
+	i = proto_perl->Ibufptr - SvPVX_const(proto_perl->Ilinestr);
 	PL_bufptr		= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
-	i = proto_perl->Ioldbufptr - SvPVX(proto_perl->Ilinestr);
+	i = proto_perl->Ioldbufptr - SvPVX_const(proto_perl->Ilinestr);
 	PL_oldbufptr	= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
-	i = proto_perl->Ioldoldbufptr - SvPVX(proto_perl->Ilinestr);
+	i = proto_perl->Ioldoldbufptr - SvPVX_const(proto_perl->Ilinestr);
 	PL_oldoldbufptr	= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
-	i = proto_perl->Ilinestart - SvPVX(proto_perl->Ilinestr);
+	i = proto_perl->Ilinestart - SvPVX_const(proto_perl->Ilinestr);
 	PL_linestart	= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
     }
     else {
@@ -11331,9 +11331,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* XXX See comment on SvANY(proto_perl->Ilinestr) above */
     if (SvANY(proto_perl->Ilinestr)) {
-	i = proto_perl->Ilast_uni - SvPVX(proto_perl->Ilinestr);
+	i = proto_perl->Ilast_uni - SvPVX_const(proto_perl->Ilinestr);
 	PL_last_uni		= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
-	i = proto_perl->Ilast_lop - SvPVX(proto_perl->Ilinestr);
+	i = proto_perl->Ilast_lop - SvPVX_const(proto_perl->Ilinestr);
 	PL_last_lop		= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
 	PL_last_lop_op	= proto_perl->Ilast_lop_op;
     }
@@ -11740,9 +11740,9 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 	uni = POPs;
 	PUTBACK;
 	s = SvPV(uni, len);
-	if (s != SvPVX(sv)) {
+	if (s != SvPVX_const(sv)) {
 	    SvGROW(sv, len + 1);
-	    Move(s, SvPVX(sv), len, char);
+	    Move(s, SvPVX_const(sv), len, char);
 	    SvCUR_set(sv, len);
 	    SvPVX(sv)[len] = 0;	
 	}
