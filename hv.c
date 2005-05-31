@@ -913,9 +913,9 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 {
     dVAR;
     register XPVHV* xhv;
-    register I32 i;
     register HE *entry;
     register HE **oentry;
+    HE *const *first_entry;
     SV *sv;
     bool is_utf8;
     int masked_flags;
@@ -1006,10 +1006,9 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     masked_flags = (k_flags & HVhek_MASK);
 
-    oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)];
+    first_entry = oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)];
     entry = *oentry;
-    i = 1;
-    for (; entry; i=0, oentry = &HeNEXT(entry), entry = *oentry) {
+    for (; entry; oentry = &HeNEXT(entry), entry = *oentry) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
 	if (HeKLEN(entry) != (I32)klen)
@@ -1055,8 +1054,9 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    HvPLACEHOLDERS(hv)++;
 	} else {
 	    *oentry = HeNEXT(entry);
-	    if (i && !*oentry)
+	    if(!*first_entry) {
 		xhv->xhv_fill--; /* HvFILL(hv)-- */
+	    }
 	    if (xhv->xhv_aux && entry
 		== ((struct xpvhv_aux *)xhv->xhv_aux)->xhv_eiter /* HvEITER(hv) */)
 		HvLAZYDEL_on(hv);
