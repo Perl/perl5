@@ -1236,7 +1236,7 @@ PP(pp_getc)
     *SvPVX(TARG) = PerlIO_getc(IoIFP(GvIOp(gv))); /* should never be EOF */
     if (PerlIO_isutf8(IoIFP(GvIOp(gv)))) {
 	/* Find out how many bytes the char needs */
-	Size_t len = UTF8SKIP(SvPVX(TARG));
+	Size_t len = UTF8SKIP(SvPVX_const(TARG));
 	if (len > 1) {
 	    SvGROW(TARG,len+1);
 	    len = PerlIO_read(IoIFP(GvIOp(gv)),SvPVX(TARG)+1,len-1);
@@ -1371,7 +1371,7 @@ PP(pp_leavewrite)
 	    }
 	    if (s) {
 		const STRLEN save = SvCUR(PL_formtarget);
-		SvCUR_set(PL_formtarget, s - SvPVX(PL_formtarget));
+		SvCUR_set(PL_formtarget, s - SvPVX_const(PL_formtarget));
 		do_print(PL_formtarget, ofp);
 		SvCUR_set(PL_formtarget, save);
 		sv_chop(PL_formtarget, s);
@@ -1740,7 +1740,7 @@ PP(pp_sysread)
 		report_evil_fh(gv, io, OP_phoney_OUTPUT_ONLY);
 	goto say_undef;
     }
-    SvCUR_set(read_target, count+(buffer - SvPVX(read_target)));
+    SvCUR_set(read_target, count+(buffer - SvPVX_const(read_target)));
     *SvEND(read_target) = '\0';
     (void)SvPOK_only(read_target);
     if (fp_utf8 && !IN_BYTES) {
@@ -1754,7 +1754,7 @@ PP(pp_sysread)
 	    if (buffer - charskip + skip > bend) {
 		/* partial character - try for rest of it */
 		length = skip - (bend-buffer);
-		offset = bend - SvPVX(bufsv);
+		offset = bend - SvPVX_const(bufsv);
 		charstart = FALSE;
 		charskip += count;
 		goto more_bytes;
@@ -1771,7 +1771,7 @@ PP(pp_sysread)
 	 */
 	if (got < wanted && count == length) {
 	    length = wanted - got;
-	    offset = bend - SvPVX(bufsv);
+	    offset = bend - SvPVX_const(bufsv);
 	    goto more_bytes;
 	}
 	/* return value is character count */
@@ -3461,7 +3461,7 @@ PP(pp_fttext)
 	PL_statgv = Nullgv;
 	PL_laststype = OP_STAT;
 	sv_setpv(PL_statname, SvPV(sv, n_a));
-	if (!(fp = PerlIO_open(SvPVX(PL_statname), "r"))) {
+	if (!(fp = PerlIO_open(SvPVX_const(PL_statname), "r"))) {
 	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV(PL_statname, n_a), '\n'))
 		Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "open");
 	    RETPUSHUNDEF;

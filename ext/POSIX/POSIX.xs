@@ -1261,7 +1261,7 @@ sigaction(sig, optaction, oldaction = 0)
 	    SV** svp;
 	    SV** sigsvp;
 	    if (sig == 0 && SvPOK(ST(0))) {
-	        char *s = SvPVX(ST(0));
+	        const char *s = SvPVX_const(ST(0));
 		int i = whichsig(s);
 
 	        if (i < 0 && memEQ(s, "SIG", 3))
@@ -1366,7 +1366,7 @@ sigaction(sig, optaction, oldaction = 0)
 
 		/* And here again we duplicate -- DEFAULT/IGNORE checking. */
 		if(SvPOK(*svp)) {
-			char *s=SvPVX(*svp);
+			const char *s=SvPVX_const(*svp);
 			if(strEQ(s,"IGNORE")) {
 				act.sa_handler = SIG_IGN;
 			}

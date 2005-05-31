@@ -1558,7 +1558,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		}
 	    }
 	    *str = '\0';
-	    SvCUR_set(sv, str - SvPVX(sv));
+	    SvCUR_set(sv, str - SvPVX_const(sv));
 	    XPUSHs(sv);
 	    break;
 	}
@@ -1595,7 +1595,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		}
 	    }
 	    *str = '\0';
-	    SvCUR_set(sv, str - SvPVX(sv));
+	    SvCUR_set(sv, str - SvPVX_const(sv));
 	    XPUSHs(sv);
 	    break;
 	}
@@ -2445,7 +2445,7 @@ marked_upgrade(pTHX_ SV *sv, tempsym_t *sym_ptr) {
 
     if (SvUTF8(sv)) return;
 
-    from_start = SvPVX(sv);
+    from_start = SvPVX_const(sv);
     from_end = from_start + SvCUR(sv);
     for (from_ptr = from_start; from_ptr < from_end; from_ptr++)
 	if (!NATIVE_IS_INVARIANT(*from_ptr)) break;

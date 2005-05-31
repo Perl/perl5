@@ -379,7 +379,7 @@ typedef struct stcxt {
 	PerlIO *fio;		/* where I/O are performed, NULL for memory */
 	int ver_major;		/* major of version for retrieved object */
 	int ver_minor;		/* minor of version for retrieved object */
-	SV *(**retrieve_vtbl)(pTHX_ struct stcxt *, char *);	/* retrieve dispatch table */
+	SV *(**retrieve_vtbl)(pTHX_ struct stcxt *, const char *);	/* retrieve dispatch table */
 	SV *prev;		/* contexts chained backwards in real recursion */
 	SV *my_sv;		/* the blessed scalar who's SvPVX() I am */
 } stcxt_t;
@@ -1064,7 +1064,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #endif /* PATCHLEVEL <= 6 */
 
 static int store(pTHX_ stcxt_t *cxt, SV *sv);
-static SV *retrieve(pTHX_ stcxt_t *cxt, char *cname);
+static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname);
 
 /*
  * Dynamic dispatching table for SV store.
@@ -1099,24 +1099,24 @@ static sv_store_t sv_store[] = {
  * Dynamic dispatching tables for SV retrieval.
  */
 
-static SV *retrieve_lscalar(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_lutf8str(pTHX_ stcxt_t *cxt, char *cname);
-static SV *old_retrieve_array(pTHX_ stcxt_t *cxt, char *cname);
-static SV *old_retrieve_hash(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_ref(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_undef(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_integer(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_double(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_byte(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_netint(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_scalar(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_utf8str(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_tied_array(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_tied_hash(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_tied_scalar(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_other(pTHX_ stcxt_t *cxt, char *cname);
+static SV *retrieve_lscalar(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_lutf8str(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *old_retrieve_array(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *old_retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_ref(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_undef(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_integer(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_double(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_byte(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_netint(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_scalar(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_utf8str(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_tied_array(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_tied_hash(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_tied_scalar(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_other(pTHX_ stcxt_t *cxt, const char *cname);
 
-typedef SV* (*sv_retrieve_t)(pTHX_ stcxt_t *cxt, char *name);
+typedef SV* (*sv_retrieve_t)(pTHX_ stcxt_t *cxt, const char *name);
 
 static const sv_retrieve_t sv_old_retrieve[] = {
 	0,			/* SX_OBJECT -- entry unused dynamically */
@@ -1151,21 +1151,21 @@ static const sv_retrieve_t sv_old_retrieve[] = {
 	(sv_retrieve_t)retrieve_other,	/* SX_ERROR */
 };
 
-static SV *retrieve_array(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_hash(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_sv_undef(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_sv_yes(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_sv_no(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_blessed(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_idx_blessed(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_hook(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_overloaded(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_tied_key(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_tied_idx(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_code(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_weakref(pTHX_ stcxt_t *cxt, char *cname);
-static SV *retrieve_weakoverloaded(pTHX_ stcxt_t *cxt, char *cname);
+static SV *retrieve_array(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_sv_undef(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_sv_yes(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_sv_no(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_blessed(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_idx_blessed(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_overloaded(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_tied_key(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_tied_idx(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_code(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_weakref(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_weakoverloaded(pTHX_ stcxt_t *cxt, const char *cname);
 
 static const sv_retrieve_t sv_retrieve[] = {
 	0,			/* SX_OBJECT -- entry unused dynamically */
@@ -3887,7 +3887,7 @@ SV *net_mstore(pTHX_ SV *sv)
  * Return an error via croak, since it is not possible that we get here
  * under normal conditions, when facing a file produced via pstore().
  */
-static SV *retrieve_other(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_other(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	if (
 		cxt->ver_major != STORABLE_BIN_MAJOR &&
@@ -3912,10 +3912,10 @@ static SV *retrieve_other(pTHX_ stcxt_t *cxt, char *cname)
  * Layout is SX_IX_BLESS <index> <object> with SX_IX_BLESS already read.
  * <index> can be coded on either 1 or 5 bytes.
  */
-static SV *retrieve_idx_blessed(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_idx_blessed(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	I32 idx;
-	char *classname;
+	const char *classname;
 	SV **sva;
 	SV *sv;
 
@@ -3953,7 +3953,7 @@ static SV *retrieve_idx_blessed(pTHX_ stcxt_t *cxt, char *cname)
  * Layout is SX_BLESS <len> <classname> <object> with SX_BLESS already read.
  * <len> can be coded on either 1 or 5 bytes.
  */
-static SV *retrieve_blessed(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_blessed(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	I32 len;
 	SV *sv;
@@ -4019,7 +4019,7 @@ static SV *retrieve_blessed(pTHX_ stcxt_t *cxt, char *cname)
  * processing (since we won't have seen the magic object by the time the hook
  * is called).  See comments below for why it was done that way.
  */
-static SV *retrieve_hook(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	I32 len;
 	char buf[LG_BLESS + 1];		/* Avoid malloc() if possible */
@@ -4419,7 +4419,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, char *cname)
  * Retrieve reference to some other scalar.
  * Layout is SX_REF <object>, with SX_REF already read.
  */
-static SV *retrieve_ref(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_ref(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	SV *rv;
 	SV *sv;
@@ -4479,7 +4479,7 @@ static SV *retrieve_ref(pTHX_ stcxt_t *cxt, char *cname)
  * Retrieve weak reference to some other scalar.
  * Layout is SX_WEAKREF <object>, with SX_WEAKREF already read.
  */
-static SV *retrieve_weakref(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_weakref(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	SV *sv;
 
@@ -4502,7 +4502,7 @@ static SV *retrieve_weakref(pTHX_ stcxt_t *cxt, char *cname)
  * Retrieve reference to some other scalar with overloading.
  * Layout is SX_OVERLOAD <object>, with SX_OVERLOAD already read.
  */
-static SV *retrieve_overloaded(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_overloaded(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	SV *rv;
 	SV *sv;
@@ -4571,7 +4571,7 @@ static SV *retrieve_overloaded(pTHX_ stcxt_t *cxt, char *cname)
  * Retrieve weak overloaded reference to some other scalar.
  * Layout is SX_WEAKOVERLOADED <object>, with SX_WEAKOVERLOADED already read.
  */
-static SV *retrieve_weakoverloaded(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_weakoverloaded(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	SV *sv;
 
@@ -4594,7 +4594,7 @@ static SV *retrieve_weakoverloaded(pTHX_ stcxt_t *cxt, char *cname)
  * Retrieve tied array
  * Layout is SX_TIED_ARRAY <object>, with SX_TIED_ARRAY already read.
  */
-static SV *retrieve_tied_array(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_tied_array(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	SV *tv;
 	SV *sv;
@@ -4623,7 +4623,7 @@ static SV *retrieve_tied_array(pTHX_ stcxt_t *cxt, char *cname)
  * Retrieve tied hash
  * Layout is SX_TIED_HASH <object>, with SX_TIED_HASH already read.
  */
-static SV *retrieve_tied_hash(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_tied_hash(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	SV *tv;
 	SV *sv;
@@ -4651,7 +4651,7 @@ static SV *retrieve_tied_hash(pTHX_ stcxt_t *cxt, char *cname)
  * Retrieve tied scalar
  * Layout is SX_TIED_SCALAR <object>, with SX_TIED_SCALAR already read.
  */
-static SV *retrieve_tied_scalar(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_tied_scalar(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	SV *tv;
 	SV *sv, *obj = NULL;
@@ -4687,7 +4687,7 @@ static SV *retrieve_tied_scalar(pTHX_ stcxt_t *cxt, char *cname)
  * Retrieve reference to value in a tied hash.
  * Layout is SX_TIED_KEY <object> <key>, with SX_TIED_KEY already read.
  */
-static SV *retrieve_tied_key(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_tied_key(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	SV *tv;
 	SV *sv;
@@ -4719,7 +4719,7 @@ static SV *retrieve_tied_key(pTHX_ stcxt_t *cxt, char *cname)
  * Retrieve reference to value in a tied array.
  * Layout is SX_TIED_IDX <object> <idx>, with SX_TIED_IDX already read.
  */
-static SV *retrieve_tied_idx(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_tied_idx(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	SV *tv;
 	SV *sv;
@@ -4752,7 +4752,7 @@ static SV *retrieve_tied_idx(pTHX_ stcxt_t *cxt, char *cname)
  * The scalar is "long" in that <length> is larger than LG_SCALAR so it
  * was not stored on a single byte.
  */
-static SV *retrieve_lscalar(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_lscalar(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	I32 len;
 	SV *sv;
@@ -4798,7 +4798,7 @@ static SV *retrieve_lscalar(pTHX_ stcxt_t *cxt, char *cname)
  * The scalar is "short" so <length> is single byte. If it is 0, there
  * is no <data> section.
  */
-static SV *retrieve_scalar(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_scalar(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	int len;
 	SV *sv;
@@ -4857,7 +4857,7 @@ static SV *retrieve_scalar(pTHX_ stcxt_t *cxt, char *cname)
  * Like retrieve_scalar(), but tag result as utf8.
  * If we're retrieving UTF8 data in a non-UTF8 perl, croaks.
  */
-static SV *retrieve_utf8str(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_utf8str(pTHX_ stcxt_t *cxt, const char *cname)
 {
     SV *sv;
 
@@ -4886,7 +4886,7 @@ static SV *retrieve_utf8str(pTHX_ stcxt_t *cxt, char *cname)
  * Like retrieve_lscalar(), but tag result as utf8.
  * If we're retrieving UTF8 data in a non-UTF8 perl, croaks.
  */
-static SV *retrieve_lutf8str(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_lutf8str(pTHX_ stcxt_t *cxt, const char *cname)
 {
     SV *sv;
 
@@ -4914,7 +4914,7 @@ static SV *retrieve_lutf8str(pTHX_ stcxt_t *cxt, char *cname)
  * Retrieve defined integer.
  * Layout is SX_INTEGER <data>, whith SX_INTEGER already read.
  */
-static SV *retrieve_integer(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_integer(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	SV *sv;
 	IV iv;
@@ -4937,7 +4937,7 @@ static SV *retrieve_integer(pTHX_ stcxt_t *cxt, char *cname)
  * Retrieve defined integer in network order.
  * Layout is SX_NETINT <data>, whith SX_NETINT already read.
  */
-static SV *retrieve_netint(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_netint(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	SV *sv;
 	I32 iv;
@@ -4965,7 +4965,7 @@ static SV *retrieve_netint(pTHX_ stcxt_t *cxt, char *cname)
  * Retrieve defined double.
  * Layout is SX_DOUBLE <data>, whith SX_DOUBLE already read.
  */
-static SV *retrieve_double(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_double(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	SV *sv;
 	NV nv;
@@ -4988,7 +4988,7 @@ static SV *retrieve_double(pTHX_ stcxt_t *cxt, char *cname)
  * Retrieve defined byte (small integer within the [-128, +127] range).
  * Layout is SX_BYTE <data>, whith SX_BYTE already read.
  */
-static SV *retrieve_byte(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_byte(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	SV *sv;
 	int siv;
@@ -5013,7 +5013,7 @@ static SV *retrieve_byte(pTHX_ stcxt_t *cxt, char *cname)
  *
  * Return the undefined value.
  */
-static SV *retrieve_undef(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_undef(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	SV* sv;
 
@@ -5030,7 +5030,7 @@ static SV *retrieve_undef(pTHX_ stcxt_t *cxt, char *cname)
  *
  * Return the immortal undefined value.
  */
-static SV *retrieve_sv_undef(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_sv_undef(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	SV *sv = &PL_sv_undef;
 
@@ -5051,7 +5051,7 @@ static SV *retrieve_sv_undef(pTHX_ stcxt_t *cxt, char *cname)
  *
  * Return the immortal yes value.
  */
-static SV *retrieve_sv_yes(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_sv_yes(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	SV *sv = &PL_sv_yes;
 
@@ -5066,7 +5066,7 @@ static SV *retrieve_sv_yes(pTHX_ stcxt_t *cxt, char *cname)
  *
  * Return the immortal no value.
  */
-static SV *retrieve_sv_no(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_sv_no(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	SV *sv = &PL_sv_no;
 
@@ -5085,7 +5085,7 @@ static SV *retrieve_sv_no(pTHX_ stcxt_t *cxt, char *cname)
  *
  * When we come here, SX_ARRAY has been read already.
  */
-static SV *retrieve_array(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_array(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	I32 len;
 	I32 i;
@@ -5136,7 +5136,7 @@ static SV *retrieve_array(pTHX_ stcxt_t *cxt, char *cname)
  *
  * When we come here, SX_HASH has been read already.
  */
-static SV *retrieve_hash(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	I32 len;
 	I32 size;
@@ -5210,7 +5210,7 @@ static SV *retrieve_hash(pTHX_ stcxt_t *cxt, char *cname)
  *
  * When we come here, SX_HASH has been read already.
  */
-static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, const char *cname)
 {
     dVAR;
     I32 len;
@@ -5347,7 +5347,7 @@ static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, char *cname)
  *
  * Return a code reference.
  */
-static SV *retrieve_code(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve_code(pTHX_ stcxt_t *cxt, const char *cname)
 {
 #if PERL_VERSION < 6
     CROAK(("retrieve_code does not work with perl 5.005 or less\n"));
@@ -5468,7 +5468,7 @@ static SV *retrieve_code(pTHX_ stcxt_t *cxt, char *cname)
  *
  * When we come here, SX_ARRAY has been read already.
  */
-static SV *old_retrieve_array(pTHX_ stcxt_t *cxt, char *cname)
+static SV *old_retrieve_array(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	I32 len;
 	I32 i;
@@ -5528,7 +5528,7 @@ static SV *old_retrieve_array(pTHX_ stcxt_t *cxt, char *cname)
  *
  * When we come here, SX_HASH has been read already.
  */
-static SV *old_retrieve_hash(pTHX_ stcxt_t *cxt, char *cname)
+static SV *old_retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	I32 len;
 	I32 size;
@@ -5687,7 +5687,7 @@ static SV *magic_check(pTHX_ stcxt_t *cxt)
      */
 
     version_major = use_network_order >> 1;
-    cxt->retrieve_vtbl = (SV*(**)(pTHX_ stcxt_t *cxt, char *cname)) (version_major ? sv_retrieve : sv_old_retrieve);
+    cxt->retrieve_vtbl = (SV*(**)(pTHX_ stcxt_t *cxt, const char *cname)) (version_major ? sv_retrieve : sv_old_retrieve);
 
     TRACEME(("magic_check: netorder = 0x%x", use_network_order));
 
@@ -5800,7 +5800,7 @@ static SV *magic_check(pTHX_ stcxt_t *cxt)
  * root SV (which may be an AV or an HV for what we care).
  * Returns null if there is a problem.
  */
-static SV *retrieve(pTHX_ stcxt_t *cxt, char *cname)
+static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	int type;
 	SV **svh;

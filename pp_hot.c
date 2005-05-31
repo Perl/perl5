@@ -1397,7 +1397,7 @@ yup:					/* Confirmed by INTUIT */
 			      (int)(t-truebase));
 	    }
 	    rx->saved_copy = sv_setsv_cow(rx->saved_copy, TARG);
-	    rx->subbeg = SvPVX(rx->saved_copy) + (t - truebase);
+	    rx->subbeg = SvPVX_const(rx->saved_copy) + (t - truebase);
 	    assert (SvPOKp(rx->saved_copy));
 	} else
 #endif
@@ -1593,7 +1593,7 @@ Perl_do_readline(pTHX)
 
 	    if (SvCUR(sv) > 0 && SvCUR(PL_rs) > 0) {
 		tmps = SvEND(sv) - 1;
-		if (*tmps == *SvPVX(PL_rs)) {
+		if (*tmps == *SvPVX_const(PL_rs)) {
 		    *tmps = '\0';
 		    SvCUR_set(sv, SvCUR(sv) - 1);
 		}
@@ -1602,7 +1602,7 @@ Perl_do_readline(pTHX)
 		if (!isALPHA(*tmps) && !isDIGIT(*tmps) &&
 		    strchr("$&*(){}[]'\";\\|?<>~`", *tmps))
 			break;
-	    if (*tmps && PerlLIO_lstat(SvPVX(sv), &PL_statbuf) < 0) {
+	    if (*tmps && PerlLIO_lstat(SvPVX_const(sv), &PL_statbuf) < 0) {
 		(void)POPs;		/* Unmatched wildcard?  Chuck it... */
 		continue;
 	    }
@@ -1837,7 +1837,7 @@ PP(pp_iter)
 		    *itersvp = newSVsv(cur);
 		    SvREFCNT_dec(oldsv);
 		}
-		if (strEQ(SvPVX(cur), max))
+		if (strEQ(SvPVX_const(cur), max))
 		    sv_setiv(cur, 0); /* terminate next time */
 		else
 		    sv_inc(cur);
@@ -2162,7 +2162,7 @@ PP(pp_subst)
 				 REXEC_NOT_FIRST|REXEC_IGNOREPOS));
 	    if (s != d) {
 		i = strend - s;
-		SvCUR_set(TARG, d - SvPVX(TARG) + i);
+		SvCUR_set(TARG, d - SvPVX_const(TARG) + i);
 		Move(s, d, i+1, char);		/* include the NUL */
 	    }
 	    TAINT_IF(rxtainted & 1);
@@ -2619,7 +2619,7 @@ PP(pp_entersub)
 		mg_get(sv);
 		if (SvROK(sv))
 		    goto got_rv;
-		sym = SvPOKp(sv) ? SvPVX(sv) : Nullch;
+		sym = SvPOKp(sv) ? SvPVX_const(sv) : Nullch;
 	    }
 	    else {
                 STRLEN n_a;

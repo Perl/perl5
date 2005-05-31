@@ -6,8 +6,8 @@
 static I32 num_q (char *s, STRLEN slen);
 static I32 esc_q (char *dest, char *src, STRLEN slen);
 static I32 esc_q_utf8 (pTHX_ SV *sv, char *src, STRLEN slen);
-static SV *sv_x (pTHX_ SV *sv, char *str, STRLEN len, I32 n);
-static I32 DD_dump (pTHX_ SV *val, char *name, STRLEN namelen, SV *retval,
+static SV *sv_x (pTHX_ SV *sv, const char *str, STRLEN len, I32 n);
+static I32 DD_dump (pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval,
 		    HV *seenhv, AV *postav, I32 *levelp, I32 indent,
 		    SV *pad, SV *xpad, SV *apad, SV *sep, SV *pair,
 		    SV *freezer, SV *toaster,
@@ -208,7 +208,7 @@ esc_q_utf8(pTHX_ SV* sv, register char *src, register STRLEN slen)
 
 /* append a repeated string to an SV */
 static SV *
-sv_x(pTHX_ SV *sv, register char *str, STRLEN len, I32 n)
+sv_x(pTHX_ SV *sv, const char *str, STRLEN len, I32 n)
 {
     if (sv == Nullsv)
 	sv = newSVpvn("", 0);
@@ -239,7 +239,7 @@ sv_x(pTHX_ SV *sv, register char *str, STRLEN len, I32 n)
  * efficiency raisins.)  Ugggh!
  */
 static I32
-DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
+DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	AV *postav, I32 *levelp, I32 indent, SV *pad, SV *xpad,
 	SV *apad, SV *sep, SV *pair, SV *freezer, SV *toaster, I32 purity,
 	I32 deepcopy, I32 quotekeys, SV *bless, I32 maxdepth, SV *sortkeys)
@@ -268,12 +268,12 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
            it.  Warn on errors. */
 	if (SvOBJECT(SvRV(val)) && freezer &&
 	    SvPOK(freezer) && SvCUR(freezer) &&
-            gv_fetchmeth(SvSTASH(SvRV(val)), SvPVX(freezer), 
+            gv_fetchmeth(SvSTASH(SvRV(val)), SvPVX_const(freezer), 
                          SvCUR(freezer), -1) != NULL)
 	{
 	    dSP; ENTER; SAVETMPS; PUSHMARK(sp);
 	    XPUSHs(val); PUTBACK;
-	    i = perl_call_method(SvPVX(freezer), G_EVAL|G_VOID);
+	    i = perl_call_method(SvPVX_const(freezer), G_EVAL|G_VOID);
 	    SPAGAIN;
 	    if (SvTRUE(ERRSV))
 		warn("WARNING(Freezer method call failed): %"SVf"", ERRSV);
@@ -316,9 +316,9 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		    }
 		    else {
 			if (name[0] == '@' || name[0] == '%') {
-			    if ((SvPVX(othername))[0] == '\\' &&
-				(SvPVX(othername))[1] == name[0]) {
-				sv_catpvn(retval, SvPVX(othername)+1,
+			    if ((SvPVX_const(othername))[0] == '\\' &&
+				(SvPVX_const(othername))[1] == name[0]) {
+				sv_catpvn(retval, SvPVX_const(othername)+1,
 					  SvCUR(othername)-1);
 			    }
 			    else {
@@ -405,7 +405,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	}
 
 	(*levelp)++;
-	ipad = sv_x(aTHX_ Nullsv, SvPVX(xpad), SvCUR(xpad), *levelp);
+	ipad = sv_x(aTHX_ Nullsv, SvPVX_const(xpad), SvCUR(xpad), *levelp);
 
 	if (realtype <= SVt_PVBM) {			     /* scalar ref */
 	    SV *namesv = newSVpvn("${", 2);
@@ -413,7 +413,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    sv_catpvn(namesv, "}", 1);
 	    if (realpack) {				     /* blessed */
 		sv_catpvn(retval, "do{\\(my $o = ", 13);
-		DD_dump(aTHX_ ival, SvPVX(namesv), SvCUR(namesv), retval, seenhv,
+		DD_dump(aTHX_ ival, SvPVX_const(namesv), SvCUR(namesv), retval, seenhv,
 			postav, levelp,	indent, pad, xpad, apad, sep, pair,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
 			maxdepth, sortkeys);
@@ -421,7 +421,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    }						     /* plain */
 	    else {
 		sv_catpvn(retval, "\\", 1);
-		DD_dump(aTHX_ ival, SvPVX(namesv), SvCUR(namesv), retval, seenhv,
+		DD_dump(aTHX_ ival, SvPVX_const(namesv), SvCUR(namesv), retval, seenhv,
 			postav, levelp,	indent, pad, xpad, apad, sep, pair,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
 			maxdepth, sortkeys);
@@ -433,7 +433,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    sv_catpvn(namesv, name, namelen);
 	    sv_catpvn(namesv, "}", 1);
 	    sv_catpvn(retval, "\\", 1);
-	    DD_dump(aTHX_ ival, SvPVX(namesv), SvCUR(namesv), retval, seenhv,
+	    DD_dump(aTHX_ ival, SvPVX_const(namesv), SvCUR(namesv), retval, seenhv,
 		    postav, levelp,	indent, pad, xpad, apad, sep, pair,
 		    freezer, toaster, purity, deepcopy, quotekeys, bless,
 		    maxdepth, sortkeys);
@@ -510,7 +510,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		    sv_catpvn(retval, ",", 1);
 	    }
 	    if (ixmax >= 0) {
-		SV *opad = sv_x(aTHX_ Nullsv, SvPVX(xpad), SvCUR(xpad), (*levelp)-1);
+		SV *opad = sv_x(aTHX_ Nullsv, SvPVX_const(xpad), SvCUR(xpad), (*levelp)-1);
 		sv_catsv(retval, totpad);
 		sv_catsv(retval, opad);
 		SvREFCNT_dec(opad);
@@ -707,7 +707,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		else
 		    newapad = apad;
 
-		DD_dump(aTHX_ hval, SvPVX(sname), SvCUR(sname), retval, seenhv,
+		DD_dump(aTHX_ hval, SvPVX_const(sname), SvCUR(sname), retval, seenhv,
 			postav, levelp,	indent, pad, xpad, newapad, sep, pair,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
 			maxdepth, sortkeys);
@@ -717,7 +717,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		    SvREFCNT_dec(newapad);
 	    }
 	    if (i) {
-		SV *opad = sv_x(aTHX_ Nullsv, SvPVX(xpad), SvCUR(xpad), *levelp-1);
+		SV *opad = sv_x(aTHX_ Nullsv, SvPVX_const(xpad), SvCUR(xpad), *levelp-1);
 		sv_catsv(retval, totpad);
 		sv_catsv(retval, opad);
 		SvREFCNT_dec(opad);
@@ -863,7 +863,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 			if (indent >= 2)
 			    (void)sv_x(aTHX_ newapad, " ", 1, SvCUR(postentry));
 			
-			DD_dump(aTHX_ e, SvPVX(nname), SvCUR(nname), postentry,
+			DD_dump(aTHX_ e, SvPVX_const(nname), SvCUR(nname), postentry,
 				seenhv, postav, &nlevel, indent, pad, xpad,
 				newapad, sep, pair, freezer, toaster, purity,
 				deepcopy, quotekeys, bless, maxdepth, 
@@ -1047,7 +1047,7 @@ Data_Dumper_Dumpxs(href, ...)
 			(void)SvOK_off(name);
 		
 		    if (SvOK(name)) {
-			if ((SvPVX(name))[0] == '*') {
+			if ((SvPVX_const(name))[0] == '*') {
 			    if (SvROK(val)) {
 				switch (SvTYPE(SvRV(val))) {
 				case SVt_PVAV:
@@ -1067,7 +1067,7 @@ Data_Dumper_Dumpxs(href, ...)
 			    else
 				(SvPVX(name))[0] = '$';
 			}
-			else if ((SvPVX(name))[0] != '$')
+			else if ((SvPVX_const(name))[0] != '$')
 			    sv_insert(name, 0, 0, "$", 1);
 		    }
 		    else {
@@ -1088,7 +1088,7 @@ Data_Dumper_Dumpxs(href, ...)
 		    else
 			newapad = apad;
 		
-		    DD_dump(aTHX_ val, SvPVX(name), SvCUR(name), valstr, seenhv,
+		    DD_dump(aTHX_ val, SvPVX_const(name), SvCUR(name), valstr, seenhv,
 			    postav, &level, indent, pad, xpad, newapad, sep, pair,
 			    freezer, toaster, purity, deepcopy, quotekeys,
 			    bless, maxdepth, sortkeys);
@@ -1099,7 +1099,7 @@ Data_Dumper_Dumpxs(href, ...)
 		    postlen = av_len(postav);
 		    if (postlen >= 0 || !terse) {
 			sv_insert(valstr, 0, 0, " = ", 3);
-			sv_insert(valstr, 0, 0, SvPVX(name), SvCUR(name));
+			sv_insert(valstr, 0, 0, SvPVX_const(name), SvCUR(name));
 			sv_catpvn(valstr, ";", 1);
 		    }
 		    sv_catsv(retval, pad);

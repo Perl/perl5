@@ -267,7 +267,7 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
     SSPUSHIV((IV)SvLEN(gv));
     SvLEN_set(gv, 0); /* forget that anything was allocated here */
     SSPUSHIV((IV)SvCUR(gv));
-    SSPUSHPTR(SvPVX(gv));
+    SSPUSHPTR(SvPVX_const(gv));
     SvPOK_off(gv);
     SSPUSHPTR(SvREFCNT_inc(gv));
     SSPUSHPTR(GvGP(gv));
@@ -838,8 +838,8 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_GP:				/* scalar reference */
 	    ptr = SSPOPPTR;
 	    gv = (GV*)SSPOPPTR;
-	    if (SvPVX(gv) && SvLEN(gv) > 0) {
-		Safefree(SvPVX(gv));
+	    if (SvPVX_const(gv) && SvLEN(gv) > 0) {
+		Safefree(SvPVX_const(gv));
 	    }
 	    SvPV_set(gv, (char *)SSPOPPTR);
 	    SvCUR_set(gv, (STRLEN)SSPOPIV);
@@ -1091,7 +1091,7 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 		PL_op_desc[cx->blk_eval.old_op_type]);
 	if (cx->blk_eval.old_namesv)
 	    PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_NAME = %s\n",
-			  SvPVX(cx->blk_eval.old_namesv));
+			  SvPVX_const(cx->blk_eval.old_namesv));
 	PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_EVAL_ROOT = 0x%"UVxf"\n",
 		PTR2UV(cx->blk_eval.old_eval_root));
 	PerlIO_printf(Perl_debug_log, "BLK_EVAL.RETOP = 0x%"UVxf"\n",

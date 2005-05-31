@@ -1215,7 +1215,7 @@ SvPV(sv)
     CODE:
         ST(0) = sv_newmortal();
         if( SvPOK(sv) ) { 
-            sv_setpvn(ST(0), SvPVX(sv), SvCUR(sv));
+            sv_setpvn(ST(0), SvPVX_const(sv), SvCUR(sv));
             SvFLAGS(ST(0)) |= SvUTF8(sv);
         }
         else {
@@ -1229,7 +1229,7 @@ SvPVBM(sv)
 	B::PV	sv
     CODE:
         ST(0) = sv_newmortal();
-	sv_setpvn(ST(0), SvPVX(sv),
+	sv_setpvn(ST(0), SvPVX_const(sv),
 	    SvCUR(sv) + (SvTYPE(sv) == SVt_PVBM ? 257 : 0));
 
 

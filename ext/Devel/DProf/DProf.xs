@@ -24,7 +24,7 @@ db_get_cv(pTHX_ SV *sv)
 	    cv = INT2PTR(CV*,SvIVX(sv));
 	} else {
 	    if (SvPOK(sv)) {
-		cv = get_cv(SvPVX(sv), TRUE);
+		cv = get_cv(SvPVX_const(sv), TRUE);
 	    } else if (SvROK(sv)) {
 		cv = (CV*)SvRV(sv);
 	    } else {
@@ -376,7 +376,7 @@ prof_mark(pTHX_ opcode ptype)
 	gname = GvNAME(gv);
 
 	set_cv_key(aTHX_ cv, pname, gname);
-	svp = hv_fetch(g_cv_hash, SvPVX(g_key_hash), SvCUR(g_key_hash), TRUE);
+	svp = hv_fetch(g_cv_hash, SvPVX_const(g_key_hash), SvCUR(g_key_hash), TRUE);
 	if (!SvOK(*svp)) {
 	    sv_setiv(*svp, id = ++g_lastid);
 	    if (CvXSUB(cv) == XS_Devel__DProf_END)
