@@ -57,7 +57,7 @@ struct xpvhv {
 
 #define xhv_keys xiv_u.xivu_iv
 
-#if !defined(PERL_EXPERIMENTAL_LAYOUT)
+#if 0
 typedef struct xpvhv xpvhv_allocated;
 #else
 typedef struct {
