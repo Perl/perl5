@@ -413,7 +413,6 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 {
     dVAR;
     XPVHV* xhv;
-    U32 n_links;
     HE *entry;
     HE **oentry;
     SV *sv;
@@ -654,7 +653,6 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     }
 
     masked_flags = (flags & HVhek_MASK);
-    n_links = 0;
 
 #ifdef DYNAMIC_ENV_FETCH
     if (!HvARRAY(hv)) entry = Null(HE*);
@@ -663,7 +661,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     {
 	entry = (HvARRAY(hv))[hash & (I32) HvMAX(hv)];
     }
-    for (; entry; ++n_links, entry = HeNEXT(entry)) {
+    for (; entry; entry = HeNEXT(entry)) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
 	if (HeKLEN(entry) != (I32)klen)
@@ -798,18 +796,30 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     if (masked_flags & HVhek_ENABLEHVKFLAGS)
 	HvHASKFLAGS_on(hv);
 
-    xhv->xhv_keys++; /* HvKEYS(hv)++ */
-    if (!n_links) {				/* initial entry? */
-	xhv->xhv_fill++; /* HvFILL(hv)++ */
-    } else if ((xhv->xhv_keys > (IV)xhv->xhv_max)
-	       || ((n_links > HV_MAX_LENGTH_BEFORE_SPLIT) && !HvREHASH(hv))) {
-	/* Use only the old HvKEYS(hv) > HvMAX(hv) condition to limit bucket
-	   splits on a rehashed hash, as we're not going to split it again,
-	   and if someone is lucky (evil) enough to get all the keys in one
-	   list they could exhaust our memory as we repeatedly double the
-	   number of buckets on every entry. Linear search feels a less worse
-	   thing to do.  */
-        hsplit(hv);
+    {
+	const HE *counter = HeNEXT(entry);
+
+	xhv->xhv_keys++; /* HvKEYS(hv)++ */
+	if (!counter) {				/* initial entry? */
+	    xhv->xhv_fill++; /* HvFILL(hv)++ */
+	} else if (xhv->xhv_keys > (IV)xhv->xhv_max) {
+	    hsplit(hv);
+	} else if(!HvREHASH(hv)) {
+	    U32 n_links = 1;
+
+	    while ((counter = HeNEXT(counter)))
+		n_links++;
+
+	    if (n_links > HV_MAX_LENGTH_BEFORE_SPLIT) {
+		/* Use only the old HvKEYS(hv) > HvMAX(hv) condition to limit
+		   bucket splits on a rehashed hash, as we're not going to
+		   split it again, and if someone is lucky (evil) enough to
+		   get all the keys in one list they could exhaust our memory
+		   as we repeatedly double the number of buckets on every
+		   entry. Linear search feels a less worse thing to do.  */
+		hsplit(hv);
+	    }
+	}
     }
 
     return entry;
