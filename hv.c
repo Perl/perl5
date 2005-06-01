@@ -603,10 +603,13 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 #ifdef DYNAMIC_ENV_FETCH  /* if it's an %ENV lookup, we may get it on the fly */
 		 || (SvRMAGICAL((SV*)hv) && mg_find((SV*)hv, PERL_MAGIC_env))
 #endif
-								  )
-	    Newz(503, HvARRAY(hv),
+								  ) {
+	    char *array;
+	    Newz(503, array,
 		 PERL_HV_ARRAY_ALLOC_BYTES(xhv->xhv_max+1 /* HvMAX(hv)+1 */),
-		 HE*);
+		 char);
+	    HvARRAY(hv) = (HE**)array;
+	}
 #ifdef DYNAMIC_ENV_FETCH
 	else if (action & HV_FETCH_ISEXISTS) {
 	    /* for an %ENV exists, if we do an insert it's by a recursive
@@ -773,9 +776,11 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	/* Not sure if we can get here.  I think the only case of oentry being
 	   NULL is for %ENV with dynamic env fetch.  But that should disappear
 	   with magic in the previous code.  */
-	Newz(503, HvARRAY(hv),
+	char *array;
+	Newz(503, array,
 	     PERL_HV_ARRAY_ALLOC_BYTES(xhv->xhv_max+1 /* HvMAX(hv)+1 */),
-	     HE*);
+	     char);
+	HvARRAY(hv) = (HE**)array;
     }
 
     oentry = &(HvARRAY(hv))[hash & (I32) xhv->xhv_max];
