@@ -867,6 +867,7 @@ EOS
 unshift(@INC,'lib');
 unshift(@INC,'xlib/symbian') if $Opts{cross};
 require $Config_PM;
+require $Config_heavy;
 import Config;
 
 die "$0: $Config_PM not valid"
