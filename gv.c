@@ -1094,11 +1094,11 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    break;
 
 	case '\014':	/* $^L */
-	    sv_setpv(GvSV(gv),"\f");
+	    sv_setpvn(GvSV(gv),"\f",1);
 	    PL_formfeed = GvSV(gv);
 	    break;
 	case ';':
-	    sv_setpv(GvSV(gv),"\034");
+	    sv_setpvn(GvSV(gv),"\034",1);
 	    break;
 	case ']':
 	{

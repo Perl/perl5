@@ -758,12 +758,15 @@ S_varname(pTHX_ GV *gv, const char *gvtype, PADOFFSET targ,
     else {
 	U32 u;
 	CV *cv = find_runcv(&u);
+	STRLEN len;
+	const char *str;
 	if (!cv || !CvPADLIST(cv))
 	    return Nullsv;;
 	av = (AV*)(*av_fetch(CvPADLIST(cv), 0, FALSE));
 	sv = *av_fetch(av, targ, FALSE);
 	/* SvLEN in a pad name is not to be trusted */
-	sv_setpv(name, SvPV_nolen(sv));
+	str = SvPV(sv,len);
+	sv_setpvn(name, str, len);
     }
 
     if (subscript_type == FUV_SUBSCRIPT_HASH) {
@@ -1028,7 +1031,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 				 : DEFSV))
 	    {
 		sv = sv_newmortal();
-		sv_setpv(sv, "$_");
+		sv_setpvn(sv, "$_", 2);
 		return sv;
 	    }
 	}
@@ -7577,9 +7580,7 @@ Perl_newSVpv(pTHX_ const char *s, STRLEN len)
     register SV *sv;
 
     new_SV(sv);
-    if (!len)
-	len = strlen(s);
-    sv_setpvn(sv,s,len);
+    sv_setpvn(sv,s,len ? len : strlen(s));
     return sv;
 }
 
@@ -10931,9 +10932,9 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 
 	    if (HvARRAY((HV*)sstr)) {
 		STRLEN i = 0;
-		bool sharekeys = !!HvSHAREKEYS(sstr);
-		XPVHV *dxhv = (XPVHV*)SvANY(dstr);
-		XPVHV *sxhv = (XPVHV*)SvANY(sstr);
+		const bool sharekeys = !!HvSHAREKEYS(sstr);
+		XPVHV * const dxhv = (XPVHV*)SvANY(dstr);
+		XPVHV * const sxhv = (XPVHV*)SvANY(sstr);
 		char *darray;
 		New(0, darray,
 		     PERL_HV_ARRAY_ALLOC_BYTES(dxhv->xhv_max+1)

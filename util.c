@@ -2735,13 +2735,13 @@ Perl_same_dirent(pTHX_ const char *a, const char *b)
     if (strNE(a,b))
 	return FALSE;
     if (fa == a)
-	sv_setpv(tmpsv, ".");
+	sv_setpvn(tmpsv, ".", 1);
     else
 	sv_setpvn(tmpsv, a, fa - a);
     if (PerlLIO_stat(SvPVX_const(tmpsv), &tmpstatbuf1) < 0)
 	return FALSE;
     if (fb == b)
-	sv_setpv(tmpsv, ".");
+	sv_setpvn(tmpsv, ".", 1);
     else
 	sv_setpvn(tmpsv, b, fb - b);
     if (PerlLIO_stat(SvPVX_const(tmpsv), &tmpstatbuf2) < 0)
