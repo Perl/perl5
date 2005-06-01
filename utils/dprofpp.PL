@@ -763,9 +763,9 @@ sub parsestack {
 			}
 			add_to_tree($curdeep_times, $ename,
 				    $t - $overhead) if $opt_S;
-			exitstamp( \@stack, \@tstack, 
-				   $t - $overhead, 
-				   $times, $ctimes, $ename, \$in, $tab, 
+			exitstamp( \@stack, \@tstack,
+				   $t - $overhead,
+				   $times, $ctimes, $name, \$in, $tab,
 				   $curdeep_times, \%outer );
 		} 
 		next unless $in_level or $name eq $opt_g;
