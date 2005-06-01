@@ -225,7 +225,10 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVf_ROK		0x00080000	/* has a valid reference pointer */
 
 #define SVf_FAKE	0x00100000	/* glob or lexical is just a copy */
-#define SVf_OOK		0x00200000	/* has valid offset value */
+#define SVf_OOK		0x00200000	/* has valid offset value
+					   For a PVHV this means that a
+					   hv_aux struct is present after the
+					   main array  */
 #define SVf_BREAK	0x00400000	/* refcnt is artificially low - used
 					 * by SV's in final arena  cleanup */
 #define SVf_READONLY	0x00800000	/* may not be modified */

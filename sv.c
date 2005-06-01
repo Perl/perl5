@@ -1867,7 +1867,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	break;
     case SVt_PVHV:
 	SvANY(sv) = new_XPVHV();
-	((XPVHV*) SvANY(sv))->xhv_aux = 0;
 	HvFILL(sv)	= 0;
 	HvMAX(sv)	= 0;
 	HvTOTALKEYS(sv)	= 0;
@@ -1983,6 +1982,8 @@ int
 Perl_sv_backoff(pTHX_ register SV *sv)
 {
     assert(SvOOK(sv));
+    assert(SvTYPE(sv) != SVt_PVHV);
+    assert(SvTYPE(sv) != SVt_PVAV);
     if (SvIVX(sv)) {
 	char *s = SvPVX(sv);
 	SvLEN_set(sv, SvLEN(sv) + SvIVX(sv));
@@ -10921,30 +10922,8 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
 	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
 	{
-	    struct xpvhv_aux *aux = ((XPVHV *)SvANY(sstr))->xhv_aux;
 	    HEK *hvname = 0;
 
-	    if (aux) {
-		I32 riter = aux->xhv_riter;
-
-		hvname = aux->xhv_name;
-		if (hvname || riter != -1) {
-		    struct xpvhv_aux *d_aux;
-
-		    New(0, d_aux, 1, struct xpvhv_aux);
-
-		    d_aux->xhv_riter = riter;
-		    d_aux->xhv_eiter = 0;
-		    d_aux->xhv_name = hvname ? hek_dup(hvname, param) : hvname;
-
-		    ((XPVHV *)SvANY(dstr))->xhv_aux = d_aux;
-		} else {
-		    ((XPVHV *)SvANY(dstr))->xhv_aux = 0;
-		}
-	    }
-	    else {
-		((XPVHV *)SvANY(dstr))->xhv_aux = 0;
-	    }
 	    if (HvARRAY((HV*)sstr)) {
 		STRLEN i = 0;
 		XPVHV *dxhv = (XPVHV*)SvANY(dstr);
@@ -10952,7 +10931,8 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 		char *darray;
 		/* FIXME - surely this doesn't need to be zeroed?  */
 		Newz(0, darray,
-		     PERL_HV_ARRAY_ALLOC_BYTES(dxhv->xhv_max+1), char);
+		     PERL_HV_ARRAY_ALLOC_BYTES(dxhv->xhv_max+1)
+		     + (SvOOK(sstr) ? sizeof(struct xpvhv_aux) : 0), char);
 		HvARRAY(dstr) = (HE**)darray;
 		while (i <= sxhv->xhv_max) {
 		    HvARRAY(dstr)[i]
@@ -10960,12 +10940,24 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 				 (bool)!!HvSHAREKEYS(sstr), param);
 		    ++i;
 		}
-		HvEITER_set(dstr, he_dup(HvEITER_get(sstr),
-					 (bool)!!HvSHAREKEYS(sstr), param));
+		if (SvOOK(sstr)) {
+		    struct xpvhv_aux *saux = HvAUX(sstr);
+		    struct xpvhv_aux *daux = HvAUX(dstr);
+		    /* This flag isn't copied.  */
+		    /* SvOOK_on(hv) attacks the IV flags.  */
+		    SvFLAGS(dstr) |= SVf_OOK;
+
+		    hvname = saux->xhv_name;
+		    daux->xhv_name = hvname ? hek_dup(hvname, param) : hvname;
+
+		    daux->xhv_riter = saux->xhv_riter;
+		    daux->xhv_eiter = saux->xhv_eiter
+			? he_dup(saux->xhv_eiter, (bool)!!HvSHAREKEYS(sstr),
+				 param) : 0;
+		}
 	    }
 	    else {
 		SvPV_set(dstr, Nullch);
-		HvEITER_set((HV*)dstr, (HE*)NULL);
 	    }
 	    /* Record stashes for possible cloning in Perl_clone(). */
 	    if(hvname)

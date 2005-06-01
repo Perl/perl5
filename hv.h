@@ -39,6 +39,8 @@ struct xpvhv_aux {
     I32		xhv_riter;	/* current root of iterator */
 };
 
+#define HV_AUX_SIZE STRUCT_OFFSET(struct xpvhv_aux, xhv_array)
+
 /* hash structure: */
 /* This structure must match the beginning of struct xpvmg in sv.h. */
 struct xpvhv {
@@ -52,7 +54,6 @@ struct xpvhv {
     }		xiv_u;
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
-    struct xpvhv_aux *xhv_aux;
 };
 
 #define xhv_keys xiv_u.xivu_iv
@@ -70,7 +71,6 @@ typedef struct {
     }		xiv_u;
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
-    struct xpvhv_aux *xhv_aux;
 } xpvhv_allocated;
 #endif
 
@@ -206,23 +206,24 @@ C<SV*>.
 #define HvARRAY(hv)	(*(HE***)&((hv)->sv_u.svu_array))
 #define HvFILL(hv)	((XPVHV*)  SvANY(hv))->xhv_fill
 #define HvMAX(hv)	((XPVHV*)  SvANY(hv))->xhv_max
+/* This quite intentionally does no flag checking first. That's your
+   responsibility.  */
+#define HvAUX(hv)	((struct xpvhv_aux*)&(HvARRAY(hv)[HvMAX(hv)+1]))
 #define HvRITER(hv)	(*Perl_hv_riter_p(aTHX_ (HV*)(hv)))
 #define HvEITER(hv)	(*Perl_hv_eiter_p(aTHX_ (HV*)(hv)))
 #define HvRITER_set(hv,r)	Perl_hv_riter_set(aTHX_ (HV*)(hv), r)
 #define HvEITER_set(hv,e)	Perl_hv_eiter_set(aTHX_ (HV*)(hv), e)
-#define HvRITER_get(hv)	(((XPVHV *)SvANY(hv))->xhv_aux ? \
-			 ((struct xpvhv_aux*)((XPVHV *)SvANY(hv))->xhv_aux)->xhv_riter : -1)
-#define HvEITER_get(hv)	(((XPVHV *)SvANY(hv))->xhv_aux ? \
-			 ((struct xpvhv_aux *)((XPVHV *)SvANY(hv))->xhv_aux)->xhv_eiter : 0)
+#define HvRITER_get(hv)	(SvOOK(hv) ? HvAUX(hv)->xhv_riter : -1)
+#define HvEITER_get(hv)	(SvOOK(hv) ? HvAUX(hv)->xhv_eiter : 0)
 #define HvNAME(hv)	HvNAME_get(hv)
 /* FIXME - all of these should use a UTF8 aware API, which should also involve
    getting the length. */
 /* This macro may go away without notice.  */
-#define HvNAME_HEK(hv) (((XPVHV *)SvANY(hv))->xhv_aux && (((struct xpvhv_aux *)((XPVHV *)SvANY(hv))->xhv_aux)->xhv_name) ? ((struct xpvhv_aux *)((XPVHV *)SvANY(hv))->xhv_aux)->xhv_name: 0)
-#define HvNAME_get(hv)	(((XPVHV *)SvANY(hv))->xhv_aux ? \
-			 (((struct xpvhv_aux *)((XPVHV *)SvANY(hv))->xhv_aux)->xhv_name) ? HEK_KEY(((struct xpvhv_aux *)((XPVHV *)SvANY(hv))->xhv_aux)->xhv_name) : 0 : 0)
-#define HvNAMELEN_get(hv)	(((XPVHV *)SvANY(hv))->xhv_aux ? \
-			 (((struct xpvhv_aux *)((XPVHV *)SvANY(hv))->xhv_aux)->xhv_name) ? HEK_LEN(((struct xpvhv_aux *)((XPVHV *)SvANY(hv))->xhv_aux)->xhv_name) : 0 : 0)
+#define HvNAME_HEK(hv) (SvOOK(hv) ? HvAUX(hv)->xhv_name : 0)
+#define HvNAME_get(hv)	((SvOOK(hv) && (HvAUX(hv)->xhv_name)) \
+			 ? HEK_KEY(HvAUX(hv)->xhv_name) : 0)
+#define HvNAMELEN_get(hv)	((SvOOK(hv) && (HvAUX(hv)->xhv_name)) \
+				 ? HEK_LEN(HvAUX(hv)->xhv_name) : 0)
 
 /* the number of keys (including any placeholers) */
 #define XHvTOTALKEYS(xhv)	((xhv)->xhv_keys)

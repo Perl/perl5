@@ -1067,8 +1067,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    if(!*first_entry) {
 		xhv->xhv_fill--; /* HvFILL(hv)-- */
 	    }
-	    if (xhv->xhv_aux && entry
-		== ((struct xpvhv_aux *)xhv->xhv_aux)->xhv_eiter /* HvEITER(hv) */)
+	    if (SvOOK(hv) && entry == HvAUX(hv)->xhv_eiter /* HvEITER(hv) */)
 		HvLAZYDEL_on(hv);
 	    else
 		hv_free_ent(hv, entry);
@@ -1115,21 +1114,30 @@ S_hsplit(pTHX_ HV *hv)
 	       
     PL_nomemok = TRUE;
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
-    Renew(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
+    Renew(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
+	  + (SvOOK(hv) ? sizeof(struct xpvhv_aux) : 0), char);
     if (!a) {
       PL_nomemok = FALSE;
       return;
     }
+    if (SvOOK(hv)) {
+	Copy(HvAUX(hv), &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
+    }
 #else
-    New(2, a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
+    New(2, a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
+	+ (SvOOK(hv) ? sizeof(struct xpvhv_aux) : 0), char);
     if (!a) {
       PL_nomemok = FALSE;
       return;
     }
     Copy(HvARRAY(hv), a, oldsize * sizeof(HE*), char);
+    if (SvOOK(hv)) {
+	Copy(HvAUX(hv), &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
+    }
     if (oldsize >= 64) {
 	offer_nice_chunk(HvARRAY(hv),
-			PERL_HV_ARRAY_ALLOC_BYTES(oldsize));
+			 PERL_HV_ARRAY_ALLOC_BYTES(oldsize)
+			 + (SvOOK(hv) ? sizeof(struct xpvhv_aux) : 0));
     }
     else
 	Safefree(HvARRAY(hv));
@@ -1194,7 +1202,12 @@ S_hsplit(pTHX_ HV *hv)
       longest_chain, HvTOTALKEYS(hv), HvFILL(hv),  1+HvMAX(hv));*/
 
     ++newsize;
-    Newz(2, a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
+    Newz(2, a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
+	 + (SvOOK(hv) ? sizeof(struct xpvhv_aux) : 0), char);
+    if (SvOOK(hv)) {
+	Copy(HvAUX(hv), &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
+    }
+
     was_shared = HvSHAREKEYS(hv);
 
     xhv->xhv_fill = 0;
@@ -1271,21 +1284,30 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
     if (a) {
 	PL_nomemok = TRUE;
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
-	Renew(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
+	Renew(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
+	      + (SvOOK(hv) ? sizeof(struct xpvhv_aux) : 0), char);
 	if (!a) {
 	  PL_nomemok = FALSE;
 	  return;
 	}
+	if (SvOOK(hv)) {
+	    Copy(HvAUX(hv), &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
+	}
 #else
-	New(2, a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
+	New(2, a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
+	    + (SvOOK(hv) ? sizeof(struct xpvhv_aux) : 0), char);
 	if (!a) {
 	  PL_nomemok = FALSE;
 	  return;
 	}
 	Copy(HvARRAY(hv), a, oldsize * sizeof(HE*), char);
+	if (SvOOK(hv)) {
+	    Copy(HvAUX(hv), &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
+	}
 	if (oldsize >= 64) {
 	    offer_nice_chunk(HvARRAY(hv),
-			    PERL_HV_ARRAY_ALLOC_BYTES(oldsize));
+			     PERL_HV_ARRAY_ALLOC_BYTES(oldsize)
+			     + (SvOOK(hv) ? sizeof(struct xpvhv_aux) : 0));
 	}
 	else
 	    Safefree(HvARRAY(hv));
@@ -1348,7 +1370,6 @@ Perl_newHV(pTHX)
 
     xhv->xhv_max    = 7;	/* HvMAX(hv) = 7 (start with 8 buckets) */
     xhv->xhv_fill   = 0;	/* HvFILL(hv) = 0 */
-    xhv->xhv_aux = 0;
     return hv;
 }
 
@@ -1526,7 +1547,7 @@ Perl_hv_clear(pTHX_ HV *hv)
     HvHASKFLAGS_off(hv);
     HvREHASH_off(hv);
     reset:
-    if (xhv->xhv_aux) {
+    if (SvOOK(hv)) {
 	HvEITER_set(hv, NULL);
     }
 }
@@ -1601,11 +1622,12 @@ S_hfreeentries(pTHX_ HV *hv)
     I32 riter;
     I32 max;
     struct xpvhv_aux *iter;
-
     if (!hv)
 	return;
     if (!HvARRAY(hv))
 	return;
+
+    iter =  SvOOK(hv) ? HvAUX(hv) : 0;
 
     riter = 0;
     max = HvMAX(hv);
@@ -1613,6 +1635,8 @@ S_hfreeentries(pTHX_ HV *hv)
     /* make everyone else think the array is empty, so that the destructors
      * called for freed entries can't recusively mess with us */
     HvARRAY(hv) = Null(HE**); 
+    SvFLAGS(hv) &= ~SVf_OOK;
+
     HvFILL(hv) = 0;
     ((XPVHV*) SvANY(hv))->xhv_keys = 0;
 
@@ -1629,20 +1653,35 @@ S_hfreeentries(pTHX_ HV *hv)
 	    entry = array[riter];
 	}
     }
-    HvARRAY(hv) = array;
 
-    iter = ((XPVHV*) SvANY(hv))->xhv_aux;
+    if (SvOOK(hv)) {
+	/* Someone attempted to iterate or set the hash name while we had
+	   the array set to 0.  */
+	assert(HvARRAY(hv));
+
+	if (HvAUX(hv)->xhv_name)
+	    unshare_hek_or_pvn(HvAUX(hv)->xhv_name, 0, 0, 0);
+	/* SvOOK_off calls sv_backoff, which isn't correct.  */
+
+	Safefree(HvARRAY(hv));
+	HvARRAY(hv) = 0;
+	SvFLAGS(hv) &= ~SVf_OOK;
+    }
+
+    /* FIXME - things will still go horribly wrong (or at least leak) if
+       people attempt to add elements to the hash while we're undef()ing it  */
     if (iter) {
 	entry = iter->xhv_eiter; /* HvEITER(hv) */
 	if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
 	    HvLAZYDEL_off(hv);
 	    hv_free_ent(hv, entry);
 	}
-	if (iter->xhv_name)
-	    unshare_hek_or_pvn(iter->xhv_name, 0, 0, 0);
-	Safefree(iter);
-	((XPVHV*) SvANY(hv))->xhv_aux = 0;
+	iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
+	iter->xhv_eiter = Null(HE*); /* HvEITER(hv) = Null(HE*) */
+	SvFLAGS(hv) |= SVf_OOK;
     }
+
+    HvARRAY(hv) = array;
 }
 
 /*
@@ -1663,12 +1702,13 @@ Perl_hv_undef(pTHX_ HV *hv)
     DEBUG_A(Perl_hv_assert(aTHX_ hv));
     xhv = (XPVHV*)SvANY(hv);
     hfreeentries(hv);
-    Safefree(HvARRAY(hv));
     if ((name = HvNAME_get(hv))) {
         if(PL_stashcache)
 	    hv_delete(PL_stashcache, name, HvNAMELEN_get(hv), G_DISCARD);
 	Perl_hv_name_set(aTHX_ hv, 0, 0, 0);
     }
+    SvFLAGS(hv) &= ~SVf_OOK;
+    Safefree(HvARRAY(hv));
     xhv->xhv_max   = 7;	/* HvMAX(hv) = 7 (it's a normal hash) */
     HvARRAY(hv) = 0;
     HvPLACEHOLDERS_set(hv, 0);
@@ -1678,10 +1718,22 @@ Perl_hv_undef(pTHX_ HV *hv)
 }
 
 struct xpvhv_aux*
-S_hv_auxinit(pTHX) {
+S_hv_auxinit(pTHX_ HV *hv) {
     struct xpvhv_aux *iter;
+    char *array;
 
-    New(0, iter, 1, struct xpvhv_aux);
+    if (!HvARRAY(hv)) {
+	Newz(0, array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1)
+	    + sizeof(struct xpvhv_aux), char);
+    } else {
+	array = (char *) HvARRAY(hv);
+	Renew(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1)
+	      + sizeof(struct xpvhv_aux), char);
+    }
+    HvARRAY(hv) = (HE**) array;
+    /* SvOOK_on(hv) attacks the IV flags.  */
+    SvFLAGS(hv) |= SVf_OOK;
+    iter = HvAUX(hv);
 
     iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
     iter->xhv_eiter = Null(HE*); /* HvEITER(hv) = Null(HE*) */
@@ -1710,14 +1762,13 @@ Perl_hv_iterinit(pTHX_ HV *hv)
 {
     register XPVHV* xhv;
     HE *entry;
-    struct xpvhv_aux *iter;
 
     if (!hv)
 	Perl_croak(aTHX_ "Bad hash");
     xhv = (XPVHV*)SvANY(hv);
 
-    iter = xhv->xhv_aux;
-    if (iter) {
+    if (SvOOK(hv)) {
+	struct xpvhv_aux *iter = HvAUX(hv);
 	entry = iter->xhv_eiter; /* HvEITER(hv) */
 	if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
 	    HvLAZYDEL_off(hv);
@@ -1726,7 +1777,7 @@ Perl_hv_iterinit(pTHX_ HV *hv)
 	iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
 	iter->xhv_eiter = Null(HE*); /* HvEITER(hv) = Null(HE*) */
     } else {
-	xhv->xhv_aux = S_hv_auxinit(aTHX);
+	S_hv_auxinit(aTHX_ hv);
     }
 
     /* used to be xhv->xhv_fill before 5.004_65 */
@@ -1740,10 +1791,7 @@ Perl_hv_riter_p(pTHX_ HV *hv) {
     if (!hv)
 	Perl_croak(aTHX_ "Bad hash");
 
-    iter = ((XPVHV *)SvANY(hv))->xhv_aux;
-    if (!iter) {
-	((XPVHV *)SvANY(hv))->xhv_aux = iter = S_hv_auxinit(aTHX);
-    }
+    iter = SvOOK(hv) ? HvAUX(hv) : S_hv_auxinit(aTHX_ hv);
     return &(iter->xhv_riter);
 }
 
@@ -1754,10 +1802,7 @@ Perl_hv_eiter_p(pTHX_ HV *hv) {
     if (!hv)
 	Perl_croak(aTHX_ "Bad hash");
 
-    iter = ((XPVHV *)SvANY(hv))->xhv_aux;
-    if (!iter) {
-	((XPVHV *)SvANY(hv))->xhv_aux = iter = S_hv_auxinit(aTHX);
-    }
+    iter = SvOOK(hv) ? HvAUX(hv) : S_hv_auxinit(aTHX_ hv);
     return &(iter->xhv_eiter);
 }
 
@@ -1768,13 +1813,13 @@ Perl_hv_riter_set(pTHX_ HV *hv, I32 riter) {
     if (!hv)
 	Perl_croak(aTHX_ "Bad hash");
 
-
-    iter = ((XPVHV *)SvANY(hv))->xhv_aux;
-    if (!iter) {
+    if (SvOOK(hv)) {
+	iter = HvAUX(hv);
+    } else {
 	if (riter == -1)
 	    return;
 
-	((XPVHV *)SvANY(hv))->xhv_aux = iter = S_hv_auxinit(aTHX);
+	iter = S_hv_auxinit(aTHX_ hv);
     }
     iter->xhv_riter = riter;
 }
@@ -1786,14 +1831,15 @@ Perl_hv_eiter_set(pTHX_ HV *hv, HE *eiter) {
     if (!hv)
 	Perl_croak(aTHX_ "Bad hash");
 
-    iter = ((XPVHV *)SvANY(hv))->xhv_aux;
-    if (!iter) {
+    if (SvOOK(hv)) {
+	iter = HvAUX(hv);
+    } else {
 	/* 0 is the default so don't go malloc()ing a new structure just to
 	   hold 0.  */
 	if (!eiter)
 	    return;
 
-	((XPVHV *)SvANY(hv))->xhv_aux = iter = S_hv_auxinit(aTHX);
+	iter = S_hv_auxinit(aTHX_ hv);
     }
     iter->xhv_eiter = eiter;
 }
@@ -1801,10 +1847,11 @@ Perl_hv_eiter_set(pTHX_ HV *hv, HE *eiter) {
 void
 Perl_hv_name_set(pTHX_ HV *hv, const char *name, I32 len, int flags)
 {
-    struct xpvhv_aux *iter = ((XPVHV *)SvANY(hv))->xhv_aux;
+    struct xpvhv_aux *iter;
     U32 hash;
 
-    if (iter) {
+    if (SvOOK(hv)) {
+	iter = HvAUX(hv);
 	if (iter->xhv_name) {
 	    unshare_hek_or_pvn(iter->xhv_name, 0, 0, 0);
 	}
@@ -1812,7 +1859,7 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, I32 len, int flags)
 	if (name == 0)
 	    return;
 
-	((XPVHV *)SvANY(hv))->xhv_aux = iter = S_hv_auxinit(aTHX);
+	iter = S_hv_auxinit(aTHX_ hv);
     }
     PERL_HASH(hash, name, len);
     iter->xhv_name = name ? share_hek(name, len, hash) : 0;
@@ -1868,15 +1915,14 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
     if (!hv)
 	Perl_croak(aTHX_ "Bad hash");
     xhv = (XPVHV*)SvANY(hv);
-    iter = xhv->xhv_aux;
 
-    if (!iter) {
+    if (!SvOOK(hv)) {
 	/* Too many things (well, pp_each at least) merrily assume that you can
 	   call iv_iternext without calling hv_iterinit, so we'll have to deal
 	   with it.  */
 	hv_iterinit(hv);
-	iter = ((XPVHV *)SvANY(hv))->xhv_aux;
     }
+    iter = HvAUX(hv);
 
     oldentry = entry = iter->xhv_eiter; /* HvEITER(hv) */
 
@@ -1916,13 +1962,9 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	prime_env_iter();
 #endif
 
-    if (!HvARRAY(hv)) {
-	char *darray;
-	Newz(506, darray,
-	     PERL_HV_ARRAY_ALLOC_BYTES(xhv->xhv_max+1 /* HvMAX(hv)+1 */),
-	     char);
-	HvARRAY(hv) = (HE**) darray;
-    }
+    /* hv_iterint now ensures this.  */
+    assert (HvARRAY(hv));
+
     /* At start of hash, entry is NULL.  */
     if (entry)
     {
