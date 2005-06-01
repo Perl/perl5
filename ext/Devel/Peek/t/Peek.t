@@ -400,7 +400,7 @@ do_test(20,
   NV = 0
   PV = $ADDR ""\\\0
   CUR = 0
-  LEN = 1
+  LEN = \d+
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_mglob
     MG_TYPE = PERL_MAGIC_regex_global\\(g\\)

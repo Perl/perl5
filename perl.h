@@ -803,6 +803,13 @@ int usleep(unsigned int);
 
 #define MEM_SIZE Size_t
 
+/* Round all values passed to malloc up, by default to a multiple of
+   sizeof(size_t)
+*/
+#ifndef PERL_STRLEN_ROUNDUP_QUANTUM
+#define PERL_STRLEN_ROUNDUP_QUANTUM Size_t_size
+#endif
+
 #if defined(STANDARD_C) && defined(I_STDDEF)
 #   include <stddef.h>
 #   define STRUCT_OFFSET(s,m)  offsetof(s,m)
