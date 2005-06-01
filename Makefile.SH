@@ -768,7 +768,6 @@ $(CONFIGPM): config.sh miniperl$(EXE_EXT) configpm Porting/Glossary
 lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl$(EXE_EXT) minimod.pl $(CONFIGPM)
 	$(LDLIBPTH) ./miniperl minimod.pl > minimod.tmp
 	sh mv-if-diff minimod.tmp $@
-	-touch lib/ExtUtils/Miniperl.pm
 
 lib/re.pm: ext/re/re.pm
 	cp ext/re/re.pm ext/re/re.tmp && sh mv-if-diff ext/re/re.tmp lib/re.pm
