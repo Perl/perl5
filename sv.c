@@ -10926,18 +10926,18 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 
 	    if (HvARRAY((HV*)sstr)) {
 		STRLEN i = 0;
+		bool sharekeys = !!HvSHAREKEYS(sstr);
 		XPVHV *dxhv = (XPVHV*)SvANY(dstr);
 		XPVHV *sxhv = (XPVHV*)SvANY(sstr);
 		char *darray;
-		/* FIXME - surely this doesn't need to be zeroed?  */
-		Newz(0, darray,
+		New(0, darray,
 		     PERL_HV_ARRAY_ALLOC_BYTES(dxhv->xhv_max+1)
 		     + (SvOOK(sstr) ? sizeof(struct xpvhv_aux) : 0), char);
 		HvARRAY(dstr) = (HE**)darray;
 		while (i <= sxhv->xhv_max) {
+		    HE *source = HvARRAY(sstr)[i];
 		    HvARRAY(dstr)[i]
-			= he_dup(HvARRAY(sstr)[i],
-				 (bool)!!HvSHAREKEYS(sstr), param);
+			= source ? he_dup(source, sharekeys, param) : 0;
 		    ++i;
 		}
 		if (SvOOK(sstr)) {
