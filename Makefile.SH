@@ -762,8 +762,9 @@ preplibrary: miniperl$(EXE_EXT) $(CONFIGPM) lib/lib.pm $(PREPLIBRARY_LIBPERL)
 # (If trying to create a new port and having problems with the configpm script,
 # try 'make minitest' and/or commenting out the tests at the end of configpm.)
 $(CONFIGPM): config.sh miniperl$(EXE_EXT) configpm Porting/Glossary
-	$(LDLIBPTH) ./miniperl -Ilib configpm --heavy=lib/Config_heavy.pl configpm.tmp
+	$(LDLIBPTH) ./miniperl -Ilib configpm --heavy=heavy.tmp configpm.tmp
 	sh mv-if-diff configpm.tmp lib/Config.pm
+	sh mv-if-diff heavy.tmp lib/Config_heavy.pl
 
 lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl$(EXE_EXT) minimod.pl $(CONFIGPM)
 	$(LDLIBPTH) ./miniperl minimod.pl > minimod.tmp
