@@ -173,7 +173,7 @@ sub concise_cv_obj {
 	    print $walkHandle "coderef $name has no START\n";
 	}
 	elsif (exists &$name) {
-	    print $walkHandle "subroutine $name exists\n";
+	    print $walkHandle "$name exists in stash, but has no START\n";
 	}
 	else {
 	    print $walkHandle "$name not in symbol table\n";

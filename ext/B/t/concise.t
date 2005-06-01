@@ -15,10 +15,9 @@ BEGIN {
     }
     require 'test.pl';		# we use runperl from 'test.pl', so can't use Test::More
     sub diag { print "# @_\n" } # but this is still handy
-
 }
 
-plan tests => 147;
+plan tests => 149;
 
 require_ok("B::Concise");
 
@@ -193,7 +192,7 @@ SKIP: {
 
     my ($res,$err);
     TODO: {
-	local $TODO = "\tdoes this handling make sense ?";
+	#local $TODO = "\tdoes this handling make sense ?";
 
 	sub declared_only;
 	($res,$err) = render('-basic', \&declared_only);
@@ -215,7 +214,7 @@ SKIP: {
 	{
 	    package Bar;
 	    our $AUTOLOAD = 'garbage';
-	    sub AUTOLOAD { print "# in AUTOLOAD: $AUTOLOAD\n" }
+	    sub AUTOLOAD { print "# in AUTOLOAD body: $AUTOLOAD\n" }
 	}
 	($res,$err) = render('-basic', Bar::auto_func);
 	like ($res, qr/unknown function \(Bar::auto_func\)/,
@@ -226,7 +225,7 @@ SKIP: {
 	      "'\&Bar::auto_func' seen as having no START");
 
 	($res,$err) = render('-basic', \&Bar::AUTOLOAD);
-	like ($res, qr/called Bar::AUTOLOAD/, "found body of Bar::AUTOLOAD");
+	like ($res, qr/in AUTOLOAD body: /, "found body of Bar::AUTOLOAD");
 
     }
     ($res,$err) = render('-basic', Foo::bar);
@@ -361,6 +360,31 @@ SKIP: {
 	}
     }
 }
+
+
+# test proper NULLING of pointer, derefd by CvSTART, when a coderef is
+# undefd.  W/o this, the pointer can dangle into freed and reused
+# optree mem, which no longer points to opcodes.
+
+# Using B::Concise to render Config::AUTOLOAD's optree at BEGIN-time
+# triggers this obscure bug, cuz AUTOLOAD has a bootstrap version,
+# which is used at load-time then undeffed.  It is normally
+# re-vivified later, but not in time for this (BEGIN/CHECK)-time
+# rendering.
+
+$out = runperl ( switches => ["-MO=Concise,Config::AUTOLOAD"],
+		 prog => 'use Config; BEGIN { $Config{awk} }',
+		 stderr => 1 );
+
+like($out, qr/Config::AUTOLOAD exists in stash, but has no START/,
+    "coderef properly undefined");
+
+$out = runperl ( switches => ["-MO=Concise,Config::AUTOLOAD"],
+		 prog => 'use Config; CHECK { $Config{awk} }',
+		 stderr => 1 );
+
+like($out, qr/Config::AUTOLOAD exists in stash, but has no START/,
+    "coderef properly undefined");
 
 __END__
 
