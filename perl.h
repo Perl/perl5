@@ -2101,7 +2101,6 @@ typedef struct context PERL_CONTEXT;
 typedef struct block BLOCK;
 
 typedef struct magic MAGIC;
-typedef struct xrv XRV;
 typedef struct xpv XPV;
 typedef struct xpviv XPVIV;
 typedef struct xpvuv XPVUV;
