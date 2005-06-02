@@ -631,6 +631,7 @@ sub concise_sv {
     $hr->{svclass} = class($sv);
     $hr->{svclass} = "UV"
       if $hr->{svclass} eq "IV" and $sv->FLAGS & SVf_IVisUV;
+    Carp::cluck("bad concise_sv: $sv") unless $sv and $$sv;
     $hr->{svaddr} = sprintf("%#x", $$sv);
     if ($hr->{svclass} eq "GV") {
 	my $gv = $sv;
@@ -759,19 +760,18 @@ sub concise_op {
     } elsif ($h{class} eq "LOGOP") {
 	undef $lastnext;
 	$h{arg} = "(other->" . seq($op->other) . ")";
-    } elsif ($h{class} eq "SVOP") {
+    }
+    elsif ($h{class} eq "SVOP" or $h{class} eq "PADOP") {
 	unless ($h{name} eq 'aelemfast' and $op->flags & OPf_SPECIAL) {
-	    if (! ${$op->sv}) {
-		my $sv = (($curcv->PADLIST->ARRAY)[1]->ARRAY)[$op->targ];
+	    my $idx = ($h{class} eq "SVOP") ? $op->targ : $op->padix;
+	    if ($h{class} eq "PADOP" or !${$op->sv}) {
+		my $sv = (($curcv->PADLIST->ARRAY)[1]->ARRAY)[$idx];
 		$h{arg} = "[" . concise_sv($sv, \%h) . "]";
 		$h{targarglife} = $h{targarg} = "";
 	    } else {
 		$h{arg} = "(" . concise_sv($op->sv, \%h) . ")";
 	    }
 	}
-    } elsif ($h{class} eq "PADOP") {
-	my $sv = (($curcv->PADLIST->ARRAY)[1]->ARRAY)[$op->padix];
-	$h{arg} = "[" . concise_sv($sv, \%h) . "]";
     }
     $h{seq} = $h{hyphseq} = seq($op);
     $h{seq} = "" if $h{seq} eq "-";
