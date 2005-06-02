@@ -9,7 +9,7 @@ use File::Spec;
 use ExtUtils::CBuilder::Base;
 
 use vars qw($VERSION @ISA);
-$VERSION = '0.01';
+$VERSION = '0.12';
 @ISA = qw(ExtUtils::CBuilder::Base);
 
 sub new {
@@ -158,7 +158,7 @@ sub link {
   # if running in perl source tree, look for libs there, not installed
   my $lddlflags = $cf->{lddlflags};
   my $perl_src = $self->perl_src();
-  $lddlflags =~ s/\Q$cf->{archlibexp}\E\\CORE/$perl_src/ if $perl_src;
+  $lddlflags =~ s/\Q$cf->{archlibexp}\E[\\\/]CORE/$perl_src/ if $perl_src;
 
   my %spec = (
     srcdir        => $to,

@@ -5,7 +5,7 @@ use File::Path ();
 use File::Basename ();
 
 use vars qw($VERSION @ISA);
-$VERSION = '0.11_01';
+$VERSION = '0.12';
 $VERSION = eval $VERSION;
 
 # Okay, this is the brute-force method of finding out what kind of
@@ -154,7 +154,7 @@ together.
 =back
 
 The operation of this method is also affected by the
-C<installarchlib>, C<cccdlflags>, C<ccflags>, C<optimize>, and C<cc>
+C<archlibexp>, C<cccdlflags>, C<ccflags>, C<optimize>, and C<cc>
 entries in C<Config.pm>.
 
 =item link

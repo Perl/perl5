@@ -7,8 +7,7 @@ use Config;
 use Text::ParseWords;
 
 use vars qw($VERSION);
-$VERSION = '0.00_02';
-$VERSION = eval $VERSION;
+$VERSION = '0.12';
 
 sub new {
   my $class = shift;
@@ -181,7 +180,7 @@ sub _do_link {
   my @temp_files;
   @temp_files =
     $self->prelink(%args,
-		   dl_name => $args{module_name}) if $self->need_prelink;
+		   dl_name => $args{module_name}) if $args{lddl} && $self->need_prelink;
   
   my @linker_flags = $self->split_like_shell($args{extra_linker_flags});
   my @output = $args{lddl} ? $self->arg_share_object_file($out) : $self->arg_exec_file($out);
@@ -216,29 +215,27 @@ sub perl_src {
   # N.B. makemaker actually searches regardless of PERL_CORE, but
   # only squawks at not finding it if PERL_CORE is set
 
-  if ($ENV{PERL_CORE}) {
-    my $Updir  = File::Spec->updir;
-    my($dir);
-    foreach $dir ($Updir,
-                  File::Spec->catdir($Updir,$Updir),
-                  File::Spec->catdir($Updir,$Updir,$Updir),
-                  File::Spec->catdir($Updir,$Updir,$Updir,$Updir),
-                  File::Spec->catdir($Updir,$Updir,$Updir,$Updir,$Updir))
-    {
-      if (
-           -f File::Spec->catfile($dir,"config_h.SH")
-           &&
-           -f File::Spec->catfile($dir,"perl.h")
-          &&
-           -f File::Spec->catfile($dir,"lib","Exporter.pm")
-        ) {
-        return $dir;
-      }
+  return unless $ENV{PERL_CORE};
+
+  my $Updir  = File::Spec->updir;
+  my $dir = $Updir;
+
+  # Try up to 5 levels upwards
+  for (1..5) {
+    if (
+	-f File::Spec->catfile($dir,"config_h.SH")
+	&&
+	-f File::Spec->catfile($dir,"perl.h")
+	&&
+	-f File::Spec->catfile($dir,"lib","Exporter.pm")
+       ) {
+      return $dir;
     }
 
-    warn "PERL_CORE is set but I can't find your perl source!\n";
+    $dir = File::Spec->catdir($dir, $Updir);
   }
-
+  
+  warn "PERL_CORE is set but I can't find your perl source!\n";
   return;
 }
 
