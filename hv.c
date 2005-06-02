@@ -1126,7 +1126,7 @@ S_hsplit(pTHX_ HV *hv)
       return;
     }
     if (SvOOK(hv)) {
-	Copy(HvAUX(hv), &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
+	Copy(&a[oldsize * sizeof(HE*)], &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
     }
 #else
     New(2, a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
@@ -1296,7 +1296,7 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 	  return;
 	}
 	if (SvOOK(hv)) {
-	    Copy(HvAUX(hv), &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
+	    Copy(&a[oldsize * sizeof(HE*)], &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
 	}
 #else
 	New(2, a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
