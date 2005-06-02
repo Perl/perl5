@@ -365,7 +365,7 @@ S_cache_re(pTHX_ regexp *prog)
 
 /* Assumptions: if ANCH_GPOS, then strpos is anchored. XXXX Check GPOS logic */
 
-/* If SCREAM, then SvPVX(sv) should be compatible with strpos and strend.
+/* If SCREAM, then SvPVX_const(sv) should be compatible with strpos and strend.
    Otherwise, only SvCUR(sv) is used to get strbeg. */
 
 /* XXXX We assume that strpos is strbeg unless sv. */
@@ -480,7 +480,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	if (!ml_anch) {
 	  if ( !(prog->reganch & (ROPT_ANCH_GPOS /* Checked by the caller */
 				  | ROPT_IMPLICIT)) /* not a real BOL */
-	       /* SvCUR is not set on references: SvRV and SvPVX overlap */
+	       /* SvCUR is not set on references: SvRV and SvPVX_const overlap */
 	       && sv && !SvROK(sv)
 	       && (strpos != strbeg)) {
 	      DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Not at start...\n"));
@@ -502,17 +502,17 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		}
 		/* Now should match s[0..slen-2] */
 		slen--;
-		if (slen && (*SvPVX(check) != *s
+		if (slen && (*SvPVX_const(check) != *s
 			     || (slen > 1
-				 && memNE(SvPVX(check), s, slen)))) {
+				 && memNE(SvPVX_const(check), s, slen)))) {
 		  report_neq:
 		    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "String not equal...\n"));
 		    goto fail_finish;
 		}
 	    }
-	    else if (*SvPVX(check) != *s
+	    else if (*SvPVX_const(check) != *s
 		     || ((slen = SvCUR(check)) > 1
-			 && memNE(SvPVX(check), s, slen)))
+			 && memNE(SvPVX_const(check), s, slen)))
 		goto report_neq;
 	    goto success_at_start;
 	  }
@@ -562,7 +562,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    goto fail_finish;
 	/* we may be pointing at the wrong string */
 	if (s && RX_MATCH_COPIED(prog))
-	    s = strbeg + (s - SvPVX(sv));
+	    s = strbeg + (s - SvPVX_const(sv));
 	if (data)
 	    *data->scream_olds = s;
     }
@@ -583,7 +583,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 			  (check == (do_utf8 ? prog->anchored_utf8 : prog->anchored_substr) ? "anchored" : "floating"),
 			  PL_colors[0],
 			  (int)(SvCUR(check) - (SvTAIL(check)!=0)),
-			  SvPVX(check),
+			  SvPVX_const(check),
 			  PL_colors[1], (SvTAIL(check) ? "$" : ""),
 			  (s ? " at offset " : "...\n") ) );
 
@@ -650,7 +650,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 			PL_colors[0],
 			  (int)(SvCUR(must)
 			  - (SvTAIL(must)!=0)),
-			  SvPVX(must),
+			  SvPVX_const(must),
 			  PL_colors[1], (SvTAIL(must) ? "$" : "")));
 		if (!s) {
 		    if (last1 >= last2) {
@@ -708,7 +708,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		    (s ? "Found" : "Contradicts"),
 		    PL_colors[0],
 		      (int)(SvCUR(must) - (SvTAIL(must)!=0)),
-		      SvPVX(must),
+		      SvPVX_const(must),
 		      PL_colors[1], (SvTAIL(must) ? "$" : "")));
 	    if (!s) {
 		if (last1 == last) {
@@ -1813,7 +1813,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 #endif
 	if (!(do_utf8 ? prog->anchored_utf8 : prog->anchored_substr))
 	    do_utf8 ? to_utf8_substr(prog) : to_byte_substr(prog);
-	ch = SvPVX(do_utf8 ? prog->anchored_utf8 : prog->anchored_substr)[0];
+	ch = SvPVX_const(do_utf8 ? prog->anchored_utf8 : prog->anchored_substr)[0];
 
 	if (do_utf8) {
 	    while (s < strend) {
@@ -1896,7 +1896,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 				  multiline ? FBMrf_MULTILINE : 0))) ) {
 	    /* we may be pointing at the wrong string */
 	    if ((flags & REXEC_SCREAM) && RX_MATCH_COPIED(prog))
-		s = strbeg + (s - SvPVX(sv));
+		s = strbeg + (s - SvPVX_const(sv));
 	    DEBUG_EXECUTE_r( did_match = 1 );
 	    if (HOPc(s, -back_max) > last1) {
 		last1 = HOPc(s, -back_min);
@@ -1930,7 +1930,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 			       ? "anchored" : "floating"),
 			      PL_colors[0],
 			      (int)(SvCUR(must) - (SvTAIL(must)!=0)),
-			      SvPVX(must),
+			      SvPVX_const(must),
                                   PL_colors[1], (SvTAIL(must) ? "$" : ""))
                );
 	goto phooey;
@@ -1951,7 +1951,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 
 	    regprop(prop, c);
 	    s0 = UTF ?
-	      pv_uni_display(dsv0, (U8*)SvPVX(prop), SvCUR(prop), 60,
+	      pv_uni_display(dsv0, (U8*)SvPVX_const(prop), SvCUR(prop), 60,
 			     UNI_DISPLAY_REGEX) :
 	      SvPVX(prop);
 	    len0 = UTF ? SvCUR(dsv0) : SvCUR(prop);
@@ -1985,7 +1985,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		    last = scream_olds; /* Only one occurrence. */
 		/* we may be pointing at the wrong string */
 		else if (RX_MATCH_COPIED(prog))
-		    s = strbeg + (s - SvPVX(sv));
+		    s = strbeg + (s - SvPVX_const(sv));
 	    }
 	    else {
 		STRLEN len;
@@ -2486,7 +2486,7 @@ S_regmatch(pTHX_ regnode *prog)
 			    15 - l - pref_len + 1,
 			    "",
 			    (IV)(scan - PL_regprogram), PL_regindent*2, "",
-			    SvPVX(prop));
+			    SvPVX_const(prop));
 	    }
 	});
 
@@ -4594,7 +4594,7 @@ S_regrepeat(pTHX_ const regnode *p, I32 max)
 		regprop(prop, p);
 		PerlIO_printf(Perl_debug_log,
 			      "%*s  %s can match %"IVdf" times out of %"IVdf"...\n",
-			      REPORT_CODE_OFF+1, "", SvPVX(prop),(IV)c,(IV)max);
+			      REPORT_CODE_OFF+1, "", SvPVX_const(prop),(IV)c,(IV)max);
 	});
 	});
 

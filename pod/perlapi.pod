@@ -2997,12 +2997,12 @@ Found in file sv.c
 
 =item newSVpvn_share
 
-Creates a new SV with its SvPVX pointing to a shared string in the string
+Creates a new SV with its SvPVX_const pointing to a shared string in the string
 table. If the string does not already exist in the table, it is created
 first.  Turns on READONLY and FAKE.  The string's hash is stored in the UV
 slot of the SV; if the C<hash> parameter is non-zero, that value is used;
 otherwise the hash is computed.  The idea here is that as the string table
-is used for shared hash keys these strings will have SvPVX == HeKEY and
+is used for shared hash keys these strings will have SvPVX_const == HeKEY and
 hash lookup will avoid string compare.
 
 	SV*	newSVpvn_share(const char* s, I32 len, U32 hash)
@@ -4189,7 +4189,7 @@ Efficient removal of characters from the beginning of the string buffer.
 SvPOK(sv) must be true and the C<ptr> must be a pointer to somewhere inside
 the string buffer.  The C<ptr> becomes the first character of the adjusted
 string. Uses the "OOK hack".
-Beware: after this function returns, C<ptr> and SvPVX(sv) may no longer
+Beware: after this function returns, C<ptr> and SvPVX_const(sv) may no longer
 refer to the same chunk of data.
 
 	void	sv_chop(SV* sv, const char* ptr)

@@ -2388,7 +2388,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			    if (mincount > 1) {
 				SvGROW(last_str, (mincount * l) + 1);
 				repeatcpy(SvPVX(last_str) + l,
-					  SvPVX(last_str), l, mincount - 1);
+					  SvPVX_const(last_str), l, mincount - 1);
 				SvCUR_set(last_str, SvCUR(last_str) * mincount);
 				/* Add additional parts. */
 				SvCUR_set(data->last_found,
@@ -3140,7 +3140,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	              regprop(sv, (regnode*)data.start_class);
 		      PerlIO_printf(Perl_debug_log,
 				    "synthetic stclass \"%s\".\n",
-				    SvPVX(sv));});
+				    SvPVX_const(sv));});
 	}
 
 	/* A temporary algorithm prefers floated substr to fixed one to dig more info. */
@@ -3195,7 +3195,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	              regprop(sv, (regnode*)data.start_class);
 		      PerlIO_printf(Perl_debug_log,
 				    "synthetic stclass \"%s\".\n",
-				    SvPVX(sv));});
+				    SvPVX_const(sv));});
 	}
     }
 
@@ -5694,7 +5694,7 @@ S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 	    goto after_print;
 	regprop(sv, node);
 	PerlIO_printf(Perl_debug_log, "%4"IVdf":%*s%s", (IV)(node - start),
-		      (int)(2*l + 1), "", SvPVX(sv));
+		      (int)(2*l + 1), "", SvPVX_const(sv));
 	if (next == NULL)		/* Next ptr. */
 	    PerlIO_printf(Perl_debug_log, "(0)");
 	else
@@ -5803,7 +5803,7 @@ Perl_regdump(pTHX_ regexp *r)
 		      "anchored \"%s%.*s%s\"%s at %"IVdf" ",
 		      PL_colors[0],
 		      (int)(SvCUR(r->anchored_substr) - (SvTAIL(r->anchored_substr)!=0)),
-		      SvPVX(r->anchored_substr),
+		      SvPVX_const(r->anchored_substr),
 		      PL_colors[1],
 		      SvTAIL(r->anchored_substr) ? "$" : "",
 		      (IV)r->anchored_offset);
@@ -5812,7 +5812,7 @@ Perl_regdump(pTHX_ regexp *r)
 		      "anchored utf8 \"%s%.*s%s\"%s at %"IVdf" ",
 		      PL_colors[0],
 		      (int)(SvCUR(r->anchored_utf8) - (SvTAIL(r->anchored_utf8)!=0)),
-		      SvPVX(r->anchored_utf8),
+		      SvPVX_const(r->anchored_utf8),
 		      PL_colors[1],
 		      SvTAIL(r->anchored_utf8) ? "$" : "",
 		      (IV)r->anchored_offset);
@@ -5821,7 +5821,7 @@ Perl_regdump(pTHX_ regexp *r)
 		      "floating \"%s%.*s%s\"%s at %"IVdf"..%"UVuf" ",
 		      PL_colors[0],
 		      (int)(SvCUR(r->float_substr) - (SvTAIL(r->float_substr)!=0)),
-		      SvPVX(r->float_substr),
+		      SvPVX_const(r->float_substr),
 		      PL_colors[1],
 		      SvTAIL(r->float_substr) ? "$" : "",
 		      (IV)r->float_min_offset, (UV)r->float_max_offset);
@@ -5830,7 +5830,7 @@ Perl_regdump(pTHX_ regexp *r)
 		      "floating utf8 \"%s%.*s%s\"%s at %"IVdf"..%"UVuf" ",
 		      PL_colors[0],
 		      (int)(SvCUR(r->float_utf8) - (SvTAIL(r->float_utf8)!=0)),
-		      SvPVX(r->float_utf8),
+		      SvPVX_const(r->float_utf8),
 		      PL_colors[1],
 		      SvTAIL(r->float_utf8) ? "$" : "",
 		      (IV)r->float_min_offset, (UV)r->float_max_offset);
@@ -5848,7 +5848,7 @@ Perl_regdump(pTHX_ regexp *r)
 
     if (r->regstclass) {
 	regprop(sv, r->regstclass);
-	PerlIO_printf(Perl_debug_log, "stclass \"%s\" ", SvPVX(sv));
+	PerlIO_printf(Perl_debug_log, "stclass \"%s\" ", SvPVX_const(sv));
     }
     if (r->reganch & ROPT_ANCH) {
 	PerlIO_printf(Perl_debug_log, "anchored");

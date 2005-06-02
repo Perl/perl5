@@ -1266,7 +1266,7 @@ s	|bool	|utf8_mg_pos	|NN SV *sv|NN MAGIC **mgp|NN STRLEN **cachep \
 s	|bool	|utf8_mg_pos_init	|NN SV *sv|NN MAGIC **mgp|NN STRLEN **cachep \
 				|I32 i|I32 offsetp|NN U8 *s|NN U8 *start
 #if defined(PERL_COPY_ON_WRITE)
-sM	|void	|sv_release_COW	|SV *sv|char *pvx|STRLEN cur|STRLEN len \
+sM	|void	|sv_release_COW	|SV *sv|const char *pvx|STRLEN cur|STRLEN len \
 				|U32 hash|SV *after
 #endif
 #endif
