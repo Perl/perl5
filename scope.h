@@ -198,7 +198,7 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
  * SSNEWa() works like SSNEW(), but also aligns the data to the specified
  * number of bytes.  MEM_ALIGNBYTES is perhaps the most useful.  The
  * alignment will be preserved therough savestack reallocation *only* if
- * realloc returns data aligned to a size divisible by `align'!
+ * realloc returns data aligned to a size divisible by "align"!
  *
  * SSPTR() converts the index returned by SSNEW/SSNEWa() into a pointer.
  */

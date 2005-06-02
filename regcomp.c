@@ -674,7 +674,7 @@ S_cl_or(pTHX_ RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, str
 /* REx optimizer.  Converts nodes into quickier variants "in place".
    Finds fixed substrings.  */
 
-/* Stops at toplevel WHILEM as well as at `last'. At end *scanp is set
+/* Stops at toplevel WHILEM as well as at "last". At end *scanp is set
    to the position after last scanned or to NULL. */
 
 STATIC I32
@@ -2053,7 +2053,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    DEBUG_r({ SV *sv = sv_newmortal();
 	              regprop(sv, (regnode*)data.start_class);
 		      PerlIO_printf(Perl_debug_log,
-				    "synthetic stclass `%s'.\n",
+				    "synthetic stclass \"%s\".\n",
 				    SvPVX(sv));});
 	}
 
@@ -2108,7 +2108,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    DEBUG_r({ SV* sv = sv_newmortal();
 	              regprop(sv, (regnode*)data.start_class);
 		      PerlIO_printf(Perl_debug_log,
-				    "synthetic stclass `%s'.\n",
+				    "synthetic stclass \"%s\".\n",
 				    SvPVX(sv));});
 	}
     }
@@ -3059,7 +3059,7 @@ tryagain:
 		FAIL("Trailing \\");
 	    /* FALL THROUGH */
 	default:
-	    /* Do not generate `unrecognized' warnings here, we fall
+	    /* Do not generate "unrecognized" warnings here, we fall
 	       back into the quick-grab loop below */
 	    parse_start--;
 	    goto defchar;
@@ -4622,7 +4622,7 @@ S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 	else if (PL_regkind[(U8)op] == BRANCH) {
 	    node = dumpuntil(start, NEXTOPER(node), next, sv, l + 1);
 	}
-	else if ( op == CURLY) {   /* `next' might be very big: optimizer */
+	else if ( op == CURLY) {   /* "next" might be very big: optimizer */
 	    node = dumpuntil(start, NEXTOPER(node) + EXTRA_STEP_2ARGS,
 			     NEXTOPER(node) + EXTRA_STEP_2ARGS + 1, sv, l + 1);
 	}
@@ -4672,7 +4672,7 @@ Perl_regdump(pTHX_ regexp *r)
     /* Header fields of interest. */
     if (r->anchored_substr)
 	PerlIO_printf(Perl_debug_log,
-		      "anchored `%s%.*s%s'%s at %"IVdf" ",
+		      "anchored \"%s%.*s%s\"%s at %"IVdf" ",
 		      PL_colors[0],
 		      (int)(SvCUR(r->anchored_substr) - (SvTAIL(r->anchored_substr)!=0)),
 		      SvPVX(r->anchored_substr),
@@ -4681,7 +4681,7 @@ Perl_regdump(pTHX_ regexp *r)
 		      (IV)r->anchored_offset);
     else if (r->anchored_utf8)
 	PerlIO_printf(Perl_debug_log,
-		      "anchored utf8 `%s%.*s%s'%s at %"IVdf" ",
+		      "anchored utf8 \"%s%.*s%s\"%s at %"IVdf" ",
 		      PL_colors[0],
 		      (int)(SvCUR(r->anchored_utf8) - (SvTAIL(r->anchored_utf8)!=0)),
 		      SvPVX(r->anchored_utf8),
@@ -4690,7 +4690,7 @@ Perl_regdump(pTHX_ regexp *r)
 		      (IV)r->anchored_offset);
     if (r->float_substr)
 	PerlIO_printf(Perl_debug_log,
-		      "floating `%s%.*s%s'%s at %"IVdf"..%"UVuf" ",
+		      "floating \"%s%.*s%s\"%s at %"IVdf"..%"UVuf" ",
 		      PL_colors[0],
 		      (int)(SvCUR(r->float_substr) - (SvTAIL(r->float_substr)!=0)),
 		      SvPVX(r->float_substr),
@@ -4699,7 +4699,7 @@ Perl_regdump(pTHX_ regexp *r)
 		      (IV)r->float_min_offset, (UV)r->float_max_offset);
     else if (r->float_utf8)
 	PerlIO_printf(Perl_debug_log,
-		      "floating utf8 `%s%.*s%s'%s at %"IVdf"..%"UVuf" ",
+		      "floating utf8 \"%s%.*s%s\"%s at %"IVdf"..%"UVuf" ",
 		      PL_colors[0],
 		      (int)(SvCUR(r->float_utf8) - (SvTAIL(r->float_utf8)!=0)),
 		      SvPVX(r->float_utf8),
@@ -4720,7 +4720,7 @@ Perl_regdump(pTHX_ regexp *r)
 
     if (r->regstclass) {
 	regprop(sv, r->regstclass);
-	PerlIO_printf(Perl_debug_log, "stclass `%s' ", SvPVX(sv));
+	PerlIO_printf(Perl_debug_log, "stclass \"%s\" ", SvPVX(sv));
     }
     if (r->reganch & ROPT_ANCH) {
 	PerlIO_printf(Perl_debug_log, "anchored");
@@ -4970,7 +4970,7 @@ Perl_re_intuit_string(pTHX_ regexp *prog)
 
 	    if (!PL_colorset) reginitcolors();
 	    PerlIO_printf(Perl_debug_log,
-		      "%sUsing REx %ssubstr:%s `%s%.60s%s%s'\n",
+		      "%sUsing REx %ssubstr:%s \"%s%.60s%s%s\"\n",
 		      PL_colors[4],
 		      prog->check_substr ? "" : "utf8 ",
 		      PL_colors[5],PL_colors[0],

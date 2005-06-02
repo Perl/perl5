@@ -147,17 +147,17 @@ typedef SV * gptr;		/* pointers in our lists */
 **
 ** Unless otherwise specified, pair pointers address the first of two elements.
 **
-** b and b+1 are a pair that compare with sense ``sense''.
-** b is the ``bottom'' of adjacent pairs that might form a longer run.
+** b and b+1 are a pair that compare with sense "sense".
+** b is the "bottom" of adjacent pairs that might form a longer run.
 **
 ** p2 parallels b in the list2 array, where runs are defined by
 ** a pointer chain.
 **
-** t represents the ``top'' of the adjacent pairs that might extend
+** t represents the "top" of the adjacent pairs that might extend
 ** the run beginning at b.  Usually, t addresses a pair
 ** that compares with opposite sense from (b,b+1).
 ** However, it may also address a singleton element at the end of list1,
-** or it may be equal to ``last'', the first element beyond list1.
+** or it may be equal to "last", the first element beyond list1.
 **
 ** r addresses the Nth pair following b.  If this would be beyond t,
 ** we back it off to t.  Only when r is less than t do we consider the
@@ -412,7 +412,7 @@ S_mergesortsv(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 		    ** which head to merge) the item to merge
 		    ** (at pointer q) is the first operand of
 		    ** the comparison.  When we want to know
-		    ** if ``q is strictly less than the other'',
+		    ** if "q is strictly less than the other",
 		    ** we can't just do
 		    **    cmp(q, other) < 0
 		    ** because stability demands that we treat equality

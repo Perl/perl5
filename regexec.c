@@ -432,7 +432,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	     DEBUG_r(PerlIO_printf(Perl_debug_log,
 				   "UTF-8 target...\n"));
 	 PerlIO_printf(Perl_debug_log,
-		       "%sGuessing start of match, REx%s `%s%.60s%s%s' against `%s%.*s%s%s'...\n",
+		       "%sGuessing start of match, REx%s \"%s%.60s%s%s\" against \"%s%.*s%s%s\"...\n",
 		       PL_colors[4],PL_colors[5],PL_colors[0],
 		       prog->precomp,
 		       PL_colors[1],
@@ -572,7 +572,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     /* Update the count-of-usability, remove useless subpatterns,
 	unshift s.  */
 
-    DEBUG_r(PerlIO_printf(Perl_debug_log, "%s %s substr `%s%.*s%s'%s%s",
+	/* FIXME - DEBUG_EXECUTE_r if that is merged to maint.  */
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "%s %s substr \"%s%.*s%s\"%s%s",
 			  (s ? "Found" : "Did not find"),
 			  (check == (do_utf8 ? prog->anchored_utf8 : prog->anchored_substr) ? "anchored" : "floating"),
 			  PL_colors[0],
@@ -592,7 +593,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     /* Got a candidate.  Check MBOL anchoring, and the *other* substr.
        Start with the other substr.
        XXXX no SCREAM optimization yet - and a very coarse implementation
-       XXXX /ttx+/ results in anchored=`ttx', floating=`x'.  floating will
+       XXXX /ttx+/ results in anchored="ttx", floating="x".  floating will
 		*always* match.  Probably should be marked during compile...
        Probably it is right to do no SCREAM here...
      */
@@ -639,7 +640,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 			PL_multiline ? FBMrf_MULTILINE : 0
 		    );
 		DEBUG_r(PerlIO_printf(Perl_debug_log,
-			"%s anchored substr `%s%.*s%s'%s",
+			"%s anchored substr \"%s%.*s%s\"%s",
 			(s ? "Found" : "Contradicts"),
 			PL_colors[0],
 			  (int)(SvCUR(must)
@@ -698,7 +699,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 			      (unsigned char*)last + SvCUR(must)
 				  - (SvTAIL(must)!=0),
 			      must, PL_multiline ? FBMrf_MULTILINE : 0);
-	    DEBUG_r(PerlIO_printf(Perl_debug_log, "%s floating substr `%s%.*s%s'%s",
+	    /* FIXME - DEBUG_EXECUTE_r if that is merged to maint  */
+	    DEBUG_r(PerlIO_printf(Perl_debug_log, "%s floating substr \"%s%.*s%s\"%s",
 		    (s ? "Found" : "Contradicts"),
 		    PL_colors[0],
 		      (int)(SvCUR(must) - (SvTAIL(must)!=0)),
@@ -1731,7 +1733,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	 if (!PL_colorset)
 	     reginitcolors();
 	 PerlIO_printf(Perl_debug_log,
-		       "%sMatching REx%s `%s%*.*s%s%s' against `%s%.*s%s%s'\n",
+		       "%sMatching REx%s \"%s%*.*s%s%s\" against \"%s%.*s%s%s\"\n",
 		       PL_colors[4],PL_colors[5],PL_colors[0],
 		       len0, len0, s0,
 		       PL_colors[1],
@@ -1871,7 +1873,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	else
 	    last1 = s - 1;	/* bogus */
 
-	/* XXXX check_substr already used to find `s', can optimize if
+	/* XXXX check_substr already used to find "s", can optimize if
 	   check_substr==must. */
 	scream_pos = -1;
 	dontbother = end_shift;
@@ -1914,7 +1916,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	}
 	DEBUG_r(if (!did_match)
                     PerlIO_printf(Perl_debug_log, 
-                                  "Did not find %s substr `%s%.*s%s'%s...\n",
+                                  "Did not find %s substr \"%s%.*s%s\"%s...\n",
 			      ((must == prog->anchored_substr || must == prog->anchored_utf8)
 			       ? "anchored" : "floating"),
 			      PL_colors[0],
@@ -1948,7 +1950,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	      sv_uni_display(dsv1, sv, 60, UNI_DISPLAY_REGEX) : s;
 	    len1 = UTF ? SvCUR(dsv1) : strend - s;
 	    PerlIO_printf(Perl_debug_log,
-			  "Matching stclass `%*.*s' against `%*.*s'\n",
+			  "Matching stclass \"%*.*s\" against \"%*.*s\"\n",
 			  len0, len0, s0,
 			  len1, len1, s1);
 	});
@@ -1993,7 +1995,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		    if (len)
 			last = rninstr(s, strend, little, little + len);
 		    else
-			last = strend;	/* matching `$' */
+			last = strend;	/* matching "$" */
 		}
 	    }
 	    if (last == NULL) {
@@ -2949,7 +2951,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    }
 		    DEBUG_r(
 			PerlIO_printf(Perl_debug_log,
-				      "Entering embedded `%s%.60s%s%s'\n",
+				      "Entering embedded \"%s%.60s%s%s\"\n",
 				      PL_colors[0],
 				      re->precomp,
 				      PL_colors[1],

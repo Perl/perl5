@@ -1516,7 +1516,7 @@ Perl_malloc(register size_t nbytes)
 	     || (p->ov_next && PTR2UV(p->ov_next) < (1<<LOG_OF_MIN_ARENA)) ) {
 	    dTHX;
 	    PerlIO_printf(PerlIO_stderr(),
-			  "Unaligned `next' pointer in the free "
+			  "Unaligned \"next\" pointer in the free "
 			  "chain 0x%"UVxf" at 0x%"UVxf"\n",
 			  PTR2UV(p->ov_next), PTR2UV(p));
 	}
@@ -1805,7 +1805,7 @@ getpages(MEM_SIZE needed, int *nblksp, int bucket)
 # endif
 	}
 #endif
-	;				/* Finish `else' */
+	;				/* Finish "else" */
 	sbrked_remains = require - needed;
 	last_op = cp;
     }
@@ -1899,9 +1899,9 @@ morecore(register int bucket)
 		    }
 		}
 		if (t && *t) {
-		    write2("Unrecognized part of PERL_MALLOC_OPT: `");
+		    write2("Unrecognized part of PERL_MALLOC_OPT: \"");
 		    write2(t);
-		    write2("'\n");
+		    write2("\"\n");
 		}
 		if (changed)
 		    MallocCfg[MallocCfg_cfg_env_read] = 1;
