@@ -967,8 +967,8 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	return Nullsv;
 
     if (is_utf8) {
-    const char *keysave = key;
-    key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
+	const char *keysave = key;
+	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
 
         if (is_utf8)
             k_flags |= HVhek_UTF8;
@@ -1470,8 +1470,8 @@ Perl_hv_clear(pTHX_ HV *hv)
 
     if (SvREADONLY(hv) && xhv->xhv_array != NULL) {
 	/* restricted hash: convert all keys to placeholders */
-	I32 i;
-	for (i = 0; i <= (I32) xhv->xhv_max; i++) {
+	STRLEN i;
+	for (i = 0; i <= xhv->xhv_max; i++) {
 	    HE *entry = ((HE**)xhv->xhv_array)[i];
 	    for (; entry; entry = HeNEXT(entry)) {
 		/* not already placeholder */
@@ -1524,11 +1524,12 @@ void
 Perl_hv_clear_placeholders(pTHX_ HV *hv)
 {
     I32 items = (I32)HvPLACEHOLDERS_get(hv);
-    I32 i = HvMAX(hv);
+    I32 i;
 
     if (items == 0)
 	return;
 
+    i = HvMAX(hv);
     do {
 	/* Loop down the linked list heads  */
 	bool first = 1;

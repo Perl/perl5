@@ -57,7 +57,9 @@ PERL_CALLCONV Malloc_t	Perl_realloc(Malloc_t where, MEM_SIZE nbytes)
 
 PERL_CALLCONV Free_t	Perl_mfree(Malloc_t where);
 #if defined(MYMALLOC)
-PERL_CALLCONV MEM_SIZE	Perl_malloced_size(void *p);
+PERL_CALLCONV MEM_SIZE	Perl_malloced_size(void *p)
+			__attribute__warn_unused_result__;
+
 #endif
 
 PERL_CALLCONV void*	Perl_get_context(void);
@@ -465,12 +467,18 @@ PERL_CALLCONV void	Perl_init_stacks(pTHX);
 PERL_CALLCONV void	Perl_init_tm(pTHX_ struct tm *ptm);
 PERL_CALLCONV U32	Perl_intro_my(pTHX);
 PERL_CALLCONV char*	Perl_instr(pTHX_ const char* big, const char* little)
+			__attribute__warn_unused_result__
 			__attribute__pure__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV bool	Perl_io_close(pTHX_ IO* io, bool not_implicit);
-PERL_CALLCONV OP*	Perl_invert(pTHX_ OP* cmd);
+PERL_CALLCONV bool	Perl_io_close(pTHX_ IO* io, bool not_implicit)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV OP*	Perl_invert(pTHX_ OP* cmd)
+			__attribute__warn_unused_result__;
+
 PERL_CALLCONV bool	Perl_is_gv_magical(pTHX_ char *name, STRLEN len, U32 flags)
 			__attribute__warn_unused_result__;
 
@@ -1488,8 +1496,12 @@ PERL_CALLCONV SV*	Perl_sv_newmortal(pTHX)
 
 PERL_CALLCONV SV*	Perl_sv_newref(pTHX_ SV* sv);
 PERL_CALLCONV char*	Perl_sv_peek(pTHX_ SV* sv);
-PERL_CALLCONV void	Perl_sv_pos_u2b(pTHX_ SV* sv, I32* offsetp, I32* lenp);
-PERL_CALLCONV void	Perl_sv_pos_b2u(pTHX_ SV* sv, I32* offsetp);
+PERL_CALLCONV void	Perl_sv_pos_u2b(pTHX_ SV* sv, I32* offsetp, I32* lenp)
+			__attribute__nonnull__(pTHX_2);
+
+PERL_CALLCONV void	Perl_sv_pos_b2u(pTHX_ SV* sv, I32* offsetp)
+			__attribute__nonnull__(pTHX_2);
+
 /* PERL_CALLCONV char*	sv_pvn_force(pTHX_ SV* sv, STRLEN* lp); */
 PERL_CALLCONV char*	Perl_sv_pvutf8n_force(pTHX_ SV* sv, STRLEN* lp);
 PERL_CALLCONV char*	Perl_sv_pvbyten_force(pTHX_ SV* sv, STRLEN* lp);
@@ -1854,9 +1866,7 @@ STATIC void	S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 
-STATIC void	S_unshare_hek_or_pvn(pTHX_ HEK* hek, const char* sv, I32 len, U32 hash)
-			__attribute__nonnull__(pTHX_2);
-
+STATIC void	S_unshare_hek_or_pvn(pTHX_ HEK* hek, const char* str, I32 len, U32 hash);
 STATIC HEK*	S_share_hek_flags(pTHX_ const char* sv, I32 len, U32 hash, int flags)
 			__attribute__warn_unused_result__;
 
@@ -2050,10 +2060,21 @@ STATIC SV*	S_method_common(pTHX_ SV* meth, U32* hashp);
 #endif
 
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
-STATIC OP*	S_doform(pTHX_ CV *cv, GV *gv, OP *retop);
-STATIC int	S_emulate_eaccess(pTHX_ const char* path, Mode_t mode);
+STATIC OP*	S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+
+STATIC int	S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
+			__attribute__noreturn__
+			__attribute__nonnull__(pTHX_1);
+
 #  if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
-STATIC int	S_dooneliner(pTHX_ char *cmd, char *filename);
+STATIC int	S_dooneliner(pTHX_ const char *cmd, const char *filename)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
 #  endif
 #endif
 
@@ -2414,13 +2435,18 @@ PERL_CALLCONV int	Perl_get_debug_opts(pTHX_ char **s);
 
 
 
-PERL_CALLCONV void	Perl_hv_clear_placeholders(pTHX_ HV* hb);
+PERL_CALLCONV void	Perl_hv_clear_placeholders(pTHX_ HV* hb)
+			__attribute__nonnull__(pTHX_1);
+
 
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
 STATIC SV*	S_hv_delete_common(pTHX_ HV* tb, SV* key_sv, const char* key, STRLEN klen, int k_flags, I32 d_flags, U32 hash);
 STATIC HE*	S_hv_fetch_common(pTHX_ HV* tb, SV* key_sv, const char* key, STRLEN klen, int flags, int action, SV* val, U32 hash);
 #endif
-PERL_CALLCONV SV*	Perl_hv_scalar(pTHX_ HV* hv);
+PERL_CALLCONV SV*	Perl_hv_scalar(pTHX_ HV* hv)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+
 PERL_CALLCONV SV*	Perl_magic_scalarpack(pTHX_ HV* hv, MAGIC*	mg);
 
 #if defined(DEBUGGING)

@@ -2870,7 +2870,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	lex_end();
 	LEAVE;
 	if (optype == OP_REQUIRE) {
-            const char* msg = SvPVx(ERRSV, n_a);
+            const char* const msg = SvPVx(ERRSV, n_a);
 	    DIE(aTHX_ "%sCompilation failed in require",
 		*msg ? msg : "Unknown error\n");
 	}

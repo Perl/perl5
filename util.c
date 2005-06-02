@@ -3009,6 +3009,8 @@ Perl_set_context(void *t)
     if (pthread_setspecific(PL_thr_key, t))
 	Perl_croak_nocontext("panic: pthread_setspecific");
 #  endif
+#else
+    (void)t;
 #endif
 }
 
