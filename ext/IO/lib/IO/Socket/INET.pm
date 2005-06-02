@@ -15,7 +15,7 @@ use Exporter;
 use Errno;
 
 @ISA = qw(IO::Socket);
-$VERSION = "1.29";
+$VERSION = "1.29_01";
 
 my $EINVAL = exists(&Errno::EINVAL) ? Errno::EINVAL() : 1;
 
@@ -81,7 +81,7 @@ sub _error {
       local($!);
       my $title = ref($sock).": ";
       $@ = join("", $_[0] =~ /^$title/ ? "" : $title, @_);
-      close($sock)
+      $sock->close()
 	if(defined fileno($sock));
     }
     $! = $err;
