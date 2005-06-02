@@ -605,7 +605,7 @@ hopefully catches attempts to access uninitialized memory.
 	(void)((n)>((MEM_SIZE)~0)/sizeof(t)?(Perl_croak_nocontext(a,b),0):0)
 #define MEM_WRAP_CHECK_(n,t) MEM_WRAP_CHECK(n,t),
 
-#define PERL_STRLEN_ROUNDUP(n) ((void)(((n) > (MEM_SIZE)~0 - 2 * PERL_STRLEN_ROUNDUP_QUANTUM) ? (Perl_croak_nocontext(PL_memory_wrap),0):0),((n)&~((MEM_SIZE)PERL_STRLEN_ROUNDUP_QUANTUM-1))+PERL_STRLEN_ROUNDUP_QUANTUM)
+#define PERL_STRLEN_ROUNDUP(n) ((void)(((n) > (MEM_SIZE)~0 - 2 * PERL_STRLEN_ROUNDUP_QUANTUM) ? (Perl_croak_nocontext(PL_memory_wrap),0):0),((n-1)&~((MEM_SIZE)PERL_STRLEN_ROUNDUP_QUANTUM-1))+PERL_STRLEN_ROUNDUP_QUANTUM)
 
 #else
 
@@ -614,7 +614,7 @@ hopefully catches attempts to access uninitialized memory.
 #define MEM_WRAP_CHECK_2(n,t,a,b)
 #define MEM_WRAP_CHECK_(n,t)
 
-#define PERL_STRLEN_ROUNDUP(n) (((n)&~((MEM_SIZE)PERL_STRLEN_ROUNDUP_QUANTUM-1))+PERL_STRLEN_ROUNDUP_QUANTUM)
+#define PERL_STRLEN_ROUNDUP(n) (((n-1)&~((MEM_SIZE)PERL_STRLEN_ROUNDUP_QUANTUM-1))+PERL_STRLEN_ROUNDUP_QUANTUM)
 
 #endif
 
