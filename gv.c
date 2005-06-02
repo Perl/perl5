@@ -564,7 +564,7 @@ S_require_errno(pTHX_ GV *gv)
     dVAR;
     HV* stash = gv_stashpvn("Errno",5,FALSE);
 
-    if (!stash || !(gv_fetchmethod(stash, "TIEHASH"))) { 
+    if (!stash || !(gv_fetchmethod(stash, "TIEHASH"))) {
 	dSP;
 	PUTBACK;
 	ENTER;
@@ -852,7 +852,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     gv_init(gv, stash, name, len, add & GV_ADDMULTI);
     gv_init_sv(gv, sv_type);
 
-    if (isALPHA(name[0]) && ! (isLEXWARN_on ? ckWARN(WARN_ONCE) 
+    if (isALPHA(name[0]) && ! (isLEXWARN_on ? ckWARN(WARN_ONCE)
 			                    : (PL_dowarn & G_WARN_ON ) ) )
         GvMULTI_on(gv) ;
 
@@ -952,9 +952,9 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		    goto ro_magicalize;
 		break;
 	    case '\025':	/* ${^UNICODE}, ${^UTF8LOCALE} */
-		if (strEQ(name2, "NICODE")) 
+		if (strEQ(name2, "NICODE"))
 		    goto ro_magicalize;
-		if (strEQ(name2, "TF8LOCALE")) 
+		if (strEQ(name2, "TF8LOCALE"))
 		    goto ro_magicalize;
 		break;
 	    case '\027':	/* $^WARNING_BITS */
@@ -1134,7 +1134,7 @@ Perl_gv_fullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain)
 	return;
     }
     sv_setpv(sv, prefix ? prefix : "");
-    
+
     name = HvNAME_get(hv);
     if (name) {
 	namelen = HvNAMELEN_get(hv);
@@ -1142,7 +1142,7 @@ Perl_gv_fullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain)
 	name = "__ANON__";
 	namelen = 8;
     }
-	
+
     if (keepmain || strNE(name, "main")) {
 	sv_catpvn(sv,name,namelen);
 	sv_catpvn(sv,"::", 2);
@@ -1194,7 +1194,7 @@ Perl_newIO(pTHX)
     sv_upgrade((SV *)io,SVt_PVIO);
     SvREFCNT(io) = 1;
     SvOBJECT_on(io);
-    /* Clear the stashcache because a new IO could overrule a 
+    /* Clear the stashcache because a new IO could overrule a
        package name */
     hv_clear(PL_stashcache);
     iogv = gv_fetchpv("FileHandle::", FALSE, SVt_PVHV);
@@ -1399,7 +1399,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 	const char *cp = (i >= DESTROY_amg ? cooky : AMG_id2name(i));
 	const STRLEN l = strlen(cooky);
 
-	DEBUG_o( Perl_deb(aTHX_ "Checking overloading of `%s' in package `%.256s'\n",
+	DEBUG_o( Perl_deb(aTHX_ "Checking overloading of \"%s\" in package \"%.256s\"\n",
 		     cp, HvNAME_get(stash)) );
 	/* don't fill the cache while looking up!
 	   Creation of inheritance stubs in intermediate packages may
@@ -1421,26 +1421,27 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 		   knowing *which* methods were declared as overloaded. */
 		/* GvSV contains the name of the method. */
 		GV *ngv = Nullgv;
-		
-		DEBUG_o( Perl_deb(aTHX_ "Resolving method `%"SVf256\
-			"' for overloaded `%s' in package `%.256s'\n",
+
+		DEBUG_o( Perl_deb(aTHX_ "Resolving method \"%"SVf256\
+			"\" for overloaded \"%s\" in package \"%.256s\"\n",
 			     GvSV(gv), cp, hvname) );
 		if (!SvPOK(GvSV(gv))
 		    || !(ngv = gv_fetchmethod_autoload(stash, SvPVX_const(GvSV(gv)),
 						       FALSE)))
 		{
-		    /* Can be an import stub (created by `can'). */
+		    /* Can be an import stub (created by "can"). */
 		    SV *gvsv = GvSV(gv);
 		    const char *name = SvPOK(gvsv) ?  SvPVX_const(gvsv) : "???";
-		    Perl_croak(aTHX_ "%s method `%.256s' overloading `%s' "\
-				"in package `%.256s'",
+		    Perl_croak(aTHX_ "%s method \"%.256s\" overloading \"%s\" "\
+				"in package \"%.256s\"",
 			       (GvCVGEN(gv) ? "Stub found while resolving"
 				: "Can't resolve"),
 			       name, cp, hvname);
 		}
 		cv = GvCV(gv = ngv);
 	    }
-	    DEBUG_o( Perl_deb(aTHX_ "Overloading `%s' in package `%.256s' via `%.256s::%.256s' \n",
+	    DEBUG_o( Perl_deb(aTHX_ "Overloading \"%s\" in package \"%.256s\" "\
+	                            "via \"%.256s::%.256s\"\n",
 			 cp, HvNAME_get(stash), HvNAME_get(GvSTASH(CvGV(cv))),
 			 GvNAME(CvGV(cv))) );
 	    filled = 1;
@@ -1502,7 +1503,7 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
 	}
 	return ret;
     }
-    
+
     return Nullcv;
 }
 
@@ -1533,7 +1534,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 		  (
 #ifdef DEBUGGING
 		   fl = 1,
-#endif 
+#endif
 		   cv = cvp[off=method])))) {
     lr = -1;			/* Call method for left argument */
   } else {
@@ -1700,7 +1701,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	SV *msg;
 	if (off==-1) off=method;
 	msg = sv_2mortal(Perl_newSVpvf(aTHX_
-		      "Operation `%s': no method found,%sargument %s%s%s%s",
+		      "Operation \"%s\": no method found,%sargument %s%s%s%s",
 		      AMG_id2name(method + assignshift),
 		      (flags & AMGf_unary ? " " : "\n\tleft "),
 		      SvAMAGIC(left)?
@@ -1730,13 +1731,13 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 #ifdef DEBUGGING
   if (!notfound) {
     DEBUG_o(Perl_deb(aTHX_
-		     "Overloaded operator `%s'%s%s%s:\n\tmethod%s found%s in package %s%s\n",
+		     "Overloaded operator \"%s\"%s%s%s:\n\tmethod%s found%s in package %s%s\n",
 		     AMG_id2name(off),
 		     method+assignshift==off? "" :
-		     " (initially `",
+		     " (initially \"",
 		     method+assignshift==off? "" :
 		     AMG_id2name(method+assignshift),
-		     method+assignshift==off? "" : "')",
+		     method+assignshift==off? "" : "\")",
 		     flags & AMGf_unary? "" :
 		     lr==1 ? " for right argument": " for left argument",
 		     flags & AMGf_unary? " for argument" : "",
@@ -1918,7 +1919,7 @@ Perl_is_gv_magical(pTHX_ const char *name, STRLEN len, U32 flags)
 	case '\025':	/* ${^UNICODE} */
 	    if (strEQ(name1, "NICODE"))
 		goto yes;
-	    if (strEQ(name1, "TF8LOCALE")) 
+	    if (strEQ(name1, "TF8LOCALE"))
 		goto yes;
 	    break;
 	case '\027':   /* ${^WARNING_BITS} */

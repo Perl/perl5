@@ -383,7 +383,7 @@ Perl_av_make(pTHX_ register I32 size, register SV **strp)
     av = (AV*)NEWSV(8,0);
     sv_upgrade((SV *) av,SVt_PVAV);
     AvREAL_only(av);
-    if (size) {		/* `defined' was returning undef for size==0 anyway. */
+    if (size) {		/* "defined" was returning undef for size==0 anyway. */
         register SV** ary;
         register I32 i;
 	New(4,ary,size,SV*);

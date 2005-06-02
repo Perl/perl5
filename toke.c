@@ -3368,7 +3368,7 @@ Perl_yylex(pTHX)
 		 * eval"") we have to resolve the ambiguity.  This code
 		 * covers the case where the first term in the curlies is a
 		 * quoted string.  Most other cases need to be explicitly
-		 * disambiguated by prepending a `+' before the opening
+		 * disambiguated by prepending a "+" before the opening
 		 * curly in order to force resolution as an anon hash.
 		 *
 		 * XXX should probably propagate the outer expectation

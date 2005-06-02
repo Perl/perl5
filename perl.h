@@ -208,7 +208,7 @@
  
 /* gcc -Wall:
  * for silencing unused variables that are actually used most of the time,
- * but we cannot quite get rid of, such `ax' in PPCODE+noargs xsubs
+ * but we cannot quite get rid of, such as "ax" in PPCODE+noargs xsubs
  */
 #define PERL_UNUSED_VAR(var) ((void)var)
 
@@ -320,7 +320,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
  */
 #if !(defined(STMT_START) && defined(STMT_END))
 # if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN) && !defined(__cplusplus)
-#   define STMT_START	(void)(	/* gcc supports ``({ STATEMENTS; })'' */
+#   define STMT_START	(void)(	/* gcc supports "({ STATEMENTS; })" */
 #   define STMT_END	)
 # else
    /* Now which other defined()s do we need here ??? */

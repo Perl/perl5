@@ -1883,7 +1883,7 @@ nothing in the core.
 #ifndef VMS /* VMS' cando is in vms.c */
 bool
 Perl_cando(pTHX_ Mode_t mode, Uid_t effective, register const Stat_t *statbufp)
-/* Note: we use `effective' both for uids and gids.
+/* Note: we use "effective" both for uids and gids.
  * Here we are betting on Uid_t being equal or wider than Gid_t.  */
 {
 #ifdef DOSISH

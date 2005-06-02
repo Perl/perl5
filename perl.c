@@ -2450,8 +2450,8 @@ S_usage(pTHX_ const char *name)		/* XXX move this out into a module ? */
 "-i[extension]   edit <> files in place (makes backup if extension supplied)",
 "-Idirectory     specify @INC/#include directory (several -I's allowed)",
 "-l[octal]       enable line ending processing, specifies line terminator",
-"-[mM][-]module  execute `use/no module...' before executing program",
-"-n              assume 'while (<>) { ... }' loop around program",
+"-[mM][-]module  execute \"use/no module...\" before executing program",
+"-n              assume \"while (<>) { ... }\" loop around program",
 "-p              assume loop like -n but print line also, like sed",
 "-P              run program through C preprocessor before compilation",
 "-s              enable rudimentary parsing for switches after programfile",
@@ -2926,7 +2926,7 @@ Perl_moreswitches(pTHX_ char *s)
 Perl may be copied only under the terms of either the Artistic License or the\n\
 GNU General Public License, which may be found in the Perl 5 source kit.\n\n\
 Complete documentation for Perl, including FAQ lists, should be found on\n\
-this system using `man perl' or `perldoc perl'.  If you have access to the\n\
+this system using \"man perl\" or \"perldoc perl\".  If you have access to the\n\
 Internet, point your browser at http://www.perl.org/, the Perl Home Page.\n\n");
 	my_exit(0);
     case 'w':

@@ -263,8 +263,8 @@ Perl_yyparse (pTHX)
     int yytoken = 0;
 
     /* two stacks and their tools:
-	  `yyss': related to states,
-	  `yyvs': related to semantic values,
+	  yyss: related to states,
+	  yyvs: related to semantic values,
 
 	  Refer to the stacks thru separate pointers, to allow yyoverflow
 	  to reallocate them elsewhere.  */
@@ -482,7 +482,7 @@ Perl_yyparse (pTHX)
     yylen = yyr2[yyn];
 
     /* If YYLEN is nonzero, implement the default value of the action:
-      `$$ = $1'.
+      "$$ = $1".
 
       Otherwise, the following line sets YYVAL to garbage.
       This behavior is undocumented and Bison
@@ -514,7 +514,7 @@ Perl_yyparse (pTHX)
     *++yynsp = (const char *)(yytname [yyr1[yyn]]);
 #endif
 
-    /* Now `shift' the result of the reduction.  Determine what state
+    /* Now shift the result of the reduction.  Determine what state
 	  that goes to, based on the state we popped back to and the rule
 	  number reduced by.  */
 
