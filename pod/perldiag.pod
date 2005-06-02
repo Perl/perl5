@@ -3648,7 +3648,7 @@ a block by itself.
 (W unopened) You tried to use the stat() function on a filehandle that
 was either never opened or has since been closed.
 
-=item Stub found while resolving method `%s' overloading %s
+=item Stub found while resolving method "%s" overloading "%s"
 
 (P) Overloading resolution over @ISA tree may be broken by importation
 stubs.  Stubs should never be implicitly created, but explicit calls to
