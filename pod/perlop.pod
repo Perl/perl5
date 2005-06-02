@@ -1987,7 +1987,8 @@ depending on context.  This distinction is determined on syntactic
 grounds alone.  That means C<< <$x> >> is always a readline() from
 an indirect handle, but C<< <$hash{key}> >> is always a glob().
 That's because $x is a simple scalar variable, but C<$hash{key}> is
-not--it's a hash element.
+not--it's a hash element.  Even C<< <$x > >> (note the extra space)
+is treated as C<glob("$x ")>, not C<readline($x)>.
 
 One level of double-quote interpretation is done first, but you can't
 say C<< <$foo> >> because that's an indirect filehandle as explained
