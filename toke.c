@@ -5538,8 +5538,9 @@ S_pending_ident(pTHX)
             /* might be an "our" variable" */
             if (PAD_COMPNAME_FLAGS(tmp) & SVpad_OUR) {
                 /* build ops for a bareword */
-                SV *sym = newSVpvn(HvNAME_get(PAD_COMPNAME_OURSTASH(tmp)),
-				   HvNAMELEN_get(PAD_COMPNAME_OURSTASH(tmp)));
+		HV *stash = PAD_COMPNAME_OURSTASH(tmp);
+		HEK *stashname = HvNAME_HEK(stash);
+                SV *sym = newSVpvn(HEK_KEY(stashname), HEK_LEN(stashname));
                 sv_catpvn(sym, "::", 2);
                 sv_catpv(sym, PL_tokenbuf+1);
                 yylval.opval = (OP*)newSVOP(OP_CONST, 0, sym);
@@ -9739,9 +9740,10 @@ S_scan_inputsymbol(pTHX_ char *start)
 	    */
 	    if ((tmp = pad_findmy(d)) != NOT_IN_PAD) {
 		if (PAD_COMPNAME_FLAGS(tmp) & SVpad_OUR) {
-		    SV *sym = sv_2mortal(
-			    newSVpvn(HvNAME_get(PAD_COMPNAME_OURSTASH(tmp)),
-				     HvNAMELEN_get(PAD_COMPNAME_OURSTASH(tmp))));
+		    HV *stash = PAD_COMPNAME_OURSTASH(tmp);
+		    HEK *stashname = HvNAME_HEK(stash);
+		    SV *sym = sv_2mortal(newSVpvn(HEK_KEY(stashname),
+						  HEK_LEN(stashname)));
 		    sv_catpvn(sym, "::", 2);
 		    sv_catpv(sym, d+1);
 		    d = SvPVX(sym);
