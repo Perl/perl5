@@ -257,3 +257,73 @@ encoded character.
 	 toLOWER((input)[1]) == 's')
 #endif
 #define SHARP_S_SKIP 2
+
+#define IS_UTF8_CHAR_1(p)	\
+	((p)[0] <= 0x7F)
+#define IS_UTF8_CHAR_2(p)	\
+	((p)[0] >= 0xC2 && (p)[0] <= 0xDF && \
+	 (p)[1] >= 0x80 && (p)[1] <= 0xBF)
+#define IS_UTF8_CHAR_3a(p)	\
+	((p)[0] == 0xE0 && \
+	 (p)[1] >= 0xA0 && (p)[1] <= 0xBF && \
+	 (p)[2] >= 0x80 && (p)[2] <= 0xBF)
+#define IS_UTF8_CHAR_3b(p)	\
+	((p)[0] >= 0xE1 && (p)[0] <= 0xEC && \
+	 (p)[1] >= 0x80 && (p)[1] <= 0xBF && \
+	 (p)[2] >= 0x80 && (p)[2] <= 0xBF)
+#define IS_UTF8_CHAR_3c(p)	\
+	((p)[0] == 0xED && \
+	 (p)[1] >= 0x80 && (p)[1] <= 0xBF && \
+	 (p)[2] >= 0x80 && (p)[2] <= 0xBF)
+/* In IS_UTF8_CHAR_3c(p) one could use
+ * (p)[1] >= 0x80 && (p)[1] <= 0x9F
+ * if one wanted to exclude surrogates. */
+#define IS_UTF8_CHAR_3d(p)	\
+	((p)[0] >= 0xEE && (p)[0] <= 0xEF && \
+	 (p)[1] >= 0x80 && (p)[1] <= 0xBF && \
+	 (p)[2] >= 0x80 && (p)[2] <= 0xBF)
+#define IS_UTF8_CHAR_4a(p)	\
+	((p)[0] == 0xF0 && \
+	 (p)[1] >= 0x90 && (p)[1] <= 0xBF && \
+	 (p)[2] >= 0x80 && (p)[2] <= 0xBF && \
+	 (p)[3] >= 0x80 && (p)[3] <= 0xBF)
+#define IS_UTF8_CHAR_4b(p)	\
+	((p)[0] >= 0xF1 && (p)[0] <= 0xF3 && \
+	 (p)[1] >= 0x80 && (p)[1] <= 0xBF && \
+	 (p)[2] >= 0x80 && (p)[2] <= 0xBF && \
+	 (p)[3] >= 0x80 && (p)[3] <= 0xBF)
+/* In IS_UTF8_CHAR_4c(p) one could use
+ * (p)[0] == 0xF4
+ * if one wanted to stop at the Unicode limit U+10FFFF.
+ * The 0xF7 allows us to go to 0x1fffff (0x200000 would
+ * require five bytes).  Not doing any further code points
+ * since that is not needed (and that would not be strict
+ * UTF-8, anyway).  The "slow path" in Perl_is_utf8_char()
+ * will take care of the "extended UTF-8". */
+#define IS_UTF8_CHAR_4c(p)	\
+	((p)[0] == 0xF4 && (p)[0] <= 0xF7 && \
+	 (p)[1] >= 0x80 && (p)[1] <= 0xBF && \
+	 (p)[2] >= 0x80 && (p)[2] <= 0xBF && \
+	 (p)[3] >= 0x80 && (p)[3] <= 0xBF)
+
+#define IS_UTF8_CHAR_3(p)	\
+	(IS_UTF8_CHAR_3a(p) || \
+	 IS_UTF8_CHAR_3b(p) || \
+	 IS_UTF8_CHAR_3c(p) || \
+	 IS_UTF8_CHAR_3d(p))
+#define IS_UTF8_CHAR_4(p)	\
+	(IS_UTF8_CHAR_4a(p) || \
+	 IS_UTF8_CHAR_4b(p) || \
+	 IS_UTF8_CHAR_4c(p))
+
+/* IS_UTF8_CHAR(p) is strictly speaking wrong (not UTF-8) because it
+ * (1) allows UTF-8 encoded UTF-16 surrogates
+ * (2) it allows code points past U+10FFFF.
+ * The Perl_is_utf8_char() full "slow" code will handle the Perl
+ * "extended UTF-8". */
+#define IS_UTF8_CHAR(p, n)	\
+	((n) == 1 ? IS_UTF8_CHAR_1(p) : \
+ 	 (n) == 2 ? IS_UTF8_CHAR_2(p) : \
+	 (n) == 3 ? IS_UTF8_CHAR_3(p) : \
+	 (n) == 4 ? IS_UTF8_CHAR_4(p) : 0)
+
