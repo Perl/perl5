@@ -1160,7 +1160,7 @@ PerlIO_push(pTHX_ PerlIO *f, PERLIO_FUNCS_DECL(*tab), const char *mode, SV *arg)
 	Perl_croak(aTHX_ "Layer does not match this perl");
     }
     if (tab->size) {
-	PerlIOl *l = NULL;
+	PerlIOl *l;
 	if (tab->size < sizeof(PerlIOl)) {
 	    goto mismatch;
 	}
@@ -2507,7 +2507,7 @@ PerlIOUnix_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	return 0;
     }
     while (1) {
-	SSize_t len = PerlLIO_read(fd, vbuf, count);
+	const SSize_t len = PerlLIO_read(fd, vbuf, count);
 	if (len >= 0 || errno != EINTR) {
 	    if (len < 0) {
 		if (errno != EAGAIN) {
@@ -2522,6 +2522,7 @@ PerlIOUnix_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	}
 	PERL_ASYNC_CHECK();
     }
+    /*NOTREACHED*/
 }
 
 SSize_t

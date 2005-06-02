@@ -1390,7 +1390,7 @@ PP(pp_leavewrite)
 	cv = GvFORM(fgv);
 	if (!cv) {
 	    SV * const sv = sv_newmortal();
-	    char *name;
+	    const char *name;
 	    gv_efullname4(sv, fgv, Nullch, FALSE);
 	    name = SvPV_nolen(sv);
 	    if (name && *name)
@@ -3727,9 +3727,9 @@ PP(pp_readlink)
 
 #if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 STATIC int
-S_dooneliner(pTHX_ char *cmd, char *filename)
+S_dooneliner(pTHX_ const char *cmd, const char *filename)
 {
-    char *save_filename = filename;
+    char * const save_filename = filename;
     char *cmdline;
     char *s;
     PerlIO *myfp;

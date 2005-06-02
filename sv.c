@@ -5142,7 +5142,7 @@ Perl_sv_catsv_flags(pTHX_ SV *dsv, register SV *ssv, I32 flags)
 	    dsv->sv_flags doesn't have that bit set.
 		Andy Dougherty  12 Oct 2001
 	*/
-	I32 sutf8 = DO_UTF8(ssv);
+	const I32 sutf8 = DO_UTF8(ssv);
 	I32 dutf8;
 
 	if (SvGMAGICAL(dsv) && (flags & SV_GMAGIC))
@@ -5836,11 +5836,8 @@ Perl_sv_clear(pTHX_ register SV *sv)
     if (SvOBJECT(sv)) {
 	if (PL_defstash) {		/* Still have a symbol table? */
 	    dSP;
-	    CV* destructor;
-
-
-
 	    do {	
+		CV* destructor;
 		stash = SvSTASH(sv);
 		destructor = StashHANDLER(stash,DESTROY);
 		if (destructor) {
@@ -6380,16 +6377,16 @@ void
 Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
 {
     U8 *start;
-    U8 *s;
     STRLEN len;
-    STRLEN *cache = 0;
-    STRLEN boffset = 0;
 
     if (!sv)
 	return;
 
-    start = s = (U8*)SvPV(sv, len);
+    start = (U8*)SvPV(sv, len);
     if (len) {
+	STRLEN boffset = 0;
+	STRLEN *cache = 0;
+	U8 *s = start;
 	 I32 uoffset = *offsetp;
 	 U8 *send = s + len;
 	 MAGIC *mg = 0;
@@ -7829,11 +7826,6 @@ void
 Perl_sv_reset(pTHX_ register const char *s, HV *stash)
 {
     dVAR;
-    register HE *entry;
-    register GV *gv;
-    register SV *sv;
-    register I32 i;
-    register I32 max;
     char todo[PERL_UCHAR_MAX+1];
 
     if (!stash)
@@ -7858,7 +7850,8 @@ Perl_sv_reset(pTHX_ register const char *s, HV *stash)
 
     Zero(todo, 256, char);
     while (*s) {
-	i = (unsigned char)*s;
+	I32 max;
+	I32 i = (unsigned char)*s;
 	if (s[1] == '-') {
 	    s += 2;
 	}
@@ -7867,10 +7860,14 @@ Perl_sv_reset(pTHX_ register const char *s, HV *stash)
 	    todo[i] = 1;
 	}
 	for (i = 0; i <= (I32) HvMAX(stash); i++) {
+	    HE *entry;
 	    for (entry = HvARRAY(stash)[i];
 		 entry;
 		 entry = HeNEXT(entry))
 	    {
+		register GV *gv;
+		register SV *sv;
+
 		if (!todo[(U8)*HeKEY(entry)])
 		    continue;
 		gv = (GV*)HeVAL(entry);
@@ -9072,11 +9069,11 @@ F0convert(NV nv, char *endbuf, STRLEN *len)
 {
     const int neg = nv < 0;
     UV uv;
-    char *p = endbuf;
 
     if (neg)
 	nv = -nv;
     if (nv < UV_MAX) {
+	char *p = endbuf;
 	nv += 0.5;
 	uv = (UV)nv;
 	if (uv & 1 && uv == nv)
@@ -9120,8 +9117,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     I32 svix = 0;
     static const char nullstr[] = "(null)";
     SV *argsv = Nullsv;
-    bool has_utf8; /* has the result utf8? */
-    bool pat_utf8; /* the pattern is in utf8? */
+    bool has_utf8 = DO_UTF8(sv);    /* has the result utf8? */
+    const bool pat_utf8 = has_utf8; /* the pattern is in utf8? */
     SV *nsv = Nullsv;
     /* Times 4: a decimal digit takes more than 3 binary digits.
      * NV_DIG: mantissa takes than many decimal digits.
@@ -9129,8 +9126,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     char ebuf[IV_DIG * 4 + NV_DIG + 32];
     /* large enough for "%#.#f" --chip */
     /* what about long double NVs? --jhi */
-
-    has_utf8 = pat_utf8 = DO_UTF8(sv);
 
     /* no matter what, this is a string now */
     (void)SvPV_force(sv, origlen);
@@ -11211,7 +11206,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
     long longval;
     GP *gp;
     IV iv;
-    I32 i;
     char *c = NULL;
     void (*dptr) (void*);
     void (*dxptr) (pTHX_ void*);
@@ -11223,7 +11217,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
     Newz(54, nss, max, ANY);
 
     while (ix > 0) {
-	i = POPINT(ss,ix);
+	I32 i = POPINT(ss,ix);
 	TOPINT(nss,ix) = i;
 	switch (i) {
 	case SAVEt_ITEM:			/* normal string */
@@ -11583,7 +11577,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
      * constants; they need to be allocated as common memory and just
      * their pointers copied. */
 
-    IV i;
     CLONE_PARAMS clone_params;
     CLONE_PARAMS* param = &clone_params;
 
@@ -11810,6 +11803,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     {
 	const I32 len = av_len((AV*)proto_perl->Iregex_padav);
 	SV** regexen = AvARRAY((AV*)proto_perl->Iregex_padav);
+	IV i;
 	av_push(PL_regex_padav,
 		sv_dup_inc(regexen[0],param));
 	for(i = 1; i <= len; i++) {

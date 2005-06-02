@@ -80,7 +80,7 @@ Perl_dump_packsubs(pTHX_ const HV *stash)
 void
 Perl_dump_sub(pTHX_ const GV *gv)
 {
-    SV *sv = sv_newmortal();
+    SV * const sv = sv_newmortal();
 
     gv_fullname3(sv, gv, Nullch);
     Perl_dump_indent(aTHX_ 0, Perl_debug_log, "\nSUB %s = ", SvPVX_const(sv));
@@ -97,7 +97,7 @@ Perl_dump_sub(pTHX_ const GV *gv)
 void
 Perl_dump_form(pTHX_ const GV *gv)
 {
-    SV *sv = sv_newmortal();
+    SV * const sv = sv_newmortal();
 
     gv_fullname3(sv, gv, Nullch);
     Perl_dump_indent(aTHX_ 0, Perl_debug_log, "\nFORMAT %s = ", SvPVX_const(sv));
@@ -1634,8 +1634,8 @@ Perl_debop(pTHX_ const OP *o)
 	CV *cv = deb_curcv(cxstack_ix);
 	SV *sv;
         if (cv) {
-            AV *padlist = CvPADLIST(cv);
-            AV *comppad = (AV*)(*av_fetch(padlist, 0, FALSE));
+            AV * const padlist = CvPADLIST(cv);
+            AV * const comppad = (AV*)(*av_fetch(padlist, 0, FALSE));
             sv = *av_fetch(comppad, o->op_targ, FALSE);
         } else
             sv = Nullsv;

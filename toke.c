@@ -9484,7 +9484,7 @@ S_scan_heredoc(pTHX_ register char *s)
 #ifndef PERL_STRICT_CR
     d = strchr(s, '\r');
     if (d) {
-	char *olds = s;
+	char * const olds = s;
 	s = d;
 	while (s < PL_bufend) {
 	    if (*s == '\r') {
@@ -9532,7 +9532,7 @@ S_scan_heredoc(pTHX_ register char *s)
     if (PL_lex_inwhat == OP_SUBST && PL_in_eval && !PL_rsfp) {
 	char *bufptr = PL_sublex_info.super_bufptr;
 	char *bufend = PL_sublex_info.super_bufend;
-	char *olds = s - SvCUR(herewas);
+	char * const olds = s - SvCUR(herewas);
 	s = strchr(bufptr, '\n');
 	if (!s)
 	    s = bufend;

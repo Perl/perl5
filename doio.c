@@ -103,7 +103,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     /* Collect default raw/crlf info from the op */
     if (PL_op && PL_op->op_type == OP_OPEN) {
 	/* set up IO layers */
-	U8 flags = PL_op->op_private;
+	const U8 flags = PL_op->op_private;
 	in_raw = (flags & OPpOPEN_IN_RAW);
 	in_crlf = (flags & OPpOPEN_IN_CRLF);
 	out_raw = (flags & OPpOPEN_OUT_RAW);
@@ -2000,7 +2000,8 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 {
     SV *astr;
     char *a;
-    I32 infosize, getinfo;
+    STRLEN infosize;
+    I32 getinfo;
     I32 ret = -1;
     const I32 id  = SvIVx(*++mark);
     const I32 n   = (optype == OP_SEMCTL) ? SvIVx(*++mark) : 0;

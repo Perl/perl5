@@ -911,7 +911,7 @@ S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem)
 {
     if (*relem) {
 	SV *tmpstr;
-        HE *didstore;
+        const HE *didstore;
 
         if (ckWARN(WARN_MISC)) {
 	    const char *err;
@@ -1294,7 +1294,6 @@ play_it_again:
     if (gimme == G_ARRAY) {
 	const I32 nparens = rx->nparens;
 	I32 i = (global && !nparens) ? 1 : 0;
-	I32 len;
 
 	SPAGAIN;			/* EVAL blocks could move the stack. */
 	EXTEND(SP, nparens + i);
@@ -1303,7 +1302,7 @@ play_it_again:
 	    PUSHs(sv_newmortal());
 	    /*SUPPRESS 560*/
 	    if ((rx->startp[i] != -1) && rx->endp[i] != -1 ) {
-		len = rx->endp[i] - rx->startp[i];
+		const I32 len = rx->endp[i] - rx->startp[i];
 		s = rx->startp[i] + truebase;
 	        if (rx->endp[i] < 0 || rx->startp[i] < 0 ||
 		    len < 0 || len > strend - s)
@@ -3000,8 +2999,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	packname = Nullch;
 
         if(SvOK(sv) && (packname = SvPV(sv, packlen))) {
-          HE* he;
-	  he = hv_fetch_ent(PL_stashcache, sv, 0, 0);
+          const HE* const he = hv_fetch_ent(PL_stashcache, sv, 0, 0);
           if (he) { 
             stash = INT2PTR(HV*,SvIV(HeVAL(he)));
             goto fetch;
@@ -3055,7 +3053,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 
     /* shortcut for simple names */
     if (hashp) {
-	HE* he = hv_fetch_ent(stash, meth, 0, *hashp);
+	const HE* const he = hv_fetch_ent(stash, meth, 0, *hashp);
 	if (he) {
 	    gv = (GV*)HeVAL(he);
 	    if (isGV(gv) && GvCV(gv) &&

@@ -675,13 +675,13 @@ Perl_PerlIO_stdout
 Perl_PerlIO_stderr
 Perl_save_set_svflags
 Perl_hv_assert
-Perl_hv_clear_placeholders
 Perl_hv_scalar
 Perl_hv_riter_p
 Perl_hv_eiter_p
 Perl_hv_riter_set
 Perl_hv_eiter_set
 Perl_hv_name_set
+Perl_hv_clear_placeholders
 Perl_hv_placeholders_p
 Perl_hv_placeholders_get
 Perl_hv_placeholders_set

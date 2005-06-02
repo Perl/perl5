@@ -127,6 +127,7 @@ HEK *
 Perl_hek_dup(pTHX_ HEK *source, CLONE_PARAMS* param)
 {
     HE *shared = (HE*)ptr_table_fetch(PL_shared_hek_table, source);
+    (void)param;
 
     if (shared) {
 	/* We already shared this hash key.  */
@@ -991,8 +992,8 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	return Nullsv;
 
     if (is_utf8) {
-    const char *keysave = key;
-    key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
+	const char *keysave = key;
+	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
 
         if (is_utf8)
             k_flags |= HVhek_UTF8;
@@ -1519,8 +1520,8 @@ Perl_hv_clear(pTHX_ HV *hv)
 
     if (SvREADONLY(hv) && HvARRAY(hv) != NULL) {
 	/* restricted hash: convert all keys to placeholders */
-	I32 i;
-	for (i = 0; i <= (I32) xhv->xhv_max; i++) {
+	STRLEN i;
+	for (i = 0; i <= xhv->xhv_max; i++) {
 	    HE *entry = (HvARRAY(hv))[i];
 	    for (; entry; entry = HeNEXT(entry)) {
 		/* not already placeholder */
@@ -1576,11 +1577,12 @@ Perl_hv_clear_placeholders(pTHX_ HV *hv)
 {
     dVAR;
     I32 items = (I32)HvPLACEHOLDERS_get(hv);
-    I32 i = HvMAX(hv);
+    I32 i;
 
     if (items == 0)
 	return;
 
+    i = HvMAX(hv);
     do {
 	/* Loop down the linked list heads  */
 	bool first = 1;
@@ -1722,7 +1724,7 @@ Perl_hv_undef(pTHX_ HV *hv)
 	mg_clear((SV*)hv);
 }
 
-struct xpvhv_aux*
+static struct xpvhv_aux*
 S_hv_auxinit(pTHX_ HV *hv) {
     struct xpvhv_aux *iter;
     char *array;
@@ -1854,6 +1856,7 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, I32 len, int flags)
 {
     struct xpvhv_aux *iter;
     U32 hash;
+    (void)flags;
 
     if (SvOOK(hv)) {
 	iter = HvAUX(hv);
@@ -2373,7 +2376,7 @@ I32
 Perl_hv_placeholders_get(pTHX_ HV *hv)
 {
     dVAR;
-    MAGIC *mg = mg_find((SV*)hv, PERL_MAGIC_rhash);
+    MAGIC * const mg = mg_find((SV*)hv, PERL_MAGIC_rhash);
 
     return mg ? mg->mg_len : 0;
 }
@@ -2382,7 +2385,7 @@ void
 Perl_hv_placeholders_set(pTHX_ HV *hv, I32 ph)
 {
     dVAR;
-    MAGIC *mg = mg_find((SV*)hv, PERL_MAGIC_rhash);
+    MAGIC * const mg = mg_find((SV*)hv, PERL_MAGIC_rhash);
 
     if (mg) {
 	mg->mg_len = ph;

@@ -2945,8 +2945,8 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	lex_end();
 	LEAVE;
 	if (optype == OP_REQUIRE) {
-            const char* msg = SvPVx(ERRSV, n_a);
-	    SV *nsv = cx->blk_eval.old_namesv;
+	    const char* const msg = SvPVx(ERRSV, n_a);
+	    const SV * const nsv = cx->blk_eval.old_namesv;
 	    (void)hv_store(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv),
                           &PL_sv_undef, 0);
 	    DIE(aTHX_ "%sCompilation failed in require",

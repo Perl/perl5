@@ -1036,6 +1036,7 @@
 #define unshare_hek_or_pvn	S_unshare_hek_or_pvn
 #define share_hek_flags		S_share_hek_flags
 #define hv_notallowed		S_hv_notallowed
+#define hv_auxinit		S_hv_auxinit
 #endif
 #endif
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
@@ -1508,8 +1509,8 @@
 #define hv_fetch_common		S_hv_fetch_common
 #endif
 #endif
-#define hv_clear_placeholders	Perl_hv_clear_placeholders
 #define hv_scalar		Perl_hv_scalar
+#define hv_clear_placeholders	Perl_hv_clear_placeholders
 #ifdef PERL_CORE
 #define magic_scalarpack	Perl_magic_scalarpack
 #endif
@@ -3017,6 +3018,7 @@
 #define unshare_hek_or_pvn(a,b,c,d)	S_unshare_hek_or_pvn(aTHX_ a,b,c,d)
 #define share_hek_flags(a,b,c,d)	S_share_hek_flags(aTHX_ a,b,c,d)
 #define hv_notallowed(a,b,c,d)	S_hv_notallowed(aTHX_ a,b,c,d)
+#define hv_auxinit(a)		S_hv_auxinit(aTHX_ a)
 #endif
 #endif
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
@@ -3488,8 +3490,8 @@
 #define hv_fetch_common(a,b,c,d,e,f,g,h)	S_hv_fetch_common(aTHX_ a,b,c,d,e,f,g,h)
 #endif
 #endif
-#define hv_clear_placeholders(a)	Perl_hv_clear_placeholders(aTHX_ a)
 #define hv_scalar(a)		Perl_hv_scalar(aTHX_ a)
+#define hv_clear_placeholders(a)	Perl_hv_clear_placeholders(aTHX_ a)
 #ifdef PERL_CORE
 #define magic_scalarpack(a,b)	Perl_magic_scalarpack(aTHX_ a,b)
 #endif

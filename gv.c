@@ -867,7 +867,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	} else
 #endif
 	{
-	    const char *name2 = name + 1;
+	    const char * const name2 = name + 1;
 	    switch (*name) {
 	    case 'A':
 		if (strEQ(name2, "RGV")) {
@@ -1194,8 +1194,7 @@ Perl_newIO(pTHX)
     sv_upgrade((SV *)io,SVt_PVIO);
     SvREFCNT(io) = 1;
     SvOBJECT_on(io);
-    /* Clear the stashcache because a new IO could overrule a
-       package name */
+    /* Clear the stashcache because a new IO could overrule a package name */
     hv_clear(PL_stashcache);
     iogv = gv_fetchpv("FileHandle::", FALSE, SVt_PVHV);
     /* unless exists($main::{FileHandle}) and defined(%main::FileHandle::) */
@@ -1431,7 +1430,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 		{
 		    /* Can be an import stub (created by "can"). */
 		    SV *gvsv = GvSV(gv);
-		    const char *name = SvPOK(gvsv) ?  SvPVX_const(gvsv) : "???";
+		    const char * const name = SvPOK(gvsv) ?  SvPVX_const(gvsv) : "???";
 		    Perl_croak(aTHX_ "%s method \"%.256s\" overloading \"%s\" "\
 				"in package \"%.256s\"",
 			       (GvCVGEN(gv) ? "Stub found while resolving"
@@ -1440,8 +1439,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 		}
 		cv = GvCV(gv = ngv);
 	    }
-	    DEBUG_o( Perl_deb(aTHX_ "Overloading \"%s\" in package \"%.256s\" "\
-	                            "via \"%.256s::%.256s\"\n",
+	    DEBUG_o( Perl_deb(aTHX_ "Overloading \"%s\" in package \"%.256s\" via \"%.256s::%.256s\"\n",
 			 cp, HvNAME_get(stash), HvNAME_get(GvSTASH(CvGV(cv))),
 			 GvNAME(CvGV(cv))) );
 	    filled = 1;
@@ -1516,8 +1514,10 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
   CV *cv=NULL;
   CV **cvp=NULL, **ocvp=NULL;
   AMT *amtp=NULL, *oamtp=NULL;
-  int off=0, off1, lr=0, assign=AMGf_assign & flags, notfound=0;
-  int postpr = 0, force_cpy = 0, assignshift = assign ? 1 : 0;
+  int off = 0, off1, lr = 0, notfound = 0;
+  int postpr = 0, force_cpy = 0;
+  int assign = AMGf_assign & flags;
+  const int assignshift = assign ? 1 : 0;
 #ifdef DEBUGGING
   int fl=0;
 #endif
@@ -1891,7 +1891,7 @@ Perl_is_gv_magical(pTHX_ const char *name, STRLEN len, U32 flags)
 {
     (void)flags;
     if (len > 1) {
-	const char *name1 = name + 1;
+	const char * const name1 = name + 1;
 	switch (*name) {
 	case 'I':
 	    if (len == 3 && name1[1] == 'S' && name[2] == 'A')

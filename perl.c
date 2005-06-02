@@ -2282,7 +2282,6 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     UNOP myop;		/* fake syntax tree node */
     volatile I32 oldmark = SP - PL_stack_base;
     volatile I32 retval = 0;
-    I32 oldscope;
     int ret;
     OP* oldop = PL_op;
     dJMPENV;
@@ -2297,7 +2296,6 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     Zero(PL_op, 1, UNOP);
     EXTEND(PL_stack_sp, 1);
     *++PL_stack_sp = sv;
-    oldscope = PL_scopestack_ix;
 
     if (!(flags & G_NOARGS))
 	myop.op_flags = OPf_STACKED;

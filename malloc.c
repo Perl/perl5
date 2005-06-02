@@ -1337,7 +1337,7 @@ fill_pat_4bytes(unsigned char *s, size_t nbytes, const unsigned char *fill)
 {
     unsigned char *e = s + nbytes;
     long *lp;
-    long lfill = *(long*)fill;
+    const long lfill = *(long*)fill;
 
     if (PTR2UV(s) & (sizeof(long)-1)) {		/* Align the pattern */
 	int shift = sizeof(long) - (PTR2UV(s) & (sizeof(long)-1));
@@ -1378,7 +1378,7 @@ cmp_pat_4bytes(unsigned char *s, size_t nbytes, const unsigned char *fill)
 {
     unsigned char *e = s + nbytes;
     long *lp;
-    long lfill = *(long*)fill;
+    const long lfill = *(long*)fill;
 
     if (PTR2UV(s) & (sizeof(long)-1)) {		/* Align the pattern */
 	int shift = sizeof(long) - (PTR2UV(s) & (sizeof(long)-1));
@@ -2357,12 +2357,12 @@ Perl_malloced_size(void *p)
 {
     union overhead *ovp = (union overhead *)
 	((caddr_t)p - sizeof (union overhead) * CHUNK_SHIFT);
-    int bucket = OV_INDEX(ovp);
+    const int bucket = OV_INDEX(ovp);
 #ifdef RCHECK
     /* The caller wants to have a complete control over the chunk,
        disable the memory checking inside the chunk.  */
     if (bucket <= MAX_SHORT_BUCKET) {
-	MEM_SIZE size = BUCKET_SIZE_REAL(bucket);
+	const MEM_SIZE size = BUCKET_SIZE_REAL(bucket);
 	ovp->ov_size = size + M_OVERHEAD - 1;
 	*((u_int *)((caddr_t)ovp + size + M_OVERHEAD - RMAGIC_SZ)) = RMAGIC;
     }
