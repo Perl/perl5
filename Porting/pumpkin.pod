@@ -791,7 +791,7 @@ The only currently known leaks happen when there are compile-time errors
 within eval or require.  (Fixing these is non-trivial, unfortunately, but
 they must be fixed eventually.)
 
-=head1 Common Gotcha's
+=head1 Common Gotchas
 
 =over 4
 

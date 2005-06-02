@@ -322,7 +322,7 @@ The HTTPD::UserAdmin and HTTPD::GroupAdmin modules provide a
 consistent OO interface to these files, regardless of how they're
 stored.  Databases may be text, dbm, Berkeley DB or any database with
 a DBI compatible driver.  HTTPD::UserAdmin supports files used by the
-`Basic' and `Digest' authentication schemes.  Here's an example:
+"Basic" and "Digest" authentication schemes.  Here's an example:
 
     use HTTPD::UserAdmin ();
     HTTPD::UserAdmin
@@ -439,7 +439,7 @@ A related strategy that's less open to forgery is to give them a PIN
 (personal ID number).  Record the address and PIN (best that it be a
 random one) for later processing.  In the mail you send, ask them to
 include the PIN in their reply.  But if it bounces, or the message is
-included via a ``vacation'' script, it'll be there anyway.  So it's
+included via a "vacation" script, it'll be there anyway.  So it's
 best to ask them to mail back a slight alteration of the PIN, such as
 with the characters reversed, one added or subtracted to each digit, etc.
 

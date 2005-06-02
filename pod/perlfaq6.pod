@@ -8,9 +8,9 @@ This section is surprisingly small because the rest of the FAQ is
 littered with answers involving regular expressions.  For example,
 decoding a URL and checking whether something is a number are handled
 with regular expressions, but those answers are found elsewhere in
-this document (in L<perlfaq9>: ``How do I decode or create those %-encodings
-on the web'' and L<perlfaq4>: ``How do I determine whether a scalar is
-a number/whole/integer/float'', to be precise).
+this document (in L<perlfaq9>: "How do I decode or create those %-encodings
+on the web" and L<perlfaq4>: "How do I determine whether a scalar is
+a number/whole/integer/float", to be precise).
 
 =head2 How can I hope to use regular expressions without creating illegible and unmaintainable code?
 
@@ -509,8 +509,8 @@ regular expression:
 	print "$count $line";
     }
 
-If you want these output in a sorted order, see L<perlfaq4>: ``How do I
-sort a hash (optionally by value instead of key)?''.
+If you want these output in a sorted order, see L<perlfaq4>: "How do I
+sort a hash (optionally by value instead of key)?".
 
 =head2 How can I do approximate matching?
 
@@ -794,7 +794,7 @@ looks like it is because "SG" is next to "XX", but there's no real
 
 Here are a few ways, all painful, to deal with it:
 
-   $martian =~ s/([A-Z][A-Z])/ $1 /g; # Make sure adjacent ``martian''
+   $martian =~ s/([A-Z][A-Z])/ $1 /g; # Make sure adjacent "martian"
                                       # bytes are no longer adjacent.
    print "found GX!\n" if $martian =~ /GX/;
 

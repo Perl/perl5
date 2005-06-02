@@ -223,12 +223,12 @@ equivalents (if available) are as follows:
 
 =item [1]
 
-A GNU extension equivalent to C<[ \t]>, `all horizontal whitespace'.
+A GNU extension equivalent to C<[ \t]>, "all horizontal whitespace".
 
 =item [2]
 
 Not exactly equivalent to C<\s> since the C<[[:space:]]> includes
-also the (very rare) `vertical tabulator', "\ck", chr(11).
+also the (very rare) "vertical tabulator", "\ck", chr(11).
 
 =item [3]
 
@@ -252,7 +252,7 @@ backslash character classes (if available), will hold:
     alpha       IsAlpha
     alnum       IsAlnum
     ascii       IsASCII
-    blank	IsSpace
+    blank       IsSpace
     cntrl       IsCntrl
     digit       IsDigit        \d
     graph       IsGraph
@@ -269,7 +269,7 @@ For example C<[:lower:]> and C<\p{IsLower}> are equivalent.
 
 If the C<utf8> pragma is not used but the C<locale> pragma is, the
 classes correlate with the usual isalpha(3) interface (except for
-`word' and `blank').
+"word" and "blank").
 
 The assumedly non-obviously named classes are:
 
