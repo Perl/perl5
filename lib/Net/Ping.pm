@@ -16,7 +16,7 @@ use Carp;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
-$VERSION = "2.31_01";
+$VERSION = "2.31_02";
 
 sub SOL_IP { 0; };
 sub IP_TOS { 1; };
@@ -395,12 +395,13 @@ sub ping_external {
   return Net::Ping::External::ping(ip => $ip, timeout => $timeout);
 }
 
-use constant ICMP_ECHOREPLY => 0; # ICMP packet types
-use constant ICMP_ECHO      => 8;
-use constant ICMP_STRUCT    => "C2 n3 A";  # Structure of a minimal ICMP packet
-use constant SUBCODE        => 0; # No ICMP subcode for ECHO and ECHOREPLY
-use constant ICMP_FLAGS     => 0; # No special flags for send or recv
-use constant ICMP_PORT      => 0; # No port with ICMP
+use constant ICMP_ECHOREPLY   => 0; # ICMP packet types
+use constant ICMP_UNREACHABLE => 3; # ICMP packet types
+use constant ICMP_ECHO        => 8;
+use constant ICMP_STRUCT      => "C2 n3 A"; # Structure of a minimal ICMP packet
+use constant SUBCODE          => 0; # No ICMP subcode for ECHO and ECHOREPLY
+use constant ICMP_FLAGS       => 0; # No special flags for send or recv
+use constant ICMP_PORT        => 0; # No port with ICMP
 
 sub ping_icmp
 {
@@ -478,10 +479,12 @@ sub ping_icmp
       $self->{"from_subcode"} = $from_subcode;
       if (($from_pid == $self->{"pid"}) && # Does the packet check out?
           ($from_seq == $self->{"seq"})) {
-        if ($from_type == ICMP_ECHOREPLY){
+        if ($from_type == ICMP_ECHOREPLY) {
           $ret = 1;
+	  $done = 1;
+        } elsif ($from_type == ICMP_UNREACHABLE) {
+          $done = 1;
         }
-        $done = 1;
       }
     } else {     # Oops, timed out
       $done = 1;
