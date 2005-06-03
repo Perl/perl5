@@ -7601,6 +7601,53 @@ Perl_newSVpvn(pTHX_ const char *s, STRLEN len)
     return sv;
 }
 
+
+/*
+=for apidoc newSVpv_hek
+
+Creates a new SV from the hash key structure.  It will generate scalars that
+point to the shared string table where possible.
+
+=cut
+*/
+
+SV *
+Perl_newSVpv_hek(pTHX_ const HEK *hek)
+{
+    if (HEK_LEN(hek) == HEf_SVKEY) {
+	return newSVsv(*(SV**)HEK_KEY(hek));
+    } else {
+	const int flags = HEK_FLAGS(hek);
+	if (flags & HVhek_WASUTF8) {
+	    /* Trouble :-)
+	       Andreas would like keys he put in as utf8 to come back as utf8
+	    */
+	    STRLEN utf8_len = HEK_LEN(hek);
+	    U8 *as_utf8 = bytes_to_utf8 ((U8*)HEK_KEY(hek), &utf8_len);
+	    SV *sv = newSVpvn ((char*)as_utf8, utf8_len);
+
+	    SvUTF8_on (sv);
+	    Safefree (as_utf8); /* bytes_to_utf8() allocates a new string */
+	    return sv;
+	} else if (flags & HVhek_REHASH) {
+	    /* We don't have a pointer to the hv, so we have to replicate the
+	       flag into every HEK. This hv is using custom a hasing
+	       algorithm. Hence we can't return a shared string scalar, as
+	       that would contain the (wrong) hash value, and might get passed
+	       into an hv routine with a regular hash  */
+
+	    SV *sv = newSVpvn (HEK_KEY(hek), HEK_LEN(hek));
+	    if (HEK_UTF8(hek))
+		SvUTF8_on (sv);
+	    return sv;
+	}
+	/* This will be overwhelminly the most common case.  */
+	return newSVpvn_share(HEK_KEY(hek),
+			      (HEK_UTF8(hek) ? -HEK_LEN(hek) : HEK_LEN(hek)),
+			      HEK_HASH(hek));
+    }
+}
+
 /*
 =for apidoc newSVpvn_share
 

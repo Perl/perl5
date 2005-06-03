@@ -533,6 +533,7 @@ Apda	|SV*	|newSVuv	|UV u
 Apda	|SV*	|newSVnv	|NV n
 Apda	|SV*	|newSVpv	|const char* s|STRLEN len
 Apda	|SV*	|newSVpvn	|const char* s|STRLEN len
+Apda	|SV*	|newSVpv_hek	|const HEK *hek
 Apda	|SV*	|newSVpvn_share	|const char* s|I32 len|U32 hash
 Afpda	|SV*	|newSVpvf	|const char* pat|...
 Ap	|SV*	|vnewSVpvf	|const char* pat|va_list* args

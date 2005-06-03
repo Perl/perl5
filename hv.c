@@ -2059,39 +2059,7 @@ see C<hv_iterinit>.
 SV *
 Perl_hv_iterkeysv(pTHX_ register HE *entry)
 {
-    if (HeKLEN(entry) != HEf_SVKEY) {
-        HEK *hek = HeKEY_hek(entry);
-        const int flags = HEK_FLAGS(hek);
-        SV *sv;
-
-        if (flags & HVhek_WASUTF8) {
-            /* Trouble :-)
-               Andreas would like keys he put in as utf8 to come back as utf8
-            */
-            STRLEN utf8_len = HEK_LEN(hek);
-            U8 *as_utf8 = bytes_to_utf8 ((U8*)HEK_KEY(hek), &utf8_len);
-
-            sv = newSVpvn ((char*)as_utf8, utf8_len);
-            SvUTF8_on (sv);
-	    Safefree (as_utf8); /* bytes_to_utf8() allocates a new string */
-	} else if (flags & HVhek_REHASH) {
-	    /* We don't have a pointer to the hv, so we have to replicate the
-	       flag into every HEK. This hv is using custom a hasing
-	       algorithm. Hence we can't return a shared string scalar, as
-	       that would contain the (wrong) hash value, and might get passed
-	       into an hv routine with a regular hash  */
-
-            sv = newSVpvn (HEK_KEY(hek), HEK_LEN(hek));
-	    if (HEK_UTF8(hek))
-		SvUTF8_on (sv);
-	} else {
-            sv = newSVpvn_share(HEK_KEY(hek),
-                                (HEK_UTF8(hek) ? -HEK_LEN(hek) : HEK_LEN(hek)),
-                                HEK_HASH(hek));
-        }
-        return sv_2mortal(sv);
-    }
-    return sv_mortalcopy(HeKEY_sv(entry));
+    return sv_2mortal(newSVpv_hek(HeKEY_hek(entry)));
 }
 
 /*
