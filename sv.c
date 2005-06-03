@@ -11527,10 +11527,9 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 static void
 do_mark_cloneable_stash(pTHX_ SV *sv)
 {
-    const char *hvname = HvNAME_get((HV*)sv);
+    const HEK *hvname = HvNAME_HEK((HV*)sv);
     if (hvname) {
 	GV* cloner = gv_fetchmethod_autoload((HV*)sv, "CLONE_SKIP", 0);
-	STRLEN len = HvNAMELEN_get((HV*)sv);
 	SvFLAGS(sv) |= SVphv_CLONEABLE; /* clone objects by default */
 	if (cloner && GvCV(cloner)) {
 	    dSP;
@@ -11539,7 +11538,7 @@ do_mark_cloneable_stash(pTHX_ SV *sv)
 	    ENTER;
 	    SAVETMPS;
 	    PUSHMARK(SP);
-	    XPUSHs(sv_2mortal(newSVpvn(hvname, len)));
+	    XPUSHs(sv_2mortal(newSVhek(hvname)));
 	    PUTBACK;
 	    call_sv((SV*)GvCV(cloner), G_SCALAR);
 	    SPAGAIN;
@@ -12389,7 +12388,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	    ENTER;
 	    SAVETMPS;
 	    PUSHMARK(SP);
-	    XPUSHs(sv_2mortal(newSVpvn(HvNAME_get(stash), HvNAMELEN_get(stash))));
+	    XPUSHs(sv_2mortal(newSVhek(HvNAME_HEK(stash))));
 	    PUTBACK;
 	    call_sv((SV*)GvCV(cloner), G_DISCARD);
 	    FREETMPS;
