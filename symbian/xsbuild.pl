@@ -36,7 +36,7 @@ my $R_V_SV;
 my $PERLSDK;
 my $WIN;
 my $ARM;
-my $HOME = getcwd();
+my $BUILDROOT = getcwd();
 
 if ( !defined $PerlVersion && $0 =~ m:\\symbian\\perl\\(.+)\\bin\\xsbuild.pl:i )
 {
@@ -56,7 +56,7 @@ if ($CoreBuild) {
     $SDK     = do "sdk.pl";
     $VERSION = "$VERSION{REVISION}$VERSION{VERSION}$VERSION{SUBVERSION}";
     $R_V_SV  = "$VERSION{REVISION}.$VERSION{VERSION}.$VERSION{SUBVERSION}";
-    $HOME    = do "cwd.pl";
+    $BUILDROOT    = do "cwd.pl";
     $SymbianVersion = $1 if $SDK =~ m:\\Symbian\\([^\\]+):;
     $PerlVersion    = $R_V_SV;
     $S60SDK = $ENV{S60SDK}; # from sdk.pl
@@ -144,18 +144,19 @@ sub run_PL {
     }
     my $cmd;
     if ($CoreBuild) {
-        # Problem: the Config.pm we have in $HOME\\lib carries the
+        # Problem: the Config.pm we have in $BUILDROOT\\lib carries the
         # version number of the Perl we are building, while the Perl
         # we are running might have some other version.  Solution:
         # temporarily replace the Config.pm with a patched version.
         my $V = sprintf "%vd", $^V;
-        unlink("$HOME\\lib\\Config.pm.bak");
-	system_echo("perl -pi.bak -e \"s:\\Q$R_V_SV:$V:\" $HOME\\lib\\Config.pm");
+        unlink("$BUILDROOT\\lib\\Config.pm.bak");
+	print "(patching $BUILDROOT\\lib\\Config.pm)\n";
+	system_echo("perl -pi.bak -e \"s:\\Q$R_V_SV:$V:\" $BUILDROOT\\lib\\Config.pm");
     }
-    system_echo("perl -I$HOME\\lib -I$HOME\\xlib\\symbian $PL") == 0
+    system_echo("perl -I$BUILDROOT\\lib -I$BUILDROOT\\xlib\\symbian $PL") == 0
       or warn "$0: $PL failed.\n";
     if ($CoreBuild) {
-        system_echo("copy $HOME\\lib\\Config.pm.bak $HOME\\lib\\Config.pm");
+        system_echo("copy $BUILDROOT\\lib\\Config.pm.bak $BUILDROOT\\lib\\Config.pm");
     }
     if ( defined $file ) { -s $file or die "$0: No $file created.\n" }
 }
@@ -204,10 +205,10 @@ sub write_mmp {
     $CONF{TARGET}        = "$base.dll";
     $CONF{TARGETPATH}    = "\\System\\Libs\\Perl\\$R_V_SV";
     $CONF{SOURCE}        = [@src];
-    $CONF{SOURCEPATH}    = [ $CWD, $HOME ];
-    $CONF{USERINCLUDE}   = [ $CWD, $HOME ];
+    $CONF{SOURCEPATH}    = [ $CWD, $BUILDROOT ];
+    $CONF{USERINCLUDE}   = [ $CWD, $BUILDROOT ];
     $CONF{SYSTEMINCLUDE} = ["$PERLSDK\\include"] unless $CoreBuild;
-    $CONF{SYSTEMINCLUDE} = [ $HOME ] if $CoreBuild;
+    $CONF{SYSTEMINCLUDE} = [ $BUILDROOT ] if $CoreBuild;
     $CONF{LIBRARY}       = [];
     $CONF{MACRO}         = [];
     read_mmp( \%CONF, "_init.mmp" );
@@ -219,7 +220,7 @@ sub write_mmp {
             push @{ $CONF{USERINCLUDE} }, $ui;
         }
         else {
-            push @{ $CONF{USERINCLUDE} }, "$HOME\\$ui";
+            push @{ $CONF{USERINCLUDE} }, "$BUILDROOT\\$ui";
         }
     }
     push @{ $CONF{SYSTEMINCLUDE} }, "\\epoc32\\include";
@@ -356,7 +357,7 @@ delete $ENV{MFLAGS};
 delete $ENV{MAKEFLAGS};
 
 print "abld @ARGV\n";
-system("abld @ARGV");
+system_echo("abld @ARGV");
 __EOF__
             close(B);
 	} else {
@@ -375,7 +376,7 @@ sub update_dir {
 sub xsconfig {
     my ( $ext, $dir ) = @_;
     print "Configuring for $ext, directory $dir...\n";
-    my $extu = $CoreBuild ? "$HOME\\lib\\ExtUtils" : "$PERLSDK\\lib\\ExtUtils";
+    my $extu = $CoreBuild ? "$BUILDROOT\\lib\\ExtUtils" : "$PERLSDK\\lib\\ExtUtils";
     update_dir($dir) or die "$0: chdir '$dir': $!\n";
     my $build  = dirname($ext);
     my $base   = basename($ext);
@@ -547,8 +548,8 @@ __EOF__
             warn "$0: $basec: $!";
         }
         unless (
-            system(
-"perl -I$PERLSDK\\lib $extu\\xsubpp -C++ -csuffix .cpp -typemap $extu\\typemap -noprototypes $basexs >> $basec"
+            system_echo(
+"perl -I$BUILDROOT\\lib -I$PERLSDK\\lib $extu\\xsubpp -csuffix .cpp -typemap $extu\\typemap -noprototypes $basexs >> $basec"
             ) == 0
             && -s $basec
           )
@@ -578,7 +579,7 @@ __EOF__
                         while (<SUBMF>) {
                             next if 1 .. /postamble/;
                             if (m!^(\w+_t)\.c : !) {
-                                system(
+                                system_echo(
                                     "perl ..\\bin\\enc2xs -Q -o $1.c -f $1.fnm")
                                   == 0
                                   or warn "$0: enc2xs: $!\n";
@@ -595,8 +596,8 @@ __EOF__
                         write_bld_inf($subbase);
 
                         unless (
-                            system(
-"perl -I$HOME\\lib ..\\$extu\\xsubpp -C++ -csuffix .cpp -typemap ..\\$extu\\typemap -noprototypes $subbase.xs > $subbase.c"
+                            system_echo(
+"perl -I$BUILDROOT\\lib ..\\$extu\\xsubpp -csuffix .cpp -typemap ..\\$extu\\typemap -noprototypes $subbase.xs > $subbase.c"
                             ) == 0
                             && -s "$subbase.c"
                           )
@@ -624,7 +625,7 @@ __EOF__
     $lstname =~ s:\\:-:g;
     print "\t$lstname.lst\n";
     my $lstout =
-      $CoreBuild ? "$HOME/symbian/$lstname.lst" : "$HOME/$lstname.lst";
+      $CoreBuild ? "$BUILDROOT/symbian/$lstname.lst" : "$BUILDROOT/$lstname.lst";
     if ( open( my $lst, ">$lstout" ) ) {
         for my $f (@lst) { print $lst qq["$f"-"!:$lst{$f}"\n] }
         close($lst);
@@ -632,7 +633,7 @@ __EOF__
     else {
         die "$0: $lstout: $!\n";
     }
-    update_dir($HOME);
+    update_dir($BUILDROOT);
 }
 
 sub update_cwd {
@@ -735,8 +736,8 @@ for my $ext (@ARGV) {
      # (2) With the rest and the _init.c to get ordinals for the rest.
      # (3) With an updated _init.c that carries the symbols from step (2).
 
-        system("make clean");
-        system("make defrost") == 0 or die "$0: make defrost failed\n";
+        system_echo("make clean");
+        system_echo("make defrost") == 0 or die "$0: make defrost failed\n";
 
         my @TARGET;
 
@@ -745,19 +746,21 @@ for my $ext (@ARGV) {
         # Compile #1.
         # Hide all but the _init.c.
         print "\n*** $ext - Compile 1 of 3.\n\n";
+	print "(patching $base.mmp)\n";
         system(
 "perl -pi.bak -e \"s:^SOURCE\\s+_init.c:SOURCE\\t_init.c // :\" $base.mmp"
         );
-	system("bldmake bldfiles");
-        system("make @TARGET") == 0 or die "$0: make #1 failed\n";
+	system_echo("bldmake bldfiles");
+        system_echo("make @TARGET") == 0 or die "$0: make #1 failed\n";
 
         # Compile #2.
         # Reveal the rest again.
         print "\n*** $ext - Compile 2 of 3.\n\n";
+	print "(patching $base.mmp)\n";
         system(
 "perl -pi.bak -e \"s:^SOURCE\\t_init.c // :SOURCE\\t_init.c :\" $base.mmp"
         );
-        system("make @TARGET") == 0 or die "$0: make #2 failed\n";
+        system_echo("make @TARGET") == 0 or die "$0: make #2 failed\n";
         unlink("$base.mmp.bak");
 
         open( _INIT_C, ">_init.c" ) or die "$0: _init.c: $!\n";
@@ -828,7 +831,7 @@ __EOF__
 
         # Compile #3.  This is for real.
         print "\n*** $ext - Compile 3 of 3.\n\n";
-        system("make @TARGET") == 0 or die "$0: make #3 failed\n";
+        system_echo("make @TARGET") == 0 or die "$0: make #3 failed\n";
 
     }
     elsif ( $Clean || $DistClean ) {
@@ -838,10 +841,10 @@ __EOF__
         else {
             if ( -f "Makefile" ) {
                 if ($Clean) {
-                    system("make clean") == 0 or die "$0: make clean failed\n";
+                    system_echo("make clean") == 0 or die "$0: make clean failed\n";
                 }
                 elsif ($DistClean) {
-                    system("make distclean") == 0
+                    system_echo("make distclean") == 0
                       or die "$0: make distclean failed\n";
                 }
             }
@@ -853,7 +856,7 @@ __EOF__
         rmdir(@B) if @B;
     }
 
-    update_dir($HOME);
+    update_dir($BUILDROOT);
 
 }    # for my $ext
 
