@@ -7612,7 +7612,7 @@ point to the shared string table where possible.
 */
 
 SV *
-Perl_newSVpv_hek(pTHX_ const HEK *hek)
+Perl_newSVhek(pTHX_ const HEK *hek)
 {
     if (HEK_LEN(hek) == HEf_SVKEY) {
 	return newSVsv(*(SV**)HEK_KEY(hek));

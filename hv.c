@@ -2059,7 +2059,7 @@ see C<hv_iterinit>.
 SV *
 Perl_hv_iterkeysv(pTHX_ register HE *entry)
 {
-    return sv_2mortal(newSVpv_hek(HeKEY_hek(entry)));
+    return sv_2mortal(newSVhek(HeKEY_hek(entry)));
 }
 
 /*
