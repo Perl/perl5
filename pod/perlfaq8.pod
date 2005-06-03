@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq8 - System Interaction ($Revision: 1.23 $, $Date: 2005/01/03 18:43:37 $)
+perlfaq8 - System Interaction ($Revision: 1.24 $, $Date: 2005/04/22 19:04:48 $)
 
 =head1 DESCRIPTION
 
@@ -413,22 +413,22 @@ foregrounded process group, which you then trap in your process.
 Signals are documented in L<perlipc/"Signals"> and the
 section on ``Signals'' in the Camel.
 
-You can set the values of the %SIG hash to be the functions you want 
+You can set the values of the %SIG hash to be the functions you want
 to handle the signal.  After perl catches the signal, it looks in %SIG
 for a key with the same name as the signal, then calls the subroutine
 value for that key.
 
 	# as an anonymous subroutine
-	
+
 	$SIG{INT} = sub { syswrite(STDERR, "ouch\n", 5 ) };
-	
+
 	# or a reference to a function
-	
+
 	$SIG{INT} = \&ouch;
-	
+
 	# or the name of the function as a string
-	
-	$SIG{INT} = "ouch"; 
+
+	$SIG{INT} = "ouch";
 
 Perl versions before 5.8 had in its C source code signal handlers which
 would catch the signal and possibly run a Perl function that you had set
@@ -1095,12 +1095,12 @@ A quick and dirty fix involves a little bit of code, but this may be all
 you need to figure out the problem.
 
 	#!/usr/bin/perl -w
-	
+
 	BEGIN {
 	$SIG{__WARN__} = sub{ print STDERR "Perl: ", @_; };
 	$SIG{__DIE__}  = sub{ print STDERR "Perl: ", @_; exit 1};
 	}
-	
+
 	$a = 1 + undef;
 	$x / 0;
 	__END__

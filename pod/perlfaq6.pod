@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq6 - Regular Expressions ($Revision: 1.31 $, $Date: 2005/03/27 07:17:28 $)
+perlfaq6 - Regular Expressions ($Revision: 1.32 $, $Date: 2005/04/22 19:04:48 $)
 
 =head1 DESCRIPTION
 
@@ -520,16 +520,16 @@ See the module String::Approx available from CPAN.
 
 ( contributed by brian d foy )
 
-Avoid asking Perl to compile a regular expression every time 
+Avoid asking Perl to compile a regular expression every time
 you want to match it.  In this example, perl must recompile
 the regular expression for every iteration of the foreach()
 loop since it has no way to know what $pattern will be.
 
     @patterns = qw( foo bar baz );
-    
-    LINE: while( <> ) 
+
+    LINE: while( <> )
     	{
-		foreach $pattern ( @patterns ) 
+		foreach $pattern ( @patterns )
 			{
 	    	print if /\b$pattern\b/i;
 	    	next LINE;
@@ -545,22 +545,22 @@ but faster.
 
     @patterns = map { qr/\b$_\b/i } qw( foo bar baz );
 
-    LINE: while( <> ) 
+    LINE: while( <> )
     	{
-		foreach $pattern ( @patterns ) 
+		foreach $pattern ( @patterns )
 			{
 	    	print if /\b$pattern\b/i;
 	    	next LINE;
 	   		}
 		}
-		
+
 In some cases, you may be able to make several patterns into
 a single regular expression.  Beware of situations that require
 backtracking though.
 
 	$regex = join '|', qw( foo bar baz );
 
-    LINE: while( <> ) 
+    LINE: while( <> )
     	{
 		print if /\b(?:$regex)\b/i;
 		}
@@ -568,7 +568,7 @@ backtracking though.
 For more details on regular expression efficiency, see Mastering
 Regular Expressions by Jeffrey Freidl.  He explains how regular
 expressions engine work and why some patterns are surprisingly
-inefficient.  Once you understand how perl applies regular 
+inefficient.  Once you understand how perl applies regular
 expressions, you can tune them for individual situations.
 
 =head2 Why don't word-boundary searches with C<\b> work for me?
@@ -601,18 +601,18 @@ These strings do not match /\bPerl\b/.
 
 	"Perl_"   # _ is a word char!
 	"Perler"  # no word char before P, but one after l
-	
+
 You don't have to use \b to match words though.  You can look for
 non-word characters surrrounded by word characters.  These strings
 match the pattern /\b'\b/.
 
 	"don't"   # the ' char is surrounded by "n" and "t"
 	"qep'a'"  # the ' char is surrounded by "p" and "a"
-	
+
 These strings do not match /\b'\b/.
 
 	"foo'"    # there is no word char after non-word '
-	
+
 You can also use the complement of \b, \B, to specify that there
 should not be a word boundary.
 
@@ -621,7 +621,7 @@ and after the "m". These patterns match /\Bam\B/:
 
 	"llama"   # "am" surrounded by word chars
 	"Samuel"  # same
-	
+
 These strings do not match /\Bam\B/
 
 	"Sam"      # no word boundary before "a", but one after "m"
@@ -641,7 +641,7 @@ if you can, but if you can't, once you've used them at all, use them
 at will because you've already paid the price. Remember that some
 algorithms really appreciate them.  As of the 5.005 release, the $&
 variable is no longer "expensive" the way the other two are.
-       
+
 =head2 What good is C<\G> in a regular expression?
 
 You use the C<\G> anchor to start the next match on the same

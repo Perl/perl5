@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 1.35 $, $Date: 2005/01/21 12:26:11 $)
+perlfaq5 - Files and Formats ($Revision: 1.36 $, $Date: 2005/04/22 19:04:48 $)
 
 =head1 DESCRIPTION
 
@@ -129,7 +129,7 @@ with C<undef> in place of the file name.  The C<open()> function
 creates an anonymous temporary file.
 
 	open my $tmp, '+>', undef or die $!;
-	
+
 Otherwise, you can use the File::Temp module.
 
   use File::Temp qw/ tempfile tempdir /;

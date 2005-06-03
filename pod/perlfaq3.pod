@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.47 $, $Date: 2005/03/27 07:21:22 $)
+perlfaq3 - Programming Tools ($Revision: 1.48 $, $Date: 2005/04/22 19:04:48 $)
 
 =head1 DESCRIPTION
 
@@ -225,7 +225,7 @@ order of preference):
 
 =item Eclipse
 
-The Eclipse Perl Integration Project integrates Perl 
+The Eclipse Perl Integration Project integrates Perl
 editing/debugging with Eclipse.
 
 The website for the project is http://e-p-i-c.sf.net/
@@ -407,7 +407,7 @@ no 32k limit).
 
 =item Affrus
 
-is a full Perl development enivornment with full debugger support 
+is a full Perl development enivornment with full debugger support
 ( http://www.latenightsw.com ).
 
 =item Alpha
@@ -754,10 +754,10 @@ you want to be sure your license's wording will stand up in court.
 
 In general, you can't do this.  There are some things that may work
 for your situation though.  People usually ask this question
-because they want to distribute their works without giving away 
+because they want to distribute their works without giving away
 the source code, and most solutions trade disk space for convenience.
 You probably won't see much of a speed increase either, since most
-solutions simply bundle a Perl interpreter in the final product 
+solutions simply bundle a Perl interpreter in the final product
 (but see L<How can I make my Perl program run faster?>).
 
 The Perl Archive Toolkit (http://par.perl.org/index.cgi) is

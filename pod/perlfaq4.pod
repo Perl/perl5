@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.61 $, $Date: 2005/03/11 16:27:53 $)
+perlfaq4 - Data Manipulation ($Revision: 1.64 $, $Date: 2005/04/27 00:18:04 $)
 
 =head1 DESCRIPTION
 
@@ -406,7 +406,7 @@ a time in epoch seconds for the argument to localtime.
 
 	use POSIX qw/strftime/;
 	use Time::Local;
-	my $week_of_year = strftime "%W", 
+	my $week_of_year = strftime "%W",
 		localtime( timelocal( 0, 0, 0, 18, 11, 1987 ) );
 
 The Date::Calc module provides two functions for to calculate these.
@@ -422,7 +422,7 @@ Use the following simple functions:
     sub get_century    {
 	return int((((localtime(shift || time))[5] + 1999))/100);
     }
-    
+
     sub get_millennium {
 	return 1+int((((localtime(shift || time))[5] + 1899))/1000);
     }
@@ -481,60 +481,30 @@ Julian day)
 
 =head2 How do I find yesterday's date?
 
-If you only need to find the date (and not the same time), you
-can use the Date::Calc module.
+(contributed by brian d foy)
 
-	use Date::Calc qw(Today Add_Delta_Days);
+Use one of the Date modules. The C<DateTime> module makes it simple, and
+give you the same time of day, only the day before.
 
-	my @date = Add_Delta_Days( Today(), -1 );
+	use DateTime;
+	
+	my $yesterday = DateTime->now->subtract( days => 1 );
+	
+	print "Yesterday was $yesterday\n";
 
+You can also use the C<Date::Calc> module using its Today_and_Now
+function.
+
+	use Date::Calc qw( Today_and_Now Add_Delta_DHMS );
+	
+	my @date_time = Add_Delta_DHMS( Today_and_Now(), -1, 0, 0, 0 );
+	
 	print "@date\n";
-
-Most people try to use the time rather than the calendar to
-figure out dates, but that assumes that your days are
-twenty-four hours each.  For most people, there are two days
-a year when they aren't: the switch to and from summer time
-throws this off. Russ Allbery offers this solution.
-
-    sub yesterday {
-		my $now  = defined $_[0] ? $_[0] : time;
-		my $then = $now - 60 * 60 * 24;
-		my $ndst = (localtime $now)[8] > 0;
-		my $tdst = (localtime $then)[8] > 0;
-		$then - ($tdst - $ndst) * 60 * 60;
-		}
-
-Should give you "this time yesterday" in seconds since epoch relative to
-the first argument or the current time if no argument is given and
-suitable for passing to localtime or whatever else you need to do with
-it.  $ndst is whether we're currently in daylight savings time; $tdst is
-whether the point 24 hours ago was in daylight savings time.  If $tdst
-and $ndst are the same, a boundary wasn't crossed, and the correction
-will subtract 0.  If $tdst is 1 and $ndst is 0, subtract an hour more
-from yesterday's time since we gained an extra hour while going off
-daylight savings time.  If $tdst is 0 and $ndst is 1, subtract a
-negative hour (add an hour) to yesterday's time since we lost an hour.
-
-All of this is because during those days when one switches off or onto
-DST, a "day" isn't 24 hours long; it's either 23 or 25.
-
-The explicit settings of $ndst and $tdst are necessary because localtime
-only says it returns the system tm struct, and the system tm struct at
-least on Solaris doesn't guarantee any particular positive value (like,
-say, 1) for isdst, just a positive value.  And that value can
-potentially be negative, if DST information isn't available (this sub
-just treats those cases like no DST).
-
-Note that between 2am and 3am on the day after the time zone switches
-off daylight savings time, the exact hour of "yesterday" corresponding
-to the current hour is not clearly defined.  Note also that if used
-between 2am and 3am the day after the change to daylight savings time,
-the result will be between 3am and 4am of the previous day; it's
-arguable whether this is correct.
-
-This sub does not attempt to deal with leap seconds (most things don't).
-
-
+	
+Most people try to use the time rather than the calendar to figure out
+dates, but that assumes that days are twenty-four hours each.  For
+most people, there are two days a year when they aren't: the switch to
+and from summer time throws this off. Let the modules do the work.
 
 =head2 Does Perl have a Year 2000 problem?  Is Perl Y2K compliant?
 
@@ -570,9 +540,16 @@ a longer exposition.
 
 =head2 How do I validate input?
 
-The answer to this question is usually a regular expression, perhaps
-with auxiliary logic.  See the more specific questions (numbers, mail
-addresses, etc.) for details.
+(contributed by brian d foy)
+
+There are many ways to ensure that values are what you expect or
+want to accept. Besides the specific examples that we cover in the
+perlfaq, you can also look at the modules with "Assert" and "Validate"
+in their names, along with other modules such as C<Regexp::Common>.
+
+Some modules have validation for particular types of input, such
+as C<Business::ISBN>, C<Business::CreditCard>, C<Email::Valid>,
+and C<Data::Validate::IP>.
 
 =head2 How do I unescape a string?
 
@@ -586,21 +563,61 @@ This won't expand C<"\n"> or C<"\t"> or any other special escapes.
 
 =head2 How do I remove consecutive pairs of characters?
 
-To turn C<"abbcccd"> into C<"abccd">:
+(contributed by brian d foy)
 
-    s/(.)\1/$1/g;	# add /s to include newlines
+You can use the substitution operator to find pairs of characters (or
+runs of characters) and replace them with a single instance. In this
+substitution, we find a character in C<(.)>. The memory parentheses
+store the matched character in the back-reference C<\1> and we use
+that to require that the same thing immediately follow it. We replace
+that part of the string with the character in C<$1>.
 
-Here's a solution that turns "abbcccd" to "abcd":
+    s/(.)\1/$1/g;
 
-    y///cs;	# y == tr, but shorter :-)
+We can also use the transliteration operator, C<tr///>. In this
+example, the search list side of our C<tr///> contains nothing, but
+the C<c> option complements that so it contains everything. The
+replacement list also contains nothing, so the transliteration is
+almost a no-op since it won't do any replacements (or more exactly,
+replace the character with itself). However, the C<s> option squashes
+duplicated and consecutive characters in the string so a character
+does not show up next to itself
+
+	my $str = 'Haarlem';   # in the Netherlands
+    $str =~ tr///cs;       # Now Harlem, like in New York
 
 =head2 How do I expand function calls in a string?
 
-This is documented in L<perlref>.  In general, this is fraught with
-quoting and readability problems, but it is possible.  To interpolate
-a subroutine call (in list context) into a string:
+(contributed by brian d foy)
 
-    print "My sub returned @{[mysub(1,2,3)]} that time.\n";
+This is documented in L<perlref>, and although it's not the easiest
+thing to read, it does work. In each of these examples, we call the
+function inside the braces of used to dereference a reference. If we
+have a more than one return value, we can contruct and dereference an
+anonymous array. In this case, we call the function in list context.
+
+    print "The time values are @{ [localtime] }.\n";
+
+If we want to call the function in scalar context, we have to do a bit
+more work. We can really have any code we like inside the braces, so
+we simply have to end with the scalar reference, although how you do
+that is up to you, and you can use code inside the braces.
+
+	print "The time is ${\(scalar localtime)}.\n"
+	
+	print "The time is ${ my $x = localtime; \$x }.\n";
+	
+If your function already returns a reference, you don't need to create
+the reference yourself.
+
+	sub timestamp { my $t = localtime; \$t }
+	
+	print "The time is ${ timestamp() }.\n";
+	
+In most cases, it is probably easier to simply use string
+concatenation, which also forces scalar context.
+
+	print "The time is " . localtime . ".\n";
 
 =head2 How do I find matching/nesting anything?
 
@@ -609,15 +626,16 @@ matter how complicated.  To find something between two single
 characters, a pattern like C</x([^x]*)x/> will get the intervening
 bits in $1. For multiple ones, then something more like
 C</alpha(.*?)omega/> would be needed.  But none of these deals with
-nested patterns.  For balanced expressions using C<(>, C<{>, C<[>
-or C<< < >> as delimiters, use the CPAN module Regexp::Common, or see
-L<perlre/(??{ code })>.  For other cases, you'll have to write a parser.
+nested patterns.  For balanced expressions using C<(>, C<{>, C<[> or
+C<< < >> as delimiters, use the CPAN module Regexp::Common, or see
+L<perlre/(??{ code })>.  For other cases, you'll have to write a
+parser.
 
 If you are serious about writing a parser, there are a number of
 modules or oddities that will make your life a lot easier.  There are
 the CPAN modules Parse::RecDescent, Parse::Yapp, and Text::Balanced;
-and the byacc program.   Starting from perl 5.8 the Text::Balanced
-is part of the standard distribution.
+and the byacc program.   Starting from perl 5.8 the Text::Balanced is
+part of the standard distribution.
 
 One simple destructive, inside-out approach that you might try is to
 pull out the smallest nesting parts one at a time:
@@ -841,34 +859,52 @@ There's also a Text::CSV (Comma-Separated Values) module on CPAN.
 
 =head2 How do I strip blank space from the beginning/end of a string?
 
-Although the simplest approach would seem to be
+(contributed by brian d foy)
 
-    $string =~ s/^\s*(.*?)\s*$/$1/;
+A substitution can do this for you. For a single line, you want to
+replace all the leading or trailing whitespace with nothing. You
+can do that with a pair of substitutions.
 
-not only is this unnecessarily slow and destructive, it also fails with
-embedded newlines.  It is much faster to do this operation in two steps:
-
-    $string =~ s/^\s+//;
-    $string =~ s/\s+$//;
-
-Or more nicely written as:
-
-    for ($string) {
 	s/^\s+//;
 	s/\s+$//;
-    }
 
-This idiom takes advantage of the C<foreach> loop's aliasing
-behavior to factor out common code.  You can do this
-on several strings at once, or arrays, or even the
-values of a hash if you use a slice:
+You can also write that as a single substitution, although it turns
+out the combined statement is slower than the separate ones. That
+might not matter to you, though.
 
-    # trim whitespace in the scalar, the array,
-    # and all the values in the hash
-    foreach ($scalar, @array, @hash{keys %hash}) {
-        s/^\s+//;
-        s/\s+$//;
-    }
+	s/^\s+|\s+$//g;
+
+In this regular expression, the alternation matches either at the
+beginning or the end of the string since the anchors have a lower
+precedence than the alternation. With the C</g> flag, the substitution
+makes all possible matches, so it gets both. Remember, the trailing
+newline matches the C<\s+>, and  the C<$> anchor can match to the
+physical end of the string, so the newline disappears too. Just add
+the newline to the output, which has the added benefit of preserving
+"blank" (consisting entirely of whitespace) lines which the C<^\s+>
+would remove all by itself.
+
+	while( <> )
+		{
+		s/^\s+|\s+$//g;
+		print "$_\n";
+		}
+
+For a multi-line string, you can apply the regular expression
+to each logical line in the string by adding the C</m> flag (for
+"multi-line"). With the C</m> flag, the C<$> matches I<before> an
+embedded newline, so it doesn't remove it. It still removes the
+newline at the end of the string.
+
+    $string =~ s/^\s+|\s+$//gm;
+
+Remember that lines consisting entirely of whitespace will disappear,
+since the first part of the alternation can match the entire string
+and replace it with nothing. If need to keep embedded blank lines,
+you have to do a little more work. Instead of matching any whitespace
+(since that includes a newline), just match the other whitespace.
+
+	$string =~ s/^[\t\f ]+|[\t\f ]+$//mg;
 
 =head2 How do I pad a string with blanks or pad a number with zeroes?
 
@@ -1136,56 +1172,46 @@ matters.
 
 =head2 How can I remove duplicate elements from a list or array?
 
-There are several possible ways, depending on whether the array is
-ordered and whether you wish to preserve the ordering.
+(contributed by brian d foy)
 
-=over 4
+Use a hash. When you think the words "unique" or "duplicated", think
+"hash keys".
 
-=item a)
+If you don't care about the order of the elements, you could just
+create the hash then extract the keys. It's not important how you
+create that hash: just that you use C<keys> to get the unique
+elements.
 
-If @in is sorted, and you want @out to be sorted:
-(this assumes all true values in the array)
+   my %hash   = map { $_, 1 } @array;
+   # or a hash slice: @hash{ @array } = ();
+   # or a foreach: $hash{$_} = 1 foreach ( @array );
 
-    $prev = "not equal to $in[0]";
-    @out = grep($_ ne $prev && ($prev = $_, 1), @in);
+   my @unique = keys %hash;
 
-This is nice in that it doesn't use much extra memory, simulating
-uniq(1)'s behavior of removing only adjacent duplicates.  The ", 1"
-guarantees that the expression is true (so that grep picks it up)
-even if the $_ is 0, "", or undef.
+You can also go through each element and skip the ones you've seen
+before. Use a hash to keep track. The first time the loop sees an
+element, that element has no key in C<%Seen>. The C<next> statement
+creates the key and immediately uses its value, which is C<undef>, so
+the loop continues to the C<push> and increments the value for that
+key. The next time the loop sees that same element, its key exists in
+the hash I<and> the value for that key is true (since it's not 0 or
+undef), so the next skips that iteration and the loop goes to the next
+element.
 
-=item b)
+	my @unique = ();
+	my %seen   = ();
 
-If you don't know whether @in is sorted:
+	foreach my $elem ( @array )
+		{
+		next if $seen{ $elem }++;
+		push @unique, $elem;
+		}
 
-    undef %saw;
-    @out = grep(!$saw{$_}++, @in);
+You can write this more briefly using a grep, which does the
+same thing.
 
-=item c)
-
-Like (b), but @in contains only small integers:
-
-    @out = grep(!$saw[$_]++, @in);
-
-=item d)
-
-A way to do (b) without any loops or greps:
-
-    undef %saw;
-    @saw{@in} = ();
-    @out = sort keys %saw;  # remove sort if undesired
-
-=item e)
-
-Like (d), but @in contains only small positive integers:
-
-    undef @ary;
-    @ary[@in] = @in;
-    @out = grep {defined} @ary;
-
-=back
-
-But perhaps you should have been using a hash all along, eh?
+   my %seen = ();
+   my @unique = grep { ! $seen{ $_ }++ } @array;
 
 =head2 How can I tell whether a certain element is contained in a list or array?
 
@@ -1325,9 +1351,9 @@ If you cannot use List::Util, you can make your own loop to do the
 same thing.  Once you find the element, you stop the loop with last.
 
 	my $found;
-	foreach my $element ( @array )
+	foreach ( @array )
 		{
-		if( /Perl/ ) { $found = $element; last }
+		if( /Perl/ ) { $found = $_; last }
 		}
 
 If you want the array index, you can iterate through the indices
@@ -1335,15 +1361,15 @@ and check the array element at each index until you find one
 that satisfies the condition.
 
 	my( $found, $index ) = ( undef, -1 );
-    for( $i = 0; $i < @array; $i++ )
-    	{
-        if( $array[$i] =~ /Perl/ )
-        	{
-        	$found = $array[$i];
-        	$index = $i;
-        	last;
-        	}
-        }
+	for( $i = 0; $i < @array; $i++ )
+		{
+		if( $array[$i] =~ /Perl/ )
+			{
+			$found = $array[$i];
+			$index = $i;
+			last;
+			}
+		}
 
 =head2 How do I handle linked lists?
 
@@ -1416,7 +1442,7 @@ If not, you can use a Fisher-Yates shuffle.
     sub fisher_yates_shuffle {
         my $deck = shift;  # $deck is a reference to an array
         my $i = @$deck;
-        while ($i--) {
+        while (--$i) {
             my $j = int rand ($i+1);
             @$deck[$i,$j] = @$deck[$j,$i];
         }
@@ -1452,15 +1478,15 @@ this until you have rather largish arrays.
 Use C<for>/C<foreach>:
 
     for (@lines) {
-	s/foo/bar/;	# change that word
-	y/XZ/ZX/;	# swap those letters
+		s/foo/bar/;	# change that word
+		tr/XZ/ZX/;	# swap those letters
     }
 
 Here's another; let's compute spherical volumes:
 
     for (@volumes = @radii) {   # @volumes has changed parts
-	$_ **= 3;
-	$_ *= (4/3) * 3.14159;  # this will be constant folded
+		$_ **= 3;
+		$_ *= (4/3) * 3.14159;  # this will be constant folded
     }
 
 which can also be done with map() which is made to transform
@@ -1474,7 +1500,7 @@ the values are not copied, so if you modify $orbit (in this
 case), you modify the value.
 
     for $orbit ( values %orbits ) {
-	($orbit **= 3) *= (4/3) * 3.14159;
+		($orbit **= 3) *= (4/3) * 3.14159;
     }
 
 Prior to perl 5.6 C<values> returned copies of the values,
