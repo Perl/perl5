@@ -7,7 +7,7 @@ bool
 _runops_debug(int flag)
 {
     dTHX;
-    bool d = PL_runops == MEMBER_TO_FPTR(Perl_runops_debug);
+    const bool d = PL_runops == MEMBER_TO_FPTR(Perl_runops_debug);
 
     if (flag >= 0)
 	PL_runops 
@@ -174,7 +174,7 @@ fill_mstats(SV *sv, int level)
 }
 
 void
-_mstats_to_hv(HV *hv, struct mstats_buffer *b, int level)
+_mstats_to_hv(HV *hv, const struct mstats_buffer *b, int level)
 {
     dTHX;
     SV **svp;
@@ -338,9 +338,9 @@ I32	lim
 PPCODE:
 {
     SV *pv_lim_sv = perl_get_sv("Devel::Peek::pv_limit", FALSE);
-    STRLEN pv_lim = pv_lim_sv ? SvIV(pv_lim_sv) : 0;
+    const STRLEN pv_lim = pv_lim_sv ? SvIV(pv_lim_sv) : 0;
     SV *dumpop = perl_get_sv("Devel::Peek::dump_ops", FALSE);
-    I32 save_dumpindent = PL_dumpindent;
+    const I32 save_dumpindent = PL_dumpindent;
     PL_dumpindent = 2;
     do_sv_dump(0, Perl_debug_log, sv, 0, lim,
 	       (bool)(dumpop && SvTRUE(dumpop)), pv_lim);
@@ -354,9 +354,9 @@ PPCODE:
 {
     long i;
     SV *pv_lim_sv = perl_get_sv("Devel::Peek::pv_limit", FALSE);
-    STRLEN pv_lim = pv_lim_sv ? SvIV(pv_lim_sv) : 0;
+    const STRLEN pv_lim = pv_lim_sv ? SvIV(pv_lim_sv) : 0;
     SV *dumpop = perl_get_sv("Devel::Peek::dump_ops", FALSE);
-    I32 save_dumpindent = PL_dumpindent;
+    const I32 save_dumpindent = PL_dumpindent;
     PL_dumpindent = 2;
 
     for (i=1; i<items; i++) {
