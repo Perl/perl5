@@ -431,16 +431,16 @@ can access the value (and each time you do, you increment the value).
 The data in chunk of memory defined by C<$count> is private to
 C<counter>.
 
-	BEGIN {
-		my $count = 1;
-		sub counter { $count++ }
-		}
+    BEGIN {
+        my $count = 1;
+        sub counter { $count++ }
+    }
 
-	my $start = count();
+    my $start = count();
 
-	.... # code that calls count();
+    .... # code that calls count();
 
-	my $end = count();
+    my $end = count();
 
 In the previous example, you created a function-private variable
 because only one function remembered its reference. You could define
@@ -457,7 +457,7 @@ there is no other way to access it.
         my $count = 1;
         sub increment_count { $count++ }
         sub return_count    { $count }
-		}
+    }
 
 To declare a file-private variable, you still use a lexical variable.
 A file is also a scope, so a lexical variable defined in the file
