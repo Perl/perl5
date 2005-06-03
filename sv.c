@@ -4329,7 +4329,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 {
     if (SvREADONLY(sv)) {
 	if (SvFAKE(sv)) {
-	    char *pvx = SvPVX_const(sv);
+	    const char *pvx = SvPVX_const(sv);
 	    STRLEN len = SvCUR(sv);
             U32 hash   = SvUVX(sv);
 	    SvFAKE_off(sv);
@@ -10933,6 +10933,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
      * constants; they need to be allocated as common memory and just
      * their pointers copied. */
 
+    IV i;
     CLONE_PARAMS clone_params;
     CLONE_PARAMS* param = &clone_params;
 

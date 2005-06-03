@@ -178,22 +178,27 @@ int yyactlevel = -1;
 /* This bit of chicanery makes a unary function followed by
  * a parenthesis into a function with one argument, highest precedence.
  */
-#define UNI(f) return(yylval.ival = f, \
-	PL_expect = XTERM, \
-	PL_bufptr = s, \
-	PL_last_uni = PL_oldbufptr, \
-	PL_last_lop_op = f, \
-	REPORT( \
-	    (*s == '(' || (s = skipspace(s), *s == '(')  \
-	    ? (int)FUNC1 : (int)UNIOP)))
+#define UNI(f) { \
+	yylval.ival = f; \
+	PL_expect = XTERM; \
+	PL_bufptr = s; \
+	PL_last_uni = PL_oldbufptr; \
+	PL_last_lop_op = f; \
+	if (*s == '(') \
+	    return REPORT( (int)FUNC1 ); \
+	s = skipspace(s); \
+	return REPORT( *s=='(' ? (int)FUNC1 : (int)UNIOP ); \
+	}
 
-#define UNIBRACK(f) return ( \
-	yylval.ival = f, \
-	PL_bufptr = s, \
-	PL_last_uni = PL_oldbufptr, \
-        REPORT( \
-	    (*s == '(' || (s = skipspace(s), *s == '(') \
-	? (int)FUNC1 : (int)UNIOP)))
+#define UNIBRACK(f) { \
+	yylval.ival = f; \
+	PL_bufptr = s; \
+	PL_last_uni = PL_oldbufptr; \
+	if (*s == '(') \
+	    return REPORT( (int)FUNC1 ); \
+	s = skipspace(s); \
+	return REPORT( (*s == '(') ? (int)FUNC1 : (int)UNIOP ); \
+	}
 
 /* grandfather return to old style */
 #define OLDLOP(f) return(yylval.ival=f,PL_expect = XTERM,PL_bufptr = s,(int)LSTOP)
