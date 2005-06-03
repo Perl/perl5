@@ -176,25 +176,29 @@ typedef union {
  * The UNIDOR macro is for unary functions that can be followed by the //
  * operator (such as C<shift // 0>).
  */
-#define UNI2(f,x) return ( \
-	yylval.ival = f, \
-	PL_expect = x, \
-	PL_bufptr = s, \
-	PL_last_uni = PL_oldbufptr, \
-	PL_last_lop_op = f, \
-	REPORT( \
-	    (*s == '(' || (s = skipspace(s), *s == '(')  \
-	    ? (int)FUNC1 : (int)UNIOP)))
+#define UNI2(f,x) { \
+	yylval.ival = f; \
+	PL_expect = x; \
+	PL_bufptr = s; \
+	PL_last_uni = PL_oldbufptr; \
+	PL_last_lop_op = f; \
+	if (*s == '(') \
+	    return REPORT( (int)FUNC1 ); \
+	s = skipspace(s); \
+	return REPORT( *s=='(' ? (int)FUNC1 : (int)UNIOP ); \
+	}
 #define UNI(f)    UNI2(f,XTERM)
 #define UNIDOR(f) UNI2(f,XTERMORDORDOR)
 
-#define UNIBRACK(f) return ( \
-	yylval.ival = f, \
-	PL_bufptr = s, \
-	PL_last_uni = PL_oldbufptr, \
-        REPORT( \
-	    (*s == '(' || (s = skipspace(s), *s == '(') \
-	? (int)FUNC1 : (int)UNIOP)))
+#define UNIBRACK(f) { \
+	yylval.ival = f; \
+	PL_bufptr = s; \
+	PL_last_uni = PL_oldbufptr; \
+	if (*s == '(') \
+	    return REPORT( (int)FUNC1 ); \
+	s = skipspace(s); \
+	return REPORT( (*s == '(') ? (int)FUNC1 : (int)UNIOP ); \
+	}
 
 /* grandfather return to old style */
 #define OLDLOP(f) return(yylval.ival=f,PL_expect = XTERM,PL_bufptr = s,(int)LSTOP)
