@@ -1534,10 +1534,7 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs, bool for_my)
     /* fake up C<use attributes $pkg,$rv,@attrs> */
     ENTER;		/* need to protect against side-effects of 'use' */
     SAVEINT(PL_expect);
-    if (stash)
-	stashsv = newSVpvn(HvNAME_get(stash), HvNAMELEN_get(stash));
-    else
-	stashsv = &PL_sv_no;
+    stashsv = stash ? newSVhek(HvNAME_HEK(stash)) : &PL_sv_no;
 
 #define ATTRSMODULE "attributes"
 #define ATTRSMODULE_PM "attributes.pm"
@@ -1587,10 +1584,8 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
     pack = newSVOP(OP_CONST, 0, newSVpvn(ATTRSMODULE, sizeof(ATTRSMODULE)-1));
 
     /* Build up the real arg-list. */
-    if (stash)
-	stashsv = newSVpvn(HvNAME_get(stash), HvNAMELEN_get(stash));
-    else
-	stashsv = &PL_sv_no;
+    stashsv = stash ? newSVhek(HvNAME_HEK(stash)) : &PL_sv_no;
+
     arg = newOP(OP_PADSV, 0);
     arg->op_targ = target->op_targ;
     arg = prepend_elem(OP_LIST,
