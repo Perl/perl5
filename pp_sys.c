@@ -4372,12 +4372,9 @@ PP(pp_getppid)
 #ifdef HAS_GETPPID
     dSP; dTARGET;
 #   ifdef THREADS_HAVE_PIDS
-    {
-	IV cur_ppid = getppid();
-	if (cur_ppid == 1)
-	    /* maybe the parent process has died. Refresh ppid cache */
-	    PL_ppid = cur_ppid;
-    }
+    if (PL_ppid != 1 && getppid() == 1)
+	/* maybe the parent process has died. Refresh ppid cache */
+	PL_ppid = 1;
     XPUSHi( PL_ppid );
 #   else
     XPUSHi( getppid() );
