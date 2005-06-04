@@ -1344,6 +1344,10 @@ s	|SV*	|mess_alloc
 sn	|NV|mulexp10	|NV value|I32 exponent
 #endif
 
+#if defined(PERL_IN_UTF8_C) || defined(PERL_DECL_PROT)
+s	|STRLEN	|is_utf8_char_slow|NN const U8 *s|const STRLEN len
+#endif
+
 START_EXTERN_C
 
 Apd	|void	|sv_setsv_flags	|NN SV* dsv|SV* ssv|I32 flags

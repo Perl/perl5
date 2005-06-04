@@ -2492,6 +2492,12 @@ STATIC SV*	S_mess_alloc(pTHX);
 STATIC NV	S_mulexp10(NV value, I32 exponent);
 #endif
 
+#if defined(PERL_IN_UTF8_C) || defined(PERL_DECL_PROT)
+STATIC STRLEN	S_is_utf8_char_slow(pTHX_ const U8 *s, const STRLEN len)
+			__attribute__nonnull__(pTHX_1);
+
+#endif
+
 START_EXTERN_C
 
 PERL_CALLCONV void	Perl_sv_setsv_flags(pTHX_ SV* dsv, SV* ssv, I32 flags)
