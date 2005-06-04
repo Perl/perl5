@@ -4956,7 +4956,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 #else
     if (SvREADONLY(sv)) {
 	if (SvFAKE(sv)) {
-	    char *pvx = SvPVX_const(sv);
+	    const char *pvx = SvPVX_const(sv);
 	    const int is_utf8 = SvUTF8(sv);
 	    STRLEN len = SvCUR(sv);
             U32 hash   = SvUVX(sv);
