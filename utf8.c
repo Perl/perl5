@@ -246,7 +246,7 @@ Perl_is_utf8_char(pTHX_ const U8 *s)
     if (len <= 4)
         return IS_UTF8_CHAR(s, len) ? len : 0;
 #endif /* #ifdef IS_UTF8_CHAR */
-    return S_is_utf8_char_slow(s, len);
+    return is_utf8_char_slow(s, len);
 }
 
 /*
@@ -285,7 +285,7 @@ Perl_is_utf8_string(pTHX_ const U8 *s, STRLEN len)
 		 if (!IS_UTF8_CHAR(x, c))
 		     return FALSE;
 	     } else {
-		 if (!S_is_utf8_char_slow(x, c))
+		 if (!is_utf8_char_slow(x, c))
 		     return FALSE;
 	     }
 #else
