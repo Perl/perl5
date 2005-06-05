@@ -1608,7 +1608,7 @@ static void free_context(pTHX_ stcxt_t *cxt)
  *
  * Tells whether we're in the middle of a store operation.
  */
-int is_storing(pTHX)
+static int is_storing(pTHX)
 {
 	dSTCXT;
 
@@ -1620,7 +1620,7 @@ int is_storing(pTHX)
  *
  * Tells whether we're in the middle of a retrieve operation.
  */
-int is_retrieving(pTHX)
+static int is_retrieving(pTHX)
 {
 	dSTCXT;
 
@@ -1635,7 +1635,7 @@ int is_retrieving(pTHX)
  * This is typically out-of-band information that might prove useful
  * to people wishing to convert native to network order data when used.
  */
-int last_op_in_netorder(pTHX)
+static int last_op_in_netorder(pTHX)
 {
 	dSTCXT;
 
@@ -3806,7 +3806,7 @@ static int do_store(
  * Store the transitive data closure of given object to disk.
  * Returns 0 on error, a true value otherwise.
  */
-int pstore(pTHX_ PerlIO *f, SV *sv)
+static int pstore(pTHX_ PerlIO *f, SV *sv)
 {
 	TRACEME(("pstore"));
 	return do_store(aTHX_ f, sv, 0, FALSE, (SV**) 0);
@@ -3819,7 +3819,7 @@ int pstore(pTHX_ PerlIO *f, SV *sv)
  * Same as pstore(), but network order is used for integers and doubles are
  * emitted as strings.
  */
-int net_pstore(pTHX_ PerlIO *f, SV *sv)
+static int net_pstore(pTHX_ PerlIO *f, SV *sv)
 {
 	TRACEME(("net_pstore"));
 	return do_store(aTHX_ f, sv, 0, TRUE, (SV**) 0);
@@ -3847,7 +3847,7 @@ static SV *mbuf2sv(pTHX)
  * Store the transitive data closure of given object to memory.
  * Returns undef on error, a scalar value containing the data otherwise.
  */
-SV *mstore(pTHX_ SV *sv)
+static SV *mstore(pTHX_ SV *sv)
 {
 	SV *out;
 
@@ -3865,7 +3865,7 @@ SV *mstore(pTHX_ SV *sv)
  * Same as mstore(), but network order is used for integers and doubles are
  * emitted as strings.
  */
-SV *net_mstore(pTHX_ SV *sv)
+static SV *net_mstore(pTHX_ SV *sv)
 {
 	SV *out;
 
@@ -6192,7 +6192,7 @@ static SV *do_retrieve(
  *
  * Retrieve data held in file and return the root object, undef on error.
  */
-SV *pretrieve(pTHX_ PerlIO *f)
+static SV *pretrieve(pTHX_ PerlIO *f)
 {
 	TRACEME(("pretrieve"));
 	return do_retrieve(aTHX_ f, Nullsv, 0);
@@ -6203,7 +6203,7 @@ SV *pretrieve(pTHX_ PerlIO *f)
  *
  * Retrieve data held in scalar and return the root object, undef on error.
  */
-SV *mretrieve(pTHX_ SV *sv)
+static SV *mretrieve(pTHX_ SV *sv)
 {
 	TRACEME(("mretrieve"));
 	return do_retrieve(aTHX_ (PerlIO*) 0, sv, 0);
@@ -6222,7 +6222,7 @@ SV *mretrieve(pTHX_ SV *sv)
  * there. Not that efficient, but it should be faster than doing it from
  * pure perl anyway.
  */
-SV *dclone(pTHX_ SV *sv)
+static SV *dclone(pTHX_ SV *sv)
 {
 	dSTCXT;
 	int size;
