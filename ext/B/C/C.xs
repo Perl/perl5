@@ -2,7 +2,7 @@
 #include <perl.h>
 #include <XSUB.h>
 
-int
+static int
 my_runops(pTHX)
 {
     HV* regexp_hv = get_hv( "B::C::REGEXP", 0 );

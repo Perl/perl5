@@ -1076,40 +1076,8 @@ Perl_write_to_stderr(pTHX_ const char* message, int msglen)
 
 /* Common code used by vcroak, vdie and vwarner  */
 
-void S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8);
-
 /* Whilst this should really be STATIC, it was not in 5.8.7, hence something
    may have linked against it.  */
-char *
-S_vdie_croak_common(pTHX_ const char* pat, va_list* args, STRLEN* msglen,
-		    I32* utf8)
-{
-    char *message;
-
-    if (pat) {
-	SV *msv = vmess(pat, args);
-	if (PL_errors && SvCUR(PL_errors)) {
-	    sv_catsv(PL_errors, msv);
-	    message = SvPV(PL_errors, *msglen);
-	    SvCUR_set(PL_errors, 0);
-	}
-	else
-	    message = SvPV(msv,*msglen);
-	*utf8 = SvUTF8(msv);
-    }
-    else {
-	message = Nullch;
-    }
-
-    DEBUG_S(PerlIO_printf(Perl_debug_log,
-			  "%p: die/croak: message = %s\ndiehook = %p\n",
-			  thr, message, PL_diehook));
-    if (PL_diehook) {
-	S_vdie_common(aTHX_ message, *msglen, *utf8);
-    }
-    return message;
-}
-
 void
 S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8)
 {
@@ -1149,6 +1117,38 @@ S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8)
 	POPSTACK;
 	LEAVE;
     }
+}
+
+/* Whilst this should really be STATIC, it was not in 5.8.7, hence something
+   may have linked against it.  */
+char *
+S_vdie_croak_common(pTHX_ const char* pat, va_list* args, STRLEN* msglen,
+		    I32* utf8)
+{
+    char *message;
+
+    if (pat) {
+	SV *msv = vmess(pat, args);
+	if (PL_errors && SvCUR(PL_errors)) {
+	    sv_catsv(PL_errors, msv);
+	    message = SvPV(PL_errors, *msglen);
+	    SvCUR_set(PL_errors, 0);
+	}
+	else
+	    message = SvPV(msv,*msglen);
+	*utf8 = SvUTF8(msv);
+    }
+    else {
+	message = Nullch;
+    }
+
+    DEBUG_S(PerlIO_printf(Perl_debug_log,
+			  "%p: die/croak: message = %s\ndiehook = %p\n",
+			  thr, message, PL_diehook));
+    if (PL_diehook) {
+	S_vdie_common(aTHX_ message, *msglen, *utf8);
+    }
+    return message;
 }
 
 OP *
