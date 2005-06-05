@@ -2312,6 +2312,41 @@ typedef struct clone_params CLONE_PARAMS;
 #  endif
 #endif
 
+/* In case Configure was not used (we are using a "canned config"
+ * such as Win32, or a cross-compilation setup, for example) try going
+ * by the gcc major and minor versions.  One useful URL is
+ * http://www.ohse.de/uwe/articles/gcc-attributes.html,
+ * but contrary to this information warn_unused_result seems
+ * not to be in gcc 3.3.5, at least. --jhi
+ * Set these up now otherwise we get confused when some of the <*thread.h>
+ * includes below indirectly pull in <perlio.h> (which needs to know if we
+ * have HASATTRIBUTE_FORMAT).
+ */
+
+#if defined __GNUC__
+#  if __GNUC__ >= 3 /* 3.0 -> */ /* XXX Verify this version */
+#    define HASATTRIBUTE_FORMAT
+#  endif
+#  if __GNUC__ >= 3 /* 3.0 -> */
+#    define HASATTRIBUTE_MALLOC
+#  endif
+#  if __GNUC__ == 3 && __GNUC_MINOR__ >= 3 || __GNUC__ > 3 /* 3.3 -> */
+#    define HASATTRIBUTE_NONNULL
+#  endif
+#  if __GNUC__ == 2 && __GNUC_MINOR__ >= 5 || __GNUC__ > 2 /* 2.5 -> */
+#    define HASATTRIBUTE_NORETURN
+#  endif
+#  if __GNUC__ >= 3 /* gcc 3.0 -> */
+#    define HASATTRIBUTE_PURE
+#  endif
+#  if __GNUC__ >= 3 /* gcc 3.0 -> */ /* XXX Verify this version */
+#    define HASATTRIBUTE_UNUSED
+#  endif
+#  if __GNUC__ == 3 && __GNUC_MINOR__ >= 4 || __GNUC__ > 3 /* 3.4 -> */
+#    define HASATTRIBUTE_WARN_UNUSED_RESULT
+#  endif
+#endif
+
 /*
  * USE_5005THREADS needs to be after unixish.h as <pthread.h> includes
  * <sys/signal.h> which defines NSIG - which will stop inclusion of <signal.h>
@@ -2511,36 +2546,6 @@ typedef pthread_key_t	perl_key;
 
 #ifndef DieNull
 #  define DieNull Perl_vdie(aTHX_ Nullch, Null(va_list *))
-#endif
-
-/* In case Configure was not used (we are using a "canned config"
- * such as Win32, or a cross-compilation setup, for example) try going
- * by the gcc major and minor versions.  One useful URL is
- * http://www.ohse.de/uwe/articles/gcc-attributes.html,
- * but contrary to this information warn_unused_result seems
- * not to be in gcc 3.3.5, at least. --jhi */
-#if defined __GNUC__
-#  if __GNUC__ >= 3 /* 3.0 -> */ /* XXX Verify this version */
-#    define HASATTRIBUTE_FORMAT
-#  endif
-#  if __GNUC__ >= 3 /* 3.0 -> */
-#    define HASATTRIBUTE_MALLOC
-#  endif
-#  if __GNUC__ == 3 && __GNUC_MINOR__ >= 3 || __GNUC__ > 3 /* 3.3 -> */
-#    define HASATTRIBUTE_NONNULL
-#  endif
-#  if __GNUC__ == 2 && __GNUC_MINOR__ >= 5 || __GNUC__ > 2 /* 2.5 -> */
-#    define HASATTRIBUTE_NORETURN
-#  endif
-#  if __GNUC__ >= 3 /* gcc 3.0 -> */
-#    define HASATTRIBUTE_PURE
-#  endif
-#  if __GNUC__ >= 3 /* gcc 3.0 -> */ /* XXX Verify this version */
-#    define HASATTRIBUTE_UNUSED
-#  endif
-#  if __GNUC__ == 3 && __GNUC_MINOR__ >= 4 || __GNUC__ > 3 /* 3.4 -> */
-#    define HASATTRIBUTE_WARN_UNUSED_RESULT
-#  endif
 #endif
 
 /* Because 5.8.x has to keep using %_ for SVf, which will make the format
