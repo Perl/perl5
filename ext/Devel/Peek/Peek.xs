@@ -3,7 +3,7 @@
 #include "perl.h"
 #include "XSUB.h"
 
-bool
+static bool
 _runops_debug(int flag)
 {
     dTHX;
@@ -15,7 +15,7 @@ _runops_debug(int flag)
     return d;
 }
 
-SV *
+static SV *
 DeadCode(pTHX)
 {
 #ifdef PURIFY
@@ -147,7 +147,7 @@ struct mstats_buffer
     UV buf[_NBUCKETS*4];
 };
 
-void
+static void
 _fill_mstats(struct mstats_buffer *b, int level)
 {
     dTHX;
@@ -159,7 +159,7 @@ _fill_mstats(struct mstats_buffer *b, int level)
     get_mstats(&(b->buffer), _NBUCKETS, level);
 }
 
-void
+static void
 fill_mstats(SV *sv, int level)
 {
     dTHX;
@@ -173,7 +173,7 @@ fill_mstats(SV *sv, int level)
     SvPOK_only(sv);
 }
 
-void
+static void
 _mstats_to_hv(HV *hv, const struct mstats_buffer *b, int level)
 {
     dTHX;
@@ -271,7 +271,8 @@ _mstats_to_hv(HV *hv, const struct mstats_buffer *b, int level)
 	}
     }
 }
-void
+
+static void
 mstats_fillhash(SV *sv, int level)
 {
     struct mstats_buffer buf;
@@ -281,7 +282,8 @@ mstats_fillhash(SV *sv, int level)
     _fill_mstats(&buf, level);
     _mstats_to_hv((HV *)SvRV(sv), &buf, level);
 }
-void
+
+static void
 mstats2hash(SV *sv, SV *rv, int level)
 {
     if (!(SvROK(rv) && SvTYPE(SvRV(rv)) == SVt_PVHV))
@@ -293,17 +295,19 @@ mstats2hash(SV *sv, SV *rv, int level)
     _mstats_to_hv((HV *)SvRV(rv), (struct mstats_buffer*)SvPVX(sv), level);
 }
 #else	/* !( defined(PERL_DEBUGGING_MSTATS) || defined(DEBUGGING_MSTATS) \ ) */ 
-void
+static void
 fill_mstats(SV *sv, int level)
 {
     croak("Cannot report mstats without Perl malloc");
 }
-void
+
+static void
 mstats_fillhash(SV *sv, int level)
 {
     croak("Cannot report mstats without Perl malloc");
 }
-void
+
+static void
 mstats2hash(SV *sv, SV *rv, int level)
 {
     croak("Cannot report mstats without Perl malloc");
