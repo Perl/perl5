@@ -1488,6 +1488,10 @@ S_sortsv_desc(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
     sortsvp(aTHX_ array, nmemb, cmp, 1);
 }
 
+#define SvNSIOK(sv) ((SvFLAGS(sv) & SVf_NOK) || ((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV)) == SVf_IOK))
+#define SvSIOK(sv) ((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV)) == SVf_IOK)
+#define SvNSIV(sv) ( SvNOK(sv) ? SvNVX(sv) : ( SvSIOK(sv) ? SvIVX(sv) : sv_2nv(sv) ) )
+
 PP(pp_sort)
 {
     dSP; dMARK; dORIGMARK;
@@ -1507,6 +1511,7 @@ PP(pp_sort)
     U8 flags = PL_op->op_flags;
     void (*sortsvp)(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
       = Perl_sortsv;
+    I32 all_SIVs = 1;
 
     if (gimme != G_ARRAY) {
 	SP = MARK;
@@ -1593,17 +1598,42 @@ PP(pp_sort)
 	sortsvp = S_sortsv_desc;
     }
 
-    /* shuffle stack down, removing optional initial cv (p1!=p2), plus any
-     * nulls; also stringify any args */
+    /* shuffle stack down, removing optional initial cv (p1!=p2), plus
+     * any nulls; also stringify or converting to integer or number as
+     * required any args */
     for (i=max; i > 0 ; i--) {
 	if ((*p1 = *p2++)) {			/* Weed out nulls. */
 	    SvTEMP_off(*p1);
-	    if (!PL_sortcop && !SvPOK(*p1)) {
-		STRLEN n_a;
-	        if (SvAMAGIC(*p1))
-	            overloading = 1;
-	        else
-		    (void)sv_2pv(*p1, &n_a);
+	    if (!PL_sortcop) {
+		if (priv & OPpSORT_NUMERIC) {
+		    if (priv & OPpSORT_INTEGER) {
+			if (!SvIOK(*p1)) {
+			    if (SvAMAGIC(*p1))
+				overloading = 1;
+			    else
+				(void)sv_2iv(*p1);
+			}
+		    }
+		    else {
+			if (!SvNSIOK(*p1)) {
+			    if (SvAMAGIC(*p1))
+				overloading = 1;
+			    else
+				(void)sv_2nv(*p1);
+			}
+			if (all_SIVs && !SvSIOK(*p1))
+			    all_SIVs = 0;
+		    }
+		}
+		else {
+		    if (!SvPOK(*p1)) {
+			STRLEN n_a;
+			if (SvAMAGIC(*p1))
+			    overloading = 1;
+			else
+			    (void)sv_2pv(*p1, &n_a);
+		    }
+		}
 	    }
 	    p1++;
 	}
@@ -1675,9 +1705,9 @@ PP(pp_sort)
 	    start = sorting_av ? AvARRAY(av) : ORIGMARK+1;
 	    sortsvp(aTHX_ start, max,
 		    (priv & OPpSORT_NUMERIC)
-			? ( (priv & OPpSORT_INTEGER)
+		        ? ( ( ( priv & OPpSORT_INTEGER) || all_SIVs)
 			    ? ( overloading ? amagic_i_ncmp : sv_i_ncmp)
-			    : ( overloading ? amagic_ncmp : sv_ncmp))
+			    : ( overloading ? amagic_ncmp : sv_ncmp ) )
 			: ( IN_LOCALE_RUNTIME
 			    ? ( overloading
 				? amagic_cmp_locale
@@ -1817,8 +1847,8 @@ sortcv_xsub(pTHX_ SV *a, SV *b)
 static I32
 sv_ncmp(pTHX_ SV *a, SV *b)
 {
-    NV nv1 = SvNV(a);
-    NV nv2 = SvNV(b);
+    NV nv1 = SvNSIV(a);
+    NV nv2 = SvNSIV(b);
     return nv1 < nv2 ? -1 : nv1 > nv2 ? 1 : 0;
 }
 
