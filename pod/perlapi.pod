@@ -5325,6 +5325,8 @@ UTF-8 string, false otherwise.  Note that 'a valid UTF-8 string' does
 not mean 'a string that contains code points above 0x7F encoded in UTF-8'
 because a valid ASCII string is a valid UTF-8 string.
 
+See also is_utf8_string_loclen() and is_utf8_string_loc().
+
 	bool	is_utf8_string(const U8 *s, STRLEN len)
 
 =for hackers
@@ -5332,10 +5334,27 @@ Found in file utf8.c
 
 =item is_utf8_string_loc
 
-Like is_ut8_string but store the location of the failure in
-the last argument.
+Like is_ut8_string() but stores the location of the failure (in the
+case of "utf8ness failure") or the location s+len (in the case of
+"utf8ness success") in the C<ep>.
+
+See also is_utf8_string_loclen() and is_utf8_string().
 
 	bool	is_utf8_string_loc(const U8 *s, STRLEN len, const U8 **p)
+
+=for hackers
+Found in file utf8.c
+
+=item is_utf8_string_loclen
+
+Like is_ut8_string() but stores the location of the failure (in the
+case of "utf8ness failure") or the location s+len (in the case of
+"utf8ness success") in the C<ep>, and the number of UTF-8
+encoded characters in the C<el>.
+
+See also is_utf8_string_loc() and is_utf8_string().
+
+	bool	is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 
 =for hackers
 Found in file utf8.c

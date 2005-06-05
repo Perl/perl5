@@ -346,7 +346,8 @@ ApPR	|bool	|is_uni_punct_lc|UV c
 ApPR	|bool	|is_uni_xdigit_lc|UV c
 Apd	|STRLEN	|is_utf8_char	|NN const U8 *p
 Apd	|bool	|is_utf8_string	|NN const U8 *s|STRLEN len
-Apd	|bool	|is_utf8_string_loc|NN const U8 *s|STRLEN len|NN const U8 **p
+Apd	|bool	|is_utf8_string_loc|NN const U8 *s|STRLEN len|const U8 **p
+Apd	|bool	|is_utf8_string_loclen|NN const U8 *s|STRLEN len|const U8 **ep|STRLEN *el
 ApR	|bool	|is_utf8_alnum	|NN const U8 *p
 ApR	|bool	|is_utf8_alnumc	|NN const U8 *p
 ApR	|bool	|is_utf8_idfirst|NN const U8 *p

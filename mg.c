@@ -495,10 +495,12 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 		if (i > 0 && RX_MATCH_UTF8(rx)) {
 		    char *s    = rx->subbeg + s1;
 		    char *send = rx->subbeg + t1;
+		    const U8 *ep;
+		    STRLEN el;
 
                     i = t1 - s1;
-		    if (is_utf8_string((U8*)s, i))
-			i = Perl_utf8_length(aTHX_ (U8*)s, (U8*)send);
+		    if (is_utf8_string_loclen((U8*)s, i, &ep, &el))
+			i = el;
 		}
 		if (i < 0)
 		    Perl_croak(aTHX_ "panic: magic_len: %"IVdf, (IV)i);

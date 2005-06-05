@@ -240,10 +240,9 @@ will be returned if it is valid, otherwise 0.
 STRLEN
 Perl_is_utf8_char(pTHX_ const U8 *s)
 {
-    STRLEN len;
+    STRLEN len = UTF8SKIP(s);
 #ifdef IS_UTF8_CHAR
-    len = UTF8SKIP(s);
-    if (len <= 4)
+    if (IS_UTF8_CHAR_FAST(len))
         return IS_UTF8_CHAR(s, len) ? len : 0;
 #endif /* #ifdef IS_UTF8_CHAR */
     return is_utf8_char_slow(s, len);
@@ -256,6 +255,8 @@ Returns true if first C<len> bytes of the given string form a valid
 UTF-8 string, false otherwise.  Note that 'a valid UTF-8 string' does
 not mean 'a string that contains code points above 0x7F encoded in UTF-8'
 because a valid ASCII string is a valid UTF-8 string.
+
+See also is_utf8_string_loclen() and is_utf8_string_loc().
 
 =cut
 */
@@ -276,26 +277,26 @@ Perl_is_utf8_string(pTHX_ const U8 *s, STRLEN len)
 	 if (UTF8_IS_INVARIANT(*x))
 	      c = 1;
 	 else if (!UTF8_IS_START(*x))
-	      return FALSE;
+	     goto out;
 	 else {
 	      /* ... and call is_utf8_char() only if really needed. */
 #ifdef IS_UTF8_CHAR
 	     c = UTF8SKIP(x);
-	     if (c <= 4) {
-		 if (!IS_UTF8_CHAR(x, c))
-		     return FALSE;
-	     } else {
-		 if (!is_utf8_char_slow(x, c))
-		     return FALSE;
-	     }
+	     if (IS_UTF8_CHAR_FAST(c)) {
+	         if (!IS_UTF8_CHAR(x, c))
+		     goto out;
+	     } else if (!is_utf8_char_slow(x, c))
+	         goto out;
 #else
 	     c = is_utf8_char(x);
 #endif /* #ifdef IS_UTF8_CHAR */
 	      if (!c)
-		   return FALSE;
+		  goto out;
 	 }
         x += c;
     }
+
+ out:
     if (x != send)
 	return FALSE;
 
@@ -303,16 +304,20 @@ Perl_is_utf8_string(pTHX_ const U8 *s, STRLEN len)
 }
 
 /*
-=for apidoc A|bool|is_utf8_string_loc|const U8 *s|STRLEN len|const U8 **p
+=for apidoc A|bool|is_utf8_string_loclen|const U8 *s|STRLEN len|const U8 **ep|const STRLEN *el
 
-Like is_ut8_string but store the location of the failure in
-the last argument.
+Like is_ut8_string() but stores the location of the failure (in the
+case of "utf8ness failure") or the location s+len (in the case of
+"utf8ness success") in the C<ep>, and the number of UTF-8
+encoded characters in the C<el>.
+
+See also is_utf8_string_loc() and is_utf8_string().
 
 =cut
 */
 
 bool
-Perl_is_utf8_string_loc(pTHX_ const U8 *s, STRLEN len, const U8 **p)
+Perl_is_utf8_string_loclen(pTHX_ const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 {
     const U8* x = s;
     const U8* send;
@@ -321,34 +326,60 @@ Perl_is_utf8_string_loc(pTHX_ const U8 *s, STRLEN len, const U8 **p)
     if (!len && s)
         len = strlen((const char *)s);
     send = s + len;
+    if (el)
+        *el = 0;
 
     while (x < send) {
 	 /* Inline the easy bits of is_utf8_char() here for speed... */
 	 if (UTF8_IS_INVARIANT(*x))
-	      c = 1;
-	 else if (!UTF8_IS_START(*x)) {
-	      if (p)
-		  *p = x;
-	      return FALSE;
-	 }
+	     c = 1;
+	 else if (!UTF8_IS_START(*x))
+	     goto out;
 	 else {
-	      /* ... and call is_utf8_char() only if really needed. */
-	      c = is_utf8_char(x);
-	      if (!c) {
-		   if (p)
-		      *p = x;
-		   return FALSE;
-	      }
+	     /* ... and call is_utf8_char() only if really needed. */
+#ifdef IS_UTF8_CHAR
+	     c = UTF8SKIP(x);
+	     if (IS_UTF8_CHAR_FAST(c)) {
+	         if (!IS_UTF8_CHAR(x, c))
+		     c = 0;
+	     } else
+	         c = is_utf8_char_slow(x, c);
+#else
+	     c = is_utf8_char(x);
+#endif /* #ifdef IS_UTF8_CHAR */
+	     if (!c)
+	         goto out;
 	 }
-        x += c;
-    }
-    if (x != send) {
-       if (p)
-	   *p = x;
-	return FALSE;
+         x += c;
+	 if (el)
+	     (*el)++;
     }
 
+ out:
+    if (ep)
+        *ep = x;
+    if (x != send)
+	return FALSE;
+
     return TRUE;
+}
+
+/*
+=for apidoc A|bool|is_utf8_string_loc|const U8 *s|STRLEN len|const U8 **ep|const STRLEN *el
+
+Like is_ut8_string() but stores the location of the failure (in the
+case of "utf8ness failure") or the location s+len (in the case of
+"utf8ness success") in the C<ep>.
+
+See also is_utf8_string_loclen() and is_utf8_string().
+
+=cut
+*/
+
+bool
+Perl_is_utf8_string_loc(pTHX_ const U8 *s, STRLEN len, const U8 **ep)
+{
+    return is_utf8_string_loclen(s, len, ep, 0);
 }
 
 /*

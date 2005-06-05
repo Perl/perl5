@@ -327,3 +327,5 @@ encoded character.
 	 (n) == 3 ? IS_UTF8_CHAR_3(p) : \
 	 (n) == 4 ? IS_UTF8_CHAR_4(p) : 0)
 
+#define IS_UTF8_CHAR_FAST(n) ((n) <= 4)
+
