@@ -1593,17 +1593,40 @@ PP(pp_sort)
 	sortsvp = S_sortsv_desc;
     }
 
-    /* shuffle stack down, removing optional initial cv (p1!=p2), plus any
-     * nulls; also stringify any args */
+    /* shuffle stack down, removing optional initial cv (p1!=p2), plus
+     * any nulls; also stringify or converting to integer or number as
+     * required any args */
     for (i=max; i > 0 ; i--) {
 	if ((*p1 = *p2++)) {			/* Weed out nulls. */
 	    SvTEMP_off(*p1);
-	    if (!PL_sortcop && !SvPOK(*p1)) {
-		STRLEN n_a;
-	        if (SvAMAGIC(*p1))
-	            overloading = 1;
-	        else
-		    (void)sv_2pv(*p1, &n_a);
+	    if (!PL_sortcop) {
+		if (priv & OPpSORT_NUMERIC) {
+		    if (priv & OPpSORT_INTEGER) {
+			if (!SvIOK(*p1)) {
+			    if (SvAMAGIC(*p1))
+				overloading = 1;
+			    else
+				(void)sv_2iv(*p1);
+			}
+		    }
+		    else {
+			if (!SvNOK(*p1)) {
+			    if (SvAMAGIC(*p1))
+				overloading = 1;
+			    else
+				(void)sv_2nv(*p1);
+			}
+		    }
+		}
+		else {
+		    if (!SvPOK(*p1)) {
+			STRLEN n_a;
+			if (SvAMAGIC(*p1))
+			    overloading = 1;
+			else
+			    (void)sv_2pv(*p1, &n_a);
+		    }
+		}
 	    }
 	    p1++;
 	}
