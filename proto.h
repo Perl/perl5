@@ -1080,7 +1080,7 @@ PERL_CALLCONV char*	Perl_scan_vstring(pTHX_ const char *vstr, SV *sv)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV char*	Perl_scan_version(pTHX_ const char *vstr, SV *sv, bool qv)
+PERL_CALLCONV const char*	Perl_scan_version(pTHX_ const char *vstr, SV *sv, bool qv)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 

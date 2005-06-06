@@ -639,10 +639,10 @@ usage if $opt_h;
 
 if( $opt_b ){
     usage "You cannot use -b and -m at the same time.\n" if ($opt_b && $opt_m);
-    $opt_b =~ /^\d+\.\d+\.\d+/ ||
+    $opt_b =~ /^v?(\d+)\.(\d+)\.(\d+)/ ||
     usage "You must provide the backwards compatibility version in X.Y.Z form. "
           .  "(i.e. 5.5.0)\n";
-    my ($maj,$min,$sub) = split(/\./,$opt_b,3);
+    my ($maj,$min,$sub) = ($1,$2,$3);
     if ($maj < 5 || ($maj == 5 && $min < 6)) {
         $compat_version =
 	    $sub ? sprintf("%d.%03d%02d",$maj,$min,$sub) :

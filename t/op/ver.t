@@ -205,6 +205,9 @@ is(v200, eval("+v200"), 'v200 eq eval("+v200")' );
 # Tests for string/numeric value of $] itself
 my ($revision,$version,$subversion) = split '\.', sprintf("%vd",$^V);
 
+# $^V always displays the leading 'v' but we don't want that here
+$revision =~ s/^v//;
+
 print "# revision   = '$revision'\n";
 print "# version    = '$version'\n";
 print "# subversion = '$subversion'\n";

@@ -82,7 +82,7 @@ use strict;
 # use vars pulls in Carp
 ENDOFBEG
 
-my $myver = sprintf "v%vd", $^V;
+my $myver = sprintf "%vd", $^V;
 
 printf CONFIG <<'ENDOFBEG', ($myver) x 3;
 # This file was created by configpm when Perl was built. Any changes

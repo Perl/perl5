@@ -4,7 +4,7 @@
 
 #########################
 
-use Test::More tests => 170;
+use Test::More tests => 183;
 
 diag "Tests with base class" unless $ENV{PERL_CORE};
 
@@ -15,16 +15,16 @@ diag "Tests with empty derived class" unless $ENV{PERL_CORE};
 
 package version::Empty;
 use vars qw($VERSION @ISA);
-use Exporter;
 use version 0.30;
-@ISA = qw(Exporter version);
+@ISA = qw(version);
 $VERSION = 0.01;
 
 package main;
 my $testobj = new version::Empty 1.002_003;
 isa_ok( $testobj, "version::Empty" );
 ok( $testobj->numify == 1.002003, "Numified correctly" );
-ok( $testobj->stringify eq "1.2.3", "Stringified correctly" );
+ok( $testobj->stringify eq "1.002003", "Stringified correctly" );
+ok( $testobj->normal eq "v1.2.3", "Normalified correctly" );
 
 my $verobj = new version "1.2.4";
 ok( $verobj > $testobj, "Comparison vs parent class" );
@@ -41,7 +41,7 @@ sub BaseTests {
 	# Test bare number processing
 	diag "tests with bare numbers" unless $ENV{PERL_CORE};
 	$version = $CLASS->new(5.005_03);
-	is ( "$version" , "5.5.30" , '5.005_03 eq 5.5.30' );
+	is ( "$version" , "5.005030" , '5.005_03 eq 5.5.30' );
 	$version = $CLASS->new(1.23);
 	is ( "$version" , "1.230" , '1.23 eq "1.230"' );
 	
@@ -50,16 +50,16 @@ sub BaseTests {
 	$version = $CLASS->new("5.005_03");
 	is ( "$version" , "5.005_030" , '"5.005_03" eq "5.005_030"' );
 	$version = $CLASS->new("v1.23");
-	is ( "$version" , "1.23.0" , '"v1.23" eq "1.23.0"' );
+	is ( "$version" , "v1.23.0" , '"v1.23" eq "v1.23.0"' );
 	
 	# Test stringify operator
 	diag "tests with stringify" unless $ENV{PERL_CORE};
 	$version = $CLASS->new("5.005");
 	is ( "$version" , "5.005" , '5.005 eq "5.005"' );
 	$version = $CLASS->new("5.006.001");
-	is ( "$version" , "5.6.1" , '5.006.001 eq 5.6.1' );
+	is ( "$version" , "v5.6.1" , '5.006.001 eq v5.6.1' );
 	$version = $CLASS->new("1.2.3_4");
-	is ( "$version" , "1.2.3_4" , 'alpha version 1.2.3_4 eq 1.2.3_4' );
+	is ( "$version" , "v1.2.3_4" , 'alpha version 1.2.3_4 eq v1.2.3_4' );
 	
 	# test illegal formats
 	diag "test illegal formats" unless $ENV{PERL_CORE};
@@ -74,6 +74,7 @@ sub BaseTests {
 	$version = $CLASS->new("99 and 44/100 pure");
 	ok ("$version" eq "99.000", '$version eq "99.000"');
 	ok ($version->numify == 99.0, '$version->numify == 99.0');
+	ok ($version->normal eq "v99.0.0", '$version->normal eq v99.0.0');
 	
 	$version = $CLASS->new("something");
 	ok (defined $version, 'defined $version');
@@ -216,7 +217,11 @@ sub BaseTests {
 	diag "create new from existing version" unless $ENV{PERL_CORE};
 	ok (eval {$new_version = version->new($version)},
 		"new from existing object");
-	ok ($new_version == $version, "duped object identical");
+	ok ($new_version == $version, "class->new($version) identical");
+	$new_version = $version->new();
+	ok ($new_version == $version, "$version->new() also identical");
+	$new_version = $version->new("1.2.3");
+	is ($new_version, "v1.2.3" , '$version->new("1.2.3") works too');
 
 	# test the CVS revision mode
 	diag "testing CVS Revision" unless $ENV{PERL_CORE};
@@ -225,6 +230,13 @@ sub BaseTests {
 	$version = new version qw$Revision: 1.2.3.4$;
 	ok ( $version eq "1.2.3.4", 'qw$Revision: 1.2.3.4$ eq 1.2.3.4' );
 	
+	# test the CPAN style reduced significant digit form
+	diag "testing CPAN-style versions" unless $ENV{PERL_CORE};
+	$version = $CLASS->new("1.23_01");
+	is ( "$version" , "1.23_0100", "CPAN-style alpha version" );
+	ok ( $version > 1.23, "1.23_01 > 1.23");
+	ok ( $version < 1.24, "1.23_01 < 1.24");
+
 	# test reformed UNIVERSAL::VERSION
 	diag "Replacement UNIVERSAL::VERSION tests" unless $ENV{PERL_CORE};
 	
@@ -255,12 +267,12 @@ SKIP: 	{
 		    if $] < 5.008_001; 
 	    diag "Tests with v-strings" unless $ENV{PERL_CORE};
 	    $version = $CLASS->new(1.2.3);
-	    ok("$version" eq "1.2.3", '"$version" eq 1.2.3');
+	    ok("$version" eq "v1.2.3", '"$version" eq 1.2.3');
 	    $version = $CLASS->new(1.0.0);
 	    $new_version = $CLASS->new(1);
 	    ok($version == $new_version, '$version == $new_version');
 	    ok($version eq $new_version, '$version eq $new_version');
 	    $version = qv(1.2.3);
-	    ok("$version" eq "1.2.3", 'v-string initialized qv()');
+	    ok("$version" eq "v1.2.3", 'v-string initialized qv()');
 	}
 }

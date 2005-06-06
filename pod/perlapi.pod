@@ -1828,7 +1828,7 @@ is a alpha version).  The boolean qv denotes that the version
 should be interpreted as if it had multiple decimals, even if
 it doesn't.
 
-	char*	scan_version(const char *vstr, SV *sv, bool qv)
+	const char*	scan_version(const char *vstr, SV *sv, bool qv)
 
 =for hackers
 Found in file util.c

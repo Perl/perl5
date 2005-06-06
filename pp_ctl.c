@@ -3084,8 +3084,8 @@ PP(pp_require)
 	if (!sv_derived_from(PL_patchlevel, "version"))
 	    (void *)upg_version(PL_patchlevel);
 	if ( vcmp(sv,PL_patchlevel) > 0 )
-	    DIE(aTHX_ "Perl v%"SVf" required--this is only v%"SVf", stopped",
-		vstringify(sv), vstringify(PL_patchlevel));
+	    DIE(aTHX_ "Perl %"SVf" required--this is only %"SVf", stopped",
+		vnormal(sv), vnormal(PL_patchlevel));
 
 	    RETPUSHYES;
     }

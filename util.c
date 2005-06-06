@@ -3825,18 +3825,27 @@ it doesn't.
 =cut
 */
 
-char *
+const char *
 Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
 {
     const char *start = s;
-    const char *pos = s;
-    I32 saw_period = 0;
-    bool saw_under = 0;
-    SV* sv = newSVrv(rv, "version"); /* create an SV and upgrade the RV */
-    (void)sv_upgrade(sv, SVt_PVAV); /* needs to be an AV type */
-    AvREAL_on((AV*)sv);
+    const char *pos;
+    const char *last;
+    int saw_period = 0;
+    int saw_under = 0;
+    int width = 3;
+    AV *av = newAV();
+    SV* hv = newSVrv(rv, "version"); /* create an SV and upgrade the RV */
+    (void)sv_upgrade(hv, SVt_PVHV); /* needs to be an HV type */
 
-    /* pre-scan the imput string to check for decimals */
+    if (*s == 'v') {
+	s++;  /* get past 'v' */
+	qv = 1; /* force quoted version processing */
+    }
+
+    last = pos = s;
+
+    /* pre-scan the input string to check for decimals/underbars */
     while ( *pos == '.' || *pos == '_' || isDIGIT(*pos) )
     {
 	if ( *pos == '.' )
@@ -3844,38 +3853,45 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
 	    if ( saw_under )
 		Perl_croak(aTHX_ "Invalid version format (underscores before decimal)");
 	    saw_period++ ;
+	    last = pos;
 	}
 	else if ( *pos == '_' )
 	{
 	    if ( saw_under )
 		Perl_croak(aTHX_ "Invalid version format (multiple underscores)");
 	    saw_under = 1;
+	    width = pos - last - 1; /* natural width of sub-version */
 	}
 	pos++;
     }
-    pos = s;
 
-    if (*pos == 'v') {
-	pos++;  /* get past 'v' */
+    if ( saw_period > 1 ) {
 	qv = 1; /* force quoted version processing */
     }
+
+    pos = s;
+
+    if ( qv )
+	hv_store((HV *)hv, "qv", 2, &PL_sv_yes, 0);
+    if ( saw_under ) {
+	hv_store((HV *)hv, "alpha", 5, &PL_sv_yes, 0);
+    }
+    if ( !qv && width < 3 )
+	hv_store((HV *)hv, "width", 5, newSViv(width), 0);
+    
     while (isDIGIT(*pos))
 	pos++;
     if (!isALPHA(*pos)) {
 	I32 rev;
 
-	if (*s == 'v') s++;  /* get past 'v' */
-
 	for (;;) {
 	    rev = 0;
 	    {
   		/* this is atoi() that delimits on underscores */
-		const char *end = pos;
+  		const char *end = pos;
   		I32 mult = 1;
  		I32 orev;
-  		if ( s < pos && s > start && *(s-1) == '_' ) {
- 			mult *= -1;	/* alpha version */
-  		}
+
 		/* the following if() will only be true after the decimal
 		 * point of a version originally created with a bare
 		 * floating point number, i.e. not quoted in any way
@@ -3889,6 +3905,8 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
  			if ( PERL_ABS(orev) > PERL_ABS(rev) )
  			    Perl_croak(aTHX_ "Integer overflow in version");
  			s++;
+			if ( *s == '_' )
+			    s++;
  		    }
   		}
  		else {
@@ -3901,10 +3919,12 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
  		    }
  		} 
   	    }
-  
+
   	    /* Append revision */
-	    av_push((AV *)sv, newSViv(rev));
-	    if ( (*pos == '.' || *pos == '_') && isDIGIT(pos[1]))
+	    av_push(av, newSViv(rev));
+	    if ( *pos == '.' && isDIGIT(pos[1]) )
+		s = ++pos;
+	    else if ( *pos == '_' && isDIGIT(pos[1]) )
 		s = ++pos;
 	    else if ( isDIGIT(*pos) )
 		s = pos;
@@ -3912,15 +3932,22 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
 		s = pos;
 		break;
 	    }
-	    while ( isDIGIT(*pos) ) {
-		if ( saw_period == 1 && pos-s == 3 )
-		    break;
-		pos++;
+	    if ( qv ) {
+		while ( isDIGIT(*pos) )
+		    pos++;
+	    }
+	    else {
+		int digits = 0;
+		while ( ( isDIGIT(*pos) || *pos == '_' ) && digits < 3 ) {
+		    if ( *pos != '_' )
+			digits++;
+		    pos++;
+		}
 	    }
 	}
     }
-    if ( qv ) { /* quoted versions always become full version objects */
-	I32 len = av_len((AV *)sv);
+    if ( qv ) { /* quoted versions always get at least three terms*/
+	I32 len = av_len(av);
 	/* This for loop appears to trigger a compiler bug on OS X, as it
 	   loops infinitely. Yes, len is negative. No, it makes no sense.
 	   Compiler in question is:
@@ -3930,9 +3957,15 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
 	*/
 	len = 2 - len;
 	while (len-- > 0)
-	    av_push((AV *)sv, newSViv(0));
+	    av_push(av, newSViv(0));
     }
-    return (char *)s;
+
+    if ( av_len(av) == -1 ) /* oops, someone forgot to pass a value */
+	av_push(av, newSViv(0));
+
+    /* And finally, store the AV in the hash */
+    hv_store((HV *)hv, "version", 7, (SV *)av, 0);
+    return s;
 }
 
 /*
@@ -3955,15 +3988,37 @@ Perl_new_version(pTHX_ SV *ver)
     if ( sv_derived_from(ver,"version") ) /* can just copy directly */
     {
 	I32 key;
-	AV *av = (AV *)SvRV(ver);
-	SV* sv = newSVrv(rv, "version"); /* create an SV and upgrade the RV */
-	(void)sv_upgrade(sv, SVt_PVAV); /* needs to be an AV type */
-	AvREAL_on((AV*)sv);
-	for ( key = 0; key <= av_len(av); key++ )
+	AV *av = newAV();
+	AV *sav;
+	/* This will get reblessed later if a derived class*/
+	SV* hv = newSVrv(rv, "version"); 
+	(void)sv_upgrade(hv, SVt_PVHV); /* needs to be an HV type */
+
+	if ( SvROK(ver) )
+	    ver = SvRV(ver);
+
+	/* Begin copying all of the elements */
+	if ( hv_exists((HV *)ver, "qv", 2) )
+	    hv_store((HV *)hv, "qv", 2, &PL_sv_yes, 0);
+
+	if ( hv_exists((HV *)ver, "alpha", 5) )
+	    hv_store((HV *)hv, "alpha", 5, &PL_sv_yes, 0);
+	
+	if ( hv_exists((HV*)ver, "width", 5 ) )
 	{
-	    const I32 rev = SvIV(*av_fetch(av, key, FALSE));
-	    av_push((AV *)sv, newSViv(rev));
+	    I32 width = SvIV(*hv_fetch((HV*)ver, "width", 5, FALSE));
+	    hv_store((HV *)hv, "width", 5, newSViv(width), 0);
 	}
+
+	sav = (AV *)*hv_fetch((HV*)ver, "version", 7, FALSE);
+	/* This will get reblessed later if a derived class*/
+	for ( key = 0; key <= av_len(sav); key++ )
+	{
+	    const I32 rev = SvIV(*av_fetch(sav, key, FALSE));
+	    av_push(av, newSViv(rev));
+	}
+
+	hv_store((HV *)hv, "version", 7, (SV *)av, 0);
 	return rv;
     }
 #ifdef SvVOK
@@ -4017,7 +4072,7 @@ Perl_upg_version(pTHX_ SV *ver)
 #endif
     else /* must be a string or something like a string */
     {
-	version = savesvpv(ver);
+	version = savepv(SvPV_nolen(ver));
     }
     (void)scan_version(version, ver, qv);
     Safefree(version);
@@ -4043,35 +4098,60 @@ SV *
 Perl_vnumify(pTHX_ SV *vs)
 {
     I32 i, len, digit;
+    int width;
+    bool alpha = FALSE;
     SV *sv = newSV(0);
+    AV *av;
     if ( SvROK(vs) )
 	vs = SvRV(vs);
-    len = av_len((AV *)vs);
+
+    /* see if various flags exist */
+    if ( hv_exists((HV*)vs, "alpha", 5 ) )
+	alpha = TRUE;
+    if ( hv_exists((HV*)vs, "width", 5 ) )
+	width = SvIV(*hv_fetch((HV*)vs, "width", 5, FALSE));
+    else
+	width = 3;
+
+
+    /* attempt to retrieve the version array */
+    if ( !(av = (AV *)*hv_fetch((HV*)vs, "version", 7, FALSE) ) ) {
+	Perl_sv_catpv(aTHX_ sv,"0");
+	return sv;
+    }
+
+    len = av_len(av);
     if ( len == -1 )
     {
 	sv_catpvn(sv,"0",1);
 	return sv;
     }
-    digit = SvIVX(*av_fetch((AV *)vs, 0, 0));
+
+    digit = SvIV(*av_fetch(av, 0, 0));
     Perl_sv_setpvf(aTHX_ sv,"%d.", (int)PERL_ABS(digit));
     for ( i = 1 ; i < len ; i++ )
     {
-	digit = SvIVX(*av_fetch((AV *)vs, i, 0));
-	Perl_sv_catpvf(aTHX_ sv,"%03d", (int)PERL_ABS(digit));
+	digit = SvIV(*av_fetch(av, i, 0));
+	if ( width < 3 ) {
+	    int denom = (int)pow(10,(3-width));
+	    div_t term = div((int)PERL_ABS(digit),denom);
+	    Perl_sv_catpvf(aTHX_ sv,"%0*d_%d", width, term.quot, term.rem);
+	}
+	else {
+	    Perl_sv_catpvf(aTHX_ sv,"%0*d", width, (int)digit);
+	}
     }
 
     if ( len > 0 )
     {
-	digit = SvIVX(*av_fetch((AV *)vs, len, 0));
-	if ( (int)PERL_ABS(digit) != 0 || len == 1 )
-	{
-	    if ( digit < 0 ) /* alpha version */
-		sv_catpvn(sv,"_",1);
-	    /* Don't display additional trailing zeros */
-	    Perl_sv_catpvf(aTHX_ sv,"%03d", (int)PERL_ABS(digit));
-	}
+	digit = SvIV(*av_fetch(av, len, 0));
+	if ( alpha && width == 3 ) /* alpha version */
+	    Perl_sv_catpv(aTHX_ sv,"_");
+	/* Don't display additional trailing zeros */
+	if ( digit > 0 )
+	    Perl_sv_catpvf(aTHX_ sv,"%0*d", width, (int)digit);
     }
-    else /* len == 0 */
+    else /* len == 1 */
     {
 	 sv_catpvn(sv,"000",3);
     }
@@ -4096,33 +4176,44 @@ SV *
 Perl_vnormal(pTHX_ SV *vs)
 {
     I32 i, len, digit;
+    bool alpha = FALSE;
     SV *sv = newSV(0);
+    AV *av;
     if ( SvROK(vs) )
 	vs = SvRV(vs);
-    len = av_len((AV *)vs);
-    if ( len == -1 )
-    {
+
+    if ( hv_exists((HV*)vs, "alpha", 5 ) )
+	alpha = TRUE;
+    av = (AV *)*hv_fetch((HV*)vs, "version", 7, FALSE);
+
+    len = av_len(av);
+    if ( len == -1 ) {
 	sv_catpvn(sv,"",0);
 	return sv;
     }
-    digit = SvIVX(*av_fetch((AV *)vs, 0, 0));
-    Perl_sv_setpvf(aTHX_ sv,"%"IVdf,(IV)digit);
-    for ( i = 1 ; i <= len ; i++ )
-    {
-	digit = SvIVX(*av_fetch((AV *)vs, i, 0));
-	if ( digit < 0 )
-	    Perl_sv_catpvf(aTHX_ sv,"_%"IVdf,(IV)-digit);
-	else
-	    Perl_sv_catpvf(aTHX_ sv,".%"IVdf,(IV)digit);
+    digit = SvIV(*av_fetch(av, 0, 0));
+    Perl_sv_setpvf(aTHX_ sv,"v%"IVdf,(IV)digit);
+    for ( i = 1 ; i <= len-1 ; i++ ) {
+	digit = SvIV(*av_fetch(av, i, 0));
+	Perl_sv_catpvf(aTHX_ sv, ".%"IVdf, (IV)digit);
     }
-    
+
+    if ( len > 0 ) {
+	/* handle last digit specially */
+	digit = SvIV(*av_fetch(av, len, 0));
+	if ( alpha )
+	    Perl_sv_catpvf(aTHX_ sv, "_%"IVdf, (IV)digit);
+	else
+	    Perl_sv_catpvf(aTHX_ sv, ".%"IVdf, (IV)digit);
+    }
+
     if ( len <= 2 ) { /* short version, must be at least three */
 	for ( len = 2 - len; len != 0; len-- )
 	    sv_catpvn(sv,".0",2);
     }
 
     return sv;
-} 
+}
 
 /*
 =for apidoc vstringify
@@ -4138,16 +4229,17 @@ the original version contained 1 or more dots, respectively
 SV *
 Perl_vstringify(pTHX_ SV *vs)
 {
-    I32 len, digit;
+    I32 qv = 0;
     if ( SvROK(vs) )
 	vs = SvRV(vs);
-    len = av_len((AV *)vs);
-    digit = SvIVX(*av_fetch((AV *)vs, len, 0));
     
-    if ( len < 2 || ( len == 2 && digit < 0 ) )
-	return vnumify(vs);
-    else
+    if ( hv_exists((HV *)vs, "qv", 2) )
+	qv = 1;
+    
+    if ( qv )
 	return vnormal(vs);
+    else
+	return vnumify(vs);
 }
 
 /*
@@ -4160,31 +4252,56 @@ converted into version objects.
 */
 
 int
-Perl_vcmp(pTHX_ SV *lsv, SV *rsv)
+Perl_vcmp(pTHX_ SV *lhv, SV *rhv)
 {
     I32 i,l,m,r,retval;
-    if ( SvROK(lsv) )
-	lsv = SvRV(lsv);
-    if ( SvROK(rsv) )
-	rsv = SvRV(rsv);
-    l = av_len((AV *)lsv);
-    r = av_len((AV *)rsv);
+    bool lalpha = FALSE;
+    bool ralpha = FALSE;
+    I32 left = 0;
+    I32 right = 0;
+    AV *lav, *rav;
+    if ( SvROK(lhv) )
+	lhv = SvRV(lhv);
+    if ( SvROK(rhv) )
+	rhv = SvRV(rhv);
+
+    /* get the left hand term */
+    lav = (AV *)*hv_fetch((HV*)lhv, "version", 7, FALSE);
+    if ( hv_exists((HV*)lhv, "alpha", 5 ) )
+	lalpha = TRUE;
+
+    /* and the right hand term */
+    rav = (AV *)*hv_fetch((HV*)rhv, "version", 7, FALSE);
+    if ( hv_exists((HV*)rhv, "alpha", 5 ) )
+	ralpha = TRUE;
+
+    l = av_len(lav);
+    r = av_len(rav);
     m = l < r ? l : r;
     retval = 0;
     i = 0;
     while ( i <= m && retval == 0 )
     {
-	I32 left  = SvIV(*av_fetch((AV *)lsv,i,0));
-	I32 right = SvIV(*av_fetch((AV *)rsv,i,0));
-	bool lalpha = left  < 0 ? 1 : 0;
-	bool ralpha = right < 0 ? 1 : 0;
-	left  = abs(left);
-	right = abs(right);
-	if ( left < right || (left == right && lalpha && !ralpha) )
+	left  = SvIV(*av_fetch(lav,i,0));
+	right = SvIV(*av_fetch(rav,i,0));
+	if ( left < right  )
 	    retval = -1;
-	if ( left > right || (left == right && ralpha && !lalpha) )
+	if ( left > right )
 	    retval = +1;
 	i++;
+    }
+
+    /* tiebreaker for alpha with identical terms */
+    if ( retval == 0 && l == r && left == right && ( lalpha || ralpha ) )
+    {
+	if ( lalpha && !ralpha )
+	{
+	    retval = -1;
+	}
+	else if ( ralpha && !lalpha)
+	{
+	    retval = +1;
+	}
     }
 
     if ( l != r && retval == 0 ) /* possible match except for trailing 0's */
@@ -4193,7 +4310,7 @@ Perl_vcmp(pTHX_ SV *lsv, SV *rsv)
 	{
 	    while ( i <= r && retval == 0 )
 	    {
-		if ( SvIV(*av_fetch((AV *)rsv,i,0)) != 0 )
+		if ( SvIV(*av_fetch(rav,i,0)) != 0 )
 		    retval = -1; /* not a match after all */
 		i++;
 	    }
@@ -4202,7 +4319,7 @@ Perl_vcmp(pTHX_ SV *lsv, SV *rsv)
 	{
 	    while ( i <= l && retval == 0 )
 	    {
-		if ( SvIV(*av_fetch((AV *)lsv,i,0)) != 0 )
+		if ( SvIV(*av_fetch(lav,i,0)) != 0 )
 		    retval = +1; /* not a match after all */
 		i++;
 	    }

@@ -12,7 +12,7 @@ use vars qw(@ISA $VERSION $CLASS @EXPORT);
 
 @EXPORT = qw(qv);
 
-$VERSION = 0.42; # stop using CVS and switch to subversion
+$VERSION = "0.43"; 
 
 $CLASS = 'version';
 
@@ -36,15 +36,15 @@ version - Perl extension for Version Objects
   print $version->numify; 	# 12.002001
   if ( $version gt  "12.2" )	# true
 
-  $alphaver = version->new("1.2_3"); # must be quoted!
-  print $alphaver;		# 1.2_3
+  $alphaver = version->new("1.02_03"); # must be quoted!
+  print $alphaver;		# 1.02_030
   print $alphaver->is_alpha();  # true
   
   $ver = qv(1.2);               # 1.2.0
   $ver = qv("1.2");             # 1.2.0
 
   $perlver = version->new(5.005_03); # must not be quoted!
-  print $perlver;		# 5.5.30
+  print $perlver;		# 5.005030
 
 =head1 DESCRIPTION
 
@@ -67,16 +67,14 @@ There are actually two distinct ways to initialize versions:
 =item * Numeric Versions
 
 Any initial parameter which "looks like a number", see L<Numeric
-Versions>.
+Versions>.  This also covers versions with a single decimal place and
+a single embedded underscore, see L<Numeric Alpha Versions>, even though
+these must be quoted to preserve the underscore formatting.
 
 =item * Quoted Versions
 
 Any initial parameter which contains more than one decimal point
-or contains an embedded underscore, see L<Quoted Versions>.  The
-most recent development version of Perl (5.9.x) and the next major
-release (5.10.0) will automatically create version objects for bare
-numbers containing more than one decimal point in the appropriate
-context.
+and an optional embedded underscore, see L<Quoted Versions>.
 
 =back
 
@@ -85,11 +83,15 @@ the default stringification will yield the version L<Normal Form> only
 if required:
 
   $v  = version->new(1.002);     # 1.002, but compares like 1.2.0
-  $v  = version->new(1.002003);  # 1.2.3
-  $v2 = version->new( "1.2.3");  # 1.2.3
-  $v3 = version->new(  1.2.3);   # 1.2.3 for Perl >= 5.8.1
+  $v  = version->new(1.002003);  # 1.002003
+  $v2 = version->new( "1.2.3");  # v1.2.3
+  $v3 = version->new(  1.2.3);   # v1.2.3 for Perl >= 5.8.1
 
-Please see L<"Quoting"> for more details on how Perl will parse various
+In specific, version numbers initialized as L<Numeric Versions> will
+stringify in Numeric form.  Version numbers initialized as L<Quoted Versions>
+will be stringified as L<Normal Form>.
+
+Please see L<Quoting> for more details on how Perl will parse various
 input values.
 
 Any value passed to the new() operator will be parsed only so far as it
@@ -187,6 +189,29 @@ to specify a version, whereas Numeric Versions enforce a certain
 uniformity.  See also L<New Operator> for an additional method of
 initializing version objects.
 
+=head2 Numeric Alpha Versions
+
+The one time that a numeric version must be quoted is when a alpha form is
+used with an otherwise numeric version (i.e. a single decimal place).  This
+is commonly used for CPAN releases, where CPAN or CPANPLUS will ignore alpha
+versions for automatic updating purposes.  Since some developers have used
+only two significant decimal places for their non-alpha releases, the
+version object will automatically take that into account if the initializer
+is quoted.  For example Module::Example was released to CPAN with the
+following sequence of $VERSION's:
+
+  # $VERSION    Stringified
+  0.01          0.010
+  0.02          0.020
+  0.02_01       0.02_0100
+  0.02_02       0.02_0200
+  0.03          0.030
+  etc.
+
+As you can see, the version object created from the values in the first
+column may contain a trailing 0, but will otherwise be both mathematically
+equivalent and sorts alpha-numerically as would be expected.
+
 =head2 Object Methods
 
 Overloading has been used with version objects to provide a natural
@@ -218,13 +243,18 @@ carries for versions.  The CVS $Revision$ increments differently from
 numeric versions (i.e. 1.10 follows 1.9), so it must be handled as if
 it were a L<Quoted Version>.
 
-New in 0.38, a new version object can be created as a copy of an existing
-version object:
+A new version object can be created as a copy of an existing version
+object, either as a class method:
 
   $v1 = version->new(12.3);
   $v2 = version->new($v1);
 
-and $v1 and $v2 will be identical.
+or as an object method:
+
+  $v1 = version->new(12.3);
+  $v2 = $v1->new();
+
+and in each case, $v1 and $v2 will be identical.
 
 =back
 
@@ -250,7 +280,7 @@ For the subsequent examples, the following three objects will be used:
 
   $ver   = version->new("1.2.3.4"); # see "Quoting" below
   $alpha = version->new("1.2.3_4"); # see "Alpha versions" below
-  $nver  = version->new(1.2);       # see "Numeric Versions" above
+  $nver  = version->new(1.002);       # see "Numeric Versions" above
 
 =over 4
 
@@ -259,13 +289,13 @@ For the subsequent examples, the following three objects will be used:
 For any version object which is initialized with multiple decimal
 places (either quoted or if possible v-string), or initialized using
 the L<qv()> operator, the stringified representation is returned in
-a normalized or reduced form (no extraneous zeros):
+a normalized or reduced form (no extraneous zeros), and with a leading 'v':
 
-  print $ver->normal;         # prints as 1.2.3
+  print $ver->normal;         # prints as v1.2.3
   print $ver->stringify;      # ditto
   print $ver;                 # ditto
-  print $nver->normal;        # prints as 1.2.0
-  print $nver->stringify;     # prints as 1.2, see "Stringification" 
+  print $nver->normal;        # prints as v1.2.0
+  print $nver->stringify;     # prints as 1.002, see "Stringification" 
 
 In order to preserve the meaning of the processed version, the 
 normalized representation will always contain at least three sub terms.
@@ -289,7 +319,7 @@ corresponds a version object, all sub versions are assumed to have
 three decimal places.  So for example:
 
   print $ver->numify;         # prints 1.002003
-  print $nver->numify;        # prints 1.2
+  print $nver->numify;        # prints 1.002
 
 Unlike the stringification operator, there is never any need to append
 trailing zeros to preserve the correct version value.
@@ -318,8 +348,8 @@ form will be the L<Normal Form>.  The $obj->normal operation can always be
 used to produce the L<Normal Form>, even if the version was originally a
 L<Numeric Version>.
 
-  print $ver->stringify;    # prints 1.2.3
-  print $nver->stringify;   # prints 1.2
+  print $ver->stringify;    # prints v1.2.3
+  print $nver->stringify;   # prints 1.002
 
 =back
 
@@ -412,9 +442,8 @@ but other operations are not likely to be what you intend.  For example:
   $V2 = version->new(100/9); # Integer overflow in decimal number
   print $V2;               # yields something like 11.111.111.100
 
-Perl 5.8.1 and beyond will be able to automatically quote v-strings
-(although a warning may be issued under 5.9.x and 5.10.0), but that
-is not possible in earlier versions of Perl.  In other words:
+Perl 5.8.1 and beyond will be able to automatically quote v-strings but
+that is not possible in earlier versions of Perl.  In other words:
 
   $version = version->new("v2.5.4");  # legal in all versions of Perl
   $newvers = version->new(v2.5.4);    # legal only in Perl >= 5.8.1
@@ -441,39 +470,35 @@ This allows you to automatically increment your module version by
 using the Revision number from the primary file in a distribution, see
 L<ExtUtils::MakeMaker/"VERSION_FROM">.
 
-=item * Alpha versions
+=item * Alpha Versions
 
 For module authors using CPAN, the convention has been to note
 unstable releases with an underscore in the version string, see
 L<CPAN>.  Alpha releases will test as being newer than the more recent
 stable release, and less than the next stable release.  For example:
 
-  $alphaver = version->new("12.3_1"); # must quote
+  $alphaver = version->new("12.03_01"); # must be quoted
 
 obeys the relationship
 
-  12.3 < $alphaver < 12.4
-
-As a matter of fact, if is also true that
-
-  12.3.0 < $alphaver < 12.3.1
-
-where the subversion is identical but the alpha release is less than
-the non-alpha release.
+  12.03 < $alphaver < 12.04
 
 Alpha versions with a single decimal place will be treated exactly as if
 they were L<Numeric Versions>, for parsing purposes.  The stringification for
 alpha versions with a single decimal place may seem suprising, since any
 trailing zeros will visible.  For example, the above $alphaver will print as
 
-  12.300_100
+  12.03_0100
+
+which is mathematically equivalent and ASCII sorts exactly the same as
+without the trailing zeros.
 
 Alpha versions with more than a single decimal place will be treated 
 exactly as if they were L<Quoted Versions>, and will display without any
 trailing (or leading) zeros, in the L<Version Normal> form.  For example,
 
   $newver = version->new("12.3.1_1");
-  print $newver; # 12.3.1_1
+  print $newver; # v12.3.1_1
 
 =head2 Replacement UNIVERSAL::VERSION
 
@@ -509,12 +534,9 @@ The replacement UNIVERSAL::VERSION, when used as a function, like this:
 
   print $module->VERSION;
 
-will follow the stringification rules; i.e. Numeric versions will be displayed
-with the numified format, and the rest will be displayed with the Normal
-format.  Technically, the $module->VERSION function returns a string (PV) that
-can be converted to a number following the normal Perl rules, when used in a
-numeric context.
-
+will also exclusively return the numified form.  Technically, the 
+$module->VERSION function returns a string (PV) that can be converted to a 
+number following the normal Perl rules, when used in a numeric context.
 
 =head1 EXPORT
 
@@ -522,7 +544,7 @@ qv - quoted version initialization operator
 
 =head1 AUTHOR
 
-John Peacock E<lt>jpeacock@rowman.comE<gt>
+John Peacock E<lt>jpeacock@cpan.orgE<gt>
 
 =head1 SEE ALSO
 

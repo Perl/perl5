@@ -75,7 +75,7 @@ print "ok ",$i++,"\n";
 # check inaccurate fp
 $ver = 10.2;
 eval { require $ver; };
-print "# $@\nnot " unless $@ =~ /^Perl v10\.200 required/;
+print "# $@\nnot " unless $@ =~ /^Perl v10\.200.0 required/;
 print "ok ",$i++,"\n";
 
 $ver = 10.000_02;

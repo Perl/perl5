@@ -174,6 +174,7 @@ PERL_XS_EXPORT_C void XS_UNIVERSAL_VERSION(pTHX_ CV *cv);
 XS(XS_version_new);
 XS(XS_version_stringify);
 XS(XS_version_numify);
+XS(XS_version_normal);
 XS(XS_version_vcmp);
 XS(XS_version_boolean);
 #ifdef HASATTRIBUTE_NORETURN
@@ -218,6 +219,7 @@ Perl_boot_core_UNIVERSAL(pTHX)
 	newXS("version::stringify", XS_version_stringify, file);
 	newXS("version::(0+", XS_version_numify, file);
 	newXS("version::numify", XS_version_numify, file);
+	newXS("version::normal", XS_version_normal, file);
 	newXS("version::(cmp", XS_version_vcmp, file);
 	newXS("version::(<=>", XS_version_vcmp, file);
 	newXS("version::vcmp", XS_version_vcmp, file);
@@ -395,12 +397,32 @@ XS(XS_version_new)
 	Perl_croak(aTHX_ "Usage: version::new(class, version)");
     SP -= items;
     {
-        const char *classname = SvPV_nolen_const(ST(0));
         SV *vs = ST(1);
 	SV *rv;
-	if (items == 3 )
-	{
-	    vs = sv_newmortal(); 
+	const char *classname;
+
+	/* get the class if called as an object method */
+	if ( sv_isobject(ST(0)) ) {
+	    classname = HvNAME(SvSTASH(SvRV(ST(0))));
+	}
+	else {
+	    classname = (char *)SvPV_nolen(ST(0));
+	}
+
+	if ( items == 1 ) {
+	    /* no parameter provided */
+	    if ( sv_isobject(ST(0)) ) {
+		/* copy existing object */
+		vs = ST(0);
+	    }
+	    else {
+		/* create empty object */
+		vs = sv_newmortal();
+		sv_setpv(vs,"");
+	    }
+	}
+	else if ( items == 3 ) {
+	    vs = sv_newmortal();
 	    Perl_sv_setpvf(aTHX_ vs,"v%s",SvPV_nolen_const(ST(2)));
 	}
 
@@ -424,8 +446,7 @@ XS(XS_version_stringify)
 	  SV *	lobj = Nullsv;
 
 	  if (sv_derived_from(ST(0), "version")) {
-	       SV *tmp = SvRV(ST(0));
-	       lobj = tmp;
+	       lobj = SvRV(ST(0));
 	  }
 	  else
 	       Perl_croak(aTHX_ "lobj is not of type version");
@@ -447,13 +468,34 @@ XS(XS_version_numify)
 	  SV *	lobj = Nullsv;
 
 	  if (sv_derived_from(ST(0), "version")) {
-	       SV *tmp = SvRV(ST(0));
-	       lobj = tmp;
+	       lobj = SvRV(ST(0));
 	  }
 	  else
 	       Perl_croak(aTHX_ "lobj is not of type version");
 
 	  PUSHs(sv_2mortal(vnumify(lobj)));
+
+	  PUTBACK;
+	  return;
+     }
+}
+
+XS(XS_version_normal)
+{
+     dXSARGS;
+     if (items < 1)
+	  Perl_croak(aTHX_ "Usage: version::normal(lobj, ...)");
+     SP -= items;
+     {
+	  SV *	lobj = Nullsv;
+
+	  if (sv_derived_from(ST(0), "version")) {
+	       lobj = SvRV(ST(0));
+	  }
+	  else
+	       Perl_croak(aTHX_ "lobj is not of type version");
+
+	  PUSHs(sv_2mortal(vnormal(lobj)));
 
 	  PUTBACK;
 	  return;
@@ -470,8 +512,7 @@ XS(XS_version_vcmp)
 	  SV *	lobj = Nullsv;
 
 	  if (sv_derived_from(ST(0), "version")) {
-	       SV *tmp = SvRV(ST(0));
-	       lobj = tmp;
+	       lobj = SvRV(ST(0));
 	  }
 	  else
 	       Perl_croak(aTHX_ "lobj is not of type version");
@@ -515,9 +556,7 @@ XS(XS_version_boolean)
 	  SV *	lobj = Nullsv;
 
 	  if (sv_derived_from(ST(0), "version")) {
-               /* XXX If tmp serves a purpose, explain it. */
-	       SV *tmp = SvRV(ST(0));
-	       lobj = tmp;
+	       lobj = SvRV(ST(0));
 	  }
 	  else
 	       Perl_croak(aTHX_ "lobj is not of type version");
@@ -556,17 +595,12 @@ XS(XS_version_is_alpha)
     {
 	SV * lobj = Nullsv;
 
-        if (sv_derived_from(ST(0), "version")) {
-                /* XXX If tmp serves a purpose, explain it. */
-                SV *tmp = SvRV(ST(0));
-        	lobj = tmp;
-        }
+        if (sv_derived_from(ST(0), "version"))
+        	lobj = ST(0);
         else
                 Perl_croak(aTHX_ "lobj is not of type version");
 {
-    const I32 len = av_len((AV *)lobj);
-    const I32 digit = SvIVX(*av_fetch((AV *)lobj, len, 0));
-    if ( digit < 0 )
+    if ( hv_exists((HV*)SvRV(lobj), "alpha", 5 ) )
 	XSRETURN_YES;
     else
 	XSRETURN_NO;
