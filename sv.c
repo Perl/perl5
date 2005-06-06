@@ -4443,10 +4443,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	(void)SvPOK_only(dstr);
 
 	if (
-#ifdef PERL_COPY_ON_WRITE
             (sflags & (SVf_FAKE | SVf_READONLY)) != (SVf_FAKE | SVf_READONLY)
             &&
-#endif
             !(isSwipe =
                  (sflags & SVs_TEMP) &&   /* slated for free anyway? */
                  !(sflags & SVf_OOK) &&   /* and not involved in OOK hack? */
@@ -4472,7 +4470,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
         } else {
             /* If PERL_COPY_ON_WRITE is not defined, then isSwipe will always
                be true in here.  */
-#ifdef PERL_COPY_ON_WRITE
             /* Either it's a shared hash key, or it's suitable for
                copy-on-write or we can swipe the string.  */
             if (DEBUG_C_TEST) {
@@ -4480,6 +4477,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
                 sv_dump(sstr);
                 sv_dump(dstr);
             }
+#ifdef PERL_COPY_ON_WRITE
             if (!isSwipe) {
                 /* I believe I should acquire a global SV mutex if
                    it's a COW sv (not a shared hash key) to stop
@@ -4507,19 +4505,21 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		    Safefree(SvPVX_const(dstr));
 	    }
 
-#ifdef PERL_COPY_ON_WRITE
             if (!isSwipe) {
                 /* making another shared SV.  */
                 STRLEN cur = SvCUR(sstr);
                 STRLEN len = SvLEN(sstr);
 		assert (SvTYPE(dstr) >= SVt_PVIV);
+#ifdef PERL_COPY_ON_WRITE
                 if (len) {
                     /* SvIsCOW_normal */
                     /* splice us in between source and next-after-source.  */
                     SV_COW_NEXT_SV_SET(dstr, SV_COW_NEXT_SV(sstr));
                     SV_COW_NEXT_SV_SET(sstr, dstr);
                     SvPV_set(dstr, SvPVX(sstr));
-                } else {
+                } else
+#endif
+		{
                     /* SvIsCOW_shared_hash */
                     UV hash = SvUVX(sstr);
                     DEBUG_C(PerlIO_printf(Perl_debug_log,
@@ -4536,7 +4536,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
                 /* Relesase a global SV mutex.  */
             }
             else
-#endif
                 {	/* Passes the swipe test.  */
                 SvPV_set(dstr, SvPVX(sstr));
                 SvLEN_set(dstr, SvLEN(sstr));
