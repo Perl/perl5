@@ -54,7 +54,7 @@ static int
 not_here(const char *s)
 {
     croak("%s not implemented on this architecture", s);
-    NORETURN_FUNCTION_END
+    NORETURN_FUNCTION_END;
 }
 
 
