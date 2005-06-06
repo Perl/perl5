@@ -11631,6 +11631,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
      * constants; they need to be allocated as common memory and just
      * their pointers copied. */
 
+    IV i;
     CLONE_PARAMS clone_params;
     CLONE_PARAMS* param = &clone_params;
 
