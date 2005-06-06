@@ -538,7 +538,7 @@ Apa	|OP*	|newLISTOP	|I32 type|I32 flags|OP* first|OP* last
 Apa	|OP*	|newPADOP	|I32 type|I32 flags|SV* sv
 Apa	|OP*	|newPMOP	|I32 type|I32 flags
 Apa	|OP*	|newPVOP	|I32 type|I32 flags|char* pv
-Apa	|SV*	|newRV		|SV* pref
+Apa	|SV*	|newRV		|NN SV* pref
 Apda	|SV*	|newRV_noinc	|NN SV *sv
 Apda	|SV*	|newSV		|STRLEN len
 Apa	|OP*	|newSVREF	|NN OP* o
@@ -1349,26 +1349,26 @@ Ap	|char*	|my_atof2	|NN const char *s|NN NV* value
 Apn	|int	|my_socketpair	|int family|int type|int protocol|int fd[2]
 
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
-Ap	|int	|PerlIO_close		|PerlIO *
-Ap	|int	|PerlIO_fill		|PerlIO *
-Ap	|int	|PerlIO_fileno		|PerlIO *
-Ap	|int	|PerlIO_eof		|PerlIO *
-Ap	|int	|PerlIO_error		|PerlIO *
-Ap	|int	|PerlIO_flush		|PerlIO *
-Ap	|void	|PerlIO_clearerr	|PerlIO *
-Ap	|void	|PerlIO_set_cnt		|PerlIO *|int
-Ap	|void	|PerlIO_set_ptrcnt	|PerlIO *|STDCHAR *|int
-Ap	|void	|PerlIO_setlinebuf	|PerlIO *
-Ap	|SSize_t|PerlIO_read		|PerlIO *|void *|Size_t
-Ap	|SSize_t|PerlIO_write		|PerlIO *|const void *|Size_t
-Ap	|SSize_t|PerlIO_unread		|PerlIO *|const void *|Size_t
-Ap	|Off_t	|PerlIO_tell		|PerlIO *
-Ap	|int	|PerlIO_seek		|PerlIO *|Off_t|int
+Ap	|int	|PerlIO_close		|PerlIO *f
+Ap	|int	|PerlIO_fill		|PerlIO *f
+Ap	|int	|PerlIO_fileno		|PerlIO *f
+Ap	|int	|PerlIO_eof		|PerlIO *f
+Ap	|int	|PerlIO_error		|PerlIO *f
+Ap	|int	|PerlIO_flush		|PerlIO *f
+Ap	|void	|PerlIO_clearerr	|PerlIO *f
+Ap	|void	|PerlIO_set_cnt		|PerlIO *f|int cnt
+Ap	|void	|PerlIO_set_ptrcnt	|PerlIO *f|NN STDCHAR *ptr|int cnt
+Ap	|void	|PerlIO_setlinebuf	|PerlIO *f
+Ap	|SSize_t|PerlIO_read		|PerlIO *f|NN void *buf|Size_t count
+Ap	|SSize_t|PerlIO_write		|PerlIO *f|NN const void *buf|Size_t count
+Ap	|SSize_t|PerlIO_unread		|PerlIO *f|NN const void *buf|Size_t count
+Ap	|Off_t	|PerlIO_tell		|PerlIO *f
+Ap	|int	|PerlIO_seek		|PerlIO *f|Off_t offset|int whence
 
-Ap	|STDCHAR *|PerlIO_get_base	|PerlIO *
-Ap	|STDCHAR *|PerlIO_get_ptr	|PerlIO *
-Ap	|int	  |PerlIO_get_bufsiz	|PerlIO *
-Ap	|int	  |PerlIO_get_cnt	|PerlIO *
+Ap	|STDCHAR *|PerlIO_get_base	|PerlIO *f
+Ap	|STDCHAR *|PerlIO_get_ptr	|PerlIO *f
+Ap	|int	  |PerlIO_get_bufsiz	|PerlIO *f
+Ap	|int	  |PerlIO_get_cnt	|PerlIO *f
 
 Ap	|PerlIO *|PerlIO_stdin
 Ap	|PerlIO *|PerlIO_stdout
@@ -1381,29 +1381,28 @@ s	|void	|deb_stack_n	|SV** stack_base|I32 stack_min \
 				|I32 stack_max|I32 mark_min|I32 mark_max
 #endif
 
-pd	|PADLIST*|pad_new	|int flags
+pda	|PADLIST*|pad_new	|int flags
 pd	|void	|pad_undef	|CV* cv
 pd	|PADOFFSET|pad_add_name	|NN char *name\
 				|HV* typestash|HV* ourstash \
 				|bool clone
 pd	|PADOFFSET|pad_add_anon	|SV* sv|OPCODE op_type
-pd	|void	|pad_check_dup	|char* name|bool is_our|HV* ourstash
+pd	|void	|pad_check_dup	|NN char* name|bool is_our|NN HV* ourstash
 #ifdef DEBUGGING
-pd	|void	|pad_setsv	|PADOFFSET po|SV* sv
+pd	|void	|pad_setsv	|PADOFFSET po|NN SV* sv
 #endif
 pd	|void	|pad_block_start|int full
 pd	|void	|pad_tidy	|padtidy_type type
-pd 	|void	|do_dump_pad	|I32 level|PerlIO *file \
-				|PADLIST *padlist|int full
-pd	|void	|pad_fixup_inner_anons|PADLIST *padlist|CV *old_cv|CV *new_cv
+pd 	|void	|do_dump_pad	|I32 level|NN PerlIO *file|PADLIST *padlist|int full
+pd	|void	|pad_fixup_inner_anons|NN PADLIST *padlist|CV *old_cv|CV *new_cv
 
-pd	|void	|pad_push	|PADLIST *padlist|int depth|int has_args
+pd	|void	|pad_push	|NN PADLIST *padlist|int depth|int has_args
 p	|HV*	|pad_compname_type|const PADOFFSET po
 
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
 sd	|PADOFFSET|pad_findlex	|const char* name|PADOFFSET newoff|const CV* innercv
 #  if defined(DEBUGGING)
-sd	|void	|cv_dump	|const CV *cv|const char *title
+sd	|void	|cv_dump	|NN const CV *cv|NN const char *title
 #  endif
 s	|CV*	|cv_clone2	|CV *proto|CV *outside
 #endif
@@ -1423,7 +1422,7 @@ sM	|SV*	|hv_delete_common|HV* tb|SV* key_sv|const char* key|STRLEN klen|int k_fl
 sM	|HE*	|hv_fetch_common|HV* tb|SV* key_sv|const char* key|STRLEN klen|int flags|int action|SV* val|U32 hash
 #endif
 ApdR	|SV*	|hv_scalar	|NN HV* hv|
-p	|SV*	|magic_scalarpack|HV* hv|MAGIC*	mg
+p	|SV*	|magic_scalarpack|NN HV* hv|NN MAGIC* mg
 
 #if defined(DEBUGGING)
 p	|int	|get_debug_opts_flags	|char **s|int flags

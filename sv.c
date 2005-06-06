@@ -2720,7 +2720,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
 		    report_uninit();
 	    }
-            return 0;
+            return (NV)0;
         }
     }
     if (SvTHINKFIRST(sv)) {
@@ -2834,7 +2834,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
                        flags.  NWC, 2000/11/25 */
                     /* Both already have p flags, so do nothing */
                 } else {
-                    NV nv = SvNVX(sv);
+		    const NV nv = SvNVX(sv);
                     if (SvNVX(sv) < (NV)IV_MAX + 0.5) {
                         if (SvIVX(sv) == I_V(nv)) {
                             SvNOK_on(sv);
@@ -2850,7 +2850,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
                         if (numtype & IS_NUMBER_NOT_INT) {
                             /* UV and NV both imprecise.  */
                         } else {
-                            UV nv_as_uv = U_V(nv);
+			    const UV nv_as_uv = U_V(nv);
 
                             if (value == nv_as_uv && SvUVX(sv) != UV_MAX) {
                                 SvNOK_on(sv);
@@ -2900,7 +2900,7 @@ STATIC IV
 S_asIV(pTHX_ SV *sv)
 {
     UV value;
-    int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
+    const int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
 
     if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
 	== IS_NUMBER_IN_UV) {
@@ -4337,8 +4337,8 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
     if (SvREADONLY(sv)) {
 	if (SvFAKE(sv)) {
 	    const char *pvx = SvPVX_const(sv);
-	    STRLEN len = SvCUR(sv);
-            U32 hash   = SvSHARED_HASH(sv);
+	    const STRLEN len = SvCUR(sv);
+	    const U32 hash   = SvSHARED_HASH(sv);
 	    SvFAKE_off(sv);
 	    SvREADONLY_off(sv);
 	    SvGROW(sv, len + 1);

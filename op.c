@@ -3883,7 +3883,7 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *
 }
 
 OP *
-Perl_newFOROP(pTHX_ I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *block,OP *cont)
+Perl_newFOROP(pTHX_ I32 flags, char *label, line_t forline, OP *sv, OP *expr, OP *block, OP *cont)
 {
     LOOP *loop;
     OP *wop;
@@ -3936,8 +3936,8 @@ Perl_newFOROP(pTHX_ I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *blo
 	 */
 	UNOP* flip = (UNOP*)((UNOP*)((BINOP*)expr)->op_first)->op_first;
 	LOGOP* range = (LOGOP*) flip->op_first;
-	OP* left  = range->op_first;
-	OP* right = left->op_sibling;
+	OP* const left  = range->op_first;
+	OP* const right = left->op_sibling;
 	LISTOP* listop;
 
 	range->op_flags &= ~OPf_KIDS;
@@ -4613,24 +4613,32 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
 	if (GvCVGEN(gv)) {
 	    /* just a cached method */
 	    SvREFCNT_dec(cv);
-	    cv = 0;
+	    cv = Nullcv;
 	}
 	else if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
 	    /* already defined (or promised) */
 	    /* XXX It's possible for this HvNAME_get to return null, and get passed into strEQ */
-	    if (ckWARN(WARN_REDEFINE) && !(CvGV(cv) && GvSTASH(CvGV(cv))
-			    && strEQ(HvNAME_get(GvSTASH(CvGV(cv))), "autouse"))) {
-		const line_t oldline = CopLINE(PL_curcop);
-		if (PL_copline != NOLINE)
-		    CopLINE_set(PL_curcop, PL_copline);
-		Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
-			    CvCONST(cv) ? "Constant subroutine %s redefined"
-					: "Subroutine %s redefined"
-			    ,name);
-		CopLINE_set(PL_curcop, oldline);
+	    if (ckWARN(WARN_REDEFINE)) {
+		GV * const gvcv = CvGV(cv);
+		if (gvcv) {
+		    HV * const stash = GvSTASH(gvcv);
+		    if (stash) {
+			const char *name = HvNAME_get(stash);
+			if ( strEQ(name,"autouse") ) {
+			    const line_t oldline = CopLINE(PL_curcop);
+			    if (PL_copline != NOLINE)
+				CopLINE_set(PL_curcop, PL_copline);
+			    Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
+					CvCONST(cv) ? "Constant subroutine %s redefined"
+						    : "Subroutine %s redefined"
+					,name);
+			    CopLINE_set(PL_curcop, oldline);
+			}
+		    }
+		}
 	    }
 	    SvREFCNT_dec(cv);
-	    cv = 0;
+	    cv = Nullcv;
 	}
     }
 
