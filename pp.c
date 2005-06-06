@@ -3356,7 +3356,20 @@ PP(pp_chr)
 {
     dSP; dTARGET;
     char *tmps;
-    UV value = POPu;
+    UV value;
+
+    if (((SvIOK_notUV(TOPs) && SvIV(TOPs) < 0)
+	 ||
+	 (SvNOK(TOPs) && SvNV(TOPs) < 0.0))) {
+	if (IN_BYTES) {
+	    value = POPu; /* chr(-1) eq chr(0xff), etc. */
+	} else {
+	    (void) POPs; /* Ignore the argument value. */
+	    value = UNICODE_REPLACEMENT;
+	}
+    } else {
+	value = POPu;
+    }
 
     SvUPGRADE(TARG,SVt_PV);
 

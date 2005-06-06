@@ -6,7 +6,7 @@ BEGIN {
     require "test.pl";
 }
 
-plan tests => 26;
+plan tests => 34;
 
 # Note that t/op/ord.t already tests for chr() <-> ord() rountripping.
 
@@ -19,11 +19,24 @@ is(chr(127), "\x7F");
 is(chr(128), "\x80");
 is(chr(255), "\xFF");
 
-# is(chr(-1), undef); # Shouldn't it be?
+is(chr(-0.1), "\x{FFFD}"); # The U+FFFD Unicode replacement character.
+is(chr(-1  ), "\x{FFFD}");
+is(chr(-2  ), "\x{FFFD}");
+is(chr(-3.0), "\x{FFFD}");
+{
+    use bytes; # Backward compatibility.
+    is(chr(-0.1), "\x00");
+    is(chr(-1  ), "\xFF");
+    is(chr(-2  ), "\xFE");
+    is(chr(-3.0), "\xFD");
+}
 
 # Check UTF-8.
 
-sub hexes { join(" ",map{sprintf"%02x",$_}unpack("C*",chr($_[0]))) }
+sub hexes {
+    no warnings 'utf8'; # avoid surrogate and beyond Unicode warnings
+    join(" ",map{sprintf"%02x",$_}unpack("C*",chr($_[0])));
+}
 
 # The following code points are some interesting steps in UTF-8.
 is(hexes(   0x100), "c4 80");
