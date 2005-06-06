@@ -673,11 +673,11 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 
                 LOCK_FDPID_MUTEX;
                 sv = *av_fetch(PL_fdpid,fd,TRUE);
-                (void)SvUPGRADE(sv, SVt_IV);
+                SvUPGRADE(sv, SVt_IV);
                 pid = SvIVX(sv);
                 SvIV_set(sv, 0);
                 sv = *av_fetch(PL_fdpid,savefd,TRUE);
-                (void)SvUPGRADE(sv, SVt_IV);
+                SvUPGRADE(sv, SVt_IV);
                 SvIV_set(sv, pid);
                 UNLOCK_FDPID_MUTEX;
             }

@@ -720,7 +720,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv) &&
 		SvTYPE(sv) != SVt_PVGV)
 	    {
-		(void)SvUPGRADE(value, SvTYPE(sv));
+		SvUPGRADE(value, SvTYPE(sv));
 		SvMAGIC_set(value, SvMAGIC(sv));
 		SvFLAGS(value) |= SvMAGICAL(sv);
 		SvMAGICAL_off(sv);

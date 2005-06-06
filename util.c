@@ -380,7 +380,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	    mg->mg_len++;
     }
     s = (U8*)SvPV_force(sv, len);
-    (void)SvUPGRADE(sv, SVt_PVBM);
+    SvUPGRADE(sv, SVt_PVBM);
     if (len == 0)		/* TAIL might be on a zero-length string. */
 	return;
     if (len > 2) {
@@ -2039,7 +2039,7 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
     LOCK_FDPID_MUTEX;
     sv = *av_fetch(PL_fdpid,p[This],TRUE);
     UNLOCK_FDPID_MUTEX;
-    (void)SvUPGRADE(sv,SVt_IV);
+    SvUPGRADE(sv,SVt_IV);
     SvIV_set(sv, pid);
     PL_forkprocess = pid;
     /* If we managed to get status pipe check for exec fail */
@@ -2190,7 +2190,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
     LOCK_FDPID_MUTEX;
     sv = *av_fetch(PL_fdpid,p[This],TRUE);
     UNLOCK_FDPID_MUTEX;
-    (void)SvUPGRADE(sv,SVt_IV);
+    SvUPGRADE(sv,SVt_IV);
     SvIV_set(sv, pid);
     PL_forkprocess = pid;
     if (did_pipes && pid > 0) {
@@ -2656,7 +2656,7 @@ Perl_pidgone(pTHX_ Pid_t pid, int status)
 
     sprintf(spid, "%"IVdf, (IV)pid);
     sv = *hv_fetch(PL_pidstatus,spid,strlen(spid),TRUE);
-    (void)SvUPGRADE(sv,SVt_IV);
+    SvUPGRADE(sv,SVt_IV);
     SvIV_set(sv, status);
     return;
 }
@@ -3706,7 +3706,7 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
     int pathlen=0;
     Direntry_t *dp;
 
-    (void)SvUPGRADE(sv, SVt_PV);
+    SvUPGRADE(sv, SVt_PV);
 
     if (PerlLIO_lstat(".", &statbuf) < 0) {
 	SV_CWD_RETURN_UNDEF;

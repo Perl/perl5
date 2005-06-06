@@ -3674,7 +3674,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	    len = 1;
 	}
 #endif
-	(void)SvUPGRADE(sv, SVt_PV);
+	SvUPGRADE(sv, SVt_PV);
 	*lp = len;
 	s = SvGROW(sv, len + 1);
 	SvCUR_set(sv, len);
@@ -4260,9 +4260,9 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    }
 	}
 	if (stype == SVt_PVLV)
-	    (void)SvUPGRADE(dstr, SVt_PVNV);
+	    SvUPGRADE(dstr, SVt_PVNV);
 	else
-	    (void)SvUPGRADE(dstr, (U32)stype);
+	    SvUPGRADE(dstr, (U32)stype);
     }
 
     sflags = SvFLAGS(sstr);
@@ -4652,7 +4652,7 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
     }
     else
 	new_SV(dstr);
-    (void)SvUPGRADE (dstr, SVt_PVIV);
+    SvUPGRADE(dstr, SVt_PVIV);
 
     assert (SvPOK(sstr));
     assert (SvPOKp(sstr));
@@ -4675,7 +4675,7 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 	SV_COW_NEXT_SV_SET(dstr, SV_COW_NEXT_SV(sstr));
     } else {
 	assert ((SvFLAGS(sstr) & CAN_COW_MASK) == CAN_COW_FLAGS);
-	(void)SvUPGRADE (sstr, SVt_PVIV);
+	SvUPGRADE(sstr, SVt_PVIV);
 	SvREADONLY_on(sstr);
 	SvFAKE_on(sstr);
 	DEBUG_C(PerlIO_printf(Perl_debug_log,
@@ -4725,7 +4725,7 @@ Perl_sv_setpvn(pTHX_ register SV *sv, register const char *ptr, register STRLEN 
 	if (iv < 0)
 	    Perl_croak(aTHX_ "panic: sv_setpvn called with negative strlen");
     }
-    (void)SvUPGRADE(sv, SVt_PV);
+    SvUPGRADE(sv, SVt_PV);
 
     SvGROW(sv, len + 1);
     dptr = SvPVX(sv);
@@ -4771,7 +4771,7 @@ Perl_sv_setpv(pTHX_ register SV *sv, register const char *ptr)
 	return;
     }
     len = strlen(ptr);
-    (void)SvUPGRADE(sv, SVt_PV);
+    SvUPGRADE(sv, SVt_PV);
 
     SvGROW(sv, len + 1);
     Move(ptr,SvPVX(sv),len+1,char);
@@ -4814,7 +4814,7 @@ Perl_sv_usepvn(pTHX_ register SV *sv, register char *ptr, register STRLEN len)
 {
     STRLEN allocate;
     SV_CHECK_THINKFIRST_COW_DROP(sv);
-    (void)SvUPGRADE(sv, SVt_PV);
+    SvUPGRADE(sv, SVt_PV);
     if (!ptr) {
 	(void)SvOK_off(sv);
 	return;
@@ -5270,7 +5270,7 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, const MGVTBL *vtable,
     MAGIC* mg;
 
     if (SvTYPE(sv) < SVt_PVMG) {
-	(void)SvUPGRADE(sv, SVt_PVMG);
+	SvUPGRADE(sv, SVt_PVMG);
     }
     Newz(702,mg, 1, MAGIC);
     mg->mg_moremagic = SvMAGIC(sv);
@@ -6887,7 +6887,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
        However, perlbench says it's slower, because the existing swipe code
        is faster than copy on write.
        Swings and roundabouts.  */
-    (void)SvUPGRADE(sv, SVt_PV);
+    SvUPGRADE(sv, SVt_PV);
 
     SvSCREAM_off(sv);
 
@@ -8280,7 +8280,7 @@ Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
 	
 	    if (SvROK(sv))
 		sv_unref(sv);
-	    (void)SvUPGRADE(sv, SVt_PV);		/* Never FALSE */
+	    SvUPGRADE(sv, SVt_PV);		/* Never FALSE */
 	    SvGROW(sv, len + 1);
 	    Move(s,SvPVX_const(sv),len,char);
 	    SvCUR_set(sv, len);
@@ -8690,7 +8690,7 @@ Perl_sv_bless(pTHX_ SV *sv, HV *stash)
     SvOBJECT_on(tmpRef);
     if (SvTYPE(tmpRef) != SVt_PVIO)
 	++PL_sv_objcount;
-    (void)SvUPGRADE(tmpRef, SVt_PVMG);
+    SvUPGRADE(tmpRef, SVt_PVMG);
     SvSTASH_set(tmpRef, (HV*)SvREFCNT_inc(stash));
 
     if (Gv_AMG(stash))

@@ -1597,7 +1597,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
 
     /* Fake up a method call to import */
     meth = newSVpvn("import", 6);
-    (void)SvUPGRADE(meth, SVt_PVIV);
+    SvUPGRADE(meth, SVt_PVIV);
     (void)SvIOK_on(meth);
     {
 	U32 hash;
@@ -3064,7 +3064,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 
 	/* Fake up a method call to import/unimport */
 	meth = aver ? newSVpvn("import",6) : newSVpvn("unimport", 8);
-	(void)SvUPGRADE(meth, SVt_PVIV);
+	SvUPGRADE(meth, SVt_PVIV);
 	(void)SvIOK_on(meth);
 	{
 	    U32 hash;
@@ -5500,7 +5500,7 @@ Perl_ck_fun(pTHX_ OP *o)
 				SV *namesv;
 				targ = pad_alloc(OP_RV2GV, SVs_PADTMP);
 				namesv = PAD_SVl(targ);
-				(void)SvUPGRADE(namesv, SVt_PV);
+				SvUPGRADE(namesv, SVt_PV);
 				if (*name != '$')
 				    sv_setpvn(namesv, "$", 1);
 				sv_catpvn(namesv, name, len);

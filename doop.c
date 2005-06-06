@@ -653,7 +653,7 @@ Perl_do_join(pTHX_ register SV *sv, SV *del, register SV **mark, register SV **s
 
     mark++;
     len = (items > 0 ? (delimlen * (items - 1) ) : 0);
-    (void)SvUPGRADE(sv, SVt_PV);
+    SvUPGRADE(sv, SVt_PV);
     if (SvLEN(sv) < len + items) {	/* current length is way too short */
 	while (items-- > 0) {
 	    if (*mark && !SvGAMAGIC(*mark) && SvOK(*mark)) {

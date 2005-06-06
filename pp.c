@@ -3358,7 +3358,7 @@ PP(pp_chr)
     char *tmps;
     UV value = POPu;
 
-    (void)SvUPGRADE(TARG,SVt_PV);
+    SvUPGRADE(TARG,SVt_PV);
 
     if (value > 255 && !IN_BYTES) {
 	SvGROW(TARG, (STRLEN)UNISKIP(value)+1);
@@ -3587,7 +3587,7 @@ PP(pp_uc)
 	else {
 	    STRLEN min = len + 1;
 
-	    (void)SvUPGRADE(TARG, SVt_PV);
+	    SvUPGRADE(TARG, SVt_PV);
 	    SvGROW(TARG, min);
 	    (void)SvPOK_only(TARG);
 	    d = (U8*)SvPVX(TARG);
@@ -3670,7 +3670,7 @@ PP(pp_lc)
 	else {
 	    STRLEN min = len + 1;
 
-	    (void)SvUPGRADE(TARG, SVt_PV);
+	    SvUPGRADE(TARG, SVt_PV);
 	    SvGROW(TARG, min);
 	    (void)SvPOK_only(TARG);
 	    d = (U8*)SvPVX(TARG);
@@ -3759,7 +3759,7 @@ PP(pp_quotemeta)
 
     SvUTF8_off(TARG);				/* decontaminate */
     if (len) {
-	(void)SvUPGRADE(TARG, SVt_PV);
+	SvUPGRADE(TARG, SVt_PV);
 	SvGROW(TARG, (len * 2) + 1);
 	d = SvPVX(TARG);
 	if (DO_UTF8(sv)) {

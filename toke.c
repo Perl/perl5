@@ -1027,7 +1027,7 @@ S_force_version(pTHX_ char *s, int guessing)
             version = yylval.opval;
 	    ver = cSVOPx(version)->op_sv;
 	    if (SvPOK(ver) && !SvNIOK(ver)) {
-		(void)SvUPGRADE(ver, SVt_PVNV);
+		SvUPGRADE(ver, SVt_PVNV);
 		SvNV_set(ver, str_to_version(ver));
 		SvNOK_on(ver);		/* hint that it is a version */
 	    }
@@ -2150,7 +2150,7 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
 	PL_rsfp_filters = newAV();
     if (!datasv)
 	datasv = NEWSV(255,0);
-    (void)SvUPGRADE(datasv, SVt_PVIO);
+    SvUPGRADE(datasv, SVt_PVIO);
     u.filter = funcp;
     IoANY(datasv) = u.iop; /* stash funcp into spare field */
     IoFLAGS(datasv) |= IOf_FAKE_DIRP;

@@ -285,7 +285,7 @@ PP(pp_substcont)
 	MAGIC *mg;
 	I32 i;
 	if (SvTYPE(sv) < SVt_PVMG)
-	    (void)SvUPGRADE(sv, SVt_PVMG);
+	    SvUPGRADE(sv, SVt_PVMG);
 	if (!(mg = mg_find(sv, PERL_MAGIC_regex_global))) {
 	    sv_magic(sv, Nullsv, PERL_MAGIC_regex_global, Nullch, 0);
 	    mg = mg_find(sv, PERL_MAGIC_regex_global);

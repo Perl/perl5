@@ -449,7 +449,7 @@ PP(pp_warn)
     tmps = SvPV(tmpsv, len);
     if ((!tmps || !len) && PL_errgv) {
   	SV *error = ERRSV;
-	(void)SvUPGRADE(error, SVt_PV);
+	SvUPGRADE(error, SVt_PV);
 	if (SvPOK(error) && SvCUR(error))
 	    sv_catpv(error, "\t...caught");
 	tmpsv = error;
@@ -486,7 +486,7 @@ PP(pp_die)
     }
     if (!tmps || !len) {
   	SV *error = ERRSV;
-	(void)SvUPGRADE(error, SVt_PV);
+	SvUPGRADE(error, SVt_PV);
 	if (multiarg ? SvROK(error) : SvROK(tmpsv)) {
 	    if (!multiarg)
 		SvSetSV(error,tmpsv);
@@ -1698,7 +1698,7 @@ PP(pp_sysread)
 	SvCUR_set(bufsv, offset);
 
 	read_target = sv_newmortal();
-	(void)SvUPGRADE(read_target, SVt_PV);
+	SvUPGRADE(read_target, SVt_PV);
 	buffer = SvGROW(read_target, (STRLEN)(length + 1));
     }
 

@@ -1518,7 +1518,7 @@ Perl_do_readline(pTHX)
 	sv = TARG;
 	if (SvROK(sv))
 	    sv_unref(sv);
-	(void)SvUPGRADE(sv, SVt_PV);
+	SvUPGRADE(sv, SVt_PV);
 	tmplen = SvLEN(sv);	/* remember if already alloced */
 	if (!tmplen && !SvREADONLY(sv))
 	    Sv_Grow(sv, 80);	/* try short-buffering it */
