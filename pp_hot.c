@@ -1665,11 +1665,7 @@ PP(pp_helem)
     const U32 lval = PL_op->op_flags & OPf_MOD || LVRET;
     const U32 defer = PL_op->op_private & OPpLVAL_DEFER;
     SV *sv;
-#ifdef PERL_COPY_ON_WRITE
     const U32 hash = (SvIsCOW_shared_hash(keysv)) ? SvUVX(keysv) : 0;
-#else
-    const U32 hash = (SvFAKE(keysv) && SvREADONLY(keysv)) ? SvUVX(keysv) : 0;
-#endif
     I32 preeminent = 0;
 
     if (SvTYPE(hv) == SVt_PVHV) {
