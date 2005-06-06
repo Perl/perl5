@@ -524,7 +524,7 @@ Apa	|OP*	|newLISTOP	|I32 type|I32 flags|OP* first|OP* last
 Apa	|OP*	|newPADOP	|I32 type|I32 flags|SV* sv
 Apa	|OP*	|newPMOP	|I32 type|I32 flags
 Apa	|OP*	|newPVOP	|I32 type|I32 flags|char* pv
-Apa	|SV*	|newRV		|SV* pref
+Apa	|SV*	|newRV		|NN SV* pref
 Apda	|SV*	|newRV_noinc	|NN SV *sv
 Apda	|SV*	|newSV		|STRLEN len
 Apa	|OP*	|newSVREF	|NN OP* o
@@ -1000,7 +1000,7 @@ s	|void	|hv_magic_check	|NN HV *hv|NN bool *needs_copy|NN bool *needs_store
 s	|void	|unshare_hek_or_pvn|HEK* hek|const char* str|I32 len|U32 hash
 sR	|HE*	|share_hek_flags|const char* sv|I32 len|U32 hash|int flags
 rs	|void	|hv_notallowed	|int flags|NN const char *key|I32 klen|NN const char *msg
-asR	|struct xpvhv_aux*|hv_auxinit|HV *hv
+s	|struct xpvhv_aux*|hv_auxinit|HV *hv
 #endif
 
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
@@ -1364,26 +1364,26 @@ pMXE	|SV*	|sv_setsv_cow	|SV* dsv|SV* ssv
 #endif
 
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
-Ap	|int	|PerlIO_close		|PerlIO *
-Ap	|int	|PerlIO_fill		|PerlIO *
-Ap	|int	|PerlIO_fileno		|PerlIO *
-Ap	|int	|PerlIO_eof		|PerlIO *
-Ap	|int	|PerlIO_error		|PerlIO *
-Ap	|int	|PerlIO_flush		|PerlIO *
-Ap	|void	|PerlIO_clearerr	|PerlIO *
-Ap	|void	|PerlIO_set_cnt		|PerlIO *|int
-Ap	|void	|PerlIO_set_ptrcnt	|PerlIO *|STDCHAR *|int
-Ap	|void	|PerlIO_setlinebuf	|PerlIO *
-Ap	|SSize_t|PerlIO_read		|PerlIO *|void *|Size_t
-Ap	|SSize_t|PerlIO_write		|PerlIO *|const void *|Size_t
-Ap	|SSize_t|PerlIO_unread		|PerlIO *|const void *|Size_t
-Ap	|Off_t	|PerlIO_tell		|PerlIO *
-Ap	|int	|PerlIO_seek		|PerlIO *|Off_t|int
+Ap	|int	|PerlIO_close		|PerlIO *f
+Ap	|int	|PerlIO_fill		|PerlIO *f
+Ap	|int	|PerlIO_fileno		|PerlIO *f
+Ap	|int	|PerlIO_eof		|PerlIO *f
+Ap	|int	|PerlIO_error		|PerlIO *f
+Ap	|int	|PerlIO_flush		|PerlIO *f
+Ap	|void	|PerlIO_clearerr	|PerlIO *f
+Ap	|void	|PerlIO_set_cnt		|PerlIO *f|int cnt
+Ap	|void	|PerlIO_set_ptrcnt	|PerlIO *f|NN STDCHAR *ptr|int cnt
+Ap	|void	|PerlIO_setlinebuf	|PerlIO *f
+Ap	|SSize_t|PerlIO_read		|PerlIO *f|NN void *buf|Size_t count
+Ap	|SSize_t|PerlIO_write		|PerlIO *f|NN const void *buf|Size_t count
+Ap	|SSize_t|PerlIO_unread		|PerlIO *f|NN const void *buf|Size_t count
+Ap	|Off_t	|PerlIO_tell		|PerlIO *f
+Ap	|int	|PerlIO_seek		|PerlIO *f|Off_t offset|int whence
 
-Ap	|STDCHAR *|PerlIO_get_base	|PerlIO *
-Ap	|STDCHAR *|PerlIO_get_ptr	|PerlIO *
-Ap	|int	  |PerlIO_get_bufsiz	|PerlIO *
-Ap	|int	  |PerlIO_get_cnt	|PerlIO *
+Ap	|STDCHAR *|PerlIO_get_base	|PerlIO *f
+Ap	|STDCHAR *|PerlIO_get_ptr	|PerlIO *f
+Ap	|int	  |PerlIO_get_bufsiz	|PerlIO *f
+Ap	|int	  |PerlIO_get_cnt	|PerlIO *f
 
 Ap	|PerlIO *|PerlIO_stdin
 Ap	|PerlIO *|PerlIO_stdout
@@ -1396,23 +1396,22 @@ s	|void	|deb_stack_n	|SV** stack_base|I32 stack_min \
 				|I32 stack_max|I32 mark_min|I32 mark_max
 #endif
 
-pd	|PADLIST*|pad_new	|int flags
+pda	|PADLIST*|pad_new	|int flags
 pd	|void	|pad_undef	|CV* cv
 pd	|PADOFFSET|pad_add_name	|NN const char *name\
 				|HV* typestash|HV* ourstash \
 				|bool clone
 pd	|PADOFFSET|pad_add_anon	|SV* sv|OPCODE op_type
-pd	|void	|pad_check_dup	|const char* name|bool is_our|const HV* ourstash
+pd	|void	|pad_check_dup	|NN const char* name|bool is_our|NN const HV* ourstash
 #ifdef DEBUGGING
-pd	|void	|pad_setsv	|PADOFFSET po|SV* sv
+pd	|void	|pad_setsv	|PADOFFSET po|NN SV* sv
 #endif
 pd	|void	|pad_block_start|int full
 pd	|void	|pad_tidy	|padtidy_type type
-pd 	|void	|do_dump_pad	|I32 level|PerlIO *file \
-				|PADLIST *padlist|int full
-pd	|void	|pad_fixup_inner_anons|PADLIST *padlist|CV *old_cv|CV *new_cv
+pd 	|void	|do_dump_pad	|I32 level|NN PerlIO *file|PADLIST *padlist|int full
+pd	|void	|pad_fixup_inner_anons|NN PADLIST *padlist|CV *old_cv|CV *new_cv
 
-pd	|void	|pad_push	|PADLIST *padlist|int depth
+pd	|void	|pad_push	|NN PADLIST *padlist|int depth
 p	|HV*	|pad_compname_type|const PADOFFSET po
 
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
@@ -1420,7 +1419,7 @@ sd	|PADOFFSET|pad_findlex	|const char *name|const CV* cv|U32 seq|int warn \
 				|SV** out_capture|SV** out_name_sv \
 				|int *out_flags
 #  if defined(DEBUGGING)
-sd	|void	|cv_dump	|const CV *cv|const char *title
+sd	|void	|cv_dump	|NN const CV *cv|NN const char *title
 #  endif
 #endif
 pdR	|CV*	|find_runcv	|U32 *db_seqp
@@ -1429,7 +1428,7 @@ p	|void	|free_tied_hv_pool
 p	|int	|get_debug_opts	|const char **s|bool givehelp
 #endif
 Ap	|void	|save_set_svflags|SV* sv|U32 mask|U32 val
-Apod	|void	|hv_assert	|HV* tb
+Apod	|void	|hv_assert	|NN HV* tb
 
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
 sM	|SV*	|hv_delete_common|HV* tb|SV* key_sv|const char* key|STRLEN klen|int k_flags|I32 d_flags|U32 hash
@@ -1440,14 +1439,14 @@ ApdR	|SV*	|hv_scalar	|NN HV* hv
 ApoR	|I32*	|hv_riter_p	|NN HV* hv
 ApoR	|HE**	|hv_eiter_p	|NN HV* hv
 Apo	|void	|hv_riter_set	|NN HV* hv|I32 riter
-Apo	|void	|hv_eiter_set	|NN HV* hv|NN HE* eiter
+Apo	|void	|hv_eiter_set	|NN HV* hv|HE* eiter
 Apo	|void	|hv_name_set	|NN HV* hv|const char *name|I32 len|int flags
 Apd	|void	|hv_clear_placeholders	|NN HV* hb
 ApoR	|I32*	|hv_placeholders_p	|NN HV* hv
 ApoR	|I32	|hv_placeholders_get	|NN HV* hv
-ApoR	|void	|hv_placeholders_set	|NN HV* hv|I32 ph
+Apo	|void	|hv_placeholders_set	|NN HV* hv|I32 ph
 
-p	|SV*	|magic_scalarpack|HV* hv|MAGIC*	mg
+p	|SV*	|magic_scalarpack|NN HV* hv|NN MAGIC* mg
 #ifdef PERL_IN_SV_C
 sMd	|SV*	|find_uninit_var|OP* obase|SV* uninit_sv|bool top
 #endif

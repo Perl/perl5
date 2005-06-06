@@ -3095,7 +3095,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
 		    report_uninit(sv);
 	    }
-            return 0;
+            return (NV)0;
         }
     }
     if (SvTHINKFIRST(sv)) {
@@ -3209,7 +3209,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
                        flags.  NWC, 2000/11/25 */
                     /* Both already have p flags, so do nothing */
                 } else {
-                    NV nv = SvNVX(sv);
+		    const NV nv = SvNVX(sv);
                     if (SvNVX(sv) < (NV)IV_MAX + 0.5) {
                         if (SvIVX(sv) == I_V(nv)) {
                             SvNOK_on(sv);
@@ -3225,7 +3225,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
                         if (numtype & IS_NUMBER_NOT_INT) {
                             /* UV and NV both imprecise.  */
                         } else {
-                            UV nv_as_uv = U_V(nv);
+			    const UV nv_as_uv = U_V(nv);
 
                             if (value == nv_as_uv && SvUVX(sv) != UV_MAX) {
                                 SvNOK_on(sv);
@@ -3275,7 +3275,7 @@ STATIC IV
 S_asIV(pTHX_ SV *sv)
 {
     UV value;
-    int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
+    const int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
 
     if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
 	== IS_NUMBER_IN_UV) {
@@ -4934,10 +4934,10 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
         /* At this point I believe I should acquire a global SV mutex.  */
 	if (SvFAKE(sv)) {
             const char *pvx = SvPVX_const(sv);
-            STRLEN len = SvLEN(sv);
-            STRLEN cur = SvCUR(sv);
-            U32 hash = SvSHARED_HASH(sv);
-            SV *next = SV_COW_NEXT_SV(sv);   /* next COW sv in the loop. */
+            const STRLEN len = SvLEN(sv);
+            const STRLEN cur = SvCUR(sv);
+            const U32 hash = SvSHARED_HASH(sv);
+            SV *const next = SV_COW_NEXT_SV(sv);   /* next COW sv in the loop. */
             if (DEBUG_C_TEST) {
                 PerlIO_printf(Perl_debug_log,
                               "Copy on write: Force normal %ld\n",
@@ -4972,12 +4972,12 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 	if (SvFAKE(sv)) {
 	    const char *pvx = SvPVX_const(sv);
 	    const int is_utf8 = SvUTF8(sv);
-	    STRLEN len = SvCUR(sv);
-            U32 hash   = SvSHARED_HASH(sv);
+	    const STRLEN len = SvCUR(sv);
+	    const U32 hash   = SvSHARED_HASH(sv);
 	    SvFAKE_off(sv);
 	    SvREADONLY_off(sv);
-            SvPV_set(sv, (char*)0);
-            SvLEN_set(sv, 0);
+	    SvPV_set(sv, Nullch);
+	    SvLEN_set(sv, 0);
 	    SvGROW(sv, len + 1);
 	    Move(pvx,SvPVX_const(sv),len,char);
 	    *SvEND(sv) = '\0';

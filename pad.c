@@ -1524,8 +1524,8 @@ void
 Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
 {
     I32 ix;
-    AV *comppad_name = (AV*)AvARRAY(padlist)[0];
-    AV *comppad = (AV*)AvARRAY(padlist)[1];
+    AV * const comppad_name = (AV*)AvARRAY(padlist)[0];
+    AV * const comppad = (AV*)AvARRAY(padlist)[1];
     SV **namepad = AvARRAY(comppad_name);
     SV **curpad = AvARRAY(comppad);
     for (ix = AvFILLp(comppad_name); ix > 0; ix--) {

@@ -1767,12 +1767,10 @@ value, you can get it through the macro C<HvFILL(tb)>.
 I32
 Perl_hv_iterinit(pTHX_ HV *hv)
 {
-    register XPVHV* xhv;
     HE *entry;
 
     if (!hv)
 	Perl_croak(aTHX_ "Bad hash");
-    xhv = (XPVHV*)SvANY(hv);
 
     if (SvOOK(hv)) {
 	struct xpvhv_aux *iter = HvAUX(hv);

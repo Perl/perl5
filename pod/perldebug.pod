@@ -669,7 +669,7 @@ include lexicals in a module's file scope, or lost in closures.
 =back
 
 After the rc file is read, the debugger reads the C<$ENV{PERLDB_OPTS}>
-environment variable and parses this as the remainder of a `O ...'
+environment variable and parses this as the remainder of a "O ..."
 line as one might enter at the debugger prompt.  You may place the
 initialization options C<TTY>, C<noTTY>, C<ReadLine>, and C<NonStop>
 there.
@@ -1016,7 +1016,7 @@ L<perlrun>.
 
 When debugging a script that uses #! and is thus normally found in
 $PATH, the -S option causes perl to search $PATH for it, so you don't
-have to type the path or `which $scriptname`.
+have to type the path or C<which $scriptname>.
 
   $ perl -Sd foo.pl
 

@@ -355,12 +355,12 @@ obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) utf8$(OBJ_EXT) taint$(OBJ
 obj = $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
 
 lintflags = \
-    -bh \
+    -bhn \
     -p \
     -s \
     -Ncheck=%all \
     -Nlevel=4 \
-    -errfmt=simple \
+    -errfmt=src \
     -errtags \
     -erroff=E_BAD_PTR_CAST \
     -erroff=E_BLOCK_DECL_UNUSED \
@@ -370,7 +370,15 @@ lintflags = \
     -erroff=E_EXPR_NULL_EFFECT \
     -erroff=E_BAD_PTR_INT_COMBINATION \
     -erroff=E_LOOP_EMPTY \
-    *.c
+    -erroff=E_TRUE_LOGICAL_EXPR \
+    -erroff=E_FALSE_LOGICAL_EXPR \
+    -erroff=E_INDISTING_FROM_TRUNC \
+    -erroff=E_POINTER_TO_OBJECT \
+    -erroff=E_ASSIGN_NARROW_CONV \
+    -erroff=E_BAD_SIGN_EXTEND \
+    -erroff=E_INCL_NUSD \
+    -erroff=E_MAIN_PARAM \
+    -Wfoo.flow
 
 .c$(OBJ_EXT):
 	$(CCCMD) $(PLDLFLAGS) $*.c
@@ -1052,7 +1060,7 @@ _verycleaner:
 .PHONY: lint
 lint: $(c)
 	rm -f *.ln
-	lint $(lintflags) -DPERL_CORE -D_REENTRANT -DDEBUGGING -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 $(c) perly.c
+	lint $(lintflags) -DPERL_CORE -D_REENTRANT -DDEBUGGING -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 $(c)
 
 # Need to unset during recursion to go out of loop.
 # The README below ensures that the dependency list is never empty and
@@ -1294,7 +1302,7 @@ tags:	TAGS
 	perl emacs/e2ctags.pl TAGS > tags
 
 ctags:
-	ctags -f Tags --totals --languages=c --langmap=c:+.h *.c *.h
+	ctags -f Tags -N --totals --languages=c --langmap=c:+.h *.c *.h
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 # If this runs make out of memory, delete /usr/include lines.

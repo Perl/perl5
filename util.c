@@ -261,7 +261,6 @@ Perl_delimcpy(pTHX_ register char *to, register const char *toend, register cons
 char *
 Perl_instr(pTHX_ register const char *big, register const char *little)
 {
-    register const char *s, *x;
     register I32 first;
 
     if (!little)
@@ -270,6 +269,7 @@ Perl_instr(pTHX_ register const char *big, register const char *little)
     if (!first)
 	return (char*)big;
     while (*big) {
+	register const char *s, *x;
 	if (*big++ != first)
 	    continue;
 	for (x=big,s=little; *s; /**/ ) {
@@ -291,7 +291,6 @@ Perl_instr(pTHX_ register const char *big, register const char *little)
 char *
 Perl_ninstr(pTHX_ register const char *big, register const char *bigend, const char *little, const char *lend)
 {
-    register const char *s, *x;
     register const I32 first = *little;
     register const char *littleend = lend;
 
@@ -301,6 +300,7 @@ Perl_ninstr(pTHX_ register const char *big, register const char *bigend, const c
 	return Nullch;
     bigend -= littleend - little++;
     while (big <= bigend) {
+	register const char *s, *x;
 	if (*big++ != first)
 	    continue;
 	for (x=big,s=little; s < littleend; /**/ ) {
@@ -321,7 +321,6 @@ char *
 Perl_rninstr(pTHX_ register const char *big, const char *bigend, const char *little, const char *lend)
 {
     register const char *bigbeg;
-    register const char *s, *x;
     register const I32 first = *little;
     register const char *littleend = lend;
 
@@ -330,6 +329,7 @@ Perl_rninstr(pTHX_ register const char *big, const char *bigend, const char *lit
     bigbeg = big;
     big = bigend - (littleend - little++);
     while (big >= bigbeg) {
+	register const char *s, *x;
 	if (*big-- != first)
 	    continue;
 	for (x=big+2,s=little; s < littleend; /**/ ) {
@@ -384,13 +384,9 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
     if (len == 0)		/* TAIL might be on a zero-length string. */
 	return;
     if (len > 2) {
-	U8 mlen;
 	const unsigned char *sb;
+	const U8 mlen = (len>255) ? 255 : (U8)len;
 
-	if (len > 255)
-	    mlen = 255;
-	else
-	    mlen = (U8)len;
 	Sv_Grow(sv, len + 256 + FBM_TABLE_OFFSET);
 	table = (unsigned char*)(SvPVX_mutable(sv) + len + FBM_TABLE_OFFSET);
 	s = table - 1 - FBM_TABLE_OFFSET;	/* last char */
@@ -492,8 +488,8 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	    /* This should be better than FBM if c1 == c2, and almost
 	       as good otherwise: maybe better since we do less indirection.
 	       And we save a lot of memory by caching no table. */
-	    register unsigned char c1 = little[0];
-	    register unsigned char c2 = little[1];
+	    const unsigned char c1 = little[0];
+	    const unsigned char c2 = little[1];
 
 	    s = big + 1;
 	    bigend--;
@@ -595,7 +591,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 		goto check_end;
 	    }
 	    else {		/* less expensive than calling strncmp() */
-		register unsigned char *olds = s;
+		register unsigned char * const olds = s;
 
 		tmp = littlelen;
 
@@ -638,7 +634,6 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 char *
 Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift, I32 *old_posp, I32 last)
 {
-    register unsigned char *s, *x;
     register unsigned char *big;
     register I32 pos;
     register I32 previous;
@@ -687,6 +682,7 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
     }
     big -= previous;
     do {
+	register unsigned char *s, *x;
 	if (pos >= stop_pos) break;
 	if (big[pos] != first)
 	    continue;
@@ -765,20 +761,15 @@ be freed with the C<Safefree()> function.
 char *
 Perl_savepv(pTHX_ const char *pv)
 {
-    register char *newaddr;
-#ifdef PERL_MALLOC_WRAP
-    STRLEN pvlen;
-#endif
     if (!pv)
 	return Nullch;
+    else {
+	char *newaddr;
+	const STRLEN pvlen = strlen(pv)+1;
+	New(902,newaddr,pvlen,char);
+	return strcpy(newaddr,pv);
+    }
 
-#ifdef PERL_MALLOC_WRAP
-    pvlen = strlen(pv)+1;
-    New(902,newaddr,pvlen,char);
-#else
-    New(902,newaddr,strlen(pv)+1,char);
-#endif
-    return strcpy(newaddr,pv);
 }
 
 /* same thing but with a known length */
@@ -4058,7 +4049,7 @@ Perl_vnumify(pTHX_ SV *vs)
     len = av_len((AV *)vs);
     if ( len == -1 )
     {
-	Perl_sv_catpv(aTHX_ sv,"0");
+	sv_catpvn(sv,"0",1);
 	return sv;
     }
     digit = SvIVX(*av_fetch((AV *)vs, 0, 0));
@@ -4075,14 +4066,14 @@ Perl_vnumify(pTHX_ SV *vs)
 	if ( (int)PERL_ABS(digit) != 0 || len == 1 )
 	{
 	    if ( digit < 0 ) /* alpha version */
-		Perl_sv_catpv(aTHX_ sv,"_");
+		sv_catpvn(sv,"_",1);
 	    /* Don't display additional trailing zeros */
 	    Perl_sv_catpvf(aTHX_ sv,"%03d", (int)PERL_ABS(digit));
 	}
     }
     else /* len == 0 */
     {
-	 Perl_sv_catpv(aTHX_ sv,"000");
+	 sv_catpvn(sv,"000",3);
     }
     return sv;
 }
@@ -4111,7 +4102,7 @@ Perl_vnormal(pTHX_ SV *vs)
     len = av_len((AV *)vs);
     if ( len == -1 )
     {
-	Perl_sv_catpv(aTHX_ sv,"");
+	sv_catpvn(sv,"",0);
 	return sv;
     }
     digit = SvIVX(*av_fetch((AV *)vs, 0, 0));
@@ -4127,7 +4118,7 @@ Perl_vnormal(pTHX_ SV *vs)
     
     if ( len <= 2 ) { /* short version, must be at least three */
 	for ( len = 2 - len; len != 0; len-- )
-	    Perl_sv_catpv(aTHX_ sv,".0");
+	    sv_catpvn(sv,".0",2);
     }
 
     return sv;

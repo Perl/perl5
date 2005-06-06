@@ -1653,8 +1653,8 @@ PP(pp_caller)
     if (CxTYPE(cx) == CXt_SUB && cx->blk_sub.hasargs
 	&& CopSTASH_eq(PL_curcop, PL_debstash))
     {
-	AV *ary = cx->blk_sub.argarray;
-        const int off = AvARRAY(ary) - AvALLOC(ary);
+	AV * const ary = cx->blk_sub.argarray;
+	const int off = AvARRAY(ary) - AvALLOC(ary);
 
 	if (!PL_dbargs) {
 	    GV* tmpgv;

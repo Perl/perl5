@@ -9908,7 +9908,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
 	    while (cont) {
 		int offset = s - SvPVX_const(PL_linestr);
-		bool found = sv_cat_decode(sv, PL_encoding, PL_linestr,
+		const bool found = sv_cat_decode(sv, PL_encoding, PL_linestr,
 					   &offset, (char*)termstr, termlen);
 		const char *ns = SvPVX_const(PL_linestr) + offset;
 		char *svlast = SvEND(sv) - 1;
