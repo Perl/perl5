@@ -650,7 +650,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	flags |= HVhek_REHASH;
     } else if (!hash) {
         if (keysv && (SvIsCOW_shared_hash(keysv))) {
-            hash = SvUVX(keysv);
+            hash = SvSHARED_HASH(keysv);
         } else {
             PERL_HASH(hash, key, klen);
         }
@@ -1014,7 +1014,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	PERL_HASH_INTERNAL(hash, key, klen);
     } else if (!hash) {
         if (keysv && (SvIsCOW_shared_hash(keysv))) {
-            hash = SvUVX(keysv);
+            hash = SvSHARED_HASH(keysv);
         } else {
             PERL_HASH(hash, key, klen);
         }

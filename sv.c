@@ -4521,7 +4521,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 #endif
 		{
                     /* SvIsCOW_shared_hash */
-                    UV hash = SvUVX(sstr);
+                    UV hash = SvSHARED_HASH(sstr);
                     DEBUG_C(PerlIO_printf(Perl_debug_log,
                                           "Copy on write: Sharing hash\n"));
                     SvPV_set(dstr,
@@ -4665,7 +4665,7 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 
 	if (SvLEN(sstr) == 0) {
 	    /* source is a COW shared hash key.  */
-	    UV hash = SvUVX(sstr);
+	    UV hash = SvSHARED_HASH(sstr);
 	    DEBUG_C(PerlIO_printf(Perl_debug_log,
 				  "Fast copy on write: Sharing hash\n"));
 	    SvUV_set(dstr, hash);
@@ -4921,7 +4921,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
             const char *pvx = SvPVX_const(sv);
             STRLEN len = SvLEN(sv);
             STRLEN cur = SvCUR(sv);
-            U32 hash = SvUVX(sv);
+            U32 hash = SvSHARED_HASH(sv);
             SV *next = SV_COW_NEXT_SV(sv);   /* next COW sv in the loop. */
             if (DEBUG_C_TEST) {
                 PerlIO_printf(Perl_debug_log,
@@ -4958,7 +4958,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 	    const char *pvx = SvPVX_const(sv);
 	    const int is_utf8 = SvUTF8(sv);
 	    STRLEN len = SvCUR(sv);
-            U32 hash   = SvUVX(sv);
+            U32 hash   = SvSHARED_HASH(sv);
 	    SvFAKE_off(sv);
 	    SvREADONLY_off(sv);
             SvPV_set(sv, (char*)0);
