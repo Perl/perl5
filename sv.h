@@ -1309,6 +1309,7 @@ Like C<sv_catsv> but doesn't process magic.
 #  define SvNVx(sv) ((PL_Sv = (sv)), SvNV(PL_Sv))
 #  define SvPVx(sv, lp) ((PL_Sv = (sv)), SvPV(PL_Sv, lp))
 #  define SvPVx_const(sv, lp) ((PL_Sv = (sv)), SvPV_const(PL_Sv, lp))
+#  define SvPVx_nolen_const(sv) ((PL_Sv = (sv)), SvPV_nolen_const(PL_Sv))
 #  define SvPVutf8x(sv, lp) ((PL_Sv = (sv)), SvPVutf8(PL_Sv, lp))
 #  define SvPVbytex(sv, lp) ((PL_Sv = (sv)), SvPVbyte(PL_Sv, lp))
 #  define SvTRUE(sv) (						\
