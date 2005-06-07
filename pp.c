@@ -3011,7 +3011,7 @@ PP(pp_substr)
     if (num_args > 2) {
 	if (num_args > 3) {
 	    repl_sv = POPs;
-	    repl = SvPV(repl_sv, repl_len);
+	    repl = SvPV_const(repl_sv, repl_len);
 	    repl_is_utf8 = DO_UTF8(repl_sv) && SvCUR(repl_sv);
 	}
 	len = POPi;
@@ -3275,7 +3275,7 @@ PP(pp_rindex)
 	/* One needs to be upgraded.  */
 	SV *bytes = little_utf8 ? big : little;
 	STRLEN len;
-	char *p = SvPV(bytes, len);
+	const char *p = SvPV_const(bytes, len);
 
 	temp = newSVpvn(p, len);
 
@@ -3412,7 +3412,6 @@ PP(pp_crypt)
 #ifdef HAS_CRYPT
     dSP; dTARGET;
     dPOPTOPssrl;
-    STRLEN n_a;
     STRLEN len;
     const char *tmps = SvPV_const(left, len);
 
@@ -3445,9 +3444,9 @@ PP(pp_crypt)
 #     endif /* HAS_CRYPT_R */
 #   endif /* USE_ITHREADS */
 #   ifdef FCRYPT
-    sv_setpv(TARG, fcrypt(tmps, SvPV(right, n_a)));
+    sv_setpv(TARG, fcrypt(tmps, SvPV_nolen_const(right)));
 #   else
-    sv_setpv(TARG, PerlProc_crypt(tmps, SvPV(right, n_a)));
+    sv_setpv(TARG, PerlProc_crypt(tmps, SvPV_nolen_const(right)));
 #   endif
     SETs(TARG);
     RETURN;
@@ -3461,12 +3460,12 @@ PP(pp_ucfirst)
 {
     dSP;
     SV *sv = TOPs;
-    register U8 *s;
+    const U8 *s;
     STRLEN slen;
 
     SvGETMAGIC(sv);
     if (DO_UTF8(sv) &&
-	(s = (U8*)SvPV_nomg(sv, slen)) && slen &&
+	(s = (const U8*)SvPV_nomg_const(sv, slen)) && slen &&
 	UTF8_IS_START(*s)) {
 	U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
 	STRLEN ulen;
@@ -3497,6 +3496,7 @@ PP(pp_ucfirst)
 	}
     }
     else {
+	U8 *s1;
 	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
 	    SvUTF8_off(TARG);				/* decontaminate */
@@ -3504,15 +3504,15 @@ PP(pp_ucfirst)
 	    sv = TARG;
 	    SETs(sv);
 	}
-	s = (U8*)SvPV_force_nomg(sv, slen);
-	if (*s) {
+	s1 = (U8*)SvPV_force_nomg(sv, slen);
+	if (*s1) {
 	    if (IN_LOCALE_RUNTIME) {
 		TAINT;
 		SvTAINTED_on(sv);
-		*s = toUPPER_LC(*s);
+		*s1 = toUPPER_LC(*s1);
 	    }
 	    else
-		*s = toUPPER(*s);
+		*s1 = toUPPER(*s1);
 	}
     }
     SvSETMAGIC(sv);
@@ -3523,12 +3523,12 @@ PP(pp_lcfirst)
 {
     dSP;
     SV *sv = TOPs;
-    register U8 *s;
+    const U8 *s;
     STRLEN slen;
 
     SvGETMAGIC(sv);
     if (DO_UTF8(sv) &&
-	(s = (U8*)SvPV_nomg(sv, slen)) && slen &&
+	(s = (const U8*)SvPV_nomg_const(sv, slen)) && slen &&
 	UTF8_IS_START(*s)) {
 	STRLEN ulen;
 	U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
@@ -3553,6 +3553,7 @@ PP(pp_lcfirst)
 	}
     }
     else {
+	U8 *s1;
 	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
 	    SvUTF8_off(TARG);				/* decontaminate */
@@ -3560,15 +3561,15 @@ PP(pp_lcfirst)
 	    sv = TARG;
 	    SETs(sv);
 	}
-	s = (U8*)SvPV_force_nomg(sv, slen);
-	if (*s) {
+	s1 = (U8*)SvPV_force_nomg(sv, slen);
+	if (*s1) {
 	    if (IN_LOCALE_RUNTIME) {
 		TAINT;
 		SvTAINTED_on(sv);
-		*s = toLOWER_LC(*s);
+		*s1 = toLOWER_LC(*s1);
 	    }
 	    else
-		*s = toLOWER(*s);
+		*s1 = toLOWER(*s1);
 	}
     }
     SvSETMAGIC(sv);
@@ -4663,8 +4664,7 @@ PP(pp_split)
 
 	len = rx->minlen;
 	if (len == 1 && !(rx->reganch & ROPT_UTF8) && !tail) {
-	    STRLEN n_a;
-	    char c = *SvPV(csv, n_a);
+	    char c = *SvPV_nolen_const(csv);
 	    while (--limit) {
 		/*SUPPRESS 530*/
 		for (m = s; m < strend && *m != c; m++) ;

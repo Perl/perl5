@@ -3248,7 +3248,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    }
 		    else {
 			STRLEN len;
-			char *t = SvPV(ret, len);
+			const char *t = SvPV_const(ret, len);
 			PMOP pm;
 			char * const oprecomp = PL_regprecomp;
 			const I32 osize = PL_regsize;
@@ -3256,7 +3256,7 @@ S_regmatch(pTHX_ regnode *prog)
 
 			Zero(&pm, 1, PMOP);
                         if (DO_UTF8(ret)) pm.op_pmdynflags |= PMdf_DYN_UTF8;
-			re = CALLREGCOMP(aTHX_ t, t + len, &pm);
+			re = CALLREGCOMP(aTHX_ (char*)t, (char*)t + len, &pm);
 			if (!(SvFLAGS(ret)
 			      & (SVs_TEMP | SVs_PADTMP | SVf_READONLY
 				| SVs_GMG)))

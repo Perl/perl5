@@ -2289,7 +2289,7 @@ S_find_in_my_stash(pTHX_ const char *pkgname, I32 len)
     if ((gv = gv_fetchpv(pkgname, FALSE, SVt_PVCV))) {
         SV *sv;
         if (GvCV(gv) && (sv = cv_const_sv(GvCV(gv)))) {
-            pkgname = SvPV_nolen(sv);
+            pkgname = SvPV_nolen_const(sv);
         }
     }
 

@@ -97,8 +97,8 @@ S_do_trans_simple(pTHX_ SV *sv)
 STATIC I32
 S_do_trans_count(pTHX_ SV *sv)
 {
-    U8 *s;
-    U8 *send;
+    const U8 *s;
+    const U8 *send;
     I32 matches = 0;
     STRLEN len;
     const I32 complement = PL_op->op_private & OPpTRANS_COMPLEMENT;
@@ -107,7 +107,7 @@ S_do_trans_count(pTHX_ SV *sv)
     if (!tbl)
 	Perl_croak(aTHX_ "panic: do_trans_count line %d",__LINE__);
 
-    s = (U8*)SvPV(sv, len);
+    s = (const U8*)SvPV_const(sv, len);
     send = s + len;
 
     if (!SvUTF8(sv))

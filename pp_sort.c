@@ -1526,8 +1526,7 @@ PP(pp_sort)
 	else {
 	    cv = sv_2cv(*++MARK, &stash, &gv, 0);
 	    if (cv && SvPOK(cv)) {
-		STRLEN n_a;
-		char *proto = SvPV((SV*)cv, n_a);
+		char *proto = SvPV_nolen((SV*)cv);
 		if (proto && strEQ(proto, "$$")) {
 		    hasargs = TRUE;
 		}
@@ -1620,11 +1619,11 @@ PP(pp_sort)
 		}
 		else {
 		    if (!SvPOK(*p1)) {
-			STRLEN n_a;
 			if (SvAMAGIC(*p1))
 			    overloading = 1;
 			else
-			    (void)sv_2pv(*p1, &n_a);
+			    (void)sv_2pv_flags(*p1, 0,
+					       SV_GMAGIC|SV_CONST_RETURN);
 		    }
 		}
 	    }

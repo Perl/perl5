@@ -2323,7 +2323,7 @@ Perl_looks_like_number(pTHX_ SV *sv)
 	len = SvCUR(sv);
     }
     else if (SvPOKp(sv))
-	sbegin = SvPV(sv, len);
+	sbegin = SvPV_const(sv, len);
     else
 	return SvFLAGS(sv) & (SVf_NOK|SVp_NOK|SVf_IOK|SVp_IOK);
     return grok_number(sbegin, len, NULL);
@@ -6472,17 +6472,17 @@ Handles magic and type coercion.
 void
 Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 {
-    U8* s;
+    const U8* s;
     STRLEN len;
 
     if (!sv)
 	return;
 
-    s = (U8*)SvPV(sv, len);
+    s = (const U8*)SvPV_const(sv, len);
     if ((I32)len < *offsetp)
 	Perl_croak(aTHX_ "panic: sv_pos_b2u: bad byte offset");
     else {
-	U8* send = s + *offsetp;
+	const U8* send = s + *offsetp;
 	MAGIC* mg = NULL;
 	STRLEN *cache = NULL;
 
@@ -6514,7 +6514,7 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 		    STRLEN backw = cache[1] - *offsetp;
 
 		    if (!(forw < 2 * backw)) {
-			U8 *p = s + cache[1];
+			const U8 *p = s + cache[1];
 			STRLEN ubackw = 0;
 			
 			cache[1] -= backw;

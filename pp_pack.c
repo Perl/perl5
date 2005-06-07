@@ -3513,7 +3513,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    /* Fall through! */
 	case 'p':
 	    while (len-- > 0) {
-		char *aptr;
+		const char *aptr;
 
 		fromstr = NEXTFROM;
 		SvGETMAGIC(fromstr);
@@ -3532,7 +3532,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 				    "Attempt to pack pointer to temporary value");
 		    }
 		    if (SvPOK(fromstr) || SvNIOK(fromstr))
-			aptr = SvPV_flags(fromstr, n_a, 0);
+			aptr = SvPV_nomg_const(fromstr, n_a);
 		    else
 			aptr = SvPV_force_flags(fromstr, n_a, 0);
 		}
@@ -3552,7 +3552,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 			    "Field too wide in 'u' format in pack");
 		len = 63;
 	    }
-	    aptr = SvPV(fromstr, fromlen);
+	    aptr = SvPV_const(fromstr, fromlen);
 	    from_utf8 = DO_UTF8(fromstr);
 	    if (from_utf8) {
 		aend = aptr + fromlen;

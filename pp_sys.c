@@ -1817,7 +1817,7 @@ PP(pp_send)
     GV *gv;
     IO *io;
     SV *bufsv;
-    char *buffer;
+    const char *buffer;
     Size_t length;
     SSize_t retval;
     STRLEN blen;
@@ -1866,7 +1866,7 @@ PP(pp_send)
 	    bufsv = sv_2mortal(newSVsv(bufsv));
 	    buffer = sv_2pvutf8(bufsv, &blen);
 	} else
-	    buffer = SvPV(bufsv, blen);
+	    buffer = SvPV_const(bufsv, blen);
     }
     else {
 	 if (DO_UTF8(bufsv)) {
@@ -1874,7 +1874,7 @@ PP(pp_send)
 	      bufsv = sv_2mortal(newSVsv(bufsv));
 	      sv_utf8_downgrade(bufsv, FALSE);
 	 }
-	 buffer = SvPV(bufsv, blen);
+	 buffer = SvPV_const(bufsv, blen);
     }
 
     if (PL_op->op_type == OP_SYSWRITE) {
@@ -1896,7 +1896,7 @@ PP(pp_send)
 	if (length > blen - offset)
 	    length = blen - offset;
 	if (DO_UTF8(bufsv)) {
-	    buffer = (char*)utf8_hop((U8 *)buffer, offset);
+	    buffer = (const char*)utf8_hop((const U8 *)buffer, offset);
 	    length = utf8_hop((U8 *)buffer, length) - (U8 *)buffer;
 	}
 	else {
@@ -2142,8 +2142,7 @@ PP(pp_truncate)
 	}
 	else {
 	    SV *sv = POPs;
-	    char *name;
-	    STRLEN n_a;
+	    const char *name;
 
 	    if (SvTYPE(sv) == SVt_PVGV) {
 	        tmpgv = (GV*)sv;		/* *main::FRED for example */
@@ -2158,7 +2157,7 @@ PP(pp_truncate)
 		goto do_ftruncate_io;
 	    }
 
-	    name = SvPV(sv, n_a);
+	    name = SvPV_nolen_const(sv);
 	    TAINT_PROPER("truncate");
 #ifdef HAS_TRUNCATE
 	    if (truncate(name, len) < 0)
@@ -3689,8 +3688,8 @@ PP(pp_symlink)
 #ifdef HAS_SYMLINK
     dSP; dTARGET;
     STRLEN n_a;
-    char *tmps2 = POPpx;
-    char *tmps = SvPV(TOPs, n_a);
+    const char *tmps2 = POPpconstx;
+    const char *tmps = SvPV_nolen_const(TOPs);
     TAINT_PROPER("symlink");
     SETi( symlink(tmps, tmps2) >= 0 );
     RETURN;
