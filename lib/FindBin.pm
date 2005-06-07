@@ -104,7 +104,7 @@ use File::Spec;
 %EXPORT_TAGS = (ALL => [qw($Bin $Script $RealBin $RealScript $Dir $RealDir)]);
 @ISA = qw(Exporter);
 
-$VERSION = "1.46";
+$VERSION = "1.47";
 
 sub cwd2 {
    my $cwd = getcwd();
@@ -188,7 +188,11 @@ sub init
       }
 
      # Get absolute paths to directories
-     $Bin     = abs_path($Bin)     if($Bin);
+     if ($Bin) {
+      my $BinOld = $Bin;
+      $Bin = abs_path($Bin);
+      defined $Bin or $Bin = File::Spec->canonpath($BinOld);
+     }
      $RealBin = abs_path($RealBin) if($RealBin);
     }
   }
