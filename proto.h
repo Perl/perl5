@@ -1346,24 +1346,19 @@ PERL_CALLCONV NV	Perl_sv_2nv(pTHX_ SV* sv)
 			__attribute__nonnull__(pTHX_1);
 
 /* PERL_CALLCONV char*	sv_2pv(pTHX_ SV* sv, STRLEN* lp)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2); */
+			__attribute__nonnull__(pTHX_1); */
 
 PERL_CALLCONV char*	Perl_sv_2pv_flags(pTHX_ SV* sv, STRLEN* lp, I32 flags)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV char*	Perl_sv_2pvutf8(pTHX_ SV* sv, STRLEN* lp)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV char*	Perl_sv_2pvbyte(pTHX_ SV* sv, STRLEN* lp)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV char*	Perl_sv_pvn_nomg(pTHX_ SV* sv, STRLEN* lp)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_1);
 
 /* PERL_CALLCONV UV	sv_2uv(pTHX_ SV* sv)
 			__attribute__nonnull__(pTHX_1); */
