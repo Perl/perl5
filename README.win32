@@ -239,7 +239,7 @@ shells available after you install the Platform SDK from the Start Menu.
 
 =item MinGW release 3 with gcc
 
-The latest release of MinGW at the time of writing is 3.1.0, which contains 
+The latest release of MinGW at the time of writing is 3.1.0, which contains
 gcc-3.2.3.  It can be downloaded here:
 
     http://www.mingw.org/
@@ -301,7 +301,7 @@ defaults in the dmake makefile are setup to build using MinGW/gcc.
 
 =item *
 
-Edit the makefile.mk (or Makefile, if you're using nmake) and change 
+Edit the makefile.mk (or Makefile, if you're using nmake) and change
 the values of INST_DRV and INST_TOP.   You can also enable various
 build flags.  These are explained in the makefiles.
 
@@ -312,12 +312,17 @@ lib/ExtUtils/t/Embed.t test, which attempts to build a test program and
 may end up building against the installed perl's lib/CORE directory rather
 than the one being tested.
 
-You will have to make sure that CCTYPE is set correctly and that 
+You will have to make sure that CCTYPE is set correctly and that
 CCHOME points to wherever you installed your compiler.
 
 The default value for CCHOME in the makefiles for Visual C++
 may not be correct for some versions.  Make sure the default exists
 and is valid.
+
+You may also need to comment out a line C<DELAYLOAD = ...> in the
+makefile, in case you're using an older version of the Visual C++ compiler
+(e.g. 6.0 without service packs) and if the linker reports an internal
+error.
 
 If you have either the source or a library that contains des_fcrypt(),
 enable the appropriate option in the makefile.  A ready-to-use version
@@ -328,6 +333,9 @@ Alternatively, if you have built a library that contains des_fcrypt(),
 you can set CRYPT_LIB to point to the library name.
 Perl will also build without des_fcrypt(), but the crypt() builtin will
 fail at run time.
+
+If you want build some core extensions statically into perl's dll, specify
+them in the STATIC_EXT macro.
 
 Be sure to read the instructions near the top of the makefiles carefully.
 
@@ -611,10 +619,10 @@ be a source of frustration if you use such a perl binary with an
 alternate shell that *does* expand wildcards.
 
 Instead, the following solution works rather well. The nice things
-about it are 1) you can start using it right away; 2) it is more 
+about it are 1) you can start using it right away; 2) it is more
 powerful, because it will do the right thing with a pattern like
 */*/*.c; 3) you can decide whether you do/don't want to use it; and
-4) you can extend the method to add any customizations (or even 
+4) you can extend the method to add any customizations (or even
 entirely different kinds of wildcard expansion).
 
 	C:\> copy con c:\perl\lib\Wild.pm
@@ -812,15 +820,15 @@ find a mailer on your system).
 
 =head1 BUGS AND CAVEATS
 
-Norton AntiVirus interferes with the build process, particularly if 
-set to "AutoProtect, All Files, when Opened". Unlike large applications 
-the perl build process opens and modifies a lot of files. Having the  
+Norton AntiVirus interferes with the build process, particularly if
+set to "AutoProtect, All Files, when Opened". Unlike large applications
+the perl build process opens and modifies a lot of files. Having the
 the AntiVirus scan each and every one slows build the process significantly.
 Worse, with PERLIO=stdio the build process fails with peculiar messages
-as the virus checker interacts badly with miniperl.exe writing configure 
+as the virus checker interacts badly with miniperl.exe writing configure
 files (it seems to either catch file part written and treat it as suspicious,
 or virus checker may have it "locked" in a way which inhibits miniperl
-updating it). The build does complete with 
+updating it). The build does complete with
 
    set PERLIO=perlio
 
@@ -853,7 +861,7 @@ Thus, signals may work only for simple things like setting a flag
 variable in the handler.  Using signals under this port should
 currently be considered unsupported.
 
-Please send detailed descriptions of any problems and solutions that 
+Please send detailed descriptions of any problems and solutions that
 you may find to E<lt>F<perlbug@perl.org>E<gt>, along with the output
 produced by C<perl -V>.
 
@@ -903,6 +911,6 @@ Win9x support was added in 5.6 (Benjamin Stuhl).
 
 Support for 64-bit Windows added in 5.8 (ActiveState Corp).
 
-Last updated: 15 February 2005
+Last updated: 7 June 2005
 
 =cut
