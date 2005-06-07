@@ -4527,18 +4527,18 @@ PP(pp_split)
     register IV limit = POPi;			/* note, negative is forever */
     SV *sv = POPs;
     STRLEN len;
-    register char *s = SvPV(sv, len);
+    register const char *s = SvPV_const(sv, len);
     bool do_utf8 = DO_UTF8(sv);
-    char *strend = s + len;
+    const char *strend = s + len;
     register PMOP *pm;
     register REGEXP *rx;
     register SV *dstr;
-    register char *m;
+    register const char *m;
     I32 iters = 0;
     const STRLEN slen = do_utf8 ? utf8_length((U8*)s, (U8*)strend) : (strend - s);
     I32 maxiters = slen + 10;
     I32 i;
-    char *orig;
+    const char *orig;
     I32 origlimit = limit;
     I32 realarray = 0;
     I32 base;
@@ -4708,7 +4708,8 @@ PP(pp_split)
 	while (s < strend && --limit)
 	{
 	    PUTBACK;
-	    i = CALLREGEXEC(aTHX_ rx, s, strend, orig, 1 , sv, NULL, 0);
+	    i = CALLREGEXEC(aTHX_ rx, (char*)s, (char*)strend, (char*)orig, 1 ,
+			    sv, NULL, 0);
 	    SPAGAIN;
 	    if (i == 0)
 		break;
