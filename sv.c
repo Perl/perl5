@@ -3328,8 +3328,7 @@ use the macro wrapper C<SvPV_nolen(sv)> instead.
 char *
 Perl_sv_2pv_nolen(pTHX_ register SV *sv)
 {
-    STRLEN n_a;
-    return sv_2pv(sv, &n_a);
+    return sv_2pv(sv, 0);
 }
 
 /* uiv_2buf(): private routine for use by sv_2pv_flags(): print an IV or
@@ -3394,6 +3393,12 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
     SV *tsv, *origsv;
     char tbuf[64];	/* Must fit sprintf/Gconvert of longest IV/NV */
     char *tmpbuf = tbuf;
+    STRLEN n_a;
+
+    if (!lp) {
+	/* Saves needing to do lots of if (!lp) checks below  */
+	lp = &n_a;
+    }
 
     if (!sv) {
 	*lp = 0;
@@ -3728,8 +3733,7 @@ Usually accessed via the C<SvPVbyte_nolen> macro.
 char *
 Perl_sv_2pvbyte_nolen(pTHX_ register SV *sv)
 {
-    STRLEN n_a;
-    return sv_2pvbyte(sv, &n_a);
+    return sv_2pvbyte(sv, 0);
 }
 
 /*
@@ -3765,8 +3769,7 @@ Usually accessed via the C<SvPVutf8_nolen> macro.
 char *
 Perl_sv_2pvutf8_nolen(pTHX_ register SV *sv)
 {
-    STRLEN n_a;
-    return sv_2pvutf8(sv, &n_a);
+    return sv_2pvutf8(sv, 0);
 }
 
 /*

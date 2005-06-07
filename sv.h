@@ -1222,7 +1222,7 @@ Like C<sv_catsv> but doesn't process magic.
 
 #define SvPV_nolen(sv) \
     ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
-     ? SvPVX(sv) : sv_2pv_nolen(sv))
+     ? SvPVX(sv) : sv_2pv_flags(sv, 0, SV_GMAGIC))
 
 #define SvPV_nomg(sv, lp) SvPV_flags(sv, lp, 0)
 
@@ -1239,7 +1239,7 @@ Like C<sv_catsv> but doesn't process magic.
 
 #define SvPVutf8_nolen(sv) \
     ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == (SVf_POK|SVf_UTF8)\
-     ? SvPVX(sv) : sv_2pvutf8_nolen(sv))
+     ? SvPVX(sv) : sv_2pvutf8(sv, 0))
 
 /* ----*/
 
@@ -1253,7 +1253,7 @@ Like C<sv_catsv> but doesn't process magic.
 
 #define SvPVbyte_nolen(sv) \
     ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == (SVf_POK)\
-     ? SvPVX(sv) : sv_2pvbyte_nolen(sv))
+     ? SvPVX(sv) : sv_2pvbyte(sv, 0))
 
 
     
