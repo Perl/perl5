@@ -2942,6 +2942,17 @@ macro.
 =for hackers
 Found in file sv.c
 
+=item newSVhek
+
+Creates a new SV from the hash key structure.  It will generate scalars that
+point to the shared string table where possible. Returns a new (undefined)
+SV if the hek is NULL.
+
+	SV*	newSVhek(const HEK *hek)
+
+=for hackers
+Found in file sv.c
+
 =item newSViv
 
 Creates a new SV and copies an integer into it.  The reference count for the

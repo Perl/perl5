@@ -7606,7 +7606,7 @@ Perl_newSVpvn(pTHX_ const char *s, STRLEN len)
 
 
 /*
-=for apidoc newSVpv_hek
+=for apidoc newSVhek
 
 Creates a new SV from the hash key structure.  It will generate scalars that
 point to the shared string table where possible. Returns a new (undefined)
