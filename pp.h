@@ -129,6 +129,7 @@ Pops a long off the stack.
 #define POPs		(*sp--)
 #define POPp		(SvPVx(POPs, PL_na))		/* deprecated */
 #define POPpx		(SvPVx(POPs, n_a))
+#define POPpconstx	(SvPVx_const(POPs, n_a))
 #define POPpbytex	(SvPVbytex(POPs, n_a))
 #define POPn		(SvNVx(POPs))
 #define POPi		((IV)SvIVx(POPs))
