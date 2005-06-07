@@ -1835,7 +1835,7 @@ PP(pp_enteriter)
 		STRLEN n_a;
 		cx->blk_loop.iterlval = newSVsv(sv);
 		(void) SvPV_force(cx->blk_loop.iterlval,n_a);
-		(void) SvPV(right,n_a);
+		(void) SvPV_nolen_const(right);
 	    }
 	}
 	else if (PL_op->op_private & OPpITER_REVERSED) {

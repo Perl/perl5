@@ -3704,7 +3704,7 @@ PP(pp_readlink)
     dSP;
 #ifdef HAS_SYMLINK
     dTARGET;
-    char *tmps;
+    const char *tmps;
     char buf[MAXPATHLEN];
     int len;
     STRLEN n_a;
@@ -3712,7 +3712,7 @@ PP(pp_readlink)
 #ifndef INCOMPLETE_TAINTS
     TAINT;
 #endif
-    tmps = POPpx;
+    tmps = POPpconstx;
     len = readlink(tmps, buf, sizeof(buf) - 1);
     EXTEND(SP, 1);
     if (len < 0)
@@ -3890,7 +3890,7 @@ PP(pp_open_dir)
 #if defined(Direntry_t) && defined(HAS_READDIR)
     dSP;
     STRLEN n_a;
-    char *dirname = POPpx;
+    const char *dirname = POPpconstx;
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
 
@@ -4181,7 +4181,7 @@ PP(pp_system)
     if (PL_tainting) {
 	TAINT_ENV();
 	while (++MARK <= SP) {
-	    (void)SvPV_nolen(*MARK);      /* stringify for taint check */
+	    (void)SvPV_nolen_const(*MARK);      /* stringify for taint check */
 	    if (PL_tainted)
 		break;
 	}
@@ -4310,7 +4310,7 @@ PP(pp_exec)
     if (PL_tainting) {
 	TAINT_ENV();
 	while (++MARK <= SP) {
-	    (void)SvPV_nolen(*MARK);      /* stringify for taint check */
+	    (void)SvPV_nolen_const(*MARK);      /* stringify for taint check */
 	    if (PL_tainted)
 		break;
 	}

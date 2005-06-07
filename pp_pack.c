@@ -2005,8 +2005,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 			continue;
 		    }
 		    if (++bytes >= sizeof(UV)) {	/* promote to string */
-			char *t;
-			STRLEN n_a;
+			const char *t;
 
 			sv = Perl_newSVpvf(aTHX_ "%.*"UVf, (int)TYPE_DIGITS(UV), auv);
 			while (s < strend) {
@@ -2017,7 +2016,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 				break;
 			    }
 			}
-			t = SvPV(sv, n_a);
+			t = SvPV_nolen_const(sv);
 			while (*t == '0')
 			    t++;
 			sv_chop(sv, t);
@@ -2904,14 +2903,14 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	}
 	case 'H':
 	case 'h': {
-	    char *str, *end;
+	    const char *str, *end;
 	    I32 l, field_len;
 	    U8 bits;
 	    bool utf8_source;
 	    U32 utf8_flags;
 
 	    fromstr = NEXTFROM;
-	    str = SvPV(fromstr, fromlen);
+	    str = SvPV_const(fromstr, fromlen);
 	    end = str + fromlen;
 	    if (DO_UTF8(fromstr)) {
 		utf8_source = TRUE;

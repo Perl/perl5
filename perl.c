@@ -4703,7 +4703,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	case 0:
 	    call_list_body(cv);
 	    atsv = ERRSV;
-	    (void)SvPV(atsv, len);
+	    (void)SvPV_const(atsv, len);
 	    if (len) {
 		PL_curcop = &PL_compiling;
 		CopLINE_set(PL_curcop, oldline);

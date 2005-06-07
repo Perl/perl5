@@ -3410,6 +3410,8 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	    mg_get(sv);
 	if (SvPOKp(sv)) {
 	    *lp = SvCUR(sv);
+	    if (flags & SV_MUTABLE_RETURN)
+		return SvPVX_mutable(sv);
 	    if (flags & SV_CONST_RETURN)
 		return (char *)SvPVX_const(sv);
 	    return SvPVX(sv);
@@ -3651,6 +3653,8 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 			  PTR2UV(sv),SvPVX_const(sv)));
     if (flags & SV_CONST_RETURN)
 	return (char *)SvPVX_const(sv);
+    if (flags & SV_MUTABLE_RETURN)
+	return SvPVX_mutable(sv);
     return SvPVX(sv);
 
   tokensave:

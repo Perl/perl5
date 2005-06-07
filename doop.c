@@ -605,7 +605,7 @@ Perl_do_trans(pTHX_ SV *sv)
         if (SvREADONLY(sv) && !(PL_op->op_private & OPpTRANS_IDENTICAL))
             Perl_croak(aTHX_ PL_no_modify);
     }
-    (void)SvPV(sv, len);
+    (void)SvPV_const(sv, len);
     if (!len)
 	return 0;
     if (!(PL_op->op_private & OPpTRANS_IDENTICAL)) {
@@ -717,7 +717,7 @@ UV
 Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 {
     STRLEN srclen, len;
-    unsigned char *s = (unsigned char *) SvPV(sv, srclen);
+    const unsigned char *s = (const unsigned char *) SvPV_const(sv, srclen);
     UV retnum = 0;
 
     if (offset < 0)

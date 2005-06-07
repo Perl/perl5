@@ -2421,7 +2421,7 @@ PP(pp_complement)
 	register I32 anum;
 	STRLEN len;
 
-	(void)SvPV_nomg(sv,len); /* force check for uninit var */
+	(void)SvPV_nomg_const(sv,len); /* force check for uninit var */
 	sv_setsv_nomg(TARG, sv);
 	tmps = (U8*)SvPV_force(TARG, len);
 	anum = len;
@@ -3194,8 +3194,8 @@ PP(pp_index)
     SV *temp = Nullsv;
     I32 offset;
     I32 retval;
-    char *tmps;
-    char *tmps2;
+    const char *tmps;
+    const char *tmps2;
     STRLEN biglen;
     I32 arybase = PL_curcop->cop_arybase;
     int big_utf8;
@@ -3213,7 +3213,7 @@ PP(pp_index)
 	/* One needs to be upgraded.  */
 	SV *bytes = little_utf8 ? big : little;
 	STRLEN len;
-	char *p = SvPV(bytes, len);
+	const char *p = SvPV_const(bytes, len);
 
 	temp = newSVpvn(p, len);
 
@@ -3231,7 +3231,7 @@ PP(pp_index)
     }
     if (big_utf8 && offset > 0)
 	sv_pos_u2b(big, &offset, 0);
-    tmps = SvPV(big, biglen);
+    tmps = SvPV_const(big, biglen);
     if (offset < 0)
 	offset = 0;
     else if (offset > (I32)biglen)
@@ -3259,8 +3259,8 @@ PP(pp_rindex)
     STRLEN llen;
     I32 offset;
     I32 retval;
-    char *tmps;
-    char *tmps2;
+    const char *tmps;
+    const char *tmps2;
     I32 arybase = PL_curcop->cop_arybase;
     int big_utf8;
     int little_utf8;
@@ -3291,8 +3291,8 @@ PP(pp_rindex)
 	    little = temp;
 	}
     }
-    tmps2 = SvPV(little, llen);
-    tmps = SvPV(big, blen);
+    tmps2 = SvPV_const(little, llen);
+    tmps = SvPV_const(big, blen);
 
     if (MAXARG < 3)
 	offset = blen;
@@ -3414,7 +3414,7 @@ PP(pp_crypt)
     dPOPTOPssrl;
     STRLEN n_a;
     STRLEN len;
-    char *tmps = SvPV(left, len);
+    const char *tmps = SvPV_const(left, len);
 
     if (DO_UTF8(left)) {
          /* If Unicode, try to downgrade.
@@ -3579,7 +3579,6 @@ PP(pp_uc)
 {
     dSP;
     SV *sv = TOPs;
-    register U8 *s;
     STRLEN len;
 
     SvGETMAGIC(sv);
@@ -3587,10 +3586,11 @@ PP(pp_uc)
 	dTARGET;
 	STRLEN ulen;
 	register U8 *d;
-	U8 *send;
+	const U8 *s;
+	const U8 *send;
 	U8 tmpbuf[UTF8_MAXBYTES+1];
 
-	s = (U8*)SvPV_nomg(sv,len);
+	s = (const U8*)SvPV_nomg_const(sv,len);
 	if (!len) {
 	    SvUTF8_off(TARG);				/* decontaminate */
 	    sv_setpvn(TARG, "", 0);
@@ -3631,6 +3631,7 @@ PP(pp_uc)
 	}
     }
     else {
+	U8 *s;
 	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
 	    SvUTF8_off(TARG);				/* decontaminate */
@@ -3640,7 +3641,7 @@ PP(pp_uc)
 	}
 	s = (U8*)SvPV_force_nomg(sv, len);
 	if (len) {
-	    register U8 *send = s + len;
+	    const register U8 *send = s + len;
 
 	    if (IN_LOCALE_RUNTIME) {
 		TAINT;
@@ -3662,18 +3663,18 @@ PP(pp_lc)
 {
     dSP;
     SV *sv = TOPs;
-    register U8 *s;
     STRLEN len;
 
     SvGETMAGIC(sv);
     if (DO_UTF8(sv)) {
 	dTARGET;
+	const U8 *s;
 	STRLEN ulen;
 	register U8 *d;
-	U8 *send;
+	const U8 *send;
 	U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
 
-	s = (U8*)SvPV_nomg(sv,len);
+	s = (const U8*)SvPV_nomg_const(sv,len);
 	if (!len) {
 	    SvUTF8_off(TARG);				/* decontaminate */
 	    sv_setpvn(TARG, "", 0);
@@ -3733,6 +3734,7 @@ PP(pp_lc)
 	}
     }
     else {
+	U8 *s;
 	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
 	    SvUTF8_off(TARG);				/* decontaminate */
