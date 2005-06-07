@@ -335,7 +335,7 @@ PP(pp_backtick)
     if (fp) {
         const char *type = NULL;
 	if (PL_curcop->cop_io) {
-	    type = SvPV_nolen(PL_curcop->cop_io);
+	    type = SvPV_nolen_const(PL_curcop->cop_io);
 	}
 	if (type && *type)
 	    PerlIO_apply_layers(aTHX_ fp,mode,type);
@@ -446,14 +446,14 @@ PP(pp_warn)
     else {
 	tmpsv = TOPs;
     }
-    tmps = SvPV(tmpsv, len);
+    tmps = SvPV_const(tmpsv, len);
     if ((!tmps || !len) && PL_errgv) {
   	SV *error = ERRSV;
 	SvUPGRADE(error, SVt_PV);
 	if (SvPOK(error) && SvCUR(error))
 	    sv_catpv(error, "\t...caught");
 	tmpsv = error;
-	tmps = SvPV(tmpsv, len);
+	tmps = SvPV_const(tmpsv, len);
     }
     if (!tmps || !len)
 	tmpsv = sv_2mortal(newSVpvn("Warning: something's wrong", 26));
@@ -513,7 +513,7 @@ PP(pp_die)
 	    if (SvPOK(error) && SvCUR(error))
 		sv_catpv(error, "\t...propagated");
 	    tmpsv = error;
-	    tmps = SvPV(tmpsv, len);
+	    tmps = SvPV_const(tmpsv, len);
 	}
     }
     if (!tmps || !len)
@@ -766,11 +766,11 @@ PP(pp_binmode)
 
     PUTBACK;
     if (PerlIO_binmode(aTHX_ fp,IoTYPE(io),mode_from_discipline(discp),
-                       (discp) ? SvPV_nolen(discp) : Nullch)) {
+                       (discp) ? SvPV_nolen_const(discp) : Nullch)) {
 	if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {
 	     if (!PerlIO_binmode(aTHX_ IoOFP(io),IoTYPE(io),
 			mode_from_discipline(discp),
-                       (discp) ? SvPV_nolen(discp) : Nullch)) {
+                       (discp) ? SvPV_nolen_const(discp) : Nullch)) {
 		SPAGAIN;
 		RETPUSHUNDEF;
 	     }
@@ -1301,9 +1301,9 @@ PP(pp_enterwrite)
     if (!cv) {
 	if (fgv) {
 	    SV * const tmpsv = sv_newmortal();
-	    char *name;
+	    const char *name;
 	    gv_efullname4(tmpsv, fgv, Nullch, FALSE);
-	    name = SvPV_nolen(tmpsv);
+	    name = SvPV_nolen_const(tmpsv);
 	    if (name && *name)
 		DIE(aTHX_ "Undefined format \"%s\" called", name);
 	}
@@ -1392,7 +1392,7 @@ PP(pp_leavewrite)
 	    SV * const sv = sv_newmortal();
 	    const char *name;
 	    gv_efullname4(sv, fgv, Nullch, FALSE);
-	    name = SvPV_nolen(sv);
+	    name = SvPV_nolen_const(sv);
 	    if (name && *name)
 		DIE(aTHX_ "Undefined top format \"%s\" called",name);
 	}
@@ -1521,7 +1521,7 @@ PP(pp_sysopen)
     dSP;
     GV *gv;
     SV *sv;
-    char *tmps;
+    const char *tmps;
     STRLEN len;
     const int perm = (MAXARG > 3) ? POPi : 0666;
     const int mode = POPi;
@@ -1531,8 +1531,9 @@ PP(pp_sysopen)
 
     /* Need TIEHANDLE method ? */
 
-    tmps = SvPV(sv, len);
-    if (do_open(gv, tmps, len, TRUE, mode, perm, Nullfp)) {
+    tmps = SvPV_const(sv, len);
+    /* FIXME? do_open should do const  */
+    if (do_open(gv, (char*)tmps, len, TRUE, mode, perm, Nullfp)) {
 	IoLINES(GvIOp(gv)) = 0;
 	PUSHs(&PL_sv_yes);
     }
@@ -3647,9 +3648,8 @@ PP(pp_rename)
     dSP; dTARGET;
     int anum;
     STRLEN n_a;
-
-    char *tmps2 = POPpx;
-    char *tmps = SvPV(TOPs, n_a);
+    const char *tmps2 = POPpconstx;
+    const char *tmps = SvPV_nolen_const(TOPs);
     TAINT_PROPER("rename");
 #ifdef HAS_RENAME
     anum = PerlLIO_rename(tmps, tmps2);
@@ -3674,8 +3674,8 @@ PP(pp_link)
 #ifdef HAS_LINK
     dSP; dTARGET;
     STRLEN n_a;
-    char *tmps2 = POPpx;
-    char *tmps = SvPV(TOPs, n_a);
+    const char *tmps2 = POPpconstx;
+    const char *tmps = SvPV_nolen_const(TOPs);
     TAINT_PROPER("link");
     SETi( PerlLIO_link(tmps, tmps2) >= 0 );
     RETURN;

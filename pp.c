@@ -553,10 +553,9 @@ PP(pp_gelem)
     SV *tmpRef;
     const char *elem;
     dSP;
-    STRLEN n_a;
 
     sv = POPs;
-    elem = SvPV(sv, n_a);
+    elem = SvPV_nolen_const(sv);
     gv = (GV*)POPs;
     tmpRef = Nullsv;
     sv = Nullsv;

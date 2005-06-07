@@ -1149,12 +1149,12 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     register char *dc;
     STRLEN leftlen;
     STRLEN rightlen;
-    register char *lc;
-    register char *rc;
+    register const char *lc;
+    register const char *rc;
     register I32 len;
     I32 lensave;
-    char *lsave;
-    char *rsave;
+    const char *lsave;
+    const char *rsave;
     const bool left_utf = DO_UTF8(left);
     const bool right_utf = DO_UTF8(right);
     I32 needlen = 0;
@@ -1166,8 +1166,8 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 
     if (sv != left || (optype != OP_BIT_AND && !SvOK(sv) && !SvGMAGICAL(sv)))
 	sv_setpvn(sv, "", 0);	/* avoid undef warning on |= and ^= */
-    lsave = lc = SvPV_nomg(left, leftlen);
-    rsave = rc = SvPV_nomg(right, rightlen);
+    lsave = lc = SvPV_nomg_const(left, leftlen);
+    rsave = rc = SvPV_nomg_const(right, rightlen);
     len = leftlen < rightlen ? leftlen : rightlen;
     lensave = len;
     if ((left_utf || right_utf) && (sv == left || sv == right)) {

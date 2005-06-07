@@ -498,7 +498,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 	return Nullgv;
     if (stash) {
 	if (SvTYPE(stash) < SVt_PVHV) {
-	    packname = SvPV((SV*)stash, packname_len);
+	    packname = SvPV_const((SV*)stash, packname_len);
 	    stash = Nullhv;
 	}
 	else {
@@ -1865,7 +1865,7 @@ bool
 Perl_is_gv_magical_sv(pTHX_ SV *name, U32 flags)
 {
     STRLEN len;
-    const char *temp = SvPV(name, len);
+    const char *temp = SvPV_const(name, len);
     return is_gv_magical(temp, len, flags);
 }
 

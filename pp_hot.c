@@ -1719,7 +1719,7 @@ PP(pp_helem)
 	    else {
 		if (!preeminent) {
 		    STRLEN keylen;
-		    const char * const key = SvPV(keysv, keylen);
+		    const char * const key = SvPV_const(keysv, keylen);
 		    SAVEDELETE(hv, savepvn(key,keylen), keylen);
 		} else
 		    save_helem(hv, keysv, svp);

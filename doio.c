@@ -1176,7 +1176,7 @@ Perl_mode_from_discipline(pTHX_ SV *discp)
     int mode = O_BINARY;
     if (discp) {
 	STRLEN len;
-	const char *s = SvPV(discp,len);
+	const char *s = SvPV_const(discp,len);
 	while (*s) {
 	    if (*s == ':') {
 		switch (s[1]) {
@@ -1423,7 +1423,6 @@ Perl_my_lstat(pTHX)
 {
     dSP;
     SV *sv;
-    STRLEN n_a;
     if (PL_op->op_flags & OPf_REF) {
 	EXTEND(SP,1);
 	if (cGVOP_gv == PL_defgv) {
@@ -1451,9 +1450,9 @@ Perl_my_lstat(pTHX)
 	return (PL_laststatval = -1);
     }
     /* XXX Do really need to be calling SvPV() all these times? */
-    sv_setpv(PL_statname,SvPV(sv, n_a));
-    PL_laststatval = PerlLIO_lstat(SvPV(sv, n_a),&PL_statcache);
-    if (PL_laststatval < 0 && ckWARN(WARN_NEWLINE) && strchr(SvPV(sv, n_a), '\n'))
+    sv_setpv(PL_statname,SvPV_nolen_const(sv));
+    PL_laststatval = PerlLIO_lstat(SvPV_nolen_const(sv),&PL_statcache);
+    if (PL_laststatval < 0 && ckWARN(WARN_NEWLINE) && strchr(SvPV_nolen_const(sv), '\n'))
 	Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "lstat");
     return PL_laststatval;
 }
@@ -1476,20 +1475,19 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 #else
     register char **a;
     const char *tmps = Nullch;
-    STRLEN n_a;
 
     if (sp > mark) {
 	New(401,PL_Argv, sp - mark + 1, char*);
 	a = PL_Argv;
 	while (++mark <= sp) {
 	    if (*mark)
-		*a++ = SvPVx(*mark, n_a);
+		*a++ = (char*)SvPV_nolen_const(*mark);
 	    else
 		*a++ = "";
 	}
 	*a = Nullch;
 	if (really)
-	    tmps = SvPV(really, n_a);
+	    tmps = SvPV_nolen_const(really);
 	if ((!really && *PL_Argv[0] != '/') ||
 	    (really && *tmps != '/'))		/* will execvp use PATH? */
 	    TAINT_ENV();		/* testing IFS here is overkill, probably */
@@ -1674,7 +1672,6 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
     const char *what;
     const char *s;
     SV **oldmark = mark;
-    STRLEN n_a;
 
 #define APPLY_TAINT_PROPER() \
     STMT_START {							\
@@ -1700,7 +1697,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 	    APPLY_TAINT_PROPER();
 	    tot = sp - mark;
 	    while (++mark <= sp) {
-		const char *name = SvPVx(*mark, n_a);
+		const char *name = SvPV_nolen_const(*mark);
 		APPLY_TAINT_PROPER();
 		if (PerlLIO_chmod(name, val))
 		    tot--;
@@ -1718,7 +1715,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 	    APPLY_TAINT_PROPER();
 	    tot = sp - mark;
 	    while (++mark <= sp) {
-		const char *name = SvPVx(*mark, n_a);
+		const char *name = SvPV_nolen_const(*mark);
 		APPLY_TAINT_PROPER();
 		if (PerlLIO_chown(name, val, val2))
 		    tot--;
@@ -1738,7 +1735,7 @@ nothing in the core.
 	APPLY_TAINT_PROPER();
 	if (mark == sp)
 	    break;
-	s = SvPVx_const(*++mark, n_a);
+	s = SvPVx_nolen_const(*++mark);
 	if (isALPHA(*s)) {
 	    if (*s == 'S' && s[1] == 'I' && s[2] == 'G')
 		s += 3;
@@ -1808,7 +1805,7 @@ nothing in the core.
 	APPLY_TAINT_PROPER();
 	tot = sp - mark;
 	while (++mark <= sp) {
-	    s = SvPVx_const(*mark, n_a);
+	    s = SvPV_nolen_const(*mark);
 	    APPLY_TAINT_PROPER();
 	    if (PL_euid || PL_unsafe) {
 		if (UNLINK(s))
@@ -1862,8 +1859,7 @@ nothing in the core.
 	    APPLY_TAINT_PROPER();
 	    tot = sp - mark;
 	    while (++mark <= sp) {
-		STRLEN n_a;
-		const char *name = SvPVx(*mark, n_a);
+		const char *name = SvPV_nolen_const(*mark);
 		APPLY_TAINT_PROPER();
 		if (PerlLIO_utime(name, utbufp))
 		    tot--;

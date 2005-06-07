@@ -2248,8 +2248,9 @@ S_not_a_number(pTHX_ SV *sv)
 	  /* each *s can expand to 4 chars + "...\0",
 	     i.e. need room for 8 chars */
 	
-	  char *s, *end;
-	  for (s = SvPVX(sv), end = s + SvCUR(sv); s < end && d < limit; s++) {
+	  const char *s, *end;
+	  for (s = SvPVX_const(sv), end = s + SvCUR(sv); s < end && d < limit;
+	       s++) {
 	       int ch = *s & 0xFF;
 	       if (ch & 128 && !isPRINT_LC(ch)) {
 		    *d++ = 'M';
@@ -6191,7 +6192,7 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
     else
     {
 	STRLEN len, ulen;
-	const U8 *s = (U8*)SvPV(sv, len);
+	const U8 *s = (U8*)SvPV_const(sv, len);
 	MAGIC *mg = SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : 0;
 
 	if (mg && mg->mg_len != -1 && (mg->mg_len > 0 || len == 0)) {

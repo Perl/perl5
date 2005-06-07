@@ -839,7 +839,7 @@ char *
 Perl_savesvpv(pTHX_ SV *sv)
 {
     STRLEN len;
-    const char *pv = SvPV(sv, len);
+    const char *pv = SvPV_const(sv, len);
     register char *newaddr;
 
     ++len;

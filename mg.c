@@ -953,11 +953,11 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
     register char *s;
-    char *ptr;
+    const char *ptr;
     STRLEN len, klen;
 
     s = SvPV(sv,len);
-    ptr = MgPV(mg,klen);
+    ptr = MgPV_const(mg,klen);
     my_setenv(ptr, s);
 
 #ifdef DYNAMIC_ENV_FETCH

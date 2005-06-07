@@ -268,7 +268,7 @@ XS(XS_UNIVERSAL_isa)
 		|| (SvGMAGICAL(sv) && SvPOKp(sv) && SvCUR(sv))))
 	XSRETURN_UNDEF;
 
-    name = (const char *)SvPV(ST(1),n_a);
+    name = SvPV_const(ST(1),n_a);
 
     ST(0) = boolSV(sv_derived_from(sv, name));
     XSRETURN(1);
@@ -295,7 +295,7 @@ XS(XS_UNIVERSAL_can)
 		|| (SvGMAGICAL(sv) && SvPOKp(sv) && SvCUR(sv))))
 	XSRETURN_UNDEF;
 
-    name = (const char *)SvPV(ST(1),n_a);
+    name = SvPV_const(ST(1),n_a);
     rv = &PL_sv_undef;
 
     if (SvROK(sv)) {
@@ -642,7 +642,7 @@ XS(XS_utf8_valid)
 	  SV *	sv = ST(0);
 	  {
 	       STRLEN len;
-	       const char *s = SvPV(sv,len);
+	       const char *s = SvPV_const(sv,len);
 	       if (!SvUTF8(sv) || is_utf8_string((const U8*)s,len))
 		    XSRETURN_YES;
 	       else
@@ -810,7 +810,7 @@ XS(XS_PerlIO_get_layers)
 		  SV **varp = svp;
 		  SV **valp = svp + 1;
 		  STRLEN klen;
-                  const char *key = SvPV(*varp, klen);
+                  const char *key = SvPV_const(*varp, klen);
 
 		  switch (*key) {
 		  case 'i':

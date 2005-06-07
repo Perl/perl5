@@ -2750,7 +2750,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    const char *aptr;
 
 	    fromstr = NEXTFROM;
-	    aptr = SvPV(fromstr, fromlen);
+	    aptr = SvPV_const(fromstr, fromlen);
 	    if (DO_UTF8(fromstr)) {
                 const char *end, *s;
 

@@ -308,7 +308,7 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 	if (*args == &PL_sv_undef)
 	    return PerlIO_tmpfile();
 	else {
-	    const char *name = SvPV_nolen(*args);
+	    const char *name = SvPV_nolen_const(*args);
 	    if (*mode == IoTYPE_NUMERIC) {
 		fd = PerlLIO_open3(name, imode, perm);
 		if (fd >= 0)
@@ -334,7 +334,7 @@ XS(XS_PerlIO__Layer__find)
     if (items < 2)
 	Perl_croak(aTHX_ "Usage class->find(name[,load])");
     else {
-	const char *name = SvPV_nolen(ST(1));
+	const char *name = SvPV_nolen_const(ST(1));
 	ST(0) = (strEQ(name, "crlf")
 		 || strEQ(name, "raw")) ? &PL_sv_yes : &PL_sv_undef;
 	XSRETURN(1);
@@ -844,7 +844,7 @@ XS(XS_io_MODIFY_SCALAR_ATTRIBUTES)
     Perl_warn(aTHX_ "attrib %" SVf, sv);
     for (i = 2; i < items; i++) {
 	STRLEN len;
-	const char *name = SvPV(ST(i), len);
+	const char *name = SvPV_const(ST(i), len);
 	SV *layer = PerlIO_find_layer(aTHX_ name, len, 1);
 	if (layer) {
 	    av_push(av, SvREFCNT_inc(layer));
@@ -875,7 +875,7 @@ XS(XS_PerlIO__Layer__NoWarnings)
      */
     dXSARGS;
     if (items)
-    	PerlIO_debug("warning:%s\n",SvPV_nolen(ST(0)));
+    	PerlIO_debug("warning:%s\n",SvPV_nolen_const(ST(0)));
     XSRETURN(0);
 }
 
@@ -886,7 +886,7 @@ XS(XS_PerlIO__Layer__find)
 	Perl_croak(aTHX_ "Usage class->find(name[,load])");
     else {
 	STRLEN len;
-	const char *name = SvPV(ST(1), len);
+	const char *name = SvPV_const(ST(1), len);
 	const bool load = (items > 2) ? SvTRUE(ST(2)) : 0;
 	PerlIO_funcs *layer = PerlIO_find_layer(aTHX_ name, len, load);
 	ST(0) =
@@ -2443,7 +2443,7 @@ PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 	    perm = 0666;
 	}
 	if (imode != -1) {
-	    const char *path = SvPV_nolen(*args);
+	    const char *path = SvPV_nolen_const(*args);
 	    fd = PerlLIO_open3(path, imode, perm);
 	}
     }
@@ -2732,7 +2732,7 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 {
     char tmode[8];
     if (PerlIOValid(f)) {
-	const char *path = SvPV_nolen(*args);
+	const char *path = SvPV_nolen_const(*args);
 	PerlIOStdio *s = PerlIOSelf(f, PerlIOStdio);
 	FILE *stdio;
 	PerlIOUnix_refcnt_dec(fileno(s->stdio));
@@ -2746,7 +2746,7 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
     }
     else {
 	if (narg > 0) {
-	    const char *path = SvPV_nolen(*args);
+	    const char *path = SvPV_nolen_const(*args);
 	    if (*mode == IoTYPE_NUMERIC) {
 		mode++;
 		fd = PerlLIO_open3(path, imode, perm);

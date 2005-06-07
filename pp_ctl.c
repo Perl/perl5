@@ -78,9 +78,7 @@ PP(pp_regcomp)
 {
     dSP;
     register PMOP *pm = (PMOP*)cLOGOP->op_other;
-    register char *t;
     SV *tmpstr;
-    STRLEN len;
     MAGIC *mg = Null(MAGIC*);
 
     /* prevent recompiling under /o and ithreads. */
@@ -129,7 +127,8 @@ PP(pp_regcomp)
 	PM_SETRE(pm, ReREFCNT_inc(re));
     }
     else {
-	t = SvPV(tmpstr, len);
+	STRLEN len;
+	const char *t = SvPV_const(tmpstr, len);
 
 	/* Check against the last compiled regexp. */
 	if (!PM_GETRE(pm) || !PM_GETRE(pm)->precomp ||
@@ -151,7 +150,7 @@ PP(pp_regcomp)
 		if (pm->op_pmdynflags & PMdf_UTF8)
 		    t = (char*)bytes_to_utf8((U8*)t, &len);
 	    }
-	    PM_SETRE(pm, CALLREGCOMP(aTHX_ t, t + len, pm));
+	    PM_SETRE(pm, CALLREGCOMP(aTHX_ (char *)t, (char *)t + len, pm));
 	    if (!DO_UTF8(tmpstr) && (pm->op_pmdynflags & PMdf_UTF8))
 		Safefree(t);
 	    PL_reginterp_cnt = 0;	/* XXXX Be extra paranoid - needed
@@ -1710,7 +1709,7 @@ PP(pp_reset)
     if (MAXARG < 1)
 	tmps = "";
     else
-	tmps = POPpx;
+	tmps = POPpconstx;
     sv_reset(tmps, CopSTASH(PL_curcop));
     PUSHs(&PL_sv_yes);
     RETURN;

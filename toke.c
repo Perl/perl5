@@ -980,7 +980,7 @@ Perl_str_to_version(pTHX_ SV *sv)
     NV retval = 0.0;
     NV nshift = 1.0;
     STRLEN len;
-    const char *start = SvPVx(sv,len);
+    const char *start = SvPVx_const(sv,len);
     const char *end = start + len;
     const bool utf = SvUTF8(sv) ? TRUE : FALSE;
     while (start < end) {
