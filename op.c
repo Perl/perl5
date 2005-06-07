@@ -2384,8 +2384,8 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     SV *rstr = ((SVOP*)repl)->op_sv;
     STRLEN tlen;
     STRLEN rlen;
-    U8 *t = (U8*)SvPV(tstr, tlen);
-    U8 *r = (U8*)SvPV(rstr, rlen);
+    const U8 *t = (U8*)SvPV_const(tstr, tlen);
+    const U8 *r = (U8*)SvPV_const(rstr, rlen);
     register I32 i;
     register I32 j;
     I32 del;
@@ -2408,8 +2408,8 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     if (o->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF)) {
 	SV* listsv = newSVpvn("# comment\n",10);
 	SV* transv = 0;
-	U8* tend = t + tlen;
-	U8* rend = r + rlen;
+	const U8* tend = t + tlen;
+	const U8* rend = r + rlen;
 	STRLEN ulen;
 	UV tfirst = 1;
 	UV tlast = 0;
@@ -2430,12 +2430,12 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
 	if (!from_utf) {
 	    STRLEN len = tlen;
-	    tsave = t = bytes_to_utf8(t, &len);
+	    t = tsave = bytes_to_utf8(t, &len);
 	    tend = t + len;
 	}
 	if (!to_utf && rlen) {
 	    STRLEN len = rlen;
-	    rsave = r = bytes_to_utf8(r, &len);
+	    r = rsave = bytes_to_utf8(r, &len);
 	    rend = r + len;
 	}
 
@@ -2792,15 +2792,31 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
     if (expr->op_type == OP_CONST) {
 	STRLEN plen;
 	SV *pat = ((SVOP*)expr)->op_sv;
-	char *p = SvPV(pat, plen);
+	const char *p = SvPV_const(pat, plen);
 	if ((o->op_flags & OPf_SPECIAL) && (*p == ' ' && p[1] == '\0')) {
+	    U32 was_readonly = SvREADONLY(pat);
+
+	    if (was_readonly) {
+		if (SvFAKE(pat)) {
+		    sv_force_normal_flags(pat, 0);
+		    assert(!SvREADONLY(pat));
+		    was_readonly = 0;
+		} else {
+		    SvREADONLY_off(pat);
+		}
+	    }   
+
 	    sv_setpvn(pat, "\\s+", 3);
-	    p = SvPV(pat, plen);
+
+	    SvFLAGS(pat) |= was_readonly;
+
+	    p = SvPV_const(pat, plen);
 	    pm->op_pmflags |= PMf_SKIPWHITE;
 	}
         if (DO_UTF8(pat))
 	    pm->op_pmdynflags |= PMdf_UTF8;
-	PM_SETRE(pm, CALLREGCOMP(aTHX_ p, p + plen, pm));
+	/* FIXME - can we make this function take const char * args?  */
+	PM_SETRE(pm, CALLREGCOMP(aTHX_ (char*)p, (char*)p + plen, pm));
 	if (strEQ("\\s+", PM_GETRE(pm)->precomp))
 	    pm->op_pmflags |= PMf_WHITE;
 	op_free(expr);
@@ -2996,7 +3012,7 @@ Perl_package(pTHX_ OP *o)
     save_hptr(&PL_curstash);
     save_item(PL_curstname);
 
-    name = SvPV(cSVOPo->op_sv, len);
+    name = SvPV_const(cSVOPo->op_sv, len);
     PL_curstash = gv_stashpvn(name, len, TRUE);
     sv_setpvn(PL_curstname, name, len);
     op_free(o);
@@ -4009,7 +4025,7 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
 	    o = newOP(type, OPf_SPECIAL);
 	else {
 	    o = newPVOP(type, 0, savepv(label->op_type == OP_CONST
-					? SvPVx(((SVOP*)label)->op_sv, n_a)
+					? SvPVx_const(((SVOP*)label)->op_sv, n_a)
 					: ""));
 	}
 	op_free(label);
@@ -4235,16 +4251,16 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     STRLEN n_a;
     const char *aname;
     GV *gv;
-    char *ps;
+    const char *ps;
     STRLEN ps_len;
     register CV *cv=0;
     SV *const_sv;
 
-    const char * const name = o ? SvPVx(cSVOPo->op_sv, n_a) : Nullch;
+    const char * const name = o ? SvPVx_const(cSVOPo->op_sv, n_a) : Nullch;
 
     if (proto) {
 	assert(proto->op_type == OP_CONST);
-	ps = SvPVx(((SVOP*)proto)->op_sv, ps_len);
+	ps = SvPVx_const(((SVOP*)proto)->op_sv, ps_len);
     }
     else
 	ps = Nullch;
@@ -5918,21 +5934,29 @@ Perl_ck_require(pTHX_ OP *o)
 	SVOP *kid = (SVOP*)cUNOPo->op_first;
 
 	if (kid->op_type == OP_CONST && (kid->op_private & OPpCONST_BARE)) {
+	    SV *sv = kid->op_sv;
+	    U32 was_readonly = SvREADONLY(sv);
 	    char *s;
-	    for (s = SvPVX(kid->op_sv); *s; s++) {
+
+	    if (was_readonly) {
+		if (SvFAKE(sv)) {
+		    sv_force_normal_flags(sv, 0);
+		    assert(!SvREADONLY(sv));
+		    was_readonly = 0;
+		} else {
+		    SvREADONLY_off(sv);
+		}
+	    }   
+
+	    for (s = SvPVX(sv); *s; s++) {
 		if (*s == ':' && s[1] == ':') {
 		    *s = '/';
 		    Move(s+2, s+1, strlen(s+2)+1, char);
-		    SvCUR_set(kid->op_sv, SvCUR(kid->op_sv) - 1);
+		    SvCUR_set(sv, SvCUR(sv) - 1);
 		}
 	    }
-	    if (SvREADONLY(kid->op_sv)) {
-		SvREADONLY_off(kid->op_sv);
-		sv_catpvn(kid->op_sv, ".pm", 3);
-		SvREADONLY_on(kid->op_sv);
-	    }
-	    else
-		sv_catpvn(kid->op_sv, ".pm", 3);
+	    sv_catpvn(sv, ".pm", 3);
+	    SvFLAGS(sv) |= was_readonly;
 	}
     }
 

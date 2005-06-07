@@ -1345,7 +1345,7 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 		Perl_warner(aTHX_ packWARN(WARN_UTF8), "Wide character in print");
 	    }
 	}
-	tmps = SvPV(sv, len);
+	tmps = SvPV_const(sv, len);
 	break;
     }
     /* To detect whether the process is about to overstep its
@@ -1404,7 +1404,7 @@ Perl_my_stat(pTHX)
 	    goto do_fstat;
 	}
 
-	s = SvPV(sv, len);
+	s = SvPV_const(sv, len);
 	PL_statgv = Nullgv;
 	sv_setpvn(PL_statname, s, len);
 	s = SvPVX_const(PL_statname);		/* s now NUL-terminated */
@@ -1672,7 +1672,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
     register I32 val;
     register I32 tot = 0;
     const char *what;
-    char *s;
+    const char *s;
     SV **oldmark = mark;
     STRLEN n_a;
 
@@ -1738,7 +1738,7 @@ nothing in the core.
 	APPLY_TAINT_PROPER();
 	if (mark == sp)
 	    break;
-	s = SvPVx(*++mark, n_a);
+	s = SvPVx_const(*++mark, n_a);
 	if (isALPHA(*s)) {
 	    if (*s == 'S' && s[1] == 'I' && s[2] == 'G')
 		s += 3;
@@ -1808,7 +1808,7 @@ nothing in the core.
 	APPLY_TAINT_PROPER();
 	tot = sp - mark;
 	while (++mark <= sp) {
-	    s = SvPVx(*mark, n_a);
+	    s = SvPVx_const(*mark, n_a);
 	    APPLY_TAINT_PROPER();
 	    if (PL_euid || PL_unsafe) {
 		if (UNLINK(s))

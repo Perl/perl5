@@ -322,7 +322,7 @@ PP(pp_backtick)
     dSP; dTARGET;
     PerlIO *fp;
     STRLEN n_a;
-    char *tmps = POPpx;
+    const char *tmps = POPpconstx;
     const I32 gimme = GIMME_V;
     const char *mode = "r";
 
@@ -331,7 +331,7 @@ PP(pp_backtick)
 	mode = "rb";
     else if (PL_op->op_private & OPpOPEN_IN_CRLF)
 	mode = "rt";
-    fp = PerlProc_popen(tmps, (char *)mode);
+    fp = PerlProc_popen((char*)tmps, (char *)mode);
     if (fp) {
         const char *type = NULL;
 	if (PL_curcop->cop_io) {
@@ -476,13 +476,13 @@ PP(pp_die)
 	dTARGET;
 	do_join(TARG, &PL_sv_no, MARK, SP);
 	tmpsv = TARG;
-	tmps = SvPV(tmpsv, len);
+	tmps = SvPV_const(tmpsv, len);
 	multiarg = 1;
 	SP = MARK + 1;
     }
     else {
 	tmpsv = TOPs;
-        tmps = SvROK(tmpsv) ? Nullch : SvPV(tmpsv, len);
+        tmps = SvROK(tmpsv) ? Nullch : SvPV_const(tmpsv, len);
     }
     if (!tmps || !len) {
   	SV *error = ERRSV;
@@ -532,7 +532,7 @@ PP(pp_open)
     GV *gv;
     SV *sv;
     IO *io;
-    char *tmps;
+    const char *tmps;
     STRLEN len;
     MAGIC *mg;
     bool  ok;
@@ -563,8 +563,8 @@ PP(pp_open)
 	sv = GvSV(gv);
     }
 
-    tmps = SvPV(sv, len);
-    ok = do_openn(gv, tmps, len, FALSE, O_RDONLY, 0, Nullfp, MARK+1, (SP-MARK));
+    tmps = SvPV_const(sv, len);
+    ok = do_openn(gv, (char *)tmps, len, FALSE, O_RDONLY, 0, Nullfp, MARK+1, (SP-MARK));
     SP = ORIGMARK;
     if (ok)
 	PUSHi( (I32)PL_forkprocess );
@@ -2840,7 +2840,7 @@ PP(pp_stat)
 			"lstat() on filehandle %s", GvENAME(gv));
 	    goto do_fstat;
 	}
-	sv_setpv(PL_statname, SvPV(sv,n_a));
+	sv_setpv(PL_statname, SvPV_const(sv,n_a));
 	PL_statgv = Nullgv;
 	PL_laststype = PL_op->op_type;
 	if (PL_op->op_type == OP_LSTAT)
@@ -3546,12 +3546,12 @@ PP(pp_ftbinary)
 PP(pp_chdir)
 {
     dSP; dTARGET;
-    char *tmps;
+    const char *tmps;
     SV **svp;
     STRLEN n_a;
 
     if( MAXARG == 1 )
-        tmps = POPpx;
+        tmps = POPpconstx;
     else
         tmps = 0;
 
@@ -3565,7 +3565,7 @@ PP(pp_chdir)
         {
             if( MAXARG == 1 )
                 deprecate("chdir('') or chdir(undef) as chdir()");
-            tmps = SvPV(*svp, n_a);
+            tmps = SvPV_const(*svp, n_a);
         }
         else {
             PUSHi(0);
@@ -3823,7 +3823,7 @@ S_dooneliner(pTHX_ const char *cmd, const char *filename)
  * -d, chdir(), chmod(), chown(), chroot(), fcntl()?,
  * (mkdir()), opendir(), rename(), rmdir(), stat(). --jhi */
 
-#define TRIMSLASHES(tmps,len,copy) (tmps) = SvPV(TOPs, (len)); \
+#define TRIMSLASHES(tmps,len,copy) (tmps) = SvPV_const(TOPs, (len)); \
     if ((len) > 1 && (tmps)[(len)-1] == '/') { \
 	do { \
 	    (len)--; \
@@ -3840,7 +3840,7 @@ PP(pp_mkdir)
     int oldumask;
 #endif
     STRLEN len;
-    char *tmps;
+    const char *tmps;
     bool copy = FALSE;
 
     if (MAXARG > 1)
@@ -3868,7 +3868,7 @@ PP(pp_rmdir)
 {
     dSP; dTARGET;
     STRLEN len;
-    char *tmps;
+    const char *tmps;
     bool copy = FALSE;
 
     TRIMSLASHES(tmps,len,copy);

@@ -535,7 +535,7 @@ PP(pp_bless)
 
 	if (ssv && !SvGMAGICAL(ssv) && !SvAMAGIC(ssv) && SvROK(ssv))
 	    Perl_croak(aTHX_ "Attempt to bless into a reference");
-	ptr = SvPV(ssv,len);
+	ptr = SvPV_const(ssv,len);
 	if (ckWARN(WARN_MISC) && len == 0)
 	    Perl_warner(aTHX_ packWARN(WARN_MISC),
 		   "Explicit blessing to '' (assuming package main)");
@@ -2906,14 +2906,14 @@ PP(pp_abs)
 PP(pp_hex)
 {
     dSP; dTARGET;
-    char *tmps;
+    const char *tmps;
     I32 flags = PERL_SCAN_ALLOW_UNDERSCORES;
     STRLEN len;
     NV result_nv;
     UV result_uv;
     SV* sv = POPs;
 
-    tmps = (SvPVx(sv, len));
+    tmps = (SvPVx_const(sv, len));
     if (DO_UTF8(sv)) {
 	 /* If Unicode, try to downgrade
 	  * If not possible, croak. */
@@ -2936,14 +2936,14 @@ PP(pp_hex)
 PP(pp_oct)
 {
     dSP; dTARGET;
-    char *tmps;
+    const char *tmps;
     I32 flags = PERL_SCAN_ALLOW_UNDERSCORES;
     STRLEN len;
     NV result_nv;
     UV result_uv;
     SV* sv = POPs;
 
-    tmps = (SvPVx(sv, len));
+    tmps = (SvPVx_const(sv, len));
     if (DO_UTF8(sv)) {
 	 /* If Unicode, try to downgrade
 	  * If not possible, croak. */
@@ -3028,7 +3028,7 @@ PP(pp_substr)
 	else if (DO_UTF8(sv))
 	    repl_need_utf8_upgrade = TRUE;
     }
-    tmps = SvPV(sv, curlen);
+    tmps = SvPV_const(sv, curlen);
     if (DO_UTF8(sv)) {
         utf8_curlen = sv_len_utf8(sv);
 	if (utf8_curlen == curlen)
@@ -3336,7 +3336,7 @@ PP(pp_ord)
     dSP; dTARGET;
     SV *argsv = POPs;
     STRLEN len;
-    U8 *s = (U8*)SvPVx(argsv, len);
+    const U8 *s = (U8*)SvPVx_const(argsv, len);
     SV *tmpsv;
 
     if (PL_encoding && SvPOK(argsv) && !DO_UTF8(argsv)) {
@@ -3767,7 +3767,7 @@ PP(pp_quotemeta)
     dSP; dTARGET;
     SV *sv = TOPs;
     STRLEN len;
-    register char *s = SvPV(sv,len);
+    const register char *s = SvPV_const(sv,len);
     register char *d;
 
     SvUTF8_off(TARG);				/* decontaminate */
@@ -4042,7 +4042,7 @@ PP(pp_hslice)
                     save_helem(hv, keysv, svp);
                 else {
                     STRLEN keylen;
-                    char *key = SvPV(keysv, keylen);
+                    const char *key = SvPV_const(keysv, keylen);
                     SAVEDELETE(hv, savepvn(key,keylen), keylen);
                 }
             }

@@ -650,7 +650,7 @@ HV*
 Perl_gv_stashsv(pTHX_ SV *sv, I32 create)
 {
     STRLEN len;
-    const char *ptr = SvPV(sv,len);
+    const char *ptr = SvPV_const(sv,len);
     return gv_stashpvn(ptr, len, create);
 }
 
@@ -663,7 +663,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type) {
 GV *
 Perl_gv_fetchsv(pTHX_ SV *name, I32 flags, I32 sv_type) {
     STRLEN len;
-    const char *nambeg = SvPV(name, len);
+    const char *nambeg = SvPV_const(name, len);
     return gv_fetchpvn_flags(nambeg, len, flags | SvUTF8(name), sv_type);
 }
 

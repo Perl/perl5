@@ -2275,8 +2275,8 @@ PP(pp_unpack)
     I32 gimme = GIMME_V;
     STRLEN llen;
     STRLEN rlen;
-    const char *pat = SvPV(left,  llen);
-    const char *s   = SvPV(right, rlen);
+    const char *pat = SvPV_const(left,  llen);
+    const char *s   = SvPV_const(right, rlen);
     const char *strend = s + rlen;
     const char *patend = pat + llen;
     I32 cnt;
@@ -3603,7 +3603,7 @@ PP(pp_pack)
     dSP; dMARK; dORIGMARK; dTARGET;
     register SV *cat = TARG;
     STRLEN fromlen;
-    register const char *pat = SvPVx(*++MARK, fromlen);
+    register const char *pat = SvPVx_const(*++MARK, fromlen);
     register const char *patend = pat + fromlen;
 
     MARK++;
