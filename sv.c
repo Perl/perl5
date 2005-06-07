@@ -1804,7 +1804,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	pv	= (char*)SvRV(sv);
 	break;
     case SVt_PV:
-	pv	= SvPVX(sv);
+	pv	= SvPVX_mutable(sv);
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
 	del_XPV(SvANY(sv));
@@ -1814,14 +1814,14 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	    mt = SVt_PVNV;
 	break;
     case SVt_PVIV:
-	pv	= SvPVX(sv);
+	pv	= SvPVX_mutable(sv);
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
 	iv	= SvIVX(sv);
 	del_XPVIV(SvANY(sv));
 	break;
     case SVt_PVNV:
-	pv	= SvPVX(sv);
+	pv	= SvPVX_mutable(sv);
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
 	iv	= SvIVX(sv);
@@ -1837,7 +1837,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	   Given that it only has meaning inside the pad, it shouldn't be set
 	   on anything that can get upgraded.  */
 	assert((SvFLAGS(sv) & SVpad_TYPED) == 0);
-	pv	= SvPVX(sv);
+	pv	= SvPVX_mutable(sv);
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
 	iv	= SvIVX(sv);
@@ -2037,7 +2037,7 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 #endif
     }
     else
-	s = SvPVX(sv);
+	s = SvPVX_mutable(sv);
 
     if (newlen > SvLEN(sv)) {		/* need more room? */
 	newlen = PERL_STRLEN_ROUNDUP(newlen);
@@ -3404,6 +3404,8 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	    mg_get(sv);
 	if (SvPOKp(sv)) {
 	    *lp = SvCUR(sv);
+	    if (flags & SV_CONST_RETURN)
+		return (char *)SvPVX_const(sv);
 	    return SvPVX(sv);
 	}
 	if (SvIOKp(sv)) {
@@ -3589,7 +3591,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	else
 	    ptr = uiv_2buf(buf, SvIVX(sv), 0, 0, &ebuf);
 	SvGROW(sv, (STRLEN)(ebuf - ptr + 1));	/* inlined from sv_setpvn */
-	Move(ptr,SvPVX(sv),ebuf - ptr,char);
+	Move(ptr,SvPVX_mutable(sv),ebuf - ptr,char);
 	SvCUR_set(sv, ebuf - ptr);
 	s = SvEND(sv);
 	*s = '\0';
@@ -3605,7 +3607,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	    sv_upgrade(sv, SVt_PVNV);
 	/* The +20 is pure guesswork.  Configure test needed. --jhi */
 	SvGROW(sv, NV_DIG + 20);
-	s = SvPVX(sv);
+	s = SvPVX_mutable(sv);
 	olderrno = errno;	/* some Xenix systems wipe out errno here */
 #ifdef apollo
 	if (SvNVX(sv) == 0.0)
@@ -3641,6 +3643,8 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
     SvPOK_on(sv);
     DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2pv(%s)\n",
 			  PTR2UV(sv),SvPVX_const(sv)));
+    if (flags & SV_CONST_RETURN)
+	return (char *)SvPVX_const(sv);
     return SvPVX(sv);
 
   tokensave:
@@ -3701,8 +3705,8 @@ void
 Perl_sv_copypv(pTHX_ SV *dsv, register SV *ssv)
 {
     STRLEN len;
-    char *s;
-    s = SvPV(ssv,len);
+    const char *s;
+    s = SvPV_const(ssv,len);
     sv_setpvn(dsv,s,len);
     if (SvUTF8(ssv))
 	SvUTF8_on(dsv);
@@ -5129,11 +5133,11 @@ and C<sv_catsv_nomg> are implemented in terms of this function.
 void
 Perl_sv_catsv_flags(pTHX_ SV *dsv, register SV *ssv, I32 flags)
 {
-    char *spv;
+    const char *spv;
     STRLEN slen;
     if (!ssv)
 	return;
-    if ((spv = SvPV(ssv, slen))) {
+    if ((spv = SvPV_const(ssv, slen))) {
 	/*  sutf8 and dutf8 were type bool, but under USE_ITHREADS,
 	    gcc version 2.95.2 20000220 (Debian GNU/Linux) for
 	    Linux xxx 2.2.17 on sparc64 with gcc -O2, we erroneously
@@ -6145,7 +6149,7 @@ Perl_sv_len(pTHX_ register SV *sv)
     if (SvGMAGICAL(sv))
 	len = mg_length(sv);
     else
-        (void)SvPV(sv, len);
+        (void)SvPV_const(sv, len);
     return len;
 }
 
@@ -6587,14 +6591,14 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 	cur1 = 0;
     }
     else
-	pv1 = SvPV(sv1, cur1);
+	pv1 = SvPV_const(sv1, cur1);
 
     if (!sv2){
 	pv2 = "";
 	cur2 = 0;
     }
     else
-	pv2 = SvPV(sv2, cur2);
+	pv2 = SvPV_const(sv2, cur2);
 
     if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTES) {
         /* Differing utf8ness.
@@ -6680,14 +6684,14 @@ Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
 	cur1 = 0;
     }
     else
-	pv1 = SvPV(sv1, cur1);
+	pv1 = SvPV_const(sv1, cur1);
 
     if (!sv2) {
 	pv2 = "";
 	cur2 = 0;
     }
     else
-	pv2 = SvPV(sv2, cur2);
+	pv2 = SvPV_const(sv2, cur2);
 
     if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTES) {
         /* Differing utf8ness.
@@ -8269,6 +8273,15 @@ Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
     }
     else {
 	char *s;
+
+	if (SvREADONLY(sv) && !(flags & SV_MUTABLE_RETURN)) {
+	    if (PL_op)
+		Perl_croak(aTHX_ "Can't coerce readonly %s to string in %s",
+			   sv_reftype(sv,0), OP_NAME(PL_op));
+	    else
+		Perl_croak(aTHX_ "Can't coerce readonly %s to string",
+			   sv_reftype(sv,0));
+	}
 	if (SvTYPE(sv) > SVt_PVLV && SvTYPE(sv) != SVt_PVFM) {
 	    Perl_croak(aTHX_ "Can't coerce %s to string in %s", sv_reftype(sv,0),
 		OP_NAME(PL_op));
@@ -8293,7 +8306,7 @@ Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
 				  PTR2UV(sv),SvPVX_const(sv)));
 	}
     }
-    return SvPVX(sv);
+    return SvPVX_mutable(sv);
 }
 
 /* sv_pvbyte () is now a macro using Perl_sv_2pv_flags();
@@ -9281,7 +9294,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	U8 utf8buf[UTF8_MAXBYTES+1];
 	STRLEN esignlen = 0;
 
-	char *eptr = Nullch;
+	const char *eptr = Nullch;
 	STRLEN elen = 0;
 	SV *vecsv = Nullsv;
 	U8 *vecstr = Null(U8*);
@@ -9572,7 +9585,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		}
 	    }
 	    else {
-		eptr = SvPVx(argsv, elen);
+		eptr = SvPVx_const(argsv, elen);
 		if (DO_UTF8(argsv)) {
 		    if (has_precis && precis < elen) {
 			I32 p = precis;
@@ -9605,7 +9618,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		if (vectorize)
 		    goto unknown;
 		argsv = va_arg(*args, SV*);
-		eptr = SvPVx(argsv, elen);
+		eptr = SvPVx_const(argsv, elen);
 		if (DO_UTF8(argsv))
 		    is_utf8 = TRUE;
 		goto string;
@@ -9750,54 +9763,57 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    }
 
 	integer:
-	    eptr = ebuf + sizeof ebuf;
-	    switch (base) {
-		unsigned dig;
-	    case 16:
-		if (!uv)
-		    alt = FALSE;
-		p = (char*)((c == 'X')
-			    ? "0123456789ABCDEF" : "0123456789abcdef");
-		do {
-		    dig = uv & 15;
-		    *--eptr = p[dig];
-		} while (uv >>= 4);
-		if (alt) {
-		    esignbuf[esignlen++] = '0';
-		    esignbuf[esignlen++] = c;  /* 'x' or 'X' */
+	    {
+		char *ptr = ebuf + sizeof ebuf;
+		switch (base) {
+		    unsigned dig;
+		case 16:
+		    if (!uv)
+			alt = FALSE;
+		    p = (char*)((c == 'X')
+				? "0123456789ABCDEF" : "0123456789abcdef");
+		    do {
+			dig = uv & 15;
+			*--ptr = p[dig];
+		    } while (uv >>= 4);
+		    if (alt) {
+			esignbuf[esignlen++] = '0';
+			esignbuf[esignlen++] = c;  /* 'x' or 'X' */
+		    }
+		    break;
+		case 8:
+		    do {
+			dig = uv & 7;
+			*--ptr = '0' + dig;
+		    } while (uv >>= 3);
+		    if (alt && *ptr != '0')
+			*--ptr = '0';
+		    break;
+		case 2:
+		    do {
+			dig = uv & 1;
+			*--ptr = '0' + dig;
+		    } while (uv >>= 1);
+		    if (alt) {
+			esignbuf[esignlen++] = '0';
+			esignbuf[esignlen++] = 'b';
+		    }
+		    break;
+		default:		/* it had better be ten or less */
+		    do {
+			dig = uv % base;
+			*--ptr = '0' + dig;
+		    } while (uv /= base);
+		    break;
 		}
-		break;
-	    case 8:
-		do {
-		    dig = uv & 7;
-		    *--eptr = '0' + dig;
-		} while (uv >>= 3);
-		if (alt && *eptr != '0')
-		    *--eptr = '0';
-		break;
-	    case 2:
-		do {
-		    dig = uv & 1;
-		    *--eptr = '0' + dig;
-		} while (uv >>= 1);
-		if (alt) {
-		    esignbuf[esignlen++] = '0';
-		    esignbuf[esignlen++] = 'b';
+		elen = (ebuf + sizeof ebuf) - ptr;
+		eptr = ptr;
+		if (has_precis) {
+		    if (precis > elen)
+			zeros = precis - elen;
+		    else if (precis == 0 && elen == 1 && *eptr == '0')
+			elen = 0;
 		}
-		break;
-	    default:		/* it had better be ten or less */
-		do {
-		    dig = uv % base;
-		    *--eptr = '0' + dig;
-		} while (uv /= base);
-		break;
-	    }
-	    elen = (ebuf + sizeof ebuf) - eptr;
-	    if (has_precis) {
-		if (precis > elen)
-		    zeros = precis - elen;
-		else if (precis == 0 && elen == 1 && *eptr == '0')
-		    elen = 0;
 	    }
 	    break;
 
@@ -9955,50 +9971,52 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 			break;
 		}
 	    }
-	    eptr = ebuf + sizeof ebuf;
-	    *--eptr = '\0';
-	    *--eptr = c;
-	    /* FIXME: what to do if HAS_LONG_DOUBLE but not PERL_PRIfldbl? */
+	    {
+		char *ptr = ebuf + sizeof ebuf;
+		*--ptr = '\0';
+		*--ptr = c;
+		/* FIXME: what to do if HAS_LONG_DOUBLE but not PERL_PRIfldbl? */
 #if defined(HAS_LONG_DOUBLE) && defined(PERL_PRIfldbl)
-	    if (intsize == 'q') {
-		/* Copy the one or more characters in a long double
-		 * format before the 'base' ([efgEFG]) character to
-		 * the format string. */
-		static char const prifldbl[] = PERL_PRIfldbl;
-		char const *p = prifldbl + sizeof(prifldbl) - 3;
-		while (p >= prifldbl) { *--eptr = *p--; }
-	    }
+		if (intsize == 'q') {
+		    /* Copy the one or more characters in a long double
+		     * format before the 'base' ([efgEFG]) character to
+		     * the format string. */
+		    static char const prifldbl[] = PERL_PRIfldbl;
+		    char const *p = prifldbl + sizeof(prifldbl) - 3;
+		    while (p >= prifldbl) { *--ptr = *p--; }
+		}
 #endif
-	    if (has_precis) {
-		base = precis;
-		do { *--eptr = '0' + (base % 10); } while (base /= 10);
-		*--eptr = '.';
-	    }
-	    if (width) {
-		base = width;
-		do { *--eptr = '0' + (base % 10); } while (base /= 10);
-	    }
-	    if (fill == '0')
-		*--eptr = fill;
-	    if (left)
-		*--eptr = '-';
-	    if (plus)
-		*--eptr = plus;
-	    if (alt)
-		*--eptr = '#';
-	    *--eptr = '%';
+		if (has_precis) {
+		    base = precis;
+		    do { *--ptr = '0' + (base % 10); } while (base /= 10);
+		    *--ptr = '.';
+		}
+		if (width) {
+		    base = width;
+		    do { *--ptr = '0' + (base % 10); } while (base /= 10);
+		}
+		if (fill == '0')
+		    *--ptr = fill;
+		if (left)
+		    *--ptr = '-';
+		if (plus)
+		    *--ptr = plus;
+		if (alt)
+		    *--ptr = '#';
+		*--ptr = '%';
 
-	    /* No taint.  Otherwise we are in the strange situation
-	     * where printf() taints but print($float) doesn't.
-	     * --jhi */
+		/* No taint.  Otherwise we are in the strange situation
+		 * where printf() taints but print($float) doesn't.
+		 * --jhi */
 #if defined(HAS_LONG_DOUBLE)
-	    if (intsize == 'q')
-		(void)sprintf(PL_efloatbuf, eptr, nv);
-	    else
-		(void)sprintf(PL_efloatbuf, eptr, (double)nv);
+		if (intsize == 'q')
+		    (void)sprintf(PL_efloatbuf, ptr, nv);
+		else
+		    (void)sprintf(PL_efloatbuf, ptr, (double)nv);
 #else
-	    (void)sprintf(PL_efloatbuf, eptr, nv);
+		(void)sprintf(PL_efloatbuf, ptr, nv);
 #endif
+	    }
 	float_converted:
 	    eptr = PL_efloatbuf;
 	    elen = strlen(PL_efloatbuf);
