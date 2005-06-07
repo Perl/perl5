@@ -2521,9 +2521,6 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     Pid_t pid2;
     bool close_failed;
     int saved_errno = 0;
-#ifdef VMS
-    int saved_vaxc_errno;
-#endif
 #ifdef WIN32
     int saved_win32_errno;
 #endif
@@ -2541,9 +2538,6 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 #endif
     if ((close_failed = (PerlIO_close(ptr) == EOF))) {
 	saved_errno = errno;
-#ifdef VMS
-	saved_vaxc_errno = vaxc$errno;
-#endif
 #ifdef WIN32
 	saved_win32_errno = GetLastError();
 #endif
@@ -2565,7 +2559,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     rsignal_restore(SIGQUIT, &qstat);
 #endif
     if (close_failed) {
-	SETERRNO(saved_errno, saved_vaxc_errno);
+	SETERRNO(saved_errno, 0);
 	return -1;
     }
     return(pid2 < 0 ? pid2 : status == 0 ? 0 : (errno = 0, status));
