@@ -388,7 +388,7 @@ PP(pp_formline)
     register SV *tmpForm = *++MARK;
     register U32 *fpc;
     register char *t;
-    register char *f;
+    const char *f;
     register char *s;
     register char *send;
     register I32 arg;
@@ -428,11 +428,9 @@ PP(pp_formline)
 	targ_is_utf8 = TRUE;
     t = SvGROW(PL_formtarget, len + fudge + 1);  /* XXX SvCUR bad */
     t += len;
-    f = SvPV(tmpForm, len);
+    f = SvPV_const(tmpForm, len);
     /* need to jump to the next word */
-    s = f + len + WORD_ALIGN - SvCUR(tmpForm) % WORD_ALIGN;
-
-    fpc = (U32*)s;
+    fpc = (U32*)(f + len + WORD_ALIGN - SvCUR(tmpForm) % WORD_ALIGN);
 
     for (;;) {
 	DEBUG_f( {
@@ -511,7 +509,7 @@ PP(pp_formline)
 	    break;
 
 	case FF_CHECKNL:
-	    item = s = SvPV(sv, len);
+	    s = item = SvPV(sv, len);
 	    itemsize = len;
 	    if (DO_UTF8(sv)) {
 		itemsize = sv_len_utf8(sv);
@@ -553,7 +551,7 @@ PP(pp_formline)
 	    break;
 
 	case FF_CHECKCHOP:
-	    item = s = SvPV(sv, len);
+	    s = item = SvPV(sv, len);
 	    itemsize = len;
 	    if (DO_UTF8(sv)) {
 		itemsize = sv_len_utf8(sv);
@@ -732,7 +730,7 @@ PP(pp_formline)
 	case FF_LINEGLOB:
 	    oneline = FALSE;
 	ff_line:
-	    item = s = SvPV(sv, len);
+	    s = item = SvPV(sv, len);
 	    itemsize = len;
 	    if ((item_is_utf8 = DO_UTF8(sv)))
 		itemsize = sv_len_utf8(sv);

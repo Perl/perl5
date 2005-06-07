@@ -6226,7 +6226,8 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
  *
  */
 STATIC bool
-S_utf8_mg_pos_init(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 offsetp, U8 *s, U8 *start)
+S_utf8_mg_pos_init(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i,
+		   I32 offsetp, const U8 *s, const U8 *start)
 {
     bool found = FALSE;
 
@@ -6259,7 +6260,7 @@ S_utf8_mg_pos_init(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 offset
  *
  */
 STATIC bool
-S_utf8_mg_pos(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I32 uoff, U8 **sp, U8 *start, U8 *send)
+S_utf8_mg_pos(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I32 uoff, const U8 **sp, const U8 *start, const U8 *send)
 {
     bool found = FALSE;
 
@@ -6391,21 +6392,21 @@ type coercion.
 void
 Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
 {
-    U8 *start;
+    const U8 *start;
     STRLEN len;
 
     if (!sv)
 	return;
 
-    start = (U8*)SvPV(sv, len);
+    start = (U8*)SvPV_const(sv, len);
     if (len) {
 	STRLEN boffset = 0;
 	STRLEN *cache = 0;
-	U8 *s = start;
-	 I32 uoffset = *offsetp;
-	 U8 *send = s + len;
-	 MAGIC *mg = 0;
-	 bool found = FALSE;
+	const U8 *s = start;
+	I32 uoffset = *offsetp;
+	const U8 *send = s + len;
+	MAGIC *mg = 0;
+	bool found = FALSE;
 
          if (utf8_mg_pos(sv, &mg, &cache, 0, offsetp, *offsetp, &s, start, send))
              found = TRUE;
@@ -9309,7 +9310,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	const char *eptr = Nullch;
 	STRLEN elen = 0;
 	SV *vecsv = Nullsv;
-	U8 *vecstr = Null(U8*);
+	const U8 *vecstr = Null(U8*);
 	STRLEN veclen = 0;
 	char c = 0;
 	int i;
@@ -9429,18 +9430,18 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		else
 		    vecsv = (evix ? evix <= svmax : svix < svmax) ?
 			svargs[evix ? evix-1 : svix++] : &PL_sv_undef;
-		dotstr = SvPVx(vecsv, dotstrlen);
+		dotstr = SvPV_const(vecsv, dotstrlen);
 		if (DO_UTF8(vecsv))
 		    is_utf8 = TRUE;
 	    }
 	    if (args) {
 		vecsv = va_arg(*args, SV*);
-		vecstr = (U8*)SvPVx(vecsv,veclen);
+		vecstr = (U8*)SvPV_const(vecsv,veclen);
 		vec_utf8 = DO_UTF8(vecsv);
 	    }
 	    else if (efix ? efix <= svmax : svix < svmax) {
 		vecsv = svargs[efix ? efix-1 : svix++];
-		vecstr = (U8*)SvPVx(vecsv,veclen);
+		vecstr = (U8*)SvPV_const(vecsv,veclen);
 		vec_utf8 = DO_UTF8(vecsv);
 		/* if this is a version object, we need to return the
 		 * stringified representation (which the SvPVX_const has
@@ -9449,7 +9450,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		if ( *q == 'd' && sv_derived_from(vecsv,"version") )
 		{
 			q++; /* skip past the rest of the %vd format */
-			eptr = (char *) vecstr;
+			eptr = (const char *) vecstr;
 			elen = strlen(eptr);
 			vectorize=FALSE;
 			goto string;
