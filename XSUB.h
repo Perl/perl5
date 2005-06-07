@@ -261,7 +261,7 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #  define XS_VERSION_BOOTCHECK \
     STMT_START {							\
 	SV *_sv; STRLEN n_a;						\
-	const char *vn = Nullch, *module = SvPV(ST(0),n_a);		\
+	const char *vn = Nullch, *module = SvPV_const(ST(0),n_a);	\
 	if (items >= 2)	 /* version supplied as bootstrap arg */	\
 	    _sv = ST(1);						\
 	else {								\
