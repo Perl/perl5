@@ -4447,7 +4447,13 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	(void)SvPOK_only(dstr);
 
 	if (
-            (sflags & (SVf_FAKE | SVf_READONLY)) != (SVf_FAKE | SVf_READONLY)
+	    /* We're not already COW  */
+            ((sflags & (SVf_FAKE | SVf_READONLY)) != (SVf_FAKE | SVf_READONLY)
+#ifndef PERL_COPY_ON_WRITE
+	     /* or we are, but dstr isn't a suitable target.  */
+	     || (SvFLAGS(dstr) & CAN_COW_MASK) != CAN_COW_FLAGS
+#endif
+	     )
             &&
             !(isSwipe =
                  (sflags & SVs_TEMP) &&   /* slated for free anyway? */
@@ -4513,9 +4519,9 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
                 /* making another shared SV.  */
                 STRLEN cur = SvCUR(sstr);
                 STRLEN len = SvLEN(sstr);
-		assert (SvTYPE(dstr) >= SVt_PVIV);
 #ifdef PERL_COPY_ON_WRITE
                 if (len) {
+		    assert (SvTYPE(dstr) >= SVt_PVIV);
                     /* SvIsCOW_normal */
                     /* splice us in between source and next-after-source.  */
                     SV_COW_NEXT_SV_SET(dstr, SV_COW_NEXT_SV(sstr));
@@ -4528,6 +4534,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
                     UV hash = SvSHARED_HASH(sstr);
                     DEBUG_C(PerlIO_printf(Perl_debug_log,
                                           "Copy on write: Sharing hash\n"));
+
+		    assert (SvTYPE(dstr) >= SVt_PVIV);
                     SvPV_set(dstr,
                              sharepvn(SvPVX_const(sstr),
                                       (sflags & SVf_UTF8?-cur:cur), hash));
