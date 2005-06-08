@@ -873,7 +873,8 @@ in gv.h: */
 #define SvIVX(sv) (0 + ((XPVIV*) SvANY(sv))->xiv_iv)
 #define SvUVX(sv) (0 + ((XPVUV*) SvANY(sv))->xuv_uv)
 #define SvNVX(sv) (0 + ((XPVNV*) SvANY(sv))->xnv_nv)
-#if PERL_DEBUG_COW > 1
+/* Don't test the core XS code yet.  */
+#if defined (PERL_CORE) && PERL_DEBUG_COW > 1
 #define SvPVX(sv) (0 + (assert(!SvREADONLY(sv)), (sv)->sv_u.svu_pv))
 #else
 #define SvPVX(sv) SvPVX_mutable(sv)
