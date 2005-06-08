@@ -3418,13 +3418,13 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname)
      */
 
 #ifdef DOSUID
-    char *s, *s2;
+    const char *s, *s2;
 
     if (PerlLIO_fstat(PerlIO_fileno(PL_rsfp),&PL_statbuf) < 0)	/* normal stat is insecure */
 	Perl_croak(aTHX_ "Can't stat script \"%s\"",PL_origfilename);
     if (PL_statbuf.st_mode & (S_ISUID|S_ISGID)) {
 	I32 len;
-	STRLEN n_a;
+	const char *linestr;
 
 #ifdef IAMSUID
 	if (PL_fdscript < 0 || PL_suidscript != 1)
@@ -3522,10 +3522,12 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname)
 	PL_doswitches = FALSE;		/* -s is insecure in suid */
 	/* PSz 13 Nov 03  But -s was caught elsewhere ... so unsetting it here is useless(?!) */
 	CopLINE_inc(PL_curcop);
+	linestr = SvPV_nolen_const(PL_linestr);
 	if (sv_gets(PL_linestr, PL_rsfp, 0) == Nullch ||
-	  strnNE(SvPV(PL_linestr,n_a),"#!",2) )	/* required even on Sys V */
+	  strnNE(linestr,"#!",2) )	/* required even on Sys V */
 	    Perl_croak(aTHX_ "No #! line");
-	s = SvPV(PL_linestr,n_a)+2;
+	linestr+=2;
+	s = linestr;
 	/* PSz 27 Feb 04 */
 	/* Sanity check on line length */
 	if (strlen(s) < 1 || strlen(s) > 4000)
@@ -3534,12 +3536,12 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname)
 	while (isSPACE(*s)) s++;
 	/* Sanity check on buffer end */
 	while ((*s) && !isSPACE(*s)) s++;
-	for (s2 = s;  (s2 > SvPV(PL_linestr,n_a)+2 &&
+	for (s2 = s;  (s2 > linestr &&
 		       (isDIGIT(s2[-1]) || s2[-1] == '.' || s2[-1] == '_'
 			|| s2[-1] == '-'));  s2--) ;
 	/* Sanity check on buffer start */
-	if ( (s2-4 < SvPV(PL_linestr,n_a)+2 || strnNE(s2-4,"perl",4)) &&
-	      (s-9 < SvPV(PL_linestr,n_a)+2 || strnNE(s-9,"perl",4)) )
+	if ( (s2-4 < linestr || strnNE(s2-4,"perl",4)) &&
+	      (s-9 < linestr || strnNE(s-9,"perl",4)) )
 	    Perl_croak(aTHX_ "Not a perl script");
 	while (*s == ' ' || *s == '\t') s++;
 	/*
