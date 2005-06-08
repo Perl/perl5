@@ -1398,7 +1398,7 @@ yup:					/* Confirmed by INTUIT */
 			      (int)(t-truebase));
 	    }
 	    rx->saved_copy = sv_setsv_cow(rx->saved_copy, TARG);
-	    rx->subbeg = SvPVX_const(rx->saved_copy) + (t - truebase);
+	    rx->subbeg = (char *) SvPVX_const(rx->saved_copy) + (t - truebase);
 	    assert (SvPOKp(rx->saved_copy));
 	} else
 #endif
