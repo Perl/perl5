@@ -1702,7 +1702,6 @@ PP(pp_reset)
 {
     dSP;
     const char *tmps;
-    STRLEN n_a;
 
     if (MAXARG < 1)
 	tmps = "";
