@@ -2319,9 +2319,9 @@ functions will serve you better than will int().
 
 Implements the ioctl(2) function.  You'll probably first have to say
 
-    require "ioctl.ph";	# probably in /usr/local/lib/perl/ioctl.ph
+    require "sys/ioctl.ph";	# probably in $Config{archlib}/ioctl.ph
 
-to get the correct function definitions.  If F<ioctl.ph> doesn't
+to get the correct function definitions.  If F<sys/ioctl.ph> doesn't
 exist or doesn't have the correct definitions you'll have to roll your
 own, based on your C header files such as F<< <sys/ioctl.h> >>.
 (There is a Perl script called B<h2ph> that comes with the Perl kit that
