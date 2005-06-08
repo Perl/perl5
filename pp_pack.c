@@ -2317,11 +2317,11 @@ doencodes(U8 *h, const char *s, I32 len)
 STATIC SV *
 S_is_an_int(pTHX_ const char *s, STRLEN l)
 {
-  SV             *result = newSVpvn(s, l);
-  char           *result_c = SvPV_nolen(result);	/* convenience */
-  char           *out = result_c;
-  bool            skip = 1;
-  bool            ignore = 0;
+  SV *result = newSVpvn(s, l);
+  char *const result_c = SvPV_nolen(result);	/* convenience */
+  char *out = result_c;
+  bool skip = 1;
+  bool ignore = 0;
 
   while (*s) {
     switch (*s) {
@@ -2366,25 +2366,24 @@ S_is_an_int(pTHX_ const char *s, STRLEN l)
 STATIC int
 S_div128(pTHX_ SV *pnum, bool *done)
 {
-  STRLEN          len;
-  char           *s = SvPV(pnum, len);
-  int             m = 0;
-  int             r = 0;
-  char           *t = s;
+    STRLEN len;
+    char * const s = SvPV(pnum, len);
+    char *t = s;
+    int m = 0;
 
-  *done = 1;
-  while (*t) {
-    const int i = m * 10 + (*t - '0');
-    m = i & 0x7F;
-    r = (i >> 7);		/* r < 10 */
-    if (r) {
-      *done = 0;
+    *done = 1;
+    while (*t) {
+	const int i = m * 10 + (*t - '0');
+	const int r = (i >> 7); /* r < 10 */
+	m = i & 0x7F;
+	if (r) {
+	    *done = 0;
+	}
+	*(t++) = '0' + r;
     }
-    *(t++) = '0' + r;
-  }
-  *(t++) = '\0';
-  SvCUR_set(pnum, (STRLEN) (t - s));
-  return (m);
+    *(t++) = '\0';
+    SvCUR_set(pnum, (STRLEN) (t - s));
+    return (m);
 }
 
 /*
@@ -3369,9 +3368,9 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 #endif
 		    char  *in = buf + sizeof(buf);
 
-                    anv = Perl_floor(anv);
+		    anv = Perl_floor(anv);
 		    do {
-			NV next = Perl_floor(anv / 128);
+			const NV next = Perl_floor(anv / 128);
 			if (in <= buf)  /* this cannot happen ;-) */
 			    Perl_croak(aTHX_ "Cannot compress integer in pack");
 			*--in = (unsigned char)(anv - (next * 128)) | 0x80;
@@ -3381,7 +3380,8 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    PUSH_GROWING_BYTES(utf8, cat, start, cur,
 				       in, (buf + sizeof(buf)) - in);
 		} else {
-		    char           *from, *result, *in;
+		    const char     *from;
+		    char           *result, *in;
 		    SV             *norm;
 		    STRLEN          len;
 		    bool            done;
