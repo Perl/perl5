@@ -1002,7 +1002,7 @@
 #endif
 #define custom_op_name		Perl_custom_op_name
 #define custom_op_desc		Perl_custom_op_desc
-#if defined(PERL_COPY_ON_WRITE)
+#if defined(PERL_OLD_COPY_ON_WRITE)
 #ifdef PERL_CORE
 #define sv_release_IVX		Perl_sv_release_IVX
 #endif
@@ -1331,7 +1331,7 @@
 #define utf8_mg_pos		S_utf8_mg_pos
 #define utf8_mg_pos_init	S_utf8_mg_pos_init
 #endif
-#if defined(PERL_COPY_ON_WRITE)
+#if defined(PERL_OLD_COPY_ON_WRITE)
 #ifdef PERL_CORE
 #define sv_release_COW		S_sv_release_COW
 #endif
@@ -1431,7 +1431,7 @@
 #define sv_copypv		Perl_sv_copypv
 #define my_atof2		Perl_my_atof2
 #define my_socketpair		Perl_my_socketpair
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define sv_setsv_cow		Perl_sv_setsv_cow
 #endif
@@ -2991,7 +2991,7 @@
 #endif
 #define custom_op_name(a)	Perl_custom_op_name(aTHX_ a)
 #define custom_op_desc(a)	Perl_custom_op_desc(aTHX_ a)
-#if defined(PERL_COPY_ON_WRITE)
+#if defined(PERL_OLD_COPY_ON_WRITE)
 #ifdef PERL_CORE
 #define sv_release_IVX(a)	Perl_sv_release_IVX(aTHX_ a)
 #endif
@@ -3319,7 +3319,7 @@
 #define utf8_mg_pos(a,b,c,d,e,f,g,h,i)	S_utf8_mg_pos(aTHX_ a,b,c,d,e,f,g,h,i)
 #define utf8_mg_pos_init(a,b,c,d,e,f,g)	S_utf8_mg_pos_init(aTHX_ a,b,c,d,e,f,g)
 #endif
-#if defined(PERL_COPY_ON_WRITE)
+#if defined(PERL_OLD_COPY_ON_WRITE)
 #ifdef PERL_CORE
 #define sv_release_COW(a,b,c,d,e,f)	S_sv_release_COW(aTHX_ a,b,c,d,e,f)
 #endif
@@ -3419,7 +3419,7 @@
 #define sv_copypv(a,b)		Perl_sv_copypv(aTHX_ a,b)
 #define my_atof2(a,b)		Perl_my_atof2(aTHX_ a,b)
 #define my_socketpair		Perl_my_socketpair
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define sv_setsv_cow(a,b)	Perl_sv_setsv_cow(aTHX_ a,b)
 #endif

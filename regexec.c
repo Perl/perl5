@@ -2061,7 +2061,7 @@ got_it:
 	RX_MATCH_COPY_FREE(prog);
 	if (flags & REXEC_COPY_STR) {
 	    I32 i = PL_regeol - startpos + (stringarg - strbeg);
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 	    if ((SvIsCOW(sv)
 		 || (SvFLAGS(sv) & CAN_COW_MASK) == CAN_COW_FLAGS)) {
 		if (DEBUG_C_TEST) {
@@ -2169,7 +2169,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 		$` inside (?{}) could fail... */
 	    PL_reg_oldsaved = prog->subbeg;
 	    PL_reg_oldsavedlen = prog->sublen;
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 	    PL_nrs = prog->saved_copy;
 #endif
 	    RX_MATCH_COPIED_off(prog);
@@ -4908,7 +4908,7 @@ restore_pos(pTHX_ void *arg)
 	if (PL_reg_oldsaved) {
 	    PL_reg_re->subbeg = PL_reg_oldsaved;
 	    PL_reg_re->sublen = PL_reg_oldsavedlen;
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 	    PL_reg_re->saved_copy = PL_nrs;
 #endif
 	    RX_MATCH_COPIED_on(PL_reg_re);

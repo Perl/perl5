@@ -2900,7 +2900,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     r->prelen = xend - exp;
     r->precomp = savepvn(RExC_precomp, r->prelen);
     r->subbeg = NULL;
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
     r->saved_copy = Nullsv;
 #endif
     r->reganch = pm->op_pmflags & PMf_COMPILETIME;
@@ -6156,7 +6156,7 @@ Perl_pregfree(pTHX_ struct regexp *r)
     if (r->offsets)             /* 20010421 MJD */
 	Safefree(r->offsets);
     RX_MATCH_COPY_FREE(r);
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
     if (r->saved_copy)
 	SvREFCNT_dec(r->saved_copy);
 #endif
@@ -6338,7 +6338,7 @@ Perl_save_re_context(pTHX)
     PL_reg_oldsaved = Nullch;
     SAVEI32(PL_reg_oldsavedlen);	/* old length of saved substr during match */
     PL_reg_oldsavedlen = 0;
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
     SAVESPTR(PL_nrs);
     PL_nrs = Nullsv;
 #endif

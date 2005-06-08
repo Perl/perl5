@@ -1359,13 +1359,13 @@ Like C<sv_catsv> but doesn't process magic.
 #define SV_CHECK_THINKFIRST_COW_DROP(sv) if (SvTHINKFIRST(sv)) \
 				    sv_force_normal_flags(sv, SV_COW_DROP_PV)
 
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 #  define SvRELEASE_IVX(sv)   ((void)((SvFLAGS(sv) & (SVf_OOK|SVf_READONLY|SVf_FAKE)) \
 				&& Perl_sv_release_IVX(aTHX_ sv)))
 #  define SvIsCOW_normal(sv)	(SvIsCOW(sv) && SvLEN(sv))
 #else
 #  define SvRELEASE_IVX(sv)   SvOOK_off(sv)
-#endif /* PERL_COPY_ON_WRITE */
+#endif /* PERL_OLD_COPY_ON_WRITE */
 
 #define CAN_COW_MASK	(SVs_OBJECT|SVs_GMG|SVs_SMG|SVs_RMG|SVf_IOK|SVf_NOK| \
 			 SVf_POK|SVf_ROK|SVp_IOK|SVp_NOK|SVp_POK|SVf_FAKE| \

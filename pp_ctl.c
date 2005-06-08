@@ -233,7 +233,7 @@ PP(pp_substcont)
 	    }
 	    cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
 
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 	    if (SvIsCOW(targ)) {
 		sv_force_normal_flags(targ, SV_COW_DROP_PV);
 	    } else
@@ -308,7 +308,7 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
     U32 i;
 
     if (!p || p[1] < rx->nparens) {
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 	i = 7 + rx->nparens * 2;
 #else
 	i = 6 + rx->nparens * 2;
@@ -323,7 +323,7 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
     *p++ = PTR2UV(RX_MATCH_COPIED(rx) ? rx->subbeg : Nullch);
     RX_MATCH_COPIED_off(rx);
 
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
     *p++ = PTR2UV(rx->saved_copy);
     rx->saved_copy = Nullsv;
 #endif
@@ -348,7 +348,7 @@ Perl_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
     RX_MATCH_COPIED_set(rx, *p);
     *p++ = 0;
 
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
     if (rx->saved_copy)
 	SvREFCNT_dec (rx->saved_copy);
     rx->saved_copy = INT2PTR(SV*,*p);
@@ -372,7 +372,7 @@ Perl_rxres_free(pTHX_ void **rsp)
 
     if (p) {
 	Safefree(INT2PTR(char*,*p));
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 	if (p[1]) {
 	    SvREFCNT_dec (INT2PTR(SV*,p[1]));
 	}

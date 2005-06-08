@@ -47,7 +47,7 @@
 #define ASSERT_UTF8_CACHE(cache) NOOP
 #endif
 
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 #define SV_COW_NEXT_SV(sv)	INT2PTR(SV *,SvUVX(sv))
 #define SV_COW_NEXT_SV_SET(current,next)	SvUV_set(current, PTR2UV(next))
 /* This is a pessimistic view. Scalar must be purely a read-write PV to copy-
@@ -4193,7 +4193,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	}
 	break;
     case SVt_PVFM:
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 	if ((SvFLAGS(sstr) & CAN_COW_MASK) == CAN_COW_FLAGS) {
 	    if (dtype < SVt_PVIV)
 		sv_upgrade(dstr, SVt_PVIV);
@@ -4464,7 +4464,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	if (
 	    /* We're not already COW  */
             ((sflags & (SVf_FAKE | SVf_READONLY)) != (SVf_FAKE | SVf_READONLY)
-#ifndef PERL_COPY_ON_WRITE
+#ifndef PERL_OLD_COPY_ON_WRITE
 	     /* or we are, but dstr isn't a suitable target.  */
 	     || (SvFLAGS(dstr) & CAN_COW_MASK) != CAN_COW_FLAGS
 #endif
@@ -4479,7 +4479,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
                  SvLEN(sstr) 	&&	  /* and really is a string */
 	    			/* and won't be needed again, potentially */
 	      !(PL_op && PL_op->op_type == OP_AASSIGN))
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
             && !((sflags & CAN_COW_MASK) == CAN_COW_FLAGS
 		 && (SvFLAGS(dstr) & CAN_COW_MASK) == CAN_COW_FLAGS
                  && SvTYPE(sstr) >= SVt_PVIV)
@@ -4493,7 +4493,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
             SvCUR_set(dstr, len);
             *SvEND(dstr) = '\0';
         } else {
-            /* If PERL_COPY_ON_WRITE is not defined, then isSwipe will always
+            /* If PERL_OLD_COPY_ON_WRITE is not defined, then isSwipe will always
                be true in here.  */
             /* Either it's a shared hash key, or it's suitable for
                copy-on-write or we can swipe the string.  */
@@ -4502,7 +4502,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
                 sv_dump(sstr);
                 sv_dump(dstr);
             }
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
             if (!isSwipe) {
                 /* I believe I should acquire a global SV mutex if
                    it's a COW sv (not a shared hash key) to stop
@@ -4534,7 +4534,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
                 /* making another shared SV.  */
                 STRLEN cur = SvCUR(sstr);
                 STRLEN len = SvLEN(sstr);
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
                 if (len) {
 		    assert (SvTYPE(dstr) >= SVt_PVIV);
                     /* SvIsCOW_normal */
@@ -4655,7 +4655,7 @@ Perl_sv_setsv_mg(pTHX_ SV *dstr, register SV *sstr)
     SvSETMAGIC(dstr);
 }
 
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 SV *
 Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 {
@@ -4874,7 +4874,7 @@ Perl_sv_usepvn_mg(pTHX_ register SV *sv, register char *ptr, register STRLEN len
     SvSETMAGIC(sv);
 }
 
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 /* Need to do this *after* making the SV normal, as we need the buffer
    pointer to remain valid until after we've copied it.  If we let go too early,
    another thread could invalidate it by unsharing last of the same hash key
@@ -4941,7 +4941,7 @@ with flags set to 0.
 void
 Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 {
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
     if (SvREADONLY(sv)) {
         /* At this point I believe I should acquire a global SV mutex.  */
 	if (SvFAKE(sv)) {
@@ -5381,7 +5381,7 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     const MGVTBL *vtable = 0;
     MAGIC* mg;
 
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
     if (SvIsCOW(sv))
         sv_force_normal_flags(sv, 0);
 #endif
@@ -5809,7 +5809,7 @@ Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
     }
 	
 
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
     if (SvIsCOW_normal(nsv)) {
 	/* We need to follow the pointers around the loop to make the
 	   previous SV point to sv, rather than nsv.  */
@@ -5979,7 +5979,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	    else
 	        SvREFCNT_dec(SvRV(sv));
 	}
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 	else if (SvPVX_const(sv)) {
             if (SvIsCOW(sv)) {
                 /* I believe I need to grab the global SV mutex here and
@@ -10321,7 +10321,7 @@ Perl_re_dup(pTHX_ REGEXP *r, CLONE_PARAMS *param)
 	ret->subbeg  = SAVEPVN(r->subbeg, r->sublen);
     else
 	ret->subbeg = Nullch;
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
     ret->saved_copy = Nullsv;
 #endif
 
@@ -12389,7 +12389,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_reg_curpm	= (PMOP*)NULL;
     PL_reg_oldsaved	= Nullch;
     PL_reg_oldsavedlen	= 0;
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
     PL_nrs		= Nullsv;
 #endif
     PL_reg_maxiter	= 0;

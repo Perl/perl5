@@ -1235,7 +1235,7 @@ Perl_pad_free(pTHX_ PADOFFSET po)
 #ifdef USE_ITHREADS
 	/* SV could be a shared hash key (eg bugid #19022) */
 	if (
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 	    !SvIsCOW(PL_curpad[po])
 #else
 	    !SvFAKE(PL_curpad[po])

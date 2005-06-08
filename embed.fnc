@@ -965,7 +965,7 @@ Ap	|void	|sys_intern_init
 Ap	|char *	|custom_op_name	|NN const OP* op
 Ap	|char *	|custom_op_desc	|NN const OP* op
 
-#if defined(PERL_COPY_ON_WRITE)
+#if defined(PERL_OLD_COPY_ON_WRITE)
 pMX	|int	|sv_release_IVX	|SV *sv
 #endif
 
@@ -1269,7 +1269,7 @@ s	|bool	|utf8_mg_pos	|NN SV *sv|NN MAGIC **mgp|NN STRLEN **cachep \
 s	|bool	|utf8_mg_pos_init	|NN SV *sv|NN MAGIC **mgp \
 				|NN STRLEN **cachep|I32 i|I32 offsetp \
 				|NN const U8 *s|NN const U8 *start
-#if defined(PERL_COPY_ON_WRITE)
+#if defined(PERL_OLD_COPY_ON_WRITE)
 sM	|void	|sv_release_COW	|SV *sv|const char *pvx|STRLEN cur|STRLEN len \
 				|U32 hash|SV *after
 #endif
@@ -1361,7 +1361,7 @@ Apd	|char*	|sv_pvn_force_flags|SV* sv|NN STRLEN* lp|I32 flags
 Apd	|void	|sv_copypv	|NN SV* dsv|NN SV* ssv
 Ap	|char*	|my_atof2	|NN const char *s|NN NV* value
 Apn	|int	|my_socketpair	|int family|int type|int protocol|int fd[2]
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 pMXE	|SV*	|sv_setsv_cow	|SV* dsv|SV* ssv
 #endif
 

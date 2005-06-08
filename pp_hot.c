@@ -1389,7 +1389,7 @@ yup:					/* Confirmed by INTUIT */
     }
     if (PL_sawampersand) {
 	I32 off;
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 	if (SvIsCOW(TARG) || (SvFLAGS(TARG) & CAN_COW_MASK) == CAN_COW_FLAGS) {
 	    if (DEBUG_C_TEST) {
 		PerlIO_printf(Perl_debug_log,
@@ -1405,7 +1405,7 @@ yup:					/* Confirmed by INTUIT */
 	{
 
 	    rx->subbeg = savepvn(t, strend - t);
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 	    rx->saved_copy = Nullsv;
 #endif
 	}
@@ -1958,7 +1958,7 @@ PP(pp_subst)
     I32 oldsave = PL_savestack_ix;
     STRLEN slen;
     bool doutf8 = FALSE;
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
     bool is_cow;
 #endif
     SV *nsv = Nullsv;
@@ -1974,7 +1974,7 @@ PP(pp_subst)
 	EXTEND(SP,1);
     }
 
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
     /* Awooga. Awooga. "bool" types that are actually char are dangerous,
        because they make integers such as 256 "false".  */
     is_cow = SvIsCOW(TARG) ? TRUE : FALSE;
@@ -1983,7 +1983,7 @@ PP(pp_subst)
 	sv_force_normal_flags(TARG,0);
 #endif
     if (
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 	!is_cow &&
 #endif
 	(SvREADONLY(TARG)
@@ -2067,7 +2067,7 @@ PP(pp_subst)
     
     /* can do inplace substitution? */
     if (c
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 	&& !is_cow
 #endif
 	&& (I32)clen <= rx->minlen && (once || !(r_flags & REXEC_COPY_STR))
@@ -2081,7 +2081,7 @@ PP(pp_subst)
 	    LEAVE_SCOPE(oldsave);
 	    RETURN;
 	}
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 	if (SvIsCOW(TARG)) {
 	    assert (!force_on_match);
 	    goto have_a_cow;
@@ -2188,7 +2188,7 @@ PP(pp_subst)
 	    s = SvPV_force(TARG, len);
 	    goto force_it;
 	}
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
       have_a_cow:
 #endif
 	rxtainted |= RX_MATCH_TAINTED(rx);
@@ -2232,7 +2232,7 @@ PP(pp_subst)
 	else
 	    sv_catpvn(dstr, s, strend - s);
 
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 	/* The match may make the string COW. If so, brilliant, because that's
 	   just saved us one malloc, copy and free - the regexp has donated
 	   the old buffer, and we malloc an entirely new one, rather than the

@@ -37,7 +37,7 @@ typedef struct regexp {
         struct reg_data *data;	/* Additional data. */
 	char *subbeg;		/* saved or original string 
 				   so \digit works forever. */
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
         SV *saved_copy;         /* If non-NULL, SV which is COW from original */
 #endif
         U32 *offsets;           /* offset annotations 20001228 MJD */
@@ -104,7 +104,7 @@ typedef struct regexp {
 					 ? RX_MATCH_COPIED_on(prog) \
 					 : RX_MATCH_COPIED_off(prog))
 
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 #define RX_MATCH_COPY_FREE(rx) \
 	STMT_START {if (rx->saved_copy) { \
 	    SV_CHECK_THINKFIRST_COW_DROP(rx->saved_copy); \

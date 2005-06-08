@@ -599,7 +599,7 @@ else {
 		    )];
 }
 
-unless ($define{'PERL_COPY_ON_WRITE'}) {
+unless ($define{'PERL_OLD_COPY_ON_WRITE'}) {
     skip_symbols [qw(
 		    Perl_sv_setsv_cow
 		    Perl_sv_release_IVX

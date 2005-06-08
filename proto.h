@@ -1809,7 +1809,7 @@ PERL_CALLCONV char *	Perl_custom_op_desc(pTHX_ const OP* op)
 			__attribute__nonnull__(pTHX_1);
 
 
-#if defined(PERL_COPY_ON_WRITE)
+#if defined(PERL_OLD_COPY_ON_WRITE)
 PERL_CALLCONV int	Perl_sv_release_IVX(pTHX_ SV *sv);
 #endif
 
@@ -2398,7 +2398,7 @@ STATIC bool	S_utf8_mg_pos_init(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i
 			__attribute__nonnull__(pTHX_6)
 			__attribute__nonnull__(pTHX_7);
 
-#if defined(PERL_COPY_ON_WRITE)
+#if defined(PERL_OLD_COPY_ON_WRITE)
 STATIC void	S_sv_release_COW(pTHX_ SV *sv, const char *pvx, STRLEN cur, STRLEN len, U32 hash, SV *after);
 #endif
 #endif
@@ -2520,7 +2520,7 @@ PERL_CALLCONV char*	Perl_my_atof2(pTHX_ const char *s, NV* value)
 			__attribute__nonnull__(pTHX_2);
 
 PERL_CALLCONV int	Perl_my_socketpair(int family, int type, int protocol, int fd[2]);
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 PERL_CALLCONV SV*	Perl_sv_setsv_cow(pTHX_ SV* dsv, SV* ssv);
 #endif
 

@@ -81,7 +81,7 @@ S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
 {
     MGS* mgs;
     assert(SvMAGICAL(sv));
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
     /* Turning READONLY off for a copy-on-write scalar is a bad idea.  */
     if (SvIsCOW(sv))
       sv_force_normal(sv);
@@ -2643,7 +2643,7 @@ restore_magic(pTHX_ const void *p)
 
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv))
     {
-#ifdef PERL_COPY_ON_WRITE
+#ifdef PERL_OLD_COPY_ON_WRITE
 	/* While magic was saved (and off) sv_setsv may well have seen
 	   this SV as a prime candidate for COW.  */
 	if (SvIsCOW(sv))
