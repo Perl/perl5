@@ -1991,7 +1991,7 @@ PP(pp_subst)
 	DIE(aTHX_ PL_no_modify);
     PUTBACK;
 
-    s = SvPV(TARG, len);
+    s = SvPV_mutable(TARG, len);
     if (!SvPOKp(TARG) || SvTYPE(TARG) == SVt_PVGV)
 	force_on_match = 1;
     rxtainted = ((pm->op_pmdynflags & PMdf_TAINTED) ||

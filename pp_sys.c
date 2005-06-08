@@ -3449,7 +3449,7 @@ PP(pp_fttext)
       really_filename:
 	PL_statgv = Nullgv;
 	PL_laststype = OP_STAT;
-	sv_setpv(PL_statname, SvPV_nolen(sv));
+	sv_setpv(PL_statname, SvPV_nolen_const(sv));
 	if (!(fp = PerlIO_open(SvPVX_const(PL_statname), "r"))) {
 	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV_nolen(PL_statname), '\n'))
 		Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "open");

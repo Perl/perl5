@@ -1289,7 +1289,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
     SV* save_sv;
 #endif
 
-    register const char *s = MgPV(mg,len);
+    register const char *s = MgPV_const(mg,len);
     if (*s == '_') {
 	if (strEQ(s,"__DIE__"))
 	    svp = &PL_diehook;

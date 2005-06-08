@@ -6781,7 +6781,7 @@ Perl_peep(pTHX_ register OP *o)
             SV *lexname;
 	    GV **fields;
 	    SV **svp, *sv;
-	    char *key = NULL;
+	    const char *key = NULL;
 	    STRLEN keylen;
 
 	    o->op_opt = 1;
@@ -6792,7 +6792,7 @@ Perl_peep(pTHX_ register OP *o)
 	    /* Make the CONST have a shared SV */
 	    svp = cSVOPx_svp(((BINOP*)o)->op_last);
 	    if ((!SvFAKE(sv = *svp) || !SvREADONLY(sv)) && !IS_PADCONST(sv)) {
-		key = SvPV(sv, keylen);
+		key = SvPV_const(sv, keylen);
 		lexname = newSVpvn_share(key,
 					 SvUTF8(sv) ? -(I32)keylen : keylen,
 					 0);

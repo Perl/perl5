@@ -2070,7 +2070,7 @@ got_it:
 				  (int) SvTYPE(sv));
 		}
 		prog->saved_copy = sv_setsv_cow(prog->saved_copy, sv);
-		prog->subbeg = SvPVX(prog->saved_copy);
+		prog->subbeg = (char *)SvPVX_const(prog->saved_copy);
 		assert (SvPOKp(prog->saved_copy));
 	    } else
 #endif

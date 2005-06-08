@@ -770,7 +770,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 		SAVEFREESV(tmpsv);
 		gv_fullname3(tmpsv, (GV*)cSVOPo->op_sv, Nullch);
 		Perl_dump_indent(aTHX_ level, file, "GV = %s\n",
-				 SvPV_const_nolen(tmpsv));
+				 SvPV_nolen_const(tmpsv));
 		LEAVE;
 	    }
 	    else
