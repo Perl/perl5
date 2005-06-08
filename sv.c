@@ -4541,7 +4541,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
                     /* splice us in between source and next-after-source.  */
                     SV_COW_NEXT_SV_SET(dstr, SV_COW_NEXT_SV(sstr));
                     SV_COW_NEXT_SV_SET(sstr, dstr);
-                    SvPV_set(dstr, SvPVX(sstr));
+                    SvPV_set(dstr, SvPVX_mutable(sstr));
                 } else
 #endif
 		{
@@ -4710,7 +4710,7 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 	SV_COW_NEXT_SV_SET(dstr, sstr);
     }
     SV_COW_NEXT_SV_SET(sstr, dstr);
-    new_pv = SvPVX(sstr);
+    new_pv = SvPVX_mutable(sstr);
 
   common_exit:
     SvPV_set(dstr, new_pv);
