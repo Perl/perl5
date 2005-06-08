@@ -1278,9 +1278,11 @@ Like C<sv_catsv> but doesn't process magic.
 #  define SvNVx(sv) ({SV *_sv = (SV*)(sv); SvNV(_sv); })
 #  define SvPVx(sv, lp) ({SV *_sv = (sv); SvPV(_sv, lp); })
 #  define SvPVx_const(sv, lp) ({SV *_sv = (sv); SvPV_const(_sv, lp); })
+#  define SvPVx_nolen(sv) ({SV *_sv = (sv); SvPV_nolen(_sv); })
 #  define SvPVx_nolen_const(sv) ({SV *_sv = (sv); SvPV_nolen_const(_sv); })
 #  define SvPVutf8x(sv, lp) ({SV *_sv = (sv); SvPVutf8(_sv, lp); })
 #  define SvPVbytex(sv, lp) ({SV *_sv = (sv); SvPVbyte(_sv, lp); })
+#  define SvPVbytex_nolen(sv) ({SV *_sv = (sv); SvPVbyte_nolen(_sv); })
 #  define SvTRUE(sv) (						\
     !sv								\
     ? 0								\
@@ -1309,9 +1311,11 @@ Like C<sv_catsv> but doesn't process magic.
 #  define SvNVx(sv) ((PL_Sv = (sv)), SvNV(PL_Sv))
 #  define SvPVx(sv, lp) ((PL_Sv = (sv)), SvPV(PL_Sv, lp))
 #  define SvPVx_const(sv, lp) ((PL_Sv = (sv)), SvPV_const(PL_Sv, lp))
+#  define SvPVx_nolen(sv) ((PL_Sv = (sv)), SvPV_nolen(PL_Sv))
 #  define SvPVx_nolen_const(sv) ((PL_Sv = (sv)), SvPV_nolen_const(PL_Sv))
 #  define SvPVutf8x(sv, lp) ((PL_Sv = (sv)), SvPVutf8(PL_Sv, lp))
 #  define SvPVbytex(sv, lp) ((PL_Sv = (sv)), SvPVbyte(PL_Sv, lp))
+#  define SvPVbytex_nolen(sv) ((PL_Sv = (sv)), SvPVbyte_nolen(PL_Sv))
 #  define SvTRUE(sv) (						\
     !sv								\
     ? 0								\
