@@ -3011,7 +3011,6 @@ PP(pp_fteread)
     STACKED_FTEST_CHECK;
 #ifdef PERL_EFF_ACCESS_R_OK
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	STRLEN n_a;
 	result = PERL_EFF_ACCESS_R_OK(POPpx);
 	if (result == 0)
 	    RETPUSHYES;
@@ -3039,7 +3038,6 @@ PP(pp_ftewrite)
     STACKED_FTEST_CHECK;
 #ifdef PERL_EFF_ACCESS_W_OK
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	STRLEN n_a;
 	result = PERL_EFF_ACCESS_W_OK(POPpx);
 	if (result == 0)
 	    RETPUSHYES;
