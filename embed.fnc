@@ -1357,7 +1357,7 @@ Apd	|void	|sv_setsv_flags	|NN SV* dsv|SV* ssv|I32 flags
 Apd	|void	|sv_catpvn_flags|NN SV* sv|NN const char* ptr|STRLEN len|I32 flags
 Apd	|void	|sv_catsv_flags	|NN SV* dsv|SV* ssv|I32 flags
 Apd	|STRLEN	|sv_utf8_upgrade_flags|NN SV *sv|I32 flags
-Apd	|char*	|sv_pvn_force_flags|SV* sv|NN STRLEN* lp|I32 flags
+Apd	|char*	|sv_pvn_force_flags|SV* sv|STRLEN* lp|I32 flags
 Apd	|void	|sv_copypv	|NN SV* dsv|NN SV* ssv
 Ap	|char*	|my_atof2	|NN const char *s|NN NV* value
 Apn	|int	|my_socketpair	|int family|int type|int protocol|int fd[2]

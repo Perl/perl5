@@ -1134,11 +1134,11 @@ PP(pp_flop)
 	}
 	else {
 	    SV *final = sv_mortalcopy(right);
-	    STRLEN len, n_a;
+	    STRLEN len;
 	    const char *tmps = SvPV(final, len);
 
 	    sv = sv_mortalcopy(left);
-	    SvPV_force(sv,n_a);
+	    SvPV_force_nolen(sv);
 	    while (!SvNIOKp(sv) && SvCUR(sv) <= len) {
 		XPUSHs(sv);
 	        if (strEQ(SvPVX_const(sv),tmps))
@@ -1831,9 +1831,8 @@ PP(pp_enteriter)
 		cx->blk_loop.itermax = SvIV(right);
 	    }
 	    else {
-		STRLEN n_a;
 		cx->blk_loop.iterlval = newSVsv(sv);
-		(void) SvPV_force(cx->blk_loop.iterlval,n_a);
+		(void) SvPV_force_nolen(cx->blk_loop.iterlval);
 		(void) SvPV_nolen_const(right);
 	    }
 	}

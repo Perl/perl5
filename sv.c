@@ -8293,11 +8293,13 @@ Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
         sv_force_normal_flags(sv, 0);
 
     if (SvPOK(sv)) {
-	*lp = SvCUR(sv);
+	if (lp)
+	    *lp = SvCUR(sv);
     }
     else {
 	char *s;
-
+	STRLEN len;
+ 
 	if (SvREADONLY(sv) && !(flags & SV_MUTABLE_RETURN)) {
 	    if (PL_op)
 		Perl_croak(aTHX_ "Can't coerce readonly %s to string in %s",
@@ -8311,10 +8313,11 @@ Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
 		OP_NAME(PL_op));
 	}
 	else
-	    s = sv_2pv_flags(sv, lp, flags);
+	    s = sv_2pv_flags(sv, &len, flags);
+	if (lp)
+	    *lp = len;
+
 	if (s != SvPVX_const(sv)) {	/* Almost, but not quite, sv_setpvn() */
-	    const STRLEN len = *lp;
-	
 	    if (SvROK(sv))
 		sv_unref(sv);
 	    SvUPGRADE(sv, SVt_PV);		/* Never FALSE */

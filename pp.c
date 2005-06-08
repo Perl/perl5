@@ -3121,8 +3121,7 @@ PP(pp_substr)
 	else if (lvalue) {		/* it's an lvalue! */
 	    if (!SvGMAGICAL(sv)) {
 		if (SvROK(sv)) {
-		    STRLEN n_a;
-		    SvPV_force(sv,n_a);
+		    SvPV_force_nolen(sv);
 		    if (ckWARN(WARN_SUBSTR))
 			Perl_warner(aTHX_ packWARN(WARN_SUBSTR),
 				"Attempt to use reference as lvalue in substr");
