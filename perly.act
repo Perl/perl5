@@ -329,7 +329,7 @@ case 2:
 
   case 61:
 #line 341 "perly.y"
-    { STRLEN n_a; char *name = SvPV(((SVOP*)yyvsp[0].opval)->op_sv,n_a);
+    { STRLEN n_a; const char *name = SvPV_const(((SVOP*)yyvsp[0].opval)->op_sv,n_a);
 			  if (strEQ(name, "BEGIN") || strEQ(name, "END")
 			      || strEQ(name, "INIT") || strEQ(name, "CHECK"))
 			      CvSPECIAL_on(PL_compcv);
