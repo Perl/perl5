@@ -1159,14 +1159,13 @@ perl_get_emergency_buffer(IV *size)
     GV **gvp = (GV**)hv_fetch(PL_defstash, "^M", 2, 0);
     SV *sv;
     char *pv;
-    STRLEN n_a;
 
     if (!gvp) gvp = (GV**)hv_fetch(PL_defstash, "\015", 1, 0);
     if (!gvp || !(sv = GvSV(*gvp)) || !SvPOK(sv) 
         || (SvLEN(sv) < (1<<LOG_OF_MIN_ARENA) - M_OVERHEAD))
         return NULL;		/* Now die die die... */
     /* Got it, now detach SvPV: */
-    pv = SvPV(sv, n_a);
+    pv = SvPV_nolen(sv);
     /* Check alignment: */
     if ((PTR2UV(pv) - sizeof(union overhead)) & (NEEDED_ALIGNMENT - 1)) {
         PerlIO_puts(PerlIO_stderr(),"Bad alignment of $^M!\n");
