@@ -142,7 +142,7 @@ Pops a long off the stack.
 #define TOPm1s		(*(sp-1))
 #define TOPp1s		(*(sp+1))
 #define TOPp		(SvPV(TOPs, PL_na))		/* deprecated */
-#define TOPpx		(SvPV(TOPs, n_a))
+#define TOPpx		(SvPV_nolen(TOPs))
 #define TOPn		(SvNV(TOPs))
 #define TOPi		((IV)SvIV(TOPs))
 #define TOPu		((UV)SvUV(TOPs))
