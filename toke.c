@@ -9030,9 +9030,8 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv,
 
     /* Check the eval first */
     if (!PL_in_eval && SvTRUE(ERRSV)) {
-	STRLEN n_a;
  	sv_catpv(ERRSV, "Propagated");
-	yyerror(SvPV(ERRSV, n_a)); /* Duplicates the message inside eval */
+	yyerror(SvPV_nolen_const(ERRSV)); /* Duplicates the message inside eval */
 	(void)POPs;
  	res = SvREFCNT_inc(sv);
     }

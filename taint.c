@@ -143,10 +143,10 @@ Perl_taint_env(pTHX)
     /* tainted $TERM is okay if it contains no metachars */
     svp = hv_fetch(GvHVn(PL_envgv),"TERM",4,FALSE);
     if (svp && *svp && SvTAINTED(*svp)) {
-	STRLEN n_a;
+	STRLEN len;
 	const bool was_tainted = PL_tainted;
-	char *t = SvPV(*svp, n_a);
-	char *e = t + n_a;
+	const char *t = SvPV(*svp, len);
+	const char *e = t + len;
 	PL_tainted = was_tainted;
 	if (t < e && isALNUM(*t))
 	    t++;

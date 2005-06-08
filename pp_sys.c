@@ -1009,7 +1009,6 @@ PP(pp_sselect)
     struct timeval *tbuf = &timebuf;
     I32 growsize;
     char *fd_sets[4];
-    STRLEN n_a;
 #if BYTEORDER != 0x1234 && BYTEORDER != 0x12345678
 	I32 masksize;
 	I32 offset;
@@ -1081,7 +1080,7 @@ PP(pp_sselect)
 	    continue;
 	}
 	else if (!SvPOK(sv))
-	    SvPV_force(sv,n_a);	/* force string conversion */
+	    SvPV_force_nolen(sv);	/* force string conversion */
 	j = SvLEN(sv);
 	if (j < growsize) {
 	    Sv_Grow(sv, growsize);
@@ -5635,7 +5634,6 @@ PP(pp_syscall)
     unsigned long a[20];
     register I32 i = 0;
     I32 retval = -1;
-    STRLEN n_a;
 
     if (PL_tainting) {
 	while (++MARK <= SP) {
@@ -5658,7 +5656,7 @@ PP(pp_syscall)
 	else if (*MARK == &PL_sv_undef)
 	    a[i++] = 0;
 	else
-	    a[i++] = (unsigned long)SvPV_force(*MARK, n_a);
+	    a[i++] = (unsigned long)SvPV_force_nolen(*MARK);
 	if (i > 15)
 	    break;
     }

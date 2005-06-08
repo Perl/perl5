@@ -2317,9 +2317,8 @@ doencodes(U8 *h, const char *s, I32 len)
 STATIC SV *
 S_is_an_int(pTHX_ const char *s, STRLEN l)
 {
-  STRLEN	 n_a;
   SV             *result = newSVpvn(s, l);
-  char           *result_c = SvPV(result, n_a);	/* convenience */
+  char           *result_c = SvPV_nolen(result);	/* convenience */
   char           *out = result_c;
   bool            skip = 1;
   bool            ignore = 0;

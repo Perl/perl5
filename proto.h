@@ -2084,7 +2084,7 @@ STATIC OP*	S_new_logop(pTHX_ I32 type, I32 flags, OP **firstp, OP **otherp)
 STATIC void	S_simplify_sort(pTHX_ OP *o)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC char*	S_gv_ename(pTHX_ GV *gv);
+STATIC const char*	S_gv_ename(pTHX_ GV *gv);
 STATIC bool	S_scalar_mod_type(pTHX_ const OP *o, I32 type);
 STATIC OP *	S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp);
 STATIC OP *	S_dup_attrlist(pTHX_ OP *o);

@@ -1527,8 +1527,7 @@ Perl_do_readline(pTHX)
 	offset = 0;
 	if (type == OP_RCATLINE && SvOK(sv)) {
 	    if (!SvPOK(sv)) {
-		STRLEN n_a;
-		(void)SvPV_force(sv, n_a);
+		SvPV_force_nolen(sv);
 	    }
 	    offset = SvCUR(sv);
 	}
@@ -2619,8 +2618,7 @@ PP(pp_entersub)
 		sym = SvPOKp(sv) ? SvPVX_const(sv) : Nullch;
 	    }
 	    else {
-                STRLEN n_a;
-		sym = SvPV(sv, n_a);
+		sym = SvPV_nolen_const(sv);
             }
 	    if (!sym)
 		DIE(aTHX_ PL_no_usym, "a subroutine");

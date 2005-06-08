@@ -1060,7 +1060,7 @@ s	|OP*	|scalarboolean	|NN OP *o
 sR	|OP*	|newDEFSVOP
 sR	|OP*	|new_logop	|I32 type|I32 flags|NN OP **firstp|NN OP **otherp
 s	|void	|simplify_sort	|NN OP *o
-s	|char*	|gv_ename	|GV *gv
+s	|const char*	|gv_ename	|GV *gv
 s	|bool	|scalar_mod_type|const OP *o|I32 type
 s	|OP *	|my_kid		|OP *o|OP *attrs|OP **imopsp
 s	|OP *	|dup_attrlist	|OP *o

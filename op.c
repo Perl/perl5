@@ -158,13 +158,12 @@ Perl_Slab_Free(pTHX_ void *op)
 
 #define RETURN_UNLIMITED_NUMBER (PERL_INT_MAX / 2)
 
-STATIC char*
+STATIC const char*
 S_gv_ename(pTHX_ GV *gv)
 {
-    STRLEN n_a;
     SV* tmpsv = sv_newmortal();
     gv_efullname3(tmpsv, gv, Nullch);
-    return SvPV(tmpsv,n_a);
+    return SvPV_nolen_const(tmpsv);
 }
 
 STATIC OP *
@@ -4017,7 +4016,6 @@ OP*
 Perl_newLOOPEX(pTHX_ I32 type, OP *label)
 {
     OP *o;
-    STRLEN n_a;
 
     if (type != OP_GOTO || label->op_type == OP_CONST) {
 	/* "last()" means "last" */
@@ -4025,7 +4023,7 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
 	    o = newOP(type, OPf_SPECIAL);
 	else {
 	    o = newPVOP(type, 0, savepv(label->op_type == OP_CONST
-					? SvPVx_const(((SVOP*)label)->op_sv, n_a)
+					? SvPVx_nolen_const(((SVOP*)label)->op_sv)
 					: ""));
 	}
 	op_free(label);
@@ -4248,7 +4246,6 @@ CV *
 Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 {
     dVAR;
-    STRLEN n_a;
     const char *aname;
     GV *gv;
     const char *ps;
@@ -4256,7 +4253,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     register CV *cv=0;
     SV *const_sv;
 
-    const char * const name = o ? SvPVx_const(cSVOPo->op_sv, n_a) : Nullch;
+    const char * const name = o ? SvPVx_nolen_const(cSVOPo->op_sv) : Nullch;
 
     if (proto) {
 	assert(proto->op_type == OP_CONST);
@@ -6263,7 +6260,6 @@ Perl_ck_subr(pTHX_ OP *o)
     I32 arg = 0;
     I32 contextclass = 0;
     char *e = 0;
-    STRLEN n_a;
     bool delete_op = 0;
 
     o->op_private |= OPpENTERSUB_HASTARG;
@@ -6281,7 +6277,7 @@ Perl_ck_subr(pTHX_ OP *o)
 	    else {
 		if (SvPOK(cv)) {
 		    namegv = CvANON(cv) ? gv : CvGV(cv);
-		    proto = SvPV((SV*)cv, n_a);
+		    proto = SvPV_nolen((SV*)cv);
 		}
 		if (CvASSERTION(cv)) {
 		    if (PL_hints & HINT_ASSERTING) {

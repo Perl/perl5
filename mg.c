@@ -556,8 +556,7 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
     }
     magic_get(sv,mg);
     if (!SvPOK(sv) && SvNIOK(sv)) {
-	STRLEN n_a;
-	sv_2pv(sv, &n_a);
+	sv_2pv(sv, 0);
     }
     if (SvPOK(sv))
 	return SvCUR(sv);
