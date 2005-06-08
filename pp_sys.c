@@ -2799,7 +2799,6 @@ PP(pp_stat)
     GV *gv;
     I32 gimme;
     I32 max = 13;
-    STRLEN n_a;
 
     if (PL_op->op_flags & OPf_REF) {
 	gv = cGVOP_gv;
@@ -2839,15 +2838,15 @@ PP(pp_stat)
 			"lstat() on filehandle %s", GvENAME(gv));
 	    goto do_fstat;
 	}
-	sv_setpv(PL_statname, SvPV_const(sv,n_a));
+	sv_setpv(PL_statname, SvPV_nolen_const(sv));
 	PL_statgv = Nullgv;
 	PL_laststype = PL_op->op_type;
 	if (PL_op->op_type == OP_LSTAT)
-	    PL_laststatval = PerlLIO_lstat(SvPV(PL_statname, n_a), &PL_statcache);
+	    PL_laststatval = PerlLIO_lstat(SvPV_nolen_const(PL_statname), &PL_statcache);
 	else
-	    PL_laststatval = PerlLIO_stat(SvPV(PL_statname, n_a), &PL_statcache);
+	    PL_laststatval = PerlLIO_stat(SvPV_nolen_const(PL_statname), &PL_statcache);
 	if (PL_laststatval < 0) {
-	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV(PL_statname, n_a), '\n'))
+	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV_nolen_const(PL_statname), '\n'))
 		Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "stat");
 	    max = 0;
 	}

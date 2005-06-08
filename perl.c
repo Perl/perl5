@@ -336,11 +336,8 @@ perl_construct(pTHXx)
 	if ((long) PL_mmap_page_size < 0) {
 	  if (errno) {
 	    SV *error = ERRSV;
-	    char *msg;
-	    STRLEN n_a;
 	    (void) SvUPGRADE(error, SVt_PV);
-	    msg = SvPVx(error, n_a);
-	    Perl_croak(aTHX_ "panic: sysconf: %s", msg);
+	    Perl_croak(aTHX_ "panic: sysconf: %s", SvPV_nolen_const(error));
 	  }
 	  else
 	    Perl_croak(aTHX_ "panic: sysconf: pagesize unknown");
@@ -2381,8 +2378,7 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
     PUTBACK;
 
     if (croak_on_error && SvTRUE(ERRSV)) {
-	STRLEN n_a;
-	Perl_croak(aTHX_ SvPVx(ERRSV, n_a));
+	Perl_croak(aTHX_ SvPVx_nolen_const(ERRSV));
     }
 
     return sv;

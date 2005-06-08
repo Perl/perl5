@@ -1381,7 +1381,6 @@ OP *
 Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 {
     dVAR;
-    STRLEN n_a;
 
     if (PL_in_eval) {
 	I32 cxix;
@@ -1396,8 +1395,9 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 		if (!SvPOK(err))
 		    sv_setpvn(err,"",0);
 		else if (SvCUR(err) >= sizeof(prefix)+msglen-1) {
-		    e = SvPV(err, n_a);
-		    e += n_a - msglen;
+		    STRLEN len;
+		    e = SvPV(err, len);
+		    e += len - msglen;
 		    if (*e != *message || strNE(e,message))
 			e = Nullch;
 		}
@@ -1453,7 +1453,7 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 	    PL_curcop = cx->blk_oldcop;
 
 	    if (optype == OP_REQUIRE) {
-                const char* msg = SvPVx(ERRSV, n_a);
+                const char* msg = SvPVx_nolen_const(ERRSV);
                 SV *nsv = cx->blk_eval.old_namesv;
                 (void)hv_store(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv),
                                &PL_sv_undef, 0);
@@ -2252,7 +2252,6 @@ PP(pp_goto)
 
     if (PL_op->op_flags & OPf_STACKED) {
 	SV *sv = POPs;
-	STRLEN n_a;
 
 	/* This egregious kludge implements goto &subroutine */
 	if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVCV) {
@@ -2462,7 +2461,7 @@ PP(pp_goto)
 	    }
 	}
 	else {
-	    label = SvPV(sv,n_a);
+	    label = SvPV_nolen_const(sv);
 	    if (!(do_dump || *label))
 		DIE(aTHX_ must_have_label);
 	}
@@ -2641,8 +2640,7 @@ PP(pp_cswitch)
     if (PL_multiline)
 	PL_op = PL_op->op_next;			/* can't assume anything */
     else {
-	STRLEN n_a;
-	match = *(SvPVx(GvSV(cCOP->cop_gv), n_a)) & 255;
+	match = *(SvPVx_nolen_const(GvSV(cCOP->cop_gv))) & 255;
 	match -= cCOP->uop.scop.scop_offset;
 	if (match < 0)
 	    match = 0;
@@ -2926,7 +2924,6 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	SV **newsp;			/* Used by POPBLOCK. */
        PERL_CONTEXT *cx = &cxstack[cxstack_ix];
 	I32 optype = 0;			/* Might be reset by POPEVAL. */
-	STRLEN n_a;
 
 	PL_op = saveop;
 	if (PL_eval_root) {
@@ -2941,7 +2938,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	lex_end();
 	LEAVE;
 	if (optype == OP_REQUIRE) {
-	    const char* const msg = SvPVx(ERRSV, n_a);
+	    const char* const msg = SvPVx_nolen_const(ERRSV);
 	    const SV * const nsv = cx->blk_eval.old_namesv;
 	    (void)hv_store(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv),
                           &PL_sv_undef, 0);
@@ -2949,7 +2946,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 		*msg ? msg : "Unknown error\n");
 	}
 	else if (startop) {
-            const char* msg = SvPVx(ERRSV, n_a);
+            const char* msg = SvPVx_nolen_const(ERRSV);
 
 	    POPBLOCK(cx,PL_curpm);
 	    POPEVAL(cx);
@@ -2957,7 +2954,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 		       (*msg ? msg : "Unknown error\n"));
 	}
 	else {
-            const char* msg = SvPVx(ERRSV, n_a);
+            const char* msg = SvPVx_nolen_const(ERRSV);
 	    if (!*msg) {
 	        sv_setpv(ERRSV, "Compilation error");
 	    }
@@ -3241,8 +3238,7 @@ PP(pp_require)
 			|| (*name == ':' && name[1] != ':' && strchr(name+2, ':'))
 #endif
 		  ) {
-		    STRLEN n_a;
-		    char *dir = SvPVx(dirsv, n_a);
+		    const char *dir = SvPVx_nolen_const(dirsv);
 #ifdef MACOS_TRADITIONAL
 		    char buf1[256];
 		    char buf2[256];
@@ -3305,8 +3301,7 @@ PP(pp_require)
 		    sv_catpv(msg, " (did you run h2ph?)");
 		sv_catpv(msg, " (@INC contains:");
 		for (i = 0; i <= AvFILL(ar); i++) {
-		    STRLEN n_a;
-		    const char *dir = SvPVx(*av_fetch(ar, i, TRUE), n_a);
+		    const char *dir = SvPVx_nolen_const(*av_fetch(ar, i, TRUE));
 		    Perl_sv_setpvf(aTHX_ dirmsgsv, " %s", dir);
 		    sv_catsv(msg, dirmsgsv);
 		}

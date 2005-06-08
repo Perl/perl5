@@ -254,7 +254,6 @@ XS(XS_UNIVERSAL_isa)
     dXSARGS;
     SV *sv;
     const char *name;
-    STRLEN n_a;
 
     if (items != 2)
 	Perl_croak(aTHX_ "Usage: UNIVERSAL::isa(reference, kind)");
@@ -268,7 +267,7 @@ XS(XS_UNIVERSAL_isa)
 		|| (SvGMAGICAL(sv) && SvPOKp(sv) && SvCUR(sv))))
 	XSRETURN_UNDEF;
 
-    name = SvPV_const(ST(1),n_a);
+    name = SvPV_nolen_const(ST(1));
 
     ST(0) = boolSV(sv_derived_from(sv, name));
     XSRETURN(1);
@@ -281,7 +280,6 @@ XS(XS_UNIVERSAL_can)
     const char *name;
     SV   *rv;
     HV   *pkg = NULL;
-    STRLEN n_a;
 
     if (items != 2)
 	Perl_croak(aTHX_ "Usage: UNIVERSAL::can(object-ref, method)");
@@ -295,7 +293,7 @@ XS(XS_UNIVERSAL_can)
 		|| (SvGMAGICAL(sv) && SvPOKp(sv) && SvCUR(sv))))
 	XSRETURN_UNDEF;
 
-    name = SvPV_const(ST(1),n_a);
+    name = SvPV_nolen_const(ST(1));
     rv = &PL_sv_undef;
 
     if (SvROK(sv)) {
@@ -361,10 +359,9 @@ XS(XS_UNIVERSAL_VERSION)
 			   "%s does not define $%s::VERSION--version check failed",
 			   name, name);
 	    } else {
-		STRLEN n_a;
 		Perl_croak(aTHX_
 			     "%s defines neither package nor VERSION--version check failed",
-			     SvPVx(ST(0),n_a) );
+			     SvPVx_nolen_const(ST(0)) );
 	     }
 	}
 
