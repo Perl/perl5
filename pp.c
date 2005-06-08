@@ -2358,7 +2358,7 @@ PP(pp_negate)
 	    SETn(-SvNV(sv));
 	else if (SvPOKp(sv)) {
 	    STRLEN len;
-	    char *s = SvPV(sv, len);
+	    const char *s = SvPV_const(sv, len);
 	    if (isIDFIRST(*s)) {
 		sv_setpvn(TARG, "-", 1);
 		sv_catsv(TARG, sv);
