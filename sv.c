@@ -4564,7 +4564,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
             }
             else
                 {	/* Passes the swipe test.  */
-                SvPV_set(dstr, SvPVX(sstr));
+                SvPV_set(dstr, SvPVX_mutable(sstr));
                 SvLEN_set(dstr, SvLEN(sstr));
                 SvCUR_set(dstr, SvCUR(sstr));
 
