@@ -1353,6 +1353,7 @@ SKIP: {
 	     my $p = eval { pack $junk1, @list2 };
              skip "cannot pack '$type' on this perl", 12
                if is_valid_error($@);
+	     die "pack $junk1 failed: $@" if $@;
 
 	     my $half = int( (length $p)/2 );
 	     for my $move ('', "X$half", "X!$half", 'x1', 'x!8', "x$half") {
