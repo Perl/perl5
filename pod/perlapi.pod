@@ -2441,8 +2441,7 @@ Found in file pp.h
 
 =item POPp
 
-Pops a string off the stack. Deprecated. New code should provide
-a STRLEN n_a and use POPpx.
+Pops a string off the stack. Deprecated. New code should use POPpx.
 
 	char*	POPp
 
@@ -2452,7 +2451,6 @@ Found in file pp.h
 =item POPpbytex
 
 Pops a string off the stack which must consist of bytes i.e. characters < 256.
-Requires a variable STRLEN n_a in scope.
 
 	char*	POPpbytex
 
@@ -2462,7 +2460,6 @@ Found in file pp.h
 =item POPpx
 
 Pops a string off the stack.
-Requires a variable STRLEN n_a in scope.
 
 	char*	POPpx
 
