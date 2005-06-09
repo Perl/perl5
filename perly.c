@@ -322,6 +322,7 @@ Perl_yyparse (pTHX)
 #ifdef DEBUGGING
     yyns_sv = NEWSV(73, YYINITDEPTH * sizeof(char *));
     SAVEFREESV(yyns_sv);
+    /* XXX This seems strange to cast char * to char ** */
     yyns = (const char **) SvPVX(yyns_sv);
     yynsp = yyns;
 #endif
@@ -366,6 +367,7 @@ Perl_yyparse (pTHX)
 	 yyvs = (YYSTYPE *) SvPVX(yyvs_sv);
 #ifdef DEBUGGING
 	 SvGROW(yyns_sv, yystacksize * sizeof(char *));
+	 /* XXX This seems strange to cast char * to char ** */
 	 yyns = (const char **) SvPVX(yyns_sv);
 	 if (! yyns)
 	       goto yyoverflowlab;

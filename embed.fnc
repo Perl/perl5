@@ -53,7 +53,7 @@ Anod	|void	|perl_free	|NN PerlInterpreter* interp
 Anod	|int	|perl_run	|NN PerlInterpreter* interp
 Anod	|int	|perl_parse	|PerlInterpreter* interp|XSINIT_t xsinit \
 				|int argc|char** argv|char** env
-Anp	|bool	|doing_taint	|int argc|char** argv|char** env
+AnpR	|bool	|doing_taint	|int argc|char** argv|char** env
 #if defined(USE_ITHREADS)
 Anod	|PerlInterpreter*|perl_clone|PerlInterpreter* interp|UV flags
 #  if defined(PERL_IMPLICIT_SYS)
@@ -248,8 +248,7 @@ Ap	|GP*	|gp_ref		|GP* gp
 Ap	|GV*	|gv_AVadd	|GV* gv
 Ap	|GV*	|gv_HVadd	|GV* gv
 Ap	|GV*	|gv_IOadd	|GV* gv
-Ap	|GV*	|gv_autoload4	|HV* stash|const char* name|STRLEN len \
-				|I32 method
+ApR	|GV*	|gv_autoload4	|HV* stash|NN const char* name|STRLEN len|I32 method
 Ap	|void	|gv_check	|HV* stash
 Ap	|void	|gv_efullname	|SV* sv|const GV* gv
 Apmb	|void	|gv_efullname3	|SV* sv|const GV* gv|const char* prefix
@@ -797,7 +796,7 @@ Apd	|void	|sv_setpv	|SV* sv|const char* ptr
 Apd	|void	|sv_setpvn	|NN SV* sv|const char* ptr|STRLEN len
 Amdb	|void	|sv_setsv	|SV* dsv|SV* ssv
 Apd	|void	|sv_taint	|SV* sv
-Apd	|bool	|sv_tainted	|SV* sv
+ApdR	|bool	|sv_tainted	|SV* sv
 Apd	|int	|sv_unmagic	|NN SV* sv|int type
 Apd	|void	|sv_unref	|NN SV* sv
 Apd	|void	|sv_unref_flags	|NN SV* sv|U32 flags
@@ -1136,9 +1135,9 @@ s	|bool	|path_is_absolute|NN const char *name
 #endif
 
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
-s	|void	|do_oddball	|HV *hash|SV **relem|SV **firstrelem
-s	|CV*	|get_db_sub	|SV **svp|CV *cv
-s	|SV*	|method_common	|SV* meth|U32* hashp
+s	|void	|do_oddball	|NN HV *hash|NN SV **relem|NN SV **firstrelem
+sR	|CV*	|get_db_sub	|NN SV **svp|NN CV *cv
+sR	|SV*	|method_common	|NN SV* meth|U32* hashp
 #endif
 
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
@@ -1150,34 +1149,34 @@ sR	|int	|dooneliner	|NN const char *cmd|NN const char *filename
 #endif
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)
-Es	|regnode*|reg		|struct RExC_state_t*|I32|I32 *
-Es	|regnode*|reganode	|struct RExC_state_t*|U8|U32
-Es	|regnode*|regatom	|struct RExC_state_t*|I32 *
-Es	|regnode*|regbranch	|struct RExC_state_t*|I32 *|I32
-Es	|void	|reguni		|struct RExC_state_t*|UV|char *|STRLEN*
-Es	|regnode*|regclass	|struct RExC_state_t*
+Es	|regnode*|reg		|NN struct RExC_state_t *state|I32 paren|NN I32 *flagp
+Es	|regnode*|reganode	|NN struct RExC_state_t *state|U8 op|U32 arg
+Es	|regnode*|regatom	|NN struct RExC_state_t *state|NN I32 *flagp
+Es	|regnode*|regbranch	|NN struct RExC_state_t *state|NN I32 *flagp|I32 first
+Es	|void	|reguni		|NN const struct RExC_state_t *state|UV uv|NN char *s|NN STRLEN *lenp
+Es	|regnode*|regclass	|NN struct RExC_state_t *state
 ERs	|I32	|regcurly	|NN const char *
-Es	|regnode*|reg_node	|struct RExC_state_t*|U8
-Es	|regnode*|regpiece	|struct RExC_state_t*|I32 *
-Es	|void	|reginsert	|struct RExC_state_t*|U8|regnode *
-Es	|void	|regoptail	|struct RExC_state_t*|regnode *|regnode *
-Es	|void	|regtail	|struct RExC_state_t*|regnode *|regnode *
-Es	|char*	|regwhite	|char *p|const char *e
-Es	|char*	|nextchar	|struct RExC_state_t*
+Es	|regnode*|reg_node	|NN struct RExC_state_t *state|U8 op
+Es	|regnode*|regpiece	|NN struct RExC_state_t *state|NN I32 *flagp
+Es	|void	|reginsert	|NN struct RExC_state_t *state|U8 op|NN regnode *opnd
+Es	|void	|regoptail	|NN struct RExC_state_t *state|NN regnode *p|NN regnode *val
+Es	|void	|regtail	|NN struct RExC_state_t *state|NN regnode *p|NN regnode *val
+Es	|char*	|regwhite	|NN char *p|NN const char *e
+Es	|char*	|nextchar	|NN struct RExC_state_t*
 #  ifdef DEBUGGING
 Es	|regnode*|dumpuntil	|regnode *start|regnode *node \
 				|regnode *last|SV* sv|I32 l
 Es	|void	|put_byte	|NN SV* sv|int c
 #  endif
 Es	|void	|scan_commit	|struct RExC_state_t*|struct scan_data_t *data
-Es	|void	|cl_anything	|struct RExC_state_t*|struct regnode_charclass_class *cl
-Es	|int	|cl_is_anything	|struct regnode_charclass_class *cl
-Es	|void	|cl_init	|struct RExC_state_t*|struct regnode_charclass_class *cl
-Es	|void	|cl_init_zero	|struct RExC_state_t*|struct regnode_charclass_class *cl
-Es	|void	|cl_and		|struct regnode_charclass_class *cl \
-				|struct regnode_charclass_class *and_with
-Es	|void	|cl_or		|struct RExC_state_t*|struct regnode_charclass_class *cl \
-				|struct regnode_charclass_class *or_with
+Es	|void	|cl_anything	|NN struct RExC_state_t*|NN struct regnode_charclass_class *cl
+Es	|int	|cl_is_anything	|NN const struct regnode_charclass_class *cl
+Es	|void	|cl_init	|NN struct RExC_state_t*|NN struct regnode_charclass_class *cl
+Es	|void	|cl_init_zero	|NN struct RExC_state_t*|NN struct regnode_charclass_class *cl
+Es	|void	|cl_and		|NN struct regnode_charclass_class *cl \
+				|const struct regnode_charclass_class *and_with
+Es	|void	|cl_or		|NN struct RExC_state_t*|NN struct regnode_charclass_class *cl \
+				|NN const struct regnode_charclass_class *or_with
 Es	|I32	|study_chunk	|struct RExC_state_t*|regnode **scanp|I32 *deltap \
 				|regnode *last|struct scan_data_t *data \
 				|U32 flags|U32 depth

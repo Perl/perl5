@@ -35,7 +35,9 @@ PERL_CALLCONV int	perl_run(PerlInterpreter* interp)
 			__attribute__nonnull__(1);
 
 PERL_CALLCONV int	perl_parse(PerlInterpreter* interp, XSINIT_t xsinit, int argc, char** argv, char** env);
-PERL_CALLCONV bool	Perl_doing_taint(int argc, char** argv, char** env);
+PERL_CALLCONV bool	Perl_doing_taint(int argc, char** argv, char** env)
+			__attribute__warn_unused_result__;
+
 #if defined(USE_ITHREADS)
 PERL_CALLCONV PerlInterpreter*	perl_clone(PerlInterpreter* interp, UV flags);
 #  if defined(PERL_IMPLICIT_SYS)
@@ -362,7 +364,10 @@ PERL_CALLCONV GP*	Perl_gp_ref(pTHX_ GP* gp);
 PERL_CALLCONV GV*	Perl_gv_AVadd(pTHX_ GV* gv);
 PERL_CALLCONV GV*	Perl_gv_HVadd(pTHX_ GV* gv);
 PERL_CALLCONV GV*	Perl_gv_IOadd(pTHX_ GV* gv);
-PERL_CALLCONV GV*	Perl_gv_autoload4(pTHX_ HV* stash, const char* name, STRLEN len, I32 method);
+PERL_CALLCONV GV*	Perl_gv_autoload4(pTHX_ HV* stash, const char* name, STRLEN len, I32 method)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_2);
+
 PERL_CALLCONV void	Perl_gv_check(pTHX_ HV* stash);
 PERL_CALLCONV void	Perl_gv_efullname(pTHX_ SV* sv, const GV* gv);
 /* PERL_CALLCONV void	Perl_gv_efullname3(pTHX_ SV* sv, const GV* gv, const char* prefix); */
@@ -1551,7 +1556,9 @@ PERL_CALLCONV void	Perl_sv_setpvn(pTHX_ SV* sv, const char* ptr, STRLEN len)
 
 /* PERL_CALLCONV void	sv_setsv(pTHX_ SV* dsv, SV* ssv); */
 PERL_CALLCONV void	Perl_sv_taint(pTHX_ SV* sv);
-PERL_CALLCONV bool	Perl_sv_tainted(pTHX_ SV* sv);
+PERL_CALLCONV bool	Perl_sv_tainted(pTHX_ SV* sv)
+			__attribute__warn_unused_result__;
+
 PERL_CALLCONV int	Perl_sv_unmagic(pTHX_ SV* sv, int type)
 			__attribute__nonnull__(pTHX_1);
 
@@ -2205,9 +2212,20 @@ STATIC bool	S_path_is_absolute(pTHX_ const char *name)
 #endif
 
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
-STATIC void	S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem);
-STATIC CV*	S_get_db_sub(pTHX_ SV **svp, CV *cv);
-STATIC SV*	S_method_common(pTHX_ SV* meth, U32* hashp);
+STATIC void	S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+
+STATIC CV*	S_get_db_sub(pTHX_ SV **svp, CV *cv)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC SV*	S_method_common(pTHX_ SV* meth, U32* hashp)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+
 #endif
 
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
@@ -2230,23 +2248,61 @@ STATIC int	S_dooneliner(pTHX_ const char *cmd, const char *filename)
 #endif
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)
-STATIC regnode*	S_reg(pTHX_ struct RExC_state_t*, I32, I32 *);
-STATIC regnode*	S_reganode(pTHX_ struct RExC_state_t*, U8, U32);
-STATIC regnode*	S_regatom(pTHX_ struct RExC_state_t*, I32 *);
-STATIC regnode*	S_regbranch(pTHX_ struct RExC_state_t*, I32 *, I32);
-STATIC void	S_reguni(pTHX_ struct RExC_state_t*, UV, char *, STRLEN*);
-STATIC regnode*	S_regclass(pTHX_ struct RExC_state_t*);
+STATIC regnode*	S_reg(pTHX_ struct RExC_state_t *state, I32 paren, I32 *flagp)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_3);
+
+STATIC regnode*	S_reganode(pTHX_ struct RExC_state_t *state, U8 op, U32 arg)
+			__attribute__nonnull__(pTHX_1);
+
+STATIC regnode*	S_regatom(pTHX_ struct RExC_state_t *state, I32 *flagp)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC regnode*	S_regbranch(pTHX_ struct RExC_state_t *state, I32 *flagp, I32 first)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC void	S_reguni(pTHX_ const struct RExC_state_t *state, UV uv, char *s, STRLEN *lenp)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_3)
+			__attribute__nonnull__(pTHX_4);
+
+STATIC regnode*	S_regclass(pTHX_ struct RExC_state_t *state)
+			__attribute__nonnull__(pTHX_1);
+
 STATIC I32	S_regcurly(pTHX_ const char *)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
-STATIC regnode*	S_reg_node(pTHX_ struct RExC_state_t*, U8);
-STATIC regnode*	S_regpiece(pTHX_ struct RExC_state_t*, I32 *);
-STATIC void	S_reginsert(pTHX_ struct RExC_state_t*, U8, regnode *);
-STATIC void	S_regoptail(pTHX_ struct RExC_state_t*, regnode *, regnode *);
-STATIC void	S_regtail(pTHX_ struct RExC_state_t*, regnode *, regnode *);
-STATIC char*	S_regwhite(pTHX_ char *p, const char *e);
-STATIC char*	S_nextchar(pTHX_ struct RExC_state_t*);
+STATIC regnode*	S_reg_node(pTHX_ struct RExC_state_t *state, U8 op)
+			__attribute__nonnull__(pTHX_1);
+
+STATIC regnode*	S_regpiece(pTHX_ struct RExC_state_t *state, I32 *flagp)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC void	S_reginsert(pTHX_ struct RExC_state_t *state, U8 op, regnode *opnd)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_3);
+
+STATIC void	S_regoptail(pTHX_ struct RExC_state_t *state, regnode *p, regnode *val)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+
+STATIC void	S_regtail(pTHX_ struct RExC_state_t *state, regnode *p, regnode *val)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+
+STATIC char*	S_regwhite(pTHX_ char *p, const char *e)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC char*	S_nextchar(pTHX_ struct RExC_state_t*)
+			__attribute__nonnull__(pTHX_1);
+
 #  ifdef DEBUGGING
 STATIC regnode*	S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l);
 STATIC void	S_put_byte(pTHX_ SV* sv, int c)
@@ -2254,12 +2310,29 @@ STATIC void	S_put_byte(pTHX_ SV* sv, int c)
 
 #  endif
 STATIC void	S_scan_commit(pTHX_ struct RExC_state_t*, struct scan_data_t *data);
-STATIC void	S_cl_anything(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl);
-STATIC int	S_cl_is_anything(pTHX_ struct regnode_charclass_class *cl);
-STATIC void	S_cl_init(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl);
-STATIC void	S_cl_init_zero(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl);
-STATIC void	S_cl_and(pTHX_ struct regnode_charclass_class *cl, struct regnode_charclass_class *and_with);
-STATIC void	S_cl_or(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl, struct regnode_charclass_class *or_with);
+STATIC void	S_cl_anything(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC int	S_cl_is_anything(pTHX_ const struct regnode_charclass_class *cl)
+			__attribute__nonnull__(pTHX_1);
+
+STATIC void	S_cl_init(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC void	S_cl_init_zero(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC void	S_cl_and(pTHX_ struct regnode_charclass_class *cl, const struct regnode_charclass_class *and_with)
+			__attribute__nonnull__(pTHX_1);
+
+STATIC void	S_cl_or(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+
 STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t*, regnode **scanp, I32 *deltap, regnode *last, struct scan_data_t *data, U32 flags, U32 depth);
 STATIC I32	S_add_data(pTHX_ struct RExC_state_t*, I32 n, const char *s);
 STATIC void	S_re_croak2(pTHX_ const char* pat1, const char* pat2, ...)

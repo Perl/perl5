@@ -493,7 +493,7 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 		i = t1 - s1;
 	      getlen:
 		if (i > 0 && RX_MATCH_UTF8(rx)) {
-		    char *s    = rx->subbeg + s1;
+		    const char * const s = rx->subbeg + s1;
 		    const U8 *ep;
 		    STRLEN el;
 

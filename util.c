@@ -4049,7 +4049,7 @@ Perl_vnumify(pTHX_ SV *vs)
     len = av_len((AV *)vs);
     if ( len == -1 )
     {
-	sv_catpvn(sv,"0",1);
+	Perl_sv_catpv(aTHX_ sv,"0");
 	return sv;
     }
     digit = SvIVX(*av_fetch((AV *)vs, 0, 0));
@@ -4066,14 +4066,14 @@ Perl_vnumify(pTHX_ SV *vs)
 	if ( (int)PERL_ABS(digit) != 0 || len == 1 )
 	{
 	    if ( digit < 0 ) /* alpha version */
-		sv_catpvn(sv,"_",1);
+		Perl_sv_catpv(aTHX_ sv,"_");
 	    /* Don't display additional trailing zeros */
 	    Perl_sv_catpvf(aTHX_ sv,"%03d", (int)PERL_ABS(digit));
 	}
     }
     else /* len == 0 */
     {
-	 sv_catpvn(sv,"000",3);
+	 Perl_sv_catpv(aTHX_ sv,"000");
     }
     return sv;
 }
@@ -4102,7 +4102,7 @@ Perl_vnormal(pTHX_ SV *vs)
     len = av_len((AV *)vs);
     if ( len == -1 )
     {
-	sv_catpvn(sv,"",0);
+	Perl_sv_catpv(aTHX_ sv,"");
 	return sv;
     }
     digit = SvIVX(*av_fetch((AV *)vs, 0, 0));
@@ -4118,7 +4118,7 @@ Perl_vnormal(pTHX_ SV *vs)
     
     if ( len <= 2 ) { /* short version, must be at least three */
 	for ( len = 2 - len; len != 0; len-- )
-	    sv_catpvn(sv,".0",2);
+	    Perl_sv_catpv(aTHX_ sv,".0");
     }
 
     return sv;
