@@ -5,6 +5,11 @@
 # and optionally also the relevant metaconfig units (-U option).
 # 
 
+BEGIN {
+    # Get function prototypes
+    require 'regen_lib.pl';
+}
+
 use strict;
 use Getopt::Std;
 my %opts;
@@ -35,6 +40,7 @@ my %map = (
 # Example #3: S_CBI   means type func_r(const char*, char*, int)
 
 
+safer_unlink 'reentr.h';
 die "reentr.h: $!" unless open(H, ">reentr.h");
 select H;
 print <<EOF;
@@ -759,6 +765,7 @@ close(H);
 
 # Prepare to write the reentr.c.
 
+safer_unlink 'reentr.c';
 die "reentr.c: $!" unless open(C, ">reentr.c");
 select C;
 print <<EOF;
