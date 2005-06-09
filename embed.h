@@ -421,6 +421,7 @@
 #define magic_set		Perl_magic_set
 #define magic_setamagic		Perl_magic_setamagic
 #define magic_setarylen		Perl_magic_setarylen
+#define magic_freearylen_p	Perl_magic_freearylen_p
 #define magic_setbm		Perl_magic_setbm
 #define magic_setdbline		Perl_magic_setdbline
 #define magic_setdefelem	Perl_magic_setdefelem
@@ -2420,6 +2421,7 @@
 #define magic_set(a,b)		Perl_magic_set(aTHX_ a,b)
 #define magic_setamagic(a,b)	Perl_magic_setamagic(aTHX_ a,b)
 #define magic_setarylen(a,b)	Perl_magic_setarylen(aTHX_ a,b)
+#define magic_freearylen_p(a,b)	Perl_magic_freearylen_p(aTHX_ a,b)
 #define magic_setbm(a,b)	Perl_magic_setbm(aTHX_ a,b)
 #define magic_setdbline(a,b)	Perl_magic_setdbline(aTHX_ a,b)
 #define magic_setdefelem(a,b)	Perl_magic_setdefelem(aTHX_ a,b)

@@ -970,6 +970,7 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
 	    else if (v == &PL_vtbl_amagicelem) s = "amagicelem";
 	    else if (v == &PL_vtbl_backref)    s = "backref";
 	    else if (v == &PL_vtbl_utf8)       s = "utf8";
+            else if (v == &PL_vtbl_arylen_p)   s = "arylen_p";
 	    if (s)
 	        Perl_dump_indent(aTHX_ level, file, "    MG_VIRTUAL = &PL_vtbl_%s\n", s);
 	    else

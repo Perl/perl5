@@ -1647,14 +1647,42 @@ Perl_magic_setdbline(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_getarylen(pTHX_ SV *sv, MAGIC *mg)
 {
-    sv_setiv(sv, AvFILL((AV*)mg->mg_obj) + PL_curcop->cop_arybase);
+    AV *obj = (AV*)mg->mg_obj;
+    if (obj) {
+	sv_setiv(sv, AvFILL(obj) + PL_curcop->cop_arybase);
+    } else {
+	SvOK_off(sv);
+    }
     return 0;
 }
 
 int
 Perl_magic_setarylen(pTHX_ SV *sv, MAGIC *mg)
 {
-    av_fill((AV*)mg->mg_obj, SvIV(sv) - PL_curcop->cop_arybase);
+    AV *obj = (AV*)mg->mg_obj;
+    if (obj) {
+	av_fill(obj, SvIV(sv) - PL_curcop->cop_arybase);
+    } else {
+	if (ckWARN(WARN_MISC))
+	    Perl_warner(aTHX_ packWARN(WARN_MISC),
+			"Attempt to set length of freed array");
+    }
+    return 0;
+}
+
+int
+Perl_magic_freearylen_p(pTHX_ SV *sv, MAGIC *mg)
+{
+    mg = mg_find (mg->mg_obj, PERL_MAGIC_arylen);
+
+    if (mg) {
+	/* arylen scalar holds a pointer back to the array, but doesn't own a
+	   reference. Hence the we (the array) are about to go away with it
+	   still pointing at us. Clear its pointer, else it would be pointing
+	   at free memory. See the comment in sv_magic about reference loops,
+	   and why it can't own a reference to us.  */
+	mg->mg_obj = 0;
+    }
     return 0;
 }
 

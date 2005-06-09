@@ -762,6 +762,7 @@ PERL_CALLCONV int	Perl_magic_regdatum_set(pTHX_ SV* sv, MAGIC* mg)
 PERL_CALLCONV int	Perl_magic_set(pTHX_ SV* sv, MAGIC* mg);
 PERL_CALLCONV int	Perl_magic_setamagic(pTHX_ SV* sv, MAGIC* mg);
 PERL_CALLCONV int	Perl_magic_setarylen(pTHX_ SV* sv, MAGIC* mg);
+PERL_CALLCONV int	Perl_magic_freearylen_p(pTHX_ SV* sv, MAGIC* mg);
 PERL_CALLCONV int	Perl_magic_setbm(pTHX_ SV* sv, MAGIC* mg);
 PERL_CALLCONV int	Perl_magic_setdbline(pTHX_ SV* sv, MAGIC* mg);
 PERL_CALLCONV int	Perl_magic_setdefelem(pTHX_ SV* sv, MAGIC* mg);

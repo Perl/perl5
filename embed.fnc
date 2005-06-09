@@ -411,6 +411,7 @@ pr	|int	|magic_regdatum_set|SV* sv|MAGIC* mg
 p	|int	|magic_set	|SV* sv|MAGIC* mg
 p	|int	|magic_setamagic|SV* sv|MAGIC* mg
 p	|int	|magic_setarylen|SV* sv|MAGIC* mg
+p	|int	|magic_freearylen_p|SV* sv|MAGIC* mg
 p	|int	|magic_setbm	|SV* sv|MAGIC* mg
 p	|int	|magic_setdbline|SV* sv|MAGIC* mg
 p	|int	|magic_setdefelem|SV* sv|MAGIC* mg

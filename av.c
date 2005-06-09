@@ -504,10 +504,8 @@ Perl_av_undef(pTHX_ register AV *av)
     AvALLOC(av) = 0;
     SvPV_set(av, (char*)0);
     AvMAX(av) = AvFILLp(av) = -1;
-    if (AvARYLEN(av)) {
-	SvREFCNT_dec(AvARYLEN(av));
-	AvARYLEN(av) = 0;
-    }
+    /* It's in magic - it must already be gone.  */
+    assert (!AvARYLEN(av));
 }
 
 /*
@@ -949,6 +947,14 @@ Perl_av_arylen_p(pTHX_ AV *av) {
 	}
 	/* sv_magicext won't set this for us because we pass in a NULL obj  */
 	mg->mg_flags |= MGf_REFCOUNTED;
+
+	/* This is very naughty, but we don't want SvRMAGICAL() set on the
+	   hash, because it slows down all accesses.  If we pass in a vtable
+	   to sv_magicext then it is (correctly) set for us.  However, the only
+	   entry in our vtable is for free, and mg_free always calls the free
+	   vtable entry irrespective of the flags, so it doesn't actually
+	   matter that the R flag is off.  */
+	mg->mg_virtual = &PL_vtbl_arylen_p;
     }
     return &(mg->mg_obj);
 }

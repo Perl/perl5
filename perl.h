@@ -3805,7 +3805,8 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_regdatum,
     want_vtbl_backref,
     want_vtbl_utf8,
-    want_vtbl_symtab
+    want_vtbl_symtab,
+    want_vtbl_arylen_p
 };
 
 				/* Note: the lowest 8 bits are reserved for
@@ -4160,6 +4161,17 @@ MGVTBL_SET(
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_arylen_p,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_freearylen_p),
     NULL,
     NULL
 );
