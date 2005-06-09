@@ -11309,9 +11309,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
     void (*dptr) (void*);
     void (*dxptr) (pTHX_ void*);
     OP *o;
-    /* Unions for circumventing strict ANSI C89 casting rules. */
-    union { void *vptr; void (*dptr)(void*); } u1, u2;
-    union { void *vptr; void (*dxptr)(pTHX_ void*); } u3, u4;
 
     Newz(54, nss, max, ANY);
 
@@ -11483,17 +11480,17 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);	/* XXX quite arbitrary */
 	    dptr = POPDPTR(ss,ix);
-	    u1.dptr = dptr;
-	    u2.vptr = any_dup(u1.vptr, proto_perl);
-	    TOPDPTR(nss,ix) = u2.dptr;
+	    TOPDPTR(nss,ix) = DPTR2FPTR(void (*)(void*),
+					any_dup(FPTR2DPTR(void *, dptr),
+						proto_perl));
 	    break;
 	case SAVEt_DESTRUCTOR_X:
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);	/* XXX quite arbitrary */
 	    dxptr = POPDXPTR(ss,ix);
-	    u3.dxptr = dxptr;
-	    u4.vptr = any_dup(u3.vptr, proto_perl);;
-	    TOPDXPTR(nss,ix) = u4.dxptr;
+	    TOPDXPTR(nss,ix) = DPTR2FPTR(void (*)(pTHX_ void*),
+					 any_dup(FPTR2DPTR(void *, dxptr),
+						 proto_perl));
 	    break;
 	case SAVEt_REGCONTEXT:
 	case SAVEt_ALLOC:

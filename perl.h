@@ -1495,6 +1495,19 @@ typedef UVTYPE UV;
 #  define PTR2ul(p)	INT2PTR(unsigned long,p)	
 #endif
 
+/* According to strict ANSI C89 one cannot freely cast between
+ * data pointers and function (code) pointers.  There are at least
+ * two ways around this.  One (used below) is to do two casts,
+ * first the other pointer to an (unsigned) integer, and then
+ * the integer to the other pointer.  The other way would be
+ * to use unions to "overlay" the pointers.  For an example of
+ * the latter technique, see union dirpu in struct xpvio in sv.h.
+ * The only feasible use is probably temporarily storing
+ * function pointers in a data pointer (such as a void pointer). */
+
+#define DPTR2FPTR(t,p) ((t)PTR2UV(p)) /* data pointer to function pointer */
+#define FPTR2DPTR(t,p) ((t)PTR2UV(p)) /* function pointer to data pointer */
+
 #ifdef USE_LONG_DOUBLE
 #  if defined(HAS_LONG_DOUBLE) && LONG_DOUBLESIZE == DOUBLESIZE
 #      define LONG_DOUBLE_EQUALS_DOUBLE

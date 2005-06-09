@@ -107,15 +107,6 @@ static const char* const lex_state_names[] = {
 #endif
 #define CLINE (PL_copline = (CopLINE(PL_curcop) < PL_copline ? CopLINE(PL_curcop) : PL_copline))
 
-/* According to some strict interpretations of ANSI C89 one cannot
- * cast void pointers to code pointers or vice versa (as filter_add(),
- * filter_del(), and filter_read() will want to do).  We should still
- * be able to use a union for sneaky "casting". */
-typedef union {
-    XPVIO*   iop;
-    filter_t filter;
-} xpvio_filter_u;
-
 /*
  * Convenience functions to return different tokens and prime the
  * lexer for the next token.  They all take an argument.
@@ -2141,8 +2132,6 @@ S_incl_perldb(pTHX)
 SV *
 Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
 {
-    xpvio_filter_u u;
-
     if (!funcp)
 	return Nullsv;
 
@@ -2151,11 +2140,10 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
     if (!datasv)
 	datasv = NEWSV(255,0);
     SvUPGRADE(datasv, SVt_PVIO);
-    u.filter = funcp;
-    IoANY(datasv) = u.iop; /* stash funcp into spare field */
+    IoANY(datasv) = FPTR2DPTR(void *, funcp); /* stash funcp into spare field */
     IoFLAGS(datasv) |= IOf_FAKE_DIRP;
     DEBUG_P(PerlIO_printf(Perl_debug_log, "filter_add func %p (%s)\n",
-			  (void*)u.iop, SvPV_nolen(datasv)));
+			  IoANY(datasv), SvPV_nolen(datasv)));
     av_unshift(PL_rsfp_filters, 1);
     av_store(PL_rsfp_filters, 0, datasv) ;
     return(datasv);
@@ -2167,18 +2155,15 @@ void
 Perl_filter_del(pTHX_ filter_t funcp)
 {
     SV *datasv;
-    xpvio_filter_u u;
 
 #ifdef DEBUGGING
-    u.filter = funcp;
-    DEBUG_P(PerlIO_printf(Perl_debug_log, "filter_del func %p", (void*)u.iop));
+    DEBUG_P(PerlIO_printf(Perl_debug_log, "filter_del func %p", FPTR2DPTR(XPVIO *, funcp)));
 #endif
     if (!PL_rsfp_filters || AvFILLp(PL_rsfp_filters)<0)
 	return;
     /* if filter is on top of stack (usual case) just pop it off */
     datasv = FILTER_DATA(AvFILLp(PL_rsfp_filters));
-    u.iop = IoANY(datasv);
-    if (u.filter == funcp) {
+    if (IoANY(datasv) == FPTR2DPTR(void *, funcp)) {
 	IoFLAGS(datasv) &= ~IOf_FAKE_DIRP;
 	IoANY(datasv) = (void *)NULL;
 	sv_free(av_pop(PL_rsfp_filters));
@@ -2197,7 +2182,6 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 {
     filter_t funcp;
     SV *datasv = NULL;
-    xpvio_filter_u u;
 
     if (!PL_rsfp_filters)
 	return -1;
@@ -2239,11 +2223,10 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 	return FILTER_READ(idx+1, buf_sv, maxlen); /* recurse */
     }
     /* Get function pointer hidden within datasv	*/
-    u.iop = IoANY(datasv);
-    funcp = u.filter;
+    funcp = DPTR2FPTR(filter_t, IoANY(datasv));
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 			  "filter_read %d: via function %p (%s)\n",
-			  idx, (void*)u.iop, SvPV_nolen(datasv)));
+			  idx, datasv, SvPV_nolen(datasv)));
     /* Call function. The function is expected to 	*/
     /* call "FILTER_READ(idx+1, buf_sv)" first.		*/
     /* Return: <0:error, =0:eof, >0:not eof 		*/
