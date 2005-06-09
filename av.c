@@ -940,21 +940,14 @@ Perl_av_arylen_p(pTHX_ AV *av) {
     MAGIC *mg = mg_find((SV*)av, PERL_MAGIC_arylen_p);
 
     if (!mg) {
-	mg = sv_magicext((SV*)av, 0, PERL_MAGIC_arylen_p, 0, 0, 0);
+	mg = sv_magicext((SV*)av, 0, PERL_MAGIC_arylen_p, &PL_vtbl_arylen_p,
+			 0, 0);
 
 	if (!mg) {
 	    Perl_die(aTHX_ "panic: av_arylen_p");
 	}
 	/* sv_magicext won't set this for us because we pass in a NULL obj  */
 	mg->mg_flags |= MGf_REFCOUNTED;
-
-	/* This is very naughty, but we don't want SvRMAGICAL() set on the
-	   hash, because it slows down all accesses.  If we pass in a vtable
-	   to sv_magicext then it is (correctly) set for us.  However, the only
-	   entry in our vtable is for free, and mg_free always calls the free
-	   vtable entry irrespective of the flags, so it doesn't actually
-	   matter that the R flag is off.  */
-	mg->mg_virtual = &PL_vtbl_arylen_p;
     }
     return &(mg->mg_obj);
 }

@@ -7,7 +7,7 @@ BEGIN {
 
 require 'test.pl';
 
-plan (88);
+plan (91);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -277,13 +277,20 @@ is ($got, '');
     like($@, qr/Modification of non-creatable array value attempted, subscript -1/, "\$a[-1] = 0");
 }
 
-{
+sub test_arylen {
+    my $ref = shift;
     local $^W = 1;
-    my $a = \$#{[]};
-    is ($$a, undef, "\$# on freed array is undef");
+    is ($$ref, undef, "\$# on freed array is undef");
     my @warn;
     local $SIG{__WARN__} = sub {push @warn, "@_"};
-    $$a = 1000;
+    $$ref = 1000;
     is (scalar @warn, 1);
     like ($warn[0], qr/^Attempt to set length of freed array/);
+}
+
+{
+    my $a = \$#{[]};
+    # Need a new statement to make it go out of scope
+    test_arylen ($a);
+    test_arylen (do {my @a; \$#a});
 }
