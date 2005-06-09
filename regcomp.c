@@ -307,7 +307,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  * Simple_vFAIL -- like FAIL, but marks the current location in the scan
  */
 #define	Simple_vFAIL(m) STMT_START {					\
-    IV offset = RExC_parse - RExC_precomp;				\
+    const IV offset = RExC_parse - RExC_precomp;			\
     Perl_croak(aTHX_ "%s" REPORT_LOCATION,				\
 	    m, (int)offset, RExC_precomp, RExC_precomp + offset);	\
 } STMT_END
@@ -325,7 +325,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  * Like Simple_vFAIL(), but accepts two arguments.
  */
 #define	Simple_vFAIL2(m,a1) STMT_START {			\
-    IV offset = RExC_parse - RExC_precomp;			\
+    const IV offset = RExC_parse - RExC_precomp;			\
     S_re_croak2(aTHX_ m, REPORT_LOCATION, a1,			\
 	    (int)offset, RExC_precomp, RExC_precomp + offset);	\
 } STMT_END
@@ -344,7 +344,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  * Like Simple_vFAIL(), but accepts three arguments.
  */
 #define	Simple_vFAIL3(m, a1, a2) STMT_START {			\
-    IV offset = RExC_parse - RExC_precomp;			\
+    const IV offset = RExC_parse - RExC_precomp;		\
     S_re_croak2(aTHX_ m, REPORT_LOCATION, a1, a2,		\
 	    (int)offset, RExC_precomp, RExC_precomp + offset);	\
 } STMT_END
@@ -362,29 +362,19 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  * Like Simple_vFAIL(), but accepts four arguments.
  */
 #define	Simple_vFAIL4(m, a1, a2, a3) STMT_START {		\
-    IV offset = RExC_parse - RExC_precomp;			\
+    const IV offset = RExC_parse - RExC_precomp;		\
     S_re_croak2(aTHX_ m, REPORT_LOCATION, a1, a2, a3,		\
 	    (int)offset, RExC_precomp, RExC_precomp + offset);	\
 } STMT_END
 
-/*
- * Like Simple_vFAIL(), but accepts five arguments.
- */
-#define	Simple_vFAIL5(m, a1, a2, a3, a4) STMT_START {		\
-    IV offset = RExC_parse - RExC_precomp;			\
-    S_re_croak2(aTHX_ m, REPORT_LOCATION, a1, a2, a3, a4,	\
-	    (int)offset, RExC_precomp, RExC_precomp + offset);	\
-} STMT_END
-
-
 #define	vWARN(loc,m) STMT_START {					\
-    IV offset = loc - RExC_precomp;					\
+    const IV offset = loc - RExC_precomp;				\
     Perl_warner(aTHX_ packWARN(WARN_REGEXP), "%s" REPORT_LOCATION,	\
 	    m, (int)offset, RExC_precomp, RExC_precomp + offset);	\
 } STMT_END
 
 #define	vWARNdep(loc,m) STMT_START {					\
-    IV offset = loc - RExC_precomp;					\
+    const IV offset = loc - RExC_precomp;				\
     Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_REGEXP),		\
 	    "%s" REPORT_LOCATION,					\
 	    m, (int)offset, RExC_precomp, RExC_precomp + offset);	\
@@ -392,25 +382,25 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 
 #define	vWARN2(loc, m, a1) STMT_START {					\
-    IV offset = loc - RExC_precomp;					\
+    const IV offset = loc - RExC_precomp;				\
     Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,		\
 	    a1, (int)offset, RExC_precomp, RExC_precomp + offset);	\
 } STMT_END
 
 #define	vWARN3(loc, m, a1, a2) STMT_START {				\
-    IV offset = loc - RExC_precomp;					\
+    const IV offset = loc - RExC_precomp;				\
     Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,		\
 	    a1, a2, (int)offset, RExC_precomp, RExC_precomp + offset);	\
 } STMT_END
 
 #define	vWARN4(loc, m, a1, a2, a3) STMT_START {				\
-    IV offset = loc - RExC_precomp;					\
+    const IV offset = loc - RExC_precomp;				\
     Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,		\
 	    a1, a2, a3, (int)offset, RExC_precomp, RExC_precomp + offset); \
 } STMT_END
 
 #define	vWARN5(loc, m, a1, a2, a3, a4) STMT_START {			\
-    IV offset = loc - RExC_precomp;					\
+    const IV offset = loc - RExC_precomp;				\
     Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,		\
 	    a1, a2, a3, a4, (int)offset, RExC_precomp, RExC_precomp + offset); \
 } STMT_END
@@ -507,8 +497,8 @@ S_scan_commit(pTHX_ RExC_state_t *pRExC_state, scan_data_t *data)
     }
     SvCUR_set(data->last_found, 0);
     {
-	SV * sv = data->last_found;
-	MAGIC *mg =
+	SV * const sv = data->last_found;
+	MAGIC * const mg =
 	    SvUTF8(sv) && SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : NULL;
 	if (mg && mg->mg_len > 0)
 	    mg->mg_len = 0;
@@ -530,7 +520,7 @@ S_cl_anything(pTHX_ RExC_state_t *pRExC_state, struct regnode_charclass_class *c
 
 /* Can match anything (initialization) */
 STATIC int
-S_cl_is_anything(pTHX_ struct regnode_charclass_class *cl)
+S_cl_is_anything(pTHX_ const struct regnode_charclass_class *cl)
 {
     int value;
 
@@ -567,7 +557,7 @@ S_cl_init_zero(pTHX_ RExC_state_t *pRExC_state, struct regnode_charclass_class *
 /* We assume that cl is not inverted */
 STATIC void
 S_cl_and(pTHX_ struct regnode_charclass_class *cl,
-	 struct regnode_charclass_class *and_with)
+	const struct regnode_charclass_class *and_with)
 {
     if (!(and_with->flags & ANYOF_CLASS)
 	&& !(cl->flags & ANYOF_CLASS)
@@ -603,7 +593,7 @@ S_cl_and(pTHX_ struct regnode_charclass_class *cl,
 /* 'OR' a given class with another one.  Can create false positives */
 /* We assume that cl is not inverted */
 STATIC void
-S_cl_or(pTHX_ RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, struct regnode_charclass_class *or_with)
+S_cl_or(pTHX_ RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with)
 {
     if (or_with->flags & ANYOF_INVERT) {
 	/* We do not use
@@ -770,8 +760,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 */
 		 char *s0 = STRING(scan), *s, *t;
 		 char *s1 = s0 + STR_LEN(scan) - 1, *s2 = s1 - 4;
-                 const char *t0 = "\xcc\x88\xcc\x81";
-                 const char *t1 = t0 + 3;
+		 const char * const t0 = "\xcc\x88\xcc\x81";
+		 const char * const t1 = t0 + 3;
 
 		 for (s = s0 + 2;
 		      s < s2 && (t = ninstr(s, s1, t0, t1));
@@ -936,7 +926,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		sv_catpvn(data->last_found, STRING(scan), STR_LEN(scan));
 		{
 		    SV * sv = data->last_found;
-		    MAGIC *mg = SvUTF8(sv) && SvMAGICAL(sv) ?
+		    MAGIC * const mg = SvUTF8(sv) && SvMAGICAL(sv) ?
 			mg_find(sv, PERL_MAGIC_utf8) : NULL;
 		    if (mg && mg->mg_len >= 0)
 			mg->mg_len += utf8_length((U8*)STRING(scan),
@@ -1623,7 +1613,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 	    if (data)
 		data->whilem_c = data_fake.whilem_c;
 	    if (f & SCF_DO_STCLASS_AND) {
-		int was = (data->start_class->flags & ANYOF_EOS);
+		const int was = (data->start_class->flags & ANYOF_EOS);
 
 		cl_and(data->start_class, &intrnl);
 		if (was)
@@ -2159,7 +2149,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
         wasted_c    = 0x04;
 
     char * parse_start = RExC_parse; /* MJD */
-    char *oregcomp_parse = RExC_parse;
+    char * const oregcomp_parse = RExC_parse;
     char c;
 
     *flagp = 0;				/* Tentatively. */
@@ -2171,7 +2161,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 	    U32 posflags = 0, negflags = 0;
 	    U32 *flagsp = &posflags;
 	    int logical = 0;
-	    char *seqstart = RExC_parse;
+	    const char * const seqstart = RExC_parse;
 
 	    RExC_parse++;
 	    paren = *RExC_parse++;
@@ -3384,7 +3374,6 @@ S_regwhite(pTHX_ char *p, const char *e)
 STATIC I32
 S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
 {
-    char *posixcc = 0;
     I32 namedclass = OOB_NAMEDCLASS;
 
     if (value == '[' && RExC_parse + 1 < RExC_end &&
@@ -3400,6 +3389,7 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
 	    RExC_parse = s;
 	else {
 	    const char* t = RExC_parse++; /* skip over the c */
+	    const char *posixcc;
 
 	    assert(*t == c);
 
@@ -4449,7 +4439,7 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 - reguni - emit (if appropriate) a Unicode character
 */
 STATIC void
-S_reguni(pTHX_ RExC_state_t *pRExC_state, UV uv, char* s, STRLEN* lenp)
+S_reguni(pTHX_ const RExC_state_t *pRExC_state, UV uv, char* s, STRLEN* lenp)
 {
     *lenp = SIZE_ONLY ? UNISKIP(uv) : (uvchr_to_utf8((U8*)s, uv) - (U8*)s);
 }
@@ -4582,82 +4572,6 @@ S_regcurly(pTHX_ register const char *s)
     return TRUE;
 }
 
-
-#ifdef DEBUGGING
-
-STATIC regnode *
-S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
-{
-    register U8 op = EXACT;	/* Arbitrary non-END op. */
-    register regnode *next;
-
-    while (op != END && (!last || node < last)) {
-	/* While that wasn't END last time... */
-
-	NODE_ALIGN(node);
-	op = OP(node);
-	if (op == CLOSE)
-	    l--;	
-	next = regnext(node);
-	/* Where, what. */
-	if (OP(node) == OPTIMIZED)
-	    goto after_print;
-	regprop(sv, node);
-	PerlIO_printf(Perl_debug_log, "%4"IVdf":%*s%s", (IV)(node - start),
-		      (int)(2*l + 1), "", SvPVX_const(sv));
-	if (next == NULL)		/* Next ptr. */
-	    PerlIO_printf(Perl_debug_log, "(0)");
-	else
-	    PerlIO_printf(Perl_debug_log, "(%"IVdf")", (IV)(next - start));
-	(void)PerlIO_putc(Perl_debug_log, '\n');
-      after_print:
-	if (PL_regkind[(U8)op] == BRANCHJ) {
-	    register regnode *nnode = (OP(next) == LONGJMP
-				       ? regnext(next)
-				       : next);
-	    if (last && nnode > last)
-		nnode = last;
-	    node = dumpuntil(start, NEXTOPER(NEXTOPER(node)), nnode, sv, l + 1);
-	}
-	else if (PL_regkind[(U8)op] == BRANCH) {
-	    node = dumpuntil(start, NEXTOPER(node), next, sv, l + 1);
-	}
-	else if ( op == CURLY) {   /* "next" might be very big: optimizer */
-	    node = dumpuntil(start, NEXTOPER(node) + EXTRA_STEP_2ARGS,
-			     NEXTOPER(node) + EXTRA_STEP_2ARGS + 1, sv, l + 1);
-	}
-	else if (PL_regkind[(U8)op] == CURLY && op != CURLYX) {
-	    node = dumpuntil(start, NEXTOPER(node) + EXTRA_STEP_2ARGS,
-			     next, sv, l + 1);
-	}
-	else if ( op == PLUS || op == STAR) {
-	    node = dumpuntil(start, NEXTOPER(node), NEXTOPER(node) + 1, sv, l + 1);
-	}
-	else if (op == ANYOF) {
-	    /* arglen 1 + class block */
-	    node += 1 + ((ANYOF_FLAGS(node) & ANYOF_LARGE)
-		    ? ANYOF_CLASS_SKIP : ANYOF_SKIP);
-	    node = NEXTOPER(node);
-	}
-	else if (PL_regkind[(U8)op] == EXACT) {
-            /* Literal string, where present. */
-	    node += NODE_SZ_STR(node) - 1;
-	    node = NEXTOPER(node);
-	}
-	else {
-	    node = NEXTOPER(node);
-	    node += regarglen[(U8)op];
-	}
-	if (op == CURLYX || op == OPEN)
-	    l++;
-	else if (op == WHILEM)
-	    l--;
-    }
-    return node;
-}
-
-#endif	/* DEBUGGING */
-
 /*
  - regdump - dump a regexp onto Perl_debug_log in vaguely comprehensible form
  */
@@ -4756,21 +4670,6 @@ Perl_regdump(pTHX_ regexp *r)
     }
 #endif	/* DEBUGGING */
 }
-
-#ifdef DEBUGGING
-
-STATIC void
-S_put_byte(pTHX_ SV *sv, int c)
-{
-    if (isCNTRL(c) || c == 255 || !isPRINT(c))
-	Perl_sv_catpvf(aTHX_ sv, "\\%o", c);
-    else if (c == '-' || c == ']' || c == '\\' || c == '^')
-	Perl_sv_catpvf(aTHX_ sv, "\\%c", c);
-    else
-	Perl_sv_catpvf(aTHX_ sv, "%c", c);
-}
-
-#endif	/* DEBUGGING */
 
 /*
 - regprop - printable representation of opcode
@@ -4964,9 +4863,9 @@ SV *
 Perl_re_intuit_string(pTHX_ regexp *prog)
 {				/* Assume that RE_INTUIT is set */
     DEBUG_r(
-	{
-	    const char *s = SvPV_nolen_const(prog->check_substr
-		      ? prog->check_substr : prog->check_utf8);
+	{   STRLEN n_a;
+	    const char *s = SvPV(prog->check_substr
+		      ? prog->check_substr : prog->check_utf8, n_a);
 
 	    if (!PL_colorset) reginitcolors();
 	    PerlIO_printf(Perl_debug_log,
@@ -5205,6 +5104,93 @@ clear_re(pTHX_ void *r)
 {
     ReREFCNT_dec((regexp *)r);
 }
+
+#ifdef DEBUGGING
+
+STATIC void
+S_put_byte(pTHX_ SV *sv, int c)
+{
+    if (isCNTRL(c) || c == 255 || !isPRINT(c))
+	Perl_sv_catpvf(aTHX_ sv, "\\%o", c);
+    else if (c == '-' || c == ']' || c == '\\' || c == '^')
+	Perl_sv_catpvf(aTHX_ sv, "\\%c", c);
+    else
+	Perl_sv_catpvf(aTHX_ sv, "%c", c);
+}
+
+
+STATIC regnode *
+S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
+{
+    register U8 op = EXACT;	/* Arbitrary non-END op. */
+    register regnode *next;
+
+    while (op != END && (!last || node < last)) {
+	/* While that wasn't END last time... */
+
+	NODE_ALIGN(node);
+	op = OP(node);
+	if (op == CLOSE)
+	    l--;	
+	next = regnext(node);
+	/* Where, what. */
+	if (OP(node) == OPTIMIZED)
+	    goto after_print;
+	regprop(sv, node);
+	PerlIO_printf(Perl_debug_log, "%4"IVdf":%*s%s", (IV)(node - start),
+		      (int)(2*l + 1), "", SvPVX_const(sv));
+	if (next == NULL)		/* Next ptr. */
+	    PerlIO_printf(Perl_debug_log, "(0)");
+	else
+	    PerlIO_printf(Perl_debug_log, "(%"IVdf")", (IV)(next - start));
+	(void)PerlIO_putc(Perl_debug_log, '\n');
+      after_print:
+	if (PL_regkind[(U8)op] == BRANCHJ) {
+	    register regnode *nnode = (OP(next) == LONGJMP
+				       ? regnext(next)
+				       : next);
+	    if (last && nnode > last)
+		nnode = last;
+	    node = dumpuntil(start, NEXTOPER(NEXTOPER(node)), nnode, sv, l + 1);
+	}
+	else if (PL_regkind[(U8)op] == BRANCH) {
+	    node = dumpuntil(start, NEXTOPER(node), next, sv, l + 1);
+	}
+	else if ( op == CURLY) {   /* "next" might be very big: optimizer */
+	    node = dumpuntil(start, NEXTOPER(node) + EXTRA_STEP_2ARGS,
+			     NEXTOPER(node) + EXTRA_STEP_2ARGS + 1, sv, l + 1);
+	}
+	else if (PL_regkind[(U8)op] == CURLY && op != CURLYX) {
+	    node = dumpuntil(start, NEXTOPER(node) + EXTRA_STEP_2ARGS,
+			     next, sv, l + 1);
+	}
+	else if ( op == PLUS || op == STAR) {
+	    node = dumpuntil(start, NEXTOPER(node), NEXTOPER(node) + 1, sv, l + 1);
+	}
+	else if (op == ANYOF) {
+	    /* arglen 1 + class block */
+	    node += 1 + ((ANYOF_FLAGS(node) & ANYOF_LARGE)
+		    ? ANYOF_CLASS_SKIP : ANYOF_SKIP);
+	    node = NEXTOPER(node);
+	}
+	else if (PL_regkind[(U8)op] == EXACT) {
+            /* Literal string, where present. */
+	    node += NODE_SZ_STR(node) - 1;
+	    node = NEXTOPER(node);
+	}
+	else {
+	    node = NEXTOPER(node);
+	    node += regarglen[(U8)op];
+	}
+	if (op == CURLYX || op == OPEN)
+	    l++;
+	else if (op == WHILEM)
+	    l--;
+    }
+    return node;
+}
+
+#endif	/* DEBUGGING */
 
 /*
  * Local variables:

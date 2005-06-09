@@ -4352,7 +4352,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 	if (SvFAKE(sv)) {
 	    const char *pvx = SvPVX_const(sv);
 	    const STRLEN len = SvCUR(sv);
-	    const U32 hash   = SvSHARED_HASH(sv);
+	    const U32 hash = SvSHARED_HASH(sv);
 	    SvFAKE_off(sv);
 	    SvREADONLY_off(sv);
 	    SvGROW(sv, len + 1);
@@ -4412,7 +4412,7 @@ Perl_sv_chop(pTHX_ register SV *sv, register char *ptr)
     if (!SvOOK(sv)) {
 	if (!SvLEN(sv)) { /* make copy of shared string */
 	    const char *pvx = SvPVX_const(sv);
-	    STRLEN len = SvCUR(sv);
+	    const STRLEN len = SvCUR(sv);
 	    SvGROW(sv, len + 1);
 	    Move(pvx,SvPVX_const(sv),len,char);
 	    *SvEND(sv) = '\0';
@@ -8180,7 +8180,7 @@ bool
 Perl_sv_tainted(pTHX_ SV *sv)
 {
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
-	MAGIC *mg = mg_find(sv, PERL_MAGIC_taint);
+	MAGIC * const mg = mg_find(sv, PERL_MAGIC_taint);
 	if (mg && ((mg->mg_len & 1) || ((mg->mg_len & 2) && mg->mg_obj == sv)))
 	    return TRUE;
     }
