@@ -484,7 +484,7 @@ PerlIO_debug(const char *fmt, ...)
 		       (IV) CopLINE(PL_curcop));
 	Perl_sv_vcatpvf(aTHX_ sv, fmt, &ap);
 
-	s = SvPV(sv, len);
+	s = SvPV_const(sv, len);
 	PerlLIO_write(PL_perlio_debug_fd, s, len);
 	SvREFCNT_dec(sv);
 #endif
@@ -1388,7 +1388,7 @@ PerlIO_context_layers(pTHX_ const char *mode)
 	SV *layers = PL_curcop->cop_io;
 	if (layers) {
 	    STRLEN len;
-	    type = SvPV(layers, len);
+	    type = SvPV_const(layers, len);
 	    if (type && mode[0] != 'r') {
 		/*
 		 * Skip to write part
@@ -4832,7 +4832,7 @@ PerlIO_vprintf(PerlIO *f, const char *fmt, va_list ap)
 {
     dTHX;
     SV *sv = newSVpvn("", 0);
-    char *s;
+    const char *s;
     STRLEN len;
     SSize_t wrote;
 #ifdef NEED_VA_COPY
@@ -4842,7 +4842,7 @@ PerlIO_vprintf(PerlIO *f, const char *fmt, va_list ap)
 #else
     sv_vcatpvf(sv, fmt, &ap);
 #endif
-    s = SvPV(sv, len);
+    s = SvPV_const(sv, len);
     wrote = PerlIO_write(f, s, len);
     SvREFCNT_dec(sv);
     return wrote;

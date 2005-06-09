@@ -951,11 +951,11 @@ int
 Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
-    register char *s;
+    const char *s;
     const char *ptr;
     STRLEN len, klen;
 
-    s = SvPV(sv,len);
+    s = SvPV_const(sv,len);
     ptr = MgPV_const(mg,klen);
     my_setenv(ptr, s);
 
@@ -965,7 +965,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
     if (!len) {
 	SV **valp;
 	if ((valp = hv_fetch(GvHVn(PL_envgv), ptr, klen, FALSE)))
-	    s = SvPV(*valp, len);
+	    s = SvPV_const(*valp, len);
     }
 #endif
 
@@ -1001,7 +1001,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 	}
 #endif /* VMS */
 	if (s && klen == 4 && strEQ(ptr,"PATH")) {
-	    char *strend = s + len;
+	    const char *strend = s + len;
 
 	    while (s < strend) {
 		char tmpbuf[256];
@@ -1040,13 +1040,12 @@ Perl_magic_set_all_env(pTHX_ SV *sv, MAGIC *mg)
 #else
     if (PL_localizing) {
 	HE* entry;
-	STRLEN n_a;
 	magic_clear_all_env(sv,mg);
 	hv_iterinit((HV*)sv);
 	while ((entry = hv_iternext((HV*)sv))) {
 	    I32 keylen;
 	    my_setenv(hv_iterkey(entry, &keylen),
-		      SvPV(hv_iterval((HV*)sv, entry), n_a));
+		      SvPV_nolen_const(hv_iterval((HV*)sv, entry)));
 	}
     }
 #endif
@@ -1098,7 +1097,7 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
 static void
 restore_sigmask(pTHX_ SV *save_sv)
 {
-    sigset_t *ossetp = (sigset_t *) SvPV_nolen( save_sv );
+    const sigset_t *ossetp = (const sigset_t *) SvPV_nolen_const( save_sv );
     (void)sigprocmask(SIG_SETMASK, ossetp, (sigset_t *)0);
 }
 #endif
@@ -1766,7 +1765,7 @@ Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
 {
     STRLEN len;
     SV * const lsv = LvTARG(sv);
-    const char * const tmps = SvPV(lsv,len);
+    const char * const tmps = SvPV_const(lsv,len);
     I32 offs = LvTARGOFF(sv);
     I32 rem = LvTARGLEN(sv);
     (void)mg;
@@ -1787,7 +1786,7 @@ int
 Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 {
     STRLEN len;
-    char *tmps = SvPV(sv, len);
+    const char *tmps = SvPV_const(sv, len);
     SV * const lsv = LvTARG(sv);
     I32 lvoff = LvTARGOFF(sv);
     I32 lvlen = LvTARGLEN(sv);
@@ -2066,7 +2065,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 
     case '\004':	/* ^D */
 #ifdef DEBUGGING
-	s = SvPV_nolen(sv);
+	s = SvPV_nolen_const(sv);
 	PL_debug = get_debug_opts(&s, 0) | DEBUG_TOP_FLAG;
 	DEBUG_x(dump_all());
 #else
@@ -2168,7 +2167,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 		    STRLEN len, i;
 		    int accumulate = 0 ;
 		    int any_fatals = 0 ;
-		    const char * const ptr = (char*)SvPV(sv, len) ;
+		    const char * const ptr = SvPV_const(sv, len) ;
 		    for (i = 0 ; i < len ; ++i) {
 		        accumulate |= ptr[i] ;
 		        any_fatals |= (ptr[i] & 0xAA) ;
@@ -2385,7 +2384,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     case ')':
 #ifdef HAS_SETGROUPS
 	{
-	    const char *p = SvPV(sv, len);
+	    const char *p = SvPV_const(sv, len);
 	    Groups_t gary[NGROUPS];
 
 	    while (isSPACE(*p))
@@ -2442,7 +2441,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	 * show a string from the process struct and provide
 	 * the setproctitle() routine to manipulate that. */
 	{
-	    s = SvPV(sv, len);
+	    s = SvPV_const(sv, len);
 #   if __FreeBSD_version > 410001
 	    /* The leading "-" removes the "perl: " prefix,
 	     * but not the "(perl) suffix from the ps(1)
@@ -2464,7 +2463,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #if defined(__hpux) && defined(PSTAT_SETCMD)
 	{
 	     union pstun un;
-	     s = SvPV(sv, len);
+	     s = SvPV_const(sv, len);
 	     un.pst_command = (char *)s;
 	     pstat(PSTAT_SETCMD, un, len, 0, 0);
 	}
