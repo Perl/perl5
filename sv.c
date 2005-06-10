@@ -5796,6 +5796,7 @@ Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
     sv->sv_flags  = nsv->sv_flags;
     sv->sv_any    = nsv->sv_any;
     sv->sv_refcnt = nsv->sv_refcnt;
+    sv->sv_u      = nsv->sv_u;
 #else
     StructCopy(nsv,sv,SV);
 #endif
