@@ -422,8 +422,7 @@ Zip_gzread(file, buf, len=4096)
 	CODE:
 	if (SvREADONLY(buf) && PL_curcop != &PL_compiling)
             croak("gzread: buffer parameter is read-only");
-        if (!SvUPGRADE(buf, SVt_PV))
-            croak("cannot use buf argument as lvalue");
+        SvUPGRADE(buf, SVt_PV);
         SvPOK_only(buf);
         SvCUR_set(buf, 0);
 	/* any left over from gzreadline ? */
@@ -468,8 +467,7 @@ gzreadline(file, buf)
 	CODE:
 	if (SvREADONLY(buf) && PL_curcop != &PL_compiling) 
             croak("gzreadline: buffer parameter is read-only"); 
-        if (!SvUPGRADE(buf, SVt_PV))
-            croak("cannot use buf argument as lvalue");
+        SvUPGRADE(buf, SVt_PV);
         SvPOK_only(buf);
 	/* sv_setpvn(buf, "", SIZE) ; */
         SvGROW(buf, SIZE) ;
