@@ -1024,9 +1024,16 @@ PP(pp_sselect)
 
     SP -= 4;
     for (i = 1; i <= 3; i++) {
-	if (!SvPOK(SP[i]))
+	SV *sv = SP[i];
+	if (SvOK(sv) && SvREADONLY(sv)) {
+	    if (SvIsCOW(sv))
+		sv_force_normal_flags(sv, 0);
+	    if (SvREADONLY(sv))
+		DIE(aTHX_ PL_no_modify);
+	}
+	if (!SvPOK(sv))
 	    continue;
-	j = SvCUR(SP[i]);
+	j = SvCUR(sv);
 	if (maxlen < j)
 	    maxlen = j;
     }
