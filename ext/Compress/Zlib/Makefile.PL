@@ -25,8 +25,12 @@ my $OLD_ZLIB = '' ;
 my $WALL = '';
 #$WALL = ' -Wall ';
 
+unless($ENV{PERL_CORE}) {
+    $ENV{PERL_CORE} = 1 if grep { $_ eq 'PERL_CORE=1' } @ARGV;
+}
+
 # don't ask if MM_USE_DEFAULT is set -- enables perl core building on cygwin
-if ($^O =~ /cygwin/i and not $ENV{PERL_MM_USE_DEFAULT})
+if ($^O =~ /cygwin/i and not $ENV{PERL_MM_USE_DEFAULT} and not $ENV{PERL_CORE})
 {
     print <<EOM ;
 
