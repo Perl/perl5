@@ -1,0 +1,21 @@
+# Filename:	config.in
+#
+# written by Paul Marquess <pmqs@cpan.org>
+# last modified 30th January 2005
+# version 1.34
+# 
+# 
+# This file is used to control which zlib library will be used by
+# Compress::Zlib
+# 
+# See to the section "Controlling the version of zlib used by
+# Compress::Zlib" in the README file for details of how to use this file.
+
+BUILD_ZLIB = True
+INCLUDE    = ./zlib-src-1.2.2
+LIB        = ./zlib-src-1.2.2
+OLD_ZLIB   = False
+
+
+
+# end of file config.in
