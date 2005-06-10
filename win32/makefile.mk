@@ -855,7 +855,7 @@ DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
 		Sys/Hostname Storable Filter/Util/Call Encode \
 		Digest/MD5 PerlIO/scalar MIME/Base64 Time/HiRes \
-		Unicode/Normalize Math/BigInt/FastCalc Win32
+		Unicode/Normalize Math/BigInt/FastCalc Compress/Zlib Win32
 STATIC_EXT	= 
 NONXS_EXT	= Errno
 

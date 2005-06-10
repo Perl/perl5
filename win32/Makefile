@@ -727,6 +727,7 @@ XSAPITEST		= $(EXTDIR)\XS\APItest\APItest
 XSTYPEMAP		= $(EXTDIR)\XS\Typemap\Typemap
 UNICODENORMALIZE	= $(EXTDIR)\Unicode\Normalize\Normalize
 MATHBIGINTFASTCALC	= $(EXTDIR)\Math\BigInt\FastCalc\FastCalc
+COMPRESSZLIB		= $(EXTDIR)\Compress\Zlib\Zlib
 WIN32_DIR		= ext\Win32
 
 SOCKET_DLL		= $(AUTODIR)\Socket\Socket.dll
@@ -759,6 +760,7 @@ XSAPITEST_DLL		= $(AUTODIR)\XS\APItest\APItest.dll
 XSTYPEMAP_DLL		= $(AUTODIR)\XS\Typemap\Typemap.dll
 UNICODENORMALIZE_DLL	= $(AUTODIR)\Unicode\Normalize\Normalize.dll
 MATHBIGINTFASTCALC_DLL	= $(AUTODIR)\Math\BigInt\FastCalc\FastCalc.dll
+COMPRESSZLIB_DLL	= $(AUTODIR)\Compress\Zlib\Zlib.dll
 WIN32_DLL		= $(AUTODIR)\Win32\Win32.dll
 
 EXTENSION_C	= 		\
@@ -792,6 +794,7 @@ EXTENSION_C	= 		\
 		$(XSTYPEMAP).c	\
 		$(UNICODENORMALIZE).c	\
 		$(MATHBIGINTFASTCALC).c	\
+		$(COMPRESSZLIB).c	\
 		$(WIN32_DIR).c
 
 EXTENSION_DLL	= 		\
@@ -825,6 +828,7 @@ EXTENSION_DLL	= 		\
 		$(XSTYPEMAP_DLL)	\
 		$(UNICODENORMALIZE_DLL)	\
 		$(MATHBIGINTFASTCALC_DLL)	\
+		$(COMPRESSZLIB_DLL)	\
 		$(WIN32_DLL)
 
 POD2HTML	= $(PODDIR)\pod2html
