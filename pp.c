@@ -2912,7 +2912,7 @@ PP(pp_hex)
     UV result_uv;
     SV* sv = POPs;
 
-    tmps = (SvPVx_const(sv, len));
+    tmps = (SvPV_const(sv, len));
     if (DO_UTF8(sv)) {
 	 /* If Unicode, try to downgrade
 	  * If not possible, croak. */
@@ -2920,7 +2920,7 @@ PP(pp_hex)
 	
 	 SvUTF8_on(tsv);
 	 sv_utf8_downgrade(tsv, FALSE);
-	 tmps = SvPVX(tsv);
+	 tmps = SvPV_const(tsv, len);
     }
     result_uv = grok_hex (tmps, &len, &flags, &result_nv);
     if (flags & PERL_SCAN_GREATER_THAN_UV_MAX) {
@@ -2942,7 +2942,7 @@ PP(pp_oct)
     UV result_uv;
     SV* sv = POPs;
 
-    tmps = (SvPVx_const(sv, len));
+    tmps = (SvPV_const(sv, len));
     if (DO_UTF8(sv)) {
 	 /* If Unicode, try to downgrade
 	  * If not possible, croak. */
@@ -2950,7 +2950,7 @@ PP(pp_oct)
 	
 	 SvUTF8_on(tsv);
 	 sv_utf8_downgrade(tsv, FALSE);
-	 tmps = SvPVX(tsv);
+	 tmps = SvPV_const(tsv, len);
     }
     while (*tmps && len && isSPACE(*tmps))
         tmps++, len--;
@@ -3109,7 +3109,7 @@ PP(pp_substr)
 	    if (repl_need_utf8_upgrade) {
 		repl_sv_copy = newSVsv(repl_sv);
 		sv_utf8_upgrade(repl_sv_copy);
-		repl = SvPV(repl_sv_copy, repl_len);
+		repl = SvPV_const(repl_sv_copy, repl_len);
 		repl_is_utf8 = DO_UTF8(repl_sv_copy) && SvCUR(sv);
 	    }
 	    sv_insert(sv, pos, rem, repl, repl_len);
@@ -3334,7 +3334,7 @@ PP(pp_ord)
     dSP; dTARGET;
     SV *argsv = POPs;
     STRLEN len;
-    const U8 *s = (U8*)SvPVx_const(argsv, len);
+    const U8 *s = (U8*)SvPV_const(argsv, len);
     SV *tmpsv;
 
     if (PL_encoding && SvPOK(argsv) && !DO_UTF8(argsv)) {
@@ -3374,7 +3374,7 @@ PP(pp_chr)
     if (value > 255 && !IN_BYTES) {
 	SvGROW(TARG, (STRLEN)UNISKIP(value)+1);
 	tmps = (char*)uvchr_to_utf8_flags((U8*)SvPVX(TARG), value, 0);
-	SvCUR_set(TARG, tmps - SvPVX(TARG));
+	SvCUR_set(TARG, tmps - SvPVX_const(TARG));
 	*tmps = '\0';
 	(void)SvPOK_only(TARG);
 	SvUTF8_on(TARG);
@@ -3422,7 +3422,7 @@ PP(pp_crypt)
 
 	 SvUTF8_on(tsv);
 	 sv_utf8_downgrade(tsv, FALSE);
-	 tmps = SvPVX(tsv);
+	 tmps = SvPV_const(tsv, len);
     }
 #   ifdef USE_ITHREADS
 #     ifdef HAS_CRYPT_R
@@ -3611,7 +3611,7 @@ PP(pp_uc)
 		if (ulen > u && (SvLEN(TARG) < (min += ulen - u))) {
 		    /* If the eventually required minimum size outgrows
 		     * the available space, we need to grow. */
-		    UV o = d - (U8*)SvPVX(TARG);
+		    UV o = d - (U8*)SvPVX_const(TARG);
 
 		    /* If someone uppercases one million U+03B0s we
 		     * SvGROW() one million times.  Or we could try
@@ -3626,7 +3626,7 @@ PP(pp_uc)
 	    }
 	    *d = '\0';
 	    SvUTF8_on(TARG);
-	    SvCUR_set(TARG, d - (U8*)SvPVX(TARG));
+	    SvCUR_set(TARG, d - (U8*)SvPVX_const(TARG));
 	    SETs(TARG);
 	}
     }
@@ -3714,7 +3714,7 @@ PP(pp_lc)
 		if (ulen > u && (SvLEN(TARG) < (min += ulen - u))) {
 		    /* If the eventually required minimum size outgrows
 		     * the available space, we need to grow. */
-		    UV o = d - (U8*)SvPVX(TARG);
+		    UV o = d - (U8*)SvPVX_const(TARG);
 
 		    /* If someone lowercases one million U+0130s we
 		     * SvGROW() one million times.  Or we could try
@@ -3729,7 +3729,7 @@ PP(pp_lc)
 	    }
 	    *d = '\0';
 	    SvUTF8_on(TARG);
-	    SvCUR_set(TARG, d - (U8*)SvPVX(TARG));
+	    SvCUR_set(TARG, d - (U8*)SvPVX_const(TARG));
 	    SETs(TARG);
 	}
     }
@@ -3803,7 +3803,7 @@ PP(pp_quotemeta)
 	    }
 	}
 	*d = '\0';
-	SvCUR_set(TARG, d - SvPVX(TARG));
+	SvCUR_set(TARG, d - SvPVX_const(TARG));
 	(void)SvPOK_only_UTF8(TARG);
     }
     else
@@ -4485,7 +4485,7 @@ PP(pp_reverse)
 	if (len > 1) {
 	    if (DO_UTF8(TARG)) {	/* first reverse each character */
 		U8* s = (U8*)SvPVX(TARG);
-		U8* send = (U8*)(s + len);
+		const U8* send = (U8*)(s + len);
 		while (s < send) {
 		    if (UTF8_IS_INVARIANT(*s)) {
 			s++;

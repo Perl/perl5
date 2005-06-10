@@ -1148,7 +1148,7 @@ PP(pp_flop)
 	else {
 	    SV *final = sv_mortalcopy(right);
 	    STRLEN len;
-	    const char *tmps = SvPV(final, len);
+	    const char *tmps = SvPV_const(final, len);
 
 	    sv = sv_mortalcopy(left);
 	    SvPV_force_nolen(sv);
@@ -1409,7 +1409,7 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 		    sv_setpvn(err,"",0);
 		else if (SvCUR(err) >= sizeof(prefix)+msglen-1) {
 		    STRLEN len;
-		    e = SvPV(err, len);
+		    e = SvPV_const(err, len);
 		    e += len - msglen;
 		    if (*e != *message || strNE(e,message))
 			e = Nullch;
@@ -1446,7 +1446,7 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 	    POPBLOCK(cx,PL_curpm);
 	    if (CxTYPE(cx) != CXt_EVAL) {
 		if (!message)
-		    message = SvPVx(ERRSV, msglen);
+		    message = SvPVx_const(ERRSV, msglen);
 		PerlIO_write(Perl_error_log, "panic: die ", 11);
 		PerlIO_write(Perl_error_log, message, msglen);
 		my_exit(1);
@@ -1478,7 +1478,7 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 	}
     }
     if (!message)
-	message = SvPVx(ERRSV, msglen);
+	message = SvPVx_const(ERRSV, msglen);
 
     write_to_stderr(message, msglen);
     my_failure_exit();
@@ -3027,7 +3027,7 @@ S_doopen_pm(pTHX_ const char *name, const char *mode)
 
     if (namelen > 3 && strEQ(name + namelen - 3, ".pm")) {
 	SV *pmcsv = Perl_newSVpvf(aTHX_ "%s%c", name, 'c');
-	const char * const pmc = SvPV_nolen(pmcsv);
+	const char * const pmc = SvPV_nolen_const(pmcsv);
 	Stat_t pmstat;
 	Stat_t pmcstat;
 	if (PerlLIO_stat(pmc, &pmcstat) < 0) {
@@ -3142,7 +3142,7 @@ PP(pp_require)
 
 		    Perl_sv_setpvf(aTHX_ namesv, "/loader/0x%"UVxf"/%s",
 				   PTR2UV(SvRV(dirsv)), name);
-		    tryname = SvPVX(namesv);
+		    tryname = SvPVX_const(namesv);
 		    tryrsfp = 0;
 
 		    ENTER;
@@ -3283,7 +3283,7 @@ PP(pp_require)
 #  endif
 #endif
 		    TAINT_PROPER("require");
-		    tryname = SvPVX(namesv);
+		    tryname = SvPVX_const(namesv);
 		    tryrsfp = doopen_pm(tryname, PERL_SCRIPT_MODE);
 		    if (tryrsfp) {
 			if (tryname[0] == '.' && tryname[1] == '/')
@@ -3319,7 +3319,7 @@ PP(pp_require)
 		}
 		sv_catpvn(msg, ")", 1);
 		SvREFCNT_dec(dirmsgsv);
-		msgstr = SvPV_nolen(msg);
+		msgstr = SvPV_nolen_const(msg);
 	    }
 	    DIE(aTHX_ "Can't locate %s", msgstr);
 	}

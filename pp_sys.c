@@ -2437,7 +2437,8 @@ PP(pp_bind)
     extern void GETUSERMODE();
 #endif
     SV *addrsv = POPs;
-    char *addr;
+    /* OK, so on what platform does bind modify addr?  */
+    const char *addr;
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
     STRLEN len;
@@ -2449,7 +2450,7 @@ PP(pp_bind)
     if (!io || !IoIFP(io))
 	goto nuts;
 
-    addr = SvPV(addrsv, len);
+    addr = SvPV_const(addrsv, len);
     TAINT_PROPER("bind");
 #ifdef MPE /* Deal with MPE bind() peculiarities */
     if (((struct sockaddr *)addr)->sa_family == AF_INET) {
@@ -2492,7 +2493,7 @@ PP(pp_connect)
 #ifdef HAS_SOCKET
     dSP;
     SV *addrsv = POPs;
-    char *addr;
+    const char *addr;
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
     STRLEN len;
@@ -2500,7 +2501,7 @@ PP(pp_connect)
     if (!io || !IoIFP(io))
 	goto nuts;
 
-    addr = SvPV(addrsv, len);
+    addr = SvPV_const(addrsv, len);
     TAINT_PROPER("connect");
     if (PerlSock_connect(PerlIO_fileno(IoIFP(io)), (struct sockaddr *)addr, len) >= 0)
 	RETPUSHYES;
@@ -2687,16 +2688,16 @@ PP(pp_ssockopt)
 	PUSHs(sv);
 	break;
     case OP_SSOCKOPT: {
-	    char *buf;
+	    const char *buf;
 	    int aint;
 	    if (SvPOKp(sv)) {
 		STRLEN l;
-		buf = SvPV(sv, l);
+		buf = SvPV_const(sv, l);
 		len = l;
 	    }
 	    else {
 		aint = (int)SvIV(sv);
-		buf = (char*)&aint;
+		buf = (const char*)&aint;
 		len = sizeof(int);
 	    }
 	    if (PerlSock_setsockopt(fd, lvl, optname, buf, len) < 0)
@@ -2760,8 +2761,8 @@ PP(pp_getpeername)
 	{
 	    static const char nowhere[] = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
 	    /* If the call succeeded, make sure we don't have a zeroed port/addr */
-	    if (((struct sockaddr *)SvPVX(sv))->sa_family == AF_INET &&
-		!memcmp((char *)SvPVX(sv) + sizeof(u_short), nowhere,
+	    if (((struct sockaddr *)SvPVX_const(sv))->sa_family == AF_INET &&
+		!memcmp((char *)SvPVX_const(sv) + sizeof(u_short), nowhere,
 			sizeof(u_short) + sizeof(struct in_addr))) {
 		goto nuts2;	
 	    }
@@ -3356,7 +3357,7 @@ PP(pp_fttty)
     if (GvIO(gv) && IoIFP(GvIOp(gv)))
 	fd = PerlIO_fileno(IoIFP(GvIOp(gv)));
     else if (tmpsv && SvOK(tmpsv)) {
-	char *tmps = SvPV_nolen(tmpsv);
+	const char *tmps = SvPV_nolen_const(tmpsv);
 	if (isDIGIT(*tmps))
 	    fd = atoi(tmps);
 	else 
@@ -3458,7 +3459,8 @@ PP(pp_fttext)
 	PL_laststype = OP_STAT;
 	sv_setpv(PL_statname, SvPV_nolen_const(sv));
 	if (!(fp = PerlIO_open(SvPVX_const(PL_statname), "r"))) {
-	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV_nolen(PL_statname), '\n'))
+	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV_nolen_const(PL_statname),
+					       '\n'))
 		Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "open");
 	    RETPUSHUNDEF;
 	}
