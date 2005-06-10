@@ -755,6 +755,9 @@ Perl_leave_scope(pTHX_ I32 base)
 	    gv = (GV*)SSPOPPTR;
 	    if (GvAV(gv)) {
 		AV * const goner = GvAV(gv);
+		/* FIXME - this is a temporary hack until we work out what
+		   the correct behaviour for magic should be.  */
+		sv_unmagic((SV*)goner, PERL_MAGIC_arylen_p);
 		SvMAGIC_set(av, SvMAGIC(goner));
 		SvFLAGS((SV*)av) |= SvMAGICAL(goner);
 		SvMAGICAL_off(goner);

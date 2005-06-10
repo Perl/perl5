@@ -2,12 +2,12 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '.', '../lib';
+    @INC = ('.', '../lib');
 }
 
 require 'test.pl';
 
-plan (91);
+plan (111);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -294,3 +294,68 @@ sub test_arylen {
     test_arylen ($a);
     test_arylen (do {my @a; \$#a});
 }
+
+{
+    use vars '@array';
+
+    my $outer = \$#array;
+    is ($$outer, -1);
+    is (scalar @array, 0);
+
+    $$outer = 3;
+    is ($$outer, 3);
+    is (scalar @array, 4);
+
+    my $ref = \@array;
+
+    local $TODO = '$#foo semantics with local @foo not fixed yet';
+
+    my $inner;
+    {
+	local @array;
+	$inner = \$#array;
+
+	is ($$inner, -1);
+	is (scalar @array, 0);
+	$$outer = 6;
+
+	is (scalar @$ref, 7);
+
+	is ($$inner, -1);
+	is (scalar @array, 0);
+
+	$$inner = 42;
+    }
+
+    is (scalar @array, 7);
+    is ($$outer, 6);
+
+    is ($$inner, 0, "This is emergent behaviour");
+
+    is (scalar @array, 7);
+    is ($$outer, 6);
+
+    $$inner = 1;
+
+    is (scalar @array, 7);
+    is ($$outer, 6);
+
+    $$inner = 503; # Bang!
+
+    is (scalar @array, 7);
+    is ($$outer, 6);
+}
+
+{
+    # Bug #36211
+    use vars '@array';
+    for (1,2) {
+	{
+	    local @a;
+	    is ($#a, -1);
+	    @a=(1..4)
+	}
+    }
+}
+
+"We're included by lib/Tie/Array/std.t so we need to return something true";
