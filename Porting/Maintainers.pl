@@ -98,6 +98,13 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'Compress::Zlib' =>
+		{
+		'MAINTAINER'	=> 'pmqs',
+		'FILES'		=> q[ext/Compress/Zlib],
+		'CPAN'		=> 1,
+		},
+
 	'CGI' =>
 		{
 		'MAINTAINER'	=> 'lstein',
