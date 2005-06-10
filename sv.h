@@ -1525,6 +1525,8 @@ Returns a pointer to the character buffer.
 #define isGV(sv) (SvTYPE(sv) == SVt_PVGV)
 
 #define SvGROW(sv,len) (SvLEN(sv) < (len) ? sv_grow(sv,len) : SvPVX(sv))
+#define SvGROW_mutable(sv,len) \
+    (SvLEN(sv) < (len) ? sv_grow(sv,len) : SvPVX_mutable(sv))
 #define Sv_Grow sv_grow
 
 #define CLONEf_COPY_STACKS 1

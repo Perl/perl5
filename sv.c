@@ -3598,7 +3598,8 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	    ptr = uiv_2buf(buf, 0, SvUVX(sv), 1, &ebuf);
 	else
 	    ptr = uiv_2buf(buf, SvIVX(sv), 0, 0, &ebuf);
-	SvGROW(sv, (STRLEN)(ebuf - ptr + 1));	/* inlined from sv_setpvn */
+	/* inlined from sv_setpvn */
+	SvGROW_mutable(sv, (STRLEN)(ebuf - ptr + 1));
 	Move(ptr,SvPVX_mutable(sv),ebuf - ptr,char);
 	SvCUR_set(sv, ebuf - ptr);
 	s = SvEND(sv);
@@ -3614,8 +3615,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	if (SvTYPE(sv) < SVt_PVNV)
 	    sv_upgrade(sv, SVt_PVNV);
 	/* The +20 is pure guesswork.  Configure test needed. --jhi */
-	SvGROW(sv, NV_DIG + 20);
-	s = SvPVX_mutable(sv);
+	s = SvGROW_mutable(sv, NV_DIG + 20);
 	olderrno = errno;	/* some Xenix systems wipe out errno here */
 #ifdef apollo
 	if (SvNVX(sv) == 0.0)
@@ -3697,7 +3697,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	SvUPGRADE(sv, SVt_PV);
 	if (lp)
 	    *lp = len;
-	s = SvGROW(sv, len + 1);
+	s = SvGROW_mutable(sv, len + 1);
 	SvCUR_set(sv, len);
 	SvPOKp_on(sv);
 	return strcpy(s, t);
@@ -4754,8 +4754,7 @@ Perl_sv_setpvn(pTHX_ register SV *sv, register const char *ptr, register STRLEN 
     }
     SvUPGRADE(sv, SVt_PV);
 
-    SvGROW(sv, len + 1);
-    dptr = SvPVX(sv);
+    dptr = SvGROW(sv, len + 1);
     Move(ptr,dptr,len,char);
     dptr[len] = '\0';
     SvCUR_set(sv, len);
