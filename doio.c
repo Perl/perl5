@@ -852,7 +852,8 @@ Perl_nextargv(pTHX_ register GV *gv)
 		    do_close(gv,FALSE);
 		    (void)PerlLIO_unlink(SvPVX_const(sv));
 		    (void)PerlLIO_rename(PL_oldname,SvPVX_const(sv));
-		    do_open(gv,SvPVX(sv),SvCUR(sv),PL_inplace!=0,O_RDONLY,0,Nullfp);
+		    do_open(gv,(char*)SvPVX_const(sv),SvCUR(sv),PL_inplace!=0,
+			    O_RDONLY,0,Nullfp);
 #endif /* DOSISH */
 #else
 		    (void)UNLINK(SvPVX_const(sv));
@@ -888,11 +889,12 @@ Perl_nextargv(pTHX_ register GV *gv)
 		sv_catpvn(sv,PL_oldname,oldlen);
 		SETERRNO(0,0);		/* in case sprintf set errno */
 #ifdef VMS
-		if (!do_open(PL_argvoutgv,SvPVX(sv),SvCUR(sv),PL_inplace!=0,
-                 O_WRONLY|O_CREAT|O_TRUNC,0,Nullfp))
+		if (!do_open(PL_argvoutgv,(char*)SvPVX_const(sv),SvCUR(sv),
+			     PL_inplace!=0,O_WRONLY|O_CREAT|O_TRUNC,0,Nullfp))
 #else
-		if (!do_open(PL_argvoutgv,SvPVX(sv),SvCUR(sv),PL_inplace!=0,
-			     O_WRONLY|O_CREAT|OPEN_EXCL,0666,Nullfp))
+		    if (!do_open(PL_argvoutgv,(char*)SvPVX_const(sv),SvCUR(sv),
+			     PL_inplace!=0,O_WRONLY|O_CREAT|OPEN_EXCL,0666,
+			     Nullfp))
 #endif
 		{
 		    if (ckWARN_d(WARN_INPLACE))	
@@ -2056,14 +2058,14 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 
     if (infosize)
     {
-	STRLEN len;
 	if (getinfo)
 	{
-	    SvPV_force(astr, len);
+	    SvPV_force_nolen(astr);
 	    a = SvGROW(astr, infosize+1);
 	}
 	else
 	{
+	    STRLEN len;
 	    a = SvPV(astr, len);
 	    if (len != infosize)
 		Perl_croak(aTHX_ "Bad arg length for %s, is %lu, should be %ld",
@@ -2121,7 +2123,7 @@ Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
 {
 #ifdef HAS_MSG
     SV *mstr;
-    char *mbuf;
+    const char *mbuf;
     I32 msize, flags;
     STRLEN len;
     const I32 id = SvIVx(*++mark);
@@ -2129,7 +2131,7 @@ Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
 
     mstr = *++mark;
     flags = SvIVx(*++mark);
-    mbuf = SvPV(mstr, len);
+    mbuf = SvPV_const(mstr, len);
     if ((msize = len - sizeof(long)) < 0)
 	Perl_croak(aTHX_ "Arg too short for msgsnd");
     SETERRNO(0,0);
@@ -2147,7 +2149,6 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
     char *mbuf;
     long mtype;
     I32 msize, flags, ret;
-    STRLEN len;
     const I32 id = SvIVx(*++mark);
     (void)sp;
 
@@ -2158,7 +2159,7 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
     msize = SvIVx(*++mark);
     mtype = (long)SvIVx(*++mark);
     flags = SvIVx(*++mark);
-    SvPV_force(mstr, len);
+    SvPV_force_nolen(mstr);
     mbuf = SvGROW(mstr, sizeof(long)+msize+1);
 
     SETERRNO(0,0);
@@ -2182,13 +2183,13 @@ Perl_do_semop(pTHX_ SV **mark, SV **sp)
 {
 #ifdef HAS_SEM
     SV *opstr;
-    char *opbuf;
+    const char *opbuf;
     STRLEN opsize;
     const I32 id = SvIVx(*++mark);
     (void)sp;
 
     opstr = *++mark;
-    opbuf = SvPV(opstr, opsize);
+    opbuf = SvPV_const(opstr, opsize);
     if (opsize < 3 * SHORTSIZE
 	|| (opsize % (3 * SHORTSIZE))) {
 	SETERRNO(EINVAL,LIB_INVARG);
@@ -2237,7 +2238,6 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
     SV *mstr;
     char *shm;
     I32 mpos, msize;
-    STRLEN len;
     struct shmid_ds shmds;
     const I32 id = SvIVx(*++mark);
     (void)sp;
@@ -2260,7 +2260,7 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 	/* suppress warning when reading into undef var (tchrist 3/Mar/00) */
 	if (! SvOK(mstr))
 	    sv_setpvn(mstr, "", 0);
-	SvPV_force(mstr, len);
+	SvPV_force_nolen(mstr);
 	mbuf = SvGROW(mstr, msize+1);
 
 	Copy(shm + mpos, mbuf, msize, char);
@@ -2274,8 +2274,9 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
     }
     else {
 	I32 n;
+	STRLEN len;
 
-	const char *mbuf = SvPV(mstr, len);
+	const char *mbuf = SvPV_const(mstr, len);
 	if ((n = len) > msize)
 	    n = msize;
 	Copy(mbuf, shm + mpos, n, char);
@@ -2433,7 +2434,7 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 #endif /* !CSH */
 #endif /* !DOSISH */
 #endif /* MACOS_TRADITIONAL */
-    (void)do_open(PL_last_in_gv, SvPVX(tmpcmd), SvCUR(tmpcmd),
+    (void)do_open(PL_last_in_gv, (char*)SvPVX_const(tmpcmd), SvCUR(tmpcmd),
 		  FALSE, O_RDONLY, 0, Nullfp);
     fp = IoIFP(io);
 #endif /* !VMS */

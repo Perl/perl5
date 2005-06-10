@@ -765,7 +765,7 @@ S_varname(pTHX_ GV *gv, const char *gvtype, PADOFFSET targ,
 	av = (AV*)(*av_fetch(CvPADLIST(cv), 0, FALSE));
 	sv = *av_fetch(av, targ, FALSE);
 	/* SvLEN in a pad name is not to be trusted */
-	str = SvPV(sv,len);
+	str = SvPV_const(sv,len);
 	sv_setpvn(name, str, len);
     }
 
@@ -1120,7 +1120,7 @@ Perl_report_uninit(pTHX_ SV* uninit_sv)
 		sv_insert(varname, 0, 0, " ", 1);
 	}
 	Perl_warner(aTHX_ packWARN(WARN_UNINITIALIZED), PL_warn_uninit,
-		varname ? SvPV_nolen(varname) : "",
+		varname ? SvPV_nolen_const(varname) : "",
 		" in ", OP_DESC(PL_op));
     }
     else
@@ -2024,11 +2024,11 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 	sv_unref(sv);
     if (SvTYPE(sv) < SVt_PV) {
 	sv_upgrade(sv, SVt_PV);
-	s = SvPVX(sv);
+	s = SvPVX_mutable(sv);
     }
     else if (SvOOK(sv)) {	/* pv is offset? */
 	sv_backoff(sv);
-	s = SvPVX(sv);
+	s = SvPVX_mutable(sv);
 	if (newlen > SvLEN(sv))
 	    newlen += 10 * (newlen - SvCUR(sv)); /* avoid copy each time */
 #ifdef HAS_64K_LIMIT
@@ -2043,7 +2043,7 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 	newlen = PERL_STRLEN_ROUNDUP(newlen);
 	if (SvLEN(sv) && s) {
 #ifdef MYMALLOC
-	    const STRLEN l = malloced_size((void*)SvPVX(sv));
+	    const STRLEN l = malloced_size((void*)SvPVX_const(sv));
 	    if (newlen <= l) {
 		SvLEN_set(sv, l);
 		return s;
@@ -3441,6 +3441,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
             register const char *typestr;
             if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,string)) &&
                 (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
+		/* FIXME - figure out best way to pass context inwards.  */
                 char *pv = lp ? SvPV(tmpstr, *lp) : SvPV_nolen(tmpstr);
                 if (SvUTF8(tmpstr))
                     SvUTF8_on(sv);
@@ -3916,9 +3917,9 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
 	 * had a FLAG in SVs to signal if there are any hibit
 	 * chars in the PV.  Given that there isn't such a flag
 	 * make the loop as fast as possible. */
-	U8 *s = (U8 *) SvPVX(sv);
-	U8 *e = (U8 *) SvEND(sv);
-	U8 *t = s;
+	const U8 *s = (U8 *) SvPVX_const(sv);
+	const U8 *e = (U8 *) SvEND(sv);
+	const U8 *t = s;
 	int hibit = 0;
 	
 	while (t < e) {
@@ -3928,11 +3929,11 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
 	}
 	if (hibit) {
 	    STRLEN len = SvCUR(sv) + 1; /* Plus the \0 */
-	    s = bytes_to_utf8((U8*)s, &len);
+	    char *recoded = bytes_to_utf8((U8*)s, &len);
 
 	    SvPV_free(sv); /* No longer using what was there before. */
 
-	    SvPV_set(sv, (char*)s);
+	    SvPV_set(sv, recoded);
 	    SvCUR_set(sv, len - 1);
 	    SvLEN_set(sv, len); /* No longer know the real size. */
 	}
@@ -4024,8 +4025,8 @@ bool
 Perl_sv_utf8_decode(pTHX_ register SV *sv)
 {
     if (SvPOKp(sv)) {
-        U8 *c;
-        U8 *e;
+        const U8 *c;
+        const U8 *e;
 
 	/* The octets may have got themselves encoded - get them back as
 	 * bytes
@@ -4036,10 +4037,10 @@ Perl_sv_utf8_decode(pTHX_ register SV *sv)
         /* it is actually just a matter of turning the utf8 flag on, but
          * we want to make sure everything inside is valid utf8 first.
          */
-        c = (U8 *) SvPVX(sv);
+        c = (const U8 *) SvPVX_const(sv);
 	if (!is_utf8_string(c, SvCUR(sv)+1))
 	    return FALSE;
-        e = (U8 *) SvEND(sv);
+        e = (const U8 *) SvEND(sv);
         while (c < e) {
 	    U8 ch = *c++;
             if (!UTF8_IS_INVARIANT(ch)) {
@@ -4373,7 +4374,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 			    }
 			    if (!intro)
 				cv_ckproto(cv, (GV*)dstr,
-					SvPOK(sref) ? SvPVX(sref) : Nullch);
+					   SvPOK(sref)
+					   ? SvPVX_const(sref) : Nullch);
 			}
 			GvCV(dstr) = (CV*)sref;
 			GvCVGEN(dstr) = 0; /* Switch off cacheness. */
@@ -5180,7 +5182,7 @@ Perl_sv_catsv_flags(pTHX_ SV *dsv, register SV *ssv, I32 flags)
 		SV* csv = sv_2mortal(newSVpvn(spv, slen));
 
 		sv_utf8_upgrade(csv);
-		spv = SvPV(csv, slen);
+		spv = SvPV_const(csv, slen);
 	    }
 	    else
 		sv_utf8_upgrade_nomg(dsv);
@@ -5690,7 +5692,7 @@ Perl_sv_insert(pTHX_ SV *bigstr, STRLEN offset, STRLEN len, const char *little, 
     (void)SvPOK_only_UTF8(bigstr);
     if (offset + len > curlen) {
 	SvGROW(bigstr, offset+len+1);
-	Zero(SvPVX_const(bigstr)+curlen, offset+len-curlen, char);
+	Zero(SvPVX(bigstr)+curlen, offset+len-curlen, char);
 	SvCUR_set(bigstr, offset+len);
     }
 
@@ -5967,7 +5969,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
       freescalar:
 	/* Don't bother with SvOOK_off(sv); as we're only going to free it.  */
 	if (SvOOK(sv)) {
-	    SvPV_set(sv, SvPVX(sv) - SvIVX(sv));
+	    SvPV_set(sv, SvPVX_mutable(sv) - SvIVX(sv));
 	    /* Don't even bother with turning off the OOK flag.  */
 	}
 	/* FALL THROUGH */
@@ -6631,12 +6633,12 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 	      if (SvUTF8(sv1)) {
 		   svrecode = newSVpvn(pv2, cur2);
 		   sv_recode_to_utf8(svrecode, PL_encoding);
-		   pv2 = SvPV(svrecode, cur2);
+		   pv2 = SvPV_const(svrecode, cur2);
 	      }
 	      else {
 		   svrecode = newSVpvn(pv1, cur1);
 		   sv_recode_to_utf8(svrecode, PL_encoding);
-		   pv1 = SvPV(svrecode, cur1);
+		   pv1 = SvPV_const(svrecode, cur1);
 	      }
 	      /* Now both are in UTF-8. */
 	      if (cur1 != cur2) {
@@ -6724,7 +6726,7 @@ Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
 	    if (PL_encoding) {
 		 svrecode = newSVpvn(pv2, cur2);
 		 sv_recode_to_utf8(svrecode, PL_encoding);
-		 pv2 = SvPV(svrecode, cur2);
+		 pv2 = SvPV_const(svrecode, cur2);
 	    }
 	    else {
 		 pv2 = tpv = (char*)bytes_to_utf8((const U8*)pv2, &cur2);
@@ -6734,7 +6736,7 @@ Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
 	    if (PL_encoding) {
 		 svrecode = newSVpvn(pv1, cur1);
 		 sv_recode_to_utf8(svrecode, PL_encoding);
-		 pv1 = SvPV(svrecode, cur1);
+		 pv1 = SvPV_const(svrecode, cur1);
 	    }
 	    else {
 		 pv1 = tpv = (char*)bytes_to_utf8((const U8*)pv1, &cur1);
@@ -6848,12 +6850,13 @@ Perl_sv_collxfrm(pTHX_ SV *sv, STRLEN *nxp)
 
     mg = SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_collxfrm) : (MAGIC *) NULL;
     if (!mg || !mg->mg_ptr || *(U32*)mg->mg_ptr != PL_collation_ix) {
-	char *s, *xf;
+	const char *s;
+	char *xf;
 	STRLEN len, xlen;
 
 	if (mg)
 	    Safefree(mg->mg_ptr);
-	s = SvPV(sv, len);
+	s = SvPV_const(sv, len);
 	if ((xf = mem_collxfrm(s, len, &xlen))) {
 	    if (SvREADONLY(sv)) {
 		SAVEFREEPV(xf);
@@ -7001,7 +7004,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 		    Perl_croak(aTHX_ "Wide character in $/");
 		}
 	    }
-	    rsptr = SvPV(PL_rs, rslen);
+	    rsptr = SvPV_const(PL_rs, rslen);
 	}
     }
 
@@ -8214,12 +8217,10 @@ Perl_sv_nv(pTHX_ register SV *sv)
 char *
 Perl_sv_pv(pTHX_ SV *sv)
 {
-    STRLEN n_a;
-
     if (SvPOK(sv))
 	return SvPVX(sv);
 
-    return sv_2pv(sv, &n_a);
+    return sv_2pv(sv, 0);
 }
 
 /*
@@ -10119,7 +10120,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	     else {
 		  SV *nsv = sv_2mortal(newSVpvn(eptr, elen));
 		  sv_utf8_upgrade(nsv);
-		  eptr = SvPVX(nsv);
+		  eptr = SvPVX_const(nsv);
 		  elen = SvCUR(nsv);
 	     }
 	     SvGROW(sv, SvCUR(sv) + elen + 1);
@@ -12476,7 +12477,7 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
     if (SvPOK(sv) && !SvUTF8(sv) && !IN_BYTES && SvROK(encoding)) {
 	SV *uni;
 	STRLEN len;
-	char *s;
+	const char *s;
 	dSP;
 	ENTER;
 	SAVETMPS;
@@ -12500,12 +12501,11 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 	SPAGAIN;
 	uni = POPs;
 	PUTBACK;
-	s = SvPV(uni, len);
+	s = SvPV_const(uni, len);
 	if (s != SvPVX_const(sv)) {
 	    SvGROW(sv, len + 1);
-	    Move(s, SvPVX_const(sv), len, char);
+	    Move(s, SvPVX(sv), len + 1, char);
 	    SvCUR_set(sv, len);
-	    SvPVX(sv)[len] = 0;	
 	}
 	FREETMPS;
 	LEAVE;

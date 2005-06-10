@@ -2491,7 +2491,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    t = uvuni_to_utf8_flags(tmpbuf, 0x7fffffff,
 				    UNICODE_ALLOW_SUPER);
 	    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
-	    t = (U8*)SvPVX(transv);
+	    t = (const U8*)SvPVX_const(transv);
 	    tlen = SvCUR(transv);
 	    tend = t + tlen;
 	    Safefree(cp);
@@ -5507,7 +5507,7 @@ Perl_ck_fun(pTHX_ OP *o)
 					   
 				      }
 				      if (tmpstr) {
-					   name = SvPV(tmpstr, len);
+					   name = SvPV_const(tmpstr, len);
 					   sv_2mortal(tmpstr);
 				      }
 				 }
@@ -6812,13 +6812,13 @@ Perl_peep(pTHX_ register OP *o)
 	    fields = (GV**)hv_fetch(SvSTASH(lexname), "FIELDS", 6, FALSE);
 	    if (!fields || !GvHV(*fields))
 		break;
-	    key = SvPV(*svp, keylen);
+	    key = SvPV_const(*svp, keylen);
 	    if (!hv_fetch(GvHV(*fields), key,
 			SvUTF8(*svp) ? -(I32)keylen : keylen, FALSE))
 	    {
 		Perl_croak(aTHX_ "No such class field \"%s\" " 
 			   "in variable %s of type %s", 
-		      key, SvPV_nolen(lexname), HvNAME_get(SvSTASH(lexname)));
+		      key, SvPV_nolen_const(lexname), HvNAME_get(SvSTASH(lexname)));
 	    }
 
             break;
@@ -6829,7 +6829,7 @@ Perl_peep(pTHX_ register OP *o)
 	    SV *lexname;
 	    GV **fields;
 	    SV **svp;
-	    char *key;
+	    const char *key;
 	    STRLEN keylen;
 	    SVOP *first_key_op, *key_op;
 
@@ -6869,7 +6869,7 @@ Perl_peep(pTHX_ register OP *o)
 		if (key_op->op_type != OP_CONST)
 		    continue;
 		svp = cSVOPx_svp(key_op);
-		key = SvPV(*svp, keylen);
+		key = SvPV_const(*svp, keylen);
 		if (!hv_fetch(GvHV(*fields), key, 
 			    SvUTF8(*svp) ? -(I32)keylen : keylen, FALSE))
 		{

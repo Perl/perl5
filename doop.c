@@ -395,8 +395,8 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)
 STATIC I32
 S_do_trans_count_utf8(pTHX_ SV *sv)
 {
-    U8 *s;
-    U8 *start = 0, *send;
+    const U8 *s;
+    const U8 *start = 0, *send;
     I32 matches = 0;
     STRLEN len;
 
@@ -407,7 +407,7 @@ S_do_trans_count_utf8(pTHX_ SV *sv)
     const UV extra = none + 1;
     U8 hibit = 0;
 
-    s = (U8*)SvPV(sv, len);
+    s = (const U8*)SvPV_const(sv, len);
     if (!SvUTF8(sv)) {
 	const U8 *t = s;
 	const U8 *e = s + len;
@@ -1071,7 +1071,7 @@ Perl_do_chomp(pTHX_ register SV *sv)
 	}
 	else {
 	    STRLEN rslen, rs_charlen;
-	    char *rsptr = SvPV(PL_rs, rslen);
+	    const char *rsptr = SvPV_const(PL_rs, rslen);
 
 	    rs_charlen = SvUTF8(PL_rs)
 		? sv_len_utf8(PL_rs)
@@ -1098,7 +1098,7 @@ Perl_do_chomp(pTHX_ register SV *sv)
 		     * Do not recode PL_rs as a side-effect. */
 		   svrecode = newSVpvn(rsptr, rslen);
 		   sv_recode_to_utf8(svrecode, PL_encoding);
-		   rsptr = SvPV(svrecode, rslen);
+		   rsptr = SvPV_const(svrecode, rslen);
 		   rs_charlen = sv_len_utf8(svrecode);
 		}
 		else {
