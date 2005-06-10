@@ -1069,7 +1069,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                 for( charid = 1 ; charid <= TRIE_LIST_USED( state ) ; charid++ ) {
                     SV **tmp = av_fetch( trie->revcharmap, TRIE_LIST_ITEM(state,charid).forid, 0);
                     PerlIO_printf( Perl_debug_log, "%s:%3X=%04"UVXf" | ",
-                        SvPV_nolen( *tmp ),
+                        SvPV_nolen_const( *tmp ),
                         TRIE_LIST_ITEM(state,charid).forid,
                         (UV)TRIE_LIST_ITEM(state,charid).newstate
                     );
@@ -1266,7 +1266,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
             for( charid = 0 ; charid < trie->uniquecharcount ; charid++ ) {
                 SV **tmp = av_fetch( trie->revcharmap, charid, 0);
                 if ( tmp ) {
-                  PerlIO_printf( Perl_debug_log, "%4.4s ", SvPV_nolen( *tmp ) );
+                  PerlIO_printf( Perl_debug_log, "%4.4s ", SvPV_nolen_const( *tmp ) );
                 }
             }
 
@@ -1423,7 +1423,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         for( state = 0 ; state < trie->uniquecharcount ; state++ ) {
             SV **tmp = av_fetch( trie->revcharmap, state, 0);
             if ( tmp ) {
-              PerlIO_printf( Perl_debug_log, "%4.4s ", SvPV_nolen( *tmp ) );
+              PerlIO_printf( Perl_debug_log, "%4.4s ", SvPV_nolen_const( *tmp ) );
             }
         }
         PerlIO_printf( Perl_debug_log, "\n-----:-----------------------");
@@ -1564,7 +1564,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 	  SV *mysv=sv_newmortal();
 	  regprop( mysv, scan);
 	  PerlIO_printf(Perl_debug_log, "%*speep: %s (0x%08"UVXf")\n",
-	    (int)depth*2, "", SvPV_nolen(mysv), PTR2UV(scan));
+	    (int)depth*2, "", SvPV_nolen_const(mysv), PTR2UV(scan));
 	});
 
 	if (PL_regkind[(U8)OP(scan)] == EXACT) {
@@ -1858,7 +1858,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
                         DEBUG_OPTIMISE_r({
                             regprop( mysv, tail );
                             PerlIO_printf( Perl_debug_log, "%*s%s%s%s\n",
-                                (int)depth * 2 + 2, "", "Tail node is:", SvPV_nolen( mysv ),
+                                (int)depth * 2 + 2, "", "Tail node is:", SvPV_nolen_const( mysv ),
                                 (RExC_seen_evals) ? "[EVAL]" : ""
                             );
                         });
@@ -1895,16 +1895,16 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
                             DEBUG_OPTIMISE_r({
                                 regprop( mysv, cur);
                                 PerlIO_printf( Perl_debug_log, "%*s%s",
-                                   (int)depth * 2 + 2,"  ", SvPV_nolen( mysv ) );
+                                   (int)depth * 2 + 2,"  ", SvPV_nolen_const( mysv ) );
 
                                 regprop( mysv, noper);
                                 PerlIO_printf( Perl_debug_log, " -> %s",
-                                    SvPV_nolen(mysv));
+                                    SvPV_nolen_const(mysv));
 
                                 if ( noper_next ) {
                                   regprop( mysv, noper_next );
                                   PerlIO_printf( Perl_debug_log,"\t=> %s\t",
-                                    SvPV_nolen(mysv));
+                                    SvPV_nolen_const(mysv));
                                 }
                                 PerlIO_printf( Perl_debug_log, "0x%p,0x%p,0x%p)\n",
                                    first, last, cur );
@@ -1922,20 +1922,20 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
                                         if (!last ) {
                                             regprop( mysv, first);
                                             PerlIO_printf( Perl_debug_log, "%*s%s",
-                                              (int)depth * 2 + 2, "F:", SvPV_nolen( mysv ) );
+                                              (int)depth * 2 + 2, "F:", SvPV_nolen_const( mysv ) );
                                             regprop( mysv, NEXTOPER(first) );
                                             PerlIO_printf( Perl_debug_log, " -> %s\n",
-                                              SvPV_nolen( mysv ) );
+                                              SvPV_nolen_const( mysv ) );
                                         }
                                     );
                                     last = cur;
                                     DEBUG_OPTIMISE_r({
                                         regprop( mysv, cur);
                                         PerlIO_printf( Perl_debug_log, "%*s%s",
-                                          (int)depth * 2 + 2, "N:", SvPV_nolen( mysv ) );
+                                          (int)depth * 2 + 2, "N:", SvPV_nolen_const( mysv ) );
                                         regprop( mysv, noper );
                                         PerlIO_printf( Perl_debug_log, " -> %s\n",
-                                          SvPV_nolen( mysv ) );
+                                          SvPV_nolen_const( mysv ) );
                                     });
                                 }
                             } else {
@@ -1964,7 +1964,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
                             regprop( mysv, cur);
                             PerlIO_printf( Perl_debug_log,
                               "%*s%s\t(0x%p,0x%p,0x%p)\n", (int)depth * 2 + 2,
-                              "  ", SvPV_nolen( mysv ), first, last, cur);
+                              "  ", SvPV_nolen_const( mysv ), first, last, cur);
 
                         });
                         if ( last ) {
@@ -2341,7 +2341,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 #if defined(SPARC64_GCC_WORKAROUND)
 			I32 b = 0;
 			STRLEN l = 0;
-			char *s = NULL;
+			const char *s = NULL;
 			I32 old = 0;
 
 			if (pos_before >= data->last_start_min)
@@ -2350,14 +2350,14 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			    b = data->last_start_min;
 
 			l = 0;
-			s = SvPV(data->last_found, l);
+			s = SvPV_const(data->last_found, l);
 			old = b - data->last_start_min;
 
 #else
 			I32 b = pos_before >= data->last_start_min
 			    ? pos_before : data->last_start_min;
 			STRLEN l;
-			char *s = SvPV(data->last_found, l);
+			const char *s = SvPV_const(data->last_found, l);
 			I32 old = b - data->last_start_min;
 #endif
 
@@ -5963,9 +5963,9 @@ Perl_re_intuit_string(pTHX_ regexp *prog)
 {				/* Assume that RE_INTUIT is set */
     GET_RE_DEBUG_FLAGS_DECL;
     DEBUG_COMPILE_r(
-	{   STRLEN n_a;
-	    const char *s = SvPV(prog->check_substr
-		      ? prog->check_substr : prog->check_utf8, n_a);
+	{
+	    const char *s = SvPV_nolen_const(prog->check_substr
+		      ? prog->check_substr : prog->check_utf8);
 
 	    if (!PL_colorset) reginitcolors();
 	    PerlIO_printf(Perl_debug_log,
@@ -6148,7 +6148,7 @@ S_re_croak2(pTHX_ const char* pat1,const char* pat2,...)
 #endif
     msv = vmess(buf, &args);
     va_end(args);
-    message = SvPV(msv,l1);
+    message = SvPV_const(msv,l1);
     if (l1 > 512)
 	l1 = 512;
     Copy(message, buf, l1 , char);
@@ -6310,7 +6310,7 @@ S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 		    PerlIO_printf(Perl_debug_log, "%*s<%s%s%s>\n",
 		       (int)(2*(l+4)), "",
 		       PL_colors[0],
-		       SvPV_nolen(*elem_ptr),
+		       SvPV_nolen_const(*elem_ptr),
 		       PL_colors[1]
 		    );
 		    /*

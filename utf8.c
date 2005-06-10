@@ -1476,9 +1476,9 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, const
 	 if ((hv  = get_hv(special, FALSE)) &&
 	     (svp = hv_fetch(hv, (const char*)tmpbuf, UNISKIP(uv1), FALSE)) &&
 	     (*svp)) {
-	      char *s;
+	     const char *s;
 
-	      s = SvPV(*svp, len);
+	      s = SvPV_const(*svp, len);
 	      if (len == 1)
 		   len = uvuni_to_utf8(ustrp, NATIVE_TO_UNI(*(U8*)s)) - ustrp;
 	      else {
@@ -1674,7 +1674,7 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
     POPSTACK;
     if (IN_PERL_COMPILETIME) {
 	STRLEN len;
-        const char* pv = SvPV(tokenbufsv, len);
+        const char* pv = SvPV_const(tokenbufsv, len);
 
 	Copy(pv, PL_tokenbuf, len+1, char);
 	PL_curcop->op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
@@ -1703,7 +1703,7 @@ Perl_swash_fetch(pTHX_ SV *sv, const U8 *ptr, bool do_utf8)
     U32 off;
     STRLEN slen;
     STRLEN needents;
-    U8 *tmps = NULL;
+    const U8 *tmps = NULL;
     U32 bit;
     SV *retval;
     U8 tmputf8[2];
@@ -1758,7 +1758,7 @@ Perl_swash_fetch(pTHX_ SV *sv, const U8 *ptr, bool do_utf8)
 	SV** svp = hv_fetch(hv, (const char*)ptr, klen, FALSE);
 
 	/* If not cached, generate it via utf8::SWASHGET */
-	if (!svp || !SvPOK(*svp) || !(tmps = (U8*)SvPV(*svp, slen))) {
+	if (!svp || !SvPOK(*svp) || !(tmps = (const U8*)SvPV_const(*svp, slen))) {
 	    dSP;
 	    /* We use utf8n_to_uvuni() as we want an index into
 	       Unicode tables, not a native character number.
@@ -1801,7 +1801,8 @@ Perl_swash_fetch(pTHX_ SV *sv, const U8 *ptr, bool do_utf8)
 
 	PL_last_swash_hv = hv;
 	PL_last_swash_klen = klen;
-	PL_last_swash_tmps = tmps;
+	/* FIXME change interpvar.h?  */
+	PL_last_swash_tmps = (U8 *) tmps;
 	PL_last_swash_slen = slen;
 	if (klen)
 	    Copy(ptr, PL_last_swash_key, klen, U8);
@@ -1969,8 +1970,8 @@ The pointer to the PV of the dsv is returned.
 char *
 Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
 {
-     return Perl_pv_uni_display(aTHX_ dsv, (U8*)SvPVX(ssv), SvCUR(ssv),
-				pvlim, flags);
+     return Perl_pv_uni_display(aTHX_ dsv, (const U8*)SvPVX_const(ssv),
+				SvCUR(ssv), pvlim, flags);
 }
 
 /*

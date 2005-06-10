@@ -1949,8 +1949,8 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	}
 	DEBUG_EXECUTE_r({
 	    SV *prop = sv_newmortal();
-	    char *s0;
-	    char *s1;
+	    const char *s0;
+	    const char *s1;
 	    int len0;
 	    int len1;
 
@@ -1958,7 +1958,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    s0 = UTF ?
 	      pv_uni_display(dsv0, (U8*)SvPVX_const(prop), SvCUR(prop), 60,
 			     UNI_DISPLAY_REGEX) :
-	      SvPVX(prop);
+	      SvPVX_const(prop);
 	    len0 = UTF ? SvCUR(dsv0) : SvCUR(prop);
 	    s1 = UTF ?
 	      sv_uni_display(dsv1, sv, 60, UNI_DISPLAY_REGEX) : s;
@@ -1994,7 +1994,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    }
 	    else {
 		STRLEN len;
-                const char * const little = SvPV(float_real, len);
+                const char * const little = SvPV_const(float_real, len);
 
 		if (SvTAIL(float_real)) {
 		    if (memEQ(strend - len + 1, little, len - 1))
@@ -2727,7 +2727,7 @@ S_regmatch(pTHX_ regnode *prog)
 			    "%*s  %sonly one match : #%d <%s>%s\n",
 			    REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4],
         		    accept_buff[ 0 ].wordnum,
-        		    tmp ? SvPV_nolen( *tmp ) : "not compiled under -Dr",
+        		    tmp ? SvPV_nolen_const( *tmp ) : "not compiled under -Dr",
         		    PL_colors[5] );
 		    });
 		    PL_reginput = (char *)accept_buff[ 0 ].endpos;
@@ -2762,7 +2762,7 @@ S_regmatch(pTHX_ regnode *prog)
     			    PerlIO_printf( Perl_debug_log, "%*s  %strying alternation #%d <%s> at 0x%p%s\n",
     			        REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4],
     			        accept_buff[best].wordnum,
-        		        tmp ? SvPV_nolen( *tmp ) : "not compiled under -Dr",scan,
+        		        tmp ? SvPV_nolen_const( *tmp ) : "not compiled under -Dr",scan,
         		        PL_colors[5] );
 			});
 			if ( best<accepted ) {
@@ -4752,7 +4752,7 @@ S_reginclass(pTHX_ register const regnode *n, register const U8* p, STRLEN* lenp
 			for (i = 0; i <= av_len(av); i++) {
 			    SV* sv = *av_fetch(av, i, FALSE);
 			    STRLEN len;
-			    const char *s = SvPV(sv, len);
+			    const char *s = SvPV_const(sv, len);
 			
 			    if (len <= plen && memEQ(s, (char*)p, len)) {
 			        *lenp = len;

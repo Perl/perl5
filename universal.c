@@ -395,13 +395,13 @@ XS(XS_version_new)
 	Perl_croak(aTHX_ "Usage: version::new(class, version)");
     SP -= items;
     {
-        const char *classname = SvPV_nolen(ST(0));
+        const char *classname = SvPV_nolen_const(ST(0));
         SV *vs = ST(1);
 	SV *rv;
 	if (items == 3 )
 	{
 	    vs = sv_newmortal(); 
-	    Perl_sv_setpvf(aTHX_ vs,"v%s",SvPV_nolen(ST(2)));
+	    Perl_sv_setpvf(aTHX_ vs,"v%s",SvPV_nolen_const(ST(2)));
 	}
 
 	rv = new_version(vs);
