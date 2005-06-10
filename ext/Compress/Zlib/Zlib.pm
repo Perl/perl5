@@ -18,9 +18,9 @@ use Carp ;
 use IO::Handle ;
 
 use strict ;
-local ($^W) = 1; #use warnings ;
-use vars qw($VERSION @ISA @EXPORT $AUTOLOAD);
-use vars qw($deflateDefault $deflateParamsDefault $inflateDefault);
+use warnings ;
+our ($VERSION, @ISA, @EXPORT, $AUTOLOAD);
+our ($deflateDefault, $deflateParamsDefault, $inflateDefault);
 
 $VERSION = "1.34_01" ;
 
@@ -197,7 +197,7 @@ $inflateDefault = {
 sub deflateInit(@)
 {
     my ($got) = ParseParameters($deflateDefault, @_) ;
-    local ($^W) = 0; #no warnings;
+    no warnings;
     croak "deflateInit: Bufsize must be >= 1, you specified $got->{Bufsize}"
         unless $got->{Bufsize} >= 1;
     _deflateInit($got->{Level}, $got->{Method}, $got->{WindowBits}, 
@@ -209,7 +209,7 @@ sub deflateInit(@)
 sub inflateInit(@)
 {
     my ($got) = ParseParameters($inflateDefault, @_) ;
-    local ($^W) = 0; #no warnings;
+    no warnings;
     croak "inflateInit: Bufsize must be >= 1, you specified $got->{Bufsize}"
         unless $got->{Bufsize} >= 1;
     _inflateInit($got->{WindowBits}, $got->{Bufsize}, $got->{Dictionary});
@@ -222,7 +222,7 @@ sub Compress::Zlib::deflateStream::deflateParams
     my ($got) = ParseParameters($deflateParamsDefault, @_) ;
     croak "deflateParams needs Level and/or Strategy"
         unless defined $got->{Level} || defined $got->{Strategy};
-    local ($^W) = 0; #no warnings;
+    no warnings;
     croak "deflateParams: Bufsize must be >= 1, you specified $got->{Bufsize}"
         unless  !defined $got->{Bufsize} || $got->{Bufsize} >= 1;
 

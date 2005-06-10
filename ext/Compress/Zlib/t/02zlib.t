@@ -1,7 +1,7 @@
 
 
 use strict ;
-local ($^W) = 1; #use warnings ;
+use warnings ;
 
 use Compress::Zlib ;
 

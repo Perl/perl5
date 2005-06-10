@@ -351,8 +351,10 @@ sub UpDowngrade
           { return }
     }
 
-    foreach (@files)
-      { doUpDown($our_sub, $warn_sub, $_) }
+    unless ($ENV{PERL_CORE}) {
+      foreach (@files)
+        { doUpDown($our_sub, $warn_sub, $_) }
+    }
 
     warn "Up/Downgrade complete.\n" ;
     exit 0 if $upgrade || $downgrade;
