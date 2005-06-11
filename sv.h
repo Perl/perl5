@@ -1350,7 +1350,7 @@ Like C<sv_catsv> but doesn't process magic.
 
 #define SvSHARED_HEK_FROM_PV(pvx) \
 	((struct hek*)(pvx - STRUCT_OFFSET(struct hek, hek_key)))
-#define SvSHARED_HASH(sv) (SvSHARED_HEK_FROM_PV(SvPVX_const(sv))->hek_hash)
+#define SvSHARED_HASH(sv) (0 + SvSHARED_HEK_FROM_PV(SvPVX_const(sv))->hek_hash)
 
 /* flag values for sv_*_flags functions */
 #define SV_IMMEDIATE_UNREF	1
