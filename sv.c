@@ -3441,8 +3441,22 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
             register const char *typestr;
             if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,string)) &&
                 (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
-		/* FIXME - figure out best way to pass context inwards.  */
-                char *pv = lp ? SvPV(tmpstr, *lp) : SvPV_nolen(tmpstr);
+		/* Unwrap this:  */
+		/* char *pv = lp ? SvPV(tmpstr, *lp) : SvPV_nolen(tmpstr); */
+
+                char *pv;
+		if ((SvFLAGS(tmpstr) & (SVf_POK)) == SVf_POK) {
+		    if (flags & SV_CONST_RETURN) {
+			pv = (char *) SvPVX_const(tmpstr);
+		    } else {
+			pv = (flags & SV_MUTABLE_RETURN)
+			    ? SvPVX_mutable(tmpstr) : SvPVX(tmpstr);
+		    }
+		    if (lp)
+			*lp = SvCUR(tmpstr);
+		} else {
+		    pv = sv_2pv_flags(tmpstr, lp, flags);
+		}
                 if (SvUTF8(tmpstr))
                     SvUTF8_on(sv);
                 else
