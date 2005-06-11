@@ -39,8 +39,6 @@ struct xpvhv_aux {
     I32		xhv_riter;	/* current root of iterator */
 };
 
-#define HV_AUX_SIZE STRUCT_OFFSET(struct xpvhv_aux, xhv_array)
-
 /* hash structure: */
 /* This structure must match the beginning of struct xpvmg in sv.h. */
 struct xpvhv {

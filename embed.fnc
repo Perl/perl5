@@ -997,7 +997,7 @@ sR	|HE*	|new_he
 s	|void	|del_he		|NN HE *p
 sR	|HEK*	|save_hek_flags	|NN const char *str|I32 len|U32 hash|int flags
 s	|void	|hv_magic_check	|NN HV *hv|NN bool *needs_copy|NN bool *needs_store
-s	|void	|unshare_hek_or_pvn|HEK* hek|const char* str|I32 len|U32 hash
+s	|void	|unshare_hek_or_pvn|const HEK* hek|const char* str|I32 len|U32 hash
 sR	|HE*	|share_hek_flags|const char* sv|I32 len|U32 hash|int flags
 rs	|void	|hv_notallowed	|int flags|NN const char *key|I32 klen|NN const char *msg
 s	|struct xpvhv_aux*|hv_auxinit|HV *hv

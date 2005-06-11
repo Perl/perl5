@@ -2149,7 +2149,7 @@ Perl_unshare_hek(pTHX_ HEK *hek)
    are used.  If so, len and hash must both be valid for str.
  */
 STATIC void
-S_unshare_hek_or_pvn(pTHX_ HEK *hek, const char *str, I32 len, U32 hash)
+S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
 {
     register XPVHV* xhv;
     register HE *entry;

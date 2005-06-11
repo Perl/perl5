@@ -1874,7 +1874,7 @@ STATIC void	S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 
-STATIC void	S_unshare_hek_or_pvn(pTHX_ HEK* hek, const char* str, I32 len, U32 hash);
+STATIC void	S_unshare_hek_or_pvn(pTHX_ const HEK* hek, const char* str, I32 len, U32 hash);
 STATIC HE*	S_share_hek_flags(pTHX_ const char* sv, I32 len, U32 hash, int flags)
 			__attribute__warn_unused_result__;
 
