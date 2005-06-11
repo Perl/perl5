@@ -855,8 +855,11 @@ Here is an example of using B<inflate>.
 =head1 COMPRESS/UNCOMPRESS
 
 Two high-level functions are provided by I<zlib> to perform in-memory
-compression. They are B<compress> and B<uncompress>. Two Perl subs are
-provided which provide similar functionality.
+compression/uncompression of RFC1950 data streams. They are called
+B<compress> and B<uncompress>.
+
+The two Perl subs defined below provide the equivalent
+functionality.
 
 =over 5
 
@@ -881,6 +884,9 @@ data. Otherwise it returns I<undef>.
 The source buffer can either be a scalar or a scalar reference.
 
 =back
+
+Please note: the two functions defined above are I<not> compatible with
+the Unix commands of the same name.
 
 =head1 GZIP INTERFACE
 

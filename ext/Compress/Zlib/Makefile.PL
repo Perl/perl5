@@ -66,7 +66,7 @@ EOM
 ParseCONFIG() ;
 
 my @files = ('Zlib.pm', glob("t/*.t"), grep(!/\.bak$/,  glob("examples/*"))) ;
-UpDowngrade(@files);
+UpDowngrade(@files) unless $ENV{PERL_CORE}; 
 
 WriteMakefile(	
 	NAME   	 	=> 'Compress::Zlib',
@@ -351,10 +351,8 @@ sub UpDowngrade
           { return }
     }
 
-    unless ($ENV{PERL_CORE}) {
-      foreach (@files)
-        { doUpDown($our_sub, $warn_sub, $_) }
-    }
+    foreach (@files)
+      { doUpDown($our_sub, $warn_sub, $_) }
 
     warn "Up/Downgrade complete.\n" ;
     exit 0 if $upgrade || $downgrade;

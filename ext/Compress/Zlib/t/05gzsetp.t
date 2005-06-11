@@ -9,7 +9,6 @@ BEGIN
 {
  
     my $ver = Compress::Zlib::zlib_version();
-    print "ver $ver\n";
     if (defined $ver && $ver =~ /^(\d+)\.(\d+)\.(\d+)/ )
     {
         my $sum = $1 * 1000000 + $2 * 1000 + $3 ;
@@ -81,4 +80,5 @@ ok(1, Compress::Zlib::zlib_version eq ZLIB_VERSION) ;
 
     ok(10, $uncompressed  eq $input ) ;
     ok(11, ! $k->gzclose ) ;
+    unlink $name ;
 }
