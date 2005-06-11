@@ -246,7 +246,12 @@ mechanism for processes communicating on the same machine.  It works
 just like a regular, connected anonymous pipes, except that the
 processes rendezvous using a filename and don't have to be related.
 
-To create a named pipe, use the Unix command mknod(1) or on some
+To create a named pipe, use the C<POSIX::mkfifo()> function.
+
+    use POSIX qw(mkfifo);
+    mkfifo($path, 0700) or die "mkfifo $path failed: $!";
+
+You can also use the Unix command mknod(1) or on some
 systems, mkfifo(1).  These may not be in your normal path.
 
     # system return val is backwards, so && not ||
@@ -272,13 +277,13 @@ to find out whether anyone (or anything) has accidentally removed our fifo.
 
     chdir; # go home
     $FIFO = '.signature';
-    $ENV{PATH} .= ":/etc:/usr/games";
 
     while (1) {
 	unless (-p $FIFO) {
 	    unlink $FIFO;
-	    system('mknod', $FIFO, 'p')
-		&& die "can't mknod $FIFO: $!";
+	    require POSIX;
+	    POSIX::mkfifo($FIFO, 0700)
+		or die "can't mkfifo $FIFO: $!";
 	}
 
 	# next line blocks until there's a reader
