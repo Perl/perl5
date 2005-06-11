@@ -1270,8 +1270,7 @@ s	|bool	|utf8_mg_pos_init	|NN SV *sv|NN MAGIC **mgp \
 				|NN STRLEN **cachep|I32 i|I32 offsetp \
 				|NN const U8 *s|NN const U8 *start
 #if defined(PERL_OLD_COPY_ON_WRITE)
-sM	|void	|sv_release_COW	|SV *sv|const char *pvx|STRLEN cur|STRLEN len \
-				|U32 hash|SV *after
+sM	|void	|sv_release_COW	|SV *sv|const char *pvx|STRLEN len|SV *after
 #endif
 #endif
 

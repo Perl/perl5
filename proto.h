@@ -2473,7 +2473,7 @@ STATIC bool	S_utf8_mg_pos_init(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i
 			__attribute__nonnull__(pTHX_7);
 
 #if defined(PERL_OLD_COPY_ON_WRITE)
-STATIC void	S_sv_release_COW(pTHX_ SV *sv, const char *pvx, STRLEN cur, STRLEN len, U32 hash, SV *after);
+STATIC void	S_sv_release_COW(pTHX_ SV *sv, const char *pvx, STRLEN len, SV *after);
 #endif
 #endif
 

@@ -3323,7 +3323,7 @@
 #endif
 #if defined(PERL_OLD_COPY_ON_WRITE)
 #ifdef PERL_CORE
-#define sv_release_COW(a,b,c,d,e,f)	S_sv_release_COW(aTHX_ a,b,c,d,e,f)
+#define sv_release_COW(a,b,c,d)	S_sv_release_COW(aTHX_ a,b,c,d)
 #endif
 #endif
 #endif

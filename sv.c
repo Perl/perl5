@@ -4566,12 +4566,12 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
                     DEBUG_C(PerlIO_printf(Perl_debug_log,
                                           "Copy on write: Sharing hash\n"));
 
-		    assert (SvTYPE(dstr) >= SVt_PVIV);
+		    assert (SvTYPE(dstr) >= SVt_PV);
+		    /* FIXME - would benefit from share_hek_hek  */
                     SvPV_set(dstr,
                              sharepvn(SvPVX_const(sstr),
                                       (sflags & SVf_UTF8?-cur:cur), hash));
-                    SvUV_set(dstr, hash);
-                }
+		}
                 SvLEN_set(dstr, len);
                 SvCUR_set(dstr, cur);
                 SvREADONLY_on(dstr);
@@ -4711,7 +4711,7 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 	    UV hash = SvSHARED_HASH(sstr);
 	    DEBUG_C(PerlIO_printf(Perl_debug_log,
 				  "Fast copy on write: Sharing hash\n"));
-	    SvUV_set(dstr, hash);
+	    /* FIXME - would benefit from share_hek_hek  */
 	    new_pv = sharepvn(SvPVX_const(sstr), (SvUTF8(sstr)?-cur:cur), hash);
 	    goto common_exit;
 	}
@@ -4896,8 +4896,7 @@ Perl_sv_usepvn_mg(pTHX_ register SV *sv, register char *ptr, register STRLEN len
    (which it can do by means other than releasing copy-on-write Svs)
    or by changing the other copy-on-write SVs in the loop.  */
 STATIC void
-S_sv_release_COW(pTHX_ register SV *sv, const char *pvx, STRLEN cur, STRLEN len,
-                 U32 hash, SV *after)
+S_sv_release_COW(pTHX_ register SV *sv, const char *pvx, STRLEN len, SV *after)
 {
     if (len) { /* this SV was SvIsCOW_normal(sv) */
          /* we need to find the SV pointing to us.  */
@@ -4924,7 +4923,7 @@ S_sv_release_COW(pTHX_ register SV *sv, const char *pvx, STRLEN cur, STRLEN len,
             SV_COW_NEXT_SV_SET(current, after);
         }
     } else {
-        unsharepvn(pvx, SvUTF8(sv) ? -(I32)cur : cur, hash);
+        unshare_hek(SvSHARED_HEK_FROM_PV(pvx));
     }
 }
 
@@ -4963,7 +4962,6 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 	    const char *pvx = SvPVX_const(sv);
 	    const STRLEN len = SvLEN(sv);
 	    const STRLEN cur = SvCUR(sv);
-	    const U32 hash = SvSHARED_HASH(sv);
 	    SV * const next = SV_COW_NEXT_SV(sv);   /* next COW sv in the loop. */
             if (DEBUG_C_TEST) {
                 PerlIO_printf(Perl_debug_log,
@@ -4985,7 +4983,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
                 SvCUR_set(sv, cur);
                 *SvEND(sv) = '\0';
             }
-            sv_release_COW(sv, pvx, cur, len, hash, next);
+            sv_release_COW(sv, pvx, len, next);
             if (DEBUG_C_TEST) {
                 sv_dump(sv);
             }
@@ -4998,9 +4996,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
     if (SvREADONLY(sv)) {
 	if (SvFAKE(sv)) {
 	    const char *pvx = SvPVX_const(sv);
-	    const int is_utf8 = SvUTF8(sv);
 	    const STRLEN len = SvCUR(sv);
-	    const U32 hash = SvSHARED_HASH(sv);
 	    SvFAKE_off(sv);
 	    SvREADONLY_off(sv);
 	    SvPV_set(sv, Nullch);
@@ -5008,7 +5004,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 	    SvGROW(sv, len + 1);
 	    Move(pvx,SvPVX_const(sv),len,char);
 	    *SvEND(sv) = '\0';
-	    unsharepvn(pvx, is_utf8 ? -(I32)len : len, hash);
+	    unshare_hek(SvSHARED_HEK_FROM_PV(pvx));
 	}
 	else if (IN_PERL_RUNTIME)
 	    Perl_croak(aTHX_ PL_no_modify);
@@ -6004,8 +6000,8 @@ Perl_sv_clear(pTHX_ register SV *sv)
                     PerlIO_printf(Perl_debug_log, "Copy on write: clear\n");
                     sv_dump(sv);
                 }
-                sv_release_COW(sv, SvPVX_const(sv), SvCUR(sv), SvLEN(sv),
-                                 SvUVX(sv), SV_COW_NEXT_SV(sv));
+                sv_release_COW(sv, SvPVX_const(sv), SvLEN(sv),
+			       SV_COW_NEXT_SV(sv));
                 /* And drop it here.  */
                 SvFAKE_off(sv);
             } else if (SvLEN(sv)) {
@@ -6016,9 +6012,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	else if (SvPVX_const(sv) && SvLEN(sv))
 	    Safefree(SvPVX_const(sv));
 	else if (SvPVX_const(sv) && SvREADONLY(sv) && SvFAKE(sv)) {
-	    unsharepvn(SvPVX_const(sv),
-		       SvUTF8(sv) ? -(I32)SvCUR(sv) : SvCUR(sv),
-		       SvUVX(sv));
+	    unshare_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sv)));
 	    SvFAKE_off(sv);
 	}
 #endif
@@ -7729,10 +7723,9 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
     if (!hash)
 	PERL_HASH(hash, src, len);
     new_SV(sv);
-    sv_upgrade(sv, SVt_PVIV);
+    sv_upgrade(sv, SVt_PV);
     SvPV_set(sv, sharepvn(src, is_utf8?-len:len, hash));
     SvCUR_set(sv, len);
-    SvUV_set(sv, hash);
     SvLEN_set(sv, 0);
     SvREADONLY_on(sv);
     SvFAKE_on(sv);
@@ -10759,9 +10752,9 @@ Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
                        and they should not have these flags
                        turned off */
 
+		    /* FIXME - would benefit from share_hek_hek  */
                     SvPV_set(dstr, sharepvn(SvPVX_const(sstr), SvCUR(sstr),
                                            SvUVX(sstr)));
-                    SvUV_set(dstr, SvUVX(sstr));
                 } else {
 
                     SvPV_set(dstr, SAVEPVN(SvPVX_const(sstr), SvCUR(sstr)));
