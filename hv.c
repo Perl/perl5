@@ -126,19 +126,20 @@ Perl_free_tied_hv_pool(pTHX)
 HEK *
 Perl_hek_dup(pTHX_ HEK *source, CLONE_PARAMS* param)
 {
-    HE *shared = (HE*)ptr_table_fetch(PL_shared_hek_table, source);
+    HEK *shared = (HEK*)ptr_table_fetch(PL_ptr_table, source);
     (void)param;
 
     if (shared) {
 	/* We already shared this hash key.  */
-	++HeVAL(shared);
+	share_hek_hek(shared);
     }
     else {
-	shared = share_hek_flags(HEK_KEY(source), HEK_LEN(source),
-				 HEK_HASH(source), HEK_FLAGS(source));
-	ptr_table_store(PL_shared_hek_table, source, shared);
+	shared
+	    = HeKEY_hek(share_hek_flags(HEK_KEY(source), HEK_LEN(source),
+					HEK_HASH(source), HEK_FLAGS(source)));
+	ptr_table_store(PL_ptr_table, source, shared);
     }
-    return HeKEY_hek(shared);
+    return shared;
 }
 
 HE *
@@ -168,18 +169,20 @@ Perl_he_dup(pTHX_ HE *e, bool shared, CLONE_PARAMS* param)
 	/* This is hek_dup inlined, which seems to be important for speed
 	   reasons.  */
 	HEK *source = HeKEY_hek(e);
-	HE *shared = (HE*)ptr_table_fetch(PL_shared_hek_table, source);
+	HEK *shared = (HEK*)ptr_table_fetch(PL_ptr_table, source);
 
 	if (shared) {
 	    /* We already shared this hash key.  */
-	    ++HeVAL(shared);
+	    share_hek_hek(shared);
 	}
 	else {
-	    shared = share_hek_flags(HEK_KEY(source), HEK_LEN(source),
-				     HEK_HASH(source), HEK_FLAGS(source));
-	    ptr_table_store(PL_shared_hek_table, source, shared);
+	    shared
+		= HeKEY_hek(share_hek_flags(HEK_KEY(source), HEK_LEN(source),
+					    HEK_HASH(source),
+					    HEK_FLAGS(source)));
+	    ptr_table_store(PL_ptr_table, source, shared);
 	}
-	HeKEY_hek(ret) = HeKEY_hek(shared);
+	HeKEY_hek(ret) = shared;
     }
     else
 	HeKEY_hek(ret) = save_hek_flags(HeKEY(e), HeKLEN(e), HeHASH(e),
