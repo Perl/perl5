@@ -2201,9 +2201,10 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
     /* assert(xhv_array != 0) */
     LOCK_STRTAB_MUTEX;
     first = oentry = &(HvARRAY(PL_strtab))[hash & (I32) HvMAX(PL_strtab)];
-    if (hek) {
+    if (he) {
+	const HE *const he_he = &(he->shared_he_he);
         for (entry = *oentry; entry; oentry = &HeNEXT(entry), entry = *oentry) {
-            if (HeKEY_hek(entry) != hek)
+            if (entry != he_he)
                 continue;
             found = 1;
             break;
