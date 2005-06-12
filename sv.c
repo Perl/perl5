@@ -4562,15 +4562,12 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 #endif
 		{
                     /* SvIsCOW_shared_hash */
-                    UV hash = SvSHARED_HASH(sstr);
                     DEBUG_C(PerlIO_printf(Perl_debug_log,
                                           "Copy on write: Sharing hash\n"));
 
 		    assert (SvTYPE(dstr) >= SVt_PV);
-		    /* FIXME - would benefit from share_hek_hek  */
                     SvPV_set(dstr,
-                             sharepvn(SvPVX_const(sstr),
-                                      (sflags & SVf_UTF8?-cur:cur), hash));
+			     HEK_KEY(share_hek_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sstr)))));
 		}
                 SvLEN_set(dstr, len);
                 SvCUR_set(dstr, cur);
@@ -4708,11 +4705,9 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 
 	if (SvLEN(sstr) == 0) {
 	    /* source is a COW shared hash key.  */
-	    UV hash = SvSHARED_HASH(sstr);
 	    DEBUG_C(PerlIO_printf(Perl_debug_log,
 				  "Fast copy on write: Sharing hash\n"));
-	    /* FIXME - would benefit from share_hek_hek  */
-	    new_pv = sharepvn(SvPVX_const(sstr), (SvUTF8(sstr)?-cur:cur), hash);
+	    new_pv = HEK_KEY(share_hek_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sstr))));
 	    goto common_exit;
 	}
 	SV_COW_NEXT_SV_SET(dstr, SV_COW_NEXT_SV(sstr));

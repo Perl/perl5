@@ -364,6 +364,13 @@ C<SV*>.
 #define Perl_sharepvn(sv, len, hash) HEK_KEY(share_hek(sv, len, hash))
 #define sharepvn(sv, len, hash)	     Perl_sharepvn(sv, len, hash)
 
+#define share_hek_hek(hek)						\
+    (++(((struct shared_he *)(((char *)hek)				\
+			      - STRUCT_OFFSET(struct shared_he,		\
+					      shared_he_hek)))		\
+	->shared_he_he.hent_val),					\
+     hek)
+
 /*
  * Local variables:
  * c-indentation-style: bsd
