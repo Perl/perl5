@@ -10747,9 +10747,9 @@ Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
                        and they should not have these flags
                        turned off */
 
-		    /* FIXME - would benefit from share_hek_hek  */
-                    SvPV_set(dstr, sharepvn(SvPVX_const(sstr), SvCUR(sstr),
-                                           SvUVX(sstr)));
+		    SvPV_set(dstr,
+			     HEK_KEY(hek_dup(SvSHARED_HEK_FROM_PV(SvPVX_const(sstr)),
+					     param)));
                 } else {
 
                     SvPV_set(dstr, SAVEPVN(SvPVX_const(sstr), SvCUR(sstr)));
