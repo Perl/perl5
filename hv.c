@@ -2159,8 +2159,17 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
     bool is_utf8 = FALSE;
     int k_flags = 0;
     const char *save = str;
+    struct shared_he *he = 0;
 
     if (hek) {
+	/* Find the shared he which is just before us in memory.  */
+	he = (struct shared_he *)(((char *)hek)
+				  - STRUCT_OFFSET(struct shared_he,
+						  shared_he_hek));
+
+	/* Assert that the caller passed us a genuine (or at least consistent)
+	   shared hek  */
+	assert (he->shared_he_he.hent_hek == hek);
         hash = HEK_HASH(hek);
     } else if (len < 0) {
         STRLEN tmplen = -len;
@@ -2213,8 +2222,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
 		/* There are now no entries in our slot.  */
                 xhv->xhv_fill--; /* HvFILL(hv)-- */
 	    }
-            Safefree(HeKEY_hek(entry));
-            del_HE(entry);
+            Safefree(entry);
             xhv->xhv_keys--; /* HvKEYS(hv)-- */
         }
     }
@@ -2299,11 +2307,35 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 	   If this is NULL, then we're the first entry for this slot, which
 	   means we need to increate fill.  */
 	const HE *old_first = *oentry;
-	entry = new_HE();
-	HeKEY_hek(entry) = save_hek_flags(str, len, hash, flags_masked);
+	struct shared_he *new_entry;
+	HEK *hek;
+	char *k;
+
+	/* We don't actually store a HE from the arena and a regular HEK.
+	   Instead we allocate one chunk of memory big enough for both,
+	   and put the HEK straight after the HE. This way we can find the
+	   HEK directly from the HE.
+	*/
+
+	New(0, k, STRUCT_OFFSET(struct shared_he,
+				shared_he_hek.hek_key[0]) + len + 2, char);
+	new_entry = (struct shared_he *)k;
+	entry = &(new_entry->shared_he_he);
+	hek = &(new_entry->shared_he_hek);
+
+	Copy(str, HEK_KEY(hek), len, char);
+	HEK_KEY(hek)[len] = 0;
+	HEK_LEN(hek) = len;
+	HEK_HASH(hek) = hash;
+	HEK_FLAGS(hek) = (unsigned char)flags_masked;
+
+	/* Still "point" to the HEK, so that other code need not know what
+	   we're up to.  */
+	HeKEY_hek(entry) = hek;
 	HeVAL(entry) = Nullsv;
 	HeNEXT(entry) = *oentry;
 	*oentry = entry;
+
 	xhv->xhv_keys++; /* HvKEYS(hv)++ */
 	if (!old_first) {			/* initial entry? */
 	    xhv->xhv_fill++; /* HvFILL(hv)++ */

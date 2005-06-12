@@ -29,6 +29,10 @@ struct hek {
        is UTF-8 */
 };
 
+struct shared_he {
+    struct he shared_he_he;
+    struct hek shared_he_hek;
+};
 
 /* Subject to change.
    Don't access this directly.
