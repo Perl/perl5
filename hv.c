@@ -2170,6 +2170,15 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
 	/* Assert that the caller passed us a genuine (or at least consistent)
 	   shared hek  */
 	assert (he->shared_he_he.hent_hek == hek);
+
+	LOCK_STRTAB_MUTEX;
+	if (he->shared_he_he.hent_val - 1) {
+	    --he->shared_he_he.hent_val;
+	    UNLOCK_STRTAB_MUTEX;
+	    return;
+	}
+	UNLOCK_STRTAB_MUTEX;
+
         hash = HEK_HASH(hek);
     } else if (len < 0) {
         STRLEN tmplen = -len;
