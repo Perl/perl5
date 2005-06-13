@@ -338,3 +338,10 @@ mycroak(pv)
     const char* pv
     CODE:
     Perl_croak(aTHX_ "%s", pv);
+
+SV*
+strtab()
+   CODE:
+   RETVAL = newRV_inc((SV*)PL_strtab);
+   OUTPUT:
+   RETVAL

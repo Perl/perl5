@@ -33,6 +33,9 @@ holds the key and hash value.
 
 #define HV_MAX_LENGTH_BEFORE_SPLIT 14
 
+static const char *const S_strtab_error
+    = "Cannot modify shared string table in hv_%s";
+
 STATIC void
 S_more_he(pTHX)
 {
@@ -692,6 +695,14 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		    unshare_hek (HeKEY_hek(entry));
 		    HeKEY_hek(entry) = new_hek;
 		}
+		else if (hv == PL_strtab) {
+		    /* PL_strtab is usually the only hash without HvSHAREKEYS,
+		       so putting this test here is cheap  */
+		    if (flags & HVhek_FREEKEY)
+			Safefree(key);
+		    Perl_croak(aTHX_ S_strtab_error,
+			       action & HV_FETCH_LVALUE ? "fetch" : "store");
+		}
 		else
 		    HeKFLAGS(entry) = masked_flags;
 		if (masked_flags & HVhek_ENABLEHVKFLAGS)
@@ -793,6 +804,14 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
        bad API design.  */
     if (HvSHAREKEYS(hv))
 	HeKEY_hek(entry) = share_hek_flags(key, klen, hash, flags);
+    else if (hv == PL_strtab) {
+	/* PL_strtab is usually the only hash without HvSHAREKEYS, so putting
+	   this test here is cheap  */
+	if (flags & HVhek_FREEKEY)
+	    Safefree(key);
+	Perl_croak(aTHX_ S_strtab_error,
+		   action & HV_FETCH_LVALUE ? "fetch" : "store");
+    }
     else                                       /* gotta do the real thing */
 	HeKEY_hek(entry) = save_hek_flags(key, klen, hash, flags);
     HeVAL(entry) = val;
@@ -1035,6 +1054,12 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    continue;
 	if ((HeKFLAGS(entry) ^ masked_flags) & HVhek_UTF8)
 	    continue;
+
+	if (hv == PL_strtab) {
+	    if (k_flags & HVhek_FREEKEY)
+		Safefree(key);
+	    Perl_croak(aTHX_ S_strtab_error, "delete");
+	}
 
 	/* if placeholder is here, it's already been deleted.... */
 	if (HeVAL(entry) == &PL_sv_placeholder)

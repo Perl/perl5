@@ -19,7 +19,7 @@ our @EXPORT = qw( print_double print_int print_long
 		  call_sv call_pv call_method eval_sv eval_pv require_pv
 		  G_SCALAR G_ARRAY G_VOID G_DISCARD G_EVAL G_NOARGS
 		  G_KEEPERR G_NODEBUG G_METHOD
-		  exception mycroak
+		  exception mycroak strtab
 );
 
 # from cop.h 
@@ -33,7 +33,7 @@ sub G_KEEPERR()	{  16 }
 sub G_NODEBUG()	{  32 }
 sub G_METHOD()	{  64 }
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 bootstrap XS::APItest $VERSION;
 
