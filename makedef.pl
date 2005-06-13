@@ -691,7 +691,6 @@ unless ($define{'USE_ITHREADS'}) {
 		    PL_op_mutex
 		    PL_regex_pad
 		    PL_regex_padav
-		    PL_shared_hek_table
 		    PL_sharedsv_space
 		    PL_sharedsv_space_mutex
 		    PL_dollarzero_mutex
