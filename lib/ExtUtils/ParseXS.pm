@@ -196,8 +196,8 @@ sub process_file {
     $input_expr{$key} =~ s/;*\s+\z//;
   }
 
-  my ($bal, $cast, $size);
-  $bal = qr[(?:(?>[^()]+)|\((??{ $bal })\))*]; # ()-balanced
+  my ($cast, $size);
+  our $bal = qr[(?:(?>[^()]+)|\((??{ $bal })\))*]; # ()-balanced
   $cast = qr[(?:\(\s*SV\s*\*\s*\)\s*)?]; # Optional (SV*) cast
   $size = qr[,\s* (??{ $bal }) ]x; # Third arg (to setpvn)
 
@@ -225,7 +225,7 @@ sub process_file {
 				  )) . "|$END)\\s*:";
 
   
-  my ($C_group_rex, $C_arg);
+  our ($C_group_rex, $C_arg);
   # Group in C (no support for comments or literals)
   $C_group_rex = qr/ [({\[]
 		       (?: (?> [^()\[\]{}]+ ) | (??{ $C_group_rex }) )*
