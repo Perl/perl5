@@ -66,7 +66,7 @@ checkOptree ( name	=> 'BEGIN',
 # 6              <0> pushmark s ->7
 # 7              <$> const[PV "warnings"] sM ->8
 # 8              <$> const[PV "qw"] sM ->9
-# 9              <$> method_named[PVIV 1520340202] ->a
+# 9              <$> method_named[PV "import"] ->a
 # BEGIN 2:
 # f  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->f
@@ -88,7 +88,7 @@ EOT_EOT
 # 6              <0> pushmark s ->7
 # 7              <$> const(PV "warnings") sM ->8
 # 8              <$> const(PV "qw") sM ->9
-# 9              <$> method_named(PVIV 1520340202) ->a
+# 9              <$> method_named(PV "import") ->a
 # BEGIN 2:
 # f  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->f
@@ -180,7 +180,7 @@ checkOptree ( name	=> 'all of BEGIN END INIT CHECK -exec',
 # 6  <0> pushmark s
 # 7  <$> const[PV "warnings"] sM
 # 8  <$> const[PV "qw"] sM
-# 9  <$> method_named[PVIV 1520340202] 
+# 9  <$> method_named[PV "unimport"] 
 # a  <1> entersub[t1] KS*/TARG,2
 # b  <1> leavesub[1 ref] K/REFC,1
 # BEGIN 2:
@@ -213,7 +213,7 @@ EOT_EOT
 # 6  <0> pushmark s
 # 7  <$> const(PV "warnings") sM
 # 8  <$> const(PV "qw") sM
-# 9  <$> method_named(PVIV 1520340202) 
+# 9  <$> method_named(PV "unimport") 
 # a  <1> entersub[t1] KS*/TARG,2
 # b  <1> leavesub[1 ref] K/REFC,1
 # BEGIN 2:

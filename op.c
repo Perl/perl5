@@ -1595,14 +1595,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
 				    dup_attrlist(attrs)));
 
     /* Fake up a method call to import */
-    meth = newSVpvn("import", 6);
-    SvUPGRADE(meth, SVt_PVIV);
-    (void)SvIOK_on(meth);
-    {
-	U32 hash;
-	PERL_HASH(hash, SvPVX_const(meth), SvCUR(meth));
-	SvUV_set(meth, hash);
-    }
+    meth = newSVpvn_share("import", 6, 0);
     imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL|OPf_WANT_VOID,
 		   append_elem(OP_LIST,
 			       prepend_elem(OP_LIST, pack, list(arg)),
@@ -3050,14 +3043,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	    pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)idop)->op_sv));
 
 	    /* Fake up a method call to VERSION */
-	    meth = newSVpvn("VERSION",7);
-	    sv_upgrade(meth, SVt_PVIV);
-	    (void)SvIOK_on(meth);
-	    {
-		U32 hash;
-		PERL_HASH(hash, SvPVX_const(meth), SvCUR(meth));
-		SvUV_set(meth, hash);
-	    }
+	    meth = newSVpvn_share("VERSION", 7, 0);
 	    veop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
 			    append_elem(OP_LIST,
 					prepend_elem(OP_LIST, pack, list(version)),
@@ -3078,14 +3064,8 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)idop)->op_sv));
 
 	/* Fake up a method call to import/unimport */
-	meth = aver ? newSVpvn("import",6) : newSVpvn("unimport", 8);
-	SvUPGRADE(meth, SVt_PVIV);
-	(void)SvIOK_on(meth);
-	{
-	    U32 hash;
-	    PERL_HASH(hash, SvPVX_const(meth), SvCUR(meth));
-	    SvUV_set(meth, hash);
-	}
+	meth = aver
+	    ? newSVpvn_share("import",6, 0) : newSVpvn_share("unimport", 8, 0);
 	imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
 		       append_elem(OP_LIST,
 				   prepend_elem(OP_LIST, pack, list(arg)),
@@ -3094,7 +3074,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 
     /* Fake up the BEGIN {}, which does its thing immediately. */
     newATTRSUB(floor,
-	newSVOP(OP_CONST, 0, newSVpvn("BEGIN", 5)),
+	newSVOP(OP_CONST, 0, newSVpvn_share("BEGIN", 5, 0)),
 	Nullop,
 	Nullop,
 	append_elem(OP_LINESEQ,
