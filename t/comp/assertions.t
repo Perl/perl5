@@ -45,17 +45,17 @@ require assertions;
 while (@expr) {
     my $expr=shift @expr;
     my $expected=shift @expr;
-    my $result=eval {assertions::calc_expr($expr)};
+    my $result=eval {assertions::_calc_expr($expr)};
     if (defined $expected) {
 	unless (defined $result and $result == $expected) {
-	    print STDERR "assertions::calc_expr($expr) failed,".
+	    print STDERR "assertions::_calc_expr($expr) failed,".
 		" expected '$expected' but '$result' obtained (\$@=$@)\n";
 	    print "not ";
 	}
     }
     else {
 	if (defined $result) {
-	    print STDERR "assertions::calc_expr($expr) failed,".
+	    print STDERR "assertions::_calc_expr($expr) failed,".
 		" expected undef but '$result' obtained\n";
 	    print "not ";
 	}

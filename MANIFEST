@@ -1178,6 +1178,7 @@ lib/abbrev.pl			An abbreviation table builder
 lib/AnyDBM_File.pm		Perl module to emulate dbmopen
 lib/AnyDBM_File.t		See if AnyDBM_File works
 lib/assertions/activate.pm	assertions activate/deactivate
+lib/assertions/compat.pm	assertions compatibility for earlier perls
 lib/assertions.pm		module support for -A flag
 lib/assert.pl			assertion and panic with stack trace
 lib/Attribute/Handlers/Changes	Attribute::Handlers
@@ -2612,6 +2613,7 @@ t/cmd/subval.t			See if subroutine values work
 t/cmd/switch.t			See if switch optimizations work
 t/cmd/while.t			See if while loops work
 t/comp/assertions.t		See if assertions work
+t/comp/asstcompat.t		See if assertions::compat work
 t/comp/bproto.t			See if builtins conform to their prototypes
 t/comp/cmdopt.t			See if command optimization works
 t/comp/colon.t			See if colons are parsed correctly

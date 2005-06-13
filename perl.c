@@ -2427,37 +2427,37 @@ S_usage(pTHX_ const char *name)		/* XXX move this out into a module ? */
      * Removed -h because the user already knows that option. Others? */
 
     static const char * const usage_msg[] = {
-"-0[octal]       specify record separator (\\0, if no argument)",
-"-A[name]        activate all/given assertions",
-"-a              autosplit mode with -n or -p (splits $_ into @F)",
-"-C[number/list] enables the listed Unicode features",
-"-c              check syntax only (runs BEGIN and CHECK blocks)",
-"-d[:debugger]   run program under debugger",
-"-D[number/list] set debugging flags (argument is a bit mask or alphabets)",
-"-e program      one line of program (several -e's allowed, omit programfile)",
+"-0[octal]         specify record separator (\\0, if no argument)",
+"-A[mod][=pattern] activate all/given assertions",
+"-a                autosplit mode with -n or -p (splits $_ into @F)",
+"-C[number/list]   enables the listed Unicode features",
+"-c                check syntax only (runs BEGIN and CHECK blocks)",
+"-d[:debugger]     run program under debugger",
+"-D[number/list]   set debugging flags (argument is a bit mask or alphabets)",
+"-e program        one line of program (several -e's allowed, omit programfile)",
 #ifdef USE_SITECUSTOMIZE
-"-f              don't do $sitelib/sitecustomize.pl at startup",
+"-f                don't do $sitelib/sitecustomize.pl at startup",
 #endif
-"-F/pattern/     split() pattern for -a switch (//'s are optional)",
-"-i[extension]   edit <> files in place (makes backup if extension supplied)",
-"-Idirectory     specify @INC/#include directory (several -I's allowed)",
-"-l[octal]       enable line ending processing, specifies line terminator",
-"-[mM][-]module  execute \"use/no module...\" before executing program",
-"-n              assume \"while (<>) { ... }\" loop around program",
-"-p              assume loop like -n but print line also, like sed",
-"-P              run program through C preprocessor before compilation",
-"-s              enable rudimentary parsing for switches after programfile",
-"-S              look for programfile using PATH environment variable",
-"-t              enable tainting warnings",
-"-T              enable tainting checks",
-"-u              dump core after parsing program",
-"-U              allow unsafe operations",
-"-v              print version, subversion (includes VERY IMPORTANT perl info)",
-"-V[:variable]   print configuration summary (or a single Config.pm variable)",
-"-w              enable many useful warnings (RECOMMENDED)",
-"-W              enable all warnings",
-"-x[directory]   strip off text before #!perl line and perhaps cd to directory",
-"-X              disable all warnings",
+"-F/pattern/       split() pattern for -a switch (//'s are optional)",
+"-i[extension]     edit <> files in place (makes backup if extension supplied)",
+"-Idirectory       specify @INC/#include directory (several -I's allowed)",
+"-l[octal]         enable line ending processing, specifies line terminator",
+"-[mM][-]module    execute \"use/no module...\" before executing program",
+"-n                assume \"while (<>) { ... }\" loop around program",
+"-p                assume loop like -n but print line also, like sed",
+"-P                run program through C preprocessor before compilation",
+"-s                enable rudimentary parsing for switches after programfile",
+"-S                look for programfile using PATH environment variable",
+"-t                enable tainting warnings",
+"-T                enable tainting checks",
+"-u                dump core after parsing program",
+"-U                allow unsafe operations",
+"-v                print version, subversion (includes VERY IMPORTANT perl info)",
+"-V[:variable]     print configuration summary (or a single Config.pm variable)",
+"-w                enable many useful warnings (RECOMMENDED)",
+"-W                enable all warnings",
+"-x[directory]     strip off text before #!perl line and perhaps cd to directory",
+"-X                disable all warnings",
 "\n",
 NULL
 };
@@ -2729,17 +2729,27 @@ Perl_moreswitches(pTHX_ char *s)
 	forbid_setid("-A");
 	if (!PL_preambleav)
 	    PL_preambleav = newAV();
-	if (*++s) {
-	    SV *sv = newSVpv("use assertions::activate split(/,/,q", 0);
-	    sv_catpvn(sv, "\0", 1);     /* Use NUL as q//-delimiter. */
-	    sv_catpv(sv,s);
-	    sv_catpvn(sv, "\0)", 2);
-	    s+=strlen(s);
+	s++;
+	{
+	    char *start = s;
+	    SV *sv = newSVpv("use assertions::activate", 24);
+	    while(isALNUM(*s) || *s == ':') ++s;
+	    if (s != start) {
+		sv_catpvn(sv, "::", 2);
+		sv_catpvn(sv, start, s-start);
+	    }
+	    if (*s == '=') {
+		sv_catpvn(sv, " split(/,/,q\0", 13);
+		sv_catpv(sv, s+1);
+		sv_catpvn(sv, "\0)", 2);
+		s+=strlen(s);
+	    }
+	    else if (*s != '\0') {
+		Perl_croak(aTHX_ "Can't use '%c' after -A%.*s", *s, s-start, start);
+	    }
 	    av_push(PL_preambleav, sv);
+	    return s;
 	}
-	else
-	    av_push(PL_preambleav, newSVpvn("use assertions::activate",24));
-	return s;
     case 'M':
 	forbid_setid("-M");	/* XXX ? */
 	/* FALL THROUGH */

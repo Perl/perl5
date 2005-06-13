@@ -1,11 +1,11 @@
 package assertions::activate;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 sub import {
     shift;
     @_ = '.*' unless @_;
-    push @{^ASSERTING}, map { qr/^(?:$_)\z/ } @_;
+    push @{^ASSERTING}, map { ref $_ eq 'Regexp' ? $_ : qr/^(?:$_)\z/ } @_;
 }
 
 1;
@@ -25,7 +25,11 @@ assertions::activate - activate assertions
 =head1 DESCRIPTION
 
 This module is used internally by perl (and its C<-A> command-line switch) to
-enable and disable assertions. It can also be used directly.
+enable and disable assertions.
+
+It can also be used directly:
+
+  use assertions::activate qw(foo bar);
 
 The import parameters are a list of strings or of regular expressions. The
 assertion tags that match those regexps are enabled. If no parameter is
@@ -41,7 +45,7 @@ Salvador FandiE<ntilde>o, E<lt>sfandino@yahoo.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2002 by Salvador FandiE<ntilde>o
+Copyright 2002, 2005 by Salvador FandiE<ntilde>o
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
