@@ -208,7 +208,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVTYPEMASK	0xff
 #define SvTYPE(sv)	((sv)->sv_flags & SVTYPEMASK)
 
-#define SvUPGRADE(sv, mt) (void)(SvTYPE(sv) >= mt || sv_upgrade(sv, mt))
+#define SvUPGRADE(sv, mt) (SvTYPE(sv) >= (mt) || (sv_upgrade(sv, mt), 1))
 
 #define SVs_PADSTALE	0x00000100	/* lexical has gone out of scope */
 #define SVs_PADTMP	0x00000200	/* in use as tmp */

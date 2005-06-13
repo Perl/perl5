@@ -1757,7 +1757,7 @@ You generally want to use the C<SvUPGRADE> macro wrapper. See also C<svtype>.
 =cut
 */
 
-bool
+void
 Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 {
 
@@ -1774,7 +1774,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     }
 
     if (SvTYPE(sv) == mt)
-	return TRUE;
+	return;
 
     pv = NULL;
     cur = 0;
@@ -1969,7 +1969,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	SvLEN_set(sv, len);
 	break;
     }
-    return TRUE;
 }
 
 /*

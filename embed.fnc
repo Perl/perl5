@@ -802,7 +802,7 @@ Apd	|int	|sv_unmagic	|NN SV* sv|int type
 Apd	|void	|sv_unref	|NN SV* sv
 Apd	|void	|sv_unref_flags	|NN SV* sv|U32 flags
 Apd	|void	|sv_untaint	|NN SV* sv
-Apd	|bool	|sv_upgrade	|NN SV* sv|U32 mt
+Apd	|void	|sv_upgrade	|NN SV* sv|U32 mt
 Apd	|void	|sv_usepvn	|NN SV* sv|char* ptr|STRLEN len
 Apd	|void	|sv_vcatpvfn	|NN SV* sv|NN const char* pat|STRLEN patlen \
 				|va_list* args|SV** svargs|I32 svmax \
