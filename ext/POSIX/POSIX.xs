@@ -413,7 +413,6 @@ foreach (C_constant ("POSIX", 'int_macro_int', 'IV', $types, undef, 5, @names) )
 }
 print "#### XS Section:\n";
 print XS_constant ("POSIX", $types);
-__END__
    */
 
   switch (len) {
