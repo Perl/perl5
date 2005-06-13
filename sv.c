@@ -11776,8 +11776,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* create SV map for pointer relocation */
     PL_ptr_table = ptr_table_new();
-    /* and one for finding shared hash keys quickly */
-    PL_shared_hek_table = ptr_table_new();
 
     /* initialize these special pointers as early as possible */
     SvANY(&PL_sv_undef)		= NULL;
@@ -12407,8 +12405,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     if (!(flags & CLONEf_KEEP_PTR_TABLE)) {
         ptr_table_free(PL_ptr_table);
         PL_ptr_table = NULL;
-        ptr_table_free(PL_shared_hek_table);
-        PL_shared_hek_table = NULL;
     }
 
     /* Call the ->CLONE method, if it exists, for each of the stashes

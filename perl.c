@@ -834,8 +834,6 @@ perl_destruct(pTHXx)
     /* free the pointer tables used for cloning */
     ptr_table_free(PL_ptr_table);
     PL_ptr_table = (PTR_TBL_t*)NULL;
-    ptr_table_free(PL_shared_hek_table);
-    PL_shared_hek_table = (PTR_TBL_t*)NULL;
 #endif
 
     /* free special SVs */

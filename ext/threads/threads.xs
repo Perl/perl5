@@ -615,7 +615,6 @@ Perl_ithread_join(pTHX_ SV *obj)
 	  clone_params.stashes = newAV();
 	  clone_params.flags |= CLONEf_JOIN_IN;
 	  PL_ptr_table = ptr_table_new();
-	  PL_shared_hek_table = ptr_table_new();
 	  current_thread = Perl_ithread_get(aTHX);
 	  Perl_ithread_set(aTHX_ thread);
 	  /* ensure 'meaningful' addresses retain their meaning */
@@ -647,8 +646,6 @@ Perl_ithread_join(pTHX_ SV *obj)
 	  SvREFCNT_inc(retparam);
 	  ptr_table_free(PL_ptr_table);
 	  PL_ptr_table = NULL;
-	  ptr_table_free(PL_shared_hek_table);
-	  PL_shared_hek_table = NULL;
 
 	}
 	/* We are finished with it */
