@@ -1125,6 +1125,86 @@ Perl_report_uninit(pTHX_ SV* uninit_sv)
 		    "", "", "");
 }
 
+#define USE_S_MORE_THINGY
+
+#ifdef USE_S_MORE_THINGY
+
+#define S_more_thingy(TYPE,lctype)					\
+STATIC void								\
+S_more_## lctype (pTHX)						\
+{									\
+    TYPE* lctype;							\
+    TYPE* lctype ## end;						\
+    void *ptr;								\
+    New(711, ptr, PERL_ARENA_SIZE/sizeof(TYPE), TYPE);			\
+    *((void **) ptr) = (void *)PL_## lctype ## _arenaroot;		\
+    PL_## lctype ## _arenaroot = ptr;					\
+									\
+    lctype = (TYPE*) ptr;						\
+    lctype ## end = &lctype[PERL_ARENA_SIZE / sizeof(TYPE) - 1];	\
+									\
+   /* fudge by sizeof XPVIV */						\
+    lctype += (sizeof(XPVIV) - 1) / sizeof(TYPE) + 1;			\
+									\
+    PL_ ## lctype ## _root = lctype;					\
+    while ( lctype < lctype ## end) {					\
+	*(TYPE**) lctype = (TYPE*)(lctype + 1);				\
+	lctype++;							\
+    }									\
+    *(TYPE**) lctype = 0;						\
+}
+
+#define S_more_thingy_allocated(lctype)				\
+STATIC void								\
+S_more_## lctype (pTHX)						\
+{									\
+    lctype ## _allocated * lctype ;					\
+    lctype ## _allocated * lctype ## end;				\
+    void *ptr;								\
+    New(711, ptr, PERL_ARENA_SIZE/sizeof(lctype ## _allocated ), lctype ## _allocated );	\
+    *((void **) ptr) = (void *)PL_ ## lctype ## _arenaroot;		\
+    PL_## lctype ## _arenaroot = ptr;					\
+									\
+    lctype = (lctype ## _allocated *) ptr;						\
+    lctype ## end = &lctype[PERL_ARENA_SIZE / sizeof(lctype ## _allocated ) - 1];	\
+									\
+   /* fudge by sizeof XPVIV */						\
+    lctype += (sizeof(XPVIV) - 1) / sizeof(lctype ## _allocated ) + 1;			\
+									\
+    PL_ ## lctype ## _root = lctype;					\
+    while ( lctype < lctype ## end) {					\
+	*(lctype ## _allocated **) lctype = (lctype ## _allocated *)(lctype + 1);	\
+	lctype++;							\
+    }									\
+    *(lctype ## _allocated **) lctype = 0;						\
+}
+
+S_more_thingy(NV, xnv)
+     
+S_more_thingy_allocated(xpv)
+   
+S_more_thingy_allocated(xpviv)
+     
+S_more_thingy(XPVNV, xpvnv)
+     
+S_more_thingy(XPVCV, xpvcv)
+     
+S_more_thingy_allocated(xpvav)
+     
+S_more_thingy_allocated(xpvhv)
+
+S_more_thingy(XPVGV, xpvgv)
+
+S_more_thingy(XPVMG, xpvmg)
+
+S_more_thingy(XPVBM, xpvbm)
+
+S_more_thingy(XPVLV, xpvlv)
+
+
+#else
+
+
 /* allocate another arena's worth of NV bodies */
 
 STATIC void
@@ -1349,6 +1429,8 @@ S_more_xpvbm(pTHX)
     }
     *((XPVBM**)xpvbm) = 0;
 }
+
+#endif
 
 /* grab a new NV body from the free list, allocating more if necessary */
 
