@@ -529,14 +529,14 @@ Perl_sv_free_arenas(pTHX)
 	    Safefree(sva);
     }
 
-    for (arena = PL_xiv_arenaroot; arena; arena = arenanext) {
+    for (arena = (XPV*)PL_xiv_arenaroot; arena; arena = arenanext) {
 	arenanext = (XPV*)arena->xpv_pv;
 	Safefree(arena);
     }
     PL_xiv_arenaroot = 0;
     PL_xiv_root = 0;
 
-    for (arena = PL_xnv_arenaroot; arena; arena = arenanext) {
+    for (arena = (XPV*)PL_xnv_arenaroot; arena; arena = arenanext) {
 	arenanext = (XPV*)arena->xpv_pv;
 	Safefree(arena);
     }
@@ -660,6 +660,91 @@ Perl_report_uninit(pTHX)
     else
 	Perl_warner(aTHX_ packWARN(WARN_UNINITIALIZED), PL_warn_uninit, "", "");
 }
+#define USE_S_MORE_THINGY
+
+#ifdef USE_S_MORE_THINGY
+
+#define S_more_thingy(TYPE,lctype)					\
+STATIC void								\
+S_more_## lctype (pTHX)						\
+{									\
+    TYPE* lctype;							\
+    TYPE* lctype ## end;						\
+    void *ptr;								\
+    New(711, ptr, PERL_ARENA_SIZE/sizeof(TYPE), TYPE);			\
+    *((void **) ptr) = (void *)PL_## lctype ## _arenaroot;		\
+    PL_## lctype ## _arenaroot = ptr;					\
+									\
+    lctype = (TYPE*) ptr;						\
+    lctype ## end = &lctype[PERL_ARENA_SIZE / sizeof(TYPE) - 1];	\
+									\
+   /* fudge by sizeof XPVIV */						\
+    lctype += (sizeof(XPVIV) - 1) / sizeof(TYPE) + 1;			\
+									\
+    PL_ ## lctype ## _root = lctype;					\
+    while ( lctype < lctype ## end) {					\
+	*(TYPE**) lctype = (TYPE*)(lctype + 1);				\
+	lctype++;							\
+    }									\
+    *(TYPE**) lctype = 0;						\
+}
+
+#define S_more_thingy_allocated(lctype)				\
+STATIC void								\
+S_more_## lctype (pTHX)						\
+{									\
+    lctype ## _allocated * lctype ;					\
+    lctype ## _allocated * lctype ## end;				\
+    void *ptr;								\
+    New(711, ptr, PERL_ARENA_SIZE/sizeof(lctype ## _allocated ), lctype ## _allocated );	\
+    *((void **) ptr) = (void *)PL_ ## lctype ## _arenaroot;		\
+    PL_## lctype ## _arenaroot = ptr;					\
+									\
+    lctype = (lctype ## _allocated *) ptr;						\
+    lctype ## end = &lctype[PERL_ARENA_SIZE / sizeof(lctype ## _allocated ) - 1];	\
+									\
+   /* fudge by sizeof XPVIV */						\
+    lctype += (sizeof(XPVIV) - 1) / sizeof(lctype ## _allocated ) + 1;			\
+									\
+    PL_ ## lctype ## _root = lctype;					\
+    while ( lctype < lctype ## end) {					\
+	*(lctype ## _allocated **) lctype = (lctype ## _allocated *)(lctype + 1);	\
+	lctype++;							\
+    }									\
+    *(lctype ## _allocated **) lctype = 0;						\
+}
+
+S_more_thingy_allocated(xiv)
+
+S_more_thingy_allocated(xnv)
+
+S_more_thingy(XRV, xrv)
+     
+S_more_thingy_allocated(xpv)
+   
+S_more_thingy_allocated(xpviv)
+     
+S_more_thingy(XPVNV, xpvnv)
+     
+S_more_thingy(XPVCV, xpvcv)
+     
+S_more_thingy_allocated(xpvav)
+     
+S_more_thingy_allocated(xpvhv)
+
+S_more_thingy(XPVGV, xpvgv)
+
+S_more_thingy(XPVMG, xpvmg)
+
+S_more_thingy(XPVBM, xpvbm)
+
+S_more_thingy(XPVLV, xpvlv)
+
+
+#else
+
+
+/* allocate another arena's worth of NV bodies */
 
 /* allocate another arena's worth of struct xrv */
 
@@ -706,8 +791,6 @@ S_more_xiv(pTHX)
     }
     *(IV**)xiv = 0;
 }
-
-/* allocate another arena's worth of NV bodies */
 
 STATIC void
 S_more_xnv(pTHX)
@@ -931,6 +1014,8 @@ S_more_xpvbm(pTHX)
     xpvbm->xpv_pv = 0;
 }
 
+#endif
+
 /* grab a new struct xrv from the free list, allocating more if necessary */
 
 STATIC XRV*
@@ -962,7 +1047,7 @@ S_del_xrv(pTHX_ XRV *p)
 STATIC XPVIV*
 S_new_xiv(pTHX)
 {
-    IV* xiv;
+    xiv_allocated* xiv;
     LOCK_SV_MUTEX;
     if (!PL_xiv_root)
 	S_more_xiv(aTHX);
@@ -970,7 +1055,7 @@ S_new_xiv(pTHX)
     /*
      * See comment in more_xiv() -- RAM.
      */
-    PL_xiv_root = *(IV**)xiv;
+    PL_xiv_root = *(xiv_allocated**)xiv;
     UNLOCK_SV_MUTEX;
     return (XPVIV*)((char*)xiv - STRUCT_OFFSET(XPVIV, xiv_iv));
 }
@@ -980,9 +1065,9 @@ S_new_xiv(pTHX)
 STATIC void
 S_del_xiv(pTHX_ XPVIV *p)
 {
-    IV* xiv = (IV*)((char*)(p) + STRUCT_OFFSET(XPVIV, xiv_iv));
+    xiv_allocated * xiv = (xiv_allocated*)((char*)(p) + STRUCT_OFFSET(XPVIV, xiv_iv));
     LOCK_SV_MUTEX;
-    *(IV**)xiv = PL_xiv_root;
+    *(xiv_allocated**)xiv = PL_xiv_root;
     PL_xiv_root = xiv;
     UNLOCK_SV_MUTEX;
 }
@@ -992,12 +1077,12 @@ S_del_xiv(pTHX_ XPVIV *p)
 STATIC XPVNV*
 S_new_xnv(pTHX)
 {
-    NV* xnv;
+    xnv_allocated* xnv;
     LOCK_SV_MUTEX;
     if (!PL_xnv_root)
 	S_more_xnv(aTHX);
     xnv = PL_xnv_root;
-    PL_xnv_root = *(NV**)xnv;
+    PL_xnv_root = *(xnv_allocated **)xnv;
     UNLOCK_SV_MUTEX;
     return (XPVNV*)((char*)xnv - STRUCT_OFFSET(XPVNV, xnv_nv));
 }
@@ -1007,9 +1092,9 @@ S_new_xnv(pTHX)
 STATIC void
 S_del_xnv(pTHX_ XPVNV *p)
 {
-    NV* xnv = (NV*)((char*)(p) + STRUCT_OFFSET(XPVNV, xnv_nv));
+    xnv_allocated * xnv = (xnv_allocated*)((char*)(p) + STRUCT_OFFSET(XPVNV, xnv_nv));
     LOCK_SV_MUTEX;
-    *(NV**)xnv = PL_xnv_root;
+    *(xnv_allocated**)xnv = PL_xnv_root;
     PL_xnv_root = xnv;
     UNLOCK_SV_MUTEX;
 }

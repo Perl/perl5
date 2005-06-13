@@ -242,6 +242,14 @@ perform the upgrade if necessary.  See C<svtype>.
 
 #define SVprv_WEAKREF   0x80000000      /* Weak reference */
 
+typedef struct {
+    IV		xiv_iv;		/* integer value or pv offset */
+} xiv_allocated;
+
+typedef struct {
+    NV    	xnv_nv;		/* numeric value, if any */
+} xnv_allocated;
+
 struct xrv {
     SV *	xrv_rv;		/* pointer to another SV */
 };
@@ -260,6 +268,8 @@ struct xpviv {
     STRLEN	xpv_len;	/* allocated size */
     IV		xiv_iv;		/* integer value or pv offset */
 };
+
+typedef struct xpviv xpviv_allocated;
 
 struct xpvuv {
     char *	xpv_pv;		/* pointer to malloced string */
