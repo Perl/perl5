@@ -758,15 +758,12 @@ S_varname(pTHX_ GV *gv, const char *gvtype, PADOFFSET targ,
     else {
 	U32 u;
 	CV *cv = find_runcv(&u);
-	STRLEN len;
-	const char *str;
 	if (!cv || !CvPADLIST(cv))
 	    return Nullsv;;
 	av = (AV*)(*av_fetch(CvPADLIST(cv), 0, FALSE));
 	sv = *av_fetch(av, targ, FALSE);
 	/* SvLEN in a pad name is not to be trusted */
-	str = SvPV_const(sv,len);
-	sv_setpvn(name, str, len);
+	sv_setpv(name, SvPV_nolen_const(sv));
     }
 
     if (subscript_type == FUV_SUBSCRIPT_HASH) {
