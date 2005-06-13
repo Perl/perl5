@@ -696,7 +696,8 @@ SETARGV_OBJ	= setargv$(o)
 !ENDIF
 
 # specify static extensions here
-STATIC_EXT	= Cwd Compress/Zlib
+#STATIC_EXT	= Cwd Compress/Zlib
+STATIC_EXT	= 
 
 DYNALOADER		= $(EXTDIR)\DynaLoader\DynaLoader
 SOCKET			= $(EXTDIR)\Socket\Socket
@@ -957,8 +958,7 @@ perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ..\makedef.pl
 	    CCTYPE=$(CCTYPE) > perldll.def
 
 $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
-	$(MINIPERL) -I..\lib buildext.pl --list-static-libs > stat-exts.tmp
-	$(LINK32) -dll -def:perldll.def -base:0x28000000 -out:$@ @stat-exts.tmp @<<
+	$(LINK32) -dll -def:perldll.def -base:0x28000000 -out:$@ @Extensions_static @<<
 		$(LINK_FLAGS) $(DELAYLOAD) $(LIBFILES) $(PERLDLL_OBJ) $(PERLDLL_RES)
 <<
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
@@ -1030,8 +1030,9 @@ Extensions: buildext.pl $(PERLDEP) $(CONFIGPM)
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --dynamic
 
 Extensions_static : buildext.pl
-	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --static
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) --static
+	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --static
+	$(MINIPERL) -I..\lib buildext.pl --list-static-libs > Extensions_static
 
 Extensions_clean: 
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) clean
@@ -1110,7 +1111,6 @@ distclean: realclean
 	-del /f $(MINIPERL) $(PERLEXE) $(PERLDLL) $(GLOBEXE) \
 		$(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
 	-del /f *.def *.map
-	-del /f stat-exts.tmp
 	-del /f $(EXTENSION_DLL)
 	-del /f $(EXTENSION_C) $(DYNALOADER).c $(ERRNO).pm
 	-del /f $(EXTDIR)\DynaLoader\dl_win32.xs
@@ -1274,6 +1274,7 @@ _clean :
 	-@$(DEL) ..\x2p\*.exe ..\x2p\*.bat
 	-@$(DEL) *.ilk
 	-@$(DEL) *.pdb
+	-@$(DEL) Extensions_static
 
 clean : Extensions_clean _clean
 
