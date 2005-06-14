@@ -1163,6 +1163,13 @@ documentation for the C<-C> switch for more information about
 the possible values. This variable is set during Perl startup
 and is thereafter read-only.
 
+=item ${^UTF8LOCALE}
+
+This variable indicates whether an UTF-8 locale was detected by perl at
+startup. This information is used by perl when it's in
+adjust-utf8ness-to-locale mode (as when run with the C<-CL> command-line
+switch); see L<perlrun> for more info on this.
+
 =item $PERL_VERSION
 
 =item $^V
