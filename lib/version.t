@@ -8,7 +8,10 @@ use Test::More tests => 183;
 
 diag "Tests with base class" unless $ENV{PERL_CORE};
 
-use_ok("version"); # If we made it this far, we are ok.
+BEGIN {
+    use_ok("version", 0.30); # If we made it this far, we are ok.
+}
+
 BaseTests("version");
 
 diag "Tests with empty derived class" unless $ENV{PERL_CORE};
