@@ -58,8 +58,9 @@ main_tests (\@keys, \@testkeys, ' [utf8 hash]');
 {
     my $strtab = strtab();
     is (ref $strtab, 'HASH', "The shared string table quacks like a hash");
+    my $wibble = "\0";
     eval {
-	$strtab->{wibble}++;
+	$strtab->{$wibble}++;
     };
     my $prefix = "Cannot modify shared string table in hv_";
     my $what = $prefix . 'fetch';
