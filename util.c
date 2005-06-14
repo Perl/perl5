@@ -4812,6 +4812,23 @@ Perl_get_hash_seed(pTHX)
      return myseed;
 }
 
+#ifdef USE_ITHREADS
+bool
+Perl_stashpv_hvname_match(pTHX_ const COP *c, const HV *hv)
+{
+    const char * const stashpv = CopSTASHPV(c);
+    const char * const name = HvNAME_get(hv);
+
+    if (stashpv == name)
+	return TRUE;
+    if (stashpv && name)
+	if (strEQ(stashpv, name))
+	    return TRUE;
+    return FALSE;
+}
+#endif
+
+
 #ifdef PERL_GLOBAL_STRUCT
 
 struct perl_vars *

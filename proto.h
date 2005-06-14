@@ -2820,6 +2820,11 @@ PERL_CALLCONV bool	Perl_is_gv_magical_sv(pTHX_ SV *name, U32 flags)
 
 
 PERL_CALLCONV char*	Perl_savesvpv(pTHX_ SV* sv);
+PERL_CALLCONV bool	Perl_stashpv_hvname_match(pTHX_ const COP *cop, const HV *hv)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
 
 END_EXTERN_C
 /*

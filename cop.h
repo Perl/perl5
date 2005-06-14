@@ -178,20 +178,13 @@ struct cop {
 #  define CopSTASH(c)		(CopSTASHPV(c) \
 				 ? gv_stashpv(CopSTASHPV(c),GV_ADD) : Nullhv)
 #  define CopSTASH_set(c,hv)	CopSTASHPV_set(c, (hv) ? HvNAME_get(hv) : Nullch)
-#  define CopSTASH_eq(c,hv)	((hv) 					\
-				 && (CopSTASHPV(c) == HvNAME_get(hv)	\
-				     || (CopSTASHPV(c) && HvNAME_get(hv)\
-					 && strEQ(CopSTASHPV(c), HvNAME_get(hv)))))
+#  define CopSTASH_eq(c,hv)	((hv) && stashpv_hvname_match(c,hv))
 #  ifdef NETWARE
 #    define CopSTASH_free(c) SAVECOPSTASH_FREE(c)
-#  else
-#    define CopSTASH_free(c)	PerlMemShared_free(CopSTASHPV(c))      
-#  endif
-
-#  ifdef NETWARE
 #    define CopFILE_free(c) SAVECOPFILE_FREE(c)
 #  else
-#    define CopFILE_free(c)	(PerlMemShared_free(CopFILE(c)),(CopFILE(c) = Nullch))      
+#    define CopSTASH_free(c)	PerlMemShared_free(CopSTASHPV(c))
+#    define CopFILE_free(c)	(PerlMemShared_free(CopFILE(c)),(CopFILE(c) = Nullch))
 #  endif
 #else
 #  define CopFILEGV(c)		((c)->cop_filegv)

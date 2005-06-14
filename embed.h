@@ -1656,6 +1656,7 @@
 #define is_gv_magical_sv	Perl_is_gv_magical_sv
 #endif
 #define savesvpv		Perl_savesvpv
+#define stashpv_hvname_match	Perl_stashpv_hvname_match
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_concat		Perl_ck_concat
@@ -3645,6 +3646,7 @@
 #define is_gv_magical_sv(a,b)	Perl_is_gv_magical_sv(aTHX_ a,b)
 #endif
 #define savesvpv(a)		Perl_savesvpv(aTHX_ a)
+#define stashpv_hvname_match(a,b)	Perl_stashpv_hvname_match(aTHX_ a,b)
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
 #define ck_concat(a)		Perl_ck_concat(aTHX_ a)

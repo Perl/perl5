@@ -1533,6 +1533,7 @@ Ap	|GV*	|gv_fetchsv|SV *name|I32 flags|I32 sv_type
 dpR	|bool	|is_gv_magical_sv|SV *name|U32 flags
 
 Apd	|char*	|savesvpv	|SV* sv
+ApR	|bool	|stashpv_hvname_match|NN const COP *cop|NN const HV *hv
 
 END_EXTERN_C
 /*
