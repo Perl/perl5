@@ -167,6 +167,7 @@ CCLIBDIR	= $(CCHOME)\lib
 #
 # Additional compiler flags can be specified here.
 #
+BUILDOPT	= $(BUILDOPTEXTRA)
 
 #
 # Adding -DPERL_HASH_SEED_EXPLICIT will disable randomization of Perl's
