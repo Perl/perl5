@@ -1574,6 +1574,16 @@ lib/importenv.pl		Perl routine to get environment into variables
 lib/integer.pm			For "use integer"
 lib/integer.t			For "use integer" testing
 lib/Internals.t			For Internals::* testing
+lib/IO/Zlib.pm			IO::Zlib
+lib/IO/Zlib/t/basic.t		Tests for IO::Zlib
+lib/IO/Zlib/t/external.t	Tests for IO::Zlib
+lib/IO/Zlib/t/getc.t		Tests for IO::Zlib
+lib/IO/Zlib/t/getline.t		Tests for IO::Zlib
+lib/IO/Zlib/t/import.t		Tests for IO::Zlib
+lib/IO/Zlib/t/large.t		Tests for IO::Zlib
+lib/IO/Zlib/t/tied.t		Tests for IO::Zlib
+lib/IO/Zlib/t/uncomp1.t		Tests for IO::Zlib
+lib/IO/Zlib/t/uncomp2.t		Tests for IO::Zlib
 lib/IPC/Open2.pm		Open a two-ended pipe
 lib/IPC/Open2.t			See if IPC::Open2 works
 lib/IPC/Open3.pm		Open a three-ended pipe!
