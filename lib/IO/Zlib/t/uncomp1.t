@@ -18,7 +18,7 @@ hello world
 this is a test
 EOM
 
-$name = "test";
+$name = "IO-Zlib-test";
 
 if (open(FH, ">$name")) {
     binmode FH;
