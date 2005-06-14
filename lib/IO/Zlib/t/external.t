@@ -10,6 +10,7 @@ unless( -x $gzip &&
         ":$ENV{PATH}:" =~ m!:/usr/bin:! &&
         -d "/usr/bin" && -x "/usr/bin") {
     print "1..0 # Skip: no $gzip\n";
+    exit 0;
 }
 
 sub ok
