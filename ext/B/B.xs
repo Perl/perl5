@@ -1215,7 +1215,15 @@ SvPV(sv)
     CODE:
         ST(0) = sv_newmortal();
         if( SvPOK(sv) ) {
-            sv_setpv(ST(0), SvPV_nolen_const(sv));
+	    /* FIXME - we need a better way for B to identify PVs that are
+	       in the pads as variable names.  */
+	    if((SvLEN(sv) && SvCUR(sv) >= SvLEN(sv))) {
+		/* It claims to be longer than the space allocated for it -
+		   presuambly it's a variable name in the pad  */
+		sv_setpv(ST(0), SvPV_nolen_const(sv));
+	    } else {
+		sv_setpvn(ST(0), SvPVX_const(sv), SvCUR(sv));
+	    }
             SvFLAGS(ST(0)) |= SvUTF8(sv);
         }
         else {
