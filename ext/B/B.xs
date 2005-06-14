@@ -1214,8 +1214,8 @@ SvPV(sv)
 	B::PV	sv
     CODE:
         ST(0) = sv_newmortal();
-        if( SvPOK(sv) ) { 
-            sv_setpvn(ST(0), SvPVX_const(sv), SvCUR(sv));
+        if( SvPOK(sv) ) {
+            sv_setpv(ST(0), SvPV_nolen_const(sv));
             SvFLAGS(ST(0)) |= SvUTF8(sv);
         }
         else {
