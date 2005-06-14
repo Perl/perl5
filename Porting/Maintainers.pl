@@ -53,6 +53,7 @@ package Maintainers;
 	'mschwern'	=> 'Michael Schwern <mschwern@cpan.org>',
 	'smccam'	=> 'Stephen McCamant <smccam@cpan.org>',
 	'tels'		=> 'perl_dummy a-t bloodgate.com',
+	'tomhughes'	=> 'Tom Hughes <tomhughes@cpan.org>',
 	'tjenness'	=> 'Tim Jenness <tjenness@cpan.org>'
 	);
 
@@ -274,6 +275,13 @@ package Maintainers;
 		'MAINTAINER'	=> 'p5p', # Not gbarr.
 		'FILES'		=> q[ext/IO],
 		'CPAN'		=> 0,
+		},
+
+	'IO::Zlib' =>
+		{
+		'MAINTAINER'	=> 'tomhughes',
+		'FILES'		=> q[lib/IO/Zlib.pm lib/IO/Zlib],
+		'CPAN'		=> 1,
 		},
 
 	'libnet' =>
