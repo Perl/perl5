@@ -4295,7 +4295,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     }
 #endif
 
-    if (!block || !ps || *ps || attrs)
+    if (!block || !ps || *ps || attrs || (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS))
 	const_sv = Nullsv;
     else
 	const_sv = op_const_sv(block, Nullcv);
