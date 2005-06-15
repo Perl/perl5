@@ -3923,8 +3923,9 @@ the corresponding right parenthesis to terminate the arguments to
 the print--interpose a C<+> or put parentheses around all the
 arguments.
 
-Note that if you're storing FILEHANDLES in an array or other expression,
-you will have to use a block returning its value instead:
+Note that if you're storing FILEHANDLEs in an array, or if you're using
+any other expression more complex than a scalar variable to retrieve it,
+you will have to use a block returning the filehandle value instead:
 
     print { $files[$i] } "stuff\n";
     print { $OK ? STDOUT : STDERR } "stuff\n";
