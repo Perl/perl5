@@ -1282,7 +1282,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     register SV *sv;
     register char *s;
     const char *cddir = Nullch;
+#ifdef USE_SITECUSTOMIZE
     bool minus_f = FALSE;
+#endif
 
     PL_fdscript = -1;
     PL_suidscript = -1;
@@ -1376,11 +1378,13 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    sv_catpv(PL_e_script, "\n");
 	    break;
 
+#ifdef USE_SITECUSTOMIZE
 	case 'f':
 	    minus_f = TRUE;
 	    s++;
 	    goto reswitch;
 
+#endif
 	case 'I':	/* -I handled both here and in moreswitches() */
 	    forbid_setid("-I");
 	    if (!*++s && (s=argv[1]) != Nullch) {

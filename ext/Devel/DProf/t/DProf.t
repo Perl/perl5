@@ -17,6 +17,7 @@ END {
 }
 
 use Benchmark qw( timediff timestr );
+use Config;
 use Getopt::Std 'getopts';
 getopts('vI:p:');
 
@@ -45,10 +46,11 @@ sub profile {
 	my $test = shift;
 	my @results;
 	local $ENV{PERL5LIB} = $perl5lib;
+	my $opt_f = $Config{ccflags} =~ /USE_SITECUSTOMIZE/ ? '-f' : '';
 	my $opt_d = '-d:DProf';
 
 	my $t_start = new Benchmark;
-        open( R, "$perl -f \"$opt_d\" $test |" ) || warn "$0: Can't run. $!\n";
+	open( R, "$perl $opt_f \"$opt_d\" $test |" ) || warn "$0: Can't run. $!\n";
 	@results = <R>;
 	close R or warn "Could not close: $!";
 	my $t_total = timediff( new Benchmark, $t_start );
@@ -76,7 +78,7 @@ $| = 1;
 print "1..20\n";
 while( @tests ){
 	$test = shift @tests;
-        $test =~ s/\.$// if $^O eq 'VMS';
+	$test =~ s/\.$// if $^O eq 'VMS';
 	if( $test =~ /_t$/i ){
 		print "# $test" . '.' x (20 - length $test);
 		profile $test;
