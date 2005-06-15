@@ -240,6 +240,13 @@ sub B::PVIV::bsave {
 sub B::PVNV::bsave {
     my ($sv,$ix) = @_;
     $sv->B::PVIV::bsave($ix);
+    # Magical AVs end up here, but AVs now don't have an NV slot actually
+    # allocated. Hence don't write out assembly to store the NV slot if we're
+    # actually an array.
+    return if $sv->isa('B::AV');
+    # Likewise HVs have no NV slot actually allocated.
+    # I don't think that they can get here, but better safe than sorry
+    return if $sv->isa('B::HV');
     asm "xnv", sprintf "%.40g", $sv->NVX;
 }
 
