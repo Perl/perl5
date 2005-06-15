@@ -1351,7 +1351,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     register SV *sv;
     register char *s;
     const char *cddir = Nullch;
+#ifdef USE_SITECUSTOMIZE
     bool minus_f = FALSE;
+#endif
 
     PL_fdscript = -1;
     PL_suidscript = -1;
@@ -1445,7 +1447,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    break;
 
 	case 'f':
+#ifdef USE_SITECUSTOMIZE
 	    minus_f = TRUE;
+#endif
 	    s++;
 	    goto reswitch;
 
@@ -2544,9 +2548,7 @@ S_usage(pTHX_ const char *name)		/* XXX move this out into a module ? */
 "-d[:debugger]   run program under debugger",
 "-D[number/list] set debugging flags (argument is a bit mask or alphabets)",
 "-e program      one line of program (several -e's allowed, omit programfile)",
-#ifdef USE_SITECUSTOMIZE
 "-f              don't do $sitelib/sitecustomize.pl at startup",
-#endif
 "-F/pattern/     split() pattern for -a switch (//'s are optional)",
 "-i[extension]   edit <> files in place (makes backup if extension supplied)",
 "-Idirectory     specify @INC/#include directory (several -I's allowed)",
