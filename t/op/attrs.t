@@ -106,6 +106,11 @@ is ref($thunk), "Z";
 @attrs = eval 'attributes::get $thunk';
 is "@attrs", "locked method Z";
 
+# Test attributes on predeclared subroutines:
+eval 'package A; sub PS : lvalue';
+@attrs = eval 'attributes::get \&A::PS';
+is "@attrs", "lvalue";
+
 # Test ability to modify existing sub's (or XSUB's) attributes.
 eval 'package A; sub X { $_[0] } sub X : lvalue';
 @attrs = eval 'attributes::get \&A::X';

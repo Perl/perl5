@@ -4232,6 +4232,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     STRLEN ps_len;
     register CV *cv=0;
     SV *const_sv;
+    I32 gv_fetch_flags;
 
     const char * const name = o ? SvPVx_nolen_const(cSVOPo->op_sv) : Nullch;
 
@@ -4251,13 +4252,13 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     }
     else
 	aname = Nullch;
-    gv = name ? gv_fetchsv(cSVOPo->op_sv,
-			   GV_ADDMULTI | ((block || attrs) ? 0 : GV_NOINIT),
-			   SVt_PVCV)
+
+    gv_fetch_flags = (block || attrs || (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS))
+	? GV_ADDMULTI : GV_ADDMULTI | GV_NOINIT;
+    gv = name ? gv_fetchsv(cSVOPo->op_sv, gv_fetch_flags, SVt_PVCV)
 	: gv_fetchpv(aname ? aname
 		     : (PL_curstash ? "__ANON__" : "__ANON__::__ANON__"),
-		     GV_ADDMULTI | ((block || attrs) ? 0 : GV_NOINIT),
-		     SVt_PVCV);
+		     gv_fetch_flags, SVt_PVCV);
 
     if (o)
 	SAVEFREEOP(o);
