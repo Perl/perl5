@@ -941,6 +941,7 @@ in gv.h: */
 		(((XPVIV*)  SvANY(sv))->xiv_iv = (val)); } STMT_END
 #define SvNV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) == SVt_NV || SvTYPE(sv) >= SVt_PVNV); \
+	    assert(SvTYPE(sv) != SVt_PVAV); assert(SvTYPE(sv) != SVt_PVHV); \
 		(((XPVNV*)SvANY(sv))->xnv_nv = (val)); } STMT_END
 #define SvPV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
