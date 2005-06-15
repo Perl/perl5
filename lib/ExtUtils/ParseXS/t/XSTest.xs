@@ -42,7 +42,7 @@ xstest_something3 (class, some_thing)
 	SV   * class
 	char * some_thing
     PREINIT:
-    	int i;
+    	int i = 0;
     PPCODE:
     	/* it's up to us clear these warnings */
 	class = class;
