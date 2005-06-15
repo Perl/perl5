@@ -3939,11 +3939,11 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
 	}
 	if (hibit) {
 	    STRLEN len = SvCUR(sv) + 1; /* Plus the \0 */
-	    char *recoded = bytes_to_utf8((U8*)s, &len);
+	    U8 *recoded = bytes_to_utf8((U8*)s, &len);
 
 	    SvPV_free(sv); /* No longer using what was there before. */
 
-	    SvPV_set(sv, recoded);
+	    SvPV_set(sv, (char*)recoded);
 	    SvCUR_set(sv, len - 1);
 	    SvLEN_set(sv, len); /* No longer know the real size. */
 	}
