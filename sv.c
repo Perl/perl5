@@ -3775,7 +3775,7 @@ char *
 Perl_sv_2pvbyte(pTHX_ register SV *sv, STRLEN *lp)
 {
     sv_utf8_downgrade(sv,0);
-    return SvPV(sv,*lp);
+    return lp ? SvPV(sv,*lp) : SvPV_nolen(sv);
 }
 
 /*
