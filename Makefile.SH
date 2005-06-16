@@ -773,6 +773,8 @@ $(CONFIGPM): config.sh miniperl$(EXE_EXT) configpm Porting/Glossary
 	$(LDLIBPTH) ./miniperl -Ilib configpm --heavy=lib/Config_heavy.pl configpm.tmp
 	sh mv-if-diff configpm.tmp lib/Config.pm
 
+lib/Config.pm: lib/Config_heavy.pl
+
 lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl$(EXE_EXT) minimod.pl $(CONFIGPM)
 	$(LDLIBPTH) ./miniperl minimod.pl > minimod.tmp
 	sh mv-if-diff minimod.tmp $@
