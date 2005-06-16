@@ -48,10 +48,12 @@ following compilers on the Intel x86 architecture:
 The last of these is a high quality freeware compiler.  Use version
 3.2.x or later for the best results with this compiler.
 
-The Microsoft Visual C++ compiler is also now being given away free in
-the "Visual C++ Toolkit 2003", and also as part of the ".NET Framework
-SDK".  This is the same compiler that ships with "Visual Studio .NET 2003
-Professional".
+The Borland C++ and Microsoft Visual C++ compilers are also now being given
+away free.  The Borland compiler is available as "Borland C++ Compiler Free
+Command Line Tools" and is the same compiler that ships with the full
+"Borland C++ Builder" product.  The Microsoft compiler is available as
+"Visual C++ Toolkit 2003", and also as part of the ".NET Framework SDK", and
+is the same compiler that ships with "Visual Studio .NET 2003 Professional".
 
 This port can also be built on the Intel IA64 using:
 
@@ -672,13 +674,12 @@ To ensure smooth transitioning of existing code that uses the
 ActiveState port, there is a bundle of Win32 extensions that contains
 all of the ActiveState extensions and several other Win32 extensions from
 CPAN in source form, along with many added bugfixes, and with MakeMaker
-support.  This bundle is available at:
+support.  The latest version of this bundle is available at:
 
-   http://www.cpan.org/modules/by-module/Win32/libwin32-0.191.zip
+    http://search.cpan.org/dist/libwin32/
 
 See the README in that distribution for building and installation
-instructions.  Look for later versions that may be available at the
-same location.
+instructions.
 
 =item Notes on 64-bit Windows
 
@@ -911,6 +912,6 @@ Win9x support was added in 5.6 (Benjamin Stuhl).
 
 Support for 64-bit Windows added in 5.8 (ActiveState Corp).
 
-Last updated: 7 June 2005
+Last updated: 16 June 2005
 
 =cut
