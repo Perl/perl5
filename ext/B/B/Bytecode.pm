@@ -233,6 +233,9 @@ sub B::PVIV::bsave {
     $sv->ROK ?
 	$sv->B::RV::bsave($ix):
 	$sv->B::NULL::bsave($ix);
+    # See note below in B::PVNV::bsave
+    return if $sv->isa('B::AV');
+    return if $sv->isa('B::HV');
     asm "xiv", !ITHREADS && $sv->FLAGS & (SVf_FAKE|SVf_READONLY) ?
 	"0 but true" : $sv->IVX;
 }
