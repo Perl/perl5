@@ -819,6 +819,7 @@ XS(XS_Internals_hv_clear_placehold)
 
 XS(XS_Regexp_DESTROY)
 {
+    LINT_UNUSED_ARG(cv)
 }
 
 XS(XS_PerlIO_get_layers)
@@ -951,7 +952,8 @@ XS(XS_Internals_hash_seed)
     /* Using dXSARGS would also have dITEM and dSP,
      * which define 2 unused local variables.  */
     dAXMARK;
-    (void)mark;
+    LINT_UNUSED_ARG(cv)
+    PERL_UNUSED_VAR(mark);
     XSRETURN_UV(PERL_HASH_SEED);
 }
 
@@ -960,7 +962,8 @@ XS(XS_Internals_rehash_seed)
     /* Using dXSARGS would also have dITEM and dSP,
      * which define 2 unused local variables.  */
     dAXMARK;
-    (void)mark;
+    LINT_UNUSED_ARG(cv)
+    PERL_UNUSED_VAR(mark);
     XSRETURN_UV(PL_rehash_seed);
 }
 

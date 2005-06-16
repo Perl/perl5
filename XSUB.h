@@ -82,6 +82,15 @@ is a lexical $_ in scope.
 =cut
 */
 
+#ifndef LINT_UNUSED_ARG
+#  ifdef lint
+#    include <note.h>
+#    define LINT_UNUSED_ARG(x) NOTE(ARGUNUSED(x))
+#  else
+#    define LINT_UNUSED_ARG(x)
+#  endif
+#endif
+
 #define ST(off) PL_stack_base[ax + (off)]
 
 #undef XS
@@ -107,7 +116,8 @@ is a lexical $_ in scope.
 
 #define dITEMS I32 items = SP - MARK
 
-#define dXSARGS				\
+#define dXSARGS \
+	LINT_UNUSED_ARG(cv) \
 	dSP; dAXMARK; dITEMS
 
 #define dXSTARG SV * const targ = ((PL_op->op_private & OPpENTERSUB_HASTARG) \
@@ -601,3 +611,13 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #endif  /* PERL_IMPLICIT_SYS && !PERL_CORE */
 
 #endif /* _INC_PERL_XSUB_H */		/* include guard */
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */
