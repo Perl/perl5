@@ -4342,8 +4342,6 @@ Perl_yylex(pTHX)
 	case KEY___DATA__:
 	case KEY___END__: {
 	    GV *gv;
-
-	    /*SUPPRESS 560*/
 	    if (PL_rsfp && (!PL_in_eval || PL_tokenbuf[2] == 'D')) {
 		const char *pname = "main";
 		if (PL_tokenbuf[2] == 'D')
@@ -10518,7 +10516,6 @@ S_scan_formline(pTHX_ register char *s)
 
     while (!needargs) {
 	if (*s == '.') {
-	    /*SUPPRESS 530*/
 #ifdef PERL_STRICT_CR
 	    for (t = s+1;SPACE_OR_TAB(*t); t++) ;
 #else

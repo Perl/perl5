@@ -2654,7 +2654,6 @@ Perl_moreswitches(pTHX_ char *s)
 	           "Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)\n");
 	for (s++; isALNUM(*s); s++) ;
 #endif
-	/*SUPPRESS 530*/
 	return s;
     }	
     case 'h':
@@ -2670,8 +2669,8 @@ Perl_moreswitches(pTHX_ char *s)
 	}
 #endif /* __CYGWIN__ */
 	PL_inplace = savepv(s+1);
-	/*SUPPRESS 530*/
-	for (s = PL_inplace; *s && !isSPACE(*s); s++) ;
+	for (s = PL_inplace; *s && !isSPACE(*s); s++)
+	    ;
 	if (*s) {
 	    *s++ = '\0';
 	    if (*s == '-')	/* Additional switches on #! line. */
@@ -3842,7 +3841,6 @@ S_find_beginning(pTHX)
 		while (isDIGIT(s2[-1]) || s2[-1] == '-' || s2[-1] == '.'
 		       || s2[-1] == '_') s2--;
 		if (strnEQ(s2-4,"perl",4))
-		    /*SUPPRESS 530*/
 		    while ((s = moreswitches(s)))
 			;
 	    }

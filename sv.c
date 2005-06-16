@@ -4587,7 +4587,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
         }
 	if (sflags & SVf_UTF8)
 	    SvUTF8_on(dstr);
-	/*SUPPRESS 560*/
 	if (sflags & SVp_NOK) {
 	    SvNOKp_on(dstr);
 	    if (sflags & SVf_NOK)
@@ -5739,7 +5738,6 @@ Perl_sv_insert(pTHX_ SV *bigstr, STRLEN offset, STRLEN len, const char *little, 
 	*mid = '\0';
 	SvCUR_set(bigstr, mid - big);
     }
-    /*SUPPRESS 560*/
     else if ((i = mid - big)) {	/* faster from front */
 	midend -= littlelen;
 	mid = midend;

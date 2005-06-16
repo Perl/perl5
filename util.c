@@ -152,7 +152,6 @@ Perl_safesysfree(Malloc_t where)
 #endif
     DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) free\n",PTR2UV(where),(long)PL_an++));
     if (where) {
-	/*SUPPRESS 701*/
 	PerlMem_free(where);
     }
 }
@@ -584,7 +583,6 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	    register I32 tmp;
 
 	  top2:
-	    /*SUPPRESS 560*/
 	    if ((tmp = table[*s])) {
 		if ((s += tmp) < bigend)
 		    goto top2;
@@ -1412,7 +1410,6 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
 	I32 max;
 	char **tmpenv;
 
-	/*SUPPRESS 530*/
 	for (max = i; environ[max]; max++) ;
 	tmpenv = (char**)safesysmalloc((max+2) * sizeof(char*));
 	for (j=0; j<max; j++) {		/* copy environment */
@@ -2151,7 +2148,6 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 	    PerlProc__exit(1);
 	}
 #endif	/* defined OS2 */
-	/*SUPPRESS 560*/
 	if ((tmpgv = gv_fetchpv("$",TRUE, SVt_PV))) {
 	    SvREADONLY_off(GvSV(tmpgv));
 	    sv_setiv(GvSV(tmpgv), PerlProc_getpid());
@@ -2632,7 +2628,6 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 #endif /* !DOSISH || OS2 || WIN32 || NETWARE */
 
 void
-/*SUPPRESS 590*/
 Perl_pidgone(pTHX_ Pid_t pid, int status)
 {
     register SV *sv;

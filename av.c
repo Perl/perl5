@@ -445,7 +445,6 @@ Perl_av_clear(pTHX_ register AV *av)
 #endif
     if (!av)
 	return;
-    /*SUPPRESS 560*/
 
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ PL_no_modify);
@@ -489,7 +488,6 @@ Perl_av_undef(pTHX_ register AV *av)
 {
     if (!av)
 	return;
-    /*SUPPRESS 560*/
 
     /* Give any tie a chance to cleanup first */
     if (SvTIED_mg((SV*)av, PERL_MAGIC_tied)) 

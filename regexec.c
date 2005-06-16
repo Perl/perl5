@@ -55,7 +55,6 @@
 #  define PERL_NO_GET_CONTEXT
 #endif
 
-/*SUPPRESS 112*/
 /*
  * pregcomp and pregexec -- regsub and regerror are not used in perl
  *
@@ -1849,7 +1848,6 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
                                   "Did not find anchored character...\n")
                );
     }
-    /*SUPPRESS 560*/
     else if (prog->anchored_substr != Nullsv
 	      || prog->anchored_utf8 != Nullsv
 	      || ((prog->float_substr != Nullsv || prog->float_utf8 != Nullsv)
@@ -4328,7 +4326,6 @@ do_no:
 		goto do_no;
 	    }
 	    /* Have more choice yet.  Reuse the same uwb.  */
-	    /*SUPPRESS 560*/
 	    if ((n = (uwb->type == RE_UNWIND_BRANCH
 		      ? NEXT_OFF(next) : ARG(next))))
 		next += n;

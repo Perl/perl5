@@ -342,7 +342,6 @@ PP(pp_backtick)
 	if (gimme == G_VOID) {
 	    char tmpbuf[256];
 	    while (PerlIO_read(fp, tmpbuf, sizeof tmpbuf) > 0)
-		/*SUPPRESS 530*/
 		;
 	}
 	else if (gimme == G_SCALAR) {
@@ -351,7 +350,6 @@ PP(pp_backtick)
 	    PL_rs = &PL_sv_undef;
 	    sv_setpvn(TARG, "", 0);	/* note that this preserves previous buffer */
 	    while (sv_gets(TARG, fp, SvCUR(TARG)) != Nullch)
-		/*SUPPRESS 530*/
 		;
 	    LEAVE;
 	    XPUSHs(TARG);
@@ -4070,7 +4068,6 @@ PP(pp_fork)
     if (childpid < 0)
 	RETSETUNDEF;
     if (!childpid) {
-	/*SUPPRESS 560*/
 	if ((tmpgv = gv_fetchpv("$", TRUE, SVt_PV))) {
             SvREADONLY_off(GvSV(tmpgv));
 	    sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());

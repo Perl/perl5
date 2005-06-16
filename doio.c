@@ -213,7 +213,6 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	SAVEFREEPV(type);
 
         /* Lose leading and trailing white space */
-        /*SUPPRESS 530*/
         for (; isSPACE(*type); type++) ;
         while (tend > type && isSPACE(tend[-1]))
 	    *--tend = '\0';
@@ -253,7 +252,6 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		}
 		type++;
 	    }
-	    /*SUPPRESS 530*/
 	    for (type++; isSPACE(*type); type++) ;
 	    if (!num_svs) {
 		name = type;
@@ -341,7 +339,6 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		    if (num_svs > 1) {
 			Perl_croak(aTHX_ "More than one argument to '%c&' open",IoTYPE(io));
 		    }
-		    /*SUPPRESS 530*/
 		    for (; isSPACE(*type); type++) ;
 		    if (num_svs && (SvIOK(*svp) || (SvPOK(*svp) && looks_like_number(*svp)))) {
 			fd = SvUV(*svp);
@@ -418,10 +415,8 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		}
 	    } /* & */
 	    else {
-		/*SUPPRESS 530*/
 		for (; isSPACE(*type); type++) ;
 		if (*type == IoTYPE_STD && (!type[1] || isSPACE(type[1]) || type[1] == ':')) {
-		    /*SUPPRESS 530*/
 		    type++;
 		    fp = PerlIO_stdout();
 		    IoTYPE(io) = IoTYPE_STD;
@@ -443,7 +438,6 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	       goto unknown_open_mode;
 	} /* IoTYPE_WRONLY */
 	else if (*type == IoTYPE_RDONLY) {
-	    /*SUPPRESS 530*/
 	    for (type++; isSPACE(*type); type++) ;
 	    mode[0] = 'r';
 #ifdef HAS_STRLCAT
@@ -461,7 +455,6 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		goto duplicity;
 	    }
 	    if (*type == IoTYPE_STD && (!type[1] || isSPACE(type[1]) || type[1] == ':')) {
-		/*SUPPRESS 530*/
 		type++;
 		fp = PerlIO_stdin();
 		IoTYPE(io) = IoTYPE_STD;
@@ -491,8 +484,8 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		*--tend = '\0';
 		while (tend > type && isSPACE(tend[-1]))
 		    *--tend = '\0';
-		/*SUPPRESS 530*/
-		for (; isSPACE(*type); type++) ;
+		for (; isSPACE(*type); type++)
+		    ;
 		name = type;
 	        len  = tend-type;
 	    }
@@ -541,8 +534,8 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		goto unknown_open_mode;
 	    name = type;
 	    IoTYPE(io) = IoTYPE_RDONLY;
-	    /*SUPPRESS 530*/
-	    for (; isSPACE(*name); name++) ;
+	    for (; isSPACE(*name); name++)
+		;
 	    mode[0] = 'r';
 
 #ifdef HAS_STRLCAT

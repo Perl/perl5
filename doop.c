@@ -954,7 +954,6 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
         HV* hv = (HV*)sv;
 	HE* entry;
         (void)hv_iterinit(hv);
-        /*SUPPRESS 560*/
         while ((entry = hv_iternext(hv)))
             do_chop(astr,hv_iterval(hv,entry));
         return;
@@ -1031,7 +1030,6 @@ Perl_do_chomp(pTHX_ register SV *sv)
         HV* hv = (HV*)sv;
 	HE* entry;
         (void)hv_iterinit(hv);
-        /*SUPPRESS 560*/
         while ((entry = hv_iternext(hv)))
             count += do_chomp(hv_iterval(hv,entry));
         return count;
@@ -1379,7 +1377,6 @@ Perl_do_kv(pTHX)
 	    i = HvKEYS(keys);
 	else {
 	    i = 0;
-	    /*SUPPRESS 560*/
 	    while (hv_iternext(keys)) i++;
 	}
 	PUSHi( i );

@@ -971,7 +971,6 @@ PP(pp_aassign)
     if (PL_op->op_private & (OPpASSIGN_COMMON)) {
 	EXTEND_MORTAL(lastrelem - firstrelem + 1);
 	for (relem = firstrelem; relem <= lastrelem; relem++) {
-	    /*SUPPRESS 560*/
 	    if ((sv = *relem)) {
 		TAINT_NOT;	/* Each item is independent */
 		*relem = sv_mortalcopy(sv);
@@ -1301,7 +1300,6 @@ play_it_again:
 	EXTEND_MORTAL(nparens + i);
 	for (i = !i; i <= nparens; i++) {
 	    PUSHs(sv_newmortal());
-	    /*SUPPRESS 560*/
 	    if ((rx->startp[i] != -1) && rx->endp[i] != -1 ) {
 		const I32 len = rx->endp[i] - rx->startp[i];
 		s = rx->startp[i] + truebase;
@@ -2113,7 +2111,6 @@ PP(pp_subst)
 		*m = '\0';
 		SvCUR_set(TARG, m - s);
 	    }
-	    /*SUPPRESS 560*/
 	    else if ((i = m - s)) {	/* faster from front */
 		d -= clen;
 		m = d;
@@ -2142,7 +2139,6 @@ PP(pp_subst)
 		    DIE(aTHX_ "Substitution loop");
 		rxtainted |= RX_MATCH_TAINTED(rx);
 		m = rx->startp[0] + orig;
-		/*SUPPRESS 560*/
 		if ((i = m - s)) {
 		    if (s != d)
 			Move(s, d, i, char);

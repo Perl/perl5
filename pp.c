@@ -4640,8 +4640,8 @@ PP(pp_split)
     }
     else if (rx->precomp[0] == '^' && rx->precomp[1] == '\0') {
 	while (--limit) {
-	    /*SUPPRESS 530*/
-	    for (m = s; m < strend && *m != '\n'; m++) ;
+	    for (m = s; m < strend && *m != '\n'; m++)
+		;
 	    m++;
 	    if (m >= strend)
 		break;
@@ -4665,8 +4665,8 @@ PP(pp_split)
 	if (len == 1 && !(rx->reganch & ROPT_UTF8) && !tail) {
 	    char c = *SvPV_nolen_const(csv);
 	    while (--limit) {
-		/*SUPPRESS 530*/
-		for (m = s; m < strend && *m != c; m++) ;
+		for (m = s; m < strend && *m != c; m++)
+		    ;
 		if (m >= strend)
 		    break;
 		dstr = newSVpvn(s, m-s);
