@@ -1088,13 +1088,13 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 	$(LINK32) -Tpd -ap $(BLINK_FLAGS) \
 	    @$(mktmp c0d32$(o) $(PERLDLL_OBJ:s,\,$B,)$N \
 		$@,$N \
-	        $(shell @type Extensions_static) $(LIBFILES)$N \
+	        $(subst,\,$B $(shell @type Extensions_static)) $(LIBFILES)$N \
 		perldll.def$N)
 	$(IMPLIB) $*.lib $@
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -mdll -o $@ -Wl,--base-file -Wl,perl.base $(BLINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(PERLDLL_OBJ:s,\,$B,) \
-	        $(shell @type Extensions_static) \
+	        $(subst,\,$B $(shell @type Extensions_static)) \
 	        $(LIBFILES) $(LKPOST))
 	dlltool --output-lib $(PERLIMPLIB) \
 		--dllname $(PERLDLL:b).dll \
@@ -1103,7 +1103,7 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 		--output-exp perl.exp
 	$(LINK32) -mdll -o $@ $(BLINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(PERLDLL_OBJ:s,\,$B,) \
-	        $(shell @type Extensions_static) \
+	        $(subst,\,$B $(shell @type Extensions_static)) \
 	        $(LIBFILES) perl.exp $(LKPOST))
 .ELSE
 	$(LINK32) -dll -def:perldll.def -out:$@ \
