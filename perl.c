@@ -1378,13 +1378,13 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    sv_catpv(PL_e_script, "\n");
 	    break;
 
-#ifdef USE_SITECUSTOMIZE
 	case 'f':
+#ifdef USE_SITECUSTOMIZE
 	    minus_f = TRUE;
+#endif
 	    s++;
 	    goto reswitch;
 
-#endif
 	case 'I':	/* -I handled both here and in moreswitches() */
 	    forbid_setid("-I");
 	    if (!*++s && (s=argv[1]) != Nullch) {
@@ -2439,9 +2439,7 @@ S_usage(pTHX_ const char *name)		/* XXX move this out into a module ? */
 "-d[:debugger]     run program under debugger",
 "-D[number/list]   set debugging flags (argument is a bit mask or alphabets)",
 "-e program        one line of program (several -e's allowed, omit programfile)",
-#ifdef USE_SITECUSTOMIZE
 "-f                don't do $sitelib/sitecustomize.pl at startup",
-#endif
 "-F/pattern/       split() pattern for -a switch (//'s are optional)",
 "-i[extension]     edit <> files in place (makes backup if extension supplied)",
 "-Idirectory       specify @INC/#include directory (several -I's allowed)",
