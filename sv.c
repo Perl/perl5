@@ -1154,320 +1154,82 @@ S_more_bodies (pTHX_ void **arena_root, void **root, size_t size)
     return *root;
 }
 
-#define more_thingy(TYPE,lctype)				\
-    S_more_bodies(aTHX_ (void**)&PL_## lctype ## _arenaroot,	\
-		  (void**)&PL_ ## lctype ## _root,		\
-		  sizeof(TYPE))
+/* grab a new thing from the free list, allocating more if necessary */
 
-#define more_thingy_allocated(lctype)				\
-    S_more_bodies(aTHX_ (void**)&PL_## lctype ## _arenaroot,	\
-		  (void**)&PL_ ## lctype ## _root,		\
-		  sizeof(lctype ## _allocated))
-
-
-#define more_xnv()	more_thingy(NV, xnv)
-#define more_xpv()	more_thingy_allocated(xpv)
-#define more_xpviv()	more_thingy_allocated(xpviv)
-#define more_xpvnv()	more_thingy(XPVNV, xpvnv)
-#define more_xpvcv()	more_thingy(XPVCV, xpvcv)
-#define more_xpvav()	more_thingy_allocated(xpvav)
-#define more_xpvhv()	more_thingy_allocated(xpvhv)
-#define more_xpvgv()	more_thingy(XPVGV, xpvgv)
-#define more_xpvmg()	more_thingy(XPVMG, xpvmg)
-#define more_xpvbm()	more_thingy(XPVBM, xpvbm)
-#define more_xpvlv()	more_thingy(XPVLV, xpvlv)
-
-
-/* grab a new NV body from the free list, allocating more if necessary */
-
-STATIC XPVNV*
-S_new_xnv(pTHX)
+STATIC void *
+S_new_body(pTHX_ void **arena_root, void **root, size_t size, size_t offset)
 {
-    NV* xnv;
+    void *xpv;
     LOCK_SV_MUTEX;
-    xnv = PL_xnv_root ? PL_xnv_root : more_xnv();
-    PL_xnv_root = *(NV**)xnv;
+    xpv = *root ? *root : S_more_bodies(aTHX_ arena_root, root, size);
+    *root = *(void**)xpv;
     UNLOCK_SV_MUTEX;
-    return (XPVNV*)((char*)xnv - STRUCT_OFFSET(XPVNV, xnv_nv));
+    return (void*)((char*)xpv - offset);
 }
 
-/* return an NV body to the free list */
+/* return a thing to the free list */
 
 STATIC void
-S_del_xnv(pTHX_ XPVNV *p)
+S_del_body(pTHX_ void *thing, void **root, size_t offset)
 {
-    NV* xnv = (NV*)((char*)(p) + STRUCT_OFFSET(XPVNV, xnv_nv));
+    void **real_thing = (void**)((char *)thing + offset);
     LOCK_SV_MUTEX;
-    *(NV**)xnv = PL_xnv_root;
-    PL_xnv_root = xnv;
+    *real_thing = *root;
+    *root = (void*)real_thing;
     UNLOCK_SV_MUTEX;
 }
 
-/* grab a new struct xpv from the free list, allocating more if necessary */
+/* Conventionally we simply malloc() a big block of memory, then divide it
+   up into lots of the thing that we're allocating.
 
-STATIC XPV*
-S_new_xpv(pTHX)
-{
-    xpv_allocated* xpv;
-    LOCK_SV_MUTEX;
-    xpv = PL_xpv_root ? PL_xpv_root : more_xpv();
-    PL_xpv_root = *(xpv_allocated**)xpv;
-    UNLOCK_SV_MUTEX;
-    /* If xpv_allocated is the same structure as XPV then the two OFFSETs
-       sum to zero, and the pointer is unchanged. If the allocated structure
-       is smaller (no initial IV actually allocated) then the net effect is
-       to subtract the size of the IV from the pointer, to return a new pointer
-       as if an initial IV were actually allocated.  */
-    return (XPV*)((char*)xpv - STRUCT_OFFSET(XPV, xpv_cur)
-		  + STRUCT_OFFSET(xpv_allocated, xpv_cur));
-}
+   This macro will expand to call to S_new_body. So for XPVBM (with ithreads),
+   it would become
 
-/* return a struct xpv to the free list */
+   S_new_body(my_perl, (void**)&(my_perl->Ixpvbm_arenaroot),
+	      (void**)&(my_perl->Ixpvbm_root), sizeof(XPVBM), 0)
+*/
 
-STATIC void
-S_del_xpv(pTHX_ XPV *p)
-{
-    xpv_allocated* xpv
-	= (xpv_allocated*)((char*)(p) + STRUCT_OFFSET(XPV, xpv_cur)
-			   - STRUCT_OFFSET(xpv_allocated, xpv_cur));
-    LOCK_SV_MUTEX;
-    *(xpv_allocated**)xpv = PL_xpv_root;
-    PL_xpv_root = xpv;
-    UNLOCK_SV_MUTEX;
-}
+#define new_body(TYPE,lctype)						\
+    S_new_body(aTHX_ (void**)&PL_ ## lctype ## _arenaroot,		\
+		 (void**)&PL_ ## lctype ## _root,			\
+		 sizeof(TYPE),						\
+		 0)
 
-/* grab a new struct xpviv from the free list, allocating more if necessary */
+/* But for some types, we cheat. The type starts with some members that are
+   never accessed. So we allocate the substructure, starting at the first used
+   member, then adjust the pointer back in memory by the size of the bit not
+   allocated, so it's as if we allocated the full structure.
+   (But things will all go boom if you write to the part that is "not there",
+   because you'll be overwriting the last members of the preceding structure
+   in memory.)
 
-STATIC XPVIV*
-S_new_xpviv(pTHX)
-{
-    xpviv_allocated* xpviv;
-    LOCK_SV_MUTEX;
-    xpviv = PL_xpviv_root ? PL_xpviv_root : more_xpviv();
-    PL_xpviv_root = *(xpviv_allocated**)xpviv;
-    UNLOCK_SV_MUTEX;
-    /* If xpviv_allocated is the same structure as XPVIV then the two OFFSETs
-       sum to zero, and the pointer is unchanged. If the allocated structure
-       is smaller (no initial IV actually allocated) then the net effect is
-       to subtract the size of the IV from the pointer, to return a new pointer
-       as if an initial IV were actually allocated.  */
-    return (XPVIV*)((char*)xpviv - STRUCT_OFFSET(XPVIV, xpv_cur)
-		  + STRUCT_OFFSET(xpviv_allocated, xpv_cur));
-}
+   We calculate the correction using the STRUCT_OFFSET macro. For example, if
+   xpv_allocated is the same structure as XPV then the two OFFSETs sum to zero,
+   and the pointer is unchanged. If the allocated structure is smaller (no
+   initial NV actually allocated) then the net effect is to subtract the size
+   of the NV from the pointer, to return a new pointer as if an initial NV were
+   actually allocated.
 
-/* return a struct xpviv to the free list */
+   This is the same trick as was used for NV and IV bodies. Ironically it
+   doesn't need to be used for NV bodies any more, because NV is now at the
+   start of the structure. IV bodies don't need it either, because they are
+   no longer allocated.  */
 
-STATIC void
-S_del_xpviv(pTHX_ XPVIV *p)
-{
-    xpviv_allocated* xpviv
-	= (xpviv_allocated*)((char*)(p) + STRUCT_OFFSET(XPVIV, xpv_cur)
-			   - STRUCT_OFFSET(xpviv_allocated, xpv_cur));
-    LOCK_SV_MUTEX;
-    *(xpviv_allocated**)xpviv = PL_xpviv_root;
-    PL_xpviv_root = xpviv;
-    UNLOCK_SV_MUTEX;
-}
+#define new_body_allocated(TYPE,lctype,member)				\
+    S_new_body(aTHX_ (void**)&PL_ ## lctype ## _arenaroot,		\
+	       (void**)&PL_ ## lctype ## _root,				\
+	       sizeof(lctype ## _allocated),				\
+	       STRUCT_OFFSET(TYPE, member)				\
+	       - STRUCT_OFFSET(lctype ## _allocated, member))
 
-/* grab a new struct xpvnv from the free list, allocating more if necessary */
 
-STATIC XPVNV*
-S_new_xpvnv(pTHX)
-{
-    XPVNV* xpvnv;
-    LOCK_SV_MUTEX;
-    xpvnv = PL_xpvnv_root ? PL_xpvnv_root : more_xpvnv();
-    PL_xpvnv_root = *(XPVNV**)xpvnv;
-    UNLOCK_SV_MUTEX;
-    return xpvnv;
-}
+#define del_body(p,TYPE,lctype)						\
+    S_del_body(aTHX_ (void*)p, (void**)&PL_ ## lctype ## _root, 0)
 
-/* return a struct xpvnv to the free list */
-
-STATIC void
-S_del_xpvnv(pTHX_ XPVNV *p)
-{
-    LOCK_SV_MUTEX;
-    *(XPVNV**)p = PL_xpvnv_root;
-    PL_xpvnv_root = p;
-    UNLOCK_SV_MUTEX;
-}
-
-/* grab a new struct xpvcv from the free list, allocating more if necessary */
-
-STATIC XPVCV*
-S_new_xpvcv(pTHX)
-{
-    XPVCV* xpvcv;
-    LOCK_SV_MUTEX;
-    xpvcv = PL_xpvcv_root ? PL_xpvcv_root : more_xpvcv();
-    PL_xpvcv_root = *(XPVCV**)xpvcv;
-    UNLOCK_SV_MUTEX;
-    return xpvcv;
-}
-
-/* return a struct xpvcv to the free list */
-
-STATIC void
-S_del_xpvcv(pTHX_ XPVCV *p)
-{
-    LOCK_SV_MUTEX;
-    *(XPVCV**)p = PL_xpvcv_root;
-    PL_xpvcv_root = p;
-    UNLOCK_SV_MUTEX;
-}
-
-/* grab a new struct xpvav from the free list, allocating more if necessary */
-
-STATIC XPVAV*
-S_new_xpvav(pTHX)
-{
-    xpvav_allocated* xpvav;
-    LOCK_SV_MUTEX;
-    xpvav = PL_xpvav_root ? PL_xpvav_root : more_xpvav();
-    PL_xpvav_root = *(xpvav_allocated**)xpvav;
-    UNLOCK_SV_MUTEX;
-    return (XPVAV*)((char*)xpvav - STRUCT_OFFSET(XPVAV, xav_fill)
-		    + STRUCT_OFFSET(xpvav_allocated, xav_fill));
-}
-
-/* return a struct xpvav to the free list */
-
-STATIC void
-S_del_xpvav(pTHX_ XPVAV *p)
-{
-    xpvav_allocated* xpvav
-	= (xpvav_allocated*)((char*)(p) + STRUCT_OFFSET(XPVAV, xav_fill)
-			     - STRUCT_OFFSET(xpvav_allocated, xav_fill));
-    LOCK_SV_MUTEX;
-    *(xpvav_allocated**)xpvav = PL_xpvav_root;
-    PL_xpvav_root = xpvav;
-    UNLOCK_SV_MUTEX;
-}
-
-/* grab a new struct xpvhv from the free list, allocating more if necessary */
-
-STATIC XPVHV*
-S_new_xpvhv(pTHX)
-{
-    xpvhv_allocated* xpvhv;
-    LOCK_SV_MUTEX;
-    xpvhv = PL_xpvhv_root ? PL_xpvhv_root : more_xpvhv();
-    PL_xpvhv_root = *(xpvhv_allocated**)xpvhv;
-    UNLOCK_SV_MUTEX;
-    return (XPVHV*)((char*)xpvhv - STRUCT_OFFSET(XPVHV, xhv_fill)
-		    + STRUCT_OFFSET(xpvhv_allocated, xhv_fill));
-}
-
-/* return a struct xpvhv to the free list */
-
-STATIC void
-S_del_xpvhv(pTHX_ XPVHV *p)
-{
-    xpvhv_allocated* xpvhv
-	= (xpvhv_allocated*)((char*)(p) + STRUCT_OFFSET(XPVHV, xhv_fill)
-			     - STRUCT_OFFSET(xpvhv_allocated, xhv_fill));
-    LOCK_SV_MUTEX;
-    *(xpvhv_allocated**)xpvhv = PL_xpvhv_root;
-    PL_xpvhv_root = xpvhv;
-    UNLOCK_SV_MUTEX;
-}
-
-/* grab a new struct xpvmg from the free list, allocating more if necessary */
-
-STATIC XPVMG*
-S_new_xpvmg(pTHX)
-{
-    XPVMG* xpvmg;
-    LOCK_SV_MUTEX;
-    xpvmg = PL_xpvmg_root ? PL_xpvmg_root : more_xpvmg();
-    PL_xpvmg_root = *(XPVMG**)xpvmg;
-    UNLOCK_SV_MUTEX;
-    return xpvmg;
-}
-
-/* return a struct xpvmg to the free list */
-
-STATIC void
-S_del_xpvmg(pTHX_ XPVMG *p)
-{
-    LOCK_SV_MUTEX;
-    *(XPVMG**)p = PL_xpvmg_root;
-    PL_xpvmg_root = p;
-    UNLOCK_SV_MUTEX;
-}
-
-/* grab a new struct xpvgv from the free list, allocating more if necessary */
-
-STATIC XPVGV*
-S_new_xpvgv(pTHX)
-{
-    XPVGV* xpvgv;
-    LOCK_SV_MUTEX;
-    xpvgv = PL_xpvgv_root ? PL_xpvgv_root : more_xpvgv();
-    PL_xpvgv_root = *(XPVGV**)xpvgv;
-    UNLOCK_SV_MUTEX;
-    return xpvgv;
-}
-
-/* return a struct xpvgv to the free list */
-
-STATIC void
-S_del_xpvgv(pTHX_ XPVGV *p)
-{
-    LOCK_SV_MUTEX;
-    *(XPVGV**)p = PL_xpvgv_root;
-    PL_xpvgv_root = p;
-    UNLOCK_SV_MUTEX;
-}
-
-/* grab a new struct xpvlv from the free list, allocating more if necessary */
-
-STATIC XPVLV*
-S_new_xpvlv(pTHX)
-{
-    XPVLV* xpvlv;
-    LOCK_SV_MUTEX;
-    xpvlv = PL_xpvlv_root ? PL_xpvlv_root : more_xpvlv();
-    PL_xpvlv_root = *(XPVLV**)xpvlv;
-    UNLOCK_SV_MUTEX;
-    return xpvlv;
-}
-
-/* return a struct xpvlv to the free list */
-
-STATIC void
-S_del_xpvlv(pTHX_ XPVLV *p)
-{
-    LOCK_SV_MUTEX;
-    *(XPVLV**)p = PL_xpvlv_root;
-    PL_xpvlv_root = p;
-    UNLOCK_SV_MUTEX;
-}
-
-/* grab a new struct xpvbm from the free list, allocating more if necessary */
-
-STATIC XPVBM*
-S_new_xpvbm(pTHX)
-{
-    XPVBM* xpvbm;
-    LOCK_SV_MUTEX;
-    xpvbm = PL_xpvbm_root ? PL_xpvbm_root : more_xpvbm();
-    PL_xpvbm_root = *(XPVBM**)xpvbm;
-    UNLOCK_SV_MUTEX;
-    return xpvbm;
-}
-
-/* return a struct xpvbm to the free list */
-
-STATIC void
-S_del_xpvbm(pTHX_ XPVBM *p)
-{
-    LOCK_SV_MUTEX;
-    *(XPVBM**)p = PL_xpvbm_root;
-    PL_xpvbm_root = p;
-    UNLOCK_SV_MUTEX;
-}
+#define del_body_allocated(p,TYPE,lctype,member)			\
+    S_del_body(aTHX_ (void*)p, (void**)&PL_ ## lctype ## _root,		\
+	       STRUCT_OFFSET(TYPE, member)				\
+	       - STRUCT_OFFSET(lctype ## _allocated, member))
 
 #define my_safemalloc(s)	(void*)safemalloc(s)
 #define my_safefree(p)	safefree((char*)p)
@@ -1509,38 +1271,38 @@ S_del_xpvbm(pTHX_ XPVBM *p)
 
 #else /* !PURIFY */
 
-#define new_XNV()	(void*)new_xnv()
-#define del_XNV(p)	del_xnv((XPVNV*) p)
+#define new_XNV()	new_body(NV, xnv)
+#define del_XNV(p)	del_body(p, NV, xnv)
 
-#define new_XPV()	(void*)new_xpv()
-#define del_XPV(p)	del_xpv((XPV *)p)
+#define new_XPV()	new_body_allocated(XPV, xpv, xpv_cur)
+#define del_XPV(p)	del_body_allocated(p, XPV, xpv, xpv_cur)
 
-#define new_XPVIV()	(void*)new_xpviv()
-#define del_XPVIV(p)	del_xpviv((XPVIV *)p)
+#define new_XPVIV()	new_body_allocated(XPVIV, xpviv, xpv_cur)
+#define del_XPVIV(p)	del_body_allocated(p, XPVIV, xpviv, xpv_cur)
 
-#define new_XPVNV()	(void*)new_xpvnv()
-#define del_XPVNV(p)	del_xpvnv((XPVNV *)p)
+#define new_XPVNV()	new_body(XPVNV, xpvnv)
+#define del_XPVNV(p)	del_body(p, XPVNV, xpvnv)
 
-#define new_XPVCV()	(void*)new_xpvcv()
-#define del_XPVCV(p)	del_xpvcv((XPVCV *)p)
+#define new_XPVCV()	new_body(XPVCV, xpvcv)
+#define del_XPVCV(p)	del_body(p, XPVCV, xpvcv)
 
-#define new_XPVAV()	(void*)new_xpvav()
-#define del_XPVAV(p)	del_xpvav((XPVAV *)p)
+#define new_XPVAV()	new_body_allocated(XPVAV, xpvav, xav_fill)
+#define del_XPVAV(p)	del_body_allocated(p, XPVAV, xpvav, xav_fill)
 
-#define new_XPVHV()	(void*)new_xpvhv()
-#define del_XPVHV(p)	del_xpvhv((XPVHV *)p)
+#define new_XPVHV()	new_body_allocated(XPVHV, xpvhv, xhv_fill)
+#define del_XPVHV(p)	del_body_allocated(p, XPVHV, xpvhv, xhv_fill)
 
-#define new_XPVMG()	(void*)new_xpvmg()
-#define del_XPVMG(p)	del_xpvmg((XPVMG *)p)
+#define new_XPVMG()	new_body(XPVMG, xpvmg)
+#define del_XPVMG(p)	del_body(p, XPVMG, xpvmg)
 
-#define new_XPVGV()	(void*)new_xpvgv()
-#define del_XPVGV(p)	del_xpvgv((XPVGV *)p)
+#define new_XPVGV()	new_body(XPVGV, xpvgv)
+#define del_XPVGV(p)	del_body(p, XPVGV, xpvgv)
 
-#define new_XPVLV()	(void*)new_xpvlv()
-#define del_XPVLV(p)	del_xpvlv((XPVLV *)p)
+#define new_XPVLV()	new_body(XPVLV, xpvlv)
+#define del_XPVLV(p)	del_body(p, XPVLV, xpvlv)
 
-#define new_XPVBM()	(void*)new_xpvbm()
-#define del_XPVBM(p)	del_xpvbm((XPVBM *)p)
+#define new_XPVBM()	new_body(XPVBM, xpvbm)
+#define del_XPVBM(p)	del_body(p, XPVBM, xpvbm)
 
 #endif /* PURIFY */
 
