@@ -1125,7 +1125,7 @@ Perl_report_uninit(pTHX_ SV* uninit_sv)
 		    "", "", "");
 }
 
-STATIC void
+STATIC void *
 S_more_bodies (pTHX_ void **arena_root, void **root, size_t size)
 {
     char *start;
@@ -1150,6 +1150,8 @@ S_more_bodies (pTHX_ void **arena_root, void **root, size_t size)
 	start = next;
     }
     *(void **)start = 0;
+
+    return *root;
 }
 
 #define more_thingy(TYPE,lctype)				\
@@ -1183,9 +1185,7 @@ S_new_xnv(pTHX)
 {
     NV* xnv;
     LOCK_SV_MUTEX;
-    if (!PL_xnv_root)
-	more_xnv();
-    xnv = PL_xnv_root;
+    xnv = PL_xnv_root ? PL_xnv_root : more_xnv();
     PL_xnv_root = *(NV**)xnv;
     UNLOCK_SV_MUTEX;
     return (XPVNV*)((char*)xnv - STRUCT_OFFSET(XPVNV, xnv_nv));
@@ -1210,9 +1210,7 @@ S_new_xpv(pTHX)
 {
     xpv_allocated* xpv;
     LOCK_SV_MUTEX;
-    if (!PL_xpv_root)
-	more_xpv();
-    xpv = PL_xpv_root;
+    xpv = PL_xpv_root ? PL_xpv_root : more_xpv();
     PL_xpv_root = *(xpv_allocated**)xpv;
     UNLOCK_SV_MUTEX;
     /* If xpv_allocated is the same structure as XPV then the two OFFSETs
@@ -1245,9 +1243,7 @@ S_new_xpviv(pTHX)
 {
     xpviv_allocated* xpviv;
     LOCK_SV_MUTEX;
-    if (!PL_xpviv_root)
-	more_xpviv();
-    xpviv = PL_xpviv_root;
+    xpviv = PL_xpviv_root ? PL_xpviv_root : more_xpviv();
     PL_xpviv_root = *(xpviv_allocated**)xpviv;
     UNLOCK_SV_MUTEX;
     /* If xpviv_allocated is the same structure as XPVIV then the two OFFSETs
@@ -1280,9 +1276,7 @@ S_new_xpvnv(pTHX)
 {
     XPVNV* xpvnv;
     LOCK_SV_MUTEX;
-    if (!PL_xpvnv_root)
-	more_xpvnv();
-    xpvnv = PL_xpvnv_root;
+    xpvnv = PL_xpvnv_root ? PL_xpvnv_root : more_xpvnv();
     PL_xpvnv_root = *(XPVNV**)xpvnv;
     UNLOCK_SV_MUTEX;
     return xpvnv;
@@ -1306,9 +1300,7 @@ S_new_xpvcv(pTHX)
 {
     XPVCV* xpvcv;
     LOCK_SV_MUTEX;
-    if (!PL_xpvcv_root)
-	more_xpvcv();
-    xpvcv = PL_xpvcv_root;
+    xpvcv = PL_xpvcv_root ? PL_xpvcv_root : more_xpvcv();
     PL_xpvcv_root = *(XPVCV**)xpvcv;
     UNLOCK_SV_MUTEX;
     return xpvcv;
@@ -1332,9 +1324,7 @@ S_new_xpvav(pTHX)
 {
     xpvav_allocated* xpvav;
     LOCK_SV_MUTEX;
-    if (!PL_xpvav_root)
-	more_xpvav();
-    xpvav = PL_xpvav_root;
+    xpvav = PL_xpvav_root ? PL_xpvav_root : more_xpvav();
     PL_xpvav_root = *(xpvav_allocated**)xpvav;
     UNLOCK_SV_MUTEX;
     return (XPVAV*)((char*)xpvav - STRUCT_OFFSET(XPVAV, xav_fill)
@@ -1362,9 +1352,7 @@ S_new_xpvhv(pTHX)
 {
     xpvhv_allocated* xpvhv;
     LOCK_SV_MUTEX;
-    if (!PL_xpvhv_root)
-	more_xpvhv();
-    xpvhv = PL_xpvhv_root;
+    xpvhv = PL_xpvhv_root ? PL_xpvhv_root : more_xpvhv();
     PL_xpvhv_root = *(xpvhv_allocated**)xpvhv;
     UNLOCK_SV_MUTEX;
     return (XPVHV*)((char*)xpvhv - STRUCT_OFFSET(XPVHV, xhv_fill)
@@ -1392,9 +1380,7 @@ S_new_xpvmg(pTHX)
 {
     XPVMG* xpvmg;
     LOCK_SV_MUTEX;
-    if (!PL_xpvmg_root)
-	more_xpvmg();
-    xpvmg = PL_xpvmg_root;
+    xpvmg = PL_xpvmg_root ? PL_xpvmg_root : more_xpvmg();
     PL_xpvmg_root = *(XPVMG**)xpvmg;
     UNLOCK_SV_MUTEX;
     return xpvmg;
@@ -1418,9 +1404,7 @@ S_new_xpvgv(pTHX)
 {
     XPVGV* xpvgv;
     LOCK_SV_MUTEX;
-    if (!PL_xpvgv_root)
-	more_xpvgv();
-    xpvgv = PL_xpvgv_root;
+    xpvgv = PL_xpvgv_root ? PL_xpvgv_root : more_xpvgv();
     PL_xpvgv_root = *(XPVGV**)xpvgv;
     UNLOCK_SV_MUTEX;
     return xpvgv;
@@ -1444,9 +1428,7 @@ S_new_xpvlv(pTHX)
 {
     XPVLV* xpvlv;
     LOCK_SV_MUTEX;
-    if (!PL_xpvlv_root)
-	more_xpvlv();
-    xpvlv = PL_xpvlv_root;
+    xpvlv = PL_xpvlv_root ? PL_xpvlv_root : more_xpvlv();
     PL_xpvlv_root = *(XPVLV**)xpvlv;
     UNLOCK_SV_MUTEX;
     return xpvlv;
@@ -1470,9 +1452,7 @@ S_new_xpvbm(pTHX)
 {
     XPVBM* xpvbm;
     LOCK_SV_MUTEX;
-    if (!PL_xpvbm_root)
-	more_xpvbm();
-    xpvbm = PL_xpvbm_root;
+    xpvbm = PL_xpvbm_root ? PL_xpvbm_root : more_xpvbm();
     PL_xpvbm_root = *(XPVBM**)xpvbm;
     UNLOCK_SV_MUTEX;
     return xpvbm;
