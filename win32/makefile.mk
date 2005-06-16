@@ -1088,7 +1088,7 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 	$(LINK32) -Tpd -ap $(BLINK_FLAGS) \
 	    @$(mktmp c0d32$(o) $(PERLDLL_OBJ:s,\,$B,)$N \
 		$@,$N \
-		$(LIBFILES)$N \
+	        $(shell @type Extensions_static) $(LIBFILES)$N \
 		perldll.def$N)
 	$(IMPLIB) $*.lib $@
 .ELIF "$(CCTYPE)" == "GCC"

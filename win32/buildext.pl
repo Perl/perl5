@@ -61,7 +61,7 @@ if ($opts{'list-static-libs'} || $opts{'create-perllibst-h'}) {
       open my $fh, "<..\\lib\\auto\\$_\\extralibs.ld" or die "can't open <..\\lib\\auto\\$_\\extralibs.ld: $!";
       $extralibs{$_}++ for grep {/\S/} split /\s+/, join '', <$fh>;
     }
-    print map {/([^\/]+)$/;"..\\lib\\auto\\$_/$1$Config{_a} "} @statics;
+    print map {s|/|\\|g;m|([^\\]+)$|;"..\\lib\\auto\\$_\\$1$Config{_a} "} @statics;
     print map {"$_ "} sort keys %extralibs;
   }
   exit;
