@@ -138,6 +138,10 @@ set_w32_module_name(void)
 				: w32_perldll_handle),
 		      w32_module_name, sizeof(w32_module_name));
 
+    /* remove \\?\ prefix */
+    if (memcmp(w32_module_name, "\\\\?\\", 4) == 0)
+        memmove(w32_module_name, w32_module_name+4, strlen(w32_module_name+4)+1);
+
     /* try to get full path to binary (which may be mangled when perl is
      * run from a 16-bit app) */
     /*PerlIO_printf(Perl_debug_log, "Before %s\n", w32_module_name);*/
