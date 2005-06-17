@@ -268,7 +268,7 @@ int Perl_getcwd_sv(pTHX_ register SV *sv)
     }
 
 #else
-
+  {
     Stat_t statbuf;
     int orig_cdev, orig_cino, cdev, cino, odev, oino, tdev, tino;
     int namelen, pathlen=0;
@@ -380,6 +380,7 @@ int Perl_getcwd_sv(pTHX_ register SV *sv)
     }
 
     return TRUE;
+  }
 #endif
 
 #else

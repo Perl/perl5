@@ -1,5 +1,20 @@
 Revision history for Perl distribution PathTools.
 
+3.09  Tue Jun 14 20:36:50 CDT 2005
+
+ - Added some block delimiters (brackets) in the Perl_getcwd_sv() XS
+   function, which were necessary to separate the variable
+   declarations from the statements when HAS_GETCWD is not
+   defined. [Yves]
+
+ - Apparently the _NT_cwd() routine is never defined externally like I
+   thought it was, so I simplified the code around it.
+
+ - When cwd() is implemented using the _backtick_pwd() function, it
+   sometimes could create accidental undef entries in %ENV under perl
+   5.6, because local($hash{key}) is somewhat broken.  This is now
+   fixed with an appropriate workaround. [Neil Watkiss]
+
 3.08  Sat May 28 10:10:29 CDT 2005
 
  - Fixed a test failure with fast_abs_path() on Windows - it was

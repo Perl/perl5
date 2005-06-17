@@ -170,7 +170,7 @@ use strict;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 
-$VERSION = '3.08';
+$VERSION = '3.09';
 
 @ISA = qw/ Exporter /;
 @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
@@ -315,7 +315,10 @@ sub _croak { require Carp; Carp::croak(@_) }
 
 # The 'natural and safe form' for UNIX (pwd may be setuid root)
 sub _backtick_pwd {
-    local @ENV{qw(PATH IFS CDPATH ENV BASH_ENV)};
+    # Localize %ENV entries in a way that won't create new hash keys
+    my @localize = grep exists $ENV{$_}, qw(PATH IFS CDPATH ENV BASH_ENV);
+    local @ENV{@localize};
+    
     my $cwd = `$pwd_cmd`;
     # Belt-and-suspenders in case someone said "undef $/".
     local $/ = "\n";
@@ -642,10 +645,7 @@ sub _win32_cwd {
     return $ENV{'PWD'};
 }
 
-*_NT_cwd = \&_win32_cwd if (!defined &_NT_cwd && 
-                            defined &Win32::GetCwd);
-
-*_NT_cwd = \&_os2_cwd unless defined &_NT_cwd;
+*_NT_cwd = defined &Win32::GetCwd ? \&_win32_cwd : \&_os2_cwd;
 
 sub _dos_cwd {
     if (!defined &Dos::GetCwd) {
