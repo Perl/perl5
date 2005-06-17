@@ -286,8 +286,8 @@ Apd	|void	|hv_clear	|HV* tb
 Ap	|void	|hv_delayfree_ent|HV* hv|HE* entry
 Apd	|SV*	|hv_delete	|HV* tb|const char* key|I32 klen|I32 flags
 Apd	|SV*	|hv_delete_ent	|HV* tb|SV* key|I32 flags|U32 hash
-Apd	|bool	|hv_exists	|HV* tb|const char* key|I32 klen
-Apd	|bool	|hv_exists_ent	|HV* tb|SV* key|U32 hash
+ApdR	|bool	|hv_exists	|HV* tb|const char* key|I32 klen
+ApdR	|bool	|hv_exists_ent	|HV* tb|SV* key|U32 hash
 Apd	|SV**	|hv_fetch	|HV* tb|const char* key|I32 klen|I32 lval
 Apd	|HE*	|hv_fetch_ent	|HV* tb|SV* key|I32 lval|U32 hash
 Ap	|void	|hv_free_ent	|NN HV* hv|HE* entry
@@ -391,7 +391,7 @@ ApdR	|I32	|looks_like_number|NN SV* sv
 Apd	|UV	|grok_bin	|NN char* start|NN STRLEN* len|NN I32* flags|NV *result
 Apd	|UV	|grok_hex	|NN char* start|NN STRLEN* len|NN I32* flags|NV *result
 Apd	|int	|grok_number	|NN const char *pv|STRLEN len|UV *valuep
-Apd	|bool	|grok_numeric_radix|const char **sp|const char *send
+ApdR	|bool	|grok_numeric_radix|const char **sp|const char *send
 Apd	|UV	|grok_oct	|char* start|STRLEN* len_p|I32* flags|NV *result
 p	|int	|magic_clearenv	|SV* sv|MAGIC* mg
 p	|int	|magic_clear_all_env|SV* sv|MAGIC* mg
@@ -1091,7 +1091,7 @@ s	|struct perl_thread *	|init_main_thread
 #endif
 
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
-s	|SV*	|refto		|SV* sv
+sR	|SV*	|refto		|SV* sv
 #endif
 
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
@@ -1108,23 +1108,23 @@ s	|int	|div128		|NN SV *pnum|NN bool *done
 #endif
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
-s	|OP*	|docatch	|OP *o
-s	|void*	|docatch_body
+sR	|OP*	|docatch	|OP *o
+s	|void	|docatch_body
 #if defined(PERL_FLEXIBLE_EXCEPTIONS)
 s	|void*	|vdocatch_body	|va_list args
 #endif
-s	|OP*	|dofindlabel	|OP *o|const char *label|OP **opstack|OP **oplimit
-s	|OP*	|doparseform	|SV *sv
-sn	|bool	|num_overflow	|NV value|I32 fldsize|I32 frcsize
-s	|I32	|dopoptoeval	|I32 startingblock
-s	|I32	|dopoptolabel	|NN const char *label
-s	|I32	|dopoptoloop	|I32 startingblock
-s	|I32	|dopoptosub	|I32 startingblock
-s	|I32	|dopoptosub_at	|PERL_CONTEXT* cxstk|I32 startingblock
+sR	|OP*	|dofindlabel	|OP *o|const char *label|OP **opstack|OP **oplimit
+sR	|OP*	|doparseform	|SV *sv
+snR	|bool	|num_overflow	|NV value|I32 fldsize|I32 frcsize
+sR	|I32	|dopoptoeval	|I32 startingblock
+sR	|I32	|dopoptolabel	|NN const char *label
+sR	|I32	|dopoptoloop	|I32 startingblock
+sR	|I32	|dopoptosub	|I32 startingblock
+sR	|I32	|dopoptosub_at	|const PERL_CONTEXT* cxstk|I32 startingblock
 s	|void	|save_lines	|AV *array|SV *sv
-s	|OP*	|doeval		|int gimme|OP** startop|CV* outside|U32 seq
-s	|PerlIO *|doopen_pm	|const char *name|const char *mode
-s	|bool	|path_is_absolute|NN const char *name
+sR	|OP*	|doeval		|int gimme|OP** startop|CV* outside|U32 seq
+sR	|PerlIO *|doopen_pm	|const char *name|const char *mode
+sR	|bool	|path_is_absolute|NN const char *name
 #endif
 
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
@@ -1398,7 +1398,7 @@ pd 	|void	|do_dump_pad	|I32 level|NN PerlIO *file|PADLIST *padlist|int full
 pd	|void	|pad_fixup_inner_anons|NN PADLIST *padlist|CV *old_cv|CV *new_cv
 
 pd	|void	|pad_push	|NN PADLIST *padlist|int depth|int has_args
-p	|HV*	|pad_compname_type|const PADOFFSET po
+pR	|HV*	|pad_compname_type|const PADOFFSET po
 
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
 sd	|PADOFFSET|pad_findlex	|const char* name|PADOFFSET newoff|const CV* innercv
