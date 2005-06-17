@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.09';
+our $VERSION = '1.10';
 require Exporter;
 require Cwd;
 
@@ -88,23 +88,23 @@ specifying C<<{ bydepth => 1 }>> in the first argument of C<find()>.
 
 =item C<preprocess>
 
-The value should be a code reference. This code reference is used to 
-preprocess the current directory. The name of the currently processed 
+The value should be a code reference. This code reference is used to
+preprocess the current directory. The name of the currently processed
 directory is in C<$File::Find::dir>. Your preprocessing function is
 called after C<readdir()>, but before the loop that calls the C<wanted()>
-function. It is called with a list of strings (actually file/directory 
-names) and is expected to return a list of strings. The code can be 
-used to sort the file/directory names alphabetically, numerically, 
-or to filter out directory entries based on their name alone. When 
+function. It is called with a list of strings (actually file/directory
+names) and is expected to return a list of strings. The code can be
+used to sort the file/directory names alphabetically, numerically,
+or to filter out directory entries based on their name alone. When
 I<follow> or I<follow_fast> are in effect, C<preprocess> is a no-op.
 
 =item C<postprocess>
 
-The value should be a code reference. It is invoked just before leaving 
-the currently processed directory. It is called in void context with no 
-arguments. The name of the current directory is in C<$File::Find::dir>. This 
-hook is handy for summarizing a directory, such as calculating its disk 
-usage. When I<follow> or I<follow_fast> are in effect, C<postprocess> is a 
+The value should be a code reference. It is invoked just before leaving
+the currently processed directory. It is called in void context with no
+arguments. The name of the current directory is in C<$File::Find::dir>. This
+hook is handy for summarizing a directory, such as calculating its disk
+usage. When I<follow> or I<follow_fast> are in effect, C<postprocess> is a
 no-op.
 
 =item C<follow>
@@ -143,7 +143,7 @@ is worse than just taking time, the option I<follow> should be used.
 
 C<follow_skip==1>, which is the default, causes all files which are
 neither directories nor symbolic links to be ignored if they are about
-to be processed a second time. If a directory or a symbolic link 
+to be processed a second time. If a directory or a symbolic link
 are about to be processed a second time, File::Find dies.
 
 C<follow_skip==0> causes File::Find to die if any file is about to be
@@ -171,19 +171,19 @@ C<$_> will be the same as C<$File::Find::name>.
 If find is used in taint-mode (-T command line switch or if EUID != UID
 or if EGID != GID) then internally directory names have to be untainted
 before they can be chdir'ed to. Therefore they are checked against a regular
-expression I<untaint_pattern>.  Note that all names passed to the user's 
-I<wanted()> function are still tainted. If this option is used while 
+expression I<untaint_pattern>.  Note that all names passed to the user's
+I<wanted()> function are still tainted. If this option is used while
 not in taint-mode, C<untaint> is a no-op.
 
 =item C<untaint_pattern>
 
 See above. This should be set using the C<qr> quoting operator.
-The default is set to  C<qr|^([-+@\w./]+)$|>. 
+The default is set to  C<qr|^([-+@\w./]+)$|>.
 Note that the parentheses are vital.
 
 =item C<untaint_skip>
 
-If set, a directory which fails the I<untaint_pattern> is skipped, 
+If set, a directory which fails the I<untaint_pattern> is skipped,
 including all its sub-directories. The default is to 'die' in such a case.
 
 =back
@@ -217,7 +217,7 @@ For example, when examining the file F</some/path/foo.ext> you will have:
     $_                = foo.ext
     $File::Find::name = /some/path/foo.ext
 
-You are chdir()'d toC<$File::Find::dir> when the function is called,
+You are chdir()'d to C<$File::Find::dir> when the function is called,
 unless C<no_chdir> was specified. Note that when changing to
 directories is in effect the root directory (F</>) is a somewhat
 special case inasmuch as the concatenation of C<$File::Find::dir>,
@@ -309,7 +309,7 @@ If you do set C<$File::Find::dont_use_nlink> to 1, you will notice slow-downs.
 Be aware that the option to follow symbolic links can be dangerous.
 Depending on the structure of the directory tree (including symbolic
 links to directories) you might traverse a given (physical) directory
-more than once (only if C<follow_fast> is in effect). 
+more than once (only if C<follow_fast> is in effect).
 Furthermore, deleting or changing files in a symbolically linked directory
 might cause very unpleasant surprises, since you delete or change files
 in an unknown directory.
@@ -326,46 +326,46 @@ Mac OS (Classic) users should note a few differences:
 
 =over 4
 
-=item *   
+=item *
 
-The path separator is ':', not '/', and the current directory is denoted 
-as ':', not '.'. You should be careful about specifying relative pathnames. 
-While a full path always begins with a volume name, a relative pathname 
-should always begin with a ':'.  If specifying a volume name only, a 
+The path separator is ':', not '/', and the current directory is denoted
+as ':', not '.'. You should be careful about specifying relative pathnames.
+While a full path always begins with a volume name, a relative pathname
+should always begin with a ':'.  If specifying a volume name only, a
 trailing ':' is required.
 
-=item *   
+=item *
 
-C<$File::Find::dir> is guaranteed to end with a ':'. If C<$_> 
-contains the name of a directory, that name may or may not end with a 
-':'. Likewise, C<$File::Find::name>, which contains the complete 
-pathname to that directory, and C<$File::Find::fullname>, which holds 
+C<$File::Find::dir> is guaranteed to end with a ':'. If C<$_>
+contains the name of a directory, that name may or may not end with a
+':'. Likewise, C<$File::Find::name>, which contains the complete
+pathname to that directory, and C<$File::Find::fullname>, which holds
 the absolute pathname of that directory with all symbolic links resolved,
 may or may not end with a ':'.
 
-=item *   
+=item *
 
-The default C<untaint_pattern> (see above) on Mac OS is set to  
+The default C<untaint_pattern> (see above) on Mac OS is set to
 C<qr|^(.+)$|>. Note that the parentheses are vital.
 
-=item *   
+=item *
 
-The invisible system file "Icon\015" is ignored. While this file may 
-appear in every directory, there are some more invisible system files 
-on every volume, which are all located at the volume root level (i.e. 
-"MacintoshHD:"). These system files are B<not> excluded automatically. 
-Your filter may use the following code to recognize invisible files or 
+The invisible system file "Icon\015" is ignored. While this file may
+appear in every directory, there are some more invisible system files
+on every volume, which are all located at the volume root level (i.e.
+"MacintoshHD:"). These system files are B<not> excluded automatically.
+Your filter may use the following code to recognize invisible files or
 directories (requires Mac::Files):
 
  use Mac::Files;
 
- # invisible() --  returns 1 if file/directory is invisible,  
+ # invisible() --  returns 1 if file/directory is invisible,
  # 0 if it's visible or undef if an error occurred
 
- sub invisible($) { 
+ sub invisible($) {
    my $file = shift;
-   my ($fileCat, $fileInfo); 
-   my $invisible_flag =  1 << 14; 
+   my ($fileCat, $fileInfo);
+   my $invisible_flag =  1 << 14;
 
    if ( $fileCat = FSpGetCatInfo($file) ) {
      if ($fileInfo = $fileCat->ioFlFndrInfo() ) {
@@ -375,16 +375,16 @@ directories (requires Mac::Files):
    return undef;
  }
 
-Generally, invisible files are system files, unless an odd application 
-decides to use invisible files for its own purposes. To distinguish 
-such files from system files, you have to look at the B<type> and B<creator> 
-file attributes. The MacPerl built-in functions C<GetFileInfo(FILE)> and 
-C<SetFileInfo(CREATOR, TYPE, FILES)> offer access to these attributes 
+Generally, invisible files are system files, unless an odd application
+decides to use invisible files for its own purposes. To distinguish
+such files from system files, you have to look at the B<type> and B<creator>
+file attributes. The MacPerl built-in functions C<GetFileInfo(FILE)> and
+C<SetFileInfo(CREATOR, TYPE, FILES)> offer access to these attributes
 (see MacPerl.pm for details).
 
 Files that appear on the desktop actually reside in an (hidden) directory
 named "Desktop Folder" on the particular disk volume. Note that, although
-all desktop files appear to be on the same "virtual" desktop, each disk 
+all desktop files appear to be on the same "virtual" desktop, each disk
 volume actually maintains its own "Desktop Folder" directory.
 
 =back
@@ -444,7 +444,7 @@ sub contract_name {
 
 # return the absolute name of a directory or file
 sub contract_name_Mac {
-    my ($cdir,$fn) = @_; 
+    my ($cdir,$fn) = @_;
     my $abs_name;
 
     if ($fn =~ /^(:+)(.*)$/) { # valid pathname starting with a ':'
@@ -454,8 +454,8 @@ sub contract_name_Mac {
 	    $abs_name = $cdir . $2;
 	    return $abs_name;
 	}
-	else { 
-	    # need to move up the tree, but 
+	else {
+	    # need to move up the tree, but
 	    # only if it's not a volume name
 	    for (my $i=1; $i<$colon_count; $i++) {
 		unless ($cdir =~ /^[^:]+:$/) { # volume name
@@ -483,7 +483,7 @@ sub contract_name_Mac {
 		return $abs_name;
 	    }
 	}
-	else { # argh!, $fn is not a valid directory/file 
+	else { # argh!, $fn is not a valid directory/file
 	     return undef;
 	}
     }
@@ -496,7 +496,7 @@ sub PathCombine($$) {
     if ($Is_MacOS) {
 	# $Name is the resolved symlink (always a full path on MacOS),
 	# i.e. there's no need to call contract_name_Mac()
-	$AbsName = $Name; 
+	$AbsName = $Name;
 
 	# (simple) check for recursion
 	if ( ( $Base =~ /^$AbsName/) && (-d $AbsName) ) { # recursion
@@ -579,7 +579,7 @@ sub is_tainted_pp {
     local $@;
     eval { eval "# $nada" };
     return length($@) != 0;
-} 
+}
 
 sub _find_opt {
     my $wanted = shift;
@@ -616,21 +616,23 @@ sub _find_opt {
 
     # a symbolic link to a directory doesn't increase the link count
     $avoid_nlink      = $follow || $File::Find::dont_use_nlink;
-    
+
     my ($abs_dir, $Is_Dir);
 
     Proc_Top_Item:
     foreach my $TOP (@_) {
 	my $top_item = $TOP;
 
+	($topdev,$topino,$topmode,$topnlink) = $follow ? stat $top_item : lstat $top_item;
+
 	if ($Is_MacOS) {
-	    ($topdev,$topino,$topmode,$topnlink) = $follow ? stat $top_item : lstat $top_item;
 	    $top_item = ":$top_item"
 		if ( (-d _) && ( $top_item !~ /:/ ) );
+	} elsif ($^O eq 'MSWin32') {
+	    $top_item =~ s|/\z|| unless $top_item =~ m|\w:/$|;
 	}
 	else {
 	    $top_item =~ s|/\z|| unless $top_item eq '/';
-	    ($topdev,$topino,$topmode,$topnlink) = $follow ? stat $top_item : lstat $top_item;
 	}
 
 	$Is_Dir= 0;
@@ -768,6 +770,8 @@ sub _find_dir($$$) {
 
     if ($Is_MacOS) {
 	$dir_pref= ($p_dir =~ /:$/) ? $p_dir : "$p_dir:"; # preface
+    } elsif ($^O eq 'MSWin32') {
+	$dir_pref = ($p_dir =~ m|\w:/$| ? $p_dir : "$p_dir/" );
     }
     else {
 	$dir_pref= ( $p_dir eq '/' ? '/' : "$p_dir/" );
@@ -803,8 +807,8 @@ sub _find_dir($$$) {
 
     while (defined $SE) {
 	unless ($bydepth) {
-	    $dir= $p_dir; # $File::Find::dir 
-	    $name= $dir_name; # $File::Find::name 
+	    $dir= $p_dir; # $File::Find::dir
+	    $name= $dir_name; # $File::Find::name
 	    $_= ($no_chdir ? $dir_name : $dir_rel ); # $_
 	    # prune may happen here
 	    $prune= 0;
@@ -826,7 +830,7 @@ sub _find_dir($$$) {
 			    die "directory (" . ($p_dir ne '/' ? $p_dir : '') . "/) $dir_rel is still tainted";
 			}
 		    } else { # $untaint_skip == 1
-			next; 
+			next;
 		    }
 		}
 	    }
@@ -847,7 +851,7 @@ sub _find_dir($$$) {
 	    $dir_name = "$dir_name:" unless ($dir_name =~ /:$/);
 	}
 
-	$dir= $dir_name; # $File::Find::dir 
+	$dir= $dir_name; # $File::Find::dir
 
 	# Get the list of files in the current directory.
 	unless (opendir DIR, ($no_chdir ? $dir_name : $File::Find::current_dir)) {
@@ -937,6 +941,10 @@ sub _find_dir($$$) {
 		$dir_name = "$p_dir$dir_rel";
 		$dir_pref = "$dir_name:";
 	    }
+	    elsif ($^O eq 'MSWin32') {
+		$dir_name = ($p_dir =~ m|\w:/$| ? "$p_dir$dir_rel" : "$p_dir/$dir_rel");
+		$dir_pref = "$dir_name/";
+	    }
 	    else {
 		$dir_name = ($p_dir eq '/' ? "/$dir_rel" : "$p_dir/$dir_rel");
 		$dir_pref = "$dir_name/";
@@ -1015,8 +1023,8 @@ sub _find_dir_symlnk($$$) {
 	if (( $untaint ) && (is_tainted($dir_loc) )) {
 	    ( $updir_loc ) = $dir_loc =~ m|$untaint_pat|; # parent dir, now untainted
 	     # once untainted, $updir_loc is pushed on the stack (as parent directory);
-	    # hence, we don't need to untaint the parent directory every time we chdir 
-	    # to it later 
+	    # hence, we don't need to untaint the parent directory every time we chdir
+	    # to it later
 	    unless (defined $updir_loc) {
 		if ($untaint_skip == 0) {
 		    die "directory $dir_loc is still tainted";
@@ -1064,7 +1072,7 @@ sub _find_dir_symlnk($$$) {
 	unless ($no_chdir || ($dir_rel eq $File::Find::current_dir)) {
 	    $updir_loc = $dir_loc;
 	    if ( ($untaint) && (($tainted) || ($tainted = is_tainted($dir_loc) )) ) {
-		# untaint $dir_loc, what will be pushed on the stack as (untainted) parent dir 
+		# untaint $dir_loc, what will be pushed on the stack as (untainted) parent dir
 		( $updir_loc ) = $dir_loc =~ m|$untaint_pat|;
 		unless (defined $updir_loc) {
 		    if ($untaint_skip == 0) {
@@ -1102,7 +1110,7 @@ sub _find_dir_symlnk($$$) {
 	    $new_loc = Follow_SymLink($loc_pref.$FN);
 
 	    # ignore if invalid symlink
-            unless (defined $new_loc) {
+	    unless (defined $new_loc) {
 	        if ($dangling_symlinks) {
 	            if (ref $dangling_symlinks eq 'CODE') {
 	                $dangling_symlinks->($FN, $dir_pref);
@@ -1122,7 +1130,7 @@ sub _find_dir_symlnk($$$) {
 		push @Stack,[$new_loc,$updir_loc,$dir_name,$FN,1];
 	    }
 	    else {
-		$fullname = $new_loc; # $File::Find::fullname 
+		$fullname = $new_loc; # $File::Find::fullname
 		$name = $dir_pref . $FN; # $File::Find::name
 		$_ = ($no_chdir ? $name : $FN); # $_
 		{ $wanted_callback->() }; # protect against wild "next"
@@ -1147,7 +1155,7 @@ sub _find_dir_symlnk($$$) {
 	    }
 	    if ( $byd_flag < 0 ) {  # must be finddepth, report dirname now
 		unless ($no_chdir || ($dir_rel eq $File::Find::current_dir)) {
-		    unless (chdir $updir_loc) { # $updir_loc (parent dir) is always untainted 
+		    unless (chdir $updir_loc) { # $updir_loc (parent dir) is always untainted
 			warnings::warnif "Can't cd to $updir_loc: $!\n";
 			next;
 		    }
@@ -1192,7 +1200,7 @@ sub wrap_wanted {
 	    $wanted->{follow_skip} = 1 unless defined $wanted->{follow_skip};
 	}
 	if ( $wanted->{untaint} ) {
-	    $wanted->{untaint_pattern} = $File::Find::untaint_pattern  
+	    $wanted->{untaint_pattern} = $File::Find::untaint_pattern
 		unless defined $wanted->{untaint_pattern};
 	    $wanted->{untaint_skip} = 0 unless defined $wanted->{untaint_skip};
 	}
@@ -1248,8 +1256,8 @@ unless ($File::Find::dont_use_nlink) {
     $File::Find::dont_use_nlink = 1 if ($Config::Config{'dont_use_nlink'});
 }
 
-# We need a function that checks if a scalar is tainted. Either use the 
-# Scalar::Util module's tainted() function or our (slower) pure Perl 
+# We need a function that checks if a scalar is tainted. Either use the
+# Scalar::Util module's tainted() function or our (slower) pure Perl
 # fallback is_tainted_pp()
 {
     local $@;
