@@ -139,7 +139,7 @@ Perl_free_tmps(pTHX)
     /* XXX should tmps_floor live in cxstack? */
     const I32 myfloor = PL_tmps_floor;
     while (PL_tmps_ix > myfloor) {      /* clean up after last statement */
-	SV* sv = PL_tmps_stack[PL_tmps_ix];
+	SV* const sv = PL_tmps_stack[PL_tmps_ix];
 	PL_tmps_stack[PL_tmps_ix--] = Nullsv;
 	if (sv && sv != &PL_sv_undef) {
 	    SvTEMP_off(sv);
@@ -151,10 +151,9 @@ Perl_free_tmps(pTHX)
 STATIC SV *
 S_save_scalar_at(pTHX_ SV **sptr)
 {
-    register SV *sv;
-    SV *osv = *sptr;
+    SV * const osv = *sptr;
+    register SV * const sv = *sptr = NEWSV(0,0);
 
-    sv = *sptr = NEWSV(0,0);
     if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(osv) && SvTYPE(osv) != SVt_PVGV) {
 	MAGIC *mg;
 	sv_upgrade(sv, SvTYPE(osv));
@@ -301,7 +300,7 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
 AV *
 Perl_save_ary(pTHX_ GV *gv)
 {
-    AV *oav = GvAVn(gv);
+    AV * const oav = GvAVn(gv);
     AV *av;
 
     if (!AvREAL(oav) && AvREIFY(oav))
@@ -352,7 +351,7 @@ Perl_save_hash(pTHX_ GV *gv)
 void
 Perl_save_item(pTHX_ register SV *item)
 {
-    register SV *sv = newSVsv(item);
+    register SV * const sv = newSVsv(item);
 
     SSCHECK(3);
     SSPUSHPTR(item);		/* remember the pointer */
@@ -553,11 +552,10 @@ Perl_save_delete(pTHX_ HV *hv, char *key, I32 klen)
 void
 Perl_save_list(pTHX_ register SV **sarg, I32 maxsarg)
 {
-    register SV *sv;
     register I32 i;
 
     for (i = 1; i <= maxsarg; i++) {
-	sv = NEWSV(0,0);
+	register SV * const sv = NEWSV(0,0);
 	sv_setsv(sv,sarg[i]);
 	SSCHECK(3);
 	SSPUSHPTR(sarg[i]);		/* remember the pointer */

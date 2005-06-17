@@ -274,8 +274,8 @@ Apd	|void	|hv_clear	|HV* tb
 Ap	|void	|hv_delayfree_ent|HV* hv|HE* entry
 Apd	|SV*	|hv_delete	|HV* tb|const char* key|I32 klen|I32 flags
 Apd	|SV*	|hv_delete_ent	|HV* tb|SV* key|I32 flags|U32 hash
-Apd	|bool	|hv_exists	|HV* tb|const char* key|I32 klen
-Apd	|bool	|hv_exists_ent	|HV* tb|SV* key|U32 hash
+ApdR	|bool	|hv_exists	|HV* tb|const char* key|I32 klen
+ApdR	|bool	|hv_exists_ent	|HV* tb|SV* key|U32 hash
 Apd	|SV**	|hv_fetch	|HV* tb|const char* key|I32 klen|I32 lval
 Apd	|HE*	|hv_fetch_ent	|HV* tb|SV* key|I32 lval|U32 hash
 Ap	|void	|hv_free_ent	|NN HV* hv|HE* entry
@@ -382,7 +382,7 @@ ApdR	|I32	|looks_like_number|NN SV* sv
 Apd	|UV	|grok_bin	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NV *result
 Apd	|UV	|grok_hex	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NV *result
 Apd	|int	|grok_number	|NN const char *pv|STRLEN len|UV *valuep
-Apd	|bool	|grok_numeric_radix|const char **sp|const char *send
+ApdR	|bool	|grok_numeric_radix|const char **sp|const char *send
 Apd	|UV	|grok_oct	|const char* start|STRLEN* len_p|I32* flags|NV *result
 p	|int	|magic_clearenv	|SV* sv|MAGIC* mg
 p	|int	|magic_clear_all_env|SV* sv|MAGIC* mg
@@ -1001,6 +1001,8 @@ s	|void	|unshare_hek_or_pvn|const HEK* hek|const char* str|I32 len|U32 hash
 sR	|HEK*	|share_hek_flags|const char* sv|I32 len|U32 hash|int flags
 rs	|void	|hv_notallowed	|int flags|NN const char *key|I32 klen|NN const char *msg
 s	|struct xpvhv_aux*|hv_auxinit|HV *hv
+sM	|SV*	|hv_delete_common|HV* tb|SV* key_sv|const char* key|STRLEN klen|int k_flags|I32 d_flags|U32 hash
+sM	|HE*	|hv_fetch_common|HV* tb|SV* key_sv|const char* key|STRLEN klen|int flags|int action|SV* val|U32 hash
 #endif
 
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
@@ -1103,7 +1105,7 @@ s	|void*	|call_list_body	|CV *cv
 #endif
 
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
-s	|SV*	|refto		|SV* sv
+sR	|SV*	|refto		|SV* sv
 #endif
 
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
@@ -1119,20 +1121,20 @@ s	|const char *|get_num	|NN const char *ppat|NN I32 *lenptr
 #endif
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
-s	|OP*	|docatch	|OP *o
-s	|void*	|docatch_body
-s	|OP*	|dofindlabel	|OP *o|const char *label|OP **opstack|OP **oplimit
-s	|OP*	|doparseform	|SV *sv
-sn	|bool	|num_overflow	|NV value|I32 fldsize|I32 frcsize
-s	|I32	|dopoptoeval	|I32 startingblock
-s	|I32	|dopoptolabel	|NN const char *label
-s	|I32	|dopoptoloop	|I32 startingblock
-s	|I32	|dopoptosub	|I32 startingblock
-s	|I32	|dopoptosub_at	|PERL_CONTEXT* cxstk|I32 startingblock
+sR	|OP*	|docatch	|OP *o
+s	|void	|docatch_body
+sR	|OP*	|dofindlabel	|OP *o|const char *label|OP **opstack|OP **oplimit
+sR	|OP*	|doparseform	|SV *sv
+snR	|bool	|num_overflow	|NV value|I32 fldsize|I32 frcsize
+sR	|I32	|dopoptoeval	|I32 startingblock
+sR	|I32	|dopoptolabel	|NN const char *label
+sR	|I32	|dopoptoloop	|I32 startingblock
+sR	|I32	|dopoptosub	|I32 startingblock
+sR	|I32	|dopoptosub_at	|const PERL_CONTEXT* cxstk|I32 startingblock
 s	|void	|save_lines	|AV *array|SV *sv
-s	|OP*	|doeval		|int gimme|OP** startop|CV* outside|U32 seq
-s	|PerlIO *|doopen_pm	|const char *name|const char *mode
-s	|bool	|path_is_absolute|NN const char *name
+sR	|OP*	|doeval		|int gimme|OP** startop|CV* outside|U32 seq
+sR	|PerlIO *|doopen_pm	|const char *name|const char *mode
+sR	|bool	|path_is_absolute|NN const char *name
 #endif
 
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
@@ -1391,7 +1393,7 @@ pd 	|void	|do_dump_pad	|I32 level|NN PerlIO *file|PADLIST *padlist|int full
 pd	|void	|pad_fixup_inner_anons|NN PADLIST *padlist|CV *old_cv|CV *new_cv
 
 pd	|void	|pad_push	|NN PADLIST *padlist|int depth
-p	|HV*	|pad_compname_type|const PADOFFSET po
+pR	|HV*	|pad_compname_type|const PADOFFSET po
 
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
 sd	|PADOFFSET|pad_findlex	|const char *name|const CV* cv|U32 seq|int warn \
@@ -1408,11 +1410,6 @@ p	|int	|get_debug_opts	|const char **s|bool givehelp
 #endif
 Ap	|void	|save_set_svflags|SV* sv|U32 mask|U32 val
 Apod	|void	|hv_assert	|NN HV* tb
-
-#if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
-sM	|SV*	|hv_delete_common|HV* tb|SV* key_sv|const char* key|STRLEN klen|int k_flags|I32 d_flags|U32 hash
-sM	|HE*	|hv_fetch_common|HV* tb|SV* key_sv|const char* key|STRLEN klen|int flags|int action|SV* val|U32 hash
-#endif
 
 ApdR	|SV*	|hv_scalar	|NN HV* hv
 ApoR	|I32*	|hv_riter_p	|NN HV* hv
@@ -1510,7 +1507,7 @@ Ap	|GV*	|gv_fetchpvn_flags|const char* name|STRLEN len|I32 flags|I32 sv_type
 Ap	|GV*	|gv_fetchsv|SV *name|I32 flags|I32 sv_type
 dpR	|bool	|is_gv_magical_sv|SV *name|U32 flags
 
-Apd	|char*	|savesvpv	|SV* sv
+Apda	|char*	|savesvpv	|NN SV* sv
 ApR	|bool	|stashpv_hvname_match|NN const COP *cop|NN const HV *hv
 
 END_EXTERN_C

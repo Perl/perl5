@@ -389,8 +389,12 @@ PERL_CALLCONV void	Perl_hv_clear(pTHX_ HV* tb);
 PERL_CALLCONV void	Perl_hv_delayfree_ent(pTHX_ HV* hv, HE* entry);
 PERL_CALLCONV SV*	Perl_hv_delete(pTHX_ HV* tb, const char* key, I32 klen, I32 flags);
 PERL_CALLCONV SV*	Perl_hv_delete_ent(pTHX_ HV* tb, SV* key, I32 flags, U32 hash);
-PERL_CALLCONV bool	Perl_hv_exists(pTHX_ HV* tb, const char* key, I32 klen);
-PERL_CALLCONV bool	Perl_hv_exists_ent(pTHX_ HV* tb, SV* key, U32 hash);
+PERL_CALLCONV bool	Perl_hv_exists(pTHX_ HV* tb, const char* key, I32 klen)
+			__attribute__warn_unused_result__;
+
+PERL_CALLCONV bool	Perl_hv_exists_ent(pTHX_ HV* tb, SV* key, U32 hash)
+			__attribute__warn_unused_result__;
+
 PERL_CALLCONV SV**	Perl_hv_fetch(pTHX_ HV* tb, const char* key, I32 klen, I32 lval);
 PERL_CALLCONV HE*	Perl_hv_fetch_ent(pTHX_ HV* tb, SV* key, I32 lval, U32 hash);
 PERL_CALLCONV void	Perl_hv_free_ent(pTHX_ HV* hv, HE* entry)
@@ -731,7 +735,9 @@ PERL_CALLCONV UV	Perl_grok_hex(pTHX_ const char* start, STRLEN* len_p, I32* flag
 PERL_CALLCONV int	Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV bool	Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send);
+PERL_CALLCONV bool	Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
+			__attribute__warn_unused_result__;
+
 PERL_CALLCONV UV	Perl_grok_oct(pTHX_ const char* start, STRLEN* len_p, I32* flags, NV *result);
 PERL_CALLCONV int	Perl_magic_clearenv(pTHX_ SV* sv, MAGIC* mg);
 PERL_CALLCONV int	Perl_magic_clear_all_env(pTHX_ SV* sv, MAGIC* mg);
@@ -1884,6 +1890,8 @@ STATIC void	S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen, const ch
 			__attribute__nonnull__(pTHX_4);
 
 STATIC struct xpvhv_aux*	S_hv_auxinit(pTHX_ HV *hv);
+STATIC SV*	S_hv_delete_common(pTHX_ HV* tb, SV* key_sv, const char* key, STRLEN klen, int k_flags, I32 d_flags, U32 hash);
+STATIC HE*	S_hv_fetch_common(pTHX_ HV* tb, SV* key_sv, const char* key, STRLEN klen, int flags, int action, SV* val, U32 hash);
 #endif
 
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
@@ -2158,7 +2166,9 @@ STATIC void*	S_call_list_body(pTHX_ CV *cv);
 #endif
 
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
-STATIC SV*	S_refto(pTHX_ SV* sv);
+STATIC SV*	S_refto(pTHX_ SV* sv)
+			__attribute__warn_unused_result__;
+
 #endif
 
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
@@ -2192,22 +2202,44 @@ STATIC const char *	S_get_num(pTHX_ const char *ppat, I32 *lenptr)
 #endif
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
-STATIC OP*	S_docatch(pTHX_ OP *o);
-STATIC void*	S_docatch_body(pTHX);
-STATIC OP*	S_dofindlabel(pTHX_ OP *o, const char *label, OP **opstack, OP **oplimit);
-STATIC OP*	S_doparseform(pTHX_ SV *sv);
-STATIC bool	S_num_overflow(NV value, I32 fldsize, I32 frcsize);
-STATIC I32	S_dopoptoeval(pTHX_ I32 startingblock);
+STATIC OP*	S_docatch(pTHX_ OP *o)
+			__attribute__warn_unused_result__;
+
+STATIC void	S_docatch_body(pTHX);
+STATIC OP*	S_dofindlabel(pTHX_ OP *o, const char *label, OP **opstack, OP **oplimit)
+			__attribute__warn_unused_result__;
+
+STATIC OP*	S_doparseform(pTHX_ SV *sv)
+			__attribute__warn_unused_result__;
+
+STATIC bool	S_num_overflow(NV value, I32 fldsize, I32 frcsize)
+			__attribute__warn_unused_result__;
+
+STATIC I32	S_dopoptoeval(pTHX_ I32 startingblock)
+			__attribute__warn_unused_result__;
+
 STATIC I32	S_dopoptolabel(pTHX_ const char *label)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
-STATIC I32	S_dopoptoloop(pTHX_ I32 startingblock);
-STATIC I32	S_dopoptosub(pTHX_ I32 startingblock);
-STATIC I32	S_dopoptosub_at(pTHX_ PERL_CONTEXT* cxstk, I32 startingblock);
+STATIC I32	S_dopoptoloop(pTHX_ I32 startingblock)
+			__attribute__warn_unused_result__;
+
+STATIC I32	S_dopoptosub(pTHX_ I32 startingblock)
+			__attribute__warn_unused_result__;
+
+STATIC I32	S_dopoptosub_at(pTHX_ const PERL_CONTEXT* cxstk, I32 startingblock)
+			__attribute__warn_unused_result__;
+
 STATIC void	S_save_lines(pTHX_ AV *array, SV *sv);
-STATIC OP*	S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq);
-STATIC PerlIO *	S_doopen_pm(pTHX_ const char *name, const char *mode);
+STATIC OP*	S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
+			__attribute__warn_unused_result__;
+
+STATIC PerlIO *	S_doopen_pm(pTHX_ const char *name, const char *mode)
+			__attribute__warn_unused_result__;
+
 STATIC bool	S_path_is_absolute(pTHX_ const char *name)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 #endif
@@ -2643,7 +2675,9 @@ PERL_CALLCONV void	Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv
 PERL_CALLCONV void	Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV HV*	Perl_pad_compname_type(pTHX_ const PADOFFSET po);
+PERL_CALLCONV HV*	Perl_pad_compname_type(pTHX_ const PADOFFSET po)
+			__attribute__warn_unused_result__;
+
 
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
 STATIC PADOFFSET	S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn, SV** out_capture, SV** out_name_sv, int *out_flags);
@@ -2665,11 +2699,6 @@ PERL_CALLCONV void	Perl_save_set_svflags(pTHX_ SV* sv, U32 mask, U32 val);
 PERL_CALLCONV void	Perl_hv_assert(pTHX_ HV* tb)
 			__attribute__nonnull__(pTHX_1);
 
-
-#if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
-STATIC SV*	S_hv_delete_common(pTHX_ HV* tb, SV* key_sv, const char* key, STRLEN klen, int k_flags, I32 d_flags, U32 hash);
-STATIC HE*	S_hv_fetch_common(pTHX_ HV* tb, SV* key_sv, const char* key, STRLEN klen, int flags, int action, SV* val, U32 hash);
-#endif
 
 PERL_CALLCONV SV*	Perl_hv_scalar(pTHX_ HV* hv)
 			__attribute__warn_unused_result__
@@ -2797,7 +2826,11 @@ PERL_CALLCONV bool	Perl_is_gv_magical_sv(pTHX_ SV *name, U32 flags)
 			__attribute__warn_unused_result__;
 
 
-PERL_CALLCONV char*	Perl_savesvpv(pTHX_ SV* sv);
+PERL_CALLCONV char*	Perl_savesvpv(pTHX_ SV* sv)
+			__attribute__malloc__
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+
 PERL_CALLCONV bool	Perl_stashpv_hvname_match(pTHX_ const COP *cop, const HV *hv)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)

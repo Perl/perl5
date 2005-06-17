@@ -188,13 +188,13 @@ PP(pp_regcomp)
 PP(pp_substcont)
 {
     dSP;
-    register PMOP *pm = (PMOP*) cLOGOP->op_other;
     register PERL_CONTEXT *cx = &cxstack[cxstack_ix];
-    register SV *dstr = cx->sb_dstr;
+    register PMOP * const pm = (PMOP*) cLOGOP->op_other;
+    register SV * const dstr = cx->sb_dstr;
     register char *s = cx->sb_s;
     register char *m = cx->sb_m;
     char *orig = cx->sb_orig;
-    register REGEXP *rx = cx->sb_rx;
+    register REGEXP * const rx = cx->sb_rx;
     SV *nsv = Nullsv;
     REGEXP *old = PM_GETRE(pm);
     if(old != rx) {
@@ -699,7 +699,7 @@ PP(pp_formline)
 		    sv_catpvn_utf8_upgrade(PL_formtarget, s, arg, nsv);
 		    for (; t < SvEND(PL_formtarget); t++) {
 #ifdef EBCDIC
-			int ch = *t;
+			const int ch = *t;
 			if (iscntrl(ch))
 #else
 			    if (!(*t & ~31))
@@ -710,7 +710,7 @@ PP(pp_formline)
 		}
 		while (arg--) {
 #ifdef EBCDIC
-		    int ch = *t++ = *s++;
+		    const int ch = *t++ = *s++;
 		    if (iscntrl(ch))
 #else
 			if ( !((*t++ = *s++) & ~31) )
@@ -1118,9 +1118,6 @@ PP(pp_flop)
 
     if (GIMME == G_ARRAY) {
 	dPOPPOPssrl;
-	register IV i, j;
-	register SV *sv;
-	IV max;
 
 	if (SvGMAGICAL(left))
 	    mg_get(left);
@@ -1128,6 +1125,8 @@ PP(pp_flop)
 	    mg_get(right);
 
 	if (RANGE_IS_NUMERIC(left,right)) {
+	    register IV i, j;
+	    IV max;
 	    if ((SvOK(left) && SvNV(left) < IV_MIN) ||
 		(SvOK(right) && SvNV(right) > IV_MAX))
 		DIE(aTHX_ "Range iterator outside integer range");
@@ -1141,7 +1140,7 @@ PP(pp_flop)
 	    else
 		j = 0;
 	    while (j--) {
-		sv = sv_2mortal(newSViv(i++));
+		SV * const sv = sv_2mortal(newSViv(i++));
 		PUSHs(sv);
 	    }
 	}
@@ -1150,7 +1149,7 @@ PP(pp_flop)
 	    STRLEN len;
 	    const char *tmps = SvPV_const(final, len);
 
-	    sv = sv_mortalcopy(left);
+	    SV *sv = sv_mortalcopy(left);
 	    SvPV_force_nolen(sv);
 	    while (!SvNIOKp(sv) && SvCUR(sv) <= len) {
 		XPUSHs(sv);
@@ -1163,7 +1162,7 @@ PP(pp_flop)
     }
     else {
 	dTOPss;
-	SV *targ = PAD_SV(cUNOP->op_first->op_targ);
+	SV * const targ = PAD_SV(cUNOP->op_first->op_targ);
 	int flop = 0;
 	sv_inc(targ);
 
@@ -1172,7 +1171,7 @@ PP(pp_flop)
 		flop = SvIV(sv) == (IV)IoLINES(GvIOp(PL_last_in_gv));
 	    }
 	    else {
-		GV *gv = gv_fetchpv(".", TRUE, SVt_PV);
+		GV * const gv = gv_fetchpv(".", TRUE, SVt_PV);
 		if (gv && GvSV(gv)) flop = SvIV(sv) == SvIV(GvSV(gv));
 	    }
 	}
@@ -1182,7 +1181,7 @@ PP(pp_flop)
 
 	if (flop) {
 	    sv_setiv(PAD_SV(((UNOP*)cUNOP->op_first)->op_first->op_targ), 0);
-	    sv_catpv(targ, "E0");
+	    sv_catpvn(targ, "E0", 2);
 	}
 	SETs(targ);
     }
@@ -1208,7 +1207,7 @@ S_dopoptolabel(pTHX_ const char *label)
     register I32 i;
 
     for (i = cxstack_ix; i >= 0; i--) {
-	register const PERL_CONTEXT *cx = &cxstack[i];
+	register const PERL_CONTEXT * const cx = &cxstack[i];
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
 	case CXt_SUB:
@@ -1222,8 +1221,7 @@ S_dopoptolabel(pTHX_ const char *label)
 		return -1;
 	    break;
 	case CXt_LOOP:
-	    if (!cx->blk_loop.label ||
-	      strNE(label, cx->blk_loop.label) ) {
+	    if ( !cx->blk_loop.label || strNE(label, cx->blk_loop.label) ) {
 		DEBUG_l(Perl_deb(aTHX_ "(Skipping label #%ld %s)\n",
 			(long)i, cx->blk_loop.label));
 		continue;
@@ -1282,11 +1280,11 @@ S_dopoptosub(pTHX_ I32 startingblock)
 }
 
 STATIC I32
-S_dopoptosub_at(pTHX_ PERL_CONTEXT *cxstk, I32 startingblock)
+S_dopoptosub_at(pTHX_ const PERL_CONTEXT *cxstk, I32 startingblock)
 {
     I32 i;
     for (i = startingblock; i >= 0; i--) {
-        register const PERL_CONTEXT *cx = &cxstk[i];
+	register const PERL_CONTEXT * const cx = &cxstk[i];
 	switch (CxTYPE(cx)) {
 	default:
 	    continue;
@@ -1322,7 +1320,7 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 {
     I32 i;
     for (i = startingblock; i >= 0; i--) {
-	register const PERL_CONTEXT *cx = &cxstack[i];
+	register const PERL_CONTEXT * const cx = &cxstack[i];
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
 	case CXt_SUB:
@@ -1398,7 +1396,6 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
     if (PL_in_eval) {
 	I32 cxix;
 	I32 gimme;
-	SV **newsp;
 
 	if (message) {
 	    if (PL_in_eval & EVAL_KEEPERR) {
@@ -1439,6 +1436,7 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 	if (cxix >= 0) {
 	    I32 optype;
 	    register PERL_CONTEXT *cx;
+	    SV **newsp;
 
 	    if (cxix < cxstack_ix)
 		dounwind(cxix);
@@ -1467,7 +1465,7 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 
 	    if (optype == OP_REQUIRE) {
                 const char* msg = SvPVx_nolen_const(ERRSV);
-                SV *nsv = cx->blk_eval.old_namesv;
+		SV * const nsv = cx->blk_eval.old_namesv;
                 (void)hv_store(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv),
                                &PL_sv_undef, 0);
 		DIE(aTHX_ "%sCompilation failed in require",
@@ -1550,9 +1548,9 @@ PP(pp_caller)
 {
     dSP;
     register I32 cxix = dopoptosub(cxstack_ix);
-    register PERL_CONTEXT *cx;
-    register PERL_CONTEXT *ccstack = cxstack;
-    PERL_SI *top_si = PL_curstackinfo;
+    register const PERL_CONTEXT *cx;
+    register const PERL_CONTEXT *ccstack = cxstack;
+    const PERL_SI *top_si = PL_curstackinfo;
     I32 gimme;
     const char *stashname;
     I32 count = 0;
@@ -1978,7 +1976,7 @@ PP(pp_return)
 	    (MARK == SP || (gimme == G_SCALAR && !SvTRUE(*SP))) )
 	{
 	    /* Unassume the success we assumed earlier. */
-	    SV *nsv = cx->blk_eval.old_namesv;
+	    SV * const nsv = cx->blk_eval.old_namesv;
 	    (void)hv_delete(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv), G_DISCARD);
 	    DIE(aTHX_ "%"SVf" did not return a true value", nsv);
 	}
@@ -2690,11 +2688,11 @@ S_save_lines(pTHX_ AV *array, SV *sv)
     }
 }
 
-STATIC void *
+STATIC void
 S_docatch_body(pTHX)
 {
     CALLRUNOPS(aTHX);
-    return NULL;
+    return;
 }
 
 STATIC OP *
@@ -3533,7 +3531,7 @@ PP(pp_leaveeval)
 	!(gimme == G_SCALAR ? SvTRUE(*SP) : SP > newsp))
     {
 	/* Unassume the success we assumed earlier. */
-	SV *nsv = cx->blk_eval.old_namesv;
+	SV * const nsv = cx->blk_eval.old_namesv;
 	(void)hv_delete(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv), G_DISCARD);
 	retop = Perl_die(aTHX_ "%"SVf" did not return a true value", nsv);
 	/* die_where() did LEAVE, or we won't be here */

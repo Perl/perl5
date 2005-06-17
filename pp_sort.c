@@ -784,10 +784,10 @@ S_qsortsvu(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
 
    /* Innoculate large partitions against quadratic behavior */
    if (num_elts > QSORT_PLAY_SAFE) {
-      register size_t n, j;
-      register SV **q;
-      for (n = num_elts, q = array; n > 1; ) {
-         j = (size_t)(n-- * Drand01());
+      register size_t n;
+      register SV ** const q = array;
+      for (n = num_elts; n > 1; ) {
+         register const size_t j = (size_t)(n-- * Drand01());
          temp = q[j];
          q[j] = q[n];
          q[n] = temp;
@@ -1143,7 +1143,7 @@ S_qsortsvu(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
             qsort_break_even *= 2;
 #endif
 #if QSORT_ORDER_GUESS == 3
-            int prev_break = qsort_break_even;
+            const int prev_break = qsort_break_even;
             qsort_break_even *= qsort_break_even;
             if (qsort_break_even < prev_break) {
                qsort_break_even = (part_right - part_left) + 1;
@@ -1321,8 +1321,8 @@ static I32
 cmpindir(pTHX_ gptr a, gptr b)
 {
     I32 sense;
-    gptr *ap = (gptr *)a;
-    gptr *bp = (gptr *)b;
+    gptr * const ap = (gptr *)a;
+    gptr * const bp = (gptr *)b;
 
     if ((sense = PL_sort_RealCmp(aTHX_ *ap, *bp)) == 0)
 	 sense = (ap > bp) ? 1 : ((ap < bp) ? -1 : 0);
@@ -1333,8 +1333,8 @@ static I32
 cmpindir_desc(pTHX_ gptr a, gptr b)
 {
     I32 sense;
-    gptr *ap = (gptr *)a;
-    gptr *bp = (gptr *)b;
+    gptr * const ap = (gptr *)a;
+    gptr * const bp = (gptr *)b;
 
     /* Reverse the default */
     if ((sense = PL_sort_RealCmp(aTHX_ *ap, *bp)))
@@ -1443,14 +1443,13 @@ Perl_sortsv(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
     void (*sortsvp)(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
       = S_mergesortsv;
     SV *hintsv;
-    I32 hints;
 
     /*  Sun's Compiler (cc: WorkShop Compilers 4.2 30 Oct 1996 C 4.2) used 
 	to miscompile this function under optimization -O.  If you get test 
 	errors related to picking the correct sort() function, try recompiling 
 	this file without optimiziation.  -- A.D.  4/2002.
     */
-    hints = SORTHINTS(hintsv);
+    const I32 hints = SORTHINTS(hintsv);
     if (hints & HINT_SORT_QUICKSORT) {
 	sortsvp = S_qsortsv;
     }
@@ -1469,14 +1468,13 @@ S_sortsv_desc(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
     void (*sortsvp)(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
       = S_mergesortsv;
     SV *hintsv;
-    I32 hints;
 
     /*  Sun's Compiler (cc: WorkShop Compilers 4.2 30 Oct 1996 C 4.2) used 
 	to miscompile this function under optimization -O.  If you get test 
 	errors related to picking the correct sort() function, try recompiling 
 	this file without optimiziation.  -- A.D.  4/2002.
     */
-    hints = SORTHINTS(hintsv);
+    const I32 hints = SORTHINTS(hintsv);
     if (hints & HINT_SORT_QUICKSORT) {
 	sortsvp = S_qsortsv;
     }
@@ -1507,8 +1505,8 @@ PP(pp_sort)
     bool hasargs = FALSE;
     I32 is_xsub = 0;
     I32 sorting_av = 0;
-    U8 priv = PL_op->op_private;
-    U8 flags = PL_op->op_flags;
+    const U8 priv = PL_op->op_private;
+    const U8 flags = PL_op->op_flags;
     void (*sortsvp)(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
       = Perl_sortsv;
     I32 all_SIVs = 1;
@@ -1647,7 +1645,7 @@ PP(pp_sort)
 	if (PL_sortcop) {
 	    PERL_CONTEXT *cx;
 	    SV** newsp;
-	    bool oldcatch = CATCH_GET;
+	    const bool oldcatch = CATCH_GET;
 
 	    SAVETMPS;
 	    SAVEOP();
@@ -1718,17 +1716,15 @@ PP(pp_sort)
     }
     if (av && !sorting_av) {
 	/* simulate pp_aassign of tied AV */
-	SV *sv;
-	SV** base, **didstore;
-	for (base = ORIGMARK+1, i=0; i < max; i++) {
-	    sv = newSVsv(base[i]);
-	    base[i] = sv;
+	SV** const base = ORIGMARK+1;
+	for (i=0; i < max; i++) {
+	    base[i] = newSVsv(base[i]);
 	}
 	av_clear(av);
 	av_extend(av, max);
 	for (i=0; i < max; i++) {
-	    sv = base[i];
-	    didstore = av_store(av, i, sv);
+	    SV * const sv = base[i];
+	    SV **didstore = av_store(av, i, sv);
 	    if (SvSMAGICAL(sv))
 		mg_set(sv);
 	    if (!didstore)
@@ -1744,8 +1740,8 @@ static I32
 sortcv(pTHX_ SV *a, SV *b)
 {
     dVAR;
-    I32 oldsaveix = PL_savestack_ix;
-    I32 oldscopeix = PL_scopestack_ix;
+    const I32 oldsaveix = PL_savestack_ix;
+    const I32 oldscopeix = PL_scopestack_ix;
     I32 result;
     GvSV(PL_firstgv) = a;
     GvSV(PL_secondgv) = b;
@@ -1768,12 +1764,10 @@ static I32
 sortcv_stacked(pTHX_ SV *a, SV *b)
 {
     dVAR;
-    I32 oldsaveix = PL_savestack_ix;
-    I32 oldscopeix = PL_scopestack_ix;
+    const I32 oldsaveix = PL_savestack_ix;
+    const I32 oldscopeix = PL_scopestack_ix;
     I32 result;
-    AV *av;
-
-    av = GvAV(PL_defgv);
+    AV * const av = GvAV(PL_defgv);
 
     if (AvMAX(av) < 1) {
 	SV** ary = AvALLOC(av);
@@ -1810,10 +1804,10 @@ static I32
 sortcv_xsub(pTHX_ SV *a, SV *b)
 {
     dVAR; dSP;
-    I32 oldsaveix = PL_savestack_ix;
-    I32 oldscopeix = PL_scopestack_ix;
+    const I32 oldsaveix = PL_savestack_ix;
+    const I32 oldscopeix = PL_scopestack_ix;
+    CV * const cv=(CV*)PL_sortcop;
     I32 result;
-    CV *cv=(CV*)PL_sortcop;
 
     SP = PL_stack_base;
     PUSHMARK(SP);
@@ -1838,47 +1832,41 @@ sortcv_xsub(pTHX_ SV *a, SV *b)
 static I32
 sv_ncmp(pTHX_ SV *a, SV *b)
 {
-    NV nv1 = SvNSIV(a);
-    NV nv2 = SvNSIV(b);
+    const NV nv1 = SvNSIV(a);
+    const NV nv2 = SvNSIV(b);
     return nv1 < nv2 ? -1 : nv1 > nv2 ? 1 : 0;
 }
 
 static I32
 sv_i_ncmp(pTHX_ SV *a, SV *b)
 {
-    IV iv1 = SvIV(a);
-    IV iv2 = SvIV(b);
+    const IV iv1 = SvIV(a);
+    const IV iv2 = SvIV(b);
     return iv1 < iv2 ? -1 : iv1 > iv2 ? 1 : 0;
 }
-#define tryCALL_AMAGICbin(left,right,meth,svp) STMT_START { \
-	  *svp = Nullsv;				\
-          if (PL_amagic_generation) { \
-	    if (SvAMAGIC(left)||SvAMAGIC(right))\
-		*svp = amagic_call(left, \
-				   right, \
-				   CAT2(meth,_amg), \
-				   0); \
-	  } \
-	} STMT_END
+
+#define tryCALL_AMAGICbin(left,right,meth) \
+    (PL_amagic_generation && (SvAMAGIC(left)||SvAMAGIC(right))) \
+	? amagic_call(left, right, CAT2(meth,_amg), 0) \
+	: Nullsv;
 
 static I32
 amagic_ncmp(pTHX_ register SV *a, register SV *b)
 {
-    SV *tmpsv;
-    tryCALL_AMAGICbin(a,b,ncmp,&tmpsv);
+    SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp);
     if (tmpsv) {
-    	NV d;
- 
         if (SvIOK(tmpsv)) {
-            I32 i = SvIVX(tmpsv);
+            const I32 i = SvIVX(tmpsv);
             if (i > 0)
                return 1;
             return i? -1 : 0;
         }
-        d = SvNV(tmpsv);
-        if (d > 0)
-           return 1;
-        return d? -1 : 0;
+	else {
+	    const NV d = SvNV(tmpsv);
+	    if (d > 0)
+	       return 1;
+	    return d ? -1 : 0;
+	}
      }
      return sv_ncmp(aTHX_ a, b);
 }
@@ -1886,21 +1874,20 @@ amagic_ncmp(pTHX_ register SV *a, register SV *b)
 static I32
 amagic_i_ncmp(pTHX_ register SV *a, register SV *b)
 {
-    SV *tmpsv;
-    tryCALL_AMAGICbin(a,b,ncmp,&tmpsv);
+    SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp);
     if (tmpsv) {
-    	NV d;
-
         if (SvIOK(tmpsv)) {
-            I32 i = SvIVX(tmpsv);
+            const I32 i = SvIVX(tmpsv);
             if (i > 0)
                return 1;
             return i? -1 : 0;
         }
-        d = SvNV(tmpsv);
-        if (d > 0)
-           return 1;
-        return d? -1 : 0;
+	else {
+	    const NV d = SvNV(tmpsv);
+	    if (d > 0)
+	       return 1;
+	    return d ? -1 : 0;
+	}
     }
     return sv_i_ncmp(aTHX_ a, b);
 }
@@ -1908,21 +1895,20 @@ amagic_i_ncmp(pTHX_ register SV *a, register SV *b)
 static I32
 amagic_cmp(pTHX_ register SV *str1, register SV *str2)
 {
-    SV *tmpsv;
-    tryCALL_AMAGICbin(str1,str2,scmp,&tmpsv);
+    SV * const tmpsv = tryCALL_AMAGICbin(str1,str2,scmp);
     if (tmpsv) {
-    	NV d;
- 
         if (SvIOK(tmpsv)) {
-            I32 i = SvIVX(tmpsv);
+            const I32 i = SvIVX(tmpsv);
             if (i > 0)
                return 1;
             return i? -1 : 0;
         }
-        d = SvNV(tmpsv);
-        if (d > 0)
-           return 1;
-        return d? -1 : 0;
+	else {
+	    const NV d = SvNV(tmpsv);
+	    if (d > 0)
+	       return 1;
+	    return d? -1 : 0;
+	}
     }
     return sv_cmp(str1, str2);
 }
@@ -1930,21 +1916,20 @@ amagic_cmp(pTHX_ register SV *str1, register SV *str2)
 static I32
 amagic_cmp_locale(pTHX_ register SV *str1, register SV *str2)
 {
-    SV *tmpsv;
-    tryCALL_AMAGICbin(str1,str2,scmp,&tmpsv);
+    SV * const tmpsv = tryCALL_AMAGICbin(str1,str2,scmp);
     if (tmpsv) {
-    	NV d;
- 
         if (SvIOK(tmpsv)) {
-            I32 i = SvIVX(tmpsv);
+            const I32 i = SvIVX(tmpsv);
             if (i > 0)
                return 1;
             return i? -1 : 0;
         }
-        d = SvNV(tmpsv);
-        if (d > 0)
-           return 1;
-        return d? -1 : 0;
+	else {
+	    const NV d = SvNV(tmpsv);
+	    if (d > 0)
+	       return 1;
+	    return d? -1 : 0;
+	}
     }
     return sv_cmp_locale(str1, str2);
 }

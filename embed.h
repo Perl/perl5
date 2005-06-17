@@ -1040,6 +1040,8 @@
 #define share_hek_flags		S_share_hek_flags
 #define hv_notallowed		S_hv_notallowed
 #define hv_auxinit		S_hv_auxinit
+#define hv_delete_common	S_hv_delete_common
+#define hv_fetch_common		S_hv_fetch_common
 #endif
 #endif
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
@@ -1489,12 +1491,6 @@
 #endif
 #endif
 #define save_set_svflags	Perl_save_set_svflags
-#if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
-#ifdef PERL_CORE
-#define hv_delete_common	S_hv_delete_common
-#define hv_fetch_common		S_hv_fetch_common
-#endif
-#endif
 #define hv_scalar		Perl_hv_scalar
 #define hv_clear_placeholders	Perl_hv_clear_placeholders
 #ifdef PERL_CORE
@@ -3009,6 +3005,8 @@
 #define share_hek_flags(a,b,c,d)	S_share_hek_flags(aTHX_ a,b,c,d)
 #define hv_notallowed(a,b,c,d)	S_hv_notallowed(aTHX_ a,b,c,d)
 #define hv_auxinit(a)		S_hv_auxinit(aTHX_ a)
+#define hv_delete_common(a,b,c,d,e,f,g)	S_hv_delete_common(aTHX_ a,b,c,d,e,f,g)
+#define hv_fetch_common(a,b,c,d,e,f,g,h)	S_hv_fetch_common(aTHX_ a,b,c,d,e,f,g,h)
 #endif
 #endif
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
@@ -3457,12 +3455,6 @@
 #endif
 #endif
 #define save_set_svflags(a,b,c)	Perl_save_set_svflags(aTHX_ a,b,c)
-#if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
-#ifdef PERL_CORE
-#define hv_delete_common(a,b,c,d,e,f,g)	S_hv_delete_common(aTHX_ a,b,c,d,e,f,g)
-#define hv_fetch_common(a,b,c,d,e,f,g,h)	S_hv_fetch_common(aTHX_ a,b,c,d,e,f,g,h)
-#endif
-#endif
 #define hv_scalar(a)		Perl_hv_scalar(aTHX_ a)
 #define hv_clear_placeholders(a)	Perl_hv_clear_placeholders(aTHX_ a)
 #ifdef PERL_CORE
