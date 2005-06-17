@@ -1573,11 +1573,11 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 
     if (old_body_arena) {
 #ifdef PURIFY
-	my_safefree(old_body)
+	my_safefree(old_body);
 #else
 	S_del_body(aTHX_ old_body, old_body_arena, old_body_offset);
 #endif
-}
+    }
 }
 
 /*
