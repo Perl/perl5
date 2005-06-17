@@ -1234,6 +1234,9 @@ if ($PLATFORM =~ /^win(?:32|ce)$/) {
     {
 	try_symbol($symbol);
     }
+    if ($CCTYPE eq "BORLAND") {
+	try_symbol('_matherr');
+    }
 }
 elsif ($PLATFORM eq 'os2') {
     open MAP, 'miniperl.map' or die 'Cannot read miniperl.map';
