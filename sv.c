@@ -10056,43 +10056,8 @@ Perl_ptr_table_new(pTHX)
 #  define PTR_TABLE_HASH(ptr) (PTR2UV(ptr) >> 2)
 #endif
 
-
-
-STATIC void
-S_more_pte(pTHX)
-{
-    struct ptr_tbl_ent* pte;
-    struct ptr_tbl_ent* pteend;
-    New(0, pte, PERL_ARENA_SIZE/sizeof(struct ptr_tbl_ent), struct ptr_tbl_ent);
-    pte->next = PL_pte_arenaroot;
-    PL_pte_arenaroot = pte;
-
-    pteend = &pte[PERL_ARENA_SIZE / sizeof(struct ptr_tbl_ent) - 1];
-    PL_pte_root = ++pte;
-    while (pte < pteend) {
-	pte->next = pte + 1;
-	pte++;
-    }
-    pte->next = 0;
-}
-
-STATIC struct ptr_tbl_ent*
-S_new_pte(pTHX)
-{
-    struct ptr_tbl_ent* pte;
-    if (!PL_pte_root)
-	S_more_pte(aTHX);
-    pte = PL_pte_root;
-    PL_pte_root = pte->next;
-    return pte;
-}
-
-STATIC void
-S_del_pte(pTHX_ struct ptr_tbl_ent*p)
-{
-    p->next = PL_pte_root;
-    PL_pte_root = p;
-}
+#define new_pte()	new_body(struct ptr_tbl_ent, pte)
+#define del_pte(p)	del_body(p, struct ptr_tbl_ent, pte)
 
 /* map an existing pointer using a table */
 
@@ -10130,7 +10095,7 @@ Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldv, void *newv)
 	    return;
 	}
     }
-    tblent = S_new_pte(aTHX);
+    tblent = new_pte();
     tblent->oldval = oldv;
     tblent->newval = newv;
     tblent->next = *otblent;
@@ -10194,7 +10159,7 @@ Perl_ptr_table_clear(pTHX_ PTR_TBL_t *tbl)
         if (entry) {
             PTR_TBL_ENT_t *oentry = entry;
             entry = entry->next;
-            S_del_pte(aTHX_ oentry);
+            del_pte(oentry);
         }
         if (!entry) {
             if (++riter > max) {
