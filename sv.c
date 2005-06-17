@@ -8847,7 +8847,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 #ifndef USE_LONG_DOUBLE
     /* special-case "%.<number>[gf]" */
-    if ( patlen <= 5 && pat[0] == '%' && pat[1] == '.'
+    if ( !args && patlen <= 5 && pat[0] == '%' && pat[1] == '.'
 	 && (pat[patlen-1] == 'g' || pat[patlen-1] == 'f') ) {
 	unsigned digits = 0;
 	const char *pp;
@@ -8858,9 +8858,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	if (pp - pat == (int)patlen - 1) {
 	    NV nv;
 
-	    if (args)
-		nv = (NV)va_arg(*args, double);
-	    else if (svix < svmax)
+	    if (svix < svmax)
 		nv = SvNV(*svargs);
 	    else
 		return;
@@ -8937,7 +8935,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	STRLEN have;
 	STRLEN need;
 	STRLEN gap;
-        const char *dotstr = ".";
+	const char *dotstr = ".";
 	STRLEN dotstrlen = 1;
 	I32 efix = 0; /* explicit format parameter index */
 	I32 ewix = 0; /* explicit width index */
