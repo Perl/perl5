@@ -1345,8 +1345,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	return;
 
     if (SvTYPE(sv) > mt)
-	croak ("sv_upgrade from type %d down to type %d", (int)SvTYPE(sv),
-	       (int)mt);
+	Perl_croak(aTHX_ "sv_upgrade from type %d down to type %d",
+		(int)SvTYPE(sv), (int)mt);
 
     pv = NULL;
     cur = 0;
