@@ -1333,7 +1333,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     NV		nv;
     MAGIC*	magic;
     HV*		stash;
-    void*	old_body_arena;
+    void**	old_body_arena;
     size_t	old_body_offset;
     size_t	old_body_length;	/* Well, the length to copy.  */
     void*	old_body;
@@ -1380,7 +1380,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	break;
     case SVt_NV:
 	nv	= SvNVX(sv);
-	old_body_arena = PL_xnv_root;
+	old_body_arena = (void **) &PL_xnv_root;
 	old_body_length = sizeof(NV);
 	zero_nv = FALSE;
 
@@ -1394,7 +1394,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	pv	= SvPVX_mutable(sv);
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
-	old_body_arena = PL_xpv_root;
+	old_body_arena = (void **) &PL_xpv_root;
 	old_body_offset = STRUCT_OFFSET(XPV, xpv_cur)
 	    - STRUCT_OFFSET(xpv_allocated, xpv_cur);
 	old_body_length = sizeof(XPV) - old_body_offset;
@@ -1408,7 +1408,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
 	iv	= SvIVX(sv);
-	old_body_arena = PL_xpviv_root;
+	old_body_arena = (void **) &PL_xpviv_root;
 	old_body_offset = STRUCT_OFFSET(XPVIV, xpv_cur)
 	    - STRUCT_OFFSET(xpviv_allocated, xpv_cur);
 	old_body_length = sizeof(XPVIV) - old_body_offset;
@@ -1419,7 +1419,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	len	= SvLEN(sv);
 	iv	= SvIVX(sv);
 	nv	= SvNVX(sv);
-	old_body_arena = PL_xpvnv_root;
+	old_body_arena = (void **) &PL_xpvnv_root;
 	old_body_length = sizeof(XPVNV);
 	zero_nv = FALSE;
 	break;
@@ -1439,7 +1439,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	nv	= SvNVX(sv);
 	magic	= SvMAGIC(sv);
 	stash	= SvSTASH(sv);
-	old_body_arena = PL_xpvmg_root;
+	old_body_arena = (void **) &PL_xpvmg_root;
 	old_body_length = sizeof(XPVMG);
 	zero_nv = FALSE;
 	break;
