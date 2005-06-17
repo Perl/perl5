@@ -3449,6 +3449,16 @@ construct, not just the empty search pattern.  Therefore code written
 in Perl 5.9.0 or later that uses the // as the I<defined-or> can be
 misparsed by pre-5.9.0 Perls as a non-terminated search pattern.
 
+=item Search pattern not terminated or ternary operator parsed as search pattern
+
+(F) The lexer couldn't find the final delimiter of a C<?PATTERN?>
+construct.
+
+The question mark is also used as part of the ternary operator (as in
+C<foo ? 0 : 1>) leading to some ambiguous constructions being wrongly
+parsed. One way to disambiguate the parsing is to put parentheses around
+the conditional expression, i.e. C<(foo) ? 0 : 1>.
+
 =item %sseek() on unopened filehandle
 
 (W unopened) You tried to use the seek() or sysseek() function on a

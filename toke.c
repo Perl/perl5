@@ -9261,8 +9261,12 @@ S_scan_pat(pTHX_ char *start, I32 type)
     PMOP *pm;
     char *s = scan_str(start,FALSE,FALSE);
 
-    if (!s)
-	Perl_croak(aTHX_ "Search pattern not terminated");
+    if (!s) {
+	char *delimiter = skipspace(start);
+	Perl_croak(aTHX_ *delimiter == '?'
+		   ? "Search pattern not terminated or ternary operator parsed as search pattern"
+		   : "Search pattern not terminated" );
+    }
 
     pm = (PMOP*)newPMOP(type, 0);
     if (PL_multi_open == '?')
