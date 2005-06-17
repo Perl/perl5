@@ -1341,6 +1341,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     if (SvTYPE(sv) == mt)
 	return;
 
+    if (SvTYPE(sv) > mt)
+	croak ("sv_upgrade from type %d down to type %d", SvTYPE(sv), mt);
+
     pv = NULL;
     cur = 0;
     len = 0;
@@ -6881,7 +6884,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
 
     if (!(flags & SVp_POK) || !*SvPVX_const(sv)) {
 	if ((flags & SVTYPEMASK) < SVt_PVIV)
-	    sv_upgrade(sv, SVt_IV);
+	    sv_upgrade(sv, ((flags & SVTYPEMASK) > SVt_IV ? SVt_PVIV : SVt_IV));
 	(void)SvIOK_only(sv);
 	SvIV_set(sv, 1);
 	return;
