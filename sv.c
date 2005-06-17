@@ -1333,6 +1333,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     NV		nv;
     MAGIC*	magic;
     HV*		stash;
+    void*	old_body_arena;
+    size_t	old_body_offset;
+    void*	old_body;
 
     if (mt != SVt_PV && SvIsCOW(sv)) {
 	sv_force_normal_flags(sv, 0);
@@ -1342,7 +1345,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	return;
 
     if (SvTYPE(sv) > mt)
-	croak ("sv_upgrade from type %d down to type %d", SvTYPE(sv), mt);
+	croak ("sv_upgrade from type %d down to type %d", (int)SvTYPE(sv),
+	       (int)mt);
 
     pv = NULL;
     cur = 0;
@@ -1351,6 +1355,10 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     nv = 0.0;
     magic = NULL;
     stash = Nullhv;
+
+    old_body = SvANY(sv);
+    old_body_arena = 0;
+    old_body_offset = 0;
 
     switch (SvTYPE(sv)) {
     case SVt_NULL:
@@ -1364,7 +1372,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	break;
     case SVt_NV:
 	nv	= SvNVX(sv);
-	del_XNV(SvANY(sv));
+	old_body_arena = PL_xnv_root;
+
 	if (mt < SVt_PVNV)
 	    mt = SVt_PVNV;
 	break;
@@ -1375,7 +1384,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	pv	= SvPVX_mutable(sv);
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
-	del_XPV(SvANY(sv));
+	old_body_arena = PL_xpv_root;
+	old_body_offset = STRUCT_OFFSET(XPV, xpv_cur)
+	    - STRUCT_OFFSET(xpv_allocated, xpv_cur);
 	if (mt <= SVt_IV)
 	    mt = SVt_PVIV;
 	else if (mt == SVt_NV)
@@ -1386,7 +1397,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
 	iv	= SvIVX(sv);
-	del_XPVIV(SvANY(sv));
+	old_body_arena = PL_xpviv_root;
+	old_body_offset = STRUCT_OFFSET(XPVIV, xpv_cur)
+	    - STRUCT_OFFSET(xpviv_allocated, xpv_cur);
 	break;
     case SVt_PVNV:
 	pv	= SvPVX_mutable(sv);
@@ -1394,7 +1407,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	len	= SvLEN(sv);
 	iv	= SvIVX(sv);
 	nv	= SvNVX(sv);
-	del_XPVNV(SvANY(sv));
+	old_body_arena = PL_xpvnv_root;
 	break;
     case SVt_PVMG:
 	/* Because the XPVMG of PL_mess_sv isn't allocated from the arena,
@@ -1412,7 +1425,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	nv	= SvNVX(sv);
 	magic	= SvMAGIC(sv);
 	stash	= SvSTASH(sv);
-	del_XPVMG(SvANY(sv));
+	old_body_arena = PL_xpvmg_root;
 	break;
     default:
 	Perl_croak(aTHX_ "Can't upgrade that kind of scalar");
@@ -1537,6 +1550,15 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	SvLEN_set(sv, len);
 	break;
     }
+
+
+    if (old_body_arena) {
+#ifdef PURIFY
+	my_safefree(old_body)
+#else
+	S_del_body(aTHX_ old_body, old_body_arena, old_body_offset);
+#endif
+}
 }
 
 /*
