@@ -1325,14 +1325,6 @@ You generally want to use the C<SvUPGRADE> macro wrapper. See also C<svtype>.
 void
 Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 {
-
-    char*	pv;
-    U32		cur;
-    U32		len;
-    IV		iv;
-    NV		nv;
-    MAGIC*	magic;
-    HV*		stash;
     void**	old_body_arena;
     size_t	old_body_offset;
     size_t	old_body_length;	/* Well, the length to copy.  */
@@ -1356,13 +1348,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	Perl_croak(aTHX_ "sv_upgrade from type %d down to type %d",
 		(int)SvTYPE(sv), (int)mt);
 
-    pv = NULL;
-    cur = 0;
-    len = 0;
-    iv = 0;
-    nv = 0.0;
-    magic = NULL;
-    stash = Nullhv;
 
     old_body = SvANY(sv);
     old_body_arena = 0;
@@ -1411,7 +1396,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     case SVt_NULL:
 	break;
     case SVt_IV:
-	iv	= SvIVX(sv);
 	if (mt == SVt_NV)
 	    mt = SVt_PVNV;
 	else if (mt < SVt_PVIV)
@@ -1420,7 +1404,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	old_body_length = sizeof(IV);
 	break;
     case SVt_NV:
-	nv	= SvNVX(sv);
 	old_body_arena = (void **) &PL_xnv_root;
 	old_body_length = sizeof(NV);
 	zero_nv = FALSE;
@@ -1429,12 +1412,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	    mt = SVt_PVNV;
 	break;
     case SVt_RV:
-	pv	= (char*)SvRV(sv);
 	break;
     case SVt_PV:
-	pv	= SvPVX_mutable(sv);
-	cur	= SvCUR(sv);
-	len	= SvLEN(sv);
 	old_body_arena = (void **) &PL_xpv_root;
 	old_body_offset = STRUCT_OFFSET(XPV, xpv_cur)
 	    - STRUCT_OFFSET(xpv_allocated, xpv_cur);
@@ -1447,10 +1426,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	    mt = SVt_PVNV;
 	break;
     case SVt_PVIV:
-	pv	= SvPVX_mutable(sv);
-	cur	= SvCUR(sv);
-	len	= SvLEN(sv);
-	iv	= SvIVX(sv);
 	old_body_arena = (void **) &PL_xpviv_root;
 	old_body_offset = STRUCT_OFFSET(XPVIV, xpv_cur)
 	    - STRUCT_OFFSET(xpviv_allocated, xpv_cur);
@@ -1459,11 +1434,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	    - old_body_offset;
 	break;
     case SVt_PVNV:
-	pv	= SvPVX_mutable(sv);
-	cur	= SvCUR(sv);
-	len	= SvLEN(sv);
-	iv	= SvIVX(sv);
-	nv	= SvNVX(sv);
 	old_body_arena = (void **) &PL_xpvnv_root;
 	old_body_length = STRUCT_OFFSET(XPVNV, xiv_u)
 	    + sizeof (((XPVNV*)SvANY(sv))->xiv_u);
@@ -1478,13 +1448,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	   Given that it only has meaning inside the pad, it shouldn't be set
 	   on anything that can get upgraded.  */
 	assert((SvFLAGS(sv) & SVpad_TYPED) == 0);
-	pv	= SvPVX_mutable(sv);
-	cur	= SvCUR(sv);
-	len	= SvLEN(sv);
-	iv	= SvIVX(sv);
-	nv	= SvNVX(sv);
-	magic	= SvMAGIC(sv);
-	stash	= SvSTASH(sv);
 	old_body_arena = (void **) &PL_xpvmg_root;
 	old_body_length = STRUCT_OFFSET(XPVMG, xmg_stash)
 	    + sizeof (((XPVMG*)SvANY(sv))->xmg_stash);
@@ -1521,28 +1484,35 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	HvMAX(sv)	= 0;
 	HvTOTALKEYS(sv)	= 0;
 
-	/* Fall through...  */
-	if (0) {
-	case SVt_PVAV:
-	    SvANY(sv) = new_XPVAV();
-	    AvMAX(sv)	= -1;
-	    AvFILLp(sv)	= -1;
-	    AvALLOC(sv)	= 0;
-	    AvREAL_only(sv);
+	goto hv_av_common;
+
+    case SVt_PVAV:
+	SvANY(sv) = new_XPVAV();
+	AvMAX(sv)	= -1;
+	AvFILLp(sv)	= -1;
+	AvALLOC(sv)	= 0;
+	AvREAL_only(sv);
+
+    hv_av_common:
+	/* SVt_NULL isn't the only thing upgraded to AV or HV.
+	   The target created by newSVrv also is, and it can have magic.
+	   However, it never has SvPVX set.
+	*/
+	if (old_type >= SVt_RV) {
+	    assert(SvPVX_const(sv) == 0);
 	}
-	/* to here.  */
-	/* XXX? Only SVt_NULL is ever upgraded to AV or HV?  */
-	assert(!pv);
-	/* FIXME. Should be able to remove all this if()... if the above
-	   assertion is genuinely always true.  */
-	if(SvOOK(sv)) {
-	    pv -= iv;
-	    SvFLAGS(sv) &= ~SVf_OOK;
-	}
-	Safefree(pv);
+
+	/* Could put this in the else clause below, as PVMG must have SvPVX
+	   0 already (the assertion above)  */
 	SvPV_set(sv, (char*)0);
-	SvMAGIC_set(sv, magic);
-	SvSTASH_set(sv, stash);
+
+	if (old_type >= SVt_PVMG) {
+	    SvMAGIC_set(sv, ((XPVMG*)old_body)->xmg_magic);
+	    SvSTASH_set(sv, ((XPVMG*)old_body)->xmg_stash);
+	} else {
+	    SvMAGIC_set(sv, 0);
+	    SvSTASH_set(sv, 0);
+	}
 	break;
 
     case SVt_PVIO:
@@ -1651,7 +1621,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 #else
 	S_del_body(aTHX_ old_body, old_body_arena, old_body_offset);
 #endif
-}
+    }
 }
 
 /*
