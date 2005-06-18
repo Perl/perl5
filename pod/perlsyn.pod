@@ -199,6 +199,8 @@ The following compound statements may be used to control flow:
     if (EXPR) BLOCK elsif (EXPR) BLOCK ... else BLOCK
     LABEL while (EXPR) BLOCK
     LABEL while (EXPR) BLOCK continue BLOCK
+    LABEL until (EXPR) BLOCK
+    LABEL until (EXPR) BLOCK continue BLOCK
     LABEL for (EXPR; EXPR; EXPR) BLOCK
     LABEL foreach VAR (LIST) BLOCK
     LABEL foreach VAR (LIST) BLOCK continue BLOCK
