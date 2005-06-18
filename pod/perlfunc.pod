@@ -1162,9 +1162,11 @@ maintain arbitrary state about the nature of the exception.  Such a scheme
 is sometimes preferable to matching particular string values of $@ using
 regular expressions.  Here's an example:
 
+    use Scalar::Util 'blessed';
+
     eval { ... ; die Some::Module::Exception->new( FOO => "bar" ) };
     if ($@) {
-        if (ref($@) && UNIVERSAL::isa($@,"Some::Module::Exception")) {
+        if (blessed($@) && $@->isa("Some::Module::Exception")) {
             # handle Some::Module::Exception
         }
         else {
@@ -4199,9 +4201,6 @@ name is returned instead.  You can think of C<ref> as a C<typeof> operator.
     }
     unless (ref($r)) {
 	print "r is not a reference at all.\n";
-    }
-    if (UNIVERSAL::isa($r, "HASH")) {  # for subclassing
-	print "r is a reference to something that isa hash.\n";
     }
 
 See also L<perlref>.
