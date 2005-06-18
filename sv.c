@@ -1338,9 +1338,12 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     size_t	old_body_length;	/* Well, the length to copy.  */
     void*	old_body;
     bool	zero_nv = TRUE;
-#ifdef DEBUGGING
+    void*	new_body;
+    size_t	new_body_length;
+    size_t	new_body_offset;
+    void**	new_body_arena;
+    void**	new_body_arenaroot;
     U32		old_type = SvTYPE(sv);
-#endif
 
     if (mt != SVt_PV && SvIsCOW(sv)) {
 	sv_force_normal_flags(sv, 0);
@@ -1365,6 +1368,44 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     old_body_arena = 0;
     old_body_offset = 0;
     old_body_length = 0;
+    new_body_offset = 0;
+    new_body_length = ~0;
+
+    /* Copying structures onto other structures that have been neatly zeroed
+       has a subtle gotcha. Consider XPVMG
+
+       +------+------+------+------+------+-------+-------+
+       |     NV      | CUR  | LEN  |  IV  | MAGIC | STASH |
+       +------+------+------+------+------+-------+-------+
+       0      4      8     12     16     20      24      28
+
+       where NVs are aligned to 8 bytes, so that sizeof that structure is
+       actually 32 bytes long, with 4 bytes of padding at the end:
+
+       +------+------+------+------+------+-------+-------+------+
+       |     NV      | CUR  | LEN  |  IV  | MAGIC | STASH | ???  |
+       +------+------+------+------+------+-------+-------+------+
+       0      4      8     12     16     20      24      28     32
+
+       so what happens if you allocate memory for this structure:
+
+       +------+------+------+------+------+-------+-------+------+------+...
+       |     NV      | CUR  | LEN  |  IV  | MAGIC | STASH |  GP  | NAME |
+       +------+------+------+------+------+-------+-------+------+------+...
+       0      4      8     12     16     20      24      28     32     36
+
+       zero it, then copy sizeof(XPVMG) bytes on top of it? Not quite what you
+       expect, because you copy the area marked ??? onto GP. Now, ??? may have
+       started out as zero once, but it's quite possible that it isn't. So now,
+       rather than a nicely zeroed GP, you have it pointing somewhere random.
+       Bugs ensue.
+
+       (In fact, GP ends up pointing at a previous GP structure, because the
+       principle cause of the padding in XPVMG getting garbage is a copy of
+       sizeof(XPVMG) bytes from a XPVGV structure in sv_unglob)
+
+       So we are careful and work out the size of used parts of all the
+       structures.  */
 
     switch (SvTYPE(sv)) {
     case SVt_NULL:
@@ -1397,7 +1438,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	old_body_arena = (void **) &PL_xpv_root;
 	old_body_offset = STRUCT_OFFSET(XPV, xpv_cur)
 	    - STRUCT_OFFSET(xpv_allocated, xpv_cur);
-	old_body_length = sizeof(XPV) - old_body_offset;
+	old_body_length = STRUCT_OFFSET(XPV, xpv_len)
+	    + sizeof (((XPV*)SvANY(sv))->xpv_len)
+	    - old_body_offset;
 	if (mt <= SVt_IV)
 	    mt = SVt_PVIV;
 	else if (mt == SVt_NV)
@@ -1411,7 +1454,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	old_body_arena = (void **) &PL_xpviv_root;
 	old_body_offset = STRUCT_OFFSET(XPVIV, xpv_cur)
 	    - STRUCT_OFFSET(xpviv_allocated, xpv_cur);
-	old_body_length = sizeof(XPVIV) - old_body_offset;
+	old_body_length =  STRUCT_OFFSET(XPVIV, xiv_u)
+	    + sizeof (((XPVIV*)SvANY(sv))->xiv_u)
+	    - old_body_offset;
 	break;
     case SVt_PVNV:
 	pv	= SvPVX_mutable(sv);
@@ -1420,7 +1465,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	iv	= SvIVX(sv);
 	nv	= SvNVX(sv);
 	old_body_arena = (void **) &PL_xpvnv_root;
-	old_body_length = sizeof(XPVNV);
+	old_body_length = STRUCT_OFFSET(XPVNV, xiv_u)
+	    + sizeof (((XPVNV*)SvANY(sv))->xiv_u);
 	zero_nv = FALSE;
 	break;
     case SVt_PVMG:
@@ -1440,7 +1486,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	magic	= SvMAGIC(sv);
 	stash	= SvSTASH(sv);
 	old_body_arena = (void **) &PL_xpvmg_root;
-	old_body_length = sizeof(XPVMG);
+	old_body_length = STRUCT_OFFSET(XPVMG, xmg_stash)
+	    + sizeof (((XPVMG*)SvANY(sv))->xmg_stash);
 	zero_nv = FALSE;
 	break;
     default:
@@ -1456,17 +1503,17 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     case SVt_IV:
 	assert(old_type == SVt_NULL);
 	SvANY(sv) = (XPVIV*)((char*)&(sv->sv_u.svu_iv) - STRUCT_OFFSET(XPVIV, xiv_iv));
-	SvIV_set(sv, iv);
+	SvIV_set(sv, 0);
 	break;
     case SVt_NV:
 	assert(old_type == SVt_NULL);
 	SvANY(sv) = new_XNV();
-	SvNV_set(sv, nv);
+	SvNV_set(sv, 0);
 	break;
     case SVt_RV:
 	assert(old_type == SVt_NULL);
 	SvANY(sv) = &sv->sv_u.svu_rv;
-	SvRV_set(sv, (SV*)pv);
+	SvRV_set(sv, 0);
 	break;
     case SVt_PVHV:
 	SvANY(sv) = new_XPVHV();
@@ -1499,75 +1546,102 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	break;
 
     case SVt_PVIO:
-	SvANY(sv) = new_XPVIO();
-	Zero(SvANY(sv), 1, XPVIO);
-	IoPAGE_LEN(sv)	= 60;
-	goto set_magic_common;
+	new_body = new_XPVIO();
+	new_body_length = sizeof(XPVIO);
+	goto zero;
     case SVt_PVFM:
-	SvANY(sv) = new_XPVFM();
-	Zero(SvANY(sv), 1, XPVFM);
-	goto set_magic_common;
+	new_body = new_XPVFM();
+	new_body_length = sizeof(XPVFM);
+	goto zero;
+
     case SVt_PVBM:
-	SvANY(sv) = new_XPVBM();
-	BmRARE(sv)	= 0;
-	BmUSEFUL(sv)	= 0;
-	BmPREVIOUS(sv)	= 0;
-	goto set_magic_common;
+	new_body_length = sizeof(XPVBM);
+	new_body_arena = (void **) &PL_xpvbm_root;
+	new_body_arenaroot = (void **) &PL_xpvbm_arenaroot;
+	goto new_body;
     case SVt_PVGV:
-	SvANY(sv) = new_XPVGV();
-	GvGP(sv)	= 0;
-	GvNAME(sv)	= 0;
-	GvNAMELEN(sv)	= 0;
-	GvSTASH(sv)	= 0;
-	GvFLAGS(sv)	= 0;
-	goto set_magic_common;
+	new_body_length = sizeof(XPVGV);
+	new_body_arena = (void **) &PL_xpvgv_root;
+	new_body_arenaroot = (void **) &PL_xpvgv_arenaroot;
+	goto new_body;
     case SVt_PVCV:
-	SvANY(sv) = new_XPVCV();
-	Zero(SvANY(sv), 1, XPVCV);
-	goto set_magic_common;
+	new_body_length = sizeof(XPVCV);
+	new_body_arena = (void **) &PL_xpvcv_root;
+	new_body_arenaroot = (void **) &PL_xpvcv_arenaroot;
+	goto new_body;
     case SVt_PVLV:
-	SvANY(sv) = new_XPVLV();
-	LvTARGOFF(sv)	= 0;
-	LvTARGLEN(sv)	= 0;
-	LvTARG(sv)	= 0;
-	LvTYPE(sv)	= 0;
-	GvGP(sv)	= 0;
-	GvNAME(sv)	= 0;
-	GvNAMELEN(sv)	= 0;
-	GvSTASH(sv)	= 0;
-	GvFLAGS(sv)	= 0;
-	/* Fall through.  */
-	if (0) {
-	case SVt_PVMG:
-	    SvANY(sv) = new_XPVMG();
+	new_body_length = sizeof(XPVLV);
+	new_body_arena = (void **) &PL_xpvlv_root;
+	new_body_arenaroot = (void **) &PL_xpvlv_arenaroot;
+	goto new_body;
+    case SVt_PVMG:
+	new_body_length = sizeof(XPVMG);
+	new_body_arena = (void **) &PL_xpvmg_root;
+	new_body_arenaroot = (void **) &PL_xpvmg_arenaroot;
+	goto new_body;
+    case SVt_PVNV:
+	new_body_length = sizeof(XPVNV);
+	new_body_arena = (void **) &PL_xpvnv_root;
+	new_body_arenaroot = (void **) &PL_xpvnv_arenaroot;
+	goto new_body;
+    case SVt_PVIV:
+	new_body_offset = STRUCT_OFFSET(XPVIV, xpv_cur)
+	    - STRUCT_OFFSET(xpviv_allocated, xpv_cur);
+	new_body_length = sizeof(XPVIV) - new_body_offset;
+	new_body_arena = (void **) &PL_xpviv_root;
+	new_body_arenaroot = (void **) &PL_xpviv_arenaroot;
+	/* XXX Is this still needed?  Was it ever needed?   Surely as there is
+	   no route from NV to PVIV, NOK can never be true  */
+	if (SvNIOK(sv))
+	    (void)SvIOK_on(sv);
+	SvNOK_off(sv);
+	goto new_body_no_NV; 
+    case SVt_PV:
+	new_body_offset = STRUCT_OFFSET(XPV, xpv_cur)
+	    - STRUCT_OFFSET(xpv_allocated, xpv_cur);
+	new_body_length = sizeof(XPV) - new_body_offset;
+	new_body_arena = (void **) &PL_xpv_root;
+	new_body_arenaroot = (void **) &PL_xpv_arenaroot;
+    new_body_no_NV:
+	/* PV and PVIV don't have an NV slot.  */
+	zero_nv = FALSE;
+
+	{
+	new_body:
+	    assert(new_body_length);
+#ifndef PURIFY
+	    new_body = S_new_body(aTHX_ new_body_arenaroot, new_body_arena,
+				  new_body_length, new_body_offset);
+#else
+	    /* We always allocated the full length item with PURIFY */
+	    new_body_length += new_body_offset;
+	    new_body_offset = 0;
+	    new_body = my_safemalloc(new_body_length);
+
+#endif
+	zero:
+	    Zero(((char *)new_body) + new_body_offset, new_body_length, char);
+	    SvANY(sv) = new_body;
+
+	    if (old_body_length) {
+		Copy((char *)old_body + old_body_offset,
+		     (char *)new_body + old_body_offset,
+		     old_body_length, char);
+	    }
+
+	    /* FIXME - add a Configure test to determine if NV 0.0 is actually
+	       all bits zero. If it is, we can skip this initialisation.  */
+	    if (zero_nv)
+		SvNV_set(sv, 0);
+
+	    if (mt == SVt_PVIO)
+		IoPAGE_LEN(sv)	= 60;
+	    if (old_type < SVt_RV)
+		SvPV_set(sv, 0);
 	}
-    set_magic_common:
-	SvMAGIC_set(sv, magic);
-	SvSTASH_set(sv, stash);
-	/* Fall through.  */
-	if (0) {
-	case SVt_PVNV:
-	    SvANY(sv) = new_XPVNV();
-	}
-	SvNV_set(sv, nv);
-	/* Fall through.  */
-	if (0) {
-	case SVt_PVIV:
-	    SvANY(sv) = new_XPVIV();
-	    if (SvNIOK(sv))
-		(void)SvIOK_on(sv);
-	    SvNOK_off(sv);
-	}
-	SvIV_set(sv, iv);
-	/* Fall through.  */
-	if (0) {
-	case SVt_PV:
-	    SvANY(sv) = new_XPV();
-	}
-	SvPV_set(sv, pv);
-	SvCUR_set(sv, cur);
-	SvLEN_set(sv, len);
 	break;
+    default:
+	Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu", mt);
     }
 
 
@@ -1577,7 +1651,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 #else
 	S_del_body(aTHX_ old_body, old_body_arena, old_body_offset);
 #endif
-    }
+}
 }
 
 /*
