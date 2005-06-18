@@ -524,6 +524,35 @@ Perl_sv_free_arenas(pTHX)
     SV* sva;
     SV* svanext;
     void *arena, *arenanext;
+    int i;
+    void **arenaroots[] = {
+	(void**) &PL_xnv_arenaroot,
+	(void**) &PL_xpv_arenaroot,
+	(void**) &PL_xpviv_arenaroot,
+	(void**) &PL_xpvnv_arenaroot,
+	(void**) &PL_xpvcv_arenaroot,
+	(void**) &PL_xpvav_arenaroot,
+	(void**) &PL_xpvhv_arenaroot,
+	(void**) &PL_xpvmg_arenaroot,
+	(void**) &PL_xpvgv_arenaroot,
+	(void**) &PL_xpvlv_arenaroot,
+	(void**) &PL_xpvbm_arenaroot,
+	(void**) 0
+    };
+    void **roots[] = {
+	(void**) &PL_xnv_root,
+	(void**) &PL_xpv_root,
+	(void**) &PL_xpviv_root,
+	(void**) &PL_xpvnv_root,
+	(void**) &PL_xpvcv_root,
+	(void**) &PL_xpvav_root,
+	(void**) &PL_xpvhv_root,
+	(void**) &PL_xpvmg_root,
+	(void**) &PL_xpvgv_root,
+	(void**) &PL_xpvlv_root,
+	(void**) &PL_xpvbm_root,
+	(void**) 0
+    };
 
     /* Free arenas here, but be careful about fake ones.  (We assume
        contiguity of the fake ones with the corresponding real ones.) */
@@ -536,83 +565,19 @@ Perl_sv_free_arenas(pTHX)
 	if (!SvFAKE(sva))
 	    Safefree(sva);
     }
+    
+    assert(sizeof(arenaroots) == sizeof(roots));
 
-    for (arena = PL_xnv_arenaroot; arena; arena = arenanext) {
-	arenanext = *(void **)arena;
-	Safefree(arena);
-    }
-    PL_xnv_arenaroot = 0;
-    PL_xnv_root = 0;
+    for (i=0; arenaroots[i]; i++) {
 
-    for (arena = PL_xpv_arenaroot; arena; arena = arenanext) {
-	arenanext = *(void **)arena;
-	Safefree(arena);
+	arena = *arenaroots[i];
+	for (; arena; arena = arenanext) {
+	    arenanext = *(void **)arena;
+	    Safefree(arena);
+	}
+	*arenaroots[i] = 0;
+	*roots[i] = 0;
     }
-    PL_xpv_arenaroot = 0;
-    PL_xpv_root = 0;
-
-    for (arena = PL_xpviv_arenaroot; arena; arena = arenanext) {
-	arenanext = *(void **)arena;
-	Safefree(arena);
-    }
-    PL_xpviv_arenaroot = 0;
-    PL_xpviv_root = 0;
-
-    for (arena = PL_xpvnv_arenaroot; arena; arena = arenanext) {
-	arenanext = *(void **)arena;
-	Safefree(arena);
-    }
-    PL_xpvnv_arenaroot = 0;
-    PL_xpvnv_root = 0;
-
-    for (arena = PL_xpvcv_arenaroot; arena; arena = arenanext) {
-	arenanext = *(void **)arena;
-	Safefree(arena);
-    }
-    PL_xpvcv_arenaroot = 0;
-    PL_xpvcv_root = 0;
-
-    for (arena = PL_xpvav_arenaroot; arena; arena = arenanext) {
-	arenanext = *(void **)arena;
-	Safefree(arena);
-    }
-    PL_xpvav_arenaroot = 0;
-    PL_xpvav_root = 0;
-
-    for (arena = PL_xpvhv_arenaroot; arena; arena = arenanext) {
-	arenanext = *(void **)arena;
-	Safefree(arena);
-    }
-    PL_xpvhv_arenaroot = 0;
-    PL_xpvhv_root = 0;
-
-    for (arena = PL_xpvmg_arenaroot; arena; arena = arenanext) {
-	arenanext = *(void **)arena;
-	Safefree(arena);
-    }
-    PL_xpvmg_arenaroot = 0;
-    PL_xpvmg_root = 0;
-
-    for (arena = PL_xpvgv_arenaroot; arena; arena = arenanext) {
-	arenanext = *(void **)arena;
-	Safefree(arena);
-    }
-    PL_xpvgv_arenaroot = 0;
-    PL_xpvgv_root = 0;
-
-    for (arena = PL_xpvlv_arenaroot; arena; arena = arenanext) {
-	arenanext = *(void **)arena;
-	Safefree(arena);
-    }
-    PL_xpvlv_arenaroot = 0;
-    PL_xpvlv_root = 0;
-
-    for (arena = PL_xpvbm_arenaroot; arena; arena = arenanext) {
-	arenanext = *(void **)arena;
-	Safefree(arena);
-    }
-    PL_xpvbm_arenaroot = 0;
-    PL_xpvbm_root = 0;
 
     {
 	HE *he;
