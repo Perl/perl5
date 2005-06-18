@@ -501,6 +501,15 @@ Perl_sv_clean_all(pTHX)
     return cleaned;
 }
 
+static void 
+S_free_arena(pTHX_ void **root) {
+    while (root) {
+	void **next = *(void **)root;
+	Safefree(root);
+	root = next;
+    }
+}
+    
 /*
 =for apidoc sv_free_arenas
 
@@ -510,12 +519,18 @@ heads and bodies within the arenas must already have been freed.
 =cut
 */
 
+#define free_arena(name)					\
+    STMT_START {						\
+	S_free_arena(aTHX_ (void**) PL_ ## name ## _arenaroot);	\
+	PL_ ## name ## _arenaroot = 0;				\
+	PL_ ## name ## _root = 0;				\
+    } STMT_END
+
 void
 Perl_sv_free_arenas(pTHX)
 {
     SV* sva;
     SV* svanext;
-    XPV *arena, *arenanext;
 
     /* Free arenas here, but be careful about fake ones.  (We assume
        contiguity of the fake ones with the corresponding real ones.) */
@@ -528,112 +543,22 @@ Perl_sv_free_arenas(pTHX)
 	if (!SvFAKE(sva))
 	    Safefree(sva);
     }
-
-    for (arena = (XPV*)PL_xiv_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
-	Safefree(arena);
-    }
-    PL_xiv_arenaroot = 0;
-    PL_xiv_root = 0;
-
-    for (arena = (XPV*)PL_xnv_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
-	Safefree(arena);
-    }
-    PL_xnv_arenaroot = 0;
-    PL_xnv_root = 0;
-
-    for (arena = PL_xrv_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
-	Safefree(arena);
-    }
-    PL_xrv_arenaroot = 0;
-    PL_xrv_root = 0;
-
-    for (arena = PL_xpv_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
-	Safefree(arena);
-    }
-    PL_xpv_arenaroot = 0;
-    PL_xpv_root = 0;
-
-    for (arena = (XPV*)PL_xpviv_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
-	Safefree(arena);
-    }
-    PL_xpviv_arenaroot = 0;
-    PL_xpviv_root = 0;
-
-    for (arena = (XPV*)PL_xpvnv_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
-	Safefree(arena);
-    }
-    PL_xpvnv_arenaroot = 0;
-    PL_xpvnv_root = 0;
-
-    for (arena = (XPV*)PL_xpvcv_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
-	Safefree(arena);
-    }
-    PL_xpvcv_arenaroot = 0;
-    PL_xpvcv_root = 0;
-
-    for (arena = (XPV*)PL_xpvav_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
-	Safefree(arena);
-    }
-    PL_xpvav_arenaroot = 0;
-    PL_xpvav_root = 0;
-
-    for (arena = (XPV*)PL_xpvhv_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
-	Safefree(arena);
-    }
-    PL_xpvhv_arenaroot = 0;
-    PL_xpvhv_root = 0;
-
-    for (arena = (XPV*)PL_xpvmg_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
-	Safefree(arena);
-    }
-    PL_xpvmg_arenaroot = 0;
-    PL_xpvmg_root = 0;
-
-    for (arena = (XPV*)PL_xpvgv_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
-	Safefree(arena);
-    }
-    PL_xpvgv_arenaroot = 0;
-    PL_xpvgv_root = 0;
-
-    for (arena = (XPV*)PL_xpvlv_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
-	Safefree(arena);
-    }
-    PL_xpvlv_arenaroot = 0;
-    PL_xpvlv_root = 0;
-
-    for (arena = (XPV*)PL_xpvbm_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
-	Safefree(arena);
-    }
-    PL_xpvbm_arenaroot = 0;
-    PL_xpvbm_root = 0;
-
-    for (arena = (XPV*)PL_he_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
-	Safefree(arena);
-    }
-    PL_he_arenaroot = 0;
-    PL_he_root = 0;
-
+    free_arena(xiv);
+    free_arena(xnv);
+    free_arena(xrv);
+    free_arena(xpv);
+    free_arena(xpviv);
+    free_arena(xpvnv);
+    free_arena(xpvcv);
+    free_arena(xpvav);
+    free_arena(xpvhv);
+    free_arena(xpvmg);
+    free_arena(xpvgv);
+    free_arena(xpvlv);
+    free_arena(xpvbm);
+    free_arena(he);
 #if defined(USE_ITHREADS)
-    for (arena = (XPV*)PL_pte_arenaroot; arena; arena = arenanext) {
-	arenanext = (XPV*)arena->xpv_pv;
-	Safefree(arena);
-    }
-    PL_pte_arenaroot = 0;
-    PL_pte_root = 0;
+    free_arena(pte);
 #endif
 
     Safefree(PL_nice_chunk);
