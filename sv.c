@@ -10279,8 +10279,6 @@ S_gv_share(pTHX_ SV *sstr, CLONE_PARAMS *param)
     return sstr; /* he_dup() will SvREFCNT_inc() */
 }
 
-/* duplicate an SV of any type (including AV, HV etc) */
-
 void
 Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
 {
@@ -10324,6 +10322,8 @@ Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
 	    SvPV_set(dstr, 0);
     }
 }
+
+/* duplicate an SV of any type (including AV, HV etc) */
 
 SV *
 Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
@@ -10402,273 +10402,294 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvANY(dstr)	= &(dstr->sv_u.svu_rv);
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	break;
-    case SVt_PV:
-	SvANY(dstr)	= new_XPV();
-	SvCUR_set(dstr, SvCUR(sstr));
-	SvLEN_set(dstr, SvLEN(sstr));
-	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
-	break;
-    case SVt_PVIV:
-	SvANY(dstr)	= new_XPVIV();
-	SvCUR_set(dstr, SvCUR(sstr));
-	SvLEN_set(dstr, SvLEN(sstr));
-	SvIV_set(dstr, SvIVX(sstr));
-	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
-	break;
-    case SVt_PVNV:
-	SvANY(dstr)	= new_XPVNV();
-	SvCUR_set(dstr, SvCUR(sstr));
-	SvLEN_set(dstr, SvLEN(sstr));
-	SvIV_set(dstr, SvIVX(sstr));
-	SvNV_set(dstr, SvNVX(sstr));
-	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
-	break;
-    case SVt_PVMG:
-	SvANY(dstr)	= new_XPVMG();
-	SvCUR_set(dstr, SvCUR(sstr));
-	SvLEN_set(dstr, SvLEN(sstr));
-	SvIV_set(dstr, SvIVX(sstr));
-	SvNV_set(dstr, SvNVX(sstr));
-	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
-	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
-	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
-	break;
-    case SVt_PVBM:
-	SvANY(dstr)	= new_XPVBM();
-	SvCUR_set(dstr, SvCUR(sstr));
-	SvLEN_set(dstr, SvLEN(sstr));
-	SvIV_set(dstr, SvIVX(sstr));
-	SvNV_set(dstr, SvNVX(sstr));
-	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
-	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
-	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
-	BmRARE(dstr)	= BmRARE(sstr);
-	BmUSEFUL(dstr)	= BmUSEFUL(sstr);
-	BmPREVIOUS(dstr)= BmPREVIOUS(sstr);
-	break;
-    case SVt_PVLV:
-	SvANY(dstr)	= new_XPVLV();
-	SvCUR_set(dstr, SvCUR(sstr));
-	SvLEN_set(dstr, SvLEN(sstr));
-	SvIV_set(dstr, SvIVX(sstr));
-	SvNV_set(dstr, SvNVX(sstr));
-	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
-	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
-	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
-	LvTARGOFF(dstr)	= LvTARGOFF(sstr);	/* XXX sometimes holds PMOP* when DEBUGGING */
-	LvTARGLEN(dstr)	= LvTARGLEN(sstr);
-	if (LvTYPE(sstr) == 't') /* for tie: unrefcnted fake (SV**) */
-	    LvTARG(dstr) = dstr;
-	else if (LvTYPE(sstr) == 'T') /* for tie: fake HE */
-	    LvTARG(dstr) = (SV*)he_dup((HE*)LvTARG(sstr), 0, param);
-	else
-	    LvTARG(dstr) = sv_dup_inc(LvTARG(sstr), param);
-	LvTYPE(dstr)	= LvTYPE(sstr);
-	break;
-    case SVt_PVGV:
-	if (GvUNIQUE((GV*)sstr)) {
-            SV *share;
-            if ((share = gv_share(sstr, param))) {
-                del_SV(dstr);
-                dstr = share;
-                ptr_table_store(PL_ptr_table, sstr, dstr);
-#if 0
-                PerlIO_printf(Perl_debug_log, "sv_dup: sharing %s::%s\n",
-                              HvNAME_get(GvSTASH(share)), GvNAME(share));
-#endif
-                break;
-            }
-	}
-	SvANY(dstr)	= new_XPVGV();
-	SvCUR_set(dstr, SvCUR(sstr));
-	SvLEN_set(dstr, SvLEN(sstr));
-	SvIV_set(dstr, SvIVX(sstr));
-	SvNV_set(dstr, SvNVX(sstr));
-	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
-	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
-	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
-	GvNAMELEN(dstr)	= GvNAMELEN(sstr);
-	GvNAME(dstr)	= SAVEPVN(GvNAME(sstr), GvNAMELEN(sstr));
-    	GvSTASH(dstr)	= hv_dup_inc(GvSTASH(sstr), param);
-	GvFLAGS(dstr)	= GvFLAGS(sstr);
-	GvGP(dstr)	= gp_dup(GvGP(sstr), param);
-	(void)GpREFCNT_inc(GvGP(dstr));
-	break;
-    case SVt_PVIO:
-	SvANY(dstr)	= new_XPVIO();
-	SvCUR_set(dstr, SvCUR(sstr));
-	SvLEN_set(dstr, SvLEN(sstr));
-	SvIV_set(dstr, SvIVX(sstr));
-	SvNV_set(dstr, SvNVX(sstr));
-	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
-	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
-	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
-	IoIFP(dstr)	= fp_dup(IoIFP(sstr), IoTYPE(sstr), param);
-	if (IoOFP(sstr) == IoIFP(sstr))
-	    IoOFP(dstr) = IoIFP(dstr);
-	else
-	    IoOFP(dstr)	= fp_dup(IoOFP(sstr), IoTYPE(sstr), param);
-	/* PL_rsfp_filters entries have fake IoDIRP() */
-	if (IoDIRP(sstr) && !(IoFLAGS(sstr) & IOf_FAKE_DIRP))
-	    IoDIRP(dstr)	= dirp_dup(IoDIRP(sstr));
-	else
-	    IoDIRP(dstr)	= IoDIRP(sstr);
-	IoLINES(dstr)		= IoLINES(sstr);
-	IoPAGE(dstr)		= IoPAGE(sstr);
-	IoPAGE_LEN(dstr)	= IoPAGE_LEN(sstr);
-	IoLINES_LEFT(dstr)	= IoLINES_LEFT(sstr);
-        if(IoFLAGS(sstr) & IOf_FAKE_DIRP) {
-            /* I have no idea why fake dirp (rsfps)
-               should be treaded differently but otherwise
-               we end up with leaks -- sky*/
-            IoTOP_GV(dstr)      = gv_dup_inc(IoTOP_GV(sstr), param);
-            IoFMT_GV(dstr)      = gv_dup_inc(IoFMT_GV(sstr), param);
-            IoBOTTOM_GV(dstr)   = gv_dup_inc(IoBOTTOM_GV(sstr), param);
-        } else {
-            IoTOP_GV(dstr)      = gv_dup(IoTOP_GV(sstr), param);
-            IoFMT_GV(dstr)      = gv_dup(IoFMT_GV(sstr), param);
-            IoBOTTOM_GV(dstr)   = gv_dup(IoBOTTOM_GV(sstr), param);
-        }
-	IoTOP_NAME(dstr)	= SAVEPV(IoTOP_NAME(sstr));
-	IoFMT_NAME(dstr)	= SAVEPV(IoFMT_NAME(sstr));
-	IoBOTTOM_NAME(dstr)	= SAVEPV(IoBOTTOM_NAME(sstr));
-	IoSUBPROCESS(dstr)	= IoSUBPROCESS(sstr);
-	IoTYPE(dstr)		= IoTYPE(sstr);
-	IoFLAGS(dstr)		= IoFLAGS(sstr);
-	break;
-    case SVt_PVAV:
-	SvANY(dstr)	= new_XPVAV();
-	SvCUR_set(dstr, SvCUR(sstr));
-	SvLEN_set(dstr, SvLEN(sstr));
-	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
-	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
-	if (AvARRAY((AV*)sstr)) {
-	    SV **dst_ary, **src_ary;
-	    SSize_t items = AvFILLp((AV*)sstr) + 1;
-
-	    src_ary = AvARRAY((AV*)sstr);
-	    Newz(0, dst_ary, AvMAX((AV*)sstr)+1, SV*);
-	    ptr_table_store(PL_ptr_table, src_ary, dst_ary);
-	    SvPV_set(dstr, (char*)dst_ary);
-	    AvALLOC((AV*)dstr) = dst_ary;
-	    if (AvREAL((AV*)sstr)) {
-		while (items-- > 0)
-		    *dst_ary++ = sv_dup_inc(*src_ary++, param);
-	    }
-	    else {
-		while (items-- > 0)
-		    *dst_ary++ = sv_dup(*src_ary++, param);
-	    }
-	    items = AvMAX((AV*)sstr) - AvFILLp((AV*)sstr);
-	    while (items-- > 0) {
-		*dst_ary++ = &PL_sv_undef;
-	    }
-	}
-	else {
-	    SvPV_set(dstr, Nullch);
-	    AvALLOC((AV*)dstr)	= (SV**)NULL;
-	}
-	break;
-    case SVt_PVHV:
-	SvANY(dstr)	= new_XPVHV();
-	SvCUR_set(dstr, SvCUR(sstr));
-	SvLEN_set(dstr, SvLEN(sstr));
-	HvTOTALKEYS(dstr) = HvTOTALKEYS(sstr);
-	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
-	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
-	{
-	    HEK *hvname = 0;
-
-	    if (HvARRAY((HV*)sstr)) {
-		STRLEN i = 0;
-		const bool sharekeys = !!HvSHAREKEYS(sstr);
-		XPVHV * const dxhv = (XPVHV*)SvANY(dstr);
-		XPVHV * const sxhv = (XPVHV*)SvANY(sstr);
-		char *darray;
-		New(0, darray,
-		     PERL_HV_ARRAY_ALLOC_BYTES(dxhv->xhv_max+1)
-		     + (SvOOK(sstr) ? sizeof(struct xpvhv_aux) : 0), char);
-		HvARRAY(dstr) = (HE**)darray;
-		while (i <= sxhv->xhv_max) {
-		    HE *source = HvARRAY(sstr)[i];
-		    HvARRAY(dstr)[i]
-			= source ? he_dup(source, sharekeys, param) : 0;
-		    ++i;
-		}
-		if (SvOOK(sstr)) {
-		    struct xpvhv_aux *saux = HvAUX(sstr);
-		    struct xpvhv_aux *daux = HvAUX(dstr);
-		    /* This flag isn't copied.  */
-		    /* SvOOK_on(hv) attacks the IV flags.  */
-		    SvFLAGS(dstr) |= SVf_OOK;
-
-		    hvname = saux->xhv_name;
-		    daux->xhv_name = hvname ? hek_dup(hvname, param) : hvname;
-
-		    daux->xhv_riter = saux->xhv_riter;
-		    daux->xhv_eiter = saux->xhv_eiter
-			? he_dup(saux->xhv_eiter, (bool)!!HvSHAREKEYS(sstr),
-				 param) : 0;
-		}
-	    }
-	    else {
-		SvPV_set(dstr, Nullch);
-	    }
-	    /* Record stashes for possible cloning in Perl_clone(). */
-	    if(hvname)
-		av_push(param->stashes, dstr);
-	}
-	break;
-    case SVt_PVFM:
-	SvANY(dstr)	= new_XPVFM();
-	FmLINES(dstr)	= FmLINES(sstr);
-	goto dup_pvcv;
-	/* NOTREACHED */
-    case SVt_PVCV:
-	SvANY(dstr)	= new_XPVCV();
-        dup_pvcv:
-	SvCUR_set(dstr, SvCUR(sstr));
-	SvLEN_set(dstr, SvLEN(sstr));
-	SvIV_set(dstr, SvIVX(sstr));
-	SvNV_set(dstr, SvNVX(sstr));
-	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
-	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
-	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
-	CvSTASH(dstr)	= hv_dup(CvSTASH(sstr), param); /* NOTE: not refcounted */
-	CvSTART(dstr)	= CvSTART(sstr);
-	OP_REFCNT_LOCK;
-	CvROOT(dstr)	= OpREFCNT_inc(CvROOT(sstr));
-	OP_REFCNT_UNLOCK;
-	CvXSUB(dstr)	= CvXSUB(sstr);
-	CvXSUBANY(dstr)	= CvXSUBANY(sstr);
-	if (CvCONST(sstr)) {
-	    CvXSUBANY(dstr).any_ptr = GvUNIQUE(CvGV(sstr)) ?
-                SvREFCNT_inc(CvXSUBANY(sstr).any_ptr) :
-                sv_dup_inc((SV *)CvXSUBANY(sstr).any_ptr, param);
-	}
-	/* don't dup if copying back - CvGV isn't refcounted, so the
-	 * duped GV may never be freed. A bit of a hack! DAPM */
-	CvGV(dstr)	= (param->flags & CLONEf_JOIN_IN) ?
-		Nullgv : gv_dup(CvGV(sstr), param) ;
-	if (param->flags & CLONEf_COPY_STACKS) {
-	  CvDEPTH(dstr)	= CvDEPTH(sstr);
-	} else {
-	  CvDEPTH(dstr) = 0;
-	}
-	PAD_DUP(CvPADLIST(dstr), CvPADLIST(sstr), param);
-	CvOUTSIDE_SEQ(dstr) = CvOUTSIDE_SEQ(sstr);
-	CvOUTSIDE(dstr)	=
-		CvWEAKOUTSIDE(sstr)
-			? cv_dup(    CvOUTSIDE(sstr), param)
-			: cv_dup_inc(CvOUTSIDE(sstr), param);
-	CvFLAGS(dstr)	= CvFLAGS(sstr);
-	CvFILE(dstr) = CvXSUB(sstr) ? CvFILE(sstr) : SAVEPV(CvFILE(sstr));
-	break;
     default:
-	Perl_croak(aTHX_ "Bizarre SvTYPE [%" IVdf "]", (IV)SvTYPE(sstr));
-	break;
+	{
+	    /* These are all the types that need complex bodies allocating.  */
+	    size_t new_body_length;
+	    size_t new_body_offset = 0;
+	    void **new_body_arena;
+	    void **new_body_arenaroot;
+	    void *new_body;
+
+	    switch (SvTYPE(sstr)) {
+	    default:
+		Perl_croak(aTHX_ "Bizarre SvTYPE [%" IVdf "]",
+			   (IV)SvTYPE(sstr));
+		break;
+
+	    case SVt_PVIO:
+		new_body = new_XPVIO();
+		new_body_length = sizeof(XPVIO);
+		break;
+	    case SVt_PVFM:
+		new_body = new_XPVFM();
+		new_body_length = sizeof(XPVFM);
+		break;
+
+	    case SVt_PVHV:
+		new_body_arena = (void **) &PL_xpvhv_root;
+		new_body_arenaroot = (void **) &PL_xpvhv_arenaroot;
+		new_body_offset = STRUCT_OFFSET(XPVHV, xhv_fill)
+		    - STRUCT_OFFSET(xpvhv_allocated, xhv_fill);
+		new_body_length = STRUCT_OFFSET(XPVHV, xmg_stash)
+		    + sizeof (((XPVHV*)SvANY(sstr))->xmg_stash)
+		    - new_body_offset;
+		goto new_body;
+	    case SVt_PVAV:
+		new_body_arena = (void **) &PL_xpvav_root;
+		new_body_arenaroot = (void **) &PL_xpvav_arenaroot;
+		new_body_offset = STRUCT_OFFSET(XPVAV, xav_fill)
+		    - STRUCT_OFFSET(xpvav_allocated, xav_fill);
+		new_body_length = STRUCT_OFFSET(XPVHV, xmg_stash)
+		    + sizeof (((XPVHV*)SvANY(sstr))->xmg_stash)
+		    - new_body_offset;
+		goto new_body;
+	    case SVt_PVBM:
+		new_body_length = sizeof(XPVBM);
+		new_body_arena = (void **) &PL_xpvbm_root;
+		new_body_arenaroot = (void **) &PL_xpvbm_arenaroot;
+		goto new_body;
+	    case SVt_PVGV:
+		if (GvUNIQUE((GV*)sstr)) {
+		    SV *share;
+		    if ((share = gv_share(sstr, param))) {
+			del_SV(dstr);
+			dstr = share;
+			ptr_table_store(PL_ptr_table, sstr, dstr);
+#if 0
+			PerlIO_printf(Perl_debug_log, "sv_dup: sharing %s::%s\n",
+				      HvNAME_get(GvSTASH(share)), GvNAME(share));
+#endif
+			goto done_share;
+		    }
+		}
+		new_body_length = sizeof(XPVGV);
+		new_body_arena = (void **) &PL_xpvgv_root;
+		new_body_arenaroot = (void **) &PL_xpvgv_arenaroot;
+		goto new_body;
+	    case SVt_PVCV:
+		new_body_length = sizeof(XPVCV);
+		new_body_arena = (void **) &PL_xpvcv_root;
+		new_body_arenaroot = (void **) &PL_xpvcv_arenaroot;
+		goto new_body;
+	    case SVt_PVLV:
+		new_body_length = sizeof(XPVLV);
+		new_body_arena = (void **) &PL_xpvlv_root;
+		new_body_arenaroot = (void **) &PL_xpvlv_arenaroot;
+		goto new_body;
+	    case SVt_PVMG:
+		new_body_length = sizeof(XPVMG);
+		new_body_arena = (void **) &PL_xpvmg_root;
+		new_body_arenaroot = (void **) &PL_xpvmg_arenaroot;
+		goto new_body;
+	    case SVt_PVNV:
+		new_body_length = sizeof(XPVNV);
+		new_body_arena = (void **) &PL_xpvnv_root;
+		new_body_arenaroot = (void **) &PL_xpvnv_arenaroot;
+		goto new_body;
+	    case SVt_PVIV:
+		new_body_offset = STRUCT_OFFSET(XPVIV, xpv_cur)
+		    - STRUCT_OFFSET(xpviv_allocated, xpv_cur);
+		new_body_length = sizeof(XPVIV) - new_body_offset;
+		new_body_arena = (void **) &PL_xpviv_root;
+		new_body_arenaroot = (void **) &PL_xpviv_arenaroot;
+		goto new_body; 
+	    case SVt_PV:
+		new_body_offset = STRUCT_OFFSET(XPV, xpv_cur)
+		    - STRUCT_OFFSET(xpv_allocated, xpv_cur);
+		new_body_length = sizeof(XPV) - new_body_offset;
+		new_body_arena = (void **) &PL_xpv_root;
+		new_body_arenaroot = (void **) &PL_xpv_arenaroot;
+	    new_body:
+		assert(new_body_length);
+#ifndef PURIFY
+		new_body = S_new_body(aTHX_ new_body_arenaroot, new_body_arena,
+				      new_body_length, new_body_offset);
+#else
+		/* We always allocated the full length item with PURIFY */
+		new_body_length += new_body_offset;
+		new_body_offset = 0;
+		new_body = my_safemalloc(new_body_length);
+#endif
+	    }
+	    assert(new_body);
+	    SvANY(dstr) = new_body;
+
+	    Copy(((char*)SvANY(sstr)) + new_body_offset,
+		 ((char*)SvANY(dstr)) + new_body_offset,
+		 new_body_length, char);
+
+	    if (SvTYPE(sstr) != SVt_PVAV && SvTYPE(sstr) != SVt_PVHV)
+		Perl_rvpv_dup(aTHX_ dstr, sstr, param);
+
+	    /* The Copy above means that all the source (unduplicated) pointers
+	       are now in the destination.  We can check the flags and the
+	       pointers in either, but it's possible that there's less cache
+	       missing by always going for the destination.
+	       FIXME - instrument and check that assumption  */
+	    if (SvTYPE(sstr) >= SVt_PVMG) {
+		if (SvMAGIC(dstr))
+		    SvMAGIC_set(dstr, mg_dup(SvMAGIC(dstr), param));
+		if (SvSTASH(dstr))
+		    SvSTASH_set(dstr, hv_dup_inc(SvSTASH(dstr), param));
+	    }
+
+	    switch (SvTYPE(sstr)) {
+	    case SVt_PV:
+		break;
+	    case SVt_PVIV:
+		break;
+	    case SVt_PVNV:
+		break;
+	    case SVt_PVMG:
+		break;
+	    case SVt_PVBM:
+		break;
+	    case SVt_PVLV:
+		/* XXX LvTARGOFF sometimes holds PMOP* when DEBUGGING */
+		if (LvTYPE(dstr) == 't') /* for tie: unrefcnted fake (SV**) */
+		    LvTARG(dstr) = dstr;
+		else if (LvTYPE(dstr) == 'T') /* for tie: fake HE */
+		    LvTARG(dstr) = (SV*)he_dup((HE*)LvTARG(dstr), 0, param);
+		else
+		    LvTARG(dstr) = sv_dup_inc(LvTARG(dstr), param);
+		break;
+	    case SVt_PVGV:
+		GvNAME(dstr)	= SAVEPVN(GvNAME(dstr), GvNAMELEN(dstr));
+		GvSTASH(dstr)	= hv_dup_inc(GvSTASH(dstr), param);
+		GvGP(dstr)	= gp_dup(GvGP(dstr), param);
+		(void)GpREFCNT_inc(GvGP(dstr));
+		break;
+	    case SVt_PVIO:
+		IoIFP(dstr)	= fp_dup(IoIFP(dstr), IoTYPE(dstr), param);
+		if (IoOFP(dstr) == IoIFP(sstr))
+		    IoOFP(dstr) = IoIFP(dstr);
+		else
+		    IoOFP(dstr)	= fp_dup(IoOFP(dstr), IoTYPE(dstr), param);
+		/* PL_rsfp_filters entries have fake IoDIRP() */
+		if (IoDIRP(dstr) && !(IoFLAGS(dstr) & IOf_FAKE_DIRP))
+		    IoDIRP(dstr)	= dirp_dup(IoDIRP(dstr));
+		if(IoFLAGS(dstr) & IOf_FAKE_DIRP) {
+		    /* I have no idea why fake dirp (rsfps)
+		       should be treated differently but otherwise
+		       we end up with leaks -- sky*/
+		    IoTOP_GV(dstr)      = gv_dup_inc(IoTOP_GV(dstr), param);
+		    IoFMT_GV(dstr)      = gv_dup_inc(IoFMT_GV(dstr), param);
+		    IoBOTTOM_GV(dstr)   = gv_dup_inc(IoBOTTOM_GV(dstr), param);
+		} else {
+		    IoTOP_GV(dstr)      = gv_dup(IoTOP_GV(dstr), param);
+		    IoFMT_GV(dstr)      = gv_dup(IoFMT_GV(dstr), param);
+		    IoBOTTOM_GV(dstr)   = gv_dup(IoBOTTOM_GV(dstr), param);
+		}
+		IoTOP_NAME(dstr)	= SAVEPV(IoTOP_NAME(dstr));
+		IoFMT_NAME(dstr)	= SAVEPV(IoFMT_NAME(dstr));
+		IoBOTTOM_NAME(dstr)	= SAVEPV(IoBOTTOM_NAME(dstr));
+		break;
+	    case SVt_PVAV:
+		if (AvARRAY((AV*)sstr)) {
+		    SV **dst_ary, **src_ary;
+		    SSize_t items = AvFILLp((AV*)sstr) + 1;
+
+		    src_ary = AvARRAY((AV*)sstr);
+		    Newz(0, dst_ary, AvMAX((AV*)sstr)+1, SV*);
+		    ptr_table_store(PL_ptr_table, src_ary, dst_ary);
+		    SvPV_set(dstr, (char*)dst_ary);
+		    AvALLOC((AV*)dstr) = dst_ary;
+		    if (AvREAL((AV*)sstr)) {
+			while (items-- > 0)
+			    *dst_ary++ = sv_dup_inc(*src_ary++, param);
+		    }
+		    else {
+			while (items-- > 0)
+			    *dst_ary++ = sv_dup(*src_ary++, param);
+		    }
+		    items = AvMAX((AV*)sstr) - AvFILLp((AV*)sstr);
+		    while (items-- > 0) {
+			*dst_ary++ = &PL_sv_undef;
+		    }
+		}
+		else {
+		    SvPV_set(dstr, Nullch);
+		    AvALLOC((AV*)dstr)	= (SV**)NULL;
+		}
+		break;
+	    case SVt_PVHV:
+		{
+		    HEK *hvname = 0;
+
+		    if (HvARRAY((HV*)sstr)) {
+			STRLEN i = 0;
+			const bool sharekeys = !!HvSHAREKEYS(sstr);
+			XPVHV * const dxhv = (XPVHV*)SvANY(dstr);
+			XPVHV * const sxhv = (XPVHV*)SvANY(sstr);
+			char *darray;
+			New(0, darray,
+			    PERL_HV_ARRAY_ALLOC_BYTES(dxhv->xhv_max+1)
+			    + (SvOOK(sstr) ? sizeof(struct xpvhv_aux) : 0),
+			    char);
+			HvARRAY(dstr) = (HE**)darray;
+			while (i <= sxhv->xhv_max) {
+			    HE *source = HvARRAY(sstr)[i];
+			    HvARRAY(dstr)[i] = source
+				? he_dup(source, sharekeys, param) : 0;
+			    ++i;
+			}
+			if (SvOOK(sstr)) {
+			    struct xpvhv_aux *saux = HvAUX(sstr);
+			    struct xpvhv_aux *daux = HvAUX(dstr);
+			    /* This flag isn't copied.  */
+			    /* SvOOK_on(hv) attacks the IV flags.  */
+			    SvFLAGS(dstr) |= SVf_OOK;
+
+			    hvname = saux->xhv_name;
+			    daux->xhv_name = hvname ? hek_dup(hvname, param) : hvname;
+
+			    daux->xhv_riter = saux->xhv_riter;
+			    daux->xhv_eiter = saux->xhv_eiter
+				? he_dup(saux->xhv_eiter, (bool)!!HvSHAREKEYS(sstr),
+					 param) : 0;
+			}
+		    }
+		    else {
+			SvPV_set(dstr, Nullch);
+		    }
+		    /* Record stashes for possible cloning in Perl_clone(). */
+		    if(hvname)
+			av_push(param->stashes, dstr);
+		}
+		break;
+	    case SVt_PVFM:
+	    case SVt_PVCV:
+		/* NOTE: not refcounted */
+		CvSTASH(dstr)	= hv_dup(CvSTASH(dstr), param);
+		OP_REFCNT_LOCK;
+		CvROOT(dstr)	= OpREFCNT_inc(CvROOT(dstr));
+		OP_REFCNT_UNLOCK;
+		if (CvCONST(dstr)) {
+		    CvXSUBANY(dstr).any_ptr = GvUNIQUE(CvGV(dstr)) ?
+			SvREFCNT_inc(CvXSUBANY(dstr).any_ptr) :
+			sv_dup_inc((SV *)CvXSUBANY(dstr).any_ptr, param);
+		}
+		/* don't dup if copying back - CvGV isn't refcounted, so the
+		 * duped GV may never be freed. A bit of a hack! DAPM */
+		CvGV(dstr)	= (param->flags & CLONEf_JOIN_IN) ?
+		    Nullgv : gv_dup(CvGV(dstr), param) ;
+		if (!(param->flags & CLONEf_COPY_STACKS)) {
+		    CvDEPTH(dstr) = 0;
+		}
+		PAD_DUP(CvPADLIST(dstr), CvPADLIST(sstr), param);
+		CvOUTSIDE(dstr)	=
+		    CvWEAKOUTSIDE(sstr)
+		    ? cv_dup(    CvOUTSIDE(dstr), param)
+		    : cv_dup_inc(CvOUTSIDE(dstr), param);
+		if (!CvXSUB(dstr))
+		    CvFILE(dstr) = SAVEPV(CvFILE(dstr));
+		break;
+	    }
+	}
     }
 
+ done_share:
     if (SvOBJECT(dstr) && SvTYPE(dstr) != SVt_PVIO)
 	++PL_sv_objcount;
 
