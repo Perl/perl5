@@ -14,6 +14,9 @@ typedef struct hek HEK;
 
 /* entry in hash value chain */
 struct he {
+    /* Keep hent_next first in this structure, because sv_free_arenas take
+       advantage of this to share code between the he arenas and the SV
+       body arenas  */
     HE		*hent_next;	/* next entry in chain */
     HEK		*hent_hek;	/* hash key */
     SV		*hent_val;	/* scalar value that was hashed */

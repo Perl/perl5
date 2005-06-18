@@ -2820,6 +2820,9 @@ struct regnode_charclass_class;	/* Used in S_* functions in regcomp.c */
 
 typedef I32 CHECKPOINT;
 
+/* Keep next first in this structure, because sv_free_arenas take
+   advantage of this to share code between the pte arenas and the SV
+   body arenas  */
 struct ptr_tbl_ent {
     struct ptr_tbl_ent*		next;
     void*			oldval;

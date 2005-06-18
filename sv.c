@@ -537,6 +537,10 @@ Perl_sv_free_arenas(pTHX)
 	(void**) &PL_xpvgv_arenaroot,
 	(void**) &PL_xpvlv_arenaroot,
 	(void**) &PL_xpvbm_arenaroot,
+	(void**) &PL_he_arenaroot,
+#if defined(USE_ITHREADS)
+	(void**) &PL_pte_arenaroot,
+#endif
 	(void**) 0
     };
     void **roots[] = {
@@ -551,6 +555,10 @@ Perl_sv_free_arenas(pTHX)
 	(void**) &PL_xpvgv_root,
 	(void**) &PL_xpvlv_root,
 	(void**) &PL_xpvbm_root,
+	(void**) &PL_he_root,
+#if defined(USE_ITHREADS)
+	(void**) &PL_pte_root,
+#endif
 	(void**) 0
     };
 
@@ -578,30 +586,6 @@ Perl_sv_free_arenas(pTHX)
 	*arenaroots[i] = 0;
 	*roots[i] = 0;
     }
-
-    {
-	HE *he;
-	HE *he_next;
-	for (he = PL_he_arenaroot; he; he = he_next) {
-	    he_next = HeNEXT(he);
-	    Safefree(he);
-	}
-    }
-    PL_he_arenaroot = 0;
-    PL_he_root = 0;
-
-#if defined(USE_ITHREADS)
-    {
-	struct ptr_tbl_ent *pte;
-	struct ptr_tbl_ent *pte_next;
-	for (pte = PL_pte_arenaroot; pte; pte = pte_next) {
-	    pte_next = pte->next;
-	    Safefree(pte);
-	}
-    }
-    PL_pte_arenaroot = 0;
-    PL_pte_root = 0;
-#endif
 
     if (PL_nice_chunk)
 	Safefree(PL_nice_chunk);
