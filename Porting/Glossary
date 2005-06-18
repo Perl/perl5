@@ -1383,6 +1383,10 @@ d_nv_preserves_uv (perlxv.U):
 	This variable indicates whether a variable of type nvtype
 	can preserve all the bits a variable of type uvtype.
 
+d_nv_zero_is_allbits_zero (perlxv.U):
+	This variable indicates whether a variable of type nvtype
+	stores 0.0 in memory as all bits zero.
+
 d_off64_t (d_off64_t.U):
 	This symbol will be defined if the C compiler supports off64_t.
 

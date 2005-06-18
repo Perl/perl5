@@ -1002,6 +1002,7 @@ perl5=''
 perladmin=''
 perlpath=''
 d_nv_preserves_uv=''
+d_nv_zero_is_allbits_zero=''
 i16size=''
 i16type=''
 i32size=''
@@ -14833,6 +14834,128 @@ esac
 
 $rm -f try.* try
 
+$echo "Checking whether NV 0.0 is all bits zero in memory..." >&4
+: volatile so that the compiler has to store it out to memory.
+if test X"$d_volatile" = X"$define"; then
+	volatile=volatile
+fi
+$cat <<EOP >try.c
+#include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#$i_string I_STRING
+#ifdef I_STRING
+#  include <string.h>
+#else
+#  include <strings.h>
+#endif
+#include <sys/types.h>
+#include <signal.h>
+#ifdef SIGFPE
+$volatile int bletched = 0;
+$signal_t blech(s) int s; { bletched = 1; }
+#endif
+
+int checkit($nvtype d, char *where) {
+    unsigned char *p = (char *)&d;
+    unsigned char *end = p + sizeof(d);
+    int fail = 0;
+
+    while (p < end)
+	fail += *p++;
+
+    if (!fail)
+        return 0;
+
+    p = (char *)&d;
+    printf("No - %s: 0x", where);
+    while (p < end)
+	printf ("%02X", *p++);
+    printf("\n");
+    return 1;
+}
+
+int main(int argc, char **argv) {
+    $nvtype d = 0.0;
+    int fail = 0;
+    fail += checkit(d, "0.0");
+
+    /* The compiler shouldn't be assuming that bletched is 0  */
+    d = bletched;
+
+    fail += checkit(d, "bleched");
+
+#ifdef SIGFPE
+    signal(SIGFPE, blech);
+#endif
+
+    /* Paranoia - the compiler should have no way of knowing that ANSI says
+       that argv[argc] will always be NULL.  Actually, if it did assume this it
+       would be buggy, as this is C and main() can be called from elsewhere in
+       the program.  */
+    d = argv[argc] ? 1 : 0;
+
+    if (d) {
+	printf("Odd argv[argc]=%p, d=%g\n", argv[argc], d);
+    }
+
+    fail += checkit(d, "ternary");
+
+    memset(&d, sizeof(d), argv[argc] ? 1 : 0);
+
+    if (d != 0.0) {
+	printf("No - memset doesn't give 0.0\n");
+	/* This might just blow up:  */
+	printf("(gives %g)\n", d);
+	return 1;
+    }
+    
+#ifdef SIGFPE
+    if (bletched) {
+	printf("No - something bleched\n");
+	return 1;
+    }
+#endif
+    if (fail) {
+      printf("No - %d fail(s)\n", fail);
+      return 1;
+    }
+    printf("Yes\n");
+    return 0;
+}
+EOP
+set try
+
+d_nv_zero_is_allbits_zero="$undef"
+if eval $compile; then
+    xxx="`$run ./try`"
+    case "$?" in
+	0)
+	    case "$xxx" in
+		Yes)  cat >&4 <<EOM
+0.0 is represented as all bits zero in memory
+EOM
+		    d_nv_zero_is_allbits_zero="$define"
+		    ;;
+		*)  cat >&4 <<EOM
+0.0 is not represented as all bits zero in memory
+EOM
+		    d_nv_zero_is_allbits_zero="$undef"
+		    ;;
+	    esac
+	    ;;
+	*)  cat >&4 <<EOM
+0.0 is not represented as all bits zero in memory
+EOM
+	    d_nv_zero_is_allbits_zero="$undef"
+	    ;;
+    esac
+fi
+
+$rm -f try.* try
+
 
 : check for off64_t
 echo " "
@@ -21012,6 +21135,7 @@ d_mymalloc='$d_mymalloc'
 d_nice='$d_nice'
 d_nl_langinfo='$d_nl_langinfo'
 d_nv_preserves_uv='$d_nv_preserves_uv'
+d_nv_zero_is_allbits_zero='$d_nv_zero_is_allbits_zero'
 d_off64_t='$d_off64_t'
 d_old_pthread_create_joinable='$d_old_pthread_create_joinable'
 d_oldpthreads='$d_oldpthreads'
