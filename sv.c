@@ -1276,7 +1276,11 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     size_t	old_body_offset;
     size_t	old_body_length;	/* Well, the length to copy.  */
     void*	old_body;
+#ifndef NV_ZERO_IS_ALLBITS_ZERO
+    /* If NV 0.0 is store as all bits 0 then Zero() already creates a correct
+       0.0 for us.  */
     bool	zero_nv = TRUE;
+#endif
     void*	new_body;
     size_t	new_body_length;
     size_t	new_body_offset;
@@ -1353,8 +1357,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     case SVt_NV:
 	old_body_arena = (void **) &PL_xnv_root;
 	old_body_length = sizeof(NV);
+#ifndef NV_ZERO_IS_ALLBITS_ZERO
 	zero_nv = FALSE;
-
+#endif
 	if (mt < SVt_PVNV)
 	    mt = SVt_PVNV;
 	break;
@@ -1384,7 +1389,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	old_body_arena = (void **) &PL_xpvnv_root;
 	old_body_length = STRUCT_OFFSET(XPVNV, xiv_u)
 	    + sizeof (((XPVNV*)SvANY(sv))->xiv_u);
+#ifndef NV_ZERO_IS_ALLBITS_ZERO
 	zero_nv = FALSE;
+#endif
 	break;
     case SVt_PVMG:
 	/* Because the XPVMG of PL_mess_sv isn't allocated from the arena,
@@ -1398,7 +1405,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	old_body_arena = (void **) &PL_xpvmg_root;
 	old_body_length = STRUCT_OFFSET(XPVMG, xmg_stash)
 	    + sizeof (((XPVMG*)SvANY(sv))->xmg_stash);
+#ifndef NV_ZERO_IS_ALLBITS_ZERO
 	zero_nv = FALSE;
+#endif
 	break;
     default:
 	Perl_croak(aTHX_ "Can't upgrade that kind of scalar");
@@ -1521,43 +1530,43 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	new_body_arenaroot = (void **) &PL_xpv_arenaroot;
     new_body_no_NV:
 	/* PV and PVIV don't have an NV slot.  */
+#ifndef NV_ZERO_IS_ALLBITS_ZERO
 	zero_nv = FALSE;
+#endif
 
-	{
-	new_body:
-	    assert(new_body_length);
+    new_body:
+	assert(new_body_length);
 #ifndef PURIFY
-	    /* This points to the start of the allocated area.  */
-	    new_body = S_new_body(aTHX_ new_body_arenaroot, new_body_arena,
-				  new_body_length);
+	/* This points to the start of the allocated area.  */
+	new_body = S_new_body(aTHX_ new_body_arenaroot, new_body_arena,
+			      new_body_length);
 #else
-	    /* We always allocated the full length item with PURIFY */
-	    new_body_length += new_body_offset;
-	    new_body_offset = 0;
-	    new_body = my_safemalloc(new_body_length);
+	/* We always allocated the full length item with PURIFY */
+	new_body_length += new_body_offset;
+	new_body_offset = 0;
+	new_body = my_safemalloc(new_body_length);
 
 #endif
-	zero:
-	    Zero(new_body, new_body_length, char);
-	    new_body = ((char *)new_body) - new_body_offset;
-	    SvANY(sv) = new_body;
+    zero:
+	Zero(new_body, new_body_length, char);
+	new_body = ((char *)new_body) - new_body_offset;
+	SvANY(sv) = new_body;
 
-	    if (old_body_length) {
-		Copy((char *)old_body + old_body_offset,
-		     (char *)new_body + old_body_offset,
-		     old_body_length, char);
-	    }
-
-	    /* FIXME - add a Configure test to determine if NV 0.0 is actually
-	       all bits zero. If it is, we can skip this initialisation.  */
-	    if (zero_nv)
-		SvNV_set(sv, 0);
-
-	    if (mt == SVt_PVIO)
-		IoPAGE_LEN(sv)	= 60;
-	    if (old_type < SVt_RV)
-		SvPV_set(sv, 0);
+	if (old_body_length) {
+	    Copy((char *)old_body + old_body_offset,
+		 (char *)new_body + old_body_offset,
+		 old_body_length, char);
 	}
+
+#ifndef NV_ZERO_IS_ALLBITS_ZERO
+	if (zero_nv)
+	    SvNV_set(sv, 0);
+#endif
+
+	if (mt == SVt_PVIO)
+	    IoPAGE_LEN(sv)	= 60;
+	if (old_type < SVt_RV)
+	    SvPV_set(sv, 0);
 	break;
     default:
 	Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu", mt);
