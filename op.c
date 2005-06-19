@@ -3274,14 +3274,15 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	OP *curop;
 
 	PL_modcount = 0;
-	PL_eval_start = right;	/* Grandfathering $[ assignment here.  Bletch.*/
+	/* Grandfathering $[ assignment here.  Bletch.*/
+	/* Only simple assignments like C<< ($[) = 1 >> are allowed */
+	PL_eval_start = (left->op_type == OP_CONST) ? right : 0;
 	left = mod(left, OP_AASSIGN);
 	if (PL_eval_start)
 	    PL_eval_start = 0;
-	else {
-	    op_free(left);
-	    op_free(right);
-	    return Nullop;
+	else if (left->op_type == OP_CONST) {
+	    /* Result of assignment is always 1 (or we'd be dead already) */
+	    return newSVOP(OP_CONST, 0, newSViv(1));
 	}
 	/* optimise C<my @x = ()> to C<my @x>, and likewise for hashes */
 	if ((left->op_type == OP_PADAV || left->op_type == OP_PADHV)
@@ -3418,8 +3419,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	if (PL_eval_start)
 	    PL_eval_start = 0;
 	else {
-	    op_free(o);
-	    return Nullop;
+	    o = newSVOP(OP_CONST, 0, newSViv(PL_compiling.cop_arybase));
 	}
     }
     return o;
