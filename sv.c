@@ -1106,25 +1106,24 @@ S_more_bodies (pTHX_ void **arena_root, void **root, size_t size)
 /* grab a new thing from the free list, allocating more if necessary */
 
 STATIC void *
-S_new_body(pTHX_ void **arena_root, void **root, size_t size, size_t offset)
+S_new_body(pTHX_ void **arena_root, void **root, size_t size)
 {
     void *xpv;
     LOCK_SV_MUTEX;
     xpv = *root ? *root : S_more_bodies(aTHX_ arena_root, root, size);
     *root = *(void**)xpv;
     UNLOCK_SV_MUTEX;
-    return (void*)((char*)xpv - offset);
+    return xpv;
 }
 
 /* return a thing to the free list */
 
 STATIC void
-S_del_body(pTHX_ void *thing, void **root, size_t offset)
+S_del_body(pTHX_ void *thing, void **root)
 {
-    void **real_thing = (void**)((char *)thing + offset);
     LOCK_SV_MUTEX;
-    *real_thing = *root;
-    *root = (void*)real_thing;
+    *(void **)thing = *root;
+    *root = (void*)thing;
     UNLOCK_SV_MUTEX;
 }
 
@@ -1141,8 +1140,10 @@ S_del_body(pTHX_ void *thing, void **root, size_t offset)
 #define new_body(TYPE,lctype)						\
     S_new_body(aTHX_ (void**)&PL_ ## lctype ## _arenaroot,		\
 		 (void**)&PL_ ## lctype ## _root,			\
-		 sizeof(TYPE),						\
-		 0)
+		 sizeof(TYPE))
+
+#define del_body(p,TYPE,lctype)						\
+    S_del_body(aTHX_ (void*)p, (void**)&PL_ ## lctype ## _root)
 
 /* But for some types, we cheat. The type starts with some members that are
    never accessed. So we allocate the substructure, starting at the first used
@@ -1165,20 +1166,17 @@ S_del_body(pTHX_ void *thing, void **root, size_t offset)
    no longer allocated.  */
 
 #define new_body_allocated(TYPE,lctype,member)				\
-    S_new_body(aTHX_ (void**)&PL_ ## lctype ## _arenaroot,		\
-	       (void**)&PL_ ## lctype ## _root,				\
-	       sizeof(lctype ## _allocated),				\
-	       STRUCT_OFFSET(TYPE, member)				\
-	       - STRUCT_OFFSET(lctype ## _allocated, member))
+    (void*)((char*)S_new_body(aTHX_ (void**)&PL_ ## lctype ## _arenaroot, \
+			      (void**)&PL_ ## lctype ## _root,		\
+			      sizeof(lctype ## _allocated)) -		\
+			      STRUCT_OFFSET(TYPE, member)		\
+	    + STRUCT_OFFSET(lctype ## _allocated, member))
 
-
-#define del_body(p,TYPE,lctype)						\
-    S_del_body(aTHX_ (void*)p, (void**)&PL_ ## lctype ## _root, 0)
 
 #define del_body_allocated(p,TYPE,lctype,member)			\
-    S_del_body(aTHX_ (void*)p, (void**)&PL_ ## lctype ## _root,		\
-	       STRUCT_OFFSET(TYPE, member)				\
-	       - STRUCT_OFFSET(lctype ## _allocated, member))
+    S_del_body(aTHX_ (void*)((char*)p + STRUCT_OFFSET(TYPE, member)	\
+			     - STRUCT_OFFSET(lctype ## _allocated, member)), \
+			     (void**)&PL_ ## lctype ## _root)
 
 #define my_safemalloc(s)	(void*)safemalloc(s)
 #define my_safefree(p)	safefree((char*)p)
@@ -1529,8 +1527,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	new_body:
 	    assert(new_body_length);
 #ifndef PURIFY
+	    /* This points to the start of the allocated area.  */
 	    new_body = S_new_body(aTHX_ new_body_arenaroot, new_body_arena,
-				  new_body_length, new_body_offset);
+				  new_body_length);
 #else
 	    /* We always allocated the full length item with PURIFY */
 	    new_body_length += new_body_offset;
@@ -1539,7 +1538,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 
 #endif
 	zero:
-	    Zero(((char *)new_body) + new_body_offset, new_body_length, char);
+	    Zero(new_body, new_body_length, char);
+	    new_body = ((char *)new_body) - new_body_offset;
 	    SvANY(sv) = new_body;
 
 	    if (old_body_length) {
@@ -1568,7 +1568,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 #ifdef PURIFY
 	my_safefree(old_body);
 #else
-	S_del_body(aTHX_ old_body, old_body_arena, old_body_offset);
+	S_del_body(aTHX_ (void*)((char*)old_body + old_body_offset),
+		   old_body_arena);
 #endif
     }
 }
@@ -10503,8 +10504,10 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	    new_body:
 		assert(new_body_length);
 #ifndef PURIFY
-		new_body = S_new_body(aTHX_ new_body_arenaroot, new_body_arena,
-				      new_body_length, new_body_offset);
+		new_body = (void*)((char*)S_new_body(aTHX_ new_body_arenaroot,
+						     new_body_arena,
+						     new_body_length)
+				   - new_body_offset);
 #else
 		/* We always allocated the full length item with PURIFY */
 		new_body_length += new_body_offset;
@@ -10642,12 +10645,13 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 			    SvFLAGS(dstr) |= SVf_OOK;
 
 			    hvname = saux->xhv_name;
-			    daux->xhv_name = hvname ? hek_dup(hvname, param) : hvname;
+			    daux->xhv_name
+				= hvname ? hek_dup(hvname, param) : hvname;
 
 			    daux->xhv_riter = saux->xhv_riter;
 			    daux->xhv_eiter = saux->xhv_eiter
-				? he_dup(saux->xhv_eiter, (bool)!!HvSHAREKEYS(sstr),
-					 param) : 0;
+				? he_dup(saux->xhv_eiter,
+					 (bool)!!HvSHAREKEYS(sstr), param) : 0;
 			}
 		    }
 		    else {
