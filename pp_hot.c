@@ -2919,7 +2919,8 @@ try_autoload:
 	    }
 	}
 #endif /* USE_5005THREADS */		
-	PAD_SET_CUR(padlist, CvDEPTH(cv));
+	SAVECOMPPAD();
+	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
 #ifndef USE_5005THREADS
 	if (hasargs)
 #endif /* USE_5005THREADS */

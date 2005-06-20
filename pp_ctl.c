@@ -1663,7 +1663,8 @@ PP(pp_dbstate)
 	PUSHBLOCK(cx, CXt_SUB, SP);
 	PUSHSUB_DB(cx);
 	CvDEPTH(cv)++;
-	PAD_SET_CUR(CvPADLIST(cv),1);
+	SAVECOMPPAD();
+	PAD_SET_CUR_NOSAVE(CvPADLIST(cv), 1);
 	RETURNOP(CvSTART(cv));
     }
     else
@@ -2311,7 +2312,8 @@ PP(pp_goto)
 		    }
 		}
 #endif /* USE_5005THREADS */
-		PAD_SET_CUR(padlist, CvDEPTH(cv));
+		SAVECOMPPAD();
+		PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
 #ifndef USE_5005THREADS
 		if (cx->blk_sub.hasargs)
 #endif /* USE_5005THREADS */

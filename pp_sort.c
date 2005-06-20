@@ -1544,7 +1544,8 @@ PP(pp_sort)
 		SAVEVPTR(CvROOT(cv)->op_ppaddr);
 		CvROOT(cv)->op_ppaddr = PL_ppaddr[OP_NULL];
 
-		PAD_SET_CUR(CvPADLIST(cv), 1);
+		SAVECOMPPAD();
+		PAD_SET_CUR_NOSAVE(CvPADLIST(cv), 1);
             }
 	}
     }

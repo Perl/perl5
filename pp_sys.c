@@ -1259,7 +1259,8 @@ S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
     push_return(retop);
     PUSHBLOCK(cx, CXt_FORMAT, PL_stack_sp);
     PUSHFORMAT(cx);
-    PAD_SET_CUR(CvPADLIST(cv), 1);
+    SAVECOMPPAD();
+    PAD_SET_CUR_NOSAVE(CvPADLIST(cv), 1);
 
     setdefout(gv);	    /* locally select filehandle so $% et al work */
     return CvSTART(cv);

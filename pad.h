@@ -103,7 +103,12 @@ Get the value from slot C<po> in the base (DEPTH=1) pad of a padlist
 
 =for apidoc m|void|PAD_SET_CUR	|PADLIST padlist|I32 n
 Set the current pad to be pad C<n> in the padlist, saving
-the previous current pad.
+the previous current pad. NB currently this macro expands to a string too
+long for some compilers, so it's best to replace it with
+
+    SAVECOMPPAD();
+    PAD_SET_CUR_NOSAVE(padlist,n);
+
 
 =for apidoc m|void|PAD_SET_CUR_NOSAVE	|PADLIST padlist|I32 n
 like PAD_SET_CUR, but without the save
