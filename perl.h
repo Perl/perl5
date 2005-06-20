@@ -1515,8 +1515,8 @@ typedef UVTYPE UV;
  * The only feasible use is probably temporarily storing
  * function pointers in a data pointer (such as a void pointer). */
 
-#define DPTR2FPTR(t,p) ((t)PTR2UV(p)) /* data pointer to function pointer */
-#define FPTR2DPTR(t,p) ((t)PTR2UV(p)) /* function pointer to data pointer */
+#define DPTR2FPTR(t,p) ((t)(PTRV)(p)) /* data pointer to function pointer */
+#define FPTR2DPTR(t,p) ((t)(PTRV)(p)) /* function pointer to data pointer */
 
 #ifdef USE_LONG_DOUBLE
 #  if defined(HAS_LONG_DOUBLE) && LONG_DOUBLESIZE == DOUBLESIZE
