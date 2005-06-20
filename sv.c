@@ -1118,14 +1118,13 @@ S_new_body(pTHX_ void **arena_root, void **root, size_t size)
 
 /* return a thing to the free list */
 
-STATIC void
-S_del_body(pTHX_ void *thing, void **root)
-{
-    LOCK_SV_MUTEX;
-    *(void **)thing = *root;
-    *root = (void*)thing;
-    UNLOCK_SV_MUTEX;
-}
+#define del_body(thing, root)			\
+    STMT_START {				\
+	LOCK_SV_MUTEX;				\
+	*(void **)thing = *root;		\
+	*root = (void*)thing;			\
+	UNLOCK_SV_MUTEX;			\
+    } STMT_END
 
 /* Conventionally we simply malloc() a big block of memory, then divide it
    up into lots of the thing that we're allocating.
@@ -1142,8 +1141,8 @@ S_del_body(pTHX_ void *thing, void **root)
 		 (void**)&PL_ ## lctype ## _root,			\
 		 sizeof(TYPE))
 
-#define del_body(p,TYPE,lctype)						\
-    S_del_body(aTHX_ (void*)p, (void**)&PL_ ## lctype ## _root)
+#define del_body_type(p,TYPE,lctype)			\
+    del_body((void*)p, (void**)&PL_ ## lctype ## _root)
 
 /* But for some types, we cheat. The type starts with some members that are
    never accessed. So we allocate the substructure, starting at the first used
@@ -1174,9 +1173,9 @@ S_del_body(pTHX_ void *thing, void **root)
 
 
 #define del_body_allocated(p,TYPE,lctype,member)			\
-    S_del_body(aTHX_ (void*)((char*)p + STRUCT_OFFSET(TYPE, member)	\
-			     - STRUCT_OFFSET(lctype ## _allocated, member)), \
-			     (void**)&PL_ ## lctype ## _root)
+    del_body((void*)((char*)p + STRUCT_OFFSET(TYPE, member)		\
+		     - STRUCT_OFFSET(lctype ## _allocated, member)),	\
+	     (void**)&PL_ ## lctype ## _root)
 
 #define my_safemalloc(s)	(void*)safemalloc(s)
 #define my_safefree(p)	safefree((char*)p)
@@ -1219,7 +1218,7 @@ S_del_body(pTHX_ void *thing, void **root)
 #else /* !PURIFY */
 
 #define new_XNV()	new_body(NV, xnv)
-#define del_XNV(p)	del_body(p, NV, xnv)
+#define del_XNV(p)	del_body_type(p, NV, xnv)
 
 #define new_XPV()	new_body_allocated(XPV, xpv, xpv_cur)
 #define del_XPV(p)	del_body_allocated(p, XPV, xpv, xpv_cur)
@@ -1228,10 +1227,10 @@ S_del_body(pTHX_ void *thing, void **root)
 #define del_XPVIV(p)	del_body_allocated(p, XPVIV, xpviv, xpv_cur)
 
 #define new_XPVNV()	new_body(XPVNV, xpvnv)
-#define del_XPVNV(p)	del_body(p, XPVNV, xpvnv)
+#define del_XPVNV(p)	del_body_type(p, XPVNV, xpvnv)
 
 #define new_XPVCV()	new_body(XPVCV, xpvcv)
-#define del_XPVCV(p)	del_body(p, XPVCV, xpvcv)
+#define del_XPVCV(p)	del_body_type(p, XPVCV, xpvcv)
 
 #define new_XPVAV()	new_body_allocated(XPVAV, xpvav, xav_fill)
 #define del_XPVAV(p)	del_body_allocated(p, XPVAV, xpvav, xav_fill)
@@ -1240,16 +1239,16 @@ S_del_body(pTHX_ void *thing, void **root)
 #define del_XPVHV(p)	del_body_allocated(p, XPVHV, xpvhv, xhv_fill)
 
 #define new_XPVMG()	new_body(XPVMG, xpvmg)
-#define del_XPVMG(p)	del_body(p, XPVMG, xpvmg)
+#define del_XPVMG(p)	del_body_type(p, XPVMG, xpvmg)
 
 #define new_XPVGV()	new_body(XPVGV, xpvgv)
-#define del_XPVGV(p)	del_body(p, XPVGV, xpvgv)
+#define del_XPVGV(p)	del_body_type(p, XPVGV, xpvgv)
 
 #define new_XPVLV()	new_body(XPVLV, xpvlv)
-#define del_XPVLV(p)	del_body(p, XPVLV, xpvlv)
+#define del_XPVLV(p)	del_body_type(p, XPVLV, xpvlv)
 
 #define new_XPVBM()	new_body(XPVBM, xpvbm)
-#define del_XPVBM(p)	del_body(p, XPVBM, xpvbm)
+#define del_XPVBM(p)	del_body_type(p, XPVBM, xpvbm)
 
 #endif /* PURIFY */
 
@@ -1577,8 +1576,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 #ifdef PURIFY
 	my_safefree(old_body);
 #else
-	S_del_body(aTHX_ (void*)((char*)old_body + old_body_offset),
-		   old_body_arena);
+	del_body((void*)((char*)old_body + old_body_offset),
+		 old_body_arena);
 #endif
     }
 }
@@ -10104,7 +10103,7 @@ Perl_ptr_table_new(pTHX)
 #endif
 
 #define new_pte()	new_body(struct ptr_tbl_ent, pte)
-#define del_pte(p)	del_body(p, struct ptr_tbl_ent, pte)
+#define del_pte(p)	del_body_type(p, struct ptr_tbl_ent, pte)
 
 /* map an existing pointer using a table */
 
