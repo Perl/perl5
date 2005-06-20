@@ -330,7 +330,6 @@
 #define PL_numeric_name		(vTHX->Inumeric_name)
 #define PL_numeric_radix_sv	(vTHX->Inumeric_radix_sv)
 #define PL_numeric_standard	(vTHX->Inumeric_standard)
-#define PL_ofmt			(vTHX->Iofmt)
 #define PL_oldbufptr		(vTHX->Ioldbufptr)
 #define PL_oldname		(vTHX->Ioldname)
 #define PL_oldoldbufptr		(vTHX->Ioldoldbufptr)
@@ -634,7 +633,6 @@
 #define PL_Inumeric_name	PL_numeric_name
 #define PL_Inumeric_radix_sv	PL_numeric_radix_sv
 #define PL_Inumeric_standard	PL_numeric_standard
-#define PL_Iofmt		PL_ofmt
 #define PL_Ioldbufptr		PL_oldbufptr
 #define PL_Ioldname		PL_oldname
 #define PL_Ioldoldbufptr	PL_oldoldbufptr

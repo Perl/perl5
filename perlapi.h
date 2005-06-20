@@ -456,8 +456,6 @@ END_EXTERN_C
 #define PL_numeric_radix_sv	(*Perl_Inumeric_radix_sv_ptr(aTHX))
 #undef  PL_numeric_standard
 #define PL_numeric_standard	(*Perl_Inumeric_standard_ptr(aTHX))
-#undef  PL_ofmt
-#define PL_ofmt			(*Perl_Iofmt_ptr(aTHX))
 #undef  PL_oldbufptr
 #define PL_oldbufptr		(*Perl_Ioldbufptr_ptr(aTHX))
 #undef  PL_oldname

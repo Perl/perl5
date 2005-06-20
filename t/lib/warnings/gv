@@ -8,7 +8,7 @@
 	@ISA = qw(Other) ;
 	fred() ;
 
-     Use of $# is deprecated
+     $# is no longer supported
      $* is no longer supported
 
 	$a = ${"#"} ;
@@ -50,5 +50,5 @@ no warnings 'deprecated' ;
 $a = ${"#"};
 $a = ${"*"};
 EXPECT
-Use of $# is deprecated at - line 3.
+$# is no longer supported at - line 3.
 $* is no longer supported at - line 4.

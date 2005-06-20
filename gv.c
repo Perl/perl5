@@ -1031,15 +1031,11 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    goto magicalize;
 	}
 	case '*':
-	    if (sv_type == SVt_PV && ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
-		Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
-			    "$* is no longer supported");
-	    break;
 	case '#':
 	    if (sv_type == SVt_PV && ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
 		Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
-			    "Use of $# is deprecated");
-	    goto magicalize;
+			    "$%c is no longer supported", *name);
+	    break;
 	case '|':
 	    sv_setiv(GvSV(gv), (IV)(IoFLAGS(GvIOp(PL_defoutgv)) & IOf_FLUSH) != 0);
 	    goto magicalize;

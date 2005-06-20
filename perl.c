@@ -922,8 +922,6 @@ perl_destruct(pTHXx)
     Safefree(PL_psig_pend);
     PL_psig_pend = (int*)NULL;
     PL_formfeed = Nullsv;
-    Safefree(PL_ofmt);
-    PL_ofmt = Nullch;
     nuke_stacks();
     PL_tainting = FALSE;
     PL_taint_warn = FALSE;

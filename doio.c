@@ -1298,19 +1298,6 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
     /* assuming fp is checked earlier */
     if (!sv)
 	return TRUE;
-    if (PL_ofmt) {
-	if (SvGMAGICAL(sv))
-	    mg_get(sv);
-        if (SvIOK(sv) && SvIVX(sv) != 0) {
-	    PerlIO_printf(fp, PL_ofmt, (NV)SvIVX(sv));
-	    return !PerlIO_error(fp);
-	}
-	if (  (SvNOK(sv) && SvNVX(sv) != 0.0)
-	   || (looks_like_number(sv) && sv_2nv(sv) != 0.0) ) {
-	    PerlIO_printf(fp, PL_ofmt, SvNVX(sv));
-	    return !PerlIO_error(fp);
-	}
-    }
     switch (SvTYPE(sv)) {
     case SVt_NULL:
 	if (ckWARN(WARN_UNINITIALIZED))

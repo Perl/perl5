@@ -11584,7 +11584,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_mess_sv		= Nullsv;
 
     PL_ors_sv		= sv_dup_inc(proto_perl->Iors_sv, param);
-    PL_ofmt		= SAVEPV(proto_perl->Iofmt);
 
     /* interpreter atexit processing */
     PL_exitlistlen	= proto_perl->Iexitlistlen;

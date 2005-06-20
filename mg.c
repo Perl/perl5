@@ -879,9 +879,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	if (PL_ors_sv)
 	    sv_copypv(sv, PL_ors_sv);
 	break;
-    case '#':
-	sv_setpv(sv,PL_ofmt);
-	break;
     case '!':
 #ifdef VMS
 	sv_setnv(sv, (NV)((errno == EVMSERR) ? vaxc$errno : errno));
@@ -2292,11 +2289,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	else {
 	    PL_ofs_sv = Nullsv;
 	}
-	break;
-    case '#':
-	if (PL_ofmt)
-	    Safefree(PL_ofmt);
-	PL_ofmt = savesvpv(sv);
 	break;
     case '[':
 	PL_compiling.cop_arybase = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);

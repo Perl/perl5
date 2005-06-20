@@ -180,7 +180,6 @@ PERLVAR(Imess_sv,	SV *)
 
 /* XXX shouldn't these be per-thread? --GSAR */
 PERLVAR(Iors_sv,	SV *)		/* output record separator $\ */
-PERLVAR(Iofmt,		char *)		/* output format for numbers $# */
 
 /* interpreter atexit processing */
 PERLVARI(Iexitlist,	PerlExitListEntry *, NULL)
