@@ -306,8 +306,8 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)
     const I32 grows = PL_op->op_private & OPpTRANS_GROWS;
     STRLEN len;
 
-    SV* rv = (SV*)cSVOP->op_sv;
-    HV* hv = (HV*)SvRV(rv);
+    SV* const  rv = (SV*)cSVOP->op_sv;
+    HV* const  hv = (HV*)SvRV(rv);
     SV** svp = hv_fetch(hv, "NONE", 4, FALSE);
     const UV none = svp ? SvUV(*svp) : 0x7fffffff;
     const UV extra = none + 1;
@@ -400,9 +400,9 @@ S_do_trans_count_utf8(pTHX_ SV *sv)
     I32 matches = 0;
     STRLEN len;
 
-    SV* rv = (SV*)cSVOP->op_sv;
-    HV* hv = (HV*)SvRV(rv);
-    SV** svp = hv_fetch(hv, "NONE", 4, FALSE);
+    SV* const rv = (SV*)cSVOP->op_sv;
+    HV* const hv = (HV*)SvRV(rv);
+    SV** const svp = hv_fetch(hv, "NONE", 4, FALSE);
     const UV none = svp ? SvUV(*svp) : 0x7fffffff;
     const UV extra = none + 1;
     U8 hibit = 0;
@@ -442,8 +442,8 @@ S_do_trans_complex_utf8(pTHX_ SV *sv)
     const I32 squash   = PL_op->op_private & OPpTRANS_SQUASH;
     const I32 del      = PL_op->op_private & OPpTRANS_DELETE;
     const I32 grows    = PL_op->op_private & OPpTRANS_GROWS;
-    SV* rv = (SV*)cSVOP->op_sv;
-    HV* hv = (HV*)SvRV(rv);
+    SV * const rv = (SV*)cSVOP->op_sv;
+    HV * const hv = (HV*)SvRV(rv);
     SV** svp = hv_fetch(hv, "NONE", 4, FALSE);
     const UV none = svp ? SvUV(*svp) : 0x7fffffff;
     const UV extra = none + 1;
@@ -456,7 +456,8 @@ S_do_trans_complex_utf8(pTHX_ SV *sv)
     U8 *s = (U8*)SvPV(sv, len);
     const I32 isutf8 = SvUTF8(sv);
     if (!isutf8) {
-	const U8 *t = s, *e = s + len;
+	const U8 *t = s;
+	const U8 * const e = s + len;
 	while (t < e) {
 	    const U8 ch = *t++;
 	    if ((hibit = !NATIVE_IS_INVARIANT(ch)))
@@ -643,7 +644,7 @@ Perl_do_trans(pTHX_ SV *sv)
 void
 Perl_do_join(pTHX_ register SV *sv, SV *del, register SV **mark, register SV **sp)
 {
-    SV **oldmark = mark;
+    SV ** const oldmark = mark;
     register I32 items = sp - mark;
     register STRLEN len;
     STRLEN delimlen;
@@ -700,7 +701,7 @@ void
 Perl_do_sprintf(pTHX_ SV *sv, I32 len, SV **sarg)
 {
     STRLEN patlen;
-    const char *pat = SvPV_const(*sarg, patlen);
+    const char * const pat = SvPV_const(*sarg, patlen);
     bool do_taint = FALSE;
 
     SvUTF8_off(sv);

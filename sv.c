@@ -257,8 +257,8 @@ S_del_sv(pTHX_ SV *p)
 	SV* sva;
 	bool ok = 0;
 	for (sva = PL_sv_arenaroot; sva; sva = (SV *) SvANY(sva)) {
-	    SV *sv = sva + 1;
-	    SV *svend = &sva[SvREFCNT(sva)];
+	    const SV * const sv = sva + 1;
+	    const SV * const svend = &sva[SvREFCNT(sva)];
 	    if (p >= sv && p < svend) {
 		ok = 1;
 		break;
@@ -337,7 +337,7 @@ S_visit(pTHX_ SVFUNC_t f, U32 flags, U32 mask)
     I32 visited = 0;
 
     for (sva = PL_sv_arenaroot; sva; sva = (SV*)SvANY(sva)) {
-	register SV * const svend = &sva[SvREFCNT(sva)];
+	register const SV * const svend = &sva[SvREFCNT(sva)];
 	register SV* sv;
 	for (sv = sva + 1; sv < svend; ++sv) {
 	    if (SvTYPE(sv) != SVTYPEMASK
@@ -1628,7 +1628,7 @@ Perl_sv_backoff(pTHX_ register SV *sv)
 {
     assert(SvOOK(sv));
     if (SvIVX(sv)) {
-	const char *s = SvPVX_const(sv);
+	const char * const s = SvPVX_const(sv);
 	SvLEN_set(sv, SvLEN(sv) + SvIVX(sv));
 	SvPV_set(sv, SvPVX(sv) - SvIVX(sv));
 	SvIV_set(sv, 0);
@@ -3361,8 +3361,7 @@ void
 Perl_sv_copypv(pTHX_ SV *dsv, register SV *ssv)
 {
     STRLEN len;
-    const char *s;
-    s = SvPV_const(ssv,len);
+    const char * const s = SvPV_const(ssv,len);
     sv_setpvn(dsv,s,len);
     if (SvUTF8(ssv))
 	SvUTF8_on(dsv);
@@ -3466,8 +3465,8 @@ Perl_sv_2bool(pTHX_ register SV *sv)
       return SvRV(sv) != 0;
     }
     if (SvPOKp(sv)) {
-	register XPV* Xpvtmp;
-	if ((Xpvtmp = (XPV*)SvANY(sv)) &&
+	register XPV* const Xpvtmp = (XPV*)SvANY(sv);
+	if (Xpvtmp &&
 		(*Xpvtmp->xpv_pv > '0' ||
 		Xpvtmp->xpv_cur > 1 ||
 		(Xpvtmp->xpv_cur && *Xpvtmp->xpv_pv != '0')))
@@ -3561,13 +3560,13 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
 	int hibit = 0;
 	
 	while (t < e) {
-	    U8 ch = *t++;
+	    const U8 ch = *t++;
 	    if ((hibit = !NATIVE_IS_INVARIANT(ch)))
 		break;
 	}
 	if (hibit) {
 	    STRLEN len = SvCUR(sv) + 1; /* Plus the \0 */
-	    U8 *recoded = bytes_to_utf8((U8*)s, &len);
+	    U8 * const recoded = bytes_to_utf8((U8*)s, &len);
 
 	    SvPV_free(sv); /* No longer using what was there before. */
 
@@ -8544,6 +8543,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     /* large enough for "%#.#f" --chip */
     /* what about long double NVs? --jhi */
 
+    PERL_UNUSED_ARG(maybe_tainted);
+
     /* no matter what, this is a string now */
     (void)SvPV_force(sv, origlen);
 
@@ -8554,7 +8555,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	switch (pat[1]) {
 	case 's':
 	    if (args) {
-                const char *s = va_arg(*args, char*);
+		const char * const s = va_arg(*args, char*);
 		sv_catpv(sv, s ? s : nullstr);
 	    }
 	    else if (svix < svmax) {
@@ -9469,7 +9470,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		       sv_utf8_upgrade(sv);
 	     }
 	     else {
-		  SV *nsv = sv_2mortal(newSVpvn(eptr, elen));
+		  SV * const nsv = sv_2mortal(newSVpvn(eptr, elen));
 		  sv_utf8_upgrade(nsv);
 		  eptr = SvPVX_const(nsv);
 		  elen = SvCUR(nsv);
@@ -9492,6 +9493,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	SvGROW(sv, SvCUR(sv) + need + dotstrlen + 1);
 	p = SvEND(sv);
 	if (esignlen && fill == '0') {
+	    int i;
 	    for (i = 0; i < (int)esignlen; i++)
 		*p++ = esignbuf[i];
 	}
@@ -9500,10 +9502,12 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    p += gap;
 	}
 	if (esignlen && fill != '0') {
+	    int i;
 	    for (i = 0; i < (int)esignlen; i++)
 		*p++ = esignbuf[i];
 	}
 	if (zeros) {
+	    int i;
 	    for (i = zeros; i; i--)
 		*p++ = '0';
 	}
@@ -9618,6 +9622,7 @@ Perl_re_dup(pTHX_ REGEXP *r, CLONE_PARAMS *param)
     if (r->data) {
 	struct reg_data *d;
         const int count = r->data->count;
+	int i;
 
 	Newc(0, d, sizeof(struct reg_data) + count*sizeof(void *),
 		char, struct reg_data);
@@ -9687,7 +9692,8 @@ PerlIO *
 Perl_fp_dup(pTHX_ PerlIO *fp, char type, CLONE_PARAMS *param)
 {
     PerlIO *ret;
-    (void)type;
+
+    PERL_UNUSED_ARG(type);
 
     if (!fp)
 	return (PerlIO*)NULL;
@@ -10611,9 +10617,9 @@ Perl_any_dup(pTHX_ void *v, PerlInterpreter *proto_perl)
 ANY *
 Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 {
-    ANY *ss	= proto_perl->Tsavestack;
-    I32 ix	= proto_perl->Tsavestack_ix;
-    I32 max	= proto_perl->Tsavestack_max;
+    ANY * const ss	= proto_perl->Tsavestack;
+    const I32 max	= proto_perl->Tsavestack_max;
+    I32 ix		= proto_perl->Tsavestack_ix;
     ANY *nss;
     SV *sv;
     GV *gv;
@@ -10627,7 +10633,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
     char *c = NULL;
     void (*dptr) (void*);
     void (*dxptr) (pTHX_ void*);
-    OP *o;
 
     Newz(54, nss, max, ANY);
 
@@ -10760,6 +10765,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    ptr = POPPTR(ss,ix);
 	    if (ptr && (((OP*)ptr)->op_private & OPpREFCOUNTED)) {
 		/* these are assumed to be refcounted properly */
+		OP *o;
 		switch (((OP*)ptr)->op_type) {
 		case OP_LEAVESUB:
 		case OP_LEAVESUBLV:
@@ -10879,9 +10885,9 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 static void
 do_mark_cloneable_stash(pTHX_ SV *sv)
 {
-    const char *hvname = HvNAME_get((HV*)sv);
+    const char *const hvname = HvNAME_get((HV*)sv);
     if (hvname) {
-	GV* cloner = gv_fetchmethod_autoload((HV*)sv, "CLONE_SKIP", 0);
+	GV* const cloner = gv_fetchmethod_autoload((HV*)sv, "CLONE_SKIP", 0);
 	SvFLAGS(sv) |= SVphv_CLONEABLE; /* clone objects by default */
 	if (cloner && GvCV(cloner)) {
 	    dSP;
@@ -11212,7 +11218,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_regex_padav = newAV();
     {
 	const I32 len = av_len((AV*)proto_perl->Iregex_padav);
-	SV** regexen = AvARRAY((AV*)proto_perl->Iregex_padav);
+	SV** const regexen = AvARRAY((AV*)proto_perl->Iregex_padav);
 	IV i;
 	av_push(PL_regex_padav,
 		sv_dup_inc(regexen[0],param));
@@ -11762,8 +11768,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
        identified by sv_dup() above.
     */
     while(av_len(param->stashes) != -1) {
-        HV* stash = (HV*) av_shift(param->stashes);
-	GV* cloner = gv_fetchmethod_autoload(stash, "CLONE", 0);
+	HV* const stash = (HV*) av_shift(param->stashes);
+	GV* const cloner = gv_fetchmethod_autoload(stash, "CLONE", 0);
 	if (cloner && GvCV(cloner)) {
 	    dSP;
 	    ENTER;
