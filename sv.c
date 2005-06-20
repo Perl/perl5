@@ -509,6 +509,15 @@ Perl_sv_clean_all(pTHX)
     return cleaned;
 }
 
+static void 
+S_free_arena(pTHX_ void **root) {
+    while (root) {
+	void **next = *(void **)root;
+	Safefree(root);
+	root = next;
+    }
+}
+    
 /*
 =for apidoc sv_free_arenas
 
@@ -518,49 +527,18 @@ heads and bodies within the arenas must already have been freed.
 =cut
 */
 
+#define free_arena(name)					\
+    STMT_START {						\
+	S_free_arena(aTHX_ (void**) PL_ ## name ## _arenaroot);	\
+	PL_ ## name ## _arenaroot = 0;				\
+	PL_ ## name ## _root = 0;				\
+    } STMT_END
+
 void
 Perl_sv_free_arenas(pTHX)
 {
     SV* sva;
     SV* svanext;
-    void *arena, *arenanext;
-    int i;
-    void **arenaroots[] = {
-	(void**) &PL_xnv_arenaroot,
-	(void**) &PL_xpv_arenaroot,
-	(void**) &PL_xpviv_arenaroot,
-	(void**) &PL_xpvnv_arenaroot,
-	(void**) &PL_xpvcv_arenaroot,
-	(void**) &PL_xpvav_arenaroot,
-	(void**) &PL_xpvhv_arenaroot,
-	(void**) &PL_xpvmg_arenaroot,
-	(void**) &PL_xpvgv_arenaroot,
-	(void**) &PL_xpvlv_arenaroot,
-	(void**) &PL_xpvbm_arenaroot,
-	(void**) &PL_he_arenaroot,
-#if defined(USE_ITHREADS)
-	(void**) &PL_pte_arenaroot,
-#endif
-	(void**) 0
-    };
-    void **roots[] = {
-	(void**) &PL_xnv_root,
-	(void**) &PL_xpv_root,
-	(void**) &PL_xpviv_root,
-	(void**) &PL_xpvnv_root,
-	(void**) &PL_xpvcv_root,
-	(void**) &PL_xpvav_root,
-	(void**) &PL_xpvhv_root,
-	(void**) &PL_xpvmg_root,
-	(void**) &PL_xpvgv_root,
-	(void**) &PL_xpvlv_root,
-	(void**) &PL_xpvbm_root,
-	(void**) &PL_he_root,
-#if defined(USE_ITHREADS)
-	(void**) &PL_pte_root,
-#endif
-	(void**) 0
-    };
 
     /* Free arenas here, but be careful about fake ones.  (We assume
        contiguity of the fake ones with the corresponding real ones.) */
@@ -574,18 +552,21 @@ Perl_sv_free_arenas(pTHX)
 	    Safefree(sva);
     }
     
-    assert(sizeof(arenaroots) == sizeof(roots));
-
-    for (i=0; arenaroots[i]; i++) {
-
-	arena = *arenaroots[i];
-	for (; arena; arena = arenanext) {
-	    arenanext = *(void **)arena;
-	    Safefree(arena);
-	}
-	*arenaroots[i] = 0;
-	*roots[i] = 0;
-    }
+    free_arena(xnv);
+    free_arena(xpv);
+    free_arena(xpviv);
+    free_arena(xpvnv);
+    free_arena(xpvcv);
+    free_arena(xpvav);
+    free_arena(xpvhv);
+    free_arena(xpvmg);
+    free_arena(xpvgv);
+    free_arena(xpvlv);
+    free_arena(xpvbm);
+    free_arena(he);
+#if defined(USE_ITHREADS)
+    free_arena(pte);
+#endif
 
     if (PL_nice_chunk)
 	Safefree(PL_nice_chunk);
