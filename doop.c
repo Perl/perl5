@@ -1398,7 +1398,7 @@ Perl_do_kv(pTHX)
 	    tmpstr = hv_iterval(hv,entry);
 	    DEBUG_H(Perl_sv_setpvf(aTHX_ tmpstr, "%lu%%%d=%lu",
 			    (unsigned long)HeHASH(entry),
-			    HvMAX(keys)+1,
+			    (int)HvMAX(keys)+1,
 			    (unsigned long)(HeHASH(entry) & HvMAX(keys))));
 	    SPAGAIN;
 	    XPUSHs(tmpstr);
