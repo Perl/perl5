@@ -1051,9 +1051,9 @@ Perl_write_to_stderr(pTHX_ const char* message, int msglen)
     else {
 #ifdef USE_SFIO
 	/* SFIO can really mess with your errno */
-	int e = errno;
+	const int e = errno;
 #endif
-	PerlIO *serr = Perl_error_log;
+	PerlIO * const serr = Perl_error_log;
 
 	PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
 	(void)PerlIO_flush(serr);
@@ -1254,21 +1254,18 @@ void
 Perl_vwarn(pTHX_ const char* pat, va_list *args)
 {
     dVAR;
-    const char *message;
-    HV *stash;
-    GV *gv;
-    CV *cv;
-    SV *msv;
     STRLEN msglen;
-    I32 utf8 = 0;
-
-    msv = vmess(pat, args);
-    utf8 = SvUTF8(msv);
-    message = SvPV_const(msv, msglen);
+    SV * const msv = vmess(pat, args);
+    const I32 utf8 = SvUTF8(msv);
+    const char * const message = SvPV_const(msv, msglen);
 
     if (PL_warnhook) {
 	/* sv_2cv might call Perl_warn() */
-	SV *oldwarnhook = PL_warnhook;
+	SV * const oldwarnhook = PL_warnhook;
+	CV * cv;
+	HV * stash;
+	GV * gv;
+
 	ENTER;
 	SAVESPTR(PL_warnhook);
 	PL_warnhook = Nullsv;
@@ -1446,7 +1443,8 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
     setenv(nam, val, 1);
 #   else
     char *new_env;
-    int nlen = strlen(nam), vlen;
+    const int nlen = strlen(nam);
+    int vlen;
     if (!val) {
 	val = "";
     }
@@ -1488,7 +1486,8 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
 I32
 Perl_setenv_getix(pTHX_ const char *nam)
 {
-    register I32 i, len = strlen(nam);
+    register I32 i;
+    const register I32 len = strlen(nam);
 
     for (i = 0; environ[i]; i++) {
 	if (
@@ -2758,7 +2757,7 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch, const char **searc
     int extidx = 0, i = 0;
     const char *curext = Nullch;
 #else
-    (void)search_ext;
+    PERL_UNUSED_ARG(search_ext);
 #  define MAX_EXT_LEN 0
 #endif
 
@@ -3986,10 +3985,10 @@ Perl_new_version(pTHX_ SV *ver)
     if ( sv_derived_from(ver,"version") ) /* can just copy directly */
     {
 	I32 key;
-	AV *av = newAV();
+	AV * const av = newAV();
 	AV *sav;
 	/* This will get reblessed later if a derived class*/
-	SV* hv = newSVrv(rv, "version"); 
+	SV*  const hv = newSVrv(rv, "version"); 
 	(void)sv_upgrade(hv, SVt_PVHV); /* needs to be an HV type */
 #ifndef NODEFAULT_SHAREKEYS
 	HvSHAREKEYS_on(hv);         /* key-sharing on by default */
@@ -4007,7 +4006,7 @@ Perl_new_version(pTHX_ SV *ver)
 	
 	if ( hv_exists((HV*)ver, "width", 5 ) )
 	{
-	    I32 width = SvIV(*hv_fetch((HV*)ver, "width", 5, FALSE));
+	    const I32 width = SvIV(*hv_fetch((HV*)ver, "width", 5, FALSE));
 	    hv_store((HV *)hv, "width", 5, newSViv(width), 0);
 	}
 
@@ -4101,7 +4100,7 @@ Perl_vnumify(pTHX_ SV *vs)
     I32 i, len, digit;
     int width;
     bool alpha = FALSE;
-    SV *sv = newSV(0);
+    SV * const sv = newSV(0);
     AV *av;
     if ( SvROK(vs) )
 	vs = SvRV(vs);
@@ -4117,7 +4116,7 @@ Perl_vnumify(pTHX_ SV *vs)
 
     /* attempt to retrieve the version array */
     if ( !(av = (AV *)*hv_fetch((HV*)vs, "version", 7, FALSE) ) ) {
-	Perl_sv_catpv(aTHX_ sv,"0");
+	sv_catpvn(sv,"0",1);
 	return sv;
     }
 
@@ -4134,8 +4133,8 @@ Perl_vnumify(pTHX_ SV *vs)
     {
 	digit = SvIV(*av_fetch(av, i, 0));
 	if ( width < 3 ) {
-	    int denom = (int)pow(10,(3-width));
-	    div_t term = div((int)PERL_ABS(digit),denom);
+	    const int denom = (int)pow(10,(3-width));
+	    const div_t term = div((int)PERL_ABS(digit),denom);
 	    Perl_sv_catpvf(aTHX_ sv,"%0*d_%d", width, term.quot, term.rem);
 	}
 	else {
@@ -4605,7 +4604,7 @@ some level of strict-ness.
 void
 Perl_sv_nosharing(pTHX_ SV *sv)
 {
-    (void)sv;
+    PERL_UNUSED_ARG(sv);
 }
 
 /*
@@ -4621,7 +4620,7 @@ some level of strict-ness.
 void
 Perl_sv_nolocking(pTHX_ SV *sv)
 {
-    (void)sv;
+    PERL_UNUSED_ARG(sv);
 }
 
 
@@ -4638,7 +4637,7 @@ some level of strict-ness.
 void
 Perl_sv_nounlocking(pTHX_ SV *sv)
 {
-    (void)sv;
+    PERL_UNUSED_ARG(sv);
 }
 
 U32

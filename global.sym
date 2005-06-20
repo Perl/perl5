@@ -381,8 +381,9 @@ Perl_rninstr
 Perl_rsignal
 Perl_rsignal_state
 Perl_savepv
-Perl_savesharedpv
 Perl_savepvn
+Perl_savesharedpv
+Perl_savesvpv
 Perl_savestack_grow
 Perl_savestack_grow_cnt
 Perl_save_aelem
@@ -689,6 +690,5 @@ Perl_hv_placeholders_get
 Perl_hv_placeholders_set
 Perl_gv_fetchpvn_flags
 Perl_gv_fetchsv
-Perl_savesvpv
 Perl_stashpv_hvname_match
 # ex: set ro:

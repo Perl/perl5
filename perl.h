@@ -210,15 +210,16 @@
  * for silencing unused variables that are actually used most of the time,
  * but we cannot quite get rid of, such as "ax" in PPCODE+noargs xsubs
  */
-#define PERL_UNUSED_VAR(var) ((void)var)
-
-#ifndef LINT_UNUSED_ARG
+#ifndef PERL_UNUSED_ARG
 #  ifdef lint
 #    include <note.h>
-#    define LINT_UNUSED_ARG(x) NOTE(ARGUNUSED(x))
+#    define PERL_UNUSED_ARG(x) NOTE(ARGUNUSED(x))
 #  else
-#    define LINT_UNUSED_ARG(x)
+#    define PERL_UNUSED_ARG(x) ((void)x)
 #  endif
+#endif
+#ifndef PERL_UNUSED_VAR
+#  define PERL_UNUSED_VAR(x) ((void)x)
 #endif
 
 #define NOOP (void)0
@@ -2825,7 +2826,7 @@ typedef I32 CHECKPOINT;
    body arenas  */
 struct ptr_tbl_ent {
     struct ptr_tbl_ent*		next;
-    void*			oldval;
+    const void*			oldval;
     void*			newval;
 };
 

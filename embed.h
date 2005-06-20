@@ -675,8 +675,9 @@
 #endif
 #endif
 #define savepv			Perl_savepv
-#define savesharedpv		Perl_savesharedpv
 #define savepvn			Perl_savepvn
+#define savesharedpv		Perl_savesharedpv
+#define savesvpv		Perl_savesvpv
 #define savestack_grow		Perl_savestack_grow
 #define savestack_grow_cnt	Perl_savestack_grow_cnt
 #define save_aelem		Perl_save_aelem
@@ -1629,7 +1630,6 @@
 #ifdef PERL_CORE
 #define is_gv_magical_sv	Perl_is_gv_magical_sv
 #endif
-#define savesvpv		Perl_savesvpv
 #define stashpv_hvname_match	Perl_stashpv_hvname_match
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
@@ -2647,8 +2647,9 @@
 #endif
 #endif
 #define savepv(a)		Perl_savepv(aTHX_ a)
-#define savesharedpv(a)		Perl_savesharedpv(aTHX_ a)
 #define savepvn(a,b)		Perl_savepvn(aTHX_ a,b)
+#define savesharedpv(a)		Perl_savesharedpv(aTHX_ a)
+#define savesvpv(a)		Perl_savesvpv(aTHX_ a)
 #define savestack_grow()	Perl_savestack_grow(aTHX)
 #define savestack_grow_cnt(a)	Perl_savestack_grow_cnt(aTHX_ a)
 #define save_aelem(a,b,c)	Perl_save_aelem(aTHX_ a,b,c)
@@ -3593,7 +3594,6 @@
 #ifdef PERL_CORE
 #define is_gv_magical_sv(a,b)	Perl_is_gv_magical_sv(aTHX_ a,b)
 #endif
-#define savesvpv(a)		Perl_savesvpv(aTHX_ a)
 #define stashpv_hvname_match(a,b)	Perl_stashpv_hvname_match(aTHX_ a,b)
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)

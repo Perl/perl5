@@ -82,13 +82,16 @@ is a lexical $_ in scope.
 =cut
 */
 
-#ifndef LINT_UNUSED_ARG
+#ifndef PERL_UNUSED_ARG
 #  ifdef lint
 #    include <note.h>
-#    define LINT_UNUSED_ARG(x) NOTE(ARGUNUSED(x))
+#    define PERL_UNUSED_ARG(x) NOTE(ARGUNUSED(x))
 #  else
-#    define LINT_UNUSED_ARG(x)
+#    define PERL_UNUSED_ARG(x) ((void)x)
 #  endif
+#endif
+#ifndef PERL_UNUSED_VAR
+#  define PERL_UNUSED_VAR(x) ((void)x)
 #endif
 
 #define ST(off) PL_stack_base[ax + (off)]
@@ -116,9 +119,14 @@ is a lexical $_ in scope.
 
 #define dITEMS I32 items = SP - MARK
 
-#define dXSARGS \
-	LINT_UNUSED_ARG(cv) \
+#ifdef lint
+#  define dXSARGS \
+	NOTE(ARGUNUSED(cv)) \
 	dSP; dAXMARK; dITEMS
+#else
+#  define dXSARGS \
+	dSP; dAXMARK; dITEMS
+#endif
 
 #define dXSTARG SV * const targ = ((PL_op->op_private & OPpENTERSUB_HASTARG) \
 			     ? PAD_SV(PL_op->op_targ) : sv_newmortal())

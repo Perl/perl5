@@ -1327,13 +1327,13 @@ Perl_gp_free(pTHX_ GV *gv)
 int
 Perl_magic_freeovrld(pTHX_ SV *sv, MAGIC *mg)
 {
-    AMT *amtp = (AMT*)mg->mg_ptr;
-    (void)sv;
+    AMT * const amtp = (AMT*)mg->mg_ptr;
+    PERL_UNUSED_ARG(sv);
 
     if (amtp && AMT_AMAGIC(amtp)) {
 	int i;
 	for (i = 1; i < NofAMmeth; i++) {
-	    CV *cv = amtp->table[i];
+	    CV * const cv = amtp->table[i];
 	    if (cv != Nullcv) {
 		SvREFCNT_dec((SV *) cv);
 		amtp->table[i] = Nullcv;
@@ -1348,10 +1348,8 @@ Perl_magic_freeovrld(pTHX_ SV *sv, MAGIC *mg)
 bool
 Perl_Gv_AMupdate(pTHX_ HV *stash)
 {
-  GV* gv;
-  CV* cv;
-  MAGIC* mg=mg_find((SV*)stash, PERL_MAGIC_overload_table);
-  AMT *amtp = (mg) ? (AMT*)mg->mg_ptr: (AMT *) NULL;
+  MAGIC* const mg = mg_find((SV*)stash, PERL_MAGIC_overload_table);
+  AMT * const amtp = (mg) ? (AMT*)mg->mg_ptr: (AMT *) NULL;
   AMT amt;
 
   if (mg && amtp->was_ok_am == PL_amagic_generation
@@ -1370,14 +1368,13 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
   {
     int filled = 0, have_ovl = 0;
     int i, lim = 1;
-    SV* sv = NULL;
 
     /* Work with "fallback" key, which we assume to be first in PL_AMG_names */
 
     /* Try to find via inheritance. */
-    gv = gv_fetchmeth(stash, PL_AMG_names[0], 2, -1);
-    if (gv)
-	sv = GvSV(gv);
+    GV *gv = gv_fetchmeth(stash, PL_AMG_names[0], 2, -1);
+    SV * const sv = gv ? GvSV(gv) : NULL;
+    CV* cv;
 
     if (!gv)
 	lim = DESTROY_amg;		/* Skip overloading entries. */

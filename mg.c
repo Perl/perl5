@@ -1670,6 +1670,7 @@ Perl_magic_setarylen(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_freearylen_p(pTHX_ SV *sv, MAGIC *mg)
 {
+    PERL_UNUSED_ARG(sv);
     /* during global destruction, mg_obj may already have been freed */
     if (PL_in_clean_all)
 	return 0;

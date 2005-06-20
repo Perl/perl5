@@ -114,14 +114,14 @@ p	|void	|boot_core_UNIVERSAL
 p	|void	|boot_core_PerlIO
 Ap	|void	|call_list	|I32 oldscope|NN AV* av_list
 pR	|bool	|cando		|Mode_t mode|Uid_t effective|NN const Stat_t* statbufp
-Ap	|U32	|cast_ulong	|NV f
-Ap	|I32	|cast_i32	|NV f
-Ap	|IV	|cast_iv	|NV f
-Ap	|UV	|cast_uv	|NV f
+ApR	|U32	|cast_ulong	|NV f
+ApR	|I32	|cast_i32	|NV f
+ApR	|IV	|cast_iv	|NV f
+ApR	|UV	|cast_uv	|NV f
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
-Ap	|I32	|my_chsize	|int fd|Off_t length
+ApR	|I32	|my_chsize	|int fd|Off_t length
 #endif
-p	|OP*	|convert	|I32 optype|I32 flags|OP* o
+pR	|OP*	|convert	|I32 optype|I32 flags|OP* o
 Afprd	|void	|croak		|const char* pat|...
 Apr	|void	|vcroak		|const char* pat|va_list* args
 #if defined(PERL_IMPLICIT_CONTEXT)
@@ -245,15 +245,15 @@ p	|char*	|getenv_len	|const char* key|unsigned long *len
 #endif
 Ap	|void	|gp_free	|GV* gv
 Ap	|GP*	|gp_ref		|GP* gp
-Ap	|GV*	|gv_AVadd	|GV* gv
-Ap	|GV*	|gv_HVadd	|GV* gv
-Ap	|GV*	|gv_IOadd	|GV* gv
+Ap	|GV*	|gv_AVadd	|NN GV* gv
+Ap	|GV*	|gv_HVadd	|NN GV* gv
+Ap	|GV*	|gv_IOadd	|NN GV* gv
 ApR	|GV*	|gv_autoload4	|HV* stash|NN const char* name|STRLEN len|I32 method
 Ap	|void	|gv_check	|HV* stash
 Ap	|void	|gv_efullname	|SV* sv|const GV* gv
 Apmb	|void	|gv_efullname3	|SV* sv|const GV* gv|const char* prefix
 Ap	|void	|gv_efullname4	|SV* sv|const GV* gv|const char* prefix|bool keepmain
-Ap	|GV*	|gv_fetchfile	|const char* name
+Ap	|GV*	|gv_fetchfile	|NN const char* name
 Apd	|GV*	|gv_fetchmeth	|HV* stash|const char* name|STRLEN len \
 				|I32 level
 Apd	|GV*	|gv_fetchmeth_autoload	|HV* stash|const char* name|STRLEN len \
@@ -265,7 +265,7 @@ Ap	|GV*	|gv_fetchpv	|const char* name|I32 add|I32 sv_type
 Ap	|void	|gv_fullname	|SV* sv|const GV* gv
 Apmb	|void	|gv_fullname3	|SV* sv|const GV* gv|const char* prefix
 Ap	|void	|gv_fullname4	|SV* sv|const GV* gv|const char* prefix|bool keepmain
-Ap	|void	|gv_init	|GV* gv|HV* stash|const char* name \
+Ap	|void	|gv_init	|NN GV* gv|NN HV* stash|NN const char* name \
 				|STRLEN len|int multi
 Apd	|HV*	|gv_stashpv	|const char* name|I32 create
 Apd	|HV*	|gv_stashpvn	|const char* name|U32 namelen|I32 create
@@ -639,9 +639,10 @@ p	|void	|rxres_save	|NN void** rsp|NN REGEXP* prx
 #if !defined(HAS_RENAME)
 p	|I32	|same_dirent	|NN const char* a|NN const char* b
 #endif
-Apd	|char*	|savepv		|const char* pv
-Apd	|char*	|savesharedpv	|const char* pv
-Apd	|char*	|savepvn	|const char* pv|I32 len
+Apda	|char*	|savepv		|NN const char* pv
+Apda	|char*	|savepvn	|NN const char* pv|I32 len
+Apda	|char*	|savesharedpv	|const char* pv
+Apda	|char*	|savesvpv	|NN SV* sv
 Ap	|void	|savestack_grow
 Ap	|void	|savestack_grow_cnt	|I32 need
 Ap	|void	|save_aelem	|const AV* av|I32 idx|SV **sptr
@@ -934,22 +935,22 @@ Apr	|void	|newMYSUB	|I32 floor|OP *o|OP *proto|OP *attrs|OP *block
 p	|OP *	|my_attrs	|NN OP *o|OP *attrs
 p	|void	|boot_core_xsutils
 #if defined(USE_ITHREADS)
-Ap	|PERL_CONTEXT*|cx_dup	|PERL_CONTEXT* cx|I32 ix|I32 max|CLONE_PARAMS* param
-Ap	|PERL_SI*|si_dup	|PERL_SI* si|CLONE_PARAMS* param
-Ap	|ANY*	|ss_dup		|PerlInterpreter* proto_perl|CLONE_PARAMS* param
-Ap	|void*	|any_dup	|void* v|PerlInterpreter* proto_perl
-Ap	|HE*	|he_dup		|HE* e|bool shared|CLONE_PARAMS* param
-Ap	|HEK*	|hek_dup	|HEK* e|CLONE_PARAMS* param
-Ap	|REGEXP*|re_dup		|REGEXP* r|CLONE_PARAMS* param
-Ap	|PerlIO*|fp_dup		|PerlIO* fp|char type|CLONE_PARAMS* param
-Ap	|DIR*	|dirp_dup	|DIR* dp
-Ap	|GP*	|gp_dup		|GP* gp|CLONE_PARAMS* param
-Ap	|MAGIC*	|mg_dup		|MAGIC* mg|CLONE_PARAMS* param
-Ap	|SV*	|sv_dup		|SV* sstr|CLONE_PARAMS* param
-Ap	|void	|rvpv_dup	|SV* dstr|SV *sstr|CLONE_PARAMS* param
-Ap	|PTR_TBL_t*|ptr_table_new
-Ap	|void*	|ptr_table_fetch|NN PTR_TBL_t *tbl|NN void *sv
-Ap	|void	|ptr_table_store|NN PTR_TBL_t *tbl|void *oldsv|void *newsv
+Apa	|PERL_CONTEXT*|cx_dup	|PERL_CONTEXT* cx|I32 ix|I32 max|CLONE_PARAMS* param
+Apa	|PERL_SI*|si_dup	|PERL_SI* si|CLONE_PARAMS* param
+Apa	|ANY*	|ss_dup		|NN PerlInterpreter* proto_perl|CLONE_PARAMS* param
+Apa	|void*	|any_dup	|void* v|NN const PerlInterpreter* proto_perl
+Apa	|HE*	|he_dup		|HE* e|bool shared|CLONE_PARAMS* param
+Apa	|HEK*	|hek_dup	|HEK* e|CLONE_PARAMS* param
+Apa	|REGEXP*|re_dup		|const REGEXP* r|CLONE_PARAMS* param
+Apa	|PerlIO*|fp_dup		|PerlIO* fp|char type|CLONE_PARAMS* param
+Apa	|DIR*	|dirp_dup	|DIR* dp
+Apa	|GP*	|gp_dup		|GP* gp|CLONE_PARAMS* param
+Apa	|MAGIC*	|mg_dup		|NN MAGIC* mg|CLONE_PARAMS* param
+Apa	|SV*	|sv_dup		|NN SV* sstr|CLONE_PARAMS* param
+Ap	|void	|rvpv_dup	|NN SV* dstr|NN SV *sstr|CLONE_PARAMS* param
+Apa	|PTR_TBL_t*|ptr_table_new
+Apa	|void*	|ptr_table_fetch|NN PTR_TBL_t *tbl|NN const void *sv
+Ap	|void	|ptr_table_store|NN PTR_TBL_t *tbl|const void *oldsv|NN void *newsv
 Ap	|void	|ptr_table_split|NN PTR_TBL_t *tbl
 Ap	|void	|ptr_table_clear|PTR_TBL_t *tbl
 Ap	|void	|ptr_table_free|PTR_TBL_t *tbl
@@ -962,8 +963,8 @@ Ap	|void	|sys_intern_clear
 Ap	|void	|sys_intern_init
 #endif
 
-Ap	|char *	|custom_op_name	|NN const OP* op
-Ap	|char *	|custom_op_desc	|NN const OP* op
+ApR	|char *	|custom_op_name	|NN const OP* op
+ApR	|char *	|custom_op_desc	|NN const OP* op
 
 #if defined(PERL_OLD_COPY_ON_WRITE)
 pMX	|int	|sv_release_IVX	|SV *sv
@@ -977,30 +978,30 @@ Adp	|int	|nothreadhook
 END_EXTERN_C
 
 #if defined(PERL_IN_DOOP_C) || defined(PERL_DECL_PROT)
-s	|I32	|do_trans_simple	|NN SV *sv
-s	|I32	|do_trans_count		|NN SV *sv
-s	|I32	|do_trans_complex	|NN SV *sv
-s	|I32	|do_trans_simple_utf8	|NN SV *sv
-s	|I32	|do_trans_count_utf8	|NN SV *sv
-s	|I32	|do_trans_complex_utf8	|NN SV *sv
+sR	|I32	|do_trans_simple	|NN SV *sv
+sR	|I32	|do_trans_count		|NN SV *sv
+sR	|I32	|do_trans_complex	|NN SV *sv
+sR	|I32	|do_trans_simple_utf8	|NN SV *sv
+sR	|I32	|do_trans_count_utf8	|NN SV *sv
+sR	|I32	|do_trans_complex_utf8	|NN SV *sv
 #endif
 
 #if defined(PERL_IN_GV_C) || defined(PERL_DECL_PROT)
-s	|void	|gv_init_sv	|GV *gv|I32 sv_type
+s	|void	|gv_init_sv	|NN GV *gv|I32 sv_type
 s	|void	|require_errno	|NN GV *gv
 #endif
 
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
-s	|void	|hsplit		|HV *hv
+s	|void	|hsplit		|NN HV *hv
 s	|void	|hfreeentries	|HV *hv
-sR	|HE*	|new_he
+sa	|HE*	|new_he
 s	|void	|del_he		|NN HE *p
-sR	|HEK*	|save_hek_flags	|NN const char *str|I32 len|U32 hash|int flags
+sa	|HEK*	|save_hek_flags	|NN const char *str|I32 len|U32 hash|int flags
 s	|void	|hv_magic_check	|NN HV *hv|NN bool *needs_copy|NN bool *needs_store
 s	|void	|unshare_hek_or_pvn|const HEK* hek|const char* str|I32 len|U32 hash
 sR	|HEK*	|share_hek_flags|const char* sv|I32 len|U32 hash|int flags
 rs	|void	|hv_notallowed	|int flags|NN const char *key|I32 klen|NN const char *msg
-s	|struct xpvhv_aux*|hv_auxinit|HV *hv
+s	|struct xpvhv_aux*|hv_auxinit|NN HV *hv
 sM	|SV*	|hv_delete_common|HV* tb|SV* key_sv|const char* key|STRLEN klen|int k_flags|I32 d_flags|U32 hash
 sM	|HE*	|hv_fetch_common|HV* tb|SV* key_sv|const char* key|STRLEN klen|int flags|int action|SV* val|U32 hash
 #endif
@@ -1507,7 +1508,6 @@ Ap	|GV*	|gv_fetchpvn_flags|const char* name|STRLEN len|I32 flags|I32 sv_type
 Ap	|GV*	|gv_fetchsv|SV *name|I32 flags|I32 sv_type
 dpR	|bool	|is_gv_magical_sv|SV *name|U32 flags
 
-Apda	|char*	|savesvpv	|NN SV* sv
 ApR	|bool	|stashpv_hvname_match|NN const COP *cop|NN const HV *hv
 
 END_EXTERN_C
