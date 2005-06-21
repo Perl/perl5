@@ -89,6 +89,8 @@ copy( File::Basename::basename($0), 'copy' );
 my $COMPRESS_FILE   = 'copy';
 chmod 0644, $COMPRESS_FILE;
 
+END { unlink $COMPRESS_FILE; }
+
 ### done setting up environment ###
 
 
