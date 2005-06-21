@@ -1181,6 +1181,19 @@ lib/assertions/activate.pm	assertions activate/deactivate
 lib/assertions/compat.pm	assertions compatibility for earlier perls
 lib/assertions.pm		module support for -A flag
 lib/assert.pl			assertion and panic with stack trace
+lib/Archive/Tar/Constant.pm	Archive::Tar
+lib/Archive/Tar/File.pm		Archive::Tar
+lib/Archive/Tar/t/01_use.t	Archive::Tar tests
+lib/Archive/Tar/t/02_methods.t	Archive::Tar tests
+lib/Archive/Tar/t/03_file.t	Archive::Tar tests
+lib/Archive/Tar/t/99_pod.t	Archive::Tar tests
+lib/Archive/Tar/t/src/long/b	Archive::Tar tests
+lib/Archive/Tar/t/src/long/bar.tar	Archive::Tar tests
+lib/Archive/Tar/t/src/long/foo.tgz	Archive::Tar tests
+lib/Archive/Tar/t/src/short/b	Archive::Tar tests
+lib/Archive/Tar/t/src/short/bar.tar	Archive::Tar tests
+lib/Archive/Tar/t/src/short/foo.tgz	Archive::Tar tests
+lib/Archive/Tar.pm		Archive::Tar
 lib/Attribute/Handlers/Changes	Attribute::Handlers
 lib/Attribute/Handlers/demo/demo2.pl	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/demo3.pl	Attribute::Handlers demo
