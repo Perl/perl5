@@ -46,9 +46,8 @@ static I32 amagic_cmp_locale(pTHX_ SV *a, SV *b);
 #define sv_cmp_static Perl_sv_cmp
 #define sv_cmp_locale_static Perl_sv_cmp_locale
 
-#define SORTHINTS(hintsv) \
-    (((hintsv) = GvSV(gv_fetchpv("sort::hints", GV_ADDMULTI, SVt_IV))), \
-    (SvIOK(hintsv) ? ((I32)SvIV(hintsv)) : 0))
+#define dSORTHINTS   SV *hintsv = GvSV(gv_fetchpv("sort::hints", GV_ADDMULTI, SVt_IV))
+#define SORTHINTS    (SvIOK(hintsv) ? ((I32)SvIV(hintsv)) : 0)
 
 #ifndef SMALLSORT
 #define	SMALLSORT (200)
@@ -1347,9 +1346,10 @@ cmpindir_desc(pTHX_ gptr a, gptr b)
 STATIC void
 S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 {
-    SV *hintsv;
 
-    if (SORTHINTS(hintsv) & HINT_SORT_STABLE) {
+    dSORTHINTS;
+
+    if (SORTHINTS & HINT_SORT_STABLE) {
 	 register gptr **pp, *q;
 	 register size_t n, j, i;
 	 gptr *small[SMALLSORT], **indir, tmp;
@@ -1442,14 +1442,8 @@ Perl_sortsv(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
 {
     void (*sortsvp)(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
       = S_mergesortsv;
-    SV *hintsv;
-
-    /*  Sun's Compiler (cc: WorkShop Compilers 4.2 30 Oct 1996 C 4.2) used 
-	to miscompile this function under optimization -O.  If you get test 
-	errors related to picking the correct sort() function, try recompiling 
-	this file without optimiziation.  -- A.D.  4/2002.
-    */
-    const I32 hints = SORTHINTS(hintsv);
+    dSORTHINTS;
+    const I32 hints = SORTHINTS;
     if (hints & HINT_SORT_QUICKSORT) {
 	sortsvp = S_qsortsv;
     }
@@ -1467,14 +1461,8 @@ S_sortsv_desc(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
 {
     void (*sortsvp)(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
       = S_mergesortsv;
-    SV *hintsv;
-
-    /*  Sun's Compiler (cc: WorkShop Compilers 4.2 30 Oct 1996 C 4.2) used 
-	to miscompile this function under optimization -O.  If you get test 
-	errors related to picking the correct sort() function, try recompiling 
-	this file without optimiziation.  -- A.D.  4/2002.
-    */
-    const I32 hints = SORTHINTS(hintsv);
+    dSORTHINTS;
+    const I32 hints = SORTHINTS;
     if (hints & HINT_SORT_QUICKSORT) {
 	sortsvp = S_qsortsv;
     }
