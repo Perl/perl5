@@ -1183,6 +1183,7 @@ lib/assertions.pm		module support for -A flag
 lib/assert.pl			assertion and panic with stack trace
 lib/Archive/Tar/Constant.pm	Archive::Tar
 lib/Archive/Tar/File.pm		Archive::Tar
+lib/Archive/Tar/bin/ptar	the ptar utility
 lib/Archive/Tar/t/01_use.t	Archive::Tar tests
 lib/Archive/Tar/t/02_methods.t	Archive::Tar tests
 lib/Archive/Tar/t/03_file.t	Archive::Tar tests
@@ -3050,6 +3051,7 @@ utils/perlivp.PL		installation verification procedure
 utils/piconv.PL			iconv(1), reinvented in perl
 utils/pl2pm.PL			A pl to pm translator
 utils/prove.PL			The prove harness utility
+utils/ptar.PL			The ptar utility
 utils/splain.PL			Stand-alone version of diagnostics.pm
 utils/xsubpp.PL			External subroutine preprocessor
 uts/sprintf_wrap.c		sprintf wrapper for UTS
