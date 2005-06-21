@@ -563,6 +563,13 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
+#define SvRTRIM(sv) STMT_START { \
+    STRLEN len = SvCUR(sv); \
+    while (len > 0 && isSPACE(SvPVX(sv)[len-1])) \
+	--len; \
+    SvCUR_set(sv, len); \
+} STMT_END
+
 int
 Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 {
@@ -648,6 +655,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 #endif
 #endif
 #endif
+	     SvRTRIM(sv);
 	     SvNOK_on(sv);	/* what a wonderful hack! */
 	 }
 	 else if (strEQ(mg->mg_ptr+1, "NCODING"))
@@ -896,6 +904,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	errno = saveerrno;
 	}
 #endif
+	SvRTRIM(sv);
 	SvNOK_on(sv);	/* what a wonderful hack! */
 	break;
     case '<':
