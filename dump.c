@@ -1190,7 +1190,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	/* FALL THROUGH */
     default:
 	if (SvEVALED(sv))	sv_catpv(d, "EVALED,");
-	if (SvIsUV(sv))		sv_catpv(d, "IsUV,");
+	if (SvIsUV(sv) && !(flags & SVf_ROK))	sv_catpv(d, "IsUV,");
 	break;
     case SVt_PVBM:
 	if (SvTAIL(sv))		sv_catpv(d, "TAIL,");
