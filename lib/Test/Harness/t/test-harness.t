@@ -472,7 +472,8 @@ my %samples = (
 plan tests => (keys(%samples) * 8);
 
 use Test::Harness;
-$Test::Harness::Switches = '"-Mstrict"';
+my @_INC = map { qq{"-I$_"} } @INC;
+$Test::Harness::Switches = "@_INC -Mstrict";
 
 tie *NULL, 'Dev::Null' or die $!;
 

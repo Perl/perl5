@@ -1,5 +1,18 @@
 Revision history for Perl extension Test::Harness
 
+2.49_02 Tue Jun 21 09:54:44 CDT 2005
+    [FIXES]
+    * Added some includes in t/test_harness.t to make Cygwin happy.
+
+2.49_01 Fri Jun 10 15:37:31 CDT 2005
+    [ENHANCEMENTS]
+    * Now shows elapsed time in 1000ths of a second if Time::HiRes
+      is available.
+
+    [FIXES]
+    * Test::Harness::Iterator didn't have a 1; at the end.  Thanks to
+      Steve Peters for finding it.
+
 2.48    Fri Apr 22 22:41:46 CDT 2005
     Released after weeks of non-complaint.
 

@@ -10,6 +10,13 @@ use Benchmark;
 use Config;
 use strict;
 
+use vars '$has_time_hires';
+
+BEGIN {
+    eval "use Time::HiRes 'time'";
+    $has_time_hires = !$@;
+}
+
 use vars qw(
     $VERSION 
     @ISA @EXPORT @EXPORT_OK 
@@ -27,11 +34,11 @@ Test::Harness - Run Perl standard test scripts with statistics
 
 =head1 VERSION
 
-Version 2.48
+Version 2.49_02
 
 =cut
 
-$VERSION = "2.48";
+$VERSION = "2.49_02";
 
 # Backwards compatibility for exportable variable names.
 *verbose  = *Verbose;
@@ -322,7 +329,7 @@ sub _run_all_tests {
 
     my @dir_files;
     @dir_files = _globdir $Files_In_Dir if defined $Files_In_Dir;
-    my $t_start = new Benchmark;
+    my $run_start_time = new Benchmark;
 
     my $width = _leader_width(@tests);
     foreach my $tfile (@tests) {
@@ -338,8 +345,12 @@ sub _run_all_tests {
         if ( $Test::Harness::Debug ) {
             print "# Running: ", $Strap->_command_line($tfile), "\n";
         }
+        my $test_start_time = time;
         my %results = $Strap->analyze_file($tfile) or
           do { warn $Strap->{error}, "\n";  next };
+        my $test_end_time = time;
+        my $elapsed = $test_end_time - $test_start_time;
+        $elapsed = $has_time_hires ? sprintf( " %8.3fs", $elapsed ) : "";
 
         # state of the current test.
         my @failed = grep { !$results{details}[$_-1]{ok} }
@@ -365,19 +376,23 @@ sub _run_all_tests {
         my($estatus, $wstatus) = @results{qw(exit wait)};
 
         if ($results{passing}) {
+            # XXX Combine these first two
             if ($test{max} and $test{skipped} + $test{bonus}) {
                 my @msg;
                 push(@msg, "$test{skipped}/$test{max} skipped: $test{skip_reason}")
                     if $test{skipped};
                 push(@msg, "$test{bonus}/$test{max} unexpectedly succeeded")
                     if $test{bonus};
-                print "$test{ml}ok\n        ".join(', ', @msg)."\n";
-            } elsif ($test{max}) {
-                print "$test{ml}ok\n";
-            } elsif (defined $test{skip_all} and length $test{skip_all}) {
+                print "$test{ml}ok$elapsed\n        ".join(', ', @msg)."\n";
+            }
+            elsif ( $test{max} ) {
+                print "$test{ml}ok$elapsed\n";
+            }
+            elsif ( defined $test{skip_all} and length $test{skip_all} ) {
                 print "skipped\n        all skipped: $test{skip_all}\n";
                 $tot{skipped}++;
-            } else {
+            }
+            else {
                 print "skipped\n        all skipped: no reason given\n";
                 $tot{skipped}++;
             }
@@ -415,7 +430,8 @@ sub _run_all_tests {
                                              estat   => '',
                                              wstat   => '',
                                            };
-                } else {
+                }
+                else {
                     print "Don't know which tests failed: got $test{ok} ok, ".
                           "expected $test{max}\n";
                     $failedtests{$tfile} = { canon   => '??',
@@ -428,7 +444,8 @@ sub _run_all_tests {
                                            };
                 }
                 $tot{bad}++;
-            } else {
+            }
+            else {
                 print "FAILED before any test output arrived\n";
                 $tot{bad}++;
                 $failedtests{$tfile} = { canon       => '??',
@@ -454,7 +471,7 @@ sub _run_all_tests {
             }
         }
     } # foreach test
-    $tot{bench} = timediff(new Benchmark, $t_start);
+    $tot{bench} = timediff(new Benchmark, $run_start_time);
 
     $Strap->_restore_PERL5LIB;
 
@@ -479,13 +496,15 @@ sub _mk_leader {
     chomp($te);
     $te =~ s/\.\w+$/./;
 
-    if ($^O eq 'VMS') { $te =~ s/^.*\.t\./\[.t./s; }
-    my $blank = (' ' x 77);
+    if ($^O eq 'VMS') {
+        $te =~ s/^.*\.t\./\[.t./s;
+    }
     my $leader = "$te" . '.' x ($width - length($te));
     my $ml = "";
 
-    $ml = "\r$blank\r$leader"
-      if -t STDOUT and not $ENV{HARNESS_NOTTY} and not $Verbose;
+    if ( -t STDOUT and not $ENV{HARNESS_NOTTY} and not $Verbose ) {
+        $ml = "\r" . (' ' x 77) . "\r$leader"
+    }
 
     return($leader, $ml);
 }
@@ -522,13 +541,16 @@ sub _show_results {
 
     if (_all_ok($tot)) {
         print "All tests successful$bonusmsg.\n";
-    } elsif (!$tot->{tests}){
+    }
+    elsif (!$tot->{tests}){
         die "FAILED--no tests were run for some reason.\n";
-    } elsif (!$tot->{max}) {
+    }
+    elsif (!$tot->{max}) {
         my $blurb = $tot->{tests}==1 ? "script" : "scripts";
         die "FAILED--$tot->{tests} test $blurb could be run, ".
             "alas--no output ever seen\n";
-    } else {
+    }
+    else {
         $pct = sprintf("%.2f", $tot->{good} / $tot->{tests} * 100);
         my $percent_ok = 100*$tot->{ok}/$tot->{max};
         my $subpct = sprintf " %d/%d subtests failed, %.2f%% okay.",
@@ -764,11 +786,7 @@ sub _canonfailed ($$@) {
     if (@failed) {
         for (@failed, $failed[-1]) { # don't forget the last one
             if ($_ > $last+1 || $_ == $last) {
-                if ($min == $last) {
-                    push @canon, $last;
-                } else {
-                    push @canon, "$min-$last";
-                }
+                push @canon, ($min == $last) ? $last : "$min-$last";
                 $min = $_;
             }
             $last = $_;
@@ -776,7 +794,8 @@ sub _canonfailed ($$@) {
         local $" = ", ";
         push @result, "FAILED tests @canon\n";
         $canon = join ' ', @canon;
-    } else {
+    }
+    else {
         push @result, "FAILED test $last\n";
         $canon = $last;
     }
@@ -784,7 +803,8 @@ sub _canonfailed ($$@) {
     push @result, "\tFailed $failed/$max tests, ";
     if ($max) {
 	push @result, sprintf("%.2f",100*(1-$failed/$max)), "% okay";
-    } else {
+    }
+    else {
 	push @result, "?% okay";
     }
     my $ender = 's' x ($skipped > 1);
@@ -794,7 +814,8 @@ sub _canonfailed ($$@) {
 	if ($max) {
 	    my $goodper = sprintf("%.2f",100*($good/$max));
 	    $skipmsg .= "$goodper%)";
-	} else {
+        }
+        else {
 	    $skipmsg .= "?%)";
 	}
 	push @result, $skipmsg;

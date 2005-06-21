@@ -457,7 +457,8 @@ sub _filtered_INC {
 	# toss the ones that involve perl_root, the install location
         @inc = grep !/perl_root/i, @inc;
 
-    } elsif ( $self->{_is_win32} ) {
+    }
+    elsif ( $self->{_is_win32} ) {
 	# Lose any trailing backslashes in the Win32 paths
 	s/[\\\/+]$// foreach @inc;
     }
