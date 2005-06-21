@@ -5230,13 +5230,6 @@ S_sv_add_backref(pTHX_ SV *tsv, SV *sv)
 	 * by magic_killbackrefs() when tsv is being freed */
     }
     if (AvFILLp(av) >= AvMAX(av)) {
-        I32 i;
-        SV **svp = AvARRAY(av);
-        for (i = AvFILLp(av); i >= 0; i--)
-            if (!svp[i]) {
-                svp[i] = sv;        /* reuse the slot */
-                return;
-            }
         av_extend(av, AvFILLp(av)+1);
     }
     AvARRAY(av)[++AvFILLp(av)] = sv; /* av_push() */
@@ -5258,8 +5251,23 @@ S_sv_del_backref(pTHX_ SV *sv)
 	Perl_croak(aTHX_ "panic: del_backref");
     av = (AV *)mg->mg_obj;
     svp = AvARRAY(av);
-    for (i = AvFILLp(av); i >= 0; i--)
-	if (svp[i] == sv) svp[i] = Nullsv;
+    /* We shouldn't be in here more than once, but for paranoia reasons lets
+       not assume this.  */
+    for (i = AvFILLp(av); i >= 0; i--) {
+	if (svp[i] == sv) {
+	    const SSize_t fill = AvFILLp(av);
+	    if (i != fill) {
+		/* We weren't the last entry.
+		   An unordered list has this property that you can take the
+		   last element off the end to fill the hole, and it's still
+		   an unordered list :-)
+		*/
+		svp[i] = svp[fill];
+	    }
+	    svp[fill] = Nullsv;
+	    AvFILLp(av) = fill - 1;
+	}
+    }
 }
 
 /*
