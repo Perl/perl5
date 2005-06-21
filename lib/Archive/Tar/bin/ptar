@@ -72,3 +72,36 @@ See Also:
     \n]
 }
 
+__END__
+
+=head1 NAME
+
+ptar - a tar-like program written in perl
+
+=head1 DESCRIPTION
+
+ptar is a small, tar look-alike program that uses the perl module
+Archive::Tar to extract, create and list tar archives.
+
+=head1 SYNOPSIS
+
+    ptar -c [-v] [-z] [-f ARCHIVE_FILE] FILE FILE ...
+    ptar -x [-v] [-z] [-f ARCHIVE_FILE]
+    ptar -t [-z] [-f ARCHIVE_FILE]
+    ptar -h
+
+=head1 OPTIONS
+
+    x   Extract from ARCHIVE_FILE
+    c   Create ARCHIVE_FILE from FILE
+    t   List the contents of ARCHIVE_FILE
+    f   Name of the ARCHIVE_FILE to use. Default is './default.tar'
+    z   Read/Write zlib compressed ARCHIVE_FILE (not always available)
+    v   Print filenames as they are added or extraced from ARCHIVE_FILE
+    h   Prints this help message
+
+=head1 SEE ALSO
+
+tar(1), L<Archive::Tar>.
+
+=cut
