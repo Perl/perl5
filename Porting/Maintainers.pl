@@ -30,6 +30,7 @@ package Maintainers;
 	'jhi'		=> 'Jarkko Hietaniemi <jhi@cpan.org>',
 	'jstowe'	=> 'Jonathan Stowe <jstowe@cpan.org>',
 	'jv'		=> 'Johan Vromans <jv@cpan.org>',
+	'kane'		=> 'Jos Boumans <kane@cpan.org>',
 	'kwilliams'	=> 'Ken Williams <kwilliams@cpan.org>',
 	'laun'		=> 'Wolfgang Laun <Wolfgang.Laun@alcatel.at>',
 	'lstein'	=> 'Lincoln D. Stein <lds@cpan.org>',
@@ -62,6 +63,13 @@ package Maintainers;
 # latest one from CPAN) or 0 (there is no valid CPAN release).
 
 %Modules = (
+
+	'Archive::Tar' =>
+		{
+		'MAINTAINER'	=> 'kane',
+		'FILES'		=> q[lib/Archive/Tar.pm lib/Archive/Tar],
+		'CPAN'		=> 1,
+		},
 
 	'Attribute::Handlers' =>
 		{
