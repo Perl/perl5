@@ -930,15 +930,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define OSNAME "$osname"		/**/
 #define OSVERS "$osvers"		/**/
 
-/* MULTIARCH:
- *	This symbol, if defined, signifies that the build
- *	process will produce some binary files that are going to be
- *	used in a cross-platform environment.  This is the case for
- *	example with the NeXT "fat" binaries that contain executables
- *	for several CPUs.
- */
-#$multiarch MULTIARCH		/**/
-
 /* USE_CROSS_COMPILE:
  *	This symbol, if defined, indicates that Perl is being cross-compiled.
  */
@@ -950,6 +941,15 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$usecrosscompile	USE_CROSS_COMPILE	/**/
 #define	PERL_TARGETARCH	"$targetarch"	/**/
 #endif
+
+/* MULTIARCH:
+ *	This symbol, if defined, signifies that the build
+ *	process will produce some binary files that are going to be
+ *	used in a cross-platform environment.  This is the case for
+ *	example with the NeXT "fat" binaries that contain executables
+ *	for several CPUs.
+ */
+#$multiarch MULTIARCH		/**/
 
 /* MEM_ALIGNBYTES:
  *	This symbol contains the number of bytes required to align a
@@ -1894,12 +1894,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_ldbl_dig HAS_LDBL_DIG 	/* */
 
-/* LIBM_LIB_VERSION:
- *	This symbol, if defined, indicates that libm exports _LIB_VERSION
- *	and that math.h defines the enum to manipulate it.
- */
-#$d_libm_lib_version LIBM_LIB_VERSION		/**/
-
 /* HAS_LOCALTIME_R:
  *	This symbol, if defined, indicates that the localtime_r routine
  *	is available to localtime re-entrantly.
@@ -2302,6 +2296,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define Sigsetjmp(buf,save_mask) setjmp((buf))
 #define Siglongjmp(buf,retval) longjmp((buf),(retval))
 #endif
+
+/* USE_SITECUSTOMIZE:
+ *	This symbol, if defined, indicates that sitecustomize should
+ *	be used.
+ */
+#$usesitecustomize	USE_SITECUSTOMIZE		/**/
 
 /* HAS_SOCKET:
  *	This symbol, if defined, indicates that the BSD socket interface is
@@ -3235,7 +3235,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol contains the number of bits a variable of type NVTYPE
  *	can preserve of a variable of type UVTYPE.
  */
-/* NV_ZERO_IS_ALLBITS_ZERO
+/* NV_ZERO_IS_ALLBITS_ZERO:
  *	This symbol, if defined, indicates that a variable of type NVTYPE
  *	stores 0.0 in memory as all bits zero.
  */
@@ -3618,12 +3618,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$useperlio	USE_PERLIO		/**/
 #endif
 
-/* PERL_RELOCATABLE_INC:
- *	This symbol, if defined, indicates that we'd like to relocate entries
- *	in @INC at run time based on the location of the perl binary.
- */
-#define PERL_RELOCATABLE_INC "$userelocatableinc" 		/**/
-
 /* USE_SOCKS:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use socks.
@@ -3889,6 +3883,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_ilogbl HAS_ILOGBL		/**/
 
+/* LIBM_LIB_VERSION:
+ *	This symbol, if defined, indicates that libm exports _LIB_VERSION
+ *	and that math.h defines the enum to manipulate it.
+ */
+#$d_libm_lib_version LIBM_LIB_VERSION		/**/
+
 /* HAS_NL_LANGINFO:
  *	This symbol, if defined, indicates that the nl_langinfo routine is
  *	available to return local data.  You will also need <langinfo.h>
@@ -3929,12 +3929,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	of the calling process.
  */
 #$d_sigprocmask HAS_SIGPROCMASK		/**/
-
-/* USE_SITECUSTOMIZE:
- *	This symbol, if defined, indicates that sitecustomize should
- *	be used.
- */
-#$usesitecustomize	USE_SITECUSTOMIZE		/**/
 
 /* HAS_SOCKATMARK:
  *	This symbol, if defined, indicates that the sockatmark routine is
@@ -4035,6 +4029,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #ifndef USE_FAST_STDIO
 #$usefaststdio	USE_FAST_STDIO		/**/
 #endif
+
+/* PERL_RELOCATABLE_INC:
+ *	This symbol, if defined, indicates that we'd like to relocate entries
+ *	in @INC at run time based on the location of the perl binary.
+ */
+#define PERL_RELOCATABLE_INC "$userelocatableinc" 		/**/
 
 /* HAS_CTERMID_R:
  *	This symbol, if defined, indicates that the ctermid_r routine
