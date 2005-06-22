@@ -547,6 +547,8 @@ my %samples = (
 plan tests => (keys(%samples) * 5) + 3;
 
 use Test::Harness::Straps;
+my @_INC = map { qq{"-I$_"} } @INC;
+$Test::Harness::Switches = "@_INC -Mstrict";
 
 $SIG{__WARN__} = sub { 
     warn @_ unless $_[0] =~ /^Enormous test number/ ||
