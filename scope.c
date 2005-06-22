@@ -155,38 +155,13 @@ S_save_scalar_at(pTHX_ SV **sptr)
     register SV * const sv = *sptr = NEWSV(0,0);
 
     if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(osv) && SvTYPE(osv) != SVt_PVGV) {
-	MAGIC *mg;
-	sv_upgrade(sv, SvTYPE(osv));
 	if (SvGMAGICAL(osv)) {
 	    const bool oldtainted = PL_tainted;
-	    mg_get(osv);		/* note, can croak! */
-	    if (PL_tainting && PL_tainted &&
-			(mg = mg_find(osv, PERL_MAGIC_taint))) {
-		SAVESPTR(mg->mg_obj);
-		mg->mg_obj = osv;
-	    }
 	    SvFLAGS(osv) |= (SvFLAGS(osv) &
 	       (SVp_NOK|SVp_POK)) >> PRIVSHIFT;
 	    PL_tainted = oldtainted;
 	}
-	SvMAGIC_set(sv, SvMAGIC(osv));
-	/* if it's a special scalar or if it has no 'set' magic,
-	 * propagate the SvREADONLY flag. --rgs 20030922 */
-	for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
-	    if (mg->mg_type == '\0'
-		    || !(mg->mg_virtual && mg->mg_virtual->svt_set))
-	    {
-		SvFLAGS(sv) |= SvREADONLY(osv);
-		break;
-	    }
-	}
-	SvFLAGS(sv) |= SvMAGICAL(osv);
-	/* XXX SvMAGIC() is *shared* between osv and sv.  This can
-	 * lead to coredumps when both SVs are destroyed without one
-	 * of their SvMAGIC() slots being NULLed. */
-	PL_localizing = 1;
-	SvSETMAGIC(sv);
-	PL_localizing = 0;
+	mg_localize(osv, sv);
     }
     return sv;
 }
@@ -195,6 +170,7 @@ SV *
 Perl_save_scalar(pTHX_ GV *gv)
 {
     SV **sptr = &GvSV(gv);
+    SvGETMAGIC(*sptr);
     SSCHECK(3);
     SSPUSHPTR(SvREFCNT_inc(gv));
     SSPUSHPTR(SvREFCNT_inc(*sptr));
@@ -205,6 +181,7 @@ Perl_save_scalar(pTHX_ GV *gv)
 SV*
 Perl_save_svref(pTHX_ SV **sptr)
 {
+    SvGETMAGIC(*sptr);
     SSCHECK(3);
     SSPUSHPTR(sptr);
     SSPUSHPTR(SvREFCNT_inc(*sptr));
@@ -312,15 +289,8 @@ Perl_save_ary(pTHX_ GV *gv)
 
     GvAV(gv) = Null(AV*);
     av = GvAVn(gv);
-    if (SvMAGIC(oav)) {
-	SvMAGIC_set(av, SvMAGIC(oav));
-	SvFLAGS((SV*)av) |= SvMAGICAL(oav);
-	SvMAGICAL_off(oav);
-	SvMAGIC_set(oav, NULL);
-	PL_localizing = 1;
-	SvSETMAGIC((SV*)av);
-	PL_localizing = 0;
-    }
+    if (SvMAGIC(oav))
+	mg_localize((SV*)oav, (SV*)av);
     return av;
 }
 
@@ -336,15 +306,8 @@ Perl_save_hash(pTHX_ GV *gv)
 
     GvHV(gv) = Null(HV*);
     hv = GvHVn(gv);
-    if (SvMAGIC(ohv)) {
-	SvMAGIC_set(hv, SvMAGIC(ohv));
-	SvFLAGS((SV*)hv) |= SvMAGICAL(ohv);
-	SvMAGICAL_off(ohv);
-	SvMAGIC_set(ohv, NULL);
-	PL_localizing = 1;
-	SvSETMAGIC((SV*)hv);
-	PL_localizing = 0;
-    }
+    if (SvMAGIC(ohv))
+	mg_localize((SV*)ohv, (SV*)hv);
     return hv;
 }
 
@@ -586,6 +549,7 @@ void
 Perl_save_aelem(pTHX_ const AV *av, I32 idx, SV **sptr)
 {
     SV *sv;
+    SvGETMAGIC(*sptr);
     SSCHECK(4);
     SSPUSHPTR(SvREFCNT_inc(av));
     SSPUSHINT(idx);
@@ -608,6 +572,7 @@ void
 Perl_save_helem(pTHX_ HV *hv, SV *key, SV **sptr)
 {
     SV *sv;
+    SvGETMAGIC(*sptr);
     SSCHECK(4);
     SSPUSHPTR(SvREFCNT_inc(hv));
     SSPUSHPTR(SvREFCNT_inc(key));
@@ -715,30 +680,6 @@ Perl_leave_scope(pTHX_ I32 base)
 	    DEBUG_S(PerlIO_printf(Perl_debug_log,
 				  "restore svref: %p %p:%s -> %p:%s\n",
 				  ptr, sv, SvPEEK(sv), value, SvPEEK(value)));
-	    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv) &&
-		SvTYPE(sv) != SVt_PVGV)
-	    {
-		SvUPGRADE(value, SvTYPE(sv));
-		SvMAGIC_set(value, SvMAGIC(sv));
-		SvFLAGS(value) |= SvMAGICAL(sv);
-		SvMAGICAL_off(sv);
-		SvMAGIC_set(sv, 0);
-	    }
-	    /* XXX This branch is pretty bogus.  This code irretrievably
-	     * clears(!) the magic on the SV (either to avoid further
-	     * croaking that might ensue when the SvSETMAGIC() below is
-	     * called, or to avoid two different SVs pointing at the same
-	     * SvMAGIC()).  This needs a total rethink.  --GSAR */
-	    else if (SvTYPE(value) >= SVt_PVMG && SvMAGIC(value) &&
-		     SvTYPE(value) != SVt_PVGV)
-	    {
-		SvFLAGS(value) |= (SvFLAGS(value) &
-				  (SVp_NOK|SVp_POK)) >> PRIVSHIFT;
-		SvMAGICAL_off(value);
-		/* XXX this is a leak when we get here because the
-		 * mg_get() in save_scalar_at() croaked */
-		SvMAGIC_set(value, NULL);
-	    }
 	    *(SV**)ptr = value;
 	    SvREFCNT_dec(sv);
 	    PL_localizing = 2;

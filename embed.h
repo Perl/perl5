@@ -460,6 +460,9 @@
 #define sortsv			Perl_sortsv
 #define mg_clear		Perl_mg_clear
 #define mg_copy			Perl_mg_copy
+#ifdef PERL_CORE
+#define mg_localize		Perl_mg_localize
+#endif
 #define mg_find			Perl_mg_find
 #define mg_free			Perl_mg_free
 #define mg_get			Perl_mg_get
@@ -2434,6 +2437,9 @@
 #define sortsv(a,b,c)		Perl_sortsv(aTHX_ a,b,c)
 #define mg_clear(a)		Perl_mg_clear(aTHX_ a)
 #define mg_copy(a,b,c,d)	Perl_mg_copy(aTHX_ a,b,c,d)
+#ifdef PERL_CORE
+#define mg_localize(a,b)	Perl_mg_localize(aTHX_ a,b)
+#endif
 #define mg_find(a,b)		Perl_mg_find(aTHX_ a,b)
 #define mg_free(a)		Perl_mg_free(aTHX_ a)
 #define mg_get(a)		Perl_mg_get(aTHX_ a)

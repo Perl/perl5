@@ -1046,8 +1046,12 @@ The current kinds of Magic Virtual Tables are:
     *  PERL_MAGIC_glob           vtbl_glob      GV (typeglob)
     #  PERL_MAGIC_arylen         vtbl_arylen    Array length ($#ary)
     .  PERL_MAGIC_pos            vtbl_pos       pos() lvalue
-    <  PERL_MAGIC_backref        vtbl_backref   ???
+    <  PERL_MAGIC_backref        vtbl_backref   back pointer to a weak ref 
     ~  PERL_MAGIC_ext            (none)         Available for use by extensions
+    :  PERL_MAGIC_symtab	 (none)		hash used as symbol table
+    %  PERL_MAGIC_rhash	 	 (none)		hash used as restricted hash
+    @  PERL_MAGIC_arylen_p	 vtbl_arylen_p	pointer to $#a from @a
+
 
 When an uppercase and lowercase letter both exist in the table, then the
 uppercase letter is typically used to represent some kind of composite type

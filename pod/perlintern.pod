@@ -450,6 +450,24 @@ Found in file doio.c
 
 =back
 
+=head1 Magical Functions
+
+=over 8
+
+=item mg_localize
+
+Copy some of the magic from an existing SV to new localized version of
+that SV. Container magic (eg %ENV, $1, tie) gets copied, value magic
+doesn't (eg taint, pos).
+
+	void	mg_localize(SV* sv, SV* nsv)
+
+=for hackers
+Found in file mg.c
+
+
+=back
+
 =head1 Pad Data Structures
 
 =over 8

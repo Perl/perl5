@@ -445,6 +445,7 @@ p	|void	|qerror		|SV* err
 Apd     |void   |sortsv         |SV ** array|size_t num_elts|SVCOMPARE_t cmp
 Apd	|int	|mg_clear	|SV* sv
 Apd	|int	|mg_copy	|SV* sv|SV* nsv|const char* key|I32 klen
+pd	|void	|mg_localize	|SV* sv|SV* nsv
 Apd	|MAGIC*	|mg_find	|const SV* sv|int type
 Apd	|int	|mg_free	|SV* sv
 Apd	|int	|mg_get		|SV* sv

@@ -828,6 +828,7 @@ PERL_CALLCONV void	Perl_qerror(pTHX_ SV* err);
 PERL_CALLCONV void	Perl_sortsv(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t cmp);
 PERL_CALLCONV int	Perl_mg_clear(pTHX_ SV* sv);
 PERL_CALLCONV int	Perl_mg_copy(pTHX_ SV* sv, SV* nsv, const char* key, I32 klen);
+PERL_CALLCONV void	Perl_mg_localize(pTHX_ SV* sv, SV* nsv);
 PERL_CALLCONV MAGIC*	Perl_mg_find(pTHX_ const SV* sv, int type);
 PERL_CALLCONV int	Perl_mg_free(pTHX_ SV* sv);
 PERL_CALLCONV int	Perl_mg_get(pTHX_ SV* sv);

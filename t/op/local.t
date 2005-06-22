@@ -268,8 +268,9 @@ eval { for ($1) { local $_ = 1 } };
 print "not " if $@ !~ /Modification of a read-only value attempted/;
 print "ok 77\n";
 
+# make sure $1 is still read-only
 eval { for ($1) { local $_ = 1 } };
-print "not " if $@;
+print "not " if $@ !~ /Modification of a read-only value attempted/;
 print "ok 78\n";
 
 # The s/// adds 'g' magic to $_, but it should remain non-readonly
