@@ -195,6 +195,7 @@ sub write_protos {
 	    for my $arg ( @args ) {
 		++$n;
 		push( @nonnull, $n ) if ( $arg =~ s/\s*\bNN\b\s+// );
+		$arg =~ s/\s*\bNULLOK\b\s+//; # strip NULLOK with no effect
 	    }
 	    $ret .= join ", ", @args;
 	}
@@ -953,3 +954,5 @@ my %vfuncs = qw(
     Perl_dump_indent		Perl_dump_vindent
     Perl_default_protect	Perl_vdefault_protect
 );
+
+# ex: set ts=8 sts=4 sw=4 noet:

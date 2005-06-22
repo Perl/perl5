@@ -1374,6 +1374,7 @@ Perl_dounwind(pTHX_ I32 cxix)
 	}
 	cxstack_ix--;
     }
+    PERL_UNUSED_VAR(optype);
 }
 
 void
@@ -2068,6 +2069,7 @@ PP(pp_last)
 	dounwind(cxix);
 
     POPBLOCK(cx,newpm);
+    PERL_UNUSED_VAR(optype);
     cxstack_ix++; /* temporarily protect top context */
     mark = newsp;
     switch (CxTYPE(cx)) {
@@ -2380,6 +2382,9 @@ PP(pp_goto)
 		    PUSHMARK(mark);
 		    PUTBACK;
 		    (void)(*CvXSUB(cv))(aTHX_ cv);
+		    /* Put these at the bottom since the vars are set but not used */
+		    PERL_UNUSED_VAR(newsp);
+		    PERL_UNUSED_VAR(gimme);
 		}
 		LEAVE;
 		return retop;
@@ -2857,7 +2862,7 @@ Perl_find_runcv(pTHX_ U32 *db_seqp)
 	for (ix = si->si_cxix; ix >= 0; ix--) {
 	    const PERL_CONTEXT *cx = &(si->si_cxstack[ix]);
 	    if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
-		CV *cv = cx->blk_sub.cv;
+		CV * const cv = cx->blk_sub.cv;
 		/* skip DB:: code */
 		if (db_seqp && PL_debstash && CvSTASH(cv) == PL_debstash) {
 		    *db_seqp = cx->blk_oldcop->cop_seq;

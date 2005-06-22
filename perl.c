@@ -428,6 +428,7 @@ perl_destruct(pTHXx)
         int x = 0;
 
         JMPENV_PUSH(x);
+	PERL_UNUSED_VAR(x);
         if (PL_endav && !PL_minus_c)
             call_list(PL_scopestack_ix, PL_endav);
         JMPENV_POP;
@@ -1231,15 +1232,10 @@ setuid perl scripts securely.\n");
     if (!PL_rehash_seed_set)
 	 PL_rehash_seed = get_hash_seed();
     {
-	 char *s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG");
+	const char *s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG");
 
-	 if (s) {
-	      int i = atoi(s);
-
-	      if (i == 1)
-		   PerlIO_printf(Perl_debug_log, "HASH_SEED = %"UVuf"\n",
-				 PL_rehash_seed);
-	 }
+	if (s && (atoi(s) == 1))
+	    PerlIO_printf(Perl_debug_log, "HASH_SEED = %"UVuf"\n", PL_rehash_seed);
     }
 #endif /* #if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT) */
 
@@ -1256,10 +1252,10 @@ setuid perl scripts securely.\n");
 	 * --jhi */
 	 const char *s = NULL;
 	 int i;
-	 UV mask =
+	 const UV mask =
 	   ~(UV)(PTRSIZE == 4 ? 3 : PTRSIZE == 8 ? 7 : PTRSIZE == 16 ? 15 : 0);
          /* Do the mask check only if the args seem like aligned. */
-	 UV aligned =
+	 const UV aligned =
 	   (mask < ~(UV)0) && ((PTR2UV(argv[0]) & mask) == PTR2UV(argv[0]));
 
 	 /* See if all the arguments are contiguous in memory.  Note

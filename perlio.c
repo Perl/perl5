@@ -650,6 +650,9 @@ PerlIO_clone(pTHX_ PerlInterpreter *proto, CLONE_PARAMS *param)
 		f++;
 	    }
 	}
+#else
+    PERL_UNUSED_ARG(proto);
+    PERL_UNUSED_ARG(param);
 #endif
 }
 
@@ -2178,6 +2181,7 @@ PerlIO_sv_dup(pTHX_ SV *arg, CLONE_PARAMS *param)
 	return newSVsv(arg);
     }
 #else
+    PERL_UNUSED_ARG(param);
     return newSVsv(arg);
 #endif
 }
@@ -2185,7 +2189,7 @@ PerlIO_sv_dup(pTHX_ SV *arg, CLONE_PARAMS *param)
 PerlIO *
 PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 {
-    PerlIO *nexto = PerlIONext(o);
+    PerlIO * const nexto = PerlIONext(o);
     if (PerlIOValid(nexto)) {
 	const PerlIO_funcs * const tab = PerlIOBase(nexto)->tab;
 	if (tab && tab->Dup)
@@ -2545,6 +2549,7 @@ PerlIOUnix_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 	}
 	PERL_ASYNC_CHECK();
     }
+    /*NOTREACHED*/
 }
 
 Off_t

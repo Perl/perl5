@@ -171,7 +171,7 @@ Perl_he_dup(pTHX_ HE *e, bool shared, CLONE_PARAMS* param)
     else if (shared) {
 	/* This is hek_dup inlined, which seems to be important for speed
 	   reasons.  */
-	HEK *source = HeKEY_hek(e);
+	HEK * const source = HeKEY_hek(e);
 	HEK *shared = (HEK*)ptr_table_fetch(PL_ptr_table, source);
 
 	if (shared) {
@@ -198,7 +198,7 @@ static void
 S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
 		const char *msg)
 {
-    SV *sv = sv_newmortal();
+    SV * const sv = sv_newmortal();
     if (!(flags & HVhek_FREEKEY)) {
 	sv_setpvn(sv, key, klen);
     }
@@ -2309,7 +2309,6 @@ Perl_share_hek(pTHX_ const char *str, I32 len, register U32 hash)
 STATIC HEK *
 S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 {
-    register XPVHV* xhv;
     register HE *entry;
     register HE **oentry;
     I32 found = 0;
@@ -2323,7 +2322,7 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 	Can't rehash the shared string table, so not sure if it's worth
 	counting the number of entries in the linked list
     */
-    xhv = (XPVHV*)SvANY(PL_strtab);
+    register XPVHV * const xhv = (XPVHV*)SvANY(PL_strtab);
     /* assert(xhv_array != 0) */
     LOCK_STRTAB_MUTEX;
     oentry = &(HvARRAY(PL_strtab))[hash & (I32) HvMAX(PL_strtab)];

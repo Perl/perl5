@@ -283,8 +283,8 @@ and C<PUSHu>.
 			} } STMT_END
 
 /* Same thing, but update mark register too. */
-#define MEXTEND(p,n)	STMT_START {if (PL_stack_max - p < (int)(n)) {		\
-			    int markoff = mark - PL_stack_base;		\
+#define MEXTEND(p,n)	STMT_START {if (PL_stack_max - p < (int)(n)) {	\
+			    const int markoff = mark - PL_stack_base;	\
 			    sp = stack_grow(sp,p,(int) (n));		\
 			    mark = PL_stack_base + markoff;		\
 			} } STMT_END
@@ -401,7 +401,7 @@ and C<PUSHu>.
 #define tryAMAGICbinW(meth,assign,set) STMT_START { \
           if (PL_amagic_generation) { \
 	    SV* tmpsv; \
-	    SV* right= *(sp); SV* left= *(sp-1);\
+	    SV* const right= *(sp); SV* const left= *(sp-1);\
 	    if ((SvAMAGIC(left)||SvAMAGIC(right))&&\
 		(tmpsv=amagic_call(left, \
 				   right, \
@@ -483,3 +483,13 @@ True if this op will be the return value of an lvalue subroutine
 
 =cut */
 #define LVRET ((PL_op->op_private & OPpMAYBE_LVSUB) && is_lvalue_sub())
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */

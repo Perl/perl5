@@ -512,7 +512,7 @@ Perl_sv_clean_all(pTHX)
 static void 
 S_free_arena(pTHX_ void **root) {
     while (root) {
-	void **next = *(void **)root;
+	void ** const next = *(void **)root;
 	Safefree(root);
 	root = next;
     }
@@ -690,7 +690,7 @@ S_varname(pTHX_ GV *gv, const char *gvtype, PADOFFSET targ,
 	AV *av;
 
 	if (!cv || !CvPADLIST(cv))
-	    return Nullsv;;
+	    return Nullsv;
 	av = (AV*)(*av_fetch(CvPADLIST(cv), 0, FALSE));
 	sv = *av_fetch(av, targ, FALSE);
 	/* SvLEN in a pad name is not to be trusted */
@@ -698,9 +698,8 @@ S_varname(pTHX_ GV *gv, const char *gvtype, PADOFFSET targ,
     }
 
     if (subscript_type == FUV_SUBSCRIPT_HASH) {
-	SV *sv;
+	SV * const sv = NEWSV(0,0);
 	*SvPVX(name) = '$';
-	sv = NEWSV(0,0);
 	Perl_sv_catpvf(aTHX_ name, "{%s}",
 	    pv_display(sv,SvPVX_const(keyname), SvCUR(keyname), 0, 32));
 	SvREFCNT_dec(sv);
@@ -742,7 +741,6 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
     dVAR;
     SV *sv;
     AV *av;
-    SV **svp;
     GV *gv;
     OP *o, *o2, *kid;
 
@@ -795,25 +793,26 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 	if (match && subscript_type == FUV_SUBSCRIPT_WITHIN)
 	    break;
 
-	return S_varname(aTHX_ gv, hash ? "%" : "@", obase->op_targ,
+	return varname(gv, hash ? "%" : "@", obase->op_targ,
 				    keysv, index, subscript_type);
       }
 
     case OP_PADSV:
 	if (match && PAD_SVl(obase->op_targ) != uninit_sv)
 	    break;
-	return S_varname(aTHX_ Nullgv, "$", obase->op_targ,
+	return varname(Nullgv, "$", obase->op_targ,
 				    Nullsv, 0, FUV_SUBSCRIPT_NONE);
 
     case OP_GVSV:
 	gv = cGVOPx_gv(obase);
 	if (!gv || (match && GvSV(gv) != uninit_sv))
 	    break;
-	return S_varname(aTHX_ gv, "$", 0, Nullsv, 0, FUV_SUBSCRIPT_NONE);
+	return varname(gv, "$", 0, Nullsv, 0, FUV_SUBSCRIPT_NONE);
 
     case OP_AELEMFAST:
 	if (obase->op_flags & OPf_SPECIAL) { /* lexical array */
 	    if (match) {
+		SV **svp;
 		av = (AV*)PAD_SV(obase->op_targ);
 		if (!av || SvRMAGICAL(av))
 		    break;
@@ -821,7 +820,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 		if (!svp || *svp != uninit_sv)
 		    break;
 	    }
-	    return S_varname(aTHX_ Nullgv, "$", obase->op_targ,
+	    return varname(Nullgv, "$", obase->op_targ,
 		    Nullsv, (I32)obase->op_private, FUV_SUBSCRIPT_ARRAY);
 	}
 	else {
@@ -829,6 +828,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 	    if (!gv)
 		break;
 	    if (match) {
+		SV **svp;
 		av = GvAV(gv);
 		if (!av || SvRMAGICAL(av))
 		    break;
@@ -836,7 +836,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 		if (!svp || *svp != uninit_sv)
 		    break;
 	    }
-	    return S_varname(aTHX_ gv, "$", 0,
+	    return varname(gv, "$", 0,
 		    Nullsv, (I32)obase->op_private, FUV_SUBSCRIPT_ARRAY);
 	}
 	break;
@@ -885,16 +885,16 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 			break;
 		}
 		else {
-		    svp = av_fetch((AV*)sv, SvIV(cSVOPx_sv(kid)), FALSE);
+		    SV ** const svp = av_fetch((AV*)sv, SvIV(cSVOPx_sv(kid)), FALSE);
 		    if (!svp || *svp != uninit_sv)
 			break;
 		}
 	    }
 	    if (obase->op_type == OP_HELEM)
-		return S_varname(aTHX_ gv, "%", o->op_targ,
+		return varname(gv, "%", o->op_targ,
 			    cSVOPx_sv(kid), 0, FUV_SUBSCRIPT_HASH);
 	    else
-		return S_varname(aTHX_ gv, "@", o->op_targ, Nullsv,
+		return varname(gv, "@", o->op_targ, Nullsv,
 			    SvIV(cSVOPx_sv(kid)), FUV_SUBSCRIPT_ARRAY);
 	    ;
 	}
@@ -904,18 +904,18 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 	    if (obase->op_type == OP_HELEM) {
 		SV * const keysv = S_find_hash_subscript(aTHX_ (HV*)sv, uninit_sv);
 		if (keysv)
-		    return S_varname(aTHX_ gv, "%", o->op_targ,
+		    return varname(gv, "%", o->op_targ,
 						keysv, 0, FUV_SUBSCRIPT_HASH);
 	    }
 	    else {
 		const I32 index = S_find_array_subscript(aTHX_ (AV*)sv, uninit_sv);
 		if (index >= 0)
-		    return S_varname(aTHX_ gv, "@", o->op_targ,
+		    return varname(gv, "@", o->op_targ,
 					Nullsv, index, FUV_SUBSCRIPT_ARRAY);
 	    }
 	    if (match)
 		break;
-	    return S_varname(aTHX_ gv,
+	    return varname(gv,
 		(o->op_type == OP_PADAV || o->op_type == OP_RV2AV)
 		? "@" : "%",
 		o->op_targ, Nullsv, 0, FUV_SUBSCRIPT_WITHIN);
@@ -939,7 +939,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 		gv = cGVOPx_gv(o);
 		if (match && GvSV(gv) != uninit_sv)
 		    break;
-		return S_varname(aTHX_ gv, "$", 0,
+		return varname(gv, "$", 0,
 			    Nullsv, 0, FUV_SUBSCRIPT_NONE);
 	    }
 	    /* other possibilities not handled are:
@@ -1830,7 +1830,7 @@ S_not_a_number(pTHX_ SV *sv)
 {
      SV *dsv;
      char tmpbuf[64];
-     char *pv;
+     const char *pv;
 
      if (DO_UTF8(sv)) {
           dsv = sv_2mortal(newSVpv("", 0));
@@ -5245,7 +5245,7 @@ S_sv_del_backref(pTHX_ SV *sv)
     AV *av;
     SV **svp;
     I32 i;
-    SV *tsv = SvRV(sv);
+    SV * const tsv = SvRV(sv);
     MAGIC *mg = NULL;
     if (!SvMAGICAL(tsv) || !(mg = mg_find(tsv, PERL_MAGIC_backref)))
 	Perl_croak(aTHX_ "panic: del_backref");
@@ -5472,7 +5472,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 		stash = SvSTASH(sv);
 		destructor = StashHANDLER(stash,DESTROY);
 		if (destructor) {
-		    SV* tmpref = newRV(sv);
+		    SV* const tmpref = newRV(sv);
 	            SvREADONLY_on(tmpref);   /* DESTROY() could be naughty */
 		    ENTER;
 		    PUSHSTACKi(PERLSI_DESTROY);
@@ -6530,7 +6530,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 		sv_pos_u2b(sv,&append,0);
 	    }
 	} else if (SvUTF8(sv)) {
-	    SV *tsv = NEWSV(0,0);
+	    SV * const tsv = NEWSV(0,0);
 	    sv_gets(tsv, fp, 0);
 	    sv_utf8_upgrade_nomg(tsv);
 	    SvCUR_set(sv,append);
@@ -8053,7 +8053,7 @@ Perl_sv_reftype(pTHX_ const SV *sv, int ob)
     /* The fact that I don't need to downcast to char * everywhere, only in ?:
        inside return suggests a const propagation bug in g++.  */
     if (ob && SvOBJECT(sv)) {
-	char *name = HvNAME_get(SvSTASH(sv));
+	char * const name = HvNAME_get(SvSTASH(sv));
 	return name ? name : (char *) "__ANON__";
     }
     else {
@@ -8187,7 +8187,7 @@ Perl_newSVrv(pTHX_ SV *rv, const char *classname)
     SvROK_on(rv);
 
     if (classname) {
-	HV* stash = gv_stashpv(classname, TRUE);
+	HV* const stash = gv_stashpv(classname, TRUE);
 	(void)sv_bless(rv, stash);
     }
     return sv;
@@ -8296,7 +8296,7 @@ Note that C<sv_setref_pv> copies the pointer while this copies the string.
 */
 
 SV*
-Perl_sv_setref_pvn(pTHX_ SV *rv, const char *classname, char *pv, STRLEN n)
+Perl_sv_setref_pvn(pTHX_ SV *rv, const char *classname, const char *pv, STRLEN n)
 {
     sv_setpvn(newSVrv(rv,classname), pv, n);
     return rv;

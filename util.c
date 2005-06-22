@@ -3340,11 +3340,13 @@ Perl_init_tm(pTHX_ struct tm *ptm)	/* see mktime, strftime and asctime */
 {
 #ifdef HAS_TM_TM_ZONE
     Time_t now;
-    struct tm* my_tm;
+    const struct tm* my_tm;
     (void)time(&now);
     my_tm = localtime(&now);
     if (my_tm)
         Copy(my_tm, ptm, 1, struct tm);
+#else
+    PERL_UNUSED_ARG(ptm);
 #endif
 }
 

@@ -4873,7 +4873,7 @@ of 1, and the RV will be returned.
 
 Note that C<sv_setref_pv> copies the pointer while this copies the string.
 
-	SV*	sv_setref_pvn(SV* rv, const char* classname, char* pv, STRLEN n)
+	SV*	sv_setref_pvn(SV* rv, const char* classname, const char* pv, STRLEN n)
 
 =for hackers
 Found in file sv.c
