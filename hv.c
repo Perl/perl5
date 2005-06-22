@@ -134,7 +134,7 @@ Perl_hek_dup(pTHX_ HEK *source, CLONE_PARAMS* param)
 
     if (shared) {
 	/* We already shared this hash key.  */
-	share_hek_hek(shared);
+	(void)share_hek_hek(shared);
     }
     else {
 	shared
@@ -176,7 +176,7 @@ Perl_he_dup(pTHX_ HE *e, bool shared, CLONE_PARAMS* param)
 
 	if (shared) {
 	    /* We already shared this hash key.  */
-	    share_hek_hek(shared);
+	    (void)share_hek_hek(shared);
 	}
 	else {
 	    shared

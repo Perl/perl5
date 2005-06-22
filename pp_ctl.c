@@ -295,7 +295,7 @@ PP(pp_substcont)
 	mg->mg_len = i;
     }
     if (old != rx)
-	ReREFCNT_inc(rx);
+	(void)ReREFCNT_inc(rx);
     cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
     rxres_save(&cx->sb_rxres, rx);
     RETURNOP(pm->op_pmreplstart);
