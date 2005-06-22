@@ -8472,7 +8472,7 @@ Perl_sv_tainted(pTHX_ SV *sv)
 {
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 	MAGIC * const mg = mg_find(sv, PERL_MAGIC_taint);
-	if (mg && ((mg->mg_len & 1) || ((mg->mg_len & 2) && mg->mg_obj == sv)))
+	if (mg && (mg->mg_len & 1) )
 	    return TRUE;
     }
     return FALSE;

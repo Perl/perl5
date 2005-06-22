@@ -1919,8 +1919,7 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_gettaint(pTHX_ SV *sv, MAGIC *mg)
 {
-    TAINT_IF((mg->mg_len & 1) ||
-	     ((mg->mg_len & 2) && mg->mg_obj == sv));	/* kludge */
+    TAINT_IF(mg->mg_len & 1);
     return 0;
 }
 
@@ -1928,13 +1927,7 @@ int
 Perl_magic_settaint(pTHX_ SV *sv, MAGIC *mg)
 {
     (void)sv;
-    if (PL_localizing) {
-	if (PL_localizing == 1)
-	    mg->mg_len <<= 1;
-	else
-	    mg->mg_len >>= 1;
-    }
-    else if (PL_tainted)
+    if (PL_tainted)
 	mg->mg_len |= 1;
     else
 	mg->mg_len &= ~1;
