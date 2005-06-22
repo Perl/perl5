@@ -83,7 +83,7 @@ PP(pp_padav)
 	if (SvMAGICAL(TARG)) {
 	    U32 i;
 	    for (i=0; i < (U32)maxarg; i++) {
-		SV **svp = av_fetch((AV*)TARG, i, FALSE);
+		SV ** const svp = av_fetch((AV*)TARG, i, FALSE);
 		SP[i+1] = (svp) ? *svp : &PL_sv_undef;
 	    }
 	}
@@ -93,7 +93,7 @@ PP(pp_padav)
 	SP += maxarg;
     }
     else if (gimme == G_SCALAR) {
-	SV* sv = sv_newmortal();
+	SV* const sv = sv_newmortal();
 	const I32 maxarg = AvFILL((AV*)TARG) + 1;
 	sv_setiv(sv, maxarg);
 	PUSHs(sv);
@@ -121,7 +121,7 @@ PP(pp_padhv)
 	RETURNOP(do_kv());
     }
     else if (gimme == G_SCALAR) {
-	SV* sv = Perl_hv_scalar(aTHX_ (HV*)TARG);
+	SV* const sv = Perl_hv_scalar(aTHX_ (HV*)TARG);
 	SETs(sv);
     }
     RETURN;
@@ -144,7 +144,7 @@ PP(pp_rv2gv)
 
 	sv = SvRV(sv);
 	if (SvTYPE(sv) == SVt_PVIO) {
-	    GV *gv = (GV*) sv_newmortal();
+	    GV * const gv = (GV*) sv_newmortal();
 	    gv_init(gv, 0, "", 0, 0);
 	    GvIOp(gv) = (IO *)sv;
 	    (void)SvREFCNT_inc(sv);
@@ -301,7 +301,7 @@ PP(pp_rv2sv)
 PP(pp_av2arylen)
 {
     dSP;
-    AV *av = (AV*)TOPs;
+    AV *const av = (AV*)TOPs;
     SV *sv = AvARYLEN(av);
     if (!sv) {
 	AvARYLEN(av) = sv = NEWSV(0,0);
@@ -332,10 +332,8 @@ PP(pp_pos)
 	RETURN;
     }
     else {
-	MAGIC* mg;
-
 	if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
-	    mg = mg_find(sv, PERL_MAGIC_regex_global);
+	    const MAGIC * const mg = mg_find(sv, PERL_MAGIC_regex_global);
 	    if (mg && mg->mg_len >= 0) {
 		I32 i = mg->mg_len;
 		if (DO_UTF8(sv))
@@ -512,10 +510,8 @@ S_refto(pTHX_ SV *sv)
 PP(pp_ref)
 {
     dSP; dTARGET;
-    SV *sv;
     const char *pv;
-
-    sv = POPs;
+    SV * const sv = POPs;
 
     if (sv && SvGMAGICAL(sv))
 	mg_get(sv);
@@ -523,8 +519,7 @@ PP(pp_ref)
     if (!sv || !SvROK(sv))
 	RETPUSHNO;
 
-    sv = SvRV(sv);
-    pv = sv_reftype(sv,TRUE);
+    pv = sv_reftype(SvRV(sv),TRUE);
     PUSHp(pv, strlen(pv));
     RETURN;
 }
@@ -537,7 +532,7 @@ PP(pp_bless)
     if (MAXARG == 1)
 	stash = CopSTASH(PL_curcop);
     else {
-	SV *ssv = POPs;
+	SV * const ssv = POPs;
 	STRLEN len;
 	const char *ptr;
 
@@ -556,63 +551,60 @@ PP(pp_bless)
 
 PP(pp_gelem)
 {
-    GV *gv;
-    SV *sv;
-    SV *tmpRef;
-    const char *elem;
     dSP;
 
-    sv = POPs;
-    elem = SvPV_nolen_const(sv);
-    gv = (GV*)POPs;
-    tmpRef = Nullsv;
+    SV *sv = POPs;
+    const char * const elem = SvPV_nolen_const(sv);
+    GV * const gv = (GV*)POPs;
+    SV * tmpRef = Nullsv;
+
     sv = Nullsv;
     if (elem) {
 	/* elem will always be NUL terminated.  */
-	const char *elem2 = elem + 1;
+	const char * const second_letter = elem + 1;
 	switch (*elem) {
 	case 'A':
-	    if (strEQ(elem2, "RRAY"))
+	    if (strEQ(second_letter, "RRAY"))
 		tmpRef = (SV*)GvAV(gv);
 	    break;
 	case 'C':
-	    if (strEQ(elem2, "ODE"))
+	    if (strEQ(second_letter, "ODE"))
 		tmpRef = (SV*)GvCVu(gv);
 	    break;
 	case 'F':
-	    if (strEQ(elem2, "ILEHANDLE")) {
+	    if (strEQ(second_letter, "ILEHANDLE")) {
 		/* finally deprecated in 5.8.0 */
 		deprecate("*glob{FILEHANDLE}");
 		tmpRef = (SV*)GvIOp(gv);
 	    }
 	    else
-		if (strEQ(elem2, "ORMAT"))
+		if (strEQ(second_letter, "ORMAT"))
 		    tmpRef = (SV*)GvFORM(gv);
 	    break;
 	case 'G':
-	    if (strEQ(elem2, "LOB"))
+	    if (strEQ(second_letter, "LOB"))
 		tmpRef = (SV*)gv;
 	    break;
 	case 'H':
-	    if (strEQ(elem2, "ASH"))
+	    if (strEQ(second_letter, "ASH"))
 		tmpRef = (SV*)GvHV(gv);
 	    break;
 	case 'I':
-	    if (*elem2 == 'O' && !elem[2])
+	    if (*second_letter == 'O' && !elem[2])
 		tmpRef = (SV*)GvIOp(gv);
 	    break;
 	case 'N':
-	    if (strEQ(elem2, "AME"))
+	    if (strEQ(second_letter, "AME"))
 		sv = newSVpvn(GvNAME(gv), GvNAMELEN(gv));
 	    break;
 	case 'P':
-	    if (strEQ(elem2, "ACKAGE")) {
+	    if (strEQ(second_letter, "ACKAGE")) {
 		const char *name = HvNAME_get(GvSTASH(gv));
 		sv = newSVpv(name ? name : "__ANON__", 0);
 	    }
 	    break;
 	case 'S':
-	    if (strEQ(elem2, "CALAR"))
+	    if (strEQ(second_letter, "CALAR"))
 		tmpRef = GvSV(gv);
 	    break;
 	}
@@ -678,7 +670,7 @@ PP(pp_study)
     sfirst -= 256;
 
     while (--pos >= 0) {
-	ch = s[pos];
+	register const I32 ch = s[pos];
 	if (sfirst[ch] >= 0)
 	    snext[pos] = sfirst[ch] - pos;
 	else
@@ -749,9 +741,8 @@ PP(pp_chomp)
 PP(pp_defined)
 {
     dSP;
-    register SV* sv;
+    register SV* const sv = POPs;
 
-    sv = POPs;
     if (!sv || !SvANY(sv))
 	RETPUSHNO;
     switch (SvTYPE(sv)) {
@@ -924,7 +915,7 @@ PP(pp_pow)
             if (baseuok) {
                 baseuv = SvUVX(TOPm1s);
             } else {
-                IV iv = SvIVX(TOPm1s);
+		const IV iv = SvIVX(TOPm1s);
                 if (iv >= 0) {
                     baseuv = iv;
                     baseuok = TRUE; /* effectively it's a UV now */
@@ -966,7 +957,7 @@ PP(pp_pow)
                     for (; power; base *= base, n++) {
                         /* Do I look like I trust gcc with long longs here?
                            Do I hell.  */
-                        UV bit = (UV)1 << (UV)n;
+			const UV bit = (UV)1 << (UV)n;
                         if (power & bit) {
                             result *= base;
                             /* Only bother to clear the bit if it is set.  */
@@ -998,7 +989,7 @@ PP(pp_pow)
 			register UV base = baseuv;
 			register int n = 0;
 			for (; power; base *= base, n++) {
-			    register UV bit = (UV)1 << (UV)n;
+			    register const UV bit = (UV)1 << (UV)n;
 			    if (power & bit) {
 				result *= base;
 				power -= bit;
@@ -1061,7 +1052,7 @@ PP(pp_multiply)
 	    if (auvok) {
 		alow = SvUVX(TOPm1s);
 	    } else {
-		IV aiv = SvIVX(TOPm1s);
+		const IV aiv = SvIVX(TOPm1s);
 		if (aiv >= 0) {
 		    alow = aiv;
 		    auvok = TRUE; /* effectively it's a UV now */
@@ -1072,7 +1063,7 @@ PP(pp_multiply)
 	    if (buvok) {
 		blow = SvUVX(TOPs);
 	    } else {
-		IV biv = SvIVX(TOPs);
+		const IV biv = SvIVX(TOPs);
 		if (biv >= 0) {
 		    blow = biv;
 		    buvok = TRUE; /* effectively it's a UV now */
@@ -1193,7 +1184,7 @@ PP(pp_divide)
                 right = SvUVX(TOPs);
             }
 	    else {
-                IV biv = SvIVX(TOPs);
+		const IV biv = SvIVX(TOPs);
                 if (biv >= 0) {
                     right = biv;
                     right_non_neg = TRUE; /* effectively it's a UV now */
@@ -1214,7 +1205,7 @@ PP(pp_divide)
                 left = SvUVX(TOPm1s);
             }
 	    else {
-                IV aiv = SvIVX(TOPm1s);
+		const IV aiv = SvIVX(TOPm1s);
                 if (aiv >= 0) {
                     left = aiv;
                     left_non_neg = TRUE; /* effectively it's a UV now */
@@ -1240,7 +1231,7 @@ PP(pp_divide)
 #endif
                 ) {
                 /* Integer division can't overflow, but it can be imprecise.  */
-                UV result = left / right;
+		const UV result = left / right;
                 if (result * right == left) {
                     SP--; /* result is valid */
                     if (left_non_neg == right_non_neg) {
@@ -1289,7 +1280,7 @@ PP(pp_modulo)
             if (!right_neg) {
                 right = SvUVX(POPs);
             } else {
-                IV biv = SvIVX(POPs);
+		const IV biv = SvIVX(POPs);
                 if (biv >= 0) {
                     right = biv;
                     right_neg = FALSE; /* effectively it's a UV now */
@@ -1408,7 +1399,7 @@ PP(pp_repeat)
 	 mg_get(sv);
     if (SvIOKp(sv)) {
 	 if (SvUOK(sv)) {
-	      UV uv = SvUV(sv);
+	      const UV uv = SvUV(sv);
 	      if (uv > IV_MAX)
 		   count = IV_MAX; /* The best we can do? */
 	      else
@@ -1422,7 +1413,7 @@ PP(pp_repeat)
 	 }
     }
     else if (SvNOKp(sv)) {
-	 NV nv = SvNV(sv);
+	 const NV nv = SvNV(sv);
 	 if (nv < 0.0)
 	      count = 0;
 	 else
@@ -1553,7 +1544,7 @@ PP(pp_subtract)
 		if ((auvok = SvUOK(TOPm1s)))
 		    auv = SvUVX(TOPm1s);
 		else {
-		    register IV aiv = SvIVX(TOPm1s);
+		    register const IV aiv = SvIVX(TOPm1s);
 		    if (aiv >= 0) {
 			auv = aiv;
 			auvok = 1;	/* Now acting as a sign flag.  */
@@ -1573,7 +1564,7 @@ PP(pp_subtract)
 	    if (buvok)
 		buv = SvUVX(TOPs);
 	    else {
-		register IV biv = SvIVX(TOPs);
+		register const IV biv = SvIVX(TOPs);
 		if (biv >= 0) {
 		    buv = biv;
 		    buvok = 1;
@@ -1647,7 +1638,7 @@ PP(pp_left_shift)
 {
     dSP; dATARGET; tryAMAGICbin(lshift,opASSIGN);
     {
-      IV shift = POPi;
+      const IV shift = POPi;
       if (PL_op->op_private & HINT_INTEGER) {
 	IV i = TOPi;
 	SETi(i << shift);
@@ -1664,7 +1655,7 @@ PP(pp_right_shift)
 {
     dSP; dATARGET; tryAMAGICbin(rshift,opASSIGN);
     {
-      IV shift = POPi;
+      const IV shift = POPi;
       if (PL_op->op_private & HINT_INTEGER) {
 	IV i = TOPi;
 	SETi(i >> shift);
@@ -1689,16 +1680,16 @@ PP(pp_lt)
 	    bool buvok = SvUOK(TOPs);
 	
 	    if (!auvok && !buvok) { /* ## IV < IV ## */
-		IV aiv = SvIVX(TOPm1s);
-		IV biv = SvIVX(TOPs);
+		const IV aiv = SvIVX(TOPm1s);
+		const IV biv = SvIVX(TOPs);
 		
 		SP--;
 		SETs(boolSV(aiv < biv));
 		RETURN;
 	    }
 	    if (auvok && buvok) { /* ## UV < UV ## */
-		UV auv = SvUVX(TOPm1s);
-		UV buv = SvUVX(TOPs);
+		const UV auv = SvUVX(TOPm1s);
+		const UV buv = SvUVX(TOPs);
 		
 		SP--;
 		SETs(boolSV(auv < buv));
@@ -1706,9 +1697,7 @@ PP(pp_lt)
 	    }
 	    if (auvok) { /* ## UV < IV ## */
 		UV auv;
-		IV biv;
-		
-		biv = SvIVX(TOPs);
+		const IV biv = SvIVX(TOPs);
 		SP--;
 		if (biv < 0) {
 		    /* As (a) is a UV, it's >=0, so it cannot be < */
@@ -1720,10 +1709,9 @@ PP(pp_lt)
 		RETURN;
 	    }
 	    { /* ## IV < UV ## */
-		IV aiv;
+		const IV aiv = SvIVX(TOPm1s);
 		UV buv;
 		
-		aiv = SvIVX(TOPm1s);
 		if (aiv < 0) {
 		    /* As (b) is a UV, it's >=0, so it must be < */
 		    SP--;
@@ -1767,16 +1755,16 @@ PP(pp_gt)
 	    bool buvok = SvUOK(TOPs);
 	
 	    if (!auvok && !buvok) { /* ## IV > IV ## */
-		IV aiv = SvIVX(TOPm1s);
-		IV biv = SvIVX(TOPs);
-		
+		const IV aiv = SvIVX(TOPm1s);
+		const IV biv = SvIVX(TOPs);
+
 		SP--;
 		SETs(boolSV(aiv > biv));
 		RETURN;
 	    }
 	    if (auvok && buvok) { /* ## UV > UV ## */
-		UV auv = SvUVX(TOPm1s);
-		UV buv = SvUVX(TOPs);
+		const UV auv = SvUVX(TOPm1s);
+		const UV buv = SvUVX(TOPs);
 		
 		SP--;
 		SETs(boolSV(auv > buv));
@@ -1784,9 +1772,8 @@ PP(pp_gt)
 	    }
 	    if (auvok) { /* ## UV > IV ## */
 		UV auv;
-		IV biv;
-		
-		biv = SvIVX(TOPs);
+		const IV biv = SvIVX(TOPs);
+
 		SP--;
 		if (biv < 0) {
 		    /* As (a) is a UV, it's >=0, so it must be > */
@@ -1798,10 +1785,9 @@ PP(pp_gt)
 		RETURN;
 	    }
 	    { /* ## IV > UV ## */
-		IV aiv;
+		const IV aiv = SvIVX(TOPm1s);
 		UV buv;
 		
-		aiv = SvIVX(TOPm1s);
 		if (aiv < 0) {
 		    /* As (b) is a UV, it's >=0, so it cannot be > */
 		    SP--;
@@ -1845,8 +1831,8 @@ PP(pp_le)
 	    bool buvok = SvUOK(TOPs);
 	
 	    if (!auvok && !buvok) { /* ## IV <= IV ## */
-		IV aiv = SvIVX(TOPm1s);
-		IV biv = SvIVX(TOPs);
+		const IV aiv = SvIVX(TOPm1s);
+		const IV biv = SvIVX(TOPs);
 		
 		SP--;
 		SETs(boolSV(aiv <= biv));
@@ -1862,9 +1848,8 @@ PP(pp_le)
 	    }
 	    if (auvok) { /* ## UV <= IV ## */
 		UV auv;
-		IV biv;
-		
-		biv = SvIVX(TOPs);
+		const IV biv = SvIVX(TOPs);
+
 		SP--;
 		if (biv < 0) {
 		    /* As (a) is a UV, it's >=0, so a cannot be <= */
@@ -1876,10 +1861,9 @@ PP(pp_le)
 		RETURN;
 	    }
 	    { /* ## IV <= UV ## */
-		IV aiv;
+		const IV aiv = SvIVX(TOPm1s);
 		UV buv;
-		
-		aiv = SvIVX(TOPm1s);
+
 		if (aiv < 0) {
 		    /* As (b) is a UV, it's >=0, so a must be <= */
 		    SP--;
@@ -1923,26 +1907,25 @@ PP(pp_ge)
 	    bool buvok = SvUOK(TOPs);
 	
 	    if (!auvok && !buvok) { /* ## IV >= IV ## */
-		IV aiv = SvIVX(TOPm1s);
-		IV biv = SvIVX(TOPs);
-		
+		const IV aiv = SvIVX(TOPm1s);
+		const IV biv = SvIVX(TOPs);
+
 		SP--;
 		SETs(boolSV(aiv >= biv));
 		RETURN;
 	    }
 	    if (auvok && buvok) { /* ## UV >= UV ## */
-		UV auv = SvUVX(TOPm1s);
-		UV buv = SvUVX(TOPs);
-		
+		const UV auv = SvUVX(TOPm1s);
+		const UV buv = SvUVX(TOPs);
+
 		SP--;
 		SETs(boolSV(auv >= buv));
 		RETURN;
 	    }
 	    if (auvok) { /* ## UV >= IV ## */
 		UV auv;
-		IV biv;
-		
-		biv = SvIVX(TOPs);
+		const IV biv = SvIVX(TOPs);
+
 		SP--;
 		if (biv < 0) {
 		    /* As (a) is a UV, it's >=0, so it must be >= */
@@ -1954,10 +1937,9 @@ PP(pp_ge)
 		RETURN;
 	    }
 	    { /* ## IV >= UV ## */
-		IV aiv;
+		const IV aiv = SvIVX(TOPm1s);
 		UV buv;
-		
-		aiv = SvIVX(TOPm1s);
+
 		if (aiv < 0) {
 		    /* As (b) is a UV, it's >=0, so a cannot be >= */
 		    SP--;
@@ -2014,9 +1996,9 @@ PP(pp_ne)
                    differ from normal zero. As I understand it. (Need to
                    check - is negative zero implementation defined behaviour
                    anyway?). NWC  */
-		UV buv = SvUVX(POPs);
-		UV auv = SvUVX(TOPs);
-		
+		const UV buv = SvUVX(POPs);
+		const UV auv = SvUVX(TOPs);
+
 		SETs(boolSV(auv != buv));
 		RETURN;
 	    }
@@ -2075,12 +2057,12 @@ PP(pp_ncmp)
     if (SvIOK(TOPs)) {
 	SvIV_please(TOPm1s);
 	if (SvIOK(TOPm1s)) {
-	    bool leftuvok = SvUOK(TOPm1s);
-	    bool rightuvok = SvUOK(TOPs);
+	    const bool leftuvok = SvUOK(TOPm1s);
+	    const bool rightuvok = SvUOK(TOPs);
 	    I32 value;
 	    if (!leftuvok && !rightuvok) { /* ## IV <=> IV ## */
-		IV leftiv = SvIVX(TOPm1s);
-		IV rightiv = SvIVX(TOPs);
+		const IV leftiv = SvIVX(TOPm1s);
+		const IV rightiv = SvIVX(TOPs);
 		
 		if (leftiv > rightiv)
 		    value = 1;
@@ -2089,8 +2071,8 @@ PP(pp_ncmp)
 		else
 		    value = 0;
 	    } else if (leftuvok && rightuvok) { /* ## UV <=> UV ## */
-		UV leftuv = SvUVX(TOPm1s);
-		UV rightuv = SvUVX(TOPs);
+		const UV leftuv = SvUVX(TOPm1s);
+		const UV rightuv = SvUVX(TOPs);
 		
 		if (leftuv > rightuv)
 		    value = 1;
@@ -2099,15 +2081,12 @@ PP(pp_ncmp)
 		else
 		    value = 0;
 	    } else if (leftuvok) { /* ## UV <=> IV ## */
-		UV leftuv;
-		IV rightiv;
-		
-		rightiv = SvIVX(TOPs);
+		const IV rightiv = SvIVX(TOPs);
 		if (rightiv < 0) {
 		    /* As (a) is a UV, it's >=0, so it cannot be < */
 		    value = 1;
 		} else {
-		    leftuv = SvUVX(TOPm1s);
+		    const UV leftuv = SvUVX(TOPm1s);
 		    if (leftuv > (UV)rightiv) {
 			value = 1;
 		    } else if (leftuv < (UV)rightiv) {
@@ -2117,15 +2096,12 @@ PP(pp_ncmp)
 		    }
 		}
 	    } else { /* ## IV <=> UV ## */
-		IV leftiv;
-		UV rightuv;
-		
-		leftiv = SvIVX(TOPm1s);
+		const IV leftiv = SvIVX(TOPm1s);
 		if (leftiv < 0) {
 		    /* As (b) is a UV, it's >=0, so it must be < */
 		    value = -1;
 		} else {
-		    rightuv = SvUVX(TOPs);
+		    const UV rightuv = SvUVX(TOPs);
 		    if ((UV)leftiv > rightuv) {
 			value = 1;
 		    } else if ((UV)leftiv < rightuv) {
@@ -2173,7 +2149,7 @@ PP(pp_slt)
     dSP; tryAMAGICbinSET(slt,0);
     {
       dPOPTOPssrl;
-      int cmp = (IN_LOCALE_RUNTIME
+      const int cmp = (IN_LOCALE_RUNTIME
 		 ? sv_cmp_locale(left, right)
 		 : sv_cmp(left, right));
       SETs(boolSV(cmp < 0));
@@ -2186,7 +2162,7 @@ PP(pp_sgt)
     dSP; tryAMAGICbinSET(sgt,0);
     {
       dPOPTOPssrl;
-      int cmp = (IN_LOCALE_RUNTIME
+      const int cmp = (IN_LOCALE_RUNTIME
 		 ? sv_cmp_locale(left, right)
 		 : sv_cmp(left, right));
       SETs(boolSV(cmp > 0));
@@ -2199,7 +2175,7 @@ PP(pp_sle)
     dSP; tryAMAGICbinSET(sle,0);
     {
       dPOPTOPssrl;
-      int cmp = (IN_LOCALE_RUNTIME
+      const int cmp = (IN_LOCALE_RUNTIME
 		 ? sv_cmp_locale(left, right)
 		 : sv_cmp(left, right));
       SETs(boolSV(cmp <= 0));
@@ -2212,7 +2188,7 @@ PP(pp_sge)
     dSP; tryAMAGICbinSET(sge,0);
     {
       dPOPTOPssrl;
-      int cmp = (IN_LOCALE_RUNTIME
+      const int cmp = (IN_LOCALE_RUNTIME
 		 ? sv_cmp_locale(left, right)
 		 : sv_cmp(left, right));
       SETs(boolSV(cmp >= 0));
@@ -2245,7 +2221,7 @@ PP(pp_scmp)
     dSP; dTARGET;  tryAMAGICbin(scmp,0);
     {
       dPOPTOPssrl;
-      int cmp = (IN_LOCALE_RUNTIME
+      const int cmp = (IN_LOCALE_RUNTIME
 		 ? sv_cmp_locale(left, right)
 		 : sv_cmp(left, right));
       SETi( cmp );
@@ -2260,11 +2236,11 @@ PP(pp_bit_and)
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (PL_op->op_private & HINT_INTEGER) {
-	  IV i = SvIV(left) & SvIV(right);
+	  const IV i = SvIV(left) & SvIV(right);
 	  SETi(i);
 	}
 	else {
-	  UV u = SvUV(left) & SvUV(right);
+	  const UV u = SvUV(left) & SvUV(right);
 	  SETu(u);
 	}
       }
@@ -2283,11 +2259,11 @@ PP(pp_bit_xor)
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (PL_op->op_private & HINT_INTEGER) {
-	  IV i = (USE_LEFT(left) ? SvIV(left) : 0) ^ SvIV(right);
+	  const IV i = (USE_LEFT(left) ? SvIV(left) : 0) ^ SvIV(right);
 	  SETi(i);
 	}
 	else {
-	  UV u = (USE_LEFT(left) ? SvUV(left) : 0) ^ SvUV(right);
+	  const UV u = (USE_LEFT(left) ? SvUV(left) : 0) ^ SvUV(right);
 	  SETu(u);
 	}
       }
@@ -2306,11 +2282,11 @@ PP(pp_bit_or)
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (PL_op->op_private & HINT_INTEGER) {
-	  IV i = (USE_LEFT(left) ? SvIV(left) : 0) | SvIV(right);
+	  const IV i = (USE_LEFT(left) ? SvIV(left) : 0) | SvIV(right);
 	  SETi(i);
 	}
 	else {
-	  UV u = (USE_LEFT(left) ? SvUV(left) : 0) | SvUV(right);
+	  const UV u = (USE_LEFT(left) ? SvUV(left) : 0) | SvUV(right);
 	  SETu(u);
 	}
       }
@@ -2327,7 +2303,7 @@ PP(pp_negate)
     dSP; dTARGET; tryAMAGICun(neg);
     {
 	dTOPss;
-	int flags = SvFLAGS(sv);
+	const int flags = SvFLAGS(sv);
 	if (SvGMAGICAL(sv))
 	    mg_get(sv);
 	if ((flags & SVf_IOK) || ((flags & (SVp_IOK | SVp_NOK)) == SVp_IOK)) {
@@ -2407,11 +2383,11 @@ PP(pp_complement)
       dTOPss;
       if (SvNIOKp(sv)) {
 	if (PL_op->op_private & HINT_INTEGER) {
-	  IV i = ~SvIV(sv);
+	  const IV i = ~SvIV(sv);
 	  SETi(i);
 	}
 	else {
-	  UV u = ~SvUV(sv);
+	  const UV u = ~SvUV(sv);
 	  SETu(u);
 	}
       }
@@ -2435,7 +2411,7 @@ PP(pp_complement)
 
 	  send = tmps + len;
 	  while (tmps < send) {
-	    UV c = utf8n_to_uvchr(tmps, send-tmps, &l, UTF8_ALLOW_ANYUV);
+	    const UV c = utf8n_to_uvchr(tmps, send-tmps, &l, UTF8_ALLOW_ANYUV);
 	    tmps += UTF8SKIP(tmps);
 	    targlen += UNISKIP(~c);
 	    nchar++;
@@ -2449,7 +2425,7 @@ PP(pp_complement)
 	  if (nwide) {
 	      Newz(0, result, targlen + 1, U8);
 	      while (tmps < send) {
-		  UV c = utf8n_to_uvchr(tmps, send-tmps, &l, UTF8_ALLOW_ANYUV);
+		  const UV c = utf8n_to_uvchr(tmps, send-tmps, &l, UTF8_ALLOW_ANYUV);
 		  tmps += UTF8SKIP(tmps);
 		  result = uvchr_to_utf8_flags(result, ~c, UNICODE_ALLOW_ANY);
 	      }
@@ -2461,7 +2437,7 @@ PP(pp_complement)
 	  else {
 	      Newz(0, result, nchar + 1, U8);
 	      while (tmps < send) {
-		  U8 c = (U8)utf8n_to_uvchr(tmps, 0, &l, UTF8_ALLOW_ANY);
+		  const U8 c = (U8)utf8n_to_uvchr(tmps, 0, &l, UTF8_ALLOW_ANY);
 		  tmps += UTF8SKIP(tmps);
 		  *result++ = ~c;
 	      }
@@ -2712,10 +2688,8 @@ PP(pp_sin)
 {
     dSP; dTARGET; tryAMAGICun(sin);
     {
-      NV value;
-      value = POPn;
-      value = Perl_sin(value);
-      XPUSHn(value);
+      const NV value = POPn;
+      XPUSHn(Perl_sin(value));
       RETURN;
     }
 }
@@ -2724,10 +2698,8 @@ PP(pp_cos)
 {
     dSP; dTARGET; tryAMAGICun(cos);
     {
-      NV value;
-      value = POPn;
-      value = Perl_cos(value);
-      XPUSHn(value);
+      const NV value = POPn;
+      XPUSHn(Perl_cos(value));
       RETURN;
     }
 }
@@ -2796,14 +2768,12 @@ PP(pp_log)
 {
     dSP; dTARGET; tryAMAGICun(log);
     {
-      NV value;
-      value = POPn;
+      const NV value = POPn;
       if (value <= 0.0) {
 	SET_NUMERIC_STANDARD();
 	DIE(aTHX_ "Can't take log of %"NVgf, value);
       }
-      value = Perl_log(value);
-      XPUSHn(value);
+      XPUSHn(Perl_log(value));
       RETURN;
     }
 }
@@ -2812,14 +2782,12 @@ PP(pp_sqrt)
 {
     dSP; dTARGET; tryAMAGICun(sqrt);
     {
-      NV value;
-      value = POPn;
+      const NV value = POPn;
       if (value < 0.0) {
 	SET_NUMERIC_STANDARD();
 	DIE(aTHX_ "Can't take sqrt of %"NVgf, value);
       }
-      value = Perl_sqrt(value);
-      XPUSHn(value);
+      XPUSHn(Perl_sqrt(value));
       RETURN;
     }
 }
@@ -2828,8 +2796,7 @@ PP(pp_int)
 {
     dSP; dTARGET; tryAMAGICun(int);
     {
-      NV value;
-      IV iv = TOPi; /* attempt to convert to IV if possible. */
+      const IV iv = TOPi; /* attempt to convert to IV if possible. */
       /* XXX it's arguable that compiler casting to IV might be subtly
 	 different from modf (for numbers inside (IV_MIN,UV_MAX)) in which
 	 else preferring IV has introduced a subtle behaviour change bug. OTOH
@@ -2839,12 +2806,12 @@ PP(pp_int)
         SETu(0);
       else if (SvIOK(TOPs)) {
 	if (SvIsUV(TOPs)) {
-	    UV uv = TOPu;
+	    const UV uv = TOPu;
 	    SETu(uv);
 	} else
 	    SETi(iv);
       } else {
-	  value = TOPn;
+	  const NV value = TOPn;
 	  if (value >= 0.0) {
 	      if (value < (NV)UV_MAX + 0.5) {
 		  SETu(U_V(value));
@@ -2869,7 +2836,7 @@ PP(pp_abs)
     dSP; dTARGET; tryAMAGICun(abs);
     {
       /* This will cache the NV value if string isn't actually integer  */
-      IV iv = TOPi;
+      const IV iv = TOPi;
 
       if (!SvOK(TOPs))
         SETu(0);
@@ -2891,10 +2858,11 @@ PP(pp_abs)
 	  }
 	}
       } else{
-	NV value = TOPn;
+	const NV value = TOPn;
 	if (value < 0.0)
-	  value = -value;
-	SETn(value);
+	  SETn(value);
+	else
+	  SETn(-value);
       }
     }
     RETURN;
@@ -2909,13 +2877,13 @@ PP(pp_hex)
     STRLEN len;
     NV result_nv;
     UV result_uv;
-    SV* sv = POPs;
+    SV* const sv = POPs;
 
     tmps = (SvPV_const(sv, len));
     if (DO_UTF8(sv)) {
 	 /* If Unicode, try to downgrade
 	  * If not possible, croak. */
-         SV* tsv = sv_2mortal(newSVsv(sv));
+	 SV* const tsv = sv_2mortal(newSVsv(sv));
 	
 	 SvUTF8_on(tsv);
 	 sv_utf8_downgrade(tsv, FALSE);
@@ -2939,13 +2907,13 @@ PP(pp_oct)
     STRLEN len;
     NV result_nv;
     UV result_uv;
-    SV* sv = POPs;
+    SV* const sv = POPs;
 
     tmps = (SvPV_const(sv, len));
     if (DO_UTF8(sv)) {
 	 /* If Unicode, try to downgrade
 	  * If not possible, croak. */
-         SV* tsv = sv_2mortal(newSVsv(sv));
+	 SV* const tsv = sv_2mortal(newSVsv(sv));
 	
 	 SvUTF8_on(tsv);
 	 sv_utf8_downgrade(tsv, FALSE);
@@ -3001,7 +2969,7 @@ PP(pp_substr)
     SV *repl_sv = NULL;
     const char *repl = 0;
     STRLEN repl_len;
-    int num_args = PL_op->op_private & 7;
+    const int num_args = PL_op->op_private & 7;
     bool repl_need_utf8_upgrade = FALSE;
     bool repl_is_utf8 = FALSE;
 
@@ -3078,8 +3046,8 @@ PP(pp_substr)
 	RETPUSHUNDEF;
     }
     else {
-	I32 upos = pos;
-	I32 urem = rem;
+	const I32 upos = pos;
+	const I32 urem = rem;
 	if (utf8_curlen)
 	    sv_pos_u2b(sv, &pos, &rem);
 	tmps += pos;
@@ -3156,10 +3124,10 @@ PP(pp_substr)
 PP(pp_vec)
 {
     dSP; dTARGET;
-    register IV size   = POPi;
-    register IV offset = POPi;
-    register SV *src = POPs;
-    I32 lvalue = PL_op->op_flags & OPf_MOD || LVRET;
+    register const IV size   = POPi;
+    register const IV offset = POPi;
+    register SV * const src = POPs;
+    const I32 lvalue = PL_op->op_flags & OPf_MOD || LVRET;
 
     SvTAINTED_off(TARG);		/* decontaminate */
     if (lvalue) {			/* it's an lvalue! */
@@ -3195,7 +3163,7 @@ PP(pp_index)
     const char *tmps;
     const char *tmps2;
     STRLEN biglen;
-    I32 arybase = PL_curcop->cop_arybase;
+    const I32 arybase = PL_curcop->cop_arybase;
     int big_utf8;
     int little_utf8;
 
@@ -3209,9 +3177,9 @@ PP(pp_index)
     little_utf8 = DO_UTF8(little);
     if (big_utf8 ^ little_utf8) {
 	/* One needs to be upgraded.  */
-	SV *bytes = little_utf8 ? big : little;
+	SV * const bytes = little_utf8 ? big : little;
 	STRLEN len;
-	const char *p = SvPV_const(bytes, len);
+	const char * const p = SvPV_const(bytes, len);
 
 	temp = newSVpvn(p, len);
 
@@ -3259,7 +3227,7 @@ PP(pp_rindex)
     I32 retval;
     const char *tmps;
     const char *tmps2;
-    I32 arybase = PL_curcop->cop_arybase;
+    const I32 arybase = PL_curcop->cop_arybase;
     int big_utf8;
     int little_utf8;
 
@@ -3271,7 +3239,7 @@ PP(pp_rindex)
     little_utf8 = DO_UTF8(little);
     if (big_utf8 ^ little_utf8) {
 	/* One needs to be upgraded.  */
-	SV *bytes = little_utf8 ? big : little;
+	SV * const bytes = little_utf8 ? big : little;
 	STRLEN len;
 	const char *p = SvPV_const(bytes, len);
 
@@ -3404,7 +3372,7 @@ PP(pp_crypt)
          /* If Unicode, try to downgrade.
 	  * If not possible, croak.
 	  * Yes, we made this up.  */
-         SV* tsv = sv_2mortal(newSVsv(left));
+	 SV* const tsv = sv_2mortal(newSVsv(left));
 
 	 SvUTF8_on(tsv);
 	 sv_utf8_downgrade(tsv, FALSE);
@@ -3675,8 +3643,8 @@ PP(pp_lc)
 	    d = (U8*)SvPVX(TARG);
 	    send = s + len;
 	    while (s < send) {
-		STRLEN u = UTF8SKIP(s);
-		UV uv = toLOWER_utf8(s, tmpbuf, &ulen);
+		const STRLEN u = UTF8SKIP(s);
+		const UV uv = toLOWER_utf8(s, tmpbuf, &ulen);
 
 #define GREEK_CAPITAL_LETTER_SIGMA 0x03A3 /* Unicode U+03A3 */
 		if (uv == GREEK_CAPITAL_LETTER_SIGMA) {
@@ -3731,7 +3699,7 @@ PP(pp_lc)
 
 	s = (U8*)SvPV_force_nomg(sv, len);
 	if (len) {
-	    register U8 *send = s + len;
+	    register const U8 * const send = s + len;
 
 	    if (IN_LOCALE_RUNTIME) {
 		TAINT;
@@ -3752,13 +3720,13 @@ PP(pp_lc)
 PP(pp_quotemeta)
 {
     dSP; dTARGET;
-    SV *sv = TOPs;
+    SV * const sv = TOPs;
     STRLEN len;
     const register char *s = SvPV_const(sv,len);
-    register char *d;
 
     SvUTF8_off(TARG);				/* decontaminate */
     if (len) {
+	register char *d;
 	(void)SvUPGRADE(TARG, SVt_PV);
 	SvGROW(TARG, (len * 2) + 1);
 	d = SvPVX(TARG);
@@ -3805,17 +3773,16 @@ PP(pp_quotemeta)
 PP(pp_aslice)
 {
     dSP; dMARK; dORIGMARK;
-    register SV** svp;
-    register AV* av = (AV*)POPs;
-    register I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
-    I32 arybase = PL_curcop->cop_arybase;
-    I32 elem;
+    register AV* const av = (AV*)POPs;
+    register const I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
 
     if (SvTYPE(av) == SVt_PVAV) {
+	const I32 arybase = PL_curcop->cop_arybase;
 	if (lval && PL_op->op_private & OPpLVAL_INTRO) {
+	    register SV **svp;
 	    I32 max = -1;
 	    for (svp = MARK + 1; svp <= SP; svp++) {
-		elem = SvIVx(*svp);
+		const I32 elem = SvIVx(*svp);
 		if (elem > max)
 		    max = elem;
 	    }
@@ -3823,7 +3790,8 @@ PP(pp_aslice)
 		av_extend(av, max);
 	}
 	while (++MARK <= SP) {
-	    elem = SvIVx(*MARK);
+	    register SV **svp;
+	    I32 elem = SvIVx(*MARK);
 
 	    if (elem > 0)
 		elem -= arybase;
@@ -3850,7 +3818,7 @@ PP(pp_aslice)
 PP(pp_each)
 {
     dSP;
-    HV *hash = (HV*)POPs;
+    HV * const hash = (HV*)POPs;
     HE *entry;
     const I32 gimme = GIMME_V;
     I32 realhv = (SvTYPE(hash) == SVt_PVHV);
@@ -3862,7 +3830,7 @@ PP(pp_each)
 
     EXTEND(SP, 2);
     if (entry) {
-        SV* sv = hv_iterkeysv(entry);
+	SV* const sv = hv_iterkeysv(entry);
 	PUSHs(sv);	/* won't clobber stack_sp */
 	if (gimme == G_ARRAY) {
 	    SV *val;
@@ -3895,30 +3863,27 @@ PP(pp_delete)
     dSP;
     const I32 gimme = GIMME_V;
     const I32 discard = (gimme == G_VOID) ? G_DISCARD : 0;
-    SV *sv;
-    HV *hv;
 
     if (PL_op->op_private & OPpSLICE) {
 	dMARK; dORIGMARK;
-	U32 hvtype;
-	hv = (HV*)POPs;
-	hvtype = SvTYPE(hv);
+	HV * const hv = (HV*)POPs;
+	const U32 hvtype = SvTYPE(hv);
 	if (hvtype == SVt_PVHV) {			/* hash element */
 	    while (++MARK <= SP) {
-		sv = hv_delete_ent(hv, *MARK, discard, 0);
+		SV * const sv = hv_delete_ent(hv, *MARK, discard, 0);
 		*MARK = sv ? sv : &PL_sv_undef;
 	    }
 	}
 	else if (hvtype == SVt_PVAV) {
 	    if (PL_op->op_flags & OPf_SPECIAL) {	/* array element */
 		while (++MARK <= SP) {
-		    sv = av_delete((AV*)hv, SvIV(*MARK), discard);
+		    SV * const sv = av_delete((AV*)hv, SvIV(*MARK), discard);
 		    *MARK = sv ? sv : &PL_sv_undef;
 		}
 	    }
 	    else {					/* pseudo-hash element */
 		while (++MARK <= SP) {
-		    sv = avhv_delete_ent((AV*)hv, *MARK, discard, 0);
+		    SV * const sv = avhv_delete_ent((AV*)hv, *MARK, discard, 0);
 		    *MARK = sv ? sv : &PL_sv_undef;
 		}
 	    }
@@ -3938,7 +3903,8 @@ PP(pp_delete)
     }
     else {
 	SV *keysv = POPs;
-	hv = (HV*)POPs;
+	HV * const hv = (HV*)POPs;
+	SV *sv;
 	if (SvTYPE(hv) == SVt_PVHV)
 	    sv = hv_delete_ent(hv, keysv, discard, 0);
 	else if (SvTYPE(hv) == SVt_PVAV) {
@@ -3965,9 +3931,8 @@ PP(pp_exists)
 
     if (PL_op->op_private & OPpEXISTS_SUB) {
 	GV *gv;
-	CV *cv;
 	SV *sv = POPs;
-	cv = sv_2cv(sv, &hv, &gv, FALSE);
+	CV * const cv = sv_2cv(sv, &hv, &gv, FALSE);
 	if (cv)
 	    RETPUSHYES;
 	if (gv && isGV(gv) && GvCV(gv) && !GvCVGEN(gv))
@@ -3997,10 +3962,10 @@ PP(pp_exists)
 PP(pp_hslice)
 {
     dSP; dMARK; dORIGMARK;
-    register HV *hv = (HV*)POPs;
-    register I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
+    register HV * const hv = (HV*)POPs;
+    register const I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
     I32 realhv = (SvTYPE(hv) == SVt_PVHV);
-    bool localizing = PL_op->op_private & OPpLVAL_INTRO ? TRUE : FALSE;
+    const bool localizing = PL_op->op_private & OPpLVAL_INTRO ? TRUE : FALSE;
     bool other_magic = FALSE;
 
     if (localizing) {
@@ -4082,20 +4047,18 @@ PP(pp_list)
 PP(pp_lslice)
 {
     dSP;
-    SV **lastrelem = PL_stack_sp;
-    SV **lastlelem = PL_stack_base + POPMARK;
-    SV **firstlelem = PL_stack_base + POPMARK + 1;
-    register SV **firstrelem = lastlelem + 1;
-    I32 arybase = PL_curcop->cop_arybase;
-    I32 lval = PL_op->op_flags & OPf_MOD;
-    I32 is_something_there = lval;
+    SV ** const lastrelem = PL_stack_sp;
+    SV ** const lastlelem = PL_stack_base + POPMARK;
+    SV ** const firstlelem = PL_stack_base + POPMARK + 1;
+    register SV ** const firstrelem = lastlelem + 1;
+    const I32 arybase = PL_curcop->cop_arybase;
+    I32 is_something_there = PL_op->op_flags & OPf_MOD;
 
-    register I32 max = lastrelem - lastlelem;
+    register const I32 max = lastrelem - lastlelem;
     register SV **lelem;
-    register I32 ix;
 
     if (GIMME != G_ARRAY) {
-	ix = SvIVx(*lastlelem);
+	I32 ix = SvIVx(*lastlelem);
 	if (ix < 0)
 	    ix += max;
 	else
@@ -4114,7 +4077,7 @@ PP(pp_lslice)
     }
 
     for (lelem = firstlelem; lelem <= lastlelem; lelem++) {
-	ix = SvIVx(*lelem);
+	I32 ix = SvIVx(*lelem);
 	if (ix < 0)
 	    ix += max;
 	else
@@ -4137,8 +4100,8 @@ PP(pp_lslice)
 PP(pp_anonlist)
 {
     dSP; dMARK; dORIGMARK;
-    I32 items = SP - MARK;
-    SV *av = sv_2mortal((SV*)av_make(items, MARK+1));
+    const I32 items = SP - MARK;
+    SV * const av = sv_2mortal((SV*)av_make(items, MARK+1));
     SP = ORIGMARK;		/* av_make() might realloc stack_sp */
     XPUSHs(av);
     RETURN;
@@ -4147,11 +4110,11 @@ PP(pp_anonlist)
 PP(pp_anonhash)
 {
     dSP; dMARK; dORIGMARK;
-    HV* hv = (HV*)sv_2mortal((SV*)newHV());
+    HV* const hv = (HV*)sv_2mortal((SV*)newHV());
 
     while (MARK < SP) {
-	SV* key = *++MARK;
-	SV *val = NEWSV(46, 0);
+	SV * const key = *++MARK;
+	SV * const val = NEWSV(46, 0);
 	if (MARK < SP)
 	    sv_setsv(val, *++MARK);
 	else if (ckWARN(WARN_MISC))
@@ -4176,9 +4139,9 @@ PP(pp_splice)
     I32 after;
     I32 diff;
     SV **tmparyval = 0;
-    MAGIC *mg;
+    const MAGIC * const mg = SvTIED_mg((SV*)ary, PERL_MAGIC_tied);
 
-    if ((mg = SvTIED_mg((SV*)ary, PERL_MAGIC_tied))) {
+    if (mg) {
 	*MARK-- = SvTIED_obj((SV*)ary, mg);
 	PUSHMARK(MARK);
 	PUTBACK;
@@ -4236,7 +4199,7 @@ PP(pp_splice)
 
     /* make new elements SVs now: avoid problems if they're from the array */
     for (dst = MARK, i = newlen; i; i--) {
-        SV *h = *dst;
+        SV * const h = *dst;
 	*dst++ = newSVsv(h);
     }
 
@@ -4374,10 +4337,9 @@ PP(pp_push)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
     register AV *ary = (AV*)*++MARK;
-    register SV *sv = &PL_sv_undef;
-    MAGIC *mg;
+    const MAGIC * const mg = SvTIED_mg((SV*)ary, PERL_MAGIC_tied);
 
-    if ((mg = SvTIED_mg((SV*)ary, PERL_MAGIC_tied))) {
+    if (mg) {
 	*MARK-- = SvTIED_obj((SV*)ary, mg);
 	PUSHMARK(MARK);
 	PUTBACK;
@@ -4389,7 +4351,7 @@ PP(pp_push)
     else {
 	/* Why no pre-extend of ary here ? */
 	for (++MARK; MARK <= SP; MARK++) {
-	    sv = NEWSV(51, 0);
+	    SV * const sv = NEWSV(51, 0);
 	    if (*MARK)
 		sv_setsv(sv, *MARK);
 	    av_push(ary, sv);
@@ -4403,8 +4365,8 @@ PP(pp_push)
 PP(pp_pop)
 {
     dSP;
-    AV *av = (AV*)POPs;
-    SV *sv = av_pop(av);
+    AV * const av = (AV*)POPs;
+    SV * const sv = av_pop(av);
     if (AvREAL(av))
 	(void)sv_2mortal(sv);
     PUSHs(sv);
@@ -4414,8 +4376,8 @@ PP(pp_pop)
 PP(pp_shift)
 {
     dSP;
-    AV *av = (AV*)POPs;
-    SV *sv = av_shift(av);
+    AV * const av = (AV*)POPs;
+    SV * const sv = av_shift(av);
     EXTEND(SP, 1);
     if (!sv)
 	RETPUSHUNDEF;
@@ -4429,11 +4391,9 @@ PP(pp_unshift)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
     register AV *ary = (AV*)*++MARK;
-    register SV *sv;
-    register I32 i = 0;
-    MAGIC *mg;
+    const MAGIC * const mg = SvTIED_mg((SV*)ary, PERL_MAGIC_tied);
 
-    if ((mg = SvTIED_mg((SV*)ary, PERL_MAGIC_tied))) {
+    if (mg) {
 	*MARK-- = SvTIED_obj((SV*)ary, mg);
 	PUSHMARK(MARK);
 	PUTBACK;
@@ -4443,9 +4403,10 @@ PP(pp_unshift)
 	SPAGAIN;
     }
     else {
+	register I32 i = 0;
 	av_unshift(ary, SP - MARK);
 	while (MARK < SP) {
-	    sv = newSVsv(*++MARK);
+	    SV * const sv = newSVsv(*++MARK);
 	    (void)av_store(ary, i++, sv);
 	}
     }
@@ -4457,13 +4418,12 @@ PP(pp_unshift)
 PP(pp_reverse)
 {
     dSP; dMARK;
-    register SV *tmp;
-    SV **oldsp = SP;
+    SV ** const oldsp = SP;
 
     if (GIMME == G_ARRAY) {
 	MARK++;
 	while (MARK < SP) {
-	    tmp = *MARK;
+	    register SV * const tmp = *MARK;
 	    *MARK++ = *SP;
 	    *SP-- = tmp;
 	}
@@ -4527,10 +4487,10 @@ PP(pp_split)
     dSP; dTARG;
     AV *ary;
     register IV limit = POPi;			/* note, negative is forever */
-    SV *sv = POPs;
+    SV * const sv = POPs;
     STRLEN len;
     register const char *s = SvPV_const(sv, len);
-    bool do_utf8 = DO_UTF8(sv);
+    const bool do_utf8 = DO_UTF8(sv);
     const char *strend = s + len;
     register PMOP *pm;
     register REGEXP *rx;
@@ -4539,9 +4499,8 @@ PP(pp_split)
     I32 iters = 0;
     const STRLEN slen = do_utf8 ? utf8_length((U8*)s, (U8*)strend) : (strend - s);
     I32 maxiters = slen + 10;
-    I32 i;
     const char *orig;
-    I32 origlimit = limit;
+    const I32 origlimit = limit;
     I32 realarray = 0;
     I32 base;
     const I32 gimme = GIMME_V;
@@ -4590,6 +4549,7 @@ PP(pp_split)
 	}
 	else {
 	    if (!AvREAL(ary)) {
+		I32 i;
 		AvREAL_on(ary);
 		AvREIFY_off(ary);
 		for (i = AvFILLp(ary); i >= 0; i--)
@@ -4663,12 +4623,12 @@ PP(pp_split)
 	     (rx->reganch & RE_USE_INTUIT) && !rx->nparens
 	     && (rx->reganch & ROPT_CHECK_ALL)
 	     && !(rx->reganch & ROPT_ANCH)) {
-	int tail = (rx->reganch & RE_INTUIT_TAIL);
-	SV *csv = CALLREG_INTUIT_STRING(aTHX_ rx);
+	const int tail = (rx->reganch & RE_INTUIT_TAIL);
+	SV * const csv = CALLREG_INTUIT_STRING(aTHX_ rx);
 
 	len = rx->minlen;
 	if (len == 1 && !(rx->reganch & ROPT_UTF8) && !tail) {
-	    char c = *SvPV_nolen_const(csv);
+	    const char c = *SvPV_nolen_const(csv);
 	    while (--limit) {
 		for (m = s; m < strend && *m != c; m++)
 		    ;
@@ -4712,11 +4672,12 @@ PP(pp_split)
 	maxiters += slen * rx->nparens;
 	while (s < strend && --limit)
 	{
+	    I32 rex_return;
 	    PUTBACK;
-	    i = CALLREGEXEC(aTHX_ rx, (char*)s, (char*)strend, (char*)orig, 1 ,
+	    rex_return = CALLREGEXEC(aTHX_ rx, (char*)s, (char*)strend, (char*)orig, 1 ,
 			    sv, NULL, 0);
 	    SPAGAIN;
-	    if (i == 0)
+	    if (rex_return == 0)
 		break;
 	    TAINT_IF(RX_MATCH_TAINTED(rx));
 	    if (RX_MATCH_COPIED(rx) && rx->subbeg != orig) {
@@ -4734,6 +4695,7 @@ PP(pp_split)
 		(void)SvUTF8_on(dstr);
 	    XPUSHs(dstr);
 	    if (rx->nparens) {
+		I32 i;
 		for (i = 1; i <= (I32)rx->nparens; i++) {
 		    s = rx->startp[i] + orig;
 		    m = rx->endp[i] + orig;
@@ -4763,7 +4725,7 @@ PP(pp_split)
 
     /* keep field after final delim? */
     if (s < strend || (iters && origlimit)) {
-        STRLEN l = strend - s;
+        const STRLEN l = strend - s;
 	dstr = newSVpvn(s, l);
 	if (make_mortal)
 	    sv_2mortal(dstr);
@@ -4805,6 +4767,7 @@ PP(pp_split)
 	    LEAVE;
 	    SPAGAIN;
 	    if (gimme == G_ARRAY) {
+		I32 i;
 		/* EXTEND should not be needed - we just popped them */
 		EXTEND(SP, iters);
 		for (i=0; i < iters; i++) {

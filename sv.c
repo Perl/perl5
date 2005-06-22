@@ -1885,7 +1885,7 @@ S_not_a_number(pTHX_ SV *sv)
 {
      SV *dsv;
      char tmpbuf[64];
-     char *pv;
+     const char *pv;
 
      if (DO_UTF8(sv)) {
           dsv = sv_2mortal(newSVpv("", 0));
@@ -5020,7 +5020,7 @@ S_sv_del_backref(pTHX_ SV *sv)
     AV *av;
     SV **svp;
     I32 i;
-    SV *tsv = SvRV(sv);
+    SV * const tsv = SvRV(sv);
     MAGIC *mg = NULL;
     if (!SvMAGICAL(tsv) || !(mg = mg_find(tsv, PERL_MAGIC_backref)))
 	Perl_croak(aTHX_ "panic: del_backref");
@@ -5207,7 +5207,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 		stash = SvSTASH(sv);
 		destructor = StashHANDLER(stash,DESTROY);
 		if (destructor) {
-		    SV* tmpref = newRV(sv);
+		    SV* const tmpref = newRV(sv);
 	            SvREADONLY_on(tmpref);   /* DESTROY() could be naughty */
 		    ENTER;
 		    PUSHSTACKi(PERLSI_DESTROY);
@@ -6245,7 +6245,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 		sv_pos_u2b(sv,&append,0);
 	    }
 	} else if (SvUTF8(sv)) {
-	    SV *tsv = NEWSV(0,0);
+	    SV * const tsv = NEWSV(0,0);
 	    sv_gets(tsv, fp, 0);
 	    sv_utf8_upgrade_nomg(tsv);
 	    SvCUR_set(sv,append);
@@ -7774,7 +7774,7 @@ Perl_sv_reftype(pTHX_ SV *sv, int ob)
     /* The fact that I don't need to downcast to char * everywhere, only in ?:
        inside return suggests a const propagation bug in g++.  */
     if (ob && SvOBJECT(sv)) {
-	char *name = HvNAME_get(SvSTASH(sv));
+	char * const name = HvNAME_get(SvSTASH(sv));
 	return name ? name : (char *) "__ANON__";
     }
     else {
@@ -7906,7 +7906,7 @@ Perl_newSVrv(pTHX_ SV *rv, const char *classname)
     SvROK_on(rv);
 
     if (classname) {
-	HV* stash = gv_stashpv(classname, TRUE);
+	HV* const stash = gv_stashpv(classname, TRUE);
 	(void)sv_bless(rv, stash);
     }
     return sv;

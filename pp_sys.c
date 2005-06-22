@@ -315,7 +315,7 @@ PP(pp_backtick)
 {
     dSP; dTARGET;
     PerlIO *fp;
-    const char *tmps = POPpconstx;
+    const char * const tmps = POPpconstx;
     const I32 gimme = GIMME_V;
     const char *mode = "r";
 
@@ -350,10 +350,8 @@ PP(pp_backtick)
 	    SvTAINTED_on(TARG);
 	}
 	else {
-	    SV *sv;
-
 	    for (;;) {
-		sv = NEWSV(56, 79);
+		SV * const sv = NEWSV(56, 79);
 		if (sv_gets(sv, fp, 0) == Nullch) {
 		    SvREFCNT_dec(sv);
 		    break;
@@ -438,7 +436,7 @@ PP(pp_warn)
     }
     tmps = SvPV_const(tmpsv, len);
     if ((!tmps || !len) && PL_errgv) {
-  	SV *error = ERRSV;
+  	SV * const error = ERRSV;
 	(void)SvUPGRADE(error, SVt_PV);
 	if (SvPOK(error) && SvCUR(error))
 	    sv_catpv(error, "\t...caught");
@@ -875,7 +873,7 @@ PP(pp_untie)
 	RETPUSHYES;
 
     if ((mg = SvTIED_mg(sv, how))) {
-	SV *obj = SvRV(SvTIED_obj(sv, mg));
+	SV * const obj = SvRV(SvTIED_obj(sv, mg));
 	GV *gv;
 	CV *cv = NULL;
         if (obj) {
@@ -905,7 +903,7 @@ PP(pp_untie)
 PP(pp_tied)
 {
     dSP;
-    MAGIC *mg;
+    const MAGIC *mg;
     SV *sv = POPs;
     const char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
 		? PERL_MAGIC_tied : PERL_MAGIC_tiedscalar;
@@ -926,13 +924,12 @@ PP(pp_tied)
 PP(pp_dbmopen)
 {
     dSP;
-    HV *hv;
     dPOPPOPssrl;
     HV* stash;
     GV *gv;
     SV *sv;
 
-    hv = (HV*)POPs;
+    HV * const hv = (HV*)POPs;
 
     sv = sv_mortalcopy(&PL_sv_no);
     sv_setpv(sv, "AnyDBM_File");
@@ -1171,7 +1168,7 @@ PP(pp_select)
     if (! hv)
 	XPUSHs(&PL_sv_undef);
     else {
-	GV **gvp = (GV**)hv_fetch(hv, GvNAME(egv), GvNAMELEN(egv), FALSE);
+	GV ** const gvp = (GV**)hv_fetch(hv, GvNAME(egv), GvNAMELEN(egv), FALSE);
 	if (gvp && *gvp == egv) {
 	    gv_efullname4(TARG, PL_defoutgv, Nullch, TRUE);
 	    XPUSHTARG;
@@ -1193,14 +1190,9 @@ PP(pp_select)
 PP(pp_getc)
 {
     dSP; dTARGET;
-    GV *gv;
     IO *io = NULL;
     MAGIC *mg;
-
-    if (MAXARG == 0)
-	gv = PL_stdingv;
-    else
-	gv = (GV*)POPs;
+    GV * const gv = (MAXARG==0) ? PL_stdingv : (GV*)POPs;
 
     if (gv && (io = GvIO(gv))
 	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
@@ -1311,13 +1303,15 @@ PP(pp_enterwrite)
 PP(pp_leavewrite)
 {
     dSP;
-    GV *gv = cxstack[cxstack_ix].blk_sub.gv;
-    register IO *io = GvIOp(gv);
-    PerlIO *ofp = IoOFP(io);
+    GV * const gv = cxstack[cxstack_ix].blk_sub.gv;
+    register IO * const io = GvIOp(gv);
+    PerlIO * const ofp = IoOFP(io);
     PerlIO *fp;
     SV **newsp = Null(SV**);
     I32 gimme = 0;
     register PERL_CONTEXT *cx;
+    PERL_UNUSED_VAR(newsp);
+    PERL_UNUSED_VAR(gimme);
 
     DEBUG_f(PerlIO_printf(Perl_debug_log, "left=%ld, todo=%ld\n",
 	  (long)IoLINES_LEFT(io), (long)FmLINES(PL_formtarget)));
@@ -1330,9 +1324,9 @@ PP(pp_leavewrite)
 	CV *cv;
 	if (!IoTOP_GV(io)) {
 	    GV *topgv;
-	    SV *topname;
 
 	    if (!IoTOP_NAME(io)) {
+		SV *topname;
 		if (!IoFMT_NAME(io))
 		    IoFMT_NAME(io) = savepv(GvNAME(gv));
 		topname = sv_2mortal(Perl_newSVpvf(aTHX_ "%s_TOP", GvNAME(gv)));
@@ -1511,19 +1505,14 @@ PP(pp_prtf)
 PP(pp_sysopen)
 {
     dSP;
-    GV *gv;
-    SV *sv;
-    const char *tmps;
-    STRLEN len;
     const int perm = (MAXARG > 3) ? POPi : 0666;
     const int mode = POPi;
-
-    sv = POPs;
-    gv = (GV *)POPs;
+    SV * const sv = POPs;
+    GV * const gv = (GV *)POPs;
+    STRLEN len;
 
     /* Need TIEHANDLE method ? */
-
-    tmps = SvPV_const(sv, len);
+    const char * const tmps = SvPV_const(sv, len);
     /* FIXME? do_open should do const  */
     if (do_open(gv, (char*)tmps, len, TRUE, mode, perm, Nullfp)) {
 	IoLINES(GvIOp(gv)) = 0;
@@ -1539,7 +1528,6 @@ PP(pp_sysread)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
     int offset;
-    GV *gv;
     IO *io;
     char *buffer;
     SSize_t length;
@@ -1547,7 +1535,6 @@ PP(pp_sysread)
     Sock_size_t bufsize;
     SV *bufsv;
     STRLEN blen;
-    MAGIC *mg;
     int fp_utf8;
     int buffer_utf8;
     SV *read_target;
@@ -1557,23 +1544,24 @@ PP(pp_sysread)
     STRLEN charskip = 0;
     STRLEN skip = 0;
 
-    gv = (GV*)*++MARK;
+    GV * const gv = (GV*)*++MARK;
     if ((PL_op->op_type == OP_READ || PL_op->op_type == OP_SYSREAD)
-	&& gv && (io = GvIO(gv))
-	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
+	&& gv && (io = GvIO(gv)) )
     {
-	SV *sv;
-	
-	PUSHMARK(MARK-1);
-	*MARK = SvTIED_obj((SV*)io, mg);
-	ENTER;
-	call_method("READ", G_SCALAR);
-	LEAVE;
-	SPAGAIN;
-	sv = POPs;
-	SP = ORIGMARK;
-	PUSHs(sv);
-	RETURN;
+	const MAGIC * mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar);
+	if (mg) {
+	    SV *sv;
+	    PUSHMARK(MARK-1);
+	    *MARK = SvTIED_obj((SV*)io, mg);
+	    ENTER;
+	    call_method("READ", G_SCALAR);
+	    LEAVE;
+	    SPAGAIN;
+	    sv = POPs;
+	    SP = ORIGMARK;
+	    PUSHs(sv);
+	    RETURN;
+	}
     }
 
     if (!gv)

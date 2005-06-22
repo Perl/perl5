@@ -53,7 +53,7 @@ sub walk_table (&@) {
 	else {
 	    @args = split /\s*\|\s*/, $_;
 	}
-	s/\bNN\b\s+// for @args;
+	s/\b(NN|NULLOK)\b\s+//g for @args;
 	print $F $function->(@args);
     }
     print $F $trailer if $trailer;
