@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-$VERSION = '1.02';
+$VERSION = '1.02_01';
 
 BEGIN {
   push @INC, './lib';
@@ -384,10 +384,10 @@ print WARN <<'EOM';
 	         isWARN_on(PL_curcop->cop_warnings, z)  ||		\
 	         isWARN_on(PL_curcop->cop_warnings, t) ) ) )
 
-#define packWARN(a)		(a                                 )
-#define packWARN2(a,b)		((a) | (b)<<8                      )
-#define packWARN3(a,b,c)	((a) | (b)<<8 | (c) <<16           )
-#define packWARN4(a,b,c,d)	((a) | (b)<<8 | (c) <<16 | (d) <<24)
+#define packWARN(a)		(a                                      )
+#define packWARN2(a,b)		((a) | ((b)<<8)                         )
+#define packWARN3(a,b,c)	((a) | ((b)<<8) | ((c)<<16)             )
+#define packWARN4(a,b,c,d)	((a) | ((b)<<8) | ((c)<<16) | ((d) <<24))
 
 #define unpackWARN1(x)		((x)        & 0xFF)
 #define unpackWARN2(x)		(((x) >>8)  & 0xFF)
