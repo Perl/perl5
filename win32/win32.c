@@ -5139,8 +5139,8 @@ Perl_sys_intern_init(pTHX)
     {
 #  endif
 	/* Force C runtime signal stuff to set its console handler */
-	signal(SIGINT,&win32_csighandler);
-	signal(SIGBREAK,&win32_csighandler);
+	signal(SIGINT,win32_csighandler);
+	signal(SIGBREAK,win32_csighandler);
 	/* Push our handler on top */
 	SetConsoleCtrlHandler(win32_ctrlhandler,TRUE);
     }

@@ -2562,7 +2562,7 @@ PP(pp_i_modulo)
 	  /* The assumption is to use hereafter the old vanilla version... */
 	  PL_op->op_ppaddr =
 	       PL_ppaddr[OP_I_MODULO] =
-	           &Perl_pp_i_modulo_0;
+	           Perl_pp_i_modulo_0;
 	  /* .. but if we have glibc, we might have a buggy _moddi3
 	   * (at least glicb 2.2.5 is known to have this bug), in other
 	   * words our integer modulus with negative quad as the second
