@@ -14,7 +14,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG              = 0;
 $WARN               = 1;
 $FOLLOW_SYMLINK     = 0;
-$VERSION            = "1.24";
+$VERSION            = "1.24_01";
 $CHOWN              = 1;
 $CHMOD              = 1;
 $DO_NOT_USE_PREFIX  = 0;
@@ -479,8 +479,15 @@ sub _extract_file {
 
                             ### splitpath takes a bool at the end to indicate
                             ### that it's splitting a dir
-    my ($vol,$dirs,$file) = File::Spec::Unix->splitpath(    $name,
-                                                            $entry->is_dir );
+    my ($vol,$dirs,$file);
+    if ( defined $alt ) { # It's a local-OS path
+        ($vol,$dirs,$file) = File::Spec->splitpath(       $alt,
+                                                          $entry->is_dir );
+    } else {
+        ($vol,$dirs,$file) = File::Spec::Unix->splitpath( $name,
+                                                          $entry->is_dir );
+    }
+
     my $dir;
     ### is $name an absolute path? ###
     if( File::Spec->file_name_is_absolute( $dirs ) ) {
