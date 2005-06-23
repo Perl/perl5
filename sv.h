@@ -870,56 +870,55 @@ in gv.h: */
 #define SvRVx(sv) SvRV(sv)
 
 #ifdef PERL_DEBUG_COW
-#define SvIVX(sv) (0 + ((XPVIV*) SvANY(sv))->xiv_iv)
-#define SvUVX(sv) (0 + ((XPVUV*) SvANY(sv))->xuv_uv)
-#define SvNVX(sv) (0 + ((XPVNV*) SvANY(sv))->xnv_nv)
+#  define SvIVX(sv) (0 + ((XPVIV*) SvANY(sv))->xiv_iv)
+#  define SvUVX(sv) (0 + ((XPVUV*) SvANY(sv))->xuv_uv)
+#  define SvNVX(sv) (0 + ((XPVNV*) SvANY(sv))->xnv_nv)
 /* Don't test the core XS code yet.  */
-#if defined (PERL_CORE) && PERL_DEBUG_COW > 1
-#define SvPVX(sv) (0 + (assert(!SvREADONLY(sv)), (sv)->sv_u.svu_pv))
-#else
-#define SvPVX(sv) SvPVX_mutable(sv)
-#endif
-#define SvPVX_mutable(sv)	(0 + (sv)->sv_u.svu_pv)
-#define SvPVX_const(sv)	((const char*)(0 + (sv)->sv_u.svu_pv))
-#define SvCUR(sv) (0 + ((XPV*) SvANY(sv))->xpv_cur)
-#define SvLEN(sv) (0 + ((XPV*) SvANY(sv))->xpv_len)
-#define SvEND(sv) ((sv)->sv_u.svu_pv + ((XPV*)SvANY(sv))->xpv_cur)
+#  if defined (PERL_CORE) && PERL_DEBUG_COW > 1
+#    define SvPVX(sv) (0 + (assert(!SvREADONLY(sv)), (sv)->sv_u.svu_pv))
+#  else
+#  define SvPVX(sv) SvPVX_mutable(sv)
+#  endif
+#  define SvPVX_mutable(sv)	(0 + (sv)->sv_u.svu_pv)
+#  define SvPVX_const(sv)	((const char*)(0 + (sv)->sv_u.svu_pv))
+#  define SvCUR(sv) (0 + ((XPV*) SvANY(sv))->xpv_cur)
+#  define SvLEN(sv) (0 + ((XPV*) SvANY(sv))->xpv_len)
+#  define SvEND(sv) ((sv)->sv_u.svu_pv + ((XPV*)SvANY(sv))->xpv_cur)
 
-#ifdef DEBUGGING
-#  ifdef PERL_IN_SV_C
+#  ifdef DEBUGGING
+#    ifdef PERL_IN_SV_C
 /* Can't make this RVALUE because of Perl_sv_unmagic.  */
+#      define SvMAGIC(sv)	(*(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_magic))
+#    else
+#      define SvMAGIC(sv)	(0 + *(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_magic))
+#    endif
+#  define SvSTASH(sv)	(0 + *(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_stash))
+#  else
+#    ifdef PERL_IN_SV_C
+#      define SvMAGIC(sv) ((XPVMG*)  SvANY(sv))->xmg_magic
+#    else
+#      define SvMAGIC(sv) (0 + ((XPVMG*)  SvANY(sv))->xmg_magic)
+#    endif
+#  define SvSTASH(sv)     (0 + ((XPVMG*)  SvANY(sv))->xmg_stash)
+#  endif
+#else
+#  define SvIVX(sv) ((XPVIV*) SvANY(sv))->xiv_iv
+#  define SvUVX(sv) ((XPVUV*) SvANY(sv))->xuv_uv
+#  define SvNVX(sv) ((XPVNV*) SvANY(sv))->xnv_nv
+#  define SvPVX(sv) ((sv)->sv_u.svu_pv)
+#  define SvPVX_mutable(sv)	SvPVX(sv)
+#  define SvPVX_const(sv)	((const char*)SvPVX(sv))
+#  define SvCUR(sv) ((XPV*) SvANY(sv))->xpv_cur
+#  define SvLEN(sv) ((XPV*) SvANY(sv))->xpv_len
+#  define SvEND(sv) ((sv)->sv_u.svu_pv + ((XPV*)SvANY(sv))->xpv_cur)
+
+#  ifdef DEBUGGING
 #    define SvMAGIC(sv)	(*(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_magic))
+#    define SvSTASH(sv)	(*(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_stash))
 #  else
-#    define SvMAGIC(sv)	(0 + *(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_magic))
+#    define SvMAGIC(sv)	((XPVMG*)  SvANY(sv))->xmg_magic
+#    define SvSTASH(sv)	((XPVMG*)  SvANY(sv))->xmg_stash
 #  endif
-#define SvSTASH(sv)	(0 + *(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_stash))
-#else
-#  ifdef PERL_IN_SV_C
-#    define SvMAGIC(sv) ((XPVMG*)  SvANY(sv))->xmg_magic
-#  else
-#    define SvMAGIC(sv) (0 + ((XPVMG*)  SvANY(sv))->xmg_magic)
-#  endif
-#define SvSTASH(sv)     (0 + ((XPVMG*)  SvANY(sv))->xmg_stash)
-#endif
-#else
-#define SvIVX(sv) ((XPVIV*) SvANY(sv))->xiv_iv
-#define SvUVX(sv) ((XPVUV*) SvANY(sv))->xuv_uv
-#define SvNVX(sv) ((XPVNV*) SvANY(sv))->xnv_nv
-#define SvPVX(sv) ((sv)->sv_u.svu_pv)
-#define SvPVX_mutable(sv)	SvPVX(sv)
-#define SvPVX_const(sv)	((const char*)SvPVX(sv))
-#define SvCUR(sv) ((XPV*) SvANY(sv))->xpv_cur
-#define SvLEN(sv) ((XPV*) SvANY(sv))->xpv_len
-#define SvEND(sv) ((sv)->sv_u.svu_pv + ((XPV*)SvANY(sv))->xpv_cur)
-
-#ifdef DEBUGGING
-#define SvMAGIC(sv)	(*(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_magic))
-#define SvSTASH(sv)	(*(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_stash))
-#else
-#define SvMAGIC(sv)	((XPVMG*)  SvANY(sv))->xmg_magic
-#define SvSTASH(sv)	((XPVMG*)  SvANY(sv))->xmg_stash
-#endif
-
 #endif
 
 #define SvIVXx(sv) SvIVX(sv)
@@ -980,17 +979,17 @@ in gv.h: */
 		   SvPV_renew(sv, _lEnGtH); \
 		 } STMT_END
 
-#define SvPV_free(sv) \
-	STMT_START { assert(SvTYPE(sv) >= SVt_PV);	\
-		if (SvLEN(sv)) {			\
-		    if(SvOOK(sv)) {			\
-		      Safefree(SvPVX(sv) - SvIVX(sv));	\
-		      SvFLAGS(sv) &= ~SVf_OOK;		\
-		    } else {				\
-		      Safefree(SvPVX(sv));		\
-		    }					\
-		}					\
-	} STMT_END
+#define SvPV_free(sv)							\
+    STMT_START {							\
+		     assert(SvTYPE(sv) >= SVt_PV);			\
+		     if (SvLEN(sv)) {					\
+			 if(SvOOK(sv)) {				\
+			     SvPV_set(sv, SvPVX_mutable(sv) - SvIVX(sv)); \
+			     SvFLAGS(sv) &= ~SVf_OOK;			\
+			 }						\
+			 Safefree(SvPVX(sv));				\
+		     }							\
+		 } STMT_END
 
 #define BmRARE(sv)	((XPVBM*)  SvANY(sv))->xbm_rare
 #define BmUSEFUL(sv)	((XPVBM*)  SvANY(sv))->xbm_useful
