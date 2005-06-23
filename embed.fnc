@@ -1244,9 +1244,6 @@ s	|int	|sv_2iuv_non_preserve	|SV *sv|I32 numtype
 #  endif
 sR	|I32	|expect_number	|NN char** pattern
 #
-#  if defined(USE_ITHREADS)
-s	|SV*	|gv_share	|SV *sv|CLONE_PARAMS *param
-#  endif
 s	|bool	|utf8_mg_pos	|NN SV *sv|NN MAGIC **mgp|NN STRLEN **cachep \
 				|I32 i|NN I32 *offsetp|I32 uoff \
 				|NN const U8 **sp|NN const U8 *start \

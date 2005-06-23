@@ -10221,62 +10221,6 @@ Perl_ptr_table_free(pTHX_ PTR_TBL_t *tbl)
     Safefree(tbl);
 }
 
-/* attempt to make everything in the typeglob readonly */
-
-STATIC SV *
-S_gv_share(pTHX_ SV *sstr, CLONE_PARAMS *param)
-{
-    GV *gv = (GV*)sstr;
-    SV *sv = &param->proto_perl->Isv_no; /* just need SvREADONLY-ness */
-
-    if (GvIO(gv) || GvFORM(gv)) {
-        GvUNIQUE_off(gv); /* GvIOs cannot be shared. nor can GvFORMs */
-    }
-    else if (!GvCV(gv)) {
-        GvCV(gv) = (CV*)sv;
-    }
-    else {
-        /* CvPADLISTs cannot be shared */
-        if (!SvREADONLY(GvCV(gv)) && !CvXSUB(GvCV(gv))) {
-            GvUNIQUE_off(gv);
-        }
-    }
-
-    if (!GvUNIQUE(gv)) {
-#if 0
-        PerlIO_printf(Perl_debug_log, "gv_share: unable to share %s::%s\n",
-                      HvNAME_get(GvSTASH(gv)), GvNAME(gv));
-#endif
-        return Nullsv;
-    }
-
-    /*
-     * write attempts will die with
-     * "Modification of a read-only value attempted"
-     */
-    if (!GvSV(gv)) {
-        GvSV(gv) = sv;
-    }
-    else {
-        SvREADONLY_on(GvSV(gv));
-    }
-
-    if (!GvAV(gv)) {
-        GvAV(gv) = (AV*)sv;
-    }
-    else {
-        SvREADONLY_on(GvAV(gv));
-    }
-
-    if (!GvHV(gv)) {
-        GvHV(gv) = (HV*)sv;
-    }
-    else {
-        SvREADONLY_on(GvHV(gv));
-    }
-
-    return sstr; /* he_dup() will SvREFCNT_inc() */
-}
 
 void
 Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
@@ -10450,17 +10394,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 		goto new_body;
 	    case SVt_PVGV:
 		if (GvUNIQUE((GV*)sstr)) {
-		    SV *share;
-		    if ((share = gv_share(sstr, param))) {
-			del_SV(dstr);
-			dstr = share;
-			ptr_table_store(PL_ptr_table, sstr, dstr);
-#if 0
-			PerlIO_printf(Perl_debug_log, "sv_dup: sharing %s::%s\n",
-				      HvNAME_get(GvSTASH(share)), GvNAME(share));
-#endif
-			goto done_share;
-		    }
+		    /* Do sharing here.  */
 		}
 		new_body_length = sizeof(XPVGV);
 		new_body_arena = (void **) &PL_xpvgv_root;
@@ -10691,7 +10625,6 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	}
     }
 
- done_share:
     if (SvOBJECT(dstr) && SvTYPE(dstr) != SVt_PVIO)
 	++PL_sv_objcount;
 

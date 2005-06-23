@@ -1307,11 +1307,6 @@
 #ifdef PERL_CORE
 #define expect_number		S_expect_number
 #endif
-#  if defined(USE_ITHREADS)
-#ifdef PERL_CORE
-#define gv_share		S_gv_share
-#endif
-#  endif
 #ifdef PERL_CORE
 #define utf8_mg_pos		S_utf8_mg_pos
 #define utf8_mg_pos_init	S_utf8_mg_pos_init
@@ -3274,11 +3269,6 @@
 #ifdef PERL_CORE
 #define expect_number(a)	S_expect_number(aTHX_ a)
 #endif
-#  if defined(USE_ITHREADS)
-#ifdef PERL_CORE
-#define gv_share(a,b)		S_gv_share(aTHX_ a,b)
-#endif
-#  endif
 #ifdef PERL_CORE
 #define utf8_mg_pos(a,b,c,d,e,f,g,h,i)	S_utf8_mg_pos(aTHX_ a,b,c,d,e,f,g,h,i)
 #define utf8_mg_pos_init(a,b,c,d,e,f,g)	S_utf8_mg_pos_init(aTHX_ a,b,c,d,e,f,g)

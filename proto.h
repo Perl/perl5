@@ -2603,9 +2603,6 @@ STATIC I32	S_expect_number(pTHX_ char** pattern)
 			__attribute__nonnull__(pTHX_1);
 
 #
-#  if defined(USE_ITHREADS)
-STATIC SV*	S_gv_share(pTHX_ SV *sv, CLONE_PARAMS *param);
-#  endif
 STATIC bool	S_utf8_mg_pos(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I32 uoff, const U8 **sp, const U8 *start, const U8 *send)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)

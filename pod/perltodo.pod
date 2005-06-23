@@ -265,7 +265,21 @@ Some more nebulous ideas
 
 =head2 threads
 
-Make threads more robust.
+=over 4
+
+=item *
+
+Re-implement C<:unique> in a way that is actualy thread-safe
+
+=item *
+
+Make C<threads::shared> share aggregates properly
+
+(these two may actually share approach, if not implementation
+
+=back
+
+Generally make threads more robust. See also L<iCOW>
 
 =head2 POSIX memory footprint
 
