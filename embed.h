@@ -1285,6 +1285,8 @@
 #define save_scalar_at		S_save_scalar_at
 #endif
 #endif
+#if defined(PERL_IN_GV_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
+#endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define asIV			S_asIV
@@ -1292,7 +1294,6 @@
 #define sv_unglob		S_sv_unglob
 #define not_a_number		S_not_a_number
 #define visit			S_visit
-#define sv_add_backref		S_sv_add_backref
 #define sv_del_backref		S_sv_del_backref
 #define varname			S_varname
 #endif
@@ -3249,6 +3250,10 @@
 #define save_scalar_at(a)	S_save_scalar_at(aTHX_ a)
 #endif
 #endif
+#if defined(PERL_IN_GV_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#endif
+#endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define asIV(a)			S_asIV(aTHX_ a)
@@ -3256,8 +3261,7 @@
 #define sv_unglob(a)		S_sv_unglob(aTHX_ a)
 #define not_a_number(a)		S_not_a_number(aTHX_ a)
 #define visit(a,b,c)		S_visit(aTHX_ a,b,c)
-#define sv_add_backref(a,b)	S_sv_add_backref(aTHX_ a,b)
-#define sv_del_backref(a)	S_sv_del_backref(aTHX_ a)
+#define sv_del_backref(a,b)	S_sv_del_backref(aTHX_ a,b)
 #define varname(a,b,c,d,e,f)	S_varname(aTHX_ a,b,c,d,e,f)
 #endif
 #  ifdef DEBUGGING

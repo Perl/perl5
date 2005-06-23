@@ -414,20 +414,20 @@ Perl_sv_report_used(pTHX)
 /* called by sv_clean_objs() for each live SV */
 
 static void
-do_clean_objs(pTHX_ SV *sv)
+do_clean_objs(pTHX_ SV *ref)
 {
-    SV* rv;
+    SV* target;
 
-    if (SvROK(sv) && SvOBJECT(rv = SvRV(sv))) {
-	DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning object ref:\n "), sv_dump(sv)));
-	if (SvWEAKREF(sv)) {
-	    sv_del_backref(sv);
-	    SvWEAKREF_off(sv);
-	    SvRV_set(sv, NULL);
+    if (SvROK(ref) && SvOBJECT(target = SvRV(ref))) {
+	DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning object ref:\n "), sv_dump(ref)));
+	if (SvWEAKREF(ref)) {
+	    sv_del_backref(target, ref);
+	    SvWEAKREF_off(ref);
+	    SvRV_set(ref, NULL);
 	} else {
-	    SvROK_off(sv);
-	    SvRV_set(sv, NULL);
-	    SvREFCNT_dec(rv);
+	    SvROK_off(ref);
+	    SvRV_set(ref, NULL);
+	    SvREFCNT_dec(target);
 	}
     }
 
@@ -3843,7 +3843,9 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		if (dtype != SVt_PVLV)
 		    sv_upgrade(dstr, SVt_PVGV);
 		sv_magic(dstr, dstr, PERL_MAGIC_glob, Nullch, 0);
-		GvSTASH(dstr) = (HV*)SvREFCNT_inc(GvSTASH(sstr));
+		GvSTASH(dstr) = GvSTASH(sstr);
+		if (GvSTASH(dstr))
+		    Perl_sv_add_backref(aTHX_ (SV*)GvSTASH(dstr), dstr);
 		GvNAME(dstr) = savepvn(name, len);
 		GvNAMELEN(dstr) = len;
 		SvFAKE_on(dstr);	/* can coerce to non-glob */
@@ -5200,7 +5202,7 @@ Perl_sv_rvweaken(pTHX_ SV *sv)
 	return sv;
     }
     tsv = SvRV(sv);
-    sv_add_backref(tsv, sv);
+    Perl_sv_add_backref(aTHX_ tsv, sv);
     SvWEAKREF_on(sv);
     SvREFCNT_dec(tsv);
     return sv;
@@ -5210,8 +5212,8 @@ Perl_sv_rvweaken(pTHX_ SV *sv)
  * back-reference to sv onto the array associated with the backref magic.
  */
 
-STATIC void
-S_sv_add_backref(pTHX_ SV *tsv, SV *sv)
+void
+Perl_sv_add_backref(pTHX_ SV *tsv, SV *sv)
 {
     AV *av;
     MAGIC *mg;
@@ -5235,13 +5237,16 @@ S_sv_add_backref(pTHX_ SV *tsv, SV *sv)
  */
 
 STATIC void
-S_sv_del_backref(pTHX_ SV *sv)
+S_sv_del_backref(pTHX_ SV *tsv, SV *sv)
 {
     AV *av;
     SV **svp;
     I32 i;
-    SV * const tsv = SvRV(sv);
     MAGIC *mg = NULL;
+    if (!SvMAGICAL(tsv) || !(mg = mg_find(tsv, PERL_MAGIC_backref))) {
+	if (PL_in_clean_all)
+	    return;
+    }
     if (!SvMAGICAL(tsv) || !(mg = mg_find(tsv, PERL_MAGIC_backref)))
 	Perl_croak(aTHX_ "panic: del_backref");
     av = (AV *)mg->mg_obj;
@@ -5574,10 +5579,11 @@ Perl_sv_clear(pTHX_ register SV *sv)
     case SVt_PV:
     case SVt_RV:
 	if (SvROK(sv)) {
+	    SV *target = SvRV(sv);
 	    if (SvWEAKREF(sv))
-	        sv_del_backref(sv);
+	        sv_del_backref(target, sv);
 	    else
-	        SvREFCNT_dec(SvRV(sv));
+	        SvREFCNT_dec(target);
 	}
 #ifdef PERL_OLD_COPY_ON_WRITE
 	else if (SvPVX_const(sv)) {
@@ -5654,7 +5660,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	SvFLAGS(sv) |= SVTYPEMASK;
 	/* decrease refcount of the stash that owns this GV, if any */
 	if (stash)
-	    SvREFCNT_dec(stash);
+	    sv_del_backref((SV*)stash, sv);
 	return; /* not break, SvFLAGS reset already happened */
     case SVt_PVBM:
 	del_XPVBM(SvANY(sv));
@@ -8356,7 +8362,7 @@ S_sv_unglob(pTHX_ SV *sv)
     if (GvGP(sv))
 	gp_free((GV*)sv);
     if (GvSTASH(sv)) {
-	SvREFCNT_dec(GvSTASH(sv));
+	sv_del_backref((SV*)GvSTASH(sv), sv);
 	GvSTASH(sv) = Nullhv;
     }
     sv_unmagic(sv, PERL_MAGIC_glob);
@@ -8388,24 +8394,24 @@ See C<SvROK_off>.
 */
 
 void
-Perl_sv_unref_flags(pTHX_ SV *sv, U32 flags)
+Perl_sv_unref_flags(pTHX_ SV *ref, U32 flags)
 {
-    SV* rv = SvRV(sv);
+    SV* target = SvRV(ref);
 
-    if (SvWEAKREF(sv)) {
-    	sv_del_backref(sv);
-	SvWEAKREF_off(sv);
-	SvRV_set(sv, NULL);
+    if (SvWEAKREF(ref)) {
+    	sv_del_backref(target, ref);
+	SvWEAKREF_off(ref);
+	SvRV_set(ref, NULL);
 	return;
     }
-    SvRV_set(sv, NULL);
-    SvROK_off(sv);
-    /* You can't have a || SvREADONLY(rv) here, as $a = $$a, where $a was
+    SvRV_set(ref, NULL);
+    SvROK_off(ref);
+    /* You can't have a || SvREADONLY(target) here, as $a = $$a, where $a was
        assigned to as BEGIN {$a = \"Foo"} will fail.  */
-    if (SvREFCNT(rv) != 1 || (flags & SV_IMMEDIATE_UNREF))
-	SvREFCNT_dec(rv);
+    if (SvREFCNT(target) != 1 || (flags & SV_IMMEDIATE_UNREF))
+	SvREFCNT_dec(target);
     else /* XXX Hack, but hard to make $a=$a->[1] work otherwise */
-	sv_2mortal(rv);		/* Schedule for freeing later */
+	sv_2mortal(target);	/* Schedule for freeing later */
 }
 
 /*
@@ -10491,7 +10497,9 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 		break;
 	    case SVt_PVGV:
 		GvNAME(dstr)	= SAVEPVN(GvNAME(dstr), GvNAMELEN(dstr));
-		GvSTASH(dstr)	= hv_dup_inc(GvSTASH(dstr), param);
+		GvSTASH(dstr)	= hv_dup(GvSTASH(dstr), param);
+		/* Don't call sv_add_backref here as it's going to be created
+		   as part of the magic cloning of the symbol table.  */
 		GvGP(dstr)	= gp_dup(GvGP(dstr), param);
 		(void)GpREFCNT_inc(GvGP(dstr));
 		break;

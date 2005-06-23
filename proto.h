@@ -2574,6 +2574,13 @@ STATIC void	S_debprof(pTHX_ const OP *o);
 STATIC SV*	S_save_scalar_at(pTHX_ SV **sptr);
 #endif
 
+#if defined(PERL_IN_GV_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
+PERL_CALLCONV void	Perl_sv_add_backref(pTHX_ SV *tsv, SV *sv)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+#endif
+
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 STATIC IV	S_asIV(pTHX_ SV* sv)
 			__attribute__warn_unused_result__
@@ -2592,12 +2599,9 @@ STATIC void	S_not_a_number(pTHX_ SV *sv)
 STATIC I32	S_visit(pTHX_ SVFUNC_t f, U32 flags, U32 mask)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC void	S_sv_add_backref(pTHX_ SV *tsv, SV *sv)
+STATIC void	S_sv_del_backref(pTHX_ SV *target, SV *ref)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
-
-STATIC void	S_sv_del_backref(pTHX_ SV *sv)
-			__attribute__nonnull__(pTHX_1);
 
 STATIC SV *	S_varname(pTHX_ GV *gv, const char *gvtype, PADOFFSET targ, SV *keyname, I32 aindex, int subscript_type)
 			__attribute__warn_unused_result__

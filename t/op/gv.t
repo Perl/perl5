@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 
 require './test.pl';
-plan( tests => 66 );
+plan( tests => 68 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -246,6 +246,19 @@ is($j[0], 1);
     is($x, "rocks\n");
 }
 
+{
+    my $output = runperl(prog => <<'EOPROG', stderr => 1);
+package M;
+sub DESTROY {warn "Farewell $_[0]"}
+package main;
+
+bless \$A::B, 'M';
+*A:: = \*B::;
+EOPROG
+    like($output, qr/^Farewell M=SCALAR/, "DESTROY was called");
+    unlike($output, qr/global destruction/,
+           "unreferenced symbol tables should be cleaned up immediately");
+}
 __END__
 Perl
 Rules

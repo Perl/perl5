@@ -344,7 +344,8 @@ Perl_pad_add_name(pTHX_ const char *name, HV* typestash, HV* ourstash, bool fake
     }
     if (ourstash) {
 	SvFLAGS(namesv) |= SVpad_OUR;
-	GvSTASH(namesv) = (HV*)SvREFCNT_inc((SV*) ourstash);
+	GvSTASH(namesv) = ourstash;
+	Perl_sv_add_backref(aTHX_ (SV*)ourstash, namesv);
     }
 
     av_store(PL_comppad_name, offset, namesv);
