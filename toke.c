@@ -8953,7 +8953,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv,
     SV *res;
     SV **cvp;
     SV *cv, *typesv;
-    const char *why1, *why2, *why3;
+    const char *why1 = "", *why2 = "", *why3 = "";
 
     if (!table || !(PL_hints & HINT_LOCALIZE_HH)) {
 	SV *msg;
