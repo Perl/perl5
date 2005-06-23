@@ -221,7 +221,7 @@ END { unlink $COMPRESS_FILE; }
         is( scalar @files, scalar @add,
                                     "Adding files");
         is( $files[0]->name, 'b',   "   Proper name" );
-        is( $files[0]->is_file, 1,  "   Proper type" );
+        is( $files[0]->is_file, !-l $add[0] && -f _,  "   Proper type" );
         like( $files[0]->get_content, qr/^bbbbbbbbbbb\s*$/,
                                     "   Content OK" );
 
