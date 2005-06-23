@@ -120,7 +120,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 	    SvLEN_set(gv, 0);
 	    SvPOK_off(gv);
 	} else
-	    Safefree(SvPVX_const(gv));
+	    Safefree(SvPVX_mutable(gv));
     }
     Newz(602, gp, 1, GP);
     GvGP(gv) = gp_ref(gp);

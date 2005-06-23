@@ -4129,13 +4129,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
             }
 #endif
             /* Initial code is common.  */
-	    if (SvPVX_const(dstr)) {		/* we know that dtype >= SVt_PV */
-		if (SvOOK(dstr)) {
-		    SvFLAGS(dstr) &= ~SVf_OOK;
-		    Safefree(SvPVX_const(dstr) - SvIVX(dstr));
-		}
-		else if (SvLEN(dstr))
-		    Safefree(SvPVX_const(dstr));
+	    if (SvPVX_const(dstr)) {	/* we know that dtype >= SVt_PV */
+		SvPV_free(dstr);
 	    }
 
             if (!isSwipe) {
@@ -5603,7 +5598,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	}
 #else
 	else if (SvPVX_const(sv) && SvLEN(sv))
-	    Safefree(SvPVX_const(sv));
+	    Safefree(SvPVX_mutable(sv));
 	else if (SvPVX_const(sv) && SvREADONLY(sv) && SvFAKE(sv)) {
 	    unshare_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sv)));
 	    SvFAKE_off(sv);
