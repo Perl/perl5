@@ -7,3 +7,5 @@ BEGIN {
 }
 
 unlink 'long/bar.tar', 'long/foo.tgz', 'short/bar.tar', 'short/foo.tgz';
+
+print "1..1\nok 1 - cleanup done\n";
