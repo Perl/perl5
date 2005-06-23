@@ -507,6 +507,11 @@ perl_destruct(pTHXx)
     /* We must account for everything.  */
 
     /* Destroy the main CV and syntax tree */
+    /* Do this now, because destroying ops can cause new SVs to be generated
+       in Perl_pad_swipe, and when running with -DDEBUG_LEAKING_SCALARS they
+       PL_curcop to point to a valid op from which the filename structure
+       member is copied.  */
+    PL_curcop = &PL_compiling;
     if (PL_main_root) {
 	/* ensure comppad/curpad to refer to main's pad */
 	if (CvPADLIST(PL_main_cv)) {
@@ -515,7 +520,6 @@ perl_destruct(pTHXx)
 	op_free(PL_main_root);
 	PL_main_root = Nullop;
     }
-    PL_curcop = &PL_compiling;
     PL_main_start = Nullop;
     SvREFCNT_dec(PL_main_cv);
     PL_main_cv = Nullcv;
