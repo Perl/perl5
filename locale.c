@@ -52,24 +52,19 @@
 STATIC char *
 S_stdize_locale(pTHX_ char *locs)
 {
-    char *s;
+    const char *s = strchr(locs, '=');
     bool okay = TRUE;
 
-    if ((s = strchr(locs, '='))) {
-	char *t;
-
+    if (s) {
+	const char * const t = strchr(s, '.');
 	okay = FALSE;
-	if ((t = strchr(s, '.'))) {
-	    char *u;
-
-	    if ((u = strchr(t, '\n'))) {
-
-		if (u[1] == 0) {
-		    STRLEN len = u - s;
-		    Move(s + 1, locs, len, char);
-		    locs[len] = 0;
-		    okay = TRUE;
-		}
+	if (t) {
+	    const char * const u = strchr(t, '\n');
+	    if (u && (u[1] == 0)) {
+		const STRLEN len = u - s;
+		Move(s + 1, locs, len, char);
+		locs[len] = 0;
+		okay = TRUE;
 	    }
 	}
     }
@@ -186,7 +181,7 @@ Perl_new_ctype(pTHX_ char *newctype)
     }
 
 #endif /* USE_LOCALE_CTYPE */
-    (void)newctype;
+    PERL_UNUSED_ARG(newctype);
 }
 
 /*
@@ -221,9 +216,9 @@ Perl_new_collate(pTHX_ char *newcoll)
 	  /* 50: surely no system expands a char more. */
 #define XFRMBUFSIZE  (2 * 50)
 	  char xbuf[XFRMBUFSIZE];
-	  Size_t fa = strxfrm(xbuf, "a",  XFRMBUFSIZE);
-	  Size_t fb = strxfrm(xbuf, "ab", XFRMBUFSIZE);
-	  SSize_t mult = fb - fa;
+	  const Size_t fa = strxfrm(xbuf, "a",  XFRMBUFSIZE);
+	  const Size_t fb = strxfrm(xbuf, "ab", XFRMBUFSIZE);
+	  const SSize_t mult = fb - fa;
 	  if (mult < 1)
 	      Perl_croak(aTHX_ "strxfrm() gets absurd");
 	  PL_collxfrm_base = (fa > (Size_t)mult) ? (fa - mult) : 0;

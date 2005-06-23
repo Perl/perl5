@@ -947,7 +947,7 @@ Perl_mess(pTHX_ const char *pat, ...)
 }
 
 STATIC COP*
-S_closest_cop(pTHX_ COP *cop, OP *o)
+S_closest_cop(pTHX_ COP *cop, const OP *o)
 {
     /* Look for PL_op starting from o.  cop is the last COP we've seen. */
 
@@ -974,7 +974,7 @@ S_closest_cop(pTHX_ COP *cop, OP *o)
 
     /* Nothing found. */
 
-    return 0;
+    return Null(COP *);
 }
 
 SV *
@@ -2996,7 +2996,7 @@ Perl_set_context(void *t)
 	Perl_croak_nocontext("panic: pthread_setspecific");
 #  endif
 #else
-    (void)t;
+    PERL_UNUSED_ARG(t);
 #endif
 }
 
@@ -3322,7 +3322,7 @@ Perl_get_ppaddr(pTHX)
 char *
 Perl_getenv_len(pTHX_ const char *env_elem, unsigned long *len)
 {
-    char *env_trans = PerlEnv_getenv(env_elem);
+    char * const env_trans = PerlEnv_getenv(env_elem);
     if (env_trans)
 	*len = strlen(env_trans);
     return env_trans;
