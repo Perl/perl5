@@ -1063,9 +1063,9 @@ Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust)
     SvPADTMP_on(PL_curpad[po]);
 #else
     PL_curpad[po] = &PL_sv_undef;
+#endif
     if ((I32)po < PL_padix)
 	PL_padix = po - 1;
-#endif
 }
 
 
