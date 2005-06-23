@@ -1055,10 +1055,17 @@ Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust)
     if (refadjust)
 	SvREFCNT_dec(PL_curpad[po]);
 
+
+    /* if pad tmps aren't shared between ops, then there's no need to
+     * create a new tmp when an existing op is freed */
+#ifdef USE_BROKEN_PAD_RESET
     PL_curpad[po] = NEWSV(1107,0);
     SvPADTMP_on(PL_curpad[po]);
+#else
+    PL_curpad[po] = &PL_sv_undef;
     if ((I32)po < PL_padix)
 	PL_padix = po - 1;
+#endif
 }
 
 
