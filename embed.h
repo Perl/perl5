@@ -1053,6 +1053,8 @@
 #define save_magic		S_save_magic
 #define magic_methpack		S_magic_methpack
 #define magic_methcall		S_magic_methcall
+#define restore_magic		S_restore_magic
+#define unwind_handler_stack	S_unwind_handler_stack
 #endif
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
@@ -3016,6 +3018,8 @@
 #define save_magic(a,b)		S_save_magic(aTHX_ a,b)
 #define magic_methpack(a,b,c)	S_magic_methpack(aTHX_ a,b,c)
 #define magic_methcall(a,b,c,d,e,f)	S_magic_methcall(aTHX_ a,b,c,d,e,f)
+#define restore_magic(a)	S_restore_magic(aTHX_ a)
+#define unwind_handler_stack(a)	S_unwind_handler_stack(aTHX_ a)
 #endif
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)

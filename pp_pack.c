@@ -1159,9 +1159,9 @@ I32
 Perl_unpack_str(pTHX_ const char *pat, const char *patend, const char *s, const char *strbeg, const char *strend, char **new_s, I32 ocnt, U32 flags)
 {
     tempsym_t sym;
-    (void)strbeg;
-    (void)new_s;
-    (void)ocnt;
+    PERL_UNUSED_ARG(strbeg);
+    PERL_UNUSED_ARG(new_s);
+    PERL_UNUSED_ARG(ocnt);
 
     if (flags & FLAG_DO_UTF8) flags |= FLAG_WAS_UTF8;
     else if (need_utf8(pat, patend)) {
@@ -2399,8 +2399,8 @@ void
 Perl_pack_cat(pTHX_ SV *cat, const char *pat, const char *patend, register SV **beglist, SV **endlist, SV ***next_in_list, U32 flags)
 {
     tempsym_t sym;
-    (void)next_in_list;
-    (void)flags;
+    PERL_UNUSED_ARG(next_in_list);
+    PERL_UNUSED_ARG(flags);
 
     TEMPSYM_INIT(&sym, pat, patend, FLAG_PACK);
 

@@ -246,7 +246,7 @@ Ap	|char*	|vform		|const char* pat|va_list* args
 Ap	|void	|free_tmps
 p	|OP*	|gen_constant_list|OP* o
 #if !defined(HAS_GETENV_LEN)
-p	|char*	|getenv_len	|const char* key|unsigned long *len
+p	|char*	|getenv_len	|NN const char* key|NN unsigned long *len
 #endif
 Ap	|void	|gp_free	|GV* gv
 Ap	|GP*	|gp_ref		|GP* gp
@@ -396,7 +396,7 @@ p	|int	|magic_existspack|SV* sv|MAGIC* mg
 p	|int	|magic_freeregexp|SV* sv|MAGIC* mg
 p	|int	|magic_freeovrld|SV* sv|MAGIC* mg
 p	|int	|magic_get	|SV* sv|MAGIC* mg
-p	|int	|magic_getarylen|SV* sv|MAGIC* mg
+p	|int	|magic_getarylen|NN SV* sv|NN const MAGIC* mg
 p	|int	|magic_getdefelem|SV* sv|MAGIC* mg
 p	|int	|magic_getglob	|SV* sv|MAGIC* mg
 p	|int	|magic_getnkeys	|SV* sv|MAGIC* mg
@@ -597,9 +597,9 @@ Apd	|HV*	|get_hv		|const char* name|I32 create
 Apd	|CV*	|get_cv		|const char* name|I32 create
 Ap	|int	|init_i18nl10n	|int printwarn
 Ap	|int	|init_i18nl14n	|int printwarn
-Ap	|void	|new_collate	|NN char* newcoll
-Ap	|void	|new_ctype	|NN char* newctype
-Ap	|void	|new_numeric	|NN char* newcoll
+Ap	|void	|new_collate	|NULLOK const char* newcoll
+Ap	|void	|new_ctype	|NN const char* newctype
+Ap	|void	|new_numeric	|NULLOK const char* newcoll
 Ap	|void	|set_numeric_local
 Ap	|void	|set_numeric_radix
 Ap	|void	|set_numeric_standard
@@ -819,7 +819,7 @@ Ap	|NV	|str_to_version	|SV *sv
 Ap	|SV*	|swash_init	|const char* pkg|const char* name|SV* listsv|I32 minbits|I32 none
 Ap	|UV	|swash_fetch	|SV *sv|const U8 *ptr|bool do_utf8
 Ap	|void	|taint_env
-Ap	|void	|taint_proper	|const char* f|const char* s
+Ap	|void	|taint_proper	|NULLOK const char* f|NN const char* s
 Apd	|UV	|to_utf8_case	|NN const U8 *p|NN U8* ustrp|STRLEN *lenp|SV **swash|const char *normal|const char *special
 Apd	|UV	|to_utf8_lower	|NN const U8 *p|NN U8* ustrp|STRLEN *lenp
 Apd	|UV	|to_utf8_upper	|NN const U8 *p|NN U8* ustrp|STRLEN *lenp
@@ -1015,6 +1015,9 @@ s	|void	|save_magic	|I32 mgs_ix|NN SV *sv
 s	|int	|magic_methpack	|NN SV *sv|NN const MAGIC *mg|NN const char *meth
 s	|int	|magic_methcall	|NN SV *sv|NN const MAGIC *mg|NN const char *meth|I32 f \
 				|int n|SV *val
+s	|void	|restore_magic	|NN const void *p
+s	|void	|unwind_handler_stack|NN const void *p
+
 #endif
 
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
@@ -1315,12 +1318,12 @@ s	|SV*|isa_lookup	|HV *stash|const char *name|HV *name_stash|int len|int level
 
 #if defined(PERL_IN_LOCALE_C) || defined(PERL_DECL_PROT)
 #if defined(USE_LOCALE_NUMERIC) || defined(USE_LOCALE_COLLATE)
-s	|char*	|stdize_locale	|char* locs
+s	|char*	|stdize_locale	|NN char* locs
 #endif
 #endif
 
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
-s	|COP*	|closest_cop	|COP *cop|OP *o
+s	|COP*	|closest_cop	|NN COP *cop|NULLOK const OP *o
 s	|SV*	|mess_alloc
 #endif
 

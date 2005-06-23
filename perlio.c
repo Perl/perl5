@@ -163,9 +163,9 @@ perlsio_binmode(FILE *fp, int iotype, int mode)
     else
 	return 0;
 #  else
-    (void)fp;
-    (void)iotype;
-    (void)mode;
+    PERL_UNUSED_ARG(fp);
+    PERL_UNUSED_ARG(iotype);
+    PERL_UNUSED_ARG(mode);
     return 1;
 #  endif
 #endif
@@ -248,9 +248,9 @@ int
 PerlIO_binmode(pTHX_ PerlIO *fp, int iotype, int mode, const char *names)
 {
 #ifdef USE_SFIO
-    (void)iotype;
-    (void)mode;
-    (void)names;
+    PERL_UNUSED_ARG(iotype);
+    PERL_UNUSED_ARG(mode);
+    PERL_UNUSED_ARG(names);
     return 1;
 #else
     return perlsio_binmode(fp, iotype, mode);
@@ -1039,9 +1039,9 @@ PerlIO_layer_fetch(pTHX_ PerlIO_list_t *av, IV n, PerlIO_funcs *def)
 IV
 PerlIOPop_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 {
-    (void)mode;
-    (void)arg;
-    (void)tab;
+    PERL_UNUSED_ARG(mode);
+    PERL_UNUSED_ARG(arg);
+    PERL_UNUSED_ARG(tab);
     if (PerlIOValid(f)) {
 	PerlIO_flush(f);
 	PerlIO_pop(aTHX_ f);
@@ -1216,9 +1216,9 @@ PerlIOBase_binmode(pTHX_ PerlIO *f)
 IV
 PerlIORaw_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 {
-    (void)mode;
-    (void)arg;
-    (void)tab;
+    PERL_UNUSED_ARG(mode);
+    PERL_UNUSED_ARG(arg);
+    PERL_UNUSED_ARG(tab);
 
     if (PerlIOValid(f)) {
 	PerlIO *t;
@@ -1260,7 +1260,7 @@ PerlIO_apply_layera(pTHX_ PerlIO *f, const char *mode,
 {
     int code = 0;
     while (n < max) {
-	PerlIO_funcs *tab = PerlIO_layer_fetch(aTHX_ layers, n, NULL);
+	PerlIO_funcs * const tab = PerlIO_layer_fetch(aTHX_ layers, n, NULL);
 	if (tab) {
 	    if (!PerlIO_push(aTHX_ f, tab, mode, PerlIOArg)) {
 		code = -1;
@@ -1277,7 +1277,7 @@ PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
 {
     int code = 0;
     if (f && names) {
-	PerlIO_list_t *layers = PerlIO_list_alloc(aTHX);
+	PerlIO_list_t * const layers = PerlIO_list_alloc(aTHX);
 	code = PerlIO_parse_layers(aTHX_ layers, names);
 	if (code == 0) {
 	    code = PerlIO_apply_layera(aTHX_ f, mode, layers, 0, layers->cur);
@@ -1815,8 +1815,8 @@ Perl_PerlIO_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, int cnt)
 IV
 PerlIOUtf8_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 {
-    (void)mode;
-    (void)arg;
+    PERL_UNUSED_ARG(mode);
+    PERL_UNUSED_ARG(arg);
     if (PerlIOValid(f)) {
 	if (tab->kind & PERLIO_K_UTF8)
 	    PerlIOBase(f)->flags |= PERLIO_F_UTF8;
@@ -1894,8 +1894,8 @@ PerlIORaw_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 	       IV n, const char *mode, int fd, int imode, int perm,
 	       PerlIO *old, int narg, SV **args)
 {
-    PerlIO_funcs *tab = PerlIO_default_btm();
-    (void)self;
+    PerlIO_funcs * const tab = PerlIO_default_btm();
+    PERL_UNUSED_ARG(self);
     if (tab && tab->Open)
 	 return (*tab->Open) (aTHX_ tab, layers, n - 1, mode, fd, imode, perm,
 			      old, narg, args);
@@ -1982,7 +1982,7 @@ IV
 PerlIOBase_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 {
     PerlIOl * const l = PerlIOBase(f);
-    (void)arg;
+    PERL_UNUSED_ARG(arg);
 
     l->flags &= ~(PERLIO_F_CANREAD | PERLIO_F_CANWRITE |
 		  PERLIO_F_TRUNCATE | PERLIO_F_APPEND);
@@ -2040,7 +2040,7 @@ PerlIOBase_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 IV
 PerlIOBase_popped(pTHX_ PerlIO *f)
 {
-    (void)f;
+    PERL_UNUSED_ARG(f);
     return 0;
 }
 
@@ -2091,14 +2091,14 @@ PerlIOBase_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 IV
 PerlIOBase_noop_ok(pTHX_ PerlIO *f)
 {
-    (void)f;
+    PERL_UNUSED_ARG(f);
     return 0;
 }
 
 IV
 PerlIOBase_noop_fail(pTHX_ PerlIO *f)
 {
-    (void)f;
+    PERL_UNUSED_ARG(f);
     return -1;
 }
 
@@ -2952,7 +2952,7 @@ PerlIOStdio_invalidate_fileno(pTHX_ FILE *f)
      */
 #    error "Don't know how to set FILE.fileno on your platform"
 #endif
-    (void)f;
+    PERL_UNUSED_ARG(f);
     return 0;
 #  endif
 }
@@ -4739,8 +4739,8 @@ PerlIO_getname(PerlIO *f, char *buf)
     }
     return name;
 #else
-    (void)f;
-    (void)buf;
+    PERL_UNUSED_ARG(f);
+    PERL_UNUSED_ARG(buf);
     Perl_croak(aTHX_ "Don't know how to get file name");
     return Nullch;
 #endif

@@ -1318,8 +1318,8 @@ PP(pp_leavewrite)
     register IO * const io = GvIOp(gv);
     PerlIO * const ofp = IoOFP(io);
     PerlIO *fp;
-    SV **newsp = Null(SV**);
-    I32 gimme = 0;
+    SV **newsp;
+    I32 gimme;
     register PERL_CONTEXT *cx;
     PERL_UNUSED_VAR(newsp);
     PERL_UNUSED_VAR(gimme);

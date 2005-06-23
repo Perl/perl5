@@ -2055,12 +2055,13 @@ PP(pp_last)
     register PERL_CONTEXT *cx;
     I32 pop2 = 0;
     I32 gimme;
-    I32 optype = 0;
+    I32 optype;
     OP *nextop;
     SV **newsp;
     PMOP *newpm;
     SV **mark;
     SV *sv = Nullsv;
+    PERL_UNUSED_VAR(optype);
 
     if (PL_op->op_flags & OPf_SPECIAL) {
 	cxix = dopoptoloop(cxstack_ix);

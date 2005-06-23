@@ -430,7 +430,7 @@ SV **
 Perl_save_threadsv(pTHX_ PADOFFSET i)
 {
     Perl_croak(aTHX_ "panic: save_threadsv called in non-threaded perl");
-    (void)i;
+    PERL_UNUSED_ARG(i);
     NORETURN_FUNCTION_END;
 }
 
