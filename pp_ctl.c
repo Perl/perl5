@@ -2048,7 +2048,7 @@ PP(pp_last)
     register PERL_CONTEXT *cx;
     I32 pop2 = 0;
     I32 gimme;
-    I32 optype;
+    I32 optype = 0;
     OP *nextop;
     SV **newsp;
     PMOP *newpm;
