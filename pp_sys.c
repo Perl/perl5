@@ -201,6 +201,15 @@ void endservent(void);
 #undef PERL_EFF_ACCESS_W_OK
 #undef PERL_EFF_ACCESS_X_OK
 
+/* AIX 5.2 and below use mktime for localtime, and defines the edge case
+ * for time 0x7fffffff to be valid only in UTC. AIX 5.3 provides localtime64
+ * available in the 32bit environment, which could warrant Configure
+ * checks in the future.
+ */
+#ifdef  _AIX
+#define LOCALTIME_EDGECASE_BROKEN
+#endif
+
 /* F_OK unused: if stat() cannot find it... */
 
 #if !defined(PERL_EFF_ACCESS_R_OK) && defined(HAS_ACCESS) && defined(EFF_ONLY_OK) && !defined(NO_EFF_ONLY_OK)
@@ -4498,6 +4507,44 @@ PP(pp_localtime)
     return pp_gmtime();
 }
 
+#ifdef LOCALTIME_EDGECASE_BROKEN
+static struct tm *S_my_localtime (Time_t *tp)
+{
+    auto time_t     T;
+    auto struct tm *P;
+
+    /* No workarounds in the valid range */
+    if (!tp || *tp < 0x7fff573f || *tp >= 0x80000000)
+	return (localtime (tp));
+
+    /* This edge case is to workaround the undefined behaviour, where the
+     * TIMEZONE makes the time go beyond the defined range.
+     * gmtime (0x7fffffff) => 2038-01-19 03:14:07
+     * If there is a negative offset in TZ, like MET-1METDST, some broken
+     * implementations of localtime () (like AIX 5.2) barf with bogus
+     * return values:
+     * 0x7fffffff gmtime               2038-01-19 03:14:07
+     * 0x7fffffff localtime            1901-12-13 21:45:51
+     * 0x7fffffff mylocaltime          2038-01-19 04:14:07
+     * 0x3c19137f gmtime               2001-12-13 20:45:51
+     * 0x3c19137f localtime            2001-12-13 21:45:51
+     * 0x3c19137f mylocaltime          2001-12-13 21:45:51
+     * Given that legal timezones are typically between GMT-12 and GMT+12
+     * we turn back the clock 23 hours before calling the localtime
+     * function, and add those to the return value. This will never cause
+     * day wrapping problems, since the edge case is Jan *19*
+     */
+    T = *tp - 82800; /* 23 hour. allows up to GMT-23 */
+    P = localtime (&T);
+    P->tm_hour += 23;
+    if (P->tm_hour >= 24) {
+	P->tm_hour -= 24;
+	P->tm_mday++;
+    }
+    return (P);
+} /* S_my_localtime */
+#endif
+
 PP(pp_gmtime)
 {
     dSP;
@@ -4519,7 +4566,11 @@ PP(pp_gmtime)
 #endif
 
     if (PL_op->op_type == OP_LOCALTIME)
+#ifdef LOCALTIME_EDGECASE_BROKEN
+	tmbuf = S_my_localtime(&when);
+#else
 	tmbuf = localtime(&when);
+#endif
     else
 	tmbuf = gmtime(&when);
 
