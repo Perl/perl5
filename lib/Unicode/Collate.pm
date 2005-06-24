@@ -14,7 +14,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.50';
+our $VERSION = '0.51';
 our $PACKAGE = __PACKAGE__;
 
 my @Path = qw(Unicode Collate);
@@ -300,8 +300,10 @@ sub read_table {
 	last if open($fh, $f);
 	$f = undef;
     }
-    defined $f
-	or croak "$PACKAGE: $self->{table} is not found in @INC";
+    if (!defined $f) {
+	$f = File::Spec->catfile(@Path, $self->{table});
+	croak("$PACKAGE: Can't locate $f in \@INC (\@INC contains: @INC)");
+    }
 
     while (<$fh>) {
 	next if /^\s*#/;
@@ -1172,11 +1174,12 @@ C<UCA_Version()> should return the latest tracking version supported.
 
 The supported tracking version: 8, 9, 11, or 14.
 
-     UCA tracking version          Unicode version
-             8                          3.1
-             9                 3.1 with Corrigendum 3
-            11                          4.0
-            14                         4.1.0
+     UCA       Unicode Standard         DUCET (@version)
+     ---------------------------------------------------
+      8              3.1                3.0.1 (3.0.1d9)
+      9     3.1 with Corrigendum 3      3.1.1 (3.1.1)
+     11              4.0                4.0.0 (4.0.0)
+     14             4.1.0               4.1.0 (4.1.0)
 
 Note: Recent UTS #10 renames "Tracking Version" to "Revision."
 
@@ -1459,6 +1462,8 @@ on C<@INC>. Say, if the filename is F<Foo.txt>,
 the table file is searched as F<Unicode/Collate/Foo.txt> in C<@INC>.
 
 By default, F<allkeys.txt> (as the filename of DUCET) is used.
+If you will prepare your own table file, any name other than F<allkeys.txt>
+may be better to avoid namespace conflict.
 
 If C<undef> is passed explicitly as the value for this key,
 no file is read (but you can define collation elements via C<entry>).
@@ -1778,6 +1783,25 @@ Returns the version number of UTS #10 this module consults.
 
 No method will be exported.
 
+=head1 INSTALL
+
+Though this module can be used without any C<table> file,
+to use this module easily, it is recommended to install a table file
+in the UCA format, by copying it under the directory
+<a place in @INC>/Unicode/Collate.
+
+The most preferable one is "The Default Unicode Collation Element Table",
+available from the Unicode Consortium's website:
+
+   http://www.unicode.org/Public/UCA/
+
+   http://www.unicode.org/Public/UCA/latest/allkeys.txt (latest version)
+
+If DUCET is not installed, it is recommended to copy the file
+from http://www.unicode.org/Public/UCA/latest/allkeys.txt
+to <a place in @INC>/Unicode/Collate/allkeys.txt
+manually.
+
 =head1 CAVEATS
 
 =over 4
@@ -1807,14 +1831,19 @@ B<Unicode::Normalize is required to try The Conformance Test.>
 
 =back
 
-=head1 AUTHOR
+=head1 AUTHOR, COPYRIGHT AND LICENSE
 
-SADAHIRO Tomoyuki <SADAHIRO@cpan.org>
+The Unicode::Collate module for perl was written by SADAHIRO Tomoyuki,
+<SADAHIRO@cpan.org>. This module is Copyright(C) 2001-2005,
+SADAHIRO Tomoyuki. Japan. All rights reserved.
 
-Copyright(C) 2001-2005, SADAHIRO Tomoyuki. Japan. All rights reserved.
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
 
-This module is free software; you can redistribute it
-and/or modify it under the same terms as Perl itself.
+The file Unicode/Collate/allkeys.txt was copied directly
+from http://www.unicode.org/Public/UCA/4.1.0/allkeys.txt (aka DUCET).
+This file is Copyright (c) 1991-2005 Unicode, Inc. All rights reserved.
+Distributed under the Terms of Use in http://www.unicode.org/copyright.html
 
 =head1 SEE ALSO
 

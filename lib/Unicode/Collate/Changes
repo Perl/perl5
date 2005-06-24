@@ -1,5 +1,12 @@
 Revision history for Perl module Unicode::Collate.
 
+0.51  Sun May 29 20:21:19 2005
+    - Added the latest DUCET (for Unicode 4.1.0) as Collate/allkeys.txt,
+      which is not required to test this module.
+      Please notice that allkeys.txt will be overwritten if you have had
+      other allkeys.txt already.
+    - Added INSTALL section in POD.
+
 0.50  Sun May  8 20:26:39 2005
     - Now UCA Revision 14 (based on Unicode 4.1.0).
     - Some tests are modified.
