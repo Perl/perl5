@@ -11,6 +11,7 @@ binmode STDOUT;
 sub output {
     $file = shift;
     open F, '>', $file or die "Can't create $file: $!\n";
+    binmode F;
     for (@_) {
 	print F pack "H*", $_;
     }
