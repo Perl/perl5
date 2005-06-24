@@ -2641,7 +2641,7 @@ typedef pthread_key_t	perl_key;
 #  define __attribute__format__(x,y,z)      __attribute__((format(x,y,z)))
 #endif
 #ifdef HASATTRIBUTE_MALLOC
-#  define __attribute__malloc__             __attribute__((malloc))
+#  define __attribute__malloc__             __attribute__((__malloc__))
 #endif
 #ifdef HASATTRIBUTE_NONNULL
 #  define __attribute__nonnull__(a)         __attribute__((nonnull(a)))
