@@ -1548,6 +1548,11 @@
  */
 #define HAS_ACCESS		/**/
 
+/* The HASATTRIBUTE_* defines are left undefined here because they vary from
+ * one version of GCC to another.  Instead, they are defined on the basis of
+ * the compiler version in <perl.h>.
+ */
+
 /* HASATTRIBUTE_FORMAT:
  *	Can we handle GCC attribute for checking printf-style formats
  */
