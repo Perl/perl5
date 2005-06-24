@@ -2597,7 +2597,7 @@ DllExport Off_t
 win32_ftell(FILE *pf)
 {
 #if defined(WIN64) || defined(USE_LARGE_FILES)
-#if defined(__BORLAND__) /* buk */
+#if defined(__BORLANDC__) /* buk */
     return win32_tell( fileno( pf ) );
 #else
     fpos_t pos;
