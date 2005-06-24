@@ -539,10 +539,13 @@ PERLVARI(Irehash_seed_set, bool, FALSE)	/* 582 hash initialized? */
    taken out of blead soon, and relevant prototypes changed.  */
 PERLVARI(Ifdscript, int, -1)	/* fd for script */
 PERLVARI(Isuidscript, int, -1)	/* fd for suid script */
+#ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
+/* File descriptor to talk to the child which dumps scalars.  */
+PERLVARI(Idumper_fd, int, -1)
+#endif
 /* New variables must be added to the very end, before this comment,
  * for binary compatibility (the offsets of the old members must not change).
  * (Don't forget to add your variable also to perl_clone()!)
  * XSUB.h provides wrapper functions via perlapi.h that make this
  * irrelevant, but not all code may be expected to #include XSUB.h.
  */
-

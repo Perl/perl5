@@ -2989,6 +2989,10 @@ PERL_CALLCONV bool	Perl_stashpv_hvname_match(pTHX_ const COP *cop, const HV *hv)
 			__attribute__nonnull__(pTHX_2);
 
 
+#ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
+PERL_CALLCONV void	Perl_dump_sv_child(pTHX_ SV *sv);
+#endif
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:

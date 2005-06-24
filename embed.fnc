@@ -1517,6 +1517,10 @@ dpR	|bool	|is_gv_magical_sv|SV *name|U32 flags
 
 ApR	|bool	|stashpv_hvname_match|NN const COP *cop|NN const HV *hv
 
+#ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
+p	|void	|dump_sv_child	|SV *sv
+#endif
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:

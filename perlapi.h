@@ -252,6 +252,8 @@ END_EXTERN_C
 #define PL_doswitches		(*Perl_Idoswitches_ptr(aTHX))
 #undef  PL_dowarn
 #define PL_dowarn		(*Perl_Idowarn_ptr(aTHX))
+#undef  PL_dumper_fd
+#define PL_dumper_fd		(*Perl_Idumper_fd_ptr(aTHX))
 #undef  PL_e_script
 #define PL_e_script		(*Perl_Ie_script_ptr(aTHX))
 #undef  PL_egid

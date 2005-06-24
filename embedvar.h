@@ -228,6 +228,7 @@
 #define PL_doextract		(vTHX->Idoextract)
 #define PL_doswitches		(vTHX->Idoswitches)
 #define PL_dowarn		(vTHX->Idowarn)
+#define PL_dumper_fd		(vTHX->Idumper_fd)
 #define PL_e_script		(vTHX->Ie_script)
 #define PL_egid			(vTHX->Iegid)
 #define PL_encoding		(vTHX->Iencoding)
@@ -531,6 +532,7 @@
 #define PL_Idoextract		PL_doextract
 #define PL_Idoswitches		PL_doswitches
 #define PL_Idowarn		PL_dowarn
+#define PL_Idumper_fd		PL_dumper_fd
 #define PL_Ie_script		PL_e_script
 #define PL_Iegid		PL_egid
 #define PL_Iencoding		PL_encoding

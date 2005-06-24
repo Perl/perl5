@@ -389,6 +389,48 @@ Perl_nothreadhook(pTHX)
     return 0;
 }
 
+#ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
+void
+Perl_dump_sv_child(pTHX_ SV *sv)
+{
+    ssize_t got;
+    int sock = PL_dumper_fd;
+    SV *target;
+
+    if(sock == -1)
+	return;
+
+    PerlIO_flush(Perl_debug_log);
+
+    got = write(sock, &sv, sizeof(sv));
+
+    if(got < 0) {
+	perror("Debug leaking scalars parent write failed");
+	abort();
+    }
+    if(got < sizeof(target)) {
+	perror("Debug leaking scalars parent short write");
+	abort();
+    }
+
+    got = read(sock, &target, sizeof(target));
+
+    if(got < 0) {
+	perror("Debug leaking scalars parent read failed");
+	abort();
+    }
+    if(got < sizeof(target)) {
+	perror("Debug leaking scalars parent short read");
+	abort();
+    }
+
+    if (target != sv) {
+	perror("Debug leaking scalars parent target != sv");
+	abort();
+    }
+}
+#endif
+
 /*
 =for apidoc perl_destruct
 
@@ -404,7 +446,6 @@ perl_destruct(pTHXx)
     volatile int destruct_level;  /* 0=none, 1=full, 2=full with checks */
     HV *hv;
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
-    int sock;
     pid_t child;
 #endif
 
@@ -464,9 +505,9 @@ perl_destruct(pTHXx)
 	    abort();
 	}
 	if (!child) {
+	    int sock = fd[1];
 	    /* We are the child */
 	    close(fd[0]);
-	    sock = fd[1];
 
 	    while (1) {
 		SV *target;
@@ -499,7 +540,7 @@ perl_destruct(pTHXx)
 	    }
 	    _exit(0);
 	}
-	sock = fd[0];
+	PL_dumper_fd = fd[0];
 	close(fd[1]);
     }
 #endif
@@ -951,11 +992,6 @@ perl_destruct(pTHXx)
 	    svend = &sva[SvREFCNT(sva)];
 	    for (sv = sva + 1; sv < svend; ++sv) {
 		if (SvTYPE(sv) != SVTYPEMASK) {
-#ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
-		    ssize_t got;
-		    SV *target;
-#endif
-
 		    PerlIO_printf(Perl_debug_log, "leaked: sv=0x%p"
 			" flags=0x%"UVxf
 			" refcnt=%"UVuf pTHX__FORMAT "\n"
@@ -968,31 +1004,8 @@ perl_destruct(pTHXx)
 			    PL_op_name[sv->sv_debug_optype]: "(none)",
 			sv->sv_debug_cloned ? " (cloned)" : ""
 		    );
-
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
-		    PerlIO_flush(Perl_debug_log);
-
-		    got = write(sock, &sv, sizeof(sv));
-
-		    if(got < 0) {
-			perror("Debug leaking scalars parent write failed");
-			abort();
-		    }
-		    if(got < sizeof(target)) {
-			perror("Debug leaking scalars parent short write");
-			abort();
-		    }
-
-		    got = read(sock, &target, sizeof(target));
-
-		    if(got < 0) {
-			perror("Debug leaking scalars parent read failed");
-			abort();
-		    }
-		    if(got < sizeof(target)) {
-			perror("Debug leaking scalars parent short read");
-			abort();
-		    }
+		    Perl_dump_sv_child(aTHX_ sv);
 #endif
 		}
 	    }
@@ -1006,6 +1019,7 @@ perl_destruct(pTHXx)
 	   This seems to be the least effort way of timing out on reaping
 	   its exit status.  */
 	struct timeval waitfor = {4, 0};
+	int sock = PL_dumper_fd;
 
 	shutdown(sock, 1);
 	FD_ZERO(&rset);
