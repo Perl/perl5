@@ -900,36 +900,37 @@ PP(pp_pow)
        we're sure it is safe; otherwise we call pow() and try to convert to
        integer afterwards. */
     {
-        SvIV_please(TOPm1s);
-        if (SvIOK(TOPm1s)) {
-            bool baseuok = SvUOK(TOPm1s);
-            UV baseuv;
+	SvIV_please(TOPs);
+	if (SvIOK(TOPs)) {
+	    SvIV_please(TOPm1s);
+	    if (SvIOK(TOPm1s)) {
+		UV power;
+		bool baseuok;
+		UV baseuv;
 
-            if (baseuok) {
-                baseuv = SvUVX(TOPm1s);
-            } else {
-		const IV iv = SvIVX(TOPm1s);
-                if (iv >= 0) {
-                    baseuv = iv;
-                    baseuok = TRUE; /* effectively it's a UV now */
-                } else {
-                    baseuv = -iv; /* abs, baseuok == false records sign */
-                }
-            }
-            SvIV_please(TOPs);
-            if (SvIOK(TOPs)) {
-                UV power;
+		if (SvUOK(TOPs)) {
+		    power = SvUVX(TOPs);
+		} else {
+		    const IV iv = SvIVX(TOPs);
+		    if (iv >= 0) {
+			power = iv;
+		    } else {
+			goto float_it; /* Can't do negative powers this way.  */
+		    }
+		}
 
-                if (SvUOK(TOPs)) {
-                    power = SvUVX(TOPs);
-                } else {
-                    IV iv = SvIVX(TOPs);
-                    if (iv >= 0) {
-                        power = iv;
-                    } else {
-                        goto float_it; /* Can't do negative powers this way.  */
-                    }
-                }
+		baseuok = SvUOK(TOPm1s);
+		if (baseuok) {
+		    baseuv = SvUVX(TOPm1s);
+		} else {
+		    const IV iv = SvIVX(TOPm1s);
+		    if (iv >= 0) {
+			baseuv = iv;
+			baseuok = TRUE; /* effectively it's a UV now */
+		    } else {
+			baseuv = -iv; /* abs, baseuok == false records sign */
+		    }
+		}
                 /* now we have integer ** positive integer. */
                 is_int = 1;
 
@@ -945,34 +946,28 @@ PP(pp_pow)
                        programmers to notice ** not doing what they mean. */
                     NV result = 1.0;
                     NV base = baseuok ? baseuv : -(NV)baseuv;
-                    int n = 0;
 
-                    for (; power; base *= base, n++) {
-                        /* Do I look like I trust gcc with long longs here?
-                           Do I hell.  */
-			const UV bit = (UV)1 << (UV)n;
-                        if (power & bit) {
-                            result *= base;
-                            /* Only bother to clear the bit if it is set.  */
-                            power -= bit;
-                           /* Avoid squaring base again if we're done. */
-                           if (power == 0) break;
-                        }
-                    }
+		    if (power & 1) {
+			result *= base;
+		    }
+		    while (power >>= 1) {
+			base *= base;
+			if (power & 1) {
+			    result *= base;
+			}
+		    }
                     SP--;
                     SETn( result );
                     SvIV_please(TOPs);
                     RETURN;
 		} else {
 		    register unsigned int highbit = 8 * sizeof(UV);
-		    register unsigned int lowbit = 0;
-		    register unsigned int diff;
-		    bool odd_power = (bool)(power & 1);
-		    while ((diff = (highbit - lowbit) >> 1)) {
-			if (baseuv & ~((1 << (lowbit + diff)) - 1))
-			    lowbit += diff;
-			else 
-			    highbit -= diff;
+		    register unsigned int diff = 8 * sizeof(UV);
+		    while (diff >>= 1) {
+			highbit -= diff;
+			if (baseuv >> highbit) {
+			    highbit += diff;
+			}
 		    }
 		    /* we now have baseuv < 2 ** highbit */
 		    if (power * highbit <= 8 * sizeof(UV)) {
@@ -980,13 +975,14 @@ PP(pp_pow)
 			   on same algorithm as above */
 			register UV result = 1;
 			register UV base = baseuv;
-			register int n = 0;
-			for (; power; base *= base, n++) {
-			    register const UV bit = (UV)1 << (UV)n;
-			    if (power & bit) {
+			const bool odd_power = (bool)(power & 1);
+			if (odd_power) {
+			    result *= base;
+			}
+			while (power >>= 1) {
+			    base *= base;
+			    if (power & 1) {
 				result *= base;
-				power -= bit;
-				if (power == 0) break;
 			    }
 			}
 			SP--;
