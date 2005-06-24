@@ -247,10 +247,12 @@ is($j[0], 1);
 }
 
 {
+    # Need some sort of die or warn to get the global destruction text if the
+    # bug is still present
     my $output = runperl(prog => <<'EOPROG');
 package M;
 $| = 1;
-sub DESTROY {print qq{Farewell $_[0]}}
+sub DESTROY {eval {die qq{Farewell $_[0]}}; print $@}
 package main;
 
 bless \$A::B, 'M';
