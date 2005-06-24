@@ -247,9 +247,10 @@ is($j[0], 1);
 }
 
 {
-    my $output = runperl(prog => <<'EOPROG', stderr => 1);
+    my $output = runperl(prog => <<'EOPROG');
 package M;
-sub DESTROY {warn "Farewell $_[0]"}
+$| = 1;
+sub DESTROY {print qq{Farewell $_[0]}}
 package main;
 
 bless \$A::B, 'M';
