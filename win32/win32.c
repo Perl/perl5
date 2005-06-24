@@ -732,7 +732,7 @@ Perl_do_exec(pTHX_ char *cmd)
  * return the pointer to the current file name.
  */
 DllExport DIR *
-win32_opendir(char *filename)
+win32_opendir(const char *filename)
 {
     dTHX;
     DIR			*dirp;

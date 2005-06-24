@@ -961,7 +961,7 @@ PerlDirClose(struct IPerlDir* piPerl, DIR *dirp)
 }
 
 DIR*
-PerlDirOpen(struct IPerlDir* piPerl, char *filename)
+PerlDirOpen(struct IPerlDir* piPerl, const char *filename)
 {
 	return nw_opendir(filename);
 }

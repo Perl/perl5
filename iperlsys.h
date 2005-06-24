@@ -366,7 +366,7 @@ typedef int		(*LPMakedir)(struct IPerlDir*, const char*, int);
 typedef int		(*LPChdir)(struct IPerlDir*, const char*);
 typedef int		(*LPRmdir)(struct IPerlDir*, const char*);
 typedef int		(*LPDirClose)(struct IPerlDir*, DIR*);
-typedef DIR*		(*LPDirOpen)(struct IPerlDir*, char*);
+typedef DIR*		(*LPDirOpen)(struct IPerlDir*, const char*);
 typedef struct direct*	(*LPDirRead)(struct IPerlDir*, DIR*);
 typedef void		(*LPDirRewind)(struct IPerlDir*, DIR*);
 typedef void		(*LPDirSeek)(struct IPerlDir*, DIR*, long);
