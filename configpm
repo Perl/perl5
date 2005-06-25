@@ -617,13 +617,15 @@ if ($Common{byteorder}) {
 }
 my $fast_config = join '', map { "    $_,\n" } sort values %Common;
 
+# Sanity check needed to stop an infite loop if Config_heavy.pl fails to define
+# &launcher for some reason (eg it got truncated)
 print CONFIG sprintf <<'ENDOFTIE', $fast_config;
 
 sub DESTROY { }
 
 sub AUTOLOAD {
     require 'Config_heavy.pl';
-    goto \&launcher;
+    goto \&launcher unless $Config::AUTOLOAD =~ /launcher$/;
     die "&Config::AUTOLOAD failed on $Config::AUTOLOAD";
 }
 
