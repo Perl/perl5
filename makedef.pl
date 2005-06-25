@@ -784,6 +784,12 @@ unless ($define{'PERL_NEED_TIMESBASE'}) {
 		    )];
 }
 
+unless ($define{'DEBUG_LEAKING_SCALARS_FORK_DUMP'}) {
+    skip_symbols [qw(
+		    PL_dumper_fd
+		    )];
+}
+
 unless ($define{'d_mmap'}) {
     skip_symbols [qw(
 		    PL_mmap_page_size
