@@ -206,6 +206,9 @@ esac
 case "$usemymalloc" in
 '') usemymalloc='n' ;;
 esac
+# However sbrk() returns -1 (failure) somewhere in lib/unicore/mktables at
+# around 14M, so we need to use system malloc() as our sbrk()
+malloc_cflags='ccflags="-DUSE_PERL_SBRK -DPERL_SBRK_VIA_MALLOC $ccflags"'
 
 # Locales aren't feeling well.
 LC_ALL=C; export LC_ALL;
