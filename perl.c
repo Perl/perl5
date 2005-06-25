@@ -505,9 +505,32 @@ perl_destruct(pTHXx)
 	    abort();
 	}
 	if (!child) {
-	    int sock = fd[1];
 	    /* We are the child */
+
+	    const int sock = fd[1];
+	    const int debug_fd = PerlIO_fileno(Perl_debug_log);
+	    int f;
+
 	    close(fd[0]);
+
+	    /* We need to close all other file descriptors otherwise we end up
+	       with interesting hangs, where the parent closes its end of a
+	       pipe, and sits waiting for (another) child to terminate. Only
+	       that child never terminates, because it never gets EOF, because
+	       we also have the far end of the pipe open.  */
+
+	    f = sysconf(_SC_OPEN_MAX);
+	    if(f < 0) {
+		perror("Debug leaking scalars sysconf failed");
+		abort();
+	    }
+	    while (f--) {
+		if (f == sock)
+		    continue;
+		if (f == debug_fd)
+		    continue;
+		close(f);
+	    }
 
 	    while (1) {
 		SV *target;
