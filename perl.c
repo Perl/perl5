@@ -96,6 +96,15 @@ char *nw_get_sitelib(const char *pl);
 #  ifdef I_SYS_WAIT
 #   include <sys/wait.h>
 #  endif
+#  ifdef I_SYSUIO
+#    include <sys/uio.h>
+#  endif
+
+union control_un {
+  struct cmsghdr cm;
+  char control[CMSG_SPACE(sizeof(int))];
+};
+
 #endif
 
 #ifdef __BEOS__
@@ -394,22 +403,49 @@ void
 Perl_dump_sv_child(pTHX_ SV *sv)
 {
     ssize_t got;
-    int sock = PL_dumper_fd;
+    const int sock = PL_dumper_fd;
+    const int debug_fd = PerlIO_fileno(Perl_debug_log);
     SV *target;
+    union control_un control;
+    struct msghdr msg;
+    struct iovec vec[1];
+    struct cmsghdr *cmptr;
 
-    if(sock == -1)
+    if(sock == -1 || debug_fd == -1)
 	return;
 
     PerlIO_flush(Perl_debug_log);
 
-    got = write(sock, &sv, sizeof(sv));
+    /* All these shenanigans are to pass a file descriptor over to our child for
+       it to dump out to.  We can't let it hold open the file descriptor when it
+       forks, as the file descriptor it will dump to can turn out to be one end
+       of pipe that some other process will wait on for EOF. (So as it would
+       be open, the wait would be forever.  */
+
+    msg.msg_control = control.control;
+    msg.msg_controllen = sizeof(control.control);
+    /* We're a connected socket so we don't need a destination  */
+    msg.msg_name = NULL;
+    msg.msg_namelen = 0;
+    msg.msg_iov = vec;
+    msg.msg_iovlen = sizeof(vec)/sizeof(vec[0]);
+
+    cmptr = CMSG_FIRSTHDR(&msg);
+    cmptr->cmsg_len = CMSG_LEN(sizeof(int));
+    cmptr->cmsg_level = SOL_SOCKET;
+    cmptr->cmsg_type = SCM_RIGHTS;
+    *((int *)CMSG_DATA(cmptr)) = 1;
+
+    vec[0].iov_base = (void*)&sv;
+    vec[0].iov_len = sizeof(sv);
+    got = sendmsg(sock, &msg, 0);
 
     if(got < 0) {
-	perror("Debug leaking scalars parent write failed");
+	perror("Debug leaking scalars parent sendmsg failed");
 	abort();
     }
-    if(got < sizeof(target)) {
-	perror("Debug leaking scalars parent short write");
+    if(got < sizeof(sv)) {
+	perror("Debug leaking scalars parent short sendmsg");
 	abort();
     }
 
@@ -517,7 +553,13 @@ perl_destruct(pTHXx)
 	       with interesting hangs, where the parent closes its end of a
 	       pipe, and sits waiting for (another) child to terminate. Only
 	       that child never terminates, because it never gets EOF, because
-	       we also have the far end of the pipe open.  */
+	       we also have the far end of the pipe open.  We even need to
+	       close the debugging fd, because sometimes it happens to be one
+	       end of a pipe, and a process is waiting on the other end for
+	       EOF. Normally it would be closed at some point earlier in
+	       destruction, but if we happen to cause the pipe to remain open,
+	       EOF never occurs, and we get an infinite hang. Hence all the
+	       games to pass in a file descriptor if it's actually needed.  */
 
 	    f = sysconf(_SC_OPEN_MAX);
 	    if(f < 0) {
@@ -527,41 +569,75 @@ perl_destruct(pTHXx)
 	    while (f--) {
 		if (f == sock)
 		    continue;
-		if (f == debug_fd)
-		    continue;
 		close(f);
 	    }
 
 	    while (1) {
 		SV *target;
-		ssize_t got = read(sock, &target, sizeof(target));
+		union control_un control;
+		struct msghdr msg;
+		struct iovec vec[1];
+		struct cmsghdr *cmptr;
+		ssize_t got;
+		int got_fd;
+
+		msg.msg_control = control.control;
+		msg.msg_controllen = sizeof(control.control);
+		/* We're a connected socket so we don't need a source  */
+		msg.msg_name = NULL;
+		msg.msg_namelen = 0;
+		msg.msg_iov = vec;
+		msg.msg_iovlen = sizeof(vec)/sizeof(vec[0]);
+
+		vec[0].iov_base = (void*)&target;
+		vec[0].iov_len = sizeof(target);
+      
+		got = recvmsg(sock, &msg, 0);
 
 		if(got == 0)
 		    break;
 		if(got < 0) {
-		    perror("Debug leaking scalars child read failed");
-		    abort();
+		    /*perror("Debug leaking scalars child recv failed");*/
+		    _exit(1);
 		}
 		if(got < sizeof(target)) {
-		    perror("Debug leaking scalars child short read");
-		    abort();
+		    /*perror("Debug leaking scalars child short recv");*/
+		    _exit(2);
 		}
+
+		if(!(cmptr = CMSG_FIRSTHDR(&msg)))
+		    _exit(3);
+		if(cmptr->cmsg_len != CMSG_LEN(sizeof(int)))
+		    _exit(4);
+		if(cmptr->cmsg_level != SOL_SOCKET)
+		    _exit(5);
+		if(cmptr->cmsg_type != SCM_RIGHTS)
+		    _exit(6);
+
+		got_fd = *(int*)CMSG_DATA(cmptr);
+		/* For our last little bit of trickery, put the file descriptor
+		   back into Perl_debug_log, as if we never actually closed it
+		*/
+		if(got_fd != debug_fd)
+		    dup2(got_fd, debug_fd);
 		sv_dump(target);
+
 		PerlIO_flush(Perl_debug_log);
 
-		/* Write something back as synchronisation.  */
 		got = write(sock, &target, sizeof(target));
 
 		if(got < 0) {
 		    perror("Debug leaking scalars child write failed");
-		    abort();
+		    PerlIO_flush(Perl_debug_log);
+		    _exit(7);
 		}
 		if(got < sizeof(target)) {
 		    perror("Debug leaking scalars child short write");
-		    abort();
+		    _exit(8);
 		}
 	    }
 	    _exit(0);
+	    /* End of child.  */
 	}
 	PL_dumper_fd = fd[0];
 	close(fd[1]);
