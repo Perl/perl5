@@ -135,11 +135,24 @@ sub try_compile_and_link {
 	    printf "cccmd = $cccmd\n" if $VERBOSE;
 	    my $res = system($cccmd);
 	    $ok = defined($res) && $res==0 && -s $tmp_exe && -x _;
+
+	    if ( $ok && exists $args{run} && $args{run}) {
+		my $abs_tmp_exe =
+		    File::Spec->
+			catfile(File::Spec->rel2abs(File::Spec->curdir),
+				$tmp_exe);
+		printf "Running $abs_tmp_exe..." if $VERBOSE;
+		if (system($abs_tmp_exe) == 0) {
+		    $ok = $? == 0;
+		} else {
+		    print "system('$abs_tmp_exe') failed: $?\n";
+		}
+	    }
 	    unlink("$tmp.c", $tmp_exe);
         }
     }
 
-    $ok;
+    return $ok;
 }
 
 sub has_gettimeofday {
@@ -200,6 +213,29 @@ int main _((int argc, char** argv, char** env))
 }
 EOM
     return 0;
+}
+
+sub has_nanosleep {
+    return 1 if
+    try_compile_and_link(<<EOM, run => 1);
+#include <time.h>
+#include <sys/time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+
+/* int nanosleep(const struct timespec *rqtp, struct timespec *rmtp); */
+
+int main() {
+    struct timespec ts1, ts2;
+    ts1.tv_sec  = 0;
+    ts1.tv_nsec = 750000000;
+    ts2.tv_sec  = 0;
+    ts2.tv_nsec = 0;
+    nanosleep(&ts1, &ts2); /* E.g. in AIX nanosleep() might return ENOSYS. */
+    exit(errno);
+}
+EOM
 }
 
 sub has_include {
@@ -344,7 +380,7 @@ EOD
 	    $DEFINE .= ' -DTIME_HIRES_NANOSLEEP';
 	}
     } elsif ($^O ne 'mpeix' && # MPE/iX falsely finds nanosleep.
-             has_x ("nanosleep (NULL, NULL)")) {
+             has_nanosleep()) {
 	$has_nanosleep++;
 	$DEFINE .= ' -DTIME_HIRES_NANOSLEEP';
     }

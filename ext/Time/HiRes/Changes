@@ -1,5 +1,18 @@
 Revision history for Perl extension Time::HiRes.
 
+1.69	- actually run a test for nanosleep since e.g. in AIX 4.2
+	  it seems that one can link in nanosleep() but then calling
+	  it fails instantly and sets errno to ENOSYS (Not implemented).
+	  This may be fixable in the AIX case by figuring out the right
+	  (realtime POSIX?) libs and whatnot, but in the general case
+	  running a real test case is better.  (Of course, this change
+	  will no doubt run into portability problems because of the
+	  execution step...)
+	  (from José Auguste-tienne)
+	- support XSLoader also since it's much faster
+	  (from Alexey Tourbin)
+	- add SEE ALSO (BSD::Resource and Time::TAI64)
+
 1.68
 	- somehow 1.67 had a lot of doubled lines (a major cut-and-paste
 	  error suspected), but miraculously it still worked since the

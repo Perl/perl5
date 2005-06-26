@@ -7,6 +7,7 @@ require Exporter;
 require DynaLoader;
 
 @ISA = qw(Exporter DynaLoader);
+@ISA = qw(Exporter);
 
 @EXPORT = qw( );
 @EXPORT_OK = qw (usleep sleep ualarm alarm gettimeofday time tv_interval
@@ -15,7 +16,7 @@ require DynaLoader;
 		 d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
 		 d_nanosleep);
 	
-$VERSION = '1.68';
+$VERSION = '1.69';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -32,7 +33,15 @@ sub AUTOLOAD {
     goto &$AUTOLOAD;
 }
 
-bootstrap Time::HiRes;
+eval {
+    require XSLoader;
+    XSLoader::load('Time::HiRes', $XS_VERSION);
+    1;
+} or do {
+    require DynaLoader;
+    local @ISA = qw(DynaLoader);
+    bootstrap Time::HiRes $XS_VERSION;
+};
 
 # Preloaded methods go here.
 
@@ -362,6 +371,10 @@ time as gracefully as UNIX ntp does).  For example in Win32 (and derived
 platforms like Cygwin and MinGW) the Time::HiRes::time() may temporarily
 drift off from the system clock (and the original time())  by up to 0.5
 seconds. Time::HiRes will notice this eventually and recalibrate.
+
+=head1 SEE ALSO
+
+L<BSD::Resource>, L<Time::TAI64>.
 
 =head1 AUTHORS
 
