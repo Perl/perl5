@@ -405,11 +405,12 @@ Perl_dump_sv_child(pTHX_ SV *sv)
     ssize_t got;
     const int sock = PL_dumper_fd;
     const int debug_fd = PerlIO_fileno(Perl_debug_log);
-    SV *target;
     union control_un control;
     struct msghdr msg;
-    struct iovec vec[1];
+    struct iovec vec[2];
     struct cmsghdr *cmptr;
+    int returned_errno;
+    unsigned char buffer[256];
 
     if(sock == -1 || debug_fd == -1)
 	return;
@@ -428,7 +429,7 @@ Perl_dump_sv_child(pTHX_ SV *sv)
     msg.msg_name = NULL;
     msg.msg_namelen = 0;
     msg.msg_iov = vec;
-    msg.msg_iovlen = sizeof(vec)/sizeof(vec[0]);
+    msg.msg_iovlen = 1;
 
     cmptr = CMSG_FIRSTHDR(&msg);
     cmptr->cmsg_len = CMSG_LEN(sizeof(int));
@@ -449,20 +450,48 @@ Perl_dump_sv_child(pTHX_ SV *sv)
 	abort();
     }
 
-    got = read(sock, &target, sizeof(target));
+    /* Return protocol is
+       int:		errno value
+       unsigned char:	length of location string (0 for empty)
+       unsigned char*:	string (not terminated)
+    */
+    vec[0].iov_base = (void*)&returned_errno;
+    vec[0].iov_len = sizeof(returned_errno);
+    vec[1].iov_base = buffer;
+    vec[1].iov_len = 1;
+
+    got = readv(sock, vec, 2);
 
     if(got < 0) {
 	perror("Debug leaking scalars parent read failed");
+	PerlIO_flush(PerlIO_stderr());
 	abort();
     }
-    if(got < sizeof(target)) {
+    if(got < sizeof(returned_errno) + 1) {
 	perror("Debug leaking scalars parent short read");
+	PerlIO_flush(PerlIO_stderr());
 	abort();
     }
 
-    if (target != sv) {
-	perror("Debug leaking scalars parent target != sv");
-	abort();
+    if (*buffer) {
+	got = read(sock, buffer + 1, *buffer);
+	if(got < 0) {
+	    perror("Debug leaking scalars parent read 2 failed");
+	    PerlIO_flush(PerlIO_stderr());
+	    abort();
+	}
+
+	if(got < *buffer) {
+	    perror("Debug leaking scalars parent short read 2");
+	    PerlIO_flush(PerlIO_stderr());
+	    abort();
+	}
+    }
+
+    if (returned_errno || *buffer) {
+	Perl_warn(aTHX_ "Debug leaking scalars child failed%s%.*s with errno"
+		  " %d: %s", (*buffer ? " at " : ""), (int) *buffer, buffer + 1,
+		  returned_errno, strerror(returned_errno));
     }
 }
 #endif
@@ -542,10 +571,12 @@ perl_destruct(pTHXx)
 	}
 	if (!child) {
 	    /* We are the child */
-
 	    const int sock = fd[1];
 	    const int debug_fd = PerlIO_fileno(Perl_debug_log);
 	    int f;
+	    const char *where;
+	    /* Our success message is an integer 0, and a char 0  */
+	    static const char success[sizeof(int) + 1];
 
 	    close(fd[0]);
 
@@ -563,8 +594,8 @@ perl_destruct(pTHXx)
 
 	    f = sysconf(_SC_OPEN_MAX);
 	    if(f < 0) {
-		perror("Debug leaking scalars sysconf failed");
-		abort();
+		where = "sysconf failed";
+		goto abort;
 	    }
 	    while (f--) {
 		if (f == sock)
@@ -597,46 +628,75 @@ perl_destruct(pTHXx)
 		if(got == 0)
 		    break;
 		if(got < 0) {
-		    /*perror("Debug leaking scalars child recv failed");*/
-		    _exit(1);
+		    where = "recv failed";
+		    goto abort;
 		}
 		if(got < sizeof(target)) {
-		    /*perror("Debug leaking scalars child short recv");*/
-		    _exit(2);
+		    where = "short recv";
+		    goto abort;
 		}
 
-		if(!(cmptr = CMSG_FIRSTHDR(&msg)))
-		    _exit(3);
-		if(cmptr->cmsg_len != CMSG_LEN(sizeof(int)))
-		    _exit(4);
-		if(cmptr->cmsg_level != SOL_SOCKET)
-		    _exit(5);
-		if(cmptr->cmsg_type != SCM_RIGHTS)
-		    _exit(6);
+		if(!(cmptr = CMSG_FIRSTHDR(&msg))) {
+		    where = "no cmsg";
+		    goto abort;
+		}
+		if(cmptr->cmsg_len != CMSG_LEN(sizeof(int))) {
+		    where = "wrong cmsg_len";
+		    goto abort;
+		}
+		if(cmptr->cmsg_level != SOL_SOCKET) {
+		    where = "wrong cmsg_level";
+		    goto abort;
+		}
+		if(cmptr->cmsg_type != SCM_RIGHTS) {
+		    where = "wrong cmsg_type";
+		    goto abort;
+		}
 
 		got_fd = *(int*)CMSG_DATA(cmptr);
 		/* For our last little bit of trickery, put the file descriptor
 		   back into Perl_debug_log, as if we never actually closed it
 		*/
-		if(got_fd != debug_fd)
-		    dup2(got_fd, debug_fd);
+		if(got_fd != debug_fd) {
+		    if (dup2(got_fd, debug_fd) == -1) {
+			where = "dup2";
+			goto abort;
+		    }
+		}
 		sv_dump(target);
 
 		PerlIO_flush(Perl_debug_log);
 
-		got = write(sock, &target, sizeof(target));
+		got = write(sock, &success, sizeof(success));
 
 		if(got < 0) {
-		    perror("Debug leaking scalars child write failed");
-		    PerlIO_flush(Perl_debug_log);
-		    _exit(7);
+		    where = "write failed";
+		    goto abort;
 		}
-		if(got < sizeof(target)) {
-		    perror("Debug leaking scalars child short write");
-		    _exit(8);
+		if(got < sizeof(success)) {
+		    where = "short write";
+		    goto abort;
 		}
 	    }
 	    _exit(0);
+	abort:
+	    {
+		int send_errno = errno;
+		unsigned char length = (unsigned char) strlen(where);
+		struct iovec failure[3] = {
+		    {(void*)&send_errno, sizeof(send_errno)},
+		    {&length, 1},
+		    {(void*)where, length}
+		};
+		int got = writev(sock, failure, 3);
+		/* Bad news travels fast. Faster than data. We'll get a SIGPIPE
+		   in the parent if we try to read from the socketpair after the
+		   child has exited, even if there was data to read.
+		   So sleep a bit to give the parent a fighting chance of
+		   reading the data.  */
+		sleep(2);
+		_exit((got == -1) ? errno : 0);
+	    }
 	    /* End of child.  */
 	}
 	PL_dumper_fd = fd[0];
