@@ -4508,7 +4508,7 @@ PP(pp_localtime)
 }
 
 #ifdef LOCALTIME_EDGECASE_BROKEN
-static struct tm *S_my_localtime (Time_t *tp)
+static struct tm *S_my_localtime (pTHX_ Time_t *tp)
 {
     auto time_t     T;
     auto struct tm *P;
@@ -4567,7 +4567,7 @@ PP(pp_gmtime)
 
     if (PL_op->op_type == OP_LOCALTIME)
 #ifdef LOCALTIME_EDGECASE_BROKEN
-	tmbuf = S_my_localtime(&when);
+	tmbuf = S_my_localtime(aTHX_ &when);
 #else
 	tmbuf = localtime(&when);
 #endif
