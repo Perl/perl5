@@ -1,14 +1,13 @@
 package Sys::Syslog;
 require 5.006;
 require Exporter;
-require DynaLoader;
 use Carp;
 use strict;
 
-our @ISA = qw(Exporter DynaLoader);
+our @ISA = qw(Exporter);
 our @EXPORT = qw(openlog closelog setlogmask syslog);
 our @EXPORT_OK = qw(setlogsock);
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 # it would be nice to try stream/unix first, since that will be
 # most efficient. However streams are dodgy - see _syslog_send_stream
@@ -175,7 +174,8 @@ sub AUTOLOAD {
     goto &$AUTOLOAD;
 }
 
-bootstrap Sys::Syslog $VERSION;
+require XSLoader;
+XSLoader::load('Sys::Syslog', $VERSION);
 
 our $maskpri = &LOG_UPTO(&LOG_DEBUG);
 
