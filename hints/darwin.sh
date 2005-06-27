@@ -152,7 +152,12 @@ case "$osvers" in
     ;;
 esac
 
-cccdlflags=' '; # space, not empty, because otherwise we get -fpic
+case "$ccdlflags" in		# If passed in from command line, presume user knows best
+'')
+   cccdlflags=' '; # space, not empty, because otherwise we get -fpic
+;;
+esac
+
 # Perl bundles do not expect two-level namespace, added in Darwin 1.4.
 # But starting from perl 5.8.1/Darwin 7 the default is the two-level.
 case "$osvers" in
@@ -189,6 +194,42 @@ case "$ldflags" in
 *) archname="${archname}-2level" ;;
 esac
 EOCBU
+
+# 64-bit addressing support. Currently strictly experimental. DFD 2005-06-06
+if [ "$use64bitall" ]
+then
+case "$osvers" in
+[1-7].*)
+     cat <<EOM >&4
+
+
+
+*** 64-bit addressing is not supported for Mac OS X versions
+*** below 10.4 ("Tiger") or Darwin versions below 8. Please try
+*** again without -D64bitall. (-D64bitint will work, however.)
+
+EOM
+     exit 1
+  ;;
+*)
+    cat <<EOM >&4
+
+
+
+*** Perl 64-bit addressing support is experimental for Mac OS X
+*** 10.4 ("Tiger") and Darwin version 8. Expect a number of test
+*** failures:
+***    ext/IO/io_*   ext/IPC/sysV/t/*   lib/Net/Ping/t/450_service
+***    Any test that uses sdbm
+
+EOM
+    for var in ccflags cppflags ld ldflags
+    do
+       eval $var="\$${var}\ -arch\ ppc64"
+    done
+    ;;
+esac
+fi
 
 ##
 # System libraries
