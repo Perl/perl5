@@ -812,6 +812,8 @@ sub installlib {
     return if $name =~ /^makefile$/i;
     # ignore the test extensions
     return if $dir =~ m{ext/XS/(?:APItest|Typemap)/};
+    # ignore the demo files
+    return if $dir =~ /\bdemos?\b/;
 
     # ignore READMEs, MANIFESTs, INSTALL docs, META.ymls and change logs.
     # Changes.e2x and README.e2x are needed by enc2xs.
