@@ -295,7 +295,7 @@ $All = "" ; vec($All, $Offsets{'all'}, 2) = 3 ;
 
 sub Croaker
 {
-    require Carp;
+    require Carp::Heavy; # this initializes %CarpInternal
     delete $Carp::CarpInternal{'warnings'};
     Carp::croak(@_);
 }

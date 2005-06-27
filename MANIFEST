@@ -1252,6 +1252,7 @@ lib/bytes.t			bytes.pm test
 lib/cacheout.pl			Manages output filehandles when you need too many
 lib/Carp/Heavy.pm		Error message workhorse
 lib/Carp.pm			Error message base class
+lib/Carp.pod			Documentation for Carp
 lib/Carp.t			See if Carp works
 lib/CGI/Apache.pm		Support for Apache's Perl module
 lib/CGI/Carp.pm			Log server errors with helpful context
