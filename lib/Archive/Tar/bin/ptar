@@ -72,8 +72,6 @@ See Also:
     \n]
 }
 
-__END__
-
 =head1 NAME
 
 ptar - a tar-like program written in perl
