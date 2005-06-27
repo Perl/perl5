@@ -629,7 +629,7 @@ hopefully catches attempts to access uninitialized memory.
 
 #ifdef PERL_POISON
 #define Safefree(d) \
-  (d ? (void)(safefree((Malloc_t)(d)), Poison(&(d), 1, Malloc_t)) : (void) 0)
+  ((d) ? (void)(safefree((Malloc_t)(d)), Poison(&(d), 1, Malloc_t)) : (void) 0)
 #else
 #define Safefree(d)	safefree((Malloc_t)(d))
 #endif

@@ -218,6 +218,7 @@ void
 perl_construct(pTHXx)
 {
     dVAR;
+    PERL_UNUSED_ARG(my_perl);
 #ifdef MULTIPLICITY
     init_interp();
     PL_perl_destruct_level = 1;
@@ -514,14 +515,16 @@ perl_destruct(pTHXx)
     pid_t child;
 #endif
 
+    PERL_UNUSED_ARG(my_perl);
+
     /* wait for all pseudo-forked children to finish */
     PERL_WAIT_FOR_CHILDREN;
 
     destruct_level = PL_perl_destruct_level;
 #ifdef DEBUGGING
     {
-	const char *s;
-	if ((s = PerlEnv_getenv("PERL_DESTRUCT_LEVEL"))) {
+	const char * const s = PerlEnv_getenv("PERL_DESTRUCT_LEVEL");
+	if (s) {
             const int i = atoi(s);
 	    if (destruct_level < i)
 		destruct_level = i;
@@ -1392,6 +1395,8 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
     int ret;
     dJMPENV;
 
+    PERL_UNUSED_VAR(my_perl);
+
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
 #ifdef IAMSUID
 #undef IAMSUID
@@ -1409,7 +1414,7 @@ setuid perl scripts securely.\n");
     if (!PL_rehash_seed_set)
 	 PL_rehash_seed = get_hash_seed();
     {
-	const char *s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG");
+	const char * const s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG");
 
 	if (s && (atoi(s) == 1))
 	    PerlIO_printf(Perl_debug_log, "HASH_SEED = %"UVuf"\n", PL_rehash_seed);
@@ -2130,6 +2135,8 @@ perl_run(pTHXx)
     int ret = 0;
     dJMPENV;
 
+    PERL_UNUSED_ARG(my_perl);
+
     oldscope = PL_scopestack_ix;
 #ifdef VMS
     VMSISH_HUSHED = 0;
@@ -2529,6 +2536,9 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	    POPEVAL(cx);
 	    PL_curpm = newpm;
 	    LEAVE;
+	    PERL_UNUSED_VAR(newsp);
+	    PERL_UNUSED_VAR(gimme);
+	    PERL_UNUSED_VAR(optype);
 	}
 	JMPENV_POP;
     }
@@ -5137,17 +5147,19 @@ S_my_exit_jump(pTHX)
     }
 
     JMPENV_JUMP(2);
+    PERL_UNUSED_VAR(gimme);
+    PERL_UNUSED_VAR(newsp);
 }
 
 static I32
 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen)
 {
-    const char *p, *nl;
-    (void)idx;
-    (void)maxlen;
+    const char * const p  = SvPVX_const(PL_e_script);
+    const char *nl = strchr(p, '\n');
 
-    p  = SvPVX_const(PL_e_script);
-    nl = strchr(p, '\n');
+    PERL_UNUSED_ARG(idx);
+    PERL_UNUSED_ARG(maxlen);
+
     nl = (nl) ? nl+1 : SvEND(PL_e_script);
     if (nl-p == 0) {
 	filter_del(read_e_script);

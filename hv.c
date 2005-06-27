@@ -114,11 +114,10 @@ S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
 void
 Perl_free_tied_hv_pool(pTHX)
 {
-    HE *ohe;
     HE *he = PL_hv_fetch_ent_mh;
     while (he) {
+	HE * const ohe = he;
 	Safefree(HeKEY_hek(he));
-	ohe = he;
 	he = HeNEXT(he);
 	del_HE(ohe);
     }
@@ -130,7 +129,8 @@ HEK *
 Perl_hek_dup(pTHX_ HEK *source, CLONE_PARAMS* param)
 {
     HEK *shared = (HEK*)ptr_table_fetch(PL_ptr_table, source);
-    (void)param;
+
+    PERL_UNUSED_ARG(param);
 
     if (shared) {
 	/* We already shared this hash key.  */
@@ -270,7 +270,7 @@ SV**
 Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
                  register U32 hash, int flags)
 {
-    HE *hek = hv_fetch_common (hv, NULL, key, klen, flags,
+    HE * const hek = hv_fetch_common (hv, NULL, key, klen, flags,
 			       (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV), val, hash);
     return hek ? &HeVAL(hek) : NULL;
 }
@@ -515,10 +515,9 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	} /* ISFETCH */
 	else if (SvRMAGICAL(hv) && (action & HV_FETCH_ISEXISTS)) {
 	    if (mg_find((SV*)hv, PERL_MAGIC_tied) || SvGMAGICAL((SV*)hv)) {
-		SV* svret;
 		/* I don't understand why hv_exists_ent has svret and sv,
 		   whereas hv_exists only had one.  */
-		svret = sv_newmortal();
+		SV * const svret = sv_newmortal();
 		sv = sv_newmortal();
 
 		if (keysv || is_utf8) {
@@ -543,7 +542,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 #ifdef ENV_IS_CASELESS
 	    else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
 		/* XXX This code isn't UTF8 clean.  */
-		const char *keysave = key;
+		char * const keysave = key;
 		/* Will need to free this, so set FREEKEY flag.  */
 		key = savepvn(key,klen);
 		key = (const char*)strupr((char*)key);
@@ -632,7 +631,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     }
 
     if (is_utf8) {
-	const char *keysave = key;
+	char * const keysave = key;
 	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
         if (is_utf8)
 	    flags |= HVhek_UTF8;
@@ -749,7 +748,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     if (!(action & HV_FETCH_ISSTORE) 
 	&& SvRMAGICAL((SV*)hv) && mg_find((SV*)hv, PERL_MAGIC_env)) {
 	unsigned long len;
-	char *env = PerlEnv_ENVgetenv_len(key,&len);
+	const char * const env = PerlEnv_ENVgetenv_len(key,&len);
 	if (env) {
 	    sv = newSVpvn(env,len);
 	    SvTAINTED_on(sv);
@@ -1254,7 +1253,7 @@ S_hsplit(pTHX_ HV *hv)
 	while (entry) {
 	    /* We're going to trash this HE's next pointer when we chain it
 	       into the new hash below, so store where we go next.  */
-	    HE *next = HeNEXT(entry);
+	    HE * const next = HeNEXT(entry);
 	    UV hash;
 	    HE **bep;
 
@@ -1389,10 +1388,9 @@ Creates a new HV.  The reference count is set to 1.
 HV *
 Perl_newHV(pTHX)
 {
-    register HV *hv;
     register XPVHV* xhv;
+    HV * const hv = (HV*)NEWSV(502,0);
 
-    hv = (HV*)NEWSV(502,0);
     sv_upgrade((SV *)hv, SVt_PVHV);
     xhv = (XPVHV*)SvANY(hv);
     SvPOK_off(hv);
@@ -1409,7 +1407,7 @@ Perl_newHV(pTHX)
 HV *
 Perl_newHVhv(pTHX_ HV *ohv)
 {
-    HV *hv = newHV();
+    HV * const hv = newHV();
     STRLEN hv_max, hv_fill;
 
     if (!ohv || (hv_fill = HvFILL(ohv)) == 0)

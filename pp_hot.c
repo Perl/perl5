@@ -2797,6 +2797,7 @@ PP(pp_entersub)
 	return NORMAL;
     }
 
+    /*NOTREACHED*/
     assert (0); /* Cannot get here.  */
     /* This is deliberately moved here as spaghetti code to keep it out of the
        hot path.  */

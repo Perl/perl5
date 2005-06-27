@@ -499,7 +499,8 @@ PERL_CALLCONV OP*	Perl_invert(pTHX_ OP* cmd)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV bool	Perl_is_gv_magical(pTHX_ const char *name, STRLEN len, U32 flags)
-			__attribute__warn_unused_result__;
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV I32	Perl_is_lvalue_sub(pTHX)
 			__attribute__warn_unused_result__;
@@ -1538,12 +1539,8 @@ PERL_CALLCONV int	Perl_sv_isa(pTHX_ SV* sv, const char* name)
 PERL_CALLCONV int	Perl_sv_isobject(pTHX_ SV* sv)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV STRLEN	Perl_sv_len(pTHX_ SV* sv)
-			__attribute__nonnull__(pTHX_1);
-
-PERL_CALLCONV STRLEN	Perl_sv_len_utf8(pTHX_ SV* sv)
-			__attribute__nonnull__(pTHX_1);
-
+PERL_CALLCONV STRLEN	Perl_sv_len(pTHX_ SV* sv);
+PERL_CALLCONV STRLEN	Perl_sv_len_utf8(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_sv_magic(pTHX_ SV* sv, SV* obj, int how, const char* name, I32 namlen)
 			__attribute__nonnull__(pTHX_1);
 
@@ -2980,7 +2977,8 @@ PERL_CALLCONV void	Perl_my_swabn(void* ptr, int n);
 PERL_CALLCONV GV*	Perl_gv_fetchpvn_flags(pTHX_ const char* name, STRLEN len, I32 flags, I32 sv_type);
 PERL_CALLCONV GV*	Perl_gv_fetchsv(pTHX_ SV *name, I32 flags, I32 sv_type);
 PERL_CALLCONV bool	Perl_is_gv_magical_sv(pTHX_ SV *name, U32 flags)
-			__attribute__warn_unused_result__;
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
 
 
 PERL_CALLCONV bool	Perl_stashpv_hvname_match(pTHX_ const COP *cop, const HV *hv)

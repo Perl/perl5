@@ -1650,7 +1650,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 
     GET_RE_DEBUG_FLAGS_DECL;
 
-    (void)data; /* Currently unused */
+    PERL_UNUSED_ARG(data);
     RX_MATCH_UTF8_set(prog,do_utf8);
 
     PL_regcc = 0;
@@ -4900,7 +4900,7 @@ S_reghopmaybe3(pTHX_ U8* s, I32 off, U8* lim)
 static void
 restore_pos(pTHX_ void *arg)
 {
-    (void)arg; /* unused */
+    PERL_UNUSED_ARG(arg);
     if (PL_reg_eval_set) {
 	if (PL_reg_oldsaved) {
 	    PL_reg_re->subbeg = PL_reg_oldsaved;
@@ -4919,8 +4919,8 @@ restore_pos(pTHX_ void *arg)
 STATIC void
 S_to_utf8_substr(pTHX_ register regexp *prog)
 {
-    SV* sv;
     if (prog->float_substr && !prog->float_utf8) {
+	SV* sv;
 	prog->float_utf8 = sv = newSVsv(prog->float_substr);
 	sv_utf8_upgrade(sv);
 	if (SvTAIL(prog->float_substr))
@@ -4929,6 +4929,7 @@ S_to_utf8_substr(pTHX_ register regexp *prog)
 	    prog->check_utf8 = sv;
     }
     if (prog->anchored_substr && !prog->anchored_utf8) {
+	SV* sv;
 	prog->anchored_utf8 = sv = newSVsv(prog->anchored_substr);
 	sv_utf8_upgrade(sv);
 	if (SvTAIL(prog->anchored_substr))
@@ -4941,8 +4942,8 @@ S_to_utf8_substr(pTHX_ register regexp *prog)
 STATIC void
 S_to_byte_substr(pTHX_ register regexp *prog)
 {
-    SV* sv;
     if (prog->float_utf8 && !prog->float_substr) {
+	SV* sv;
 	prog->float_substr = sv = newSVsv(prog->float_utf8);
 	if (sv_utf8_downgrade(sv, TRUE)) {
 	    if (SvTAIL(prog->float_utf8))
@@ -4955,6 +4956,7 @@ S_to_byte_substr(pTHX_ register regexp *prog)
 	    prog->check_substr = sv;
     }
     if (prog->anchored_utf8 && !prog->anchored_substr) {
+	SV* sv;
 	prog->anchored_substr = sv = newSVsv(prog->anchored_utf8);
 	if (sv_utf8_downgrade(sv, TRUE)) {
 	    if (SvTAIL(prog->anchored_utf8))
