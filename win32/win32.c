@@ -2597,7 +2597,7 @@ DllExport Off_t
 win32_ftell(FILE *pf)
 {
 #if defined(WIN64) || defined(USE_LARGE_FILES)
-#if defined(__BORLAND__) /* buk */
+#if defined(__BORLANDC__) /* buk */
     return win32_tell( fileno( pf ) );
 #else
     fpos_t pos;
@@ -5148,8 +5148,8 @@ Perl_sys_intern_init(pTHX)
     {
 #  endif
 	/* Force C runtime signal stuff to set its console handler */
-	signal(SIGINT,&win32_csighandler);
-	signal(SIGBREAK,&win32_csighandler);
+	signal(SIGINT,win32_csighandler);
+	signal(SIGBREAK,win32_csighandler);
 	/* Push our handler on top */
 	SetConsoleCtrlHandler(win32_ctrlhandler,TRUE);
     }

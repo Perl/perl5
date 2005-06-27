@@ -1845,7 +1845,7 @@ nothing in the core.
 	    APPLY_TAINT_PROPER();
 	    tot = sp - mark;
 	    while (++mark <= sp) {
-		const char *name = SvPV_nolen_const(*mark);
+		char *name = SvPV_nolen(*mark);
 		APPLY_TAINT_PROPER();
 		if (PerlLIO_utime(name, utbufp))
 		    tot--;

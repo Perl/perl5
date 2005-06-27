@@ -261,7 +261,7 @@ PP(pp_substcont)
 	mg->mg_len = i;
     }
     if (old != rx)
-	ReREFCNT_inc(rx);
+	(void)ReREFCNT_inc(rx);
     cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
     rxres_save(&cx->sb_rxres, rx);
     RETURNOP(pm->op_pmreplstart);
@@ -1938,7 +1938,7 @@ PP(pp_last)
     register PERL_CONTEXT *cx;
     I32 pop2 = 0;
     I32 gimme;
-    I32 optype;
+    I32 optype = 0;
     OP *nextop;
     SV **newsp;
     PMOP *newpm;

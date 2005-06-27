@@ -1315,8 +1315,8 @@ PP(pp_leavewrite)
     register IO *io = GvIOp(gv);
     PerlIO *ofp = IoOFP(io);
     PerlIO *fp;
-    SV **newsp;
-    I32 gimme;
+    SV **newsp = Null(SV**);
+    I32 gimme = 0;
     register PERL_CONTEXT *cx;
 
     DEBUG_f(PerlIO_printf(Perl_debug_log, "left=%ld, todo=%ld\n",
