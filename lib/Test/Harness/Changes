@@ -1,5 +1,23 @@
 Revision history for Perl extension Test::Harness
 
+2.52 Sun Jun 26 23:05:19 CDT 2005
+    No changes
+
+2.51_02
+    [ENHANCEMENTS]
+    * The Test::Harness timer is now off by default.  Set HARNESS_TIMER
+      true if you want it.  Added --timer flag to prove.
+
+2.50_01
+    [FIXES]
+    * Call CORE::time() to figure out if we should print when we're
+      printing once per second.  Otherwise, we're using Time::HiRes'
+      version of it.  Thanks, Nicholas Clark.
+
+2.50 Tue Jun 21 14:32:12 CDT 2005
+    [FIXES]
+    * Added some includes in t/strap-analyze.t to make Cygwin happy.
+
 2.49_02 Tue Jun 21 09:54:44 CDT 2005
     [FIXES]
     * Added some includes in t/test_harness.t to make Cygwin happy.

@@ -10,12 +10,6 @@ use Benchmark;
 use Config;
 use strict;
 
-use vars '$has_time_hires';
-
-BEGIN {
-    eval "use Time::HiRes 'time'";
-    $has_time_hires = !$@;
-}
 
 use vars qw(
     $VERSION 
@@ -24,9 +18,16 @@ use vars qw(
     $verbose $switches $debug
     $Curtest
     $Columns 
+    $Timer
     $ML $Last_ML_Print
     $Strap
+    $has_time_hires
 );
+
+BEGIN {
+    eval "use Time::HiRes 'time'";
+    $has_time_hires = !$@;
+}
 
 =head1 NAME
 
@@ -34,11 +35,11 @@ Test::Harness - Run Perl standard test scripts with statistics
 
 =head1 VERSION
 
-Version 2.50
+Version 2.52
 
 =cut
 
-$VERSION = "2.50";
+$VERSION = "2.52";
 
 # Backwards compatibility for exportable variable names.
 *verbose  = *Verbose;
@@ -72,6 +73,7 @@ $Debug    = $ENV{HARNESS_DEBUG} || 0;
 $Switches = "-w";
 $Columns  = $ENV{HARNESS_COLUMNS} || $ENV{COLUMNS} || 80;
 $Columns--;             # Some shells have trouble with a full line of text.
+$Timer    = $ENV{HARNESS_TIMER} || 0;
 
 =head1 SYNOPSIS
 
@@ -125,6 +127,11 @@ flag will set this.
 The package variable C<$Test::Harness::switches> is exportable and can be
 used to set perl command line options used for running the test
 script(s). The default value is C<-w>. It overrides C<HARNESS_SWITCHES>.
+
+=item C<$Test::Harness::Timer>
+
+If set to true, and C<Time::HiRes> is available, print elapsed seconds
+after each test file.
 
 =back
 
@@ -345,12 +352,22 @@ sub _run_all_tests {
         if ( $Test::Harness::Debug ) {
             print "# Running: ", $Strap->_command_line($tfile), "\n";
         }
-        my $test_start_time = time;
+        my $test_start_time = $Timer ? time : 0;
         my %results = $Strap->analyze_file($tfile) or
           do { warn $Strap->{error}, "\n";  next };
-        my $test_end_time = time;
-        my $elapsed = $test_end_time - $test_start_time;
-        $elapsed = $has_time_hires ? sprintf( " %8.3fs", $elapsed ) : "";
+        my $elapsed;
+        if ( $Timer ) {
+            $elapsed = time - $test_start_time;
+            if ( $has_time_hires ) {
+                $elapsed = sprintf( " %8.3fs", $elapsed );
+            }
+            else {
+                $elapsed = sprintf( " %8ss", $elapsed ? $elapsed : "<1" );
+            }
+        }
+        else {
+            $elapsed = "";
+        }
 
         # state of the current test.
         my @failed = grep { !$results{details}[$_-1]{ok} }
@@ -650,12 +667,12 @@ sub _print_ml {
 }
 
 
-# For slow connections, we save lots of bandwidth by printing only once
-# per second.
+# Print updates only once per second.
 sub _print_ml_less {
-    if ( $Last_ML_Print != time ) {
+    my $now = CORE::time;
+    if ( $Last_ML_Print != $now ) {
         _print_ml(@_);
-        $Last_ML_Print = time;
+        $Last_ML_Print = $now;
     }
 }
 
