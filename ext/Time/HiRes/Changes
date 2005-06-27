@@ -1,5 +1,10 @@
 Revision history for Perl extension Time::HiRes.
 
+1.70	- oops in 1.69 about @ISA (not affecting anything but silly)
+	- add copyright 2005 to HiRes.pm
+	- add copyright and license to HiRes.xs
+	- add copyrights 2003,2004,2005 to README
+
 1.69	- actually run a test for nanosleep since e.g. in AIX 4.2
 	  it seems that one can link in nanosleep() but then calling
 	  it fails instantly and sets errno to ENOSYS (Not implemented).

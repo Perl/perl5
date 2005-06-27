@@ -6,7 +6,6 @@ use vars qw($VERSION $XS_VERSION @ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 require Exporter;
 require DynaLoader;
 
-@ISA = qw(Exporter DynaLoader);
 @ISA = qw(Exporter);
 
 @EXPORT = qw( );
@@ -16,7 +15,7 @@ require DynaLoader;
 		 d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
 		 d_nanosleep);
 	
-$VERSION = '1.69';
+$VERSION = '1.70';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -387,7 +386,7 @@ G. Aas <gisle@aas.no>
 
 Copyright (c) 1996-2002 Douglas E. Wegscheid.  All rights reserved.
 
-Copyright (c) 2002,2003,2004 Jarkko Hietaniemi.  All rights reserved.
+Copyright (c) 2002,2003,2004,2005 Jarkko Hietaniemi.  All rights reserved.
 
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
