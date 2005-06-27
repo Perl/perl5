@@ -7075,10 +7075,10 @@ Perl_sv_dec(pTHX_ register SV *sv)
 	return;
     }
     if (!(flags & SVp_POK)) {
-	if ((flags & SVTYPEMASK) < SVt_PVNV)
-	    sv_upgrade(sv, SVt_NV);
-	SvNV_set(sv, 1.0);
-	(void)SvNOK_only(sv);
+	if ((flags & SVTYPEMASK) < SVt_PVIV)
+	    sv_upgrade(sv, ((flags & SVTYPEMASK) > SVt_IV) ? SVt_PVIV : SVt_IV);
+	SvIV_set(sv, -1);
+	(void)SvIOK_only(sv);
 	return;
     }
 #ifdef PERL_PRESERVE_IVUV
