@@ -3308,7 +3308,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	s = SvGROW_mutable(sv, len + 1);
 	SvCUR_set(sv, len);
 	SvPOKp_on(sv);
-	return strcpy(s, t);
+	return memcpy(s, t, len + 1);
     }
 }
 
