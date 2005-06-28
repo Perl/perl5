@@ -1,4 +1,4 @@
-#!./perl
+#!./perl -w
 
 BEGIN {
     chdir 't' if -d 't';
@@ -102,7 +102,7 @@ my $got = eval {&lifejacket};
 # Testing->import is called.
 ::ok( eval "defined &is",
       "Import a subroutine where exporter must create the typeglob" );
-my $got = eval "&is";
+$got = eval "&is";
 ::ok ( $@ eq "", 'check we can call the imported autoloaded subroutine')
   or chomp ($@), print STDERR "# \$\@ is $@\n";
 ::ok ( $got eq 'Is', 'and that it gave the correct result')
@@ -182,20 +182,20 @@ package Moving::Target;
 @ISA = qw(Exporter);
 @EXPORT_OK = qw (foo);
 
-sub foo {"foo"};
-sub bar {"bar"};
+sub foo {"This is foo"};
+sub bar {"This is bar"};
 
 package Moving::Target::Test;
 
-Moving::Target->import (foo);
+Moving::Target->import ('foo');
 
-::ok (foo eq "foo", "imported foo before EXPORT_OK changed");
+::ok (foo() eq "This is foo", "imported foo before EXPORT_OK changed");
 
 push @Moving::Target::EXPORT_OK, 'bar';
 
-Moving::Target->import (bar);
+Moving::Target->import ('bar');
 
-::ok (bar eq "bar", "imported bar after EXPORT_OK changed");
+::ok (bar() eq "This is bar", "imported bar after EXPORT_OK changed");
 
 package The::Import;
 
