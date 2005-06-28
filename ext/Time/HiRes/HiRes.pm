@@ -15,7 +15,7 @@ require DynaLoader;
 		 d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
 		 d_nanosleep);
 	
-$VERSION = '1.70';
+$VERSION = '1.71';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -334,8 +334,8 @@ modglobal hash:
 Both functions return equivalent information (like C<gettimeofday>)
 but with different representations.  The names C<NVtime> and C<U2time>
 were selected mainly because they are operating system independent.
-(C<gettimeofday> is Unix-centric, though some platforms like VMS have
-emulations for it.)
+(C<gettimeofday> is Unix-centric, though some platforms like Win32 and
+VMS have emulations for it.)
 
 Here is an example of using C<NVtime> from C:
 

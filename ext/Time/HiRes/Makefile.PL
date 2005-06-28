@@ -1,3 +1,10 @@
+#!/usr/bin/perl
+#
+# In general we trust %Config, but for nanosleep() this trust
+# may be misplaces (it may be linkable but not really functional).
+# Use $ENV{FORCE_NANOSLEEP_SCAN} to force rescanning whether there
+# really is hope.
+
 require 5.002;
 
 use Config;
@@ -7,7 +14,7 @@ use strict;
 my $VERBOSE = $ENV{VERBOSE};
 my $DEFINE;
 my $LIBS = [];
-my $XSOPT;
+my $XSOPT = '';
 
 use vars qw($self); # Used in 'sourcing' the hints.
 
@@ -143,8 +150,9 @@ sub try_compile_and_link {
 				$tmp_exe);
 		printf "Running $abs_tmp_exe..." if $VERBOSE;
 		if (system($abs_tmp_exe) == 0) {
-		    $ok = $? == 0;
+		    $ok = 1;
 		} else {
+		    $ok = 0;
 		    print "system('$abs_tmp_exe') failed: $?\n";
 		}
 	    }
@@ -157,7 +165,7 @@ sub try_compile_and_link {
 
 sub has_gettimeofday {
     # confusing but true (if condition true ==> -DHAS_GETTIMEOFDAY already)
-    return 0 if $Config{d_gettimeod} eq 'define';
+    return 0 if $Config{d_gettimeod};
     return 1 if try_compile_and_link(<<EOM);
 #include "EXTERN.h"
 #include "perl.h"
@@ -216,6 +224,7 @@ EOM
 }
 
 sub has_nanosleep {
+    print "Trying out nanosleep... ";
     return 1 if
     try_compile_and_link(<<EOM, run => 1);
 #include <time.h>
@@ -228,12 +237,14 @@ sub has_nanosleep {
 
 int main() {
     struct timespec ts1, ts2;
+    int ret;
     ts1.tv_sec  = 0;
     ts1.tv_nsec = 750000000;
     ts2.tv_sec  = 0;
     ts2.tv_nsec = 0;
-    nanosleep(&ts1, &ts2); /* E.g. in AIX nanosleep() might return ENOSYS. */
-    exit(errno);
+    errno = 0;
+    ret = nanosleep(&ts1, &ts2); /* E.g. in AIX nanosleep() fail and set errno to ENOSYS. */
+    ret == 0 ? exit(0) : exit(errno ? errno : -1);
 }
 EOM
 }
@@ -363,7 +374,7 @@ EOD
     } else {
 	print "NOT found.\n";
         print "Let's see if you have select()... ";
-        if ($Config{'d_select'} eq 'define') {
+        if ($Config{'d_select'}) {
 	    print "found.\n";
 	    print "We can make a Time::HiRes::usleep().\n";
 	} else {
@@ -374,7 +385,8 @@ EOD
 
     print "Looking for nanosleep()... ";
     my $has_nanosleep;
-    if (exists $Config{d_nanosleep}) {
+    if (exists $Config{d_nanosleep} && !$ENV{FORCE_NANOSLEEP_SCAN}) {
+        # Believe $Config{d_nanosleep}.
 	if ($Config{d_nanosleep}) {
 	    $has_nanosleep++;
 	    $DEFINE .= ' -DTIME_HIRES_NANOSLEEP';
