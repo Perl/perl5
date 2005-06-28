@@ -1225,7 +1225,7 @@ Carp::confess() unless ref($gv) eq "B::GV";
     my $name = $gv->SAFENAME;
     if (($stash eq 'main' && $globalnames{$name})
 	or ($stash eq $self->{'curstash'} && !$globalnames{$name})
-	or $name =~ /^[^A-Za-z_]/)
+	or $name =~ /^[^A-Za-z_:]/)
     {
 	$stash = "";
     } else {
