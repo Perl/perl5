@@ -122,7 +122,11 @@ its performance to be measured, and its bugs to be easily demonstrated.
 =head2 POD -> HTML conversion still sucks
 
 Which is crazy given just how simple POD purports to be, and how simple HTML
-can be.
+can be. It's not actually I<as> simple as it sounds, particularly with the
+flexibility POD allows for C<=item>, but it would be good to improve the
+visual appeal of the HTML generated, and to avoid it having any validation
+errors. See also L</make HTML install work>, as the layout of installation tree
+is needed to improve the cross-linking.
 
 =head1 Misc medium sized projects
 
@@ -206,9 +210,24 @@ alarm/sleep or timers.
 
 =head2 compressed man pages
 
-Be able to install them
+Be able to install them. This would probably need a configure test to see how
+the system does compressed man pages (same directory/different directory?
+same filename/different filename), as well as tweaking the F<installman> script
+to compress as necessary.
 
 =head2 Make Config.pm cope with differences between build and installed perl
+
+Quite often vendors ship a perl binary compiled with their (pay-for)
+compilers.  People install a free compiler, such as gcc. To work out how to
+build extensions, Perl interrogates C<%Config>, so in this situation
+C<%Config> describes compilers that aren't there, and extension building
+fails. This forces people into chosing between re-compiling perl themselves
+using the compiler they have, or only using modules that the vendor ships.
+
+It would be good to find a way teach C<Config.pm> about the installation setup,
+possibly involving probing at install time or later, so that the C<%Config> in
+a binary distruction better describes the installed machine, when the installed
+machine differs from the build machine in some significant way.
 
 =head2 Relocatable perl
 
@@ -217,7 +236,36 @@ with Config.pm. We could use a syntax of ... for location of current binary?
 
 =head2 make HTML install work
 
-And look at the splitting of perlfunc in chunks. It needs fixing.
+There is an C<installhtml> target in the Makefile. It's marked as
+"experimental". It would be good to get this tested, make it work reliably, and
+remove the "experimental" tag. This would include
+
+=over 4
+
+=item 1
+
+Checking that cross linking between various parts of the documentation works.
+In particular that links work between the modules (files with POD in F<lib/>)
+and the core documentation (files in F<pod/>)
+
+=item 2
+
+Work out how to split perlfunc into chunks, preferably one per function group,
+preferably with general case code that could be used elsewhere. Challenges
+here are correctly identifying the groups of functions that go together, and
+making the right named external cross-links point to the right page. Things to
+be aware of are C<-X>, groups such as C<getpwnam> to C<endservent>, two or
+more C<=items> giving the different parameter lists, such as
+
+    =item substr EXPR,OFFSET,LENGTH,REPLACEMENT
+    
+    =item substr EXPR,OFFSET,LENGTH
+    
+    =item substr EXPR,OFFSET
+
+and different parameter lists having different meanings. (eg C<select>)
+
+=back
 
 =head2 put patchlevel in -v
 
