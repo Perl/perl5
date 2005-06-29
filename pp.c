@@ -273,7 +273,7 @@ PP(pp_rv2sv)
 		gv = (GV*)gv_fetchsv(sv, TRUE, SVt_PV);
 	    }
 	}
-	sv = GvSV(gv);
+	sv = GvSVn(gv);
     }
     if (PL_op->op_flags & OPf_MOD) {
 	if (PL_op->op_private & OPpLVAL_INTRO) {

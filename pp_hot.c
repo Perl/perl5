@@ -2542,7 +2542,7 @@ PP(pp_leavesublv)
 STATIC CV *
 S_get_db_sub(pTHX_ SV **svp, CV *cv)
 {
-    SV *dbsv = GvSV(PL_DBsub);
+    SV *dbsv = GvSVn(PL_DBsub);
 
     save_item(dbsv);
     if (!PERLDB_SUB_NN) {
