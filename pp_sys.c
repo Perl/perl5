@@ -564,7 +564,7 @@ PP(pp_open)
 	sv = *++MARK;
     }
     else {
-	sv = GvSV(gv);
+	sv = GvSVn(gv);
     }
 
     tmps = SvPV_const(sv, len);
