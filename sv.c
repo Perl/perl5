@@ -11563,9 +11563,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_origalen		= proto_perl->Iorigalen;
     PL_pidstatus	= newHV();			/* XXX flag for cloning? */
     PL_osname		= SAVEPV(proto_perl->Iosname);
-    PL_sh_path_compat	= proto_perl->Ish_path_compat; /* XXX never deallocated */
     PL_sighandlerp	= proto_perl->Isighandlerp;
-
 
     PL_runops		= proto_perl->Irunops;
 

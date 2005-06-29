@@ -243,9 +243,6 @@ PERLVAR(Ipidstatus,	HV *)		/* pid-to-status mappings for waitpid */
 PERLVARI(Imaxo,	int,	MAXO)		/* maximum number of ops */
 PERLVAR(Iosname,	char *)		/* operating system */
 
-/* For binary compatibility with older versions only */
-PERLVARI(Ish_path_compat,	const char *,	SH_PATH)/* full path of shell */
-
 PERLVAR(Isighandlerp,	Sighandler_t)
 
 PERLVAR(Ixnv_root,	NV *)		/* free xnv list */

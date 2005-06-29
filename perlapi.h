@@ -548,8 +548,6 @@ END_EXTERN_C
 #define PL_savebegin		(*Perl_Isavebegin_ptr(aTHX))
 #undef  PL_sawampersand
 #define PL_sawampersand		(*Perl_Isawampersand_ptr(aTHX))
-#undef  PL_sh_path_compat
-#define PL_sh_path_compat	(*Perl_Ish_path_compat_ptr(aTHX))
 #undef  PL_sharehook
 #define PL_sharehook		(*Perl_Isharehook_ptr(aTHX))
 #undef  PL_sig_pending
