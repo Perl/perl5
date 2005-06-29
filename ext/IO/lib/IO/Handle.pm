@@ -117,7 +117,9 @@ otherwise.
 
 This works like <$io> described in L<perlop/"I/O Operators">
 except that it's more readable and can be safely called in a
-list context but still returns just one line.
+list context but still returns just one line.  If used as the conditional
++within a C<while> or C-style C<for> loop, however, you will need to
++emulate the functionality of <$io> with C<< defined($_ = $io->getline) >>.
 
 =item $io->getlines
 
