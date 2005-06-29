@@ -2991,6 +2991,12 @@ PERL_CALLCONV bool	Perl_stashpv_hvname_match(pTHX_ const COP *cop, const HV *hv)
 PERL_CALLCONV void	Perl_dump_sv_child(pTHX_ SV *sv);
 #endif
 
+#ifdef PERL_DONT_CREATE_GVSV
+PERL_CALLCONV GV*	Perl_gv_SVadd(pTHX_ GV* gv)
+			__attribute__nonnull__(pTHX_1);
+
+#endif
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:

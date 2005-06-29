@@ -441,7 +441,11 @@ static void
 do_clean_named_objs(pTHX_ SV *sv)
 {
     if (SvTYPE(sv) == SVt_PVGV && GvGP(sv)) {
-	if ( SvOBJECT(GvSV(sv)) ||
+	if ((
+#ifdef PERL_DONT_CREATE_GVSV
+	     GvSV(sv) &&
+#endif
+	     SvOBJECT(GvSV(sv))) ||
 	     (GvAV(sv) && SvOBJECT(GvAV(sv))) ||
 	     (GvHV(sv) && SvOBJECT(GvHV(sv))) ||
 	     (GvIO(sv) && SvOBJECT(GvIO(sv))) ||

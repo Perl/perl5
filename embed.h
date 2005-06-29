@@ -1637,6 +1637,9 @@
 #define dump_sv_child		Perl_dump_sv_child
 #endif
 #endif
+#ifdef PERL_DONT_CREATE_GVSV
+#define gv_SVadd		Perl_gv_SVadd
+#endif
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_concat		Perl_ck_concat
@@ -3608,6 +3611,9 @@
 #ifdef PERL_CORE
 #define dump_sv_child(a)	Perl_dump_sv_child(aTHX_ a)
 #endif
+#endif
+#ifdef PERL_DONT_CREATE_GVSV
+#define gv_SVadd(a)		Perl_gv_SVadd(aTHX_ a)
 #endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)

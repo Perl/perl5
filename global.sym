@@ -691,4 +691,5 @@ Perl_hv_placeholders_set
 Perl_gv_fetchpvn_flags
 Perl_gv_fetchsv
 Perl_stashpv_hvname_match
+Perl_gv_SVadd
 # ex: set ro:

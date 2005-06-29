@@ -789,6 +789,11 @@ unless ($define{'DEBUG_LEAKING_SCALARS_FORK_DUMP'}) {
 		    PL_dumper_fd
 		    )];
 }
+unless ($define{'PERL_DONT_CREATE_GVSV'}) {
+    skip_symbols [qw(
+		     Perl_gv_SVadd
+		    )];
+}
 
 unless ($define{'d_mmap'}) {
     skip_symbols [qw(

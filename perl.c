@@ -1371,9 +1371,9 @@ S_set_caret_X(pTHX) {
 	S_procself_val(aTHX_ GvSV(tmpgv), PL_origargv[0]);
 #else
 #ifdef OS2
-	sv_setpv(GvSV(tmpgv), os2_execname(aTHX));
+	sv_setpv(GvSVn(tmpgv), os2_execname(aTHX));
 #else
-	sv_setpv(GvSV(tmpgv),PL_origargv[0]);
+	sv_setpv(GvSVn(tmpgv),PL_origargv[0]);
 #endif
 #endif
     }
@@ -3381,6 +3381,9 @@ S_init_main_stash(pTHX)
     PL_replgv = gv_fetchpv("\022", TRUE, SVt_PV); /* ^R */
     GvMULTI_on(PL_replgv);
     (void)Perl_form(aTHX_ "%240s","");	/* Preallocate temp - for immediate signals. */
+#ifdef PERL_DONT_CREATE_GVSV
+    gv_SVadd(PL_errgv);
+#endif
     sv_grow(ERRSV, 240);	/* Preallocate - for immediate signals. */
     sv_setpvn(ERRSV, "", 0);
     PL_curstash = PL_defstash;

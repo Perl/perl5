@@ -58,7 +58,7 @@ PP(pp_gvsv)
     if (PL_op->op_private & OPpLVAL_INTRO)
 	PUSHs(save_scalar(cGVOP_gv));
     else
-	PUSHs(GvSV(cGVOP_gv));
+	PUSHs(GvSVn(cGVOP_gv));
     RETURN;
 }
 
@@ -1473,7 +1473,7 @@ Perl_do_readline(pTHX)
 		    if (av_len(GvAVn(PL_last_in_gv)) < 0) {
 			IoFLAGS(io) &= ~IOf_START;
 			do_open(PL_last_in_gv,"-",1,FALSE,O_RDONLY,0,Nullfp);
-			sv_setpvn(GvSV(PL_last_in_gv), "-", 1);
+			sv_setpvn(GvSVn(PL_last_in_gv), "-", 1);
 			SvSETMAGIC(GvSV(PL_last_in_gv));
 			fp = IoIFP(io);
 			goto have_fp;
