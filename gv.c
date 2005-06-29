@@ -582,7 +582,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 #endif
     }
     LEAVE;
-    varsv = GvSV(vargv);
+    varsv = GvSVn(vargv);
     sv_setpvn(varsv, packname, packname_len);
     sv_catpvn(varsv, "::", 2);
     sv_catpvn(varsv, name, len);

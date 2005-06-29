@@ -1126,7 +1126,8 @@ int sockatmark(int);
 #endif
 
 #define ERRSV GvSV(PL_errgv)
-#define DEFSV GvSV(PL_defgv)
+/* FIXME? Change the assignments to PL_defgv to instantiate GvSV?  */
+#define DEFSV GvSVn(PL_defgv)
 #define SAVE_DEFSV SAVESPTR(GvSV(PL_defgv))
 
 #define ERRHV GvHV(PL_errgv)	/* XXX unused, here for compatibility */

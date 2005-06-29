@@ -7566,17 +7566,21 @@ Perl_sv_reset(pTHX_ register const char *s, HV *stash)
 		    continue;
 		gv = (GV*)HeVAL(entry);
 		sv = GvSV(gv);
-		if (SvTHINKFIRST(sv)) {
-		    if (!SvREADONLY(sv) && SvROK(sv))
-			sv_unref(sv);
-		    continue;
-		}
-		SvOK_off(sv);
-		if (SvTYPE(sv) >= SVt_PV) {
-		    SvCUR_set(sv, 0);
-		    if (SvPVX_const(sv) != Nullch)
-			*SvPVX(sv) = '\0';
-		    SvTAINT(sv);
+		if (sv) {
+		    if (SvTHINKFIRST(sv)) {
+			if (!SvREADONLY(sv) && SvROK(sv))
+			    sv_unref(sv);
+			/* XXX Is this continue a bug? Why should THINKFIRST
+			   exempt us from resetting arrays and hashes?  */
+			continue;
+		    }
+		    SvOK_off(sv);
+		    if (SvTYPE(sv) >= SVt_PV) {
+			SvCUR_set(sv, 0);
+			if (SvPVX_const(sv) != Nullch)
+			    *SvPVX(sv) = '\0';
+			SvTAINT(sv);
+		    }
 		}
 		if (GvAV(gv)) {
 		    av_clear(GvAV(gv));

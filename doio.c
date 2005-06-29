@@ -773,7 +773,7 @@ Perl_nextargv(pTHX_ register GV *gv)
 	STRLEN oldlen;
 	sv = av_shift(GvAV(gv));
 	SAVEFREESV(sv);
-	sv_setsv(GvSV(gv),sv);
+	sv_setsv(GvSVn(gv),sv);
 	SvSETMAGIC(GvSV(gv));
 	PL_oldname = SvPVx(GvSV(gv), oldlen);
 	if (do_open(gv,PL_oldname,oldlen,PL_inplace!=0,O_RDONLY,0,Nullfp)) {
