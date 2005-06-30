@@ -2929,9 +2929,7 @@ Perl_moreswitches(pTHX_ char *s)
 		sv_catpv(sv, start);
 	    else {
 		sv_catpvn(sv, start, s-start);
-		sv_catpv(sv, " split(/,/,q{");
-		sv_catpv(sv, ++s);
-		sv_catpv(sv, "})");
+		Perl_sv_catpvf(aTHX_ sv, " split(/,/,q%c%s%c)", 0, ++s, 0);
 	    }
 	    s += strlen(s);
 	    my_setenv("PERL5DB", SvPV_nolen_const(sv));
@@ -3039,9 +3037,7 @@ Perl_moreswitches(pTHX_ char *s)
 		sv_catpvn(sv, start, s-start);
 	    }
 	    if (*s == '=') {
-		sv_catpvn(sv, " split(/,/,q\0", 13);
-		sv_catpv(sv, s+1);
-		sv_catpvn(sv, "\0)", 2);
+		Perl_sv_catpvf(aTHX_ sv, " split(/,/,q%c%s%c)", 0, ++s, 0);
 		s+=strlen(s);
 	    }
 	    else if (*s != '\0') {
