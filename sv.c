@@ -10011,7 +10011,6 @@ Perl_gp_dup(pTHX_ GP *gp, CLONE_PARAMS* param)
     ret->gp_egv	= gv_dup(gp->gp_egv, param);/* GvEGV is not refcounted */
     ret->gp_cv		= cv_dup_inc(gp->gp_cv, param);
     ret->gp_cvgen	= gp->gp_cvgen;
-    ret->gp_flags	= gp->gp_flags;
     ret->gp_line	= gp->gp_line;
     ret->gp_file	= gp->gp_file;		/* points to COP.cop_file */
     return ret;

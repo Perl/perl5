@@ -18,7 +18,6 @@ struct gp {
     GV *	gp_egv;		/* effective gv, if *glob */
     CV *	gp_cv;		/* subroutine value */
     U32		gp_cvgen;	/* generational validity of cached gv_cv */
-    U32		gp_flags;	/* XXX unused */
     line_t	gp_line;	/* line first declared at (for -w) */
     char *	gp_file;	/* file first declared in (for -w) */
 };
@@ -73,8 +72,6 @@ Return the SV from the GV.
 #define GvCV(gv)	(GvGP(gv)->gp_cv)
 #define GvCVGEN(gv)	(GvGP(gv)->gp_cvgen)
 #define GvCVu(gv)	(GvGP(gv)->gp_cvgen ? Nullcv : GvGP(gv)->gp_cv)
-
-#define GvGPFLAGS(gv)	(GvGP(gv)->gp_flags)
 
 #define GvLINE(gv)	(GvGP(gv)->gp_line)
 #define GvFILE(gv)	(GvGP(gv)->gp_file)

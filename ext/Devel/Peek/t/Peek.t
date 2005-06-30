@@ -313,7 +313,6 @@ do_test(17,
     HV = 0x0
     CV = 0x0
     CVGEN = 0x0
-    GPFLAGS = 0x0
     LINE = \\d+
     FILE = ".*\\b(?i:peek\\.t)"
     FLAGS = $ADDR
