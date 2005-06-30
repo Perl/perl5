@@ -418,7 +418,7 @@ XS(XS_version_new)
 	    else {
 		/* create empty object */
 		vs = sv_newmortal();
-		sv_setpv(vs,"");
+		sv_setpvn(vs,"",0);
 	    }
 	}
 	else if ( items == 3 ) {
