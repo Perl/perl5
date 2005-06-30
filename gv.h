@@ -130,12 +130,9 @@ Return the SV from the GV.
 #define GvIN_PAD_on(gv)		(GvFLAGS(gv) |= GVf_IN_PAD)
 #define GvIN_PAD_off(gv)	(GvFLAGS(gv) &= ~GVf_IN_PAD)
 
-/* XXX: all GvFLAGS options are used, borrowing GvGPFLAGS for the moment */
-
-#define GVf_UNIQUE           0x0001
-#define GvUNIQUE(gv)         (GvGP(gv) && (GvGPFLAGS(gv) & GVf_UNIQUE))
-#define GvUNIQUE_on(gv)      (GvGPFLAGS(gv) |= GVf_UNIQUE)
-#define GvUNIQUE_off(gv)     (GvGPFLAGS(gv) &= ~GVf_UNIQUE)
+#define GvUNIQUE(gv)            0
+#define GvUNIQUE_on(gv)         0
+#define GvUNIQUE_off(gv)        0
 
 #ifdef USE_ITHREADS
 #define GV_UNIQUE_CHECK
