@@ -2719,11 +2719,8 @@ Perl_require_pv(pTHX_ const char *pv)
     dSP;
     PUSHSTACKi(PERLSI_REQUIRE);
     PUTBACK;
-    sv = sv_newmortal();
-    sv_setpv(sv, "require '");
-    sv_catpv(sv, pv);
-    sv_catpv(sv, "'");
-    eval_sv(sv, G_DISCARD);
+    sv = Perl_newSVpvf(aTHX_ "require q%c%s%c", 0, pv, 0);
+    eval_sv(sv_2mortal(sv), G_DISCARD);
     SPAGAIN;
     POPSTACK;
 }
