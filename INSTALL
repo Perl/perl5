@@ -1859,36 +1859,75 @@ to avoid the BIND.
 
 =head2 Cross-compilation
 
-Starting from version 5.8, Perl has the beginnings of cross-compilation
-support.  What is known to work is running Configure in a
-cross-compilation environment and building the miniperl executable.
-What is known not to work is building the perl executable because
-that would require building extensions: Dynaloader statically and
-File::Glob dynamically, for extensions one needs MakeMaker and
-MakeMaker is not yet cross-compilation aware, and neither is
-the main Makefile.
+Perl can be cross-compiled.  It is just not trivial, cross-compilation
+rarely is.  Perl is routinely cross-compiled for many platforms (as of
+June 2005 at least PocketPC aka WinCE, Open Zaurus, EPOC, Symbian, and
+the IBM OS/400).  These platforms are known as the B<target> platforms,
+while the systems where the compilation takes place are the B<host>
+platforms.
 
-Since the functionality is so lacking, it must be considered
-highly experimental.  It is so experimental that it is not even
-mentioned during an interactive Configure session, a direct command
-line invocation (detailed shortly) is required to access the
-functionality.
+What makes the situation difficult is that first of all,
+cross-compilation environments vary significantly in how they are set
+up and used, and secondly because the primary way of configuring Perl
+(using the rather large Unix-tool-dependent Configure script) is not
+awfully well suited for cross-compilation.  However, starting from
+version 5.8.0, the Configure script also knows one way of supporting
+cross-compilation support, please keep reading.
 
-    NOTE: Perl is routinely built using cross-compilation
-    in the EPOC environment, in the WinCE, and in the OpenZaurus
-    project, but all those use something slightly different setup
-    than what described here.  For the WinCE setup, read the
-    wince/README.compile.  For the OpenZaurus setup, read the
-    Cross/README.
+See the following files for more information about compiling Perl for
+the particular platforms:
 
-The one environment where this cross-compilation setup has
-successfully been used as of this writing is the Compaq iPAQ running
-ARM Linux.  The build host was Intel Linux, the networking setup was
-PPP + SSH.  The exact setup details are beyond the scope of this
-document, see http://www.handhelds.org/ for more information.
+=over 4
 
-To run Configure in cross-compilation mode the basic switch is
-C<-Dusecrosscompile>.
+=item WinCE/PocketPC
+
+README.ce, wince/README.perlce
+
+=item Open Zaurus
+
+Cross/README
+
+=item EPOC
+
+README.epoc
+
+=item Symbian
+
+README.symbian
+
+=item OS/400
+
+README.os400
+
+=back
+
+Packaging and transferring either the core Perl modules or CPAN
+modules to the target platform is also left up to the each
+cross-compilation environment.  Often the cross-compilation target
+platforms are somewhat limited in diskspace: see the section
+L<Minimizing the Perl installation> to learn more of the minimal set
+of files required for a functional Perl installation.
+
+For some cross-compilation environments the Configure option
+C<-Dinstallprefix=...> might be handy, see L<Changing the installation
+directory>.
+
+About the cross-compilation support of Configure: what is known to
+work is running Configure in a cross-compilation environment and
+building the miniperl executable.  What is known not to work is
+building the perl executable because that would require building
+extensions: Dynaloader statically and File::Glob dynamically, for
+extensions one needs MakeMaker and MakeMaker is not yet
+cross-compilation aware, and neither is the main Makefile.
+
+The cross-compilation setup of Configure has successfully been used in
+at least two Linux cross-compilation environments.  The setups were
+both such that the host system was Intel Linux with a gcc built for
+cross-compiling into ARM Linux, and there was a SSH connection to the
+target system.
+
+To run Configure in cross-compilation mode the basic switch that
+has to be used is C<-Dusecrosscompile>.
 
    sh ./Configure -des -Dusecrosscompile -D...
 
@@ -1957,12 +1996,22 @@ Putting it all together:
         -Dlibpth=/skiff/local/arm-linux/lib \
         -D...
 
-or if you are happy with the defaults
+or if you are happy with the defaults:
 
     sh ./Configure -des -Dusecrosscompile \
         -Dtargethost=so.me.ho.st \
         -Dcc=arm-linux-gcc \
         -D...
+
+Another example where the cross-compiler has been installed under
+F</usr/local/arm/2.95.5>:
+
+    sh ./Configure -des -Dusecrosscompile \
+        -Dtargethost=so.me.ho.st \
+        -Dcc=/usr/local/arm/2.95.5/bin/arm-linux-gcc \
+        -Dincpth=/usr/local/arm/2.95.5/include \
+        -Dusrinc=/usr/local/arm/2.95.5/include \
+        -Dlibpth=/usr/local/arm/2.95.5/lib
 
 =head1 make test
 
@@ -2548,6 +2597,20 @@ size about 1.9MB in its i386 version:
   /usr/share/perl/5.8.4/vars.pm
   /usr/share/perl/5.8.4/warnings.pm
   /usr/share/perl/5.8.4/warnings/register.pm
+
+A nice trick to find out the minimal set of Perl library files you will
+need to run a Perl program is
+
+   perl -e 'do "prog.pl"; END { print "$_\n" for sort keys %INC }' 
+
+(this will not find libraries required in runtime, unfortunately, but
+it's a minimal set) and if you want to find out all the files you can
+use something like the below
+
+   strace perl -le 'do "x.pl"' 2>&1 | perl -nle '/^open\(\"(.+?)"/ && print $1'
+
+(The 'strace' is Linux-specific, other similar utilities include 'truss'
+and 'ktrace'.)
 
 =head1 DOCUMENTATION
 
