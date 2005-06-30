@@ -1812,9 +1812,8 @@ print \"  \\%ENV:\\n    @env\\n\" if @env; \
 print \"  \\@INC:\\n    @INC\\n\";");
 	    }
 	    else {
-		PL_Sv = newSVpv("config_vars(qw(",0);
-		sv_catpv(PL_Sv, ++s);
-		sv_catpv(PL_Sv, "))");
+		++s;
+		PL_Sv = Perl_newSVpvf(aTHX_ "config_vars(qw%c%s%c)", 0, s, 0);
 		s += strlen(s);
 	    }
 	    av_push(PL_preambleav, PL_Sv);
