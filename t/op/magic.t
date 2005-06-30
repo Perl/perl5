@@ -36,7 +36,7 @@ sub skip {
     return 1;
 }
 
-print "1..56\n";
+print "1..57\n";
 
 $Is_MSWin32  = $^O eq 'MSWin32';
 $Is_NetWare  = $^O eq 'NetWare';
@@ -432,9 +432,12 @@ ok "@+" eq "10 1 6 10";
     local @ISA;
     local %ENV;
     eval { push @ISA, __PACKAGE__ };
-    ok( $@ eq '', 'Push a constant on a magic array', '#36434' );
+    ok( $@ eq '', 'Push a constant on a magic array');
     $@ and print "# $@";
     eval { %ENV = (PATH => __PACKAGE__) };
-    ok( $@ eq '', 'Assign a constant to a magic hash', '#36434' );
+    ok( $@ eq '', 'Assign a constant to a magic hash');
+    $@ and print "# $@";
+    eval { my %h = qw(A B); %ENV = (PATH => (keys %h)[0]) };
+    ok( $@ eq '', 'Assign a shared key to a magic hash');
     $@ and print "# $@";
 }
