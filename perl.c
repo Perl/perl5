@@ -3061,8 +3061,10 @@ Perl_moreswitches(pTHX_ char *s)
 	    SV *sv;
 	    const char *use = "use ";
 	    /* -M-foo == 'no foo'	*/
-	    if (*s == '-') { use = "no "; ++s; }
-	    sv = newSVpv(use,0);
+	    /* Leading space on " no " is deliberate, to make both
+	       possibilities the same length.  */
+	    if (*s == '-') { use = " no "; ++s; }
+	    sv = newSVpvn(use,4);
 	    start = s;
 	    /* We allow -M'Module qw(Foo Bar)'	*/
 	    while(isALNUM(*s) || *s==':') ++s;

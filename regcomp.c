@@ -765,7 +765,7 @@ and would end up looking like:
     DEBUG_TRIE_COMPILE_r({                                                 \
 	SV *tmp;                                                           \
 	if ( UTF ) {                                                       \
-	    tmp = newSVpv( "", 0 );                                        \
+	    tmp = newSVpvn( "", 0 );                                       \
 	    pv_uni_display( tmp, uc, len, 60, UNI_DISPLAY_REGEX );         \
 	} else {                                                           \
 	    tmp = Perl_newSVpvf_nocontext( "%c", (int)uvc );               \

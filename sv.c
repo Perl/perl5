@@ -988,7 +988,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
     case OP_SCHOMP:
     case OP_CHOMP:
 	if (SvROK(PL_rs) && uninit_sv == SvRV(PL_rs))
-	    return sv_2mortal(newSVpv("${$/}", 0));
+	    return sv_2mortal(newSVpvn("${$/}", 5));
 	/* FALL THROUGH */
 
     default:
@@ -1837,7 +1837,7 @@ S_not_a_number(pTHX_ SV *sv)
      const char *pv;
 
      if (DO_UTF8(sv)) {
-          dsv = sv_2mortal(newSVpv("", 0));
+          dsv = sv_2mortal(newSVpvn("", 0));
           pv = sv_uni_display(dsv, sv, 10, 0);
      } else {
 	  char *d = tmpbuf;
