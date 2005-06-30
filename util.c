@@ -4032,8 +4032,9 @@ Perl_new_version(pTHX_ SV *ver)
     if ( SvVOK(ver) ) { /* already a v-string */
 	char *version;
 	MAGIC* mg = mg_find(ver,PERL_MAGIC_vstring);
-	version = savepvn( (const char*)mg->mg_ptr,mg->mg_len );
-	sv_setpv(rv,version);
+	const STRLEN len = mg->mg_len;
+	version = savepvn( (const char*)mg->mg_ptr, len);
+	sv_setpvn(rv,version,len);
 	Safefree(version);
     }
     else {
