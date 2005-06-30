@@ -2934,7 +2934,7 @@ Perl_moreswitches(pTHX_ char *s)
 		sv_catpv(sv, "})");
 	    }
 	    s += strlen(s);
-	    my_setenv("PERL5DB", SvPV(sv, PL_na));
+	    my_setenv("PERL5DB", SvPV_nolen_const(sv));
 	}
 	if (!PL_perldb) {
 	    PL_perldb = PERLDB_ALL;
