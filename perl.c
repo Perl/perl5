@@ -332,12 +332,8 @@ perl_construct(pTHXx)
 
     PL_stashcache = newHV();
 
-    PL_patchlevel = newSVpv(
-	    Perl_form(aTHX_ "%d.%d.%d",
-	    (int)PERL_REVISION,
-	    (int)PERL_VERSION,
-	    (int)PERL_SUBVERSION ), 0
-    );
+    PL_patchlevel = Perl_newSVpvf(aTHX_ "%d.%d.%d", (int)PERL_REVISION,
+				  (int)PERL_VERSION, (int)PERL_SUBVERSION);
 
 #ifdef HAS_MMAP
     if (!PL_mmap_page_size) {
