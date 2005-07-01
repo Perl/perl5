@@ -55,6 +55,10 @@ Select assertions in blocks of code
 
 Activate assertions
 
+=item assertions::compat
+
+Assertions for pre-5.9 versions of perl
+
 =item attributes
 
 Get/set subroutine or variable attributes
@@ -221,6 +225,14 @@ don't have the gdbm library.
 
 Provide framework for multiple DBMs
 
+=item Archive::Tar
+
+Module for manipulations of tar archives
+
+=item Archive::Tar::File
+
+A subclass for in-memory extracted file from Archive::Tar
+
 =item Attribute::Handlers
 
 Simpler definition of attribute handlers
@@ -372,6 +384,10 @@ Report the search path for a class's ISA tree
 =item Class::Struct
 
 Declare struct-like datatypes as Perl classes
+
+=item Compress::Zlib
+
+Interface to zlib compression library
 
 =item Config
 
@@ -553,6 +569,14 @@ Implements default import method for modules
 
 Exporter guts
 
+=item ExtUtils::CBuilder
+
+Compile and link C code for Perl modules
+
+=item ExtUtils::CBuilder::Platform::Windows
+
+Builder class for Windows platforms
+
 =item ExtUtils::Command
 
 Utilities to replace common UNIX commands in Makefiles etc.
@@ -597,6 +621,10 @@ Determine libraries to use and how to use them
 
 OS adjusted ExtUtils::MakeMaker subclass
 
+=item ExtUtils::MM_AIX
+
+AIX specific subclass of ExtUtils::MM_Unix
+
 =item ExtUtils::MM_Any
 
 Platform-agnostic MM methods
@@ -625,6 +653,10 @@ Methods to override UN*X behaviour in ExtUtils::MakeMaker
 
 Methods to override UN*X behaviour in ExtUtils::MakeMaker
 
+=item ExtUtils::MM_QNX
+
+QNX specific subclass of ExtUtils::MM_Unix
+
 =item ExtUtils::MM_UWIN
 
 U/WIN specific subclass of ExtUtils::MM_Unix
@@ -636,6 +668,10 @@ Methods used by ExtUtils::MakeMaker
 =item ExtUtils::MM_VMS
 
 Methods to override UN*X behaviour in ExtUtils::MakeMaker
+
+=item ExtUtils::MM_VOS
+
+VOS specific subclass of ExtUtils::MM_Unix
 
 =item ExtUtils::MM_Win32
 
@@ -652,6 +688,10 @@ ExtUtils::MakeMaker subclass for customization
 =item ExtUtils::MakeMaker
 
 Create a module Makefile
+
+=item ExtUtils::MakeMaker::Config
+
+Wrapper around Config.pm
 
 =item ExtUtils::MakeMaker::FAQ
 
@@ -684,6 +724,10 @@ Write linker options files for dynamic extension
 =item ExtUtils::Packlist
 
 Manage .packlist files
+
+=item ExtUtils::ParseXS
+
+Converts Perl XS code into C code
 
 =item ExtUtils::testlib
 
@@ -873,6 +917,10 @@ Object interface for AF_INET domain sockets
 
 Object interface for AF_UNIX domain sockets
 
+=item IO::Zlib
+
+IO:: style interface to L<Compress::Zlib>
+
 =item IPC::Open2
 
 Open a process for both reading and writing
@@ -939,7 +987,7 @@ Arbitrary size floating point math package
 
 =item Math::BigInt
 
-Arbitrary size integer math package
+Arbitrary size integer/float math package
 
 =item Math::BigInt::Calc
 
@@ -948,6 +996,10 @@ Pure Perl module to support Math::BigInt
 =item Math::BigInt::CalcEmu
 
 Emulate low-level math with BigInt code
+
+=item Math::BigInt::FastCalc
+
+Math::BigInt::Calc with some XS for more speed
 
 =item Math::BigRat
 
@@ -1292,6 +1344,10 @@ Simple assert
 =item Test::Harness::Iterator
 
 Internal Test::Harness Iterator
+
+=item Test::Harness::Point
+
+Object for tracking a single test point
 
 =item Test::Harness::Straps
 
