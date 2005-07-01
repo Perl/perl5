@@ -1778,7 +1778,8 @@ PP(pp_dbstate)
 	PUSHSUB_DB(cx);
 	cx->blk_sub.retop = PL_op->op_next;
 	CvDEPTH(cv)++;
-	PAD_SET_CUR(CvPADLIST(cv),1);
+	SAVECOMPPAD();
+	PAD_SET_CUR_NOSAVE(CvPADLIST(cv), 1);
 	RETURNOP(CvSTART(cv));
     }
     else
@@ -2417,7 +2418,8 @@ PP(pp_goto)
 			sub_crush_depth(cv);
 		    pad_push(padlist, CvDEPTH(cv));
 		}
-		PAD_SET_CUR(padlist, CvDEPTH(cv));
+		SAVECOMPPAD();
+		PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
 		if (cx->blk_sub.hasargs)
 		{
 		    AV* av = (AV*)PAD_SVl(0);
