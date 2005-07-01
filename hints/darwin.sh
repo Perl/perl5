@@ -283,6 +283,10 @@ esac
 # really need ODBM_FIle, though, so let's just hint ODBM away.
 i_dbm=undef;
 
+# Configure doesn't detect ranlib on Tiger properly.
+# NeilW says this should be acceptable on all darwin versions.
+ranlib='ranlib'
+
 ##
 # Build process
 ##

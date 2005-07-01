@@ -19092,7 +19092,9 @@ if $cc -o foobar $ccflags $ldflags foo$_o bar$_a $libs > /dev/null 2>&1 &&
 	$run ./foobar >/dev/null 2>&1; then
 	echo "$ar appears to generate random libraries itself."
 	orderlib=false
-	ranlib=":"
+	if [ "X$ranlib" = "X" ]; then
+	    ranlib=":"
+	fi
 elif $ar ts bar$_a >/dev/null 2>&1 &&
 	$cc -o foobar $ccflags $ldflags foo$_o bar$_a $libs > /dev/null 2>&1 &&
 	$run ./foobar >/dev/null 2>&1; then
