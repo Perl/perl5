@@ -311,7 +311,7 @@ eval_sv(sv, flags)
 	EXTEND(SP, 1);
 	PUSHs(sv_2mortal(newSViv(i)));
 
-SV*
+void
 eval_pv(p, croak_on_error)
     const char* p
     I32 croak_on_error
