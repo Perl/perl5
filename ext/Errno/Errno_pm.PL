@@ -24,6 +24,8 @@ if ($Config{gccversion} ne '' && $^O eq 'MSWin32') {
     open INCS, '>includes.c' or
 	die "Cannot open includes.c";
     foreach $file (@files) {
+	next if $file eq 'errno.c';
+	next unless -f $file;
 	print INCS qq[#include "$file"\n];
     }
     close INCS;
@@ -194,8 +196,6 @@ sub get_files {
 		if (/$pat/o) {
 		   my $f = $1;
 		   $f =~ s,\\\\,/,g;
-		   next if $f eq 'errno.c';
-		   next unless -f $f;
 		   $file{$f} = 1;
 		}
 	    }
