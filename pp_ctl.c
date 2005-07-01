@@ -2768,7 +2768,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
     dVAR; dSP;				/* Make POPBLOCK work. */
     PERL_CONTEXT *cx;
     SV **newsp;
-    I32 gimme;
+    I32 gimme = G_VOID;
     I32 optype;
     OP dummy;
     OP *rop;
