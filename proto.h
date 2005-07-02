@@ -2997,6 +2997,10 @@ PERL_CALLCONV GV*	Perl_gv_SVadd(pTHX_ GV* gv)
 
 #endif
 
+PERL_CALLCONV void	Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
+			__attribute__nonnull__(pTHX_1);
+
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:

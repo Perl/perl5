@@ -1525,6 +1525,8 @@ p	|void	|dump_sv_child	|SV *sv
 Ap	|GV*	|gv_SVadd	|NN GV* gv
 #endif
 
+p	|void	|offer_nice_chunk	|NN void *chunk|U32 chunk_size
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:

@@ -4753,26 +4753,6 @@ typedef struct am_table_short AMTS;
 #define PERL_ALLOC_CHECK(p)  NOOP
 #endif
 
-/*
- * nice_chunk and nice_chunk size need to be set
- * and queried under the protection of sv_mutex
- */
-#define offer_nice_chunk(chunk, chunk_size) STMT_START {  \
-       void *new_chunk;                                   \
-       U32 new_chunk_size;                                \
-       LOCK_SV_MUTEX;                                     \
-       new_chunk = (void *)(chunk);                       \
-       new_chunk_size = (chunk_size);                     \
-       if (new_chunk_size > PL_nice_chunk_size) {         \
-           Safefree(PL_nice_chunk);                       \
-           PL_nice_chunk = (char *) new_chunk;            \
-           PL_nice_chunk_size = new_chunk_size;           \
-       } else {                                           \
-           Safefree(chunk);                               \
-       }                                                  \
-       UNLOCK_SV_MUTEX;                                   \
-   } STMT_END
-
 #ifdef HAS_SEM
 #   include <sys/ipc.h>
 #   include <sys/sem.h>
