@@ -676,7 +676,7 @@ S_find_array_subscript(pTHX_ AV *av, SV* val)
 #define FUV_SUBSCRIPT_WITHIN	4	/* "within @foo"   */
 
 STATIC SV*
-S_varname(pTHX_ GV *gv, const char *gvtype, PADOFFSET targ,
+S_varname(pTHX_ GV *gv, const char gvtype, PADOFFSET targ,
 	SV* keyname, I32 aindex, int subscript_type)
 {
 
@@ -689,15 +689,15 @@ S_varname(pTHX_ GV *gv, const char *gvtype, PADOFFSET targ,
 
 	const char *p;
 	HV * const hv = GvSTASH(gv);
-	sv_setpv(name, gvtype);
 	if (!hv)
 	    p = "???";
 	else if (!(p=HvNAME_get(hv)))
 	    p = "__ANON__";
-	if (strNE(p, "main")) {
-	    sv_catpv(name,p);
-	    sv_catpvn(name,"::", 2);
-	}
+	if (strEQ(p, "main"))
+	    sv_setpvn(name, &gvtype, 1);
+	else
+	    Perl_sv_setpvf(aTHX_ name, "%c%s::", gvtype, p);
+
 	if (GvNAMELEN(gv)>= 1 &&
 	    ((unsigned int)*GvNAME(gv)) <= 26)
 	{ /* handle $^FOO */
@@ -817,21 +817,21 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 	if (match && subscript_type == FUV_SUBSCRIPT_WITHIN)
 	    break;
 
-	return varname(gv, hash ? "%" : "@", obase->op_targ,
+	return varname(gv, hash ? '%' : '@', obase->op_targ,
 				    keysv, index, subscript_type);
       }
 
     case OP_PADSV:
 	if (match && PAD_SVl(obase->op_targ) != uninit_sv)
 	    break;
-	return varname(Nullgv, "$", obase->op_targ,
+	return varname(Nullgv, '$', obase->op_targ,
 				    Nullsv, 0, FUV_SUBSCRIPT_NONE);
 
     case OP_GVSV:
 	gv = cGVOPx_gv(obase);
 	if (!gv || (match && GvSV(gv) != uninit_sv))
 	    break;
-	return varname(gv, "$", 0, Nullsv, 0, FUV_SUBSCRIPT_NONE);
+	return varname(gv, '$', 0, Nullsv, 0, FUV_SUBSCRIPT_NONE);
 
     case OP_AELEMFAST:
 	if (obase->op_flags & OPf_SPECIAL) { /* lexical array */
@@ -844,7 +844,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 		if (!svp || *svp != uninit_sv)
 		    break;
 	    }
-	    return varname(Nullgv, "$", obase->op_targ,
+	    return varname(Nullgv, '$', obase->op_targ,
 		    Nullsv, (I32)obase->op_private, FUV_SUBSCRIPT_ARRAY);
 	}
 	else {
@@ -860,7 +860,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 		if (!svp || *svp != uninit_sv)
 		    break;
 	    }
-	    return varname(gv, "$", 0,
+	    return varname(gv, '$', 0,
 		    Nullsv, (I32)obase->op_private, FUV_SUBSCRIPT_ARRAY);
 	}
 	break;
@@ -915,10 +915,10 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 		}
 	    }
 	    if (obase->op_type == OP_HELEM)
-		return varname(gv, "%", o->op_targ,
+		return varname(gv, '%', o->op_targ,
 			    cSVOPx_sv(kid), 0, FUV_SUBSCRIPT_HASH);
 	    else
-		return varname(gv, "@", o->op_targ, Nullsv,
+		return varname(gv, '@', o->op_targ, Nullsv,
 			    SvIV(cSVOPx_sv(kid)), FUV_SUBSCRIPT_ARRAY);
 	    ;
 	}
@@ -928,20 +928,20 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 	    if (obase->op_type == OP_HELEM) {
 		SV * const keysv = S_find_hash_subscript(aTHX_ (HV*)sv, uninit_sv);
 		if (keysv)
-		    return varname(gv, "%", o->op_targ,
+		    return varname(gv, '%', o->op_targ,
 						keysv, 0, FUV_SUBSCRIPT_HASH);
 	    }
 	    else {
 		const I32 index = S_find_array_subscript(aTHX_ (AV*)sv, uninit_sv);
 		if (index >= 0)
-		    return varname(gv, "@", o->op_targ,
+		    return varname(gv, '@', o->op_targ,
 					Nullsv, index, FUV_SUBSCRIPT_ARRAY);
 	    }
 	    if (match)
 		break;
 	    return varname(gv,
 		(o->op_type == OP_PADAV || o->op_type == OP_RV2AV)
-		? "@" : "%",
+		? '@' : '%',
 		o->op_targ, Nullsv, 0, FUV_SUBSCRIPT_WITHIN);
 	}
 
@@ -963,7 +963,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 		gv = cGVOPx_gv(o);
 		if (match && GvSV(gv) != uninit_sv)
 		    break;
-		return varname(gv, "$", 0,
+		return varname(gv, '$', 0,
 			    Nullsv, 0, FUV_SUBSCRIPT_NONE);
 	    }
 	    /* other possibilities not handled are:

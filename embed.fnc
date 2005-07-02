@@ -1240,7 +1240,7 @@ s	|void	|sv_unglob	|NN SV* sv
 s	|void	|not_a_number	|NN SV *sv
 s	|I32	|visit		|NN SVFUNC_t f|U32 flags|U32 mask
 s	|void	|sv_del_backref	|NN SV *target|NN SV *ref
-sR	|SV *	|varname	|NULLOK GV *gv|NN const char *gvtype|PADOFFSET targ \
+sR	|SV *	|varname	|NULLOK GV *gv|const char gvtype|PADOFFSET targ \
 				|NULLOK SV *keyname|I32 aindex|int subscript_type
 #  ifdef DEBUGGING
 s	|void	|del_sv	|SV *p

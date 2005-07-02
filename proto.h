@@ -2600,9 +2600,8 @@ STATIC void	S_sv_del_backref(pTHX_ SV *target, SV *ref)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-STATIC SV *	S_varname(pTHX_ GV *gv, const char *gvtype, PADOFFSET targ, SV *keyname, I32 aindex, int subscript_type)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_2);
+STATIC SV *	S_varname(pTHX_ GV *gv, const char gvtype, PADOFFSET targ, SV *keyname, I32 aindex, int subscript_type)
+			__attribute__warn_unused_result__;
 
 #  ifdef DEBUGGING
 STATIC void	S_del_sv(pTHX_ SV *p);
