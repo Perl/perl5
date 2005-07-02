@@ -2959,8 +2959,7 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch, const char **searc
 	    }
 	    scriptname = Nullch;
 	}
-	if (xfailed)
-	    Safefree(xfailed);
+	Safefree(xfailed);
 	scriptname = xfound;
     }
     return (scriptname ? savepv(scriptname) : Nullch);

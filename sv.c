@@ -572,8 +572,7 @@ Perl_sv_free_arenas(pTHX)
     free_arena(pte);
 #endif
 
-    if (PL_nice_chunk)
-	Safefree(PL_nice_chunk);
+    Safefree(PL_nice_chunk);
     PL_nice_chunk = Nullch;
     PL_nice_chunk_size = 0;
     PL_sv_arenaroot = 0;

@@ -1497,14 +1497,10 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 void
 Perl_do_execfree(pTHX)
 {
-    if (PL_Argv) {
-	Safefree(PL_Argv);
-	PL_Argv = Null(char **);
-    }
-    if (PL_Cmd) {
-	Safefree(PL_Cmd);
-	PL_Cmd = Nullch;
-    }
+    Safefree(PL_Argv);
+    PL_Argv = Null(char **);
+    Safefree(PL_Cmd);
+    PL_Cmd = Nullch;
 }
 
 #if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC) && !defined(SYMBIAN) && !defined(MACOS_TRADITIONAL)

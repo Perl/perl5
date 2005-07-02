@@ -1208,8 +1208,7 @@ perl_destruct(pTHXx)
     Safefree(PL_reg_start_tmp);
     PL_reg_start_tmp = (char**)NULL;
     PL_reg_start_tmpl = 0;
-    if (PL_reg_curpm)
-	Safefree(PL_reg_curpm);
+    Safefree(PL_reg_curpm);
     Safefree(PL_reg_poscache);
     free_tied_hv_pool();
     Safefree(PL_op_mask);
@@ -2968,8 +2967,7 @@ Perl_moreswitches(pTHX_ char *s)
 	usage(PL_origargv[0]);
 	my_exit(0);
     case 'i':
-	if (PL_inplace)
-	    Safefree(PL_inplace);
+	Safefree(PL_inplace);
 #if defined(__CYGWIN__) /* do backup extension automagically */
 	if (*(s+1) == '\0') {
 	PL_inplace = savepv(".bak");
@@ -4405,8 +4403,7 @@ S_init_predump_symbols(pTHX)
 
     PL_statname = NEWSV(66,0);		/* last filename we did stat on */
 
-    if (PL_osname)
-    	Safefree(PL_osname);
+    Safefree(PL_osname);
     PL_osname = savepv(OSNAME);
 }
 

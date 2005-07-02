@@ -6007,10 +6007,10 @@ Perl_pregfree(pTHX_ struct regexp *r)
 		       len > 60 ? "..." : "");
     });
 
-    if (r->precomp)
-	Safefree(r->precomp);
-    if (r->offsets)             /* 20010421 MJD */
-	Safefree(r->offsets);
+    /* gcov results gave these as non-null 100% of the time, so there's no
+       optimisation in checking them before calling Safefree  */
+    Safefree(r->precomp);
+    Safefree(r->offsets);             /* 20010421 MJD */
     RX_MATCH_COPY_FREE(r);
 #ifdef PERL_OLD_COPY_ON_WRITE
     if (r->saved_copy)
@@ -6073,14 +6073,11 @@ Perl_pregfree(pTHX_ struct regexp *r)
 			refcount = trie->refcount--;
 			OP_REFCNT_UNLOCK;
 			if ( !refcount ) {
-			    if (trie->charmap)
-			        Safefree(trie->charmap);
+			    Safefree(trie->charmap);
 			    if (trie->widecharmap)
 			        SvREFCNT_dec((SV*)trie->widecharmap);
-			    if (trie->states)
-			        Safefree(trie->states);
-			    if (trie->trans)
-			        Safefree(trie->trans);
+			    Safefree(trie->states);
+			    Safefree(trie->trans);
 #ifdef DEBUGGING
 			    if (trie->words)
 			        SvREFCNT_dec((SV*)trie->words);

@@ -4764,7 +4764,7 @@ typedef struct am_table_short AMTS;
        new_chunk = (void *)(chunk);                       \
        new_chunk_size = (chunk_size);                     \
        if (new_chunk_size > PL_nice_chunk_size) {         \
-           if (PL_nice_chunk) Safefree(PL_nice_chunk);    \
+           Safefree(PL_nice_chunk);                       \
            PL_nice_chunk = (char *) new_chunk;            \
            PL_nice_chunk_size = new_chunk_size;           \
        } else {                                           \

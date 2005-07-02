@@ -112,10 +112,8 @@ Perl_new_numeric(pTHX_ const char *newnum)
 #ifdef USE_LOCALE_NUMERIC
 
     if (! newnum) {
-	if (PL_numeric_name) {
-	    Safefree(PL_numeric_name);
-	    PL_numeric_name = NULL;
-	}
+	Safefree(PL_numeric_name);
+	PL_numeric_name = NULL;
 	PL_numeric_standard = TRUE;
 	PL_numeric_local = TRUE;
 	return;
@@ -534,16 +532,13 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #endif
 
 #ifdef USE_LOCALE_CTYPE
-    if (curctype != NULL)
-	Safefree(curctype);
+    Safefree(curctype);
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
-    if (curcoll != NULL)
-	Safefree(curcoll);
+    Safefree(curcoll);
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
-    if (curnum != NULL)
-	Safefree(curnum);
+    Safefree(curnum);
 #endif /* USE_LOCALE_NUMERIC */
     return ok;
 }

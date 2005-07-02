@@ -2215,19 +2215,12 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	PL_hints = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 	break;
     case '\011':	/* ^I */ /* NOT \t in EBCDIC */
-	if (PL_inplace)
-	    Safefree(PL_inplace);
-	if (SvOK(sv))
-	    PL_inplace = savesvpv(sv);
-	else
-	    PL_inplace = Nullch;
-	break;
+	Safefree(PL_inplace);
+	PL_inplace = SvOK(sv) ? savesvpv(sv) : Nullch;
     case '\017':	/* ^O */
 	if (*(mg->mg_ptr+1) == '\0') {
-	    if (PL_osname) {
-		Safefree(PL_osname);
-		PL_osname = Nullch;
-	    }
+	    Safefree(PL_osname);
+	    PL_osname = Nullch;
 	    if (SvOK(sv)) {
 		TAINT_PROPER("assigning to $^O");
 		PL_osname = savesvpv(sv);
