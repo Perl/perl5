@@ -1,5 +1,9 @@
 Revision history for Perl extension Time::HiRes.
 
+1.72	- going back to the 1.68 loader setup (using DynaLoader)
+	  since too many weird things starting breaking
+	- fix a typo in José Auguste-Etienne's name
+
 1.71	- a thinko in the nanosleep() detection
 	- move more changes stuff from the README to Changes
 	- add -w to the Makefile.PL
@@ -17,8 +21,12 @@ Revision history for Perl extension Time::HiRes.
 	  (realtime POSIX?) libs and whatnot, but in the general case
 	  running a real test case is better.  (Of course, this change
 	  will no doubt run into portability problems because of the
-	  execution step...)
-	  (from José Auguste-tienne)
+	  execution step...)  Note that because of hysterical raisins
+	  most Perls do NOT have $Config{d_nanosleep} (scanning for
+	  it by Configure would in many platforms require linking in
+	  things like -lrt, which would in many platforms be a bad idea
+	  for Perl itself).
+	  (from José Auguste-Etienne)
 	- support XSLoader also since it's much faster
 	  (from Alexey Tourbin)
 	- add SEE ALSO (BSD::Resource and Time::TAI64)

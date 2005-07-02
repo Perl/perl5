@@ -14,7 +14,7 @@ BEGIN {
 
 BEGIN { $| = 1; print "1..28\n"; }
 
-END {print "not ok 1\n" unless $loaded;}
+END { print "not ok 1\n" unless $loaded }
 
 use Time::HiRes qw(tv_interval);
 

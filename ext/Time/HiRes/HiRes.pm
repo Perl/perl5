@@ -6,7 +6,7 @@ use vars qw($VERSION $XS_VERSION @ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 require Exporter;
 require DynaLoader;
 
-@ISA = qw(Exporter);
+@ISA = qw(Exporter DynaLoader);
 
 @EXPORT = qw( );
 @EXPORT_OK = qw (usleep sleep ualarm alarm gettimeofday time tv_interval
@@ -15,7 +15,7 @@ require DynaLoader;
 		 d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
 		 d_nanosleep);
 	
-$VERSION = '1.71';
+$VERSION = '1.72';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -24,7 +24,10 @@ sub AUTOLOAD {
     ($constname = $AUTOLOAD) =~ s/.*:://;
     die "&Time::HiRes::constant not defined" if $constname eq 'constant';
     my ($error, $val) = constant($constname);
-    if ($error) { die $error; }
+    if ($error) {
+        my (undef,$file,$line) = caller;
+        die "$error at $file line $line.\n";
+    }
     {
 	no strict 'refs';
 	*$AUTOLOAD = sub { $val };
@@ -32,15 +35,7 @@ sub AUTOLOAD {
     goto &$AUTOLOAD;
 }
 
-eval {
-    require XSLoader;
-    XSLoader::load('Time::HiRes', $XS_VERSION);
-    1;
-} or do {
-    require DynaLoader;
-    local @ISA = qw(DynaLoader);
-    bootstrap Time::HiRes $XS_VERSION;
-};
+bootstrap Time::HiRes;
 
 # Preloaded methods go here.
 
@@ -119,9 +114,9 @@ C<&Time::HiRes::d_nanosleep> to see whether you have nanosleep, and
 then carefully read your C<nanosleep()> C API documentation for any
 peculiarities.
 
-Unless using C<nanosleep> for mixing sleeping with signals, give
-some thought to whether Perl is the tool you should be using for
-work requiring nanosecond accuracies.
+If you are using C<nanosleep> for something else than mixing sleeping
+with signals, give some thought to whether Perl is the tool you should
+be using for work requiring nanosecond accuracies.
 
 The following functions can be imported from this module.
 No functions are exported by default.
@@ -386,7 +381,7 @@ G. Aas <gisle@aas.no>
 
 Copyright (c) 1996-2002 Douglas E. Wegscheid.  All rights reserved.
 
-Copyright (c) 2002,2003,2004,2005 Jarkko Hietaniemi.  All rights reserved.
+Copyright (c) 2002, 2003, 2004, 2005 Jarkko Hietaniemi.  All rights reserved.
 
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

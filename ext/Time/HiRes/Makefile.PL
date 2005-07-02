@@ -153,7 +153,7 @@ sub try_compile_and_link {
 		    $ok = 1;
 		} else {
 		    $ok = 0;
-		    print "system('$abs_tmp_exe') failed: $?\n";
+		    print "[ system('$abs_tmp_exe') failed: status $? ] ";
 		}
 	    }
 	    unlink("$tmp.c", $tmp_exe);
