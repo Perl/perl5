@@ -88,61 +88,15 @@
 #define isWARN_on(c,x)	(IsSet(SvPVX_const(c), 2*(x)))
 #define isWARNf_on(c,x)	(IsSet(SvPVX_const(c), 2*(x)+1))
 
-#define ckWARN(x)							\
-	( (isLEXWARN_on && PL_curcop->cop_warnings != pWARN_NONE &&	\
-	      (PL_curcop->cop_warnings == pWARN_ALL ||			\
-	       isWARN_on(PL_curcop->cop_warnings, x) ) )		\
-	  || (isLEXWARN_off && PL_dowarn & G_WARN_ON) )
+#define ckWARN(w)		Perl_ckwarn(aTHX_ packWARN(w))
+#define ckWARN2(w1,w2)		Perl_ckwarn(aTHX_ packWARN2(w1,w2))
+#define ckWARN3(w1,w2,w3)	Perl_ckwarn(aTHX_ packWARN3(w1,w2,w3))
+#define ckWARN4(w1,w2,w3,w4)	Perl_ckwarn(aTHX_ packWARN4(w1,w2,w3,w4))
 
-#define ckWARN2(x,y)							\
-	  ( (isLEXWARN_on && PL_curcop->cop_warnings != pWARN_NONE &&	\
-	      (PL_curcop->cop_warnings == pWARN_ALL ||			\
-	        isWARN_on(PL_curcop->cop_warnings, x)  ||		\
-	        isWARN_on(PL_curcop->cop_warnings, y) ) ) 		\
-	    ||	(isLEXWARN_off && PL_dowarn & G_WARN_ON) )
-
-#define ckWARN3(x,y,z)							\
-	  ( (isLEXWARN_on && PL_curcop->cop_warnings != pWARN_NONE &&	\
-	      (PL_curcop->cop_warnings == pWARN_ALL ||			\
-	        isWARN_on(PL_curcop->cop_warnings, x)  ||		\
-	        isWARN_on(PL_curcop->cop_warnings, y)  ||		\
-	        isWARN_on(PL_curcop->cop_warnings, z) ) ) 		\
-	    ||	(isLEXWARN_off && PL_dowarn & G_WARN_ON) )
-
-#define ckWARN4(x,y,z,t)						\
-	  ( (isLEXWARN_on && PL_curcop->cop_warnings != pWARN_NONE &&	\
-	      (PL_curcop->cop_warnings == pWARN_ALL ||			\
-	        isWARN_on(PL_curcop->cop_warnings, x)  ||		\
-	        isWARN_on(PL_curcop->cop_warnings, y)  ||		\
-	        isWARN_on(PL_curcop->cop_warnings, z)  ||		\
-	        isWARN_on(PL_curcop->cop_warnings, t) ) ) 		\
-	    ||	(isLEXWARN_off && PL_dowarn & G_WARN_ON) )
-
-#define ckWARN_d(x)							\
-	  (isLEXWARN_off || PL_curcop->cop_warnings == pWARN_ALL ||	\
-	     (PL_curcop->cop_warnings != pWARN_NONE &&			\
-	      isWARN_on(PL_curcop->cop_warnings, x) ) )
-
-#define ckWARN2_d(x,y)							\
-	  (isLEXWARN_off || PL_curcop->cop_warnings == pWARN_ALL ||	\
-	     (PL_curcop->cop_warnings != pWARN_NONE &&			\
-	        (isWARN_on(PL_curcop->cop_warnings, x)  ||		\
-	         isWARN_on(PL_curcop->cop_warnings, y) ) ) )
-
-#define ckWARN3_d(x,y,z)						\
-	  (isLEXWARN_off || PL_curcop->cop_warnings == pWARN_ALL ||	\
-	     (PL_curcop->cop_warnings != pWARN_NONE &&			\
-	        (isWARN_on(PL_curcop->cop_warnings, x)  ||		\
-	         isWARN_on(PL_curcop->cop_warnings, y)  ||		\
-	         isWARN_on(PL_curcop->cop_warnings, z) ) ) )
-
-#define ckWARN4_d(x,y,z,t)						\
-	  (isLEXWARN_off || PL_curcop->cop_warnings == pWARN_ALL ||	\
-	     (PL_curcop->cop_warnings != pWARN_NONE &&			\
-	        (isWARN_on(PL_curcop->cop_warnings, x)  ||		\
-	         isWARN_on(PL_curcop->cop_warnings, y)  ||		\
-	         isWARN_on(PL_curcop->cop_warnings, z)  ||		\
-	         isWARN_on(PL_curcop->cop_warnings, t) ) ) )
+#define ckWARN_d(w)		Perl_ckwarn_d(aTHX_ packWARN(w))
+#define ckWARN2_d(w1,w2)	Perl_ckwarn_d(aTHX_ packWARN2(w1,w2))
+#define ckWARN3_d(w1,w2,w3)	Perl_ckwarn_d(aTHX_ packWARN3(w1,w2,w3))
+#define ckWARN4_d(w1,w2,w3,w4)	Perl_ckwarn_d(aTHX_ packWARN4(w1,w2,w3,w4))
 
 #define packWARN(a)		(a                                      )
 #define packWARN2(a,b)		((a) | ((b)<<8)                         )

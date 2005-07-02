@@ -1376,6 +1376,58 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
     }
 }
 
+/* implements the ckWARN? macros */
+
+bool
+Perl_ckwarn(pTHX_ U32 w)
+{
+    return
+	(
+	       isLEXWARN_on
+	    && PL_curcop->cop_warnings != pWARN_NONE
+	    && (
+		   PL_curcop->cop_warnings == pWARN_ALL
+		|| isWARN_on(PL_curcop->cop_warnings, unpackWARN1(w))
+		|| (unpackWARN2(w) &&
+		     isWARN_on(PL_curcop->cop_warnings, unpackWARN2(w)))
+		|| (unpackWARN3(w) &&
+		     isWARN_on(PL_curcop->cop_warnings, unpackWARN3(w)))
+		|| (unpackWARN4(w) &&
+		     isWARN_on(PL_curcop->cop_warnings, unpackWARN4(w)))
+		)
+	)
+	||
+	(
+	    isLEXWARN_off && PL_dowarn & G_WARN_ON
+	)
+	;
+}
+
+/* implements the ckWARN?_d macro */
+
+bool
+Perl_ckwarn_d(pTHX_ U32 w)
+{
+    return
+	   isLEXWARN_off
+	|| PL_curcop->cop_warnings == pWARN_ALL
+	|| (
+	      PL_curcop->cop_warnings != pWARN_NONE 
+	   && (
+		   isWARN_on(PL_curcop->cop_warnings, unpackWARN1(w))
+	      || (unpackWARN2(w) &&
+		   isWARN_on(PL_curcop->cop_warnings, unpackWARN2(w)))
+	      || (unpackWARN3(w) &&
+		   isWARN_on(PL_curcop->cop_warnings, unpackWARN3(w)))
+	      || (unpackWARN4(w) &&
+		   isWARN_on(PL_curcop->cop_warnings, unpackWARN4(w)))
+	      )
+	   )
+	;
+}
+
+
+
 /* since we've already done strlen() for both nam and val
  * we can use that info to make things faster than
  * sprintf(s, "%s=%s", nam, val)

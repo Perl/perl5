@@ -224,7 +224,12 @@ Found in file pad.h
 =item PAD_SET_CUR	
 
 Set the current pad to be pad C<n> in the padlist, saving
-the previous current pad.
+the previous current pad. NB currently this macro expands to a string too
+long for some compilers, so it's best to replace it with
+
+    SAVECOMPPAD();
+    PAD_SET_CUR_NOSAVE(padlist,n);
+
 
 	void	PAD_SET_CUR	(PADLIST padlist, I32 n)
 

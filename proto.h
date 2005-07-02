@@ -2995,6 +2995,8 @@ PERL_CALLCONV GV*	Perl_gv_SVadd(pTHX_ GV* gv)
 			__attribute__nonnull__(pTHX_1);
 
 #endif
+PERL_CALLCONV bool	Perl_ckwarn(pTHX_ U32 w);
+PERL_CALLCONV bool	Perl_ckwarn_d(pTHX_ U32 w);
 
 PERL_CALLCONV void	Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
 			__attribute__nonnull__(pTHX_1);

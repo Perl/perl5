@@ -3619,6 +3619,8 @@
 #define gv_SVadd(a)		Perl_gv_SVadd(aTHX_ a)
 #endif
 #ifdef PERL_CORE
+#endif
+#ifdef PERL_CORE
 #define offer_nice_chunk(a,b)	Perl_offer_nice_chunk(aTHX_ a,b)
 #endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
