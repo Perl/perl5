@@ -2678,7 +2678,8 @@ PP(pp_entersub)
 	    PERL_STACK_OVERFLOW_CHECK();
 	    pad_push(padlist, CvDEPTH(cv));
 	}
-	PAD_SET_CUR(padlist, CvDEPTH(cv));
+	SAVECOMPPAD();
+	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
 	if (hasargs)
 	{
 	    AV* av;
