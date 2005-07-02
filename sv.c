@@ -1127,9 +1127,10 @@ S_new_body(pTHX_ void **arena_root, void **root, size_t size)
 
 #define del_body(thing, root)			\
     STMT_START {				\
+	void **thing_copy = (void **)thing;	\
 	LOCK_SV_MUTEX;				\
-	*(void **)thing = *root;		\
-	*root = (void*)thing;			\
+	*thing_copy = *root;			\
+	*root = (void*)thing_copy;		\
 	UNLOCK_SV_MUTEX;			\
     } STMT_END
 
