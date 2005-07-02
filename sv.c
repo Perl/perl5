@@ -5489,13 +5489,13 @@ void
 Perl_sv_clear(pTHX_ register SV *sv)
 {
     dVAR;
-    HV* stash;
     assert(sv);
     assert(SvREFCNT(sv) == 0);
 
     if (SvOBJECT(sv)) {
 	if (PL_defstash) {		/* Still have a symbol table? */
 	    dSP;
+	    HV* stash;
 	    do {	
 		CV* destructor;
 		stash = SvSTASH(sv);
@@ -5548,7 +5548,6 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	if (SvTYPE(sv) == SVt_PVMG && SvFLAGS(sv) & SVpad_TYPED)
 	    SvREFCNT_dec(SvSTASH(sv));
     }
-    stash = NULL;
     switch (SvTYPE(sv)) {
     case SVt_PVIO:
 	if (IoIFP(sv) &&
@@ -5589,11 +5588,10 @@ Perl_sv_clear(pTHX_ register SV *sv)
     case SVt_PVGV:
 	gp_free((GV*)sv);
 	Safefree(GvNAME(sv));
-	/* cannot decrease stash refcount yet, as we might recursively delete
-	   ourselves when the refcnt drops to zero. Delay SvREFCNT_dec
-	   of stash until current sv is completely gone.
-	   -- JohnPC, 27 Mar 1998 */
-	stash = GvSTASH(sv);
+	/* If we're in a stash, we don't own a reference to it. However it does
+	   have a back reference to us, which needs to be cleared.  */
+	if (GvSTASH(sv))
+	    sv_del_backref((SV*)GvSTASH(sv), sv);
 	/* FALL THROUGH */
     case SVt_PVMG:
     case SVt_PVNV:
@@ -5648,6 +5646,9 @@ Perl_sv_clear(pTHX_ register SV *sv)
 */
     }
 
+    SvFLAGS(sv) &= SVf_BREAK;
+    SvFLAGS(sv) |= SVTYPEMASK;
+
     switch (SvTYPE(sv)) {
     case SVt_NULL:
 	break;
@@ -5684,13 +5685,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	break;
     case SVt_PVGV:
 	del_XPVGV(SvANY(sv));
-	/* code duplication for increased performance. */
-	SvFLAGS(sv) &= SVf_BREAK;
-	SvFLAGS(sv) |= SVTYPEMASK;
-	/* decrease refcount of the stash that owns this GV, if any */
-	if (stash)
-	    sv_del_backref((SV*)stash, sv);
-	return; /* not break, SvFLAGS reset already happened */
+	break;
     case SVt_PVBM:
 	del_XPVBM(SvANY(sv));
 	break;
@@ -5701,8 +5696,6 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	del_XPVIO(SvANY(sv));
 	break;
     }
-    SvFLAGS(sv) &= SVf_BREAK;
-    SvFLAGS(sv) |= SVTYPEMASK;
 }
 
 /*
