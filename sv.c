@@ -5489,8 +5489,18 @@ void
 Perl_sv_clear(pTHX_ register SV *sv)
 {
     dVAR;
+    void** old_body_arena;
+    size_t old_body_offset;
+    const U32 type = SvTYPE(sv);
+
     assert(sv);
     assert(SvREFCNT(sv) == 0);
+
+    if (type <= SVt_IV)
+	return;
+
+    old_body_arena = 0;
+    old_body_offset = 0;
 
     if (SvOBJECT(sv)) {
 	if (PL_defstash) {		/* Still have a symbol table? */
@@ -5538,17 +5548,17 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	if (SvOBJECT(sv)) {
 	    SvREFCNT_dec(SvSTASH(sv));	/* possibly of changed persuasion */
 	    SvOBJECT_off(sv);	/* Curse the object. */
-	    if (SvTYPE(sv) != SVt_PVIO)
+	    if (type != SVt_PVIO)
 		--PL_sv_objcount;	/* XXX Might want something more general */
 	}
     }
-    if (SvTYPE(sv) >= SVt_PVMG) {
+    if (type >= SVt_PVMG) {
     	if (SvMAGIC(sv))
 	    mg_free(sv);
-	if (SvTYPE(sv) == SVt_PVMG && SvFLAGS(sv) & SVpad_TYPED)
+	if (type == SVt_PVMG && SvFLAGS(sv) & SVpad_TYPED)
 	    SvREFCNT_dec(SvSTASH(sv));
     }
-    switch (SvTYPE(sv)) {
+    switch (type) {
     case SVt_PVIO:
 	if (IoIFP(sv) &&
 	    IoIFP(sv) != PerlIO_stdin() &&
@@ -5563,18 +5573,26 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	Safefree(IoTOP_NAME(sv));
 	Safefree(IoFMT_NAME(sv));
 	Safefree(IoBOTTOM_NAME(sv));
-	/* FALL THROUGH */
+	/* PVIOs aren't from arenas  */
+	goto freescalar;
     case SVt_PVBM:
+	old_body_arena = (void **) &PL_xpvbm_root;
 	goto freescalar;
     case SVt_PVCV:
+	old_body_arena = (void **) &PL_xpvcv_root;
     case SVt_PVFM:
+	/* PVFMs aren't from arenas  */
 	cv_undef((CV*)sv);
 	goto freescalar;
     case SVt_PVHV:
 	hv_undef((HV*)sv);
+	old_body_arena = (void **) &PL_xpvhv_root;
+	old_body_offset = STRUCT_OFFSET(XPVHV, xhv_fill);
 	break;
     case SVt_PVAV:
 	av_undef((AV*)sv);
+	old_body_arena = (void **) &PL_xpvav_root;
+	old_body_offset = STRUCT_OFFSET(XPVAV, xav_fill);
 	break;
     case SVt_PVLV:
 	if (LvTYPE(sv) == 'T') { /* for tie: return HE to pool */
@@ -5584,6 +5602,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	}
 	else if (LvTYPE(sv) != 't') /* unless tie: unrefcnted fake SV**  */
 	    SvREFCNT_dec(LvTARG(sv));
+	old_body_arena = (void **) &PL_xpvlv_root;
 	goto freescalar;
     case SVt_PVGV:
 	gp_free((GV*)sv);
@@ -5592,19 +5611,29 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	   have a back reference to us, which needs to be cleared.  */
 	if (GvSTASH(sv))
 	    sv_del_backref((SV*)GvSTASH(sv), sv);
-	/* FALL THROUGH */
+	old_body_arena = (void **) &PL_xpvgv_root;
+	goto freescalar;
     case SVt_PVMG:
+	old_body_arena = (void **) &PL_xpvmg_root;
+	goto freescalar;
     case SVt_PVNV:
+	old_body_arena = (void **) &PL_xpvnv_root;
+	goto freescalar;
     case SVt_PVIV:
+	old_body_arena = (void **) &PL_xpviv_root;
+	old_body_offset = STRUCT_OFFSET(XPVIV, xpv_cur);
       freescalar:
 	/* Don't bother with SvOOK_off(sv); as we're only going to free it.  */
 	if (SvOOK(sv)) {
 	    SvPV_set(sv, SvPVX_mutable(sv) - SvIVX(sv));
 	    /* Don't even bother with turning off the OOK flag.  */
 	}
-	/* FALL THROUGH */
+	goto pvrv_common;
     case SVt_PV:
+	old_body_arena = (void **) &PL_xpv_root;
+	old_body_offset = STRUCT_OFFSET(XPV, xpv_cur);
     case SVt_RV:
+    pvrv_common:
 	if (SvROK(sv)) {
 	    SV *target = SvRV(sv);
 	    if (SvWEAKREF(sv))
@@ -5638,64 +5667,23 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	}
 #endif
 	break;
-/*
     case SVt_NV:
-    case SVt_IV:
-    case SVt_NULL:
+	old_body_arena = (void **) &PL_xnv_root;
 	break;
-*/
     }
 
     SvFLAGS(sv) &= SVf_BREAK;
     SvFLAGS(sv) |= SVTYPEMASK;
 
-    switch (SvTYPE(sv)) {
-    case SVt_NULL:
-	break;
-    case SVt_IV:
-	break;
-    case SVt_NV:
-	del_XNV(SvANY(sv));
-	break;
-    case SVt_RV:
-	break;
-    case SVt_PV:
-	del_XPV(SvANY(sv));
-	break;
-    case SVt_PVIV:
-	del_XPVIV(SvANY(sv));
-	break;
-    case SVt_PVNV:
-	del_XPVNV(SvANY(sv));
-	break;
-    case SVt_PVMG:
-	del_XPVMG(SvANY(sv));
-	break;
-    case SVt_PVLV:
-	del_XPVLV(SvANY(sv));
-	break;
-    case SVt_PVAV:
-	del_XPVAV(SvANY(sv));
-	break;
-    case SVt_PVHV:
-	del_XPVHV(SvANY(sv));
-	break;
-    case SVt_PVCV:
-	del_XPVCV(SvANY(sv));
-	break;
-    case SVt_PVGV:
-	del_XPVGV(SvANY(sv));
-	break;
-    case SVt_PVBM:
-	del_XPVBM(SvANY(sv));
-	break;
-    case SVt_PVFM:
-	del_XPVFM(SvANY(sv));
-	break;
-    case SVt_PVIO:
-	del_XPVIO(SvANY(sv));
-	break;
+#ifndef PURIFY
+    if (old_body_arena) {
+	del_body(((char *)SvANY(sv) + old_body_offset), old_body_arena);
     }
+    else
+#endif
+	if (type > SVt_RV) {
+	    my_safefree(SvANY(sv));
+	}
 }
 
 /*
