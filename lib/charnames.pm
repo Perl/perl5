@@ -1,9 +1,8 @@
 package charnames;
 use strict;
 use warnings;
-use Carp;
 use File::Spec;
-our $VERSION = '1.04';
+our $VERSION = '1.04_1';
 
 use bytes ();		# for $bytes::hint_bits
 $charnames::hint_bits = 0x20000; # HINT_LOCALIZE_HH
@@ -43,6 +42,16 @@ my %alias3 = (
 		# User defined aliasses. Even more convenient :)
 	    );
 my $txt;
+
+sub croak
+{
+  require Carp; goto &Carp::croak;
+} # croak
+
+sub carp
+{
+  require Carp; goto &Carp::carp;
+} # carp
 
 sub alias (@)
 {

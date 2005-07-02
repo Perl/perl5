@@ -1,9 +1,8 @@
 package SelfLoader;
-# use Carp;
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(AUTOLOAD);
-$VERSION = "1.0904";
+$VERSION = "1.0905";
 sub Version {$VERSION}
 $DEBUG = 0;
 
@@ -18,6 +17,7 @@ our $one_attr = qr{ (?> (?! \d) \w+ (?:$nested)? ) (?:\s*\:\s*|\s+(?!\:)) }x;
 our $attr_list = qr{ \s* : \s* (?: $one_attr )* }x;
 
 sub croak { require Carp; goto &Carp::croak }
+sub carp { require Carp; goto &Carp::carp }
 
 AUTOLOAD {
     print STDERR "SelfLoader::AUTOLOAD for $AUTOLOAD\n" if $DEBUG;
@@ -115,7 +115,7 @@ sub _load_stubs {
 sub _add_to_cache {
     my($self,$fullname,$pack,$lines, $protoype) = @_;
     return () unless $fullname;
-    (require Carp), Carp::carp("Redefining sub $fullname")
+    carp("Redefining sub $fullname")
       if exists $Cache{$fullname};
     $Cache{$fullname} = join('', "package $pack; ",@$lines);
     print STDERR "SelfLoader cached $fullname: $Cache{$fullname}" if $DEBUG;

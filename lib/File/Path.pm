@@ -119,13 +119,12 @@ Charles Bailey <F<bailey@newman.upenn.edu>>
 =cut
 
 use 5.006;
-use Carp;
 use File::Basename ();
 use Exporter ();
 use strict;
 use warnings;
 
-our $VERSION = "1.07";
+our $VERSION = "1.07_01";
 our @ISA = qw( Exporter );
 our @EXPORT = qw( mkpath rmtree );
 
@@ -136,6 +135,16 @@ my $Is_MacOS = $^O eq 'MacOS';
 # write permission to:
 my $force_writeable = ($^O eq 'os2' || $^O eq 'dos' || $^O eq 'MSWin32' ||
 		       $^O eq 'amigaos' || $^O eq 'MacOS' || $^O eq 'epoc');
+
+sub carp {
+    require Carp;
+    goto &Carp::carp;
+}
+
+sub croak {
+    require Carp;
+    goto &Carp::croak;
+}
 
 sub mkpath {
     my($paths, $verbose, $mode) = @_;
@@ -165,7 +174,7 @@ sub mkpath {
 	unless (mkdir($path,$mode)) {
 	    my $e = $!;
 	    # allow for another process to have created it meanwhile
-	    croak "mkdir $path: $e" unless -d $path;
+	    croak ("mkdir $path: $e") unless -d $path;
 	}
 	push(@created, $path);
     }
@@ -183,7 +192,7 @@ sub rmtree {
       $roots = [$roots] unless ref $roots;
     }
     else {
-      carp "No root path(s) specified\n";
+      carp ("No root path(s) specified\n");
       return 0;
     }
 
@@ -203,7 +212,7 @@ sub rmtree {
 	    # to recurse in which case we are better than rm -rf for 
 	    # subtrees with strange permissions
 	    chmod($rp | 0700, ($Is_VMS ? VMS::Filespec::fileify($root) : $root))
-	      or carp "Can't make directory $root read+writeable: $!"
+	      or carp ("Can't make directory $root read+writeable: $!")
 		unless $safe;
 
 	    if (opendir my $d, $root) {
@@ -217,7 +226,7 @@ sub rmtree {
 		closedir $d;
 	    }
 	    else {
-	        carp "Can't read $root: $!";
+	        carp ("Can't read $root: $!");
 		@files = ();
 	    }
 
@@ -237,14 +246,14 @@ sub rmtree {
 		next;
 	    }
 	    chmod $rp | 0700, $root
-	      or carp "Can't make directory $root writeable: $!"
+	      or carp ("Can't make directory $root writeable: $!")
 		if $force_writeable;
 	    print "rmdir $root\n" if $verbose;
 	    if (rmdir $root) {
 		++$count;
 	    }
 	    else {
-		carp "Can't remove directory $root: $!";
+		carp ("Can't remove directory $root: $!");
 		chmod($rp, ($Is_VMS ? VMS::Filespec::fileify($root) : $root))
 		    or carp("and can't restore permissions to "
 		            . sprintf("0%o",$rp) . "\n");
@@ -259,13 +268,13 @@ sub rmtree {
 		next;
 	    }
 	    chmod $rp | 0600, $root
-	      or carp "Can't make file $root writeable: $!"
+	      or carp ("Can't make file $root writeable: $!")
 		if $force_writeable;
 	    print "unlink $root\n" if $verbose;
 	    # delete all versions under VMS
 	    for (;;) {
 		unless (unlink $root) {
-		    carp "Can't unlink file $root: $!";
+		    carp ("Can't unlink file $root: $!");
 		    if ($force_writeable) {
 			chmod $rp, $root
 			    or carp("and can't restore permissions to "

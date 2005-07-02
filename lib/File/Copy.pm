@@ -10,7 +10,6 @@ package File::Copy;
 use 5.006;
 use strict;
 use warnings;
-use Carp;
 use File::Spec;
 use Config;
 our(@ISA, @EXPORT, @EXPORT_OK, $VERSION, $Too_Big, $Syscopy_is_copy);
@@ -24,7 +23,7 @@ sub mv;
 # package has not yet been updated to work with Perl 5.004, and so it
 # would be a Bad Thing for the CPAN module to grab it and replace this
 # module.  Therefore, we set this module's version higher than 2.0.
-$VERSION = '2.08';
+$VERSION = '2.08_01';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -32,6 +31,11 @@ require Exporter;
 @EXPORT_OK = qw(cp mv);
 
 $Too_Big = 1024 * 1024 * 2;
+
+sub croak {
+    require Carp;
+    goto &Carp::croak;
+}
 
 my $macfiles;
 if ($^O eq 'MacOS') {

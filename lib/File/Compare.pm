@@ -6,14 +6,18 @@ use warnings;
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK, $Too_Big);
 
 require Exporter;
-use Carp;
 
-$VERSION = '1.1003';
+$VERSION = '1.1004';
 @ISA = qw(Exporter);
 @EXPORT = qw(compare);
 @EXPORT_OK = qw(cmp compare_text);
 
 $Too_Big = 1024 * 1024 * 2;
+
+sub croak {
+    require Carp;
+    goto &Carp::croak;
+}
 
 sub compare {
     croak("Usage: compare( file1, file2 [, buffersize]) ")

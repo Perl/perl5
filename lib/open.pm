@@ -1,9 +1,8 @@
 package open;
 use warnings;
-use Carp;
 $open::hint_bits = 0x20000; # HINT_LOCALIZE_HH
 
-our $VERSION = '1.04';
+our $VERSION = '1.04_01';
 
 require 5.008001; # for PerlIO::get_layers()
 
@@ -12,6 +11,10 @@ my $locale_encoding;
 sub _get_encname {
     return ($1, Encode::resolve_alias($1)) if $_[0] =~ /^:?encoding\((.+)\)$/;
     return;
+}
+
+sub croak {
+    require Carp; goto &Carp::croak;
 }
 
 sub _drop_oldenc {
@@ -39,13 +42,11 @@ sub _drop_oldenc {
     require Encode;
     my ($loname, $lcname) = _get_encname($old[-2]);
     unless (defined $lcname) { # Should we trust get_layers()?
-	require Carp;
-	Carp::croak("open: Unknown encoding '$loname'");
+	croak("open: Unknown encoding '$loname'");
     }
     my ($voname, $vcname) = _get_encname($new[-1]);
     unless (defined $vcname) {
-	require Carp;
-	Carp::croak("open: Unknown encoding '$voname'");
+	croak("open: Unknown encoding '$voname'");
     }
     if ($lcname eq $vcname) {
 	binmode($h, ":pop"); # utf8 is part of the encoding layer

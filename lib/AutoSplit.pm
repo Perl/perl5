@@ -3,7 +3,6 @@ package AutoSplit;
 use 5.006_001;
 use Exporter ();
 use Config qw(%Config);
-use Carp qw(carp);
 use File::Basename ();
 use File::Path qw(mkpath);
 use File::Spec::Functions qw(curdir catfile catdir);
@@ -11,7 +10,7 @@ use strict;
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK, $Verbose, $Keep, $Maxlen,
     $CheckForAutoloader, $CheckModTime);
 
-$VERSION = "1.04";
+$VERSION = "1.04_01";
 @ISA = qw(Exporter);
 @EXPORT = qw(&autosplit &autosplit_lib_modules);
 @EXPORT_OK = qw($Verbose $Keep $Maxlen $CheckForAutoloader $CheckModTime);
@@ -168,6 +167,10 @@ sub autosplit{
     autosplit_file($file, $autodir, $keep, $ckal, $ckmt);
 }
 
+sub carp{
+    require Carp;
+    goto &Carp::carp;
+}
 
 # This function is used during perl building/installation
 # ./miniperl -e 'use AutoSplit; autosplit_lib_modules(@ARGV)' ...
@@ -405,14 +408,14 @@ EOT
 		print "  deleting $file\n" if ($Verbose>=2);
 		my($deleted,$thistime);  # catch all versions on VMS
 		do { $deleted += ($thistime = unlink $file) } while ($thistime);
-		carp "Unable to delete $file: $!" unless $deleted;
+		carp ("Unable to delete $file: $!") unless $deleted;
 	    }
 	    closedir($outdir);
 	}
     }
 
     open(my $ts,">$al_idx_file") or
-	carp "AutoSplit: unable to create timestamp file ($al_idx_file): $!";
+	carp ("AutoSplit: unable to create timestamp file ($al_idx_file): $!");
     print $ts "# Index created by AutoSplit for $filename\n";
     print $ts "#    (file acts as timestamp)\n";
     $last_package = '';
