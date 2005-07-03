@@ -93,7 +93,7 @@ S_deb_stack_n(pTHX_ SV** stack_base, I32 stack_min, I32 stack_max,
 {
 #ifdef DEBUGGING
     register I32 i = stack_max - 30;
-    I32 *markscan = PL_markstack + mark_min;
+    const I32 *markscan = PL_markstack + mark_min;
     if (i < stack_min)
 	i = stack_min;
     

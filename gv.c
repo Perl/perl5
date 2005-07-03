@@ -1897,7 +1897,7 @@ bool
 Perl_is_gv_magical_sv(pTHX_ SV *name, U32 flags)
 {
     STRLEN len;
-    const char *temp = SvPV_const(name, len);
+    const char * const temp = SvPV_const(name, len);
     return is_gv_magical(temp, len, flags);
 }
 
