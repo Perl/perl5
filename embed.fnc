@@ -939,18 +939,18 @@ Ap	|void	|reginitcolors
 Apd	|char*	|sv_2pv_nolen	|SV* sv
 Apd	|char*	|sv_2pvutf8_nolen|SV* sv
 Apd	|char*	|sv_2pvbyte_nolen|SV* sv
-Amdb	|char*	|sv_pv		|SV *sv
-Amdb	|char*	|sv_pvutf8	|SV *sv
-Amdb	|char*	|sv_pvbyte	|SV *sv
-Amdb	|STRLEN	|sv_utf8_upgrade|SV *sv
-ApdM	|bool	|sv_utf8_downgrade|SV *sv|bool fail_ok
-Apd	|void	|sv_utf8_encode |SV *sv
-ApdM	|bool	|sv_utf8_decode |SV *sv
-Apd	|void	|sv_force_normal|SV *sv
-Apd	|void	|sv_force_normal_flags|SV *sv|U32 flags
+AmdbR	|char*	|sv_pv		|NN SV *sv
+AmdbR	|char*	|sv_pvutf8	|NN SV *sv
+AmdbR	|char*	|sv_pvbyte	|NN SV *sv
+Amdb	|STRLEN	|sv_utf8_upgrade|NN SV *sv
+ApdM	|bool	|sv_utf8_downgrade|NN SV *sv|bool fail_ok
+Apd	|void	|sv_utf8_encode |NN SV *sv
+ApdM	|bool	|sv_utf8_decode |NN SV *sv
+Apd	|void	|sv_force_normal|NN SV *sv
+Apd	|void	|sv_force_normal_flags|NN SV *sv|U32 flags
 Ap	|void	|tmps_grow	|I32 n
-Apd	|SV*	|sv_rvweaken	|SV *sv
-p	|int	|magic_killbackrefs|SV *sv|MAGIC *mg
+Apd	|SV*	|sv_rvweaken	|NN SV *sv
+p	|int	|magic_killbackrefs|NN SV *sv|NN MAGIC *mg
 Ap	|OP*	|newANONATTRSUB	|I32 floor|OP *proto|OP *attrs|OP *block
 Ap	|CV*	|newATTRSUB	|I32 floor|OP *o|OP *proto|OP *attrs|OP *block
 Apr	|void	|newMYSUB	|I32 floor|OP *o|OP *proto|OP *attrs|OP *block
@@ -1016,7 +1016,7 @@ s	|void	|require_errno	|NN GV *gv
 
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
 s	|void	|hsplit		|NN HV *hv
-s	|void	|hfreeentries	|HV *hv
+s	|void	|hfreeentries	|NN HV *hv
 sa	|HE*	|new_he
 s	|void	|del_he		|NN HE *p
 sa	|HEK*	|save_hek_flags	|NN const char *str|I32 len|U32 hash|int flags
@@ -1381,23 +1381,22 @@ Ap	|PerlIO *|PerlIO_stderr
 
 p	|void	|deb_stack_all
 #ifdef PERL_IN_DEB_C
-s	|void	|deb_stack_n	|SV** stack_base|I32 stack_min \
+s	|void	|deb_stack_n	|NN SV** stack_base|I32 stack_min \
 				|I32 stack_max|I32 mark_min|I32 mark_max
 #endif
 
 pda	|PADLIST*|pad_new	|int flags
-pd	|void	|pad_undef	|CV* cv
+pd	|void	|pad_undef	|NN CV* cv
 pd	|PADOFFSET|pad_add_name	|NN char *name\
-				|HV* typestash|HV* ourstash \
-				|bool clone
-pd	|PADOFFSET|pad_add_anon	|SV* sv|OPCODE op_type
+				|NULLOK HV* typestash|NULLOK HV* ourstash|bool clone
+pd	|PADOFFSET|pad_add_anon	|NN SV* sv|OPCODE op_type
 pd	|void	|pad_check_dup	|NN char* name|bool is_our|NN HV* ourstash
 #ifdef DEBUGGING
 pd	|void	|pad_setsv	|PADOFFSET po|NN SV* sv
 #endif
 pd	|void	|pad_block_start|int full
 pd	|void	|pad_tidy	|padtidy_type type
-pd 	|void	|do_dump_pad	|I32 level|NN PerlIO *file|PADLIST *padlist|int full
+pd 	|void	|do_dump_pad	|I32 level|NN PerlIO *file|NULLOK PADLIST *padlist|int full
 pd	|void	|pad_fixup_inner_anons|NN PADLIST *padlist|CV *old_cv|CV *new_cv
 
 pd	|void	|pad_push	|NN PADLIST *padlist|int depth|int has_args
@@ -1410,7 +1409,7 @@ sd	|void	|cv_dump	|NN const CV *cv|NN const char *title
 #  endif
 s	|CV*	|cv_clone2	|CV *proto|CV *outside
 #endif
-pdR	|CV*	|find_runcv	|U32 *db_seqp
+pdR	|CV*	|find_runcv	|NULLOK U32 *db_seqp
 p	|void	|free_tied_hv_pool
 #if defined(DEBUGGING)
 p	|int	|get_debug_opts	|char **s
@@ -1510,7 +1509,7 @@ np	|long	|my_htobel	|long n
 np	|long	|my_betohl	|long n
 #endif
 
-np	|void	|my_swabn	|void* ptr|int n
+np	|void	|my_swabn	|NN void* ptr|int n
 
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 ApR	|OP*	|ck_anoncode	|NN OP *o

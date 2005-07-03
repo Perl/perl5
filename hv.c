@@ -1573,8 +1573,7 @@ S_hfreeentries(pTHX_ HV *hv)
     I32 riter;
     I32 max;
 
-    if (!hv)
-	return;
+
     if (!HvARRAY(hv))
 	return;
 

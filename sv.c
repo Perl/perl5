@@ -3678,7 +3678,7 @@ Perl_sv_utf8_decode(pTHX_ register SV *sv)
 	    return FALSE;
         e = (const U8 *) SvEND(sv);
         while (c < e) {
-	    U8 ch = *c++;
+	    const U8 ch = *c++;
             if (!UTF8_IS_INVARIANT(ch)) {
 		SvUTF8_on(sv);
 		break;
@@ -4361,7 +4361,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 {
     if (SvREADONLY(sv)) {
 	if (SvFAKE(sv)) {
-	    const char *pvx = SvPVX_const(sv);
+	    const char * const pvx = SvPVX_const(sv);
 	    const STRLEN len = SvCUR(sv);
 	    const U32 hash = SvSHARED_HASH(sv);
 	    SvFAKE_off(sv);
@@ -6990,8 +6990,8 @@ Perl_newSVhek(pTHX_ const HEK *hek)
 	       Andreas would like keys he put in as utf8 to come back as utf8
 	    */
 	    STRLEN utf8_len = HEK_LEN(hek);
-	    U8 *as_utf8 = bytes_to_utf8 ((U8*)HEK_KEY(hek), &utf8_len);
-	    SV *sv = newSVpvn ((char*)as_utf8, utf8_len);
+	    const U8 *as_utf8 = bytes_to_utf8 ((U8*)HEK_KEY(hek), &utf8_len);
+	    SV * const sv = newSVpvn ((const char*)as_utf8, utf8_len);
 
 	    SvUTF8_on (sv);
 	    Safefree (as_utf8); /* bytes_to_utf8() allocates a new string */
@@ -7003,7 +7003,7 @@ Perl_newSVhek(pTHX_ const HEK *hek)
 	       that would contain the (wrong) hash value, and might get passed
 	       into an hv routine with a regular hash  */
 
-	    SV *sv = newSVpvn (HEK_KEY(hek), HEK_LEN(hek));
+	    SV * const sv = newSVpvn (HEK_KEY(hek), HEK_LEN(hek));
 	    if (HEK_UTF8(hek))
 		SvUTF8_on (sv);
 	    return sv;
@@ -7627,19 +7627,17 @@ Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
 	STRLEN len;
  
 	if (SvREADONLY(sv) && !(flags & SV_MUTABLE_RETURN)) {
+	    const char * const ref = sv_reftype(sv,0);
 	    if (PL_op)
 		Perl_croak(aTHX_ "Can't coerce readonly %s to string in %s",
-			   sv_reftype(sv,0), OP_NAME(PL_op));
+			   ref, OP_NAME(PL_op));
 	    else
-		Perl_croak(aTHX_ "Can't coerce readonly %s to string",
-			   sv_reftype(sv,0));
+		Perl_croak(aTHX_ "Can't coerce readonly %s to string", ref);
 	}
-	if (SvTYPE(sv) > SVt_PVLV && SvTYPE(sv) != SVt_PVFM) {
+	if (SvTYPE(sv) > SVt_PVLV && SvTYPE(sv) != SVt_PVFM)
 	    Perl_croak(aTHX_ "Can't coerce %s to string in %s", sv_reftype(sv,0),
 		OP_NAME(PL_op));
-	}
-	else
-	    s = sv_2pv_flags(sv, &len, flags);
+	s = sv_2pv_flags(sv, &len, flags);
 	if (lp)
 	    *lp = len;
 
@@ -8118,7 +8116,7 @@ See C<SvROK_off>.
 void
 Perl_sv_unref_flags(pTHX_ SV *sv, U32 flags)
 {
-    SV* rv = SvRV(sv);
+    SV const * rv = SvRV(sv);
 
     if (SvWEAKREF(sv)) {
     	sv_del_backref(sv);
@@ -8177,7 +8175,7 @@ void
 Perl_sv_untaint(pTHX_ SV *sv)
 {
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
-	MAGIC *mg = mg_find(sv, PERL_MAGIC_taint);
+	MAGIC * const mg = mg_find(sv, PERL_MAGIC_taint);
 	if (mg)
 	    mg->mg_len &= ~1;
     }
@@ -8215,7 +8213,7 @@ Perl_sv_setpviv(pTHX_ SV *sv, IV iv)
 {
     char buf[TYPE_CHARS(UV)];
     char *ebuf;
-    char *ptr = uiv_2buf(buf, iv, 0, 0, &ebuf);
+    char * const ptr = uiv_2buf(buf, iv, 0, 0, &ebuf);
 
     sv_setpvn(sv, ptr, ebuf - ptr);
 }
@@ -8233,7 +8231,7 @@ Perl_sv_setpviv_mg(pTHX_ SV *sv, IV iv)
 {
     char buf[TYPE_CHARS(UV)];
     char *ebuf;
-    char *ptr = uiv_2buf(buf, iv, 0, 0, &ebuf);
+    char * const ptr = uiv_2buf(buf, iv, 0, 0, &ebuf);
 
     sv_setpvn(sv, ptr, ebuf - ptr);
     SvSETMAGIC(sv);

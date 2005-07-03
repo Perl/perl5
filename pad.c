@@ -226,7 +226,7 @@ void
 Perl_pad_undef(pTHX_ CV* cv)
 {
     I32 ix;
-    const PADLIST *padlist = CvPADLIST(cv);
+    const PADLIST * const padlist = CvPADLIST(cv);
 
     if (!padlist)
 	return;
@@ -457,9 +457,7 @@ PADOFFSET
 Perl_pad_add_anon(pTHX_ SV* sv, OPCODE op_type)
 {
     PADOFFSET ix;
-    SV* name;
-
-    name = NEWSV(1106, 0);
+    SV* const name = NEWSV(1106, 0);
     sv_upgrade(name, SVt_PVNV);
     sv_setpvn(name, "&", 1);
     SvIV_set(name, -1);

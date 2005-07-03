@@ -3648,10 +3648,10 @@ Perl_yylex(pTHX)
 	    s = skipspace(s);
 
 	if ((PL_expect != XREF || PL_oldoldbufptr == PL_last_lop) && intuit_more(s)) {
-	    char *t;
 	    if (*s == '[') {
 		PL_tokenbuf[0] = '@';
 		if (ckWARN(WARN_SYNTAX)) {
+		    char *t;
 		    for(t = s + 1;
 			isSPACE(*t) || isALNUM_lazy_if(t,UTF) || *t == '$';
 			t++) ;
@@ -3666,6 +3666,7 @@ Perl_yylex(pTHX)
 		}
 	    }
 	    else if (*s == '{') {
+		char *t;
 		PL_tokenbuf[0] = '%';
 		if (ckWARN(WARN_SYNTAX) && strEQ(PL_tokenbuf+1, "SIG") &&
 		    (t = strchr(s, '}')) && (t = strchr(t, '=')))
@@ -5482,7 +5483,8 @@ S_pending_ident(pTHX)
             /* might be an "our" variable" */
             if (PAD_COMPNAME_FLAGS(tmp) & SVpad_OUR) {
                 /* build ops for a bareword */
-                SV *sym = newSVpv(HvNAME_get(PAD_COMPNAME_OURSTASH(tmp)), 0);
+                SV * const sym
+		  = newSVpv(HvNAME_get(PAD_COMPNAME_OURSTASH(tmp)), 0);
                 sv_catpvn(sym, "::", 2);
                 sv_catpv(sym, PL_tokenbuf+1);
                 yylval.opval = (OP*)newSVOP(OP_CONST, 0, sym);
