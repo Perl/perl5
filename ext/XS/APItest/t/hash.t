@@ -82,6 +82,13 @@ main_tests (\@keys, \@testkeys, ' [utf8 hash]');
     # I can't work out how to get to the code that flips the wasutf8 flag on
     # the hash key without some ikcy XS
 }
+
+{
+    is_deeply([&XS::APItest::Hash::test_hv_free_ent], [2,2,1,1],
+	      "hv_free_ent frees the value immediately");
+    is_deeply([&XS::APItest::Hash::test_hv_delayfree_ent], [2,2,2,1],
+	      "hv_delayfree_ent keeps the value around until FREETMPS");
+}
 exit;
 
 ################################   The End   ################################
