@@ -36,7 +36,7 @@ sub skip {
     return 1;
 }
 
-print "1..57\n";
+print "1..58\n";
 
 $Is_MSWin32  = $^O eq 'MSWin32';
 $Is_NetWare  = $^O eq 'NetWare';
@@ -267,6 +267,14 @@ EOF
 ok $] >= 5.00319, $];
 ok $^O;
 ok $^T > 850000000, $^T;
+
+# Test change 25062 is working
+my $orig_osname = $^O;
+{
+local $^I = '.bak';
+ok($^O eq $orig_osname, 'Assigning $^I does not clobber $^O');
+}
+$^O = $orig_osname;
 
 if ($Is_VMS || $Is_Dos || $Is_MacOS) {
     skip("%ENV manipulations fail or aren't safe on $^O") for 1..4;
