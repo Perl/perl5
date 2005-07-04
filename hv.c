@@ -33,7 +33,7 @@ holds the key and hash value.
 
 #define HV_MAX_LENGTH_BEFORE_SPLIT 14
 
-static const char *const S_strtab_error
+static const char S_strtab_error[]
     = "Cannot modify shared string table in hv_%s";
 
 STATIC void
