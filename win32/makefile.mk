@@ -1343,7 +1343,7 @@ distclean: realclean
 	-del /f bin\*.bat
 	-del /f perllibst.h
 	-del /f $(PERLEXE_ICO) perl.base
-	-cd .. && del /s *$(a) *.map *.pdb *.ilk *.bs *$(o) .exists pm_to_blib
+	-cd .. && del /s *$(a) *.map *.pdb *.ilk *.tds *.bs *$(o) .exists pm_to_blib
 	-cd $(EXTDIR) && del /s *.def Makefile Makefile.old
 	-if exist $(AUTODIR) rmdir /s /q $(AUTODIR)
 	-if exist $(AUTODIR) rmdir /s $(AUTODIR)
@@ -1440,6 +1440,7 @@ _clean :
 	-@erase ..\x2p\*.exe ..\x2p\*.bat
 	-@erase *.ilk
 	-@erase *.pdb
+	-@erase *.tds
 	-@erase Extensions_static
 
 clean : Extensions_clean _clean
