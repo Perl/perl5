@@ -2217,6 +2217,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     case '\011':	/* ^I */ /* NOT \t in EBCDIC */
 	Safefree(PL_inplace);
 	PL_inplace = SvOK(sv) ? savesvpv(sv) : Nullch;
+	break;
     case '\017':	/* ^O */
 	if (*(mg->mg_ptr+1) == '\0') {
 	    Safefree(PL_osname);
