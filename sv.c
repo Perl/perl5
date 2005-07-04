@@ -1123,6 +1123,17 @@ S_new_body(pTHX_ void **arena_root, void **root, size_t size)
     return xpv;
 }
 
+/* and an inline version  */
+
+#define new_body_inline(xpv, arena_root, root, size) \
+    STMT_START { \
+	LOCK_SV_MUTEX; \
+	xpv = *((void **)(root)) \
+	  ? *((void **)(root)) : S_more_bodies(aTHX_ arena_root, root, size); \
+	*(root) = *(void**)(xpv); \
+	UNLOCK_SV_MUTEX; \
+    } STMT_END
+
 /* return a thing to the free list */
 
 #define del_body(thing, root)			\
@@ -1144,7 +1155,7 @@ S_new_body(pTHX_ void **arena_root, void **root, size_t size)
 	      (void**)&(my_perl->Ixpvbm_root), sizeof(XPVBM), 0)
 */
 
-#define new_body(TYPE,lctype)						\
+#define new_body_type(TYPE,lctype)					\
     S_new_body(aTHX_ (void**)&PL_ ## lctype ## _arenaroot,		\
 		 (void**)&PL_ ## lctype ## _root,			\
 		 sizeof(TYPE))
@@ -1225,7 +1236,7 @@ S_new_body(pTHX_ void **arena_root, void **root, size_t size)
 
 #else /* !PURIFY */
 
-#define new_XNV()	new_body(NV, xnv)
+#define new_XNV()	new_body_type(NV, xnv)
 #define del_XNV(p)	del_body_type(p, NV, xnv)
 
 #define new_XPV()	new_body_allocated(XPV, xpv, xpv_cur)
@@ -1234,10 +1245,10 @@ S_new_body(pTHX_ void **arena_root, void **root, size_t size)
 #define new_XPVIV()	new_body_allocated(XPVIV, xpviv, xpv_cur)
 #define del_XPVIV(p)	del_body_allocated(p, XPVIV, xpviv, xpv_cur)
 
-#define new_XPVNV()	new_body(XPVNV, xpvnv)
+#define new_XPVNV()	new_body_type(XPVNV, xpvnv)
 #define del_XPVNV(p)	del_body_type(p, XPVNV, xpvnv)
 
-#define new_XPVCV()	new_body(XPVCV, xpvcv)
+#define new_XPVCV()	new_body_type(XPVCV, xpvcv)
 #define del_XPVCV(p)	del_body_type(p, XPVCV, xpvcv)
 
 #define new_XPVAV()	new_body_allocated(XPVAV, xpvav, xav_fill)
@@ -1246,16 +1257,16 @@ S_new_body(pTHX_ void **arena_root, void **root, size_t size)
 #define new_XPVHV()	new_body_allocated(XPVHV, xpvhv, xhv_fill)
 #define del_XPVHV(p)	del_body_allocated(p, XPVHV, xpvhv, xhv_fill)
 
-#define new_XPVMG()	new_body(XPVMG, xpvmg)
+#define new_XPVMG()	new_body_type(XPVMG, xpvmg)
 #define del_XPVMG(p)	del_body_type(p, XPVMG, xpvmg)
 
-#define new_XPVGV()	new_body(XPVGV, xpvgv)
+#define new_XPVGV()	new_body_type(XPVGV, xpvgv)
 #define del_XPVGV(p)	del_body_type(p, XPVGV, xpvgv)
 
-#define new_XPVLV()	new_body(XPVLV, xpvlv)
+#define new_XPVLV()	new_body_type(XPVLV, xpvlv)
 #define del_XPVLV(p)	del_body_type(p, XPVLV, xpvlv)
 
-#define new_XPVBM()	new_body(XPVBM, xpvbm)
+#define new_XPVBM()	new_body_type(XPVBM, xpvbm)
 #define del_XPVBM(p)	del_body_type(p, XPVBM, xpvbm)
 
 #endif /* PURIFY */
@@ -1545,8 +1556,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	assert(new_body_length);
 #ifndef PURIFY
 	/* This points to the start of the allocated area.  */
-	new_body = S_new_body(aTHX_ new_body_arenaroot, new_body_arena,
-			      new_body_length);
+	new_body_inline(new_body, new_body_arenaroot, new_body_arena,
+			new_body_length);
 #else
 	/* We always allocated the full length item with PURIFY */
 	new_body_length += new_body_offset;
@@ -10102,7 +10113,6 @@ Perl_ptr_table_new(pTHX)
 #  define PTR_TABLE_HASH(ptr) (PTR2UV(ptr) >> 2)
 #endif
 
-#define new_pte()	new_body(struct ptr_tbl_ent, pte)
 #define del_pte(p)	del_body_type(p, struct ptr_tbl_ent, pte)
 
 /* map an existing pointer using a table */
@@ -10141,7 +10151,8 @@ Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, const void *oldv, void *newv)
 	    return;
 	}
     }
-    tblent = new_pte();
+    new_body_inline(tblent, (void**)&PL_pte_arenaroot, (void**)&PL_pte_root,
+		    sizeof(struct ptr_tbl_ent));
     tblent->oldval = oldv;
     tblent->newval = newv;
     tblent->next = *otblent;
@@ -10446,10 +10457,9 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	    new_body:
 		assert(new_body_length);
 #ifndef PURIFY
-		new_body = (void*)((char*)S_new_body(aTHX_ new_body_arenaroot,
-						     new_body_arena,
-						     new_body_length)
-				   - new_body_offset);
+		new_body_inline(new_body, new_body_arenaroot, new_body_arena,
+				new_body_length);
+		new_body = (void*)((char*)new_body - new_body_offset);
 #else
 		/* We always allocated the full length item with PURIFY */
 		new_body_length += new_body_offset;
