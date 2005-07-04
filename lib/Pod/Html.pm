@@ -1883,7 +1883,7 @@ sub coderef($$){
     my( $url );
 
     my $fid = fragment_id( $item );
-    if( defined( $page ) ){
+    if( defined( $page ) && $page ne "" ){
 	# we have been given a $page...
 	$page =~ s{::}{/}g;
 

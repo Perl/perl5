@@ -1864,6 +1864,8 @@ lib/Pod/Text/Termcap.pm		Convert POD data to ASCII text with format escapes
 lib/Pod/t/Functions.t		See if Pod::Functions works
 lib/Pod/t/htmlescp.pod		pod2html escape test input data
 lib/Pod/t/htmlescp.t		pod2html escape test
+lib/Pod/t/htmllink.pod		pod2html link test input data
+lib/Pod/t/htmllink.t		pod2html link test
 lib/Pod/t/htmlview.pod		pod2html render test input data
 lib/Pod/t/htmlview.t		pod2html render test
 lib/Pod/t/InputObjects.t	See if Pod::InputObjects works
