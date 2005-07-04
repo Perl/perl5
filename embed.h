@@ -748,7 +748,9 @@
 #endif
 #ifdef PERL_CORE
 #define setdefout		Perl_setdefout
+#endif
 #define share_hek		Perl_share_hek
+#ifdef PERL_CORE
 #define sighandler		Perl_sighandler
 #endif
 #define csighandler		Perl_csighandler
@@ -2731,7 +2733,9 @@
 #endif
 #ifdef PERL_CORE
 #define setdefout(a)		Perl_setdefout(aTHX_ a)
+#endif
 #define share_hek(a,b,c)	Perl_share_hek(aTHX_ a,b,c)
+#ifdef PERL_CORE
 #define sighandler		Perl_sighandler
 #endif
 #define csighandler		Perl_csighandler

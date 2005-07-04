@@ -705,7 +705,7 @@ Ap	|char*	|screaminstr	|SV* bigsv|SV* littlesv|I32 start_shift \
 p	|I32	|setenv_getix	|const char* nam
 #endif
 p	|void	|setdefout	|GV* gv
-p	|HEK*	|share_hek	|const char* sv|I32 len|U32 hash
+Ap	|HEK*	|share_hek	|const char* sv|I32 len|U32 hash
 np	|Signal_t |sighandler	|int sig
 Anp	|Signal_t |csighandler	|int sig
 Ap	|SV**	|stack_grow	|NN SV** sp|NN SV**p|int n
