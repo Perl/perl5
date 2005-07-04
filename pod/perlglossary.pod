@@ -9,7 +9,7 @@ Other useful sources include the Free On-Line Dictionary of Computing
 L<http://foldoc.doc.ic.ac.uk/foldoc/index.html>, the Jargon File
 L<http://catb.org/~esr/jargon/>, and Wikipedia L<http://www.wikipedia.org/>.
 
-=head1 Terms
+=head2 A
 
 =over 4
 
@@ -226,6 +226,8 @@ some of its high-level ideas.
 
 =back
 
+=head2 B
+
 =over 4
 
 =item backreference
@@ -408,6 +410,8 @@ characterized by representing everything as a
 non-architecture-dependent sequence of bytes.
 
 =back
+
+=head2 C
 
 =over 4
 
@@ -704,6 +708,8 @@ type is a subclass of C<SV>.
 
 =back
 
+=head2 D
+
 =over 4
 
 =item dangling statement
@@ -881,6 +887,8 @@ how a subroutine that is in the middle of calling another subroutine
 
 =back
 
+=head2 E
+
 =over 4
 
 =item eclectic
@@ -1006,6 +1014,8 @@ generally, any experimental option that can be compiled into Perl,
 such as multithreading.
 
 =back
+
+=head2 F
 
 =over 4
 
@@ -1199,6 +1209,8 @@ circular references and such.)
 
 =back
 
+=head2 G
+
 =over 4
 
 =item GID
@@ -1264,6 +1276,8 @@ An internal "glob value" typedef, holding a C<typeglob>.  The C<GV>
 type is a subclass of C<SV>.
 
 =back
+
+=head2 H
 
 =over 4
 
@@ -1353,6 +1367,8 @@ Short for a "hash value" typedef, which holds Perl's internal
 representation of a hash.  The C<HV> type is a subclass of C<SV>.
 
 =back
+
+=head2 I
 
 =over 4
 
@@ -1543,6 +1559,8 @@ hold, not to be confused with an C<NV>.
 
 =back
 
+=head2 J
+
 =over 4
 
 =item JAPH
@@ -1553,6 +1571,8 @@ particular Perl feature, and something of an ungoing Obfuscated Perl
 Contest seen in Usenix signatures.
 
 =back
+
+=head2 K
 
 =over 4
 
@@ -1566,6 +1586,8 @@ associated with that key.
 See C<reserved words>.
 
 =back
+
+=head2 L
 
 =over 4
 
@@ -1773,6 +1795,8 @@ L<local|perlfunc/local>.
 
 =back
 
+=head2 M
+
 =over 4
 
 =item magic
@@ -1912,6 +1936,8 @@ classes|/base class>.
 
 =back
 
+=head2 N
+
 =over 4
 
 =item named pipe
@@ -1976,6 +2002,8 @@ Half a C<byte>, equivalent to one C<hexadecimal> digit, and worth
 four C<bit>s.
 
 =back
+
+=head2 O
 
 =over 4
 
@@ -2076,6 +2104,8 @@ exercise joint ownership if the real owner permits it.  See
 C<permission bits>.
 
 =back
+
+=head2 P
 
 =over 4
 
@@ -2334,6 +2364,8 @@ A "pointer value", which is Perl Internals Talk for a C<char*>.
 
 =back
 
+=head2 Q
+
 =over 4
 
 =item qualified
@@ -2348,6 +2380,8 @@ A component of a C<regular expression> specifying how many times the
 foregoing C<atom> may occur.
 
 =back
+
+=head2 R
 
 =over 4
 
@@ -2495,6 +2529,8 @@ A C<value> that you might find on the right side of an
 C<assignment>.  See also C<lvalue>.
 
 =back
+
+=head2 S
 
 =over 4
 
@@ -2979,6 +3015,8 @@ you would call with Perl's L<system|perlfunc/system> function.
 
 =back
 
+=head2 T
+
 =over 4
 
 =item tainted
@@ -3126,6 +3164,8 @@ within an C<extension> module written in C<XS>.
 
 =back
 
+=head2 U
+
 =over 4
 
 =item UDP
@@ -3177,6 +3217,8 @@ that wasn't doing much of anything else at the time.
 
 =back
 
+=head2 V
+
 =over 4
 
 =item value
@@ -3226,6 +3268,8 @@ specified ordinal value.  (The C<v> is optional when there are at
 least three integers.)
 
 =back
+
+=head2 W
 
 =over 4
 
@@ -3279,6 +3323,8 @@ in the three-argument form of L<open|perlfunc/open>.
 
 =back
 
+=head2 X
+
 =over 4
 
 =item XS
@@ -3295,6 +3341,8 @@ An external C<subroutine> defined in C<XS>.
 
 =back
 
+=head2 Y
+
 =over 4
 
 =item yacc
@@ -3304,6 +3352,8 @@ probably would not have existed.  See the file I<perly.y> in the Perl
 source distribution.
 
 =back
+
+=head2 Z
 
 =over 4
 
