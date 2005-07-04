@@ -42,6 +42,7 @@ my %map = (
 
 safer_unlink 'reentr.h';
 die "reentr.h: $!" unless open(H, ">reentr.h");
+binmode H;
 select H;
 print <<EOF;
 /* -*- buffer-read-only: t -*-
@@ -183,6 +184,7 @@ while (<DATA>) { # Read in the protypes.
 
     # If given the -U option open up the metaconfig unit for this function.
     if ($opts{U} && open(U, ">d_${func}_r.U"))  {
+    	binmode U;
 	select U;
     }
 
@@ -767,6 +769,7 @@ close(H);
 
 safer_unlink 'reentr.c';
 die "reentr.c: $!" unless open(C, ">reentr.c");
+binmode C;
 select C;
 print <<EOF;
 /* -*- buffer-read-only: t -*-
