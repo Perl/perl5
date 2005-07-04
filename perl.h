@@ -4050,8 +4050,10 @@ START_EXTERN_C
 
 #ifdef DOINIT
 #  define MGVTBL_SET(var,a,b,c,d,e,f,g) EXTCONST MGVTBL var = {a,b,c,d,e,f,g}
+#  define MGVTBL_SET_CONST_MAGIC_GET(var,a,b,c,d,e,f,g) EXTCONST MGVTBL var = {(int (*)(pTHX_ SV *, MAGIC *))a,b,c,d,e,f,g} /* Like MGVTBL_SET but with the get magic having a const MG* */
 #else
 #  define MGVTBL_SET(var,a,b,c,d,e,f,g) EXTCONST MGVTBL var
+#  define MGVTBL_SET_CONST_MAGIC_GET(var,a,b,c,d,e,f,g) EXTCONST MGVTBL var
 #endif
 
 MGVTBL_SET(
@@ -4172,7 +4174,7 @@ MGVTBL_SET(
     NULL
 );
 
-MGVTBL_SET(
+MGVTBL_SET_CONST_MAGIC_GET(
     PL_vtbl_arylen,
     MEMBER_TO_FPTR(Perl_magic_getarylen),
     MEMBER_TO_FPTR(Perl_magic_setarylen),
