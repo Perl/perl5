@@ -1508,18 +1508,12 @@ Perl_hv_delayfree_ent(pTHX_ HV *hv, register HE *entry)
 {
     if (!entry)
 	return;
-    if (isGV(HeVAL(entry)) && GvCVu(HeVAL(entry)) && HvNAME_get(hv))
-	PL_sub_generation++;	/* may be deletion of method from stash */
-    sv_2mortal(HeVAL(entry));	/* free between statements */
+    /* SvREFCNT_inc to counter the SvREFCNT_dec in hv_free_ent  */
+    sv_2mortal(SvREFCNT_inc(HeVAL(entry)));	/* free between statements */
     if (HeKLEN(entry) == HEf_SVKEY) {
-	sv_2mortal(HeKEY_sv(entry));
-	Safefree(HeKEY_hek(entry));
+	sv_2mortal(SvREFCNT_inc(HeKEY_sv(entry)));
     }
-    else if (HvSHAREKEYS(hv))
-	unshare_hek(HeKEY_hek(entry));
-    else
-	Safefree(HeKEY_hek(entry));
-    del_HE(entry);
+    hv_free_ent(hv, entry);
 }
 
 /*
