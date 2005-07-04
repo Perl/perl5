@@ -161,13 +161,13 @@ fetch(hash, key_sv)
         OUTPUT:
         RETVAL
 
-void *
+void
 test_hv_free_ent()
 	PPCODE:
 	test_freeent(&Perl_hv_free_ent);
 	XSRETURN(4);
 
-void *
+void
 test_hv_delayfree_ent()
 	PPCODE:
 	test_freeent(&Perl_hv_delayfree_ent);
