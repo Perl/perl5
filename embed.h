@@ -1037,7 +1037,6 @@
 #define hsplit			S_hsplit
 #define hfreeentries		S_hfreeentries
 #define new_he			S_new_he
-#define del_he			S_del_he
 #define save_hek_flags		S_save_hek_flags
 #define hv_magic_check		S_hv_magic_check
 #define unshare_hek_or_pvn	S_unshare_hek_or_pvn
@@ -3014,7 +3013,6 @@
 #define hsplit(a)		S_hsplit(aTHX_ a)
 #define hfreeentries(a)		S_hfreeentries(aTHX_ a)
 #define new_he()		S_new_he(aTHX)
-#define del_he(a)		S_del_he(aTHX_ a)
 #define save_hek_flags(a,b,c,d)	S_save_hek_flags(aTHX_ a,b,c,d)
 #define hv_magic_check(a,b,c)	S_hv_magic_check(aTHX_ a,b,c)
 #define unshare_hek_or_pvn(a,b,c,d)	S_unshare_hek_or_pvn(aTHX_ a,b,c,d)

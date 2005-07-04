@@ -54,6 +54,13 @@ S_more_he(pTHX)
     HeNEXT(he) = 0;
 }
 
+#ifdef PURIFY
+
+#define new_HE() (HE*)safemalloc(sizeof(HE))
+#define del_HE(p) safefree((char*)p)
+
+#else
+
 STATIC HE*
 S_new_he(pTHX)
 {
@@ -67,24 +74,16 @@ S_new_he(pTHX)
     return he;
 }
 
-STATIC void
-S_del_he(pTHX_ HE *p)
-{
-    LOCK_SV_MUTEX;
-    HeNEXT(p) = (HE*)PL_he_root;
-    PL_he_root = p;
-    UNLOCK_SV_MUTEX;
-}
-
-#ifdef PURIFY
-
-#define new_HE() (HE*)safemalloc(sizeof(HE))
-#define del_HE(p) safefree((char*)p)
-
-#else
-
 #define new_HE() new_he()
-#define del_HE(p) del_he(p)
+#define del_HE(p) \
+    STMT_START { \
+	LOCK_SV_MUTEX; \
+	HeNEXT(p) = (HE*)PL_he_root; \
+	PL_he_root = p; \
+	UNLOCK_SV_MUTEX; \
+    } STMT_END
+
+
 
 #endif
 

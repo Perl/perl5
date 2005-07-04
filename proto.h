@@ -1988,9 +1988,6 @@ STATIC HE*	S_new_he(pTHX)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
-STATIC void	S_del_he(pTHX_ HE *p)
-			__attribute__nonnull__(pTHX_1);
-
 STATIC HEK*	S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
 			__attribute__malloc__
 			__attribute__warn_unused_result__
