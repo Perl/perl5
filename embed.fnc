@@ -1524,8 +1524,8 @@ p	|void	|dump_sv_child	|SV *sv
 #ifdef PERL_DONT_CREATE_GVSV
 Ap	|GV*	|gv_SVadd	|NN GV* gv
 #endif
-po	|bool	|ckwarn		|U32 w
-po	|bool	|ckwarn_d	|U32 w
+Apo	|bool	|ckwarn		|U32 w
+Apo	|bool	|ckwarn_d	|U32 w
 
 p	|void	|offer_nice_chunk	|NN void *chunk|U32 chunk_size
 
