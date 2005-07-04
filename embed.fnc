@@ -997,7 +997,7 @@ s	|void	|require_errno	|NN GV *gv
 
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
 s	|void	|hsplit		|NN HV *hv
-s	|void	|hfreeentries	|HV *hv
+s	|void	|hfreeentries	|NN HV *hv
 sa	|HE*	|new_he
 sa	|HEK*	|save_hek_flags	|NN const char *str|I32 len|U32 hash|int flags
 s	|void	|hv_magic_check	|NN HV *hv|NN bool *needs_copy|NN bool *needs_store

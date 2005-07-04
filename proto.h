@@ -2009,7 +2009,9 @@ STATIC void	S_require_errno(pTHX_ GV *gv)
 STATIC void	S_hsplit(pTHX_ HV *hv)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC void	S_hfreeentries(pTHX_ HV *hv);
+STATIC void	S_hfreeentries(pTHX_ HV *hv)
+			__attribute__nonnull__(pTHX_1);
+
 STATIC HE*	S_new_he(pTHX)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
