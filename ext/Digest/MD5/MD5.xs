@@ -590,7 +590,6 @@ clone(self)
 	char *myname = sv_reftype(SvRV(self),TRUE);
 	MD5_CTX* context;
     PPCODE:
-	STRLEN my_na;
 	New(55, context, 1, MD5_CTX);
 	ST(0) = sv_newmortal();
 	sv_setref_pv(ST(0), myname , (void*)context);
