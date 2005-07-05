@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 238;
+plan tests => 243;
 
 
 $| = 1;
@@ -1106,3 +1106,25 @@ TERNARY_CONDITIONALS: {
         test not any_tainted @bar;
     }
 }
+
+# at scope exit, a restored localised value should have its old
+# taint status, not the taint status of the current statement
+
+{
+    our $x99 = $^X;
+    test tainted $x99;
+
+    $x99 = '';
+    test not tainted $x99;
+
+    my $c = do { local $x99; $^X };
+    test not tainted $x99;
+}
+{
+    our $x99 = $^X;
+    test tainted $x99;
+
+    my $c = do { local $x99; '' };
+    test tainted $x99;
+}
+
