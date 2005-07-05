@@ -718,7 +718,7 @@ EOF
 		    my $rv = $v ? ", $v" : "";
 		    if ($r eq 'I') {
 			push @wrap, <<EOF;
-#       define $func($v) ($memzero(PL_reentrant_retint = $call)$test ? $true : (((PL_reentrant_retint == ERANGE) || (errno == ERANGE)) ? ($seent{$func} *) Perl_reentrant_retry("$func"$rv) : 0))
+#       define $func($v) ($memzero(PL_reentrant_retint = $call)$test ? $true : ((PL_reentrant_retint == ERANGE) ? ($seent{$func} *) Perl_reentrant_retry("$func"$rv) : 0))
 EOF
 		    } else {
 			push @wrap, <<EOF;
