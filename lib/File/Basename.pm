@@ -22,6 +22,13 @@ B<NOTE>: C<dirname()> and C<basename()> emulate the behaviours, and quirks, of
 the shell and C functions of the same name.  See each function's documention
 for details.
 
+It is guaranteed that
+
+    # Where $path_separator is / for Unix, \ for Windows, etc...
+    dirname($path) . $path_separator . basename($path);
+
+is equivalent to the original path for all systems but VMS.
+
 =cut
 
 
@@ -172,21 +179,32 @@ sub fileparse {
     my $filename = basename($path);
     my $filename = basename($path, @suffixes);
 
-C<basename()> works just like C<fileparse()> in scalar context - you only get
-the $filename - except that it always quotes metacharacters in the @suffixes.
+This function is provided for compatibility with the Unix shell command 
+C<basename(1)>.  It does B<NOT> always return the file name portion of a
+path as you might expect.  To be safe, if you want the file name portion of
+a path use C<fileparse()>.
+
+C<basename()> returns the last level of a filepath even if the last
+level is clearly directory.  In effect, it is acting like C<pop()> for
+paths.  This differs from C<fileparse()>'s behaviour.
+
+    # Both return "bar"
+    basename("/foo/bar");
+    basename("/foo/bar/");
+
+@suffixes work as in C<fileparse()> except all regex metacharacters are
+quoted.
 
     # These two function calls are equivalent.
     my $filename = basename("/foo/bar/baz.txt",  ".txt");
     my $filename = fileparse("/foo/bar/baz.txt", qr/\Q.txt\E/);
-
-This function is provided for compatibility with the Unix shell command 
-C<basename(1)>.
 
 =cut
 
 
 sub basename {
   my($name) = shift;
+  _strip_trailing_sep($name);
   (fileparse($name, map("\Q$_\E",@_)))[0];
 }
 
@@ -251,16 +269,16 @@ sub dirname {
     }
     elsif ($type eq 'MacOS') {
 	if( !length($basename) && $dirname !~ /^[^:]+:\z/) {
-	    $dirname =~ s/([^:]):\z/$1/s;
+            _strip_trailing_sep($dirname);
 	    ($basename,$dirname) = fileparse $dirname;
 	}
 	$dirname .= ":" unless $dirname =~ /:\z/;
     }
     elsif (grep { $type eq $_ } qw(MSDOS DOS MSWin32 OS2)) { 
-        $dirname =~ s/([^:])[\\\/]*\z/$1/;
+        _strip_trailing_sep($dirname);
         unless( length($basename) ) {
 	    ($basename,$dirname) = fileparse $dirname;
-	    $dirname =~ s/([^:])[\\\/]*\z/$1/;
+	    _strip_trailing_sep($dirname);
 	}
     }
     elsif ($type eq 'AmigaOS') {
@@ -269,14 +287,30 @@ sub dirname {
         $dirname =~ s#[^:/]+\z## unless length($basename);
     }
     else {
-        $dirname =~ s{(.)/*\z}{$1}s;
+        _strip_trailing_sep($dirname);
         unless( length($basename) ) {
 	    ($basename,$dirname) = fileparse $dirname;
-	    $dirname =~ s{(.)/*\z}{$1}s;
+	    _strip_trailing_sep($dirname);
 	}
     }
 
     $dirname;
+}
+
+
+# Strip the trailing path separator.
+sub _strip_trailing_sep  {
+    my $type = $Fileparse_fstype;
+
+    if ($type eq 'MacOS') {
+        $_[0] =~ s/([^:]):\z/$1/s;
+    }
+    elsif (grep { $type eq $_ } qw(MSDOS DOS MSWin32 OS2)) { 
+        $_[0] =~ s/([^:])[\\\/]*\z/$1/;
+    }
+    else {
+        $_[0] =~ s{(.)/*\z}{$1}s;
+    }
 }
 
 

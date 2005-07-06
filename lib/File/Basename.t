@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-use Test::More tests => 53;
+use Test::More tests => 57;
 
 BEGIN { use_ok 'File::Basename' }
 
@@ -118,6 +118,16 @@ can_ok( __PACKAGE__, qw( basename fileparse dirname fileparse_set_fstype ) );
     is(dirname('/perl/'), '/');
     # perl5.003_18 gives '/perl/lib'
     is(dirname('/perl/lib//'), '/perl');
+}
+
+### rt.perl.org 22236
+{
+    is(basename('a/'), 'a');
+    is(basename('/usr/lib//'), 'lib');
+
+    fileparse_set_fstype 'MSWin32';
+    is(basename('a\\'), 'a');
+    is(basename('\\usr\\lib\\\\'), 'lib');
 }
 
 
