@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-use Test::More 'no_plan';
+use Test::More tests => 53;
 
 BEGIN { use_ok 'File::Basename' }
 
@@ -15,6 +15,7 @@ can_ok( __PACKAGE__, qw( basename fileparse dirname fileparse_set_fstype ) );
 ### Testing Unix
 {
     ok length fileparse_set_fstype('unix'), 'set fstype to unix';
+    is( fileparse_set_fstype(), 'Unix',     'get fstype' );
 
     my($base,$path,$type) = fileparse('/virgil/aeneid/draft.book7',
                                       qr'\.book\d+');
@@ -31,7 +32,7 @@ can_ok( __PACKAGE__, qw( basename fileparse dirname fileparse_set_fstype ) );
 
 ### Testing VMS
 {
-    is(fileparse_set_fstype('VMS'), 'unix', 'set fstype to VMS');
+    is(fileparse_set_fstype('VMS'), 'Unix', 'set fstype to VMS');
 
     my($base,$path,$type) = fileparse('virgil:[aeneid]draft.book7',
                                       qr{\.book\d+});
@@ -52,9 +53,9 @@ can_ok( __PACKAGE__, qw( basename fileparse dirname fileparse_set_fstype ) );
 }
 
 
-### Testing MSDOS
+### Testing DOS
 {
-    is(fileparse_set_fstype('MSDOS'), 'VMS', 'set fstype to MSDOS');
+    is(fileparse_set_fstype('DOS'), 'VMS', 'set fstype to DOS');
 
     my($base,$path,$type) = fileparse('C:\\virgil\\aeneid\\draft.book7',
                                       '\.book\d+');
@@ -67,8 +68,13 @@ can_ok( __PACKAGE__, qw( basename fileparse dirname fileparse_set_fstype ) );
     is(dirname('A:\\'), 'A:\\');
     is(dirname('arma\\'), '.');
 
-    # Yes "/" is a legal path separator under MSDOS
+    # Yes "/" is a legal path separator under DOS
     is(basename("lib/File/Basename.pm"), "Basename.pm");
+
+    # $^O for DOS is "dos" not "MSDOS" but "MSDOS" is left in for
+    # backward bug compat.
+    is(fileparse_set_fstype('MSDOS'), 'DOS');
+    is( dirname("\\foo\\bar\\baz"), "\\foo\\bar" );
 }
 
 
@@ -101,7 +107,7 @@ can_ok( __PACKAGE__, qw( basename fileparse dirname fileparse_set_fstype ) );
 
 ### extra tests for a few specific bugs
 {
-    fileparse_set_fstype 'MSDOS';
+    fileparse_set_fstype 'DOS';
     # perl5.003_18 gives C:/perl/.\
     is((fileparse 'C:/perl/lib')[1], 'C:/perl/');
     # perl5.003_18 gives C:\perl\

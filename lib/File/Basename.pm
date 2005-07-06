@@ -80,10 +80,9 @@ portion is removed and becomes the $suffix.
      # On Unix returns ("baz", "/foo/bar", ".txt")
      fileparse("/foo/bar/baz", qr/\.[^.]*/);
 
-If type is one of "VMS", "MSDOS", "MacOS", "AmigaOS", "OS2", "MSWin32"
-or "RISCOS" (see C<fileparse_set_fstype()>) then the pattern matching
-for suffix removal is performed case-insensitively, since those
-systems are not case-sensitive when opening existing files.
+If type is non-Unix (see C<fileparse_set_fstype()>) then the pattern
+matching for suffix removal is performed case-insensitively, since
+those systems are not case-sensitive when opening existing files.
 
 You are guaranteed that C<$directories . $filename . $suffix> will
 denote the same location as the original $path.
@@ -93,41 +92,49 @@ denote the same location as the original $path.
 
 sub fileparse {
   my($fullname,@suffices) = @_;
+
   unless (defined $fullname) {
       require Carp;
       Carp::croak("fileparse(): need a valid pathname");
   }
-  my($fstype,$igncase) = ($Fileparse_fstype, $Fileparse_igncase);
-  my($dirpath,$tail,$suffix,$basename);
+
+  my $orig_type = '';
+  my($type,$igncase) = ($Fileparse_fstype, $Fileparse_igncase);
+
   my($taint) = substr($fullname,0,0);  # Is $fullname tainted?
 
-  if ($fstype =~ /^VMS/i) {
-    if ($fullname =~ m#/#) { $fstype = '' }  # We're doing Unix emulation
-    else {
-      ($dirpath,$basename) = ($fullname =~ /^(.*[:>\]])?(.*)/s);
-      $dirpath ||= '';  # should always be defined
-    }
+  if ($type eq "VMS" and $fullname =~ m{/} ) {
+    # We're doing Unix emulation
+    $orig_type = $type;
+    $type = 'Unix';
   }
-  if ($fstype =~ /^MS(DOS|Win32)|epoc/i) {
+
+  my($dirpath, $basename);
+
+  if (grep { $type eq $_ } qw(MSDOS DOS MSWin32 Epoc)) {
     ($dirpath,$basename) = ($fullname =~ /^((?:.*[:\\\/])?)(.*)/s);
     $dirpath .= '.\\' unless $dirpath =~ /[\\\/]\z/;
   }
-  elsif ($fstype =~ /^os2/i) {
+  elsif ($type eq "OS2") {
     ($dirpath,$basename) = ($fullname =~ m#^((?:.*[:\\/])?)(.*)#s);
     $dirpath = './' unless $dirpath;	# Can't be 0
     $dirpath .= '/' unless $dirpath =~ m#[\\/]\z#;
   }
-  elsif ($fstype =~ /^MacOS/si) {
+  elsif ($type eq "MacOS") {
     ($dirpath,$basename) = ($fullname =~ /^(.*:)?(.*)/s);
     $dirpath = ':' unless $dirpath;
   }
-  elsif ($fstype =~ /^AmigaOS/i) {
+  elsif ($type eq "AmigaOS") {
     ($dirpath,$basename) = ($fullname =~ /(.*[:\/])?(.*)/s);
     $dirpath = './' unless $dirpath;
   }
-  elsif ($fstype !~ /^VMS/i) {  # default to Unix
+  elsif ($type eq 'VMS' ) {
+    ($dirpath,$basename) = ($fullname =~ /^(.*[:>\]])?(.*)/s);
+    $dirpath ||= '';  # should always be defined
+  }
+  else { # Default to Unix semantics.
     ($dirpath,$basename) = ($fullname =~ m#^(.*/)?(.*)#s);
-    if ($^O eq 'VMS' and $fullname =~ m:^(/[^/]+/000000(/|$))(.*):) {
+    if ($orig_type eq 'VMS' and $fullname =~ m:^(/[^/]+/000000(/|$))(.*):) {
       # dev:[000000] is top of VMS tree, similar to Unix '/'
       # so strip it off and treat the rest as "normal"
       my $devspec  = $1;
@@ -138,7 +145,9 @@ sub fileparse {
     }
     $dirpath = './' unless $dirpath;
   }
+      
 
+  my($tail, $suffix);
   if (@suffices) {
     $tail = '';
     foreach $suffix (@suffices) {
@@ -191,14 +200,13 @@ its name it does B<NOT> always return the directory name as you might
 expect.  To be safe, if you want the directory name of a path use
 C<fileparse()>.
 
-    # On all but Unix and MSDOS
+Only on VMS (where there is no ambiguity between the file and directory
+portions of a path) and AmigaOS (possibly due to an implementation quirk in
+this module) does C<dirname()> work like C<fileparse($path)>, returning just the
+$directories.
+
+    # On VMS and AmigaOS
     my $directories = dirname($path);
-
-On all system types but Unix and MSDOS this works just like
-C<fileparse($path)> but returning just the $directories.
-
-    # On Unix and MSDOS
-    my $path_one_level_up = dirname($path);
 
 When using Unix or MSDOS syntax this emulates the C<dirname(1)> shell function
 which is subtly different from how C<fileparse()> works.  It returns all but
@@ -226,34 +234,36 @@ current default device and directory is used.
 
 
 sub dirname {
-    my($fstype) = $Fileparse_fstype;
+    my $path = shift;
 
-    if( $fstype =~ /VMS/i and $_[0] =~ m{/} ) {
+    my($type) = $Fileparse_fstype;
+
+    if( $type eq 'VMS' and $path =~ m{/} ) {
         # Parse as Unix
         local($File::Basename::Fileparse_fstype) = '';
-        return dirname(@_);
+        return dirname($path);
     }
 
-    my($basename,$dirname) = fileparse($_[0]);
+    my($basename, $dirname) = fileparse($path);
 
-    if ($fstype =~ /VMS/i) { 
+    if ($type eq 'VMS') { 
         $dirname ||= $ENV{DEFAULT};
     }
-    elsif ($fstype =~ /MacOS/i) {
+    elsif ($type eq 'MacOS') {
 	if( !length($basename) && $dirname !~ /^[^:]+:\z/) {
 	    $dirname =~ s/([^:]):\z/$1/s;
 	    ($basename,$dirname) = fileparse $dirname;
 	}
 	$dirname .= ":" unless $dirname =~ /:\z/;
     }
-    elsif ($fstype =~ /MS(DOS|Win32)|os2/i) { 
+    elsif (grep { $type eq $_ } qw(MSDOS DOS MSWin32 OS2)) { 
         $dirname =~ s/([^:])[\\\/]*\z/$1/;
         unless( length($basename) ) {
 	    ($basename,$dirname) = fileparse $dirname;
 	    $dirname =~ s/([^:])[\\\/]*\z/$1/;
 	}
     }
-    elsif ($fstype =~ /AmigaOS/i) {
+    elsif ($type eq 'AmigaOS') {
         if ( $dirname =~ /:\z/) { return $dirname }
         chop $dirname;
         $dirname =~ s#[^:/]+\z## unless length($basename);
@@ -272,15 +282,17 @@ sub dirname {
 
 =item C<fileparse_set_fstype>
 
-  my $previous_fstype = fileparse_set_fstype($type);
+  my $type = fileparse_set_fstype();
+  my $previous_type = fileparse_set_fstype($type);
 
 Normally File::Basename will assume a file path type native to your current
 operating system (ie. /foo/bar style on Unix, \foo\bar on Windows, etc...).
 With this function you can override that assumption.
 
-Valid $types are "VMS", "MSDOS", "MacOS", "AmigaOS", "OS2", "RISCOS",
-"MSWin32" and "Unix" (case-insensitive).  If an unrecognized $type is
-given Unix semantics will be assumed.
+Valid $types are "MacOS", "VMS", "AmigaOS", "OS2", "RISCOS",
+"MSWin32", "DOS" (also "MSDOS" for backwards bug compatibility),
+"Epoc" and "Unix" (all case-insensitive).  If an unrecognized $type is
+given "Unix" will be assumed.
 
 If you've selected VMS syntax, and the file specification you pass to
 one of these routines contains a "/", they assume you are using Unix
@@ -292,13 +304,29 @@ call only.
 =cut
 
 
+BEGIN {
+
+my @Ignore_Case = qw(MacOS VMS AmigaOS OS2 RISCOS MSWin32 MSDOS DOS Epoc);
+my @Types = (@Ignore_Case, qw(Unix));
+
 sub fileparse_set_fstype {
-  my @old = ($Fileparse_fstype, $Fileparse_igncase);
-  if (@_) {
-    $Fileparse_fstype = $_[0];
-    $Fileparse_igncase = ($_[0] =~ /^(?:MacOS|VMS|AmigaOS|os2|RISCOS|MSWin32|MSDOS)/i);
-  }
-  wantarray ? @old : $old[0];
+    my $old = $Fileparse_fstype;
+
+    if (@_) {
+        my $new_type = shift;
+
+        $Fileparse_fstype = 'Unix';  # default
+        foreach my $type (@Types) {
+            $Fileparse_fstype = $type if $new_type =~ /^$type/i;
+        }
+
+        $Fileparse_igncase = 
+          (grep $Fileparse_fstype eq $_, @Ignore_Case) ? 1 : 0;
+    }
+
+    return $old;
+}
+
 }
 
 
