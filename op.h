@@ -516,7 +516,7 @@ struct loop {
 	(var = (OP *) Perl_Slab_Alloc(aTHX_ m,size))
 #define FreeOp(p) Perl_Slab_Free(aTHX_ p)
 #else
-#define NewOp(m, var, c, type) Newz(m, var, c, type)
+#define NewOp(m, var, c, type) Newxz(var, c, type)
 #define NewOpSz(m, var, size)	\
 	(var = (OP*)safemalloc(size), memzero(var, size))
 #define FreeOp(p) Safefree(p)

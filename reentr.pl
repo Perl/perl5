@@ -349,7 +349,7 @@ sub pushssif {
 sub pushinitfree {
     my $func = shift;
     push @init, <<EOF;
-	New(31338, PL_reentrant_buffer->_${func}_buffer, PL_reentrant_buffer->_${func}_size, char);
+	Newx(PL_reentrant_buffer->_${func}_buffer, PL_reentrant_buffer->_${func}_size, char);
 EOF
     push @free, <<EOF;
 	Safefree(PL_reentrant_buffer->_${func}_buffer);
@@ -597,7 +597,7 @@ EOF
 EOF
 	    push @init, <<EOF;
 #if   !($D)
-	New(31338, PL_reentrant_buffer->_${genfunc}_buffer, PL_reentrant_buffer->_${genfunc}_size, char);
+	Newx(PL_reentrant_buffer->_${genfunc}_buffer, PL_reentrant_buffer->_${genfunc}_size, char);
 #endif
 EOF
 	    push @free, <<EOF;
@@ -812,7 +812,7 @@ Perl_reentrant_size(pTHX) {
 void
 Perl_reentrant_init(pTHX) {
 #ifdef USE_REENTRANT_API
-	New(31337, PL_reentrant_buffer, 1, REENTR);
+	Newx(PL_reentrant_buffer, 1, REENTR);
 	Perl_reentrant_size(aTHX);
 @init
 #endif /* USE_REENTRANT_API */

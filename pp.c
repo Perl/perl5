@@ -642,8 +642,8 @@ PP(pp_study)
     if (pos > PL_maxscream) {
 	if (PL_maxscream < 0) {
 	    PL_maxscream = pos + 80;
-	    New(301, PL_screamfirst, 256, I32);
-	    New(302, PL_screamnext, PL_maxscream, I32);
+	    Newx(PL_screamfirst, 256, I32);
+	    Newx(PL_screamnext, PL_maxscream, I32);
 	}
 	else {
 	    PL_maxscream = pos + pos / 4;
@@ -807,7 +807,7 @@ PP(pp_undef)
 	else {
 	    GP *gp;
 	    gp_free((GV*)sv);
-	    Newz(602, gp, 1, GP);
+	    Newxz(gp, 1, GP);
 	    GvGP(sv) = gp_ref(gp);
 	    GvSV(sv) = NEWSV(72,0);
 	    GvLINE(sv) = CopLINE(PL_curcop);
@@ -2424,7 +2424,7 @@ PP(pp_complement)
 	  tmps -= len;
 
 	  if (nwide) {
-	      Newz(0, result, targlen + 1, U8);
+	      Newxz(result, targlen + 1, U8);
 	      while (tmps < send) {
 		  const UV c = utf8n_to_uvchr(tmps, send-tmps, &l, UTF8_ALLOW_ANYUV);
 		  tmps += UTF8SKIP(tmps);
@@ -2436,7 +2436,7 @@ PP(pp_complement)
 	      SvUTF8_on(TARG);
 	  }
 	  else {
-	      Newz(0, result, nchar + 1, U8);
+	      Newxz(result, nchar + 1, U8);
 	      while (tmps < send) {
 		  const U8 c = (U8)utf8n_to_uvchr(tmps, 0, &l, UTF8_ALLOW_ANY);
 		  tmps += UTF8SKIP(tmps);
@@ -4199,7 +4199,7 @@ PP(pp_splice)
 
     if (diff < 0) {				/* shrinking the area */
 	if (newlen) {
-	    New(451, tmparyval, newlen, SV*);	/* so remember insertion */
+	    Newx(tmparyval, newlen, SV*);	/* so remember insertion */
 	    Copy(MARK, tmparyval, newlen, SV*);
 	}
 
@@ -4259,7 +4259,7 @@ PP(pp_splice)
     }
     else {					/* no, expanding (or same) */
 	if (length) {
-	    New(452, tmparyval, length, SV*);	/* so remember deletion */
+	    Newx(tmparyval, length, SV*);	/* so remember deletion */
 	    Copy(AvARRAY(ary)+offset, tmparyval, length, SV*);
 	}
 

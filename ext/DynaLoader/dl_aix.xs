@@ -228,7 +228,7 @@ void *dlopen(char *path, int mode)
 			mp->refCnt++;
 			return mp;
 		}
-	Newz(1000,mp,1,Module);
+	Newxz(mp,1,Module);
 	if (mp == NULL) {
 		dl_errvalid++;
 		strcpy(dl_errbuf, "Newz: ");
@@ -568,7 +568,7 @@ static int readExports(ModulePtr mp)
 			continue;
 		mp->nExports++;
 	}
-	Newz(1001, mp->exports, mp->nExports, Export);
+	Newxz(mp->exports, mp->nExports, Export);
 	if (mp->exports == NULL) {
 		dl_errvalid++;
 		strcpy(dl_errbuf, "readExports: ");

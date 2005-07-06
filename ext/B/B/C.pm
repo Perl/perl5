@@ -659,7 +659,7 @@ sub savepvn {
     # work with byte offsets/lengths
     my $pv = pack "a*", $pv;
     if (defined $max_string_len && length($pv) > $max_string_len) {
-	push @res, sprintf("New(0,%s,%u,char);", $dest, length($pv)+1);
+	push @res, sprintf("Newx(%s,%u,char);", $dest, length($pv)+1);
 	my $offset = 0;
 	while (length $pv) {
 	    my $str = substr $pv, 0, $max_string_len, '';
@@ -1579,7 +1579,7 @@ EOT
 #else
 #define EXTRA_OPTIONS 4
 #endif /* ALLOW_PERL_OPTIONS */
-    New(666, fakeargv, argc + EXTRA_OPTIONS + 1, char *);
+    Newx(fakeargv, argc + EXTRA_OPTIONS + 1, char *);
 
     fakeargv[0] = argv[0];
     fakeargv[1] = "-e";

@@ -534,16 +534,21 @@ C<id> is an integer id between 0 and 1299 (used to identify leaks).
 
 =head1 Memory Management
 
-=for apidoc Am|void|New|int id|void* ptr|int nitems|type
+=for apidoc Am|void|Newx|void* ptr|int nitems|type
 The XSUB-writer's interface to the C C<malloc> function.
 
-=for apidoc Am|void|Newc|int id|void* ptr|int nitems|type|cast
+=for apidoc Am|void|Newxc|void* ptr|int nitems|type|cast
 The XSUB-writer's interface to the C C<malloc> function, with
 cast.
 
-=for apidoc Am|void|Newz|int id|void* ptr|int nitems|type
+=for apidoc Am|void|Newxz|void* ptr|int nitems|type
 The XSUB-writer's interface to the C C<malloc> function.  The allocated
 memory is zeroed with C<memzero>.
+
+In 5.9.3, we removed the 1st parameter, a debug aid, from the api.  It
+was used to uniquely identify each usage of these allocation
+functions, but was deemed unnecessary with the availability of better
+memory tracking tools, valgrind for example.
 
 =for apidoc Am|void|Renew|void* ptr|int nitems|type
 The XSUB-writer's interface to the C C<realloc> function.
@@ -618,10 +623,15 @@ hopefully catches attempts to access uninitialized memory.
 
 #endif
 
-#define New(x,v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) (t*)safemalloc((MEM_SIZE)((n)*sizeof(t)))))
-#define Newc(x,v,n,t,c)	(v = (MEM_WRAP_CHECK_(n,t) (c*)safemalloc((MEM_SIZE)((n)*sizeof(t)))))
-#define Newz(x,v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) (t*)safemalloc((MEM_SIZE)((n)*sizeof(t))))), \
+#define Newx(v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) (t*)safemalloc((MEM_SIZE)((n)*sizeof(t)))))
+#define Newxc(v,n,t,c)	(v = (MEM_WRAP_CHECK_(n,t) (c*)safemalloc((MEM_SIZE)((n)*sizeof(t)))))
+#define Newxz(v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) (t*)safemalloc((MEM_SIZE)((n)*sizeof(t))))), \
 			memzero((char*)(v), (n)*sizeof(t))
+/* pre 5.9.x compatibility */
+#define New(x,v,n,t)	Newx(v,n,t)
+#define Newc(x,v,n,t,c)	Newxc(v,n,t,c)
+#define Newc(x,v,n,t,c)	Newxc(v,n,t,c)
+
 #define Renew(v,n,t) \
 	  (v = (MEM_WRAP_CHECK_(n,t) (t*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t)))))
 #define Renewc(v,n,t,c) \

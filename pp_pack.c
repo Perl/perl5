@@ -1492,7 +1492,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    if (checksum) {
 		if (!PL_bitcount) {
 		    int bits;
-		    Newz(601, PL_bitcount, 256, char);
+		    Newxz(PL_bitcount, 256, char);
 		    for (bits = 1; bits < 256; bits++) {
 			if (bits & 1)	PL_bitcount[bits]++;
 			if (bits & 2)	PL_bitcount[bits]++;
@@ -2453,11 +2453,11 @@ marked_upgrade(pTHX_ SV *sv, tempsym_t *sym_ptr) {
     }
 
     len = (from_end-from_ptr)*UTF8_EXPAND+(from_ptr-from_start)+1;
-    New('U', to_start, len, char);
+    Newx(to_start, len, char);
     Copy(from_start, to_start, from_ptr-from_start, char);
     to_ptr = to_start + (from_ptr-from_start);
 
-    New('U', marks, sym_ptr->level+2, const char *);
+    Newx(marks, sym_ptr->level+2, const char *);
     for (group=sym_ptr; group; group = group->previous)
 	marks[group->level] = from_start + group->strbeg;
     marks[sym_ptr->level+1] = from_end+1;
@@ -3392,7 +3392,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    if ((norm = is_an_int(from, len)) == NULL)
 			Perl_croak(aTHX_ "Can only compress unsigned integers in pack");
 
-		    New('w', result, len, char);
+		    Newx(result, len, char);
 		    in = result + len;
 		    done = FALSE;
 		    while (!done) *--in = div128(norm, &done) | 0x80;

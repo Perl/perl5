@@ -1107,7 +1107,7 @@ PP(pp_sselect)
 
 #if BYTEORDER != 0x1234 && BYTEORDER != 0x12345678
 	s = SvPVX(sv);
-	New(403, fd_sets[i], growsize, char);
+	Newx(fd_sets[i], growsize, char);
 	for (offset = 0; offset < growsize; offset += masksize) {
 	    for (j = 0, k=ORDERBYTE; j < masksize; j++, (k >>= 4))
 		fd_sets[i][j+offset] = s[(k % masksize) + offset];
@@ -3725,7 +3725,7 @@ S_dooneliner(pTHX_ const char *cmd, const char *filename)
     PerlIO *myfp;
     int anum = 1;
 
-    New(666, cmdline, strlen(cmd) + (strlen(filename) * 2) + 10, char);
+    Newx(cmdline, strlen(cmd) + (strlen(filename) * 2) + 10, char);
     strcpy(cmdline, cmd);
     strcat(cmdline, " ");
     for (s = cmdline + strlen(cmdline); *filename; ) {

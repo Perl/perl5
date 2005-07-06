@@ -112,7 +112,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
     SV *specialsv_list[6];
 
     BYTECODE_HEADER_CHECK;	/* croak if incorrect platform */
-    New(666, bstate->bs_obj_list, 32, void*); /* set op objlist */
+    Newx(bstate->bs_obj_list, 32, void*); /* set op objlist */
     bstate->bs_obj_list_fill = 31;
     bstate->bs_obj_list[0] = NULL; /* first is always Null */
     bstate->bs_ix = 1;

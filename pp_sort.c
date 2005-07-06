@@ -375,7 +375,7 @@ S_mergesortsv(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
     }
 
     if (nmemb <= SMALLSORT) aux = small;	/* use stack for aux array */
-    else { New(799,aux,nmemb,gptr); }		/* allocate auxilliary array */
+    else { Newx(aux,nmemb,gptr); }		/* allocate auxilliary array */
     level = 0;
     stackp = stack;
     stackp->runs = dynprep(aTHX_ base, aux, nmemb, cmp);
@@ -1358,7 +1358,7 @@ S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 
 	 /* Small arrays can use the stack, big ones must be allocated */
 	 if (nmemb <= SMALLSORT) indir = small;
-	 else { New(1799, indir, nmemb, gptr *); }
+	 else { Newx(indir, nmemb, gptr *); }
 
 	 /* Copy pointers to original array elements into indirect array */
 	 for (n = nmemb, pp = indir, q = list1; n--; ) *pp++ = q++;

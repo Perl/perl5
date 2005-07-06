@@ -2441,7 +2441,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    U8 tmpbuf[UTF8_MAXBYTES+1];
 	    UV *cp;
 	    UV nextmin = 0;
-	    New(1109, cp, 2*tlen, UV);
+	    Newx(cp, 2*tlen, UV);
 	    i = 0;
 	    transv = newSVpvn("",0);
 	    while (t < tend) {

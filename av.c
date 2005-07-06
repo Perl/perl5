@@ -132,7 +132,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 		assert(itmp > newmax);
 		newmax = itmp - 1;
 		assert(newmax >= AvMAX(av));
-		New(2,ary, newmax+1, SV*);
+		Newx(ary, newmax+1, SV*);
 		Copy(AvALLOC(av), ary, AvMAX(av)+1, SV*);
 		if (AvMAX(av) > 64)
 		    offer_nice_chunk(AvALLOC(av), (AvMAX(av)+1) * sizeof(SV*));
@@ -154,7 +154,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 	    else {
 		newmax = key < 3 ? 3 : key;
 		MEM_WRAP_CHECK_1(newmax+1, SV*, oom_array_extend);
-		New(2,AvALLOC(av), newmax+1, SV*);
+		Newx(AvALLOC(av), newmax+1, SV*);
 		ary = AvALLOC(av) + 1;
 		tmp = newmax;
 		AvALLOC(av)[0] = &PL_sv_undef;	/* For the stacks */
@@ -386,7 +386,7 @@ Perl_av_make(pTHX_ register I32 size, register SV **strp)
     if (size) {		/* "defined" was returning undef for size==0 anyway. */
         register SV** ary;
         register I32 i;
-	New(4,ary,size,SV*);
+	Newx(ary,size,SV*);
 	AvALLOC(av) = ary;
 	SvPV_set(av, (char*)ary);
 	AvFILLp(av) = size - 1;
@@ -409,7 +409,7 @@ Perl_av_fake(pTHX_ register I32 size, register SV **strp)
 
     av = (AV*)NEWSV(9,0);
     sv_upgrade((SV *)av, SVt_PVAV);
-    New(4,ary,size+1,SV*);
+    Newx(ary,size+1,SV*);
     AvALLOC(av) = ary;
     Copy(strp,ary,size,SV*);
     AvREIFY_only(av);

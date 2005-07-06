@@ -586,7 +586,7 @@ new(packname = "POSIX::SigSet", ...)
     CODE:
 	{
 	    int i;
-	    New(0, RETVAL, 1, sigset_t);
+	    Newx(RETVAL, 1, sigset_t);
 	    sigemptyset(RETVAL);
 	    for (i = 1; i < items; i++)
 		sigaddset(RETVAL, SvIV(ST(i)));
@@ -631,7 +631,7 @@ new(packname = "POSIX::Termios", ...)
     CODE:
 	{
 #ifdef I_TERMIOS
-	    New(0, RETVAL, 1, struct termios);
+	    Newx(RETVAL, 1, struct termios);
 #else
 	    not_here("termios");
         RETVAL = 0;
@@ -1328,7 +1328,7 @@ sigaction(sig, optaction, oldaction = 0)
 		    sigset = INT2PTR(sigset_t*, tmp);
 		}
 		else {
-		    New(0, sigset, 1, sigset_t);
+		    Newx(sigset, 1, sigset_t);
 		    sv_setptrobj(*svp, sigset, "POSIX::SigSet");
 		}
 		*sigset = oact.sa_mask;

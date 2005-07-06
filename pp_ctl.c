@@ -314,7 +314,7 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
 	i = 6 + rx->nparens * 2;
 #endif
 	if (!p)
-	    New(501, p, i, UV);
+	    Newx(p, i, UV);
 	else
 	    Renew(p, i, UV);
 	*rsp = (void*)p;
@@ -3660,7 +3660,7 @@ S_doparseform(pTHX_ SV *sv)
     s = base;
     base = Nullch;
 
-    New(804, fops, maxops, U32);
+    Newx(fops, maxops, U32);
     fpc = fops;
 
     if (s < send) {

@@ -41,7 +41,7 @@ S_more_he(pTHX)
 {
     HE* he;
     HE* heend;
-    New(54, he, PERL_ARENA_SIZE/sizeof(HE), HE);
+    Newx(he, PERL_ARENA_SIZE/sizeof(HE), HE);
     HeNEXT(he) = PL_he_arenaroot;
     PL_he_arenaroot = he;
 
@@ -94,7 +94,7 @@ S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
     char *k;
     register HEK *hek;
 
-    New(54, k, HEK_BASESIZE + len + 2, char);
+    Newx(k, HEK_BASESIZE + len + 2, char);
     hek = (HEK*)k;
     Copy(str, HEK_KEY(hek), len, char);
     HEK_KEY(hek)[len] = 0;
@@ -163,7 +163,7 @@ Perl_he_dup(pTHX_ HE *e, bool shared, CLONE_PARAMS* param)
     HeNEXT(ret) = he_dup(HeNEXT(e),shared, param);
     if (HeKLEN(e) == HEf_SVKEY) {
 	char *k;
-	New(54, k, HEK_BASESIZE + sizeof(SV*), char);
+	Newx(k, HEK_BASESIZE + sizeof(SV*), char);
 	HeKEY_hek(ret) = (HEK*)k;
 	HeKEY_sv(ret) = SvREFCNT_inc(sv_dup(HeKEY_sv(e), param));
     }
@@ -464,7 +464,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		else {
 		    char *k;
 		    entry = new_HE();
-		    New(54, k, HEK_BASESIZE + sizeof(SV*), char);
+		    Newx(k, HEK_BASESIZE + sizeof(SV*), char);
 		    HeKEY_hek(entry) = (HEK*)k;
 		}
 		HeNEXT(entry) = Nullhe;
@@ -609,7 +609,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 #endif
 								  ) {
 	    char *array;
-	    Newz(503, array,
+	    Newxz(array,
 		 PERL_HV_ARRAY_ALLOC_BYTES(xhv->xhv_max+1 /* HvMAX(hv)+1 */),
 		 char);
 	    HvARRAY(hv) = (HE**)array;
@@ -789,7 +789,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	   NULL is for %ENV with dynamic env fetch.  But that should disappear
 	   with magic in the previous code.  */
 	char *array;
-	Newz(503, array,
+	Newxz(array,
 	     PERL_HV_ARRAY_ALLOC_BYTES(xhv->xhv_max+1 /* HvMAX(hv)+1 */),
 	     char);
 	HvARRAY(hv) = (HE**)array;
@@ -1155,7 +1155,7 @@ S_hsplit(pTHX_ HV *hv)
 	Copy(&a[oldsize * sizeof(HE*)], &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
     }
 #else
-    New(2, a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
+    Newx(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
 	+ (SvOOK(hv) ? sizeof(struct xpvhv_aux) : 0), char);
     if (!a) {
       PL_nomemok = FALSE;
@@ -1233,7 +1233,7 @@ S_hsplit(pTHX_ HV *hv)
       longest_chain, HvTOTALKEYS(hv), HvFILL(hv),  1+HvMAX(hv));*/
 
     ++newsize;
-    Newz(2, a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
+    Newxz(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
 	 + (SvOOK(hv) ? sizeof(struct xpvhv_aux) : 0), char);
     if (SvOOK(hv)) {
 	Copy(HvAUX(hv), &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
@@ -1325,7 +1325,7 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 	    Copy(&a[oldsize * sizeof(HE*)], &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
 	}
 #else
-	New(2, a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
+	Newx(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
 	    + (SvOOK(hv) ? sizeof(struct xpvhv_aux) : 0), char);
 	if (!a) {
 	  PL_nomemok = FALSE;
@@ -1347,7 +1347,7 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 	Zero(&a[oldsize * sizeof(HE*)], (newsize-oldsize) * sizeof(HE*), char); /* zero 2nd half*/
     }
     else {
-	Newz(0, a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
+	Newxz(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
     }
     xhv->xhv_max = --newsize; 	/* HvMAX(hv) = --newsize */
     HvARRAY(hv) = (HE **) a;
@@ -1419,7 +1419,7 @@ Perl_newHVhv(pTHX_ HV *ohv)
 	const bool shared = !!HvSHAREKEYS(ohv);
 	HE **ents, **oents = (HE **)HvARRAY(ohv);
 	char *a;
-	New(0, a, PERL_HV_ARRAY_ALLOC_BYTES(hv_max+1), char);
+	Newx(a, PERL_HV_ARRAY_ALLOC_BYTES(hv_max+1), char);
 	ents = (HE**)a;
 
 	/* In each bucket... */
@@ -1747,7 +1747,7 @@ S_hv_auxinit(pTHX_ HV *hv) {
     char *array;
 
     if (!HvARRAY(hv)) {
-	Newz(0, array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1)
+	Newxz(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1)
 	    + sizeof(struct xpvhv_aux), char);
     } else {
 	array = (char *) HvARRAY(hv);
@@ -1962,7 +1962,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	    /* one HE per MAGICAL hash */
 	    iter->xhv_eiter = entry = new_HE(); /* HvEITER(hv) = new_HE() */
 	    Zero(entry, 1, HE);
-	    Newz(54, k, HEK_BASESIZE + sizeof(SV*), char);
+	    Newxz(k, HEK_BASESIZE + sizeof(SV*), char);
 	    hek = (HEK*)k;
 	    HeKEY_hek(entry) = hek;
 	    HeKLEN(entry) = HEf_SVKEY;
@@ -2343,7 +2343,7 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 	   HEK directly from the HE.
 	*/
 
-	New(0, k, STRUCT_OFFSET(struct shared_he,
+	Newx(k, STRUCT_OFFSET(struct shared_he,
 				shared_he_hek.hek_key[0]) + len + 2, char);
 	new_entry = (struct shared_he *)k;
 	entry = &(new_entry->shared_he_he);

@@ -101,7 +101,7 @@ Perl_gv_fetchfile(pTHX_ const char *name)
     if (tmplen < sizeof smallbuf)
 	tmpbuf = smallbuf;
     else
-	New(603, tmpbuf, tmplen + 1, char);
+	Newx(tmpbuf, tmplen + 1, char);
     /* This is where the debugger's %{"::_<$filename"} hash is created */
     tmpbuf[0] = '_';
     tmpbuf[1] = '<';
@@ -139,7 +139,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 	} else
 	    Safefree(SvPVX_mutable(gv));
     }
-    Newz(602, gp, 1, GP);
+    Newxz(gp, 1, GP);
     GvGP(gv) = gp_ref(gp);
 #ifdef PERL_DONT_CREATE_GVSV
     GvSV(gv) = 0;
@@ -654,7 +654,7 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 create)
     if (namelen + 3 < sizeof smallbuf)
 	tmpbuf = smallbuf;
     else
-	New(606, tmpbuf, namelen + 3, char);
+	Newx(tmpbuf, namelen + 3, char);
     Copy(name,tmpbuf,namelen,char);
     tmpbuf[namelen++] = ':';
     tmpbuf[namelen++] = ':';
@@ -735,7 +735,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		if (len + 3 < sizeof (smallbuf))
 		    tmpbuf = smallbuf;
 		else
-		    New(601, tmpbuf, len+3, char);
+		    Newx(tmpbuf, len+3, char);
 		Copy(name, tmpbuf, len, char);
 		tmpbuf[len++] = ':';
 		tmpbuf[len++] = ':';
@@ -948,9 +948,9 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		    HV *hv;
 		    I32 i;
 		    if (!PL_psig_ptr) {
-			Newz(73, PL_psig_ptr,  SIG_SIZE, SV*);
-			Newz(73, PL_psig_name, SIG_SIZE, SV*);
-			Newz(73, PL_psig_pend, SIG_SIZE, int);
+			Newxz(PL_psig_ptr,  SIG_SIZE, SV*);
+			Newxz(PL_psig_name, SIG_SIZE, SV*);
+			Newxz(PL_psig_pend, SIG_SIZE, int);
 		    }
 		    GvMULTI_on(gv);
 		    hv = GvHVn(gv);

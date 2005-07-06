@@ -764,7 +764,7 @@ Perl_savepv(pTHX_ const char *pv)
     else {
 	char *newaddr;
 	const STRLEN pvlen = strlen(pv)+1;
-	New(902,newaddr,pvlen,char);
+	Newx(newaddr,pvlen,char);
 	return memcpy(newaddr,pv,pvlen);
     }
 
@@ -788,7 +788,7 @@ Perl_savepvn(pTHX_ const char *pv, register I32 len)
 {
     register char *newaddr;
 
-    New(903,newaddr,len+1,char);
+    Newx(newaddr,len+1,char);
     /* Give a meaning to NULL pointer mainly for the use in sv_magic() */
     if (pv) {
 	/* might not be null terminated */
@@ -843,7 +843,7 @@ Perl_savesvpv(pTHX_ SV *sv)
     register char *newaddr;
 
     ++len;
-    New(903,newaddr,len,char);
+    Newx(newaddr,len,char);
     return (char *) CopyD(pv,newaddr,len,char);
 }
 
@@ -863,8 +863,8 @@ S_mess_alloc(pTHX)
 	return PL_mess_sv;
 
     /* Create as PVMG now, to avoid any upgrading later */
-    New(905, sv, 1, SV);
-    Newz(905, any, 1, XPVMG);
+    Newx(sv, 1, SV);
+    Newxz(any, 1, XPVMG);
     SvFLAGS(sv) = SVt_PVMG;
     SvANY(sv) = (void*)any;
     SvPV_set(sv, 0);
@@ -1528,7 +1528,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
 	val = "";
     }
     vlen = strlen(val);
-    New(904, envstr, nlen+vlen+2, char);
+    Newx(envstr, nlen+vlen+2, char);
     my_setenv_format(envstr, nam, nlen, val, vlen);
     (void)PerlEnv_putenv(envstr);
     Safefree(envstr);
@@ -3634,7 +3634,7 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour, int mday, in
   } STMT_END;
 #endif
   buflen = 64;
-  New(0, buf, buflen, char);
+  Newx(buf, buflen, char);
   len = strftime(buf, buflen, fmt, &mytm);
   /*
   ** The following is needed to handle to the situation where
@@ -3657,7 +3657,7 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour, int mday, in
     const int fmtlen = strlen(fmt);
     const int bufsize = fmtlen + buflen;
 
-    New(0, buf, bufsize, char);
+    Newx(buf, bufsize, char);
     while (buf) {
       buflen = strftime(buf, bufsize, fmt, &mytm);
       if (buflen > 0 && buflen < bufsize)

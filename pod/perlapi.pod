@@ -1598,31 +1598,36 @@ optimise.
 =for hackers
 Found in file handy.h
 
-=item New
+=item Newx
 
 The XSUB-writer's interface to the C C<malloc> function.
 
-	void	New(int id, void* ptr, int nitems, type)
+	void	Newx(void* ptr, int nitems, type)
 
 =for hackers
 Found in file handy.h
 
-=item Newc
+=item Newxc
 
 The XSUB-writer's interface to the C C<malloc> function, with
 cast.
 
-	void	Newc(int id, void* ptr, int nitems, type, cast)
+	void	Newxc(void* ptr, int nitems, type, cast)
 
 =for hackers
 Found in file handy.h
 
-=item Newz
+=item Newxz
 
 The XSUB-writer's interface to the C C<malloc> function.  The allocated
 memory is zeroed with C<memzero>.
 
-	void	Newz(int id, void* ptr, int nitems, type)
+In 5.9.3, we removed the 1st parameter, a debug aid, from the api.  It
+was used to uniquely identify each usage of these allocation
+functions, but was deemed unnecessary with the availability of better
+memory tracking tools, valgrind for example.
+
+	void	Newxz(void* ptr, int nitems, type)
 
 =for hackers
 Found in file handy.h

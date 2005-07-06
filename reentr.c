@@ -149,10 +149,10 @@ Perl_reentrant_size(pTHX) {
 void
 Perl_reentrant_init(pTHX) {
 #ifdef USE_REENTRANT_API
-	New(31337, PL_reentrant_buffer, 1, REENTR);
+	Newx(PL_reentrant_buffer, 1, REENTR);
 	Perl_reentrant_size(aTHX);
 #ifdef HAS_ASCTIME_R
-	New(31338, PL_reentrant_buffer->_asctime_buffer, PL_reentrant_buffer->_asctime_size, char);
+	Newx(PL_reentrant_buffer->_asctime_buffer, PL_reentrant_buffer->_asctime_size, char);
 #endif /* HAS_ASCTIME_R */
 #ifdef HAS_CRYPT_R
 #if CRYPT_R_PROTO != REENTRANT_PROTO_B_CCD
@@ -160,7 +160,7 @@ Perl_reentrant_init(pTHX) {
 #endif
 #endif /* HAS_CRYPT_R */
 #ifdef HAS_CTIME_R
-	New(31338, PL_reentrant_buffer->_ctime_buffer, PL_reentrant_buffer->_ctime_size, char);
+	Newx(PL_reentrant_buffer->_ctime_buffer, PL_reentrant_buffer->_ctime_size, char);
 #endif /* HAS_CTIME_R */
 #ifdef HAS_DRAND48_R
 #endif /* HAS_DRAND48_R */
@@ -168,42 +168,42 @@ Perl_reentrant_init(pTHX) {
 #   ifdef USE_GRENT_FPTR
 	PL_reentrant_buffer->_grent_fptr = NULL;
 #   endif
-	New(31338, PL_reentrant_buffer->_grent_buffer, PL_reentrant_buffer->_grent_size, char);
+	Newx(PL_reentrant_buffer->_grent_buffer, PL_reentrant_buffer->_grent_size, char);
 #endif /* HAS_GETGRNAM_R */
 #ifdef HAS_GETHOSTBYNAME_R
 #if   !(GETHOSTBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-	New(31338, PL_reentrant_buffer->_hostent_buffer, PL_reentrant_buffer->_hostent_size, char);
+	Newx(PL_reentrant_buffer->_hostent_buffer, PL_reentrant_buffer->_hostent_size, char);
 #endif
 #endif /* HAS_GETHOSTBYNAME_R */
 #ifdef HAS_GETLOGIN_R
-	New(31338, PL_reentrant_buffer->_getlogin_buffer, PL_reentrant_buffer->_getlogin_size, char);
+	Newx(PL_reentrant_buffer->_getlogin_buffer, PL_reentrant_buffer->_getlogin_size, char);
 #endif /* HAS_GETLOGIN_R */
 #ifdef HAS_GETNETBYNAME_R
 #if   !(GETNETBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-	New(31338, PL_reentrant_buffer->_netent_buffer, PL_reentrant_buffer->_netent_size, char);
+	Newx(PL_reentrant_buffer->_netent_buffer, PL_reentrant_buffer->_netent_size, char);
 #endif
 #endif /* HAS_GETNETBYNAME_R */
 #ifdef HAS_GETPROTOBYNAME_R
 #if   !(GETPROTOBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-	New(31338, PL_reentrant_buffer->_protoent_buffer, PL_reentrant_buffer->_protoent_size, char);
+	Newx(PL_reentrant_buffer->_protoent_buffer, PL_reentrant_buffer->_protoent_size, char);
 #endif
 #endif /* HAS_GETPROTOBYNAME_R */
 #ifdef HAS_GETPWNAM_R
 #   ifdef USE_PWENT_FPTR
 	PL_reentrant_buffer->_pwent_fptr = NULL;
 #   endif
-	New(31338, PL_reentrant_buffer->_pwent_buffer, PL_reentrant_buffer->_pwent_size, char);
+	Newx(PL_reentrant_buffer->_pwent_buffer, PL_reentrant_buffer->_pwent_size, char);
 #endif /* HAS_GETPWNAM_R */
 #ifdef HAS_GETSERVBYNAME_R
 #if   !(GETSERVBYNAME_R_PROTO == REENTRANT_PROTO_I_CCSD)
-	New(31338, PL_reentrant_buffer->_servent_buffer, PL_reentrant_buffer->_servent_size, char);
+	Newx(PL_reentrant_buffer->_servent_buffer, PL_reentrant_buffer->_servent_size, char);
 #endif
 #endif /* HAS_GETSERVBYNAME_R */
 #ifdef HAS_GETSPNAM_R
 #   ifdef USE_SPENT_FPTR
 	PL_reentrant_buffer->_spent_fptr = NULL;
 #   endif
-	New(31338, PL_reentrant_buffer->_spent_buffer, PL_reentrant_buffer->_spent_size, char);
+	Newx(PL_reentrant_buffer->_spent_buffer, PL_reentrant_buffer->_spent_size, char);
 #endif /* HAS_GETSPNAM_R */
 #ifdef HAS_GMTIME_R
 #endif /* HAS_GMTIME_R */
@@ -218,15 +218,15 @@ Perl_reentrant_init(pTHX) {
 	PL_reentrant_buffer->_readdir64_struct = (struct dirent64*)safemalloc(PL_reentrant_buffer->_readdir64_size);
 #endif /* HAS_READDIR64_R */
 #ifdef HAS_SETLOCALE_R
-	New(31338, PL_reentrant_buffer->_setlocale_buffer, PL_reentrant_buffer->_setlocale_size, char);
+	Newx(PL_reentrant_buffer->_setlocale_buffer, PL_reentrant_buffer->_setlocale_size, char);
 #endif /* HAS_SETLOCALE_R */
 #ifdef HAS_SRANDOM_R
 #endif /* HAS_SRANDOM_R */
 #ifdef HAS_STRERROR_R
-	New(31338, PL_reentrant_buffer->_strerror_buffer, PL_reentrant_buffer->_strerror_size, char);
+	Newx(PL_reentrant_buffer->_strerror_buffer, PL_reentrant_buffer->_strerror_size, char);
 #endif /* HAS_STRERROR_R */
 #ifdef HAS_TTYNAME_R
-	New(31338, PL_reentrant_buffer->_ttyname_buffer, PL_reentrant_buffer->_ttyname_size, char);
+	Newx(PL_reentrant_buffer->_ttyname_buffer, PL_reentrant_buffer->_ttyname_size, char);
 #endif /* HAS_TTYNAME_R */
 
 #endif /* USE_REENTRANT_API */

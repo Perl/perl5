@@ -46,7 +46,7 @@ PERL_SI *
 Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems)
 {
     PERL_SI *si;
-    New(56, si, 1, PERL_SI);
+    Newx(si, 1, PERL_SI);
     si->si_stack = newAV();
     AvREAL_off(si->si_stack);
     av_extend(si->si_stack, stitems > 0 ? stitems-1 : 0);
@@ -57,7 +57,7 @@ Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems)
     si->si_cxmax = cxitems - 1;
     si->si_cxix = -1;
     si->si_type = PERLSI_UNDEF;
-    New(56, si->si_cxstack, cxitems, PERL_CONTEXT);
+    Newx(si->si_cxstack, cxitems, PERL_CONTEXT);
     /* Without any kind of initialising PUSHSUBST()
      * in pp_subst() will read uninitialised heap. */
     Poison(si->si_cxstack, cxitems, PERL_CONTEXT);
@@ -254,7 +254,7 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
     if (empty) {
 	register GP *gp;
 
-	Newz(602, gp, 1, GP);
+	Newxz(gp, 1, GP);
 
 	if (GvCVu(gv))
 	    PL_sub_generation++;	/* taking a method out of circulation */

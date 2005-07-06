@@ -521,7 +521,7 @@ PerlIO_allocate(pTHX)
 	    }
 	}
     }
-    Newz('I',f,PERLIO_TABLE_SIZE,PerlIO);
+    Newxz(f,PERLIO_TABLE_SIZE,PerlIO);
     if (!f) {
 	return NULL;
     }
@@ -571,7 +571,7 @@ PerlIO_list_t *
 PerlIO_list_alloc(pTHX)
 {
     PerlIO_list_t *list;
-    Newz('L', list, 1, PerlIO_list_t);
+    Newxz(list, 1, PerlIO_list_t);
     list->refcnt = 1;
     return list;
 }
@@ -603,7 +603,7 @@ PerlIO_list_push(pTHX_ PerlIO_list_t *list, PerlIO_funcs *funcs, SV *arg)
 	if (list->array)
 	    Renew(list->array, list->len, PerlIO_pair_t);
 	else
-	    New('l', list->array, list->len, PerlIO_pair_t);
+	    Newx(list->array, list->len, PerlIO_pair_t);
     }
     p = &(list->array[list->cur++]);
     p->funcs = funcs;
@@ -1168,7 +1168,7 @@ PerlIO_push(pTHX_ PerlIO *f, PERLIO_FUNCS_DECL(*tab), const char *mode, SV *arg)
 	    goto mismatch;
 	}
 	/* Real layer with a data area */
-	Newc('L',l,tab->size,char,PerlIOl);
+	Newxc(l,tab->size,char,PerlIOl);
 	if (l && f) {
 	    Zero(l, tab->size, char);
 	    l->next = *f;
@@ -3881,7 +3881,7 @@ PerlIOBuf_get_base(pTHX_ PerlIO *f)
     if (!b->buf) {
 	if (!b->bufsiz)
 	    b->bufsiz = 4096;
-	b->buf = Newz('B',b->buf,b->bufsiz, STDCHAR);
+	b->buf = Newxz(b->buf,b->bufsiz, STDCHAR);
 	if (!b->buf) {
 	    b->buf = (STDCHAR *) & b->oneword;
 	    b->bufsiz = sizeof(b->oneword);

@@ -570,8 +570,8 @@ Perl_lex_start(pTHX_ SV *line)
     PL_lex_defer = 0;
     PL_expect = XSTATE;
     PL_lex_brackets = 0;
-    New(899, PL_lex_brackstack, 120, char);
-    New(899, PL_lex_casestack, 12, char);
+    Newx(PL_lex_brackstack, 120, char);
+    Newx(PL_lex_casestack, 12, char);
     PL_lex_casemods = 0;
     *PL_lex_casestack = '\0';
     PL_lex_dojoin = 0;
@@ -1206,8 +1206,8 @@ S_sublex_push(pTHX)
 
     PL_lex_dojoin = FALSE;
     PL_lex_brackets = 0;
-    New(899, PL_lex_brackstack, 120, char);
-    New(899, PL_lex_casestack, 12, char);
+    Newx(PL_lex_brackstack, 120, char);
+    Newx(PL_lex_casestack, 12, char);
     PL_lex_casemods = 0;
     *PL_lex_casestack = '\0';
     PL_lex_starts = 0;
@@ -2846,7 +2846,7 @@ Perl_yylex(pTHX)
 		    while (s < PL_bufend && isSPACE(*s))
 			s++;
 		    if (s < PL_bufend) {
-			Newz(899,newargv,PL_origargc+3,char*);
+			Newxz(newargv,PL_origargc+3,char*);
 			newargv[1] = s;
 			while (s < PL_bufend && !isSPACE(*s))
 			    s++;
@@ -9411,7 +9411,7 @@ S_scan_trans(pTHX_ char *start)
     }
   no_more:
 
-    New(803, tbl, complement&&!del?258:256, short);
+    Newx(tbl, complement&&!del?258:256, short);
     o = newPVOP(OP_TRANS, 0, (char*)tbl);
     o->op_private &= ~OPpTRANS_ALL;
     o->op_private |= del|squash|complement|
@@ -10766,7 +10766,7 @@ S_swallow_bom(pTHX_ U8 *s)
 		I32 newlen;
 
 		filter_add(utf16rev_textfilter, NULL);
-		New(898, news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
+		Newx(news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
 		utf16_to_utf8_reversed(s, news,
 				       PL_bufend - (char*)s - 1,
 				       &newlen);
@@ -10792,7 +10792,7 @@ S_swallow_bom(pTHX_ U8 *s)
 		I32 newlen;
 
 		filter_add(utf16_textfilter, NULL);
-		New(898, news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
+		Newx(news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
 		utf16_to_utf8(s, news,
 			      PL_bufend - (char*)s,
 			      &newlen);
@@ -10870,7 +10870,7 @@ utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     if (count) {
 	U8* tmps;
 	I32 newlen;
-	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, U8);
+	Newx(tmps, SvCUR(sv) * 3 / 2 + 1, U8);
 	Copy(SvPVX_const(sv), tmps, old, char);
 	utf16_to_utf8((U8*)SvPVX_const(sv) + old, tmps + old,
 		      SvCUR(sv) - old, &newlen);
@@ -10891,7 +10891,7 @@ utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     if (count) {
 	U8* tmps;
 	I32 newlen;
-	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, U8);
+	Newx(tmps, SvCUR(sv) * 3 / 2 + 1, U8);
 	Copy(SvPVX_const(sv), tmps, old, char);
 	utf16_to_utf8((U8*)SvPVX_const(sv) + old, tmps + old,
 		      SvCUR(sv) - old, &newlen);

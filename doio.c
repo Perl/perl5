@@ -1459,7 +1459,7 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
     const char *tmps = Nullch;
 
     if (sp > mark) {
-	New(401,PL_Argv, sp - mark + 1, char*);
+	Newx(PL_Argv, sp - mark + 1, char*);
 	a = PL_Argv;
 	while (++mark <= sp) {
 	    if (*mark)
@@ -1605,7 +1605,7 @@ Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
 	}
     }
 
-    New(402,PL_Argv, (s - cmd) / 2 + 2, char*);
+    Newx(PL_Argv, (s - cmd) / 2 + 2, char*);
     PL_Cmd = savepvn(cmd, s-cmd);
     a = PL_Argv;
     for (s = PL_Cmd; *s;) {
@@ -2181,7 +2181,7 @@ Perl_do_semop(pTHX_ SV **mark, SV **sp)
         struct sembuf *temps, *t;
         I32 result;
 
-        New (0, temps, nsops, struct sembuf);
+        Newx (temps, nsops, struct sembuf);
         t = temps;
         while (i--) {
             t->sem_num = *o++;

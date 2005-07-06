@@ -2146,7 +2146,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 	    SAVEDESTRUCTOR_X(restore_pos, 0);
         }
         if (!PL_reg_curpm) {
-	    Newz(22, PL_reg_curpm, 1, PMOP);
+	    Newxz(PL_reg_curpm, 1, PMOP);
 #ifdef USE_ITHREADS
             {
                 SV* repointer = newSViv(0);
@@ -2192,7 +2192,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
         if(PL_reg_start_tmp)
             Renew(PL_reg_start_tmp, PL_reg_start_tmpl, char*);
         else
-            New(22, PL_reg_start_tmp, PL_reg_start_tmpl, char*);
+            Newx(PL_reg_start_tmp, PL_reg_start_tmpl, char*);
     }
 
     /* XXXX What this code is doing here?!!!  There should be no need
@@ -3554,7 +3554,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    }
 		    else {
 			PL_reg_poscache_size = size;
-			Newz(29, PL_reg_poscache, size, char);
+			Newxz(PL_reg_poscache, size, char);
 		    }
 		    DEBUG_EXECUTE_r(
 			PerlIO_printf(Perl_debug_log,

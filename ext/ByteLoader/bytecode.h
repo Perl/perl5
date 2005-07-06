@@ -31,7 +31,7 @@ typedef char *pvindex;
 #define BGET_PV(arg)	STMT_START {					\
 	BGET_U32(arg);							\
 	if (arg) {							\
-	    New(666, bstate->bs_pv.pvx, arg, char);			\
+	    Newx(bstate->bs_pv.pvx, arg, char);			\
 	    bl_read(bstate->bs_fdata, bstate->bs_pv.pvx, arg, 1);	\
 	    bstate->bs_pv.xpv.xpv_len = arg;				\
 	    bstate->bs_pv.xpv.xpv_cur = arg - 1;			\
@@ -63,7 +63,7 @@ typedef char *pvindex;
 #define BGET_op_tr_array(arg) do {			\
 	unsigned short *ary, len;			\
 	BGET_U16(len);					\
-	New(666, ary, len, unsigned short);		\
+	Newx(ary, len, unsigned short);		\
 	BGET_FREAD(ary, sizeof(unsigned short), len);	\
 	arg = (char *) ary;				\
     } while (0)

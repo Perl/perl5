@@ -1682,7 +1682,7 @@ S_debprof(pTHX_ const OP *o)
     if (CopSTASH_eq(PL_curcop, PL_debstash) && !DEBUG_J_TEST_)
 	return;
     if (!PL_profiledata)
-	Newz(000, PL_profiledata, MAXO, U32);
+	Newxz(PL_profiledata, MAXO, U32);
     ++PL_profiledata[o->op_type];
 }
 

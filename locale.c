@@ -570,7 +570,7 @@ Perl_mem_collxfrm(pTHX_ const char *s, STRLEN len, STRLEN *xlen)
     /* the +1 is for the terminating NUL. */
 
     xAlloc = sizeof(PL_collation_ix) + PL_collxfrm_base + (PL_collxfrm_mult * len) + 1;
-    New(171, xbuf, xAlloc, char);
+    Newx(xbuf, xAlloc, char);
     if (! xbuf)
 	goto bad;
 

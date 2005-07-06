@@ -1988,7 +1988,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     CvPADLIST(PL_compcv) = pad_new(0);
 #ifdef USE_5005THREADS
     CvOWNER(PL_compcv) = 0;
-    New(666, CvMUTEXP(PL_compcv), 1, perl_mutex);
+    Newx(CvMUTEXP(PL_compcv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(PL_compcv));
 #endif /* USE_5005THREADS */
 
@@ -4315,22 +4315,22 @@ Perl_init_stacks(pTHX)
     PL_stack_sp = PL_stack_base;
     PL_stack_max = PL_stack_base + AvMAX(PL_curstack);
 
-    New(50,PL_tmps_stack,REASONABLE(128),SV*);
+    Newx(PL_tmps_stack,REASONABLE(128),SV*);
     PL_tmps_floor = -1;
     PL_tmps_ix = -1;
     PL_tmps_max = REASONABLE(128);
 
-    New(54,PL_markstack,REASONABLE(32),I32);
+    Newx(PL_markstack,REASONABLE(32),I32);
     PL_markstack_ptr = PL_markstack;
     PL_markstack_max = PL_markstack + REASONABLE(32);
 
     SET_MARK_OFFSET;
 
-    New(54,PL_scopestack,REASONABLE(32),I32);
+    Newx(PL_scopestack,REASONABLE(32),I32);
     PL_scopestack_ix = 0;
     PL_scopestack_max = REASONABLE(32);
 
-    New(54,PL_savestack,REASONABLE(128),ANY);
+    Newx(PL_savestack,REASONABLE(128),ANY);
     PL_savestack_ix = 0;
     PL_savestack_max = REASONABLE(128);
 }
@@ -4913,7 +4913,7 @@ S_init_main_thread(pTHX)
 #endif
     XPV *xpv;
 
-    Newz(53, thr, 1, struct perl_thread);
+    Newxz(thr, 1, struct perl_thread);
     PL_curcop = &PL_compiling;
     thr->interp = PERL_GET_INTERP;
     thr->cvcache = newHV();
@@ -4923,8 +4923,8 @@ S_init_main_thread(pTHX)
     thr->flags = THRf_R_JOINABLE;
     MUTEX_INIT(&thr->mutex);
     /* Handcraft thrsv similarly to mess_sv */
-    New(53, PL_thrsv, 1, SV);
-    Newz(53, xpv, 1, XPV);
+    Newx(PL_thrsv, 1, SV);
+    Newxz(xpv, 1, XPV);
     SvFLAGS(PL_thrsv) = SVt_PV;
     SvANY(PL_thrsv) = (void*)xpv;
     SvREFCNT(PL_thrsv) = 1 << 30;	/* practically infinite */
