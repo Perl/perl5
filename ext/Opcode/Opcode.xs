@@ -510,7 +510,7 @@ opmask_add(opset)
     SV *opset
 PREINIT:
     if (!PL_op_mask)
-	Newz(0, PL_op_mask, PL_maxo, char);
+	Newxz(PL_op_mask, PL_maxo, char);
 CODE:
     opmask_add(aTHX_ opset);
 

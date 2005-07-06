@@ -60,7 +60,7 @@ S_do_trans_simple(pTHX_ SV *sv)
 
     /* Allow for expansion: $_="a".chr(400); tr/a/\xFE/, FE needs encoding */
     if (grows)
-	New(0, d, len*2+1, U8);
+	Newx(d, len*2+1, U8);
     else
 	d = s;
     dstart = d;
@@ -190,7 +190,7 @@ S_do_trans_complex(pTHX_ SV *sv)
     }
     else { /* isutf8 */
 	if (grows)
-	    New(0, d, len*2+1, U8);
+	    Newx(d, len*2+1, U8);
 	else
 	    d = s;
 	dstart = d;
@@ -337,7 +337,7 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)
 
     if (grows) {
 	/* d needs to be bigger than s, in case e.g. upgrading is required */
-	New(0, d, len * 3 + UTF8_MAXBYTES, U8);
+	Newx(d, len * 3 + UTF8_MAXBYTES, U8);
 	dend = d + len * 3;
 	dstart = d;
     }
@@ -477,7 +477,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv)
 
     if (grows) {
 	/* d needs to be bigger than s, in case e.g. upgrading is required */
-	New(0, d, len * 3 + UTF8_MAXBYTES, U8);
+	Newx(d, len * 3 + UTF8_MAXBYTES, U8);
 	dend = d + len * 3;
 	dstart = d;
     }
@@ -1170,7 +1170,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     lensave = len;
     if ((left_utf || right_utf) && (sv == left || sv == right)) {
 	needlen = optype == OP_BIT_AND ? len : leftlen + rightlen;
-	Newz(801, dc, needlen + 1, char);
+	Newxz(dc, needlen + 1, char);
     }
     else if (SvOK(sv) || SvTYPE(sv) > SVt_PVMG) {
 	STRLEN n_a;
@@ -1185,7 +1185,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     else {
 	needlen = ((optype == OP_BIT_AND)
 		    ? len : (leftlen > rightlen ? leftlen : rightlen));
-	Newz(801, dc, needlen + 1, char);
+	Newxz(dc, needlen + 1, char);
 	(void)sv_usepvn(sv, dc, needlen);
 	dc = SvPVX(sv);		/* sv_usepvn() calls Renew() */
     }

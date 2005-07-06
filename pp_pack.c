@@ -1084,7 +1084,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		len = (strend - s) * 8;
 	    if (checksum) {
 		if (!PL_bitcount) {
-		    Newz(601, PL_bitcount, 256, char);
+		    Newxz(PL_bitcount, 256, char);
 		    for (bits = 1; bits < 256; bits++) {
 			if (bits & 1)	PL_bitcount[bits]++;
 			if (bits & 2)	PL_bitcount[bits]++;
@@ -2576,7 +2576,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 		    if ((norm = is_an_int(from, len)) == NULL)
 			Perl_croak(aTHX_ "Can only compress unsigned integers in pack");
 
-		    New('w', result, len, char);
+		    Newx(result, len, char);
 		    in = result + len;
 		    done = FALSE;
 		    while (!done)

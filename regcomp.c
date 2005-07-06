@@ -1681,9 +1681,9 @@ S_add_data(pTHX_ RExC_state_t *pRExC_state, I32 n, const char *s)
 	RExC_rx->data->count += n;
     }
     else {
-	Newc(1207, RExC_rx->data, sizeof(*RExC_rx->data) + sizeof(void*) * (n - 1),
+	Newxc(RExC_rx->data, sizeof(*RExC_rx->data) + sizeof(void*) * (n - 1),
 	     char, struct reg_data);
-	New(1208, RExC_rx->data->what, n, U8);
+	Newx(RExC_rx->data->what, n, U8);
 	RExC_rx->data->count = n;
     }
     Copy(s, RExC_rx->data->what + RExC_rx->data->count - n, n, U8);
@@ -1794,7 +1794,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	RExC_whilem_seen = 15;
 
     /* Allocate space and initialize. */
-    Newc(1001, r, sizeof(regexp) + (unsigned)RExC_size * sizeof(regnode),
+    Newxc(r, sizeof(regexp) + (unsigned)RExC_size * sizeof(regnode),
 	 char, regexp);
     if (r == NULL)
 	FAIL("Regexp out of space");
@@ -1814,7 +1814,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     r->startp = 0;			/* Useful during FAIL. */
     r->endp = 0;			/* Useful during FAIL. */
 
-    Newz(1304, r->offsets, 2*RExC_size+1, U32); /* MJD 20001228 */
+    Newxz(r->offsets, 2*RExC_size+1, U32); /* MJD 20001228 */
     if (r->offsets) {
 	r->offsets[0] = RExC_size;
     }
@@ -1852,7 +1852,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 
     /* XXXX To minimize changes to RE engine we always allocate
        3-units-long substrs field. */
-    Newz(1004, r->substrs, 1, struct reg_substr_data);
+    Newxz(r->substrs, 1, struct reg_substr_data);
 
     StructCopy(&zero_scan_data, &data, scan_data_t);
     /* XXXX Should not we check for something else?  Usually it is OPEN1... */
@@ -2031,7 +2031,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	{
 	    const I32 n = add_data(pRExC_state, 1, "f");
 
-	    New(1006, RExC_rx->data->data[n], 1,
+	    Newx(RExC_rx->data->data[n], 1,
 		struct regnode_charclass_class);
 	    StructCopy(data.start_class,
 		       (struct regnode_charclass_class*)RExC_rx->data->data[n],
@@ -2087,7 +2087,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	{
 	    const I32 n = add_data(pRExC_state, 1, "f");
 
-	    New(1006, RExC_rx->data->data[n], 1,
+	    Newx(RExC_rx->data->data[n], 1,
 		struct regnode_charclass_class);
 	    StructCopy(data.start_class,
 		       (struct regnode_charclass_class*)RExC_rx->data->data[n],
@@ -2111,8 +2111,8 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	r->reganch |= ROPT_EVAL_SEEN;
     if (RExC_seen & REG_SEEN_CANY)
 	r->reganch |= ROPT_CANY_SEEN;
-    Newz(1002, r->startp, RExC_npar, I32);
-    Newz(1002, r->endp, RExC_npar, I32);
+    Newxz(r->startp, RExC_npar, I32);
+    Newxz(r->endp, RExC_npar, I32);
     PL_regdata = r->data; /* for regprop() */
     DEBUG_r(regdump(r));
     return(r);

@@ -332,7 +332,7 @@ bsd_glob(const char *pattern, int flags,
 
 	/* We operate on a copy of the pattern */
 	len = strlen(pattern);
-	New(0, new_pat, len + 1, char);
+	Newx(new_pat, len + 1, char);
 	if (new_pat == NULL)
 	    return (GLOB_NOSPACE);
 
@@ -1009,7 +1009,7 @@ globextend(const Char *path, glob_t *pglob, size_t *limitp)
 	if (pglob->gl_pathv)
 		pathv = Renew(pglob->gl_pathv,newsize,char*);
 	else
-		New(0,pathv,newsize,char*);
+		Newx(pathv,newsize,char*);
 	if (pathv == NULL) {
 		if (pglob->gl_pathv) {
 			Safefree(pglob->gl_pathv);
@@ -1030,7 +1030,7 @@ globextend(const Char *path, glob_t *pglob, size_t *limitp)
 		;
 	len = (STRLEN)(p - path);
 	*limitp += len;
-	New(0, copy, p-path, char);
+	Newx(copy, p-path, char);
 	if (copy != NULL) {
 		if (g_Ctoc(path, copy, len)) {
 			Safefree(copy);

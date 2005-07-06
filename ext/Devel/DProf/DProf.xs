@@ -738,7 +738,7 @@ BOOT:
 	g_key_hash = newSV(256);
         g_prof_pid = (int)getpid();
 
-	New(0, g_profstack, g_profstack_max, PROFANY);
+	Newx(g_profstack, g_profstack_max, PROFANY);
         prof_recordheader(aTHX);
         DBG_TIMER_NOTIFY("Profiler timer is on.\n");
 	g_orealtime = g_rprof_start = Times(&g_prof_start);

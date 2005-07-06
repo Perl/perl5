@@ -212,7 +212,7 @@ S_more_sv(pTHX)
     }
     else {
 	char *chunk;                /* must use New here to match call to */
-	New(704,chunk,PERL_ARENA_SIZE,char);   /* Safefree() in sv_free_arenas()     */
+	Newx(chunk,PERL_ARENA_SIZE,char);   /* Safefree() in sv_free_arenas()     */
 	sv_add_arena(chunk, PERL_ARENA_SIZE, 0);
     }
     uproot_SV(sv);
@@ -3184,7 +3184,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
                                 }
                             }
 
-			    New(616, mg->mg_ptr, mg->mg_len + 1 + left, char);
+			    Newx(mg->mg_ptr, mg->mg_len + 1 + left, char);
 			    Copy("(?", mg->mg_ptr, 2, char);
 			    Copy(reflags, mg->mg_ptr+2, left, char);
 			    Copy(":", mg->mg_ptr+left+2, 1, char);
@@ -4693,7 +4693,7 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
     if (SvTYPE(sv) < SVt_PVMG) {
 	(void)SvUPGRADE(sv, SVt_PVMG);
     }
-    Newz(702,mg, 1, MAGIC);
+    Newxz(mg, 1, MAGIC);
     mg->mg_moremagic = SvMAGIC(sv);
     SvMAGIC_set(sv, mg);
 
@@ -5588,13 +5588,13 @@ S_utf8_mg_pos_init(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i,
 	    *mgp = sv_magicext(sv, 0, PERL_MAGIC_utf8, &PL_vtbl_utf8, 0, 0);
 	assert(*mgp);
 
-        if ((*mgp)->mg_ptr)
-            *cachep = (STRLEN *) (*mgp)->mg_ptr;
-        else {
-            Newz(0, *cachep, PERL_MAGIC_UTF8_CACHESIZE * 2, STRLEN);
-            (*mgp)->mg_ptr = (char *) *cachep;
-        }
-        assert(*cachep);
+	if ((*mgp)->mg_ptr)
+	    *cachep = (STRLEN *) (*mgp)->mg_ptr;
+	else {
+	    Newxz(*cachep, PERL_MAGIC_UTF8_CACHESIZE * 2, STRLEN);
+	    (*mgp)->mg_ptr = (char *) *cachep;
+	}
+	assert(*cachep);
 
 	(*cachep)[i]   = offsetp;
 	(*cachep)[i+1] = s - start;
@@ -5913,7 +5913,7 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 	    assert(mg);
 
 	    if (!mg->mg_ptr) {
-		Newz(0, cache, PERL_MAGIC_UTF8_CACHESIZE * 2, STRLEN);
+		Newxz(cache, PERL_MAGIC_UTF8_CACHESIZE * 2, STRLEN);
 		mg->mg_ptr = (char *) cache;
 	    }
 	    assert(cache);
@@ -6522,7 +6522,7 @@ thats_really_all_folks:
 
 #ifdef USEHEAPINSTEADOFSTACK
 	STDCHAR *buf = 0;
-	New(0, buf, 8192, STDCHAR);
+	Newx(buf, 8192, STDCHAR);
 	assert(buf);
 #else
 	STDCHAR buf[8192];
@@ -9357,7 +9357,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (PL_efloatsize < need) {
 		Safefree(PL_efloatbuf);
 		PL_efloatsize = need + 20; /* more fudge */
-		New(906, PL_efloatbuf, PL_efloatsize, char);
+		Newx(PL_efloatbuf, PL_efloatsize, char);
 		PL_efloatbuf[0] = '\0';
 	    }
 
@@ -9625,15 +9625,15 @@ Perl_re_dup(pTHX_ REGEXP *r, CLONE_PARAMS *param)
     len = r->offsets[0];
     npar = r->nparens+1;
 
-    Newc(0, ret, sizeof(regexp) + (len+1)*sizeof(regnode), char, regexp);
+    Newxc(ret, sizeof(regexp) + (len+1)*sizeof(regnode), char, regexp);
     Copy(r->program, ret->program, len+1, regnode);
 
-    New(0, ret->startp, npar, I32);
+    Newx(ret->startp, npar, I32);
     Copy(r->startp, ret->startp, npar, I32);
-    New(0, ret->endp, npar, I32);
+    Newx(ret->endp, npar, I32);
     Copy(r->startp, ret->startp, npar, I32);
 
-    New(0, ret->substrs, 1, struct reg_substr_data);
+    Newx(ret->substrs, 1, struct reg_substr_data);
     for (s = ret->substrs->data, i = 0; i < 3; i++, s++) {
 	s->min_offset = r->substrs->data[i].min_offset;
 	s->max_offset = r->substrs->data[i].max_offset;
@@ -9647,9 +9647,9 @@ Perl_re_dup(pTHX_ REGEXP *r, CLONE_PARAMS *param)
         const int count = r->data->count;
 	int i;
 
-	Newc(0, d, sizeof(struct reg_data) + count*sizeof(void *),
+	Newxc(d, sizeof(struct reg_data) + count*sizeof(void *),
 		char, struct reg_data);
-	New(0, d->what, count, U8);
+	Newx(d->what, count, U8);
 
 	d->count = count;
 	for (i = 0; i < count; i++) {
@@ -9663,7 +9663,7 @@ Perl_re_dup(pTHX_ REGEXP *r, CLONE_PARAMS *param)
 		break;
 	    case 'f':
 		/* This is cheating. */
-		New(0, d->data[i], 1, struct regnode_charclass_class);
+		Newx(d->data[i], 1, struct regnode_charclass_class);
 		StructCopy(r->data->data[i], d->data[i],
 			    struct regnode_charclass_class);
 		ret->regstclass = (regnode*)d->data[i];
@@ -9686,7 +9686,7 @@ Perl_re_dup(pTHX_ REGEXP *r, CLONE_PARAMS *param)
     else
 	ret->data = NULL;
 
-    New(0, ret->offsets, 2*len+1, U32);
+    Newx(ret->offsets, 2*len+1, U32);
     Copy(r->offsets, ret->offsets, 2*len+1, U32);
 
     ret->precomp        = SAVEPVN(r->precomp, r->prelen);
@@ -9757,7 +9757,7 @@ Perl_gp_dup(pTHX_ GP *gp, CLONE_PARAMS* param)
 	return ret;
 
     /* create anew and remember what it is */
-    Newz(0, ret, 1, GP);
+    Newxz(ret, 1, GP);
     ptr_table_store(PL_ptr_table, gp, ret);
 
     /* clone */
@@ -9792,7 +9792,7 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS* param)
 
     for (; mg; mg = mg->mg_moremagic) {
 	MAGIC *nmg;
-	Newz(0, nmg, 1, MAGIC);
+	Newxz(nmg, 1, MAGIC);
 	if (mgprev)
 	    mgprev->mg_moremagic = nmg;
 	else
@@ -9853,10 +9853,10 @@ PTR_TBL_t *
 Perl_ptr_table_new(pTHX)
 {
     PTR_TBL_t *tbl;
-    Newz(0, tbl, 1, PTR_TBL_t);
+    Newxz(tbl, 1, PTR_TBL_t);
     tbl->tbl_max	= 511;
     tbl->tbl_items	= 0;
-    Newz(0, tbl->tbl_ary, tbl->tbl_max + 1, PTR_TBL_ENT_t*);
+    Newxz(tbl->tbl_ary, tbl->tbl_max + 1, PTR_TBL_ENT_t*);
     return tbl;
 }
 
@@ -10326,7 +10326,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	    STRLEN i = 0;
 	    XPVHV *dxhv = (XPVHV*)SvANY(dstr);
 	    XPVHV *sxhv = (XPVHV*)SvANY(sstr);
-	    New(0, dxhv->xhv_array,
+	    Newx(dxhv->xhv_array,
 		 PERL_HV_ARRAY_ALLOC_BYTES(dxhv->xhv_max+1), char);
 	    while (i <= sxhv->xhv_max) {
 		HE *source = HvARRAY(sstr)[i];
@@ -10419,7 +10419,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 	return ncxs;
 
     /* create anew and remember what it is */
-    Newz(56, ncxs, max + 1, PERL_CONTEXT);
+    Newxz(ncxs, max + 1, PERL_CONTEXT);
     ptr_table_store(PL_ptr_table, cxs, ncxs);
 
     while (ix >= 0) {
@@ -10507,7 +10507,7 @@ Perl_si_dup(pTHX_ PERL_SI *si, CLONE_PARAMS* param)
 	return nsi;
 
     /* create anew and remember what it is */
-    Newz(56, nsi, 1, PERL_SI);
+    Newxz(nsi, 1, PERL_SI);
     ptr_table_store(PL_ptr_table, si, nsi);
 
     nsi->si_stack	= av_dup_inc(si->si_stack, param);
@@ -10591,7 +10591,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
     void (*dptr) (void*);
     void (*dxptr) (pTHX_ void*);
 
-    Newz(54, nss, max, ANY);
+    Newxz(nss, max, ANY);
 
     while (ix > 0) {
 	I32 i = POPINT(ss,ix);
@@ -11278,7 +11278,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* interpreter atexit processing */
     PL_exitlistlen	= proto_perl->Iexitlistlen;
     if (PL_exitlistlen) {
-	New(0, PL_exitlist, PL_exitlistlen, PerlExitListEntry);
+	Newx(PL_exitlist, PL_exitlistlen, PerlExitListEntry);
 	Copy(proto_perl->Iexitlist, PL_exitlist, PL_exitlistlen, PerlExitListEntry);
     }
     else
@@ -11506,15 +11506,15 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_bitcount		= Nullch;	/* reinits on demand */
 
     if (proto_perl->Ipsig_pend) {
-	Newz(0, PL_psig_pend, SIG_SIZE, int);
+	Newxz(PL_psig_pend, SIG_SIZE, int);
     }
     else {
 	PL_psig_pend	= (int*)NULL;
     }
 
     if (proto_perl->Ipsig_ptr) {
-	Newz(0, PL_psig_ptr,  SIG_SIZE, SV*);
-	Newz(0, PL_psig_name, SIG_SIZE, SV*);
+	Newxz(PL_psig_ptr,  SIG_SIZE, SV*);
+	Newxz(PL_psig_name, SIG_SIZE, SV*);
 	for (i = 1; i < SIG_SIZE; i++) {
 	    PL_psig_ptr[i]  = sv_dup_inc(proto_perl->Ipsig_ptr[i], param);
 	    PL_psig_name[i] = sv_dup_inc(proto_perl->Ipsig_name[i], param);
@@ -11532,7 +11532,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	PL_tmps_ix		= proto_perl->Ttmps_ix;
 	PL_tmps_max		= proto_perl->Ttmps_max;
 	PL_tmps_floor		= proto_perl->Ttmps_floor;
-	Newz(50, PL_tmps_stack, PL_tmps_max, SV*);
+	Newxz(PL_tmps_stack, PL_tmps_max, SV*);
 	i = 0;
 	while (i <= PL_tmps_ix) {
 	    PL_tmps_stack[i]	= sv_dup_inc(proto_perl->Ttmps_stack[i], param);
@@ -11541,7 +11541,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
 	/* next PUSHMARK() sets *(PL_markstack_ptr+1) */
 	i = proto_perl->Tmarkstack_max - proto_perl->Tmarkstack;
-	Newz(54, PL_markstack, i, I32);
+	Newxz(PL_markstack, i, I32);
 	PL_markstack_max	= PL_markstack + (proto_perl->Tmarkstack_max
 						  - proto_perl->Tmarkstack);
 	PL_markstack_ptr	= PL_markstack + (proto_perl->Tmarkstack_ptr
@@ -11553,7 +11553,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	 * NOTE: unlike the others! */
 	PL_scopestack_ix	= proto_perl->Tscopestack_ix;
 	PL_scopestack_max	= proto_perl->Tscopestack_max;
-	Newz(54, PL_scopestack, PL_scopestack_max, I32);
+	Newxz(PL_scopestack, PL_scopestack_max, I32);
 	Copy(proto_perl->Tscopestack, PL_scopestack, PL_scopestack_ix, I32);
 
 	/* next push_return() sets PL_retstack[PL_retstack_ix]
@@ -11580,7 +11580,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	 * NOTE: unlike the others! */
 	PL_savestack_ix		= proto_perl->Tsavestack_ix;
 	PL_savestack_max	= proto_perl->Tsavestack_max;
-	/*Newz(54, PL_savestack, PL_savestack_max, ANY);*/
+	/*Newxz(PL_savestack, PL_savestack_max, ANY);*/
 	PL_savestack		= ss_dup(proto_perl, param);
     }
     else {
