@@ -517,7 +517,10 @@ PP(pp_die)
 	    if (SvPOK(error) && SvCUR(error))
 		sv_catpv(error, "\t...propagated");
 	    tmpsv = error;
-	    tmps = SvPV_const(tmpsv, len);
+	    if (SvOK(tmpsv))
+		tmps = SvPV_const(tmpsv, len);
+	    else
+		tmps = Nullch;
 	}
     }
     if (!tmps || !len)
