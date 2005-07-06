@@ -18,9 +18,11 @@ File::Basename - Parse file paths into directory, filename and suffix.
 These routines allow you to parse file paths into their directory, filename
 and suffix.
 
-B<NOTE>: C<dirname()> and C<basename()> emulate the behaviours, and quirks, of
-the shell and C functions of the same name.  See each function's documention
-for details.
+B<NOTE>: C<dirname()> and C<basename()> emulate the behaviours, and
+quirks, of the shell and C functions of the same name.  See each
+function's documention for details.  If your concern is just parsing
+paths it is safer to use L<File::Spec>'s C<splitpath()> and
+C<splitdir()> methods.
 
 It is guaranteed that
 
@@ -28,6 +30,7 @@ It is guaranteed that
     dirname($path) . $path_separator . basename($path);
 
 is equivalent to the original path for all systems but VMS.
+
 
 =cut
 
@@ -51,7 +54,7 @@ our(@ISA, @EXPORT, $VERSION, $Fileparse_fstype, $Fileparse_igncase);
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(fileparse fileparse_set_fstype basename dirname);
-$VERSION = "2.73";
+$VERSION = "2.74";
 
 fileparse_set_fstype($^O);
 
@@ -365,3 +368,8 @@ sub fileparse_set_fstype {
 
 
 1;
+
+
+=head1 SEE ALSO
+
+L<dirname(1)>, L<basename(1)>, L<File::Spec>
