@@ -204,7 +204,7 @@ PP(pp_substcont)
     }
 
     rxres_restore(&cx->sb_rxres, rx);
-    RX_MATCH_UTF8_set(rx, SvUTF8(cx->sb_targ));
+    RX_MATCH_UTF8_set(rx, DO_UTF8(cx->sb_targ));
 
     if (cx->sb_iters++) {
 	const I32 saviters = cx->sb_iters;
