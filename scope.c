@@ -170,7 +170,9 @@ SV *
 Perl_save_scalar(pTHX_ GV *gv)
 {
     SV **sptr = &GvSV(gv);
+    PL_localizing = 1;
     SvGETMAGIC(*sptr);
+    PL_localizing = 0;
     SSCHECK(3);
     SSPUSHPTR(SvREFCNT_inc(gv));
     SSPUSHPTR(SvREFCNT_inc(*sptr));

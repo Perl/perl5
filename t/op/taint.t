@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 243;
+plan tests => 244;
 
 
 $| = 1;
@@ -1128,3 +1128,10 @@ TERNARY_CONDITIONALS: {
     test tainted $x99;
 }
 
+# an mg_get of a tainted value during localization shouldn't taint the
+# statement
+
+{
+    eval { local $0, eval '1' };
+    test $@ eq '';
+}
