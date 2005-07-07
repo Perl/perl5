@@ -157,9 +157,9 @@ sub fileparse {
   }
       
 
-  my($tail, $suffix);
+  my $tail   = '';
+  my $suffix = '';
   if (@suffices) {
-    $tail = '';
     foreach $suffix (@suffices) {
       my $pat = ($igncase ? '(?i)' : '') . "($suffix)\$";
       if ($basename =~ s/$pat//s) {
@@ -170,7 +170,7 @@ sub fileparse {
   }
 
   # Ensure taint is propgated from the path to its pieces.
-  $tail .= $taint if defined $tail; # avoid warning if $tail == undef
+  $tail .= $taint;
   wantarray ? ($basename .= $taint, $dirpath .= $taint, $tail)
             : ($basename .= $taint);
 }
@@ -202,15 +202,34 @@ quoted.
     my $filename = basename("/foo/bar/baz.txt",  ".txt");
     my $filename = fileparse("/foo/bar/baz.txt", qr/\Q.txt\E/);
 
+Also note that in order to be compatible with the shell command,
+C<basename()> does not strip off a suffix if it is identical to the
+remaining characters in the filename.
+
 =cut
 
 
 sub basename {
   my($path) = shift;
 
+  # From BSD basename(1)
+  # The basename utility deletes any prefix ending with the last slash `/'
+  # character present in string (after first stripping trailing slashes)
   _strip_trailing_sep($path);
-  my($basename, $dirname) = fileparse( $path, map("\Q$_\E",@_) );
-  $basename = $dirname unless length $basename;
+
+  my($basename, $dirname, $suffix) = fileparse( $path, map("\Q$_\E",@_) );
+
+  # From BSD basename(1)
+  # The suffix is not stripped if it is identical to the remaining 
+  # characters in string.
+  if( length $suffix and !length $basename ) {
+      $basename = $suffix;
+  }
+  
+  # Ensure that basename '/' == '/'
+  if( !length $basename ) {
+      $basename = $dirname;
+  }
 
   return $basename;
 }

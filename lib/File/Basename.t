@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-use Test::More tests => 60;
+use Test::More tests => 64;
 
 BEGIN { use_ok 'File::Basename' }
 
@@ -139,6 +139,17 @@ can_ok( __PACKAGE__, qw( basename fileparse dirname fileparse_set_fstype ) );
     fileparse_set_fstype('DOS');
     is(dirname('\\'), '\\');
     is(basename('\\'), '\\');
+}
+
+
+### basename(1) sez: "The suffix is not stripped if it is identical to the
+### remaining characters in string"
+{
+    fileparse_set_fstype('Unix');
+    is(basename('.foo'), '.foo');
+    is(basename('.foo', '.foo'),     '.foo');
+    is(basename('.foo.bar', '.foo'), '.foo.bar');
+    is(basename('.foo.bar', '.bar'), '.foo');
 }
 
 
