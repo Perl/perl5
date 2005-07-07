@@ -206,9 +206,13 @@ quoted.
 
 
 sub basename {
-  my($name) = shift;
-  _strip_trailing_sep($name);
-  (fileparse($name, map("\Q$_\E",@_)))[0];
+  my($path) = shift;
+
+  _strip_trailing_sep($path);
+  my($basename, $dirname) = fileparse( $path, map("\Q$_\E",@_) );
+  $basename = $dirname unless length $basename;
+
+  return $basename;
 }
 
 

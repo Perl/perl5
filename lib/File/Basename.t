@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-use Test::More tests => 57;
+use Test::More tests => 60;
 
 BEGIN { use_ok 'File::Basename' }
 
@@ -26,7 +26,6 @@ can_ok( __PACKAGE__, qw( basename fileparse dirname fileparse_set_fstype ) );
     is(basename('/arma/virumque.cano'), 'virumque.cano');
     is(dirname ('/arma/virumque.cano'), '/arma');
     is(dirname('arma/'), '.');
-    is(dirname('/'), '/');
 }
 
 
@@ -131,6 +130,18 @@ can_ok( __PACKAGE__, qw( basename fileparse dirname fileparse_set_fstype ) );
 }
 
 
+### rt.cpan.org 36477
+{
+    fileparse_set_fstype('Unix');
+    is(dirname('/'), '/');
+    is(basename('/'), '/');
+
+    fileparse_set_fstype('DOS');
+    is(dirname('\\'), '\\');
+    is(basename('\\'), '\\');
+}
+
+
 ### Test tainting
 {
     #   The empty tainted value, for tainting strings
@@ -150,6 +161,7 @@ can_ok( __PACKAGE__, qw( basename fileparse dirname fileparse_set_fstype ) );
         1;
     }
 
+    fileparse_set_fstype 'Unix';
     ok tainted(dirname($TAINT.'/perl/lib//'));
     ok all_tainted(fileparse($TAINT.'/dir/draft.book7','\.book\d+'));
 }
