@@ -96,7 +96,7 @@ SKIP: {
     isnt(fileno(F), fileno(STDOUT));
     close F;
 
-    ok(open(F, "<&=STDIN"));
+    ok(open(F, "<&=STDIN")) or _diag $!;
     is(fileno(F), fileno(STDIN));
     close F;
 
