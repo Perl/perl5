@@ -42,9 +42,9 @@ Return the SV from the GV.
 
 #define GvSV(gv)	(GvGP(gv)->gp_sv)
 #ifdef PERL_DONT_CREATE_GVSV
-#define GvSVn(gv)	(GvGP(gv)->gp_sv ? \
-			 GvGP(gv)->gp_sv : \
-			 GvGP(gv_SVadd(gv))->gp_sv)
+#define GvSVn(gv)	(*(GvGP(gv)->gp_sv ? \
+			 &(GvGP(gv)->gp_sv) : \
+			 &(GvGP(gv_SVadd(gv))->gp_sv)))
 #else
 #define GvSVn(gv)	GvSV(gv)
 #endif
