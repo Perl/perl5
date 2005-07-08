@@ -2612,7 +2612,7 @@ S_regmatch(pTHX_ regnode *prog)
 
 		    if ( base ) {
 
-			if ( do_utf8 || UTF ) {
+			if ( do_utf8 ) {
 			    if ( foldlen>0 ) {
 				uvc = utf8n_to_uvuni( uscan, UTF8_MAXLEN, &len, uniflags );
 				foldlen -= len;
@@ -2678,7 +2678,7 @@ S_regmatch(pTHX_ regnode *prog)
 
 		    if ( base ) {
 
-			if ( do_utf8 || UTF ) {
+			if ( do_utf8 ) {
 			    uvc = utf8n_to_uvuni( (U8*)uc, UTF8_MAXLEN, &len, uniflags );
 			} else {
 			    uvc = (U32)*uc;

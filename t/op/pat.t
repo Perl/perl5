@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..1180\n";
+print "1..1186\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3368,10 +3368,18 @@ ok(("foba  ba$s" =~ qr/(foo|BaSS|bar)/i)
 # [perl #36207] mixed utf8 / latin-1 and case folding
 
 {
-    my $u = "\xe9\x{100}";
-    chop $u;
-    ok($u =~ /\xe9/i, "utf8/latin");
-    ok("\xe9" =~ /$u/i, "# TODO latin/utf8");
+    my $utf8 = "\xe9\x{100}"; chop $utf8;
+    my $latin1 = "\xe9";
+
+    ok($utf8 =~ /\xe9/i, "utf8/latin");
+    ok($utf8 =~ /$latin1/i, "utf8/latin runtime");
+    ok($utf8 =~ /(abc|\xe9)/i, "utf8/latin trie");
+    ok($utf8 =~ /(abc|$latin1)/i, "utf8/latin trie runtime");
+
+    ok("\xe9" =~ /$utf8/i, "# TODO latin/utf8");
+    ok("\xe9" =~ /(abc|$utf8)/i, "# latin/utf8 trie");
+    ok($latin1 =~ /$utf8/i, "# TODO latin/utf8 runtime");
+    ok($latin1 =~ /(abc|$utf8)/i, "# latin/utf8 trie runtime");
 }
 
-# last test 1180
+# last test 1186
