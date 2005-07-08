@@ -804,6 +804,12 @@ int usleep(unsigned int);
 
 #endif /* PERL_CORE */
 
+/* We no longer default to creating a new SV for GvSV.
+   Do this before embed.  */
+#ifndef PERL_CREATE_GVSV
+#define PERL_DONT_CREATE_GVSV
+#endif
+
 /* Cannot include embed.h here on Win32 as win32.h has not 
    yet been included and defines some config variables e.g. HAVE_INTERP_INTERN
  */
