@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..1178\n";
+print "1..1180\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3364,4 +3364,14 @@ ok(("foba  ba$s" =~ qr/(foo|BaSS|bar)/i)
     my $psycho=join "|",@normal,map chr $_,255..20000;
     ok(('these'=~/($psycho)/) && $1 eq 'these','Pyscho');
 }
-# last test 1178
+
+# [perl #36207] mixed utf8 / latin-1 and case folding
+
+{
+    my $u = "\xe9\x{100}";
+    chop $u;
+    ok($u =~ /\xe9/i, "utf8/latin");
+    ok("\xe9" =~ /$u/i, "# TODO latin/utf8");
+}
+
+# last test 1180
