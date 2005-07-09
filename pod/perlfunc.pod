@@ -603,6 +603,8 @@ previous time C<caller> was called.
 
 =item chdir EXPR
 
+=item chdir
+
 Changes the working directory to EXPR, if possible. If EXPR is omitted,
 changes to the directory specified by C<$ENV{HOME}>, if set; if not,
 changes to the directory specified by C<$ENV{LOGDIR}>. (Under VMS, the
@@ -1378,6 +1380,8 @@ there was an error.
 
 =item eval BLOCK
 
+=item eval
+
 In the first form, the return value of EXPR is parsed and executed as if it
 were a little Perl program.  The value of the expression (which is itself
 determined within scalar context) is first parsed, and if there weren't any
@@ -1625,6 +1629,8 @@ to exists() is an error.
     exists &sub();	# Error
 
 =item exit EXPR
+
+=item exit
 
 Evaluates EXPR and exits immediately with that value.    Example:
 
@@ -2149,6 +2155,8 @@ C<File::Glob> extension.  See L<File::Glob> for details.
 
 =item gmtime EXPR
 
+=item gmtime
+
 Converts a time as returned by the time function to an 8-element list
 with the time localized for the standard Greenwich time zone.
 Typically used as follows:
@@ -2285,7 +2293,7 @@ integer overflow trigger a warning.  Leading whitespace is not stripped,
 unlike oct(). To present something as hex, look into L</printf>,
 L</sprintf>, or L</unpack>.
 
-=item import
+=item import LIST
 
 There is no builtin C<import> function.  It is just an ordinary
 method (subroutine) defined (or inherited) by modules that wish to export
