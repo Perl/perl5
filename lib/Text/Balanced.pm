@@ -7,7 +7,6 @@ use strict;
 package Text::Balanced;
 
 use Exporter;
-use SelfLoader;
 use vars qw { $VERSION @ISA %EXPORT_TAGS };
 
 $VERSION = '1.95_01';
@@ -36,6 +35,14 @@ sub _match_bracketed($$$$$$);
 sub _match_variable($$);
 sub _match_codeblock($$$$$$$);
 sub _match_quotelike($$$$);
+
+sub carp {
+  require Carp; goto &Carp::carp;
+}
+
+sub croak {
+  require Carp; goto &Carp::croak;
+}
 
 # HANDLE RETURN VALUES IN VARIOUS CONTEXTS
 
@@ -343,8 +350,7 @@ sub _match_tagged	# ($$$$$$$)
 			for (qw,~ ! ^ & * ) _ + - = } ] : " ; ' > . ? / | ',)
 				{ next if $rdel =~ /\Q$_/; $del = $_; last }
 			unless ($del) {
-				use Carp;
-				croak "Can't interpolate right delimiter $rdel"
+				croak ("Can't interpolate right delimiter $rdel")
 			}
 			eval "qq$del$rdel$del";
 		};
@@ -887,8 +893,7 @@ sub extract_multiple (;$$$$)	# ($text, $functions_ref, $max_fields, $ignoreunkno
 
 		unless (wantarray)
 		{
-			use Carp;
-			carp "extract_multiple reset maximal count to 1 in scalar context"
+			carp ("extract_multiple reset maximal count to 1 in scalar context")
 				if $^W && defined($_[2]) && $max > 1;
 			$max = 1
 		}
