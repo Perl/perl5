@@ -7067,7 +7067,7 @@ Perl_sv_dec(pTHX_ register SV *sv)
 	    }
 	    else {
 		(void)SvIOK_only_UV(sv);
-		SvUV_set(sv, SvUVX(sv) + 1);
+		SvUV_set(sv, SvUVX(sv) - 1);
 	    }	
 	} else {
 	    if (SvIVX(sv) == IV_MIN)
