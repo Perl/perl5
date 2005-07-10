@@ -87,6 +87,19 @@ Null SV pointer.
 # define HAS_BOOL 1
 #endif
 
+/* Try to figure out __func__ or __FUNCTION__ equivalent, if any.
+ * XXX Should really be a Configure probe. */
+#if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || (defined(__SUNPRO_C)) /* C99 or close enough. */
+#  define FUNCTION__ __func__
+#else
+#  if (defined(_MSC_VER) && _MSC_VER < 1300) || /* Pre-MSVC 7.0 has neither __func__ nor __FUNCTION and no good workarounds, either. */ \
+      (defined(__DECC_VER)) /* Tru64 or VMS, and strict C89 being used. */
+#    define FUNCTION__ ""
+#  else
+#    define FUNCTION__ __FUNCTION__ /* Common extension. */
+#  endif
+#endif
+
 /* XXX A note on the perl source internal type system.  The
    original intent was that I32 be *exactly* 32 bits.
 
@@ -624,15 +637,48 @@ hopefully catches attempts to access uninitialized memory.
 #endif
 
 #ifdef PERL_MEM_LOG
-Malloc_t Perl_mem_log_alloc(const UV n, const UV typesize, const char *typename, Malloc_t newalloc, const char *filename, const int linenumber);
-Malloc_t Perl_mem_log_realloc(const UV n, const UV typesize, const char *typename, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber);
-Malloc_t Perl_mem_log_free(Malloc_t oldalloc, const char *filename, const int linenumber);
+/*
+ * If PERL_MEM_LOG is defined, all New()s, Renew()s, and Safefree()s
+ * go through functions, which are handy for debugging breakpoints, but
+ * which more importantly get the immediate calling environment (file and
+ * line number) passed in.  This can then be used for logging the calls,
+ * for which one can get a sample implementation if PERL_MEM_LOG_STDERR
+ * is defined.
+ * 
+ * Known problems:
+ * - all memory allocs do not get logged, only those
+ *   that go through Newx() and derivatives (while all
+ *  Safefrees do get logged)
+ * - __FILE__ and __LINE__ do not work everywhere
+ * - __func__ or __FUNCTION__ even less so
+ * - I think more goes on after the perlio frees but
+ *   the thing is that STDERR gets closed (as do all
+ *   the file descriptors)
+ * - no deeper calling stack than the caller of the Newx()
+ *   or the kind, but do I look like a C reflection/introspection
+ *   utility to you?
+ * - the function prototypes for the logging functions
+ *   probably should maybe be somewhere else than handy.h
+ * - one could consider inlining (macrofying) the logging
+ *   for speed, but I am too lazy
+ * - one could imagine recording the allocations in a hash,
+ *   (keyed by the allocation address?), and maintain that
+ *   through reallocs and frees, but how to do that without
+ *   any News() happening...?
+ */
+
+Malloc_t Perl_mem_log_alloc(const UV n, const UV typesize, const char *typename, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname);
+
+Malloc_t Perl_mem_log_realloc(const UV n, const UV typesize, const char *typename, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname);
+
+Malloc_t Perl_mem_log_free(Malloc_t oldalloc, const char *filename, const int linenumber, const char *funcname);
+
 #endif
 
 #ifdef PERL_MEM_LOG
-#define MEM_LOG_ALLOC(n,t,a)     Perl_mem_log_alloc(n,sizeof(t),STRINGIFY(t),a,__FILE__,__LINE__)
-#define MEM_LOG_REALLOC(n,t,v,a) Perl_mem_log_realloc(n,sizeof(t),STRINGIFY(t),v,a,__FILE__,__LINE__)
-#define MEM_LOG_FREE(a)           Perl_mem_log_free(a,__FILE__,__LINE__)
+#define MEM_LOG_ALLOC(n,t,a)     Perl_mem_log_alloc(n,sizeof(t),STRINGIFY(t),a,__FILE__,__LINE__,FUNCTION__)
+#define MEM_LOG_REALLOC(n,t,v,a) Perl_mem_log_realloc(n,sizeof(t),STRINGIFY(t),v,a,__FILE__,__LINE__,FUNCTION__)
+#define MEM_LOG_FREE(a)          Perl_mem_log_free(a,__FILE__,__LINE__,FUNCTION__)
 #endif
 
 #ifndef MEM_LOG_ALLOC

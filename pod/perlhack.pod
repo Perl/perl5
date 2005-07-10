@@ -2468,6 +2468,15 @@ memory usage, so it shouldn't be used in production environments. It also
 converts C<new_SV()> from a macro into a real function, so you can use
 your favourite debugger to discover where those pesky SVs were allocated.
 
+=head2 PERL_MEM_LOG
+
+If compiled with C<-DPERL_MEM_LOG>, all New() and Renew() allocations
+and Safefree() in the Perl core go through logging functions, which is
+handy for breakpoint setting.  If also compiled with C<-DPERL_MEM_LOG_STDERR>,
+the allocations and frees are logged to STDERR in these logging functions,
+with the calling source code file and line number (and C function name,
+if supported by the C compiler).
+
 =head2 Profiling
 
 Depending on your platform there are various of profiling Perl.
