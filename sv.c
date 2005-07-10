@@ -617,28 +617,37 @@ S_more_bodies (pTHX_ void **arena_root, void **root, size_t size)
 
 /* grab a new thing from the free list, allocating more if necessary */
 
+/* 1st, the inline version  */
+
+#define new_body_inline(xpv, arena_root, root, size) \
+    STMT_START { \
+	LOCK_SV_MUTEX; \
+	xpv = *((void **)(root)) \
+	  ? *((void **)(root)) : S_more_bodies(aTHX_ arena_root, root, size); \
+	*(root) = *(void**)(xpv); \
+	UNLOCK_SV_MUTEX; \
+    } STMT_END
+
+/* now use the inline version in the proper function */
+
 STATIC void *
-S_new_body(pTHX_ void **arena_root, void **root, size_t size, size_t offset)
+S_new_body(pTHX_ void **arena_root, void **root, size_t size)
 {
     void *xpv;
-    LOCK_SV_MUTEX;
-    xpv = *root ? *root : S_more_bodies(aTHX_ arena_root, root, size);
-    *root = *(void**)xpv;
-    UNLOCK_SV_MUTEX;
-    return (void*)((char*)xpv - offset);
+    new_body_inline(xpv, arena_root, root, size);
+    return xpv;
 }
 
 /* return a thing to the free list */
 
-STATIC void
-S_del_body(pTHX_ void *thing, void **root, size_t offset)
-{
-    void **real_thing = (void**)((char *)thing + offset);
-    LOCK_SV_MUTEX;
-    *real_thing = *root;
-    *root = (void*)real_thing;
-    UNLOCK_SV_MUTEX;
-}
+#define del_body(thing, root)			\
+    STMT_START {				\
+	void **thing_copy = (void **)thing;	\
+	LOCK_SV_MUTEX;				\
+	*thing_copy = *root;			\
+	*root = (void*)thing_copy;		\
+	UNLOCK_SV_MUTEX;			\
+    } STMT_END
 
 /* Conventionally we simply malloc() a big block of memory, then divide it
    up into lots of the thing that we're allocating.
@@ -650,11 +659,13 @@ S_del_body(pTHX_ void *thing, void **root, size_t offset)
 	      (void**)&(my_perl->Ixpvbm_root), sizeof(XPVBM), 0)
 */
 
-#define new_body(TYPE,lctype)						\
+#define new_body_type(TYPE,lctype)					\
     S_new_body(aTHX_ (void**)&PL_ ## lctype ## _arenaroot,		\
 		 (void**)&PL_ ## lctype ## _root,			\
-		 sizeof(TYPE),						\
-		 0)
+		 sizeof(TYPE))
+
+#define del_body_type(p,TYPE,lctype)			\
+    del_body((void*)p, (void**)&PL_ ## lctype ## _root)
 
 /* But for some types, we cheat. The type starts with some members that are
    never accessed. So we allocate the substructure, starting at the first used
@@ -677,20 +688,17 @@ S_del_body(pTHX_ void *thing, void **root, size_t offset)
    no longer allocated.  */
 
 #define new_body_allocated(TYPE,lctype,member)				\
-    S_new_body(aTHX_ (void**)&PL_ ## lctype ## _arenaroot,		\
-	       (void**)&PL_ ## lctype ## _root,				\
-	       sizeof(lctype ## _allocated),				\
-	       STRUCT_OFFSET(TYPE, member)				\
-	       - STRUCT_OFFSET(lctype ## _allocated, member))
+    (void*)((char*)S_new_body(aTHX_ (void**)&PL_ ## lctype ## _arenaroot, \
+			      (void**)&PL_ ## lctype ## _root,		\
+			      sizeof(lctype ## _allocated)) -		\
+			      STRUCT_OFFSET(TYPE, member)		\
+	    + STRUCT_OFFSET(lctype ## _allocated, member))
 
-
-#define del_body(p,TYPE,lctype)						\
-    S_del_body(aTHX_ (void*)p, (void**)&PL_ ## lctype ## _root, 0)
 
 #define del_body_allocated(p,TYPE,lctype,member)			\
-    S_del_body(aTHX_ (void*)p, (void**)&PL_ ## lctype ## _root,		\
-	       STRUCT_OFFSET(TYPE, member)				\
-	       - STRUCT_OFFSET(lctype ## _allocated, member))
+    del_body((void*)((char*)p + STRUCT_OFFSET(TYPE, member)		\
+		     - STRUCT_OFFSET(lctype ## _allocated, member)),	\
+	     (void**)&PL_ ## lctype ## _root)
 
 #define my_safemalloc(s)	(void*)safemalloc(s)
 #define my_safefree(p)	safefree((char*)p)
@@ -747,8 +755,8 @@ typedef struct xpvnv XNV;
 #define new_XNV()	new_body_allocated(XNV, xnv, xnv_nv)
 #define del_XNV(p)	del_body_allocated(p, XNV, xnv, xnv_nv)
 
-#define new_XRV()	new_body(XRV, xrv)
-#define del_XRV(p)	del_body(p, XRV, xrv)
+#define new_XRV()	new_body_type(XRV, xrv)
+#define del_XRV(p)	del_body_type(p, XRV, xrv)
 
 #define new_XPV()	new_body_allocated(XPV, xpv, xpv_cur)
 #define del_XPV(p)	del_body_allocated(p, XPV, xpv, xpv_cur)
@@ -756,11 +764,11 @@ typedef struct xpvnv XNV;
 #define new_XPVIV()	new_body_allocated(XPVIV, xpviv, xpv_cur)
 #define del_XPVIV(p)	del_body_allocated(p, XPVIV, xpviv, xpv_cur)
 
-#define new_XPVNV()	new_body(XPVNV, xpvnv)
-#define del_XPVNV(p)	del_body(p, XPVNV, xpvnv)
+#define new_XPVNV()	new_body_type(XPVNV, xpvnv)
+#define del_XPVNV(p)	del_body_type(p, XPVNV, xpvnv)
 
-#define new_XPVCV()	new_body(XPVCV, xpvcv)
-#define del_XPVCV(p)	del_body(p, XPVCV, xpvcv)
+#define new_XPVCV()	new_body_type(XPVCV, xpvcv)
+#define del_XPVCV(p)	del_body_type(p, XPVCV, xpvcv)
 
 #define new_XPVAV()	new_body_allocated(XPVAV, xpvav, xav_fill)
 #define del_XPVAV(p)	del_body_allocated(p, XPVAV, xpvav, xav_fill)
@@ -768,17 +776,17 @@ typedef struct xpvnv XNV;
 #define new_XPVHV()	new_body_allocated(XPVHV, xpvhv, xhv_fill)
 #define del_XPVHV(p)	del_body_allocated(p, XPVHV, xpvhv, xhv_fill)
 
-#define new_XPVMG()	new_body(XPVMG, xpvmg)
-#define del_XPVMG(p)	del_body(p, XPVMG, xpvmg)
+#define new_XPVMG()	new_body_type(XPVMG, xpvmg)
+#define del_XPVMG(p)	del_body_type(p, XPVMG, xpvmg)
 
-#define new_XPVGV()	new_body(XPVGV, xpvgv)
-#define del_XPVGV(p)	del_body(p, XPVGV, xpvgv)
+#define new_XPVGV()	new_body_type(XPVGV, xpvgv)
+#define del_XPVGV(p)	del_body_type(p, XPVGV, xpvgv)
 
-#define new_XPVLV()	new_body(XPVLV, xpvlv)
-#define del_XPVLV(p)	del_body(p, XPVLV, xpvlv)
+#define new_XPVLV()	new_body_type(XPVLV, xpvlv)
+#define del_XPVLV(p)	del_body_type(p, XPVLV, xpvlv)
 
-#define new_XPVBM()	new_body(XPVBM, xpvbm)
-#define del_XPVBM(p)	del_body(p, XPVBM, xpvbm)
+#define new_XPVBM()	new_body_type(XPVBM, xpvbm)
+#define del_XPVBM(p)	del_body_type(p, XPVBM, xpvbm)
 
 #endif /* PURIFY */
 
@@ -805,7 +813,11 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     size_t	old_body_offset;
     size_t	old_body_length;	/* Well, the length to copy.  */
     void*	old_body;
+#ifndef NV_ZERO_IS_ALLBITS_ZERO
+    /* If NV 0.0 is store as all bits 0 then Zero() already creates a correct
+       0.0 for us.  */
     bool	zero_nv = TRUE;
+#endif
     void*	new_body;
     size_t	new_body_length;
     size_t	new_body_offset;
@@ -887,10 +899,11 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     case SVt_NV:
 	old_body_arena = (void **) &PL_xnv_root;
 	old_body_length = sizeof(NV);
+#ifndef NV_ZERO_IS_ALLBITS_ZERO
 	zero_nv = FALSE;
+#endif
 	old_body_offset = STRUCT_OFFSET(XNV, xnv_nv)
 	    - STRUCT_OFFSET(xnv_allocated, xnv_nv);
-
 	if (mt < SVt_PVNV)
 	    mt = SVt_PVNV;
 	break;
@@ -922,7 +935,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	old_body_arena = (void **) &PL_xpvnv_root;
 	old_body_length = STRUCT_OFFSET(XPVNV, xiv_iv)
 	    + sizeof (((XPVNV*)SvANY(sv))->xiv_iv);
+#ifndef NV_ZERO_IS_ALLBITS_ZERO
 	zero_nv = FALSE;
+#endif
 	break;
     case SVt_PVMG:
 	/* Because the XPVMG of PL_mess_sv isn't allocated from the arena,
@@ -936,7 +951,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	old_body_arena = (void **) &PL_xpvmg_root;
 	old_body_length = STRUCT_OFFSET(XPVMG, xmg_stash)
 	    + sizeof (((XPVMG*)SvANY(sv))->xmg_stash);
+#ifndef NV_ZERO_IS_ALLBITS_ZERO
 	zero_nv = FALSE;
+#endif
 	break;
     default:
 	Perl_croak(aTHX_ "Can't upgrade that kind of scalar");
@@ -952,17 +969,17 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	assert(old_type == SVt_NULL);
 	SvANY(sv) = new_XIV();
 	SvIV_set(sv, 0);
-	break;
+	return;
     case SVt_NV:
 	assert(old_type == SVt_NULL);
 	SvANY(sv) = new_XNV();
 	SvNV_set(sv, 0);
-	break;
+	return;
     case SVt_RV:
 	assert(old_type == SVt_NULL);
 	SvANY(sv) = new_XRV();
 	SvRV_set(sv, 0);
-	break;
+	return;
     case SVt_PVHV:
 
 	SvANY(sv) = new_XPVHV();
@@ -1078,39 +1095,41 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	new_body_arenaroot = (void **) &PL_xpv_arenaroot;
     new_body_no_NV:
 	/* PV and PVIV don't have an NV slot.  */
+#ifndef NV_ZERO_IS_ALLBITS_ZERO
 	zero_nv = FALSE;
+#endif
 
-	{
-	new_body:
-	    assert(new_body_length);
+    new_body:
+	assert(new_body_length);
 #ifndef PURIFY
-	    new_body = S_new_body(aTHX_ new_body_arenaroot, new_body_arena,
-				  new_body_length, new_body_offset);
+	/* This points to the start of the allocated area.  */
+	new_body_inline(new_body, new_body_arenaroot, new_body_arena,
+			new_body_length);
 #else
-	    /* We always allocated the full length item with PURIFY */
-	    new_body_length += new_body_offset;
-	    new_body_offset = 0;
-	    new_body = my_safemalloc(new_body_length);
+	/* We always allocated the full length item with PURIFY */
+	new_body_length += new_body_offset;
+	new_body_offset = 0;
+	new_body = my_safemalloc(new_body_length);
 
 #endif
-	zero:
-	    Zero(((char *)new_body) + new_body_offset, new_body_length, char);
-	    SvANY(sv) = new_body;
+    zero:
+	Zero(new_body, new_body_length, char);
+	new_body = ((char *)new_body) - new_body_offset;
+	SvANY(sv) = new_body;
 
-	    if (old_body_length) {
-		Copy((char *)old_body + old_body_offset,
-		     (char *)new_body + old_body_offset,
-		     old_body_length, char);
-	    }
-
-	    /* FIXME - add a Configure test to determine if NV 0.0 is actually
-	       all bits zero. If it is, we can skip this initialisation.  */
-	    if (zero_nv)
-		SvNV_set(sv, 0);
-
-	    if (mt == SVt_PVIO)
-		IoPAGE_LEN(sv)	= 60;
+	if (old_body_length) {
+	    Copy((char *)old_body + old_body_offset,
+		 (char *)new_body + old_body_offset,
+		 old_body_length, char);
 	}
+
+#ifndef NV_ZERO_IS_ALLBITS_ZERO
+	if (zero_nv)
+	    SvNV_set(sv, 0);
+#endif
+
+	if (mt == SVt_PVIO)
+	    IoPAGE_LEN(sv)	= 60;
 	break;
     default:
 	Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu", mt);
@@ -1121,7 +1140,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 #ifdef PURIFY
 	my_safefree(old_body);
 #else
-	S_del_body(aTHX_ old_body, old_body_arena, old_body_offset);
+	del_body((void*)((char*)old_body + old_body_offset),
+		 old_body_arena);
 #endif
     }
     return TRUE;
@@ -9362,8 +9382,7 @@ Perl_ptr_table_new(pTHX)
 #define PTR_TABLE_HASH(ptr) \
   ((PTR2UV(ptr) >> 3) ^ (PTR2UV(ptr) >> (3 + 7)) ^ (PTR2UV(ptr) >> (3 + 17)))
 
-#define new_pte()	new_body(struct ptr_tbl_ent, pte)
-#define del_pte(p)	del_body(p, struct ptr_tbl_ent, pte)
+#define del_pte(p)	del_body_type(p, struct ptr_tbl_ent, pte)
 
 /* map an existing pointer using a table */
 
@@ -9401,7 +9420,8 @@ Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldsv, void *newsv)
 	    return;
 	}
     }
-    tblent = new_pte();
+    new_body_inline(tblent, (void**)&PL_pte_arenaroot, (void**)&PL_pte_root,
+		    sizeof(struct ptr_tbl_ent));
     tblent->oldval = oldsv;
     tblent->newval = newsv;
     tblent->next = *otblent;
@@ -9697,8 +9717,9 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	    new_body:
 		assert(new_body_length);
 #ifndef PURIFY
-		new_body = S_new_body(aTHX_ new_body_arenaroot, new_body_arena,
-				      new_body_length, new_body_offset);
+		new_body_inline(new_body, new_body_arenaroot, new_body_arena,
+				new_body_length);
+		new_body = (void*)((char*)new_body - new_body_offset);
 #else
 		/* We always allocated the full length item with PURIFY */
 		new_body_length += new_body_offset;
