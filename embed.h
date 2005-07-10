@@ -1395,6 +1395,8 @@
 #ifdef PERL_CORE
 #define closest_cop		S_closest_cop
 #define mess_alloc		S_mess_alloc
+#define vdie_croak_common	S_vdie_croak_common
+#define vdie_common		S_vdie_common
 #endif
 #endif
 #if defined(PERL_IN_NUMERIC_C) || defined(PERL_DECL_PROT)
@@ -3374,6 +3376,8 @@
 #ifdef PERL_CORE
 #define closest_cop(a,b)	S_closest_cop(aTHX_ a,b)
 #define mess_alloc()		S_mess_alloc(aTHX)
+#define vdie_croak_common(a,b,c,d)	S_vdie_croak_common(aTHX_ a,b,c,d)
+#define vdie_common(a,b,c)	S_vdie_common(aTHX_ a,b,c)
 #endif
 #endif
 #if defined(PERL_IN_NUMERIC_C) || defined(PERL_DECL_PROT)
