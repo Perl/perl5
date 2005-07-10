@@ -1456,9 +1456,10 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
     Perl_croak(aTHX_ "exec? I'm not *that* kind of operating system");
 #else
     if (sp > mark) {
-	Newx(PL_Argv, sp - mark + 1, char*);
-	char **a = PL_Argv;
+	char **a;
 	const char *tmps = Nullch;
+	Newx(PL_Argv, sp - mark + 1, char*);
+	a = PL_Argv;
 
 	while (++mark <= sp) {
 	    if (*mark)
