@@ -4958,6 +4958,52 @@ Perl_free_global_struct(pTHX_ struct perl_vars *plvarsp)
 
 #endif /* PERL_GLOBAL_STRUCT */
 
+#ifdef PERL_MEM_LOG
+
+Malloc_t
+Perl_mem_log_alloc(const UV n, const UV typesize, const char *typename, Malloc_t newalloc, const char *filename, const int linenumber)
+{
+#ifdef PERL_MEM_LOG_STDERR
+    /* We can't use PerlIO_printf() for obvious reasons. */
+    char buf[1024];
+    sprintf(buf,
+	    "alloc: %s:%d: %"IVdf" %"UVuf" %s = %"IVdf": %p\n",
+	    filename, linenumber,
+	    n, typesize, typename, n * typesize, newalloc);
+    write(2, buf, strlen(buf));
+#endif
+    return newalloc;
+}
+
+Malloc_t
+Perl_mem_log_realloc(const UV n, const UV typesize, const char *typename, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber)
+{
+#ifdef PERL_MEM_LOG_STDERR
+    /* We can't use PerlIO_printf() for obvious reasons. */
+    char buf[1024];
+    sprintf(buf,
+	    "realloc: %s:%d: %"IVdf" %"UVuf" %s = %"IVdf": %p -> %p\n",
+	    filename, linenumber,
+	    n, typesize, typename, n * typesize, oldalloc, newalloc);
+    write(2, buf, strlen(buf));
+#endif
+    return newalloc;
+}
+
+Malloc_t
+Perl_mem_log_free(Malloc_t oldalloc, const char *filename, const int linenumber)
+{
+#ifdef PERL_MEM_LOG_STDERR
+    /* We can't use PerlIO_printf() for obvious reasons. */
+    char buf[1024];
+    sprintf(buf, "free: %s:%d: %p\n", filename, linenumber, oldalloc);
+    write(2, buf, strlen(buf));
+#endif
+    return oldalloc;
+}
+
+#endif /* PERL_MEM_LOG */
+
 /*
  * Local variables:
  * c-indentation-style: bsd

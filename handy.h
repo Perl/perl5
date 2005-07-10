@@ -623,9 +623,31 @@ hopefully catches attempts to access uninitialized memory.
 
 #endif
 
-#define Newx(v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) (t*)safemalloc((MEM_SIZE)((n)*sizeof(t)))))
-#define Newxc(v,n,t,c)	(v = (MEM_WRAP_CHECK_(n,t) (c*)safemalloc((MEM_SIZE)((n)*sizeof(t)))))
-#define Newxz(v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) (t*)safemalloc((MEM_SIZE)((n)*sizeof(t))))), \
+#ifdef PERL_MEM_LOG
+Malloc_t Perl_mem_log_alloc(const UV n, const UV typesize, const char *typename, Malloc_t newalloc, const char *filename, const int linenumber);
+Malloc_t Perl_mem_log_realloc(const UV n, const UV typesize, const char *typename, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber);
+Malloc_t Perl_mem_log_free(Malloc_t oldalloc, const char *filename, const int linenumber);
+#endif
+
+#ifdef PERL_MEM_LOG
+#define MEM_LOG_ALLOC(n,t,a)     Perl_mem_log_alloc(n,sizeof(t),STRINGIFY(t),a,__FILE__,__LINE__)
+#define MEM_LOG_REALLOC(n,t,v,a) Perl_mem_log_realloc(n,sizeof(t),STRINGIFY(t),v,a,__FILE__,__LINE__)
+#define MEM_LOG_FREE(a)           Perl_mem_log_free(a,__FILE__,__LINE__)
+#endif
+
+#ifndef MEM_LOG_ALLOC
+#define MEM_LOG_ALLOC(n,t,a)     (a)
+#endif
+#ifndef MEM_LOG_REALLOC
+#define MEM_LOG_REALLOC(n,t,v,a) (a)
+#endif
+#ifndef MEM_LOG_FREE
+#define MEM_LOG_FREE(a)          (a)
+#endif
+
+#define Newx(v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) MEM_LOG_ALLOC(n,t,(t*)safemalloc((MEM_SIZE)((n)*sizeof(t))))))
+#define Newxc(v,n,t,c)	(v = (MEM_WRAP_CHECK_(n,t) MEM_LOG_ALLOC(n,t,(c*)safemalloc((MEM_SIZE)((n)*sizeof(t))))))
+#define Newxz(v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) MEM_LOG_ALLOC(n,t,(t*)safemalloc((MEM_SIZE)((n)*sizeof(t)))))), \
 			memzero((char*)(v), (n)*sizeof(t))
 /* pre 5.9.x compatibility */
 #define New(x,v,n,t)	Newx(v,n,t)
@@ -633,15 +655,15 @@ hopefully catches attempts to access uninitialized memory.
 #define Newc(x,v,n,t,c)	Newxc(v,n,t,c)
 
 #define Renew(v,n,t) \
-	  (v = (MEM_WRAP_CHECK_(n,t) (t*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t)))))
+	  (v = (MEM_WRAP_CHECK_(n,t) MEM_LOG_REALLOC(n,t,v,(t*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))))
 #define Renewc(v,n,t,c) \
-	  (v = (MEM_WRAP_CHECK_(n,t) (c*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t)))))
+	  (v = (MEM_WRAP_CHECK_(n,t) MEM_LOG_REALLOC(n,t,v,(c*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))))
 
 #ifdef PERL_POISON
 #define Safefree(d) \
-  ((d) ? (void)(safefree((Malloc_t)(d)), Poison(&(d), 1, Malloc_t)) : (void) 0)
+  ((d) ? (void)(safefree(MEM_LOG_FREE((Malloc_t)(d)))), Poison(&(d), 1, Malloc_t)) : (void) 0)
 #else
-#define Safefree(d)	safefree((Malloc_t)(d))
+#define Safefree(d)	safefree(MEM_LOG_FREE((Malloc_t)(d)))
 #endif
 
 #define Move(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) (void)memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
