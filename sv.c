@@ -1112,18 +1112,7 @@ S_more_bodies (pTHX_ void **arena_root, void **root, size_t size)
 
 /* grab a new thing from the free list, allocating more if necessary */
 
-STATIC void *
-S_new_body(pTHX_ void **arena_root, void **root, size_t size)
-{
-    void *xpv;
-    LOCK_SV_MUTEX;
-    xpv = *root ? *root : S_more_bodies(aTHX_ arena_root, root, size);
-    *root = *(void**)xpv;
-    UNLOCK_SV_MUTEX;
-    return xpv;
-}
-
-/* and an inline version  */
+/* 1st, the inline version  */
 
 #define new_body_inline(xpv, arena_root, root, size) \
     STMT_START { \
@@ -1133,6 +1122,16 @@ S_new_body(pTHX_ void **arena_root, void **root, size_t size)
 	*(root) = *(void**)(xpv); \
 	UNLOCK_SV_MUTEX; \
     } STMT_END
+
+/* now use the inline version in the proper function */
+
+STATIC void *
+S_new_body(pTHX_ void **arena_root, void **root, size_t size)
+{
+    void *xpv;
+    new_body_inline(xpv, arena_root, root, size);
+    return xpv;
+}
 
 /* return a thing to the free list */
 
