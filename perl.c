@@ -2382,7 +2382,7 @@ set and the variable does not exist then NULL is returned.
 HV*
 Perl_get_hv(pTHX_ const char *name, I32 create)
 {
-    GV* gv = gv_fetchpv(name, create, SVt_PVHV);
+    GV* const gv = gv_fetchpv(name, create, SVt_PVHV);
     if (create)
     	return GvHVn(gv);
     if (gv)
