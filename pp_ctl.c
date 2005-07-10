@@ -2343,8 +2343,7 @@ PP(pp_goto)
 		}
 	    }
 	    else if (CvXSUB(cv)) {	/* put GvAV(defgv) back onto stack */
-		AV* av;
-		av = GvAV(PL_defgv);
+		AV* const av = GvAV(PL_defgv);
 		items = AvFILLp(av) + 1;
 		EXTEND(SP, items+1); /* @_ could have been extended. */
 		Copy(AvARRAY(av), SP + 1, items, SV*);
@@ -2463,12 +2462,12 @@ PP(pp_goto)
 		     * We do not care about using sv to call CV;
 		     * it's for informational purposes only.
 		     */
-		    SV *sv = GvSV(PL_DBsub);
+		    SV * const sv = GvSV(PL_DBsub);
 		    CV *gotocv;
 
 		    save_item(sv);
 		    if (PERLDB_SUB_NN) {
-			int type = SvTYPE(sv);
+			const int type = SvTYPE(sv);
 			if (type < SVt_PVIV && type != SVt_IV)
 			    sv_upgrade(sv, SVt_PVIV);
 			(void)SvIOK_on(sv);
@@ -2684,12 +2683,12 @@ STATIC void
 S_save_lines(pTHX_ AV *array, SV *sv)
 {
     const char *s = SvPVX_const(sv);
-    const char *send = SvPVX_const(sv) + SvCUR(sv);
+    const char * const send = SvPVX_const(sv) + SvCUR(sv);
     I32 line = 1;
 
     while (s && s < send) {
 	const char *t;
-	SV *tmpstr = NEWSV(85,0);
+	SV * const tmpstr = NEWSV(85,0);
 
 	sv_upgrade(tmpstr, SVt_PVMG);
 	t = strchr(s, '\n');
@@ -3015,7 +3014,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 
     /* Register with debugger: */
     if (PERLDB_INTER && saveop->op_type == OP_REQUIRE) {
-	CV *cv = get_cv("DB::postponed", FALSE);
+	CV * const cv = get_cv("DB::postponed", FALSE);
 	if (cv) {
 	    dSP;
 	    PUSHMARK(SP);
@@ -3378,7 +3377,7 @@ PP(pp_require)
     PL_compiling.cop_io = Nullsv;
 
     if (filter_sub || filter_child_proc) {
-	SV *datasv = filter_add(run_user_filter, Nullsv);
+	SV * const datasv = filter_add(run_user_filter, Nullsv);
 	IoLINES(datasv) = filter_has_file;
 	IoFMT_GV(datasv) = (GV *)filter_child_proc;
 	IoTOP_GV(datasv) = (GV *)filter_state;
@@ -3417,7 +3416,8 @@ PP(pp_entereval)
     dVAR; dSP;
     register PERL_CONTEXT *cx;
     dPOPss;
-    const I32 gimme = GIMME_V, was = PL_sub_generation;
+    const I32 gimme = GIMME_V;
+    const I32 was = PL_sub_generation;
     char tbuf[TYPE_DIGITS(long) + 12];
     char *tmpbuf = tbuf;
     char *safestr;
@@ -3437,7 +3437,7 @@ PP(pp_entereval)
     /* switch to eval mode */
 
     if (PERLDB_NAMEEVAL && CopLINE(PL_curcop)) {
-	SV *sv = sv_newmortal();
+	SV * const sv = sv_newmortal();
 	Perl_sv_setpvf(aTHX_ sv, "_<(eval %lu)[%s:%"IVdf"]",
 		       (unsigned long)++PL_evalseq,
 		       CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));

@@ -8950,7 +8950,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv,
 	       const char *type)
 {
     dVAR; dSP;
-    HV *table = GvHV(PL_hintgv);		 /* ^H */
+    HV * const table = GvHV(PL_hintgv);		 /* ^H */
     SV *res;
     SV **cvp;
     SV *cv, *typesv;
@@ -9047,7 +9047,7 @@ STATIC char *
 S_scan_word(pTHX_ register char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp)
 {
     register char *d = dest;
-    register char *e = d + destlen - 3;  /* two-character token, ending NUL */
+    register char * const e = d + destlen - 3;  /* two-character token, ending NUL */
     for (;;) {
 	if (d >= e)
 	    Perl_croak(aTHX_ ident_too_long);

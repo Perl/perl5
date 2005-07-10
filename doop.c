@@ -1017,7 +1017,7 @@ Perl_do_chomp(pTHX_ register SV *sv)
     count = 0;
     if (SvTYPE(sv) == SVt_PVAV) {
 	register I32 i;
-	AV* av = (AV*)sv;
+	AV* const av = (AV*)sv;
 	const I32 max = AvFILL(av);
 
 	for (i = 0; i <= max; i++) {
@@ -1028,7 +1028,7 @@ Perl_do_chomp(pTHX_ register SV *sv)
         return count;
     }
     else if (SvTYPE(sv) == SVt_PVHV) {
-        HV* hv = (HV*)sv;
+	HV* const hv = (HV*)sv;
 	HE* entry;
         (void)hv_iterinit(hv);
         while ((entry = hv_iternext(hv)))
@@ -1390,7 +1390,7 @@ Perl_do_kv(pTHX)
     while ((entry = hv_iternext(keys))) {
 	SPAGAIN;
 	if (dokeys) {
-	    SV* sv = hv_iterkeysv(entry);
+	    SV* const sv = hv_iterkeysv(entry);
 	    XPUSHs(sv);	/* won't clobber stack_sp */
 	}
 	if (dovalues) {

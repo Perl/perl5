@@ -366,14 +366,13 @@ void
 Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 {
     const register U8 *s;
-    register U8 *table;
     register U32 i;
     STRLEN len;
     I32 rarest = 0;
     U32 frequency = 256;
 
     if (flags & FBMcf_TAIL) {
-	MAGIC *mg = SvUTF8(sv) && SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : NULL;
+	MAGIC * const mg = SvUTF8(sv) && SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : NULL;
 	sv_catpvn(sv, "\n", 1);		/* Taken into account in fbm_instr() */
 	if (mg && mg->mg_len >= 0)
 	    mg->mg_len++;
@@ -385,6 +384,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
     if (len > 2) {
 	const unsigned char *sb;
 	const U8 mlen = (len>255) ? 255 : (U8)len;
+	register U8 *table;
 
 	Sv_Grow(sv, len + 256 + FBM_TABLE_OFFSET);
 	table = (unsigned char*)(SvPVX_mutable(sv) + len + FBM_TABLE_OFFSET);
@@ -1074,7 +1074,7 @@ S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8)
     GV *gv;
     CV *cv;
     /* sv_2cv might call Perl_croak() */
-    SV *olddiehook = PL_diehook;
+    SV * const olddiehook = PL_diehook;
 
     assert(PL_diehook);
     ENTER;
@@ -1116,7 +1116,7 @@ S_vdie_croak_common(pTHX_ const char* pat, va_list* args, STRLEN* msglen,
     const char *message;
 
     if (pat) {
-	SV *msv = vmess(pat, args);
+	SV * const msv = vmess(pat, args);
 	if (PL_errors && SvCUR(PL_errors)) {
 	    sv_catsv(PL_errors, msv);
 	    message = SvPV_const(PL_errors, *msglen);
@@ -1151,7 +1151,7 @@ Perl_vdie(pTHX_ const char* pat, va_list *args)
 			  "%p: die: curstack = %p, mainstack = %p\n",
 			  thr, PL_curstack, PL_mainstack));
 
-    message = S_vdie_croak_common(aTHX_ pat, args, &msglen, &utf8);
+    message = vdie_croak_common(pat, args, &msglen, &utf8);
 
     PL_restartop = die_where(message, msglen);
     SvFLAGS(ERRSV) |= utf8;

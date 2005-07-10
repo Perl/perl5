@@ -1636,7 +1636,7 @@ Perl_apply_attrs_string(pTHX_ const char *stashpv, CV *cv,
     while (len) {
         for (; isSPACE(*attrstr) && len; --len, ++attrstr) ;
         if (len) {
-            const char *sstr = attrstr;
+            const char * const sstr = attrstr;
             for (; !isSPACE(*attrstr) && len; --len, ++attrstr) ;
             attrs = append_elem(OP_LIST, attrs,
                                 newSVOP(OP_CONST, 0,
@@ -4157,7 +4157,7 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
 	o = cLISTOPo->op_first->op_sibling;
 
     for (; o; o = o->op_next) {
-	OPCODE type = o->op_type;
+	const OPCODE type = o->op_type;
 
 	if (sv && o->op_next == o)
 	    return sv;

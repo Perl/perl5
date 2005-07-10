@@ -1667,7 +1667,7 @@ S_hfreeentries(pTHX_ HV *hv)
     entry = array[0];
     for (;;) {
 	if (entry) {
-	    register HE *oentry = entry;
+	    register HE * const oentry = entry;
 	    entry = HeNEXT(entry);
 	    hv_free_ent(hv, oentry);
 	}

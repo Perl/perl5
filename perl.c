@@ -2301,7 +2301,7 @@ set and the variable does not exist then NULL is returned.
 HV*
 Perl_get_hv(pTHX_ const char *name, I32 create)
 {
-    GV* gv = gv_fetchpv(name, create, SVt_PVHV);
+    GV* const gv = gv_fetchpv(name, create, SVt_PVHV);
     if (create)
     	return GvHVn(gv);
     if (gv)
@@ -4753,11 +4753,11 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
 	 * The intent is that /usr/local/bin/perl and .../../lib/perl5
 	 * generates /usr/local/lib/perl5
 	 */
-	    char *libpath = SvPVX(libdir);
+	    const char *libpath = SvPVX(libdir);
 	    STRLEN libpath_len = SvCUR(libdir);
 	    if (libpath_len >= 4 && memEQ (libpath, ".../", 4)) {
 		/* Game on!  */
-		SV *caret_X = get_sv("\030", 0);
+		SV * const caret_X = get_sv("\030", 0);
 		/* Going to use the SV just as a scratch buffer holding a C
 		   string:  */
 		SV *prefix_sv;

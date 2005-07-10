@@ -416,8 +416,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     char *check_at = Nullch;		/* check substr found at this pos */
     const I32 multiline = prog->reganch & PMf_MULTILINE;
 #ifdef DEBUGGING
-    char *i_strpos = strpos;
-    SV *dsv = PERL_DEBUG_PAD_ZERO(0);
+    const char * const i_strpos = strpos;
+    SV * const dsv = PERL_DEBUG_PAD_ZERO(0);
 #endif
 
     GET_RE_DEBUG_FLAGS_DECL;
@@ -615,7 +615,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	if (check == (do_utf8 ? prog->float_utf8 : prog->float_substr)) {
 	  do_other_anchored:
 	    {
-		char *last = HOP3c(s, -start_shift, strbeg), *last1, *last2;
+		char * const last = HOP3c(s, -start_shift, strbeg);
+		char *last1, *last2;
 		char *s1 = s;
 		SV* must;
 
@@ -861,7 +862,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	   regstclass does not come from lookahead...  */
 	/* If regstclass takes bytelength more than 1: If charlength==1, OK.
 	   This leaves EXACTF only, which is dealt with in find_byclass().  */
-        const U8* str = (U8*)STRING(prog->regstclass);
+        const U8* const str = (U8*)STRING(prog->regstclass);
         const int cl_l = (PL_regkind[(U8)OP(prog->regstclass)] == EXACT
 		    ? CHR_DIST(str+STR_LEN(prog->regstclass), str)
 		    : 1);
@@ -4670,8 +4671,8 @@ Perl_regclass_swash(pTHX_ register const regnode* node, bool doinit, SV** listsv
 	const U32 n = ARG(node);
 
 	if (PL_regdata->what[n] == 's') {
-	    SV *rv = (SV*)PL_regdata->data[n];
-	    AV *av = (AV*)SvRV((SV*)rv);
+	    SV * const rv = (SV*)PL_regdata->data[n];
+	    AV * const av = (AV*)SvRV((SV*)rv);
 	    SV **ary = AvARRAY(av);
 	    SV **a, **b;
 	
@@ -4737,7 +4738,7 @@ S_reginclass(pTHX_ register const regnode *n, register const U8* p, STRLEN* lenp
 	    match = TRUE;
 	if (!match) {
 	    AV *av;
-	    SV *sw = regclass_swash(n, TRUE, 0, (SV**)&av);
+	    SV * const sw = regclass_swash(n, TRUE, 0, (SV**)&av);
 	
 	    if (sw) {
 		if (swash_fetch(sw, p, do_utf8))
@@ -4745,11 +4746,10 @@ S_reginclass(pTHX_ register const regnode *n, register const U8* p, STRLEN* lenp
 		else if (flags & ANYOF_FOLD) {
 		    if (!match && lenp && av) {
 		        I32 i;
-		      
 			for (i = 0; i <= av_len(av); i++) {
-			    SV* sv = *av_fetch(av, i, FALSE);
+			    SV* const sv = *av_fetch(av, i, FALSE);
 			    STRLEN len;
-			    const char *s = SvPV_const(sv, len);
+			    const char * const s = SvPV_const(sv, len);
 			
 			    if (len <= plen && memEQ(s, (char*)p, len)) {
 			        *lenp = len;

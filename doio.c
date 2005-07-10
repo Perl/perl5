@@ -71,7 +71,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	      int rawmode, int rawperm, PerlIO *supplied_fp, SV *svs,
 	      I32 num_svs)
 {
-    (void)num_svs;
+    PERL_UNUSED_ARG(num_svs);
     return do_openn(gv, name, len, as_raw, rawmode, rawperm,
 		    supplied_fp, &svs, 1);
 }
@@ -82,7 +82,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	      I32 num_svs)
 {
     dVAR;
-    register IO *io = GvIOn(gv);
+    register IO * const io = GvIOn(gv);
     PerlIO *saveifp = Nullfp;
     PerlIO *saveofp = Nullfp;
     int savefd = -1;
@@ -1455,12 +1455,11 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 #if defined(MACOS_TRADITIONAL) || defined(SYMBIAN)
     Perl_croak(aTHX_ "exec? I'm not *that* kind of operating system");
 #else
-    register char **a;
-    const char *tmps = Nullch;
-
     if (sp > mark) {
 	Newx(PL_Argv, sp - mark + 1, char*);
-	a = PL_Argv;
+	char **a = PL_Argv;
+	const char *tmps = Nullch;
+
 	while (++mark <= sp) {
 	    if (*mark)
 		*a++ = (char*)SvPV_nolen_const(*mark);
@@ -1649,7 +1648,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
     register I32 tot = 0;
     const char *what;
     const char *s;
-    SV **oldmark = mark;
+    SV ** const oldmark = mark;
 
 #define APPLY_TAINT_PROPER() \
     STMT_START {							\
@@ -1980,7 +1979,7 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
     const I32 id  = SvIVx(*++mark);
     const I32 n   = (optype == OP_SEMCTL) ? SvIVx(*++mark) : 0;
     const I32 cmd = SvIVx(*++mark);
-    (void)sp;
+    PERL_UNUSED_ARG(sp);
 
     astr = *++mark;
     infosize = 0;
@@ -2103,7 +2102,7 @@ Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
     I32 msize, flags;
     STRLEN len;
     const I32 id = SvIVx(*++mark);
-    (void)sp;
+    PERL_UNUSED_ARG(sp);
 
     mstr = *++mark;
     flags = SvIVx(*++mark);
@@ -2126,7 +2125,7 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
     long mtype;
     I32 msize, flags, ret;
     const I32 id = SvIVx(*++mark);
-    (void)sp;
+    PERL_UNUSED_ARG(sp);
 
     mstr = *++mark;
     /* suppress warning when reading into undef var --jhi */
@@ -2162,7 +2161,7 @@ Perl_do_semop(pTHX_ SV **mark, SV **sp)
     const char *opbuf;
     STRLEN opsize;
     const I32 id = SvIVx(*++mark);
-    (void)sp;
+    PERL_UNUSED_ARG(sp);
 
     opstr = *++mark;
     opbuf = SvPV_const(opstr, opsize);
@@ -2216,7 +2215,7 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
     I32 mpos, msize;
     struct shmid_ds shmds;
     const I32 id = SvIVx(*++mark);
-    (void)sp;
+    PERL_UNUSED_ARG(sp);
 
     mstr = *++mark;
     mpos = SvIVx(*++mark);
@@ -2297,7 +2296,8 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 #include <rmsdef.h>
 	char rslt[NAM$C_MAXRSS+1+sizeof(unsigned short int)] = {'\0','\0'};
 	char vmsspec[NAM$C_MAXRSS+1];
-	char *rstr = rslt + sizeof(unsigned short int), *begin, *end, *cp;
+	char * const rstr = rslt + sizeof(unsigned short int);
+	char *begin, *end, *cp;
 	$DESCRIPTOR(dfltdsc,"SYS$DISK:[]*.*;");
 	PerlIO *tmpfp;
 	STRLEN i;

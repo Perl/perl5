@@ -1201,9 +1201,9 @@ PP(pp_match)
 
     PUTBACK;				/* EVAL blocks need stack_sp. */
     s = SvPV_const(TARG, len);
-    strend = s + len;
     if (!s)
 	DIE(aTHX_ "panic: pp_match");
+    strend = s + len;
     rxtainted = ((pm->op_pmdynflags & PMdf_TAINTED) ||
 		 (PL_tainted && (pm->op_pmflags & PMf_RETAINT)));
     TAINT_NOT;
@@ -2941,10 +2941,10 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
 PP(pp_method)
 {
     dSP;
-    SV* sv = TOPs;
+    SV* const sv = TOPs;
 
     if (SvROK(sv)) {
-	SV* rsv = SvRV(sv);
+	SV* const rsv = SvRV(sv);
 	if (SvTYPE(rsv) == SVt_PVCV) {
 	    SETs(rsv);
 	    RETURN;
@@ -2958,7 +2958,7 @@ PP(pp_method)
 PP(pp_method_named)
 {
     dSP;
-    SV* sv = cSVOP_sv;
+    SV* const sv = cSVOP_sv;
     U32 hash = SvSHARED_HASH(sv);
 
     XPUSHs(method_common(sv, &hash));

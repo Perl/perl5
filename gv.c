@@ -713,7 +713,8 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     register const char *namend;
     HV *stash = 0;
     const I32 add = flags & ~SVf_UTF8;
-    (void)full_len;
+
+    PERL_UNUSED_ARG(full_len);
 
     if (*name == '*' && isALPHA(name[1])) /* accidental stringify on a GV? */
 	name++;
@@ -1526,7 +1527,7 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
 	       "Inherited AUTOLOAD for a non-method deprecated", since
 	       our caller is going through a function call, not a method call.
 	       So return the CV for AUTOLOAD, setting $AUTOLOAD. */
-	    GV *gv = gv_fetchmethod(stash, PL_AMG_names[id]);
+	    GV * const gv = gv_fetchmethod(stash, PL_AMG_names[id]);
 
 	    if (gv && GvCV(gv))
 		return GvCV(gv);
@@ -1611,13 +1612,13 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 		  * SV* ref causes confusion with the interpreter variable of
 		  * the same name
 		  */
-	     SV* tmpRef=SvRV(left);
+	     SV* const tmpRef=SvRV(left);
 	     if (!SvROK(tmpRef) && SvTYPE(tmpRef) <= SVt_PVMG) {
 		/*
 		 * Just to be extra cautious.  Maybe in some
 		 * additional cases sv_setsv is safe, too.
 		 */
-		SV* newref = newSVsv(tmpRef);
+		SV* const newref = newSVsv(tmpRef);
 		SvOBJECT_on(newref);
 		SvSTASH_set(newref, (HV*)SvREFCNT_inc(SvSTASH(tmpRef)));
 		return newref;
@@ -1627,13 +1628,13 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	 case abs_amg:
 	   if ((cvp[off1=lt_amg] || cvp[off1=ncmp_amg])
 	       && ((cv = cvp[off=neg_amg]) || (cv = cvp[off=subtr_amg]))) {
-	     SV* nullsv=sv_2mortal(newSViv(0));
+	     SV* const nullsv=sv_2mortal(newSViv(0));
 	     if (off1==lt_amg) {
-	       SV* lessp = amagic_call(left,nullsv,
+	       SV* const lessp = amagic_call(left,nullsv,
 				       lt_amg,AMGf_noright);
 	       logic = SvTRUE(lessp);
 	     } else {
-	       SV* lessp = amagic_call(left,nullsv,
+	       SV* const lessp = amagic_call(left,nullsv,
 				       ncmp_amg,AMGf_noright);
 	       logic = (SvNV(lessp) < 0);
 	     }
