@@ -1509,8 +1509,8 @@ np	|long	|my_betohl	|long n
 
 np	|void	|my_swabn	|NN void* ptr|int n
 
-ApR	|GV*	|gv_fetchpvn_flags|NN const char* name|STRLEN len|I32 flags|I32 sv_type
-ApR	|GV*	|gv_fetchsv|NN SV *name|I32 flags|I32 sv_type
+Ap	|GV*	|gv_fetchpvn_flags|NN const char* name|STRLEN len|I32 flags|I32 sv_type
+Ap	|GV*	|gv_fetchsv|NN SV *name|I32 flags|I32 sv_type
 dpR	|bool	|is_gv_magical_sv|NN SV *name|U32 flags
 
 ApR	|bool	|stashpv_hvname_match|NN const COP *cop|NN const HV *hv
