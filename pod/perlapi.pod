@@ -1078,7 +1078,8 @@ Found in file hv.h
 
 =item HvNAME
 
-Returns the package name of a stash.  See C<SvSTASH>, C<CvSTASH>.
+Returns the package name of a stash, or NULL if C<stash> isn't a stash.
+See C<SvSTASH>, C<CvSTASH>.
 
 	char*	HvNAME(HV* stash)
 
