@@ -54,6 +54,8 @@ $CPAN::DEBUG ||= 0;
 $CPAN::Signal ||= 0;
 $CPAN::Frontend ||= "CPAN::Shell";
 $CPAN::Defaultsite ||= "ftp://ftp.perl.org/pub/CPAN";
+$CPAN::Perl ||= CPAN::find_perl();
+
 
 package CPAN;
 use strict qw(vars);
@@ -84,6 +86,7 @@ sub AUTOLOAD {
 });
     }
 }
+
 
 #-> sub CPAN::shell ;
 sub shell {
@@ -667,6 +670,32 @@ sub cwd {Cwd::cwd();}
 
 #-> sub CPAN::getcwd ;
 sub getcwd {Cwd::getcwd();}
+
+#-> sub CPAN::find_perl ;
+sub find_perl {
+    my($perl) = File::Spec->file_name_is_absolute($^X) ? $^X : "";
+    my $pwd  = CPAN::anycwd();
+    my $candidate = File::Spec->catfile($pwd,$^X);
+    $perl ||= $candidate if MM->maybe_command($candidate);
+
+    unless ($perl) {
+	my ($component,$perl_name);
+      DIST_PERLNAME: foreach $perl_name ($^X, 'perl', 'perl5', "perl$]") {
+	    PATH_COMPONENT: foreach $component (File::Spec->path(),
+						$Config::Config{'binexp'}) {
+		  next unless defined($component) && $component;
+		  my($abs) = File::Spec->catfile($component,$perl_name);
+		  if (MM->maybe_command($abs)) {
+		      $perl = $abs;
+		      last DIST_PERLNAME;
+		  }
+	      }
+	  }
+    }
+
+    return $perl;
+}
+
 
 #-> sub CPAN::exists ;
 sub exists {
@@ -4411,29 +4440,12 @@ sub isa_perl {
   }
 }
 
+
 #-> sub CPAN::Distribution::perl ;
 sub perl {
-    my($self) = @_;
-    my($perl) = File::Spec->file_name_is_absolute($^X) ? $^X : "";
-    my $pwd  = CPAN::anycwd();
-    my $candidate = File::Spec->catfile($pwd,$^X);
-    $perl ||= $candidate if MM->maybe_command($candidate);
-    unless ($perl) {
-	my ($component,$perl_name);
-      DIST_PERLNAME: foreach $perl_name ($^X, 'perl', 'perl5', "perl$]") {
-	    PATH_COMPONENT: foreach $component (File::Spec->path(),
-						$Config::Config{'binexp'}) {
-		  next unless defined($component) && $component;
-		  my($abs) = File::Spec->catfile($component,$perl_name);
-		  if (MM->maybe_command($abs)) {
-		      $perl = $abs;
-		      last DIST_PERLNAME;
-		  }
-	      }
-	  }
-    }
-    $perl;
+    return $CPAN::Perl;
 }
+
 
 #-> sub CPAN::Distribution::make ;
 sub make {
