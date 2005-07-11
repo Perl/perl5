@@ -1358,8 +1358,8 @@ sub h {
 Display Information
  command  argument          description
  a,b,d,m  WORD or /REGEXP/  about authors, bundles, distributions, modules
- i        WORD or /REGEXP/  about anything of above
- r        NONE              reinstall recommendations
+ i        WORD or /REGEXP/  about any of the above
+ r        NONE              report updatable modules
  ls       AUTHOR            about files in the author's directory
 
 Download, Test, Make, Install...
