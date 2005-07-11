@@ -88,7 +88,9 @@ Null SV pointer.
 #endif
 
 /* Try to figure out __func__ or __FUNCTION__ equivalent, if any.
- * XXX Should really be a Configure probe. */
+ * XXX Should really be a Configure probe, with HAS__FUNCTION__
+ *     and FUNCTION__ as results.
+ * XXX Similarly, a Configure probe for __FILE__ and __LINE__ is needed. */
 #if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || (defined(__SUNPRO_C)) /* C99 or close enough. */
 #  define FUNCTION__ __func__
 #else
@@ -642,9 +644,9 @@ hopefully catches attempts to access uninitialized memory.
  * If PERL_MEM_LOG is defined, all Newx()s, Renew()s, and Safefree()s
  * go through functions, which are handy for debugging breakpoints, but
  * which more importantly get the immediate calling environment (file and
- * line number) passed in.  This can then be used for logging the calls,
- * for which one can get a sample implementation if PERL_MEM_LOG_STDERR
- * is defined.
+ * line number, and C function name if available) passed in.  This info can
+ * then be used for logging the calls, for which one gets a sample
+ * implementation if PERL_MEM_LOG_STDERR is defined.
  * 
  * Known problems:
  * - all memory allocs do not get logged, only those
