@@ -11373,6 +11373,10 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     param->stashes      = newAV();  /* Setup array of objects to call clone on */
 
+    /* Set tainting stuff before PerlIO_debug can possibly get called */
+    PL_tainting		= proto_perl->Itainting;
+    PL_taint_warn	= proto_perl->Itaint_warn;
+
 #ifdef PERLIO_LAYERS
     /* Clone PerlIO tables as soon as we can handle general xx_dup() */
     PerlIO_clone(aTHX_ proto_perl, param);
@@ -11494,8 +11498,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_fdpid		= av_dup_inc(proto_perl->Ifdpid, param);
 
     /* internal state */
-    PL_tainting		= proto_perl->Itainting;
-    PL_taint_warn       = proto_perl->Itaint_warn;
     PL_maxo		= proto_perl->Imaxo;
     if (proto_perl->Iop_mask)
 	PL_op_mask	= SAVEPVN(proto_perl->Iop_mask, PL_maxo);
