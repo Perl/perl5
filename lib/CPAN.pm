@@ -1,6 +1,6 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
-$VERSION = '1.76_01';
+$VERSION = '1.76_02';
 $VERSION = eval $VERSION;
 # $Id: CPAN.pm,v 1.412 2003/07/31 14:53:04 k Exp $
 
@@ -2605,7 +2605,10 @@ sub hosthard {
 
 	$self->debug("localizing funkyftpwise[$url]") if $CPAN::DEBUG;
 	my($f,$funkyftp);
-	for $f ('lynx','ncftpget','ncftp','wget') {
+
+        # Try the most capable first (wget does HTTP, HTTPS and FTP) and
+        # leave ncftp* for last as it only does FTP.
+	for $f (qw(wget lynx ncftpget ncftp)) {
 	  next unless exists $CPAN::Config->{$f};
 	  $funkyftp = $CPAN::Config->{$f};
 	  next unless defined $funkyftp;
@@ -2696,7 +2699,7 @@ returned status $estatus (wstat $wstatus)$size
 });
 	  }
           return if $CPAN::Signal;
-	} # lynx,ncftpget,ncftp
+	} # wget,lynx,ncftpget,ncftp
     } # host
 }
 
