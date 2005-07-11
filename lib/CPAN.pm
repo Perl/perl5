@@ -3948,9 +3948,9 @@ sub get {
         -d $packagedir and $CPAN::Frontend->myprint("Removing previously used ".
                                                     "$packagedir\n");
         File::Path::rmtree($packagedir);
-        rename($distdir,$packagedir) or
-            Carp::confess("Couldn't rename $distdir to $packagedir: $!");
-        $self->debug(sprintf("renamed distdir[%s] to packagedir[%s] -e[%s]-d[%s]",
+        File::Copy::move($distdir,$packagedir) or
+            Carp::confess("Couldn't move $distdir to $packagedir: $!");
+        $self->debug(sprintf("moved distdir[%s] to packagedir[%s] -e[%s]-d[%s]",
                              $distdir,
                              $packagedir,
                              -e $packagedir,
@@ -3971,7 +3971,7 @@ sub get {
         my($f);
         for $f (@readdir) { # is already without "." and ".."
             my $to = File::Spec->catdir($packagedir,$f);
-            rename($f,$to) or Carp::confess("Couldn't rename $f to $to: $!");
+            File::Copy::move($f,$to) or Carp::confess("Couldn't move $f to $to: $!");
         }
     }
     if ($CPAN::Signal){
