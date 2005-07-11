@@ -550,18 +550,19 @@ C<id> is an integer id between 0 and 1299 (used to identify leaks).
 =for apidoc Am|void|Newx|void* ptr|int nitems|type
 The XSUB-writer's interface to the C C<malloc> function.
 
+In 5.9.3, Newx() and friends replace the older New() API, and drops
+the first parameter, I<x>, a debug aid which allowed callers to identify
+themselves.  This aid has been superceded by a new build option,
+PERL_MEM_LOG (see L<perlhack/PERL_MEM_LOG>).  The older API is still
+there for use in XS modules supporting older perls.
+
 =for apidoc Am|void|Newxc|void* ptr|int nitems|type|cast
 The XSUB-writer's interface to the C C<malloc> function, with
-cast.
+cast.  See also C<Newx>.
 
 =for apidoc Am|void|Newxz|void* ptr|int nitems|type
 The XSUB-writer's interface to the C C<malloc> function.  The allocated
-memory is zeroed with C<memzero>.
-
-In 5.9.3, we removed the 1st parameter, a debug aid, from the api.  It
-was used to uniquely identify each usage of these allocation
-functions, but was deemed unnecessary with the availability of better
-memory tracking tools, valgrind for example.
+memory is zeroed with C<memzero>.  See also C<Newx>.
 
 =for apidoc Am|void|Renew|void* ptr|int nitems|type
 The XSUB-writer's interface to the C C<realloc> function.
