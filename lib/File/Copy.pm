@@ -205,7 +205,17 @@ sub move {
                 $tosz2 == $fromsz;                         # it's all there
 
     ($tosz1,$tomt1) = (stat($to))[7,9];  # just in case rename did something
-    return 1 if copy($from,$to) && unlink($from);
+
+    {
+        local $@;
+        eval {
+            copy($from,$to) or die;
+            my($atime, $mtime) = (stat($from))[8,9];
+            utime($atime, $mtime, $to);
+            unlink($from)   or die;
+        };
+        return 1 unless $@;
+    }
     ($sts,$ossts) = ($! + 0, $^E + 0);
 
     ($tosz2,$tomt2) = ((stat($to))[7,9],0,0) if defined $tomt1;
