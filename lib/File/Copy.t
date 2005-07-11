@@ -9,12 +9,23 @@ use Test::More;
 
 my $TB = Test::More->builder;
 
-plan tests => 46;
+plan tests => 48;
+
+# We're going to override rename() later on but Perl has to see an override
+# at compile time to honor it.
+BEGIN { *CORE::GLOBAL::rename = sub { CORE::rename($_[0], $_[1]) }; }
+
 
 use File::Copy;
 use Config;
 
-for (1..2) {
+for my $cross_partition_test (0..1) {
+  {
+    # Simulate a cross-partition copy/move by forcing rename to
+    # fail.
+    no warnings 'redefine';
+    *CORE::GLOBAL::rename = sub { 0 } if $cross_partition_test;
+  }
 
   # First we create a file
   open(F, ">file-$$") or die;
@@ -72,11 +83,25 @@ for (1..2) {
   ok !move("file-$$", "copy-$$"), "move on missing file";
   ok -e "copy-$$",                '  target still there';
 
+  # Doesn't really matter what time it is as long as its not now.
+  my $time = 1000000000;
+  utime( $time, $time, "copy-$$" );
+
+  # Recheck the mtime rather than rely on utime in case we're on a
+  # system where utime doesn't work or there's no mtime at all.
+  # The destination file will reflect the same difficulties.
+  my $mtime = (stat("copy-$$"))[9];
+
   ok move "copy-$$", "file-$$", 'move';
   ok -e "file-$$",              '  destination exists';
   ok !-e "copy-$$",              '  source does not';
   open(R, "file-$$") or die; $foo = <R>; close(R);
   is $foo, "ok\n";
+
+  my $dest_mtime = (stat("file-$$"))[9];
+  is $dest_mtime, $mtime,
+    "mtime preserved by copy()". 
+    ($cross_partition_test ? " while testing cross-partition" : "");
 
   copy "file-$$", "lib";
   open(R, "lib/file-$$") or die; $foo = <R>; close(R);
@@ -130,7 +155,6 @@ for (1..2) {
     unlink "hardlink-$$";
     unlink "file-$$";
   }
-
 }
 
 
