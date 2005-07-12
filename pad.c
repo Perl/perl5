@@ -753,7 +753,8 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 			    "Pad findlex cv=0x%"UVxf" chasing lex in outer pad\n",
 			    PTR2UV(cv)));
 			n = *out_name_sv;
-			pad_findlex(name, CvOUTSIDE(cv), CvOUTSIDE_SEQ(cv),
+			(void) pad_findlex(name, CvOUTSIDE(cv),
+			    CvOUTSIDE_SEQ(cv),
 			    newwarn, out_capture, out_name_sv, out_flags);
 			*out_name_sv = n;
 			return offset;
