@@ -567,7 +567,7 @@ Perl_yyparse (pTHX)
 		    yysize += yystrlen (yytname[yyx]) + 15, yycount++;
 	    yysize += yystrlen ("syntax error, unexpected ") + 1;
 	    yysize += yystrlen (yytname[yytype]);
-	    New(yymsg, yysize, char *);
+	    Newx(yymsg, yysize, char *);
 	    if (yymsg != 0) {
 		const char *yyp = yystpcpy (yymsg, "syntax error, unexpected ");
 		yyp = yystpcpy (yyp, yytname[yytype]);
