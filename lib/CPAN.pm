@@ -1454,13 +1454,14 @@ sub m { # emacs confused here }; sub mimimimimi { # emacs in sync here
 sub i {
     my($self) = shift;
     my(@args) = @_;
-    my(@type,$type,@m);
-    @type = qw/Author Bundle Distribution Module/;
     @args = '/./' unless @args;
     my(@result);
-    for $type (@type) {
+    for my $type (qw/Bundle Distribution Module/) {
 	push @result, $self->expand($type,@args);
     }
+    # Authors are always uppercase.
+    push @result, $self->expand("Author", map { uc $_ } @args);
+
     my $result = @result == 1 ?
 	$result[0]->as_string :
             @result == 0 ?
