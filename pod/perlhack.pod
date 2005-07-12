@@ -2470,7 +2470,7 @@ your favourite debugger to discover where those pesky SVs were allocated.
 
 =head2 PERL_MEM_LOG
 
-If compiled with C<-DPERL_MEM_LOG>, all New() and Renew() allocations
+If compiled with C<-DPERL_MEM_LOG>, all Newx() and Renew() allocations
 and Safefree() in the Perl core go through logging functions, which is
 handy for breakpoint setting.  If also compiled with C<-DPERL_MEM_LOG_STDERR>,
 the allocations and frees are logged to STDERR in these logging functions,

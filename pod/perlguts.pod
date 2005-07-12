@@ -1490,25 +1490,20 @@ platforms, it may cause spurious malloc or free errors.
 
 The following three macros are used to initially allocate memory :
 
-    New(x, pointer, number, type);
-    Newc(x, pointer, number, type, cast);
-    Newz(x, pointer, number, type);
+    Newx(pointer, number, type);
+    Newxc(pointer, number, type, cast);
+    Newxz(pointer, number, type);
 
-The first argument C<x> was a "magic cookie" that was used to keep track
-of who called the macro, to help when debugging memory problems.  However,
-the current code makes no use of this feature (most Perl developers now
-use run-time memory checkers), so this argument can be any number.
-
-The second argument C<pointer> should be the name of a variable that will
+The first argument C<pointer> should be the name of a variable that will
 point to the newly allocated memory.
 
-The third and fourth arguments C<number> and C<type> specify how many of
+The second and third arguments C<number> and C<type> specify how many of
 the specified type of data structure should be allocated.  The argument
-C<type> is passed to C<sizeof>.  The final argument to C<Newc>, C<cast>,
+C<type> is passed to C<sizeof>.  The final argument to C<Newxc>, C<cast>,
 should be used if the C<pointer> argument is different from the C<type>
 argument.
 
-Unlike the C<New> and C<Newc> macros, the C<Newz> macro calls C<memzero>
+Unlike the C<Newx> and C<Newxc> macros, the C<Newxz> macro calls C<memzero>
 to zero out all the newly allocated memory.
 
 =head3 Reallocation

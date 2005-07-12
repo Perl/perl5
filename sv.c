@@ -4577,7 +4577,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
             }
             SvFAKE_off(sv);
             SvREADONLY_off(sv);
-            /* This SV doesn't own the buffer, so need to New() a new one:  */
+            /* This SV doesn't own the buffer, so need to Newx() a new one:  */
             SvPV_set(sv, (char*)0);
             SvLEN_set(sv, 0);
             if (flags & SV_COW_DROP_PV) {

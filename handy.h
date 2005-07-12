@@ -639,7 +639,7 @@ hopefully catches attempts to access uninitialized memory.
 
 #ifdef PERL_MEM_LOG
 /*
- * If PERL_MEM_LOG is defined, all New()s, Renew()s, and Safefree()s
+ * If PERL_MEM_LOG is defined, all Newx()s, Renew()s, and Safefree()s
  * go through functions, which are handy for debugging breakpoints, but
  * which more importantly get the immediate calling environment (file and
  * line number) passed in.  This can then be used for logging the calls,

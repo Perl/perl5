@@ -165,7 +165,7 @@ perl_alloc_using(struct IPerlMem* ipM, struct IPerlMem* ipMS,
 		 struct IPerlProc* ipP)
 {
     PerlInterpreter *my_perl;
-    /* New() needs interpreter, so call malloc() instead */
+    /* Newx() needs interpreter, so call malloc() instead */
     my_perl = (PerlInterpreter*)(*ipM->pMalloc)(ipM, sizeof(PerlInterpreter));
     S_init_tls_and_interp(my_perl);
     Zero(my_perl, 1, PerlInterpreter);
@@ -198,7 +198,7 @@ perl_alloc(void)
 {
     PerlInterpreter *my_perl;
 
-    /* New() needs interpreter, so call malloc() instead */
+    /* Newx() needs interpreter, so call malloc() instead */
     my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
 
     S_init_tls_and_interp(my_perl);
