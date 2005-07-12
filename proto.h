@@ -1315,19 +1315,15 @@ PERL_CALLCONV I32	Perl_eval_sv(pTHX_ SV* sv, I32 flags)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV SV*	Perl_get_sv(pTHX_ const char* name, I32 create)
-			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV AV*	Perl_get_av(pTHX_ const char* name, I32 create)
-			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV HV*	Perl_get_hv(pTHX_ const char* name, I32 create)
-			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV CV*	Perl_get_cv(pTHX_ const char* name, I32 create)
-			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV int	Perl_init_i18nl10n(pTHX_ int printwarn);
