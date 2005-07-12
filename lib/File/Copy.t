@@ -9,7 +9,7 @@ use Test::More;
 
 my $TB = Test::More->builder;
 
-plan tests => 48;
+plan tests => 60;
 
 # We're going to override rename() later on but Perl has to see an override
 # at compile time to honor it.
@@ -18,6 +18,16 @@ BEGIN { *CORE::GLOBAL::rename = sub { CORE::rename($_[0], $_[1]) }; }
 
 use File::Copy;
 use Config;
+
+
+foreach my $code ("copy()", "copy('arg')", "copy('arg', 'arg', 'arg', 'arg')",
+                  "move()", "move('arg')", "move('arg', 'arg', 'arg')"
+                 )
+{
+    eval $code;
+    like $@, qr/^Usage: /;
+}
+
 
 for my $cross_partition_test (0..1) {
   {
@@ -92,7 +102,7 @@ for my $cross_partition_test (0..1) {
   # The destination file will reflect the same difficulties.
   my $mtime = (stat("copy-$$"))[9];
 
-  ok move "copy-$$", "file-$$", 'move';
+  ok move("copy-$$", "file-$$"), 'move';
   ok -e "file-$$",              '  destination exists';
   ok !-e "copy-$$",              '  source does not';
   open(R, "file-$$") or die; $foo = <R>; close(R);
@@ -114,9 +124,14 @@ for my $cross_partition_test (0..1) {
   is $foo, "ok\n";
   unlink "lib/file-$$" or die "unlink: $!";
 
-  eval { copy("file-$$", "file-$$") };
-  like $@, qr/are identical/;
-  ok -s "file-$$";
+  { 
+    my $warnings = '';
+    local $SIG{__WARN__} = sub { $warnings .= join '', @_ };
+    ok copy("file-$$", "file-$$");
+
+    like $warnings, qr/are identical/;
+    ok -s "file-$$";
+  }
 
   move "file-$$", "lib";
   open(R, "lib/file-$$") or die "open lib/file-$$: $!"; $foo = <R>; close(R);
@@ -125,14 +140,18 @@ for my $cross_partition_test (0..1) {
   unlink "lib/file-$$" or die "unlink: $!";
 
   SKIP: {
-    skip "Testing symlinks", 2 unless $Config{d_symlink};
+    skip "Testing symlinks", 3 unless $Config{d_symlink};
 
     open(F, ">file-$$") or die $!;
     print F "dummy content\n";
     close F;
     symlink("file-$$", "symlink-$$") or die $!;
-    eval { copy("file-$$", "symlink-$$") };
-    like $@, qr/are identical/;
+
+    my $warnings = '';
+    local $SIG{__WARN__} = sub { $warnings .= join '', @_ };
+    ok !copy("file-$$", "symlink-$$");
+
+    like $warnings, qr/are identical/;
     ok !-z "file-$$", 
       'rt.perl.org 5196: copying to itself would truncate the file';
 
@@ -141,14 +160,18 @@ for my $cross_partition_test (0..1) {
   }
 
   SKIP: {
-    skip "Testing hard links", 2 if !$Config{d_link} or $^O eq 'MSWin32';
+    skip "Testing hard links", 3 if !$Config{d_link} or $^O eq 'MSWin32';
 
     open(F, ">file-$$") or die $!;
     print F "dummy content\n";
     close F;
     link("file-$$", "hardlink-$$") or die $!;
-    eval { copy("file-$$", "hardlink-$$") };
-    like $@, qr/are identical/;
+
+    my $warnings = '';
+    local $SIG{__WARN__} = sub { $warnings .= join '', @_ };
+    ok !copy("file-$$", "hardlink-$$");
+
+    like $warnings, qr/are identical/;
     ok ! -z "file-$$",
       'rt.perl.org 5196: copying to itself would truncate the file';
 
