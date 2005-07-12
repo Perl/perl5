@@ -524,7 +524,7 @@ END_OF_HEAD
 		} elsif (/^=over\s*(.*)/) {		# =over N
 		    process_over();
 		} elsif (/^=back/) {		# =back
-		    process_back();
+		    process_back($need_dd);
 		} elsif (/^=for\s+(\S+)\s*(.*)/si) {# =for
 		    process_for($1,$2);
 		} else {
@@ -571,11 +571,9 @@ END_OF_HEAD
 		## end of experimental
 
 		if( $after_item ){
-		    print HTML "$text\n";
 		    $After_Lpar = 1;
-		} else {
-		    print HTML "<p>$text</p>\n";
 		}
+		print HTML "<p>$text</p>\n";
 	    }
 	    print HTML "</dd>\n" if $need_dd;
 	    $after_item = 0;
@@ -959,6 +957,19 @@ sub scan_dir {
 	    $Pages{$_}  = "" unless defined $Pages{$_};
 	    $Pages{$_} .= "$dir/$_.pm:";
 	    push(@pods, "$dir/$_.pm");
+	} elsif (-T "$dir/$_") {			    # script(?)
+	    local *F;
+	    if (open(F, "$dir/$_")) {
+		my $line;
+		while (defined($line = <F>)) {
+		    if ($line =~ /^=(?:pod|head1)/) {
+			$Pages{$_}  = "" unless defined $Pages{$_};
+			$Pages{$_} .= "$dir/$_.pod:";
+			last;
+		    }
+		}
+		close(F);
+	    }
 	}
     }
     closedir(DIR);
@@ -1107,7 +1118,7 @@ sub emit_item_tag($$$){
         $name = anchorify($name);
 	print HTML qq{<a name="$name">}, process_text( \$otext ), '</a>';
     }
-    print HTML "</strong><br />\n";
+    print HTML "</strong>\n";
     undef( $EmittedItem );
 }
 
@@ -1139,7 +1150,7 @@ sub process_item {
 
     # formatting: insert a paragraph if preceding item has >1 paragraph
     if( $After_Lpar ){
-	print HTML "<p></p>\n";
+	print HTML $need_dd ? "</dd>\n" : "</li>\n" if $After_Lpar;
 	$After_Lpar = 0;
     }
 
@@ -1172,7 +1183,6 @@ sub process_item {
         }
         $need_dd = 1;
     }
-    print HTML "</$emitted>" if $emitted;
     print HTML "\n";
     return $need_dd;
 }
@@ -1191,6 +1201,7 @@ sub process_over {
 # process_back - process a pod back tag and convert it to HTML format.
 #
 sub process_back {
+    my $need_dd = shift;
     if( $Listlevel == 0 ){
 	warn "$0: $Podfile: unexpected =back directive in paragraph $Paragraph.  ignoring.\n" unless $Quiet;
 	return;
@@ -1201,7 +1212,7 @@ sub process_back {
     # $Listend[$Listlevel] may have never been initialized.
     $Listlevel--;
     if( defined $Listend[$Listlevel] ){
-	print HTML '<p></p>' if $After_Lpar;
+	print HTML $need_dd ? "</dd>\n" : "</li>\n" if $After_Lpar;
 	print HTML $Listend[$Listlevel];
         print HTML "\n";
         pop( @Listend );
