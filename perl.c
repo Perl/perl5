@@ -1730,38 +1730,80 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef DEBUGGING
 		    sv_catpv(opts_prog," DEBUGGING");
 #  endif
+#  ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
+		    sv_catpv(opts_prog," DEBUG_LEAKING_SCALARS_FORK_DUMP");
+#  endif
+#  ifdef FAKE_THREADS
+		    sv_catpv(opts_prog," FAKE_THREADS");
+#  endif
 #  ifdef MULTIPLICITY
 		    sv_catpv(opts_prog," MULTIPLICITY");
 #  endif
-#  ifdef USE_5005THREADS
-		    sv_catpv(opts_prog," USE_5005THREADS");
+#  ifdef MYMALLOC
+		    sv_catpv(opts_prog," MYMALLOC");
 #  endif
-#  ifdef USE_ITHREADS
-		    sv_catpv(opts_prog," USE_ITHREADS");
+#  ifdef PERL_DONT_CREATE_GVSV
+		    sv_catpv(opts_prog," PERL_DONT_CREATE_GVSV");
 #  endif
-#  ifdef USE_64_BIT_INT
-		    sv_catpv(opts_prog," USE_64_BIT_INT");
+#  ifdef PERL_GLOBAL_STRUCT
+		    sv_catpv(opts_prog," PERL_GLOBAL_STRUCT");
 #  endif
-#  ifdef USE_64_BIT_ALL
-		    sv_catpv(opts_prog," USE_64_BIT_ALL");
-#  endif
-#  ifdef USE_LONG_DOUBLE
-		    sv_catpv(opts_prog," USE_LONG_DOUBLE");
-#  endif
-#  ifdef USE_LARGE_FILES
-		    sv_catpv(opts_prog," USE_LARGE_FILES");
-#  endif
-#  ifdef USE_SOCKS
-		    sv_catpv(opts_prog," USE_SOCKS");
-#  endif
-#  ifdef USE_SITECUSTOMIZE
-		    sv_catpv(opts_prog," USE_SITECUSTOMIZE");
-#  endif	       
 #  ifdef PERL_IMPLICIT_CONTEXT
 		    sv_catpv(opts_prog," PERL_IMPLICIT_CONTEXT");
 #  endif
 #  ifdef PERL_IMPLICIT_SYS
 		    sv_catpv(opts_prog," PERL_IMPLICIT_SYS");
+#  endif
+#  ifdef PERL_MALLOC_WRAP
+		    sv_catpv(opts_prog," PERL_MALLOC_WRAP");
+#  endif
+#  ifdef PERL_NEED_APPCTX
+		    sv_catpv(opts_prog," PERL_NEED_APPCTX");
+#  endif
+#  ifdef PERL_NEED_TIMESBASE
+		    sv_catpv(opts_prog," PERL_NEED_TIMESBASE");
+#  endif
+#  ifdef PERL_OLD_COPY_ON_WRITE
+		    sv_catpv(opts_prog," PERL_OLD_COPY_ON_WRITE");
+#  endif
+#  ifdef PL_OP_SLAB_ALLOC
+		    sv_catpv(opts_prog," PL_OP_SLAB_ALLOC");
+#  endif
+#  ifdef THREADS_HAVE_PIDS
+		    sv_catpv(opts_prog," THREADS_HAVE_PIDS");
+#  endif
+#  ifdef USE_5005THREADS
+		    sv_catpv(opts_prog," USE_5005THREADS");
+#  endif
+#  ifdef USE_64_BIT_ALL
+		    sv_catpv(opts_prog," USE_64_BIT_ALL");
+#  endif
+#  ifdef USE_64_BIT_INT
+		    sv_catpv(opts_prog," USE_64_BIT_INT");
+#  endif
+#  ifdef USE_ITHREADS
+		    sv_catpv(opts_prog," USE_ITHREADS");
+#  endif
+#  ifdef USE_LARGE_FILES
+		    sv_catpv(opts_prog," USE_LARGE_FILES");
+#  endif
+#  ifdef USE_LONG_DOUBLE
+		    sv_catpv(opts_prog," USE_LONG_DOUBLE");
+#  endif
+#  ifdef USE_PERLIO
+		    sv_catpv(opts_prog," USE_PERLIO");
+#  endif
+#  ifdef USE_REENTRANT_API
+		    sv_catpv(opts_prog," USE_REENTRANT_API");
+#  endif
+#  ifdef USE_SFIO
+		    sv_catpv(opts_prog," USE_SFIO");
+#  endif
+#  ifdef USE_SITECUSTOMIZE
+		    sv_catpv(opts_prog," USE_SITECUSTOMIZE");
+#  endif	       
+#  ifdef USE_SOCKS
+		    sv_catpv(opts_prog," USE_SOCKS");
 #  endif
 
 		    while (SvCUR(opts_prog) > opts+76) {
