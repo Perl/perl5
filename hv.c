@@ -1625,7 +1625,7 @@ Perl_hv_undef(pTHX_ HV *hv)
 	/* FIXME - strlen HvNAME  */
         if(PL_stashcache)
 	    hv_delete(PL_stashcache, name, strlen(name), G_DISCARD);
-	hv_name_set(hv, 0, 0, 0);
+	hv_name_set(hv, Nullch, 0, 0);
     }
     xhv->xhv_max   = 7;	/* HvMAX(hv) = 7 (it's a normal hash) */
     xhv->xhv_array = 0;	/* HvARRAY(hv) = 0 */

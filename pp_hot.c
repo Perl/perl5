@@ -3117,17 +3117,15 @@ PP(pp_method_named)
 STATIC SV *
 S_method_common(pTHX_ SV* meth, U32* hashp)
 {
-    SV* sv;
     SV* ob;
     GV* gv;
     HV* stash;
     STRLEN namelen;
-    const char* packname = 0;
+    const char* packname = Nullch;
     SV *packsv = Nullsv;
     STRLEN packlen;
-    const char *name = SvPV_const(meth, namelen);
-
-    sv = *(PL_stack_base + TOPMARK + 1);
+    const char * const name = SvPV_const(meth, namelen);
+    SV * const sv = *(PL_stack_base + TOPMARK + 1);
 
     if (!sv)
 	Perl_croak(aTHX_ "Can't call method \"%s\" on an undefined value", name);
@@ -3140,8 +3138,6 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	GV* iogv;
 
 	/* this isn't a reference */
-	packname = Nullch;
-
         if(SvOK(sv) && (packname = SvPV_const(sv, packlen))) {
           const HE* const he = hv_fetch_ent(PL_stashcache, sv, 0, 0);
           if (he) { 
