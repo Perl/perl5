@@ -1767,11 +1767,12 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
     OP *o;
     bool ismatchop = 0;
 
-    if (ckWARN(WARN_MISC) &&
-      (left->op_type == OP_RV2AV ||
+    if ( (left->op_type == OP_RV2AV ||
        left->op_type == OP_RV2HV ||
        left->op_type == OP_PADAV ||
-       left->op_type == OP_PADHV)) {
+       left->op_type == OP_PADHV)
+       && ckWARN(WARN_MISC))
+    {
       const char *desc = PL_op_desc[(right->op_type == OP_SUBST ||
                             right->op_type == OP_TRANS)
                            ? right->op_type : OP_MATCH];
@@ -1960,8 +1961,8 @@ Perl_localize(pTHX_ OP *o, I32 lex)
 	;
 #endif
     else {
-	if (ckWARN(WARN_PARENTHESIS)
-	    && PL_bufptr > PL_oldbufptr && PL_bufptr[-1] == ',')
+	if ( PL_bufptr > PL_oldbufptr && PL_bufptr[-1] == ','
+	    && ckWARN(WARN_PARENTHESIS))
 	{
 	    char *s = PL_bufptr;
 	    bool sigil = FALSE;
@@ -3528,7 +3529,7 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
     if (first->op_type == OP_CONST) {
 	if (first->op_private & OPpCONST_STRICT)
 	    no_bareword_allowed(first);
-	else if (ckWARN(WARN_BAREWORD) && (first->op_private & OPpCONST_BARE))
+	else if ((first->op_private & OPpCONST_BARE) && ckWARN(WARN_BAREWORD))
 		Perl_warner(aTHX_ packWARN(WARN_BAREWORD), "Bareword found in conditional");
 	if ((type == OP_AND &&  SvTRUE(((SVOP*)first)->op_sv)) ||
 	    (type == OP_OR  && !SvTRUE(((SVOP*)first)->op_sv)) ||
@@ -3564,8 +3565,8 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	    return first;
 	}
     }
-    else if (ckWARN(WARN_MISC) && (first->op_flags & OPf_KIDS) &&
-             type != OP_DOR) /* [#24076] Don't warn for <FH> err FOO. */
+    else if ((first->op_flags & OPf_KIDS) && type != OP_DOR
+	&& ckWARN(WARN_MISC)) /* [#24076] Don't warn for <FH> err FOO. */
     {
 	const OP *k1 = ((UNOP*)first)->op_first;
 	const OP *k2 = k1->op_sibling;
@@ -6188,7 +6189,7 @@ Perl_ck_split(pTHX_ OP *o)
     kid->op_type = OP_PUSHRE;
     kid->op_ppaddr = PL_ppaddr[OP_PUSHRE];
     scalar(kid);
-    if (ckWARN(WARN_REGEXP) && ((PMOP *)kid)->op_pmflags & PMf_GLOBAL) {
+    if (((PMOP *)kid)->op_pmflags & PMf_GLOBAL && ckWARN(WARN_REGEXP)) {
       Perl_warner(aTHX_ packWARN(WARN_REGEXP),
                   "Use of /g modifier is meaningless in split");
     }
@@ -6214,9 +6215,9 @@ Perl_ck_split(pTHX_ OP *o)
 OP *
 Perl_ck_join(pTHX_ OP *o)
 {
-    if (ckWARN(WARN_SYNTAX)) {
-	const OP *kid = cLISTOPo->op_first->op_sibling;
-	if (kid && kid->op_type == OP_MATCH) {
+    const OP *kid = cLISTOPo->op_first->op_sibling;
+    if (kid && kid->op_type == OP_MATCH) {
+	if (ckWARN(WARN_SYNTAX)) {
             const REGEXP *re = PM_GETRE(kPMOP);
 	    const char *pmstr = re ? re->precomp : "STRING";
 	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
@@ -6267,7 +6268,7 @@ Perl_ck_subr(pTHX_ OP *o)
 		    }
 		    else {
 			delete_op = 1;
-			if (ckWARN(WARN_ASSERTIONS) && !(PL_hints & HINT_ASSERTIONSSEEN)) {
+			if (!(PL_hints & HINT_ASSERTIONSSEEN) && ckWARN(WARN_ASSERTIONS)) {
 			    Perl_warner(aTHX_ packWARN(WARN_ASSERTIONS),
 					"Impossible to activate assertion call");
 			}
@@ -6739,8 +6740,9 @@ Perl_peep(pTHX_ register OP *o)
 
 	case OP_EXEC:
 	    o->op_opt = 1;
-	    if (ckWARN(WARN_SYNTAX) && o->op_next
-		&& o->op_next->op_type == OP_NEXTSTATE) {
+	    if (o->op_next && o->op_next->op_type == OP_NEXTSTATE
+		&& ckWARN(WARN_SYNTAX))
+	    {
 		if (o->op_next->op_sibling &&
 			o->op_next->op_sibling->op_type != OP_EXIT &&
 			o->op_next->op_sibling->op_type != OP_WARN &&

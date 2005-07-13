@@ -1555,9 +1555,9 @@ S_scan_const(pTHX_ char *start)
 		/* FALL THROUGH */
 	    default:
 	        {
-		    if (ckWARN(WARN_MISC) &&
-			isALNUM(*s) &&
-			*s != '_')
+		    if (isALNUM(*s) &&
+			*s != '_' &&
+			ckWARN(WARN_MISC))
 			Perl_warner(aTHX_ packWARN(WARN_MISC),
 			       "Unrecognized escape \\%c passed through",
 			       *s);
@@ -3479,8 +3479,8 @@ Perl_yylex(pTHX)
 	    AOPERATOR(ANDAND);
 	s--;
 	if (PL_expect == XOPERATOR) {
-	    if (ckWARN(WARN_SEMICOLON)
-		&& isIDFIRST_lazy_if(s,UTF) && PL_bufptr == PL_linestart)
+	    if (PL_bufptr == PL_linestart && ckWARN(WARN_SEMICOLON)
+		&& isIDFIRST_lazy_if(s,UTF))
 	    {
 		CopLINE_dec(PL_curcop);
 		Perl_warner(aTHX_ packWARN(WARN_SEMICOLON), PL_warn_nosemi);
@@ -3515,7 +3515,7 @@ Perl_yylex(pTHX)
 	    OPERATOR(',');
 	if (tmp == '~')
 	    PMop(OP_MATCH);
-	if (ckWARN(WARN_SYNTAX) && tmp && isSPACE(*s) && strchr("+-*/%.^&|<",tmp))
+	if (tmp && isSPACE(*s) && strchr("+-*/%.^&|<",tmp) && ckWARN(WARN_SYNTAX))
 	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Reversed %c= operator",(int)tmp);
 	s--;
 	if (PL_expect == XSTATE && isALPHA(tmp) &&
@@ -3685,8 +3685,8 @@ Perl_yylex(pTHX)
 	    else if (*s == '{') {
 		char *t;
 		PL_tokenbuf[0] = '%';
-		if (ckWARN(WARN_SYNTAX) && strEQ(PL_tokenbuf+1, "SIG") &&
-		    (t = strchr(s, '}')) && (t = strchr(t, '=')))
+		if (strEQ(PL_tokenbuf+1, "SIG") && (t = strchr(s, '}'))
+		    && (t = strchr(t, '=')) && ckWARN(WARN_SYNTAX))
 		{
 		    char tmpbuf[sizeof PL_tokenbuf];
 		    for (t++; isSPACE(*t); t++) ;
@@ -3766,8 +3766,8 @@ Perl_yylex(pTHX)
 		PL_tokenbuf[0] = '%';
 
 	    /* Warn about @ where they meant $. */
-	    if (ckWARN(WARN_SYNTAX)) {
-		if (*s == '[' || *s == '{') {
+	    if (*s == '[' || *s == '{') {
+		if (ckWARN(WARN_SYNTAX)) {
 		    const char *t = s + 1;
 		    while (*t && (isALNUM_lazy_if(t,UTF) || strchr(" \t$#+-'\"", *t)))
 			t++;
@@ -3920,7 +3920,7 @@ Perl_yylex(pTHX)
 
     case '\\':
 	s++;
-	if (ckWARN(WARN_SYNTAX) && PL_lex_inwhat && isDIGIT(*s))
+	if (PL_lex_inwhat && isDIGIT(*s) && ckWARN(WARN_SYNTAX))
 	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),"Can't use \\%c to mean $%c in expression",
 			*s, *s);
 	if (PL_expect == XOPERATOR)
@@ -4081,8 +4081,8 @@ Perl_yylex(pTHX)
 		}
 		gv = Nullgv;
 		gvp = 0;
-		if (ckWARN(WARN_AMBIGUOUS) && hgv
-		    && tmp != KEY_x && tmp != KEY_CORE)	/* never ambiguous */
+		if (hgv && tmp != KEY_x && tmp != KEY_CORE
+			&& ckWARN(WARN_AMBIGUOUS))	/* never ambiguous */
 		    Perl_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
 		    	"Ambiguous call resolved as CORE::%s(), %s",
 			 GvENAME(hgv), "qualify as such or use &");
@@ -4300,8 +4300,8 @@ Perl_yylex(pTHX)
 		    yylval.opval->op_private |= OPpCONST_STRICT;
 		else {
 		bareword:
-		    if (ckWARN(WARN_RESERVED)) {
-			if (lastchar != '-') {
+		    if (lastchar != '-') {
+			if (ckWARN(WARN_RESERVED)) {
 			    for (d = PL_tokenbuf; *d && isLOWER(*d); d++) ;
 			    if (!*d && !gv_stashpv(PL_tokenbuf,FALSE))
 				Perl_warner(aTHX_ packWARN(WARN_RESERVED), PL_warn_reserved,
@@ -9281,8 +9281,8 @@ S_scan_pat(pTHX_ char *start, I32 type)
 	    pmflag(&pm->op_pmflags,*s++);
     }
     /* issue a warning if /c is specified,but /g is not */
-    if (ckWARN(WARN_REGEXP) &&
-        (pm->op_pmflags & PMf_CONTINUE) && !(pm->op_pmflags & PMf_GLOBAL))
+    if ((pm->op_pmflags & PMf_CONTINUE) && !(pm->op_pmflags & PMf_GLOBAL)
+	    && ckWARN(WARN_REGEXP))
     {
         Perl_warner(aTHX_ packWARN(WARN_REGEXP), c_without_g);
     }
@@ -9337,7 +9337,7 @@ S_scan_subst(pTHX_ char *start)
     }
 
     /* /c is not meaningful with s/// */
-    if (ckWARN(WARN_REGEXP) && (pm->op_pmflags & PMf_CONTINUE))
+    if ((pm->op_pmflags & PMf_CONTINUE) && ckWARN(WARN_REGEXP))
     {
         Perl_warner(aTHX_ packWARN(WARN_REGEXP), c_in_subst);
     }
@@ -10223,7 +10223,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
 		/* _ are ignored -- but warned about if consecutive */
 		case '_':
-		    if (ckWARN(WARN_SYNTAX) && lastub && s == lastub + 1)
+		    if (lastub && s == lastub + 1 && ckWARN(WARN_SYNTAX))
 		        Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 				    "Misplaced _ in number");
 		    lastub = s++;
@@ -10303,7 +10303,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
 	    sv = NEWSV(92,0);
 	    if (overflowed) {
-		if (ckWARN(WARN_PORTABLE) && n > 4294967295.0)
+		if (n > 4294967295.0 && ckWARN(WARN_PORTABLE))
 		    Perl_warner(aTHX_ packWARN(WARN_PORTABLE),
 				"%s number > %s non-portable",
 				Base, max);
@@ -10311,7 +10311,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	    }
 	    else {
 #if UVSIZE > 4
-		if (ckWARN(WARN_PORTABLE) && u > 0xffffffff)
+		if (u > 0xffffffff && ckWARN(WARN_PORTABLE))
 		    Perl_warner(aTHX_ packWARN(WARN_PORTABLE),
 				"%s number > %s non-portable",
 				Base, max);
@@ -10343,7 +10343,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	       if -w is on
 	    */
 	    if (*s == '_') {
-		if (ckWARN(WARN_SYNTAX) && lastub && s == lastub + 1)
+		if (lastub && s == lastub + 1 && ckWARN(WARN_SYNTAX))
 		    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 				"Misplaced _ in number");
 		lastub = s++;
@@ -10385,7 +10385,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 		if (d >= e)
 		    Perl_croak(aTHX_ number_too_long);
 		if (*s == '_') {
-		   if (ckWARN(WARN_SYNTAX) && lastub && s == lastub + 1)
+		   if (lastub && s == lastub + 1 && ckWARN(WARN_SYNTAX))
 		       Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 				   "Misplaced _ in number");
 		   lastub = s;
@@ -10442,9 +10442,9 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 		    *d++ = *s++;
 		}
 		else {
-		   if (ckWARN(WARN_SYNTAX) &&
-		       ((lastub && s == lastub + 1) ||
-			(!isDIGIT(s[1]) && s[1] != '_')))
+		   if (((lastub && s == lastub + 1) ||
+			(!isDIGIT(s[1]) && s[1] != '_'))
+	   	    && ckWARN(WARN_SYNTAX))
 		       Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 				   "Misplaced _ in number");
 		   lastub = s++;

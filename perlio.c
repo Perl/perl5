@@ -979,7 +979,6 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 		    }
 		}
 		if (e > s) {
-		    const bool warn_layer = ckWARN(WARN_LAYER);
 		    PerlIO_funcs *layer =
 			PerlIO_find_layer(aTHX_ s, llen, 1);
 		    if (layer) {
@@ -989,7 +988,7 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 					 &PL_sv_undef);
 		    }
 		    else {
-			if (warn_layer)
+			if (ckWARN(WARN_LAYER))
 			    Perl_warner(aTHX_ packWARN(WARN_LAYER), "Unknown PerlIO layer \"%.*s\"",
 				  (int) llen, s);
 			return -1;

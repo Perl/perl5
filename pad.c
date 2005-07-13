@@ -501,7 +501,7 @@ Perl_pad_check_dup(pTHX_ const char *name, bool is_our, const HV *ourstash)
     PADOFFSET	top, off;
 
     ASSERT_CURPAD_ACTIVE("pad_check_dup");
-    if (!ckWARN(WARN_MISC) || AvFILLp(PL_comppad_name) < 0)
+    if (AvFILLp(PL_comppad_name) < 0 || !ckWARN(WARN_MISC))
 	return; /* nothing to check */
 
     svp = AvARRAY(PL_comppad_name);

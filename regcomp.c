@@ -2202,12 +2202,12 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		}
 		if (!scan) 		/* It was not CURLYX, but CURLY. */
 		    scan = next;
-		if (ckWARN(WARN_REGEXP)
-		       /* ? quantifier ok, except for (?{ ... }) */
-		    && (next_is_eval || !(mincount == 0 && maxcount == 1))
+		if ( /* ? quantifier ok, except for (?{ ... }) */
+		    (next_is_eval || !(mincount == 0 && maxcount == 1))
 		    && (minnext == 0) && (deltanext == 0)
 		    && data && !(data->flags & (SF_HAS_PAR|SF_IN_PAR))
-		    && maxcount <= REG_INFTY/3) /* Complement check for big count */
+		    && maxcount <= REG_INFTY/3 /* Complement check for big count */
+		    && ckWARN(WARN_REGEXP))
 		{
 		    vWARN(RExC_parse,
 			  "Quantifier unexpected on zero-length expression");
@@ -3838,7 +3838,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp)
 	goto do_curly;
     }
   nest_check:
-    if (ckWARN(WARN_REGEXP) && !SIZE_ONLY && !(flags&HASWIDTH) && max > REG_INFTY/3) {
+    if (!SIZE_ONLY && !(flags&HASWIDTH) && max > REG_INFTY/3 && ckWARN(WARN_REGEXP)) {
 	vWARN3(RExC_parse,
 	       "%.*s matches null string many times",
 	       RExC_parse - origparse,
@@ -4275,7 +4275,7 @@ tryagain:
 			    FAIL("Trailing \\");
 			/* FALL THROUGH */
 		    default:
-			if (!SIZE_ONLY && ckWARN(WARN_REGEXP) && isALPHA(*p))
+			if (!SIZE_ONLY&& isALPHA(*p) && ckWARN(WARN_REGEXP))
 			    vWARN2(p + 1, "Unrecognized escape \\%c passed through", UCHARAT(p));
 			goto normal_default;
 		    }
@@ -4818,7 +4818,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		break;
             }
 	    default:
-		if (!SIZE_ONLY && ckWARN(WARN_REGEXP) && isALPHA(value))
+		if (!SIZE_ONLY && isALPHA(value) && ckWARN(WARN_REGEXP))
 		    vWARN2(RExC_parse,
 			   "Unrecognized escape \\%c in character class passed through",
 			   (int)value);

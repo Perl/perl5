@@ -566,7 +566,9 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	}
     }
     if (!fp) {
-	if (ckWARN(WARN_NEWLINE) && IoTYPE(io) == IoTYPE_RDONLY && strchr(name, '\n'))
+	if (IoTYPE(io) == IoTYPE_RDONLY && strchr(name, '\n')
+	    && ckWARN(WARN_NEWLINE)
+	)
 	    Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "open");
 	goto say_false;
     }
@@ -1079,7 +1081,7 @@ Perl_do_eof(pTHX_ GV *gv)
 
     if (!io)
 	return TRUE;
-    else if (ckWARN(WARN_IO) && (IoTYPE(io) == IoTYPE_WRONLY))
+    else if ((IoTYPE(io) == IoTYPE_WRONLY) && ckWARN(WARN_IO))
 	report_evil_fh(gv, io, OP_phoney_OUTPUT_ONLY);
 
     while (IoIFP(io)) {
@@ -1392,7 +1394,7 @@ Perl_my_stat(pTHX)
 	s = SvPVX_const(PL_statname);		/* s now NUL-terminated */
 	PL_laststype = OP_STAT;
 	PL_laststatval = PerlLIO_stat(s, &PL_statcache);
-	if (PL_laststatval < 0 && ckWARN(WARN_NEWLINE) && strchr(s, '\n'))
+	if (PL_laststatval < 0 && strchr(s, '\n') && ckWARN(WARN_NEWLINE))
 	    Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "stat");
 	return PL_laststatval;
     }
@@ -1418,8 +1420,8 @@ Perl_my_lstat(pTHX)
 	    return (PL_laststatval = -1);
 	}
     }
-    else if (ckWARN(WARN_IO) && PL_laststype != OP_LSTAT
-	    && (PL_op->op_private & OPpFT_STACKED))
+    else if (PL_laststype != OP_LSTAT
+	    && (PL_op->op_private & OPpFT_STACKED) && ckWARN(WARN_IO))
 	Perl_croak(aTHX_ no_prev_lstat);
 
     PL_laststype = OP_LSTAT;

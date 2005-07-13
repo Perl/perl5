@@ -907,8 +907,7 @@ PP(pp_untie)
 	       LEAVE;
 	       SPAGAIN;
             }
-           else if (ckWARN(WARN_UNTIE)) {
-	       if (mg && SvREFCNT(obj) > 1)
+	    else if (mg && SvREFCNT(obj) > 1 && ckWARN(WARN_UNTIE)) {
 		  Perl_warner(aTHX_ packWARN(WARN_UNTIE),
 		      "untie attempted while %"UVuf" inner references still exist",
 		       (UV)SvREFCNT(obj) - 1 ) ;
@@ -1232,8 +1231,8 @@ PP(pp_getc)
 	RETURN;
     }
     if (!gv || do_eof(gv)) { /* make sure we have fp with something */
-	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED)
-		&& (!io || (!IoIFP(io) && IoTYPE(io) != IoTYPE_WRONLY)))
+	if ((!io || (!IoIFP(io) && IoTYPE(io) != IoTYPE_WRONLY))
+	  && ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
 	SETERRNO(EBADF,RMS_IFI);
 	RETPUSHUNDEF;

@@ -531,7 +531,7 @@ PP(pp_bless)
 	if (ssv && !SvGMAGICAL(ssv) && !SvAMAGIC(ssv) && SvROK(ssv))
 	    Perl_croak(aTHX_ "Attempt to bless into a reference");
 	ptr = SvPV_const(ssv,len);
-	if (ckWARN(WARN_MISC) && len == 0)
+	if (len == 0 && ckWARN(WARN_MISC))
 	    Perl_warner(aTHX_ packWARN(WARN_MISC),
 		   "Explicit blessing to '' (assuming package main)");
 	stash = gv_stashpvn(ptr, len, TRUE);
@@ -789,7 +789,7 @@ PP(pp_undef)
 	hv_undef((HV*)sv);
 	break;
     case SVt_PVCV:
-	if (ckWARN(WARN_MISC) && cv_const_sv((CV*)sv))
+	if (cv_const_sv((CV*)sv) && ckWARN(WARN_MISC))
 	    Perl_warner(aTHX_ packWARN(WARN_MISC), "Constant subroutine %s undefined",
 		 CvANON((CV*)sv) ? "(anonymous)" : GvENAME(CvGV((CV*)sv)));
 	/* FALL THROUGH */

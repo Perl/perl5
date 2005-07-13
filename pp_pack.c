@@ -1024,8 +1024,7 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
           Perl_croak(aTHX_ "Can't use '%c' in a group with different byte-order in %s",
                      *patptr, _action( symptr ) );
 
-        if (ckWARN(WARN_UNPACK)) {
-          if (code & modifier)
+        if ((code & modifier) && ckWARN(WARN_UNPACK)) {
 	    Perl_warner(aTHX_ packWARN(WARN_UNPACK),
                         "Duplicate modifier '%c' after '%c' in %s",
                         *patptr, (int) TYPE_NO_MODIFIERS(code),
@@ -2518,6 +2517,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
     I32 items  = endlist - beglist;
     bool found = next_symbol(symptr);
     bool utf8 = (symptr->flags & FLAG_PARSE_UTF8) ? 1 : 0;
+    bool warn_utf8 = ckWARN(WARN_UTF8);
 
     if (symptr->level == 0 && found && symptr->code == 'U') {
 	marked_upgrade(aTHX_ cat, symptr);
@@ -2843,7 +2843,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    end = str + fromlen;
 	    if (DO_UTF8(fromstr)) {
 		utf8_source = TRUE;
-		utf8_flags  = ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY;
+		utf8_flags  = warn_utf8 ? 0 : UTF8_ALLOW_ANY;
 	    } else {
 		utf8_source = FALSE;
 		utf8_flags  = 0; /* Unused, but keep compilers happy */
@@ -2912,7 +2912,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    end = str + fromlen;
 	    if (DO_UTF8(fromstr)) {
 		utf8_source = TRUE;
-		utf8_flags  = ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY;
+		utf8_flags  = warn_utf8 ? 0 : UTF8_ALLOW_ANY;
 	    } else {
 		utf8_source = FALSE;
 		utf8_flags  = 0; /* Unused, but keep compilers happy */
@@ -3025,7 +3025,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    }
 		    cur = (char *) uvuni_to_utf8_flags((U8 *) cur,
 						       NATIVE_TO_UNI(auv),
-						       ckWARN(WARN_UTF8) ?
+						       warn_utf8 ?
 						       0 : UNICODE_ALLOW_ANY);
 		} else {
 		    if (auv >= 0x100) {
@@ -3079,7 +3079,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		if (utf8) {
 		    U8 buffer[UTF8_MAXLEN], *endb;
 		    endb = uvuni_to_utf8_flags(buffer, auv,
-					       ckWARN(WARN_UTF8) ?
+					       warn_utf8 ?
 					       0 : UNICODE_ALLOW_ANY);
 		    if (cur+(endb-buffer)*UTF8_EXPAND >= end) {
 			*cur = '\0';
@@ -3097,7 +3097,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 			end = start+SvLEN(cat)-UTF8_MAXLEN;
 		    }
 		    cur = (char *) uvuni_to_utf8_flags((U8 *) cur, auv,
-						       ckWARN(WARN_UTF8) ?
+						       warn_utf8 ?
 						       0 : UNICODE_ALLOW_ANY);
 		}
 	    }
@@ -3524,9 +3524,8 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		     * of pack() (and all copies of the result) are
 		     * gone.
 		     */
-		    if (ckWARN(WARN_PACK) &&
-			(SvTEMP(fromstr) || (SvPADTMP(fromstr) &&
-					     !SvREADONLY(fromstr)))) {
+		    if ((SvTEMP(fromstr) || (SvPADTMP(fromstr) &&
+			     !SvREADONLY(fromstr))) && ckWARN(WARN_PACK)) {
 			Perl_warner(aTHX_ packWARN(WARN_PACK),
 				    "Attempt to pack pointer to temporary value");
 		    }

@@ -1494,8 +1494,9 @@ Perl_do_readline(pTHX)
 	}
     }
     if (!fp) {
-	if (ckWARN2(WARN_GLOB, WARN_CLOSED)
-		&& (!io || !(IoFLAGS(io) & IOf_START))) {
+	if ((!io || !(IoFLAGS(io) & IOf_START))
+	    && ckWARN2(WARN_GLOB, WARN_CLOSED))
+	{
 	    if (type == OP_GLOB)
 		Perl_warner(aTHX_ packWARN(WARN_GLOB),
 			    "glob failed (can't start child: %s)",
@@ -1610,8 +1611,8 @@ Perl_do_readline(pTHX)
 	     const STRLEN len = SvCUR(sv) - offset;
 	     const U8 *f;
 	     
-	     if (ckWARN(WARN_UTF8) &&
-		 !Perl_is_utf8_string_loc(aTHX_ s, len, &f))
+	     if (!Perl_is_utf8_string_loc(aTHX_ s, len, &f)
+	        && ckWARN(WARN_UTF8))
 		  /* Emulate :encoding(utf8) warning in the same case. */
 		  Perl_warner(aTHX_ packWARN(WARN_UTF8),
 			      "utf8 \"\\x%02X\" does not map to Unicode",
