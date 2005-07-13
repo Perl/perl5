@@ -66,7 +66,7 @@ int mkstemp(char*);
 /* Call the callback or PerlIOBase, and return failure. */
 #define Perl_PerlIO_or_Base(f, callback, base, failure, args) 	\
 	if (PerlIOValid(f)) {					\
-		const PerlIO_funcs *tab = PerlIOBase(f)->tab;	\
+		const PerlIO_funcs * const tab = PerlIOBase(f)->tab;\
 		if (tab && tab->callback)			\
 			return (*tab->callback) args;		\
 		else						\
@@ -79,7 +79,7 @@ int mkstemp(char*);
 /* Call the callback or fail, and return failure. */
 #define Perl_PerlIO_or_fail(f, callback, failure, args) 	\
 	if (PerlIOValid(f)) {					\
-		const PerlIO_funcs *tab = PerlIOBase(f)->tab;	\
+		const PerlIO_funcs * const tab = PerlIOBase(f)->tab;\
 		if (tab && tab->callback)			\
 			return (*tab->callback) args;		\
 		SETERRNO(EINVAL, LIB_INVARG);			\
@@ -91,7 +91,7 @@ int mkstemp(char*);
 /* Call the callback or PerlIOBase, and be void. */
 #define Perl_PerlIO_or_Base_void(f, callback, base, args) 	\
 	if (PerlIOValid(f)) {					\
-		const PerlIO_funcs *tab = PerlIOBase(f)->tab;	\
+		const PerlIO_funcs * const tab = PerlIOBase(f)->tab;\
 		if (tab && tab->callback)			\
 			(*tab->callback) args;			\
 		else						\
@@ -103,7 +103,7 @@ int mkstemp(char*);
 /* Call the callback or fail, and be void. */
 #define Perl_PerlIO_or_fail_void(f, callback, args) 		\
 	if (PerlIOValid(f)) {					\
-		const PerlIO_funcs *tab = PerlIOBase(f)->tab;	\
+		const PerlIO_funcs * const tab = PerlIOBase(f)->tab;\
 		if (tab && tab->callback)			\
 			(*tab->callback) args;			\
 		else						\
@@ -747,7 +747,7 @@ PerlIO_find_layer(pTHX_ const char *name, STRLEN len, int load)
     if ((SSize_t) len <= 0)
 	len = strlen(name);
     for (i = 0; i < PL_known_layers->cur; i++) {
-	PerlIO_funcs *f = PL_known_layers->array[i].funcs;
+	PerlIO_funcs * const f = PL_known_layers->array[i].funcs;
 	if (memEQ(f->name, name, len) && f->name[len] == 0) {
 	    PerlIO_debug("%.*s => %p\n", (int) len, name, (void*)f);
 	    return f;
@@ -759,10 +759,10 @@ PerlIO_find_layer(pTHX_ const char *name, STRLEN len, int load)
 	    Perl_croak(aTHX_ "Recursive call to Perl_load_module in PerlIO_find_layer");
 	    return NULL;
 	} else {
-	    SV *pkgsv = newSVpvn("PerlIO", 6);
-	    SV *layer = newSVpvn(name, len);
-	    CV *cv  = get_cv("PerlIO::Layer::NoWarnings", FALSE);
-    	    ENTER;
+	    SV * const pkgsv = newSVpvn("PerlIO", 6);
+	    SV * const layer = newSVpvn(name, len);
+	    CV * const cv    = get_cv("PerlIO::Layer::NoWarnings", FALSE);
+	    ENTER;
 	    SAVEINT(PL_in_load_module);
 	    if (cv) {
 		SAVEGENERICSV(PL_warnhook);
@@ -866,8 +866,8 @@ XS(XS_io_MODIFY_SCALAR_ATTRIBUTES)
 SV *
 PerlIO_tab_sv(pTHX_ PerlIO_funcs *tab)
 {
-    HV *stash = gv_stashpv("PerlIO::Layer", TRUE);
-    SV *sv = sv_bless(newRV_noinc(newSViv(PTR2IV(tab))), stash);
+    HV * const stash = gv_stashpv("PerlIO::Layer", TRUE);
+    SV * const sv = sv_bless(newRV_noinc(newSViv(PTR2IV(tab))), stash);
     return sv;
 }
 
@@ -889,9 +889,9 @@ XS(XS_PerlIO__Layer__find)
 	Perl_croak(aTHX_ "Usage class->find(name[,load])");
     else {
 	STRLEN len;
-	const char *name = SvPV_const(ST(1), len);
+	const char * const name = SvPV_const(ST(1), len);
 	const bool load = (items > 2) ? SvTRUE(ST(2)) : 0;
-	PerlIO_funcs *layer = PerlIO_find_layer(aTHX_ name, len, load);
+	PerlIO_funcs * const layer = PerlIO_find_layer(aTHX_ name, len, load);
 	ST(0) =
 	    (layer) ? sv_2mortal(PerlIO_tab_sv(aTHX_ layer)) :
 	    &PL_sv_undef;
@@ -979,7 +979,7 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 		    }
 		}
 		if (e > s) {
-		    PerlIO_funcs *layer =
+		    PerlIO_funcs * const layer =
 			PerlIO_find_layer(aTHX_ s, llen, 1);
 		    if (layer) {
 			PerlIO_list_push(aTHX_ av, layer,
@@ -1134,7 +1134,7 @@ Perl_boot_core_PerlIO(pTHX)
 PerlIO_funcs *
 PerlIO_default_layer(pTHX_ I32 n)
 {
-    PerlIO_list_t *av = PerlIO_default_layers(aTHX);
+    PerlIO_list_t * const av = PerlIO_default_layers(aTHX);
     if (n < 0)
 	n += av->cur;
     return PerlIO_layer_fetch(aTHX_ av, n, PERLIO_FUNCS_CAST(&PerlIO_stdio));
@@ -1351,7 +1351,7 @@ int
 PerlIO__close(pTHX_ PerlIO *f)
 {
     if (PerlIOValid(f)) {
-	PerlIO_funcs *tab = PerlIOBase(f)->tab;
+	PerlIO_funcs * const tab = PerlIOBase(f)->tab;
 	if (tab && tab->Close)
 	    return (*tab->Close)(aTHX_ f);
 	else
@@ -1445,7 +1445,7 @@ PerlIO_resolve_layers(pTHX_ const char *layers,
 	 * for it
 	 */
 	if (SvROK(arg) && !sv_isobject(arg)) {
-	    PerlIO_funcs *handler = PerlIO_layer_from_ref(aTHX_ SvRV(arg));
+	    PerlIO_funcs * const handler = PerlIO_layer_from_ref(aTHX_ SvRV(arg));
 	    if (handler) {
 		def = PerlIO_list_alloc(aTHX);
 		PerlIO_list_push(aTHX_ def, handler, &PL_sv_undef);
@@ -1512,7 +1512,7 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 	    PerlIOl *l = *f;
 	    layera = PerlIO_list_alloc(aTHX);
 	    while (l) {
-		SV *arg = (l->tab->Getarg)
+		SV * const arg = (l->tab->Getarg)
 			? (*l->tab->Getarg) (aTHX_ &l, NULL, 0)
 			: &PL_sv_undef;
 		PerlIO_list_push(aTHX_ layera, l->tab, arg);
@@ -1530,7 +1530,7 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 	 */
 	n = layera->cur - 1;
 	while (n >= 0) {
-	    PerlIO_funcs *t = PerlIO_layer_fetch(aTHX_ layera, n, NULL);
+	    PerlIO_funcs * const t = PerlIO_layer_fetch(aTHX_ layera, n, NULL);
 	    if (t && t->Open) {
 		tab = t;
 		break;
@@ -1709,7 +1709,7 @@ int
 PerlIO_has_base(PerlIO *f)
 {
      if (PerlIOValid(f)) {
-          const PerlIO_funcs *tab = PerlIOBase(f)->tab;
+	  const PerlIO_funcs * const tab = PerlIOBase(f)->tab;
 
 	  if (tab)
 	       return (tab->Get_base != NULL);
@@ -1725,7 +1725,7 @@ int
 PerlIO_fast_gets(PerlIO *f)
 {
     if (PerlIOValid(f) && (PerlIOBase(f)->flags & PERLIO_F_FASTGETS)) {
-	 const PerlIO_funcs *tab = PerlIOBase(f)->tab;
+	 const PerlIO_funcs * const tab = PerlIOBase(f)->tab;
 
 	 if (tab)
 	      return (tab->Set_ptrcnt != NULL);
@@ -1741,7 +1741,7 @@ int
 PerlIO_has_cntptr(PerlIO *f)
 {
     if (PerlIOValid(f)) {
-	const PerlIO_funcs *tab = PerlIOBase(f)->tab;
+	const PerlIO_funcs * const tab = PerlIOBase(f)->tab;
 
 	if (tab)
 	     return (tab->Get_ptr != NULL && tab->Get_cnt != NULL);
@@ -1757,7 +1757,7 @@ int
 PerlIO_canset_cnt(PerlIO *f)
 {
     if (PerlIOValid(f)) {
-	  const PerlIO_funcs *tab = PerlIOBase(f)->tab;
+	  const PerlIO_funcs * const tab = PerlIOBase(f)->tab;
 
 	  if (tab)
 	       return (tab->Set_ptrcnt != NULL);
@@ -2667,7 +2667,7 @@ PerlIOStdio_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab
 {
     PerlIO *n;
     if (PerlIOValid(f) && PerlIOValid(n = PerlIONext(f))) {
-        PerlIO_funcs *toptab = PerlIOBase(n)->tab;
+	PerlIO_funcs * const toptab = PerlIOBase(n)->tab;
         if (toptab == tab) {
 	    /* Top is already stdio - pop self (duplicate) and use original */
 	    PerlIO_pop(aTHX_ f);

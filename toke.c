@@ -9085,7 +9085,7 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
 {
     register char *d;
     register char *e;
-    char *bracket = 0;
+    char *bracket = Nullch;
     char funny = *s++;
 
     if (isSPACE(*s))
@@ -9263,7 +9263,7 @@ S_scan_pat(pTHX_ char *start, I32 type)
     char *s = scan_str(start,FALSE,FALSE);
 
     if (!s) {
-	char *delimiter = skipspace(start);
+	char * const delimiter = skipspace(start);
 	Perl_croak(aTHX_ *delimiter == '?'
 		   ? "Search pattern not terminated or ternary operator parsed as search pattern"
 		   : "Search pattern not terminated" );

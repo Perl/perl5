@@ -1729,7 +1729,7 @@ Perl_hv_undef(pTHX_ HV *hv)
     if ((name = HvNAME_get(hv))) {
         if(PL_stashcache)
 	    hv_delete(PL_stashcache, name, HvNAMELEN_get(hv), G_DISCARD);
-	Perl_hv_name_set(aTHX_ hv, 0, 0, 0);
+	Perl_hv_name_set(aTHX_ hv, Nullch, 0, 0);
     }
     SvFLAGS(hv) &= ~SVf_OOK;
     Safefree(HvARRAY(hv));
@@ -1871,7 +1871,8 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, I32 len, int flags)
 {
     struct xpvhv_aux *iter;
     U32 hash;
-    (void)flags;
+
+    PERL_UNUSED_ARG(flags);
 
     if (SvOOK(hv)) {
 	iter = HvAUX(hv);

@@ -1539,7 +1539,7 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
 	if (namesv && namesv != &PL_sv_undef
 	    && *SvPVX_const(namesv) == '&')
 	{
-	    CV *innercv = (CV*)curpad[ix];
+	    CV * const innercv = (CV*)curpad[ix];
 	    assert(CvWEAKOUTSIDE(innercv));
 	    assert(CvOUTSIDE(innercv) == old_cv);
 	    CvOUTSIDE(innercv) = new_cv;

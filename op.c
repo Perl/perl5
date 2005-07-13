@@ -161,7 +161,7 @@ Perl_Slab_Free(pTHX_ void *op)
 STATIC const char*
 S_gv_ename(pTHX_ GV *gv)
 {
-    SV* tmpsv = sv_newmortal();
+    SV* const tmpsv = sv_newmortal();
     gv_efullname3(tmpsv, gv, Nullch);
     return SvPV_nolen_const(tmpsv);
 }
@@ -3743,7 +3743,8 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
     OP* o;
     const bool once = block && block->op_flags & OPf_SPECIAL &&
       (block->op_type == OP_ENTERSUB || block->op_type == OP_NULL);
-    (void)debuggable;
+
+    PERL_UNUSED_ARG(debuggable);
 
     if (expr) {
 	if (once && expr->op_type == OP_CONST && !SvTRUE(((SVOP*)expr)->op_sv))
@@ -3753,8 +3754,8 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
 	    expr = newUNOP(OP_DEFINED, 0,
 		newASSIGNOP(0, newDEFSVOP(), 0, expr) );
 	} else if (expr->op_flags & OPf_KIDS) {
-            const OP *k1 = ((UNOP*)expr)->op_first;
-            const OP *k2 = (k1) ? k1->op_sibling : NULL;
+	    const OP * const k1 = ((UNOP*)expr)->op_first;
+	    const OP * const k2 = k1 ? k1->op_sibling : NULL;
 	    switch (expr->op_type) {
 	      case OP_NULL:
 		if (k2 && k2->op_type == OP_READLINE
@@ -3806,15 +3807,16 @@ whileline, OP *expr, OP *block, OP *cont, I32 has_my)
     OP *listop;
     OP *o;
     U8 loopflags = 0;
-    (void)debuggable;
+
+    PERL_UNUSED_ARG(debuggable);
 
     if (expr && (expr->op_type == OP_READLINE || expr->op_type == OP_GLOB
 		 || (expr->op_type == OP_NULL && expr->op_targ == OP_GLOB))) {
 	expr = newUNOP(OP_DEFINED, 0,
 	    newASSIGNOP(0, newDEFSVOP(), 0, expr) );
     } else if (expr && (expr->op_flags & OPf_KIDS)) {
-	const OP *k1 = ((UNOP*)expr)->op_first;
-	const OP *k2 = (k1) ? k1->op_sibling : NULL;
+	const OP * const k1 = ((UNOP*)expr)->op_first;
+	const OP * const k2 = (k1) ? k1->op_sibling : NULL;
 	switch (expr->op_type) {
 	  case OP_NULL:
 	    if (k2 && k2->op_type == OP_READLINE
@@ -4205,7 +4207,8 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
 void
 Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 {
-    (void)floor;
+    PERL_UNUSED_ARG(floor);
+
     if (o)
 	SAVEFREEOP(o);
     if (proto)
@@ -4905,7 +4908,7 @@ Perl_oopsCV(pTHX_ OP *o)
 {
     Perl_croak(aTHX_ "NOT IMPL LINE %d",__LINE__);
     /* STUB */
-    (void)o;
+    PERL_UNUSED_ARG(o);
     NORETURN_FUNCTION_END;
 }
 
@@ -5069,7 +5072,7 @@ Perl_ck_eval(pTHX_ OP *o)
     dVAR;
     PL_hints |= HINT_BLOCK_SCOPE;
     if (o->op_flags & OPf_KIDS) {
-	SVOP *kid = (SVOP*)cUNOPo->op_first;
+	SVOP * const kid = (SVOP*)cUNOPo->op_first;
 
 	if (!kid) {
 	    o->op_flags &= ~OPf_KIDS;
@@ -5143,7 +5146,7 @@ Perl_ck_exists(pTHX_ OP *o)
 {
     o = ck_fun(o);
     if (o->op_flags & OPf_KIDS) {
-	OP *kid = cUNOPo->op_first;
+	OP * const kid = cUNOPo->op_first;
 	if (kid->op_type == OP_ENTERSUB) {
 	    (void) ref(kid, o->op_type);
 	    if (kid->op_type != OP_RV2CV && !PL_error_count)
