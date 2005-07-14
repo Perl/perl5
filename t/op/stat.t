@@ -462,7 +462,7 @@ ok(unlink($f), 'unlink tmp file');
     -T _;
     my $s2 = -s _;
     is($s1, $s2, q(-T _ doesn't break the statbuffer));
-    unlink $file;
+    unlink $tmpfile;
 }
 
 END {
