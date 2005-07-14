@@ -8816,6 +8816,11 @@ Usually used via one of its frontends C<sv_vcatpvf> and C<sv_vcatpvf_mg>.
 =cut
 */
 
+
+#define VECTORIZE_ARGS	vecsv = va_arg(*args, SV*);\
+			vecstr = (U8*)SvPV_const(vecsv,veclen);\
+			vec_utf8 = DO_UTF8(vecsv);
+
 /* XXX maybe_tainted is never assigned to, so the doc above is lying. */
 
 void
@@ -8843,7 +8848,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     /* no matter what, this is a string now */
     (void)SvPV_force(sv, origlen);
 
-    /* special-case "", "%s", and "%-p" (SVf) */
+    /* special-case "", "%s", and "%-p" (SVf - see below) */
     if (patlen == 0)
 	return;
     if (patlen == 2 && pat[0] == '%' && pat[1] == 's') {
@@ -8858,15 +8863,13 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    }
 	    return;
     }
-    if (patlen == 3 && pat[0] == '%' &&
-	pat[1] == '-' && pat[2] == 'p') {
-	    if (args) {
-		argsv = va_arg(*args, SV*);
-		sv_catsv(sv, argsv);
-		if (DO_UTF8(argsv))
-		    SvUTF8_on(sv);
-		return;
-	    }
+    if (args && patlen == 3 && pat[0] == '%' &&
+		pat[1] == '-' && pat[2] == 'p') {
+	argsv = va_arg(*args, SV*);
+	sv_catsv(sv, argsv);
+	if (DO_UTF8(argsv))
+	    SvUTF8_on(sv);
+	return;
     }
 
 #ifndef USE_LONG_DOUBLE
@@ -8988,8 +8991,60 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	\d+|\*(\d+\$)?     width using optional (optionally specified) arg
 	\.(\d*|\*(\d+\$)?) precision using optional (optionally specified) arg
 	[hlqLV]            size
-    [%bcdefginopsux_DFOUX] format (mandatory)
+    [%bcdefginopsuxDFOUX] format (mandatory)
 */
+
+	if (args) {
+/*  
+	As of perl5.9.3, printf format checking is on by default.
+	Internally, perl uses %p formats to provide an escape to
+	some extended formatting.  This block deals with those
+	extensions: if it does not match, (char*)q is reset and
+	the normal format processing code is used.
+
+	Currently defined extensions are:
+		%p		include pointer address (standard)	
+		%-p	(SVf)	include an SV (previously %_)
+		%-<num>p	include an SV with precision <num>	
+		%1p	(VDf)	include a v-string (as %vd)
+		%<num>p		reserved for future extensions
+
+	Robin Barker 2005-07-14
+*/
+ 	    char* r = q; 
+	    bool sv = FALSE;	
+	    STRLEN n = 0;
+	    if (*q == '-')
+		sv = *q++;
+	    EXPECT_NUMBER(q, n);
+	    if (*q++ == 'p') {
+		if (sv) {			/* SVf */
+		    if (n) {
+			precis = n;
+			has_precis = TRUE;
+		    }
+		    argsv = va_arg(*args, SV*);
+		    eptr = SvPVx_const(argsv, elen);
+		    if (DO_UTF8(argsv))
+			is_utf8 = TRUE;
+		    goto string;
+		}
+#if vdNUMBER
+		else if (n == vdNUMBER) {	/* VDf */
+		    vectorize = TRUE;
+		    VECTORIZE_ARGS
+		    goto format_vd;
+	  	}
+#endif
+		else if (n) {
+		    if (ckWARN_d(WARN_INTERNAL))
+			Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
+			"internal %%<num>p might conflict with future printf extensions");
+		}
+	    }
+	    q = r; 
+	}
+
 	if (EXPECT_NUMBER(q, width)) {
 	    if (*q == '$') {
 		++q;
@@ -9068,9 +9123,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    is_utf8 = TRUE;
 	    }
 	    if (args) {
-		vecsv = va_arg(*args, SV*);
-		vecstr = (U8*)SvPV_const(vecsv,veclen);
-		vec_utf8 = DO_UTF8(vecsv);
+		VECTORIZE_ARGS
 	    }
 	    else if (efix ? efix <= svmax : svix < svmax) {
 		vecsv = svargs[efix ? efix-1 : svix++];
@@ -9254,21 +9307,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    /* INTEGERS */
 
 	case 'p':
-	    if (left && args) {		/* SVf */
-		left = FALSE;
-		if (width) {
-		    precis = width;
-		    has_precis = TRUE;
-		    width = 0;
-		}
-		if (vectorize)
-		    goto unknown;
-		argsv = va_arg(*args, SV*);
-		eptr = SvPVx_const(argsv, elen);
-		if (DO_UTF8(argsv))
-		    is_utf8 = TRUE;
-		goto string;
-	    }
 	    if (alt || vectorize)
 		goto unknown;
 	    uv = PTR2UV(args ? va_arg(*args, void*) : argsv);
@@ -9284,6 +9322,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    /* FALL THROUGH */
 	case 'd':
 	case 'i':
+#if vdNUMBER
+	format_vd:
+#endif
 	    if (vectorize) {
 		STRLEN ulen;
 		if (!veclen)

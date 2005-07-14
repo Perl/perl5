@@ -2615,25 +2615,49 @@ typedef pthread_key_t	perl_key;
 #  define PERL_SET_THX(t)		PERL_SET_CONTEXT(t)
 #endif
 
-/*  This replaces the previous %_ "hack" by the "%-p" hack
+/* 
+    This replaces the previous %_ "hack" by the "%p" hacks.
     All that is required is that the perl source does not
-    use "%-p" or "%-<number>p" format.  These format will
-    still work in perl code.   RMB 2005/05/17
+    use "%-p" or "%-<number>p" or "%<number>p" formats.  
+    These formats will still work in perl code.   
+    See comments in sv.c for futher details.
+
+	-DvdNUMBER=<number> can be used to redefine VDf
+
+	-DvdNUMBER=0 reverts VDf to "vd", as in perl5.8.7,
+	    which works properly but gives compiler warnings
+
+    Robin Barker 2005-07-14
 */
-#ifndef SVf
-#  define SVf "-p"
+
+#ifndef SVf_
+#  define SVf_(n) "-" #n "p"
 #endif
 
-#ifndef SVf_precision
-#  define SVf_precision(n) "-" n "p"
+#ifndef SVf
+#  define SVf SVf_()
 #endif
 
 #ifndef SVf32
-#  define SVf32 SVf_precision("32")
+#  define SVf32 SVf_(32)
 #endif
 
 #ifndef SVf256
-#  define SVf256 SVf_precision("256")
+#  define SVf256 SVf_(256)
+#endif
+
+#ifndef vdNUMBER
+#  define vdNUMBER 1
+#endif
+ 
+#ifndef VDf
+#  if vdNUMBER 
+#    define vdFORMAT(n) #n "p"
+#    define VDf_(n) vdFORMAT(n)
+#    define VDf VDf_(vdNUMBER)
+#  else
+#    define VDf "vd"
+#  endif
 #endif
  
 #ifndef UVf
