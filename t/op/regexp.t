@@ -74,7 +74,21 @@ while (<TESTS>) {
     $result =~ s/B//i unless $skip;
     for $study ('', 'study \$subject') {
  	$c = $iters;
- 	eval "$study; \$match = (\$subject =~ $OP$pat) while \$c--; \$got = \"$repl\";";
+    if ($qr_embed) {
+ 	    eval qq"
+            my \$RE = qr$pat;
+            $study;
+            \$match = (\$subject =~ /(?:)\$RE(?:)/) while \$c--;
+            \$got = \"$repl\";
+        ";
+    } 
+    else {
+ 	    eval qq"
+            $study;
+            \$match = (\$subject =~ $OP$pat) while \$c--;
+            \$got = \"$repl\";
+        ";
+    }
 	chomp( $err = $@ );
 	if ($result eq 'c') {
 	    if ($err !~ m!^\Q$expect!) { print "not ok $. (compile) $input => `$err'\n"; next TEST }
