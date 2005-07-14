@@ -304,7 +304,7 @@ CCCMD    = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $@`
 CCCMDSRC = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $<`
 
 CONFIGPM = lib/Config.pm lib/Config_heavy.pl
-private = preplibrary $(CONFIGPM) lib/ExtUtils/Miniperl.pm
+private = preplibrary $(CONFIGPM) lib/Config.pod lib/ExtUtils/Miniperl.pm
 
 # Files to be built with variable substitution before miniperl
 # is available.
@@ -766,14 +766,10 @@ preplibrary: miniperl$(EXE_EXT) $(CONFIGPM) lib/lib.pm $(PREPLIBRARY_LIBPERL)
 		autosplit_lib_modules(@ARGV)' lib/*/*.pm
 	$(MAKE) lib/re.pm
 
-# Take care to avoid modifying lib/Config.pm without reason
-# (If trying to create a new port and having problems with the configpm script,
-# try 'make minitest' and/or commenting out the tests at the end of configpm.)
-$(CONFIGPM): config.sh miniperl$(EXE_EXT) configpm Porting/Glossary
-	$(LDLIBPTH) ./miniperl -Ilib configpm --heavy=lib/Config_heavy.pl configpm.tmp
-	sh mv-if-diff configpm.tmp lib/Config.pm
+lib/Config.pod: config.sh miniperl$(EXE_EXT) configpm Porting/Glossary
+	$(LDLIBPTH) ./miniperl -Ilib configpm --heavy=lib/Config_heavy.pl lib/Config.pm
 
-lib/Config.pm: lib/Config_heavy.pl
+$(CONFIGPM): lib/Config.pod
 
 lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl$(EXE_EXT) minimod.pl $(CONFIGPM)
 	$(LDLIBPTH) ./miniperl minimod.pl > minimod.tmp
@@ -1033,7 +1029,7 @@ _cleaner2:
 	rm -f so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
 	rm -rf $(addedbyconf)
 	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old makefile.old
-	rm -f $(private) lib/Config.pod
+	rm -f $(private)
 	rm -rf $(unidatafiles) $(unidatadirs)
 	rm -rf lib/auto
 	rm -f lib/.exists lib/*/.exists lib/*/*/.exists
