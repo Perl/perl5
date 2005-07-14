@@ -689,12 +689,29 @@ both its arguments into the list.
 
 The C<< => >> operator is a synonym for the comma, but forces any word
 (consisting entirely of word characters) to its left to be interpreted
-as a string (as of 5.001).  If the argument on the left is not a word,
-it is first interpreted as an expression, and then the string value of
-that is used.
+as a string (as of 5.001).  This includes words that might otherwise be
+considered a constant or function call.
+
+    use constant FOO => "something";
+
+    my %h = ( FOO => 23 );
+
+is equivalent to:
+
+    my %h = ("FOO", 23);
+
+It is I<NOT>:
+
+    my %h = ("something", 23);
+
+If the argument on the left is not a word, it is first interpreted as
+an expression, and then the string value of that is used.
 
 The C<< => >> operator is helpful in documenting the correspondence
 between keys and values in hashes, and other paired elements in lists.
+
+        %hash = ( $key => $value );
+        login( $username => $password );
 
 =head2 List Operators (Rightward)
 
