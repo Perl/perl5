@@ -603,6 +603,10 @@ previous time C<caller> was called.
 
 =item chdir EXPR
 
+=item chdir FILEHANDLE
+
+=item chdir DIRHANDLE
+
 =item chdir
 
 Changes the working directory to EXPR, if possible. If EXPR is omitted,
@@ -611,6 +615,10 @@ changes to the directory specified by C<$ENV{LOGDIR}>. (Under VMS, the
 variable C<$ENV{SYS$LOGIN}> is also checked, and used if it is set.) If
 neither is set, C<chdir> does nothing. It returns true upon success,
 false otherwise. See the example under C<die>.
+
+On systems that support fchdir, you might pass a file handle or
+directory handle as argument.  On systems that don't support fchdir,
+passing handles produces a fatal error at run time.
 
 =item chmod LIST
 
@@ -626,6 +634,14 @@ successfully changed.  See also L</oct>, if all you have is a string.
                                              # --w----r-T
     $mode = '0644'; chmod oct($mode), 'foo'; # this is better
     $mode = 0644;   chmod $mode, 'foo';      # this is best
+
+On systems that support fchmod, you might pass file handles among the
+files.  On systems that don't support fchmod, passing file handles
+produces a fatal error at run time.
+
+    open(my $fh, "<", "foo");
+    my $perm = (stat $fh)[2] & 07777;
+    chmod($perm | 0600, $fh);
 
 You can also import the symbolic C<S_I*> constants from the Fcntl
 module:
@@ -711,6 +727,10 @@ successfully changed.
 
     $cnt = chown $uid, $gid, 'foo', 'bar';
     chown $uid, $gid, @filenames;
+
+On systems that support fchown, you might pass file handles among the
+files.  On systems that don't support fchown, passing file handles
+produces a fatal error at run time.
 
 Here's an example that looks up nonnumeric uids in the passwd file:
 

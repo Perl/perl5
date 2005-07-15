@@ -3542,15 +3542,24 @@ PP(pp_ftbinary)
 PP(pp_chdir)
 {
     dSP; dTARGET;
-    const char *tmps;
+    const char *tmps = 0;
+    GV *gv = 0;
     SV **svp;
 
-    if( MAXARG == 1 )
-        tmps = POPpconstx;
-    else
-        tmps = 0;
+    if( MAXARG == 1 ) {
+	SV *sv = POPs;
+        if (SvTYPE(sv) == SVt_PVGV) {
+	    gv = (GV*)sv;
+        }
+	else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
+            gv = (GV*)SvRV(sv);
+        }
+        else {
+	    tmps = SvPVx_nolen_const(sv);
+	}
+    }
 
-    if( !tmps || !*tmps ) {
+    if( !gv && (!tmps || !*tmps) ) {
         if (    (svp = hv_fetch(GvHVn(PL_envgv), "HOME", 4, FALSE))
              || (svp = hv_fetch(GvHVn(PL_envgv), "LOGDIR", 6, FALSE))
 #ifdef VMS
@@ -3570,7 +3579,33 @@ PP(pp_chdir)
     }
 
     TAINT_PROPER("chdir");
-    PUSHi( PerlDir_chdir(tmps) >= 0 );
+    if (gv) {
+#ifdef HAS_FCHDIR
+	IO* io = GvIO(gv);
+	if (io) {
+	    if (IoIFP(io)) {
+		PUSHi(fchdir(PerlIO_fileno(IoIFP(io))) >= 0);
+	    }
+	    else if (IoDIRP(io)) {
+#ifdef HAS_DIRFD
+		PUSHi(fchdir(dirfd(IoDIRP(io))) >= 0);
+#else
+		DIE(aTHX PL_no_func, "dirfd");
+#endif
+	    }
+	    else {
+		PUSHi(0);
+	    }
+        }
+	else {
+	    PUSHi(0);
+	}
+#else
+	DIE(aTHX_ PL_no_func, "fchdir");
+#endif
+    }
+    else 
+        PUSHi( PerlDir_chdir(tmps) >= 0 );
 #ifdef VMS
     /* Clear the DEFAULT element of ENV so we'll get the new value
      * in the future. */

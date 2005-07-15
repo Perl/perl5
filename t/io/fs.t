@@ -47,7 +47,7 @@ $needs_fh_reopen = 1 if (defined &Win32::IsWin95 && Win32::IsWin95());
 my $skip_mode_checks =
     $^O eq 'cygwin' && $ENV{CYGWIN} !~ /ntsec/;
 
-plan tests => 34;
+plan tests => 42;
 
 
 if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
@@ -164,6 +164,37 @@ SKIP: {
      $blksize,$blocks) = stat('x');
 
     is($ino, undef, "ino of removed file x should be undef");
+}
+
+SKIP: {
+    skip "no fchmod", 5 unless ($Config{d_fchmod} || "") eq "define";
+    ok(open(my $fh, "<", "a"), "open a");
+    is(chmod(0, $fh), 1, "fchmod");
+    $mode = (stat "a")[2];
+    is($mode & 0777, 0, "perm reset");
+    is(chmod($newmode, "a"), 1, "fchmod");
+    $mode = (stat $fh)[2];
+    is($mode & 0777, $newmode, "perm restored");
+}
+
+SKIP: {
+    skip "no fchown", 1 unless ($Config{d_fchown} || "") eq "define";
+    open(my $fh, "<", "a");
+    is(chown(-1, -1, $fh), 1, "fchown");
+}
+
+SKIP: {
+    skip "has fchmod", 1 if ($Config{d_fchmod} || "") eq "define";
+    open(my $fh, "<", "a");
+    eval { chmod(0777, $fh); };
+    like($@, qr/^The fchmod function is unimplemented at/, "fchmod is unimplemented");
+}
+
+SKIP: {
+    skip "has fchown", 1 if ($Config{d_fchown} || "") eq "define";
+    open(my $fh, "<", "a");
+    eval { chown(0, 0, $fh); };
+    like($@, qr/^The fchown function is unimplemented at/, "fchown is unimplemented");
 }
 
 is(rename('a','b'), 1, "rename a b");

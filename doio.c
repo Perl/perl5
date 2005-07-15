@@ -1677,10 +1677,33 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 	    APPLY_TAINT_PROPER();
 	    tot = sp - mark;
 	    while (++mark <= sp) {
-		const char *name = SvPV_nolen_const(*mark);
-		APPLY_TAINT_PROPER();
-		if (PerlLIO_chmod(name, val))
-		    tot--;
+                GV* gv;
+                if (SvTYPE(*mark) == SVt_PVGV) {
+                    gv = (GV*)*mark;
+		do_fchmod:
+		    if (GvIO(gv) && IoIFP(GvIOp(gv))) {
+#ifdef HAS_FCHMOD
+			APPLY_TAINT_PROPER();
+			if (fchmod(PerlIO_fileno(IoIFP(GvIOn(gv))), val))
+			    tot--;
+#else
+			DIE(aTHX_ PL_no_func, "fchmod");
+#endif
+		    }
+		    else {
+			tot--;
+		    }
+		}
+		else if (SvROK(*mark) && SvTYPE(SvRV(*mark)) == SVt_PVGV) {
+		    gv = (GV*)SvRV(*mark);
+		    goto do_fchmod;
+		}
+		else {
+		    const char *name = SvPV_nolen_const(*mark);
+		    APPLY_TAINT_PROPER();
+		    if (PerlLIO_chmod(name, val))
+			tot--;
+		}
 	    }
 	}
 	break;
@@ -1695,10 +1718,33 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 	    APPLY_TAINT_PROPER();
 	    tot = sp - mark;
 	    while (++mark <= sp) {
-		const char *name = SvPV_nolen_const(*mark);
-		APPLY_TAINT_PROPER();
-		if (PerlLIO_chown(name, val, val2))
-		    tot--;
+                GV* gv;
+                if (SvTYPE(*mark) == SVt_PVGV) {
+                    gv = (GV*)*mark;
+		do_fchown:
+		    if (GvIO(gv) && IoIFP(GvIOp(gv))) {
+#ifdef HAS_FCHOWN
+			APPLY_TAINT_PROPER();
+			if (fchown(PerlIO_fileno(IoIFP(GvIOn(gv))), val, val2))
+			    tot--;
+#else
+			DIE(aTHX_ PL_no_func, "fchown");
+#endif
+		    }
+		    else {
+			tot--;
+		    }
+		}
+		else if (SvROK(*mark) && SvTYPE(SvRV(*mark)) == SVt_PVGV) {
+		    gv = (GV*)SvRV(*mark);
+		    goto do_fchown;
+		}
+		else {
+		    const char *name = SvPV_nolen_const(*mark);
+		    APPLY_TAINT_PROPER();
+		    if (PerlLIO_chown(name, val, val2))
+			tot--;
+		}
 	    }
 	}
 	break;
