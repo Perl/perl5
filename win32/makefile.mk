@@ -1062,9 +1062,9 @@ $(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
 
 perllib$(o)	: perllib.c .\perlhost.h .\vdir.h .\vmem.h
 .IF "$(USE_IMP_SYS)" == "define"
-	$(CC) -c -I. -DWITH_STATIC $(CFLAGS_O) $(CXX_FLAG) $(OBJOUT_FLAG)$@ perllib.c
+	$(CC) -c -I. $(CFLAGS_O) $(CXX_FLAG) $(OBJOUT_FLAG)$@ perllib.c
 .ELSE
-	$(CC) -c -I. -DWITH_STATIC $(CFLAGS_O) $(OBJOUT_FLAG)$@ perllib.c
+	$(CC) -c -I. $(CFLAGS_O) $(OBJOUT_FLAG)$@ perllib.c
 .ENDIF
 
 # 1. we don't want to rebuild miniperl.exe when config.h changes
