@@ -151,7 +151,7 @@ Perl_pv_display(pTHX_ SV *dsv, char *pv, STRLEN cur, STRLEN len, STRLEN pvlim)
 char *
 Perl_sv_peek(pTHX_ SV *sv)
 {
-    SV *t = sv_newmortal();
+    SV * const t = sv_newmortal();
     int unref = 0;
 
     sv_setpvn(t, "", 0);

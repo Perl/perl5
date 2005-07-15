@@ -898,6 +898,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			data->start_class->flags |= ANYOF_EOS;
 		    }
 		}
+
 	    }
 	    else if (code == BRANCHJ)	/* single branch is optimized. */
 		scan = NEXTOPER(NEXTOPER(scan));

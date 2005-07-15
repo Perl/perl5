@@ -1455,7 +1455,7 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
     U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
     STRLEN len = 0;
 
-    const UV uv0 = utf8_to_uvchr(p, 0);
+    const UV uv0 = utf8_to_uvchr(p, NULL);
     /* The NATIVE_TO_UNI() and UNI_TO_NATIVE() mappings
      * are necessary in EBCDIC, they are redundant no-ops
      * in ASCII-ish platforms, and hopefully optimized away. */
@@ -1627,7 +1627,7 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
     dSP;
     const size_t pkg_len = strlen(pkg);
     const size_t name_len = strlen(name);
-    HV *stash = gv_stashpvn(pkg, pkg_len, FALSE);
+    HV * const stash = gv_stashpvn(pkg, pkg_len, FALSE);
     SV* errsv_save;
 
     PUSHSTACKi(PERLSI_MAGIC);
@@ -1672,7 +1672,7 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
     POPSTACK;
     if (IN_PERL_COMPILETIME) {
 	STRLEN len;
-        const char* pv = SvPV_const(tokenbufsv, len);
+	const char* const pv = SvPV_const(tokenbufsv, len);
 
 	Copy(pv, PL_tokenbuf, len+1, char);
 	PL_curcop->op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
@@ -1695,7 +1695,7 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
 UV
 Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr, bool do_utf8)
 {
-    HV* hv = (HV*)SvRV(sv);
+    HV* const hv = (HV*)SvRV(sv);
     U32 klen;
     U32 off;
     STRLEN slen;
@@ -1760,7 +1760,7 @@ Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr, bool do_utf8)
 	    /* We use utf8n_to_uvuni() as we want an index into
 	       Unicode tables, not a native character number.
 	     */
-	    UV code_point = utf8n_to_uvuni(ptr, UTF8_MAXBYTES, 0,
+	    const UV code_point = utf8n_to_uvuni(ptr, UTF8_MAXBYTES, 0,
 					   ckWARN(WARN_UTF8) ?
 					   0 : UTF8_ALLOW_ANY);
 	    SV *errsv_save;
@@ -1875,7 +1875,7 @@ Allows length and flags to be passed to low level routine.
 UV
 Perl_utf8n_to_uvchr(pTHX_ U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 {
-    UV uv = Perl_utf8n_to_uvuni(aTHX_ s, curlen, retlen, flags);
+    const UV uv = Perl_utf8n_to_uvuni(aTHX_ s, curlen, retlen, flags);
     return UNI_TO_NATIVE(uv);
 }
 

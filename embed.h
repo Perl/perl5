@@ -1292,6 +1292,7 @@
 #endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
+#define uiv_2buf		S_uiv_2buf
 #define asIV			S_asIV
 #define asUV			S_asUV
 #define new_xiv			S_new_xiv
@@ -3331,6 +3332,7 @@
 #endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
+#define uiv_2buf		S_uiv_2buf
 #define asIV(a)			S_asIV(aTHX_ a)
 #define asUV(a)			S_asUV(aTHX_ a)
 #define new_xiv()		S_new_xiv(aTHX)

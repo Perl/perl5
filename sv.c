@@ -2989,7 +2989,7 @@ Perl_sv_2pv_nolen(pTHX_ register SV *sv)
  */
 
 static char *
-uiv_2buf(char *buf, IV iv, UV uv, int is_uv, char **peob)
+S_uiv_2buf(char *buf, IV iv, UV uv, int is_uv, char **peob)
 {
     char *ptr = buf + TYPE_CHARS(UV);
     char *ebuf = ptr;
@@ -4771,7 +4771,7 @@ to add more than one instance of the same 'how'.
 void
 Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 namlen)
 {
-    const MGVTBL *vtable = 0;
+    const MGVTBL *vtable;
     MAGIC* mg;
 
     if (SvREADONLY(sv)) {
@@ -4841,7 +4841,7 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
 	vtable = &PL_vtbl_nkeys;
 	break;
     case PERL_MAGIC_dbfile:
-	vtable = 0;
+	vtable = NULL;
 	break;
     case PERL_MAGIC_dbline:
 	vtable = &PL_vtbl_dbline;
@@ -4882,7 +4882,7 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
 	vtable = &PL_vtbl_vec;
 	break;
     case PERL_MAGIC_vstring:
-	vtable = 0;
+	vtable = NULL;
 	break;
     case PERL_MAGIC_utf8:
         vtable = &PL_vtbl_utf8;
@@ -4910,6 +4910,7 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
 	/* Useful for attaching extension internal data to perl vars.	*/
 	/* Note that multiple extensions may clash if magical scalars	*/
 	/* etc holding private data from one are passed to another.	*/
+	vtable = NULL;
 	break;
     default:
 	Perl_croak(aTHX_ "Don't know how to handle magic of type \\%o", how);
