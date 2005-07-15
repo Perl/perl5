@@ -18,7 +18,7 @@ use File::Basename ();
 use File::Path ();
 use File::Spec;
 use vars qw($VERSION);
-$VERSION = substr q$Revision: 1.60 $, 10;
+$VERSION = substr q$Revision: 1.60_01 $, 10;
 
 =head1 NAME
 
@@ -289,7 +289,10 @@ by ENTER.
     my(@path) = split /$Config{'path_sep'}/, $ENV{'PATH'};
     local $^W = $old_warn;
     my $progname;
-    for $progname (qw/gzip tar unzip make lynx wget ncftpget ncftp ftp gpg/){
+    for $progname (qw/gzip tar unzip make 
+                      curl lynx wget ncftpget ncftp ftp 
+                      gpg/)
+    {
       if ($^O eq 'MacOS') {
           $CPAN::Config->{$progname} = 'not_here';
           next;

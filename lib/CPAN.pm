@@ -2634,26 +2634,27 @@ sub hosthard {
                                            # success above. Likely a bogus URL
 
 	$self->debug("localizing funkyftpwise[$url]") if $CPAN::DEBUG;
-	my($f,$funkyftp);
 
-        # Try the most capable first (wget does HTTP, HTTPS and FTP) and
-        # leave ncftp* for last as it only does FTP.
-	for $f (qw(wget lynx ncftpget ncftp)) {
-	  next unless exists $CPAN::Config->{$f};
-	  $funkyftp = $CPAN::Config->{$f};
-	  next unless defined $funkyftp;
+        # Try the most capable first and leave ncftp* for last as it only 
+        # does FTP.
+	for my $f (qw(curl wget lynx ncftpget ncftp)) {
+          my $funkyftp = $CPAN::Config->{$f};
+          next unless defined $funkyftp;
 	  next if $funkyftp =~ /^\s*$/;
+
 	  my($asl_ungz, $asl_gz);
 	  ($asl_ungz = $aslocal) =~ s/\.gz//;
           $asl_gz = "$asl_ungz.gz";
+
 	  my($src_switch) = "";
 	  if ($f eq "lynx"){
 	    $src_switch = " -source";
 	  } elsif ($f eq "ncftp"){
 	    $src_switch = " -c";
           } elsif ($f eq "wget"){
-              $src_switch = " -O -";
+            $src_switch = " -O -";
 	  }
+
 	  my($chdir) = "";
 	  my($stdout_redir) = " > $asl_ungz";
 	  if ($f eq "ncftpget"){
@@ -2729,7 +2730,7 @@ returned status $estatus (wstat $wstatus)$size
 });
 	  }
           return if $CPAN::Signal;
-	} # wget,lynx,ncftpget,ncftp
+	} # transfer programs
     } # host
 }
 
