@@ -2020,7 +2020,7 @@ Perl_vivify_defelem(pTHX_ SV *sv)
 	if ((I32)LvTARGLEN(sv) < 0 && (I32)LvTARGOFF(sv) > AvFILL(av))
 	    LvTARG(sv) = Nullsv;	/* array can't be extended */
 	else {
-	    SV** svp = av_fetch(av, LvTARGOFF(sv), TRUE);
+	    SV** const svp = av_fetch(av, LvTARGOFF(sv), TRUE);
 	    if (!svp || (value = *svp) == &PL_sv_undef)
 		Perl_croak(aTHX_ PL_no_aelem, (I32)LvTARGOFF(sv));
 	}

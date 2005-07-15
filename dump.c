@@ -154,7 +154,7 @@ char *
 Perl_sv_peek(pTHX_ SV *sv)
 {
     dVAR;
-    SV *t = sv_newmortal();
+    SV * const t = sv_newmortal();
     int unref = 0;
 
     sv_setpvn(t, "", 0);

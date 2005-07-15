@@ -1261,7 +1261,7 @@ S_hsplit(pTHX_ HV *hv)
 
 	    if (was_shared) {
 		/* Unshare it.  */
-		HEK *new_hek
+		HEK * const new_hek
 		    = save_hek_flags(HeKEY(entry), HeKLEN(entry),
 				     hash, HeKFLAGS(entry));
 		unshare_hek (HeKEY_hek(entry));
@@ -1417,14 +1417,15 @@ Perl_newHVhv(pTHX_ HV *ohv)
 	/* It's an ordinary hash, so copy it fast. AMS 20010804 */
 	STRLEN i;
 	const bool shared = !!HvSHAREKEYS(ohv);
-	HE **ents, **oents = (HE **)HvARRAY(ohv);
+	HE **ents, ** const oents = (HE **)HvARRAY(ohv);
 	char *a;
 	Newx(a, PERL_HV_ARRAY_ALLOC_BYTES(hv_max+1), char);
 	ents = (HE**)a;
 
 	/* In each bucket... */
 	for (i = 0; i <= hv_max; i++) {
-	    HE *prev = NULL, *ent = NULL, *oent = oents[i];
+	    HE *prev = NULL, *ent = NULL;
+	    HE *oent = oents[i];
 
 	    if (!oent) {
 		ents[i] = NULL;
@@ -1432,7 +1433,7 @@ Perl_newHVhv(pTHX_ HV *ohv)
 	    }
 
 	    /* Copy the linked list of entries. */
-	    for (oent = oents[i]; oent; oent = HeNEXT(oent)) {
+	    for (; oent; oent = HeNEXT(oent)) {
 		const U32 hash   = HeHASH(oent);
 		const char * const key = HeKEY(oent);
 		const STRLEN len = HeKLEN(oent);
@@ -1456,7 +1457,7 @@ Perl_newHVhv(pTHX_ HV *ohv)
 	HvFILL(hv)  = hv_fill;
 	HvTOTALKEYS(hv)  = HvTOTALKEYS(ohv);
 	HvARRAY(hv) = ents;
-    }
+    } /* not magical */
     else {
 	/* Iterate over ohv, copying keys and values one at a time. */
 	HE *entry;
@@ -2176,7 +2177,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
     bool found = 0;
     bool is_utf8 = FALSE;
     int k_flags = 0;
-    const char *save = str;
+    const char * const save = str;
     struct shared_he *he = 0;
 
     if (hek) {
@@ -2275,7 +2276,7 @@ Perl_share_hek(pTHX_ const char *str, I32 len, register U32 hash)
 {
     bool is_utf8 = FALSE;
     int flags = 0;
-    const char *save = str;
+    const char * const save = str;
 
     if (len < 0) {
       STRLEN tmplen = -len;

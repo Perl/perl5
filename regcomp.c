@@ -1888,8 +1888,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 
                         /* dont use tail as the end marker for this traverse */
                         for ( cur = startbranch ; cur != scan ; cur = regnext( cur ) ) {
-                            regnode *noper = NEXTOPER( cur );
-                            regnode *noper_next = regnext( noper );
+                            regnode * const noper = NEXTOPER( cur );
+                            regnode * const noper_next = regnext( noper );
 
                             DEBUG_OPTIMISE_r({
                                 regprop( mysv, cur);

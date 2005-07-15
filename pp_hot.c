@@ -2843,7 +2843,7 @@ Perl_sub_crush_depth(pTHX_ CV *cv)
     if (CvANON(cv))
 	Perl_warner(aTHX_ packWARN(WARN_RECURSION), "Deep recursion on anonymous subroutine");
     else {
-	SV* tmpstr = sv_newmortal();
+	SV* const tmpstr = sv_newmortal();
 	gv_efullname3(tmpstr, CvGV(cv), Nullch);
 	Perl_warner(aTHX_ packWARN(WARN_RECURSION), "Deep recursion on subroutine \"%"SVf"\"",
 		tmpstr);

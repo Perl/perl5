@@ -1116,7 +1116,6 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
    version of the string. Users are advised to upgrade their pack string
    themselves if they need to do a lot of unpacks like this on it
 */
-/* XXX These can be const */
 STATIC bool
 need_utf8(const char *pat, const char *patend)
 {

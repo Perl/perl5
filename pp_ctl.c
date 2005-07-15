@@ -2210,7 +2210,6 @@ PP(pp_redo)
 STATIC OP *
 S_dofindlabel(pTHX_ OP *o, const char *label, OP **opstack, OP **oplimit)
 {
-    OP *kid = Nullop;
     OP **ops = opstack;
     static const char too_deep[] = "Target of goto is too deeply nested";
 
@@ -2228,6 +2227,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, OP **opstack, OP **oplimit)
     }
     *ops = 0;
     if (o->op_flags & OPf_KIDS) {
+	OP *kid;
 	/* First try all the kids at this level, since that's likeliest. */
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
 	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) &&

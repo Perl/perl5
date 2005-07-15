@@ -1685,9 +1685,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		argc--,argv++;
 	    }
 	    if (s && *s) {
-		char *p;
 		STRLEN len = strlen(s);
-		p = savepvn(s, len);
+		const char * const p = savepvn(s, len);
 		incpush(p, TRUE, TRUE, FALSE, FALSE);
 		sv_catpvn(sv, "-I", 2);
 		sv_catpvn(sv, p, len);
@@ -4452,10 +4451,10 @@ S_init_predump_symbols(pTHX)
 void
 Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
 {
-    char *s;
     argc--,argv++;	/* skip name of script */
     if (PL_doswitches) {
 	for (; argc > 0 && **argv == '-'; argc--,argv++) {
+	    char *s;
 	    if (!argv[0][1])
 		break;
 	    if (argv[0][1] == '-' && !argv[0][2]) {
@@ -4475,7 +4474,7 @@ Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
 	(void)gv_AVadd(PL_argvgv);
 	av_clear(GvAVn(PL_argvgv));
 	for (; argc > 0; argc--,argv++) {
-	    SV *sv = newSVpv(argv[0],0);
+	    SV * const sv = newSVpv(argv[0],0);
 	    av_push(GvAVn(PL_argvgv),sv);
 	    if (!(PL_unicode & PERL_UNICODE_LOCALE_FLAG) || PL_utf8locale) {
 		 if (PL_unicode & PERL_UNICODE_ARGV_FLAG)

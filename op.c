@@ -128,8 +128,8 @@ Perl_Slab_Alloc(pTHX_ int m, size_t sz)
 void
 Perl_Slab_Free(pTHX_ void *op)
 {
-    I32 **ptr = (I32 **) op;
-    I32 *slab = ptr[-1];
+    I32 ** const ptr = (I32 **) op;
+    I32 * const slab = ptr[-1];
     assert( ptr-1 > (I32 **) slab );
     assert( ptr < ( (I32 **) slab + PERL_SLAB_SIZE) );
     assert( *slab > 0 );
@@ -3027,10 +3027,10 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 
     veop = Nullop;
 
-    if (version != Nullop) {
+    if (version) {
 	SV *vesv = ((SVOP*)version)->op_sv;
 
-	if (arg == Nullop && !SvNIOKp(vesv)) {
+	if (!arg && !SvNIOKp(vesv)) {
 	    arg = version;
 	}
 	else {
@@ -4248,7 +4248,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	ps = Nullch;
 
     if (!name && PERLDB_NAMEANON && CopLINE(PL_curcop)) {
-	SV *sv = sv_newmortal();
+	SV * const sv = sv_newmortal();
 	Perl_sv_setpvf(aTHX_ sv, "%s[%s:%"IVdf"]",
 		       PL_curstash ? "__ANON__" : "__ANON__::__ANON__",
 		       CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));

@@ -2956,7 +2956,7 @@ Perl_sv_2pv_nolen(pTHX_ register SV *sv)
  */
 
 static char *
-uiv_2buf(char *buf, IV iv, UV uv, int is_uv, char **peob)
+S_uiv_2buf(char *buf, IV iv, UV uv, int is_uv, char **peob)
 {
     char *ptr = buf + TYPE_CHARS(UV);
     char *ebuf = ptr;
@@ -4505,7 +4505,7 @@ S_sv_release_COW(pTHX_ register SV *sv, const char *pvx, STRLEN len, SV *after)
 {
     if (len) { /* this SV was SvIsCOW_normal(sv) */
          /* we need to find the SV pointing to us.  */
-        SV *current = SV_COW_NEXT_SV(after);
+        SV * const current = SV_COW_NEXT_SV(after);
 
         if (current == sv) {
             /* The SV we point to points back to us (there were only two of us
@@ -4994,7 +4994,7 @@ to add more than one instance of the same 'how'.
 void
 Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 namlen)
 {
-    const MGVTBL *vtable = 0;
+    const MGVTBL *vtable;
     MAGIC* mg;
 
 #ifdef PERL_OLD_COPY_ON_WRITE
@@ -5073,7 +5073,7 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
 	vtable = &PL_vtbl_nkeys;
 	break;
     case PERL_MAGIC_dbfile:
-	vtable = 0;
+	vtable = NULL;
 	break;
     case PERL_MAGIC_dbline:
 	vtable = &PL_vtbl_dbline;
@@ -5112,7 +5112,7 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     case PERL_MAGIC_rhash:
     case PERL_MAGIC_symtab:
     case PERL_MAGIC_vstring:
-	vtable = 0;
+	vtable = NULL;
 	break;
     case PERL_MAGIC_utf8:
 	vtable = &PL_vtbl_utf8;
@@ -5140,13 +5140,14 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
 	/* Useful for attaching extension internal data to perl vars.	*/
 	/* Note that multiple extensions may clash if magical scalars	*/
 	/* etc holding private data from one are passed to another.	*/
+	vtable = NULL;
 	break;
     default:
 	Perl_croak(aTHX_ "Don't know how to handle magic of type \\%o", how);
     }
 
     /* Rest of work is done else where */
-    mg = sv_magicext(sv,obj,how,(MGVTBL*)vtable,name,namlen);
+    mg = sv_magicext(sv,obj,how,vtable,name,namlen);
 
     switch (how) {
     case PERL_MAGIC_taint:
@@ -7530,7 +7531,7 @@ Perl_sv_reset(pTHX_ register const char *s, HV *stash)
 	return;
 
     if (!*s) {		/* reset ?? searches */
-	MAGIC *mg = mg_find((SV *)stash, PERL_MAGIC_symtab);
+	MAGIC * const mg = mg_find((SV *)stash, PERL_MAGIC_symtab);
 	if (mg) {
 	    PMOP *pm = (PMOP *) mg->mg_obj;
 	    while (pm) {

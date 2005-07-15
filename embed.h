@@ -1172,6 +1172,8 @@
 #define div128			S_div128
 #define group_end		S_group_end
 #define get_num			S_get_num
+#define need_utf8		S_need_utf8
+#define first_symbol		S_first_symbol
 #endif
 #endif
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
@@ -1290,6 +1292,7 @@
 #endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
+#define uiv_2buf		S_uiv_2buf
 #define asIV			S_asIV
 #define asUV			S_asUV
 #define sv_unglob		S_sv_unglob
@@ -3152,6 +3155,8 @@
 #define div128(a,b)		S_div128(aTHX_ a,b)
 #define group_end(a,b,c)	S_group_end(aTHX_ a,b,c)
 #define get_num(a,b)		S_get_num(aTHX_ a,b)
+#define need_utf8		S_need_utf8
+#define first_symbol		S_first_symbol
 #endif
 #endif
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
@@ -3271,6 +3276,7 @@
 #endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
+#define uiv_2buf		S_uiv_2buf
 #define asIV(a)			S_asIV(aTHX_ a)
 #define asUV(a)			S_asUV(aTHX_ a)
 #define sv_unglob(a)		S_sv_unglob(aTHX_ a)
