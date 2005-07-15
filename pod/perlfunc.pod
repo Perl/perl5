@@ -3263,17 +3263,20 @@ See L<perlunicode> and L<encoding> for more about Unicode.
 =item our TYPE EXPR : ATTRS
 
 C<our> associates a simple name with a package variable in the current
-package for the remander of the lexical scope.  The listed variables
-are declared to be valid globals within the enclosing block, file, or
-C<eval>.  That is, it has the same scoping rules as a "my"
-declaration, but does not create a local variable.  When C<use strict
-'vars'> is in effect, the C<our> declaration lets you use the declared
-global variable without qualifying it with a package name.  (But only
-within the lexical scope of the C<our> declaration.  In this it
-differs from "use vars", which is package scoped.)
+package for use within the current scope.  When C<use strict 'vars'> is in
+effect, C<our> lets you use declared global variables without qualifying
+them with package names, within the lexical scope of the C<our> declaration.
+In this way C<our> differs from C<use vars>, which is package scoped.
 
-If more than one value is listed, the list must be placed in
-parentheses.
+Unlike C<my>, which both allocates storage for a variable and associates a
+a simple name with that storage for use within the current scope, C<our>
+associates a simple name with a package variable in the current package,
+for use within the current scope.  In other words, C<our> has the same
+scoping rules as C<my>, but does not necessarily create a
+variable.
+
+If more than one value is listed, the list must be placed
+in parentheses.
 
     our $foo;
     our($bar, $baz);
@@ -3289,11 +3292,15 @@ behavior holds:
     $bar = 20;
 
     package Bar;
-    print $bar;		# prints 20 as it refers to $Foo::bar
+    print $bar;		# prints 20, as it refers to $Foo::bar
 
-Multiple C<our> declarations in the same lexical scope are allowed
-if they are in different packages.  If they happen to be in the same
-package, Perl will emit warnings if you have asked for them.
+Multiple C<our> declarations with the same name in the same lexical
+scope are allowed if they are in different packages.  If they happen
+to be in the same package, Perl will emit warnings if you have asked
+for them, just like multiple C<my> declarations.  Unlike a second
+C<my> declaration, which will bind the name to a fresh variable, a
+second C<our> declaration in the same package, in the same scope, is
+merely redundant.
 
     use warnings;
     package Foo;
@@ -3304,7 +3311,8 @@ package, Perl will emit warnings if you have asked for them.
     our $bar = 30;	# declares $Bar::bar for rest of lexical scope
     print $bar;		# prints 30
 
-    our $bar;		# emits warning
+    our $bar;		# emits warning but has no other effect
+    print $bar;		# still prints 30
 
 An C<our> declaration may also have a list of attributes associated
 with it.
