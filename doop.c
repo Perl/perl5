@@ -977,7 +977,7 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
 	    s = send - 1;
 	    while (s > start && UTF8_IS_CONTINUATION(*s))
 		s--;
-	    if (utf8_to_uvchr((U8*)s, 0)) {
+	    if (is_utf8_string((U8*)s, send - s)) {
 		sv_setpvn(astr, s, send - s);
 		*s = '\0';
 		SvCUR_set(sv, s - start);
