@@ -1668,6 +1668,11 @@ Because the slash that terminated C<m//> was followed by a C<SPACE>,
 the example above is not C<m//x>, but rather C<m//> with no C</x>
 modifier.  So the embedded C<#> is interpreted as a literal C<#>.
 
+Also no attention is paid to C<\c\> during this search.
+Thus the second C<\> in C<qq/\c\/> is interpreted as a part of C<\/>,
+and the following C</> is not recognized as a delimiter.
+Instead, use C<\034> or C<\x1c> at the end of quoted constructs.
+
 =item Removal of backslashes before delimiters
 
 During the second pass, text between the starting and ending
