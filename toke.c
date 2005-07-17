@@ -3515,7 +3515,7 @@ Perl_yylex(pTHX)
 	    OPERATOR(',');
 	if (tmp == '~')
 	    PMop(OP_MATCH);
-	if (tmp && isSPACE(*s) && strchr("+-*/%.^&|<",tmp) && ckWARN(WARN_SYNTAX))
+	if (tmp && isSPACE(*s) && ckWARN(WARN_SYNTAX) && strchr("+-*/%.^&|<",tmp))
 	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Reversed %c= operator",(int)tmp);
 	s--;
 	if (PL_expect == XSTATE && isALPHA(tmp) &&
@@ -3685,8 +3685,8 @@ Perl_yylex(pTHX)
 	    else if (*s == '{') {
 		char *t;
 		PL_tokenbuf[0] = '%';
-		if (strEQ(PL_tokenbuf+1, "SIG") && (t = strchr(s, '}'))
-		    && (t = strchr(t, '=')) && ckWARN(WARN_SYNTAX))
+		if (strEQ(PL_tokenbuf+1, "SIG")  && ckWARN(WARN_SYNTAX)
+		    && (t = strchr(s, '}')) && (t = strchr(t, '=')))
 		{
 		    char tmpbuf[sizeof PL_tokenbuf];
 		    for (t++; isSPACE(*t); t++) ;

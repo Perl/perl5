@@ -566,8 +566,9 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	}
     }
     if (!fp) {
-	if (IoTYPE(io) == IoTYPE_RDONLY && strchr(name, '\n')
-	    && ckWARN(WARN_NEWLINE)
+	if (IoTYPE(io) == IoTYPE_RDONLY && ckWARN(WARN_NEWLINE)
+	    && strchr(name, '\n')
+	    
 	)
 	    Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "open");
 	goto say_false;
@@ -1394,7 +1395,7 @@ Perl_my_stat(pTHX)
 	s = SvPVX_const(PL_statname);		/* s now NUL-terminated */
 	PL_laststype = OP_STAT;
 	PL_laststatval = PerlLIO_stat(s, &PL_statcache);
-	if (PL_laststatval < 0 && strchr(s, '\n') && ckWARN(WARN_NEWLINE))
+	if (PL_laststatval < 0 && ckWARN(WARN_NEWLINE) && strchr(s, '\n'))
 	    Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "stat");
 	return PL_laststatval;
     }
