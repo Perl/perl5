@@ -168,11 +168,6 @@ SKIP: {
 
 
 
-
-# in ms windows, $tmpfile inherits owner uid from directory
-# not sure about os/2, but chown is harmless anyway
-eval { chown $>,$tmpfile; 1 } or print "# $@" ;
-
 ok(chmod(0700,$tmpfile),    'chmod 0700');
 ok(-r $tmpfile,     '   -r');
 ok(-w $tmpfile,     '   -w');
