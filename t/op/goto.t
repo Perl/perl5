@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 56;
+plan tests => 57;
 
 our $foo;
 while ($?) {
@@ -436,3 +436,13 @@ eval 'goto &null';
 like($@, qr/Can't goto subroutine from an eval-string/, 'eval string');
 eval { goto &null };
 like($@, qr/Can't goto subroutine from an eval-block/, 'eval block');
+
+# [perl #36521] goto &foo in warn handler could defeat recursion avoider
+
+{
+    my $r = runperl(
+		stderr => 1,
+		prog => 'my $d; my $w = sub { return if $d++; warn q(bar)}; local $SIG{__WARN__} = sub { goto &$w; }; warn q(foo);'
+    );
+    like($r, qr/bar/, "goto &foo in warn");
+}
