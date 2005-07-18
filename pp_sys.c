@@ -3543,11 +3543,10 @@ PP(pp_chdir)
 {
     dSP; dTARGET;
     const char *tmps = 0;
-    GV *gv = 0;
-    SV **svp;
+    GV *gv = NULL;
 
     if( MAXARG == 1 ) {
-	SV *sv = POPs;
+	SV * const sv = POPs;
         if (SvTYPE(sv) == SVt_PVGV) {
 	    gv = (GV*)sv;
         }
@@ -3560,10 +3559,13 @@ PP(pp_chdir)
     }
 
     if( !gv && (!tmps || !*tmps) ) {
-        if (    (svp = hv_fetch(GvHVn(PL_envgv), "HOME", 4, FALSE))
-             || (svp = hv_fetch(GvHVn(PL_envgv), "LOGDIR", 6, FALSE))
+	HV * const table = GvHVn(PL_envgv);
+	SV **svp;
+
+        if (    (svp = hv_fetch(table, "HOME", 4, FALSE))
+             || (svp = hv_fetch(table, "LOGDIR", 6, FALSE))
 #ifdef VMS
-             || (svp = hv_fetch(GvHVn(PL_envgv), "SYS$LOGIN", 9, FALSE))
+             || (svp = hv_fetch(table, "SYS$LOGIN", 9, FALSE))
 #endif
            )
         {
@@ -3581,7 +3583,7 @@ PP(pp_chdir)
     TAINT_PROPER("chdir");
     if (gv) {
 #ifdef HAS_FCHDIR
-	IO* io = GvIO(gv);
+	IO* const io = GvIO(gv);
 	if (io) {
 	    if (IoIFP(io)) {
 		PUSHi(fchdir(PerlIO_fileno(IoIFP(io))) >= 0);

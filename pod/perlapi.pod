@@ -5455,7 +5455,7 @@ Perl_to_utf8_case().
 The "normal" is a string like "ToLower" which means the swash
 %utf8::ToLower.
 
-	UV	to_utf8_case(const U8 *p, U8* ustrp, STRLEN *lenp, SV **swash, const char *normal, const char *special)
+	UV	to_utf8_case(const U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, const char *normal, const char *special)
 
 =for hackers
 Found in file utf8.c
@@ -5529,7 +5529,7 @@ length, in bytes, of that character.
 
 Allows length and flags to be passed to low level routine.
 
-	UV	utf8n_to_uvchr(const U8 *s, STRLEN curlen, STRLEN* retlen, U32 flags)
+	UV	utf8n_to_uvchr(const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 
 =for hackers
 Found in file utf8.c
@@ -5554,7 +5554,7 @@ the strict UTF-8 encoding (see F<utf8.h>).
 
 Most code should use utf8_to_uvchr() rather than call this directly.
 
-	UV	utf8n_to_uvuni(const U8 *s, STRLEN curlen, STRLEN* retlen, U32 flags)
+	UV	utf8n_to_uvuni(const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 
 =for hackers
 Found in file utf8.c
@@ -5621,7 +5621,7 @@ length, in bytes, of that character.
 If C<s> does not point to a well-formed UTF-8 character, zero is
 returned and retlen is set, if possible, to -1.
 
-	UV	utf8_to_uvchr(const U8 *s, STRLEN* retlen)
+	UV	utf8_to_uvchr(const U8 *s, STRLEN *retlen)
 
 =for hackers
 Found in file utf8.c
@@ -5638,7 +5638,7 @@ an index into the Unicode semantic tables (e.g. swashes).
 If C<s> does not point to a well-formed UTF-8 character, zero is
 returned and retlen is set, if possible, to -1.
 
-	UV	utf8_to_uvuni(const U8 *s, STRLEN* retlen)
+	UV	utf8_to_uvuni(const U8 *s, STRLEN *retlen)
 
 =for hackers
 Found in file utf8.c

@@ -1451,7 +1451,8 @@ The "normal" is a string like "ToLower" which means the swash
 =cut */
 
 UV
-Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, const char *normal, const char *special)
+Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
+			SV **swashp, const char *normal, const char *special)
 {
     U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
     STRLEN len = 0;
@@ -1625,7 +1626,7 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
 {
     dVAR;
     SV* retval;
-    SV* tokenbufsv = sv_newmortal();
+    SV* const tokenbufsv = sv_newmortal();
     dSP;
     const size_t pkg_len = strlen(pkg);
     const size_t name_len = strlen(name);

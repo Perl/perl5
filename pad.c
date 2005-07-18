@@ -1505,7 +1505,7 @@ Perl_cv_clone(pTHX_ CV *proto)
 	SV* const_sv = op_const_sv(CvSTART(cv), cv);
 	if (const_sv) {
 	    SvREFCNT_dec(cv);
-	    cv = newCONSTSUB(CvSTASH(proto), 0, const_sv);
+	    cv = newCONSTSUB(CvSTASH(proto), Nullch, const_sv);
 	}
 	else {
 	    CvCONST_off(cv);
