@@ -4572,14 +4572,16 @@ static struct tm *S_my_localtime (pTHX_ Time_t *tp)
      * Given that legal timezones are typically between GMT-12 and GMT+12
      * we turn back the clock 23 hours before calling the localtime
      * function, and add those to the return value. This will never cause
-     * day wrapping problems, since the edge case is Jan *19*
+     * day wrapping problems, since the edge case is Tue Jan *19*
      */
     T = *tp - 82800; /* 23 hour. allows up to GMT-23 */
     P = localtime (&T);
     P->tm_hour += 23;
     if (P->tm_hour >= 24) {
 	P->tm_hour -= 24;
-	P->tm_mday++;
+	P->tm_mday++;	/* 18  -> 19  */
+	P->tm_wday++;	/* Mon -> Tue */
+	P->tm_yday++;	/* 18  -> 19  */
     }
     return (P);
 } /* S_my_localtime */
