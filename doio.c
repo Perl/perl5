@@ -1688,7 +1688,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 			if (fchmod(PerlIO_fileno(IoIFP(GvIOn(gv))), val))
 			    tot--;
 #else
-			DIE(aTHX_ PL_no_func, "fchmod");
+			Perl_die(aTHX_ PL_no_func, "fchmod");
 #endif
 		    }
 		    else {
@@ -1729,7 +1729,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 			if (fchown(PerlIO_fileno(IoIFP(GvIOn(gv))), val, val2))
 			    tot--;
 #else
-			DIE(aTHX_ PL_no_func, "fchown");
+			Perl_die(aTHX_ PL_no_func, "fchown");
 #endif
 		    }
 		    else {
