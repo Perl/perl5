@@ -533,12 +533,12 @@ malformed:
     }
 
     if (dowarn) {
-	SV* const sv = sv_2mortal(newSVpv("Malformed UTF-8 character ", 0));
+	SV* const sv = sv_2mortal(newSVpvs("Malformed UTF-8 character "));
 
 	switch (warning) {
 	case 0: /* Intentionally empty. */ break;
 	case UTF8_WARN_EMPTY:
-	    Perl_sv_catpv(aTHX_ sv, "(empty string)");
+	    sv_catpvs(sv, "(empty string)");
 	    break;
 	case UTF8_WARN_CONTINUATION:
 	    Perl_sv_catpvf(aTHX_ sv, "(unexpected continuation byte 0x%02"UVxf", with no preceding start byte)", uv);
@@ -577,7 +577,7 @@ malformed:
 	    Perl_sv_catpvf(aTHX_ sv, "(character 0x%04"UVxf")", uv);
 	    break;
 	default:
-	    Perl_sv_catpv(aTHX_ sv, "(unknown reason)");
+	    sv_catpvs(sv, "(unknown reason)");
 	    break;
 	}
 	
@@ -1729,11 +1729,11 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
     STRLEN lcur, xcur, scur;
 
     HV* const hv = (HV*)SvRV(swash);
-    SV** const listsvp = hv_fetch(hv, "LIST", 4, FALSE);
-    SV** const typesvp = hv_fetch(hv, "TYPE", 4, FALSE);
-    SV** const bitssvp = hv_fetch(hv, "BITS", 4, FALSE);
-    SV** const nonesvp = hv_fetch(hv, "NONE", 4, FALSE);
-    SV** const extssvp = hv_fetch(hv, "EXTRAS", 6, FALSE);
+    SV** const listsvp = hv_fetchs(hv, "LIST", FALSE);
+    SV** const typesvp = hv_fetchs(hv, "TYPE", FALSE);
+    SV** const bitssvp = hv_fetchs(hv, "BITS", FALSE);
+    SV** const nonesvp = hv_fetchs(hv, "NONE", FALSE);
+    SV** const extssvp = hv_fetchs(hv, "EXTRAS", FALSE);
     const U8* const typestr = (U8*)SvPV_nolen(*typesvp);
     const int  typeto  = typestr[0] == 'T' && typestr[1] == 'o';
     const STRLEN bits  = SvUV(*bitssvp);
@@ -1747,7 +1747,7 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
     }
 
     /* create and initialize $swatch */
-    swatch = newSVpvn("",0);
+    swatch = newSVpvs("");
     scur   = octets ? (span * octets) : (span + 7) / 8;
     SvGROW(swatch, scur + 1);
     s = (U8*)SvPVX(swatch);
@@ -1936,7 +1936,7 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 
 	othersvp = hv_fetch(hv, (char *)namestr, namelen, FALSE);
 	otherhv = (HV*)SvRV(*othersvp);
-	otherbitssvp = hv_fetch(otherhv, "BITS", 4, FALSE);
+	otherbitssvp = hv_fetchs(otherhv, "BITS", FALSE);
 	otherbits = (STRLEN)SvUV(*otherbitssvp);
 	if (bits < otherbits)
 	    Perl_croak(aTHX_ "panic: swash_get found swatch size mismatch");
@@ -2150,7 +2150,7 @@ Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
 	     Perl_sv_catpvf(aTHX_ dsv, "\\x{%"UVxf"}", u);
     }
     if (truncated)
-	 sv_catpvn(dsv, "...", 3);
+	 sv_catpvs(dsv, "...");
     
     return SvPVX(dsv);
 }

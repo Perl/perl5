@@ -402,7 +402,7 @@ PP(pp_glob)
     PL_last_in_gv = (GV*)*PL_stack_sp--;
 
     SAVESPTR(PL_rs);		/* This is not permanent, either. */
-    PL_rs = sv_2mortal(newSVpvn("\000", 1));
+    PL_rs = sv_2mortal(newSVpvs("\000"));
 #ifndef DOSISH
 #ifndef CSH
     *SvPVX(PL_rs) = '\n';
@@ -444,12 +444,12 @@ PP(pp_warn)
   	SV * const error = ERRSV;
 	(void)SvUPGRADE(error, SVt_PV);
 	if (SvPOK(error) && SvCUR(error))
-	    sv_catpv(error, "\t...caught");
+	    sv_catpvs(error, "\t...caught");
 	tmpsv = error;
 	tmps = SvPV_const(tmpsv, len);
     }
     if (!tmps || !len)
-	tmpsv = sv_2mortal(newSVpvn("Warning: something's wrong", 26));
+	tmpsv = sv_2mortal(newSVpvs("Warning: something's wrong"));
 
     Perl_warn(aTHX_ "%"SVf, tmpsv);
     RETSETYES;
@@ -504,7 +504,7 @@ PP(pp_die)
 	}
 	else {
 	    if (SvPOK(error) && SvCUR(error))
-		sv_catpv(error, "\t...propagated");
+		sv_catpvs(error, "\t...propagated");
 	    tmpsv = error;
 	    if (SvOK(tmpsv))
 		tmps = SvPV_const(tmpsv, len);
@@ -513,7 +513,7 @@ PP(pp_die)
 	}
     }
     if (!tmps || !len)
-	tmpsv = sv_2mortal(newSVpvn("Died", 4));
+	tmpsv = sv_2mortal(newSVpvs("Died"));
 
     DIE(aTHX_ "%"SVf, tmpsv);
 }
@@ -1324,7 +1324,7 @@ PP(pp_leavewrite)
 		  !gv_fetchpv("top", 0, SVt_PVFM))
 		    IoTOP_NAME(io) = savesvpv(topname);
 		else
-		    IoTOP_NAME(io) = savepv("top");
+		    IoTOP_NAME(io) = savepvs("top");
 	    }
 	    topgv = gv_fetchpv(IoTOP_NAME(io), 0, SVt_PVFM);
 	    if (!topgv || !GvFORM(topgv)) {
@@ -2850,7 +2850,7 @@ PP(pp_stat)
 #ifdef USE_STAT_RDEV
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_rdev)));
 #else
-	PUSHs(sv_2mortal(newSVpvn("", 0)));
+	PUSHs(sv_2mortal(newSVpvs("")));
 #endif
 #if Off_t_size > IVSIZE
 	PUSHs(sv_2mortal(newSVnv((NV)PL_statcache.st_size)));
@@ -2870,8 +2870,8 @@ PP(pp_stat)
 	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_blksize)));
 	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_blocks)));
 #else
-	PUSHs(sv_2mortal(newSVpvn("", 0)));
-	PUSHs(sv_2mortal(newSVpvn("", 0)));
+	PUSHs(sv_2mortal(newSVpvs("")));
+	PUSHs(sv_2mortal(newSVpvs("")));
 #endif
     }
     RETURN;
@@ -3316,11 +3316,10 @@ PP(pp_chdir)
 {
     dSP; dTARGET;
     const char *tmps = NULL;
-    GV *gv = 0;
-    SV **svp;
+    GV *gv = NULL;
 
     if( MAXARG == 1 ) {
-	SV *sv = POPs;
+	SV * const sv = POPs;
         if (SvTYPE(sv) == SVt_PVGV) {
 	    gv = (GV*)sv;
         }
@@ -3333,10 +3332,13 @@ PP(pp_chdir)
     }
 
     if( !gv && (!tmps || !*tmps) ) {
-        if (    (svp = hv_fetch(GvHVn(PL_envgv), "HOME", 4, FALSE))
-             || (svp = hv_fetch(GvHVn(PL_envgv), "LOGDIR", 6, FALSE))
+	HV * const table = GvHVn(PL_envgv);
+	SV **svp;
+
+        if (    (svp = hv_fetchs(table, "HOME", FALSE))
+             || (svp = hv_fetchs(table, "LOGDIR", FALSE))
 #ifdef VMS
-             || (svp = hv_fetch(GvHVn(PL_envgv), "SYS$LOGIN", 9, FALSE))
+             || (svp = hv_fetchs(table, "SYS$LOGIN", FALSE))
 #endif
            )
         {
@@ -3354,7 +3356,7 @@ PP(pp_chdir)
     TAINT_PROPER("chdir");
     if (gv) {
 #ifdef HAS_FCHDIR
-	IO* io = GvIO(gv);
+	IO* const io = GvIO(gv);
 	if (io) {
 	    if (IoIFP(io)) {
 		PUSHi(fchdir(PerlIO_fileno(IoIFP(io))) >= 0);
@@ -4580,7 +4582,7 @@ PP(pp_ghostent)
 	for (elem = hent->h_aliases; elem && *elem; elem++) {
 	    sv_catpv(sv, *elem);
 	    if (elem[1])
-		sv_catpvn(sv, " ", 1);
+		sv_catpvs(sv, " ");
 	}
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setiv(sv, (IV)hent->h_addrtype);
@@ -4672,7 +4674,7 @@ PP(pp_gnetent)
 	for (elem = nent->n_aliases; elem && *elem; elem++) {
 	    sv_catpv(sv, *elem);
 	    if (elem[1])
-		sv_catpvn(sv, " ", 1);
+		sv_catpvs(sv, " ");
 	}
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setiv(sv, (IV)nent->n_addrtype);
@@ -4742,7 +4744,7 @@ PP(pp_gprotoent)
 	for (elem = pent->p_aliases; elem && *elem; elem++) {
 	    sv_catpv(sv, *elem);
 	    if (elem[1])
-		sv_catpvn(sv, " ", 1);
+		sv_catpvs(sv, " ");
 	}
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setiv(sv, (IV)pent->p_proto);
@@ -4820,7 +4822,7 @@ PP(pp_gservent)
 	for (elem = sent->s_aliases; elem && *elem; elem++) {
 	    sv_catpv(sv, *elem);
 	    if (elem[1])
-		sv_catpvn(sv, " ", 1);
+		sv_catpvs(sv, " ");
 	}
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #ifdef HAS_NTOHS
@@ -5247,7 +5249,7 @@ PP(pp_ggrent)
 	for (elem = grent->gr_mem; elem && *elem; elem++) {
 	    sv_catpv(sv, *elem);
 	    if (elem[1])
-		sv_catpvn(sv, " ", 1);
+		sv_catpvs(sv, " ");
 	}
 #endif
     }

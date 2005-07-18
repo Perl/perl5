@@ -1156,11 +1156,11 @@ perl_get_emergency_buffer(IV *size)
     dTHX;
     /* First offense, give a possibility to recover by dieing. */
     /* No malloc involved here: */
-    GV **gvp = (GV**)hv_fetch(PL_defstash, "^M", 2, 0);
     SV *sv;
     char *pv;
+    GV **gvp = (GV**)hv_fetchs(PL_defstash, "^M", FALSE);
 
-    if (!gvp) gvp = (GV**)hv_fetch(PL_defstash, "\015", 1, 0);
+    if (!gvp) gvp = (GV**)hv_fetchs(PL_defstash, "\015", FALSE);
     if (!gvp || !(sv = GvSV(*gvp)) || !SvPOK(sv) 
         || (SvLEN(sv) < (1<<LOG_OF_MIN_ARENA) - M_OVERHEAD))
         return NULL;		/* Now die die die... */

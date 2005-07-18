@@ -816,7 +816,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		 * it could have been extended by warnings::register */
 		SV **bits_all;
 		HV * const bits=get_hv("warnings::Bits", FALSE);
-		if (bits && (bits_all=hv_fetch(bits, "all", 3, FALSE))) {
+		if (bits && (bits_all=hv_fetchs(bits, "all", FALSE))) {
 		    sv_setsv(sv, *bits_all);
 		}
 	        else {
@@ -1476,7 +1476,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	 * tell whether HINT_STRICT_REFS is in force or not.
 	 */
 	if (!strchr(s,':') && !strchr(s,'\''))
-	    sv_insert(sv, 0, 0, "main::", 6);
+	    Perl_sv_insert(aTHX_ sv, 0, 0, STR_WITH_LEN("main::"));
 	if (i)
 	    (void)rsignal(i, PL_csighandlerp);
 	else

@@ -399,7 +399,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 
     if (flags & FBMcf_TAIL) {
 	MAGIC * const mg = SvUTF8(sv) && SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : NULL;
-	sv_catpvn(sv, "\n", 1);		/* Taken into account in fbm_instr() */
+	sv_catpvs(sv, "\n");		/* Taken into account in fbm_instr() */
 	if (mg && mg->mg_len >= 0)
 	    mg->mg_len++;
     }
@@ -880,7 +880,7 @@ S_mess_alloc(pTHX)
     XPVMG *any;
 
     if (!PL_dirty)
-	return sv_2mortal(newSVpvn("",0));
+	return sv_2mortal(newSVpvs(""));
 
     if (PL_mess_sv)
 	return PL_mess_sv;

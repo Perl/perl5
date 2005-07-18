@@ -485,7 +485,7 @@ PerlIO_debug(const char *fmt, ...)
 #else
 	const char *s = CopFILE(PL_curcop);
 	STRLEN len;
-	SV * const sv = newSVpvn("", 0);
+	SV * const sv = newSVpvs("");
 	Perl_sv_catpvf(aTHX_ sv, "%s:%" IVdf " ", s ? s : "(none)",
 		       (IV) CopLINE(PL_curcop));
 	Perl_sv_vcatpvf(aTHX_ sv, fmt, &ap);
@@ -764,7 +764,7 @@ PerlIO_find_layer(pTHX_ const char *name, STRLEN len, int load)
 	    Perl_croak(aTHX_ "Recursive call to Perl_load_module in PerlIO_find_layer");
 	    return NULL;
 	} else {
-	    SV * const pkgsv = newSVpvn("PerlIO", 6);
+	    SV * const pkgsv = newSVpvs("PerlIO");
 	    SV * const layer = newSVpvn(name, len);
 	    CV * const cv    = get_cv("PerlIO::Layer::NoWarnings", FALSE);
 	    ENTER;
@@ -870,7 +870,7 @@ XS(XS_io_MODIFY_SCALAR_ATTRIBUTES)
 SV *
 PerlIO_tab_sv(pTHX_ PerlIO_funcs *tab)
 {
-    HV * const stash = gv_stashpvn("PerlIO::Layer", 13, TRUE);
+    HV * const stash = gv_stashpvs("PerlIO::Layer", TRUE);
     SV * const sv = sv_bless(newRV_noinc(newSViv(PTR2IV(tab))), stash);
     return sv;
 }
@@ -1417,20 +1417,20 @@ PerlIO_layer_from_ref(pTHX_ SV *sv)
      * For any scalar type load the handler which is bundled with perl
      */
     if (SvTYPE(sv) < SVt_PVAV)
-	return PerlIO_find_layer(aTHX_ "scalar", 6, 1);
+	return PerlIO_find_layer(aTHX_ STR_WITH_LEN("scalar"), 1);
 
     /*
      * For other types allow if layer is known but don't try and load it
      */
     switch (SvTYPE(sv)) {
     case SVt_PVAV:
-	return PerlIO_find_layer(aTHX_ "Array", 5, 0);
+	return PerlIO_find_layer(aTHX_ STR_WITH_LEN("Array"), 0);
     case SVt_PVHV:
-	return PerlIO_find_layer(aTHX_ "Hash", 4, 0);
+	return PerlIO_find_layer(aTHX_ STR_WITH_LEN("Hash"), 0);
     case SVt_PVCV:
-	return PerlIO_find_layer(aTHX_ "Code", 4, 0);
+	return PerlIO_find_layer(aTHX_ STR_WITH_LEN("Code"), 0);
     case SVt_PVGV:
-	return PerlIO_find_layer(aTHX_ "Glob", 4, 0);
+	return PerlIO_find_layer(aTHX_ STR_WITH_LEN("Glob"), 0);
     }
     return NULL;
 }
@@ -4889,7 +4889,7 @@ int
 PerlIO_vprintf(PerlIO *f, const char *fmt, va_list ap)
 {
     dTHX;
-    SV * const sv = newSVpvn("", 0);
+    SV * const sv = newSVpvs("");
     const char *s;
     STRLEN len;
     SSize_t wrote;
@@ -4943,7 +4943,7 @@ PerlIO_tmpfile(void)
 	  f = PerlIO_fdopen(fd, "w+b");
 #else /* WIN32 */
 #    if defined(HAS_MKSTEMP) && ! defined(VMS) && ! defined(OS2)
-     SV * const sv = newSVpv("/tmp/PerlIO_XXXXXX", 0);
+     SV * const sv = newSVpvs("/tmp/PerlIO_XXXXXX");
      /*
       * I have no idea how portable mkstemp() is ... NI-S
       */

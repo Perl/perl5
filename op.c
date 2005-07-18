@@ -1,4 +1,4 @@
-/*    op.c
+ /*    op.c
  *
  *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
  *    2000, 2001, 2002, 2003, 2004, 2005, 2006, by Larry Wall and others
@@ -1598,8 +1598,7 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs, bool for_my)
 
     if (for_my) {
 	/* Don't force the C<use> if we don't need it. */
-	SV * const * const svp = hv_fetch(GvHVn(PL_incgv), ATTRSMODULE_PM,
-		       sizeof(ATTRSMODULE_PM)-1, 0);
+	SV * const * const svp = hv_fetchs(GvHVn(PL_incgv), ATTRSMODULE_PM, FALSE);
 	if (svp && *svp != &PL_sv_undef)
 	    ; 		/* already in %INC */
 	else
@@ -1655,14 +1654,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
 				    dup_attrlist(attrs)));
 
     /* Fake up a method call to import */
-    meth = newSVpvn("import", 6);
-    (void)SvUPGRADE(meth, SVt_PVIV);
-    (void)SvIOK_on(meth);
-    {
-	U32 hash;
-	PERL_HASH(hash, SvPVX_const(meth), SvCUR(meth));
-	SvUV_set(meth, hash);
-    }
+    meth = newSVpvs("import");
     imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL|OPf_WANT_VOID,
 		   append_elem(OP_LIST,
 			       prepend_elem(OP_LIST, pack, list(arg)),
@@ -2534,7 +2526,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
         o->op_private |= OPpTRANS_TO_UTF;
 
     if (o->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF)) {
-	SV* const listsv = newSVpvn("# comment\n",10);
+	SV* const listsv = newSVpvs("# comment\n");
 	SV* transv = NULL;
 	const U8* tend = t + tlen;
 	const U8* rend = r + rlen;
@@ -2579,7 +2571,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    UV nextmin = 0;
 	    Newx(cp, 2*tlen, UV);
 	    i = 0;
-	    transv = newSVpvn("",0);
+	    transv = newSVpvs("");
 	    while (t < tend) {
 		cp[2*i] = utf8n_to_uvuni((U8 *)t, tend-t, &ulen, 0);
 		t += ulen;
@@ -3140,7 +3132,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	    pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)idop)->op_sv));
 
 	    /* Fake up a method call to VERSION */
-	    meth = newSVpvn("VERSION",7);
+	    meth = newSVpvs("VERSION");
 	    sv_upgrade(meth, SVt_PVIV);
 	    (void)SvIOK_on(meth);
 	    {
@@ -3170,7 +3162,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)idop)->op_sv));
 
 	/* Fake up a method call to import/unimport */
-	meth = aver ? newSVpvn("import",6) : newSVpvn("unimport", 8);
+	meth = aver ? newSVpvs("import") : newSVpvs("unimport");
 	(void)SvUPGRADE(meth, SVt_PVIV);
 	(void)SvIOK_on(meth);
 	{
@@ -3186,7 +3178,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 
     /* Fake up the BEGIN {}, which does its thing immediately. */
     newATTRSUB(floor,
-	newSVOP(OP_CONST, 0, newSVpvn("BEGIN", 5)),
+	newSVOP(OP_CONST, 0, newSVpvs("BEGIN")),
 	Nullop,
 	Nullop,
 	append_elem(OP_LINESEQ,
@@ -3310,8 +3302,8 @@ Perl_dofile2(pTHX_ OP *term, I32 force_builtin)
     if (!force_builtin) {
 	gv = gv_fetchpv("do", 0, SVt_PVCV);
 	if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv))) {
-	    GV **gvp = (GV**)hv_fetch(PL_globalstash, "do", 2, FALSE);
-	    if (gvp) gv = *gvp; else gv = Nullgv;
+	    GV * const * const gvp = (GV**)hv_fetchs(PL_globalstash, "do", FALSE);
+	    gv = gvp ? *gvp : Nullgv;
 	}
     }
 
@@ -4212,12 +4204,12 @@ Perl_cv_ckproto(pTHX_ CV *cv, GV *gv, char *p)
 	if (SvPOK(cv))
 	    Perl_sv_catpvf(aTHX_ msg, " (%"SVf")", (const SV *)cv);
 	else
-	    Perl_sv_catpv(aTHX_ msg, ": none");
-	sv_catpv(msg, " vs ");
+	    sv_catpvs(msg, ": none");
+	sv_catpvs(msg, " vs ");
 	if (p)
 	    Perl_sv_catpvf(aTHX_ msg, "(%s)", p);
 	else
-	    sv_catpv(msg, "none");
+	    sv_catpvs(msg, "none");
 	Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE), "%"SVf, msg);
     }
 }
@@ -5201,7 +5193,7 @@ Perl_ck_exit(pTHX_ OP *o)
 #ifdef VMS
     HV * const table = GvHV(PL_hintgv);
     if (table) {
-       SV * const * const svp = hv_fetch(table, "vmsish_exit", 11, FALSE);
+       SV * const * const svp = hv_fetchs(table, "vmsish_exit", FALSE);
        if (svp && *svp && SvTRUE(*svp))
            o->op_private |= OPpEXIT_VMSISH;
     }
@@ -5552,7 +5544,7 @@ Perl_ck_fun(pTHX_ OP *o)
 				     || kid->op_type == OP_HELEM)
 			    {
 				 OP *op = ((BINOP*)kid)->op_first;
-				 name = 0;
+				 name = NULL;
 				 if (op) {
 				      SV *tmpstr = NULL;
 				      const char * const a =
@@ -5662,7 +5654,7 @@ Perl_ck_glob(pTHX_ OP *o)
 	GV *glob_gv;
 	ENTER;
 	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
-		newSVpvn("File::Glob", 10), NULL, NULL, NULL);
+		newSVpvs("File::Glob"), NULL, NULL, NULL);
 	gv = gv_fetchpv("CORE::GLOBAL::glob", 0, SVt_PVCV);
 	glob_gv = gv_fetchpv("File::Glob::csh_glob", 0, SVt_PVCV);
 	GvCV(gv) = GvCV(glob_gv);
@@ -5893,10 +5885,11 @@ Perl_ck_method(pTHX_ OP *o)
     OP * const kid = cUNOPo->op_first;
     if (kid->op_type == OP_CONST) {
 	SV* sv = kSVOP->op_sv;
-	if (!(strchr(SvPVX_const(sv), ':') || strchr(SvPVX_const(sv), '\''))) {
+	const char * const method = SvPVX_const(sv);
+	if (!(strchr(method, ':') || strchr(method, '\''))) {
 	    OP *cmop;
 	    if (!SvREADONLY(sv) || !SvFAKE(sv)) {
-		sv = newSVpvn_share(SvPVX_const(sv), SvCUR(sv), 0);
+		sv = newSVpvn_share(method, SvCUR(sv), 0);
 	    }
 	    else {
 		kSVOP->op_sv = NULL;
@@ -5920,7 +5913,7 @@ Perl_ck_open(pTHX_ OP *o)
 {
     HV * const table = GvHV(PL_hintgv);
     if (table) {
-	SV **svp = hv_fetch(table, "open_IN", 7, FALSE);
+	SV **svp = hv_fetchs(table, "open_IN", FALSE);
 	if (svp && *svp) {
 	    const I32 mode = mode_from_discipline(*svp);
 	    if (mode & O_BINARY)
@@ -5929,7 +5922,7 @@ Perl_ck_open(pTHX_ OP *o)
 		o->op_private |= OPpOPEN_IN_CRLF;
 	}
 
-	svp = hv_fetch(table, "open_OUT", 8, FALSE);
+	svp = hv_fetchs(table, "open_OUT", FALSE);
 	if (svp && *svp) {
 	    const I32 mode = mode_from_discipline(*svp);
 	    if (mode & O_BINARY)
@@ -6006,7 +5999,7 @@ Perl_ck_require(pTHX_ OP *o)
 		    SvCUR_set(sv, SvCUR(sv) - 1);
 		}
 	    }
-	    sv_catpvn(sv, ".pm", 3);
+	    sv_catpvs(sv, ".pm");
 	    SvFLAGS(sv) |= was_readonly;
 	}
     }
@@ -6015,8 +6008,8 @@ Perl_ck_require(pTHX_ OP *o)
 	/* handle override, if any */
 	gv = gv_fetchpv("require", 0, SVt_PVCV);
 	if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv))) {
-	    GV **gvp = (GV**)hv_fetch(PL_globalstash, "require", 7, FALSE);
-	    if (gvp) gv = *gvp; else gv = Nullgv;
+	    GV * const * const gvp = (GV**)hv_fetchs(PL_globalstash, "require", FALSE);
+	    gv = gvp ? *gvp : Nullgv;
 	}
     }
 
@@ -6240,7 +6233,7 @@ Perl_ck_split(pTHX_ OP *o)
     op_free(cLISTOPo->op_first);
     cLISTOPo->op_first = kid;
     if (!kid) {
-	cLISTOPo->op_first = kid = newSVOP(OP_CONST, 0, newSVpvn(" ", 1));
+	cLISTOPo->op_first = kid = newSVOP(OP_CONST, 0, newSVpvs(" "));
 	cLISTOPo->op_last = kid; /* There was only one element previously */
     }
 
@@ -6391,7 +6384,7 @@ Perl_ck_subr(pTHX_ OP *o)
 			    {
 				GV * const gv = cGVOPx_gv(gvop);
 				OP * const sibling = o2->op_sibling;
-				SV * const n = newSVpvn("",0);
+				SV * const n = newSVpvs("");
 				op_free(o2);
 				gv_fullname4(n, gv, "", FALSE);
 				o2 = newSVOP(OP_CONST, 0, n);
@@ -6846,7 +6839,7 @@ Perl_peep(pTHX_ register OP *o)
 	    lexname = *av_fetch(PL_comppad_name, rop->op_first->op_targ, TRUE);
 	    if (!(SvFLAGS(lexname) & SVpad_TYPED))
 		break;
-	    fields = (GV**)hv_fetch(SvSTASH(lexname), "FIELDS", 6, FALSE);
+	    fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE);
 	    if (!fields || !GvHV(*fields))
 		break;
 	    key = SvPV_const(*svp, keylen);
@@ -6897,7 +6890,7 @@ Perl_peep(pTHX_ register OP *o)
 	    lexname = *av_fetch(PL_comppad_name, rop->op_first->op_targ, TRUE);
 	    if (!(SvFLAGS(lexname) & SVpad_TYPED))
 		break;
-	    fields = (GV**)hv_fetch(SvSTASH(lexname), "FIELDS", 6, FALSE);
+	    fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE);
 	    if (!fields || !GvHV(*fields))
 		break;
 	    /* Again guessing that the pushmark can be jumped over.... */

@@ -306,7 +306,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
     /* UNIVERSAL methods should be callable without a stash */
     if (!stash) {
 	level = -1;  /* probably appropriate */
-	if(!(stash = gv_stashpvn("UNIVERSAL", 9, FALSE)))
+	if(!(stash = gv_stashpvs("UNIVERSAL", FALSE)))
 	    return 0;
     }
 
@@ -341,7 +341,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 	    return 0;  /* cache indicates sub doesn't exist */
     }
 
-    gvp = (GV**)hv_fetch(stash, "ISA", 3, FALSE);
+    gvp = (GV**)hv_fetchs(stash, "ISA", FALSE);
     av = (gvp && (gv = *gvp) && gv != (GV*)&PL_sv_undef) ? GvAV(gv) : NULL;
 
     /* create and re-create @.*::SUPER::ISA on demand */
@@ -353,9 +353,9 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 
 	    packlen -= 7;
 	    basestash = gv_stashpvn(hvname, packlen, TRUE);
-	    gvp = (GV**)hv_fetch(basestash, "ISA", 3, FALSE);
+	    gvp = (GV**)hv_fetchs(basestash, "ISA", FALSE);
 	    if (gvp && (gv = *gvp) != (GV*)&PL_sv_undef && (av = GvAV(gv))) {
-		gvp = (GV**)hv_fetch(stash, "ISA", 3, TRUE);
+		gvp = (GV**)hv_fetchs(stash, "ISA", TRUE);
 		if (!gvp || !(gv = *gvp))
 		    Perl_croak(aTHX_ "Cannot create %s::ISA", hvname);
 		if (SvTYPE(gv) != SVt_PVGV)
@@ -389,7 +389,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
     /* if at top level, try UNIVERSAL */
 
     if (level == 0 || level == -1) {
-	HV* const lastchance = gv_stashpvn("UNIVERSAL", 9, FALSE);
+	HV* const lastchance = gv_stashpvs("UNIVERSAL", FALSE);
 
 	if (lastchance) {
 	    if ((gv = gv_fetchmeth(lastchance, name, len,
@@ -645,7 +645,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
     sv_lock(varsv);
 #endif
     sv_setpv(varsv, packname);
-    sv_catpvn(varsv, "::", 2);
+    sv_catpvs(varsv, "::");
     sv_catpvn(varsv, name, len);
     SvTAINTED_off(varsv);
     return gv;
@@ -657,7 +657,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 STATIC void
 S_require_errno(pTHX_ GV *gv)
 {
-    HV* stash = gv_stashpvn("Errno",5,FALSE);
+    HV* stash = gv_stashpvs("Errno", FALSE);
 
     if (!stash || !(gv_fetchmethod(stash, "TIEHASH"))) {
 	dSP;
@@ -665,10 +665,10 @@ S_require_errno(pTHX_ GV *gv)
 	ENTER;
 	save_scalar(gv); /* keep the value of $! */
         Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
-                         newSVpvn("Errno",5), NULL);
+                         newSVpvs("Errno"), NULL);
 	LEAVE;
 	SPAGAIN;
-	stash = gv_stashpvn("Errno",5,FALSE);
+	stash = gv_stashpvs("Errno", FALSE);
 	if (!stash || !(gv_fetchmethod(stash, "TIEHASH")))
 	    Perl_croak(aTHX_ "Can't use %%! because Errno.pm is not available");
     }
@@ -832,7 +832,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    name_cursor++;
 	    name = name_cursor;
 	    if (name == name_end)
-		return gv ? gv : (GV*)*hv_fetch(PL_defstash, "main::", 6, TRUE);
+		return gv ? gv : (GV*)*hv_fetchs(PL_defstash, "main::", TRUE);
 	}
     }
     len = name_cursor - name;
@@ -1254,7 +1254,7 @@ Perl_gv_fullname4(pTHX_ SV *sv, GV *gv, const char *prefix, bool keepmain)
 
     if (keepmain || strNE(name, "main")) {
 	sv_catpv(sv,name);
-	sv_catpvn(sv,"::", 2);
+	sv_catpvs(sv,"::");
     }
     sv_catpvn(sv,GvNAME(gv),GvNAMELEN(gv));
 }

@@ -1111,7 +1111,7 @@ PP(pp_flop)
 
 	if (flop) {
 	    sv_setiv(PAD_SV(((UNOP*)cUNOP->op_first)->op_first->op_targ), 0);
-	    sv_catpvn(targ, "E0", 2);
+	    sv_catpvs(targ, "E0");
 	}
 	SETs(targ);
     }
@@ -1498,12 +1498,12 @@ PP(pp_caller)
 	    PUSHs(sv_2mortal(newSViv((I32)cx->blk_sub.hasargs)));
 	}
 	else {
-	    PUSHs(sv_2mortal(newSVpvn("(unknown)",9)));
+	    PUSHs(sv_2mortal(newSVpvs("(unknown)")));
 	    PUSHs(sv_2mortal(newSViv((I32)cx->blk_sub.hasargs)));
 	}
     }
     else {
-	PUSHs(sv_2mortal(newSVpvn("(eval)",6)));
+	PUSHs(sv_2mortal(newSVpvs("(eval)")));
 	PUSHs(sv_2mortal(newSViv(0)));
     }
     gimme = (I32)cx->blk_gimme;
@@ -1568,7 +1568,7 @@ PP(pp_caller)
 	     * it could have been extended by warnings::register */
 	    SV **bits_all;
 	    HV * const bits = get_hv("warnings::Bits", FALSE);
-	    if (bits && (bits_all=hv_fetch(bits, "all", 3, FALSE))) {
+	    if (bits && (bits_all=hv_fetchs(bits, "all", FALSE))) {
 		mask = newSVsv(*bits_all);
 	    }
 	    else {
@@ -3315,10 +3315,10 @@ PP(pp_require)
 							      ));
 		    
 		    for (i = 0; i <= AvFILL(ar); i++) {
-			sv_catpvn(msg, " ", 1);
+			sv_catpvs(msg, " ");
 			sv_catsv(msg, *av_fetch(ar, i, TRUE));
 		    }
-		    sv_catpvn(msg, ")", 1);
+		    sv_catpvs(msg, ")");
 		    msgstr = SvPV_nolen_const(msg);
 		}    
 	    }
@@ -3343,7 +3343,7 @@ PP(pp_require)
 
     ENTER;
     SAVETMPS;
-    lex_start(sv_2mortal(newSVpvn("",0)));
+    lex_start(sv_2mortal(newSVpvs("")));
     SAVEGENERICSV(PL_rsfp_filters);
     PL_rsfp_filters = NULL;
 
