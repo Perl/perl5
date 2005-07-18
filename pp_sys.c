@@ -3592,7 +3592,7 @@ PP(pp_chdir)
 #ifdef HAS_DIRFD
 		PUSHi(fchdir(dirfd(IoDIRP(io))) >= 0);
 #else
-		DIE(aTHX PL_no_func, "dirfd");
+		DIE(aTHX_ PL_no_func, "dirfd");
 #endif
 	    }
 	    else {
