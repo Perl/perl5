@@ -2635,7 +2635,7 @@ typedef pthread_key_t	perl_key;
 #endif
 
 #ifndef SVf
-#  define SVf SVf_()
+#  define SVf "-p"
 #endif
 
 #ifndef SVf32
