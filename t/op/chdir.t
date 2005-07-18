@@ -48,7 +48,14 @@ SKIP: {
     ok(open(my $fh, "<", "op"), "open op");
     ok(chdir($fh), "fchdir op");
     ok(-f "chdir.t", "verify that we are in op");
-    ok(chdir($dh), "fchdir back");
+    if (($Config{d_dirfd} || "") eq "define") {
+       ok(chdir($dh), "fchdir back");
+    }
+    else {
+       eval { chdir($dh); };
+       like($@, qr/^The dirfd function is unimplemented at/, "dirfd is unimplemented");
+       chdir "..";
+    }
     ok(-d "op", "verify that we are back");
 }
 
