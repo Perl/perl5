@@ -1849,6 +1849,10 @@ PP(pp_enteriter)
 		    DIE(aTHX_ "Range iterator outside integer range");
 		cx->blk_loop.iterix = SvIV(sv);
 		cx->blk_loop.itermax = SvIV(right);
+#ifdef DEBUGGING
+		/* for correct -Dstv display */
+		cx->blk_oldsp = sp - PL_stack_base;
+#endif
 	    }
 	    else {
 		cx->blk_loop.iterlval = newSVsv(sv);
