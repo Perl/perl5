@@ -1446,7 +1446,7 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
 	assert(const_sv);
 	/* constant sub () { $x } closing over $x - see lib/constant.pm */
 	SvREFCNT_dec(cv);
-	cv = newCONSTSUB(CvSTASH(proto), 0, const_sv);
+	cv = newCONSTSUB(CvSTASH(proto), Nullch, const_sv);
     }
 
     return cv;

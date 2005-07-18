@@ -925,7 +925,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		}
 		sv_catpvn(data->last_found, STRING(scan), STR_LEN(scan));
 		{
-		    SV * sv = data->last_found;
+		    SV * const sv = data->last_found;
 		    MAGIC * const mg = SvUTF8(sv) && SvMAGICAL(sv) ?
 			mg_find(sv, PERL_MAGIC_utf8) : NULL;
 		    if (mg && mg->mg_len >= 0)
