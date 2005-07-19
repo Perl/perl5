@@ -33,51 +33,70 @@ use warnings 'misc' ;
 my $x ;
 my $x ;
 my $y = my $y ;
+my $p ;
+package X ;
+my $p ;
+package main ;
 no warnings 'misc' ;
 my $x ;
 my $y ;
+my $p ;
 EXPECT
 "my" variable $x masks earlier declaration in same scope at - line 4.
 "my" variable $y masks earlier declaration in same statement at - line 5.
+"my" variable $p masks earlier declaration in same scope at - line 8.
 ########
 # pad.c
 use warnings 'misc' ;
 our $x ;
 our $x ;
 our $y = our $y ;
-no warnings 'misc' ;
-our $x ;
-our $y ;
+our $p ;
+package X ;
+our $p ;
 EXPECT
-"our" variable $x masks earlier declaration in same scope at - line 4.
-"our" variable $y masks earlier declaration in same statement at - line 5.
 ########
 # pad.c
 use warnings 'misc' ;
 our $x ;
 my $x ;
 our $y = my $y ;
+our $p ;
+package X ;
+my $p ;
+package main ;
 no warnings 'misc' ;
 our $z ;
 my $z ;
 our $t = my $t ;
+our $q ;
+package X ;
+my $q ;
 EXPECT
 "my" variable $x masks earlier declaration in same scope at - line 4.
 "my" variable $y masks earlier declaration in same statement at - line 5.
+"my" variable $p masks earlier declaration in same scope at - line 8.
 ########
 # pad.c
-# TODO not implemented yet
 use warnings 'misc' ;
 my $x ;
 our $x ;
 my $y = our $y ;
+my $p ;
+package X ;
+our $p ;
+package main ;
 no warnings 'misc' ;
 my $z ;
 our $z ;
 my $t = our $t ;
+my $q ;
+package X ;
+our $q ;
 EXPECT
-"our" variable $x masks earlier declaration in same scope at - line 5.
-"our" variable $y masks earlier declaration in same statement at - line 6.
+"our" variable $x masks earlier declaration in same scope at - line 4.
+"our" variable $y masks earlier declaration in same statement at - line 5.
+"our" variable $p masks earlier declaration in same scope at - line 8.
 ########
 # pad.c
 use warnings 'closure' ;
@@ -219,6 +238,13 @@ EXPECT
 
 ########
 use warnings 'misc' ;
+my $x;
+{
+    my $x;
+}
+EXPECT
+########
+use warnings 'misc' ;
 our $x;
 {
     our $x;
@@ -226,6 +252,20 @@ our $x;
 EXPECT
 "our" variable $x redeclared at - line 4.
 	(Did you mean "local" instead of "our"?)
+########
+use warnings 'misc' ;
+our $x;
+{
+    my $x;
+}
+EXPECT
+########
+use warnings 'misc' ;
+my $x;
+{
+    our $x;
+}
+EXPECT
 ########
 # an our var being introduced should suppress errors about global syms
 use strict;

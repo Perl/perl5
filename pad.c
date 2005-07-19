@@ -515,8 +515,7 @@ Perl_pad_check_dup(pTHX_ const char *name, bool is_our, const HV *ourstash)
 	    && sv != &PL_sv_undef
 	    && !SvFAKE(sv)
 	    && (SvIVX(sv) == PAD_MAX || SvIVX(sv) == 0)
-	    && (!is_our
-		|| ((SvFLAGS(sv) & SVpad_OUR) && GvSTASH(sv) == ourstash))
+	    && !(is_our && (SvFLAGS(sv) & SVpad_OUR))
 	    && strEQ(name, SvPVX_const(sv)))
 	{
 	    Perl_warner(aTHX_ packWARN(WARN_MISC),
