@@ -24,7 +24,7 @@
 /*
 =head1 Handy Values
 
-=for apidoc AmU||Nullch 
+=for apidoc AmU||Nullch
 Null character pointer.
 
 =for apidoc AmU||Nullsv
@@ -59,7 +59,7 @@ Null SV pointer.
    g++ can be identified by __GNUG__.
    Andy Dougherty	February 2000
 */
-#ifdef __GNUG__ 	/* GNU g++ has bool built-in */
+#ifdef __GNUG__		/* GNU g++ has bool built-in */
 #  ifndef HAS_BOOL
 #    define HAS_BOOL 1
 #  endif
@@ -122,11 +122,11 @@ Null SV pointer.
    For dealing with issues that may arise from various 32/64-bit
    systems, we will ask Configure to check out
 
-   	SHORTSIZE == sizeof(short)
-   	INTSIZE == sizeof(int)
-   	LONGSIZE == sizeof(long)
+	SHORTSIZE == sizeof(short)
+	INTSIZE == sizeof(int)
+	LONGSIZE == sizeof(long)
 	LONGLONGSIZE == sizeof(long long) (if HAS_LONG_LONG)
-   	PTRSIZE == sizeof(void *)
+	PTRSIZE == sizeof(void *)
 	DOUBLESIZE == sizeof(double)
 	LONG_DOUBLESIZE == sizeof(long double) (if HAS_LONG_DOUBLE).
 
@@ -422,7 +422,7 @@ Converts the specified character to lowercase.
 
 #  else
 
-#    define isALNUM_LC(c) 	(isascii(c) && (isalnum(c) || (c) == '_'))
+#    define isALNUM_LC(c)	(isascii(c) && (isalnum(c) || (c) == '_'))
 #    define isIDFIRST_LC(c)	(isascii(c) && (isalpha(c) || (c) == '_'))
 #    define isALPHA_LC(c)	(isascii(c) && isalpha(c))
 #    define isSPACE_LC(c)	(isascii(c) && isspace(c))
@@ -700,10 +700,11 @@ hopefully catches attempts to access uninitialized memory.
 #define pTHX__VALUE_ ,(void *)my_perl,
 #define pTHX__VALUE  ,(void *)my_perl
 #else
-#define pTHX_FORMAT 
+#define pTHX_FORMAT
 #define pTHX__FORMAT
-#define pTHX_VALUE_ 
+#define pTHX_VALUE_
 #define pTHX_VALUE
-#define pTHX__VALUE_ 
+#define pTHX__VALUE_
 #define pTHX__VALUE
 #endif /* USE_ITHREADS */
+

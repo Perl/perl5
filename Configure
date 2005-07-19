@@ -19452,6 +19452,12 @@ int main() {
 #endif
 
 #ifndef NSIG
+#  ifdef _SIG_MAX
+#    define NSIG (_SIG_MAX+1)
+#  endif
+#endif
+
+#ifndef NSIG
 #  ifdef MAXSIG
 #    define NSIG (MAXSIG+1)
 #  endif
@@ -19465,7 +19471,7 @@ int main() {
 
 #ifndef NSIG
 #  ifdef SIGARRAYSIZE
-#    define NSIG (SIGARRAYSIZE+1) /* Not sure of the +1 */
+#    define NSIG SIGARRAYSIZE /* Assume ary[SIGARRAYSIZE] */
 #  endif
 #endif
 
