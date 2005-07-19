@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Jul 18 12:48:03 CEST 2005 [metaconfig 3.0 PL70]
+# Generated on Tue Jul 19 13:22:25 CEST 2005 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -19337,6 +19337,12 @@ int main() {
 #endif
 
 #ifndef NSIG
+#  ifdef _SIG_MAX
+#    define NSIG (_SIG_MAX+1)
+#  endif
+#endif
+
+#ifndef NSIG
 #  ifdef MAXSIG
 #    define NSIG (MAXSIG+1)
 #  endif
@@ -19350,7 +19356,7 @@ int main() {
 
 #ifndef NSIG
 #  ifdef SIGARRAYSIZE
-#    define NSIG (SIGARRAYSIZE+1) /* Not sure of the +1 */
+#    define NSIG SIGARRAYSIZE /* Assume ary[SIGARRAYSIZE] */
 #  endif
 #endif
 

@@ -1,6 +1,6 @@
 package POSIX;
 
-our(@ISA, %EXPORT_TAGS, @EXPORT_OK, $AUTOLOAD) = ();
+our(@ISA, %EXPORT_TAGS, @EXPORT_OK, $AUTOLOAD, %SIGRT) = ();
 
 our $VERSION = "1.09";
 
@@ -55,6 +55,70 @@ package POSIX::SigAction;
 
 use AutoLoader 'AUTOLOAD';
 sub new { bless {HANDLER => $_[1], MASK => $_[2], FLAGS => $_[3] || 0, SAFE => 0}, $_[0] }
+
+package POSIX::SigRt;
+
+use strict;
+
+use Tie::Hash;
+use base qw(Tie::StdHash);
+
+use POSIX qw(sigaction SIGRTMIN SIGRTMAX SA_RESTART);
+
+use vars qw($SIGACTION_FLAGS);
+
+$SIGACTION_FLAGS = 0;
+
+my $SIGRTMIN = &SIGRTMIN;
+my $SIGRTMAX = &SIGRTMAX;
+my $sigrtn   = $SIGRTMAX - $SIGRTMIN;
+
+sub _croak {
+    die "POSIX::SigRt not available" unless defined $sigrtn && $sigrtn > 0;
+}
+
+sub _getsig {
+    &_croak;
+    my $rtsig = $_[0];
+    # Allow (SIGRT)?MIN( + n)?, a common idiom when doing these things in C.
+    $rtsig = $SIGRTMIN + ($1 || 0)
+	if $rtsig =~ /^(?:(?:SIG)?RT)?MIN(\s*\+\s*(\d+))?$/;
+    return $rtsig;
+}
+
+sub _exist {
+    my $rtsig = _getsig($_[1]);
+    my $ok    = $rtsig >= $SIGRTMIN && $rtsig <= $SIGRTMAX;
+    ($rtsig, $ok);
+}
+
+sub _check {
+    my ($rtsig, $ok) = &_exist;
+    die "No POSIX::SigRt signal $_[1] (valid range SIGRTMIN..SIGRTMAX, or $SIGRTMIN..$SIGRTMAX)"
+	unless $ok;
+    return $rtsig;
+}
+
+sub new {
+    my ($rtsig, $handler, $flags) = @_;
+    my $sigset = POSIX::SigSet->new($rtsig);
+    my $sigact = POSIX::SigAction->new($handler,
+				       $sigset,
+				       $flags);
+    sigaction($rtsig, $sigact);
+}
+
+sub EXISTS { &_exist }
+sub FETCH  { my $rtsig = &_check;
+	     my $oa = POSIX::SigAction->new();
+	     sigaction($rtsig, undef, $oa);
+	     return $oa->{HANDLER} }
+sub STORE  { my $rtsig = &_check; new($rtsig, $_[2], $SIGACTION_FLAGS) }
+sub DELETE { delete $SIG{ &_check } }
+sub CLEAR  { &_exist; delete @SIG{ SIGRTMIN .. SIGRTMAX } }
+sub SCALAR { &_croak; $sigrtn + 1 }
+
+tie %POSIX::SIGRT, 'POSIX::SigRt';
 
 package POSIX;
 
@@ -812,10 +876,10 @@ sub load_imports {
     signal_h =>	[qw(SA_NOCLDSTOP SA_NOCLDWAIT SA_NODEFER SA_ONSTACK
 		SA_RESETHAND SA_RESTART SA_SIGINFO SIGABRT SIGALRM
 		SIGCHLD SIGCONT SIGFPE SIGHUP SIGILL SIGINT SIGKILL
-		SIGPIPE SIGQUIT SIGSEGV SIGSTOP SIGTERM SIGTSTP SIGTTIN
-		SIGTTOU SIGUSR1 SIGUSR2 SIG_BLOCK SIG_DFL SIG_ERR
-		SIG_IGN SIG_SETMASK SIG_UNBLOCK raise sigaction signal
-		sigpending sigprocmask sigsuspend)],
+		SIGPIPE %SIGRT SIGRTMIN SIGRTMAX SIGQUIT SIGSEGV SIGSTOP
+		SIGTERM SIGTSTP SIGTTIN	SIGTTOU SIGUSR1 SIGUSR2
+		SIG_BLOCK SIG_DFL SIG_ERR SIG_IGN SIG_SETMASK SIG_UNBLOCK
+		raise sigaction signal sigpending sigprocmask sigsuspend)],
 
     stdarg_h =>	[],
 
@@ -963,3 +1027,4 @@ sub handler { $_[0]->{HANDLER} = $_[1] if @_ > 1; $_[0]->{HANDLER} };
 sub mask    { $_[0]->{MASK}    = $_[1] if @_ > 1; $_[0]->{MASK} };
 sub flags   { $_[0]->{FLAGS}   = $_[1] if @_ > 1; $_[0]->{FLAGS} };
 sub safe    { $_[0]->{SAFE}    = $_[1] if @_ > 1; $_[0]->{SAFE} };
+

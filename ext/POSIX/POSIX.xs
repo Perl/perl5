@@ -51,7 +51,7 @@
 #include <unistd.h>
 #endif
 
-/* XXX This comment is just to make I_TERMIO and I_SGTTY visible to 
+/* XXX This comment is just to make I_TERMIO and I_SGTTY visible to
    metaconfig for future extension writers.  We don't use them in POSIX.
    (This is really sneaky :-)  --AD
 */
@@ -198,7 +198,7 @@ char *tzname[] = { "" , "" };
 #  ifndef HAS_MKFIFO
 #    if defined(OS2) || defined(MACOS_TRADITIONAL)
 #      define mkfifo(a,b) not_here("mkfifo")
-#    else	/* !( defined OS2 ) */ 
+#    else	/* !( defined OS2 ) */
 #      ifndef mkfifo
 #        define mkfifo(path, mode) (mknod((path), (mode) | S_IFIFO, 0))
 #      endif
@@ -265,7 +265,7 @@ unsigned long strtoul (const char *, char **, int);
 #endif
 #endif
 #ifndef HAS_FPATHCONF
-#define fpathconf(f,n) 	(SysRetLong) not_here("fpathconf")
+#define fpathconf(f,n)	(SysRetLong) not_here("fpathconf")
 #endif
 #ifndef HAS_MKTIME
 #define mktime(a) not_here("mktime")
@@ -274,10 +274,10 @@ unsigned long strtoul (const char *, char **, int);
 #define nice(a) not_here("nice")
 #endif
 #ifndef HAS_PATHCONF
-#define pathconf(f,n) 	(SysRetLong) not_here("pathconf")
+#define pathconf(f,n)	(SysRetLong) not_here("pathconf")
 #endif
 #ifndef HAS_SYSCONF
-#define sysconf(n) 	(SysRetLong) not_here("sysconf")
+#define sysconf(n)	(SysRetLong) not_here("sysconf")
 #endif
 #ifndef HAS_READLINK
 #define readlink(a,b,c) not_here("readlink")
@@ -1060,7 +1060,7 @@ localeconv()
 	    if (lcbuf->mon_thousands_sep && *lcbuf->mon_thousands_sep)
 		hv_store(RETVAL, "mon_thousands_sep", 17,
 		    newSVpv(lcbuf->mon_thousands_sep, 0), 0);
-#endif                    
+#endif
 #ifndef NO_LOCALECONV_MON_GROUPING
 	    if (lcbuf->mon_grouping && *lcbuf->mon_grouping)
 		hv_store(RETVAL, "mon_grouping", 12,
@@ -1259,6 +1259,7 @@ sigaction(sig, optaction, oldaction = 0)
 	    POSIX__SigSet sigset;
 	    SV** svp;
 	    SV** sigsvp;
+
 	    if (sig == 0 && SvPOK(ST(0))) {
 	        const char *s = SvPVX_const(ST(0));
 		int i = whichsig(s);
@@ -1274,6 +1275,13 @@ sigaction(sig, optaction, oldaction = 0)
 	        else
 		    sig = i;
             }
+#ifdef NSIG
+	    if (sig > NSIG) { /* NSIG - 1 is still okay. */
+	        Perl_warner(aTHX_ packWARN(WARN_SIGNAL),
+                            "No such signal: %d", sig);
+	        XSRETURN_UNDEF;
+	    }
+#endif
 	    sigsvp = hv_fetch(GvHVn(siggv),
 			      PL_sig_name[sig],
 			      strlen(PL_sig_name[sig]),
