@@ -63,17 +63,20 @@ use strict;
 use Tie::Hash;
 use base qw(Tie::StdHash);
 
-use POSIX qw(sigaction SIGRTMIN SIGRTMAX SA_RESTART);
-
 use vars qw($SIGACTION_FLAGS);
 
 $SIGACTION_FLAGS = 0;
 
-my $SIGRTMIN = &SIGRTMIN;
-my $SIGRTMAX = &SIGRTMAX;
-my $sigrtn   = $SIGRTMAX - $SIGRTMIN;
+my ($SIGRTMIN, $SIGRTMAX, $sigrtn);
+
+sub _init {
+    $SIGRTMIN = &POSIX::SIGRTMIN;
+    $SIGRTMAX = &POSIX::SIGRTMAX;
+    $sigrtn   = $SIGRTMAX - $SIGRTMIN;
+}
 
 sub _croak {
+    &_init unless defined $sigrtn;
     die "POSIX::SigRt not available" unless defined $sigrtn && $sigrtn > 0;
 }
 
@@ -105,17 +108,17 @@ sub new {
     my $sigact = POSIX::SigAction->new($handler,
 				       $sigset,
 				       $flags);
-    sigaction($rtsig, $sigact);
+    POSIX::sigaction($rtsig, $sigact);
 }
 
 sub EXISTS { &_exist }
 sub FETCH  { my $rtsig = &_check;
 	     my $oa = POSIX::SigAction->new();
-	     sigaction($rtsig, undef, $oa);
+	     POSIX::sigaction($rtsig, undef, $oa);
 	     return $oa->{HANDLER} }
 sub STORE  { my $rtsig = &_check; new($rtsig, $_[2], $SIGACTION_FLAGS) }
 sub DELETE { delete $SIG{ &_check } }
-sub CLEAR  { &_exist; delete @SIG{ SIGRTMIN .. SIGRTMAX } }
+sub CLEAR  { &_exist; delete @SIG{ &POSIX::SIGRTMIN .. &POSIX::SIGRTMAX } }
 sub SCALAR { &_croak; $sigrtn + 1 }
 
 tie %POSIX::SIGRT, 'POSIX::SigRt';
