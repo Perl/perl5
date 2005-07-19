@@ -308,8 +308,6 @@ sub test_arylen {
 
     my $ref = \@array;
 
-    local $TODO = '$#foo semantics with local @foo not fixed yet';
-
     my $inner;
     {
 	local @array;
@@ -330,7 +328,7 @@ sub test_arylen {
     is (scalar @array, 7);
     is ($$outer, 6);
 
-    is ($$inner, 0, "This is emergent behaviour");
+    is ($$inner, undef, "orphaned $#foo is always undef");
 
     is (scalar @array, 7);
     is ($$outer, 6);
