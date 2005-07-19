@@ -179,7 +179,7 @@ kill 'HUP', $$;
 ok($ok, "safe signal delivery must work");
 
 SKIP: {
-    eval 'use POSIX qw(%SIGRT SIGRTMIN SIGRTMAX)';
+    eval 'use POSIX qw(%SIGRT SIGRTMIN SIGRTMAX); SIGRTMIN + SIGRTMAX';
     skip("no SIGRT signals", 4) if $@;
     ok(SIGRTMAX > SIGRTMIN, "SIGRTMAX > SIGRTMIN");
     is(scalar %SIGRT, SIGRTMAX() - SIGRTMIN() + 1, "scalar SIGRT");
