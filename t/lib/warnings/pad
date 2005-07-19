@@ -1,6 +1,6 @@
   pad.c		AOK
 
-     "my" variable %s masks earlier declaration in same scope
+     "%s" variable %s masks earlier declaration in same scope
 	my $x;
 	my $x ;
 
@@ -45,16 +45,6 @@ EXPECT
 "my" variable $x masks earlier declaration in same scope at - line 4.
 "my" variable $y masks earlier declaration in same statement at - line 5.
 "my" variable $p masks earlier declaration in same scope at - line 8.
-########
-# pad.c
-use warnings 'misc' ;
-our $x ;
-our $x ;
-our $y = our $y ;
-our $p ;
-package X ;
-our $p ;
-EXPECT
 ########
 # pad.c
 use warnings 'misc' ;
@@ -244,19 +234,52 @@ my $x;
 }
 EXPECT
 ########
+# pad.c
+use warnings 'misc' ;
+our $x ;
+our $x ;
+our $y = our $y ;
+our $p ;
+package X ;
+our $p ;
+package main ;
+no warnings 'misc' ;
+our $a ;
+our $a ;
+our $b = our $b ;
+our $c ;
+package X ;
+our $c ;
+EXPECT
+"our" variable $x redeclared at - line 4.
+"our" variable $y redeclared at - line 5.
+########
 use warnings 'misc' ;
 our $x;
 {
     our $x;
 }
+our $x;
+no warnings 'misc' ;
+our $y;
+{
+    our $y;
+}
+our $y;
 EXPECT
 "our" variable $x redeclared at - line 4.
 	(Did you mean "local" instead of "our"?)
+"our" variable $x redeclared at - line 6.
 ########
 use warnings 'misc' ;
 our $x;
 {
     my $x;
+}
+no warnings 'misc' ;
+our $y;
+{
+    my $y;
 }
 EXPECT
 ########
@@ -264,6 +287,23 @@ use warnings 'misc' ;
 my $x;
 {
     our $x;
+}
+no warnings 'misc' ;
+my $y;
+{
+    our $y;
+}
+EXPECT
+########
+use warnings 'misc' ;
+my $x;
+{
+    my $x;
+}
+no warnings 'misc' ;
+my $y;
+{
+    my $y;
 }
 EXPECT
 ########

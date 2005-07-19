@@ -515,9 +515,10 @@ Perl_pad_check_dup(pTHX_ const char *name, bool is_our, const HV *ourstash)
 	    && sv != &PL_sv_undef
 	    && !SvFAKE(sv)
 	    && (SvIVX(sv) == PAD_MAX || SvIVX(sv) == 0)
-	    && !(is_our && (SvFLAGS(sv) & SVpad_OUR))
 	    && strEQ(name, SvPVX_const(sv)))
 	{
+	    if (is_our && (SvFLAGS(sv) & SVpad_OUR))
+		break; /* "our" masking "our" */
 	    Perl_warner(aTHX_ packWARN(WARN_MISC),
 		"\"%s\" variable %s masks earlier declaration in same %s",
 		(is_our ? "our" : "my"),
@@ -540,8 +541,9 @@ Perl_pad_check_dup(pTHX_ const char *name, bool is_our, const HV *ourstash)
 	    {
 		Perl_warner(aTHX_ packWARN(WARN_MISC),
 		    "\"our\" variable %s redeclared", name);
-		Perl_warner(aTHX_ packWARN(WARN_MISC),
-		    "\t(Did you mean \"local\" instead of \"our\"?)\n");
+		if (off <= PL_comppad_name_floor)
+		    Perl_warner(aTHX_ packWARN(WARN_MISC),
+			"\t(Did you mean \"local\" instead of \"our\"?)\n");
 		break;
 	    }
 	} while ( off-- > 0 );
