@@ -4711,16 +4711,6 @@ the beginning of the string being (un)packed.  See L<perlfunc/pack>.
 (F) You had a pack template that specified a relative position after
 the end of the string being unpacked.  See L<perlfunc/pack>.
 
-=item Xsub "%s" called in sort
-
-(F) The use of an external subroutine as a sort comparison is not yet
-supported.
-
-=item Xsub called in sort
-
-(F) The use of an external subroutine as a sort comparison is not yet
-supported.
-
 =item YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!
 
 (F) And you probably never will, because you probably don't have the
