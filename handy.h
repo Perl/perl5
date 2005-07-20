@@ -701,7 +701,7 @@ Malloc_t Perl_mem_log_free(Malloc_t oldalloc, const char *filename, const int li
 /* pre 5.9.x compatibility */
 #define New(x,v,n,t)	Newx(v,n,t)
 #define Newc(x,v,n,t,c)	Newxc(v,n,t,c)
-#define Newz(x,v,n,t,c)	Newxz(v,n,t,c)
+#define Newz(x,v,n,t)	Newxz(v,n,t)
 
 #define Renew(v,n,t) \
 	  (v = (MEM_WRAP_CHECK_(n,t) MEM_LOG_REALLOC(n,t,v,(t*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))))
