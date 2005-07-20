@@ -541,7 +541,7 @@ Perl_pad_check_dup(pTHX_ const char *name, bool is_our, const HV *ourstash)
 	    {
 		Perl_warner(aTHX_ packWARN(WARN_MISC),
 		    "\"our\" variable %s redeclared", name);
-		if (off <= PL_comppad_name_floor)
+		if ((I32)off <= PL_comppad_name_floor)
 		    Perl_warner(aTHX_ packWARN(WARN_MISC),
 			"\t(Did you mean \"local\" instead of \"our\"?)\n");
 		break;
