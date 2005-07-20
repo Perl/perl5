@@ -2621,7 +2621,11 @@ Perl_whichsig(pTHX_ const char *sig)
 }
 
 Signal_t
+#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 Perl_sighandler(int sig, ...)
+#else
+Perl_sighandler(int sig)
+#endif
 {
 #ifdef PERL_GET_SIG_CONTEXT
     dTHXa(PERL_GET_SIG_CONTEXT);
