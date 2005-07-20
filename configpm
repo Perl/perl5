@@ -362,15 +362,11 @@ if (%need_relocation) {
 print CONFIG_HEAVY @non_v, "\n";
 
 # copy config summary format from the myconfig.SH script
-print CONFIG_HEAVY "our \$summary : unique = <<'!END!';\n";
+print CONFIG_HEAVY "our \$summary = <<'!END!';\n";
 open(MYCONFIG,"<myconfig.SH") || die "open myconfig.SH failed: $!";
 1 while defined($_ = <MYCONFIG>) && !/^Summary of/;
 do { print CONFIG_HEAVY $_ } until !defined($_ = <MYCONFIG>) || /^\s*$/;
 close(MYCONFIG);
-
-# NB. as $summary is unique, we need to copy it in a lexical variable
-# before expanding it, because may have been made readonly if a perl
-# interpreter has been cloned.
 
 print CONFIG_HEAVY "\n!END!\n", <<'EOT';
 my $summary_expanded;
@@ -418,7 +414,7 @@ s/(byteorder=)(['"]).*?\2/$1$2$Config::byteorder$2/m;
 
 my $config_sh_len = length $_;
 
-our $Config_SH_expanded : unique = "\n$_" . << 'EOVIRTUAL';
+our $Config_SH_expanded = "\n$_" . << 'EOVIRTUAL';
 EOT
 
 foreach my $prefix (qw(ccflags ldflags)) {
