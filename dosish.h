@@ -18,7 +18,6 @@
 #  define OP_BINARY O_BINARY
 #  define PERL_SYS_INIT(c,v) MALLOC_CHECK_TAINT2(*c,*v) Perl_DJGPP_init(c,v)
 #  define init_os_extras Perl_init_os_extras
-#  include <signal.h>
 #  define HAS_UTIME
 #  define HAS_KILL
    char *djgpp_pathexp (const char*);
@@ -118,6 +117,8 @@
  *	shebang sequence that might be legal Perl code.)
  */
 /* #define ALTERNATE_SHEBANG "#!" / **/
+
+#include <signal.h>
 
 /*
  * fwrite1() should be a routine with the same calling sequence as fwrite(),
