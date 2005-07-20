@@ -1,7 +1,5 @@
 #!./perl
 
-use Test::More tests => 29;
-
 BEGIN {
 	chdir 't' if -d 't';
 	unshift @INC, '../lib';
@@ -17,6 +15,8 @@ BEGIN{
 		exit 0;
 	}
 }
+
+use Test::More tests => 29;
 
 use strict;
 use vars qw/$bad $bad7 $ok10 $bad18 $ok/;
