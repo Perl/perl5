@@ -2331,6 +2331,64 @@ typedef struct clone_params CLONE_PARAMS;
 #   define ISHISH "unix"
 #endif
 
+/* NSIG logic from Configure --> */
+/* Strange style to avoid deeply-nested #if/#else/#endif */
+#ifndef NSIG
+#  ifdef _NSIG
+#    define NSIG (_NSIG)
+#  endif
+#endif
+
+#ifndef NSIG
+#  ifdef SIGMAX
+#    define NSIG (SIGMAX+1)
+#  endif
+#endif
+
+#ifndef NSIG
+#  ifdef SIG_MAX
+#    define NSIG (SIG_MAX+1)
+#  endif
+#endif
+
+#ifndef NSIG
+#  ifdef _SIG_MAX
+#    define NSIG (_SIG_MAX+1)
+#  endif
+#endif
+
+#ifndef NSIG
+#  ifdef MAXSIG
+#    define NSIG (MAXSIG+1)
+#  endif
+#endif
+
+#ifndef NSIG
+#  ifdef MAX_SIG
+#    define NSIG (MAX_SIG+1)
+#  endif
+#endif
+
+#ifndef NSIG
+#  ifdef SIGARRAYSIZE
+#    define NSIG SIGARRAYSIZE /* Assume ary[SIGARRAYSIZE] */
+#  endif
+#endif
+
+#ifndef NSIG
+#  ifdef _sys_nsig
+#    define NSIG (_sys_nsig) /* Solaris 2.5 */
+#  endif
+#endif
+
+/* Default to some arbitrary number that's big enough to get most
+   of the common signals.
+*/
+#ifndef NSIG
+#    define NSIG 50
+#endif
+/* <-- NSIG logic from Configure */
+
 #ifndef NO_ENVIRON_ARRAY
 #  define USE_ENVIRON_ARRAY
 #endif
