@@ -2413,10 +2413,10 @@ Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
 #ifdef USE_ITHREADS
     /* only "parent" interpreter can diddle signals */
     if (PL_curinterp != aTHX)
-	return SIG_ERR;
+	return (Sighandler_t) SIG_ERR;
 #endif
 
-    act.sa_handler = handler;
+    act.sa_handler = (void(*)(int))handler;
     sigemptyset(&act.sa_mask);
     act.sa_flags = 0;
 #ifdef SA_RESTART
@@ -2424,13 +2424,13 @@ Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
         act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
 #endif
 #if defined(SA_NOCLDWAIT) && !defined(BSDish) /* See [perl #18849] */
-    if (signo == SIGCHLD && handler == (Sighandler_t)SIG_IGN)
+    if (signo == SIGCHLD && handler == (Sighandler_t) SIG_IGN)
 	act.sa_flags |= SA_NOCLDWAIT;
 #endif
     if (sigaction(signo, &act, &oact) == -1)
-    	return SIG_ERR;
+    	return (Sighandler_t) SIG_ERR;
     else
-    	return oact.sa_handler;
+    	return (Sighandler_t) oact.sa_handler;
 }
 
 Sighandler_t
@@ -2439,9 +2439,9 @@ Perl_rsignal_state(pTHX_ int signo)
     struct sigaction oact;
 
     if (sigaction(signo, (struct sigaction *)NULL, &oact) == -1)
-	return SIG_ERR;
+	return (Sighandler_t) SIG_ERR;
     else
-	return oact.sa_handler;
+	return (Sighandler_t) oact.sa_handler;
 }
 
 int
@@ -2456,7 +2456,7 @@ Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 	return -1;
 #endif
 
-    act.sa_handler = handler;
+    act.sa_handler = (void(*)(int))handler;
     sigemptyset(&act.sa_mask);
     act.sa_flags = 0;
 #ifdef SA_RESTART
@@ -2464,7 +2464,7 @@ Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
         act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
 #endif
 #if defined(SA_NOCLDWAIT) && !defined(BSDish) /* See [perl #18849] */
-    if (signo == SIGCHLD && handler == (Sighandler_t)SIG_IGN)
+    if (signo == SIGCHLD && handler == (Sighandler_t) SIG_IGN)
 	act.sa_flags |= SA_NOCLDWAIT;
 #endif
     return sigaction(signo, &act, save);
@@ -2491,7 +2491,7 @@ Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
 #if defined(USE_ITHREADS) && !defined(WIN32)
     /* only "parent" interpreter can diddle signals */
     if (PL_curinterp != aTHX)
-	return SIG_ERR;
+	return (Sighandler_t) SIG_ERR;
 #endif
 
     return PerlProc_signal(signo, handler);
@@ -2514,7 +2514,7 @@ Perl_rsignal_state(pTHX_ int signo)
 #if defined(USE_ITHREADS) && !defined(WIN32)
     /* only "parent" interpreter can diddle signals */
     if (PL_curinterp != aTHX)
-	return SIG_ERR;
+	return (Sighandler_t) SIG_ERR;
 #endif
 
     PL_sig_trapped = 0;
@@ -2534,7 +2534,7 @@ Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 	return -1;
 #endif
     *save = PerlProc_signal(signo, handler);
-    return (*save == SIG_ERR) ? -1 : 0;
+    return (*save == (Sighandler_t) SIG_ERR) ? -1 : 0;
 }
 
 int
@@ -2545,7 +2545,7 @@ Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
     if (PL_curinterp != aTHX)
 	return -1;
 #endif
-    return (PerlProc_signal(signo, *save) == SIG_ERR) ? -1 : 0;
+    return (PerlProc_signal(signo, *save) == (Sighandler_t) SIG_ERR) ? -1 : 0;
 }
 
 #endif /* !HAS_SIGACTION */
@@ -2588,9 +2588,9 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     if(PerlProc_kill(pid, 0) < 0) { return(pid); }   /* HOM 12/23/91 */
 #endif
 #ifndef PERL_MICRO
-    rsignal_save(SIGHUP, SIG_IGN, &hstat);
-    rsignal_save(SIGINT, SIG_IGN, &istat);
-    rsignal_save(SIGQUIT, SIG_IGN, &qstat);
+    rsignal_save(SIGHUP,  (Sighandler_t) SIG_IGN, &hstat);
+    rsignal_save(SIGINT,  (Sighandler_t) SIG_IGN, &istat);
+    rsignal_save(SIGQUIT, (Sighandler_t) SIG_IGN, &qstat);
 #endif
     do {
 	pid2 = wait4pid(pid, &status, 0);

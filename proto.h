@@ -1655,8 +1655,13 @@ PERL_CALLCONV void	Perl_setdefout(pTHX_ GV* gv);
 PERL_CALLCONV HEK*	Perl_share_hek(pTHX_ const char* str, I32 len, U32 hash)
 			__attribute__nonnull__(pTHX_1);
 
+#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+PERL_CALLCONV Signal_t	Perl_sighandler(int sig, ...);
+PERL_CALLCONV Signal_t	Perl_csighandler(int sig, ...);
+#else
 PERL_CALLCONV Signal_t	Perl_sighandler(int sig);
 PERL_CALLCONV Signal_t	Perl_csighandler(int sig);
+#endif
 PERL_CALLCONV SV**	Perl_stack_grow(pTHX_ SV** sp, SV**p, int n)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);

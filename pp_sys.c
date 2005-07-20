@@ -4240,8 +4240,8 @@ PP(pp_system)
 	    if (did_pipes)
 		PerlLIO_close(pp[1]);
 #ifndef PERL_MICRO
-	    rsignal_save(SIGINT, SIG_IGN, &ihand);
-	    rsignal_save(SIGQUIT, SIG_IGN, &qhand);
+	    rsignal_save(SIGINT,  (Sighandler_t) SIG_IGN, &ihand);
+	    rsignal_save(SIGQUIT, (Sighandler_t) SIG_IGN, &qhand);
 #endif
 	    do {
 		result = wait4pid(childpid, &status, 0);

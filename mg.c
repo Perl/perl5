@@ -52,7 +52,11 @@ tie.
 #  include <sys/pstat.h>
 #endif
 
+#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+Signal_t Perl_csighandler(int sig, ...);
+#else
 Signal_t Perl_csighandler(int sig);
+#endif
 
 #ifdef __Lynx__
 /* Missing protos on LynxOS */
@@ -1184,7 +1188,7 @@ Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
     	    if (PL_sig_handlers_initted && PL_sig_defaulting[i]) sigstate = SIG_DFL;
 #endif
     	    /* cache state so we don't fetch it again */
-    	    if(sigstate == SIG_IGN)
+    	    if(sigstate == (Sighandler_t) SIG_IGN)
     	    	sv_setpv(sv,"IGNORE");
     	    else
     	    	sv_setsv(sv,&PL_sv_undef);
@@ -1241,7 +1245,7 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
 	    PL_sig_defaulting[i] = 1;
 	    (void)rsignal(i, PL_csighandlerp);
 #else
-	    (void)rsignal(i, SIG_DFL);
+	    (void)rsignal(i, (Sighandler_t) SIG_DFL);
 #endif
     	    if(PL_psig_name[i]) {
     		SvREFCNT_dec(PL_psig_name[i]);
@@ -1270,7 +1274,11 @@ S_raise_signal(pTHX_ int sig)
 }
 
 Signal_t
+#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+Perl_csighandler(int sig, ...)
+#else
 Perl_csighandler(int sig)
+#endif
 {
 #ifdef PERL_GET_SIG_CONTEXT
     dTHXa(PERL_GET_SIG_CONTEXT);
@@ -1419,7 +1427,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	    PL_sig_ignoring[i] = 1;
 	    (void)rsignal(i, PL_csighandlerp);
 #else
-	    (void)rsignal(i, SIG_IGN);
+	    (void)rsignal(i, (Sighandler_t) SIG_IGN);
 #endif
 	}
     }
@@ -1431,7 +1439,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	    (void)rsignal(i, PL_csighandlerp);
 	  }
 #else
-	    (void)rsignal(i, SIG_DFL);
+	    (void)rsignal(i, (Sighandler_t) SIG_DFL);
 #endif
     }
     else {
@@ -2613,7 +2621,7 @@ Perl_whichsig(pTHX_ const char *sig)
 }
 
 Signal_t
-Perl_sighandler(int sig)
+Perl_sighandler(int sig, ...)
 {
 #ifdef PERL_GET_SIG_CONTEXT
     dTHXa(PERL_GET_SIG_CONTEXT);
@@ -2683,6 +2691,36 @@ Perl_sighandler(int sig)
     PUSHSTACKi(PERLSI_SIGNAL);
     PUSHMARK(SP);
     PUSHs(sv);
+#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+    {
+	 struct sigaction oact;
+
+	 if (sigaction(sig, 0, &oact) == 0 && oact.sa_flags & SA_SIGINFO) {
+	      siginfo_t *sip;
+	      va_list args;
+
+	      va_start(args, sig);
+	      sip = (siginfo_t*)va_arg(args, siginfo_t*);
+	      if (sip) {
+		   HV *sih = newHV();
+		   SV *rv  = newRV_noinc((SV*)sih);
+		   /* The siginfo fields signo, code, errno, pid, uid,
+		    * addr, status, and band are defined by POSIX/SUSv3. */
+		   hv_store(sih, "signo",   5, newSViv(sip->si_signo),  0);
+		   hv_store(sih, "code",    4, newSViv(sip->si_code),   0);
+		   hv_store(sih, "errno",   5, newSViv(sip->si_errno),  0);
+		   hv_store(sih, "uid",     3, newSViv(sip->si_uid),    0);
+		   hv_store(sih, "pid",     3, newSViv(sip->si_pid),    0);
+		   hv_store(sih, "addr",    4, newSVuv(PTR2UV(sip->si_addr)),   0);
+		   hv_store(sih, "status",  6, newSViv(sip->si_status), 0);
+		   hv_store(sih, "band",    4, newSViv(sip->si_band),   0);
+		   EXTEND(SP, 2);
+		   PUSHs((SV*)rv);
+		   PUSHs(newSVpv((void*)sip, sizeof(*sip)));
+	      }
+	 }
+    }
+#endif
     PUTBACK;
 
     call_sv((SV*)cv, G_DISCARD|G_EVAL);

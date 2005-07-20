@@ -750,10 +750,17 @@
 #define setdefout		Perl_setdefout
 #endif
 #define share_hek		Perl_share_hek
+#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 #ifdef PERL_CORE
 #define sighandler		Perl_sighandler
 #endif
 #define csighandler		Perl_csighandler
+#else
+#ifdef PERL_CORE
+#define sighandler		Perl_sighandler
+#endif
+#define csighandler		Perl_csighandler
+#endif
 #define stack_grow		Perl_stack_grow
 #define start_subparse		Perl_start_subparse
 #ifdef PERL_CORE
@@ -2740,10 +2747,15 @@
 #define setdefout(a)		Perl_setdefout(aTHX_ a)
 #endif
 #define share_hek(a,b,c)	Perl_share_hek(aTHX_ a,b,c)
+#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+#ifdef PERL_CORE
+#endif
+#else
 #ifdef PERL_CORE
 #define sighandler		Perl_sighandler
 #endif
 #define csighandler		Perl_csighandler
+#endif
 #define stack_grow(a,b,c)	Perl_stack_grow(aTHX_ a,b,c)
 #define start_subparse(a,b)	Perl_start_subparse(aTHX_ a,b)
 #ifdef PERL_CORE

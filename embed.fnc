@@ -706,8 +706,13 @@ p	|I32	|setenv_getix	|const char* nam
 #endif
 p	|void	|setdefout	|NULLOK GV* gv
 Ap	|HEK*	|share_hek	|NN const char* str|I32 len|U32 hash
+#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+np	|Signal_t |sighandler	|int sig|...
+Anp	|Signal_t |csighandler	|int sig|...
+#else
 np	|Signal_t |sighandler	|int sig
 Anp	|Signal_t |csighandler	|int sig
+#endif
 Ap	|SV**	|stack_grow	|NN SV** sp|NN SV**p|int n
 ApR	|I32	|start_subparse	|I32 is_format|U32 flags
 p	|void	|sub_crush_depth|NN CV* cv
