@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, $XS_VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.06";
+$VERSION = "1.07";
 $XS_VERSION = "1.03";
 
 use Carp;
@@ -374,8 +374,9 @@ used to implement a resource attack (e.g., consume all available CPU time).
 
 These ops enable I<filehandle> (rather than filename) based input and
 output. These are safe on the assumption that only pre-existing
-filehandles are available for use.  To create new filehandles other ops
-such as open would need to be enabled.
+filehandles are available for use.  Usually, to create new filehandles
+other ops such as open would need to be enabled, if you don't take into
+account the magical open of ARGV.
 
     readline rcatline getc read
 
@@ -441,11 +442,12 @@ These ops are related to multi-threading.
 A handy tag name for a I<reasonable> default set of ops.  (The current ops
 allowed are unstable while development continues. It will change.)
 
-    :base_core :base_mem :base_loop :base_io :base_orig :base_thread
+    :base_core :base_mem :base_loop :base_orig :base_thread
+
+This list used to contain :base_io prior to Opcode 1.07.
 
 If safety matters to you (and why else would you be using the Opcode module?)
 then you should not rely on the definition of this, or indeed any other, optag!
-
 
 =item :filesys_read
 
