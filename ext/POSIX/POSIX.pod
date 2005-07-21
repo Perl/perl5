@@ -1140,6 +1140,10 @@ semantics, as defined by POSIX/SUSv3:
     code        if this is zero or less, the signal was sent by
                 a user process and the uid and pid make sense,
                 otherwise the signal was sent by the kernel
+
+The following are also defined by POSIX/SUSv3, but unfortunately
+not very widely implemented:
+
     pid         the process id generating the signal
     uid         the uid of the process id generating the signal
     status      exit value or signal for SIGCHLD

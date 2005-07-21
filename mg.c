@@ -2713,11 +2713,13 @@ Perl_sighandler(int sig)
 		   hv_store(sih, "signo",   5, newSViv(sip->si_signo),  0);
 		   hv_store(sih, "code",    4, newSViv(sip->si_code),   0);
 		   hv_store(sih, "errno",   5, newSViv(sip->si_errno),  0);
+#if 0 /* XXX TODO: Configure scan for the existence of these, but even that does not help if the SA_SIGINFO is not implemented according to the spec. */
+		   hv_store(sih, "status",  6, newSViv(sip->si_status), 0);
 		   hv_store(sih, "uid",     3, newSViv(sip->si_uid),    0);
 		   hv_store(sih, "pid",     3, newSViv(sip->si_pid),    0);
 		   hv_store(sih, "addr",    4, newSVuv(PTR2UV(sip->si_addr)),   0);
-		   hv_store(sih, "status",  6, newSViv(sip->si_status), 0);
 		   hv_store(sih, "band",    4, newSViv(sip->si_band),   0);
+#endif
 		   EXTEND(SP, 2);
 		   PUSHs((SV*)rv);
 		   PUSHs(newSVpv((void*)sip, sizeof(*sip)));

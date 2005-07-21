@@ -195,7 +195,7 @@ SKIP: {
     eval 'use POSIX qw(SA_SIGINFO); SA_SIGINFO';
     skip("no SA_SIGINFO", 1) if $@;
     sub hiphup {
-	is($_[1]->{pid}, $$, "SA_SIGINFO got right pid");
+	is($_[1]->{signo}, 1, "SA_SIGINFO got right signal");
     }
     my $act = POSIX::SigAction->new('hiphup', 0, SA_SIGINFO);
     sigaction(SIGHUP, $act);
