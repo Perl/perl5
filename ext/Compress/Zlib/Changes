@@ -1,6 +1,26 @@
 CHANGES
 -------
 
+  1.35 - 16 July 2005
+
+      * Updated zlib source to 1.2.3
+
+      * Fixed problem with where two calls to gzclose would hang the debugger.
+        See https://rt.cpan.org/Ticket/Display.html?id=13789
+
+      * Added code from Alexey Tourbin to use XSLoader when available,
+        and DynaLoader otherwise.
+
+      * Documented that the compress & uncompress functions were not
+        the same as the Unix utilities of the same name.
+
+      * Fixed 05gzsetp -- it left a temp file hanging around. 
+
+      * Integrate core change 24787 - SvUPGRADE returns void in blead
+
+      * Integrate core change 24788 - Makefile.PL adjustments for the core
+
+
   1.34 - 30 January 2005
 
       * Fixed typo in the README

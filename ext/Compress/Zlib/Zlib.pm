@@ -1,7 +1,7 @@
 # File	  : Zlib.pm
 # Author  : Paul Marquess
 # Created : 30 January 2005
-# Version : 1.34
+# Version : 1.35
 #
 #     Copyright (c) 1995-2005 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -12,7 +12,6 @@ package Compress::Zlib;
 
 require 5.004 ;
 require Exporter;
-require DynaLoader;
 use AutoLoader;
 use Carp ;
 use IO::Handle ;
@@ -22,9 +21,9 @@ use warnings ;
 our ($VERSION, @ISA, @EXPORT, $AUTOLOAD);
 our ($deflateDefault, $deflateParamsDefault, $inflateDefault);
 
-$VERSION = "1.34_01" ;
+$VERSION = "1.35" ;
 
-@ISA = qw(Exporter DynaLoader);
+@ISA = qw(Exporter);
 # Items to export into callers namespace by default. Note: do not export
 # names by default without a very good reason. Use EXPORT_OK instead.
 # Do not simply export all your public functions/methods/constants.
@@ -44,6 +43,7 @@ $VERSION = "1.34_01" ;
 	crc32
 
 	ZLIB_VERSION
+    ZLIB_VERNUM
 
 	DEF_WBITS
 	OS_CODE
@@ -91,7 +91,14 @@ sub AUTOLOAD {
     goto &{$AUTOLOAD};
 }
 
-bootstrap Compress::Zlib $VERSION ;
+eval {
+    require XSLoader;
+    XSLoader::load('Compress::Zlib', $VERSION);
+} or do {
+    require DynaLoader;
+    local @ISA = qw(DynaLoader);
+    bootstrap Compress::Zlib $VERSION ;
+} ;
 
 # Preloaded methods go here.
 
