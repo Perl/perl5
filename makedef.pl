@@ -36,6 +36,22 @@ my %PLATFORM;
 defined $PLATFORM || die "PLATFORM undefined, must be one of: @PLATFORM\n";
 exists $PLATFORM{$PLATFORM} || die "PLATFORM must be one of: @PLATFORM\n";
 
+if ($PLATFORM eq 'win32') {
+	# Add the compile-time options that miniperl was built with to %define.
+	# These are not the same options as perl itself will be built with since
+	# miniperl is built with a canned config (one of the win32/config_H.*)
+	# and none of the BUILDOPT's that are set in the makefiles, but they do
+	# include some #define's that are hard-coded in various source files and
+	# header files and don't include any BUILDOPT's that the user might have
+	# chosen to disable because the canned configs are minimal configs that
+	# don't include any of those options.
+	my $config = `$^X -V`;
+	my($options) = $config =~ /^  Compile-time options: (.*?)^  \S/ms;
+	foreach (split /\s+/, $options) {
+		$define{$_} = 1;
+	}
+}
+
 my %exportperlmalloc =
     (
        Perl_malloc		=>	"malloc",
