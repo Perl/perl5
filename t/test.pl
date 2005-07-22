@@ -579,7 +579,7 @@ sub _fresh_perl {
                   {if (-e _ and -f _)}
     }
 
-    print TEST $prog, "\n";
+    print TEST $prog;
     close TEST or die "Cannot close $tmpfile: $!";
 
     my $results = runperl(%$runperl_args);
