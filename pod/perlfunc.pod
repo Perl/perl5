@@ -4930,6 +4930,12 @@ loop control operators described in L<perlsyn> or with C<goto>.
 When C<use locale> is in effect, C<sort LIST> sorts LIST according to the
 current collation locale.  See L<perllocale>.
 
+sort() returns aliases into the original list, much as a for loop's index
+variable aliases the list elements.  That is, modifying an element of a
+list returned by sort() (for example, in a C<foreach>, C<map> or C<grep>)
+actually modifies the element in the original list.  This is usually
+something to be avoided when writing clear code.
+
 Perl 5.6 and earlier used a quicksort algorithm to implement sort.
 That algorithm was not stable, and I<could> go quadratic.  (A I<stable> sort
 preserves the input order of elements that compare equal.  Although
