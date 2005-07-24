@@ -833,7 +833,7 @@ Apd	|UV	|to_utf8_upper	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
 Apd	|UV	|to_utf8_title	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
 Apd	|UV	|to_utf8_fold	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
 #if defined(UNLINK_ALL_VERSIONS)
-Ap	|I32	|unlnk		|NN char* f
+Ap	|I32	|unlnk		|NN const char* f
 #endif
 Apd	|I32	|unpack_str	|NN const char *pat|NN const char *patend|NN const char *s \
 				|NULLOK const char *strbeg|NN const char *strend|NULLOK char **new_s \

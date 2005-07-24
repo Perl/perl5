@@ -3468,7 +3468,7 @@ char *getlogin (void);
 
 #ifdef UNLINK_ALL_VERSIONS /* Currently only makes sense for VMS */
 #define UNLINK unlnk
-I32 unlnk (char*);
+I32 unlnk (const char*);
 #else
 #define UNLINK PerlLIO_unlink
 #endif

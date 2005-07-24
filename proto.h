@@ -2056,7 +2056,7 @@ PERL_CALLCONV UV	Perl_to_utf8_fold(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
 			__attribute__nonnull__(pTHX_2);
 
 #if defined(UNLINK_ALL_VERSIONS)
-PERL_CALLCONV I32	Perl_unlnk(pTHX_ char* f)
+PERL_CALLCONV I32	Perl_unlnk(pTHX_ const char* f)
 			__attribute__nonnull__(pTHX_1);
 
 #endif

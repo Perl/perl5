@@ -1563,7 +1563,7 @@ Perl_setenv_getix(pTHX_ const char *nam)
 
 #ifdef UNLINK_ALL_VERSIONS
 I32
-Perl_unlnk(pTHX_ char *f)	/* unlink all versions of a file */
+Perl_unlnk(pTHX_ const char *f)	/* unlink all versions of a file */
 {
     I32 i;
 
