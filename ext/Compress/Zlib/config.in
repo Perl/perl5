@@ -12,8 +12,8 @@
 # Compress::Zlib" in the README file for details of how to use this file.
 
 BUILD_ZLIB = True
-INCLUDE    = ./zlib-src-1.2.3
-LIB        = ./zlib-src-1.2.3
+INCLUDE    = ./zlib-src
+LIB        = ./zlib-src
 OLD_ZLIB   = False
 
 

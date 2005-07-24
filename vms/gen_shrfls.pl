@@ -152,7 +152,8 @@ sub scan_func {
   $line =~ s/\b(IV|Off_t|Size_t|SSize_t|void)\b//i;
   if ( $line =~ /(\w+)\s*\(/ ) {
     print "\troutine name is \\$1\\\n" if $debug > 1;
-    if ($1 eq 'main' || $1 eq 'perl_init_ext' || $1 eq '__attribute__format__') {
+    if ($1 eq 'main' || $1 eq 'perl_init_ext' || $1 eq '__attribute__format__'
+        || (($1 eq 'Perl_stashpv_hvname_match') && ! $use_threads)) {
       print "\tskipped\n" if $debug > 1;
     }
     else { $fcns{$1}++ }

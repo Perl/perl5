@@ -3607,7 +3607,7 @@ PP(pp_chdir)
 #endif
     }
     else 
-        PUSHi( PerlDir_chdir(tmps) >= 0 );
+        PUSHi( PerlDir_chdir((char *)tmps) >= 0 );
 #ifdef VMS
     /* Clear the DEFAULT element of ENV so we'll get the new value
      * in the future. */
@@ -3878,7 +3878,7 @@ PP(pp_mkdir)
 
     TAINT_PROPER("mkdir");
 #ifdef HAS_MKDIR
-    SETi( PerlDir_mkdir(tmps, mode) >= 0 );
+    SETi( PerlDir_mkdir((char *)tmps, mode) >= 0 );
 #else
     SETi( dooneliner("mkdir", tmps) );
     oldumask = PerlLIO_umask(0);
@@ -3900,7 +3900,7 @@ PP(pp_rmdir)
     TRIMSLASHES(tmps,len,copy);
     TAINT_PROPER("rmdir");
 #ifdef HAS_RMDIR
-    SETi( PerlDir_rmdir(tmps) >= 0 );
+    SETi( PerlDir_rmdir((char *)tmps) >= 0 );
 #else
     SETi( dooneliner("rmdir", tmps) );
 #endif
@@ -3924,7 +3924,7 @@ PP(pp_open_dir)
 
     if (IoDIRP(io))
 	PerlDir_close(IoDIRP(io));
-    if (!(IoDIRP(io) = PerlDir_open(dirname)))
+    if (!(IoDIRP(io) = PerlDir_open((char *)dirname)))
 	goto nope;
 
     RETPUSHYES;
