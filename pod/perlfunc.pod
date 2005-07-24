@@ -3707,7 +3707,7 @@ binary representation (e.g. IEEE floating point format).  Even if all
 platforms are using IEEE, there may be subtle differences.  Being able
 to use C<E<gt>> or C<E<lt>> on floating point values can be very useful,
 but also very dangerous if you don't know exactly what you're doing.
-It is definetely not a general way to portably store floating point
+It is definitely not a general way to portably store floating point
 values.
 
 When using C<E<gt>> or C<E<lt>> on an C<()>-group, this will affect
