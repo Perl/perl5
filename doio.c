@@ -1835,14 +1835,14 @@ nothing in the core.
 	    s = SvPV_nolen_const(*mark);
 	    APPLY_TAINT_PROPER();
 	    if (PL_euid || PL_unsafe) {
-		if (UNLINK(s))
+               if (UNLINK((char *)s))
 		    tot--;
 	    }
 	    else {	/* don't let root wipe out directories without -U */
 		if (PerlLIO_lstat(s,&PL_statbuf) < 0 || S_ISDIR(PL_statbuf.st_mode))
 		    tot--;
 		else {
-		    if (UNLINK(s))
+                   if (UNLINK((char *)s))
 			tot--;
 		}
 	    }
