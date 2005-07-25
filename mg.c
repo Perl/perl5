@@ -2712,8 +2712,8 @@ Perl_sighandler(int sig)
 		    * addr, status, and band are defined by POSIX/SUSv3. */
 		   hv_store(sih, "signo",   5, newSViv(sip->si_signo),  0);
 		   hv_store(sih, "code",    4, newSViv(sip->si_code),   0);
-		   hv_store(sih, "errno",   5, newSViv(sip->si_errno),  0);
 #if 0 /* XXX TODO: Configure scan for the existence of these, but even that does not help if the SA_SIGINFO is not implemented according to the spec. */
+		   hv_store(sih, "errno",   5, newSViv(sip->si_errno),  0);
 		   hv_store(sih, "status",  6, newSViv(sip->si_status), 0);
 		   hv_store(sih, "uid",     3, newSViv(sip->si_uid),    0);
 		   hv_store(sih, "pid",     3, newSViv(sip->si_pid),    0);
