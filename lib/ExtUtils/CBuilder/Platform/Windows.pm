@@ -122,8 +122,6 @@ sub compile {
     use_scripts => 1, # XXX provide user option to change this???
   );
 
-  $self->add_to_cleanup($spec{output});
-
   $self->normalize_filespecs(
     \$spec{source},
     \$spec{output},
@@ -196,7 +194,7 @@ sub link {
 
   $self->add_to_cleanup(
     grep defined,
-    @{[ @spec{qw(output implib explib def_file base_file map_file)} ]}
+    @{[ @spec{qw(implib explib def_file base_file map_file)} ]}
   );
 
   foreach my $opt ( qw(output implib explib def_file map_file base_file) ) {
