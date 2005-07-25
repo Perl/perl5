@@ -3037,7 +3037,7 @@
 /* PERL_MALLOC_WRAP:
  *	This symbol, if defined, indicates that we'd like malloc wrap checks.
  */
-/*#define PERL_MALLOC_WRAP		/**/
+#define PERL_MALLOC_WRAP		/**/
 
 /* MYMALLOC:
  *	This symbol, if defined, indicates that we're using our own malloc.
