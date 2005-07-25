@@ -55,10 +55,7 @@ ok $exe_file;
 ok my_system($exe_file), 11;
 
 # Clean up
-for ($source_file, $exe_file, $object_file, @temps) {
-  tr/"'//d;
-  1 while unlink;
-}
+unlink $source_file;
 
 sub my_system {
   my $cmd = shift;

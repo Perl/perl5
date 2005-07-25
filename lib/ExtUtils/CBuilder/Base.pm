@@ -32,7 +32,16 @@ sub find_perl_interpreter {
 
 sub add_to_cleanup {
   my $self = shift;
-  my %files = map {$_, 1} @_;
+  foreach (@_) {
+    $self->{files_to_clean}{$_} = 1;
+  }
+}
+
+sub cleanup {
+  my $self = shift;
+  foreach my $file (keys %{$self->{files_to_clean}}) {
+    unlink $file;
+  }
 }
 
 sub object_file {
@@ -244,6 +253,11 @@ sub perl_inc {
   my $self = shift;
 
   $self->perl_src() || File::Spec->catdir($self->{config}{archlibexp},"CORE");
+}
+
+sub DESTROY {
+  my $self = shift;
+  $self->cleanup();
 }
 
 1;
