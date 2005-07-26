@@ -2171,7 +2171,7 @@ This function is a part of the public API.
 
 =item p
 
-This function has a C<Perl_> prefix; ie, it is defined as C<Perl_av_fetch>
+This function has a C<Perl_> prefix; i.e. it is defined as C<Perl_av_fetch>
 
 =item d
 

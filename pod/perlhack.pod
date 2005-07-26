@@ -877,9 +877,9 @@ retrieves the return op from it, and returns it.
 
 =item Exception handing
 
-Perl's exception handing (ie C<die> etc) is built on top of the low-level
+Perl's exception handing (i.e. C<die> etc) is built on top of the low-level
 C<setjmp()>/C<longjmp()> C-library functions. These basically provide a
-way to capture the current PC and SP registers and later restore them; ie
+way to capture the current PC and SP registers and later restore them; i.e.
 a C<longjmp()> continues at the point in code where a previous C<setjmp()>
 was done, with anything further up on the C stack being lost. This is why
 code should always save values using C<SAVE_FOO> rather than in auto

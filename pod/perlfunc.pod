@@ -1181,7 +1181,7 @@ This is useful for propagating exceptions:
 If LIST is empty and C<$@> contains an object reference that has a
 C<PROPAGATE> method, that method will be called with additional file
 and line number parameters.  The return value replaces the value in
-C<$@>.  ie. as if C<< $@ = eval { $@->PROPAGATE(__FILE__, __LINE__) }; >>
+C<$@>.  i.e. as if C<< $@ = eval { $@->PROPAGATE(__FILE__, __LINE__) }; >>
 were called.
 
 If C<$@> is empty then the string C<"Died"> is used.
@@ -2995,7 +2995,7 @@ to the temporary file first.  You will need to seek() to do the
 reading.
 
 Since v5.8.0, perl has built using PerlIO by default.  Unless you've
-changed this (ie Configure -Uuseperlio), you can open file handles to
+changed this (i.e. Configure -Uuseperlio), you can open file handles to
 "in memory" files held in Perl scalars via:
 
     open($fh, '>', \$variable) || ..
