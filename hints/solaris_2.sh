@@ -211,7 +211,10 @@ echo 'int main() { return 0; }' > try.c
 	# Indent to avoid propagation to config.sh
 	verbose=`${cc:-cc} -v -o try try.c 2>&1`
 
-if echo "$verbose" | grep '^Reading specs from' >/dev/null 2>&1; then
+# XXX TODO:  'specs' output changed from 'Reading specs from' in gcc-[23] to 'Using
+# built-in specs' in gcc-4.  Perhaps we should just use the same gcc test as
+# in Configure to see if we're using gcc.
+if echo "$verbose" | egrep '(Reading specs from)|(Using built-in specs)' >/dev/null 2>&1; then
 	#
 	# Using gcc.
 	#
