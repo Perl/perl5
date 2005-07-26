@@ -320,8 +320,8 @@ libswanted_uselargefiles="`getconf XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@
 		lddlflags="`echo ' '$lddlflags | sed -e 's@ -b@ -Wl,-b@g'`"
 		lddlflags="`echo ' '$lddlflags | sed -e 's@ -G @ -Wl,-G @g'`"
 		case "$use64bitall" in
-		    $define|true|[yY]*) ld="gcc -maix64"	;;
-		    *)			ld="gcc"		;;
+		    $define|true|[yY]*) ld="$cc -maix64"	;;
+		    *)			ld="$cc"		;;
 		    esac
 		echo >&4 "(using ccflags   $ccflags)"
 		echo >&4 "(using ldflags   $ldflags)"
