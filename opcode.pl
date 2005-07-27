@@ -809,8 +809,8 @@ fteread		-r			ck_ftst		isu-	F-
 ftewrite	-w			ck_ftst		isu-	F-
 fteexec		-x			ck_ftst		isu-	F-
 ftis		-e			ck_ftst		isu-	F-
-fteowned	-O			ck_ftst		isu-	F-
-ftrowned	-o			ck_ftst		isu-	F-
+fteowned	-o			ck_ftst		isu-	F-
+ftrowned	-O			ck_ftst		isu-	F-
 ftzero		-z			ck_ftst		isu-	F-
 ftsize		-s			ck_ftst		istu-	F-
 ftmtime		-M			ck_ftst		stu-	F-
