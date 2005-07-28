@@ -1347,7 +1347,9 @@ sigaction(sig, optaction, oldaction = 0)
 
 		/* Get back whether the old handler used safe signals. */
 		svp = hv_fetch(oldaction, "SAFE", 4, TRUE);
-		sv_setiv(*svp, oact.sa_handler == PL_csighandlerp);
+		sv_setiv(*svp,
+		/* compare incompatible pointers by casting to integer */
+		    PTR2nat(oact.sa_handler) == PTR2nat(PL_csighandlerp));
 	    }
 
 	    if (action) {
@@ -1355,8 +1357,12 @@ sigaction(sig, optaction, oldaction = 0)
 		   PL_sighandlerp pointer when it's safe to do so.
 		   (BTW, "csighandler" is very different from "sighandler".) */
 		svp = hv_fetch(action, "SAFE", 4, FALSE);
-		act.sa_handler = (*svp && SvTRUE(*svp))
-				 ? PL_csighandlerp : PL_sighandlerp;
+		act.sa_handler =
+			DPTR2FPTR(
+			    void (*)(),
+			    (*svp && SvTRUE(*svp))
+				? PL_csighandlerp : PL_sighandlerp
+			);
 
 		/* Vector new Perl handler through %SIG.
 		   (The core signal handlers read %SIG to dispatch.) */

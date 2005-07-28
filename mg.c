@@ -2069,7 +2069,7 @@ Perl_magic_killbackrefs(pTHX_ SV *sv, MAGIC *mg)
 		} else {
 		    Perl_croak(aTHX_
 			       "panic: magic_killbackrefs (flags=%"UVxf")",
-			       SvFLAGS(referrer));
+			       (UV)SvFLAGS(referrer));
 		}
 
 		*svp = Nullsv;
