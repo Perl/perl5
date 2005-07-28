@@ -1408,7 +1408,7 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 	if (message) {
 	    if (PL_in_eval & EVAL_KEEPERR) {
                 static const char prefix[] = "\t(in cleanup) ";
-		SV *err = ERRSV;
+		SV * const err = ERRSV;
                 const char *e = Nullch;
 		if (!SvPOK(err))
 		    sv_setpvn(err,"",0);

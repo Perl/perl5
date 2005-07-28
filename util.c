@@ -921,7 +921,7 @@ Perl_form(pTHX_ const char* pat, ...)
 char *
 Perl_vform(pTHX_ const char *pat, va_list *args)
 {
-    SV *sv = mess_alloc();
+    SV * const sv = mess_alloc();
     sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
     return SvPVX(sv);
 }
@@ -1577,7 +1577,7 @@ Perl_unlnk(pTHX_ char *f)	/* unlink all versions of a file */
 char *
 Perl_my_bcopy(register const char *from,register char *to,register I32 len)
 {
-    char *retval = to;
+    char * const retval = to;
 
     if (from - to >= 0) {
 	while (len--)
@@ -1598,7 +1598,7 @@ Perl_my_bcopy(register const char *from,register char *to,register I32 len)
 void *
 Perl_my_memset(register char *loc, register I32 ch, register I32 len)
 {
-    char *retval = loc;
+    char * const retval = loc;
 
     while (len--)
 	*loc++ = ch;
@@ -1611,7 +1611,7 @@ Perl_my_memset(register char *loc, register I32 ch, register I32 len)
 char *
 Perl_my_bzero(register char *loc, register I32 len)
 {
-    char *retval = loc;
+    char * const retval = loc;
 
     while (len--)
 	*loc++ = 0;
@@ -4037,7 +4037,7 @@ want to upgrade the SV.
 SV *
 Perl_new_version(pTHX_ SV *ver)
 {
-    SV *rv = newSV(0);
+    SV * const rv = newSV(0);
     if ( sv_derived_from(ver,"version") ) /* can just copy directly */
     {
 	I32 key;
@@ -4079,10 +4079,9 @@ Perl_new_version(pTHX_ SV *ver)
     }
 #ifdef SvVOK
     if ( SvVOK(ver) ) { /* already a v-string */
-	char *version;
 	MAGIC* mg = mg_find(ver,PERL_MAGIC_vstring);
 	const STRLEN len = mg->mg_len;
-	version = savepvn( (const char*)mg->mg_ptr, len);
+	char * const version = savepvn( (const char*)mg->mg_ptr, len);
 	sv_setpvn(rv,version,len);
 	Safefree(version);
     }
@@ -4122,7 +4121,7 @@ Perl_upg_version(pTHX_ SV *ver)
     }
 #ifdef SvVOK
     else if ( SvVOK(ver) ) { /* already a v-string */
-	MAGIC* mg = mg_find(ver,PERL_MAGIC_vstring);
+	const MAGIC* const mg = mg_find(ver,PERL_MAGIC_vstring);
 	version = savepvn( (const char*)mg->mg_ptr,mg->mg_len );
 	qv = 1;
     }
@@ -4234,7 +4233,7 @@ Perl_vnormal(pTHX_ SV *vs)
 {
     I32 i, len, digit;
     bool alpha = FALSE;
-    SV *sv = newSV(0);
+    SV * const sv = newSV(0);
     AV *av;
     if ( SvROK(vs) )
 	vs = SvRV(vs);
@@ -4286,14 +4285,9 @@ the original version contained 1 or more dots, respectively
 SV *
 Perl_vstringify(pTHX_ SV *vs)
 {
-    I32 qv = 0;
     if ( SvROK(vs) )
 	vs = SvRV(vs);
-    
     if ( hv_exists((HV *)vs, "qv", 2) )
-	qv = 1;
-    
-    if ( qv )
 	return vnormal(vs);
     else
 	return vnumify(vs);

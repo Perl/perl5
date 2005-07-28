@@ -5779,12 +5779,12 @@ Perl_regprop(pTHX_ SV *sv, const regnode *o)
     k = PL_regkind[(U8)OP(o)];
 
     if (k == EXACT) {
-        SV *dsv = sv_2mortal(newSVpvn("", 0));
+	SV * const dsv = sv_2mortal(newSVpvn("", 0));
 	/* Using is_utf8_string() is a crude hack but it may
 	 * be the best for now since we have no flag "this EXACTish
 	 * node was UTF-8" --jhi */
 	const bool do_utf8 = is_utf8_string((U8*)STRING(o), STR_LEN(o));
-	const char *s = do_utf8 ?
+	const char * const s = do_utf8 ?
 	  pv_uni_display(dsv, (U8*)STRING(o), STR_LEN(o), 60,
 			 UNI_DISPLAY_REGEX) :
 	  STRING(o);
@@ -5819,7 +5819,7 @@ Perl_regprop(pTHX_ SV *sv, const regnode *o)
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);	/* 2: embedded, otherwise 1 */
     else if (k == ANYOF) {
 	int i, rangestart = -1;
-	U8 flags = ANYOF_FLAGS(o);
+	const U8 flags = ANYOF_FLAGS(o);
 	const char * const anyofs[] = {	/* Should be synchronized with
 					 * ANYOF_ #xdefines in regcomp.h */
 	    "\\w",
@@ -5890,7 +5890,7 @@ Perl_regprop(pTHX_ SV *sv, const regnode *o)
 
 	{
 	    SV *lv;
-	    SV *sw = regclass_swash(o, FALSE, &lv, 0);
+	    SV * const sw = regclass_swash(o, FALSE, &lv, 0);
 	
 	    if (lv) {
 		if (sw) {
@@ -5903,20 +5903,21 @@ Perl_regprop(pTHX_ SV *sv, const regnode *o)
 			    if (rangestart == -1)
 				rangestart = i;
 			} else if (rangestart != -1) {
-			    U8 *p;
-			
 			    if (i <= rangestart + 3)
 				for (; rangestart < i; rangestart++) {
-				    U8 *e;
-				    for(e = uvchr_to_utf8(s, rangestart), p = s; p < e; p++)
+				    const U8 * const e = uvchr_to_utf8(s,rangestart);
+				    U8 *p;
+				    for(p = s; p < e; p++)
 					put_byte(sv, *p);
 				}
 			    else {
-				U8 *e;
-				for (e = uvchr_to_utf8(s, rangestart), p = s; p < e; p++)
+				const U8 *e = uvchr_to_utf8(s,rangestart);
+				U8 *p;
+				for (p = s; p < e; p++)
 				    put_byte(sv, *p);
-				sv_catpv(sv, "-");
-				for (e = uvchr_to_utf8(s, i - 1), p = s; p < e; p++)
+				sv_catpvn(sv, "-", 1);
+				e = uvchr_to_utf8(s, i-1);
+				for (p = s; p < e; p++)
 				    put_byte(sv, *p);
 				}
 				rangestart = -1;
@@ -5933,7 +5934,7 @@ Perl_regprop(pTHX_ SV *sv, const regnode *o)
 		    while(*s && *s != '\n') s++;
 		
 		    if (*s == '\n') {
-			const char *t = ++s;
+			const char * const t = ++s;
 			
 			while (*s) {
 			    if (*s == '\n')
@@ -5964,7 +5965,7 @@ Perl_re_intuit_string(pTHX_ regexp *prog)
     GET_RE_DEBUG_FLAGS_DECL;
     DEBUG_COMPILE_r(
 	{
-	    const char *s = SvPV_nolen_const(prog->check_substr
+	    const char * const s = SvPV_nolen_const(prog->check_substr
 		      ? prog->check_substr : prog->check_utf8);
 
 	    if (!PL_colorset) reginitcolors();

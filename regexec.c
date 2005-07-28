@@ -4660,7 +4660,7 @@ Perl_regclass_swash(pTHX_ register const regnode* node, bool doinit, SV** listsv
 	if (PL_regdata->what[n] == 's') {
 	    SV * const rv = (SV*)PL_regdata->data[n];
 	    AV * const av = (AV*)SvRV((SV*)rv);
-	    SV **ary = AvARRAY(av);
+	    SV **const ary = AvARRAY(av);
 	    SV **a, **b;
 	
 	    /* See the end of regcomp.c:S_reglass() for

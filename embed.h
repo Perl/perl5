@@ -1377,12 +1377,6 @@
 #define depcom			S_depcom
 #define incl_perldb		S_incl_perldb
 #endif
-#if 0
-#ifdef PERL_CORE
-#define utf16_textfilter	S_utf16_textfilter
-#define utf16rev_textfilter	S_utf16rev_textfilter
-#endif
-#endif
 #  if defined(PERL_CR_FILTER)
 #ifdef PERL_CORE
 #define cr_textfilter		S_cr_textfilter
@@ -3365,12 +3359,6 @@
 #define ao(a)			S_ao(aTHX_ a)
 #define depcom()		S_depcom(aTHX)
 #define incl_perldb()		S_incl_perldb(aTHX)
-#endif
-#if 0
-#ifdef PERL_CORE
-#define utf16_textfilter(a,b,c)	S_utf16_textfilter(aTHX_ a,b,c)
-#define utf16rev_textfilter(a,b,c)	S_utf16rev_textfilter(aTHX_ a,b,c)
-#endif
 #endif
 #  if defined(PERL_CR_FILTER)
 #ifdef PERL_CORE

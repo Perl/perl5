@@ -8852,16 +8852,16 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     if (patlen == 0)
 	return;
     if (patlen == 2 && pat[0] == '%' && pat[1] == 's') {
-	    if (args) {
-		const char * const s = va_arg(*args, char*);
-		sv_catpv(sv, s ? s : nullstr);
-	    }
-	    else if (svix < svmax) {
-		sv_catsv(sv, *svargs);
-		if (DO_UTF8(*svargs))
-		    SvUTF8_on(sv);
-	    }
-	    return;
+	if (args) {
+	    const char * const s = va_arg(*args, char*);
+	    sv_catpv(sv, s ? s : nullstr);
+	}
+	else if (svix < svmax) {
+	    sv_catsv(sv, *svargs);
+	    if (DO_UTF8(*svargs))
+		SvUTF8_on(sv);
+	}
+	return;
     }
     if (args && patlen == 3 && pat[0] == '%' &&
 		pat[1] == '-' && pat[2] == 'p') {
