@@ -171,7 +171,7 @@ Ap	|char*	|delimcpy	|NN char* to|NN const char* toend|NN const char* from \
 				|NN const char* fromend|int delim|NN I32* retlen
 p	|void	|deprecate	|NN const char* s
 p	|void	|deprecate_old	|NN const char* s
-Afp	|OP*	|die		|NN const char* pat|...
+Afp	|OP*	|die		|NULLOK const char* pat|...
 p	|OP*	|vdie		|NULLOK const char* pat|NULLOK va_list* args
 p	|OP*	|die_where	|NN const char* message|STRLEN msglen
 Ap	|void	|dounwind	|I32 cxix

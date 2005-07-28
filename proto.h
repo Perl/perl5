@@ -329,8 +329,7 @@ PERL_CALLCONV void	Perl_deprecate_old(pTHX_ const char* s)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV OP*	Perl_die(pTHX_ const char* pat, ...)
-			__attribute__format__(__printf__,pTHX_1,pTHX_2)
-			__attribute__nonnull__(pTHX_1);
+			__attribute__format__(__printf__,pTHX_1,pTHX_2);
 
 PERL_CALLCONV OP*	Perl_vdie(pTHX_ const char* pat, va_list* args);
 PERL_CALLCONV OP*	Perl_die_where(pTHX_ const char* message, STRLEN msglen)

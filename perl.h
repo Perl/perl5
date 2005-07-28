@@ -2727,10 +2727,6 @@ typedef pthread_key_t	perl_key;
 #  define UVf UVuf
 #endif
 
-#ifndef DieNull
-#  define DieNull Perl_vdie(aTHX_ Nullch, Null(va_list *))
-#endif
-
 #ifdef HASATTRIBUTE_FORMAT
 #  define __attribute__format__(x,y,z)      __attribute__((format(x,y,z)))
 #endif
