@@ -1229,9 +1229,10 @@ behavior may be fixed in a future release.
 =item do BLOCK
 
 Not really a function.  Returns the value of the last command in the
-sequence of commands indicated by BLOCK.  When modified by a loop
-modifier, executes the BLOCK once before testing the loop condition.
-(On other statements the loop modifiers test the conditional first.)
+sequence of commands indicated by BLOCK.  When modified by the C<while> or
+C<until> loop modifier, executes the BLOCK once before testing the loop
+condition. (On other statements the loop modifiers test the conditional
+first.)
 
 C<do BLOCK> does I<not> count as a loop, so the loop control statements
 C<next>, C<last>, or C<redo> cannot be used to leave or restart the block.
