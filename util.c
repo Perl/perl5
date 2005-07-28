@@ -918,7 +918,7 @@ Perl_form(pTHX_ const char* pat, ...)
 char *
 Perl_vform(pTHX_ const char *pat, va_list *args)
 {
-    SV *sv = mess_alloc();
+    SV * const sv = mess_alloc();
     sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
     return SvPVX(sv);
 }
@@ -1527,7 +1527,7 @@ Perl_unlnk(pTHX_ char *f)	/* unlink all versions of a file */
 char *
 Perl_my_bcopy(register const char *from,register char *to,register I32 len)
 {
-    char *retval = to;
+    char * const retval = to;
 
     if (from - to >= 0) {
 	while (len--)
@@ -1548,7 +1548,7 @@ Perl_my_bcopy(register const char *from,register char *to,register I32 len)
 void *
 Perl_my_memset(register char *loc, register I32 ch, register I32 len)
 {
-    char *retval = loc;
+    char * const retval = loc;
 
     while (len--)
 	*loc++ = ch;
@@ -1561,7 +1561,7 @@ Perl_my_memset(register char *loc, register I32 ch, register I32 len)
 char *
 Perl_my_bzero(register char *loc, register I32 len)
 {
-    char *retval = loc;
+    char * const retval = loc;
 
     while (len--)
 	*loc++ = 0;

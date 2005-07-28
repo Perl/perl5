@@ -743,7 +743,7 @@ Perl_nextargv(pTHX_ register GV *gv)
 #endif
     Uid_t fileuid;
     Gid_t filegid;
-    IO *io = GvIOp(gv);
+    IO * const io = GvIOp(gv);
 
     if (!PL_argvoutgv)
 	PL_argvoutgv = gv_fetchpv("ARGVOUT",TRUE,SVt_PVIO);
@@ -798,9 +798,9 @@ Perl_nextargv(pTHX_ register GV *gv)
 		    continue;
 		}
 		if (*PL_inplace) {
-		    char *star = strchr(PL_inplace, '*');
+		    const char *star = strchr(PL_inplace, '*');
 		    if (star) {
-			char *begin = PL_inplace;
+			const char *begin = PL_inplace;
 			sv_setpvn(sv, "", 0);
 			do {
 			    sv_catpvn(sv, begin, star - begin);
@@ -2286,7 +2286,7 @@ Moving it away shrinks pp_hot.c; shrinking pp_hot.c helps speed perl up.
 PerlIO *
 Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 {
-    SV *tmpcmd = NEWSV(55, 0);
+    SV * const tmpcmd = NEWSV(55, 0);
     PerlIO *fp;
     ENTER;
     SAVEFREESV(tmpcmd);

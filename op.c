@@ -2402,8 +2402,8 @@ static int uvcompare(const void *a, const void *b)
 OP *
 Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 {
-    SV *tstr = ((SVOP*)expr)->op_sv;
-    SV *rstr = ((SVOP*)repl)->op_sv;
+    SV * const tstr = ((SVOP*)expr)->op_sv;
+    SV * const rstr = ((SVOP*)repl)->op_sv;
     STRLEN tlen;
     STRLEN rlen;
     const U8 *t = (U8*)SvPV_const(tstr, tlen);
@@ -3496,9 +3496,9 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
     CopSTASH_set(cop, PL_curstash);
 
     if (PERLDB_LINE && PL_curstash != PL_debstash) {
-	SV **svp = av_fetch(CopFILEAV(PL_curcop), (I32)CopLINE(cop), FALSE);
-        if (svp && *svp != &PL_sv_undef ) {
-           (void)SvIOK_on(*svp);
+	SV ** const svp = av_fetch(CopFILEAV(PL_curcop), (I32)CopLINE(cop), FALSE);
+	if (svp && *svp != &PL_sv_undef ) {
+	    (void)SvIOK_on(*svp);
 	    SvIV_set(*svp, PTR2IV(cop));
 	}
     }
@@ -3799,28 +3799,30 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *
 
     PERL_UNUSED_ARG(debuggable);
 
-    if (expr && (expr->op_type == OP_READLINE || expr->op_type == OP_GLOB
-		 || (expr->op_type == OP_NULL && expr->op_targ == OP_GLOB))) {
-	expr = newUNOP(OP_DEFINED, 0,
-	    newASSIGNOP(0, newDEFSVOP(), 0, expr) );
-    } else if (expr && (expr->op_flags & OPf_KIDS)) {
-	const OP * const k1 = ((UNOP*)expr)->op_first;
-	const OP * const k2 = (k1) ? k1->op_sibling : NULL;
-	switch (expr->op_type) {
-	  case OP_NULL:
-	    if (k2 && k2->op_type == OP_READLINE
-		  && (k2->op_flags & OPf_STACKED)
-		  && ((k1->op_flags & OPf_WANT) == OPf_WANT_SCALAR))
-		expr = newUNOP(OP_DEFINED, 0, expr);
-	    break;
+    if (expr) {
+	if (expr->op_type == OP_READLINE || expr->op_type == OP_GLOB
+		     || (expr->op_type == OP_NULL && expr->op_targ == OP_GLOB)) {
+	    expr = newUNOP(OP_DEFINED, 0,
+		newASSIGNOP(0, newDEFSVOP(), 0, expr) );
+	} else if (expr->op_flags & OPf_KIDS) {
+	    const OP * const k1 = ((UNOP*)expr)->op_first;
+	    const OP * const k2 = (k1) ? k1->op_sibling : NULL;
+	    switch (expr->op_type) {
+	      case OP_NULL:
+		if (k2 && k2->op_type == OP_READLINE
+		      && (k2->op_flags & OPf_STACKED)
+		      && ((k1->op_flags & OPf_WANT) == OPf_WANT_SCALAR))
+		    expr = newUNOP(OP_DEFINED, 0, expr);
+		break;
 
-	  case OP_SASSIGN:
-	    if (k1->op_type == OP_READDIR
-		  || k1->op_type == OP_GLOB
-		  || (k1->op_type == OP_NULL && k1->op_targ == OP_GLOB)
-		  || k1->op_type == OP_EACH)
-		expr = newUNOP(OP_DEFINED, 0, expr);
-	    break;
+	      case OP_SASSIGN:
+		if (k1->op_type == OP_READDIR
+		      || k1->op_type == OP_GLOB
+		      || (k1->op_type == OP_NULL && k1->op_targ == OP_GLOB)
+		      || k1->op_type == OP_EACH)
+		    expr = newUNOP(OP_DEFINED, 0, expr);
+		break;
+	    }
 	}
     }
 
@@ -4082,7 +4084,7 @@ void
 Perl_cv_ckproto(pTHX_ CV *cv, GV *gv, char *p)
 {
     if (((!p != !SvPOK(cv)) || (p && strNE(p, SvPVX_const(cv)))) && ckWARN_d(WARN_PROTOTYPE)) {
-	SV* msg = sv_newmortal();
+	SV* const msg = sv_newmortal();
 	SV* name = Nullsv;
 
 	if (gv)

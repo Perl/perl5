@@ -8580,16 +8580,16 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     if (patlen == 2 && pat[0] == '%') {
 	switch (pat[1]) {
 	case 's':
-	    if (args) {
-		const char * const s = va_arg(*args, char*);
-		sv_catpv(sv, s ? s : nullstr);
-	    }
-	    else if (svix < svmax) {
-		sv_catsv(sv, *svargs);
-		if (DO_UTF8(*svargs))
-		    SvUTF8_on(sv);
-	    }
-	    return;
+	if (args) {
+	    const char * const s = va_arg(*args, char*);
+	    sv_catpv(sv, s ? s : nullstr);
+	}
+	else if (svix < svmax) {
+	    sv_catsv(sv, *svargs);
+	    if (DO_UTF8(*svargs))
+		SvUTF8_on(sv);
+	}
+	return;
 	case '_':
 	    if (args) {
 		argsv = va_arg(*args, SV*);
