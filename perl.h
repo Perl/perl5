@@ -2694,7 +2694,7 @@ typedef pthread_key_t	perl_key;
 */
 
 #ifndef SVf_
-#  define SVf_(n) "-" #n "p"
+#  define SVf_(n) "-" STRINGIFY(n) "p"
 #endif
 
 #ifndef SVf
@@ -2715,9 +2715,7 @@ typedef pthread_key_t	perl_key;
  
 #ifndef VDf
 #  if vdNUMBER 
-#    define vdFORMAT(n) #n "p"
-#    define VDf_(n) vdFORMAT(n)
-#    define VDf VDf_(vdNUMBER)
+#    define VDf STRINGIFY(vdNUMBER) "p"
 #  else
 #    define VDf "vd"
 #  endif
