@@ -95,7 +95,7 @@ Null SV pointer.
 #  define FUNCTION__ __func__
 #else
 #  if (defined(_MSC_VER) && _MSC_VER < 1300) || /* Pre-MSVC 7.0 has neither __func__ nor __FUNCTION and no good workarounds, either. */ \
-      (defined(__DECC_VER)) /* Tru64 or VMS, and strict C89 being used. */
+      (defined(__DECC_VER)) /* Tru64 or VMS, and strict C89 being used, but not modern enough cc (in Tur64, -c99 not known, only -std1). */
 #    define FUNCTION__ ""
 #  else
 #    define FUNCTION__ __FUNCTION__ /* Common extension. */
