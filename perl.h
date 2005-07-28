@@ -2574,8 +2574,10 @@ typedef pthread_key_t	perl_key;
 #  define UVf UVuf
 #endif
 
-#ifndef DieNull
-#  define DieNull Perl_vdie(aTHX_ Nullch, Null(va_list *))
+#ifndef PERL_CORE
+#  ifndef DieNull
+#    define DieNull Perl_vdie(aTHX_ Nullch, Null(va_list *))
+#  endif
 #endif
 
 /* Because 5.8.x has to keep using %_ for SVf, which will make the format
