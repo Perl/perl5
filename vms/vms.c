@@ -5293,7 +5293,7 @@ setup_cmddsc(pTHX_ char *cmd, int check_img, int *suggest_quote,
       *s = '\0';
 
       /* check that it's really not DCL with no file extension */
-      fp = fopen(resspec,"r","ctx=bin,shr=get");
+      fp = fopen(resspec,"r","ctx=bin","shr=get");
       if (fp) {
         char b[4] = {0,0,0,0};
         read(fileno(fp),b,4);
