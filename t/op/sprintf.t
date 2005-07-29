@@ -97,7 +97,7 @@ for ($i = 1; @tests; $i++) {
 	    # Only compare on the the first pair of digits, as numeric
 	    # compares don't like 2.6.10-3mdksmp or 2.6.8-24.10-default
 	    s/^(\d+(\.\d+)?).*/$1/ for $osv, $vsn;
-	    $vsn && $osv <= $vsn and $skip = 1;
+	    $skip = $vsn ? ($osv <= $vsn ? 1 : 0) : 1;
 	}
 	$skip and $comment =~ s/$/, failure expected on $^O $osv/;
     }
@@ -146,7 +146,7 @@ for ($i = 1; @tests; $i++) {
 # tag 'all' is allowed for todo tests that should fail on any system
 #
 # >%G<   >1234567e96<  >1.23457E+102<   >exponent too big skip: os390<
-# >%.0g< >-0.0<        >-0<             >No minus skip: VMS hpux:10.20<
+# >%.0g< >-0.0<        >-0<             >No minus skip: MSWin32 VMS hpux:10.20<
 # >%d<   >4<           >1<              >4 != 1 skip: all<
 #
 # The following tests are not currently run, for the reasons stated:
@@ -310,7 +310,7 @@ __END__
 >%g<        >12345.6789<  >12345.7<
 >%+g<       >12345.6789<  >+12345.7<
 >%#g<       >12345.6789<  >12345.7<
->%.0g<      >-0.0<	  >-0<		   >No minus skip: VMS hpux:10.20<
+>%.0g<      >-0.0<	  >-0<		   >No minus skip: MSWin32 VMS hpux:10.20<
 >%.0g<      >12345.6789<  >1e+04<
 >%#.0g<     >12345.6789<  >1.e+04<
 >%.2g<      >12345.6789<  >1.2e+04<
