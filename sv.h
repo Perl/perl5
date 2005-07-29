@@ -870,9 +870,11 @@ in gv.h: */
 #define SvRVx(sv) SvRV(sv)
 
 #ifdef PERL_DEBUG_COW
+/* Need -0.0 for SvNVX to preserve IEEE FP "negative zero" because
+   +0.0 + -0.0 => +0.0 but -0.0 + -0.0 => -0.0 */
 #  define SvIVX(sv) (0 + ((XPVIV*) SvANY(sv))->xiv_iv)
 #  define SvUVX(sv) (0 + ((XPVUV*) SvANY(sv))->xuv_uv)
-#  define SvNVX(sv) (0 + ((XPVNV*) SvANY(sv))->xnv_nv)
+#  define SvNVX(sv) (-0.0 + ((XPVNV*) SvANY(sv))->xnv_nv)
 /* Don't test the core XS code yet.  */
 #  if defined (PERL_CORE) && PERL_DEBUG_COW > 1
 #    define SvPVX(sv) (0 + (assert(!SvREADONLY(sv)), (sv)->sv_u.svu_pv))
