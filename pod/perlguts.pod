@@ -304,7 +304,7 @@ The are various ways in which the private and public flags may differ.
 For example, a tied SV may have a valid underlying value in the IV slot
 (so SvIOKp is true), but the data should be accessed via the FETCH
 routine rather than directly, so SvIOK is false. Another is when
-numeric conversion has occured and precision has been lost: only the
+numeric conversion has occurred and precision has been lost: only the
 private flag is set on 'lossy' values. So when an NV is converted to an
 IV with loss, SvIOKp, SvNOKp and SvNOK will be set, while SvIOK wont be.
 
@@ -2298,7 +2298,7 @@ be able to use these macros:
 You can use these macros if you call code that may croak, but you need
 to do some cleanup before giving control back to Perl. For example:
 
-        dXCPT;    /* set up neccessary variables */
+        dXCPT;    /* set up necessary variables */
 
         XCPT_TRY_START {
           code_that_may_croak();

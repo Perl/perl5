@@ -312,7 +312,7 @@ Some more nebulous ideas
 
 =item *
 
-Re-implement C<:unique> in a way that is actualy thread-safe
+Re-implement C<:unique> in a way that is actually thread-safe
 
 =item *
 

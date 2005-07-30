@@ -407,7 +407,7 @@ no 32k limit).
 
 =item Affrus
 
-is a full Perl development enivornment with full debugger support
+is a full Perl development environment with full debugger support
 ( http://www.latenightsw.com ).
 
 =item Alpha

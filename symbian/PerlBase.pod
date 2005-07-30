@@ -111,7 +111,7 @@ will get the error).
 
 int Run()
 
-Start executing an interpeter.  A Parse() must have been called before
+Start executing an interpreter.  A Parse() must have been called before
 a Run(): use 3 and { "", "-e", 0 } if you do not have an argv.
 
 Note that a call to Parse() is required before Run().

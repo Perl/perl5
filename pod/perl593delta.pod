@@ -5,7 +5,7 @@ perldelta - what is new for perl v5.9.3
 =head1 DESCRIPTION
 
 This document describes differences between the 5.9.2 and the 5.9.3
-developement releases. See L<perl590delta>, L<perl591delta> and
+development releases. See L<perl590delta>, L<perl591delta> and
 L<perl592delta> for the differences between 5.8.0 and 5.9.2.
 
 =head1 Incompatible Changes

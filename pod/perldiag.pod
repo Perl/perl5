@@ -1642,13 +1642,13 @@ Another possibility is that you attempted to open filedescriptor 0
 =item Filehandle %s reopened as %s only for input
 
 (W io) You opened for reading a filehandle that got the same filehandle id
-as STDOUT or STDERR. This occured because you closed STDOUT or STDERR
+as STDOUT or STDERR. This occurred because you closed STDOUT or STDERR
 previously.
 
 =item Filehandle STDIN reopened as %s only for output
 
 (W io) You opened for writing a filehandle that got the same filehandle id
-as STDIN. This occured because you closed STDIN previously.
+as STDIN. This occurred because you closed STDIN previously.
 
 =item Final $ should be \$ or $name
 
@@ -2110,7 +2110,7 @@ effective uids or gids failed.
 
 =item length/code after end of string in unpack
 
-(F) While unpacking, the string buffer was alread used up when an unpack
+(F) While unpacking, the string buffer was already used up when an unpack
 length/code combination tried to obtain more data. This results in
 an undefined value for the length. See L<perlfunc/pack>.
 
@@ -3379,7 +3379,7 @@ earlier.
 
 =item Repeated format line will never terminate (~~ and @# incompatible)
 
-(F) Your format containes the ~~ repeat-until-blank sequence and a
+(F) Your format contains the ~~ repeat-until-blank sequence and a
 numeric field that will never go blank so that the repetition never
 terminates. You might use ^# instead.  See L<perlform>.
 

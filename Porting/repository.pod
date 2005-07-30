@@ -359,7 +359,7 @@ Here is (part of) the current structure of the repository:
     /----+-----perl                  - Mainline development (bleadperl)
          +-----perlio                - PerlIO Pumpkin's Perl
          +-----vmsperl               - VMS Pumpkin's Perl
-         +-----maint-5.004------perl - Maintainance branches
+         +-----maint-5.004------perl - Maintenance branches
          +-----maint-5.005------perl
          +-----maint-5.6--------perl
          +-----maint-5.8--------perl

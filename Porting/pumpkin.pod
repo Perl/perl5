@@ -455,7 +455,7 @@ This is to ease maintenance.  When Configure gets updated, the parts
 sometimes get scrambled around, and the changes in config_H can
 sometimes be very hard to follow.  config.sh, on the other hand, can
 safely be sorted, so it's easy to track (typically very small) changes
-to config.sh and then propoagate them to a canned 'config.h' by any
+to config.sh and then propagate them to a canned 'config.h' by any
 number of means, including a perl script in win32/ or carrying 
 config.sh and config_h.SH to a Unix system and running sh
 config_h.SH.)  Vms uses configure.com to generate its own config.sh
@@ -479,7 +479,7 @@ directories.
 
 =head2 make regen_perly
 
-If perly.y has been edited, it is nessary to run this target to rebuild
+If perly.y has been edited, it is necessary to run this target to rebuild
 perly.h, perly.act and perly.tab. In fact this target just runs the Perl
 script regen_perly.pl. Note that perly.c is I<not> rebuilt; this is just a
 plain static file now. 
@@ -587,7 +587,7 @@ time around, may be tackled in the future.  Update the file to reflect
 the situation as it stands when you hand over the pumpkin.
 
 You might like, early in your pumpkin-holding career, to see if you
-can find champions for partiticular issues on the to-do list: an issue
+can find champions for particular issues on the to-do list: an issue
 owned is an issue more likely to be resolved.
 
 There are also some more porting-specific L</Todo> items later in this

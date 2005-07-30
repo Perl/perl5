@@ -71,7 +71,7 @@ pity.
 
 =item architecture
 
-The kind of compluter you're working on, where one "kind" of computer
+The kind of computer you're working on, where one "kind" of computer
 means all those computers sharing a compatible machine language.
 Since Perl programs are (typically) simple text files, not executable
 images, a Perl program is much less sensitive to the architecture it's
