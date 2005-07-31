@@ -294,7 +294,7 @@ to do the opposite and interpret the argument as a character block. The
 return value is a I<range>: an anonymous list of lists that contain
 I<start-of-range>, I<end-of-range> code point pairs. You can test whether
 a code point is in a range using the L</charinrange> function. If the
-argument is not a known charater block, C<undef> is returned.
+argument is not a known character block, C<undef> is returned.
 
 =cut
 
@@ -356,7 +356,7 @@ to do the opposite and interpret the argument as a character script. The
 return value is a I<range>: an anonymous list of lists that contain
 I<start-of-range>, I<end-of-range> code point pairs. You can test whether a
 code point is in a range using the L</charinrange> function. If the
-argument is not a known charater script, C<undef> is returned.
+argument is not a known character script, C<undef> is returned.
 
 =cut
 

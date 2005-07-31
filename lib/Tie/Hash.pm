@@ -167,7 +167,7 @@ method.
 
 The methods C<UNTIE> and C<DESTROY> are not defined in B<Tie::Hash>,
 B<Tie::StdHash>, or B<Tie::ExtraHash>.  Tied hashes do not require
-presense of these methods, but if defined, the methods will be called in
+presence of these methods, but if defined, the methods will be called in
 proper time, see L<perltie>.
 
 C<SCALAR> is only defined in B<Tie::StdHash> and B<Tie::ExtraHash>.
