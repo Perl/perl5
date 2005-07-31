@@ -152,7 +152,7 @@ purposes of comparison with other version objects.  For example:
   $v = version->new( 1.002_03);    # 1.2.30   See "Quoting"
   $v = version->new( 1.002003);    # 1.2.3
 
-All of the preceeding examples except the second to last are true
+All of the preceding examples except the second to last are true
 whether or not the input value is quoted.  The important feature is that
 the input value contains only a single decimal.
 
@@ -379,7 +379,7 @@ notation and stick with it, to reduce confusion.  Perl6 version objects
 B<may> only support numeric comparisons.  See also L<"Quoting">.
 
 WARNING: Comparing version with unequal numbers of decimal places (whether
-explicitely or implicitely initialized), may yield unexpected results at
+explicitly or implicitly initialized), may yield unexpected results at
 first glance.  For example, the following inequalities hold:
 
   version->new(0.96)     > version->new(0.95); # 0.960.0 > 0.950.0
@@ -485,7 +485,7 @@ obeys the relationship
 
 Alpha versions with a single decimal place will be treated exactly as if
 they were L<Numeric Versions>, for parsing purposes.  The stringification for
-alpha versions with a single decimal place may seem suprising, since any
+alpha versions with a single decimal place may seem surprising, since any
 trailing zeros will visible.  For example, the above $alphaver will print as
 
   12.03_0100

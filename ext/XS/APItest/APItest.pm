@@ -160,17 +160,17 @@ the function; for example
 
 =item B<eval_sv>
 
-Evalulates the passed SV. Result handling is done the same as for
+Evaluates the passed SV. Result handling is done the same as for
 C<call_sv()> etc.
 
 =item B<eval_pv>
 
-Excercises the C function of the same name in scalar context. Returns the
+Exercises the C function of the same name in scalar context. Returns the
 same SV that the C function returns.
 
 =item B<require_pv>
 
-Excercises the C function of the same name. Returns nothing.
+Exercises the C function of the same name. Returns nothing.
 
 =back
 

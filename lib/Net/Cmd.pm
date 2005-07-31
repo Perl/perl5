@@ -749,7 +749,7 @@ Returns a filehandle tied to the Net::Cmd object.  After issuing a
 command, you may read from this filehandle using read() or <>.  The
 filehandle will return EOF when the final dot is encountered.
 Similarly, you may write to the filehandle in order to send data to
-the server after issuing a commmand that expects data to be written.
+the server after issuing a command that expects data to be written.
 
 See the Net::POP3 and Net::SMTP modules for examples of this.
 

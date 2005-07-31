@@ -252,7 +252,7 @@ use vars qw($Ua $Thesite $Themethod);
 
 package CPAN::LWP::UserAgent;
 use vars qw(@ISA $USER $PASSWD $SETUPDONE);
-# we delay requiring LWP::UserAgent and setting up inheritence until we need it
+# we delay requiring LWP::UserAgent and setting up inheritance until we need it
 
 package CPAN::Complete;
 @CPAN::Complete::ISA = qw(CPAN::Debug);
@@ -6772,7 +6772,7 @@ added to the search path of the CPAN module before the use() or
 require() statements.
 
 The configuration dialog can be started any time later again by
-issueing the command C< o conf init > in the CPAN shell.
+issuing the command C< o conf init > in the CPAN shell.
 
 Currently the following keys in the hash reference $CPAN::Config are
 defined:
@@ -6921,7 +6921,7 @@ untended.
 
 Thanks to Graham Barr for contributing the following paragraphs about
 the interaction between perl, and various firewall configurations. For
-further informations on firewalls, it is recommended to consult the
+further information on firewalls, it is recommended to consult the
 documentation that comes with the ncftp program. If you are unable to
 go through the firewall with a simple Perl setup, it is very likely
 that you can configure ncftp so that it works for your firewall.

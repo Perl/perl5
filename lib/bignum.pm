@@ -218,13 +218,13 @@ You can see this with the following:
 
 Don't worry if it says Math::BigInt::Lite, bignum and friends will use Lite
 if it is installed since it is faster for some operations. It will be
-automatically upgraded to BigInt whenever neccessary:
+automatically upgraded to BigInt whenever necessary:
 
         perl -Mbignum -le 'print ref(2**255)'
 
 This also means it is a bad idea to check for some specific package, since
 the actual contents of $x might be something unexpected. Due to the
-transparent way of bignum C<ref()> should not be neccessary, anyway.
+transparent way of bignum C<ref()> should not be necessary, anyway.
 
 Since Math::BigInt and BigFloat also overload the normal math operations,
 the following line will still work:
@@ -364,7 +364,7 @@ following work:
         print $x + 1, " ", $y,"\n";     # prints 10 9
 
 but calling any method that modifies the number directly will result in
-B<both> the original and the copy beeing destroyed:
+B<both> the original and the copy being destroyed:
 
         $x = 9; $y = $x;
         print $x->badd(1), " ", $y,"\n";        # prints 10 10
@@ -387,12 +387,12 @@ well as the documentation in BigInt for further details.
 
 =item inf()
 
-A shortcut to return Math::BigInt->binf(). Usefull because Perl does not always
+A shortcut to return Math::BigInt->binf(). Useful because Perl does not always
 handle bareword C<inf> properly.
 
 =item NaN()
 
-A shortcut to return Math::BigInt->bnan(). Usefull because Perl does not always
+A shortcut to return Math::BigInt->bnan(). Useful because Perl does not always
 handle bareword C<NaN> properly.
 
 =item upgrade()

@@ -20,7 +20,7 @@ and suffix.
 
 B<NOTE>: C<dirname()> and C<basename()> emulate the behaviours, and
 quirks, of the shell and C functions of the same name.  See each
-function's documention for details.  If your concern is just parsing
+function's documentation for details.  If your concern is just parsing
 paths it is safer to use L<File::Spec>'s C<splitpath()> and
 C<splitdir()> methods.
 

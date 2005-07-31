@@ -938,7 +938,7 @@ tree in one of several space-efficient text formats suitable for debugging
 the inner workings of perl or other compiler backends. It can print OPs in
 the order they appear in the OP tree, in the order they will execute, or
 in a text approximation to their tree structure, and the format of the
-information displyed is customizable. Its function is similar to that of
+information displayed is customizable. Its function is similar to that of
 perl's B<-Dx> debugging flag or the B<B::Terse> module, but it is more
 sophisticated and flexible.
 

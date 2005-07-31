@@ -183,7 +183,7 @@ sub name {
         my $handle = $pod_input->handle();
 
 Returns a reference to the handle object from which input is read (the
-one used to contructed this input source object).
+one used to construct this input source object).
 
 =end __PRIVATE__
 

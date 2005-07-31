@@ -204,7 +204,7 @@ sub new
     $self->{sign} = $$mis;
 
     # for something like 0Ey, set y to 1, and -0 => +0
-    # Check $$miv for beeing '0' and $$mfv eq '', because otherwise _m could not
+    # Check $$miv for being '0' and $$mfv eq '', because otherwise _m could not
     # have become 0. That's faster than to call $MBI->_is_zero().
     $self->{sign} = '+', $self->{_e} = $MBI->_one()
      if $$miv eq '0' and $$mfv eq '';
@@ -2557,7 +2557,7 @@ Math::BigFloat - Arbitrary size floating point math package
 
   # The following all modify their first argument. If you want to preserve
   # $x, use $z = $x->copy()->bXXX($y); See under L<CAVEATS> for why this is
-  # neccessary when mixing $a = $b assigments with non-overloaded math.
+  # necessary when mixing $a = $b assignments with non-overloaded math.
  
   # set 
   $x->bzero();			# set $i to 0
@@ -2632,7 +2632,7 @@ Math::BigFloat - Arbitrary size floating point math package
 
 =head1 DESCRIPTION
 
-All operators (inlcuding basic math operations) are overloaded if you
+All operators (including basic math operations) are overloaded if you
 declare your big floating point numbers as
 
   $i = new Math::BigFloat '12_3.456_789_123_456_789E-2';
@@ -2665,7 +2665,7 @@ C</^[+-]\d*\.\d+E[+-]?\d+$/>
 
 =back
 
-all with optional leading and trailing zeros and/or spaces. Additonally,
+all with optional leading and trailing zeros and/or spaces. Additionally,
 numbers are allowed to have an underscore between any two digits.
 
 Empty strings as well as other illegal numbers results in 'NaN'.
@@ -2756,11 +2756,11 @@ supplied to the operation after the I<scale>:
 
 Note that C<< Math::BigFloat->accuracy() >> and C<< Math::BigFloat->precision() >>
 set the global variables, and thus B<any> newly created number will be subject
-to the global rounding B<immidiately>. This means that in the examples above, the
+to the global rounding B<immediately>. This means that in the examples above, the
 C<3> as argument to C<bdiv()> will also get an accuracy of B<5>.
 
 It is less confusing to either calculate the result fully, and afterwards
-round it explicitely, or use the additional parameters to the math
+round it explicitly, or use the additional parameters to the math
 functions like so:
 
 	use Math::BigFloat;	
@@ -2844,7 +2844,7 @@ Warning! The accuracy I<sticks>, e.g. once you created a number under the
 influence of C<< CLASS->accuracy($A) >>, all results from math operations with
 that number will also be rounded.
 
-In most cases, you should probably round the results explicitely using one of
+In most cases, you should probably round the results explicitly using one of
 L<round()>, L<bround()> or L<bfround()> or by passing the desired accuracy
 to the math operation as additional parameter:
 
@@ -2904,7 +2904,7 @@ Math::BigInt::Bar, and when this also fails, revert to Math::BigInt::Calc:
 	use Math::BigFloat lib => 'Foo,Math::BigInt::Bar';
 
 Calc.pm uses as internal format an array of elements of some decimal base
-(usually 1e7, but this might be differen for some systems) with the least
+(usually 1e7, but this might be different for some systems) with the least
 significant digit first, while BitVect.pm uses a bit vector of base 2, most
 significant bit first. Other modules might use even different means of
 representing the numbers. See the respective module documentation for further
@@ -2925,7 +2925,7 @@ It is also possible to just require Math::BigFloat:
 
 	require Math::BigFloat;
 
-This will load the neccessary things (like BigInt) when they are needed, and
+This will load the necessary things (like BigInt) when they are needed, and
 automatically.
 
 Use the lib, Luke! And see L<Using Math::BigInt::Lite> for more details than
@@ -2971,9 +2971,9 @@ words, Math::BigFloat will try to retain previously loaded libs when you
 don't specify it onem but if you specify one, it will try to load them.
 
 Actually, the lib loading order would be "Bar,Baz,Calc", and then
-"Foo,Bar,Baz,Calc", but independend of which lib exists, the result is the
+"Foo,Bar,Baz,Calc", but independent of which lib exists, the result is the
 same as trying the latter load alone, except for the fact that one of Bar or
-Baz might be loaded needlessly in an intermidiate step (and thus hang around
+Baz might be loaded needlessly in an intermediate step (and thus hang around
 and waste memory). If neither Bar nor Baz exist (or don't work/compile), they
 will still be tried to be loaded, but this is not as time/memory consuming as
 actually loading one of them. Still, this type of usage is not recommended due
@@ -3046,7 +3046,7 @@ The following will probably not do what you expect:
 	print $c->bdiv(123.456),"\n";
 
 It prints both quotient and reminder since print works in list context. Also,
-bdiv() will modify $c, so be carefull. You probably want to use
+bdiv() will modify $c, so be careful. You probably want to use
 	
 	print $c / 123.456,"\n";
 	print scalar $c->bdiv(123.456),"\n";  # or if you want to modify $c
@@ -3096,7 +3096,7 @@ Replacing L<precision> with L<accuracy> is probably not what you want, either:
 	use Math::BigFloat;
 
 	Math::BigFloat->accuracy(4);		# enables global rounding:
-	my $x = Math::BigFloat->new(123456);	# rounded immidiately to "12350"
+	my $x = Math::BigFloat->new(123456);	# rounded immediately to "12350"
 	print "$x\n";				# print "123500"
 	my $y = Math::BigFloat->new(3);		# rounded to "3
 	print "$y\n";				# print "3"

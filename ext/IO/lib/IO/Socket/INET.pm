@@ -319,7 +319,7 @@ C<IO::Socket::INET> provides.
     ReusePort	Set SO_REUSEPORT before binding
     Broadcast	Set SO_BROADCAST before binding
     Timeout	Timeout	value for various operations
-    MultiHomed  Try all adresses for multi-homed hosts
+    MultiHomed  Try all addresses for multi-homed hosts
     Blocking    Determine if connection will be blocking mode
 
 If C<Listen> is defined then a listen socket is created, else if the

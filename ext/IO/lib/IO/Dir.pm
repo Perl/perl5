@@ -178,7 +178,7 @@ directory reading routines.
 
 =item new ( [ DIRNAME ] )
 
-C<new> is the constuctor for C<IO::Dir> objects. It accepts one optional
+C<new> is the constructor for C<IO::Dir> objects. It accepts one optional
 argument which,  if given, C<new> will pass to C<open>
 
 =back

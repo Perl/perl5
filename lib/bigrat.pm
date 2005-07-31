@@ -182,7 +182,7 @@ bigrat - Transparent BigNumber/BigRational support for Perl
 
 =head1 DESCRIPTION
 
-All operators (inlcuding basic math operations) are overloaded. Integer and
+All operators (including basic math operations) are overloaded. Integer and
 floating-point constants are created as proper BigInts or BigFloats,
 respectively.
 
@@ -236,7 +236,7 @@ the BigInt or BigFloat API. It is wise to use only the bxxx() notation, and not
 the fxxx() notation, though. This makes you independed on the fact that the
 underlying object might morph into a different class than BigFloat.
 
-=head2 Cavaet
+=head2 Caveat
 
 But a warning is in order. When using the following to make a copy of a number,
 only a shallow copy will be made.
@@ -255,7 +255,7 @@ following work:
         print $x + 1, " ", $y,"\n";     # prints 10 9
 
 but calling any method that modifies the number directly will result in
-B<both> the original and the copy beeing destroyed:
+B<both> the original and the copy being destroyed:
 
         $x = 9; $y = $x;
         print $x->badd(1), " ", $y,"\n";        # prints 10 10

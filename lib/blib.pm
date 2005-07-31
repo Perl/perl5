@@ -16,7 +16,7 @@ Looks for MakeMaker-like I<'blib'> directory structure starting in
 I<dir> (or current directory) and working back up to five levels of '..'.
 
 Intended for use on command line with B<-M> option as a way of testing
-arbitary scripts against an uninstalled version of a package.
+arbitrary scripts against an uninstalled version of a package.
 
 However it is possible to : 
 

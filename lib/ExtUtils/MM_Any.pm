@@ -1374,7 +1374,7 @@ Defines at least these macros.
                     file
 
   UMASK_NULL        Nullify umask
-  DEV_NULL          Supress all command output
+  DEV_NULL          Suppress all command output
 
 
 =head3 init_DIRFILESEP  I<Abstract>

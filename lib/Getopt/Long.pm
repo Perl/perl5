@@ -1605,7 +1605,7 @@ destination:
 Used with the example above, C<@libfiles> (or C<@$libfiles>) would
 contain two strings upon completion: C<"lib/srdlib"> and
 C<"lib/extlib">, in that order. It is also possible to specify that
-only integer or floating point numbers are acceptible values.
+only integer or floating point numbers are acceptable values.
 
 Often it is useful to allow comma-separated lists of values as well as
 multiple occurrences of the options. This is easy using Perl's split()
@@ -1656,7 +1656,7 @@ When used with command line options:
 the hash C<%defines> (or C<%$defines>) will contain two keys, C<"os">
 with value C<"linux> and C<"vendor"> with value C<"redhat">. It is
 also possible to specify that only integer or floating point numbers
-are acceptible values. The keys are always taken to be strings.
+are acceptable values. The keys are always taken to be strings.
 
 =head2 User-defined subroutines to handle options
 
@@ -1686,7 +1686,7 @@ the desired error message as its argument. GetOptions() will catch the
 die(), issue the error message, and record that an error result must
 be returned upon completion.
 
-If the text of the error message starts with an exclamantion mark C<!>
+If the text of the error message starts with an exclamation mark C<!>
 it is interpreted specially by GetOptions(). There is currently one
 special command implemented: C<die("!FINISH")> will cause GetOptions()
 to stop processing options, as if it encountered a double dash C<-->.
@@ -1890,7 +1890,7 @@ messages. For example:
 
     =head1 DESCRIPTION
 
-    B<This program> will read the given input file(s) and do someting
+    B<This program> will read the given input file(s) and do something
     useful with the contents thereof.
 
     =cut
@@ -1962,7 +1962,7 @@ The first level of bundling can be enabled with:
 
 Configured this way, single-character options can be bundled but long
 options B<must> always start with a double dash C<--> to avoid
-abiguity. For example, when C<vax>, C<a>, C<v> and C<x> are all valid
+ambiguity. For example, when C<vax>, C<a>, C<v> and C<x> are all valid
 options,
 
     -vax
@@ -2115,7 +2115,7 @@ is equivalent to
     --foo --bar arg1 arg2 arg3
 
 If an argument callback routine is specified, C<@ARGV> will always be
-empty upon succesful return of GetOptions() since all options have been
+empty upon successful return of GetOptions() since all options have been
 processed. The only exception is when C<--> is used:
 
     --foo arg1 --bar arg2 -- arg3
@@ -2152,7 +2152,7 @@ auto_abbrev enabled, possible arguments and option settings are:
     -al, -la, -ala, -all,...     a, l
     --al, --all                  all
 
-The suprising part is that C<--a> sets option C<a> (due to auto
+The surprising part is that C<--a> sets option C<a> (due to auto
 completion), not C<all>.
 
 Note: disabling C<bundling> also disables C<bundling_override>.

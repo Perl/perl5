@@ -283,7 +283,7 @@ sub maybe_command {
 =item pasthru (override)
 
 VMS has $(MMSQUALIFIERS) which is a listing of all the original command line
-options.  This is used in every invokation of make in the VMS Makefile so
+options.  This is used in every invocation of make in the VMS Makefile so
 PASTHRU should not be necessary.  Using PASTHRU tends to blow commands past
 the 256 character limit.
 

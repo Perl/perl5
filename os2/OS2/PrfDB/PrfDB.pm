@@ -213,7 +213,7 @@ OS2::PrfDB - Perl extension for access to OS/2 setting database.
 
 =head1 DESCRIPTION
 
-The extention provides both high-level and low-level access to .ini
+The extension provides both high-level and low-level access to .ini
 files. 
 
 =head2 High level access

@@ -175,7 +175,7 @@ happen, or -1 on error.
 
 =item events ( IO )
 
-Returns the event mask which represents the events that happend on IO
+Returns the event mask which represents the events that happened on IO
 during the last call to C<poll>.
 
 =item remove ( IO )

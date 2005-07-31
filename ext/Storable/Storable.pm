@@ -524,7 +524,7 @@ settings.
 
 Since Storable version 2.05, CODE references may be serialized with
 the help of L<B::Deparse>. To enable this feature, set
-C<$Storable::Deparse> to a true value. To enable deserializazion,
+C<$Storable::Deparse> to a true value. To enable deserialization,
 C<$Storable::Eval> should be set to a true value. Be aware that
 deserialization is done through C<eval>, which is dangerous if the
 Storable file contains malicious data. You can set C<$Storable::Eval>
@@ -701,7 +701,7 @@ Returned value: none.
 =item C<STORABLE_attach> I<class>, I<cloning>, I<serialized>
 
 While C<STORABLE_freeze> and C<STORABLE_thaw> are useful for classes where
-each instance is independant, this mechanism has difficulty (or is
+each instance is independent, this mechanism has difficulty (or is
 incompatible) with objects that exist as common process-level or
 system-level resources, such as singleton objects, database pools, caches
 or memoized objects.
@@ -931,7 +931,7 @@ data back to 8 bit and C<croak()> if the conversion fails.
 Prior to Storable 2.01, no distinction was made between signed and
 unsigned integers on storing.  By default Storable prefers to store a
 scalars string representation (if it has one) so this would only cause
-problems when storing large unsigned integers that had never been coverted
+problems when storing large unsigned integers that had never been converted
 to string or floating point.  In other words values that had been generated
 by integer operations such as logic ops and then not used in any string or
 arithmetic context before storing.

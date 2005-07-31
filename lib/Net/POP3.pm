@@ -572,7 +572,7 @@ Return the sever's connection banner
 
 =item capa ()
 
-Return a reference to a hash of the capabilties of the server.  APOP
+Return a reference to a hash of the capabilities of the server.  APOP
 is added as a pseudo capability.  Note that I've been unable to
 find a list of the standard capability values, and some appear to
 be multi-word and some are not.  We make an attempt at intelligently
@@ -639,7 +639,7 @@ when the server connection closed.
 
 =item reset ()
 
-Reset the status of the remote POP3 server. This includes reseting the
+Reset the status of the remote POP3 server. This includes resetting the
 status of all messages to not be deleted.
 
 =item quit ()

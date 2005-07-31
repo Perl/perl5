@@ -321,7 +321,7 @@ following work:
 	print $x + 1, " ", $y,"\n";	# prints 10 9
 
 but calling any method that modifies the number directly will result in
-B<both> the original and the copy beeing destroyed:
+B<both> the original and the copy being destroyed:
 	
 	$x = 9; $y = $x;
 	print $x->badd(1), " ", $y,"\n";	# prints 10 10

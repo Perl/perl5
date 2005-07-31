@@ -186,7 +186,7 @@ B::Bblock - Walk basic blocks
 
 This module is used by the B::CC back end.  It walks "basic blocks".
 A basic block is a series of operations which is known to execute from
-start to finish, with no possiblity of branching or halting.
+start to finish, with no possibility of branching or halting.
 
 It can be used either stand alone or from inside another program.
 

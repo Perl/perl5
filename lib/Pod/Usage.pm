@@ -200,8 +200,8 @@ to C<STDOUT>, just in case the user wants to pipe the output to a pager
 =item *
 
 If program usage has been explicitly requested by the user, it is often
-desireable to exit with a status of 1 (as opposed to 0) after issuing
-the user-requested usage message.  It is also desireable to give a
+desirable to exit with a status of 1 (as opposed to 0) after issuing
+the user-requested usage message.  It is also desirable to give a
 more verbose description of program usage in this case.
 
 =back

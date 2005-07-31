@@ -877,7 +877,7 @@ compressed data. Otherwise it returns I<undef>.
 
 The source buffer can either be a scalar or a scalar reference.
 
-The B<$level> paramter defines the compression level. Valid values are
+The B<$level> parameter defines the compression level. Valid values are
 0 through 9, C<Z_NO_COMPRESSION>, C<Z_BEST_SPEED>,
 C<Z_BEST_COMPRESSION>, and C<Z_DEFAULT_COMPRESSION>.
 If B<$level> is not specified C<Z_DEFAULT_COMPRESSION> will be used.

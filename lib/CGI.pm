@@ -5939,7 +5939,7 @@ for each option element within the optgroup.
 =item 5.
 
 An optional fifth parameter (-novals) can be set to a true value and
-indicates to suppress the val attribut in each option element within
+indicates to suppress the val attribute in each option element within
 the optgroup.
 
 See the discussion on optgroup at W3C
@@ -6646,7 +6646,7 @@ Netscape versions 2.0 and higher incorporate an interpreted language
 called JavaScript. Internet Explorer, 3.0 and higher, supports a
 closely-related dialect called JScript. JavaScript isn't the same as
 Java, and certainly isn't at all the same as Perl, which is a great
-pity. JavaScript allows you to programatically change the contents of
+pity. JavaScript allows you to programmatically change the contents of
 fill-out forms, create new windows, and pop up dialog box from within
 Netscape itself. From the point of view of CGI scripting, JavaScript
 is quite useful for validating fill-out forms prior to submitting

@@ -1135,9 +1135,9 @@ The substring to be extracted must appear at the
 current C<pos> location of the string's variable
 (or at index zero, if no C<pos> position is defined).
 In other words, the C<extract_...> subroutines I<don't>
-extract the first occurance of a substring anywhere
+extract the first occurrence of a substring anywhere
 in a string (like an unanchored regex would). Rather,
-they extract an occurance of the substring appearing
+they extract an occurrence of the substring appearing
 immediately at the current matching position in the
 string (like a C<\G>-anchored regex would).
 
@@ -1403,7 +1403,7 @@ See also: C<"extract_quotelike"> and C<"extract_codeblock">.
 
 C<extract_variable> extracts any valid Perl variable or
 variable-involved expression, including scalars, arrays, hashes, array
-accesses, hash look-ups, method calls through objects, subroutine calles
+accesses, hash look-ups, method calls through objects, subroutine calls
 through subroutine references, etc.
 
 The subroutine takes up to two optional arguments:
@@ -2062,7 +2062,7 @@ If none of the extractor subroutines succeeds, then one
 character is extracted from the start of the text and the extraction
 subroutines reapplied. Characters which are thus removed are accumulated and
 eventually become the next field (unless the fourth argument is true, in which
-case they are disgarded).
+case they are discarded).
 
 For example, the following extracts substrings that are valid Perl variables:
 

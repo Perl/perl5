@@ -562,7 +562,7 @@ Encode::FB_DEFAULT ( == 0 ) is assumed.
 
 =over 2
 
-=item B<NOTE:> Not all encoding suppport this feature
+=item B<NOTE:> Not all encoding support this feature
 
 Some encodings ignore I<CHECK> argument.  For example,
 L<Encode::Unicode> ignores I<CHECK> and it always croaks on error.
@@ -731,7 +731,7 @@ After C<$utf8 = decode('foo', $octet);>,
   In any other Encoding                      ON
   ---------------------------------------------
 
-As you see, there is one exception, In ASCII.  That way you can assue
+As you see, there is one exception, In ASCII.  That way you can assume
 Goal #1.  And with Encode Goal #2 is assumed but you still have to be
 careful in such cases mentioned in B<CAVEAT> paragraphs.
 

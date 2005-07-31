@@ -494,7 +494,7 @@ If used in conjunction with C<AddPostamble> a full latex document will
 be written that could be immediately processed by C<latex>.
 
 For some pod escapes it may be necessary to include the amsmath
-package. This is not yet added to the preamble automaatically.
+package. This is not yet added to the preamble automatically.
 
 =cut
 

@@ -1146,7 +1146,7 @@ method call instead.
 Returns true if we currently have C<IO::String> support loaded.
 
 Either C<IO::String> or C<perlio> support is needed to support writing 
-stringified archives. Currently, C<perlio> is the preffered method, if
+stringified archives. Currently, C<perlio> is the preferred method, if
 available.
 
 See the C<GLOBAL VARIABLES> section to see how to change this preference.
@@ -1162,7 +1162,7 @@ Returns true if we currently have C<perlio> support loaded.
 This requires C<perl-5.8> or higher, compiled with C<perlio> 
 
 Either C<IO::String> or C<perlio> support is needed to support writing 
-stringified archives. Currently, C<perlio> is the preffered method, if
+stringified archives. Currently, C<perlio> is the preferred method, if
 available.
 
 See the C<GLOBAL VARIABLES> section to see how to change this preference.

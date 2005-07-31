@@ -129,7 +129,7 @@ Net::Config - Local configuration data for libnet
 =head1 DESCRIPTION
 
 C<Net::Config> holds configuration data for the modules in the libnet
-distribuion. During installation you will be asked for these values.
+distribution. During installation you will be asked for these values.
 
 The configuration data is held globally in a file in the perl installation
 tree, but a user may override any of these values by providing their own. This
@@ -139,7 +139,7 @@ For example
 
     # .libnetrc
     {
-        nntp_hosts => [ "my_prefered_host" ],
+        nntp_hosts => [ "my_preferred_host" ],
 	ph_hosts   => [ "my_ph_server" ],
     }
     __END__
@@ -267,7 +267,7 @@ There is no firewall
 
 =item ftp_ext_passive
 
-=item ftp_int_pasive
+=item ftp_int_passive
 
 FTP servers normally work on a non-passive mode. That is when you want to
 transfer data you have to tell the server the address and port to

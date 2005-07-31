@@ -233,7 +233,7 @@ do better.
 
 By default, if a redispatch attempt fails to find another method
 elsewhere in the objects class hierarchy, it quietly gives up and does
-nothing (but see L<"Enforcing redispatch">). This gracious acquiesence
+nothing (but see L<"Enforcing redispatch">). This gracious acquiescence
 is also unlike the (generally annoying) behaviour of C<SUPER>, which
 throws an exception if it cannot redispatch.
 
@@ -420,7 +420,7 @@ order. Instead, they are called "breadth-first-dependency-wise".
 That means that the inheritance tree of the object is traversed breadth-first
 and the resulting order of classes is used as the sequence in which methods
 are called. However, that sequence is modified by imposing a rule that the
-appropritae method of a derived class must be called before the same method of
+appropriate method of a derived class must be called before the same method of
 any ancestral class. That's why, in the above example, C<X::foo> is called
 before C<D::foo>, even though C<D> comes before C<X> in C<@B::ISA>.
 

@@ -252,7 +252,7 @@ sub mselect
     }
 }
 
-# Description: Allow UDP source endpoint comparision to be
+# Description: Allow UDP source endpoint comparison to be
 #              skipped for those remote interfaces that do
 #              not response from the same endpoint.
 
@@ -1474,7 +1474,7 @@ otherwise it will return false.  NOTE: Unlike the other protocols,
 the return value does NOT determine if the remote host is alive or
 not since the full TCP three-way handshake may not have completed
 yet.  The remote host is only considered reachable if it receives
-a TCP ACK within the timeout specifed.  To begin waiting for the
+a TCP ACK within the timeout specified.  To begin waiting for the
 ACK packets, use the ack() method as explained below.  Use the
 "syn" protocol instead the "tcp" protocol to determine reachability
 of multiple destinations simultaneously by sending parallel TCP
@@ -1506,10 +1506,10 @@ otherwise.  The maximum number of data bytes that can be specified is
 1024.
 
 If $device is given, this device is used to bind the source endpoint
-before sending the ping packet.  I beleive this only works with
+before sending the ping packet.  I believe this only works with
 superuser privileges and with udp and icmp protocols at this time.
 
-If $tos is given, this ToS is configured into the soscket.
+If $tos is given, this ToS is configured into the socket.
 
 =item $p->ping($host [, $timeout]);
 
@@ -1562,7 +1562,7 @@ This is disabled by default.
 
 =item $p->tcp_service_check( { 0 | 1 } );
 
-Depricated method, but does the same as service_check() method.
+Deprecated method, but does the same as service_check() method.
 
 =item $p->hires( { 0 | 1 } );
 
@@ -1611,7 +1611,7 @@ connection will not be established and ack() will return
 undef.  In list context, the host, the ack time, and the
 dotted ip string will be returned instead of just the host.
 If the optional $host argument is specified, the return
-value will be partaining to that host only.
+value will be pertaining to that host only.
 This call simply does nothing if you are using any protocol
 other than syn.
 

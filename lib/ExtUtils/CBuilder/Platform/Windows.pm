@@ -260,10 +260,10 @@ sub perl_inc {
 =begin comment
 
 The packages below implement functions for generating properly
-formated commandlines for the compiler being used. Each package
+formatted commandlines for the compiler being used. Each package
 defines two primary functions 'format_linker_cmd()' &
 'format_compiler_cmd()' that accepts a list of named arguments (a
-hash) and returns a list of formated options suitable for invoking the
+hash) and returns a list of formatted options suitable for invoking the
 compiler. By default, if the compiler supports scripting of its
 operation then a script file is built containing the options while
 those options are removed from the commandline, and a reference to the

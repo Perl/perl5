@@ -188,7 +188,7 @@ An example of a possible use might be:
     ...
     binmode($fh,":encoding(...)");  # next chunk is encoded
     ...
-    binmode($fh,":pop");            # back to un-encocded
+    binmode($fh,":pop");            # back to un-encoded
 
 A more elegant (and safer) interface is needed.
 

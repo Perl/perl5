@@ -1937,7 +1937,7 @@ done.  For instance, you would need to say:
 
   {'PM_FILTER' => 'grep -v \\"^\\#\\"'}
 
-to remove all the leading coments on the fly during the build.  The
+to remove all the leading comments on the fly during the build.  The
 extra \\ are necessary, unfortunately, because this variable is interpolated
 within the context of a Perl program built on the command line, and double
 quotes are what is used with the -e switch to build that command line.  The
@@ -2161,7 +2161,7 @@ passed to the method as a hash.
 
 =item depend
 
-  {ANY_TARGET => ANY_DEPENDECY, ...}
+  {ANY_TARGET => ANY_DEPENDENCY, ...}
 
 (ANY_TARGET must not be given a double-colon rule by MakeMaker.)
 
@@ -2271,7 +2271,7 @@ Some of the most common mistakes:
 
 =item C<< MAN3PODS => ' ' >>
 
-This is commonly used to supress the creation of man pages.  MAN3PODS
+This is commonly used to suppress the creation of man pages.  MAN3PODS
 takes a hash ref not a string, but the above worked by accident in old
 versions of MakeMaker.
 

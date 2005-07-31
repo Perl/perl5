@@ -142,7 +142,7 @@ There is no specification of the formatter after the C<=for> command.
 =item * unresolved internal link I<NAME>
 
 The given link to I<NAME> does not have a matching node in the current
-POD. This also happend when a single word node name is not enclosed in
+POD. This also happens when a single word node name is not enclosed in
 C<"">.
 
 =item * Unknown command "I<CMD>"
@@ -234,7 +234,7 @@ C<=over>/C<=back> block.
 
 =item * =item type mismatch (I<one> vs. I<two>)
 
-A list started with e.g. a bulletted C<=item> and continued with a
+A list started with e.g. a bulleted C<=item> and continued with a
 numbered one. This is obviously inconsistent. For most translators the
 type of the I<first> C<=item> determines the type of the list.
 

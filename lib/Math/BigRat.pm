@@ -1440,7 +1440,7 @@ Currently the following replacement libraries exist, search for them at CPAN:
 
 =head1 METHODS
 
-Any methods not listed here are dervied from Math::BigFloat (or
+Any methods not listed here are derived from Math::BigFloat (or
 Math::BigInt), so make sure you check these two modules for further
 information.
 
@@ -1636,7 +1636,7 @@ appropriate information.
                                 undef
         round_mode      RW      Global round mode
                                 even
-        div_scale       RW      Fallback acccuracy for div
+        div_scale       RW      Fallback accuracy for div
                                 40
         trap_nan        RW      Trap creation of NaN (undef = no)
                                 undef

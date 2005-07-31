@@ -1970,7 +1970,7 @@ Math::BigInt v1.70 or later:
 	_num(obj)	returns a Perl integer/floating point number
 			NOTE: because of Perl numeric notation defaults,
 			the _num'ified obj may lose accuracy due to 
-			machine-dependend floating point size limitations
+			machine-dependent floating point size limitations
                     
 	_add(obj,obj)	Simple addition of two objects
 	_mul(obj,obj)	Multiplication of two objects
@@ -1985,7 +1985,7 @@ Math::BigInt v1.70 or later:
 			are swapped. In this case, the first param needs to
 			be preserved, while you can destroy the second.
 			sub (x,y,1) => return x - y and keep x intact!
-	_dec(obj)	decrement object by one (input is garant. to be > 0)
+	_dec(obj)	decrement object by one (input is guaranteed to be > 0)
 	_inc(obj)	increment object by one
 
 
@@ -2060,11 +2060,11 @@ cases.
 
 The first parameter can be modified, that includes the possibility that you
 return a reference to a completely different object instead. Although keeping
-the reference and just changing it's contents is prefered over creating and
+the reference and just changing it's contents is preferred over creating and
 returning a different reference.
 
 Return values are always references to objects, strings, or true/false for
-comparisation routines.
+comparison routines.
 
 =head1 WRAP YOUR OWN
 

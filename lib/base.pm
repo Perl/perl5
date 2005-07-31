@@ -97,7 +97,7 @@ ERROR
         push @{"$inheritor\::ISA"}, $base;
 
         if ( has_fields($base) || has_attr($base) ) {
-	    # No multiple fields inheritence *suck*
+	    # No multiple fields inheritance *suck*
 	    if ($fields_base) {
 		require Carp;
 		Carp::croak("Can't multiply inherit %FIELDS");
@@ -192,7 +192,7 @@ it, <base> will define $VERSION in the base package, setting it to the string
 C<-1, set by base.pm>.
 
 Will also initialize the fields if one of the base classes has it.
-Multiple inheritence of fields is B<NOT> supported, if two or more
+Multiple inheritance of fields is B<NOT> supported, if two or more
 base classes each have inheritable fields the 'base' pragma will
 croak.  See L<fields>, L<public> and L<protected> for a description of
 this feature.

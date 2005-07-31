@@ -2327,7 +2327,7 @@ sub indirop {
 	# give bareword warnings in that case. Therefore if context
 	# requires, we'll put parens around the outside "(sort f 1, 2,
 	# 3)". Unfortunately, we'll currently think the parens are
-	# neccessary more often that they really are, because we don't
+	# necessary more often that they really are, because we don't
 	# distinguish which side of an assignment we're on.
 	if ($cx >= 5) {
 	    return "($name2 $args)";

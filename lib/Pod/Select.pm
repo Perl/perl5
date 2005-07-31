@@ -428,7 +428,7 @@ sub clear_selections {
 Returns a value of true if the given section and subsection heading
 titles match any of the currently selected section specifications in
 effect from prior calls to B<select()> and B<add_selection()> (or if
-there are no explictly selected/deselected sections).
+there are no explicitly selected/deselected sections).
 
 The arguments C<$heading1>, C<$heading2>, etc. are the heading titles of
 the corresponding sections, subsections, etc. to try and match.  If
@@ -575,7 +575,7 @@ are used.
 
 All other arguments should correspond to the names of input files
 containing POD sections. A file name of "-" or "<&STDIN" will
-be interpeted to mean standard input (which is the default if no
+be interpreted to mean standard input (which is the default if no
 filenames are given).
 
 =cut 

@@ -767,7 +767,7 @@ specified article.
 If C<FH> is specified then it is expected to be a valid filehandle
 and the result will be printed to it, on success a true value will be
 returned. If C<FH> is not specified then the return value, on success,
-will be a reference to an array containg the article requested, each
+will be a reference to an array containing the article requested, each
 entry in the array will contain one line of the article.
 
 If no arguments are passed then the current article in the currently

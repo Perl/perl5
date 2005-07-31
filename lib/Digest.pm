@@ -204,7 +204,7 @@ Note that the C<digest> operation is effectively a destructive,
 read-once operation. Once it has been performed, the $ctx object is
 automatically C<reset> and can be used to calculate another digest
 value.  Call $ctx->clone->digest if you want to calculate the digest
-without reseting the digest state.
+without resetting the digest state.
 
 =item $ctx->hexdigest
 

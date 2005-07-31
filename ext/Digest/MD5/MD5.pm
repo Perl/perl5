@@ -202,7 +202,7 @@ Note that the C<digest> operation is effectively a destructive,
 read-once operation. Once it has been performed, the C<Digest::MD5>
 object is automatically C<reset> and can be used to calculate another
 digest value.  Call $md5->clone->digest if you want to calculate the
-digest without reseting the digest state.
+digest without resetting the digest state.
 
 =item $md5->hexdigest
 

@@ -352,7 +352,7 @@ also the section on L<LIMITATIONS of B<-x>>.
 
 Suppose that you have some C files implementing some functionality,
 and the corresponding header files.  How to create an extension which
-makes this functionality accessable in Perl?  The example below
+makes this functionality accessible in Perl?  The example below
 assumes that the header files are F<interface_simple.h> and
 I<interface_hairy.h>, and you want the perl module be named as
 C<Ext::Ension>.  If you need some preprocessor directives and/or

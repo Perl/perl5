@@ -1863,7 +1863,7 @@ fields returned by stat() are compared).
 Returns false if the stat information differs or if the link count is
 greater than 1.
 
-On certain platofms, eg Windows, not all the fields returned by stat()
+On certain platforms, e.g. Windows, not all the fields returned by stat()
 can be compared. For example, the C<dev> and C<rdev> fields seem to be
 different in Windows.  Also, it seems that the size of the file
 returned by stat() does not always agree, with C<stat(FH)> being more

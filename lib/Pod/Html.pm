@@ -635,7 +635,7 @@ Usage:  $0 --help --htmlroot=<name> --infile=<name> --outfile=<name>
                    pods (empty by default).
   --podroot      - filesystem base directory from which all relative paths
                    in podpath stem (default is .).
-  --[no]quiet    - supress some benign warning messages (default is off).
+  --[no]quiet    - suppress some benign warning messages (default is off).
   --[no]recurse  - recurse on those subdirectories listed in podpath
                    (default behaviour).
   --title        - title that will appear in resulting html file.

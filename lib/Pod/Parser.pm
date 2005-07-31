@@ -118,7 +118,7 @@ You may also want to override the B<begin_input()> and B<end_input()>
 methods for your subclass (to perform any needed per-file and/or
 per-document initialization or cleanup).
 
-If you need to perform any preprocesssing of input before it is parsed
+If you need to perform any preprocessing of input before it is parsed
 you may want to override one or more of B<preprocess_line()> and/or
 B<preprocess_paragraph()>.
 
@@ -140,7 +140,7 @@ to avoid name collisions.
 
 For the most part, the B<Pod::Parser> base class should be able to
 do most of the input parsing for you and leave you free to worry about
-how to intepret the commands and translate the result.
+how to interpret the commands and translate the result.
 
 Note that all we have described here in this quick overview is the
 simplest most straightforward use of B<Pod::Parser> to do stream-based
@@ -651,7 +651,7 @@ them in simple bottom-up order.
 
 The parameter C<$text> is a string or block of text to be parsed
 for interior sequences; and the parameter C<$line_num> is the
-line number curresponding to the beginning of C<$text>.
+line number corresponding to the beginning of C<$text>.
 
 B<parse_text()> will parse the given text into a parse-tree of "nodes."
 and interior-sequences.  Each "node" in the parse tree is either a

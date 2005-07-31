@@ -824,11 +824,11 @@ Send the QUIT command to the remote SMTP server and close the socket connection.
 
 Net::SMTP attempts to DWIM with addresses that are passed. For
 example an application might extract The From: line from an email
-and pass that to mail(). While this may work, it is not reccomended.
+and pass that to mail(). While this may work, it is not recommended.
 The application should really use a module like L<Mail::Address>
 to extract the mail address and pass that.
 
-If C<ExactAddresses> is passed to the contructor, then addresses
+If C<ExactAddresses> is passed to the constructor, then addresses
 should be a valid rfc2821-quoted address, although Net::SMTP will
 accept accept the address surrounded by angle brackets.
 

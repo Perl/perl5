@@ -40,7 +40,7 @@ use constant READ_ONLY      => sub { shift() ? 'rb' : 'r' };
 use constant WRITE_ONLY     => sub { $_[0] ? 'wb' . shift : 'w' };
 use constant MODE_READ      => sub { $_[0] =~ /^r/ ? 1 : 0 };
 
-# Pointless assigment to make -w shut up
+# Pointless assignment to make -w shut up
 my $getpwuid; $getpwuid = 'unknown' unless eval { my $f = getpwuid (0); };
 my $getgrgid; $getgrgid = 'unknown' unless eval { my $f = getgrgid (0); };
 use constant UNAME          => sub { $getpwuid || scalar getpwuid( shift() ) };

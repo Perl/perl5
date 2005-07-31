@@ -656,7 +656,7 @@ sub _mtwrite {
       if (@_) {
         $unwritten = $self->_downcopy($data, $end, $_[1] - $end);
       } else {
-        # Make the file longer to accomodate the last segment that doesn'
+        # Make the file longer to accommodate the last segment that doesn'
         $unwritten = $self->_downcopy($data, $end);
       }
     }

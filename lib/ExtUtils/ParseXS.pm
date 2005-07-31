@@ -1870,7 +1870,7 @@ sub DESTROY {
 }
 
 sub UNTIE {
-  # This sub does nothing, but is neccessary for references to be released.
+  # This sub does nothing, but is necessary for references to be released.
 }
 
 sub end_marker {
@@ -1939,7 +1939,7 @@ Adds C<extern "C"> to the C code.  Default is false.
 
 =item B<hiertype>
 
-Retains C<::> in type names so that C++ hierachical types can be
+Retains C<::> in type names so that C++ hierarchical types can be
 mapped.  Default is false.
 
 =item B<except>

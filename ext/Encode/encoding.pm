@@ -402,7 +402,7 @@ B<use encoding> can appear as many times as you want in a given script.
 The multiple use of this pragma is discouraged.
 
 By the same reason, the use this pragma inside modules is also
-discouraged (though not as strongly discouranged as the case above.  
+discouraged (though not as strongly discouraged as the case above.  
 See below).
 
 If you still have to write a module with this pragma, be very careful

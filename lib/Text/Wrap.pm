@@ -143,11 +143,11 @@ B<Example 3>
 =head1 DESCRIPTION
 
 C<Text::Wrap::wrap()> is a very simple paragraph formatter.  It formats a
-single paragraph at a time by breaking lines at word boundries.
+single paragraph at a time by breaking lines at word boundaries.
 Indentation is controlled for the first line (C<$initial_tab>) and
 all subsequent lines (C<$subsequent_tab>) independently.  Please note: 
 C<$initial_tab> and C<$subsequent_tab> are the literal strings that will
-be used: it is unlikley you would want to pass in a number.
+be used: it is unlikely you would want to pass in a number.
 
 Text::Wrap::fill() is a simple multi-paragraph formatter.  It formats
 each paragraph separately and then joins them together when it's done.  It

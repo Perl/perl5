@@ -305,7 +305,7 @@ twenty-two in the constants interface.  On the flip side, the constants
 interface has the advantage of better compile time error checking, since
 misspelled names of colors or attributes in calls to color() and colored()
 won't be caught until runtime whereas misspelled names of constants will be
-caught at compile time.  So, polute your namespace with almost two dozen
+caught at compile time.  So, pollute your namespace with almost two dozen
 subroutines that you may not even use that often, or risk a silly bug by
 mistyping an attribute.  Your choice, TMTOWTDI after all.
 
@@ -390,7 +390,7 @@ string.  (Of course, you may consider it a bug that commas between all the
 constants aren't required, in which case you may feel free to insert commas
 unless you're using $Term::ANSIColor::AUTORESET.)
 
-For easier debuging, you may prefer to always use the commas when not
+For easier debugging, you may prefer to always use the commas when not
 setting $Term::ANSIColor::AUTORESET so that you'll get a fatal compile error
 rather than a warning.
 
