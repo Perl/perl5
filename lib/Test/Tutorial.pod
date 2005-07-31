@@ -174,7 +174,7 @@ run that and you get:
     # Looks like you failed 1 tests of 8.
 
 Whoops, a failure! [4] Test::Simple helpfully lets us know on what line
-the failure occured, but not much else.  We were supposed to get 17,
+the failure occurred, but not much else.  We were supposed to get 17,
 but we didn't.  What did we get??  Dunno.  We'll have to re-run the
 test in the debugger or throw in some print statements to find out.
 

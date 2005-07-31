@@ -151,7 +151,7 @@ To shut off its generation, pass the C<NO_META> flag to C<WriteMakefile()>.
 
 XS code is very sensitive to the module version number and will
 complain if the version number in your Perl module doesn't match.  If
-you change your module's version # without reruning Makefile.PL the old
+you change your module's version # without rerunning Makefile.PL the old
 version number will remain in the Makefile causing the XS code to be built
 with the wrong number.
 

@@ -294,7 +294,7 @@ This listing shows that the entire listing is a skip. No tests were run.
 =head2 Got spare tuits?
 
 The following example reports that four tests are run and the last two
-tests failed. However, becauses the failing tests are marked as things
+tests failed. However, because the failing tests are marked as things
 to do later, they are considered successes. Thus, a harness should report
 this entire listing as a success.
 

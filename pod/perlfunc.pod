@@ -3373,7 +3373,7 @@ of values, as follows:
 
     a	A string with arbitrary binary data, will be null padded.
     A	A text (ASCII) string, will be space padded.
-    Z	A null terminated (ASCIZ) string, will be null padded.
+    Z	A null terminated (ASCIIZ) string, will be null padded.
 
     b	A bit string (ascending bit order inside each byte, like vec()).
     B	A bit string (descending bit order inside each byte).

@@ -13409,7 +13409,7 @@ CHECK]);
 
 =item Handling Malformed Data
 
-B<NOTE:> Not all encoding suppport this feature, I<CHECK> =
+B<NOTE:> Not all encoding support this feature, I<CHECK> =
 Encode::FB_DEFAULT ( == 0), I<CHECK> = Encode::FB_CROAK ( == 1), I<CHECK> =
 Encode::FB_QUIET, I<CHECK> = Encode::FB_WARN, perlqq mode (I<CHECK> =
 Encode::FB_PERLQQ), HTML charref mode (I<CHECK> = Encode::FB_HTMLCREF), XML
@@ -15251,7 +15251,7 @@ os_flavor
 
 =over 4
 
-=item Overriden methods
+=item Overridden methods
 
 xs_c
 
