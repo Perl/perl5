@@ -275,7 +275,7 @@ non-overridden program name
      fatalsToBrowser() output.
 
 1.23 ineval() now checks both $^S and inspects the message for the "eval" pattern
-     (hack alert!) in order to accomodate various combinations of Perl and
+     (hack alert!) in order to accommodate various combinations of Perl and
      mod_perl.
 
 1.24 Patch from Scott Gifford (sgifford@suspectclass.com): Add support
