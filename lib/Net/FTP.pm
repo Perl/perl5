@@ -22,7 +22,7 @@ use Net::Config;
 use Fcntl qw(O_WRONLY O_RDONLY O_APPEND O_CREAT O_TRUNC);
 # use AutoLoader qw(AUTOLOAD);
 
-$VERSION = "2.75";
+$VERSION = '2.77';
 @ISA     = qw(Exporter Net::Cmd IO::Socket::INET);
 
 # Someday I will "use constant", when I am not bothered to much about
@@ -1118,7 +1118,7 @@ sub response
 sub parse_response
 {
  return ($1, $2 eq "-")
-    if $_[1] =~ s/^(\d\d\d)(.?)//o;
+    if $_[1] =~ s/^(\d\d\d)([- ]?)//o;
 
  my $ftp = shift;
 
@@ -1217,10 +1217,20 @@ sub _STOR { shift->command("STOR",@_)->response() == CMD_INFO }
 sub _STOU { shift->command("STOU",@_)->response() == CMD_INFO }
 sub _RNFR { shift->command("RNFR",@_)->response() == CMD_MORE }
 sub _REST { shift->command("REST",@_)->response() == CMD_MORE }
-sub _USER { shift->command("user",@_)->response() } # A certain brain dead firewall :-)
 sub _PASS { shift->command("PASS",@_)->response() }
 sub _ACCT { shift->command("ACCT",@_)->response() }
 sub _AUTH { shift->command("AUTH",@_)->response() }
+
+sub _USER {
+  my $ftp = shift;
+  my $ok = $ftp->command("USER",@_)->response();
+
+  # A certain brain dead firewall :-)
+  $ok = $ftp->command("user",@_)->response()
+    unless $ok == CMD_MORE or $ok == CMD_OK;
+
+  $ok;
+}
 
 sub _SMNT { shift->unsupported(@_) }
 sub _MODE { shift->unsupported(@_) }
@@ -1314,7 +1324,7 @@ B<Firewall> - The name of a machine which acts as an FTP firewall. This can be
 overridden by an environment variable C<FTP_FIREWALL>. If specified, and the
 given host cannot be directly connected to, then the
 connection is made to the firewall machine and the string C<@hostname> is
-appended to the login identifier. This kind of setup is also refered to
+appended to the login identifier. This kind of setup is also referred to
 as an ftp proxy.
 
 B<FirewallType> - The type of firewall running on the machine indicated by
@@ -1441,7 +1451,7 @@ Returns the full pathname to the new directory.
 =item alloc ( SIZE [, RECORD_SIZE] )
 
 The alloc command allows you to give the ftp server a hint about the size
-of the file about to be transfered using the ALLO ftp command. Some storage
+of the file about to be transferred using the ALLO ftp command. Some storage
 systems use this to make intelligent decisions about how to store the file.
 The C<SIZE> argument represents the size of the file in bytes. The
 C<RECORD_SIZE> argument indicates a mazimum record or page size for files
@@ -1449,7 +1459,7 @@ sent with a record or page structure.
 
 The size of the file will be determined, and sent to the server
 automatically for normal files so that this method need only be called if
-you are transfering data from a socket, named pipe, or other stream not
+you are transferring data from a socket, named pipe, or other stream not
 associated with a normal file.
 
 =item ls ( [ DIR ] )
@@ -1473,7 +1483,7 @@ a filename or a filehandle. If not specified, the file will be stored in
 the current directory with the same leafname as the remote file.
 
 If C<WHERE> is given then the first C<WHERE> bytes of the file will
-not be transfered, and the remaining bytes will be appended to
+not be transferred, and the remaining bytes will be appended to
 the local file if it already exists.
 
 Returns C<LOCAL_FILE>, or the generated local file name if C<LOCAL_FILE>
@@ -1490,7 +1500,7 @@ Returns C<REMOTE_FILE>, or the generated remote filename if C<REMOTE_FILE>
 is not given.
 
 B<NOTE>: If for some reason the transfer does not complete and an error is
-returned then the contents that had been transfered will not be remove
+returned then the contents that had been transferred will not be remove
 automatically.
 
 =item put_unique ( LOCAL_FILE [, REMOTE_FILE ] )
@@ -1520,7 +1530,7 @@ Returns the I<modification time> of the given file
 Returns the size in bytes for the given file as stored on the remote server.
 
 B<NOTE>: The size reported is the size of the stored file on the remote server.
-If the file is subsequently transfered from the server in ASCII mode
+If the file is subsequently transferred from the server in ASCII mode
 and the remote server and local machine have different ideas about
 "End Of Line" then the size of file on the local machine after transfer
 may be different.

@@ -16,7 +16,7 @@ use Net::Config;
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(hostname hostdomain hostfqdn domainname);
 
-$VERSION = "2.19"; # $Id: //depot/libnet/Net/Domain.pm#21 $
+$VERSION = "2.19_01"; # $Id: //depot/libnet/Net/Domain.pm#21 $
 
 my($host,$domain,$fqdn) = (undef,undef,undef);
 
@@ -299,7 +299,7 @@ Net::Domain - Attempt to evaluate the current host's internet name and domain
 
 =head1 SYNOPSIS
 
-    use Net::Domain qw(hostname hostfqdn hostdomain);
+    use Net::Domain qw(hostname hostfqdn hostdomain domainname);
 
 =head1 DESCRIPTION
 
@@ -313,6 +313,10 @@ Each of the functions will return I<undef> if the FQDN cannot be determined.
 =item hostfqdn ()
 
 Identify and return the FQDN of the current host.
+
+=item domainname ()
+
+An alias for hostfqdn ().
 
 =item hostname ()
 
