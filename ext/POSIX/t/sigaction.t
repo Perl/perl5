@@ -179,7 +179,7 @@ kill 'HUP', $$;
 ok($ok, "safe signal delivery must work");
 
 SKIP: {
-    eval 'use POSIX qw(%SIGRT SIGRTMIN SIGRTMAX); SIGRTMIN() + SIGRTMAX()';
+    eval 'use POSIX qw(%SIGRT SIGRTMIN SIGRTMAX); scalar %SIGRT + SIGRTMIN() + SIGRTMAX()';
     $@					# POSIX did not exort
     || SIGRTMIN() < 0 || SIGRTMAX() < 0	# HP-UX 10.20 exports both as -1
     || SIGRTMIN() > $Config{sig_count}	# AIX 4.3.3 exports bogus 888 and 999
