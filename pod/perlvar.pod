@@ -475,18 +475,6 @@ taken for something more important.)
 Consider using "real" multidimensional arrays as described
 in L<perllol>.
 
-=item $#
-
-The output format for printed numbers.  This variable is a half-hearted
-attempt to emulate B<awk>'s OFMT variable.  There are times, however,
-when B<awk> and Perl have differing notions of what counts as 
-numeric.  The initial value is "%.I<n>g", where I<n> is the value
-of the macro DBL_DIG from your system's F<float.h>.  This is different from
-B<awk>'s default OFMT setting of "%.6g", so you need to set C<$#>
-explicitly to get B<awk>'s value.  (Mnemonic: # is the number sign.)
-
-Use of C<$#> is deprecated.
-
 =item HANDLE->format_page_number(EXPR)
 
 =item $FORMAT_PAGE_NUMBER
