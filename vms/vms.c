@@ -3842,8 +3842,10 @@ static char *mp_do_tovmsspec(pTHX_ const char *path, char *buf, int ts) {
         if (!buf && ts) Renew(rslt,strlen(path)-strlen(rslt)+trnend+4,char);
         strcpy(rslt,trndev);
         cp1 = rslt + trnend;
-        *(cp1++) = '.';
-        cp2++;
+	if (*cp2 != 0) {
+          *(cp1++) = '.';
+          cp2++;
+        }
       }
       else {
         *(cp1++) = ':';
