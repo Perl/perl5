@@ -2232,7 +2232,7 @@ Found in file pad.c
 
 =item dXCPT
 
-Set up neccessary local variables for exception handling.
+Set up necessary local variables for exception handling.
 See L<perlguts/"Exception Handling">.
 
 		dXCPT;

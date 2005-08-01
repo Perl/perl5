@@ -229,7 +229,7 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 =head1 Simple Exception Handling Macros
 
 =for apidoc Ams||dXCPT
-Set up neccessary local variables for exception handling.
+Set up necessary local variables for exception handling.
 See L<perlguts/"Exception Handling">.
 
 =for apidoc AmU||XCPT_TRY_START
