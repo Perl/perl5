@@ -1858,6 +1858,9 @@ the module maintainer (with a copy to p5p).  This will help the module
 maintainer keep the CPAN version in sync with the core version without
 constantly scanning p5p.
 
+The list of maintainers of core modules is usefully documented in
+F<Porting/Maintainers.pl>.
+
 =head2 Adding a new function to the core
 
 If, as part of a patch to fix a bug, or just because you have an
