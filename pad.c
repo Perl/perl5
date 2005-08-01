@@ -75,7 +75,7 @@ The SVs in the names AV have their PV being the name of the variable.
 NV+1..IV inclusive is a range of cop_seq numbers for which the name is
 valid.  For typed lexicals name SV is SVt_PVMG and SvSTASH points at the
 type.  For C<our> lexicals, the type is SVt_PVGV, and GvSTASH points at the
-stash of the associated global (so that duplicate C<our> delarations in the
+stash of the associated global (so that duplicate C<our> declarations in the
 same package can be detected).  SvCUR is sometimes hijacked to
 store the generation number during compilation.
 
@@ -1215,7 +1215,7 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 /*
 =for apidoc pad_free
 
-Free the SV at offet po in the current pad.
+Free the SV at offset po in the current pad.
 
 =cut
 */
