@@ -1005,12 +1005,12 @@ Perl_my_crypt(pTHX_ const char *textpasswd, const char *usrname)
 
 
 static char *mp_do_rmsexpand(pTHX_ char *, char *, int, char *, unsigned);
-static char *mp_do_fileify_dirspec(pTHX_ char *, char *, int);
-static char *mp_do_tovmsspec(pTHX_ char *, char *, int);
+static char *mp_do_fileify_dirspec(pTHX_ const char *, char *, int);
+static char *mp_do_tovmsspec(pTHX_ const char *, char *, int);
 
 /*{{{int do_rmdir(char *name)*/
 int
-Perl_do_rmdir(pTHX_ char *name)
+Perl_do_rmdir(pTHX_ const char *name)
 {
     char dirfile[NAM$C_MAXRSS+1];
     int retval;
@@ -1034,7 +1034,7 @@ Perl_do_rmdir(pTHX_ char *name)
  */
 /*{{{int kill_file(char *name)*/
 int
-Perl_kill_file(pTHX_ char *name)
+Perl_kill_file(pTHX_ const char *name)
 {
     char vmsname[NAM$C_MAXRSS+1], rspec[NAM$C_MAXRSS+1];
     unsigned long int jpicode = JPI$_UIC, type = ACL$C_FILE;
@@ -1135,7 +1135,7 @@ Perl_kill_file(pTHX_ char *name)
 
 /*{{{int my_mkdir(char *,Mode_t)*/
 int
-Perl_my_mkdir(pTHX_ char *dir, Mode_t mode)
+Perl_my_mkdir(pTHX_ const char *dir, Mode_t mode)
 {
   STRLEN dirlen = strlen(dir);
 
@@ -1158,7 +1158,7 @@ Perl_my_mkdir(pTHX_ char *dir, Mode_t mode)
 
 /*{{{int my_chdir(char *)*/
 int
-Perl_my_chdir(pTHX_ char *dir)
+Perl_my_chdir(pTHX_ const char *dir)
 {
   STRLEN dirlen = strlen(dir);
 
@@ -2947,7 +2947,7 @@ my_gconvert(double val, int ndig, int trail, char *buf)
  * rmesexpand() returns the address of the resultant string if
  * successful, and NULL on error.
  */
-static char *mp_do_tounixspec(pTHX_ char *, char *, int);
+static char *mp_do_tounixspec(pTHX_ const char *, char *, int);
 
 static char *
 mp_do_rmsexpand(pTHX_ char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
@@ -3126,7 +3126,7 @@ char *Perl_rmsexpand_ts(pTHX_ char *spec, char *buf, char *def, unsigned opt)
  */
 
 /*{{{ char *fileify_dirspec[_ts](char *path, char *buf)*/
-static char *mp_do_fileify_dirspec(pTHX_ char *dir,char *buf,int ts)
+static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts)
 {
     static char __fileify_retbuf[NAM$C_MAXRSS+1];
     unsigned long int dirlen, retlen, addmfd = 0, hasfilename = 0;
@@ -3140,9 +3140,8 @@ static char *mp_do_fileify_dirspec(pTHX_ char *dir,char *buf,int ts)
     dirlen = strlen(dir);
     while (dirlen && dir[dirlen-1] == '/') --dirlen;
     if (!dirlen) { /* We had Unixish '/' -- substitute top of current tree */
-      strcpy(trndir,"/sys$disk/000000");
-      dir = trndir;
-      dirlen = 16;
+      dir = "/sys$disk";
+      dirlen = 9;
     }
     if (dirlen > NAM$C_MAXRSS) {
       set_errno(ENAMETOOLONG); set_vaxc_errno(RMS$_SYN); return NULL;
@@ -3154,36 +3153,39 @@ static char *mp_do_fileify_dirspec(pTHX_ char *dir,char *buf,int ts)
         trnlnm_iter_count++; 
         if (trnlnm_iter_count >= PERL_LNM_MAX_ITER) break;
       }
-      dir = trndir;
-      dirlen = strlen(dir);
+      dirlen = strlen(trndir);
     }
     else {
       strncpy(trndir,dir,dirlen);
       trndir[dirlen] = '\0';
-      dir = trndir;
     }
+
+    /* At this point we are done with *dir and use *trndir which is a
+     * copy that can be modified.  *dir must not be modified.
+     */
+
     /* If we were handed a rooted logical name or spec, treat it like a
      * simple directory, so that
      *    $ Define myroot dev:[dir.]
      *    ... do_fileify_dirspec("myroot",buf,1) ...
      * does something useful.
      */
-    if (dirlen >= 2 && !strcmp(dir+dirlen-2,".]")) {
-      dir[--dirlen] = '\0';
-      dir[dirlen-1] = ']';
+    if (dirlen >= 2 && !strcmp(trndir+dirlen-2,".]")) {
+      trndir[--dirlen] = '\0';
+      trndir[dirlen-1] = ']';
     }
-    if (dirlen >= 2 && !strcmp(dir+dirlen-2,".>")) {
-      dir[--dirlen] = '\0';
-      dir[dirlen-1] = '>';
+    if (dirlen >= 2 && !strcmp(trndir+dirlen-2,".>")) {
+      trndir[--dirlen] = '\0';
+      trndir[dirlen-1] = '>';
     }
 
-    if ((cp1 = strrchr(dir,']')) != NULL || (cp1 = strrchr(dir,'>')) != NULL) {
+    if ((cp1 = strrchr(trndir,']')) != NULL || (cp1 = strrchr(trndir,'>')) != NULL) {
       /* If we've got an explicit filename, we can just shuffle the string. */
       if (*(cp1+1)) hasfilename = 1;
       /* Similarly, we can just back up a level if we've got multiple levels
          of explicit directories in a VMS spec which ends with directories. */
       else {
-        for (cp2 = cp1; cp2 > dir; cp2--) {
+        for (cp2 = cp1; cp2 > trndir; cp2--) {
           if (*cp2 == '.') {
             *cp2 = *cp1; *cp1 = '\0';
             hasfilename = 1;
@@ -3194,26 +3196,26 @@ static char *mp_do_fileify_dirspec(pTHX_ char *dir,char *buf,int ts)
       }
     }
 
-    if (hasfilename || !strpbrk(dir,"]:>")) { /* Unix-style path or filename */
-      if (dir[0] == '.') {
-        if (dir[1] == '\0' || (dir[1] == '/' && dir[2] == '\0'))
+    if (hasfilename || !strpbrk(trndir,"]:>")) { /* Unix-style path or filename */
+      if (trndir[0] == '.') {
+        if (trndir[1] == '\0' || (trndir[1] == '/' && trndir[2] == '\0'))
           return do_fileify_dirspec("[]",buf,ts);
-        else if (dir[1] == '.' &&
-                 (dir[2] == '\0' || (dir[2] == '/' && dir[3] == '\0')))
+        else if (trndir[1] == '.' &&
+                 (trndir[2] == '\0' || (trndir[2] == '/' && trndir[3] == '\0')))
           return do_fileify_dirspec("[-]",buf,ts);
       }
-      if (dirlen && dir[dirlen-1] == '/') {    /* path ends with '/'; just add .dir;1 */
+      if (dirlen && trndir[dirlen-1] == '/') {    /* path ends with '/'; just add .dir;1 */
         dirlen -= 1;                 /* to last element */
-        lastdir = strrchr(dir,'/');
+        lastdir = strrchr(trndir,'/');
       }
-      else if ((cp1 = strstr(dir,"/.")) != NULL) {
+      else if ((cp1 = strstr(trndir,"/.")) != NULL) {
         /* If we have "/." or "/..", VMSify it and let the VMS code
          * below expand it, rather than repeating the code to handle
          * relative components of a filespec here */
         do {
           if (*(cp1+2) == '.') cp1++;
           if (*(cp1+2) == '/' || *(cp1+2) == '\0') {
-            if (do_tovmsspec(dir,vmsdir,0) == NULL) return NULL;
+            if (do_tovmsspec(trndir,vmsdir,0) == NULL) return NULL;
             if (strchr(vmsdir,'/') != NULL) {
               /* If do_tovmsspec() returned it, it must have VMS syntax
                * delimiters in it, so it's a mixed VMS/Unix spec.  We take
@@ -3227,20 +3229,20 @@ static char *mp_do_fileify_dirspec(pTHX_ char *dir,char *buf,int ts)
           }
           cp1++;
         } while ((cp1 = strstr(cp1,"/.")) != NULL);
-        lastdir = strrchr(dir,'/');
+        lastdir = strrchr(trndir,'/');
       }
-      else if (dirlen >= 7 && !strcmp(&dir[dirlen-7],"/000000")) {
+      else if (dirlen >= 7 && !strcmp(&trndir[dirlen-7],"/000000")) {
         /* Ditto for specs that end in an MFD -- let the VMS code
          * figure out whether it's a real device or a rooted logical. */
-        dir[dirlen] = '/'; dir[dirlen+1] = '\0';
-        if (do_tovmsspec(dir,vmsdir,0) == NULL) return NULL;
+        trndir[dirlen] = '/'; trndir[dirlen+1] = '\0';
+        if (do_tovmsspec(trndir,vmsdir,0) == NULL) return NULL;
         if (do_fileify_dirspec(vmsdir,trndir,0) == NULL) return NULL;
         return do_tounixspec(trndir,buf,ts);
       }
       else {
-        if ( !(lastdir = cp1 = strrchr(dir,'/')) &&
-             !(lastdir = cp1 = strrchr(dir,']')) &&
-             !(lastdir = cp1 = strrchr(dir,'>'))) cp1 = dir;
+        if ( !(lastdir = cp1 = strrchr(trndir,'/')) &&
+             !(lastdir = cp1 = strrchr(trndir,']')) &&
+             !(lastdir = cp1 = strrchr(trndir,'>'))) cp1 = trndir;
         if ((cp2 = strchr(cp1,'.'))) {  /* look for explicit type */
           int ver; char *cp3;
           if (!*(cp2+1) || toupper(*(cp2+1)) != 'D' ||  /* Wrong type. */
@@ -3253,14 +3255,14 @@ static char *mp_do_fileify_dirspec(pTHX_ char *dir,char *buf,int ts)
             set_vaxc_errno(RMS$_DIR);
             return NULL;
           }
-          dirlen = cp2 - dir;
+          dirlen = cp2 - trndir;
         }
       }
       /* If we lead off with a device or rooted logical, add the MFD
          if we're specifying a top-level directory. */
-      if (lastdir && *dir == '/') {
+      if (lastdir && *trndir == '/') {
         addmfd = 1;
-        for (cp1 = lastdir - 1; cp1 > dir; cp1--) {
+        for (cp1 = lastdir - 1; cp1 > trndir; cp1--) {
           if (*cp1 == '/') {
             addmfd = 0;
             break;
@@ -3272,13 +3274,13 @@ static char *mp_do_fileify_dirspec(pTHX_ char *dir,char *buf,int ts)
       else if (ts) Newx(retspec,retlen+1,char);
       else retspec = __fileify_retbuf;
       if (addmfd) {
-        dirlen = lastdir - dir;
-        memcpy(retspec,dir,dirlen);
+        dirlen = lastdir - trndir;
+        memcpy(retspec,trndir,dirlen);
         strcpy(&retspec[dirlen],"/000000");
         strcpy(&retspec[dirlen+7],lastdir);
       }
       else {
-        memcpy(retspec,dir,dirlen);
+        memcpy(retspec,trndir,dirlen);
         retspec[dirlen] = '\0';
       }
       /* We've picked up everything up to the directory file name.
@@ -3293,14 +3295,14 @@ static char *mp_do_fileify_dirspec(pTHX_ char *dir,char *buf,int ts)
       struct NAM savnam, dirnam = cc$rms_nam;
 
       dirfab.fab$b_fns = strlen(dir);
-      dirfab.fab$l_fna = dir;
+      dirfab.fab$l_fna = trndir;
       dirfab.fab$l_nam = &dirnam;
       dirfab.fab$l_dna = ".DIR;1";
       dirfab.fab$b_dns = 6;
       dirnam.nam$b_ess = NAM$C_MAXRSS;
       dirnam.nam$l_esa = esa;
 
-      for (cp = dir; *cp; cp++)
+      for (cp = trndir; *cp; cp++)
         if (islower(*cp)) { haslower = 1; break; }
       if (!((sts = sys$parse(&dirfab))&1)) {
         if (dirfab.fab$l_sts == RMS$_DIR) {
@@ -3448,13 +3450,13 @@ static char *mp_do_fileify_dirspec(pTHX_ char *dir,char *buf,int ts)
 }  /* end of do_fileify_dirspec() */
 /*}}}*/
 /* External entry points */
-char *Perl_fileify_dirspec(pTHX_ char *dir, char *buf)
+char *Perl_fileify_dirspec(pTHX_ const char *dir, char *buf)
 { return do_fileify_dirspec(dir,buf,0); }
-char *Perl_fileify_dirspec_ts(pTHX_ char *dir, char *buf)
+char *Perl_fileify_dirspec_ts(pTHX_ const char *dir, char *buf)
 { return do_fileify_dirspec(dir,buf,1); }
 
 /*{{{ char *pathify_dirspec[_ts](char *path, char *buf)*/
-static char *mp_do_pathify_dirspec(pTHX_ char *dir,char *buf, int ts)
+static char *mp_do_pathify_dirspec(pTHX_ const char *dir,char *buf, int ts)
 {
     static char __pathify_retbuf[NAM$C_MAXRSS+1];
     unsigned long int retlen;
@@ -3486,16 +3488,19 @@ static char *mp_do_pathify_dirspec(pTHX_ char *dir,char *buf, int ts)
         return retpath;
       }
     }
-    dir = trndir;
 
-    if (!strpbrk(dir,"]:>")) { /* Unix-style path or plain name */
-      if (*dir == '.' && (*(dir+1) == '\0' ||
-                          (*(dir+1) == '.' && *(dir+2) == '\0')))
-        retlen = 2 + (*(dir+1) != '\0');
+    /* At this point we do not work with *dir, but the copy in
+     * *trndir that is modifiable.
+     */
+
+    if (!strpbrk(trndir,"]:>")) { /* Unix-style path or plain name */
+      if (*trndir == '.' && (*(trndir+1) == '\0' ||
+                          (*(trndir+1) == '.' && *(trndir+2) == '\0')))
+        retlen = 2 + (*(trndir+1) != '\0');
       else {
-        if ( !(cp1 = strrchr(dir,'/')) &&
-             !(cp1 = strrchr(dir,']')) &&
-             !(cp1 = strrchr(dir,'>')) ) cp1 = dir;
+        if ( !(cp1 = strrchr(trndir,'/')) &&
+             !(cp1 = strrchr(trndir,']')) &&
+             !(cp1 = strrchr(trndir,'>')) ) cp1 = trndir;
         if ((cp2 = strchr(cp1,'.')) != NULL &&
             (*(cp2-1) != '/' ||                /* Trailing '.', '..', */
              !(*(cp2+1) == '\0' ||             /* or '...' are dirs.  */
@@ -3512,16 +3517,16 @@ static char *mp_do_pathify_dirspec(pTHX_ char *dir,char *buf, int ts)
             set_vaxc_errno(RMS$_DIR);
             return NULL;
           }
-          retlen = cp2 - dir + 1;
+          retlen = cp2 - trndir + 1;
         }
         else {  /* No file type present.  Treat the filename as a directory. */
-          retlen = strlen(dir) + 1;
+          retlen = strlen(trndir) + 1;
         }
       }
       if (buf) retpath = buf;
       else if (ts) Newx(retpath,retlen+1,char);
       else retpath = __pathify_retbuf;
-      strncpy(retpath,dir,retlen-1);
+      strncpy(retpath, trndir, retlen-1);
       if (retpath[retlen-2] != '/') { /* If the path doesn't already end */
         retpath[retlen-1] = '/';      /* with '/', add it. */
         retpath[retlen] = '\0';
@@ -3535,8 +3540,8 @@ static char *mp_do_pathify_dirspec(pTHX_ char *dir,char *buf, int ts)
       struct NAM savnam, dirnam = cc$rms_nam;
 
       /* If we've got an explicit filename, we can just shuffle the string. */
-      if ( ( (cp1 = strrchr(dir,']')) != NULL ||
-             (cp1 = strrchr(dir,'>')) != NULL     ) && *(cp1+1)) {
+      if ( ( (cp1 = strrchr(trndir,']')) != NULL ||
+             (cp1 = strrchr(trndir,'>')) != NULL     ) && *(cp1+1)) {
         if ((cp2 = strchr(cp1,'.')) != NULL) {
           int ver; char *cp3;
           if (!*(cp2+1) || toupper(*(cp2+1)) != 'D' ||  /* Wrong type. */
@@ -3558,15 +3563,15 @@ static char *mp_do_pathify_dirspec(pTHX_ char *dir,char *buf, int ts)
         *cp1 = '.';
         /* We've now got a VMS 'path'; fall through */
       }
-      dirfab.fab$b_fns = strlen(dir);
-      dirfab.fab$l_fna = dir;
+      dirfab.fab$b_fns = strlen(trndir);
+      dirfab.fab$l_fna = trndir;
       if (dir[dirfab.fab$b_fns-1] == ']' ||
           dir[dirfab.fab$b_fns-1] == '>' ||
           dir[dirfab.fab$b_fns-1] == ':') { /* It's already a VMS 'path' */
         if (buf) retpath = buf;
         else if (ts) Newx(retpath,strlen(dir)+1,char);
         else retpath = __pathify_retbuf;
-        strcpy(retpath,dir);
+        strcpy(retpath,trndir);
         return retpath;
       } 
       dirfab.fab$l_dna = ".DIR;1";
@@ -3575,7 +3580,7 @@ static char *mp_do_pathify_dirspec(pTHX_ char *dir,char *buf, int ts)
       dirnam.nam$b_ess = (unsigned char) sizeof esa - 1;
       dirnam.nam$l_esa = esa;
 
-      for (cp = dir; *cp; cp++)
+      for (cp = trndir; *cp; cp++)
         if (islower(*cp)) { haslower = 1; break; }
 
       if (!(sts = (sys$parse(&dirfab)&1))) {
@@ -3639,16 +3644,17 @@ static char *mp_do_pathify_dirspec(pTHX_ char *dir,char *buf, int ts)
 }  /* end of do_pathify_dirspec() */
 /*}}}*/
 /* External entry points */
-char *Perl_pathify_dirspec(pTHX_ char *dir, char *buf)
+char *Perl_pathify_dirspec(pTHX_ const char *dir, char *buf)
 { return do_pathify_dirspec(dir,buf,0); }
-char *Perl_pathify_dirspec_ts(pTHX_ char *dir, char *buf)
+char *Perl_pathify_dirspec_ts(pTHX_ const char *dir, char *buf)
 { return do_pathify_dirspec(dir,buf,1); }
 
 /*{{{ char *tounixspec[_ts](char *path, char *buf)*/
-static char *mp_do_tounixspec(pTHX_ char *spec, char *buf, int ts)
+static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts)
 {
   static char __tounixspec_retbuf[NAM$C_MAXRSS+1];
-  char *dirend, *rslt, *cp1, *cp2, *cp3, tmp[NAM$C_MAXRSS+1];
+  char *dirend, *rslt, *cp1, *cp3, tmp[NAM$C_MAXRSS+1];
+  const char *cp2;
   int devlen, dirlen, retlen = NAM$C_MAXRSS+1;
   int expand = 1; /* guarantee room for leading and trailing slashes */
   unsigned short int trnlnm_iter_count;
@@ -3774,14 +3780,15 @@ static char *mp_do_tounixspec(pTHX_ char *spec, char *buf, int ts)
 }  /* end of do_tounixspec() */
 /*}}}*/
 /* External entry points */
-char *Perl_tounixspec(pTHX_ char *spec, char *buf) { return do_tounixspec(spec,buf,0); }
-char *Perl_tounixspec_ts(pTHX_ char *spec, char *buf) { return do_tounixspec(spec,buf,1); }
+char *Perl_tounixspec(pTHX_ const char *spec, char *buf) { return do_tounixspec(spec,buf,0); }
+char *Perl_tounixspec_ts(pTHX_ const char *spec, char *buf) { return do_tounixspec(spec,buf,1); }
 
 /*{{{ char *tovmsspec[_ts](char *path, char *buf)*/
-static char *mp_do_tovmsspec(pTHX_ char *path, char *buf, int ts) {
+static char *mp_do_tovmsspec(pTHX_ const char *path, char *buf, int ts) {
   static char __tovmsspec_retbuf[NAM$C_MAXRSS+1];
   char *rslt, *dirend;
-  register char *cp1, *cp2;
+  register char *cp1;
+  const char *cp2;
   unsigned long int infront = 0, hasdir = 1;
 
   if (path == NULL) return NULL;
@@ -3922,7 +3929,7 @@ char *Perl_tovmsspec(pTHX_ char *path, char *buf) { return do_tovmsspec(path,buf
 char *Perl_tovmsspec_ts(pTHX_ char *path, char *buf) { return do_tovmsspec(path,buf,1); }
 
 /*{{{ char *tovmspath[_ts](char *path, char *buf)*/
-static char *mp_do_tovmspath(pTHX_ char *path, char *buf, int ts) {
+static char *mp_do_tovmspath(pTHX_ const char *path, char *buf, int ts) {
   static char __tovmspath_retbuf[NAM$C_MAXRSS+1];
   int vmslen;
   char pathified[NAM$C_MAXRSS+1], vmsified[NAM$C_MAXRSS+1], *cp;
@@ -3946,12 +3953,12 @@ static char *mp_do_tovmspath(pTHX_ char *path, char *buf, int ts) {
 }  /* end of do_tovmspath() */
 /*}}}*/
 /* External entry points */
-char *Perl_tovmspath(pTHX_ char *path, char *buf) { return do_tovmspath(path,buf,0); }
-char *Perl_tovmspath_ts(pTHX_ char *path, char *buf) { return do_tovmspath(path,buf,1); }
+char *Perl_tovmspath(pTHX_ const char *path, char *buf) { return do_tovmspath(path,buf,0); }
+char *Perl_tovmspath_ts(pTHX_ const char *path, char *buf) { return do_tovmspath(path,buf,1); }
 
 
 /*{{{ char *tounixpath[_ts](char *path, char *buf)*/
-static char *mp_do_tounixpath(pTHX_ char *path, char *buf, int ts) {
+static char *mp_do_tounixpath(pTHX_ const char *path, char *buf, int ts) {
   static char __tounixpath_retbuf[NAM$C_MAXRSS+1];
   int unixlen;
   char pathified[NAM$C_MAXRSS+1], unixified[NAM$C_MAXRSS+1], *cp;
@@ -3975,8 +3982,8 @@ static char *mp_do_tounixpath(pTHX_ char *path, char *buf, int ts) {
 }  /* end of do_tounixpath() */
 /*}}}*/
 /* External entry points */
-char *Perl_tounixpath(pTHX_ char *path, char *buf) { return do_tounixpath(path,buf,0); }
-char *Perl_tounixpath_ts(pTHX_ char *path, char *buf) { return do_tounixpath(path,buf,1); }
+char *Perl_tounixpath(pTHX_ const char *path, char *buf) { return do_tounixpath(path,buf,0); }
+char *Perl_tounixpath_ts(pTHX_ const char *path, char *buf) { return do_tounixpath(path,buf,1); }
 
 /*
  * @(#)argproc.c 2.2 94/08/16	Mark Pizzolato (mark@infocomm.com)
@@ -4859,7 +4866,7 @@ Perl_trim_unixpath(pTHX_ char *fspec, char *wildspec, int opts)
  */
 /*{{{ DIR *opendir(char*name) */
 DIR *
-Perl_opendir(pTHX_ char *name)
+Perl_opendir(pTHX_ const char *name)
 {
     DIR *dd;
     char dir[NAM$C_MAXRSS+1];

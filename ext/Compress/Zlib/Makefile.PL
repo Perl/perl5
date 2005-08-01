@@ -193,7 +193,7 @@ MyTrebleCheck:
 	@echo All is ok.
 
 Zlib.xs:	typemap
-	@$(TOUCH) Zlib.xs
+	@ $(TOUCH) Zlib.xs
 
 EOM
 
