@@ -123,7 +123,7 @@ POSIX =
 .else
 XTRAOBJS = 
 LIBS1 = $(XTRAOBJS)
-DBGSPECFLAGS = /Show=All
+DBGSPECFLAGS = /Show=(expansion,include)/machine
 # Some versions of DECCRTL on AXP have a bug in chdir() which causes the change
 # to persist after the image exits, even when this was not requested, iff
 # SYSNAM is enabled.  This is fixed in CSC Patch # AXPACRT04_061, but turning
