@@ -3875,7 +3875,7 @@ target of the change to
 
 =item thread failed to start: %s
 
-(F) The entry point function of threads->create() failed for some reason.
+(S) The entry point function of threads->create() failed for some reason.
 
 =item times not implemented
 
