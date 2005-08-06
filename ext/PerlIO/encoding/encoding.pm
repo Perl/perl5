@@ -1,4 +1,5 @@
 package PerlIO::encoding;
+
 use strict;
 our $VERSION = '0.09';
 our $DEBUG = 0;
@@ -40,12 +41,11 @@ Perl's internal Unicode encoding, UTF-8).  On output, convert
 Perl string data into the specified character set and encoding.
 
 When the layer is pushed the current value of C<$PerlIO::encoding::fallback>
-is saved and used as the check argument when calling the Encodings
-encode and decode.
+is saved and used as the CHECK argument when calling the Encode methods encode()
+and decode().
 
 =head1 SEE ALSO
 
 L<open>, L<Encode>, L<perlfunc/binmode>, L<perluniintro>
 
 =cut
-
