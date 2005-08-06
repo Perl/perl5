@@ -1,9 +1,9 @@
 #
-# $Id: Encode.pm,v 2.10 2005/05/16 18:46:36 dankogai Exp dankogai $
+# $Id: Encode.pm,v 2.11 2005/08/05 10:58:25 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.10 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.11 $ =~ /(\d+)/g;
 sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load(__PACKAGE__, $VERSION);
@@ -19,7 +19,7 @@ our @EXPORT = qw(
 );
 
 our @FB_FLAGS  = qw(DIE_ON_ERR WARN_ON_ERR RETURN_ON_ERR LEAVE_SRC
-		    PERLQQ HTMLCREF XMLCREF);
+		    PERLQQ HTMLCREF XMLCREF STOP_AT_PARTIAL);
 our @FB_CONSTS = qw(FB_DEFAULT FB_CROAK FB_QUIET FB_WARN
 		    FB_PERLQQ FB_HTMLCREF FB_XMLCREF);
 

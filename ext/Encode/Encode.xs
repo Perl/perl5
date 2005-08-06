@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.4 2005/05/16 18:46:36 dankogai Exp dankogai $
+ $Id: Encode.xs,v 2.5 2005/08/05 10:58:25 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -151,6 +151,8 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		UV ch =
 		    utf8n_to_uvuni(s+slen, (SvCUR(src)-slen),
 				   &clen, UTF8_ALLOW_ANY|UTF8_CHECK_ONLY);
+		/* if non-representable multibyte prefix at end of current buffer - break*/
+		if (clen > tlen - sdone) break;
 		if (check & ENCODE_DIE_ON_ERR) {
 		    Perl_croak(aTHX_ ERR_ENCODE_NOMAP,
 			       (UV)ch, enc->name[0]);
@@ -290,7 +292,7 @@ process_utf8(pTHX_ SV* dst, U8* s, U8* e, int check,
             if ((s + skip) > e) {
                 /* Partial character */
                 /* XXX could check that rest of bytes are UTF8_IS_CONTINUATION(ch) */
-                if (stop_at_partial)
+                if (stop_at_partial || (check & ENCODE_STOP_AT_PARTIAL))
                     break;
 
                 goto malformed_byte;
@@ -787,6 +789,13 @@ int
 XMLCREF()
 CODE:
     RETVAL = ENCODE_XMLCREF;
+OUTPUT:
+    RETVAL
+
+int
+STOP_AT_PARTIAL()
+CODE:
+    RETVAL = ENCODE_STOP_AT_PARTIAL;
 OUTPUT:
     RETVAL
 

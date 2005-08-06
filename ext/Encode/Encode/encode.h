@@ -98,6 +98,7 @@ extern void Encode_DefineEncoding(encode_t *enc);
 #define  ENCODE_PERLQQ         0x0100 /* perlqq fallback string */
 #define  ENCODE_HTMLCREF       0x0200 /* HTML character ref. fb mode */
 #define  ENCODE_XMLCREF        0x0400 /* XML  character ref. fb mode */
+#define  ENCODE_STOP_AT_PARTIAL 0x0800 /* stop at partial explicitly */
 
 #define  ENCODE_FB_DEFAULT     0x0000
 #define  ENCODE_FB_CROAK       0x0001
