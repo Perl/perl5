@@ -168,8 +168,9 @@ Perl_ithread_hook(pTHX)
     int veto_cleanup = 0;
     MUTEX_LOCK(&create_destruct_mutex);
     if (aTHX == PL_curinterp && active_threads != 1) {
-	Perl_warn(aTHX_ "A thread exited while %" IVdf " threads were running",
-						(IV)active_threads);
+	if (ckWARN_d(WARN_THREADS))
+	    Perl_warn(aTHX_ "A thread exited while %" IVdf " threads were running",
+						      (IV)active_threads);
 	veto_cleanup = 1;
     }
     MUTEX_UNLOCK(&create_destruct_mutex);
@@ -304,7 +305,7 @@ Perl_ithread_run(void * arg) {
 		  SV *sv = POPs;
 		  av_store(params, i, SvREFCNT_inc(sv));
 		}
-		if (SvTRUE(ERRSV)) {
+		if (SvTRUE(ERRSV) && ckWARN_d(WARN_THREADS)) {
 		    Perl_warn(aTHX_ "thread failed to start: %" SVf, ERRSV);
 		}
 		FREETMPS;
@@ -566,14 +567,12 @@ Perl_ithread_self (pTHX_ SV *obj, char* Class)
 void
 Perl_ithread_CLONE(pTHX_ SV *obj)
 {
- if (SvROK(obj))
-  {
-   ithread *thread = SV_to_ithread(aTHX_ obj);
-  }
- else
-  {
-   Perl_warn(aTHX_ "CLONE %" SVf,obj);
-  }
+    if (SvROK(obj)) {
+	ithread *thread = SV_to_ithread(aTHX_ obj);
+    }
+    else if (ckWARN_d(WARN_THREADS)) {
+	Perl_warn(aTHX_ "CLONE %" SVf,obj);
+    }
 }
 
 AV*

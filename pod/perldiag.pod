@@ -193,7 +193,7 @@ know which context to supply to the right side.
 
 =item A thread exited while %d threads were running
 
-(W) When using threaded Perl, a thread (not necessarily the main
+(W threads)(S) When using threaded Perl, a thread (not necessarily the main
 thread) exited while there were still other threads running.
 Usually it's a good idea to first collect the return values of the
 created threads by joining them, and only then exit from the main
@@ -3875,7 +3875,7 @@ target of the change to
 
 =item thread failed to start: %s
 
-(S) The entry point function of threads->create() failed for some reason.
+(W threads)(S) The entry point function of threads->create() failed for some reason.
 
 =item times not implemented
 
