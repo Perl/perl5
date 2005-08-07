@@ -312,7 +312,7 @@ Locate the CV corresponding to the currently executing sub or eval.
 If db_seqp is non_null, skip CVs that are in the DB package and populate
 *db_seqp with the cop sequence number at the point that the DB:: code was
 entered. (allows debuggers to eval in the scope of the breakpoint rather
-than in in the scope of the debugger itself).
+than in the scope of the debugger itself).
 
 	CV*	find_runcv(U32 *db_seqp)
 
@@ -625,7 +625,7 @@ Found in file pad.c
 
 Allocate a new my or tmp pad entry. For a my, simply push a null SV onto
 the end of PL_comppad, but for a tmp, scan the pad from PL_padix upwards
-for a slot which has no name and and no active value.
+for a slot which has no name and no active value.
 
 	PADOFFSET	pad_alloc(I32 optype, U32 tmptype)
 
