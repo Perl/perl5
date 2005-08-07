@@ -3505,7 +3505,7 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
     LOGOP *logop;
     OP *o;
     OP *first = *firstp;
-    OP *other = *otherp;
+    OP * const other = *otherp;
 
     if (type == OP_XOR)		/* Not short circuit, but here by precedence. */
 	return newBINOP(type, flags, scalar(first), scalar(other));
@@ -3568,8 +3568,8 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
     else if ((first->op_flags & OPf_KIDS) && type != OP_DOR
 	&& ckWARN(WARN_MISC)) /* [#24076] Don't warn for <FH> err FOO. */
     {
-	const OP *k1 = ((UNOP*)first)->op_first;
-	const OP *k2 = k1->op_sibling;
+	const OP * const k1 = ((UNOP*)first)->op_first;
+	const OP * const k2 = k1->op_sibling;
 	OPCODE warnop = 0;
 	switch (first->op_type)
 	{
@@ -3649,9 +3649,9 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
     scalarboolean(first);
     if (first->op_type == OP_CONST) {
         if (first->op_private & OPpCONST_BARE &&
-           first->op_private & OPpCONST_STRICT) {
-           no_bareword_allowed(first);
-       }
+	    first->op_private & OPpCONST_STRICT) {
+	    no_bareword_allowed(first);
+	}
 	if (SvTRUE(((SVOP*)first)->op_sv)) {
 	    op_free(first);
 	    op_free(falseop);

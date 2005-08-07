@@ -271,18 +271,18 @@ Ap	|void	|gv_fullname	|NN SV* sv|NN const GV* gv
 Apmb	|void	|gv_fullname3	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix
 Ap	|void	|gv_fullname4	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix|bool keepmain
 Ap	|void	|gv_init	|NN GV* gv|HV* stash|NN const char* name|STRLEN len|int multi
-Apd	|HV*	|gv_stashpv	|const char* name|I32 create
-Apd	|HV*	|gv_stashpvn	|const char* name|U32 namelen|I32 create
-Apd	|HV*	|gv_stashsv	|SV* sv|I32 create
-Apd	|void	|hv_clear	|HV* tb
-Ap	|void	|hv_delayfree_ent|HV* hv|HE* entry
-Apd	|SV*	|hv_delete	|HV* tb|const char* key|I32 klen|I32 flags
-Apd	|SV*	|hv_delete_ent	|HV* tb|SV* key|I32 flags|U32 hash
-ApdR	|bool	|hv_exists	|HV* tb|const char* key|I32 klen
-ApdR	|bool	|hv_exists_ent	|HV* tb|SV* key|U32 hash
-Apd	|SV**	|hv_fetch	|HV* tb|const char* key|I32 klen|I32 lval
-Apd	|HE*	|hv_fetch_ent	|HV* tb|SV* key|I32 lval|U32 hash
-Ap	|void	|hv_free_ent	|NN HV* hv|NULLOK HE* entry
+Apd	|HV*	|gv_stashpv	|NN const char* name|I32 create
+Apd	|HV*	|gv_stashpvn	|NN const char* name|U32 namelen|I32 create
+Apd	|HV*	|gv_stashsv	|NULLOK SV* sv|I32 create
+Apd	|void	|hv_clear	|NULLOK HV* tb
+Ap	|void	|hv_delayfree_ent|NN HV* hv|NULLOK HE* entry
+Apd	|SV*	|hv_delete	|NULLOK HV* tb|NN const char* key|I32 klen|I32 flags
+Apd	|SV*	|hv_delete_ent	|NULLOK HV* tb|NN SV* key|I32 flags|U32 hash
+ApdR	|bool	|hv_exists	|NULLOK HV* tb|NN const char* key|I32 klen
+ApdR	|bool	|hv_exists_ent	|NULLOK HV* tb|NN SV* key|U32 hash
+Apd	|SV**	|hv_fetch	|NULLOK HV* tb|NN const char* key|I32 klen|I32 lval
+Apd	|HE*	|hv_fetch_ent	|NULLOK HV* tb|NN SV* key|I32 lval|U32 hash
+Ap	|void	|hv_free_ent	|NN HV* hv|NULLOK HE* entryK
 Apd	|I32	|hv_iterinit	|NN HV* tb
 ApdR	|char*	|hv_iterkey	|NN HE* entry|NN I32* retlen
 ApdR	|SV*	|hv_iterkeysv	|NN HE* entry
@@ -440,13 +440,13 @@ p	|int	|magic_wipepack	|SV* sv|MAGIC* mg
 p	|void	|magicname	|const char* sym|const char* name|I32 namlen
 Ap	|void	|markstack_grow
 #if defined(USE_LOCALE_COLLATE)
-p	|int	|magic_setcollxfrm|SV* sv|MAGIC* mg
-p	|char*	|mem_collxfrm	|const char* s|STRLEN len|STRLEN* xlen
+p	|int	|magic_setcollxfrm|NN SV* sv|NN MAGIC* mg
+p	|char*	|mem_collxfrm	|NN const char* s|STRLEN len|NN STRLEN* xlen
 #endif
 Afp	|SV*	|mess		|NN const char* pat|...
 Ap	|SV*	|vmess		|NN const char* pat|NULLOK va_list* args
-p	|void	|qerror		|SV* err
-Apd     |void   |sortsv         |SV ** array|size_t num_elts|SVCOMPARE_t cmp
+p	|void	|qerror		|NN SV* err
+Apd	|void	|sortsv		|NN SV** array|size_t num_elts|SVCOMPARE_t cmp
 Apd	|int	|mg_clear	|NN SV* sv
 Apd	|int	|mg_copy	|NN SV* sv|NN SV* nsv|const char* key|I32 klen
 pd	|void	|mg_localize	|NN SV* sv|NN SV* nsv
@@ -494,22 +494,22 @@ ApPa	|long	|my_htonl	|long l
 ApPa	|long	|my_ntohl	|long l
 #endif
 p	|void	|my_unexec
-Apa	|OP*	|newANONLIST	|OP* o
-Apa	|OP*	|newANONHASH	|OP* o
+Apa	|OP*	|newANONLIST	|NULLOK OP* o
+Apa	|OP*	|newANONHASH	|NULLOK OP* o
 Ap	|OP*	|newANONSUB	|I32 floor|OP* proto|OP* block
 Apa	|OP*	|newASSIGNOP	|I32 flags|NULLOK OP* left|I32 optype|NULLOK OP* right
 Apa	|OP*	|newCONDOP	|I32 flags|NN OP* first|NULLOK OP* trueop|NULLOK OP* falseop
 Apd	|CV*	|newCONSTSUB	|NULLOK HV* stash|NULLOK const char* name|NULLOK SV* sv
 Ap	|void	|newFORM	|I32 floor|NULLOK OP* o|NULLOK OP* block
-Apa	|OP*	|newFOROP	|I32 flags|char* label|line_t forline \
-				|NULLOK OP* sv|OP* expr|OP*block|OP*cont
-Apa	|OP*	|newLOGOP	|I32 optype|I32 flags|OP* left|OP* right
-Apa	|OP*	|newLOOPEX	|I32 type|OP* label
-Apa	|OP*	|newLOOPOP	|I32 flags|I32 debuggable|OP* expr|OP* block
+Apa	|OP*	|newFOROP	|I32 flags|NULLOK char* label|line_t forline \
+				|NULLOK OP* sv|NN OP* expr|NULLOK OP* block|NULLOK OP* cont
+Apa	|OP*	|newLOGOP	|I32 optype|I32 flags|NN OP* left|NN OP* right
+Apa	|OP*	|newLOOPEX	|I32 type|NN OP* label
+Apa	|OP*	|newLOOPOP	|I32 flags|I32 debuggable|NULLOK OP* expr|NULLOK OP* block
 Apa	|OP*	|newNULLLIST
 Apa	|OP*	|newOP		|I32 optype|I32 flags
 Ap	|void	|newPROG	|NN OP* o
-Apa	|OP*	|newRANGE	|I32 flags|OP* left|OP* right
+Apa	|OP*	|newRANGE	|I32 flags|NN OP* left|NN OP* right
 Apa	|OP*	|newSLICEOP	|I32 flags|NULLOK OP* subscript|NULLOK OP* listop
 Apa	|OP*	|newSTATEOP	|I32 flags|NULLOK char* label|NULLOK OP* o
 Ap	|CV*	|newSUB		|I32 floor|OP* o|OP* proto|OP* block
@@ -519,14 +519,14 @@ Apa	|OP*	|newAVREF	|NN OP* o
 Apa	|OP*	|newBINOP	|I32 type|I32 flags|OP* first|OP* last
 Apa	|OP*	|newCVREF	|I32 flags|NULLOK OP* o
 Apa	|OP*	|newGVOP	|I32 type|I32 flags|NN GV* gv
-Apa	|GV*	|newGVgen	|const char* pack
-Apa	|OP*	|newGVREF	|I32 type|OP* o
+Apa	|GV*	|newGVgen	|NN const char* pack
+Apa	|OP*	|newGVREF	|I32 type|NULLOK OP* o
 ApaR	|OP*	|newHVREF	|NN OP* o
 ApdaR	|HV*	|newHV
-ApaR	|HV*	|newHVhv	|HV* hv
+ApaR	|HV*	|newHVhv	|NULLOK HV* hv
 Apa	|IO*	|newIO
 Apa	|OP*	|newLISTOP	|I32 type|I32 flags|OP* first|OP* last
-Apa	|OP*	|newPADOP	|I32 type|I32 flags|SV* sv
+Apa	|OP*	|newPADOP	|I32 type|I32 flags|NULLOK SV* sv
 Apa	|OP*	|newPMOP	|I32 type|I32 flags
 Apa	|OP*	|newPVOP	|I32 type|I32 flags|char* pv
 Apa	|SV*	|newRV		|NN SV* pref
@@ -537,9 +537,9 @@ Apa	|OP*	|newSVOP	|I32 type|I32 flags|NN SV* sv
 Apda	|SV*	|newSViv	|IV i
 Apda	|SV*	|newSVuv	|UV u
 Apda	|SV*	|newSVnv	|NV n
-Apda	|SV*	|newSVpv	|const char* s|STRLEN len
-Apda	|SV*	|newSVpvn	|const char* s|STRLEN len
-Apda	|SV*	|newSVhek	|const HEK *hek
+Apda	|SV*	|newSVpv	|NULLOK const char* s|STRLEN len
+Apda	|SV*	|newSVpvn	|NULLOK const char* s|STRLEN len
+Apda	|SV*	|newSVhek	|NULLOK const HEK *hek
 Apda	|SV*	|newSVpvn_share	|NULLOK const char* s|I32 len|U32 hash
 Afpda	|SV*	|newSVpvf	|NN const char* pat|...
 Apa	|SV*	|vnewSVpvf	|NN const char* pat|NULLOK va_list* args
@@ -902,7 +902,7 @@ Apd	|void	|sv_catpv_mg	|NN SV *sv|NN const char *ptr
 Apd	|void	|sv_catpvn_mg	|NN SV *sv|NN const char *ptr|STRLEN len
 Apd	|void	|sv_catsv_mg	|NN SV *dstr|NULLOK SV *sstr
 Afpd	|void	|sv_setpvf_mg	|NN SV *sv|NN const char* pat|...
-Apd	|void	|sv_vsetpvf_mg	|NN SV* sv|NN const char* pat|va_list* args
+Apd	|void	|sv_vsetpvf_mg	|NN SV* sv|NN const char* pat|NULLOK va_list* args
 Apd	|void	|sv_setiv_mg	|NN SV *sv|IV i
 Apdb	|void	|sv_setpviv_mg	|NN SV *sv|IV iv
 Apd	|void	|sv_setuv_mg	|NN SV *sv|UV u
