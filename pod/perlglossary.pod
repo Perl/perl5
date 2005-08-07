@@ -184,7 +184,7 @@ regular operators.  See L<perlop>.
 
 =item autoincrement
 
-To add one to something automatically, hence the name of the the C<++>
+To add one to something automatically, hence the name of the C<++>
 operator.  To instead subtract one from something automatically is
 known as an "autodecrement".
 

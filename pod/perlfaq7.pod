@@ -179,7 +179,7 @@ If you're looking for something a bit more rigorous, try L<perltoot>.
 (contributed by brian d foy)
 
 L<perlmod>, L<perlmodlib>, L<perlmodstyle> explain modules
-in all the gory details. L<perlnewmod> gives a a brief
+in all the gory details. L<perlnewmod> gives a brief
 overview of the process along with a couple of suggestions
 about style.
 

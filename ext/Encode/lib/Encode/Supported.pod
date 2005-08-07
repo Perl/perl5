@@ -834,7 +834,7 @@ The glossary of this document is based upon this site.
 
 L<http://czyborra.com/>
 
-Contains a a lot of useful information, especially gory details of ISO
+Contains a lot of useful information, especially gory details of ISO
 vs. vendor mappings.
 
 =item CJK.inf

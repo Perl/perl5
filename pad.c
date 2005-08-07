@@ -386,7 +386,7 @@ Perl_pad_add_name(pTHX_ const char *name, HV* typestash, HV* ourstash, bool fake
 
 Allocate a new my or tmp pad entry. For a my, simply push a null SV onto
 the end of PL_comppad, but for a tmp, scan the pad from PL_padix upwards
-for a slot which has no name and and no active value.
+for a slot which has no name and no active value.
 
 =cut
 */

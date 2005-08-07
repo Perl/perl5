@@ -854,7 +854,7 @@ changes.  Modifying the $0 is more useful as a way of indicating the
 current program state than it is for hiding the program you're
 running.  (Mnemonic: same as B<sh> and B<ksh>.)
 
-Note that there are platform specific limitations on the the maximum
+Note that there are platform specific limitations on the maximum
 length of C<$0>.  In the most extreme case it may be limited to the
 space occupied by the original C<$0>.
 
@@ -872,7 +872,7 @@ and version).  This is an operating system feature, Perl cannot help it.
 
 In multithreaded scripts Perl coordinates the threads so that any
 thread may modify its copy of the C<$0> and the change becomes visible
-to ps(1) (assuming the operating system plays along).  Note that the
+to ps(1) (assuming the operating system plays along).  Note that
 the view of C<$0> the other threads have will not change since they
 have their own copies of it.
 
