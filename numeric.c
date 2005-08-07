@@ -893,6 +893,21 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 	    ++s;
     }
 
+    /* punt to strtod for NaN/Inf; if no support for it there, tough luck */
+
+#ifdef HAS_STRTOD
+    if (*s == 'n' || *s == 'N' || *s == 'i' || *s == 'I') {
+        char *p = negative ? s-1 : s;
+        char *endp;
+        NV rslt;
+        rslt = strtod(p, &endp);
+        if (endp != p) {
+            *value = rslt;
+            return (char *)endp;
+        }
+    }
+#endif
+
     /* we accumulate digits into an integer; when this becomes too
      * large, we add the total to NV and start again */
 

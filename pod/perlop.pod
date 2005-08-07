@@ -369,8 +369,8 @@ values, using them with "<=>" returns undef.  NaN is not "<", "==", ">",
 returns true, as does NaN != anything else. If your platform doesn't
 support NaNs then NaN is just a string with numeric value 0.
 
-    perl -le '$a = NaN; print "No NaN support here" if $a == $a'
-    perl -le '$a = NaN; print "NaN support here" if $a != $a'
+    perl -le '$a = "NaN"; print "No NaN support here" if $a == $a'
+    perl -le '$a = "NaN"; print "NaN support here" if $a != $a'
 
 Binary "eq" returns true if the left argument is stringwise equal to
 the right argument.
