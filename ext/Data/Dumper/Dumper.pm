@@ -9,7 +9,7 @@
 
 package Data::Dumper;
 
-$VERSION = '2.121_07';
+$VERSION = '2.121_08';
 
 #$| = 1;
 

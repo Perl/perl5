@@ -614,9 +614,11 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
                 I32 nlen;
 		bool do_utf8 = FALSE;
 
-                if ((sortkeys && !(keys && (I32)i <= av_len(keys))) ||
-                    !(entry = hv_iternext((HV *)ival)))
-                    break;
+               if (sortkeys) {
+                   if (!(keys && (I32)i <= av_len(keys))) break;
+               } else {
+                   if (!(entry = hv_iternext((HV *)ival))) break;
+               }
 
 		if (i)
 		    sv_catpvn(retval, ",", 1);
