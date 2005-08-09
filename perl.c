@@ -2238,8 +2238,10 @@ S_run_body(pTHX_ I32 oldscope)
 
     if (!PL_restartop) {
 	DEBUG_x(dump_all());
+#ifdef DEBUGGING
 	if (!DEBUG_q_TEST)
 	  PERL_DEBUG(PerlIO_printf(Perl_debug_log, "\nEXECUTING...\n\n"));
+#endif
 	DEBUG_S(PerlIO_printf(Perl_debug_log, "main thread is 0x%"UVxf"\n",
 			      PTR2UV(thr)));
 
