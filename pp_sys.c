@@ -367,7 +367,7 @@ PP(pp_backtick)
 		SvTAINTED_on(sv);
 	    }
 	}
-	STATUS_NATIVE_SET(PerlProc_pclose(fp));
+	STATUS_NATIVE_CHILD_SET(PerlProc_pclose(fp));
 	TAINT;		/* "I believe that this is not gratuitous!" */
     }
     else {
@@ -3870,9 +3870,9 @@ PP(pp_wait)
     }
 #  if defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)
     /* 0 and -1 are both error returns (the former applies to WNOHANG case) */
-    STATUS_NATIVE_SET((childpid && childpid != -1) ? argflags : -1);
+    STATUS_NATIVE_CHILD_SET((childpid && childpid != -1) ? argflags : -1);
 #  else
-    STATUS_NATIVE_SET((childpid > 0) ? argflags : -1);
+    STATUS_NATIVE_CHILD_SET((childpid > 0) ? argflags : -1);
 #  endif
     XPUSHi(childpid);
     RETURN;
@@ -3902,9 +3902,9 @@ PP(pp_waitpid)
     }
 #  if defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)
     /* 0 and -1 are both error returns (the former applies to WNOHANG case) */
-    STATUS_NATIVE_SET((result && result != -1) ? argflags : -1);
+    STATUS_NATIVE_CHILD_SET((result && result != -1) ? argflags : -1);
 #  else
-    STATUS_NATIVE_SET((result > 0) ? argflags : -1);
+    STATUS_NATIVE_CHILD_SET((result > 0) ? argflags : -1);
 #  endif
     SETi(result);
     RETURN;
@@ -4034,7 +4034,7 @@ PP(pp_system)
     }
     if (PL_statusvalue == -1)	/* hint that value must be returned as is */
 	result = 1;
-    STATUS_NATIVE_SET(value);
+    STATUS_NATIVE_CHILD_SET(value);
     do_execfree();
     SP = ORIGMARK;
     XPUSHi(result ? value : STATUS_CURRENT);
