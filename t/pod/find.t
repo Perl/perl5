@@ -88,6 +88,7 @@ print "### found $result\n";
 
 require Config;
 if ($^O eq 'VMS') { # privlib is perl_root:[lib] OK but not under mms
+    $result = VMS::Filespec::vmsify($result); #if you want VMS you need to force it.
     $compare = "lib.File]Find.pm";
     $result =~ s/perl_root:\[\-?\.?//i;
     $result =~ s/\[\-?\.?//i; # needed under `mms test`

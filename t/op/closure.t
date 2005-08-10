@@ -466,7 +466,7 @@ END
 	    my $errfile = "terr$$";  $errfile++ while -e $errfile;
 	    my @tmpfiles = ($cmdfile, $errfile);
 	    open CMD, ">$cmdfile"; print CMD $code; close CMD;
-	    my $cmd = (($^O eq 'VMS') ? "MCR $^X"
+	    my $cmd = (($^O eq 'VMS') ? "$^X"
 		       : ($^O eq 'MSWin32') ? '.\perl'
 		       : ($^O eq 'MacOS') ? $^X
 		       : ($^O eq 'NetWare') ? 'perl'

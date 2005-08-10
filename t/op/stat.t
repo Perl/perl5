@@ -49,6 +49,8 @@ close FOO;
 open(FOO, ">$tmpfile") || DIE("Can't open temp test file: $!");
 
 my($nlink, $mtime, $ctime) = (stat(FOO))[$NLINK, $MTIME, $CTIME];
+
+#VMS Fix-me: nlink should work on VMS if applicable link support configured.
 SKIP: {
     skip "No link count", 1 if $Is_VMS;
 
@@ -211,6 +213,16 @@ SKIP: {
       unless -d '/dev' && -r '/dev' && -x '/dev';
     skip "Skipping: unexpected ls output in MP-RAS", 6
       if $Is_MPRAS;
+
+    # VMS problem:  If GNV or other UNIX like tool is installed, then
+    # sometimes Perl will find /bin/ls, and will try to run it.
+    # But since Perl on VMS does not know to run it under Bash, it will
+    # try to run the DCL verb LS.  And if the VMS product Language
+    # Sensitive Editor is installed, or some other LS verb, that will
+    # be run instead.  So do not do this until we can teach Perl
+    # when to use BASH on VMS.
+    skip "ls command not available to Perl in OpenVMS right now.", 6
+      if $Is_VMS;
 
     my $LS  = $Config{d_readlink} ? "ls -lL" : "ls -l";
     my $CMD = "$LS /dev 2>/dev/null";

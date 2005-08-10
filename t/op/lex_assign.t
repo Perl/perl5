@@ -8,7 +8,7 @@ BEGIN {
 $| = 1;
 umask 0;
 $xref = \ "";
-$runme = ($^O eq 'VMS' ? 'MCR ' : '') . $^X;
+$runme = $^X;
 @a = (1..5);
 %h = (1..6);
 $aref = \@a;

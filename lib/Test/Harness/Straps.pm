@@ -356,7 +356,6 @@ sub _command {
     my $self = shift;
 
     return $ENV{HARNESS_PERL}           if defined $ENV{HARNESS_PERL};
-    return "MCR $^X"                    if $self->{_is_vms};
     return Win32::GetShortPathName($^X) if $self->{_is_win32};
     return $^X;
 }
