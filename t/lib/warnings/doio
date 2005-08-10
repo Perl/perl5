@@ -60,10 +60,10 @@
 __END__
 # doio.c [Perl_do_open9]
 use warnings 'io' ;
-open(F, '|'.($^O eq 'VMS' ? 'mcr ':'')."$^X -e 1|");
+open(F, '|'."$^X -e 1|");
 close(F);
 no warnings 'io' ;
-open(G, '|'.($^O eq 'VMS' ? 'mcr ':'')."$^X -e 1|");
+open(G, '|'."$^X -e 1|");
 close(G);
 EXPECT
 Can't open bidirectional pipe at - line 3.

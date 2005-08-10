@@ -138,6 +138,10 @@ END {
 
     # Restore the environment for VMS (and doesn't hurt for anyone else)
     @ENV{@magic_envs} = @Saved_Env{@magic_envs};
+
+    # On VMS this must be deleted or process table is wrong on exit
+    # when this script is run interactively.
+    delete $ENV{'SYS$LOGIN'} if $IsVMS;
 }
 
 
