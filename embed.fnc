@@ -181,14 +181,14 @@ Ap	|int	|do_binmode	|NN PerlIO *fp|int iotype|int mode
 p	|void	|do_chop	|NN SV* asv|NN SV* sv
 Ap	|bool	|do_close	|NN GV* gv|bool not_implicit
 p	|bool	|do_eof		|NN GV* gv
-p	|bool	|do_exec	|NN char* cmd
+p	|bool	|do_exec	|NN const char* cmd
 #if defined(WIN32) || defined(SYMBIAN)
 Ap	|int	|do_aspawn	|NN SV* really|NN SV** mark|NN SV** sp
 Ap	|int	|do_spawn	|NN char* cmd
 Ap	|int	|do_spawn_nowait|NN char* cmd
 #endif
 #if !defined(WIN32)
-p	|bool	|do_exec3	|NN char* cmd|int fd|int flag
+p	|bool	|do_exec3	|NN const char* cmd|int fd|int flag
 #endif
 p	|void	|do_execfree
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
@@ -201,12 +201,12 @@ p	|I32	|do_shmio	|I32 optype|SV** mark|SV** sp
 #endif
 Ap	|void	|do_join	|NN SV* sv|NN SV* del|NN SV** mark|NN SV** sp
 p	|OP*	|do_kv
-Ap	|bool	|do_open	|NN GV* gv|NN char* name|I32 len|int as_raw \
+Ap	|bool	|do_open	|NN GV* gv|NN const char* name|I32 len|int as_raw \
 				|int rawmode|int rawperm|NULLOK PerlIO* supplied_fp
-Ap	|bool	|do_open9	|NN GV *gv|NN char *name|I32 len|int as_raw \
+Ap	|bool	|do_open9	|NN GV *gv|NN const char *name|I32 len|int as_raw \
 				|int rawmode|int rawperm|NULLOK PerlIO *supplied_fp \
 				|NN SV *svs|I32 num
-Ap	|bool	|do_openn	|NN GV *gv|NN char *name|I32 len|int as_raw \
+Ap	|bool	|do_openn	|NN GV *gv|NN const char *name|I32 len|int as_raw \
 				|int rawmode|int rawperm|NULLOK PerlIO *supplied_fp \
 				|NULLOK SV **svp|I32 num
 p	|void	|do_pipe	|NN SV* sv|NULLOK GV* rgv|NULLOK GV* wgv
@@ -483,7 +483,7 @@ AnpP	|I32	|my_memcmp	|NN const char* s1|NN const char* s2|I32 len
 Anp	|void*	|my_memset	|NN char* loc|I32 ch|I32 len
 #endif
 Ap	|I32	|my_pclose	|PerlIO* ptr
-Ap	|PerlIO*|my_popen	|char* cmd|char* mode
+Ap	|PerlIO*|my_popen	|const char* cmd|const char* mode
 Ap	|PerlIO*|my_popen_list	|char* mode|int n|SV ** args
 Ap	|void	|my_setenv	|const char* nam|const char* val
 Ap	|I32	|my_stat

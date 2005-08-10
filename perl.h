@@ -2547,17 +2547,25 @@ typedef pthread_key_t	perl_key;
 #   define STATUS_NATIVE	PL_statusvalue_vms
 #   define STATUS_NATIVE_EXPORT \
 	(((I32)PL_statusvalue_vms == -1 ? 44 : PL_statusvalue_vms) | (VMSISH_HUSHED ? 0x10000000 : 0))
-#   define STATUS_NATIVE_SET(n)						\
+#   define STATUS_NATIVE_SET(n) STATUS_NATIVE_SET_PORC(n, 0)
+#   define STATUS_NATIVE_CHILD_SET(n) STATUS_NATIVE_SET_PORC(n, 1)
+#   define STATUS_NATIVE_SET_PORC(n, _x)				\
 	STMT_START {							\
-	    PL_statusvalue_vms = (n);					\
-	    if ((I32)PL_statusvalue_vms == -1)				\
+	    I32 evalue = (I32)n;					\
+	    if (evalue == EVMSERR) {					\
+	      PL_statusvalue_vms = vaxc$errno;				\
+	      PL_statusvalue = evalue;					\
+	    }								\
+	    else {							\
+	      PL_statusvalue_vms = evalue;				\
+	      if ((I32)PL_statusvalue_vms == -1)			\
 		PL_statusvalue = -1;					\
-	    else if (PL_statusvalue_vms & STS$M_SUCCESS)		\
-		PL_statusvalue = 0;					\
-	    else if ((PL_statusvalue_vms & STS$M_SEVERITY) == 0)	\
-		PL_statusvalue = 1 << 8;				\
-	    else							\
-		PL_statusvalue = (PL_statusvalue_vms & STS$M_SEVERITY) << 8;	\
+	      else							\
+		PL_statusvalue = vms_status_to_unix(evalue);		\
+	      set_vaxc_errno(evalue);					\
+	      set_errno(PL_statusvalue);				\
+	      if (_x) PL_statusvalue = PL_statusvalue << 8;		\
+	    }								\
 	} STMT_END
 #   ifdef VMSISH_STATUS
 #	define STATUS_CURRENT	(VMSISH_STATUS ? STATUS_NATIVE : STATUS_UNIX)
@@ -2568,8 +2576,13 @@ typedef pthread_key_t	perl_key;
 	STMT_START {					\
 	    PL_statusvalue = (n);				\
 	    if (PL_statusvalue != -1) {			\
-		PL_statusvalue &= 0xFFFF;			\
-		PL_statusvalue_vms = PL_statusvalue ? 44 : 1;	\
+		if (PL_statusvalue != EVMSERR) {		\
+		  PL_statusvalue &= 0xFFFF;			\
+		  PL_statusvalue_vms = PL_statusvalue ? 44 : 1;	\
+		}						\
+		else {						\
+		  PL_statusvalue_vms = vaxc$errno;		\
+		}						\
 	    }						\
 	    else PL_statusvalue_vms = -1;			\
 	} STMT_END
@@ -2579,6 +2592,7 @@ typedef pthread_key_t	perl_key;
 #   define STATUS_NATIVE	PL_statusvalue_posix
 #   define STATUS_NATIVE_EXPORT	STATUS_NATIVE
 #   if defined(WCOREDUMP)
+#       define STATUS_NATIVE_CHILD_SET(n) STATUS_NATIVE_SET(n)
 #       define STATUS_NATIVE_SET(n)                        \
             STMT_START {                                   \
                 PL_statusvalue_posix = (n);                \
@@ -2592,6 +2606,7 @@ typedef pthread_key_t	perl_key;
                 }                                          \
             } STMT_END
 #   elif defined(WIFEXITED)
+#       define STATUS_NATIVE_CHILD_SET(n) STATUS_NATIVE_SET(n)
 #       define STATUS_NATIVE_SET(n)                        \
             STMT_START {                                   \
                 PL_statusvalue_posix = (n);                \
@@ -2604,6 +2619,7 @@ typedef pthread_key_t	perl_key;
                 }                                          \
             } STMT_END
 #   else
+#       define STATUS_NATIVE_CHILD_SET(n) STATUS_NATIVE_SET(n)
 #       define STATUS_NATIVE_SET(n)                        \
             STMT_START {                                   \
                 PL_statusvalue_posix = (n);                \

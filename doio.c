@@ -59,7 +59,7 @@
 #include <signal.h>
 
 bool
-Perl_do_open(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
+Perl_do_open(pTHX_ GV *gv, register const char *name, I32 len, int as_raw,
 	     int rawmode, int rawperm, PerlIO *supplied_fp)
 {
     return do_openn(gv, name, len, as_raw, rawmode, rawperm,
@@ -67,7 +67,7 @@ Perl_do_open(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 }
 
 bool
-Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
+Perl_do_open9(pTHX_ GV *gv, register const char *name, I32 len, int as_raw,
 	      int rawmode, int rawperm, PerlIO *supplied_fp, SV *svs,
 	      I32 num_svs)
 {
@@ -77,7 +77,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 }
 
 bool
-Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
+Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	      int rawmode, int rawperm, PerlIO *supplied_fp, SV **svp,
 	      I32 num_svs)
 {
@@ -194,7 +194,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 
         IoTYPE(io) = PerlIO_intmode2str(rawmode, &mode[ix], &writing);
 
-	namesv = sv_2mortal(newSVpvn(name,strlen(name)));
+	namesv = sv_2mortal(newSVpvn(oname,strlen(oname)));
 	num_svs = 1;
 	svp = &namesv;
         type = Nullch;
@@ -202,13 +202,13 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     }
     else {
 	/* Regular (non-sys) open */
-	char *oname = name;
+	char *name;
 	STRLEN olen = len;
 	char *tend;
 	int dodup = 0;
 	PerlIO *that_fp = NULL;
 
-	type = savepvn(name, len);
+	type = savepvn(oname, len);
 	tend = type+len;
 	SAVEFREEPV(type);
 
@@ -220,7 +220,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	if (num_svs) {
 	    /* New style explicit name, type is just mode and layer info */
 #ifdef USE_STDIO
-	    if (SvROK(*svp) && !strchr(name,'&')) {
+	    if (SvROK(*svp) && !strchr(oname,'&')) {
 		if (ckWARN(WARN_IO))
 		    Perl_warner(aTHX_ packWARN(WARN_IO),
 			    "Can't open a reference");
@@ -567,7 +567,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     }
     if (!fp) {
 	if (IoTYPE(io) == IoTYPE_RDONLY && ckWARN(WARN_NEWLINE)
-	    && strchr(name, '\n')
+	    && strchr(oname, '\n')
 	    
 	)
 	    Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "open");
@@ -1509,17 +1509,25 @@ Perl_do_execfree(pTHX)
 #if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC) && !defined(SYMBIAN) && !defined(MACOS_TRADITIONAL)
 
 bool
-Perl_do_exec(pTHX_ char *cmd)
+Perl_do_exec(pTHX_ const char *cmd)
 {
     return do_exec3(cmd,0,0);
 }
 
 bool
-Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
+Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 {
     dVAR;
     register char **a;
     register char *s;
+    char *cmd;
+    int cmdlen;
+
+    /* Make a copy so we can change it */
+    cmdlen = strlen(incmd);
+    Newx(cmd, cmdlen+1, char);
+    strncpy(cmd, incmd, cmdlen);
+    cmd[cmdlen] = 0;
 
     while (*cmd && isSPACE(*cmd))
 	cmd++;
@@ -1560,6 +1568,7 @@ Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
 		  PerlProc_execl(PL_cshname,"csh", flags, ncmd, (char*)0);
 		  PERL_FPU_POST_EXEC
 		  *s = '\'';
+		  Safefree(cmd);
 		  return FALSE;
 	      }
 	  }
@@ -1604,6 +1613,7 @@ Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
 	    PERL_FPU_PRE_EXEC
 	    PerlProc_execl(PL_sh_path, "sh", "-c", cmd, (char*)0);
 	    PERL_FPU_POST_EXEC
+	    Safefree(cmd);
 	    return FALSE;
 	}
     }
@@ -1640,6 +1650,7 @@ Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
 	}
     }
     do_execfree();
+    Safefree(cmd);
     return FALSE;
 }
 

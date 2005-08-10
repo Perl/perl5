@@ -357,7 +357,7 @@ PERL_CALLCONV bool	Perl_do_close(pTHX_ GV* gv, bool not_implicit)
 PERL_CALLCONV bool	Perl_do_eof(pTHX_ GV* gv)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV bool	Perl_do_exec(pTHX_ char* cmd)
+PERL_CALLCONV bool	Perl_do_exec(pTHX_ const char* cmd)
 			__attribute__nonnull__(pTHX_1);
 
 #if defined(WIN32) || defined(SYMBIAN)
@@ -374,7 +374,7 @@ PERL_CALLCONV int	Perl_do_spawn_nowait(pTHX_ char* cmd)
 
 #endif
 #if !defined(WIN32)
-PERL_CALLCONV bool	Perl_do_exec3(pTHX_ char* cmd, int fd, int flag)
+PERL_CALLCONV bool	Perl_do_exec3(pTHX_ const char* cmd, int fd, int flag)
 			__attribute__nonnull__(pTHX_1);
 
 #endif
@@ -394,16 +394,16 @@ PERL_CALLCONV void	Perl_do_join(pTHX_ SV* sv, SV* del, SV** mark, SV** sp)
 			__attribute__nonnull__(pTHX_4);
 
 PERL_CALLCONV OP*	Perl_do_kv(pTHX);
-PERL_CALLCONV bool	Perl_do_open(pTHX_ GV* gv, char* name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO* supplied_fp)
+PERL_CALLCONV bool	Perl_do_open(pTHX_ GV* gv, const char* name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO* supplied_fp)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV bool	Perl_do_open9(pTHX_ GV *gv, char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp, SV *svs, I32 num)
+PERL_CALLCONV bool	Perl_do_open9(pTHX_ GV *gv, const char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp, SV *svs, I32 num)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_8);
 
-PERL_CALLCONV bool	Perl_do_openn(pTHX_ GV *gv, char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp, SV **svp, I32 num)
+PERL_CALLCONV bool	Perl_do_openn(pTHX_ GV *gv, const char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp, SV **svp, I32 num)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
@@ -1075,7 +1075,7 @@ PERL_CALLCONV void*	Perl_my_memset(char* loc, I32 ch, I32 len)
 
 #endif
 PERL_CALLCONV I32	Perl_my_pclose(pTHX_ PerlIO* ptr);
-PERL_CALLCONV PerlIO*	Perl_my_popen(pTHX_ char* cmd, char* mode);
+PERL_CALLCONV PerlIO*	Perl_my_popen(pTHX_ const char* cmd, const char* mode);
 PERL_CALLCONV PerlIO*	Perl_my_popen_list(pTHX_ char* mode, int n, SV ** args);
 PERL_CALLCONV void	Perl_my_setenv(pTHX_ const char* nam, const char* val);
 PERL_CALLCONV I32	Perl_my_stat(pTHX);

@@ -339,7 +339,7 @@ PP(pp_backtick)
 	mode = "rb";
     else if (PL_op->op_private & OPpOPEN_IN_CRLF)
 	mode = "rt";
-    fp = PerlProc_popen((char*)tmps, (char *)mode);
+    fp = PerlProc_popen(tmps, mode);
     if (fp) {
         const char *type = NULL;
 	if (PL_curcop->cop_io) {
@@ -378,7 +378,7 @@ PP(pp_backtick)
 		SvTAINTED_on(sv);
 	    }
 	}
-	STATUS_NATIVE_SET(PerlProc_pclose(fp));
+	STATUS_NATIVE_CHILD_SET(PerlProc_pclose(fp));
 	TAINT;		/* "I believe that this is not gratuitous!" */
     }
     else {
@@ -571,7 +571,7 @@ PP(pp_open)
     }
 
     tmps = SvPV_const(sv, len);
-    ok = do_openn(gv, (char *)tmps, len, FALSE, O_RDONLY, 0, Nullfp, MARK+1, (SP-MARK));
+    ok = do_openn(gv, tmps, len, FALSE, O_RDONLY, 0, Nullfp, MARK+1, (SP-MARK));
     SP = ORIGMARK;
     if (ok)
 	PUSHi( (I32)PL_forkprocess );
@@ -1537,7 +1537,7 @@ PP(pp_sysopen)
     /* Need TIEHANDLE method ? */
     const char * const tmps = SvPV_const(sv, len);
     /* FIXME? do_open should do const  */
-    if (do_open(gv, (char*)tmps, len, TRUE, mode, perm, Nullfp)) {
+    if (do_open(gv, tmps, len, TRUE, mode, perm, Nullfp)) {
 	IoLINES(GvIOp(gv)) = 0;
 	PUSHs(&PL_sv_yes);
     }
@@ -1971,7 +1971,7 @@ PP(pp_eof)
 		if ((IoFLAGS(io) & IOf_START) && av_len(GvAVn(gv)) < 0) {
 		    IoLINES(io) = 0;
 		    IoFLAGS(io) &= ~IOf_START;
-		    do_open(gv, (char *)"-", 1, FALSE, O_RDONLY, 0, Nullfp);
+		    do_open(gv, "-", 1, FALSE, O_RDONLY, 0, Nullfp);
 		    sv_setpvn(GvSV(gv), "-", 1);
 		    SvSETMAGIC(GvSV(gv));
 		}
@@ -2760,7 +2760,7 @@ PP(pp_getpeername)
 	    static const char nowhere[] = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
 	    /* If the call succeeded, make sure we don't have a zeroed port/addr */
 	    if (((struct sockaddr *)SvPVX_const(sv))->sa_family == AF_INET &&
-		!memcmp((char *)SvPVX_const(sv) + sizeof(u_short), nowhere,
+		!memcmp(SvPVX_const(sv) + sizeof(u_short), nowhere,
 			sizeof(u_short) + sizeof(struct in_addr))) {
 		goto nuts2;	
 	    }
@@ -4152,9 +4152,9 @@ PP(pp_wait)
     }
 #  if defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)
     /* 0 and -1 are both error returns (the former applies to WNOHANG case) */
-    STATUS_NATIVE_SET((childpid && childpid != -1) ? argflags : -1);
+    STATUS_NATIVE_CHILD_SET((childpid && childpid != -1) ? argflags : -1);
 #  else
-    STATUS_NATIVE_SET((childpid > 0) ? argflags : -1);
+    STATUS_NATIVE_CHILD_SET((childpid > 0) ? argflags : -1);
 #  endif
     XPUSHi(childpid);
     RETURN;
@@ -4184,9 +4184,9 @@ PP(pp_waitpid)
     }
 #  if defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)
     /* 0 and -1 are both error returns (the former applies to WNOHANG case) */
-    STATUS_NATIVE_SET((result && result != -1) ? argflags : -1);
+    STATUS_NATIVE_CHILD_SET((result && result != -1) ? argflags : -1);
 #  else
-    STATUS_NATIVE_SET((result > 0) ? argflags : -1);
+    STATUS_NATIVE_CHILD_SET((result > 0) ? argflags : -1);
 #  endif
     SETi(result);
     RETURN;
@@ -4316,7 +4316,7 @@ PP(pp_system)
     }
     if (PL_statusvalue == -1)	/* hint that value must be returned as is */
 	result = 1;
-    STATUS_NATIVE_SET(value);
+    STATUS_NATIVE_CHILD_SET(value);
     do_execfree();
     SP = ORIGMARK;
     PUSHi(result ? value : STATUS_CURRENT);
