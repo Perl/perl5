@@ -292,7 +292,7 @@ Sort an array. Here is an example:
 
 See lib/sort.pm for details about controlling the sorting algorithm.
 
-	void	sortsv(SV ** array, size_t num_elts, SVCOMPARE_t cmp)
+	void	sortsv(SV** array, size_t num_elts, SVCOMPARE_t cmp)
 
 =for hackers
 Found in file pp_sort.c
