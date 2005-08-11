@@ -61,6 +61,13 @@ if ($^O eq 'VMS') {
     $neg_epoch_ok = 0; # time_t is unsigned
 }
 
+# Borland compiler sets $neg_epoch_ok differently depending on the
+# current Time Zone in use on the machine, but it should always be
+# set to 0.
+if ($^O eq 'MSWin32' and $Config{ccname} eq 'bcc32') {
+    $neg_epoch_ok = 0;
+}
+
 my $tests = (@time * 12);
 $tests += @neg_time * 12;
 $tests += @bad_time;
