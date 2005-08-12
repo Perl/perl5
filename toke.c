@@ -1368,6 +1368,9 @@ S_scan_const(pTHX_ char *start)
     I32  has_utf8 = FALSE;			/* Output constant is UTF8 */
     I32  this_utf8 = UTF;			/* The source string is assumed to be UTF8 */
     UV uv;
+#ifdef EBCDIC
+    UV literal_endpoint = 0;
+#endif
 
     const char *leaveit =	/* set of acceptably-backslashed characters */
 	PL_lex_inpat
@@ -1417,8 +1420,9 @@ S_scan_const(pTHX_ char *start)
                 }
 
 #ifdef EBCDIC
-		if ((isLOWER(min) && isLOWER(max)) ||
-		    (isUPPER(min) && isUPPER(max))) {
+		if (literal_endpoint == 2 &&
+		    ((isLOWER(min) && isLOWER(max)) ||
+		     (isUPPER(min) && isUPPER(max)))) {
 		    if (isLOWER(min)) {
 			for (i = min; i <= max; i++)
 			    if (isLOWER(i))
@@ -1437,6 +1441,9 @@ S_scan_const(pTHX_ char *start)
 		/* mark the range as done, and continue */
 		dorange = FALSE;
 		didrange = TRUE;
+#ifdef EBCDIC
+		literal_endpoint = 0;
+#endif
 		continue;
 	    }
 
@@ -1455,6 +1462,9 @@ S_scan_const(pTHX_ char *start)
 	    }
 	    else {
 		didrange = FALSE;
+#ifdef EBCDIC
+		literal_endpoint = 0;
+#endif
 	    }
 	}
 
@@ -1788,6 +1798,10 @@ S_scan_const(pTHX_ char *start)
 	    s++;
 	    continue;
 	} /* end if (backslash) */
+#ifdef EBCDIC
+	else
+	    literal_endpoint++;
+#endif
 
     default_action:
 	/* If we started with encoded form, or already know we want it
