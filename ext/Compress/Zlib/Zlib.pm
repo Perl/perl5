@@ -1,7 +1,7 @@
 # File	  : Zlib.pm
 # Author  : Paul Marquess
-# Created : 30 January 2005
-# Version : 1.35
+# Created : 12 August 2005
+# Version : 1.37
 #
 #     Copyright (c) 1995-2005 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -21,7 +21,7 @@ use warnings ;
 our ($VERSION, @ISA, @EXPORT, $AUTOLOAD);
 our ($deflateDefault, $deflateParamsDefault, $inflateDefault);
 
-$VERSION = "1.35" ;
+$VERSION = "1.37" ;
 
 @ISA = qw(Exporter);
 # Items to export into callers namespace by default. Note: do not export
@@ -877,7 +877,7 @@ compressed data. Otherwise it returns I<undef>.
 
 The source buffer can either be a scalar or a scalar reference.
 
-The B<$level> parameter defines the compression level. Valid values are
+The B<$level> paramter defines the compression level. Valid values are
 0 through 9, C<Z_NO_COMPRESSION>, C<Z_BEST_SPEED>,
 C<Z_BEST_COMPRESSION>, and C<Z_DEFAULT_COMPRESSION>.
 If B<$level> is not specified C<Z_DEFAULT_COMPRESSION> will be used.
@@ -1147,7 +1147,85 @@ The buffer parameters can either be a scalar or a scalar reference.
 
 If the $crc parameters is C<undef>, the crc value will be reset.
 
-=head1 ACCESSING ZIP FILES
+=head1 FAQ
+
+=head2 Compatibility with Unix compress/uncompress.
+
+Although C<Compress::Zlib> has a pair of functions called C<compress>
+and C<uncompress>, they are I<not> the same as the Unix programs of the
+same name. The C<Compress::Zlib> library is not compatable with Unix
+C<compress>.
+
+If you have the C<uncompress> program available, you can use this to
+read compressed files
+
+    open F, "uncompress -c $filename |";
+    while (<F>)
+    {
+        ...
+
+If you have the C<gunzip> program available, you can use this to read
+compressed files
+
+    open F, "gunzip -c $filename |";
+    while (<F>)
+    {
+        ...
+
+and this to write compress files if you have the C<compress> program
+available
+
+    open F, "| compress -c $filename ";
+    print F "data";
+    ...
+    close F ;
+
+=head2 Accessing .tar.Z files
+
+The C<Archive::Tar> module can optionally use C<Compress::Zlib> (via
+the C<IO::Zlib> module) to access tar files that have been compressed
+with C<gzip>. Unfortunately tar files compressed with the Unix C<compress>
+utility cannot be read by C<Compress::Zlib> and so cannot be directly
+accesses by C<Archive::Tar>.
+
+If the C<uncompress> or C<gunzip> programs are available, you can use
+one of these workarounds to read C<.tar.Z> files from C<Archive::Tar>
+
+Firstly with C<uncompress>
+
+    use strict;
+    use warnings;
+    use Archive::Tar;
+
+    open F, "uncompress -c $filename |";
+    my $tar = Archive::Tar->new(*F);
+    ...
+
+and this with C<gunzip>
+
+    use strict;
+    use warnings;
+    use Archive::Tar;
+
+    open F, "gunzip -c $filename |";
+    my $tar = Archive::Tar->new(*F);
+    ...
+
+Similarly, if the C<compress> program is available, you can use this to
+write a C<.tar.Z> file
+
+    use strict;
+    use warnings;
+    use Archive::Tar;
+    use IO::File;
+
+    my $fh = newIO::File "| compress -c >$filename";
+    my $tar = Archive::Tar->new();
+    ...
+    $tar->write($fh);
+    $fh->close ;
+
+=head2 Accessing ZIP Files
 
 Although it is possible to use this module to access .zip files, there
 is a module on CPAN that will do all the hard work for you. Check out

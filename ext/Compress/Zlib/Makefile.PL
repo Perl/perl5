@@ -22,6 +22,7 @@ my $ZLIB_LIB ;
 my $ZLIB_INCLUDE ;
 my $BUILD_ZLIB = 0 ;
 my $OLD_ZLIB = '' ;
+my $EXTRA_DEFINE = '';
 my $WALL = '';
 #$WALL = ' -Wall ';
 
@@ -66,13 +67,13 @@ EOM
 ParseCONFIG() ;
 
 my @files = ('Zlib.pm', glob("t/*.t"), grep(!/\.bak$/,  glob("examples/*"))) ;
-UpDowngrade(@files) unless $ENV{PERL_CORE}; 
+UpDowngrade(@files) unless $ENV{PERL_CORE} ;
 
 WriteMakefile(	
 	NAME   	 	=> 'Compress::Zlib',
 	VERSION_FROM  	=> 'Zlib.pm',
 	INC      	=> "-I$ZLIB_INCLUDE" ,
-	DEFINE   	=> "$OLD_ZLIB $WALL" ,
+	DEFINE   	=> "$OLD_ZLIB $WALL $EXTRA_DEFINE" ,
 	XS	 	=> { 'Zlib.xs'    => 'Zlib.c' },
 	'depend' 	=> { 'Makefile'	  => 'config.in' },
 	'clean' 	=> { FILES        => '*.c constants.h constants.xs' },
@@ -192,9 +193,6 @@ MyTrebleCheck:
 	(echo found unexpected $$^W ; exit 1)
 	@echo All is ok.
 
-Zlib.xs:	typemap
-	@ $(TOUCH) Zlib.xs
-
 EOM
 
     return $postamble;
@@ -246,6 +244,8 @@ sub ParseCONFIG
         $ZLIB_INCLUDE = VMS::Filespec::vmspath($ZLIB_INCLUDE);
         $ZLIB_LIB = VMS::Filespec::vmspath($ZLIB_LIB);
     }
+
+    $EXTRA_DEFINE = $ENV{EXTRA_DEFINE} if defined $ENV{EXTRA_DEFINE};
 
     my $y = $ENV{'OLD_ZLIB'} || $Info{'OLD_ZLIB'} ;
     $OLD_ZLIB = '-DOLD_ZLIB' if $y and $y =~ /^yes|on|true|1$/i;

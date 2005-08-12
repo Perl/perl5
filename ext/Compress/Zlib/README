@@ -1,18 +1,18 @@
                                  Compress::Zlib
 
-                                  Version 1.35
+                                  Version 1.37
 
-                                  18 July 2005
+                                 12 August 2005
 
-             Copyright (c) 1995-2005 Paul Marquess. All rights reserved.
-            This program is free software; you can redistribute it and/or
-                modify it under the same terms as Perl itself.
+          Copyright (c) 1995-2005 Paul Marquess. All rights reserved.
+         This program is free software; you can redistribute it and/or
+                 modify it under the same terms as Perl itself.
 
-         The directory zlib-src contains a subset of the source files copied 
-	   directly from zlib version 1.2.2.  These files are Copyright(C) 
-	            1995-2004 Jean-loup Gailly and Mark Adler.
-                 Full source for the zlib library is available at 
-	                      http://www.zlib.org
+      The directory zlib-src contains a subset of the source files copied 
+        directly from zlib version 1.2.3.  These files are Copyright(C) 
+                   1995-2005 Jean-loup Gailly and Mark Adler.
+                Full source for the zlib library is available at 
+                              http://www.zlib.org
 
 
 DESCRIPTION
@@ -87,7 +87,7 @@ library is used:
     2. Build a private copy of the zlib library using a standard zlib
        source distribution.
 
-    3. Use a pre-buiild zlib library.
+    3. Use a pre-built zlib library.
 
 Note that if you intend to use either Option 2 or 3, you need to have
 zlib version 1.0.6 or better. Although this module can build with old
@@ -340,7 +340,7 @@ Some versions of Mac OS X are failing a number of the tests in the
 06gzdopen.t test harness.
 
 The functionality being exercised in these tests is checking that it is
-possible to call gzopen with an existing Perl filenhandle instead of a
+possible to call gzopen with an existing Perl filehandle instead of a
 filename. For some reason it does not seem possible to extract a
 numeric file descriptor (using fileno) from a FILE* and then make use
 of it.
