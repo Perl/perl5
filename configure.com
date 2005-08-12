@@ -4900,14 +4900,37 @@ $   d_truncate="define"
 $   d_wait4="define"
 $   d_index="define"
 $   pidtype="pid_t"
-$   sig_name="ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM ABRT USR1 USR2 SPARE18 SPARE19 CHLD CONT STOP TSTP TTIN TTOU DEBUG SPARE27 SPARE28 SPARE29 SPARE30 SPARE31 SPARE32 RTMIN RTMAX"
+$   sig_name1="ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM "
+$   sig_name2="TERM ABRT USR1 USR2 SPARE18 SPARE19 CHLD CONT STOP TSTP TTIN TTOU "
+$   sig_name3="DEBUG SPARE27 SPARE28 SPARE29 SPARE30 SPARE31 SPARE32 "
+$   sig_name4="WINCH "
+$   sig_namert="RTMIN RTMAX"
 $   psnwc1="""ZERO"",""HUP"",""INT"",""QUIT"",""ILL"",""TRAP"",""IOT"",""EMT"",""FPE"",""KILL"",""BUS"",""SEGV"",""SYS"","
 $   psnwc2="""PIPE"",""ALRM"",""TERM"",""ABRT"",""USR1"",""USR2"",""SPARE18"",""SPARE19"",""CHLD"",""CONT"",""STOP"",""TSTP"","
-$   psnwc3="""TTIN"",""TTOU"",""DEBUG"",""SPARE27"",""SPARE28"",""SPARE29"",""SPARE30"",""SPARE31"",""SPARE32"",""RTMIN"",""RTMAX"",0"
-$   sig_name_init = psnwc1 + psnwc2 + psnwc3
-$   sig_num="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 6 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 64"
-$   sig_num_init="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,64,0"
-$   sig_size="36"
+$   psnwc3="""TTIN"",""TTOU"",""DEBUG"",""SPARE27"",""SPARE28"",""SPARE29"",""SPARE30"",""SPARE31"",""SPARE32"","
+$   psnwc4_v7_3="""WINCH"","
+$   psnwcrt="""RTMIN"",""RTMAX"",0"
+$   sig_num1="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 6 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 "
+$   sig_num_v7_3="28 "
+$   sig_numrt="33 64"
+$   sig_num_init1="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,"
+$   sig_num_init_v7_3="28,"
+$   sig_num_initrt="33,64,0"
+$   if (vms_ver .GES. "7.3")
+$   then
+$	sig_name = sig_name1 + sig_name2 + sig_name3 + sig_name4 + sig_namert
+$       sig_name_init = psnwc1 + psnwc2 + psnwc3 + psnwc4_v7_3 + psnwcrt
+$	sig_num = sig_num1 + sig_num_v7_3 + sig_numrt
+$	sig_num_init = sig_num_init1 + sig_num_v7_3 + sig_num_initrt
+$	sig_size="37"
+$   else
+$	sig_name = sig_name1 + sig_name2 + sig_name3 + sig_namert
+$       sig_name_init = psnwc1 + psnwc2 + psnwc3 + psnwrt
+$	sig_num = sig_num1 + sig_numrt
+$	sig_num_init = sig_num_init1 + sig_num_initrt
+$	sig_size="36"
+$   endif
+$   sig_count="64"
 $   uidtype="uid_t"
 $   d_pathconf="define"
 $   d_fpathconf="define"
@@ -4938,6 +4961,8 @@ $   sig_name_init = psnwc1 + psnwc2
 $   sig_num="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 6 16 17"
 $   sig_num_init="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,16,17,0"
 $   sig_size="19"
+$   sig_count="15"
+$   if (vms_ver .GES. "6.2") then sig_count="17"
 $   uidtype="unsigned int"
 $   d_pathconf="undef"
 $   d_fpathconf="undef"
@@ -5283,6 +5308,7 @@ $           sig_name_init = psnwc1 + psnwc2
 $           sig_num="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 6 16 17"
 $           sig_num_init="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,16,17,0"
 $           sig_size="19"
+$	    sig_count="17"
 $       else
 $           sig_name="ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM ABRT"
 $           psnwc1="""ZERO"",""HUP"",""INT"",""QUIT"",""ILL"",""TRAP"",""IOT"",""EMT"",""FPE"",""KILL"",""BUS"",""SEGV"",""SYS"","
@@ -5291,6 +5317,7 @@ $           sig_name_init = psnwc1 + psnwc2
 $           sig_num="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 6"
 $           sig_num_init="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,0"
 $           sig_size="17"
+$	    sig_count="15"
 $       endif
 $   ELSE
 $       echo4 "Nope, we can't."
@@ -6015,6 +6042,7 @@ $ WC/symbol tmp
 $ DELETE/SYMBOL tmp
 $ WC "sig_num='" + sig_num + "'"
 $ WC "sig_num_init='" + sig_num_init + "'"
+$ WC "sig_count='" + sig_count + "'"
 $ WC "sig_size='" + sig_size + "'"
 $ WC "signal_t='" + signal_t + "'"
 $ WC "sitearch='" + sitearch + "'"
