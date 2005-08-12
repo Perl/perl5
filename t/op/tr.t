@@ -295,18 +295,15 @@ is($a, "X");
 # (i-j, r-s, I-J, R-S), [\x89-\x91] [\xc9-\xd1] has to match them,
 # from Karsten Sperling.
 
-# Not working in EBCDIC as of 12674.
 $c = ($a = "\x89\x8a\x8b\x8c\x8d\x8f\x90\x91") =~ tr/\x89-\x91/X/;
 is($c, 8);
 is($a, "XXXXXXXX");
-   
-# Not working in EBCDIC as of 12674.
+
 $c = ($a = "\xc9\xca\xcb\xcc\xcd\xcf\xd0\xd1") =~ tr/\xc9-\xd1/X/;
 is($c, 8);
 is($a, "XXXXXXXX");
 
-
-SKIP: {   
+SKIP: {
     skip "not EBCDIC", 4 unless $Is_EBCDIC;
 
     $c = ($a = "\x89\x8a\x8b\x8c\x8d\x8f\x90\x91") =~ tr/i-j/X/;
