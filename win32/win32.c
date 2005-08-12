@@ -92,8 +92,8 @@ int _fcloseall();
 
 static void		get_shell(void);
 static long		tokenize(const char *str, char **dest, char ***destv);
-static int		do_spawn2(pTHX_ char *cmd, int exectype);
-static BOOL		has_shell_metachars(char *ptr);
+static int		do_spawn2(pTHX_ const char *cmd, int exectype);
+static BOOL		has_shell_metachars(const char *ptr);
 static long		filetime_to_clock(PFILETIME ft);
 static BOOL		filetime_from_time(PFILETIME ft, time_t t);
 static char *		get_emd_part(SV **leading, char *trailing, ...);
@@ -349,7 +349,7 @@ win32_get_vendorlib(const char *pl)
 }
 
 static BOOL
-has_shell_metachars(char *ptr)
+has_shell_metachars(const char *ptr)
 {
     int inquote = 0;
     char quote = '\0';
@@ -618,7 +618,7 @@ find_next_space(const char *s)
 }
 
 static int
-do_spawn2(pTHX_ char *cmd, int exectype)
+do_spawn2(pTHX_ const char *cmd, int exectype)
 {
     char **a;
     char *s;
@@ -671,7 +671,7 @@ do_spawn2(pTHX_ char *cmd, int exectype)
 	Newx(argv, w32_perlshell_items + 2, char*);
 	while (++i < w32_perlshell_items)
 	    argv[i] = w32_perlshell_vec[i];
-	argv[i++] = cmd;
+	argv[i++] = (char *)cmd;
 	argv[i] = Nullch;
 	switch (exectype) {
 	case EXECF_SPAWN:
@@ -723,7 +723,7 @@ Perl_do_spawn_nowait(pTHX_ char *cmd)
 bool
 Perl_do_exec(pTHX_ const char *cmd)
 {
-    do_spawn2(aTHX_ (char *)cmd, EXECF_EXEC);
+    do_spawn2(aTHX_ cmd, EXECF_EXEC);
     return FALSE;
 }
 
