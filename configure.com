@@ -6727,6 +6727,7 @@ $ WRITE CONFIG "$!pod2man    == """ + perl_setup_perl + " ''vms_prefix':[utils]p
 $ WRITE CONFIG "$ pod2usage  == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2usage.com"""
 $ WRITE CONFIG "$ podchecker == """ + perl_setup_perl + " ''vms_prefix':[utils]podchecker.com"""
 $ WRITE CONFIG "$ podselect  == """ + perl_setup_perl + " ''vms_prefix':[utils]podselect.com"""
+$ WRITE CONFIG "$ prove      == """ + perl_setup_perl + " ''vms_prefix':[utils]prove.com"""
 $ WRITE CONFIG "$ psed       == """ + perl_setup_perl + " ''vms_prefix':[utils]psed.com"""
 $ WRITE CONFIG "$ pstruct    == """ + perl_setup_perl + " ''vms_prefix':[utils]pstruct.com"""
 $ WRITE CONFIG "$ s2p        == """ + perl_setup_perl + " ''vms_prefix':[utils]s2p.com"""
