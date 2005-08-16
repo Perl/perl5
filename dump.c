@@ -414,10 +414,8 @@ sequence(pTHX_ register const OP *o)
     if (!o)
 	return;
 
-    op = newSVuv(PTR2UV(o));
-    key = SvPV_const(op, len);
-    if (hv_exists(Sequence, key, len))
-	return;
+    if (!Sequence)
+	Sequence = newHV();
 
     for (; o; o = o->op_next) {
 	op = newSVuv(PTR2UV(o));
