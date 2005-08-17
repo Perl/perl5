@@ -8,10 +8,6 @@
  *
  */
 
-/* typedefs to eliminate some typing */
-typedef struct he HE;
-typedef struct hek HEK;
-
 /* entry in hash value chain */
 struct he {
     /* Keep hent_next first in this structure, because sv_free_arenas take
@@ -209,7 +205,7 @@ C<SV*>.
 
 
 #define Nullhv Null(HV*)
-#define HvARRAY(hv)	(*(HE***)&((hv)->sv_u.svu_array))
+#define HvARRAY(hv)	((hv)->sv_u.svu_hash)
 #define HvFILL(hv)	((XPVHV*)  SvANY(hv))->xhv_fill
 #define HvMAX(hv)	((XPVHV*)  SvANY(hv))->xhv_max
 /* This quite intentionally does no flag checking first. That's your

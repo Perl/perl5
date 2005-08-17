@@ -62,6 +62,11 @@ typedef enum {
 	SVt_PVIO	/* 15 */
 } svtype;
 
+
+/* typedefs to eliminate some typing */
+typedef struct he HE;
+typedef struct hek HEK;
+
 /* Using C's structural equivalence to help emulate C++ inheritance here... */
 
 struct STRUCT_SV {		/* struct sv { */
@@ -74,6 +79,7 @@ struct STRUCT_SV {		/* struct sv { */
 	SV*	svu_rv;		/* pointer to another SV */
 	char*	svu_pv;    	/* pointer to malloced string */
 	SV**	svu_array;
+	HE**	svu_hash;
     }		sv_u;
 #ifdef DEBUG_LEAKING_SCALARS
     unsigned	sv_debug_optype:9;	/* the type of OP that allocated us */
@@ -94,6 +100,7 @@ struct gv {
 	SV*	svu_rv;
 	char*	svu_pv;
 	SV**	svu_array;
+	HE**	svu_hash;
     }		sv_u;
 };
 
@@ -107,6 +114,7 @@ struct cv {
 	SV*	svu_rv;
 	char*	svu_pv;
 	SV**	svu_array;
+	HE**	svu_hash;
     }		sv_u;
 };
 
@@ -120,6 +128,7 @@ struct av {
 	SV*	svu_rv;
 	char*	svu_pv;		/* pointer to first array element */
 	SV**	svu_array;
+	HE**	svu_hash;
     }		sv_u;
 };
 
@@ -133,6 +142,7 @@ struct hv {
 	SV*	svu_rv;
 	char*	svu_pv;
 	SV**	svu_array;
+	HE**	svu_hash;
     }		sv_u;
 };
 
@@ -146,6 +156,7 @@ struct io {
 	SV*	svu_rv;
 	char*	svu_pv;
 	SV**	svu_array;
+	HE**	svu_hash;
     }		sv_u;
 };
 
