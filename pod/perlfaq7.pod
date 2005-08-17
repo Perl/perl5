@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq7 - General Perl Language Issues ($Revision: 1.23 $, $Date: 2005/04/07 21:39:34 $)
+perlfaq7 - General Perl Language Issues ($Revision: 1.25 $, $Date: 2005/08/08 02:38:25 $)
 
 =head1 DESCRIPTION
 

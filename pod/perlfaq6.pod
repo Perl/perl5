@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq6 - Regular Expressions ($Revision: 1.32 $, $Date: 2005/04/22 19:04:48 $)
+perlfaq6 - Regular Expressions ($Revision: 1.35 $, $Date: 2005/08/10 15:55:08 $)
 
 =head1 DESCRIPTION
 
@@ -633,14 +633,20 @@ These strings do not match /\Bam\B/
 (contributed by Anno Siegel)
 
 Once Perl sees that you need one of these variables anywhere in the
-program, it provides them on each and every pattern match.  That means
-that on every pattern match the entire string will be copied, part of
-it to $`, part to $&, and part to $'.  Thus the penalty is most severe
-with long strings and patterns that match often.  Avoid $&, $', and $`
-if you can, but if you can't, once you've used them at all, use them
-at will because you've already paid the price. Remember that some
-algorithms really appreciate them.  As of the 5.005 release, the $&
-variable is no longer "expensive" the way the other two are.
+program, it provides them on each and every pattern match. That means
+that on every pattern match the entire string will be copied, part of it
+to $`, part to $&, and part to $'. Thus the penalty is most severe with
+long strings and patterns that match often. Avoid $&, $', and $` if you
+can, but if you can't, once you've used them at all, use them at will
+because you've already paid the price. Remember that some algorithms
+really appreciate them. As of the 5.005 release, the $& variable is no
+longer "expensive" the way the other two are.
+
+Since Perl 5.6.1 the special variables @- and @+ can functionally replace
+$`, $& and $'.  These arrays contain pointers to the beginning and end
+of each match (see perlvar for the full story), so they give you
+essentially the same information, but without the risk of excessive
+string copying.
 
 =head2 What good is C<\G> in a regular expression?
 

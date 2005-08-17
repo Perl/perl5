@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.48 $, $Date: 2005/04/22 19:04:48 $)
+perlfaq3 - Programming Tools ($Revision: 1.51 $, $Date: 2005/08/10 15:56:39 $)
 
 =head1 DESCRIPTION
 
@@ -202,13 +202,11 @@ documents, as does enscript at http://people.ssh.fi/mtr/genscript/ .
 
 =head2 Is there a ctags for Perl?
 
-Recent versions of ctags do much more than older versions did.
-EXUBERANT CTAGS is available from http://ctags.sourceforge.net/
-and does a good job of making tags files for perl code.
+(contributed by brian d foy)
 
-There is also a simple one at
-http://www.cpan.org/authors/id/TOMC/scripts/ptags.gz which may do
-the trick.  It can be easy to hack this into what you want.
+Exuberent ctags supports Perl: http://ctags.sourceforge.net/
+
+You might also try pltags: http://www.mscha.com/pltags.zip
 
 =head2 Is there an IDE or Windows Perl Editor?
 
@@ -225,68 +223,91 @@ order of preference):
 
 =item Eclipse
 
+http://e-p-i-c.sf.net/
+
 The Eclipse Perl Integration Project integrates Perl
 editing/debugging with Eclipse.
 
-The website for the project is http://e-p-i-c.sf.net/
+=item Enginsite
+
+http://www.enginsite.com/
+
+Perl Editor by EngInSite is a complete integrated development
+environment (IDE) for creating, testing, and  debugging  Perl scripts;
+the tool runs on Windows 9x/NT/2000/XP or later.
 
 =item Komodo
 
+http://www.ActiveState.com/Products/Komodo/
+
 ActiveState's cross-platform (as of October 2004, that's Windows, Linux,
 and Solaris), multi-language IDE has Perl support, including a regular expression
-debugger and remote debugging
-( http://www.ActiveState.com/Products/Komodo/ ).
+debugger and remote debugging.
 
 =item Open Perl IDE
 
-( http://open-perl-ide.sourceforge.net/ )
+http://open-perl-ide.sourceforge.net/
+
 Open Perl IDE is an integrated development environment for writing
 and debugging Perl scripts with ActiveState's ActivePerl distribution
 under Windows 95/98/NT/2000.
 
 =item OptiPerl
 
-( http://www.optiperl.com/ ) is a Windows IDE with simulated CGI
-environment, including debugger and syntax highlighting editor.
+http://www.optiperl.com/
+
+OptiPerl is a Windows IDE with simulated CGI environment, including
+debugger and syntax highlighting editor.
 
 =item PerlBuilder
 
-( http://www.solutionsoft.com/perl.htm ) is an integrated development
-environment for Windows that supports Perl development.
+http://www.solutionsoft.com/perl.htm
+
+PerlBuidler is an integrated development environment for Windows that
+supports Perl development.
 
 =item visiPerl+
 
-( http://helpconsulting.net/visiperl/ )
+http://helpconsulting.net/visiperl/
+
 From Help Consulting, for Windows.
 
 =item Visual Perl
 
-( http://www.activestate.com/Products/Visual_Perl/ )
+http://www.activestate.com/Products/Visual_Perl/
+
 Visual Perl is a Visual Studio.NET plug-in from ActiveState.
 
+=item Zeus
+
+http://www.zeusedit.com/lookmain.html
+
+Zeus for Window is another Win32 multi-language editor/IDE
+that comes with support for Perl:
 
 =back
 
-For editors: if you're on Unix you probably have vi or a vi clone already,
-and possibly an emacs too, so you may not need to download anything.
-In any emacs the cperl-mode (M-x cperl-mode) gives you perhaps the
-best available Perl editing mode in any editor.
+For editors: if you're on Unix you probably have vi or a vi clone
+already, and possibly an emacs too, so you may not need to download
+anything. In any emacs the cperl-mode (M-x cperl-mode) gives you
+perhaps the best available Perl editing mode in any editor.
 
-If you are using Windows, you can use any editor that lets
-you work with plain text, such as NotePad or WordPad.  Word
-processors, such as Microsoft Word or WordPerfect, typically
-do not work since they insert all sorts of behind-the-scenes
-information, although some allow you to save files as "Text
-Only". You can also download text editors designed
-specifically for programming, such as Textpad
-( http://www.textpad.com/ ) and UltraEdit
-( http://www.ultraedit.com/ ), among others.
+If you are using Windows, you can use any editor that lets you work
+with plain text, such as NotePad or WordPad.  Word processors, such as
+Microsoft Word or WordPerfect, typically do not work since they insert
+all sorts of behind-the-scenes information, although some allow you to
+save files as "Text Only". You can also download text editors designed
+specifically for programming, such as Textpad (
+http://www.textpad.com/ ) and UltraEdit ( http://www.ultraedit.com/ ),
+among others.
 
-If you are using MacOS, the same concerns apply.  MacPerl
-(for Classic environments) comes with a simple editor.
-Popular external editors are BBEdit ( http://www.bbedit.com/ )
-or Alpha ( http://www.his.com/~jguyer/Alpha/Alpha8.html ). MacOS X users can
-use Unix editors as well.
+If you are using MacOS, the same concerns apply.  MacPerl (for Classic
+environments) comes with a simple editor. Popular external editors are
+BBEdit ( http://www.bbedit.com/ ) or Alpha (
+http://www.his.com/~jguyer/Alpha/Alpha8.html ). MacOS X users can use
+Unix editors as well. Neil Bowers (the man behind Geekcruises) has a
+list of Mac editors that can handle Perl (
+http://www.neilbowers.org/macperleditors.html ).
 
 =over 4
 
@@ -909,7 +930,7 @@ A good book on OO on Perl is the "Object-Oriented Perl"
 by Damian Conway from Manning Publications,
 http://www.manning.com/Conway/index.html
 
-=head2 Where can I learn about linking C with Perl? [h2xs, xsubpp]
+=head2 Where can I learn about linking C with Perl?
 
 If you want to call C from Perl, start with L<perlxstut>,
 moving on to L<perlxs>, L<xsubpp>, and L<perlguts>.  If you want to
@@ -917,6 +938,12 @@ call Perl from C, then read L<perlembed>, L<perlcall>, and
 L<perlguts>.  Don't forget that you can learn a lot from looking at
 how the authors of existing extension modules wrote their code and
 solved their problems.
+
+You might not need all the power of XS. The Inline::C module lets
+you put C code directly in your Perl source. It handles all the
+magic to make it work. You still have to learn at least some of 
+the perl API but you won't have to deal with the complexity of the
+XS support files.
 
 =head2 I've read perlembed, perlguts, etc., but I can't embed perl in my C program; what am I doing wrong?
 
