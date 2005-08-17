@@ -1,5 +1,9 @@
 Revision history for Perl extension Time::HiRes.
 
+1.73	- Time::HiRes::nanosleep support for Solaris [PATCH]
+	  (POSIX::uname() not available if building with core perl,
+	   from Gisle Aas, via perl5-porters, perl change #25295)
+
 1.72	- going back to the 1.68 loader setup (using DynaLoader)
 	  since too many weird things starting breaking
 	- fix a typo in José Auguste-Etienne's name
