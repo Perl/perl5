@@ -117,7 +117,6 @@
 	- libnet
 	- Bundle::CPAN
 		- Archive::Tar
-		- Compress::Zlib (zlib?) (there is builtin gz support)
 		- Term::ReadKey (useless?)
 		- Term::ReadLine (useless?)
 	- Bundle::LWP
@@ -128,7 +127,6 @@
 		- HTML::HeadParser
 		- LWP
 	- Crypt::SSLeay? (ssl?)
-	- IO::Zlib? (zlib?)
 	- IMAP?
 	- Net::Telnet?
 	- Archive::Zip?
@@ -136,7 +134,7 @@
 	- Date::Calc?
 	- XML? XML::Simple? (expat?) (there is builtin xml support)
 	- RSS?
-	- DBI
+	- DBI (DBD::???)
 	- DBD::SQLite? (sqlite?)
 	- SOAP? XML-RPC?
 

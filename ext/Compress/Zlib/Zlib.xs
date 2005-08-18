@@ -85,7 +85,7 @@ typedef gzType* Compress__Zlib__gzFile ;
 #define crcInitial crc32(0L, Z_NULL, 0)
 
 #if 1
-static char *my_z_errmsg[] = {
+static const char * const my_z_errmsg[] = {
     "need dictionary",     /* Z_NEED_DICT     2 */
     "stream end",          /* Z_STREAM_END    1 */
     "",                    /* Z_OK            0 */
@@ -98,8 +98,20 @@ static char *my_z_errmsg[] = {
     ""};
 #endif
 
+#if defined(__SYMBIAN32__)
+# define NO_WRITEABLE_DATA
+#endif
 
-static int trace = 0 ;
+#define TRACE_DEFAULT 0
+
+#ifdef NO_WRITEABLE_DATA
+#define trace TRACE_DEFAULT
+#else
+static int trace = TRACE_DEFAULT ;
+#endif
+
+/* Dodge PerlIO hiding of these functions. */
+#undef printf
 
 static void
 #ifdef CAN_PROTOTYPE
@@ -109,6 +121,7 @@ SetGzErrorNo(error_no)
 int error_no ;
 #endif
 {
+    dTHX;
     char * errstr ;
     SV * gzerror_sv = perl_get_sv(GZERRNO, FALSE) ;
   
@@ -249,7 +262,7 @@ gzreadline(file, output)
   SV * output ;
 #endif
 {
-
+    dTHX;
     SV * store = file->buffer ;
     char *nl = "\n"; 
     char *p;
@@ -303,6 +316,7 @@ SV * sv ;
 char * string;
 #endif
 {
+    dTHX;
     if (SvROK(sv)) {
 	sv = SvRV(sv) ;
 	switch(SvTYPE(sv)) {

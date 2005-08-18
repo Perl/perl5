@@ -31,7 +31,8 @@ mainly as demonstrations.
 (0) You need to have the Symbian SDK installed.
 
     These instructions have been tested under various Nokia Series 60
-    Symbian SDKs (1.2 to 2.6).  You can get the SDKs from
+    Symbian SDKs (1.2 to 2.6, 2.8 should also work, 1.2 compiles but
+    does not work).  You can get the SDKs from
     Forum Nokia (http://www.forum.nokia.com/).
 
     A prerequisite for any of the SDKs is to install ActivePerl
@@ -42,7 +43,7 @@ mainly as demonstrations.
     or the Microsoft Visual C++ 6.0 installed (SP3 minimum, SP5 recommended).
 
     Note that for example the Serie s60 2.0 VC SDK installation talks
-    about ActivePerl build 518, which does no more (as of mid-2004) exist
+    about ActivePerl build 518, which does no more (as of mid-2005) exist
     at the ActiveState website.  The ActivePerl 5.8.4 build 810 was
     used successfully for compiling Perl on Symbian.  The 5.6.x ActivePerls
     do not work.
@@ -92,6 +93,8 @@ mainly as demonstrations.
         2.0 | +  | +  | 6600
         2.1 | -  | +  | 6670
         2.6 | +  | +  | 6630    
+
+    Also 2.8 should work fine.
 
     If you are using the 'make' directly, it is the GNU make from the SDKs,
     and it will invoke the right make commands for the Windows emulator
@@ -331,7 +334,7 @@ Perl Symbian Port version 0.1.0: April 2005
     DynaLoader Exporter File::Spec integer lib strict Symbol
     vars warnings XSLoader
   - The following extensions are available:
-    attrs Cwd Data::Dumper Devel::Peek Digest::MD5 DynaLoader
+    attrs Compress::Zlib Cwd Data::Dumper Devel::Peek Digest::MD5 DynaLoader
     Fcntl File::Glob Filter::Util::Call IO List::Util MIME::Base64
     PerlIO::scalar PerlIO::via SDBM_File Socket Storable Time::HiRes
   - The following extensions are missing for various technical reasons:

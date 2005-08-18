@@ -43,8 +43,8 @@ void Perl_my_setenv(pTHX_ char *var, char *val) { }
 void Perl_my_setenv(pTHX_ const char *var, const char *val) { }
 #endif
 
-bool Perl_do_exec(pTHX_ char *cmd) { return FALSE; }
-bool Perl_do_exec3(pTHX_ char *cmd, int fd, int flag) { return FALSE; }
+bool Perl_do_exec(pTHX_ const char *cmd) { return FALSE; }
+bool Perl_do_exec3(pTHX_ const char *cmd, int fd, int flag) { return FALSE; }
 
 int Perl_do_spawn(pTHX_ char *cmd) { return symbian_do_spawn(cmd); }
 int Perl_do_aspawn(pTHX_ SV *really, SV** mark, SV **sp) { return symbian_do_aspawn(really, mark, sp); }

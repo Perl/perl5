@@ -554,12 +554,12 @@ perllib.sis:	\$(PM)
 perlext.sis:	perldll_arm buildext_sis
 	perl symbian\\makesis.pl perl${VERSION}ext
 
-EXT = 	Cwd Data::Dumper Devel::Peek Digest::MD5 Errno Fcntl File::Glob Filter::Util::Call IO List::Util MIME::Base64 PerlIO::scalar PerlIO::via SDBM_File Socket Storable Time::HiRes XSLoader attrs
+EXT = 	Compress::Zlib Cwd Data::Dumper Devel::Peek Digest::MD5 Errno Fcntl File::Glob Filter::Util::Call IO List::Util MIME::Base64 PerlIO::scalar PerlIO::via SDBM_File Socket Storable Time::HiRes XSLoader attrs
 
-buildext: perldll symbian\\xsbuild.pl
+buildext: perldll symbian\\xsbuild.pl lib\\Config.pm
 	perl \$(XLIB) symbian\\xsbuild.pl \$(XSBOPT) \$(EXT)
 
-buildext_sis: perldll.sis symbian\\xsbuild.pl
+buildext_sis: perldll.sis symbian\\xsbuild.pl lib\\Config.pm
 	perl \$(XLIB) symbian\\xsbuild.pl \$(XSBOPT) --sis \$(EXT)
 
 cleanext: symbian\\xsbuild.pl

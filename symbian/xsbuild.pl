@@ -427,17 +427,23 @@ sub xsconfig {
         }
     }
     if ( my @c = glob("*.c *.cpp */*.c */*.cpp") ) {
+        @c = grep { ! m:^zlib-src/: } @c if $ext eq 'ext\Compress\Zlib';
         for my $c (@c) {
             $c =~ s:/:\\:g;
             $src{$c}++;
         }
     }
     if ( my @h = glob("*.h */*.h") ) {
+        @h = grep { ! m:^zlib-src/: } @h if $ext eq 'ext\Compress\Zlib';
         for my $h (@h) {
             $h =~ s:/:\\:g;
             $h = dirname($h);
             $incdir{"$dir\\$h"}++ unless $h eq ".";
         }
+    }
+    if ( $ext eq 'ext\Compress\Zlib' ) {
+        system_echo("perl -pi.bak -e s:True:False: config.in") == 0
+          or die "$0: changing BUILD_ZLIB failed: $!\n";
     }
     if ( exists $EXTCFG{$ext} ) {
         for my $cfg ( @{ $EXTCFG{$ext} } ) {

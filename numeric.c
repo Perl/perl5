@@ -897,7 +897,7 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 
 #ifdef HAS_STRTOD
     if (*s == 'n' || *s == 'N' || *s == 'i' || *s == 'I') {
-        char *p = negative ? s-1 : s;
+        const char *p = negative ? s - 1 : s;
         char *endp;
         NV rslt;
         rslt = strtod(p, &endp);
