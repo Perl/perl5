@@ -75,7 +75,7 @@ esac
 
 # Check if we're about to use Intel's ICC compiler
 case "`${cc:-cc} -V 2>&1`" in
-*"Intel(R) C++ Compiler"*)
+*"Intel(R) C++ Compiler"*|*"Intel(R) C Compiler"*)
     # This is needed for Configure's prototype checks to work correctly
     ccflags="-we147 $ccflags"
     # If we're using ICC, we usually want the best performance
