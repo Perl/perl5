@@ -1843,6 +1843,8 @@ PP(pp_enteriter)
 	if (SvTYPE(cx->blk_loop.iterary) != SVt_PVAV) {
 	    dPOPss;
 	    SV *right = (SV*)cx->blk_loop.iterary;
+	    SvGETMAGIC(sv);
+	    SvGETMAGIC(right);
 	    if (RANGE_IS_NUMERIC(sv,right)) {
 		if ((SvOK(sv) && SvNV(sv) < IV_MIN) ||
 		    (SvOK(right) && SvNV(right) >= IV_MAX))
