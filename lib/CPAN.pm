@@ -2651,8 +2651,10 @@ sub hosthard {
 	    $src_switch = " -source";
 	  } elsif ($f eq "ncftp"){
 	    $src_switch = " -c";
-          } elsif ($f eq "wget"){
-            $src_switch = " -O -";
+	  } elsif ($f eq "wget"){
+	    $src_switch = " -O -";
+	  } elsif ($f eq 'curl'){
+	    $src_switch = ' -L';
 	  }
 
 	  my($chdir) = "";
