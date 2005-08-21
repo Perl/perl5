@@ -4926,7 +4926,7 @@ $	sig_num_init = sig_num_init1 + sig_num_v7_3 + sig_num_initrt
 $	sig_size="37"
 $   else
 $	sig_name = sig_name1 + sig_name2 + sig_name3 + sig_namert
-$       sig_name_init = psnwc1 + psnwc2 + psnwc3 + psnwrt
+$       sig_name_init = psnwc1 + psnwc2 + psnwc3 + psnwcrt
 $	sig_num = sig_num1 + sig_numrt
 $	sig_num_init = sig_num_init1 + sig_num_initrt
 $	sig_size="36"
