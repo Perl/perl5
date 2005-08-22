@@ -195,9 +195,9 @@ sub GetOSName {
 		    90 => "Me"
 		},
 		2 => {
-		    0  => "2000",
+		    0  => "NT4",
 		    1  => "XP/.Net",
-                    2  => "2003",
+		    2  => "2003",
 		    51 => "NT3.51"
 		}
 	    }->{$id}->{$minor};
@@ -212,9 +212,9 @@ sub GetOSName {
 
         my $tag = "";
 
-        # But distinguising W2k from NT4 requires looking at the major version
-        if ($os eq "2000" && $major != 5) {
-            $os = "NT4";
+        # But distinguising W2k and Vista from NT4 requires looking at the major version
+        if ($os eq "NT4") {
+	    $os = {5 => "2000", 6 => "Vista"}->{$major} || "NT4";
         }
 
         # For the rest we take a look at the build numbers and try to deduce
@@ -483,6 +483,7 @@ Currently known values for ID MAJOR and MINOR are as follows:
     Windows 2000           2      5       0
     Windows XP             2      5       1
     Windows Server 2003    2      5       2
+    Windows Vista          2      6       0
 
 On Windows NT 4 SP6 and later this function returns the following
 additional values: SPMAJOR, SPMINOR, SUITEMASK, PRODUCTTYPE.
