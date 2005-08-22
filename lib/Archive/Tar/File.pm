@@ -2,9 +2,10 @@ package Archive::Tar::File;
 use strict;
 
 use IO::File;
-use File::Spec::Unix ();
-use File::Spec ();
-use File::Basename ();
+use File::Spec::Unix    ();
+use File::Spec          ();
+use File::Basename      ();
+
 use Archive::Tar::Constant;
 
 use vars qw[@ISA $VERSION];
@@ -200,6 +201,12 @@ sub clone {
 sub _new_from_chunk {
     my $class = shift;
     my $chunk = shift or return;
+    my %hash  = @_;
+
+    ### filter any arguments on defined-ness of values.
+    ### this allows overriding from what the tar-header is saying
+    ### about this tar-entry. Particularly useful for @LongLink files
+    my %args  = map { $_ => $hash{$_} } grep { defined $hash{$_} } keys %hash;
 
     ### makes it start at 0 actually... :) ###
     my $i = -1;
@@ -207,7 +214,7 @@ sub _new_from_chunk {
         $tmpl->[++$i] => $tmpl->[++$i] ? oct $_ : $_
     } map { /^([^\0]*)/ } unpack( UNPACK, $chunk );
 
-    my $obj = bless \%entry, $class;
+    my $obj = bless { %entry, %args }, $class;
 
 	### magic is a filetype string.. it should have something like 'ustar' or
 	### something similar... if the chunk is garbage, skip it

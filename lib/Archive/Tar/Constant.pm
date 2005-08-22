@@ -62,7 +62,12 @@ use constant MAGIC          => "ustar";
 use constant TAR_VERSION    => "00";
 use constant LONGLINK_NAME  => '././@LongLink';
 
-use constant ZLIB           => do { eval { require IO::Zlib }; $@ ? 0 : 1 };
+                            ### allow ZLIB to be turned off using ENV
+                            ### DEBUG only
+use constant ZLIB           => do { !$ENV{'PERL5_AT_NO_ZLIB'} and
+                                        eval { require IO::Zlib };
+                                    $ENV{'PERL5_AT_NO_ZLIB'} || $@ ? 0 : 1 };
+                                    
 use constant GZIP_MAGIC_NUM => qr/^(?:\037\213|\037\235)/;
 
 use constant CAN_CHOWN      => do { ($> == 0 and $^O ne "MacOS" and $^O ne "MSWin32") };

@@ -1186,10 +1186,12 @@ lib/assert.pl			assertion and panic with stack trace
 lib/Archive/Tar/Constant.pm	Archive::Tar
 lib/Archive/Tar/File.pm		Archive::Tar
 lib/Archive/Tar/bin/ptar	the ptar utility
+lib/Archive/Tar/bin/ptardiff	the ptardiff utility
 lib/Archive/Tar/t/00_setup.t	Archive::Tar test setup
 lib/Archive/Tar/t/01_use.t	Archive::Tar tests
 lib/Archive/Tar/t/02_methods.t	Archive::Tar tests
 lib/Archive/Tar/t/03_file.t	Archive::Tar tests
+lib/Archive/Tar/t/04_resolved issues.t	Archive::Tar tests
 lib/Archive/Tar/t/99_clean.t	Archive::Tar test cleanup
 lib/Archive/Tar/t/src/long/b	Archive::Tar tests
 lib/Archive/Tar/t/src/short/b	Archive::Tar tests

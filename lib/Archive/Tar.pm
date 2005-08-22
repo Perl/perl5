@@ -14,7 +14,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG              = 0;
 $WARN               = 1;
 $FOLLOW_SYMLINK     = 0;
-$VERSION            = "1.24_02";
+$VERSION            = "1.26_01";
 $CHOWN              = 1;
 $CHMOD              = 1;
 $DO_NOT_USE_PREFIX  = 0;
@@ -110,7 +110,10 @@ sub new {
     my $obj = bless { _data => [ ], _file => 'Unknown' }, $class;
 
     if (@_) {
-        return unless $obj->read( @_ );
+        unless ( $obj->read( @_ ) ) {
+            $obj->_error(qq[No data could be read from file]);
+            return;
+        }
     }
 
     return $obj;
@@ -259,10 +262,19 @@ sub _read_tar {
         ### source code (tar.c) to GNU cpio.
         next if $chunk eq TAR_END;
 
+        ### pass the realname, so we can set it 'proper' right away
+        ### some of the heuristics are done on the name, so important
+        ### to set it ASAP
         my $entry;
-        unless( $entry = Archive::Tar::File->new( chunk => $chunk ) ) {
-            $self->_error( qq[Couldn't read chunk at offset $offset] );
-            next;
+        {   my %extra_args = ();
+            $extra_args{'name'} = $$real_name if defined $real_name;
+            
+            unless( $entry = Archive::Tar::File->new(   chunk => $chunk, 
+                                                        %extra_args ) 
+            ) {
+                $self->_error( qq[Couldn't read chunk at offset $offset] );
+                next;
+            }
         }
 
         ### ignore labels:
@@ -497,7 +509,14 @@ sub _extract_file {
     } else {
         my @dirs    = File::Spec::Unix->splitdir( $dirs );
         my @cwd     = File::Spec->splitdir( $cwd );
-        $dir        = File::Spec->catdir(@cwd, @dirs);
+        $dir        = File::Spec->catdir( @cwd, @dirs );
+
+        # catdir() returns undef if the path is longer than 255 chars on VMS
+        unless ( defined $dir ) {
+            $^W && $self->_error( qq[Could not compose a path for '$dirs'\n] );
+            return;
+        }
+
     }
 
     if( -e $dir && !-d _ ) {
@@ -1438,6 +1457,46 @@ have incompatible filetypes and still expect things to work).
 
 For other filetypes, like C<chardevs> and C<blockdevs> we'll warn that
 the extraction of this particular item didn't work.
+
+=item How do I access .tar.Z files?
+
+The C<Archive::Tar> module can optionally use C<Compress::Zlib> (via
+the C<IO::Zlib> module) to access tar files that have been compressed
+with C<gzip>. Unfortunately tar files compressed with the Unix C<compress>
+utility cannot be read by C<Compress::Zlib> and so cannot be directly
+accesses by C<Archive::Tar>.
+
+If the C<uncompress> or C<gunzip> programs are available, you can use
+one of these workarounds to read C<.tar.Z> files from C<Archive::Tar>
+
+Firstly with C<uncompress>
+
+    use Archive::Tar;
+
+    open F, "uncompress -c $filename |";
+    my $tar = Archive::Tar->new(*F);
+    ...
+
+and this with C<gunzip>
+
+    use Archive::Tar;
+
+    open F, "gunzip -c $filename |";
+    my $tar = Archive::Tar->new(*F);
+    ...
+
+Similarly, if the C<compress> program is available, you can use this to
+write a C<.tar.Z> file
+
+    use Archive::Tar;
+    use IO::File;
+
+    my $fh = new IO::File "| compress -c >$filename";
+    my $tar = Archive::Tar->new();
+    ...
+    $tar->write($fh);
+    $fh->close ;
+
 
 =back
 

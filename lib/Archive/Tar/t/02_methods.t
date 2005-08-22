@@ -60,7 +60,7 @@ my @EXPECTX = (
 my $LONG_FILE = qq[directory/really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-long-directory-name/myfile];
 
 ### wintendo can't deal with too long paths, so we might have to skip tests ###
-my $TOO_LONG    =   ($^O eq 'MSWin32' or $^O eq 'cygwin')
+my $TOO_LONG    =   ($^O eq 'MSWin32' or $^O eq 'cygwin' or $^O eq 'VMS')
                     && length( cwd(). $LONG_FILE ) > 247;
 
 ### warn if we are going to skip long file names
@@ -85,11 +85,10 @@ my $TGZ_FILE        = File::Spec->catfile( @ROOT, 'foo.tgz' );
 my $OUT_TAR_FILE    = File::Spec->catfile( @ROOT, 'out.tar' );
 my $OUT_TGZ_FILE    = File::Spec->catfile( @ROOT, 'out.tgz' );
 
-copy( File::Basename::basename($0), 'copy' );
-my $COMPRESS_FILE   = 'copy';
+my $COMPRESS_FILE = 'copy';
+$^O eq 'VMS' and $COMPRESS_FILE .= '.';
+copy( File::Basename::basename($0), $COMPRESS_FILE );
 chmod 0644, $COMPRESS_FILE;
-
-END { unlink $COMPRESS_FILE; }
 
 ### done setting up environment ###
 
@@ -221,7 +220,7 @@ END { unlink $COMPRESS_FILE; }
         is( scalar @files, scalar @add,
                                     "Adding files");
         is( $files[0]->name, 'b',   "   Proper name" );
-        is( $files[0]->is_file, !-l $add[0] && -f _,  "   Proper type" );
+        is( $files[0]->is_file, 1,  "   Proper type" );
         like( $files[0]->get_content, qr/^bbbbbbbbbbb\s*$/,
                                     "   Content OK" );
 
@@ -559,6 +558,7 @@ END {
 
     my ($dir) = File::Spec::Unix->splitdir( $LONG_FILE );
     rmtree $dir if $dir && -d $dir && not $NO_UNLINK;
+    1 while unlink $COMPRESS_FILE;
 }
 
 ###########################
@@ -581,7 +581,11 @@ sub is_dir {
 
 sub rm {
     my $x = shift;
-    is_dir($x) ? rmtree($x) : unlink $x;
+    if  ( is_dir($x) ) {
+         rmtree($x);
+    } else {
+         1 while unlink $x;
+    }
 }
 
 sub check_tar_file {
@@ -680,8 +684,7 @@ sub check_tar_extract {
         like( $content, qr/$econtent/,
                                     "   Contents OK" );
 
-        close $fh;
-        unlink $path unless $NO_UNLINK;
+        $NO_UNLINK or 1 while unlink $path;
 
         ### alternate extract path tests 
         ### to abs and rel paths
@@ -690,8 +693,8 @@ sub check_tar_extract {
                                     File::Spec->catdir( @ROOT )
                                 )
             ) {
-            
-                my $outfile = File::Spec->catfile( $outpath, $$ ); 
+
+                my $outfile = File::Spec->catfile( $outpath, $$ );
     
                 ok( $tar->extract_file( $file->full_path, $outfile ),
                                 "   Extracted file '$path' to $outfile" );
