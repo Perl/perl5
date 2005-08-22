@@ -305,8 +305,7 @@ usage:
 
     rv = ST(0);
     ST(0) = TARG;
-    if (SvGMAGICAL(rv))
-	mg_get(rv);
+    SvGETMAGIC(rv);
     if (!(SvOK(rv) && SvROK(rv)))
 	goto usage;
     sv = SvRV(rv);

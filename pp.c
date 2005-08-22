@@ -505,8 +505,8 @@ PP(pp_ref)
     const char *pv;
     SV * const sv = POPs;
 
-    if (sv && SvGMAGICAL(sv))
-	mg_get(sv);
+    if (sv)
+	SvGETMAGIC(sv);
 
     if (!sv || !SvROK(sv))
 	RETPUSHNO;
@@ -755,8 +755,7 @@ PP(pp_defined)
 	    RETPUSHYES;
 	break;
     default:
-	if (SvGMAGICAL(sv))
-	    mg_get(sv);
+	SvGETMAGIC(sv);
 	if (SvOK(sv))
 	    RETPUSHYES;
     }
@@ -1384,8 +1383,7 @@ PP(pp_repeat)
   {
     register IV count;
     dPOPss;
-    if (SvGMAGICAL(sv))
-	 mg_get(sv);
+    SvGETMAGIC(sv);
     if (SvIOKp(sv)) {
 	 if (SvUOK(sv)) {
 	      const UV uv = SvUV(sv);
@@ -2223,8 +2221,8 @@ PP(pp_bit_and)
     dSP; dATARGET; tryAMAGICbin(band,opASSIGN);
     {
       dPOPTOPssrl;
-      if (SvGMAGICAL(left)) mg_get(left);
-      if (SvGMAGICAL(right)) mg_get(right);
+      SvGETMAGIC(left);
+      SvGETMAGIC(right);
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (PL_op->op_private & HINT_INTEGER) {
 	  const IV i = SvIV_nomg(left) & SvIV_nomg(right);
@@ -2248,8 +2246,8 @@ PP(pp_bit_xor)
     dSP; dATARGET; tryAMAGICbin(bxor,opASSIGN);
     {
       dPOPTOPssrl;
-      if (SvGMAGICAL(left)) mg_get(left);
-      if (SvGMAGICAL(right)) mg_get(right);
+      SvGETMAGIC(left);
+      SvGETMAGIC(right);
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (PL_op->op_private & HINT_INTEGER) {
 	  const IV i = (USE_LEFT(left) ? SvIV_nomg(left) : 0) ^ SvIV_nomg(right);
@@ -2273,8 +2271,8 @@ PP(pp_bit_or)
     dSP; dATARGET; tryAMAGICbin(bor,opASSIGN);
     {
       dPOPTOPssrl;
-      if (SvGMAGICAL(left)) mg_get(left);
-      if (SvGMAGICAL(right)) mg_get(right);
+      SvGETMAGIC(left);
+      SvGETMAGIC(right);
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (PL_op->op_private & HINT_INTEGER) {
 	  const IV i = (USE_LEFT(left) ? SvIV_nomg(left) : 0) | SvIV_nomg(right);
@@ -2299,8 +2297,7 @@ PP(pp_negate)
     {
 	dTOPss;
 	const int flags = SvFLAGS(sv);
-	if (SvGMAGICAL(sv))
-	    mg_get(sv);
+	SvGETMAGIC(sv);
 	if ((flags & SVf_IOK) || ((flags & (SVp_IOK | SVp_NOK)) == SVp_IOK)) {
 	    /* It's publicly an integer, or privately an integer-not-float */
 	oops_its_an_int:
@@ -2376,8 +2373,7 @@ PP(pp_complement)
     dSP; dTARGET; tryAMAGICun(compl);
     {
       dTOPss;
-      if (SvGMAGICAL(sv))
-	  mg_get(sv);
+      SvGETMAGIC(sv);
       if (SvNIOKp(sv)) {
 	if (PL_op->op_private & HINT_INTEGER) {
 	  const IV i = ~SvIV_nomg(sv);

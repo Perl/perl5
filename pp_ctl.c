@@ -1126,10 +1126,8 @@ PP(pp_flop)
     if (GIMME == G_ARRAY) {
 	dPOPPOPssrl;
 
-	if (SvGMAGICAL(left))
-	    mg_get(left);
-	if (SvGMAGICAL(right))
-	    mg_get(right);
+	SvGETMAGIC(left);
+	SvGETMAGIC(right);
 
 	if (RANGE_IS_NUMERIC(left,right)) {
 	    register IV i, j;
@@ -1543,8 +1541,7 @@ PP(pp_dorassign)
 	    RETURN;
 	break;
     default:
-	if (SvGMAGICAL(sv))
-	    mg_get(sv);
+	SvGETMAGIC(sv);
 	if (SvOK(sv))
 	    RETURN;
     }

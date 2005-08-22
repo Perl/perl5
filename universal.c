@@ -144,8 +144,7 @@ Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
     HV *stash = Nullhv;
     HV *name_stash;
 
-    if (SvGMAGICAL(sv))
-        mg_get(sv) ;
+    SvGETMAGIC(sv);
 
     if (SvROK(sv)) {
         sv = SvRV(sv);
@@ -262,8 +261,7 @@ XS(XS_UNIVERSAL_isa)
 
     sv = ST(0);
 
-    if (SvGMAGICAL(sv))
-	mg_get(sv);
+    SvGETMAGIC(sv);
 
     if (!SvOK(sv) || !(SvROK(sv) || (SvPOK(sv) && SvCUR(sv))
 		|| (SvGMAGICAL(sv) && SvPOKp(sv) && SvCUR(sv))))
@@ -288,8 +286,7 @@ XS(XS_UNIVERSAL_can)
 
     sv = ST(0);
 
-    if (SvGMAGICAL(sv))
-	mg_get(sv);
+    SvGETMAGIC(sv);
 
     if (!SvOK(sv) || !(SvROK(sv) || (SvPOK(sv) && SvCUR(sv))
 		|| (SvGMAGICAL(sv) && SvPOKp(sv) && SvCUR(sv))))

@@ -169,8 +169,7 @@ PP(pp_concat)
     }
     else { /* TARG == left */
         STRLEN llen;
-	if (SvGMAGICAL(left))
-	    mg_get(left);		/* or mg_get(left) may happen here */
+	SvGETMAGIC(left);		/* or mg_get(left) may happen here */
 	if (!SvOK(TARG))
 	    sv_setpvn(left, "", 0);
 	(void)SvPV_nomg_const(left, llen);    /* Needed to set UTF8 flag */
@@ -350,8 +349,7 @@ PP(pp_dor)
 	    RETURN;
 	break;
     default:
-	if (SvGMAGICAL(sv))
-	    mg_get(sv);
+	SvGETMAGIC(sv);
 	if (SvOK(sv))
 	    RETURN;
     }
@@ -2914,8 +2912,7 @@ PP(pp_aelem)
 void
 Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
 {
-    if (SvGMAGICAL(sv))
-	mg_get(sv);
+    SvGETMAGIC(sv);
     if (!SvOK(sv)) {
 	if (SvREADONLY(sv))
 	    Perl_croak(aTHX_ PL_no_modify);
@@ -2985,8 +2982,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     if (!sv)
 	Perl_croak(aTHX_ "Can't call method \"%s\" on an undefined value", name);
 
-    if (SvGMAGICAL(sv))
-	mg_get(sv);
+    SvGETMAGIC(sv);
     if (SvROK(sv))
 	ob = (SV*)SvRV(sv);
     else {
