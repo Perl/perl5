@@ -28,34 +28,34 @@ if( $opts->{c} ) {
     my @files;
     find( sub { push @files, $File::Find::name;
                 print $File::Find::name.$/ if $verbose }, @ARGV );
-                
-    Archive::Tar->create_archive( $file, $compress, @files );              
+
+    Archive::Tar->create_archive( $file, $compress, @files );
     exit;
-} 
+}
 
 my $tar = Archive::Tar->new($file, $compress);
 
 if( $opts->{t} ) {
-    print map { $_->full_path . $/ } $tar->get_files; 
+    print map { $_->full_path . $/ } $tar->get_files;
 
-} elsif( $opts->{x} ) {    
+} elsif( $opts->{x} ) {
     print map { $_->full_path . $/ } $tar->get_files
         if $verbose;
     Archive::Tar->extract_archive($file, $compress);
-}    
+}
 
 
 
 sub usage {
     qq[
-Usage:  ptar -c [-v] [-z] [-f ARCHIVE_FILE] FILE FILE ...      
-        ptar -x [-v] [-z] [-f ARCHIVE_FILE] 
-        ptar -t [-z] [-f ARCHIVE_FILE] 
+Usage:  ptar -c [-v] [-z] [-f ARCHIVE_FILE] FILE FILE ...
+        ptar -x [-v] [-z] [-f ARCHIVE_FILE]
+        ptar -t [-z] [-f ARCHIVE_FILE]
         ptar -h
-    
+
     ptar is a small, tar look-alike program that uses the perl module
-    Archive::Tar to extract, create and list tar archives.    
-    
+    Archive::Tar to extract, create and list tar archives.
+
 Options:
     x   Extract from ARCHIVE_FILE
     c   Create ARCHIVE_FILE from FILE
@@ -72,3 +72,34 @@ See Also:
     \n]
 }
 
+=head1 NAME
+
+ptar - a tar-like program written in perl
+
+=head1 DESCRIPTION
+
+ptar is a small, tar look-alike program that uses the perl module
+Archive::Tar to extract, create and list tar archives.
+
+=head1 SYNOPSIS
+
+    ptar -c [-v] [-z] [-f ARCHIVE_FILE] FILE FILE ...
+    ptar -x [-v] [-z] [-f ARCHIVE_FILE]
+    ptar -t [-z] [-f ARCHIVE_FILE]
+    ptar -h
+
+=head1 OPTIONS
+
+    x   Extract from ARCHIVE_FILE
+    c   Create ARCHIVE_FILE from FILE
+    t   List the contents of ARCHIVE_FILE
+    f   Name of the ARCHIVE_FILE to use. Default is './default.tar'
+    z   Read/Write zlib compressed ARCHIVE_FILE (not always available)
+    v   Print filenames as they are added or extraced from ARCHIVE_FILE
+    h   Prints this help message
+
+=head1 SEE ALSO
+
+tar(1), L<Archive::Tar>.
+
+=cut
