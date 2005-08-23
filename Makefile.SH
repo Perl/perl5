@@ -1024,7 +1024,7 @@ _cleaner1:
 # Some systems do not support "?", so keep these files separate.
 _cleaner2:
 	-rm -f core.*perl.*.? t/core.perl.*.? .?*.c
-	rm -f core *perl.core t/core t/*perl.core
+	rm -f core *perl.core t/core t/*perl.core core.* t/core.*
 	rm -f t/misctmp* t/forktmp* t/tmp* t/c t/perl$(EXE_EXT) t/rantests
 	rm -f so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
 	rm -rf $(addedbyconf)
