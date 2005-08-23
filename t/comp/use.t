@@ -153,7 +153,7 @@ print "ok ",$i++,"\n";
     print "ok ",$i++,"\n";
 
     eval "use lib v100.105";
-    unless ($@ =~ /lib version 100.105 \(v100\.105\.0\) required--this is only version 35.036 \(v35\.36\.0\)/) {
+    unless ($@ =~ /lib version 100.105 \(v100\.105\.0\) required--this is only version 35.036000 \(v35\.36\.0\)/) {
 	print "not ";
     }
     print "ok ",$i++,"\n";
@@ -163,7 +163,7 @@ print "ok ",$i++,"\n";
     print "ok ",$i++,"\n";
 
     eval "use lib 100.105";
-    unless ($@ =~ /lib version 100.105 \(v100\.105\.0\) required--this is only version 35.036 \(v35\.36\.0\)/) {
+    unless ($@ =~ /lib version 100.105 \(v100\.105\.0\) required--this is only version 35.036000 \(v35\.36\.0\)/) {
 	print "not ";
     }
     print "ok ",$i++,"\n";

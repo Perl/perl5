@@ -329,6 +329,7 @@ Perl_scan_vstring
 Perl_scan_version
 Perl_new_version
 Perl_upg_version
+Perl_vverify
 Perl_vnumify
 Perl_vnormal
 Perl_vstringify

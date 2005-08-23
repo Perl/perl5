@@ -12,7 +12,7 @@ use vars qw(@ISA $VERSION $CLASS @EXPORT);
 
 @EXPORT = qw(qv);
 
-$VERSION = "0.44"; 
+$VERSION = "0.47"; 
 
 $CLASS = 'version';
 
@@ -537,6 +537,28 @@ The replacement UNIVERSAL::VERSION, when used as a function, like this:
 will also exclusively return the numified form.  Technically, the 
 $module->VERSION function returns a string (PV) that can be converted to a 
 number following the normal Perl rules, when used in a numeric context.
+
+=head1 SUBCLASSING
+
+This module is specifically designed and tested to be easily subclassed.
+In practice, you only need to override the methods you want to change, but
+you have to take some care when overriding new() (since that is where all
+of the parsing takes place).  For example, this is a perfect acceptable
+derived class:
+
+  package myversion;
+  use base version;
+  sub new { 
+      my($self,$n)=@_;
+      my $obj;
+      # perform any special input handling here
+      $obj = $self->SUPER::new($n);
+      # and/or add additional hash elements here
+      return $obj;
+  }
+
+See also L<version::AlphaBeta> on CPAN for an alternate representation of
+version strings.
 
 =head1 EXPORT
 

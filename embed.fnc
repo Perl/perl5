@@ -554,6 +554,7 @@ Ap	|char*	|scan_vstring	|NN const char *vstr|NN SV *sv
 Apd	|const char*	|scan_version	|NN const char *vstr|NN SV *sv|bool qv
 Apd	|SV*	|new_version	|NN SV *ver
 Apd	|SV*	|upg_version	|NN SV *ver
+Apd	|bool	|vverify	|NN SV *vs
 Apd	|SV*	|vnumify	|NN SV *vs
 Apd	|SV*	|vnormal	|NN SV *vs
 Apd	|SV*	|vstringify	|NN SV *vs

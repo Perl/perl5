@@ -4,12 +4,12 @@
 
 #########################
 
-use Test::More tests => 183;
+use Test::More tests => 200;
 
 diag "Tests with base class" unless $ENV{PERL_CORE};
 
 BEGIN {
-    use_ok("version", 0.30); # If we made it this far, we are ok.
+    use_ok("version", 0.47); # If we made it this far, we are ok.
 }
 
 BaseTests("version");
@@ -22,17 +22,37 @@ use version 0.30;
 @ISA = qw(version);
 $VERSION = 0.01;
 
+package version::Bad;
+use base version;
+sub new { my($self,$n)=@_;  bless \$n, $self }
+
 package main;
-my $testobj = new version::Empty 1.002_003;
+my $testobj = version::Empty->new(1.002_003);
 isa_ok( $testobj, "version::Empty" );
 ok( $testobj->numify == 1.002003, "Numified correctly" );
 ok( $testobj->stringify eq "1.002003", "Stringified correctly" );
 ok( $testobj->normal eq "v1.2.3", "Normalified correctly" );
 
-my $verobj = new version "1.2.4";
+my $verobj = version->new("1.2.4");
 ok( $verobj > $testobj, "Comparison vs parent class" );
 ok( $verobj gt $testobj, "Comparison vs parent class" );
 BaseTests("version::Empty");
+
+diag "tests with bad subclass" unless $ENV{PERL_CORE};
+$testobj = version::Bad->new(1.002_003);
+isa_ok( $testobj, "version::Bad" );
+eval { my $string = $testobj->numify };
+like($@, qr/Invalid version object/,
+    "Bad subclass numify");
+eval { my $string = $testobj->normal };
+like($@, qr/Invalid version object/,
+    "Bad subclass normal");
+eval { my $string = $testobj->stringify };
+like($@, qr/Invalid version object/,
+    "Bad subclass stringify");
+eval { my $test = $testobj > 1.0 };
+like($@, qr/Invalid version object/,
+    "Bad subclass vcmp");
 
 sub BaseTests {
 
@@ -278,4 +298,25 @@ SKIP: 	{
 	    $version = qv(1.2.3);
 	    ok("$version" eq "v1.2.3", 'v-string initialized qv()');
 	}
+
+	diag "Tests with real-world (malformed) data" unless $ENV{PERL_CORE};
+
+	# trailing zero testing (reported by Andreas Koenig).
+	$version = $CLASS->new("1");
+	ok($version->numify eq "1.000", "trailing zeros preserved");
+	$version = $CLASS->new("1.0");
+	ok($version->numify eq "1.000", "trailing zeros preserved");
+	$version = $CLASS->new("1.0.0");
+	ok($version->numify eq "1.000000", "trailing zeros preserved");
+	$version = $CLASS->new("1.0.0.0");
+	ok($version->numify eq "1.000000000", "trailing zeros preserved");
+	
+	# leading zero testing (reported by Andreas Koenig).
+	$version = $CLASS->new(".7");
+	ok($version->numify eq "0.700", "leading zero inferred");
+
+	# leading space testing (reported by Andreas Koenig).
+	$version = $CLASS->new(" 1.7");
+	ok($version->numify eq "1.700", "leading space ignored");
+
 }

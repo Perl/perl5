@@ -2019,6 +2019,20 @@ the original version contained 1 or more dots, respectively
 =for hackers
 Found in file util.c
 
+=item vverify
+
+Validates that the SV contains a valid version object.
+
+    bool vverify(SV *vobj);
+
+Note that it only confirms the bare minimum structure (so as not to get
+confused by derived classes which may contain additional hash entries):
+
+	bool	vverify(SV *vs)
+
+=for hackers
+Found in file util.c
+
 
 =back
 
