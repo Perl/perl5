@@ -1610,12 +1610,13 @@ the output.
 
 =head2 Errors
 
-All detected errors, (invalid arguments, internal errors, etc.) are
-resolved with a die($message). Use an eval if you wish to catch these
-errors and continue processing.
+Errors in rendering (non-existent function-name, non-existent coderef)
+are written to the STDOUT, or wherever you've set it via
+walk_output().
 
-In particular, B<compile> will die if you've asked for a non-existent
-function-name, a non-existent coderef, or a non-CODE reference.
+Errors using the various *style* calls, and bad args to walk_output(),
+result in die().  Use an eval if you wish to catch these errors and
+continue processing.
 
 =head1 AUTHOR
 
