@@ -544,7 +544,7 @@ After a match against some variable $var:
 
 =item C<$2> is the same as C<substr($var, $-[2], $+[2] - $-[2])>
 
-=item C<$3> is the same as C<substr $var, $-[3], $+[3] - $-[3])>
+=item C<$3> is the same as C<substr($var, $-[3], $+[3] - $-[3])>
 
 =back
 
