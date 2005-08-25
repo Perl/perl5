@@ -4227,17 +4227,17 @@ Perl_vnumify(pTHX_ SV *vs)
     }
 
     digit = SvIV(*av_fetch(av, 0, 0));
-    sv_setpvf(sv, "%d.", (int)PERL_ABS(digit));
+    Perl_sv_setpvf(aTHX_ sv, "%d.", (int)PERL_ABS(digit));
     for ( i = 1 ; i < len ; i++ )
     {
 	digit = SvIV(*av_fetch(av, i, 0));
 	if ( width < 3 ) {
 	    const int denom = (int)pow(10,(3-width));
 	    const div_t term = div((int)PERL_ABS(digit),denom);
-	    sv_catpvf(sv, "%0*d_%d", width, term.quot, term.rem);
+	    Perl_sv_catpvf(aTHX_ sv, "%0*d_%d", width, term.quot, term.rem);
 	}
 	else {
-	    sv_catpvf(sv, "%0*d", width, (int)digit);
+	    Perl_sv_catpvf(aTHX_ sv, "%0*d", width, (int)digit);
 	}
     }
 
@@ -4246,7 +4246,7 @@ Perl_vnumify(pTHX_ SV *vs)
 	digit = SvIV(*av_fetch(av, len, 0));
 	if ( alpha && width == 3 ) /* alpha version */
 	    sv_catpvn(sv,"_",1);
-	sv_catpvf(sv, "%0*d", width, (int)digit);
+	Perl_sv_catpvf(aTHX_ sv, "%0*d", width, (int)digit);
     }
     else /* len == 0 */
     {
@@ -4293,10 +4293,10 @@ Perl_vnormal(pTHX_ SV *vs)
 	return sv;
     }
     digit = SvIV(*av_fetch(av, 0, 0));
-    sv_setpvf(sv, "v%"IVdf, (IV)digit);
+    Perl_sv_setpvf(aTHX_ sv, "v%"IVdf, (IV)digit);
     for ( i = 1 ; i <= len-1 ; i++ ) {
 	digit = SvIV(*av_fetch(av, i, 0));
-	sv_catpvf(sv, ".%"IVdf, (IV)digit);
+	Perl_sv_catpvf(aTHX_ sv, ".%"IVdf, (IV)digit);
     }
 
     if ( len > 0 )
@@ -4304,9 +4304,9 @@ Perl_vnormal(pTHX_ SV *vs)
 	/* handle last digit specially */
 	digit = SvIV(*av_fetch(av, len, 0));
 	if ( alpha )
-	    sv_catpvf(sv, "_%"IVdf, (IV)digit);
+	    Perl_sv_catpvf(aTHX_ sv, "_%"IVdf, (IV)digit);
 	else
-	    sv_catpvf(sv, ".%"IVdf, (IV)digit);
+	    Perl_sv_catpvf(aTHX_ sv, ".%"IVdf, (IV)digit);
     }
 
     if ( len <= 2 ) { /* short version, must be at least three */
@@ -4341,9 +4341,9 @@ Perl_vstringify(pTHX_ SV *vs)
 	qv = 1;
     
     if ( qv )
-	return vnormal(vs);
+	return Perl_vnormal(aTHX_ vs);
     else
-	return vnumify(vs);
+	return Perl_vnumify(aTHX_ vs);
 }
 
 /*
