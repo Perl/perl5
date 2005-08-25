@@ -5412,10 +5412,6 @@ Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
 	Perl_croak(aTHX_ "panic: reference miscount on nsv in sv_replace() (%"
 		   UVuf " != 1)", (UV) SvREFCNT(nsv));
     }
-    if (SvREFCNT(sv) != 1) {
-	Perl_croak(aTHX_ "panic: reference miscount on sv in sv_replace() (%"
-		   UVuf " != 1)", (UV) SvREFCNT(sv));
-    }
     if (SvMAGICAL(sv)) {
 	if (SvMAGICAL(nsv))
 	    mg_free(nsv);
