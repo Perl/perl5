@@ -1222,7 +1222,10 @@ Perl_newIO(pTHX)
     IO * const io = (IO*)NEWSV(0,0);
 
     sv_upgrade((SV *)io,SVt_PVIO);
-    SvREFCNT(io) = 1;
+    /* This used to read SvREFCNT(io) = 1;
+       It's not clear why the reference count needed an explicit reset. NWC
+    */
+    assert (SvREFCNT(io) == 1);
     SvOBJECT_on(io);
     /* Clear the stashcache because a new IO could overrule a package name */
     hv_clear(PL_stashcache);
