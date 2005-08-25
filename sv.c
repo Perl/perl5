@@ -5408,8 +5408,10 @@ Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
 {
     const U32 refcnt = SvREFCNT(sv);
     SV_CHECK_THINKFIRST_COW_DROP(sv);
-    if (SvREFCNT(nsv) != 1 && ckWARN_d(WARN_INTERNAL))
-	Perl_warner(aTHX_ packWARN(WARN_INTERNAL), "Reference miscount in sv_replace()");
+    if (SvREFCNT(nsv) != 1) {
+	Perl_croak(aTHX_ "panic: feference miscount on nsv in sv_replace() (%"
+		   UVuf " != 1)", (UV) SvREFCNT(nsv));
+    }
     if (SvMAGICAL(sv)) {
 	if (SvMAGICAL(nsv))
 	    mg_free(nsv);
