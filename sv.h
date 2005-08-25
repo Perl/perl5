@@ -69,18 +69,26 @@ typedef struct hek HEK;
 
 /* Using C's structural equivalence to help emulate C++ inheritance here... */
 
+/* start with 2 sv-head building blocks */
+#define _SV_HEAD(ptrtype) \
+    ptrtype	sv_any;		/* pointer to body */	\
+    U32		sv_refcnt;	/* how many references to us */	\
+    U32		sv_flags	/* what we are */
+
+#define _SV_HEAD_UNION \
+    union {				\
+	IV      svu_iv;			\
+	UV      svu_uv;			\
+	SV*     svu_rv;		/* pointer to another SV */		\
+	char*   svu_pv;		/* pointer to malloced string */	\
+	SV**    svu_array;		\
+	HE**	svu_hash;		\
+    }	sv_u
+
+
 struct STRUCT_SV {		/* struct sv { */
-    void*	sv_any;		/* pointer to something */
-    U32		sv_refcnt;	/* how many references to us */
-    U32		sv_flags;	/* what we are */
-    union {
-	IV	svu_iv;
-	UV	svu_uv;
-	SV*	svu_rv;		/* pointer to another SV */
-	char*	svu_pv;    	/* pointer to malloced string */
-	SV**	svu_array;
-	HE**	svu_hash;
-    }		sv_u;
+    _SV_HEAD(void*);
+    _SV_HEAD_UNION;
 #ifdef DEBUG_LEAKING_SCALARS
     unsigned	sv_debug_optype:9;	/* the type of OP that allocated us */
     unsigned	sv_debug_inpad:1;	/* was allocated in a pad for an OP */
@@ -91,74 +99,32 @@ struct STRUCT_SV {		/* struct sv { */
 };
 
 struct gv {
-    XPVGV*	sv_any;		/* pointer to something */
-    U32		sv_refcnt;	/* how many references to us */
-    U32		sv_flags;	/* what we are */
-    union {
-	IV	svu_iv;
-	UV	svu_uv;
-	SV*	svu_rv;
-	char*	svu_pv;
-	SV**	svu_array;
-	HE**	svu_hash;
-    }		sv_u;
+    _SV_HEAD(XPVGV*);		/* pointer to xpvgv body */
+    _SV_HEAD_UNION;
 };
 
 struct cv {
-    XPVCV*	sv_any;		/* pointer to something */
-    U32		sv_refcnt;	/* how many references to us */
-    U32		sv_flags;	/* what we are */
-    union {
-	IV	svu_iv;
-	UV	svu_uv;
-	SV*	svu_rv;
-	char*	svu_pv;
-	SV**	svu_array;
-	HE**	svu_hash;
-    }		sv_u;
+    _SV_HEAD(XPVCV*);		/* pointer to xpvcv body */
+    _SV_HEAD_UNION;
 };
 
 struct av {
-    XPVAV*	sv_any;		/* pointer to something */
-    U32		sv_refcnt;	/* how many references to us */
-    U32		sv_flags;	/* what we are */
-    union {
-	IV	svu_iv;
-	UV	svu_uv;
-	SV*	svu_rv;
-	char*	svu_pv;		/* pointer to first array element */
-	SV**	svu_array;
-	HE**	svu_hash;
-    }		sv_u;
+    _SV_HEAD(XPVAV*);		/* pointer to xpvcv body */
+    _SV_HEAD_UNION;
 };
 
 struct hv {
-    XPVHV*	sv_any;		/* pointer to something */
-    U32		sv_refcnt;	/* how many references to us */
-    U32		sv_flags;	/* what we are */
-    union {
-	IV	svu_iv;
-	UV	svu_uv;
-	SV*	svu_rv;
-	char*	svu_pv;
-	SV**	svu_array;
-	HE**	svu_hash;
-    }		sv_u;
+    _SV_HEAD(XPVHV*);		/* pointer to xpvhv body */
+    _SV_HEAD_UNION;
 };
 
 struct io {
-    XPVIO*	sv_any;		/* pointer to something */
-    U32		sv_refcnt;	/* how many references to us */
-    U32		sv_flags;	/* what we are */
-    union {
-	IV	svu_iv;
-	UV	svu_uv;
-	SV*	svu_rv;
-	char*	svu_pv;
-	SV**	svu_array;
-	HE**	svu_hash;
-    }		sv_u;
+    _SV_HEAD(XPVIO*);		/* pointer to xpvio body */
+    _SV_HEAD_UNION;
 };
+
+#undef _SV_HEAD
+#undef _SV_HEAD_UNION		/* insure no pollution */
 
 /*
 =head1 SV Manipulation Functions
