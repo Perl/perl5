@@ -127,7 +127,7 @@ On Win32 makes
 
 sub canonpath {
     my ($self,$path) = @_;
-    my $orig_path = $path;
+    
     $path =~ s/^([a-z]:)/\u$1/s;
     $path =~ s|/|\\|g;
     $path =~ s|([^\\])\\+|$1\\|g;                  # xx\\\\xx  -> xx\xx
@@ -144,29 +144,7 @@ sub canonpath {
     $path =~ s{^\\\.\.$}{\\};                      # \..    -> \
     1 while $path =~ s{^\\\.\.}{};                 # \..\xx -> \xx
 
-    my ($vol,$dirs,$file) = $self->splitpath($path);
-    my @dirs = $self->splitdir($dirs);
-    my (@base_dirs, @path_dirs);
-    my $dest = \@base_dirs;
-    for my $dir (@dirs){
-	$dest = \@path_dirs if $dir eq $self->updir;
-	push @$dest, $dir;
-    }
-    # for each .. in @path_dirs pop one item from 
-    # @base_dirs
-    while (my $dir = shift @path_dirs){ 
-	unless ($dir eq $self->updir){
-	    unshift @path_dirs, $dir;
-	    last;
-	}
-	pop @base_dirs;
-    }
-    $path = $self->catpath( 
-			   $vol, 
-			   $self->catdir(@base_dirs, @path_dirs), 
-			   $file
-			  );
-    return $path;
+    return $self->_collapse($path);
 }
 
 =item splitpath
@@ -274,8 +252,9 @@ sub catpath {
 
     # If it's UNC, make sure the glue separator is there, reusing
     # whatever separator is first in the $volume
-    $volume .= $1
-        if ( $volume =~ m@^([\\/])[\\/][^\\/]+[\\/][^\\/]+\Z(?!\n)@s &&
+    my $v;
+    $volume .= $v
+        if ( (($v) = $volume =~ m@^([\\/])[\\/][^\\/]+[\\/][^\\/]+\Z(?!\n)@s) &&
              $directory =~ m@^[^\\/]@s
            ) ;
 

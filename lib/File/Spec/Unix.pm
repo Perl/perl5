@@ -59,7 +59,8 @@ sub canonpath {
     $path =~ s|/+|/|g;                             # xx////xx  -> xx/xx
     $path =~ s@(/\.)+(/|\Z(?!\n))@/@g;             # xx/././xx -> xx/xx
     $path =~ s|^(\./)+||s unless $path eq "./";    # ./xx      -> xx
-    $path =~ s|^/(\.\./)+|/|s;                     # /../../xx -> xx
+    $path =~ s|^/(\.\./)+|/|;                      # /../../xx -> xx
+    $path =~ s|^/\.\.$|/|;                         # /..       -> /
     $path =~ s|/\Z(?!\n)|| unless $path eq "/";          # xx/       -> xx
     return "$node$path";
 }
@@ -471,5 +472,39 @@ sub _cwd {
     require Cwd;
     Cwd::cwd();
 }
+
+
+# Internal method to reduce xx\..\yy -> yy
+sub _collapse {
+    my($fs, $path) = @_;
+
+    my $updir  = $fs->updir;
+    my $curdir = $fs->curdir;
+
+    my($vol, $dirs, $file) = $fs->splitpath($path);
+    my @dirs = $fs->splitdir($dirs);
+
+    my @collapsed;
+    foreach my $dir (@dirs) {
+        if( $dir eq $updir              and   # if we have an updir
+            @collapsed                  and   # and something to collapse
+            length $collapsed[-1]       and   # and its not the rootdir
+            $collapsed[-1] ne $updir    and   # nor another updir
+            $collapsed[-1] ne $curdir         # nor the curdir
+          ) 
+        {                                     # then
+            pop @collapsed;                   # collapse
+        }
+        else {                                # else
+            push @collapsed, $dir;            # just hang onto it
+        }
+    }
+
+    return $fs->catpath($vol,
+                        $fs->catdir(@collapsed),
+                        $file
+                       );
+}
+
 
 1;
