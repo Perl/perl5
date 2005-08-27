@@ -436,7 +436,7 @@ ok "@+" eq "10 1 6 10";
 }
 
 # Test for bug [perl #36434]
-{
+if (!$Is_VMS) {
     local @ISA;
     local %ENV;
     eval { push @ISA, __PACKAGE__ };
@@ -448,4 +448,10 @@ ok "@+" eq "10 1 6 10";
     eval { my %h = qw(A B); %ENV = (PATH => (keys %h)[0]) };
     ok( $@ eq '', 'Assign a shared key to a magic hash');
     $@ and print "# $@";
+}
+else {
+# Can not do this test on VMS, EPOC, and SYMBIAN according to comments
+# in mg.c/Perl_magic_clear_all_env()
+#
+    skip('Can\'t make assignment to \%ENV on this system') for 1..3;
 }
