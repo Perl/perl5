@@ -36,7 +36,7 @@ sub skip {
     return 1;
 }
 
-print "1..55\n";
+print "1..58\n";
 
 $Is_MSWin32  = $^O eq 'MSWin32';
 $Is_NetWare  = $^O eq 'NetWare';
@@ -433,4 +433,25 @@ ok "@+" eq "10 1 6 10";
     };
     my @y = f();
     ok( $x eq "@y", "return a magic array ($x) vs (@y)" );
+}
+
+# Test for bug [perl #36434]
+if (!$Is_VMS) {
+    local @ISA;
+    local %ENV;
+    eval { push @ISA, __PACKAGE__ };
+    ok( $@ eq '', 'Push a constant on a magic array');
+    $@ and print "# $@";
+    eval { %ENV = (PATH => __PACKAGE__) };
+    ok( $@ eq '', 'Assign a constant to a magic hash');
+    $@ and print "# $@";
+    eval { my %h = qw(A B); %ENV = (PATH => (keys %h)[0]) };
+    ok( $@ eq '', 'Assign a shared key to a magic hash');
+    $@ and print "# $@";
+}
+else {
+# Can not do this test on VMS, EPOC, and SYMBIAN according to comments
+# in mg.c/Perl_magic_clear_all_env()
+#
+    skip('Can\'t make assignment to \%ENV on this system') for 1..3;
 }

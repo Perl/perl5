@@ -4774,7 +4774,12 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     MAGIC* mg;
 
     if (SvREADONLY(sv)) {
-	if (IN_PERL_RUNTIME
+	if (
+	    /* its okay to attach magic to shared strings; the subsequent
+	     * upgrade to PVMG will unshare the string */
+	    !(SvFAKE(sv) && SvTYPE(sv) < SVt_PVMG)
+
+	    && IN_PERL_RUNTIME
 	    && how != PERL_MAGIC_regex_global
 	    && how != PERL_MAGIC_bm
 	    && how != PERL_MAGIC_fm
