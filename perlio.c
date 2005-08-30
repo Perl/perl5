@@ -3170,7 +3170,7 @@ PerlIOStdio_flush(pTHX_ PerlIO *f)
 	/*
 	 * Not writeable - sync by attempting a seek
 	 */
-	int err = errno;
+	const int err = errno;
 	if (PerlSIO_fseek(stdio, (Off_t) 0, SEEK_CUR) != 0)
 	    errno = err;
 #endif

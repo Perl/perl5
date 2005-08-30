@@ -2576,7 +2576,6 @@ PP(pp_entersub)
 {
     dSP; dPOPss;
     GV *gv;
-    HV *stash;
     register CV *cv;
     register PERL_CONTEXT *cx;
     I32 gimme;
@@ -2585,6 +2584,18 @@ PP(pp_entersub)
     if (!sv)
 	DIE(aTHX_ "Not a CODE reference");
     switch (SvTYPE(sv)) {
+	/* This is overwhelming the most common case:  */
+    case SVt_PVGV:
+	if (!(cv = GvCVu((GV*)sv))) {
+	    HV *stash;
+	    cv = sv_2cv(sv, &stash, &gv, 0);
+	}
+	if (!cv) {
+	    ENTER;
+	    SAVETMPS;
+	    goto try_autoload;
+	}
+	break;
     default:
 	if (!SvROK(sv)) {
 	    const char *sym;
@@ -2621,17 +2632,9 @@ PP(pp_entersub)
     case SVt_PVHV:
     case SVt_PVAV:
 	DIE(aTHX_ "Not a CODE reference");
+	/* This is the second most common case:  */
     case SVt_PVCV:
 	cv = (CV*)sv;
-	break;
-    case SVt_PVGV:
-	if (!(cv = GvCVu((GV*)sv)))
-	    cv = sv_2cv(sv, &stash, &gv, 0);
-	if (!cv) {
-	    ENTER;
-	    SAVETMPS;
-	    goto try_autoload;
-	}
 	break;
     }
 

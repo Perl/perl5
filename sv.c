@@ -6595,7 +6595,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
     CV *cv = Nullcv;
 
     if (!sv)
-	return *gvp = NULL, NULL;
+	return *st = NULL, *gvp = NULL, NULL;
     switch (SvTYPE(sv)) {
     case SVt_PVCV:
 	*st = CvSTASH(sv);
@@ -6603,6 +6603,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 	return (CV*)sv;
     case SVt_PVHV:
     case SVt_PVAV:
+	*st = NULL;
 	*gvp = NULL;
 	return Nullcv;
     case SVt_PVGV:
@@ -6634,8 +6635,10 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 	else
 	    gv = gv_fetchsv(sv, lref, SVt_PVCV);
 	*gvp = gv;
-	if (!gv)
+	if (!gv) {
+	    *st = NULL;
 	    return Nullcv;
+	}
 	*st = GvESTASH(gv);
     fix_gv:
 	if (lref && !GvCVu(gv)) {

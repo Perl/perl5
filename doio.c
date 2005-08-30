@@ -1019,22 +1019,22 @@ Perl_do_eof(pTHX_ GV *gv)
 	report_evil_fh(gv, io, OP_phoney_OUTPUT_ONLY);
 
     while (IoIFP(io)) {
-        int saverrno;
-	int ch;
-
         if (PerlIO_has_cntptr(IoIFP(io))) {	/* (the code works without this) */
 	    if (PerlIO_get_cnt(IoIFP(io)) > 0)	/* cheat a little, since */
 		return FALSE;			/* this is the most usual case */
         }
 
-	saverrno = errno; /* getc and ungetc can stomp on errno */
-	ch = PerlIO_getc(IoIFP(io));
-	if (ch != EOF) {
-	    (void)PerlIO_ungetc(IoIFP(io),ch);
+	{
+	     /* getc and ungetc can stomp on errno */
+	    const int saverrno = errno;
+	    const int ch = PerlIO_getc(IoIFP(io));
+	    if (ch != EOF) {
+		(void)PerlIO_ungetc(IoIFP(io),ch);
+		errno = saverrno;
+		return FALSE;
+	    }
 	    errno = saverrno;
-	    return FALSE;
 	}
-	errno = saverrno;
 
         if (PerlIO_has_cntptr(IoIFP(io)) && PerlIO_canset_cnt(IoIFP(io))) {
 	    if (PerlIO_get_cnt(IoIFP(io)) < -1)
@@ -1420,7 +1420,7 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 	    Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
 		(really ? tmps : PL_Argv[0]), Strerror(errno));
 	if (do_report) {
-	    int e = errno;
+	    const int e = errno;
 
 	    PerlLIO_write(fd, (void*)&e, sizeof(int));
 	    PerlLIO_close(fd);
@@ -1568,7 +1568,7 @@ Perl_do_exec3(pTHX_ char *incmd, int fd, int do_report)
 		Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
 		    PL_Argv[0], Strerror(errno));
 	    if (do_report) {
-		int e = errno;
+		const int e = errno;
 		PerlLIO_write(fd, (void*)&e, sizeof(int));
 		PerlLIO_close(fd);
 	    }
@@ -1586,7 +1586,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 {
     register I32 val;
     register I32 tot = 0;
-    const char *what;
+    const char *const what = PL_op_name[type];
     const char *s;
     SV ** const oldmark = mark;
 
@@ -1595,11 +1595,11 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
        platforms where kill was not defined.  */
 #ifndef HAS_KILL
     if (type == OP_KILL)
-	Perl_die(aTHX_ PL_no_func, "kill");
+	Perl_die(aTHX_ PL_no_func, what);
 #endif
 #ifndef HAS_CHOWN
     if (type == OP_CHOWN)
-	Perl_die(aTHX_ PL_no_func, "chown");
+	Perl_die(aTHX_ PL_no_func, what);
 #endif
 
 
@@ -1620,7 +1620,6 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
     }
     switch (type) {
     case OP_CHMOD:
-	what = "chmod";
 	APPLY_TAINT_PROPER();
 	if (++mark <= sp) {
 	    val = SvIVx(*mark);
@@ -1659,7 +1658,6 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 	break;
 #ifdef HAS_CHOWN
     case OP_CHOWN:
-	what = "chown";
 	APPLY_TAINT_PROPER();
 	if (sp - mark > 2) {
             register I32 val2;
@@ -1707,7 +1705,6 @@ nothing in the core.
 */
 #ifdef HAS_KILL
     case OP_KILL:
-	what = "kill";
 	APPLY_TAINT_PROPER();
 	if (mark == sp)
 	    break;
@@ -1777,7 +1774,6 @@ nothing in the core.
 	break;
 #endif
     case OP_UNLINK:
-	what = "unlink";
 	APPLY_TAINT_PROPER();
 	tot = sp - mark;
 	while (++mark <= sp) {
@@ -1799,7 +1795,6 @@ nothing in the core.
 	break;
 #if defined(HAS_UTIME) || defined(HAS_FUTIMES)
     case OP_UTIME:
-	what = "utime";
 	APPLY_TAINT_PROPER();
 	if (sp - mark > 2) {
 #if defined(HAS_FUTIMES)
