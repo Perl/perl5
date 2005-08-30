@@ -1,5 +1,10 @@
 Revision history for Perl distribution PathTools.
 
+3.11  Sat Aug 27 20:12:55 CDT 2005
+
+ - Fixed a couple of typos in the documentation for
+   File::Spec::Mac. [Piotr Fusik]
+
 3.10  Thu Aug 25 22:24:57 CDT 2005
 
  - eliminate_macros() and fixpath() in File::Spec::VMS are now
