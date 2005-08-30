@@ -410,6 +410,8 @@ do_test(20,
 # TAINTEDDIR is not set on: OS2, AMIGAOS, WIN32, MSDOS
 # environment variables may be invisibly case-forced, hence the (?i:PATH)
 # C<scalar(@ARGV)> is turned into an IV on VMS hence the (?:IV)?
+# VMS is setting FAKE and READONLY flags.  What VMS uses for storing
+# ENV hashes is also not always null terminated.
 #
 do_test(21,
         $ENV{PATH}=@ARGV,  # scalar(@ARGV) is a handy known tainted value
@@ -430,9 +432,9 @@ do_test(21,
     MG_PTR = $ADDR (?:"(?i:PATH)"|=> HEf_SVKEY
     SV = PV(?:IV)?\\($ADDR\\) at $ADDR
       REFCNT = \d+
-      FLAGS = \\(TEMP,POK,pPOK\\)
+      FLAGS = \\(TEMP,POK,(?:FAKE,READONLY,)pPOK\\)
 (?:      IV = 0
-)?      PV = $ADDR "(?i:PATH)"\\\0
+)?      PV = $ADDR "(?i:PATH)"(?:\\\0)?
       CUR = \d+
       LEN = \d+)
   MAGIC = $ADDR
