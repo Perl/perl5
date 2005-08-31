@@ -5896,6 +5896,7 @@ Perl_ck_open(pTHX_ OP *o)
 	     (last->op_private & OPpCONST_STRICT) &&
 	     (oa = first->op_sibling) &&		/* The fh. */
 	     (oa = oa->op_sibling) &&			/* The mode. */
+	     (oa->op_type == OP_CONST) &&
 	     SvPOK(((SVOP*)oa)->op_sv) &&
 	     (mode = SvPVX_const(((SVOP*)oa)->op_sv)) &&
 	     mode[0] == '>' && mode[1] == '&' &&	/* A dup open. */
