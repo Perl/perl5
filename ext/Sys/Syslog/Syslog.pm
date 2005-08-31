@@ -53,13 +53,15 @@ Syslog provides the functions:
 
 =item openlog $ident, $logopt, $facility
 
+Opens the syslog.
 I<$ident> is prepended to every message.  I<$logopt> contains zero or
 more of the words I<pid>, I<ndelay>, I<nowait>.  The cons option is
 ignored, since the failover mechanism will drop down to the console
 automatically if all other media fail.  I<$facility> specifies the
 part of the system to report about, for example LOG_USER or LOG_LOCAL0:
 see your C<syslog(3)> documentation for the facilities available in
-your system.
+your system. This function will croak if it can't connect to the syslog
+daemon.
 
 B<You should use openlog() before calling syslog().>
 
