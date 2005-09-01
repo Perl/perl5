@@ -2293,6 +2293,30 @@ S_find_in_my_stash(pTHX_ const char *pkgname, I32 len)
     return gv_stashpv(pkgname, FALSE);
 }
 
+STATIC char *
+S_tokenize_use(int is_use, char *s) {
+    if (PL_expect != XSTATE)
+	yyerror(Perl_form(aTHX_ "\"%s\" not allowed in expression",
+		    is_use ? "use" : "no"));
+    s = skipspace(s);
+    if (isDIGIT(*s) || (*s == 'v' && isDIGIT(s[1]))) {
+	s = force_version(s, TRUE);
+	if (*s == ';' || (s = skipspace(s), *s == ';')) {
+	    PL_nextval[PL_nexttoke].opval = Nullop;
+	    force_next(WORD);
+	}
+	else if (*s == 'v') {
+	    s = force_word(s,WORD,FALSE,TRUE,FALSE);
+	    s = force_version(s, FALSE);
+	}
+    }
+    else {
+	s = force_word(s,WORD,FALSE,TRUE,FALSE);
+	s = force_version(s, FALSE);
+    }
+    yylval.ival = is_use;
+    return s;
+}
 #ifdef DEBUGGING
     static const char* const exp_name[] =
 	{ "OPERATOR", "TERM", "REF", "STATE", "BLOCK", "ATTRBLOCK",
@@ -4871,11 +4895,7 @@ Perl_yylex(pTHX)
 	    Eop(OP_SNE);
 
 	case KEY_no:
-	    if (PL_expect != XSTATE)
-		yyerror("\"no\" not allowed in expression");
-	    s = force_word(s,WORD,FALSE,TRUE,FALSE);
-	    s = force_version(s, FALSE);
-	    yylval.ival = 0;
+	    s = tokenize_use(0, s);
 	    OPERATOR(USE);
 
 	case KEY_not:
@@ -5407,25 +5427,7 @@ Perl_yylex(pTHX)
 	    LOP(OP_UNSHIFT,XTERM);
 
 	case KEY_use:
-	    if (PL_expect != XSTATE)
-		yyerror("\"use\" not allowed in expression");
-	    s = skipspace(s);
-	    if (isDIGIT(*s) || (*s == 'v' && isDIGIT(s[1]))) {
-		s = force_version(s, TRUE);
-		if (*s == ';' || (s = skipspace(s), *s == ';')) {
-		    PL_nextval[PL_nexttoke].opval = Nullop;
-		    force_next(WORD);
-		}
-		else if (*s == 'v') {
-		    s = force_word(s,WORD,FALSE,TRUE,FALSE);
-		    s = force_version(s, FALSE);
-		}
-	    }
-	    else {
-		s = force_word(s,WORD,FALSE,TRUE,FALSE);
-		s = force_version(s, FALSE);
-	    }
-	    yylval.ival = 1;
+	    s = tokenize_use(1, s);
 	    OPERATOR(USE);
 
 	case KEY_values:

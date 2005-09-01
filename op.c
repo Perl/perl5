@@ -3057,6 +3057,8 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	imop = arg;		/* no import on explicit () */
     else if (SvNIOKp(((SVOP*)idop)->op_sv)) {
 	imop = Nullop;		/* use 5.0; */
+	if (!aver)
+	    idop->op_private |= OPpCONST_NOVER;
     }
     else {
 	SV *meth;

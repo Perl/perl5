@@ -184,6 +184,7 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpITER_REVERSED	4	/* for (reverse ...) */
 
 /* Private for OP_CONST */
+#define	OPpCONST_NOVER		2	/* no 6; */
 #define	OPpCONST_SHORTCIRCUIT	4	/* eg the constant 5 in (5 || foo) */
 #define	OPpCONST_STRICT		8	/* bearword subject to strict 'subs' */
 #define OPpCONST_ENTERED	16	/* Has been entered as symbol. */

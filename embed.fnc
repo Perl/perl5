@@ -1315,6 +1315,7 @@ sR	|I32	|sublex_push
 sR	|I32	|sublex_start
 sR	|char *	|filter_gets	|NN SV *sv|NN PerlIO *fp|STRLEN append
 sR	|HV *	|find_in_my_stash|NN const char *pkgname|I32 len
+sR	|char *	|tokenize_use	|int|NN char*
 s	|SV*	|new_constant	|NULLOK const char *s|STRLEN len|NN const char *key|NN SV *sv \
 				|NULLOK SV *pv|NULLOK const char *type
 #  if defined(DEBUGGING)

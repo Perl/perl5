@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..28\n";
+print "1..31\n";
 
 my $i = 1;
 eval "use 5.000";	# implicit semicolon
@@ -18,6 +18,25 @@ print "ok ",$i++,"\n";
 eval "use 5.000;";
 if ($@) {
     print STDERR $@,"\n";
+    print "not ";
+}
+print "ok ",$i++,"\n";
+
+eval "use 6.000;";
+unless ($@ =~ /Perl v6\.0\.0 required--this is only \Q$^V\E, stopped/) {
+    print "not ";
+}
+print "ok ",$i++,"\n";
+
+eval "no 6.000;";
+if ($@) {
+    print STDERR $@,"\n";
+    print "not ";
+}
+print "ok ",$i++,"\n";
+
+eval "no 5.000;";
+unless ($@ =~ /Perls since v5\.0\.0 too modern--this is \Q$^V\E, stopped/) {
     print "not ";
 }
 print "ok ",$i++,"\n";

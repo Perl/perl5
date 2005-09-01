@@ -3451,6 +3451,10 @@ STATIC HV *	S_find_in_my_stash(pTHX_ const char *pkgname, I32 len)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
+STATIC char *	S_tokenize_use(pTHX_ int, char*)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_2);
+
 STATIC SV*	S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv, const char *type)
 			__attribute__nonnull__(pTHX_3)
 			__attribute__nonnull__(pTHX_4);
