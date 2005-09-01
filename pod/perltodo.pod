@@ -153,10 +153,6 @@ as a module on CPAN.
 
 Allow lexical aliases (maybe via the syntax C<my \$alias = \$foo>.
 
-=head2 no 6
-
-Make C<no 6> and C<no v6> work (opposite of C<use 5.005>, etc.).
-
 =head2 IPv6
 
 Clean this up. Check everything in core works
