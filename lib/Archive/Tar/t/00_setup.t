@@ -1,4 +1,5 @@
 #!perl
+use File::Spec ();
 
 BEGIN {
     if ($ENV{PERL_CORE}) {
@@ -6,8 +7,15 @@ BEGIN {
     }
 }
 
+for my $d (qw(short long)) {
+    my $file = File::Spec->catfile($d,'b');
+    open F, '>', $file or die "Can't create $file: $!\n";
+    print F "bbbbbbbbbbb\n"; 
+    close F;
+}
+ 
 sub output {
-    $file = shift;
+    my $file = shift;
     open F, '>', $file or die "Can't create $file: $!\n";
     binmode F;
     for (@_) {
