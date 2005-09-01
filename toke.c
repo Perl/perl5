@@ -2294,7 +2294,7 @@ S_find_in_my_stash(pTHX_ const char *pkgname, I32 len)
 }
 
 STATIC char *
-S_tokenize_use(int is_use, char *s) {
+S_tokenize_use(pTHX_ int is_use, char *s) {
     if (PL_expect != XSTATE)
 	yyerror(Perl_form(aTHX_ "\"%s\" not allowed in expression",
 		    is_use ? "use" : "no"));
