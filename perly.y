@@ -487,6 +487,10 @@ subscripted:    star '{' expr ';' '}'        /* *main::{something} */
 	|	subscripted '(' ')'        /* $foo->{bar}->() */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				   newCVREF(0, scalar($1))); }
+	|	'(' expr ')' '[' expr ']'            /* list slice */
+			{ $$ = newSLICEOP(0, $5, $2); }
+	|	'(' ')' '[' expr ']'                 /* empty list slice! */
+			{ $$ = newSLICEOP(0, $4, Nullop); }
     ;
 
 /* Binary operators between terms */
@@ -622,10 +626,6 @@ term	:	termbinop
 			{ $$ = newUNOP(OP_AV2ARYLEN, 0, ref($1, OP_AV2ARYLEN));}
 	|       subscripted
 			{ $$ = $1; }
-	|	'(' expr ')' '[' expr ']'            /* list slice */
-			{ $$ = newSLICEOP(0, $5, $2); }
-	|	'(' ')' '[' expr ']'                 /* empty list slice! */
-			{ $$ = newSLICEOP(0, $4, Nullop); }
 	|	ary '[' expr ']'                     /* array slice */
 			{ $$ = prepend_elem(OP_ASLICE,
 				newOP(OP_PUSHMARK, 0),

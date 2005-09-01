@@ -8,7 +8,7 @@ BEGIN {
 require 'test.pl';
 use strict qw(refs subs);
 
-plan (89);
+plan (96);
 
 # Test glob operations.
 
@@ -423,6 +423,23 @@ TODO: {
     local $TODO = "NUL bytes truncate in symrefs";
     is ($$name2, undef,
 	'Accessing via a different NUL-containing name gives nothing');
+}
+
+# test derefs after list slice
+
+is ( ({foo => "bar"})[0]{foo}, "bar", 'hash deref from list slice w/o ->' );
+is ( ({foo => "bar"})[0]->{foo}, "bar", 'hash deref from list slice w/ ->' );
+is ( ([qw/foo bar/])[0][1], "bar", 'array deref from list slice w/o ->' );
+is ( ([qw/foo bar/])[0]->[1], "bar", 'array deref from list slice w/ ->' );
+is ( (sub {"bar"})[0](), "bar", 'code deref from list slice w/o ->' );
+is ( (sub {"bar"})[0]->(), "bar", 'code deref from list slice w/ ->' );
+
+# deref on empty list shouldn't autovivify
+{
+    local $@;
+    eval { ()[0]{foo} };
+    like ( "$@", "Can't use an undefined value as a HASH reference",
+           "deref of undef from list slice fails" );
 }
 
 # Bit of a hack to make test.pl happy. There are 3 more tests after it leaves.
