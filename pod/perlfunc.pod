@@ -2339,7 +2339,9 @@ The index function searches for one string within another, but without
 the wildcard-like behavior of a full regular-expression pattern match.
 It returns the position of the first occurrence of SUBSTR in STR at
 or after POSITION.  If POSITION is omitted, starts searching from the
-beginning of the string.  The return value is based at C<0> (or whatever
+beginning of the string.  POSITION before the beginning of the string
+or after its end is treated as if it were the beginning or the end,
+respectively.  POSITION and the return value are based at C<0> (or whatever
 you've set the C<$[> variable to--but don't do that).  If the substring
 is not found, C<index> returns one less than the base, ordinarily C<-1>.
 
