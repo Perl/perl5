@@ -8,6 +8,7 @@ BEGIN {
 }
 
 for my $d (qw(short long)) {
+    -d $d or mkdir $d;
     my $file = File::Spec->catfile($d,'b');
     open F, '>', $file or die "Can't create $file: $!\n";
     print F "bbbbbbbbbbb\n"; 
