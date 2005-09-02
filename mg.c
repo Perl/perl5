@@ -2793,8 +2793,16 @@ S_restore_magic(pTHX_ const void *p)
 	    SvFLAGS(sv) |= mgs->mgs_flags;
 	else
 	    mg_magical(sv);
-	if (SvGMAGICAL(sv))
-	    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+	if (SvGMAGICAL(sv)) {
+	    /* downgrade public flags to private,
+	       and discard any other private flags */
+
+	    U32 public = SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
+	    if (public) {
+		SvFLAGS(sv) &= ~( public | SVp_IOK|SVp_NOK|SVp_POK );
+		SvFLAGS(sv) |= ( public << PRIVSHIFT );
+	    }
+	}
     }
 
     mgs->mgs_sv = NULL;  /* mark the MGS structure as restored */
