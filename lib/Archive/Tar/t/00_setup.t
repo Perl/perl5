@@ -3,7 +3,9 @@ use File::Spec ();
 
 BEGIN {
     if ($ENV{PERL_CORE}) {
-	chdir '../lib/Archive/Tar/t/src' if -d '../lib/Archive/Tar/t/src';
+	chdir '../lib/Archive/Tar/t' if -d '../lib/Archive/Tar/t';
+	mkdir 'src' unless -d 'src';
+	chdir 'src';
     }
 }
 
