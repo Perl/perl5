@@ -12,6 +12,8 @@ sub ok
     print "ok $no\n" if $ok ;
     print "not ok $no\n" unless $ok ;
     printf "# Failed test at line %d\n", (caller)[2] unless $ok ;
+
+    $ok;
 }
 
 sub writeFile
@@ -105,8 +107,10 @@ EOM
  
 $a = `$Perl $Inc ${examples}/gzcat $file1 $file2 2>&1` ;
 
-ok(1, $? == 0) ;
-ok(2, $a eq $hello1 . $hello2) ;
+ok(1, $? == 0) 
+    or print "# \$\? == [$?]\n";
+ok(2, $a eq $hello1 . $hello2) 
+    or print "# got $a\n";
 #print "? = $? [$a]\n";
 
 
@@ -116,9 +120,11 @@ ok(2, $a eq $hello1 . $hello2) ;
 $a = ($^O eq 'MSWin32' || $^O eq 'VMS'
      ? `$Perl $Inc ${examples}/gzgrep "^x" $file1 $file2 2>&1`
      : `$Perl $Inc ${examples}/gzgrep '^x' $file1 $file2 2>&1`) ;
-ok(3, $? == 0) ;
+ok(3, $? == 0) 
+    or print "# \$\? == [$?]\n";
 
-ok(4, $a eq join('', grep(/^x/, @hello1, @hello2))) ;
+ok(4, $a eq join('', grep(/^x/, @hello1, @hello2))) 
+    or print "# got $a\n";
 #print "? = $? [$a]\n";
 
 
@@ -136,14 +142,17 @@ writeFile($file2, $hello2) ;
 
 # there's no way to set binmode on backticks in Win32 so we won't use $a later
 $a = `$Perl $Inc ${examples}/filtdef $file1 $file2 2>$stderr` ;
-ok(5, $? == 0) ;
+ok(5, $? == 0)
+    or print "# \$\? == [$?]\n";
 ok(6, -s $stderr == 0) ;
 
 unlink $stderr;
 $a = `$Perl $Inc ${examples}/filtdef $file1 $file2 | $Perl $Inc ${examples}/filtinf 2>$stderr`;
-ok(7, $? == 0) ;
+ok(7, $? == 0) 
+    or print "# \$\? == [$?]\n";
 ok(8, -s $stderr == 0) ;
-ok(9, $a eq $hello1 . $hello2) ;
+ok(9, $a eq $hello1 . $hello2) 
+    or print "# got $a\n";
 
 # gzstream
 # ########
@@ -151,12 +160,16 @@ ok(9, $a eq $hello1 . $hello2) ;
 {
     writeFile($file1, $hello1) ;
     $a = `$Perl $Inc ${examples}/gzstream <$file1 >$file2 2>$stderr` ;
-    ok(10, $? == 0) ;
+    ok(10, $? == 0) 
+        or print "# \$\? == [$?]\n";
     ok(11, -s $stderr == 0) ;
 
     my $b = `$Perl $Inc ${examples}/gzcat $file2 2>&1` ;
-    ok(12, $? == 0) ;
-    ok(13, $b eq $hello1 ) ;
+    ok(12, $? == 0) 
+        or print "# \$\? == [$?]\n";
+    ok(13, $b eq $hello1 ) 
+        or print "# got $b\n";
+
 }
 
 

@@ -1,6 +1,12 @@
 CHANGES
 -------
 
+  1.38 - 6 September 2005
+
+      * Integrate core change 25304 -- Symbian Update
+
+      * Added libscan to Makefile.PL
+
   1.37 - 12 August 2005
 
       * Change to t/03examples.t for VMS from Abe Timmerman

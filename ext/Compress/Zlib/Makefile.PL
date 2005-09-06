@@ -168,6 +168,19 @@ else {
       or die "Can't copy fallback.xs to constants.xs: $!";
 }
 
+sub MY::libscan
+{
+    my $self = shift ;
+    my $path = shift ;
+
+    return undef
+        if $path =~ /(~|\.bak|_bak)$/ || 
+           $path =~ /^\..*\.swp$/ ;
+
+    return $path;    
+}
+
+
 sub MY::postamble 
 {
     my $postamble = <<'EOM';

@@ -1,7 +1,7 @@
 /* Filename: Zlib.xs
  * Author  : Paul Marquess, <pmqs@cpan.org>
  * Created : 30 January 2005
- * Version : 1.35
+ * Version : 1.38
  *
  *   Copyright (c) 1995-2005 Paul Marquess. All rights reserved.
  *   This program is free software; you can redistribute it and/or
@@ -42,6 +42,10 @@
 
 #ifndef newSVuv
 #    define newSVuv	newSViv
+#endif
+
+#ifndef dTHX
+#   define dTHX
 #endif
 
 typedef struct di_stream {
