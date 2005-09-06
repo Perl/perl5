@@ -13,7 +13,7 @@ use Exporter ();
 our(@ISA, @EXPORT_OK, @EXPORT, $VERSION);
 
 @ISA = qw(Exporter);
-$VERSION = "0.06";
+$VERSION = "0.07";
 
 @EXPORT = qw( POLLIN
 	      POLLOUT

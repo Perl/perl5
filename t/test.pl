@@ -649,4 +649,66 @@ sub fresh_perl_like {
 		$runperl_args, $name);
 }
 
+sub can_ok ($@) {
+    my($proto, @methods) = @_;
+    my $class = ref $proto || $proto;
+
+    unless( @methods ) {
+        return _ok( 0, _where(), "$class->can(...)" );
+    }
+
+    my @nok = ();
+    foreach my $method (@methods) {
+        local($!, $@);  # don't interfere with caller's $@
+                        # eval sometimes resets $!
+        eval { $proto->can($method) } || push @nok, $method;
+    }
+
+    my $name;
+    $name = @methods == 1 ? "$class->can('$methods[0]')" 
+                          : "$class->can(...)";
+    
+    _ok( !@nok, _where(), $name );
+}
+
+sub isa_ok ($$;$) {
+    my($object, $class, $obj_name) = @_;
+
+    my $diag;
+    $obj_name = 'The object' unless defined $obj_name;
+    my $name = "$obj_name isa $class";
+    if( !defined $object ) {
+        $diag = "$obj_name isn't defined";
+    }
+    elsif( !ref $object ) {
+        $diag = "$obj_name isn't a reference";
+    }
+    else {
+        # We can't use UNIVERSAL::isa because we want to honor isa() overrides
+        local($@, $!);  # eval sometimes resets $!
+        my $rslt = eval { $object->isa($class) };
+        if( $@ ) {
+            if( $@ =~ /^Can't call method "isa" on unblessed reference/ ) {
+                if( !UNIVERSAL::isa($object, $class) ) {
+                    my $ref = ref $object;
+                    $diag = "$obj_name isn't a '$class' it's a '$ref'";
+                }
+            } else {
+                die <<WHOA;
+WHOA! I tried to call ->isa on your object and got some weird error.
+This should never happen.  Please contact the author immediately.
+Here's the error.
+$@
+WHOA
+            }
+        }
+        elsif( !$rslt ) {
+            my $ref = ref $object;
+            $diag = "$obj_name isn't a '$class' it's a '$ref'";
+        }
+    }
+
+    _ok( !$diag, _where(), $name );
+}
+
 1;

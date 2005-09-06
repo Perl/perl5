@@ -15,7 +15,7 @@ use Exporter;
 use Errno;
 
 @ISA = qw(IO::Socket);
-$VERSION = "1.28";
+$VERSION = "1.29";
 
 my $EINVAL = exists(&Errno::EINVAL) ? Errno::EINVAL() : 1;
 
