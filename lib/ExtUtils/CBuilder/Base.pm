@@ -89,6 +89,13 @@ sub compile {
   my @extra_compiler_flags = $self->split_like_shell($args{extra_compiler_flags});
   my @cccdlflags = $self->split_like_shell($cf->{cccdlflags});
   my @ccflags = $self->split_like_shell($cf->{ccflags});
+
+  #VMS can only have one include list, remove the one from config.
+  if ((@include_dirs != 0) && ($^O eq 'VMS')) {
+    for (@ccflags) {
+      s/\/Include[^\/]*//;
+    }
+  }
   my @optimize = $self->split_like_shell($cf->{optimize});
   my @flags = (@include_dirs, @cccdlflags, @extra_compiler_flags,
 	       $self->arg_nolink,
@@ -186,6 +193,15 @@ sub _do_link {
   $objects = [$objects] unless ref $objects;
   my $out = $args{$type} || $self->$type($objects->[0]);
   
+  # Need to create with the same name as Dyanloader will load with.
+  if ($^O eq 'VMS') {
+    my ($dev,$dir,$file) = File::Spec->splitpath($out);
+    if (defined &DynaLoader::mod2fname) {
+      $file = DynaLoader::mod2fname([$file]);
+      $out = File::Spec->catpath($dev,$dir,$file);
+    }
+  }
+
   my @temp_files;
   @temp_files =
     $self->prelink(%args,
@@ -195,6 +211,14 @@ sub _do_link {
   my @output = $args{lddl} ? $self->arg_share_object_file($out) : $self->arg_exec_file($out);
   my @shrp = $self->split_like_shell($cf->{shrpenv});
   my @ld = $self->split_like_shell($cf->{ld});
+
+  # vms has two option files, the external symbol, and to pull in PerlShr
+  if ($^O eq 'VMS') {
+    $objects->[0] .= ',';
+    $objects->[1] = 'sys$disk:[]' . @temp_files[0] . '/opt,';
+    $objects->[2] = $self->perl_inc() . 'PerlShr.Opt/opt';
+  }
+
   $self->do_system(@shrp, @ld, @output, @$objects, @linker_flags)
     or die "error building $out from @$objects";
   
