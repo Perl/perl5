@@ -859,9 +859,7 @@ S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store)
     while (mg) {
 	if (isUPPER(mg->mg_type)) {
 	    *needs_copy = TRUE;
-	    switch (mg->mg_type) {
-	    case PERL_MAGIC_tied:
-	    case PERL_MAGIC_sig:
+	    if (mg->mg_type == PERL_MAGIC_tied) {
 		*needs_store = FALSE;
 		return; /* We've set all there is to set. */
 	    }

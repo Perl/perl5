@@ -4,7 +4,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
 }
-plan tests => 79;
+plan tests => 85;
 
 sub foo {
     local($a, $b) = @_;
@@ -93,6 +93,11 @@ ok(!defined $a[0]);
     shift @a;
 }
 is($a[0].$a[1], "Xb");
+{
+    my $d = "@a";
+    local @a = @a;
+    is("@a", $d);
+}
 
 %h = ('a' => 1, 'b' => 2, 'c' => 3);
 {
@@ -105,6 +110,11 @@ is($a[0].$a[1], "Xb");
 }
 is($h{'a'}, 1);
 is($h{'b'}, 2);
+{
+    my $d = join("\n", map { "$_=>$h{$_}" } sort keys %h);
+    local %h = %h;
+    is(join("\n", map { "$_=>$h{$_}" } sort keys %h), $d);
+}
 is($h{'c'}, 3);
 
 # check for scope leakage
@@ -146,6 +156,11 @@ tie @a, 'TA';
 is($a[1], 'b');
 is($a[2], 'c');
 ok(!defined $a[0]);
+{
+    my $d = "@a";
+    local @a = @a;
+    is("@a", $d);
+}
 
 {
     package TH;
@@ -155,6 +170,8 @@ ok(!defined $a[0]);
     sub EXISTS { print "# EXISTS [@_]\n"; exists $_[0]->{$_[1]}; }
     sub DELETE { print "# DELETE [@_]\n"; delete $_[0]->{$_[1]}; }
     sub CLEAR { print "# CLEAR [@_]\n"; %{$_[0]} = (); }
+    sub FIRSTKEY { print "# FIRSTKEY [@_]\n"; keys %{$_[0]}; each %{$_[0]} }
+    sub NEXTKEY { print "# NEXTKEY [@_]\n"; each %{$_[0]} }
 }
 
 # see if localization works on tied hashes
@@ -177,6 +194,12 @@ is($h{'c'}, 3);
 # local() should preserve the existenceness of tied hash elements
 ok(! exists $h{'y'});
 ok(! exists $h{'z'});
+TODO: {
+    todo_skip("Localize entire tied hash");
+    my $d = join("\n", map { "$_=>$h{$_}" } sort keys %h);
+    local %h = %h;
+    is(join("\n", map { "$_=>$h{$_}" } sort keys %h), $d);
+}
 
 @a = ('a', 'b', 'c');
 {
@@ -203,6 +226,11 @@ $SIG{__WARN__} = $SIG{INT};
 is($SIG{TERM}, 'main::foo');
 is($SIG{INT}, \&foo);
 is($SIG{__WARN__}, \&foo);
+{
+    my $d = join("\n", map { "$_=>$SIG{$_}" } sort keys %SIG);
+    local %SIG = %SIG;
+    is(join("\n", map { "$_=>$SIG{$_}" } sort keys %SIG), $d);
+}
 
 # and for %ENV
 
@@ -225,6 +253,11 @@ is($ENV{_Z_}, 'c');
 # local() should preserve the existenceness of %ENV elements
 ok(! exists $ENV{_A_});
 ok(! exists $ENV{_B_});
+{
+    my $d = join("\n", map { "$_=>$ENV{$_}" } sort keys %ENV);
+    local %ENV = %ENV;
+    is(join("\n", map { "$_=>$ENV{$_}" } sort keys %ENV), $d);
+}
 
 # does implicit localization in foreach skip magic?
 
