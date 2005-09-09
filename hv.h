@@ -82,7 +82,7 @@ typedef struct {
 /* The use of a temporary pointer and the casting games
  * is needed to serve the dual purposes of
  * (a) the hashed data being interpreted as "unsigned char" (new since 5.8,
- *     a "char" can be either signed or signed, depending on the compiler)
+ *     a "char" can be either signed or unsigned, depending on the compiler)
  * (b) catering for old code that uses a "char"
  *
  * The "hash seed" feature was added in Perl 5.8.1 to perturb the results
