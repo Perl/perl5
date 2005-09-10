@@ -1,3 +1,10 @@
+#!/usr/bin/perl
+#
+# In general we trust %Config, but for nanosleep() this trust
+# may be misplaces (it may be linkable but not really functional).
+# Use $ENV{FORCE_NANOSLEEP_SCAN} to force rescanning whether there
+# really is hope.
+
 require 5.002;
 
 use Config;
@@ -7,7 +14,7 @@ use strict;
 my $VERBOSE = $ENV{VERBOSE};
 my $DEFINE;
 my $LIBS = [];
-my $XSOPT;
+my $XSOPT = '';
 
 use vars qw($self); # Used in 'sourcing' the hints.
 
@@ -135,16 +142,30 @@ sub try_compile_and_link {
 	    printf "cccmd = $cccmd\n" if $VERBOSE;
 	    my $res = system($cccmd);
 	    $ok = defined($res) && $res==0 && -s $tmp_exe && -x _;
+
+	    if ( $ok && exists $args{run} && $args{run}) {
+		my $abs_tmp_exe =
+		    File::Spec->
+			catfile(File::Spec->rel2abs(File::Spec->curdir),
+				$tmp_exe);
+		printf "Running $abs_tmp_exe..." if $VERBOSE;
+		if (system($abs_tmp_exe) == 0) {
+		    $ok = 1;
+		} else {
+		    $ok = 0;
+		    print "[ system('$abs_tmp_exe') failed: status $? ] ";
+		}
+	    }
 	    unlink("$tmp.c", $tmp_exe);
         }
     }
 
-    $ok;
+    return $ok;
 }
 
 sub has_gettimeofday {
     # confusing but true (if condition true ==> -DHAS_GETTIMEOFDAY already)
-    return 0 if $Config{d_gettimeod} eq 'define';
+    return 0 if $Config{d_gettimeod};
     return 1 if try_compile_and_link(<<EOM);
 #include "EXTERN.h"
 #include "perl.h"
@@ -200,6 +221,32 @@ int main _((int argc, char** argv, char** env))
 }
 EOM
     return 0;
+}
+
+sub has_nanosleep {
+    print "Trying out nanosleep... ";
+    return 1 if
+    try_compile_and_link(<<EOM, run => 1);
+#include <time.h>
+#include <sys/time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+
+/* int nanosleep(const struct timespec *rqtp, struct timespec *rmtp); */
+
+int main() {
+    struct timespec ts1, ts2;
+    int ret;
+    ts1.tv_sec  = 0;
+    ts1.tv_nsec = 750000000;
+    ts2.tv_sec  = 0;
+    ts2.tv_nsec = 0;
+    errno = 0;
+    ret = nanosleep(&ts1, &ts2); /* E.g. in AIX nanosleep() fail and set errno to ENOSYS. */
+    ret == 0 ? exit(0) : exit(errno ? errno : -1);
+}
+EOM
 }
 
 sub has_include {
@@ -327,7 +374,7 @@ EOD
     } else {
 	print "NOT found.\n";
         print "Let's see if you have select()... ";
-        if ($Config{'d_select'} eq 'define') {
+        if ($Config{'d_select'}) {
 	    print "found.\n";
 	    print "We can make a Time::HiRes::usleep().\n";
 	} else {
@@ -338,13 +385,14 @@ EOD
 
     print "Looking for nanosleep()... ";
     my $has_nanosleep;
-    if (exists $Config{d_nanosleep}) {
+    if (exists $Config{d_nanosleep} && !$ENV{FORCE_NANOSLEEP_SCAN}) {
+        # Believe $Config{d_nanosleep}.
 	if ($Config{d_nanosleep}) {
 	    $has_nanosleep++;
 	    $DEFINE .= ' -DTIME_HIRES_NANOSLEEP';
 	}
     } elsif ($^O ne 'mpeix' && # MPE/iX falsely finds nanosleep.
-             has_x ("nanosleep (NULL, NULL)")) {
+             has_nanosleep()) {
 	$has_nanosleep++;
 	$DEFINE .= ' -DTIME_HIRES_NANOSLEEP';
     }

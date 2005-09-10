@@ -1,5 +1,54 @@
 Revision history for Perl extension Time::HiRes.
 
+1.73	- Time::HiRes::nanosleep support for Solaris [PATCH]
+	  (POSIX::uname() not available if building with core perl,
+	   from Gisle Aas, via perl5-porters, perl change #25295)
+
+1.72	- going back to the 1.68 loader setup (using DynaLoader)
+	  since too many weird things starting breaking
+	- fix a typo in José Auguste-Etienne's name
+
+1.71	- a thinko in the nanosleep() detection
+	- move more changes stuff from the README to Changes
+	- add -w to the Makefile.PL
+
+1.70	- oops in 1.69 about @ISA (not affecting anything but silly)
+	- add copyright 2005 to HiRes.pm
+	- add copyright and license to HiRes.xs
+	- add copyrights 2003, 2004, 2005 to README
+
+1.69	- actually run a test for nanosleep
+	  (if there is no $Config{d_nanosleep}) since e.g. in AIX 4.2
+	  it seems that one can link in nanosleep() but then calling
+	  it fails instantly and sets errno to ENOSYS (Not implemented).
+	  This may be fixable in the AIX case by figuring out the right
+	  (realtime POSIX?) libs and whatnot, but in the general case
+	  running a real test case is better.  (Of course, this change
+	  will no doubt run into portability problems because of the
+	  execution step...)  Note that because of hysterical raisins
+	  most Perls do NOT have $Config{d_nanosleep} (scanning for
+	  it by Configure would in many platforms require linking in
+	  things like -lrt, which would in many platforms be a bad idea
+	  for Perl itself).
+	  (from José Auguste-Etienne)
+	- support XSLoader also since it's much faster
+	  (from Alexey Tourbin)
+	- add SEE ALSO (BSD::Resource and Time::TAI64)
+
+1.68
+	- somehow 1.67 had a lot of doubled lines (a major cut-and-paste
+	  error suspected), but miraculously it still worked since the
+	  doubling took place below the __END__ token
+	- undef Pause() before defining it to avoid redefinition warnings
+	  during compilation in case perl.h had already defined Pause()
+	  (part of perl change #24271)
+	- minor doc tweaks
+
+1.67
+	- (internal) don't ignore the return value of gettimeofday()
+	- (external) return undef or an empty if the C gettimeofday() fails
+	  (affects Time::HiRes gettimeofday() and the hires time())
+
 1.66
 	- add nanosleep()
 	- fix the 'hierachy' typo in Makefile.PL [rt.cpan.org #8492]
@@ -237,9 +286,22 @@ Revision history for Perl extension Time::HiRes.
 	    the IVSIZE might not be defined)
 	  - define NVgf if needed
 	  - grab the typemap from 5.8.0 for the NV stuff
+
+	1.31 and 1.32 add more backward compatibility (now all the way
+	back to Perl 5.00404), and using nanosleep() (if available) for
+	subsecond sleeps.
+
 1.30
 
 	- release 1.29_02 as 1.30
+
+	1.30 adds all the changes made during the Perl 5.6->5.7->5.8
+	development cycle.  Most notably portability across platforms has been
+	enhanced, and the interval timers (setitimer, getitimer) have been
+	added.  Note that the version of Time::HiRes that is included in Perl
+	5.8.0 calls itself 1.20_00, but it is equivalent to this Time::HiRes
+	version.  Note also that in 1.30 Wegscheid turns over the maintenance
+	to Jarkko Hietaniemi.
 
 1.29_02
 
@@ -346,6 +408,10 @@ Revision history for Perl extension Time::HiRes.
 	- hopefully correct "-lc" fix for SCO.
 	- add PPD stuff
 
+	1.20 adds a platform neutral set of C accessible routines if you are
+	running 5.005+.  All other changes are packaging changes and build
+	fixes(?) for statically linked Perl, SCO, and VMS.
+
 1.19  Tue Sep 29 22:30 1998
 	- put VMS gettimeofday() in. Patch is from Sebastian Bazley
 	  <seb@stian.demon.co.uk>
@@ -357,12 +423,17 @@ Revision history for Perl extension Time::HiRes.
 	- fix Makefile.PL (more) so that detection of gettimeofday is
 	  more correct.
 
+	1.19 has better VMS support.
+
 1.18  Mon Jul 6 22:40 1998
 	- add usleep() for Win32.
 	- fix Makefile.PL to fix reported HP/UX feature where unresolved
 	  externals still cause an executable to be generated (though no
 	  x bit set). Thanks to David Kozinn for report and explanation.
 	  Problems with the fix are mine :)
+
+	1.18 has limited Win32 support (no ualarm). Added usleep for Win32.
+	Probably buggy. I'm sure I'll hear.
 
 1.17  Wed Jul 1 20:10 1998
 	- fix setitimer calls so microseconds is not more than 1000000.
@@ -374,6 +445,22 @@ Revision history for Perl extension Time::HiRes.
 
 1.16  Wed Nov 12 21:05 1997
 	- add missing EXTEND in new gettimeofday scalar code.
+
+	1.16+ should be closer to building out of the box on Linux. Thanks
+	to Gisle Aas for patches, and the ualarm equivalent using setitimer.
+
+	If your underlying operating system doesn't implement ualarm(), then
+	a fake using setitimer() will be made.  If the OS is missing usleep(),
+	a fake one using select() will be made. If a fake can't be made for
+	either ualarm() or usleep(), then the corresponding Perl function will
+	not be available.  If the OS is missing gettimeofday(), you will get
+	unresolved externals, either at link- or run-time.
+
+	This is an improvement; the package used to not even build if
+	you were missing any of these bits. Roderick Schertler
+
+	<roderick@argon.org> did all the conditional compilation stuff,
+	look at HiRes.pm and the test suites; it's good educational reading.
 
 1.15  Mon Nov 10 21:30 1997
 	- HiRes.pm: update pod. Provided by Gisle Aas.
