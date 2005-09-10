@@ -66,3 +66,5 @@ sub next {
     my $self = shift;
     return $self->{array}->[$self->{idx}++];
 }
+
+"Steve Peters, Master Of True Value Finding, was here.";

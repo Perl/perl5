@@ -40,6 +40,7 @@ GetOptions(
     's|shuffle'     => \$shuffle,
     't'             => sub { unshift @switches, "-t" }, # Always want -t up front
     'T'             => sub { unshift @switches, "-T" }, # Always want -T up front
+    'timer'         => \$Test::Harness::Timer,
     'v|verbose'     => \$Test::Harness::verbose,
     'V|version'     => sub { print_version(); exit; },
     'ext=s@'        => \@ext,
@@ -179,6 +180,7 @@ Options:
     -s, --shuffle   Run the tests in a random order.
     -T              Enable tainting checks
     -t              Enable tainting warnings
+        --timer     Print elapsed time after each test file
     -v, --verbose   Display standard output of test scripts while running them.
     -V, --version   Display version info
 
@@ -292,6 +294,10 @@ Runs test programs under perl's -t taint warning mode.
 
 Runs test programs under perl's -T taint mode.
 
+=head2 --timer
+
+Print elapsed time after each test file
+
 =head2 -v, --verbose
 
 Display standard output of test scripts while running them.  Also sets
@@ -323,7 +329,7 @@ Andy Lester C<< <andy@petdance.com> >>
 
 =head1 COPYRIGHT
 
-Copyright 2003 by Andy Lester C<< <andy@petdance.com> >>.
+Copyright 2005 by Andy Lester C<< <andy@petdance.com> >>.
 
 This program is free software; you can redistribute it and/or 
 modify it under the same terms as Perl itself.
