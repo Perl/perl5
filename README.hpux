@@ -162,9 +162,9 @@ that contained the explanation is dead, so here's a short summary:
   HP 9000 L-Class servers, now renamed HP Server rp5400 series.
   HP 9000 N-Class servers, now renamed HP Server rp7400.
 
-  rp2400, rp2405, rp2430, rp2450, rp2470, rp3410, rp3440, rp4440,
-  rp5400, rp5405, rp5430, rp5450, rp5470, rp7400, rp7405, rp7410,
-  rp7420, rp8400, rp8420, Superdome
+  rp2400, rp2405, rp2430, rp2450, rp2470, rp3410, rp3440, rp4410,
+  rp4440, rp5400, rp5405, rp5430, rp5450, rp5470, rp7400, rp7405,
+  rp7410, rp7420, rp8400, rp8420, Superdome
 
 The current naming convention is:
 
@@ -414,8 +414,7 @@ HP-UX versions before 10.30 require a separate installation of a POSIX
 threads library package. Two examples are the HP DCE package, available
 on "HP-UX Hardware Extensions 3.0, Install and Core OS, Release 10.20,
 April 1999 (B3920-13941)" or the Freely available PTH package, available
-though worldwide HP-UX mirrors of precompiled packages
-(e.g. http://hpux.tn.tudelft.nl/hppd/hpux/)
+on H.Merijn's site (http://mirrors.develooper.com/hpux/).
 
 If you are going to use the HP DCE package, the library used for threading
 is /usr/lib/libcma.sl, but there have been multiple updates of that
@@ -441,6 +440,9 @@ reformatted output:
                                    Date: Apr  9 2001 10:01:06
   d3:/usr/lib 107 >
 
+For building perl to support Oracle, it needs to be linked with libcl
+and libpthread. So even if your perl is an unthreaded build, these
+libraries might be required. See "Oracle on HP-UX" below.
 
 =head2 64-bit Perl on HP-UX
 
@@ -577,6 +579,6 @@ With much assistance regarding shared libraries from Marc Sabatella.
 
 =head1 DATE
 
-Version 0.7.3: 2005-03-08
+Version 0.7.4: 2005-06-02
 
 =cut

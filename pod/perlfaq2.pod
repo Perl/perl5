@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.31 $, $Date: 2005/01/31 15:54:44 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.32 $, $Date: 2005/04/22 19:04:48 $)
 
 =head1 DESCRIPTION
 
@@ -195,7 +195,7 @@ under the C<perl.*> hierarchy at http://groups.google.com . Other
 groups are listed at http://lists.perl.org/ ( also known as
 http://lists.cpan.org/ ).
 
-A nice place to ask questions is the PerlMonks site, 
+A nice place to ask questions is the PerlMonks site,
 http://www.perlmonks.org/ , or the Perl Beginners mailing list
 http://lists.perl.org/showlist.cgi?name=beginners .
 
@@ -219,7 +219,7 @@ This is faster and more productive than just posting a request.
 =head2 Perl Books
 
 A number of books on Perl and/or CGI programming are available.  A few
-of these are good, some are OK, but many aren't worth your money. 
+of these are good, some are OK, but many aren't worth your money.
 There is a list of these books, some with extensive reviews, at
 http://books.perl.org/ .
 
@@ -385,7 +385,7 @@ Recommended books on (or mostly on) Perl follow.
 	by Scott Walters
 	ISBN 1-59059-395-2 [1st edition December 2004
 	http://apress.com/book/bookDisplay.html?bID=355
-	
+
 	Mastering Regular Expressions
 	by Jeffrey E. F. Friedl
 	ISBN 0-596-00289-0 [2nd edition July 2002]
@@ -420,7 +420,7 @@ Recommended books on (or mostly on) Perl follow.
 	Perl Debugger Pocket Reference
 	by Richard Foley
 	ISBN 0-596-00503-2 [1st edition January 2004]
-	http://www.oreilly.com/catalog/perldebugpr/ 
+	http://www.oreilly.com/catalog/perldebugpr/
 
 =back
 
@@ -431,8 +431,8 @@ I<The Perl Journal> contains tutorials, demonstrations, case studies,
 announcements, contests, and much more.  I<TPJ> has columns on web
 development, databases, Win32 Perl, graphical programming, regular
 expressions, and networking, and sponsors the Obfuscated Perl Contest
-and the Perl Poetry Contests.  Beginning in November 2002, TPJ moved to a 
-reader-supported monthly e-zine format in which subscribers can download 
+and the Perl Poetry Contests.  Beginning in November 2002, TPJ moved to a
+reader-supported monthly e-zine format in which subscribers can download
 issues as PDF documents. For more details on TPJ, see http://www.tpj.com/
 
 Beyond this, magazines that frequently carry quality articles on

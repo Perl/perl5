@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq9 - Networking ($Revision: 1.19 $, $Date: 2005/01/21 12:14:12 $)
+perlfaq9 - Networking ($Revision: 1.21 $, $Date: 2005/04/22 19:04:48 $)
 
 =head1 DESCRIPTION
 
@@ -16,9 +16,8 @@ a program ("CGI script") and a web server (HTTPD). It is not specific
 to Perl, and has its own FAQs and tutorials, and usenet group,
 comp.infosystems.www.authoring.cgi
 
-The original CGI specification is at: http://hoohoo.ncsa.uiuc.edu/cgi/
-
-Current best-practice RFC draft at: http://CGI-Spec.Golux.Com/
+The CGI specification is outlined in an informational RFC:
+http://www.ietf.org/rfc/rfc3875
 
 Other relevant documentation listed in: http://www.perl.org/CGI_MetaFAQ.html
 
@@ -366,19 +365,19 @@ parses the input and makes each value available through the
 C<param()> function.
 
 	use CGI qw(:standard);
-	
+
 	my $total = param( "price" ) + param( "shipping" );
-	
+
 	my @items = param( "item ); # multiple values, same field name
-	
+
 If you want an object-oriented approach, CGI.pm can do that too.
 
 	use CGI;
-	
+
 	my $cgi = CGI->new();
-	
+
 	my $total = $cgi->param( "price" ) + $cgi->param( "shipping" );
-	
+
 	my @items = $cgi->param( "item" );
 
 You might also try CGI::Minimal which is a lightweight version
