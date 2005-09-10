@@ -165,6 +165,10 @@ Intel*) ;;
     ;;
 esac
 
+if test -f .patch; then
+  ccflags="-DPERL_PATCHNUM=`cat .patch` $ccflags"
+fi
+
     : Can we perhaps use $ansi2knr here
     echo "$cc -c -DPERL_CORE $ccflags $optimize $warn"
     eval "$also "'"$cc -DPERL_CORE -c $ccflags $optimize $warn"'
