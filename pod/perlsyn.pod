@@ -199,6 +199,8 @@ The following compound statements may be used to control flow:
     if (EXPR) BLOCK elsif (EXPR) BLOCK ... else BLOCK
     LABEL while (EXPR) BLOCK
     LABEL while (EXPR) BLOCK continue BLOCK
+    LABEL until (EXPR) BLOCK
+    LABEL until (EXPR) BLOCK continue BLOCK
     LABEL for (EXPR; EXPR; EXPR) BLOCK
     LABEL foreach VAR (LIST) BLOCK
     LABEL foreach VAR (LIST) BLOCK continue BLOCK
@@ -223,6 +225,8 @@ the sense of the test is reversed.
 
 The C<while> statement executes the block as long as the expression is
 true (does not evaluate to the null string C<""> or C<0> or C<"0">).
+The C<until> statement executes the block as long as the expression is
+false.
 The LABEL is optional, and if present, consists of an identifier followed
 by a colon.  The LABEL identifies the loop for the loop control
 statements C<next>, C<last>, and C<redo>.

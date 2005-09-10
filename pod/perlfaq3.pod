@@ -31,7 +31,7 @@ A crude table of contents for the Perl manpage set is found in L<perltoc>.
 =head2 How can I use Perl interactively?
 
 The typical approach uses the Perl debugger, described in the
-perldebug(1) manpage, on an ``empty'' program, like this:
+perldebug(1) manpage, on an "empty" program, like this:
 
     perl -de 42
 
@@ -481,8 +481,8 @@ on optimization, too.  Advice on benchmarking boils down to: benchmark
 and profile to make sure you're optimizing the right part, look for
 better algorithms instead of microtuning your code, and when all else
 fails consider just buying faster hardware.  You will probably want to
-read the answer to the earlier question ``How do I profile my Perl
-programs?'' if you haven't done so already.
+read the answer to the earlier question "How do I profile my Perl
+programs?" if you haven't done so already.
 
 A different approach is to autoload seldom-used Perl code.  See the
 AutoSplit and AutoLoader modules in the standard distribution for
@@ -696,19 +696,10 @@ care.
 
 See http://www.cpan.org/modules/by-category/15_World_Wide_Web_HTML_HTTP_CGI/ .
 
-A non-free, commercial product, ``The Velocity Engine for Perl'',
-(http://www.binevolve.com/ or http://www.binevolve.com/velocigen/ )
-might also be worth looking at.  It will allow you to increase the
-performance of your Perl programs, running programs up to 25 times
-faster than normal CGI Perl when running in persistent Perl mode or 4
-to 5 times faster without any modification to your existing CGI
-programs. Fully functional evaluation copies are available from the
-web site.
-
 =head2 How can I hide the source for my Perl program?
 
 Delete it. :-) Seriously, there are a number of (mostly
-unsatisfactory) solutions with varying levels of ``security''.
+unsatisfactory) solutions with varying levels of "security".
 
 First of all, however, you I<can't> take away read permission, because
 the source code has to be readable in order to be compiled and
@@ -743,9 +734,9 @@ unique to Perl.
 If you're concerned about people profiting from your code, then the
 bottom line is that nothing but a restrictive license will give you
 legal security.  License your software and pepper it with threatening
-statements like ``This is unpublished proprietary software of XYZ Corp.
+statements like "This is unpublished proprietary software of XYZ Corp.
 Your access to it does not give you permission to use it blah blah
-blah.''  We are not lawyers, of course, so you should see a lawyer if
+blah."  We are not lawyers, of course, so you should see a lawyer if
 you want to be sure your license's wording will stand up in court.
 
 =head2 How can I compile my Perl program into byte code or C?
@@ -802,7 +793,7 @@ For OS/2 just use
     extproc perl -S -your_switches
 
 as the first line in C<*.cmd> file (C<-S> due to a bug in cmd.exe's
-`extproc' handling).  For DOS one should first invent a corresponding
+"extproc" handling).  For DOS one should first invent a corresponding
 batch file and codify it in C<ALTERNATE_SHEBANG> (see the
 F<dosish.h> file in the source distribution for more information).
 
@@ -900,9 +891,9 @@ There is no general solution to all of this.  It is a mess.
 
 For modules, get the CGI or LWP modules from CPAN.  For textbooks,
 see the two especially dedicated to web stuff in the question on
-books.  For problems and questions related to the web, like ``Why
-do I get 500 Errors'' or ``Why doesn't it run from the browser right
-when it runs fine on the command line'', see the troubleshooting
+books.  For problems and questions related to the web, like "Why
+do I get 500 Errors" or "Why doesn't it run from the browser right
+when it runs fine on the command line", see the troubleshooting
 guides and references in L<perlfaq9> or in the CGI MetaFAQ:
 
 	http://www.perl.org/CGI_MetaFAQ.html

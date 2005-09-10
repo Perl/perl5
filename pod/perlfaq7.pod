@@ -296,7 +296,7 @@ With the exception of regexes, you need to pass references to these
 objects.  See L<perlsub/"Pass by Reference"> for this particular
 question, and L<perlref> for information on references.
 
-See ``Passing Regexes'', below, for information on passing regular
+See "Passing Regexes", below, for information on passing regular
 expressions.
 
 =over 4

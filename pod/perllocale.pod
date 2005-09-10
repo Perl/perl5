@@ -293,7 +293,7 @@ programs you run see the changes.  See L<ENVIRONMENT> for
 the full list of relevant environment variables and L<USING LOCALES>
 for their effects in Perl.  Effects in other programs are 
 easily deducible.  For example, the variable LC_COLLATE may well affect
-your B<sort> program (or whatever the program that arranges `records'
+your B<sort> program (or whatever the program that arranges "records"
 alphabetically in your system is called).
 
 You can test out changing these variables temporarily, and if the

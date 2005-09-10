@@ -658,9 +658,9 @@ Do not assume that the alphabetic characters are encoded contiguously
 
 Do not assume anything about the ordering of the characters.
 The lowercase letters may come before or after the uppercase letters;
-the lowercase and uppercase may be interlaced so that both `a' and `A'
-come before `b'; the accented and other international characters may
-be interlaced so that E<auml> comes before `b'.
+the lowercase and uppercase may be interlaced so that both "a" and "A"
+come before "b"; the accented and other international characters may
+be interlaced so that E<auml> comes before "b".
 
 =head2 Internationalisation
 

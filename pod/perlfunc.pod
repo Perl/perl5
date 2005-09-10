@@ -1151,9 +1151,11 @@ maintain arbitrary state about the nature of the exception.  Such a scheme
 is sometimes preferable to matching particular string values of $@ using
 regular expressions.  Here's an example:
 
+    use Scalar::Util 'blessed';
+
     eval { ... ; die Some::Module::Exception->new( FOO => "bar" ) };
     if ($@) {
-        if (ref($@) && UNIVERSAL::isa($@,"Some::Module::Exception")) {
+        if (blessed($@) && $@->isa("Some::Module::Exception")) {
             # handle Some::Module::Exception
         }
         else {
@@ -2306,9 +2308,9 @@ functions will serve you better than will int().
 
 Implements the ioctl(2) function.  You'll probably first have to say
 
-    require "ioctl.ph";	# probably in /usr/local/lib/perl/ioctl.ph
+    require "sys/ioctl.ph";	# probably in $Config{archlib}/ioctl.ph
 
-to get the correct function definitions.  If F<ioctl.ph> doesn't
+to get the correct function definitions.  If F<sys/ioctl.ph> doesn't
 exist or doesn't have the correct definitions you'll have to roll your
 own, based on your C header files such as F<< <sys/ioctl.h> >>.
 (There is a Perl script called B<h2ph> that comes with the Perl kit that
@@ -3796,8 +3798,9 @@ the corresponding right parenthesis to terminate the arguments to
 the print--interpose a C<+> or put parentheses around all the
 arguments.
 
-Note that if you're storing FILEHANDLES in an array or other expression,
-you will have to use a block returning its value instead:
+Note that if you're storing FILEHANDLEs in an array, or if you're using
+any other expression more complex than a scalar variable to retrieve it,
+you will have to use a block returning the filehandle value instead:
 
     print { $files[$i] } "stuff\n";
     print { $OK ? STDOUT : STDERR } "stuff\n";
@@ -4071,9 +4074,6 @@ name is returned instead.  You can think of C<ref> as a C<typeof> operator.
     }
     unless (ref($r)) {
 	print "r is not a reference at all.\n";
-    }
-    if (UNIVERSAL::isa($r, "HASH")) {  # for subclassing
-	print "r is a reference to something that isa hash.\n";
     }
 
 See also L<perlref>.

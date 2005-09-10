@@ -45,7 +45,7 @@ Several people have contributed answers, corrections, and comments.
 
 =head1 Author and Copyright Information
 
-Copyright (c) 1997-2003 Tom Christiansen, Nathan Torkington, and 
+Copyright (c) 1997-2005 Tom Christiansen, Nathan Torkington, and 
 other contributors noted in the answers.
 
 All rights reserved.
@@ -398,7 +398,7 @@ Why am I getting long decimals (eg, 19.9499999999999) instead of the numbers I s
 
 =item *
 
-Why is int() broken?
+Why is C<int()> broken?
 
 =item *
 
@@ -406,7 +406,7 @@ Why isn't my octal data interpreted correctly?
 
 =item *
 
-Does Perl have a round() function?  What about ceil() and floor()?  Trig functions?
+Does Perl have a C<round()> function?  What about C<ceil()> and C<floor()>?  Trig functions?
 
 =item *
 
@@ -550,7 +550,7 @@ What is the difference between a list and an array?
 
 =item *
 
-What is the difference between $array[1] and @array[1]?
+What is the difference between C<$array[1]> and C<@array[1]>?
 
 =item *
 
@@ -606,7 +606,7 @@ How do I manipulate arrays of bits?
 
 =item *
 
-Why does defined() return true on empty arrays and hashes?
+Why does C<defined()> return true on empty arrays and hashes?
 
 =item *
 
@@ -642,7 +642,7 @@ Why don't my tied hashes make the defined/exists distinction?
 
 =item *
 
-How do I reset an each() operation part-way through?
+How do I reset an C<each()> operation part-way through?
 
 =item *
 
@@ -743,11 +743,11 @@ How can I use a filehandle indirectly?
 
 =item *
 
-How can I set up a footer format to be used with write()?
+How can I set up a footer format to be used with C<write()>?
 
 =item *
 
-How can I write() into a string?
+How can I C<write()> into a string?
 
 =item *
 
@@ -767,7 +767,7 @@ Why do I sometimes get an "Argument list too long" when I use E<lt>*E<gt>?
 
 =item *
 
-Is there a leak/bug in glob()?
+Is there a leak/bug in C<glob()>?
 
 =item *
 
@@ -783,7 +783,7 @@ How can I lock a file?
 
 =item *
 
-Why can't I just open(FH, "E<gt>file.lock")?
+Why can't I just C<< open(FH, ">file.lock") >>?
 
 =item *
 
@@ -831,7 +831,7 @@ How do I do a C<tail -f> in perl?
 
 =item *
 
-How do I dup() a filehandle in Perl?
+How do I C<dup()> a filehandle in Perl?
 
 =item *
 
@@ -843,7 +843,7 @@ Why can't I use "C:\temp\foo" in DOS paths?  Why doesn't `C:\temp\foo.exe` work?
 
 =item *
 
-Why doesn't glob("*.*") get all the files?
+Why doesn't C<glob("*.*")> get all the files?
 
 =item *
 
@@ -862,7 +862,13 @@ Why do I get weird spaces when I print an array of lines?
 
 =head2 L<perlfaq6>: Regular Expressions
 
-This section is surprisingly small because the rest of the FAQ is littered with answers involving regular expressions. For example, decoding a URL and checking whether something is a number are handled with regular expressions, but those answers are found elsewhere in this document (in L<perlfaq9>: ``How do I decode or create those %-encodings on the web'' and L<perlfaq4>: ``How do I determine whether a scalar is a number/whole/integer/float'', to be precise).
+This section is surprisingly small because the rest of the FAQ is
+littered with answers involving regular expressions. For example,
+decoding a URL and checking whether something is a number are handled
+with regular expressions, but those answers are found elsewhere in this
+document (in L<perlfaq9>: "How do I decode or create those %-encodings
+on the web" and L<perlfaq4>: "How do I determine whether a scalar is
+a number/whole/integer/float", to be precise).
 
 =over 4
 
@@ -880,7 +886,7 @@ How can I pull out lines between two patterns that are themselves on different l
 
 =item *
 
-I put a regular expression into $/ but it didn't work. What's wrong?
+I put a regular expression into C<$/> but it didn't work. What's wrong?
 
 =item *
 
@@ -936,7 +942,7 @@ Why don't word-boundary searches with C<\b> work for me?
 
 =item *
 
-Why does using $&, $`, or $' slow my program down?
+Why does using C<$&>, C<$`>, or C<$'> slow my program down?
 
 =item *
 
@@ -1041,7 +1047,7 @@ What's the difference between deep and shallow binding?
 
 =item *
 
-Why doesn't "my($foo) = E<lt>FILEE<gt>;" work right?
+Why doesn't C<< my($foo) = <FILE>; >> work right?
 
 =item *
 
@@ -1049,7 +1055,7 @@ How do I redefine a builtin function, operator, or method?
 
 =item *
 
-What's the difference between calling a function as &foo and foo()?
+What's the difference between calling a function as C<&foo> and C<foo()>?
 
 =item *
 
@@ -1098,7 +1104,7 @@ How do I find out which operating system I'm running under?
 
 =item *
 
-How come exec() doesn't return?
+How come C<exec()> doesn't return?
 
 =item *
 
@@ -1154,7 +1160,7 @@ How do I set the time and date?
 
 =item *
 
-How can I sleep() or alarm() for under a second?
+How can I C<sleep()> or C<alarm()> for under a second?
 
 =item *
 
@@ -1162,7 +1168,7 @@ How can I measure time under a second?
 
 =item *
 
-How can I do an atexit() or setjmp()/longjmp()? (Exception handling)
+How can I do an C<atexit()> or C<setjmp()>/C<longjmp()>? (Exception handling)
 
 =item *
 
@@ -1174,7 +1180,7 @@ How can I call my system's unique C functions from Perl?
 
 =item *
 
-Where do I get the include files to do ioctl() or syscall()?
+Where do I get the include files to do C<ioctl()> or C<syscall()>?
 
 =item *
 
@@ -1186,7 +1192,7 @@ How can I open a pipe both to and from a command?
 
 =item *
 
-Why can't I get the output of a command with system()?
+Why can't I get the output of a command with C<system()>?
 
 =item *
 
@@ -1194,7 +1200,7 @@ How can I capture STDERR from an external command?
 
 =item *
 
-Why doesn't open() return an error when a pipe open fails?
+Why doesn't C<open()> return an error when a pipe open fails?
 
 =item *
 
@@ -1226,7 +1232,9 @@ Is there a way to hide perl's command line from programs such as "ps"?
 
 =item *
 
-I {changed directory, modified my environment} in a perl script.  How come the change disappeared when I exited the script?  How do I get my changes to be visible?
+I {changed directory, modified my environment} in a perl script.  How come
+the change disappeared when I exited the script?  How do I get my changes
+to be visible?
 
 =item *
 
@@ -1258,7 +1266,7 @@ How do I use an SQL database?
 
 =item *
 
-How do I make a system() exit on control-C?
+How do I make a C<system()> exit on control-C?
 
 =item *
 
@@ -1286,11 +1294,11 @@ How do I add the directory my program lives in to the module/library search path
 
 =item *
 
-How do I add a directory to my include path (@INC) at runtime?
+How do I add a directory to my include path (C<@INC>) at runtime?
 
 =item *
 
-What is socket.ph and where do I get it?
+What is F<socket.ph> and where do I get it?
 
 =back
 
@@ -1351,7 +1359,7 @@ How do I put a password on my web pages?
 
 =item *
 
-How do I edit my .htpasswd and .htgroup files with Perl?
+How do I edit my F<.htpasswd> and F<.htgroup> files with Perl?
 
 =item *
 

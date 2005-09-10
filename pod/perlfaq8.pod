@@ -276,8 +276,8 @@ next.
 If you expect characters to get to your device when you print() them,
 you'll want to autoflush that filehandle.  You can use select()
 and the C<$|> variable to control autoflushing (see L<perlvar/$E<verbar>>
-and L<perlfunc/select>, or L<perlfaq5>, ``How do I flush/unbuffer an
-output filehandle?  Why must I do this?''):
+and L<perlfunc/select>, or L<perlfaq5>, "How do I flush/unbuffer an
+output filehandle?  Why must I do this?"):
 
     $oldh = select(DEV);
     $| = 1;
@@ -411,7 +411,7 @@ You don't actually "trap" a control character.  Instead, that character
 generates a signal which is sent to your terminal's currently
 foregrounded process group, which you then trap in your process.
 Signals are documented in L<perlipc/"Signals"> and the
-section on ``Signals'' in the Camel.
+section on "Signals" in the Camel.
 
 You can set the values of the %SIG hash to be the functions you want
 to handle the signal.  After perl catches the signal, it looks in %SIG
@@ -527,7 +527,7 @@ though, so if you use END blocks you should also use
 Perl's exception-handling mechanism is its eval() operator.  You can
 use eval() as setjmp and die() as longjmp.  For details of this, see
 the section on signals, especially the time-out handler for a blocking
-flock() in L<perlipc/"Signals"> or the section on ``Signals'' in
+flock() in L<perlipc/"Signals"> or the section on "Signals" in
 the Camel Book.
 
 If exception handling is all you're interested in, try the
@@ -1017,7 +1017,7 @@ the current process group of your controlling terminal as follows:
 
 Use the alarm() function, probably in conjunction with a signal
 handler, as documented in L<perlipc/"Signals"> and the section on
-``Signals'' in the Camel.  You may instead use the more flexible
+"Signals" in the Camel.  You may instead use the more flexible
 Sys::AlarmCall module available from CPAN.
 
 The alarm() function is not implemented on all versions of Windows.
@@ -1177,8 +1177,8 @@ just need to replace step 3 (B<make>) with B<make perl> and you will
 get a new F<perl> binary with your extension linked in.
 
 See L<ExtUtils::MakeMaker> for more details on building extensions.
-See also the next question, ``What's the difference between require
-and use?''.
+See also the next question, "What's the difference between require
+and use?".
 
 =head2 What's the difference between require and use?
 

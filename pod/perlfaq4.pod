@@ -349,16 +349,16 @@ Computers are good at being predictable and bad at being random
 (despite appearances caused by bugs in your programs :-).  see the
 F<random> article in the "Far More Than You Ever Wanted To Know"
 collection in http://www.cpan.org/misc/olddoc/FMTEYEWTK.tgz , courtesy of
-Tom Phoenix, talks more about this.  John von Neumann said, ``Anyone
+Tom Phoenix, talks more about this.  John von Neumann said, "Anyone
 who attempts to generate random numbers by deterministic means is, of
-course, living in a state of sin.''
+course, living in a state of sin."
 
 If you want numbers that are more random than C<rand> with C<srand>
 provides, you should also check out the Math::TrulyRandom module from
 CPAN.  It uses the imperfections in your system's timer to generate
 random numbers, but this takes quite a while.  If you want a better
 pseudorandom generator than comes with your operating system, look at
-``Numerical Recipes in C'' at http://www.nr.com/ .
+"Numerical Recipes in C" at http://www.nr.com/ .
 
 =head2 How do I get a random number between X and Y?
 
@@ -532,8 +532,8 @@ C<$timestamp = gmtime(1005613200)> sets $timestamp to "Tue Nov 13 01:00:00
 
 That doesn't mean that Perl can't be used to create non-Y2K compliant
 programs.  It can.  But so can your pencil.  It's the fault of the user,
-not the language.  At the risk of inflaming the NRA: ``Perl doesn't
-break Y2K, people do.''  See http://www.perl.org/about/y2k.html for
+not the language.  At the risk of inflaming the NRA: "Perl doesn't
+break Y2K, people do."  See http://www.perl.org/about/y2k.html for
 a longer exposition.
 
 =head1 Data: Strings
@@ -553,7 +553,7 @@ and C<Data::Validate::IP>.
 
 =head2 How do I unescape a string?
 
-It depends just what you mean by ``escape''.  URL escapes are dealt
+It depends just what you mean by "escape".  URL escapes are dealt
 with in L<perlfaq9>.  Shell escapes with the backslash (C<\>)
 character are removed with
 
@@ -2037,7 +2037,7 @@ function.  Its semantics are somewhat cumbersome, so here's a C<getnum>
 wrapper function for more convenient access.  This function takes
 a string and returns the number it found, or C<undef> for input that
 isn't a C float.  The C<is_numeric> function is a front end to C<getnum>
-if you just want to say, ``Is this a float?''
+if you just want to say, "Is this a float?"
 
     sub getnum {
         use POSIX qw(strtod);
