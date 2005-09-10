@@ -304,7 +304,7 @@ The are various ways in which the private and public flags may differ.
 For example, a tied SV may have a valid underlying value in the IV slot
 (so SvIOKp is true), but the data should be accessed via the FETCH
 routine rather than directly, so SvIOK is false. Another is when
-numeric conversion has occured and precision has been lost: only the
+numeric conversion has occurred and precision has been lost: only the
 private flag is set on 'lossy' values. So when an NV is converted to an
 IV with loss, SvIOKp, SvNOKp and SvNOK will be set, while SvIOK wont be.
 
@@ -2144,7 +2144,7 @@ This function is a part of the public API.
 
 =item p
 
-This function has a C<Perl_> prefix; ie, it is defined as C<Perl_av_fetch>
+This function has a C<Perl_> prefix; i.e. it is defined as C<Perl_av_fetch>
 
 =item d
 

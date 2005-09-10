@@ -904,7 +904,7 @@ However, the generated Perl function is called in very C-ish style:
 
 If one of the input arguments to the C function is the length of a string
 argument C<NAME>, one can substitute the name of the length-argument by
-C<length(NAME)> in the XSUB declaration.  This argument must be omited when
+C<length(NAME)> in the XSUB declaration.  This argument must be omitted when
 the generated Perl function is called.  E.g.,
 
   void

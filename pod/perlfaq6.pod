@@ -603,7 +603,7 @@ These strings do not match /\bPerl\b/.
 	"Perler"  # no word char before P, but one after l
 
 You don't have to use \b to match words though.  You can look for
-non-word characters surrrounded by word characters.  These strings
+non-word characters surrounded by word characters.  These strings
 match the pattern /\b'\b/.
 
 	"don't"   # the ' char is surrounded by "n" and "t"

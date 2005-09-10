@@ -912,7 +912,7 @@ You can mock TTY input to debugger by adding arbitrary commands to
     sub afterinit { push @DB::typeahead, "b 4", "b 6"; }
 
 Which would attempt to set breakpoints on lines 4 and 6 immediately
-after debugger initilization. Note that @DB::typeahead is not a supported
+after debugger initialization. Note that @DB::typeahead is not a supported
 interface and is subject to change in future releases.
 
 If you want to modify the debugger, copy F<perl5db.pl> from the

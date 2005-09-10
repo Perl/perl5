@@ -148,7 +148,7 @@ these two keywords are not case-sensitive.
 =head2 TODO tests
 
 If the directive starts with C<# TODO>, the test is counted as a
-todo test, and the text after C<TODO> is the the explanation.
+todo test, and the text after C<TODO> is the explanation.
 
     not ok 13 # TODO bend space and time
 

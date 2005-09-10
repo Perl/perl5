@@ -538,7 +538,7 @@ Perl user group web site at http://www.pm.org/ for more information about
 joining, starting, or requesting services for a Perl user group.
 
 http://www.cpan.org/ is the Comprehensive Perl Archive Network,
-a replicated worlwide repository of Perl software, see
+a replicated worldwide repository of Perl software, see
 the I<What is CPAN?> question earlier in this document.
 
 =head1 AUTHOR AND COPYRIGHT

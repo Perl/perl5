@@ -28,7 +28,7 @@ C<CvWEAKOUTSIDE> flag in the child. This allows us to determine under what
 circumstances we should decrement the refcount of the parent when freeing
 the child.
 
-There is a further complication with non-closure anonymous subs (ie those
+There is a further complication with non-closure anonymous subs (i.e. those
 that do not refer to any lexicals outside that sub). In this case, the
 anonymous prototype is shared rather than being cloned. This has the
 consequence that the parent may be freed while there are still active
@@ -253,7 +253,7 @@ Found in file pad.h
 
 =item SAVECLEARSV	
 
-Clear the pointed to pad value on scope exit. (ie the runtime action of 'my')
+Clear the pointed to pad value on scope exit. (i.e. the runtime action of 'my')
 
 	void	SAVECLEARSV	(SV **svp)
 
@@ -483,7 +483,7 @@ The SVs in the names AV have their PV being the name of the variable.
 NV+1..IV inclusive is a range of cop_seq numbers for which the name is
 valid.  For typed lexicals name SV is SVt_PVMG and SvSTASH points at the
 type.  For C<our> lexicals, the type is SVt_PVGV, and GvSTASH points at the
-stash of the associated global (so that duplicate C<our> delarations in the
+stash of the associated global (so that duplicate C<our> declarations in the
 same package can be detected).  SvCUR is sometimes hijacked to
 store the generation number during compilation.
 
@@ -644,7 +644,7 @@ Found in file pad.c
 
 =item pad_free
 
-Free the SV at offet po in the current pad.
+Free the SV at offset po in the current pad.
 
 	void	pad_free(PADOFFSET po)
 
