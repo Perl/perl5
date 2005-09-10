@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq9 - Networking ($Revision: 1.21 $, $Date: 2005/04/22 19:04:48 $)
+perlfaq9 - Networking ($Revision: 1.23 $, $Date: 2005/08/10 15:54:54 $)
 
 =head1 DESCRIPTION
 
@@ -635,10 +635,10 @@ available from CPAN) is more complex but can put as well as fetch.
 
 =head2 How can I do RPC in Perl?
 
-A DCE::RPC module is being developed (but is not yet available) and
-will be released as part of the DCE-Perl package (available from
-CPAN).  The rpcgen suite, available from CPAN/authors/id/JAKE/, is
-an RPC stub generator and includes an RPC::ONC module.
+(Contributed by brian d foy)
+
+Use one of the RPC modules you can find on CPAN (
+http://search.cpan.org/search?query=RPC&mode=all ).
 
 =head1 AUTHOR AND COPYRIGHT
 

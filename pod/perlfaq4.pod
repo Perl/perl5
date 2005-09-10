@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.64 $, $Date: 2005/04/27 00:18:04 $)
+perlfaq4 - Data Manipulation ($Revision: 1.67 $, $Date: 2005/08/10 15:55:49 $)
 
 =head1 DESCRIPTION
 
@@ -409,7 +409,7 @@ a time in epoch seconds for the argument to localtime.
 	my $week_of_year = strftime "%W",
 		localtime( timelocal( 0, 0, 0, 18, 11, 1987 ) );
 
-The Date::Calc module provides two functions for to calculate these.
+The Date::Calc module provides two functions to calculate these.
 
 	use Date::Calc;
 	my $day_of_year  = Day_of_Year(  1987, 12, 18 );
@@ -436,15 +436,12 @@ reliably determine the current century or millennium.
 
 =head2 How can I compare two dates and find the difference?
 
-If you're storing your dates as epoch seconds then simply subtract one
-from the other.  If you've got a structured date (distinct year, day,
-month, hour, minute, seconds values), then for reasons of accessibility,
-simplicity, and efficiency, merely use either timelocal or timegm (from
-the Time::Local module in the standard distribution) to reduce structured
-dates to epoch seconds.  However, if you don't know the precise format of
-your dates, then you should probably use either of the Date::Manip and
-Date::Calc modules from CPAN before you go hacking up your own parsing
-routine to handle arbitrary date formats.
+(contributed by brian d foy)
+
+You could just store all your dates as a number and then subtract. Life
+isn't always that simple though. If you want to work with formatted
+dates, the Date::Manip, Date::Calc, or DateTime modules can help you.
+
 
 =head2 How can I take a string and turn it into epoch seconds?
 

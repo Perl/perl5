@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 1.36 $, $Date: 2005/04/22 19:04:48 $)
+perlfaq5 - Files and Formats ($Revision: 1.37 $, $Date: 2005/08/10 15:55:23 $)
 
 =head1 DESCRIPTION
 
@@ -339,6 +339,13 @@ See L<perlform/"Accessing Formatting Internals"> for an swrite() function.
 
 =head2 How can I output my numbers with commas added?
 
+(contributed by brian d foy and Benjamin Goldberg)
+
+You can use L<Number::Format> to separate places in a number.
+It handles locale information for those of you who want to insert
+full stops instead (or anything else that they want to use,
+really).
+
 This subroutine will add commas to your number:
 
 	sub commify {
@@ -482,24 +489,19 @@ best therefore to use glob() only in list context.
 
 =head2 How can I open a file with a leading ">" or trailing blanks?
 
-Normally perl ignores trailing blanks in filenames, and interprets
-certain leading characters (or a trailing "|") to mean something
-special.
+(contributed by Brian McCauley)
 
-The three argument form of open() lets you specify the mode
-separately from the filename.  The open() function treats
-special mode characters and whitespace in the filename as
-literals
+The special two argument form of Perl's open() function ignores
+trailing blanks in filenames and infers the mode from certain leading
+characters (or a trailing "|"). In older versions of Perl this was the
+only version of open() and so it is prevalent in old code and books.
 
+Unless you have a particular reason to use the two argument form you
+should use the three argument form of open() which does not treat any
+charcters in the filename as special.
+     
 	open FILE, "<", "  file  ";  # filename is "   file   "
 	open FILE, ">", ">file";     # filename is ">file"
-
-It may be a lot clearer to use sysopen(), though:
-
-    use Fcntl;
-    $badpath = "<<<something really wicked   ";
-    sysopen (FH, $badpath, O_WRONLY | O_CREAT | O_TRUNC)
-	or die "can't open $badpath: $!";
 
 =head2 How can I reliably rename a file?
 
