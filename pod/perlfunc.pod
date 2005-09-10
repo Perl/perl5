@@ -226,7 +226,7 @@ C<dbmclose>, C<dbmopen>, C<dump>, C<endgrent>, C<endhostent>,
 C<endnetent>, C<endprotoent>, C<endpwent>, C<endservent>, C<exec>,
 C<fcntl>, C<flock>, C<fork>, C<getgrent>, C<getgrgid>, C<gethostbyname>,
 C<gethostent>, C<getlogin>, C<getnetbyaddr>, C<getnetbyname>, C<getnetent>,
-C<getppid>, C<getprgp>, C<getpriority>, C<getprotobynumber>,
+C<getppid>, C<getpgrp>, C<getpriority>, C<getprotobynumber>,
 C<getprotoent>, C<getpwent>, C<getpwnam>, C<getpwuid>,
 C<getservbyport>, C<getservent>, C<getsockopt>, C<glob>, C<ioctl>,
 C<kill>, C<link>, C<lstat>, C<msgctl>, C<msgget>, C<msgrcv>,
@@ -597,6 +597,8 @@ previous time C<caller> was called.
 
 =item chdir EXPR
 
+=item chdir
+
 Changes the working directory to EXPR, if possible. If EXPR is omitted,
 changes to the directory specified by C<$ENV{HOME}>, if set; if not,
 changes to the directory specified by C<$ENV{LOGDIR}>. (Under VMS, the
@@ -852,31 +854,42 @@ function, or use this relation:
 
 =item crypt PLAINTEXT,SALT
 
-Encrypts a string exactly like the crypt(3) function in the C library
-(assuming that you actually have a version there that has not been
-extirpated as a potential munition).  This can prove useful for checking
-the password file for lousy passwords, amongst other things.  Only the
-guys wearing white hats should do this.
+Creates a digest string exactly like the crypt(3) function in the C
+library (assuming that you actually have a version there that has not
+been extirpated as a potential munition).
 
-Note that L<crypt|/crypt> is intended to be a one-way function, much like
-breaking eggs to make an omelette.  There is no (known) corresponding
-decrypt function (in other words, the crypt() is a one-way hash
-function).  As a result, this function isn't all that useful for
-cryptography.  (For that, see your nearby CPAN mirror.)
+crypt() is a one-way hash function.  The PLAINTEXT and SALT is turned
+into a short string, called a digest, which is returned.  The same
+PLAINTEXT and SALT will always return the same string, but there is no
+(known) way to get the original PLAINTEXT from the hash.  Small
+changes in the PLAINTEXT or SALT will result in large changes in the
+digest.
 
-When verifying an existing encrypted string you should use the
-encrypted text as the salt (like C<crypt($plain, $crypted) eq
-$crypted>).  This allows your code to work with the standard L<crypt|/crypt>
-and with more exotic implementations.  In other words, do not assume
-anything about the returned string itself, or how many bytes in
-the encrypted string matter.
+There is no decrypt function.  This function isn't all that useful for
+cryptography (for that, look for F<Crypt> modules on your nearby CPAN
+mirror) and the name "crypt" is a bit of a misnomer.  Instead it is
+primarily used to check if two pieces of text are the same without
+having to transmit or store the text itself.  An example is checking
+if a correct password is given.  The digest of the password is stored,
+not the password itself.  The user types in a password which is
+crypt()'d with the same salt as the stored digest.  If the two digests
+match the password is correct.
+
+When verifying an existing digest string you should use the digest as
+the salt (like C<crypt($plain, $digest) eq $digest>).  The SALT used
+to create the digest is visible as part of the digest so this ensures
+crypt() will hash the new string with the same salt as the digest.
+This allows your code to work with the standard L<crypt|/crypt> and
+with more exotic implementations.  In other words, do not assume
+anything about the returned string itself, or how many bytes in the
+digest matter.
 
 Traditionally the result is a string of 13 bytes: two first bytes of
 the salt, followed by 11 bytes from the set C<[./0-9A-Za-z]>, and only
-the first eight bytes of the encrypted string mattered, but
-alternative hashing schemes (like MD5), higher level security schemes
-(like C2), and implementations on non-UNIX platforms may produce
-different strings.
+the first eight bytes of the digest string mattered, but alternative
+hashing schemes (like MD5), higher level security schemes (like C2),
+and implementations on non-UNIX platforms may produce different
+strings.
 
 When choosing a new salt create a random two character string whose
 characters come from the set C<[./0-9A-Za-z]> (like C<join '', ('.',
@@ -905,11 +918,9 @@ their own password:
 Of course, typing in your own password to whoever asks you
 for it is unwise.
 
-The L<crypt|/crypt> function is unsuitable for encrypting large quantities
+The L<crypt|/crypt> function is unsuitable for hashing large quantities
 of data, not least of all because you can't get the information
-back.  Look at the F<by-module/Crypt> and F<by-module/PGP> directories
-on your favorite CPAN mirror for a slew of potentially useful
-modules.
+back.  Look at the L<Digest> module for more robust algorithms.
 
 If using crypt() on a Unicode string (which I<potentially> has
 characters with codepoints above 255), Perl tries to make sense
@@ -1367,6 +1378,8 @@ there was an error.
 
 =item eval BLOCK
 
+=item eval
+
 In the first form, the return value of EXPR is parsed and executed as if it
 were a little Perl program.  The value of the expression (which is itself
 determined within scalar context) is first parsed, and if there weren't any
@@ -1617,6 +1630,8 @@ to exists() is an error.
     exists &sub();	# Error
 
 =item exit EXPR
+
+=item exit
 
 Evaluates EXPR and exits immediately with that value.    Example:
 
@@ -2141,6 +2156,8 @@ C<File::Glob> extension.  See L<File::Glob> for details.
 
 =item gmtime EXPR
 
+=item gmtime
+
 Converts a time as returned by the time function to an 8-element list
 with the time localized for the standard Greenwich time zone.
 Typically used as follows:
@@ -2272,7 +2289,7 @@ integer overflow trigger a warning.  Leading whitespace is not stripped,
 unlike oct(). To present something as hex, look into L</printf>,
 L</sprintf>, or L</unpack>.
 
-=item import
+=item import LIST
 
 There is no builtin C<import> function.  It is just an ordinary
 method (subroutine) defined (or inherited) by modules that wish to export
@@ -3212,15 +3229,24 @@ See L<perlunicode> and L<encoding> for more about Unicode.
 
 =item our TYPE EXPR : ATTRS
 
-An C<our> declares the listed variables to be valid globals within
-the enclosing block, file, or C<eval>.  That is, it has the same
-scoping rules as a "my" declaration, but does not create a local
-variable.  If more than one value is listed, the list must be placed
-in parentheses.  The C<our> declaration has no semantic effect unless
-"use strict vars" is in effect, in which case it lets you use the
-declared global variable without qualifying it with a package name.
-(But only within the lexical scope of the C<our> declaration.  In this
-it differs from "use vars", which is package scoped.)
+C<our> associates a simple name with a package variable in the current
+package for use within the current scope.  When C<use strict 'vars'> is in
+effect, C<our> lets you use declared global variables without qualifying
+them with package names, within the lexical scope of the C<our> declaration.
+In this way C<our> differs from C<use vars>, which is package scoped.
+
+Unlike C<my>, which both allocates storage for a variable and associates a
+a simple name with that storage for use within the current scope, C<our>
+associates a simple name with a package variable in the current package,
+for use within the current scope.  In other words, C<our> has the same
+scoping rules as C<my>, but does not necessarily create a
+variable.
+
+If more than one value is listed, the list must be placed
+in parentheses.
+
+    our $foo;
+    our($bar, $baz);
 
 An C<our> declaration declares a global variable that will be visible
 across its entire lexical scope, even across package boundaries.  The
@@ -3233,11 +3259,15 @@ behavior holds:
     $bar = 20;
 
     package Bar;
-    print $bar;		# prints 20
+    print $bar;		# prints 20, as it refers to $Foo::bar
 
-Multiple C<our> declarations in the same lexical scope are allowed
-if they are in different packages.  If they happened to be in the same
-package, Perl will emit warnings if you have asked for them.
+Multiple C<our> declarations with the same name in the same lexical
+scope are allowed if they are in different packages.  If they happen
+to be in the same package, Perl will emit warnings if you have asked
+for them, just like multiple C<my> declarations.  Unlike a second
+C<my> declaration, which will bind the name to a fresh variable, a
+second C<our> declaration in the same package, in the same scope, is
+merely redundant.
 
     use warnings;
     package Foo;
@@ -3248,7 +3278,8 @@ package, Perl will emit warnings if you have asked for them.
     our $bar = 30;	# declares $Bar::bar for rest of lexical scope
     print $bar;		# prints 30
 
-    our $bar;		# emits warning
+    our $bar;		# emits warning but has no other effect
+    print $bar;		# still prints 30
 
 An C<our> declaration may also have a list of attributes associated
 with it.

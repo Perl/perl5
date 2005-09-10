@@ -94,6 +94,8 @@ h Reference Manual
 
   perlfilter		Perl source filters
 
+  perlglossary		Perl Glossary
+
 h Internals and C Language Interface
 
   perlembed		Perl ways to embed perl in your C or C++ application
