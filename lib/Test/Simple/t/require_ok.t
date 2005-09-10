@@ -11,7 +11,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 7;
+use Test::More tests => 8;
 
 # Symbol and Class::Struct are both non-XS core modules back to 5.004.
 # So they'll always be there.
@@ -26,3 +26,4 @@ ok( $INC{'Class/Struct.pm'},    "require_ok FILE" );
 ok !Test::More::_is_module_name('foo:bar');
 ok !Test::More::_is_module_name('foo/bar.thing');
 ok !Test::More::_is_module_name('Foo::Bar::');
+ok Test::More::_is_module_name('V');

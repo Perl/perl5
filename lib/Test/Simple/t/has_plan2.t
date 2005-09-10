@@ -31,4 +31,4 @@ use strict;
 use Test::Builder;
 
 plan 'no_plan';
-is(Test::Builder->has_plan, 'no_plan', 'has no_plan');
+is(Test::Builder->new->has_plan, 'no_plan', 'has no_plan');

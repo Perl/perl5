@@ -4,7 +4,7 @@ use 5.004;
 
 use strict 'vars';
 use vars qw($VERSION);
-$VERSION = '0.54';
+$VERSION = '0.60';
 $VERSION = eval $VERSION;    # make the alpha version come out as a number
 
 
@@ -130,7 +130,7 @@ Here's an example of a simple .t file for the fictional Film module.
                              Rating   => 'R',
                              NumExplodingSheep => 1
                            });
-    ok( defined($btaste) and ref $btaste eq 'Film',     'new() works' );
+    ok( defined($btaste) && ref $btaste eq 'Film,     'new() works' );
 
     ok( $btaste->Title      eq 'Bad Taste',     'Title() get'    );
     ok( $btaste->Director   eq 'Peter Jackson', 'Director() get' );

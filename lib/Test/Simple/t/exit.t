@@ -58,6 +58,7 @@ my %Tests = (
              'pre_plan_death.plx'       => ['not zero',    'not zero'],
              'death_in_eval.plx'        => [0,      0],
              'require.plx'              => [0,      0],
+	     'exit.plx'                 => [1,      4],
             );
 
 print "1..".keys(%Tests)."\n";

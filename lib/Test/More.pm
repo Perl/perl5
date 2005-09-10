@@ -18,7 +18,7 @@ sub _carp {
 
 require Exporter;
 use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS $TODO);
-$VERSION = '0.54';
+$VERSION = '0.60';
 $VERSION = eval $VERSION;    # make the alpha version come out as a number
 
 @ISA    = qw(Exporter);
@@ -99,11 +99,6 @@ Test::More - yet another framework for writing test scripts
 
   pass($test_name);
   fail($test_name);
-
-  # Utility comparison functions.
-  eq_array(\@this, \@that);
-  eq_hash(\%this, \%that);
-  eq_set(\@this, \@that);
 
   # UNIMPLEMENTED!!!
   my @status = Test::More::status;
@@ -805,7 +800,7 @@ sub _is_module_name {
     # End with an alphanumeric.
     # The rest is an alphanumeric or ::
     $module =~ s/\b::\b//g;
-    $module =~ /^[a-zA-Z]\w+$/;
+    $module =~ /^[a-zA-Z]\w*$/;
 }
 
 =back
@@ -982,11 +977,11 @@ but want to put tests in your testing script (always a good idea).
 
 =back
 
-=head2 Comparison functions
+=head2 Complex data structures
 
 Not everything is a simple eq check or regex.  There are times you
-need to see if two arrays are equivalent, for instance.  For these
-instances, Test::More provides a handful of useful functions.
+need to see if two data structures are equivalent.  For these
+instances Test::More provides a handful of useful functions.
 
 B<NOTE> I'm not quite sure what will happen with filehandles.
 
@@ -1018,26 +1013,28 @@ WARNING
         chop $msg;   # clip off newline so carp() will put in line/file
 
         _carp sprintf $msg, scalar @_;
+
+	return $Test->ok(0);
     }
 
     my($this, $that, $name) = @_;
 
     my $ok;
-    if( !ref $this xor !ref $that ) {  # one's a reference, one isn't
-        $ok = 0;
-    }
-    if( !ref $this and !ref $that ) {
+    if( !ref $this and !ref $that ) {  		# neither is a reference
         $ok = $Test->is_eq($this, $that, $name);
     }
-    else {
+    elsif( !ref $this xor !ref $that ) {  	# one's a reference, one isn't
+        $ok = $Test->ok(0, $name);
+	$Test->diag( _format_stack({ vals => [ $this, $that ] }) );
+    }
+    else {			       		# both references
         local @Data_Stack = ();
-        local %Refs_Seen  = ();
         if( _deep_check($this, $that) ) {
             $ok = $Test->ok(1, $name);
         }
         else {
             $ok = $Test->ok(0, $name);
-            $ok = $Test->diag(_format_stack(@Data_Stack));
+            $Test->diag(_format_stack(@Data_Stack));
         }
     }
 
@@ -1073,9 +1070,10 @@ sub _format_stack {
     my $out = "Structures begin differing at:\n";
     foreach my $idx (0..$#vals) {
         my $val = $vals[$idx];
-        $vals[$idx] = !defined $val ? 'undef' : 
-                      $val eq $DNE  ? "Does not exist"
-                                    : "'$val'";
+        $vals[$idx] = !defined $val ? 'undef'          :
+                      $val eq $DNE  ? "Does not exist" :
+	              ref $val      ? "$val"           :
+                                      "'$val'";
     }
 
     $out .= "$vars[0] = $vals[0]\n";
@@ -1099,9 +1097,28 @@ sub _type {
 }
 
 
+=head2 Discouraged comparison functions
+
+The use of the following functions is discouraged as they are not
+actually testing functions and produce no diagnostics to help figure
+out what went wrong.  They were written before is_deeply() existed
+because I couldn't figure out how to display a useful diff of two
+arbitrary data structures.
+
+These functions are usually used inside an ok().
+
+    ok( eq_array(\@this, \@that) );
+
+C<is_deeply()> can do that better and with diagnostics.  
+
+    is_deeply( \@this, \@that );
+
+They may be deprecated in future versions.
+
+
 =item B<eq_array>
 
-  eq_array(\@this, \@that);
+  my $is_eq = eq_array(\@this, \@that);
 
 Checks if two arrays are equivalent.  This is a deep check, so
 multi-level structures are handled correctly.
@@ -1111,8 +1128,7 @@ multi-level structures are handled correctly.
 #'#
 sub eq_array {
     local @Data_Stack;
-    local %Refs_Seen;
-    _eq_array(@_);
+    _deep_check(@_);
 }
 
 sub _eq_array  {
@@ -1124,13 +1140,6 @@ sub _eq_array  {
     }
 
     return 1 if $a1 eq $a2;
-
-    if($Refs_Seen{$a1}) {
-        return $Refs_Seen{$a1} eq $a2;
-    }
-    else {
-        $Refs_Seen{$a1} = "$a2";
-    }
 
     my $ok = 1;
     my $max = $#$a1 > $#$a2 ? $#$a1 : $#$a2;
@@ -1152,6 +1161,11 @@ sub _deep_check {
     my($e1, $e2) = @_;
     my $ok = 0;
 
+    # Effectively turn %Refs_Seen into a stack.  This avoids picking up
+    # the same referenced used twice (such as [\$a, \$a]) to be considered
+    # circular.
+    local %Refs_Seen = %Refs_Seen;
+
     {
         # Quiet uninitialized value warnings when comparing undefs.
         local $^W = 0; 
@@ -1160,6 +1174,7 @@ sub _deep_check {
 
         # Either they're both references or both not.
         my $same_ref = !(!ref $e1 xor !ref $e2);
+	my $not_ref  = (!ref $e1 and !ref $e2);
 
         if( defined $e1 xor defined $e2 ) {
             $ok = 0;
@@ -1170,12 +1185,23 @@ sub _deep_check {
         elsif ( $same_ref and ($e1 eq $e2) ) {
             $ok = 1;
         }
+	elsif ( $not_ref ) {
+	    push @Data_Stack, { type => '', vals => [$e1, $e2] };
+	    $ok = 0;
+	}
         else {
-            my $type = _type($e1);
-            $type = '' unless _type($e2) eq $type;
+            if( $Refs_Seen{$e1} ) {
+                return $Refs_Seen{$e1} eq $e2;
+            }
+            else {
+                $Refs_Seen{$e1} = "$e2";
+            }
 
-            if( !$type ) {
-                push @Data_Stack, { vals => [$e1, $e2] };
+            my $type = _type($e1);
+            $type = 'DIFFERENT' unless _type($e2) eq $type;
+
+            if( $type eq 'DIFFERENT' ) {
+                push @Data_Stack, { type => $type, vals => [$e1, $e2] };
                 $ok = 0;
             }
             elsif( $type eq 'ARRAY' ) {
@@ -1185,7 +1211,7 @@ sub _deep_check {
                 $ok = _eq_hash($e1, $e2);
             }
             elsif( $type eq 'REF' ) {
-                push @Data_Stack, { type => 'REF', vals => [$e1, $e2] };
+                push @Data_Stack, { type => $type, vals => [$e1, $e2] };
                 $ok = _deep_check($$e1, $$e2);
                 pop @Data_Stack if $ok;
             }
@@ -1194,6 +1220,9 @@ sub _deep_check {
                 $ok = _deep_check($$e1, $$e2);
                 pop @Data_Stack if $ok;
             }
+	    else {
+		_whoa(1, "No type in _deep_check");
+	    }
         }
     }
 
@@ -1201,9 +1230,20 @@ sub _deep_check {
 }
 
 
+sub _whoa {
+    my($check, $desc) = @_;
+    if( $check ) {
+        die <<WHOA;
+WHOA!  $desc
+This should never happen!  Please contact the author immediately!
+WHOA
+    }
+}
+
+
 =item B<eq_hash>
 
-  eq_hash(\%this, \%that);
+  my $is_eq = eq_hash(\%this, \%that);
 
 Determines if the two hashes contain the same keys and values.  This
 is a deep check.
@@ -1212,8 +1252,7 @@ is a deep check.
 
 sub eq_hash {
     local @Data_Stack;
-    local %Refs_Seen;
-    return _eq_hash(@_);
+    return _deep_check(@_);
 }
 
 sub _eq_hash {
@@ -1225,13 +1264,6 @@ sub _eq_hash {
     }
 
     return 1 if $a1 eq $a2;
-
-    if( $Refs_Seen{$a1} ) {
-        return $Refs_Seen{$a1} eq $a2;
-    }
-    else {
-        $Refs_Seen{$a1} = "$a2";
-    }
 
     my $ok = 1;
     my $bigger = keys %$a1 > keys %$a2 ? $a1 : $a2;
@@ -1251,14 +1283,22 @@ sub _eq_hash {
 
 =item B<eq_set>
 
-  eq_set(\@this, \@that);
+  my $is_eq = eq_set(\@this, \@that);
 
 Similar to eq_array(), except the order of the elements is B<not>
 important.  This is a deep check, but the irrelevancy of order only
 applies to the top level.
 
+    ok( eq_set(\@this, \@that) );
+
+Is better written:
+
+    is_deeply( [sort @this], [sort @that] );
+
 B<NOTE> By historical accident, this is not a true set comparision.
 While the order of elements does not matter, duplicate elements do.
+
+Test::Deep contains much better set comparison functions.
 
 =cut
 
@@ -1329,6 +1369,8 @@ So the exit codes are...
     any other number    how many failed (including missing or extras)
 
 If you fail more than 254 tests, it will be reported as 254.
+
+B<NOTE>  This behavior may go away in future versions.
 
 
 =head1 CAVEATS and NOTES
