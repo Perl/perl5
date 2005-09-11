@@ -429,7 +429,14 @@ yylex(void)
 		maxfld = tmp;
 	    XOP(FIELD);
 	}
+	for (d = s; isALPHA(*s) || isDIGIT(*s) || *s == '_'; )
+	    s++;
 	split_to_array = set_array_base = TRUE;
+	if (d != s)
+	{
+	    yylval = string(d,s-d);
+	    XTERM(SVFIELD);
+	}
 	XOP(VFIELD);
 
     case '/':			/* may either be division or pattern */

@@ -660,13 +660,11 @@ sub Pick {\n\
 	str_cat(str,", ");
 	str_scat(str,fstr=walk(1,level,ops[node+2].ival,&numarg,P_COMMA+1));
 	str_free(fstr);
-	str_cat(str,", ");
 	if (len == 3) {
+	    str_cat(str,", ");
 	    str_scat(str,fstr=walk(1,level,ops[node+3].ival,&numarg,P_COMMA+1));
 	    str_free(fstr);
 	}
-	else
-	    str_cat(str,"999999");
 	str_cat(str,")");
 	break;
     case OSTRING:
@@ -675,7 +673,7 @@ sub Pick {\n\
 	break;
     case OSPLIT:
 	str = str_new(0);
-	limit = ", 9999)";
+	limit = ", -1)";
 	numeric = 1;
 	tmpstr = walk(1,level,ops[node+2].ival,&numarg,P_MIN);
 	if (useval)
@@ -1617,13 +1615,13 @@ emit_split(register STR *str, int level)
 	str_cat(str,tokenbuf);
     }
     if (const_FS) {
-	sprintf(tokenbuf," = split(/[%c\\n]/, $_, 9999);\n",const_FS);
+	sprintf(tokenbuf," = split(/[%c\\n]/, $_, -1);\n",const_FS);
 	str_cat(str,tokenbuf);
     }
     else if (saw_FS)
-	str_cat(str," = split($FS, $_, 9999);\n");
+	str_cat(str," = split($FS, $_, -1);\n");
     else
-	str_cat(str," = split(' ', $_, 9999);\n");
+	str_cat(str," = split(' ', $_, -1);\n");
     tab(str,level);
 }
 
