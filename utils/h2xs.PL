@@ -894,9 +894,8 @@ if( @path_h ){
         # Remove C and C++ comments
         $src =~ s#/\*[^*]*\*+([^/*][^*]*\*+)*/|("(\\.|[^"\\])*"|'(\\.|[^'\\])*'|.[^/"'\\]*)#$2#gs;
 
-        while ($src =~ /(\benum\s*([\w_]*)\s*\{\s([\s\w=,]+)\})/gsc) {
-            my ($enum_name, $enum_body) =
-                $1 =~ /enum\s*([\w_]*)\s*\{\s([\s\w=,]+)\}/gs;
+	while ($src =~ /\benum\s*([\w_]*)\s*\{\s([^}]+)\}/gsc) {
+	    my ($enum_name, $enum_body) = ($1, $2);
             # skip enums matching $opt_e
             next if $opt_e && $enum_name =~ /$opt_e/;
             my $val = 0;
