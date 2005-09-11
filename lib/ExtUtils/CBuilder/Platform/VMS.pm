@@ -7,7 +7,7 @@ use vars qw($VERSION @ISA);
 $VERSION = '0.12';
 @ISA = qw(ExtUtils::CBuilder::Base);
 
-sub need_prelink { 1 }
+sub need_prelink { 0 }
 
 sub arg_include_dirs {
   my $self = shift;
