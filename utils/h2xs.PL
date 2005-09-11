@@ -554,6 +554,8 @@ OPTIONS:
         --skip-warnings   Do not use the pragma C<warnings>.
     -v, --version         Specify a version number for this extension.
     -x, --autogen-xsubs   Autogenerate XSUBs using C::Scan.
+        --use-xsloader    Use XSLoader in backward compatible modules (ignored
+                          when used with -X).
 
 extra_libraries
          are any libraries that might be needed for loading the
@@ -593,6 +595,7 @@ my ($opt_A,
     $skip_autoloader,
     $skip_strict,
     $skip_warnings,
+    $use_xsloader
    );
 
 Getopt::Long::Configure('bundling');
@@ -631,6 +634,7 @@ my %options = (
                 'skip-autoloader'    => \$skip_autoloader,
                 'skip-warnings'      => \$skip_warnings,
                 'skip-strict'        => \$skip_strict,
+                'use-xsloader'       => \$use_xsloader,
               );
 
 GetOptions(%options) || usage;
@@ -894,9 +898,8 @@ if( @path_h ){
         # Remove C and C++ comments
         $src =~ s#/\*[^*]*\*+([^/*][^*]*\*+)*/|("(\\.|[^"\\])*"|'(\\.|[^'\\])*'|.[^/"'\\]*)#$2#gs;
 
-        while ($src =~ /(\benum\s*([\w_]*)\s*\{\s([\s\w=,]+)\})/gsc) {
-            my ($enum_name, $enum_body) =
-                $1 =~ /enum\s*([\w_]*)\s*\{\s([\s\w=,]+)\}/gs;
+	while ($src =~ /\benum\s*([\w_]*)\s*\{\s([^}]+)\}/gsc) {
+	    my ($enum_name, $enum_body) = ($1, $2);
             # skip enums matching $opt_e
             next if $opt_e && $enum_name =~ /$opt_e/;
             my $val = 0;
@@ -1101,7 +1104,7 @@ print PM <<'END' unless $skip_exporter;
 require Exporter;
 END
 
-my $use_Dyna = (not $opt_X and $compat_version < 5.006);
+my $use_Dyna = (not $opt_X and $compat_version < 5.006 and not $use_xsloader);
 print PM <<"END" if $use_Dyna;  # use DynaLoader, unless XS was disabled
 require DynaLoader;
 END
@@ -1236,6 +1239,7 @@ eval {
        }
      };
 
+$author =~ s/'/\\'/g if defined $author;
 $author ||= "A. U. Thor";
 $email  ||= 'a.u.thor@a.galaxy.far.far.away';
 
@@ -1884,15 +1888,16 @@ EOP
 warn "Writing $ext$modpname/Makefile.PL\n";
 open(PL, ">Makefile.PL") || die "Can't create $ext$modpname/Makefile.PL: $!\n";
 
-my $prereq_pm;
+my $prereq_pm = '';
 
 if ( $compat_version < 5.00702 and $new_test )
 {
-  $prereq_pm = q%'Test::More'  =>  0%;
+  $prereq_pm .= q%'Test::More'  =>  0, %;
 }
-else
+
+if ( $compat_version < 5.00600 and !$opt_X and $use_xsloader)
 {
-  $prereq_pm = '';
+  $prereq_pm .= q%'XSLoader'  =>  0, %;
 }
 
 print PL <<"END";
