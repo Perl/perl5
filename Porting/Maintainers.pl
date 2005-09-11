@@ -30,6 +30,7 @@ package Maintainers;
 	'jhi'		=> 'Jarkko Hietaniemi <jhi@cpan.org>',
 	'jstowe'	=> 'Jonathan Stowe <jstowe@cpan.org>',
 	'jv'		=> 'Johan Vromans <jv@cpan.org>',
+	'kane'		=> 'Jos Boumans <kane@cpan.org>',
 	'kwilliams'	=> 'Ken Williams <kwilliams@cpan.org>',
 	'laun'		=> 'Wolfgang Laun <Wolfgang.Laun@alcatel.at>',
 	'lstein'	=> 'Lincoln D. Stein <lds@cpan.org>',
@@ -44,6 +45,7 @@ package Maintainers;
 	'petdance'	=> 'Andy Lester <petdance@cpan.org>',
 	'pmqs'		=> 'Paul Marquess <pmqs@cpan.org>',
 	'pvhp'		=> 'Peter Prymmer <pvhp@best.com>',
+	'rclamp'	=> 'Richard Clamp <rclamp@cpan.org>',
 	'rgarcia'	=> 'Rafael Garcia-Suarez <rgarcia@cpan.org>',
 	'rmbarker'	=> 'Robin Barker <rmbarker@cpan.org>',
 	'rra'		=> 'Russ Allbery <rra@cpan.org>',
@@ -52,6 +54,7 @@ package Maintainers;
 	'mschwern'	=> 'Michael Schwern <mschwern@cpan.org>',
 	'smccam'	=> 'Stephen McCamant <smccam@cpan.org>',
 	'tels'		=> 'perl_dummy a-t bloodgate.com',
+	'tomhughes'	=> 'Tom Hughes <tomhughes@cpan.org>',
 	'tjenness'	=> 'Tim Jenness <tjenness@cpan.org>'
 	);
 
@@ -60,6 +63,13 @@ package Maintainers;
 # latest one from CPAN) or 0 (there is no valid CPAN release).
 
 %Modules = (
+
+	'Archive::Tar' =>
+		{
+		'MAINTAINER'	=> 'kane',
+		'FILES'		=> q[lib/Archive/Tar.pm lib/Archive/Tar],
+		'CPAN'		=> 1,
+		},
 
 	'Attribute::Handlers' =>
 		{
@@ -94,6 +104,13 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'tels',
 		'FILES'		=> q[lib/big{int,num,rat}.pm lib/bignum],
+		'CPAN'		=> 1,
+		},
+
+	'Compress::Zlib' =>
+		{
+		'MAINTAINER'	=> 'pmqs',
+		'FILES'		=> q[ext/Compress/Zlib],
 		'CPAN'		=> 1,
 		},
 
@@ -181,11 +198,25 @@ package Maintainers;
 		'CPAN'		=> 0,
 		},
 
+	'ExtUtils::CBuilder' =>
+		{
+		'MAINTAINER'	=> 'kwilliams',
+		'FILES'		=> q[lib/ExtUtils/CBuilder.pm lib/ExtUtils/CBuilder],
+		'CPAN'		=> 1,
+		},
+
 	'ExtUtils::MakeMaker' =>
 		{
 		'MAINTAINER'	=> 'mschwern',
 		'FILES'		=> q[lib/ExtUtils/{Command,Install,Installed,Liblist,MakeMaker,Manifest,Mkbootstrap,Mksymlists,MM*,MY,Packlist,testlib}.pm lib/ExtUtils/{Command,Liblist,MakeMaker,MANIFEST.SKIP}
 				     lib/ExtUtils/t t/lib/MakeMaker t/lib/TieIn.pm t/lib/TieOut.pm],
+		'CPAN'		=> 1,
+		},
+
+	'ExtUtils::ParseXS' =>
+		{
+		'MAINTAINER'	=> 'kwilliams',
+		'FILES'		=> q[lib/ExtUtils/ParseXS.pm lib/ExtUtils/ParseXS],
 		'CPAN'		=> 1,
 		},
 
@@ -254,6 +285,13 @@ package Maintainers;
 		'CPAN'		=> 0,
 		},
 
+	'IO::Zlib' =>
+		{
+		'MAINTAINER'	=> 'tomhughes',
+		'FILES'		=> q[lib/IO/Zlib.pm lib/IO/Zlib],
+		'CPAN'		=> 1,
+		},
+
 	'libnet' =>
 		{
 		'MAINTAINER'	=> 'gbarr',
@@ -298,6 +336,13 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'Math::BigInt::FastCalc' =>
+		{
+		'MAINTAINER'	=> 'tels',
+		'FILES'		=> q[ext/Math/BigInt/FastCalc],
+		'CPAN'		=> 1,
+		},
+
 	'Math::BigRat' =>
 		{
 		'MAINTAINER'	=> 'tels',
@@ -316,6 +361,13 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'gaas',
 		'FILES'		=> q[ext/MIME/Base64],
+		'CPAN'		=> 1,
+		},
+
+	'Module::CoreList' =>
+		{
+		'MAINTAINER'	=> 'rclamp',
+		'FILES'		=> q[lib/Module/CoreList lib/Module/CoreList.pm],
 		'CPAN'		=> 1,
 		},
 
