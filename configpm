@@ -777,6 +777,7 @@ EOS
 # Now do some simple tests on the Config.pm file we have created
 unshift(@INC,'lib');
 require $Config_PM;
+require $Config_heavy;
 import Config;
 
 die "$0: $Config_PM not valid"

@@ -390,32 +390,15 @@ sub Table::New
     return $Table;
 }
 
-##
-## Returns true if the Table has no code points
-##
-sub Table::IsEmpty
-{
-    my $Table = shift; #self
-    return not @$Table;
-}
-
-##
-## Returns true if the Table has code points
-##
-sub Table::NotEmpty
-{
-    my $Table = shift; #self
-    return @$Table;
-}
 
 ##
 ## Returns the maximum code point currently in the table.
 ##
 sub Table::Max
 {
-    my $Table = shift; #self
-    confess "oops" if $Table->IsEmpty; ## must have code points to have a max
-    return $Table->[-1]->[RANGE_END];
+    my $last = $_[0]->[-1];      ## last code point
+    confess "oops" unless $last; ## must have code points to have a max
+    return $last->[RANGE_END];
 }
 
 ##
@@ -434,6 +417,8 @@ sub Table::Replace($$)
 ## Given a new code point, make the last range of the Table extend to
 ## include the new (and all intervening) code points.
 ##
+## Takes the time to make sure that the extension is valid.
+##
 sub Table::Extend
 {
     my $Table = shift; #self
@@ -443,7 +428,21 @@ sub Table::Extend
 
     confess "oops ($codepoint <= $PrevMax)" if $codepoint <= $PrevMax;
 
-    $Table->[-1]->[RANGE_END] = $codepoint;
+    $Table->ExtendNoCheck($codepoint);
+}
+
+
+##
+## Given a new code point, make the last range of the Table extend to
+## include the new (and all intervening) code points.
+##
+## Does NOT check that the extension is valid.  Assumes that the caller
+## has already made this check.
+##
+sub Table::ExtendNoCheck
+{
+    ## Optmized adding: Assumes $Table and $codepoint as parms
+    $_[0]->[-1]->[RANGE_END] = $_[1];
 }
 
 ##
@@ -481,13 +480,14 @@ sub Table::Append
     ## If we've already got a range working, and this code point is the next
     ## one in line, and if the name is the same, just extend the current range.
     ##
-    if ($Table->NotEmpty
+    my $last = $Table->[-1];
+    if ($last
         and
-        $Table->Max == $codepoint - 1
+        $last->[RANGE_END] == $codepoint - 1
         and
-        $Table->[-1]->[RANGE_NAME] eq $name)
+        $last->[RANGE_NAME] eq $name)
     {
-        $Table->Extend($codepoint);
+        $Table->ExtendNoCheck($codepoint);
     }
     else
     {
@@ -585,7 +585,7 @@ sub Table::Merge
         if ($start > $New->Max) {
             $New->AppendRange($start, $end);
         } elsif ($end > $New->Max) {
-            $New->Extend($end);
+            $New->ExtendNoCheck($end);
         }
     }
 
@@ -662,7 +662,7 @@ sub Table::InvalidCode
 {
     my $Table = shift; #self
 
-    return 0x1234 if $Table->IsEmpty();
+    return 0x1234 if not @$Table;
 
     for my $set (@$Table)
     {
