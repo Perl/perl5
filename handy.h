@@ -175,7 +175,7 @@ typedef U64TYPE U64;
 #endif
 
 /* HMB H.Merijn Brand - a placeholder for preparing Configure patches */
-#if defined(LIBM_LIB_VERSION)
+#if defined(HAS_MALLOC_SIZE) && defined(HAS_MALLOC_GOOD_SIZE)
 /* Not (yet) used at top level, but mention them for metaconfig */
 #endif
 

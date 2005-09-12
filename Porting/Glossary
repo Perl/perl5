@@ -1215,6 +1215,14 @@ d_madvise (d_madvise.U):
 	This variable conditionally defines HAS_MADVISE if madvise() is
 	available to map a file into memory.
 
+d_malloc_size (d_malloc_size.U):
+	This symbol, if defined, indicates that the malloc_size
+	routine is available for use.
+
+d_malloc_good_size (d_malloc_good_size.U):
+	This symbol, if defined, indicates that the malloc_good_size
+	routine is available for use.
+
 d_mblen (d_mblen.U):
 	This variable conditionally defines the HAS_MBLEN symbol, which
 	indicates to the C program that the mblen() routine is available

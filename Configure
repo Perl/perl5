@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Sep  6 16:35:32 CEST 2005 [metaconfig 3.0 PL70]
+# Generated on Mon Sep 12 15:44:06 CEST 2005 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -550,6 +550,8 @@ longlongsize=''
 d_lseekproto=''
 d_lstat=''
 d_madvise=''
+d_malloc_good_size=''
+d_malloc_size=''
 d_mblen=''
 d_mbstowcs=''
 d_mbtowc=''
@@ -14247,6 +14249,14 @@ eval $inlibc
 set madvise d_madvise
 eval $inlibc
 
+: see if malloc_size exists
+set malloc_size d_malloc_size
+eval $inlibc
+
+: see if malloc_size_good exists
+set malloc_good_size d_malloc_good_size
+eval $inlibc
+
 : see if mblen exists
 set mblen d_mblen
 eval $inlibc
@@ -21112,6 +21122,8 @@ d_longlong='$d_longlong'
 d_lseekproto='$d_lseekproto'
 d_lstat='$d_lstat'
 d_madvise='$d_madvise'
+d_malloc_good_size='$d_malloc_good_size'
+d_malloc_size='$d_malloc_size'
 d_mblen='$d_mblen'
 d_mbstowcs='$d_mbstowcs'
 d_mbtowc='$d_mbtowc'
