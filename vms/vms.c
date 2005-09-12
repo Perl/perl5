@@ -7692,7 +7692,16 @@ int
 Perl_flex_fstat(pTHX_ int fd, Stat_t *statbufp)
 {
   if (!fstat(fd,(stat_t *) statbufp)) {
-    if (statbufp == (Stat_t *) &PL_statcache) *namecache == '\0';
+    if (statbufp == (Stat_t *) &PL_statcache) {
+    char *cptr;
+
+	/* Save name for cando by name in VMS format */
+	cptr = getname(fd, namecache, 1);
+
+	/* This should not happen, but just in case */
+	if (cptr == NULL)
+	   namecache[0] = '\0';
+    }
     statbufp->st_dev = encode_dev(aTHX_ statbufp->st_devnam);
 #   ifdef RTL_USES_UTC
 #   ifdef VMSISH_TIME
