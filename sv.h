@@ -740,17 +740,18 @@ and leaves the UTF-8 status as it was.
 #define SvRVx(sv) SvRV(sv)
 
 #define SvIVX(sv) ((XPVIV*)  SvANY(sv))->xiv_iv
-#define SvIVXx(sv) SvIVX(sv)
 #define SvUVX(sv) ((XPVUV*)  SvANY(sv))->xuv_uv
-#define SvUVXx(sv) SvUVX(sv)
 #define SvNVX(sv)  ((XPVNV*)SvANY(sv))->xnv_nv
-#define SvNVXx(sv) SvNVX(sv)
 #define SvPVX(sv)  ((XPV*)  SvANY(sv))->xpv_pv
-#define SvPVXx(sv) SvPVX(sv)
 #define SvCUR(sv) ((XPV*)  SvANY(sv))->xpv_cur
 #define SvLEN(sv) ((XPV*)  SvANY(sv))->xpv_len
-#define SvLENx(sv) SvLEN(sv)
 #define SvEND(sv)(((XPV*)  SvANY(sv))->xpv_pv + ((XPV*)SvANY(sv))->xpv_cur)
+
+#define SvIVXx(sv) SvIVX(sv)
+#define SvUVXx(sv) SvUVX(sv)
+#define SvNVXx(sv) SvNVX(sv)
+#define SvPVXx(sv) SvPVX(sv)
+#define SvLENx(sv) SvLEN(sv)
 #define SvENDx(sv) ((PL_Sv = (sv)), SvEND(PL_Sv))
 #define SvMAGIC(sv)	((XPVMG*)  SvANY(sv))->xmg_magic
 #define SvSTASH(sv)	((XPVMG*)  SvANY(sv))->xmg_stash
@@ -768,7 +769,7 @@ and leaves the UTF-8 status as it was.
 		(((XPVIV*)  SvANY(sv))->xiv_iv = (val)); } STMT_END
 #define SvNV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) == SVt_NV || SvTYPE(sv) >= SVt_PVNV); \
-		(SvNVX(sv) = (val)); } STMT_END
+		(((XPVNV*)SvANY(sv))->xnv_nv = (val)); } STMT_END
 /* assert(SvTYPE(sv) >= SVt_PV); */
 #define SvPV_set(sv, val) \
 	STMT_START { \

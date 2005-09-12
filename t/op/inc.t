@@ -2,7 +2,7 @@
 
 # use strict;
 
-print "1..26\n";
+print "1..32\n";
 
 my $test = 1;
 
@@ -157,3 +157,31 @@ foreach (keys %postdec) {
 }
 
 check_same (\%orig, \%postdec);
+
+{
+    no warnings 'uninitialized';
+    my $x, $y;
+    eval {
+	$y ="$x\n";
+	++$x;
+    };
+    ok($x == 1, $x);
+    ok($@ eq '', $@);
+
+    my $p, $q;
+    eval {
+	$q ="$p\n";
+	--$p;
+    };
+    ok($p == -1, $p);
+    ok($@ eq '', $@);
+}
+
+$a = 2147483648;
+$c=--$a;
+ok ($a == 2147483647, $a);
+
+
+$a = 2147483648;
+$c=$a--;
+ok ($a == 2147483647, $a);
