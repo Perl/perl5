@@ -5,6 +5,11 @@
 # and optionally also the relevant metaconfig units (-U option).
 # 
 
+BEGIN {
+    # Get function prototypes
+    require 'regen_lib.pl';
+}
+
 use strict;
 use Getopt::Std;
 my %opts;
@@ -35,7 +40,9 @@ my %map = (
 # Example #3: S_CBI   means type func_r(const char*, char*, int)
 
 
+safer_unlink 'reentr.h';
 die "reentr.h: $!" unless open(H, ">reentr.h");
+binmode H;
 select H;
 print <<EOF;
 /*
@@ -173,6 +180,7 @@ while (<DATA>) { # Read in the protypes.
 
     # If given the -U option open up the metaconfig unit for this function.
     if ($opts{U} && open(U, ">d_${func}_r.U"))  {
+    	binmode U;
 	select U;
     }
 
@@ -847,7 +855,9 @@ close(H);
 
 # Prepare to write the reentr.c.
 
+safer_unlink 'reentr.c';
 die "reentr.c: $!" unless open(C, ">reentr.c");
+binmode C;
 select C;
 print <<EOF;
 /*
