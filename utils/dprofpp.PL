@@ -735,7 +735,7 @@ sub parsestack {
 
 		my $ot = $t;
 		if ( $dir eq '/' ) {
-		  $syst = $stack[-1][0];
+		  $syst = $stack[-1][0] if scalar @stack;
 		  $usert = '&';
 		  $dir = '-';
 		  #warn("Inserted exit for $stack[-1][0].\n")
