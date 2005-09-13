@@ -2129,7 +2129,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
     register I32 This, that;
     register Pid_t pid;
     SV *sv;
-    I32 doexec = !(*cmd == '-' && cmd[1] == '\0');
+    const I32 doexec = !(*cmd == '-' && cmd[1] == '\0');
     I32 did_pipes = 0;
     int pp[2];
 

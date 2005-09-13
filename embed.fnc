@@ -305,7 +305,7 @@ pR	|bool	|ingroup	|Gid_t testgid|Uid_t effective
 p	|void	|init_argv_symbols|int argc|NN char **argv
 p	|void	|init_debugger
 Ap	|void	|init_stacks
-Ap	|void	|init_tm	|struct tm *ptm
+Ap	|void	|init_tm	|NN struct tm *ptm
 pd	|U32	|intro_my
 ApPR	|char*	|instr		|NN const char* big|NN const char* little
 pR	|bool	|io_close	|NN IO* io|bool not_implicit
@@ -371,7 +371,7 @@ p	|OP*	|jmaybe		|NN OP* arg
 pP	|I32	|keyword	|NN const char* d|I32 len
 Ap	|void	|leave_scope	|I32 base
 p	|void	|lex_end
-p	|void	|lex_start	|SV* line
+p	|void	|lex_start	|NN SV* line
 Ap	|void	|op_null	|NN OP* o
 p	|void	|op_clear	|NN OP* o
 Ap	|void	|op_refcnt_lock
@@ -381,63 +381,63 @@ p	|OP*	|list		|NULLOK OP* o
 p	|OP*	|listkids	|NULLOK OP* o
 Apd	|void	|load_module|U32 flags|NN SV* name|NULLOK SV* ver|...
 Ap	|void	|vload_module|U32 flags|NN SV* name|NULLOK SV* ver|NULLOK va_list* args
-p	|OP*	|localize	|OP* arg|I32 lexical
+p	|OP*	|localize	|NN OP* arg|I32 lexical
 ApdR	|I32	|looks_like_number|NN SV* sv
 Apd	|UV	|grok_bin	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NV *result
 Apd	|UV	|grok_hex	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NV *result
 Apd	|int	|grok_number	|NN const char *pv|STRLEN len|UV *valuep
-ApdR	|bool	|grok_numeric_radix|const char **sp|const char *send
-Apd	|UV	|grok_oct	|const char* start|STRLEN* len_p|I32* flags|NV *result
-p	|int	|magic_clearenv	|SV* sv|MAGIC* mg
-p	|int	|magic_clear_all_env|SV* sv|MAGIC* mg
-p	|int	|magic_clearpack|SV* sv|MAGIC* mg
-p	|int	|magic_clearsig	|SV* sv|MAGIC* mg
-p	|int	|magic_existspack|SV* sv|MAGIC* mg
-p	|int	|magic_freeregexp|SV* sv|MAGIC* mg
-p	|int	|magic_freeovrld|SV* sv|MAGIC* mg
-p	|int	|magic_get	|SV* sv|MAGIC* mg
+ApdR	|bool	|grok_numeric_radix|NN const char **sp|NN const char *send
+Apd	|UV	|grok_oct	|NN const char* start|STRLEN* len_p|I32* flags|NV *result
+p	|int	|magic_clearenv	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_clear_all_env|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_clearpack|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_clearsig	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_existspack|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_freeregexp|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_freeovrld|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_get	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_getarylen|NN SV* sv|NN const MAGIC* mg
-p	|int	|magic_getdefelem|SV* sv|MAGIC* mg
-p	|int	|magic_getglob	|SV* sv|MAGIC* mg
-p	|int	|magic_getnkeys	|SV* sv|MAGIC* mg
-p	|int	|magic_getpack	|SV* sv|MAGIC* mg
-p	|int	|magic_getpos	|SV* sv|MAGIC* mg
-p	|int	|magic_getsig	|SV* sv|MAGIC* mg
-p	|int	|magic_getsubstr|SV* sv|MAGIC* mg
-p	|int	|magic_gettaint	|SV* sv|MAGIC* mg
-p	|int	|magic_getuvar	|SV* sv|MAGIC* mg
-p	|int	|magic_getvec	|SV* sv|MAGIC* mg
-p	|U32	|magic_len	|SV* sv|MAGIC* mg
-p	|int	|magic_nextpack	|SV* sv|MAGIC* mg|SV* key
-p	|U32	|magic_regdata_cnt|SV* sv|MAGIC* mg
-p	|int	|magic_regdatum_get|SV* sv|MAGIC* mg
-pr	|int	|magic_regdatum_set|SV* sv|MAGIC* mg
-p	|int	|magic_set	|SV* sv|MAGIC* mg
-p	|int	|magic_setamagic|SV* sv|MAGIC* mg
-p	|int	|magic_setarylen|SV* sv|MAGIC* mg
-p	|int	|magic_freearylen_p|SV* sv|MAGIC* mg
-p	|int	|magic_setbm	|SV* sv|MAGIC* mg
-p	|int	|magic_setdbline|SV* sv|MAGIC* mg
-p	|int	|magic_setdefelem|SV* sv|MAGIC* mg
-p	|int	|magic_setenv	|SV* sv|MAGIC* mg
-p	|int	|magic_setfm	|SV* sv|MAGIC* mg
-p	|int	|magic_setisa	|SV* sv|MAGIC* mg
-p	|int	|magic_setglob	|SV* sv|MAGIC* mg
-p	|int	|magic_setmglob	|SV* sv|MAGIC* mg
-p	|int	|magic_setnkeys	|SV* sv|MAGIC* mg
-p	|int	|magic_setpack	|SV* sv|MAGIC* mg
-p	|int	|magic_setpos	|SV* sv|MAGIC* mg
-p	|int	|magic_setregexp|SV* sv|MAGIC* mg
-p	|int	|magic_setsig	|SV* sv|MAGIC* mg
-p	|int	|magic_setsubstr|SV* sv|MAGIC* mg
-p	|int	|magic_settaint	|SV* sv|MAGIC* mg
-p	|int	|magic_setuvar	|SV* sv|MAGIC* mg
-p	|int	|magic_setvec	|SV* sv|MAGIC* mg
-p	|int	|magic_setutf8	|SV* sv|MAGIC* mg
-p	|int	|magic_set_all_env|SV* sv|MAGIC* mg
-p	|U32	|magic_sizepack	|SV* sv|MAGIC* mg
-p	|int	|magic_wipepack	|SV* sv|MAGIC* mg
-p	|void	|magicname	|const char* sym|const char* name|I32 namlen
+p	|int	|magic_getdefelem|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_getglob	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_getnkeys	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_getpack	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_getpos	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_getsig	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_getsubstr|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_gettaint	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_getuvar	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_getvec	|NN SV* sv|NN MAGIC* mg
+p	|U32	|magic_len	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_nextpack	|NN SV* sv|NN MAGIC* mg|NN SV* key
+p	|U32	|magic_regdata_cnt|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_regdatum_get|NN SV* sv|NN MAGIC* mg
+pr	|int	|magic_regdatum_set|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_set	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setamagic|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setarylen|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_freearylen_p|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setbm	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setdbline|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setdefelem|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setenv	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setfm	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setisa	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setglob	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setmglob	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setnkeys	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setpack	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setpos	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setregexp|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setsig	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setsubstr|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_settaint	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setuvar	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setvec	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setutf8	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_set_all_env|NN SV* sv|NN MAGIC* mg
+p	|U32	|magic_sizepack	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_wipepack	|NN SV* sv|NN MAGIC* mg
+p	|void	|magicname	|NN const char* sym|NULLOK const char* name|I32 namlen
 Ap	|void	|markstack_grow
 #if defined(USE_LOCALE_COLLATE)
 p	|int	|magic_setcollxfrm|NN SV* sv|NN MAGIC* mg
@@ -448,7 +448,7 @@ Ap	|SV*	|vmess		|NN const char* pat|NULLOK va_list* args
 p	|void	|qerror		|NN SV* err
 Apd	|void	|sortsv		|NN SV** array|size_t num_elts|SVCOMPARE_t cmp
 Apd	|int	|mg_clear	|NN SV* sv
-Apd	|int	|mg_copy	|NN SV* sv|NN SV* nsv|const char* key|I32 klen
+Apd	|int	|mg_copy	|NN SV* sv|NN SV* nsv|NULLOK const char* key|I32 klen
 pd	|void	|mg_localize	|NN SV* sv|NN SV* nsv
 ApdR	|MAGIC*	|mg_find	|NULLOK const SV* sv|int type
 Apd	|int	|mg_free	|NN SV* sv
@@ -459,8 +459,8 @@ Apd	|int	|mg_set		|NN SV* sv
 Ap	|I32	|mg_size	|NN SV* sv
 Ap	|void	|mini_mktime	|NN struct tm *pm
 p	|OP*	|mod		|NULLOK OP* o|I32 type
-p	|int	|mode_from_discipline|SV* discp
-Ap	|char*	|moreswitches	|char* s
+p	|int	|mode_from_discipline|NULLOK SV* discp
+Ap	|char*	|moreswitches	|NN char* s
 p	|OP*	|my		|NN OP* o
 Ap	|NV	|my_atof	|NN const char *s
 #if (!defined(HAS_MEMCPY) && !defined(HAS_BCOPY)) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY) && !defined(HAS_SAFE_BCOPY))
@@ -482,12 +482,12 @@ AnpP	|I32	|my_memcmp	|NN const char* s1|NN const char* s2|I32 len
 #if !defined(HAS_MEMSET)
 Anp	|void*	|my_memset	|NN char* loc|I32 ch|I32 len
 #endif
-Ap	|I32	|my_pclose	|PerlIO* ptr
-Ap	|PerlIO*|my_popen	|const char* cmd|const char* mode
-Ap	|PerlIO*|my_popen_list	|char* mode|int n|SV ** args
-Ap	|void	|my_setenv	|const char* nam|const char* val
+Ap	|I32	|my_pclose	|NULLOK PerlIO* ptr
+Ap	|PerlIO*|my_popen	|NN const char* cmd|NN const char* mode
+Ap	|PerlIO*|my_popen_list	|NN char* mode|int n|NN SV ** args
+Ap	|void	|my_setenv	|NULLOK const char* nam|NULLOK const char* val
 Ap	|I32	|my_stat
-Ap	|char *	|my_strftime	|const char *fmt|int sec|int min|int hour|int mday|int mon|int year|int wday|int yday|int isdst
+Ap	|char *	|my_strftime	|NN const char *fmt|int sec|int min|int hour|int mday|int mon|int year|int wday|int yday|int isdst
 #if defined(MYSWAP)
 ApPa	|short	|my_swap	|short s
 ApPa	|long	|my_htonl	|long l
@@ -496,7 +496,7 @@ ApPa	|long	|my_ntohl	|long l
 p	|void	|my_unexec
 Apa	|OP*	|newANONLIST	|NULLOK OP* o
 Apa	|OP*	|newANONHASH	|NULLOK OP* o
-Ap	|OP*	|newANONSUB	|I32 floor|OP* proto|OP* block
+Ap	|OP*	|newANONSUB	|I32 floor|NULLOK OP* proto|NULLOK OP* block
 Apa	|OP*	|newASSIGNOP	|I32 flags|NULLOK OP* left|I32 optype|NULLOK OP* right
 Apa	|OP*	|newCONDOP	|I32 flags|NN OP* first|NULLOK OP* trueop|NULLOK OP* falseop
 Apd	|CV*	|newCONSTSUB	|NULLOK HV* stash|NULLOK const char* name|NULLOK SV* sv
@@ -512,11 +512,11 @@ Ap	|void	|newPROG	|NN OP* o
 Apa	|OP*	|newRANGE	|I32 flags|NN OP* left|NN OP* right
 Apa	|OP*	|newSLICEOP	|I32 flags|NULLOK OP* subscript|NULLOK OP* listop
 Apa	|OP*	|newSTATEOP	|I32 flags|NULLOK char* label|NULLOK OP* o
-Ap	|CV*	|newSUB		|I32 floor|OP* o|OP* proto|OP* block
+Ap	|CV*	|newSUB		|I32 floor|NULLOK OP* o|NULLOK OP* proto|NULLOK OP* block
 Apd	|CV*	|newXS		|NN const char* name|NN XSUBADDR_t f|NN const char* filename
 Apda	|AV*	|newAV
 Apa	|OP*	|newAVREF	|NN OP* o
-Apa	|OP*	|newBINOP	|I32 type|I32 flags|OP* first|OP* last
+Apa	|OP*	|newBINOP	|I32 type|I32 flags|NULLOK OP* first|NULLOK OP* last
 Apa	|OP*	|newCVREF	|I32 flags|NULLOK OP* o
 Apa	|OP*	|newGVOP	|I32 type|I32 flags|NN GV* gv
 Apa	|GV*	|newGVgen	|NN const char* pack
@@ -525,10 +525,10 @@ ApaR	|OP*	|newHVREF	|NN OP* o
 ApdaR	|HV*	|newHV
 ApaR	|HV*	|newHVhv	|NULLOK HV* hv
 Apa	|IO*	|newIO
-Apa	|OP*	|newLISTOP	|I32 type|I32 flags|OP* first|OP* last
+Apa	|OP*	|newLISTOP	|I32 type|I32 flags|NULLOK OP* first|NULLOK OP* last
 Apa	|OP*	|newPADOP	|I32 type|I32 flags|NULLOK SV* sv
 Apa	|OP*	|newPMOP	|I32 type|I32 flags
-Apa	|OP*	|newPVOP	|I32 type|I32 flags|char* pv
+Apa	|OP*	|newPVOP	|I32 type|I32 flags|NULLOK char* pv
 Apa	|SV*	|newRV		|NN SV* pref
 Apda	|SV*	|newRV_noinc	|NN SV *sv
 Apda	|SV*	|newSV		|STRLEN len

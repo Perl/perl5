@@ -2390,8 +2390,8 @@ S_div128(pTHX_ SV *pnum, bool *done)
 The engine implementing pack() Perl function. Note: parameters next_in_list and
 flags are not used. This call should not be used; use packlist instead.
 
-=cut */
-
+=cut
+*/
 
 void
 Perl_pack_cat(pTHX_ SV *cat, const char *pat, const char *patend, register SV **beglist, SV **endlist, SV ***next_in_list, U32 flags)
@@ -2411,8 +2411,8 @@ Perl_pack_cat(pTHX_ SV *cat, const char *pat, const char *patend, register SV **
 
 The engine implementing pack() Perl function.
 
-=cut */
-
+=cut
+*/
 
 void
 Perl_packlist(pTHX_ SV *cat, const char *pat, const char *patend, register SV **beglist, SV **endlist )
@@ -2425,7 +2425,8 @@ Perl_packlist(pTHX_ SV *cat, const char *pat, const char *patend, register SV **
     /* We're going to do changes through SvPVX(cat). Make sure it's valid.
        Also make sure any UTF8 flag is loaded */
     SvPV_force(cat, no_len);
-    if (DO_UTF8(cat)) sym.flags |= FLAG_PARSE_UTF8 | FLAG_DO_UTF8;
+    if (DO_UTF8(cat))
+	sym.flags |= FLAG_PARSE_UTF8 | FLAG_DO_UTF8;
 
     (void)pack_rec( cat, &sym, beglist, endlist );
 }
