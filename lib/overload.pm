@@ -718,7 +718,7 @@ Returns C<undef> or a reference to the method that implements C<op>.
 =head1 Overloading constants
 
 For some applications, the Perl parser mangles constants too much.
-It is possible to hook into this process via the C<overload::constant()>
+It is possible to hook into this process via C<overload::constant()>
 and C<overload::remove_constant()> functions.
 
 These functions take a hash as an argument.  The recognized keys of this hash
