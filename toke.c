@@ -664,6 +664,39 @@ S_incline(pTHX_ char *s)
     ch = *t;
     *t = '\0';
     if (t - s > 0) {
+	const char *cf = CopFILE(PL_curcop);
+	if (cf && strlen(cf) > 7 && strnEQ(cf, "(eval ", 6)) {
+	    /* must copy *{"::_<(eval N)[oldfilename:L]"}
+	     * to *{"::_<newfilename"} */
+	    char smallbuf[256], smallbuf2[256];
+	    char *tmpbuf, *tmpbuf2;
+	    GV *gv, *gv2;
+	    STRLEN tmplen = strlen(cf);
+	    STRLEN tmplen2 = strlen(s);
+	    if (tmplen + 3 < sizeof smallbuf)
+		tmpbuf = smallbuf;
+	    else
+		Newx(tmpbuf, tmplen + 3, char);
+	    if (tmplen2 + 3 < sizeof smallbuf2)
+		tmpbuf2 = smallbuf2;
+	    else
+		Newx(tmpbuf2, tmplen2 + 3, char);
+	    tmpbuf[0] = tmpbuf2[0] = '_';
+	    tmpbuf[1] = tmpbuf2[1] = '<';
+	    memcpy(tmpbuf + 2, cf, ++tmplen);
+	    memcpy(tmpbuf2 + 2, s, ++tmplen2);
+	    ++tmplen; ++tmplen2;
+	    gv = *(GV**)hv_fetch(PL_defstash, tmpbuf, tmplen, FALSE);
+	    gv2 = *(GV**)hv_fetch(PL_defstash, tmpbuf2, tmplen2, TRUE);
+	    if (!isGV(gv2))
+		gv_init(gv2, PL_defstash, tmpbuf2, tmplen2, FALSE);
+	    /* adjust ${"::_<newfilename"} to store the new file name */
+	    GvSV(gv2) = newSVpvn(tmpbuf2 + 2, tmplen2 - 2);
+	    GvHV(gv2) = (HV*)SvREFCNT_inc(GvHV(gv));
+	    GvAV(gv2) = (AV*)SvREFCNT_inc(GvAV(gv));
+	    if (tmpbuf != smallbuf) Safefree(tmpbuf);
+	    if (tmpbuf2 != smallbuf2) Safefree(tmpbuf2);
+	}
 	CopFILE_free(PL_curcop);
 	CopFILE_set(PL_curcop, s);
     }
