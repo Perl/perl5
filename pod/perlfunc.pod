@@ -446,6 +446,8 @@ function, or use the familiar relation:
 
     sub tan { sin($_[0]) / cos($_[0])  }
 
+Note that atan2(0, 0) is not well-defined.
+
 =item bind SOCKET,NAME
 
 Binds a network address to a socket, just as the bind system call
