@@ -41,12 +41,12 @@ typedef struct {
 #define xav_alloc xiv_u.xivu_p1
 /* SV*	xav_arylen; */
 
-/* AVf_REAL is set for all AVs whose xav_array contents are refcounted.
+/* SVpav_REAL is set for all AVs whose xav_array contents are refcounted.
  * Some things like "@_" and the scratchpad list do not set this, to
  * indicate that they are cheating (for efficiency) by not refcounting
  * the AV's contents.
  * 
- * AVf_REIFY is only meaningful on such "fake" AVs (i.e. where AVf_REAL
+ * SVpav_REIFY is only meaningful on such "fake" AVs (i.e. where SVpav_REAL
  * is not set).  It indicates that the fake AV is capable of becoming
  * real if the array needs to be modified in some way.  Functions that
  * modify fake AVs check both flags to call av_reify() as appropriate.
