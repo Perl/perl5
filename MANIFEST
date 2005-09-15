@@ -2177,6 +2177,7 @@ lib/vars_carp.t			See if "use vars" doesn't load Carp.pm per default
 lib/vars.pm			Declare pseudo-imported global variables
 lib/vars.t			See if "use vars" works
 lib/version.pm			Support for version objects
+lib/version.pod			Documentation of the version module
 lib/version.t			Tests for version objects
 lib/vmsish.pm			Control VMS-specific behavior of Perl core
 lib/vmsish.t			Tests for vmsish.pm
