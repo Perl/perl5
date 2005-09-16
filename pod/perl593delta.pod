@@ -10,9 +10,6 @@ L<perl592delta> for the differences between 5.8.0 and 5.9.2.
 
 =head1 Incompatible Changes
 
-The 4-argument form of select() now returns C<undef> on error (instead of
--1).
-
 =head1 Core Enhancements
 
 =head1 Modules and Pragmata

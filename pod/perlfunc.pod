@@ -4673,7 +4673,8 @@ Note that whether C<select> gets restarted after signals (say, SIGALRM)
 is implementation-dependent.  See also L<perlport> for notes on the
 portability of C<select>.
 
-On error, C<select> returns C<undef> and sets C<$!>.
+On error, C<select> behaves like the select(2) system call : it returns
+-1 and sets C<$!>.
 
 Note: on some Unixes, the select(2) system call may report a socket file
 descriptor as "ready for reading", when actually no data is available,

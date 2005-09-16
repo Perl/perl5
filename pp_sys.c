@@ -1148,10 +1148,7 @@ PP(pp_sselect)
 	}
     }
 
-    if (nfound == -1)
-	PUSHs(&PL_sv_undef);
-    else
-	PUSHi(nfound);
+    PUSHi(nfound);
     if (GIMME == G_ARRAY && tbuf) {
 	value = (NV)(timebuf.tv_sec) +
 		(NV)(timebuf.tv_usec) / 1000000.0;
