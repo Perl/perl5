@@ -735,7 +735,7 @@ sub parsestack {
 
 		my $ot = $t;
 		if ( $dir eq '/' ) {
-		  $syst = $stack[-1][0];
+		  $syst = $stack[-1][0] if scalar @stack;
 		  $usert = '&';
 		  $dir = '-';
 		  #warn("Inserted exit for $stack[-1][0].\n")
@@ -763,9 +763,9 @@ sub parsestack {
 			}
 			add_to_tree($curdeep_times, $ename,
 				    $t - $overhead) if $opt_S;
-			exitstamp( \@stack, \@tstack, 
-				   $t - $overhead, 
-				   $times, $ctimes, $ename, \$in, $tab, 
+			exitstamp( \@stack, \@tstack,
+				   $t - $overhead,
+				   $times, $ctimes, $name, \$in, $tab,
 				   $curdeep_times, \%outer );
 		} 
 		next unless $in_level or $name eq $opt_g;
