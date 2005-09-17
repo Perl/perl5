@@ -4,122 +4,30 @@ perltodo - Perl TO-DO List
 
 =head1 DESCRIPTION
 
-This is a list of wishes for Perl.  Send updates to
-I<perl5-porters@perl.org>.  If you want to work on any of these
-projects, be sure to check the perl5-porters archives for past ideas,
-flames, and propaganda.  This will save you time and also prevent you
-from implementing something that Larry has already vetoed.  One set
-of archives may be found at:
+This is a list of wishes for Perl. The tasks we think are smaller or easier
+are listed first. Anyone is welcome to work on any of these, but it's a good
+idea to first contact I<perl5-porters@perl.org> to avoid duplication of
+effort. By all means contact a pumpking privately first if you prefer.
+
+Whilst patches to make the list shorter are most welcome, ideas to add to
+the list are also encouraged. Check the perl5-porters archives for past
+ideas, and any discussion about them. One set of archives may be found at:
 
     http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 
-=head1 assertions
 
-Clean up and finish support for assertions. See L<assertions>.
 
-=head1 iCOW
 
-Sarathy and Arthur have a proposal for an improved Copy On Write which
-specifically will be able to COW new ithreads. If this can be implemented
-it would be a good thing.
 
-=head1 (?{...}) closures in regexps
+=head1 Tasks that only need Perl knowledge
 
-Fix (or rewrite) the implementation of the C</(?{...})/> closures.
+=head2 common test code for timed bail out
 
-=head1 A re-entrant regexp engine
+Write portable self destruct code for tests to stop them burning CPU in
+infinite loops. This needs to avoid using alarm, as some of the tests are
+testing alarm/sleep or timers.
 
-This will allow the use of a regex from inside (?{ }), (??{ }) and
-(?(?{ })|) constructs.
-
-=head1 pragmata
-
-=head2 lexical pragmas
-
-Reimplement the mechanism of lexical pragmas to be more extensible. Fix
-current pragmas that don't work well (or at all) with lexical scopes or in
-run-time eval(STRING) (C<sort>, C<re>, C<encoding> for example). MJD has a
-preliminary patch that implements this.
-
-=head2 use less 'memory'
-
-Investigate trade offs to switch out perl's choices on memory usage.
-Particularly perl should be able to give memory back.
-
-=head1 prototypes and functions
-
-=head2 _ prototype character
-
-Study the possibility of adding a new prototype character, C<_>, meaning
-"this argument defaults to $_".
-
-=head2 inlining autoloaded constants
-
-Currently the optimiser can inline constants when expressed as subroutines
-with prototype ($) that return a constant. Likewise, many packages wrapping
-C libraries export lots of constants as subroutines which are AUTOLOADed on
-demand. However, these have no prototypes, so can't be seen as constants by
-the optimiser. Some way of cheaply (low syntax, low memory overhead) to the
-perl compiler that a name is a constant would be great, so that it knows to
-call the AUTOLOAD routine at compile time, and then inline the constant.
-
-=head2 Finish off lvalue functions
-
-The old perltodo notes "They don't work in the debugger, and they don't work for
-list or hash slices."
-
-=head1 Unicode and UTF8
-
-=head2 Implicit Latin 1 => Unicode translation
-
-Conversions from byte strings to UTF-8 currently map high bit characters
-to Unicode without translation (or, depending on how you look at it, by
-implicitly assuming that the byte strings are in Latin-1). As perl assumes
-the C locale by default, upgrading a string to UTF-8 may change the
-meaning of its contents regarding character classes, case mapping, etc.
-This should probably emit a warning (at least).
-
-=head2 UTF8 caching code
-
-The string position/offset cache is not optional. It should be.
-
-=head2 Unicode in Filenames
-
-chdir, chmod, chown, chroot, exec, glob, link, lstat, mkdir, open,
-opendir, qx, readdir, readlink, rename, rmdir, stat, symlink, sysopen,
-system, truncate, unlink, utime, -X.  All these could potentially accept
-Unicode filenames either as input or output (and in the case of system
-and qx Unicode in general, as input or output to/from the shell).
-Whether a filesystem - an operating system pair understands Unicode in
-filenames varies.
-
-Known combinations that have some level of understanding include
-Microsoft NTFS, Apple HFS+ (In Mac OS 9 and X) and Apple UFS (in Mac
-OS X), NFS v4 is rumored to be Unicode, and of course Plan 9.  How to
-create Unicode filenames, what forms of Unicode are accepted and used
-(UCS-2, UTF-16, UTF-8), what (if any) is the normalization form used,
-and so on, varies.  Finding the right level of interfacing to Perl
-requires some thought.  Remember that an OS does not implicate a
-filesystem.
-
-(The Windows -C command flag "wide API support" has been at least
-temporarily retired in 5.8.1, and the -C has been repurposed, see
-L<perlrun>.)
-
-=head2 Unicode in %ENV
-
-Currently the %ENV entries are always byte strings.
-
-=head1 Regexps
-
-=head2 regexp optimiser optional
-
-The regexp optimiser is not optional. It should configurable to be, to allow
-its performance to be measured, and its bugs to be easily demonstrated.
-
-=head1 POD
-
-=head2 POD -> HTML conversion still sucks
+=head2 POD -> HTML conversion in the core still sucks
 
 Which is crazy given just how simple POD purports to be, and how simple HTML
 can be. It's not actually I<as> simple as it sounds, particularly with the
@@ -128,102 +36,65 @@ visual appeal of the HTML generated, and to avoid it having any validation
 errors. See also L</make HTML install work>, as the layout of installation tree
 is needed to improve the cross-linking.
 
-=head1 Misc medium sized projects
-
-=head2 UNITCHECK
-
-Introduce a new special block, UNITCHECK, which is run at the end of a
-compilation unit (module, file, eval(STRING) block). This will correspond to
-the Perl 6 CHECK. Perl 5's CHECK cannot be changed or removed because the
-O.pm/B.pm backend framework depends on it.
-
-=head2 optional optimizer
-
-Make the peephole optimizer optional.
-
-=head2 You WANT *how* many
-
-Currently contexts are void, scalar and list. split has a special mechanism in
-place to pass in the number of return values wanted. It would be useful to
-have a general mechanism for this, backwards compatible and little speed hit.
-This would allow proposals such as short circuiting sort to be implemented
-as a module on CPAN.
-
-=head2 lexical aliases
-
-Allow lexical aliases (maybe via the syntax C<my \$alias = \$foo>.
-
-=head2 IPv6
-
-Clean this up. Check everything in core works
-
-=head2 entersub XS vs Perl
-
-At the moment pp_entersub is huge, and has code to deal with entering both
-perl and XS subroutines. Subroutine implementations rarely change between 
-perl and XS at run time, so investigate using 2 ops to enter subs (one for
-XS, one for perl) and swap between if a sub is redefined.
-
-=head2 @INC source filter to Filter::Simple
-
-The second return value from a sub in @INC can be a source filter. This isn't
-documented. It should be changed to use Filter::Simple, tested and documented.
-
-=head2 bincompat functions
-
-There are lots of functions which are retained for binary compatibility.
-Clean these up. Move them to mathom.c, and don't compile for blead?
-
-=head2 Constant folding
-
-The peephole optimiser should trap errors during constant folding, and give
-up on the folding, rather than bailing out at compile time.  It is quite
-possible that the unfoldable constant is in unreachable code, eg something
-akin to C<$a = 0/0 if 0;>
-
-=head1 Tests
-
 =head2 Make Schwern poorer
 
-Tests for everything, At which point Schwern coughs up $500 to TPF.
+We should have for everything. When all the core's modules are tested,
+Schwern has promised to donate to $500 to TPF. We may need volunteers to
+hold him upside down and shake vigorously in order to actually extract the
+cash.
 
+See F<t/lib/1_compile.t> for the 3 remaining modules that need tests.
+
+=head2 Improve the coverage of the core tests
+
+Use Devel::Cover to ascertain the core's test coverage, then add tests that
+are currently missing.
 =head2 test B
 
-A test suite for the B module would be nice.
+A full test suite for the B module would be nice.
 
-=head2 common test code for timed bailout
+=head2 A decent benchmark
 
-Write portable self destruct code for tests to stop them burning CPU in
-infinite loops. Needs to avoid using alarm, as some of the tests are testing
-alarm/sleep or timers.
+perlbench seems impervious to any recent changes made to the perl core. It
+would be useful to have a reasonable general benchmarking suite that roughly
+represented what current perl programs do, and measurably reported whether
+tweaks to the core improve, degrade or don't really affect performance, to
+guide people attempting to optimise the guts of perl. Gisle would welcome
+new tests for perlbench.
 
-=head1 Installation
+=head2 fix tainting bugs
 
-=head2 compressed man pages
+Fix the bugs revealed by running the test suite with the C<-t> switch (via
+C<make test.taintwarn>).
 
-Be able to install them. This would probably need a configure test to see how
-the system does compressed man pages (same directory/different directory?
-same filename/different filename), as well as tweaking the F<installman> script
-to compress as necessary.
+=head2 Dual life everything
 
-=head2 Make Config.pm cope with differences between build and installed perl
+As part of the "dists" plan, anything that doesn't belong in the smallest perl
+distribution needs to be dual lifed. Anything else can be too. Figure out what
+changes would be needed to package that module and its tests up for CPAN, and
+do so. Test it with older perl releases, and fix the problems you find.
 
-Quite often vendors ship a perl binary compiled with their (pay-for)
-compilers.  People install a free compiler, such as gcc. To work out how to
-build extensions, Perl interrogates C<%Config>, so in this situation
-C<%Config> describes compilers that aren't there, and extension building
-fails. This forces people into chosing between re-compiling perl themselves
-using the compiler they have, or only using modules that the vendor ships.
+=head2 Improving C<threads::shared>
 
-It would be good to find a way teach C<Config.pm> about the installation setup,
-possibly involving probing at install time or later, so that the C<%Config> in
-a binary distruction better describes the installed machine, when the installed
-machine differs from the build machine in some significant way.
+Investigate whether C<threads::shared> could share aggregates properly with
+only Perl level changes to shared.pm
 
-=head2 Relocatable perl
+=head2 POSIX memory footprint
 
-Make it possible to create a relocatable perl binary. Will need some collusion
-with Config.pm. We could use a syntax of ... for location of current binary?
+Ilya observed that use POSIX; eats memory like there's no tomorrow, and at
+various times worked to cut it down. There is probably still fat to cut out -
+for example POSIX passes Exporter some very memory hungry data structures.
+
+
+
+
+
+
+
+=head1 Tasks that need a little sysadmin-type knowledge
+
+Or if you prefer, tasks that you would learn from, and broaden your skills
+base...
 
 =head2 make HTML install work
 
@@ -258,7 +129,43 @@ and different parameter lists having different meanings. (eg C<select>)
 
 =back
 
-=head2 put patchlevel in -v
+=head2 compressed man pages
+
+Be able to install them. This would probably need a configure test to see how
+the system does compressed man pages (same directory/different directory?
+same filename/different filename), as well as tweaking the F<installman> script
+to compress as necessary.
+
+=head2 Make Config.pm cope with differences between build and installed perl
+
+Quite often vendors ship a perl binary compiled with their (pay-for)
+compilers.  People install a free compiler, such as gcc. To work out how to
+build extensions, Perl interrogates C<%Config>, so in this situation
+C<%Config> describes compilers that aren't there, and extension building
+fails. This forces people into choosing between re-compiling perl themselves
+using the compiler they have, or only using modules that the vendor ships.
+
+It would be good to find a way teach C<Config.pm> about the installation setup,
+possibly involving probing at install time or later, so that the C<%Config> in
+a binary distribution better describes the installed machine, when the
+installed machine differs from the build machine in some significant way.
+
+=head2 Relocatable perl
+
+The C level patches needed to create a relocatable perl binary are done, as
+is the work on Config.pm. All that's left to do is the C<Configure> tweaking
+to let people specify how they want to do the install.
+
+
+
+
+
+=head1 Tasks that need a little C knowledge
+
+These tasks would need a little C knowledge, but don't need any specific
+background or experience with XS, or how the Perl interpreter works
+
+=head2 Make it clear from -v if this is the exact official release
 
 Currently perl from p4/rsync ships with a patchlevel.h file that usually
 defines one local patch, of the form "MAINT12345" or "RC1". The output of
@@ -275,56 +182,206 @@ always say "I'm a development release" and it would be safe to bump the
 reported minor version as soon as a release ships, which would aid perl
 developers.
 
-=head1 Incremental things
+This task is really about thinking of an elegant way to arrange the C source
+such that it's trivial for the Pumpking to flag "this is an official release"
+when making a tarball, yet leave the default source saying "I'm not the
+official release".
 
-Some tasks that don't need to get done in one big hit.
+=head2 bincompat functions
+
+There are lots of functions which are retained for binary compatibility.
+Clean these up. Move them to mathom.c, and don't compile for blead?
+
+
+
+
+
+=head1 Tasks that need a knowledge of XS
+
+These tasks would need C knowledge, and roughly the level of knowledge of
+the perl API that comes from writing modules that use XS to interface to
+C.
+
+=head2 IPv6
+
+Clean this up. Check everything in core works
+
+=head2 UTF8 caching code
+
+The string position/offset cache is not optional. It should be.
+
+=head2 Implicit Latin 1 => Unicode translation
+
+Conversions from byte strings to UTF-8 currently map high bit characters
+to Unicode without translation (or, depending on how you look at it, by
+implicitly assuming that the byte strings are in Latin-1). As perl assumes
+the C locale by default, upgrading a string to UTF-8 may change the
+meaning of its contents regarding character classes, case mapping, etc.
+This should probably emit a warning (at least).
+
+This task is incremental - even a little bit of work on it will help.
 
 =head2 autovivification
 
 Make all autovivification consistent w.r.t LVALUE/RVALUE and strict/no strict;
 
-=head2 fix tainting bugs
+This task is incremental - even a little bit of work on it will help.
 
-Fix the bugs revealed by running the test suite with the C<-t> switch (via
-C<make test.taintwarn>).
+=head2 Unicode in Filenames
+
+chdir, chmod, chown, chroot, exec, glob, link, lstat, mkdir, open,
+opendir, qx, readdir, readlink, rename, rmdir, stat, symlink, sysopen,
+system, truncate, unlink, utime, -X.  All these could potentially accept
+Unicode filenames either as input or output (and in the case of system
+and qx Unicode in general, as input or output to/from the shell).
+Whether a filesystem - an operating system pair understands Unicode in
+filenames varies.
+
+Known combinations that have some level of understanding include
+Microsoft NTFS, Apple HFS+ (In Mac OS 9 and X) and Apple UFS (in Mac
+OS X), NFS v4 is rumored to be Unicode, and of course Plan 9.  How to
+create Unicode filenames, what forms of Unicode are accepted and used
+(UCS-2, UTF-16, UTF-8), what (if any) is the normalization form used,
+and so on, varies.  Finding the right level of interfacing to Perl
+requires some thought.  Remember that an OS does not implicate a
+filesystem.
+
+(The Windows -C command flag "wide API support" has been at least
+temporarily retired in 5.8.1, and the -C has been repurposed, see
+L<perlrun>.)
+
+=head2 Unicode in %ENV
+
+Currently the %ENV entries are always byte strings.
+
+=head2 use less 'memory'
+
+Investigate trade offs to switch out perl's choices on memory usage.
+Particularly perl should be able to give memory back.
+
+This task is incremental - even a little bit of work on it will help.
+
+=head2 Re-implement C<:unique> in a way that is actually thread-safe
+
+The old implementation made bad assumptions on several levels. A good 90%
+solution might be just to make C<:unique> work to share the string buffer
+of SvPVs. That way large constant strings can be shared between ithreads,
+such as the configuration information in F<Config>.
 
 =head2 Make tainting consistent
 
-Tainting would be easier to use if it didn't take documented shortcuts and allow
-taint to "leak" everywhere within an expression.
+Tainting would be easier to use if it didn't take documented shortcuts and
+allow taint to "leak" everywhere within an expression.
 
-=head2 Dual life everything
+=head2 readpipe(LIST)
 
-As part of the "dists" plan, anything that doesn't belong in the smallest perl
-distribution needs to be dual lifed. Anything else can be too.
+system() accepts a LIST syntax (and a PROGRAM LIST syntax) to avoid
+running a shell. readpipe() (the function behind qx//) could be similarly
+extended.
 
-=head1 Vague things
 
-Some more nebulous ideas
 
-=head2 threads
 
-=over 4
 
-=item *
+=head1 Tasks that need a knowledge of the interpreter
 
-Re-implement C<:unique> in a way that is actually thread-safe
+These tasks would need C knowledge, and knowledge of how the interpreter works,
+or a willingness to learn.
 
-=item *
+=head2 lexical pragmas
 
-Make C<threads::shared> share aggregates properly
+Reimplement the mechanism of lexical pragmas to be more extensible. Fix
+current pragmas that don't work well (or at all) with lexical scopes or in
+run-time eval(STRING) (C<sort>, C<re>, C<encoding> for example). MJD has a
+preliminary patch that implements this.
 
-(these two may actually share approach, if not implementation
+=head2 Attach/detach debugger from running program
 
-=back
+The old perltodo notes "With C<gdb>, you can attach the debugger to a running
+program if you pass the process ID. It would be good to do this with the Perl
+debugger on a running Perl program, although I'm not sure how it would be
+done." ssh and screen do this with named pipes in /tmp. Maybe we can too.
 
-Generally make threads more robust. See also L<iCOW>
+=head2 inlining autoloaded constants
 
-=head2 POSIX memory footprint
+Currently the optimiser can inline constants when expressed as subroutines
+with prototype ($) that return a constant. Likewise, many packages wrapping
+C libraries export lots of constants as subroutines which are AUTOLOADed on
+demand. However, these have no prototypes, so can't be seen as constants by
+the optimiser. Some way of cheaply (low syntax, low memory overhead) to the
+perl compiler that a name is a constant would be great, so that it knows to
+call the AUTOLOAD routine at compile time, and then inline the constant.
 
-Ilya observed that use POSIX; eats memory like there's no tomorrow, and at
-various times worked to cut it down. There is probably still fat to cut out -
-for example POSIX passes Exporter some very memory hungry data structures.
+=head2 Constant folding
+
+The peephole optimiser should trap errors during constant folding, and give
+up on the folding, rather than bailing out at compile time.  It is quite
+possible that the unfoldable constant is in unreachable code, eg something
+akin to C<$a = 0/0 if 0;>
+
+=head2 LVALUE functions for lists
+
+The old perltodo notes that lvalue functions don't work for list or hash
+slices. This would be good to fix.
+
+=head2 LVALUE functions in the debugger
+
+The old perltodo notes that lvalue functions don't work in the debugger. This
+would be good to fix.
+
+=head2 _ prototype character
+
+Study the possibility of adding a new prototype character, C<_>, meaning
+"this argument defaults to $_".
+
+=head2 @INC source filter to Filter::Simple
+
+The second return value from a sub in @INC can be a source filter. This isn't
+documented. It should be changed to use Filter::Simple, tested and documented.
+
+=head2 regexp optimiser optional
+
+The regexp optimiser is not optional. It should configurable to be, to allow
+its performance to be measured, and its bugs to be easily demonstrated.
+
+=head2 UNITCHECK
+
+Introduce a new special block, UNITCHECK, which is run at the end of a
+compilation unit (module, file, eval(STRING) block). This will correspond to
+the Perl 6 CHECK. Perl 5's CHECK cannot be changed or removed because the
+O.pm/B.pm backend framework depends on it.
+
+=head2 optional optimizer
+
+Make the peephole optimizer optional. Currently it performs two tasks as
+it walks the optree - genuine peephole optimisations, and necessary fixups of
+ops. It would be good to find an efficient way to switch out the
+optimisations whilst keeping the fixups.
+
+=head2 You WANT *how* many
+
+Currently contexts are void, scalar and list. split has a special mechanism in
+place to pass in the number of return values wanted. It would be useful to
+have a general mechanism for this, backwards compatible and little speed hit.
+This would allow proposals such as short circuiting sort to be implemented
+as a module on CPAN.
+
+=head2 lexical aliases
+
+Allow lexical aliases (maybe via the syntax C<my \$alias = \$foo>.
+
+=head2 entersub XS vs Perl
+
+At the moment pp_entersub is huge, and has code to deal with entering both
+perl and XS subroutines. Subroutine implementations rarely change between 
+perl and XS at run time, so investigate using 2 ops to enter subs (one for
+XS, one for perl) and swap between if a sub is redefined.
+
+=head2 Self ties
+
+self ties are currently illegal because they caused too many segfaults. Maybe
+the causes of these could be tracked down and self-ties on all types re-
+instated.
 
 =head2 Optimize away @_
 
@@ -336,29 +393,44 @@ The old perltodo notes "Although we have C<Switch.pm> in core, Larry points to
 the dormant C<nswitch> and C<cswitch> ops in F<pp.c>; using these opcodes would
 be much faster."
 
-=head2 Attach/detach debugger from running program
+=head2 What hooks would assertions need?
 
-The old perltodo notes "With C<gdb>, you can attach the debugger to a running
-program if you pass the process ID. It would be good to do this with the Perl
-debugger on a running Perl program, although I'm not sure how it would be done."
-ssh and screen do this with named pipes in tmp. Maybe we can too.
+Assertions are in the core, and work. However, assertions needed to be added
+as a core patch, rather than an XS module in ext, or a CPAN module, because
+the core has no hooks in the necessary places. It would be useful to
+investigate what hooks would need to be added to make it possible to provide
+the full assertion support from a CPAN module, so that we aren't constraining
+the imagination of future CPAN authors.
 
-=head2 A decent benchmark
 
-perlbench seems impervious to any recent changes made to the perl core. It would
-be useful to have a reasonable general benchmarking suite that roughly
-represented what current perl programs do, and measurably reported whether
-tweaks to the core improve, degrade or don't really affect performance, to
-guide people attempting to optimise the guts of perl.
 
-=head2 readpipe(LIST)
 
-system() accepts a LIST syntax (and a PROGRAM LIST syntax) to avoid
-running a shell. readpipe() (the function behind qx//) could be similarly
-extended.
 
-=head2 Self ties
 
-self ties are currently illegal because they caused too many segfaults. Maybe
-the causes of these could be tracked down and self-ties on all types re-
-instated.
+
+=head1 Big projects
+
+Tasks that will get your name mentioned in the description of the "Highlights
+of 5.10"
+
+=head2 make ithreads more robust
+
+Generally make ithreads more robust. See also L<iCOW>
+
+This task is incremental - even a little bit of work on it will help, and
+will be greatly appreciated.
+
+=head2 iCOW
+
+Sarathy and Arthur have a proposal for an improved Copy On Write which
+specifically will be able to COW new ithreads. If this can be implemented
+it would be a good thing.
+
+=head2 (?{...}) closures in regexps
+
+Fix (or rewrite) the implementation of the C</(?{...})/> closures.
+
+=head2 A re-entrant regexp engine
+
+This will allow the use of a regex from inside (?{ }), (??{ }) and
+(?(?{ })|) constructs.
