@@ -1623,6 +1623,7 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 	s = SvPVX(sv);
 
     if (newlen > SvLEN(sv)) {		/* need more room? */
+	newlen = PERL_STRLEN_ROUNDUP(newlen);
 	if (SvLEN(sv) && s) {
 #ifdef MYMALLOC
 	    STRLEN l = malloced_size((void*)SvPVX(sv));
@@ -1631,7 +1632,7 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 		return s;
 	    } else
 #endif
-	    Renew(s,newlen,char);
+	    s = saferealloc(s, newlen);
 	}
 	else {
 	    /* sv_force_normal_flags() must not try to unshare the new
@@ -1640,7 +1641,7 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 		SvFAKE_off(sv);
 		SvREADONLY_off(sv);
 	    }
-	    New(703, s, newlen, char);
+	    s = safemalloc(newlen);
 	    if (SvPVX(sv) && SvCUR(sv)) {
 	        Move(SvPVX(sv), s, (newlen < SvCUR(sv)) ? newlen : SvCUR(sv), char);
 	    }
@@ -4216,6 +4217,7 @@ See C<sv_usepvn_mg>.
 void
 Perl_sv_usepvn(pTHX_ register SV *sv, register char *ptr, register STRLEN len)
 {
+    STRLEN allocate;
     SV_CHECK_THINKFIRST(sv);
     (void)SvUPGRADE(sv, SVt_PV);
     if (!ptr) {
@@ -4224,10 +4226,12 @@ Perl_sv_usepvn(pTHX_ register SV *sv, register char *ptr, register STRLEN len)
     }
     if (SvPVX(sv))
 	SvPV_free(sv);
-    Renew(ptr, len+1, char);
+
+    allocate = PERL_STRLEN_ROUNDUP(len + 1);
+    ptr = saferealloc (ptr, allocate);
     SvPV_set(sv, ptr);
     SvCUR_set(sv, len);
-    SvLEN_set(sv, len+1);
+    SvLEN_set(sv, allocate);
     *SvEND(sv) = '\0';
     (void)SvPOK_only_UTF8(sv);		/* validate pointer */
     SvTAINT(sv);
