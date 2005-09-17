@@ -345,6 +345,13 @@ C.
 
 Clean this up. Check everything in core works
 
+=head2 shrink C<GV>s, C<CV>s
+
+By removing unused elements and careful re-ordering, the structures for C<AV>s
+and C<HV>s have recently been shrunk considerably. It's probable that the same
+approach would find savings in C<GV>s and C<CV>s, if not all the other
+larger-than-C<PVMG> types.
+
 =head2 merge Perl_sv_2[inpu]v
 
 There's a lot of code shared between C<Perl_sv_2iv_flags>,
