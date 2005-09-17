@@ -1348,7 +1348,7 @@ STATIC void *
 S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 {
     int argc = PL_origargc;
-    const char **argv = PL_origargv;
+    char **argv = PL_origargv;
     const char *scriptname = NULL;
     VOL bool dosearch = FALSE;
     const char *validarg = "";

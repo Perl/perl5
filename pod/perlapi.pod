@@ -310,7 +310,7 @@ Performs a callback to the specified Perl sub.  See L<perlcall>.
 
 NOTE: the perl_ form of this function is deprecated.
 
-	I32	call_argv(const char* sub_name, I32 flags, const char** argv)
+	I32	call_argv(const char* sub_name, I32 flags, char** argv)
 
 =for hackers
 Found in file perl.c

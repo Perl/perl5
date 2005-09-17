@@ -305,7 +305,7 @@ Ap	|I32	|ibcmp		|const char* a|const char* b|I32 len
 Ap	|I32	|ibcmp_locale	|const char* a|const char* b|I32 len
 Apd	|I32	|ibcmp_utf8	|const char* a|char **pe1|UV l1|bool u1|const char* b|char **pe2|UV l2|bool u2
 p	|bool	|ingroup	|Gid_t testgid|Uid_t effective
-p	|void	|init_argv_symbols|int|char **
+p	|void	|init_argv_symbols|int argc|char **argv
 p	|void	|init_debugger
 Ap	|void	|init_stacks
 Ap	|void	|init_tm	|struct tm *ptm
