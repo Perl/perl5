@@ -1497,6 +1497,9 @@
 #ifdef PERL_CORE
 #define pad_push		Perl_pad_push
 #endif
+#ifdef PERL_CORE
+#define pad_compname_type	Perl_pad_compname_type
+#endif
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define pad_findlex		S_pad_findlex
@@ -3487,6 +3490,9 @@
 #endif
 #ifdef PERL_CORE
 #define pad_push(a,b,c)		Perl_pad_push(aTHX_ a,b,c)
+#endif
+#ifdef PERL_CORE
+#define pad_compname_type(a)	Perl_pad_compname_type(aTHX_ a)
 #endif
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE

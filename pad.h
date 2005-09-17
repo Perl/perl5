@@ -216,10 +216,7 @@ ling pad (lvalue) to C<gen>.  Note that C<SvCUR_set> is hijacked for this purpos
 #define PAD_COMPNAME_FLAGS(po) SvFLAGS(*av_fetch(PL_comppad_name, (po), FALSE))
 #define PAD_COMPNAME_PV(po) SvPV_nolen(*av_fetch(PL_comppad_name, (po), FALSE))
 
-/* XXX DAPM yuk - using av_fetch twice. Is there a better way? */
-#define PAD_COMPNAME_TYPE(po) \
-    ((SvFLAGS(*av_fetch(PL_comppad_name, (po), FALSE)) & SVpad_TYPED) \
-    ? (SvSTASH(*av_fetch(PL_comppad_name, (po), FALSE))) :  Nullhv)
+#define PAD_COMPNAME_TYPE(po) pad_compname_type(po)
 
 #define PAD_COMPNAME_OURSTASH(po) \
     (GvSTASH(*av_fetch(PL_comppad_name, (po), FALSE)))
