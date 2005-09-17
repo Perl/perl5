@@ -264,7 +264,6 @@ Clean these up. Move them to mathom.c, and don't compile for blead?
 
 
 
-
 =head1 Tasks that need a knowledge of XS
 
 These tasks would need C knowledge, and roughly the level of knowledge of
@@ -274,6 +273,16 @@ C.
 =head2 IPv6
 
 Clean this up. Check everything in core works
+
+=head2 merge Perl_sv_2[inpu]v
+
+There's a lot of code shared between C<Perl_sv_2iv_flags>,
+C<Perl_sv_2uv_flags>, C<Perl_sv_2nv>, and C<Perl_sv_2pv_flags>. It would be
+interesting to see if some of it can be merged into common shared static
+functions. In particular, C<Perl_sv_2uv_flags> started out as a cut&paste
+from C<Perl_sv_2iv_flags> around 5.005_50 time, and it may be possible to
+replace both with a single function that returns a value or union which is
+split out by the macros in F<sv.h>
 
 =head2 UTF8 caching code
 
