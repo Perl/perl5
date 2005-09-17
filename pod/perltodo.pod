@@ -86,6 +86,20 @@ Ilya observed that use POSIX; eats memory like there's no tomorrow, and at
 various times worked to cut it down. There is probably still fat to cut out -
 for example POSIX passes Exporter some very memory hungry data structures.
 
+=head2 Refactor C<xsubpp> to be a thin wrapper around C<ExtUtils::ParseXS>
+
+C<ExtUtils::ParseXS> encapsulates a version of the C<xsubpp> into a module.
+In effect this is a code fork, and it's likely that C<xsubpp> has had some
+bug fixes since the code from C<ExtUtils::ParseXS> was derived. It would be
+good to merge the differences in, reduce down to 1 canonical implementation,
+and convert C<xsubpp> to a very thin command line wrapper to
+C<ExtUtils::ParseXS>.
+
+In theory this needs no real C knowledge, as one way of approaching this task
+is to ensure that C<ExtUtils::ParseXS> generates identical output to C<xsubpp>
+for input XS files, which does not require understanding the contents of the
+output C file. However, some C knowledge is likely to help with testing, and
+locating/producing comprehensive test cases.
 
 
 
@@ -226,22 +240,6 @@ Currently parallel builds (such as C<make -j3>) don't work reliably. We believe
 that this is due to incomplete dependency specification in the F<Makefile>.
 It would be good if someone were able to track down the causes of these
 problems, so that parallel builds worked properly.
-
-=head2 Refactor C<xsubpp> to be a thin wrapper around C<ExtUtils::ParseXS>
-
-C<ExtUtils::ParseXS> encapsulates a version of the C<xsubpp> into a module.
-In effect this is a code fork, and it's likely that C<xsubpp> has had some
-bug fixes since the code from C<ExtUtils::ParseXS> was derived. It would be
-good to merge the differences in, reduce down to 1 canonical implementation,
-and convert C<xsubpp> to a very thin command line wrapper to
-C<ExtUtils::ParseXS>.
-
-In theory this needs no real C knowledge, as one way of approaching this task
-is to ensure that C<ExtUtils::ParseXS> generates identical output to C<xsubpp>
-for input XS files, which does not require understanding the contents of the
-output C file. However, some C knowledge is likely to help with testing, and
-locating/producing comprehensive test cases.
-
 
 
 
