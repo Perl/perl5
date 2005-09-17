@@ -1820,8 +1820,7 @@ S_scan_const(pTHX_ char *start)
 
     /* shrink the sv if we allocated more than we used */
     if (SvCUR(sv) + 5 < SvLEN(sv)) {
-	SvLEN_set(sv, SvCUR(sv) + 1);
-	Renew(SvPVX(sv), SvLEN(sv), char);
+	SvPV_shrink_to_cur(sv);
     }
 
     /* return the substring (via yylval) only if we parsed anything */
@@ -9555,8 +9554,7 @@ S_scan_heredoc(pTHX_ register char *s)
 retval:
     PL_multi_end = CopLINE(PL_curcop);
     if (SvCUR(tmpstr) + 5 < SvLEN(tmpstr)) {
-	SvLEN_set(tmpstr, SvCUR(tmpstr) + 1);
-	Renew(SvPVX(tmpstr), SvLEN(tmpstr), char);
+	SvPV_shrink_to_cur(tmpstr);
     }
     SvREFCNT_dec(herewas);
     if (!IN_BYTES) {
@@ -10032,7 +10030,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
     /* if we allocated too much space, give some back */
     if (SvCUR(sv) + 5 < SvLEN(sv)) {
 	SvLEN_set(sv, SvCUR(sv) + 1);
-	Renew(SvPVX(sv), SvLEN(sv), char);
+	SvPV_renew(sv, SvLEN(sv));
     }
 
     /* decide whether this is the first or second quoted string we've read
@@ -10940,3 +10938,12 @@ Perl_scan_vstring(pTHX_ char *s, SV *sv)
     return (char *)s;
 }
 
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * vim: shiftwidth=4:
+*/

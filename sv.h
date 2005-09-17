@@ -802,6 +802,18 @@ and leaves the UTF-8 status as it was.
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
 		(SvCUR(sv) = (val) - SvPVX(sv)); } STMT_END
 
+#define SvPV_renew(sv,n) \
+	STMT_START { SvLEN_set(sv, n); \
+		SvPV_set((sv), (MEM_WRAP_CHECK_(n,char)			\
+				(char*)saferealloc((Malloc_t)SvPVX(sv), \
+						   (MEM_SIZE)((n)))));  \
+		 } STMT_END
+
+#define SvPV_shrink_to_cur(sv) STMT_START { \
+		   const STRLEN _lEnGtH = SvCUR(sv) + 1; \
+		   SvPV_renew(sv, _lEnGtH); \
+		 } STMT_END
+
 #define SvPV_free(sv) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV);	\
 		if (SvLEN(sv)) {			\

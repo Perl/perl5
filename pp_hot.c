@@ -1666,8 +1666,7 @@ Perl_do_readline(pTHX)
 	}
 	if (gimme == G_ARRAY) {
 	    if (SvLEN(sv) - SvCUR(sv) > 20) {
-		SvLEN_set(sv, SvCUR(sv)+1);
-		Renew(SvPVX(sv), SvLEN(sv), char);
+		SvPV_shrink_to_cur(sv);
 	    }
 	    sv = sv_2mortal(NEWSV(58, 80));
 	    continue;
@@ -1676,8 +1675,7 @@ Perl_do_readline(pTHX)
 	    /* try to reclaim a bit of scalar space (only on 1st alloc) */
 	    const STRLEN new_len
 		= SvCUR(sv) < 60 ? 80 : SvCUR(sv)+40; /* allow some slop */
-	    SvLEN_set(sv, new_len);
-	    Renew(SvPVX(sv), SvLEN(sv), char);
+	    SvPV_renew(sv, new_len);
 	}
 	RETURN;
     }
