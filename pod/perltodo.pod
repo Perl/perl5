@@ -256,6 +256,21 @@ such that it's trivial for the Pumpking to flag "this is an official release"
 when making a tarball, yet leave the default source saying "I'm not the
 official release".
 
+=head2 Ordering of "global" variables.
+
+F<thrdvar.h> and F<intrpvarh> define the "global" variables that need to be
+per-thread under ithreads, where the variables are actually elements in a
+structure. As C dictates, the variables must be laid out in order of
+declaration. There is a comment
+C</* Important ones in the first cache line (if alignment is done right) */>
+which implies that at some point in the past the ordering was carefully chosen
+(at least in part). However, it's clear that the ordering is less than perfect,
+as currently there are things such as 7 C<bool>s in a row, then something
+typically requiring 4 byte alignment, and then an odd C<bool> later on.
+(C<bool>s are typically defined as C<char>s). So it would be good for someone
+to review the ordering of the variables, to see how much alignment padding can
+be removed.
+
 =head2 bincompat functions
 
 There are lots of functions which are retained for binary compatibility.
