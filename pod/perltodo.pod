@@ -220,7 +220,12 @@ The C level patches needed to create a relocatable perl binary are done, as
 is the work on Config.pm. All that's left to do is the C<Configure> tweaking
 to let people specify how they want to do the install.
 
+=head2 make parallel builds work
 
+Currently parallel builds (such as C<make -j3>) don't work reliably. We believe
+that this is due to incomplete dependency specification in the F<Makefile>.
+It would be good if someone were able to track down the causes of these
+problems, so that parallel builds worked properly.
 
 
 
