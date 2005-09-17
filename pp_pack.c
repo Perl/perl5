@@ -158,12 +158,14 @@ S_mul128(pTHX_ SV *sv, U8 m)
 
 # define DO_BO_UNPACK(var, type)
 # define DO_BO_PACK(var, type)
-# define DO_BO_UNPACK_PTR(var, type, pre_cast)
-# define DO_BO_PACK_PTR(var, type, pre_cast)
+# define DO_BO_UNPACK_PTR(var, type, pre_cast, post_cast)
+# define DO_BO_PACK_PTR(var, type, pre_cast, post_cast)
 # define DO_BO_UNPACK_N(var, type)
 # define DO_BO_PACK_N(var, type)
 # define DO_BO_UNPACK_P(var)
 # define DO_BO_PACK_P(var)
+# define DO_BO_UNPACK_PC(var)
+# define DO_BO_PACK_PC(var)
 
 #else
 
@@ -190,28 +192,28 @@ S_mul128(pTHX_ SV *sv, U8 m)
           }                                                                   \
         } STMT_END
 
-# define DO_BO_UNPACK_PTR(var, type, pre_cast)                                \
+# define DO_BO_UNPACK_PTR(var, type, pre_cast, post_cast)                     \
         STMT_START {                                                          \
           switch (TYPE_ENDIANNESS(datumtype)) {                               \
             case TYPE_IS_BIG_ENDIAN:                                          \
-              var = (void *) my_betoh ## type ((pre_cast) var);               \
+              var = (post_cast*) my_betoh ## type ((pre_cast) var);           \
               break;                                                          \
             case TYPE_IS_LITTLE_ENDIAN:                                       \
-              var = (void *) my_letoh ## type ((pre_cast) var);               \
+              var = (post_cast *) my_letoh ## type ((pre_cast) var);          \
               break;                                                          \
             default:                                                          \
               break;                                                          \
           }                                                                   \
         } STMT_END
 
-# define DO_BO_PACK_PTR(var, type, pre_cast)                                  \
+# define DO_BO_PACK_PTR(var, type, pre_cast, post_cast)                       \
         STMT_START {                                                          \
           switch (TYPE_ENDIANNESS(datumtype)) {                               \
             case TYPE_IS_BIG_ENDIAN:                                          \
-              var = (void *) my_htobe ## type ((pre_cast) var);               \
+              var = (post_cast *) my_htobe ## type ((pre_cast) var);          \
               break;                                                          \
             case TYPE_IS_LITTLE_ENDIAN:                                       \
-              var = (void *) my_htole ## type ((pre_cast) var);               \
+              var = (post_cast *) my_htole ## type ((pre_cast) var);          \
               break;                                                          \
             default:                                                          \
               break;                                                          \
@@ -235,14 +237,20 @@ S_mul128(pTHX_ SV *sv, U8 m)
          } STMT_END
 
 # if PTRSIZE == INTSIZE
-#  define DO_BO_UNPACK_P(var)	DO_BO_UNPACK_PTR(var, i, int)
-#  define DO_BO_PACK_P(var)	DO_BO_PACK_PTR(var, i, int)
+#  define DO_BO_UNPACK_P(var)	DO_BO_UNPACK_PTR(var, i, int, void)
+#  define DO_BO_PACK_P(var)	DO_BO_PACK_PTR(var, i, int, void)
+#  define DO_BO_UNPACK_PC(var)	DO_BO_UNPACK_PTR(var, i, int, char)
+#  define DO_BO_PACK_PC(var)	DO_BO_PACK_PTR(var, i, int, char)
 # elif PTRSIZE == LONGSIZE
-#  define DO_BO_UNPACK_P(var)	DO_BO_UNPACK_PTR(var, l, long)
-#  define DO_BO_PACK_P(var)	DO_BO_PACK_PTR(var, l, long)
+#  define DO_BO_UNPACK_P(var)	DO_BO_UNPACK_PTR(var, l, long, void)
+#  define DO_BO_PACK_P(var)	DO_BO_PACK_PTR(var, l, long, void)
+#  define DO_BO_UNPACK_PC(var)	DO_BO_UNPACK_PTR(var, l, long, char)
+#  define DO_BO_PACK_PC(var)	DO_BO_PACK_PTR(var, l, long, char)
 # else
 #  define DO_BO_UNPACK_P(var)	BO_CANT_DOIT(unpack, pointer)
 #  define DO_BO_PACK_P(var)	BO_CANT_DOIT(pack, pointer)
+#  define DO_BO_UNPACK_PC(var)	BO_CANT_DOIT(unpack, pointer)
+#  define DO_BO_PACK_PC(var)	BO_CANT_DOIT(pack, pointer)
 # endif
 
 # if defined(my_htolen) && defined(my_letohn) && \
@@ -1503,7 +1511,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    while (len-- > 0) {
 		assert (sizeof(char*) <= strend - s);
 		Copy(s, &aptr, 1, char*);
-		DO_BO_UNPACK_P(aptr);
+		DO_BO_UNPACK_PC(aptr);
 		s += sizeof(char*);
 		/* newSVpv generates undef if aptr is NULL */
 		PUSHs(sv_2mortal(newSVpv(aptr, 0)));
@@ -1556,7 +1564,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		break;
 	    else {
 		Copy(s, &aptr, 1, char*);
-		DO_BO_UNPACK_P(aptr);
+		DO_BO_UNPACK_PC(aptr);
 		s += sizeof(char*);
 	    }
 	    /* newSVpvn generates undef if aptr is NULL */
@@ -2706,7 +2714,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 		    else
 			aptr = SvPV_force_flags(fromstr, n_a, 0);
 		}
-		DO_BO_PACK_P(aptr);
+		DO_BO_PACK_PC(aptr);
 		sv_catpvn(cat, (char*)&aptr, sizeof(char*));
 	    }
 	    break;

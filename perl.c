@@ -207,7 +207,7 @@ perl_alloc(void)
     my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
 
     INIT_TLS_AND_INTERP;
-    return ZeroD(my_perl, 1, PerlInterpreter);
+    return (PerlInterpreter *) ZeroD(my_perl, 1, PerlInterpreter);
 }
 #endif /* PERL_IMPLICIT_SYS */
 

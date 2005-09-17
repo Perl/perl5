@@ -122,7 +122,9 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     GvGP(gv) = gp_ref(gp);
     GvSV(gv) = NEWSV(72,0);
     GvLINE(gv) = CopLINE(PL_curcop);
-    GvFILE(gv) = CopFILE(PL_curcop) ? CopFILE(PL_curcop) : "";
+    /* XXX Ideally this cast would be replaced with a change to const char*
+       in the struct.  */
+    GvFILE(gv) = CopFILE(PL_curcop) ? CopFILE(PL_curcop) : (char *) "";
     GvCVGEN(gv) = 0;
     GvEGV(gv) = gv;
     sv_magic((SV*)gv, (SV*)gv, PERL_MAGIC_glob, Nullch, 0);

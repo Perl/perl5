@@ -1,7 +1,7 @@
 /* $RCSfile: walk.c,v $$Revision: 4.1 $$Date: 92/08/07 18:29:31 $
  *
  *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1997, 1998, 1999,
- *    2000, 2001, 2002, by Larry Wall and others
+ *    2000, 2001, 2002, 2005 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -858,7 +858,7 @@ sub Pick {\n\
 	    }
 	    *d = '\0';
 	    str_set(tmp2str,tokenbuf);
-	    s = gsub ? "/g" : "/";
+	    s = (char *) (gsub ? "/g" : "/");
 	}
 	else {
 	    tmp2str=walk(1,level,ops[node+2].ival,&numarg,P_MIN);
@@ -866,7 +866,7 @@ sub Pick {\n\
 	    str_scat(tmp3str,tmp2str);
 	    str_cat(tmp3str,").'\"') =~ s/&/\\$&/g, ");
 	    str_set(tmp2str,"eval $s_");
-	    s = gsub ? "/ge" : "/e";
+	    s = (char *) (gsub ? "/ge" : "/e");
 	    i++;
 	}
 	str_cat(tmp2str,s);
