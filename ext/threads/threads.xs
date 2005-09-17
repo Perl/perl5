@@ -96,6 +96,7 @@ Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
         PerlInterpreter *freeperl = NULL;
 	MUTEX_LOCK(&thread->mutex);
 	if (!thread->next) {
+	    MUTEX_UNLOCK(&thread->mutex);
 	    Perl_croak(aTHX_ "panic: destruct destroyed thread %p (%s)",thread, why);
 	}
 	if (thread->count != 0) {
