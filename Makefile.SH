@@ -316,7 +316,7 @@ CCCMD    = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $@`
 CCCMDSRC = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $<`
 
 CONFIGPM = lib/Config.pm lib/Config_heavy.pl
-private = preplibrary $(CONFIGPM) lib/ExtUtils/Miniperl.pm
+private = preplibrary $(CONFIGPM) lib/Config.pod lib/ExtUtils/Miniperl.pm
 
 # Files to be built with variable substitution before miniperl
 # is available.
@@ -366,7 +366,31 @@ obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) utf8$(OBJ_EXT) taint$(OBJ
 
 obj = $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
 
-lintflags = -hbvxac
+lintflags = \
+    -bhn \
+    -p \
+    -s \
+    -Ncheck=%all \
+    -Nlevel=4 \
+    -errfmt=src \
+    -errtags \
+    -erroff=E_BAD_PTR_CAST \
+    -erroff=E_BLOCK_DECL_UNUSED \
+    -erroff=E_CONSTANT_CONDITION \
+    -erroff=E_BAD_PTR_CAST_ALIGN \
+    -erroff=E_PTRDIFF_OVERFLOW \
+    -erroff=E_EXPR_NULL_EFFECT \
+    -erroff=E_BAD_PTR_INT_COMBINATION \
+    -erroff=E_LOOP_EMPTY \
+    -erroff=E_TRUE_LOGICAL_EXPR \
+    -erroff=E_FALSE_LOGICAL_EXPR \
+    -erroff=E_INDISTING_FROM_TRUNC \
+    -erroff=E_POINTER_TO_OBJECT \
+    -erroff=E_ASSIGN_NARROW_CONV \
+    -erroff=E_BAD_SIGN_EXTEND \
+    -erroff=E_INCL_NUSD \
+    -erroff=E_MAIN_PARAM \
+    -Wfoo.flow
 
 .c$(OBJ_EXT):
 	$(CCCMD) $(PLDLFLAGS) $*.c
@@ -754,18 +778,14 @@ preplibrary: miniperl$(EXE_EXT) $(CONFIGPM) lib/lib.pm $(PREPLIBRARY_LIBPERL)
 		autosplit_lib_modules(@ARGV)' lib/*/*.pm
 	$(MAKE) lib/re.pm
 
-# Take care to avoid modifying lib/Config.pm without reason
-# (If trying to create a new port and having problems with the configpm script,
-# try 'make minitest' and/or commenting out the tests at the end of configpm.)
-$(CONFIGPM): config.sh miniperl$(EXE_EXT) configpm Porting/Glossary
-	$(LDLIBPTH) ./miniperl -Ilib configpm --heavy=heavy.tmp configpm.tmp
-	sh mv-if-diff configpm.tmp lib/Config.pm
-	sh mv-if-diff heavy.tmp lib/Config_heavy.pl
+lib/Config.pod: config.sh miniperl$(EXE_EXT) configpm Porting/Glossary
+	$(LDLIBPTH) ./miniperl -Ilib configpm --heavy=lib/Config_heavy.pl lib/Config.pm
+
+$(CONFIGPM): lib/Config.pod
 
 lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl$(EXE_EXT) minimod.pl $(CONFIGPM)
 	$(LDLIBPTH) ./miniperl minimod.pl > minimod.tmp
 	sh mv-if-diff minimod.tmp $@
-	-touch lib/ExtUtils/Miniperl.pm
 
 lib/re.pm: ext/re/re.pm
 	cp ext/re/re.pm ext/re/re.tmp && sh mv-if-diff ext/re/re.tmp lib/re.pm
@@ -1029,12 +1049,12 @@ _cleaner1:
 # Some systems do not support "?", so keep these files separate.
 _cleaner2:
 	-rm -f core.*perl.*.? t/core.perl.*.? .?*.c
-	rm -f core *perl.core t/core t/*perl.core
+	rm -f core *perl.core t/core t/*perl.core core.* t/core.*
 	rm -f t/misctmp* t/forktmp* t/tmp* t/c t/perl$(EXE_EXT) t/rantests
 	rm -f so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
 	rm -rf $(addedbyconf)
 	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old makefile.old
-	rm -f $(private) lib/Config.pod
+	rm -f $(private)
 	rm -rf $(unidatafiles) $(unidatadirs)
 	rm -rf lib/auto
 	rm -f lib/.exists lib/*/.exists lib/*/*/.exists
@@ -1057,14 +1077,10 @@ _verycleaner:
 	@$(LDLIBPTH) $(MAKE) _cleaner2
 	-rm -f *~ *.orig */*~ */*.orig */*/*~ */*/*.orig
 
-# The following lint has practically everything turned on.  Unfortunately,
-# you have to wade through a lot of mumbo jumbo that can't be suppressed.
-# If the source file has a /*NOSTRICT*/ somewhere, ignore the lint message
-# for that spot.
-
 .PHONY: lint
 lint: $(c)
-	lint $(lintflags) $(defs) perly.c $(c) > perl.fuzz
+	rm -f *.ln
+	lint $(lintflags) -DPERL_CORE -D_REENTRANT -DDEBUGGING -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 $(c)
 
 # Need to unset during recursion to go out of loop.
 # The README below ensures that the dependency list is never empty and
@@ -1299,13 +1315,14 @@ etags:	TAGS
 TAGS: emacs/cperl-mode.elc
 	sh emacs/ptags
 
-ctags:	tags
-
 # Let's hope make will not go into an infinite loop on case-unsensitive systems
 # This may also fail if . is in the head of the path, since perl will
 # require -Ilib
 tags:	TAGS
 	perl emacs/e2ctags.pl TAGS > tags
+
+ctags:
+	ctags -f Tags -N --totals --languages=c --langmap=c:+.h *.c *.h
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 # If this runs make out of memory, delete /usr/include lines.
@@ -1418,3 +1435,4 @@ esac
     ;;
 esac
 
+# ex: set ts=8 sts=4 sw=4 noet:

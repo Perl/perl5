@@ -4693,11 +4693,9 @@ PP(pp_split)
 	    }
 	}
 	else {
-#ifndef lint
 	    while (s < strend && --limit &&
 	      (m = fbm_instr((unsigned char*)s, (unsigned char*)strend,
 			     csv, PL_multiline ? FBMrf_MULTILINE : 0)) )
-#endif
 	    {
 		dstr = newSVpvn(s, m-s);
 		if (make_mortal)
