@@ -240,6 +240,8 @@ S_mul128(pTHX_ SV *sv, U8 m)
 # define DO_BO_PACK_N(var, type)
 # define DO_BO_UNPACK_P(var)
 # define DO_BO_PACK_P(var)
+# define DO_BO_UNPACK_PC(var)
+# define DO_BO_PACK_PC(var)
 
 #else /* PERL_PACK_CAN_BYTEORDER */
 
@@ -323,6 +325,8 @@ S_mul128(pTHX_ SV *sv, U8 m)
 # else
 #  define DO_BO_UNPACK_P(var)	BO_CANT_DOIT(unpack, pointer)
 #  define DO_BO_PACK_P(var)	BO_CANT_DOIT(pack, pointer)
+#  define DO_BO_UNPACK_PC(var)	BO_CANT_DOIT(unpack, pointer)
+#  define DO_BO_PACK_PC(var)	BO_CANT_DOIT(pack, pointer)
 # endif
 
 # if defined(my_htolen) && defined(my_letohn) && \
