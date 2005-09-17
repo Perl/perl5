@@ -49,6 +49,7 @@ See F<t/lib/1_compile.t> for the 3 remaining modules that need tests.
 
 Use Devel::Cover to ascertain the core's test coverage, then add tests that
 are currently missing.
+
 =head2 test B
 
 A full test suite for the B module would be nice.
@@ -135,6 +136,69 @@ Be able to install them. This would probably need a configure test to see how
 the system does compressed man pages (same directory/different directory?
 same filename/different filename), as well as tweaking the F<installman> script
 to compress as necessary.
+
+=head2 Add a code coverage target to the Makefile
+
+Make it easy for anyone to run Devel::Cover on the core's tests. The steps
+to do this manually are roughly
+
+=over 4
+
+=item *
+
+do a normal C<Configure>, but include Devel::Cover as a module to install
+(see F<INSTALL> for how to do this)
+
+=item *
+
+    make perl
+
+=item *
+
+    cd t; HARNESS_PERL_SWITCHES=-MDevel::Cover ./perl -I../lib harness
+
+=item *
+
+Process the resulting Devel::Cover database
+
+=back
+
+This just give you the coverage of the F<.pm>s. To also get the C level
+coverage you need to
+
+=over 4
+
+=item *
+
+Additionally tell C<Configure> to use the appropriate C compiler flags for
+C<gcov>
+
+=item *
+
+    make perl.gcov
+
+(instead of C<make perl>)
+
+=item *
+
+After running the tests run C<gcov> to generate all the F<.gcov> files.
+(Including down in the subdirectories of F<ext/>
+
+=item *
+
+(From the top level perl directory) run C<gcov2perl> on all the C<.gcov> files
+to get their stats into the cover_db directory.
+
+=item *
+
+Then process the Devel::Cover database
+
+=back
+
+It would be good to add a single switch to C<Configure> to specify that you
+wanted to perform perl level coverage, and another to specify C level
+coverage, and have C<Configure> and the F<Makefile> do all the right things
+automatically.
 
 =head2 Make Config.pm cope with differences between build and installed perl
 
