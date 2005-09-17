@@ -316,8 +316,11 @@ S_tokereport(pTHX_ const char* s, I32 rv)
 	    Perl_sv_catpvf(aTHX_ report, "(pval=\"%s\")", yylval.pval);
 	    break;
 	case TOKENTYPE_OPVAL:
-	    Perl_sv_catpvf(aTHX_ report, "(opval=op_%s)",
+	    if (yylval.opval)
+		Perl_sv_catpvf(aTHX_ report, "(opval=op_%s)",
 				    PL_op_name[yylval.opval->op_type]);
+	    else
+		Perl_sv_catpv(aTHX_ report, "(opval=null)");
 	    break;
 	}
         Perl_sv_catpvf(aTHX_ report, " at line %d [", CopLINE(PL_curcop));
@@ -2322,7 +2325,7 @@ Perl_yylex_r(pTHX_ YYSTYPE *lvalp, int *lcharp)
 int
 Perl_yylex(pTHX)
 {
-    register char *s;
+    register char *s = PL_bufptr;
     register char *d;
     register I32 tmp;
     STRLEN len;
