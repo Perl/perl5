@@ -320,6 +320,18 @@ necessary to do something like
 although C<long double> might not be the only type to add to the padding
 union.
 
+=head2 reduce duplication in sv_setsv_flags
+
+C<Perl_sv_setsv_flags> has a comment
+C</* There's a lot of redundancy below but we're going for speed here */>
+
+Whilst this was true 10 years ago, the growing disparity between RAM and CPU
+speeds mean that the trade offs have changed. In addition, the duplicate code
+adds to the maintenance burden. It would be good to see how much of the
+redundancy can be pruned, particular in the less common paths. (Profiling
+tools at the ready...). For example, why does the test for
+"Can't redefine active sort subroutine" need to occur in two places?
+
 
 
 
