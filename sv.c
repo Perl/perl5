@@ -10821,6 +10821,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
 #  ifdef DEBUGGING
     Poison(my_perl, 1, PerlInterpreter);
+    PL_op = Nullop;
+    PL_curcop = (COP *)Nullop;
     PL_markstack = 0;
     PL_scopestack = 0;
     PL_savestack = 0;
@@ -10854,6 +10856,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
 #    ifdef DEBUGGING
     Poison(my_perl, 1, PerlInterpreter);
+    PL_op = Nullop;
+    PL_curcop = (COP *)Nullop;
     PL_markstack = 0;
     PL_scopestack = 0;
     PL_savestack = 0;
