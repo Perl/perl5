@@ -2387,9 +2387,8 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
     return fold_constants((OP *)binop);
 }
 
-static int uvcompare(const void *a, const void *b) __attribute__((nonnull,pure));
-static int
-uvcompare(const void *a, const void *b)
+static int uvcompare(const void *a, const void *b) __attribute__nonnull__(1) __attribute__nonnull__(2) __attribute__pure__;
+static int uvcompare(const void *a, const void *b)
 {
     if (*((const UV *)a) < (*(const UV *)b))
 	return -1;
@@ -4188,7 +4187,6 @@ CV *
 Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 {
     STRLEN n_a;
-    const char *name;
     const char *aname;
     GV *gv;
     char *ps;
@@ -4196,7 +4194,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     register CV *cv=0;
     SV *const_sv;
 
-    name = o ? SvPVx(cSVOPo->op_sv, n_a) : Nullch;
+    const char * const name = o ? SvPVx(cSVOPo->op_sv, n_a) : Nullch;
 
     if (proto) {
 	assert(proto->op_type == OP_CONST);
@@ -4858,11 +4856,7 @@ Perl_oopsCV(pTHX_ OP *o)
     Perl_croak(aTHX_ "NOT IMPL LINE %d",__LINE__);
     /* STUB */
     (void)o;
-#ifndef HASATTRIBUTE
-    /* No __attribute__, so the compiler doesn't know that croak never returns
-     */
-    return 0;
-#endif
+    NORETURN_FUNCTION_END;
 }
 
 OP *

@@ -107,7 +107,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 {
     register GP *gp;
     const bool doproto = SvTYPE(gv) > SVt_NULL;
-    char *proto = (doproto && SvPOK(gv)) ? SvPVX(gv) : NULL;
+    const char * const proto = (doproto && SvPOK(gv)) ? SvPVX(gv) : NULL;
 
     sv_upgrade((SV*)gv, SVt_PVGV);
     if (SvLEN(gv)) {

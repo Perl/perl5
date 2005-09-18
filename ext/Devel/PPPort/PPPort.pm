@@ -3951,14 +3951,16 @@ __DATA__
 /* Replace: 0 */
 #endif
 
-#ifdef HASATTRIBUTE
-#  if (defined(__GNUC__) && defined(__cplusplus)) || defined(__INTEL_COMPILER)
-#    define PERL_UNUSED_DECL
+#ifndef PERL_UNUSED_DECL
+#  ifdef HASATTRIBUTE
+#    if (defined(__GNUC__) && defined(__cplusplus)) || defined(__INTEL_COMPILER)
+#      define PERL_UNUSED_DECL
+#    else
+#      define PERL_UNUSED_DECL __attribute__((unused))
+#    endif
 #  else
-#    define PERL_UNUSED_DECL __attribute__((unused))
+#    define PERL_UNUSED_DECL
 #  endif
-#else
-#  define PERL_UNUSED_DECL
 #endif
 #ifndef NOOP
 #  define NOOP                           (void)0

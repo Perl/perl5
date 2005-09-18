@@ -504,11 +504,7 @@ Perl_save_threadsv(pTHX_ PADOFFSET i)
 #else
     Perl_croak(aTHX_ "panic: save_threadsv called in non-threaded perl");
     (void)i;
-#ifndef HASATTRIBUTE
-    /* No __attribute__, so the compiler doesn't know that croak never returns
-     */
-    return 0;
-#endif
+    NORETURN_FUNCTION_END;
 #endif /* USE_5005THREADS */
 }
 

@@ -79,8 +79,8 @@ handled automatically by C<xsubpp>.
 #if defined(__CYGWIN__) && defined(USE_DYNAMIC_LOADING)
 #  define XS(name) __declspec(dllexport) void name(pTHX_ CV* cv)
 #else
-#  if defined(HASATTRIBUTE)
-#    define XS(name) void name(pTHX_ CV* cv __attribute__((unused)))
+#  ifdef HASATTRIBUTE_UNUSED
+#    define XS(name) void name(pTHX_ CV* cv __attribute__unused__)
 #  else
 #    define XS(name) void name(pTHX_ CV* cv)
 #  endif

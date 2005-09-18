@@ -872,7 +872,7 @@ PP(pp_mapstart)
 PP(pp_mapwhile)
 {
     dSP;
-    I32 gimme = GIMME_V;
+    const I32 gimme = GIMME_V;
     I32 items = (SP - PL_stack_base) - *PL_markstack_ptr; /* how many new items */
     I32 count;
     I32 shift;
@@ -1069,7 +1069,7 @@ PP(pp_flop)
 	else {
 	    SV *final = sv_mortalcopy(right);
 	    STRLEN len, n_a;
-	    char *tmps = SvPV(final, len);
+	    const char *tmps = SvPV(final, len);
 
 	    sv = sv_mortalcopy(left);
 	    SvPV_force(sv,n_a);
@@ -1159,7 +1159,7 @@ S_dopoptolabel(pTHX_ const char *label)
 I32
 Perl_dowantarray(pTHX)
 {
-    I32 gimme = block_gimme();
+    const I32 gimme = block_gimme();
     return (gimme == G_VOID) ? G_SCALAR : gimme;
 }
 
@@ -1436,10 +1436,8 @@ PP(pp_caller)
     register PERL_CONTEXT *cx;
     register PERL_CONTEXT *ccstack = cxstack;
     PERL_SI *top_si = PL_curstackinfo;
-    I32 dbcxix;
     I32 gimme;
     const char *stashname;
-    SV *sv;
     I32 count = 0;
 
     if (MAXARG)
@@ -1470,7 +1468,7 @@ PP(pp_caller)
 
     cx = &ccstack[cxix];
     if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
-        dbcxix = dopoptosub_at(ccstack, cxix - 1);
+        const I32 dbcxix = dopoptosub_at(ccstack, cxix - 1);
 	/* We expect that ccstack[dbcxix] is CXt_SUB, anyway, the
 	   field below is defined for any cx. */
 	/* caller() should not report the automatic calls to &DB::sub */
@@ -1505,7 +1503,7 @@ PP(pp_caller)
 	GV *cvgv = CvGV(ccstack[cxix].blk_sub.cv);
 	/* So is ccstack[dbcxix]. */
 	if (isGV(cvgv)) {
-	    sv = NEWSV(49, 0);
+	    SV * const sv = NEWSV(49, 0);
 	    gv_efullname3(sv, cvgv, Nullch);
 	    PUSHs(sv_2mortal(sv));
 	    PUSHs(sv_2mortal(newSViv((I32)cx->blk_sub.hasargs)));
@@ -1631,7 +1629,7 @@ PP(pp_dbstate)
 	dSP;
 	register CV *cv;
 	register PERL_CONTEXT *cx;
-	I32 gimme = G_ARRAY;
+	const I32 gimme = G_ARRAY;
 	U8 hasargs;
 	GV *gv;
 
@@ -1673,7 +1671,7 @@ PP(pp_enteriter)
 {
     dSP; dMARK;
     register PERL_CONTEXT *cx;
-    I32 gimme = GIMME_V;
+    const I32 gimme = GIMME_V;
     SV **svp;
     U32 cxtype = CXt_LOOP;
 #ifdef USE_ITHREADS
@@ -1763,7 +1761,7 @@ PP(pp_enterloop)
 {
     dSP;
     register PERL_CONTEXT *cx;
-    I32 gimme = GIMME_V;
+    const I32 gimme = GIMME_V;
 
     ENTER;
     SAVETMPS;
@@ -2521,7 +2519,7 @@ PP(pp_exit)
 PP(pp_nswitch)
 {
     dSP;
-    NV value = SvNVx(GvSV(cCOP->cop_gv));
+    const NV value = SvNVx(GvSV(cCOP->cop_gv));
     register I32 match = I_32(value);
 
     if (value < 0.0) {
@@ -2565,10 +2563,10 @@ S_save_lines(pTHX_ AV *array, SV *sv)
 {
     register const char *s = SvPVX(sv);
     register const char *send = SvPVX(sv) + SvCUR(sv);
-    register const char *t;
     register I32 line = 1;
 
     while (s && s < send) {
+	const char *t;
 	SV *tmpstr = NEWSV(85,0);
 
 	sv_upgrade(tmpstr, SVt_PVMG);
@@ -2948,7 +2946,7 @@ STATIC PerlIO *
 S_doopen_pm(pTHX_ const char *name, const char *mode)
 {
 #ifndef PERL_DISABLE_PMC
-    STRLEN namelen = strlen(name);
+    const STRLEN namelen = strlen(name);
     PerlIO *fp;
 
     if (namelen > 3 && strEQ(name + namelen - 3, ".pm")) {
@@ -2990,9 +2988,8 @@ PP(pp_require)
     char *tryname = Nullch;
     SV *namesv = Nullsv;
     SV** svp;
-    I32 gimme = GIMME_V;
+    const I32 gimme = GIMME_V;
     PerlIO *tryrsfp = 0;
-    STRLEN n_a;
     int filter_has_file = 0;
     GV *filter_child_proc = 0;
     SV *filter_state = 0;
@@ -3218,6 +3215,7 @@ PP(pp_require)
 			|| (*name == ':' && name[1] != ':' && strchr(name+2, ':'))
 #endif
 		  ) {
+		    STRLEN n_a;
 		    char *dir = SvPVx(dirsv, n_a);
 #ifdef MACOS_TRADITIONAL
 		    char buf1[256];
@@ -3267,7 +3265,8 @@ PP(pp_require)
 		    sv_catpv(msg, " (did you run h2ph?)");
 		sv_catpv(msg, " (@INC contains:");
 		for (i = 0; i <= AvFILL(ar); i++) {
-		    char *dir = SvPVx(*av_fetch(ar, i, TRUE), n_a);
+		    STRLEN n_a;
+		    const char *dir = SvPVx(*av_fetch(ar, i, TRUE), n_a);
 		    Perl_sv_setpvf(aTHX_ dirmsgsv, " %s", dir);
 		    sv_catsv(msg, dirmsgsv);
 		}
@@ -3362,7 +3361,7 @@ PP(pp_entereval)
     dSP;
     register PERL_CONTEXT *cx;
     dPOPss;
-    I32 gimme = GIMME_V, was = PL_sub_generation;
+    const I32 gimme = GIMME_V, was = PL_sub_generation;
     char tbuf[TYPE_DIGITS(long) + 12];
     char *tmpbuf = tbuf;
     char *safestr;
@@ -3521,7 +3520,7 @@ PP(pp_entertry)
 {
     dSP;
     register PERL_CONTEXT *cx;
-    I32 gimme = GIMME_V;
+    const I32 gimme = GIMME_V;
 
     ENTER;
     SAVETMPS;

@@ -320,9 +320,9 @@ S_more_sv(pTHX)
         PL_nice_chunk_size = 0;
     }
     else {
-	char *chunk; /* must use New here to match call to Safefree()      */
-	New(704,chunk,PERL_ARENA_SIZE,char);   /*  in sv_free_arenas()     */
-	sv_add_arena(chunk, PERL_ARENA_SIZE, 0);
+	char *chunk;                /* must use New here to match call to */
+	New(704,chunk,1008,char);   /* Safefree() in sv_free_arenas()     */
+	sv_add_arena(chunk, 1008, 0);
     }
     uproot_SV(sv);
     return sv;
@@ -2186,7 +2186,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
     }
     else if (SvPOKp(sv) && SvLEN(sv)) {
 	UV value;
-	int numtype = grok_number(SvPVX(sv), SvCUR(sv), &value);
+	const int numtype = grok_number(SvPVX(sv), SvCUR(sv), &value);
 	/* We want to avoid a possible problem when we cache an IV which
 	   may be later translated to an NV, and the resulting NV is not
 	   the same as the direct translation of the initial string
@@ -2478,7 +2478,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
     }
     else if (SvPOKp(sv) && SvLEN(sv)) {
 	UV value;
-	int numtype = grok_number(SvPVX(sv), SvCUR(sv), &value);
+	const int numtype = grok_number(SvPVX(sv), SvCUR(sv), &value);
 
 	/* We want to avoid a possible problem when we cache a UV which
 	   may be later translated to an NV, and the resulting NV is not
@@ -2728,7 +2728,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     }
     else if (SvPOKp(sv) && SvLEN(sv)) {
 	UV value;
-	int numtype = grok_number(SvPVX(sv), SvCUR(sv), &value);
+	const int numtype = grok_number(SvPVX(sv), SvCUR(sv), &value);
 	if (ckWARN(WARN_NUMERIC) && !SvIOKp(sv) && !numtype)
 	    not_a_number(sv);
 #ifdef NV_PRESERVES_UV
@@ -4333,7 +4333,7 @@ Perl_sv_chop(pTHX_ register SV *sv, register char *ptr)
 
     if (!SvOOK(sv)) {
 	if (!SvLEN(sv)) { /* make copy of shared string */
-	    char *pvx = SvPVX(sv);
+	    const char *pvx = SvPVX(sv);
 	    STRLEN len = SvCUR(sv);
 	    SvGROW(sv, len + 1);
 	    Move(pvx,SvPVX(sv),len,char);
@@ -4386,9 +4386,8 @@ void
 Perl_sv_catpvn_flags(pTHX_ register SV *dsv, register const char *sstr, register STRLEN slen, I32 flags)
 {
     STRLEN dlen;
-    char *dstr;
+    const char *dstr = SvPV_force_flags(dsv, dlen, flags);
 
-    dstr = SvPV_force_flags(dsv, dlen, flags);
     SvGROW(dsv, dlen + slen + 1);
     if (sstr == dstr)
 	sstr = SvPVX(dsv);
@@ -6186,7 +6185,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 	 */
 	Stat_t st;
 	if (!PerlLIO_fstat(PerlIO_fileno(fp), &st) && S_ISREG(st.st_mode))  {
-	    Off_t offset = PerlIO_tell(fp);
+	    const Off_t offset = PerlIO_tell(fp);
 	    if (offset != (Off_t) -1 && st.st_size + append > offset) {
 	     	(void) SvGROW(sv, (STRLEN)((st.st_size - offset) + append + 1));
 	    }

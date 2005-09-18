@@ -315,7 +315,7 @@ PP(pp_backtick)
     PerlIO *fp;
     STRLEN n_a;
     char *tmps = POPpx;
-    I32 gimme = GIMME_V;
+    const I32 gimme = GIMME_V;
     const char *mode = "r";
 
     TAINT_PROPER("``");
@@ -1200,7 +1200,7 @@ PP(pp_getc)
     if (gv && (io = GvIO(gv))
 	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
     {
-	I32 gimme = GIMME_V;
+	const I32 gimme = GIMME_V;
 	PUSHMARK(SP);
 	XPUSHs(SvTIED_obj((SV*)io, mg));
 	PUTBACK;
@@ -1245,7 +1245,7 @@ STATIC OP *
 S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 {
     register PERL_CONTEXT *cx;
-    I32 gimme = GIMME_V;
+    const I32 gimme = GIMME_V;
 
     ENTER;
     SAVETMPS;
@@ -1347,7 +1347,7 @@ PP(pp_leavewrite)
 	}
 	if (IoFLAGS(io) & IOf_DIDTOP) {	/* Oh dear.  It still doesn't fit. */
 	    I32 lines = IoLINES_LEFT(io);
-	    char *s = SvPVX(PL_formtarget);
+	    const char *s = SvPVX(PL_formtarget);
 	    if (lines <= 0)		/* Yow, header didn't even fit!!! */
 		goto forget_top;
 	    while (lines-- > 0) {
@@ -1357,7 +1357,7 @@ PP(pp_leavewrite)
 		s++;
 	    }
 	    if (s) {
-		STRLEN save = SvCUR(PL_formtarget);
+		const STRLEN save = SvCUR(PL_formtarget);
 		SvCUR_set(PL_formtarget, s - SvPVX(PL_formtarget));
 		do_print(PL_formtarget, ofp);
 		SvCUR_set(PL_formtarget, save);
@@ -3848,7 +3848,7 @@ PP(pp_readdir)
     dSP;
 
     SV *sv;
-    I32 gimme = GIMME;
+    const I32 gimme = GIMME;
     GV *gv = (GV *)POPs;
     register Direntry_t *dp;
     register IO *io = GvIOn(gv);

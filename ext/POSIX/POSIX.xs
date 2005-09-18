@@ -85,6 +85,26 @@ char *tzname[] = { "" , "" };
 #endif
 #endif
 
+#ifndef PERL_UNUSED_DECL
+#  ifdef HASATTRIBUTE
+#    if (defined(__GNUC__) && defined(__cplusplus)) || defined(__INTEL_COMPILER)
+#      define PERL_UNUSED_DECL
+#    else
+#      define PERL_UNUSED_DECL __attribute__((unused))
+#    endif
+#  else
+#    define PERL_UNUSED_DECL
+#  endif
+#endif
+
+#ifndef dNOOP
+#define dNOOP extern int Perl___notused PERL_UNUSED_DECL
+#endif
+
+#ifndef dVAR
+#define dVAR dNOOP
+#endif
+
 #if defined(__VMS) && !defined(__POSIX_SOURCE)
 #  include <libdef.h>       /* LIB$_INVARG constant */
 #  include <lib$routines.h> /* prototype for lib$ediv() */

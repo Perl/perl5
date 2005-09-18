@@ -1110,14 +1110,10 @@ perl_free(pTHXx)
 #pragma fini "perl_fini"
 #endif
 
-#if defined(__GNUC__) && defined(__attribute__) 
-/* want to make sure __attribute__ works here even
- * for -Dd_attribut=undef builds.
- */
-#undef __attribute__
+static void
+#if defined(__GNUC__)
+__attribute__((destructor))
 #endif
-
-static void __attribute__((destructor))
 perl_fini(void)
 {
     if (PL_curinterp)
@@ -2250,7 +2246,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	/* we're trying to emulate pp_entertry() here */
 	{
 	    register PERL_CONTEXT *cx;
-	    I32 gimme = GIMME_V;
+	    const I32 gimme = GIMME_V;
 	
 	    ENTER;
 	    SAVETMPS;

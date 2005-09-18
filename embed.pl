@@ -201,23 +201,37 @@ sub write_protos {
 	    $ret .= "void" if !$has_context;
 	}
 	$ret .= ")";
-	$ret .= " __attribute__((noreturn))" if $flags =~ /r/;
-	$ret .= "\n\t\t\t__attribute__((malloc)) __attribute__((warn_unused_result))" if $flags =~ /a/;
-	$ret .= "\n\t\t\t__attribute__((pure))" if $flags =~ /P/;
+	my @attrs;
+	if ( $flags =~ /r/ ) {
+	    push @attrs, "__attribute__noreturn__";
+	}
+	if ( $flags =~ /a/ ) {
+	    push @attrs, "__attribute__malloc__";
+	    $flags .= "R"; # All allocing must check return value
+	}
+	if ( $flags =~ /R/ ) {
+	    push @attrs, "__attribute__warn_unused_result__";
+	}
+	if ( $flags =~ /P/ ) {
+	    push @attrs, "__attribute__pure__";
+	}
 	if( $flags =~ /f/ ) {
 	    my $prefix = $has_context ? 'pTHX_' : '';
 	    my $args = scalar @args;
-	    $ret .= sprintf "\n\t\t\t__attribute__format__(__printf__,%s%d,%s%d)",
+	    push @attrs, sprintf "__attribute__format__(__printf__,%s%d,%s%d)",
 				    $prefix, $args - 1, $prefix, $args;
 	}
-	$ret .= "\n\t\t\t__attribute__((nonnull))" if $flags =~ /N/;
 	if ( @nonnull ) {
 	    my @pos = map { $has_context ? "pTHX_$_" : $_ } @nonnull;
-	    $ret .= sprintf( "\n\t\t\t__attribute__((nonnull(%s)))", join( ",", @pos ) );
+	    push @attrs, map { sprintf( "__attribute__nonnull__(%s)", $_ ) } @pos;
+	}
+	if ( @attrs ) {
+	    $ret .= "\n";
+	    $ret .= join( "\n", map { "\t\t\t$_" } @attrs );
 	}
 	$ret .= ";";
 	$ret .= ' */' if $flags =~ /m/;
-	$ret .= "\n";
+	$ret .= @attrs ? "\n\n" : "\n";
     }
     $ret;
 }

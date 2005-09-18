@@ -1399,7 +1399,6 @@ The "normal" is a string like "ToLower" which means the swash
 UV
 Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *normal, char *special)
 {
-    UV uv1;
     U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
     STRLEN len = 0;
 
@@ -1407,7 +1406,7 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
     /* The NATIVE_TO_UNI() and UNI_TO_NATIVE() mappings
      * are necessary in EBCDIC, they are redundant no-ops
      * in ASCII-ish platforms, and hopefully optimized away. */
-    uv1 = NATIVE_TO_UNI(uv0);
+    const UV uv1 = NATIVE_TO_UNI(uv0);
     uvuni_to_utf8(tmpbuf, uv1);
 
     if (!*swashp) /* load on-demand */
