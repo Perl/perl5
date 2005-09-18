@@ -15,7 +15,10 @@ ideas, and any discussion about them. One set of archives may be found at:
 
     http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 
-
+What can we offer you in return? Fame, fortune, and everlasting glory? Maybe
+not, but if your patch is incorporated, then we'll add your name to the
+F<AUTHORS> file, which ships in the official distribution. How many other
+programming languages offer you 1 line of immortality?
 
 
 
@@ -56,7 +59,7 @@ A full test suite for the B module would be nice.
 
 =head2 A decent benchmark
 
-perlbench seems impervious to any recent changes made to the perl core. It
+C<perlbench> seems impervious to any recent changes made to the perl core. It
 would be useful to have a reasonable general benchmarking suite that roughly
 represented what current perl programs do, and measurably reported whether
 tweaks to the core improve, degrade or don't really affect performance, to
@@ -111,6 +114,12 @@ locating/producing comprehensive test cases.
 Or if you prefer, tasks that you would learn from, and broaden your skills
 base...
 
+=head2 Relocatable perl
+
+The C level patches needed to create a relocatable perl binary are done, as
+is the work on F<Config.pm>. All that's left to do is the C<Configure> tweaking
+to let people specify how they want to do the install.
+
 =head2 make HTML install work
 
 There is an C<installhtml> target in the Makefile. It's marked as
@@ -127,12 +136,13 @@ and the core documentation (files in F<pod/>)
 
 =item 2
 
-Work out how to split perlfunc into chunks, preferably one per function group,
-preferably with general case code that could be used elsewhere. Challenges
-here are correctly identifying the groups of functions that go together, and
-making the right named external cross-links point to the right page. Things to
-be aware of are C<-X>, groups such as C<getpwnam> to C<endservent>, two or
-more C<=items> giving the different parameter lists, such as
+Work out how to split C<perlfunc> into chunks, preferably one per function
+group, preferably with general case code that could be used elsewhere.
+Challenges here are correctly identifying the groups of functions that go
+together, and making the right named external cross-links point to the right
+page. Things to be aware of are C<-X>, groups such as C<getpwnam> to
+C<endservent>, two or more C<=items> giving the different parameter lists, such
+as
 
     =item substr EXPR,OFFSET,LENGTH,REPLACEMENT
     
@@ -228,12 +238,6 @@ possibly involving probing at install time or later, so that the C<%Config> in
 a binary distribution better describes the installed machine, when the
 installed machine differs from the build machine in some significant way.
 
-=head2 Relocatable perl
-
-The C level patches needed to create a relocatable perl binary are done, as
-is the work on Config.pm. All that's left to do is the C<Configure> tweaking
-to let people specify how they want to do the install.
-
 =head2 make parallel builds work
 
 Currently parallel builds (such as C<make -j3>) don't work reliably. We believe
@@ -251,9 +255,9 @@ background or experience with XS, or how the Perl interpreter works
 
 =head2 Make it clear from -v if this is the exact official release
 
-Currently perl from p4/rsync ships with a patchlevel.h file that usually
-defines one local patch, of the form "MAINT12345" or "RC1". The output of
-perl -v doesn't report that a perl isn't an official release, and this
+Currently perl from C<p4>/C<rsync> ships with a F<patchlevel.h> file that
+usually defines one local patch, of the form "MAINT12345" or "RC1". The output
+of perl -v doesn't report that a perl isn't an official release, and this
 information can get lost in bugs reports. Because of this, the minor version
 isn't bumped up until RC time, to minimise the possibility of versions of perl
 escaping that believe themselves to be newer than they actually are.
