@@ -683,7 +683,7 @@ XS(XS_Internals_hash_seed)
 {
     /* Using dXSARGS would also have dITEM and dSP,
      * which define 2 unused local variables.  */
-    dMARK; dAX;
+    dAXMARK;
     XSRETURN_UV(PERL_HASH_SEED);
 }
 
@@ -691,7 +691,7 @@ XS(XS_Internals_rehash_seed)
 {
     /* Using dXSARGS would also have dITEM and dSP,
      * which define 2 unused local variables.  */
-    dMARK; dAX;
+    dAXMARK;
     XSRETURN_UV(PL_rehash_seed);
 }
 

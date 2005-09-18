@@ -772,7 +772,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		 char *s1 = s0 + STR_LEN(scan) - 1, *s2 = s1 - 4;
                  const char *t0 = "\xcc\x88\xcc\x81";
                  const char *t1 = t0 + 3;
-		 
+
 		 for (s = s0 + 2;
 		      s < s2 && (t = ninstr(s, s1, t0, t1));
 		      s = t + 4) {
@@ -1826,11 +1826,11 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 
     Newz(1304, r->offsets, 2*RExC_size+1, U32); /* MJD 20001228 */
     if (r->offsets) {
-      r->offsets[0] = RExC_size; 
+	r->offsets[0] = RExC_size;
     }
     DEBUG_r(PerlIO_printf(Perl_debug_log, 
-                          "%s %"UVuf" bytes for offset annotations.\n", 
-                          r->offsets ? "Got" : "Couldn't get", 
+                          "%s %"UVuf" bytes for offset annotations.\n",
+                          r->offsets ? "Got" : "Couldn't get",
                           (UV)((2*RExC_size+1) * sizeof(U32))));
 
     RExC_rx = r;
@@ -2306,7 +2306,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 		    while (isDIGIT(*RExC_parse))
 			RExC_parse++;
                     ret = reganode(pRExC_state, GROUPP, parno);
-                    
+
 		    if ((c = *nextchar(pRExC_state)) != ')')
 			vFAIL("Switch condition not recognized");
 		  insert_if:
@@ -2428,7 +2428,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
     parse_start = RExC_parse;   /* MJD */
     br = regbranch(pRExC_state, &flags, 1);
     /*     branch_len = (paren != 0); */
-    
+
     if (br == NULL)
 	return(NULL);
     if (*RExC_parse == '|') {
@@ -2463,7 +2463,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 	    RExC_extralen += 2;		/* Account for LONGJMP. */
 	nextchar(pRExC_state);
 	br = regbranch(pRExC_state, &flags, 0);
-        
+
 	if (br == NULL)
 	    return(NULL);
 	regtail(pRExC_state, lastbr, br);		/* BRANCH -> BRANCH. */
@@ -2690,9 +2690,9 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp)
 		reginsert(pRExC_state, CURLYX,ret);
                                 /* MJD hk */
                 Set_Node_Offset(ret, parse_start+1);
-                Set_Node_Length(ret, 
+                Set_Node_Length(ret,
                                 op == '{' ? (RExC_parse - parse_start) : 1);
-                
+
 		if (!SIZE_ONLY && RExC_extralen)
 		    NEXT_OFF(ret) = 3;	/* Go over NOTHING to LONGJMP. */
 		regtail(pRExC_state, ret, reg_node(pRExC_state, NOTHING));
@@ -3047,9 +3047,9 @@ tryagain:
 				   (U8)(FOLD ? (LOC ? REFFL : REFF) : REF),
 				   num);
 		    *flagp |= HASWIDTH;
-                    
+
                     /* override incorrect value set in reganode MJD */
-                    Set_Node_Offset(ret, parse_start+1); 
+                    Set_Node_Offset(ret, parse_start+1);
                     Set_Node_Cur_Length(ret); /* MJD */
 		    RExC_parse--;
 		    nextchar(pRExC_state);
