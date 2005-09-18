@@ -158,6 +158,7 @@ Public API:
  * "A time to plant, and a time to uproot what was planted..."
  */
 
+
 #define plant_SV(p) \
     STMT_START {					\
 	SvANY(p) = (void *)PL_sv_root;			\
@@ -175,6 +176,28 @@ Public API:
     } STMT_END
 
 
+/* make some more SVs by adding another arena */
+
+/* sv_mutex must be held while calling more_sv() */
+STATIC SV*
+S_more_sv(pTHX)
+{
+    SV* sv;
+
+    if (PL_nice_chunk) {
+	sv_add_arena(PL_nice_chunk, PL_nice_chunk_size, 0);
+	PL_nice_chunk = Nullch;
+        PL_nice_chunk_size = 0;
+    }
+    else {
+	char *chunk;                /* must use New here to match call to */
+	New(704,chunk,PERL_ARENA_SIZE,char);   /* Safefree() in sv_free_arenas()     */
+	sv_add_arena(chunk, PERL_ARENA_SIZE, 0);
+    }
+    uproot_SV(sv);
+    return sv;
+}
+
 /* new_SV(): return a new, empty SV head */
 
 #ifdef DEBUG_LEAKING_SCALARS
@@ -188,7 +211,7 @@ S_new_SV(pTHX)
     if (PL_sv_root)
 	uproot_SV(sv);
     else
-	sv = more_sv();
+	sv = S_more_sv(aTHX);
     UNLOCK_SV_MUTEX;
     SvANY(sv) = 0;
     SvREFCNT(sv) = 1;
@@ -204,7 +227,7 @@ S_new_SV(pTHX)
 	if (PL_sv_root)					\
 	    uproot_SV(p);				\
 	else						\
-	    (p) = more_sv();				\
+	    (p) = S_more_sv(aTHX);			\
 	UNLOCK_SV_MUTEX;				\
 	SvANY(p) = 0;					\
 	SvREFCNT(p) = 1;				\
@@ -304,28 +327,6 @@ Perl_sv_add_arena(pTHX_ char *ptr, U32 size, U32 flags)
     SvREFCNT(sv) = 0;
 #endif
     SvFLAGS(sv) = SVTYPEMASK;
-}
-
-/* make some more SVs by adding another arena */
-
-/* sv_mutex must be held while calling more_sv() */
-STATIC SV*
-S_more_sv(pTHX)
-{
-    register SV* sv;
-
-    if (PL_nice_chunk) {
-	sv_add_arena(PL_nice_chunk, PL_nice_chunk_size, 0);
-	PL_nice_chunk = Nullch;
-        PL_nice_chunk_size = 0;
-    }
-    else {
-	char *chunk;                /* must use New here to match call to */
-	New(704,chunk,1008,char);   /* Safefree() in sv_free_arenas()     */
-	sv_add_arena(chunk, 1008, 0);
-    }
-    uproot_SV(sv);
-    return sv;
 }
 
 /* visit(): call the named function for each non-free SV in the arenas
@@ -576,6 +577,13 @@ Perl_sv_free_arenas(pTHX)
     PL_xpvmg_arenaroot = 0;
     PL_xpvmg_root = 0;
 
+    for (arena = (XPV*)PL_xpvgv_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xpvgv_arenaroot = 0;
+    PL_xpvgv_root = 0;
+
     for (arena = (XPV*)PL_xpvlv_arenaroot; arena; arena = arenanext) {
 	arenanext = (XPV*)arena->xpv_pv;
 	Safefree(arena);
@@ -632,6 +640,302 @@ Perl_report_uninit(pTHX)
 	Perl_warner(aTHX_ packWARN(WARN_UNINITIALIZED), PL_warn_uninit, "", "");
 }
 
+
+/* allocate another arena's worth of struct xrv */
+
+STATIC void
+S_more_xrv(pTHX)
+{
+    XRV* xrv;
+    XRV* xrvend;
+    XPV *ptr;
+    New(712, ptr, PERL_ARENA_SIZE/sizeof(XPV), XPV);
+    ptr->xpv_pv = (char*)PL_xrv_arenaroot;
+    PL_xrv_arenaroot = ptr;
+
+    xrv = (XRV*) ptr;
+    xrvend = &xrv[PERL_ARENA_SIZE / sizeof(XRV) - 1];
+    xrv += (sizeof(XPV) - 1) / sizeof(XRV) + 1;
+    PL_xrv_root = xrv;
+    while (xrv < xrvend) {
+	xrv->xrv_rv = (SV*)(xrv + 1);
+	xrv++;
+    }
+    xrv->xrv_rv = 0;
+}
+
+/* allocate another arena's worth of IV bodies */
+
+STATIC void
+S_more_xiv(pTHX)
+{
+    IV* xiv;
+    IV* xivend;
+    XPV* ptr;
+    New(705, ptr, PERL_ARENA_SIZE/sizeof(XPV), XPV);
+    ptr->xpv_pv = (char*)PL_xiv_arenaroot;	/* linked list of xiv arenas */
+    PL_xiv_arenaroot = ptr;			/* to keep Purify happy */
+
+    xiv = (IV*) ptr;
+    xivend = &xiv[PERL_ARENA_SIZE / sizeof(IV) - 1];
+    xiv += (sizeof(XPV) - 1) / sizeof(IV) + 1;	/* fudge by size of XPV */
+    PL_xiv_root = xiv;
+    while (xiv < xivend) {
+	*(IV**)xiv = (IV *)(xiv + 1);
+	xiv++;
+    }
+    *(IV**)xiv = 0;
+}
+
+/* allocate another arena's worth of NV bodies */
+
+STATIC void
+S_more_xnv(pTHX)
+{
+    NV* xnv;
+    NV* xnvend;
+    XPV *ptr;
+    New(711, ptr, PERL_ARENA_SIZE/sizeof(XPV), XPV);
+    ptr->xpv_pv = (char*)PL_xnv_arenaroot;
+    PL_xnv_arenaroot = ptr;
+
+    xnv = (NV*) ptr;
+    xnvend = &xnv[PERL_ARENA_SIZE / sizeof(NV) - 1];
+    xnv += (sizeof(XPVIV) - 1) / sizeof(NV) + 1; /* fudge by sizeof XPVIV */
+    PL_xnv_root = xnv;
+    while (xnv < xnvend) {
+	*(NV**)xnv = (NV*)(xnv + 1);
+	xnv++;
+    }
+    *(NV**)xnv = 0;
+}
+
+/* allocate another arena's worth of struct xpv */
+
+STATIC void
+S_more_xpv(pTHX)
+{
+    XPV* xpv;
+    XPV* xpvend;
+    New(713, xpv, PERL_ARENA_SIZE/sizeof(XPV), XPV);
+    xpv->xpv_pv = (char*)PL_xpv_arenaroot;
+    PL_xpv_arenaroot = xpv;
+
+    xpvend = &xpv[PERL_ARENA_SIZE / sizeof(XPV) - 1];
+    PL_xpv_root = ++xpv;
+    while (xpv < xpvend) {
+	xpv->xpv_pv = (char*)(xpv + 1);
+	xpv++;
+    }
+    xpv->xpv_pv = 0;
+}
+
+/* allocate another arena's worth of struct xpviv */
+
+STATIC void
+S_more_xpviv(pTHX)
+{
+    XPVIV* xpviv;
+    XPVIV* xpvivend;
+    New(714, xpviv, PERL_ARENA_SIZE/sizeof(XPVIV), XPVIV);
+    xpviv->xpv_pv = (char*)PL_xpviv_arenaroot;
+    PL_xpviv_arenaroot = xpviv;
+
+    xpvivend = &xpviv[PERL_ARENA_SIZE / sizeof(XPVIV) - 1];
+    PL_xpviv_root = ++xpviv;
+    while (xpviv < xpvivend) {
+	xpviv->xpv_pv = (char*)(xpviv + 1);
+	xpviv++;
+    }
+    xpviv->xpv_pv = 0;
+}
+
+/* allocate another arena's worth of struct xpvnv */
+
+STATIC void
+S_more_xpvnv(pTHX)
+{
+    XPVNV* xpvnv;
+    XPVNV* xpvnvend;
+    New(715, xpvnv, PERL_ARENA_SIZE/sizeof(XPVNV), XPVNV);
+    xpvnv->xpv_pv = (char*)PL_xpvnv_arenaroot;
+    PL_xpvnv_arenaroot = xpvnv;
+
+    xpvnvend = &xpvnv[PERL_ARENA_SIZE / sizeof(XPVNV) - 1];
+    PL_xpvnv_root = ++xpvnv;
+    while (xpvnv < xpvnvend) {
+	xpvnv->xpv_pv = (char*)(xpvnv + 1);
+	xpvnv++;
+    }
+    xpvnv->xpv_pv = 0;
+}
+
+/* allocate another arena's worth of struct xpvcv */
+
+STATIC void
+S_more_xpvcv(pTHX)
+{
+    XPVCV* xpvcv;
+    XPVCV* xpvcvend;
+    New(716, xpvcv, PERL_ARENA_SIZE/sizeof(XPVCV), XPVCV);
+    xpvcv->xpv_pv = (char*)PL_xpvcv_arenaroot;
+    PL_xpvcv_arenaroot = xpvcv;
+
+    xpvcvend = &xpvcv[PERL_ARENA_SIZE / sizeof(XPVCV) - 1];
+    PL_xpvcv_root = ++xpvcv;
+    while (xpvcv < xpvcvend) {
+	xpvcv->xpv_pv = (char*)(xpvcv + 1);
+	xpvcv++;
+    }
+    xpvcv->xpv_pv = 0;
+}
+
+/* allocate another arena's worth of struct xpvav */
+
+STATIC void
+S_more_xpvav(pTHX)
+{
+    XPVAV* xpvav;
+    XPVAV* xpvavend;
+    New(717, xpvav, PERL_ARENA_SIZE/sizeof(XPVAV), XPVAV);
+    xpvav->xav_array = (char*)PL_xpvav_arenaroot;
+    PL_xpvav_arenaroot = xpvav;
+
+    xpvavend = &xpvav[PERL_ARENA_SIZE / sizeof(XPVAV) - 1];
+    PL_xpvav_root = ++xpvav;
+    while (xpvav < xpvavend) {
+	xpvav->xav_array = (char*)(xpvav + 1);
+	xpvav++;
+    }
+    xpvav->xav_array = 0;
+}
+
+/* allocate another arena's worth of struct xpvhv */
+
+STATIC void
+S_more_xpvhv(pTHX)
+{
+    XPVHV* xpvhv;
+    XPVHV* xpvhvend;
+    New(718, xpvhv, PERL_ARENA_SIZE/sizeof(XPVHV), XPVHV);
+    xpvhv->xhv_array = (char*)PL_xpvhv_arenaroot;
+    PL_xpvhv_arenaroot = xpvhv;
+
+    xpvhvend = &xpvhv[PERL_ARENA_SIZE / sizeof(XPVHV) - 1];
+    PL_xpvhv_root = ++xpvhv;
+    while (xpvhv < xpvhvend) {
+	xpvhv->xhv_array = (char*)(xpvhv + 1);
+	xpvhv++;
+    }
+    xpvhv->xhv_array = 0;
+}
+
+/* allocate another arena's worth of struct xpvmg */
+
+STATIC void
+S_more_xpvmg(pTHX)
+{
+    XPVMG* xpvmg;
+    XPVMG* xpvmgend;
+    New(719, xpvmg, PERL_ARENA_SIZE/sizeof(XPVMG), XPVMG);
+    xpvmg->xpv_pv = (char*)PL_xpvmg_arenaroot;
+    PL_xpvmg_arenaroot = xpvmg;
+
+    xpvmgend = &xpvmg[PERL_ARENA_SIZE / sizeof(XPVMG) - 1];
+    PL_xpvmg_root = ++xpvmg;
+    while (xpvmg < xpvmgend) {
+	xpvmg->xpv_pv = (char*)(xpvmg + 1);
+	xpvmg++;
+    }
+    xpvmg->xpv_pv = 0;
+}
+
+/* allocate another arena's worth of struct xpvgv */
+
+STATIC void
+S_more_xpvgv(pTHX)
+{
+    XPVGV* xpvgv;
+    XPVGV* xpvgvend;
+    New(720, xpvgv, PERL_ARENA_SIZE/sizeof(XPVGV), XPVGV);
+    xpvgv->xpv_pv = (char*)PL_xpvgv_arenaroot;
+    PL_xpvgv_arenaroot = xpvgv;
+
+    xpvgvend = &xpvgv[PERL_ARENA_SIZE / sizeof(XPVGV) - 1];
+    PL_xpvgv_root = ++xpvgv;
+    while (xpvgv < xpvgvend) {
+	xpvgv->xpv_pv = (char*)(xpvgv + 1);
+	xpvgv++;
+    }
+    xpvgv->xpv_pv = 0;
+}
+
+/* allocate another arena's worth of struct xpvlv */
+
+STATIC void
+S_more_xpvlv(pTHX)
+{
+    XPVLV* xpvlv;
+    XPVLV* xpvlvend;
+    New(720, xpvlv, PERL_ARENA_SIZE/sizeof(XPVLV), XPVLV);
+    xpvlv->xpv_pv = (char*)PL_xpvlv_arenaroot;
+    PL_xpvlv_arenaroot = xpvlv;
+
+    xpvlvend = &xpvlv[PERL_ARENA_SIZE / sizeof(XPVLV) - 1];
+    PL_xpvlv_root = ++xpvlv;
+    while (xpvlv < xpvlvend) {
+	xpvlv->xpv_pv = (char*)(xpvlv + 1);
+	xpvlv++;
+    }
+    xpvlv->xpv_pv = 0;
+}
+
+/* allocate another arena's worth of struct xpvbm */
+
+STATIC void
+S_more_xpvbm(pTHX)
+{
+    XPVBM* xpvbm;
+    XPVBM* xpvbmend;
+    New(721, xpvbm, PERL_ARENA_SIZE/sizeof(XPVBM), XPVBM);
+    xpvbm->xpv_pv = (char*)PL_xpvbm_arenaroot;
+    PL_xpvbm_arenaroot = xpvbm;
+
+    xpvbmend = &xpvbm[PERL_ARENA_SIZE / sizeof(XPVBM) - 1];
+    PL_xpvbm_root = ++xpvbm;
+    while (xpvbm < xpvbmend) {
+	xpvbm->xpv_pv = (char*)(xpvbm + 1);
+	xpvbm++;
+    }
+    xpvbm->xpv_pv = 0;
+}
+
+/* grab a new struct xrv from the free list, allocating more if necessary */
+
+STATIC XRV*
+S_new_xrv(pTHX)
+{
+    XRV* xrv;
+    LOCK_SV_MUTEX;
+    if (!PL_xrv_root)
+	S_more_xrv(aTHX);
+    xrv = PL_xrv_root;
+    PL_xrv_root = (XRV*)xrv->xrv_rv;
+    UNLOCK_SV_MUTEX;
+    return xrv;
+}
+
+/* return a struct xrv to the free list */
+
+STATIC void
+S_del_xrv(pTHX_ XRV *p)
+{
+    LOCK_SV_MUTEX;
+    p->xrv_rv = (SV*)PL_xrv_root;
+    PL_xrv_root = p;
+    UNLOCK_SV_MUTEX;
+}
+
 /* grab a new IV body from the free list, allocating more if necessary */
 
 STATIC XPVIV*
@@ -640,7 +944,7 @@ S_new_xiv(pTHX)
     IV* xiv;
     LOCK_SV_MUTEX;
     if (!PL_xiv_root)
-	more_xiv();
+	S_more_xiv(aTHX);
     xiv = PL_xiv_root;
     /*
      * See comment in more_xiv() -- RAM.
@@ -662,29 +966,6 @@ S_del_xiv(pTHX_ XPVIV *p)
     UNLOCK_SV_MUTEX;
 }
 
-/* allocate another arena's worth of IV bodies */
-
-STATIC void
-S_more_xiv(pTHX)
-{
-    register IV* xiv;
-    register IV* xivend;
-    XPV* ptr;
-    New(705, ptr, PERL_ARENA_SIZE/sizeof(XPV), XPV);
-    ptr->xpv_pv = (char*)PL_xiv_arenaroot;	/* linked list of xiv arenas */
-    PL_xiv_arenaroot = ptr;			/* to keep Purify happy */
-
-    xiv = (IV*) ptr;
-    xivend = &xiv[PERL_ARENA_SIZE / sizeof(IV) - 1];
-    xiv += (sizeof(XPV) - 1) / sizeof(IV) + 1;	/* fudge by size of XPV */
-    PL_xiv_root = xiv;
-    while (xiv < xivend) {
-	*(IV**)xiv = (IV *)(xiv + 1);
-	xiv++;
-    }
-    *(IV**)xiv = 0;
-}
-
 /* grab a new NV body from the free list, allocating more if necessary */
 
 STATIC XPVNV*
@@ -693,7 +974,7 @@ S_new_xnv(pTHX)
     NV* xnv;
     LOCK_SV_MUTEX;
     if (!PL_xnv_root)
-	more_xnv();
+	S_more_xnv(aTHX);
     xnv = PL_xnv_root;
     PL_xnv_root = *(NV**)xnv;
     UNLOCK_SV_MUTEX;
@@ -712,78 +993,6 @@ S_del_xnv(pTHX_ XPVNV *p)
     UNLOCK_SV_MUTEX;
 }
 
-/* allocate another arena's worth of NV bodies */
-
-STATIC void
-S_more_xnv(pTHX)
-{
-    register NV* xnv;
-    register NV* xnvend;
-    XPV *ptr;
-    New(711, ptr, PERL_ARENA_SIZE/sizeof(XPV), XPV);
-    ptr->xpv_pv = (char*)PL_xnv_arenaroot;
-    PL_xnv_arenaroot = ptr;
-
-    xnv = (NV*) ptr;
-    xnvend = &xnv[PERL_ARENA_SIZE / sizeof(NV) - 1];
-    xnv += (sizeof(XPVIV) - 1) / sizeof(NV) + 1; /* fudge by sizeof XPVIV */
-    PL_xnv_root = xnv;
-    while (xnv < xnvend) {
-	*(NV**)xnv = (NV*)(xnv + 1);
-	xnv++;
-    }
-    *(NV**)xnv = 0;
-}
-
-/* grab a new struct xrv from the free list, allocating more if necessary */
-
-STATIC XRV*
-S_new_xrv(pTHX)
-{
-    XRV* xrv;
-    LOCK_SV_MUTEX;
-    if (!PL_xrv_root)
-	more_xrv();
-    xrv = PL_xrv_root;
-    PL_xrv_root = (XRV*)xrv->xrv_rv;
-    UNLOCK_SV_MUTEX;
-    return xrv;
-}
-
-/* return a struct xrv to the free list */
-
-STATIC void
-S_del_xrv(pTHX_ XRV *p)
-{
-    LOCK_SV_MUTEX;
-    p->xrv_rv = (SV*)PL_xrv_root;
-    PL_xrv_root = p;
-    UNLOCK_SV_MUTEX;
-}
-
-/* allocate another arena's worth of struct xrv */
-
-STATIC void
-S_more_xrv(pTHX)
-{
-    register XRV* xrv;
-    register XRV* xrvend;
-    XPV *ptr;
-    New(712, ptr, PERL_ARENA_SIZE/sizeof(XPV), XPV);
-    ptr->xpv_pv = (char*)PL_xrv_arenaroot;
-    PL_xrv_arenaroot = ptr;
-
-    xrv = (XRV*) ptr;
-    xrvend = &xrv[PERL_ARENA_SIZE / sizeof(XRV) - 1];
-    xrv += (sizeof(XPV) - 1) / sizeof(XRV) + 1;
-    PL_xrv_root = xrv;
-    while (xrv < xrvend) {
-	xrv->xrv_rv = (SV*)(xrv + 1);
-	xrv++;
-    }
-    xrv->xrv_rv = 0;
-}
-
 /* grab a new struct xpv from the free list, allocating more if necessary */
 
 STATIC XPV*
@@ -792,7 +1001,7 @@ S_new_xpv(pTHX)
     XPV* xpv;
     LOCK_SV_MUTEX;
     if (!PL_xpv_root)
-	more_xpv();
+	S_more_xpv(aTHX);
     xpv = PL_xpv_root;
     PL_xpv_root = (XPV*)xpv->xpv_pv;
     UNLOCK_SV_MUTEX;
@@ -810,26 +1019,6 @@ S_del_xpv(pTHX_ XPV *p)
     UNLOCK_SV_MUTEX;
 }
 
-/* allocate another arena's worth of struct xpv */
-
-STATIC void
-S_more_xpv(pTHX)
-{
-    register XPV* xpv;
-    register XPV* xpvend;
-    New(713, xpv, PERL_ARENA_SIZE/sizeof(XPV), XPV);
-    xpv->xpv_pv = (char*)PL_xpv_arenaroot;
-    PL_xpv_arenaroot = xpv;
-
-    xpvend = &xpv[PERL_ARENA_SIZE / sizeof(XPV) - 1];
-    PL_xpv_root = ++xpv;
-    while (xpv < xpvend) {
-	xpv->xpv_pv = (char*)(xpv + 1);
-	xpv++;
-    }
-    xpv->xpv_pv = 0;
-}
-
 /* grab a new struct xpviv from the free list, allocating more if necessary */
 
 STATIC XPVIV*
@@ -838,7 +1027,7 @@ S_new_xpviv(pTHX)
     XPVIV* xpviv;
     LOCK_SV_MUTEX;
     if (!PL_xpviv_root)
-	more_xpviv();
+	S_more_xpviv(aTHX);
     xpviv = PL_xpviv_root;
     PL_xpviv_root = (XPVIV*)xpviv->xpv_pv;
     UNLOCK_SV_MUTEX;
@@ -856,26 +1045,6 @@ S_del_xpviv(pTHX_ XPVIV *p)
     UNLOCK_SV_MUTEX;
 }
 
-/* allocate another arena's worth of struct xpviv */
-
-STATIC void
-S_more_xpviv(pTHX)
-{
-    register XPVIV* xpviv;
-    register XPVIV* xpvivend;
-    New(714, xpviv, PERL_ARENA_SIZE/sizeof(XPVIV), XPVIV);
-    xpviv->xpv_pv = (char*)PL_xpviv_arenaroot;
-    PL_xpviv_arenaroot = xpviv;
-
-    xpvivend = &xpviv[PERL_ARENA_SIZE / sizeof(XPVIV) - 1];
-    PL_xpviv_root = ++xpviv;
-    while (xpviv < xpvivend) {
-	xpviv->xpv_pv = (char*)(xpviv + 1);
-	xpviv++;
-    }
-    xpviv->xpv_pv = 0;
-}
-
 /* grab a new struct xpvnv from the free list, allocating more if necessary */
 
 STATIC XPVNV*
@@ -884,7 +1053,7 @@ S_new_xpvnv(pTHX)
     XPVNV* xpvnv;
     LOCK_SV_MUTEX;
     if (!PL_xpvnv_root)
-	more_xpvnv();
+	S_more_xpvnv(aTHX);
     xpvnv = PL_xpvnv_root;
     PL_xpvnv_root = (XPVNV*)xpvnv->xpv_pv;
     UNLOCK_SV_MUTEX;
@@ -902,26 +1071,6 @@ S_del_xpvnv(pTHX_ XPVNV *p)
     UNLOCK_SV_MUTEX;
 }
 
-/* allocate another arena's worth of struct xpvnv */
-
-STATIC void
-S_more_xpvnv(pTHX)
-{
-    register XPVNV* xpvnv;
-    register XPVNV* xpvnvend;
-    New(715, xpvnv, PERL_ARENA_SIZE/sizeof(XPVNV), XPVNV);
-    xpvnv->xpv_pv = (char*)PL_xpvnv_arenaroot;
-    PL_xpvnv_arenaroot = xpvnv;
-
-    xpvnvend = &xpvnv[PERL_ARENA_SIZE / sizeof(XPVNV) - 1];
-    PL_xpvnv_root = ++xpvnv;
-    while (xpvnv < xpvnvend) {
-	xpvnv->xpv_pv = (char*)(xpvnv + 1);
-	xpvnv++;
-    }
-    xpvnv->xpv_pv = 0;
-}
-
 /* grab a new struct xpvcv from the free list, allocating more if necessary */
 
 STATIC XPVCV*
@@ -930,7 +1079,7 @@ S_new_xpvcv(pTHX)
     XPVCV* xpvcv;
     LOCK_SV_MUTEX;
     if (!PL_xpvcv_root)
-	more_xpvcv();
+	S_more_xpvcv(aTHX);
     xpvcv = PL_xpvcv_root;
     PL_xpvcv_root = (XPVCV*)xpvcv->xpv_pv;
     UNLOCK_SV_MUTEX;
@@ -948,26 +1097,6 @@ S_del_xpvcv(pTHX_ XPVCV *p)
     UNLOCK_SV_MUTEX;
 }
 
-/* allocate another arena's worth of struct xpvcv */
-
-STATIC void
-S_more_xpvcv(pTHX)
-{
-    register XPVCV* xpvcv;
-    register XPVCV* xpvcvend;
-    New(716, xpvcv, PERL_ARENA_SIZE/sizeof(XPVCV), XPVCV);
-    xpvcv->xpv_pv = (char*)PL_xpvcv_arenaroot;
-    PL_xpvcv_arenaroot = xpvcv;
-
-    xpvcvend = &xpvcv[PERL_ARENA_SIZE / sizeof(XPVCV) - 1];
-    PL_xpvcv_root = ++xpvcv;
-    while (xpvcv < xpvcvend) {
-	xpvcv->xpv_pv = (char*)(xpvcv + 1);
-	xpvcv++;
-    }
-    xpvcv->xpv_pv = 0;
-}
-
 /* grab a new struct xpvav from the free list, allocating more if necessary */
 
 STATIC XPVAV*
@@ -976,7 +1105,7 @@ S_new_xpvav(pTHX)
     XPVAV* xpvav;
     LOCK_SV_MUTEX;
     if (!PL_xpvav_root)
-	more_xpvav();
+	S_more_xpvav(aTHX);
     xpvav = PL_xpvav_root;
     PL_xpvav_root = (XPVAV*)xpvav->xav_array;
     UNLOCK_SV_MUTEX;
@@ -994,26 +1123,6 @@ S_del_xpvav(pTHX_ XPVAV *p)
     UNLOCK_SV_MUTEX;
 }
 
-/* allocate another arena's worth of struct xpvav */
-
-STATIC void
-S_more_xpvav(pTHX)
-{
-    register XPVAV* xpvav;
-    register XPVAV* xpvavend;
-    New(717, xpvav, PERL_ARENA_SIZE/sizeof(XPVAV), XPVAV);
-    xpvav->xav_array = (char*)PL_xpvav_arenaroot;
-    PL_xpvav_arenaroot = xpvav;
-
-    xpvavend = &xpvav[PERL_ARENA_SIZE / sizeof(XPVAV) - 1];
-    PL_xpvav_root = ++xpvav;
-    while (xpvav < xpvavend) {
-	xpvav->xav_array = (char*)(xpvav + 1);
-	xpvav++;
-    }
-    xpvav->xav_array = 0;
-}
-
 /* grab a new struct xpvhv from the free list, allocating more if necessary */
 
 STATIC XPVHV*
@@ -1022,7 +1131,7 @@ S_new_xpvhv(pTHX)
     XPVHV* xpvhv;
     LOCK_SV_MUTEX;
     if (!PL_xpvhv_root)
-	more_xpvhv();
+	S_more_xpvhv(aTHX);
     xpvhv = PL_xpvhv_root;
     PL_xpvhv_root = (XPVHV*)xpvhv->xhv_array;
     UNLOCK_SV_MUTEX;
@@ -1040,26 +1149,6 @@ S_del_xpvhv(pTHX_ XPVHV *p)
     UNLOCK_SV_MUTEX;
 }
 
-/* allocate another arena's worth of struct xpvhv */
-
-STATIC void
-S_more_xpvhv(pTHX)
-{
-    register XPVHV* xpvhv;
-    register XPVHV* xpvhvend;
-    New(718, xpvhv, PERL_ARENA_SIZE/sizeof(XPVHV), XPVHV);
-    xpvhv->xhv_array = (char*)PL_xpvhv_arenaroot;
-    PL_xpvhv_arenaroot = xpvhv;
-
-    xpvhvend = &xpvhv[PERL_ARENA_SIZE / sizeof(XPVHV) - 1];
-    PL_xpvhv_root = ++xpvhv;
-    while (xpvhv < xpvhvend) {
-	xpvhv->xhv_array = (char*)(xpvhv + 1);
-	xpvhv++;
-    }
-    xpvhv->xhv_array = 0;
-}
-
 /* grab a new struct xpvmg from the free list, allocating more if necessary */
 
 STATIC XPVMG*
@@ -1068,7 +1157,7 @@ S_new_xpvmg(pTHX)
     XPVMG* xpvmg;
     LOCK_SV_MUTEX;
     if (!PL_xpvmg_root)
-	more_xpvmg();
+	S_more_xpvmg(aTHX);
     xpvmg = PL_xpvmg_root;
     PL_xpvmg_root = (XPVMG*)xpvmg->xpv_pv;
     UNLOCK_SV_MUTEX;
@@ -1086,24 +1175,30 @@ S_del_xpvmg(pTHX_ XPVMG *p)
     UNLOCK_SV_MUTEX;
 }
 
-/* allocate another arena's worth of struct xpvmg */
+/* grab a new struct xpvgv from the free list, allocating more if necessary */
+
+STATIC XPVGV*
+S_new_xpvgv(pTHX)
+{
+    XPVGV* xpvgv;
+    LOCK_SV_MUTEX;
+    if (!PL_xpvgv_root)
+	S_more_xpvgv(aTHX);
+    xpvgv = PL_xpvgv_root;
+    PL_xpvgv_root = (XPVGV*)xpvgv->xpv_pv;
+    UNLOCK_SV_MUTEX;
+    return xpvgv;
+}
+
+/* return a struct xpvgv to the free list */
 
 STATIC void
-S_more_xpvmg(pTHX)
+S_del_xpvgv(pTHX_ XPVGV *p)
 {
-    register XPVMG* xpvmg;
-    register XPVMG* xpvmgend;
-    New(719, xpvmg, PERL_ARENA_SIZE/sizeof(XPVMG), XPVMG);
-    xpvmg->xpv_pv = (char*)PL_xpvmg_arenaroot;
-    PL_xpvmg_arenaroot = xpvmg;
-
-    xpvmgend = &xpvmg[PERL_ARENA_SIZE / sizeof(XPVMG) - 1];
-    PL_xpvmg_root = ++xpvmg;
-    while (xpvmg < xpvmgend) {
-	xpvmg->xpv_pv = (char*)(xpvmg + 1);
-	xpvmg++;
-    }
-    xpvmg->xpv_pv = 0;
+    LOCK_SV_MUTEX;
+    p->xpv_pv = (char*)PL_xpvgv_root;
+    PL_xpvgv_root = p;
+    UNLOCK_SV_MUTEX;
 }
 
 /* grab a new struct xpvlv from the free list, allocating more if necessary */
@@ -1114,7 +1209,7 @@ S_new_xpvlv(pTHX)
     XPVLV* xpvlv;
     LOCK_SV_MUTEX;
     if (!PL_xpvlv_root)
-	more_xpvlv();
+	S_more_xpvlv(aTHX);
     xpvlv = PL_xpvlv_root;
     PL_xpvlv_root = (XPVLV*)xpvlv->xpv_pv;
     UNLOCK_SV_MUTEX;
@@ -1132,26 +1227,6 @@ S_del_xpvlv(pTHX_ XPVLV *p)
     UNLOCK_SV_MUTEX;
 }
 
-/* allocate another arena's worth of struct xpvlv */
-
-STATIC void
-S_more_xpvlv(pTHX)
-{
-    register XPVLV* xpvlv;
-    register XPVLV* xpvlvend;
-    New(720, xpvlv, PERL_ARENA_SIZE/sizeof(XPVLV), XPVLV);
-    xpvlv->xpv_pv = (char*)PL_xpvlv_arenaroot;
-    PL_xpvlv_arenaroot = xpvlv;
-
-    xpvlvend = &xpvlv[PERL_ARENA_SIZE / sizeof(XPVLV) - 1];
-    PL_xpvlv_root = ++xpvlv;
-    while (xpvlv < xpvlvend) {
-	xpvlv->xpv_pv = (char*)(xpvlv + 1);
-	xpvlv++;
-    }
-    xpvlv->xpv_pv = 0;
-}
-
 /* grab a new struct xpvbm from the free list, allocating more if necessary */
 
 STATIC XPVBM*
@@ -1160,7 +1235,7 @@ S_new_xpvbm(pTHX)
     XPVBM* xpvbm;
     LOCK_SV_MUTEX;
     if (!PL_xpvbm_root)
-	more_xpvbm();
+	S_more_xpvbm(aTHX);
     xpvbm = PL_xpvbm_root;
     PL_xpvbm_root = (XPVBM*)xpvbm->xpv_pv;
     UNLOCK_SV_MUTEX;
@@ -1176,26 +1251,6 @@ S_del_xpvbm(pTHX_ XPVBM *p)
     p->xpv_pv = (char*)PL_xpvbm_root;
     PL_xpvbm_root = p;
     UNLOCK_SV_MUTEX;
-}
-
-/* allocate another arena's worth of struct xpvbm */
-
-STATIC void
-S_more_xpvbm(pTHX)
-{
-    register XPVBM* xpvbm;
-    register XPVBM* xpvbmend;
-    New(721, xpvbm, PERL_ARENA_SIZE/sizeof(XPVBM), XPVBM);
-    xpvbm->xpv_pv = (char*)PL_xpvbm_arenaroot;
-    PL_xpvbm_arenaroot = xpvbm;
-
-    xpvbmend = &xpvbm[PERL_ARENA_SIZE / sizeof(XPVBM) - 1];
-    PL_xpvbm_root = ++xpvbm;
-    while (xpvbm < xpvbmend) {
-	xpvbm->xpv_pv = (char*)(xpvbm + 1);
-	xpvbm++;
-    }
-    xpvbm->xpv_pv = 0;
 }
 
 #define my_safemalloc(s)	(void*)safemalloc(s)
@@ -1232,6 +1287,9 @@ S_more_xpvbm(pTHX)
 
 #define new_XPVMG()	my_safemalloc(sizeof(XPVMG))
 #define del_XPVMG(p)	my_safefree(p)
+
+#define new_XPVGV()	my_safemalloc(sizeof(XPVGV))
+#define del_XPVGV(p)	my_safefree(p)
 
 #define new_XPVLV()	my_safemalloc(sizeof(XPVLV))
 #define del_XPVLV(p)	my_safefree(p)
@@ -1271,6 +1329,9 @@ S_more_xpvbm(pTHX)
 #define new_XPVMG()	(void*)new_xpvmg()
 #define del_XPVMG(p)	del_xpvmg((XPVMG *)p)
 
+#define new_XPVGV()	(void*)new_xpvgv()
+#define del_XPVGV(p)	del_xpvgv((XPVGV *)p)
+
 #define new_XPVLV()	(void*)new_xpvlv()
 #define del_XPVLV(p)	del_xpvlv((XPVLV *)p)
 
@@ -1278,9 +1339,6 @@ S_more_xpvbm(pTHX)
 #define del_XPVBM(p)	del_xpvbm((XPVBM *)p)
 
 #endif /* PURIFY */
-
-#define new_XPVGV()	my_safemalloc(sizeof(XPVGV))
-#define del_XPVGV(p)	my_safefree(p)
 
 #define new_XPVFM()	my_safemalloc(sizeof(XPVFM))
 #define del_XPVFM(p)	my_safefree(p)
@@ -9684,8 +9742,8 @@ Perl_ptr_table_new(pTHX)
 STATIC void
 S_more_pte(pTHX)
 {
-    register struct ptr_tbl_ent* pte;
-    register struct ptr_tbl_ent* pteend;
+    struct ptr_tbl_ent* pte;
+    struct ptr_tbl_ent* pteend;
     XPV *ptr;
     New(54, ptr, PERL_ARENA_SIZE/sizeof(XPV), XPV);
     ptr->xpv_pv = (char*)PL_pte_arenaroot;
@@ -10909,6 +10967,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_xpvhv_root	= NULL;
     PL_xpvmg_arenaroot	= NULL;
     PL_xpvmg_root	= NULL;
+    PL_xpvgv_arenaroot	= NULL;
+    PL_xpvgv_root	= NULL;
     PL_xpvlv_arenaroot	= NULL;
     PL_xpvlv_root	= NULL;
     PL_xpvbm_arenaroot	= NULL;

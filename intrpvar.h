@@ -580,3 +580,6 @@ PERLVARI(Isuidscript, int, -1)	/* fd for suid script */
 PERLVAR(Ipte_root,	struct ptr_tbl_ent *)	/* free ptr_tbl_ent list */
 PERLVAR(Ipte_arenaroot,	XPV*)		/* list of allocated pte areas */
 #endif
+
+PERLVAR(Ixpvgv_root,	XPVGV *)	/* free xpvgv list */
+PERLVAR(Ixpvgv_arenaroot,XPVGV*)	/* list of allocated xpvgv areas */

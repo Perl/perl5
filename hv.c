@@ -33,28 +33,6 @@ holds the key and hash value.
 
 #define HV_MAX_LENGTH_BEFORE_SPLIT 14
 
-STATIC HE*
-S_new_he(pTHX)
-{
-    HE* he;
-    LOCK_SV_MUTEX;
-    if (!PL_he_root)
-	more_he();
-    he = PL_he_root;
-    PL_he_root = HeNEXT(he);
-    UNLOCK_SV_MUTEX;
-    return he;
-}
-
-STATIC void
-S_del_he(pTHX_ HE *p)
-{
-    LOCK_SV_MUTEX;
-    HeNEXT(p) = (HE*)PL_he_root;
-    PL_he_root = p;
-    UNLOCK_SV_MUTEX;
-}
-
 STATIC void
 S_more_he(pTHX)
 {
@@ -73,6 +51,28 @@ S_more_he(pTHX)
 	he++;
     }
     HeNEXT(he) = 0;
+}
+
+STATIC HE*
+S_new_he(pTHX)
+{
+    HE* he;
+    LOCK_SV_MUTEX;
+    if (!PL_he_root)
+	S_more_he(aTHX);
+    he = PL_he_root;
+    PL_he_root = HeNEXT(he);
+    UNLOCK_SV_MUTEX;
+    return he;
+}
+
+STATIC void
+S_del_he(pTHX_ HE *p)
+{
+    LOCK_SV_MUTEX;
+    HeNEXT(p) = (HE*)PL_he_root;
+    PL_he_root = p;
+    UNLOCK_SV_MUTEX;
 }
 
 #ifdef PURIFY

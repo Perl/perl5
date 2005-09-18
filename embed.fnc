@@ -1016,7 +1016,6 @@ s	|void	|require_errno	|GV *gv
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
 s	|void	|hsplit		|HV *hv
 s	|void	|hfreeentries	|HV *hv
-s	|void	|more_he
 s	|HE*	|new_he
 s	|void	|del_he		|HE *p
 s	|HEK*	|save_hek_flags	|const char *str|I32 len|U32 hash|int flags
@@ -1215,19 +1214,6 @@ s	|SV*	|save_scalar_at	|SV **sptr
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 s	|IV	|asIV		|SV* sv
 s	|UV	|asUV		|SV* sv
-s	|SV*	|more_sv
-s	|void	|more_xiv
-s	|void	|more_xnv
-s	|void	|more_xpv
-s	|void	|more_xpviv
-s	|void	|more_xpvnv
-s	|void	|more_xpvcv
-s	|void	|more_xpvav
-s	|void	|more_xpvhv
-s	|void	|more_xpvmg
-s	|void	|more_xpvlv
-s	|void	|more_xpvbm
-s	|void	|more_xrv
 s	|XPVIV*	|new_xiv
 s	|XPVNV*	|new_xnv
 s	|XPV*	|new_xpv
@@ -1237,6 +1223,7 @@ s	|XPVCV*	|new_xpvcv
 s	|XPVAV*	|new_xpvav
 s	|XPVHV*	|new_xpvhv
 s	|XPVMG*	|new_xpvmg
+s	|XPVGV*	|new_xpvgv
 s	|XPVLV*	|new_xpvlv
 s	|XPVBM*	|new_xpvbm
 s	|XRV*	|new_xrv
@@ -1249,6 +1236,7 @@ s	|void	|del_xpvcv	|XPVCV* p
 s	|void	|del_xpvav	|XPVAV* p
 s	|void	|del_xpvhv	|XPVHV* p
 s	|void	|del_xpvmg	|XPVMG* p
+s	|void	|del_xpvgv	|XPVGV* p
 s	|void	|del_xpvlv	|XPVLV* p
 s	|void	|del_xpvbm	|XPVBM* p
 s	|void	|del_xrv	|XRV* p
