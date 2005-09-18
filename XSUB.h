@@ -75,7 +75,11 @@ handled automatically by C<xsubpp>.
 #if defined(__CYGWIN__) && defined(USE_DYNAMIC_LOADING)
 #  define XS(name) __declspec(dllexport) void name(pTHX_ CV* cv)
 #else
-#  define XS(name) void name(pTHX_ CV* cv)
+#  if defined(HASATTRIBUTE)
+#    define XS(name) void name(pTHX_ CV* cv __attribute__((unused)))
+#  else
+#    define XS(name) void name(pTHX_ CV* cv)
+#  endif
 #endif
 
 #define dAX I32 ax = MARK - PL_stack_base + 1

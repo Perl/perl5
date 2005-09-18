@@ -880,6 +880,7 @@ if ($define{'USE_PERLIO'}) {
     if ($define{'USE_SFIO'}) {
 	# Old legacy non-stdio "PerlIO"
 	skip_symbols \@layer_syms;
+	skip_symbols [qw(perlsio_binmode)];
 	# SFIO defines most of the PerlIO routines as macros
 	# So undo most of what $perlio_sym has just done - d'oh !
 	# Perhaps it would be better to list the ones which do exist
@@ -957,12 +958,14 @@ if ($define{'USE_PERLIO'}) {
     else {
 	# PerlIO with layers - export implementation
 	emit_symbols \@layer_syms;
+	emit_symbols [qw(perlsio_binmode)];
     }
 } else {
 	# -Uuseperlio
 	# Skip the PerlIO layer symbols - although
 	# nothing should have exported them any way
 	skip_symbols \@layer_syms;
+	skip_symbols [qw(perlsio_binmode)];
         skip_symbols [qw(PL_def_layerlist PL_known_layers PL_perlio)];
 
 	# Also do NOT add abstraction symbols from $perlio_sym
@@ -1454,4 +1457,3 @@ PerlIO_sprintf
 PerlIO_sv_dup
 PerlIO_tmpfile
 PerlIO_vsprintf
-perlsio_binmode

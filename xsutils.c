@@ -160,7 +160,6 @@ XS(XS_attributes_bootstrap)
 {
     dXSARGS;
     const char file[] = __FILE__;
-    (void)cv;
 
     if( items > 1 )
         Perl_croak(aTHX_ "Usage: attributes::bootstrap $module");
@@ -178,7 +177,6 @@ XS(XS_attributes__modify_attrs)
 {
     dXSARGS;
     SV *rv, *sv;
-    (void)cv;
 
     if (items < 1) {
 usage:
@@ -201,7 +199,6 @@ XS(XS_attributes__fetch_attrs)
     dXSARGS;
     SV *rv, *sv;
     cv_flags_t cvflags;
-    (void)cv;
 
     if (items != 1) {
 usage:
@@ -245,7 +242,6 @@ XS(XS_attributes__guess_stash)
     dXSARGS;
     SV *rv, *sv;
     dXSTARG;
-    (void)cv;
 
     if (items != 1) {
 usage:
@@ -298,7 +294,6 @@ XS(XS_attributes_reftype)
     dXSARGS;
     SV *rv, *sv;
     dXSTARG;
-    (void)cv;
 
     if (items != 1) {
 usage:
@@ -322,7 +317,6 @@ usage:
 XS(XS_attributes__warn_reserved)
 {
     dXSARGS;
-    (void)cv;
 
     if (items != 0) {
 	Perl_croak(aTHX_
