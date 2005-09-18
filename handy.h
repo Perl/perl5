@@ -87,6 +87,21 @@ Null SV pointer.
 # define HAS_BOOL 1
 #endif
 
+/* Try to figure out __func__ or __FUNCTION__ equivalent, if any.
+ * XXX Should really be a Configure probe, with HAS__FUNCTION__
+ *     and FUNCTION__ as results.
+ * XXX Similarly, a Configure probe for __FILE__ and __LINE__ is needed. */
+#if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || (defined(__SUNPRO_C)) /* C99 or close enough. */
+#  define FUNCTION__ __func__
+#else
+#  if (defined(_MSC_VER) && _MSC_VER < 1300) || /* Pre-MSVC 7.0 has neither __func__ nor __FUNCTION and no good workarounds, either. */ \
+      (defined(__DECC_VER)) /* Tru64 or VMS, and strict C89 being used, but not modern enough cc (in Tur64, -c99 not known, only -std1). */
+#    define FUNCTION__ ""
+#  else
+#    define FUNCTION__ __FUNCTION__ /* Common extension. */
+#  endif
+#endif
+
 /* XXX A note on the perl source internal type system.  The
    original intent was that I32 be *exactly* 32 bits.
 

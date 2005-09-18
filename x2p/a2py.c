@@ -56,6 +56,10 @@ usage()
 }
 #endif
 
+#ifdef __osf__
+#pragma message disable (mainparm) /* We have the envp in main(). */
+#endif
+
 int
 main(register int argc, register char **argv, register char **env)
 {

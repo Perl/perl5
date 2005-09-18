@@ -250,9 +250,16 @@ dl_install_xsub(perl_name, symref, filename="$Package")
     CODE:
     DLDEBUG(2,PerlIO_printf(Perl_debug_log, "dl_install_xsub(name=%s, symref=%lx)\n",
 		perl_name, (unsigned long) symref));
+#if defined(__DECC) && defined(__osf__)
+#pragma message save
+#pragma message disable (nonstandcast) /* Avoid symref cast warning. */
+#endif
     ST(0) = sv_2mortal(newRV((SV*)newXS(perl_name,
 					(void(*)(pTHX_ CV *))symref,
 					filename)));
+#if defined(__DECC) && defined(__osf__)
+#pragma message restore
+#endif
 
 
 char *
