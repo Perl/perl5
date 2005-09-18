@@ -577,7 +577,7 @@ Also, if the name is @.. or %.., create a new array or hash for that slot
 
 If fake, it means we're cloning an existing entry
 
-	PADOFFSET	pad_add_name(const char *name, HV* typestash, HV* ourstash, bool clone)
+	PADOFFSET	pad_add_name(char *name, HV* typestash, HV* ourstash, bool clone)
 
 =for hackers
 Found in file pad.c
@@ -610,7 +610,7 @@ Check for duplicate declarations: report any of:
        as C<ourstash>
 C<is_our> indicates that the name to check is an 'our' declaration
 
-	void	pad_check_dup(const char* name, bool is_our, const HV* ourstash)
+	void	pad_check_dup(char* name, bool is_our, HV* ourstash)
 
 =for hackers
 Found in file pad.c
@@ -623,7 +623,7 @@ the chain of outer CVs to be searched. If newoff is non-null, this is a
 run-time cloning: don't add fake entries, just find the lexical and add a
 ref to it at newoff in the current pad.
 
-	PADOFFSET	pad_findlex(char* name, PADOFFSET newoff, CV* innercv)
+	PADOFFSET	pad_findlex(const char* name, PADOFFSET newoff, const CV* innercv)
 
 =for hackers
 Found in file pad.c
@@ -636,7 +636,7 @@ the complications introduced by eval). If the name is found in an outer pad,
 then a fake entry is added to the current pad.
 Returns the offset in the current pad, or NOT_IN_PAD on failure.
 
-	PADOFFSET	pad_findmy(const char* name)
+	PADOFFSET	pad_findmy(char* name)
 
 =for hackers
 Found in file pad.c
