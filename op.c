@@ -1558,7 +1558,7 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs, bool for_my)
     ENTER;		/* need to protect against side-effects of 'use' */
     SAVEINT(PL_expect);
     if (stash)
-	stashsv = newSVpv(HvNAME(stash), 0);
+	stashsv = newSVpv(HvNAME_get(stash), 0);
     else
 	stashsv = &PL_sv_no;
 
@@ -1612,7 +1612,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
 
     /* Build up the real arg-list. */
     if (stash)
-	stashsv = newSVpv(HvNAME(stash), 0);
+	stashsv = newSVpv(HvNAME_get(stash), 0);
     else
 	stashsv = &PL_sv_no;
     arg = newOP(OP_PADSV, 0);
@@ -4602,7 +4602,7 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
 	else if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
 	    /* already defined (or promised) */
 	    if (ckWARN(WARN_REDEFINE) && !(CvGV(cv) && GvSTASH(CvGV(cv))
-			    && strEQ(HvNAME(GvSTASH(CvGV(cv))), "autouse"))) {
+			    && strEQ(HvNAME_get(GvSTASH(CvGV(cv))), "autouse"))) {
 		const line_t oldline = CopLINE(PL_curcop);
 		if (PL_copline != NOLINE)
 		    CopLINE_set(PL_curcop, PL_copline);
@@ -6725,7 +6725,7 @@ Perl_peep(pTHX_ register OP *o)
 			      SvUTF8(*svp) ? -(I32)keylen : keylen, FALSE);
 	    if (!indsvp) {
 		Perl_croak(aTHX_ "No such pseudo-hash field \"%s\" in variable %s of type %s",
-		      key, SvPV(lexname, n_a), HvNAME(SvSTASH(lexname)));
+		      key, SvPV(lexname, n_a), HvNAME_get(SvSTASH(lexname)));
 	    }
 	    ind = SvIV(*indsvp);
 	    if (ind < 1)
@@ -6792,7 +6792,7 @@ Perl_peep(pTHX_ register OP *o)
 		if (!indsvp) {
 		    Perl_croak(aTHX_ "No such pseudo-hash field \"%s\" "
 			       "in variable %s of type %s",
-			  key, SvPV(lexname, n_a), HvNAME(SvSTASH(lexname)));
+			  key, SvPV(lexname, n_a), HvNAME_get(SvSTASH(lexname)));
 		}
 		ind = SvIV(*indsvp);
 		if (ind < 1)
@@ -7074,7 +7074,7 @@ const_sv_xsub(pTHX_ CV* cv)
     if (items != 0) {
 #if 0
         Perl_croak(aTHX_ "usage: %s::%s()",
-                   HvNAME(GvSTASH(CvGV(cv))), GvNAME(CvGV(cv)));
+                   HvNAME_get(GvSTASH(CvGV(cv))), GvNAME(CvGV(cv)));
 #endif
     }
     EXTEND(sp, 1);

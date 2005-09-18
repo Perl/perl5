@@ -207,6 +207,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
     GV* gv;
     GV** gvp;
     CV* cv;
+    const char *hvname;
 
     /* UNIVERSAL methods should be callable without a stash */
     if (!stash) {
@@ -215,15 +216,16 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 	    return 0;
     }
 
-    if (!HvNAME(stash))
+    hvname = HvNAME_get(stash);
+    if (!hvname)
       Perl_croak(aTHX_
 		 "Can't use anonymous symbol table for method lookup");
 
     if ((level > 100) || (level < -100))
 	Perl_croak(aTHX_ "Recursive inheritance detected while looking for method '%s' in package '%s'",
-	      name, HvNAME(stash));
+	      name, hvname);
 
-    DEBUG_o( Perl_deb(aTHX_ "Looking for method %s in package %s\n",name,HvNAME(stash)) );
+    DEBUG_o( Perl_deb(aTHX_ "Looking for method %s in package %s\n",name,hvname) );
 
     gvp = (GV**)hv_fetch(stash, name, len, (level >= 0));
     if (!gvp)
@@ -250,19 +252,18 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 
     /* create and re-create @.*::SUPER::ISA on demand */
     if (!av || !SvMAGIC(av)) {
-	const char* packname = HvNAME(stash);
-	STRLEN packlen = strlen(packname);
+	STRLEN packlen = strlen(hvname);
 
-	if (packlen >= 7 && strEQ(packname + packlen - 7, "::SUPER")) {
+	if (packlen >= 7 && strEQ(hvname + packlen - 7, "::SUPER")) {
 	    HV* basestash;
 
 	    packlen -= 7;
-	    basestash = gv_stashpvn(packname, packlen, TRUE);
+	    basestash = gv_stashpvn(hvname, packlen, TRUE);
 	    gvp = (GV**)hv_fetch(basestash, "ISA", 3, FALSE);
 	    if (gvp && (gv = *gvp) != (GV*)&PL_sv_undef && (av = GvAV(gv))) {
 		gvp = (GV**)hv_fetch(stash, "ISA", 3, TRUE);
 		if (!gvp || !(gv = *gvp))
-		    Perl_croak(aTHX_ "Cannot create %s::ISA", HvNAME(stash));
+		    Perl_croak(aTHX_ "Cannot create %s::ISA", hvname);
 		if (SvTYPE(gv) != SVt_PVGV)
 		    gv_init(gv, stash, "ISA", 3, TRUE);
 		SvREFCNT_dec(GvAV(gv));
@@ -281,7 +282,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 	    if (!basestash) {
 		if (ckWARN(WARN_MISC))
 		    Perl_warner(aTHX_ packWARN(WARN_MISC), "Can't locate package %"SVf" for @%s::ISA",
-			sv, HvNAME(stash));
+			sv, hvname);
 		continue;
 	    }
 	    gv = gv_fetchmeth(basestash, name, len,
@@ -441,7 +442,7 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 	    /* __PACKAGE__::SUPER stash should be autovivified */
 	    stash = gv_stashpvn(SvPVX_const(tmpstr), SvCUR(tmpstr), TRUE);
 	    DEBUG_o( Perl_deb(aTHX_ "Treating %s as %s::%s\n",
-			 origname, HvNAME(stash), name) );
+			 origname, HvNAME_get(stash), name) );
 	}
 	else {
             /* don't autovifify if ->NoSuchStash::method */
@@ -505,7 +506,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 	    stash = Nullhv;
 	}
 	else {
-	    packname = HvNAME(stash);
+	    packname = HvNAME_get(stash);
 	}
     }
     if (!(gv = gv_fetchmeth(stash, S_autoload, S_autolen, FALSE)))
@@ -641,8 +642,8 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 create)
     if (!GvHV(tmpgv))
 	GvHV(tmpgv) = newHV();
     stash = GvHV(tmpgv);
-    if (!HvNAME(stash))
-	HvNAME(stash) = savepv(name);
+    if (!HvNAME_get(stash))
+	hv_name_set(stash, name, namelen, 0);
     return stash;
 }
 
@@ -715,8 +716,8 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		if (!(stash = GvHV(gv)))
 		    stash = GvHV(gv) = newHV();
 
-		if (!HvNAME(stash))
-		    HvNAME(stash) = savepvn(nambeg, namend - nambeg);
+		if (!HvNAME_get(stash))
+		    hv_name_set(stash, nambeg, namend - nambeg, 0);
 	    }
 
 	    if (*namend == ':')
@@ -1126,7 +1127,7 @@ Perl_gv_fullname4(pTHX_ SV *sv, GV *gv, const char *prefix, bool keepmain)
     }
     sv_setpv(sv, prefix ? prefix : "");
     
-    name = HvNAME(hv);
+    name = HvNAME_get(hv);
     if (!name)
 	name = "__ANON__";
 	
@@ -1237,7 +1238,7 @@ Perl_gv_check(pTHX_ HV *stash)
 #endif
 		Perl_warner(aTHX_ packWARN(WARN_ONCE),
 			"Name \"%s::%s\" used only once: possible typo",
-			HvNAME(stash), GvNAME(gv));
+			HvNAME_get(stash), GvNAME(gv));
 	    }
 	}
     }
@@ -1299,12 +1300,14 @@ Perl_gp_free(pTHX_ GV *gv)
 
     if (gp->gp_sv) SvREFCNT_dec(gp->gp_sv);
     if (gp->gp_av) SvREFCNT_dec(gp->gp_av);
-    if (gp->gp_hv) {
-	 if (PL_stashcache && HvNAME(gp->gp_hv))
-	      hv_delete(PL_stashcache,
-			HvNAME(gp->gp_hv), strlen(HvNAME(gp->gp_hv)),
-			G_DISCARD);
-	 SvREFCNT_dec(gp->gp_hv);
+    /* FIXME - another reference loop GV -> symtab -> GV ?
+       Somehow gp->gp_hv can end up pointing at freed garbage.  */
+    if (gp->gp_hv && SvTYPE(gp->gp_hv) == SVt_PVHV) {
+	/* FIXME strlen HvNAME  */
+	const char *hvname = HvNAME_get(gp->gp_hv);
+	if (PL_stashcache && hvname)
+	    hv_delete(PL_stashcache, hvname, strlen(hvname), G_DISCARD);
+	SvREFCNT_dec(gp->gp_hv);
     }
     if (gp->gp_io)   SvREFCNT_dec(gp->gp_io);
     if (gp->gp_cv)   SvREFCNT_dec(gp->gp_cv);
@@ -1349,7 +1352,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
       return (bool)AMT_OVERLOADED(amtp);
   sv_unmagic((SV*)stash, PERL_MAGIC_overload_table);
 
-  DEBUG_o( Perl_deb(aTHX_ "Recalcing overload magic in package %s\n",HvNAME(stash)) );
+  DEBUG_o( Perl_deb(aTHX_ "Recalcing overload magic in package %s\n",HvNAME_get(stash)) );
 
   Zero(&amt,1,AMT);
   amt.was_ok_am = PL_amagic_generation;
@@ -1385,7 +1388,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 	const STRLEN l = strlen(cooky);
 
 	DEBUG_o( Perl_deb(aTHX_ "Checking overloading of `%s' in package `%.256s'\n",
-		     cp, HvNAME(stash)) );
+		     cp, HvNAME_get(stash)) );
 	/* don't fill the cache while looking up!
 	   Creation of inheritance stubs in intermediate packages may
 	   conflict with the logic of runtime method substitution.
@@ -1399,8 +1402,9 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 	    gv = Perl_gv_fetchmeth(aTHX_ stash, cooky, l, -1);
         cv = 0;
         if (gv && (cv = GvCV(gv))) {
+	    const char *hvname;
 	    if (GvNAMELEN(CvGV(cv)) == 3 && strEQ(GvNAME(CvGV(cv)), "nil")
-		&& strEQ(HvNAME(GvSTASH(CvGV(cv))), "overload")) {
+		&& strEQ(hvname = HvNAME_get(GvSTASH(CvGV(cv))), "overload")) {
 		/* This is a hack to support autoloading..., while
 		   knowing *which* methods were declared as overloaded. */
 		/* GvSV contains the name of the method. */
@@ -1408,7 +1412,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 		
 		DEBUG_o( Perl_deb(aTHX_ "Resolving method `%"SVf256\
 			"' for overloaded `%s' in package `%.256s'\n",
-			     GvSV(gv), cp, HvNAME(stash)) );
+			     GvSV(gv), cp, hvname) );
 		if (!SvPOK(GvSV(gv))
 		    || !(ngv = gv_fetchmethod_autoload(stash, SvPVX_const(GvSV(gv)),
 						       FALSE)))
@@ -1420,12 +1424,12 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 				"in package `%.256s'",
 			       (GvCVGEN(gv) ? "Stub found while resolving"
 				: "Can't resolve"),
-			       name, cp, HvNAME(stash));
+			       name, cp, hvname);
 		}
 		cv = GvCV(gv = ngv);
 	    }
 	    DEBUG_o( Perl_deb(aTHX_ "Overloading `%s' in package `%.256s' via `%.256s::%.256s' \n",
-			 cp, HvNAME(stash), HvNAME(GvSTASH(CvGV(cv))),
+			 cp, HvNAME_get(stash), HvNAME_get(GvSTASH(CvGV(cv))),
 			 GvNAME(CvGV(cv))) );
 	    filled = 1;
 	    if (i < DESTROY_amg)
@@ -1460,7 +1464,7 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
     MAGIC *mg;
     AMT *amtp;
 
-    if (!stash || !HvNAME(stash))
+    if (!stash || !HvNAME_get(stash))
         return Nullcv;
     mg = mg_find((SV*)stash, PERL_MAGIC_overload_table);
     if (!mg) {
@@ -1690,7 +1694,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 		        "in overloaded package ":
 		        "has no overloaded magic",
 		      SvAMAGIC(left)?
-		        HvNAME(SvSTASH(SvRV(left))):
+		        HvNAME_get(SvSTASH(SvRV(left))):
 		        "",
 		      SvAMAGIC(right)?
 		        ",\n\tright argument in overloaded package ":
@@ -1698,7 +1702,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 			 ? ""
 			 : ",\n\tright argument has no overloaded magic"),
 		      SvAMAGIC(right)?
-		        HvNAME(SvSTASH(SvRV(right))):
+		        HvNAME_get(SvSTASH(SvRV(right))):
 		        ""));
 	if (amtp && amtp->fallback >= AMGfallYES) {
 	  DEBUG_o( Perl_deb(aTHX_ "%s", SvPVX_const(msg)) );
@@ -1723,7 +1727,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 		     flags & AMGf_unary? "" :
 		     lr==1 ? " for right argument": " for left argument",
 		     flags & AMGf_unary? " for argument" : "",
-		     stash ? HvNAME(stash) : "null",
+		     stash ? HvNAME_get(stash) : "null",
 		     fl? ",\n\tassignment variant used": "") );
   }
 #endif

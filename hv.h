@@ -180,9 +180,18 @@ C<SV*>.
 #define HvFILL(hv)	((XPVHV*)  SvANY(hv))->xhv_fill
 #define HvMAX(hv)	((XPVHV*)  SvANY(hv))->xhv_max
 #define HvRITER(hv)	((XPVHV*)  SvANY(hv))->xhv_riter
+#define HvRITER_get(hv)	((XPVHV*)  SvANY(hv))->xhv_riter
+#define HvRITER_set(hv,r)	(HvRITER(hv) = r)
 #define HvEITER(hv)	((XPVHV*)  SvANY(hv))->xhv_eiter
+#define HvEITER_get(hv)	((XPVHV*)  SvANY(hv))->xhv_eiter
+#define HvEITER_set(hv,e)	(HvEITER(hv) = e)
 #define HvPMROOT(hv)	((XPVHV*)  SvANY(hv))->xhv_pmroot
 #define HvNAME(hv)	((XPVHV*)  SvANY(hv))->xhv_name
+/* FIXME - all of these should use a UTF8 aware API, which should also involve
+   getting the length. */
+#define HvNAME_get(hv)	((XPVHV*)  SvANY(hv))->xhv_name
+#define hv_name_set(hv,name,length,flags) \
+    (HvNAME((hv)) = (name) ? savepvn(name, length) : 0)
 
 /* the number of keys (including any placeholers) */
 #define XHvTOTALKEYS(xhv)	((xhv)->xhv_keys)
@@ -324,3 +333,13 @@ C<SV*>.
 /* available as a function in hv.c */
 #define Perl_sharepvn(sv, len, hash) HEK_KEY(share_hek(sv, len, hash))
 #define sharepvn(sv, len, hash)	     Perl_sharepvn(sv, len, hash)
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */

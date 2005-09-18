@@ -1389,8 +1389,8 @@ Perl_newHVhv(pTHX_ HV *ohv)
     else {
 	/* Iterate over ohv, copying keys and values one at a time. */
 	HE *entry;
-	I32 riter = HvRITER(ohv);
-	HE *eiter = HvEITER(ohv);
+	const I32 riter = HvRITER_get(ohv);
+	HE * const eiter = HvEITER_get(ohv);
 
 	/* Can we use fewer buckets? (hv_max is always 2^n-1) */
 	while (hv_max && hv_max + 1 >= hv_fill * 2)
@@ -1403,8 +1403,8 @@ Perl_newHVhv(pTHX_ HV *ohv)
                            newSVsv(HeVAL(entry)), HeHASH(entry),
                            HeKFLAGS(entry));
 	}
-	HvRITER(ohv) = riter;
-	HvEITER(ohv) = eiter;
+	HvRITER_set(ohv, riter);
+	HvEITER_set(ohv, eiter);
     }
 
     return hv;
@@ -1418,7 +1418,7 @@ Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
     if (!entry)
 	return;
     val = HeVAL(entry);
-    if (val && isGV(val) && GvCVu(val) && HvNAME(hv))
+    if (val && isGV(val) && GvCVu(val) && HvNAME_get(hv))
 	PL_sub_generation++;	/* may be deletion of method from stash */
     SvREFCNT_dec(val);
     if (HeKLEN(entry) == HEf_SVKEY) {
@@ -1437,7 +1437,7 @@ Perl_hv_delayfree_ent(pTHX_ HV *hv, register HE *entry)
 {
     if (!entry)
 	return;
-    if (isGV(HeVAL(entry)) && GvCVu(HeVAL(entry)) && HvNAME(hv))
+    if (isGV(HeVAL(entry)) && GvCVu(HeVAL(entry)) && HvNAME_get(hv))
 	PL_sub_generation++;	/* may be deletion of method from stash */
     sv_2mortal(HeVAL(entry));	/* free between statements */
     if (HeKLEN(entry) == HEf_SVKEY) {
@@ -1504,7 +1504,7 @@ Perl_hv_clear(pTHX_ HV *hv)
     HvHASKFLAGS_off(hv);
     HvREHASH_off(hv);
     reset:
-    HvEITER(hv) = NULL;
+    HvEITER_set(hv, NULL);
 }
 
 /*
@@ -1544,7 +1544,7 @@ Perl_hv_clear_placeholders(pTHX_ HV *hv)
 		*oentry = HeNEXT(entry);
 		if (first && !*oentry)
 		    HvFILL(hv)--; /* This linked list is now empty.  */
-		if (HvEITER(hv))
+		if (HvEITER_get(hv))
 		    HvLAZYDEL_on(hv);
 		else
 		    hv_free_ent(hv, entry);
@@ -1620,16 +1620,17 @@ void
 Perl_hv_undef(pTHX_ HV *hv)
 {
     register XPVHV* xhv;
+    const char *name;
     if (!hv)
 	return;
     xhv = (XPVHV*)SvANY(hv);
     hfreeentries(hv);
     Safefree(xhv->xhv_array /* HvARRAY(hv) */);
-    if (HvNAME(hv)) {
+    if ((name = HvNAME_get(hv))) {
+	/* FIXME - strlen HvNAME  */
         if(PL_stashcache)
-	    hv_delete(PL_stashcache, HvNAME(hv), strlen(HvNAME(hv)), G_DISCARD);
-	Safefree(HvNAME(hv));
-	HvNAME(hv) = 0;
+	    hv_delete(PL_stashcache, name, strlen(name), G_DISCARD);
+	hv_name_set(hv, 0, 0, 0);
     }
     xhv->xhv_max   = 7;	/* HvMAX(hv) = 7 (it's a normal hash) */
     xhv->xhv_array = 0;	/* HvARRAY(hv) = 0 */

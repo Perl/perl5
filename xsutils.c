@@ -256,7 +256,7 @@ usage:
     sv = SvRV(rv);
 
     if (SvOBJECT(sv))
-	sv_setpv(TARG, HvNAME(SvSTASH(sv)));
+	sv_setpv(TARG, HvNAME_get(SvSTASH(sv)));
 #if 0	/* this was probably a bad idea */
     else if (SvPADMY(sv))
 	sv_setsv(TARG, &PL_sv_no);	/* unblessed lexical */
@@ -282,7 +282,7 @@ usage:
 	    break;
 	}
 	if (stash)
-	    sv_setpv(TARG, HvNAME(stash));
+	    sv_setpv(TARG, HvNAME_get(stash));
     }
 
     SvSETMAGIC(TARG);

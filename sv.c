@@ -3184,7 +3184,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		}
 		tsv = NEWSV(0,0);
 		if (SvOBJECT(sv)) {
-		    const char *name = HvNAME(SvSTASH(sv));
+		    const char *name = HvNAME_get(SvSTASH(sv));
 		    Perl_sv_setpvf(aTHX_ tsv, "%s=%s(0x%"UVxf")",
 				   name ? name : "__ANON__" , typestr, PTR2UV(sv));
 		}
@@ -3962,7 +3962,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
  					CvCONST(cv)
  					? "Constant subroutine %s::%s redefined"
  					: "Subroutine %s::%s redefined",
-					HvNAME(GvSTASH((GV*)dstr)),
+					HvNAME_get(GvSTASH((GV*)dstr)),
  					GvENAME((GV*)dstr));
  				}
 			    }
@@ -5208,7 +5208,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	    if (SvREFCNT(sv)) {
 		if (PL_in_clean_objs)
 		    Perl_croak(aTHX_ "DESTROY created new reference to dead object '%s'",
-			  HvNAME(stash));
+			  HvNAME_get(stash));
 		/* DESTROY gave object new lease on life */
 		return;
 	    }
@@ -7208,7 +7208,7 @@ Perl_sv_reset(pTHX_ register char *s, HV *stash)
 		if (GvAV(gv)) {
 		    av_clear(GvAV(gv));
 		}
-		if (GvHV(gv) && !HvNAME(GvHV(gv))) {
+		if (GvHV(gv) && !HvNAME_get(GvHV(gv))) {
 		    hv_clear(GvHV(gv));
 #ifndef PERL_MICRO
 #ifdef USE_ENVIRON_ARRAY
@@ -7680,7 +7680,7 @@ Perl_sv_reftype(pTHX_ SV *sv, int ob)
     /* The fact that I don't need to downcast to char * everywhere, only in ?:
        inside return suggests a const propagation bug in g++.  */
     if (ob && SvOBJECT(sv)) {
-	char *name = HvNAME(SvSTASH(sv));
+	char *name = HvNAME_get(SvSTASH(sv));
 	return name ? name : (char *) "__ANON__";
     }
     else {
@@ -7753,6 +7753,7 @@ an inheritance relationship.
 int
 Perl_sv_isa(pTHX_ SV *sv, const char *name)
 {
+    const char *hvname;
     if (!sv)
 	return 0;
     if (SvGMAGICAL(sv))
@@ -7762,10 +7763,11 @@ Perl_sv_isa(pTHX_ SV *sv, const char *name)
     sv = (SV*)SvRV(sv);
     if (!SvOBJECT(sv))
 	return 0;
-    if (!HvNAME(SvSTASH(sv)))
+    hvname = HvNAME_get(SvSTASH(sv));
+    if (!hvname)
 	return 0;
 
-    return strEQ(HvNAME(SvSTASH(sv)), name);
+    return strEQ(hvname, name);
 }
 
 /*
@@ -9931,7 +9933,7 @@ S_gv_share(pTHX_ SV *sstr, CLONE_PARAMS *param)
     if (!GvUNIQUE(gv)) {
 #if 0
         PerlIO_printf(Perl_debug_log, "gv_share: unable to share %s::%s\n",
-                      HvNAME(GvSTASH(gv)), GvNAME(gv));
+                      HvNAME_get(GvSTASH(gv)), GvNAME(gv));
 #endif
         return Nullsv;
     }
@@ -10030,11 +10032,12 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
     if(param->flags & CLONEf_JOIN_IN) {
         /** We are joining here so we don't want do clone
 	    something that is bad **/
+	const char *hvname;
 
         if(SvTYPE(sstr) == SVt_PVHV &&
-	   HvNAME(sstr)) {
+	   (hvname = HvNAME_get(sstr))) {
 	    /** don't clone stashes if they already exist **/
-	    HV* old_stash = gv_stashpv(HvNAME(sstr),0);
+	    HV* old_stash = gv_stashpv(hvname,0);
 	    return (SV*) old_stash;
         }
     }
@@ -10149,7 +10152,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
                 ptr_table_store(PL_ptr_table, sstr, dstr);
 #if 0
                 PerlIO_printf(Perl_debug_log, "sv_dup: sharing %s::%s\n",
-                              HvNAME(GvSTASH(share)), GvNAME(share));
+                              HvNAME_get(GvSTASH(share)), GvNAME(share));
 #endif
                 break;
             }
@@ -10256,7 +10259,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvNV_set(dstr, SvNVX(sstr));
 	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
 	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
-	HvRITER((HV*)dstr)	= HvRITER((HV*)sstr);
+	HvRITER_set((HV*)dstr, HvRITER_get((HV*)sstr));
 	if (HvARRAY((HV*)sstr)) {
 	    STRLEN i = 0;
 	    XPVHV *dxhv = (XPVHV*)SvANY(dstr);
@@ -10274,11 +10277,11 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	}
 	else {
 	    SvPV_set(dstr, Nullch);
-	    HvEITER((HV*)dstr)	= (HE*)NULL;
+	    HvEITER_set((HV*)dstr, (HE*)NULL);
 	}
 	HvPMROOT((HV*)dstr)	= HvPMROOT((HV*)sstr);		/* XXX */
 	HvNAME((HV*)dstr)	= SAVEPV(HvNAME((HV*)sstr));
-    /* Record stashes for possible cloning in Perl_clone(). */
+	/* Record stashes for possible cloning in Perl_clone(). */
 	if(HvNAME((HV*)dstr))
 	    av_push(param->stashes, dstr);
 	break;
@@ -10781,7 +10784,8 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 static void
 do_mark_cloneable_stash(pTHX_ SV *sv)
 {
-    if (HvNAME((HV*)sv)) {
+    const char *hvname = HvNAME_get((HV*)sv);
+    if (hvname) {
 	GV* cloner = gv_fetchmethod_autoload((HV*)sv, "CLONE_SKIP", 0);
 	SvFLAGS(sv) |= SVphv_CLONEABLE; /* clone objects by default */
 	if (cloner && GvCV(cloner)) {
@@ -10791,7 +10795,7 @@ do_mark_cloneable_stash(pTHX_ SV *sv)
 	    ENTER;
 	    SAVETMPS;
 	    PUSHMARK(SP);
-	    XPUSHs(sv_2mortal(newSVpv(HvNAME((HV*)sv), 0)));
+	    XPUSHs(sv_2mortal(newSVpv(hvname, 0)));
 	    PUTBACK;
 	    call_sv((SV*)GvCV(cloner), G_SCALAR);
 	    SPAGAIN;
@@ -11668,7 +11672,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	    ENTER;
 	    SAVETMPS;
 	    PUSHMARK(SP);
-	    XPUSHs(sv_2mortal(newSVpv(HvNAME(stash), 0)));
+	    XPUSHs(sv_2mortal(newSVpv(HvNAME_get(stash), 0)));
 	    PUTBACK;
 	    call_sv((SV*)GvCV(cloner), G_DISCARD);
 	    FREETMPS;
