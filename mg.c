@@ -1944,7 +1944,6 @@ Perl_vivify_defelem(pTHX_ SV *sv)
 	return;
     if (mg->mg_obj) {
 	SV *ahv = LvTARG(sv);
-	STRLEN n_a;
 	if (SvTYPE(ahv) == SVt_PVHV) {
 	    HE *he = hv_fetch_ent((HV*)ahv, mg->mg_obj, TRUE, 0);
 	    if (he)
@@ -1956,7 +1955,7 @@ Perl_vivify_defelem(pTHX_ SV *sv)
 		value = *svp;
 	}
 	if (!value || value == &PL_sv_undef)
-	    Perl_croak(aTHX_ PL_no_helem, SvPV(mg->mg_obj, n_a));
+	    Perl_croak(aTHX_ PL_no_helem_sv, mg->mg_obj);
     }
     else {
 	AV* av = (AV*)LvTARG(sv);
