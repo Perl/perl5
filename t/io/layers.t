@@ -41,7 +41,7 @@ if (${^UNICODE} & 1) {
 	$UNICODE_STDIN = 1;
     }
 }
-my $NTEST = 43 - (($DOSISH || !$FASTSTDIO) ? 7 : 0) - ($DOSISH ? 5 : 0)
+my $NTEST = 44 - (($DOSISH || !$FASTSTDIO) ? 7 : 0) - ($DOSISH ? 5 : 0)
     + $UNICODE_STDIN;
 
 sub PerlIO::F_UTF8 () { 0x00008000 } # from perliol.h
@@ -211,6 +211,13 @@ SKIP: {
 	close F;
 	close G;
     }
+
+    # Check that PL_sigwarn's reference count is correct, and that 
+    # &PerlIO::Layer::NoWarnings isn't prematurely freed.
+    fresh_perl_like (<<'EOT', qr/^CODE/);
+open(UTF, "<:raw:encoding(utf8)", $^X) or die $!;
+print ref *PerlIO::Layer::NoWarnings{CODE};
+EOT
 
     1 while unlink "afile";
 }
