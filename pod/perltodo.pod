@@ -287,6 +287,18 @@ such that it's trivial for the Pumpking to flag "this is an official release"
 when making a tarball, yet leave the default source saying "I'm not the
 official release".
 
+=head2 Tidy up global variables
+
+There's a note in F<intrpvar.h>
+
+  /* These two variables are needed to preserve 5.8.x bincompat because
+     we can't change function prototypes of two exported functions.
+     Probably should be taken out of blead soon, and relevant prototypes
+     changed.  */
+
+So doing this, and removing any of the unused variables still present would
+be good.
+
 =head2 Ordering of "global" variables.
 
 F<thrdvar.h> and F<intrpvarh> define the "global" variables that need to be
