@@ -3415,7 +3415,7 @@ S_init_main_stash(pTHX)
     SvREFCNT_dec(GvHV(gv));
     GvHV(gv) = (HV*)SvREFCNT_inc(PL_defstash);
     SvREADONLY_on(gv);
-    Perl_hv_name_set(aTHX_ PL_defstash, "main", 4, 0);
+    hv_name_set(PL_defstash, "main", 4, 0);
     PL_incgv = gv_HVadd(gv_AVadd(gv_fetchpv("INC",TRUE, SVt_PVAV)));
     GvMULTI_on(PL_incgv);
     PL_hintgv = gv_fetchpv("\010",TRUE, SVt_PV); /* ^H */

@@ -269,7 +269,7 @@ PPCODE:
 
     if (strNE(HvNAME_get(hv),"main")) {
         /* make it think it's in main:: */
-	Perl_hv_name_set(aTHX_ hv, "main", 4, 0);
+	hv_name_set(hv, "main", 4, 0);
         hv_store(hv,"_",1,(SV *)PL_defgv,0);  /* connect _ to global */
         SvREFCNT_inc((SV *)PL_defgv);  /* want to keep _ around! */
     }
