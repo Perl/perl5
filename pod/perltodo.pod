@@ -245,6 +245,18 @@ that this is due to incomplete dependency specification in the F<Makefile>.
 It would be good if someone were able to track down the causes of these
 problems, so that parallel builds worked properly.
 
+=head2 linker specification files
+
+Some platforms mandate that you provide a list of a shared library's external
+symbols to the linker, so the core already has the infrastructure in place to
+do this for generating shared perl libraries. My understanding is that the
+GNU toolchain can accept an optional linker specification file, and restrict
+visibility just to symbols declared in that file. It would be good to extend
+F<makedef.pl> to support this format, and to provide a means within
+C<Configure> to enable it. This would allow Unix users to test that the
+export list is correct, and to build a perl that does not pollute the global
+namespace with private symbols.
+
 
 
 
