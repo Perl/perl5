@@ -34,6 +34,9 @@ Perl stores its global variables.
 #define PERL_IN_GV_C
 #include "perl.h"
 
+const char S_autoload[] = "AUTOLOAD";
+const STRLEN S_autolen = sizeof(S_autoload)-1;
+
 GV *
 Perl_gv_AVadd(pTHX_ register GV *gv)
 {
@@ -344,16 +347,14 @@ Perl_gv_fetchmeth_autoload(pTHX_ HV *stash, const char *name, STRLEN len, I32 le
     GV *gv = gv_fetchmeth(stash, name, len, level);
 
     if (!gv) {
-	const char autoload[] = "AUTOLOAD";
-	STRLEN autolen = sizeof(autoload)-1;
 	CV *cv;
 	GV **gvp;
 
 	if (!stash)
 	    return Nullgv;	/* UNIVERSAL::AUTOLOAD could cause trouble */
-	if (len == autolen && strnEQ(name, autoload, autolen))
+	if (len == S_autolen && strnEQ(name, S_autoload, S_autolen))
 	    return Nullgv;
-	if (!(gv = gv_fetchmeth(stash, autoload, autolen, FALSE)))
+	if (!(gv = gv_fetchmeth(stash, S_autoload, S_autolen, FALSE)))
 	    return Nullgv;
 	cv = GvCV(gv);
 	if (!(CvROOT(cv) || CvXSUB(cv)))
@@ -489,8 +490,6 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 GV*
 Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 {
-    const char autoload[] = "AUTOLOAD";
-    const STRLEN autolen = sizeof(autoload)-1;
     GV* gv;
     CV* cv;
     HV* varstash;
@@ -498,7 +497,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
     SV* varsv;
     const char *packname = "";
 
-    if (len == autolen && strnEQ(name, autoload, autolen))
+    if (len == S_autolen && strnEQ(name, S_autoload, S_autolen))
 	return Nullgv;
     if (stash) {
 	if (SvTYPE(stash) < SVt_PVHV) {
@@ -509,7 +508,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 	    packname = HvNAME(stash);
 	}
     }
-    if (!(gv = gv_fetchmeth(stash, autoload, autolen, FALSE)))
+    if (!(gv = gv_fetchmeth(stash, S_autoload, S_autolen, FALSE)))
 	return Nullgv;
     cv = GvCV(gv);
 
@@ -546,14 +545,14 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
      * original package to look up $AUTOLOAD.
      */
     varstash = GvSTASH(CvGV(cv));
-    vargv = *(GV**)hv_fetch(varstash, autoload, autolen, TRUE);
+    vargv = *(GV**)hv_fetch(varstash, S_autoload, S_autolen, TRUE);
     ENTER;
 
 #ifdef USE_5005THREADS
     sv_lock((SV *)varstash);
 #endif
     if (!isGV(vargv))
-	gv_init(vargv, varstash, autoload, autolen, FALSE);
+	gv_init(vargv, varstash, S_autoload, S_autolen, FALSE);
     LEAVE;
     varsv = GvSV(vargv);
 #ifdef USE_5005THREADS
@@ -1973,3 +1972,13 @@ Perl_is_gv_magical(pTHX_ char *name, STRLEN len, U32 flags)
     }
     return FALSE;
 }
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */

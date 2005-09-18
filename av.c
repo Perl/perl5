@@ -1036,3 +1036,13 @@ Perl_avhv_iterval(pTHX_ AV *av, register HE *entry)
     SV *sv = hv_iterval(avhv_keys(av), entry);
     return *av_fetch(av, avhv_index_sv(sv), TRUE);
 }
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */

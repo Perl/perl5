@@ -1,4 +1,5 @@
-/*
+/* -*- buffer-read-only: t -*-
+ *
  *    opcode.h
  *
  *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999,
@@ -1826,3 +1827,4 @@ EXT U32 PL_opargs[] = {
 #endif
 
 END_EXTERN_C
+/* ex: set ro: */

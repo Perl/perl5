@@ -2544,3 +2544,13 @@ yydestruct(pTHX_ void *ptr)
     yylval	= ysave->oldyylval;
     Safefree(ysave);
 }
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */

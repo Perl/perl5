@@ -1,4 +1,5 @@
-/*
+/* -*- buffer-read-only: t -*-
+ *
  *    reentr.h
  *
  *    Copyright (C) 2002, 2003, 2005 by Larry Wall and others
@@ -11,7 +12,7 @@
  */
 
 #ifndef REENTR_H
-#define REENTR_H 
+#define REENTR_H
 
 #ifdef USE_REENTRANT_API
 

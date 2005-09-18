@@ -1,4 +1,5 @@
-/*
+/*  -*- buffer-read-only: t -*-
+ *
  *    proto.h
  *
  *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999,
@@ -2255,3 +2256,4 @@ PERL_CALLCONV long	Perl_my_betohl(long n);
 PERL_CALLCONV void	Perl_my_swabn(void* ptr, int n);
 
 END_EXTERN_C
+/* ex: set ro: */

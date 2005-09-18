@@ -1,4 +1,5 @@
-/*
+/*  -*- buffer-read-only: t -*-
+ *
  *    perlapi.c
  *
  *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999,
@@ -65,3 +66,5 @@ START_EXTERN_C
 END_EXTERN_C
 
 #endif /* MULTIPLICITY */
+
+/* ex: set ro: */

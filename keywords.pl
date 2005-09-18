@@ -7,7 +7,8 @@ binmode KW;
 select KW;
 
 print <<EOM;
-/*
+/* -*- buffer-read-only: t -*-
+ *
  *    keywords.h
  *
  *    Copyright (C) 1994, 1995, 1996, 1997, 1999, 2000, 2001, 2002,
@@ -32,6 +33,8 @@ while (<DATA>) {
     ($keyword) = split;
     print &tab(5, "#define KEY_$keyword"), $keynum++, "\n";
 }
+
+print KW "\n/* ex: set ro: */\n";
 
 close KW or die "Error closing keywords.h: $!";
 

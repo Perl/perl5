@@ -7089,5 +7089,5 @@ const_sv_xsub(pTHX_ CV* cv)
  * indent-tabs-mode: t
  * End:
  *
- * vim: shiftwidth=4:
-*/
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */

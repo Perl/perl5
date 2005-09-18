@@ -1,3 +1,4 @@
+#  -*- buffer-read-only: t -*-
 #
 #    global.sym
 #
@@ -671,3 +672,4 @@ Perl_hv_scalar
 Perl_op_refcnt_lock
 Perl_op_refcnt_unlock
 Perl_savesvpv
+# ex: set ro:

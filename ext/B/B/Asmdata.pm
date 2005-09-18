@@ -1,3 +1,4 @@
+# -#- buffer-read-only: t -#-
 #
 #      Copyright (c) 1996-1999 Malcolm Beattie
 #
@@ -245,3 +246,5 @@ or '&PL_sv_undef').
 Malcolm Beattie, C<mbeattie@sable.ox.ac.uk>
 
 =cut
+
+# ex: set ro:
