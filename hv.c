@@ -145,7 +145,7 @@ Perl_hek_dup(pTHX_ HEK *source, CLONE_PARAMS* param)
 }
 
 HE *
-Perl_he_dup(pTHX_ HE *e, bool shared, CLONE_PARAMS* param)
+Perl_he_dup(pTHX_ const HE *e, bool shared, CLONE_PARAMS* param)
 {
     HE *ret;
 

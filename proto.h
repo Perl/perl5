@@ -2603,7 +2603,7 @@ PERL_CALLCONV void*	Perl_any_dup(pTHX_ void* v, const PerlInterpreter* proto_per
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV HE*	Perl_he_dup(pTHX_ HE* e, bool shared, CLONE_PARAMS* param)
+PERL_CALLCONV HE*	Perl_he_dup(pTHX_ const HE* e, bool shared, CLONE_PARAMS* param)
 			__attribute__malloc__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_3);

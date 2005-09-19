@@ -954,7 +954,7 @@ Apa	|PERL_CONTEXT*|cx_dup	|NULLOK PERL_CONTEXT* cx|I32 ix|I32 max|NN CLONE_PARAM
 Apa	|PERL_SI*|si_dup	|NULLOK PERL_SI* si|NN CLONE_PARAMS* param
 Apa	|ANY*	|ss_dup		|NN PerlInterpreter* proto_perl|NN CLONE_PARAMS* param
 Apa	|void*	|any_dup	|NULLOK void* v|NN const PerlInterpreter* proto_perl
-Apa	|HE*	|he_dup		|NULLOK HE* e|bool shared|NN CLONE_PARAMS* param
+Apa	|HE*	|he_dup		|NULLOK const HE* e|bool shared|NN CLONE_PARAMS* param
 Apa	|HEK*	|hek_dup	|NULLOK HEK* e|NN CLONE_PARAMS* param
 Apa	|REGEXP*|re_dup		|NULLOK const REGEXP* r|NN CLONE_PARAMS* param
 Apa	|PerlIO*|fp_dup		|NULLOK PerlIO* fp|char type|NN CLONE_PARAMS* param

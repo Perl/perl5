@@ -10625,7 +10625,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 			    char);
 			HvARRAY(dstr) = (HE**)darray;
 			while (i <= sxhv->xhv_max) {
-			    HE *source = HvARRAY(sstr)[i];
+			    const HE *source = HvARRAY(sstr)[i];
 			    HvARRAY(dstr)[i] = source
 				? he_dup(source, sharekeys, param) : 0;
 			    ++i;
