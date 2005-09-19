@@ -180,16 +180,16 @@ C<SV*>.
 #define HvFILL(hv)	((XPVHV*)  SvANY(hv))->xhv_fill
 #define HvMAX(hv)	((XPVHV*)  SvANY(hv))->xhv_max
 #define HvRITER(hv)	((XPVHV*)  SvANY(hv))->xhv_riter
-#define HvRITER_get(hv)	((XPVHV*)  SvANY(hv))->xhv_riter
-#define HvRITER_set(hv,r)	(HvRITER(hv) = r)
+#define HvRITER_get(hv)	(0 + ((XPVHV*)  SvANY(hv))->xhv_riter)
+#define HvRITER_set(hv,r)	(HvRITER(hv) = (r))
 #define HvEITER(hv)	((XPVHV*)  SvANY(hv))->xhv_eiter
-#define HvEITER_get(hv)	((XPVHV*)  SvANY(hv))->xhv_eiter
-#define HvEITER_set(hv,e)	(HvEITER(hv) = e)
+#define HvEITER_get(hv)	(0 + ((XPVHV*)  SvANY(hv))->xhv_eiter)
+#define HvEITER_set(hv,e)	(HvEITER(hv) = (e))
 #define HvPMROOT(hv)	((XPVHV*)  SvANY(hv))->xhv_pmroot
 #define HvNAME(hv)	((XPVHV*)  SvANY(hv))->xhv_name
 /* FIXME - all of these should use a UTF8 aware API, which should also involve
    getting the length. */
-#define HvNAME_get(hv)	((XPVHV*)  SvANY(hv))->xhv_name
+#define HvNAME_get(hv)	(0 + ((XPVHV*)  SvANY(hv))->xhv_name)
 #define hv_name_set(hv,name,length,flags) \
     (HvNAME((hv)) = (name) ? savepvn(name, length) : 0)
 
@@ -210,7 +210,10 @@ C<SV*>.
 #define HvKEYS(hv)		XHvUSEDKEYS((XPVHV*)  SvANY(hv))
 #define HvUSEDKEYS(hv)		XHvUSEDKEYS((XPVHV*)  SvANY(hv))
 #define HvTOTALKEYS(hv)		XHvTOTALKEYS((XPVHV*)  SvANY(hv))
-#define HvPLACEHOLDERS(hv)	XHvPLACEHOLDERS((XPVHV*)  SvANY(hv))
+#define HvPLACEHOLDERS(hv)	(XHvPLACEHOLDERS((XPVHV*)  SvANY(hv)))
+#define HvPLACEHOLDERS_get(hv)	(0 + XHvPLACEHOLDERS((XPVHV*)  SvANY(hv)))
+#define HvPLACEHOLDERS_set(hv, p)	\
+	(XHvPLACEHOLDERS((XPVHV*)  SvANY(hv)) = (p))
 
 #define HvSHAREKEYS(hv)		(SvFLAGS(hv) & SVphv_SHAREKEYS)
 #define HvSHAREKEYS_on(hv)	(SvFLAGS(hv) |= SVphv_SHAREKEYS)

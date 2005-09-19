@@ -420,7 +420,7 @@ xav_fill	AvFILLp(bstate->bs_sv)			SSize_t
 xav_max		AvMAX(bstate->bs_sv)			SSize_t
 xav_flags	AvFLAGS(bstate->bs_sv)			U8
 xhv_riter	HvRITER(bstate->bs_sv)			I32
-xhv_name	HvNAME(bstate->bs_sv)			pvindex
+xhv_name	bstate->bs_sv				pvindex		x
 xhv_pmroot	*(OP**)&HvPMROOT(bstate->bs_sv)		opindex
 hv_store	bstate->bs_sv				svindex		x
 sv_magic	bstate->bs_sv				char		x

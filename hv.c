@@ -1085,7 +1085,7 @@ S_hsplit(pTHX_ HV *hv)
     /*PerlIO_printf(PerlIO_stderr(), "hsplit called for %p which had %d\n",
       hv, (int) oldsize);*/
 
-    if (HvPLACEHOLDERS(hv) && !SvREADONLY(hv)) {
+    if (HvPLACEHOLDERS_get(hv) && !SvREADONLY(hv)) {
       /* Can make this clear any placeholders first for non-restricted hashes,
 	 even though Storable rebuilds restricted hashes by putting in all the
 	 placeholders (first) before turning on the readonly flag, because
@@ -1518,7 +1518,7 @@ See Hash::Util::lock_keys() for an example of its use.
 void
 Perl_hv_clear_placeholders(pTHX_ HV *hv)
 {
-    I32 items = (I32)HvPLACEHOLDERS(hv);
+    I32 items = (I32)HvPLACEHOLDERS_get(hv);
     I32 i = HvMAX(hv);
 
     if (items == 0)
@@ -1545,10 +1545,10 @@ Perl_hv_clear_placeholders(pTHX_ HV *hv)
 
 		if (--items == 0) {
 		    /* Finished.  */
-		    HvTOTALKEYS(hv) -= (IV)HvPLACEHOLDERS(hv);
+		    HvTOTALKEYS(hv) -= (IV)HvPLACEHOLDERS_get(hv);
 		    if (HvKEYS(hv) == 0)
 			HvHASKFLAGS_off(hv);
-		    HvPLACEHOLDERS(hv) = 0;
+		    HvPLACEHOLDERS_set(hv, 0);
 		    return;
 		}
 	    } else {
@@ -1665,7 +1665,7 @@ Perl_hv_iterinit(pTHX_ HV *hv)
     xhv->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
     xhv->xhv_eiter = Null(HE*); /* HvEITER(hv) = Null(HE*) */
     /* used to be xhv->xhv_fill before 5.004_65 */
-    return XHvTOTALKEYS(xhv);
+    return HvTOTALKEYS(hv);
 }
 /*
 =for apidoc hv_iternext
