@@ -10254,7 +10254,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvANY(dstr)	= new_XPVHV();
 	SvCUR_set(dstr, SvCUR(sstr));
 	SvLEN_set(dstr, SvLEN(sstr));
-	SvIV_set(dstr, SvIVX(sstr));
+	HvTOTALKEYS(dstr) = HvTOTALKEYS(sstr);
 	SvNV_set(dstr, SvNVX(sstr));
 	SvMAGIC_set(dstr, mg_dup(SvMAGIC(sstr), param));
 	SvSTASH_set(dstr, hv_dup_inc(SvSTASH(sstr), param));
@@ -10991,6 +10991,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_debug		= proto_perl->Idebug;
 
+    PL_hash_seed	= proto_perl->Ihash_seed;
+    PL_rehash_seed	= proto_perl->Irehash_seed;
+
 #ifdef USE_REENTRANT_API
     /* XXX: things like -Dm will segfault here in perlio, but doing
      *  PERL_SET_CONTEXT(proto_perl);
@@ -11033,7 +11036,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* create (a non-shared!) shared string table */
     PL_strtab		= newHV();
     HvSHAREKEYS_off(PL_strtab);
-    hv_ksplit(PL_strtab, 512);
+    hv_ksplit(PL_strtab, HvTOTALKEYS(proto_perl->Istrtab));
     ptr_table_store(PL_ptr_table, proto_perl->Istrtab, PL_strtab);
 
     PL_compiling = proto_perl->Icompiling;
@@ -11439,8 +11442,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_glob_index	= proto_perl->Iglob_index;
     PL_srand_called	= proto_perl->Isrand_called;
-    PL_hash_seed	= proto_perl->Ihash_seed;
-    PL_rehash_seed	= proto_perl->Irehash_seed;
     PL_uudmap['M']	= 0;		/* reinits on demand */
     PL_bitcount		= Nullch;	/* reinits on demand */
 
