@@ -4606,7 +4606,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 	    SvPV_set(sv, Nullch);
 	    SvLEN_set(sv, 0);
 	    SvGROW(sv, len + 1);
-	    Move(pvx,SvPVX_const(sv),len,char);
+	    Move(pvx,SvPVX(sv),len,char);
 	    *SvEND(sv) = '\0';
 	    unshare_hek(SvSHARED_HEK_FROM_PV(pvx));
 	}
@@ -4665,7 +4665,7 @@ Perl_sv_chop(pTHX_ register SV *sv, register const char *ptr)
 	    const char *pvx = SvPVX_const(sv);
 	    const STRLEN len = SvCUR(sv);
 	    SvGROW(sv, len + 1);
-	    Move(pvx,SvPVX_const(sv),len,char);
+	    Move(pvx,SvPVX(sv),len,char);
 	    *SvEND(sv) = '\0';
 	}
 	SvIV_set(sv, 0);
@@ -7937,7 +7937,7 @@ Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
 		sv_unref(sv);
 	    SvUPGRADE(sv, SVt_PV);		/* Never FALSE */
 	    SvGROW(sv, len + 1);
-	    Move(s,SvPVX_const(sv),len,char);
+	    Move(s,SvPVX(sv),len,char);
 	    SvCUR_set(sv, len);
 	    *SvEND(sv) = '\0';
 	}
