@@ -39,6 +39,34 @@ visual appeal of the HTML generated, and to avoid it having any validation
 errors. See also L</make HTML install work>, as the layout of installation tree
 is needed to improve the cross-linking.
 
+=head2 Parallel testing
+
+The core regression test suite is getting ever more comprehensive, which has
+the side effect that it takes longer to run. This isn't so good. Investigate
+whether it would be feasible to give the harness script the B<option> of
+running sets of tests in parallel. This would be useful for tests in
+F<t/op/*.t> and F<t/uni/*.t> and maybe some sets of tests in F<lib/>.
+
+Questions to answer
+
+=over 4
+
+=item 1
+
+How does screen layout work when you're running more than one test?
+
+=item 2
+
+How does the caller of test specify how many tests to run in parallel?
+
+=item 3
+
+How do setup/teardown tests identify themselves?
+
+=back
+
+Pugs already does parallel testing - can their approach be re-used?
+
 =head2 Make Schwern poorer
 
 We should have for everything. When all the core's modules are tested,
