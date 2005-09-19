@@ -790,8 +790,11 @@ ext/Storable/MANIFEST		Storable extension
 ext/Storable/README		Storable extension
 ext/Storable/Storable.pm	Storable extension
 ext/Storable/Storable.xs	Storable extension
+ext/Storable/t/attach_errors.t	Trigger and test STORABLE_attach errors
+ext/Storable/t/attach_singleton.t	Test STORABLE_attach for the Singleton pattern
 ext/Storable/t/blessed.t	See if Storable works
 ext/Storable/t/canonical.t	See if Storable works
+ext/Storable/t/circular_hook.t	Test thaw hook called depth-first for circular refs
 ext/Storable/t/code.t		See if Storable works
 ext/Storable/t/compat06.t	See if Storable works
 ext/Storable/t/croak.t		See if Storable works
@@ -799,6 +802,7 @@ ext/Storable/t/dclone.t		See if Storable works
 ext/Storable/t/downgrade.t	See if Storable works
 ext/Storable/t/forgive.t	See if Storable works
 ext/Storable/t/freeze.t		See if Storable works
+ext/Storable/t/HAS_ATTACH.pm	For auto-requiring of modules for STORABLE_attach
 ext/Storable/t/HAS_HOOK.pm	For auto-requiring of modules for STORABLE_thaw
 ext/Storable/t/HAS_OVERLOAD.pm	For auto-requiring of mdoules for overload
 ext/Storable/t/integer.t	See if Storable works
@@ -813,14 +817,17 @@ ext/Storable/t/overload.t	See if Storable works
 ext/Storable/t/recurse.t	See if Storable works
 ext/Storable/t/restrict.t	See if Storable works
 ext/Storable/t/retrieve.t	See if Storable works
+ext/Storable/t/sig_die.t	See if Storable works
 ext/Storable/t/st-dump.pl	See if Storable works
 ext/Storable/t/store.t		See if Storable works
+ext/Storable/t/testlib.pl	more helper routines for tests
 ext/Storable/t/threads.t	Does Storable work with threads?
 ext/Storable/t/tied_hook.t	See if Storable works
 ext/Storable/t/tied_items.t	See if Storable works
 ext/Storable/t/tied.t		See if Storable works
 ext/Storable/t/utf8hash.t	See if Storable works
 ext/Storable/t/utf8.t		See if Storable works
+ext/Storable/t/weak.t		Can Storable store weakrefs
 ext/Sys/Hostname/Hostname.pm	Sys::Hostname extension Perl module
 ext/Sys/Hostname/Hostname.xs	Sys::Hostname extension external subroutines
 ext/Sys/Hostname/Makefile.PL	Sys::Hostname extension makefile writer
