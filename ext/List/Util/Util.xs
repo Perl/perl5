@@ -230,6 +230,7 @@ reduce(block,...)
 PROTOTYPE: &@
 CODE:
 {
+    dVAR;
     SV *ret = sv_newmortal();
     int index;
     GV *agv,*bgv,*gv;
@@ -284,6 +285,7 @@ first(block,...)
 PROTOTYPE: &@
 CODE:
 {
+    dVAR;
     int index;
     GV *gv;
     HV *stash;
@@ -314,8 +316,6 @@ CODE:
     CATCH_SET(TRUE);
     PUSHBLOCK(cx, CXt_SUB, SP);
     PUSHSUB(cx);
-    if (!CvDEPTH(cv))
-        (void)SvREFCNT_inc(cv);
 
     for(index = 1 ; index < items ; index++) {
 	GvSV(PL_defgv) = ST(index);
@@ -338,6 +338,7 @@ shuffle(...)
 PROTOTYPE: @
 CODE:
 {
+    dVAR;
     int index;
     struct op dmy_op;
     struct op *old_op = PL_op;

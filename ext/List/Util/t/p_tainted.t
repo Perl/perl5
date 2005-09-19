@@ -1,5 +1,8 @@
 #!./perl -T
 
+# force perl-only version to be tested
+sub List::Util::bootstrap {}
+
 BEGIN {
     unless (-d 'blib') {
 	chdir 't' if -d 't';
