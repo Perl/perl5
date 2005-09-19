@@ -234,7 +234,7 @@ like( $@, qr/Bad filehandle:\s+afile/,          '       right error' );
     }
 
     # used to try to open a file [perl #17830]
-    ok( open(my $stdin,  "<&", fileno STDIN),   'dup fileno(STDIN) into lexical fh');
+    ok( open(my $stdin,  "<&", fileno STDIN),   'dup fileno(STDIN) into lexical fh') or _diag $!;
 }
 
 SKIP: {
