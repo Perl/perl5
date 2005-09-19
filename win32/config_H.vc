@@ -1924,6 +1924,18 @@
  */
 /*#define HAS_MADVISE		/**/
 
+/* HAS_MALLOC_SIZE:
+ *	This symbol, if defined, indicates that the malloc_size
+ *	routine is available for use.
+ */
+/*#define HAS_MALLOC_SIZE		/**/
+
+/* HAS_MALLOC_GOOD_SIZE:
+ *	This symbol, if defined, indicates that the malloc_good_size
+ *	routine is available for use.
+ */
+/*#define HAS_MALLOC_GOOD_SIZE	/**/
+
 /* HAS_MEMCHR:
  *	This symbol, if defined, indicates that the memchr routine is available
  *	to locate characters within a C string.
