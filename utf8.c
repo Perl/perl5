@@ -172,21 +172,29 @@ Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
     return Perl_uvuni_to_utf8_flags(aTHX_ d, uv, 0);
 }
 
-
 /*
-=for apidoc A|STRLEN|is_utf8_char|U8 *s
 
 Tests if some arbitrary number of bytes begins in a valid UTF-8
 character.  Note that an INVARIANT (i.e. ASCII) character is a valid
 UTF-8 character.  The actual number of bytes in the UTF-8 character
 will be returned if it is valid, otherwise 0.
 
+This is the "slow" version as opposed to the "fast" version which is
+the "unrolled" IS_UTF8_CHAR().  E.g. for t/uni/class.t the speed
+difference is a factor of 2 to 3.  For lengths (UTF8SKIP(s)) of four
+or less you should use the IS_UTF8_CHAR(), for lengths of five or more
+you should use the _slow().  In practice this means that the _slow()
+will be used very rarely, since the maximum Unicode code point (as of
+Unicode 4.1) is U+10FFFF, which encodes in UTF-8 to four bytes.  Only
+the "Perl extended UTF-8" (the infamous 'v-strings') will encode into
+five bytes or more.
+
 =cut */
 STRLEN
-Perl_is_utf8_char(pTHX_ U8 *s)
+S_is_utf8_char_slow(pTHX_ const U8 *s, const STRLEN len)
 {
     U8 u = *s;
-    STRLEN slen, len;
+    STRLEN slen;
     UV uv, ouv;
 
     if (UTF8_IS_INVARIANT(u))
@@ -194,8 +202,6 @@ Perl_is_utf8_char(pTHX_ U8 *s)
 
     if (!UTF8_IS_START(u))
 	return 0;
-
-    len = UTF8SKIP(s);
 
     if (len < 2 || !UTF8_IS_CONTINUATION(s[1]))
 	return 0;
@@ -222,12 +228,34 @@ Perl_is_utf8_char(pTHX_ U8 *s)
 }
 
 /*
+=for apidoc A|STRLEN|is_utf8_char|U8 *s
+
+Tests if some arbitrary number of bytes begins in a valid UTF-8
+character.  Note that an INVARIANT (i.e. ASCII) character is a valid
+UTF-8 character.  The actual number of bytes in the UTF-8 character
+will be returned if it is valid, otherwise 0.
+
+=cut */
+STRLEN
+Perl_is_utf8_char(pTHX_ U8 *s)
+{
+    STRLEN len = UTF8SKIP(s);
+#ifdef IS_UTF8_CHAR
+    if (IS_UTF8_CHAR_FAST(len))
+        return IS_UTF8_CHAR(s, len) ? len : 0;
+#endif /* #ifdef IS_UTF8_CHAR */
+    return is_utf8_char_slow(s, len);
+}
+
+/*
 =for apidoc A|bool|is_utf8_string|U8 *s|STRLEN len
 
 Returns true if first C<len> bytes of the given string form a valid
 UTF-8 string, false otherwise.  Note that 'a valid UTF-8 string' does
 not mean 'a string that contains code points above 0x7F encoded in UTF-8'
 because a valid ASCII string is a valid UTF-8 string.
+
+See also is_utf8_string_loclen() and is_utf8_string_loc().
 
 =cut
 */
@@ -248,15 +276,26 @@ Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
 	 if (UTF8_IS_INVARIANT(*x))
 	      c = 1;
 	 else if (!UTF8_IS_START(*x))
-	      return FALSE;
+	     goto out;
 	 else {
 	      /* ... and call is_utf8_char() only if really needed. */
-	      c = is_utf8_char((U8*)x);
+#ifdef IS_UTF8_CHAR
+	     c = UTF8SKIP(x);
+	     if (IS_UTF8_CHAR_FAST(c)) {
+	         if (!IS_UTF8_CHAR(x, c))
+		     goto out;
+	     } else if (!is_utf8_char_slow(x, c))
+	         goto out;
+#else
+	     c = is_utf8_char(x);
+#endif /* #ifdef IS_UTF8_CHAR */
 	      if (!c)
-		   return FALSE;
+		  goto out;
 	 }
         x += c;
     }
+
+ out:
     if (x != send)
 	return FALSE;
 
@@ -264,16 +303,20 @@ Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
 }
 
 /*
-=for apidoc A|bool|is_utf8_string_loc|U8 *s|STRLEN len|U8 **p
+=for apidoc A|bool|is_utf8_string_loclen|const U8 *s|STRLEN len|const U8 **ep|const STRLEN *el
 
-Like is_ut8_string but store the location of the failure in
-the last argument.
+Like is_ut8_string() but stores the location of the failure (in the
+case of "utf8ness failure") or the location s+len (in the case of
+"utf8ness success") in the C<ep>, and the number of UTF-8
+encoded characters in the C<el>.
+
+See also is_utf8_string_loc() and is_utf8_string().
 
 =cut
 */
 
 bool
-Perl_is_utf8_string_loc(pTHX_ U8 *s, STRLEN len, U8 **p)
+Perl_is_utf8_string_loclen(pTHX_ const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 {
     const U8* x = s;
     const U8* send;
@@ -282,34 +325,60 @@ Perl_is_utf8_string_loc(pTHX_ U8 *s, STRLEN len, U8 **p)
     if (!len && s)
         len = strlen((const char *)s);
     send = s + len;
+    if (el)
+        *el = 0;
 
     while (x < send) {
 	 /* Inline the easy bits of is_utf8_char() here for speed... */
 	 if (UTF8_IS_INVARIANT(*x))
-	      c = 1;
-	 else if (!UTF8_IS_START(*x)) {
-	      if (p)
-		  *p = (U8 *)x;
-	      return FALSE;
-	 }
+	     c = 1;
+	 else if (!UTF8_IS_START(*x))
+	     goto out;
 	 else {
-	      /* ... and call is_utf8_char() only if really needed. */
-	      c = is_utf8_char((U8 *)x);
-	      if (!c) {
-		   if (p)
-		      *p = (U8 *)x;
-		   return FALSE;
-	      }
+	     /* ... and call is_utf8_char() only if really needed. */
+#ifdef IS_UTF8_CHAR
+	     c = UTF8SKIP(x);
+	     if (IS_UTF8_CHAR_FAST(c)) {
+	         if (!IS_UTF8_CHAR(x, c))
+		     c = 0;
+	     } else
+	         c = is_utf8_char_slow(x, c);
+#else
+	     c = is_utf8_char(x);
+#endif /* #ifdef IS_UTF8_CHAR */
+	     if (!c)
+	         goto out;
 	 }
-        x += c;
-    }
-    if (x != send) {
-       if (p)
-	   *p = (U8 *)x;
-	return FALSE;
+         x += c;
+	 if (el)
+	     (*el)++;
     }
 
+ out:
+    if (ep)
+        *ep = x;
+    if (x != send)
+	return FALSE;
+
     return TRUE;
+}
+
+/*
+=for apidoc A|bool|is_utf8_string_loc|const U8 *s|STRLEN len|const U8 **ep|const STRLEN *el
+
+Like is_ut8_string() but stores the location of the failure (in the
+case of "utf8ness failure") or the location s+len (in the case of
+"utf8ness success") in the C<ep>.
+
+See also is_utf8_string_loclen() and is_utf8_string().
+
+=cut
+*/
+
+bool
+Perl_is_utf8_string_loc(pTHX_ U8 *s, STRLEN len, U8 **ep)
+{
+    return is_utf8_string_loclen(s, len, (const U8 **)ep, 0);
 }
 
 /*

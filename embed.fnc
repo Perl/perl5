@@ -359,7 +359,6 @@ ApPR	|bool	|is_uni_punct_lc|UV c
 ApPR	|bool	|is_uni_xdigit_lc|UV c
 Apd	|STRLEN	|is_utf8_char	|NN U8 *p
 Apd	|bool	|is_utf8_string	|NN U8 *s|STRLEN len
-Apd	|bool	|is_utf8_string_loc|NN U8 *s|STRLEN len|NN U8 **p
 ApR	|bool	|is_utf8_alnum	|NN U8 *p
 ApR	|bool	|is_utf8_alnumc	|NN U8 *p
 ApR	|bool	|is_utf8_idfirst|NN U8 *p
@@ -1335,6 +1334,10 @@ s	|SV*	|mess_alloc
 sn	|NV|mulexp10	|NV value|I32 exponent
 #endif
 
+#if defined(PERL_IN_UTF8_C) || defined(PERL_DECL_PROT)
+s	|STRLEN	|is_utf8_char_slow|NN const U8 *s|const STRLEN len
+#endif
+
 START_EXTERN_C
 
 Apd	|void	|sv_setsv_flags	|NN SV* dsv|SV* ssv|I32 flags
@@ -1551,6 +1554,8 @@ ApR	|OP*	|ck_svconst	|NN OP *o
 ApR	|OP*	|ck_trunc	|NN OP *o
 ApR	|OP*	|ck_unpack	|NN OP *o
 #endif
+
+Apd	|bool	|is_utf8_string_loc|NN U8 *s|STRLEN len|NN U8 **p
 
 END_EXTERN_C
 /*

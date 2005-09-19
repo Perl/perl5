@@ -624,8 +624,10 @@ PERL_CALLCONV bool	Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV bool	Perl_is_utf8_string_loc(pTHX_ U8 *s, STRLEN len, U8 **p)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_3);
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV bool	Perl_is_utf8_string_loclen(pTHX_ const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
+			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV bool	Perl_is_utf8_alnum(pTHX_ U8 *p)
 			__attribute__warn_unused_result__
@@ -2310,6 +2312,12 @@ STATIC SV*	S_mess_alloc(pTHX);
 
 #if defined(PERL_IN_NUMERIC_C) || defined(PERL_DECL_PROT)
 STATIC NV	S_mulexp10(NV value, I32 exponent);
+#endif
+
+#if defined(PERL_IN_UTF8_C) || defined(PERL_DECL_PROT)
+STATIC STRLEN	S_is_utf8_char_slow(pTHX_ const U8 *s, const STRLEN len)
+			__attribute__nonnull__(pTHX_1);
+
 #endif
 
 START_EXTERN_C
