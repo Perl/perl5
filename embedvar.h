@@ -484,6 +484,8 @@
 #define PL_xpvbm_root		(PERL_GET_INTERP->Ixpvbm_root)
 #define PL_xpvcv_arenaroot	(PERL_GET_INTERP->Ixpvcv_arenaroot)
 #define PL_xpvcv_root		(PERL_GET_INTERP->Ixpvcv_root)
+#define PL_xpvgv_arenaroot	(PERL_GET_INTERP->Ixpvgv_arenaroot)
+#define PL_xpvgv_root		(PERL_GET_INTERP->Ixpvgv_root)
 #define PL_xpvhv_arenaroot	(PERL_GET_INTERP->Ixpvhv_arenaroot)
 #define PL_xpvhv_root		(PERL_GET_INTERP->Ixpvhv_root)
 #define PL_xpviv_arenaroot	(PERL_GET_INTERP->Ixpviv_arenaroot)

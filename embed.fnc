@@ -358,6 +358,7 @@ ApPR	|bool	|is_uni_print_lc|UV c
 ApPR	|bool	|is_uni_punct_lc|UV c
 ApPR	|bool	|is_uni_xdigit_lc|UV c
 Apd	|STRLEN	|is_utf8_char	|NN U8 *p
+Apd	|bool	|is_utf8_string_loc|NN U8 *s|STRLEN len|NN U8 **p
 Apd	|bool	|is_utf8_string	|NN U8 *s|STRLEN len
 ApR	|bool	|is_utf8_alnum	|NN U8 *p
 ApR	|bool	|is_utf8_alnumc	|NN U8 *p
@@ -1244,8 +1245,6 @@ s	|void	|not_a_number	|SV *sv
 s	|I32	|visit		|SVFUNC_t f|U32 flags|U32 mask
 s	|void	|sv_add_backref	|SV *tsv|SV *sv
 s	|void	|sv_del_backref	|SV *sv
-s	|SV *	|varname	|GV *gv|NN const char *gvtype|PADOFFSET targ \
-				|SV *keyname|I32 aindex|int subscript_type
 #  ifdef DEBUGGING
 s	|void	|del_sv	|SV *p
 #  endif
@@ -1555,7 +1554,7 @@ ApR	|OP*	|ck_trunc	|NN OP *o
 ApR	|OP*	|ck_unpack	|NN OP *o
 #endif
 
-Apd	|bool	|is_utf8_string_loc|NN U8 *s|STRLEN len|NN U8 **p
+Apd	|bool	|is_utf8_string_loclen|NN const U8 *s|STRLEN len|const U8 **ep|STRLEN *el
 
 END_EXTERN_C
 /*

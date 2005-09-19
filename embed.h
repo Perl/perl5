@@ -360,9 +360,8 @@
 #define is_uni_punct_lc		Perl_is_uni_punct_lc
 #define is_uni_xdigit_lc	Perl_is_uni_xdigit_lc
 #define is_utf8_char		Perl_is_utf8_char
-#define is_utf8_string		Perl_is_utf8_string
 #define is_utf8_string_loc	Perl_is_utf8_string_loc
-#define is_utf8_string_loclen	Perl_is_utf8_string_loclen
+#define is_utf8_string		Perl_is_utf8_string
 #define is_utf8_alnum		Perl_is_utf8_alnum
 #define is_utf8_alnumc		Perl_is_utf8_alnumc
 #define is_utf8_idfirst		Perl_is_utf8_idfirst
@@ -1324,7 +1323,6 @@
 #define visit			S_visit
 #define sv_add_backref		S_sv_add_backref
 #define sv_del_backref		S_sv_del_backref
-#define varname			S_varname
 #endif
 #  ifdef DEBUGGING
 #ifdef PERL_CORE
@@ -1703,6 +1701,7 @@
 #define ck_trunc		Perl_ck_trunc
 #define ck_unpack		Perl_ck_unpack
 #endif
+#define is_utf8_string_loclen	Perl_is_utf8_string_loclen
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_concat		Perl_ck_concat
@@ -2405,9 +2404,8 @@
 #define is_uni_punct_lc(a)	Perl_is_uni_punct_lc(aTHX_ a)
 #define is_uni_xdigit_lc(a)	Perl_is_uni_xdigit_lc(aTHX_ a)
 #define is_utf8_char(a)		Perl_is_utf8_char(aTHX_ a)
-#define is_utf8_string(a,b)	Perl_is_utf8_string(aTHX_ a,b)
 #define is_utf8_string_loc(a,b,c)	Perl_is_utf8_string_loc(aTHX_ a,b,c)
-#define is_utf8_string_loclen(a,b,c,d)	Perl_is_utf8_string_loclen(aTHX_ a,b,c,d)
+#define is_utf8_string(a,b)	Perl_is_utf8_string(aTHX_ a,b)
 #define is_utf8_alnum(a)	Perl_is_utf8_alnum(aTHX_ a)
 #define is_utf8_alnumc(a)	Perl_is_utf8_alnumc(aTHX_ a)
 #define is_utf8_idfirst(a)	Perl_is_utf8_idfirst(aTHX_ a)
@@ -3356,7 +3354,6 @@
 #define visit(a,b,c)		S_visit(aTHX_ a,b,c)
 #define sv_add_backref(a,b)	S_sv_add_backref(aTHX_ a,b)
 #define sv_del_backref(a)	S_sv_del_backref(aTHX_ a)
-#define varname(a,b,c,d,e,f)	S_varname(aTHX_ a,b,c,d,e,f)
 #endif
 #  ifdef DEBUGGING
 #ifdef PERL_CORE
@@ -3735,6 +3732,7 @@
 #define ck_trunc(a)		Perl_ck_trunc(aTHX_ a)
 #define ck_unpack(a)		Perl_ck_unpack(aTHX_ a)
 #endif
+#define is_utf8_string_loclen(a,b,c,d)	Perl_is_utf8_string_loclen(aTHX_ a,b,c,d)
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
 #define ck_concat(a)		Perl_ck_concat(aTHX_ a)

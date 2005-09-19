@@ -1769,8 +1769,8 @@ Perl_magic_setglob(pTHX_ SV *sv, MAGIC *mg)
 {
     register char *s;
     GV* gv;
-    (void)mg;
     STRLEN n_a;
+    (void)mg;
 
     if (!SvOK(sv))
 	return 0;

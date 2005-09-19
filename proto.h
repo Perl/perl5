@@ -620,13 +620,11 @@ PERL_CALLCONV bool	Perl_is_uni_xdigit_lc(pTHX_ UV c)
 PERL_CALLCONV STRLEN	Perl_is_utf8_char(pTHX_ U8 *p)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV bool	Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
-			__attribute__nonnull__(pTHX_1);
-
 PERL_CALLCONV bool	Perl_is_utf8_string_loc(pTHX_ U8 *s, STRLEN len, U8 **p)
-			__attribute__nonnull__(pTHX_1);
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_3);
 
-PERL_CALLCONV bool	Perl_is_utf8_string_loclen(pTHX_ const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
+PERL_CALLCONV bool	Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV bool	Perl_is_utf8_alnum(pTHX_ U8 *p)
@@ -2197,9 +2195,6 @@ STATIC void	S_not_a_number(pTHX_ SV *sv);
 STATIC I32	S_visit(pTHX_ SVFUNC_t f, U32 flags, U32 mask);
 STATIC void	S_sv_add_backref(pTHX_ SV *tsv, SV *sv);
 STATIC void	S_sv_del_backref(pTHX_ SV *sv);
-STATIC SV *	S_varname(pTHX_ GV *gv, const char *gvtype, PADOFFSET targ, SV *keyname, I32 aindex, int subscript_type)
-			__attribute__nonnull__(pTHX_2);
-
 #  ifdef DEBUGGING
 STATIC void	S_del_sv(pTHX_ SV *p);
 #  endif
@@ -2678,6 +2673,10 @@ PERL_CALLCONV OP*	Perl_ck_unpack(pTHX_ OP *o)
 			__attribute__nonnull__(pTHX_1);
 
 #endif
+
+PERL_CALLCONV bool	Perl_is_utf8_string_loclen(pTHX_ const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
+			__attribute__nonnull__(pTHX_1);
+
 
 END_EXTERN_C
 /*
