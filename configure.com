@@ -37,7 +37,7 @@ $ echo = "write sys$output "
 $ cat  = "type"
 $ delete := delete ! local symbol overrides globals with qualifiers
 $ gcc_symbol = "gcc"
-$ ld = "Link"
+$ ld = "Link/nodebug"
 $ ans = ""
 $ macros = ""
 $ extra_flags = ""
@@ -45,6 +45,7 @@ $ user_c_flags = ""
 $ use_ieee_math = "y"
 $ be_case_sensitive = "n"
 $ unlink_all_versions = "n"
+$ builder = "MMK"
 $ use_vmsdebug_perl = "n"
 $ use64bitall = "n"
 $ use64bitint = "n"
@@ -790,7 +791,12 @@ Many of the questions will have default answers in square
 brackets; typing carriage return will give you the default.
 
 $   EOD
-$   READ SYS$COMMAND/PROMPT="Type carriage return to continue " ans
+$   if (fastread)
+$   then
+$     echo4 ""
+$   else
+$     READ SYS$COMMAND/PROMPT="Type carriage return to continue " ans
+$   endif
 $   TYPE SYS$INPUT:
 $   DECK
 
@@ -800,7 +806,12 @@ there was already a config.sh file). Type '@Configure "-h"' for a list of
 options.
 
 $   EOD
-$   READ SYS$COMMAND/PROMPT="Type carriage return to continue " ans
+$   if (fastread)
+$   then
+$     echo4 ""
+$   else
+$     READ SYS$COMMAND/PROMPT="Type carriage return to continue " ans
+$   endif
 $   TYPE SYS$INPUT:
 $   DECK
 
@@ -821,7 +832,12 @@ $!
 $!If you make a mistake on a question, there is no easy way to back up to it
 $!currently.
 $!
-$   READ SYS$COMMAND/PROMPT="Type carriage return to continue " ans
+$   if (fastread)
+$   then
+$     echo4 ""
+$   else
+$     READ SYS$COMMAND/PROMPT="Type carriage return to continue " ans
+$   endif
 $   IF (F$SEARCH("[-.CONFIG]INSTRUCT.").EQS."")
 $   THEN
 $     OPEN/WRITE CONFIG [-.CONFIG]INSTRUCT.
@@ -840,7 +856,7 @@ $! echo "I don't know where '$file' is, and my life depends on it."
 $! echo "Go find a public domain implementation or fix your PATH setting!"
 $! echo ""
 $! echo "Don't worry if any of the following aren't found..."
-$!: determine whether symbolic links are supported !sfn
+$!: determine whether symbolic links are supported !sfn !jem- further down
 $!: see whether [:lower:] and [:upper:] are supported character classes !sfn
 $!: set up the translation script tr, must be called with ./tr of course !sfn
 $!
@@ -885,6 +901,7 @@ $   config_symbols1 ="|installprivlib|installscript|installsitearch|installsitel
 $   config_symbols2 ="|prefix|privlib|privlibexp|scriptdir|sitearch|sitearchexp|sitebin|sitelib|sitelib_stem|sitelibexp|try_cxx|use64bitall|use64bitint|"
 $   config_symbols3 ="|usecasesensitive|usedefaulttypes|usedevel|useieee|useithreads|usemultiplicity|usemymalloc|usedebugging_perl|useperlio|usesecurelog|"
 $   config_symbols4 ="|usethreads|usevmsdebug|usefaststdio|usemallocwrap|unlink_all_versions|uselargefiles|usesitecustomize|"
+$   config_symbols5 ="|buildmake|builder|"
 $!  
 $   open/read CONFIG 'config_sh'
 $   rd_conf_loop:
@@ -900,7 +917,7 @@ $         syms = config_symbols'k'
 $         j = f$locate(dsym, syms)
 $         if j .lt. f$length(syms) then goto erd_ck_loop
 $         k = k + 1
-$     if k .lt. 5 then goto rd_ck_loop
+$     if k .lt. 6 then goto rd_ck_loop
 $     goto rd_conf_loop
 $     erd_ck_loop:
 $     val = f$element(1,"=",line)
@@ -915,6 +932,7 @@ $   delete/symbol config_symbols1
 $   delete/symbol config_symbols2
 $   delete/symbol config_symbols3
 $   delete/symbol config_symbols4
+$   delete/symbol config_symbols5
 $   delete/symbol sym
 $   delete/symbol val
 $   delete/symbol dsym
@@ -1467,7 +1485,7 @@ $!: determine where public executables go
 $   IF F$TYPE(bin) .NES. ""
 $   THEN dflt = bin
 $!   ELSE dflt = prefix - ".]" + ".BIN]"
-$   ELSE dflt = "/''vms_prefix'/000000"
+$   ELSE dflt = "/''vms_prefix'"
 $   ENDIF
 $   rp = "Pathname where the public executables will reside? "
 $   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
@@ -1495,7 +1513,7 @@ $ ELSE ! skipping "where install" questions, we must set some symbols
 $   IF F$TYPE(archlib).EQS."" THEN -
       archlib="''vms_prefix':[lib.''archname'.''version']"
 $   IF F$TYPE(bin) .EQS. "" THEN -
-      bin="/''vms_prefix'/000000"
+      bin="/''vms_prefix'"
 $   IF F$TYPE(privlib) .EQS. "" THEN -
       privlib ="''vms_prefix':[lib]"
 $   IF F$TYPE(sitearch) .EQS. "" THEN -
@@ -1686,7 +1704,7 @@ $! Which linker?
 $   SET NOON
 $   DEFINE/USER_MODE SYS$OUTPUT NL:
 $   DEFINE/USER_MODE SYS$ERROR NL:
-$   link ccvms.obj
+$   link/nodebug ccvms.obj
 $   tmp = $status
 $   SET ON
 $   ! success $status with:
@@ -1817,7 +1835,7 @@ $   tmp = $status
 $   IF (silent) THEN GOSUB Shut_up
 $   DEFINE/USER_MODE SYS$ERROR NL:
 $   DEFINE/USER_MODE SYS$OUTPUT NL:
-$   link deccvers.obj
+$   link/nodebug deccvers.obj
 $   tmp = $status
 $   IF (silent) THEN GOSUB Shut_up
 $   OPEN/WRITE CONFIG deccvers.out
@@ -1914,17 +1932,17 @@ $     IF vaxcrtl_exe .EQS. ""
 $     THEN 
 $       IF F$LOCATE("VAXCRTL",gcclib_olb).NE.F$LENGTH(gcclib_olb)
 $       THEN 
-$         link gccvers.obj,'gcclib_olb',SYS$LIBRARY:VAXCRTL/Library
+$         link/nodebug gccvers.obj,'gcclib_olb',SYS$LIBRARY:VAXCRTL/Library
 $         tmp = $status
 $       ELSE
-$         link gccvers.obj,'gcclib_olb'
+$         link/nodebug gccvers.obj,'gcclib_olb'
 $         tmp = $status
 $       ENDIF
 $     ELSE
 $       OPEN/WRITE CONFIG GCCVERS.OPT
 $       WRITE CONFIG "SYS$SHARE:VAXCRTL/SHARE"
 $       CLOSE CONFIG
-$       link gccvers.obj,GCCVERS.OPT/OPT,'gcclib_olb'
+$       link/nodebug gccvers.obj,GCCVERS.OPT/OPT,'gcclib_olb'
 $       tmp = $status
 $     ENDIF
 $     DEASSIGN SYS$ERROR
@@ -2323,10 +2341,11 @@ $   THEN
 $     echo ""
 $     echo "Since you have chosen a maximally 64-bit build, I'm also turning on"
 $     echo "the use of 64-bit integers."
+$     echo "I am also setting the default to use large files if available."
 $     use64bitint="Y"
 $   ENDIF
 $!
-$   bool_dflt = "n"
+$   bool_dflt = use64bitall
 $   IF F$TYPE(uselargefiles) .NES. "" 
 $   THEN
 $       IF uselargefiles .OR. uselargefiles .eqs. "define" THEN bool_dflt = "y"
@@ -2693,7 +2712,8 @@ $ builders = "IMAKE/GNUMAKE/MGMAKE/GMAKE/MAKE/MMS/MMK"
 $ probers  = "-f Makefile. -v!-f Makefile. -v!-f Makefile. -v!-f Makefile. -v!-f Makefile. -v!/IDENT!/IDENT"
 $ max_build = 7
 $!
-$ orig_dflt = "MMK"
+$ orig_dflt = f$edit(builder,"UPCASE")
+$ if orig_dflt .eqs. "" then orig_dflt = "MMK"
 $ default_set = ""
 $ ok_builders = ""
 $ OPEN/WRITE/ERROR=Open_error CONFIG Makefile.
@@ -4015,24 +4035,6 @@ $ tmp = "strtoq"
 $ GOSUB inlibc
 $ d_strtoq = tmp
 $!
-$! Check for strtoq
-$!
-$ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
-$ WS "#include <stdlib.h>"
-$ WS "#endif"
-$ WS "#include <string.h>"
-$ WS "int main()"
-$ WS "{"
-$ WS "__int64 result;"
-$ WS "result = strtoq(""123123"", NULL, 10);"
-$ WS "exit(0);"
-$ WS "}"
-$ CS
-$ tmp = "strtoq"
-$ GOSUB inlibc
-$ d_strtoq = tmp
-$!
 $! Check for strtold
 $!
 $ OS
@@ -4803,6 +4805,167 @@ $   echo4 "I'm disabling large file support."
 $   uselargefiles = "undef"
 $ ENDIF
 $!
+$! Tests for hard link, symbolic links, and 7.3 + CRTL features
+$!
+$  d_lchown = "undef"
+$  d_link = "undef"
+$  d_lstat = "undef"
+$  d_readlink = "undef"
+$  d_symlink = "undef"
+$  d_realpath = "undef"
+$  tmp = f$extract(1,3,f$edit(f$getsyi("VERSION"),"TRIM,COLLAPSE"))
+$!
+$! Hard link support has been present since 7.3-1 except for the
+$! easy to use DCL test to see if hardlinks are enabled on the build
+$! disk.  That would require more work to test, and I am only testing
+$! this on 8.2, so that is why the 8.2 test.
+$!
+$  IF (tmp .GES. "8.2") .AND. (f$getsyi("HW_MODEL") .GE. 1024)
+$  THEN
+$   IF f$getdvi("SYS$DISK","HARDLINKS_SUPPORTED")
+$   THEN
+$       echo "I Found 64 bit OpenVMS 8.2 or later, and hard links enabled on build disk."
+$	echo "I will build with hard link support"
+$	d_link = "define"
+$   ELSE
+$	echo "I Found 64 bit OpenVMS 8.2 or later, and hard links disabled on build disk."
+$	echo "I will not build with hard link support."
+$   ENDIF
+$  ELSE
+$    echo4 "I can not dected if your CRTL and build disk support hard links."
+$    echo4 "I am disabling hard link support."
+$  ENDIF
+$!
+$  IF uselargefiles .OR. uselargefiles .eqs. "define"
+$  THEN
+$    IF (tmp .GES. "8.2") .AND. (f$getsyi("HW_MODEL") .GE. 1024)
+$    THEN
+$      echo4 -
+   "Looking for the realpath() function to indicate symbolic link support..."
+$      OS
+$!      WS "#include <stdlib.h>"
+$      WS "void exit(int foo);"
+$      WS "char *realpath(const char *file_name, char * resolved_name, ...);"
+$      WS "int main()"
+$      WS "{"
+$      WS "char result[255];"
+$      WS "realpath(""foo"",result);"
+$      WS "exit(0);"
+$      WS "}"
+$      CS
+$      GOSUB link_ok
+$      IF compile_status .EQ. good_compile .AND. link_status .EQ. good_link
+$      THEN
+$        echo -
+           "Found realpath() which indicates symbolic link support is present."
+$	 d_lchown = "define"
+$	 d_lstat = "define"
+$	 d_readlink = "define"
+$	 d_symlink = "define"
+$!	 d_realpath = "define" ! Perl will not put it in the config.h file?
+$!	Perl apparently does not use a built in realpath() on other platforms,
+$!      but there is a severe performance penatly on OpenVMS to use the Perl
+$!      script that implements a realpath().  The d_symlink symbol is used
+$!      as a replacement for the d_realpath since they are related and both
+$!      were activated by the CRTL at the same time.
+$!
+$	 ELSE
+$	  echo4 "Your system does not support symbolic links."
+$	  echo4 "I am disabling symbolic link support."
+$	ENDIF
+$    ELSE
+$       echo4 "Your system does not support symbolic links."
+$       echo4 "I am disabling symbolic link support."
+$    ENDIF
+$  ELSE
+$    IF (tmp .GES. "8.2") .AND. (f$getsyi("HW_MODEL") .GE. 1024)
+$    THEN
+$       echo4 "-duselargefiles is required for symbolic link support."
+$       echo4 "You did not specify that, so I am disabling symbolic link support."
+$    ENDIF
+$  ENDIF
+$!
+$! VMS V7.3-2 powered options
+$! We know that it is only available for V7.3-2 and later on 64 bit platforms.
+$! Only implementing right now on 8.2 because that is what I am testing.
+$!
+$  d_getgrgid_r = "undef"
+$  getgrgid_r_proto = "0"
+$  d_getgrnam_r = "undef"
+$  getgrnam_r_proto = "0"
+$  d_getpgid = "undef"
+$  d_getpgrp = "undef"
+$  d_getpwnam_r = "undef"
+$  getpwnam_r_proto = "0"
+$  d_getpwuid_r = "undef"
+$  getpwuid_r_proto = "0"
+$  d_setgrent = "undef"
+$  d_ttyname_r = "undef"
+$  ttyname_r_proto = "0"
+$  tmp = f$extract(1,3,f$edit(f$getsyi("VERSION"),"TRIM,COLLAPSE"))
+$  if (tmp .GES. "8.2") .AND. (f$getsyi("HW_MODEL") .GE. 1024)
+$  then
+$    echo "Found 64 bit OpenVMS 8.2, will build with V7.3-2 routines"
+$    d_getgrgid_r = "define"
+$    getgrgid_r_proto = "1"
+$    d_getgrnam_r = "define"
+$    getgrnam_r_proto = "1"
+$    if d_symlink .or. d_symlink .EQS. "define"
+$    then
+$!	 FIXME: Need to find how to activate this.
+$!       d_getpgid = "define"
+$!       d_getpgrp = "define"
+$    endif
+$    d_getpwnam_r = "define"
+$    getpwnam_r_proto = "1"
+$    d_getpwuid_r = "define"
+$    getpwuid_r_proto = "1"
+$    d_setgrent = "define"
+$    d_ttyname_r = "define"
+$    ttyname_r_proto = "1"
+$  endif
+$!
+$! VMS V7.3-2 powered options
+$! We know that it is only available for V7.3-2 and later on 64 bit platforms.
+$! Only implementing right now on 8.2 because that is what I am testing
+$! These functions may require POSIX UIDs/GIDs to be active, so I am
+$! not activating the features at this time, just preparing this file
+$! to easily use them in the future.
+$!
+$  d_seteuid = "undef"
+$  d_setpgid = "undef"
+$  d_setpgrp = "undef"
+$  d_setregid = "undef"
+$  d_setreuid = "undef"
+$  d_setsid = "undef"
+$!  tmp = f$extract(1,3,f$edit(f$getsyi("VERSION"),"TRIM,COLLAPSE"))
+$tmp = "" ! Disable this section for now.
+$  if (tmp .GES. "8.2") .AND. (f$getsyi("HW_MODEL") .GE. 1024)
+$  then
+$    echo "Found 64 bit OpenVMS 8.2, will build with V7.3-2 UID setting routines"
+$    d_seteuid = "define"
+$    d_setpgid = "define"
+$    d_setpgrp = "define"
+$    d_setregid = "define"
+$    d_setreuid = "define"
+$    d_setsid = "define"
+$  endif
+$!
+$! VMS V8 powered options
+$! We know that it is only available for 8.2 and later on 64 bit platforms.
+$!
+$  d_fstatvfs = "undef"
+$!  d_statvfs = "undef"
+$  i_sysstatvfs = "undef"
+$  tmp = f$extract(1,3,f$edit(f$getsyi("VERSION"),"TRIM,COLLAPSE"))
+$  if (tmp .GES. "8.2") .AND. (f$getsyi("HW_MODEL") .GE. 1024)
+$  then
+$    echo "Found 64 bit OpenVMS 8.2, will build with 8.2 routines"
+$    d_fstatvfs = "define"
+$!    d_statvfs = "define"
+$    i_sysstatvfs = "define"
+$  endif
+$!
 $! Check rand48 and its ilk
 $!
 $ echo4 "Looking for a random number function..."
@@ -5051,6 +5214,13 @@ $ THEN
 $   d_vms_do_sockets="define"
 $   d_htonl="define"
 $   d_socket="define"
+$   d_sockpair = "undef"
+$   tmp = f$extract(1,3,f$edit(f$getsyi("VERSION"),"TRIM,COLLAPSE"))
+$   if (tmp .GES. "8.2") .AND. (f$getsyi("HW_MODEL") .GE. 1024)
+$   then
+$     echo "Found 64 bit OpenVMS 8.2, will build with socketpair support"
+$     d_sockpair = "define"
+$   endif
 $   d_select="define"
 $   netdb_hlen_type="int"
 $   netdb_host_type="char *"
@@ -5078,6 +5248,7 @@ $ ELSE
 $   d_vms_do_sockets="undef"
 $   d_htonl="undef"
 $   d_socket="undef"
+$   d_socketpair = "undef"
 $   d_select="undef"
 $   netdb_hlen_type="int"
 $   netdb_host_type="char *"
@@ -5401,7 +5572,17 @@ $ WC "cccdlflags='" + cccdlflags + "'"
 $ WC "ccdlflags='" + ccdlflags + "'"
 $ IF uselargefiles .OR. uselargefiles .EQS. "define"
 $ THEN
-$   WC "ccflags='" + ccflags + "/Define=_LARGEFILE'"
+$!    Perl can not use _USE_STD_STAT at the moment
+$!    IF d_symlink .OR. d_symlink .EQS. "define"
+$!    THEN
+$!	ccdefines = "_USE_STD_STAT=1"
+$!    ELSE
+$	ccdefines = "_LARGEFILE=1"
+$!    ENDIF
+$ ENDIF
+$ IF ccdefines .NES. ""
+$ THEN
+$   WC "ccflags='" + ccflags + "/Define=" + ccdefines + "'"
 $ ELSE
 $   WC "ccflags='" + ccflags + "'"
 $ ENDIF
@@ -5476,7 +5657,17 @@ $ WC "d_dbl_dig='define'"
 $ WC "d_dbminitproto='undef'"
 $ WC "d_difftime='define'"
 $ WC "d_dirfd='undef'"
-$ WC "d_dirnamlen='define'"
+$ tmp = f$extract(1,3,f$edit(f$getsyi("VERSION"),"TRIM,COLLAPSE"))
+$ IF (tmp .GES. "8.2") .AND. (f$getsyi("HW_MODEL") .GE. 1024)
+$ then
+$! Sorry, CRTL does not have this, and in order to support
+$! POSIX filespecifications, the CRTL readdir() structures
+$! need to be used globaly for now.
+$  echo "Building for OpenVMS 8.2 uses CRTL dirent.h, so no dirnamlen member"
+$   WC "d_dirnamlen='undef'"
+$ else
+$   WC "d_dirnamlen='define'"
+$ endif
 $ WC "d_dlerror='undef'"
 $ WC "d_dlsymun='undef'"
 $ WC "d_dosuid='undef'"
@@ -5515,7 +5706,7 @@ $ WC "d_fs_data_s='undef'"
 $ WC "d_fseeko='" + d_fseeko + "'"
 $ WC "d_fsetpos='define'"
 $ WC "d_fstatfs='undef'"
-$ WC "d_fstatvfs='undef'"
+$ WC "d_fstatvfs='" + d_fstatvfs + "'"
 $ WC "d_fsync='undef'"
 $ WC "d_ftello='" + d_ftello + "'"
 $ WC "d_getcwd='define'"
@@ -5540,9 +5731,9 @@ $ WC "d_getpagsz='undef'"
 $ WC "d_getpbyname='" + d_getpbyname + "'"
 $ WC "d_getpbynumber='" + d_getpbynumber + "'"
 $ WC "d_getpent='" + d_getpent + "'"
-$ WC "d_getpgid='undef'"
+$ WC "d_getpgid='" + d_getpgid + "'"
 $ WC "d_getpgrp2='undef'"
-$ WC "d_getpgrp='undef'"
+$ WC "d_getpgrp='" + d_getpgrp + "'"
 $ WC "d_getppid='" + d_getppid + "'"
 $ WC "d_getprior='undef'"
 $ WC "d_getprotoprotos='" + d_getprotoprotos + "'"
@@ -5568,17 +5759,17 @@ $ WC "d_isinf='undef'"
 $ WC "d_isnan='" + d_isnan + "'"
 $ WC "d_isnanl='" + d_isnanl + "'"
 $ WC "d_killpg='undef'"
-$ WC "d_lchown='undef'"
+$ WC "d_lchown='" + d_lchown + "'"
 $ WC "d_ldbl_dig='define'"
 $ WC "d_libm_lib_version='undef'"
-$ WC "d_link='undef'"
+$ WC "d_link='" + d_link + "'"
 $ WC "d_llseek='undef'"
 $ WC "d_locconv='" + d_locconv + "'"
 $ WC "d_lockf='undef'"
 $ WC "d_longdbl='" + d_longdbl + "'"
 $ WC "d_longlong='" + d_longlong + "'"
 $ WC "d_lseekproto='define'"
-$ WC "d_lstat='undef'"
+$ WC "d_lstat='" + d_lstat + "'"
 $ WC "d_madvise='undef'"
 $ WC "d_malloc_size='undef'"
 $ WC "d_malloc_good_size='undef'"
@@ -5645,9 +5836,9 @@ $ WC "d_pwquota='undef'"
 $ WC "d_qgcvt='undef'"
 $ WC "d_quad='" + d_quad + "'"
 $ WC "d_readdir='define'"
-$ WC "d_readlink='undef'"
+$ WC "d_readlink='" + d_readlink + "'"
 $ WC "d_readv='undef'"
-$ WC "d_realpath='undef'"
+$ WC "d_realpath='" + d_realpath + "'"
 $ WC "d_recvmsg='undef'"
 $ WC "d_rename='define'"
 $ WC "d_rewinddir='define'"
@@ -5667,8 +5858,8 @@ $ WC "d_semctl_semun='undef'"
 $ WC "d_sendmsg='undef'"
 $ WC "d_setegid='undef'"
 $ WC "d_setenv='" + d_setenv + "'"
-$ WC "d_seteuid='undef'"
-$ WC "d_setgrent='undef'"
+$ WC "d_seteuid='" + d_seteuid + "'"
+$ WC "d_setgrent='" + d_setgrent + "'"
 $ WC "d_setgrps='undef'"
 $ WC "d_sethent='" + d_sethent + "'"
 $ WC "d_setitimer='" + d_setitimer + "'"
@@ -5676,20 +5867,20 @@ $ WC "d_setlinebuf='undef'"
 $ WC "d_setlocale='" + d_setlocale + "'"
 $ WC "d_setnent='" + d_setnent + "'"
 $ WC "d_setpent='" + d_setpent + "'"
-$ WC "d_setpgid='undef'"
+$ WC "d_setpgid='" + d_setpgid + "'"
 $ WC "d_setpgrp2='undef'"
-$ WC "d_setpgrp='undef'"
+$ WC "d_setpgrp='" + d_setpgrp + "'"
 $ WC "d_setprior='undef'"
 $ WC "d_setproctitle='" + d_setproctitle + "'"
 $ WC "d_setpwent='define'"
-$ WC "d_setregid='undef'"
+$ WC "d_setregid='" + d_setregid + "'"
 $ WC "d_setresgid='undef'"
 $ WC "d_setresuid='undef'"
-$ WC "d_setreuid='undef'"
+$ WC "d_setreuid='" + d_setreuid + "'"
 $ WC "d_setrgid='undef'"
 $ WC "d_setruid='undef'"
 $ WC "d_setsent='" + d_setsent + "'"
-$ WC "d_setsid='undef'"
+$ WC "d_setsid='" + d_setsid + "'"
 $ WC "d_setvbuf='" + d_setvbuf + "'"
 $ WC "d_sfio='undef'"
 $ WC "d_shm='undef'"
@@ -5701,7 +5892,7 @@ $ WC "d_sockatmark='undef'"
 $ WC "d_sockatmarkproto='undef'"
 $ WC "d_socket='" + d_socket + "'"
 $ WC "d_socklen_t='" + d_socklen_t + "'"
-$ WC "d_sockpair='undef'"
+$ WC "d_sockpair='" + d_sockpair + "'"
 $ WC "d_socks5_init='undef'"
 $ WC "d_sqrtl='define'"
 $ WC "d_sresgproto='undef'"
@@ -5738,7 +5929,7 @@ $ WC "d_strtoull='" + d_strtoull + "'"
 $ WC "d_strtouq='" + d_strtouq + "'"
 $ WC "d_strxfrm='" + d_strxfrm  + "'"
 $ WC "d_suidsafe='undef'"
-$ WC "d_symlink='undef'"
+$ WC "d_symlink='" + d_symlink + "'"
 $ WC "d_syscall='undef'"
 $ WC "d_syscallproto='undef'"
 $ WC "d_sysconf='" + d_sysconf + "'"
@@ -5894,7 +6085,7 @@ $ WC "i_sysselct='undef'"
 $ WC "i_syssockio='undef'"
 $ WC "i_sysstat='define'"
 $ WC "i_sysstatfs='undef'"
-$ WC "i_sysstatvfs='undef'"
+$ WC "i_sysstatvfs='" + i_sysstatvfs + "'"
 $ WC "i_systime='undef'"
 $ WC "i_systimek='undef'"
 $ WC "i_systimes='undef'"
@@ -6163,8 +6354,8 @@ $ WC "d_endprotoent_r='undef'"
 $ WC "d_endpwent_r='undef'"
 $ WC "d_endservent_r='undef'"
 $ WC "d_getgrent_r='undef'"
-$ WC "d_getgrgid_r='undef'"
-$ WC "d_getgrnam_r='undef'"
+$ WC "d_getgrgid_r='" + d_getgrgid_r + "'"
+$ WC "d_getgrnam_r='" + d_getgrnam_r + "'"
 $ WC "d_gethostbyaddr_r='undef'"
 $ WC "d_gethostbyname_r='undef'"
 $ WC "d_gethostent_r='undef'"
@@ -6176,8 +6367,8 @@ $ WC "d_getprotobyname_r='undef'"
 $ WC "d_getprotobynumber_r='undef'"
 $ WC "d_getprotoent_r='undef'"
 $ WC "d_getpwent_r='undef'"
-$ WC "d_getpwnam_r='undef'"
-$ WC "d_getpwuid_r='undef'"
+$ WC "d_getpwnam_r='" + d_getpwnam_r + "'"
+$ WC "d_getpwuid_r='" + d_getpwuid_r + "'"
 $ WC "d_getservbyname_r='undef'"
 $ WC "d_getservbyport_r='undef'"
 $ WC "d_getservent_r='undef'"
@@ -6198,7 +6389,7 @@ $ WC "d_srand48_r='undef'"
 $ WC "d_srandom_r='undef'"
 $ WC "d_strerror_r='undef'"
 $ WC "d_tmpnam_r='undef'"
-$ WC "d_ttyname_r='undef'"
+$ WC "d_ttyname_r='" + d_ttyname_r + "'"
 $ WC "ctermid_r_proto='0'"
 $ WC "crypt_r_proto='0'"
 $ WC "drand48_r_proto='0'"
@@ -6209,8 +6400,8 @@ $ WC "endprotoent_r_proto='0'"
 $ WC "endpwent_r_proto='0'"
 $ WC "endservent_r_proto='0'"
 $ WC "getgrent_r_proto='0'"
-$ WC "getgrgid_r_proto='0'"
-$ WC "getgrnam_r_proto='0'"
+$ WC "getgrgid_r_proto='" + getgrgid_r_proto + "'"
+$ WC "getgrnam_r_proto='" + getgrnam_r_proto + "'"
 $ WC "gethostbyaddr_r_proto='0'"
 $ WC "gethostbyname_r_proto='0'"
 $ WC "gethostent_r_proto='0'"
@@ -6244,7 +6435,7 @@ $ WC "srand48_r_proto='0'"
 $ WC "srandom_r_proto='0'"
 $ WC "strerror_r_proto='0'"
 $ WC "tmpnam_r_proto='0'"
-$ WC "ttyname_r_proto='0'"
+$ WC "ttyname_r_proto='" + ttyname_r_proto + "'"
 $!
 $! ##END WRITE NEW CONSTANTS HERE##
 $!
@@ -6415,7 +6606,13 @@ $   MALLOC_REPLACE = "MALLOC="
 $ ENDIF
 $ IF uselargefiles .OR. uselargefiles .EQS. "define"
 $ THEN
-$   LARGEFILE_REPLACE = "LARGEFILE=LARGEFILE=1"
+$!    Perl can not use _USE_STD_STAT at the moment
+$!   IF d_symlink .or. d_symlink .eqs. "define"
+$!   THEN
+$!      LARGEFILE_REPLACE = "LARGEFILE=LARGEFILE=_USE_STD_STAT=1"
+$!   ELSE
+$      LARGEFILE_REPLACE = "LARGEFILE=LARGEFILE=_LARGEFILE=1"
+$!   ENDIF
 $ ELSE
 $   LARGEFILE_REPLACE = "LARGEFILE="
 $ ENDIF
@@ -6659,9 +6856,33 @@ $ ELSE
 $ WRITE CONFIG "$! This perl configured & administered by ''perladmin'"
 $ ENDIF
 $ WRITE CONFIG "$!"
+$! HP hack to make distributing binaries easier
+$!----------------------------------------------
+$ pcsi_producer = f$trnlnm("PCSI_PRODUCER")
+$ if pcsi_producer .eqs. ""
+$ then
+$   prefix = prefix - "000000."
+$   IF F$LOCATE(".]",prefix) .EQ. F$LENGTH(prefix) THEN prefix = prefix - "]" + ".]"
+$   WRITE CONFIG "$ define/translation=concealed ''vms_prefix' ''prefix'"
+$ else
+$  WRITE CONFIG "$ myproc = f$environment(""PROCEDURE"")"
+$  WRITE CONFIG "$ myroot_dev = f$parse(myproc,,,""DEVICE"",""NO_CONCEAL"")"
+$  WRITE CONFIG "$ myroot_dir = f$parse(myproc,,,""DIRECTORY"",""NO_CONCEAL"")"
+$  WRITE CONFIG "$ myroot_dir = myroot_dir - ""][000000."" - ""><000000."""
+$  WRITE CONFIG "$ myroot_dir = myroot_dir - ""][000000]"" - ""><000000>"""
+$  WRITE CONFIG "$ myroot_dir = myroot_dir - ""]["" - ""><"""
+$  WRITE CONFIG "$ myroot_dir = myroot_dir - "".]"" - "".>"" - ""["" - ""]"" - ""<"" - "">"""
+$  WRITE CONFIG "$ if f$trnlnm(""HP_BUILD_PERL_BIN_KIT"",""LNM$PROCESS_TABLE"") .EQS. """""
+$  WRITE CONFIG "$ then"
+$  WRITE CONFIG "$  define/translation=concealed ''vms_prefix' 'myroot_dev'['myroot_dir'.]"
+$  WRITE CONFIG "$ endif"
+$ endif
+$
 $ prefix = prefix - "000000."
 $ IF F$LOCATE(".]",prefix) .EQ. F$LENGTH(prefix) THEN prefix = prefix - "]" + ".]" 
 $ WRITE CONFIG "$ define/translation=concealed ''vms_prefix' ''prefix'"
+
+
 $ WRITE CONFIG "$ ext = "".exe"""
 $ IF sharedperl
 $ THEN

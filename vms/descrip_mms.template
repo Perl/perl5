@@ -212,9 +212,9 @@ THREADH =
 
 # C preprocessor manifest "DEBUGGING" ==> perl -D, not the VMS debugger
 .IFDEF LARGEFILE
-CFLAGS = $(XTRACCFLAGS)$(DBGCCFLAGS)$(FLAGS)/Define=_LARGEFILE
-X2PCFLAGS = $(XTRACCFLAGS)$(DBGCCFLAGS)$(FLAGS)/Define=(PERL_FOR_X2P,_LARGEFILE)
-CORECFLAGS = $(XTRACCFLAGS)$(DBGCCFLAGS)$(FLAGS)/Define=(PERL_CORE,_LARGEFILE)
+CFLAGS = $(XTRACCFLAGS)$(DBGCCFLAGS)$(FLAGS)/Define=$(LARGEFILE)
+X2PCFLAGS = $(XTRACCFLAGS)$(DBGCCFLAGS)$(FLAGS)/Define=(PERL_FOR_X2P,$(LARGEFILE))
+CORECFLAGS = $(XTRACCFLAGS)$(DBGCCFLAGS)$(FLAGS)/Define=(PERL_CORE,$(LARGEFILE))
 .ELSE
 CFLAGS = $(XTRACCFLAGS)$(DBGCCFLAGS)$(FLAGS)
 X2PCFLAGS = $(XTRACCFLAGS)$(DBGCCFLAGS)$(FLAGS)/Define=PERL_FOR_X2P
@@ -1727,6 +1727,7 @@ realclean : clean
 	- If F$Search("Descrip.MMS").nes."" Then Delete/NoConfirm/Log Descrip.MMS;*
 	- If F$Search("make_ext.Com").nes."" Then Delete/NoConfirm/Log make_ext.Com;*
 	- If F$Search("extra_pods.Com").nes."" Then Delete/NoConfirm/Log extra_pods.Com;*
+	- If F$Search("extra.pods").nes."" Then Delete/NoConfirm/Log extra.pods;*
 	- $(MINIPERL) -e "use File::Path; rmtree(['lib/auto','lib/VMS','lib/$(ARCH)'],1,0);"
 	- If F$Search("*.TS").nes."" Then Delete/NoConfirm/Log *.TS;*
 	- If F$Search("[.Lib]DynaLoader.pm").nes."" Then Delete/NoConfirm/Log [.Lib]DynaLoader.pm;*
