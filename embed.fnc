@@ -1554,6 +1554,7 @@ ApR	|OP*	|ck_unpack	|NN OP *o
 #endif
 
 Apd	|bool	|is_utf8_string_loclen|NN const U8 *s|STRLEN len|const U8 **ep|STRLEN *el
+Apda	|SV*	|newSVhek	|const HEK *hek
 
 END_EXTERN_C
 /*

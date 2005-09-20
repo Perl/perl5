@@ -578,6 +578,7 @@
 #define newSVnv			Perl_newSVnv
 #define newSVpv			Perl_newSVpv
 #define newSVpvn		Perl_newSVpvn
+#define newSVhek		Perl_newSVhek
 #define newSVpvn_share		Perl_newSVpvn_share
 #define newSVpvf		Perl_newSVpvf
 #define vnewSVpvf		Perl_vnewSVpvf
@@ -2620,6 +2621,7 @@
 #define newSVnv(a)		Perl_newSVnv(aTHX_ a)
 #define newSVpv(a,b)		Perl_newSVpv(aTHX_ a,b)
 #define newSVpvn(a,b)		Perl_newSVpvn(aTHX_ a,b)
+#define newSVhek(a)		Perl_newSVhek(aTHX_ a)
 #define newSVpvn_share(a,b,c)	Perl_newSVpvn_share(aTHX_ a,b,c)
 #define vnewSVpvf(a,b)		Perl_vnewSVpvf(aTHX_ a,b)
 #define newSVrv(a,b)		Perl_newSVrv(aTHX_ a,b)
