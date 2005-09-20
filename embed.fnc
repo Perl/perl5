@@ -721,10 +721,10 @@ Apd	|IO*	|sv_2io		|NN SV* sv
 Apd	|IV	|sv_2iv		|NN SV* sv
 Apd	|SV*	|sv_2mortal	|NN SV* sv
 Apd	|NV	|sv_2nv		|NN SV* sv
-Amb	|char*	|sv_2pv		|NN SV* sv|NN STRLEN* lp
-Apd	|char*	|sv_2pvutf8	|NN SV* sv|NN STRLEN* lp
-Apd	|char*	|sv_2pvbyte	|NN SV* sv|NN STRLEN* lp
-Ap	|char*	|sv_pvn_nomg	|NN SV* sv|NN STRLEN* lp
+Amb	|char*	|sv_2pv		|NN SV* sv|STRLEN* lp
+Apd	|char*	|sv_2pvutf8	|NN SV* sv|STRLEN* lp
+Apd	|char*	|sv_2pvbyte	|NN SV* sv|STRLEN* lp
+Ap	|char*	|sv_pvn_nomg	|NN SV* sv|STRLEN* lp
 Apd	|UV	|sv_2uv		|NN SV* sv
 Apd	|IV	|sv_iv		|NN SV* sv
 Apd	|UV	|sv_uv		|NN SV* sv
