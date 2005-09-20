@@ -1,6 +1,10 @@
 CHANGES
 -------
 
+  1.39 - 15 September 2005
+
+      * Fixed dTHX macro for 5.00503 on FreeBSD
+
   1.38 - 6 September 2005
 
       * Integrate core change 25304 -- Symbian Update

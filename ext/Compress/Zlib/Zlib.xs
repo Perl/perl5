@@ -44,10 +44,6 @@
 #    define newSVuv	newSViv
 #endif
 
-#ifndef dTHX
-#   define dTHX
-#endif
-
 typedef struct di_stream {
     z_stream stream;
     uLong    bufsize; 
@@ -125,7 +121,9 @@ SetGzErrorNo(error_no)
 int error_no ;
 #endif
 {
+#ifdef dTHX    
     dTHX;
+#endif    
     char * errstr ;
     SV * gzerror_sv = perl_get_sv(GZERRNO, FALSE) ;
   
@@ -266,7 +264,9 @@ gzreadline(file, output)
   SV * output ;
 #endif
 {
+#ifdef dTHX    
     dTHX;
+#endif    
     SV * store = file->buffer ;
     char *nl = "\n"; 
     char *p;
@@ -320,7 +320,9 @@ SV * sv ;
 char * string;
 #endif
 {
+#ifdef dTHX    
     dTHX;
+#endif    
     if (SvROK(sv)) {
 	sv = SvRV(sv) ;
 	switch(SvTYPE(sv)) {
