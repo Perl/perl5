@@ -208,8 +208,8 @@
 #define my_fdopen               Perl_my_fdopen
 #define my_fclose               Perl_my_fclose
 #define my_fwrite		Perl_my_fwrite
-#define my_getpwent		Perl_my_getpwent
-#define my_endpwent		Perl_my_endpwent
+#define my_getpwent()		Perl_my_getpwent(aTHX)
+#define my_endpwent()		Perl_my_endpwent(aTHX)
 #define my_getlogin		Perl_my_getlogin
 #define init_os_extras	Perl_init_os_extras
 
@@ -860,8 +860,8 @@ int    my_fwrite (const void *, size_t, size_t, FILE *);
 int	Perl_my_flush (pTHX_ FILE *);
 struct passwd *	Perl_my_getpwnam (pTHX_ char *name);
 struct passwd *	Perl_my_getpwuid (pTHX_ Uid_t uid);
-void	my_endpwent ();
-char *	my_getlogin ();
+void	Perl_my_endpwent (pTHX);
+char *	my_getlogin (void);
 typedef char __VMS_SEPYTOTORP__;
 /* prototype section end marker; `typedef' passes through cpp */
 
