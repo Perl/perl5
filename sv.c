@@ -4331,7 +4331,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 	if (SvFAKE(sv)) {
 	    const char *pvx = SvPVX_const(sv);
 	    STRLEN len = SvCUR(sv);
-            U32 hash   = SvUVX(sv);
+            U32 hash   = SvSHARED_HASH(sv);
 	    SvFAKE_off(sv);
 	    SvREADONLY_off(sv);
 	    SvGROW(sv, len + 1);

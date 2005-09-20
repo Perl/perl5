@@ -1708,7 +1708,7 @@ PP(pp_helem)
     const U32 lval = PL_op->op_flags & OPf_MOD || LVRET;
     const U32 defer = PL_op->op_private & OPpLVAL_DEFER;
     SV *sv;
-    const U32 hash = (SvFAKE(keysv) && SvREADONLY(keysv)) ? SvUVX(keysv) : 0;
+    const U32 hash = (SvIsCOW_shared_hash(keysv)) ? SvSHARED_HASH(keysv) : 0;
     I32 preeminent = 0;
 
     if (SvTYPE(hv) == SVt_PVHV) {
@@ -3109,7 +3109,7 @@ PP(pp_method_named)
 {
     dSP;
     SV* sv = cSVOP_sv;
-    U32 hash = SvUVX(sv);
+    U32 hash = SvSHARED_HASH(sv);
 
     XPUSHs(method_common(sv, &hash));
     RETURN;

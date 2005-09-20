@@ -621,7 +621,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	/* Not enough shared hash key scalars around to make this worthwhile
 	   (about 4% slowdown in perlbench with this in)
         if (keysv && (SvIsCOW_shared_hash(keysv))) {
-            hash = SvUVX(keysv);
+            hash = SvSHARED_HASH(keysv);
         } else
 	*/
 	{
@@ -991,7 +991,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	/* Not enough shared hash key scalars around to make this worthwhile
 	   (about 4% slowdown in perlbench with this in)
         if (keysv && (SvIsCOW_shared_hash(keysv))) {
-            hash = SvUVX(keysv);
+            hash = SvSHARED_HASH(keysv);
         } else
 	*/
 	{

@@ -1178,6 +1178,8 @@ Like C<sv_catsv> but doesn't process magic.
 				    (SVf_FAKE | SVf_READONLY))
 #define SvIsCOW_shared_hash(sv)	(SvIsCOW(sv) && SvLEN(sv) == 0)
 
+#define SvSHARED_HASH(sv) (0 + SvUVX(sv))
+
 /* flag values for sv_*_flags functions */
 #define SV_IMMEDIATE_UNREF	1
 #define SV_GMAGIC		2
