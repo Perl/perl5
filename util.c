@@ -365,7 +365,7 @@ Analyses the string in order to make fast searches on it using fbm_instr()
 void
 Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 {
-    register U8 *s;
+    const register U8 *s;
     register U8 *table;
     register U32 i;
     STRLEN len;
@@ -378,20 +378,20 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	if (mg && mg->mg_len >= 0)
 	    mg->mg_len++;
     }
-    s = (U8*)SvPV_force(sv, len);
+    s = (U8*)SvPV_force_mutable(sv, len);
     (void)SvUPGRADE(sv, SVt_PVBM);
     if (len == 0)		/* TAIL might be on a zero-length string. */
 	return;
     if (len > 2) {
 	U8 mlen;
-	unsigned char *sb;
+	const unsigned char *sb;
 
 	if (len > 255)
 	    mlen = 255;
 	else
 	    mlen = (U8)len;
 	Sv_Grow(sv, len + 256 + FBM_TABLE_OFFSET);
-	table = (unsigned char*)(SvPVX(sv) + len + FBM_TABLE_OFFSET);
+	table = (unsigned char*)(SvPVX_mutable(sv) + len + FBM_TABLE_OFFSET);
 	s = table - 1 - FBM_TABLE_OFFSET;	/* last char */
 	memset((void*)table, mlen, 256);
 	table[-1] = (U8)flags;
@@ -406,7 +406,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
     sv_magic(sv, Nullsv, PERL_MAGIC_bm, Nullch, 0);	/* deep magic */
     SvVALID_on(sv);
 
-    s = (unsigned char*)(SvPVX(sv));		/* deeper magic */
+    s = (const unsigned char*)(SvPVX_const(sv));	/* deeper magic */
     for (i = 0; i < len; i++) {
 	if (PL_freq[s[i]] < frequency) {
 	    rarest = i;
@@ -442,7 +442,8 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 {
     register unsigned char *s;
     STRLEN l;
-    register unsigned char *little = (unsigned char *)SvPV(littlestr,l);
+    register const unsigned char *little
+	= (const unsigned char *)SvPV_const(littlestr,l);
     register STRLEN littlelen = l;
     register const I32 multiline = flags & FBMrf_MULTILINE;
 
@@ -573,7 +574,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 
     {	/* Do actual FBM.  */
 	register const unsigned char *table = little + littlelen + FBM_TABLE_OFFSET;
-	register unsigned char *oldlittle;
+	const register unsigned char *oldlittle;
 
 	if (littlelen > (STRLEN)(bigend - big))
 	    return Nullch;

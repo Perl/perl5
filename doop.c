@@ -648,7 +648,7 @@ Perl_do_join(pTHX_ register SV *sv, SV *del, register SV **mark, register SV **s
     register STRLEN len;
     STRLEN delimlen;
 
-    (void) SvPV(del, delimlen); /* stringify and get the delimlen */
+    (void) SvPV_const(del, delimlen); /* stringify and get the delimlen */
     /* SvCUR assumes it's SvPOK() and woe betide you if it's not. */
 
     mark++;
@@ -658,7 +658,7 @@ Perl_do_join(pTHX_ register SV *sv, SV *del, register SV **mark, register SV **s
 	while (items-- > 0) {
 	    if (*mark && !SvGAMAGIC(*mark) && SvOK(*mark)) {
 		STRLEN tmplen;
-		SvPV(*mark, tmplen);
+		SvPV_const(*mark, tmplen);
 		len += tmplen;
 	    }
 	    mark++;
@@ -700,7 +700,7 @@ void
 Perl_do_sprintf(pTHX_ SV *sv, I32 len, SV **sarg)
 {
     STRLEN patlen;
-    const char *pat = SvPV(*sarg, patlen);
+    const char *pat = SvPV_const(*sarg, patlen);
     bool do_taint = FALSE;
 
     SvUTF8_off(sv);

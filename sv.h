@@ -767,6 +767,8 @@ and leaves the UTF-8 status as it was.
 #define SvUVX(sv) ((XPVUV*)  SvANY(sv))->xuv_uv
 #define SvNVX(sv)  ((XPVNV*)SvANY(sv))->xnv_nv
 #define SvPVX(sv)  ((XPV*)  SvANY(sv))->xpv_pv
+#define SvPVX_mutable(sv)	SvPVX(sv)
+#define SvPVX_const(sv)	((const char*)SvPVX(sv))
 #define SvCUR(sv) ((XPV*)  SvANY(sv))->xpv_cur
 #define SvLEN(sv) ((XPV*)  SvANY(sv))->xpv_len
 #define SvEND(sv)(((XPV*)  SvANY(sv))->xpv_pv + ((XPV*)SvANY(sv))->xpv_cur)
@@ -849,8 +851,6 @@ and leaves the UTF-8 status as it was.
 		    }					\
 		}					\
 	} STMT_END
-
-#define SvPVX_const(sv)	((const char*)SvPVX(sv))
 
 #define BmRARE(sv)	((XPVBM*)  SvANY(sv))->xbm_rare
 #define BmUSEFUL(sv)	((XPVBM*)  SvANY(sv))->xbm_useful
@@ -1047,18 +1047,28 @@ Like C<sv_catsv> but doesn't process magic.
 /* ----*/
 
 #define SvPV(sv, lp) SvPV_flags(sv, lp, SV_GMAGIC)
+#define SvPV_const(sv, lp) SvPV_flags_const(sv, lp, SV_GMAGIC)
 
 #define SvPV_flags(sv, lp, flags) \
     ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pv_flags(sv, &lp, flags))
+#define SvPV_flags_const(sv, lp, flags) \
+    ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
+     ? ((lp = SvCUR(sv)), SvPVX_const(sv)) : \
+     (const char*) sv_2pv_flags(sv, &lp, flags|SV_CONST_RETURN))
 
 #define SvPV_force(sv, lp) SvPV_force_flags(sv, lp, SV_GMAGIC)
+#define SvPV_force_mutable(sv, lp) SvPV_force_flags_mutable(sv, lp, SV_GMAGIC)
 
 #define SvPV_force_nomg(sv, lp) SvPV_force_flags(sv, lp, 0)
 
 #define SvPV_force_flags(sv, lp, flags) \
     ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == SVf_POK \
     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvn_force_flags(sv, &lp, flags))
+#define SvPV_force_flags_mutable(sv, lp, flags) \
+    ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == SVf_POK \
+    ? ((lp = SvCUR(sv)), SvPVX_mutable(sv)) \
+     : sv_pvn_force_flags(sv, &lp, flags|SV_MUTABLE_RETURN))
 
 #define SvPV_nolen(sv) \
     ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
@@ -1112,6 +1122,7 @@ Like C<sv_catsv> but doesn't process magic.
 #  define SvUVx(sv) ({SV *_sv = (SV*)(sv); SvUV(_sv); })
 #  define SvNVx(sv) ({SV *_sv = (SV*)(sv); SvNV(_sv); })
 #  define SvPVx(sv, lp) ({SV *_sv = (sv); SvPV(_sv, lp); })
+#  define SvPVx_const(sv, lp) ({SV *_sv = (sv); SvPV_const(_sv, lp); })
 #  define SvPVutf8x(sv, lp) ({SV *_sv = (sv); SvPVutf8(_sv, lp); })
 #  define SvPVbytex(sv, lp) ({SV *_sv = (sv); SvPVbyte(_sv, lp); })
 #  define SvTRUE(sv) (						\
@@ -1153,6 +1164,7 @@ Like C<sv_catsv> but doesn't process magic.
 #    define SvUVx(sv) ((PL_Sv = (sv)), SvUV(PL_Sv))
 #    define SvNVx(sv) ((PL_Sv = (sv)), SvNV(PL_Sv))
 #    define SvPVx(sv, lp) ((PL_Sv = (sv)), SvPV(PL_Sv, lp))
+#    define SvPVx_const(sv, lp) ((PL_Sv = (sv)), SvPV_const(PL_Sv, lp))
 #    define SvPVutf8x(sv, lp) ((PL_Sv = (sv)), SvPVutf8(PL_Sv, lp))
 #    define SvPVbytex(sv, lp) ((PL_Sv = (sv)), SvPVbyte(PL_Sv, lp))
 #    define SvTRUE(sv) (						\
@@ -1186,6 +1198,8 @@ Like C<sv_catsv> but doesn't process magic.
 #define SV_COW_DROP_PV		4	/* Unused in Perl 5.8.x */
 #define SV_UTF8_NO_ENCODING	8
 #define SV_NOSTEAL		16
+#define SV_CONST_RETURN		32
+#define SV_MUTABLE_RETURN	64
 
 /* all these 'functions' are now just macros */
 

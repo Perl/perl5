@@ -660,7 +660,7 @@ HV*
 Perl_gv_stashsv(pTHX_ SV *sv, I32 create)
 {
     STRLEN len;
-    const char *ptr = SvPV(sv,len);
+    const char *ptr = SvPV_const(sv,len);
     return gv_stashpvn(ptr, len, create);
 }
 

@@ -1785,14 +1785,14 @@ PP(pp_unpack)
     I32 gimme = GIMME_V;
     STRLEN llen;
     STRLEN rlen;
-    register char *pat = SvPV(left, llen);
+    const char *pat = SvPV_const(left, llen);
 #ifdef PACKED_IS_OCTETS
     /* Packed side is assumed to be octets - so force downgrade if it
        has been UTF-8 encoded by accident
      */
     register char *s = SvPVbyte(right, rlen);
 #else
-    register char *s = SvPV(right, rlen);
+    const char *s = SvPV_const(right, rlen);
 #endif
     char *strend = s + rlen;
     register char *patend = pat + llen;
@@ -2753,13 +2753,13 @@ PP(pp_pack)
     dSP; dMARK; dORIGMARK; dTARGET;
     register SV *cat = TARG;
     STRLEN fromlen;
-    register char *pat = SvPVx(*++MARK, fromlen);
-    register char *patend = pat + fromlen;
+    register const char *pat = SvPVx_const(*++MARK, fromlen);
+    register const char *patend = pat + fromlen;
 
     MARK++;
     sv_setpvn(cat, "", 0);
 
-    packlist(cat, pat, patend, MARK, SP + 1);
+    packlist(cat, (char *) pat, (char *) patend, MARK, SP + 1);
 
     SvSETMAGIC(cat);
     SP = ORIGMARK;

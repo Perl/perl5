@@ -2988,9 +2988,9 @@ PP(pp_require)
     dSP;
     register PERL_CONTEXT *cx;
     SV *sv;
-    char *name;
+    const char *name;
     STRLEN len;
-    char *tryname = Nullch;
+    const char *tryname = Nullch;
     SV *namesv = Nullsv;
     SV** svp;
     const I32 gimme = GIMME_V;
@@ -3062,7 +3062,7 @@ PP(pp_require)
 	    RETPUSHYES;
 	}
     }
-    name = SvPV(sv, len);
+    name = SvPV_const(sv, len);
     if (!(name && len > 0 && *name))
 	DIE(aTHX_ "Null filename used");
     TAINT_PROPER("require");
@@ -3257,7 +3257,7 @@ PP(pp_require)
     SvREFCNT_dec(namesv);
     if (!tryrsfp) {
 	if (PL_op->op_type == OP_REQUIRE) {
-	    char *msgstr = name;
+	    const char *msgstr = name;
 	    if (namesv) {			/* did we lookup @INC? */
 		SV *msg = sv_2mortal(newSVpv(msgstr,0));
 		SV *dirmsgsv = NEWSV(0, 0);
@@ -3375,7 +3375,7 @@ PP(pp_entereval)
     CV* runcv;
     U32 seq;
 
-    if (!SvPV(sv,len))
+    if (!SvPV_const(sv,len))
 	RETPUSHUNDEF;
     TAINT_PROPER("eval");
 

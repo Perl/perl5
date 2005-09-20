@@ -151,7 +151,7 @@ PP(pp_concat)
     dPOPTOPssrl;
     bool lbyte;
     STRLEN rlen;
-    const char *rpv = SvPV(right, rlen);	/* mg_get(right) happens here */
+    const char *rpv = SvPV_const(right, rlen);	/* mg_get(right) happens here */
     const bool rbyte = !DO_UTF8(right);
     bool rcopied = FALSE;
 
@@ -163,7 +163,7 @@ PP(pp_concat)
 
     if (TARG != left) {
         STRLEN llen;
-        const char* const lpv = SvPV(left, llen);	/* mg_get(left) may happen here */
+        const char* const lpv = SvPV_const(left, llen);	/* mg_get(left) may happen here */
 	lbyte = !DO_UTF8(left);
 	sv_setpvn(TARG, lpv, llen);
 	if (!lbyte)
@@ -1234,12 +1234,12 @@ PP(pp_match)
     dSP; dTARG;
     register PMOP *pm = cPMOP;
     PMOP *dynpm = pm;
-    register char *t;
-    register char *s;
-    char *strend;
+    const register char *t;
+    const register char *s;
+    const char *strend;
     I32 global;
     I32 r_flags = REXEC_CHECKED;
-    char *truebase;			/* Start of string  */
+    const char *truebase;			/* Start of string  */
     register REGEXP *rx = PM_GETRE(pm);
     bool rxtainted;
     const I32 gimme = GIMME;
@@ -1257,7 +1257,7 @@ PP(pp_match)
     }
 
     PUTBACK;				/* EVAL blocks need stack_sp. */
-    s = SvPV(TARG, len);
+    s = SvPV_const(TARG, len);
     strend = s + len;
     if (!s)
 	DIE(aTHX_ "panic: pp_match");
@@ -1324,8 +1324,9 @@ play_it_again:
     }
     if (rx->reganch & RE_USE_INTUIT &&
 	DO_UTF8(TARG) == ((rx->reganch & ROPT_UTF8) != 0)) {
-	PL_bostr = truebase;
-	s = CALLREG_INTUIT_START(aTHX_ rx, TARG, s, strend, r_flags, NULL);
+	/* FIXME - can PL_bostr be made const char *?  */
+	PL_bostr = (char *)truebase;
+	s = CALLREG_INTUIT_START(aTHX_ rx, TARG, (char *)s, (char *)strend, r_flags, NULL);
 
 	if (!s)
 	    goto nope;
@@ -1337,7 +1338,7 @@ play_it_again:
 	     && !SvROK(TARG))	/* Cannot trust since INTUIT cannot guess ^ */
 	    goto yup;
     }
-    if (CALLREGEXEC(aTHX_ rx, s, strend, truebase, minmatch, TARG, NULL, r_flags))
+    if (CALLREGEXEC(aTHX_ rx, (char*)s, (char *)strend, (char*)truebase, minmatch, TARG, NULL, r_flags))
     {
 	PL_curpm = pm;
 	if (dynpm->op_pmflags & PMf_ONCE)
@@ -1434,7 +1435,8 @@ yup:					/* Confirmed by INTUIT */
     RX_MATCH_COPIED_off(rx);
     rx->subbeg = Nullch;
     if (global) {
-	rx->subbeg = truebase;
+	/* FIXME - should rx->subbeg be const char *?  */
+	rx->subbeg = (char *) truebase;
 	rx->startp[0] = s - truebase;
 	if (RX_MATCH_UTF8(rx)) {
 	    char *t = (char*)utf8_hop((U8*)s, rx->minlen);
@@ -1991,7 +1993,7 @@ PP(pp_subst)
     register char *s;
     char *strend;
     register char *m;
-    char *c;
+    const char *c;
     register char *d;
     STRLEN clen;
     I32 iters = 0;
@@ -2089,11 +2091,11 @@ PP(pp_subst)
 		  sv_recode_to_utf8(nsv, PL_encoding);
 	     else
 		  sv_utf8_upgrade(nsv);
-	     c = SvPV(nsv, clen);
+	     c = SvPV_const(nsv, clen);
 	     doutf8 = TRUE;
 	}
 	else {
-	    c = SvPV(dstr, clen);
+	    c = SvPV_const(dstr, clen);
 	    doutf8 = DO_UTF8(dstr);
 	}
     }
@@ -3126,7 +3128,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     const char* packname = 0;
     SV *packsv = Nullsv;
     STRLEN packlen;
-    const char *name = SvPV(meth, namelen);
+    const char *name = SvPV_const(meth, namelen);
 
     sv = *(PL_stack_base + TOPMARK + 1);
 
@@ -3143,7 +3145,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	/* this isn't a reference */
 	packname = Nullch;
 
-        if(SvOK(sv) && (packname = SvPV(sv, packlen))) {
+        if(SvOK(sv) && (packname = SvPV_const(sv, packlen))) {
           const HE* const he = hv_fetch_ent(PL_stashcache, sv, 0, 0);
           if (he) { 
             stash = INT2PTR(HV*,SvIV(HeVAL(he)));
