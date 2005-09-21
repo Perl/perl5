@@ -3013,6 +3013,10 @@ PERL_CALLCONV bool	Perl_stashpv_hvname_match(pTHX_ const COP *cop, const HV *hv)
 PERL_CALLCONV void	Perl_dump_sv_child(pTHX_ SV *sv);
 #endif
 
+PERL_CALLCONV void	Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
+			__attribute__nonnull__(pTHX_1);
+
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:

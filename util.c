@@ -763,7 +763,7 @@ Perl_savepv(pTHX_ const char *pv)
 	char *newaddr;
 	const STRLEN pvlen = strlen(pv)+1;
 	New(902,newaddr,pvlen,char);
-	return strcpy(newaddr,pv);
+	return memcpy(newaddr,pv,pvlen);
     }
 
 }
@@ -810,16 +810,18 @@ char *
 Perl_savesharedpv(pTHX_ const char *pv)
 {
     register char *newaddr;
+    STRLEN pvlen;
     if (!pv)
 	return Nullch;
 
-    newaddr = (char*)PerlMemShared_malloc(strlen(pv)+1);
+    pvlen = strlen(pv)+1;
+    newaddr = (char*)PerlMemShared_malloc(pvlen);
     if (!newaddr) {
 	PerlLIO_write(PerlIO_fileno(Perl_error_log),
 		      PL_no_mem, strlen(PL_no_mem));
 	my_exit(1);
     }
-    return strcpy(newaddr,pv);
+    return memcpy(newaddr,pv,pvlen);
 }
 
 /*
@@ -2841,6 +2843,7 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 f
 		len = strlen(scriptname);
 		if (len+MAX_EXT_LEN+1 >= sizeof(tmpbuf))
 		    break;
+		/* FIXME? Convert to memcpy  */
 		cur = strcpy(tmpbuf, scriptname);
 	    }
 	} while (extidx >= 0 && ext[extidx]	/* try an extension? */
@@ -2895,15 +2898,17 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 f
 	    	tmpbuf[len++] = ':';
 #else
 	    if (len
-#if defined(atarist) || defined(__MINT__) || defined(DOSISH)
+#  if defined(atarist) || defined(__MINT__) || defined(DOSISH)
 		&& tmpbuf[len - 1] != '/'
 		&& tmpbuf[len - 1] != '\\'
-#endif
+#  endif
 	       )
 		tmpbuf[len++] = '/';
 	    if (len == 2 && tmpbuf[0] == '.')
 		seen_dot = 1;
 #endif
+	    /* FIXME? Convert to memcpy by storing previous strlen(scriptname)
+	     */
 	    (void)strcpy(tmpbuf + len, scriptname);
 #endif  /* !VMS */
 
@@ -2955,8 +2960,7 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 f
 	    }
 	    scriptname = Nullch;
 	}
-	if (xfailed)
-	    Safefree(xfailed);
+	Safefree(xfailed);
 	scriptname = xfound;
     }
     return (scriptname ? savepv(scriptname) : Nullch);

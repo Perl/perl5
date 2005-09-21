@@ -1297,8 +1297,7 @@ perl_destruct(pTHXx)
     Safefree(PL_reg_start_tmp);
     PL_reg_start_tmp = (char**)NULL;
     PL_reg_start_tmpl = 0;
-    if (PL_reg_curpm)
-	Safefree(PL_reg_curpm);
+    Safefree(PL_reg_curpm);
     Safefree(PL_reg_poscache);
     free_tied_hv_pool();
     Safefree(PL_op_mask);
@@ -1778,117 +1777,130 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    s++;
 	    goto reswitch;
 	case 'V':
-	    if (!PL_preambleav)
-		PL_preambleav = newAV();
-	    av_push(PL_preambleav, newSVpv("use Config qw(myconfig config_vars)",0));
-	    if (*++s != ':')  {
-                STRLEN opts;
+	    {
+		SV *opts_prog;
 
-		PL_Sv = newSVpv("print myconfig();",0);
+		if (!PL_preambleav)
+		    PL_preambleav = newAV();
+		av_push(PL_preambleav,
+			newSVpv("use Config;",0));
+		if (*++s != ':')  {
+		    STRLEN opts;
+		
+		    opts_prog = newSVpv("print Config::myconfig(),",0);
 #ifdef VMS
-		sv_catpv(PL_Sv,"print \"\\nCharacteristics of this PERLSHR image: \\n\",");
+		    sv_catpv(opts_prog,"\"\\nCharacteristics of this PERLSHR image: \\n\",");
 #else
-		sv_catpv(PL_Sv,"print \"\\nCharacteristics of this binary (from libperl): \\n\",");
+		    sv_catpv(opts_prog,"\"\\nCharacteristics of this binary (from libperl): \\n\",");
 #endif
-                opts = SvCUR(PL_Sv);
+		    opts = SvCUR(opts_prog);
 
-		sv_catpv(PL_Sv,"\"  Compile-time options:");
+		    sv_catpv(opts_prog,"\"  Compile-time options:");
 #  ifdef DEBUGGING
-		sv_catpv(PL_Sv," DEBUGGING");
+		    sv_catpv(opts_prog," DEBUGGING");
 #  endif
 #  ifdef MULTIPLICITY
-		sv_catpv(PL_Sv," MULTIPLICITY");
+		    sv_catpv(opts_prog," MULTIPLICITY");
 #  endif
 #  ifdef USE_5005THREADS
-		sv_catpv(PL_Sv," USE_5005THREADS");
+		    sv_catpv(opts_prog," USE_5005THREADS");
 #  endif
 #  ifdef USE_ITHREADS
-		sv_catpv(PL_Sv," USE_ITHREADS");
+		    sv_catpv(opts_prog," USE_ITHREADS");
 #  endif
 #  ifdef USE_64_BIT_INT
-		sv_catpv(PL_Sv," USE_64_BIT_INT");
+		    sv_catpv(opts_prog," USE_64_BIT_INT");
 #  endif
 #  ifdef USE_64_BIT_ALL
-		sv_catpv(PL_Sv," USE_64_BIT_ALL");
+		    sv_catpv(opts_prog," USE_64_BIT_ALL");
 #  endif
 #  ifdef USE_LONG_DOUBLE
-		sv_catpv(PL_Sv," USE_LONG_DOUBLE");
+		    sv_catpv(opts_prog," USE_LONG_DOUBLE");
 #  endif
 #  ifdef USE_LARGE_FILES
-		sv_catpv(PL_Sv," USE_LARGE_FILES");
+		    sv_catpv(opts_prog," USE_LARGE_FILES");
 #  endif
 #  ifdef USE_SOCKS
-		sv_catpv(PL_Sv," USE_SOCKS");
+		    sv_catpv(opts_prog," USE_SOCKS");
 #  endif
 #  ifdef USE_SITECUSTOMIZE
-		sv_catpv(PL_Sv," USE_SITECUSTOMIZE");
+		    sv_catpv(opts_prog," USE_SITECUSTOMIZE");
 #  endif	       
 #  ifdef PERL_IMPLICIT_CONTEXT
-		sv_catpv(PL_Sv," PERL_IMPLICIT_CONTEXT");
+		    sv_catpv(opts_prog," PERL_IMPLICIT_CONTEXT");
 #  endif
 #  ifdef PERL_IMPLICIT_SYS
-		sv_catpv(PL_Sv," PERL_IMPLICIT_SYS");
+		    sv_catpv(opts_prog," PERL_IMPLICIT_SYS");
 #  endif
 
-                while (SvCUR(PL_Sv) > opts+76) {
-                    /* find last space after "options: " and before col 76 */
+		    while (SvCUR(opts_prog) > opts+76) {
+			/* find last space after "options: " and before col 76
+			 */
 
-                    const char *space;
-                    char *pv = SvPV_nolen(PL_Sv);
-                    const char c = pv[opts+76];
-                    pv[opts+76] = '\0';
-                    space = strrchr(pv+opts+26, ' ');
-                    pv[opts+76] = c;
-                    if (!space) break; /* "Can't happen" */
+			const char *space;
+			char *pv = SvPV_nolen(opts_prog);
+			const char c = pv[opts+76];
+			pv[opts+76] = '\0';
+			space = strrchr(pv+opts+26, ' ');
+			pv[opts+76] = c;
+			if (!space) break; /* "Can't happen" */
 
-                    /* break the line before that space */
+			/* break the line before that space */
 
-                    opts = space - pv;
-                    sv_insert(PL_Sv, opts, 0,
-                              "\\n                       ", 25);
-                }
+			opts = space - pv;
+			sv_insert(opts_prog, opts, 0,
+				  "\\n                       ", 25);
+		    }
 
-		sv_catpv(PL_Sv,"\\n\",");
+		    sv_catpv(opts_prog,"\\n\",");
 
 #if defined(LOCAL_PATCH_COUNT)
-		if (LOCAL_PATCH_COUNT > 0) {
-		    int i;
-		    sv_catpv(PL_Sv,"\"  Locally applied patches:\\n\",");
-		    for (i = 1; i <= LOCAL_PATCH_COUNT; i++) {
-			if (PL_localpatches[i])
-			    Perl_sv_catpvf(aTHX_ PL_Sv,"q%c\t%s\n%c,",
-				    0, PL_localpatches[i], 0);
+		    if (LOCAL_PATCH_COUNT > 0) {
+			int i;
+			sv_catpv(opts_prog,
+				 "\"  Locally applied patches:\\n\",");
+			for (i = 1; i <= LOCAL_PATCH_COUNT; i++) {
+			    if (PL_localpatches[i])
+				Perl_sv_catpvf(aTHX_ opts_prog,"q%c\t%s\n%c,",
+					       0, PL_localpatches[i], 0);
+			}
 		    }
-		}
 #endif
-		Perl_sv_catpvf(aTHX_ PL_Sv,"\"  Built under %s\\n\"",OSNAME);
+		    Perl_sv_catpvf(aTHX_ opts_prog,
+				   "\"  Built under %s\\n\"",OSNAME);
 #ifdef __DATE__
 #  ifdef __TIME__
-		Perl_sv_catpvf(aTHX_ PL_Sv,",\"  Compiled at %s %s\\n\"",__DATE__,__TIME__);
+		    Perl_sv_catpvf(aTHX_ opts_prog,
+				   ",\"  Compiled at %s %s\\n\"",__DATE__,
+				   __TIME__);
 #  else
-		Perl_sv_catpvf(aTHX_ PL_Sv,",\"  Compiled on %s\\n\"",__DATE__);
+		    Perl_sv_catpvf(aTHX_ opts_prog,",\"  Compiled on %s\\n\"",
+				   __DATE__);
 #  endif
 #endif
-		sv_catpv(PL_Sv, "; \
-$\"=\"\\n    \"; \
-@env = map { \"$_=\\\"$ENV{$_}\\\"\" } sort grep {/^PERL/} keys %ENV; ");
+		    sv_catpv(opts_prog, "; $\"=\"\\n    \"; "
+			     "@env = map { \"$_=\\\"$ENV{$_}\\\"\" } "
+			     "sort grep {/^PERL/} keys %ENV; ");
 #ifdef __CYGWIN__
-		sv_catpv(PL_Sv,"\
-push @env, \"CYGWIN=\\\"$ENV{CYGWIN}\\\"\";");
+		    sv_catpv(opts_prog,
+			     "push @env, \"CYGWIN=\\\"$ENV{CYGWIN}\\\"\";");
 #endif
-		sv_catpv(PL_Sv, "\
-print \"  \\%ENV:\\n    @env\\n\" if @env; \
-print \"  \\@INC:\\n    @INC\\n\";");
+		    sv_catpv(opts_prog, 
+			     "print \"  \\%ENV:\\n    @env\\n\" if @env;"
+			     "print \"  \\@INC:\\n    @INC\\n\";");
+		}
+		else {
+		    ++s;
+		    opts_prog = Perl_newSVpvf(aTHX_
+					      "Config::config_vars(qw%c%s%c)",
+					      0, s, 0);
+		    s += strlen(s);
+		}
+		av_push(PL_preambleav, opts_prog);
+		/* don't look for script or read stdin */
+		scriptname = BIT_BUCKET;
+		goto reswitch;
 	    }
-	    else {
-		PL_Sv = newSVpv("config_vars(qw(",0);
-		sv_catpv(PL_Sv, ++s);
-		sv_catpv(PL_Sv, "))");
-		s += strlen(s);
-	    }
-	    av_push(PL_preambleav, PL_Sv);
-	    scriptname = BIT_BUCKET;	/* don't look for script or read stdin */
-	    goto reswitch;
 	case 'x':
 	    PL_doextract = TRUE;
 	    s++;
@@ -2817,11 +2829,8 @@ Perl_require_pv(pTHX_ const char *pv)
     dSP;
     PUSHSTACKi(PERLSI_REQUIRE);
     PUTBACK;
-    sv = sv_newmortal();
-    sv_setpv(sv, "require '");
-    sv_catpv(sv, pv);
-    sv_catpv(sv, "'");
-    eval_sv(sv, G_DISCARD);
+    sv = Perl_newSVpvf(aTHX_ "require q%c%s%c", 0, pv, 0);
+    eval_sv(sv_2mortal(sv), G_DISCARD);
     SPAGAIN;
     POPSTACK;
 }
@@ -3046,12 +3055,10 @@ Perl_moreswitches(pTHX_ char *s)
 		sv_catpv(sv, start);
 	    else {
 		sv_catpvn(sv, start, s-start);
-		sv_catpv(sv, " split(/,/,q{");
-		sv_catpv(sv, ++s);
-		sv_catpv(sv, "})");
+		Perl_sv_catpvf(aTHX_ sv, " split(/,/,q%c%s%c)", 0, ++s, 0);
 	    }
 	    s += strlen(s);
-	    my_setenv("PERL5DB", SvPV(sv, PL_na));
+	    my_setenv("PERL5DB", SvPV_nolen_const(sv));
 	}
 	if (!PL_perldb) {
 	    PL_perldb = PERLDB_ALL;
@@ -3076,8 +3083,7 @@ Perl_moreswitches(pTHX_ char *s)
 	usage(PL_origargv[0]);
 	my_exit(0);
     case 'i':
-	if (PL_inplace)
-	    Safefree(PL_inplace);
+	Safefree(PL_inplace);
 #if defined(__CYGWIN__) /* do backup extension automagically */
 	if (*(s+1) == '\0') {
 	PL_inplace = savepv(".bak");
@@ -3152,8 +3158,10 @@ Perl_moreswitches(pTHX_ char *s)
 	    SV *sv;
 	    const char *use = "use ";
 	    /* -M-foo == 'no foo'	*/
-	    if (*s == '-') { use = "no "; ++s; }
-	    sv = newSVpv(use,0);
+	    /* Leading space on " no " is deliberate, to make both
+	       possibilities the same length.  */
+	    if (*s == '-') { use = " no "; ++s; }
+	    sv = newSVpvn(use,4);
 	    start = s;
 	    /* We allow -M'Module qw(Foo Bar)'	*/
 	    while(isALNUM(*s) || *s==':') ++s;
@@ -4479,8 +4487,7 @@ S_init_predump_symbols(pTHX)
 
     PL_statname = NEWSV(66,0);		/* last filename we did stat on */
 
-    if (PL_osname)
-    	Safefree(PL_osname);
+    Safefree(PL_osname);
     PL_osname = savepv(OSNAME);
 }
 

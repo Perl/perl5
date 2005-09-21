@@ -92,7 +92,7 @@ Perl_gv_fetchfile(pTHX_ const char *name)
     /* This is where the debugger's %{"::_<$filename"} hash is created */
     tmpbuf[0] = '_';
     tmpbuf[1] = '<';
-    strcpy(tmpbuf + 2, name);
+    memcpy(tmpbuf + 2, name, tmplen - 1);
     gv = *(GV**)hv_fetch(PL_defstash, tmpbuf, tmplen, TRUE);
     if (!isGV(gv)) {
 	gv_init(gv, PL_defstash, tmpbuf, tmplen, FALSE);

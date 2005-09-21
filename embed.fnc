@@ -1561,6 +1561,8 @@ ApR	|bool	|stashpv_hvname_match|NN const COP *cop|NN const HV *hv
 p	|void	|dump_sv_child	|SV *sv
 #endif
 
+p	|void	|offer_nice_chunk	|NN void *chunk|U32 chunk_size
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:

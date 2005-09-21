@@ -158,6 +158,27 @@ Public API:
  * "A time to plant, and a time to uproot what was planted..."
  */
 
+/*
+ * nice_chunk and nice_chunk size need to be set
+ * and queried under the protection of sv_mutex
+ */
+void
+Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
+{
+    void *new_chunk;
+    U32 new_chunk_size;
+    LOCK_SV_MUTEX;
+    new_chunk = (void *)(chunk);
+    new_chunk_size = (chunk_size);
+    if (new_chunk_size > PL_nice_chunk_size) {
+	Safefree(PL_nice_chunk);
+	PL_nice_chunk = (char *) new_chunk;
+	PL_nice_chunk_size = new_chunk_size;
+    } else {
+	Safefree(chunk);
+    }
+    UNLOCK_SV_MUTEX;
+}
 
 #define plant_SV(p) \
     STMT_START {					\
@@ -611,8 +632,7 @@ Perl_sv_free_arenas(pTHX)
     PL_pte_root = 0;
 #endif
 
-    if (PL_nice_chunk)
-	Safefree(PL_nice_chunk);
+    Safefree(PL_nice_chunk);
     PL_nice_chunk = Nullch;
     PL_nice_chunk_size = 0;
     PL_sv_arenaroot = 0;
@@ -1888,7 +1908,7 @@ S_not_a_number(pTHX_ SV *sv)
      const char *pv;
 
      if (DO_UTF8(sv)) {
-          dsv = sv_2mortal(newSVpv("", 0));
+          dsv = sv_2mortal(newSVpvn("", 0));
           pv = sv_uni_display(dsv, sv, 10, 0);
      } else {
 	  char *d = tmpbuf;
@@ -3339,7 +3359,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	s = SvGROW_mutable(sv, len + 1);
 	SvCUR_set(sv, len);
 	SvPOKp_on(sv);
-	return strcpy(s, t);
+	return memcpy(s, t, len + 1);
     }
 }
 

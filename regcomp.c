@@ -4904,10 +4904,10 @@ Perl_pregfree(pTHX_ struct regexp *r)
 		       len > 60 ? "..." : "");
     });
 
-    if (r->precomp)
-	Safefree(r->precomp);
-    if (r->offsets)             /* 20010421 MJD */
-	Safefree(r->offsets);
+    /* gcov results gave these as non-null 100% of the time, so there's no
+       optimisation in checking them before calling Safefree  */
+    Safefree(r->precomp);
+    Safefree(r->offsets);             /* 20010421 MJD */
     if (RX_MATCH_COPIED(r))
 	Safefree(r->subbeg);
     if (r->substrs) {
