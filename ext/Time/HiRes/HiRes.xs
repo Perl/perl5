@@ -658,10 +658,8 @@ BOOT:
 #ifdef ATLEASTFIVEOHOHFIVE
 #ifdef HAS_GETTIMEOFDAY
   {
-    UV auv[2];
     hv_store(PL_modglobal, "Time::NVtime", 12, newSViv(PTR2IV(myNVtime)), 0);
-    if (myU2time(aTHX_ auv) == 0)
-      hv_store(PL_modglobal, "Time::U2time", 12, newSViv((IV) auv[0]), 0);
+    hv_store(PL_modglobal, "Time::U2time", 12, newSViv(PTR2IV(myU2time)), 0);
   }
 #endif
 #endif

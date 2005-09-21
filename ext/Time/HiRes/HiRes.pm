@@ -15,7 +15,7 @@ require DynaLoader;
 		 d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
 		 d_nanosleep);
 	
-$VERSION = '1.73';
+$VERSION = '1.74';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -324,7 +324,7 @@ modglobal hash:
   name             C prototype
   ---------------  ----------------------
   Time::NVtime     double (*)()
-  Time::U2time     void (*)(UV ret[2])
+  Time::U2time     void (*)(pTHX_ UV ret[2])
 
 Both functions return equivalent information (like C<gettimeofday>)
 but with different representations.  The names C<NVtime> and C<U2time>

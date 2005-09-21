@@ -144,16 +144,14 @@ sub try_compile_and_link {
 	    $ok = defined($res) && $res==0 && -s $tmp_exe && -x _;
 
 	    if ( $ok && exists $args{run} && $args{run}) {
-		my $abs_tmp_exe =
-		    File::Spec->
-			catfile(File::Spec->rel2abs(File::Spec->curdir),
-				$tmp_exe);
-		printf "Running $abs_tmp_exe..." if $VERBOSE;
-		if (system($abs_tmp_exe) == 0) {
+		my $tmp_exe =
+		    File::Spec->catfile(File::Spec->curdir, $tmp_exe);
+		printf "Running $tmp_exe..." if $VERBOSE;
+		if (system($tmp_exe) == 0) {
 		    $ok = 1;
 		} else {
 		    $ok = 0;
-		    print "[ system('$abs_tmp_exe') failed: status $? ] ";
+		    print "[ system('$tmp_exe') failed: status $? ] ";
 		}
 	    }
 	    unlink("$tmp.c", $tmp_exe);
