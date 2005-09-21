@@ -14,7 +14,7 @@ use I18N::LangTags 0.30 ();
 BEGIN { unless(defined &DEBUG) { *DEBUG = sub () {0} } }
  # define the constant 'DEBUG' at compile-time
 
-$VERSION = "1.09";
+$VERSION = "1.09_01";
 @ISA = ();
 
 $MATCH_SUPERS = 1;
@@ -174,6 +174,9 @@ sub maketext {
   Carp::croak "maketext requires at least one parameter" unless @_ > 1;
 
   my($handle, $phrase) = splice(@_,0,2);
+
+  # Don't interefere with $@ in case that's being interpolated into the msg.
+  local $@;
 
   # Look up the value:
 
