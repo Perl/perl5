@@ -915,8 +915,10 @@ struct IPerlProcInfo;
 typedef void		(*LPProcAbort)(struct IPerlProc*);
 typedef char*		(*LPProcCrypt)(struct IPerlProc*, const char*,
 			    const char*);
-typedef void		(*LPProcExit)(struct IPerlProc*, int);
-typedef void		(*LPProc_Exit)(struct IPerlProc*, int);
+typedef void		(*LPProcExit)(struct IPerlProc*, int)
+			    __attribute__noreturn__;
+typedef void		(*LPProc_Exit)(struct IPerlProc*, int)
+			    __attribute__noreturn__;
 typedef int		(*LPProcExecl)(struct IPerlProc*, const char*,
 			    const char*, const char*, const char*,
 			    const char*);

@@ -11,8 +11,26 @@ unlink "Errno.pm" if -f "Errno.pm";
 open OUT, ">Errno.pm" or die "Cannot open Errno.pm: $!";
 select OUT;
 my $file;
-foreach $file (get_files()) {
-    process_file($file);
+my @files = get_files();
+if ($Config{gccversion} ne '' && $^O eq 'MSWin32') {
+    # MinGW complains "warning: #pragma system_header ignored outside include
+    # file" if the header files are processed individually, so include them
+    # all in .c file and process that instead.
+    open INCS, '>includes.c' or
+	die "Cannot open includes.c";
+    foreach $file (@files) {
+	next if $file eq 'errno.c';
+	next unless -f $file;
+	print INCS qq[#include "$file"\n];
+    }
+    close INCS;
+    process_file('includes.c');
+    unlink 'includes.c';
+}
+else {
+    foreach $file (@files) {
+	process_file($file);
+    }
 }
 write_errno_pm();
 unlink "errno.c" if -f "errno.c";

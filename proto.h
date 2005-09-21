@@ -511,7 +511,8 @@ PERL_CALLCONV OP*	Perl_invert(pTHX_ OP* cmd)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV bool	Perl_is_gv_magical(pTHX_ char *name, STRLEN len, U32 flags)
-			__attribute__warn_unused_result__;
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV I32	Perl_is_lvalue_sub(pTHX)
 			__attribute__warn_unused_result__;
@@ -1517,12 +1518,8 @@ PERL_CALLCONV int	Perl_sv_isa(pTHX_ SV* sv, const char* name)
 PERL_CALLCONV int	Perl_sv_isobject(pTHX_ SV* sv)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV STRLEN	Perl_sv_len(pTHX_ SV* sv)
-			__attribute__nonnull__(pTHX_1);
-
-PERL_CALLCONV STRLEN	Perl_sv_len_utf8(pTHX_ SV* sv)
-			__attribute__nonnull__(pTHX_1);
-
+PERL_CALLCONV STRLEN	Perl_sv_len(pTHX_ SV* sv);
+PERL_CALLCONV STRLEN	Perl_sv_len_utf8(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_sv_magic(pTHX_ SV* sv, SV* obj, int how, const char* name, I32 namlen)
 			__attribute__nonnull__(pTHX_1);
 
@@ -2968,7 +2965,8 @@ PERL_CALLCONV bool	Perl_is_utf8_string_loclen(pTHX_ const U8 *s, STRLEN len, con
 
 PERL_CALLCONV SV*	Perl_newSVhek(pTHX_ const HEK *hek)
 			__attribute__malloc__
-			__attribute__warn_unused_result__;
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV bool	Perl_stashpv_hvname_match(pTHX_ const COP *cop, const HV *hv)
 			__attribute__warn_unused_result__

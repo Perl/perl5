@@ -4064,9 +4064,17 @@ win32_execv(const char *cmdname, const char *const *argv)
     /* if this is a pseudo-forked child, we just want to spawn
      * the new program, and return */
     if (w32_pseudo_id)
+#  ifdef __BORLANDC__
 	return spawnv(P_WAIT, cmdname, (char *const *)argv);
+#  else
+	return spawnv(P_WAIT, cmdname, argv);
+#  endif
 #endif
+#ifdef __BORLANDC__
     return execv(cmdname, (char *const *)argv);
+#else
+    return execv(cmdname, argv);
+#endif
 }
 
 DllExport int
@@ -4086,7 +4094,11 @@ win32_execvp(const char *cmdname, const char *const *argv)
 	    return status;
     }
 #endif
+#ifdef __BORLANDC__
     return execvp(cmdname, (char *const *)argv);
+#else
+    return execvp(cmdname, argv);
+#endif
 }
 
 DllExport void

@@ -1319,8 +1319,6 @@ PP(pp_leavewrite)
     SV **newsp;
     I32 gimme;
     register PERL_CONTEXT *cx;
-    PERL_UNUSED_VAR(newsp);
-    PERL_UNUSED_VAR(gimme);
 
     DEBUG_f(PerlIO_printf(Perl_debug_log, "left=%ld, todo=%ld\n",
 	  (long)IoLINES_LEFT(io), (long)FmLINES(PL_formtarget)));
@@ -1434,6 +1432,8 @@ PP(pp_leavewrite)
     /* bad_ofp: */
     PL_formtarget = PL_bodytarget;
     PUTBACK;
+    PERL_UNUSED_VAR(newsp);
+    PERL_UNUSED_VAR(gimme);
     return pop_return();
 }
 

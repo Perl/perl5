@@ -5737,7 +5737,7 @@ Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
 	STRLEN *cache = 0;
 	const U8 *s = start;
 	I32 uoffset = *offsetp;
-	const U8 *send = s + len;
+	const U8 * const send = s + len;
 	MAGIC *mg = 0;
 	bool found = FALSE;
 
@@ -5839,7 +5839,7 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 		     * is made as in S_utf8_mg_pos(), namely that
 		     * walking backward is twice slower than
 		     * walking forward. */
-		    STRLEN forw  = *offsetp;
+		    const STRLEN forw  = *offsetp;
 		    STRLEN backw = cache[1] - *offsetp;
 
 		    if (!(forw < 2 * backw)) {
@@ -5973,7 +5973,7 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 	      if (SvUTF8(sv1)) {
 		   /* sv1 is the UTF-8 one,
 		    * if is equal it must be downgrade-able */
-		   char *pv = (char*)bytes_from_utf8((const U8*)pv1,
+		   char * const pv = (char*)bytes_from_utf8((const U8*)pv1,
 						     &cur1, &is_utf8);
 		   if (pv != pv1)
 			pv1 = tpv = pv;
@@ -5981,7 +5981,7 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 	      else {
 		   /* sv2 is the UTF-8 one,
 		    * if is equal it must be downgrade-able */
-		   char *pv = (char *)bytes_from_utf8((const U8*)pv2,
+		   char * const pv = (char *)bytes_from_utf8((const U8*)pv2,
 						      &cur2, &is_utf8);
 		   if (pv != pv2)
 			pv2 = tpv = pv;

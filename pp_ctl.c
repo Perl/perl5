@@ -1945,7 +1945,7 @@ PP(pp_last)
     PMOP *newpm;
     SV **mark;
     SV *sv = Nullsv;
-    PERL_UNUSED_VAR(optype);
+
 
     if (PL_op->op_flags & OPf_SPECIAL) {
 	cxix = dopoptoloop(cxstack_ix);
@@ -1961,7 +1961,6 @@ PP(pp_last)
 	dounwind(cxix);
 
     POPBLOCK(cx,newpm);
-    PERL_UNUSED_VAR(optype);
     cxstack_ix++; /* temporarily protect top context */
     mark = newsp;
     switch (CxTYPE(cx)) {
@@ -2019,6 +2018,8 @@ PP(pp_last)
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
     LEAVESUB(sv);
+    PERL_UNUSED_VAR(optype);
+    PERL_UNUSED_VAR(gimme);
     return nextop;
 }
 
@@ -2144,7 +2145,7 @@ PP(pp_goto)
     static const char must_have_label[] = "goto must have label";
 
     if (PL_op->op_flags & OPf_STACKED) {
-	SV *sv = POPs;
+	SV * const sv = POPs;
 
 	/* This egregious kludge implements goto &subroutine */
 	if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVCV) {
@@ -2680,7 +2681,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, PAD** padp)
     dSP;				/* Make POPBLOCK work. */
     PERL_CONTEXT *cx;
     SV **newsp;
-    I32 gimme = 0;   /* SUSPECT - INITIALZE TO WHAT?  NI-S */
+    I32 gimme = G_VOID;
     I32 optype;
     OP dummy;
     OP *rop;
@@ -2700,7 +2701,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, PAD** padp)
 	CopSTASH_set(&PL_compiling, PL_curstash);
     }
     if (PERLDB_NAMEEVAL && CopLINE(PL_curcop)) {
-	SV *sv = sv_newmortal();
+	SV * const sv = sv_newmortal();
 	Perl_sv_setpvf(aTHX_ sv, "_<(%.10seval %lu)[%s:%"IVdf"]",
 		       code, (unsigned long)++PL_evalseq,
 		       CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
@@ -2755,6 +2756,9 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, PAD** padp)
 #ifdef OP_IN_REGISTER
     op = PL_opsave;
 #endif
+    PERL_UNUSED_VAR(newsp);
+    PERL_UNUSED_VAR(optype);
+
     return rop;
 }
 
@@ -2866,6 +2870,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	SV **newsp;			/* Used by POPBLOCK. */
 	PERL_CONTEXT *cx;
 	I32 optype = 0;			/* Might be reset by POPEVAL. */
+	const char *msg;
 
 	PL_op = saveop;
 	if (PL_eval_root) {
@@ -2880,21 +2885,20 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	}
 	lex_end();
 	LEAVE;
+
+	msg = SvPVx_nolen_const(ERRSV);
 	if (optype == OP_REQUIRE) {
             const char* const msg = SvPVx_nolen_const(ERRSV);
 	    DIE(aTHX_ "%sCompilation failed in require",
 		*msg ? msg : "Unknown error\n");
 	}
 	else if (startop) {
-            const char* msg = SvPVx_nolen_const(ERRSV);
-
 	    POPBLOCK(cx,PL_curpm);
 	    POPEVAL(cx);
 	    Perl_croak(aTHX_ "%sCompilation failed in regexp",
 		       (*msg ? msg : "Unknown error\n"));
 	}
 	else {
-            const char* msg = SvPVx_nolen_const(ERRSV);
 	    if (!*msg) {
 	        sv_setpv(ERRSV, "Compilation error");
 	    }
@@ -2905,6 +2909,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	COND_SIGNAL(&PL_eval_cond);
 	MUTEX_UNLOCK(&PL_eval_mutex);
 #endif /* USE_5005THREADS */
+	PERL_UNUSED_VAR(newsp);
 	RETPUSHUNDEF;
     }
     CopLINE_set(&PL_compiling, 0);
@@ -2966,14 +2971,14 @@ S_doopen_pm(pTHX_ const char *name, const char *mode)
     PerlIO *fp;
 
     if (namelen > 3 && strEQ(name + namelen - 3, ".pm")) {
-	SV *pmcsv = Perl_newSVpvf(aTHX_ "%s%c", name, 'c');
+	SV * const pmcsv = Perl_newSVpvf(aTHX_ "%s%c", name, 'c');
 	const char * const pmc = SvPV_nolen_const(pmcsv);
-	Stat_t pmstat;
 	Stat_t pmcstat;
 	if (PerlLIO_stat(pmc, &pmcstat) < 0) {
 	    fp = PerlIO_open(name, mode);
 	}
 	else {
+	    Stat_t pmstat;
 	    if (PerlLIO_stat(name, &pmstat) < 0 ||
 	        pmstat.st_mtime < pmcstat.st_mtime)
 	    {
@@ -3563,6 +3568,7 @@ PP(pp_leavetry)
     POPBLOCK(cx,newpm);
     POPEVAL(cx);
     retop = pop_return();
+    PERL_UNUSED_VAR(optype);
 
     TAINT_NOT;
     if (gimme == G_VOID)

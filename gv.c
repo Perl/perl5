@@ -431,7 +431,7 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 	    nsplit = ++nend;
     }
     if (nsplit) {
-	const char *origname = name;
+	const char * const origname = name;
 	name = nsplit + 1;
 	if (*nsplit == ':')
 	    --nsplit;
@@ -466,7 +466,7 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 	    gv = gv_autoload4(ostash, name, nend - name, TRUE);
     }
     else if (autoload) {
-	CV* cv = GvCV(gv);
+	CV* const cv = GvCV(gv);
 	if (!CvROOT(cv) && !CvXSUB(cv)) {
 	    GV* stubgv;
 	    GV* autogv;
@@ -660,7 +660,7 @@ HV*
 Perl_gv_stashsv(pTHX_ SV *sv, I32 create)
 {
     STRLEN len;
-    const char *ptr = SvPV_const(sv,len);
+    const char * const ptr = SvPV_const(sv,len);
     return gv_stashpvn(ptr, len, create);
 }
 
@@ -806,7 +806,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 
     if (!stash) {
 	if (add) {
-	    register SV *err = Perl_mess(aTHX_
+	    SV * const err = Perl_mess(aTHX_
 		 "Global symbol \"%s%s\" requires explicit package name",
 		 (sv_type == SVt_PV ? "$"
 		  : sv_type == SVt_PVAV ? "@"
@@ -875,7 +875,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		break;
 	    case 'I':
 		if (strEQ(name2, "SA")) {
-		    AV* av = GvAVn(gv);
+		    AV* const av = GvAVn(gv);
 		    GvMULTI_on(gv);
 		    sv_magic((SV*)av, (SV*)gv, PERL_MAGIC_isa, Nullch, 0);
 		    /* NOTE: No support for tied ISA */
@@ -898,7 +898,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		break;
 	    case 'O':
 		if (strEQ(name2, "VERLOAD")) {
-		    HV* hv = GvHVn(gv);
+		    HV* const hv = GvHVn(gv);
 		    GvMULTI_on(gv);
 		    hv_magic(hv, Nullgv, PERL_MAGIC_overload);
 		}
@@ -916,8 +916,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		    hv = GvHVn(gv);
 		    hv_magic(hv, Nullgv, PERL_MAGIC_sig);
 		    for (i = 1; i < SIG_SIZE; i++) {
-			SV ** init;
-			init = hv_fetch(hv, PL_sig_name[i], strlen(PL_sig_name[i]), 1);
+			SV ** const init = hv_fetch(hv, PL_sig_name[i], strlen(PL_sig_name[i]), 1);
 			if (init)
 			    sv_setsv(*init, &PL_sv_undef);
 			PL_psig_ptr[i] = 0;
@@ -1016,7 +1015,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	    break;
 	case '-':
 	{
-            AV* av = GvAVn(gv);
+	    AV* const av = GvAVn(gv);
             sv_magic((SV*)av, Nullsv, PERL_MAGIC_regdata, Nullch, 0);
 	    SvREADONLY_on(av);
 	    goto magicalize;
@@ -1033,7 +1032,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 
 	case '+':
 	{
-	    AV* av = GvAVn(gv);
+	    AV* const av = GvAVn(gv);
             sv_magic((SV*)av, (SV*)av, PERL_MAGIC_regdata, Nullch, 0);
 	    SvREADONLY_on(av);
 	    /* FALL THROUGH */
@@ -1089,7 +1088,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	    break;
 	case ']':
 	{
-	    SV *sv = GvSV(gv);
+	    SV * const sv = GvSV(gv);
 	    (void)SvUPGRADE(sv, SVt_PVNV);
 	    Perl_sv_setpvf(aTHX_ sv,
 #if defined(PERL_SUBVERSION) && (PERL_SUBVERSION > 0)
@@ -1857,7 +1856,8 @@ pointers returned by SvPV.
 bool
 Perl_is_gv_magical(pTHX_ char *name, STRLEN len, U32 flags)
 {
-    (void)flags;
+    PERL_UNUSED_ARG(flags);
+
     if (len > 1) {
 	const char * const name1 = name + 1;
 	switch (*name) {

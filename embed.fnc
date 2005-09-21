@@ -161,7 +161,7 @@ Apd	|SV*	|cv_const_sv	|CV* cv
 p	|SV*	|op_const_sv	|OP* o|CV* cv
 Apd	|void	|cv_undef	|CV* cv
 Ap	|void	|cx_dump	|PERL_CONTEXT* cs
-Ap	|SV*	|filter_add	|filter_t funcp|SV* datasv
+Ap	|SV*	|filter_add	|NULLOK filter_t funcp|NULLOK SV* datasv
 Ap	|void	|filter_del	|filter_t funcp
 Ap	|I32	|filter_read	|int idx|SV* buffer|int maxlen
 ApPR	|char**	|get_op_descs
@@ -322,7 +322,7 @@ pd	|U32	|intro_my
 ApPR	|char*	|instr		|NN const char* big|NN const char* little
 pR	|bool	|io_close	|NN IO* io|bool not_implicit
 pR	|OP*	|invert		|OP* cmd
-dpR	|bool	|is_gv_magical	|char *name|STRLEN len|U32 flags
+dpR	|bool	|is_gv_magical	|NN char *name|STRLEN len|U32 flags
 ApR	|I32	|is_lvalue_sub
 ApPR	|U32	|to_uni_upper_lc|U32 c
 ApPR	|U32	|to_uni_title_lc|U32 c
@@ -768,8 +768,8 @@ Apd	|void	|sv_insert	|NN SV* bigsv|STRLEN offset|STRLEN len \
 				|NN char* little|STRLEN littlelen
 Apd	|int	|sv_isa		|NN SV* sv|const char* name
 Apd	|int	|sv_isobject	|NN SV* sv
-Apd	|STRLEN	|sv_len		|NN SV* sv
-Apd	|STRLEN	|sv_len_utf8	|NN SV* sv
+Apd	|STRLEN	|sv_len		|NULLOK SV* sv
+Apd	|STRLEN	|sv_len_utf8	|NULLOK SV* sv
 Apd	|void	|sv_magic	|NN SV* sv|SV* obj|int how|const char* name \
 				|I32 namlen
 Apd	|MAGIC *|sv_magicext	|NN SV* sv|SV* obj|int how|MGVTBL *vtbl \
@@ -778,8 +778,8 @@ ApdaR	|SV*	|sv_mortalcopy	|NULLOK SV* oldsv
 ApdR	|SV*	|sv_newmortal
 Apd	|SV*	|sv_newref	|NULLOK SV* sv
 Ap	|char*	|sv_peek	|SV* sv
-Apd	|void	|sv_pos_u2b	|SV* sv|NN I32* offsetp|I32* lenp
-Apd	|void	|sv_pos_b2u	|SV* sv|NN I32* offsetp
+Apd	|void	|sv_pos_u2b	|NULLOK SV* sv|NN I32* offsetp|NULLOK I32* lenp
+Apd	|void	|sv_pos_b2u	|NULLOK SV* sv|NN I32* offsetp
 Amdb	|char*	|sv_pvn_force	|SV* sv|STRLEN* lp
 Apd	|char*	|sv_pvutf8n_force|SV* sv|STRLEN* lp
 Apd	|char*	|sv_pvbyten_force|SV* sv|STRLEN* lp
@@ -1315,7 +1315,7 @@ s	|I32	|utf16_textfilter|int idx|SV *sv|int maxlen
 s	|I32	|utf16rev_textfilter|int idx|SV *sv|int maxlen
 #endif
 #  if defined(PERL_CR_FILTER)
-s	|I32	|cr_textfilter	|int idx|SV *sv|int maxlen
+s	|I32	|cr_textfilter	|int idx|NULLOK SV *sv|int maxlen
 #  endif
 #endif
 

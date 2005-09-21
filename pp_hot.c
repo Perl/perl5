@@ -2908,6 +2908,7 @@ try_autoload:
 	if (!hasargs) {
 	    AV* av = (AV*)PAD_SVl(0);
 
+    /*NOTREACHED*/
 	    items = AvFILLp(av) + 1;
 	    if (items) {
 		/* Mark is at the end of the stack. */
