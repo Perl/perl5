@@ -1256,10 +1256,12 @@ sR	|I32	|expect_number	|NN char** pattern
 s	|SV*	|gv_share	|SV *sv|CLONE_PARAMS *param
 #  endif
 s	|bool	|utf8_mg_pos	|NN SV *sv|NN MAGIC **mgp|NN STRLEN **cachep \
-				|I32 i|NN I32 *offsetp|I32 uoff|NN U8 **sp \
-				|NN U8 *start|NN U8 *send
-s	|bool	|utf8_mg_pos_init	|NN SV *sv|NN MAGIC **mgp|NN STRLEN **cachep \
-				|I32 i|I32 offsetp|NN U8 *s|NN U8 *start
+				|I32 i|NN I32 *offsetp|I32 uoff \
+				|NN const U8 **sp|NN const U8 *start \
+				|NN const U8 *send
+s	|bool	|utf8_mg_pos_init	|NN SV *sv|NN MAGIC **mgp \
+				|NN STRLEN **cachep|I32 i|I32 offsetp \
+				|NN const U8 *s|NN const U8 *start
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)

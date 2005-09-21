@@ -1534,8 +1534,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 			auv = 0;
 		    }
 		    else if (++bytes >= sizeof(UV)) {	/* promote to string */
-			char *t;
-			STRLEN n_a;
+			const char *t;
 
 			sv = Perl_newSVpvf(aTHX_ "%.*"UVf, (int)TYPE_DIGITS(UV), auv);
 			while (s < strend) {
@@ -1545,7 +1544,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 				break;
 			    }
 			}
-			t = SvPV(sv, n_a);
+			t = SvPV_nolen_const(sv);
 			while (*t == '0')
 			    t++;
 			sv_chop(sv, t);
@@ -2109,7 +2108,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	case 'Z':
 	case 'a':
 	    fromstr = NEXTFROM;
-	    aptr = SvPV(fromstr, fromlen);
+	    aptr = SvPV_const(fromstr, fromlen);
 	    if (howlen == e_star) {   
 		len = fromlen;
 		if (datumtype == 'Z')
@@ -2712,7 +2711,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 				"Attempt to pack pointer to temporary value");
 		    }
 		    if (SvPOK(fromstr) || SvNIOK(fromstr))
-			aptr = SvPV_flags(fromstr, n_a, 0);
+			aptr = SvPV_nomg_const(fromstr, n_a);
 		    else
 			aptr = SvPV_force_flags(fromstr, n_a, 0);
 		}
@@ -2722,7 +2721,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	    break;
 	case 'u':
 	    fromstr = NEXTFROM;
-	    aptr = SvPV(fromstr, fromlen);
+	    aptr = SvPV_const(fromstr, fromlen);
 	    SvGROW(cat, fromlen * 4 / 3);
 	    if (len <= 2)
 		len = 45;

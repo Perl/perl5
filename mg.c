@@ -267,11 +267,11 @@ Perl_mg_length(pTHX_ SV *sv)
     }
 
     if (DO_UTF8(sv)) {
-        U8 *s = (U8*)SvPV(sv, len);
+        const U8 *s = (U8*)SvPV_const(sv, len);
         len = Perl_utf8_length(aTHX_ s, s + len);
     }
     else
-        (void)SvPV(sv, len);
+        (void)SvPV_const(sv, len);
     return len;
 }
 
@@ -960,11 +960,11 @@ int
 Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 {
     register char *s;
-    char *ptr;
+    const char *ptr;
     STRLEN len, klen;
 
     s = SvPV(sv,len);
-    ptr = MgPV(mg,klen);
+    ptr = MgPV_const(mg,klen);
     my_setenv(ptr, s);
 
 #ifdef DYNAMIC_ENV_FETCH

@@ -177,7 +177,7 @@ PP(pp_concat)
 	    mg_get(left);		/* or mg_get(left) may happen here */
 	if (!SvOK(TARG))
 	    sv_setpvn(left, "", 0);
-	(void)SvPV_nomg(left, llen);    /* Needed to set UTF8 flag */
+	(void)SvPV_nomg_const(left, llen);    /* Needed to set UTF8 flag */
 	lbyte = !DO_UTF8(left);
 	if (IN_BYTES)
 	    SvUTF8_off(TARG);
@@ -1767,7 +1767,7 @@ PP(pp_helem)
 	    else {
 		if (!preeminent) {
 		    STRLEN keylen;
-		    const char * const key = SvPV(keysv, keylen);
+		    const char * const key = SvPV_const(keysv, keylen);
 		    SAVEDELETE(hv, savepvn(key,keylen), keylen);
 		} else
 		    save_helem(hv, keysv, svp);
@@ -1867,7 +1867,7 @@ PP(pp_iter)
 	    /* string increment */
 	    register SV* cur = cx->blk_loop.iterlval;
 	    STRLEN maxlen = 0;
-	    const char *max = SvOK((SV*)av) ? SvPV((SV*)av, maxlen) : "";
+	    const char *max = SvOK((SV*)av) ? SvPV_const((SV*)av, maxlen) : "";
 	    if (!SvNIOK(cur) && SvCUR(cur) <= maxlen) {
 #ifndef USE_5005THREADS			  /* don't risk potential race */
 		if (SvREFCNT(*itersvp) == 1 && !SvMAGICAL(*itersvp)) {

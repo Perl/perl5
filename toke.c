@@ -966,7 +966,7 @@ Perl_str_to_version(pTHX_ SV *sv)
     NV retval = 0.0;
     NV nshift = 1.0;
     STRLEN len;
-    const char *start = SvPVx(sv,len);
+    const char *start = SvPVx_const(sv,len);
     const char *end = start + len;
     const bool utf = SvUTF8(sv) ? TRUE : FALSE;
     while (start < end) {
@@ -2262,7 +2262,7 @@ S_find_in_my_stash(pTHX_ const char *pkgname, I32 len)
     if ((gv = gv_fetchpv(pkgname, FALSE, SVt_PVCV))) {
         SV *sv;
         if (GvCV(gv) && (sv = cv_const_sv(GvCV(gv)))) {
-            pkgname = SvPV_nolen(sv);
+            pkgname = SvPV_nolen_const(sv);
         }
     }
 

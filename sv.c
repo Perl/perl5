@@ -1896,8 +1896,9 @@ S_not_a_number(pTHX_ SV *sv)
 	  /* each *s can expand to 4 chars + "...\0",
 	     i.e. need room for 8 chars */
 	
-	  char *s, *end;
-	  for (s = SvPVX(sv), end = s + SvCUR(sv); s < end && d < limit; s++) {
+	  const char *s, *end;
+	  for (s = SvPVX_const(sv), end = s + SvCUR(sv); s < end && d < limit;
+	       s++) {
 	       int ch = *s & 0xFF;
 	       if (ch & 128 && !isPRINT_LC(ch)) {
 		    *d++ = 'M';
@@ -1970,7 +1971,7 @@ Perl_looks_like_number(pTHX_ SV *sv)
 	len = SvCUR(sv);
     }
     else if (SvPOKp(sv))
-	sbegin = SvPV(sv, len);
+	sbegin = SvPV_const(sv, len);
     else
 	return SvFLAGS(sv) & (SVf_NOK|SVp_NOK|SVf_IOK|SVp_IOK);
     return grok_number(sbegin, len, NULL);
@@ -3034,6 +3035,8 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	    mg_get(sv);
 	if (SvPOKp(sv)) {
 	    *lp = SvCUR(sv);
+	    if (flags & SV_MUTABLE_RETURN)
+		return SvPVX_mutable(sv);
 	    if (flags & SV_CONST_RETURN)
 		return (char *)SvPVX_const(sv);
 	    return SvPVX(sv);
@@ -3275,6 +3278,8 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 			  PTR2UV(sv),SvPVX_const(sv)));
     if (flags & SV_CONST_RETURN)
 	return (char *)SvPVX_const(sv);
+    if (flags & SV_MUTABLE_RETURN)
+	return SvPVX_mutable(sv);
     return SvPVX(sv);
 
   tokensave:
@@ -5497,7 +5502,7 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
     else
     {
 	STRLEN len, ulen;
-	const U8 *s = (U8*)SvPV(sv, len);
+	const U8 *s = (U8*)SvPV_const(sv, len);
 	MAGIC *mg = SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : 0;
 
 	if (mg && mg->mg_len != -1 && (mg->mg_len > 0 || len == 0)) {
@@ -5531,7 +5536,8 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
  *
  */
 STATIC bool
-S_utf8_mg_pos_init(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 offsetp, U8 *s, U8 *start)
+S_utf8_mg_pos_init(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i,
+		   I32 offsetp, const U8 *s, const U8 *start)
 {
     bool found = FALSE; 
 
@@ -5564,7 +5570,7 @@ S_utf8_mg_pos_init(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 offset
  *
  */
 STATIC bool
-S_utf8_mg_pos(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I32 uoff, U8 **sp, U8 *start, U8 *send)
+S_utf8_mg_pos(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I32 uoff, const U8 **sp, const U8 *start, const U8 *send)
 {
     bool found = FALSE;
 
@@ -5696,21 +5702,21 @@ type coercion.
 void
 Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
 {
-    U8 *start;
+    const U8 *start;
     STRLEN len;
 
     if (!sv)
 	return;
 
-    start = (U8*)SvPV(sv, len);
+    start = (U8*)SvPV_const(sv, len);
     if (len) {
 	STRLEN boffset = 0;
 	STRLEN *cache = 0;
-	U8 *s = start;
-	 I32 uoffset = *offsetp;
-	 U8 *send = s + len;
-	 MAGIC *mg = 0;
-	 bool found = FALSE;
+	const U8 *s = start;
+	I32 uoffset = *offsetp;
+	const U8 *send = s + len;
+	MAGIC *mg = 0;
+	bool found = FALSE;
 
          if (utf8_mg_pos(sv, &mg, &cache, 0, offsetp, *offsetp, &s, start, send))
              found = TRUE;
@@ -5772,17 +5778,17 @@ Handles magic and type coercion.
 void
 Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 {
-    U8* s;
+    const U8* s;
     STRLEN len;
 
     if (!sv)
 	return;
 
-    s = (U8*)SvPV(sv, len);
+    s = (const U8*)SvPV_const(sv, len);
     if ((I32)len < *offsetp)
 	Perl_croak(aTHX_ "panic: sv_pos_b2u: bad byte offset");
     else {
-	U8* send = s + *offsetp;
+	const U8* send = s + *offsetp;
 	MAGIC* mg = NULL;
 	STRLEN *cache = NULL;
       
@@ -5814,7 +5820,7 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 		    STRLEN backw = cache[1] - *offsetp;
 
 		    if (!(forw < 2 * backw)) {
-			U8 *p = s + cache[1];
+			const U8 *p = s + cache[1];
 			STRLEN ubackw = 0;
 			     
 			cache[1] -= backw;
@@ -8622,7 +8628,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	const char *eptr = Nullch;
 	STRLEN elen = 0;
 	SV *vecsv = Nullsv;
-	U8 *vecstr = Null(U8*);
+	const U8 *vecstr = Null(U8*);
 	STRLEN veclen = 0;
 	char c = 0;
 	int i;
@@ -8747,18 +8753,18 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		else
 		    vecsv = (evix ? evix <= svmax : svix < svmax) ?
 			svargs[evix ? evix-1 : svix++] : &PL_sv_undef;
-		dotstr = SvPVx(vecsv, dotstrlen);
+		dotstr = SvPV_const(vecsv, dotstrlen);
 		if (DO_UTF8(vecsv))
 		    is_utf8 = TRUE;
 	    }
 	    if (args) {
 		vecsv = va_arg(*args, SV*);
-		vecstr = (U8*)SvPVx(vecsv,veclen);
+		vecstr = (U8*)SvPV_const(vecsv,veclen);
 		vec_utf8 = DO_UTF8(vecsv);
 	    }
 	    else if (efix ? efix <= svmax : svix < svmax) {
 		vecsv = svargs[efix ? efix-1 : svix++];
-		vecstr = (U8*)SvPVx(vecsv,veclen);
+		vecstr = (U8*)SvPV_const(vecsv,veclen);
 		vec_utf8 = DO_UTF8(vecsv);
 	    }
 	    else {

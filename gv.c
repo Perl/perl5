@@ -502,7 +502,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 	return Nullgv;
     if (stash) {
 	if (SvTYPE(stash) < SVt_PVHV) {
-	    packname = SvPV_nolen((SV*)stash);
+	    packname = SvPV_nolen_const((SV*)stash);
 	    stash = Nullhv;
 	}
 	else {

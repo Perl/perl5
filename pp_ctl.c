@@ -78,9 +78,7 @@ PP(pp_regcomp)
 {
     dSP;
     register PMOP *pm = (PMOP*)cLOGOP->op_other;
-    register char *t;
     SV *tmpstr;
-    STRLEN len;
     MAGIC *mg = Null(MAGIC*);
 
     tmpstr = POPs;
@@ -102,7 +100,8 @@ PP(pp_regcomp)
 	PM_SETRE(pm, ReREFCNT_inc(re));
     }
     else {
-	t = SvPV(tmpstr, len);
+	STRLEN len;
+	const char *t = SvPV_const(tmpstr, len);
 
 	/* Check against the last compiled regexp. */
 	if (!PM_GETRE(pm) || !PM_GETRE(pm)->precomp ||
@@ -124,7 +123,7 @@ PP(pp_regcomp)
 		if (pm->op_pmdynflags & PMdf_UTF8)
 		    t = (char*)bytes_to_utf8((U8*)t, &len);
 	    }
-	    PM_SETRE(pm, CALLREGCOMP(aTHX_ t, t + len, pm));
+	    PM_SETRE(pm, CALLREGCOMP(aTHX_ (char *)t, (char *)t + len, pm));
 	    if (!DO_UTF8(tmpstr) && (pm->op_pmdynflags & PMdf_UTF8))
 		Safefree(t);
 	    PL_reginterp_cnt = 0;	/* XXXX Be extra paranoid - needed
@@ -335,7 +334,7 @@ PP(pp_formline)
     register SV *tmpForm = *++MARK;
     register U32 *fpc;
     register char *t;
-    register char *f;
+    const char *f;
     register char *s;
     register char *send;
     register I32 arg;
@@ -375,11 +374,9 @@ PP(pp_formline)
 	targ_is_utf8 = TRUE;
     t = SvGROW(PL_formtarget, len + fudge + 1);  /* XXX SvCUR bad */
     t += len;
-    f = SvPV(tmpForm, len);
+    f = SvPV_const(tmpForm, len);
     /* need to jump to the next word */
-    s = f + len + WORD_ALIGN - SvCUR(tmpForm) % WORD_ALIGN;
-
-    fpc = (U32*)s;
+    fpc = (U32*)(f + len + WORD_ALIGN - SvCUR(tmpForm) % WORD_ALIGN);
 
     for (;;) {
 	DEBUG_f( {
@@ -458,7 +455,7 @@ PP(pp_formline)
 	    break;
 
 	case FF_CHECKNL:
-	    item = s = SvPV(sv, len);
+	    s = item = SvPV(sv, len);
 	    itemsize = len;
 	    if (DO_UTF8(sv)) {
 		itemsize = sv_len_utf8(sv);
@@ -500,7 +497,7 @@ PP(pp_formline)
 	    break;
 
 	case FF_CHECKCHOP:
-	    item = s = SvPV(sv, len);
+	    s = item = SvPV(sv, len);
 	    itemsize = len;
 	    if (DO_UTF8(sv)) {
 		itemsize = sv_len_utf8(sv);
@@ -679,7 +676,7 @@ PP(pp_formline)
 	case FF_LINEGLOB:
 	    oneline = FALSE;
 	ff_line:
-	    item = s = SvPV(sv, len);
+	    s = item = SvPV(sv, len);
 	    itemsize = len;
 	    if ((item_is_utf8 = DO_UTF8(sv)))
 		itemsize = sv_len_utf8(sv);
@@ -1603,7 +1600,7 @@ PP(pp_reset)
     if (MAXARG < 1)
 	tmps = "";
     else
-	tmps = POPpx;
+	tmps = POPpconstx;
     sv_reset(tmps, CopSTASH(PL_curcop));
     PUSHs(&PL_sv_yes);
     RETURN;
@@ -1733,7 +1730,7 @@ PP(pp_enteriter)
 		STRLEN n_a;
 		cx->blk_loop.iterlval = newSVsv(sv);
 		(void) SvPV_force(cx->blk_loop.iterlval,n_a);
-		(void) SvPV(right,n_a);
+		(void) SvPV_nolen_const(right);
 	    }
 	}
 	else if (PL_op->op_private & OPpITER_REVERSED) {

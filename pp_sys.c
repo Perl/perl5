@@ -329,7 +329,7 @@ PP(pp_backtick)
     if (fp) {
         const char *type = NULL;
 	if (PL_curcop->cop_io) {
-	    type = SvPV_nolen(PL_curcop->cop_io);
+	    type = SvPV_nolen_const(PL_curcop->cop_io);
 	}
 	if (type && *type)
 	    PerlIO_apply_layers(aTHX_ fp,mode,type);
@@ -439,14 +439,14 @@ PP(pp_warn)
     else {
 	tmpsv = TOPs;
     }
-    tmps = SvPV(tmpsv, len);
+    tmps = SvPV_const(tmpsv, len);
     if ((!tmps || !len) && PL_errgv) {
   	SV *error = ERRSV;
 	(void)SvUPGRADE(error, SVt_PV);
 	if (SvPOK(error) && SvCUR(error))
 	    sv_catpv(error, "\t...caught");
 	tmpsv = error;
-	tmps = SvPV(tmpsv, len);
+	tmps = SvPV_const(tmpsv, len);
     }
     if (!tmps || !len)
 	tmpsv = sv_2mortal(newSVpvn("Warning: something's wrong", 26));
@@ -506,7 +506,7 @@ PP(pp_die)
 	    if (SvPOK(error) && SvCUR(error))
 		sv_catpv(error, "\t...propagated");
 	    tmpsv = error;
-	    tmps = SvPV(tmpsv, len);
+	    tmps = SvPV_const(tmpsv, len);
 	}
     }
     if (!tmps || !len)
@@ -758,11 +758,11 @@ PP(pp_binmode)
 
     PUTBACK;
     if (PerlIO_binmode(aTHX_ fp,IoTYPE(io),mode_from_discipline(discp),
-                       (discp) ? SvPV_nolen(discp) : Nullch)) {
+                       (discp) ? SvPV_nolen_const(discp) : Nullch)) {
 	if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {
 	     if (!PerlIO_binmode(aTHX_ IoOFP(io),IoTYPE(io),
 			mode_from_discipline(discp),
-                       (discp) ? SvPV_nolen(discp) : Nullch)) {
+                       (discp) ? SvPV_nolen_const(discp) : Nullch)) {
 		SPAGAIN;
 		RETPUSHUNDEF;
 	     }
@@ -1297,9 +1297,9 @@ PP(pp_enterwrite)
     if (!cv) {
 	if (fgv) {
 	    SV * const tmpsv = sv_newmortal();
-	    char *name;
+	    const char *name;
 	    gv_efullname4(tmpsv, fgv, Nullch, FALSE);
-	    name = SvPV_nolen(tmpsv);
+	    name = SvPV_nolen_const(tmpsv);
 	    if (name && *name)
 		DIE(aTHX_ "Undefined format \"%s\" called", name);
 	}
@@ -1388,7 +1388,7 @@ PP(pp_leavewrite)
 	    SV * const sv = sv_newmortal();
 	    const char *name;
 	    gv_efullname4(sv, fgv, Nullch, FALSE);
-	    name = SvPV_nolen(sv);
+	    name = SvPV_nolen_const(sv);
 	    if (name && *name)
 		DIE(aTHX_ "Undefined top format \"%s\" called",name);
 	}
@@ -1517,7 +1517,7 @@ PP(pp_sysopen)
     dSP;
     GV *gv;
     SV *sv;
-    char *tmps;
+    const char *tmps;
     STRLEN len;
     const int perm = (MAXARG > 3) ? POPi : 0666;
     const int mode = POPi;
@@ -1527,8 +1527,9 @@ PP(pp_sysopen)
 
     /* Need TIEHANDLE method ? */
 
-    tmps = SvPV(sv, len);
-    if (do_open(gv, tmps, len, TRUE, mode, perm, Nullfp)) {
+    tmps = SvPV_const(sv, len);
+    /* FIXME? do_open should do const  */
+    if (do_open(gv, (char*)tmps, len, TRUE, mode, perm, Nullfp)) {
 	IoLINES(GvIOp(gv)) = 0;
 	PUSHs(&PL_sv_yes);
     }
@@ -1812,7 +1813,7 @@ PP(pp_send)
     GV *gv;
     IO *io;
     SV *bufsv;
-    char *buffer;
+    const char *buffer;
     Size_t length;
     SSize_t retval;
     STRLEN blen;
@@ -1861,7 +1862,7 @@ PP(pp_send)
 	    bufsv = sv_2mortal(newSVsv(bufsv));
 	    buffer = sv_2pvutf8(bufsv, &blen);
 	} else
-	    buffer = SvPV(bufsv, blen);
+	    buffer = SvPV_const(bufsv, blen);
     }
     else {
 	 if (DO_UTF8(bufsv)) {
@@ -1869,7 +1870,7 @@ PP(pp_send)
 	      bufsv = sv_2mortal(newSVsv(bufsv));
 	      sv_utf8_downgrade(bufsv, FALSE);
 	 }
-	 buffer = SvPV(bufsv, blen);
+	 buffer = SvPV_const(bufsv, blen);
     }
 
     if (PL_op->op_type == OP_SYSWRITE) {
@@ -1891,7 +1892,7 @@ PP(pp_send)
 	if (length > blen - offset)
 	    length = blen - offset;
 	if (DO_UTF8(bufsv)) {
-	    buffer = (char*)utf8_hop((U8 *)buffer, offset);
+	    buffer = (const char*)utf8_hop((const U8 *)buffer, offset);
 	    length = utf8_hop((U8 *)buffer, length) - (U8 *)buffer;
 	}
 	else {
@@ -2138,7 +2139,7 @@ PP(pp_truncate)
 	}
 	else {
 	    SV *sv = POPs;
-	    char *name;
+	    const  char *name;
 	
 	    if (SvTYPE(sv) == SVt_PVGV) {
 	        tmpgv = (GV*)sv;		/* *main::FRED for example */
@@ -2153,7 +2154,7 @@ PP(pp_truncate)
 		goto do_ftruncate_io;
 	    }
 
-	    name = SvPV(sv, n_a);
+	    name = SvPV_nolen_const(sv);
 	    TAINT_PROPER("truncate");
 #ifdef HAS_TRUNCATE
 	    if (truncate(name, len) < 0)
@@ -3574,9 +3575,8 @@ PP(pp_rename)
     dSP; dTARGET;
     int anum;
     STRLEN n_a;
-
-    char *tmps2 = POPpx;
-    char *tmps = SvPV(TOPs, n_a);
+    const char *tmps2 = POPpconstx;
+    const char *tmps = SvPV_nolen_const(TOPs);
     TAINT_PROPER("rename");
 #ifdef HAS_RENAME
     anum = PerlLIO_rename(tmps, tmps2);
@@ -3601,8 +3601,8 @@ PP(pp_link)
 #ifdef HAS_LINK
     dSP; dTARGET;
     STRLEN n_a;
-    char *tmps2 = POPpx;
-    char *tmps = SvPV(TOPs, n_a);
+    const char *tmps2 = POPpconstx;
+    const char *tmps = SvPV_nolen_const(TOPs);
     TAINT_PROPER("link");
     SETi( PerlLIO_link(tmps, tmps2) >= 0 );
     RETURN;
@@ -3616,8 +3616,8 @@ PP(pp_symlink)
 #ifdef HAS_SYMLINK
     dSP; dTARGET;
     STRLEN n_a;
-    char *tmps2 = POPpx;
-    char *tmps = SvPV(TOPs, n_a);
+    const char *tmps2 = POPpconstx;
+    const char *tmps = SvPV_nolen_const(TOPs);
     TAINT_PROPER("symlink");
     SETi( symlink(tmps, tmps2) >= 0 );
     RETURN;
@@ -3631,7 +3631,7 @@ PP(pp_readlink)
     dSP;
 #ifdef HAS_SYMLINK
     dTARGET;
-    char *tmps;
+    const char *tmps;
     char buf[MAXPATHLEN];
     int len;
     STRLEN n_a;
@@ -3639,7 +3639,7 @@ PP(pp_readlink)
 #ifndef INCOMPLETE_TAINTS
     TAINT;
 #endif
-    tmps = POPpx;
+    tmps = POPpconstx;
     len = readlink(tmps, buf, sizeof(buf) - 1);
     EXTEND(SP, 1);
     if (len < 0)
@@ -3817,7 +3817,7 @@ PP(pp_open_dir)
 #if defined(Direntry_t) && defined(HAS_READDIR)
     dSP;
     STRLEN n_a;
-    char *dirname = POPpx;
+    const char *dirname = POPpconstx;
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
 
@@ -4109,7 +4109,7 @@ PP(pp_system)
     if (PL_tainting) {
 	TAINT_ENV();
 	while (++MARK <= SP) {
-	    (void)SvPV_nolen(*MARK);      /* stringify for taint check */
+	    (void)SvPV_nolen_const(*MARK);      /* stringify for taint check */
 	    if (PL_tainted)
 		break;
 	}
@@ -4237,7 +4237,7 @@ PP(pp_exec)
     if (PL_tainting) {
 	TAINT_ENV();
 	while (++MARK <= SP) {
-	    (void)SvPV_nolen(*MARK);      /* stringify for taint check */
+	    (void)SvPV_nolen_const(*MARK);      /* stringify for taint check */
 	    if (PL_tainted)
 		break;
 	}

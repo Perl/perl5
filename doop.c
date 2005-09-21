@@ -97,8 +97,8 @@ S_do_trans_simple(pTHX_ SV *sv)
 STATIC I32
 S_do_trans_count(pTHX_ SV *sv)
 {
-    U8 *s;
-    U8 *send;
+    const U8 *s;
+    const U8 *send;
     I32 matches = 0;
     STRLEN len;
     const I32 complement = PL_op->op_private & OPpTRANS_COMPLEMENT;
@@ -107,7 +107,7 @@ S_do_trans_count(pTHX_ SV *sv)
     if (!tbl)
 	Perl_croak(aTHX_ "panic: do_trans_count line %d",__LINE__);
 
-    s = (U8*)SvPV(sv, len);
+    s = (const U8*)SvPV_const(sv, len);
     send = s + len;
 
     if (!SvUTF8(sv))
@@ -605,7 +605,7 @@ Perl_do_trans(pTHX_ SV *sv)
         if (SvREADONLY(sv) && !(PL_op->op_private & OPpTRANS_IDENTICAL))
             Perl_croak(aTHX_ PL_no_modify);
     }
-    (void)SvPV(sv, len);
+    (void)SvPV_const(sv, len);
     if (!len)
 	return 0;
     if (!(PL_op->op_private & OPpTRANS_IDENTICAL)) {
@@ -717,7 +717,7 @@ UV
 Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 {
     STRLEN srclen, len;
-    unsigned char *s = (unsigned char *) SvPV(sv, srclen);
+    const unsigned char *s = (const unsigned char *) SvPV_const(sv, srclen);
     UV retnum = 0;
 
     if (offset < 0)
@@ -1149,12 +1149,12 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     register char *dc;
     STRLEN leftlen;
     STRLEN rightlen;
-    register char *lc;
-    register char *rc;
+    register const char *lc;
+    register const char *rc;
     register I32 len;
     I32 lensave;
-    char *lsave;
-    char *rsave;
+    const char *lsave;
+    const char *rsave;
     const bool left_utf = DO_UTF8(left);
     const bool right_utf = DO_UTF8(right);
     I32 needlen = 0;
@@ -1166,8 +1166,8 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 
     if (sv != left || (optype != OP_BIT_AND && !SvOK(sv) && !SvGMAGICAL(sv)))
 	sv_setpvn(sv, "", 0);	/* avoid undef warning on |= and ^= */
-    lsave = lc = SvPV(left, leftlen);
-    rsave = rc = SvPV(right, rightlen);
+    lsave = lc = SvPV_const(left, leftlen);
+    rsave = rc = SvPV_const(right, rightlen);
     len = leftlen < rightlen ? leftlen : rightlen;
     lensave = len;
     if ((left_utf || right_utf) && (sv == left || sv == right)) {
