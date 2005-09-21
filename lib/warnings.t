@@ -137,11 +137,6 @@ for (@prgs){
 	$results =~ s|:abc(d)?\b|./abc$1|g;
     }
 
-    # Borland compiler whines about DOMAIN errors for some "uninit" tests
-    if ($^O eq 'MSWin32' and $Config{ccname} =~ /bcc32/) {
-	$results =~ s|\n\n\w+: DOMAIN error||g;
-    }
-
     $expected =~ s/\n+$//;
     my $prefix = ($results =~ s#^PREFIX(\n|$)##) ;
     # any special options? (OPTIONS foo bar zap)

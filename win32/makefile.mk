@@ -202,6 +202,7 @@ CCLIBDIR	*= $(CCHOME)\lib
 #
 # Additional compiler flags can be specified here.
 #
+BUILDOPT	*= $(BUILDOPTEXTRA)
 
 #
 # Adding -DPERL_HASH_SEED_EXPLICIT will disable randomization of Perl's
@@ -396,7 +397,7 @@ LINK32		= tlink32
 .ENDIF
 LIB32		= tlib /P128
 IMPLIB		= implib -c
-RSC		= rc
+RSC		= brcc32
 
 #
 # Options
@@ -409,7 +410,7 @@ SUBSYS		= console
 CXX_FLAG	= -P
 
 LIBC		= cw32mti.lib
-LIBFILES	= $(CRYPT_LIB) import32.lib $(LIBC)
+LIBFILES	= $(CRYPT_LIB) ws2_32.lib import32.lib $(LIBC)
 
 .IF  "$(CFG)" == "Debug"
 OPTIMIZE	= -v -D_RTLDLL -DDEBUGGING
@@ -585,10 +586,21 @@ BLINK_FLAGS	= $(PRIV_LINK_FLAGS) $(LINK_FLAGS)
 # require backslashes to be doubled-up when written to $(mktmp) files.
 # Other dmake's do not require this and would actually output a double
 # backslash if they were doubled-up.
-.IF "$(shell type $(mktmp \\))"=="\\"
+.IF "$(shell @type $(mktmp \\))"=="\\"
 B=\\
 .ELSE
 B=\\\
+.ENDIF
+
+# There is a related issue with other escape sequences: Sarathy's old
+# dmake automatically maps escape sequences like \n to their ASCII values
+# when used in macros, while other dmake's only do so if this behaviour
+# is explicitly requested with the :m modifier.
+DONTUSETHIS=\n
+.IF "$(shell @type $(mktmp \n))"=="\n"
+N=$(DONTUSETHIS:m)
+.ELSE
+N=$(DONTUSETHIS)
 .ENDIF
 
 o *= .obj
@@ -1094,15 +1106,15 @@ perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ..\makedef.pl
 $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpd -ap $(BLINK_FLAGS) \
-	    @$(mktmp c0d32$(o) $(PERLDLL_OBJ:s,\,$B,)\n \
-		$@,\n \
-		$(LIBFILES)\n \
-		perldll.def\n)
+	    @$(mktmp c0d32$(o) $(PERLDLL_OBJ:s,\,$B,)$N \
+		$@,$N \
+	        $(subst,\,$B $(shell @type Extensions_static)) $(LIBFILES)$N \
+		perldll.def$N)
 	$(IMPLIB) $*.lib $@
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -mdll -o $@ -Wl,--base-file -Wl,perl.base $(BLINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(PERLDLL_OBJ:s,\,$B,) \
-	        $(shell $(MINIPERL) -I..\lib buildext.pl --list-static-libs) \
+	        $(subst,\,$B $(shell @type Extensions_static)) \
 	        $(LIBFILES) $(LKPOST))
 	dlltool --output-lib $(PERLIMPLIB) \
 		--dllname $(PERLDLL:b).dll \
@@ -1111,11 +1123,11 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 		--output-exp perl.exp
 	$(LINK32) -mdll -o $@ $(BLINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(PERLDLL_OBJ:s,\,$B,) \
-	        $(shell $(MINIPERL) -I..\lib buildext.pl --list-static-libs) \
+	        $(subst,\,$B $(shell @type Extensions_static)) \
 	        $(LIBFILES) perl.exp $(LKPOST))
 .ELSE
 	$(LINK32) -dll -def:perldll.def -out:$@ \
-	    $(shell $(MINIPERL) -I..\lib buildext.pl --list-static-libs) \
+	    @Extensions_static \
 	    @$(mktmp -base:0x28000000 $(BLINK_FLAGS) $(DELAYLOAD) $(LIBFILES) \
 	        $(PERLDLL_RES) $(PERLDLL_OBJ:s,\,$B,))
 .ENDIF
@@ -1168,9 +1180,9 @@ perlmain$(o) : perlmain.c
 $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpe -ap $(BLINK_FLAGS) \
-	    @$(mktmp c0x32$(o) $(PERLEXE_OBJ:s,\,$B,)\n \
-	    $(@:s,\,$B,),\n \
-	    $(PERLIMPLIB) $(LIBFILES)\n)
+	    @$(mktmp c0x32$(o) $(PERLEXE_OBJ:s,\,$B,)$N \
+	    $(@:s,\,$B,),$N \
+	    $(PERLIMPLIB) $(LIBFILES)$N)
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -mconsole -o $@ $(BLINK_FLAGS)  \
 	    $(PERLEXE_OBJ) $(PERLIMPLIB) $(LIBFILES)
@@ -1201,8 +1213,9 @@ Extensions : buildext.pl $(PERLDEP) $(CONFIGPM)
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --dynamic
 
 Extensions_static : buildext.pl
-	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --static
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) --static
+	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --static
+	$(MINIPERL) -I..\lib buildext.pl --list-static-libs > Extensions_static
 
 Extensions_clean :
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) clean
@@ -1444,6 +1457,7 @@ _clean :
 	-@erase ..\x2p\*.exe ..\x2p\*.bat
 	-@erase *.ilk
 	-@erase *.pdb
+	-@erase Extensions_static
 
 clean : Extensions_clean _clean
 

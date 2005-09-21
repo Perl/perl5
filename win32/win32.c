@@ -117,6 +117,16 @@ static DWORD	w32_platform = (DWORD)-1;
 
 #define ONE_K_BUFSIZE	1024
 
+#ifdef __BORLANDC__
+/* Silence STDERR grumblings from Borland's math library. */
+DllExport int
+_matherr(struct _exception *a)
+{
+    PERL_UNUSED_VAR(a);
+    return 1;
+}
+#endif
+
 int
 IsWin95(void)
 {
@@ -137,6 +147,10 @@ set_w32_module_name(void)
 				? GetModuleHandle(NULL)
 				: w32_perldll_handle),
 		      w32_module_name, sizeof(w32_module_name));
+
+    /* remove \\?\ prefix */
+    if (memcmp(w32_module_name, "\\\\?\\", 4) == 0)
+        memmove(w32_module_name, w32_module_name+4, strlen(w32_module_name+4)+1);
 
     /* try to get full path to binary (which may be mangled when perl is
      * run from a 16-bit app) */

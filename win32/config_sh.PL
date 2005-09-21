@@ -87,8 +87,7 @@ if (exists $opt{cc}) {
     }
     elsif ($opt{cc} eq 'bcc32') {
         my $output = `bcc32 --version 2>&1`;
-        $opt{ccversion} = $output =~ /(\d+.*)/ ? $1 : '?';
-        $opt{ccversion} =~ s/\s+copyright.*//i;
+        $opt{ccversion} = $output =~ /([\d.]+)/ ? $1 : '?';
     }
     elsif ($opt{cc} eq 'gcc') {
         chomp($opt{gccversion} = `gcc -dumpversion`);

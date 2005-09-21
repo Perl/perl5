@@ -177,6 +177,7 @@ CCLIBDIR	= $(CCHOME)\lib
 #
 # Additional compiler flags can be specified here.
 #
+BUILDOPT	= $(BUILDOPTEXTRA)
 
 # Adding -DPERL_HASH_SEED_EXPLICIT will disable randomization of Perl's
 # internal hash function unless the PERL_HASH_SEED environment variable is set.
@@ -717,6 +718,10 @@ PERLDLL_OBJ	= $(PERLDLL_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
 SETARGV_OBJ	= setargv$(o)
 !ENDIF
 
+# specify static extensions here
+#STATIC_EXT	= Cwd Compress/Zlib
+STATIC_EXT	= 
+
 DYNALOADER		= $(EXTDIR)\DynaLoader\DynaLoader
 SOCKET			= $(EXTDIR)\Socket\Socket
 FCNTL			= $(EXTDIR)\Fcntl\Fcntl
@@ -965,11 +970,12 @@ $(DLL_OBJ)	: $(CORE_H)
 $(X2P_OBJ)	: $(CORE_H)
 
 perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ..\makedef.pl
+	$(MINIPERL) -I..\lib buildext.pl --create-perllibst-h
 	$(MINIPERL) -w ..\makedef.pl PLATFORM=win32 $(OPTIMIZE) $(DEFINES) $(BUILDOPT) \
 	    CCTYPE=$(CCTYPE) > perldll.def
 
-$(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES)
-	$(LINK32) -dll -def:perldll.def -base:0x28000000 -out:$@ @<<
+$(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
+	$(LINK32) -dll -def:perldll.def -base:0x28000000 -out:$@ @Extensions_static @<<
 		$(LINK_FLAGS) $(DELAYLOAD) $(LIBFILES) $(PERLDLL_OBJ) $(PERLDLL_RES)
 <<
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
@@ -1037,8 +1043,13 @@ $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 
 #-------------------------------------------------------------------------------
 Extensions: buildext.pl $(PERLDEP) $(CONFIGPM)
-	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR)
-	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext
+	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) --dynamic
+	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --dynamic
+
+Extensions_static : buildext.pl
+	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) --static
+	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --static
+	$(MINIPERL) -I..\lib buildext.pl --list-static-libs > Extensions_static
 
 Extensions_clean: 
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) clean
@@ -1278,6 +1289,7 @@ _clean :
 	-@$(DEL) ..\x2p\*.exe ..\x2p\*.bat
 	-@$(DEL) *.ilk
 	-@$(DEL) *.pdb
+	-@$(DEL) Extensions_static
 
 clean : Extensions_clean _clean
 
