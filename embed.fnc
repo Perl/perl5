@@ -1537,7 +1537,6 @@ ApR	|OP*	|ck_null	|NN OP *o
 ApR	|OP*	|ck_open	|NN OP *o
 ApR	|OP*	|ck_repeat	|NN OP *o
 ApR	|OP*	|ck_require	|NN OP *o
-ApR	|OP*	|ck_retarget	|NN OP *o
 ApR	|OP*	|ck_return	|NN OP *o
 ApR	|OP*	|ck_rfun	|NN OP *o
 ApR	|OP*	|ck_rvconst	|NN OP *o
@@ -1551,7 +1550,6 @@ ApR	|OP*	|ck_subr	|NN OP *o
 ApR	|OP*	|ck_substr	|NN OP *o
 ApR	|OP*	|ck_svconst	|NN OP *o
 ApR	|OP*	|ck_trunc	|NN OP *o
-ApR	|OP*	|ck_unpack	|NN OP *o
 #endif
 
 Apd	|bool	|is_utf8_string_loclen|NN const U8 *s|STRLEN len|const U8 **ep|STRLEN *el

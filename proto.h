@@ -2661,10 +2661,6 @@ PERL_CALLCONV OP*	Perl_ck_require(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV OP*	Perl_ck_retarget(pTHX_ OP *o)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
-
 PERL_CALLCONV OP*	Perl_ck_return(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -2714,10 +2710,6 @@ PERL_CALLCONV OP*	Perl_ck_svconst(pTHX_ OP *o)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV OP*	Perl_ck_trunc(pTHX_ OP *o)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
-
-PERL_CALLCONV OP*	Perl_ck_unpack(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 

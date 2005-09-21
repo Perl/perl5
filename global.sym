@@ -320,7 +320,6 @@ Perl_newSVuv
 Perl_newSVnv
 Perl_newSVpv
 Perl_newSVpvn
-Perl_newSVpv_hek
 Perl_newSVpvn_share
 Perl_newSVpvf
 Perl_vnewSVpvf
@@ -700,7 +699,6 @@ Perl_ck_null
 Perl_ck_open
 Perl_ck_repeat
 Perl_ck_require
-Perl_ck_retarget
 Perl_ck_return
 Perl_ck_rfun
 Perl_ck_rvconst
@@ -714,6 +712,6 @@ Perl_ck_subr
 Perl_ck_substr
 Perl_ck_svconst
 Perl_ck_trunc
-Perl_ck_unpack
 Perl_is_utf8_string_loclen
+Perl_newSVhek
 # ex: set ro:
