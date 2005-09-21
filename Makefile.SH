@@ -858,13 +858,14 @@ install.man:	all installman
 # Eventually Configure could ask for some of these values.
 install.html: all installhtml
 	-@test -f README.vms && cd vms && $(LNS) ../README.vms README_vms.pod && cd ..
-	$(LDLIBPTH) ./perl installhtml                   \
+	$(LDLIBPTH) ./perl installhtml   \
       --podroot=. --podpath=. --recurse  \
-      --htmldir=$(privlib)/html     \
-      --htmlroot=$(privlib)/html    \
+      --htmldir=$(privlib)/html   \
+      --htmlroot=$(privlib)/html  \
       --splithead=pod/perlipc     \
       --splititem=pod/perlfunc    \
       --libpods=perlfunc:perlguts:perlvar:perlrun:perlop \
+      --ignore=Porting/Maintainers.pm,Porting/patching.pod,Porting/pumpkin.pod,Porting/repository.pod \
       --verbose
 
 
