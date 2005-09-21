@@ -1006,7 +1006,6 @@ Perl_do_chomp(pTHX_ register SV *sv)
 {
     register I32 count;
     STRLEN len;
-    STRLEN n_a;
     char *s;
     char *temp_buffer = NULL;
     SV* svrecode = Nullsv;
@@ -1123,7 +1122,7 @@ Perl_do_chomp(pTHX_ register SV *sv)
 		count += rs_charlen;
 	    }
 	}
-	s = SvPV_force(sv, n_a);
+	s = SvPV_force_nolen(sv);
 	SvCUR_set(sv, len);
 	*SvEND(sv) = '\0';
 	SvNIOK_off(sv);

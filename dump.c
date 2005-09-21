@@ -152,7 +152,6 @@ char *
 Perl_sv_peek(pTHX_ SV *sv)
 {
     SV *t = sv_newmortal();
-    STRLEN n_a;
     int unref = 0;
 
     sv_setpvn(t, "", 0);
@@ -328,7 +327,7 @@ Perl_sv_peek(pTHX_ SV *sv)
 	while (unref--)
 	    sv_catpv(t, ")");
     }
-    return SvPV(t, n_a);
+    return SvPV_nolen(t);
 }
 
 void
@@ -652,11 +651,11 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 	if ( ! PL_op->op_flags & OPf_SPECIAL) { /* not lexical */
 	    if (cSVOPo->op_sv) {
 		SV *tmpsv = NEWSV(0,0);
-		STRLEN n_a;
 		ENTER;
 		SAVEFREESV(tmpsv);
 		gv_fullname3(tmpsv, (GV*)cSVOPo->op_sv, Nullch);
-		Perl_dump_indent(aTHX_ level, file, "GV = %s\n", SvPV(tmpsv, n_a));
+		Perl_dump_indent(aTHX_ level, file, "GV = %s\n",
+				 SvPV_const_nolen(tmpsv));
 		LEAVE;
 	    }
 	    else

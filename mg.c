@@ -560,8 +560,7 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
     }
     magic_get(sv,mg);
     if (!SvPOK(sv) && SvNIOK(sv)) {
-	STRLEN n_a;
-	sv_2pv(sv, &n_a);
+	sv_2pv(sv, 0);
     }
     if (SvPOK(sv))
 	return SvCUR(sv);
@@ -1035,9 +1034,8 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_clearenv(pTHX_ SV *sv, MAGIC *mg)
 {
-    STRLEN n_a;
     (void)sv;
-    my_setenv(MgPV(mg,n_a),Nullch);
+    my_setenv(MgPV_nolen_const(mg),Nullch);
     return 0;
 }
 
@@ -1124,9 +1122,8 @@ int
 Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
 {
     I32 i;
-    STRLEN n_a;
     /* Are we fetching a signal entry? */
-    i = whichsig(MgPV(mg,n_a));
+    i = whichsig(MgPV_nolen_const(mg));
     if (i > 0) {
     	if(PL_psig_ptr[i])
     	    sv_setsv(sv,PL_psig_ptr[i]);
@@ -1156,8 +1153,7 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
     /* XXX Some of this code was copied from Perl_magic_setsig. A little
      * refactoring might be in order.
      */
-    STRLEN n_a;
-    register char *s = MgPV(mg,n_a);
+    register const char *s = MgPV_nolen_const(mg);
     (void)sv;
     if (*s == '_') {
 	SV** svp;
@@ -1648,12 +1644,11 @@ Perl_magic_setdbline(pTHX_ SV *sv, MAGIC *mg)
     I32 i;
     GV* gv;
     SV** svp;
-    STRLEN n_a;
 
     gv = PL_DBline;
     i = SvTRUE(sv);
     svp = av_fetch(GvAV(gv),
-		     atoi(MgPV(mg,n_a)), FALSE);
+		     atoi(MgPV_nolen_const(mg)), FALSE);
     if (svp && SvIOKp(*svp) && (o = INT2PTR(OP*,SvIVX(*svp)))) {
 	/* set or clear breakpoint in the relevant control op */
 	if (i)

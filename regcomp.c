@@ -4964,9 +4964,9 @@ SV *
 Perl_re_intuit_string(pTHX_ regexp *prog)
 {				/* Assume that RE_INTUIT is set */
     DEBUG_r(
-	{   STRLEN n_a;
-	    const char *s = SvPV(prog->check_substr
-		      ? prog->check_substr : prog->check_utf8, n_a);
+	{
+	    const char *s = SvPV_nolen_const(prog->check_substr
+		      ? prog->check_substr : prog->check_utf8);
 
 	    if (!PL_colorset) reginitcolors();
 	    PerlIO_printf(Perl_debug_log,
