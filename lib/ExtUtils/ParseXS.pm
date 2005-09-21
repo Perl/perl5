@@ -17,7 +17,7 @@ my(@XSStack);	# Stack of conditionals and INCLUDEs
 my($XSS_work_idx, $cpp_next_tmp);
 
 use vars qw($VERSION);
-$VERSION = '2.11_01';
+$VERSION = '2.12';
 
 use vars qw(%input_expr %output_expr $ProtoUsed @InitFileCode $FH $proto_re $Overload $errors $Fallback
 	    $cplusplus $hiertype $WantPrototypes $WantVersionChk $except $WantLineNumbers
@@ -1870,7 +1870,7 @@ sub DESTROY {
 }
 
 sub UNTIE {
-  # This sub does nothing, but is necessary for references to be released.
+  # This sub does nothing, but is neccessary for references to be released.
 }
 
 sub end_marker {
@@ -1939,7 +1939,7 @@ Adds C<extern "C"> to the C code.  Default is false.
 
 =item B<hiertype>
 
-Retains C<::> in type names so that C++ hierarchical types can be
+Retains C<::> in type names so that C++ hierachical types can be
 mapped.  Default is false.
 
 =item B<except>
