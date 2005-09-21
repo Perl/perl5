@@ -2398,7 +2398,6 @@ PERL_CALLCONV void	Perl_dump_mstats(pTHX_ char* s)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV int	Perl_get_mstats(pTHX_ perl_mstats_t *buf, int buflen, int level)
-			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 #endif

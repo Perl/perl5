@@ -23,8 +23,8 @@ do_spawnvp (const char *path, const char * const *argv)
     Sigsave_t ihand,qhand;
     int childpid, result, status;
 
-    rsignal_save(SIGINT, SIG_IGN, &ihand);
-    rsignal_save(SIGQUIT, SIG_IGN, &qhand);
+    rsignal_save(SIGINT, (Sighandler_t) SIG_IGN, &ihand);
+    rsignal_save(SIGQUIT, (Sighandler_t) SIG_IGN, &qhand);
     childpid = spawnvp(_P_NOWAIT,path,argv);
     if (childpid < 0) {
 	status = -1;

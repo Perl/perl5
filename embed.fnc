@@ -884,7 +884,7 @@ p	|int	|yyparse
 p	|int	|yywarn		|NN const char* s
 #if defined(MYMALLOC)
 Ap	|void	|dump_mstats	|NN char* s
-ApR	|int	|get_mstats	|NN perl_mstats_t *buf|int buflen|int level
+Ap	|int	|get_mstats	|NN perl_mstats_t *buf|int buflen|int level
 #endif
 Anpa	|Malloc_t|safesysmalloc	|MEM_SIZE nbytes
 Anpa	|Malloc_t|safesyscalloc	|MEM_SIZE elements|MEM_SIZE size
