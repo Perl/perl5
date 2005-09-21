@@ -2081,7 +2081,6 @@ STATIC OP*	S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 			__attribute__nonnull__(pTHX_3);
 
 STATIC int	S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
-			__attribute__noreturn__
 			__attribute__nonnull__(pTHX_1);
 
 #  if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
@@ -2794,6 +2793,11 @@ PERL_CALLCONV bool	Perl_is_utf8_string_loclen(pTHX_ const U8 *s, STRLEN len, con
 PERL_CALLCONV SV*	Perl_newSVhek(pTHX_ const HEK *hek)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
+
+PERL_CALLCONV bool	Perl_stashpv_hvname_match(pTHX_ const COP *cop, const HV *hv)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
 
 
 END_EXTERN_C

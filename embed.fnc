@@ -1137,7 +1137,7 @@ sR	|SV*	|method_common	|NN SV* meth|U32* hashp
 
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 s	|OP*	|doform		|NN CV *cv|NN GV *gv|NN OP *retop
-sr	|int	|emulate_eaccess|NN const char* path|Mode_t mode
+s	|int	|emulate_eaccess|NN const char* path|Mode_t mode
 #  if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 sR	|int	|dooneliner	|NN const char *cmd|NN const char *filename
 #  endif
@@ -1553,6 +1553,7 @@ ApR	|OP*	|ck_trunc	|NN OP *o
 
 Apd	|bool	|is_utf8_string_loclen|NN const U8 *s|STRLEN len|const U8 **ep|STRLEN *el
 Apda	|SV*	|newSVhek	|const HEK *hek
+ApR	|bool	|stashpv_hvname_match|NN const COP *cop|NN const HV *hv
 
 END_EXTERN_C
 /*
