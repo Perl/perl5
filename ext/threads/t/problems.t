@@ -82,14 +82,18 @@ our @unique_array : unique;
 our %unique_hash : unique;
 threads->new(
     sub {
+	my $TODO = ":unique needs to be re-implemented in a non-broken way";
 	eval { $unique_scalar = 1 };
-	print $@ =~ /read-only/  ? '' : 'not ', "ok $test - unique_scalar\n";
+	print $@ =~ /read-only/
+	  ? '' : 'not ', "ok $test # TODO $TODO unique_scalar\n";
 	$test++;
 	eval { $unique_array[0] = 1 };
-	print $@ =~ /read-only/  ? '' : 'not ', "ok $test - unique_array\n";
+	print $@ =~ /read-only/
+	  ? '' : 'not ', "ok $test # TODO $TODO - unique_array\n";
 	$test++;
 	eval { $unique_hash{abc} = 1 };
-	print $@ =~ /disallowed/  ? '' : 'not ', "ok $test - unique_hash\n";
+	print $@ =~ /disallowed/
+	  ? '' : 'not ', "ok $test # TODO $TODO - unique_hash\n";
 	$test++;
     }
 )->join;

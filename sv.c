@@ -8579,7 +8579,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 #ifndef USE_LONG_DOUBLE
     /* special-case "%.<number>[gf]" */
-    if ( patlen <= 5 && pat[0] == '%' && pat[1] == '.'
+    if ( !args && patlen <= 5 && pat[0] == '%' && pat[1] == '.'
 	 && (pat[patlen-1] == 'g' || pat[patlen-1] == 'f') ) {
 	unsigned digits = 0;
 	const char *pp;
@@ -8590,9 +8590,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	if (pp - pat == (int)patlen - 1) {
 	    NV nv;
 
-	    if (args)
-		nv = (NV)va_arg(*args, double);
-	    else if (svix < svmax)
+	    if (svix < svmax)
 		nv = SvNV(*svargs);
 	    else
 		return;
@@ -8669,7 +8667,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	STRLEN have;
 	STRLEN need;
 	STRLEN gap;
-        const char *dotstr = ".";
+	const char *dotstr = ".";
 	STRLEN dotstrlen = 1;
 	I32 efix = 0; /* explicit format parameter index */
 	I32 ewix = 0; /* explicit width index */
@@ -10013,62 +10011,6 @@ Perl_ptr_table_free(pTHX_ PTR_TBL_t *tbl)
 char *PL_watch_pvx;
 #endif
 
-/* attempt to make everything in the typeglob readonly */
-
-STATIC SV *
-S_gv_share(pTHX_ SV *sstr, CLONE_PARAMS *param)
-{
-    GV *gv = (GV*)sstr;
-    SV *sv = &param->proto_perl->Isv_no; /* just need SvREADONLY-ness */
-
-    if (GvIO(gv) || GvFORM(gv)) {
-        GvUNIQUE_off(gv); /* GvIOs cannot be shared. nor can GvFORMs */
-    }
-    else if (!GvCV(gv)) {
-        GvCV(gv) = (CV*)sv;
-    }
-    else {
-        /* CvPADLISTs cannot be shared */
-        if (!SvREADONLY(GvCV(gv)) && !CvXSUB(GvCV(gv))) {
-            GvUNIQUE_off(gv);
-        }
-    }
-
-    if (!GvUNIQUE(gv)) {
-#if 0
-        PerlIO_printf(Perl_debug_log, "gv_share: unable to share %s::%s\n",
-                      HvNAME_get(GvSTASH(gv)), GvNAME(gv));
-#endif
-        return Nullsv;
-    }
-
-    /*
-     * write attempts will die with
-     * "Modification of a read-only value attempted"
-     */
-    if (!GvSV(gv)) {
-        GvSV(gv) = sv;
-    }
-    else {
-        SvREADONLY_on(GvSV(gv));
-    }
-
-    if (!GvAV(gv)) {
-        GvAV(gv) = (AV*)sv;
-    }
-    else {
-        SvREADONLY_on(GvAV(gv));
-    }
-
-    if (!GvHV(gv)) {
-        GvHV(gv) = (HV*)sv;
-    }
-    else {
-        SvREADONLY_on(GvHV(gv));
-    }
-
-    return sstr; /* he_dup() will SvREFCNT_inc() */
-}
 
 /* duplicate an SV of any type (including AV, HV etc) */
 
@@ -10249,17 +10191,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	break;
     case SVt_PVGV:
 	if (GvUNIQUE((GV*)sstr)) {
-            SV *share;
-            if ((share = gv_share(sstr, param))) {
-                del_SV(dstr);
-                dstr = share;
-                ptr_table_store(PL_ptr_table, sstr, dstr);
-#if 0
-                PerlIO_printf(Perl_debug_log, "sv_dup: sharing %s::%s\n",
-                              HvNAME_get(GvSTASH(share)), GvNAME(share));
-#endif
-                break;
-            }
+	    /* Do sharing here.  */
 	}
 	SvANY(dstr)	= new_XPVGV();
 	SvCUR_set(dstr, SvCUR(sstr));
