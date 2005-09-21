@@ -711,6 +711,8 @@ branches.
 
 =head2 Other tests
 
+=over 4
+
 =item gcc -ansi -pedantic
 
 Configure -Dgccansipedantic [ -Dcc=gcc ] will enable (via the cflags script,

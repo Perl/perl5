@@ -1247,7 +1247,7 @@ Private flags, if any are set for an opcode, are displayed after a '/'
 
 They're opcode specific, and occur less often than the public ones, so
 they're represented by short mnemonics instead of single-chars; see
-L<op.h> for gory details, or try this quick 2-liner:
+F<op.h> for gory details, or try this quick 2-liner:
 
   $> perl -MB::Concise -de 1
   DB<1> |x \%B::Concise::priv
@@ -1343,7 +1343,7 @@ rendering of each opcode.
 Only some of these are used by the standard styles, the others are
 provided for you to delve into optree mechanics, should you wish to
 add a new style (see L</add_style> below) that uses them.  You can
-also add new ones using L<add_callback>.
+also add new ones using L</add_callback>.
 
 =over 4
 
