@@ -181,7 +181,6 @@ dprof_times(pTHX_ struct tms *t)
 #ifdef OS2
     ULONG rc;
     QWORD cnt;
-    STRLEN n_a;
     
     if (!g_frequ) {
 	if (CheckOSError(DosTmrQueryFreq(&g_frequ)))
@@ -190,7 +189,7 @@ dprof_times(pTHX_ struct tms *t)
 	    g_frequ = g_frequ/DPROF_HZ;	/* count per tick */
 	if (CheckOSError(DosTmrQueryTime(&cnt)))
 	    croak("DosTmrQueryTime: %s",
-		  SvPV(perl_get_sv("!",TRUE), n_a));
+		  SvPV_nolen_const(perl_get_sv("!",TRUE)));
 	g_start_cnt = toLongLong(cnt);
     }
 

@@ -3522,7 +3522,6 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		SvGETMAGIC(fromstr);
 		if (!SvOK(fromstr)) aptr = NULL;
 		else {
-		    STRLEN n_a;
 		    /* XXX better yet, could spirit away the string to
 		     * a safe spot and hang on to it until the result
 		     * of pack() (and all copies of the result) are
@@ -3534,9 +3533,9 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 				    "Attempt to pack pointer to temporary value");
 		    }
 		    if (SvPOK(fromstr) || SvNIOK(fromstr))
-			aptr = SvPV_nomg_const(fromstr, n_a);
+			aptr = SvPV_nomg_const_nolen(fromstr);
 		    else
-			aptr = SvPV_force_flags(fromstr, n_a, 0);
+			aptr = SvPV_force_flags_nolen(fromstr, 0);
 		}
 		DO_BO_PACK_PC(aptr);
 		PUSH_VAR(utf8, cur, aptr);

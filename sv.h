@@ -1187,6 +1187,10 @@ Like C<sv_catsv> but doesn't process magic.
     ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
      ? ((lp = SvCUR(sv)), SvPVX_const(sv)) : \
      (const char*) sv_2pv_flags(sv, &lp, flags|SV_CONST_RETURN))
+#define SvPV_flags_const_nolen(sv, flags) \
+    ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
+     ? SvPVX_const(sv) : \
+     (const char*) sv_2pv_flags(sv, 0, flags|SV_CONST_RETURN))
 #define SvPV_flags_mutable(sv, lp, flags) \
     ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
      ? ((lp = SvCUR(sv)), SvPVX_mutable(sv)) : \
@@ -1197,6 +1201,7 @@ Like C<sv_catsv> but doesn't process magic.
 #define SvPV_force_mutable(sv, lp) SvPV_force_flags_mutable(sv, lp, SV_GMAGIC)
 
 #define SvPV_force_nomg(sv, lp) SvPV_force_flags(sv, lp, 0)
+#define SvPV_force_nomg_nolen(sv) SvPV_force_flags_nolen(sv, 0)
 
 #define SvPV_force_flags(sv, lp, flags) \
     ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == SVf_POK \
@@ -1219,6 +1224,7 @@ Like C<sv_catsv> but doesn't process magic.
 
 #define SvPV_nomg(sv, lp) SvPV_flags(sv, lp, 0)
 #define SvPV_nomg_const(sv, lp) SvPV_flags_const(sv, lp, 0)
+#define SvPV_nomg_const_nolen(sv) SvPV_flags_const_nolen(sv, 0)
 
 /* ----*/
 

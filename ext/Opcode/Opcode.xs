@@ -466,8 +466,7 @@ PPCODE:
 	}
 	else if (SvPOK(bitspec) && SvCUR(bitspec) == (STRLEN)opset_len) {
 	    int b, j;
-	    STRLEN n_a;
-	    const char * const bitmap = SvPV(bitspec,n_a);
+	    const char * const bitmap = SvPV_nolen_const(bitspec);
 	    int myopcode = 0;
 	    for (b=0; b < opset_len; b++) {
 		const U16 bits = bitmap[b];

@@ -1173,8 +1173,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	Newxz(dc, needlen + 1, char);
     }
     else if (SvOK(sv) || SvTYPE(sv) > SVt_PVMG) {
-	STRLEN n_a;
-	dc = SvPV_force_nomg(sv, n_a);
+	dc = SvPV_force_nomg_nolen(sv);
 	if (SvCUR(sv) < (STRLEN)len) {
 	    dc = SvGROW(sv, (STRLEN)(len + 1));
 	    (void)memzero(dc + SvCUR(sv), len - SvCUR(sv) + 1);
