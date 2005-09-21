@@ -157,7 +157,7 @@ PP(pp_concat)
 
     if (TARG == right && right != left) {
 	right = sv_2mortal(newSVpvn(rpv, rlen));
-	rpv = SvPV(right, rlen);	/* no point setting UTF-8 here */
+	rpv = SvPV_const(right, rlen);	/* no point setting UTF-8 here */
 	rcopied = TRUE;
     }
 
@@ -201,7 +201,7 @@ PP(pp_concat)
 	    if (!rcopied)
 		right = sv_2mortal(newSVpvn(rpv, rlen));
 	    sv_utf8_upgrade_nomg(right);
-	    rpv = SvPV(right, rlen);
+	    rpv = SvPV_const(right, rlen);
 	}
     }
     sv_catpvn_nomg(TARG, rpv, rlen);
@@ -1633,6 +1633,7 @@ Perl_do_readline(pTHX)
 	XPUSHs(sv);
 	if (type == OP_GLOB) {
 	    char *tmps;
+	    const char *t1;
 
 	    if (SvCUR(sv) > 0 && SvCUR(PL_rs) > 0) {
 		tmps = SvEND(sv) - 1;
@@ -1641,16 +1642,16 @@ Perl_do_readline(pTHX)
 		    SvCUR_set(sv, SvCUR(sv) - 1);
 		}
 	    }
-	    for (tmps = SvPVX(sv); *tmps; tmps++)
-		if (!isALPHA(*tmps) && !isDIGIT(*tmps) &&
-		    strchr("$&*(){}[]'\";\\|?<>~`", *tmps))
+	    for (t1 = SvPVX_const(sv); *t1; t1++)
+		if (!isALPHA(*t1) && !isDIGIT(*t1) &&
+		    strchr("$&*(){}[]'\";\\|?<>~`", *t1))
 			break;
-	    if (*tmps && PerlLIO_lstat(SvPVX_const(sv), &PL_statbuf) < 0) {
+	    if (*t1 && PerlLIO_lstat(SvPVX_const(sv), &PL_statbuf) < 0) {
 		(void)POPs;		/* Unmatched wildcard?  Chuck it... */
 		continue;
 	    }
 	} else if (SvUTF8(sv)) { /* OP_READLINE, OP_RCATLINE */
-	     const U8 *s = (U8*)SvPVX(sv) + offset;
+	     const U8 *s = (const U8*)SvPVX_const(sv) + offset;
 	     const STRLEN len = SvCUR(sv) - offset;
 	     const U8 *f;
 	     
@@ -2027,7 +2028,7 @@ PP(pp_subst)
 	DIE(aTHX_ PL_no_modify);
     PUTBACK;
 
-    s = SvPV(TARG, len);
+    s = SvPV_mutable(TARG, len);
     if (!SvPOKp(TARG) || SvTYPE(TARG) == SVt_PVGV)
 	force_on_match = 1;
     rxtainted = ((pm->op_pmdynflags & PMdf_TAINTED) ||

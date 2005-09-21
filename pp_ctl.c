@@ -335,16 +335,14 @@ PP(pp_formline)
     register U32 *fpc;
     register char *t;
     const char *f;
-    register char *s;
-    register char *send;
     register I32 arg;
     register SV *sv = Nullsv;
-    char *item = Nullch;
+    const char *item = Nullch;
     I32 itemsize  = 0;
     I32 fieldsize = 0;
     I32 lines = 0;
     bool chopspace = (strchr(PL_chopset, ' ') != Nullch);
-    char *chophere = Nullch;
+    const char *chophere = Nullch;
     char *linemark = Nullch;
     NV value;
     bool gotsome = FALSE;
@@ -455,127 +453,134 @@ PP(pp_formline)
 	    break;
 
 	case FF_CHECKNL:
-	    s = item = SvPV(sv, len);
-	    itemsize = len;
-	    if (DO_UTF8(sv)) {
-		itemsize = sv_len_utf8(sv);
-		if (itemsize != (I32)len) {
-		    I32 itembytes;
-		    if (itemsize > fieldsize) {
-			itemsize = fieldsize;
-			itembytes = itemsize;
-			sv_pos_u2b(sv, &itembytes, 0);
-		    }
-		    else
-			itembytes = len;
-		    send = chophere = s + itembytes;
-		    while (s < send) {
-			if (*s & ~31)
-			    gotsome = TRUE;
-			else if (*s == '\n')
-			    break;
-			s++;
-		    }
-		    item_is_utf8 = TRUE;
-		    itemsize = s - item;
-		    sv_pos_b2u(sv, &itemsize);
-		    break;
-		}
-	    }
-	    item_is_utf8 = FALSE;
-	    if (itemsize > fieldsize)
-		itemsize = fieldsize;
-	    send = chophere = s + itemsize;
-	    while (s < send) {
-		if (*s & ~31)
-		    gotsome = TRUE;
-		else if (*s == '\n')
-		    break;
-		s++;
-	    }
-	    itemsize = s - item;
-	    break;
-
-	case FF_CHECKCHOP:
-	    s = item = SvPV(sv, len);
-	    itemsize = len;
-	    if (DO_UTF8(sv)) {
-		itemsize = sv_len_utf8(sv);
-		if (itemsize != (I32)len) {
-		    I32 itembytes;
-		    if (itemsize <= fieldsize) {
-			send = chophere = s + itemsize;
-			while (s < send) {
-			    if (*s == '\r') {
-				itemsize = s - item;
-				chophere = s;
-				break;
-			    }
-			    if (*s++ & ~31)
-				gotsome = TRUE;
+	    {
+		const char *send;
+		const char *s = item = SvPV_const(sv, len);
+		itemsize = len;
+		if (DO_UTF8(sv)) {
+		    itemsize = sv_len_utf8(sv);
+		    if (itemsize != (I32)len) {
+			I32 itembytes;
+			if (itemsize > fieldsize) {
+			    itemsize = fieldsize;
+			    itembytes = itemsize;
+			    sv_pos_u2b(sv, &itembytes, 0);
 			}
-		    }
-		    else {
-			itemsize = fieldsize;
-			itembytes = itemsize;
-			sv_pos_u2b(sv, &itembytes, 0);
+			else
+			    itembytes = len;
 			send = chophere = s + itembytes;
-			while (s < send || (s == send && isSPACE(*s))) {
-			    if (isSPACE(*s)) {
-				if (chopspace)
-				    chophere = s;
-				if (*s == '\r')
-				    break;
-			    }
-			    else {
-				if (*s & ~31)
-				    gotsome = TRUE;
-				if (strchr(PL_chopset, *s))
-				    chophere = s + 1;
-			    }
+			while (s < send) {
+			    if (*s & ~31)
+				gotsome = TRUE;
+			    else if (*s == '\n')
+				break;
 			    s++;
 			}
-			itemsize = chophere - item;
-			sv_pos_b2u(sv, &itemsize);
-		    }
-		    item_is_utf8 = TRUE;
-		    break;
-		}
-	    }
-	    item_is_utf8 = FALSE;
-	    if (itemsize <= fieldsize) {
-		send = chophere = s + itemsize;
-		while (s < send) {
-		    if (*s == '\r') {
+			item_is_utf8 = TRUE;
 			itemsize = s - item;
-			chophere = s;
+			sv_pos_b2u(sv, &itemsize);
 			break;
 		    }
-		    if (*s++ & ~31)
-			gotsome = TRUE;
 		}
-	    }
-	    else {
-		itemsize = fieldsize;
+		item_is_utf8 = FALSE;
+		if (itemsize > fieldsize)
+		    itemsize = fieldsize;
 		send = chophere = s + itemsize;
-		while (s < send || (s == send && isSPACE(*s))) {
-		    if (isSPACE(*s)) {
-			if (chopspace)
-			    chophere = s;
-			if (*s == '\r')
-			    break;
-		    }
-		    else {
-			if (*s & ~31)
-			    gotsome = TRUE;
-			if (strchr(PL_chopset, *s))
-			    chophere = s + 1;
-		    }
+		while (s < send) {
+		    if (*s & ~31)
+			gotsome = TRUE;
+		    else if (*s == '\n')
+			break;
 		    s++;
 		}
-		itemsize = chophere - item;
+		itemsize = s - item;
+		break;
 	    }
-	    break;
+
+	case FF_CHECKCHOP:
+	    {
+		const char *s = item = SvPV_const(sv, len);
+		itemsize = len;
+		if (DO_UTF8(sv)) {
+		    itemsize = sv_len_utf8(sv);
+		    if (itemsize != (I32)len) {
+			I32 itembytes;
+			if (itemsize <= fieldsize) {
+			    const char *send = chophere = s + itemsize;
+			    while (s < send) {
+				if (*s == '\r') {
+				    itemsize = s - item;
+				    chophere = s;
+				    break;
+				}
+				if (*s++ & ~31)
+				    gotsome = TRUE;
+			    }
+			}
+			else {
+			    const char *send;
+			    itemsize = fieldsize;
+			    itembytes = itemsize;
+			    sv_pos_u2b(sv, &itembytes, 0);
+			    send = chophere = s + itembytes;
+			    while (s < send || (s == send && isSPACE(*s))) {
+				if (isSPACE(*s)) {
+				    if (chopspace)
+					chophere = s;
+				    if (*s == '\r')
+					break;
+				}
+				else {
+				    if (*s & ~31)
+					gotsome = TRUE;
+				    if (strchr(PL_chopset, *s))
+					chophere = s + 1;
+				}
+				s++;
+			    }
+			    itemsize = chophere - item;
+			    sv_pos_b2u(sv, &itemsize);
+			}
+			item_is_utf8 = TRUE;
+			break;
+		    }
+		}
+		item_is_utf8 = FALSE;
+		if (itemsize <= fieldsize) {
+		    const char *const send = chophere = s + itemsize;
+		    while (s < send) {
+			if (*s == '\r') {
+			    itemsize = s - item;
+			    chophere = s;
+			    break;
+			}
+			if (*s++ & ~31)
+			    gotsome = TRUE;
+		    }
+		}
+		else {
+		    const char *send;
+		    itemsize = fieldsize;
+		    send = chophere = s + itemsize;
+		    while (s < send || (s == send && isSPACE(*s))) {
+			if (isSPACE(*s)) {
+			    if (chopspace)
+				chophere = s;
+			    if (*s == '\r')
+				break;
+			}
+			else {
+			    if (*s & ~31)
+				gotsome = TRUE;
+			    if (strchr(PL_chopset, *s))
+				chophere = s + 1;
+			}
+			s++;
+		    }
+		    itemsize = chophere - item;
+		}
+		break;
+	    }
 
 	case FF_SPACE:
 	    arg = fieldsize - itemsize;
@@ -597,77 +602,81 @@ PP(pp_formline)
 	    break;
 
 	case FF_ITEM:
-	    arg = itemsize;
-	    s = item;
-	    if (item_is_utf8) {
-		if (!targ_is_utf8) {
-		    SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
-		    *t = '\0';
-		    sv_utf8_upgrade(PL_formtarget);
-		    SvGROW(PL_formtarget, SvCUR(PL_formtarget) + fudge + 1);
-		    t = SvEND(PL_formtarget);
-		    targ_is_utf8 = TRUE;
-		}
-		while (arg--) {
-		    if (UTF8_IS_CONTINUED(*s)) {
-			STRLEN skip = UTF8SKIP(s);
-			switch (skip) {
-			default:
-			    Move(s,t,skip,char);
-			    s += skip;
-			    t += skip;
-			    break;
-			case 7: *t++ = *s++;
-			case 6: *t++ = *s++;
-			case 5: *t++ = *s++;
-			case 4: *t++ = *s++;
-			case 3: *t++ = *s++;
-			case 2: *t++ = *s++;
-			case 1: *t++ = *s++;
+	    {
+		const char *s = item;
+		arg = itemsize;
+		if (item_is_utf8) {
+		    if (!targ_is_utf8) {
+			SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
+			*t = '\0';
+			sv_utf8_upgrade(PL_formtarget);
+			SvGROW(PL_formtarget, SvCUR(PL_formtarget) + fudge + 1);
+			t = SvEND(PL_formtarget);
+			targ_is_utf8 = TRUE;
+		    }
+		    while (arg--) {
+			if (UTF8_IS_CONTINUED(*s)) {
+			    STRLEN skip = UTF8SKIP(s);
+			    switch (skip) {
+			    default:
+				Move(s,t,skip,char);
+				s += skip;
+				t += skip;
+				break;
+			    case 7: *t++ = *s++;
+			    case 6: *t++ = *s++;
+			    case 5: *t++ = *s++;
+			    case 4: *t++ = *s++;
+			    case 3: *t++ = *s++;
+			    case 2: *t++ = *s++;
+			    case 1: *t++ = *s++;
+			    }
+			}
+			else {
+			    if ( !((*t++ = *s++) & ~31) )
+				t[-1] = ' ';
 			}
 		    }
-		    else {
-			if ( !((*t++ = *s++) & ~31) )
-			    t[-1] = ' ';
-		    }
+		    break;
 		}
-		break;
-	    }
-	    if (targ_is_utf8 && !item_is_utf8) {
-		SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
-		*t = '\0';
-		sv_catpvn_utf8_upgrade(PL_formtarget, s, arg, nsv);
-		for (; t < SvEND(PL_formtarget); t++) {
+		if (targ_is_utf8 && !item_is_utf8) {
+		    SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
+		    *t = '\0';
+		    sv_catpvn_utf8_upgrade(PL_formtarget, s, arg, nsv);
+		    for (; t < SvEND(PL_formtarget); t++) {
 #ifdef EBCDIC
-		    int ch = *t;
+			int ch = *t;
+			if (iscntrl(ch))
+#else
+			    if (!(*t & ~31))
+#endif
+				*t = ' ';
+		    }
+		    break;
+		}
+		while (arg--) {
+#ifdef EBCDIC
+		    int ch = *t++ = *s++;
 		    if (iscntrl(ch))
 #else
-		    if (!(*t & ~31))
+			if ( !((*t++ = *s++) & ~31) )
 #endif
-			*t = ' ';
+			    t[-1] = ' ';
 		}
 		break;
 	    }
-	    while (arg--) {
-#ifdef EBCDIC
-		int ch = *t++ = *s++;
-		if (iscntrl(ch))
-#else
-		if ( !((*t++ = *s++) & ~31) )
-#endif
-		    t[-1] = ' ';
-	    }
-	    break;
 
 	case FF_CHOP:
-	    s = chophere;
-	    if (chopspace) {
-		while (*s && isSPACE(*s))
-		    s++;
+	    {
+		const char *s = chophere;
+		if (chopspace) {
+		    while (*s && isSPACE(*s))
+			s++;
+		}
+		sv_chop(sv,s);
+		SvSETMAGIC(sv);
+		break;
 	    }
-	    sv_chop(sv,s);
-	    SvSETMAGIC(sv);
-	    break;
 
 	case FF_LINESNGL:
 	    chopspace = 0;
@@ -676,47 +685,49 @@ PP(pp_formline)
 	case FF_LINEGLOB:
 	    oneline = FALSE;
 	ff_line:
-	    s = item = SvPV(sv, len);
-	    itemsize = len;
-	    if ((item_is_utf8 = DO_UTF8(sv)))
-		itemsize = sv_len_utf8(sv);
-	    if (itemsize) {
-		bool chopped = FALSE;
-		gotsome = TRUE;
-		send = s + len;
-		chophere = s + itemsize;
-		while (s < send) {
-		    if (*s++ == '\n') {
-		        if (oneline) {
-			    chopped = TRUE;
-			    chophere = s;
-			    break;
-			} else {
-			    if (s == send) {
-			        itemsize--;
-			        chopped = TRUE;
-			    } else
-			        lines++;
+	    {
+		const char *s = item = SvPV_const(sv, len);
+		itemsize = len;
+		if ((item_is_utf8 = DO_UTF8(sv)))
+		    itemsize = sv_len_utf8(sv);
+		if (itemsize) {
+		    bool chopped = FALSE;
+		    const char *const send = s + len;
+		    gotsome = TRUE;
+		    chophere = s + itemsize;
+		    while (s < send) {
+			if (*s++ == '\n') {
+			    if (oneline) {
+				chopped = TRUE;
+				chophere = s;
+				break;
+			    } else {
+				if (s == send) {
+				    itemsize--;
+				    chopped = TRUE;
+				} else
+				    lines++;
+			    }
 			}
 		    }
+		    SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
+		    if (targ_is_utf8)
+			SvUTF8_on(PL_formtarget);
+		    if (oneline) {
+			SvCUR_set(sv, chophere - item);
+			sv_catsv(PL_formtarget, sv);
+			SvCUR_set(sv, itemsize);
+		    } else
+			sv_catsv(PL_formtarget, sv);
+		    if (chopped)
+			SvCUR_set(PL_formtarget, SvCUR(PL_formtarget) - 1);
+		    SvGROW(PL_formtarget, SvCUR(PL_formtarget) + fudge + 1);
+		    t = SvPVX(PL_formtarget) + SvCUR(PL_formtarget);
+		    if (item_is_utf8)
+			targ_is_utf8 = TRUE;
 		}
-		SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
-		if (targ_is_utf8)
-		    SvUTF8_on(PL_formtarget);
-		if (oneline) {
-		    SvCUR_set(sv, chophere - item);
-		    sv_catsv(PL_formtarget, sv);
-		    SvCUR_set(sv, itemsize);
-		} else
-		    sv_catsv(PL_formtarget, sv);
-		if (chopped)
-		    SvCUR_set(PL_formtarget, SvCUR(PL_formtarget) - 1);
-		SvGROW(PL_formtarget, SvCUR(PL_formtarget) + fudge + 1);
-		t = SvPVX(PL_formtarget) + SvCUR(PL_formtarget);
-		if (item_is_utf8)
-		    targ_is_utf8 = TRUE;
+		break;
 	    }
-	    break;
 
 	case FF_0DECIMAL:
 	    arg = *fpc++;
@@ -793,30 +804,32 @@ PP(pp_formline)
 	    break;
 
 	case FF_MORE:
-	    s = chophere;
-	    send = item + len;
-	    if (chopspace) {
-		while (*s && isSPACE(*s) && s < send)
-		    s++;
-	    }
-	    if (s < send) {
-		arg = fieldsize - itemsize;
-		if (arg) {
-		    fieldsize -= arg;
-		    while (arg-- > 0)
-			*t++ = ' ';
+	    {
+		const char *s = chophere;
+		const char *send = item + len;
+		if (chopspace) {
+		    while (*s && isSPACE(*s) && s < send)
+			s++;
 		}
-		s = t - 3;
-		if (strnEQ(s,"   ",3)) {
-		    while (s > SvPVX_const(PL_formtarget) && isSPACE(s[-1]))
-			s--;
+		if (s < send) {
+		    char *s1;
+		    arg = fieldsize - itemsize;
+		    if (arg) {
+			fieldsize -= arg;
+			while (arg-- > 0)
+			    *t++ = ' ';
+		    }
+		    s1 = t - 3;
+		    if (strnEQ(s1,"   ",3)) {
+			while (s1 > SvPVX_const(PL_formtarget) && isSPACE(s1[-1]))
+			    s1--;
+		    }
+		    *s1++ = '.';
+		    *s1++ = '.';
+		    *s1++ = '.';
 		}
-		*s++ = '.';
-		*s++ = '.';
-		*s++ = '.';
+		break;
 	    }
-	    break;
-
 	case FF_END:
 	    *t = '\0';
 	    SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
@@ -1066,7 +1079,7 @@ PP(pp_flop)
 	else {
 	    SV *final = sv_mortalcopy(right);
 	    STRLEN len;
-	    const char *tmps = SvPV(final, len);
+	    const char *tmps = SvPV_const(final, len);
 
 	    sv = sv_mortalcopy(left);
 	    SvPV_force_nolen(sv);
@@ -1326,7 +1339,7 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 		    sv_setpvn(err,"",0);
 		else if (SvCUR(err) >= sizeof(prefix)+msglen-1) {
 		    STRLEN len;
-		    e = SvPV(err, len);
+		    e = SvPV_const(err, len);
 		    e += len - msglen;
 		    if (*e != *message || strNE(e,message))
 			e = Nullch;
@@ -1363,7 +1376,7 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 	    POPBLOCK(cx,PL_curpm);
 	    if (CxTYPE(cx) != CXt_EVAL) {
 		if (!message)
-		    message = SvPVx(ERRSV, msglen);
+		    message = SvPVx_const(ERRSV, msglen);
 		PerlIO_write(Perl_error_log, "panic: die ", 11);
 		PerlIO_write(Perl_error_log, message, msglen);
 		my_exit(1);
@@ -1391,7 +1404,7 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 	}
     }
     if (!message)
-	message = SvPVx(ERRSV, msglen);
+	message = SvPVx_const(ERRSV, msglen);
 
     write_to_stderr(message, msglen);
     my_failure_exit();
@@ -2948,7 +2961,7 @@ S_doopen_pm(pTHX_ const char *name, const char *mode)
 
     if (namelen > 3 && strEQ(name + namelen - 3, ".pm")) {
 	SV *pmcsv = Perl_newSVpvf(aTHX_ "%s%c", name, 'c');
-	const char * const pmc = SvPV_nolen(pmcsv);
+	const char * const pmc = SvPV_nolen_const(pmcsv);
 	Stat_t pmstat;
 	Stat_t pmcstat;
 	if (PerlLIO_stat(pmc, &pmcstat) < 0) {
@@ -3104,7 +3117,7 @@ PP(pp_require)
 
 		    Perl_sv_setpvf(aTHX_ namesv, "/loader/0x%"UVxf"/%s",
 				   PTR2UV(SvRV(dirsv)), name);
-		    tryname = SvPVX(namesv);
+		    tryname = SvPVX_const(namesv);
 		    tryrsfp = 0;
 
 		    ENTER;
@@ -3231,7 +3244,7 @@ PP(pp_require)
 #endif
 #endif
 		    TAINT_PROPER("require");
-		    tryname = SvPVX(namesv);
+		    tryname = SvPVX_const(namesv);
 		    tryrsfp = doopen_pm(tryname, PERL_SCRIPT_MODE);
 		    if (tryrsfp) {
 			if (tryname[0] == '.' && tryname[1] == '/')
@@ -3267,7 +3280,7 @@ PP(pp_require)
 		}
 		sv_catpvn(msg, ")", 1);
 		SvREFCNT_dec(dirmsgsv);
-		msgstr = SvPV_nolen(msg);
+		msgstr = SvPV_nolen_const(msg);
 	    }
 	    DIE(aTHX_ "Can't locate %s", msgstr);
 	}

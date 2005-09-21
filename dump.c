@@ -655,7 +655,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 		SAVEFREESV(tmpsv);
 		gv_fullname3(tmpsv, (GV*)cSVOPo->op_sv, Nullch);
 		Perl_dump_indent(aTHX_ level, file, "GV = %s\n",
-				 SvPV_const_nolen(tmpsv));
+				 SvPV_nolen_const(tmpsv));
 		LEAVE;
 	    }
 	    else
@@ -1317,7 +1317,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		U32 hash = HeHASH(he);
 
 		keysv = hv_iterkeysv(he);
-		keypv = SvPV(keysv, len);
+		keypv = SvPV_const(keysv, len);
 		elt = hv_iterval(hv, he);
 		Perl_dump_indent(aTHX_ level+1, file, "Elt %s ", pv_display(d, keypv, len, 0, pvlim));
 		if (SvUTF8(keysv))
@@ -1332,7 +1332,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	break;
     case SVt_PVCV:
 	if (SvPOK(sv))
-	    Perl_dump_indent(aTHX_ level, file, "  PROTOTYPE = \"%s\"\n", SvPV_nolen(sv));
+	    Perl_dump_indent(aTHX_ level, file, "  PROTOTYPE = \"%s\"\n", SvPV_nolen_const(sv));
 	/* FALL THROUGH */
     case SVt_PVFM:
 	do_hv_dump(level, file, "  COMP_STASH", CvSTASH(sv));
@@ -1478,7 +1478,7 @@ Perl_debop(pTHX_ OP *o)
 	if (cGVOPo_gv) {
 	    SV *sv = NEWSV(0,0);
 	    gv_fullname3(sv, cGVOPo_gv, Nullch);
-	    PerlIO_printf(Perl_debug_log, "(%s)", SvPV_nolen(sv));
+	    PerlIO_printf(Perl_debug_log, "(%s)", SvPV_nolen_const(sv));
 	    SvREFCNT_dec(sv);
 	}
 	else
@@ -1498,7 +1498,7 @@ Perl_debop(pTHX_ OP *o)
         } else
             sv = Nullsv;
         if (sv)
-           PerlIO_printf(Perl_debug_log, "(%s)", SvPV_nolen(sv));
+           PerlIO_printf(Perl_debug_log, "(%s)", SvPV_nolen_const(sv));
         else
            PerlIO_printf(Perl_debug_log, "[%"UVuf"]", (UV)o->op_targ);
 	}

@@ -2572,7 +2572,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 		    bool            done;
 
 		    /* Copy string and check for compliance */
-		    from = SvPV(fromstr, len);
+		    from = SvPV_const(fromstr, len);
 		    if ((norm = is_an_int(from, len)) == NULL)
 			Perl_croak(aTHX_ "Can only compress unsigned integers in pack");
 
@@ -2751,7 +2751,8 @@ PP(pp_pack)
     dSP; dMARK; dORIGMARK; dTARGET;
     register SV *cat = TARG;
     STRLEN fromlen;
-    register const char *pat = SvPVx_const(*++MARK, fromlen);
+    SV *pat_sv = *++MARK;
+    register const char *pat = SvPV_const(pat_sv, fromlen);
     register const char *patend = pat + fromlen;
 
     MARK++;
