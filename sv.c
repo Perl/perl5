@@ -3066,8 +3066,22 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
             register const char *typestr;
             if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,string)) &&
                 (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
-		/* FIXME - figure out best way to pass context inwards.  */
-                char *pv = lp ? SvPV(tmpstr, *lp) : SvPV_nolen(tmpstr);
+		/* Unwrap this:  */
+		/* char *pv = lp ? SvPV(tmpstr, *lp) : SvPV_nolen(tmpstr); */
+
+                char *pv;
+		if ((SvFLAGS(tmpstr) & (SVf_POK)) == SVf_POK) {
+		    if (flags & SV_CONST_RETURN) {
+			pv = (char *) SvPVX_const(tmpstr);
+		    } else {
+			pv = (flags & SV_MUTABLE_RETURN)
+			    ? SvPVX_mutable(tmpstr) : SvPVX(tmpstr);
+		    }
+		    if (lp)
+			*lp = SvCUR(tmpstr);
+		} else {
+		    pv = sv_2pv_flags(tmpstr, lp, flags);
+		}
                 if (SvUTF8(tmpstr))
                     SvUTF8_on(sv);
                 else
@@ -3224,7 +3238,8 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	    ptr = uiv_2buf(buf, 0, SvUVX(sv), 1, &ebuf);
 	else
 	    ptr = uiv_2buf(buf, SvIVX(sv), 0, 0, &ebuf);
-	SvGROW(sv, (STRLEN)(ebuf - ptr + 1));	/* inlined from sv_setpvn */
+	/* inlined from sv_setpvn */
+	SvGROW_mutable(sv, (STRLEN)(ebuf - ptr + 1));
 	Move(ptr,SvPVX_mutable(sv),ebuf - ptr,char);
 	SvCUR_set(sv, ebuf - ptr);
 	s = SvEND(sv);
@@ -3240,8 +3255,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	if (SvTYPE(sv) < SVt_PVNV)
 	    sv_upgrade(sv, SVt_PVNV);
 	/* The +20 is pure guesswork.  Configure test needed. --jhi */
-	SvGROW(sv, NV_DIG + 20);
-	s = SvPVX_mutable(sv);
+	s = SvGROW_mutable(sv, NV_DIG + 20);
 	olderrno = errno;	/* some Xenix systems wipe out errno here */
 #ifdef apollo
 	if (SvNVX(sv) == 0.0)
@@ -3322,7 +3336,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	(void)SvUPGRADE(sv, SVt_PV);
 	if (lp)
 	    *lp = len;
-	s = SvGROW(sv, len + 1);
+	s = SvGROW_mutable(sv, len + 1);
 	SvCUR_set(sv, len);
 	SvPOKp_on(sv);
 	return strcpy(s, t);
@@ -3389,7 +3403,7 @@ char *
 Perl_sv_2pvbyte(pTHX_ register SV *sv, STRLEN *lp)
 {
     sv_utf8_downgrade(sv,0);
-    return SvPV(sv,*lp);
+    return lp ? SvPV(sv,*lp) : SvPV_nolen(sv);
 }
 
 /*
@@ -3553,11 +3567,11 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
 	}
 	if (hibit) {
 	    STRLEN len = SvCUR(sv) + 1; /* Plus the \0 */
-	    char *recoded = bytes_to_utf8((U8*)s, &len);
+	    U8 *recoded = bytes_to_utf8((U8*)s, &len);
 
 	    SvPV_free(sv); /* No longer using what was there before. */
 
-	    SvPV_set(sv, recoded);
+	    SvPV_set(sv, (char*)recoded);
 	    SvCUR_set(sv, len - 1);
 	    SvLEN_set(sv, len); /* No longer know the real size. */
 	}
@@ -4109,7 +4123,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	}
 	if (sflags & SVf_UTF8)
 	    SvUTF8_on(dstr);
-	/*SUPPRESS 560*/
 	if (sflags & SVp_NOK) {
 	    SvNOKp_on(dstr);
 	    if (sflags & SVf_NOK)
@@ -4214,8 +4227,7 @@ Perl_sv_setpvn(pTHX_ register SV *sv, register const char *ptr, register STRLEN 
     }
     (void)SvUPGRADE(sv, SVt_PV);
 
-    SvGROW(sv, len + 1);
-    dptr = SvPVX(sv);
+    dptr = SvGROW(sv, len + 1);
     Move(ptr,dptr,len,char);
     dptr[len] = '\0';
     SvCUR_set(sv, len);
@@ -5106,7 +5118,6 @@ Perl_sv_insert(pTHX_ SV *bigstr, STRLEN offset, STRLEN len, char *little, STRLEN
 	*mid = '\0';
 	SvCUR_set(bigstr, mid - big);
     }
-    /*SUPPRESS 560*/
     else if ((i = mid - big)) {	/* faster from front */
 	midend -= littlelen;
 	mid = midend;

@@ -151,7 +151,6 @@ Perl_safesysfree(Malloc_t where)
 #endif
     DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) free\n",PTR2UV(where),(long)PL_an++));
     if (where) {
-	/*SUPPRESS 701*/
 	PerlMem_free(where);
     }
 }
@@ -583,7 +582,6 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	    register I32 tmp;
 
 	  top2:
-	    /*SUPPRESS 560*/
 	    if ((tmp = table[*s])) {
 		if ((s += tmp) < bigend)
 		    goto top2;
@@ -633,13 +631,13 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 char *
 Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift, I32 *old_posp, I32 last)
 {
-    register unsigned char *big;
+    const register unsigned char *big;
     register I32 pos;
     register I32 previous;
     register I32 first;
-    register unsigned char *little;
+    const register unsigned char *little;
     register I32 stop_pos;
-    register unsigned char *littleend;
+    const register unsigned char *littleend;
     I32 found = 0;
 
     if (*old_posp == -1
@@ -648,7 +646,7 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
       cant_find:
 	if ( BmRARE(littlestr) == '\n'
 	     && BmPREVIOUS(littlestr) == SvCUR(littlestr) - 1) {
-	    little = (unsigned char *)(SvPVX(littlestr));
+	    little = (const unsigned char *)(SvPVX_const(littlestr));
 	    littleend = little + SvCUR(littlestr);
 	    first = *little++;
 	    goto check_tail;
@@ -656,12 +654,12 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
 	return Nullch;
     }
 
-    little = (unsigned char *)(SvPVX(littlestr));
+    little = (const unsigned char *)(SvPVX_const(littlestr));
     littleend = little + SvCUR(littlestr);
     first = *little++;
     /* The value of pos we can start at: */
     previous = BmPREVIOUS(littlestr);
-    big = (unsigned char *)(SvPVX(bigstr));
+    big = (const unsigned char *)(SvPVX_const(bigstr));
     /* The value of pos we can stop at: */
     stop_pos = SvCUR(bigstr) - end_shift - (SvCUR(littlestr) - 1 - previous);
     if (previous + start_shift > stop_pos) {
@@ -681,7 +679,7 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
     }
     big -= previous;
     do {
-	register unsigned char *s, *x;
+	const register unsigned char *s, *x;
 	if (pos >= stop_pos) break;
 	if (big[pos] != first)
 	    continue;
@@ -703,7 +701,7 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
     if (!SvTAIL(littlestr) || (end_shift > 0))
 	return Nullch;
     /* Ignore the trailing "\n".  This code is not microoptimized */
-    big = (unsigned char *)(SvPVX(bigstr) + SvCUR(bigstr));
+    big = (const unsigned char *)(SvPVX_const(bigstr) + SvCUR(bigstr));
     stop_pos = littleend - little;	/* Actual littlestr len */
     if (stop_pos == 0)
 	return (char*)big;
@@ -1116,17 +1114,17 @@ char *
 S_vdie_croak_common(pTHX_ const char* pat, va_list* args, STRLEN* msglen,
 		    I32* utf8)
 {
-    char *message;
+    const char *message;
 
     if (pat) {
 	SV *msv = vmess(pat, args);
 	if (PL_errors && SvCUR(PL_errors)) {
 	    sv_catsv(PL_errors, msv);
-	    message = SvPV(PL_errors, *msglen);
+	    message = SvPV_const(PL_errors, *msglen);
 	    SvCUR_set(PL_errors, 0);
 	}
 	else
-	    message = SvPV(msv,*msglen);
+	    message = SvPV_const(msv,*msglen);
 	*utf8 = SvUTF8(msv);
     }
     else {
@@ -1206,7 +1204,7 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
 	JMPENV_JUMP(3);
     }
     else if (!message)
-	message = SvPVx(ERRSV, msglen);
+	message = SvPVx_const(ERRSV, msglen);
 
     write_to_stderr(message, msglen);
     my_failure_exit();
@@ -1258,7 +1256,7 @@ Perl_croak(pTHX_ const char *pat, ...)
 void
 Perl_vwarn(pTHX_ const char* pat, va_list *args)
 {
-    char *message;
+    const char *message;
     HV *stash;
     GV *gv;
     CV *cv;
@@ -1268,7 +1266,7 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
 
     msv = vmess(pat, args);
     utf8 = SvUTF8(msv);
-    message = SvPV(msv, msglen);
+    message = SvPV_const(msv, msglen);
 
     if (PL_warnhook) {
 	/* sv_2cv might call Perl_warn() */
@@ -1360,7 +1358,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
     if (ckDEAD(err)) {
 	SV * const msv = vmess(pat, args);
 	STRLEN msglen;
-	const char *message = SvPV(msv, msglen);
+	const char *message = SvPV_const(msv, msglen);
 	const I32 utf8 = SvUTF8(msv);
 
 #ifdef USE_5005THREADS
@@ -1415,7 +1413,6 @@ Perl_my_setenv(pTHX_ char *nam, char *val)
 	I32 max;
 	char **tmpenv;
 
-	/*SUPPRESS 530*/
 	for (max = i; environ[max]; max++) ;
 	tmpenv = (char**)safesysmalloc((max+2) * sizeof(char*));
 	for (j=0; j<max; j++) {		/* copy environment */
@@ -2155,7 +2152,6 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 	    PerlProc__exit(1);
 	}
 #endif	/* defined OS2 */
-	/*SUPPRESS 560*/
 	if ((tmpgv = gv_fetchpv("$",TRUE, SVt_PV))) {
 	    SvREADONLY_off(GvSV(tmpgv));
 	    sv_setiv(GvSV(tmpgv), PerlProc_getpid());
@@ -2633,7 +2629,6 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 #endif /* !DOSISH || OS2 || WIN32 || NETWARE */
 
 void
-/*SUPPRESS 590*/
 Perl_pidgone(pTHX_ Pid_t pid, int status)
 {
     register SV *sv;

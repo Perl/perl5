@@ -61,7 +61,7 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 
     for (nret = 0 ; numattrs && (attr = *attrlist++); numattrs--) {
 	STRLEN len;
-	const char *name = SvPV(attr, len);
+	const char *name = SvPV_const(attr, len);
 	const bool negated = (*name == '-');
 
 	if (negated) {

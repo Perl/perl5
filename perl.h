@@ -172,6 +172,15 @@ struct perl_thread;
  */
 #define PERL_UNUSED_VAR(var) ((void)var)
 
+#ifndef LINT_UNUSED_ARG
+#  ifdef lint
+#    include <note.h>
+#    define LINT_UNUSED_ARG(x) NOTE(ARGUNUSED(x))
+#  else
+#    define LINT_UNUSED_ARG(x)
+#  endif
+#endif
+
 #define NOOP (void)0
 #define dNOOP extern int Perl___notused PERL_UNUSED_DECL
 

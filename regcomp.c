@@ -55,7 +55,6 @@
 #  define PERL_NO_GET_CONTEXT
 #endif
 
-/*SUPPRESS 112*/
 /*
  * pregcomp and pregexec -- regsub and regerror are not used in perl
  *
@@ -1265,7 +1264,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 #if defined(SPARC64_GCC_WORKAROUND)
 			I32 b = 0;
 			STRLEN l = 0;
-			char *s = NULL;
+			const char *s = NULL;
 			I32 old = 0;
 
 			if (pos_before >= data->last_start_min)
@@ -1274,14 +1273,14 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			    b = data->last_start_min;
 
 			l = 0;
-			s = SvPV(data->last_found, l);
+			s = SvPV_const(data->last_found, l);
 			old = b - data->last_start_min;
 
 #else
 			I32 b = pos_before >= data->last_start_min
 			    ? pos_before : data->last_start_min;
 			STRLEN l;
-			char *s = SvPV(data->last_found, l);
+			const char *s = SvPV_const(data->last_found, l);
 			I32 old = b - data->last_start_min;
 #endif
 
@@ -4863,9 +4862,9 @@ SV *
 Perl_re_intuit_string(pTHX_ regexp *prog)
 {				/* Assume that RE_INTUIT is set */
     DEBUG_r(
-	{   STRLEN n_a;
-	    const char *s = SvPV(prog->check_substr
-		      ? prog->check_substr : prog->check_utf8, n_a);
+	{
+	    const char *s = SvPV_nolen_const(prog->check_substr
+		      ? prog->check_substr : prog->check_utf8);
 
 	    if (!PL_colorset) reginitcolors();
 	    PerlIO_printf(Perl_debug_log,
@@ -5019,7 +5018,7 @@ S_re_croak2(pTHX_ const char* pat1,const char* pat2,...)
 #endif
     msv = vmess(buf, &args);
     va_end(args);
-    message = SvPV(msv,l1);
+    message = SvPV_const(msv,l1);
     if (l1 > 512)
 	l1 = 512;
     Copy(message, buf, l1 , char);

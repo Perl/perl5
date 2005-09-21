@@ -335,7 +335,7 @@ S_tokereport(pTHX_ const char* s, I32 rv)
             if (PL_oldbufptr && *PL_oldbufptr)
                 sv_catpv(report, PL_tokenbuf);
         }
-        PerlIO_printf(Perl_debug_log, "### %s]\n", SvPV_nolen(report));
+        PerlIO_printf(Perl_debug_log, "### %s]\n", SvPV_nolen_const(report));
     };
     return (int)rv;
 }
@@ -533,7 +533,7 @@ S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 void
 Perl_lex_start(pTHX_ SV *line)
 {
-    char *s;
+    const char *s;
     STRLEN len;
 
     SAVEI32(PL_lex_dojoin);
@@ -589,7 +589,7 @@ Perl_lex_start(pTHX_ SV *line)
     PL_linestr = line;
     if (SvREADONLY(PL_linestr))
 	PL_linestr = sv_2mortal(newSVsv(PL_linestr));
-    s = SvPV(PL_linestr, len);
+    s = SvPV_const(PL_linestr, len);
     if (!len || s[len-1] != ';') {
 	if (!(SvFLAGS(PL_linestr) & SVs_TEMP))
 	    PL_linestr = sv_2mortal(newSVsv(PL_linestr));
@@ -966,7 +966,7 @@ Perl_str_to_version(pTHX_ SV *sv)
     NV retval = 0.0;
     NV nshift = 1.0;
     STRLEN len;
-    const char *start = SvPVx_const(sv,len);
+    const char *start = SvPV_const(sv,len);
     const char *end = start + len;
     const bool utf = SvUTF8(sv) ? TRUE : FALSE;
     while (start < end) {
@@ -1126,7 +1126,7 @@ S_sublex_start(pTHX)
 	if (SvTYPE(sv) == SVt_PVIV) {
 	    /* Overloaded constants, nothing fancy: Convert to SVt_PV: */
 	    STRLEN len;
-	    const char *p = SvPV(sv, len);
+	    const char *p = SvPV_const(sv, len);
 	    SV * const nsv = newSVpvn(p, len);
 	    if (SvUTF8(sv))
 		SvUTF8_on(nsv);
@@ -1625,7 +1625,7 @@ S_scan_const(pTHX_ char *start)
 			    src = (U8 *)d - 1;
 			    dst = src+hicount;
 			    d  += hicount;
-			    while (src >= (U8 *)SvPVX(sv)) {
+			    while (src >= (const U8 *)SvPVX_const(sv)) {
 			        if (!NATIVE_IS_INVARIANT(*src)) {
 				    U8 ch = NATIVE_TO_ASCII(*src);
 				    *dst-- = (U8)UTF8_EIGHT_BIT_LO(ch);
@@ -1665,7 +1665,7 @@ S_scan_const(pTHX_ char *start)
  		    char* e = strchr(s, '}');
  		    SV *res;
  		    STRLEN len;
- 		    char *str;
+ 		    const char *str;
 
  		    if (!e) {
 			yyerror("Missing right brace on \\N{}");
@@ -1687,7 +1687,7 @@ S_scan_const(pTHX_ char *start)
 					res, Nullsv, "\\N{...}" );
 		    if (has_utf8)
 			sv_utf8_upgrade(res);
-		    str = SvPV(res,len);
+		    str = SvPV_const(res,len);
 #ifdef EBCDIC_NEVER_MIND
 		    /* charnames uses pack U and that has been
 		     * recently changed to do the below uni->native
@@ -1697,14 +1697,14 @@ S_scan_const(pTHX_ char *start)
 		     * gets revoked, but the semantics is still
 		     * desireable for charnames. --jhi */
 		    {
-			 UV uv = utf8_to_uvchr((U8*)str, 0);
+			 UV uv = utf8_to_uvchr((const U8*)str, 0);
 
 			 if (uv < 0x100) {
 			      U8 tmpbuf[UTF8_MAXBYTES+1], *d;
 
 			      d = uvchr_to_utf8(tmpbuf, UNI_TO_NATIVE(uv));
 			      sv_setpvn(res, (char *)tmpbuf, d - tmpbuf);
-			      str = SvPV(res, len);
+			      str = SvPV_const(res, len);
 			 }
 		    }
 #endif
@@ -2216,7 +2216,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
     funcp = DPTR2FPTR(filter_t, IoANY(datasv));
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 			  "filter_read %d: via function %p (%s)\n",
-			  idx, datasv, SvPV_nolen(datasv)));
+			  idx, datasv, SvPV_nolen_const(datasv)));
     /* Call function. The function is expected to 	*/
     /* call "FILTER_READ(idx+1, buf_sv)" first.		*/
     /* Return: <0:error, =0:eof, >0:not eof 		*/
@@ -2777,8 +2777,8 @@ Perl_yylex(pTHX)
 		    else {
 			STRLEN blen;
 			STRLEN llen;
-			const char *bstart = SvPV(CopFILESV(PL_curcop),blen);
-			const char *lstart = SvPV(x,llen);
+			const char *bstart = SvPV_const(CopFILESV(PL_curcop),blen);
+			const char *lstart = SvPV_const(x,llen);
 			if (llen < blen) {
 			    bstart += blen - llen;
 			    if (strnEQ(bstart, lstart, llen) &&	bstart[-1] == '/') {
@@ -3856,6 +3856,8 @@ Perl_yylex(pTHX)
 	if (!s)
 	    missingterm((char*)0);
 	yylval.ival = OP_CONST;
+	/* FIXME. I think that this can be const if char *d is replaced by
+	   more localised variables.  */
 	for (d = SvPV(PL_lex_stuff, len); len; len--, d++) {
 	    if (*d == '$' || *d == '@' || *d == '\\' || !UTF8_IS_INVARIANT((U8)*d)) {
 		yylval.ival = OP_STRINGIFY;
@@ -4222,7 +4224,7 @@ Perl_yylex(pTHX)
 		    /* Is there a prototype? */
 		    if (SvPOK(cv)) {
 			STRLEN len;
-			char *proto = SvPV((SV*)cv, len);
+			const char *proto = SvPV_const((SV*)cv, len);
 			if (!len)
 			    TERM(FUNC0SUB);
 			if (*proto == '$' && proto[1] == '\0')
@@ -4290,8 +4292,6 @@ Perl_yylex(pTHX)
 	case KEY___DATA__:
 	case KEY___END__: {
 	    GV *gv;
-
-	    /*SUPPRESS 560*/
 	    if (PL_rsfp && (!PL_in_eval || PL_tokenbuf[2] == 'D')) {
 		const char *pname = "main";
 		if (PL_tokenbuf[2] == 'D')
@@ -9588,7 +9588,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 {
     register char *s = start;		/* current position in buffer */
     register char *d;
-    register char *e;
+    const char *e;
     char *end;
     I32 len;
 
@@ -10460,7 +10460,6 @@ S_scan_formline(pTHX_ register char *s)
 
     while (!needargs) {
 	if (*s == '.') {
-	    /*SUPPRESS 530*/
 #ifdef PERL_STRICT_CR
 	    for (t = s+1;SPACE_OR_TAB(*t); t++) ;
 #else

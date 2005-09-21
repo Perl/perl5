@@ -145,7 +145,7 @@ Perl_taint_env(pTHX)
     if (svp && *svp && SvTAINTED(*svp)) {
 	STRLEN len;
 	const bool was_tainted = PL_tainted;
-	const char *t = SvPV(*svp, len);
+	const char *t = SvPV_const(*svp, len);
 	const char *e = t + len;
 	PL_tainted = was_tainted;
 	if (t < e && isALNUM(*t))

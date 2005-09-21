@@ -2767,7 +2767,6 @@ Perl_moreswitches(pTHX_ char *s)
 	           "Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)\n");
 	for (s++; isALNUM(*s); s++) ;
 #endif
-	/*SUPPRESS 530*/
 	return s;
     }	
     case 'h':
@@ -2783,8 +2782,8 @@ Perl_moreswitches(pTHX_ char *s)
 	}
 #endif /* __CYGWIN__ */
 	PL_inplace = savepv(s+1);
-	/*SUPPRESS 530*/
-	for (s = PL_inplace; *s && !isSPACE(*s); s++) ;
+	for (s = PL_inplace; *s && !isSPACE(*s); s++)
+	    ;
 	if (*s) {
 	    *s++ = '\0';
 	    if (*s == '-')	/* Additional switches on #! line. */
@@ -3270,7 +3269,8 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
 
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
 			      "PL_preprocess: scriptname=\"%s\", cpp=\"%s\", sv=\"%s\", CPPMINUS=\"%s\"\n",
-			      scriptname, SvPVX (cpp), SvPVX (sv), CPPMINUS));
+			      scriptname, SvPVX_const (cpp), SvPVX_const (sv),
+			      CPPMINUS));
 
 #       if defined(MSDOS) || defined(WIN32) || defined(VMS)
             quote = "\"";
@@ -3311,9 +3311,9 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
 
         DEBUG_P(PerlIO_printf(Perl_debug_log,
                               "PL_preprocess: cmd=\"%s\"\n",
-                              SvPVX(cmd)));
+                              SvPVX_const(cmd)));
 
-	PL_rsfp = PerlProc_popen(SvPVX(cmd), (char *)"r");
+	PL_rsfp = PerlProc_popen((char *)SvPVX_const(cmd), (char *)"r");
 	SvREFCNT_dec(cmd);
 	SvREFCNT_dec(cpp);
     }
@@ -3920,7 +3920,6 @@ S_find_beginning(pTHX)
 		while (isDIGIT(s2[-1]) || s2[-1] == '-' || s2[-1] == '.'
 		       || s2[-1] == '_') s2--;
 		if (strnEQ(s2-4,"perl",4))
-		    /*SUPPRESS 530*/
 		    while ((s = moreswitches(s)))
 			;
 	    }
@@ -4504,7 +4503,7 @@ STATIC SV *
 S_incpush_if_exists(pTHX_ SV *dir)
 {
     Stat_t tmpstatbuf;
-    if (PerlLIO_stat(SvPVX(dir), &tmpstatbuf) >= 0 &&
+    if (PerlLIO_stat(SvPVX_const(dir), &tmpstatbuf) >= 0 &&
 	S_ISDIR(tmpstatbuf.st_mode)) {
 	av_push(GvAVn(PL_incgv), dir);
 	dir = NEWSV(0,0);
@@ -4896,11 +4895,11 @@ S_my_exit_jump(pTHX)
 static I32
 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen)
 {
-    char *p, *nl;
+    const char *p, *nl;
     (void)idx;
     (void)maxlen;
 
-    p  = SvPVX(PL_e_script);
+    p  = SvPVX_const(PL_e_script);
     nl = strchr(p, '\n');
     nl = (nl) ? nl+1 : SvEND(PL_e_script);
     if (nl-p == 0) {

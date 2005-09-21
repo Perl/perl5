@@ -55,7 +55,6 @@
 #  define PERL_NO_GET_CONTEXT
 #endif
 
-/*SUPPRESS 112*/
 /*
  * pregcomp and pregexec -- regsub and regerror are not used in perl
  *
@@ -1840,7 +1839,6 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
                                   "Did not find anchored character...\n")
                );
     }
-    /*SUPPRESS 560*/
     else if (prog->anchored_substr != Nullsv
 	      || prog->anchored_utf8 != Nullsv
 	      || ((prog->float_substr != Nullsv || prog->float_utf8 != Nullsv)
@@ -1940,8 +1938,8 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	}
 	DEBUG_r({
 	    SV *prop = sv_newmortal();
-	    char *s0;
-	    char *s1;
+	    const char *s0;
+	    const char *s1;
 	    int len0;
 	    int len1;
 
@@ -1949,7 +1947,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    s0 = UTF ?
 	      pv_uni_display(dsv0, (U8*)SvPVX_const(prop), SvCUR(prop), 60,
 			     UNI_DISPLAY_REGEX) :
-	      SvPVX(prop);
+	      SvPVX_const(prop);
 	    len0 = UTF ? SvCUR(dsv0) : SvCUR(prop);
 	    s1 = UTF ?
 	      sv_uni_display(dsv1, sv, 60, UNI_DISPLAY_REGEX) : s;
@@ -1985,7 +1983,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    }
 	    else {
 		STRLEN len;
-                const char * const little = SvPV(float_real, len);
+                const char * const little = SvPV_const(float_real, len);
 
 		if (SvTAIL(float_real)) {
 		    if (memEQ(strend - len + 1, little, len - 1))
@@ -4011,7 +4009,6 @@ do_no:
 		goto do_no;
 	    }
 	    /* Have more choice yet.  Reuse the same uwb.  */
-	    /*SUPPRESS 560*/
 	    if ((n = (uwb->type == RE_UNWIND_BRANCH
 		      ? NEXT_OFF(next) : ARG(next))))
 		next += n;
@@ -4431,7 +4428,7 @@ S_reginclass(pTHX_ register const regnode *n, register const U8* p, STRLEN* lenp
 			for (i = 0; i <= av_len(av); i++) {
 			    SV* sv = *av_fetch(av, i, FALSE);
 			    STRLEN len;
-			    const char *s = SvPV(sv, len);
+			    const char *s = SvPV_const(sv, len);
 			
 			    if (len <= plen && memEQ(s, (char*)p, len)) {
 			        *lenp = len;
