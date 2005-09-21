@@ -92,6 +92,21 @@ char *nw_get_sitelib(const char *pl);
 #include <unistd.h>
 #endif
 
+#ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
+#  ifdef I_SYS_WAIT
+#   include <sys/wait.h>
+#  endif
+#  ifdef I_SYSUIO
+#    include <sys/uio.h>
+#  endif
+
+union control_un {
+  struct cmsghdr cm;
+  char control[CMSG_SPACE(sizeof(int))];
+};
+
+#endif
+
 #ifdef __BEOS__
 #  define HZ 1000000
 #endif
@@ -407,6 +422,104 @@ Perl_nothreadhook(pTHX)
     return 0;
 }
 
+#ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
+void
+Perl_dump_sv_child(pTHX_ SV *sv)
+{
+    ssize_t got;
+    const int sock = PL_dumper_fd;
+    const int debug_fd = PerlIO_fileno(Perl_debug_log);
+    union control_un control;
+    struct msghdr msg;
+    struct iovec vec[2];
+    struct cmsghdr *cmptr;
+    int returned_errno;
+    unsigned char buffer[256];
+
+    if(sock == -1 || debug_fd == -1)
+	return;
+
+    PerlIO_flush(Perl_debug_log);
+
+    /* All these shenanigans are to pass a file descriptor over to our child for
+       it to dump out to.  We can't let it hold open the file descriptor when it
+       forks, as the file descriptor it will dump to can turn out to be one end
+       of pipe that some other process will wait on for EOF. (So as it would
+       be open, the wait would be forever.  */
+
+    msg.msg_control = control.control;
+    msg.msg_controllen = sizeof(control.control);
+    /* We're a connected socket so we don't need a destination  */
+    msg.msg_name = NULL;
+    msg.msg_namelen = 0;
+    msg.msg_iov = vec;
+    msg.msg_iovlen = 1;
+
+    cmptr = CMSG_FIRSTHDR(&msg);
+    cmptr->cmsg_len = CMSG_LEN(sizeof(int));
+    cmptr->cmsg_level = SOL_SOCKET;
+    cmptr->cmsg_type = SCM_RIGHTS;
+    *((int *)CMSG_DATA(cmptr)) = 1;
+
+    vec[0].iov_base = (void*)&sv;
+    vec[0].iov_len = sizeof(sv);
+    got = sendmsg(sock, &msg, 0);
+
+    if(got < 0) {
+	perror("Debug leaking scalars parent sendmsg failed");
+	abort();
+    }
+    if(got < sizeof(sv)) {
+	perror("Debug leaking scalars parent short sendmsg");
+	abort();
+    }
+
+    /* Return protocol is
+       int:		errno value
+       unsigned char:	length of location string (0 for empty)
+       unsigned char*:	string (not terminated)
+    */
+    vec[0].iov_base = (void*)&returned_errno;
+    vec[0].iov_len = sizeof(returned_errno);
+    vec[1].iov_base = buffer;
+    vec[1].iov_len = 1;
+
+    got = readv(sock, vec, 2);
+
+    if(got < 0) {
+	perror("Debug leaking scalars parent read failed");
+	PerlIO_flush(PerlIO_stderr());
+	abort();
+    }
+    if(got < sizeof(returned_errno) + 1) {
+	perror("Debug leaking scalars parent short read");
+	PerlIO_flush(PerlIO_stderr());
+	abort();
+    }
+
+    if (*buffer) {
+	got = read(sock, buffer + 1, *buffer);
+	if(got < 0) {
+	    perror("Debug leaking scalars parent read 2 failed");
+	    PerlIO_flush(PerlIO_stderr());
+	    abort();
+	}
+
+	if(got < *buffer) {
+	    perror("Debug leaking scalars parent short read 2");
+	    PerlIO_flush(PerlIO_stderr());
+	    abort();
+	}
+    }
+
+    if (returned_errno || *buffer) {
+	Perl_warn(aTHX_ "Debug leaking scalars child failed%s%.*s with errno"
+		  " %d: %s", (*buffer ? " at " : ""), (int) *buffer, buffer + 1,
+		  returned_errno, strerror(returned_errno));
+    }
+}
+#endif
+
 /*
 =for apidoc perl_destruct
 
@@ -420,6 +533,9 @@ perl_destruct(pTHXx)
 {
     volatile int destruct_level;  /* 0=none, 1=full, 2=full with checks */
     HV *hv;
+#ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
+    pid_t child;
+#endif
 #ifdef USE_5005THREADS
     Thread t;
     dTHX;
@@ -533,6 +649,160 @@ perl_destruct(pTHXx)
         return STATUS_NATIVE_EXPORT;
     }
 
+#ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
+    if (destruct_level != 0) {
+	/* Fork here to create a child. Our child's job is to preserve the
+	   state of scalars prior to destruction, so that we can instruct it
+	   to dump any scalars that we later find have leaked.
+	   There's no subtlety in this code - it assumes POSIX, and it doesn't
+	   fail gracefully  */
+	int fd[2];
+
+	if(socketpair(AF_UNIX, SOCK_STREAM, 0, fd)) {
+	    perror("Debug leaking scalars socketpair failed");
+	    abort();
+	}
+
+	child = fork();
+	if(child == -1) {
+	    perror("Debug leaking scalars fork failed");
+	    abort();
+	}
+	if (!child) {
+	    /* We are the child */
+	    const int sock = fd[1];
+	    const int debug_fd = PerlIO_fileno(Perl_debug_log);
+	    int f;
+	    const char *where;
+	    /* Our success message is an integer 0, and a char 0  */
+	    static const char success[sizeof(int) + 1];
+
+	    close(fd[0]);
+
+	    /* We need to close all other file descriptors otherwise we end up
+	       with interesting hangs, where the parent closes its end of a
+	       pipe, and sits waiting for (another) child to terminate. Only
+	       that child never terminates, because it never gets EOF, because
+	       we also have the far end of the pipe open.  We even need to
+	       close the debugging fd, because sometimes it happens to be one
+	       end of a pipe, and a process is waiting on the other end for
+	       EOF. Normally it would be closed at some point earlier in
+	       destruction, but if we happen to cause the pipe to remain open,
+	       EOF never occurs, and we get an infinite hang. Hence all the
+	       games to pass in a file descriptor if it's actually needed.  */
+
+	    f = sysconf(_SC_OPEN_MAX);
+	    if(f < 0) {
+		where = "sysconf failed";
+		goto abort;
+	    }
+	    while (f--) {
+		if (f == sock)
+		    continue;
+		close(f);
+	    }
+
+	    while (1) {
+		SV *target;
+		union control_un control;
+		struct msghdr msg;
+		struct iovec vec[1];
+		struct cmsghdr *cmptr;
+		ssize_t got;
+		int got_fd;
+
+		msg.msg_control = control.control;
+		msg.msg_controllen = sizeof(control.control);
+		/* We're a connected socket so we don't need a source  */
+		msg.msg_name = NULL;
+		msg.msg_namelen = 0;
+		msg.msg_iov = vec;
+		msg.msg_iovlen = sizeof(vec)/sizeof(vec[0]);
+
+		vec[0].iov_base = (void*)&target;
+		vec[0].iov_len = sizeof(target);
+      
+		got = recvmsg(sock, &msg, 0);
+
+		if(got == 0)
+		    break;
+		if(got < 0) {
+		    where = "recv failed";
+		    goto abort;
+		}
+		if(got < sizeof(target)) {
+		    where = "short recv";
+		    goto abort;
+		}
+
+		if(!(cmptr = CMSG_FIRSTHDR(&msg))) {
+		    where = "no cmsg";
+		    goto abort;
+		}
+		if(cmptr->cmsg_len != CMSG_LEN(sizeof(int))) {
+		    where = "wrong cmsg_len";
+		    goto abort;
+		}
+		if(cmptr->cmsg_level != SOL_SOCKET) {
+		    where = "wrong cmsg_level";
+		    goto abort;
+		}
+		if(cmptr->cmsg_type != SCM_RIGHTS) {
+		    where = "wrong cmsg_type";
+		    goto abort;
+		}
+
+		got_fd = *(int*)CMSG_DATA(cmptr);
+		/* For our last little bit of trickery, put the file descriptor
+		   back into Perl_debug_log, as if we never actually closed it
+		*/
+		if(got_fd != debug_fd) {
+		    if (dup2(got_fd, debug_fd) == -1) {
+			where = "dup2";
+			goto abort;
+		    }
+		}
+		sv_dump(target);
+
+		PerlIO_flush(Perl_debug_log);
+
+		got = write(sock, &success, sizeof(success));
+
+		if(got < 0) {
+		    where = "write failed";
+		    goto abort;
+		}
+		if(got < sizeof(success)) {
+		    where = "short write";
+		    goto abort;
+		}
+	    }
+	    _exit(0);
+	abort:
+	    {
+		int send_errno = errno;
+		unsigned char length = (unsigned char) strlen(where);
+		struct iovec failure[3] = {
+		    {(void*)&send_errno, sizeof(send_errno)},
+		    {&length, 1},
+		    {(void*)where, length}
+		};
+		int got = writev(sock, failure, 3);
+		/* Bad news travels fast. Faster than data. We'll get a SIGPIPE
+		   in the parent if we try to read from the socketpair after the
+		   child has exited, even if there was data to read.
+		   So sleep a bit to give the parent a fighting chance of
+		   reading the data.  */
+		sleep(2);
+		_exit((got == -1) ? errno : 0);
+	    }
+	    /* End of child.  */
+	}
+	PL_dumper_fd = fd[0];
+	close(fd[1]);
+    }
+#endif
+    
     /* We must account for everything.  */
 
     /* Destroy the main CV and syntax tree */
@@ -978,10 +1248,31 @@ perl_destruct(pTHXx)
 			" flags=0x08%"UVxf
 			" refcnt=%"UVuf pTHX__FORMAT "\n",
 			sv, sv->sv_flags, sv->sv_refcnt pTHX__VALUE);
+#ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
+		    Perl_dump_sv_child(aTHX_ sv);
+#endif
 		}
 	    }
 	}
     }
+#ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
+    {
+	int status;
+	fd_set rset;
+	/* Wait for up to 4 seconds for child to terminate.
+	   This seems to be the least effort way of timing out on reaping
+	   its exit status.  */
+	struct timeval waitfor = {4, 0};
+	int sock = PL_dumper_fd;
+
+	shutdown(sock, 1);
+	FD_ZERO(&rset);
+	FD_SET(sock, &rset);
+	select(sock + 1, &rset, NULL, NULL, &waitfor);
+	waitpid(child, &status, WNOHANG);
+	close(sock);
+    }
+#endif
 #endif
     PL_sv_count = 0;
 

@@ -764,6 +764,12 @@ unless ($define{'THREADS_HAVE_PIDS'}) {
     skip_symbols [qw(PL_ppid)];
 }
 
+unless ($define{'DEBUG_LEAKING_SCALARS_FORK_DUMP'}) {
+    skip_symbols [qw(
+		    PL_dumper_fd
+		    )];
+}
+
 sub readvar {
     my $file = shift;
     my $proc = shift || sub { "PL_$_[2]" };

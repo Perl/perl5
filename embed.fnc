@@ -1558,6 +1558,10 @@ Apd	|bool	|is_utf8_string_loclen|NN const U8 *s|STRLEN len|const U8 **ep|STRLEN 
 Apda	|SV*	|newSVhek	|const HEK *hek
 ApR	|bool	|stashpv_hvname_match|NN const COP *cop|NN const HV *hv
 
+#ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
+p	|void	|dump_sv_child	|SV *sv
+#endif
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:
