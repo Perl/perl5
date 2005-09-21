@@ -10,7 +10,7 @@
 package Pod::Parser;
 
 use vars qw($VERSION);
-$VERSION = 1.30;  ## Current version of this package
+$VERSION = 1.32;  ## Current version of this package
 require  5.005;    ## requires this Perl version or later
 
 #############################################################################
@@ -118,7 +118,7 @@ You may also want to override the B<begin_input()> and B<end_input()>
 methods for your subclass (to perform any needed per-file and/or
 per-document initialization or cleanup).
 
-If you need to perform any preprocessing of input before it is parsed
+If you need to perform any preprocesssing of input before it is parsed
 you may want to override one or more of B<preprocess_line()> and/or
 B<preprocess_paragraph()>.
 
@@ -140,7 +140,7 @@ to avoid name collisions.
 
 For the most part, the B<Pod::Parser> base class should be able to
 do most of the input parsing for you and leave you free to worry about
-how to interpret the commands and translate the result.
+how to intepret the commands and translate the result.
 
 Note that all we have described here in this quick overview is the
 simplest most straightforward use of B<Pod::Parser> to do stream-based
@@ -651,7 +651,7 @@ them in simple bottom-up order.
 
 The parameter C<$text> is a string or block of text to be parsed
 for interior sequences; and the parameter C<$line_num> is the
-line number corresponding to the beginning of C<$text>.
+line number curresponding to the beginning of C<$text>.
 
 B<parse_text()> will parse the given text into a parse-tree of "nodes."
 and interior-sequences.  Each "node" in the parse tree is either a
@@ -1066,7 +1066,6 @@ sub parse_from_filehandle {
     while (defined ($textline = $tied_fh ? <$in_fh> : $in_fh->getline)) {
         $textline = $self->preprocess_line($textline, ++$nlines);
         next  unless ((defined $textline)  &&  (length $textline));
-        $_ = $paragraph;  ## save previous contents
 
         if ((! length $paragraph) && ($textline =~ /^==/)) {
             ## '==' denotes a one-line command paragraph
@@ -1157,20 +1156,13 @@ sub parse_from_file {
     my $self = shift;
     my %opts = (ref $_[0] eq 'HASH') ? %{ shift() } : ();
     my ($infile, $outfile) = @_;
-    my ($in_fh,  $out_fh) = (gensym, gensym)  if ($] < 5.6);
+    my ($in_fh,  $out_fh) = (gensym(), gensym())  if ($] < 5.006);
     my ($close_input, $close_output) = (0, 0);
     local *myData = $self;
     local *_;
 
     ## Is $infile a filename or a (possibly implied) filehandle
-    $infile  = '-'  unless ((defined $infile) && (length $infile));
-    if (($infile  eq '-') || ($infile =~ /^<&(STDIN|0)$/i)) {
-        ## Not a filename, just a string implying STDIN
-        $infile ||= '-';
-        $myData{_INFILE} = "<standard input>";
-        $in_fh = \*STDIN;
-    }
-    elsif (ref $infile) {
+    if (defined $infile && ref $infile) {
         if (ref($infile) =~ /^(SCALAR|ARRAY|HASH|CODE|REF)$/) {
             croak "Input from $1 reference not supported!\n";
         }
@@ -1178,6 +1170,14 @@ sub parse_from_file {
         ## that supports the common IO read operations).
         $myData{_INFILE} = ${$infile};
         $in_fh = $infile;
+    }
+    elsif (!defined($infile) || !length($infile) || ($infile eq '-')
+        || ($infile =~ /^<&(?:STDIN|0)$/i))
+    {
+        ## Not a filename, just a string implying STDIN
+        $infile ||= '-';
+        $myData{_INFILE} = "<standard input>";
+        $in_fh = \*STDIN;
     }
     else {
         ## We have a filename, open it for reading
@@ -1194,20 +1194,7 @@ sub parse_from_file {
     ## already
 
     ## Is $outfile a filename, a (possibly implied) filehandle, maybe a ref?
-    if (!defined($outfile) || !length($outfile) || ($outfile eq '-')
-        || ($outfile =~ /^>&?(?:STDOUT|1)$/i))
-    {
-        if (defined $myData{_TOP_STREAM}) {
-            $out_fh = $myData{_OUTPUT};
-        }
-        else {
-            ## Not a filename, just a string implying STDOUT
-            $outfile ||= '-';
-            $myData{_OUTFILE} = "<standard output>";
-            $out_fh  = \*STDOUT;
-        }
-    }
-    elsif (ref $outfile) {
+    if (ref $outfile) {
         ## we need to check for ref() first, as other checks involve reading
         if (ref($outfile) =~ /^(ARRAY|HASH|CODE)$/) {
             croak "Output to $1 reference not supported!\n";
@@ -1225,6 +1212,19 @@ sub parse_from_file {
             ## object that supports the common IO write operations).
             $myData{_OUTFILE} = ${$outfile};
             $out_fh = $outfile;
+        }
+    }
+    elsif (!defined($outfile) || !length($outfile) || ($outfile eq '-')
+        || ($outfile =~ /^>&?(?:STDOUT|1)$/i))
+    {
+        if (defined $myData{_TOP_STREAM}) {
+            $out_fh = $myData{_OUTPUT};
+        }
+        else {
+            ## Not a filename, just a string implying STDOUT
+            $outfile ||= '-';
+            $myData{_OUTFILE} = "<standard output>";
+            $out_fh  = \*STDOUT;
         }
     }
     elsif ($outfile =~ /^>&(STDERR|2)$/i) {

@@ -2976,6 +2976,7 @@ t/pod/oneline_cmds.t		Test single paragraph ==cmds
 t/pod/oneline_cmds.xr		Expected results for oneline_cmds.t
 t/pod/plainer.t			Test Pod::Plainer
 t/pod/pod2usage.t		Test Pod::Usage
+t/pod/pod2usage2.t		Test Pod::Usage
 t/pod/pod2usage.xr		Expected results for pod2usage.t
 t/pod/poderrs.t			Test POD errors
 t/pod/poderrs.xr		Expected results for poderrs.t

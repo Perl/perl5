@@ -10,7 +10,7 @@
 package Pod::Checker;
 
 use vars qw($VERSION);
-$VERSION = 1.42;  ## Current version of this package
+$VERSION = 1.43;  ## Current version of this package
 require  5.005;    ## requires this Perl version or later
 
 use Pod::ParseUtils; ## for hyperlinks and lists
@@ -57,7 +57,7 @@ Curious/ambitious users are welcome to propose additional features they wish
 to see in B<Pod::Checker> and B<podchecker> and verify that the checks are
 consistent with L<perlpod>.
 
-The following checks are currently preformed:
+The following checks are currently performed:
 
 =over 4
 
@@ -142,7 +142,7 @@ There is no specification of the formatter after the C<=for> command.
 =item * unresolved internal link I<NAME>
 
 The given link to I<NAME> does not have a matching node in the current
-POD. This also happens when a single word node name is not enclosed in
+POD. This also happend when a single word node name is not enclosed in
 C<"">.
 
 =item * Unknown command "I<CMD>"
@@ -234,7 +234,7 @@ C<=over>/C<=back> block.
 
 =item * =item type mismatch (I<one> vs. I<two>)
 
-A list started with e.g. a bulleted C<=item> and continued with a
+A list started with e.g. a bulletted C<=item> and continued with a
 numbered one. This is obviously inconsistent. For most translators the
 type of the I<first> C<=item> determines the type of the list.
 
@@ -623,9 +623,11 @@ sub poderror {
         if(!%opts || ($opts{-severity} && $opts{-severity} eq 'ERROR'));
     ++($self->{_NUM_WARNINGS})
         if(!%opts || ($opts{-severity} && $opts{-severity} eq 'WARNING'));
-    my $out_fh = $self->output_handle() || \*STDERR;
-    print $out_fh ($severity, $msg, $line, $file, "\n")
-      if($self->{-warnings} || !%opts || $opts{-severity} ne 'WARNING');
+    unless($self->{-quiet}) {
+      my $out_fh = $self->output_handle() || \*STDERR;
+      print $out_fh ($severity, $msg, $line, $file, "\n")
+        if($self->{-warnings} || !%opts || $opts{-severity} ne 'WARNING');
+    }
 }
 
 ##################################
@@ -1101,7 +1103,7 @@ sub _check_ptree {
         }
         if($nestlist =~ /$cmd/) {
             $self->poderror({ -line => $line, -file => $file,
-                 -severity => 'ERROR', 
+                 -severity => 'WARNING', 
                  -msg => "nested commands $cmd<...$cmd<...>...>"});
             # _TODO_ should we add the contents anyway?
             # expand it anyway, see below
