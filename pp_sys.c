@@ -315,7 +315,6 @@ PP(pp_backtick)
 {
     dSP; dTARGET;
     PerlIO *fp;
-    STRLEN n_a;
     const char *tmps = POPpconstx;
     const I32 gimme = GIMME_V;
     const char *mode = "r";
@@ -2107,7 +2106,6 @@ PP(pp_truncate)
     /* XXX Configure probe for the signedness of the length type of *truncate() needed? XXX */
     SETERRNO(0,0);
     {
-        STRLEN n_a;
 	int result = 1;
 	GV *tmpgv;
 	IO *io;
@@ -2797,7 +2795,6 @@ PP(pp_stat)
     GV *gv;
     I32 gimme;
     I32 max = 13;
-    STRLEN n_a;
 
     if (PL_op->op_flags & OPf_REF) {
 	gv = cGVOP_gv;
@@ -2837,15 +2834,15 @@ PP(pp_stat)
 			"lstat() on filehandle %s", GvENAME(gv));
 	    goto do_fstat;
 	}
-	sv_setpv(PL_statname, SvPV_const(sv,n_a));
+	sv_setpv(PL_statname, SvPV_nolen_const(sv));
 	PL_statgv = Nullgv;
 	PL_laststype = PL_op->op_type;
 	if (PL_op->op_type == OP_LSTAT)
-	    PL_laststatval = PerlLIO_lstat(SvPV(PL_statname, n_a), &PL_statcache);
+	    PL_laststatval = PerlLIO_lstat(SvPV_nolen_const(PL_statname), &PL_statcache);
 	else
-	    PL_laststatval = PerlLIO_stat(SvPV(PL_statname, n_a), &PL_statcache);
+	    PL_laststatval = PerlLIO_stat(SvPV_nolen_const(PL_statname), &PL_statcache);
 	if (PL_laststatval < 0) {
-	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV(PL_statname, n_a), '\n'))
+	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV_nolen_const(PL_statname), '\n'))
 		Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "stat");
 	    max = 0;
 	}
@@ -2917,7 +2914,6 @@ PP(pp_ftrread)
     I32 result;
     dSP;
 #if defined(HAS_ACCESS) && defined(R_OK)
-    STRLEN n_a;
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
 	result = access(POPpx, R_OK);
 	if (result == 0)
@@ -2944,7 +2940,6 @@ PP(pp_ftrwrite)
     I32 result;
     dSP;
 #if defined(HAS_ACCESS) && defined(W_OK)
-    STRLEN n_a;
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
 	result = access(POPpx, W_OK);
 	if (result == 0)
@@ -2971,7 +2966,6 @@ PP(pp_ftrexec)
     I32 result;
     dSP;
 #if defined(HAS_ACCESS) && defined(X_OK)
-    STRLEN n_a;
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
 	result = access(POPpx, X_OK);
 	if (result == 0)
@@ -2998,7 +2992,6 @@ PP(pp_fteread)
     I32 result;
     dSP;
 #ifdef PERL_EFF_ACCESS_R_OK
-    STRLEN n_a;
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
 	result = PERL_EFF_ACCESS_R_OK(POPpx);
 	if (result == 0)
@@ -3025,7 +3018,6 @@ PP(pp_ftewrite)
     I32 result;
     dSP;
 #ifdef PERL_EFF_ACCESS_W_OK
-    STRLEN n_a;
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
 	result = PERL_EFF_ACCESS_W_OK(POPpx);
 	if (result == 0)
@@ -3052,7 +3044,6 @@ PP(pp_fteexec)
     I32 result;
     dSP;
 #ifdef PERL_EFF_ACCESS_X_OK
-    STRLEN n_a;
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
 	result = PERL_EFF_ACCESS_X_OK(POPpx);
 	if (result == 0)
@@ -3280,7 +3271,6 @@ PP(pp_fttty)
     int fd;
     GV *gv;
     char *tmps = Nullch;
-    STRLEN n_a;
 
     if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP_gv;
@@ -3321,7 +3311,6 @@ PP(pp_fttext)
     register IO *io;
     register SV *sv;
     GV *gv;
-    STRLEN n_a;
     PerlIO *fp;
 
     if (PL_op->op_flags & OPf_REF)
@@ -3388,9 +3377,9 @@ PP(pp_fttext)
       really_filename:
 	PL_statgv = Nullgv;
 	PL_laststype = OP_STAT;
-	sv_setpv(PL_statname, SvPV(sv, n_a));
+	sv_setpv(PL_statname, SvPV_nolen(sv));
 	if (!(fp = PerlIO_open(SvPVX_const(PL_statname), "r"))) {
-	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV(PL_statname, n_a), '\n'))
+	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV_nolen(PL_statname), '\n'))
 		Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "open");
 	    RETPUSHUNDEF;
 	}
@@ -3476,7 +3465,6 @@ PP(pp_chdir)
     dSP; dTARGET;
     const char *tmps;
     SV **svp;
-    STRLEN n_a;
 
     if( MAXARG == 1 )
         tmps = POPpconstx;
@@ -3493,7 +3481,7 @@ PP(pp_chdir)
         {
             if( MAXARG == 1 )
                 deprecate("chdir('') or chdir(undef) as chdir()");
-            tmps = SvPV_const(*svp, n_a);
+            tmps = SvPV_nolen_const(*svp);
         }
         else {
             PUSHi(0);
@@ -3530,7 +3518,6 @@ PP(pp_chroot)
 {
 #ifdef HAS_CHROOT
     dSP; dTARGET;
-    STRLEN n_a;
     char *tmps = POPpx;
     TAINT_PROPER("chroot");
     PUSHi( chroot(tmps) >= 0 );
@@ -3574,7 +3561,6 @@ PP(pp_rename)
 {
     dSP; dTARGET;
     int anum;
-    STRLEN n_a;
     const char *tmps2 = POPpconstx;
     const char *tmps = SvPV_nolen_const(TOPs);
     TAINT_PROPER("rename");
@@ -3600,7 +3586,6 @@ PP(pp_link)
 {
 #ifdef HAS_LINK
     dSP; dTARGET;
-    STRLEN n_a;
     const char *tmps2 = POPpconstx;
     const char *tmps = SvPV_nolen_const(TOPs);
     TAINT_PROPER("link");
@@ -3615,7 +3600,6 @@ PP(pp_symlink)
 {
 #ifdef HAS_SYMLINK
     dSP; dTARGET;
-    STRLEN n_a;
     const char *tmps2 = POPpconstx;
     const char *tmps = SvPV_nolen_const(TOPs);
     TAINT_PROPER("symlink");
@@ -3634,7 +3618,6 @@ PP(pp_readlink)
     const char *tmps;
     char buf[MAXPATHLEN];
     int len;
-    STRLEN n_a;
 
 #ifndef INCOMPLETE_TAINTS
     TAINT;
@@ -3816,7 +3799,6 @@ PP(pp_open_dir)
 {
 #if defined(Direntry_t) && defined(HAS_READDIR)
     dSP;
-    STRLEN n_a;
     const char *dirname = POPpconstx;
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
@@ -4102,7 +4084,6 @@ PP(pp_system)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
     I32 value;
-    STRLEN n_a;
     int result;
     I32 did_pipes = 0;
 
@@ -4193,7 +4174,7 @@ PP(pp_system)
 	else if (SP - MARK != 1)
 	    value = (I32)do_aexec5(Nullsv, MARK, SP, pp[1], did_pipes);
 	else {
-	    value = (I32)do_exec3(SvPVx(sv_mortalcopy(*SP), n_a), pp[1], did_pipes);
+	    value = (I32)do_exec3(SvPVx_nolen(sv_mortalcopy(*SP)), pp[1], did_pipes);
 	}
 	PerlProc__exit(-1);
     }
@@ -4216,7 +4197,7 @@ PP(pp_system)
 #  endif
     }
     else {
-	value = (I32)do_spawn(SvPVx(sv_mortalcopy(*SP), n_a));
+	value = (I32)do_spawn(SvPVx_nolen(sv_mortalcopy(*SP)));
     }
     if (PL_statusvalue == -1)	/* hint that value must be returned as is */
 	result = 1;
@@ -4232,7 +4213,6 @@ PP(pp_exec)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
     I32 value;
-    STRLEN n_a;
 
     if (PL_tainting) {
 	TAINT_ENV();
@@ -4264,13 +4244,13 @@ PP(pp_exec)
 #endif
     else {
 #ifdef VMS
-	value = (I32)vms_do_exec(SvPVx(sv_mortalcopy(*SP), n_a));
+	value = (I32)vms_do_exec(SvPVx_nolen(sv_mortalcopy(*SP)));
 #else
 #  ifdef __OPEN_VM
-	(void) do_spawn(SvPVx(sv_mortalcopy(*SP), n_a));
+	(void) do_spawn(SvPVx_nolen(sv_mortalcopy(*SP)));
 	value = 0;
 #  else
-	value = (I32)do_exec(SvPVx(sv_mortalcopy(*SP), n_a));
+	value = (I32)do_exec(SvPVx_nolen(sv_mortalcopy(*SP)));
 #  endif
 #endif
     }
@@ -4695,7 +4675,6 @@ PP(pp_ghostent)
 #endif
     struct hostent *hent;
     unsigned long len;
-    STRLEN n_a;
 
     EXTEND(SP, 10);
     if (which == OP_GHBYNAME) {
@@ -4811,7 +4790,6 @@ PP(pp_gnetent)
     struct netent *getnetent(void);
 #endif
     struct netent *nent;
-    STRLEN n_a;
 
     if (which == OP_GNBYNAME){
 #ifdef HAS_GETNETBYNAME
@@ -4912,7 +4890,6 @@ PP(pp_gprotoent)
     struct protoent *getprotoent(void);
 #endif
     struct protoent *pent;
-    STRLEN n_a;
 
     if (which == OP_GPBYNAME) {
 #ifdef HAS_GETPROTOBYNAME
@@ -4999,7 +4976,6 @@ PP(pp_gservent)
     struct servent *getservent(void);
 #endif
     struct servent *sent;
-    STRLEN n_a;
 
     if (which == OP_GSBYNAME) {
 #ifdef HAS_GETSERVBYNAME
@@ -5195,7 +5171,6 @@ PP(pp_gpwent)
     dSP;
     I32 which = PL_op->op_type;
     register SV *sv;
-    STRLEN n_a;
     struct passwd *pwent  = NULL;
     /*
      * We currently support only the SysV getsp* shadow password interface.
@@ -5474,7 +5449,6 @@ PP(pp_ggrent)
     register char **elem;
     register SV *sv;
     struct group *grent;
-    STRLEN n_a;
 
     if (which == OP_GGRNAM) {
         char* name = POPpbytex;

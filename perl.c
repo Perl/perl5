@@ -2486,8 +2486,7 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
     PUTBACK;
 
     if (croak_on_error && SvTRUE(ERRSV)) {
-	STRLEN n_a;
-	Perl_croak(aTHX_ SvPVx(ERRSV, n_a));
+	Perl_croak(aTHX_ SvPVx_nolen_const(ERRSV));
     }
 
     return sv;

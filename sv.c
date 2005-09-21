@@ -3019,22 +3019,18 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
     SV *tsv, *origsv;
     char tbuf[64];	/* Must fit sprintf/Gconvert of longest IV/NV */
     char *tmpbuf = tbuf;
-    STRLEN n_a;
-
-    if (!lp) {
-	/* Saves needing to do lots of if (!lp) checks below  */
-	lp = &n_a;
-    }
 
     if (!sv) {
-	*lp = 0;
+	if (lp)
+	    *lp = 0;
 	return (char *)"";
     }
     if (SvGMAGICAL(sv)) {
 	if (flags & SV_GMAGIC)
 	    mg_get(sv);
 	if (SvPOKp(sv)) {
-	    *lp = SvCUR(sv);
+	    if (lp)
+		*lp = SvCUR(sv);
 	    if (flags & SV_MUTABLE_RETURN)
 		return SvPVX_mutable(sv);
 	    if (flags & SV_CONST_RETURN)
@@ -3059,7 +3055,8 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
 		    report_uninit();
 	    }
-            *lp = 0;
+	    if (lp)
+		*lp = 0;
             return (char *)"";
         }
     }
@@ -3069,7 +3066,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
             register const char *typestr;
             if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,string)) &&
                 (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
-                char *pv = SvPV(tmpstr, *lp);
+                char *pv = lp ? SvPV(tmpstr, *lp) : SvPV_nolen(tmpstr);
                 if (SvUTF8(tmpstr))
                     SvUTF8_on(sv);
                 else
@@ -3164,7 +3161,8 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 			    SvUTF8_on(origsv);
 			else
 			    SvUTF8_off(origsv);
-			*lp = mg->mg_len;
+			if (lp)
+			    *lp = mg->mg_len;
 			return mg->mg_ptr;
 		    }
 					/* Fall through */
@@ -3199,13 +3197,15 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		    Perl_sv_setpvf(aTHX_ tsv, "%s(0x%"UVxf")", typestr, PTR2UV(sv));
 		goto tokensaveref;
 	    }
-	    *lp = strlen(typestr);
+	    if (lp)
+		*lp = strlen(typestr);
 	    return (char *)typestr;
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    if (ckWARN(WARN_UNINITIALIZED))
 		report_uninit();
-	    *lp = 0;
+	    if (lp)
+		*lp = 0;
 	    return (char *)"";
 	}
     }
@@ -3265,14 +3265,19 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	if (ckWARN(WARN_UNINITIALIZED)
 	    && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
 	    report_uninit();
+	if (lp)
 	*lp = 0;
 	if (SvTYPE(sv) < SVt_PV)
 	    /* Typically the caller expects that sv_any is not NULL now.  */
 	    sv_upgrade(sv, SVt_PV);
 	return (char *)"";
     }
-    *lp = s - SvPVX_const(sv);
-    SvCUR_set(sv, *lp);
+    {
+	STRLEN len = s - SvPVX_const(sv);
+	if (lp) 
+	    *lp = len;
+	SvCUR_set(sv, len);
+    }
     SvPOK_on(sv);
     DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2pv(%s)\n",
 			  PTR2UV(sv),SvPVX_const(sv)));
@@ -3290,7 +3295,8 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	if (!tsv)
 	    tsv = newSVpv(tmpbuf, 0);
 	sv_2mortal(tsv);
-	*lp = SvCUR(tsv);
+	if (lp)
+	    *lp = SvCUR(tsv);
 	return SvPVX(tsv);
     }
     else {
@@ -3313,7 +3319,8 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	}
 #endif
 	(void)SvUPGRADE(sv, SVt_PV);
-	*lp = len;
+	if (lp)
+	    *lp = len;
 	s = SvGROW(sv, len + 1);
 	SvCUR_set(sv, len);
 	SvPOKp_on(sv);
@@ -7597,11 +7604,13 @@ Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
 	sv_force_normal(sv);
 
     if (SvPOK(sv)) {
-	*lp = SvCUR(sv);
+	if (lp)
+	    *lp = SvCUR(sv);
     }
     else {
 	char *s;
-
+	STRLEN len;
+ 
 	if (SvREADONLY(sv) && !(flags & SV_MUTABLE_RETURN)) {
 	    if (PL_op)
 		Perl_croak(aTHX_ "Can't coerce readonly %s to string in %s",
@@ -7615,10 +7624,11 @@ Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
 		OP_NAME(PL_op));
 	}
 	else
-	    s = sv_2pv_flags(sv, lp, flags);
+	    s = sv_2pv_flags(sv, &len, flags);
+	if (lp)
+	    *lp = len;
+
 	if (s != SvPVX_const(sv)) {	/* Almost, but not quite, sv_setpvn() */
-	    const STRLEN len = *lp;
-	
 	    if (SvROK(sv))
 		sv_unref(sv);
 	    (void)SvUPGRADE(sv, SVt_PV);		/* Never FALSE */
