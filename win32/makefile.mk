@@ -190,7 +190,7 @@ CRYPT_SRC	*= fcrypt.c
 # not be quoted)
 #
 .IF "$(CCTYPE)" == "BORLAND"
-CCHOME		*= C:\borland\bcc55
+CCHOME		*= C:\Borland\BCC55
 .ELIF "$(CCTYPE)" == "GCC"
 CCHOME		*= C:\MinGW
 .ELSE
@@ -410,7 +410,14 @@ SUBSYS		= console
 CXX_FLAG	= -P
 
 LIBC		= cw32mti.lib
-LIBFILES	= $(CRYPT_LIB) ws2_32.lib import32.lib $(LIBC)
+
+# same libs as MSVC, except Borland doesn't have oldnames.lib
+LIBFILES	= $(CRYPT_LIB) \
+		kernel32.lib user32.lib gdi32.lib winspool.lib \
+		comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib \
+		netapi32.lib uuid.lib ws2_32.lib mpr.lib winmm.lib \
+		version.lib odbc32.lib odbccp32.lib \
+		import32.lib $(LIBC)
 
 .IF  "$(CFG)" == "Debug"
 OPTIMIZE	= -v -D_RTLDLL -DDEBUGGING
@@ -422,7 +429,8 @@ LINK_DBG	=
 
 CFLAGS		= -w -g0 -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
-LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)"  -L"$(CCLIBDIR)"
+LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(CCLIBDIR)" \
+		-L"$(CCLIBDIR)\PSDK"
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -e
 LIBOUT_FLAG	=
@@ -465,7 +473,7 @@ LIBFILES	= $(CRYPT_LIB) $(LIBC) \
 		  -lmoldname -lkernel32 -luser32 -lgdi32 \
 		  -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 \
 		  -loleaut32 -lnetapi32 -luuid -lws2_32 -lmpr \
-		  -lwinmm -lversion -lodbc32
+		  -lwinmm -lversion -lodbc32 -lodbccp32
 
 .IF  "$(CFG)" == "Debug"
 OPTIMIZE	= -g -O2 -DDEBUGGING
@@ -945,6 +953,17 @@ MK2		= __not_needed
 RIGHTMAKE	=
 .ENDIF
 
+.IMPORT .IGNORE : SystemRoot windir
+
+# Don't just .IMPORT OS from the environment because dmake sets OS itself.
+ENV_OS=$(subst,OS=, $(shell @set OS))
+
+.IF "$(ENV_OS)" == "Windows_NT"
+ODBCCP32_DLL = $(SystemRoot)\system32\odbccp32.dll
+.ELSE
+ODBCCP32_DLL = $(windir)\system\odbccp32.dll
+.ENDIF
+
 #
 # Top targets
 #
@@ -1055,6 +1074,8 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 
 $(MINIPERL) : $(MINIDIR) $(MINI_OBJ) $(CRTIPMLIBS)
 .IF "$(CCTYPE)" == "BORLAND"
+	if not exist $(CCLIBDIR)\PSDK\odbccp32.lib \
+	    cd $(CCLIBDIR)\PSDK && implib odbccp32.lib $(ODBCCP32_DLL)
 	$(LINK32) -Tpe -ap $(BLINK_FLAGS) \
 	    @$(mktmp c0x32$(o) $(MINI_OBJ:s,\,$B,),$(@:s,\,$B,),,$(LIBFILES),)
 .ELIF "$(CCTYPE)" == "GCC"
@@ -1081,9 +1102,9 @@ $(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
 
 perllib$(o)	: perllib.c .\perlhost.h .\vdir.h .\vmem.h
 .IF "$(USE_IMP_SYS)" == "define"
-	$(CC) -c -I. -DWITH_STATIC $(CFLAGS_O) $(CXX_FLAG) $(OBJOUT_FLAG)$@ perllib.c
+	$(CC) -c -I. $(CFLAGS_O) $(CXX_FLAG) $(OBJOUT_FLAG)$@ perllib.c
 .ELSE
-	$(CC) -c -I. -DWITH_STATIC $(CFLAGS_O) $(OBJOUT_FLAG)$@ perllib.c
+	$(CC) -c -I. $(CFLAGS_O) $(OBJOUT_FLAG)$@ perllib.c
 .ENDIF
 
 # 1. we don't want to rebuild miniperl.exe when config.h changes
@@ -1360,7 +1381,7 @@ distclean: realclean
 	-del /f bin\*.bat
 	-del /f perllibst.h
 	-del /f $(PERLEXE_ICO) perl.base
-	-cd .. && del /s *$(a) *.map *.pdb *.ilk *.bs *$(o) .exists pm_to_blib
+	-cd .. && del /s *$(a) *.map *.pdb *.ilk *.tds *.bs *$(o) .exists pm_to_blib
 	-cd $(EXTDIR) && del /s *.def Makefile Makefile.old
 	-if exist $(AUTODIR) rmdir /s /q $(AUTODIR)
 	-if exist $(AUTODIR) rmdir /s $(AUTODIR)
@@ -1457,6 +1478,7 @@ _clean :
 	-@erase ..\x2p\*.exe ..\x2p\*.bat
 	-@erase *.ilk
 	-@erase *.pdb
+	-@erase *.tds
 	-@erase Extensions_static
 
 clean : Extensions_clean _clean
