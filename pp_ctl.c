@@ -177,7 +177,7 @@ PP(pp_substcont)
     }
 
     rxres_restore(&cx->sb_rxres, rx);
-    RX_MATCH_UTF8_set(rx, SvUTF8(cx->sb_targ));
+    RX_MATCH_UTF8_set(rx, DO_UTF8(cx->sb_targ));
 
     if (cx->sb_iters++) {
 	const I32 saviters = cx->sb_iters;
@@ -1744,6 +1744,10 @@ PP(pp_enteriter)
 		    DIE(aTHX_ "Range iterator outside integer range");
 		cx->blk_loop.iterix = SvIV(sv);
 		cx->blk_loop.itermax = SvIV(right);
+#ifdef DEBUGGING
+		/* for correct -Dstv display */
+		cx->blk_oldsp = sp - PL_stack_base;
+#endif
 	    }
 	    else {
 		cx->blk_loop.iterlval = newSVsv(sv);

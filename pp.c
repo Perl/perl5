@@ -2860,9 +2860,9 @@ PP(pp_abs)
       } else{
 	const NV value = TOPn;
 	if (value < 0.0)
-	  SETn(value);
-	else
 	  SETn(-value);
+	else
+	  SETn(value);
       }
     }
     RETURN;

@@ -1280,6 +1280,8 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
 	    SV *msg;
 
 	    ENTER;
+	    SAVESPTR(PL_warnhook);
+	    PL_warnhook = Nullsv;
 	    save_re_context();
 	    msg = newSVpvn(message, msglen);
 	    SvFLAGS(msg) |= utf8;
