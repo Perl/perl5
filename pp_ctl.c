@@ -322,7 +322,14 @@ Perl_rxres_free(pTHX_ void **rsp)
     UV *p = (UV*)*rsp;
 
     if (p) {
+#ifdef PERL_POISON
+	void *tmp = INT2PTR(char*,*p);
+	Safefree(tmp);
+	if (*p)
+	    Poison(*p, 1, sizeof(*p));
+#else
 	Safefree(INT2PTR(char*,*p));
+#endif
 	Safefree(p);
 	*rsp = Null(void*);
     }

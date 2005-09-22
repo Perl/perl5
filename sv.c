@@ -4116,13 +4116,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    			/* and won't be needed again, potentially */
 	    !(PL_op && PL_op->op_type == OP_AASSIGN))
 	{
-	    if (SvPVX_const(dstr)) {		/* we know that dtype >= SVt_PV */
-		if (SvOOK(dstr)) {
-		    SvFLAGS(dstr) &= ~SVf_OOK;
-		    Safefree(SvPVX_const(dstr) - SvIVX(dstr));
-		}
-		else if (SvLEN(dstr))
-		    Safefree(SvPVX_const(dstr));
+	    if (SvPVX_const(dstr)) {	/* we know that dtype >= SVt_PV */
+		SvPV_free(dstr);
 	    }
 	    (void)SvPOK_only(dstr);
 	    SvPV_set(dstr, SvPVX(sstr));
@@ -5344,7 +5339,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	        SvREFCNT_dec(SvRV(sv));
 	}
 	else if (SvPVX_const(sv) && SvLEN(sv))
-	    Safefree(SvPVX_const(sv));
+	    Safefree(SvPVX_mutable(sv));
 	else if (SvPVX_const(sv) && SvREADONLY(sv) && SvFAKE(sv)) {
 	    unsharepvn(SvPVX_const(sv),
 		       SvUTF8(sv) ? -(I32)SvCUR(sv) : SvCUR(sv),
