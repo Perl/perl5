@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-use Test::More 'no_plan';
+use Test::More tests => 64;
 
 BEGIN { use_ok 'File::Basename' }
 
@@ -15,6 +15,7 @@ can_ok( __PACKAGE__, qw( basename fileparse dirname fileparse_set_fstype ) );
 ### Testing Unix
 {
     ok length fileparse_set_fstype('unix'), 'set fstype to unix';
+    is( fileparse_set_fstype(), 'Unix',     'get fstype' );
 
     my($base,$path,$type) = fileparse('/virgil/aeneid/draft.book7',
                                       qr'\.book\d+');
@@ -25,13 +26,12 @@ can_ok( __PACKAGE__, qw( basename fileparse dirname fileparse_set_fstype ) );
     is(basename('/arma/virumque.cano'), 'virumque.cano');
     is(dirname ('/arma/virumque.cano'), '/arma');
     is(dirname('arma/'), '.');
-    is(dirname('/'), '/');
 }
 
 
 ### Testing VMS
 {
-    is(fileparse_set_fstype('VMS'), 'unix', 'set fstype to VMS');
+    is(fileparse_set_fstype('VMS'), 'Unix', 'set fstype to VMS');
 
     my($base,$path,$type) = fileparse('virgil:[aeneid]draft.book7',
                                       qr{\.book\d+});
@@ -52,9 +52,9 @@ can_ok( __PACKAGE__, qw( basename fileparse dirname fileparse_set_fstype ) );
 }
 
 
-### Testing MSDOS
+### Testing DOS
 {
-    is(fileparse_set_fstype('MSDOS'), 'VMS', 'set fstype to MSDOS');
+    is(fileparse_set_fstype('DOS'), 'VMS', 'set fstype to DOS');
 
     my($base,$path,$type) = fileparse('C:\\virgil\\aeneid\\draft.book7',
                                       '\.book\d+');
@@ -67,8 +67,13 @@ can_ok( __PACKAGE__, qw( basename fileparse dirname fileparse_set_fstype ) );
     is(dirname('A:\\'), 'A:\\');
     is(dirname('arma\\'), '.');
 
-    # Yes "/" is a legal path separator under MSDOS
+    # Yes "/" is a legal path separator under DOS
     is(basename("lib/File/Basename.pm"), "Basename.pm");
+
+    # $^O for DOS is "dos" not "MSDOS" but "MSDOS" is left in for
+    # backward bug compat.
+    is(fileparse_set_fstype('MSDOS'), 'DOS');
+    is( dirname("\\foo\\bar\\baz"), "\\foo\\bar" );
 }
 
 
@@ -101,7 +106,7 @@ can_ok( __PACKAGE__, qw( basename fileparse dirname fileparse_set_fstype ) );
 
 ### extra tests for a few specific bugs
 {
-    fileparse_set_fstype 'MSDOS';
+    fileparse_set_fstype 'DOS';
     # perl5.003_18 gives C:/perl/.\
     is((fileparse 'C:/perl/lib')[1], 'C:/perl/');
     # perl5.003_18 gives C:\perl\
@@ -112,6 +117,39 @@ can_ok( __PACKAGE__, qw( basename fileparse dirname fileparse_set_fstype ) );
     is(dirname('/perl/'), '/');
     # perl5.003_18 gives '/perl/lib'
     is(dirname('/perl/lib//'), '/perl');
+}
+
+### rt.perl.org 22236
+{
+    is(basename('a/'), 'a');
+    is(basename('/usr/lib//'), 'lib');
+
+    fileparse_set_fstype 'MSWin32';
+    is(basename('a\\'), 'a');
+    is(basename('\\usr\\lib\\\\'), 'lib');
+}
+
+
+### rt.cpan.org 36477
+{
+    fileparse_set_fstype('Unix');
+    is(dirname('/'), '/');
+    is(basename('/'), '/');
+
+    fileparse_set_fstype('DOS');
+    is(dirname('\\'), '\\');
+    is(basename('\\'), '\\');
+}
+
+
+### basename(1) sez: "The suffix is not stripped if it is identical to the
+### remaining characters in string"
+{
+    fileparse_set_fstype('Unix');
+    is(basename('.foo'), '.foo');
+    is(basename('.foo', '.foo'),     '.foo');
+    is(basename('.foo.bar', '.foo'), '.foo.bar');
+    is(basename('.foo.bar', '.bar'), '.foo');
 }
 
 
@@ -134,6 +172,7 @@ can_ok( __PACKAGE__, qw( basename fileparse dirname fileparse_set_fstype ) );
         1;
     }
 
+    fileparse_set_fstype 'Unix';
     ok tainted(dirname($TAINT.'/perl/lib//'));
     ok all_tainted(fileparse($TAINT.'/dir/draft.book7','\.book\d+'));
 }
