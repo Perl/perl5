@@ -1,14 +1,16 @@
 #!/usr/bin/perl -w
 
-use Test;
+use Test::More;
 
 BEGIN {
-  plan tests => 8;
+  if ($^O eq 'MSWin32') {
+    plan skip_all => "Not portable on Win32\n";
+  }
+  else {
+    plan tests => 15;
+  }
+  use_ok ("Pod::Usage");
 }
-
-eval "use Pod::Usage";
-
-ok($@ eq '');
 
 sub getoutput
 {
@@ -22,7 +24,9 @@ sub getoutput
     my @out = <IN>;
     close(IN);
     my $exit = $?>>8;
-    print "\nEXIT=$exit OUTPUT=+++\n@out+++\n";
+    s/^/#/ for @out;
+    local $" = "";
+    print "#EXIT=$exit OUTPUT=+++#@out#+++\n";
     return($exit, join("",@out));
   }
   # child
@@ -35,108 +39,108 @@ sub getoutput
 sub compare
 {
   my ($left,$right) = @_;
-  $left =~ s/[\n]+/\n/sg;
-  $right =~ s/[\n]+/\n/sg;
-  $left =~ s/\s+/ /gm;
+  $left  =~ s/^#\s+/#/gm;
+  $right =~ s/^#\s+/#/gm;
+  $left  =~ s/\s+/ /gm;
   $right =~ s/\s+/ /gm;
   $left eq $right;
 }
 
-# test 2
 my ($exit, $text) = getoutput( sub { pod2usage() } );
-ok($exit == 2 && compare($text, <<'EOT'));
-Usage:
-    frobnicate [ -r | --recursive ] [ -f | --force ] [ -n number ] file ...
-
+is ($exit, 2,                 "Exit status pod2usage ()");
+ok (compare ($text, <<'EOT'), "Output test pod2usage ()");
+#Usage:
+#    frobnicate [ -r | --recursive ] [ -f | --force ] [ -n number ] file ...
+#
 EOT
 
-# test 3
 ($exit, $text) = getoutput( sub { pod2usage(
   -message => 'You naughty person, what did you say?',
-  -verbose => 1 ) } );
-ok($exit == 1 && compare($text,<<'EOT'));
-You naughty person, what did you say?
- Usage:
-     frobnicate [ -r | --recursive ] [ -f | --force ] [ -n number ] file ...
- 
- Options:
-     -r | --recursive
-         Run recursively.
- 
-     -f | --force
-         Just do it!
- 
-     -n number
-         Specify number of frobs, default is 42.
- 
+  -verbose => 1 ) });
+is ($exit, 1,                 "Exit status pod2usage (-message => '...', -verbose => 1)");
+ok (compare ($text, <<'EOT'), "Output test pod2usage (-message => '...', -verbose => 1)");
+#You naughty person, what did you say?
+# Usage:
+#     frobnicate [ -r | --recursive ] [ -f | --force ] [ -n number ] file ...
+# 
+# Options:
+#     -r | --recursive
+#         Run recursively.
+# 
+#     -f | --force
+#         Just do it!
+# 
+#     -n number
+#         Specify number of frobs, default is 42.
+# 
 EOT
 
-# test 4
 ($exit, $text) = getoutput( sub { pod2usage(
   -verbose => 2, -exit => 42 ) } );
-ok($exit == 42 && compare($text,<<'EOT'));
-NAME
-     frobnicate - do what I mean
-
- SYNOPSIS
-     frobnicate [ -r | --recursive ] [ -f | --force ] [ -n number ] file ...
-
- DESCRIPTION
-     frobnicate does foo and bar and what not.
-
- OPTIONS
-     -r | --recursive
-         Run recursively.
-
-     -f | --force
-         Just do it!
-
-     -n number
-         Specify number of frobs, default is 42.
-
+is ($exit, 42,                "Exit status pod2usage (-verbose => 2, -exit => 42)");
+ok (compare ($text, <<'EOT'), "Output test pod2usage (-verbose => 2, -exit => 42)");
+#NAME
+#     frobnicate - do what I mean
+#
+# SYNOPSIS
+#     frobnicate [ -r | --recursive ] [ -f | --force ] [ -n number ] file ...
+#
+# DESCRIPTION
+#     frobnicate does foo and bar and what not.
+#
+# OPTIONS
+#     -r | --recursive
+#         Run recursively.
+#
+#     -f | --force
+#         Just do it!
+#
+#     -n number
+#         Specify number of frobs, default is 42.
+#
 EOT
 
-# test 5
 ($exit, $text) = getoutput( sub { pod2usage(0) } );
-ok($exit == 0 && compare($text, <<'EOT'));
-Usage:
-     frobnicate [ -r | --recursive ] [ -f | --force ] [ -n number ] file ...
-
- Options:
-     -r | --recursive
-         Run recursively.
-
-     -f | --force
-         Just do it!
-
-     -n number
-         Specify number of frobs, default is 42.
-
+is ($exit, 0,                 "Exit status pod2usage (0)");
+ok (compare ($text, <<'EOT'), "Output test pod2usage (0)");
+#Usage:
+#     frobnicate [ -r | --recursive ] [ -f | --force ] [ -n number ] file ...
+#
+# Options:
+#     -r | --recursive
+#         Run recursively.
+#
+#     -f | --force
+#         Just do it!
+#
+#     -n number
+#         Specify number of frobs, default is 42.
+#
 EOT
 
-# test 6
 ($exit, $text) = getoutput( sub { pod2usage(42) } );
-ok($exit == 42 && compare($text, <<'EOT'));
-Usage:
-     frobnicate [ -r | --recursive ] [ -f | --force ] [ -n number ] file ...
-
+is ($exit, 42,                "Exit status pod2usage (42)");
+ok (compare ($text, <<'EOT'), "Output test pod2usage (42)");
+#Usage:
+#     frobnicate [ -r | --recursive ] [ -f | --force ] [ -n number ] file ...
+#
 EOT
 
-# test 7
 ($exit, $text) = getoutput( sub { pod2usage(-verbose => 0, -exit => 'NOEXIT') } );
-ok($exit == 0 && compare($text, <<'EOT'));
-Usage:
-     frobnicate [ -r | --recursive ] [ -f | --force ] [ -n number ] file ...
-
- --NORMAL-RETURN--
+is ($exit, 0,                 "Exit status pod2usage (-verbose => 0, -exit => 'NOEXIT')");
+ok (compare ($text, <<'EOT'), "Output test pod2usage (-verbose => 0, -exit => 'NOEXIT')");
+#Usage:
+#     frobnicate [ -r | --recursive ] [ -f | --force ] [ -n number ] file ...
+#
+# --NORMAL-RETURN--
 EOT
 
-# test 8
 ($exit, $text) = getoutput( sub { pod2usage(-verbose => 99, -sections => 'DESCRIPTION') } );
-ok($exit == 1 && compare($text, <<'EOT'));
-Description:
-     frobnicate does foo and bar and what not.
-
+is ($exit, 1,                 "Exit status pod2usage (-verbose => 99, -sections => 'DESCRIPTION')");
+ok (compare ($text, <<'EOT'), "Output test pod2usage (-verbose => 99, -sections => 'DESCRIPTION')");
+#Description:
+#     frobnicate does foo and bar and what not.
+#
 EOT
 
 
