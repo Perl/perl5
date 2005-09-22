@@ -103,11 +103,10 @@ sub caller_info {
 # Transform an argument to a function into a string.
 sub format_arg {
   my $arg = shift;
-  if (not defined($arg)) {
-    $arg = 'undef';
-  }
-  elsif (ref($arg)) {
+  if (ref($arg)) {
       $arg = defined($overload::VERSION) ? overload::StrVal($arg) : "$arg";
+  }elsif (not defined($arg)) {
+    $arg = 'undef';
   }
   $arg =~ s/'/\\'/g;
   $arg = str_len_trim($arg, $MaxArgLen);
