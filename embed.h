@@ -1699,13 +1699,16 @@
 #define is_utf8_string_loclen	Perl_is_utf8_string_loclen
 #define newSVhek		Perl_newSVhek
 #define stashpv_hvname_match	Perl_stashpv_hvname_match
+#ifdef PERL_CORE
+#define offer_nice_chunk	Perl_offer_nice_chunk
+#endif
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 #ifdef PERL_CORE
 #define dump_sv_child		Perl_dump_sv_child
 #endif
 #endif
-#ifdef PERL_CORE
-#define offer_nice_chunk	Perl_offer_nice_chunk
+#ifdef PERL_DONT_CREATE_GVSV
+#define gv_SVadd		Perl_gv_SVadd
 #endif
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
@@ -3735,13 +3738,16 @@
 #define is_utf8_string_loclen(a,b,c,d)	Perl_is_utf8_string_loclen(aTHX_ a,b,c,d)
 #define newSVhek(a)		Perl_newSVhek(aTHX_ a)
 #define stashpv_hvname_match(a,b)	Perl_stashpv_hvname_match(aTHX_ a,b)
+#ifdef PERL_CORE
+#define offer_nice_chunk(a,b)	Perl_offer_nice_chunk(aTHX_ a,b)
+#endif
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 #ifdef PERL_CORE
 #define dump_sv_child(a)	Perl_dump_sv_child(aTHX_ a)
 #endif
 #endif
-#ifdef PERL_CORE
-#define offer_nice_chunk(a,b)	Perl_offer_nice_chunk(aTHX_ a,b)
+#ifdef PERL_DONT_CREATE_GVSV
+#define gv_SVadd(a)		Perl_gv_SVadd(aTHX_ a)
 #endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)

@@ -3009,13 +3009,20 @@ PERL_CALLCONV bool	Perl_stashpv_hvname_match(pTHX_ const COP *cop, const HV *hv)
 			__attribute__nonnull__(pTHX_2);
 
 
+PERL_CALLCONV void	Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
+			__attribute__nonnull__(pTHX_1);
+
+
+
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 PERL_CALLCONV void	Perl_dump_sv_child(pTHX_ SV *sv);
 #endif
 
-PERL_CALLCONV void	Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
+#ifdef PERL_DONT_CREATE_GVSV
+PERL_CALLCONV GV*	Perl_gv_SVadd(pTHX_ GV* gv)
 			__attribute__nonnull__(pTHX_1);
 
+#endif
 
 END_EXTERN_C
 /*

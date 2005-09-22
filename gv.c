@@ -37,6 +37,19 @@ Perl stores its global variables.
 const char S_autoload[] = "AUTOLOAD";
 const STRLEN S_autolen = sizeof(S_autoload)-1;
 
+
+#ifdef PERL_DONT_CREATE_GVSV
+GV *
+Perl_gv_SVadd(pTHX_ GV *gv)
+{
+    if (!gv || SvTYPE((SV*)gv) != SVt_PVGV)
+	Perl_croak(aTHX_ "Bad symbol for scalar");
+    if (!GvSV(gv))
+	GvSV(gv) = NEWSV(72,0);
+    return gv;
+}
+#endif
+
 GV *
 Perl_gv_AVadd(pTHX_ register GV *gv)
 {
@@ -96,7 +109,11 @@ Perl_gv_fetchfile(pTHX_ const char *name)
     gv = *(GV**)hv_fetch(PL_defstash, tmpbuf, tmplen, TRUE);
     if (!isGV(gv)) {
 	gv_init(gv, PL_defstash, tmpbuf, tmplen, FALSE);
-	sv_setpv(GvSV(gv), name);
+#ifdef PERL_DONT_CREATE_GVSV
+	GvSV(gv) = newSVpvn(name, tmplen - 2);
+#else
+	sv_setpvn(GvSV(gv), name, tmplen - 2);
+#endif
 	if (PERLDB_LINE)
 	    hv_magic(GvHVn(gv_AVadd(gv)), Nullgv, PERL_MAGIC_dbfile);
     }
@@ -123,7 +140,11 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     }
     Newz(602, gp, 1, GP);
     GvGP(gv) = gp_ref(gp);
+#ifdef PERL_DONT_CREATE_GVSV
+    GvSV(gv) = 0;
+#else
     GvSV(gv) = NEWSV(72,0);
+#endif
     GvLINE(gv) = CopLINE(PL_curcop);
     /* XXX Ideally this cast would be replaced with a change to const char*
        in the struct.  */
@@ -175,6 +196,14 @@ S_gv_init_sv(pTHX_ GV *gv, I32 sv_type)
     case SVt_PVHV:
 	(void)GvHVn(gv);
 	break;
+#ifdef PERL_DONT_CREATE_GVSV
+    case SVt_NULL:
+    case SVt_PVCV:
+    case SVt_PVFM:
+	break;
+    default:
+	(void)GvSVn(gv);
+#endif
     }
 }
 
@@ -552,10 +581,14 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 #ifdef USE_5005THREADS
     sv_lock((SV *)varstash);
 #endif
-    if (!isGV(vargv))
+    if (!isGV(vargv)) {
 	gv_init(vargv, varstash, S_autoload, S_autolen, FALSE);
+#ifdef PERL_DONT_CREATE_GVSV
+	GvSV(vargv) = NEWSV(72,0);
+#endif
+    }
     LEAVE;
-    varsv = GvSV(vargv);
+    varsv = GvSVn(vargv);
 #ifdef USE_5005THREADS
     sv_lock(varsv);
 #endif
@@ -990,13 +1023,11 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	    goto ro_magicalize;
 
 	case ':':
-	    sv_setpv(GvSV(gv),PL_chopset);
+	    sv_setpv(GvSVn(gv),PL_chopset);
 	    goto magicalize;
 
 	case '?':
-#ifdef COMPLEX_STATUS
-	    (void)SvUPGRADE(GvSV(gv), SVt_PVLV);
-#endif
+	    (void)SvUPGRADE(GvSVn(gv), SVt_PVLV);
 	    goto magicalize;
 
 	case '!':
@@ -1007,7 +1038,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	       now (rather than going to magicalize)
 	    */
 
-	    sv_magic(GvSV(gv), (SV*)gv, PERL_MAGIC_sv, name, len);
+	    sv_magic(GvSVn(gv), (SV*)gv, PERL_MAGIC_sv, name, len);
 
 	    if (sv_type == SVt_PVHV)
 		require_errno(gv);
@@ -1027,7 +1058,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 			    "Use of $%s is deprecated", name);
 	    goto magicalize;
 	case '|':
-	    sv_setiv(GvSV(gv), (IV)(IoFLAGS(GvIOp(PL_defoutgv)) & IOf_FLUSH) != 0);
+	    sv_setiv(GvSVn(gv), (IV)(IoFLAGS(GvIOp(PL_defoutgv)) & IOf_FLUSH) != 0);
 	    goto magicalize;
 
 	case '+':
@@ -1048,7 +1079,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	case '8':
 	case '9':
 	ro_magicalize:
-	    SvREADONLY_on(GvSV(gv));
+	    SvREADONLY_on(GvSVn(gv));
 	    /* FALL THROUGH */
 	case '[':
 	case '^':
@@ -1076,19 +1107,19 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	case '\024':	/* $^T */
 	case '\027':	/* $^W */
 	magicalize:
-	    sv_magic(GvSV(gv), (SV*)gv, PERL_MAGIC_sv, name, len);
+	    sv_magic(GvSVn(gv), (SV*)gv, PERL_MAGIC_sv, name, len);
 	    break;
 
 	case '\014':	/* $^L */
-	    sv_setpvn(GvSV(gv),"\f",1);
-	    PL_formfeed = GvSV(gv);
+	    sv_setpvn(GvSVn(gv),"\f",1);
+	    PL_formfeed = GvSVn(gv);
 	    break;
 	case ';':
-	    sv_setpvn(GvSV(gv),"\034",1);
+	    sv_setpvn(GvSVn(gv),"\034",1);
 	    break;
 	case ']':
 	{
-	    SV * const sv = GvSV(gv);
+	    SV * const sv = GvSVn(gv);
 	    (void)SvUPGRADE(sv, SVt_PVNV);
 	    Perl_sv_setpvf(aTHX_ sv,
 #if defined(PERL_SUBVERSION) && (PERL_SUBVERSION > 0)
@@ -1105,7 +1136,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	break;
 	case '\026':	/* $^V */
 	{
-	    SV * const sv = GvSV(gv);
+	    SV * const sv = GvSVn(gv);
 	    GvSV(gv) = SvREFCNT_inc(PL_patchlevel);
 	    SvREFCNT_dec(sv);
 	}
@@ -1369,6 +1400,11 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 
     if (!gv)
 	lim = DESTROY_amg;		/* Skip overloading entries. */
+#ifdef PERL_DONT_CREATE_GVSV
+    else if (!sv) {
+	/* Equivalent to !SvTRUE and !SvOK  */
+    }
+#endif
     else if (SvTRUE(sv))
 	amt.fallback=AMGfallYES;
     else if (SvOK(sv))
@@ -1404,17 +1440,17 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 		   knowing *which* methods were declared as overloaded. */
 		/* GvSV contains the name of the method. */
 		GV *ngv = Nullgv;
+		SV *gvsv = GvSV(gv);
 
 		DEBUG_o( Perl_deb(aTHX_ "Resolving method \"%"SVf256\
 			"\" for overloaded \"%s\" in package \"%.256s\"\n",
 			     GvSV(gv), cp, hvname) );
-		if (!SvPOK(GvSV(gv))
-		    || !(ngv = gv_fetchmethod_autoload(stash, SvPVX_const(GvSV(gv)),
+		if (!gvsv || !SvPOK(gvsv)
+		    || !(ngv = gv_fetchmethod_autoload(stash, SvPVX_const(gvsv),
 						       FALSE)))
 		{
 		    /* Can be an import stub (created by "can"). */
-		    SV *gvsv = GvSV(gv);
-		    const char * const name = SvPOK(gvsv) ?  SvPVX_const(gvsv) : "???";
+		    const char * const name = (gvsv && SvPOK(gvsv)) ?  SvPVX_const(gvsv) : "???";
 		    Perl_croak(aTHX_ "%s method \"%.256s\" overloading \"%s\" "\
 				"in package \"%.256s\"",
 			       (GvCVGEN(gv) ? "Stub found while resolving"

@@ -62,7 +62,7 @@ PP(pp_gvsv)
     if (PL_op->op_private & OPpLVAL_INTRO)
 	PUSHs(save_scalar(cGVOP_gv));
     else
-	PUSHs(GvSV(cGVOP_gv));
+	PUSHs(GvSVn(cGVOP_gv));
     RETURN;
 }
 
@@ -1516,7 +1516,7 @@ Perl_do_readline(pTHX)
 		    if (av_len(GvAVn(PL_last_in_gv)) < 0) {
 			IoFLAGS(io) &= ~IOf_START;
 			do_open(PL_last_in_gv,"-",1,FALSE,O_RDONLY,0,Nullfp);
-			sv_setpvn(GvSV(PL_last_in_gv), "-", 1);
+			sv_setpvn(GvSVn(PL_last_in_gv), "-", 1);
 			SvSETMAGIC(GvSV(PL_last_in_gv));
 			fp = IoIFP(io);
 			goto have_fp;
@@ -2546,7 +2546,7 @@ PP(pp_leavesublv)
 STATIC CV *
 S_get_db_sub(pTHX_ SV **svp, CV *cv)
 {
-    SV *dbsv = GvSV(PL_DBsub);
+    SV *dbsv = GvSVn(PL_DBsub);
 
     save_item(dbsv);
     if (!PERLDB_SUB_NN) {

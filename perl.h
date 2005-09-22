@@ -1084,8 +1084,9 @@ int sockatmark(int);
 #  define DEFSV THREADSV(0)
 #  define SAVE_DEFSV save_threadsv(0)
 #else
+/* FIXME? Change the assignments to PL_defgv to instantiate GvSV?  */
 #  define ERRSV GvSV(PL_errgv)
-#  define DEFSV GvSV(PL_defgv)
+#  define DEFSV GvSVn(PL_defgv)
 #  define SAVE_DEFSV SAVESPTR(GvSV(PL_defgv))
 #endif /* USE_5005THREADS */
 

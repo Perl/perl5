@@ -1557,11 +1557,16 @@ Apd	|bool	|is_utf8_string_loclen|NN const U8 *s|STRLEN len|const U8 **ep|STRLEN 
 Apda	|SV*	|newSVhek	|const HEK *hek
 ApR	|bool	|stashpv_hvname_match|NN const COP *cop|NN const HV *hv
 
+p	|void	|offer_nice_chunk	|NN void *chunk|U32 chunk_size
+
+
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 p	|void	|dump_sv_child	|SV *sv
 #endif
 
-p	|void	|offer_nice_chunk	|NN void *chunk|U32 chunk_size
+#ifdef PERL_DONT_CREATE_GVSV
+Ap	|GV*	|gv_SVadd	|NN GV* gv
+#endif
 
 END_EXTERN_C
 /*

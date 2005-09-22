@@ -715,4 +715,5 @@ Perl_ck_trunc
 Perl_is_utf8_string_loclen
 Perl_newSVhek
 Perl_stashpv_hvname_match
+Perl_gv_SVadd
 # ex: set ro:
