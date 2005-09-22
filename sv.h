@@ -858,8 +858,6 @@ in gv.h: */
 #  else
 #  define SvPVX(sv) SvPVX_mutable(sv)
 #  endif
-#  define SvPVX_mutable(sv)	(0 + (sv)->sv_u.svu_pv)
-#  define SvPVX_const(sv)	((const char*)(0 + (sv)->sv_u.svu_pv))
 #  define SvCUR(sv) (0 + ((XPV*) SvANY(sv))->xpv_cur)
 #  define SvLEN(sv) (0 + ((XPV*) SvANY(sv))->xpv_len)
 #  define SvEND(sv) ((sv)->sv_u.svu_pv + ((XPV*)SvANY(sv))->xpv_cur)
@@ -885,11 +883,14 @@ in gv.h: */
 #  define SvUVX(sv) ((XPVUV*) SvANY(sv))->xuv_uv
 #  define SvNVX(sv) ((XPVNV*) SvANY(sv))->xnv_nv
 #  define SvPVX(sv) ((sv)->sv_u.svu_pv)
-#  define SvPVX_mutable(sv)	SvPVX(sv)
-#  define SvPVX_const(sv)	((const char*)SvPVX(sv))
 #  define SvCUR(sv) ((XPV*) SvANY(sv))->xpv_cur
 #  define SvLEN(sv) ((XPV*) SvANY(sv))->xpv_len
 #  define SvEND(sv) ((sv)->sv_u.svu_pv + ((XPV*)SvANY(sv))->xpv_cur)
+
+/* Given that these two are new, there can't be any existing code using them
+ *  as LVALUEs  */
+#define SvPVX_mutable(sv)	(0 + (sv)->sv_u.svu_pv)
+#define SvPVX_const(sv)		((const char*)(0 + (sv)->sv_u.svu_pv))
 
 #  ifdef DEBUGGING
 #    define SvMAGIC(sv)	(*(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_magic))
