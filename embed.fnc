@@ -597,10 +597,10 @@ Apd	|I32	|call_sv	|SV* sv|I32 flags
 Ap	|void	|despatch_signals
 Apd	|SV*	|eval_pv	|NN const char* p|I32 croak_on_error
 Apd	|I32	|eval_sv	|NN SV* sv|I32 flags
-ApdR	|SV*	|get_sv		|NN const char* name|I32 create
-ApdR	|AV*	|get_av		|NN const char* name|I32 create
-ApdR	|HV*	|get_hv		|NN const char* name|I32 create
-ApdR	|CV*	|get_cv		|NN const char* name|I32 create
+Apd	|SV*	|get_sv		|NN const char* name|I32 create
+Apd	|AV*	|get_av		|NN const char* name|I32 create
+Apd	|HV*	|get_hv		|NN const char* name|I32 create
+Apd	|CV*	|get_cv		|NN const char* name|I32 create
 Ap	|int	|init_i18nl10n	|int printwarn
 Ap	|int	|init_i18nl14n	|int printwarn
 Ap	|void	|new_collate	|NULLOK char* newcoll
@@ -1406,7 +1406,7 @@ pd	|void	|pad_push	|NN PADLIST *padlist|int depth|int has_args
 pR	|HV*	|pad_compname_type|const PADOFFSET po
 
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
-sdR	|PADOFFSET|pad_findlex	|const char* name|PADOFFSET newoff|const CV* innercv
+sd	|PADOFFSET|pad_findlex	|const char* name|PADOFFSET newoff|const CV* innercv
 #  if defined(DEBUGGING)
 sd	|void	|cv_dump	|NN const CV *cv|NN const char *title
 #  endif
