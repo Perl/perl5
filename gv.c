@@ -1178,9 +1178,7 @@ void
 Perl_gv_efullname4(pTHX_ SV *sv, GV *gv, const char *prefix, bool keepmain)
 {
     const GV * const egv = GvEGV(gv);
-    if (!egv)
-	egv = gv;
-    gv_fullname4(sv, egv, prefix, keepmain);
+    gv_fullname4(sv, egv ? egv : gv, prefix, keepmain);
 }
 
 void
