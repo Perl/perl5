@@ -887,11 +887,6 @@ in gv.h: */
 #  define SvLEN(sv) ((XPV*) SvANY(sv))->xpv_len
 #  define SvEND(sv) ((sv)->sv_u.svu_pv + ((XPV*)SvANY(sv))->xpv_cur)
 
-/* Given that these two are new, there can't be any existing code using them
- *  as LVALUEs  */
-#define SvPVX_mutable(sv)	(0 + (sv)->sv_u.svu_pv)
-#define SvPVX_const(sv)		((const char*)(0 + (sv)->sv_u.svu_pv))
-
 #  ifdef DEBUGGING
 #    define SvMAGIC(sv)	(*(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_magic))
 #    define SvSTASH(sv)	(*(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_stash))
@@ -900,6 +895,11 @@ in gv.h: */
 #    define SvSTASH(sv)	((XPVMG*)  SvANY(sv))->xmg_stash
 #  endif
 #endif
+
+/* Given that these two are new, there can't be any existing code using them
+ *  as LVALUEs  */
+#define SvPVX_mutable(sv)	(0 + (sv)->sv_u.svu_pv)
+#define SvPVX_const(sv)		((const char*)(0 + (sv)->sv_u.svu_pv))
 
 #define SvIVXx(sv) SvIVX(sv)
 #define SvUVXx(sv) SvUVX(sv)
