@@ -83,6 +83,11 @@ case "`${cc:-cc} -V 2>&1`" in
     '') optimize='-O3' ;;
     esac
     ;;
+*"Sun C"*)
+    optimize='-xO2'
+    cccdlflags='-KPIC'
+    lddlflags='-G -Bdynamic'
+    ;;
 esac
 
 case "$optimize" in
@@ -315,3 +320,13 @@ ccflags_uselargefiles="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 	;;
 esac
 EOCBU
+
+# Purify fails to link Perl if a "-lc" is passed into its linker
+# due to duplicate symbols.
+case "$PURIFY" in
+$define|true|[yY]*)
+    set `echo X "$libswanted "| sed -e 's/ c / /'`
+    shift
+    libswanted="$*"
+    ;;
+esac
