@@ -2,16 +2,20 @@
 use strict ;
 use warnings ;
 
+use Compress::Zlib;
+
+my $count = 0 ;
 sub ok
 {
-    my ($no, $ok) = @_ ;
+    my $ok = shift ;
 
     #++ $total ;
     #++ $totalBad unless $ok ;
+    ++ $count;
 
-    print "ok $no\n" if $ok ;
-    print "not ok $no\n" unless $ok ;
-    printf "# Failed test at line %d\n", (caller)[2] unless $ok ;
+    print "ok $count\n" if $ok ;
+    print "not ok $count\n" unless $ok ;
+    #printf "# Failed test at line %d\n", (caller)[2] unless $ok ;
 
     $ok;
 }
@@ -40,16 +44,62 @@ sub readFile
     close F ;
     $string ;
 }
+
+sub diag
+{
+    my $msg = shift ;
+    $msg =~ s/^/# /mg;
+    #$msg =~ s/\n+$//;
+    $msg .= "\n" unless $msg =~ /\n\Z/;
+    print $msg;
+}
  
+sub check
+{
+    my $command = shift ;
+    my $expected = shift ;
+
+    my $stderr = 'err.out';
+    unlink $stderr;
+
+    my $cmd = "$command 2>$stderr";
+    my $stdout = `$cmd` ;
+
+    my $aok = 1 ;
+
+    $aok &= ok $? == 0
+        or diag "  exit status is $?" ;
+
+    $aok &= ok readFile($stderr) eq ''
+        or diag "Stderr is: " .  readFile($stderr);
+
+    if (defined $expected ) {
+        $aok &= ok $stdout eq $expected 
+            or diag "got content:\n". $stdout;
+    }
+
+    if (! $aok) {
+        diag "Command line: $cmd";
+        my ($file, $line) = (caller)[1,2];
+        diag "Test called from $file, line $line";
+    }
+
+    unlink $stderr;
+}
+
+
 
 my $Inc = join " ", map qq["-I$_"] => @INC;
+$Inc = '"-MExtUtils::testlib"'
+    if ! $ENV{PERL_CORE} && eval "require ExtUtils::testlib;" ;
 
 my $Perl = '' ;
 $Perl = ($ENV{'FULLPERL'} or $^X or 'perl') ;
 $Perl = qq["$Perl"] if $^O eq 'MSWin32' ;
  
-$Perl = "$Perl -w" ;
-my $examples = $ENV{PERL_CORE} ? "../ext/Compress/Zlib/examples" : "./examples";
+$Perl = "$Perl -w $Inc" ;
+my $examples = $ENV{PERL_CORE} ? "../ext/Compress/Zlib/examples" 
+                               : "./examples";
 
 my $hello1 = <<EOM ;
 hello
@@ -76,56 +126,33 @@ EOM
 
 my @hello2 = grep(s/$/\n/, split(/\n/, $hello2)) ;
 
-print "1..13\n" ;
+my $file1 = "hello1.gz" ;
+my $file2 = "hello2.gz" ;
+my $stderr = "err.out" ;
+unlink $stderr ;
+
+my $gz = gzopen($file1, "wb");
+$gz->gzwrite($hello1);
+$gz->gzclose();
+
+$gz = gzopen($file2, "wb");
+$gz->gzwrite($hello2);
+$gz->gzclose();
+
+print "1..16\n" ;
 
 
 
 # gzcat
 # #####
 
-my $file1 = "hello1.gz" ;
-my $file2 = "hello2.gz" ;
-unlink $file1, $file2 ;
-
-my $hello1_uue = <<'EOM';
-M'XL("(W#+3$" VAE;&QO,0#+2,W)R><JR<@L5@ BKD2%DM3B$J[<U.+BQ/14
-;K@J%$A#@JB@% Z"Z5(74O!0N &D:".,V    
-EOM
-
-my $hello2_uue = <<'EOM';
-M'XL("*[#+3$" VAE;&QO,@#C\L@O3ZGD*LG(+%8 HI*,5*[BU.3\O!2NM,R<
-A5*X*A0(0X*HH!0.NHM3$G)Q*D#*%5* : #) E6<^    
-EOM
-
-# Write a test .gz file
-{
-    #local $^W = 0 ;
-    writeFile($file1, unpack("u", $hello1_uue)) ;
-    writeFile($file2, unpack("u", $hello2_uue)) ;
-}
-
- 
-$a = `$Perl $Inc ${examples}/gzcat $file1 $file2 2>&1` ;
-
-ok(1, $? == 0) 
-    or print "# \$\? == [$?]\n";
-ok(2, $a eq $hello1 . $hello2) 
-    or print "# got $a\n";
-#print "? = $? [$a]\n";
-
+check "$Perl ${examples}/gzcat $file1 $file2", $hello1 . $hello2 ;
 
 # gzgrep
 # ######
 
-$a = ($^O eq 'MSWin32' || $^O eq 'VMS'
-     ? `$Perl $Inc ${examples}/gzgrep "^x" $file1 $file2 2>&1`
-     : `$Perl $Inc ${examples}/gzgrep '^x' $file1 $file2 2>&1`) ;
-ok(3, $? == 0) 
-    or print "# \$\? == [$?]\n";
-
-ok(4, $a eq join('', grep(/^x/, @hello1, @hello2))) 
-    or print "# got $a\n";
-#print "? = $? [$a]\n";
+check "$Perl ${examples}/gzgrep the $file1 $file2",
+        join('', grep(/the/, @hello1, @hello2));
 
 
 unlink $file1, $file2 ;
@@ -135,40 +162,22 @@ unlink $file1, $file2 ;
 # ##############
 
 
-my $stderr = "err.out" ;
-unlink $stderr ;
 writeFile($file1, $hello1) ;
 writeFile($file2, $hello2) ;
 
 # there's no way to set binmode on backticks in Win32 so we won't use $a later
-$a = `$Perl $Inc ${examples}/filtdef $file1 $file2 2>$stderr` ;
-ok(5, $? == 0)
-    or print "# \$\? == [$?]\n";
-ok(6, -s $stderr == 0) ;
+check "$Perl ${examples}/filtdef $file1 $file2"; ;
 
-unlink $stderr;
-$a = `$Perl $Inc ${examples}/filtdef $file1 $file2 | $Perl $Inc ${examples}/filtinf 2>$stderr`;
-ok(7, $? == 0) 
-    or print "# \$\? == [$?]\n";
-ok(8, -s $stderr == 0) ;
-ok(9, $a eq $hello1 . $hello2) 
-    or print "# got $a\n";
+check "$Perl ${examples}/filtdef $file1 $file2 | $Perl ${examples}/filtinf 2>$stderr", $hello1 . $hello2;
 
 # gzstream
 # ########
 
 {
     writeFile($file1, $hello1) ;
-    $a = `$Perl $Inc ${examples}/gzstream <$file1 >$file2 2>$stderr` ;
-    ok(10, $? == 0) 
-        or print "# \$\? == [$?]\n";
-    ok(11, -s $stderr == 0) ;
+    check "$Perl ${examples}/gzstream <$file1 >$file2" ;
 
-    my $b = `$Perl $Inc ${examples}/gzcat $file2 2>&1` ;
-    ok(12, $? == 0) 
-        or print "# \$\? == [$?]\n";
-    ok(13, $b eq $hello1 ) 
-        or print "# got $b\n";
+    check "$Perl ${examples}/gzcat $file2", $hello1;
 
 }
 

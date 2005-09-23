@@ -1,7 +1,7 @@
 # File	  : Zlib.pm
 # Author  : Paul Marquess
-# Created : 7 September 2005
-# Version : 1.39
+# Created : 23 September 2005
+# Version : 1.40
 #
 #     Copyright (c) 1995-2005 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -21,7 +21,7 @@ use warnings ;
 our ($VERSION, @ISA, @EXPORT, $AUTOLOAD);
 our ($deflateDefault, $deflateParamsDefault, $inflateDefault);
 
-$VERSION = "1.39" ;
+$VERSION = "1.40" ;
 
 @ISA = qw(Exporter);
 # Items to export into callers namespace by default. Note: do not export

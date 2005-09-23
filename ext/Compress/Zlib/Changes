@@ -1,6 +1,10 @@
 CHANGES
 -------
 
+  1.40 - 23 September 2005
+
+      * Fixed failure of 03examples.t for some windows systems.
+
   1.39 - 15 September 2005
 
       * Fixed dTHX macro for 5.00503 on FreeBSD
