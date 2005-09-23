@@ -50,6 +50,7 @@ package Maintainers;
 	'rmbarker'	=> 'Robin Barker <rmbarker@cpan.org>',
 	'rra'		=> 'Russ Allbery <rra@cpan.org>',
 	'sadahiro'	=> 'SADAHIRO Tomoyuki <SADAHIRO@cpan.org>',
+	'saper'		=> 'Sébastien Aperghis-Tramoni <saper@cpan.org>',
 	'sburke'	=> 'Sean Burke <sburke@cpan.org>',
 	'mschwern'	=> 'Michael Schwern <mschwern@cpan.org>',
 	'smccam'	=> 'Stephen McCamant <smccam@cpan.org>',
@@ -628,6 +629,13 @@ package Maintainers;
 		'MAINTAINER'	=> 'jand',
 		'FILES'		=> q[win32 README.win32 t/win32],
 		'CPAN'		=> 0,
+		},
+
+	'XSLoader' =>
+		{
+		'MAINTAINER'	=> 'saper',
+		'FILES'		=> q[ext/DynaLoader/t/XSLoader.t ext/DynaLoader/XSLoader_pm.PL],
+		'CPAN'		=> 1,
 		},
 
 	's2p' =>
