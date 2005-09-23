@@ -28,6 +28,7 @@ my @CFG = (
 	   "win32/config.bc",
 	   "win32/config.gc",
 	   "win32/config.vc",
+	   "win32/config.vc64",
 	   "wince/config.ce",
 	  );
 
