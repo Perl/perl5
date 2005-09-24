@@ -304,7 +304,7 @@ Perl_sharedsv_associate(pTHX_ SV **psv, SV *ssv, shared_sv *data)
 		ssv = newSV(0);
 		SvREFCNT(ssv) = 0;
 	    }
-	    data = PerlMemShared_malloc(sizeof(shared_sv));
+	    data = (shared_sv *) PerlMemShared_malloc(sizeof(shared_sv));
 	    Zero(data,1,shared_sv);
 	    SHAREDSvPTR(data) = ssv;
 	    /* Tag shared side SV with data pointer */

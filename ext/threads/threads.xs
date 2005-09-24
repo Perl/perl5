@@ -96,6 +96,7 @@ Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
         PerlInterpreter *freeperl = NULL;
 	MUTEX_LOCK(&thread->mutex);
 	if (!thread->next) {
+	    MUTEX_UNLOCK(&thread->mutex);
 	    Perl_croak(aTHX_ "panic: destruct destroyed thread %p (%s)",thread, why);
 	}
 	if (thread->count != 0) {
@@ -168,8 +169,9 @@ Perl_ithread_hook(pTHX)
     int veto_cleanup = 0;
     MUTEX_LOCK(&create_destruct_mutex);
     if (aTHX == PL_curinterp && active_threads != 1) {
-	Perl_warn(aTHX_ "A thread exited while %" IVdf " threads were running",
-						(IV)active_threads);
+	if (ckWARN_d(WARN_THREADS))
+	    Perl_warn(aTHX_ "A thread exited while %" IVdf " threads were running",
+						      (IV)active_threads);
 	veto_cleanup = 1;
     }
     MUTEX_UNLOCK(&create_destruct_mutex);
@@ -304,7 +306,7 @@ Perl_ithread_run(void * arg) {
 		  SV *sv = POPs;
 		  av_store(params, i, SvREFCNT_inc(sv));
 		}
-		if (SvTRUE(ERRSV)) {
+		if (SvTRUE(ERRSV) && ckWARN_d(WARN_THREADS)) {
 		    Perl_warn(aTHX_ "thread failed to start: %" SVf, ERRSV);
 		}
 		FREETMPS;
@@ -388,7 +390,7 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 
 
 	MUTEX_LOCK(&create_destruct_mutex);
-	thread = PerlMemShared_malloc(sizeof(ithread));
+	thread = (ithread *) PerlMemShared_malloc(sizeof(ithread));
 	if (!thread) {	
 	    MUTEX_UNLOCK(&create_destruct_mutex);
 	    PerlLIO_write(PerlIO_fileno(Perl_error_log),
@@ -566,14 +568,12 @@ Perl_ithread_self (pTHX_ SV *obj, char* Class)
 void
 Perl_ithread_CLONE(pTHX_ SV *obj)
 {
- if (SvROK(obj))
-  {
-   ithread *thread = SV_to_ithread(aTHX_ obj);
-  }
- else
-  {
-   Perl_warn(aTHX_ "CLONE %" SVf,obj);
-  }
+    if (SvROK(obj)) {
+	ithread *thread = SV_to_ithread(aTHX_ obj);
+    }
+    else if (ckWARN_d(WARN_THREADS)) {
+	Perl_warn(aTHX_ "CLONE %" SVf,obj);
+    }
 }
 
 AV*
@@ -760,7 +760,7 @@ BOOT:
 	MUTEX_INIT(&create_destruct_mutex);
 	MUTEX_LOCK(&create_destruct_mutex);
 	PL_threadhook = &Perl_ithread_hook;
-	thread  = PerlMemShared_malloc(sizeof(ithread));
+	thread  = (ithread *) PerlMemShared_malloc(sizeof(ithread));
 	if (!thread) {
 	    PerlLIO_write(PerlIO_fileno(Perl_error_log),
 			  PL_no_mem, strlen(PL_no_mem));
