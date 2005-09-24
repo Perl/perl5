@@ -137,7 +137,7 @@ require Exporter;
 
 @ISA = qw(IO::Handle IO::Seekable Exporter);
 
-$VERSION = "1.11";
+$VERSION = "1.13";
 
 @EXPORT = @IO::Seekable::EXPORT;
 
@@ -197,7 +197,7 @@ sub open {
 ##
 
 sub binmode {
-    ( @_ == 0 or @_ == 1 ) or croak 'usage $fh->binmode([LAYER])';
+    ( @_ == 1 or @_ == 2 ) or croak 'usage $fh->binmode([LAYER])';
 
     my($fh, $layer) = @_;
 

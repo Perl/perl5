@@ -49,6 +49,14 @@ typedef FILE * OutputStream;
 #define gv_stashpvn(str,len,flags) gv_stashpv(str,flags)
 #endif
 
+#ifndef __attribute__noreturn__
+#  define __attribute__noreturn__
+#endif
+
+#ifndef NORETURN_FUNCTION_END
+# define NORETURN_FUNCTION_END /* NOT REACHED */ return 0
+#endif
+
 static int not_here(const char *s) __attribute__noreturn__;
 static int
 not_here(const char *s)
@@ -125,21 +133,32 @@ fgetpos(handle)
     CODE:
 	if (handle) {
 #ifdef PerlIO
-	    ST(0) = sv_2mortal(newSV(0));
+	    ST(0) = sv_newmortal();
+#if PERL_VERSION < 8
+	    Fpos_t pos;
+	    if (PerlIO_getpos(handle, &pos) != 0) {
+		ST(0) = &PL_sv_undef;
+	    }
+	    else {
+		sv_setpvn(ST(0), (char *)&pos, sizeof(Fpos_t));
+	    }
+#else
 	    if (PerlIO_getpos(handle, ST(0)) != 0) {
 		ST(0) = &PL_sv_undef;
 	    }
+#endif
 #else
+	    Fpos_t pos;
 	    if (fgetpos(handle, &pos)) {
 		ST(0) = &PL_sv_undef;
 	    } else {
-		ST(0) = sv_2mortal(newSVpv((char*)&pos, sizeof(Fpos_t)));
+		ST(0) = sv_2mortal(newSVpvn((char*)&pos, sizeof(Fpos_t)));
 	    }
 #endif
 	}
 	else {
-	    ST(0) = &PL_sv_undef;
 	    errno = EINVAL;
+	    ST(0) = &PL_sv_undef;
 	}
 
 SysRet
@@ -149,7 +168,19 @@ fsetpos(handle, pos)
     CODE:
 	if (handle) {
 #ifdef PerlIO
+#if PERL_VERSION < 8
+	    char *p;
+	    STRLEN len;
+	    if (SvOK(pos) && (p = SvPV(pos,len)) && len == sizeof(Fpos_t)) {
+		RETVAL = PerlIO_setpos(handle, (Fpos_t*)p);
+	    }
+	    else {
+		RETVAL = -1;
+		errno = EINVAL;
+	    }
+#else
 	    RETVAL = PerlIO_setpos(handle, pos);
+#endif
 #else
 	    char *p;
 	    STRLEN len;
@@ -173,7 +204,7 @@ MODULE = IO	PACKAGE = IO::File	PREFIX = f
 
 void
 new_tmpfile(packname = "IO::File")
-    const char *	packname
+    char *	packname
     PREINIT:
 	OutputStream fp;
 	GV *gv;
