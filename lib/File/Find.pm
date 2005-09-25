@@ -131,6 +131,8 @@ a dangling symbolic link, then fullname will be set to C<undef>.
 
 =back
 
+This is a no-op on Win32.
+
 =item C<follow_fast>
 
 This is similar to I<follow> except that it may report some files more
@@ -138,6 +140,8 @@ than once.  It does detect cycles, however.  Since only symbolic links
 have to be hashed, this is much cheaper both in space and time.  If
 processing a file more than once (by the user's C<wanted()> function)
 is worse than just taking time, the option I<follow> should be used.
+
+This is also a no-op on Win32.
 
 =item C<follow_skip>
 
@@ -603,8 +607,9 @@ sub _find_opt {
     $pre_process       = $wanted->{preprocess};
     $post_process      = $wanted->{postprocess};
     $no_chdir          = $wanted->{no_chdir};
-    $full_check        = $wanted->{follow};
-    $follow            = $full_check || $wanted->{follow_fast};
+    $full_check        = $^O eq 'MSWin32' ? 0 : $wanted->{follow};
+    $follow            = $full_check || $^O eq 'MSWin32' ? 0 : 
+                             $wanted->{follow_fast};
     $follow_skip       = $wanted->{follow_skip};
     $untaint           = $wanted->{untaint};
     $untaint_pat       = $wanted->{untaint_pattern};
