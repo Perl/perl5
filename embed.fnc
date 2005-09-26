@@ -238,7 +238,7 @@ Apd	|void	|fbm_compile	|NN SV* sv|U32 flags
 ApdR	|char*	|fbm_instr	|NN unsigned char* big|NN unsigned char* bigend \
 				|NN SV* littlesv|U32 flags
 p	|char*	|find_script	|const char *scriptname|bool dosearch \
-				|const char **search_ext|I32 flags
+				|const char *const *const search_ext|I32 flags
 p	|OP*	|force_list	|NULLOK OP* arg
 p	|OP*	|fold_constants	|NN OP* arg
 Afpd	|char*	|form		|NN const char* pat|...

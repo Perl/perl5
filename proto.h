@@ -483,7 +483,7 @@ PERL_CALLCONV char*	Perl_fbm_instr(pTHX_ unsigned char* big, unsigned char* bige
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 
-PERL_CALLCONV char*	Perl_find_script(pTHX_ const char *scriptname, bool dosearch, const char **search_ext, I32 flags);
+PERL_CALLCONV char*	Perl_find_script(pTHX_ const char *scriptname, bool dosearch, const char *const *const search_ext, I32 flags);
 PERL_CALLCONV OP*	Perl_force_list(pTHX_ OP* arg);
 PERL_CALLCONV OP*	Perl_fold_constants(pTHX_ OP* arg)
 			__attribute__nonnull__(pTHX_1);
