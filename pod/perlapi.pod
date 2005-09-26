@@ -292,7 +292,7 @@ Sort an array. Here is an example:
 
 See lib/sort.pm for details about controlling the sorting algorithm.
 
-	void	sortsv(SV ** array, size_t num_elts, SVCOMPARE_t cmp)
+	void	sortsv(SV** array, size_t num_elts, SVCOMPARE_t cmp)
 
 =for hackers
 Found in file pp_sort.c
@@ -1936,7 +1936,7 @@ C<PERL_SCAN_DISALLOW_PREFIX> is set in I<*flags> on entry. If
 C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the binary
 number may use '_' characters to separate digits.
 
-	UV	grok_bin(char* start, STRLEN* len_p, I32* flags, NV *result)
+	UV	grok_bin(char* start, STRLEN* len, I32* flags, NV *result)
 
 =for hackers
 Found in file numeric.c
@@ -1964,7 +1964,7 @@ C<PERL_SCAN_DISALLOW_PREFIX> is set in I<*flags> on entry. If
 C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the hex
 number may use '_' characters to separate digits.
 
-	UV	grok_hex(char* start, STRLEN* len_p, I32* flags, NV *result)
+	UV	grok_hex(char* start, STRLEN* len, I32* flags, NV *result)
 
 =for hackers
 Found in file numeric.c
@@ -3695,6 +3695,15 @@ evaluate sv only once. Use the more efficient C<SvUV> otherwise.
 =for hackers
 Found in file sv.h
 
+=item SvUV_set
+
+Set the value of the UV pointer in sv to val.  See C<SvIV_set>.
+
+	void	SvUV_set(SV* sv, UV val)
+
+=for hackers
+Found in file sv.h
+
 =item sv_2bool
 
 This function is only called on magical items, and is only used by
@@ -4669,7 +4678,7 @@ of 1, and the RV will be returned.
 
 Note that C<sv_setref_pv> copies the pointer while this copies the string.
 
-	SV*	sv_setref_pvn(SV* rv, const char* classname, const char* pv, STRLEN n)
+	SV*	sv_setref_pvn(SV* rv, const char* classname, char* pv, STRLEN n)
 
 =for hackers
 Found in file sv.c
@@ -5246,7 +5255,7 @@ Perl_to_utf8_case().
 The "normal" is a string like "ToLower" which means the swash
 %utf8::ToLower.
 
-	UV	to_utf8_case(U8 *p, U8* ustrp, STRLEN *lenp, SV **swash, char *normal, char *special)
+	UV	to_utf8_case(U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *normal, char *special)
 
 =for hackers
 Found in file utf8.c
@@ -5320,7 +5329,7 @@ length, in bytes, of that character.
 
 Allows length and flags to be passed to low level routine.
 
-	UV	utf8n_to_uvchr(U8 *s, STRLEN curlen, STRLEN* retlen, U32 flags)
+	UV	utf8n_to_uvchr(U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 
 =for hackers
 Found in file utf8.c
@@ -5345,7 +5354,7 @@ the strict UTF-8 encoding (see F<utf8.h>).
 
 Most code should use utf8_to_uvchr() rather than call this directly.
 
-	UV	utf8n_to_uvuni(U8 *s, STRLEN curlen, STRLEN* retlen, U32 flags)
+	UV	utf8n_to_uvuni(U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 
 =for hackers
 Found in file utf8.c
@@ -5412,7 +5421,7 @@ length, in bytes, of that character.
 If C<s> does not point to a well-formed UTF-8 character, zero is
 returned and retlen is set, if possible, to -1.
 
-	UV	utf8_to_uvchr(U8 *s, STRLEN* retlen)
+	UV	utf8_to_uvchr(U8 *s, STRLEN *retlen)
 
 =for hackers
 Found in file utf8.c
@@ -5429,7 +5438,7 @@ an index into the Unicode semantic tables (e.g. swashes).
 If C<s> does not point to a well-formed UTF-8 character, zero is
 returned and retlen is set, if possible, to -1.
 
-	UV	utf8_to_uvuni(U8 *s, STRLEN* retlen)
+	UV	utf8_to_uvuni(U8 *s, STRLEN *retlen)
 
 =for hackers
 Found in file utf8.c
