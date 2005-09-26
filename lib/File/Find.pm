@@ -608,8 +608,8 @@ sub _find_opt {
     $post_process      = $wanted->{postprocess};
     $no_chdir          = $wanted->{no_chdir};
     $full_check        = $^O eq 'MSWin32' ? 0 : $wanted->{follow};
-    $follow            = $full_check || $^O eq 'MSWin32' ? 0 : 
-                             $wanted->{follow_fast};
+    $follow            = $^O eq 'MSWin32' ? 0 :
+                             $full_check || $wanted->{follow_fast};
     $follow_skip       = $wanted->{follow_skip};
     $untaint           = $wanted->{untaint};
     $untaint_pat       = $wanted->{untaint_pattern};
