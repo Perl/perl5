@@ -3,10 +3,11 @@ package Digest;
 use strict;
 use vars qw($VERSION %MMAP $AUTOLOAD);
 
-$VERSION = "1.10";
+$VERSION = "1.11_01";
 
 %MMAP = (
   "SHA-1"      => ["Digest::SHA1", ["Digest::SHA", 1], ["Digest::SHA2", 1]],
+  "SHA-224"    => [["Digest::SHA", 224]],
   "SHA-256"    => [["Digest::SHA", 256], ["Digest::SHA2", 256]],
   "SHA-384"    => [["Digest::SHA", 384], ["Digest::SHA2", 384]],
   "SHA-512"    => [["Digest::SHA", 512], ["Digest::SHA2", 512]],
