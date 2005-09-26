@@ -109,6 +109,7 @@ Deprecated.  Use C<GIMME_V> instead.
 				/*  On OP_DBSTATE, indicates breakpoint
 				 *    (runtime property) */
 				/*  On OP_AELEMFAST, indiciates pad var */
+				/*  On OP_REQUIRE, was seen as CORE::require */
 
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST
