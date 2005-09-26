@@ -19,7 +19,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LOCKED CVf_LVALUE CVf_ASSERTION
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = 0.70;
+$VERSION = 0.71;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -1680,15 +1680,16 @@ sub pp_delete {
 sub pp_require {
     my $self = shift;
     my($op, $cx) = @_;
+    my $opname = $op->flags & OPf_SPECIAL ? 'CORE::require' : 'require';
     if (class($op) eq "UNOP" and $op->first->name eq "const"
 	and $op->first->private & OPpCONST_BARE)
     {
 	my $name = $self->const_sv($op->first)->PV;
 	$name =~ s[/][::]g;
 	$name =~ s/\.pm//g;
-	return "require $name";
+	return "$opname $name";
     } else {	
-	$self->unop($op, $cx, "require");
+	$self->unop($op, $cx, $opname);
     }
 }
 
