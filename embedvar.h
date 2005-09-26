@@ -249,6 +249,7 @@
 #define PL_doextract		(PERL_GET_INTERP->Idoextract)
 #define PL_doswitches		(PERL_GET_INTERP->Idoswitches)
 #define PL_dowarn		(PERL_GET_INTERP->Idowarn)
+#define PL_dumper_fd		(PERL_GET_INTERP->Idumper_fd)
 #define PL_e_script		(PERL_GET_INTERP->Ie_script)
 #define PL_egid			(PERL_GET_INTERP->Iegid)
 #define PL_encoding		(PERL_GET_INTERP->Iencoding)
