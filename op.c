@@ -5923,7 +5923,7 @@ Perl_ck_repeat(pTHX_ OP *o)
 OP *
 Perl_ck_require(pTHX_ OP *o)
 {
-    GV* gv;
+    GV* gv = Nullgv;
 
     if (o->op_flags & OPf_KIDS) {	/* Shall we supply missing .pm? */
 	SVOP *kid = (SVOP*)cUNOPo->op_first;
@@ -5955,10 +5955,12 @@ Perl_ck_require(pTHX_ OP *o)
 	}
     }
 
-    /* handle override, if any */
-    gv = gv_fetchpv("require", FALSE, SVt_PVCV);
-    if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv)))
-	gv = gv_fetchpv("CORE::GLOBAL::require", FALSE, SVt_PVCV);
+    if (!(o->op_flags & OPf_SPECIAL)) { /* Wasn't written as CORE::require */
+	/* handle override, if any */
+	gv = gv_fetchpv("require", FALSE, SVt_PVCV);
+	if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv)))
+	    gv = gv_fetchpv("CORE::GLOBAL::require", FALSE, SVt_PVCV);
+    }
 
     if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) {
 	OP *kid = cUNOPo->op_first;

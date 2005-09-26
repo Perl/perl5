@@ -4520,6 +4520,9 @@ Perl_yylex(pTHX)
 		    Perl_croak(aTHX_ "CORE::%s is not a keyword", PL_tokenbuf);
 		if (tmp < 0)
 		    tmp = -tmp;
+		else if (tmp == KEY_require)
+		    /* that's a way to remember we saw "CORE::" */
+		    orig_keyword = KEY_require;
 		goto reserved_word;
 	    }
 	    goto just_a_word;
@@ -5101,7 +5104,18 @@ Perl_yylex(pTHX)
 		else if (*s == '<')
 		    yyerror("<> should be quotes");
 	    }
-	    UNI(OP_REQUIRE);
+	    if (orig_keyword == KEY_require) {
+		orig_keyword = 0;
+		yylval.ival = 1;
+	    }
+	    else 
+		yylval.ival = 0;
+	    PL_expect = XTERM;
+	    PL_bufptr = s;
+	    PL_last_uni = PL_oldbufptr;
+	    PL_last_lop_op = OP_REQUIRE;
+	    s = skipspace(s);
+	    return REPORT( (int)REQUIRE );
 
 	case KEY_reset:
 	    UNI(OP_RESET);

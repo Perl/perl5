@@ -45,7 +45,7 @@
 %token <ival> FUNC0 FUNC1 FUNC UNIOP LSTOP
 %token <ival> RELOP EQOP MULOP ADDOP
 %token <ival> DOLSHARP DO HASHBRACK NOAMP
-%token <ival> LOCAL MY MYSUB
+%token <ival> LOCAL MY MYSUB REQUIRE
 %token COLONATTR
 
 %type <ival> prog decl format startsub startanonsub startformsub mintro
@@ -664,6 +664,10 @@ term	:	termbinop
 			{ $$ = newUNOP($1, 0, $2); }
 	|	UNIOP term                           /* Unary op */
 			{ $$ = newUNOP($1, 0, $2); }
+	|	REQUIRE                              /* require, $_ implied */
+			{ $$ = newOP(OP_REQUIRE, $1 ? OPf_SPECIAL : 0); }
+	|	REQUIRE term                         /* require Foo */
+			{ $$ = newUNOP(OP_REQUIRE, $1 ? OPf_SPECIAL : 0, $2); }
 	|	UNIOPSUB term                        /* Sub treated as unop */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
 			    append_elem(OP_LIST, $2, scalar($1))); }

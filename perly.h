@@ -71,28 +71,29 @@
      LOCAL = 296,
      MY = 297,
      MYSUB = 298,
-     COLONATTR = 299,
-     PREC_LOW = 300,
-     DOROP = 301,
-     OROP = 302,
-     ANDOP = 303,
-     NOTOP = 304,
-     ASSIGNOP = 305,
-     DORDOR = 306,
-     OROR = 307,
-     ANDAND = 308,
-     BITOROP = 309,
-     BITANDOP = 310,
-     SHIFTOP = 311,
-     MATCHOP = 312,
-     REFGEN = 313,
-     UMINUS = 314,
-     POWOP = 315,
-     POSTDEC = 316,
-     POSTINC = 317,
-     PREDEC = 318,
-     PREINC = 319,
-     ARROW = 320
+     REQUIRE = 299,
+     COLONATTR = 300,
+     PREC_LOW = 301,
+     DOROP = 302,
+     OROP = 303,
+     ANDOP = 304,
+     NOTOP = 305,
+     ASSIGNOP = 306,
+     DORDOR = 307,
+     OROR = 308,
+     ANDAND = 309,
+     BITOROP = 310,
+     BITANDOP = 311,
+     SHIFTOP = 312,
+     MATCHOP = 313,
+     REFGEN = 314,
+     UMINUS = 315,
+     POWOP = 316,
+     POSTDEC = 317,
+     POSTINC = 318,
+     PREDEC = 319,
+     PREINC = 320,
+     ARROW = 321
    };
 #endif
 #define WORD 258
@@ -136,28 +137,29 @@
 #define LOCAL 296
 #define MY 297
 #define MYSUB 298
-#define COLONATTR 299
-#define PREC_LOW 300
-#define DOROP 301
-#define OROP 302
-#define ANDOP 303
-#define NOTOP 304
-#define ASSIGNOP 305
-#define DORDOR 306
-#define OROR 307
-#define ANDAND 308
-#define BITOROP 309
-#define BITANDOP 310
-#define SHIFTOP 311
-#define MATCHOP 312
-#define REFGEN 313
-#define UMINUS 314
-#define POWOP 315
-#define POSTDEC 316
-#define POSTINC 317
-#define PREDEC 318
-#define PREINC 319
-#define ARROW 320
+#define REQUIRE 299
+#define COLONATTR 300
+#define PREC_LOW 301
+#define DOROP 302
+#define OROP 303
+#define ANDOP 304
+#define NOTOP 305
+#define ASSIGNOP 306
+#define DORDOR 307
+#define OROR 308
+#define ANDAND 309
+#define BITOROP 310
+#define BITANDOP 311
+#define SHIFTOP 312
+#define MATCHOP 313
+#define REFGEN 314
+#define UMINUS 315
+#define POWOP 316
+#define POSTDEC 317
+#define POSTINC 318
+#define PREDEC 319
+#define PREINC 320
+#define ARROW 321
 
 
 
@@ -172,7 +174,7 @@ typedef union YYSTYPE {
     GV *gvval;
 } YYSTYPE;
 /* Line 1318 of yacc.c.  */
-#line 174 "perly.h"
+#line 176 "perly.h"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

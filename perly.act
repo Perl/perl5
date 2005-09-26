@@ -892,70 +892,70 @@ case 2:
 
   case 168:
 #line 668 "perly.y"
+    { (yyval.opval) = newOP(OP_REQUIRE, (yyvsp[0].ival) ? OPf_SPECIAL : 0); ;}
+    break;
+
+  case 169:
+#line 670 "perly.y"
+    { (yyval.opval) = newUNOP(OP_REQUIRE, (yyvsp[-1].ival) ? OPf_SPECIAL : 0, (yyvsp[0].opval)); ;}
+    break;
+
+  case 170:
+#line 672 "perly.y"
     { (yyval.opval) = newUNOP(OP_ENTERSUB, OPf_STACKED,
 			    append_elem(OP_LIST, (yyvsp[0].opval), scalar((yyvsp[-1].opval)))); ;}
     break;
 
-  case 169:
-#line 671 "perly.y"
+  case 171:
+#line 675 "perly.y"
     { (yyval.opval) = newOP((yyvsp[0].ival), 0); ;}
     break;
 
-  case 170:
-#line 673 "perly.y"
+  case 172:
+#line 677 "perly.y"
     { (yyval.opval) = newOP((yyvsp[-2].ival), 0); ;}
     break;
 
-  case 171:
-#line 675 "perly.y"
+  case 173:
+#line 679 "perly.y"
     { (yyval.opval) = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				scalar((yyvsp[0].opval))); ;}
     break;
 
-  case 172:
-#line 678 "perly.y"
+  case 174:
+#line 682 "perly.y"
     { (yyval.opval) = (yyvsp[-2].ival) == OP_NOT ? newUNOP((yyvsp[-2].ival), 0, newSVOP(OP_CONST, 0, newSViv(0)))
 					    : newOP((yyvsp[-2].ival), OPf_SPECIAL); ;}
     break;
 
-  case 173:
-#line 681 "perly.y"
+  case 175:
+#line 685 "perly.y"
     { (yyval.opval) = newUNOP((yyvsp[-3].ival), 0, (yyvsp[-1].opval)); ;}
     break;
 
-  case 174:
-#line 683 "perly.y"
+  case 176:
+#line 687 "perly.y"
     { (yyval.opval) = pmruntime((yyvsp[-3].opval), (yyvsp[-1].opval), 1); ;}
     break;
 
-  case 177:
-#line 690 "perly.y"
+  case 179:
+#line 694 "perly.y"
     { (yyval.opval) = my_attrs((yyvsp[-1].opval),(yyvsp[0].opval)); ;}
     break;
 
-  case 178:
-#line 692 "perly.y"
-    { (yyval.opval) = localize((yyvsp[0].opval),(yyvsp[-1].ival)); ;}
-    break;
-
-  case 179:
-#line 697 "perly.y"
-    { (yyval.opval) = sawparens((yyvsp[-1].opval)); ;}
-    break;
-
   case 180:
-#line 699 "perly.y"
-    { (yyval.opval) = sawparens(newNULLLIST()); ;}
+#line 696 "perly.y"
+    { (yyval.opval) = localize((yyvsp[0].opval),(yyvsp[-1].ival)); ;}
     break;
 
   case 181:
 #line 701 "perly.y"
-    { (yyval.opval) = (yyvsp[0].opval); ;}
+    { (yyval.opval) = sawparens((yyvsp[-1].opval)); ;}
     break;
 
   case 182:
 #line 703 "perly.y"
-    { (yyval.opval) = (yyvsp[0].opval); ;}
+    { (yyval.opval) = sawparens(newNULLLIST()); ;}
     break;
 
   case 183:
@@ -964,82 +964,92 @@ case 2:
     break;
 
   case 184:
-#line 710 "perly.y"
-    { (yyval.opval) = Nullop; ;}
+#line 707 "perly.y"
+    { (yyval.opval) = (yyvsp[0].opval); ;}
     break;
 
   case 185:
-#line 712 "perly.y"
+#line 709 "perly.y"
     { (yyval.opval) = (yyvsp[0].opval); ;}
     break;
 
   case 186:
-#line 716 "perly.y"
+#line 714 "perly.y"
     { (yyval.opval) = Nullop; ;}
     break;
 
   case 187:
-#line 718 "perly.y"
+#line 716 "perly.y"
     { (yyval.opval) = (yyvsp[0].opval); ;}
     break;
 
   case 188:
 #line 720 "perly.y"
-    { (yyval.opval) = (yyvsp[-1].opval); ;}
+    { (yyval.opval) = Nullop; ;}
     break;
 
   case 189:
-#line 726 "perly.y"
-    { PL_in_my = 0; (yyval.opval) = my((yyvsp[0].opval)); ;}
+#line 722 "perly.y"
+    { (yyval.opval) = (yyvsp[0].opval); ;}
     break;
 
   case 190:
-#line 730 "perly.y"
-    { (yyval.opval) = newCVREF((yyvsp[-1].ival),(yyvsp[0].opval)); ;}
+#line 724 "perly.y"
+    { (yyval.opval) = (yyvsp[-1].opval); ;}
     break;
 
   case 191:
-#line 734 "perly.y"
-    { (yyval.opval) = newSVREF((yyvsp[0].opval)); ;}
+#line 730 "perly.y"
+    { PL_in_my = 0; (yyval.opval) = my((yyvsp[0].opval)); ;}
     break;
 
   case 192:
-#line 738 "perly.y"
-    { (yyval.opval) = newAVREF((yyvsp[0].opval)); ;}
+#line 734 "perly.y"
+    { (yyval.opval) = newCVREF((yyvsp[-1].ival),(yyvsp[0].opval)); ;}
     break;
 
   case 193:
-#line 742 "perly.y"
-    { (yyval.opval) = newHVREF((yyvsp[0].opval)); ;}
+#line 738 "perly.y"
+    { (yyval.opval) = newSVREF((yyvsp[0].opval)); ;}
     break;
 
   case 194:
-#line 746 "perly.y"
+#line 742 "perly.y"
     { (yyval.opval) = newAVREF((yyvsp[0].opval)); ;}
     break;
 
   case 195:
-#line 750 "perly.y"
-    { (yyval.opval) = newGVREF(0,(yyvsp[0].opval)); ;}
+#line 746 "perly.y"
+    { (yyval.opval) = newHVREF((yyvsp[0].opval)); ;}
     break;
 
   case 196:
-#line 755 "perly.y"
-    { (yyval.opval) = scalar((yyvsp[0].opval)); ;}
+#line 750 "perly.y"
+    { (yyval.opval) = newAVREF((yyvsp[0].opval)); ;}
     break;
 
   case 197:
-#line 757 "perly.y"
-    { (yyval.opval) = scalar((yyvsp[0].opval));  ;}
+#line 754 "perly.y"
+    { (yyval.opval) = newGVREF(0,(yyvsp[0].opval)); ;}
     break;
 
   case 198:
 #line 759 "perly.y"
-    { (yyval.opval) = scope((yyvsp[0].opval)); ;}
+    { (yyval.opval) = scalar((yyvsp[0].opval)); ;}
     break;
 
   case 199:
-#line 762 "perly.y"
+#line 761 "perly.y"
+    { (yyval.opval) = scalar((yyvsp[0].opval));  ;}
+    break;
+
+  case 200:
+#line 763 "perly.y"
+    { (yyval.opval) = scope((yyvsp[0].opval)); ;}
+    break;
+
+  case 201:
+#line 766 "perly.y"
     { (yyval.opval) = (yyvsp[0].opval); ;}
     break;
 
