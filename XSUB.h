@@ -115,7 +115,7 @@ is a lexical $_ in scope.
 
 #define dAXMARK				\
 	I32 ax = POPMARK;	\
-	register SV ** const mark = PL_stack_base + ax++
+	register SV **mark = PL_stack_base + ax++
 
 #define dITEMS I32 items = SP - MARK
 
