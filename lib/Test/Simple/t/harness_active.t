@@ -19,21 +19,15 @@ my($out, $err) = Test::Simple::Catch::caught();
 # Can't use Test.pm, that's a 5.005 thing.
 package My::Test;
 
-print "1..4\n";
+# This has to be a require or else the END block below runs before
+# Test::Builder's own and the ending diagnostics don't come out right.
+require Test::Builder;
+my $TB = Test::Builder->create;
+$TB->plan(tests => 4);
 
-my $test_num = 1;
 # Utility testing functions.
 sub ok ($;$) {
-    my($test, $name) = @_;
-    my $ok = '';
-    $ok .= "not " unless $test;
-    $ok .= "ok $test_num";
-    $ok .= " - $name" if defined $name;
-    $ok .= "\n";
-    print $ok;
-    $test_num++;
-
-    return $test;
+    return $TB->ok(@_);
 }
 
 
@@ -41,14 +35,7 @@ sub main::err_ok ($) {
     my($expect) = @_;
     my $got = $err->read;
 
-    my $ok = ok( $got eq $expect );
-
-    unless( $ok ) {
-        print STDERR "got\n$got\n";
-        print STDERR "expected\n$expect\n";
-    }
-
-    return $ok;
+    return $TB->is_eq( $got, $expect );
 }
 
 
@@ -64,13 +51,14 @@ Test::More->builder->no_ending(1);
 #line 62
     fail( "this fails" );
     err_ok( <<ERR );
-#     Failed test ($0 at line 62)
+#   Failed test 'this fails'
+#   in $0 at line 62.
 ERR
 
 #line 72
     is( 1, 0 );
     err_ok( <<ERR );
-#     Failed test ($0 at line 72)
+#   Failed test in $0 at line 72.
 #          got: '1'
 #     expected: '0'
 ERR
@@ -83,7 +71,8 @@ ERR
     fail( "this fails" );
     err_ok( <<ERR );
 
-#     Failed test ($0 at line 71)
+#   Failed test 'this fails'
+#   in $0 at line 71.
 ERR
 
 
@@ -91,7 +80,7 @@ ERR
     is( 1, 0 );
     err_ok( <<ERR );
 
-#     Failed test ($0 at line 84)
+#   Failed test in $0 at line 84.
 #          got: '1'
 #     expected: '0'
 ERR

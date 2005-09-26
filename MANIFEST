@@ -1926,6 +1926,7 @@ lib/Term/Complete.t		See if Term::Complete works
 lib/Term/ReadLine.pm		Stub readline library
 lib/Term/ReadLine.t		See if Term::ReadLine works
 lib/Test/Builder.pm		For writing new test libraries
+lib/Test/Builder/Module.pm	Base class for test modules
 lib/Test/Harness/Assert.pm	Test::Harness::Assert (internal use only)
 lib/Test/Harness/bin/prove	The prove harness utility
 lib/Test/Harness/Changes	Test::Harness
@@ -1959,6 +1960,7 @@ lib/Test/Simple.pm		Basic utility for writing tests
 lib/Test/Simple/README		Test::Simple README
 lib/Test/Simple/t/00test_harness_check.t	Test::Simple test
 lib/Test/Simple/t/bad_plan.t	Test::Builder plan() test
+lib/Test/Simple/t/bail_out.t	Test::Builder BAIL_OUT test
 lib/Test/Simple/t/buffer.t	Test::Builder buffering test
 lib/Test/Simple/t/Builder.t	Test::Builder tests
 lib/Test/Simple/t/circular_data.t	Test::Simple test
@@ -2772,6 +2774,7 @@ t/lib/Test/Simple/sample_tests/pre_plan_death.plx		for exit.t
 t/lib/Test/Simple/sample_tests/require.plx		for exit.t
 t/lib/Test/Simple/sample_tests/success.plx		for exit.t
 t/lib/Test/Simple/sample_tests/too_few.plx		for exit.t
+t/lib/Test/Simple/sample_tests/too_few_fail.plx		for exit.t
 t/lib/Test/Simple/sample_tests/two_fail.plx		for exit.t
 t/lib/TieIn.pm			Testing library for dummy input handles
 t/lib/TieOut.pm			Testing library to capture prints

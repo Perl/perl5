@@ -8,7 +8,7 @@ $^C ||= 0;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.30';
+$VERSION = '0.31';
 $VERSION = eval $VERSION;    # make the alpha version come out as a number
 
 # Make Test::Builder thread-safe for ithreads.
@@ -395,7 +395,7 @@ sub ok {
     $self->{Curr_Test}++;
 
     # In case $name is a string overloaded object, force it to stringify.
-    $self->_unoverload(\$name);
+    $self->_unoverload_str(\$name);
 
     $self->diag(<<ERR) if defined $name and $name =~ /^[\d\s]+$/;
     You named your test '$name'.  You shouldn't use numbers for your test names.
@@ -405,7 +405,7 @@ ERR
     my($pack, $file, $line) = $self->caller;
 
     my $todo = $self->todo($pack);
-    $self->_unoverload(\$todo);
+    $self->_unoverload_str(\$todo);
 
     my $out;
     my $result = &share({});
@@ -448,7 +448,14 @@ ERR
     unless( $test ) {
         my $msg = $todo ? "Failed (TODO)" : "Failed";
         $self->_print_diag("\n") if $ENV{HARNESS_ACTIVE};
-        $self->diag("    $msg test ($file at line $line)\n");
+
+	if( defined $name ) {
+	    $self->diag(qq[  $msg test '$name'\n]);
+	    $self->diag(qq[  in $file at line $line.\n]);
+	}
+	else {
+	    $self->diag(qq[  $msg test in $file at line $line.\n]);
+	}
     } 
 
     return $test ? 1 : 0;
@@ -457,6 +464,7 @@ ERR
 
 sub _unoverload {
     my $self  = shift;
+    my $type  = shift;
 
     local($@,$!);
 
@@ -464,14 +472,50 @@ sub _unoverload {
 
     foreach my $thing (@_) {
         eval { 
-            if( defined $$thing ) {
-                if( my $string_meth = overload::Method($$thing, '""') ) {
+            if( _is_object($$thing) ) {
+                if( my $string_meth = overload::Method($$thing, $type) ) {
                     $$thing = $$thing->$string_meth();
                 }
             }
         };
     }
 }
+
+
+sub _is_object {
+    my $thing = shift;
+
+    return eval { ref $thing && $thing->isa('UNIVERSAL') } ? 1 : 0;
+}
+
+
+sub _unoverload_str {
+    my $self = shift;
+
+    $self->_unoverload(q[""], @_);
+}    
+
+sub _unoverload_num {
+    my $self = shift;
+
+    $self->_unoverload('0+', @_);
+
+    for my $val (@_) {
+        next unless $self->_is_dualvar($$val);
+        $$val = $$val+0;
+    }
+}
+
+
+# This is a hack to detect a dualvar such as $!
+sub _is_dualvar {
+    my($self, $val) = @_;
+
+    local $^W = 0;
+    my $numval = $val+0;
+    return 1 if $numval != 0 and $numval ne $val;
+}
+
 
 
 =item B<is_eq>
@@ -494,6 +538,8 @@ sub is_eq {
     my($self, $got, $expect, $name) = @_;
     local $Level = $Level + 1;
 
+    $self->_unoverload_str(\$got, \$expect);
+
     if( !defined $got || !defined $expect ) {
         # undef only matches undef and nothing else
         my $test = !defined $got && !defined $expect;
@@ -509,6 +555,8 @@ sub is_eq {
 sub is_num {
     my($self, $got, $expect, $name) = @_;
     local $Level = $Level + 1;
+
+    $self->_unoverload_num(\$got, \$expect);
 
     if( !defined $got || !defined $expect ) {
         # undef only matches undef and nothing else
@@ -533,7 +581,7 @@ sub _is_diag {
             }
             else {
                 # force numeric context
-                $$val = $$val+0;
+                $self->_unoverload_num($val);
             }
         }
         else {
@@ -684,8 +732,6 @@ sub maybe_regex {
 sub _regex_ok {
     my($self, $this, $regex, $cmp, $name) = @_;
 
-    local $Level = $Level + 1;
-
     my $ok = 0;
     my $usable_regex = $self->maybe_regex($regex);
     unless (defined $usable_regex) {
@@ -695,9 +741,19 @@ sub _regex_ok {
     }
 
     {
-        local $^W = 0;
-        my $test = $this =~ /$usable_regex/ ? 1 : 0;
+        my $test;
+        my $code = $self->_caller_context;
+
+        local($@, $!);
+
+        # Yes, it has to look like this or 5.4.5 won't see the #line directive.
+        # Don't ask me, man, I just work here.
+        $test = eval "
+$code" . q{$test = $this =~ /$usable_regex/ ? 1 : 0};
+
         $test = !$test if $cmp eq '!~';
+
+        local $Level = $Level + 1;
         $ok = $self->ok( $test, $name );
     }
 
@@ -724,15 +780,33 @@ Works just like Test::More's cmp_ok().
 
 =cut
 
+
+my %numeric_cmps = map { ($_, 1) } 
+                       ("<",  "<=", ">",  ">=", "==", "!=", "<=>");
+
 sub cmp_ok {
     my($self, $got, $type, $expect, $name) = @_;
 
+    # Treat overloaded objects as numbers if we're asked to do a
+    # numeric comparison.
+    my $unoverload = $numeric_cmps{$type} ? '_unoverload_num'
+                                          : '_unoverload_str';
+
+    $self->$unoverload(\$got, \$expect);
+
+
     my $test;
     {
-        local $^W = 0;
         local($@,$!);   # don't interfere with $@
                         # eval() sometimes resets $!
-        $test = eval "\$got $type \$expect";
+
+        my $code = $self->_caller_context;
+
+        # Yes, it has to look like this or 5.4.5 won't see the #line directive.
+        # Don't ask me, man, I just work here.
+        $test = eval "
+$code" . "\$got $type \$expect;";
+
     }
     local $Level = $Level + 1;
     my $ok = $self->ok($test, $name);
@@ -760,9 +834,22 @@ sub _cmp_diag {
 DIAGNOSTIC
 }
 
-=item B<BAILOUT>
 
-    $Test->BAILOUT($reason);
+sub _caller_context {
+    my $self = shift;
+
+    my($pack, $file, $line) = $self->caller(1);
+
+    my $code = '';
+    $code .= "#line $line $file\n" if defined $file and defined $line;
+
+    return $code;
+}
+
+
+=item B<BAIL_OUT>
+
+    $Test->BAIL_OUT($reason);
 
 Indicates to the Test::Harness that things are going so badly all
 testing should terminate.  This includes running any additional test
@@ -772,12 +859,19 @@ It will exit with 255.
 
 =cut
 
-sub BAILOUT {
+sub BAIL_OUT {
     my($self, $reason) = @_;
 
+    $self->{Bailed_Out} = 1;
     $self->_print("Bail out!  $reason");
     exit 255;
 }
+
+=for deprecated
+BAIL_OUT() used to be BAILOUT()
+
+*BAILOUT = \&BAIL_OUT;
+
 
 =item B<skip>
 
@@ -791,7 +885,7 @@ Skips the current test, reporting $why.
 sub skip {
     my($self, $why) = @_;
     $why ||= '';
-    $self->_unoverload(\$why);
+    $self->_unoverload_str(\$why);
 
     unless( $self->{Have_Plan} ) {
         require Carp;
@@ -948,11 +1042,13 @@ sub use_numbers {
     return $self->{Use_Nums};
 }
 
-=item B<no_header>
 
-    $Test->no_header($no_header);
+=item B<no_diag>
 
-If set to true, no "1..N" header will be printed.
+    $Test->no_diag($no_diag);
+
+If set true no diagnostics will be printed.  This includes calls to
+diag().
 
 =item B<no_ending>
 
@@ -963,24 +1059,28 @@ ends.  It also changes the exit code as described below.
 
 If this is true, none of that will be done.
 
+=item B<no_header>
+
+    $Test->no_header($no_header);
+
+If set to true, no "1..N" header will be printed.
+
 =cut
 
-sub no_header {
-    my($self, $no_header) = @_;
+foreach my $attribute (qw(No_Header No_Ending No_Diag)) {
+    my $method = lc $attribute;
 
-    if( defined $no_header ) {
-        $self->{No_Header} = $no_header;
-    }
-    return $self->{No_Header};
-}
+    my $code = sub {
+        my($self, $no) = @_;
 
-sub no_ending {
-    my($self, $no_ending) = @_;
+        if( defined $no ) {
+            $self->{$attribute} = $no;
+        }
+        return $self->{$attribute};
+    };
 
-    if( defined $no_ending ) {
-        $self->{No_Ending} = $no_ending;
-    }
-    return $self->{No_Ending};
+    no strict 'refs';
+    *{__PACKAGE__.'::'.$method} = $code;
 }
 
 
@@ -1023,6 +1123,8 @@ Mark Fowler <mark@twoshortplanks.com>
 
 sub diag {
     my($self, @msgs) = @_;
+
+    return if $self->no_diag;
     return unless @msgs;
 
     # Prevent printing headers when compiling (i.e. -c)
@@ -1172,6 +1274,7 @@ sub _new_fh {
 
 sub _is_fh {
     my $maybe_fh = shift;
+    return 0 unless defined $maybe_fh;
 
     return 1 if ref \$maybe_fh eq 'GLOB'; # its a glob
 
@@ -1490,8 +1593,11 @@ sub _ending {
     # should do the ending.
     # Exit if plan() was never called.  This is so "require Test::Simple" 
     # doesn't puke.
-    if( ($self->{Original_Pid} != $$) or
-	(!$self->{Have_Plan} && !$self->{Test_Died}) )
+    # Don't do an ending if we bailed out.
+    if( ($self->{Original_Pid} != $$) 			or
+	(!$self->{Have_Plan} && !$self->{Test_Died}) 	or
+	$self->{Bailed_Out}
+      )
     {
 	_my_exit($?);
 	return;
@@ -1516,26 +1622,31 @@ sub _ending {
         }
 
         my $num_failed = grep !$_->{'ok'}, 
-                              @{$test_results}[0..$self->{Expected_Tests}-1];
-        $num_failed += abs($self->{Expected_Tests} - @$test_results);
+                              @{$test_results}[0..$self->{Curr_Test}-1];
 
-        if( $self->{Curr_Test} < $self->{Expected_Tests} ) {
+        my $num_extra = $self->{Curr_Test} - $self->{Expected_Tests};
+
+        if( $num_extra < 0 ) {
             my $s = $self->{Expected_Tests} == 1 ? '' : 's';
             $self->diag(<<"FAIL");
 Looks like you planned $self->{Expected_Tests} test$s but only ran $self->{Curr_Test}.
 FAIL
         }
-        elsif( $self->{Curr_Test} > $self->{Expected_Tests} ) {
-            my $num_extra = $self->{Curr_Test} - $self->{Expected_Tests};
+        elsif( $num_extra > 0 ) {
             my $s = $self->{Expected_Tests} == 1 ? '' : 's';
             $self->diag(<<"FAIL");
 Looks like you planned $self->{Expected_Tests} test$s but ran $num_extra extra.
 FAIL
         }
-        elsif ( $num_failed ) {
+
+        if ( $num_failed ) {
+            my $num_tests = $self->{Curr_Test};
             my $s = $num_failed == 1 ? '' : 's';
+
+            my $qualifier = $num_extra == 0 ? '' : ' run';
+
             $self->diag(<<"FAIL");
-Looks like you failed $num_failed test$s of $self->{Expected_Tests}.
+Looks like you failed $num_failed test$s of $num_tests$qualifier.
 FAIL
         }
 
@@ -1547,7 +1658,18 @@ FAIL
             _my_exit( 255 ) && return;
         }
 
-        _my_exit( $num_failed <= 254 ? $num_failed : 254  ) && return;
+        my $exit_code;
+        if( $num_failed ) {
+            $exit_code = $num_failed <= 254 ? $num_failed : 254;
+        }
+        elsif( $num_extra != 0 ) {
+            $exit_code = 255;
+        }
+        else {
+            $exit_code = 0;
+        }
+
+        _my_exit( $exit_code ) && return;
     }
     elsif ( $self->{Skip_All} ) {
         _my_exit( 0 ) && return;
@@ -1581,7 +1703,7 @@ considered a failure and will exit with 255.
 So the exit codes are...
 
     0                   all tests successful
-    255                 test died
+    255                 test died or all passed but wrong # of tests run
     any other number    how many failed (including missing or extras)
 
 If you fail more than 254 tests, it will be reported as 254.

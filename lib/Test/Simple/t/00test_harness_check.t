@@ -5,12 +5,14 @@
 use Test::More;
 plan tests => 1;
 
+my $TH_Version = 2.03;
+
 require Test::Harness;
-unless( cmp_ok( $Test::Harness::VERSION, '>', 1.20, "T::H version" ) ) {
+unless( cmp_ok( $Test::Harness::VERSION, '>', $TH_Version, "T::H version" ) ) {
     diag <<INSTRUCTIONS;
 
 Test::Simple/More/Builder has features which depend on a version of
-Test::Harness greater than 1.20.  You have $Test::Harness::VERSION.
+Test::Harness greater than $TH_Version.  You have $Test::Harness::VERSION.
 Please install a new version from CPAN.
 
 If you've already tried to upgrade Test::Harness and still get this

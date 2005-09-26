@@ -1,3 +1,51 @@
+0.61  Fri Sep 23 23:26:05 PDT 2005
+    - create.t was trying to read from a file before it had been closed
+      (and thus the changes may not have yet been written).
+    * is_deeply() would call stringification methods on non-object strings
+      which happened to be the name of a string overloaded class.
+      [rt.cpan.org 14675]
+
+0.60_02  Tue Aug  9 00:27:41 PDT 2005
+    * Added Test::Builder::Module.
+    - Changed Test::More and Test::Simple to use Test::Builder::Module
+    - Minor Win32 testing nit in fail-more.t
+    * Added no_diag() method to Test::Builder and changed Test::More's
+      no_diag internals to use that. [rt.cpan.org 8655]
+    * Deprecated no_diag() as an option to "use Test::More".  Call the
+      Test::Builder method instead.
+
+0.60_01  Sun Jul  3 18:11:58 PDT 2005
+    - Moved the docs around a little to better group all the testing
+      functions together. [rt.cpan.org 8388]
+    * Added a BAIL_OUT() function to Test::More [rt.cpan.org 8381]
+    - Changed Test::Builder->BAILOUT to BAIL_OUT to match other method's
+      naming conventions.  BAILOUT remains but is deprecated.
+    * Changed the standard failure diagnostics to include the test name.
+      [rt.cpan.org 12490]
+    - is_deeply() was broken for overloaded objects in the top level in
+      0.59_01.  [rt.cpan.org 13506]
+    - String overloaded objects without an 'eq' or '==' method are now
+      handled in cmp_ok() and is().
+    - cmp_ok() will now treat overloaded objects as numbers if the comparison
+      operator is numeric. [rt.cpan.org 13156]
+    - cmp_ok(), like() and unlike will now throw uninit warnings if their
+      arguments are undefined. [rt.cpan.org 13155]
+    - cmp_ok() will now throw warnings as if the comparison were run 
+      normally, for example cmp_ok(2, '==', 'foo') will warn about 'foo' 
+      not being numeric.  Previously all warnings in the comparison were
+      supressed. [rt.cpan.org 13155]
+    - Tests will now report *both* the number of tests failed and if the
+      wrong number of tests were run.  Previously if tests failed and the
+      wrong number were run it would only report the latter. 
+      [rt.cpan.org 13494]
+    - Missing or extra tests are not considered failures for the purposes
+      of calculating the exit code.  Should there be no failures but the
+      wrong number of tests the exit code will be 254.
+    - Avoiding an unbalanced sort in eq_set() [bugs.perl.org 36354]
+    - Documenting that eq_set() doesn't deal well with refs.
+    - Clarified how is_deeply() compares a bit.
+    * Once again working on 5.4.5.
+
 0.60  Tue May  3 14:20:34 PDT 2005
 
 0.59_01  Tue Apr 26 21:51:12 PDT 2005
