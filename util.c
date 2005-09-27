@@ -2759,7 +2759,8 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext,
     /* additional extensions to try in each dir if scriptname not found */
 #ifdef SEARCH_EXTS
     const char *const exts[] = { SEARCH_EXTS };
-    const char *const *const ext = search_ext ? search_ext : exts;
+    const char *const *const ext =
+	search_ext ? (const char *const *const)search_ext : exts;
     int extidx = 0, i = 0;
     const char *curext = Nullch;
 #else
