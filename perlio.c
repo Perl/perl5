@@ -2066,6 +2066,8 @@ PerlIOBase_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	    return 0;
 	}
 	while (count > 0) {
+	 get_cnt:
+	  {
 	    SSize_t avail = PerlIO_get_cnt(f);
 	    SSize_t take = 0;
 	    if (avail > 0)
@@ -2076,11 +2078,14 @@ PerlIOBase_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 		PerlIO_set_ptrcnt(f, ptr + take, (avail -= take));
 		count -= take;
 		buf += take;
+		if (avail == 0)		/* set_ptrcnt could have reset avail */
+		    goto get_cnt;
 	    }
 	    if (count > 0 && avail <= 0) {
 		if (PerlIO_fill(f) != 0)
 		    break;
 	    }
+	  }
 	}
 	return (buf - (STDCHAR *) vbuf);
     }
@@ -3538,7 +3543,11 @@ PerlIOBuf_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 
 /*
  * This "flush" is akin to sfio's sync in that it handles files in either
- * read or write state
+ * read or write state.  For write state, we put the postponed data through
+ * the next layers.  For read state, we seek() the next layers to the
+ * offset given by current position in the buffer, and discard the buffer
+ * state (XXXX supposed to be for seek()able buffers only, but now it is done
+ * in any case?).  Then the pass the stick further in chain.
  */
 IV
 PerlIOBuf_flush(pTHX_ PerlIO *f)
@@ -3597,6 +3606,10 @@ PerlIOBuf_flush(pTHX_ PerlIO *f)
     return code;
 }
 
+/* This discards the content of the buffer after b->ptr, and rereads
+ * the buffer from the position off in the layer downstream; here off
+ * is at offset corresponding to b->ptr - b->buf.
+ */
 IV
 PerlIOBuf_fill(pTHX_ PerlIO *f)
 {
@@ -3607,7 +3620,7 @@ PerlIOBuf_fill(pTHX_ PerlIO *f)
      * Down-stream flush is defined not to loose read data so is harmless.
      * we would not normally be fill'ing if there was data left in anycase.
      */
-    if (PerlIO_flush(f) != 0)
+    if (PerlIO_flush(f) != 0)	/* XXXX Check that its seek() succeeded?! */
 	return -1;
     if (PerlIOBase(f)->flags & PERLIO_F_TTY)
 	PerlIOBase_flush_linebuf(aTHX);
@@ -4083,6 +4096,14 @@ PERLIO_FUNCS_DECL(PerlIO_pending) = {
  * crlf - translation On read translate CR,LF to "\n" we do this by
  * overriding ptr/cnt entries to hand back a line at a time and keeping a
  * record of which nl we "lied" about. On write translate "\n" to CR,LF
+ *
+ * c->nl points on the first byte of CR LF pair when it is temporarily
+ * replaced by LF, or to the last CR of the buffer.  In the former case
+ * the caller thinks that the buffer ends at c->nl + 1, in the latter
+ * that it ends at c->nl; these two cases can be distinguished by
+ * *c->nl.  c->nl is set during _getcnt() call, and unset during
+ * _unread() and _flush() calls.
+ * It only matters for read operations.
  */
 
 typedef struct {
@@ -4127,7 +4148,7 @@ SSize_t
 PerlIOCrlf_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
     PerlIOCrlf *c = PerlIOSelf(f, PerlIOCrlf);
-    if (c->nl) {
+    if (c->nl) {	/* XXXX Shouldn't it be done only if b->ptr > c->nl? */
 	*(c->nl) = 0xd;
 	c->nl = NULL;
     }
@@ -4157,8 +4178,10 @@ PerlIOCrlf_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 			count--;
 		    }
 		    else {
-			buf++;
-			break;
+		    /* If b->ptr - 1 == b->buf, we are undoing reading 0xa */
+			*--(b->ptr) = 0xa;	/* Works even if 0xa == '\r' */
+			unread++;
+			count--;
 		    }
 		}
 		else {
@@ -4172,6 +4195,7 @@ PerlIOCrlf_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
     }
 }
 
+/* XXXX This code assumes that buffer size >=2, but does not check it... */
 SSize_t
 PerlIOCrlf_get_cnt(pTHX_ PerlIO *f)
 {
