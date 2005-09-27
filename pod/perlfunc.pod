@@ -4298,10 +4298,10 @@ version should be used instead.
     require 5.6.1;	# ditto
     require 5.006_001;	# ditto; preferred for backwards compatibility
 
-Otherwise, C<ref> demands that a library file be included if it hasn't already
-been included.  The file is included via the do-FILE mechanism, which is
-essentially just a variety of C<eval>.  Has semantics similar to the
-following subroutine:
+Otherwise, C<require> demands that a library file be included if it
+hasn't already been included.  The file is included via the do-FILE
+mechanism, which is essentially just a variety of C<eval>.  Has
+semantics similar to the following subroutine:
 
     sub require {
        my ($filename) = @_;
