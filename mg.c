@@ -785,11 +785,16 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	if (*(mg->mg_ptr+1) == '\0')
 	    sv_setiv(sv, (IV)((PL_dowarn & G_WARN_ON) ? TRUE : FALSE));
 	else if (strEQ(mg->mg_ptr+1, "ARNING_BITS")) {
-	    if (PL_compiling.cop_warnings == pWARN_NONE ||
-	        PL_compiling.cop_warnings == pWARN_STD)
-	    {
+	    if (PL_compiling.cop_warnings == pWARN_NONE) {
 	        sv_setpvn(sv, WARN_NONEstring, WARNsize) ;
-            }
+	    }
+	    else if (PL_compiling.cop_warnings == pWARN_STD) {
+		sv_setpvn(
+		    sv, 
+		    (PL_dowarn & G_WARN_ON) ? WARN_ALLstring : WARN_NONEstring,
+		    WARNsize
+		);
+	    }
             else if (PL_compiling.cop_warnings == pWARN_ALL) {
 		/* Get the bit mask for $warnings::Bits{all}, because
 		 * it could have been extended by warnings::register */
