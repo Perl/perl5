@@ -5958,8 +5958,10 @@ Perl_ck_require(pTHX_ OP *o)
     if (!(o->op_flags & OPf_SPECIAL)) { /* Wasn't written as CORE::require */
 	/* handle override, if any */
 	gv = gv_fetchpv("require", FALSE, SVt_PVCV);
-	if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv)))
-	    gv = gv_fetchpv("CORE::GLOBAL::require", FALSE, SVt_PVCV);
+	if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv))) {
+	    GV **gvp = (GV**)hv_fetch(PL_globalstash, "require", 7, FALSE);
+	    if (gvp) gv = *gvp; else gv = Nullgv;
+	}
     }
 
     if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) {
