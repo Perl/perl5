@@ -408,7 +408,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 			else
 			    was_fdopen = TRUE;
 			if (!(fp = PerlIO_openn(aTHX_ type,mode,fd,0,0,NULL,num_svs,svp))) {
-			    if (dodup)
+			    if (dodup && fd >= 0)
 				PerlLIO_close(fd);
 			}
 		    }
