@@ -26,6 +26,7 @@
 #include "PerlApp.hrh"
 #include "PerlApp.rsg"
 
+#include "EXTERN.h"
 #include "perl.h"
 #include "PerlBase.h"
 
