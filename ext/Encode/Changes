@@ -1,8 +1,21 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.11 2005/08/05 10:58:25 dankogai Exp dankogai $
+# $Id: Changes,v 2.12 2005/09/08 14:17:17 dankogai Exp dankogai $
 #
-$Revision: 2.11 $ $Date: 2005/08/05 10:58:25 $
+$Revision: 2.12 $ $Date: 2005/09/08 14:17:17 $
+! Encode.xs Encode.pm t/fallback.t
+  Now accepts coderef for CHECK!
+! ucm/8859-7.ucm
+  Updated to newer version at unicode.org
+  http://rt.cpan.org/NoAuth/Bug.html?id=14222
+! lib/Encode/Supported.pod
+  More POD typo fixed.
+  <42F5E243.80500@gmail.com>
+! encoding.pm
+  More POD typo leftover fixed.
+  Message-Id: <b77c1dce05080615487f95314@mail.gmail.com>
+
+2.11  2005/08/05 10:58:25
 ! AUTHORS CHANGES
   To reflect changes below
 ! Encode.pm encoding.pm 

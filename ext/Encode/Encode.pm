@@ -1,9 +1,9 @@
 #
-# $Id: Encode.pm,v 2.11 2005/08/05 10:58:25 dankogai Exp dankogai $
+# $Id: Encode.pm,v 2.12 2005/09/08 14:17:17 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.11 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.12 $ =~ /(\d+)/g;
 sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load(__PACKAGE__, $VERSION);
@@ -557,8 +557,11 @@ L<Encode::Encoding> and L<Encode::PerlIO>.
 
 =head1 Handling Malformed Data
 
-The optional I<CHECK> argument is used as follows.  When you omit it,
-Encode::FB_DEFAULT ( == 0 ) is assumed.
+The optional I<CHECK> argument tells Encode what to do when it
+encounters malformed data.  Without CHECK, Encode::FB_DEFAULT ( == 0 )
+is assumed.
+
+As of version 2.12 Encode supports coderef values for CHECK.  See below.
 
 =over 2
 
@@ -648,12 +651,16 @@ constants via C<use Encode qw(:fallback_all)>.
 
 =back
 
-=head2 Unimplemented fallback schemes
+=head2 coderef for CHECK
 
-In the future, you will be able to use a code reference to a callback
-function for the value of I<CHECK> but its API is still undecided.
+As of Encode 2.12 CHECK can also be a code reference which takes the
+ord value of unmapped caharacter as an argument and returns a string
+that represents the fallback character.  For instance,
 
-The fallback scheme does not work on EBCDIC platforms.
+  $ascii = encode("ascii", $utf8, sub{ sprintf "<U+%04X>", shift });
+
+Acts like FB_PERLQQ but E<lt>U+I<XXXX>E<gt> is used instead of
+\x{I<XXXX>}.
 
 =head1 Defining Encodings
 
@@ -799,7 +806,7 @@ Now that is overruled by Larry Wall himself.
   
   For what it's worth, that's how I've always kept them straight in my
   head.
-
+  
   Also for what it's worth, Perl 6 will mostly default to strict but
   make it easy to switch back to lax.
   

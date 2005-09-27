@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.5 2005/08/05 10:58:25 dankogai Exp dankogai $
+ $Id: Encode.xs,v 2.6 2005/09/08 14:17:17 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -35,6 +35,8 @@ UNIMPLEMENTED(_encoded_bytes_to_utf8, I32)
                                 UTF8_ALLOW_NON_CONTINUATION |     \
                                 UTF8_ALLOW_LONG))
 
+static SV* fallback_cb = (SV*)NULL ;
+
 void
 Encode_XSEncoding(pTHX_ encode_t * enc)
 {
@@ -62,6 +64,29 @@ call_failure(SV * routine, U8 * done, U8 * dest, U8 * orig)
 
 #define ERR_ENCODE_NOMAP "\"\\x{%04" UVxf "}\" does not map to %s"
 #define ERR_DECODE_NOMAP "%s \"\\x%02" UVXf "\" does not map to Unicode"
+
+static SV *
+do_fallback_cb(pTHX_ UV ch)
+{
+    dSP;
+    int argc;
+    SV* retval;
+    ENTER;
+    SAVETMPS;
+    PUSHMARK(sp);
+    XPUSHs(sv_2mortal(newSVnv((UV)ch)));
+    PUTBACK;
+    argc = call_sv(fallback_cb, G_SCALAR);
+    SPAGAIN;
+    if (argc != 1){
+	croak("fallback sub must return scalar!");
+    }
+    retval = newSVsv(POPs);
+    PUTBACK;
+    FREETMPS;
+    LEAVE;
+    return retval;
+}
 
 static SV *
 encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
@@ -167,6 +192,7 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		}
 		if (check & (ENCODE_PERLQQ|ENCODE_HTMLCREF|ENCODE_XMLCREF)){
 		    SV* subchar = 
+			(fallback_cb != (SV*)NULL) ? do_fallback_cb(aTHX_ ch) :
 			newSVpvf(check & ENCODE_PERLQQ ? "\\x{%04"UVxf"}" :
 				 check & ENCODE_HTMLCREF ? "&#%" UVuf ";" :
 				 "&#x%" UVxf ";", (UV)ch);
@@ -199,7 +225,10 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		}
 		if (check &
 		    (ENCODE_PERLQQ|ENCODE_HTMLCREF|ENCODE_XMLCREF)){
-		    SV* subchar = newSVpvf("\\x%02" UVXf, (UV)s[slen]);
+		    SV* subchar = 
+			(fallback_cb != (SV*)NULL) ? 
+			do_fallback_cb(aTHX_ (UV)s[slen]) :
+			newSVpvf("\\x%02" UVXf, (UV)s[slen]);
 		    sdone += slen + 1;
 		    ddone += dlen + SvCUR(subchar);
 		    sv_catsv(dst, subchar);
@@ -536,15 +565,27 @@ CODE:
 }
 
 void
-Method_decode(obj,src,check = 0)
+Method_decode(obj,src,check_sv = &PL_sv_no)
 SV *	obj
 SV *	src
-int	check
+SV *	check_sv
 CODE:
 {
+    int check;
     encode_t *enc = INT2PTR(encode_t *, SvIV(SvRV(obj)));
     if (SvUTF8(src)) {
     	sv_utf8_downgrade(src, FALSE);
+    }
+    if (SvROK(check_sv)){
+	if (fallback_cb == (SV*)NULL){
+            fallback_cb = newSVsv(check_sv); /* First time */
+        }else{
+            SvSetSV(fallback_cb, check_sv); /* Been here before */
+	}
+	check = ENCODE_PERLQQ|ENCODE_LEAVE_SRC; /* same as FB_PERLQQ */
+    }else{
+	fallback_cb = (SV*)NULL;
+	check = SvIV(check_sv);
     }
     ST(0) = encode_method(aTHX_ enc, enc->t_utf8, src, check,
 			  NULL, Nullsv, NULL);
@@ -552,15 +593,29 @@ CODE:
     XSRETURN(1);
 }
 
+
+
 void
-Method_encode(obj,src,check = 0)
+Method_encode(obj,src,check_sv = &PL_sv_no)
 SV *	obj
 SV *	src
-int	check
+SV *	check_sv
 CODE:
 {
+    int check;
     encode_t *enc = INT2PTR(encode_t *, SvIV(SvRV(obj)));
     sv_utf8_upgrade(src);
+    if (SvROK(check_sv)){
+	if (fallback_cb == (SV*)NULL){
+            fallback_cb = newSVsv(check_sv); /* First time */
+        }else{
+            SvSetSV(fallback_cb, check_sv); /* Been here before */
+	}
+	check = ENCODE_PERLQQ|ENCODE_LEAVE_SRC; /* same as FB_PERLQQ */
+    }else{
+	fallback_cb = (SV*)NULL;
+	check = SvIV(check_sv);
+    }
     ST(0) = encode_method(aTHX_ enc, enc->f_utf8, src, check,
 			  NULL, Nullsv, NULL);
     XSRETURN(1);
