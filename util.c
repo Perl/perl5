@@ -2735,7 +2735,8 @@ Perl_same_dirent(pTHX_ char *a, char *b)
 #endif /* !HAS_RENAME */
 
 char*
-Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 flags)
+Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext,
+		 I32 flags)
 {
     const char *xfound = Nullch;
     char *xfailed = Nullch;
@@ -2757,8 +2758,8 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 f
 #endif
     /* additional extensions to try in each dir if scriptname not found */
 #ifdef SEARCH_EXTS
-    const char *exts[] = { SEARCH_EXTS };
-    const char **ext = search_ext ? search_ext : exts;
+    const char *const exts[] = { SEARCH_EXTS };
+    const char *const *const ext = search_ext ? search_ext : exts;
     int extidx = 0, i = 0;
     const char *curext = Nullch;
 #else
