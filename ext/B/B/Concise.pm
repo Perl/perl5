@@ -559,7 +559,7 @@ $priv{$_}{64} = "REFC" for ("leave", "leavesub", "leavesublv", "leavewrite");
 $priv{"aassign"}{64} = "COMMON";
 $priv{"aassign"}{32} = "PHASH" if $] < 5.009;
 $priv{"sassign"}{64} = "BKWARD";
-$priv{$_}{64} = "RTIME" for ("match", "subst", "substcont");
+$priv{$_}{64} = "RTIME" for ("match", "subst", "substcont", "qr");
 @{$priv{"trans"}}{1,2,4,8,16,64} = ("<UTF", ">UTF", "IDENT", "SQUASH", "DEL",
 				    "COMPL", "GROWS");
 $priv{"repeat"}{64} = "DOLIST";
