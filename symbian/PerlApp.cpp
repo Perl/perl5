@@ -26,7 +26,7 @@
 #include "PerlApp.hrh"
 #include "PerlApp.rsg"
 
-#include "patchlevel.h"
+#include "perl.h"
 #include "PerlBase.h"
 
 const TUid KPerlAppUid = { 0x102015F6 };
