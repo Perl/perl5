@@ -3187,14 +3187,18 @@ Perl_vload_module(pTHX_ U32 flags, SV *name, SV *ver, va_list *args)
 }
 
 OP *
-Perl_dofile(pTHX_ OP *term)
+Perl_dofile(pTHX_ OP *term, I32 force_builtin)
 {
     OP *doop;
-    GV *gv;
+    GV *gv = Nullgv;
 
-    gv = gv_fetchpv("do", FALSE, SVt_PVCV);
-    if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv)))
-	gv = gv_fetchpv("CORE::GLOBAL::do", FALSE, SVt_PVCV);
+    if (!force_builtin) {
+	gv = gv_fetchpv("do", FALSE, SVt_PVCV);
+	if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv))) {
+	    GV **gvp = (GV**)hv_fetch(PL_globalstash, "do", 2, FALSE);
+	    if (gvp) gv = *gvp; else gv = Nullgv;
+	}
+    }
 
     if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) {
 	doop = ck_subr(newUNOP(OP_ENTERSUB, OPf_STACKED,

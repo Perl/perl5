@@ -707,7 +707,7 @@ case 2:
 
   case 133:
 #line 569 "perly.y"
-    { (yyval.opval) = dofile((yyvsp[0].opval)); ;}
+    { (yyval.opval) = dofile((yyvsp[0].opval), (yyvsp[-1].ival)); ;}
     break;
 
   case 134:

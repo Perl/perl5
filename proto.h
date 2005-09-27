@@ -445,7 +445,7 @@ PERL_CALLCONV void	Perl_do_vop(pTHX_ I32 optype, SV* sv, SV* left, SV* right)
 			__attribute__nonnull__(pTHX_3)
 			__attribute__nonnull__(pTHX_4);
 
-PERL_CALLCONV OP*	Perl_dofile(pTHX_ OP* term)
+PERL_CALLCONV OP*	Perl_dofile(pTHX_ OP* term, I32 force_builtin)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV I32	Perl_dowantarray(pTHX)

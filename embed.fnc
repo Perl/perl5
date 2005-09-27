@@ -221,7 +221,7 @@ p	|I32	|do_trans	|NN SV* sv
 p	|UV	|do_vecget	|NN SV* sv|I32 offset|I32 size
 p	|void	|do_vecset	|NN SV* sv
 p	|void	|do_vop		|I32 optype|NN SV* sv|NN SV* left|NN SV* right
-p	|OP*	|dofile		|NN OP* term
+p	|OP*	|dofile		|NN OP* term|I32 force_builtin
 ApR	|I32	|dowantarray
 Ap	|void	|dump_all
 Ap	|void	|dump_eval

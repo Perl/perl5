@@ -566,7 +566,7 @@ anonymous:	'[' expr ']'
 
 /* Things called with "do" */
 termdo	:       DO term	%prec UNIOP                     /* do $filename */
-			{ $$ = dofile($2); }
+			{ $$ = dofile($2, $1); }
 	|	DO block	%prec '('               /* do { code */
 			{ $$ = newUNOP(OP_NULL, OPf_SPECIAL, scope($2)); }
 	|	DO WORD '(' ')'                         /* do somesub() */
