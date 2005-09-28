@@ -3698,7 +3698,7 @@ Perl_sv_utf8_decode(pTHX_ register SV *sv)
          * we want to make sure everything inside is valid utf8 first.
          */
         c = (const U8 *) SvPVX_const(sv);
-	if (!is_utf8_string(c, SvCUR(sv)+1))
+	if (!is_utf8_string((U8 *)c, SvCUR(sv)+1))
 	    return FALSE;
         e = (const U8 *) SvEND(sv);
         while (c < e) {
@@ -4025,7 +4025,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 			    if (!intro)
 				cv_ckproto(cv, (GV*)dstr,
 					   SvPOK(sref)
-					   ? SvPVX_const(sref) : Nullch);
+					   ? (char *)SvPVX_const(sref)
+					   : Nullch);
 			}
 			GvCV(dstr) = (CV*)sref;
 			GvCVGEN(dstr) = 0; /* Switch off cacheness. */
@@ -4917,7 +4918,7 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     }
 
     /* Rest of work is done else where */
-    mg = sv_magicext(sv,obj,how,vtable,name,namlen);
+    mg = sv_magicext(sv,obj,how,(MGVTBL *)vtable,name,namlen);
 
     switch (how) {
     case PERL_MAGIC_taint:
@@ -5555,7 +5556,7 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
 #endif
         }
 	else {
-	     ulen = Perl_utf8_length(aTHX_ s, s + len);
+	     ulen = Perl_utf8_length(aTHX_ (U8 *)s, (U8 *)s + len);
 	     if (!mg && !SvREADONLY(sv)) {
 		  sv_magic(sv, 0, PERL_MAGIC_utf8, 0, 0);
 		  mg = mg_find(sv, PERL_MAGIC_utf8);
@@ -5897,7 +5898,7 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 	    /* Call utf8n_to_uvchr() to validate the sequence
 	     * (unless a simple non-UTF character) */
 	    if (!UTF8_IS_INVARIANT(*s))
-		utf8n_to_uvchr(s, UTF8SKIP(s), &n, 0);
+		utf8n_to_uvchr((U8 *)s, UTF8SKIP(s), &n, 0);
 	    if (n > 0) {
 		s += n;
 		len++;
@@ -5993,7 +5994,7 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 	      if (SvUTF8(sv1)) {
 		   /* sv1 is the UTF-8 one,
 		    * if is equal it must be downgrade-able */
-		   char * const pv = (char*)bytes_from_utf8((const U8*)pv1,
+		   char * const pv = (char*)bytes_from_utf8((U8*)pv1,
 						     &cur1, &is_utf8);
 		   if (pv != pv1)
 			pv1 = tpv = pv;
@@ -6001,7 +6002,7 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 	      else {
 		   /* sv2 is the UTF-8 one,
 		    * if is equal it must be downgrade-able */
-		   char * const pv = (char *)bytes_from_utf8((const U8*)pv2,
+		   char * const pv = (char *)bytes_from_utf8((U8*)pv2,
 						      &cur2, &is_utf8);
 		   if (pv != pv2)
 			pv2 = tpv = pv;
@@ -6069,7 +6070,7 @@ Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
 		 pv2 = SvPV_const(svrecode, cur2);
 	    }
 	    else {
-		 pv2 = tpv = (char*)bytes_to_utf8((const U8*)pv2, &cur2);
+		 pv2 = tpv = (char*)bytes_to_utf8((U8*)pv2, &cur2);
 	    }
 	}
 	else {
@@ -6079,7 +6080,7 @@ Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
 		 pv1 = SvPV_const(svrecode, cur1);
 	    }
 	    else {
-		 pv1 = tpv = (char*)bytes_to_utf8((const U8*)pv1, &cur1);
+		 pv1 = tpv = (char*)bytes_to_utf8((U8*)pv1, &cur1);
 	    }
 	}
     }
@@ -7058,7 +7059,7 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
 	STRLEN tmplen = -len;
         is_utf8 = TRUE;
 	/* See the note in hv.c:hv_fetch() --jhi */
-	src = (char*)bytes_from_utf8((const U8*)src, &tmplen, &is_utf8);
+	src = (char*)bytes_from_utf8((U8*)src, &tmplen, &is_utf8);
 	len = tmplen;
     }
     if (!hash)
@@ -8155,7 +8156,7 @@ Perl_sv_unref_flags(pTHX_ SV *sv, U32 flags)
     if (SvREFCNT(rv) != 1 || (flags & SV_IMMEDIATE_UNREF))
 	SvREFCNT_dec(rv);
     else /* XXX Hack, but hard to make $a=$a->[1] work otherwise */
-	sv_2mortal(rv);		/* Schedule for freeing later */
+	sv_2mortal((SV *)rv);		/* Schedule for freeing later */
 }
 
 /*
@@ -9034,7 +9035,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		if (!veclen)
 		    continue;
 		if (vec_utf8)
-		    uv = utf8n_to_uvchr(vecstr, veclen, &ulen,
+		    uv = utf8n_to_uvchr((U8 *)vecstr, veclen, &ulen,
 					UTF8_ALLOW_ANYUV);
 		else {
 		    uv = *vecstr;
@@ -9120,7 +9121,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		if (!veclen)
 		    continue;
 		if (vec_utf8)
-		    uv = utf8n_to_uvchr(vecstr, veclen, &ulen,
+		    uv = utf8n_to_uvchr((U8 *)vecstr, veclen, &ulen,
 					UTF8_ALLOW_ANYUV);
 		else {
 		    uv = *vecstr;

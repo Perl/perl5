@@ -48,7 +48,7 @@ Perl_boot_core_xsutils(pTHX)
 {
     const char file[] = __FILE__;
 
-    newXS("attributes::bootstrap",	XS_attributes_bootstrap,	file);
+    newXS("attributes::bootstrap", XS_attributes_bootstrap, (char *)file);
 }
 
 #include "XSUB.h"
@@ -164,11 +164,11 @@ XS(XS_attributes_bootstrap)
     if( items > 1 )
         Perl_croak(aTHX_ "Usage: attributes::bootstrap $module");
 
-    newXSproto("attributes::_warn_reserved", XS_attributes__warn_reserved, file, "");
-    newXS("attributes::_modify_attrs",	XS_attributes__modify_attrs,	file);
-    newXSproto("attributes::_guess_stash", XS_attributes__guess_stash, file, "$");
-    newXSproto("attributes::_fetch_attrs", XS_attributes__fetch_attrs, file, "$");
-    newXSproto("attributes::reftype",	XS_attributes_reftype,	file, "$");
+    newXSproto("attributes::_warn_reserved", XS_attributes__warn_reserved, (char *)file, "");
+    newXS("attributes::_modify_attrs",	XS_attributes__modify_attrs,	(char *)file);
+    newXSproto("attributes::_guess_stash", XS_attributes__guess_stash, (char *)file, "$");
+    newXSproto("attributes::_fetch_attrs", XS_attributes__fetch_attrs, (char *)file, "$");
+    newXSproto("attributes::reftype",	XS_attributes_reftype,	(char *)file, "$");
 
     XSRETURN(0);
 }
