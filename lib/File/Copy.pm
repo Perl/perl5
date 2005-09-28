@@ -33,6 +33,11 @@ require Exporter;
 
 $Too_Big = 1024 * 1024 * 2;
 
+sub carp {
+    require Carp;
+    goto &Carp::carp;
+}
+
 my $macfiles;
 if ($^O eq 'MacOS') {
 	$macfiles = eval { require Mac::MoreFiles };
@@ -74,7 +79,10 @@ sub copy {
 			 : (ref(\$to) eq 'GLOB'));
 
     if ($from eq $to) { # works for references, too
-	croak("'$from' and '$to' are identical (not copied)");
+	carp("'$from' and '$to' are identical (not copied)");
+        # The "copy" was a success as the source and destination contain
+        # the same data.
+        return 1;
     }
 
     if ((($Config{d_symlink} && $Config{d_readlink}) || $Config{d_link}) &&
@@ -83,7 +91,8 @@ sub copy {
 	if (@fs) {
 	    my @ts = stat($to);
 	    if (@ts && $fs[0] == $ts[0] && $fs[1] == $ts[1]) {
-		croak("'$from' and '$to' are identical (not copied)");
+		carp("'$from' and '$to' are identical (not copied)");
+                return 0;
 	    }
 	}
     }
@@ -178,7 +187,10 @@ sub copy {
 }
 
 sub move {
+    croak("Usage: move(FROM, TO) ") unless @_ == 2;
+
     my($from,$to) = @_;
+
     my($fromsz,$tosz1,$tomt1,$tosz2,$tomt2,$sts,$ossts);
 
     if (-d $to && ! -d $from) {
@@ -201,7 +213,18 @@ sub move {
                 $tosz2 == $fromsz;                         # it's all there
 
     ($tosz1,$tomt1) = (stat($to))[7,9];  # just in case rename did something
-    return 1 if copy($from,$to) && unlink($from);
+
+    {
+        local $@;
+        eval {
+            local $SIG{__DIE__};
+            copy($from,$to) or die;
+            my($atime, $mtime) = (stat($from))[8,9];
+            utime($atime, $mtime, $to);
+            unlink($from)   or die;
+        };
+        return 1 unless $@;
+    }
     ($sts,$ossts) = ($! + 0, $^E + 0);
 
     ($tosz2,$tomt2) = ((stat($to))[7,9],0,0) if defined $tomt1;
