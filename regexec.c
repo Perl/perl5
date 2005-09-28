@@ -140,7 +140,7 @@
 #define HOPMAYBE3c(pos,off,lim) ((char*)HOPMAYBE3(pos,off,lim))
 
 #define LOAD_UTF8_CHARCLASS(class,str) STMT_START { \
-    if (!CAT2(PL_utf8_,class)) { bool ok; ENTER; save_re_context(); ok=CAT2(is_utf8_,class)((const U8*)str); assert(ok); LEAVE; } } STMT_END
+    if (!CAT2(PL_utf8_,class)) { bool ok; ENTER; save_re_context(); ok=CAT2(is_utf8_,class)((U8*)str); assert(ok); LEAVE; } } STMT_END
 #define LOAD_UTF8_CHARCLASS_ALNUM() LOAD_UTF8_CHARCLASS(alnum,"a")
 #define LOAD_UTF8_CHARCLASS_DIGIT() LOAD_UTF8_CHARCLASS(digit,"0")
 #define LOAD_UTF8_CHARCLASS_SPACE() LOAD_UTF8_CHARCLASS(space," ")
@@ -860,7 +860,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	   This leaves EXACTF only, which is dealt with in find_byclass().  */
         const U8* const str = (U8*)STRING(prog->regstclass);
         const int cl_l = (PL_regkind[(U8)OP(prog->regstclass)] == EXACT
-		    ? CHR_DIST(str+STR_LEN(prog->regstclass), str)
+			  ? CHR_DIST((U8 *)str+STR_LEN(prog->regstclass),
+				     (U8 *)str)
 		    : 1);
 	const char * const endpos = (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
 		? HOP3c(s, (prog->minlen ? cl_l : 0), strend)
@@ -2668,7 +2669,7 @@ S_regmatch(pTHX_ regnode *prog)
 		else {
 		    const U8 * const r = reghop3((U8*)locinput, -1, (U8*)PL_bostr);
 		
-		    ln = utf8n_to_uvchr(r, UTF8SKIP(r), 0, 0);
+		    ln = utf8n_to_uvchr((U8 *)r, UTF8SKIP(r), 0, 0);
 		}
 		if (OP(scan) == BOUND || OP(scan) == NBOUND) {
 		    ln = isALNUM_uni(ln);
@@ -4275,7 +4276,7 @@ S_regrepeat(pTHX_ const regnode *p, I32 max)
 	{
 		SV *prop = sv_newmortal();
 
-		regprop(prop, p);
+		regprop(prop, (regnode *)p);
 		PerlIO_printf(Perl_debug_log,
 			      "%*s  %s can match %"IVdf" times out of %"IVdf"...\n",
 			      REPORT_CODE_OFF+1, "", SvPVX_const(prop),(IV)c,(IV)max);
@@ -4402,7 +4403,7 @@ S_reginclass(pTHX_ register const regnode *n, register const U8* p, STRLEN* lenp
     STRLEN plen;
 
     if (do_utf8 && !UTF8_IS_INVARIANT(c))
-	 c = utf8n_to_uvchr(p, UTF8_MAXBYTES, &len,
+	c = utf8n_to_uvchr((U8 *)p, UTF8_MAXBYTES, &len,
 			    ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
 
     plen = lenp ? *lenp : UNISKIP(NATIVE_TO_UNI(c));
@@ -4417,10 +4418,10 @@ S_reginclass(pTHX_ register const regnode *n, register const U8* p, STRLEN* lenp
 	    match = TRUE;
 	if (!match) {
 	    AV *av;
-	    SV * const sw = regclass_swash(n, TRUE, 0, (SV**)&av);
+	    SV * const sw = regclass_swash((regnode *)n, TRUE, 0, (SV**)&av);
 	
 	    if (sw) {
-		if (swash_fetch(sw, p, do_utf8))
+		if (swash_fetch(sw, (U8 *)p, do_utf8))
 		    match = TRUE;
 		else if (flags & ANYOF_FOLD) {
 		    if (!match && lenp && av) {
@@ -4441,7 +4442,7 @@ S_reginclass(pTHX_ register const regnode *n, register const U8* p, STRLEN* lenp
 		        U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
 			STRLEN tmplen;
 
-		        to_utf8_fold(p, tmpbuf, &tmplen);
+		        to_utf8_fold((U8 *)p, tmpbuf, &tmplen);
 			if (swash_fetch(sw, tmpbuf, do_utf8))
 			    match = TRUE;
 		    }

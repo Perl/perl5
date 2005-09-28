@@ -911,8 +911,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 	    UV uc = *((U8*)STRING(scan));
 	    if (UTF) {
 		const U8 * const s = (U8*)STRING(scan);
-		l = utf8_length(s, s + l);
-		uc = utf8_to_uvchr(s, NULL);
+		l = utf8_length((U8 *)s, (U8 *)s + l);
+		uc = utf8_to_uvchr((U8 *)s, NULL);
 	    }
 	    min += l;
 	    if (flags & SCF_DO_SUBSTR) { /* Update longest substr. */
