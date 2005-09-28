@@ -13,7 +13,7 @@ package CGI::Cookie;
 # wish, but if you redistribute a modified version, please attach a note
 # listing the modifications you have made.
 
-$CGI::Cookie::VERSION='1.25';
+$CGI::Cookie::VERSION='1.26';
 
 use CGI::Util qw(rearrange unescape escape);
 use overload '""' => \&as_string,
@@ -23,7 +23,7 @@ use overload '""' => \&as_string,
 # Turn on special checking for Doug MacEachern's modperl
 my $MOD_PERL = 0;
 if (exists $ENV{MOD_PERL}) {
-  if ($ENV{MOD_PERL_API_VERSION} == 2) {
+  if (exists $ENV{MOD_PERL_API_VERSION} && $ENV{MOD_PERL_API_VERSION} == 2) {
       $MOD_PERL = 2;
       require Apache2::RequestUtil;
       require APR::Table;

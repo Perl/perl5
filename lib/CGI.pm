@@ -18,8 +18,8 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.181 2005/05/13 21:45:26 lstein Exp $';
-$CGI::VERSION='3.10_01';
+$CGI::revision = '$Id: CGI.pm,v 1.185 2005/08/03 21:14:55 lstein Exp $';
+$CGI::VERSION='3.11_01';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -231,7 +231,8 @@ if ($needs_binmode) {
 			  submit reset defaults radio_group popup_menu button autoEscape
 			  scrolling_list image_button start_form end_form startform endform
 			  start_multipart_form end_multipart_form isindex tmpFileName uploadInfo URL_ENCODED MULTIPART/],
-		':cgi'=>[qw/param upload path_info path_translated url self_url script_name cookie Dump
+		':cgi'=>[qw/param upload path_info path_translated request_uri url self_url script_name 
+			 cookie Dump
 			 raw_cookie request_method query_string Accept user_agent remote_host content_type
 			 remote_addr referer server_name server_software server_port server_protocol virtual_port
 			 virtual_host remote_ident auth_type http append
@@ -1134,7 +1135,7 @@ END_OF_FUNC
 ####
 'append' => <<'EOF',
 sub append {
-    my($self,@p) = @_;
+    my($self,@p) = self_or_default(@_);
     my($name,$value) = rearrange([NAME,[VALUE,VALUES]],@p);
     my(@values) = defined($value) ? (ref($value) ? @{$value} : $value) : ();
     if (@values) {
@@ -2609,18 +2610,6 @@ sub url {
     my $path = $self->path_info;
     my $script_name = $self->script_name;
 
-    # for compatibility with Apache's MultiViews
-    if (exists($ENV{REQUEST_URI})) {
-        my $index;
-	$script_name = unescape($ENV{REQUEST_URI});
-        $script_name =~ s/\?.+$//s;   # strip query string
-        # and path
-        if (exists($ENV{PATH_INFO})) {
-           my $encoded_path = unescape($ENV{PATH_INFO});
-           $script_name      =~ s/\Q$encoded_path\E$//i;
-         }
-    }
-
     if ($full) {
 	my $protocol = $self->protocol();
 	$url = "$protocol://";
@@ -2738,14 +2727,40 @@ sub path_info {
 	$info = "/$info" if $info ne '' &&  substr($info,0,1) ne '/';
 	$self->{'.path_info'} = $info;
     } elsif (! defined($self->{'.path_info'}) ) {
-	$self->{'.path_info'} = defined($ENV{'PATH_INFO'}) ? 
-	    $ENV{'PATH_INFO'} : '';
-
+        my (undef,$path_info) = $self->_name_and_path_from_env;
+	$self->{'.path_info'} = $path_info || '';
 	# hack to fix broken path info in IIS
 	$self->{'.path_info'} =~ s/^\Q$ENV{'SCRIPT_NAME'}\E// if $IIS;
 
     }
     return $self->{'.path_info'};
+}
+END_OF_FUNC
+
+# WE USE THIS TO COMPENSATE FOR A BUG IN APACHE 2 PRESENT AT LEAST UP THROUGH 2.0.54
+'_name_and_path_from_env' => <<'END_OF_FUNC',
+sub _name_and_path_from_env {
+   my $self = shift;
+   my $raw_script_name = $ENV{SCRIPT_NAME} || '';
+   my $raw_path_info   = $ENV{PATH_INFO}   || '';
+   my $uri             = $ENV{REQUEST_URI} || '';
+
+   my @uri_double_slashes  = $uri =~ m^(/{2,}?)^g;
+   my @path_double_slashes = "$raw_script_name $raw_path_info" =~ m^(/{2,}?)^g;
+
+   my $apache_bug      = @uri_double_slashes != @path_double_slashes;
+   return ($raw_script_name,$raw_path_info) unless $apache_bug;
+
+   my $path_info_search = $raw_path_info;
+   # these characters will not (necessarily) be escaped
+   $path_info_search    =~ s/([^a-zA-Z0-9$()':_.,+*\/;?=&-])/uc sprintf("%%%02x",ord($1))/eg;
+   $path_info_search    = quotemeta($path_info_search);
+   $path_info_search    =~ s!/!/+!g;
+   if ($uri =~ m/^(.+)($path_info_search)/) {
+       return ($1,$2);
+   } else {
+       return ($raw_script_name,$raw_path_info);
+   }
 }
 END_OF_FUNC
 
@@ -2775,6 +2790,16 @@ END_OF_FUNC
 'path_translated' => <<'END_OF_FUNC',
 sub path_translated {
     return $ENV{'PATH_TRANSLATED'};
+}
+END_OF_FUNC
+
+
+#### Method: request_uri
+# Return the literal request URI
+####
+'request_uri' => <<'END_OF_FUNC',
+sub request_uri {
+    return $ENV{'REQUEST_URI'};
 }
 END_OF_FUNC
 
@@ -2934,10 +2959,14 @@ END_OF_FUNC
 ####
 'script_name' => <<'END_OF_FUNC',
 sub script_name {
-    return $ENV{'SCRIPT_NAME'} if defined($ENV{'SCRIPT_NAME'});
-    # These are for debugging
-    return "/$0" unless $0=~/^\//;
-    return $0;
+    my ($self,@p) = self_or_default(@_);
+    if (@p) {
+        $self->{'.script_name'} = shift;
+    } elsif (!exists $self->{'.script_name'}) {
+        my ($script_name,$path_info) = $self->_name_and_path_from_env();
+        $self->{'.script_name'} = $script_name;
+    }
+    return $self->{'.script_name'};
 }
 END_OF_FUNC
 
@@ -3876,9 +3905,12 @@ CGI - Simple Common Gateway Interface Class
         hr;
 
    if (param()) {
-       print "Your name is",em(param('name')),p,
-	     "The keywords are: ",em(join(", ",param('words'))),p,
-	     "Your favorite color is ",em(param('color')),
+       my $name      = param('name');
+       my $keywords  = join ', ',param('words');
+       my $color     = param('color');
+       print "Your name is",em(escapeHTML($name)),p,
+	     "The keywords are: ",em(escapeHTML($keywords)),p,
+	     "Your favorite color is ",em(escapeHTML($color)),
 	     hr;
    }
 

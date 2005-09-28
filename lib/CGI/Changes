@@ -1,3 +1,13 @@
+  Version 3.11
+    1. Killed warning in CGI::Cookie about MOD_PERL_API_VERSION
+    2. Fixed append() so that it works in function mode.
+    3. Workaround for a bug that appears in Apache2 versions through 2.0.54 
+       in which SCRIPT_NAME and PATH_INFO are incorrect if the additional path_info
+       contains a double slash. This workaround will handle the common case of
+       http://mysite.com/cgi-bin/log.cgi/http://www.some.other.site/args, but will
+       not handle the uncommon case of a ScriptAlias directive that adds additional
+       path information to the end of the translated URI.
+
   Version 3.10
     1. Added Apache2::RequestIO, which is necessary for mp2 interoperability.
 
