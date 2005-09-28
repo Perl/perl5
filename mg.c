@@ -265,7 +265,7 @@ Perl_mg_length(pTHX_ SV *sv)
 
     if (DO_UTF8(sv)) {
         const U8 *s = (U8*)SvPV_const(sv, len);
-        len = Perl_utf8_length(aTHX_ s, s + len);
+        len = Perl_utf8_length(aTHX_ (U8*)s, (U8*)s + len);
     }
     else
         (void)SvPV_const(sv, len);
@@ -961,7 +961,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 
     s = SvPV_const(sv,len);
     ptr = MgPV_const(mg,klen);
-    my_setenv(ptr, s);
+    my_setenv((char *)ptr, (char *)s);
 
 #ifdef DYNAMIC_ENV_FETCH
      /* We just undefd an environment var.  Is a replacement */
@@ -1012,7 +1012,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 		Stat_t st;
 		I32 i;
 		s = delimcpy(tmpbuf, tmpbuf + sizeof tmpbuf,
-			     s, strend, ':', &i);
+			     (char *) s, (char *) strend, ':', &i);
 		s++;
 		if (i >= sizeof tmpbuf   /* too long -- assume the worst */
 		      || *tmpbuf != '/'
@@ -1032,7 +1032,7 @@ int
 Perl_magic_clearenv(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_UNUSED_ARG(sv);
-    my_setenv(MgPV_nolen_const(mg),Nullch);
+    my_setenv((char *)MgPV_nolen_const(mg),Nullch);
     return 0;
 }
 
@@ -1049,7 +1049,7 @@ Perl_magic_set_all_env(pTHX_ SV *sv, MAGIC *mg)
 	while ((entry = hv_iternext((HV*)sv))) {
 	    I32 keylen;
 	    my_setenv(hv_iterkey(entry, &keylen),
-		      SvPV_nolen_const(hv_iterval((HV*)sv, entry)));
+		      (char *)SvPV_nolen_const(hv_iterval((HV*)sv, entry)));
 	}
     }
 #endif
@@ -1118,7 +1118,7 @@ int
 Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
 {
     /* Are we fetching a signal entry? */
-    const I32 i = whichsig(MgPV_nolen_const(mg));
+    const I32 i = whichsig((char *)MgPV_nolen_const(mg));
     if (i > 0) {
     	if(PL_psig_ptr[i])
     	    sv_setsv(sv,PL_psig_ptr[i]);
@@ -1166,7 +1166,7 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
     }
     else {
 	/* Are we clearing a signal entry? */
-	const I32 i = whichsig(s);
+	const I32 i = whichsig((char *)s);
 	if (i > 0) {
 #ifdef HAS_SIGPROCMASK
 	    sigset_t set, save;
@@ -1312,7 +1312,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	}
     }
     else {
-	i = whichsig(s);	/* ...no, a brick */
+	i = whichsig((char *)s);	/* ...no, a brick */
 	if (i <= 0) {
 	    if (ckWARN(WARN_SIGNAL))
 		Perl_warner(aTHX_ packWARN(WARN_SIGNAL), "No such signal: SIG%s", s);
@@ -1807,17 +1807,17 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
     if (DO_UTF8(sv)) {
 	sv_utf8_upgrade(lsv);
  	sv_pos_u2b(lsv, &lvoff, &lvlen);
-	sv_insert(lsv, lvoff, lvlen, tmps, len);
+	sv_insert(lsv, lvoff, lvlen, (char *)tmps, len);
 	SvUTF8_on(lsv);
     }
     else if (lsv && SvUTF8(lsv)) {
 	sv_pos_u2b(lsv, &lvoff, &lvlen);
 	tmps = (char*)bytes_to_utf8((U8*)tmps, &len);
-	sv_insert(lsv, lvoff, lvlen, tmps, len);
+	sv_insert(lsv, lvoff, lvlen, (char *)tmps, len);
 	Safefree(tmps);
     }
     else
-        sv_insert(lsv, lvoff, lvlen, tmps, len);
+        sv_insert(lsv, lvoff, lvlen, (char *)tmps, len);
 
     return 0;
 }

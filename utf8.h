@@ -149,7 +149,7 @@ encoded character.
  */
 #define isIDFIRST_lazy_if(p,c) ((IN_BYTES || (!c || (*((const U8*)p) < 0xc0))) \
 				? isIDFIRST(*(p)) \
-				: isIDFIRST_utf8((const U8*)p))
+				: isIDFIRST_utf8((U8*)p))
 #define isALNUM_lazy_if(p,c)   ((IN_BYTES || (!c || (*((const U8*)p) < 0xc0))) \
 				? isALNUM(*(p)) \
 				: isALNUM_utf8((const U8*)p))

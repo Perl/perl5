@@ -524,7 +524,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
        This is an alternative to using the -C command line switch
        (the -C if present will override this). */
     {
-	 const char *p = PerlEnv_getenv("PERL_UNICODE");
+	 char *p = PerlEnv_getenv("PERL_UNICODE");
 	 PL_unicode = p ? parse_unicode_opts(&p) : 0;
     }
 #endif
