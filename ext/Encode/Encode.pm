@@ -1,9 +1,9 @@
 #
-# $Id: Encode.pm,v 2.10 2005/05/16 18:46:36 dankogai Exp dankogai $
+# $Id: Encode.pm,v 2.12 2005/09/08 14:17:17 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.10 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.12 $ =~ /(\d+)/g;
 sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load(__PACKAGE__, $VERSION);
@@ -19,7 +19,7 @@ our @EXPORT = qw(
 );
 
 our @FB_FLAGS  = qw(DIE_ON_ERR WARN_ON_ERR RETURN_ON_ERR LEAVE_SRC
-		    PERLQQ HTMLCREF XMLCREF);
+		    PERLQQ HTMLCREF XMLCREF STOP_AT_PARTIAL);
 our @FB_CONSTS = qw(FB_DEFAULT FB_CROAK FB_QUIET FB_WARN
 		    FB_PERLQQ FB_HTMLCREF FB_XMLCREF);
 
@@ -557,12 +557,15 @@ L<Encode::Encoding> and L<Encode::PerlIO>.
 
 =head1 Handling Malformed Data
 
-The optional I<CHECK> argument is used as follows.  When you omit it,
-Encode::FB_DEFAULT ( == 0 ) is assumed.
+The optional I<CHECK> argument tells Encode what to do when it
+encounters malformed data.  Without CHECK, Encode::FB_DEFAULT ( == 0 )
+is assumed.
+
+As of version 2.12 Encode supports coderef values for CHECK.  See below.
 
 =over 2
 
-=item B<NOTE:> Not all encoding suppport this feature
+=item B<NOTE:> Not all encoding support this feature
 
 Some encodings ignore I<CHECK> argument.  For example,
 L<Encode::Unicode> ignores I<CHECK> and it always croaks on error.
@@ -648,12 +651,16 @@ constants via C<use Encode qw(:fallback_all)>.
 
 =back
 
-=head2 Unimplemented fallback schemes
+=head2 coderef for CHECK
 
-In the future, you will be able to use a code reference to a callback
-function for the value of I<CHECK> but its API is still undecided.
+As of Encode 2.12 CHECK can also be a code reference which takes the
+ord value of unmapped caharacter as an argument and returns a string
+that represents the fallback character.  For instance,
 
-The fallback scheme does not work on EBCDIC platforms.
+  $ascii = encode("ascii", $utf8, sub{ sprintf "<U+%04X>", shift });
+
+Acts like FB_PERLQQ but E<lt>U+I<XXXX>E<gt> is used instead of
+\x{I<XXXX>}.
 
 =head1 Defining Encodings
 
@@ -731,7 +738,7 @@ After C<$utf8 = decode('foo', $octet);>,
   In any other Encoding                      ON
   ---------------------------------------------
 
-As you see, there is one exception, In ASCII.  That way you can assue
+As you see, there is one exception, In ASCII.  That way you can assume
 Goal #1.  And with Encode Goal #2 is assumed but you still have to be
 careful in such cases mentioned in B<CAVEAT> paragraphs.
 
@@ -799,7 +806,7 @@ Now that is overruled by Larry Wall himself.
   
   For what it's worth, that's how I've always kept them straight in my
   head.
-
+  
   Also for what it's worth, Perl 6 will mostly default to strict but
   make it easy to switch back to lax.
   

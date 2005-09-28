@@ -1,8 +1,41 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.10 2005/05/16 18:46:36 dankogai Exp dankogai $
+# $Id: Changes,v 2.12 2005/09/08 14:17:17 dankogai Exp dankogai $
 #
-$Revision: 2.10 $ $Date: 2005/05/16 18:46:36 $
+$Revision: 2.12 $ $Date: 2005/09/08 14:17:17 $
+! Encode.xs Encode.pm t/fallback.t
+  Now accepts coderef for CHECK!
+! ucm/8859-7.ucm
+  Updated to newer version at unicode.org
+  http://rt.cpan.org/NoAuth/Bug.html?id=14222
+! lib/Encode/Supported.pod
+  More POD typo fixed.
+  <42F5E243.80500@gmail.com>
+! encoding.pm
+  More POD typo leftover fixed.
+  Message-Id: <b77c1dce05080615487f95314@mail.gmail.com>
+
+2.11  2005/08/05 10:58:25
+! AUTHORS CHANGES
+  To reflect changes below
+! Encode.pm encoding.pm 
+  lib/Encode/Alias.pm lib/Encode/PerlIO.pod lib/Encode/Supported.pod
+  Typo fixed by Piotr Fusik in Change 25261 & 25266
+  Message-ID: <001401c595bd$dccb5d80$0bd34dd5@piec>
+! Encode.xs
+  Addresses "BUG REPORT: panic in Encode.xs".
+  Message-Id: <42EDDA97.2010608@hyper.to>
++ lib/Encode/MIME/Header/ISO_2022_JP.pm mime_header_iso2022jp.t
+! lib/Encode/MIME/Header.pm lib/Encode/Config.pm
+  Encoding 'MIME-Header-ISO_2022_JP' is introduced by Makamaka
+  Message-Id: <200507311557.j6VFvE2K034605@www231.sakura.ne.jp>
+! Encode/encode.h Encode.pm Encode.xs
+  PerlIO's "encoding(utf-8-strict)" got a problem w/ partial character.
+  Found and addressed by KONNO Hiroharu <hiroharu.konno@bowneglobal.co.jp>
+  See also ext/PerlIO/encoding/encoding.pm   
+  Message-Id: <E1DineE-00068X-TB@yok-gs-workman.asia.bgsinternal.com>
+
+2.10 2005/05/16 18:46:36
 ! Encode.pm
   fixed decode_utf8() accordingly to RT#8872
   http://rt.cpan.org/NoAuth/Bug.html?id=8872
