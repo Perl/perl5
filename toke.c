@@ -8880,7 +8880,7 @@ S_checkcomma(pTHX_ register char *s, const char *name, const char *what)
 	if (*s == ',') {
 	    int kw;
 	    *s = '\0'; /* XXX If we didn't do this, we could const a lot of toke.c */
-	    kw = keyword(w, s - w) || get_cv(w, FALSE) != 0;
+	    kw = keyword((char *)w, s - w) || get_cv(w, FALSE) != 0;
 	    *s = ',';
 	    if (kw)
 		return;
@@ -8925,7 +8925,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv,
 	msg = Perl_newSVpvf(aTHX_ "Constant(%s): %s%s%s",
 			    (type ? type: "undef"), why1, why2, why3);
     msgdone:
-	yyerror(SvPVX_const(msg));
+	yyerror((char *)SvPVX_const(msg));
  	SvREFCNT_dec(msg);
   	return sv;
     }
@@ -8964,7 +8964,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv,
     /* Check the eval first */
     if (!PL_in_eval && SvTRUE(ERRSV)) {
  	sv_catpv(ERRSV, "Propagated");
-	yyerror(SvPV_nolen_const(ERRSV)); /* Duplicates the message inside eval */
+	yyerror((char *)SvPV_nolen_const(ERRSV)); /* Duplicates the message inside eval */
 	(void)POPs;
  	res = SvREFCNT_inc(sv);
     }
@@ -9603,7 +9603,7 @@ S_scan_inputsymbol(pTHX_ char *start)
     end = strchr(s, '\n');
     if (!end)
 	end = PL_bufend;
-    s = delimcpy(d, e, s + 1, end, '>', &len);	/* extract until > */
+    s = delimcpy(d, (char *)e, s + 1, end, '>', &len);	/* extract until > */
 
     /* die if we didn't have space for the contents of the <>,
        or if it didn't end, or if we see a newline
@@ -10438,7 +10438,7 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
     case 'v':
 vstring:
 		sv = NEWSV(92,5); /* preallocate storage space */
-		s = scan_vstring(s,sv);
+		s = scan_vstring((char *)s,sv);
 		DEBUG_T( { PerlIO_printf(Perl_debug_log,
 		  "### Saw v-string before '%s'\n", s);
 		} ); 
@@ -10927,9 +10927,9 @@ Perl_scan_vstring(pTHX_ char *s, SV *sv)
 	    if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(rev)))
 		 SvUTF8_on(sv);
 	    if (pos + 1 < PL_bufend && *pos == '.' && isDIGIT(pos[1]))
-		 s = ++pos;
+		 s = (char *)++pos;
 	    else {
-		 s = pos;
+		 s = (char *)pos;
 		 break;
 	    }
 	    while (pos < PL_bufend && (isDIGIT(*pos) || *pos == '_'))
