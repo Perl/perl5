@@ -1392,8 +1392,8 @@ sigaction(sig, optaction, oldaction = 0)
 		 * essentially meaningless anyway.
 		 */
 		RETVAL = sigaction(sig, & act, (struct sigaction *)0);
-               if(RETVAL == -1)
-                   XSRETURN_UNDEF;
+		if(RETVAL == -1)
+		    XSRETURN_UNDEF;
 	    }
 
 	    LEAVE;
