@@ -838,6 +838,7 @@ Perl_bytes_from_utf8(pTHX_ U8 *s, STRLEN *len, bool *is_utf8)
     const U8 *start = s;
     const U8 *send;
     I32 count = 0;
+    const U8 *s2;
 
     if (!*is_utf8)
         return (U8 *)start;
@@ -857,12 +858,12 @@ Perl_bytes_from_utf8(pTHX_ U8 *s, STRLEN *len, bool *is_utf8)
     *is_utf8 = 0;		
 
     Newxz(d, (*len) - count + 1, U8);
-    s = start; start = d;
-    while (s < send) {
-	U8 c = *s++;
+    s2 = start; start = d;
+    while (s2 < send) {
+	U8 c = *s2++;
 	if (!UTF8_IS_INVARIANT(c)) {
 	    /* Then it is two-byte encoded */
-	    c = UTF8_ACCUMULATE(NATIVE_TO_UTF(c), *s++);
+	    c = UTF8_ACCUMULATE(NATIVE_TO_UTF(c), *s2++);
 	    c = ASCII_TO_NATIVE(c);
 	}
 	*d++ = c;
@@ -1967,7 +1968,7 @@ The pointer to the PV of the dsv is returned.
 char *
 Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
 {
-     return Perl_pv_uni_display(aTHX_ dsv, (const U8*)SvPVX_const(ssv),
+     return Perl_pv_uni_display(aTHX_ dsv, (U8*)SvPVX_const(ssv),
 				SvCUR(ssv), pvlim, flags);
 }
 
@@ -2032,7 +2033,7 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const
 	    (f2 == 0 || p2 < f2)) {
 	  if (n1 == 0) {
 	       if (u1)
-		    to_utf8_fold(p1, foldbuf1, &foldlen1);
+		    to_utf8_fold((U8 *)p1, foldbuf1, &foldlen1);
 	       else {
 		    uvuni_to_utf8(natbuf, (UV) NATIVE_TO_UNI(((UV)*p1)));
 		    to_utf8_fold(natbuf, foldbuf1, &foldlen1);
@@ -2042,7 +2043,7 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const
 	  }
 	  if (n2 == 0) {
 	       if (u2)
-		    to_utf8_fold(p2, foldbuf2, &foldlen2);
+		    to_utf8_fold((U8 *)p2, foldbuf2, &foldlen2);
 	       else {
 		    uvuni_to_utf8(natbuf, (UV) NATIVE_TO_UNI(((UV)*p2)));
 		    to_utf8_fold(natbuf, foldbuf2, &foldlen2);

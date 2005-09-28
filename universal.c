@@ -193,27 +193,27 @@ Perl_boot_core_UNIVERSAL(pTHX)
 {
     const char file[] = __FILE__;
 
-    newXS("UNIVERSAL::isa",             XS_UNIVERSAL_isa,         file);
-    newXS("UNIVERSAL::can",             XS_UNIVERSAL_can,         file);
-    newXS("UNIVERSAL::VERSION", 	XS_UNIVERSAL_VERSION, 	  file);
-    newXS("utf8::is_utf8", XS_utf8_is_utf8, file);
-    newXS("utf8::valid", XS_utf8_valid, file);
-    newXS("utf8::encode", XS_utf8_encode, file);
-    newXS("utf8::decode", XS_utf8_decode, file);
-    newXS("utf8::upgrade", XS_utf8_upgrade, file);
-    newXS("utf8::downgrade", XS_utf8_downgrade, file);
-    newXS("utf8::native_to_unicode", XS_utf8_native_to_unicode, file);
-    newXS("utf8::unicode_to_native", XS_utf8_unicode_to_native, file);
-    newXSproto("Internals::SvREADONLY",XS_Internals_SvREADONLY, file, "\\[$%@];$");
-    newXSproto("Internals::SvREFCNT",XS_Internals_SvREFCNT, file, "\\[$%@];$");
+    newXS("UNIVERSAL::isa",             XS_UNIVERSAL_isa,         (char *)file);
+    newXS("UNIVERSAL::can",             XS_UNIVERSAL_can,         (char *)file);
+    newXS("UNIVERSAL::VERSION", 	XS_UNIVERSAL_VERSION, 	  (char *)file);
+    newXS("utf8::is_utf8", XS_utf8_is_utf8, (char *)file);
+    newXS("utf8::valid", XS_utf8_valid, (char *)file);
+    newXS("utf8::encode", XS_utf8_encode, (char *)file);
+    newXS("utf8::decode", XS_utf8_decode, (char *)file);
+    newXS("utf8::upgrade", XS_utf8_upgrade, (char *)file);
+    newXS("utf8::downgrade", XS_utf8_downgrade, (char *)file);
+    newXS("utf8::native_to_unicode", XS_utf8_native_to_unicode, (char *)file);
+    newXS("utf8::unicode_to_native", XS_utf8_unicode_to_native, (char *)file);
+    newXSproto("Internals::SvREADONLY",XS_Internals_SvREADONLY, (char *)file, "\\[$%@];$");
+    newXSproto("Internals::SvREFCNT",XS_Internals_SvREFCNT, (char *)file, "\\[$%@];$");
     newXSproto("Internals::hv_clear_placeholders",
-               XS_Internals_hv_clear_placehold, file, "\\%");
+               XS_Internals_hv_clear_placehold, (char *)file, "\\%");
     newXSproto("PerlIO::get_layers",
-               XS_PerlIO_get_layers, file, "*;@");
-    newXS("Regexp::DESTROY", XS_Regexp_DESTROY, file);
-    newXSproto("Internals::hash_seed",XS_Internals_hash_seed, file, "");
-    newXSproto("Internals::rehash_seed",XS_Internals_rehash_seed, file, "");
-    newXSproto("Internals::HvREHASH", XS_Internals_HvREHASH, file, "\\%");
+               XS_PerlIO_get_layers, (char *)file, "*;@");
+    newXS("Regexp::DESTROY", XS_Regexp_DESTROY, (char *)file);
+    newXSproto("Internals::hash_seed",XS_Internals_hash_seed, (char *)file, "");
+    newXSproto("Internals::rehash_seed",XS_Internals_rehash_seed, (char *)file, "");
+    newXSproto("Internals::HvREHASH", XS_Internals_HvREHASH, (char *)file, "\\%");
 }
 
 
@@ -405,7 +405,7 @@ XS(XS_utf8_valid)
 	  {
 	       STRLEN len;
 	       const char *s = SvPV_const(sv,len);
-	       if (!SvUTF8(sv) || is_utf8_string((const U8*)s,len))
+	       if (!SvUTF8(sv) || is_utf8_string((U8*)s,len))
 		    XSRETURN_YES;
 	       else
 		    XSRETURN_NO;

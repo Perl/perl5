@@ -1139,7 +1139,9 @@ S_vdie_croak_common(pTHX_ const char* pat, va_list* args, STRLEN* msglen,
     if (PL_diehook) {
 	S_vdie_common(aTHX_ message, *msglen, *utf8);
     }
-    return message;
+    /* Cast because we're not changing function prototypes in maint, and this
+       function isn't actually static.  */
+    return (char *)  message;
 }
 
 OP *
@@ -1156,7 +1158,7 @@ Perl_vdie(pTHX_ const char* pat, va_list *args)
 
     message = S_vdie_croak_common(aTHX_ pat, args, &msglen, &utf8);
 
-    PL_restartop = die_where(message, msglen);
+    PL_restartop = die_where((char *)message, msglen);
     SvFLAGS(ERRSV) |= utf8;
     DEBUG_S(PerlIO_printf(Perl_debug_log,
 	  "%p: die: restartop = %p, was_in_eval = %d, top_env = %p\n",
@@ -1201,7 +1203,7 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
     message = S_vdie_croak_common(aTHX_ pat, args, &msglen, &utf8);
 
     if (PL_in_eval) {
-	PL_restartop = die_where(message, msglen);
+	PL_restartop = die_where((char *) message, msglen);
 	SvFLAGS(ERRSV) |= utf8;
 	JMPENV_JUMP(3);
     }
@@ -1370,7 +1372,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 	    S_vdie_common(aTHX_ message, msglen, utf8);
 	}
 	if (PL_in_eval) {
-	    PL_restartop = die_where(message, msglen);
+	    PL_restartop = die_where((char *) message, msglen);
 	    SvFLAGS(ERRSV) |= utf8;
 	    JMPENV_JUMP(3);
 	}
@@ -2965,7 +2967,8 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext,
 	    scriptname = Nullch;
 	}
 	Safefree(xfailed);
-	scriptname = xfound;
+	/* Cast because we're not changing function prototypes in maint.  */
+	scriptname = (char *) xfound;
     }
     return (scriptname ? savepv(scriptname) : Nullch);
 }
@@ -3311,7 +3314,8 @@ Perl_get_op_descs(pTHX)
 char *
 Perl_get_no_modify(pTHX)
 {
- return PL_no_modify;
+    /* Cast because we're not changing function prototypes in maint.  */
+    return (char *) PL_no_modify;
 }
 
 U32 *
@@ -4436,7 +4440,8 @@ Perl_parse_unicode_opts(pTHX_ char **popt)
        Perl_croak(aTHX_ "Unknown Unicode option value %"UVuf,
 		  (UV) (opt & ~PERL_UNICODE_ALL_FLAGS));
 
-  *popt = p;
+  /* Cast because we're not changing function prototypes in maint.  */
+  *popt = (char *) p;
 
   return opt;
 }
