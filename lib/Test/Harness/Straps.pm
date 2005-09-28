@@ -3,7 +3,7 @@ package Test::Harness::Straps;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.23';
+$VERSION = '0.26';
 
 use Config;
 use Test::Harness::Assert;
@@ -185,9 +185,11 @@ sub _analyze_line {
 
         $totals->{ok}++ if $point->pass;
 
-        if ( ($point->number > 100000) && ($point->number > $self->{max}) ) {
-            warn "Enormous test number seen [test ", $point->number, "]\n";
-            warn "Can't detailize, too big.\n";
+        if ( ($point->number > 100_000) && ($point->number > ($self->{max}||100_000)) ) {
+            if ( !$self->{too_many_tests}++ ) {
+                warn "Enormous test number seen [test ", $point->number, "]\n";
+                warn "Can't detailize, too big.\n";
+            }
         }
         else {
             my $details = {
@@ -602,7 +604,7 @@ etc. so it's ready to parse the next file.
 sub _reset_file_state {
     my($self) = shift;
 
-    delete @{$self}{qw(max skip_all todo)};
+    delete @{$self}{qw(max skip_all todo too_many_tests)};
     $self->{line}       = 0;
     $self->{saw_header} = 0;
     $self->{saw_bailout}= 0;

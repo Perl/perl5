@@ -200,6 +200,7 @@ ignore, at least as far as analyzing the test results.  The harness is
 free, however, to display the diagnostics.  Typically diagnostics are
 used to provide information about the environment in which test file is
 running, or to delineate a group of tests.
+
     ...
     ok 18 - Closed database connection
     # End of database section.
