@@ -192,7 +192,7 @@ STATIC void
 S_bad_type(pTHX_ I32 n, const char *t, const char *name, const OP *kid)
 {
     yyerror(Perl_form(aTHX_ "Type of arg %d to %s must be %s (not %s)",
-		 (int)n, name, t, OP_DESC(kid)));
+		 (int)n, name, t, OP_DESC((OP *)kid)));
 }
 
 STATIC void
@@ -2452,12 +2452,12 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
 	if (!from_utf) {
 	    STRLEN len = tlen;
-	    t = tsave = bytes_to_utf8(t, &len);
+	    t = tsave = bytes_to_utf8((U8 *)t, &len);
 	    tend = t + len;
 	}
 	if (!to_utf && rlen) {
 	    STRLEN len = rlen;
-	    r = rsave = bytes_to_utf8(r, &len);
+	    r = rsave = bytes_to_utf8((U8 *)r, &len);
 	    rend = r + len;
 	}
 
@@ -2475,11 +2475,11 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    i = 0;
 	    transv = newSVpvn("",0);
 	    while (t < tend) {
-		cp[2*i] = utf8n_to_uvuni(t, tend-t, &ulen, 0);
+		cp[2*i] = utf8n_to_uvuni((U8 *)t, tend-t, &ulen, 0);
 		t += ulen;
 		if (t < tend && NATIVE_TO_UTF(*t) == 0xff) {
 		    t++;
-		    cp[2*i+1] = utf8n_to_uvuni(t, tend-t, &ulen, 0);
+		    cp[2*i+1] = utf8n_to_uvuni((U8 *)t, tend-t, &ulen, 0);
 		    t += ulen;
 		}
 		else {
@@ -2533,11 +2533,11 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	while (t < tend || tfirst <= tlast) {
 	    /* see if we need more "t" chars */
 	    if (tfirst > tlast) {
-		tfirst = (I32)utf8n_to_uvuni(t, tend - t, &ulen, 0);
+		tfirst = (I32)utf8n_to_uvuni((U8 *)t, tend - t, &ulen, 0);
 		t += ulen;
 		if (t < tend && NATIVE_TO_UTF(*t) == 0xff) {	/* illegal utf8 val indicates range */
 		    t++;
-		    tlast = (I32)utf8n_to_uvuni(t, tend - t, &ulen, 0);
+		    tlast = (I32)utf8n_to_uvuni((U8 *)t, tend - t, &ulen, 0);
 		    t += ulen;
 		}
 		else
@@ -2547,11 +2547,12 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    /* now see if we need more "r" chars */
 	    if (rfirst > rlast) {
 		if (r < rend) {
-		    rfirst = (I32)utf8n_to_uvuni(r, rend - r, &ulen, 0);
+		    rfirst = (I32)utf8n_to_uvuni((U8 *)r, rend - r, &ulen, 0);
 		    r += ulen;
 		    if (r < rend && NATIVE_TO_UTF(*r) == 0xff) {	/* illegal utf8 val indicates range */
 			r++;
-			rlast = (I32)utf8n_to_uvuni(r, rend - r, &ulen, 0);
+			rlast = (I32)utf8n_to_uvuni((U8 *)r, rend - r, &ulen,
+						    0);
 			r += ulen;
 		    }
 		    else
@@ -4250,7 +4251,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    {
 		Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE), "Runaway prototype");
 	    }
-	    cv_ckproto((CV*)gv, NULL, ps);
+	    cv_ckproto((CV*)gv, NULL, (char *)ps);
 	}
 	if (ps)
 	    sv_setpvn((SV*)gv, ps, ps_len);
@@ -4289,7 +4290,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
          * skipping the prototype check
          */
         if (exists || SvPOK(cv))
-	    cv_ckproto(cv, gv, ps);
+	    cv_ckproto(cv, gv, (char *)ps);
 	/* already defined (or promised)? */
 	if (exists || GvASSUMECV(gv)) {
 	    if (!block && !attrs) {
@@ -4333,7 +4334,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	}
 	else {
 	    GvCV(gv) = Nullcv;
-	    cv = newCONSTSUB(NULL, name, const_sv);
+	    cv = newCONSTSUB(NULL, (char *)name, const_sv);
 	}
 	op_free(block);
 	SvREFCNT_dec(PL_compcv);
