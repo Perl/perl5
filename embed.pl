@@ -194,6 +194,11 @@ sub write_protos {
 	    my $n;
 	    for my $arg ( @args ) {
 		++$n;
+		if ( $arg =~ /\*/ && $arg !~ /\b(NN|NULLOK)\b/ ) {
+		    warn "$func: $arg needs NN or NULLOK\n";
+		    our $unflagged_pointers;
+		    ++$unflagged_pointers;
+		}
 		push( @nonnull, $n ) if ( $arg =~ s/\s*\bNN\b\s+// );
 		$arg =~ s/\s*\bNULLOK\b\s+//; # strip NULLOK with no effect
 	    }
@@ -252,7 +257,9 @@ sub write_global_sym {
     $ret;
 }
 
+our $unflagged_pointers;
 walk_table(\&write_protos,     "proto.h", undef, "/* ex: set ro: */\n");
+warn "$unflagged_pointers pointer arguments to clean up\n" if $unflagged_pointers;
 walk_table(\&write_global_sym, "global.sym", undef, "# ex: set ro:\n");
 
 # XXX others that may need adding
