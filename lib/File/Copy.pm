@@ -33,11 +33,6 @@ require Exporter;
 
 $Too_Big = 1024 * 1024 * 2;
 
-sub carp {
-    require Carp;
-    goto &Carp::carp;
-}
-
 my $macfiles;
 if ($^O eq 'MacOS') {
 	$macfiles = eval { require Mac::MoreFiles };
