@@ -65,12 +65,12 @@ Perl_dump_packsubs(pTHX_ HV *stash)
 	    if (SvTYPE(gv) != SVt_PVGV || !GvGP(gv))
 		continue;
 	    if (GvCVu(gv))
-		dump_sub(gv);
+		dump_sub((GV *)gv);
 	    if (GvFORM(gv))
-		dump_form(gv);
+		dump_form((GV *)gv);
 	    if (HeKEY(entry)[HeKLEN(entry)-1] == ':'
 		&& (hv = GvHV(gv)) && hv != PL_defstash)
-		dump_packsubs(hv);		/* nested package */
+		dump_packsubs((HV *) hv);		/* nested package */
 	}
     }
 }
@@ -299,8 +299,8 @@ Perl_sv_peek(pTHX_ SV *sv)
 	    SV *tmp = newSVpvn("", 0);
 	    sv_catpv(t, "(");
 	    if (SvOOK(sv))
-		Perl_sv_catpvf(aTHX_ t, "[%s]", pv_display(tmp, SvPVX_const(sv)-SvIVX(sv), SvIVX(sv), 0, 127));
-	    Perl_sv_catpvf(aTHX_ t, "%s)", pv_display(tmp, SvPVX_const(sv), SvCUR(sv), SvLEN(sv), 127));
+		Perl_sv_catpvf(aTHX_ t, "[%s]", pv_display(tmp, (char *)SvPVX_const(sv)-SvIVX(sv), SvIVX(sv), 0, 127));
+	    Perl_sv_catpvf(aTHX_ t, "%s)", pv_display(tmp, (char *)SvPVX_const(sv), SvCUR(sv), SvLEN(sv), 127));
 	    if (SvUTF8(sv))
 		Perl_sv_catpvf(aTHX_ t, " [UTF8 \"%s\"]",
 			       sv_uni_display(tmp, sv, 8 * sv_len_utf8(sv),
@@ -1180,8 +1180,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (SvPVX_const(sv)) {
 	    Perl_dump_indent(aTHX_ level, file,"  PV = 0x%"UVxf" ", PTR2UV(SvPVX_const(sv)));
 	    if (SvOOK(sv))
-		PerlIO_printf(file, "( %s . ) ", pv_display(d, SvPVX_const(sv)-SvIVX(sv), SvIVX(sv), 0, pvlim));
-	    PerlIO_printf(file, "%s", pv_display(d, SvPVX_const(sv), SvCUR(sv), SvLEN(sv), pvlim));
+		PerlIO_printf(file, "( %s . ) ", pv_display(d, (char *)SvPVX_const(sv)-SvIVX(sv), SvIVX(sv), 0, pvlim));
+	    PerlIO_printf(file, "%s", pv_display(d, (char *)SvPVX_const(sv), SvCUR(sv), SvLEN(sv), pvlim));
 	    if (SvUTF8(sv)) /* the 8?  \x{....} */
 	        PerlIO_printf(file, " [UTF8 \"%s\"]", sv_uni_display(d, sv, 8 * sv_len_utf8(sv), UNI_DISPLAY_QQ));
 	    PerlIO_printf(file, "\n");
@@ -1319,7 +1319,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		keysv = hv_iterkeysv(he);
 		keypv = SvPV_const(keysv, len);
 		elt = hv_iterval(hv, he);
-		Perl_dump_indent(aTHX_ level+1, file, "Elt %s ", pv_display(d, keypv, len, 0, pvlim));
+		Perl_dump_indent(aTHX_ level+1, file, "Elt %s ", pv_display(d, (char *)keypv, len, 0, pvlim));
 		if (SvUTF8(keysv))
 		    PerlIO_printf(file, "[UTF8 \"%s\"] ", sv_uni_display(d, keysv, 8 * sv_len_utf8(keysv), UNI_DISPLAY_QQ));
 		if (HeKREHASH(he))

@@ -118,7 +118,7 @@ S_do_trans_count(pTHX_ SV *sv)
     else
 	while (s < send) {
 	    STRLEN ulen;
-	    const UV c = utf8n_to_uvchr(s, send - s, &ulen, 0);
+	    const UV c = utf8n_to_uvchr((U8 *)s, send - s, &ulen, 0);
 	    if (c < 0x100) {
 		if (tbl[c] >= 0)
 		    matches++;
@@ -417,13 +417,13 @@ S_do_trans_count_utf8(pTHX_ SV *sv)
 		break;
 	}
 	if (hibit)
-	    start = s = bytes_to_utf8(s, &len);
+	    start = s = bytes_to_utf8((U8 *)s, &len);
     }
     send = s + len;
 
     while (s < send) {
 	UV uv;
-	if ((uv = swash_fetch(rv, s, TRUE)) < none || uv == extra)
+	if ((uv = swash_fetch(rv, (U8 *)s, TRUE)) < none || uv == extra)
 	    matches++;
 	s += UTF8SKIP(s);
     }
