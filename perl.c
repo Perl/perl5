@@ -348,7 +348,7 @@ perl_construct(pTHXx)
     }
 
 #if defined(LOCAL_PATCH_COUNT)
-    PL_localpatches = local_patches;	/* For possible -v */
+    PL_localpatches = (char **) local_patches;	/* For possible -v */
 #endif
 
 #ifdef HAVE_INTERP_INTERN
@@ -3056,7 +3056,7 @@ Perl_moreswitches(pTHX_ char *s)
     }
     case 'C':
         s++;
-        PL_unicode = parse_unicode_opts( (const char **)&s );
+        PL_unicode = parse_unicode_opts(&s);
 	return s;
     case 'F':
 	PL_minus_F = TRUE;
@@ -3099,7 +3099,7 @@ Perl_moreswitches(pTHX_ char *s)
 		Perl_sv_catpvf(aTHX_ sv, " split(/,/,q%c%s%c)", 0, ++s, 0);
 	    }
 	    s += strlen(s);
-	    my_setenv("PERL5DB", SvPV_nolen_const(sv));
+	    my_setenv("PERL5DB", (char *)SvPV_nolen_const(sv));
 	}
 	if (!PL_perldb) {
 	    PL_perldb = PERLDB_ALL;
@@ -3542,7 +3542,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
     }
     else {
 	/* if find_script() returns, it returns a malloc()-ed value */
-	scriptname = PL_origfilename = find_script(scriptname, dosearch, NULL, 1);
+	scriptname = PL_origfilename = find_script((char *)scriptname, dosearch, NULL, 1);
 
 	if (strnEQ(scriptname, "/dev/fd/", 8) && isDIGIT(scriptname[8]) ) {
             const char *s = scriptname + 8;
@@ -5263,7 +5263,7 @@ read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen)
 	return 0;
     }
     sv_catpvn(buf_sv, p, nl-p);
-    sv_chop(PL_e_script, nl);
+    sv_chop(PL_e_script, (char *) nl);
     return 1;
 }
 
