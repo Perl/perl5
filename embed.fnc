@@ -645,8 +645,8 @@ p	|void	|rxres_save	|NN void** rsp|NN REGEXP* prx
 #if !defined(HAS_RENAME)
 p	|I32	|same_dirent	|NN const char* a|NN const char* b
 #endif
-Apda	|char*	|savepv		|NN const char* pv
-Apda	|char*	|savepvn	|NN const char* pv|I32 len
+Apda	|char*	|savepv		|NULLOK const char* pv
+Apda	|char*	|savepvn	|NULLOK const char* pv|I32 len
 Apda	|char*	|savesharedpv	|NULLOK const char* pv
 Apda	|char*	|savesvpv	|NN SV* sv
 Ap	|void	|savestack_grow

@@ -1816,13 +1816,11 @@ PERL_CALLCONV I32	Perl_same_dirent(pTHX_ const char* a, const char* b)
 #endif
 PERL_CALLCONV char*	Perl_savepv(pTHX_ const char* pv)
 			__attribute__malloc__
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV char*	Perl_savepvn(pTHX_ const char* pv, I32 len)
 			__attribute__malloc__
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV char*	Perl_savesharedpv(pTHX_ const char* pv)
 			__attribute__malloc__
