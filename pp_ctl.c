@@ -680,7 +680,7 @@ PP(pp_formline)
 		    while (*s && isSPACE(*s))
 			s++;
 		}
-		sv_chop(sv,s);
+		sv_chop(sv,(char *)s);
 		SvSETMAGIC(sv);
 		break;
 	    }
@@ -1382,7 +1382,7 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 	    POPBLOCK(cx,PL_curpm);
 	    if (CxTYPE(cx) != CXt_EVAL) {
 		if (!message)
-		    message = SvPVx_const(ERRSV, msglen);
+		    message = (char *)SvPVx_const(ERRSV, msglen);
 		PerlIO_write(Perl_error_log, "panic: die ", 11);
 		PerlIO_write(Perl_error_log, message, msglen);
 		my_exit(1);
@@ -1410,7 +1410,7 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 	}
     }
     if (!message)
-	message = SvPVx_const(ERRSV, msglen);
+	message = (char *)SvPVx_const(ERRSV, msglen);
 
     write_to_stderr(message, msglen);
     my_failure_exit();
@@ -1619,7 +1619,7 @@ PP(pp_reset)
 	tmps = "";
     else
 	tmps = POPpconstx;
-    sv_reset(tmps, CopSTASH(PL_curcop));
+    sv_reset((char *)tmps, CopSTASH(PL_curcop));
     PUSHs(&PL_sv_yes);
     RETURN;
 }

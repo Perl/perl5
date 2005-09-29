@@ -1371,7 +1371,7 @@ PP(pp_leavewrite)
 		SvCUR_set(PL_formtarget, s - SvPVX_const(PL_formtarget));
 		do_print(PL_formtarget, ofp);
 		SvCUR_set(PL_formtarget, save);
-		sv_chop(PL_formtarget, s);
+		sv_chop(PL_formtarget, (char *)s);
 		FmLINES(PL_formtarget) -= IoLINES_LEFT(io);
 	    }
 	}
@@ -1889,7 +1889,7 @@ PP(pp_send)
 	if (length > blen - offset)
 	    length = blen - offset;
 	if (DO_UTF8(bufsv)) {
-	    buffer = (const char*)utf8_hop((const U8 *)buffer, offset);
+	    buffer = (const char*)utf8_hop((U8 *)buffer, offset);
 	    length = utf8_hop((U8 *)buffer, length) - (U8 *)buffer;
 	}
 	else {

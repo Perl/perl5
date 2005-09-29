@@ -180,7 +180,7 @@ PP(pp_rv2gv)
 		    }
 		    else {
 			const char *name = CopSTASHPV(PL_curcop);
-			gv = newGVgen(name);
+			gv = newGVgen((char *)name);
 		    }
 		    if (SvTYPE(sv) < SVt_RV)
 			sv_upgrade(sv, SVt_RV);
@@ -383,7 +383,7 @@ PP(pp_prototype)
     if (SvPOK(TOPs) && SvCUR(TOPs) >= 7) {
 	const char *s = SvPVX_const(TOPs);
 	if (strnEQ(s, "CORE::", 6)) {
-	    const int code = keyword(s + 6, SvCUR(TOPs) - 6);
+	    const int code = keyword((char *)s + 6, SvCUR(TOPs) - 6);
 	    if (code < 0) {	/* Overridable. */
 #define MAX_ARGS_OP ((sizeof(I32) - 1) * 2)
 		int i = 0, n = 0, seen_question = 0;
@@ -2889,7 +2889,7 @@ PP(pp_hex)
 	 sv_utf8_downgrade(tsv, FALSE);
 	 tmps = SvPV_const(tsv, len);
     }
-    result_uv = grok_hex (tmps, &len, &flags, &result_nv);
+    result_uv = grok_hex ((char *)tmps, &len, &flags, &result_nv);
     if (flags & PERL_SCAN_GREATER_THAN_UV_MAX) {
         XPUSHn(result_nv);
     }
@@ -2924,11 +2924,11 @@ PP(pp_oct)
     if (*tmps == '0')
         tmps++, len--;
     if (*tmps == 'x')
-        result_uv = grok_hex (tmps, &len, &flags, &result_nv);
+        result_uv = grok_hex ((char *)tmps, &len, &flags, &result_nv);
     else if (*tmps == 'b')
-        result_uv = grok_bin (tmps, &len, &flags, &result_nv);
+        result_uv = grok_bin ((char *)tmps, &len, &flags, &result_nv);
     else
-        result_uv = grok_oct (tmps, &len, &flags, &result_nv);
+        result_uv = grok_oct ((char *)tmps, &len, &flags, &result_nv);
 
     if (flags & PERL_SCAN_GREATER_THAN_UV_MAX) {
         XPUSHn(result_nv);
@@ -3079,7 +3079,7 @@ PP(pp_substr)
 		repl = SvPV_const(repl_sv_copy, repl_len);
 		repl_is_utf8 = DO_UTF8(repl_sv_copy) && SvCUR(sv);
 	    }
-	    sv_insert(sv, pos, rem, repl, repl_len);
+	    sv_insert(sv, pos, rem, (char *)repl, repl_len);
 	    if (repl_is_utf8)
 		SvUTF8_on(sv);
 	    if (repl_sv_copy)
@@ -3311,7 +3311,7 @@ PP(pp_ord)
     }
 
     XPUSHu(DO_UTF8(argsv) ?
-	   utf8n_to_uvchr(s, UTF8_MAXBYTES, 0, UTF8_ALLOW_ANYUV) :
+	   utf8n_to_uvchr((U8 *)s, UTF8_MAXBYTES, 0, UTF8_ALLOW_ANYUV) :
 	   (*s & 0xff));
 
     RETURN;
@@ -3424,8 +3424,8 @@ PP(pp_ucfirst)
 	STRLEN ulen;
 	STRLEN tculen;
 
-	utf8_to_uvchr(s, &ulen);
-	toTITLE_utf8(s, tmpbuf, &tculen);
+	utf8_to_uvchr((U8 *)s, &ulen);
+	toTITLE_utf8((U8 *)s, tmpbuf, &tculen);
 	utf8_to_uvchr(tmpbuf, 0);
 
 	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
@@ -3488,7 +3488,7 @@ PP(pp_lcfirst)
 	U8 *tend;
 	UV uv;
 
-	toLOWER_utf8(s, tmpbuf, &ulen);
+	toLOWER_utf8((U8 *)s, tmpbuf, &ulen);
 	uv = utf8_to_uvchr(tmpbuf, 0);
 	tend = uvchr_to_utf8(tmpbuf, uv);
 
@@ -3561,7 +3561,7 @@ PP(pp_uc)
 	    while (s < send) {
 		STRLEN u = UTF8SKIP(s);
 
-		toUPPER_utf8(s, tmpbuf, &ulen);
+		toUPPER_utf8((U8 *)s, tmpbuf, &ulen);
 		if (ulen > u && (SvLEN(TARG) < (min += ulen - u))) {
 		    /* If the eventually required minimum size outgrows
 		     * the available space, we need to grow. */
@@ -3644,7 +3644,7 @@ PP(pp_lc)
 	    send = s + len;
 	    while (s < send) {
 		const STRLEN u = UTF8SKIP(s);
-		const UV uv = toLOWER_utf8(s, tmpbuf, &ulen);
+		const UV uv = toLOWER_utf8((U8 *)s, tmpbuf, &ulen);
 
 #define GREEK_CAPITAL_LETTER_SIGMA 0x03A3 /* Unicode U+03A3 */
 		if (uv == GREEK_CAPITAL_LETTER_SIGMA) {
