@@ -73,7 +73,9 @@ $map{"nick\100ccl4.org"} = $map{"nick\100talking.bollo.cx"}
   = $map{"nick\100bagpuss.unfortu.net"} = "nicholas";
 $map{"philip.newton\100gmx.net"} = $map{"philip.newton\100datenrevision.de"}
   = "pnewton\100gmx.de",
-$map{"raphel.garcia-suarez\100hexaflux.com"} = "rgs";
+$map{"rgarciasuarez\100mandrakesoft.com"}
+  = $map{"rgarciasuarez\100mandriva.com"}
+  = $map{"raphel.garcia-suarez\100hexaflux.com"} = "rgs";
 $map{"simon\100pembro4.pmb.ox.ac.uk"} = $map{"simon\100brecon.co.uk"}
   = $map{"simon\100othersideofthe.earth.li"} = $map{"simon\100cozens.net"}
   = $map{"simon\100netthink.co.uk"} = "simon\100simon-cozens.org";
