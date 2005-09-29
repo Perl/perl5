@@ -16487,8 +16487,7 @@ ____________________________________________________________________________
 	   ! win32/Makefile win32/makefile.mk
 ____________________________________________________________________________
 [ 22419] By: davem                                 on 2004/03/01  22:17:52
-        Log:
-             add tests for change 22414 (lvalue substr jollity)
+        Log: add tests for change 22414 (lvalue substr jollity)
              courtesy of Graham Barr.
      Branch: perl
 	   ! t/op/substr.t
@@ -18130,7 +18129,7 @@ ____________________________________________________________________________
 	   ! pod/perlhist.pod
 ____________________________________________________________________________
 [ 22091] By: nicholas                              on 2004/01/07  19:09:50
-        Log:
+        Log: [Integrate]
              22088 22089 22090 (datestamp corrections - let's see if this really
              works)
      Branch: perl
@@ -18179,7 +18178,7 @@ ____________________________________________________________________________
 	   ! pp.c
 ____________________________________________________________________________
 [ 22071] By: davem                                 on 2004/01/05  22:17:04
-        Log:
+        Log: [perl #24674]
              stop $^O getting tainted on read access, and disallow tainted
              assignment to it
      Branch: perl
