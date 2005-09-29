@@ -36,6 +36,8 @@ my %map = reverse (
 		   pudge => "pudge\100pobox.com",
 		   rgs => "rgarciasuarez\100free.fr",
 		   sky => "sky\100nanisky.com", 
+		   steveh => "steve.hay\100uk.radan.com",
+		   stevep => "steve\100fisharerojo.org",
 		   "abigail\100abigail.nl"=> "abigail\100foad.org",
 		   "chromatic\100wgz.org" => "chromatic\100rmci.net",
 		   "slaven\100rezic.de" => "slaven.rezic\100berlin.de",
@@ -60,7 +62,8 @@ $map{"artur\100contiller.se"} = $map{"arthur\100contiller.se"} = "sky";
 $map{"autrijus\100egb.elixus.org"} = $map{"autrijus\100geb.elixus.org"}
   = "autrijus\100autrijus.org";
 $map{"craig.berry\100psinetcs.com"} = $map{"craig.berry\100metamorgs.com"}
-  = $map{"craig.berry\100signaltreesolutions.com"} = "craigberry\100mac.com";
+  = $map{"craig.berry\100signaltreesolutions.com"}
+  = $map{"craigberry\100mac.com"} = "craigb";
 $map{"davem\100fdgroup.co.uk"} = "davem";
 $map{"ilya\100math.ohio-state.edu"} = $map{"ilya\100math.berkeley.edu"}
   = $map{"ilya\100math.berkeley.edu"} = "nospam-abuse\100ilyaz.org";
