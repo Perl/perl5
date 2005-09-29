@@ -88,6 +88,8 @@ $map{"japhy\100perlmonk.org"} = $map{"japhy\100cpan.org"}
   = "japhy\100pobox.com";
 $map{"rmbarker\100cpan.org"} = "robin.barker\100npl.co.uk";
 
+$map{"h.m.brand\100hccnet.nl"} = 'merijn';
+
 if (@authors) {
   my %raw;
   foreach my $filename (@authors) {
