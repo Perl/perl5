@@ -1987,9 +1987,7 @@ PERL_CALLCONV SV**	Perl_stack_grow(pTHX_ SV** sp, SV**p, int n)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV I32	Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
-			__attribute__warn_unused_result__;
-
+PERL_CALLCONV I32	Perl_start_subparse(pTHX_ I32 is_format, U32 flags);
 PERL_CALLCONV void	Perl_sub_crush_depth(pTHX_ CV* cv)
 			__attribute__nonnull__(pTHX_1);
 

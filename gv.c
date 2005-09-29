@@ -164,7 +164,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 	SvIOK_off(gv);
 	ENTER;
 	/* XXX unsafe for threads if eval_owner isn't held */
-	start_subparse(0,0);		/* Create CV in compcv. */
+	(void) start_subparse(0,0);	/* Create empty CV in compcv. */
 	GvCV(gv) = PL_compcv;
 	LEAVE;
 

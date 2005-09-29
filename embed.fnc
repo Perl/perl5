@@ -715,7 +715,7 @@ np	|Signal_t |sighandler	|int sig
 Anp	|Signal_t |csighandler	|int sig
 #endif
 Ap	|SV**	|stack_grow	|NN SV** sp|NN SV**p|int n
-ApR	|I32	|start_subparse	|I32 is_format|U32 flags
+Ap	|I32	|start_subparse	|I32 is_format|U32 flags
 p	|void	|sub_crush_depth|NN CV* cv
 Apd	|bool	|sv_2bool	|NN SV* sv
 Apd	|CV*	|sv_2cv		|NULLOK SV* sv|NN HV** st|NN GV** gvp|I32 lref
