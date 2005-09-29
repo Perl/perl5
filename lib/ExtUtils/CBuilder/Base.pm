@@ -176,7 +176,7 @@ sub link_executable {
   my ($self, %args) = @_;
   return $self->_do_link('exe_file', lddl => 0, %args);
 }
-				   
+
 sub _do_link {
   my ($self, $type, %args) = @_;
 
@@ -195,6 +195,7 @@ sub _do_link {
   my @output = $args{lddl} ? $self->arg_share_object_file($out) : $self->arg_exec_file($out);
   my @shrp = $self->split_like_shell($cf->{shrpenv});
   my @ld = $self->split_like_shell($cf->{ld});
+  
   $self->do_system(@shrp, @ld, @output, @$objects, @linker_flags)
     or die "error building $out from @$objects";
   

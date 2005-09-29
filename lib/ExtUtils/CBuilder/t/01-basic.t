@@ -47,10 +47,7 @@ my ($lib, @temps) = $b->link(objects => $object_file,
 $lib =~ tr/"'//d;
 ok $lib_file, $lib;
 
-for ($source_file, $lib_file, $object_file) {
-  tr/"'//d;
-  1 while unlink;
-}
+unlink $source_file;
 
 my @words = $b->split_like_shell(' foo bar');
 ok @words, 2;
