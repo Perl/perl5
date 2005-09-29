@@ -1883,15 +1883,16 @@ EOP
 warn "Writing $ext$modpname/Makefile.PL\n";
 open(PL, ">Makefile.PL") || die "Can't create $ext$modpname/Makefile.PL: $!\n";
 
-my $prereq_pm;
+my $prereq_pm = '';
 
 if ( $compat_version < 5.00702 and $new_test )
 {
-  $prereq_pm = q%'Test::More'  =>  0%;
+  $prereq_pm .= q%'Test::More'  =>  0, %;
 }
-else
+
+if ( $compat_version < 5.00600 and !$opt_X)
 {
-  $prereq_pm = '';
+  $prereq_pm .= q%'XSLoader'  =>  0, %;
 }
 
 print PL <<"END";
