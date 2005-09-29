@@ -124,12 +124,14 @@ while (<>) {
     $log = $_;
     my $prefix = " " x length $1;
     LOG: while (<>) {
+      next if /^$/;
       if (s/^$prefix//) {
 	$log .= $_;
       } elsif (/^\s+Branch:/) {
 	last LOG;
       } else {
-	die "Malformed log end with $_";
+	chomp;
+	die "Malformed log end with '$_'";
       }
     }
   }
