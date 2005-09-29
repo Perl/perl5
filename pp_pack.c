@@ -611,8 +611,8 @@ S_measure_struct(pTHX_ register tempsym_t* symptr)
 /* locate matching closing parenthesis or bracket
  * returns char pointer to char after match, or NULL
  */
-STATIC char *
-S_group_end(pTHX_ register char *patptr, register char *patend, char ender)
+STATIC const char *
+S_group_end(pTHX_ register const char *patptr, register const char *patend, char ender)
 {
     while (patptr < patend) {
 	char c = *patptr++;
@@ -640,8 +640,8 @@ S_group_end(pTHX_ register char *patptr, register char *patend, char ender)
  * Expects a pointer to the first digit and address of length variable
  * Advances char pointer to 1st non-digit char and returns number
  */ 
-STATIC char *
-S_get_num(pTHX_ register char *patptr, I32 *lenptr )
+STATIC const char *
+S_get_num(pTHX_ register const char *patptr, I32 *lenptr )
 {
   I32 len = *patptr++ - '0';
   while (isDIGIT(*patptr)) {
@@ -693,8 +693,9 @@ S_next_symbol(pTHX_ register tempsym_t* symptr )
         if( isDIGIT(*patptr) || *patptr == '*' || *patptr == '[' )
           Perl_croak(aTHX_ "()-group starts with a count in %s",
                      symptr->flags & FLAG_PACK ? "pack" : "unpack" );
-        symptr->grpbeg = patptr;
-        patptr = 1 + ( symptr->grpend = group_end(patptr, patend, ')') );
+        symptr->grpbeg = (char *) patptr;
+        patptr
+	    = 1 + ( symptr->grpend = (char *)group_end(patptr, patend, ')') );
         if( symptr->level >= MAX_SUB_TEMPLATE_LEVEL )
 	  Perl_croak(aTHX_ "Too deeply nested ()-groups in %s",
                      symptr->flags & FLAG_PACK ? "pack" : "unpack" );
@@ -773,7 +774,7 @@ S_next_symbol(pTHX_ register tempsym_t* symptr )
           symptr->howlen = e_star;
 
         } else if (*patptr == '[') {
-          char* lenptr = ++patptr;            
+          const char* lenptr = ++patptr;            
           symptr->howlen = e_number;
           patptr = group_end( patptr, patend, ']' ) + 1;
           /* what kind of [] is it? */
@@ -784,8 +785,8 @@ S_next_symbol(pTHX_ register tempsym_t* symptr )
                          symptr->flags & FLAG_PACK ? "pack" : "unpack");
           } else {
             tempsym_t savsym = *symptr;
-            symptr->patend = patptr-1;
-            symptr->patptr = lenptr;
+            symptr->patend = (char *) patptr-1;
+            symptr->patptr = (char *) lenptr;
             savsym.length = measure_struct(symptr);
             *symptr = savsym;
           }
@@ -823,11 +824,11 @@ S_next_symbol(pTHX_ register tempsym_t* symptr )
       }
 
       symptr->code = code;
-      symptr->patptr = patptr; 
+      symptr->patptr = (char *) patptr; 
       return TRUE;
     }
   }
-  symptr->patptr = patptr; 
+  symptr->patptr = (char *) patptr; 
   return FALSE;
 }
 
@@ -1547,7 +1548,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 			t = SvPV_nolen_const(sv);
 			while (*t == '0')
 			    t++;
-			sv_chop(sv, t);
+			sv_chop(sv, (char *)t);
 			PUSHs(sv_2mortal(sv));
 			len--;
 			auv = 0;
@@ -1793,12 +1794,12 @@ PP(pp_unpack)
 #else
     const char *s = SvPV_const(right, rlen);
 #endif
-    char *strend = s + rlen;
-    register char *patend = pat + llen;
+    const char *strend = s + rlen;
+    const char *patend = pat + llen;
     register I32 cnt;
 
     PUTBACK;
-    cnt = unpackstring(pat, patend, s, strend,
+    cnt = unpackstring((char *)pat, (char *)patend, (char *)s, (char *)strend,
 		     ((gimme == G_SCALAR) ? FLAG_UNPACK_ONLY_ONE : 0)
 		     | (DO_UTF8(right) ? FLAG_UNPACK_DO_UTF8 : 0));
 
@@ -1837,7 +1838,7 @@ S_doencodes(pTHX_ register SV *sv, register char *s, register I32 len)
 }
 
 STATIC SV *
-S_is_an_int(pTHX_ char *s, STRLEN l)
+S_is_an_int(pTHX_ const char *s, STRLEN l)
 {
   SV             *result = newSVpvn(s, l);
   char           *result_c = SvPV_nolen(result);	/* convenience */
@@ -2107,7 +2108,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	case 'Z':
 	case 'a':
 	    fromstr = NEXTFROM;
-	    aptr = SvPV_const(fromstr, fromlen);
+	    aptr = (char *) SvPV_const(fromstr, fromlen);
 	    if (howlen == e_star) {   
 		len = fromlen;
 		if (datumtype == 'Z')
@@ -2566,7 +2567,8 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 		    sv_catpvn(cat, in, (buf + sizeof(buf)) - in);
 		}
 		else {
-		    char           *from, *result, *in;
+		    const char     *from;
+		    char           *result, *in;
 		    SV             *norm;
 		    STRLEN          len;
 		    bool            done;
@@ -2710,7 +2712,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 				"Attempt to pack pointer to temporary value");
 		    }
 		    if (SvPOK(fromstr) || SvNIOK(fromstr))
-			aptr = SvPV_nomg_const(fromstr, n_a);
+			aptr = (char *) SvPV_nomg_const(fromstr, n_a);
 		    else
 			aptr = SvPV_force_flags(fromstr, n_a, 0);
 		}
@@ -2720,7 +2722,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	    break;
 	case 'u':
 	    fromstr = NEXTFROM;
-	    aptr = SvPV_const(fromstr, fromlen);
+	    aptr = (char *) SvPV_const(fromstr, fromlen);
 	    SvGROW(cat, fromlen * 4 / 3);
 	    if (len <= 2)
 		len = 45;

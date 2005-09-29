@@ -2909,11 +2909,11 @@ STATIC SV*	S_mul128(pTHX_ SV *sv, U8 m)
 STATIC I32	S_measure_struct(pTHX_ tempsym_t* symptr)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC char *	S_group_end(pTHX_ char *pat, char *patend, char ender)
+STATIC const char *	S_group_end(pTHX_ const char *pat, const char *patend, char ender)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-STATIC char *	S_get_num(pTHX_ char *ppat, I32 *)
+STATIC const char *	S_get_num(pTHX_ const char *ppat, I32 *)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
@@ -2921,7 +2921,7 @@ STATIC bool	S_next_symbol(pTHX_ tempsym_t* symptr)
 			__attribute__nonnull__(pTHX_1);
 
 STATIC void	S_doencodes(pTHX_ SV* sv, char* s, I32 len);
-STATIC SV*	S_is_an_int(pTHX_ char *s, STRLEN l)
+STATIC SV*	S_is_an_int(pTHX_ const char *s, STRLEN l)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
