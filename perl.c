@@ -1725,7 +1725,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #endif
 		    opts = SvCUR(opts_prog);
 
-		    sv_catpv(opts_prog,"\"  Compile-time options:"
+		    Perl_sv_catpv(aTHX_ opts_prog,"\"  Compile-time options:"
 #  ifdef DEBUGGING
 			     " DEBUGGING"
 #  endif
