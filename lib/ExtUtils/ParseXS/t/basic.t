@@ -64,6 +64,7 @@ if ($b->have_compiler) {
       }
     }
   }
+  1 while unlink $obj_file;
   1 while unlink $lib_file;
 } else {
   skip "Skipped can't find a C compiler & linker", 1 for 1..7;
