@@ -554,6 +554,8 @@ OPTIONS:
         --skip-warnings   Do not use the pragma C<warnings>.
     -v, --version         Specify a version number for this extension.
     -x, --autogen-xsubs   Autogenerate XSUBs using C::Scan.
+        --use-xsloader    Use XSLoader in backward compatible modules (ignored
+                          when used with -X).
 
 extra_libraries
          are any libraries that might be needed for loading the
@@ -593,6 +595,7 @@ my ($opt_A,
     $skip_autoloader,
     $skip_strict,
     $skip_warnings,
+    $use_xsloader
    );
 
 Getopt::Long::Configure('bundling');
@@ -631,6 +634,7 @@ my %options = (
                 'skip-autoloader'    => \$skip_autoloader,
                 'skip-warnings'      => \$skip_warnings,
                 'skip-strict'        => \$skip_strict,
+                'use-xsloader'       => \$use_xsloader,
               );
 
 GetOptions(%options) || usage;
@@ -1100,7 +1104,7 @@ print PM <<'END' unless $skip_exporter;
 require Exporter;
 END
 
-my $use_Dyna = (not $opt_X and $compat_version < 5.006);
+my $use_Dyna = (not $opt_X and $compat_version < 5.006 and not $use_xsloader);
 print PM <<"END" if $use_Dyna;  # use DynaLoader, unless XS was disabled
 require DynaLoader;
 END
@@ -1890,7 +1894,7 @@ if ( $compat_version < 5.00702 and $new_test )
   $prereq_pm .= q%'Test::More'  =>  0, %;
 }
 
-if ( $compat_version < 5.00600 and !$opt_X)
+if ( $compat_version < 5.00600 and !$opt_X and $use_xsloader)
 {
   $prereq_pm .= q%'XSLoader'  =>  0, %;
 }
