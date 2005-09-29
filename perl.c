@@ -739,6 +739,8 @@ perl_destruct(pTHXx)
 	 */
 	sv_clean_objs();
 	PL_sv_objcount = 0;
+	if (PL_defoutgv && !SvREFCNT(PL_defoutgv))
+	    PL_defoutgv = Nullgv; /* may have been freed */
     }
 
     /* unhook hooks which will soon be, or use, destroyed data */
