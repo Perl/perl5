@@ -2642,7 +2642,7 @@ win32_fseek(FILE *pf, Off_t offset,int origin)
     return fsetpos(pf, &offset);
 #endif
 #else
-    return fseek(pf, offset, origin);
+    return fseek(pf, (long)offset, origin);
 #endif
 }
 
@@ -3192,7 +3192,7 @@ finish:
     win32_lseek(fd, cur, SEEK_SET);
     return retval;
 #else
-    return chsize(fd, size);
+    return chsize(fd, (long)size);
 #endif
 }
 
@@ -3218,7 +3218,7 @@ win32_lseek(int fd, Off_t offset, int origin)
     return _lseeki64(fd, offset, origin);
 #endif
 #else
-    return lseek(fd, offset, origin);
+    return lseek(fd, (long)offset, origin);
 #endif
 }
 
