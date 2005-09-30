@@ -3808,7 +3808,7 @@ PP(pp_open_dir)
 
     if (IoDIRP(io))
 	PerlDir_close(IoDIRP(io));
-    if (!(IoDIRP(io) = PerlDir_open(dirname)))
+    if (!(IoDIRP(io) = PerlDir_open((char *)dirname)))
 	goto nope;
 
     RETPUSHYES;
