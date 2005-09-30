@@ -42,7 +42,7 @@ system).  Currently, this port is capable of using one of the
 following compilers on the Intel x86 architecture:
 
       Borland C++           version 5.02 or later
-      Microsoft Visual C++  version 4.2 or later
+      Microsoft Visual C++  version 2.0 or later
       MinGW with gcc        gcc version 2.95.2 or later
 
 The last of these is a high quality freeware compiler.  Use version
@@ -223,11 +223,11 @@ from win32/Makefile and setargv.obj won't be required anyway.
 =back
 
 Perl should now build using the win32/Makefile.  You will need to edit that
-file to comment-out CCTYPE = MSVC60 (since that enables delay-loading of the
-Winsock DLL which the free toolkit does not support) and to set CCHOME,
-CCINCDIR and CCLIBDIR as per the environment setup above.  You may also want to
-change both mentions of the compiler's "-Gf" switch to "-GF" since the former
-is deprecated in VC7 and will be removed from future versions.
+file to set
+
+	CCTYPE = MSVC70FREE
+
+and to set CCHOME, CCINCDIR and CCLIBDIR as per the environment setup above.
 
 =item Microsoft Platform SDK 64-bit Compiler
 
@@ -317,10 +317,9 @@ The default value for CCHOME in the makefiles for Visual C++
 may not be correct for some versions.  Make sure the default exists
 and is valid.
 
-You may also need to comment out a line C<DELAYLOAD = ...> in the
-makefile, in case you're using an older version of the Visual C++ compiler
-(e.g. 6.0 without service packs) and if the linker reports an internal
-error.
+You may also need to comment out the C<DELAYLOAD = ...> line in the
+Makefile if you're using VC++ 6.0 without the latest service pack and
+the linker reports an internal error.
 
 If you have either the source or a library that contains des_fcrypt(),
 enable the appropriate option in the makefile.  A ready-to-use version
@@ -908,6 +907,6 @@ Win9x support was added in 5.6 (Benjamin Stuhl).
 
 Support for 64-bit Windows added in 5.8 (ActiveState Corp).
 
-Last updated: 16 June 2005
+Last updated: 30 September 2005
 
 =cut

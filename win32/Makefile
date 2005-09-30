@@ -1,7 +1,7 @@
 #
 # Makefile to build perl on Windows NT using Microsoft NMAKE.
 # Supported compilers:
-#	Visual C++ 2.0 through 6.0 (and possibly newer versions)
+#	Visual C++ 2.0 through 7.0 (and possibly newer versions)
 #	MS Platform SDK 64-bit compiler and tools **experimental**
 #
 # This is set up to build a perl.exe that runs off a shared library
@@ -88,11 +88,18 @@ USE_PERLIO	= define
 USE_LARGE_FILES	= define
 
 #
-# uncomment one of the following lines if you are using either
-# Visual C++ 2.x or Visual C++ 6.x (aka Visual Studio 98)
+# uncomment exactly one of the following
 #
+# Visual C++ 2.x
 #CCTYPE		= MSVC20
+# Visual C++ > 2.x and < 6.x
+#CCTYPE		= MSVC
+# Visual C++ 6.x (aka Visual Studio 98)
 CCTYPE		= MSVC60
+# Visual C++ Toolkit 2003 (free version of Visual C++ 7.x command-line tools)
+#CCTYPE		= MSVC70FREE
+# Visual C++ 7.x (aka Visual Studio .NET 2003) (full version)
+#CCTYPE		= MSVC70
 
 #
 # uncomment next line if you want debug version of perl (big,slow)
@@ -327,11 +334,10 @@ BUILDOPT	= $(BUILDOPT) -DUSE_PERLIO
 ARCHNAME	= $(ARCHNAME)-thread
 !ENDIF
 
-# Visual Studio 98 specific
-!IF "$(CCTYPE)" == "MSVC60"
-
-# VC 6.0 can load the socket dll on demand.  Makes the test suite
-# run in about 10% less time.
+# Visual Studio 98 and .NET 2003 specific
+# VC++ 6.x and 7.x can load DLL's on demand.  Makes the test suite run in
+# about 10% less time.  (The free version of 7.x can't do this, however.)
+!IF "$(CCTYPE)" == "MSVC60" || "$(CCTYPE)" == "MSVC70"
 DELAYLOAD	= -DELAYLOAD:ws2_32.dll -DELAYLOAD:shell32.dll delayimp.lib
 !ENDIF
 
@@ -411,6 +417,14 @@ DEFINES		= $(DEFINES) -DWIN64 -DCONSERVATIVE
 OPTIMIZE	= $(OPTIMIZE) -Wp64 -Op
 !ENDIF
 
+# the string-pooling option -Gf is deprecated in VC++ 7.x and will be removed
+# in later versions, so use read-only string-pooling (-GF) instead
+!IF "$(CCTYPE)" == "MSVC70FREE" || "$(CCTYPE)" == "MSVC70"
+STRPOOL		= -GF
+!ELSE
+STRPOOL		= -Gf
+!ENDIF
+
 !IF "$(USE_PERLCRT)" != "define"
 BUILDOPT	= $(BUILDOPT) -DPERL_MSVCRT_READFIX
 !ENDIF
@@ -429,7 +443,7 @@ LIBBASEFILES	= $(LIBBASEFILES) odbc32.lib odbccp32.lib
 # we add LIBC here, since we may be using PerlCRT.dll
 LIBFILES	= $(LIBBASEFILES) $(LIBC)
 
-CFLAGS		= -nologo -Gf -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) \
+CFLAGS		= -nologo $(STRPOOL) -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS	= -nologo -nodefaultlib $(LINK_DBG) \
 		-libpath:"$(INST_COREDIR)" \
@@ -850,7 +864,7 @@ CFG_VARS	=					\
 		"archname=$(ARCHNAME)"			\
 		"cc=$(CC)"				\
 		"ld=$(LINK32)"				\
-		"ccflags=-nologo -Gf -W3 $(OPTIMIZE:"=\") $(DEFINES) $(BUILDOPT)"	\
+		"ccflags=-nologo $(STRPOOL) -W3 $(OPTIMIZE:"=\") $(DEFINES) $(BUILDOPT)"	\
 		"cf_email=$(EMAIL)"	 		\
 		"d_crypt=$(D_CRYPT)"			\
 		"d_mymalloc=$(PERL_MALLOC)"		\
