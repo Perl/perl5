@@ -931,6 +931,21 @@ Perl_leave_scope(pTHX_ I32 base)
 		    break;
 		case SVt_PVAV:
 		    av_clear((AV*)sv);
+		    /* Need to detach $#array from @array that has just gone
+		       out of scope. Otherwise the first $#array controls the
+		       size of the array "newly" created the next time this
+		       scope is entered.
+		    */
+		    if (AvARYLEN(sv)) {
+			MAGIC *mg = mg_find (AvARYLEN(sv), PERL_MAGIC_arylen);
+
+			if (mg) {
+			    mg->mg_obj = 0;
+			}
+
+			SvREFCNT_dec(AvARYLEN(sv));
+			AvARYLEN(sv) = 0;
+		    }
 		    break;
 		case SVt_PVHV:
 		    hv_clear((HV*)sv);
