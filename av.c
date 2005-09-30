@@ -503,6 +503,17 @@ Perl_av_undef(pTHX_ register AV *av)
     SvPV_set(av, (char*)0);
     AvMAX(av) = AvFILLp(av) = -1;
     if (AvARYLEN(av)) {
+	MAGIC *mg = mg_find (AvARYLEN(av), PERL_MAGIC_arylen);
+
+	if (mg) {
+	    /* arylen scalar holds a pointer back to the array, but doesn't
+	       own a reference. Hence the we (the array) are about to go away
+	       with it still pointing at us. Clear its pointer, else it would
+	       be pointing at free memory. See the comment in sv_magic about
+	       reference loops, and why it can't own a reference to us.  */
+	    mg->mg_obj = 0;
+	}
+
 	SvREFCNT_dec(AvARYLEN(av));
 	AvARYLEN(av) = 0;
     }
