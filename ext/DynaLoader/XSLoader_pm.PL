@@ -1,3 +1,4 @@
+use strict;
 use Config;
 
 sub to_string {
@@ -7,14 +8,16 @@ sub to_string {
     return "'$value'";
 }
 
-unlink "XSLoader.pm" if -f "XSLoader.pm";
+1 while unlink "XSLoader.pm";
 open OUT, ">XSLoader.pm" or die $!;
 print OUT <<'EOT';
 # Generated from XSLoader.pm.PL (resolved %Config::Config value)
 
 package XSLoader;
 
-$VERSION = "0.03";
+$VERSION = "0.05_01";
+
+#use strict;
 
 # enable debug/trace messages from DynaLoader perl code
 # $dl_debug = $ENV{PERL_DL_DEBUG} || 0 unless defined $dl_debug;
@@ -75,7 +78,7 @@ print OUT <<'EOT';
 
     my $bootname = "boot_$module";
     $bootname =~ s/\W/_/g;
-    @dl_require_symbols = ($bootname);
+    @DynaLoader::dl_require_symbols = ($bootname);
 
     my $boot_symbol_ref;
 
@@ -93,23 +96,23 @@ print OUT <<'EOT';
     # it executed.
 
     my $libref = dl_load_file($file, 0) or do { 
-	require Carp;
-	Carp::croak("Can't load '$file' for module $module: " . dl_error());
+        require Carp;
+        Carp::croak("Can't load '$file' for module $module: " . dl_error());
     };
-    push(@dl_librefs,$libref);  # record loaded object
+    push(@DynaLoader::dl_librefs,$libref);  # record loaded object
 
     my @unresolved = dl_undef_symbols();
     if (@unresolved) {
-	require Carp;
-	Carp::carp("Undefined symbols present after loading $file: @unresolved\n");
+        require Carp;
+        Carp::carp("Undefined symbols present after loading $file: @unresolved\n");
     }
 
     $boot_symbol_ref = dl_find_symbol($libref, $bootname) or do {
-	require Carp;
-	Carp::croak("Can't find '$bootname' symbol in $file\n");
+        require Carp;
+        Carp::croak("Can't find '$bootname' symbol in $file\n");
     };
 
-    push(@dl_modules, $module); # record loaded module
+    push(@DynaLoader::dl_modules, $module); # record loaded module
 
   boot:
     my $xs = dl_install_xsub("${module}::bootstrap", $boot_symbol_ref, $file);
@@ -119,17 +122,35 @@ print OUT <<'EOT';
     return &$xs(@_);
 
   retry:
+    my $bootstrap_inherit = DynaLoader->can('bootstrap_inherit') || 
+                            XSLoader->can('bootstrap_inherit');
+    goto &$bootstrap_inherit;
+}
+
+# Versions of DynaLoader prior to 5.6.0 don't have this function.
+sub bootstrap_inherit {
+    package DynaLoader;
+
+    my $module = $_[0];
+    local *DynaLoader::isa = *{"$module\::ISA"};
+    local @DynaLoader::isa = (@DynaLoader::isa, 'DynaLoader');
+    # Cannot goto due to delocalization.  Will report errors on a wrong line?
     require DynaLoader;
-    goto &DynaLoader::bootstrap_inherit;
+    DynaLoader::bootstrap(@_);
 }
 
 1;
+
 
 __END__
 
 =head1 NAME
 
 XSLoader - Dynamically load C libraries into Perl code
+
+=head1 VERSION
+
+Version 0.05_01
 
 =head1 SYNOPSIS
 
@@ -145,8 +166,8 @@ linking mechanisms available on many platforms.  Its primary purpose is
 to implement cheap automatic dynamic loading of Perl modules.
 
 For a more complicated interface, see L<DynaLoader>.  Many (most)
-features of DynaLoader are not implemented in XSLoader, like for
-example the dl_load_flags, not honored by XSLoader.
+features of C<DynaLoader> are not implemented in C<XSLoader>, like for
+example the C<dl_load_flags>, not honored by C<XSLoader>.
 
 =head2 Migration from C<DynaLoader>
 
@@ -169,19 +190,19 @@ Change this to
     XSLoader::load 'YourPackage', $VERSION;
 
 In other words: replace C<require DynaLoader> by C<use XSLoader>, remove
-C<DynaLoader> from @ISA, change C<bootstrap> by C<XSLoader::load>.  Do not
+C<DynaLoader> from C<@ISA>, change C<bootstrap> by C<XSLoader::load>.  Do not
 forget to quote the name of your package on the C<XSLoader::load> line,
 and add comma (C<,>) before the arguments ($VERSION above).
 
-Of course, if @ISA contained only C<DynaLoader>, there is no need to have the
-@ISA assignment at all; moreover, if instead of C<our> one uses the more
-backward-compatible
+Of course, if C<@ISA> contained only C<DynaLoader>, there is no need to have
+the C<@ISA> assignment at all; moreover, if instead of C<our> one uses the
+more backward-compatible
 
     use vars qw($VERSION @ISA);
 
-one can remove this reference to @ISA together with the @ISA assignment.
+one can remove this reference to C<@ISA> together with the C<@ISA> assignment.
 
-If no $VERSION was specified on the C<bootstrap> line, the last line becomes
+If no C<$VERSION> was specified on the C<bootstrap> line, the last line becomes
 
     XSLoader::load 'YourPackage';
 
@@ -205,9 +226,9 @@ boilerplate.
        bootstrap YourPackage $VERSION;
     };
 
-The parentheses about XSLoader::load() arguments are needed since we replaced
+The parentheses about C<XSLoader::load()> arguments are needed since we replaced
 C<use XSLoader> by C<require>, so the compiler does not know that a function
-XSLoader::load() is present.
+C<XSLoader::load()> is present.
 
 This boilerplate uses the low-overhead C<XSLoader> if present; if used with
 an antic Perl which has no C<XSLoader>, it falls back to using C<DynaLoader>.
@@ -225,14 +246,14 @@ in F<YourPackage.pm>) and XS code (defined in F<YourPackage.xs>).  If this
 Perl code makes calls into this XS code, and/or this XS code makes calls to
 the Perl code, one should be careful with the order of initialization.
 
-The call to XSLoader::load() (or bootstrap()) has three side effects:
+The call to C<XSLoader::load()> (or C<bootstrap()>) has three side effects:
 
 =over
 
 =item *
 
-if $VERSION was specified, a sanity check is done to ensure that the versions
-of the F<.pm> and the (compiled) F<.xs> parts are compatible;
+if C<$VERSION> was specified, a sanity check is done to ensure that the
+versions of the F<.pm> and the (compiled) F<.xs> parts are compatible;
 
 =item *
 
@@ -249,7 +270,7 @@ convenient to have XSUBs installed before the Perl code is defined; for
 example, this makes prototypes for XSUBs visible to this Perl code.
 Alternatively, if the C<BOOT:> section makes calls to Perl functions (or
 uses Perl variables) defined in the F<.pm> file, they must be defined prior to
-the call to XSLoader::load() (or bootstrap()).
+the call to C<XSLoader::load()> (or C<bootstrap()>).
 
 The first situation being much more frequent, it makes sense to rewrite the
 boilerplate as
@@ -274,7 +295,7 @@ boilerplate as
 If the interdependence of your C<BOOT:> section and Perl code is
 more complicated than this (e.g., the C<BOOT:> section makes calls to Perl
 functions which make calls to XSUBs with prototypes), get rid of the C<BOOT:>
-section altogether.  Replace it with a function onBOOT(), and call it like
+section altogether.  Replace it with a function C<onBOOT()>, and call it like
 this:
 
     package YourPackage;
@@ -294,24 +315,74 @@ this:
 
     # Put Perl initialization code assuming that XS is initialized here
 
+
+=head1 DIAGNOSTICS
+
+=over 4
+
+=item Can't find '%s' symbol in %s
+
+B<(F)> The bootstrap symbol could not be found in the extension module.
+
+=item Can't load '%s' for module %s: %s
+
+B<(F)> The loading or initialisation of the extension module failed.
+The detailed error follows.
+
+=item Undefined symbols present after loading %s: %s
+
+B<(W)> As the message says, some symbols stay undefined although the
+extension module was correctly loaded and initialised. The list of undefined
+symbols follows.
+
+=item XSLoader::load('Your::Module', $Your::Module::VERSION)
+
+B<(F)> You tried to invoke C<load()> without any argument. You must supply
+a module name, and optionally its version.
+
+=back
+
+
 =head1 LIMITATIONS
 
 To reduce the overhead as much as possible, only one possible location
 is checked to find the extension DLL (this location is where C<make install>
 would put the DLL).  If not found, the search for the DLL is transparently
-delegated to C<DynaLoader>, which looks for the DLL along the @INC list.
+delegated to C<DynaLoader>, which looks for the DLL along the C<@INC> list.
 
-In particular, this is applicable to the structure of @INC used for testing
+In particular, this is applicable to the structure of C<@INC> used for testing
 not-yet-installed extensions.  This means that running uninstalled extensions
 may have much more overhead than running the same extensions after
 C<make install>.
 
+
+=head1 BUGS
+
+Please report any bugs or feature requests via the perlbug(1)
+utility.
+
+
+=head1 SEE ALSO
+
+L<DynaLoader>
+
+
 =head1 AUTHOR
 
-Ilya Zakharevich: extraction from DynaLoader.
+Ilya Zakharevich originally extracted C<XSLoader> from C<DynaLoader>.
+
+CPAN version is currently maintained by SE<eacute>bastien Aperghis-Tramoni
+E<lt>sebastien@aperghis.netE<gt>
+
+Previous maintainer was Michael G Schwern <schwern@pobox.com>
+
+
+=head1 COPYRIGHT
+
+This program is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
 
 =cut
 EOT
 
 close OUT or die $!;
-
