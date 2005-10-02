@@ -4885,6 +4885,13 @@ $       echo4 "You did not specify that, so I am disabling symbolic link support
 $    ENDIF
 $  ENDIF
 $!
+$!
+$! Check for grp.h -- should be 7.3 and later, but test to be sure
+$!
+$ tmp = "grp.h"
+$ GOSUB inhdr
+$ i_grp = tmp
+$!
 $! VMS V7.3-2 powered options
 $! We know that it is only available for V7.3-2 and later on 64 bit platforms.
 $! Only implementing right now on 8.2 because that is what I am testing.
@@ -4895,6 +4902,8 @@ $  d_getgrnam_r = "undef"
 $  getgrnam_r_proto = "0"
 $  d_getpgid = "undef"
 $  d_getpgrp = "undef"
+$! N.B.  We already have home-grown thread-safe versions of
+$!       getpwnam and getpwuid -- no need to use CRTL versions
 $  d_getpwnam_r = "undef"
 $  getpwnam_r_proto = "0"
 $  d_getpwuid_r = "undef"
@@ -4916,10 +4925,6 @@ $!	 FIXME: Need to find how to activate this.
 $!       d_getpgid = "define"
 $!       d_getpgrp = "define"
 $    endif
-$    d_getpwnam_r = "define"
-$    getpwnam_r_proto = "1"
-$    d_getpwuid_r = "define"
-$    getpwuid_r_proto = "1"
 $    d_setgrent = "define"
 $    d_ttyname_r = "define"
 $    ttyname_r_proto = "1"
@@ -6038,7 +6043,7 @@ $ WC "i_fcntl='" + i_fcntl + "'"
 $ WC "i_float='define'"
 $ WC "i_fp='undef'"
 $ WC "i_fp_class='undef'"
-$ WC "i_grp='undef'"
+$ WC "i_grp='" + i_grp + "'"
 $ WC "i_ieeefp='undef'"
 $ WC "i_inttypes='" + i_inttypes + "'"
 $ WC "i_langinfo='" + i_langinfo + "'"

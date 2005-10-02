@@ -153,7 +153,7 @@ sub scan_func {
   if ( $line =~ /(\w+)\s*\(/ ) {
     print "\troutine name is \\$1\\\n" if $debug > 1;
     if ($1 eq 'main' || $1 eq 'perl_init_ext' || $1 eq '__attribute__format__'
-        || (($1 eq 'Perl_stashpv_hvname_match') && ! $use_threads)) {
+        || $1 eq 'sizeof' || (($1 eq 'Perl_stashpv_hvname_match') && ! $use_threads)) {
       print "\tskipped\n" if $debug > 1;
     }
     else { $fcns{$1}++ }
@@ -182,7 +182,7 @@ if ($docc) {
 else {
   open(CPP,"$cpp_file") or die "$0: Can't read preprocessed file $cpp_file: $!\n";
 }
-%checkh = map { $_,1 } qw( thread bytecode byterun proto perlio perlvars intrpvar thrdvar );
+%checkh = map { $_,1 } qw( thread bytecode byterun proto perlapi perlio perlvars intrpvar thrdvar );
 $ckfunc = 0;
 LINE: while (<CPP>) {
   while (/^#.*vmsish\.h/i .. /^#.*perl\.h/i) {
