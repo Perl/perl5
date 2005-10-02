@@ -462,10 +462,12 @@ sub pod2html {
 END_OF_BLOCK
 
     print HTML <<END_OF_HEAD;
+<?xml version="1.0" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title>$Title</title>$csslink
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <link rev="made" href="mailto:$Config{perladmin}" />
 </head>
 
@@ -1182,6 +1184,7 @@ sub process_item {
             emit_item_tag( $otext, $text, 1 );
         }
         $need_dd = 1;
+        print HTML "</dd>";
     }
     print HTML "\n";
     return $need_dd;
