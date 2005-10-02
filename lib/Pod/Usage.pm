@@ -96,11 +96,11 @@ is 1, then the "SYNOPSIS" section, along with any section entitled
 "OPTIONS", "ARGUMENTS", or "OPTIONS AND ARGUMENTS" is printed.  If the
 corresponding value is 2 or more then the entire manpage is printed.
 
-The special verbosity level 99 requires to also specify the -section
+The special verbosity level 99 requires to also specify the -sections
 parameter; then these sections are extracted (see L<Pod::Select>)
 and printed.
 
-=item C<-section>
+=item C<-sections>
 
 A string representing a selection list for sections to be printed
 when -verbose is set to 99, e.g. C<"NAME|SYNOPSIS|DESCRIPTION|VERSION">.
