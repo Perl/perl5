@@ -1184,7 +1184,6 @@ sub process_item {
             emit_item_tag( $otext, $text, 1 );
         }
         $need_dd = 1;
-        print HTML "</dd>";
     }
     print HTML "\n";
     return $need_dd;
