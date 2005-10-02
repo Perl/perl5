@@ -4027,7 +4027,8 @@ LIST.  Has the same effect as
 	$ARRAY[++$#ARRAY] = $value;
     }
 
-but is more efficient.  Returns the new number of elements in the array.
+but is more efficient.  Returns the number of elements in the array following
+the completed C<push>.
 
 =item q/STRING/
 
