@@ -659,7 +659,7 @@ Ap	|void	|save_bool	|NN bool* boolp
 Ap	|void	|save_clearsv	|NN SV** svp
 Ap	|void	|save_delete	|NN HV* hv|NN char* key|I32 klen
 Ap	|void	|save_destructor|DESTRUCTORFUNC_NOCONTEXT_t f|NN void* p
-Ap	|void	|save_destructor_x|DESTRUCTORFUNC_t f|NN void* p
+Ap	|void	|save_destructor_x|DESTRUCTORFUNC_t f|NULLOK void* p
 Ap	|void	|save_freesv	|NULLOK SV* sv
 p	|void	|save_freeop	|NULLOK OP* o
 Ap	|void	|save_freepv	|NULLOK char* pv
