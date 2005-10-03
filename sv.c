@@ -11462,6 +11462,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_statusvalue	= proto_perl->Istatusvalue;
 #ifdef VMS
     PL_statusvalue_vms	= proto_perl->Istatusvalue_vms;
+#else
+    PL_statusvalue_posix = proto_perl->Istatusvalue_posix;
 #endif
     PL_encoding		= sv_dup(proto_perl->Iencoding, param);
 
