@@ -5584,6 +5584,8 @@ $!	ccdefines = "_USE_STD_STAT=1"
 $!    ELSE
 $	ccdefines = "_LARGEFILE=1"
 $!    ENDIF
+$ ELSE
+$     ccdefines = ""
 $ ENDIF
 $ IF ccdefines .NES. ""
 $ THEN
