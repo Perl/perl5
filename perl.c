@@ -546,7 +546,7 @@ perl_destruct(pTHXx)
 
     if (CALL_FPTR(PL_threadhook)(aTHX)) {
         /* Threads hook has vetoed further cleanup */
-        return STATUS_NATIVE_EXPORT;
+        return STATUS_EXIT;
     }
 
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
@@ -768,7 +768,7 @@ perl_destruct(pTHXx)
 #endif
 
 	/* The exit() function will do everything that needs doing. */
-        return STATUS_NATIVE_EXPORT;
+        return STATUS_EXIT;
     }
 
     /* jettison our possibly duplicated environment */
@@ -1259,7 +1259,7 @@ perl_destruct(pTHXx)
 	Safefree(PL_mess_sv);
 	PL_mess_sv = Nullsv;
     }
-    return STATUS_NATIVE_EXPORT;
+    return STATUS_EXIT;
 }
 
 /*
@@ -1555,7 +1555,7 @@ setuid perl scripts securely.\n");
 	PL_curstash = PL_defstash;
 	if (PL_checkav)
 	    call_list(oldscope, PL_checkav);
-	ret = STATUS_NATIVE_EXPORT;
+	ret = STATUS_EXIT;
 	break;
     case 3:
 	PerlIO_printf(Perl_error_log, "panic: top_env\n");
@@ -2215,7 +2215,7 @@ perl_run(pTHXx)
 	if (PerlEnv_getenv("PERL_DEBUG_MSTATS"))
 	    dump_mstats("after execution:  ");
 #endif
-	ret = STATUS_NATIVE_EXPORT;
+	ret = STATUS_EXIT;
 	break;
     case 3:
 	if (PL_restartop) {
@@ -5140,7 +5140,7 @@ Perl_my_exit(pTHX_ U32 status)
 	STATUS_ALL_FAILURE;
 	break;
     default:
-	STATUS_NATIVE_SET(status);
+	STATUS_UNIX_SET(status);
 	break;
     }
     my_exit_jump();

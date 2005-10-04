@@ -2545,7 +2545,7 @@ typedef pthread_key_t	perl_key;
 #define STATUS_UNIX	PL_statusvalue
 #ifdef VMS
 #   define STATUS_NATIVE	PL_statusvalue_vms
-#   define STATUS_NATIVE_EXPORT \
+#   define STATUS_EXIT \
 	(((I32)PL_statusvalue_vms == -1 ? 44 : PL_statusvalue_vms) | (VMSISH_HUSHED ? 0x10000000 : 0))
 #   define STATUS_NATIVE_SET(n) STATUS_NATIVE_SET_PORC(n, 0)
 #   define STATUS_NATIVE_CHILD_SET(n) STATUS_NATIVE_SET_PORC(n, 1)
@@ -2590,10 +2590,8 @@ typedef pthread_key_t	perl_key;
 #   define STATUS_ALL_FAILURE	(PL_statusvalue = 1, PL_statusvalue_vms = 44)
 #else
 #   define STATUS_NATIVE	PL_statusvalue_posix
-#   define STATUS_NATIVE_EXPORT	STATUS_NATIVE
 #   if defined(WCOREDUMP)
-#       define STATUS_NATIVE_CHILD_SET(n) STATUS_NATIVE_SET(n)
-#       define STATUS_NATIVE_SET(n)                        \
+#       define STATUS_NATIVE_CHILD_SET(n)                  \
             STMT_START {                                   \
                 PL_statusvalue_posix = (n);                \
                 if (PL_statusvalue_posix == -1)            \
@@ -2606,8 +2604,7 @@ typedef pthread_key_t	perl_key;
                 }                                          \
             } STMT_END
 #   elif defined(WIFEXITED)
-#       define STATUS_NATIVE_CHILD_SET(n) STATUS_NATIVE_SET(n)
-#       define STATUS_NATIVE_SET(n)                        \
+#       define STATUS_NATIVE_CHILD_SET(n)                  \
             STMT_START {                                   \
                 PL_statusvalue_posix = (n);                \
                 if (PL_statusvalue_posix == -1)            \
@@ -2619,8 +2616,7 @@ typedef pthread_key_t	perl_key;
                 }                                          \
             } STMT_END
 #   else
-#       define STATUS_NATIVE_CHILD_SET(n) STATUS_NATIVE_SET(n)
-#       define STATUS_NATIVE_SET(n)                        \
+#       define STATUS_NATIVE_CHILD_SET(n)                  \
             STMT_START {                                   \
                 PL_statusvalue_posix = (n);                \
                 if (PL_statusvalue_posix == -1)            \
@@ -2634,11 +2630,11 @@ typedef pthread_key_t	perl_key;
 #   define STATUS_UNIX_SET(n)		\
 	STMT_START {			\
 	    PL_statusvalue = (n);		\
-            PL_statusvalue_posix = PL_statusvalue;       \
 	    if (PL_statusvalue != -1)	\
 		PL_statusvalue &= 0xFFFF;	\
 	} STMT_END
 #   define STATUS_CURRENT STATUS_UNIX
+#   define STATUS_EXIT STATUS_UNIX
 #   define STATUS_ALL_SUCCESS	(PL_statusvalue = 0, PL_statusvalue_posix = 0)
 #   define STATUS_ALL_FAILURE	(PL_statusvalue = 1, PL_statusvalue_posix = 1)
 #endif

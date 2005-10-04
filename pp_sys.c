@@ -382,7 +382,7 @@ PP(pp_backtick)
 	TAINT;		/* "I believe that this is not gratuitous!" */
     }
     else {
-	STATUS_NATIVE_SET(-1);
+	STATUS_NATIVE_CHILD_SET(-1);
 	if (gimme == G_SCALAR)
 	    RETPUSHUNDEF;
     }
@@ -4247,7 +4247,7 @@ PP(pp_system)
 	    (void)rsignal_restore(SIGINT, &ihand);
 	    (void)rsignal_restore(SIGQUIT, &qhand);
 #endif
-	    STATUS_NATIVE_SET(result == -1 ? -1 : status);
+	    STATUS_NATIVE_CHILD_SET(result == -1 ? -1 : status);
 	    do_execfree();	/* free any memory child malloced on fork */
 	    SP = ORIGMARK;
 	    if (did_pipes) {
@@ -4267,7 +4267,7 @@ PP(pp_system)
 		    if (n != sizeof(int))
 			DIE(aTHX_ "panic: kid popen errno read");
 		    errno = errkid;		/* Propagate errno from kid */
-		    STATUS_CURRENT = -1;
+		    STATUS_NATIVE_CHILD_SET(-1);
 		}
 	    }
 	    PUSHi(STATUS_CURRENT);
@@ -4869,7 +4869,7 @@ PP(pp_ghostent)
 	    h_errno = PL_reentrant_buffer->_gethostent_errno;
 #   endif
 #endif
-	    STATUS_NATIVE_SET(h_errno);
+	    STATUS_UNIX_SET(h_errno);
 	}
 #endif
 
@@ -4980,7 +4980,7 @@ PP(pp_gnetent)
 	     h_errno = PL_reentrant_buffer->_getnetent_errno;
 #   endif
 #endif
-	    STATUS_NATIVE_SET(h_errno);
+	    STATUS_UNIX_SET(h_errno);
 	}
 #endif
 

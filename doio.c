@@ -1043,7 +1043,7 @@ Perl_io_close(pTHX_ IO *io, bool not_implicit)
 	if (IoTYPE(io) == IoTYPE_PIPE) {
 	    const int status = PerlProc_pclose(IoIFP(io));
 	    if (not_implicit) {
-		STATUS_NATIVE_SET(status);
+		STATUS_NATIVE_CHILD_SET(status);
 		retval = (STATUS_UNIX == 0);
 	    }
 	    else {
