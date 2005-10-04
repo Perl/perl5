@@ -347,7 +347,7 @@ perl_construct(pTHXx)
 #   endif
 	if ((long) PL_mmap_page_size < 0) {
 	  if (errno) {
-	    SV *error = ERRSV;
+	    SV * const error = ERRSV;
 	    (void) SvUPGRADE(error, SVt_PV);
 	    Perl_croak(aTHX_ "panic: sysconf: %s", SvPV_nolen_const(error));
 	  }
@@ -1085,15 +1085,15 @@ perl_destruct(pTHXx)
 	 */
 	I32 riter = 0;
 	const I32 max = HvMAX(PL_strtab);
-	HE **array = HvARRAY(PL_strtab);
+	HE ** const array = HvARRAY(PL_strtab);
 	HE *hent = array[0];
 
 	for (;;) {
 	    if (hent && ckWARN_d(WARN_INTERNAL)) {
-		HE *next = HeNEXT(hent);
+		HE * const next = HeNEXT(hent);
 		Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
-		     "Unbalanced string table refcount: (%d) for \"%s\"",
-		     HeVAL(hent) - Nullsv, HeKEY(hent));
+		     "Unbalanced string table refcount: (%ld) for \"%s\"",
+		     (long)(HeVAL(hent) - Nullsv), HeKEY(hent));
 		Safefree(hent);
 		hent = next;
 	    }
@@ -3084,8 +3084,8 @@ Perl_moreswitches(pTHX_ char *s)
 	    PL_preambleav = newAV();
 	s++;
 	{
-	    char *start = s;
-	    SV *sv = newSVpv("use assertions::activate", 24);
+	    char * const start = s;
+	    SV * const sv = newSVpv("use assertions::activate", 24);
 	    while(isALNUM(*s) || *s == ':') ++s;
 	    if (s != start) {
 		sv_catpvn(sv, "::", 2);

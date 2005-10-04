@@ -240,7 +240,7 @@ will be returned if it is valid, otherwise 0.
 STRLEN
 Perl_is_utf8_char(pTHX_ const U8 *s)
 {
-    STRLEN len = UTF8SKIP(s);
+    const STRLEN len = UTF8SKIP(s);
 #ifdef IS_UTF8_CHAR
     if (IS_UTF8_CHAR_FAST(len))
         return IS_UTF8_CHAR(s, len) ? len : 0;
@@ -267,7 +267,7 @@ Perl_is_utf8_string(pTHX_ const U8 *s, STRLEN len)
     const U8* x = s;
     const U8* send;
 
-    if (!len && s)
+    if (!len)
 	len = strlen((const char *)s);
     send = s + len;
 
@@ -323,7 +323,7 @@ Perl_is_utf8_string_loclen(pTHX_ const U8 *s, STRLEN len, const U8 **ep, STRLEN 
     const U8* send;
     STRLEN c;
 
-    if (!len && s)
+    if (!len)
         len = strlen((const char *)s);
     send = s + len;
     if (el)
@@ -543,7 +543,7 @@ malformed:
     }
 
     if (dowarn) {
-	SV* sv = sv_2mortal(newSVpv("Malformed UTF-8 character ", 0));
+	SV* const sv = sv_2mortal(newSVpv("Malformed UTF-8 character ", 0));
 
 	switch (warning) {
 	case 0: /* Intentionally empty. */ break;
@@ -590,7 +590,7 @@ malformed:
 	}
 	
 	if (warning) {
-	    const char *s = SvPVX_const(sv);
+	    const char * const s = SvPVX_const(sv);
 
 	    if (PL_op)
 		Perl_warner(aTHX_ packWARN(WARN_UTF8),

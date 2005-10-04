@@ -3266,7 +3266,7 @@ Gid_t getegid (void);
 
 #define DEBUG_SCOPE(where) \
     DEBUG_l(WITH_THR(Perl_deb(aTHX_ "%s scope %ld at %s:%d\n",	\
-		    where, PL_scopestack_ix, __FILE__, __LINE__)));
+		    where, (long)PL_scopestack_ix, __FILE__, __LINE__)));
 
 
 

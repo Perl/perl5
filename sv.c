@@ -10174,27 +10174,27 @@ Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, const void *sv)
 /* add a new entry to a pointer-mapping table */
 
 void
-Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, const void *oldv, void *newv)
+Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, const void *oldsv, void *newsv)
 {
     PTR_TBL_ENT_t *tblent, **otblent;
     /* XXX this may be pessimal on platforms where pointers aren't good
      * hash values e.g. if they grow faster in the most significant
      * bits */
-    const UV hash = PTR_TABLE_HASH(oldv);
+    const UV hash = PTR_TABLE_HASH(oldsv);
     bool empty = 1;
 
     assert(tbl);
     otblent = &tbl->tbl_ary[hash & tbl->tbl_max];
     for (tblent = *otblent; tblent; empty=0, tblent = tblent->next) {
-	if (tblent->oldval == oldv) {
-	    tblent->newval = newv;
+	if (tblent->oldval == oldsv) {
+	    tblent->newval = newsv;
 	    return;
 	}
     }
     new_body_inline(tblent, (void**)&PL_pte_arenaroot, (void**)&PL_pte_root,
 		    sizeof(struct ptr_tbl_ent));
-    tblent->oldval = oldv;
-    tblent->newval = newv;
+    tblent->oldval = oldsv;
+    tblent->newval = newsv;
     tblent->next = *otblent;
     *otblent = tblent;
     tbl->tbl_items++;

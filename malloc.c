@@ -2354,7 +2354,7 @@ Perl_putenv(char *a)
 MEM_SIZE
 Perl_malloced_size(void *p)
 {
-    union overhead *ovp = (union overhead *)
+    union overhead * const ovp = (union overhead *)
 	((caddr_t)p - sizeof (union overhead) * CHUNK_SHIFT);
     const int bucket = OV_INDEX(ovp);
 #ifdef RCHECK
