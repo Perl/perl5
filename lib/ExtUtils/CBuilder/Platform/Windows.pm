@@ -90,6 +90,12 @@ sub split_like_shell {
   return @argv;
 }
 
+sub arg_defines {
+  my ($self, %args) = @_;
+  s/"/\\"/g foreach values %args;
+  return map "-D$_=$args{$_}", keys %args;
+}
+
 sub compile {
   my ($self, %args) = @_;
   my $cf = $self->{config};
@@ -101,6 +107,8 @@ sub compile {
 
   $srcdir ||= File::Spec->curdir();
 
+  my @defines = $self->arg_defines( %{ $args{defines} || {} } );
+
   my %spec = (
     srcdir      => $srcdir,
     builddir    => $srcdir,
@@ -111,9 +119,10 @@ sub compile {
     cflags      => [
                      $self->split_like_shell($cf->{ccflags}),
                      $self->split_like_shell($cf->{cccdlflags}),
+                     $self->split_like_shell($cf->{extra_compiler_flags}),
                    ],
     optimize    => [ $self->split_like_shell($cf->{optimize})    ],
-    defines     => [ '' ],
+    defines     => \@defines,
     includes    => [ @{$args{include_dirs} || []} ],
     perlinc     => [
                      $self->perl_inc(),
@@ -308,7 +317,6 @@ sub write_compiler_script {
                                     $spec{basename} . '.ccs' );
 
   $self->add_to_cleanup($script);
-
   print "Generating script '$script'\n" if !$self->{quiet};
 
   open( SCRIPT, ">$script" )

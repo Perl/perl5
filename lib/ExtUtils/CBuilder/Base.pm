@@ -74,6 +74,11 @@ sub arg_exec_file {
   return ('-o', $file);
 }
 
+sub arg_defines {
+  my ($self, %args) = @_;
+  return map "-D$_=$args{$_}", keys %args;
+}
+
 sub compile {
   my ($self, %args) = @_;
   die "Missing 'source' argument to compile()" unless defined $args{source};
@@ -86,11 +91,13 @@ sub compile {
     (@{$args{include_dirs} || []},
      $self->perl_inc());
   
+  my @defines = $self->arg_defines( %{$args{defines} || {}} );
+  
   my @extra_compiler_flags = $self->split_like_shell($args{extra_compiler_flags});
   my @cccdlflags = $self->split_like_shell($cf->{cccdlflags});
   my @ccflags = $self->split_like_shell($cf->{ccflags});
   my @optimize = $self->split_like_shell($cf->{optimize});
-  my @flags = (@include_dirs, @cccdlflags, @extra_compiler_flags,
+  my @flags = (@include_dirs, @defines, @cccdlflags, @extra_compiler_flags,
 	       $self->arg_nolink,
 	       @ccflags, @optimize,
 	       $self->arg_object_file($args{object_file}),
@@ -147,6 +154,8 @@ sub exe_file {
 
 sub need_prelink { 0 }
 
+sub extra_link_args_after_prelink { return }
+
 sub prelink {
   my ($self, %args) = @_;
   
@@ -161,6 +170,7 @@ sub prelink {
     NAME     => $args{dl_name},
     DLBASE   => $args{dl_base},
     FILE     => $args{dl_file},
+    VERSION  => (defined $args{dl_version} ? $args{dl_version} : '0.0'),
   );
   
   # Mksymlists will create one of these files
@@ -191,7 +201,10 @@ sub _do_link {
     $self->prelink(%args,
 		   dl_name => $args{module_name}) if $args{lddl} && $self->need_prelink;
   
-  my @linker_flags = $self->split_like_shell($args{extra_linker_flags});
+  my @linker_flags = ($self->split_like_shell($args{extra_linker_flags}),
+		      $self->extra_link_args_after_prelink(%args, dl_name => $args{module_name},
+							   prelink_res => \@temp_files));
+
   my @output = $args{lddl} ? $self->arg_share_object_file($out) : $self->arg_exec_file($out);
   my @shrp = $self->split_like_shell($cf->{shrpenv});
   my @ld = $self->split_like_shell($cf->{ld});
