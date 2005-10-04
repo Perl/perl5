@@ -767,7 +767,7 @@ to 255 (inclusive) are by default not encoded in UTF-8 Unicode for
 backward compatibility reasons (but see L<encoding>).
 
 Negative values give the Unicode replacement character (chr(0xfffd)),
-except under the L</bytes> pragma, where low eight bits of the value
+except under the L<bytes> pragma, where low eight bits of the value
 (truncated to an integer) are used.
 
 If NUMBER is omitted, uses C<$_>.

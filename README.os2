@@ -2205,7 +2205,7 @@ in the I<default> behaviour.  One can start I<any> executable in
 I<any> kind of session by using the arguments C</fs>, C</pm> or
 C</win> switches of the command C<start> (of F<CMD.EXE> or a similar
 shell).  Alternatively, one can use the numeric first argument of the
-C<system> Perl function (see L<C<OS2::Process>>).
+C<system> Perl function (see L<OS2::Process>).
 
 =head2 F<perl___.exe>
 
