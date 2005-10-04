@@ -95,7 +95,7 @@ PP(pp_regcomp)
 	    mg = mg_find(sv, PERL_MAGIC_qr);
     }
     if (mg) {
-	regexp *re = (regexp *)mg->mg_obj;
+	regexp * const re = (regexp *)mg->mg_obj;
 	ReREFCNT_dec(PM_GETRE(pm));
 	PM_SETRE(pm, ReREFCNT_inc(re));
     }
@@ -246,7 +246,7 @@ PP(pp_substcont)
     }
     cx->sb_s = rx->endp[0] + orig;
     { /* Update the pos() information. */
-	SV *sv = cx->sb_targ;
+	SV * const sv = cx->sb_targ;
 	MAGIC *mg;
 	I32 i;
 	if (SvTYPE(sv) < SVt_PVMG)
@@ -319,7 +319,7 @@ Perl_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
 void
 Perl_rxres_free(pTHX_ void **rsp)
 {
-    UV *p = (UV*)*rsp;
+    UV * const p = (UV*)*rsp;
 
     if (p) {
 #ifdef PERL_POISON
@@ -1006,7 +1006,7 @@ PP(pp_flip)
     }
     else {
 	dTOPss;
-	SV *targ = PAD_SV(PL_op->op_targ);
+	SV * const targ = PAD_SV(PL_op->op_targ);
 	int flip = 0;
 
 	if (PL_op->op_private & OPpFLIP_LINENUM) {
@@ -1014,8 +1014,9 @@ PP(pp_flip)
 		flip = SvIV(sv) == (IV)IoLINES(GvIOp(PL_last_in_gv));
 	    }
 	    else {
-		GV *gv = gv_fetchpv(".", TRUE, SVt_PV);
-		if (gv && GvSV(gv)) flip = SvIV(sv) == SvIV(GvSV(gv));
+		GV * const gv = gv_fetchpv(".", TRUE, SVt_PV);
+		if (gv && GvSV(gv))
+		    flip = SvIV(sv) == SvIV(GvSV(gv));
 	    }
 	} else {
 	    flip = SvTRUE(sv);
@@ -1083,7 +1084,7 @@ PP(pp_flop)
 	    }
 	}
 	else {
-	    SV *final = sv_mortalcopy(right);
+	    SV * const final = sv_mortalcopy(right);
 	    STRLEN len;
 	    const char *tmps = SvPV_const(final, len);
 
@@ -3129,7 +3130,7 @@ PP(pp_require)
     }
 #endif
     if (!tryrsfp) {
-	AV *ar = GvAVn(PL_incgv);
+	AV * const ar = GvAVn(PL_incgv);
 	I32 i;
 #ifdef VMS
 	char *unixname;
@@ -3312,15 +3313,15 @@ PP(pp_require)
 	if (PL_op->op_type == OP_REQUIRE) {
 	    const char *msgstr = name;
 	    if(errno == EMFILE) {
-		SV *msg = sv_2mortal(newSVpv(msgstr,0));
+		SV * const msg = sv_2mortal(newSVpv(msgstr,0));
 		sv_catpv(msg, ":  "); 
 		sv_catpv(msg, Strerror(errno));
 		msgstr = SvPV_nolen_const(msg);
 	    } else {
 	        if (namesv) {			/* did we lookup @INC? */
-		    SV *msg = sv_2mortal(newSVpv(msgstr,0));
-		    SV *dirmsgsv = NEWSV(0, 0);
-		    AV *ar = GvAVn(PL_incgv);
+		    SV * const msg = sv_2mortal(newSVpv(msgstr,0));
+		    SV * const dirmsgsv = NEWSV(0, 0);
+		    AV * const ar = GvAVn(PL_incgv);
 		    I32 i;
 		    sv_catpvn(msg, " in @INC", 8);
 		    if (instr(SvPVX_const(msg), ".h "))
@@ -3349,11 +3350,12 @@ PP(pp_require)
     /* Assume success here to prevent recursive requirement. */
     len = strlen(name);
     /* Check whether a hook in @INC has already filled %INC */
-    if (!hook_sv || !(svp = hv_fetch(GvHVn(PL_incgv), name, len, 0))) {
-	(void)hv_store(GvHVn(PL_incgv), name, len,
-		       (hook_sv ? SvREFCNT_inc(hook_sv)
-				: newSVpv(CopFILE(&PL_compiling), 0)),
-		       0 );
+    if (!hook_sv) {
+	(void)hv_store(GvHVn(PL_incgv), name, len, newSVpv(CopFILE(&PL_compiling),0),0);
+    } else {
+	SV** const svp = hv_fetch(GvHVn(PL_incgv), name, len, 0);
+	if (!svp)
+	    (void)hv_store(GvHVn(PL_incgv), name, len, SvREFCNT_inc(hook_sv), 0 );
     }
 
     ENTER;

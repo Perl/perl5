@@ -1512,12 +1512,12 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth, int has_args)
 	return;
 
     {
-	SV** svp = AvARRAY(padlist);
-	AV *newpad = newAV();
-	SV **oldpad = AvARRAY(svp[depth-1]);
+	SV** const svp = AvARRAY(padlist);
+	AV* const newpad = newAV();
+	SV** const oldpad = AvARRAY(svp[depth-1]);
 	I32 ix = AvFILLp((AV*)svp[1]);
 	I32 names_fill = AvFILLp((AV*)svp[0]);
-	SV** names = AvARRAY(svp[0]);
+	SV** const names = AvARRAY(svp[0]);
 	SV* sv;
 	for ( ;ix > 0; ix--) {
 	    if (names_fill >= ix && names[ix] != &PL_sv_undef) {

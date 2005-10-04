@@ -1183,20 +1183,16 @@ perl_destruct(pTHXx)
 	/* Yell and reset the HeVAL() slots that are still holding refcounts,
 	 * so that sv_free() won't fail on them.
 	 */
-	I32 riter;
-	I32 max;
-	HE *hent;
-	HE **array;
+	I32 riter = 0;
+	const I32 max = HvMAX(PL_strtab);
+	HE ** const array = HvARRAY(PL_strtab);
+	HE *hent = array[0];
 
-	riter = 0;
-	max = HvMAX(PL_strtab);
-	array = HvARRAY(PL_strtab);
-	hent = array[0];
 	for (;;) {
 	    if (hent && ckWARN_d(WARN_INTERNAL)) {
 		Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
-		     "Unbalanced string table refcount: (%d) for \"%s\"",
-		     HeVAL(hent) - Nullsv, HeKEY(hent));
+		     "Unbalanced string table refcount: (%ld) for \"%s\"",
+		     (long)(HeVAL(hent) - Nullsv), HeKEY(hent));
 		HeVAL(hent) = Nullsv;
 		hent = HeNEXT(hent);
 	    }

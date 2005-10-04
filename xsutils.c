@@ -132,10 +132,11 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 		case 'e':
 		    if (memEQ(name, "uniqu", 5)) {
 			if (SvTYPE(sv) == SVt_PVGV) {
-			    if (negated)
+			    if (negated) {
 				GvUNIQUE_off(sv);
-			    else
+			    } else {
 				GvUNIQUE_on(sv);
+			    }
 			}
 			/* Hope this came from toke.c if not a GV. */
                         continue;
