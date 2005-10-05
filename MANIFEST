@@ -198,7 +198,6 @@ ext/Compress/Zlib/t/20tied.t	Compress::Zlib
 ext/Compress/Zlib/t/21newtied.t	Compress::Zlib
 ext/Compress/Zlib/t/22merge.t	Compress::Zlib
 ext/Compress/Zlib/t/23misc.t	Compress::Zlib
-ext/Compress/Zlib/t/99pod.t	Compress::Zlib
 ext/Compress/Zlib/t/globmapper.t	Compress::Zlib
 ext/Compress/Zlib/typemap	Compress::Zlib
 ext/Compress/Zlib/Zlib.pm	Compress::Zlib
