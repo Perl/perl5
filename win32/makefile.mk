@@ -404,6 +404,7 @@ OPTIMIZE	= -O2 -D_RTLDLL
 LINK_DBG	=
 .ENDIF
 
+EXTRACFLAGS	=
 CFLAGS		= -w -g0 -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(CCLIBDIR)" \
@@ -460,6 +461,7 @@ OPTIMIZE	= -s -O2
 LINK_DBG	= -s
 .ENDIF
 
+EXTRACFLAGS	=
 CFLAGS		= $(INCLUDES) $(DEFINES) $(LOCDEFS) $(OPTIMIZE)
 LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(CCLIBDIR)"
 OBJOUT_FLAG	= -o
@@ -552,7 +554,8 @@ LIBBASEFILES	+= odbc32.lib odbccp32.lib
 # we add LIBC here, since we may be using PerlCRT.dll
 LIBFILES	= $(LIBBASEFILES) $(LIBC)
 
-CFLAGS		= -nologo $(STRPOOL) -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) \
+EXTRACFLAGS	= -nologo $(STRPOOL) -W3
+CFLAGS		= $(EXTRACFLAGS) $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS	= -nologo -nodefaultlib $(LINK_DBG) \
 		-libpath:"$(INST_COREDIR)" \
@@ -903,7 +906,7 @@ CFG_VARS	=					\
 		archname=$(ARCHNAME)		~	\
 		cc=$(CC)			~	\
 		ld=$(LINK32)			~	\
-		ccflags=$(OPTIMIZE) $(DEFINES) $(BUILDOPT)	~	\
+		ccflags=$(EXTRACFLAGS) $(OPTIMIZE) $(DEFINES) $(BUILDOPT)	~	\
 		cf_email=$(EMAIL)		~	\
 		d_crypt=$(D_CRYPT)		~	\
 		d_mymalloc=$(PERL_MALLOC)	~	\

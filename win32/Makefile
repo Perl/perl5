@@ -443,7 +443,8 @@ LIBBASEFILES	= $(LIBBASEFILES) odbc32.lib odbccp32.lib
 # we add LIBC here, since we may be using PerlCRT.dll
 LIBFILES	= $(LIBBASEFILES) $(LIBC)
 
-CFLAGS		= -nologo $(STRPOOL) -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) \
+EXTRACFLAGS	= -nologo $(STRPOOL) -W3
+CFLAGS		= $(EXTRACFLAGS) $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS	= -nologo -nodefaultlib $(LINK_DBG) \
 		-libpath:"$(INST_COREDIR)" \
@@ -864,7 +865,7 @@ CFG_VARS	=					\
 		"archname=$(ARCHNAME)"			\
 		"cc=$(CC)"				\
 		"ld=$(LINK32)"				\
-		"ccflags=-nologo $(STRPOOL) -W3 $(OPTIMIZE:"=\") $(DEFINES) $(BUILDOPT)"	\
+		"ccflags=$(EXTRACFLAGS) $(OPTIMIZE:"=\") $(DEFINES) $(BUILDOPT)"	\
 		"cf_email=$(EMAIL)"	 		\
 		"d_crypt=$(D_CRYPT)"			\
 		"d_mymalloc=$(PERL_MALLOC)"		\
