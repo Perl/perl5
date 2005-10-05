@@ -24,12 +24,23 @@ static int
 constant_7 (pTHX_ const char *name, IV *iv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
-     OS_CODE Z_ASCII Z_ERRNO */
-  /* Offset 5 gives the best switch position.  */
-  switch (name[5]) {
+     OS_CODE Z_ASCII Z_BLOCK Z_ERRNO Z_FIXED */
+  /* Offset 6 gives the best switch position.  */
+  switch (name[6]) {
   case 'D':
-    if (memEQ(name, "OS_CODE", 7)) {
-    /*                    ^       */
+    if (memEQ(name, "Z_FIXE", 6)) {
+    /*                     D     */
+#ifdef Z_FIXED
+      *iv_return = Z_FIXED;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'E':
+    if (memEQ(name, "OS_COD", 6)) {
+    /*                     E     */
 #ifdef OS_CODE
       *iv_return = OS_CODE;
       return PERL_constant_ISIV;
@@ -39,8 +50,8 @@ constant_7 (pTHX_ const char *name, IV *iv_return) {
     }
     break;
   case 'I':
-    if (memEQ(name, "Z_ASCII", 7)) {
-    /*                    ^       */
+    if (memEQ(name, "Z_ASCI", 6)) {
+    /*                     I     */
 #ifdef Z_ASCII
       *iv_return = Z_ASCII;
       return PERL_constant_ISIV;
@@ -49,9 +60,20 @@ constant_7 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
-  case 'N':
-    if (memEQ(name, "Z_ERRNO", 7)) {
-    /*                    ^       */
+  case 'K':
+    if (memEQ(name, "Z_BLOC", 6)) {
+    /*                     K     */
+#ifdef Z_BLOCK
+      *iv_return = Z_BLOCK;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'O':
+    if (memEQ(name, "Z_ERRN", 6)) {
+    /*                     O     */
 #ifdef Z_ERRNO
       *iv_return = Z_ERRNO;
       return PERL_constant_ISIV;
@@ -287,16 +309,16 @@ constant (pTHX_ const char *name, STRLEN len, IV *iv_return, const char **pv_ret
      Regenerate these constant functions by feeding this entire source file to
      perl -x
 
-#!/home/paul/perl/install/redhat6.1/bleed/bin/perl5.7.2 -w
+#!/usr/bin/perl5.8.6 -w
 use ExtUtils::Constant qw (constant_types C_constant XS_constant);
 
 my $types = {map {($_, 1)} qw(IV PV)};
 my @names = (qw(DEF_WBITS MAX_MEM_LEVEL MAX_WBITS OS_CODE Z_ASCII
-	       Z_BEST_COMPRESSION Z_BEST_SPEED Z_BINARY Z_BUF_ERROR
+	       Z_BEST_COMPRESSION Z_BEST_SPEED Z_BINARY Z_BLOCK Z_BUF_ERROR
 	       Z_DATA_ERROR Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY Z_DEFLATED
-	       Z_ERRNO Z_FILTERED Z_FINISH Z_FULL_FLUSH Z_HUFFMAN_ONLY
+	       Z_ERRNO Z_FILTERED Z_FINISH Z_FIXED Z_FULL_FLUSH Z_HUFFMAN_ONLY
 	       Z_MEM_ERROR Z_NEED_DICT Z_NO_COMPRESSION Z_NO_FLUSH Z_NULL Z_OK
-	       Z_PARTIAL_FLUSH Z_STREAM_END Z_STREAM_ERROR Z_SYNC_FLUSH
+	       Z_PARTIAL_FLUSH Z_RLE Z_STREAM_END Z_STREAM_ERROR Z_SYNC_FLUSH
 	       Z_UNKNOWN Z_VERSION_ERROR),
             {name=>"ZLIB_VERSION", type=>"PV"});
 
@@ -314,6 +336,16 @@ __END__
     if (memEQ(name, "Z_OK", 4)) {
 #ifdef Z_OK
       *iv_return = Z_OK;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 5:
+    if (memEQ(name, "Z_RLE", 5)) {
+#ifdef Z_RLE
+      *iv_return = Z_RLE;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;

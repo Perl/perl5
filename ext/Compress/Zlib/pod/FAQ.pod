@@ -1,0 +1,198 @@
+
+=head1 NAME
+
+Compress::Zlib::FAQ -- Frequently Asked Questions about Compress::Zlib 
+
+=head1 DESCRIPTION
+
+Common questions answered.
+
+
+
+=head2 Compatibility with Unix compress/uncompress.
+
+Although C<Compress::Zlib> has a pair of functions called C<compress>
+and C<uncompress>, they are I<not> the same as the Unix programs of the
+same name. The C<Compress::Zlib> library is not compatible with Unix
+C<compress>.
+
+If you have the C<uncompress> program available, you can use this to
+read compressed files
+
+    open F, "uncompress -c $filename |";
+    while (<F>)
+    {
+        ...
+
+If you have the C<gunzip> program available, you can use this to read
+compressed files
+
+    open F, "gunzip -c $filename |";
+    while (<F>)
+    {
+        ...
+
+and this to write compress files if you have the C<compress> program
+available
+
+    open F, "| compress -c $filename ";
+    print F "data";
+    ...
+    close F ;
+
+=head2 Accessing .tar.Z files
+
+The C<Archive::Tar> module can optionally use C<Compress::Zlib> (via
+the C<IO::Zlib> module) to access tar files that have been compressed
+with C<gzip>. Unfortunately tar files compressed with the Unix C<compress>
+utility cannot be read by C<Compress::Zlib> and so cannot be directly
+accesses by C<Archive::Tar>.
+
+If the C<uncompress> or C<gunzip> programs are available, you can use
+one of these workarounds to read C<.tar.Z> files from C<Archive::Tar>
+
+Firstly with C<uncompress>
+
+    use strict;
+    use warnings;
+    use Archive::Tar;
+
+    open F, "uncompress -c $filename |";
+    my $tar = Archive::Tar->new(*F);
+    ...
+
+and this with C<gunzip>
+
+    use strict;
+    use warnings;
+    use Archive::Tar;
+
+    open F, "gunzip -c $filename |";
+    my $tar = Archive::Tar->new(*F);
+    ...
+
+Similarly, if the C<compress> program is available, you can use this to
+write a C<.tar.Z> file
+
+    use strict;
+    use warnings;
+    use Archive::Tar;
+    use IO::File;
+
+    my $fh = new IO::File "| compress -c >$filename";
+    my $tar = Archive::Tar->new();
+    ...
+    $tar->write($fh);
+    $fh->close ;
+
+
+=head2 Accessing Zip Files
+
+Although it is possible (with some effort on your part) to use this
+module to access .zip files, there is a module on CPAN that will do all
+the hard work for you. Check out the C<Archive::Zip> module on CPAN at
+
+    http://www.cpan.org/modules/by-module/Archive/Archive-Zip-*.tar.gz    
+
+Assuming you don't want to use this module to access zip files there
+are a number of undocumented features in the zlib library you need to
+be aware of.
+
+=over 5
+
+=item 1.
+
+When calling B<inflateInit> or B<deflateInit> the B<WindowBits> parameter
+must be set to C<-MAX_WBITS>. This disables the creation of the zlib
+header.
+
+=item 2.
+
+The zlib function B<inflate>, and so the B<inflate> method supplied in
+this module, assume that there is at least one trailing byte after the
+compressed data stream. Normally this isn't a problem because both
+the gzip and zip file formats will guarantee that there is data directly
+after the compressed data stream.
+
+=back
+
+
+
+
+
+
+
+
+
+
+
+
+=head2 Zlib Library Version Support
+
+By default C<Compress::Zlib> will build with a private copy of version 1.2.3 of the zlib library. (See the F<README> file for details of how
+to override this behavior)
+
+If you decide to use a different version of the zlib library, you need to be
+aware of the following issues
+
+=over 5
+
+=item *
+
+First off, you must have zlib 1.0.5 or better.
+
+=item *
+
+You need to have zlib 1.2.1 or better if you want to use the C<-Merge> option
+with C<IO::Compress::Gzip>, C<IO::Compress::Deflate> and C<IO::Compress::RawDeflate>.
+
+
+
+=back
+
+
+
+
+=head1 SEE ALSO
+
+L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Uncompress::AnyInflate>
+
+L<Compress::Zlib::FAQ|Compress::Zlib::FAQ>
+
+L<File::GlobMapper|File::GlobMapper>, L<Archive::Tar|Archive::Zip>,
+L<IO::Zlib|IO::Zlib>
+
+For RFC 1950, 1951 and 1952 see 
+F<http://www.faqs.org/rfcs/rfc1950.html>,
+F<http://www.faqs.org/rfcs/rfc1951.html> and
+F<http://www.faqs.org/rfcs/rfc1952.html>
+
+The primary site for the gzip program is F<http://www.gzip.org>.
+
+=head1 AUTHOR
+
+The I<> module was written by Paul Marquess,
+F<pmqs@cpan.org>. The latest copy of the module can be
+found on CPAN in F<modules/by-module/Compress/Compress-Zlib-x.x.tar.gz>.
+
+The I<zlib> compression library was written by Jean-loup Gailly
+F<gzip@prep.ai.mit.edu> and Mark Adler F<madler@alumni.caltech.edu>.
+
+The primary site for the I<zlib> compression library is
+F<http://www.zlib.org>.
+
+=head1 MODIFICATION HISTORY
+
+See the Changes file.
+
+=head1 COPYRIGHT AND LICENSE
+ 
+
+Copyright (c) 2005 Paul Marquess. All rights reserved.
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+
+
+
+

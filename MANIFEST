@@ -149,34 +149,65 @@ ext/Cwd/ppport.h		portability header for Cwd
 ext/Cwd/t/cwd.t			See if Cwd works
 ext/Cwd/t/taint.t		See if Cwd works with taint
 ext/Cwd/t/win32.t		See if Cwd works on Win32
-ext/Compress/Zlib/ANNOUNCE	Compress::Zlib
-ext/Compress/Zlib/Makefile.PL	Compress::Zlib
-ext/Compress/Zlib/README	Compress::Zlib
 ext/Compress/Zlib/Changes	Compress::Zlib
-ext/Compress/Zlib/Zlib.pm	Compress::Zlib
-ext/Compress/Zlib/Zlib.xs	Compress::Zlib
 ext/Compress/Zlib/config.in	Compress::Zlib
 ext/Compress/Zlib/examples/filtdef	Compress::Zlib
 ext/Compress/Zlib/examples/filtinf	Compress::Zlib
 ext/Compress/Zlib/examples/gzcat	Compress::Zlib
+ext/Compress/Zlib/examples/gzcat.zlib	Compress::Zlib
 ext/Compress/Zlib/examples/gzgrep	Compress::Zlib
 ext/Compress/Zlib/examples/gzstream	Compress::Zlib
-ext/Compress/Zlib/fallback.h		Compress::Zlib
-ext/Compress/Zlib/fallback.xs		Compress::Zlib
-ext/Compress/Zlib/t/01version.t		Compress::Zlib
-ext/Compress/Zlib/t/02zlib.t		Compress::Zlib
-ext/Compress/Zlib/t/03examples.t	Compress::Zlib
-ext/Compress/Zlib/t/04encoding.t	Compress::Zlib
-ext/Compress/Zlib/t/05gzsetp.t		Compress::Zlib
-ext/Compress/Zlib/t/06gzdopen.t		Compress::Zlib
-ext/Compress/Zlib/typemap		Compress::Zlib
+ext/Compress/Zlib/fallback/constants.h	Compress::Zlib
+ext/Compress/Zlib/fallback/constants.xs	Compress::Zlib
+ext/Compress/Zlib/lib/Compress/Gzip/Constants.pm	Compress::Zlib
+ext/Compress/Zlib/lib/Compress/Zlib/Common.pm	Compress::Zlib
+ext/Compress/Zlib/lib/Compress/Zlib/FileConstants.pm	Compress::Zlib
+ext/Compress/Zlib/lib/Compress/Zlib/ParseParameters.pm	Compress::Zlib
+ext/Compress/Zlib/lib/File/GlobMapper.pm	Compress::Zlib
+ext/Compress/Zlib/lib/IO/Compress/Deflate.pm	Compress::Zlib
+ext/Compress/Zlib/lib/IO/Compress/Gzip.pm	Compress::Zlib
+ext/Compress/Zlib/lib/IO/Compress/RawDeflate.pm	Compress::Zlib
+ext/Compress/Zlib/lib/IO/Uncompress/AnyInflate.pm	Compress::Zlib
+ext/Compress/Zlib/lib/IO/Uncompress/Gunzip.pm	Compress::Zlib
+ext/Compress/Zlib/lib/IO/Uncompress/Inflate.pm	Compress::Zlib
+ext/Compress/Zlib/lib/IO/Uncompress/RawInflate.pm	Compress::Zlib
+ext/Compress/Zlib/Makefile.PL	Compress::Zlib
+ext/Compress/Zlib/pod/FAQ.pod	Compress::Zlib
+ext/Compress/Zlib/ppport.h	Compress::Zlib
+ext/Compress/Zlib/README	Compress::Zlib
+ext/Compress/Zlib/t/01version.t	Compress::Zlib
+ext/Compress/Zlib/t/02zlib.t	Compress::Zlib
+ext/Compress/Zlib/t/03zlib-v1.t	Compress::Zlib
+ext/Compress/Zlib/t/04def.t	Compress::Zlib
+ext/Compress/Zlib/t/05examples.t	Compress::Zlib
+ext/Compress/Zlib/t/06gzsetp.t	Compress::Zlib
+ext/Compress/Zlib/t/07bufsize.t	Compress::Zlib
+ext/Compress/Zlib/t/08encoding.t	Compress::Zlib
+ext/Compress/Zlib/t/09gziphdr.t	Compress::Zlib
+ext/Compress/Zlib/t/10defhdr.t	Compress::Zlib
+ext/Compress/Zlib/t/11truncate.t	Compress::Zlib
+ext/Compress/Zlib/t/12any.t	Compress::Zlib
+ext/Compress/Zlib/t/13prime.t	Compress::Zlib
+ext/Compress/Zlib/t/14gzopen.t	Compress::Zlib
+ext/Compress/Zlib/t/15multi.t	Compress::Zlib
+ext/Compress/Zlib/t/16oneshot.t	Compress::Zlib
+ext/Compress/Zlib/t/17isize.t	Compress::Zlib
+ext/Compress/Zlib/t/18lvalue.t	Compress::Zlib
+ext/Compress/Zlib/t/19destroy.t	Compress::Zlib
+ext/Compress/Zlib/t/20tied.t	Compress::Zlib
+ext/Compress/Zlib/t/21newtied.t	Compress::Zlib
+ext/Compress/Zlib/t/22merge.t	Compress::Zlib
+ext/Compress/Zlib/t/23misc.t	Compress::Zlib
+ext/Compress/Zlib/t/99pod.t	Compress::Zlib
+ext/Compress/Zlib/t/globmapper.t	Compress::Zlib
+ext/Compress/Zlib/typemap	Compress::Zlib
+ext/Compress/Zlib/Zlib.pm	Compress::Zlib
 ext/Compress/Zlib/zlib-src/adler32.c	Compress::Zlib
 ext/Compress/Zlib/zlib-src/compress.c	Compress::Zlib
 ext/Compress/Zlib/zlib-src/crc32.c	Compress::Zlib
 ext/Compress/Zlib/zlib-src/crc32.h	Compress::Zlib
 ext/Compress/Zlib/zlib-src/deflate.c	Compress::Zlib
 ext/Compress/Zlib/zlib-src/deflate.h	Compress::Zlib
-ext/Compress/Zlib/zlib-src/gzio.c		Compress::Zlib
 ext/Compress/Zlib/zlib-src/infback.c	Compress::Zlib
 ext/Compress/Zlib/zlib-src/inffast.c	Compress::Zlib
 ext/Compress/Zlib/zlib-src/inffast.h	Compress::Zlib
@@ -189,9 +220,10 @@ ext/Compress/Zlib/zlib-src/trees.c	Compress::Zlib
 ext/Compress/Zlib/zlib-src/trees.h	Compress::Zlib
 ext/Compress/Zlib/zlib-src/uncompr.c	Compress::Zlib
 ext/Compress/Zlib/zlib-src/zconf.h	Compress::Zlib
-ext/Compress/Zlib/zlib-src/zlib.h		Compress::Zlib
+ext/Compress/Zlib/zlib-src/zlib.h	Compress::Zlib
 ext/Compress/Zlib/zlib-src/zutil.c	Compress::Zlib
 ext/Compress/Zlib/zlib-src/zutil.h	Compress::Zlib
+ext/Compress/Zlib/Zlib.xs	Compress::Zlib
 ext/Data/Dumper/Changes		Data pretty printer, changelog
 ext/Data/Dumper/Dumper.pm	Data pretty printer, module
 ext/Data/Dumper/Dumper.xs	Data pretty printer, externals
@@ -2187,6 +2219,7 @@ lib/vmsish.t			Tests for vmsish.pm
 lib/warnings.pm			For "use warnings"
 lib/warnings/register.pm	For "use warnings::register"
 lib/warnings.t			See if warning controls work
+lib/ZlibTestUtils.pm	Compress::Zlib
 locale.c			locale-specific utility functions
 makeaperl.SH			perl script that produces a new perl binary
 makedef.pl			Create symbol export lists for linking

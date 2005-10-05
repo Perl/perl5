@@ -2,17 +2,23 @@
 
 use strict ;
 use warnings ;
+use IO::Compress::Gzip qw(gzip $GzipError);
 
-use Compress::Zlib ;
+gzip '-' => '-', Minimal => 1
+  or die "gzstream: $GzipError\n" ;
 
-binmode STDOUT;	# gzopen only sets it on the fd
+#exit 0;
 
-my $gz = gzopen(\*STDOUT, "wb")
-	  or die "Cannot open stdout: $gzerrno\n" ;
+__END__
+
+#my $gz = new IO::Compress::Gzip *STDOUT 
+my $gz = new IO::Compress::Gzip '-'
+	  or die "gzstream: Cannot open stdout as gzip stream: $GzipError\n" ;
 
 while (<>) {
-    $gz->gzwrite($_) 
-	or die "error writing: $gzerrno\n" ;
+    $gz->write($_) 
+	or die "gzstream: Error writing gzip output stream: $GzipError\n" ;
 }
 
-$gz->gzclose ;
+$gz->close
+    or die "gzstream: Error closing gzip output stream: $GzipError\n" ;

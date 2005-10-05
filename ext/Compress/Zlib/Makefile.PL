@@ -4,7 +4,7 @@ use strict ;
 require 5.004 ;
 
 use ExtUtils::MakeMaker 5.16 ;
-use Config ;
+use Config qw(%Config) ;
 use File::Copy ;
 
 BEGIN
@@ -22,16 +22,14 @@ my $ZLIB_LIB ;
 my $ZLIB_INCLUDE ;
 my $BUILD_ZLIB = 0 ;
 my $OLD_ZLIB = '' ;
-my $EXTRA_DEFINE = '';
-my $WALL = '';
-#$WALL = ' -Wall ';
+my $WALL = '' ;
+my $GZIP_OS_CODE = -1 ;
 
-unless($ENV{PERL_CORE}) {
-    $ENV{PERL_CORE} = 1 if grep { $_ eq 'PERL_CORE=1' } @ARGV;
-}
+#$WALL = ' -pedantic ' if $Config{'cc'} =~ /gcc/ ;
+$WALL = ' -Wall ' if $Config{'cc'} =~ /gcc/ ;
 
 # don't ask if MM_USE_DEFAULT is set -- enables perl core building on cygwin
-if ($^O =~ /cygwin/i and not $ENV{PERL_MM_USE_DEFAULT} and not $ENV{PERL_CORE})
+if ($^O =~ /cygwin/i and not $ENV{PERL_MM_USE_DEFAULT})
 {
     print <<EOM ;
 
@@ -66,20 +64,30 @@ EOM
 
 ParseCONFIG() ;
 
-my @files = ('Zlib.pm', glob("t/*.t"), grep(!/\.bak$/,  glob("examples/*"))) ;
-UpDowngrade(@files) unless $ENV{PERL_CORE} ;
+my @files = ('Zlib.pm', 't/ZlibTestUtils.pm',
+             glob("t/*.t"), 
+             glob("lib/IO/Compress/*.pm"),
+             glob("lib/IO/Uncompress/*.pm"),
+             glob("lib/Compress/Zlib/*.pm"),
+             glob("lib/Compress/Gzip/*.pm"),
+             glob("lib/File/*.pm"),
+             grep(!/\.bak$/,  glob("examples/*"))) ;
+
+UpDowngrade(@files) unless $ENV{PERL_CORE};
 
 WriteMakefile(	
 	NAME   	 	=> 'Compress::Zlib',
-	VERSION_FROM  	=> 'Zlib.pm',
+	VERSION_FROM => 'Zlib.pm',
 	INC      	=> "-I$ZLIB_INCLUDE" ,
-	DEFINE   	=> "$OLD_ZLIB $WALL $EXTRA_DEFINE" ,
-	XS	 	=> { 'Zlib.xs'    => 'Zlib.c' },
+	DEFINE   	=> "$OLD_ZLIB $WALL -DGZIP_OS_CODE=$GZIP_OS_CODE" ,
+	XS	 	    => { 'Zlib.xs'    => 'Zlib.c' },
+	PREREQ_PM   => { 'Scalar::Util'  => 0,
+                     $] >= 5.005 && $] < 5.006   ? ('File::BSDGlob' => 0) : () },
 	'depend' 	=> { 'Makefile'	  => 'config.in' },
 	'clean' 	=> { FILES        => '*.c constants.h constants.xs' },
 	'dist'	 	=> { COMPRESS     => 'gzip', 
 		             SUFFIX       => 'gz',
-			     DIST_DEFAULT => 'MyDoubleCheck Downgrade tardist',
+			     DIST_DEFAULT => 'MyDoubleCheck downgrade tardist',
 			    },
 	($BUILD_ZLIB
           ? zlib_files($ZLIB_LIB)
@@ -103,6 +111,7 @@ my @names = qw(
 	Z_BEST_COMPRESSION
 	Z_BEST_SPEED
 	Z_BINARY
+	Z_BLOCK
 	Z_BUF_ERROR
 	Z_DATA_ERROR
 	Z_DEFAULT_COMPRESSION
@@ -111,6 +120,7 @@ my @names = qw(
 	Z_ERRNO
 	Z_FILTERED
 	Z_FINISH
+	Z_FIXED
 	Z_FULL_FLUSH
 	Z_HUFFMAN_ONLY
 	Z_MEM_ERROR
@@ -120,12 +130,15 @@ my @names = qw(
 	Z_NULL
 	Z_OK
 	Z_PARTIAL_FLUSH
+	Z_RLE
 	Z_STREAM_END
 	Z_STREAM_ERROR
 	Z_SYNC_FLUSH
 	Z_UNKNOWN
 	Z_VERSION_ERROR
+
 	);
+    #ZLIB_VERNUM
 
 if (eval {require ExtUtils::Constant; 1}) {
     # Check the constants above all appear in @EXPORT in Zlib.pm
@@ -162,38 +175,40 @@ if (eval {require ExtUtils::Constant; 1}) {
                                     );
 } 
 else {
-    copy ('fallback.h', 'constants.h')
-      or die "Can't copy fallback.h to constants.h: $!";
-    copy ('fallback.xs', 'constants.xs')
-      or die "Can't copy fallback.xs to constants.xs: $!";
+    foreach my $name (qw( constants.h constants.xs ))
+    {
+        my $from = catfile('fallback', $name);
+        copy ($from, $name)
+          or die "Can't copy $from to $name: $!";
+    }
 }
 
 sub MY::libscan
 {
-    my $self = shift ;
-    my $path = shift ;
+    my $self = shift;
+    my $path = shift;
 
     return undef
-        if $path =~ /(~|\.bak|_bak)$/ || 
-           $path =~ /^\..*\.swp$/ ;
+        if $path =~ /(~|\.bak|_bak)$/ ||
+           $path =~ /\..*\.swp$/ ;
 
-    return $path;    
+    return $path;
 }
-
 
 sub MY::postamble 
 {
     my $postamble = <<'EOM';
 
-Downgrade:
+downgrade:
 	@echo Downgrading.
 	perl Makefile.PL -downgrade
 
 MyDoubleCheck:	
 	@echo Checking config.in is setup for a release
-	@(grep '^LIB *= *./zlib' config.in &&			\
-	  grep '^INCLUDE *= *./zlib' config.in &&		\
+	@(grep '^LIB *= *./zlib-src' config.in &&			\
+	  grep '^INCLUDE *= *./zlib-src' config.in &&		\
 	  grep '^OLD_ZLIB *= *False' config.in &&		\
+	  grep '^GZIP_OS_CODE *= *AUTO_DETECT' config.in &&		\
 	  grep '^BUILD_ZLIB *= *True' config.in) >/dev/null ||	\
 	(echo config.in needs fixing ; exit 1)
 	@echo config.in is ok
@@ -206,6 +221,39 @@ MyTrebleCheck:
 	(echo found unexpected $$^W ; exit 1)
 	@echo All is ok.
 
+longtest:
+	@echo Running test suite with Devel::Cover
+	$(MAKE) test COMPRESS_ZLIB_RUN_ALL=1 
+
+cover:
+	@echo Running test suite with Devel::Cover
+	HARNESS_PERL_SWITCHES=-MDevel::Cover $(MAKE) test
+
+longcover:
+	@echo Running test suite with Devel::Cover
+	HARNESS_PERL_SWITCHES=-MDevel::Cover $(MAKE) test COMPRESS_ZLIB_RUN_ALL=1 
+
+test-utf8:
+	@echo Running test suite with utf-8 enabled
+	env LC_ALL=en_GB.UTF-8 $(MAKE) test	
+
+test-utf8de:
+	@echo Running test suite with utf-8 and non-english enabled
+	env LC_ALL=de_DE.UTF-8 $(MAKE) test	
+
+EOM
+
+    $postamble .= <<'EOM' if $^O eq 'linux' ;
+
+gcov:
+	@echo Running test suite with gcov and Devel::Cover [needs gcc 3.4?]
+	#@test  "${CC}" = "gcc" || (echo 'gcov' needs gcc, you have ${CC} ; exit 1)
+	rm -f *.o *.gcov *.da *.bbg *.bb *.gcno 
+	$(MAKE) OPTIMIZE=-g DEFINE="-fprofile-arcs -ftest-coverage"
+	HARNESS_PERL_SWITCHES=-MDevel::Cover $(MAKE) test
+    #gcov Zlib.xs
+    #gcov2perl -db cover_db Zlib.xs.gcov
+
 EOM
 
     return $postamble;
@@ -217,7 +265,7 @@ sub ParseCONFIG
     my ($k, $v) ;
     my @badkey = () ;
     my %Info = () ;
-    my @Options = qw( INCLUDE LIB BUILD_ZLIB OLD_ZLIB ) ;
+    my @Options = qw( INCLUDE LIB BUILD_ZLIB OLD_ZLIB GZIP_OS_CODE ) ;
     my %ValidOption = map {$_, 1} @Options ;
     my %Parsed = %ValidOption ;
     my $CONFIG = 'config.in' ;
@@ -258,8 +306,6 @@ sub ParseCONFIG
         $ZLIB_LIB = VMS::Filespec::vmspath($ZLIB_LIB);
     }
 
-    $EXTRA_DEFINE = $ENV{EXTRA_DEFINE} if defined $ENV{EXTRA_DEFINE};
-
     my $y = $ENV{'OLD_ZLIB'} || $Info{'OLD_ZLIB'} ;
     $OLD_ZLIB = '-DOLD_ZLIB' if $y and $y =~ /^yes|on|true|1$/i;
 
@@ -283,18 +329,33 @@ sub ParseCONFIG
 	   unless -e catfile($ZLIB_LIB, 'zlib.h') ;
 
 
-	# check Makefile.zlib has been copied to ZLIB_LIB
-    #copy 'Makefile.zlib', catfile($ZLIB_LIB, 'Makefile.PL') ||
-    #die "Could not copy Makefile.zlib to " . catfile($ZLIB_LIB, 'Makefile.PL') . ": $!\n" ;
-       #print "Created a Makefile.PL for zlib\n" ;
-	
 	# write the Makefile
 	print "Building Zlib enabled\n" ;
     }
 
+    $GZIP_OS_CODE = defined $ENV{'GZIP_OS_CODE'} 
+                          ? $ENV{'GZIP_OS_CODE'} 
+                          : $Info{'GZIP_OS_CODE'} ;
+
+	die "GZIP_OS_CODE not 'AUTO_DETECT' or a number between 0 and 255\n"
+	   unless uc $GZIP_OS_CODE eq 'AUTO_DETECT'
+                    || ( $GZIP_OS_CODE =~ /^(\d+)$/ && $1 >= 0 && $1 <= 255) ;
+
+    if (uc $GZIP_OS_CODE eq 'AUTO_DETECT')
+    {
+        print "Auto Detect Gzip OS Code..\n" ;
+        $GZIP_OS_CODE = getOSCode() ;
+    }
+    
+    my $name = getOSname($GZIP_OS_CODE);
+    print "Setting Gzip OS Code to $GZIP_OS_CODE [$name]\n" ;
+
     print <<EOM if 0 ;
-    INCLUDE	[$ZLIB_INCLUDE]
-    LIB		[$ZLIB_LIB]
+    INCLUDE         [$ZLIB_INCLUDE]
+    LIB             [$ZLIB_LIB]
+    GZIP_OS_CODE    [$GZIP_OS_CODE]
+    OLD_ZLIB        [$OLD_ZLIB]
+    BUILD_ZLIB      [$BUILD_ZLIB]
 
 EOM
 
@@ -306,7 +367,7 @@ sub UpDowngrade
 {
     my @files = @_ ;
 
-    # our      is stable from 5.6.0 onward
+    # our and use bytes/utf8 is stable from 5.6.0 onward
     # warnings is stable from 5.6.1 onward
 
     # Note: this code assumes that each statement it modifies is not
@@ -344,6 +405,10 @@ sub UpDowngrade
                 my $vars = join ' ', split /\s*,\s*/, $2;
                 $_ = "${indent}use vars qw($vars);\n";
             }
+	    elsif ( /^(\s*)((use|no)\s+(bytes|utf8)\s*;.*)$/)
+            {
+                $_ = "$1# $2\n";
+            }
           };
     }
     elsif ($] >= 5.006000 || $upgrade) {
@@ -352,6 +417,10 @@ sub UpDowngrade
                 my $indent = $1;
                 my $vars = join ', ', split ' ', $2;
                 $_ = "${indent}our ($vars);\n";
+            }
+	    elsif ( /^(\s*)#\s*((use|no)\s+(bytes|utf8)\s*;.*)$/)
+            {
+                $_ = "$1$2\n";
             }
           };
     }
@@ -377,6 +446,8 @@ sub doUpDown
 {
     my $our_sub = shift;
     my $warn_sub = shift;
+
+    return if -d $_[0];
 
     local ($^I) = ($^O eq 'VMS') ? "_bak" : ".bak";
     local (@ARGV) = shift;
@@ -408,23 +479,23 @@ sub zlib_files
         # zlib 1.2.0 or greater
         #
         @h_files = qw(crc32.h    inffast.h inflate.h  trees.h    zconf.in.h 
-    	          zutil.h    deflate.h inffixed.h inftrees.h zconf.h  
-    		  zlib.h 
+    	              zutil.h    deflate.h inffixed.h inftrees.h zconf.h  
+    		      zlib.h 
     		 );
         @c_files = qw(adler32  crc32   infback  inflate  uncompr
-    		  compress deflate gzio     inffast  inftrees  
-    		  trees    zutil 
+    		      compress deflate inffast  inftrees  
+    		      trees    zutil 
     		 );
     }
     else {
         # zlib 1.1.x
     
         @h_files = qw(deflate.h  infcodes.h inftrees.h zconf.h zutil.h
-    		  infblock.h inffast.h  infutil.h  zlib.h
+    		      infblock.h inffast.h  infutil.h  zlib.h
     		 );
-        @c_files = qw(adler32  compress crc32    gzio    uncompr
-    		  deflate  trees    zutil    inflate infblock
-    		  inftrees infcodes infutil  inffast
+        @c_files = qw(adler32  compress crc32    uncompr
+    		      deflate  trees    zutil    inflate infblock
+    		      inftrees infcodes infutil  inffast
     		 );
     }
     
@@ -445,6 +516,63 @@ sub zlib_files
            ) ;
 }
 
+
+
+my @GZIP_OS_Names ;
+my %OSnames ;
+
+BEGIN
+{
+  @GZIP_OS_Names = (
+    [ ''        => 0,    'MS-DOS'                       ],
+    [ 'amigaos' => 1,    'Amiga'                        ],
+    [ 'VMS'     => 2,    'VMS'                          ],
+    [ ''        => 3,    'Unix/Default'                 ],
+    [ ''        => 4,    'VM/CMS'                       ],
+    [ ''        => 5,    'Atari TOS'                    ],
+    [ 'os2'     => 6,    'HPFS (OS/2, NT)'              ],
+    [ 'MacOS'   => 7,    'Macintosh'                    ],
+    [ ''        => 8,    'Z-System'                     ],
+    [ ''        => 9,    'CP/M'                         ],
+    [ ''        => 10,   'TOPS-20'                      ],
+    [ ''        => 11,   'NTFS (NT)'                    ],
+    [ ''        => 12,   'SMS QDOS'                     ],
+    [ ''        => 13,   'Acorn RISCOS'                 ],
+    [ 'MSWin32' => 14,   'VFAT file system (Win95, NT)' ],
+    [ ''        => 15,   'MVS'                          ],
+    [ 'beos'    => 16,   'BeOS'                         ],
+    [ ''        => 17,   'Tandem/NSK'                   ],
+    [ ''        => 18,   'THEOS'                        ],
+    [ ''        => 255,  'Unknown OS'                   ],
+  );
+
+  %OSnames = map { $$_[1] => $$_[2] }  
+             @GZIP_OS_Names ;
+}
+
+sub getOSCode
+{
+    my $default = 3 ; # Unix is the default
+
+    my $uname = $^O;
+
+    for my $h (@GZIP_OS_Names)
+    {
+        my ($pattern, $code, $name) = @$h;
+
+        return $code
+            if $pattern && $uname eq $pattern ;
+    }
+
+    return $default ;
+}
+
+sub getOSname
+{
+    my $code = shift ;
+
+    return $OSnames{$code} || 'Unknown OS' ;
+}
 
 # end of file Makefile.PL
 

@@ -1,13 +1,44 @@
 CHANGES
 -------
 
-  1.40 - 23 September 2005
+  2.000_05 4 October 2005
 
-      * Fixed failure of 03examples.t for some windows systems.
+      * Renamed IO::* to IO::Compress::* & IO::Uncompress::*
 
-  1.39 - 15 September 2005
+  2.000_04 23 September 2005
 
-      * Fixed dTHX macro for 5.00503 on FreeBSD
+      * Fixed some more non-portable test that were failing on VMS.
+
+      * fixed problem where error messages in the oneshot interface were
+        getting lost.
+
+  2.000_03 12 September 2005
+
+      * Fixed some non-portable test that were failing on VMS.
+
+      * Fixed export of zlib constants from the IO::* classes
+
+  2.000_02 6 September 2005
+
+      * Split Append mode into Append and Merge
+
+      * Fixed typos in the documentation.
+
+      * Added pod/FAQ.pod
+
+      * Added libscan to Makefile.PL
+
+      * Added InputLength for IO::Gunzip et al
+
+  2.000_01 22 August 2005
+
+      * Fixed VERSION in Compress::Gzip::Constants
+
+      * Removed Compress::Gzip::Info from the distribution.
+
+  2.000_00 21 August 2005
+
+      * First Beta relase of Compress::zlib rewrite.
 
   1.38 - 6 September 2005
 
@@ -92,7 +123,7 @@ CHANGES
   1.31 - 29 October 2003
 
       * Reinstated the creation of .bak files - $^I seems to need a
-        backup file on Windows. For OpenVMS, the extension _bak is used.
+        backup file on Windows. For OpenVMS, the extenstion _bak is used.
 
   1.30 - 28 October 2003
 
@@ -153,39 +184,19 @@ CHANGES
         variable to config.in to flag an old version of zlib. Split
         out the tests for gzsetparams into t/05gzsetp.t
 
-  1.17 - 22 October 2002
+  1.17 - 23 May 2002
 
       * Moved the test to check the versions of libz & zlib.h into a separate
         file and added troubleshooting notes to README.
 
       * In gzopen, only attempt to call "tell" for normal files.
 
+      * Fixed to work in taint mode.
+
       * Broke changes out of README into Changes file.
 
       * Replaced internal use of Z_PARTIAL_FLUSH symbol with Z_SYNC_FLUSH. 
         zlib.h says  /* will be removed, use Z_SYNC_FLUSH instead */  
-
-      * Added support for zlib functions inflateSync and deflateParams.
-
-      * Added support for zlib functions gzeof and gzsetparams.
-
-      * Added support for access to adler, total_in & total_out
-
-      * The compress function can now take an optional parameter that
-        allows the compression level to be specified. This mirrors the
-        compress2 function available in zlib.
-
-      * memGzip doesn't work properly with perl 5.8.0 when it is given
-        UTF-8 data. Bug spotted by Andreas J. Koenig.
-
-      * Added note about Linux zlib-devel RPM to README.
-
-      * Fixed recursive build problem on win32 machines.
-
-      * Fixed problem with the test harness on Mac OS X.
-        Thanks to Carl Johan Berglund for reporting the problem and
-        helping track it down.
-
 
   1.16 - 13 December 2001
 
@@ -209,7 +220,7 @@ CHANGES
 
   1.13 - 31st June 2001
 
-      * Make sure config.in is consistent when released.
+      * Make sure config.in is consistant when released.
 
   1.12 - 28th April 2001
 

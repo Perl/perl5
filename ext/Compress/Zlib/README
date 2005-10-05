@@ -1,19 +1,28 @@
+
                                  Compress::Zlib
 
-                                  Version 1.40
+                                Version 2.000_05
 
-                                23 September 2005
+                                   4 Oct 2005 
 
-          Copyright (c) 1995-2005 Paul Marquess. All rights reserved.
-         This program is free software; you can redistribute it and/or
-                 modify it under the same terms as Perl itself.
+       Copyright (c) 1995-2005 Paul Marquess. All rights reserved.
+             This program is free software; you can redistribute it
+             and/or modify it under the same terms as Perl itself.
 
-      The directory zlib-src contains a subset of the source files copied 
-        directly from zlib version 1.2.3.  These files are Copyright(C) 
-                   1995-2005 Jean-loup Gailly and Mark Adler.
-                Full source for the zlib library is available at 
+
+                The directory zlib-src contains a subset of the 
+              source files copied directly from zlib version 1.2.3.
+                     These files are Copyright(C) 1995-2005
+                        Jean-loup Gailly and Mark Adler.
+                Full source for the zlib library is available at
                               http://www.zlib.org
 
+
+                                    WARNING
+                               THIS IS BETA CODE.
+
+                         DO NOT use in production code.
+                          Please report any problems.
 
 DESCRIPTION
 -----------
@@ -27,6 +36,8 @@ contents of .zip files, you will need to fetch and build the Archive::Zip
 module below once you have installed this one.
 
     http://www.cpan.org/modules/by-module/Archive/Archive-Zip-*.tar.gz
+
+
 
 
 PREREQUISITES
@@ -90,13 +101,11 @@ library is used:
     3. Use a pre-built zlib library.
 
 Note that if you intend to use either Option 2 or 3, you need to have
-zlib version 1.0.6 or better. Although this module can build with old
-versions of zlib, it is strongly recommended that you use the most recent
-version of zlib available.
+zlib version 1.0.5 or better.
 
 
 The contents of the file config.in are used to control which of the
-three options is actually used. This file is used during the
+three options is actually used. This file is read during the
 
     perl Makefile.PL 
 
@@ -111,10 +120,11 @@ before building this module.
   For option 1, edit the file config.in and set the variables in it
   as follows:
   
-      BUILD_ZLIB = True
-      INCLUDE    = ./zlib-src
-      LIB        = ./zlib-src
-      OLD_ZLIB   = False
+      BUILD_ZLIB   = True
+      INCLUDE      = ./zlib-src
+      LIB          = ./zlib-src
+      OLD_ZLIB     = False
+      GZIP_OS_CODE = AUTO_DETECT
   
   
   Option 2
@@ -122,17 +132,18 @@ before building this module.
   
   For option 2, fetch a copy of the zlib source distribution from
   http://www.zlib.org and unpack it into the Compress::Zlib source
-  directory. Assuming you have fetched zlib 1.1.4, it will create a
-  directory called zlib-1.1.4. 
+  directory. Assuming you have fetched zlib 1.2.3, it will create a
+  directory called zlib-1.2.3. 
   
   Now set the variables in the file config.in as follows (if the version
-  you have fetched isn't 1.1.4, change the INCLUDE and LIB variables
+  you have fetched isn't 1.2.3, change the INCLUDE and LIB variables
   appropriately):
   
-      BUILD_ZLIB = True
-      INCLUDE    = ./zlib-1.1.4
-      LIB        = ./zlib-1.1.4
-      OLD_ZLIB   = False
+      BUILD_ZLIB   = True
+      INCLUDE      = ./zlib-1.2.3
+      LIB          = ./zlib-1.2.3
+      OLD_ZLIB     = False
+      GZIP_OS_CODE = AUTO_DETECT
   
   
   Option 3
@@ -148,21 +159,53 @@ before building this module.
   Secondly, find the directory where the file zlib.h is stored. Now set
   the INCLUDE variable in the config.in file to that directory.
   
-  Next set BUILD_ZLIB to False
+  Next set BUILD_ZLIB to False.
   
   Finally, if you are running zlib 1.0.5 or older, set the OLD_ZLIB
   variable to True. Otherwise set it to False.
 
   As an example, if the zlib library on your system is in /usr/local/lib,
-  zlib.h is in /usr/local/include and zlib is more older than version
+  zlib.h is in /usr/local/include and zlib is more recent than version
   1.0.5, the variables in config.in should be set as follows:
 
-      BUILD_ZLIB = False
-      INCLUDE    = /usr/local/include
-      LIB        = /usr/local/lib
-      OLD_ZLIB   = True
+      BUILD_ZLIB   = False
+      INCLUDE      = /usr/local/include
+      LIB          = /usr/local/lib
+      OLD_ZLIB     = False
+      GZIP_OS_CODE = AUTO_DETECT
   
 
+Setting the Gzip OS Code
+------------------------
+
+Every gzip stream stores a byte in its header to identify the Operating System
+that was used to create the gzip stream. When you build Compress::Zlib it will
+attempt to determine the value that is correct for your Operating System. This
+will then be used by IO::Gzip as the default value for the OS byte in all gzip
+headers it creates. 
+ 
+The variable GZIP_OS_CODE in the config.in file controls the setting of this
+value when building Compress::Zlib. If GZIP_OS_CODE is set to AUTO_DETECT,
+Compress::Zlib will attempt to determine the correct value for your Operating
+System.
+
+Alternatively, you can override auto-detection of the default OS code and
+explicitly set it yourself. Set the GZIP_OS_CODE variable in the config.in file
+to be a number between 0 and 255. For example
+ 
+    GZIP_OS_CODE = 3
+
+See RFC 1952 for valid OS codes that can be used.
+
+If you are running one of the less popular Operating Systems, it could be that
+the default value picked by this module is incorrect or the default value (3)
+is used when there is a better value available. When Compress::Zlib cannot
+determine what operating system you are running, it will use the default value
+3 for the OS code.
+
+If you find you have to change this value, because you think the value auto
+detected is incorrect, please take a few moments to contact the author of this
+module.
 
 
 TROUBLESHOOTING
@@ -201,7 +244,6 @@ Try removing the one you don't want to use and rebuild.
 
 
 
-
 Solaris build fails with "language optional software package not installed"
 ---------------------------------------------------------------------------
 
@@ -222,7 +264,7 @@ lived in /usr/ucb.
 To continue with building this module, you need to get a C compiler,
 or tell Perl where your C compiler is, if you already have one.
 
-Assuming you have now got a C compiler, what you do next will be dependant
+Assuming you have now got a C compiler, what you do next will be dependent
 on what C compiler you have installed. If you have just installed Sun's
 C compiler, you shouldn't have to do anything. Just try rebuilding
 this module.
@@ -271,6 +313,22 @@ The solution is either:
        This second option seems to work when mixing a Perl binary built
        with the Sun C compiler and this module built with gcc. Your
        mileage may vary.
+
+
+The t/17isize Test Suite
+------------------------
+
+This test suite checks that Compress::Zlib can cope with gzip files
+that are larger than 2^32 bytes.
+
+By default these test are NOT run when you do a "make test". If you
+really want to run them, you need to execute "make longtest".
+
+Be warned though -- this test suite can take hours to run on a slow box.
+
+Also, due to the way the tests are constructed, some architectures will
+run out of memory during these test. This should not be considered a bug
+in the Compress::Zlib module.
 
 
 
@@ -330,25 +388,6 @@ Windows.
 
 The workaround is to install Compress::Zlib manually using the
 instructions given at the start of this file.
-
-
-
-Mac OX X Notes
---------------
-
-Some versions of Mac OS X are failing a number of the tests in the
-06gzdopen.t test harness.
-
-The functionality being exercised in these tests is checking that it is
-possible to call gzopen with an existing Perl filehandle instead of a
-filename. For some reason it does not seem possible to extract a
-numeric file descriptor (using fileno) from a FILE* and then make use
-of it.
-
-If you happen to now how to fix for this, I would like to hear from you.
-
-In the meantime, a workaround that has been reported to me is to use fink,
-available at http://fink.sourceforge.net
 
 
 

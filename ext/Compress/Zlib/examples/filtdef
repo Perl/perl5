@@ -1,29 +1,27 @@
 #!/usr/local/bin/perl
 
+use Compress::Zlib 2 ;
+
 use strict ;
 use warnings ;
 
-use Compress::Zlib ;
-
 binmode STDIN;
 binmode STDOUT;
-my $x = deflateInit()
+
+my $x = new Compress::Zlib::Deflate()
    or die "Cannot create a deflation stream\n" ;
 
-my ($output, $status) ;
+my $output = '' ;
+
 while (<>)
 {
-    ($output, $status) = $x->deflate($_) ;
-
-    $status == Z_OK
-        or die "deflation failed\n" ;
+    $x->deflate($_, $output) == Z_OK 
+        or die "deflate failed\n" ;
 
     print $output ;
 }
 
-($output, $status) = $x->flush() ;
-
-$status == Z_OK
-    or die "deflation failed\n" ;
+$x->flush($output) == Z_OK
+    or die "flush failed\n" ;
 
 print $output ;
