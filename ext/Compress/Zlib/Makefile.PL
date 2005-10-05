@@ -73,7 +73,7 @@ my @files = ('Zlib.pm', 't/ZlibTestUtils.pm',
              glob("lib/File/*.pm"),
              grep(!/\.bak$/,  glob("examples/*"))) ;
 
-UpDowngrade(@files) unless $ENV{PERL_CORE};
+UpDowngrade(@files) unless grep { $_ eq 'PERL_CORE=1' } @ARGV;
 
 WriteMakefile(	
 	NAME   	 	=> 'Compress::Zlib',
