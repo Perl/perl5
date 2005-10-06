@@ -2218,7 +2218,6 @@ lib/vmsish.t			Tests for vmsish.pm
 lib/warnings.pm			For "use warnings"
 lib/warnings/register.pm	For "use warnings::register"
 lib/warnings.t			See if warning controls work
-lib/ZlibTestUtils.pm	Compress::Zlib
 locale.c			locale-specific utility functions
 makeaperl.SH			perl script that produces a new perl binary
 makedef.pl			Create symbol export lists for linking
@@ -2849,6 +2848,7 @@ t/lib/warnings/toke		Tests for toke.c for warnings.t
 t/lib/warnings/universal	Tests for universal.c for warnings.t
 t/lib/warnings/utf8		Tests for utf8.c for warnings.t
 t/lib/warnings/util		Tests for util.c for warnings.t
+t/lib/ZlibTestUtils.pm		Compress::Zlib
 Todo.micro			The Wishlist for microperl
 toke.c				The tokener
 t/op/64bitint.t			See if 64 bit integers work
