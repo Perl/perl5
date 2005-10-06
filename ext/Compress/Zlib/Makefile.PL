@@ -175,7 +175,6 @@ if (eval {require ExtUtils::Constant; 1}) {
                                      NAMES => \@names,
                                      C_FILE  => 'constants.h',
                                      XS_FILE  => 'constants.xs',
-                                                                       
                                     );
 } 
 else {
@@ -194,7 +193,8 @@ sub MY::libscan
 
     return undef
         if $path =~ /(~|\.bak|_bak)$/ ||
-           $path =~ /\..*\.swp$/ ;
+           $path =~ /\..*\.swp$/ ||
+           $path =~ /\B\.svn\b/;
 
     return $path;
 }
