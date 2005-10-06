@@ -2880,7 +2880,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
 	for (; isALNUM(**s); (*s)++) ;
     }
     else if (givehelp) {
-      char **p = (char **)usage_msgd;
+      const char *const *p = usage_msgd;
       while (*p) PerlIO_printf(PerlIO_stdout(), "%s\n", *p++);
     }
 #  ifdef EBCDIC
