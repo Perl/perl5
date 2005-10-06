@@ -111,7 +111,7 @@ package Maintainers;
 	'Compress::Zlib' =>
 		{
 		'MAINTAINER'	=> 'pmqs',
-		'FILES'		=> q[ext/Compress/Zlib],
+		'FILES'		=> q[ext/Compress/Zlib t/lib/ZlibTestUtils.pm],
 		'CPAN'		=> 1,
 		},
 
