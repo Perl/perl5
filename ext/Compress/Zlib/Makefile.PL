@@ -73,7 +73,8 @@ my @files = ('Zlib.pm', 't/ZlibTestUtils.pm',
              glob("lib/File/*.pm"),
              grep(!/\.bak$/,  glob("examples/*"))) ;
 
-UpDowngrade(@files) unless grep { $_ eq 'PERL_CORE=1' } @ARGV;
+my $PERL_CORE = grep { $_ eq 'PERL_CORE=1' } @ARGV;
+UpDowngrade(@files) unless $PERL_CORE;
 
 WriteMakefile(	
 	NAME   	 	=> 'Compress::Zlib',
@@ -81,8 +82,11 @@ WriteMakefile(
 	INC      	=> "-I$ZLIB_INCLUDE" ,
 	DEFINE   	=> "$OLD_ZLIB $WALL -DGZIP_OS_CODE=$GZIP_OS_CODE" ,
 	XS	 	    => { 'Zlib.xs'    => 'Zlib.c' },
-	PREREQ_PM   => { 'Scalar::Util'  => 0,
-                     $] >= 5.005 && $] < 5.006   ? ('File::BSDGlob' => 0) : () },
+	$PERL_CORE
+	    ? (MAN3PODS    => {})
+	    : (PREREQ_PM   => { 'Scalar::Util'  => 0,
+		    $] >= 5.005 && $] < 5.006   ? ('File::BSDGlob' => 0) : () }
+	    ),
 	'depend' 	=> { 'Makefile'	  => 'config.in' },
 	'clean' 	=> { FILES        => '*.c constants.h constants.xs' },
 	'dist'	 	=> { COMPRESS     => 'gzip', 
