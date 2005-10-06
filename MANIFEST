@@ -2893,7 +2893,6 @@ t/op/flip.t			See if range operator works
 t/op/fork.t			See if fork works
 t/op/getpid.t			See if $$ and getppid work with threads
 t/op/getppid.t			See if getppid works
-t/op/getprotobynumber.t		See if getprotobynumber works
 t/op/glob.t			See if <*> works
 t/op/gmagic.t			See if GMAGIC works
 t/op/goto.t			See if goto works
