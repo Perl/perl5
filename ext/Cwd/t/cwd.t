@@ -199,7 +199,7 @@ path_ends_with(Cwd::_perl_abs_path($path), 'cwd.t', '_perl_abs_path() can be inv
 SKIP: {
   my $file;
   {
-    my $root = File::Spec->rootdir;
+    my $root = Cwd::abs_path(File::Spec->rootdir);	# Add drive letter?
     local *FH;
     opendir FH, $root or skip("Can't opendir($root): $!", 2+$EXTRA_ABSPATH_TESTS);
     ($file) = grep {-f $_ and not -l $_} map File::Spec->catfile($root, $_), readdir FH;
