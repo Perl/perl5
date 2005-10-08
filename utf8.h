@@ -258,6 +258,9 @@ encoded character.
 #endif
 #define SHARP_S_SKIP 2
 
+#ifdef EBCDIC
+/* IS_UTF8_CHAR() is not ported to EBCDIC */
+#else
 #define IS_UTF8_CHAR_1(p)	\
 	((p)[0] <= 0x7F)
 #define IS_UTF8_CHAR_2(p)	\
@@ -329,3 +332,4 @@ encoded character.
 
 #define IS_UTF8_CHAR_FAST(n) ((n) <= 4)
 
+#endif /* IS_UTF8_CHAR() for UTF-8 */

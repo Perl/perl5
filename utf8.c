@@ -209,6 +209,9 @@ S_is_utf8_char_slow(pTHX_ const U8 *s, const STRLEN len)
 
     slen = len - 1;
     s++;
+#ifdef EBCDIC
+    u = NATIVE_TO_UTF(u);
+#endif
     u &= UTF_START_MASK(len);
     uv  = u;
     ouv = uv;
