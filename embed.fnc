@@ -124,7 +124,7 @@ pR	|int	|block_start	|int full
 p	|void	|boot_core_UNIVERSAL
 p	|void	|boot_core_PerlIO
 Ap	|void	|call_list	|I32 oldscope|NN AV* av_list
-pR	|bool	|cando		|Mode_t mode|Uid_t effective|NN const Stat_t* statbufp
+pR	|bool	|cando		|Mode_t mode|Uid_t effective|NN Stat_t* statbufp
 ApR	|U32	|cast_ulong	|NV f
 ApR	|I32	|cast_i32	|NV f
 ApR	|IV	|cast_iv	|NV f

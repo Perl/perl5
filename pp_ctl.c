@@ -3120,7 +3120,7 @@ PP(pp_require)
 	I32 i;
 #ifdef VMS
 	char *unixname;
-	if ((unixname = tounixspec(name, Nullch)) != Nullch)
+	if ((unixname = tounixspec((char *)name, Nullch)) != Nullch)
 #endif
 	{
 	    namesv = NEWSV(806, 0);
@@ -3257,7 +3257,7 @@ PP(pp_require)
 #else
 #  ifdef VMS
 		    char *unixdir;
-		    if ((unixdir = tounixpath(dir, Nullch)) == Nullch)
+		    if ((unixdir = tounixpath((char *)dir, Nullch)) == Nullch)
 			continue;
 		    sv_setpv(namesv, unixdir);
 		    sv_catpv(namesv, unixname);

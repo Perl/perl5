@@ -163,7 +163,7 @@ PERL_CALLCONV void	Perl_boot_core_PerlIO(pTHX);
 PERL_CALLCONV void	Perl_call_list(pTHX_ I32 oldscope, AV* av_list)
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV bool	Perl_cando(pTHX_ Mode_t mode, Uid_t effective, const Stat_t* statbufp)
+PERL_CALLCONV bool	Perl_cando(pTHX_ Mode_t mode, Uid_t effective, Stat_t* statbufp)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_3);
 

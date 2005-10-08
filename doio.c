@@ -1790,7 +1790,7 @@ nothing in the core.
 	    s = SvPV_nolen_const(*mark);
 	    APPLY_TAINT_PROPER();
 	    if (PL_euid || PL_unsafe) {
-		if (UNLINK(s))
+		if (UNLINK((char *)s))
 		    tot--;
 	    }
 	    else {	/* don't let root wipe out directories without -U */
@@ -1860,7 +1860,7 @@ nothing in the core.
 /* Do the permissions allow some operation?  Assumes statcache already set. */
 #ifndef VMS /* VMS' cando is in vms.c */
 bool
-Perl_cando(pTHX_ Mode_t mode, Uid_t effective, register const Stat_t *statbufp)
+Perl_cando(pTHX_ Mode_t mode, Uid_t effective, register Stat_t *statbufp)
 /* Note: we use "effective" both for uids and gids.
  * Here we are betting on Uid_t being equal or wider than Gid_t.  */
 {
@@ -2335,8 +2335,8 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
        if ((tmpfp = PerlIO_tmpfile()) != NULL) {
 	    Stat_t st;
 	    if (!PerlLIO_stat(SvPVX_const(tmpglob),&st) && S_ISDIR(st.st_mode))
-		ok = ((wilddsc.dsc$a_pointer = tovmspath(SvPVX_const(tmpglob),vmsspec)) != NULL);
-	    else ok = ((wilddsc.dsc$a_pointer = tovmsspec(SvPVX_const(tmpglob),vmsspec)) != NULL);
+		ok = ((wilddsc.dsc$a_pointer = tovmspath((char *)SvPVX_const(tmpglob),vmsspec)) != NULL);
+	    else ok = ((wilddsc.dsc$a_pointer = tovmsspec((char *)SvPVX_const(tmpglob),vmsspec)) != NULL);
 	    if (ok) wilddsc.dsc$w_length = (unsigned short int) strlen(wilddsc.dsc$a_pointer);
 	    for (cp=wilddsc.dsc$a_pointer; ok && cp && *cp; cp++)
 		if (*cp == '?') *cp = '%';  /* VMS style single-char wildcard */
