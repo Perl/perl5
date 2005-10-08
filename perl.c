@@ -2995,7 +2995,7 @@ Perl_get_debug_opts_flags(pTHX_ char **s, int flags)
     }
     else if (flags & 1) {
       /* Give help.  */
-      const char **p = usage_msgd;
+      const char *const *p = usage_msgd;
       while (*p) PerlIO_printf(PerlIO_stdout(), "%s\n", *p++);
     }
 #  ifdef EBCDIC
