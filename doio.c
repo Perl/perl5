@@ -1797,7 +1797,7 @@ nothing in the core.
 		if (PerlLIO_lstat(s,&PL_statbuf) < 0 || S_ISDIR(PL_statbuf.st_mode))
 		    tot--;
 		else {
-		    if (UNLINK(s))
+		    if (UNLINK((char*)s))
 			tot--;
 		}
 	    }
