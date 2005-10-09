@@ -1,8 +1,8 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (pmqs@cpan.org)
-# last modified 12th March 2005
-# version 1.811
+# last modified 9th October 2005
+# version 1.812
 #
 #     Copyright (c) 1995-2005 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -165,7 +165,7 @@ our ($db_version, $use_XSLoader, $splice_end_array);
 use Carp;
 
 
-$VERSION = "1.811" ;
+$VERSION = "1.812" ;
 
 {
     local $SIG{__WARN__} = sub {$splice_end_array = "@_";};

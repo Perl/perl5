@@ -1,5 +1,11 @@
 
 
+1.812 9th October 2005
+
+   * Added libscan to Makefile.PL
+
+   * Fixed test failing under windows
+
 1.811 12th March 2005
 
    * Fixed DBM filter bug in seq

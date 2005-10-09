@@ -4,7 +4,7 @@
 
  written by Paul Marquess <pmqs@cpan.org>
  last modified 12th March 2005
- version 1.811
+ version 1.812
 
  All comments/suggestions/problems are welcome
 
@@ -111,6 +111,7 @@
         1.809 - no change
         1.810 - no change
         1.811 - no change
+        1.812 - no change
 
 */
 
