@@ -1,5 +1,12 @@
 #!/usr/bin/perl
 
+BEGIN {
+    if( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = '../lib';
+    }
+}
+
 use Test::More tests => 3;
 use Test::Builder::Tester;
 
