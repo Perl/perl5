@@ -5,7 +5,7 @@ use File::Path ();
 use File::Basename ();
 
 use vars qw($VERSION @ISA);
-$VERSION = '0.14_01';
+$VERSION = '0.15';
 $VERSION = eval $VERSION;
 
 # Okay, this is the brute-force method of finding out what kind of
@@ -261,6 +261,7 @@ options, as follows:
     DL_FUNCS    |  dl_funcs         | hash reference
     FUNCLIST    |  dl_func_list     | array reference
     IMPORTS     |  dl_imports       | hash reference
+    VERSION     |  dl_version       | string
 
 Please see the documentation for C<ExtUtils::Mksymlists> for the
 details of what these parameters do.
@@ -269,6 +270,12 @@ details of what these parameters do.
 
 Returns true on platforms where C<prelink()> should be called
 during linking, and false otherwise.
+
+=item extra_link_args_after_prelink
+
+Returns list of extra arguments to give to the link command; the arguments
+are the same as for prelink(), with addition of array reference to the
+results of prelink(); this reference is indexed by key C<prelink_res>.
 
 =back
 
@@ -283,7 +290,9 @@ that next.
 This module is an outgrowth of the C<Module::Build> project, to which
 there have been many contributors.  Notably, Randy W. Sims submitted
 lots of code to support 3 compilers on Windows and helped with various
-other platform-specific issues.
+other platform-specific issues.  Ilya Zakharevich has contributed
+fixes for OS/2; John E. Malmberg and Peter Prymmer have done likewise
+for VMS.
 
 =head1 AUTHOR
 
