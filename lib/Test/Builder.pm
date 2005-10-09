@@ -8,7 +8,7 @@ $^C ||= 0;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.31';
+$VERSION = '0.32';
 $VERSION = eval $VERSION;    # make the alpha version come out as a number
 
 # Make Test::Builder thread-safe for ithreads.
@@ -869,6 +869,8 @@ sub BAIL_OUT {
 
 =for deprecated
 BAIL_OUT() used to be BAILOUT()
+
+=cut
 
 *BAILOUT = \&BAIL_OUT;
 

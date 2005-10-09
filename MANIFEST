@@ -1958,6 +1958,8 @@ lib/Term/ReadLine.pm		Stub readline library
 lib/Term/ReadLine.t		See if Term::ReadLine works
 lib/Test/Builder.pm		For writing new test libraries
 lib/Test/Builder/Module.pm	Base class for test modules
+lib/Test/Builder/Tester.pm	For testing Test::Builder based classes
+lib/Test/Builder/Tester/Color.pm	Turn on color in Test::Builder::Tester
 lib/Test/Harness/Assert.pm	Test::Harness::Assert (internal use only)
 lib/Test/Harness/bin/prove	The prove harness utility
 lib/Test/Harness/Changes	Test::Harness
@@ -2040,6 +2042,13 @@ lib/Test/Simple/t/skipall.t	Test::More test, skip all tests
 lib/Test/Simple/t/skip.t	Test::More test, SKIP tests
 lib/Test/Simple/t/sort_bug.t	Test::Simple test
 lib/Test/Simple/t/strays.t	Test::Builder stray newline checks
+lib/Test/Simple/t/tbt_01basic.t	Test::Builder::Tester test
+lib/Test/Simple/t/tbt_02fhrestore.t	Test::Builder::Tester test
+lib/Test/Simple/t/tbt_03die.t	Test::Builder::Tester test
+lib/Test/Simple/t/tbt_04line_num.t	Test::Builder::Tester test
+lib/Test/Simple/t/tbt_05faildiag.t	Test::Builder::Tester test
+lib/Test/Simple/t/tbt_06errormess.t	Test::Builder::Tester test
+lib/Test/Simple/t/tbt_07args.t	Test::Builder::Tester test
 lib/Test/Simple/t/threads.t	Test::Builder thread-safe checks
 lib/Test/Simple/t/thread_taint.t	Test::Simple test
 lib/Test/Simple/t/todo.t	Test::More test, TODO tests

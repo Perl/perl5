@@ -7,7 +7,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 48;
+use Test::More tests => 51;
 
 # Make sure we don't mess with $@ or $!.  Test at bottom.
 my $Err   = "this should not be touched";
@@ -156,6 +156,16 @@ cmp_ok(0, '||', 1,          '       ||');
 }
 isa_ok( Wibble->new, 'Wibblemeister' );
 
+my $sub = sub {};
+is_deeply( $sub, $sub, 'the same function ref' );
+
+use Symbol;
+my $glob = gensym;
+is_deeply( $glob, $glob, 'the same glob' );
+
+is_deeply( { foo => $sub, bar => [1, $glob] },
+           { foo => $sub, bar => [1, $glob] }
+         );
 
 # These two tests must remain at the end.
 is( $@, $Err,               '$@ untouched' );

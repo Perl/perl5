@@ -25,7 +25,7 @@ package main;
 
 
 my $TB = Test::Builder->create;
-$TB->plan(tests => 67);
+$TB->plan(tests => 73);
 
 # Utility testing functions.
 sub ok ($;$) {
@@ -340,4 +340,34 @@ ERR
     else {
 	$TB->skip("Needs overload.pm") for 1..3;
     }
+}
+
+
+# rt.cpan.org 14746
+{
+# line 349
+    ok !is_deeply( sub {"foo"}, sub {"bar"} ), 'function refs';
+    is( $out, "not ok 27\n" );
+    like( $err, <<ERR,	     '  right diagnostic' );
+#   Failed test in $Filename at line 349.
+#     Structures begin differing at:
+#          \\\$got = CODE\\(0x[0-9a-f]+\\)
+#     \\\$expected = CODE\\(0x[0-9a-f]+\\)
+ERR
+
+
+    use Symbol;
+    my $glob1 = gensym;
+    my $glob2 = gensym;
+
+#line 357
+    ok !is_deeply( $glob1, $glob2 ), 'typeglobs';
+    is( $out, "not ok 28\n" );
+    like( $err, <<ERR,	     '  right diagnostic' );
+#   Failed test in $0 at line 357.
+#     Structures begin differing at:
+#          \\\$got = GLOB\\(0x[0-9a-f]+\\)
+#     \\\$expected = GLOB\\(0x[0-9a-f]+\\)
+ERR
+
 }
