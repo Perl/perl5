@@ -5,6 +5,7 @@ use Cwd;
 use Config;
 use File::Basename;
 use File::Spec;
+use Symbol;
 
 require Exporter;
 
@@ -17,7 +18,7 @@ my(@XSStack);	# Stack of conditionals and INCLUDEs
 my($XSS_work_idx, $cpp_next_tmp);
 
 use vars qw($VERSION);
-$VERSION = '2.13';
+$VERSION = '2.14';
 
 use vars qw(%input_expr %output_expr $ProtoUsed @InitFileCode $FH $proto_re $Overload $errors $Fallback
 	    $cplusplus $hiertype $WantPrototypes $WantVersionChk $except $WantLineNumbers
@@ -71,7 +72,7 @@ sub process_file {
   @XSStack = ({type => 'none'});
   ($XSS_work_idx, $cpp_next_tmp) = (0, "XSubPPtmpAAAA");
   @InitFileCode = ();
-  $FH = 'File0000' ;
+  $FH = Symbol::gensym();
   $proto_re = "[" . quotemeta('\$%&*@;[]') . "]" ;
   $Overload = 0;
   $errors = 0;
@@ -983,6 +984,7 @@ EOF
   chdir($orig_cwd);
   select($orig_fh);
   untie *PSEUDO_STDOUT if tied *PSEUDO_STDOUT;
+  close $FH;
 
   return 1;
 }
@@ -1439,7 +1441,7 @@ sub INCLUDE_handler ()
 		    Handle          => $FH,
 		   }) ;
 
-    ++ $FH ;
+    $FH = Symbol::gensym();
 
     # open the new file
     open ($FH, "$_") or death("Cannot open '$_': $!") ;
