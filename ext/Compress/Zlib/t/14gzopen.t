@@ -24,8 +24,6 @@ BEGIN {
 
     use_ok('Compress::Zlib', 2) ;
     use_ok('Compress::Gzip::Constants') ;
-
-    use_ok('IO::Compress::Gzip', qw($GzipError)) ;
 }
 
 
@@ -180,13 +178,13 @@ my $line = '';
 for my $i (0 .. @text -2)
 {
     ok $fil->gzreadline($line) > 0;
-    ok $line eq $text[$i] ;
+    is $line, $text[$i] ;
     ok ! $fil->gzeof() ;
 }
 
 # now read the last line
 ok $fil->gzreadline($line) > 0;
-ok $line eq $text[-1] ;
+is $line, $text[-1] ;
 ok $fil->gzeof() ;
 
 # read past the eof
@@ -214,9 +212,9 @@ while ($fil->gzreadline($line) > 0) {
     $got[$i] = $line ;    
     ++ $i ;
 }
-ok $i == 2 ;
-ok $got[0] eq $line1 ;
-ok $got[1] eq $line2 ;
+is $i, 2 ;
+is $got[0], $line1 ;
+is $got[1], $line2 ;
 
 ok   $fil->gzeof() ;
 ok ! $fil->gzclose ;
@@ -241,9 +239,9 @@ while ($fil->gzreadline($line) > 0) {
     $got[$i] = $line ;    
     ++ $i ;
 }
-ok $i == 2 ;
-ok $got[0] eq $line1 ;
-ok $got[1] eq $line2 ;
+is $i, 2 ;
+is $got[0], $line1 ;
+is $got[1], $line2 ;
 
 ok   $fil->gzeof() ;
 ok ! $fil->gzclose ;
@@ -257,13 +255,13 @@ unlink $name ;
     # case 1: read a line, then a block. The block is
     #         smaller than the internal block used by
     #	  gzreadline
-    my $name = "test.gz" ;
-    my $lex = new LexFile $name ;
+    my $lex = new LexFile my $name ;
     $line1 = "hello hello, I'm back again\n" ;
     $line2 = "abc" x 200 ; 
     my $line3 = "def" x 200 ;
     
     $text = $line1 . $line2 . $line3 ;
+    my $fil;
     ok $fil = gzopen($name, "wb"), ' gzopen for write ok' ;
     is $fil->gzwrite($text), length $text, '    gzwrite ok' ;
     is $fil->gztell(), length $text, '    gztell ok' ;
@@ -290,8 +288,7 @@ unlink $name ;
 {
     title "Pass gzopen a filehandle - use IO::File" ;
 
-    my $name = "test.gz" ;
-    my $lex = new LexFile $name ;
+    my $lex = new LexFile my $name ;
 
     my $hello = "hello" ;
     my $len = length $hello ;
@@ -301,7 +298,8 @@ unlink $name ;
     my $f = new IO::File ">$name" ;
     ok $f;
 
-    ok my $fil = gzopen($f, "wb") ;
+    my $fil;
+    ok $fil = gzopen($f, "wb") ;
 
     ok $fil->gzwrite($hello) == $len ;
 
@@ -320,7 +318,7 @@ unlink $name ;
 
     unlink $name ;
 
-    ok $hello eq $uncomp ;
+    is $uncomp, $hello, "got expected output" ;
 
 
 }
@@ -329,8 +327,7 @@ unlink $name ;
 {
     title "Pass gzopen a filehandle - use open" ;
 
-    my $name = "test.gz" ;
-    my $lex = new LexFile $name ;
+    my $lex = new LexFile my $name ;
 
     my $hello = "hello" ;
     my $len = length $hello ;
@@ -339,7 +336,8 @@ unlink $name ;
 
     open F, ">$name" ;
 
-    ok my $fil = gzopen(*F, "wb") ;
+    my $fil;
+    ok $fil = gzopen(*F, "wb") ;
 
     is $fil->gzwrite($hello), $len ;
 
@@ -358,7 +356,7 @@ unlink $name ;
 
     unlink $name ;
 
-    ok $hello eq $uncomp ;
+    is $uncomp, $hello ;
 
 
 }
@@ -370,8 +368,7 @@ foreach my $stdio ( ['-', '-'], [*STDIN, *STDOUT])
 
     title "Pass gzopen a filehandle - use $stdin" ;
 
-    my $name = "test.gz" ;
-    my $lex = new LexFile $name ;
+    my $lex = new LexFile my $name ;
 
     my $hello = "hello" ;
     my $len = length $hello ;
@@ -412,15 +409,14 @@ foreach my $stdio ( ['-', '-'], [*STDIN, *STDOUT])
 
     unlink $name ;
 
-    ok $hello eq $uncomp ;
+    is $uncomp, $hello ;
 
 
 }
 
 {
     title 'test parameters for gzopen';
-    my $name = "test.gz" ;
-    my $lex = new LexFile $name ;
+    my $lex = new LexFile my $name ;
 
     my $fil;
 
@@ -451,19 +447,20 @@ foreach my $stdio ( ['-', '-'], [*STDIN, *STDOUT])
 {
     title 'Read operations when opened for writing';
 
-    my $name = "test.gz" ;
-    my $lex = new LexFile $name ;
+    my $lex = new LexFile my $name ;
+    my $fil;
     ok $fil = gzopen($name, "wb"), '  gzopen for writing' ;
     ok !$fil->gzeof(), '    !eof'; ;
     is $fil->gzread(), Z_STREAM_ERROR, "    gzread returns Z_STREAM_ERROR" ;
+    ok ! $fil->gzclose, "  gzclose ok" ;
 }
 
 {
     title 'write operations when opened for reading';
 
-    my $name = "test.gz" ;
-    my $lex = new LexFile $name ;
+    my $lex = new LexFile my $name ;
     my $test = "hello" ;
+    my $fil;
     ok $fil = gzopen($name, "wb"), "  gzopen for writing" ;
     is $fil->gzwrite($text), length $text, "    gzwrite ok" ;
     ok ! $fil->gzclose, "  gzclose ok" ;
@@ -519,7 +516,7 @@ foreach my $stdio ( ['-', '-'], [*STDIN, *STDOUT])
     title "gzseek" ;
 
     my $buff ;
-    my $name ;#= "test.gz" ;
+    my $name ;
     my $lex = new LexFile $name ;
 
     my $first = "beginning" ;
@@ -564,8 +561,7 @@ foreach my $stdio ( ['-', '-'], [*STDIN, *STDOUT])
 
 {
     # seek error cases
-    my $name = "test.gz" ;
-    my $lex = new LexFile $name ;
+    my $lex = new LexFile my $name ;
 
     my $a = gzopen($name, "w");
 

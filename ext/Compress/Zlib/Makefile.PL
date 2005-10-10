@@ -28,9 +28,8 @@ my $GZIP_OS_CODE = -1 ;
 #$WALL = ' -pedantic ' if $Config{'cc'} =~ /gcc/ ;
 $WALL = ' -Wall ' if $Config{'cc'} =~ /gcc/ ;
 
-my $PERL_CORE = grep { $_ eq 'PERL_CORE=1' } @ARGV;
 # don't ask if MM_USE_DEFAULT is set -- enables perl core building on cygwin
-if ($^O =~ /cygwin/i and not ($ENV{PERL_MM_USE_DEFAULT} || $PERL_CORE))
+if ($^O =~ /cygwin/i and not $ENV{PERL_MM_USE_DEFAULT})
 {
     print <<EOM ;
 
@@ -74,6 +73,7 @@ my @files = ('Zlib.pm', 't/ZlibTestUtils.pm',
              glob("lib/File/*.pm"),
              grep(!/\.bak$/,  glob("examples/*"))) ;
 
+my $PERL_CORE = grep { $_ eq 'PERL_CORE=1' } @ARGV;
 UpDowngrade(@files) unless $PERL_CORE;
 
 WriteMakefile(	
