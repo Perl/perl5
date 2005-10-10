@@ -996,8 +996,8 @@ deflate (s, buf, output)
     if (DO_UTF8(buf) && !sv_utf8_downgrade(buf, 1))
          croak("Wide character in Compress::Zlib::Deflate::deflate input parameter");
 #endif         
-    s->stream.next_in = (Bytef*)SvPVbyte(buf, *(STRLEN*)&s->stream.avail_in) ;
-    /* s->stream.avail_in = SvCUR(buf) ; */
+    s->stream.next_in = (Bytef*)SvPVbyte_nolen(buf) ;
+    s->stream.avail_in = SvCUR(buf) ; 
     
     if (s->flags & FLAG_CRC32)
         s->crc32 = crc32(s->crc32, s->stream.next_in, s->stream.avail_in) ;
@@ -1346,6 +1346,7 @@ inflate (s, buf, output)
     uInt	cur_length = NO_INIT
     uInt	prefix_length = NO_INIT
     uInt	increment = NO_INIT
+    STRLEN  stmp   = NO_INIT
   PREINIT:
 #ifdef UTF8_AVAILABLE    
     bool	out_utf8  = FALSE;
@@ -1362,7 +1363,8 @@ inflate (s, buf, output)
 #endif         
     
     /* initialise the input buffer */
-    s->stream.next_in = (Bytef*)SvPVbyte_force(buf, *(STRLEN*)&s->stream.avail_in) ;
+    s->stream.next_in = (Bytef*)SvPVbyte_force(buf, stmp) ;
+    s->stream.avail_in = SvCUR(buf) ; 
 	
     /* and retrieve the output buffer */
     output = deRef_l(output, "inflate") ;
@@ -1626,6 +1628,7 @@ scan(s, buf, out=NULL)
     SV *	buf
     SV *	out
     int    start_len = NO_INIT
+    STRLEN  stmp   = NO_INIT
   ALIAS:
     inflate = 1
   CODE:
@@ -1642,7 +1645,8 @@ scan(s, buf, out=NULL)
 #endif         
     
     /* initialise the input buffer */
-    s->stream.next_in = (Bytef*)SvPVbyte_force(buf, *(STRLEN*)&s->stream.avail_in) ;
+    s->stream.next_in = (Bytef*)SvPVbyte_force(buf, stmp) ;
+    s->stream.avail_in = SvCUR(buf) ; 
     start_len = s->stream.avail_in ;
     s->bytesInflated = 0 ; 
     do
