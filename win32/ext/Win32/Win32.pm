@@ -545,9 +545,11 @@ different major/minor version number than Windows XP.
 
 =item Win32::GetShortPathName(PATHNAME)
 
-[CORE] Returns a representation of PATHNAME composed only of
-short (8.3) path components.  The result may not necessarily be
-shorter than PATHNAME.  Compare with Win32::GetFullPathName and
+[CORE] Returns a representation of PATHNAME that is composed of short
+(8.3) path components where available.  For path components where the
+file system has not generated the short form the returned path will
+use the long form, so this function might still for instance return a
+path containing spaces.  Compare with Win32::GetFullPathName and
 Win32::GetLongPathName.
 
 =item Win32::GetProcAddress(INSTANCE, PROCNAME)
