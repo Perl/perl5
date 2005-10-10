@@ -2183,6 +2183,10 @@ d_unordered (d_unordered.U):
 	This variable conditionally defines the HAS_UNORDERED symbol, which
 	indicates to the C program that the unordered() routine is available.
 
+d_unsetenv (d_unsetenv.U):
+	This variable conditionally defines the HAS_UNSETENV symbol, which
+	indicates to the C program that the unsetenv () routine is available.
+
 d_usleep (d_usleep.U):
 	This variable conditionally defines HAS_USLEEP if usleep() is
 	available to do high granularity sleeps.

@@ -2643,6 +2643,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_unordered HAS_UNORDERED		/**/
 
+/* HAS_UNSETENV:
+ *	This symbol, if defined, indicates that the unsetenv () routine is
+ *	available for use.
+ */
+#$d_unsetenv HAS_UNSETENV		/**/
+
 /* HAS_USTAT:
  *	This symbol, if defined, indicates that the ustat system call is
  *	available to query file system statistics by dev_t.
