@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Jul 18 12:48:03 CEST 2005 [metaconfig 3.0 PL70]
+# Generated on Tue Oct 18 16:11:43 CEST 2005 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -362,6 +362,7 @@ d_chown=''
 d_chroot=''
 d_chsize=''
 d_class=''
+d_clearenv=''
 d_closedir=''
 d_void_closedir=''
 d_cmsghdr_s=''
@@ -550,6 +551,8 @@ longlongsize=''
 d_lseekproto=''
 d_lstat=''
 d_madvise=''
+d_malloc_good_size=''
+d_malloc_size=''
 d_mblen=''
 d_mbstowcs=''
 d_mbtowc=''
@@ -762,6 +765,7 @@ d_semctl_semid_ds=''
 d_semctl_semun=''
 d_union_semun=''
 d_unordered=''
+d_unsetenv=''
 d_usleep=''
 d_usleepproto=''
 d_ustat=''
@@ -10495,6 +10499,10 @@ eval $inlibc
 set class d_class
 eval $inlibc
 
+: see if clearenv exists
+set clearenv d_clearenv
+eval $inlibc
+
 hasstruct='varname=$1; struct=$2; shift; shift;
 while $test $# -ge 2; do
 	case "$1" in
@@ -14241,6 +14249,14 @@ eval $inlibc
 set madvise d_madvise
 eval $inlibc
 
+: see if malloc_size exists
+set malloc_size d_malloc_size
+eval $inlibc
+
+: see if malloc_size_good exists
+set malloc_good_size d_malloc_good_size
+eval $inlibc
+
 : see if mblen exists
 set mblen d_mblen
 eval $inlibc
@@ -17444,6 +17460,10 @@ eval $inlibc
 set unordered d_unordered
 eval $inlibc
 
+: see if unsetenv exists
+set unsetenv d_unsetenv
+eval $inlibc
+
 : see if usleep exists
 set usleep d_usleep
 eval $inlibc
@@ -19985,7 +20005,7 @@ $echo "Guessing which symbols your C compiler and preprocessor define..." >&4
 $cat <<'EOSH' > Cppsym.know
 a29k ABI64 aegis AES_SOURCE AIX AIX32 AIX370
 AIX41 AIX42 AIX43 AIX_SOURCE aixpc ALL_SOURCE
-alliant alpha am29000 AM29000 AMD64 amiga AMIGAOS AMIX
+alliant alpha am29000 AM29000 AMD64 amd64 amiga AMIGAOS AMIX
 ansi ANSI_C_SOURCE apollo ardent ARM32 atarist att386 att3b
 BeOS BIG_ENDIAN BIT_MSF bsd BSD bsd43 bsd4_2 bsd4_3 BSD4_3 bsd4_4
 BSD_4_3 BSD_4_4 BSD_NET2 BSD_TIME BSD_TYPES BSDCOMPAT bsdi
@@ -20043,7 +20063,7 @@ USE_BSD USE_FILE_OFFSET64 USE_GNU USE_ISOC9X USE_LARGEFILE USE_LARGEFILE64
 USE_MISC USE_POSIX USE_POSIX199309 USE_POSIX199506 USE_POSIX2
 USE_REENTRANT USE_SVID USE_UNIX98 USE_XOPEN USE_XOPEN_EXTENDED
 USGr4 USGr4_2
-Utek UTek UTS UWIN uxpm uxps vax venix VMESA vms xenix Xenix286
+Utek UTek UTS UWIN uxpm uxps vax venix VMESA vms x86_64 xenix Xenix286
 XOPEN_SOURCE XOPEN_SOURCE_EXTENDED XPG2 XPG2_EXTENDED
 XPG3 XPG3_EXTENDED XPG4 XPG4_EXTENDED
 z8000
@@ -20951,6 +20971,7 @@ d_chown='$d_chown'
 d_chroot='$d_chroot'
 d_chsize='$d_chsize'
 d_class='$d_class'
+d_clearenv='$d_clearenv'
 d_closedir='$d_closedir'
 d_cmsghdr_s='$d_cmsghdr_s'
 d_const='$d_const'
@@ -21102,6 +21123,8 @@ d_longlong='$d_longlong'
 d_lseekproto='$d_lseekproto'
 d_lstat='$d_lstat'
 d_madvise='$d_madvise'
+d_malloc_good_size='$d_malloc_good_size'
+d_malloc_size='$d_malloc_size'
 d_mblen='$d_mblen'
 d_mbstowcs='$d_mbstowcs'
 d_mbtowc='$d_mbtowc'
@@ -21299,6 +21322,7 @@ d_umask='$d_umask'
 d_uname='$d_uname'
 d_union_semun='$d_union_semun'
 d_unordered='$d_unordered'
+d_unsetenv='$d_unsetenv'
 d_usleep='$d_usleep'
 d_usleepproto='$d_usleepproto'
 d_ustat='$d_ustat'

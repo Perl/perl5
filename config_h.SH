@@ -2631,6 +2631,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_unordered HAS_UNORDERED		/**/
 
+/* HAS_UNSETENV:
+ *	This symbol, if defined, indicates that the unsetenv () routine is
+ *	available for use.
+ */
+#$d_unsetenv HAS_UNSETENV		/**/
+
 /* HAS_USTAT:
  *	This symbol, if defined, indicates that the ustat system call is
  *	available to query file system statistics by dev_t.
@@ -3825,6 +3831,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_aintl HAS_AINTL		/**/
 
+/* HAS_CLEARENV:
+ *	This symbol, if defined, indicates that the clearenv () routine is
+ *	available for use.
+ */
+#$d_clearenv HAS_CLEARENV		/**/
+
 /* HAS_COPYSIGNL:
  *	This symbol, if defined, indicates that the copysignl routine is
  *	available.  If aintl is also present we can emulate modfl.
@@ -3888,6 +3900,18 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	and that math.h defines the enum to manipulate it.
  */
 #$d_libm_lib_version LIBM_LIB_VERSION		/**/
+
+/* HAS_MALLOC_SIZE:
+ *	This symbol, if defined, indicates that the malloc_size
+ *	routine is available for use.
+ */
+#$d_malloc_size HAS_MALLOC_SIZE		/**/
+
+/* HAS_MALLOC_GOOD_SIZE:
+ *	This symbol, if defined, indicates that the malloc_good_size
+ *	routine is available for use.
+ */
+#$d_malloc_good_size HAS_MALLOC_GOOD_SIZE	/**/
 
 /* HAS_NL_LANGINFO:
  *	This symbol, if defined, indicates that the nl_langinfo routine is
