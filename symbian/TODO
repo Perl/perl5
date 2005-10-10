@@ -43,8 +43,11 @@
 
 - in S60 1.2 (at least in 3650 Nokia 3650 v3.11) setjmp/longjmp is
   fragile (see Symbian FAQ-0929), intensive debugging and fix needed
-- in S60 2.x (at least in Nokia 6630 v4.03.11) launching scripts via
+- in S60 2.6 (at least in Nokia 6630 v4.03.11) launching scripts via
   FExplorer does not open up the console
+- in the SDK the build creates DLLs in the system area
+  (e.g. epoc32\release\thumb\urel\io.dll), this is dangerous.  Prefix them?
+  (needs changes in xsbuild and DynaLoader/XSLoader)
 
 =head2 Unicode
 

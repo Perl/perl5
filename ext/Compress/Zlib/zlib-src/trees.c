@@ -126,13 +126,23 @@ struct static_tree_desc_s {
     int     max_length;          /* max bit length for the codes */
 };
 
-local static_tree_desc  static_l_desc =
+#if defined(__SYMBIAN32__)
+# define NO_WRITEABLE_DATA
+#endif
+
+#ifdef NO_WRITEABLE_DATA
+# define DEFINE_LOCAL_STATIC const local
+#else /* #ifdef NO_WRITEABLE_DATA */
+# define DEFINE_LOCAL_STATIC local
+#endif /* #ifdef NO_WRITEABLE_DATA */
+ 
+DEFINE_LOCAL_STATIC static_tree_desc  static_l_desc =
 {static_ltree, extra_lbits, LITERALS+1, L_CODES, MAX_BITS};
 
-local static_tree_desc  static_d_desc =
+DEFINE_LOCAL_STATIC static_tree_desc  static_d_desc =
 {static_dtree, extra_dbits, 0,          D_CODES, MAX_BITS};
 
-local static_tree_desc  static_bl_desc =
+DEFINE_LOCAL_STATIC static_tree_desc  static_bl_desc =
 {(const ct_data *)0, extra_blbits, 0,   BL_CODES, MAX_BL_BITS};
 
 /* ===========================================================================
@@ -249,12 +259,14 @@ local void tr_static_init()
 
     if (static_init_done) return;
 
+#ifndef NO_WRITEABLE_DATA
     /* For some embedded targets, global variables are not initialized: */
     static_l_desc.static_tree = static_ltree;
     static_l_desc.extra_bits = extra_lbits;
     static_d_desc.static_tree = static_dtree;
     static_d_desc.extra_bits = extra_dbits;
     static_bl_desc.extra_bits = extra_blbits;
+#endif /* #ifndef NO_WRITEABLE_DATA */
 
     /* Initialize the mapping length (0..255) -> length code (0..28) */
     length = 0;

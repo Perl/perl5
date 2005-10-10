@@ -214,6 +214,10 @@ sub write_mmp {
     read_mmp( \%CONF, "_init.mmp" );
     read_mmp( \%CONF, "$base.mmp" );
 
+    if ($base eq 'Zlib') {
+	push @{$CONF{USERINCLUDE}}, "$CWD\\zlib-src";
+    }
+
     for my $ui ( @{$userinclude} ) {
         $ui =~ s!/!\\!g;
         if ( $ui =~ m!^(?:[CD]:)?\\! ) {
@@ -427,7 +431,7 @@ sub xsconfig {
         }
     }
     if ( my @c = glob("*.c *.cpp */*.c */*.cpp") ) {
-        @c = grep { ! m:^zlib-src/: } @c if $ext eq 'ext\Compress\Zlib';
+	@c = grep { ! m:^zlib-src/: } @c if $ext eq 'ext\Compress\Zlib';
         for my $c (@c) {
             $c =~ s:/:\\:g;
             $src{$c}++;
@@ -440,10 +444,6 @@ sub xsconfig {
             $h = dirname($h);
             $incdir{"$dir\\$h"}++ unless $h eq ".";
         }
-    }
-    if ( $ext eq 'ext\Compress\Zlib' ) {
-        system_echo("perl -pi.bak -e s:True:False: config.in") == 0
-          or die "$0: changing BUILD_ZLIB failed: $!\n";
     }
     if ( exists $EXTCFG{$ext} ) {
         for my $cfg ( @{ $EXTCFG{$ext} } ) {

@@ -634,6 +634,7 @@ SV * sv ;
 char * string ;
 #endif
 {
+    dTHX;
     bool wipe = 0 ;
     
     SvGETMAGIC(sv);

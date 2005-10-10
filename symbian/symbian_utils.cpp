@@ -42,30 +42,95 @@ extern "C" {
         return ((CPerlBase*)PL_appctx)->ConsoleWrite(fd, b, n);
     }
     static const char NullErr[] = "";
-    EXPORT_C char* symbian_get_error_string(const TInt error)
+    EXPORT_C char* symbian_get_error_string(TInt error)
     {
+	// CTextResolver seems to be unreliable, so we roll our own
+        // at least for the basic Symbian errors (but does not work
+        // for the various subsystems).
         dTHX;
         if (error >= 0)
             return strerror(error);
-        CTextResolver* textResolver = CTextResolver::NewL();
-        CleanupStack::PushL(textResolver);
-        TBuf<KErrorResolverMaxTextLength> buf16;
-        TBuf8<KErrorResolverMaxTextLength> buf8;
-        if (error != KErrNone)
-            buf16 = textResolver->ResolveError(error);
-        if (buf16.Length()) {
-            if (CnvUtfConverter::ConvertFromUnicodeToUtf8(buf8, buf16) !=
-                KErrNone) {
-                CleanupStack::PopAndDestroy(textResolver);
-                return (char*)NullErr;
-            }
-        }
+	error = -error; // flip
+	const TInt KErrStringMax = 256;
+	typedef struct {
+	  const char* kerr;
+	  const char* desc;
+	} kerritem;
+	static const kerritem kerrtable[] = {
+	  { "None",           /*    0 */ "No error"},
+	  { "NotFound",       /*   -1 */ "Unable to find the specified object"},
+	  { "General",        /*   -2 */ "General (unspecified) error"},
+	  { "Cancel",         /*   -3 */ "The operation was cancelled"},
+	  { "NoMemory",       /*   -4 */ "Not enough memory"},
+	  { "NotSupported",   /*   -5 */ "The operation requested is not supported"},
+	  { "Argument",       /*   -6 */ "Bad request"},
+	  { "TotalLossOfPrecision",
+	                      /*   -7 */ "Total loss of precision"},
+	  { "BadHandle",      /*   -8 */ "Bad object"},
+	  { "Overflow",       /*   -9 */ "Overflow"},
+	  { "Underflow",      /*  -10 */ "Underflow"},
+	  { "AlreadyExists",  /*  -11 */ "Already exists"},
+	  { "PathNotFound",   /*  -12 */ "Unable to find the specified folder"},
+	  { "Died",           /*  -13 */ "Closed"},
+	  { "InUse",          /*  -14 */
+	    "The specified object is currently in use by another program"},
+	  { "ServerTerminated",       /*  -15 */ "Server has closed"},
+	  { "ServerBusy",     /*  -16 */ "Server busy"},
+	  { "Completion",     /*  -17 */ "Completion error"},
+	  { "NotReady",       /*  -18 */ "Not ready"},
+	  { "Unknown",        /*  -19 */ "Unknown error"},
+	  { "Corrupt",        /*  -20 */ "Corrupt"},
+	  { "AccessDenied",   /*  -21 */ "Access denied"},
+	  { "Locked",         /*  -22 */ "Locked"},
+	  { "Write",          /*  -23 */ "Failed to write"},
+	  { "DisMounted",     /*  -24 */ "Wrong disk present"},
+	  { "Eof",            /*  -25 */ "Unexpected end of file"},
+	  { "DiskFull",       /*  -26 */ "Disk full"},
+	  { "BadDriver",      /*  -27 */ "Bad device driver"},
+	  { "BadName",        /*  -28 */ "Bad name"},
+	  { "CommsLineFail",  /*  -29 */ "Comms line failed"},
+	  { "CommsFrame",     /*  -30 */ "Comms frame error"},
+	  { "CommsOverrun",   /*  -31 */ "Comms overrun error"},
+	  { "CommsParity",    /*  -32 */ "Comms parity error"},
+	  { "TimedOut",       /*  -33 */ "Timed out"},
+	  { "CouldNotConnect",/*  -34 */ "Failed to connect"},
+	  { "CouldNotDisconnect",
+	                      /* -35 */ "Failed to disconnect"},
+	  { "Disconnected",   /* -36 */ "Disconnected"},
+	  { "BadLibraryEntryPoint",
+	                      /*  -37 */ "Bad library entry point"},
+	  { "BadDescriptor",  /*  -38 */ "Bad descriptor"},
+	  { "Abort",          /*  -39 */ "Interrupted"},
+	  { "TooBig",         /*  -40 */ "Too big"},
+	  { "DivideByZero",   /*  -41 */ "Divide by zero"},
+	  { "BadPower",       /*  -42 */ "Batteries too low"},
+	  { "DirFull",        /*  -43 */ "Folder full"},
+	  { "KErrHardwareNotAvailable",
+	                      /*  -44 */ "Hardware is not available"},
+	  { "SessionClosed",  /*  -45 */ "Session was closed"},
+	  { "PermissionDenied",
+	                      /*  -46 */ "Permission denied"}
+	};
+	const TInt n = sizeof(kerrtable) / sizeof(kerritem *);
+	TBuf8<KErrStringMax> buf8;
+	if (error >= 0 && error < n) {
+	  const char *kerr = kerrtable[error].kerr;
+	  const char *desc = kerrtable[error].desc;
+	  const TPtrC8 kerrp((const unsigned char *)kerr, strlen(kerr));
+	  const TPtrC8 descp((const unsigned char *)desc, strlen(desc));
+	  TBuf8<KErrStringMax> ckerr;
+	  TBuf8<KErrStringMax> cdesc;
+	  ckerr.Copy(kerrp);
+	  cdesc.Copy(descp);
+	  buf8.Format(_L8("K%S (%d) %S"), &ckerr, error, &cdesc);
+		     
+	} else {
+	  buf8.Format(_L8("Symbian error %d"), error);
+	}
         SV* sv = Perl_get_sv(aTHX_ "\005", TRUE); /* $^E or ${^OS_ERROR} */
         if (!sv)
             return (char*)NullErr;
         sv_setpv(sv, (const char *)buf8.PtrZ());
-        SvUTF8_on(sv);
-        CleanupStack::PopAndDestroy(textResolver);
         return SvPV_nolen(sv);
     }
     EXPORT_C void symbian_sleep_usec(const long usec)
