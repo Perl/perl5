@@ -2619,6 +2619,12 @@
  */
 /*#define HAS_UNORDERED		/**/
 
+/* HAS_UNSETENV:
+ *	This symbol, if defined, indicates that the unsetenv () routine is
+ *	available for use.
+ */
+/*#define HAS_UNSETENV		/**/
+
 /* HAS_USTAT:
  *	This symbol, if defined, indicates that the ustat system call is
  *	available to query file system statistics by dev_t.
