@@ -20,7 +20,7 @@ BEGIN
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 1775 + $extra ;
+    plan tests => 1769 + $extra ;
 
     use_ok('Compress::Zlib', 2) ;
 
@@ -222,8 +222,10 @@ EOM
           my $len ;
           1 while ($len = $x->read($uncomp)) > 0 ;
 
+          is $len, 0, "read returned 0";
+
           ok $x->close ;
-          is $hello, $uncomp ;
+          is $uncomp, $hello ;
         }
     }
 
@@ -1275,9 +1277,8 @@ EOT
 
         my $hello = "I am a HAL 9000 computer" x 2001 ;
 
-        my ($k, $err) = new $UncompressClass(\$hello, Transparent => 1);
+        my $k = new $UncompressClass(\$hello, Transparent => 1);
         ok $k ;
-        cmp_ok $err, '==', Z_OK ;
      
         # Skip to the flush point -- no-op for plain file
         my $status = $k->inflateSync();
@@ -1315,9 +1316,8 @@ EOT
         ok $x->close() ;
      
         my $k;
-        ($k, $err) = new $UncompressClass(\$Answer, BlockSize => 1);
+        $k = new $UncompressClass(\$Answer, BlockSize => 1);
         ok $k ;
-        cmp_ok $err, '==', Z_OK ;
      
         my $initial;
         is $k->read($initial, 1), 1 ;
@@ -1353,10 +1353,8 @@ EOT
     
         ok $x->close() ;
      
-        my $k;
-        ($k, $err) = new $UncompressClass(\$Answer, BlockSize => 1);
+        my $k = new $UncompressClass(\$Answer, BlockSize => 1);
         ok $k ;
-        cmp_ok $err, '==', Z_OK ;
      
         my $initial;
         is $k->read($initial, 1), 1 ;
