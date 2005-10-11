@@ -27,6 +27,7 @@ sub setBinModeInput($)
 {
     my $handle = shift ;
 
+    binmode $handle ;
     #binmode $handle if $] == 5.008 ;
     #binmode $handle unless isSTDIN($handle) ;
 }
