@@ -458,8 +458,13 @@ TBool CPerlAppUi::ProcessCommandParametersL(TApaCommand aCommand, TFileName& /* 
         TFileName appName = Application()->AppFullName();
 	TParse p;
 	p.Set(KDefaultScript, &appName, NULL);
-	DoRunScriptL(p.FullName());
-	return EFalse;
+	TEntry aEntry;
+	RFs aFs;
+	aFs.Connect();
+	if (aFs.Entry(p.FullName(), aEntry) == KErrNone) {
+	    DoRunScriptL(p.FullName());
+	    Exit();
+	}
     }
     return aCommand == EApaCommandOpen ? ETrue : EFalse;
 }
