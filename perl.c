@@ -4594,8 +4594,8 @@ S_init_perllib(pTHX)
 	s = PerlEnv_getenv("PERL5LIB");
 /*
  * It isn't possible to delete an environment variable with
- * PERL_USE_SAFE_PUTENV set unless setenv() is also available, so in that case
- * we treat PERL5LIB as undefined if it has a zero-length value.
+ * PERL_USE_SAFE_PUTENV set unless unsetenv() is also available, so in that
+ * case we treat PERL5LIB as undefined if it has a zero-length value.
  */
 #if defined(PERL_USE_SAFE_PUTENV) && ! defined(HAS_UNSETENV)
 	if (s && *s != '\0')
