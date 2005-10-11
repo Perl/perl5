@@ -1496,19 +1496,39 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
     } else {
 # endif
 #   if defined(__CYGWIN__) || defined(EPOC) || defined(SYMBIAN) 
-    setenv(nam, val, 1);
+#       if defined(HAS_UNSETENV)
+        if (val == NULL) {
+            (void)unsetenv(nam);
+        } else {
+            (void)setenv(nam, val, 1);
+        }
+#       else /* ! HAS_UNSETENV */
+        (void)setenv(nam, val, 1);
+#       endif /* HAS_UNSETENV */
 #   else
-    char *new_env;
-    const int nlen = strlen(nam);
-    int vlen;
-    if (!val) {
-	val = "";
-    }
-    vlen = strlen(val);
-    new_env = (char*)safesysmalloc((nlen + vlen + 2) * sizeof(char));
-    /* all that work just for this */
-    my_setenv_format(new_env, nam, nlen, val, vlen);
-    (void)putenv(new_env);
+#       if defined(HAS_UNSETENV)
+        if (val == NULL) {
+            (void)unsetenv(nam);
+        } else {
+            int nlen = strlen(nam);
+            int vlen = strlen(val);
+            char *new_env =
+                (char*)safesysmalloc((nlen + vlen + 2) * sizeof(char));
+            my_setenv_format(new_env, nam, nlen, val, vlen);
+            (void)putenv(new_env);
+        }
+#       else /* ! HAS_UNSETENV */
+        char *new_env;
+        int nlen = strlen(nam), vlen;
+        if (!val) {
+	   val = "";
+        }
+        vlen = strlen(val);
+        new_env = (char*)safesysmalloc((nlen + vlen + 2) * sizeof(char));
+        /* all that work just for this */
+        my_setenv_format(new_env, nam, nlen, val, vlen);
+        (void)putenv(new_env);
+#       endif /* HAS_UNSETENV */
 #   endif /* __CYGWIN__ */
 #ifndef PERL_USE_SAFE_PUTENV
     }
