@@ -1571,6 +1571,8 @@ Ap	|GV*	|gv_SVadd	|NN GV* gv
 Apo	|bool	|ckwarn		|U32 w
 Apo	|bool	|ckwarn_d	|U32 w
 
+px	|void	|my_clearenv
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:

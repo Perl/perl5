@@ -1835,6 +1835,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef PERL_OLD_COPY_ON_WRITE
 			     " PERL_OLD_COPY_ON_WRITE"
 #  endif
+#  ifdef PERL_USE_SAFE_PUTENV
+			     " PERL_USE_SAFE_PUTENV"
+#  endif
 #  ifdef PL_OP_SLAB_ALLOC
 			     " PL_OP_SLAB_ALLOC"
 #  endif
@@ -4729,7 +4732,16 @@ S_init_perllib(pTHX)
     if (!PL_tainting) {
 #ifndef VMS
 	s = PerlEnv_getenv("PERL5LIB");
+/*
+ * It isn't possible to delete an environment variable with
+ * PERL_USE_SAFE_PUTENV set unless unsetenv() is also available, so in that
+ * case we treat PERL5LIB as undefined if it has a zero-length value.
+ */
+#if defined(PERL_USE_SAFE_PUTENV) && ! defined(HAS_UNSETENV)
+	if (s && *s != '\0')
+#else
 	if (s)
+#endif
 	    incpush(s, TRUE, TRUE, TRUE);
 	else
 	    incpush(PerlEnv_getenv("PERLLIB"), FALSE, FALSE, TRUE);

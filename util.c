@@ -1501,19 +1501,39 @@ Perl_my_setenv(pTHX_ char *nam, char *val)
     } else {
 # endif
 #   if defined(__CYGWIN__) || defined(EPOC) || defined(SYMBIAN) 
-    setenv(nam, val, 1);
+#       if defined(HAS_UNSETENV)
+        if (val == NULL) {
+            (void)unsetenv(nam);
+        } else {
+            (void)setenv(nam, val, 1);
+        }
+#       else /* ! HAS_UNSETENV */
+        (void)setenv(nam, val, 1);
+#       endif /* HAS_UNSETENV */
 #   else
-    char *new_env;
-    const int nlen = strlen(nam);
-    int vlen;
-    if (!val) {
-	val = "";
-    }
-    vlen = strlen(val);
-    new_env = (char*)safesysmalloc((nlen + vlen + 2) * sizeof(char));
-    /* all that work just for this */
-    my_setenv_format(new_env, nam, nlen, val, vlen);
-    (void)putenv(new_env);
+#       if defined(HAS_UNSETENV)
+        if (val == NULL) {
+            (void)unsetenv(nam);
+        } else {
+            int nlen = strlen(nam);
+            int vlen = strlen(val);
+            char *new_env =
+                (char*)safesysmalloc((nlen + vlen + 2) * sizeof(char));
+            my_setenv_format(new_env, nam, nlen, val, vlen);
+            (void)putenv(new_env);
+        }
+#       else /* ! HAS_UNSETENV */
+        char *new_env;
+        int nlen = strlen(nam), vlen;
+        if (!val) {
+	   val = "";
+        }
+        vlen = strlen(val);
+        new_env = (char*)safesysmalloc((nlen + vlen + 2) * sizeof(char));
+        /* all that work just for this */
+        my_setenv_format(new_env, nam, nlen, val, vlen);
+        (void)putenv(new_env);
+#       endif /* HAS_UNSETENV */
 #   endif /* __CYGWIN__ */
 #ifndef PERL_USE_SAFE_PUTENV
     }
@@ -4643,6 +4663,59 @@ Perl_stashpv_hvname_match(pTHX_ const COP *c, const HV *hv)
     return FALSE;
 }
 #endif
+
+void
+Perl_my_clearenv(pTHX)
+{
+#if ! defined(PERL_MICRO)
+#  if defined(PERL_IMPLICIT_SYS) || defined(WIN32)
+    PerlEnv_clearenv();
+#  else /* ! (PERL_IMPLICIT_SYS || WIN32) */
+#    if defined(USE_ENVIRON_ARRAY)
+#      if defined(USE_ITHREADS)
+    /* only the parent thread can clobber the process environment */
+    if (PL_curinterp == aTHX)
+#      endif /* USE_ITHREADS */
+    {
+#      if ! defined(PERL_USE_SAFE_PUTENV)
+    if ( !PL_use_safe_putenv) {
+      I32 i;
+      if (environ == PL_origenviron)
+        environ = (char**)safesysmalloc(sizeof(char*));
+      else
+        for (i = 0; environ[i]; i++)
+          (void)safesysfree(environ[i]);
+    }
+    environ[0] = NULL;
+#      else /* PERL_USE_SAFE_PUTENV */
+#        if defined(HAS_CLEARENV)
+    (void)clearenv();
+#        elif defined(HAS_UNSETENV)
+    int bsiz = 80; /* Most envvar names will be shorter than this. */
+    char *buf = (char*)safesysmalloc(bsiz * sizeof(char));
+    while (*environ != NULL) {
+      char *e = strchr(*environ, '=');
+      int l = e ? e - *environ : strlen(*environ);
+      if (bsiz < l + 1) {
+        (void)safesysfree(buf);
+        bsiz = l + 1;
+        buf = (char*)safesysmalloc(bsiz * sizeof(char));
+      } 
+      strncpy(buf, *environ, l);
+      *(buf + l) = '\0';
+      (void)unsetenv(buf);
+    }
+    (void)safesysfree(buf);
+#        else /* ! HAS_CLEARENV && ! HAS_UNSETENV */
+    /* Just null environ and accept the leakage. */
+    *environ = NULL;
+#        endif /* HAS_CLEARENV || HAS_UNSETENV */
+#      endif /* ! PERL_USE_SAFE_PUTENV */
+    }
+#    endif /* USE_ENVIRON_ARRAY */
+#  endif /* PERL_IMPLICIT_SYS || WIN32 */
+#endif /* PERL_MICRO */
+}
 
 /*
  * Local variables:

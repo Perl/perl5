@@ -3904,6 +3904,8 @@ PERL_CALLCONV GV*	Perl_gv_SVadd(pTHX_ GV* gv)
 PERL_CALLCONV bool	Perl_ckwarn(pTHX_ U32 w);
 PERL_CALLCONV bool	Perl_ckwarn_d(pTHX_ U32 w);
 
+PERL_CALLCONV void	Perl_my_clearenv(pTHX);
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:

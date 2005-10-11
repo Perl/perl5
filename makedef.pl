@@ -660,6 +660,12 @@ if ($define{'PERL_MALLOC_WRAP'}) {
 		    )];
 }
 
+if ($define{'PERL_USE_SAFE_PUTENV'}) {
+    skip_symbols [qw(
+                   PL_use_safe_putenv
+                  )];
+}
+
 unless ($define{'USE_5005THREADS'} || $define{'USE_ITHREADS'}) {
     skip_symbols [qw(
 		    PL_thr_key
