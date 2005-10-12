@@ -27,42 +27,17 @@ sub setBinModeInput($)
 {
     my $handle = shift ;
 
-    binmode $handle unless $^O eq 'MSWin32' ;
-    #binmode $handle if $] == 5.008 ;
-    #binmode $handle unless isSTDIN($handle) ;
+    binmode $handle 
+        unless $^O eq 'MSWin32' && ! ( ${^UNICODE} || ${^UTF8LOCALE} );
 }
 
 sub setBinModeOutput($)
 {
     my $handle = shift ;
 
-    #binmode $handle if $] == 5.008;
-    #binmode $handle unless isSTDOUT($handle) ;
+    binmode $handle 
+        unless $^O eq 'MSWin32' && ! ( ${^UNICODE} || ${^UTF8LOCALE} );
 }
-
-#sub isSTDIO($)
-#{
-#    my $handle = shift ;
-#
-#    return 0 unless isaFilehandle($handle);
-#    return fileno $handle == fileno STDIN || fileno $handle == fileno STDOUT;
-#}
-#
-#sub isSTDIN($)
-#{
-#    my $handle = shift ;
-#
-#    return 0 unless isaFilehandle($handle);
-#    return fileno $handle == fileno STDIN;
-#}
-#
-#sub isSTDOUT($)
-#{
-#    my $handle = shift ;
-#
-#    return 0 unless isaFilehandle($handle);
-#    return fileno $handle == fileno STDOUT;
-#}
 
 sub isaFilehandle($)
 {
@@ -198,29 +173,6 @@ sub ckOutputParam ($$$)
     
     return 1;    
 }
-
-#sub ckInOutParams($$$$)
-#{
-#    my $from = shift ;
-#
-#    ckInputParam($from, $_[0], $_[2])
-#        or return undef ;
-#    ckOutputParam($from, $_[1], $_[2])
-#        or return undef ;
-#
-#    my $inType  = whatIs($_[0]);
-#    my $outType = whatIs($_[1]);
-#
-#    # Check that input != output
-#    if ($inType eq $outType && $_[0] eq $_[1])
-#    {
-#        local $Carp::CarpLevel = 1;
-#        croak("$from: input and output $inType are identical");
-#    }
-#
-#    return 1;
-#}
-
 
 sub Validator::new
 {
