@@ -1,4 +1,5 @@
 =head1 NAME
+X<object> X<OOP>
 
 perlobj - Perl objects
 
@@ -34,6 +35,7 @@ a package name, for class methods) as the first argument.
 We'll cover these points now in more depth.
 
 =head2 An Object is Simply a Reference
+X<object> X<bless> X<constructor> X<new>
 
 Unlike say C++, Perl doesn't provide any special syntax for
 constructors.  A constructor is merely a subroutine that returns a
@@ -139,6 +141,7 @@ This reports $b as being a BLAH, so obviously bless()
 operated on the object and not on the reference.
 
 =head2 A Class is Simply a Package
+X<class> X<package> X<@ISA> X<inheritance>
 
 Unlike say C++, Perl doesn't provide any special syntax for class
 definitions.  You use a package as a class by putting method
@@ -156,6 +159,7 @@ All classes implicitly inherit from class C<UNIVERSAL> as their
 last base class.  Several commonly used methods are automatically
 supplied in the UNIVERSAL class; see L<"Default UNIVERSAL methods"> for
 more details.
+X<UNIVERSAL> X<base class> X<class, base>
 
 If a missing method is found in a base class, it is cached
 in the current class for efficiency.  Changing @ISA or defining new
@@ -167,10 +171,12 @@ all over again, this time looking for a method named AUTOLOAD().  If an
 AUTOLOAD is found, this method is called on behalf of the missing method,
 setting the package global $AUTOLOAD to be the fully qualified name of
 the method that was intended to be called.
+X<AUTOLOAD>
 
 If none of that works, Perl finally gives up and complains.
 
 If you want to stop the AUTOLOAD inheritance say simply
+X<AUTOLOAD>
 
 	sub AUTOLOAD;
 
@@ -184,6 +190,7 @@ by the various classes that might want to do something with the object.
 The only problem with this is that you can't sure that you aren't using
 a piece of the hash that isn't already used.  A reasonable workaround
 is to prepend your fieldname in the hash with the package name.
+X<inheritance, method> X<inheritance, data>
 
     sub bump {
 	my $self = shift;
@@ -191,6 +198,7 @@ is to prepend your fieldname in the hash with the package name.
     } 
 
 =head2 A Method is Simply a Subroutine
+X<method>
 
 Unlike say C++, Perl doesn't provide any special syntax for method
 definition.  (It does provide a little syntax for method invocation
@@ -228,6 +236,7 @@ and then uses that as an ordinary reference.
     }
 
 =head2 Method Invocation
+X<invocation> X<method> X<arrow> X<< -> >>
 
 For various historical and other reasons, Perl offers two equivalent
 ways to write a method call.  The simpler and more common way is to use
@@ -268,6 +277,7 @@ to start looking for the subroutines in C<Critter>.
 As a special case of the above, you may use the C<SUPER> pseudo-class to
 tell Perl to start looking for the method in the packages named in the
 current class's C<@ISA> list.  
+X<SUPER>
 
     package MyCritter;
     use base 'Critter';    # sets @MyCritter::ISA = ('Critter');
@@ -282,6 +292,7 @@ I<current package> and not to the superclass(es) of the object. Also, the
 C<SUPER> pseudo-class can only currently be used as a modifier to a method
 name, but not in any of the other ways that class names are normally used,
 eg:
+X<SUPER>
 
     something->SUPER::method(...);	# OK
     SUPER::method(...);			# WRONG
@@ -298,6 +309,7 @@ and so is the following:
     my $fred = (reverse "rettirC")->find(reverse "derF");
 
 =head2 Indirect Object Syntax
+X<indirect object syntax> X<invocation, indirect> X<indirect>
 
 The other way to invoke a method is by using the so-called "indirect
 object" notation.  This syntax was available in Perl 4 long before
@@ -363,6 +375,7 @@ to read code using the indirect object notation, so it's important to be
 familiar with it.
 
 =head2 Default UNIVERSAL methods
+X<UNIVERSAL>
 
 The C<UNIVERSAL> package automatically contains the following methods that
 are inherited by all other classes:
@@ -370,6 +383,7 @@ are inherited by all other classes:
 =over 4
 
 =item isa(CLASS)
+X<isa>
 
 C<isa> returns I<true> if its object is blessed into a subclass of C<CLASS>
 
@@ -379,6 +393,7 @@ class, so don't do it.
 
 If you need to determine whether you've received a valid invocant, use the
 C<blessed> function from L<Scalar::Util>:
+X<invocant> X<blessed>
 
     if (blessed($ref) && $ref->isa( 'Some::Class')) {
         # ...
@@ -388,6 +403,7 @@ C<blessed> returns the name of the package the argument has been
 blessed into, or C<undef>.
 
 =item can(METHOD)
+X<can>
 
 C<can> checks to see if its object has a method called C<METHOD>,
 if it does then a reference to the sub is returned, if it does not then
@@ -398,6 +414,7 @@ always return I<undef> if its first argument isn't an object or a class name.
 The same caveats for calling C<UNIVERSAL::isa> directly apply here, too.
 
 =item VERSION( [NEED] )
+X<VERSION>
 
 C<VERSION> returns the version number of the class (package).  If the
 NEED argument is given then it will check that the current version (as
@@ -421,6 +438,7 @@ You do not need to C<use UNIVERSAL> to make these methods
 available to your program (and you should not do so).
 
 =head2 Destructors
+X<destructor> X<DESTROY>
 
 When the last reference to an object goes away, the object is
 automatically destroyed.  (This may even be after you exit, if you've
@@ -453,6 +471,8 @@ book about object-oriented design methodology, and bang your forehead
 with it for the next six months or so.
 
 =head2 Two-Phased Garbage Collection
+X<garbage collection> X<GC> X<circular reference>
+X<reference, circular> X<DESTROY> X<destructor>
 
 For most purposes, Perl uses a fast and simple, reference-based
 garbage collection system.  That means there's an extra

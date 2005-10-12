@@ -1,4 +1,5 @@
 =head1 NAME
+X<warning, lexical> X<warnings> X<warning>
 
 perllexwarn - Perl Lexical Warnings
 
@@ -130,6 +131,7 @@ warnings are (or aren't) produced:
 =over 5
 
 =item B<-w>
+X<-w>
 
 This is  the existing flag. If the lexical warnings pragma is B<not>
 used in any of you code, or any of the modules that you use, this flag
@@ -137,6 +139,7 @@ will enable warnings everywhere. See L<Backward Compatibility> for
 details of how this flag interacts with lexical warnings.
 
 =item B<-W>
+X<-W>
 
 If the B<-W> flag is used on the command line, it will enable all warnings
 throughout the program regardless of whether warnings were disabled
@@ -145,6 +148,7 @@ included via C<use>, C<require> or C<do>.
 Think of it as the Perl equivalent of the "lint" command.
 
 =item B<-X>
+X<-X>
 
 Does the exact opposite to the B<-W> flag, i.e. it disables all warnings.
 
@@ -199,6 +203,7 @@ the C<warnings> pragma to control the warning behavior of $^W-type
 code (using a C<local $^W=0>) if it really wants to, but not vice-versa.
 
 =head2 Category Hierarchy
+X<warning, categories>
 
 A hierarchy of "categories" have been defined to allow groups of warnings
 to be enabled/disabled in isolation.
@@ -322,6 +327,7 @@ in its own right.
 
 
 =head2 Fatal Warnings
+X<warning, fatal>
 
 The presence of the word "FATAL" in the category list will escalate any
 warnings detected from the categories specified in the lexical scope
@@ -366,6 +372,7 @@ except for those in the "syntax" category.
     use warnings FATAL => 'all', NONFATAL => 'syntax';
 
 =head2 Reporting Warnings from a Module
+X<warning, reporting> X<warning, registering>
 
 The C<warnings> pragma provides a number of functions that are useful for
 module authors. These are used when you want to report a module-specific

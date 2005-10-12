@@ -13,6 +13,8 @@ on the web" and L<perlfaq4>: "How do I determine whether a scalar is
 a number/whole/integer/float", to be precise).
 
 =head2 How can I hope to use regular expressions without creating illegible and unmaintainable code?
+X<regex, legibility> X<regexp, legibility>
+X<regular expression, legibility> X</x>
 
 Three techniques can make regular expressions maintainable and
 understandable.
@@ -69,6 +71,7 @@ delimiter within the pattern:
 =back
 
 =head2 I'm having trouble matching over more than one line.  What's wrong?
+X<regex, multiline> X<regexp, multiline> X<regular expression, multiline>
 
 Either you don't have more than one line in the string you're looking
 at (probably), or else you aren't using the correct modifier(s) on
@@ -121,6 +124,7 @@ Here's code that finds everything between START and END in a paragraph:
     }
 
 =head2 How can I pull out lines between two patterns that are themselves on different lines?
+X<..>
 
 You can use Perl's somewhat exotic C<..> operator (documented in
 L<perlop>):
@@ -146,6 +150,8 @@ Here's another example of using C<..>:
     }
 
 =head2 I put a regular expression into $/ but it didn't work. What's wrong?
+X<$/, regexes in> X<$INPUT_RECORD_SEPARATOR, regexes in>
+X<$RS, regexes in>
 
 Up to Perl 5.8.0, $/ has to be a string.  This may change in 5.10,
 but don't get your hopes up. Until then, you can use these examples
@@ -189,6 +195,8 @@ complete line (using your regular expression).
 
 
 =head2 How do I substitute case insensitively on the LHS while preserving case on the RHS?
+X<replace, case preserving> X<substitute, case preserving>
+X<substitution, case preserving> X<s, case preserving>
 
 Here's a lovely Perlish solution by Larry Rosler.  It exploits
 properties of bitwise xor on ASCII strings.
@@ -278,6 +286,7 @@ the case of the last character is used for the rest of the substitution.
     }
 
 =head2 How can I make C<\w> match national character sets?
+X<\w>
 
 Put C<use locale;> in your script.  The \w character class is taken
 from the current locale.
@@ -285,6 +294,7 @@ from the current locale.
 See L<perllocale> for details.
 
 =head2 How can I match a locale-smart version of C</[a-zA-Z]/>?
+X<alpha>
 
 You can use the POSIX character class syntax C</[[:alpha:]]/>
 documented in L<perlre>.
@@ -296,6 +306,7 @@ the non-alphabetics, is then everything in \W along with
 the digits and the underscore, or C</[\W\d_]/>.
 
 =head2 How can I quote a variable to use in a regex?
+X<regex, escaping> X<regexp, escaping> X<regular expression, escaping>
 
 The Perl parser will expand $variable and @variable references in
 regular expressions unless the delimiter is a single quote.  Remember,
@@ -326,6 +337,7 @@ The use of C<\Q> causes the <.> in the regex to be treated as a
 regular character, so that C<P.> matches a C<P> followed by a dot.
 
 =head2 What is C</o> really for?
+X</o>
 
 Using a variable in a regular expression match forces a re-evaluation
 (and perhaps recompilation) each time the regular expression is
@@ -414,6 +426,8 @@ A slight modification also removes C++ comments:
     s#/\*[^*]*\*+([^/*][^*]*\*+)*/|//[^\n]*|("(\\.|[^"\\])*"|'(\\.|[^'\\])*'|.[^/"'\\]*)#defined $2 ? $2 : ""#gse;
 
 =head2 Can I use Perl regular expressions to match balanced text?
+X<regex, matching balanced test> X<regexp, matching balanced test>
+X<regular expression, matching balanced test>
 
 Historically, Perl regular expressions were not capable of matching
 balanced text.  As of more recent versions of perl including 5.6.1
@@ -442,6 +456,7 @@ The C::Scan module from CPAN also contains such subs for internal use,
 but they are undocumented.
 
 =head2 What does it mean that regexes are greedy?  How can I get around it?
+X<greedy> X<greediness>
 
 Most people mean that greedy regexes match as much as they can.
 Technically speaking, it's actually the quantifiers (C<?>, C<*>, C<+>,
@@ -462,6 +477,7 @@ control on to whatever is next in line, like you would if you were
 playing hot potato.
 
 =head2 How do I process each word on each line?
+X<word>
 
 Use the split function:
 
@@ -513,10 +529,13 @@ If you want these output in a sorted order, see L<perlfaq4>: "How do I
 sort a hash (optionally by value instead of key)?".
 
 =head2 How can I do approximate matching?
+X<match, approximate> X<matching, approximate>
 
 See the module String::Approx available from CPAN.
 
 =head2 How do I efficiently match many regular expressions at once?
+X<regex, efficiency> X<regexp, efficiency>
+X<regular expression, efficiency>
 
 ( contributed by brian d foy )
 
@@ -572,6 +591,7 @@ inefficient.  Once you understand how perl applies regular
 expressions, you can tune them for individual situations.
 
 =head2 Why don't word-boundary searches with C<\b> work for me?
+X<\b>
 
 (contributed by brian d foy)
 
@@ -629,6 +649,7 @@ These strings do not match /\Bam\B/
 
 
 =head2 Why does using $&, $`, or $' slow my program down?
+X<$MATCH> X<$&> X<$POSTMATCH> X<$'> X<$PREMATCH> X<$`>
 
 (contributed by Anno Siegel)
 
@@ -649,6 +670,7 @@ essentially the same information, but without the risk of excessive
 string copying.
 
 =head2 What good is C<\G> in a regular expression?
+X<\G>
 
 You use the C<\G> anchor to start the next match on the same
 string where the last match left off.  The regular
@@ -742,6 +764,7 @@ match starts at the same position to try a different
 pattern.
 
 =head2 Are Perl regexes DFAs or NFAs?  Are they POSIX compliant?
+X<DFA> X<NFA> X<POSIX>
 
 While it's true that Perl's regular expressions resemble the DFAs
 (deterministic finite automata) of the egrep(1) program, they are in
@@ -755,6 +778,7 @@ hope to know on these matters (a full citation appears in
 L<perlfaq2>).
 
 =head2 What's wrong with using grep in a void context?
+X<grep>
 
 The problem is that grep builds a return list, regardless of the context.
 This means you're making Perl go to the trouble of building a list that
@@ -767,6 +791,8 @@ But since 5.8.1, this has been fixed, and map is context aware - in void
 context, no lists are constructed.
 
 =head2 How can I match strings with multibyte characters?
+X<regex, and multibyte characters> X<regexp, and multibyte characters>
+X<regular expression, and multibyte characters>
 
 Starting from Perl 5.6 Perl has had some level of multibyte character
 support.  Perl 5.8 or later is recommended.  Supported multibyte

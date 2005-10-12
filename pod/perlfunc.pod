@@ -1,4 +1,5 @@
 =head1 NAME
+X<function>
 
 perlfunc - Perl builtin functions
 
@@ -68,6 +69,7 @@ operators return the first value in the list.  Some operators return the
 last value in the list.  Some operators return a count of successful
 operations.  In general, they do what you want, unless you want
 consistency.
+X<context>
 
 A named array in scalar context is quite different from what would at
 first glance appear to be a list in scalar context.  You can't get a list
@@ -85,6 +87,7 @@ C<waitpid>, and C<syscall>.  System calls also set the special C<$!>
 variable on failure.  Other functions do not, except accidentally.
 
 =head2 Perl Functions by Category
+X<function>
 
 Here are Perl's functions (including things that look like
 functions, like some keywords and named operators)
@@ -94,33 +97,40 @@ than one place.
 =over 4
 
 =item Functions for SCALARs or strings
+X<scalar> X<string> X<character>
 
 C<chomp>, C<chop>, C<chr>, C<crypt>, C<hex>, C<index>, C<lc>, C<lcfirst>,
 C<length>, C<oct>, C<ord>, C<pack>, C<q/STRING/>, C<qq/STRING/>, C<reverse>,
 C<rindex>, C<sprintf>, C<substr>, C<tr///>, C<uc>, C<ucfirst>, C<y///>
 
 =item Regular expressions and pattern matching
+X<regular expression> X<regex> X<regexp>
 
 C<m//>, C<pos>, C<quotemeta>, C<s///>, C<split>, C<study>, C<qr//>
 
 =item Numeric functions
+X<numeric> X<number> X<trigonometric> X<trigonometry>
 
 C<abs>, C<atan2>, C<cos>, C<exp>, C<hex>, C<int>, C<log>, C<oct>, C<rand>,
 C<sin>, C<sqrt>, C<srand>
 
 =item Functions for real @ARRAYs
+X<array>
 
 C<pop>, C<push>, C<shift>, C<splice>, C<unshift>
 
 =item Functions for list data
+X<list>
 
 C<grep>, C<join>, C<map>, C<qw/STRING/>, C<reverse>, C<sort>, C<unpack>
 
 =item Functions for real %HASHes
+X<hash>
 
 C<delete>, C<each>, C<exists>, C<keys>, C<values>
 
 =item Input and output functions
+X<I/O> X<input> X<output> X<dbm>
 
 C<binmode>, C<close>, C<closedir>, C<dbmclose>, C<dbmopen>, C<die>, C<eof>,
 C<fileno>, C<flock>, C<format>, C<getc>, C<print>, C<printf>, C<read>,
@@ -133,6 +143,7 @@ C<warn>, C<write>
 C<pack>, C<read>, C<syscall>, C<sysread>, C<syswrite>, C<unpack>, C<vec>
 
 =item Functions for filehandles, files, or directories
+X<file> X<filehandle> X<directory> X<pipe> X<link> X<symlink>
 
 C<-I<X>>, C<chdir>, C<chmod>, C<chown>, C<chroot>, C<fcntl>, C<glob>,
 C<ioctl>, C<link>, C<lstat>, C<mkdir>, C<open>, C<opendir>,
@@ -140,6 +151,7 @@ C<readlink>, C<rename>, C<rmdir>, C<stat>, C<symlink>, C<sysopen>,
 C<umask>, C<unlink>, C<utime>
 
 =item Keywords related to the control flow of your Perl program
+X<control flow>
 
 C<caller>, C<continue>, C<die>, C<do>, C<dump>, C<eval>, C<exit>,
 C<goto>, C<last>, C<next>, C<redo>, C<return>, C<sub>, C<wantarray>
@@ -154,38 +166,45 @@ C<defined>, C<dump>, C<eval>, C<formline>, C<local>, C<my>, C<our>, C<reset>,
 C<scalar>, C<undef>, C<wantarray>
 
 =item Functions for processes and process groups
+X<process> X<pid> X<process id>
 
 C<alarm>, C<exec>, C<fork>, C<getpgrp>, C<getppid>, C<getpriority>, C<kill>,
 C<pipe>, C<qx/STRING/>, C<setpgrp>, C<setpriority>, C<sleep>, C<system>,
 C<times>, C<wait>, C<waitpid>
 
 =item Keywords related to perl modules
+X<module>
 
 C<do>, C<import>, C<no>, C<package>, C<require>, C<use>
 
 =item Keywords related to classes and object-orientedness
+X<object> X<class> X<package>
 
 C<bless>, C<dbmclose>, C<dbmopen>, C<package>, C<ref>, C<tie>, C<tied>,
 C<untie>, C<use>
 
 =item Low-level socket functions
+X<socket> X<sock>
 
 C<accept>, C<bind>, C<connect>, C<getpeername>, C<getsockname>,
 C<getsockopt>, C<listen>, C<recv>, C<send>, C<setsockopt>, C<shutdown>,
 C<socket>, C<socketpair>
 
 =item System V interprocess communication functions
+X<IPC> X<System V> X<semaphore> X<shared memory> X<memory> X<message>
 
 C<msgctl>, C<msgget>, C<msgrcv>, C<msgsnd>, C<semctl>, C<semget>, C<semop>,
 C<shmctl>, C<shmget>, C<shmread>, C<shmwrite>
 
 =item Fetching user and group info
+X<user> X<group> X<password> X<uid> X<gid>  X<passwd> X</etc/passwd>
 
 C<endgrent>, C<endhostent>, C<endnetent>, C<endpwent>, C<getgrent>,
 C<getgrgid>, C<getgrnam>, C<getlogin>, C<getpwent>, C<getpwnam>,
 C<getpwuid>, C<setgrent>, C<setpwent>
 
 =item Fetching network info
+X<network> X<protocol> X<host> X<hostname> X<IP> X<address> X<service>
 
 C<endprotoent>, C<endservent>, C<gethostbyaddr>, C<gethostbyname>,
 C<gethostent>, C<getnetbyaddr>, C<getnetbyname>, C<getnetent>,
@@ -194,10 +213,12 @@ C<getservbyname>, C<getservbyport>, C<getservent>, C<sethostent>,
 C<setnetent>, C<setprotoent>, C<setservent>
 
 =item Time-related functions
+X<time> X<date>
 
 C<gmtime>, C<localtime>, C<time>, C<times>
 
 =item Functions new in perl5
+X<perl5>
 
 C<abs>, C<bless>, C<chomp>, C<chr>, C<exists>, C<formline>, C<glob>,
 C<import>, C<lc>, C<lcfirst>, C<map>, C<my>, C<no>, C<our>, C<prototype>,
@@ -214,6 +235,7 @@ C<dbmclose>, C<dbmopen>
 =back
 
 =head2 Portability
+X<portability> X<Unix> X<portable>
 
 Perl was born in Unix and can therefore access all common Unix
 system calls.  In non-Unix environments, the functionality of some
@@ -247,6 +269,8 @@ L<perlport> and other available platform-specific documentation.
 =over 8
 
 =item -X FILEHANDLE
+X<-r>X<-w>X<-x>X<-o>X<-R>X<-W>X<-X>X<-O>X<-e>X<-z>X<-s>X<-f>X<-d>X<-l>X<-p>
+X<-S>X<-b>X<-c>X<-t>X<-u>X<-g>X<-k>X<-T>X<-B>X<-M>X<-A>X<-C>
 
 =item -X EXPR
 
@@ -261,8 +285,6 @@ the undefined value if the file doesn't exist.  Despite the funny
 names, precedence is the same as any other named unary operator, and
 the argument may be parenthesized like any other unary operator.  The
 operator may be any of:
-X<-r>X<-w>X<-x>X<-o>X<-R>X<-W>X<-X>X<-O>X<-e>X<-z>X<-s>X<-f>X<-d>X<-l>X<-p>
-X<-S>X<-b>X<-c>X<-t>X<-u>X<-g>X<-k>X<-T>X<-B>X<-M>X<-A>X<-C>
 
     -r	File is readable by effective uid/gid.
     -w	File is writable by effective uid/gid.
@@ -373,6 +395,7 @@ the return value of C<-f $file> as an argument to another filetest
 operator, no special magic will happen.)
 
 =item abs VALUE
+X<abs> X<absolute>
 
 =item abs
 
@@ -380,6 +403,7 @@ Returns the absolute value of its argument.
 If VALUE is omitted, uses C<$_>.
 
 =item accept NEWSOCKET,GENERICSOCKET
+X<accept>
 
 Accepts an incoming socket connect, just as the accept(2) system call
 does.  Returns the packed address if it succeeded, false otherwise.
@@ -390,6 +414,9 @@ be set for the newly opened file descriptor, as determined by the
 value of $^F.  See L<perlvar/$^F>.
 
 =item alarm SECONDS
+X<alarm>
+X<SIGALRM>
+X<timer>
 
 =item alarm
 
@@ -438,6 +465,7 @@ modulo the caveats given in L<perlipc/"Signals">.
 For more information see L<perlipc>.
 
 =item atan2 Y,X
+X<atan2> X<arctangent> X<tan> X<tangent>
 
 Returns the arctangent of Y/X in the range -PI to PI.
 
@@ -449,6 +477,7 @@ function, or use the familiar relation:
 Note that atan2(0, 0) is not well-defined.
 
 =item bind SOCKET,NAME
+X<bind>
 
 Binds a network address to a socket, just as the bind system call
 does.  Returns true if it succeeded, false otherwise.  NAME should be a
@@ -456,6 +485,7 @@ packed address of the appropriate type for the socket.  See the examples in
 L<perlipc/"Sockets: Client/Server Communication">.
 
 =item binmode FILEHANDLE, LAYER
+X<binmode> X<binary> X<text> X<DOS> X<Windows>
 
 =item binmode FILEHANDLE
 
@@ -542,6 +572,7 @@ in L<perlvar> for how to manually set your input and output
 line-termination sequences.
 
 =item bless REF,CLASSNAME
+X<bless>
 
 =item bless REF
 
@@ -562,6 +593,7 @@ that CLASSNAME is a true value.
 See L<perlmod/"Perl Modules">.
 
 =item caller EXPR
+X<caller> X<call stack> X<stack> X<stack trace>
 
 =item caller
 
@@ -604,6 +636,8 @@ C<< N > 1 >>.  In particular, C<@DB::args> might have information from the
 previous time C<caller> was called.
 
 =item chdir EXPR
+X<chdir>
+X<cd>
 
 =item chdir FILEHANDLE
 
@@ -623,6 +657,7 @@ directory handle as argument.  On systems that don't support fchdir,
 passing handles produces a fatal error at run time.
 
 =item chmod LIST
+X<chmod> X<permission> X<mode>
 
 Changes the permissions of a list of files.  The first element of the
 list must be the numerical mode, which should probably be an octal
@@ -654,6 +689,7 @@ module:
     # This is identical to the chmod 0755 of the above example.
 
 =item chomp VARIABLE
+X<chomp> X<INPUT_RECORD_SEPARATOR> X<$/> X<newline> X<eol>
 
 =item chomp( LIST )
 
@@ -699,6 +735,7 @@ C<chomp $a, $b> is interpreted as C<chomp($a), $b> rather than
 as C<chomp($a, $b)>.
 
 =item chop VARIABLE
+X<chop>
 
 =item chop( LIST )
 
@@ -720,6 +757,7 @@ character, use C<substr($string, 0, -1)>.
 See also L</chomp>.
 
 =item chown LIST
+X<chown> X<owner> X<user> X<group>
 
 Changes the owner (and group) of a list of files.  The first two
 elements of the list must be the I<numeric> uid and gid, in that
@@ -757,6 +795,7 @@ On POSIX systems, you can detect this condition this way:
     $can_chown_giveaway = not sysconf(_PC_CHOWN_RESTRICTED);
 
 =item chr NUMBER
+X<chr> X<character> X<ASCII> X<Unicode>
 
 =item chr
 
@@ -780,6 +819,7 @@ the low eight bits.
 See L<perlunicode> and L<encoding> for more about Unicode.
 
 =item chroot FILENAME
+X<chroot> X<root>
 
 =item chroot
 
@@ -791,6 +831,7 @@ reasons, this call is restricted to the superuser.  If FILENAME is
 omitted, does a C<chroot> to C<$_>.
 
 =item close FILEHANDLE
+X<close>
 
 =item close
 
@@ -833,11 +874,13 @@ FILEHANDLE may be an expression whose value can be used as an indirect
 filehandle, usually the real filehandle name.
 
 =item closedir DIRHANDLE
+X<closedir>
 
 Closes a directory opened by C<opendir> and returns the success of that
 system call.
 
 =item connect SOCKET,NAME
+X<connect>
 
 Attempts to connect to a remote socket, just as the connect system call
 does.  Returns true if it succeeded, false otherwise.  NAME should be a
@@ -845,6 +888,7 @@ packed address of the appropriate type for the socket.  See the examples in
 L<perlipc/"Sockets: Client/Server Communication">.
 
 =item continue BLOCK
+X<continue>
 
 C<continue> is actually a flow control statement rather than a function.  If
 there is a C<continue> BLOCK attached to a BLOCK (typically in a C<while> or
@@ -874,6 +918,7 @@ empty one, logically enough.  In that case, C<next> goes directly back
 to check the condition at the top of the loop.
 
 =item cos EXPR
+X<cos> X<cosine> X<acos> X<arccosine>
 
 =item cos
 
@@ -886,6 +931,8 @@ function, or use this relation:
     sub acos { atan2( sqrt(1 - $_[0] * $_[0]), $_[0] ) }
 
 =item crypt PLAINTEXT,SALT
+X<crypt> X<digest> X<hash> X<salt> X<plaintext> X<password>
+X<decrypt> X<cryptography> X<passwd>
 
 Creates a digest string exactly like the crypt(3) function in the C
 library (assuming that you actually have a version there that has not
@@ -963,12 +1010,14 @@ the string back to an eight-bit byte string before calling crypt()
 C<Wide character in crypt>.
 
 =item dbmclose HASH
+X<dbmclose>
 
 [This function has been largely superseded by the C<untie> function.]
 
 Breaks the binding between a DBM file and a hash.
 
 =item dbmopen HASH,DBNAME,MASK
+X<dbmopen> X<dbm> X<ndbm> X<sdbm> X<gdbm>
 
 [This function has been largely superseded by the C<tie> function.]
 
@@ -1011,6 +1060,7 @@ before you call dbmopen():
 	or die "Can't open netscape history file: $!";
 
 =item defined EXPR
+X<defined> X<undef> X<undefined>
 
 =item defined
 
@@ -1074,6 +1124,7 @@ what you want.
 See also L</undef>, L</exists>, L</ref>.
 
 =item delete EXPR
+X<delete>
 
 Given an expression that specifies a hash element, array element, hash slice,
 or array slice, deletes the specified element(s) from the hash or array.
@@ -1138,6 +1189,7 @@ lookup:
     delete @{$ref->[$x][$y]}[$index1, $index2, @moreindices];
 
 =item die LIST
+X<die> X<throw> X<exception> X<raise> X<$@> X<abort>
 
 Outside an C<eval>, prints the value of LIST to C<STDERR> and
 exits with the current value of C<$!> (errno).  If C<$!> is C<0>,
@@ -1229,6 +1281,7 @@ this promotes strange action at a distance, this counterintuitive
 behavior may be fixed in a future release.
 
 =item do BLOCK
+X<do> X<block>
 
 Not really a function.  Returns the value of the last command in the
 sequence of commands indicated by BLOCK.  When modified by the C<while> or
@@ -1241,10 +1294,12 @@ C<next>, C<last>, or C<redo> cannot be used to leave or restart the block.
 See L<perlsyn> for alternative strategies.
 
 =item do SUBROUTINE(LIST)
+X<do>
 
 This form of subroutine call is deprecated.  See L<perlsub>.
 
 =item do EXPR
+X<do>
 
 Uses the value of EXPR as a filename and executes the contents of the
 file as a Perl script.
@@ -1288,6 +1343,7 @@ file.  Manual error checking can be done this way:
     }
 
 =item dump LABEL
+X<dump> X<core> X<undump>
 
 =item dump
 
@@ -1320,6 +1376,7 @@ You might also consider autoloading or selfloading, which at least
 make your program I<appear> to run faster.
 
 =item each HASH
+X<each> X<hash, iterator>
 
 When called in list context, returns a 2-element list consisting of the
 key and value for the next element of a hash, so that you can iterate over
@@ -1359,6 +1416,9 @@ only in a different order:
 See also C<keys>, C<values> and C<sort>.
 
 =item eof FILEHANDLE
+X<eof>
+X<end of file>
+X<end-of-file>
 
 =item eof ()
 
@@ -1409,6 +1469,7 @@ input operators typically return C<undef> when they run out of data, or if
 there was an error.
 
 =item eval EXPR
+X<eval> X<try> X<catch> X<evaluate> X<parse> X<execute>
 
 =item eval BLOCK
 
@@ -1527,6 +1588,7 @@ scope of the first non-DB piece of code that called it. You don't normally
 need to worry about this unless you are writing a Perl debugger.
 
 =item exec LIST
+X<exec> X<execute>
 
 =item exec PROGRAM LIST
 
@@ -1602,6 +1664,7 @@ Note that C<exec> will not call your C<END> blocks, nor will it call
 any C<DESTROY> methods in your objects.
 
 =item exists EXPR
+X<exists> X<autovivification>
 
 Given an expression that specifies a hash element or array element,
 returns true if the specified element in the hash or array has ever
@@ -1662,6 +1725,7 @@ to exists() is an error.
     exists &sub();	# Error
 
 =item exit EXPR
+X<exit> X<terminate> X<abort>
 
 =item exit
 
@@ -1689,6 +1753,7 @@ can call C<POSIX:_exit($status)> to avoid END and destructor processing.
 See L<perlmod> for details.
 
 =item exp EXPR
+X<exp> X<exponential> X<antilog> X<antilogarithm> X<e>
 
 =item exp
 
@@ -1696,6 +1761,7 @@ Returns I<e> (the natural logarithm base) to the power of EXPR.
 If EXPR is omitted, gives C<exp($_)>.
 
 =item fcntl FILEHANDLE,FUNCTION,SCALAR
+X<fcntl>
 
 Implements the fcntl(2) function.  You'll probably have to say
 
@@ -1732,6 +1798,7 @@ on your own, though.
                 or die "Can't set flags for the socket: $!\n";
 
 =item fileno FILEHANDLE
+X<fileno>
 
 Returns the file descriptor for a filehandle, or undefined if the
 filehandle is not open.  This is mainly useful for constructing
@@ -1751,6 +1818,7 @@ return undefined even though they are open.)
 
 
 =item flock FILEHANDLE,OPERATION
+X<flock> X<lock> X<locking>
 
 Calls flock(2), or an emulation of it, on FILEHANDLE.  Returns true
 for success, false on failure.  Produces a fatal error if used on a
@@ -1828,6 +1896,7 @@ function lose the locks, making it harder to write servers.
 See also L<DB_File> for other flock() examples.
 
 =item fork
+X<fork> X<child> X<parent>
 
 Does a fork(2) system call to create a new process running the
 same program at the same point.  It returns the child pid to the
@@ -1856,6 +1925,7 @@ backgrounded job launched from a remote shell) won't think you're done.
 You should reopen those to F</dev/null> if it's any issue.
 
 =item format
+X<format>
 
 Declare a picture format for use by the C<write> function.  For
 example:
@@ -1873,6 +1943,7 @@ example:
 See L<perlform> for many details and examples.
 
 =item formline PICTURE,LIST
+X<formline>
 
 This is an internal function used by C<format>s, though you may call it,
 too.  It formats (see L<perlform>) a list of values according to the
@@ -1892,6 +1963,7 @@ character may be taken to mean the beginning of an array name.
 C<formline> always returns true.  See L<perlform> for other examples.
 
 =item getc FILEHANDLE
+X<getc> X<getchar>
 
 =item getc
 
@@ -1928,6 +2000,7 @@ module from your nearest CPAN site; details on CPAN can be found on
 L<perlmodlib/CPAN>.
 
 =item getlogin
+X<getlogin> X<login>
 
 This implements the C library function of the same name, which on most
 systems returns the current login from F</etc/utmp>, if any.  If null,
@@ -1939,6 +2012,7 @@ Do not consider C<getlogin> for authentication: it is not as
 secure as C<getpwuid>.
 
 =item getpeername SOCKET
+X<getpeername> X<peer>
 
 Returns the packed sockaddr address of other end of the SOCKET connection.
 
@@ -1949,6 +2023,7 @@ Returns the packed sockaddr address of other end of the SOCKET connection.
     $herstraddr     = inet_ntoa($iaddr);
 
 =item getpgrp PID
+X<getpgrp> X<group>
 
 Returns the current process group for the specified PID.  Use
 a PID of C<0> to get the current process group for the
@@ -1958,6 +2033,7 @@ group of current process.  Note that the POSIX version of C<getpgrp>
 does not accept a PID argument, so only C<PID==0> is truly portable.
 
 =item getppid
+X<getppid> X<parent> X<pid>
 
 Returns the process id of the parent process.
 
@@ -1969,12 +2045,19 @@ to call the underlying C<getppid()>, you may use the CPAN module
 C<Linux::Pid>.
 
 =item getpriority WHICH,WHO
+X<getpriority> X<priority> X<nice>
 
 Returns the current priority for a process, a process group, or a user.
 (See L<getpriority(2)>.)  Will raise a fatal exception if used on a
 machine that doesn't implement getpriority(2).
 
 =item getpwnam NAME
+X<getpwnam> X<getgrnam> X<gethostbyname> X<getnetbyname> X<getprotobyname>
+X<getpwuid> X<getgrgid> X<getservbyname> X<gethostbyaddr> X<getnetbyaddr>
+X<getprotobynumber> X<getservbyport> X<getpwent> X<getgrent> X<gethostent>
+X<getnetent> X<getprotoent> X<getservent> X<setpwent> X<setgrent> X<sethostent>
+X<setnetent> X<setprotoent> X<setservent> X<endpwent> X<endgrent> X<endhostent>
+X<endnetent> X<endprotoent> X<endservent> 
 
 =item getgrnam NAME
 
@@ -2128,6 +2211,7 @@ they aren't, because a C<File::stat> object is different from
 a C<User::pwent> object.
 
 =item getsockname SOCKET
+X<getsockname>
 
 Returns the packed sockaddr address of this end of the SOCKET connection,
 in case you don't know the address because you have several different
@@ -2141,6 +2225,7 @@ IPs that the connection might have come in on.
        inet_ntoa($myaddr);
 
 =item getsockopt SOCKET,LEVEL,OPTNAME
+X<getsockopt>
 
 Queries the option named OPTNAME associated with SOCKET at a given LEVEL.
 Options may exist at multiple protocol levels depending on the socket
@@ -2172,6 +2257,7 @@ An example testing if Nagle's algorithm is turned on on a socket:
 
 
 =item glob EXPR
+X<glob> X<wildcard> X<filename, expansion> X<expand>
 
 =item glob
 
@@ -2187,6 +2273,7 @@ Beginning with v5.6.0, this operator is implemented using the standard
 C<File::Glob> extension.  See L<File::Glob> for details.
 
 =item gmtime EXPR
+X<gmtime> X<UTC> X<Greenwich>
 
 =item gmtime
 
@@ -2236,6 +2323,7 @@ strings, see the example in L</localtime>.
 See L<perlport/gmtime> for portability concerns.
 
 =item goto LABEL
+X<goto> X<jump> X<jmp>
 
 =item goto EXPR
 
@@ -2277,6 +2365,7 @@ containing a code reference, or a block that evaluates to a code
 reference.
 
 =item grep BLOCK LIST
+X<grep>
 
 =item grep EXPR,LIST
 
@@ -2311,6 +2400,7 @@ can't be seen from the outside, avoiding any potential side-effects.
 See also L</map> for a list composed of the results of the BLOCK or EXPR.
 
 =item hex EXPR
+X<hex> X<hexadecimal>
 
 =item hex
 
@@ -2327,6 +2417,7 @@ unlike oct(). To present something as hex, look into L</printf>,
 L</sprintf>, or L</unpack>.
 
 =item import LIST
+X<import>
 
 There is no builtin C<import> function.  It is just an ordinary
 method (subroutine) defined (or inherited) by modules that wish to export
@@ -2334,6 +2425,7 @@ names to another module.  The C<use> function calls the C<import> method
 for the package used.  See also L</use>, L<perlmod>, and L<Exporter>.
 
 =item index STR,SUBSTR,POSITION
+X<index> X<indexOf> X<InStr>
 
 =item index STR,SUBSTR
 
@@ -2348,6 +2440,7 @@ you've set the C<$[> variable to--but don't do that).  If the substring
 is not found, C<index> returns one less than the base, ordinarily C<-1>.
 
 =item int EXPR
+X<int> X<integer> X<truncate> X<trunc>
 
 =item int
 
@@ -2361,6 +2454,7 @@ the C<sprintf>, C<printf>, or the C<POSIX::floor> and C<POSIX::ceil>
 functions will serve you better than will int().
 
 =item ioctl FILEHANDLE,FUNCTION,SCALAR
+X<ioctl>
 
 Implements the ioctl(2) function.  You'll probably first have to say
 
@@ -2397,6 +2491,7 @@ The special string C<"0 but true"> is exempt from B<-w> complaints
 about improper numeric conversions.
 
 =item join EXPR,LIST
+X<join>
 
 Joins the separate strings of LIST into a single string with fields
 separated by the value of EXPR, and returns that new string.  Example:
@@ -2407,6 +2502,7 @@ Beware that unlike C<split>, C<join> doesn't take a pattern as its
 first argument.  Compare L</split>.
 
 =item keys HASH
+X<keys> X<key>
 
 Returns a list consisting of all the keys of the named hash.
 (In scalar context, returns the number of keys.)
@@ -2465,6 +2561,7 @@ as trying has no effect).
 See also C<each>, C<values> and C<sort>.
 
 =item kill SIGNAL, LIST
+X<kill> X<signal>
 
 Sends a signal to a list of processes.  Returns the number of
 processes successfully signaled (which is not necessarily the
@@ -2487,6 +2584,7 @@ use a signal name in quotes.
 See L<perlipc/"Signals"> for more details.
 
 =item last LABEL
+X<last> X<break>
 
 =item last
 
@@ -2512,6 +2610,7 @@ See also L</continue> for an illustration of how C<last>, C<next>, and
 C<redo> work.
 
 =item lc EXPR
+X<lc> X<lowercase>
 
 =item lc
 
@@ -2523,6 +2622,7 @@ and L<perlunicode> for more details about locale and Unicode support.
 If EXPR is omitted, uses C<$_>.
 
 =item lcfirst EXPR
+X<lcfirst> X<lowercase>
 
 =item lcfirst
 
@@ -2535,6 +2635,7 @@ details about locale and Unicode support.
 If EXPR is omitted, uses C<$_>.
 
 =item length EXPR
+X<length> X<size>
 
 =item length
 
@@ -2548,17 +2649,20 @@ number of characters, not the number of bytes.  To get the length
 in bytes, use C<do { use bytes; length(EXPR) }>, see L<bytes>.
 
 =item link OLDFILE,NEWFILE
+X<link>
 
 Creates a new filename linked to the old filename.  Returns true for
 success, false otherwise.
 
 =item listen SOCKET,QUEUESIZE
+X<listen>
 
 Does the same thing that the listen system call does.  Returns true if
 it succeeded, false otherwise.  See the example in
 L<perlipc/"Sockets: Client/Server Communication">.
 
 =item local EXPR
+X<local>
 
 You really probably want to be using C<my> instead, because C<local> isn't
 what most people think of as "local".  See
@@ -2570,6 +2674,7 @@ be placed in parentheses.  See L<perlsub/"Temporary Values via local()">
 for details, including issues with tied arrays and hashes.
 
 =item localtime EXPR
+X<localtime>
 
 =item localtime
 
@@ -2637,6 +2742,7 @@ and the month of the year, may not necessarily be three characters wide.
 See L<perlport/localtime> for portability concerns.
 
 =item lock THING
+X<lock>
 
 This function places an advisory lock on a shared variable, or referenced
 object contained in I<THING> until the lock goes out of scope.
@@ -2647,6 +2753,7 @@ instead. (However, if you've said C<use threads>, lock() is always a
 keyword.) See L<threads>.
 
 =item log EXPR
+X<log> X<logarithm> X<e> X<ln> X<base>
 
 =item log
 
@@ -2663,6 +2770,7 @@ divided by the natural log of N.  For example:
 See also L</exp> for the inverse operation.
 
 =item lstat EXPR
+X<lstat>
 
 =item lstat
 
@@ -2679,6 +2787,7 @@ If EXPR is omitted, stats C<$_>.
 The match operator.  See L<perlop>.
 
 =item map BLOCK LIST
+X<map>
 
 =item map EXPR,LIST
 
@@ -2738,6 +2847,7 @@ or to force an anon hash constructor use C<+{>
 and you get list of anonymous hashes each with only 1 entry.
 
 =item mkdir FILENAME,MASK
+X<mkdir> X<md> X<directory, create>
 
 =item mkdir FILENAME
 
@@ -2762,6 +2872,7 @@ this right, so Perl automatically removes all trailing slashes to keep
 everyone happy.
 
 =item msgctl ID,CMD,ARG
+X<msgctl>
 
 Calls the System V IPC function msgctl(2).  You'll probably have to say
 
@@ -2774,12 +2885,14 @@ C<"0 but true"> for zero, or the actual return value otherwise.  See also
 L<perlipc/"SysV IPC">, C<IPC::SysV>, and C<IPC::Semaphore> documentation.
 
 =item msgget KEY,FLAGS
+X<msgget>
 
 Calls the System V IPC function msgget(2).  Returns the message queue
 id, or the undefined value if there is an error.  See also
 L<perlipc/"SysV IPC"> and C<IPC::SysV> and C<IPC::Msg> documentation.
 
 =item msgrcv ID,VAR,SIZE,TYPE,FLAGS
+X<msgrcv>
 
 Calls the System V IPC function msgrcv to receive a message from
 message queue ID into variable VAR with a maximum message size of
@@ -2791,6 +2904,7 @@ an error.  See also L<perlipc/"SysV IPC">, C<IPC::SysV>, and
 C<IPC::SysV::Msg> documentation.
 
 =item msgsnd ID,MSG,FLAGS
+X<msgsnd>
 
 Calls the System V IPC function msgsnd to send the message MSG to the
 message queue ID.  MSG must begin with the native long integer message
@@ -2801,6 +2915,7 @@ or false if there is an error.  See also C<IPC::SysV>
 and C<IPC::SysV::Msg> documentation.
 
 =item my EXPR
+X<my>
 
 =item my TYPE EXPR
 
@@ -2820,6 +2935,7 @@ L<perlsub/"Private Variables via my()"> for details, and L<fields>,
 L<attributes>, and L<Attribute::Handlers>.
 
 =item next LABEL
+X<next> X<continue>
 
 =item next
 
@@ -2846,6 +2962,7 @@ See also L</continue> for an illustration of how C<last>, C<next>, and
 C<redo> work.
 
 =item no Module VERSION LIST
+X<no>
 
 =item no Module VERSION
 
@@ -2856,6 +2973,7 @@ C<redo> work.
 See the C<use> function, of which C<no> is the opposite.
 
 =item oct EXPR
+X<oct> X<octal> X<hex> X<hexadecimal> X<binary> X<bin>
 
 =item oct
 
@@ -2880,6 +2998,7 @@ automatically convert strings into numbers as needed, this automatic
 conversion assumes base 10.)
 
 =item open FILEHANDLE,EXPR
+X<open> X<pipe> X<file, open> X<fopen>
 
 =item open FILEHANDLE,MODE,EXPR
 
@@ -3249,6 +3368,7 @@ them, and automatically close whenever and however you leave that scope:
 See L</seek> for some details about mixing reading and writing.
 
 =item opendir DIRHANDLE,EXPR
+X<opendir>
 
 Opens a directory named EXPR for processing by C<readdir>, C<telldir>,
 C<seekdir>, C<rewinddir>, and C<closedir>.  Returns true if successful.
@@ -3259,6 +3379,7 @@ reference to a new anonymous dirhandle.
 DIRHANDLEs have their own namespace separate from FILEHANDLEs.
 
 =item ord EXPR
+X<ord> X<encoding>
 
 =item ord
 
@@ -3270,6 +3391,7 @@ For the reverse, see L</chr>.
 See L<perlunicode> and L<encoding> for more about Unicode.
 
 =item our EXPR
+X<our> X<global>
 
 =item our EXPR TYPE
 
@@ -3364,6 +3486,7 @@ also has the effect of C<our @x : unique; our %x : unique>. This may be
 subject to change.
 
 =item pack TEMPLATE,LIST
+X<pack>
 
 Takes a LIST of values and converts it into a string using the rules
 given by the TEMPLATE.  The resulting string is the concatenation of
@@ -3883,6 +4006,7 @@ Examples:
 The same template may generally also be used in unpack().
 
 =item package NAMESPACE
+X<package> X<module> X<namespace>
 
 =item package
 
@@ -3912,6 +4036,7 @@ See L<perlmod/"Packages"> for more information about packages, modules,
 and classes.  See L<perlsub> for other scoping issues.
 
 =item pipe READHANDLE,WRITEHANDLE
+X<pipe>
 
 Opens a pair of connected pipes like the corresponding system call.
 Note that if you set up a loop of piped processes, deadlock can occur
@@ -3927,6 +4052,7 @@ for the newly opened file descriptors as determined by the value of $^F.
 See L<perlvar/$^F>.
 
 =item pop ARRAY
+X<pop> X<stack>
 
 =item pop
 
@@ -3941,6 +4067,7 @@ omitted, pops the C<@ARGV> array in the main program, and the C<@_>
 array in subroutines, just like C<shift>.
 
 =item pos SCALAR
+X<pos> X<match, position>
 
 =item pos
 
@@ -3956,6 +4083,7 @@ the return from C<pos> won't change either in this case.  See L<perlre> and
 L<perlop>.
 
 =item print FILEHANDLE LIST
+X<print>
 
 =item print LIST
 
@@ -3990,6 +4118,7 @@ you will have to use a block returning the filehandle value instead:
     print { $OK ? STDOUT : STDERR } "stuff\n";
 
 =item printf FILEHANDLE FORMAT, LIST
+X<printf>
 
 =item printf FORMAT, LIST
 
@@ -4005,6 +4134,7 @@ C<print> would do.  The C<print> is more efficient and less
 error prone.
 
 =item prototype FUNCTION
+X<prototype>
 
 Returns the prototype of a function as a string (or C<undef> if the
 function has no prototype).  FUNCTION is a reference to, or the name of,
@@ -4018,6 +4148,7 @@ like a Perl function.  Otherwise, the string describing the equivalent
 prototype is returned.
 
 =item push ARRAY,LIST
+X<push>, X<stack>
 
 Treats ARRAY as a stack, and pushes the values of LIST
 onto the end of ARRAY.  The length of ARRAY increases by the length of
@@ -4043,6 +4174,7 @@ the completed C<push>.
 Generalized quotes.  See L<perlop/"Regexp Quote-Like Operators">.
 
 =item quotemeta EXPR
+X<quotemeta> X<metacharacter>
 
 =item quotemeta
 
@@ -4056,6 +4188,7 @@ the C<\Q> escape in double-quoted strings.
 If EXPR is omitted, uses C<$_>.
 
 =item rand EXPR
+X<rand> X<random>
 
 =item rand
 
@@ -4078,6 +4211,7 @@ large or too small, then your version of Perl was probably compiled
 with the wrong number of RANDBITS.)
 
 =item read FILEHANDLE,SCALAR,LENGTH,OFFSET
+X<read>
 
 =item read FILEHANDLE,SCALAR,LENGTH
 
@@ -4107,6 +4241,7 @@ characters, not bytes.  Similarly for the C<:encoding> pragma:
 in that case pretty much any characters can be read.
 
 =item readdir DIRHANDLE
+X<readdir>
 
 Returns the next directory entry for a directory opened by C<opendir>.
 If used in list context, returns all the rest of the entries in the
@@ -4122,6 +4257,7 @@ C<chdir> there, it would have been testing the wrong file.
     closedir DIR;
 
 =item readline EXPR
+X<readline> X<gets> X<fgets>
 
 Reads from the filehandle whose typeglob is contained in EXPR.  In scalar
 context, each call reads and returns the next line, until end-of-file is
@@ -4157,6 +4293,7 @@ steps to ensure that C<readline> was successful.
     }
 
 =item readlink EXPR
+X<readlink>
 
 =item readlink
 
@@ -4166,6 +4303,7 @@ error, returns the undefined value and sets C<$!> (errno).  If EXPR is
 omitted, uses C<$_>.
 
 =item readpipe EXPR
+X<readpipe>
 
 EXPR is executed as a system command.
 The collected standard output of the command is returned.
@@ -4177,6 +4315,7 @@ operator, but you can use it directly.  The C<qx/EXPR/>
 operator is discussed in more detail in L<perlop/"I/O Operators">.
 
 =item recv SOCKET,SCALAR,LENGTH,FLAGS
+X<recv>
 
 Receives a message on a socket.  Attempts to receive LENGTH characters
 of data into variable SCALAR from the specified SOCKET filehandle.
@@ -4196,6 +4335,7 @@ characters, not bytes.  Similarly for the C<:encoding> pragma:
 in that case pretty much any characters can be read.
 
 =item redo LABEL
+X<redo>
 
 =item redo
 
@@ -4234,6 +4374,7 @@ See also L</continue> for an illustration of how C<last>, C<next>, and
 C<redo> work.
 
 =item ref EXPR
+X<ref> X<reference>
 
 =item ref
 
@@ -4264,6 +4405,7 @@ name is returned instead.  You can think of C<ref> as a C<typeof> operator.
 See also L<perlref>.
 
 =item rename OLDNAME,NEWNAME
+X<rename> X<move> X<mv> X<ren>
 
 Changes the name of a file; an existing file NEWNAME will be
 clobbered.  Returns true for success, false otherwise.
@@ -4276,6 +4418,7 @@ open files, or pre-existing files.  Check L<perlport> and either the
 rename(2) manpage or equivalent system documentation for details.
 
 =item require VERSION
+X<require>
 
 =item require EXPR
 
@@ -4432,6 +4575,7 @@ corresponding to the files they have loaded. See L<perlvar/%INC>.
 For a yet-more-powerful import facility, see L</use> and L<perlmod>.
 
 =item reset EXPR
+X<reset>
 
 =item reset
 
@@ -4455,6 +4599,7 @@ up on scope exit anyway, so you'll probably want to use them instead.
 See L</my>.
 
 =item return EXPR
+X<return>
 
 =item return
 
@@ -4470,6 +4615,7 @@ or do FILE will automatically return the value of the last expression
 evaluated.)
 
 =item reverse LIST
+X<reverse> X<rev> X<invert>
 
 In list context, returns a list value consisting of the elements
 of LIST in the opposite order.  In scalar context, concatenates the
@@ -4492,11 +4638,13 @@ on a large hash, such as from a DBM file.
     %by_name = reverse %by_address;	# Invert the hash
 
 =item rewinddir DIRHANDLE
+X<rewinddir>
 
 Sets the current position to the beginning of the directory for the
 C<readdir> routine on DIRHANDLE.
 
 =item rindex STR,SUBSTR,POSITION
+X<rindex>
 
 =item rindex STR,SUBSTR
 
@@ -4505,6 +4653,7 @@ occurrence of SUBSTR in STR.  If POSITION is specified, returns the
 last occurrence at or before that position.
 
 =item rmdir FILENAME
+X<rmdir> X<rd> X<directory, remove>
 
 =item rmdir
 
@@ -4517,6 +4666,7 @@ sets C<$!> (errno).  If FILENAME is omitted, uses C<$_>.
 The substitution operator.  See L<perlop>.
 
 =item scalar EXPR
+X<scalar> X<context>
 
 Forces EXPR to be interpreted in scalar context and returns the value
 of EXPR.
@@ -4546,6 +4696,7 @@ is the moral equivalent of these two:
 See L<perlop> for more details on unary operators and the comma operator.
 
 =item seek FILEHANDLE,POSITION,WHENCE
+X<seek> X<fseek> X<filehandle, position>
 
 Sets FILEHANDLE's position, just like the C<fseek> call of C<stdio>.
 FILEHANDLE may be an expression whose value gives the name of the
@@ -4592,6 +4743,7 @@ cantankerous), then you may need something more like this:
     }
 
 =item seekdir DIRHANDLE,POS
+X<seekdir>
 
 Sets the current position for the C<readdir> routine on DIRHANDLE.  POS
 must be a value returned by C<telldir>.  C<seekdir> also has the same caveats
@@ -4599,6 +4751,7 @@ about possible directory compaction as the corresponding system library
 routine.
 
 =item select FILEHANDLE
+X<select> X<filehandle, default>
 
 =item select
 
@@ -4627,6 +4780,7 @@ methods, preferring to write the last example as:
     STDERR->autoflush(1);
 
 =item select RBITS,WBITS,EBITS,TIMEOUT
+X<select>
 
 This calls the select(2) system call with the bit masks specified, which
 can be constructed using C<fileno> and C<vec>, along these lines:
@@ -4688,6 +4842,7 @@ or <FH>) with C<select>, except as permitted by POSIX, and even
 then only on POSIX systems.  You have to use C<sysread> instead.
 
 =item semctl ID,SEMNUM,CMD,ARG
+X<semctl>
 
 Calls the System V IPC function C<semctl>.  You'll probably have to say
 
@@ -4703,6 +4858,7 @@ See also L<perlipc/"SysV IPC">, C<IPC::SysV>, C<IPC::Semaphore>
 documentation.
 
 =item semget KEY,NSEMS,FLAGS
+X<semget>
 
 Calls the System V IPC function semget.  Returns the semaphore id, or
 the undefined value if there is an error.  See also
@@ -4710,6 +4866,7 @@ L<perlipc/"SysV IPC">, C<IPC::SysV>, C<IPC::SysV::Semaphore>
 documentation.
 
 =item semop KEY,OPSTRING
+X<semop>
 
 Calls the System V IPC function semop to perform semaphore operations
 such as signalling and waiting.  OPSTRING must be a packed array of
@@ -4727,6 +4884,7 @@ L<perlipc/"SysV IPC">, C<IPC::SysV>, and C<IPC::SysV::Semaphore>
 documentation.
 
 =item send SOCKET,MSG,FLAGS,TO
+X<send>
 
 =item send SOCKET,MSG,FLAGS
 
@@ -4747,6 +4905,7 @@ Unicode characters, not bytes.  Similarly for the C<:encoding> pragma:
 in that case pretty much any characters can be sent.
 
 =item setpgrp PID,PGRP
+X<setpgrp> X<group>
 
 Sets the current process group for the specified PID, C<0> for the current
 process.  Will produce a fatal error if used on a machine that doesn't
@@ -4756,18 +4915,21 @@ accept any arguments, so only C<setpgrp(0,0)> is portable.  See also
 C<POSIX::setsid()>.
 
 =item setpriority WHICH,WHO,PRIORITY
+X<setpriority> X<priority> X<nice> X<renice>
 
 Sets the current priority for a process, a process group, or a user.
 (See setpriority(2).)  Will produce a fatal error if used on a machine
 that doesn't implement setpriority(2).
 
 =item setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL
+X<setsockopt>
 
 Sets the socket option requested.  Returns undefined if there is an
 error.  OPTVAL may be specified as C<undef> if you don't want to pass an
 argument.
 
 =item shift ARRAY
+X<shift>
 
 =item shift
 
@@ -4784,6 +4946,7 @@ same thing to the left end of an array that C<pop> and C<push> do to the
 right end.
 
 =item shmctl ID,CMD,ARG
+X<shmctl>
 
 Calls the System V IPC function shmctl.  You'll probably have to say
 
@@ -4796,12 +4959,15 @@ true" for zero, or the actual return value otherwise.
 See also L<perlipc/"SysV IPC"> and C<IPC::SysV> documentation.
 
 =item shmget KEY,SIZE,FLAGS
+X<shmget>
 
 Calls the System V IPC function shmget.  Returns the shared memory
 segment id, or the undefined value if there is an error.
 See also L<perlipc/"SysV IPC"> and C<IPC::SysV> documentation.
 
 =item shmread ID,VAR,POS,SIZE
+X<shmread>
+X<shmwrite>
 
 =item shmwrite ID,STRING,POS,SIZE
 
@@ -4815,6 +4981,7 @@ shmread() taints the variable. See also L<perlipc/"SysV IPC">,
 C<IPC::SysV> documentation, and the C<IPC::Shareable> module from CPAN.
 
 =item shutdown SOCKET,HOW
+X<shutdown>
 
 Shuts down a socket connection in the manner indicated by HOW, which
 has the same interpretation as in the system call of the same name.
@@ -4830,6 +4997,7 @@ disables the file descriptor in any forked copies in other
 processes.
 
 =item sin EXPR
+X<sin> X<sine> X<asin> X<arcsine>
 
 =item sin
 
@@ -4842,6 +5010,7 @@ function, or use this relation:
     sub asin { atan2($_[0], sqrt(1 - $_[0] * $_[0])) }
 
 =item sleep EXPR
+X<sleep> X<pause>
 
 =item sleep
 
@@ -4866,6 +5035,7 @@ help.
 See also the POSIX module's C<pause> function.
 
 =item socket SOCKET,DOMAIN,TYPE,PROTOCOL
+X<socket>
 
 Opens a socket of the specified kind and attaches it to filehandle
 SOCKET.  DOMAIN, TYPE, and PROTOCOL are specified the same as for
@@ -4878,6 +5048,7 @@ be set for the newly opened file descriptor, as determined by the
 value of $^F.  See L<perlvar/$^F>.
 
 =item socketpair SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL
+X<socketpair>
 
 Creates an unnamed pair of sockets in the specified domain, of the
 specified type.  DOMAIN, TYPE, and PROTOCOL are specified the same as
@@ -4901,6 +5072,7 @@ emulate socketpair using IP sockets to localhost if your system implements
 sockets but not socketpair.
 
 =item sort SUBNAME LIST
+X<sort> X<qsort> X<quicksort> X<mergesort>
 
 =item sort BLOCK LIST
 
@@ -5071,6 +5243,7 @@ eliminate any C<NaN>s from the input.
     @result = sort { $a <=> $b } grep { $_ == $_ } @input;
 
 =item splice ARRAY,OFFSET,LENGTH,LIST
+X<splice>
 
 =item splice ARRAY,OFFSET,LENGTH
 
@@ -5113,6 +5286,7 @@ Example, assuming array lengths are passed before arrays:
     if (&aeq($len,@foo[1..$len],0+@bar,@bar)) { ... }
 
 =item split /PATTERN/,EXPR,LIMIT
+X<split>
 
 =item split /PATTERN/,EXPR
 
@@ -5227,6 +5401,7 @@ matched in a C<split()> will be set to C<undef> when returned:
     # @fields is (1, 'A', 2, undef, 3)
 
 =item sprintf FORMAT, LIST
+X<sprintf>
 
 Returns a string formatted by the usual C<printf> conventions of the C
 library function C<sprintf>.  See below for more details
@@ -5363,6 +5538,7 @@ If a field width obtained through C<*> is negative, it has the same
 effect as the C<-> flag: left-justification.
 
 =item precision, or maximum width
+X<precision>
 
 You can specify a precision (for numeric conversions) or a maximum
 width (for string conversions) by specifying a C<.> followed by a number.
@@ -5500,6 +5676,7 @@ point in formatted real numbers is affected by the LC_NUMERIC locale.
 See L<perllocale>.
 
 =item sqrt EXPR
+X<sqrt> X<root> X<square root>
 
 =item sqrt
 
@@ -5511,6 +5688,7 @@ loaded the standard Math::Complex module.
     print sqrt(-2);    # prints 1.4142135623731i
 
 =item srand EXPR
+X<srand> X<seed> X<randseed>
 
 =item srand
 
@@ -5572,6 +5750,7 @@ for a seed can fall prey to the mathematical property that
 one-third of the time.  So don't do that.
 
 =item stat FILEHANDLE
+X<stat> X<file, status>
 
 =item stat EXPR
 
@@ -5702,6 +5881,7 @@ about the C<S_*> constants.  To get status info for a symbolic link
 instead of the target file behind the link, use the C<lstat> function.
 
 =item study SCALAR
+X<study>
 
 =item study
 
@@ -5761,6 +5941,7 @@ out the names of those files that contain a match:
     }
 
 =item sub NAME BLOCK
+X<sub>
 
 =item sub NAME (PROTO) BLOCK
 
@@ -5778,6 +5959,7 @@ references, and L<attributes> and L<Attribute::Handlers> for more
 information about attributes.
 
 =item substr EXPR,OFFSET,LENGTH,REPLACEMENT
+X<substr> X<substring> X<mid> X<left> X<right>
 
 =item substr EXPR,OFFSET,LENGTH
 
@@ -5831,6 +6013,7 @@ Prior to Perl version 5.9.1, the result of using an lvalue multiple times was
 unspecified.
 
 =item symlink OLDFILE,NEWFILE
+X<symlink> X<link> X<symbolic link> X<link, symbolic>
 
 Creates a new filename symbolically linked to the old filename.
 Returns C<1> for success, C<0> otherwise.  On systems that don't support
@@ -5840,6 +6023,7 @@ use eval:
     $symlink_exists = eval { symlink("",""); 1 };
 
 =item syscall NUMBER, LIST
+X<syscall> X<system call>
 
 Calls the system call specified as the first element of the list,
 passing the remaining elements as arguments to the system call.  If
@@ -5874,6 +6058,7 @@ to retrieve the file number of the other end.  You can avoid this
 problem by using C<pipe> instead.
 
 =item sysopen FILEHANDLE,FILENAME,MODE
+X<sysopen>
 
 =item sysopen FILEHANDLE,FILENAME,MODE,PERMS
 
@@ -5892,6 +6077,7 @@ using the C<|>-operator.
 Some of the most common values are C<O_RDONLY> for opening the file in
 read-only mode, C<O_WRONLY> for opening the file in write-only mode,
 and C<O_RDWR> for opening the file in read-write mode.
+X<O_RDONLY> X<O_RDWR> X<O_WRONLY>
 
 For historical reasons, some values work on almost every system
 supported by perl: zero means read-only, one means write-only, and two
@@ -5905,6 +6091,7 @@ PERMS specifies the permissions of the newly created file.  If you omit
 the PERMS argument to C<sysopen>, Perl uses the octal value C<0666>.
 These permission values need to be in octal, and are modified by your
 process's current C<umask>.
+X<O_CREAT>
 
 In many systems the C<O_EXCL> flag is available for opening files in
 exclusive mode.  This is B<not> locking: exclusiveness means here that
@@ -5913,10 +6100,12 @@ on network filesystems, and has no effect unless the C<O_CREAT> flag
 is set as well.  Setting C<O_CREAT|O_EXCL> prevents the file from
 being opened if it is a symbolic link.  It does not protect against
 symbolic links in the file's path.
+X<O_EXCL>
 
 Sometimes you may want to truncate an already-existing file.  This
 can be done using the C<O_TRUNC> flag.  The behavior of
 C<O_TRUNC> with C<O_RDONLY> is undefined.
+X<O_TRUNC>
 
 You should seldom if ever use C<0644> as argument to C<sysopen>, because
 that takes away the user's option to have a more permissive umask.
@@ -5932,6 +6121,7 @@ library, or perhaps using the POSIX::open() function.
 See L<perlopentut> for a kinder, gentler explanation of opening files.
 
 =item sysread FILEHANDLE,SCALAR,LENGTH,OFFSET
+X<sysread>
 
 =item sysread FILEHANDLE,SCALAR,LENGTH
 
@@ -5963,6 +6153,7 @@ The C<:encoding(...)> layer implicitly introduces the C<:utf8> layer.
 See L</binmode>, L</open>, and the C<open> pragma, L<open>.
 
 =item sysseek FILEHANDLE,POSITION,WHENCE
+X<sysseek> X<lseek>
 
 Sets FILEHANDLE's system position in bytes using the system call
 lseek(2).  FILEHANDLE may be an expression whose value gives the name
@@ -5994,6 +6185,7 @@ true on success and false on failure, yet you can still easily determine
 the new position.
 
 =item system LIST
+X<system> X<shell>
 
 =item system PROGRAM LIST
 
@@ -6059,6 +6251,7 @@ and return codes will be subject to its quirks and capabilities.
 See L<perlop/"`STRING`"> and L</exec> for details.
 
 =item syswrite FILEHANDLE,SCALAR,LENGTH,OFFSET
+X<syswrite>
 
 =item syswrite FILEHANDLE,SCALAR,LENGTH
 
@@ -6087,6 +6280,7 @@ The C<:encoding(...)> layer implicitly introduces the C<:utf8> layer.
 See L</binmode>, L</open>, and the C<open> pragma, L<open>.
 
 =item tell FILEHANDLE
+X<tell>
 
 =item tell
 
@@ -6111,6 +6305,7 @@ that has been manipulated by sysread(), syswrite() or sysseek().
 Those functions ignore the buffering, while tell() does not.
 
 =item telldir DIRHANDLE
+X<telldir>
 
 Returns the current position of the C<readdir> routines on DIRHANDLE.
 Value may be given to C<seekdir> to access a particular location in a
@@ -6118,6 +6313,7 @@ directory.  C<telldir> has the same caveats about possible directory
 compaction as the corresponding system library routine.
 
 =item tie VARIABLE,CLASSNAME,LIST
+X<tie>
 
 This function binds a variable to a package class that will provide the
 implementation for the variable.  VARIABLE is the name of the variable
@@ -6209,6 +6405,7 @@ or the F<Config> module for interesting C<tie> implementations.
 For further details see L<perltie>, L<"tied VARIABLE">.
 
 =item tied VARIABLE
+X<tied>
 
 Returns a reference to the object underlying VARIABLE (the same value
 that was originally returned by the C<tie> call that bound the variable
@@ -6216,6 +6413,7 @@ to a package.)  Returns the undefined value if VARIABLE isn't tied to a
 package.
 
 =item time
+X<time> X<epoch>
 
 Returns the number of non-leap seconds since whatever time the system
 considers to be the epoch, suitable for feeding to C<gmtime> and
@@ -6230,6 +6428,7 @@ gettimeofday(2), you may be able to use the C<syscall> interface of Perl.
 See L<perlfaq8> for details.
 
 =item times
+X<times>
 
 Returns a four-element list giving the user and system times, in
 seconds, for this process and the children of this process.
@@ -6243,6 +6442,7 @@ In scalar context, C<times> returns C<$user>.
 The transliteration operator.  Same as C<y///>.  See L<perlop>.
 
 =item truncate FILEHANDLE,LENGTH
+X<truncate>
 
 =item truncate EXPR,LENGTH
 
@@ -6255,6 +6455,7 @@ The behavior is undefined if LENGTH is greater than the length of the
 file.
 
 =item uc EXPR
+X<uc> X<uppercase> X<toupper>
 
 =item uc
 
@@ -6268,6 +6469,7 @@ C<ucfirst> for that.
 If EXPR is omitted, uses C<$_>.
 
 =item ucfirst EXPR
+X<ucfirst> X<uppercase>
 
 =item ucfirst
 
@@ -6280,6 +6482,7 @@ for more details about locale and Unicode support.
 If EXPR is omitted, uses C<$_>.
 
 =item umask EXPR
+X<umask>
 
 =item umask
 
@@ -6317,6 +6520,7 @@ Remember that a umask is a number, usually given in octal; it is I<not> a
 string of octal digits.  See also L</oct>, if all you have is a string.
 
 =item undef EXPR
+X<undef> X<undefine>
 
 =item undef
 
@@ -6343,6 +6547,7 @@ parameter.  Examples:
 Note that this is a unary operator, not a list operator.
 
 =item unlink LIST
+X<unlink> X<delete> X<remove> X<rm>
 
 =item unlink
 
@@ -6361,6 +6566,7 @@ filesystem.  Use C<rmdir> instead.
 If LIST is omitted, uses C<$_>.
 
 =item unpack TEMPLATE,EXPR
+X<unpack>
 
 =item unpack TEMPLATE
 
@@ -6421,11 +6627,13 @@ the rest is ignored.
 See L</pack> for more examples and notes.
 
 =item untie VARIABLE
+X<untie>
 
 Breaks the binding between a variable and a package.  (See C<tie>.)
 Has no effect if the variable is not tied.
 
 =item unshift ARRAY,LIST
+X<unshift>
 
 Does the opposite of a C<shift>.  Or the opposite of a C<push>,
 depending on how you look at it.  Prepends list to the front of the
@@ -6438,6 +6646,7 @@ prepended elements stay in the same order.  Use C<reverse> to do the
 reverse.
 
 =item use Module VERSION LIST
+X<use> X<module> X<import>
 
 =item use Module VERSION
 
@@ -6536,6 +6745,7 @@ for the C<-M> and C<-m> command-line options to perl that give C<use>
 functionality from the command-line.
 
 =item utime LIST
+X<utime>
 
 Changes the access and modification times on each file of a list of
 files.  The first two elements of the list must be the NUMERICAL access
@@ -6570,6 +6780,7 @@ described when they are both C<undef>.  This case will also trigger an
 uninitialized warning.
 
 =item values HASH
+X<values>
 
 Returns a list consisting of all the values of the named hash.
 (In a scalar context, returns the number of values.)
@@ -6594,6 +6805,7 @@ modify the contents of the hash:
 See also C<keys>, C<each>, and C<sort>.
 
 =item vec EXPR,OFFSET,BITS
+X<vec> X<bit> X<bit vector>
 
 Treats the string in EXPR as a bit vector made up of elements of
 width BITS, and returns the value of the element specified by OFFSET
@@ -6834,6 +7046,7 @@ example should print the following table:
     vec($_, 3, 8) = 128 == 2147483648 00000000000000000000000000000001
 
 =item wait
+X<wait>
 
 Behaves like the wait(2) system call on your system: it waits for a child
 process to terminate and returns the pid of the deceased process, or
@@ -6843,6 +7056,7 @@ Note that a return value of C<-1> could mean that child processes are
 being automatically reaped, as described in L<perlipc>.
 
 =item waitpid PID,FLAGS
+X<waitpid>
 
 Waits for a particular child process to terminate and returns the pid of
 the deceased process, or C<-1> if there is no such child process.  On some
@@ -6867,6 +7081,7 @@ processes are being automatically reaped.  See L<perlipc> for details,
 and for other examples.
 
 =item wantarray
+X<wantarray> X<context>
 
 Returns true if the context of the currently executing subroutine or
 C<eval> is looking for a list value.  Returns false if the context is
@@ -6884,6 +7099,7 @@ method.
 This function should have been named wantlist() instead.
 
 =item warn LIST
+X<warn> X<warning> X<STDERR>
 
 Produces a message on STDERR just like C<die>, but doesn't exit or throw
 an exception.
@@ -6927,6 +7143,7 @@ examples.  See the Carp module for other kinds of warnings using its
 carp() and cluck() functions.
 
 =item write FILEHANDLE
+X<write>
 
 =item write EXPR
 
