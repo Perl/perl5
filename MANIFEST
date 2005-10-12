@@ -2659,6 +2659,7 @@ symbian/port.pl			Helper code for config.pl
 symbian/README			ReadMe for the Symbian files
 symbian/sanity.pl		Helper code for config.pl
 symbian/sdk.pl			Helper code for config.pl
+symbian/sisify.pl		Packaging utility
 symbian/symbian_dll.cpp		The DLL stub for Symbian
 symbian/symbianish.h		Header for Symbian	
 symbian/symbian_proto.h		Prototypes for Symbian

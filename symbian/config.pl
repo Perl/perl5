@@ -283,7 +283,7 @@ sub create_PerlApp_pkg {
 &EN;
 
 ; Standard SIS file header
-#{"PerlApp"},(0x102015F6),0,1,0
+#{"PerlApp"},(0x102015F6),0,2,0
 
 ; Supports Series 60 v0.9
 (0x101F6F88), 0, 0, 0, {"Series60ProductID"}

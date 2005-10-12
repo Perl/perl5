@@ -4,29 +4,7 @@
  * Note that this PerlApp is for Symbian/Series 60 smartphones and has nothing
  * whatsoever to do with the ActiveState PerlApp. */
 
-/* This source code can be compiled into "PerlApp" which is the simple
- * launchpad application/demonstrator, or into "PerlMin", which is the
- * minimal Perl-on-Series-60 application.  Define the cpp symbols
- * PerlMin (a boolean), PerlMinUid (the Symbian application uid in
- * the 0x... format), and PerlMinName (a C wide string, with the L prefix)
- * to compile as "PerlMin". */
-
 #include "PerlApp.h"
-
-#ifdef PerlMinSample
-# define PerlMin
-# define PerlMinUid 0x0beefadd
-# define PerlMinName L"PerlMin"
-#endif
-
-#ifdef PerlMin
-# ifndef PerlMinUid
-#   error PerlMin defined but PerlMinUid undefined
-# endif
-# ifndef PerlMinName
-#  error PerlMin defined but PerlMinName undefined
-# endif
-#endif
 
 #include <avkon.hrh>
 #include <aknnotewrappers.h> 
@@ -52,7 +30,7 @@
 #include "PerlApp.hrh"
 #include "PerlApp.rsg"
 
-#endif // #ifndef PerlMin
+#endif //#ifndef PerlMin
 
 #include "EXTERN.h"
 #include "perl.h"
@@ -82,6 +60,7 @@ _LIT(KAppName, "PerlApp");
 #endif
 
 #ifndef PerlMin
+
 _LIT_NO_L(KFlavor, PERL_SYMBIANSDK_FLAVOR);
 _LIT(KAboutFormat,
      "Perl %d.%d.%d, Symbian port %d.%d.%d, built for %S SDK %d.%d");
@@ -91,16 +70,19 @@ _LIT(KInboxPrefix, "\\System\\Mail\\");
 _LIT(KScriptPrefix, "\\Perl\\");
 
 _LIT8(KModulePrefix, SITELIB); // SITELIB from Perl config.h
-#endif // #ifndef PerlMin
 
 typedef TBuf<256>  TMessageBuffer;
 typedef TBuf8<256> TPeekBuffer;
 typedef TBuf8<256> TFileName8;
 
+#endif // #ifndef PerlMin
+
 // Usage: DEBUG_PRINTF((_L("%S"), &aStr))
 #if 1
 #define DEBUG_PRINTF(s) {TMessageBuffer message; message.Format s; YesNoDialogL(message);}
 #endif
+
+static void DoRunScriptL(TFileName aScriptName);
 
 TUid CPerlAppApplication::AppDllUid() const
 {
@@ -140,8 +122,6 @@ CPerlAppUi::~CPerlAppUi()
     if (iDoorObserver) // Otherwise the embedding application waits forever.
         iDoorObserver->NotifyExit(MApaEmbeddedDocObserver::EEmpty);
 }
-
-static void DoRunScriptL(TFileName aScriptName);
 
 #ifndef PerlMin
 
@@ -438,19 +418,19 @@ static void DoRunScriptL(TFileName aScriptName)
         message.Format(_L("Error %d"), error);
         YesNoDialogL(message);
     }
-#endif
+#endif // #ifndef PerlMin
     CleanupStack::PopAndDestroy(perl);
 }
 
+#ifndef PerlMin
+
 void CPerlAppUi::OpenFileL(const TDesC& aFileName)
 {
-#ifndef PerlMin
     InstallOrRunL(aFileName);
-#else
-    DoRunScriptL(aFileName);
-#endif
     return;
 }
+
+#endif // #ifndef PerlMin
 
 TBool CPerlAppUi::ProcessCommandParametersL(TApaCommand aCommand, TFileName& /* aDocumentName */, const TDesC8& /* aTail */)
 {
@@ -469,10 +449,14 @@ TBool CPerlAppUi::ProcessCommandParametersL(TApaCommand aCommand, TFileName& /* 
     return aCommand == EApaCommandOpen ? ETrue : EFalse;
 }
 
+#ifndef PerlMin
+
 void CPerlAppUi::SetFs(const RFs& aFs)
 {
     iFs = (RFs*) &aFs;
 }
+
+#endif // #ifndef PerlMin
 
 void CPerlAppUi::HandleCommandL(TInt aCommand)
 {
@@ -599,6 +583,9 @@ CEikAppUi* CPerlAppDocument::CreateAppUiL()
     return appui;
 }
 
+
+#ifndef PerlMin
+
 CFileStore* CPerlAppDocument::OpenFileL(TBool /* aDoOpen */, const TDesC& aFileName, RFs& aFs)
 {
     CPerlAppUi* appui =
@@ -607,6 +594,8 @@ CFileStore* CPerlAppDocument::OpenFileL(TBool /* aDoOpen */, const TDesC& aFileN
     appui->OpenFileL(aFileName);
     return NULL;
 }
+
+#endif // #ifndef PerlMin
 
 EXPORT_C CApaApplication* NewApplication() 
 {

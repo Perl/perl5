@@ -12,7 +12,7 @@ This document describes various features of the Symbian operating
 system that will affect how Perl version 5 (hereafter just Perl)
 is compiled and/or runs.
 
-B<NOTE: this port (as of 0.1.0) does not compile into a Symbian
+B<NOTE: this port (as of 0.2.0) does not compile into a Symbian
 OS GUI application, but instead it results in a Symbian DLL.>
 The DLL includes a C++ class called CPerlBase, which one can then
 (derive from and) use to embed Perl into applications, see F<symbian/README>.
@@ -240,6 +240,15 @@ and offers either to install it under \Perl (if the Perl file is in
 the inbox of the messaging application) or to run it (if the Perl file
 is under \Perl).
 
+=head2 sisify.pl
+
+In the symbian subdirectory there is sisify.pl utility which can be
+used to package Perl scripts and/or Perl library directories into SIS
+files, which can be installed to the device.  To run the sisify.pl
+utility, you will need to have the 'makesis' and 'uidcrc' utilities
+already installed.  If you don't have the S60 Win32 SDKs, you may try
+for example http://gnupoc.sourceforge.net/ or http://symbianos.org/~andreh/.
+
 =head2 Using Perl in Symbian
 
 First of all note that you have full access to the Symbian device
@@ -287,7 +296,7 @@ Lots.  See F<symbian\TODO>.
 
 =head1 WARNING
 
-As of Perl Symbian port version 0.1.0 any part of Perl's standard
+As of Perl Symbian port version 0.2.0 any part of Perl's standard
 regression test suite has not been run on a real Symbian device using
 the ported Perl, so innumerable bugs may lie in wait.  Therefore there
 is absolutely no warranty.
@@ -320,7 +329,12 @@ The Symbian port is licensed under the same terms as Perl itself.
 
 =head1 HISTORY
 
-Perl Symbian Port version 0.1.0: April 2005
+=over 4
+
+=item *
+
+0.1.0: April 2005
+
 (This will show as "0.01" in the Symbian Installer.)
 
   - The console window is a very simple console indeed: one can
@@ -343,13 +357,25 @@ Perl Symbian Port version 0.1.0: April 2005
     re Safe Sys::Hostname Sys::Syslog
     threads threads::shared Unicode::Normalize
   - Using MakeMaker or the Module::* to build and install modules
-    is not supported.  A future solution might use the native
-    SIS packaging format (see symbian\TODO).
+    is not supported.
   - Building XS other than the ones in the core is not supported.
 
-Since this is 0.1.0, any future releases are almost guaranteed to be
-binary incompatible.  As a sign of this the Symbian symbol exports are
-kept unfrozen and the .def files rebuilt every time.
+Since this is 0.something release, any future releases are almost
+guaranteed to be binary incompatible.  As a sign of this the Symbian
+symbol exports are kept unfrozen and the .def files rebuilt every
+time.
+
+=item *
+
+0.2.0: October 2005
+
+  - Perl 5.9.3 (patch level 25741)
+  - Compress::Zlib and IO::Zlib supported
+  - sisify.pl added
+
+We maintain the binary incompatibility.
+
+=back
 
 =cut
 

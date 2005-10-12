@@ -11,11 +11,37 @@
 #include <coecntrl.h>
 #include <f32file.h>
 
+/* The source code can be compiled into "PerlApp" which is the simple
+ * launchpad application/demonstrator, or into "PerlMin", which is the
+ * minimal Perl-on-Series-60 application.  Define the cpp symbols
+ * PerlMin (a boolean), PerlMinUid (the Symbian application uid in
+ * the 0x... format), and PerlMinName (a C wide string, with the L prefix)
+ * to compile as "PerlMin". */
+
+// #define PerlMinSample
+
+#ifdef PerlMinSample
+# define PerlMin
+# define PerlMinUid 0x102015F6
+# define PerlMinName L"PerlMin"
+#endif
+
+#ifdef PerlMin
+# ifndef PerlMinUid
+#   error PerlMin defined but PerlMinUid undefined
+# endif
+# ifndef PerlMinName
+#  error PerlMin defined but PerlMinName undefined
+# endif
+#endif
+
 class CPerlAppDocument : public CAknDocument
 {
   public:
     CPerlAppDocument(CEikApplication& aApp):CAknDocument(aApp) {;}
+#ifndef PerlMin
     CFileStore* OpenFileL(TBool aDoOpen, const TDesC& aFilename, RFs& aFs);
+#endif // #ifndef PerlMin
   private: // from CEikDocument
     CEikAppUi* CreateAppUiL();
 };
@@ -36,11 +62,13 @@ class CPerlAppUi : public CAknAppUi
   public:
     void ConstructL();
      ~CPerlAppUi();
-    void HandleCommandL(TInt aCommand);
-    void OpenFileL(const TDesC& aFileName);
     TBool ProcessCommandParametersL(TApaCommand aCommand, TFileName& aDocumentName, const TDesC8& aTail);
+    void HandleCommandL(TInt aCommand);
+#ifndef PerlMin
+    void OpenFileL(const TDesC& aFileName);
     void InstallOrRunL(const TFileName& aFileName);
     void SetFs(const RFs& aFs);
+#endif // #ifndef PerlMin
   private:
     CPerlAppView* iAppView;
     RFs* iFs;

@@ -70,6 +70,7 @@
 
 =head1 PACKAGING
 
+- @INC manipulation for sisify.pl
 - subdivide perlext.sis?
 - pm-stripper: strip pod and comments, while inserting the appropriate
   #line commands to keep linenumbers in sync.  Shaves off easily 50%
@@ -78,9 +79,6 @@
 - Symbian has APIs for opening .zip files
 - Investigate Autrijus Tang's PAR format
   http://www.autrijus.org/par-intro/
-- "makeplsis" to wrap a script.pl or dir/script.pl as a stand-alone
-  application (and SIS): unshift the "application home" to @INC and
-  chdir to that, then run the script.pl (renamed as default.pl)
 
 =head1 PerlBase
 
