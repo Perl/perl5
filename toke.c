@@ -455,7 +455,7 @@ S_missingterm(pTHX_ char *s)
 #endif
 	) {
 	*tmpbuf = '^';
-	tmpbuf[1] = toCTRL(PL_multi_close);
+	tmpbuf[1] = (char)toCTRL(PL_multi_close);
 	tmpbuf[2] = '\0';
 	s = tmpbuf;
     }
@@ -1170,7 +1170,7 @@ S_tokeq(pTHX_ SV *sv)
 STATIC I32
 S_sublex_start(pTHX)
 {
-    const register I32 op_type = yylval.ival;
+    register const I32 op_type = yylval.ival;
 
     if (op_type == OP_NULL) {
 	yylval.opval = PL_lex_op;

@@ -1233,8 +1233,8 @@ PP(pp_match)
     dSP; dTARG;
     register PMOP *pm = cPMOP;
     PMOP *dynpm = pm;
-    const register char *t;
-    const register char *s;
+    register const char *t;
+    register const char *s;
     const char *strend;
     I32 global;
     I32 r_flags = REXEC_CHECKED;
@@ -2563,7 +2563,7 @@ S_get_db_sub(pTHX_ SV **svp, CV *cv)
 		    && (gv = (GV*)*svp) ))) {
 	    /* Use GV from the stack as a fallback. */
 	    /* GV is potentially non-unique, or contain different CV. */
-	    SV *tmp = newRV((SV*)cv);
+	    SV * const tmp = newRV((SV*)cv);
 	    sv_setsv(dbsv, tmp);
 	    SvREFCNT_dec(tmp);
 	}
@@ -2624,7 +2624,7 @@ PP(pp_entersub)
 	}
   got_rv:
 	{
-	    SV **sp = &sv;		/* Used in tryAMAGICunDEREF macro. */
+	    SV * const * sp = &sv;		/* Used in tryAMAGICunDEREF macro. */
 	    tryAMAGICunDEREF(to_cv);
 	}	
 	cv = (CV*)SvRV(sv);

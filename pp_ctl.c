@@ -195,7 +195,7 @@ PP(pp_substcont)
 				      ? (REXEC_IGNOREPOS|REXEC_NOT_FIRST)
 				      : (REXEC_COPY_STR|REXEC_IGNOREPOS|REXEC_NOT_FIRST))))
 	{
-	    SV *targ = cx->sb_targ;
+	    SV * const targ = cx->sb_targ;
 
 	    assert(cx->sb_strend >= s);
 	    if(cx->sb_strend > s) {
@@ -338,7 +338,7 @@ Perl_rxres_free(pTHX_ void **rsp)
 PP(pp_formline)
 {
     dSP; dMARK; dORIGMARK;
-    register SV *tmpForm = *++MARK;
+    register SV * const tmpForm = *++MARK;
     register U32 *fpc;
     register char *t;
     const char *f;
@@ -354,7 +354,7 @@ PP(pp_formline)
     NV value;
     bool gotsome = FALSE;
     STRLEN len;
-    STRLEN fudge = SvPOK(tmpForm)
+    const STRLEN fudge = SvPOK(tmpForm)
 			? (SvCUR(tmpForm) * (IN_BYTES ? 1 : 3) + 1) : 0;
     bool item_is_utf8 = FALSE;
     bool targ_is_utf8 = FALSE;
@@ -1086,7 +1086,7 @@ PP(pp_flop)
 	else {
 	    SV * const final = sv_mortalcopy(right);
 	    STRLEN len;
-	    const char *tmps = SvPV_const(final, len);
+	    const char * const tmps = SvPV_const(final, len);
 
 	    SV *sv = sv_mortalcopy(left);
 	    SvPV_force_nolen(sv);

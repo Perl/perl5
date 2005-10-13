@@ -2924,7 +2924,7 @@ static char *
 S_uiv_2buf(char *buf, IV iv, UV uv, int is_uv, char **peob)
 {
     char *ptr = buf + TYPE_CHARS(UV);
-    char *ebuf = ptr;
+    char * const ebuf = ptr;
     int sign;
 
     if (is_uv)
@@ -3243,7 +3243,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	return (char *)"";
     }
     {
-	STRLEN len = s - SvPVX_const(sv);
+	const STRLEN len = s - SvPVX_const(sv);
 	if (lp) 
 	    *lp = len;
 	SvCUR_set(sv, len);
@@ -3871,7 +3871,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
     if (sflags & SVf_ROK) {
 	if (dtype >= SVt_PV) {
 	    if (dtype == SVt_PVGV) {
-		SV *sref = SvREFCNT_inc(SvRV(sstr));
+		SV * const sref = SvREFCNT_inc(SvRV(sstr));
 		SV *dref = 0;
 		const int intro = GvINTRO(dstr);
 
@@ -3925,7 +3925,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		    else
 			dref = (SV*)GvCV(dstr);
 		    if (GvCV(dstr) != (CV*)sref) {
-			CV* cv = GvCV(dstr);
+			CV* const cv = GvCV(dstr);
 			if (cv) {
 			    if (!GvCVGEN((GV*)dstr) &&
 				(CvROOT(cv) || CvXSUB(cv)))
@@ -6458,7 +6458,7 @@ thats_really_all_folks:
 
 screamer2:
 	if (rslen) {
-            const register STDCHAR *bpe = buf + sizeof(buf);
+            register const STDCHAR *bpe = buf + sizeof(buf);
 	    bp = buf;
 	    while ((i = PerlIO_getc(fp)) != EOF && (*bp++ = (STDCHAR)i) != rslast && bp < bpe)
 		; /* keep reading */
@@ -7344,7 +7344,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 	if (SvGMAGICAL(sv))
 	    mg_get(sv);
 	if (SvROK(sv)) {
-	    SV **sp = &sv;		/* Used in tryAMAGICunDEREF macro. */
+	    SV * const *sp = &sv;	/* Used in tryAMAGICunDEREF macro. */
 	    tryAMAGICunDEREF(to_cv);
 
 	    sv = SvRV(sv);
@@ -7405,8 +7405,8 @@ Perl_sv_true(pTHX_ register SV *sv)
     if (!sv)
 	return 0;
     if (SvPOK(sv)) {
-	const register XPV* tXpv;
-	if ((tXpv = (XPV*)SvANY(sv)) &&
+	register const XPV* const tXpv = (XPV*)SvANY(sv);
+	if (tXpv &&
 		(tXpv->xpv_cur > 1 ||
 		(tXpv->xpv_cur && *tXpv->xpv_pv != '0')))
 	    return 1;
@@ -8139,7 +8139,7 @@ bool
 Perl_sv_tainted(pTHX_ SV *sv)
 {
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
-	MAGIC * const mg = mg_find(sv, PERL_MAGIC_taint);
+	const MAGIC * const mg = mg_find(sv, PERL_MAGIC_taint);
 	if (mg && ((mg->mg_len & 1) || ((mg->mg_len & 2) && mg->mg_obj == sv)))
 	    return TRUE;
     }

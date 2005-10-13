@@ -3587,7 +3587,7 @@ PP(pp_uc)
 	}
 	s = (U8*)SvPV_force_nomg(sv, len);
 	if (len) {
-	    const register U8 *send = s + len;
+	    register const U8 *send = s + len;
 
 	    if (IN_LOCALE_RUNTIME) {
 		TAINT;
@@ -3714,7 +3714,7 @@ PP(pp_quotemeta)
     dSP; dTARGET;
     SV * const sv = TOPs;
     STRLEN len;
-    const register char *s = SvPV_const(sv,len);
+    register const char *s = SvPV_const(sv,len);
 
     SvUTF8_off(TARG);				/* decontaminate */
     if (len) {
