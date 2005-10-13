@@ -1767,6 +1767,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef PERL_OLD_COPY_ON_WRITE
 			     " PERL_OLD_COPY_ON_WRITE"
 #  endif
+#  ifdef PERL_USE_SAFE_PUTENV
+			     " PERL_USE_SAFE_PUTENV"
+#  endif
 #  ifdef PL_OP_SLAB_ALLOC
 			     " PL_OP_SLAB_ALLOC"
 #  endif
