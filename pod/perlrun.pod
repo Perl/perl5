@@ -451,7 +451,7 @@ modules in non-standard locations.
 
 specifies the pattern to split on if B<-a> is also in effect.  The
 pattern may be surrounded by C<//>, C<"">, or C<''>, otherwise it will be
-put in single quotes.
+put in single quotes. You can't use literal whitespace in the pattern.
 
 =item B<-h>
 
