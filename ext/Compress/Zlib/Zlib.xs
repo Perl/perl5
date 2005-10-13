@@ -1053,12 +1053,12 @@ deflate (s, buf, output)
 
         if (s->stream.avail_out == 0) {
 	    /* out of space in the output buffer so make it bigger */
-            s->bufinc *= 2 ;
             Sv_Grow(output, SvLEN(output) + s->bufinc) ;
             cur_length += increment ;
             s->stream.next_out = (Bytef*) SvPVbyte_nolen(output) + cur_length ;
             increment = s->bufinc ;
             s->stream.avail_out = increment;
+            s->bufinc *= 2 ;
         }
 
         RETVAL = deflate(&(s->stream), Z_NO_FLUSH);
@@ -1147,12 +1147,12 @@ flush(s, output, f=Z_FINISH)
     for (;;) {
         if (s->stream.avail_out == 0) {
 	    /* consumed all the available output, so extend it */
-            s->bufinc *= 2 ;
             Sv_Grow(output, SvLEN(output) + s->bufinc) ;
             cur_length += increment ;
             s->stream.next_out = (Bytef*) SvPVbyte_nolen(output) + cur_length ;
             increment = s->bufinc ;
             s->stream.avail_out = increment;
+            s->bufinc *= 2 ;
         }
         RETVAL = deflate(&(s->stream), f);
     
@@ -1344,9 +1344,9 @@ inflate (s, buf, output)
     Compress::Zlib::inflateStream	s
     SV *	buf
     SV * 	output 
-    uInt	cur_length = NO_INIT
-    uInt	prefix_length = NO_INIT
-    uInt	increment = NO_INIT
+    uInt	cur_length = 0;
+    uInt	prefix_length = 0;
+    uInt	increment = 0;
     STRLEN  stmp   = NO_INIT
   PREINIT:
 #ifdef UTF8_AVAILABLE    
@@ -1378,22 +1378,27 @@ inflate (s, buf, output)
     if((s->flags & FLAG_APPEND) != FLAG_APPEND) {
         SvCUR_set(output, 0);
     }
-    prefix_length = cur_length =  SvCUR(output) ;
-    s->stream.next_out = (Bytef*) SvPVbyte_nolen(output) + cur_length;
-    increment =  SvLEN(output) -  cur_length;
-    s->stream.avail_out =  increment;
+    if (SvLEN(output)) {
+        prefix_length = cur_length =  SvCUR(output) ;
+        s->stream.next_out = (Bytef*) SvPVbyte_nolen(output) + cur_length;
+        increment = SvLEN(output) -  cur_length - 1;
+        s->stream.avail_out = increment;
+    }
+    else {
+        s->stream.avail_out = 0;
+    }
     s->bytesInflated = 0;
     
     while (1) {
 
         if (s->stream.avail_out == 0) {
 	    /* out of space in the output buffer so make it bigger */
-            s->bufinc *= 2 ;
-            Sv_Grow(output, SvLEN(output) + s->bufinc + 1) ;
+            Sv_Grow(output, SvLEN(output) + s->bufinc) ;
             cur_length += increment ;
             s->stream.next_out = (Bytef*) SvPVbyte_nolen(output) + cur_length ;
             increment = s->bufinc ;
             s->stream.avail_out = increment;
+            s->bufinc *= 2 ;
         }
 
         RETVAL = inflate(&(s->stream), Z_SYNC_FLUSH);
