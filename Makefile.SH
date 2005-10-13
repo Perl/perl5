@@ -1042,8 +1042,9 @@ _cleaner2:
 	rm -f lib/ExtUtils/ParseXS/t/XSTest.c
 	rm -f lib/ExtUtils/ParseXS/t/XSTest$(OBJ_EXT)
 	rm -f lib/ExtUtils/ParseXS/t/XSTest$(DLSUFFIX)
-	-rmdir lib/B lib/Compress lib/Data
-	-rmdir lib/Filter/Util lib/IO/Socket
+	-rmdir lib/B lib/Data
+	-rmdir lib/Compress/Zlib lib/Compress/Gzip lib/Compress
+	-rmdir lib/Filter/Util lib/IO/Socket lib/IO/Compress lib/IO/Uncompress
 	-rmdir lib/List lib/MIME lib/Scalar lib/Sys 
 	-rmdir lib/threads lib/XS
 
