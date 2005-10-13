@@ -416,7 +416,7 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 	retval = AvFILLp(PL_comppad);
     }
     else {
-	SV ** const names = AvARRAY(PL_comppad_name);
+	SV * const * const names = AvARRAY(PL_comppad_name);
         const SSize_t names_fill = AvFILLp(PL_comppad_name);
 	for (;;) {
 	    /*
@@ -957,7 +957,7 @@ void
 Perl_pad_leavemy(pTHX)
 {
     I32 off;
-    SV ** const svp = AvARRAY(PL_comppad_name);
+    SV * const * const svp = AvARRAY(PL_comppad_name);
 
     PL_pad_reset_pending = FALSE;
 
@@ -1099,7 +1099,7 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 	av_store(PL_comppad_name, AvFILLp(PL_comppad), Nullsv);
 
     if (type == padtidy_SUBCLONE) {
-	SV ** const namep = AvARRAY(PL_comppad_name);
+	SV * const * const namep = AvARRAY(PL_comppad_name);
 	PADOFFSET ix;
 	for (ix = AvFILLp(PL_comppad); ix > 0; ix--) {
 	    SV *namesv;
@@ -1449,7 +1449,7 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
     LEAVE;
 
     if (CvCONST(cv)) {
-	SV* const_sv = op_const_sv(CvSTART(cv), cv);
+	SV* const const_sv = op_const_sv(CvSTART(cv), cv);
 	assert(const_sv);
 	/* constant sub () { $x } closing over $x - see lib/constant.pm */
 	SvREFCNT_dec(cv);
@@ -1479,7 +1479,7 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
     SV ** const namepad = AvARRAY(comppad_name);
     SV ** const curpad = AvARRAY(comppad);
     for (ix = AvFILLp(comppad_name); ix > 0; ix--) {
-        const SV *namesv = namepad[ix];
+        const SV * const namesv = namepad[ix];
 	if (namesv && namesv != &PL_sv_undef
 	    && *SvPVX_const(namesv) == '&')
 	{
@@ -1560,7 +1560,7 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth, int has_args)
 HV *
 Perl_pad_compname_type(pTHX_ const PADOFFSET po)
 {
-    SV** const av = av_fetch(PL_comppad_name, po, FALSE);
+    SV* const * const av = av_fetch(PL_comppad_name, po, FALSE);
     if ( SvFLAGS(*av) & SVpad_TYPED ) {
         return SvSTASH(*av);
     }

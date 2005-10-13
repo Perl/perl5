@@ -137,7 +137,8 @@ ApR	|I32	|my_chsize	|int fd|Off_t length
 Ap	|MAGIC*	|condpair_magic	|SV *sv
 #endif
 pR	|OP*	|convert	|I32 optype|I32 flags|NULLOK OP* o
-Afprd	|void	|croak		|NN const char* pat|...
+: croak()'s first parm can be NULL.  Otherwise, mod_perl breaks.
+Afprd	|void	|croak		|NULLOK const char* pat|...
 Apr	|void	|vcroak		|NN const char* pat|NULLOK va_list* args
 #if defined(PERL_IMPLICIT_CONTEXT)
 Afnrp	|void	|croak_nocontext|NN const char* pat|...
@@ -757,7 +758,7 @@ Apd	|int	|getcwd_sv	|NN SV* sv
 Apd	|void	|sv_dec		|NN SV* sv
 Ap	|void	|sv_dump	|NN SV* sv
 ApdR	|bool	|sv_derived_from|NN SV* sv|NN const char* name
-Apd	|I32	|sv_eq		|NN SV* sv1|NN SV* sv2
+Apd	|I32	|sv_eq		|NULLOK SV* sv1|NULLOK SV* sv2
 Apd	|void	|sv_free	|NULLOK SV* sv
 pd	|void	|sv_free_arenas
 Apd	|char*	|sv_gets	|NN SV* sv|NN PerlIO* fp|I32 append

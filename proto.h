@@ -217,8 +217,7 @@ PERL_CALLCONV OP*	Perl_convert(pTHX_ I32 optype, I32 flags, OP* o)
 
 PERL_CALLCONV void	Perl_croak(pTHX_ const char* pat, ...)
 			__attribute__noreturn__
-			__attribute__format__(__printf__,pTHX_1,pTHX_2)
-			__attribute__nonnull__(pTHX_1);
+			__attribute__format__(__printf__,pTHX_1,pTHX_2);
 
 PERL_CALLCONV void	Perl_vcroak(pTHX_ const char* pat, va_list* args)
 			__attribute__noreturn__
@@ -2073,10 +2072,7 @@ PERL_CALLCONV bool	Perl_sv_derived_from(pTHX_ SV* sv, const char* name)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV I32	Perl_sv_eq(pTHX_ SV* sv1, SV* sv2)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-
+PERL_CALLCONV I32	Perl_sv_eq(pTHX_ SV* sv1, SV* sv2);
 PERL_CALLCONV void	Perl_sv_free(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_sv_free_arenas(pTHX);
 PERL_CALLCONV char*	Perl_sv_gets(pTHX_ SV* sv, PerlIO* fp, I32 append)

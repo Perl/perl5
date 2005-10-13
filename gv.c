@@ -950,7 +950,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		    hv = GvHVn(gv);
 		    hv_magic(hv, Nullgv, PERL_MAGIC_sig);
 		    for (i = 1; i < SIG_SIZE; i++) {
-			SV ** const init = hv_fetch(hv, PL_sig_name[i], strlen(PL_sig_name[i]), 1);
+			SV * const * const init = hv_fetch(hv, PL_sig_name[i], strlen(PL_sig_name[i]), 1);
 			if (init)
 			    sv_setsv(*init, &PL_sv_undef);
 			PL_psig_ptr[i] = 0;
@@ -1250,14 +1250,14 @@ Perl_gv_check(pTHX_ HV *stash)
 		file = GvFILE(gv);
 		/* performance hack: if filename is absolute and it's a standard
 		 * module, don't bother warning */
+#ifdef MACOS_TRADITIONAL
+#   define LIB_COMPONENT ":lib:"
+#else
+#   define LIB_COMPONENT "/lib/"
+#endif
 		if (file
 		    && PERL_FILE_IS_ABSOLUTE(file)
-#ifdef MACOS_TRADITIONAL
-		    && (instr(file, ":lib:")
-#else
-		    && (instr(file, "/lib/")
-#endif
-		    || instr(file, ".pm")))
+		    && (instr(file, LIB_COMPONENT) || instr(file, ".pm")))
 		{
 		    continue;
 		}

@@ -425,7 +425,7 @@ static const scan_data_t zero_scan_data =
 	MJD_OFFSET_DEBUG(("** (%d) offset of node %d is %d.\n",		\
 		__LINE__, (node), (byte)));				\
 	if((node) < 0) {						\
-	    Perl_croak(aTHX_ "value of node is %d in Offset macro", node); \
+	    Perl_croak(aTHX_ "value of node is %d in Offset macro", (int)(node)); \
 	} else {							\
 	    RExC_offsets[2*(node)-1] = (byte);				\
 	}								\
@@ -439,9 +439,9 @@ static const scan_data_t zero_scan_data =
 #define Set_Node_Length_To_R(node,len) STMT_START {			\
     if (! SIZE_ONLY) {							\
 	MJD_OFFSET_DEBUG(("** (%d) size of node %d is %d.\n",		\
-		__LINE__, (node), (len)));				\
+		__LINE__, (int)(node), (int)(len)));			\
 	if((node) < 0) {						\
-	    Perl_croak(aTHX_ "value of node is %d in Length macro", node); \
+	    Perl_croak(aTHX_ "value of node is %d in Length macro", (int)(node)); \
 	} else {							\
 	    RExC_offsets[2*(node)] = (len);				\
 	}								\

@@ -1846,7 +1846,7 @@ S_not_a_number(pTHX_ SV *sv)
           pv = sv_uni_display(dsv, sv, 10, 0);
      } else {
 	  char *d = tmpbuf;
-	  char *limit = tmpbuf + sizeof(tmpbuf) - 8;
+	  const char * const limit = tmpbuf + sizeof(tmpbuf) - 8;
 	  /* each *s can expand to 4 chars + "...\0",
 	     i.e. need room for 8 chars */
 	
@@ -2095,11 +2095,13 @@ Perl_sv_2iv(pTHX_ register SV *sv)
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
-	  SV* tmpstr;
-          if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)) &&
-                (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv))))
-	      return SvIV(tmpstr);
-	  return PTR2IV(SvRV(sv));
+	    if (SvAMAGIC(sv)) {
+		SV * const tmpstr=AMG_CALLun(sv,numer);
+		if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
+		    return SvIV(tmpstr);
+		}
+	    }
+	    return PTR2IV(SvRV(sv));
 	}
 	if (SvREADONLY(sv) && SvFAKE(sv)) {
 	    sv_force_normal(sv);
@@ -10050,8 +10052,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
         if(SvTYPE(sstr) == SVt_PVHV &&
 	   (hvname = HvNAME_get(sstr))) {
 	    /** don't clone stashes if they already exist **/
-	    HV* old_stash = gv_stashpv(hvname,0);
-	    return (SV*) old_stash;
+	    return (SV*)gv_stashpv(hvname,0);
         }
     }
 
