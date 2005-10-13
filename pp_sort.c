@@ -269,7 +269,7 @@ dynprep(pTHX_ gptr *list1, gptr *list2, size_t nmemb, SVCOMPARE_t cmp)
  * problem is subdivided into smaller and smaller parts, the parts
  * fit into smaller (and faster) caches.  So it doesn't matter how
  * many levels of cache exist, quicksort will "find" them, and,
- * as long as smaller is faster, take advanatge of them.
+ * as long as smaller is faster, take advantage of them.
  *
  * By contrast, consider how the original mergesort algorithm worked.
  * Suppose we have five runs (each typically of length 2 after dynprep).
