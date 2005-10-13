@@ -65,13 +65,11 @@ die "$0: must be run on an ASCII system\n" unless ord 'A' == 65;
 # the test below to allow that version too. DAPM Feb 04.
 
 my $version = `$bison -V`;
-unless ($version =~ /\b(1\.875[a-z]?|2\.0)\b/) { die <<EOF; }
+unless ($version =~ /\b(1\.875[a-z]?|2\.[01])\b/) { die <<EOF; }
 
 You have the wrong version of bison in your path; currently 1.875
-or 2.0 is required.  Try installing
-    http://ftp.gnu.org/gnu/bison/bison-2.0.tar.gz
-or
-    http://ftp.gnu.org/gnu/bison/bison-1.875.tar.bz2
+2.0 or 2.1 is required.  Try installing
+    http://ftp.gnu.org/gnu/bison/bison-2.1.tar.gz
 or similar.  Your bison identifies itself as:
 
 $version

@@ -77,6 +77,7 @@
 %nonassoc EQOP
 %nonassoc RELOP
 %nonassoc UNIOP UNIOPSUB
+%nonassoc REQUIRE
 %left <ival> SHIFTOP
 %left ADDOP
 %left MULOP
