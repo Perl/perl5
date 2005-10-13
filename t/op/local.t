@@ -6,6 +6,12 @@ BEGIN {
 }
 plan tests => 85;
 
+my $list_assignment_supported = 1;
+
+#mg.c says list assignment not supported on VMS, EPOC, and SYMBIAN.
+$list_assignment_supported = 0 if ($^O eq 'VMS');
+
+
 sub foo {
     local($a, $b) = @_;
     local($c, $d);
@@ -253,7 +259,10 @@ is($ENV{_Z_}, 'c');
 # local() should preserve the existenceness of %ENV elements
 ok(! exists $ENV{_A_});
 ok(! exists $ENV{_B_});
-{
+
+SKIP: {
+    skip("Can't make list assignment to \%ENV on this system")
+	unless $list_assignment_supported;
     my $d = join("\n", map { "$_=>$ENV{$_}" } sort keys %ENV);
     local %ENV = %ENV;
     is(join("\n", map { "$_=>$ENV{$_}" } sort keys %ENV), $d);
