@@ -3428,7 +3428,7 @@ char *
 Perl_sv_2pvutf8(pTHX_ register SV *sv, STRLEN *lp)
 {
     sv_utf8_upgrade(sv);
-    return SvPV(sv,*lp);
+    return lp ? SvPV(sv,*lp) : SvPV_nolen(sv);
 }
 
 /*
