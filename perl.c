@@ -3096,7 +3096,7 @@ Perl_moreswitches(pTHX_ char *s)
 		s+=strlen(s);
 	    }
 	    else if (*s != '\0') {
-		Perl_croak(aTHX_ "Can't use '%c' after -A%.*s", *s, s-start, start);
+		Perl_croak(aTHX_ "Can't use '%c' after -A%.*s", *s, (int)(s-start), start);
 	    }
 	    av_push(PL_preambleav, sv);
 	    return s;

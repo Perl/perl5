@@ -17,6 +17,7 @@ $ENV{PERL_CORE} = 1;
 
 # remove empty elements due to insertion of empty symbols via "''p1'" syntax
 @ARGV = grep($_,@ARGV) if $^O eq 'VMS';
+our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
 
 # Cheesy version of Getopt::Std.  Maybe we should replace it with that.
 {
@@ -68,6 +69,7 @@ $ENV{EMXSHELL} = 'sh';        # For OS/2
 # Roll your own File::Find!
 use TestInit;
 use File::Spec;
+use Time::HiRes;
 my $curdir = File::Spec->curdir;
 my $updir  = File::Spec->updir;
 
@@ -260,8 +262,8 @@ EOT
     my $tested_files  = 0;
     my $totmax = 0;
 
-    my $test;
-    while ($test = shift @tests) {
+    while (my $test = shift @tests) {
+        my $test_start_time = Time::HiRes::time();
 
 	if ( $::infinite{$test} && $type eq 'compile' ) {
 	    print STDERR "$test creates infinite loop! Skipping.\n";
@@ -291,7 +293,7 @@ EOT
 	# XXX DAPM %OVER not defined anywhere
 	# $test = $OVER{$test} if exists $OVER{$test};
 
-	open(SCRIPT,"<$test") or die "Can't run $test.\n";
+	open(SCRIPT,"<",$test) or die "Can't run $test.\n";
 	$_ = <SCRIPT>;
 	close(SCRIPT) unless ($type eq 'deparse');
 	if ($::with_utf16) {
@@ -560,7 +562,14 @@ EOT
 	}
 	else {
 	    if ($max) {
-		print "${te}ok\n";
+		my $elapsed;
+		if ( $show_elapsed_time ) {
+		    $elapsed = sprintf( " %8.0f ms", (Time::HiRes::time() - $test_start_time) * 1000 );
+		}
+		else {
+		    $elapsed = "";
+		}
+		print "${te}ok$elapsed\n";
 		$good_files++;
 	    }
 	    else {
@@ -568,7 +577,7 @@ EOT
 		$tested_files -= 1;
 	    }
 	}
-    }
+    } # while tests
 
     if ($::bad_files == 0) {
 	if ($good_files) {

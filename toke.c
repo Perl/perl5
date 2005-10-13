@@ -408,12 +408,12 @@ S_no_op(pTHX_ const char *what, char *s)
 	    if (t < PL_bufptr && isSPACE(*t))
 		Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 			"\t(Do you need to predeclare %.*s?)\n",
-		    t - PL_oldoldbufptr, PL_oldoldbufptr);
+		    (int)(t - PL_oldoldbufptr), PL_oldoldbufptr);
 	}
 	else {
 	    assert(s >= oldbp);
 	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-		    "\t(Missing operator before %.*s?)\n", s - oldbp, oldbp);
+		    "\t(Missing operator before %.*s?)\n", (int)(s - oldbp), oldbp);
 	}
     }
     PL_bufptr = oldbp;
@@ -2852,7 +2852,7 @@ Perl_yylex(pTHX)
 		     * at least, set argv[0] to the basename of the Perl
 		     * interpreter. So, having found "#!", we'll set it right.
 		     */
-		    SV *x = GvSV(gv_fetchpv("\030", TRUE, SVt_PV)); /* $^X */
+		    SV * const x = GvSV(gv_fetchpv("\030", TRUE, SVt_PV)); /* $^X */
 		    assert(SvPOK(x) || SvGMAGICAL(x));
 		    if (sv_eq(x, CopFILESV(PL_curcop))) {
 			sv_setpvn(x, ipath, ipathend - ipath);
@@ -4964,9 +4964,10 @@ Perl_yylex(pTHX)
 		    /* [perl #16184] */
 		    && !(t[0] == '=' && t[1] == '>')
 		) {
+		    int len = (int)(d-s);
 		    Perl_warner(aTHX_ packWARN(WARN_PRECEDENCE),
 			   "Precedence problem: open %.*s should be open(%.*s)",
-			    d - s, s, d - s, s);
+			    len, s, len, s);
 		}
 	    }
 	    LOP(OP_OPEN,XTERM);

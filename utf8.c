@@ -560,10 +560,12 @@ malformed:
 	    if (s == s0)
 	        Perl_sv_catpvf(aTHX_ sv, "(unexpected non-continuation byte 0x%02"UVxf", immediately after start byte 0x%02"UVxf")",
                            (UV)s[1], startbyte);
-	    else
+	    else {
+		const int len = (int)(s-s0);
 	        Perl_sv_catpvf(aTHX_ sv, "(unexpected non-continuation byte 0x%02"UVxf", %d byte%s after start byte 0x%02"UVxf", expected %d bytes)",
-                           (UV)s[1], s - s0, s - s0 > 1 ? "s" : "", startbyte, (int)expectlen);
-	      
+                           (UV)s[1], len, len > 1 ? "s" : "", startbyte, (int)expectlen);
+	    }
+
 	    break;
 	case UTF8_WARN_FE_FF:
 	    Perl_sv_catpvf(aTHX_ sv, "(byte 0x%02"UVxf")", uv);

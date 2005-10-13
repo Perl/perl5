@@ -355,11 +355,11 @@ cmp_desc(pTHX_ gptr a, gptr b)
 STATIC void
 S_mergesortsv(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 {
-    IV i, run, runs, offset;
+    IV i, run, offset;
     I32 sense, level;
+    register gptr *f1, *f2, *t, *b, *p;
     int iwhich;
-    register gptr *f1, *f2, *t, *b, *p, *tp2, *l1, *l2, *q;
-    gptr *aux, *list1, *list2;
+    gptr *aux;
     gptr *p1;
     gptr small[SMALLSORT];
     gptr *which[3];
@@ -388,11 +388,14 @@ S_mergesortsv(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 	 * is needed at the next level up.  Hop up a level, and,
 	 * as long as stackp->runs is 0, keep merging.
 	 */
-	if ((runs = stackp->runs) == 0) {
+	IV runs = stackp->runs;
+	if (runs == 0) {
+	    gptr *list1, *list2;
 	    iwhich = level & 1;
 	    list1 = which[iwhich];		/* area where runs are now */
 	    list2 = which[++iwhich];		/* area for merged runs */
 	    do {
+		register gptr *l1, *l2, *tp2;
 		offset = stackp->offset;
 		f1 = p1 = list1 + offset;		/* start of first run */
 		p = tp2 = list2 + offset;	/* where merged run will go */
@@ -422,7 +425,7 @@ S_mergesortsv(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 		    ** and -1 when equality should look high.
 		    */
 
-
+		    register gptr *q;
 		    if (cmp(aTHX_ *f1, *f2) <= 0) {
 			q = f2; b = f1; t = l1;
 			sense = -1;
@@ -1713,7 +1716,7 @@ PP(pp_sort)
 	av_extend(av, max);
 	for (i=0; i < max; i++) {
 	    SV * const sv = base[i];
-	    SV **didstore = av_store(av, i, sv);
+	    SV ** const didstore = av_store(av, i, sv);
 	    if (SvSMAGICAL(sv))
 		mg_set(sv);
 	    if (!didstore)
