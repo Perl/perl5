@@ -1408,7 +1408,7 @@ sub inIS_text($){
 sub process_puretext {
     my($text, $quote, $notinIS) = @_;
 
-    ## Guessing at func() or [$@%&]*var references in plain text is destined
+    ## Guessing at func() or [\$\@%&]*var references in plain text is destined
     ## to produce some strange looking ref's. uncomment to disable:
     ## $notinIS = 0;
 
@@ -2072,7 +2072,7 @@ sub fragment_id {
 	return $1 if $text =~ /->\s*(\w+)\s*\(?/;
 
 	# a variable name?
-	return $1 if $text =~ /^([$@%*]\S+)/;
+	return $1 if $text =~ /^([\$\@%*]\S+)/;
 
 	# some pattern matching operator?
 	return $1 if $text =~ m|^(\w+/).*/\w*$|;
