@@ -360,7 +360,8 @@ Whitespace in filenames is tolerated on most systems, but not all,
 and even on systems where it might be tolerated, some utilities
 might become confused by such whitespace.
 
-Many systems (DOS, VMS) cannot have more than one C<.> in their filenames.
+Many systems (DOS, VMS ODS-2) cannot have more than one C<.> in their
+filenames.
 
 Don't assume C<< > >> won't be the first character of a filename.
 Always use C<< < >> explicitly to open a file for reading, or even
@@ -1057,6 +1058,9 @@ MPW, ftp://ftp.apple.com/developer/Tool_Chest/Core_Mac_OS_Tools/
 =head2 VMS
 
 Perl on VMS is discussed in L<perlvms> in the perl distribution.
+
+The official name of VMS as of this writing is OpenVMS.
+
 Perl on VMS can accept either VMS- or Unix-style file
 specifications as in either of the following:
 
@@ -1093,17 +1097,78 @@ you are so inclined.  For example:
 Do take care with C<$ ASSIGN/nolog/user SYS$COMMAND: SYS$INPUT> if your
 perl-in-DCL script expects to do things like C<< $read = <STDIN>; >>.
 
-Filenames are in the format "name.extension;version".  The maximum
-length for filenames is 39 characters, and the maximum length for
+The VMS operating system has two filesystems, known as ODS-2 and ODS-5.
+
+For ODS-2, filenames are in the format "name.extension;version".  The
+maximum length for filenames is 39 characters, and the maximum length for
 extensions is also 39 characters.  Version is a number from 1 to
 32767.  Valid characters are C</[A-Z0-9$_-]/>.
 
-VMS's RMS filesystem is case-insensitive and does not preserve case.
-C<readdir> returns lowercased filenames, but specifying a file for
-opening remains case-insensitive.  Files without extensions have a
-trailing period on them, so doing a C<readdir> with a file named F<A.;5>
-will return F<a.> (though that file could be opened with
+The ODS-2 filesystem is case-insensitive and does not preserve case.
+Perl simulates this by converting all filenames to lowercase internally.
+
+For ODS-5, filenames may have almost any character in them and can include
+Unicode characters.  Characters that could be misinterpreted by the DCL
+shell or file parsing utilities need to be prefixed with the C<^>
+character, or replaced with hexadecimal characters prefixed with the
+C<^> character.  Such prefixing is only needed with the pathnames are
+in VMS format in applications.  Programs that can accept the UNIX format
+of pathnames do not need the escape characters.  The maximum length for
+filenames is 255 characters.  The ODS-5 file system can handle both
+a case preserved and a case sensitive mode.
+
+ODS-5 is only available on the OpenVMS for 64 bit platforms.
+
+Support for the extended file specifications is being done as optional
+settings to preserve backward compatibility with Perl scripts that
+assume the previous VMS limitations.
+
+In general routines on VMS that get a UNIX format file specification
+should return it in a UNIX format, and when they get a VMS format
+specification they should return a VMS format unless they are documented
+to do a conversion.
+
+For routines that generate return a file specification, VMS allows setting
+if the C library which Perl is built on if it will be returned in VMS
+format or in UNIX format.
+
+With the ODS-2 file system, there is not much difference in syntax of
+filenames without paths for VMS or UNIX.  With the extended character
+set available with ODS-5 there can be a significant difference.
+
+Because of this, existing Perl scripts written for VMS were sometimes
+treating VMS and UNIX filenames interchangeably.  Without the extended
+character set enabled, this behavior will mostly be maintained for
+backwards compatibility.
+
+When extended characters are enabled with ODS-5, the handling of
+UNIX formatted file specifications is to that of a UNIX system.
+
+VMS file specifications without extensions have a trailing dot.  An
+equivalent UNIX file specification should not show the trailing dot.
+
+The result of all of this, is that for VMS, for portable scripts, you
+can not depend on Perl to present the filenames in lowercase, to be
+case sensitive, and that the filenames could be returned in either
+UNIX or VMS format.
+
+And if a routine returns a file specification, unless it is intended to
+convert it, it should return it in the same format as it found it.
+
+C<readdir> by default has traditionally returned lowercased filenames.
+When the ODS-5 support is enabled, it will return the exact case of the
+filename on the disk.
+
+Files without extensions have a trailing period on them, so doing a
+C<readdir> in the default mode with a file named F<A.;5> will
+return F<a.> when VMS is (though that file could be opened with
 C<open(FH, 'A')>).
+
+With support for extended file specifications and if C<opendir> was
+given a UNIX format directory, a file named F<A.;5> will return F<a>
+and optionally in the exact case on the disk.  When C<opendir> is given
+a VMS format directory, then C<readdir> should return F<a.>, and
+again with the optionally the exact case.
 
 RMS had an eight level limit on directory depths from any rooted logical
 (allowing 16 levels overall) prior to VMS 7.2.  Hence
@@ -1115,7 +1180,8 @@ as C</PERL_ROOT/lib/2/3/4/5/6/7/8/>.
 The VMS::Filespec module, which gets installed as part of the build
 process on VMS, is a pure Perl module that can easily be installed on
 non-VMS platforms and can be helpful for conversions to and from RMS
-native formats.
+native formats.  It is also now the only way that you should check to
+see if VMS is in a case sensitive mode.
 
 What C<\n> represents depends on the type of file opened.  It usually
 represents C<\012> but it could also be C<\015>, C<\012>, C<\015\012>, 
@@ -1125,6 +1191,10 @@ special fopen() requirements of files with unusual attributes on VMS.
 
 TCP/IP stacks are optional on VMS, so socket routines might not be
 implemented.  UDP sockets may not be supported.
+
+The TCP/IP library support for all current versions of VMS is dynamically
+loaded if present, so even if the routines are configured, they may
+return a status indicating that they are not implemented.
 
 The value of C<$^O> on OpenVMS is "VMS".  To determine the architecture
 that you are running on without resorting to loading all of C<%Config>
@@ -1136,9 +1206,15 @@ you can examine the content of the C<@INC> array like so:
     } elsif (grep(/VMS_VAX/, @INC)) {
         print "I'm on VAX!\n";
 
+    } elsif (grep(/VMS_IA64/, @INC)) {
+        print "I'm on IA64!\n";
+
     } else {
         print "I'm not so sure about where $^O is...\n";
     }
+
+In general, the significant differences should only be if Perl is running
+on VMS_VAX or one of the 64 bit OpenVMS platforms.
 
 On VMS, perl determines the UTC offset from the C<SYS$TIMEZONE_DIFFERENTIAL>
 logical name.  Although the VMS epoch began at 17-NOV-1858 00:00:00.00,
@@ -1622,11 +1698,17 @@ mapping the C<1> to SS$_ABORT (C<44>).  This behavior may be overridden
 with the pragma C<use vmsish 'exit'>.  As with the CRTL's exit()
 function, C<exit 0> is also mapped to an exit status of SS$_NORMAL
 (C<1>); this mapping cannot be overridden.  Any other argument to exit()
-is used directly as Perl's exit status. (VMS)
+is used directly as Perl's exit status.  On VMS, unless the future
+POSIX_EXIT mode is enabled, the exit code should always be a valid
+VMS exit code and not a generic number.  When the POSIX_EXIT mode is
+enabled, a generic number will be encoded in a method compatible with
+the C library _POSIX_EXIT macro so that it can be decoded by other
+programs, particularly ones written in C, like the GNV package.  (VMS)
 
 =item fcntl
 
-Not implemented. (Win32, VMS)
+Not implemented. (Win32)
+Some functions available based on the version of VMS. (VMS)
 
 =item flock
 
@@ -1800,15 +1882,20 @@ and makes it exit immediately with exit status $sig.  As in Unix, if
 $sig is 0 and the specified process exists, it returns true without
 actually terminating it. (Win32)
 
+Is not supported for process identification number of 0 or negative
+numbers. (VMS)
+
 =item link
 
-Not implemented. (S<Mac OS>, MPE/iX, VMS, S<RISC OS>)
+Not implemented. (S<Mac OS>, MPE/iX, S<RISC OS>)
 
 Link count not updated because hard links are not quite that hard
 (They are sort of half-way between hard and soft links). (AmigaOS)
 
 Hard links are implemented on Win32 (Windows NT and Windows 2000)
 under NTFS only.
+
+Available on 64 bit OpenVMS 8.2 and later.  (VMS)
 
 =item localtime
 
@@ -1819,7 +1906,7 @@ operating system's implementation of localtime().
 
 =item lstat
 
-Not implemented. (VMS, S<RISC OS>)
+Not implemented. (S<RISC OS>)
 
 Return values (especially for device and inode) may be bogus. (Win32)
 
@@ -1908,7 +1995,9 @@ be implemented even in UNIX platforms.
 
 =item socketpair
 
-Not implemented. (Win32, VMS, S<RISC OS>, VOS, VM/ESA)
+Not implemented. (Win32, S<RISC OS>, VOS, VM/ESA)
+
+Available on 64 bit OpenVMS 8.2 and later.  (VMS)
 
 =item stat
 
@@ -1985,6 +2074,8 @@ Does not automatically flush output handles on some platforms.
 The return value is POSIX-like (shifted up by 8 bits), which only allows
 room for a made-up value derived from the severity bits of the native
 32-bit condition code (unless overridden by C<use vmsish 'status'>). 
+If the native condition code is one that has a POSIX value encoded, the
+POSIX value will be decoded to extract the expected exit value.
 For more details see L<perlvms/$?>. (VMS)
 
 =item times
@@ -2217,4 +2308,4 @@ Paul J. Schinder <schinder@pobox.com>,
 Michael G Schwern <schwern@pobox.com>,
 Dan Sugalski <dan@sidhe.org>,
 Nathan Torkington <gnat@frii.com>.
-
+John Malmberg <wb8tyw@qsl.net>
