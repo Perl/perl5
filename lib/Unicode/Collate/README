@@ -1,4 +1,4 @@
-Unicode/Collate version 0.51
+Unicode/Collate version 0.52
 ===============================
 
 NAME
@@ -34,8 +34,8 @@ You can install such a table file by adding it
 to "Collate" directory (where "keys.txt" is placed) in this distribution
 before executing Makefile.PL.
 
-The most preferable one is "The Default Unicode Collation Element Table",
-available from the Unicode Consortium's website:
+The most preferable one is "The Default Unicode Collation Element Table"
+(aka DUCET), available from the Unicode Consortium's website:
 
    http://www.unicode.org/Public/UCA/
 
@@ -92,6 +92,6 @@ This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
 The file Unicode/Collate/allkeys.txt was copied directly
-from http://www.unicode.org/Public/UCA/4.1.0/allkeys.txt (aka DUCET).
+from http://www.unicode.org/Public/UCA/4.1.0/allkeys.txt
 This file is Copyright (c) 1991-2005 Unicode, Inc. All rights reserved.
 Distributed under the Terms of Use in http://www.unicode.org/copyright.html
