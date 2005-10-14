@@ -518,10 +518,6 @@ struct loop {
 #define PERL_LOADMOD_NOIMPORT		0x2
 #define PERL_LOADMOD_IMPORT_OPS		0x4
 
-#if defined(PERL_IN_PERLY_C) || defined(PERL_IN_OP_C)
-#define ref(o, type) doref(o, type, TRUE)
-#endif
-
 /* no longer used anywhere in core */
 #ifndef PERL_CORE
 #define cv_ckproto(cv, gv, p) \

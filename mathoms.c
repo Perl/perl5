@@ -67,6 +67,7 @@ PERL_CALLCONV int Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...
 PERL_CALLCONV int Perl_printf_nocontext(const char *format, ...);
 
 
+#if 0
 /* ref() is now a macro using Perl_doref;
  * this version provided for binary compatibility only.
  */
@@ -75,6 +76,7 @@ Perl_ref(pTHX_ OP *o, I32 type)
 {
     return doref(o, type, TRUE);
 }
+#endif
 
 /*
 =for apidoc sv_unref

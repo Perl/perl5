@@ -1450,7 +1450,7 @@ Perl_refkids(pTHX_ OP *o, I32 type)
 }
 
 OP *
-Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
+Perl_ref(pTHX_ OP *o, I32 type)
 {
     OP *kid;
 
@@ -1472,12 +1472,12 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 
     case OP_COND_EXPR:
 	for (kid = cUNOPo->op_first->op_sibling; kid; kid = kid->op_sibling)
-	    doref(kid, type, set_op_ref);
+	    ref(kid, type);
 	break;
     case OP_RV2SV:
 	if (type == OP_DEFINED)
 	    o->op_flags |= OPf_SPECIAL;		/* don't create GV */
-	doref(cUNOPo->op_first, o->op_type, set_op_ref);
+	ref(cUNOPo->op_first, o->op_type);
 	/* FALL THROUGH */
     case OP_PADSV:
 	if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV) {
@@ -1496,30 +1496,28 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 
     case OP_RV2AV:
     case OP_RV2HV:
-	if (set_op_ref)
-	    o->op_flags |= OPf_REF;
+	o->op_flags |= OPf_REF;
 	/* FALL THROUGH */
     case OP_RV2GV:
 	if (type == OP_DEFINED)
 	    o->op_flags |= OPf_SPECIAL;		/* don't create GV */
-	doref(cUNOPo->op_first, o->op_type, set_op_ref);
+	ref(cUNOPo->op_first, o->op_type);
 	break;
 
     case OP_PADAV:
     case OP_PADHV:
-	if (set_op_ref)
-	    o->op_flags |= OPf_REF;
+	o->op_flags |= OPf_REF;
 	break;
 
     case OP_SCALAR:
     case OP_NULL:
 	if (!(o->op_flags & OPf_KIDS))
 	    break;
-	doref(cBINOPo->op_first, type, set_op_ref);
+	ref(cBINOPo->op_first, type);
 	break;
     case OP_AELEM:
     case OP_HELEM:
-	doref(cBINOPo->op_first, o->op_type, set_op_ref);
+	ref(cBINOPo->op_first, o->op_type);
 	if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV) {
 	    o->op_private |= (type == OP_RV2AV ? OPpDEREF_AV
 			      : type == OP_RV2HV ? OPpDEREF_HV
@@ -1530,13 +1528,11 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 
     case OP_SCOPE:
     case OP_LEAVE:
-	set_op_ref = FALSE;
-	/* FALL THROUGH */
     case OP_ENTER:
     case OP_LIST:
 	if (!(o->op_flags & OPf_KIDS))
 	    break;
-	doref(cLISTOPo->op_last, type, set_op_ref);
+	ref(cLISTOPo->op_last, type);
 	break;
     default:
 	break;

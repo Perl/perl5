@@ -7,7 +7,7 @@ BEGIN {
 
 require 'test.pl';
 
-plan (105);
+plan (99);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -316,36 +316,6 @@ sub test_arylen {
     test_arylen ($a);
     test_arylen (do {my @a; \$#a});
 }
-
-{
-    # Bug #37350
-    my @array = (1..4);
-    $#{@array} = 7;
-    is ($#{4}, 7);
-
-    my $x;
-    $#{$x} = 3;
-    is(scalar @$x, 4);
-
-    push @{@array}, 23;
-    is ($4[8], 23);
-}
-{
-    # Bug #37350 -- once more with a global
-    use vars '@array';
-    @array = (1..4);
-    $#{@array} = 7;
-    is ($#{4}, 7);
-
-    my $x;
-    $#{$x} = 3;
-    is(scalar @$x, 4);
-
-    push @{@array}, 23;
-    is ($4[8], 23);
-}
-
-# more tests for AASSIGN_COMMON
 
 {
     our($x,$y,$z) = (1..3);

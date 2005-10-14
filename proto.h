@@ -1020,7 +1020,6 @@ PERL_CALLCONV I32	Perl_call_method(pTHX_ const char* methname, I32 flags);
 PERL_CALLCONV I32	Perl_call_pv(pTHX_ const char* sub_name, I32 flags);
 PERL_CALLCONV I32	Perl_call_sv(pTHX_ SV* sv, I32 flags);
 PERL_CALLCONV void	Perl_despatch_signals(pTHX);
-PERL_CALLCONV OP *	Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref);
 PERL_CALLCONV SV*	Perl_eval_pv(pTHX_ const char* p, I32 croak_on_error);
 PERL_CALLCONV I32	Perl_eval_sv(pTHX_ SV* sv, I32 flags);
 PERL_CALLCONV SV*	Perl_get_sv(pTHX_ const char* name, I32 create);
@@ -1047,7 +1046,7 @@ PERL_CALLCONV void	Perl_pop_scope(pTHX);
 PERL_CALLCONV OP*	Perl_prepend_elem(pTHX_ I32 optype, OP* head, OP* tail);
 PERL_CALLCONV void	Perl_push_return(pTHX_ OP* o);
 PERL_CALLCONV void	Perl_push_scope(pTHX);
-/* PERL_CALLCONV OP*	ref(pTHX_ OP* o, I32 type); */
+PERL_CALLCONV OP*	Perl_ref(pTHX_ OP* o, I32 type);
 PERL_CALLCONV OP*	Perl_refkids(pTHX_ OP* o, I32 type);
 PERL_CALLCONV void	Perl_regdump(pTHX_ const regexp* r);
 PERL_CALLCONV SV*	Perl_regclass_swash(pTHX_ struct regnode *n, bool doinit, SV **listsvp, SV **altsvp);
