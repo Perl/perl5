@@ -1422,7 +1422,7 @@ Perl_refkids(pTHX_ OP *o, I32 type)
 }
 
 OP *
-Perl_ref(pTHX_ OP *o, I32 type)
+Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 {
     dVAR;
     OP *kid;
@@ -1444,12 +1444,12 @@ Perl_ref(pTHX_ OP *o, I32 type)
 
     case OP_COND_EXPR:
 	for (kid = cUNOPo->op_first->op_sibling; kid; kid = kid->op_sibling)
-	    ref(kid, type);
+	    doref(kid, type, set_op_ref);
 	break;
     case OP_RV2SV:
 	if (type == OP_DEFINED)
 	    o->op_flags |= OPf_SPECIAL;		/* don't create GV */
-	ref(cUNOPo->op_first, o->op_type);
+	doref(cUNOPo->op_first, o->op_type, set_op_ref);
 	/* FALL THROUGH */
     case OP_PADSV:
 	if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV) {
@@ -1466,28 +1466,30 @@ Perl_ref(pTHX_ OP *o, I32 type)
 
     case OP_RV2AV:
     case OP_RV2HV:
-	o->op_flags |= OPf_REF;
+	if (set_op_ref)
+	    o->op_flags |= OPf_REF;
 	/* FALL THROUGH */
     case OP_RV2GV:
 	if (type == OP_DEFINED)
 	    o->op_flags |= OPf_SPECIAL;		/* don't create GV */
-	ref(cUNOPo->op_first, o->op_type);
+	doref(cUNOPo->op_first, o->op_type, set_op_ref);
 	break;
 
     case OP_PADAV:
     case OP_PADHV:
-	o->op_flags |= OPf_REF;
+	if (set_op_ref)
+	    o->op_flags |= OPf_REF;
 	break;
 
     case OP_SCALAR:
     case OP_NULL:
 	if (!(o->op_flags & OPf_KIDS))
 	    break;
-	ref(cBINOPo->op_first, type);
+	doref(cBINOPo->op_first, type, set_op_ref);
 	break;
     case OP_AELEM:
     case OP_HELEM:
-	ref(cBINOPo->op_first, o->op_type);
+	doref(cBINOPo->op_first, o->op_type, set_op_ref);
 	if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV) {
 	    o->op_private |= (type == OP_RV2AV ? OPpDEREF_AV
 			      : type == OP_RV2HV ? OPpDEREF_HV
@@ -1498,17 +1500,28 @@ Perl_ref(pTHX_ OP *o, I32 type)
 
     case OP_SCOPE:
     case OP_LEAVE:
+	set_op_ref = FALSE;
+	/* FALL THROUGH */
     case OP_ENTER:
     case OP_LIST:
 	if (!(o->op_flags & OPf_KIDS))
 	    break;
-	ref(cLISTOPo->op_last, type);
+	doref(cLISTOPo->op_last, type, set_op_ref);
 	break;
     default:
 	break;
     }
     return scalar(o);
 
+}
+
+/* ref() is now a macro using Perl_doref;
+ * this version provided for binary compatibility only.
+ */
+OP *
+Perl_ref(pTHX_ OP *o, I32 type)
+{
+    return doref(o, type, TRUE);
 }
 
 STATIC OP *

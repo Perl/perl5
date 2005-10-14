@@ -507,6 +507,9 @@ struct loop {
 #define PERL_LOADMOD_NOIMPORT		0x2
 #define PERL_LOADMOD_IMPORT_OPS		0x4
 
+/* used in perly.y */
+#define ref(o, type) doref(o, type, TRUE)
+
 #ifdef USE_REENTRANT_API
 #include "reentr.h"
 #endif

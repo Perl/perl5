@@ -1673,6 +1673,9 @@ PERL_CALLCONV I32	Perl_call_sv(pTHX_ SV* sv, I32 flags)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV void	Perl_despatch_signals(pTHX);
+PERL_CALLCONV OP *	Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
+			__attribute__nonnull__(pTHX_1);
+
 PERL_CALLCONV SV*	Perl_eval_pv(pTHX_ const char* p, I32 croak_on_error)
 			__attribute__nonnull__(pTHX_1);
 
@@ -1735,7 +1738,7 @@ PERL_CALLCONV OP*	Perl_pmtrans(pTHX_ OP* o, OP* expr, OP* repl)
 PERL_CALLCONV void	Perl_pop_scope(pTHX);
 PERL_CALLCONV OP*	Perl_prepend_elem(pTHX_ I32 optype, OP* head, OP* tail);
 PERL_CALLCONV void	Perl_push_scope(pTHX);
-PERL_CALLCONV OP*	Perl_ref(pTHX_ OP* o, I32 type);
+/* PERL_CALLCONV OP*	ref(pTHX_ OP* o, I32 type); */
 PERL_CALLCONV OP*	Perl_refkids(pTHX_ OP* o, I32 type);
 PERL_CALLCONV void	Perl_regdump(pTHX_ regexp* r)
 			__attribute__nonnull__(pTHX_1);

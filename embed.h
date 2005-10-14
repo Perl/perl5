@@ -614,6 +614,7 @@
 #define call_pv			Perl_call_pv
 #define call_sv			Perl_call_sv
 #define despatch_signals	Perl_despatch_signals
+#define doref			Perl_doref
 #define eval_pv			Perl_eval_pv
 #define eval_sv			Perl_eval_sv
 #define get_sv			Perl_get_sv
@@ -645,7 +646,6 @@
 #endif
 #define push_scope		Perl_push_scope
 #ifdef PERL_CORE
-#define ref			Perl_ref
 #define refkids			Perl_refkids
 #endif
 #define regdump			Perl_regdump
@@ -2608,6 +2608,7 @@
 #define call_pv(a,b)		Perl_call_pv(aTHX_ a,b)
 #define call_sv(a,b)		Perl_call_sv(aTHX_ a,b)
 #define despatch_signals()	Perl_despatch_signals(aTHX)
+#define doref(a,b,c)		Perl_doref(aTHX_ a,b,c)
 #define eval_pv(a,b)		Perl_eval_pv(aTHX_ a,b)
 #define eval_sv(a,b)		Perl_eval_sv(aTHX_ a,b)
 #define get_sv(a,b)		Perl_get_sv(aTHX_ a,b)
@@ -2639,7 +2640,6 @@
 #endif
 #define push_scope()		Perl_push_scope(aTHX)
 #ifdef PERL_CORE
-#define ref(a,b)		Perl_ref(aTHX_ a,b)
 #define refkids(a,b)		Perl_refkids(aTHX_ a,b)
 #endif
 #define regdump(a)		Perl_regdump(aTHX_ a)

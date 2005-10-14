@@ -590,6 +590,7 @@ Apd	|I32	|call_method	|NN const char* methname|I32 flags
 Apd	|I32	|call_pv	|NN const char* sub_name|I32 flags
 Apd	|I32	|call_sv	|NN SV* sv|I32 flags
 Ap	|void	|despatch_signals
+Ap	|OP *	|doref		|NN OP *o|I32 type|bool set_op_ref
 Apd	|SV*	|eval_pv	|NN const char* p|I32 croak_on_error
 Apd	|I32	|eval_sv	|NN SV* sv|I32 flags
 Apd	|SV*	|get_sv		|NN const char* name|I32 create
@@ -615,7 +616,7 @@ p	|OP*	|pmtrans	|NN OP* o|NN OP* expr|NN OP* repl
 Ap	|void	|pop_scope
 p	|OP*	|prepend_elem	|I32 optype|NULLOK OP* head|NULLOK OP* tail
 Ap	|void	|push_scope
-p	|OP*	|ref		|NULLOK OP* o|I32 type
+Amb	|OP*	|ref		|NULLOK OP* o|I32 type
 p	|OP*	|refkids	|NULLOK OP* o|I32 type
 Ap	|void	|regdump	|NN regexp* r
 Ap	|SV*	|regclass_swash	|NN const struct regnode *n|bool doinit|NULLOK SV **listsvp|NULLOK SV **altsvp
