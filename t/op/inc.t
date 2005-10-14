@@ -2,7 +2,7 @@
 
 # use strict;
 
-print "1..32\n";
+print "1..34\n";
 
 my $test = 1;
 
@@ -185,3 +185,12 @@ ok ($a == 2147483647, $a);
 $a = 2147483648;
 $c=$a--;
 ok ($a == 2147483647, $a);
+
+{
+    use integer;
+    my $x = 0;
+    $x++;
+    ok ($x == 1, "(void) i_postinc");
+    $x--;
+    ok ($x == 0, "(void) i_postdec");
+}

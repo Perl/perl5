@@ -804,6 +804,16 @@ Perl_scalarvoid(pTHX_ OP *o)
 	o->op_ppaddr = PL_ppaddr[OP_PREDEC];
 	break;
 
+    case OP_I_POSTINC:
+	o->op_type = OP_I_PREINC;	/* pre-increment is faster */
+	o->op_ppaddr = PL_ppaddr[OP_I_PREINC];
+	break;
+
+    case OP_I_POSTDEC:
+	o->op_type = OP_I_PREDEC;	/* pre-decrement is faster */
+	o->op_ppaddr = PL_ppaddr[OP_I_PREDEC];
+	break;
+
     case OP_OR:
     case OP_AND:
     case OP_DOR:
