@@ -1173,8 +1173,8 @@ PP(pp_match)
     dSP; dTARG;
     register PMOP *pm = cPMOP;
     PMOP *dynpm = pm;
-    const register char *t;
-    const register char *s;
+    register const char *t;
+    register const char *s;
     const char *strend;
     I32 global;
     I32 r_flags = REXEC_CHECKED;

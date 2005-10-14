@@ -6799,7 +6799,7 @@ thats_really_all_folks:
 
 screamer2:
 	if (rslen) {
-            const register STDCHAR *bpe = buf + sizeof(buf);
+            register const STDCHAR *bpe = buf + sizeof(buf);
 	    bp = buf;
 	    while ((i = PerlIO_getc(fp)) != EOF && (*bp++ = (STDCHAR)i) != rslast && bp < bpe)
 		; /* keep reading */
@@ -7751,7 +7751,7 @@ Perl_sv_true(pTHX_ register SV *sv)
     if (!sv)
 	return 0;
     if (SvPOK(sv)) {
-	const register XPV* tXpv;
+	register const XPV* tXpv;
 	if ((tXpv = (XPV*)SvANY(sv)) &&
 		(tXpv->xpv_cur > 1 ||
 		(tXpv->xpv_cur && *sv->sv_u.svu_pv != '0')))

@@ -719,7 +719,7 @@ empty.
 */
 
 I32
-Perl_av_len(pTHX_ const register AV *av)
+Perl_av_len(pTHX_ register const AV *av)
 {
     return AvFILL(av);
 }

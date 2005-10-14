@@ -2407,7 +2407,7 @@ S_regmatch(pTHX_ regnode *prog)
 #if 0
     I32 firstcp = PL_savestack_ix;
 #endif
-    const register bool do_utf8 = PL_reg_match_utf8;
+    register const bool do_utf8 = PL_reg_match_utf8;
 #ifdef DEBUGGING
     SV *dsv0 = PERL_DEBUG_PAD_ZERO(0);
     SV *dsv1 = PERL_DEBUG_PAD_ZERO(1);

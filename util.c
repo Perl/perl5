@@ -365,7 +365,7 @@ Analyses the string in order to make fast searches on it using fbm_instr()
 void
 Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 {
-    const register U8 *s;
+    register const U8 *s;
     register U32 i;
     STRLEN len;
     I32 rarest = 0;
@@ -570,7 +570,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 
     {	/* Do actual FBM.  */
 	register const unsigned char *table = little + littlelen + FBM_TABLE_OFFSET;
-	const register unsigned char *oldlittle;
+	register const unsigned char *oldlittle;
 
 	if (littlelen > (STRLEN)(bigend - big))
 	    return Nullch;
@@ -632,13 +632,13 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 char *
 Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift, I32 *old_posp, I32 last)
 {
-    const register unsigned char *big;
+    register const unsigned char *big;
     register I32 pos;
     register I32 previous;
     register I32 first;
-    const register unsigned char *little;
+    register const unsigned char *little;
     register I32 stop_pos;
-    const register unsigned char *littleend;
+    register const unsigned char *littleend;
     I32 found = 0;
 
     if (*old_posp == -1
@@ -680,7 +680,7 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
     }
     big -= previous;
     do {
-	const register unsigned char *s, *x;
+	register const unsigned char *s, *x;
 	if (pos >= stop_pos) break;
 	if (big[pos] != first)
 	    continue;
@@ -1563,7 +1563,7 @@ I32
 Perl_setenv_getix(pTHX_ const char *nam)
 {
     register I32 i;
-    const register I32 len = strlen(nam);
+    register const I32 len = strlen(nam);
 
     for (i = 0; environ[i]; i++) {
 	if (
