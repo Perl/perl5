@@ -29,7 +29,6 @@
 #define PERL_IN_MATHOMS_C
 #include "perl.h"
 
-#if 0
 /* ref() is now a macro using Perl_doref;
  * this version provided for binary compatibility only.
  */
@@ -38,7 +37,6 @@ Perl_ref(pTHX_ OP *o, I32 type)
 {
     return doref(o, type, TRUE);
 }
-#endif
 
 /*
 =for apidoc sv_unref

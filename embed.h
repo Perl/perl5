@@ -630,6 +630,7 @@
 #define call_pv			Perl_call_pv
 #define call_sv			Perl_call_sv
 #define despatch_signals	Perl_despatch_signals
+#define doref			Perl_doref
 #define eval_pv			Perl_eval_pv
 #define eval_sv			Perl_eval_sv
 #define get_sv			Perl_get_sv
@@ -663,7 +664,6 @@
 #endif
 #define push_scope		Perl_push_scope
 #ifdef PERL_CORE
-#define ref			Perl_ref
 #define refkids			Perl_refkids
 #endif
 #define regdump			Perl_regdump
@@ -1639,11 +1639,6 @@
 #ifdef PERL_CORE
 #define my_swabn		Perl_my_swabn
 #endif
-#define gv_fetchpvn_flags	Perl_gv_fetchpvn_flags
-#define gv_fetchsv		Perl_gv_fetchsv
-#ifdef PERL_CORE
-#define is_gv_magical_sv	Perl_is_gv_magical_sv
-#endif
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
@@ -1701,6 +1696,11 @@
 #endif
 #ifdef PERL_CORE
 #define my_clearenv		Perl_my_clearenv
+#endif
+#define gv_fetchpvn_flags	Perl_gv_fetchpvn_flags
+#define gv_fetchsv		Perl_gv_fetchsv
+#ifdef PERL_CORE
+#define is_gv_magical_sv	Perl_is_gv_magical_sv
 #endif
 #ifndef SPRINTF_RETURNS_STRLEN
 #endif
@@ -2674,6 +2674,7 @@
 #define call_pv(a,b)		Perl_call_pv(aTHX_ a,b)
 #define call_sv(a,b)		Perl_call_sv(aTHX_ a,b)
 #define despatch_signals()	Perl_despatch_signals(aTHX)
+#define doref(a,b,c)		Perl_doref(aTHX_ a,b,c)
 #define eval_pv(a,b)		Perl_eval_pv(aTHX_ a,b)
 #define eval_sv(a,b)		Perl_eval_sv(aTHX_ a,b)
 #define get_sv(a,b)		Perl_get_sv(aTHX_ a,b)
@@ -2707,7 +2708,6 @@
 #endif
 #define push_scope()		Perl_push_scope(aTHX)
 #ifdef PERL_CORE
-#define ref(a,b)		Perl_ref(aTHX_ a,b)
 #define refkids(a,b)		Perl_refkids(aTHX_ a,b)
 #endif
 #define regdump(a)		Perl_regdump(aTHX_ a)
@@ -3678,11 +3678,6 @@
 #ifdef PERL_CORE
 #define my_swabn		Perl_my_swabn
 #endif
-#define gv_fetchpvn_flags(a,b,c,d)	Perl_gv_fetchpvn_flags(aTHX_ a,b,c,d)
-#define gv_fetchsv(a,b,c)	Perl_gv_fetchsv(aTHX_ a,b,c)
-#ifdef PERL_CORE
-#define is_gv_magical_sv(a,b)	Perl_is_gv_magical_sv(aTHX_ a,b)
-#endif
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
@@ -3740,6 +3735,11 @@
 #endif
 #ifdef PERL_CORE
 #define my_clearenv()		Perl_my_clearenv(aTHX)
+#endif
+#define gv_fetchpvn_flags(a,b,c,d)	Perl_gv_fetchpvn_flags(aTHX_ a,b,c,d)
+#define gv_fetchsv(a,b,c)	Perl_gv_fetchsv(aTHX_ a,b,c)
+#ifdef PERL_CORE
+#define is_gv_magical_sv(a,b)	Perl_is_gv_magical_sv(aTHX_ a,b)
 #endif
 #ifndef SPRINTF_RETURNS_STRLEN
 #endif
