@@ -4370,7 +4370,7 @@ static char *mp_do_tovmsspec(pTHX_ const char *path, char *buf, int ts) {
 
   if (path == NULL) return NULL;
   if (buf) rslt = buf;
-  else if (ts) Newx(rslt,strlen(path)+9,char);
+  else if (ts) Newx(rslt,NAM$C_MAXRSS+1,char);
   else rslt = __tovmsspec_retbuf;
   if (strpbrk(path,"]:>") ||
       (dirend = strrchr(path,'/')) == NULL) {
@@ -4402,7 +4402,6 @@ static char *mp_do_tovmsspec(pTHX_ const char *path, char *buf, int ts) {
 
     while (*(cp2+1) == '/') cp2++;  /* Skip multiple /s */
     if (!*(cp2+1)) {
-      if (!buf & ts) Renew(rslt,18,char);
       if (decc_disable_posix_root) {
 	strcpy(rslt,"sys$disk:[000000]");
       }
