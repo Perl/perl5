@@ -194,12 +194,88 @@ provided in the C<VMS::Filespec> package for explicit
 interconversion between VMS and Unix syntax; its
 documentation provides more details.
 
-Filenames are, of course, still case-insensitive.  For
-consistency, most Perl routines return  filespecs using
-lower case letters only, regardless of the case used in
-the arguments passed to them.  (This is true  only when
-running under VMS; Perl respects the case-sensitivity
-of OSs like Unix.)
+Perl is now in the process of evolving to follow the setting of
+the DECC$* feature logicals in the interpretation of UNIX pathnames.
+This is still a work in progress.
+
+For handling extended characters, and case sensitivity, as long as
+DECC$POSIX_COMPLIANT_PATHNAMES, DECC$FILENAME_UNIX_REPORT, and
+DECC$FILENAME_UNIX_ONLY are not set, then the older Perl behavior
+for conversions of file specifications from UNIX to VMS is followed,
+except that VMS paths with concealed rooted logicals are now
+translated correctly to UNIX paths.
+
+With those features set, then new routines may handle the translation,
+because some of the rules are different.  The presence of ./.../
+in a UNIX path is no longer translated to the VMS [...].  It will
+translate to [.^.^.^.].  To be compatible with what MakeMaker expects,
+if a VMS path can not be translated to a UNIX path when unixify
+is called, it is passed through unchanged.  So unixify("[...]") will
+return "[...]".
+
+The handling of extended characters will also be better with the
+newer translation routines.  But more work is needed to fully support
+extended file syntax names.  In particular, at this writing Pathtools
+can not deal with directories containing some extended characters.
+
+There are several ambiguous cases where a conversion routine can not
+determine if an input filename is in UNIX format or in VMS format,
+since now both VMS UNIX file specifications can have characters in
+them that could be mistaken for syntax delimiters of the other type.
+So some pathnames simply can not be used in a mode that allows either
+type of pathname to be present.
+
+Perl will tend to assume that an ambiguous filename is in UNIX format.
+
+Allowing "." as a version delimiter is simply incompatible with
+determining if a pathname is already VMS format or UNIX with the
+extended file syntax.  There is no way to know if "perl-5.8.6" that
+TAR produces is a UNIX "perl-5.8.6" or a VMS "perl-5.8;6" when
+passing it to unixify() or vmsify().
+
+The DECC$FILENAME_UNIX_REPORT or the DECC$FILENAME_UNIX_ONLY logical
+names control how Perl interprets filenames.
+
+The DECC$FILENAME_UNIX_ONLY setting has not been tested at this time.
+Perl uses traditional OpenVMS file specifications internally and in
+the test harness, so this mode may have limited use, or require more
+changes to make usable.
+
+Everything about DECC$FILENAME_UNIX_REPORT should be assumed to apply
+to DECC$FILENAME_UNIX_ONLY mode.  The DECC$FILENAME_UNIX_ONLY differs
+in that it expects all filenames passed to the C runtime to be already
+in UNIX format.
+
+Again, currently most of the core Perl modules have not yet been updated
+to understand that VMS is not as limited as it use to be.  Fixing that
+is a work in progress.
+
+The logical name DECC$POSIX_COMPLIANT_PATHNAMES is new with the
+RMS Symbolic Link SDK.  This version of Perl does not support it being set.
+
+
+Filenames are case-insensitive on VAX, and on ODS-2 formatted
+volumes on ALPHA and I64.
+
+On ODS-5 volumes filenames are case preserved and on newer
+versions of OpenVMS can be optionally case sensitive.
+
+On ALPHA and I64, Perl is in the process of being changed to follow the
+process case sensitivity setting to report if the file system is case
+sensitive.
+
+Perl programs should not assume that VMS is case blind, or that
+filenames will be in lowercase.
+
+Programs should use the File::Spec:case_tolerant setting to determine
+the state, and not the $^O setting.
+
+For consistency, when the above feature is clear and when not
+otherwise overridden by DECC feature logicals, most Perl routines
+return file specifications using lower case letters only,
+regardless of the case used in the arguments passed to them.
+(This is true only when running under VMS; Perl respects the
+case-sensitivity of OSs like Unix.)
 
 We've tried to minimize the dependence of Perl library 
 modules on Unix syntax, but you may find that some of these, 
@@ -208,6 +284,11 @@ require that you use Unix syntax, since they will assume that
 '/' is the directory separator, I<etc.>  If you find instances 
 of this in the Perl distribution itself, please let us know, 
 so we can try to work around them. 
+
+Also when working on Perl programs on VMS, if you need a syntax
+in a specific operating system format, then you need to either
+check the appropriate DECC$ feature logical, or call a conversion
+routine to force it to that format.
 
 =head2 Wildcard expansion
 
@@ -250,6 +331,7 @@ the behavior of glob expansion performed by Unix shells.)
 
 Similarly, the resultant filespec will contain the file version
 only if one was present in the input filespec.
+
 
 =head2 Pipes
 
@@ -336,6 +418,10 @@ VMS than described in L<perlrun>.  Note also that in order
 to pass uppercase switches to Perl, you need to enclose
 them in double-quotes on the command line, since the CRTL
 downcases all unquoted strings.
+
+On newer 64 bit versions of OpenVMS, a process setting now
+controls if the quoting is needed to preserve the case of
+command line arguments.
 
 =over 4
 
@@ -427,6 +513,36 @@ your copy of Perl:
     getsockopt, listen, recv, select(system call)*,
     send, setsockopt, shutdown, socket
 
+The following function is available on Perls built on 64 bit OpenVMS 8.2
+with hard links enabled on an ODS-5 formatted build disk.  If someone with
+an OpenVMS 7.3-1 system were to modify configure.com and test the results,
+this feature can be brought back to OpenVMS 7.3-1 and later.  Hardlinks
+must be enabled on the build disk because if the build procedure sees
+this feature enabled, it uses it.
+
+    link
+
+The following functions are available on Perls built on 64 bit OpenVMS
+8.2 and can be implemented on OpenVMS 7.3-2 if someone were to modify
+configure.com and test the results.  (While in the build, at the time
+of this writing, they have not been specifically tested.)
+
+   getgrgid, getgrnam, getpwnam, getpwuid,
+   setgrent, ttyname
+
+The following functions are available on Perls built on 64 bit OpenVMS 8.2
+and later.  (While in the build, at the time of this writing, they have
+not been specifically tested.)
+
+   statvfs, socketpair
+
+The following functions are expected to soon be available on Perls built
+on 64 bit OpenVMS 8.2 or later with the RMS Symbolic link package.  Use
+of symbolic links at this time effectively requires the
+DECC$POSIX_COMPLIANT_PATHNAMES to defined as 3, and operating in a
+DECC$FILENAME_UNIX_REPORT mode.
+
+    lchown, link, lstat, readlink, symlink
 =over 4
 
 =item File tests
@@ -445,6 +561,9 @@ your CRTL C<stat()> routine does to the equivalent bits in the
 st_mode field.  Finally, C<-d> returns true if passed a device
 specification without an explicit directory (e.g. C<DUA1:>), as
 well as if passed a directory.
+
+There are DECC feature logicals AND ODS-5 volume attributes that
+also control what values are returned for the date fields.
 
 Note: Some sites have reported problems when using the file-access
 tests (C<-r>, C<-w>, and C<-x>) on files accessed via DEC's DFS.
@@ -886,6 +1005,9 @@ is the value of vaxc$errno, and its string value is the
 corresponding VMS message string, as retrieved by sys$getmsg().
 Setting C<$^E> sets vaxc$errno to the value specified.
 
+While Perl attempts to keep the vaxc$errno value to be current, if
+errno is not EVMSERR, it may not be from the current operation.
+
 =item $?
 
 The "status value" returned in C<$?> is synthesized from the
@@ -894,23 +1016,49 @@ POSIX wait(5) semantics, in order to allow Perl programs to
 portably test for successful completion of subprocesses.  The
 low order 8 bits of C<$?> are always 0 under VMS, since the
 termination status of a process may or may not have been
-generated by an exception.  The next 8 bits are derived from
-the severity portion of the subprocess' exit status: if the
-severity was success or informational, these bits are all 0;
-if the severity was warning, they contain a value of 1; if the
-severity was error or fatal error, they contain the actual
-severity bits, which turns out to be a value of 2 for error
-and 4 for fatal error.  
+generated by an exception.
+
+The next 8 bits contain the termination status of the program.
+
+If the child process follows the convention of C programs
+compiled with the _POSIX_EXIT macro set, the status value will
+contain the actual value of 0 to 255 returned by that program
+on a normal exit.
+
+With the _POSIX_EXIT macro set, the exit code of zero is represented
+as 1, and the values from 1 to 255 are encoded by the equation
+VMS_status = 0x35a000 + (exit_code * 8).
+
+For other termination statuses, the severity portion of the
+subprocess' exit status: if the severity was success or
+informational, these bits are all 0; if the severity was
+warning, they contain a value of 1; if the severity was
+error or fatal error, they contain the actual severity bits,
+which turns out to be a value of 2 for error and 4 for fatal error.  
 
 As a result, C<$?> will always be zero if the subprocess' exit
 status indicated successful completion, and non-zero if a
-warning or error occurred.  Conversely, when setting C<$?> in
-an END block, an attempt is made to convert the POSIX value
-into a native status intelligible to the operating system upon
-exiting Perl.  What this boils down to is that setting C<$?>
-to zero results in the generic success value SS$_NORMAL, and
-setting C<$?> to a non-zero value results in the generic
-failure status SS$_ABORT.  See also L<perlport/exit>.
+warning or error occurred or a program compliant with encoding
+_POSIX_EXIT values was run and set a status.
+
+How can you tell the difference?  You can not unless you look at
+the ${^CHILD_ERROR_NATIVE} code.  The ${^CHILD_ERROR_NATIVE} code
+returns the actual VMS status value and check the severity bits.
+If the severity bits are clear, then the numeric value is code
+passed back from the application.
+
+In practice, Perl scripts that call programs that return _POSIX_EXIT
+type status codes will be expecting those codes, and programs that
+call traditional VMS programs will be expecting the previous behavior.
+
+And success is always the code 0.
+
+Conversely, when setting C<$?> in an END block, an attempt is made
+to convert the POSIX value into a native status intelligible to
+the operating system upon exiting Perl.  What this boils down to
+is that setting C<$?> to zero results in the generic success value
+SS$_NORMAL, and setting C<$?> to a non-zero value results in the
+generic failure status SS$_ABORT.  See also L<perlport/exit>.
 
 The pragma C<use vmsish 'status'> makes C<$?> reflect the actual 
 VMS exit status instead of the default emulation of POSIX status 
@@ -939,7 +1087,7 @@ problems.
 
 =head1 Revision date
 
-This document was last updated on 01-May-2002, for Perl 5,
+This document was last updated on 14-Oct-2005, for Perl 5,
 patchlevel 8.
 
 =head1 AUTHOR
@@ -947,3 +1095,4 @@ patchlevel 8.
 Charles Bailey  bailey@cor.newman.upenn.edu
 Craig Berry  craigberry@mac.com
 Dan Sugalski  dan@sidhe.org
+John Malmberg wb8tyw@qsl.net
