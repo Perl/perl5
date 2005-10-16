@@ -15,7 +15,7 @@ print OUT <<'EOT';
 
 package XSLoader;
 
-$VERSION = "0.05_01";
+$VERSION = "0.06";
 
 #use strict;
 
@@ -150,7 +150,7 @@ XSLoader - Dynamically load C libraries into Perl code
 
 =head1 VERSION
 
-Version 0.05_01
+Version 0.06
 
 =head1 SYNOPSIS
 
@@ -192,7 +192,7 @@ Change this to
 In other words: replace C<require DynaLoader> by C<use XSLoader>, remove
 C<DynaLoader> from C<@ISA>, change C<bootstrap> by C<XSLoader::load>.  Do not
 forget to quote the name of your package on the C<XSLoader::load> line,
-and add comma (C<,>) before the arguments ($VERSION above).
+and add comma (C<,>) before the arguments (C<$VERSION> above).
 
 Of course, if C<@ISA> contained only C<DynaLoader>, there is no need to have
 the C<@ISA> assignment at all; moreover, if instead of C<our> one uses the
@@ -358,8 +358,7 @@ C<make install>.
 
 =head1 BUGS
 
-Please report any bugs or feature requests via the perlbug(1)
-utility.
+Please report any bugs or feature requests via the perlbug(1) utility.
 
 
 =head1 SEE ALSO
@@ -367,7 +366,7 @@ utility.
 L<DynaLoader>
 
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Ilya Zakharevich originally extracted C<XSLoader> from C<DynaLoader>.
 
@@ -383,6 +382,7 @@ This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
+
 EOT
 
 close OUT or die $!;
