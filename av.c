@@ -502,8 +502,6 @@ Perl_av_undef(pTHX_ register AV *av)
     AvALLOC(av) = 0;
     SvPV_set(av, (char*)0);
     AvMAX(av) = AvFILLp(av) = -1;
-    /* It's in magic - it must already be gone.  */
-    assert (!AvARYLEN(av));
 }
 
 /*
