@@ -502,7 +502,12 @@ Perl_av_undef(pTHX_ register AV *av)
     AvALLOC(av) = 0;
     SvPV_set(av, (char*)0);
     AvMAX(av) = AvFILLp(av) = -1;
-    if (AvARYLEN(av)) {
+    /* Need to check SvMAGICAL, as during global destruction it may be that
+       AvARYLEN(av) has been freed before av, and hence the SvANY() pointer
+       is now part of the linked list of SV heads, rather than pointing to
+       the original body.  */
+    /* FIXME - audit the code for other bugs like this one.  */
+    if (AvARYLEN(av) && SvMAGICAL(AvARYLEN(av))) {
 	MAGIC *mg = mg_find (AvARYLEN(av), PERL_MAGIC_arylen);
 
 	if (mg) {
