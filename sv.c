@@ -188,11 +188,7 @@ Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
 }
 
 #ifdef DEBUG_LEAKING_SCALARS
-#  ifdef NETWARE
-#    define FREE_SV_DEBUG_FILE(sv) PerlMemfree((sv)->sv_debug_file)
-#  else
-#    define FREE_SV_DEBUG_FILE(sv) PerlMemShared_free((sv)->sv_debug_file)
-#  endif
+#  define FREE_SV_DEBUG_FILE(sv) Safefree((sv)->sv_debug_file)
 #else
 #  define FREE_SV_DEBUG_FILE(sv)
 #endif
@@ -260,11 +256,7 @@ S_new_SV(pTHX)
         (PL_curcop ? CopLINE(PL_curcop) : 0) : PL_copline);
     sv->sv_debug_inpad = 0;
     sv->sv_debug_cloned = 0;
-#  ifdef NETWARE
     sv->sv_debug_file = PL_curcop ? savepv(CopFILE(PL_curcop)): NULL;
-#  else
-    sv->sv_debug_file = PL_curcop ? savesharedpv(CopFILE(PL_curcop)): NULL;
-#  endif
     
     return sv;
 }
