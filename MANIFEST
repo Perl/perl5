@@ -1891,6 +1891,7 @@ lib/Pod/t/basic.ovr		podlators test
 lib/Pod/t/basic.pod		podlators test
 lib/Pod/t/basic.t		podlators test
 lib/Pod/t/basic.txt		podlators test
+lib/Pod/t/contains_pod.t	Pod-Parser test
 lib/Pod/t/eol.t			end of line agnosticism
 lib/Pod/Text/Color.pm		Convert POD data to color ASCII text
 lib/Pod/Text/Overstrike.pm	Convert POD data to formatted overstrike text
@@ -2731,6 +2732,7 @@ t/japh/abigail.t		Obscure tests
 t/lib/1_compile.t		See if the various libraries and extensions compile
 t/lib/commonsense.t		See if configuration meets basic needs
 t/lib/compmod.pl		Helper for 1_compile.t
+t/lib/contains_pod.xr		Pod-Parser test file
 t/lib/cygwin.t			Builtin cygwin function tests
 t/lib/Devel/switchd.pm		Module for t/run/switchd.t
 t/lib/Dev/Null.pm		Module for testing Test::Harness

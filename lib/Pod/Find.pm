@@ -13,7 +13,7 @@
 package Pod::Find;
 
 use vars qw($VERSION);
-$VERSION = 1.30;   ## Current version of this package
+$VERSION = 1.34;   ## Current version of this package
 require  5.005;   ## requires this Perl version or later
 use Carp;
 
@@ -251,7 +251,7 @@ sub _check_and_extract_name {
 
     # check extension or executable flag
     # this involves testing the .bat extension on Win32!
-    unless(-f $file && -T _ && ($file =~ /\.(pod|pm|plx?)\z/i || -x _ )) {
+    unless(-f $file && -T $file && ($file =~ /\.(pod|pm|plx?)\z/i || -x $file )) {
       return undef;
     }
 
@@ -494,7 +494,7 @@ sub contains_pod {
   local $/ = undef;
   my $pod = <POD>;
   close(POD) || die "Error closing $file: $!\n";
-  unless($pod =~ /\n=(head\d|pod|over|item)\b/s) {
+  unless($pod =~ /^=(head\d|pod|over|item)\b/m) {
     warn "No POD in $file, skipping.\n"
       if($verbose);
     return 0;
