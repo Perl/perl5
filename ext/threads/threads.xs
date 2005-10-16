@@ -86,14 +86,49 @@ ithread* Perl_ithread_get (pTHX) {
 }
 
 
+/* free any data (such as the perl interpreter) attached to an
+ * ithread structure. This is a bit like undef on SVs, where the SV
+ * isn't freed, but the PVX is.
+ * Must be called with thread->mutex already held
+ */
+
+static void
+Perl_ithread_clear(pTHX_ ithread* thread)
+{
+    PerlInterpreter *interp;
+    assert(thread->state & PERL_ITHR_FINISHED &&
+    	    (thread->state & PERL_ITHR_DETACHED ||
+	    thread->state & PERL_ITHR_JOINED));
+
+    interp = thread->interp;
+    if (interp) {
+	dTHXa(interp);
+	ithread* current_thread;
+#ifdef OEMVS
+	void *ptr;
+#endif
+	PERL_SET_CONTEXT(interp);
+	current_thread = Perl_ithread_get(aTHX);
+	Perl_ithread_set(aTHX_ thread);
+	
+	SvREFCNT_dec(thread->params);
+
+	thread->params = Nullsv;
+	perl_destruct(interp);
+	thread->interp = NULL;
+    }
+    if (interp)
+	perl_free(interp);
+    PERL_SET_CONTEXT(aTHX);
+}
+
 
 /*
- *  Clear up after thread is done with
+ *  free an ithread structure and any attached data if its count == 0
  */
 void
 Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
 {
-        PerlInterpreter *freeperl = NULL;
 	MUTEX_LOCK(&thread->mutex);
 	if (!thread->next) {
 	    MUTEX_UNLOCK(&thread->mutex);
@@ -127,28 +162,7 @@ Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
 	MUTEX_UNLOCK(&create_destruct_mutex);
 	/* Thread is now disowned */
 
-	if(thread->interp) {
-	    dTHXa(thread->interp);
-	    ithread*        current_thread;
-#ifdef OEMVS
-	    void *ptr;
-#endif
-	    PERL_SET_CONTEXT(thread->interp);
-	    current_thread = Perl_ithread_get(aTHX);
-	    Perl_ithread_set(aTHX_ thread);
-
-
-
-	    
-	    SvREFCNT_dec(thread->params);
-
-
-
-	    thread->params = Nullsv;
-	    perl_destruct(thread->interp);
-            freeperl = thread->interp;
-	    thread->interp = NULL;
-	}
+	Perl_ithread_clear(aTHX_ thread);
 	MUTEX_UNLOCK(&thread->mutex);
 	MUTEX_DESTROY(&thread->mutex);
 #ifdef WIN32
@@ -157,10 +171,6 @@ Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
 	thread->handle = 0;
 #endif
         PerlMemShared_free(thread);
-        if (freeperl)
-            perl_free(freeperl);
-
-	PERL_SET_CONTEXT(aTHX);
 }
 
 int
@@ -650,6 +660,7 @@ Perl_ithread_join(pTHX_ SV *obj)
 	}
 	/* We are finished with it */
 	thread->state |= PERL_ITHR_JOINED;
+	Perl_ithread_clear(aTHX_ thread);
 	MUTEX_UNLOCK(&thread->mutex);
     	
 	return retparam;
