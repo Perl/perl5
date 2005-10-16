@@ -76,8 +76,7 @@ int   decc$feature_set_value(int index, int mode, int value);
 #include <unixlib.h>
 #endif
 
-#ifndef __VAX
-#if __CRTL_VER >= 70300000
+#if __CRTL_VER >= 70300000 && !defined(__VAX)
 
 static int set_feature_default(const char *name, int value)
 {
@@ -98,7 +97,6 @@ static int set_feature_default(const char *name, int value)
 
 return 0;
 }
-#endif
 #endif
 
 /* Older versions of ssdef.h don't have these */
@@ -1477,9 +1475,48 @@ Perl_my_kill(int pid, int sig)
                      struct dsc$descriptor_s *prcname,
                      unsigned int code);
 
+     /* sig 0 means validate the PID */
+    /*------------------------------*/
+    if (sig == 0) {
+	const unsigned long int jpicode = JPI$_PID;
+	pid_t ret_pid;
+	int status;
+        status = lib$getjpi(&jpicode, &pid, NULL, &ret_pid, NULL, NULL);
+	if ($VMS_STATUS_SUCCESS(status))
+	   return 0;
+	switch (status) {
+        case SS$_NOSUCHNODE:
+        case SS$_UNREACHABLE:
+	case SS$_NONEXPR:
+	   errno = ESRCH;
+	   break;
+	case SS$_NOPRIV:
+	   errno = EPERM;
+	   break;
+	default:
+	   errno = EVMSERR;
+	}
+	vaxc$errno=status;
+	return -1;
+    }
+
     code = Perl_sig_to_vmscondition(sig);
 
-    if (!pid || !code) {
+    if (!code) {
+	SETERRNO(EINVAL, SS$_BADPARAM);
+        return -1;
+    }
+
+    /* Fixme: Per official UNIX specification: If pid = 0, or negative then
+     * signals are to be sent to multiple processes.
+     *  pid = 0 - all processes in group except ones that the system exempts
+     *  pid = -1 - all processes except ones that the system exempts
+     *  pid = -n - all processes in group (abs(n)) except ... 
+     * For now, just report as not supported.
+     */
+
+    if (pid <= 0) {
+	SETERRNO(ENOTSUP, SS$_UNSUPPORTED);
         return -1;
     }
 
@@ -1526,7 +1563,7 @@ Perl_my_kill(int pid, int sig)
 #define DCL_IVVERB 0x38090
 #endif
 
-int vms_status_to_unix(int vms_status)
+int Perl_vms_status_to_unix(int vms_status, int child_flag)
 {
 int facility;
 int fac_sp;
@@ -1546,7 +1583,7 @@ int unix_status;
   fac_sp = vms_status & STS$M_FAC_SP;
   msg_no = vms_status & (STS$M_MSG_NO | STS$M_SEVERITY);
 
-  if ((facility == 0) || (fac_sp == 0)) {
+  if ((facility == 0) || (fac_sp == 0)  && (child_flag == 0)) {
     switch(msg_no) {
     case SS$_NORMAL:
 	unix_status = 0;
@@ -1554,6 +1591,13 @@ int unix_status;
     case SS$_ACCVIO:
 	unix_status = EFAULT;
 	break;
+    case SS$_DEVOFFLINE:
+	unix_status = EBUSY;
+	break;
+    case SS$_CLEARED:
+	unix_status = ENOTCONN;
+	break;
+    case SS$_IVCHAN:
     case SS$_IVLOGNAM:
     case SS$_BADPARAM:
     case SS$_IVLOGTAB:
@@ -1564,6 +1608,9 @@ int unix_status;
     case SS$_NOSUCHID:
     case SS$_IVIDENT:
 	unix_status = EINVAL;
+	break;
+    case SS$_UNSUPPORTED:
+	unix_status = ENOTSUP;
 	break;
     case SS$_FILACCERR:
     case SS$_NOGRPPRV:
@@ -1612,9 +1659,31 @@ int unix_status;
   else {
     /* Translate a POSIX exit code to a UNIX exit code */
     if ((facility == C_FACILITY_NO) && ((msg_no & 0xA000) == 0xA000))  {
-	unix_status = (msg_no & 0x0FF0) >> 3;
+	unix_status = (msg_no & 0x07F8) >> 3;
     }
     else {
+
+	 /* Documented traditional behavior for handling VMS child exits */
+	/*--------------------------------------------------------------*/
+	if (child_flag != 0) {
+
+	     /* Success / Informational return 0 */
+	    /*----------------------------------*/
+	    if (msg_no & STS$K_SUCCESS)
+		return 0;
+
+	     /* Warning returns 1 */
+	    /*-------------------*/
+	    if ((msg_no & (STS$K_ERROR | STS$K_SEVERE)) == 0)
+	    	return 1;
+
+	     /* Everything else pass through the severity bits */
+	    /*------------------------------------------------*/
+	    return (msg_no & STS$M_SEVERITY);
+	}
+
+	 /* Normal VMS status to ERRNO mapping attempt */
+	/*--------------------------------------------*/
 	switch(msg_status) {
 	/* case RMS$_EOF: */ /* End of File */
 	case RMS$_FNF:	/* File Not Found */
@@ -1629,6 +1698,14 @@ int unix_status;
 		break;
 	case RMS$_DEV:
 		unix_status = ENODEV;
+		break;
+	case RMS$_IFI:
+	case RMS$_FAC:
+	case RMS$_ISI:
+		unix_status = EBADF;
+		break;
+	case RMS$_FEX:
+		unix_status = EEXIST;
 		break;
 	case RMS$_SYN:
 	case RMS$_FNM:
@@ -1658,6 +1735,135 @@ int unix_status;
   return unix_status;
 } 
 
+/* Try to guess at what VMS error status should go with a UNIX errno
+ * value.  This is hard to do as there could be many possible VMS
+ * error statuses that caused the errno value to be set.
+ */
+
+int Perl_unix_status_to_vms(int unix_status)
+{
+int test_unix_status;
+
+     /* Trivial cases first */
+    /*---------------------*/
+    if (unix_status == EVMSERR)
+	return vaxc$errno;
+
+     /* Is vaxc$errno sane? */
+    /*---------------------*/
+    test_unix_status = Perl_vms_status_to_unix(vaxc$errno, 0);
+    if (test_unix_status == unix_status)
+	return vaxc$errno;
+
+     /* If way out of range, must be VMS code already */
+    /*-----------------------------------------------*/
+    if (unix_status > EVMSERR)
+	return unix_status;
+
+     /* If out of range, punt */
+    /*-----------------------*/
+    if (unix_status > __ERRNO_MAX)
+	return SS$_ABORT;
+
+
+     /* Ok, now we have to do it the hard way. */
+    /*----------------------------------------*/
+    switch(unix_status) {
+    case 0:	return SS$_NORMAL;
+    case EPERM: return SS$_NOPRIV;
+    case ENOENT: return SS$_NOSUCHOBJECT;
+    case ESRCH: return SS$_UNREACHABLE;
+    case EINTR: return SS$_ABORT;
+    /* case EIO: */
+    /* case ENXIO:  */
+    case E2BIG: return SS$_BUFFEROVF;
+    /* case ENOEXEC */
+    case EBADF: return RMS$_IFI;
+    case ECHILD: return SS$_NONEXPR;
+    /* case EAGAIN */
+    case ENOMEM: return SS$_INSFMEM;
+    case EACCES: return SS$_FILACCERR;
+    case EFAULT: return SS$_ACCVIO;
+    /* case ENOTBLK */
+    case EBUSY: SS$_DEVOFFLINE;
+    case EEXIST: return RMS$_FEX;
+    /* case EXDEV */
+    case ENODEV: return SS$_NOSUCHDEV;
+    case ENOTDIR: return RMS$_DIR;
+    /* case EISDIR */
+    case EINVAL: return SS$_INVARG;
+    /* case ENFILE */
+    /* case EMFILE */
+    /* case ENOTTY */
+    /* case ETXTBSY */
+    /* case EFBIG */
+    case ENOSPC: return SS$_DEVICEFULL;
+    case ESPIPE: return LIB$_INVARG;
+    /* case EROFS: */
+    /* case EMLINK: */
+    /* case EPIPE: */
+    /* case EDOM */
+    case ERANGE: return LIB$_INVARG;
+    /* case EWOULDBLOCK */
+    /* case EINPROGRESS */
+    /* case EALREADY */
+    /* case ENOTSOCK */
+    /* case EDESTADDRREQ */
+    /* case EMSGSIZE */
+    /* case EPROTOTYPE */
+    /* case ENOPROTOOPT */
+    /* case EPROTONOSUPPORT */
+    /* case ESOCKTNOSUPPORT */
+    /* case EOPNOTSUPP */
+    /* case EPFNOSUPPORT */
+    /* case EAFNOSUPPORT */
+    /* case EADDRINUSE */
+    /* case EADDRNOTAVAIL */
+    /* case ENETDOWN */
+    /* case ENETUNREACH */
+    /* case ENETRESET */
+    /* case ECONNABORTED */
+    /* case ECONNRESET */
+    /* case ENOBUFS */
+    /* case EISCONN */
+    case ENOTCONN: return SS$_CLEARED;
+    /* case ESHUTDOWN */
+    /* case ETOOMANYREFS */
+    /* case ETIMEDOUT */
+    /* case ECONNREFUSED */
+    /* case ELOOP */
+    /* case ENAMETOOLONG */
+    /* case EHOSTDOWN */
+    /* case EHOSTUNREACH */
+    /* case ENOTEMPTY */
+    /* case EPROCLIM */
+    /* case EUSERS  */
+    /* case EDQUOT  */
+    /* case ENOMSG  */
+    /* case EIDRM */
+    /* case EALIGN */
+    /* case ESTALE */
+    /* case EREMOTE */
+    /* case ENOLCK */
+    /* case ENOSYS */
+    /* case EFTYPE */
+    /* case ECANCELED */
+    /* case EFAIL */
+    /* case EINPROG */
+    case ENOTSUP:
+	return SS$_UNSUPPORTED;
+    /* case EDEADLK */
+    /* case ENWAIT */
+    /* case EILSEQ */
+    /* case EBADCAT */
+    /* case EBADMSG */
+    /* case EABANDONED */
+    default:
+	return SS$_ABORT; /* punt */
+    }
+
+  return SS$_ABORT; /* Should not get here */
+} 
 
 
 /* default piping mailbox size */
@@ -8307,6 +8513,10 @@ Perl_sys_intern_init(pTHX)
     double x;
 
     VMSISH_HUSHED = 0;
+
+    /* fix me later to track running under GNV */
+    /* this allows some limited testing */
+    MY_POSIX_EXIT = decc_filename_unix_report;
 
     x = (float)ix;
     MY_INV_RAND_MAX = 1./x;

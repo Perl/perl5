@@ -5155,7 +5155,7 @@ Perl_my_exit(pTHX_ U32 status)
 	STATUS_ALL_FAILURE;
 	break;
     default:
-	STATUS_UNIX_SET(status);
+	STATUS_UNIX_EXIT_SET(status);
 	break;
     }
     my_exit_jump();

@@ -17,7 +17,7 @@ sub run {
 
 BEGIN {
     # MacOS system() doesn't have good return value
-    $numtests = ($^O eq 'VMS') ? 14 : ($^O eq 'MacOS') ? 0 : 17;
+    $numtests = ($^O eq 'VMS') ? 16 : ($^O eq 'MacOS') ? 0 : 17;
 }
 
 require "test.pl";
@@ -95,24 +95,30 @@ if ($^O ne 'VMS') {
 # Double quotes are needed to pass these commands through DCL to PERL
 
   $exit = run("exit 268632065"); # %CLI-S-NORMAL
-  is( $exit, 0,             'PERL success exit' );
+  is( $exit >> 8, 0,             'PERL success exit' );
   is( ${^CHILD_ERROR_NATIVE} & 7, 1, 'VMS success exit' );
 
   $exit = run("exit 268632067");  # %CLI-I-NORMAL
-  is( $exit, 0,             'PERL informational exit' );
+  is( $exit >> 8, 0,             'PERL informational exit' );
   is( ${^CHILD_ERROR_NATIVE} & 7, 3, 'VMS informational exit' );
 
   $exit = run("exit 268632064");  # %CLI-W-NORMAL
-  is( $exit != 0, 1,             'Perl warning exit' );
+  is( $exit >> 8, 1,             'Perl warning exit' );
   is( ${^CHILD_ERROR_NATIVE} & 7, 0, 'VMS warning exit' );
 
   $exit = run("exit 268632066");  # %CLI-E-NORMAL
-  is( $exit != 0, 1,             'Perl error exit' );
+  is( $exit >> 8, 2,             'Perl error exit' );
   is( ${^CHILD_ERROR_NATIVE} & 7, 2, 'VMS error exit' );
 
   $exit = run("exit 268632068");  # %CLI-F-NORMAL
-  is( $exit != 0, 1,             'Perl fatal error exit' );
+  is( $exit >> 8, 4,             'Perl fatal error exit' );
   is( ${^CHILD_ERROR_NATIVE} & 7, 4, 'VMS fatal exit' );
+
+  $exit = run("exit 02015320012"); # POSIX exit code 1
+  is( $exit >> 8, 1,	                 'Posix exit code 1' );
+
+  $exit = run("exit 02015323771"); # POSIX exit code 255
+  is( $exit >> 8 , 255,	                 'Posix exit code 255' );
 }
 
 $exit_arg = 42;
@@ -132,7 +138,7 @@ $exit = run("END { \$? = $exit_arg }");
 # status codes to SS$_ABORT on exit, but passes through unmodified UNIX
 # status codes that exit() is called with by scripts.
 
-$exit_arg = 4 if $^O eq 'VMS';  
+$exit_arg = (44 & 7) if $^O eq 'VMS';  
 
 is( $exit >> 8, $exit_arg,             'Changing $? in END block' );
 }
