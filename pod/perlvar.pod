@@ -411,12 +411,9 @@ for that.  (Mnemonic: when you want your pipes to be piping hot.)
 
 =item $,
 
-The output field separator for the print operator.  Ordinarily the
-print operator simply prints out its arguments without further
-adornment.  To get behavior more like B<awk>, set this variable as
-you would set B<awk>'s OFS variable to specify what is printed
-between fields.  (Mnemonic: what is printed when there is a "," in
-your print statement.)
+The output field separator for the print operator.  If defined, this
+value is printed between each of print's arguments.  Default is C<undef>.
+(Mnemonic: what is printed when there is a "," in your print statement.)
 
 =item IO::Handle->output_record_separator EXPR
 
@@ -426,14 +423,10 @@ your print statement.)
 
 =item $\
 
-The output record separator for the print operator.  Ordinarily the
-print operator simply prints out its arguments as is, with no
-trailing newline or other end-of-record string added.  To get
-behavior more like B<awk>, set this variable as you would set
-B<awk>'s ORS variable to specify what is printed at the end of the
-print.  (Mnemonic: you set C<$\> instead of adding "\n" at the
-end of the print.  Also, it's just like C<$/>, but it's what you
-get "back" from Perl.)
+The output record separator for the print operator.  If defined, this
+value is printed after the last of print's arguments.  Default is C<undef>.
+(Mnemonic: you set C<$\> instead of adding "\n" at the end of the print.
+Also, it's just like C<$/>, but it's what you get "back" from Perl.)
 
 =item $LIST_SEPARATOR
 
