@@ -93,7 +93,7 @@ ithread* Perl_ithread_get (pTHX) {
  */
 
 static void
-Perl_ithread_clear(pTHX_ ithread* thread)
+S_ithread_clear(pTHX_ ithread* thread)
 {
     PerlInterpreter *interp;
     assert(thread->state & PERL_ITHR_FINISHED &&
@@ -162,7 +162,7 @@ Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
 	MUTEX_UNLOCK(&create_destruct_mutex);
 	/* Thread is now disowned */
 
-	Perl_ithread_clear(aTHX_ thread);
+	S_ithread_clear(aTHX_ thread);
 	MUTEX_UNLOCK(&thread->mutex);
 	MUTEX_DESTROY(&thread->mutex);
 #ifdef WIN32
@@ -660,7 +660,7 @@ Perl_ithread_join(pTHX_ SV *obj)
 	}
 	/* We are finished with it */
 	thread->state |= PERL_ITHR_JOINED;
-	Perl_ithread_clear(aTHX_ thread);
+	S_ithread_clear(aTHX_ thread);
 	MUTEX_UNLOCK(&thread->mutex);
     	
 	return retparam;
