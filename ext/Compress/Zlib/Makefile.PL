@@ -26,7 +26,7 @@ my $WALL = '' ;
 my $GZIP_OS_CODE = -1 ;
 
 #$WALL = ' -pedantic ' if $Config{'cc'} =~ /gcc/ ;
-$WALL = ' -Wall ' if $Config{'cc'} =~ /gcc/ ;
+$WALL = ' -Wall -Wno-comment ' if $Config{'cc'} =~ /gcc/ ;
 
 my $PERL_CORE = grep { $_ eq 'PERL_CORE=1' } @ARGV;
 # don't ask if MM_USE_DEFAULT is set -- enables perl core building on cygwin
