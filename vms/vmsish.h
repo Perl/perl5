@@ -592,6 +592,9 @@ struct utimbuf {
 /* Use our own stat() clones, which handle Unix-style directory names */
 #define Stat(name,bufptr) flex_stat(name,bufptr)
 #define Fstat(fd,bufptr) Perl_flex_fstat(aTHX_ fd,bufptr)
+#ifndef DONT_MASK_RTL_CALLS
+#define lstat(name, bufptr) Perl_flex_lstat(name, bufptr)
+#endif
 
 /* Setup for the dirent routines:
  * opendir(), closedir(), readdir(), seekdir(), telldir(), and
