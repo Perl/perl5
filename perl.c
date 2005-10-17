@@ -2070,7 +2070,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
      * or explicitly in some platforms.
      * locale.c:Perl_init_i18nl10n() if the environment
      * look like the user wants to use UTF-8. */
-#if defined(SYMBIAN)
+#if defined(__SYMBIAN32__)
     PL_unicode = PERL_UNICODE_STD_FLAG; /* See PERL_SYMBIAN_CONSOLE_UTF8. */
 #endif
     if (PL_unicode) {
@@ -3272,7 +3272,7 @@ Perl_moreswitches(pTHX_ char *s)
 	PerlIO_printf(PerlIO_stdout(),"Built on " __DATE__ " " __TIME__ "\n\n");
 	wce_hitreturn();
 #endif
-#ifdef SYMBIAN
+#ifdef __SYMBIAN32__
 	PerlIO_printf(PerlIO_stdout(),
 		      "Symbian port by Nokia, 2004-2005\n");
 #endif
@@ -4715,7 +4715,7 @@ S_init_perllib(pTHX)
 #endif /* MACOS_TRADITIONAL */
 }
 
-#if defined(DOSISH) || defined(EPOC) || defined(SYMBIAN)
+#if defined(DOSISH) || defined(EPOC) || defined(__SYMBIAN32__)
 #    define PERLLIB_SEP ';'
 #else
 #  if defined(VMS)

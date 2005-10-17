@@ -1495,7 +1495,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
     my_setenv_format(environ[i], nam, nlen, val, vlen);
     } else {
 # endif
-#   if defined(__CYGWIN__) || defined(EPOC) || defined(SYMBIAN) 
+#   if defined(__CYGWIN__) || defined(EPOC) || defined(__SYMBIAN32__)
 #       if defined(HAS_UNSETENV)
         if (val == NULL) {
             (void)unsetenv(nam);

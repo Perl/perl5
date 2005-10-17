@@ -1454,7 +1454,7 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 	       int fd, int do_report)
 {
     dVAR;
-#if defined(MACOS_TRADITIONAL) || defined(SYMBIAN)
+#if defined(MACOS_TRADITIONAL) || defined(__SYMBIAN32__)
     Perl_croak(aTHX_ "exec? I'm not *that* kind of operating system");
 #else
     if (sp > mark) {
@@ -1505,7 +1505,7 @@ Perl_do_execfree(pTHX)
     PL_Cmd = Nullch;
 }
 
-#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC) && !defined(SYMBIAN) && !defined(MACOS_TRADITIONAL)
+#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC) && !defined(__SYMBIAN32__) && !defined(MACOS_TRADITIONAL)
 
 bool
 Perl_do_exec(pTHX_ const char *cmd)

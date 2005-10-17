@@ -4,7 +4,6 @@
 # sisify.pl - package Perl scripts or Perl libraries into SIS files
 #
 # Copyright (c) 2004-2005 Nokia. All rights reserved.
-#
 # The sisify.pl utility is licensed under the same terms as Perl itself.
 #
 

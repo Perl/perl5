@@ -88,14 +88,14 @@
 #   endif
 #endif
 
-#ifdef SYMBIAN
+#ifdef __SYMBIAN32__
 #  include "symbian/symbian_proto.h"
 #endif
 
 /* Any stack-challenged places.  The limit varies (and often
  * is configurable), but using more than a kilobyte of stack
  * is usually dubious in these systems. */
-#if defined(EPOC) || defined(SYMBIAN)
+#if defined(EPOC) || defined(__SYMBIAN32__)
 /* EPOC/Symbian: need to work around the SDK features. *
  * On WINS: MS VC5 generates calls to _chkstk,         *
  * if a "large" stack frame is allocated.              *

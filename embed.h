@@ -167,7 +167,7 @@
 #define do_eof			Perl_do_eof
 #define do_exec			Perl_do_exec
 #endif
-#if defined(WIN32) || defined(SYMBIAN)
+#if defined(WIN32) || defined(__SYMBIAN32__)
 #define do_aspawn		Perl_do_aspawn
 #define do_spawn		Perl_do_spawn
 #define do_spawn_nowait		Perl_do_spawn_nowait

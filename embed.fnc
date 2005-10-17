@@ -184,7 +184,7 @@ p	|void	|do_chop	|NN SV* asv|NN SV* sv
 Ap	|bool	|do_close	|NN GV* gv|bool not_implicit
 p	|bool	|do_eof		|NN GV* gv
 p	|bool	|do_exec	|NN const char* cmd
-#if defined(WIN32) || defined(SYMBIAN)
+#if defined(WIN32) || defined(__SYMBIAN32__)
 Ap	|int	|do_aspawn	|NN SV* really|NN SV** mark|NN SV** sp
 Ap	|int	|do_spawn	|NN char* cmd
 Ap	|int	|do_spawn_nowait|NN char* cmd

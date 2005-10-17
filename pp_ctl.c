@@ -3304,7 +3304,7 @@ PP(pp_require)
 		    sv_setpv(namesv, unixdir);
 		    sv_catpv(namesv, unixname);
 #  else
-#    ifdef SYMBIAN
+#    ifdef __SYMBIAN32__
 		    if (PL_origfilename[0] &&
 			PL_origfilename[1] == ':' &&
 			!(dir[0] && dir[1] == ':'))

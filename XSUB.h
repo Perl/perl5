@@ -100,7 +100,7 @@ is a lexical $_ in scope.
 #if defined(__CYGWIN__) && defined(USE_DYNAMIC_LOADING)
 #  define XS(name) __declspec(dllexport) void name(pTHX_ CV* cv)
 #endif
-#if defined(SYMBIAN)
+#if defined(__SYMBIAN32__)
 #  define XS(name) EXPORT_C void name(pTHX_ CV* cv)
 #endif
 #ifndef XS
