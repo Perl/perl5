@@ -1,6 +1,6 @@
 =head1 NAME
 
-CPerlBase - a base class encapsulating a Perl interpreter
+CPerlBase - a C++ base class encapsulating a Perl interpreter in Symbian
 
 =head1 SYNOPSIS
 

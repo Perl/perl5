@@ -2656,6 +2656,9 @@ symbian/PerlBase.h		Symbian Perl base class header
 symbian/PerlBase.pod		Symbian Perl base class documentation
 symbian/PerlRecog.cpp		Symbian recognizer code
 symbian/PerlRecog.mmp		Symbian recognizer build
+symbian/PerlUtil.cpp		Symbian Perl utility class
+symbian/PerlUtil.h		Symbian Perl utility class header
+symbian/PerlUtil.pod		Symbian Perl utility class documentation
 symbian/port.pl			Helper code for config.pl
 symbian/README			ReadMe for the Symbian files
 symbian/sanity.pl		Helper code for config.pl

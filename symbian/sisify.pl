@@ -14,7 +14,7 @@ use strict;
 
 use vars qw($VERSION);
 
-$VERSION = '0.1';
+$VERSION = '0.2';
 
 use Getopt::Long;
 use File::Temp qw/tempdir/;
@@ -22,24 +22,14 @@ use File::Find;
 use File::Basename qw/basename dirname/;
 use Cwd qw/getcwd/;
 
-# TODO:
-# - prepend the \system\app\$AppName{,\lib} somehow to the @INC
-
 BEGIN {
-  my $warn;
-  # This utility has been developed under Cygwin in Windows with
-  # the Series 60 2.6 SDK installed, but for the makesis utility in
-  # UNIX/Linux, try e.g. one of the following:
+  # This utility has been developed in Windows under cmd.exe with
+  # the Series 60 2.6 SDK installed, but for the makesis utility
+  # in UNIX/Linux, try e.g. one of the following:
   # http://gnupoc.sourceforge.net/
   # http://symbianos.org/~andreh/ You
   # will also need the 'uidcrc' utility.
-  for my $exe (qw(/bin/cp /bin/tar)) {
-    unless( -f $exe) { # Sorry, Win32ers.
-      warn "$0: Need $exe\n";
-      $warn++;
-    }
-  }
-  die "$0: Cannot continue, aborting.\n" if $warn;
+  die "$0: Looks like Cygwin, aborting.\n" if exists $ENV{'!C:'};
 }
 
 sub die_with_usage {
@@ -52,7 +42,7 @@ $0 [ --uid=hhhhhhhh ] [ --version=a.b.c ] [ --library=x.y.z ] [ some.pl | Some.p
 The uid is the Symbian app uid for the SIS.
 The version is the version of the SIS.
 The library is the version of Perl under which to install.  If using this,
-only specify directories to package.
+only specify directories for packaging.
 __USAGE__
 }
 
@@ -156,15 +146,16 @@ for my $file (@SisPl, @SisPm, @SisOther) {
   print "[copying file '$file']\n" if $Debug;
   die_with_usage("$0: File '$file': $!") unless -f $file;
   my $dir = dirname($file);
-  do_system("mkdir $tempdir/$dir") unless $dir eq '.';
-  do_system("cp $file $tempdir");
+  do_system("mkdir $tempdir\\$dir") unless $dir eq '.';
+  do_system("copy $file $tempdir");
 }
 if (@SisPl) {
-    do_system("cp $SisPl[0] $tempdir/default.pl") unless $SisPl[0] eq "default.pl";
+    do_system("copy $SisPl[0] $tempdir\\default.pl")
+	unless $SisPl[0] eq "default.pl";
 }
 for my $dir (@SisDir) {
   print "[copying directory '$dir']\n" if $Debug;
-  do_system("tar cf - $dir | (cd $tempdir && tar xf -)");
+  do_system("copy $dir $tempdir");
 }
 
 my $SisVersionCommas = $SisVersion;
@@ -173,13 +164,43 @@ $SisVersionCommas =~ s/\./\,/g;
 
 my @pkg;
 
-push @pkg, qq[&EN];
+push @pkg, qq[&EN;];
 push @pkg, qq[#{"$AppName"},($SisUid),$SisVersionCommas];
 push @pkg, qq[(0x101F6F88), 0, 0, 0, {"Series60ProductID"}];
 
 my $OWD = getcwd();
 
+$OWD =~ s!/!\\!g;
+
 chdir($tempdir) or die "$0: chdir('$tempdir')\n";
+
+if (@SisPl) {
+  if (open(my $fi, "default.pl")) {
+    my $fn = "default.pl.new";
+    if (open(my $fo, ">$fn")) {
+      while (<$fi>) {
+	last unless /^\#/;
+	print $fo $_;
+      }
+      print $fo "use lib qw(\\system\\apps\\$AppName \\system\\apps\\$AppName\\lib);\n";
+      printf $fo qq[# %d "$SisPl[0]"\n], $.;
+      print $fo $_;
+      while (<$fi>) {
+	print $fo $_;
+      }
+      close($fo);
+    } else {
+      die "$0: open '>$fn': $!\n";
+    }
+    close($fi);
+    rename($fn, "default.pl") or die "$0: rename $fn default.pl: $!\n";
+    # system("cat -nvet default.pl");
+  } else {
+    die "$0: open 'default.pl': $!\n";
+  }
+}
+
+
 my @c;
 find(
      sub {
@@ -290,15 +311,15 @@ if ($ShowPkg) {
   }
   my $sis = "$AppName.SIS";
   unlink($sis);
+  do_system("dir");
   do_system("makesis $fn");
   unless (-f $sis) {
     die qq[$0: failed to create "$sis"\n];
   }
-  do_system("ls -l");
-  do_system("cat -vet $fn");
-  do_system("cp $AppName.sis $OWD");
+  do_system("copy $AppName.sis $OWD");
+  chdir($OWD);
+  system("dir $sis");
   print "\n=== Now transfer $sis to your device ===\n";
-  system("ls -l $sis");
 }
 
 exit(0);
@@ -307,6 +328,8 @@ sub init_hex {
   # This is Symbian application executable skeleton.
   # You can create the ...\epoc32\release\thumb\urel\foo.app
   # by compiling the PerlApp.cpp with PerlMinSample defined in PerlApp.h.
+  # The following executable has been compiled using the Series 60 SDK 2.6
+  # for Visual C.
   $APPHEX = <<__APP__;
 7900 0010 ce39 0010 f615 2010 8581 1076
 4550 4f43 0020 0000 05fc d15d 0000 0000
@@ -691,6 +714,8 @@ __APP__
   # This is Symbian application resource skeleton.
   # You can create the ...\epoc32\data\z\system\apps\PerlApp\PerlApp.rsc
   # by compiling the PerlApp.cpp.
+  # The following resource has been compiled using the Series 60 SDK 2.6
+  # for Visual C.
   $RSCHEX = <<__RSC__;
 6b4a 1f10 0000 0000 5fde 0400 1ca3 60de
 01b8 0010 0004 0000 0001 f0e5 4d00 0000

@@ -313,12 +313,15 @@ print "Creating...\n";
 create_mmp(
     'miniperl',             'exe',
     'miniperlmain.c',       'symbian\symbian_stubs.c',
-    'symbian\PerlBase.cpp', 'symbian\symbian_utils.cpp',
+    'symbian\PerlBase.cpp',
+    'symbian\PerlUtil.cpp',
+    'symbian\symbian_utils.cpp',
 );
 create_mmp(
     "perl",                      'exe',
     'perlmain.c',                'symbian\symbian_stubs.c',
     'symbian\symbian_utils.cpp', 'symbian\PerlBase.cpp',
+    'symbian\PerlUtil.cpp',
     'ext\DynaLoader\DynaLoader.cpp',
 );
 
@@ -326,6 +329,7 @@ create_mmp(
     "perl$VERSION",              'dll',
     'symbian\symbian_dll.cpp',   'symbian\symbian_stubs.c',
     'symbian\symbian_utils.cpp', 'symbian\PerlBase.cpp',
+    'symbian\PerlUtil.cpp',
     'ext\DynaLoader\DynaLoader.cpp',
 );
 
@@ -548,10 +552,10 @@ allsis: all miniperlexe.sis perlexe.sis perldll.sis perllib.sis perlext.sis perl
 perldll.sis perl$VERSION.sis:	perldll_arm pm symbian\\makesis.pl
 	perl \$(XLIB) symbian\\makesis.pl perl${VERSION}dll
 
-perllib.sis:	\$(PM)
+perl${VERSION}lib.sis perllib.sis:	\$(PM)
 	perl \$(XLIB) symbian\\makesis.pl perl${VERSION}lib
 
-perlext.sis:	perldll_arm buildext_sis
+perl${VERSION}ext.sis perlext.sis:	perldll_arm buildext_sis
 	perl symbian\\makesis.pl perl${VERSION}ext
 
 EXT = 	Compress::Zlib Cwd Data::Dumper Devel::Peek Digest::MD5 Errno Fcntl File::Glob Filter::Util::Call IO List::Util MIME::Base64 PerlIO::scalar PerlIO::via SDBM_File Socket Storable Time::HiRes XSLoader attrs
@@ -587,18 +591,33 @@ sdkinstall:
 	- copy /y *.inc \$(APIDIR)\\include
 	copy /y lib\\ExtUtils\\xsubpp  \$(APIDIR)\\lib\\ExtUtils
 	copy /y lib\\ExtUtils\\typemap \$(APIDIR)\\lib\\ExtUtils
+	copy /y lib\\ExtUtils\\ParseXS.pm \$(APIDIR)\\lib\\ExtUtils
 	copy /y symbian\\xsbuild.pl    \$(APIDIR)\\bin
+	copy /y symbian\\sisify.pl     \$(APIDIR)\\bin
 	copy /y symbian\\PerlBase.h    \$(APIDIR)\\include
+	copy /y symbian\\PerlUtil.h    \$(APIDIR)\\include
 	copy /y symbian\\symbian*.h    \$(APIDIR)\\include\\symbian
 	copy /y symbian\\PerlBase.pod  \$(APIDIR)\\pod
+	copy /y symbian\\PerlUtil.pod  \$(APIDIR)\\pod
 
 RELDIR  = $SDK\\epoc32\\release
 RELWIN = \$(RELDIR)\\\$(WIN)\\udeb
 RELARM = \$(RELDIR)\\\$(ARM)\\$UARM
+SDKZIP = perl${VERSION}sdk.zip
 
-perlsdk.zip: perldll sdkinstall
+
+\$(SDKZIP) perlsdk.zip: perldll sdkinstall
+	-del /f perl${VERSION}sdk.zip
 	zip -r perl${VERSION}sdk.zip \$(RELWIN)\\perl$VERSION.* \$(RELARM)\\perl$VERSION.* \$(APIDIR)
 	\@echo perl${VERSION}sdk.zip created.
+
+PERLSIS = perl${VERSION}.SIS perl${VERSION}lib.SIS perl${VERSION}ext.SIS
+ALLSIS  = \$(PERLSIS) perlapp.sis
+ETC     = README.symbian symbian\\PerlBase.pod symbian\\PerlUtil.pod symbian\\sisify.pl symbian\\TODO
+
+perl${VERSION}dist.zip perldist.zip: \$(ALLSIS) \$(SDKZIP) \$(ETC)
+	-del /f perl${VERSION}dist.zip
+	zip -r perl${VERSION}dist.zip \$(ALLSIS) \$(SDKZIP) \$(ETC)
 
 perlapp:	sdkinstall perlapp_win perlapp_arm
 
@@ -615,7 +634,7 @@ perlapp.sis: perlapp_arm
 	cd symbian; make perlapp.sis
 
 perlapp.zip:
-	cd symbian; zip perlapp.zip PerlApp.* PerlRecog.* PerlBase.* demo_pl
+	cd symbian; zip perlapp.zip PerlApp.* PerlRecog.* PerlBase.* PerlUtil.* demo_pl
 
 zip:	perlsdk.zip perlapp.zip
 

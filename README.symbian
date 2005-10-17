@@ -129,7 +129,7 @@ mainly as demonstrations.
     the messages.
 
     Since the total size of all Perl SIS files once installed is
-    over 1.9 MB, it is recommended to do the installation into a
+    over 2 MB, it is recommended to do the installation into a
     memory card (drive E:) instead of the C: drive.
 
     The size of the perlXYZ.SIS is about 370 kB but once it is in the
@@ -150,7 +150,7 @@ mainly as demonstrations.
 
         make perlext.sis
 
-    which will create perlXYZext.sis (210 kB -> 470 kB).
+    which will create perlXYZext.sis (290 kB -> 770 kB).
 
     To compile the demonstration application PerlApp you need first to
     install the Perl headers under the SDK.

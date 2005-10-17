@@ -41,7 +41,7 @@ extern char*  strncpy(char *dst, const char *src, size_t n);
 
 #endif /* PERL_CORE || PERL_EXT */
 
-#if defined(SYMBIAN_DLL_CPP) || defined(SYMBIAN_UTILS_CPP) || defined(PERLBASE_CPP)
+#if defined(SYMBIAN_DLL_CPP) || defined(SYMBIAN_UTILS_CPP) || defined(PERLBASE_CPP) || defined(PERLUTIL_CPP)
 #  define PERL_SYMBIAN_START_EXTERN_C extern "C" {
 #  define PERL_SYMBIAN_EXPORT_C       EXPORT_C
 #  define PERL_SYMBIAN_END_EXTERN_C   }

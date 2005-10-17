@@ -34,8 +34,8 @@ my $SDK;
 my $VERSION;
 my $R_V_SV;
 my $PERLSDK;
-my $WIN;
-my $ARM;
+my $WIN = 'wins';
+my $ARM = 'thumb';
 my $BUILDROOT = getcwd();
 
 if ( !defined $PerlVersion && $0 =~ m:\\symbian\\perl\\(.+)\\bin\\xsbuild.pl:i )
@@ -101,15 +101,22 @@ $PERLSDK = "\\Symbian\\Perl\\$PerlVersion";
 
 $R_V_SV = $PerlVersion;
 
-$VERSION =~ tr/.//d;
+$VERSION = $PerlVersion unless defined $VERSION;
+
+$VERSION =~ tr/.//d if defined $VERSION;
 
 $ENV{SDK}   = $SDK;    # For the Errno extension
 $ENV{CROSS} = 1;       # For the Encode extension
 
-my $UREL = $ENV{UREL}; # from sdk.pl
-$UREL =~ s/-ARM-/$ARM/;
-my $UARM = $ENV{UARM}; # from sdk.pl
-my $SRCDBG = $UARM eq 'udeb' ? "SRCDBG" : "";
+my $UARM = 'urel';
+my $UREL = "$SDK\\epoc32\\release\\-ARM-\\$UARM";
+my $SRCDBG;
+if (exists $ENV{UREL}) {
+    $UREL = $ENV{UREL}; # from sdk.pl
+    $UREL =~ s/-ARM-/$ARM/;
+    $UARM = $ENV{UARM}; # from sdk.pl
+    $SRCDBG = $UARM eq 'udeb' ? "SRCDBG" : "";
+}
 
 my %CONF;
 my %EXTCFG;
@@ -379,7 +386,7 @@ sub update_dir {
 
 sub xsconfig {
     my ( $ext, $dir ) = @_;
-    print "Configuring for $ext, directory $dir...\n";
+    print "Configuring for $ext, directory '$dir'...\n";
     my $extu = $CoreBuild ? "$BUILDROOT\\lib\\ExtUtils" : "$PERLSDK\\lib\\ExtUtils";
     update_dir($dir) or die "$0: chdir '$dir': $!\n";
     my $build  = dirname($ext);
@@ -743,7 +750,7 @@ for my $ext (@ARGV) {
      # (3) With an updated _init.c that carries the symbols from step (2).
 
         system_echo("make clean");
-        system_echo("make defrost") == 0 or die "$0: make defrost failed\n";
+        system_echo("make defrost") == 0 or warn "$0: make defrost failed\n";
 
         my @TARGET;
 

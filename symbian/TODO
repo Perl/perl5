@@ -27,14 +27,16 @@
     - system("app arg1 arg2 &")
     but remember that a Symbian process does get only argv[0]
     and argv[1]: all the arguments of the application are passed
-    in as a single argument ("arg1 arg2" in the above)
+    in as a single argument, the second one ("arg1 arg2" in the above)
   What does not work:
+  - I/O redirection
   - piped open, in either direction
   - qx/backtick/`
   - fork/wait (these unlikely to ever work as in POSIX)
   - IO redirection or filename globbing in system()
     (since there is no POSIX shell beneath)
   What might work in future:
+  - some I/O redirection
   - exec() might be made to work
   - Symbian::spawn("cmd args") returning a process id (what does Win32 do?) 
   - Symbian::waitpid($spawned_pid)
@@ -70,7 +72,6 @@
 
 =head1 PACKAGING
 
-- @INC manipulation for sisify.pl
 - subdivide perlext.sis?
 - pm-stripper: strip pod and comments, while inserting the appropriate
   #line commands to keep linenumbers in sync.  Shaves off easily 50%
