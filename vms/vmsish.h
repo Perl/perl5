@@ -2,8 +2,12 @@
  *
  * VMS-specific C header file for perl5.
  *
- * Last revised: 16-Sep-1998 by Charles Bailey  bailey@newman.upenn.edu
+ * revised: 16-Sep-1998 by Charles Bailey  bailey@newman.upenn.edu
  * Version: 5.5.2
+ *
+ * Last revised: 01-Feb-2005 by John Malmberg (HP OpenVMS) wb8twy@qsl.net
+ *			     Add SYMLINK support, and updated Craig Berry's
+ *			     largefile support.
  */
 
 #ifndef __vmsish_h_included
@@ -50,6 +54,9 @@
 #include <processes.h> /* for vfork() */
 #include <unixio.h>
 #include <unixlib.h>
+#if __CRTL_VER >= 80200000 && !defined(__VAX)
+#include <dirent.h>
+#endif
 #include <file.h>  /* it's not <sys/file.h>, so don't use I_SYS_FILE */
 #if (defined(__DECC) && defined(__DECC_VER) && __DECC_VER > 20000000) || defined(__DECCXX)
 #  include <unistd.h> /* DECC has this; gcc doesn't */
@@ -123,7 +130,9 @@
 #define pathify_dirspec		Perl_pathify_dirspec
 #define pathify_dirspec_ts	Perl_pathify_dirspec_ts
 #define trim_unixpath		Perl_trim_unixpath
+#ifndef DONT_MASK_RTL_CALLS
 #define opendir			Perl_opendir
+#endif
 #define rmscopy			Perl_rmscopy
 #define my_mkdir		Perl_my_mkdir
 #define vms_do_aexec		Perl_vms_do_aexec
@@ -134,13 +143,16 @@
 #define my_utime		Perl_my_utime
 #define my_chdir		Perl_my_chdir
 #define do_aspawn		Perl_do_aspawn
-#define seekdir		Perl_seekdir
+#ifndef DONT_MASK_RTL_CALLS
+#define seekdir			Perl_seekdir
+#endif
 #define my_gmtime		Perl_my_gmtime
 #define my_localtime		Perl_my_localtime
-#define my_time		Perl_my_time
+#define my_time			Perl_my_time
 #define do_spawn		Perl_do_spawn
 #define flex_fstat		Perl_flex_fstat
 #define flex_stat		Perl_flex_stat
+#define flex_lstat		Perl_flex_lstat
 #define cando_by_name		Perl_cando_by_name
 #define my_getpwnam		Perl_my_getpwnam
 #define my_getpwuid		Perl_my_getpwuid
@@ -169,7 +181,9 @@
 #define rmsexpand(a,b,c,d)	Perl_rmsexpand(aTHX_ a,b,c,d)
 #define rmsexpand_ts(a,b,c,d)	Perl_rmsexpand_ts(aTHX_ a,b,c,d)
 #define trim_unixpath(a,b,c)	Perl_trim_unixpath(aTHX_ a,b,c)
+#ifndef DONT_MASK_RTL_CALLS
 #define opendir(a)		Perl_opendir(aTHX_ a)
+#endif
 #define rmscopy(a,b,c)		Perl_rmscopy(aTHX_ a,b,c)
 #define my_mkdir(a,b)		Perl_my_mkdir(aTHX_ a,b)
 #define vms_do_aexec(a,b,c)	Perl_vms_do_aexec(aTHX_ a,b,c)
@@ -180,7 +194,9 @@
 #define my_utime(a,b)		Perl_my_utime(aTHX_ a,b)
 #define my_chdir(a)		Perl_my_chdir(aTHX_ a)
 #define do_aspawn(a,b,c)	Perl_do_aspawn(aTHX_ a,b,c)
+#ifndef DONT_MASK_RTL_CALLS
 #define seekdir(a,b)		Perl_seekdir(aTHX_ a,b)
+#endif
 #define my_gmtime(a)		Perl_my_gmtime(aTHX_ a)
 #define my_localtime(a)		Perl_my_localtime(aTHX_ a)
 #define my_time(a)		Perl_my_time(aTHX_ a)
@@ -191,12 +207,16 @@
 #define my_getpwnam(a)		Perl_my_getpwnam(aTHX_ a)
 #define my_getpwuid(a)		Perl_my_getpwuid(aTHX_ a)
 #define my_flush(a)		Perl_my_flush(aTHX_ a)
+#ifndef DONT_MASK_RTL_CALLS
 #define readdir(a)		Perl_readdir(aTHX_ a)
 #define readdir_r(a,b,c)	Perl_readdir_r(aTHX_ a,b,c)
 #endif
+#endif
 #define my_gconvert		Perl_my_gconvert
-#define telldir		Perl_telldir
+#ifndef DONT_MASK_RTL_CALLS
+#define telldir			Perl_telldir
 #define closedir		Perl_closedir
+#endif
 #define vmsreaddirversions	Perl_vmsreaddirversions
 #define my_sigemptyset        Perl_my_sigemptyset
 #define my_sigfillset         Perl_my_sigfillset
@@ -211,7 +231,17 @@
 #define my_getpwent()		Perl_my_getpwent(aTHX)
 #define my_endpwent()		Perl_my_endpwent(aTHX)
 #define my_getlogin		Perl_my_getlogin
-#define init_os_extras	Perl_init_os_extras
+#define init_os_extras		Perl_init_os_extras
+#define vms_realpath(a, b)	Perl_vms_realpath(aTHX_ a,b)
+#define vms_case_tolerant(a)	Perl_vms_case_tolerant(a)
+#define vms_decc_feature_get_name(a) \
+			Perl_vms_decc_feature_get_name(aTHX_ a)
+#define vms_decc_feature_get_value(a, b) \
+			Perl_vms_decc_feature_get_value(aTHX_ a, b)
+#define vms_decc_feature_set_value(a, b, c) \
+			Perl_vms_decc_feature_set_value(aTHX_ a, b, c)
+#define vms_decc_feature_get_index(a) \
+			Perl_vms_decc_feature_get_index(aTHX_ a)
 
 /* Delete if at all possible, changing protections if necessary. */
 #define unlink kill_file
@@ -332,7 +362,11 @@ struct interp_intern {
 #define PERL_SOCK_SYSWRITE_IS_SEND
 #endif
 
+#if __CRTL_VER < 70000000
 #define BIT_BUCKET "_NLA0:"
+#else
+#define BIT_BUCKET "/dev/null"
+#endif
 #define PERL_SYS_INIT(c,v)	MALLOC_CHECK_TAINT2(*c,*v) vms_image_init((c),(v)); MALLOC_INIT
 #define PERL_SYS_TERM()		OP_REFCNT_TERM; MALLOC_TERM
 #define dXSUB_SYS
@@ -416,6 +450,12 @@ struct interp_intern {
 *	This symbol is defined if this system has a stat structure declaring
 *	st_rdev
 *	VMS: Field exists in POSIXish version of struct stat(), but is not used.
+*
+*  No definition of what value an operating system or file system should
+*  put in the st_rdev field has been found by me so far.  Examination of
+*  LINUX source code indicates that the value is both very platform and
+*  file system specific, with many filesystems just putting 1 or 0 in it.
+*  J. Malmberg.
 */
 #undef USE_STAT_RDEV		/**/
 
@@ -439,7 +479,9 @@ struct interp_intern {
 #define Fflush(fp) my_flush(fp)
 
 /* Use our own rmdir() */
+#ifndef DONT_MASK_RTL_CALLS
 #define rmdir(name) do_rmdir(name)
+#endif
 
 /* Assorted fiddling with sigs . . . */
 # include <signal.h>
@@ -555,28 +597,49 @@ struct utimbuf {
  * opendir(), closedir(), readdir(), seekdir(), telldir(), and
  * vmsreaddirversions(), and preprocessor stuff on which these depend:
  *    Written by Rich $alz, <rsalz@bbn.com> in August, 1990.
+ *
+ * Feb 2005 - POSIX filespecs need real opendir() structures.
+ *            rename to remove conflicts.  J. Malmberg (HP OpenVMS)
  */
+
     /* Data structure returned by READDIR(). */
-struct dirent {
+struct my_dirent {
     char	d_name[256];		/* File name		*/
-    int		d_namlen;			/* Length of d_name */
+#   if defined _XOPEN_SOURCE || !defined _POSIX_C_SOURCE
+#if !_USE_STD_STAT
+	/* 3 word array */
+	__ino_t d_ino[3];	    /*  file serial number (vms-style inode) */
+	unsigned short fill;
+#else	/* quadword */
+	__ino_t d_ino;
+#endif
+    int		d_namlen;		/* Length of d_name */
     int		vms_verscount;		/* Number of versions	*/
     int		vms_versions[20];	/* Version numbers	*/
 };
 
     /* Handle returned by opendir(), used by the other routines.  You
      * are not supposed to care what's inside this structure. */
-typedef struct _dirdesc {
+typedef struct my_dirdesc {
+#if __CRTL_VER >= 80200000 && !defined(__VAX)
+    int				flags;
+    DIR				*vms_dirdesc;
+#endif
     long			context;
     int				vms_wantversions;
     unsigned long int           count;
     char			*pattern;
-    struct dirent		entry;
+    struct my_dirent		entry;
     struct dsc$descriptor_s	pat;
     void			*mutex;
-} DIR;
+} MY_DIR;
 
+
+#ifndef DONT_MASK_RTL_CALLS
+#define DIR MY_DIR
+#define dirent my_dirent
 #define rewinddir(dirp)		seekdir((dirp), 0)
+#endif
 
 /* used for our emulation of getpw* */
 struct passwd {
@@ -611,95 +674,54 @@ struct passwd {
 #include <stat.h>
 /* Since we've got to match the size of the CRTL's stat_t, we need
  * to mimic DECC's alignment settings.
+ *
+ * The simplest thing is to just put a wrapper around the stat structure
+ * supplied by the CRTL and use #defines to redirect references to the
+ * members to the real names.
  */
-#ifdef USE_LARGE_FILES
-/* Mimic the new stat structure, filler fields, and alignment. */
+
 #if defined(__DECC) || defined(__DECCXX)
 #  pragma __member_alignment __save
 #  pragma member_alignment
 #endif
 
-struct mystat
-{
-        char *st_devnam;       /* pointer to device name */
-        char *st_fill_dev;
-        unsigned st_ino;        /* hack - CRTL uses unsigned short[3] for */
-        unsigned short rvn;     /* FID (num,seq,rvn) */
-        unsigned short st_fill_ino;
-        unsigned short st_mode; /* file "mode" i.e. prot, dir, reg, etc. */
-        unsigned short st_fill_mode;
-        int     st_nlink;       /* for compatibility - not really used */
-        unsigned st_uid;        /* from ACP - QIO uic field */
-        unsigned short st_gid;  /* group number extracted from st_uid */
-        unsigned short st_fill_gid;
-        dev_t   st_rdev;        /* for compatibility - always zero */
-        off_t   st_size;        /* file size in bytes */
-        unsigned st_atime;      /* file access time; always same as st_mtime */
-        unsigned st_fill_atime;
-        unsigned st_mtime;      /* last modification time */
-        unsigned st_fill_mtime;
-        unsigned st_ctime;      /* file creation time */
-        unsigned st_fill_ctime;
-        char    st_fab_rfm;     /* record format */
-        char    st_fab_rat;     /* record attributes */
-        char    st_fab_fsz;     /* fixed header size */
-        char    st_fab_fill;
-        unsigned st_fab_mrs;    /* record size */
-        int st_fill_expand[7];  /* will probably fill from beginning, so put our st_dev at end */
-        unsigned st_dev;        /* encoded device name */
-};
-
-#else /* !defined(USE_LARGE_FILES) */
-
-#if defined(__DECC) || defined(__DECCXX)
-#  pragma __member_alignment __save
-#  pragma __nomember_alignment
-#endif
-#if defined(__DECC) 
-#  pragma __message __save
-#  pragma __message disable (__MISALGNDSTRCT)
-#  pragma __message disable (__MISALGNDMEM)
+typedef unsigned mydev_t;
+#ifndef _LARGEFILE
+typedef unsigned myino_t;
+#else
+typedef __ino64_t myino_t;
 #endif
 
 struct mystat
 {
-        char *st_devnam;  /* pointer to device name */
-        unsigned st_ino;    /* hack - CRTL uses unsigned short[3] for */
-        unsigned short rvn; /* FID (num,seq,rvn) */
-        unsigned short st_mode;	/* file "mode" i.e. prot, dir, reg, etc. */
-        int	st_nlink;	/* for compatibility - not really used */
-        unsigned st_uid;	/* from ACP - QIO uic field */
-        unsigned short st_gid;	/* group number extracted from st_uid */
-        dev_t   st_rdev;	/* for compatibility - always zero */
-        off_t   st_size;	/* file size in bytes */
-        unsigned st_atime;	/* file access time; always same as st_mtime */
-        unsigned st_mtime;	/* last modification time */
-        unsigned st_ctime;	/* file creation time */
-        char	st_fab_rfm;	/* record format */
-        char	st_fab_rat;	/* record attributes */
-        char	st_fab_fsz;	/* fixed header size */
-        unsigned st_dev;	/* encoded device name */
-        /* Pad struct out to integral number of longwords, since DECC 5.6/VAX
-         * has a bug in dealing with offsets in structs in which are embedded
-         * other structs whose size is an odd number of bytes.  (An even
-         * number of bytes is enough to make it happy, but we go for natural
-         * alignment anyhow.)
-         */
-        char	st_fill1[sizeof(void *) - (3*sizeof(unsigned short) + 3*sizeof(char))%sizeof(void *)];
+    struct stat crtl_stat;
+    myino_t st_ino;
+#ifndef _LARGEFILE
+    unsigned rvn; /* FID (num,seq,rvn) + pad */
+#endif
+    mydev_t st_dev;
+    char st_devnam[256]; /* Cache the (short) VMS name */
 };
 
-#if defined(__DECC) 
-#  pragma __message __restore
-#endif
+#define st_mode crtl_stat.st_mode
+#define st_nlink crtl_stat.st_nlink
+#define st_uid crtl_stat.st_uid
+#define st_gid crtl_stat.st_gid
+#define st_rdev crtl_stat.st_rdev
+#define st_size crtl_stat.st_size
+#define st_atime crtl_stat.st_atime
+#define st_mtime crtl_stat.st_mtime
+#define st_ctime crtl_stat.st_ctime
+#define st_fab_rfm crtl_stat.st_fab_rfm
+#define st_fab_rat crtl_stat.st_fab_rat
+#define st_fab_fsz crtl_stat.st_fab_fsz
+#define st_fab_mrs crtl_stat_st_fab_mrs
 
 #endif /* defined(USE_LARGE_FILES) */
 
 #if defined(__DECC) || defined(__DECCXX)
 #  pragma __member_alignment __restore
 #endif
-
-typedef unsigned mydev_t;
-typedef unsigned myino_t;
 
 /*
  * DEC C previous to 6.0 corrupts the behavior of the /prefix
@@ -769,7 +791,9 @@ int	Perl_unix_status_to_vms(int unix_status);
 /* prototype section start marker; `typedef' passes through cpp */
 typedef char  __VMS_PROTOTYPES__;
 int	Perl_vmstrnenv (const char *, char *, unsigned long int, struct dsc$descriptor_s **, unsigned long int);
+char *	Perl_vms_realpath (const char *, char *);
 #if !defined(PERL_IMPLICIT_CONTEXT)
+int	Perl_vms_case_tolerant(void);
 char *	Perl_my_getenv (const char *, bool);
 int	Perl_my_trnlnm (const char *, char *, unsigned long int);
 char *	Perl_tounixspec (const char *, char *);
@@ -788,7 +812,7 @@ char *	Perl_pathify_dirspec_ts (const char *, char *);
 char *	Perl_rmsexpand (const char *, char *, const char *, unsigned);
 char *	Perl_rmsexpand_ts (const char *, char *, const char *, unsigned);
 int	Perl_trim_unixpath (char *, const char*, int);
-DIR *	Perl_opendir (const char *);
+MY_DIR  * Perl_opendir (const char *);
 int	Perl_rmscopy (const char *, const char *, int);
 int	Perl_my_mkdir (const char *, Mode_t);
 bool	Perl_vms_do_aexec (SV *, SV **, SV **);
@@ -811,11 +835,17 @@ char *	Perl_pathify_dirspec_ts (pTHX_ const char *, char *);
 char *	Perl_rmsexpand (pTHX_ const char *, char *, const char *, unsigned);
 char *	Perl_rmsexpand_ts (pTHX_ const char *, char *, const char *, unsigned);
 int	Perl_trim_unixpath (pTHX_ char *, const char*, int);
-DIR *	Perl_opendir (pTHX_ const char *);
+MY_DIR * Perl_opendir (pTHX_ const char *);
 int	Perl_rmscopy (pTHX_ const char *, const char *, int);
 int	Perl_my_mkdir (pTHX_ const char *, Mode_t);
 bool	Perl_vms_do_aexec (pTHX_ SV *, SV **, SV **);
+char *	Perl_vms_realpath (pTHX_ const char *, char *);
+char *	Perl_vms_decc_feature_get_name(pTHX_ int a);
+int	Perl_vms_decc_feature_get_value(pTHX_ int, int);
+int	Perl_vms_decc_feature_set_value(pTHX_ int, int, int)
+int	Perl_vms_decc_feature_get_index(aTHX_ const char *)
 #endif
+int	Perl_vms_case_tolerant(void);
 char *	Perl_my_getenv_len (pTHX_ const char *, unsigned long *, bool);
 int	Perl_vmssetenv (pTHX_ const char *, const char *, struct dsc$descriptor_s **);
 void	Perl_vmssetuserlnm(pTHX_ const char *name, const char *eqv);
@@ -835,12 +865,12 @@ void	Perl_csighandler_init (void);
 #endif
 int	Perl_my_utime (pTHX_ const char *, const struct utimbuf *);
 void	Perl_vms_image_init (int *, char ***);
-struct dirent *	Perl_readdir (pTHX_ DIR *);
-int	Perl_readdir_r(pTHX_ DIR *, struct dirent *, struct dirent **);
-long	telldir (DIR *);
-void	Perl_seekdir (pTHX_ DIR *, long);
-void	closedir (DIR *);
-void	vmsreaddirversions (DIR *, int);
+struct my_dirent *	Perl_readdir (pTHX_ MY_DIR *);
+int	Perl_readdir_r(pTHX_ MY_DIR *, struct my_dirent *, struct my_dirent **);
+long	Perl_telldir (MY_DIR *);
+void	Perl_seekdir (pTHX_ MY_DIR *, long);
+void	Perl_closedir (MY_DIR *);
+void	vmsreaddirversions (MY_DIR *, int);
 struct tm *	Perl_my_gmtime (pTHX_ const time_t *);
 struct tm *	Perl_my_localtime (pTHX_ const time_t *);
 time_t	Perl_my_time (pTHX_ time_t *);
@@ -854,6 +884,7 @@ int     my_sigprocmask (int, sigset_t *, sigset_t *);
 #endif
 I32	Perl_cando_by_name (pTHX_ I32, Uid_t, const char *);
 int	Perl_flex_fstat (pTHX_ int, Stat_t *);
+int	Perl_flex_lstat (pTHX_ const char *, Stat_t *);
 int	Perl_flex_stat (pTHX_ const char *, Stat_t *);
 int	my_vfork (void);
 bool	Perl_vms_do_exec (pTHX_ const char *);
