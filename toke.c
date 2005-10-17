@@ -446,7 +446,7 @@ S_missingterm(pTHX_ char *s)
 #endif
 	) {
 	*tmpbuf = '^';
-	tmpbuf[1] = toCTRL(PL_multi_close);
+	tmpbuf[1] = (char)toCTRL(PL_multi_close);
 	tmpbuf[2] = '\0';
 	s = tmpbuf;
     }

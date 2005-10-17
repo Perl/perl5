@@ -2987,7 +2987,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    ckWARN(WARN_PACK))
 		    Perl_warner(aTHX_ packWARN(WARN_PACK),
 				"Character in 'c' format wrapped in pack");
-		PUSH_BYTE(utf8, cur, aiv & 0xff);
+		PUSH_BYTE(utf8, cur, (U8)(aiv & 0xff));
 	    }
 	    break;
 	case 'C':
@@ -3004,7 +3004,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    ckWARN(WARN_PACK))
 		    Perl_warner(aTHX_ packWARN(WARN_PACK),
 				"Character in 'C' format wrapped in pack");
-		*cur++ = aiv & 0xff;
+		*cur++ = (char)(aiv & 0xff);
 	    }
 	    break;
 	case 'W': {

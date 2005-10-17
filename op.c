@@ -2324,7 +2324,7 @@ Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
     unop->op_type = (OPCODE)type;
     unop->op_ppaddr = PL_ppaddr[type];
     unop->op_first = first;
-    unop->op_flags = flags | OPf_KIDS;
+    unop->op_flags = (U8)(flags | OPf_KIDS);
     unop->op_private = (U8)(1 | (flags >> 8));
     unop = (UNOP*) CHECKOP(type, unop);
     if (unop->op_next)
@@ -2346,7 +2346,7 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
     binop->op_type = (OPCODE)type;
     binop->op_ppaddr = PL_ppaddr[type];
     binop->op_first = first;
-    binop->op_flags = flags | OPf_KIDS;
+    binop->op_flags = (U8)(flags | OPf_KIDS);
     if (!last) {
 	last = first;
 	binop->op_private = (U8)(1 | (flags >> 8));
@@ -2643,7 +2643,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		j = rlen - 1;
 	    else
 		cPVOPo->op_pv = (char*)Renew(tbl, 0x101+rlen-j, short);
-	    tbl[0x100] = rlen - j;
+	    tbl[0x100] = (short)(rlen - j);
 	    for (i=0; i < (I32)rlen - j; i++)
 		tbl[0x101+i] = r[j+i];
 	}
@@ -3625,7 +3625,7 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
     logop->op_type = (OPCODE)type;
     logop->op_ppaddr = PL_ppaddr[type];
     logop->op_first = first;
-    logop->op_flags = flags | OPf_KIDS;
+    logop->op_flags = (U8)(flags | OPf_KIDS);
     logop->op_other = LINKLIST(other);
     logop->op_private = (U8)(1 | (flags >> 8));
 
@@ -3676,7 +3676,7 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
     logop->op_type = OP_COND_EXPR;
     logop->op_ppaddr = PL_ppaddr[OP_COND_EXPR];
     logop->op_first = first;
-    logop->op_flags = flags | OPf_KIDS;
+    logop->op_flags = (U8)(flags | OPf_KIDS);
     logop->op_private = (U8)(1 | (flags >> 8));
     logop->op_other = LINKLIST(trueop);
     logop->op_next = LINKLIST(falseop);
