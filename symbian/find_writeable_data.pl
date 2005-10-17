@@ -34,7 +34,7 @@ use Cwd;
 use File::Basename;
 
 my $dir = lc(getcwd());
-my $tgt = basename(shift @ARGV);
+my $tgt = basename(shift(@ARGV), ".mmp");
 
 $dir =~ s!/!\\!g;
 $dir =~ s!^c:!c:$ENV{EPOCROOT}epoc32\\build!;

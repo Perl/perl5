@@ -206,10 +206,12 @@ sub read_mmp {
 }
 
 sub write_mmp {
-    my ( $base, $userinclude, @src ) = @_;
+    my ( $ext, $base, $userinclude, @src ) = @_;
+
+    my $extdash = $ext; $extdash =~ s!\\!-!g;
 
     print "\t$base.mmp\n";
-    $CONF{TARGET}        = "$base.dll";
+    $CONF{TARGET}        = "perl$VERSION-$extdash.dll";
     $CONF{TARGETPATH}    = "\\System\\Libs\\Perl\\$R_V_SV";
     $CONF{SOURCE}        = [@src];
     $CONF{SOURCEPATH}    = [ $CWD, $BUILDROOT ];
@@ -410,8 +412,10 @@ sub xsconfig {
 
     $extdirdir = $extdirdir eq "." ? "" : "$extdirdir\\";
 
+    my $extdash = $ext; $extdash =~ s!\\!-!g;
+
     my %lst;
-    $lst{"$UREL\\$base.dll"} =
+    $lst{"$UREL\\perl$VERSION-$extdash.dll"} =
       "$targetroot\\$ARM-symbian\\$base.dll"
       if -f $basexs;
     $lst{"$dir\\$base.pm"} = "$targetroot\\$extdirdir$base.pm"
@@ -424,6 +428,7 @@ sub xsconfig {
         my @found;
         find( sub { push @found, $File::Find::name if -f $_ }, 'lib' );
         for my $found (@found) {
+	    next if $found =~ /\.bak$/i; # Zlib
             my ($short) = ( $found =~ m/^lib.(.+)/ );
             $short =~ s!/!\\!g;
             $found =~ s!/!\\!g;
@@ -603,7 +608,7 @@ __EOF__
                         unlink($submf);
                         my $subbase = $d;
                         $subbase =~ s!/!::!g;
-                        write_mmp( $subbase, ["..\\Encode"], "$subbase.c",
+                        write_mmp( $ext, $subbase, ["..\\Encode"], "$subbase.c",
                             @subsrc );
                         write_makefile( $subbase, $build );
                         write_bld_inf($subbase);
@@ -630,7 +635,7 @@ __EOF__
             print "Configuring Encode...\n";
         }
 
-        write_mmp( $base, [ keys %incdir ], @src );
+        write_mmp( $ext, $base, [ keys %incdir ], @src );
         write_makefile( $base, $build );
     }
     my $lstname = $ext;
@@ -658,6 +663,7 @@ sub update_cwd {
 for my $ext (@ARGV) {
 
     $ext =~ s!::!\\!g;
+    my $extdash = "ext\\$ext"; $extdash =~ s!\\!-!g;
     $ext =~ s!/!\\!g;
 
     my $cfg;
@@ -794,8 +800,8 @@ __EOF__
         my %symbol;
 	my $def;
 	my $basef;
-        for my $f ("$SDK\\Epoc32\\Build$CWD\\$base\\WINS\\$base.def",
-		   "..\\BMARM\\${base}u.def") {
+        for my $f ("$SDK\\Epoc32\\Build$CWD\\$base\\WINS\\perl$VERSION-$extdash.def",
+		   "..\\BMARM\\perl$VERSION-${extdash}u.def") {
 	    print "\t($f - ";
 	    if ( open( $def, $f ) ) {
 		print "OK)\n";
