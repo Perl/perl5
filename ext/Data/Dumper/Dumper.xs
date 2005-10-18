@@ -1104,7 +1104,7 @@ Data_Dumper_Dumpxs(href, ...)
 		    postlen = av_len(postav);
 		    if (postlen >= 0 || !terse) {
 			sv_insert(valstr, 0, 0, " = ", 3);
-			sv_insert(valstr, 0, 0, SvPVX_const(name), SvCUR(name));
+			sv_insert(valstr, 0, 0, (char *)SvPVX_const(name), SvCUR(name));
 			sv_catpvn(valstr, ";", 1);
 		    }
 		    sv_catsv(retval, pad);
