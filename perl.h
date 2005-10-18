@@ -190,7 +190,7 @@
 #define CALLREG_INTUIT_STRING CALL_FPTR(PL_regint_string)
 #define CALLREGFREE CALL_FPTR(PL_regfree)
 
-#if defined(SYMBIAN) && defined(__GNUC__)
+#if defined(__SYMBIAN32__) && defined(__GNUC__)
 #  ifdef __cplusplus
 #    define PERL_UNUSED_DECL
 #  else
@@ -385,11 +385,11 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #define DOSISH 1
 #endif
 
-#if defined(__STDC__) || defined(vax11c) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus) || defined( EPOC) || defined(NETWARE) || defined(SYMBIAN)
+#if defined(__STDC__) || defined(vax11c) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus) || defined(EPOC) || defined(NETWARE) || defined(__SYMBIAN32__)
 # define STANDARD_C 1
 #endif
 
-#if defined(__cplusplus) || defined(WIN32) || defined(__sgi) || defined(__EMX__) || defined(__DGUX) || defined( EPOC) || defined(__QNX__) || defined(NETWARE) || defined(PERL_MICRO)
+#if defined(__cplusplus) || defined(WIN32) || defined(__sgi) || defined(__EMX__) || defined(__DGUX) || defined(EPOC) || defined(__QNX__) || defined(NETWARE) || defined(PERL_MICRO)
 # define DONT_DECLARE_STD 1
 #endif
 
@@ -547,7 +547,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #   include <unistd.h>
 #endif
 
-#ifdef SYMBIAN
+#ifdef __SYMBIAN32__
 #   undef _SC_ARG_MAX /* Symbian has _SC_ARG_MAX but no sysconf() */
 #endif
 
@@ -833,7 +833,7 @@ int usleep(unsigned int);
 #   define STRUCT_OFFSET(s,m)  (Size_t)(&(((s *)0)->m))
 #endif
 
-#ifndef SYMBIAN
+#ifndef __SYMBIAN32__
 #  if defined(I_STRING) || defined(__cplusplus)
 #     include <string.h>
 #  else
@@ -2312,7 +2312,7 @@ typedef struct clone_params CLONE_PARAMS;
 #   define ISHISH "epoc"
 #endif
 
-#ifdef SYMBIAN
+#ifdef __SYMBIAN32__
 #   include "symbian/symbianish.h"
 #   include "embed.h"
 #   define ISHISH "symbian"
