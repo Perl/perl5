@@ -10,7 +10,7 @@ BEGIN {
 }
 
 use Config;
-plan(tests => 22);
+plan(tests => 24);
 
 ok( -d 'op' );
 ok( -f 'TEST' );
@@ -78,3 +78,10 @@ ok( ! -f -d 'op' );
 ok( -x -d -x 'op' );
 ok( (-s -f 'TEST' > 1), "-s returns real size" );
 ok( -f -s 'TEST' == 1 );
+
+# test that _ is a bareword after filetest operators
+
+-f 'TEST';
+ok( -f _ );
+sub _ { "this is not a file name" }
+ok( -f _ );

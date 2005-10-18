@@ -4272,11 +4272,16 @@ Perl_yylex(pTHX)
 
 		    /* If not a declared subroutine, it's an indirect object. */
 		    /* (But it's an indir obj regardless for sort.) */
+		    /* Also, if "_" follows a filetest operator, it's a bareword */
 
-		    if ( !immediate_paren && (PL_last_lop_op == OP_SORT ||
+		    if (
+			( !immediate_paren && (PL_last_lop_op == OP_SORT ||
                          ((!gv || !GvCVu(gv)) &&
                         (PL_last_lop_op != OP_MAPSTART &&
 			 PL_last_lop_op != OP_GREPSTART))))
+		       || (PL_tokenbuf[0] == '_' && PL_tokenbuf[1] == '\0'
+			    && ((PL_opargs[PL_last_lop_op] & OA_CLASS_MASK) == OA_FILESTATOP))
+		       )
 		    {
 			PL_expect = (PL_last_lop == PL_oldoldbufptr) ? XTERM : XOPERATOR;
 			goto bareword;
