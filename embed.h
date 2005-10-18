@@ -2166,7 +2166,7 @@
 #define do_eof(a)		Perl_do_eof(aTHX_ a)
 #define do_exec(a)		Perl_do_exec(aTHX_ a)
 #endif
-#if defined(WIN32) || defined(SYMBIAN)
+#if defined(WIN32) || defined(__SYMBIAN32__)
 #define do_aspawn(a,b,c)	Perl_do_aspawn(aTHX_ a,b,c)
 #define do_spawn(a)		Perl_do_spawn(aTHX_ a)
 #define do_spawn_nowait(a)	Perl_do_spawn_nowait(aTHX_ a)

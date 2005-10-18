@@ -392,7 +392,7 @@ PERL_CALLCONV bool	Perl_do_eof(pTHX_ GV* gv)
 PERL_CALLCONV bool	Perl_do_exec(pTHX_ const char* cmd)
 			__attribute__nonnull__(pTHX_1);
 
-#if defined(WIN32) || defined(SYMBIAN)
+#if defined(WIN32) || defined(__SYMBIAN32__)
 PERL_CALLCONV int	Perl_do_aspawn(pTHX_ SV* really, SV** mark, SV** sp)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
