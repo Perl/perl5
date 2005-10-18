@@ -302,8 +302,8 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 	/* NOTE: No support for tied ISA */
 	I32 items = AvFILLp(av) + 1;
 	while (items--) {
-	    SV* sv = *svp++;
-	    HV* basestash = gv_stashsv(sv, FALSE);
+	    SV* const sv = *svp++;
+	    HV* const basestash = gv_stashsv(sv, FALSE);
 	    if (!basestash) {
 		if (ckWARN(WARN_MISC))
 		    Perl_warner(aTHX_ packWARN(WARN_MISC), "Can't locate package %"SVf" for @%s::ISA",
@@ -320,9 +320,9 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
     /* if at top level, try UNIVERSAL */
 
     if (level == 0 || level == -1) {
-	HV* lastchance;
+	HV* const lastchance = gv_stashpvn("UNIVERSAL", 9, FALSE);
 
-	if ((lastchance = gv_stashpvn("UNIVERSAL", 9, FALSE))) {
+	if (lastchance) {
 	    if ((gv = gv_fetchmeth(lastchance, name, len,
 				  (level >= 0) ? level + 1 : level - 1)))
 	    {

@@ -60,8 +60,8 @@ extended.
 void
 Perl_av_extend(pTHX_ AV *av, I32 key)
 {
-    MAGIC *mg;
-    if ((mg = SvTIED_mg((SV*)av, PERL_MAGIC_tied))) {
+    MAGIC * const mg = SvTIED_mg((SV*)av, PERL_MAGIC_tied);
+    if (mg) {
 	dSP;
 	ENTER;
 	SAVETMPS;
@@ -92,7 +92,6 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 		while (tmp)
 		    ary[--tmp] = &PL_sv_undef;
 	    }
-	    
 	    if (key > AvMAX(av) - 10) {
 		newmax = key + AvMAX(av);
 		goto resize;
@@ -198,7 +197,7 @@ Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
 
             if (tied_magic && key < 0) {
                 /* Handle negative array indices 20020222 MJD */
-                SV **negative_indices_glob = 
+		SV * const * const negative_indices_glob =
                     hv_fetch(SvSTASH(SvRV(SvTIED_obj((SV *)av, 
                                                      tied_magic))), 
                              NEGATIVE_INDICES_VAR, 16, 0);
@@ -285,7 +284,7 @@ Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
             /* Handle negative array indices 20020222 MJD */
             if (key < 0) {
                 unsigned adjust_index = 1;
-                SV **negative_indices_glob = 
+		SV * const * const negative_indices_glob =
                     hv_fetch(SvSTASH(SvRV(SvTIED_obj((SV *)av, 
                                                      tied_magic))), 
                              NEGATIVE_INDICES_VAR, 16, 0);
@@ -354,9 +353,8 @@ Creates a new AV.  The reference count is set to 1.
 AV *
 Perl_newAV(pTHX)
 {
-    register AV *av;
+    register AV * const av = (AV*)NEWSV(3,0);
 
-    av = (AV*)NEWSV(3,0);
     sv_upgrade((SV *)av, SVt_PVAV);
     /* sv_upgrade does AvREAL_only()  */
     AvALLOC(av) = 0;
@@ -378,9 +376,8 @@ will have a reference count of 1.
 AV *
 Perl_av_make(pTHX_ register I32 size, register SV **strp)
 {
-    register AV *av;
+    register AV * const av = (AV*)NEWSV(8,0);
 
-    av = (AV*)NEWSV(8,0);
     sv_upgrade((SV *) av,SVt_PVAV);
     /* sv_upgrade does AvREAL_only()  */
     if (size) {		/* "defined" was returning undef for size==0 anyway. */
@@ -404,10 +401,9 @@ Perl_av_make(pTHX_ register I32 size, register SV **strp)
 AV *
 Perl_av_fake(pTHX_ register I32 size, register SV **strp)
 {
-    register AV *av;
     register SV** ary;
+    register AV * const av = (AV*)NEWSV(9,0);
 
-    av = (AV*)NEWSV(9,0);
     sv_upgrade((SV *)av, SVt_PVAV);
     Newx(ary,size+1,SV*);
     AvALLOC(av) = ary;
@@ -457,10 +453,10 @@ Perl_av_clear(pTHX_ register AV *av)
 	return;
 
     if (AvREAL(av)) {
-        SV** ary = AvARRAY(av);
+	SV** const ary = AvARRAY(av);
 	key = AvFILLp(av) + 1;
 	while (key) {
-	    SV * sv = ary[--key];
+	    SV * const sv = ary[--key];
 	    /* undef the slot before freeing the value, because a
 	     * destructor might try to modify this arrray */
 	    ary[key] = &PL_sv_undef;
@@ -805,7 +801,7 @@ Perl_av_delete(pTHX_ AV *av, I32 key, I32 flags)
             if (key < 0) {
                 unsigned adjust_index = 1;
                 if (tied_magic) {
-                    SV **negative_indices_glob = 
+		    SV * const * const negative_indices_glob =
                         hv_fetch(SvSTASH(SvRV(SvTIED_obj((SV *)av, 
                                                          tied_magic))), 
                                  NEGATIVE_INDICES_VAR, 16, 0);
@@ -890,7 +886,7 @@ Perl_av_exists(pTHX_ AV *av, I32 key)
             if (key < 0) {
                 unsigned adjust_index = 1;
                 if (tied_magic) {
-                    SV **negative_indices_glob = 
+		    SV * const * const negative_indices_glob =
                         hv_fetch(SvSTASH(SvRV(SvTIED_obj((SV *)av, 
                                                          tied_magic))), 
                                  NEGATIVE_INDICES_VAR, 16, 0);

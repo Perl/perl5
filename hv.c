@@ -879,13 +879,13 @@ Evaluates the hash in scalar context and returns the result. Handles magic when 
 SV *
 Perl_hv_scalar(pTHX_ HV *hv)
 {
-    MAGIC *mg;
     SV *sv;
-    
-    if ((SvRMAGICAL(hv) && (mg = mg_find((SV*)hv, PERL_MAGIC_tied)))) {
-        sv = magic_scalarpack(hv, mg);
-        return sv;
-    } 
+
+    if (SvRMAGICAL(hv)) {
+	MAGIC * const mg = mg_find((SV*)hv, PERL_MAGIC_tied);
+	if (mg)
+	    return magic_scalarpack(hv, mg);
+    }
 
     sv = sv_newmortal();
     if (HvFILL((HV*)hv)) 

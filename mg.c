@@ -369,13 +369,18 @@ Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
 	if ((mg->mg_flags & MGf_COPY) && vtbl->svt_copy){
 	    count += CALL_FPTR(vtbl->svt_copy)(aTHX_ sv, mg, nsv, key, klen);
 	}
-	else if (isUPPER(mg->mg_type)) {
-	    sv_magic(nsv,
-		     mg->mg_type == PERL_MAGIC_tied ? SvTIED_obj(sv, mg) :
-		     (mg->mg_type == PERL_MAGIC_regdata && mg->mg_obj)
-							? sv : mg->mg_obj,
-		     toLOWER(mg->mg_type), key, klen);
-	    count++;
+	else {
+	    const char type = mg->mg_type;
+	    if (isUPPER(type)) {
+		sv_magic(nsv,
+		     (type == PERL_MAGIC_tied)
+			? SvTIED_obj(sv, mg)
+			: (type == PERL_MAGIC_regdata && mg->mg_obj)
+			    ? sv
+			    : mg->mg_obj,
+		     toLOWER(type), key, klen);
+		count++;
+	    }
 	}
     }
     return count;
@@ -641,16 +646,18 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     register char *s = NULL;
     register I32 i;
     register REGEXP *rx;
+    const char * const remaining = mg->mg_ptr + 1;
+    const char nextchar = *remaining;
 
     switch (*mg->mg_ptr) {
     case '\001':		/* ^A */
 	sv_setsv(sv, PL_bodytarget);
 	break;
     case '\003':		/* ^C, ^CHILD_ERROR_NATIVE */
-	if (*(mg->mg_ptr+1) == '\0') {
+	if (nextchar == '\0') {
 	    sv_setiv(sv, (IV)PL_minus_c);
 	}
-	else if (strEQ(mg->mg_ptr, "\003HILD_ERROR_NATIVE")) {
+	else if (strEQ(remaining, "HILD_ERROR_NATIVE")) {
 	    sv_setiv(sv, (IV)STATUS_NATIVE);
         }
 	break;
@@ -659,7 +666,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	sv_setiv(sv, (IV)(PL_debug & DEBUG_MASK));
 	break;
     case '\005':  /* ^E */
-	 if (*(mg->mg_ptr+1) == '\0') {
+	 if (nextchar == '\0') {
 #ifdef MACOS_TRADITIONAL
 	     {
 		  char msg[256];
@@ -687,7 +694,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		  sv_setpv(sv, errno ? Strerror(errno) : "");
 	     } else {
 		  if (errno != errno_isOS2) {
-		       int tmp = _syserrno();
+		       const int tmp = _syserrno();
 		       if (tmp)	/* 2nd call to _syserrno() makes it 0 */
 			    Perl_rc = tmp;
 		  }
@@ -699,8 +706,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	     {
 		  DWORD dwErr = GetLastError();
 		  sv_setnv(sv, (NV)dwErr);
-		  if (dwErr)
-		  {
+		  if (dwErr) {
 		       PerlProc_GetOSError(sv, dwErr);
 		  }
 		  else
@@ -721,7 +727,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	     SvRTRIM(sv);
 	     SvNOK_on(sv);	/* what a wonderful hack! */
 	 }
-	 else if (strEQ(mg->mg_ptr+1, "NCODING"))
+	 else if (strEQ(remaining, "NCODING"))
 	      sv_setsv(sv, PL_encoding);
 	 break;
     case '\006':		/* ^F */
@@ -737,11 +743,11 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    sv_setsv(sv, &PL_sv_undef);
 	break;
     case '\017':		/* ^O & ^OPEN */
-	if (*(mg->mg_ptr+1) == '\0') {
+	if (nextchar == '\0') {
 	    sv_setpv(sv, PL_osname);
 	    SvTAINTED_off(sv);
 	}
-	else if (strEQ(mg->mg_ptr, "\017PEN")) {
+	else if (strEQ(remaining, "PEN")) {
 	    if (!PL_compiling.cop_io)
 		sv_setsv(sv, &PL_sv_undef);
             else {
@@ -753,7 +759,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	sv_setiv(sv, (IV)PL_perldb);
 	break;
     case '\023':		/* ^S */
-        if (*(mg->mg_ptr+1) == '\0') {
+	if (nextchar == '\0') {
 	    if (PL_lex_state != LEX_NOTPARSING)
 		SvOK_off(sv);
 	    else if (PL_in_eval)
@@ -763,28 +769,28 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	}
 	break;
     case '\024':		/* ^T */
-        if (*(mg->mg_ptr+1) == '\0') {
+	if (nextchar == '\0') {
 #ifdef BIG_TIME
             sv_setnv(sv, PL_basetime);
 #else
             sv_setiv(sv, (IV)PL_basetime);
 #endif
         }
-        else if (strEQ(mg->mg_ptr, "\024AINT"))
+	else if (strEQ(remaining, "AINT"))
             sv_setiv(sv, PL_tainting
 		    ? (PL_taint_warn || PL_unsafe ? -1 : 1)
 		    : 0);
         break;
     case '\025':		/* $^UNICODE, $^UTF8LOCALE */
-        if (strEQ(mg->mg_ptr, "\025NICODE"))
+	if (strEQ(remaining, "NICODE"))
 	    sv_setuv(sv, (UV) PL_unicode);
-        else if (strEQ(mg->mg_ptr, "\025TF8LOCALE"))
+	else if (strEQ(remaining, "TF8LOCALE"))
 	    sv_setuv(sv, (UV) PL_utf8locale);
         break;
     case '\027':		/* ^W  & $^WARNING_BITS */
-	if (*(mg->mg_ptr+1) == '\0')
+	if (nextchar == '\0')
 	    sv_setiv(sv, (IV)((PL_dowarn & G_WARN_ON) ? TRUE : FALSE));
-	else if (strEQ(mg->mg_ptr+1, "ARNING_BITS")) {
+	else if (strEQ(remaining, "ARNING_BITS")) {
 	    if (PL_compiling.cop_warnings == pWARN_NONE) {
 	        sv_setpvn(sv, WARN_NONEstring, WARNsize) ;
 	    }
@@ -799,7 +805,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		/* Get the bit mask for $warnings::Bits{all}, because
 		 * it could have been extended by warnings::register */
 		SV **bits_all;
-		HV *bits=get_hv("warnings::Bits", FALSE);
+		HV * const bits=get_hv("warnings::Bits", FALSE);
 		if (bits && (bits_all=hv_fetch(bits, "all", 3, FALSE))) {
 		    sv_setsv(sv, *bits_all);
 		}
@@ -842,7 +848,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 			SvUTF8_off(sv);
 		    if (PL_tainting) {
 			if (RX_MATCH_TAINTED(rx)) {
-			    MAGIC* mg = SvMAGIC(sv);
+			    MAGIC* const mg = SvMAGIC(sv);
 			    MAGIC* mgt;
 			    PL_tainted = 1;
 			    SvMAGIC_set(sv, mg->mg_moremagic);
