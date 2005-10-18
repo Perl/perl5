@@ -1259,10 +1259,10 @@ sigaction(sig, optaction, oldaction = 0)
 	    SV** sigsvp;
 	    if (sig == 0 && SvPOK(ST(0))) {
 	        const char *s = SvPVX_const(ST(0));
-		int i = whichsig(s);
+		int i = whichsig((char *)s);
 
 	        if (i < 0 && memEQ(s, "SIG", 3))
-		    i = whichsig(s + 3);
+		    i = whichsig((char *)s + 3);
 	        if (i < 0) {
 	            if (ckWARN(WARN_SIGNAL))
 		        Perl_warner(aTHX_ packWARN(WARN_SIGNAL),
