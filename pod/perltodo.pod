@@ -20,7 +20,45 @@ not, but if your patch is incorporated, then we'll add your name to the
 F<AUTHORS> file, which ships in the official distribution. How many other
 programming languages offer you 1 line of immortality?
 
+=head1 The roadmap to 5.10
 
+The roadmap to 5.10 envisages feature based releases, as various items in this
+TODO are completed.
+
+=head2 Needed for a 5.9.3 release
+
+=over
+
+=item *
+Implement L</lexical pragmas>
+
+=back
+
+=head2 Needed for a 5.9.4 release
+
+=over
+
+=item *
+Review assertions. Review syntax to combine assertions. Can assertions  take
+advantage of the lexical pragams work? L</What hooks would assertions need?>
+
+=back
+
+=head2 Needed for a 5.9.5 release
+
+=over
+
+=item *
+Implement L</_ prototype character>
+
+=item *
+Implement L</state variables>
+
+=back
+
+=head2 Needed for a 5.9.6 release
+
+Stabilisation. If all goes well, this will be the equivalent of a 5.10-beta.
 
 =head1 Tasks that only need Perl knowledge
 
@@ -117,20 +155,6 @@ Ilya observed that use POSIX; eats memory like there's no tomorrow, and at
 various times worked to cut it down. There is probably still fat to cut out -
 for example POSIX passes Exporter some very memory hungry data structures.
 
-=head2 Refactor C<xsubpp> to be a thin wrapper around C<ExtUtils::ParseXS>
-
-C<ExtUtils::ParseXS> encapsulates a version of the C<xsubpp> into a module.
-In effect this is a code fork, and it's likely that C<xsubpp> has had some
-bug fixes since the code from C<ExtUtils::ParseXS> was derived. It would be
-good to merge the differences in, reduce down to 1 canonical implementation,
-and convert C<xsubpp> to a very thin command line wrapper to
-C<ExtUtils::ParseXS>.
-
-In theory this needs no real C knowledge, as one way of approaching this task
-is to ensure that C<ExtUtils::ParseXS> generates identical output to C<xsubpp>
-for input XS files, which does not require understanding the contents of the
-output C file. However, some C knowledge is likely to help with testing, and
-locating/producing comprehensive test cases.
 
 
 
@@ -561,6 +585,11 @@ would be good to fix.
 Study the possibility of adding a new prototype character, C<_>, meaning
 "this argument defaults to $_".
 
+=head2 state variables
+
+C<my $foo if 0;> is deprecated, and should be replaced with
+C<state $x = "initial value\n";> the syntax from Perl 6.
+
 =head2 @INC source filter to Filter::Simple
 
 The second return value from a sub in @INC can be a source filter. This isn't
@@ -642,7 +671,7 @@ of 5.10"
 
 =head2 make ithreads more robust
 
-Generally make ithreads more robust. See also L<iCOW>
+Generally make ithreads more robust. See also L</iCOW>
 
 This task is incremental - even a little bit of work on it will help, and
 will be greatly appreciated.
