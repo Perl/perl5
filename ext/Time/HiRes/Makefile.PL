@@ -448,7 +448,7 @@ sub doMakefile {
 	'XSOPT'	=> $XSOPT,
     # do not even think about 'INC' => '-I/usr/ucbinclude', Solaris will avenge.
 	'INC'	=> '',     # e.g., '-I/usr/include/other'
-	'INSTALLDIRS' => 'perl',
+	'INSTALLDIRS' => ($] >= 5.008 ? 'perl' : 'site'),
 	'dist'      => {
 	    'CI'       => 'ci -l',
 	    'COMPRESS' => 'gzip -9f',

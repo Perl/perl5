@@ -1,5 +1,9 @@
 Revision history for Perl extension Time::HiRes.
 
+1.75	[2005-10-18]
+	- installation patch from Gisle Aas: in Perls 5.8.x and later
+	  use MakeMaker INSTALLDIRS value of 'perl' instead of 'site'.
+
 1.74	[2005-09-19]
 	- [cpan #14608] Solaris 8 perl 5.005_03 File::Spec module does not have method rel2abs
 	  (the workaround is not to use rel2abs, should not be necessary)
