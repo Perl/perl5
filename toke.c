@@ -3106,7 +3106,7 @@ Perl_yylex(pTHX)
 	    if (ftst) {
 		PL_last_lop_op = (OPCODE)ftst;
 		DEBUG_T( { PerlIO_printf(Perl_debug_log,
-                        "### Saw file test %c\n", (int)ftst);
+                        "### Saw file test %c\n", (int)tmp);
 		} );
 		FTST(ftst);
 	    }
