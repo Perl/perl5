@@ -498,6 +498,10 @@ d_class (d_class.U):
 	This variable conditionally defines the HAS_CLASS symbol, which
 	indicates to the C program that the class() routine is available.
 
+d_clearenv (d_clearenv.U):
+	This variable conditionally defines the HAS_CLEARENV symbol, which
+	indicates to the C program that the clearenv () routine is available.
+
 d_closedir (d_closedir.U):
 	This variable conditionally defines HAS_CLOSEDIR if closedir() is
 	available.
