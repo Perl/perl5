@@ -11,6 +11,7 @@
 #include <utf.h>
 
 #undef Copy
+#undef New
 
 EXPORT_C SV* PerlUtil::newSvPVfromTDesC8(const TDesC8& aDesC8) {
   dTHX;
