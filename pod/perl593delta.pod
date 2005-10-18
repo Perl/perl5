@@ -10,6 +10,21 @@ L<perl592delta> for the differences between 5.8.0 and 5.9.2.
 
 =head1 Incompatible Changes
 
+=head2 Parsing of C<-f _>
+
+C<_> is now forced to be a bareword after a filetest operator. This solves
+a number of misparsing issues when a global C<_> subroutine is defined.
+
+=head2 C<defined %foo::bar::>
+
+This used to report whether the C<foo::bar> package was created. Now it's
+always true, as a side-effect of a change to shrink the internal size of
+hash structures. Note that using C<defined> on hashes was deprecated
+anyway. To achieve the same result, you can use the following
+backwards-compatible idiom:
+
+    defined *foo::{HASH}->{'bar::'}
+
 =head1 Core Enhancements
 
 =head1 Modules and Pragmata
