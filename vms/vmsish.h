@@ -5,7 +5,7 @@
  * revised: 16-Sep-1998 by Charles Bailey  bailey@newman.upenn.edu
  * Version: 5.5.2
  *
- * Last revised: 01-Feb-2005 by John Malmberg (HP OpenVMS) wb8twy@qsl.net
+ * Last revised: 10-Oct-2005 by John Malmberg (HP OpenVMS) wb8twy@qsl.net
  *			     Add SYMLINK support, and updated Craig Berry's
  *			     largefile support.
  */
@@ -936,5 +936,10 @@ typedef char __VMS_SEPYTOTORP__;
 #endif 
 
 #define NO_ENVIRON_ARRAY
+
+/* RMSEXPAND options */
+#define PERL_RMSEXPAND_M_VMS		0x02 /* Force output to VMS format */
+#define PERL_RMSEXPAND_M_LONG		0x04 /* Expand to long name format */
+#define PERL_RMSEXPAND_M_SYMLINK	0x20 /* Use symbolic link, not target */
 
 #endif  /* __vmsish_h_included */

@@ -1268,7 +1268,7 @@ mp_do_kill_file(pTHX_ const char *name, int dirflag)
     }
     else {
       Newx(rspec, NAM$C_MAXRSS+1, char);
-      if (do_rmsexpand(vmsname,rspec,1,NULL,0) == NULL) {
+      if (do_rmsexpand(vmsname, rspec, 1, NULL, PERL_RMSEXPAND_M_VMS) == NULL) {
 	Safefree(rspec);
         Safefree(vmsname);
 	return -1;
@@ -3747,6 +3747,9 @@ my_gconvert(double val, int ndig, int trail, char *buf)
  * specification string.  The fourth argument is unused at present.
  * rmesexpand() returns the address of the resultant string if
  * successful, and NULL on error.
+ *
+ * New functionality for previously unused opts value:
+ *  PERL_RMSEXPAND_M_VMS - Force output file specification to VMS format.
  */
 static char *mp_do_tounixspec(pTHX_ const char *, char *, int);
 
@@ -3898,6 +3901,9 @@ mp_do_rmsexpand(pTHX_ const char *filespec, char *outbuf, int ts, const char *de
 
   /* Have we been working with an expanded, but not resultant, spec? */
   /* Also, convert back to Unix syntax if necessary. */
+  if ((opts & PERL_RMSEXPAND_M_VMS) != 0)
+    isunix = 0;
+
   if (!mynam.nam$b_rsl) {
     if (isunix) {
       if (do_tounixspec(esa,outbuf,0) == NULL) return NULL;
@@ -7218,6 +7224,8 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
                    struct dsc$descriptor_s **pvmscmd)
 {
   char vmsspec[NAM$C_MAXRSS+1], resspec[NAM$C_MAXRSS+1];
+  char image_name[NAM$C_MAXRSS+1];
+  char image_argv[NAM$C_MAXRSS+1];
   $DESCRIPTOR(defdsc,".EXE");
   $DESCRIPTOR(defdsc2,".");
   $DESCRIPTOR(resdsc,resspec);
@@ -7236,6 +7244,8 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
   Newx(cmd, cmdlen+1, char);
   strncpy(cmd, incmd, cmdlen);
   cmd[cmdlen] = 0;
+  image_name[0] = 0;
+  image_argv[0] = 0;
 
   vmscmd->dsc$a_pointer = NULL;
   vmscmd->dsc$b_dtype  = DSC$K_DTYPE_T;
@@ -7320,16 +7330,107 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
       *s = '\0';
 
       /* check that it's really not DCL with no file extension */
-      fp = fopen(resspec,"r","ctx=bin","shr=get");
+      fp = fopen(resspec,"r","ctx=bin","ctx=rec","shr=get");
       if (fp) {
         char b[256] = {0,0,0,0};
         read(fileno(fp), b, 256);
         isdcl = isprint(b[0]) && isprint(b[1]) && isprint(b[2]) && isprint(b[3]);
 	if (isdcl) {
+	  int shebang_len;
+
 	  /* Check for script */
-	  if ((b[0] == '#') && (b[1] == '!')) {
-	    /* Image is following after white space */
+	  shebang_len = 0;
+	  if ((b[0] == '#') && (b[1] == '!'))
+	     shebang_len = 2;
+#ifdef ALTERNATE_SHEBANG
+	  else {
+	    shebang_len = strlen(ALTERNATE_SHEBANG);
+	    if (strncmp(b, ALTERNATE_SHEBANG, shebang_len) == 0) {
+	      char * perlstr;
+		perlstr = strstr("perl",b);
+		if (perlstr == NULL)
+		  shebang_len = 0;
+	    }
+	    else
+	      shebang_len = 0;
+	  }
+#endif
+
+	  if (shebang_len > 0) {
+	  int i;
+	  int j;
+	  char tmpspec[NAM$C_MAXRSS + 1];
+
+	    i = shebang_len;
+	     /* Image is following after white space */
+	    /*--------------------------------------*/
+	    while (isprint(b[i]) && isspace(b[i]))
+		i++;
+
+	    j = 0;
+	    while (isprint(b[i]) && !isspace(b[i])) {
+		tmpspec[j++] = b[i++];
+		if (j >= NAM$C_MAXRSS)
+		   break;
+	    }
+	    tmpspec[j] = '\0';
+
+	     /* There may be some default parameters to the image */
+	    /*---------------------------------------------------*/
+	    j = 0;
+	    while (isprint(b[i])) {
+		image_argv[j++] = b[i++];
+		if (j >= NAM$C_MAXRSS)
+		   break;
+	    }
+	    while ((j > 0) && !isprint(image_argv[j-1]))
+		j--;
+	    image_argv[j] = 0;
+
 	    /* It will need to be converted to VMS format and validated */
+	    if (tmpspec[0] != '\0') {
+	      char * iname;
+
+	       /* Try to find the exact program requested to be run */
+	      /*---------------------------------------------------*/
+	      iname = do_rmsexpand
+		  (tmpspec, image_name, 0, ".exe", PERL_RMSEXPAND_M_VMS);
+	      if (iname != NULL) {
+		if (cando_by_name(S_IXUSR,0,image_name)) {
+		  /* MCR prefix needed */
+		  isdcl = 0;
+		}
+		else {
+		   /* Try again with a null type */
+		  /*----------------------------*/
+		  iname = do_rmsexpand
+		    (tmpspec, image_name, 0, ".", PERL_RMSEXPAND_M_VMS);
+		  if (iname != NULL) {
+		    if (cando_by_name(S_IXUSR,0,image_name)) {
+		      /* MCR prefix needed */
+		      isdcl = 0;
+		    }
+		  }
+		}
+
+		 /* Did we find the image to run the script? */
+		/*------------------------------------------*/
+		if (isdcl) {
+		  char *tchr;
+
+		   /* Assume DCL or foreign command exists */
+		  /*--------------------------------------*/
+		  tchr = strrchr(tmpspec, '/');
+		  if (tchr != NULL) {
+		    tchr++;
+		  }
+		  else {
+		    tchr = tmpspec;
+		  }
+		  strcpy(image_name, tchr);
+		}
+	      }
+	    }
 	  }
 	}
         fclose(fp);
@@ -7337,16 +7438,44 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
       if (check_img && isdcl) return RMS$_FNF;
 
       if (cando_by_name(S_IXUSR,0,resspec)) {
-        Newx(vmscmd->dsc$a_pointer,7 + s - resspec + (rest ? strlen(rest) : 0),char);
+        Newx(vmscmd->dsc$a_pointer, MAX_DCL_LINE_LENGTH ,char);
         if (!isdcl) {
             strcpy(vmscmd->dsc$a_pointer,"$ MCR ");
-            if (suggest_quote) *suggest_quote = 1;
+	    if (image_name[0] != 0) {
+		strcat(vmscmd->dsc$a_pointer, image_name);
+		strcat(vmscmd->dsc$a_pointer, " ");
+	    }
+	} else if (image_name[0] != 0) {
+	    strcpy(vmscmd->dsc$a_pointer, image_name);
+	    strcat(vmscmd->dsc$a_pointer, " ");
         } else {
             strcpy(vmscmd->dsc$a_pointer,"@");
-            if (suggest_quote) *suggest_quote = 1;
         }
-        strcat(vmscmd->dsc$a_pointer,resspec);
-        if (rest) strcat(vmscmd->dsc$a_pointer,rest);
+        if (suggest_quote) *suggest_quote = 1;
+
+	/* If there is an image name, use original command */
+	if (image_name[0] == 0)
+	    strcat(vmscmd->dsc$a_pointer,resspec);
+	else {
+	    rest = cmd;
+	    while (*rest && isspace(*rest)) rest++;
+	}
+
+	if (image_argv[0] != 0) {
+	  strcat(vmscmd->dsc$a_pointer,image_argv);
+	  strcat(vmscmd->dsc$a_pointer, " ");
+	}
+        if (rest) {
+	   int rest_len;
+	   int vmscmd_len;
+
+	   rest_len = strlen(rest);
+	   vmscmd_len = strlen(vmscmd->dsc$a_pointer);
+	   if ((rest_len + vmscmd_len) < MAX_DCL_LINE_LENGTH)
+	      strcat(vmscmd->dsc$a_pointer,rest);
+	   else
+	     retsts = CLI$_BUFOVF;
+	}
         vmscmd->dsc$w_length = strlen(vmscmd->dsc$a_pointer);
         Safefree(cmd);
         return (vmscmd->dsc$w_length > MAX_DCL_LINE_LENGTH ? CLI$_BUFOVF : retsts);
