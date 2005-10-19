@@ -146,6 +146,11 @@ struct perl_thread;
 #define CALLREG_INTUIT_STRING CALL_FPTR(PL_regint_string)
 #define CALLREGFREE CALL_FPTR(PL_regfree)
 
+/* XXX The PERL_UNUSED_DECL suffix is unfortunately rather inflexible:
+ * it assumes that in all compilers the way to suppress an "unused"
+ * warning is to have a suffix.  In some compilers that might be a
+ * a compiler pragma, e.g. #pragma unused(varname). */
+
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
 #  define CALLPROTECT CALL_FPTR(PL_protect)
 #endif
