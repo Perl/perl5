@@ -207,3 +207,13 @@ pid_t wait(int *status);
 
 #endif /* _MSC_VER */
 
+#ifdef __MWERKS__
+/* No good way of using the CodeWarrior #pragma unused(varname) with Perl
+ * source code (e.g. PERL_UNUSED_DECL doesn't work with the pragma syntax).
+ * Therefore we brutally  turn off these particular warnings since there
+ * is a lot of this in Perl code (pTHX, for example).  TOther compilers
+ * will have to detect these naughty bits. */
+#pragma warn_unusedarg off
+#pragma warn_unusedvar off
+#pragma warn_emptydecl off
+#endif

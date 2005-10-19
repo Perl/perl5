@@ -2683,16 +2683,30 @@ PP(pp_ssockopt)
 	PUSHs(sv);
 	break;
     case OP_SSOCKOPT: {
-	    const char *buf;
+#if defined(__SYMBIAN32__)
+# define SETSOCKOPT_OPTION_VALUE_T void *
+#else
+# define SETSOCKOPT_OPTION_VALUE_T const char *
+#endif
+	/* XXX TODO: We need to have a proper type (a Configure probe,
+	 * etc.) for what the C headers think of the third argument of
+	 * setsockopt(), the option_value read-only buffer: is it
+	 * a "char *", or a "void *", const or not.  Some compilers
+	 * don't take kindly to e.g. assuming that "char *" implicitly
+	 * promotes to a "void *", or to explicitly promoting/demoting
+	 * consts to non/vice versa.  The "const void *" is the SUS
+	 * definition, but that does not fly everywhere for the above
+	 * reasons. */
+	    SETSOCKOPT_OPTION_VALUE_T buf;
 	    int aint;
 	    if (SvPOKp(sv)) {
 		STRLEN l;
-		buf = SvPV_const(sv, l);
+		buf = (SETSOCKOPT_OPTION_VALUE_T) SvPV_const(sv, l);
 		len = l;
 	    }
 	    else {
 		aint = (int)SvIV(sv);
-		buf = (const char*)&aint;
+		buf = (SETSOCKOPT_OPTION_VALUE_T) &aint;
 		len = sizeof(int);
 	    }
 	    if (PerlSock_setsockopt(fd, lvl, optname, buf, len) < 0)

@@ -190,6 +190,11 @@
 #define CALLREG_INTUIT_STRING CALL_FPTR(PL_regint_string)
 #define CALLREGFREE CALL_FPTR(PL_regfree)
 
+/* XXX The PERL_UNUSED_DECL suffix is unfortunately rather inflexible:
+ * it assumes that in all compilers the way to suppress an "unused"
+ * warning is to have a suffix.  In some compilers that might be a
+ * a compiler pragma, e.g. #pragma unused(varname). */
+
 #if defined(__SYMBIAN32__) && defined(__GNUC__)
 #  ifdef __cplusplus
 #    define PERL_UNUSED_DECL

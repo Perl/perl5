@@ -160,7 +160,7 @@ sub run_PL {
 	print "(patching $BUILDROOT\\lib\\Config.pm)\n";
 	system_echo("perl -pi.bak -e \"s:\\Q$R_V_SV:$V:\" $BUILDROOT\\lib\\Config.pm");
     }
-    system_echo("perl -I$BUILDROOT\\lib -I$BUILDROOT\\xlib\\symbian $PL") == 0
+    system_echo("perl -I$BUILDROOT\\lib -I$BUILDROOT\\xlib\\symbian -I$BUILDROOT\\t\\lib $PL") == 0
       or warn "$0: $PL failed.\n";
     if ($CoreBuild) {
         system_echo("copy $BUILDROOT\\lib\\Config.pm.bak $BUILDROOT\\lib\\Config.pm");
@@ -729,6 +729,11 @@ for my $ext (@ARGV) {
         next if $Config;
     }
 
+    if ($dir eq ".") {
+	warn "$0: No directory for $ext, skipping...\n";
+	next;
+    }
+
     my $chdir = $ext eq "ext\\XSLoader" ? "ext\\DynaLoader" : $dir;
     die "$0: no directory '$chdir'\n" unless -d $chdir;
     update_dir($chdir) or die "$0: chdir '$chdir' failed: $!\n";
@@ -867,10 +872,21 @@ __EOF__
                       or die "$0: make distclean failed\n";
                 }
             }
+	    if ( $ext eq "ext\\Compress\\Zlib" ) {
+		my @bak;
+		find( sub { push @bak, $File::Find::name if /\.bak$/ }, "." );
+		unlink(@bak) if @bak;
+		my @src;
+		find( sub { push @src, $_ if -f $_ }, "zlib-src" );
+		unlink(@src) if @src;
+		unlink("constants.xs");
+	    }
             if ( $ext eq "ext\\Devel\\PPPort" ) {
                 unlink("ppport.h");
             }
         }
+	my @D = glob("../BMARM/*.def ../BWINS/*.def");
+	unlink(@D) if @D;
         my @B = glob("ext/BWINS ext/BMARM ext/*/BWINS ext/*/BMARM Makefile");
         rmdir(@B) if @B;
     }
