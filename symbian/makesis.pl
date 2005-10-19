@@ -75,6 +75,10 @@ for my $target (@target) {
             next unless /^lib\s+(.+)/;
             chomp;
             my $f = $1;
+	    unless (-f "lib/$f") {
+		warn qq[$0: No "lib/$f", skipping...\n];
+		next;
+	    }
             $f =~ s:/:\\:g;
             $copy{"lib\\$f"} = "$lib\\Perl\\$R_V_SV\\$f";
             print "\t$f\n";
