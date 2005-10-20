@@ -2397,10 +2397,10 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #endif
 #ifdef VMSISH_STATUS
 	if (VMSISH_STATUS)
-	    STATUS_NATIVE_SET((U32)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)));
+	    STATUS_NATIVE_CHILD_SET((U32)SvIV(sv));
 	else
 #endif
-	    STATUS_UNIX_SET(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	    STATUS_UNIX_EXIT_SET(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '!':
         {

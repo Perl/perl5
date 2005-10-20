@@ -195,14 +195,14 @@ interconversion between VMS and Unix syntax; its
 documentation provides more details.
 
 Perl is now in the process of evolving to follow the setting of
-the DECC$* feature logicals in the interpretation of UNIX pathnames.
+the DECC$* feature logical names in the interpretation of UNIX pathnames.
 This is still a work in progress.
 
 For handling extended characters, and case sensitivity, as long as
 DECC$POSIX_COMPLIANT_PATHNAMES, DECC$FILENAME_UNIX_REPORT, and
 DECC$FILENAME_UNIX_ONLY are not set, then the older Perl behavior
 for conversions of file specifications from UNIX to VMS is followed,
-except that VMS paths with concealed rooted logicals are now
+except that VMS paths with concealed rooted logical names are now
 translated correctly to UNIX paths.
 
 With those features set, then new routines may handle the translation,
@@ -271,7 +271,7 @@ Programs should use the File::Spec:case_tolerant setting to determine
 the state, and not the $^O setting.
 
 For consistency, when the above feature is clear and when not
-otherwise overridden by DECC feature logicals, most Perl routines
+otherwise overridden by DECC feature logical names, most Perl routines
 return file specifications using lower case letters only,
 regardless of the case used in the arguments passed to them.
 (This is true only when running under VMS; Perl respects the
@@ -562,7 +562,7 @@ st_mode field.  Finally, C<-d> returns true if passed a device
 specification without an explicit directory (e.g. C<DUA1:>), as
 well as if passed a directory.
 
-There are DECC feature logicals AND ODS-5 volume attributes that
+There are DECC feature logical names AND ODS-5 volume attributes that
 also control what values are returned for the date fields.
 
 Note: Some sites have reported problems when using the file-access
@@ -812,6 +812,9 @@ change the file protection to delete the file, and you interrupt it
 in midstream, the file may be left intact, but with a changed ACL
 allowing you delete access.
 
+This behavior of C<unlink> is to be compatible with POSIX behavior
+and not traditional VMS behavior.
+
 =item utime LIST
 
 Since ODS-2, the VMS file structure for disk files, does not keep
@@ -968,7 +971,7 @@ a fatal error.  This is equivalent to doing the following from DCL:
     DELETE/LOGICAL *
 
 You can imagine how bad things would be if, for example, the SYS$MANAGER
-or SYS$SYSTEM logicals were deleted.
+or SYS$SYSTEM logical names were deleted.
 
 At present, the first time you iterate over %ENV using
 C<keys>, or C<values>,  you will incur a time penalty as all
@@ -977,12 +980,13 @@ Subsequent iterations will not reread logical names, so they
 won't be as slow, but they also won't reflect any changes
 to logical name tables caused by other programs.
 
-You do need to be careful with the logicals representing process-permanent
-files, such as C<SYS$INPUT> and C<SYS$OUTPUT>.  The translations for these
-logicals are prepended with a two-byte binary value (0x1B 0x00) that needs to be
-stripped off if you want to use it. (In previous versions of Perl it wasn't
-possible to get the values of these logicals, as the null byte acted as an
-end-of-string marker)
+You do need to be careful with the logical names representing
+process-permanent files, such as C<SYS$INPUT> and C<SYS$OUTPUT>.
+The translations for these logical names are prepended with a
+two-byte binary value (0x1B 0x00) that needs to be stripped off
+if you wantto use it. (In previous versions of Perl it wasn't
+possible to get the values of these logical names, as the null
+byte acted as an end-of-string marker)
 
 =item $!
 
@@ -1026,8 +1030,9 @@ contain the actual value of 0 to 255 returned by that program
 on a normal exit.
 
 With the _POSIX_EXIT macro set, the exit code of zero is represented
-as 1, and the values from 1 to 255 are encoded by the equation
-VMS_status = 0x35a000 + (exit_code * 8).
+as 1, and the values from 2 to 255 are encoded by the equation
+VMS_status = 0x35a000 + (exit_code * 8) + 1.  And in the special
+case of value 1, VMS_status = 0x35a000 + 8 + 2 + 0x10000000.
 
 For other termination statuses, the severity portion of the
 subprocess' exit status: if the severity was success or
@@ -1052,6 +1057,11 @@ type status codes will be expecting those codes, and programs that
 call traditional VMS programs will be expecting the previous behavior.
 
 And success is always the code 0.
+
+When the actual VMS termination status of the child is an error,
+internally the C<$!> value will be set to the closest UNIX code to
+that error so that Perl scripts that test for error messages will
+see the expected UNIX style error message instead of a VMS message.
 
 Conversely, when setting C<$?> in an END block, an attempt is made
 to convert the POSIX value into a native status intelligible to

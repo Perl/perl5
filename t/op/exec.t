@@ -90,14 +90,13 @@ is( system(qq{$Perl "-I../lib" -e "use vmsish qw(hushed); exit 1"}), $exit_one,
     'Explicit exit of 1' );
 
 $rc = system { "lskdfj" } "lskdfj";
-$rc = 256 if ($rc == 5632) && $Is_VMS;
 unless( ok($rc == 255 << 8 or $rc == -1 or $rc == 256 or $rc == 512) ) {
     print "# \$rc == $rc\n";
 }
 
 unless ( ok( $! == 2  or  $! =~ /\bno\b.*\bfile/i or  
              $! == 13 or  $! =~ /permission denied/i or
-             $! == 22 or  $! =~ /invalid argument/           ) ) {
+             $! == 22 or  $! =~ /invalid argument/  ) ) {
     printf "# \$! eq %d, '%s'\n", $!, $!;
 }
 

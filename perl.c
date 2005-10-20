@@ -5165,16 +5165,18 @@ void
 Perl_my_failure_exit(pTHX)
 {
 #ifdef VMS
-    if (vaxc$errno & 1) {
-	if (STATUS_NATIVE & 1)		/* fortuitiously includes "-1" */
-	    STATUS_NATIVE_SET(44);
-    }
-    else {
-	if (!vaxc$errno)		/* unlikely */
-	    STATUS_NATIVE_SET(44);
-	else
-	    STATUS_NATIVE_SET(vaxc$errno);
-    }
+     /* We have been called to fall on our sword.  The desired exit code
+      * should be already set in STATUS_UNIX, but could be shifted over
+      * by 8 bits.  STATUS_UNIX_EXIT_SET will fix all cases where
+      * an error code has been set.
+      *
+      * If an error code has not been set, then force the issue.
+      */
+    if (STATUS_UNIX == 0)   /* No errors or status recorded? */
+	STATUS_ALL_FAILURE; /* Ok, force the issue with a generic code */
+    else
+      STATUS_UNIX_EXIT_SET(STATUS_UNIX);
+
 #else
     int exitstatus;
     if (errno & 255)

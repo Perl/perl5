@@ -1865,7 +1865,9 @@ int unix_status;
     case SS$_NOSUCHOBJECT:
 	unix_status = ENOENT;
 	break;
-    case SS$_ABORT:
+    case SS$_ABORT:				    /* Fatal case */
+    case ((SS$_ABORT & STS$M_COND_ID) | STS$K_ERROR): /* Error case */
+    case ((SS$_ABORT & STS$M_COND_ID) | STS$K_WARNING): /* Warning case */
 	unix_status = EINTR;
 	break;
     case SS$_BUFFEROVF:
