@@ -83,9 +83,9 @@ aggregates (arrays and hashes), these will be flattened together into
 one large indistinguishable list.
 
 If no C<return> is found and if the last statement is an expression, its
-value is returned. Otherwise, if the last statement is a control structure
-like a C<foreach>, the returned value is unspecified. The empty sub
-returns the empty list.
+value is returned. If the last statement is a loop control structure
+like a C<foreach> or a C<while>, the returned value is unspecified. The
+empty sub returns the empty list.
 X<subroutine, return value> X<return value> X<return>
 
 Perl does not have named formal parameters.  In practice all you
