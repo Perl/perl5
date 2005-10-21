@@ -7,7 +7,7 @@ BEGIN {
 
 require 'test.pl';
 
-plan (6);
+plan (9);
 
 my $blank = "";
 eval {select undef, $blank, $blank, 0};
@@ -18,8 +18,15 @@ eval {select $blank, $blank, undef, 0};
 is ($@, "");
 
 eval {select "", $blank, $blank, 0};
-like ($@, qr/^Modification of a read-only value attempted/);
+is ($@, "");
 eval {select $blank, "", $blank, 0};
-like ($@, qr/^Modification of a read-only value attempted/);
+is ($@, "");
 eval {select $blank, $blank, "", 0};
+is ($@, "");
+
+eval {select "a", $blank, $blank, 0};
+like ($@, qr/^Modification of a read-only value attempted/);
+eval {select $blank, "a", $blank, 0};
+like ($@, qr/^Modification of a read-only value attempted/);
+eval {select $blank, $blank, "a", 0};
 like ($@, qr/^Modification of a read-only value attempted/);
