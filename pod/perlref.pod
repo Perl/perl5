@@ -253,6 +253,7 @@ known as foo).
     $coderef   = *handler{CODE};
     $ioref     = *STDIN{IO};
     $globref   = *foo{GLOB};
+    $formatref = *foo{FORMAT};
 
 All of these are self-explanatory except for C<*foo{IO}>.  It returns
 the IO handle, used for file handles (L<perlfunc/open>), sockets
