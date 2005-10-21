@@ -73,16 +73,19 @@ Assigning to the whole array C<@_> removes that aliasing, and does
 not update any arguments.
 X<subroutine, argument> X<argument> X<@_>
 
-The return value of a subroutine is the value of the last expression
-evaluated by that sub, or the empty list in the case of an empty sub.
-More explicitly, a C<return> statement may be used to exit the
-subroutine, optionally specifying the returned value, which will be
-evaluated in the appropriate context (list, scalar, or void) depending
-on the context of the subroutine call.  If you specify no return value,
-the subroutine returns an empty list in list context, the undefined
-value in scalar context, or nothing in void context.  If you return
-one or more aggregates (arrays and hashes), these will be flattened
-together into one large indistinguishable list.
+A C<return> statement may be used to exit a subroutine, optionally
+specifying the returned value, which will be evaluated in the
+appropriate context (list, scalar, or void) depending on the context of
+the subroutine call.  If you specify no return value, the subroutine
+returns an empty list in list context, the undefined value in scalar
+context, or nothing in void context.  If you return one or more
+aggregates (arrays and hashes), these will be flattened together into
+one large indistinguishable list.
+
+If no C<return> is found and if the last statement is an expression, its
+value is returned. Otherwise, if the last statement is a control structure
+like a C<foreach>, the returned value is unspecified. The empty sub
+returns the empty list.
 X<subroutine, return value> X<return value> X<return>
 
 Perl does not have named formal parameters.  In practice all you
