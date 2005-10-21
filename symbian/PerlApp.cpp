@@ -1,13 +1,26 @@
 /* Copyright (c) 2004-2005 Nokia. All rights reserved. */
 
 /* The PerlApp application is licensed under the same terms as Perl itself.
- * Note that this PerlApp is for Symbian/Series 60 smartphones and has nothing
- * whatsoever to do with the ActiveState PerlApp. */
+ * Note that this PerlApp is for Symbian/Series 60/80 smartphones and it has
+ * nothing whatsoever to do with the ActiveState PerlApp. */
 
 #include "PerlApp.h"
 
-#include <avkon.hrh>
-#include <aknnotewrappers.h> 
+#ifdef __SERIES60__
+# include <avkon.hrh>
+# include <aknnotewrappers.h> 
+# include <AknCommonDialogs.h>
+# ifndef __SERIES60_1X__
+#  include <CAknFileSelectionDialog.h>
+# endif
+#endif /* #ifdef __SERIES60__ */
+
+#ifdef __SERIES80__
+# include <eikon.hrh>
+# include <cknflash.h>
+# include <ckndgopn.h>
+#endif /* #ifdef __SERIES80__ */
+
 #include <apparc.h>
 #include <e32base.h>
 #include <e32cons.h>
@@ -17,17 +30,12 @@
 #include <utf.h>
 #include <f32file.h>
 
-#include <AknCommonDialogs.h>
-
-#ifndef __SERIES60_1X__
-#include <CAknFileSelectionDialog.h>
-#endif
-
 #include <coemain.h>
 
 #ifndef PerlMin
 
 #include "PerlApp.hrh"
+
 #include "PerlApp.rsg"
 
 #endif //#ifndef PerlMin
@@ -125,54 +133,98 @@ CPerlAppUi::~CPerlAppUi()
 
 #ifndef PerlMin
 
+#ifdef __SERIES60__
+
 static TBool DlgOk(CAknNoteDialog* dlg)
 {
     return dlg && dlg->RunDlgLD() == EAknSoftkeyOk;
 }
 
+#endif /* #ifdef __SERIES60__ */
+
 static TBool OkCancelDialogL(TDesC& aMessage)
 {
+#ifdef __SERIES60__
     CAknNoteDialog* dlg =
         new (ELeave) CAknNoteDialog(CAknNoteDialog::EConfirmationTone);
     dlg->PrepareLC(R_OK_CANCEL_DIALOG);
     dlg->SetTextL(aMessage);
     return DlgOk(dlg);
+#endif /* #ifdef __SERIES60__ */
+#ifdef __SERIES80__
+    return CCknFlashingDialog::RunDlgLD(_L("OK/Cancel"), aMessage, NULL,
+                                        CCknFlashingDialog::EShort,
+                                        NULL);
+#endif /* #ifdef __SERIES80__ */
 }
 
 static TBool YesNoDialogL(TDesC& aMessage)
 {
+#ifdef __SERIES60__
     CAknNoteDialog* dlg =
         new (ELeave) CAknNoteDialog(CAknNoteDialog::EConfirmationTone);
     dlg->PrepareLC(R_YES_NO_DIALOG);
     dlg->SetTextL(aMessage);
     return DlgOk(dlg);
+#endif /* #ifdef __SERIES60__ */
+#ifdef __SERIES80__
+    return CCknFlashingDialog::RunDlgLD(_L("Yes/No"), aMessage, NULL,
+                                        CCknFlashingDialog::EShort,
+                                        NULL);
+#endif /* #ifdef __SERIES80__ */
 }
 
 static TInt InformationNoteL(TDesC& aMessage)
 {
+#ifdef __SERIES60__
     CAknInformationNote* note = new (ELeave) CAknInformationNote;
     return note->ExecuteLD(aMessage);
+#endif /* #ifdef __SERIES60__ */
+#ifdef __SERIES80__
+    return CCknFlashingDialog::RunDlgLD(_L("Info"), aMessage, NULL,
+                                        CCknFlashingDialog::ENormal,
+                                        NULL);
+#endif /* #ifdef __SERIES80__ */
 }
 
 static TInt ConfirmationNoteL(TDesC& aMessage)
 {
+#ifdef __SERIES60__
     CAknConfirmationNote* note = new (ELeave) CAknConfirmationNote;
     return note->ExecuteLD(aMessage);
+#endif /* #ifdef __SERIES60__ */
+#ifdef __SERIES80__
+    return CCknFlashingDialog::RunDlgLD(_L("Confirmation"), aMessage, NULL,
+                                        CCknFlashingDialog::ENormal,
+                                        NULL);
+#endif /* #ifdef __SERIES80__ */
 }
 
 static TInt WarningNoteL(TDesC& aMessage)
 {
+#ifdef __SERIES60__
     CAknWarningNote* note = new (ELeave) CAknWarningNote;
     return note->ExecuteLD(aMessage);
+#endif /* #ifdef __SERIES60__ */
+#ifdef __SERIES80__
+    CEikonEnv::Static()->AlertWin(aMessage);
+    return ETrue;
+#endif /* #ifdef __SERIES80__ */
 }
 
 static TInt TextQueryDialogL(const TDesC& aPrompt, TDes& aData, const TInt aMaxLength)
 {
+#ifdef __SERIES60__
     CAknTextQueryDialog* dlg =
         new (ELeave) CAknTextQueryDialog(aData);
     dlg->SetPromptL(aPrompt);
     dlg->SetMaxLength(aMaxLength);
     return dlg->ExecuteLD(R_TEXT_QUERY_DIALOG);
+#endif /* #ifdef __SERIES60__ */
+#ifdef __SERIES80__
+    /* TODO */
+    return ETrue;
+#endif
 }
 
 // The isXXX() come from the Perl headers.
@@ -436,15 +488,15 @@ TBool CPerlAppUi::ProcessCommandParametersL(TApaCommand aCommand, TFileName& /* 
 {
     if (aCommand == EApaCommandRun) {
         TFileName appName = Application()->AppFullName();
-	TParse p;
-	p.Set(KDefaultScript, &appName, NULL);
-	TEntry aEntry;
-	RFs aFs;
-	aFs.Connect();
-	if (aFs.Entry(p.FullName(), aEntry) == KErrNone) {
-	    DoRunScriptL(p.FullName());
-	    Exit();
-	}
+        TParse p;
+        p.Set(KDefaultScript, &appName, NULL);
+        TEntry aEntry;
+        RFs aFs;
+        aFs.Connect();
+        if (aFs.Entry(p.FullName(), aEntry) == KErrNone) {
+            DoRunScriptL(p.FullName());
+            Exit();
+        }
     }
     return aCommand == EApaCommandOpen ? ETrue : EFalse;
 }
@@ -458,18 +510,13 @@ void CPerlAppUi::SetFs(const RFs& aFs)
 
 #endif // #ifndef PerlMin
 
-void CPerlAppUi::HandleCommandL(TInt aCommand)
-{
+static void DoHandleCommandL(TInt aCommand) {
 #ifndef PerlMin
     TMessageBuffer message;
 #endif // #ifndef PerlMin
 
     switch(aCommand)
     {
-    case EEikCmdExit:
-    case EAknSoftkeyExit:
-        Exit();
-        break;
 #ifndef PerlMin
     case EPerlAppCommandAbout:
         {
@@ -499,21 +546,44 @@ void CPerlAppUi::HandleCommandL(TInt aCommand)
         break;
      case EPerlAppCommandRunFile:
         {
-            InformationNoteL(message);
             TFileName aScriptUtf16;
+#ifdef __SERIES60__
             if (AknCommonDialogs::RunSelectDlgLD(aScriptUtf16,
                                                  R_MEMORY_SELECTION_DIALOG))
                 DoRunScriptL(aScriptUtf16);
-        }
+#endif /* #ifdef __SERIES60__ */
+#ifdef __SERIES80__
+	    aScriptUtf16.Copy(_L("C:\\"));
+	    if (CCknOpenFileDialog::RunDlgLD(aScriptUtf16,
+		CCknOpenFileDialog::EShowSystemFilesAndFolders |
+		CCknOpenFileDialog::EShowHiddenFilesAndFolders |
+		CCknOpenFileDialog::EShowAllDrives             |
+		CCknOpenFileDialog::EShowExtendedView          |
+		CCknOpenFileDialog::EShowNoFilesText) {
+	      /* TODO: despite all the above flags still does not seem
+	       * to allow navigating outside the default directory. */
+	      TEntry aEntry;
+	      RFs aFs;
+	      aFs.Connect();
+	      if (aFs.Entry(aScriptUtf16, aEntry) == KErrNone)
+                DoRunScriptL(aScriptUtf16);
+	      /* else show error message? */
+	    }
+#endif /* #ifdef __SERIES80__ */
+	}
         break;
      case EPerlAppCommandOneLiner:
         {
             _LIT(prompt, "Oneliner:");
-            if (TextQueryDialogL(prompt, iOneLiner, KPerlAppOneLinerSize)) {
-                const TUint KPerlAppUtf8Multi = 3;
+            CPerlAppUi* cAppUi =
+              STATIC_CAST(CPerlAppUi*, CEikonEnv::Static()->EikAppUi());
+            if (TextQueryDialogL(prompt,
+				 cAppUi->iOneLiner,
+                                 KPerlAppOneLinerSize)) {
+               const TUint KPerlAppUtf8Multi = 3;
                 TBuf8<KPerlAppUtf8Multi * KPerlAppOneLinerSize> utf8;
 
-                CnvUtfConverter::ConvertFromUnicodeToUtf8(utf8, iOneLiner);
+                CnvUtfConverter::ConvertFromUnicodeToUtf8(utf8, cAppUi->iOneLiner);
                 CPerlBase* perl = CPerlBase::NewInterpreterLC();
                 int argc = 3;
                 char **argv = (char**) malloc(argc * sizeof(char *));
@@ -535,12 +605,70 @@ void CPerlAppUi::HandleCommandL(TInt aCommand)
             InformationNoteL(message);
         }
         break;
+     case EPerlAppCommandAboutCopyright:
+        {
+	    TMessageBuffer m1;
+	    TMessageBuffer m2;
+            m1.Format(KAboutFormat,
+		      PERL_REVISION,
+		      PERL_VERSION,
+		      PERL_SUBVERSION,
+		      PERL_SYMBIANPORT_MAJOR,
+		      PERL_SYMBIANPORT_MINOR,
+		      PERL_SYMBIANPORT_PATCH,
+		      &KFlavor,
+		      PERL_SYMBIANSDK_MAJOR,
+		      PERL_SYMBIANSDK_MINOR
+		      );
+            InformationNoteL(message);
+            m2.Format(KCopyrightFormat);
+	    message.Format(_L("%S %S"), &m1, &m2);
+            InformationNoteL(message);
+        }
+        break;
 #endif // #ifndef PerlMin
     default:
         Panic(EPerlAppCommandUnknown);
+    }
+}
+
+#ifdef __SERIES60__
+
+void CPerlAppUi::HandleCommandL(TInt aCommand)
+{
+    switch(aCommand)
+    {
+    case EEikCmdExit:
+    case EAknSoftkeyExit:
+        Exit();
+        break;
+    default:
+        DoHandleCommandL(aCommand);
         break;
     }
 }
+
+#endif /* #ifdef __SERIES60__ */
+
+#ifdef __SERIES80__
+
+void CPerlAppView::HandleCommandL(TInt aCommand) {
+    DoHandleCommandL(aCommand);
+}
+
+void CPerlAppUi::HandleCommandL(TInt aCommand) {
+    switch(aCommand)
+    {
+    case EEikCmdExit:
+        Exit();
+        break;
+    default:
+        iAppView->HandleCommandL(aCommand);
+        break;
+    }
+}
+
+#endif /* #ifdef __SERIES80__ */
 
 CPerlAppView* CPerlAppView::NewL(const TRect& aRect)
 {
@@ -562,6 +690,10 @@ void CPerlAppView::ConstructL(const TRect& aRect)
     CreateWindowL();
     SetRect(aRect);
     ActivateL();
+}
+
+CPerlAppView::~CPerlAppView()
+{
 }
 
 void CPerlAppView::Draw(const TRect& /*aRect*/) const
@@ -586,12 +718,13 @@ CEikAppUi* CPerlAppDocument::CreateAppUiL()
 
 #ifndef PerlMin
 
-CFileStore* CPerlAppDocument::OpenFileL(TBool /* aDoOpen */, const TDesC& aFileName, RFs& aFs)
+CFileStore* CPerlAppDocument::OpenFileL(TBool aDoOpen, const TDesC& aFileName, RFs& aFs)
 {
     CPerlAppUi* appui =
       STATIC_CAST(CPerlAppUi*, CEikonEnv::Static()->EikAppUi());
     appui->SetFs(aFs);
-    appui->OpenFileL(aFileName);
+    if (aDoOpen)
+        appui->OpenFileL(aFileName);
     return NULL;
 }
 

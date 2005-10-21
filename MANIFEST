@@ -2651,7 +2651,8 @@ symbian/PerlAppAif.rss		Symbian sample app code
 symbian/PerlApp.cpp		Symbian sample app code
 symbian/PerlApp.h		Symbian sample app header
 symbian/PerlApp.hrh		Symbian sample app resource header
-symbian/PerlApp.rss		Symbian sample app resource definition
+symbian/PerlAppS60.rss		Symbian sample app resource definition
+symbian/PerlAppS80.rss		Symbian sample app resource definition
 symbian/PerlBase.cpp		Symbian Perl base class
 symbian/PerlBase.h		Symbian Perl base class header
 symbian/PerlBase.pod		Symbian Perl base class documentation

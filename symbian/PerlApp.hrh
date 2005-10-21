@@ -11,7 +11,9 @@ enum TPerlIds
     EPerlAppCommandTime               = 1025,
     EPerlAppCommandRunFile            = 1026,
     EPerlAppCommandOneLiner           = 1027,
-    EPerlAppCommandCopyright          = 1028	// no comma here
+    EPerlAppCommandCopyright          = 1028,
+    EPerlAppCommandAboutCopyright     = 1029,
+    EPerlAppTextQueryInputField       = 1030   // no comma here
 };
 
 #endif // __PerlApp_HRH__

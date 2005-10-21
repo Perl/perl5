@@ -19,7 +19,7 @@ The DLL includes a C++ class called CPerlBase, which one can then
 
 The base port of Perl to Symbian only implements the basic POSIX-like
 functionality; it does not implement any further Symbian or Series 60
-bindings for Perl.
+or Series 80 bindings for Perl.
 
 It is also possible to generate Symbian executables for "miniperl"
 and "perl", but since there is no standard command line interface
@@ -32,7 +32,7 @@ mainly as demonstrations.
 
     These instructions have been tested under various Nokia Series 60
     Symbian SDKs (1.2 to 2.6, 2.8 should also work, 1.2 compiles but
-    does not work).  You can get the SDKs from
+    does not work), and Series 80 2.0.  You can get the SDKs from
     Forum Nokia (http://www.forum.nokia.com/).
 
     A prerequisite for any of the SDKs is to install ActivePerl
@@ -81,20 +81,22 @@ mainly as demonstrations.
 
     If you use the VC IDE, you will have to run F<symbian\config.pl>
     first using the cmd.exe, and then run 'make win.mf vc6.mf' to generate
-    the VC6 makefiles and workspaces.
+    the VC6 makefiles and workspaces.  "make vc6" will compile for the VC6,
+    and "make cw" for the CodeWarrior.
 
-    The following Series 60 SDK and compiler configurations and Nokia
-    phones that were tested (+ = compiled and PerlApp run, - = not),
+    The following Series 60 and Series 80 SDK and compiler configurations
+    and Nokia phones that were tested at some point in time
+    (+ = compiled and PerlApp run, - = not),
     both for Perl 5.8.x and 5.9.x:
 
-        SDK | VC | CW |
-        ----+----+----+---
-        1.2 | +  | +  | 3650 (*)
-        2.0 | +  | +  | 6600
-        2.1 | -  | +  | 6670
-        2.6 | +  | +  | 6630    
+        SDK     | VC | CW |
+        --------+----+----+---
+        S60 1.2 | +  | +  | 3650 (*)
+        S60 2.0 | +  | +  | 6600
+        S60 2.1 | -  | +  | 6670
+        S60 2.6 | +  | +  | 6630    
 
-    Also 2.8 should work fine.
+    Also S60 2.8 should work fine.
 
     If you are using the 'make' directly, it is the GNU make from the SDKs,
     and it will invoke the right make commands for the Windows emulator
@@ -105,7 +107,7 @@ mainly as demonstrations.
     the 'subst style' will not work.
 
     If using the VC IDE, to build use for example the File->Open Workspace->
-    C:\Symbian\8.as\S60_2nd_FP2\epoc32\build\symbian\perl\perl\wins\perl.dsw
+    C:\Symbian\8.0a\S60_2nd_FP2\epoc32\build\symbian\perl\perl\wins\perl.dsw
     The emulator binaries will appear in the same directory.
 
     If using the VC IDE, you will a lot of warnings in the beginning of
@@ -246,7 +248,7 @@ In the symbian subdirectory there is sisify.pl utility which can be
 used to package Perl scripts and/or Perl library directories into SIS
 files, which can be installed to the device.  To run the sisify.pl
 utility, you will need to have the 'makesis' and 'uidcrc' utilities
-already installed.  If you don't have the S60 Win32 SDKs, you may try
+already installed.  If you don't have the Win32 SDKs, you may try
 for example http://gnupoc.sourceforge.net/ or http://symbianos.org/~andreh/.
 
 =head2 Using Perl in Symbian
@@ -266,13 +268,14 @@ See the file symbian/config.sh and look for 'undef' to find the
 unsupported APIs (or from Perl use Config).
   
 The filesystem of Symbian devices uses DOSish syntax, "drives"
-separated from paths by a colon, and backslashes for the path.
-The exact assignment of the drives probably varies between platforms,
-but you might for example see C: as the flash main memory, D: as the
-RAM drive, E: as the memory card (MMC), Z: as the ROM.  As far the
-devices go the NUL: is the bit bucket, the COMx: are the serial lines,
-IRCOMx: are the IR ports, TMP: might be C:\System\Temp.  Remember to
-double those backslashes in doublequoted strings.
+separated from paths by a colon, and backslashes for the path.  The
+exact assignment of the drives probably varies between platforms, but
+for example in Series 60 you might see C: as the (flash) main memory,
+D: as the RAM drive, E: as the memory card (MMC), Z: as the ROM.  In
+Series 80 D: is the memory card.  As far the devices go the NUL: is
+the bit bucket, the COMx: are the serial lines, IRCOMx: are the IR
+ports, TMP: might be C:\System\Temp.  Remember to double those
+backslashes in doublequoted strings.
 
 The Perl DLL is installed in \System\Libs\.  The Perl libraries and
 extension DLLs are installed in \System\Libs\Perl\X.Y.Z\.  The PerlApp
@@ -304,10 +307,10 @@ is absolutely no warranty.
 =head1 NOTE
 
 When creating and extending application programming interfaces (APIs)
-for Symbian or Series 60 it is suggested that trademarks, registered
-trademarks, or trade names are not used in the API names.  Instead,
-developers should consider basing the API naming in the existing (C++)
-public component and API naming, modified as appropriate by the rules
+for Symbian or Series 60 or Series 80 it is suggested that trademarks,
+registered trademarks, or trade names are not used in the API names.
+Instead, developers should consider basing the API naming in the existing
+(C++) public component and API naming, modified as appropriate by the rules
 of the programming language the new APIs are for.
   
 Nokia is a registered trademark of Nokia Corporation. Nokia's product

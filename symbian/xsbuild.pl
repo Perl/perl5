@@ -49,15 +49,17 @@ if ( !defined $SymbianVersion) {
 
 my $S60SDK;
 
+my ($SYMBIAN_ROOT, $SYMBIAN_VERSION, $SDK_NAME, $SDK_VARIANT, $SDK_VERSION);
+
 if ($CoreBuild) {
     unshift @INC, "symbian";
     do "sanity.pl";
     my %VERSION = %{ do "version.pl" };
-    $SDK     = do "sdk.pl";
+    ($SYMBIAN_ROOT, $SYMBIAN_VERSION, $SDK_NAME, $SDK_VARIANT, $SDK_VERSION) =
+      @{ do "sdk.pl" };
     $VERSION = "$VERSION{REVISION}$VERSION{VERSION}$VERSION{SUBVERSION}";
     $R_V_SV  = "$VERSION{REVISION}.$VERSION{VERSION}.$VERSION{SUBVERSION}";
     $BUILDROOT    = do "cwd.pl";
-    $SymbianVersion = $1 if $SDK =~ m:\\Symbian\\([^\\]+):;
     $PerlVersion    = $R_V_SV;
     $S60SDK = $ENV{S60SDK}; # from sdk.pl
 }
@@ -96,7 +98,6 @@ die "$0: Perl version '$PerlVersion' not found\n"
 
 print "Configuring with Symbian $SymbianVersion and Perl $PerlVersion...\n";
 
-$SDK     = "\\Symbian\\$SymbianVersion" unless defined $SDK;
 $PERLSDK = "\\Symbian\\Perl\\$PerlVersion";
 
 $R_V_SV = $PerlVersion;
@@ -105,11 +106,11 @@ $VERSION = $PerlVersion unless defined $VERSION;
 
 $VERSION =~ tr/.//d if defined $VERSION;
 
-$ENV{SDK}   = $SDK;    # For the Errno extension
-$ENV{CROSS} = 1;       # For the Encode extension
+$ENV{SDK}   = $SYMBIAN_ROOT;    # For the Errno extension
+$ENV{CROSS} = 1;                # For the Encode extension (unbuilt now)
 
 my $UARM = 'urel';
-my $UREL = "$SDK\\epoc32\\release\\-ARM-\\$UARM";
+my $UREL = "$SYMBIAN_ROOT\\epoc32\\release\\-ARM-\\$UARM";
 my $SRCDBG;
 if (exists $ENV{UREL}) {
     $UREL = $ENV{UREL}; # from sdk.pl
@@ -281,12 +282,12 @@ sub write_makefile {
 
     print "\tMakefile\n";
 
-    my $windef1 = "$SDK\\Epoc32\\Build$CWD\\$base\\$WIN\\$base.def";
+    my $windef1 = "$SYMBIAN_ROOT\\Epoc32\\Build$CWD\\$base\\$WIN\\$base.def";
     my $windef2 = "..\\BWINS\\${base}u.def";
-    my $armdef1 = "$SDK\\Epoc32\\Build$CWD\\$base\\$ARM\\$base.def";
+    my $armdef1 = "$SYMBIAN_ROOT\\Epoc32\\Build$CWD\\$base\\$ARM\\$base.def";
     my $armdef2 = "..\\BMARM\\${base}u.def";
 
-    my $wrap = $SDK && $S60SDK eq '1.2' && $SDK !~ /_CW$/;
+    my $wrap = $SYMBIAN_ROOT && $S60SDK eq '1.2' && $SYMBIAN_ROOT !~ /_CW$/;
     my $ABLD = $wrap ? 'perl b.pl' : 'abld';
 
     open( MAKEFILE, ">Makefile" ) or die "$0: Makefile: $!\n";
@@ -805,7 +806,7 @@ __EOF__
         my %symbol;
 	my $def;
 	my $basef;
-        for my $f ("$SDK\\Epoc32\\Build$CWD\\$base\\WINS\\perl$VERSION-$extdash.def",
+        for my $f ("$SYMBIAN_ROOT\\Epoc32\\Build$CWD\\$base\\WINS\\perl$VERSION-$extdash.def",
 		   "..\\BMARM\\perl$VERSION-${extdash}u.def") {
 	    print "\t($f - ";
 	    if ( open( $def, $f ) ) {
