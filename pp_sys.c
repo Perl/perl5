@@ -1031,14 +1031,14 @@ PP(pp_sselect)
     SP -= 4;
     for (i = 1; i <= 3; i++) {
 	SV *sv = SP[i];
-	if (SvOK(sv) && SvREADONLY(sv)) {
-	    if (SvIsCOW(sv))
-		sv_force_normal_flags(sv, 0);
-	    if (SvREADONLY(sv))
-		DIE(aTHX_ PL_no_modify);
-	}
 	if (!SvOK(sv))
 	    continue;
+	if (SvREADONLY(sv)) {
+	    if (SvIsCOW(sv))
+		sv_force_normal_flags(sv, 0);
+	    if (SvREADONLY(sv) && !(SvPOK(sv) && SvCUR(sv) == 0))
+		DIE(aTHX_ PL_no_modify);
+	}
 	if (!SvPOK(sv)) {
 	    if (ckWARN(WARN_MISC))
                 Perl_warner(aTHX_ packWARN(WARN_MISC), "Non-string passed as bitmask");
@@ -1093,7 +1093,7 @@ PP(pp_sselect)
 
     for (i = 1; i <= 3; i++) {
 	sv = SP[i];
-	if (!SvOK(sv)) {
+	if (!SvOK(sv) || SvCUR(sv) == 0) {
 	    fd_sets[i] = 0;
 	    continue;
 	}
