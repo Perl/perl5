@@ -1037,8 +1037,13 @@ PP(pp_sselect)
 	    if (SvREADONLY(sv))
 		DIE(aTHX_ PL_no_modify);
 	}
-	if (!SvPOK(sv))
+	if (!SvOK(sv))
 	    continue;
+	if (!SvPOK(sv)) {
+	    if (ckWARN(WARN_MISC))
+                Perl_warner(aTHX_ packWARN(WARN_MISC), "Non-string passed as bitmask");
+	    SvPV_force_nolen(sv);	/* force string conversion */
+	}
 	j = SvCUR(sv);
 	if (maxlen < j)
 	    maxlen = j;
@@ -1092,8 +1097,7 @@ PP(pp_sselect)
 	    fd_sets[i] = 0;
 	    continue;
 	}
-	else if (!SvPOK(sv))
-	    SvPV_force_nolen(sv);	/* force string conversion */
+	assert(SvPOK(sv));
 	j = SvLEN(sv);
 	if (j < growsize) {
 	    Sv_Grow(sv, growsize);
