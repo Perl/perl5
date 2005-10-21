@@ -1,4 +1,4 @@
-package MakeMaker::Test::Setup::Recurs;
+package MakeMaker::Test::Setup::Problem;
 
 @ISA = qw(Exporter);
 require Exporter;
@@ -7,32 +7,27 @@ require Exporter;
 use strict;
 use File::Path;
 use File::Basename;
-use MakeMaker::Test::Utils;
 
 my %Files = (
-             'Recurs/Makefile.PL'          => <<'END',
+             'Problem-Module/Makefile.PL'   => <<'END',
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-    NAME          => 'Recurs',
-    VERSION       => 1.00,
+    NAME    => 'Problem::Module',
 );
 END
 
-             'Recurs/prj2/Makefile.PL'     => <<'END',
-use ExtUtils::MakeMaker;
+             'Problem-Module/subdir/Makefile.PL'    => <<'END',
+printf "\@INC %s .\n", (grep { $_ eq '.' } @INC) ? "has" : "doesn't have";
 
-WriteMakefile(
-    NAME => 'Recurs::prj2',
-    VERSION => 1.00,
-);
+warn "I think I'm going to be sick\n";
+die "YYYAaaaakkk\n";
 END
-            );
+
+);
+
 
 sub setup_recurs {
-    setup_mm_test_root();
-    chdir 'MM_TEST_ROOT:[t]' if $^O eq 'VMS';
-
     while(my($file, $text) = each %Files) {
         # Convert to a relative, native file path.
         $file = File::Spec->catfile(File::Spec->curdir, split m{\/}, $file);
