@@ -16,14 +16,14 @@ typedef struct encpage_s encpage_t;
 struct encpage_s
 {
 	/* fields ordered to pack nicely on 32-bit machines */
-	const U8   *seq;       /* Packed output sequences we generate 
+	const U8 *const seq;   /* Packed output sequences we generate 
 				  if we match */
-	const encpage_t  *next;      /* Page to go to if we match */
-	U8         min;        /* Min value of octet to match this entry */
-	U8         max;        /* Max value of octet to match this entry */
-	U8         dlen;       /* destination length - 
+	const encpage_t *const next;      /* Page to go to if we match */
+	const U8   min;        /* Min value of octet to match this entry */
+	const U8   max;        /* Max value of octet to match this entry */
+	const U8   dlen;       /* destination length - 
 				  size of entries in seq */
-	U8         slen;       /* source length - 
+	const U8   slen;       /* source length - 
 				  number of source octets needed */
 };
 
@@ -60,16 +60,18 @@ struct encpage_s
 typedef struct encode_s encode_t;
 struct encode_s
 {
-	const encpage_t  *t_utf8;    /* Starting table for translation from 
-					the encoding to UTF-8 form */
-	const encpage_t  *f_utf8;    /* Starting table for translation 
-					from UTF-8 to the encoding */
-	const U8   *rep;       /* Replacement character in this encoding 
-				  e.g. "?" */
-	int        replen;     /* Number of octets in rep */
-	U8         min_el;     /* Minimum octets to represent a character */
-	U8         max_el;     /* Maximum octets to represent a character */
-	const char *name[2];   /* name(s) of this encoding */
+	const encpage_t *const t_utf8;  /* Starting table for translation from 
+					   the encoding to UTF-8 form */
+	const encpage_t *const f_utf8;  /* Starting table for translation 
+					   from UTF-8 to the encoding */
+	const U8 *const rep;            /* Replacement character in this
+					   encoding e.g. "?" */
+	int        replen;              /* Number of octets in rep */
+	U8         min_el;              /* Minimum octets to represent a
+					   character */
+	U8         max_el;              /* Maximum octets to represent a
+					   character */
+	const char *const name[2];      /* name(s) of this encoding */
 };
 
 #ifdef U8
