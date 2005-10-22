@@ -89,7 +89,7 @@ do_fallback_cb(pTHX_ UV ch)
 }
 
 static SV *
-encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
+encode_method(pTHX_ const encode_t * enc, const encpage_t * dir, SV * src,
 	      int check, STRLEN * offset, SV * term, int * retcode)
 {
     STRLEN slen;

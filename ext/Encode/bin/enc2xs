@@ -279,7 +279,7 @@ if ($doC)
     my @info = ($e2u->{Cname},$u2e->{Cname},qq((U8 *)"$rep"),$replen,$min_el,$max_el);
     my $sym = "${enc}_encoding";
     $sym =~ s/\W+/_/g;
-    print C "encode_t $sym = \n";
+    print C "const encode_t $sym = \n";
     # This is to make null encoding work -- dankogai
     for (my $i = (scalar @info) - 1;  $i >= 0; --$i){
 	$info[$i] ||= 1;
@@ -685,7 +685,7 @@ sub addstrings
  if ($a->{'Forward'})
   {
    my $var = $^O eq 'MacOS' ? 'extern' : 'static';
-   print $fh "$var encpage_t $name\[",scalar(@{$a->{'Entries'}}),"];\n";
+   print $fh "$var const encpage_t $name\[",scalar(@{$a->{'Entries'}}),"];\n";
   }
  $a->{'DoneStrings'} = 1;
  foreach my $b (@{$a->{'Entries'}})
@@ -773,7 +773,8 @@ sub outtable
    my ($s,$e,$out,$t,$end,$l) = @$b;
    outtable($fh,$t,$bigname) unless $t->{'Done'};
   }
- print $fh "\nstatic encpage_t $name\[",scalar(@{$a->{'Entries'}}),"] = {\n";
+ print $fh "\nstatic const encpage_t $name\[",
+   scalar(@{$a->{'Entries'}}), "] = {\n";
  foreach my $b (@{$a->{'Entries'}})
   {
    my ($sc,$ec,$out,$t,$end,$l,$fb) = @$b;
