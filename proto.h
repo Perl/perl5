@@ -171,8 +171,7 @@ PERL_CALLCONV OP*	Perl_bind_match(pTHX_ I32 type, OP* left, OP* pat)
 			__attribute__nonnull__(pTHX_3);
 
 PERL_CALLCONV OP*	Perl_block_end(pTHX_ I32 floor, OP* seq)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_2);
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV I32	Perl_block_gimme(pTHX)
 			__attribute__warn_unused_result__;
@@ -364,9 +363,7 @@ PERL_CALLCONV OP*	Perl_die(pTHX_ const char* pat, ...)
 			__attribute__format__(__printf__,pTHX_1,pTHX_2);
 
 PERL_CALLCONV OP*	Perl_vdie(pTHX_ const char* pat, va_list* args);
-PERL_CALLCONV OP*	Perl_die_where(pTHX_ const char* message, STRLEN msglen)
-			__attribute__nonnull__(pTHX_1);
-
+PERL_CALLCONV OP*	Perl_die_where(pTHX_ const char* message, STRLEN msglen);
 PERL_CALLCONV void	Perl_dounwind(pTHX_ I32 cxix);
 PERL_CALLCONV bool	Perl_do_aexec(pTHX_ SV* really, SV** mark, SV** sp)
 			__attribute__nonnull__(pTHX_2)
@@ -1617,9 +1614,7 @@ PERL_CALLCONV OP*	Perl_oopsCV(pTHX_ OP* o)
 			__attribute__noreturn__
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV void	Perl_op_free(pTHX_ OP* arg)
-			__attribute__nonnull__(pTHX_1);
-
+PERL_CALLCONV void	Perl_op_free(pTHX_ OP* arg);
 PERL_CALLCONV void	Perl_package(pTHX_ OP* o)
 			__attribute__nonnull__(pTHX_1);
 
@@ -2007,9 +2002,7 @@ PERL_CALLCONV IO*	Perl_sv_2io(pTHX_ SV* sv)
 PERL_CALLCONV IV	Perl_sv_2iv_flags(pTHX_ SV* sv, I32 flags)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV SV*	Perl_sv_2mortal(pTHX_ SV* sv)
-			__attribute__nonnull__(pTHX_1);
-
+PERL_CALLCONV SV*	Perl_sv_2mortal(pTHX_ SV* sv);
 PERL_CALLCONV NV	Perl_sv_2nv(pTHX_ SV* sv)
 			__attribute__nonnull__(pTHX_1);
 
@@ -3660,8 +3653,7 @@ STATIC void	S_incline(pTHX_ char *s)
 			__attribute__nonnull__(pTHX_1);
 
 STATIC int	S_intuit_method(pTHX_ char *s, GV *gv)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_1);
 
 STATIC int	S_intuit_more(pTHX_ char *s)
 			__attribute__nonnull__(pTHX_1);

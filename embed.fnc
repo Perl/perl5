@@ -113,7 +113,7 @@ Apd	|void	|av_undef	|NULLOK AV* ar
 Apd	|void	|av_unshift	|NULLOK AV* ar|I32 num
 Apo	|SV**	|av_arylen_p	|NN AV* av
 pR	|OP*	|bind_match	|I32 type|NN OP* left|NN OP* pat
-pR	|OP*	|block_end	|I32 floor|NN OP* seq
+pR	|OP*	|block_end	|I32 floor|NULLOK OP* seq
 ApR	|I32	|block_gimme
 pR	|int	|block_start	|int full
 p	|void	|boot_core_UNIVERSAL
@@ -175,7 +175,7 @@ p	|void	|deprecate	|NN const char* s
 p	|void	|deprecate_old	|NN const char* s
 Afp	|OP*	|die		|NULLOK const char* pat|...
 p	|OP*	|vdie		|NULLOK const char* pat|NULLOK va_list* args
-p	|OP*	|die_where	|NN const char* message|STRLEN msglen
+p	|OP*	|die_where	|NULLOK const char* message|STRLEN msglen
 Ap	|void	|dounwind	|I32 cxix
 p	|bool	|do_aexec	|NULLOK SV* really|NN SV** mark|NN SV** sp
 p	|bool	|do_aexec5	|NULLOK SV* really|NN SV** mark|NN SV** sp|int fd|int flag
@@ -563,7 +563,7 @@ p	|PerlIO*|nextargv	|NN GV* gv
 ApP	|char*	|ninstr		|NN const char* big|NN const char* bigend \
 				|NN const char* little|NN const char* lend
 pr	|OP*	|oopsCV		|NN OP* o
-Ap	|void	|op_free	|NN OP* arg
+Ap	|void	|op_free	|NULLOK OP* arg
 p	|void	|package	|NN OP* o
 pd	|PADOFFSET|pad_alloc	|I32 optype|U32 tmptype
 p	|PADOFFSET|allocmy	|NN char* name
@@ -724,7 +724,7 @@ Apd	|CV*	|sv_2cv		|NULLOK SV* sv|NN HV** st|NN GV** gvp|I32 lref
 Apd	|IO*	|sv_2io		|NN SV* sv
 Amb	|IV	|sv_2iv		|NN SV* sv
 Apd	|IV	|sv_2iv_flags	|NN SV* sv|I32 flags
-Apd	|SV*	|sv_2mortal	|NN SV* sv
+Apd	|SV*	|sv_2mortal	|NULLOK SV* sv
 Apd	|NV	|sv_2nv		|NN SV* sv
 Amb	|char*	|sv_2pv		|NN SV* sv|NULLOK STRLEN* lp
 Apd	|char*	|sv_2pv_flags	|NN SV* sv|NULLOK STRLEN* lp|I32 flags
@@ -1304,7 +1304,7 @@ sR	|char*	|swallow_bom	|NN U8 *s
 s	|void	|checkcomma	|NN char *s|NN const char *name|NN const char *what
 s	|void	|force_ident	|NN const char *s|int kind
 s	|void	|incline	|NN char *s
-s	|int	|intuit_method	|NN char *s|NN GV *gv
+s	|int	|intuit_method	|NN char *s|NULLOK GV *gv
 s	|int	|intuit_more	|NN char *s
 s	|I32	|lop		|I32 f|int x|NN char *s
 rs	|void	|missingterm	|NULLOK char *s
