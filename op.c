@@ -1864,8 +1864,15 @@ Perl_scope(pTHX_ OP *o)
 	    o->op_type = OP_SCOPE;
 	    o->op_ppaddr = PL_ppaddr[OP_SCOPE];
 	    kid = ((LISTOP*)o)->op_first;
-	    if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE)
+	    if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) {
 		op_null(kid);
+
+		/* The following deals with things like 'do {1 for 1}' */
+		kid = kid->op_sibling;
+		if (kid &&
+		    (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE))
+		    op_null(kid);
+	    }
 	}
 	else
 	    o = newLISTOP(OP_SCOPE, 0, o, Nullop);
