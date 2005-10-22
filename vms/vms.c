@@ -1089,7 +1089,7 @@ Perl_my_setenv(pTHX_ const char *lnm, const char *eqv)
         int i;
         for (i = 0; lnm[i]; i++) uplnm[i] = _toupper(lnm[i]);
         if (!strcmp(uplnm,"DEFAULT")) {
-          if (eqv && *eqv) Perl_my_chdir(eqv);
+          if (eqv && *eqv) my_chdir(eqv);
           return;
         }
     } 
@@ -1281,7 +1281,7 @@ mp_do_kill_file(pTHX_ const char *name, int dirflag)
     if (dirflag != 0) {
 	if (decc_dir_barename && decc_posix_compliant_pathnames) {
 	  Newx(remove_name, NAM$C_MAXRSS+1, char);
-	  mp_do_pathify_dirspec(name, remove_name, 0);
+	  do_pathify_dirspec(name, remove_name, 0);
 	  if (!rmdir(remove_name)) {
 
 	    Safefree(remove_name);
@@ -1349,7 +1349,7 @@ mp_do_kill_file(pTHX_ const char *name, int dirflag)
       if (dirflag != 0)
 	if (decc_dir_barename && decc_posix_compliant_pathnames) {
 	  Newx(remove_name, NAM$C_MAXRSS+1, char);
-	  mp_do_pathify_dirspec(name, remove_name, 0);
+	  do_pathify_dirspec(name, remove_name, 0);
 	  rmsts = rmdir(remove_name);
 	  Safefree(remove_name);
 	}
@@ -1404,7 +1404,7 @@ Perl_do_rmdir(pTHX_ const char *name)
 
     if (do_fileify_dirspec(name,dirfile,0) == NULL) return -1;
     if (flex_stat(dirfile,&st) || !S_ISDIR(st.st_mode)) retval = -1;
-    else retval = mp_do_kill_file(dirfile, 1);
+    else retval = mp_do_kill_file(aTHX_ dirfile, 1);
     return retval;
 
 }  /* end of do_rmdir */
@@ -5234,8 +5234,8 @@ int quoted;
       int trnend;
 
 	/* now we have foo:bar or foo:[000000]bar to decide from */
-	islnm = my_trnlnm(vmspath, esa, 0);
-        trnend = islnm ? strlen(esa) - 1 : 0;
+	islnm = vmstrnenv(vmspath, esa, 0, fildev, 0);
+        trnend = islnm ? islnm - 1 : 0;
 
 	/* if this was a logical name, ']' or '>' must be present */
 	/* if not a logical name, then assume a device and hope. */
@@ -7074,7 +7074,7 @@ Perl_readdir_r(pTHX_ MY_DIR *dd, struct my_dirent *entry, struct my_dirent **res
 
     MUTEX_LOCK( (perl_mutex *) dd->mutex );
 
-    entry = Perl_readdir(dd);
+    entry = readdir(dd);
     *result = entry;
     retval = ( *result == NULL ? errno : 0 );
 
@@ -9132,6 +9132,8 @@ Perl_flex_fstat(pTHX_ int fd, Stat_t *statbufp)
 #define lstat(_x, _y) stat(_x, _y)
 #endif
 
+#define flex_stat_int(a,b,c)		Perl_flex_stat_int(aTHX_ a,b,c)
+
 static int
 Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
 {
@@ -9239,7 +9241,7 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
 int
 Perl_flex_stat(pTHX_ const char *fspec, Stat_t *statbufp)
 {
-   return Perl_flex_stat_int(fspec, statbufp, 0);
+   return flex_stat_int(fspec, statbufp, 0);
 }
 /*}}}*/
 
@@ -9247,7 +9249,7 @@ Perl_flex_stat(pTHX_ const char *fspec, Stat_t *statbufp)
 int
 Perl_flex_lstat(pTHX_ const char *fspec, Stat_t *statbufp)
 {
-   return Perl_flex_stat_int(fspec, statbufp, 1);
+   return flex_stat_int(fspec, statbufp, 1);
 }
 /*}}}*/
 

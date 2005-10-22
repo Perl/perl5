@@ -234,14 +234,6 @@
 #define init_os_extras		Perl_init_os_extras
 #define vms_realpath(a, b)	Perl_vms_realpath(aTHX_ a,b)
 #define vms_case_tolerant(a)	Perl_vms_case_tolerant(a)
-#define vms_decc_feature_get_name(a) \
-			Perl_vms_decc_feature_get_name(aTHX_ a)
-#define vms_decc_feature_get_value(a, b) \
-			Perl_vms_decc_feature_get_value(aTHX_ a, b)
-#define vms_decc_feature_set_value(a, b, c) \
-			Perl_vms_decc_feature_set_value(aTHX_ a, b, c)
-#define vms_decc_feature_get_index(a) \
-			Perl_vms_decc_feature_get_index(aTHX_ a)
 
 /* Delete if at all possible, changing protections if necessary. */
 #define unlink kill_file
@@ -794,7 +786,7 @@ int	Perl_unix_status_to_vms(int unix_status);
 /* prototype section start marker; `typedef' passes through cpp */
 typedef char  __VMS_PROTOTYPES__;
 int	Perl_vmstrnenv (const char *, char *, unsigned long int, struct dsc$descriptor_s **, unsigned long int);
-char *	Perl_vms_realpath (const char *, char *);
+char *	Perl_vms_realpath (pTHX_ const char *, char *);
 #if !defined(PERL_IMPLICIT_CONTEXT)
 int	Perl_vms_case_tolerant(void);
 char *	Perl_my_getenv (const char *, bool);
@@ -842,11 +834,6 @@ MY_DIR * Perl_opendir (pTHX_ const char *);
 int	Perl_rmscopy (pTHX_ const char *, const char *, int);
 int	Perl_my_mkdir (pTHX_ const char *, Mode_t);
 bool	Perl_vms_do_aexec (pTHX_ SV *, SV **, SV **);
-char *	Perl_vms_realpath (pTHX_ const char *, char *);
-char *	Perl_vms_decc_feature_get_name(pTHX_ int a);
-int	Perl_vms_decc_feature_get_value(pTHX_ int, int);
-int	Perl_vms_decc_feature_set_value(pTHX_ int, int, int)
-int	Perl_vms_decc_feature_get_index(aTHX_ const char *)
 #endif
 int	Perl_vms_case_tolerant(void);
 char *	Perl_my_getenv_len (pTHX_ const char *, unsigned long *, bool);
