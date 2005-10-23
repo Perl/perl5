@@ -3704,10 +3704,9 @@ S_fd_on_nosuid_fs(pTHX_ int fd)
                     cmplen = sizeof(fsd.fd_req.path);
                 if (strnEQ(fsd.fd_req.path, us.f_fname, cmplen) &&
                     fdst.st_dev == fsd.fd_req.dev) {
-                        check_okay = 1;
-                        on_nosuid = fsd.fd_req.flags & PERL_MOUNT_NOSUID;
-                        on_noexec = fsd.fd_req.flags & PERL_MOUNT_NOEXEC;
-                    }
+                    check_okay = 1;
+                    on_nosuid = fsd.fd_req.flags & PERL_MOUNT_NOSUID;
+                    on_noexec = fsd.fd_req.flags & PERL_MOUNT_NOEXEC;
                 }
             }
         }
