@@ -3123,9 +3123,9 @@ vmspipe_tempfile(pTHX)
     fstat(fileno(fp), (struct stat *)&s1);
 
     #if defined(_USE_STD_STAT)
-      cmp_result = s0.st_ino != s1.st_ino;
+      cmp_result = s0.crtl_stat.st_ino != s1.crtl_stat.st_ino;
     #else
-      cmp_result = memcmp(&s0.st_ino, &s1.st_ino, 6);
+      cmp_result = memcmp(s0.crtl_stat.st_ino, s1.crtl_stat.st_ino, 6);
     #endif
     if ((cmp_result != 0) && (s0.st_ctime != s1.st_ctime))  {
         fclose(fp);
@@ -9080,7 +9080,11 @@ Perl_flex_fstat(pTHX_ int fd, Stat_t *statbufp)
 	if (cptr == NULL)
 	   namecache[0] = '\0';
     }
+#ifdef _USE_STD_STAT
+    memcpy(&statbufp->st_ino, &statbufp->crtl_stat.st_ino, 8);
+#else
     memcpy(&statbufp->st_ino, statbufp->crtl_stat.st_ino, 8);
+#endif
 #ifndef _USE_STD_STAT
     strncpy(statbufp->st_devnam, statbufp->crtl_stat.st_dev, 63);
     statbufp->st_devnam[63] = 0;
@@ -9196,7 +9200,11 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
   }
 #endif
     if (!retval) {
+#ifdef _USE_STD_STAT
+      memcpy(&statbufp->st_ino, &statbufp->crtl_stat.st_ino, 8);
+#else
       memcpy(&statbufp->st_ino, statbufp->crtl_stat.st_ino, 8);
+#endif
 #ifndef _USE_STD_STAT
       strncpy(statbufp->st_devnam, statbufp->crtl_stat.st_dev, 63);
       statbufp->st_devnam[63] = 0;
