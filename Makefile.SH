@@ -424,8 +424,7 @@ $spitshell >>Makefile <<!GROK!THIS!
 # levels of symbolic links, even if we have only two)
 
 opmini.c: op.c
-	\$(CPS) op.c opmini.tmp
-	sh mv-if-diff opmini.tmp opmini.c
+	\$(CPS) op.c opmini.c
 
 opmini\$(OBJ_EXT): opmini.c
 	\$(CCCMD) \$(PLDLFLAGS) $DPERL_EXTERNAL_GLOB opmini.c
@@ -436,8 +435,7 @@ miniperlmain$(OBJ_EXT): miniperlmain.c patchlevel.h
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
 perlmain.c: miniperlmain.c config.sh $(FIRSTMAKEFILE)
-	sh writemain $(DYNALOADER) $(static_ext) > writemain.tmp
-	sh mv-if-diff writemain.tmp perlmain.c
+	sh writemain $(DYNALOADER) $(static_ext) > perlmain.c
 
 !NO!SUBS!
 case "$osname" in
@@ -511,8 +509,7 @@ PERLEXPORT		= perl.exp
 	esac
 	$spitshell >>Makefile <<'!NO!SUBS!'
 perl.exp: $(MINIPERLEXP) makedef.pl config.sh $(SYM) $(SYMH)
-	./$(MINIPERLEXP) makedef.pl PLATFORM=aix CC_FLAGS="$(OPTIMIZE)" | sort -u | sort -f > perl.exp.tmp
-	sh mv-if-diff perl.exp.tmp perl.exp
+	./$(MINIPERLEXP) makedef.pl PLATFORM=aix CC_FLAGS="$(OPTIMIZE)" | sort -u | sort -f > perl.exp
 
 !NO!SUBS!
 	;;
@@ -521,8 +518,7 @@ os2)
 MINIPERLEXP		= miniperl
 
 perl5.def: $(MINIPERLEXP) makedef.pl config.sh $(SYM) $(SYMH) miniperl.map
-	./$(MINIPERLEXP) makedef.pl PLATFORM=os2 -DPERL_DLL=$(PERL_DLL) CC_FLAGS="$(OPTIMIZE)" > perl.exp.tmp
-	sh mv-if-diff perl.exp.tmp perl5.def
+	./$(MINIPERLEXP) makedef.pl PLATFORM=os2 -DPERL_DLL=$(PERL_DLL) CC_FLAGS="$(OPTIMIZE)" > perl.exp
 
 !NO!SUBS!
 	;;
@@ -772,11 +768,10 @@ lib/Config.pod: config.sh miniperl$(EXE_EXT) configpm Porting/Glossary
 $(CONFIGPM): lib/Config.pod
 
 lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl$(EXE_EXT) minimod.pl $(CONFIGPM)
-	$(LDLIBPTH) ./miniperl minimod.pl > minimod.tmp
-	sh mv-if-diff minimod.tmp $@
+	$(LDLIBPTH) ./miniperl minimod.pl > lib/ExtUtils/Miniperl.pm
 
 lib/re.pm: ext/re/re.pm
-	cp ext/re/re.pm ext/re/re.tmp && sh mv-if-diff ext/re/re.tmp lib/re.pm
+	cp ext/re/re.pm lib/re.pm
 
 $(plextract):	miniperl$(EXE_EXT) $(CONFIGPM) x2p/s2p
 	@-rm -f $@

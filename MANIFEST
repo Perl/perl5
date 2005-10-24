@@ -2254,7 +2254,6 @@ mpeix/mpeix.c			MPE/iX port
 mpeix/mpeixish.h		MPE/iX port
 mpeix/nm			MPE/iX port
 mpeix/relink			MPE/iX port
-mv-if-diff			Script to mv a file if it changed
 myconfig.SH			Prints summary of the current configuration
 NetWare/bat/Buildtype.bat	NetWare port
 NetWare/bat/SetCodeWar.bat	NetWare port
