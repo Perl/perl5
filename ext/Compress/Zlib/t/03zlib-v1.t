@@ -23,10 +23,10 @@ BEGIN
 
     my $count = 0 ;
     if ($] < 5.005) {
-        $count = 340 ;
+        $count = 353 ;
     }
     else {
-        $count = 351 ;
+        $count = 364 ;
     }
 
 
@@ -489,6 +489,33 @@ EOM
     substr($bad, -4, 4) = "\xFF" x 4 ;
     $ungzip = Compress::Zlib::memGunzip(\$bad) ;
     ok ! defined $ungzip ;
+}
+
+{
+    title "Check all bytes can be handled";
+
+    my $lex = "\r\n" . new LexFile my $name ;
+    my $data = join '', map { chr } 0x00 .. 0xFF;
+    $data .= "\r\nabd\r\n";
+
+    my $fil;
+    ok $fil = gzopen($name, "wb") ;
+    is $fil->gzwrite($data), length $data ;
+    ok ! $fil->gzclose();
+
+    my $input;
+    ok $fil = gzopen($name, "rb") ;
+    is $fil->gzread($input), length $data ;
+    ok ! $fil->gzclose();
+    ok $input eq $data;
+
+    title "Check all bytes can be handled - transparent mode";
+    writeFile($name, $data);
+    ok $fil = gzopen($name, "rb") ;
+    is $fil->gzread($input), length $data ;
+    ok ! $fil->gzclose();
+    ok $input eq $data;
+
 }
 
 title 'memGunzip with a gzopen created file';

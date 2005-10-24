@@ -180,11 +180,15 @@ sub gzopen($$)
     _set_gzerr(0) ;
 
     if ($writing) {
-        $gz = new IO::Compress::Gzip($file, Minimal => 1, AutoClose => 1, %defOpts) 
+        $gz = new IO::Compress::Gzip($file, Minimal => 1, AutoClose => 1, 
+                                            BinModeOut => 1, %defOpts) 
             or $Compress::Zlib::gzerrno = $IO::Compress::Gzip::GzipError;
     }
     else {
-        $gz = new IO::Uncompress::Gunzip($file, Append => 0, AutoClose => 1, Strict => 0) 
+        $gz = new IO::Uncompress::Gunzip($file, 
+                                            Transparent => 1,
+                                            BinModeIn => 1, Append => 0, 
+                                            AutoClose => 1, Strict => 0) 
             or $Compress::Zlib::gzerrno = $IO::Uncompress::Gunzip::GunzipError;
     }
 

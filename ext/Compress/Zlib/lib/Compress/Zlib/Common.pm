@@ -23,20 +23,26 @@ $VERSION = '2.000_05';
               WANT_HASH
           );  
 
-sub setBinModeInput($)
+our ($wantBinmode);
+$wantBinmode = ($] >= 5.006 && eval ' ${^UNICODE} || ${^UTF8LOCALE} ')
+                    ? 1 : 0 ;
+
+sub setBinModeInput($$)
 {
     my $handle = shift ;
+    my $want   = defined $_[0] ? shift : $wantBinmode ;
 
     binmode $handle 
-        unless $^O eq 'MSWin32' && ! ( ${^UNICODE} || ${^UTF8LOCALE} );
+        if  $want;
 }
 
-sub setBinModeOutput($)
+sub setBinModeOutput($$)
 {
     my $handle = shift ;
+    my $want   = defined $_[0] ? shift : $wantBinmode ;
 
     binmode $handle 
-        unless $^O eq 'MSWin32' && ! ( ${^UNICODE} || ${^UTF8LOCALE} );
+        if  $want;
 }
 
 sub isaFilehandle($)
@@ -76,7 +82,7 @@ use constant WANT_HASH  => 8 ;
 sub whatIsInput($;$)
 {
     my $got = whatIs(@_);
-    #return $got;
+    
     if (defined $got && $got eq 'filename' && defined $_[0] && $_[0] eq '-')
     {
         use IO::File;
@@ -91,7 +97,7 @@ sub whatIsInput($;$)
 sub whatIsOutput($;$)
 {
     my $got = whatIs(@_);
-    #return $got;
+    
     if (defined $got && $got eq 'filename' && defined $_[0] && $_[0] eq '-')
     {
         $got = 'handle';

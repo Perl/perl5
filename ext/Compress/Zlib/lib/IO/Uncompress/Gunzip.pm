@@ -701,7 +701,8 @@ sub checkParams
                     'Transparent'   => [Parse_any,      1],
                     'Scan'          => [Parse_boolean,  0],
                     'InputLength'   => [Parse_unsigned, undef],
-
+                    'BinModeIn'     => [Parse_boolean,  undef],
+                    'BinModeOut'    => [Parse_boolean,  undef],                    
                     #'Todo - Revert to ordinary file on end Z_STREAM_END'=> 0,
                     # ContinueAfterEof
                 } ;
@@ -770,8 +771,8 @@ sub new
                 or return $obj->saveErrorString(undef, "cannot open file '$inValue': $!", $!) ;
             *$obj->{LineNo} = 0;
         }
-        # Setting STDIN to binmode causes grief
-        setBinModeInput(*$obj->{FH}) ;
+        
+        setBinModeInput(*$obj->{FH}, $got->valueOrDefault('BinModeIn')) ;
 
         my $buff = "" ;
         *$obj->{Buffer} = \$buff ;
@@ -1047,13 +1048,13 @@ sub _singleTarget
             if $x->{Got}->value('Append') ;
         $x->{fh} = new IO::File "$mode $output" 
             or return retErr($x, "cannot open file '$output': $!") ;
-        setBinModeOutput($x->{fh});
+        setBinModeOutput($x->{fh}, $x->{Got}->valueOrDefault('BinModeOut'));
 
     }
 
     elsif ($x->{outType} eq 'handle') {
         $x->{fh} = $output;
-        setBinModeOutput($x->{fh});
+        setBinModeOutput($x->{fh}, $x->{Got}->valueOrDefault('BinModeOut'));
         if ($x->{Got}->value('Append')) {
                 seek($x->{fh}, 0, SEEK_END)
                     or return retErr($x, "Cannot seek to end of output filehandle: $!") ;

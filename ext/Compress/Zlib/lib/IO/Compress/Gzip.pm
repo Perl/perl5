@@ -458,6 +458,8 @@ sub checkParams
             'Strict'   => [Parse_boolean,   1],
             'Append'   => [Parse_boolean,   0],
             'Merge'    => [Parse_boolean,   0],
+            'BinModeIn' => [Parse_boolean,   undef],
+            'BinModeOut'=> [Parse_boolean,   undef],
 
             # zlib behaviour
             #'Method'   => [Parse_unsigned,  Z_DEFLATED],
@@ -484,6 +486,8 @@ sub checkParams
             'Strict'    => [Parse_boolean,   1],
             'Append'    => [Parse_boolean,   0],
             'Merge'     => [Parse_boolean,   0],
+            'BinModeIn' => [Parse_boolean,   undef],
+            'BinModeOut'=> [Parse_boolean,   undef],
 
             # zlib behaviour
             #'Method'   => [Parse_unsigned,  Z_DEFLATED],
@@ -674,6 +678,7 @@ sub new
             if ($outType eq 'handle') {
                 $outValue->flush() ;
                 *$obj->{FH} = $outValue ;
+                setBinModeOutput(*$obj->{FH}, $got->valueOrDefault('BinModeOut')) ;
                 *$obj->{Handle} = 1 ;
                 if ($appendOutput)
                 {
@@ -689,9 +694,8 @@ sub new
                 *$obj->{FH} = new IO::File "$mode $outValue" 
                     or return $obj->saveErrorString(undef, "cannot open file '$outValue': $!", $!) ;
                 *$obj->{StdIO} = ($outValue eq '-'); 
+                setBinModeOutput(*$obj->{FH}, $got->valueOrDefault('BinModeOut')) ;
             }
-
-            setBinModeOutput(*$obj->{FH}) ;
 
             if (!$rfc1951) {
                 defined *$obj->{FH}->write(*$obj->{Header}, length(*$obj->{Header}))
@@ -749,6 +753,7 @@ sub new
     *$obj->{OutputRawDeflate} = $rfc1951;
     *$obj->{Output} = $outValue;
     *$obj->{ClassName} = $class;
+    *$obj->{Got} = $got;
 
     return $obj ;
 }
@@ -917,7 +922,7 @@ sub _wr2
             $fh = new IO::File "<$input"
                 or return $self->saveErrorString(undef, "cannot open file '$input': $!", $!) ;
         }
-        setBinModeInput($fh) ;
+        setBinModeInput($fh, *$self->{Got}->valueOrDefault('BinModeIn')) ;
 
         my $status ;
         my $buff ;

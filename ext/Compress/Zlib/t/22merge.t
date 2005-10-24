@@ -293,7 +293,8 @@ foreach my $CompressClass ( map { "IO::Compress::$_" } qw( Gzip RawDeflate Defla
             }
 
             my $gz1 = $CompressClass->new($dest, Merge => 1, AutoClose => 1)
-                or die "## $GzipError\n";
+                or die "## Error is  $$Error\n";
+
             #print "YYY\n";
             #hexDump($buffer);
             #print "XXX\n";
@@ -309,6 +310,7 @@ foreach my $CompressClass ( map { "IO::Compress::$_" } qw( Gzip RawDeflate Defla
     }
 
 }
+
 
 
 foreach my $CompressClass ( map { "IO::Compress::$_" } qw( Gzip RawDeflate Deflate) )

@@ -204,7 +204,8 @@ foreach my $bit ('IO::Compress::Gzip',
     ok $Func->(\$data, \$out), "  $TopType ok";
 
     # corrupt the compressed data
-    substr($out, -10, 10) = "x" x 10 ;
+    #substr($out, -10, 10) = "x" x 10 ;
+    substr($out, int(length($out)/3), 10) = 'abcdeabcde';
 
     my $result;
     ok ! $FuncInverse->(\$out => \$result, Transparent => 0), "  $TopTypeInverse ok";
