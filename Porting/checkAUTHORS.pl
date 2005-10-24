@@ -90,7 +90,7 @@ $map{"japhy\100perlmonk.org"} = $map{"japhy\100cpan.org"}
   = "japhy\100pobox.com";
 $map{"rmbarker\100cpan.org"} = "robin.barker\100npl.co.uk";
 
-$map{"h.m.brand\100hccnet.nl"} = 'merijn';
+$map{"h.m.brand\100hccnet.nl"} = $map{"merijn\100l1.procura.nl"} = "merijn";
 
 if (@authors) {
   my %raw;
