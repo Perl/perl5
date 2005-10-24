@@ -775,6 +775,7 @@ d_voidsig=''
 signal_t=''
 d_volatile=''
 d_charvspr=''
+d_sprintf_returns_strlen=''
 d_vprintf=''
 d_wait4=''
 d_waitpid=''
@@ -14185,6 +14186,68 @@ EOCP
 
     esac
 
+: see if sprintf returns the length of the string in the buffer as per ANSI
+$echo "Checking whether sprintf returns the length of the string..." >&4
+$cat <<EOP >try.c
+#include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#$i_string I_STRING
+#ifdef I_STRING
+#  include <string.h>
+#else
+#  include <strings.h>
+#endif
+#$i_math I_MATH
+#ifdef I_MATH
+#include <math.h>
+#endif
+
+char buffer[256];
+
+int check (size_t expect, int test) {
+  size_t got = strlen(buffer);
+  if (expect == got)
+    return 0;
+
+  printf("expected %ld, got %ld in test %d '%s'\n", (long) expect, (long) got,
+       test, buffer);
+  exit (test);
+}
+
+int main(int argc, char **argv) {
+  int test = 0;
+
+  check(sprintf(buffer, ""), ++test);
+  check(sprintf(buffer, "%s %s", "perl", "rules"), ++test);
+  check(sprintf(buffer, "I like %g", atan2(0,-1)), ++test);
+
+  return 0;
+}
+EOP
+set try
+
+d_sprintf_returns_strlen="$undef"
+if eval $compile; then
+    xxx="`$run ./try`"
+    case "$?" in
+	0) cat >&4 <<EOM
+sprintf returns the length of the string (as ANSI says it should)
+EOM
+	d_sprintf_returns_strlen="$define"
+	;;
+	*) cat >&4 <<EOM
+sprintf does not return the length of the string (how old is this system?)
+EOM
+	d_sprintf_returns_strlen="$undef"
+        ;;
+    esac
+fi
+
+$rm -f try.* try
+
 : see if link exists
 set link d_link
 eval $inlibc
@@ -21347,6 +21410,7 @@ d_void_closedir='$d_void_closedir'
 d_voidsig='$d_voidsig'
 d_voidtty='$d_voidtty'
 d_volatile='$d_volatile'
+d_sprintf_returns_strlen='$d_sprintf_returns_strlen'
 d_vprintf='$d_vprintf'
 d_wait4='$d_wait4'
 d_waitpid='$d_waitpid'
