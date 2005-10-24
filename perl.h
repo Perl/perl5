@@ -2642,26 +2642,28 @@ typedef pthread_key_t	perl_key;
 #   define STATUS_UNIX_SET(n)				\
 	STMT_START {					\
 	    I32 evalue = (I32)n;			\
-	    PL_statusvalue = evalue;				\
+	    PL_statusvalue = evalue;			\
 	    if (PL_statusvalue != -1) {			\
-		if (PL_statusvalue != EVMSERR) {		\
-		  PL_statusvalue &= 0xFFFF;			\
-		  PL_statusvalue_vms = Perl_unix_status_to_vms(evalue); \
-		}						\
-		else {						\
-		  PL_statusvalue_vms = vaxc$errno;		\
-		}						\
+		if (PL_statusvalue != EVMSERR) {	\
+		  PL_statusvalue &= 0xFFFF;		\
+		  if (MY_POSIX_EXIT)			\
+		    PL_statusvalue_vms=PL_statusvalue ? SS$_ABORT : SS$_NORMAL;\
+		  else PL_statusvalue_vms = Perl_unix_status_to_vms(evalue); \
+		}					\
+		else {					\
+		  PL_statusvalue_vms = vaxc$errno;	\
+		}					\
 	    }						\
-	    else PL_statusvalue_vms = SS$_ABORT;		\
-	    set_vaxc_errno(evalue);				\
+	    else PL_statusvalue_vms = SS$_ABORT;	\
+	    set_vaxc_errno(PL_statusvalue_vms);		\
 	} STMT_END
 
   /* STATUS_UNIX_EXIT_SET - Takes a UNIX/POSIX exit code and sets
    * the NATIVE error status based on it.  It does not assume that
    * the UNIX/POSIX exit codes have any relationship to errno, except
    * that 0 indicates a success.  When in the default mode to comply
-   * with the Perl VMS documentation, anything other than 0 indicates
-   * a native status should be set to the failure code SS$_ABORT;
+   * with the Perl VMS documentation, status of one is set to the
+   * failure code of SS$_ABORT.  Any other number is passed through.
    *
    * In the new POSIX EXIT mode, native status will be set so that the
    * actual exit code will can be retrieved by the calling program or
@@ -2686,7 +2688,8 @@ typedef pthread_key_t	perl_key;
 		    PL_statusvalue_vms =	\
 		       (C_FAC_POSIX | (evalue << 3 ) | (evalue == 1)? \
 		        (STS$K_ERROR | STS$M_INHIB_MSG) : 0); \
-		  else PL_statusvalue_vms = SS$_ABORT; \
+		  else					\
+		    PL_statusvalue_vms = (evalue == 1)? SS$_ABORT : evalue; \
 	      } else { /* forgive them Perl, for they have sinned */ \
 		if (evalue != EVMSERR) PL_statusvalue_vms = evalue; \
 		else PL_statusvalue_vms = vaxc$errno;		\

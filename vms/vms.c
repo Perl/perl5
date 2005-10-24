@@ -1821,7 +1821,7 @@ int unix_status;
   fac_sp = vms_status & STS$M_FAC_SP;
   msg_no = vms_status & (STS$M_MSG_NO | STS$M_SEVERITY);
 
-  if ((facility == 0) || (fac_sp == 0)  && (child_flag == 0)) {
+  if (((facility == 0) || (fac_sp == 0))  && (child_flag == 0)) {
     switch(msg_no) {
     case SS$_NORMAL:
 	unix_status = 0;
@@ -2025,7 +2025,7 @@ int test_unix_status;
     case EACCES: return SS$_FILACCERR;
     case EFAULT: return SS$_ACCVIO;
     /* case ENOTBLK */
-    case EBUSY: SS$_DEVOFFLINE;
+    case EBUSY: return SS$_DEVOFFLINE;
     case EEXIST: return RMS$_FEX;
     /* case EXDEV */
     case ENODEV: return SS$_NOSUCHDEV;

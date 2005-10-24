@@ -5166,15 +5166,57 @@ Perl_my_failure_exit(pTHX)
 #ifdef VMS
      /* We have been called to fall on our sword.  The desired exit code
       * should be already set in STATUS_UNIX, but could be shifted over
-      * by 8 bits.  STATUS_UNIX_EXIT_SET will fix all cases where
-      * an error code has been set.
+      * by 8 bits.  STATUS_UNIX_EXIT_SET will handle the cases where a
+      * that code is set.
       *
       * If an error code has not been set, then force the issue.
       */
-    if (STATUS_UNIX == 0)   /* No errors or status recorded? */
-	STATUS_ALL_FAILURE; /* Ok, force the issue with a generic code */
-    else
-      STATUS_UNIX_EXIT_SET(STATUS_UNIX);
+    if (MY_POSIX_EXIT) {
+
+	/* In POSIX_EXIT mode follow Perl documentations and use 255 for
+	 * the exit code when there isn't an error.
+	 */
+
+	if (STATUS_UNIX == 0)
+	    STATUS_UNIX_EXIT_SET(255);
+	else {
+	    STATUS_UNIX_EXIT_SET(STATUS_UNIX);
+
+	    /* The exit code could have been set by $? or vmsish which
+	     * means that it may not be fatal.  So convert
+	     * success/warning codes to fatal.
+	     */
+	    if ((STATUS_NATIVE & (STS$K_SEVERE|STS$K_ERROR)) == 0)
+		STATUS_UNIX_EXIT_SET(255);
+	}
+    }
+    else {
+	/* Traditionally Perl on VMS always expects a Fatal Error. */
+	if (vaxc$errno & 1) {
+
+	    /* So force success status to failure */
+	    if (STATUS_NATIVE & 1)
+		STATUS_ALL_FAILURE;
+	}
+	else {
+	    if (!vaxc$errno) {
+		STATUS_UNIX = EINTR; /* In case something cares */
+		STATUS_ALL_FAILURE;
+	    }
+	    else {
+		int severity;
+		STATUS_NATIVE = vaxc$errno; /* Should already be this */
+
+		/* Encode the severity code */
+		severity = STATUS_NATIVE & STS$M_SEVERITY;
+		STATUS_UNIX = (severity ? severity : 1) << 8;
+
+		/* Perl expects this to be a fatal error */
+		if (severity != STS$K_SEVERE)
+		    STATUS_ALL_FAILURE;
+	    }
+	}
+    }
 
 #else
     int exitstatus;
