@@ -2458,7 +2458,7 @@ X<ioctl>
 
 Implements the ioctl(2) function.  You'll probably first have to say
 
-    require "sys/ioctl.ph";	# probably in $Config{archlib}/ioctl.ph
+    require "sys/ioctl.ph";	# probably in $Config{archlib}/sys/ioctl.ph
 
 to get the correct function definitions.  If F<sys/ioctl.ph> doesn't
 exist or doesn't have the correct definitions you'll have to roll your
