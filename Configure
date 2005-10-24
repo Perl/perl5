@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Oct 18 16:11:43 CEST 2005 [metaconfig 3.0 PL70]
+# Generated on Tue Oct 25 01:58:55 CEST 2005 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -695,6 +695,7 @@ sockethdr=''
 socketlib=''
 d_socklen_t=''
 d_socks5_init=''
+d_sprintf_returns_strlen=''
 d_sqrtl=''
 d_srand48_r=''
 srand48_r_proto=''
@@ -775,7 +776,6 @@ d_voidsig=''
 signal_t=''
 d_volatile=''
 d_charvspr=''
-d_sprintf_returns_strlen=''
 d_vprintf=''
 d_wait4=''
 d_waitpid=''
@@ -14186,68 +14186,6 @@ EOCP
 
     esac
 
-: see if sprintf returns the length of the string in the buffer as per ANSI
-$echo "Checking whether sprintf returns the length of the string..." >&4
-$cat <<EOP >try.c
-#include <stdio.h>
-#$i_stdlib I_STDLIB
-#ifdef I_STDLIB
-#include <stdlib.h>
-#endif
-#$i_string I_STRING
-#ifdef I_STRING
-#  include <string.h>
-#else
-#  include <strings.h>
-#endif
-#$i_math I_MATH
-#ifdef I_MATH
-#include <math.h>
-#endif
-
-char buffer[256];
-
-int check (size_t expect, int test) {
-  size_t got = strlen(buffer);
-  if (expect == got)
-    return 0;
-
-  printf("expected %ld, got %ld in test %d '%s'\n", (long) expect, (long) got,
-       test, buffer);
-  exit (test);
-}
-
-int main(int argc, char **argv) {
-  int test = 0;
-
-  check(sprintf(buffer, ""), ++test);
-  check(sprintf(buffer, "%s %s", "perl", "rules"), ++test);
-  check(sprintf(buffer, "I like %g", atan2(0,-1)), ++test);
-
-  return 0;
-}
-EOP
-set try
-
-d_sprintf_returns_strlen="$undef"
-if eval $compile; then
-    xxx="`$run ./try`"
-    case "$?" in
-	0) cat >&4 <<EOM
-sprintf returns the length of the string (as ANSI says it should)
-EOM
-	d_sprintf_returns_strlen="$define"
-	;;
-	*) cat >&4 <<EOM
-sprintf does not return the length of the string (how old is this system?)
-EOM
-	d_sprintf_returns_strlen="$undef"
-        ;;
-    esac
-fi
-
-$rm -f try.* try
-
 : see if link exists
 set link d_link
 eval $inlibc
@@ -16574,6 +16512,68 @@ eval $hasproto
 : see if socks5_init exists
 set socks5_init d_socks5_init
 eval $inlibc
+
+: see if sprintf returns the length of the string in the buffer as per ANSI
+$echo "Checking whether sprintf returns the length of the string..." >&4
+$cat <<EOP >try.c
+#include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#$i_string I_STRING
+#ifdef I_STRING
+#  include <string.h>
+#else
+#  include <strings.h>
+#endif
+#$i_math I_MATH
+#ifdef I_MATH
+#include <math.h>
+#endif
+
+char buffer[256];
+
+int check (size_t expect, int test) {
+  size_t got = strlen(buffer);
+  if (expect == got)
+    return 0;
+
+  printf("expected %ld, got %ld in test %d '%s'\n", (long) expect, (long) got,
+       test, buffer);
+  exit (test);
+}
+
+int main(int argc, char **argv) {
+  int test = 0;
+
+  check(sprintf(buffer, ""), ++test);
+  check(sprintf(buffer, "%s %s", "perl", "rules"), ++test);
+  check(sprintf(buffer, "I like %g", atan2(0,-1)), ++test);
+
+  return 0;
+}
+EOP
+set try
+
+d_sprintf_returns_strlen="$undef"
+if eval $compile; then
+    xxx="`$run ./try`"
+    case "$?" in
+	0) cat >&4 <<EOM
+sprintf returns the length of the string (as ANSI says it should)
+EOM
+	d_sprintf_returns_strlen="$define"
+	;;
+	*) cat >&4 <<EOM
+sprintf does not return the length of the string (how old is this system?)
+EOM
+	d_sprintf_returns_strlen="$undef"
+        ;;
+    esac
+fi
+
+$rm -f try.* try
 
 : see if srand48_r exists
 set srand48_r d_srand48_r
@@ -20173,16 +20173,26 @@ cat <<EOSH > Cppsym.try
 $startsh
 cat <<'EOCP' > try.c
 #include <stdio.h>
+#if cpp_stuff == 1
+#define STRINGIFY(a)    "a"
+#endif
+#if cpp_stuff == 42
+#define StGiFy(a)  #a
+#define STRINGIFY(a)    StGiFy(a)
+#endif
+#if $cpp_stuff != 1 && $cpp_stuff != 42
+#   include "Bletch: How does this C preprocessor stringify macros?"
+#endif
 int main() {
 EOCP
 $awk \\
 EOSH
 cat <<'EOSH' >> Cppsym.try
 'length($1) > 0 {
-    printf "#ifdef %s\n#if %s+0\nprintf(\"%s=%%ld\\n\", (long)%s);\n#else\nprintf(\"%s\\n\");\n#endif\n#endif\n", $1, $1, $1, $1, $1
-    printf "#ifdef _%s\n#if _%s+0\nprintf(\"_%s=%%ld\\n\", (long)_%s);\n#else\nprintf(\"_%s\\n\");\n#endif\n#endif\n", $1, $1, $1, $1, $1
-    printf "#ifdef __%s\n#if __%s+0\nprintf(\"__%s=%%ld\\n\", (long)__%s);\n#else\nprintf(\"__%s\\n\");\n#endif\n#endif\n", $1, $1, $1, $1, $1
-    printf "#ifdef __%s__\n#if __%s__+0\nprintf(\"__%s__=%%ld\\n\", (long)__%s__);\n#else\nprintf(\"__%s__\\n\");\n#endif\n#endif\n", $1, $1, $1, $1, $1
+    printf "#ifdef %s\nprintf(\"%s=%%s\\n\", STRINGIFY(%s));\n#endif\n", $1, $1, $1
+    printf "#ifdef _%s\nprintf(\"_%s=%%s\\n\", STRINGIFY(_%s));\n#endif\n", $1, $1, $1
+    printf "#ifdef __%s\nprintf(\"__%s=%%s\\n\", STRINGIFY(__%s));\n#endif\n", $1, $1, $1
+    printf "#ifdef __%s__\nprintf(\"__%s__=%%s\\n\", STRINGIFY(__%s__));\n#endif\n", $1, $1, $1
 }'	 >> try.c
 echo 'return 0;}' >> try.c
 EOSH
@@ -20192,7 +20202,7 @@ case "$osname-$gccversion" in
 irix-) ccflags="\$ccflags -woff 1178" ;;
 os2-*) ccflags="\$ccflags -Zlinker /PM:VIO" ;;
 esac
-$cc -o try $optimize \$ccflags $ldflags try.c $libs && $run ./try
+$cc -o try -Dcpp_stuff=$cpp_stuff $optimize \$ccflags $ldflags try.c $libs && $run ./try | $sed 's/ /\\\\ /g'
 EOSH
 chmod +x Cppsym.try
 $eunicefix Cppsym.try
@@ -20228,11 +20238,9 @@ fi
 
 $awk '/\=/ { print $0; next }
 	{ print $0"=1" }' ccsym.raw >ccsym.list
-$awk '/\=/ { print $0; next }
-	{ print $0"=1" }' Cppsym.true >ccsym.true
-$comm -13 ccsym.true ccsym.list >ccsym.own
-$comm -12 ccsym.true ccsym.list >ccsym.com
-$comm -23 ccsym.true ccsym.list >ccsym.cpp
+$comm -13 Cppsym.true ccsym.list >ccsym.own
+$comm -12 Cppsym.true ccsym.list >ccsym.com
+$comm -23 Cppsym.true ccsym.list >ccsym.cpp
 also=''
 if $test -z ccsym.raw; then
 	echo "Your C compiler doesn't seem to define any symbols!" >&4
@@ -21337,6 +21345,7 @@ d_socket='$d_socket'
 d_socklen_t='$d_socklen_t'
 d_sockpair='$d_sockpair'
 d_socks5_init='$d_socks5_init'
+d_sprintf_returns_strlen='$d_sprintf_returns_strlen'
 d_sqrtl='$d_sqrtl'
 d_srand48_r='$d_srand48_r'
 d_srandom_r='$d_srandom_r'
@@ -21410,7 +21419,6 @@ d_void_closedir='$d_void_closedir'
 d_voidsig='$d_voidsig'
 d_voidtty='$d_voidtty'
 d_volatile='$d_volatile'
-d_sprintf_returns_strlen='$d_sprintf_returns_strlen'
 d_vprintf='$d_vprintf'
 d_wait4='$d_wait4'
 d_waitpid='$d_waitpid'
