@@ -1402,6 +1402,16 @@ int sockatmark(int);
 #  define sprintf UTS_sprintf_wrap
 #endif
 
+/* For the times when you want the return value of sprintf, and you want it
+   to be the length. Can't have a thread variable passed in, because C89 has
+   no varargs macros.
+*/
+#ifdef SPRINTF_RETURNS_STRLEN
+#  define my_sprintf sprintf
+#else
+#  define my_sprintf Perl_my_sprintf
+#endif
+
 /* Configure gets this right but the UTS compiler gets it wrong.
    -- Hal Morris <hom00@utsglobal.com> */
 #ifdef UTS

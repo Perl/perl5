@@ -819,6 +819,11 @@ unless ($define{'PERL_DONT_CREATE_GVSV'}) {
 		     Perl_gv_SVadd
 		    )];
 }
+if ($define{'SPRINTF_RETURNS_STRLEN'}) {
+    skip_symbols [qw(
+		     Perl_my_sprintf
+		    )];
+}
 
 unless ($define{'d_mmap'}) {
     skip_symbols [qw(

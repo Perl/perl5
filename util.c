@@ -2707,9 +2707,9 @@ Perl_pidgone(pTHX_ Pid_t pid, int status)
 {
     register SV *sv;
     char spid[TYPE_CHARS(IV)];
+    size_t len = my_sprintf(spid, "%"IVdf, (IV)pid);
 
-    sprintf(spid, "%"IVdf, (IV)pid);
-    sv = *hv_fetch(PL_pidstatus,spid,strlen(spid),TRUE);
+    sv = *hv_fetch(PL_pidstatus,spid,len,TRUE);
     SvUPGRADE(sv,SVt_IV);
     SvIV_set(sv, status);
     return;
@@ -5079,6 +5079,27 @@ Perl_mem_log_free(Malloc_t oldalloc, const char *filename, const int linenumber,
 }
 
 #endif /* PERL_MEM_LOG */
+
+/*
+=for apidoc my_sprintf
+
+The C library C<sprintf>, wrapped if necessary, to ensure that it will return
+the length of the string written to the buffer. Only rare pre-ANSI systems
+need the wrapper function - usually this is a direct call to C<sprintf>.
+
+=cut
+*/
+#ifndef SPRINTF_RETURNS_STRLEN
+int
+Perl_my_sprintf(char *buffer, const char* pat, ...)
+{
+    va_list args;
+    va_start(args, pat);
+    vsprintf(buffer, pat, args);
+    va_end(args);
+    return strlen(buffer);
+}
+#endif
 
 /*
  * Local variables:

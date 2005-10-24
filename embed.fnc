@@ -1545,6 +1545,10 @@ Apo	|bool	|ckwarn_d	|U32 w
 
 p	|void	|offer_nice_chunk	|NN void *chunk|U32 chunk_size
 
+#ifndef SPRINTF_RETURNS_STRLEN
+Apnod	|int	|my_sprintf	|NN char *buffer|NN const char *pat|...
+#endif
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:

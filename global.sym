@@ -699,4 +699,5 @@ Perl_stashpv_hvname_match
 Perl_gv_SVadd
 Perl_ckwarn
 Perl_ckwarn_d
+Perl_my_sprintf
 # ex: set ro:
