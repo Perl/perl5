@@ -2959,11 +2959,16 @@ typedef pthread_key_t	perl_key;
 
 #ifndef IOCPARM_LEN
 #   ifdef IOCPARM_MASK
-	/* on BSDish systes we're safe */
+	/* on BSDish systems we're safe */
 #	define IOCPARM_LEN(x)  (((x) >> 16) & IOCPARM_MASK)
 #   else
+#	if defined(_IOC_SIZE) && defined(__GLIBC__)
+	/* on Linux systems we're safe */
+#	    define IOCPARM_LEN(x) _IOC_SIZE(x)
+#	else
 	/* otherwise guess at what's safe */
-#	define IOCPARM_LEN(x)	256
+#	    define IOCPARM_LEN(x)	256
+#	endif
 #   endif
 #endif
 
