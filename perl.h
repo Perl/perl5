@@ -2691,7 +2691,7 @@ typedef pthread_key_t	perl_key;
 		  if (MY_POSIX_EXIT)			\
 		    PL_statusvalue_vms =	\
 		       (C_FAC_POSIX | (evalue << 3 ) | (evalue == 1)? \
-		        (STS$K_ERROR | STS$M_INHIB_MSG) : 0); \
+		        (STS$K_ERROR | STS$M_INHIB_MSG) : 1); \
 		  else					\
 		    PL_statusvalue_vms = SS$_ABORT; \
 	      } else { /* forgive them Perl, for they have sinned */ \
@@ -2726,7 +2726,7 @@ typedef pthread_key_t	perl_key;
 	    if (MY_POSIX_EXIT)				\
 		PL_statusvalue_vms =			\
 		  (C_FAC_POSIX | (evalue << 3 ) | (evalue == 1)? \
-		   (STS$K_ERROR | STS$M_INHIB_MSG) : 0); \
+		   (STS$K_ERROR | STS$M_INHIB_MSG) : 1); \
 	    else					\
 		PL_statusvalue_vms = evalue ? evalue : SS$_NORMAL; \
 	    set_vaxc_errno(PL_statusvalue_vms);		\

@@ -543,6 +543,7 @@ DECC$POSIX_COMPLIANT_PATHNAMES to defined as 3, and operating in a
 DECC$FILENAME_UNIX_REPORT mode.
 
     lchown, link, lstat, readlink, symlink
+
 =over 4
 
 =item File tests
@@ -634,15 +635,36 @@ if neither of the $! or $? status values are ones that would cause
 the native status to be interpreted as being what VMS classifies as
 SEVERE_ERROR severity for DCL error handling.
 
-When the future POSIX_EXIT mode is active, C<die>, the native status
-code will be set to VMS condition value that will allow C programs
-including the GNV package to automatically decode the original C<$!>
-or <$?> or <$^E> settings unless those are all success values, in
-which case it will be set for those programs to recover the value
-255.  If at the time C<die> is called, the native VMS status value
-is either of SEVERE_ERROR or ERROR severity, the native VMS
-value will be used.  See C<$?> for a description on decoding the
-native VMS value to recover the original exit status.
+When the future POSIX_EXIT mode is active, C<die>, the native VMS exit
+status value will have either one of the C<$!> or C<$?> or C<$^E> or
+the UNIX value 255 encoded into it in a way that the effective original
+value can be decoded by other programs written in C, including Perl
+and the GNV package.  As per the normal non-VMS behavior of C<die> if
+either C<$!> or C<$?> are non-zero, one of those values will be
+encoded into a native VMS status value.  If both of the UNIX status
+values are 0, and the C<$^E> value is set one of ERROR or SEVERE_ERROR
+severity, then the C<$^E> value will be used as the exit code as is.
+If none of the above apply, the UNIX value of 255 will be encoded into
+a native VMS exit status value.
+
+Please note a significant difference in the behavior of C<die> in
+the future POSIX_EXIT mode is that it does not force a VMS
+SEVERE_ERROR status on exit.  The UNIX exit values of 2 through
+255 will be encoded in VMS status values with severity levels of
+SUCCESS.  The UNIX exit value of 1 will be encoded in a VMS status
+value with a severity level of ERROR.  This is to be compatible with
+how the VMS C library encodes these values.
+
+The minimum severity level set by C<die> in a future POSIX_EXIT mode
+may be changed to be ERROR or higher before that mode becomes fully active
+depending on the results of testing and further review.  If this is
+done, the behavior of c<DIE> in the future POSIX_EXIT will close enough
+to the default mode that most DCL shell scripts will probably not notice
+a difference.
+
+See C<$?> for a description of the encoding of the UNIX value to
+produce a native VMS status containing it.
+
 
 =item dump
 
@@ -1047,39 +1069,51 @@ compiled with the _POSIX_EXIT macro set, the status value will
 contain the actual value of 0 to 255 returned by that program
 on a normal exit.
 
-With the _POSIX_EXIT macro set, the exit code of zero is represented
-as 1, and the values from 2 to 255 are encoded by the equation
-VMS_status = 0x35a000 + (exit_code * 8) + 1.  And in the special
-case of value 1, VMS_status = 0x35a000 + 8 + 2 + 0x10000000.
+With the _POSIX_EXIT macro set, the UNIX exit value of zero is
+represented as a VMS native status of 1, and the UNIX values
+from 2 to 255 are encoded by the equation:
+
+   VMS_status = 0x35a000 + (unix_value * 8) + 1.
+
+And in the special case of unix value 1 the encoding is:
+
+   VMS_status = 0x35a000 + 8 + 2 + 0x10000000.
 
 For other termination statuses, the severity portion of the
-subprocess' exit status: if the severity was success or
+subprocess' exit status is used: if the severity was success or
 informational, these bits are all 0; if the severity was
 warning, they contain a value of 1; if the severity was
 error or fatal error, they contain the actual severity bits,
-which turns out to be a value of 2 for error and 4 for fatal error.  
+which turns out to be a value of 2 for error and 4 for severe_error.
+Fatal is another term for the severe_error status.
 
 As a result, C<$?> will always be zero if the subprocess' exit
 status indicated successful completion, and non-zero if a
 warning or error occurred or a program compliant with encoding
 _POSIX_EXIT values was run and set a status.
 
-How can you tell the difference?  You can not unless you look at
-the ${^CHILD_ERROR_NATIVE} code.  The ${^CHILD_ERROR_NATIVE} code
-returns the actual VMS status value and check the severity bits.
-If the severity bits are clear, then the numeric value is code
-passed back from the application.
+How can you tell the difference between a non-zero status that is
+the result of a VMS native error status or an encoded UNIX status?
+You can not unless you look at the ${^CHILD_ERROR_NATIVE} value.
+The ${^CHILD_ERROR_NATIVE} value returns the actual VMS status value
+and check the severity bits. If the severity bits are equal to 1,
+then if the numeric value for C<$?> is between 2 and 255 or 0, then
+C<$?> accurately reflects a value passed back from a UNIX application.
+If C<$?> is 1, and the severity bits indicate a VMS error (2), then
+C<$?> is from a UNIX application exit value.
 
 In practice, Perl scripts that call programs that return _POSIX_EXIT
-type status codes will be expecting those codes, and programs that
-call traditional VMS programs will be expecting the previous behavior.
+type status values will be expecting those values, and programs that
+call traditional VMS programs will either be expecting the previous
+behavior or just checking for a non-zero status.
 
-And success is always the code 0.
+And success is always the value 0 in all behaviors.
 
 When the actual VMS termination status of the child is an error,
-internally the C<$!> value will be set to the closest UNIX code to
-that error so that Perl scripts that test for error messages will
-see the expected UNIX style error message instead of a VMS message.
+internally the C<$!> value will be set to the closest UNIX errno
+value to that error so that Perl scripts that test for error
+messages will see the expected UNIX style error message instead
+of a VMS message.
 
 Conversely, when setting C<$?> in an END block, an attempt is made
 to convert the POSIX value into a native status intelligible to
@@ -1089,14 +1123,17 @@ SS$_NORMAL, and setting C<$?> to a non-zero value results in the
 generic failure status SS$_ABORT.  See also L<perlport/exit>.
 
 With the future POSIX_EXIT mode set, setting C<$?> will cause the
-code set to be encoded into a native VMS status code so that the
-either the parent or child exit codes of 0 to 255 can be recovered
-by C programs expecting _POSIX_EXIT behavior.  If both a parent
-and a child exit code are set, then it will be assumed that this
-is a VMS status code to be passed through.  The special code of
-0xFFFF is almost a NOOP as it will cause the current native
-VMS status in the C library to become the current native Perl
-VMS status.
+new value to also be encoded into C<$^E> so that the either the
+original parent or child exit status values of 0 to 255
+can be automatically recovered by C programs expecting _POSIX_EXIT
+behavior.  If both a parent and a child exit value are non-zero, then it
+will be assumed that this is actually a VMS native status value to
+be passed through.  The special value of 0xFFFF is almost a NOOP as
+it will cause the current native VMS status in the C library to
+become the current native Perl VMS status, and is handled this way
+as consequence of it known to not be a valid native VMS status value.
+It is recommend that only values in range of normal UNIX parent or
+child status numbers, 0 to 255 are used.
 
 The pragma C<use vmsish 'status'> makes C<$?> reflect the actual 
 VMS exit status instead of the default emulation of POSIX status 
@@ -1105,7 +1142,9 @@ non-zero values to SS$_ABORT when setting C<$?> in an END
 block (but zero will still be converted to SS$_NORMAL).
 
 Do not use the pragma C<use vmsish 'status'> with the future
-POSIX_EXIT mode, as they are requesting conflicting actions.
+POSIX_EXIT mode, as they are at times requesting conflicting
+actions and the consequence of ignoring this advice will be
+undefined to allow future improvements in the POSIX exit handling.
 
 =item $|
 
