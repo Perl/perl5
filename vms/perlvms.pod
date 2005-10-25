@@ -626,6 +626,24 @@ C<crypt> to insure that you'll get the proper value:
         return 1;
     }
 
+
+=item die
+
+C<die> will force the native VMS exit status to be an SS$_ABORT code
+if neither of the $! or $? status values are ones that would cause
+the native status to be interpreted as being what VMS classifies as
+SEVERE_ERROR severity for DCL error handling.
+
+When the future POSIX_EXIT mode is active, C<die>, the native status
+code will be set to VMS condition value that will allow C programs
+including the GNV package to automatically decode the original C<$!>
+or <$?> or <$^E> settings unless those are all success values, in
+which case it will be set for those programs to recover the value
+255.  If at the time C<die> is called, the native VMS status value
+is either of SEVERE_ERROR or ERROR severity, the native VMS
+value will be used.  See C<$?> for a description on decoding the
+native VMS value to recover the original exit status.
+
 =item dump
 
 Rather than causing Perl to abort and dump core, the C<dump>
@@ -1070,11 +1088,24 @@ is that setting C<$?> to zero results in the generic success value
 SS$_NORMAL, and setting C<$?> to a non-zero value results in the
 generic failure status SS$_ABORT.  See also L<perlport/exit>.
 
+With the future POSIX_EXIT mode set, setting C<$?> will cause the
+code set to be encoded into a native VMS status code so that the
+either the parent or child exit codes of 0 to 255 can be recovered
+by C programs expecting _POSIX_EXIT behavior.  If both a parent
+and a child exit code are set, then it will be assumed that this
+is a VMS status code to be passed through.  The special code of
+0xFFFF is almost a NOOP as it will cause the current native
+VMS status in the C library to become the current native Perl
+VMS status.
+
 The pragma C<use vmsish 'status'> makes C<$?> reflect the actual 
 VMS exit status instead of the default emulation of POSIX status 
 described above.  This pragma also disables the conversion of
 non-zero values to SS$_ABORT when setting C<$?> in an END
 block (but zero will still be converted to SS$_NORMAL).
+
+Do not use the pragma C<use vmsish 'status'> with the future
+POSIX_EXIT mode, as they are requesting conflicting actions.
 
 =item $|
 

@@ -2662,8 +2662,8 @@ typedef pthread_key_t	perl_key;
    * the NATIVE error status based on it.  It does not assume that
    * the UNIX/POSIX exit codes have any relationship to errno, except
    * that 0 indicates a success.  When in the default mode to comply
-   * with the Perl VMS documentation, status of one is set to the
-   * failure code of SS$_ABORT.  Any other number is passed through.
+   * with the Perl VMS documentation, any other code sets the NATIVE
+   * status to a failure code of SS$_ABORT.
    *
    * In the new POSIX EXIT mode, native status will be set so that the
    * actual exit code will can be retrieved by the calling program or
@@ -2689,7 +2689,7 @@ typedef pthread_key_t	perl_key;
 		       (C_FAC_POSIX | (evalue << 3 ) | (evalue == 1)? \
 		        (STS$K_ERROR | STS$M_INHIB_MSG) : 0); \
 		  else					\
-		    PL_statusvalue_vms = (evalue == 1)? SS$_ABORT : evalue; \
+		    PL_statusvalue_vms = SS$_ABORT; \
 	      } else { /* forgive them Perl, for they have sinned */ \
 		if (evalue != EVMSERR) PL_statusvalue_vms = evalue; \
 		else PL_statusvalue_vms = vaxc$errno;		\
@@ -2699,6 +2699,33 @@ typedef pthread_key_t	perl_key;
 	    }							\
 	    else PL_statusvalue_vms = SS$_ABORT;		\
 	    set_vaxc_errno(PL_statusvalue_vms);			\
+	} STMT_END
+
+  /* STATUS_EXIT_SET - Takes a NATIVE/UNIX/POSIX exit code
+   * and sets the NATIVE error status based on it.  This special case
+   * is needed to maintain compatibility with past VMS behavior.
+   *
+   * In the default mode on VMS, this number is passed through as
+   * both the NATIVE and UNIX status.  Which makes it different
+   * that the STATUS_UNIX_EXIT_SET.
+   *
+   * In the new POSIX EXIT mode, native status will be set so that the
+   * actual exit code will can be retrieved by the calling program or
+   * shell.
+   *
+   */
+
+#   define STATUS_EXIT_SET(n)				\
+	STMT_START {					\
+	    I32 evalue = (I32)n;			\
+	    PL_statusvalue = evalue;			\
+	    if (MY_POSIX_EXIT)				\
+		PL_statusvalue_vms =			\
+		  (C_FAC_POSIX | (evalue << 3 ) | (evalue == 1)? \
+		   (STS$K_ERROR | STS$M_INHIB_MSG) : 0); \
+	    else					\
+		PL_statusvalue_vms = evalue ? evalue : SS$_NORMAL; \
+	    set_vaxc_errno(PL_statusvalue_vms);		\
 	} STMT_END
 
 
@@ -2757,6 +2784,7 @@ typedef pthread_key_t	perl_key;
 		PL_statusvalue &= 0xFFFF;	\
 	} STMT_END
 #   define STATUS_UNIX_EXIT_SET(n) STATUS_UNIX_SET(n)
+#   define STATUS_EXIT_SET(n) STATUS_UNIX_SET(n)
 #   define STATUS_CURRENT STATUS_UNIX
 #   define STATUS_EXIT STATUS_UNIX
 #   define STATUS_ALL_SUCCESS	(PL_statusvalue = 0, PL_statusvalue_posix = 0)
