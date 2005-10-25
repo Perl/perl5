@@ -424,6 +424,7 @@ $spitshell >>Makefile <<!GROK!THIS!
 # levels of symbolic links, even if we have only two)
 
 opmini.c: op.c
+	\$(RMS) opmini.c
 	\$(CPS) op.c opmini.c
 
 opmini\$(OBJ_EXT): opmini.c
