@@ -1773,6 +1773,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef PL_OP_SLAB_ALLOC
 			     " PL_OP_SLAB_ALLOC"
 #  endif
+#  ifdef SPRINTF_RETURNS_STRLEN
+			     " SPRINTF_RETURNS_STRLEN"
+#  endif
 #  ifdef THREADS_HAVE_PIDS
 			     " THREADS_HAVE_PIDS"
 #  endif
