@@ -69,7 +69,7 @@ $ENV{EMXSHELL} = 'sh';        # For OS/2
 # Roll your own File::Find!
 use TestInit;
 use File::Spec;
-use Time::HiRes;
+if ($show_elapsed_time) { require Time::HiRes }
 my $curdir = File::Spec->curdir;
 my $updir  = File::Spec->updir;
 
@@ -263,7 +263,7 @@ EOT
     my $totmax = 0;
 
     while (my $test = shift @tests) {
-        my $test_start_time = Time::HiRes::time();
+        my $test_start_time = $show_elapsed_time ? Time::HiRes::time() : 0;
 
 	if ( $::infinite{$test} && $type eq 'compile' ) {
 	    print STDERR "$test creates infinite loop! Skipping.\n";
