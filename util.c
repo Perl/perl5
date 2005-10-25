@@ -2641,8 +2641,9 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 
 	if (pid > 0) {
 	    SV** svp;
-	    sprintf(spid, "%"IVdf, (IV)pid);
-	    svp = hv_fetch(PL_pidstatus,spid,strlen(spid),FALSE);
+	    const I32 len = my_sprintf(spid, "%"IVdf, (IV)pid);
+
+	    svp = hv_fetch(PL_pidstatus,spid,len,FALSE);
 	    if (svp && *svp != &PL_sv_undef) {
 		*statusp = SvIVX(*svp);
 		(void)hv_delete(PL_pidstatus,spid,strlen(spid),G_DISCARD);
@@ -2655,11 +2656,12 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 	    hv_iterinit(PL_pidstatus);
 	    if ((entry = hv_iternext(PL_pidstatus))) {
 		SV *sv = hv_iterval(PL_pidstatus,entry);
+		I32 len;
 
 		pid = atoi(hv_iterkey(entry,(I32*)statusp));
 		*statusp = SvIVX(sv);
-		sprintf(spid, "%"IVdf, (IV)pid);
-		(void)hv_delete(PL_pidstatus,spid,strlen(spid),G_DISCARD);
+		len = my_sprintf(spid, "%"IVdf, (IV)pid);
+		(void)hv_delete(PL_pidstatus,spid,len,G_DISCARD);
 		return pid;
 	    }
 	}
@@ -2707,7 +2709,7 @@ Perl_pidgone(pTHX_ Pid_t pid, int status)
 {
     register SV *sv;
     char spid[TYPE_CHARS(IV)];
-    size_t len = my_sprintf(spid, "%"IVdf, (IV)pid);
+    const size_t len = my_sprintf(spid, "%"IVdf, (IV)pid);
 
     sv = *hv_fetch(PL_pidstatus,spid,len,TRUE);
     SvUPGRADE(sv,SVt_IV);
