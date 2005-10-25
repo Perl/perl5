@@ -4333,18 +4333,19 @@ PP(pp_push)
 	call_method("PUSH",G_SCALAR|G_DISCARD);
 	LEAVE;
 	SPAGAIN;
+	SP = ORIGMARK;
+	PUSHi( AvFILL(ary) + 1 );
     }
     else {
-	/* Why no pre-extend of ary here ? */
 	for (++MARK; MARK <= SP; MARK++) {
 	    SV * const sv = NEWSV(51, 0);
 	    if (*MARK)
 		sv_setsv(sv, *MARK);
-	    av_push(ary, sv);
+	    av_store(ary, AvFILLp(ary)+1, sv);
 	}
+	SP = ORIGMARK;
+	PUSHi( AvFILLp(ary) + 1 );
     }
-    SP = ORIGMARK;
-    PUSHi( AvFILL(ary) + 1 );
     RETURN;
 }
 
