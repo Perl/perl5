@@ -1,5 +1,13 @@
 Revision history for Perl extension Time::HiRes.
 
+1.76	[2005-10-22]
+	- testing for nanosleep had wrong logic which caused nanosleep
+	  to become undefined for e.g. Mac OS X
+	- added a test for a core dump that was introduced by Perl 5.8.0
+	  safe signals and was fixed for the time of 5.8.1 (one report of
+	  the core dump was [perl #20920]), the test skipped pre-5.8.1.
+	- *cough* s/unanosleep/nanosleep/g; *cough*
+
 1.75	[2005-10-18]
 	- installation patch from Gisle Aas: in Perls 5.8.x and later
 	  use MakeMaker INSTALLDIRS value of 'perl' instead of 'site'.

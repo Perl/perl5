@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #
 # In general we trust %Config, but for nanosleep() this trust
-# may be misplaces (it may be linkable but not really functional).
+# may be misplaced (it may be linkable but not really functional).
 # Use $ENV{FORCE_NANOSLEEP_SCAN} to force rescanning whether there
 # really is hope.
 
@@ -222,7 +222,7 @@ EOM
 }
 
 sub has_nanosleep {
-    print "Trying out nanosleep... ";
+    print "testing... ";
     return 1 if
     try_compile_and_link(<<EOM, run => 1);
 #include <time.h>
@@ -383,16 +383,27 @@ EOD
 
     print "Looking for nanosleep()... ";
     my $has_nanosleep;
-    if (exists $Config{d_nanosleep} && !$ENV{FORCE_NANOSLEEP_SCAN}) {
-        # Believe $Config{d_nanosleep}.
+    if ($ENV{FORCE_NANOSLEEP_SCAN}) {
+	print "forced scan... ";
+	if (has_nanosleep()) {
+	    $has_nanosleep++;
+	    $DEFINE .= ' -DTIME_HIRES_NANOSLEEP';
+	}
+    }
+    elsif (exists $Config{d_nanosleep}) {
+	print "believing \$Config{d_nanosleep}... ";
 	if ($Config{d_nanosleep}) {
 	    $has_nanosleep++;
 	    $DEFINE .= ' -DTIME_HIRES_NANOSLEEP';
 	}
-    } elsif ($^O ne 'mpeix' && # MPE/iX falsely finds nanosleep.
-             has_nanosleep()) {
-	$has_nanosleep++;
-	$DEFINE .= ' -DTIME_HIRES_NANOSLEEP';
+    } elsif ($^O =~ /^(mpeix)$/) {
+	# MPE/iX falsely finds nanosleep from its libc equivalent.
+	print "skipping because in $^O... ";
+    } else {
+	if (has_nanosleep()) {
+	    $has_nanosleep++;
+	    $DEFINE .= ' -DTIME_HIRES_NANOSLEEP';
+	}
     }
 
     if ($has_nanosleep) {

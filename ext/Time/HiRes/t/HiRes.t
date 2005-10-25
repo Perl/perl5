@@ -12,7 +12,7 @@ BEGIN {
     }
 }
 
-BEGIN { $| = 1; print "1..28\n"; }
+BEGIN { $| = 1; print "1..29\n"; }
 
 END { print "not ok 1\n" unless $loaded }
 
@@ -30,6 +30,12 @@ my $have_nanosleep	= defined &Time::HiRes::nanosleep;
 my $have_ualarm		= defined &Time::HiRes::ualarm;
 my $have_time		= defined &Time::HiRes::time;
 
+printf "# have_gettimeofday = %d\n", $have_gettimeofday;
+printf "# have_usleep       = %d\n", $have_usleep;
+printf "# have_nanosleep    = %d\n", $have_nanosleep;
+printf "# have_ualarm       = %d\n", $have_ualarm;
+printf "# have_time         = %d\n", $have_time;
+
 import Time::HiRes 'gettimeofday'	if $have_gettimeofday;
 import Time::HiRes 'usleep'		if $have_usleep;
 import Time::HiRes 'nanosleep'		if $have_nanosleep;
@@ -39,26 +45,29 @@ use Config;
 
 my $have_alarm = $Config{d_alarm};
 my $have_fork  = $Config{d_fork};
-my $waitfor = 60; # 10 seconds is normal.
-my $pid;
+my $waitfor = 60; # 10-20 seconds is normal (load affects this).
+my $timer_pid;
 
 if ($have_fork) {
-    print "# I am process $$, starting the timer process\n";
-    if (defined ($pid = fork())) {
-	if ($pid == 0) { # We are the kid, set up the timer.
-	    print "# I am timer process $$\n";
+    print "# I am the main process $$, starting the timer process...\n";
+    $timer_pid = fork();
+    if (defined $timer_pid) {
+	if ($timer_pid == 0) { # We are the kid, set up the timer.
+	    print "# I am the timer process $$, sleeping for $waitfor seconds...\n";
 	    sleep($waitfor);
-	    warn "\n$0: overall time allowed for tests (${waitfor}s) exceeded\n";
-	    print "# Terminating the testing process\n";
+	    warn "\n$0: overall time allowed for tests (${waitfor}s) exceeded!\n";
+	    print "# Terminating the main process...\n";
 	    kill('TERM', getppid());
-	    print "# Timer process exiting\n";
+	    print "# This is the timer process $$, over and out.\n";
 	    exit(0);
+	} else {
+	    print "# Timer process $timer_pid launched, continuing testing...\n";
 	}
     } else {
 	warn "$0: fork failed: $!\n";
     }
 } else {
-    print "# No timer process\n";
+    print "# No timer process (need fork)\n";
 }
 
 my $xdefine = ''; 
@@ -95,7 +104,7 @@ sub ok {
     }
 }
 
-if (!$have_gettimeofday) {
+unless ($have_gettimeofday) {
     skip 2..6;
 }
 else {
@@ -114,7 +123,7 @@ else {
     ok 6, $f - $two[0] < 2, "$f - $two[0] >= 2";
 }
 
-if (!$have_usleep) {
+unless ($have_usleep) {
     skip 7..8;
 }
 else {
@@ -125,7 +134,7 @@ else {
     my $three = time;
     ok 7, $one == $two || $two == $three, "slept too long, $one $two $three";
 
-    if (!$have_gettimeofday) {
+    unless ($have_gettimeofday) {
     	skip 8;
     }
     else {
@@ -143,7 +152,7 @@ else {
     ok 9, abs($f - 5.4) < 0.001, $f;
 }
 
-if (!$have_gettimeofday) {
+unless ($have_gettimeofday) {
     skip 10;
 }
 else {
@@ -152,7 +161,7 @@ else {
     ok 10, $f < 2, $f;
 }
 
-if (!$have_usleep || !$have_gettimeofday) {
+unless ($have_usleep && $have_gettimeofday) {
     skip 11;
 }
 else {
@@ -162,7 +171,7 @@ else {
     ok 11, $f > 0.4 && $f < 0.9, "slept $f instead of 0.5 secs.";
 }
 
-if (!$have_ualarm || !$have_alarm) {
+unless ($have_ualarm && $have_alarm) {
     skip 12..13;
 }
 else {
@@ -183,7 +192,7 @@ else {
 
 # Did we even get close?
 
-if (!$have_time) {
+unless ($have_time) {
     skip 14;
 } else {
  my ($s, $n, $i) = (0);
@@ -350,7 +359,7 @@ if ($have_gettimeofday) {
     }
 }
 
-if (!$have_nanosleep) {
+unless ($have_nanosleep) {
     skip 22..23;
 }
 else {
@@ -361,7 +370,7 @@ else {
     my $three = CORE::time;
     ok 22, $one == $two || $two == $three, "slept too long, $one $two $three";
 
-    if (!$have_gettimeofday) {
+    unless ($have_gettimeofday) {
     	skip 23;
     }
     else {
@@ -402,9 +411,24 @@ if ($have_nanosleep) {
     skip 28;
 }
 
-if (defined $pid) {
-    print "# I am process $$, terminating the timer process $pid\n";
-    kill('TERM', $pid); # We are done, the timer can go.
-    unlink("ktrace.out");
+if ($have_ualarm && $] >= 5.008001) {
+    # http://groups.google.com/group/perl.perl5.porters/browse_thread/thread/adaffaaf939b042e/20dafc298df737f0%2320dafc298df737f0?sa=X&oi=groupsr&start=0&num=3
+    # Perl changes [18765] and [18770], perl bug [perl #20920]
+    use Time::HiRes qw(alarm); 
+    $SIG{ALRM} = sub { 1 for 1..100000 }; 
+    alarm(0.01, 0.01); 
+    sleep(1);
+    print "ok 29\n"; # Not core dumping by now is considered to be the success.
+} else {
+    skip 29;
+}
+
+END {
+    if (defined $timer_pid) {
+	print "# I am the main process $$, terminating the timer process $timer_pid.\n";
+	kill('TERM', $timer_pid); # We are done, the timer can go.
+	unlink("ktrace.out"); # Used in BSD system call tracing.
+	print "# All done.\n";
+    }
 }
 

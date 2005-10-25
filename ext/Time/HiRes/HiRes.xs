@@ -362,10 +362,10 @@ gettimeofday (struct timeval *tp, void *tpz)
   * The TIME_HIRES_NANOSLEEP is set by Makefile.PL. */
 #if !defined(HAS_USLEEP) && defined(TIME_HIRES_NANOSLEEP)
 #define HAS_USLEEP
-#define usleep hrt_unanosleep  /* could conflict with ncurses for static build */
+#define usleep hrt_nanosleep  /* could conflict with ncurses for static build */
 
 void
-hrt_unanosleep(unsigned long usec) /* This is used to emulate usleep. */
+hrt_nanosleep(unsigned long usec) /* This is used to emulate usleep. */
 {
     struct timespec res;
     res.tv_sec = usec/1000/1000;
@@ -933,5 +933,4 @@ getitimer(which)
 	}
 
 #endif /* #if defined(HAS_GETITIMER) && defined(HAS_SETITIMER) */
-
 
