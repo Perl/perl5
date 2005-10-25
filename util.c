@@ -2661,6 +2661,13 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 		pid = atoi(hv_iterkey(entry,(I32*)statusp));
 		*statusp = SvIVX(sv);
 		len = my_sprintf(spid, "%"IVdf, (IV)pid);
+		/* The hash iterator is currently on this entry, so simply
+		   calling hv_delete would trigger the lazy delete, which on
+		   aggregate does more work, beacuse next call to hv_iterinit()
+		   would spot the flag, and have to call the delete routine,
+		   while in the meantime any new entries can't re-use that
+		   memory.  */
+		hv_iterinit(PL_pidstatus);
 		(void)hv_delete(PL_pidstatus,spid,len,G_DISCARD);
 		return pid;
 	    }
