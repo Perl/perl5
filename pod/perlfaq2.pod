@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.34 $, $Date: 2005/08/10 15:56:54 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.35 $, $Date: 2005/10/13 19:43:13 $)
 
 =head1 DESCRIPTION
 
@@ -149,9 +149,8 @@ You might also try C<perldoc perl> in case your system doesn't
 have a proper man command, or it's been misinstalled.  If that doesn't
 work, try looking in /usr/local/lib/perl5/pod for documentation.
 
-If all else fails, consult http://perldoc.cpan.org/ or
-http://www.perldoc.com/ both offer the complete documentation
-in html format.
+If all else fails, consult http://perldoc.perl.org/ which has the
+complete documentation in HTML and PDF format.
 
 Many good books have been written about Perl--see the section below
 for more details.
@@ -162,11 +161,9 @@ approach to objects, L<perlopentut> for file opening semantics,
 L<perlreftut> for managing references, L<perlretut> for regular
 expressions, L<perlthrtut> for threads, L<perldebtut> for debugging,
 and L<perlxstut> for linking C and Perl together.  There may be more
-by the time you read this.  The following URLs might also be of
-assistance:
+by the time you read this.  These URLs might also be useful:
 
-    http://perldoc.cpan.org/
-    http://www.perldoc.com/
+    http://perldoc.perl.org/
     http://bookmarks.cpan.org/search.cgi?cat=Training%2FTutorials
 
 =head2 What are the Perl newsgroups on Usenet?  Where do I post questions?
@@ -221,10 +218,11 @@ This is faster and more productive than just posting a request.
 A number of books on Perl and/or CGI programming are available.  A few
 of these are good, some are OK, but many aren't worth your money.
 There is a list of these books, some with extensive reviews, at
-http://books.perl.org/ .
+http://books.perl.org/ . If you don't see your book listed here, you
+can write to perlfaq-workers@perl.org .
 
 The incontestably definitive reference book on Perl, written by
-the creator of Perl, is now (Sept 2004) in its third edition:
+the creator of Perl, is Programming Perl:
 
 	Programming Perl (the "Camel Book"):
 	by Larry Wall, Tom Christiansen, and Jon Orwant
@@ -242,13 +240,13 @@ of real-world examples, mini-tutorials, and complete programs is:
 	http://www.oreilly.com/catalog/perlckbk2/
 
 If you're already a seasoned programmer, then the Camel Book might
-suffice for you to learn Perl from.  If you're not, check out the
+suffice for you to learn Perl.  If you're not, check out the
 Llama book:
 
-	Learning Perl (the "Llama Book")
-	by Randal L. Schwartz and Tom Phoenix
-	ISBN 0-596-00132-0 [3rd edition July 2001]
-	http://www.oreilly.com/catalog/lperl3/
+	Learning Perl
+	by Randal L. Schwartz, Tom Phoenix, and brian d foy
+	ISBN 0-596-10105-8 [4th edition July 2005]
+	http://www.oreilly.com/catalog/learnperl4/
 
 And for more advanced information on writing larger programs,
 presented in the same style as the Llama book, continue your education
@@ -306,11 +304,6 @@ Recommended books on (or mostly on) Perl follow.
 	ISBN 0-596-00032-4 [3rd edition May 2000]
 	http://www.oreilly.com/catalog/perlpr3/
 
-	Perl in a Nutshell
-	by Ellen Siever, Stephan Spainhour, and Nathan Patwardhan
-	ISBN 1-56592-286-7 [1st edition December 1998]
-	http://www.oreilly.com/catalog/perlnut/
-
 =item Tutorials
 
 	Beginning Perl
@@ -324,37 +317,14 @@ Recommended books on (or mostly on) Perl follow.
 	http://www.manning.com/Johnson/
 
 	Learning Perl
-	by Randal L. Schwartz and Tom Phoenix
-	ISBN 0-596-00132-0 [3rd edition July 2001]
-	http://www.oreilly.com/catalog/lperl3/
+	by Randal L. Schwartz, Tom Phoenix, and brian d foy
+	ISBN 0-596-10105-8 [4th edition July 2005]
+	http://www.oreilly.com/catalog/learnperl4/
 
 	Learning Perl Objects, References, and Modules
 	by Randal L. Schwartz, with Tom Phoenix (foreword by Damian Conway)
 	ISBN 0-596-00478-8 [1st edition June 2003]
 	http://www.oreilly.com/catalog/lrnperlorm/
-
-	Learning Perl on Win32 Systems
-	by Randal L. Schwartz, Erik Olson, and Tom Christiansen,
-	    with foreword by Larry Wall
-	ISBN 1-56592-324-3 [1st edition August 1997]
-	http://www.oreilly.com/catalog/lperlwin/
-
-	Perl: The Programmer's Companion
-	by Nigel Chapman
-	ISBN 0-471-97563-X [1997, 3rd printing Spring 1998]
-	http://www.wiley.com/compbooks/catalog/97563-X.htm
-	http://www.wiley.com/compbooks/chapman/perl/perltpc.html (errata etc)
-
-	Cross-Platform Perl
-	by Eric Foster-Johnson
-	ISBN 1-55851-483-X [2nd edition September 2000]
-	http://www.pconline.com/~erc/perlbook.htm
-
-	MacPerl: Power and Ease
-	by Vicki Brown and Chris Nandor,
-	    with foreword by Matthias Neeracher
-	ISBN 1-881957-32-2 [1st edition May 1998]
-	http://www.macperl.com/ptf_book/
 
 =item Task-Oriented
 

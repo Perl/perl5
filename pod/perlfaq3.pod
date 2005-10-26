@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.51 $, $Date: 2005/08/10 15:56:39 $)
+perlfaq3 - Programming Tools ($Revision: 1.52 $, $Date: 2005/10/13 19:43:13 $)
 
 =head1 DESCRIPTION
 
@@ -47,7 +47,7 @@ shell that combines the interactive nature of a Unix shell with the
 power of Perl. The goal is a full featured shell that behaves as
 expected for normal shell activity and uses Perl syntax and
 functionality for control-flow statements and other things.
-You can get psh at http://www.focusresearch.com/gregor/psh/ .
+You can get psh at http://sourceforge.net/projects/psh/ .
 
 Zoidberg is a similar project and provides a shell written in perl,
 configured in perl and operated in perl. It is intended as a login shell
@@ -772,30 +772,26 @@ You probably won't see much of a speed increase either, since most
 solutions simply bundle a Perl interpreter in the final product
 (but see L<How can I make my Perl program run faster?>).
 
-The Perl Archive Toolkit (http://par.perl.org/index.cgi) is
-Perl's analog to Java's JAR.  It's freely available and on
-CPAN (http://search.cpan.org/dist/PAR/).
+The Perl Archive Toolkit ( http://par.perl.org/index.cgi ) is Perl's
+analog to Java's JAR.  It's freely available and on CPAN (
+http://search.cpan.org/dist/PAR/ ).
 
-The B::* namespace, often called "the Perl compiler", but is really a
-way for Perl programs to peek at its innards rather than create
-pre-compiled versions of your program.  However. the B::Bytecode
-module can turn your script  into a bytecode format that could be
-loaded later by the ByteLoader module and executed as a regular Perl
-script.
+The B::* namespace, often called "the Perl compiler", but is really a way
+for Perl programs to peek at its innards rather than create pre-compiled
+versions of your program.  However. the B::Bytecode module can turn your
+script  into a bytecode format that could be loaded later by the
+ByteLoader module and executed as a regular Perl script.
 
-There are also some commercial products that may work for
-you, although you have to buy a license for them.
+There are also some commercial products that may work for you, although
+you have to buy a license for them.
 
-The Perl Dev Kit
-(http://www.activestate.com/Products/Perl_Dev_Kit/) from
-ActiveState can "Turn your Perl programs into ready-to-run
+The Perl Dev Kit ( http://www.activestate.com/Products/Perl_Dev_Kit/ )
+from ActiveState can "Turn your Perl programs into ready-to-run
 executables for HP-UX, Linux, Solaris and Windows."
 
-Perl2Exe (http://www.indigostar.com/perl2exe.htm) is a
-command line program for converting perl scripts to
-executable files.  It targets both Windows and unix
-platforms.
-
+Perl2Exe ( http://www.indigostar.com/perl2exe.htm ) is a command line
+program for converting perl scripts to executable files.  It targets both
+Windows and unix platforms.
 
 =head2 How can I compile Perl into Java?
 
@@ -923,12 +919,11 @@ guides and references in L<perlfaq9> or in the CGI MetaFAQ:
 
 A good place to start is L<perltoot>, and you can use L<perlobj>,
 L<perlboot>, L<perltoot>, L<perltooc>, and L<perlbot> for reference.
-(If you are using really old Perl, you may not have all of these,
-try http://www.perldoc.com/ , but consider upgrading your perl.)
 
 A good book on OO on Perl is the "Object-Oriented Perl"
-by Damian Conway from Manning Publications,
-http://www.manning.com/Conway/index.html
+by Damian Conway from Manning Publications, or "Learning Perl
+References, Objects, & Modules" by Randal Schwartz and Tom
+Phoenix from O'Reilly Media.
 
 =head2 Where can I learn about linking C with Perl?
 

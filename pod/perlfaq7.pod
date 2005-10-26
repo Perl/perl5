@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq7 - General Perl Language Issues ($Revision: 1.25 $, $Date: 2005/08/08 02:38:25 $)
+perlfaq7 - General Perl Language Issues ($Revision: 1.26 $, $Date: 2005/10/13 19:43:13 $)
 
 =head1 DESCRIPTION
 
@@ -271,24 +271,40 @@ $line back in its caller's scope.
 
 =head2 What is variable suicide and how can I prevent it?
 
-Variable suicide is when you (temporarily or permanently) lose the
-value of a variable.  It is caused by scoping through my() and local()
-interacting with either closures or aliased foreach() iterator
-variables and subroutine arguments.  It used to be easy to
-inadvertently lose a variable's value this way, but now it's much
-harder.  Take this code:
+This problem was fixed in perl 5.004_05, so preventing it means upgrading
+your version of perl. ;)
 
-    my $f = "foo";
+Variable suicide is when you (temporarily or permanently) lose the value
+of a variable.  It is caused by scoping through my() and local()
+interacting with either closures or aliased foreach() iterator variables
+and subroutine arguments.  It used to be easy to inadvertently lose a
+variable's value this way, but now it's much harder.  Take this code:
+
+    my $f = 'foo';
     sub T {
-      while ($i++ < 3) { my $f = $f; $f .= "bar"; print $f, "\n" }
+      while ($i++ < 3) { my $f = $f; $f .= $i; print $f, "\n" }
     }
     T;
     print "Finally $f\n";
 
+If you are experiencing variable suicide, that C<my $f> in the subroutine
+doesn't pick up a fresh copy of the C<$f> whose value is <foo>. The output
+shows that inside the subroutine the value of C<$f> leaks through when it
+shouldn't, as in this output:
+
+	foobar
+	foobarbar
+	foobarbarbar
+	Finally foo
+
 The $f that has "bar" added to it three times should be a new C<$f>
-(C<my $f> should create a new local variable each time through the loop).
-It isn't, however.  This was a bug, now fixed in the latest releases
-(tested against 5.004_05, 5.005_03, and 5.005_56).
+C<my $f> should create a new lexical variable each time through the loop.
+The expected output is:
+
+	foobar
+	foobar
+	foobar
+	Finally foo
 
 =head2 How can I pass/return a {Function, FileHandle, Array, Hash, Method, Regex}?
 
