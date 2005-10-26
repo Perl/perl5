@@ -2639,16 +2639,17 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 	return -1;
 #ifdef PERL_USES_PL_PIDSTATUS
     {
-	char spid[TYPE_CHARS(IV)];
-
 	if (pid > 0) {
 	    SV** svp;
-	    const I32 len = my_sprintf(spid, "%"IVdf, (IV)pid);
 
-	    svp = hv_fetch(PL_pidstatus,spid,len,FALSE);
+	    /* The keys in PL_pidstatus are now the raw 4 (or 8) bytes of the
+	       pid, rather than a string form.  */
+
+	    svp = hv_fetch(PL_pidstatus,(const char*) &pid,sizeof(Pid_t),FALSE);
 	    if (svp && *svp != &PL_sv_undef) {
 		*statusp = SvIVX(*svp);
-		(void)hv_delete(PL_pidstatus,spid,strlen(spid),G_DISCARD);
+		(void)hv_delete(PL_pidstatus,(const char*) &pid,sizeof(Pid_t),
+				G_DISCARD);
 		return pid;
 	    }
 	}
@@ -2659,10 +2660,11 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 	    if ((entry = hv_iternext(PL_pidstatus))) {
 		SV *sv = hv_iterval(PL_pidstatus,entry);
 		I32 len;
+		const char *spid = hv_iterkey(entry,&len);
 
-		pid = atoi(hv_iterkey(entry,(I32*)statusp));
+		assert (len == sizeof(Pid_t));
+		memcpy((char *)&pid, spid, len);
 		*statusp = SvIVX(sv);
-		len = my_sprintf(spid, "%"IVdf, (IV)pid);
 		/* The hash iterator is currently on this entry, so simply
 		   calling hv_delete would trigger the lazy delete, which on
 		   aggregate does more work, beacuse next call to hv_iterinit()
@@ -2718,10 +2720,8 @@ void
 Perl_pidgone(pTHX_ Pid_t pid, int status)
 {
     register SV *sv;
-    char spid[TYPE_CHARS(IV)];
-    const size_t len = my_sprintf(spid, "%"IVdf, (IV)pid);
 
-    sv = *hv_fetch(PL_pidstatus,spid,len,TRUE);
+    sv = *hv_fetch(PL_pidstatus,(const char*)&pid,sizeof(Pid_t),TRUE);
     SvUPGRADE(sv,SVt_IV);
     SvIV_set(sv, status);
     return;
