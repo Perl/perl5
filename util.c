@@ -2232,7 +2232,9 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 	PL_ppid = (IV)getppid();
 #endif
 	PL_forkprocess = 0;
+#ifdef PERL_USES_PL_PIDSTATUS
 	hv_clear(PL_pidstatus);	/* we have no children */
+#endif
 	return Nullfp;
 #undef THIS
 #undef THAT
@@ -2635,7 +2637,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
     I32 result = 0;
     if (!pid)
 	return -1;
-#if !defined(HAS_WAITPID) && !defined(HAS_WAIT4) || defined(HAS_WAITPID_RUNTIME)
+#ifdef PERL_USES_PL_PIDSTATUS
     {
 	char spid[TYPE_CHARS(IV)];
 
@@ -2686,7 +2688,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
     result = wait4((pid==-1)?0:pid,statusp,flags,Null(struct rusage *));
     goto finish;
 #endif
-#if !defined(HAS_WAITPID) && !defined(HAS_WAIT4) || defined(HAS_WAITPID_RUNTIME)
+#ifdef PERL_USES_PL_PIDSTATUS
 #if defined(HAS_WAITPID) && defined(HAS_WAITPID_RUNTIME)
   hard_way:
 #endif
@@ -2711,6 +2713,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 }
 #endif /* !DOSISH || OS2 || WIN32 || NETWARE */
 
+#ifdef PERL_USES_PL_PIDSTATUS
 void
 Perl_pidgone(pTHX_ Pid_t pid, int status)
 {
@@ -2723,6 +2726,7 @@ Perl_pidgone(pTHX_ Pid_t pid, int status)
     SvIV_set(sv, status);
     return;
 }
+#endif
 
 #if defined(atarist) || defined(OS2) || defined(EPOC)
 int pclose();

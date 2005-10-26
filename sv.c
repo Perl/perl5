@@ -11608,7 +11608,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_evalseq		= proto_perl->Ievalseq;
     PL_origenviron	= proto_perl->Iorigenviron;	/* XXX not quite right */
     PL_origalen		= proto_perl->Iorigalen;
+#ifdef PERL_USES_PL_PIDSTATUS
     PL_pidstatus	= newHV();			/* XXX flag for cloning? */
+#endif
     PL_osname		= SAVEPV(proto_perl->Iosname);
     PL_sighandlerp	= proto_perl->Isighandlerp;
 

@@ -259,7 +259,9 @@ perl_construct(pTHXx)
 	}
 
 	PL_sighandlerp = (Sighandler_t) Perl_sighandler;
+#ifdef PERL_USES_PL_PIDSTATUS
 	PL_pidstatus = newHV();
+#endif
     }
 
     PL_rs = newSVpvn("\n", 1);
@@ -952,8 +954,10 @@ perl_destruct(pTHXx)
     PL_subname = Nullsv;
     SvREFCNT_dec(PL_linestr);
     PL_linestr = Nullsv;
+#ifdef PERL_USES_PL_PIDSTATUS
     SvREFCNT_dec(PL_pidstatus);
     PL_pidstatus = Nullhv;
+#endif
     SvREFCNT_dec(PL_toptarget);
     PL_toptarget = Nullsv;
     SvREFCNT_dec(PL_bodytarget);
@@ -1770,6 +1774,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef PERL_USE_SAFE_PUTENV
 			     " PERL_USE_SAFE_PUTENV"
 #  endif
+#ifdef PERL_USES_PL_PIDSTATUS
+			     " PERL_USES_PL_PIDSTATUS"
+#endif
 #  ifdef PL_OP_SLAB_ALLOC
 			     " PL_OP_SLAB_ALLOC"
 #  endif

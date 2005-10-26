@@ -239,7 +239,9 @@ PERLVARI(Icop_seqmax,	U32,	0)	/* statement sequence number */
 PERLVARI(Ievalseq,	U32,	0)	/* eval sequence number */
 PERLVAR(Iorigenviron,	char **)
 PERLVAR(Iorigalen,	U32)
+#ifdef PERL_USES_PL_PIDSTATUS
 PERLVAR(Ipidstatus,	HV *)		/* pid-to-status mappings for waitpid */
+#endif
 PERLVARI(Imaxo,	int,	MAXO)		/* maximum number of ops */
 PERLVAR(Iosname,	char *)		/* operating system */
 

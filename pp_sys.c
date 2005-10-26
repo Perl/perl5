@@ -4128,7 +4128,9 @@ PP(pp_fork)
 #ifdef THREADS_HAVE_PIDS
 	PL_ppid = (IV)getppid();
 #endif
+#ifdef PERL_USES_PL_PIDSTATUS
 	hv_clear(PL_pidstatus);	/* no kids, so don't wait for 'em */
+#endif
     }
     PUSHi(childpid);
     RETURN;

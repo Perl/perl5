@@ -824,6 +824,12 @@ if ($define{'SPRINTF_RETURNS_STRLEN'}) {
 		     Perl_my_sprintf
 		    )];
 }
+unless ($define{'PERL_USES_PL_PIDSTATUS'}) {
+    skip_symbols [qw(
+		     Perl_pidgone
+		     PL_pidstatus
+		    )];
+}
 
 unless ($define{'d_mmap'}) {
     skip_symbols [qw(

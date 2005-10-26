@@ -815,6 +815,10 @@ int usleep(unsigned int);
 #define PERL_DONT_CREATE_GVSV
 #endif
 
+#if !defined(HAS_WAITPID) && !defined(HAS_WAIT4) || defined(HAS_WAITPID_RUNTIME)
+#define PERL_USES_PL_PIDSTATUS
+#endif
+
 /* Cannot include embed.h here on Win32 as win32.h has not 
    yet been included and defines some config variables e.g. HAVE_INTERP_INTERN
  */
