@@ -60,11 +60,11 @@
 #ifndef __VAX
 #ifndef VMS_MAXRSS
 #ifdef NAML$C_MAXRSS
-#define VMS_MAXRSS NAML$C_MAXRSS+1
+#define VMS_MAXRSS (NAML$C_MAXRSS+1)
 #ifndef VMS_LONGNAME_SUPPORT
 #define VMS_LONGNAME_SUPPORT 1
 #endif /* VMS_LONGNAME_SUPPORT */
-#endif /* NAM$L_C_MAXRSS */
+#endif /* NAML$C_MAXRSS */
 #endif /* VMS_MAXRSS */
 #endif
 
@@ -76,7 +76,7 @@
 /* end of temporary hack until support is complete */
 
 #ifndef VMS_MAXRSS
-#define VMS_MAXRSS NAM$C_MAXRSS
+#define VMS_MAXRSS (NAM$C_MAXRSS + 1)
 #endif
 
 #if  __CRTL_VER < 70301000 && __CRTL_VER >= 70300000
@@ -426,7 +426,7 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
                    (uplnm[4] == 'I' && !strcmp(uplnm,"SYS$INPUT"))   ||
                    (uplnm[4] == 'E' && !strcmp(uplnm,"SYS$ERROR"))   ||
                    (uplnm[4] == 'C' && !strcmp(uplnm,"SYS$COMMAND")) )  ) {
-              memcpy(eqv,eqv+4,eqvlen-4);
+              memmove(eqv,eqv+4,eqvlen-4);
               eqvlen -= 4;
             }
             cp2 += eqvlen;
@@ -2493,7 +2493,7 @@ popen_translate(pTHX_ char *logical, char *result)
 */
     ifi  = 0;
     if (result[0] == 0x1b && result[1] == 0x00) {
-        memcpy(&ifi,result+2,2);
+        memmove(&ifi,result+2,2);
         strcpy(result,result+4);
     }
     return ifi;     /* this is the RMS internal file id */
@@ -3755,6 +3755,8 @@ my_gconvert(double val, int ndig, int trail, char *buf)
  */
 static char *mp_do_tounixspec(pTHX_ const char *, char *, int);
 
+#if defined(__VAX) || !defined(NAML$C_MAXRSS)
+/* ODS-2 only version */
 static char *
 mp_do_rmsexpand(pTHX_ const char *filespec, char *outbuf, int ts, const char *defspec, unsigned opts)
 {
@@ -3777,7 +3779,11 @@ mp_do_rmsexpand(pTHX_ const char *filespec, char *outbuf, int ts, const char *de
   }
   isunix = is_unix_filespec(filespec);
   if (isunix) {
-    if (do_tovmsspec(filespec,vmsfspec,0) == NULL) return NULL;
+    if (do_tovmsspec(filespec,vmsfspec,0) == NULL) {
+	if (out)
+	   Safefree(out);
+	return NULL;
+    }
     filespec = vmsfspec;
   }
 
@@ -3787,7 +3793,11 @@ mp_do_rmsexpand(pTHX_ const char *filespec, char *outbuf, int ts, const char *de
 
   if (defspec && *defspec) {
     if (strchr(defspec,'/') != NULL) {
-      if (do_tovmsspec(defspec,tmpfspec,0) == NULL) return NULL;
+      if (do_tovmsspec(defspec,tmpfspec,0) == NULL) {
+	if (out)
+	   Safefree(out);
+	return NULL;
+      }
       defspec = tmpfspec;
     }
     myfab.fab$l_dna = (char *)defspec; /* cast ok for read only pointer */
@@ -3799,13 +3809,14 @@ mp_do_rmsexpand(pTHX_ const char *filespec, char *outbuf, int ts, const char *de
   mynam.nam$l_rsa = outbuf;
   mynam.nam$b_rss = NAM$C_MAXRSS;
 
+#ifdef NAM$M_NO_SHORT_UPCASE
+  if (decc_efs_case_preserve)
+    mynam.nam$b_nop |= NAM$M_NO_SHORT_UPCASE;
+#endif
+
   retsts = sys$parse(&myfab,0,0);
   if (!(retsts & 1)) {
     mynam.nam$b_nop |= NAM$M_SYNCHK;
-#ifdef NAM$M_NO_SHORT_UPCASE
-    if (decc_efs_case_preserve)
-      mynam.nam$b_nop |= NAM$M_NO_SHORT_UPCASE;
-#endif
     if (retsts == RMS$_DNF || retsts == RMS$_DIR || retsts == RMS$_DEV) {
       retsts = sys$parse(&myfab,0,0);
       if (retsts & 1) goto expanded;
@@ -3823,10 +3834,6 @@ mp_do_rmsexpand(pTHX_ const char *filespec, char *outbuf, int ts, const char *de
   retsts = sys$search(&myfab,0,0);
   if (!(retsts & 1) && retsts != RMS$_FNF) {
     mynam.nam$b_nop |= NAM$M_SYNCHK; mynam.nam$l_rlf = NULL;
-#ifdef NAM$M_NO_SHORT_UPCASE
-    if (decc_efs_case_preserve)
-      mynam.nam$b_nop |= NAM$M_NO_SHORT_UPCASE;
-#endif
     myfab.fab$b_dns = 0; sts = sys$parse(&myfab,0,0);  /* Free search context */
     if (out) Safefree(out);
     set_vaxc_errno(retsts);
@@ -3878,7 +3885,7 @@ mp_do_rmsexpand(pTHX_ const char *filespec, char *outbuf, int ts, const char *de
     if (trimtype) {
       /* If we didn't already trim version, copy down */
       if (speclen > mynam.nam$l_ver - out)
-        memcpy(mynam.nam$l_type, mynam.nam$l_ver, 
+        memmove(mynam.nam$l_type, mynam.nam$l_ver, 
                speclen - (mynam.nam$l_ver - out));
       speclen -= mynam.nam$l_ver - mynam.nam$l_type; 
     }
@@ -3917,14 +3924,343 @@ mp_do_rmsexpand(pTHX_ const char *filespec, char *outbuf, int ts, const char *de
     strcpy(outbuf,tmpfspec);
   }
   mynam.nam$b_nop |= NAM$M_SYNCHK; mynam.nam$l_rlf = NULL;
-#ifdef NAM$M_NO_SHORT_UPCASE
-  if (decc_efs_case_preserve)
-    mynam.nam$b_nop |= NAM$M_NO_SHORT_UPCASE;
-#endif
-  mynam.nam$l_rsa = NULL; mynam.nam$b_rss = 0;
-  myfab.fab$b_dns = 0; sts = sys$parse(&myfab,0,0);  /* Free search context */
+  mynam.nam$l_rsa = NULL;
+  mynam.nam$b_rss = 0;
+  myfab.fab$b_dns = 0;  sts = sys$parse(&myfab,0,0);  /* Free search context */
   return outbuf;
 }
+#else
+/* ODS-5 supporting routine */
+static char *
+mp_do_rmsexpand(pTHX_ const char *filespec, char *outbuf, int ts, const char *defspec, unsigned opts)
+{
+  static char __rmsexpand_retbuf[NAML$C_MAXRSS+1];
+  char * vmsfspec, *tmpfspec;
+  char * esa, *cp, *out = NULL;
+  char * esal;
+  char * outbufl;
+  struct FAB myfab = cc$rms_fab;
+  struct NAML mynam = cc$rms_naml;
+  STRLEN speclen;
+  unsigned long int retsts, trimver, trimtype, haslower = 0, isunix = 0;
+  int sts;
+
+  if (!filespec || !*filespec) {
+    set_vaxc_errno(LIB$_INVARG); set_errno(EINVAL);
+    return NULL;
+  }
+  if (!outbuf) {
+    if (ts) out = Newx(outbuf,VMS_MAXRSS,char);
+    else    outbuf = __rmsexpand_retbuf;
+  }
+
+  vmsfspec = NULL;
+  tmpfspec = NULL;
+  outbufl = NULL;
+  isunix = is_unix_filespec(filespec);
+  if (isunix) {
+    Newx(vmsfspec, VMS_MAXRSS, char);
+    if (do_tovmsspec(filespec,vmsfspec,0) == NULL) {
+	Safefree(vmsfspec);
+	if (out)
+	   Safefree(out);
+	return NULL;
+    }
+    filespec = vmsfspec;
+
+     /* Unless we are forcing to VMS format, a UNIX input means
+      * UNIX output, and that requires long names to be used
+      */
+    if ((opts & PERL_RMSEXPAND_M_VMS) == 0)
+	opts |= PERL_RMSEXPAND_M_LONG;
+    else {
+	isunix = 0;
+    }
+  }
+
+  myfab.fab$l_fna = (char *)-1; /* cast ok */
+  myfab.fab$b_fns = 0;
+  mynam.naml$l_long_filename = (char *)filespec; /* cast ok */
+  mynam.naml$l_long_filename_size = strlen(filespec);
+  myfab.fab$l_naml = &mynam;
+
+  if (defspec && *defspec) {
+    int t_isunix;
+    t_isunix = is_unix_filespec(defspec);
+    if (t_isunix) {
+      Newx(tmpfspec, VMS_MAXRSS, char);
+      if (do_tovmsspec(defspec,tmpfspec,0) == NULL) {
+	Safefree(tmpfspec);
+	if (vmsfspec != NULL)
+	    Safefree(vmsfspec);
+	if (out)
+	   Safefree(out);
+	return NULL;
+      }
+      defspec = tmpfspec;
+    }
+    myfab.fab$l_dna = (char *) -1; /* cast ok */
+    myfab.fab$b_dns = 0;
+    mynam.naml$l_long_defname = (char *)defspec; /* cast ok */
+    mynam.naml$l_long_defname_size = strlen(defspec);
+  }
+
+  Newx(esa, NAM$C_MAXRSS + 1, char);
+  Newx(esal, NAML$C_MAXRSS + 1, char);
+  mynam.naml$l_esa = esa;
+  mynam.naml$b_ess = NAM$C_MAXRSS;
+  mynam.naml$l_long_expand = esal;
+  mynam.naml$l_long_expand_alloc = NAML$C_MAXRSS;
+
+  if ((opts & PERL_RMSEXPAND_M_LONG) != 0) {
+    mynam.naml$l_rsa = NULL;
+    mynam.naml$b_rss = 0;
+    mynam.naml$l_long_result = outbuf;
+    mynam.naml$l_long_result_alloc = VMS_MAXRSS - 1;
+  }
+  else {
+    mynam.naml$l_rsa = outbuf;
+    mynam.naml$b_rss = NAM$C_MAXRSS;
+    Newx(outbufl, VMS_MAXRSS, char);
+    mynam.naml$l_long_result = outbufl;
+    mynam.naml$l_long_result_alloc = VMS_MAXRSS - 1;
+  }
+
+#ifdef NAM$M_NO_SHORT_UPCASE
+  if (decc_efs_case_preserve)
+    mynam.naml$b_nop |= NAM$M_NO_SHORT_UPCASE;
+#endif
+
+  /* First attempt to parse as an existing file */
+  retsts = sys$parse(&myfab,0,0);
+  if (!(retsts & STS$K_SUCCESS)) {
+
+    /* Could not find the file, try as syntax only if error is not fatal */
+    mynam.naml$b_nop |= NAM$M_SYNCHK;
+    if (retsts == RMS$_DNF || retsts == RMS$_DIR || retsts == RMS$_DEV) {
+      retsts = sys$parse(&myfab,0,0);
+      if (retsts & STS$K_SUCCESS) goto expanded;
+    }  
+
+     /* Still could not parse the file specification */
+    /*----------------------------------------------*/
+    mynam.naml$l_rlf = NULL;
+    myfab.fab$b_dns = 0;
+    mynam.naml$l_long_defname_size = 0;
+    sts = sys$parse(&myfab,0,0);  /* Free search context */
+    if (out) Safefree(out);
+    if (tmpfspec != NULL)
+	Safefree(tmpfspec);
+    if (vmsfspec != NULL)
+	Safefree(vmsfspec);
+    Safefree(esa);
+    Safefree(esal);
+    set_vaxc_errno(retsts);
+    if      (retsts == RMS$_PRV) set_errno(EACCES);
+    else if (retsts == RMS$_DEV) set_errno(ENODEV);
+    else if (retsts == RMS$_DIR) set_errno(ENOTDIR);
+    else                         set_errno(EVMSERR);
+    return NULL;
+  }
+  retsts = sys$search(&myfab,0,0);
+  if (!(retsts & STS$K_SUCCESS) && retsts != RMS$_FNF) {
+    mynam.naml$b_nop |= NAM$M_SYNCHK;
+    mynam.naml$l_rlf = NULL;
+    myfab.fab$b_dns = 0;
+    mynam.naml$l_long_defname_size = 0;
+    sts = sys$parse(&myfab,0,0);  /* Free search context */
+    if (out) Safefree(out);
+    if (tmpfspec != NULL)
+	Safefree(tmpfspec);
+    if (vmsfspec != NULL)
+	Safefree(vmsfspec);
+    Safefree(esa);
+    Safefree(esal);
+    set_vaxc_errno(retsts);
+    if      (retsts == RMS$_PRV) set_errno(EACCES);
+    else                         set_errno(EVMSERR);
+    return NULL;
+  }
+
+  /* If the input filespec contained any lowercase characters,
+   * downcase the result for compatibility with Unix-minded code. */
+  expanded:
+  if (!decc_efs_case_preserve) {
+    for (out = mynam.naml$l_long_filename; *out; out++)
+      if (islower(*out)) { haslower = 1; break; }
+  }
+
+   /* Is a long or a short name expected */
+  /*------------------------------------*/
+  if ((opts & PERL_RMSEXPAND_M_LONG) != 0) {
+    if (mynam.naml$l_long_result_size) {
+	out = outbuf;
+	speclen = mynam.naml$l_long_result_size;
+    }
+    else {
+	out = esal; /* Not esa */
+	speclen = mynam.naml$l_long_expand_size;
+    }
+  }
+  else {
+    if (mynam.naml$b_rsl) {
+	out = outbuf;
+	speclen = mynam.naml$b_rsl;
+    }
+    else {
+	out = esa; /* Not esal */
+	speclen = mynam.naml$b_esl;
+    }
+  }
+  /* Trim off null fields added by $PARSE
+   * If type > 1 char, must have been specified in original or default spec
+   * (not true for version; $SEARCH may have added version of existing file).
+   */
+  trimver  = !(mynam.naml$l_fnb & NAM$M_EXP_VER);
+  if ((opts & PERL_RMSEXPAND_M_LONG) != 0) {
+    trimtype = !(mynam.naml$l_fnb & NAM$M_EXP_TYPE) &&
+             (mynam.naml$l_long_ver - mynam.naml$l_long_type == 1);
+  }
+  else {
+    trimtype = !(mynam.naml$l_fnb & NAM$M_EXP_TYPE) &&
+             (mynam.naml$l_ver - mynam.naml$l_type == 1);
+  }
+  if (trimver || trimtype) {
+    if (defspec && *defspec) {
+      char *defesal = NULL;
+      Newx(defesal, NAML$C_MAXRSS + 1, char);
+      if (defesal != NULL) {
+	struct FAB deffab = cc$rms_fab;
+	struct NAML defnam = cc$rms_naml;
+     
+	deffab.fab$l_naml = &defnam;
+
+	deffab.fab$l_fna = (char *) - 1; /* Cast ok */ 
+	deffab.fab$b_fns = 0;
+	defnam.naml$l_long_filename = (char *)defspec; /* Cast ok */ 
+	defnam.naml$l_long_filename_size = mynam.naml$l_long_defname_size;
+	defnam.naml$l_esa = NULL; 
+	defnam.naml$b_ess = 0;
+	defnam.naml$l_long_expand = defesal;
+	defnam.naml$l_long_expand_alloc = VMS_MAXRSS - 1;
+	defnam.naml$b_nop = NAM$M_SYNCHK;
+#ifdef NAM$M_NO_SHORT_UPCASE
+	if (decc_efs_case_preserve)
+	  defnam.naml$b_nop |= NAM$M_NO_SHORT_UPCASE;
+#endif
+	if (sys$parse(&deffab,0,0) & STS$K_SUCCESS) {
+	  if (trimver) {
+	     trimver  = !(defnam.naml$l_fnb & NAM$M_EXP_VER);
+	  }
+	  if (trimtype) {
+	    trimtype = !(defnam.naml$l_fnb & NAM$M_EXP_TYPE); 
+	  }
+	}
+	Safefree(defesal);
+      }
+    }
+    if (trimver) {
+      if ((opts & PERL_RMSEXPAND_M_LONG) != 0) {
+	if (*mynam.naml$l_long_ver != '\"')
+	  speclen = mynam.naml$l_long_ver - out;
+      }
+      else {
+	if (*mynam.naml$l_ver != '\"')
+	  speclen = mynam.naml$l_ver - out;
+      }
+    }
+    if (trimtype) {
+      /* If we didn't already trim version, copy down */
+      if ((opts & PERL_RMSEXPAND_M_LONG) != 0) {
+	if (speclen > mynam.naml$l_long_ver - out)
+	  memmove
+	   (mynam.naml$l_long_type,
+	    mynam.naml$l_long_ver,
+	    speclen - (mynam.naml$l_long_ver - out));
+	  speclen -= mynam.naml$l_long_ver - mynam.naml$l_long_type;
+      }
+      else {
+	if (speclen > mynam.naml$l_ver - out)
+	  memmove
+	   (mynam.naml$l_type,
+	    mynam.naml$l_ver,
+	    speclen - (mynam.naml$l_ver - out));
+	  speclen -= mynam.naml$l_ver - mynam.naml$l_type;
+      }
+    }
+  }
+
+   /* Done with these copies of the input files */
+  /*-------------------------------------------*/
+  if (vmsfspec != NULL)
+	Safefree(vmsfspec);
+  if (tmpfspec != NULL)
+	Safefree(tmpfspec);
+
+  /* If we just had a directory spec on input, $PARSE "helpfully"
+   * adds an empty name and type for us */
+  if ((opts & PERL_RMSEXPAND_M_LONG) != 0) {
+    if (mynam.naml$l_long_name == mynam.naml$l_long_type &&
+	mynam.naml$l_long_ver  == mynam.naml$l_long_type + 1 &&
+	!(mynam.naml$l_fnb & NAM$M_EXP_NAME))
+      speclen = mynam.naml$l_long_name - out;
+  }
+  else {
+    if (mynam.naml$l_name == mynam.naml$l_type &&
+	mynam.naml$l_ver  == mynam.naml$l_type + 1 &&
+	!(mynam.naml$l_fnb & NAM$M_EXP_NAME))
+      speclen = mynam.naml$l_name - out;
+  }
+
+  /* Posix format specifications must have matching quotes */
+  if (decc_posix_compliant_pathnames && (out[0] == '\"')) {
+    if ((speclen > 1) && (out[speclen-1] != '\"')) {
+      out[speclen] = '\"';
+      speclen++;
+    }
+  }
+  out[speclen] = '\0';
+  if (haslower && !decc_efs_case_preserve) __mystrtolower(out);
+
+  /* Have we been working with an expanded, but not resultant, spec? */
+  /* Also, convert back to Unix syntax if necessary. */
+
+  if (!mynam.naml$l_long_result_size) {
+    if (isunix) {
+      if (do_tounixspec(esa,outbuf,0) == NULL) {
+	Safefree(esal);
+	Safefree(esa);
+	return NULL;
+      }
+    }
+    else strcpy(outbuf,esa);
+  }
+  else if (isunix) {
+    Newx(tmpfspec, VMS_MAXRSS, char);
+    if (do_tounixspec(outbuf,tmpfspec,0) == NULL) {
+	Safefree(esa);
+	Safefree(esal);
+	Safefree(tmpfspec);
+	return NULL;
+    }
+    strcpy(outbuf,tmpfspec);
+    Safefree(tmpfspec);
+  }
+
+  mynam.naml$b_nop |= NAM$M_SYNCHK;
+  mynam.naml$l_rlf = NULL;
+  mynam.naml$l_rsa = NULL;
+  mynam.naml$b_rss = 0;
+  mynam.naml$l_long_result = NULL;
+  mynam.naml$l_long_result_size = 0;
+  myfab.fab$b_dns = 0;
+  mynam.naml$l_long_defname_size = 0;
+  sts = sys$parse(&myfab,0,0);  /* Free search context */
+  Safefree(esa);
+  Safefree(esal);
+  return outbuf;
+}
+#endif
 /*}}}*/
 /* External entry points */
 char *Perl_rmsexpand(pTHX_ const char *spec, char *buf, const char *def, unsigned opt)
@@ -4204,7 +4540,7 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts)
         if (!cp1) cp1 = strchr(esa,'>');
         if (cp1) {  /* Should always be true */
           dirnam.nam$b_esl -= cp1 - esa - 1;
-          memcpy(esa,cp1 + 1,dirnam.nam$b_esl);
+          memmove(esa,cp1 + 1,dirnam.nam$b_esl);
         }
       }
       if (dirnam.nam$l_fnb & NAM$M_EXP_TYPE) {  /* Was type specified? */
@@ -4306,11 +4642,11 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts)
             if (*cp1 == '.') *cp1 = ']';
             else {
               memmove(cp1+8,cp1+1,retspec+dirlen-cp1);
-              memcpy(cp1+1,"000000]",7);
+              memmove(cp1+1,"000000]",7);
             }
           }
           else {
-            memcpy(retspec+dirlen,cp1+2,retlen-dirlen);
+            memmove(retspec+dirlen,cp1+2,retlen-dirlen);
             retspec[retlen] = '\0';
             /* Convert last '.' to ']' */
             cp1 = retspec+retlen-1;
@@ -4325,7 +4661,7 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts)
             if (*cp1 == '.') *cp1 = ']';
             else {
               memmove(cp1+8,cp1+1,retspec+dirlen-cp1);
-              memcpy(cp1+1,"000000]",7);
+              memmove(cp1+1,"000000]",7);
             }
           }
         }
@@ -6753,7 +7089,7 @@ Perl_trim_unixpath(pTHX_ char *fspec, const char *wildspec, int opts)
       segdirs = dirs - totells;  /* Min # of dirs we must have left */
       for (front = cp2+1; *front; front++) if (*front == '/') segdirs--;
       if (*cp1 == '\0' && *cp2 == '/' && segdirs < 1) {
-        memcpy(fspec,cp2+1,end - cp2);
+        memmove(fspec,cp2+1,end - cp2);
         return 1;
       }
     }
@@ -6827,13 +7163,13 @@ Perl_trim_unixpath(pTHX_ char *fspec, const char *wildspec, int opts)
         segdirs = dirs - totells;  /* Min # of dirs we must have left */
         for (st = cp2+1; *st; st++) if (*st == '/') segdirs--;
         if (*cp1 == '\0' && *cp2 == '/') {
-          memcpy(fspec,cp2+1,end - cp2);
+          memmove(fspec,cp2+1,end - cp2);
           return 1;
         }
         /* Nope -- stick with lcfront from above and keep going. */
       }
     }
-    memcpy(fspec,base + (lcfront - lcres), lcend - lcfront + 1);
+    memmove(fspec,base + (lcfront - lcres), lcend - lcfront + 1);
     return 1;
     ellipsis = nextell;
   }
