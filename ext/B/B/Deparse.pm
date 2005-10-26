@@ -19,7 +19,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LOCKED CVf_LVALUE CVf_ASSERTION
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = 0.71;
+$VERSION = 0.72;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -3369,14 +3369,16 @@ sub re_unback {
 sub balanced_delim {
     my($str) = @_;
     my @str = split //, $str;
-    my($ar, $open, $close, $fail, $c, $cnt);
+    my($ar, $open, $close, $fail, $c, $cnt, $last_bs);
     for $ar (['[',']'], ['(',')'], ['<','>'], ['{','}']) {
 	($open, $close) = @$ar;
-	$fail = 0; $cnt = 0;
+	$fail = 0; $cnt = 0; $last_bs = 0;
 	for $c (@str) {
 	    if ($c eq $open) {
+		$fail = 1 if $last_bs;
 		$cnt++;
 	    } elsif ($c eq $close) {
+		$fail = 1 if $last_bs;
 		$cnt--;
 		if ($cnt < 0) {
 		    # qq()() isn't ")("
@@ -3384,6 +3386,7 @@ sub balanced_delim {
 		    last;
 		}
 	    }
+	    $last_bs = $c eq '\\';
 	}
 	$fail = 1 if $cnt != 0;
 	return ($open, "$open$str$close") if not $fail;
