@@ -19,7 +19,7 @@ typedef FILE * InputStream;
 #endif
 
 
-static char *svclassnames[] = {
+static const char* const svclassnames[] = {
     "B::NULL",
     "B::IV",
     "B::NV",
@@ -58,7 +58,7 @@ typedef enum {
     OPc_COP	/* 11 */
 } opclass;
 
-static char *opclassnames[] = {
+static const char* const opclassnames[] = {
     "B::NULL",
     "B::OP",
     "B::UNOP",
@@ -73,7 +73,7 @@ static char *opclassnames[] = {
     "B::COP"	
 };
 
-static size_t opsizes[] = {
+static const size_t opsizes[] = {
     0,	
     sizeof(OP),
     sizeof(UNOP),
@@ -211,13 +211,13 @@ cc_opclass(pTHX_ const OP *o)
 static char *
 cc_opclassname(pTHX_ const OP *o)
 {
-    return opclassnames[cc_opclass(aTHX_ o)];
+    return (char *)opclassnames[cc_opclass(aTHX_ o)];
 }
 
 static SV *
 make_sv_object(pTHX_ SV *arg, SV *sv)
 {
-    char *type = 0;
+    const char *type = 0;
     IV iv;
     dMY_CXT;
     
@@ -730,7 +730,7 @@ threadsv_names()
 
 #define OP_next(o)	o->op_next
 #define OP_sibling(o)	o->op_sibling
-#define OP_desc(o)	PL_op_desc[o->op_type]
+#define OP_desc(o)	(char *)PL_op_desc[o->op_type]
 #define OP_targ(o)	o->op_targ
 #define OP_type(o)	o->op_type
 #if PERL_VERSION >= 9
@@ -765,7 +765,7 @@ char *
 OP_name(o)
 	B::OP		o
     CODE:
-	RETVAL = PL_op_name[o->op_type];
+	RETVAL = (char *)PL_op_name[o->op_type];
     OUTPUT:
 	RETVAL
 
@@ -1583,11 +1583,16 @@ SSize_t
 AvMAX(av)
 	B::AV	av
 
+#if PERL_VERSION < 9
+			   
+
 #define AvOFF(av) ((XPVAV*)SvANY(av))->xof_off
 
 IV
 AvOFF(av)
 	B::AV	av
+
+#endif
 
 void
 AvARRAY(av)
@@ -1610,12 +1615,15 @@ AvARRAYelt(av, idx)
 	else
 	    XPUSHs(make_sv_object(aTHX_ sv_newmortal(), NULL));
 
+#if PERL_VERSION < 9
 				   
 MODULE = B	PACKAGE = B::AV
 
 U8
 AvFLAGS(av)
 	B::AV	av
+
+#endif
 
 MODULE = B	PACKAGE = B::FM		PREFIX = Fm
 
@@ -1715,9 +1723,13 @@ char *
 HvNAME(hv)
 	B::HV	hv
 
+#if PERL_VERSION < 9
+
 B::PMOP
 HvPMROOT(hv)
 	B::HV	hv
+
+#endif
 
 void
 HvARRAY(hv)

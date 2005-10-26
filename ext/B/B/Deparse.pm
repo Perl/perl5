@@ -3387,14 +3387,16 @@ sub re_unback {
 sub balanced_delim {
     my($str) = @_;
     my @str = split //, $str;
-    my($ar, $open, $close, $fail, $c, $cnt);
+    my($ar, $open, $close, $fail, $c, $cnt, $last_bs);
     for $ar (['[',']'], ['(',')'], ['<','>'], ['{','}']) {
 	($open, $close) = @$ar;
-	$fail = 0; $cnt = 0;
+	$fail = 0; $cnt = 0; $last_bs = 0;
 	for $c (@str) {
 	    if ($c eq $open) {
+		$fail = 1 if $last_bs;
 		$cnt++;
 	    } elsif ($c eq $close) {
+		$fail = 1 if $last_bs;
 		$cnt--;
 		if ($cnt < 0) {
 		    # qq()() isn't ")("
@@ -3402,6 +3404,7 @@ sub balanced_delim {
 		    last;
 		}
 	    }
+	    $last_bs = $c eq '\\';
 	}
 	$fail = 1 if $cnt != 0;
 	return ($open, "$open$str$close") if not $fail;
