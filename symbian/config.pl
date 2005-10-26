@@ -384,6 +384,7 @@ __EOF__
 	push @LIB, <<__EOF__;
 LIBRARY		eikctl.lib
 LIBRARY		eikcoctl.lib
+LIBRARY		eikdlg.lib
 LIBRARY		ckndlg.lib
 __EOF__
     }
@@ -464,6 +465,8 @@ build_${WIN}:	abld.bat ${WIN}_perl.mf ${WIN}_miniperl.mf ${WIN}_${VERSION}.mf pe
 
 build_vc6:	abld.bat ${WIN}_perl.mf ${WIN}_miniperl.mf ${WIN}_${VERSION}.mf vc6.mf perldll_wins
 
+build_vc7:	abld.bat ${WIN}_perl.mf ${WIN}_miniperl.mf ${WIN}_${VERSION}.mf vc7.mf perldll_wins
+
 build_cw:	abld.bat ${WIN}_perl.mf ${WIN}_miniperl.mf ${WIN}_${VERSION}.mf cw.mf perldll_winscw
 
 build_arm:	abld.bat perl_arm miniperl_arm arm_${VERSION}.mf perldll_arm
@@ -511,9 +514,11 @@ rerename_makedef:
 abld.bat abld: bld.inf
 	bldmake bldfiles
 
-makefiles: win.mf arm.mf vc6.mf cw.mf
+makefiles: win.mf arm.mf vc6 vc7.mf cw.mf
 
 vc6:	win.mf vc6.mf build_vc6
+
+vc7:	win.mf vc7.mf build_vc7
 
 cw:	win.mf cw.mf build_cw
 
@@ -554,6 +559,10 @@ win.mf:  vc6.mf cw.mf
 vc6.mf: abld.bat symbian\\config.pl
 	abld makefile vc6
 	echo > vc6.mf
+
+vc7.mf: abld.bat symbian\\config.pl
+	abld makefile vc7
+	echo > vc7.mf
 
 cw.mf: abld.bat symbian\\config.pl
 	abld makefile cw_ide
@@ -674,11 +683,18 @@ perl${VERSION}dist.zip perldist.zip: \$(ALLSIS) \$(SDKZIP) \$(ETC)
 
 perlapp:	sdkinstall perlapp_${WIN} perlapp_arm
 
+perlapp_arm_minimal sisify_hex perlappmin.hex perlrscmin.hex:	sdkinstall config.h
+	cd symbian; make perlapp_arm USERDEFS=-DCreatePerlAppMinimal
+	perl symbian\\hexdump.pl
+
 perlapp_win perlapp_${WIN}: config.h
 	cd symbian; make perlapp_${WIN}
 
 perlapp_arm: config.h
 	cd symbian; make perlapp_arm
+
+perlapp_arm_clean:
+	cd symbian; make clean
 
 perlapp_demo_extract:
 	cd symbian; make perlapp_demo_extract
@@ -730,7 +746,8 @@ clean:	clean_${WIN} clean_arm rerename_makedef
 	-del /f symbian\\abld.bat symbian\\*.sis symbian\\*.zip
 	-del /f symbian\\perl5*.pkg symbian\\miniperl.pkg
 	-del /f symbian\\PerlApp.rss
-	-del arm_*.mf ${WIN}_*.mf vc6*.mf cw*.mf
+	-del arm_*.mf ${WIN}_*.mf vc*.mf cw*.mf
+	-del perlappmin.hex perlrscmin.hex
 	-perl symbian\\xsbuild.pl \$(XSBOPT) --clean \$(EXT)
 	-rmdir /s /q perl${VERSION}_Data
 	-cd symbian; make clean
@@ -780,6 +797,7 @@ perlapp_arm: ..\\config.h PerlApp.h PerlApp.cpp
 win.mf:
 	bldmake bldfiles
 	abld makefile vc6
+	abld makefile vc7
 	abld makefile cw_ide
 
 perlapp_demo_extract:
@@ -794,6 +812,8 @@ clean:
 	-perl demo_pl cleanup
 	-del /f perlapp.sis
 	-del /f b.pl
+	abld clean $WIN
+	abld clean thumb
 
 distclean: clean
 	-del /f *.cwlink *.resources *.pref

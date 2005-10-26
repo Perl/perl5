@@ -17,32 +17,37 @@
 # include <eikdoc.h>
 # include <eikbctrl.h>
 # include <eikgted.h>
+# include <eikdialg.h>
 #endif /* #ifdef __SERIES60__ */
 
 #include <coecntrl.h>
 #include <f32file.h>
 
 /* The source code can be compiled into "PerlApp" which is the simple
- * launchpad application/demonstrator, or into "PerlMin", which is the
- * minimal Perl launchpad application.  Define the cpp symbols
- * PerlMin (a boolean), PerlMinUid (the Symbian application uid in
- * the 0x... format), and PerlMinName (a C wide string, with the L prefix)
- * to compile as "PerlMin". */
+ * launchpad application/demonstrator, or into "PerlAppMinimal", which
+ * is the minimal Perl launchpad application.  Define the cpp symbols
+ * CreatePerlAppMinimal (a boolean), PerlAppMinimalUid (the Symbian
+ * application uid in the 0x... format), and PerlAppMinimalName (a C
+ * wide string, with the L prefix) to compile as "PerlAppMinimal". */
 
-#define PerlMinSample
+// #define CreatePerlAppMinimal
 
-#ifdef PerlMinSample
-# define PerlMin
-# define PerlMinUid 0x102015F6
-# define PerlMinName L"PerlMin"
+#ifdef CreatePerlAppMinimal
+# define PerlAppMinimal
+# ifndef PerlAppMinimalUid // PerlApp is ...F6, PerlRecog is ...F7
+#  define PerlAppMinimalUid 0x102015F8
+# endif
+# ifndef PerlAppMinimalName
+#  define PerlAppMinimalName L"PerlAppMinimal"
+# endif
 #endif
 
-#ifdef PerlMin
-# ifndef PerlMinUid
-#   error PerlMin defined but PerlMinUid undefined
+#ifdef PerlAppMinimal
+# ifndef PerlAppMinimalUid
+#   error PerlAppMinimal defined but PerlAppMinimalUid undefined
 # endif
-# ifndef PerlMinName
-#  error PerlMin defined but PerlMinName undefined
+# ifndef PerlAppMinimalName
+#  error PerlAppMinimal defined but PerlAppMinimalName undefined
 # endif
 #endif
 
@@ -66,9 +71,9 @@ class CPerlAppDocument : public CMyDocument
 {
   public:
     CPerlAppDocument(CEikApplication& aApp):CMyDocument(aApp) {;}
-#ifndef PerlMin
+#ifndef PerlAppMinimal
     CFileStore* OpenFileL(TBool aDoOpen, const TDesC& aFilename, RFs& aFs);
-#endif // #ifndef PerlMin
+#endif // #ifndef PerlAppMinimal
   private: // from CEikDocument
     CEikAppUi* CreateAppUiL();
 };
@@ -92,11 +97,11 @@ class CPerlAppUi : public CMyAppUi
      ~CPerlAppUi();
     TBool ProcessCommandParametersL(TApaCommand aCommand, TFileName& aDocumentName, const TDesC8& aTail);
     void HandleCommandL(TInt aCommand);
-#ifndef PerlMin
+#ifndef PerlAppMinimal
     void OpenFileL(const TDesC& aFileName);
     void InstallOrRunL(const TFileName& aFileName);
     void SetFs(const RFs& aFs);
-#endif // #ifndef PerlMin
+#endif // #ifndef PerlAppMinimal
     TBuf<KPerlAppOneLinerSize> iOneLiner; // Perl source code to evaluate.
     CPerlAppView* iAppView;
   private:
@@ -116,5 +121,24 @@ class CPerlAppView : public CMyAppView
   private:
     void ConstructL(const TRect& aRect);
 };
+
+#ifdef __SERIES80__
+
+class CPerlAppTextQueryDialog : public CEikDialog
+{
+  public:
+    CPerlAppTextQueryDialog(HBufC*& aBuffer);
+    /* TODO: OfferKeyEventL() so that newline can be seen as 'OK'. */
+    HBufC*& iData;
+    TPtrC iTitle;  // used in S80 but not in S60
+    TPtrC iPrompt; // used in S60 and S80
+    TInt iMaxLength;
+  protected:
+    void PreLayoutDynInitL();
+  private:
+    TBool OkToExitL(TInt aKeycode);
+};
+
+#endif /* #ifdef __SERIES80__ */
 
 #endif // __PerlApp_h__

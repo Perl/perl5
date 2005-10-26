@@ -72,3 +72,22 @@ RESOURCE MENU_PANE r_Perl_menu
         };
 }
 
+
+RESOURCE DIALOG r_Perl_oneliner_dialog
+{
+    title = "Title";
+    buttons = R_EIK_BUTTONS_CANCEL_OK;
+    flags = EEikDialogFlagWait;
+    items = {
+        DLG_LINE {
+            type = EEikCtEdwin;
+	    prompt = "Prompt";
+            id = EPerlAppTextQueryInputField;
+            control = EDWIN {
+                width = 10;
+                maxlength = 128;
+            };
+        }
+    };
+}
+

@@ -2644,6 +2644,7 @@ symbian/config.sh		Configuration data for Symbian
 symbian/cwd.pl			Helper code for config.pl
 symbian/demo_pl			"Archive" of demo code
 symbian/find_writeable_data.pl	Development utility
+symbian/hexdump.pl		Helper for sisify.pl updating
 symbian/install.cfg		Installation instructions
 symbian/makesis.pl		Installation file creator
 symbian/PerlAppAif.rss		Symbian sample app code

@@ -129,9 +129,9 @@ for my $target (@target) {
         "perl${VERSION}dll" => $UID + 0,
         "perl${VERSION}ext" => $UID + 1,
         "perl${VERSION}lib" => $UID + 2,
-
-        # app = + 3
-        # rec = + 4
+        "perlapp"           => $UID + 3,
+        "perlrecog"         => $UID + 4,
+        "perlappmin"        => $UID + 5,
     );
 
     die "$0: target has no UID\n" unless defined $UID{$target};
