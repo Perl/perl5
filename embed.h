@@ -632,8 +632,10 @@
 #define require_pv		Perl_require_pv
 #define pack_cat		Perl_pack_cat
 #define packlist		Perl_packlist
+#ifdef PERL_USES_PL_PIDSTATUS
 #ifdef PERL_CORE
 #define pidgone			Perl_pidgone
+#endif
 #endif
 #define pmflag			Perl_pmflag
 #ifdef PERL_CORE
@@ -2628,8 +2630,10 @@
 #define require_pv(a)		Perl_require_pv(aTHX_ a)
 #define pack_cat(a,b,c,d,e,f,g)	Perl_pack_cat(aTHX_ a,b,c,d,e,f,g)
 #define packlist(a,b,c,d,e)	Perl_packlist(aTHX_ a,b,c,d,e)
+#ifdef PERL_USES_PL_PIDSTATUS
 #ifdef PERL_CORE
 #define pidgone(a,b)		Perl_pidgone(aTHX_ a,b)
+#endif
 #endif
 #define pmflag(a,b)		Perl_pmflag(aTHX_ a,b)
 #ifdef PERL_CORE

@@ -1717,7 +1717,9 @@ PERL_CALLCONV void	Perl_packlist(pTHX_ SV *cat, const char *pat, const char *pat
 			__attribute__nonnull__(pTHX_4)
 			__attribute__nonnull__(pTHX_5);
 
+#ifdef PERL_USES_PL_PIDSTATUS
 PERL_CALLCONV void	Perl_pidgone(pTHX_ Pid_t pid, int status);
+#endif
 PERL_CALLCONV void	Perl_pmflag(pTHX_ U32* pmfl, int ch)
 			__attribute__nonnull__(pTHX_1);
 
