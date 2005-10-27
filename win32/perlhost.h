@@ -1719,7 +1719,9 @@ win32_start_child(LPVOID arg)
 	sv_setiv(sv, -(IV)w32_pseudo_id);
 	SvREADONLY_on(sv);
     }
+#ifdef PERL_USES_PL_PIDSTATUS    
     hv_clear(PL_pidstatus);
+#endif    
 
     /* push a zero on the stack (we are the child) */
     {
