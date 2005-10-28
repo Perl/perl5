@@ -1515,15 +1515,6 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 
 }
 
-/* ref() is now a macro using Perl_doref;
- * this version provided for binary compatibility only.
- */
-OP *
-Perl_ref(pTHX_ OP *o, I32 type)
-{
-    return doref(o, type, TRUE);
-}
-
 STATIC OP *
 S_dup_attrlist(pTHX_ OP *o)
 {

@@ -2238,6 +2238,7 @@ Makefile.SH			A script that generates Makefile
 malloc.c			A version of malloc you might not want
 malloc_ctl.h			A version of malloc you might not want
 MANIFEST			This list of files
+mathoms.c			A home for binary-compatible code artifacts
 META.yml			Distribution meta-data in YAML
 mg.c				Magic code
 mg.h				Magic header

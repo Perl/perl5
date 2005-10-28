@@ -2069,16 +2069,6 @@ S_sv_2iuv_non_preserve(pTHX_ register SV *sv, I32 numtype)
 }
 #endif /* !NV_PRESERVES_UV*/
 
-/* sv_2iv() is now a macro using Perl_sv_2iv_flags();
- * this function provided for binary compatibility only
- */
-
-IV
-Perl_sv_2iv(pTHX_ register SV *sv)
-{
-    return sv_2iv_flags(sv, SV_GMAGIC);
-}
-
 /*
 =for apidoc sv_2iv_flags
 
@@ -2975,16 +2965,6 @@ S_uiv_2buf(char *buf, IV iv, UV uv, int is_uv, char **peob)
     return ptr;
 }
 
-/* sv_2pv() is now a macro using Perl_sv_2pv_flags();
- * this function provided for binary compatibility only
- */
-
-char *
-Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
-{
-    return sv_2pv_flags(sv, lp, SV_GMAGIC);
-}
-
 /*
 =for apidoc sv_2pv_flags
 
@@ -3409,22 +3389,23 @@ Perl_sv_2pvutf8_nolen(pTHX_ register SV *sv)
 }
 
 /*
-=for apidoc sv_2pvutf8
-
-Return a pointer to the UTF-8-encoded representation of the SV, and set *lp
-to its length.  May cause the SV to be upgraded to UTF-8 as a side-effect.
-
-Usually accessed via the C<SvPVutf8> macro.
-
-=cut
-*/
+ * =for apidoc sv_2pvutf8
+ *
+ * Return a pointer to the UTF-8-encoded representation of the SV, and set *lp
+ * to its length.  May cause the SV to be upgraded to UTF-8 as a side-effect.
+ *
+ * Usually accessed via the C<SvPVutf8> macro.
+ *
+ * =cut
+ * */
 
 char *
 Perl_sv_2pvutf8(pTHX_ register SV *sv, STRLEN *lp)
 {
-    sv_utf8_upgrade(sv);
-    return lp ? SvPV(sv,*lp) : SvPV_nolen(sv);
+        sv_utf8_upgrade(sv);
+	    return lp ? SvPV(sv,*lp) : SvPV_nolen(sv);
 }
+
 
 /*
 =for apidoc sv_2bool
@@ -3672,16 +3653,6 @@ Perl_sv_utf8_decode(pTHX_ register SV *sv)
         }
     }
     return TRUE;
-}
-
-/* sv_setsv() is now a macro using Perl_sv_setsv_flags();
- * this function provided for binary compatibility only
- */
-
-void
-Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
-{
-    sv_setsv_flags(dstr, sstr, SV_GMAGIC);
 }
 
 /*
@@ -4676,16 +4647,6 @@ Perl_sv_chop(pTHX_ register SV *sv, register const char *ptr)
     SvIV_set(sv, SvIVX(sv) + delta);
 }
 
-/* sv_catpvn() is now a macro using Perl_sv_catpvn_flags();
- * this function provided for binary compatibility only
- */
-
-void
-Perl_sv_catpvn(pTHX_ SV *dsv, const char* sstr, STRLEN slen)
-{
-    sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC);
-}
-
 /*
 =for apidoc sv_catpvn
 
@@ -4735,16 +4696,6 @@ Perl_sv_catpvn_mg(pTHX_ register SV *sv, register const char *ptr, register STRL
 {
     sv_catpvn(sv,ptr,len);
     SvSETMAGIC(sv);
-}
-
-/* sv_catsv() is now a macro using Perl_sv_catsv_flags();
- * this function provided for binary compatibility only
- */
-
-void
-Perl_sv_catsv(pTHX_ SV *dstr, register SV *sstr)
-{
-    sv_catsv_flags(dstr, sstr, SV_GMAGIC);
 }
 
 /*
@@ -7821,19 +7772,6 @@ Perl_sv_nv(pTHX_ register SV *sv)
     return sv_2nv(sv);
 }
 
-/* sv_pv() is now a macro using SvPV_nolen();
- * this function provided for binary compatibility only
- */
-
-char *
-Perl_sv_pv(pTHX_ SV *sv)
-{
-    if (SvPOK(sv))
-	return SvPVX(sv);
-
-    return sv_2pv(sv, 0);
-}
-
 /*
 =for apidoc sv_pv
 
@@ -7866,16 +7804,6 @@ Perl_sv_pvn_nomg(pTHX_ register SV *sv, STRLEN *lp)
 	return SvPVX(sv);
     }
     return sv_2pv_flags(sv, lp, 0);
-}
-
-/* sv_pvn_force() is now a macro using Perl_sv_pvn_force_flags();
- * this function provided for binary compatibility only
- */
-
-char *
-Perl_sv_pvn_force(pTHX_ SV *sv, STRLEN *lp)
-{
-    return sv_pvn_force_flags(sv, lp, SV_GMAGIC);
 }
 
 /*
@@ -7946,17 +7874,6 @@ Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
     return SvPVX_mutable(sv);
 }
 
-/* sv_pvbyte () is now a macro using Perl_sv_2pv_flags();
- * this function provided for binary compatibility only
- */
-
-char *
-Perl_sv_pvbyte(pTHX_ SV *sv)
-{
-    sv_utf8_downgrade(sv,0);
-    return sv_pv(sv);
-}
-
 /*
 =for apidoc sv_pvbyte
 
@@ -7995,17 +7912,6 @@ Perl_sv_pvbyten_force(pTHX_ SV *sv, STRLEN *lp)
     sv_utf8_downgrade(sv,0);
     *lp = SvCUR(sv);
     return SvPVX(sv);
-}
-
-/* sv_pvutf8 () is now a macro using Perl_sv_2pv_flags();
- * this function provided for binary compatibility only
- */
-
-char *
-Perl_sv_pvutf8(pTHX_ SV *sv)
-{
-    sv_utf8_upgrade(sv);
-    return sv_pv(sv);
 }
 
 /*

@@ -801,6 +801,7 @@ $(DLLDIR)\globals.obj \
 $(DLLDIR)\gv.obj \
 $(DLLDIR)\hv.obj \
 $(DLLDIR)\locale.obj \
+$(DLLDIR)\mathoms.obj \
 $(DLLDIR)\mg.obj \
 $(DLLDIR)\numeric.obj \
 $(DLLDIR)\op.obj \
