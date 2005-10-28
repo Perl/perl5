@@ -281,7 +281,7 @@ package Maintainers;
 
 	'IO' =>
 		{
-		'MAINTAINER'	=> 'p5p', # Not gbarr.
+		'MAINTAINER'	=> 'gbarr',
 		'FILES'		=> q[ext/IO],
 		'CPAN'		=> 0,
 		},
