@@ -283,7 +283,7 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'gbarr',
 		'FILES'		=> q[ext/IO],
-		'CPAN'		=> 0,
+		'CPAN'		=> 1,
 		},
 
 	'IO::Zlib' =>
