@@ -9642,8 +9642,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		   aka precis is 0  */
 		if ( c == 'g' && precis) {
 		    Gconvert((NV)nv, (int)precis, 0, PL_efloatbuf);
-		    if (*PL_efloatbuf)	/* May return an empty string for digits==0 */
+		    /* May return an empty string for digits==0 */
+		    if (*PL_efloatbuf) {
+			elen = strlen(PL_efloatbuf);
 			goto float_converted;
+		    }
 		} else if ( c == 'f' && !precis) {
 		    if ((eptr = F0convert(nv, ebuf + sizeof ebuf, &elen)))
 			break;
@@ -9687,17 +9690,15 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		 * where printf() taints but print($float) doesn't.
 		 * --jhi */
 #if defined(HAS_LONG_DOUBLE)
-		if (intsize == 'q')
-		    (void)sprintf(PL_efloatbuf, ptr, nv);
-		else
-		    (void)sprintf(PL_efloatbuf, ptr, (double)nv);
+		elen = ((intsize == 'q')
+			? my_sprintf(PL_efloatbuf, ptr, nv)
+			: my_sprintf(PL_efloatbuf, ptr, (double)nv));
 #else
-		(void)sprintf(PL_efloatbuf, ptr, nv);
+		elen = my_sprintf(PL_efloatbuf, ptr, nv);
 #endif
 	    }
 	float_converted:
 	    eptr = PL_efloatbuf;
-	    elen = strlen(PL_efloatbuf);
 	    break;
 
 	    /* SPECIAL */
