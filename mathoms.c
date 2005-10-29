@@ -16,8 +16,8 @@
 
 /* 
  * This file contains mathoms, various binary artifacts from previous
- * versions of Perl.  For binary compatibility reasons, though, we
- * cannot completely remove them from the core code.  
+ * versions of Perl.  For binary or source compatibility reasons, though,
+ * we cannot completely remove them from the core code.  
  *
  * SMP - Oct. 24, 2005
  *
@@ -290,6 +290,20 @@ document
 #endif
 }
 #endif /* sfio */
+
+/* compatibility with versions <= 5.003. */
+void
+Perl_gv_fullname(pTHX_ SV *sv, const GV *gv)
+{
+    gv_fullname3(sv, gv, sv == (const SV*)gv ? "*" : "");
+}
+
+/* compatibility with versions <= 5.003. */
+void
+Perl_gv_efullname(pTHX_ SV *sv, const GV *gv)
+{
+    gv_efullname3(sv, gv, sv == (const SV*)gv ? "*" : "");
+}
 
 /*
  * Local variables:
