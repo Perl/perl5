@@ -675,30 +675,22 @@ S_varname(pTHX_ GV *gv, const char gvtype, PADOFFSET targ,
 
     SV * const name = sv_newmortal();
     if (gv) {
+	char buffer[2];
+	buffer[0] = gvtype;
+	buffer[1] = 0;
 
-	/* simulate gv_fullname4(), but add literal '^' for $^FOO names
-	 * XXX get rid of all this if gv_fullnameX() ever supports this
-	 * directly */
+	/* as gv_fullname4(), but add literal '^' for $^FOO names  */
 
-	const char *p;
-	HV * const hv = GvSTASH(gv);
-	if (!hv)
-	    p = "???";
-	else if (!(p=HvNAME_get(hv)))
-	    p = "__ANON__";
-	if (strEQ(p, "main"))
-	    sv_setpvn(name, &gvtype, 1);
-	else
-	    Perl_sv_setpvf(aTHX_ name, "%c%s::", gvtype, p);
+	gv_fullname4(name, gv, buffer, 0);
 
-	if (GvNAMELEN(gv)>= 1 &&
-	    ((unsigned int)*GvNAME(gv)) <= 26)
-	{ /* handle $^FOO */
-	    Perl_sv_catpvf(aTHX_ name,"^%c", *GvNAME(gv) + 'A' - 1);
-	    sv_catpvn(name,GvNAME(gv)+1,GvNAMELEN(gv)-1);
+	if ((unsigned int)SvPVX(name)[1] <= 26) {
+	    buffer[0] = '^';
+	    buffer[1] = SvPVX(name)[1] + 'A' - 1;
+
+	    /* Swap the 1 unprintable control character for the 2 byte pretty
+	       version - ie substr($name, 1, 1) = $buffer; */
+	    sv_insert(name, 1, 1, buffer, 2);
 	}
-	else
-	    sv_catpvn(name,GvNAME(gv),GvNAMELEN(gv));
     }
     else {
 	U32 unused;
