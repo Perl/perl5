@@ -305,6 +305,18 @@ Perl_gv_efullname(pTHX_ SV *sv, const GV *gv)
     gv_efullname3(sv, gv, sv == (const SV*)gv ? "*" : "");
 }
 
+void
+Perl_gv_fullname3(pTHX_ SV *sv, const GV *gv, const char *prefix)
+{
+    gv_fullname4(sv, gv, prefix, TRUE);
+}
+
+void
+Perl_gv_efullname3(pTHX_ SV *sv, const GV *gv, const char *prefix)
+{
+    gv_efullname4(sv, gv, prefix, TRUE);
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd
