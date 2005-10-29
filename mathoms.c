@@ -97,6 +97,54 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 }
 
 /*
+=for apidoc sv_2pv_nolen
+
+Like C<sv_2pv()>, but doesn't return the length too. You should usually
+use the macro wrapper C<SvPV_nolen(sv)> instead.
+=cut
+*/
+
+char *
+Perl_sv_2pv_nolen(pTHX_ register SV *sv)
+{
+    return sv_2pv(sv, 0);
+}
+
+/*
+=for apidoc sv_2pvbyte_nolen
+
+Return a pointer to the byte-encoded representation of the SV.
+May cause the SV to be downgraded from UTF-8 as a side-effect.
+
+Usually accessed via the C<SvPVbyte_nolen> macro.
+
+=cut
+*/
+
+char *
+Perl_sv_2pvbyte_nolen(pTHX_ register SV *sv)
+{
+    return sv_2pvbyte(sv, 0);
+}
+
+/*
+=for apidoc sv_2pvutf8_nolen
+
+Return a pointer to the UTF-8-encoded representation of the SV.
+May cause the SV to be upgraded to UTF-8 as a side-effect.
+
+Usually accessed via the C<SvPVutf8_nolen> macro.
+
+=cut
+*/
+
+char *
+Perl_sv_2pvutf8_nolen(pTHX_ register SV *sv)
+{
+    return sv_2pvutf8(sv, 0);
+}
+
+/*
 =for apidoc sv_force_normal
 
 Undo various types of fakery on an SV: if the PV is a shared string, make

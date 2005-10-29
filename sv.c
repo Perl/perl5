@@ -2901,20 +2901,6 @@ S_asUV(pTHX_ SV *sv)
     return U_V(Atof(SvPVX_const(sv)));
 }
 
-/*
-=for apidoc sv_2pv_nolen
-
-Like C<sv_2pv()>, but doesn't return the length too. You should usually
-use the macro wrapper C<SvPV_nolen(sv)> instead.
-=cut
-*/
-
-char *
-Perl_sv_2pv_nolen(pTHX_ register SV *sv)
-{
-    return sv_2pv(sv, 0);
-}
-
 /* uiv_2buf(): private routine for use by sv_2pv_flags(): print an IV or
  * UV as a string towards the end of buf, and return pointers to start and
  * end of it.
@@ -3318,23 +3304,6 @@ Perl_sv_copypv(pTHX_ SV *dsv, register SV *ssv)
 }
 
 /*
-=for apidoc sv_2pvbyte_nolen
-
-Return a pointer to the byte-encoded representation of the SV.
-May cause the SV to be downgraded from UTF-8 as a side-effect.
-
-Usually accessed via the C<SvPVbyte_nolen> macro.
-
-=cut
-*/
-
-char *
-Perl_sv_2pvbyte_nolen(pTHX_ register SV *sv)
-{
-    return sv_2pvbyte(sv, 0);
-}
-
-/*
 =for apidoc sv_2pvbyte
 
 Return a pointer to the byte-encoded representation of the SV, and set *lp
@@ -3351,23 +3320,6 @@ Perl_sv_2pvbyte(pTHX_ register SV *sv, STRLEN *lp)
 {
     sv_utf8_downgrade(sv,0);
     return lp ? SvPV(sv,*lp) : SvPV_nolen(sv);
-}
-
-/*
-=for apidoc sv_2pvutf8_nolen
-
-Return a pointer to the UTF-8-encoded representation of the SV.
-May cause the SV to be upgraded to UTF-8 as a side-effect.
-
-Usually accessed via the C<SvPVutf8_nolen> macro.
-
-=cut
-*/
-
-char *
-Perl_sv_2pvutf8_nolen(pTHX_ register SV *sv)
-{
-    return sv_2pvutf8(sv, 0);
 }
 
 /*

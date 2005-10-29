@@ -931,9 +931,9 @@ Ap	|void	|do_sv_dump	|I32 level|NN PerlIO *file|NULLOK SV *sv|I32 nest \
 				|I32 maxnest|bool dumpops|STRLEN pvlim
 Ap	|void	|magic_dump	|NULLOK const MAGIC *mg
 Ap	|void	|reginitcolors
-ApdR	|char*	|sv_2pv_nolen	|NN SV* sv
-ApdR	|char*	|sv_2pvutf8_nolen|NN SV* sv
-ApdR	|char*	|sv_2pvbyte_nolen|NN SV* sv
+ApdRmb	|char*	|sv_2pv_nolen	|NN SV* sv
+ApdRmb	|char*	|sv_2pvutf8_nolen|NN SV* sv
+ApdRmb	|char*	|sv_2pvbyte_nolen|NN SV* sv
 AmdbR	|char*	|sv_pv		|NN SV *sv
 AmdbR	|char*	|sv_pvutf8	|NN SV *sv
 AmdbR	|char*	|sv_pvbyte	|NN SV *sv
