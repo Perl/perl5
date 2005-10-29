@@ -2630,8 +2630,8 @@ PERL_CALLCONV void	Perl_sv_utf8_encode(pTHX_ SV *sv)
 PERL_CALLCONV bool	Perl_sv_utf8_decode(pTHX_ SV *sv)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV void	Perl_sv_force_normal(pTHX_ SV *sv)
-			__attribute__nonnull__(pTHX_1);
+/* PERL_CALLCONV void	Perl_sv_force_normal(pTHX_ SV *sv)
+			__attribute__nonnull__(pTHX_1); */
 
 PERL_CALLCONV void	Perl_sv_force_normal_flags(pTHX_ SV *sv, U32 flags)
 			__attribute__nonnull__(pTHX_1);

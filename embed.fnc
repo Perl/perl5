@@ -941,7 +941,7 @@ Amdb	|STRLEN	|sv_utf8_upgrade|NN SV *sv
 ApdM	|bool	|sv_utf8_downgrade|NN SV *sv|bool fail_ok
 Apd	|void	|sv_utf8_encode |NN SV *sv
 ApdM	|bool	|sv_utf8_decode |NN SV *sv
-Apd	|void	|sv_force_normal|NN SV *sv
+Apdmb	|void	|sv_force_normal|NN SV *sv
 Apd	|void	|sv_force_normal_flags|NN SV *sv|U32 flags
 Ap	|void	|tmps_grow	|I32 n
 Apd	|SV*	|sv_rvweaken	|NN SV *sv

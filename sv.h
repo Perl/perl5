@@ -1349,7 +1349,8 @@ Like C<sv_catsv> but doesn't process magic.
 #define SV_CONST_RETURN		32
 #define SV_MUTABLE_RETURN	64
 
-#define sv_unref(sv)    sv_unref_flags(sv, 0)
+#define sv_unref(sv)    	sv_unref_flags(sv, 0)
+#define sv_force_normal(sv)	sv_force_normal_flags(sv, 0)
 
 /* We are about to replace the SV's current value. So if it's copy on write
    we need to normalise it. Use the SV_COW_DROP_PV flag hint to say that

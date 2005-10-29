@@ -96,6 +96,21 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
     return sv_2pv_flags(sv, lp, SV_GMAGIC);
 }
 
+/*
+=for apidoc sv_force_normal
+
+Undo various types of fakery on an SV: if the PV is a shared string, make
+a private copy; if we're a ref, stop refing; if we're a glob, downgrade to
+an xpvmg. See also C<sv_force_normal_flags>.
+
+=cut
+*/
+
+void
+Perl_sv_force_normal(pTHX_ register SV *sv)
+{
+    sv_force_normal_flags(sv, 0);
+}
 
 /* sv_setsv() is now a macro using Perl_sv_setsv_flags();
  * this function provided for binary compatibility only
