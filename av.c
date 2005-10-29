@@ -398,28 +398,6 @@ Perl_av_make(pTHX_ register I32 size, register SV **strp)
     return av;
 }
 
-AV *
-Perl_av_fake(pTHX_ register I32 size, register SV **strp)
-{
-    register SV** ary;
-    register AV * const av = (AV*)NEWSV(9,0);
-
-    sv_upgrade((SV *)av, SVt_PVAV);
-    Newx(ary,size+1,SV*);
-    AvALLOC(av) = ary;
-    Copy(strp,ary,size,SV*);
-    AvREIFY_only(av);
-    SvPV_set(av, (char*)ary);
-    AvFILLp(av) = size - 1;
-    AvMAX(av) = size - 1;
-    while (size--) {
-	assert (*strp);
-	SvTEMP_off(*strp);
-	strp++;
-    }
-    return av;
-}
-
 /*
 =for apidoc av_clear
 

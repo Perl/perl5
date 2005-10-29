@@ -317,6 +317,28 @@ Perl_gv_efullname3(pTHX_ SV *sv, const GV *gv, const char *prefix)
     gv_efullname4(sv, gv, prefix, TRUE);
 }
 
+AV *
+Perl_av_fake(pTHX_ register I32 size, register SV **strp)
+{
+    register SV** ary;
+    register AV * const av = (AV*)NEWSV(9,0);
+
+    sv_upgrade((SV *)av, SVt_PVAV);
+    Newx(ary,size+1,SV*);
+    AvALLOC(av) = ary;
+    Copy(strp,ary,size,SV*);
+    AvREIFY_only(av);
+    SvPV_set(av, (char*)ary);
+    AvFILLp(av) = size - 1;
+    AvMAX(av) = size - 1;
+    while (size--) {
+        assert (*strp);
+        SvTEMP_off(*strp);
+        strp++;
+    }
+    return av;
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd
