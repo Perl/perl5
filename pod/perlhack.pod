@@ -2082,7 +2082,7 @@ F<testname.valgrind>.
 
 (Only in Tru64)  Run all the tests using the memory leak + naughty
 memory access tool "Third Degree".  The log files will be named
-F<perl3.log.testname>.
+F<perl.3log.testname>.
 
 =item test.torture torturetest
 
