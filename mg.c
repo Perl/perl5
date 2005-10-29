@@ -2797,7 +2797,7 @@ S_restore_magic(pTHX_ const void *p)
 	/* While magic was saved (and off) sv_setsv may well have seen
 	   this SV as a prime candidate for COW.  */
 	if (SvIsCOW(sv))
-	    sv_force_normal(sv);
+	    sv_force_normal_flags(sv, 0);
 #endif
 
 	if (mgs->mgs_flags)
