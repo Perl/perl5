@@ -8135,11 +8135,7 @@ Like C<sv_setpviv>, but also handles 'set' magic.
 void
 Perl_sv_setpviv_mg(pTHX_ SV *sv, IV iv)
 {
-    char buf[TYPE_CHARS(UV)];
-    char *ebuf;
-    char * const ptr = uiv_2buf(buf, iv, 0, 0, &ebuf);
-
-    sv_setpvn(sv, ptr, ebuf - ptr);
+    sv_setpviv(sv, iv);
     SvSETMAGIC(sv);
 }
 
