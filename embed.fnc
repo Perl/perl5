@@ -814,7 +814,7 @@ Amdb	|void	|sv_setsv	|NN SV* dsv|NULLOK SV* ssv
 Amdb	|void	|sv_taint	|NN SV* sv
 ApdR	|bool	|sv_tainted	|NN SV* sv
 Apd	|int	|sv_unmagic	|NN SV* sv|int type
-Apd	|void	|sv_unref	|NN SV* sv
+Apdmb	|void	|sv_unref	|NN SV* sv
 Apd	|void	|sv_unref_flags	|NN SV* sv|U32 flags
 Apd	|void	|sv_untaint	|NN SV* sv
 Apd	|void	|sv_upgrade	|NN SV* sv|U32 mt

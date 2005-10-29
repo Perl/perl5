@@ -2258,8 +2258,8 @@ PERL_CALLCONV bool	Perl_sv_tainted(pTHX_ SV* sv)
 PERL_CALLCONV int	Perl_sv_unmagic(pTHX_ SV* sv, int type)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV void	Perl_sv_unref(pTHX_ SV* sv)
-			__attribute__nonnull__(pTHX_1);
+/* PERL_CALLCONV void	Perl_sv_unref(pTHX_ SV* sv)
+			__attribute__nonnull__(pTHX_1); */
 
 PERL_CALLCONV void	Perl_sv_unref_flags(pTHX_ SV* sv, U32 flags)
 			__attribute__nonnull__(pTHX_1);
