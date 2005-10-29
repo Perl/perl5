@@ -187,6 +187,16 @@ Perl_sv_pvutf8(pTHX_ SV *sv)
     return sv_pv(sv);
 }
 
+/* sv_utf8_upgrade() is now a macro using sv_utf8_upgrade_flags();
+ * this function provided for binary compatibility only
+ */
+
+STRLEN
+Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
+{
+    return sv_utf8_upgrade_flags(sv, SV_GMAGIC);
+}
+
 /*
 =for apidoc A|U8 *|uvchr_to_utf8|U8 *d|UV uv
 

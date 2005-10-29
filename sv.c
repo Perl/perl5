@@ -2362,16 +2362,6 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
     return SvIsUV(sv) ? (IV)SvUVX(sv) : SvIVX(sv);
 }
 
-/* sv_2uv() is now a macro using Perl_sv_2uv_flags();
- * this function provided for binary compatibility only
- */
-
-UV
-Perl_sv_2uv(pTHX_ register SV *sv)
-{
-    return sv_2uv_flags(sv, SV_GMAGIC);
-}
-
 /*
 =for apidoc sv_2uv_flags
 
@@ -3442,17 +3432,6 @@ Perl_sv_2bool(pTHX_ register SV *sv)
 		return FALSE;
 	}
     }
-}
-
-/* sv_utf8_upgrade() is now a macro using sv_utf8_upgrade_flags();
- * this function provided for binary compatibility only
- */
-
-
-STRLEN
-Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
-{
-    return sv_utf8_upgrade_flags(sv, SV_GMAGIC);
 }
 
 /*
