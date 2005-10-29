@@ -339,6 +339,32 @@ Perl_av_fake(pTHX_ register I32 size, register SV **strp)
     return av;
 }
 
+bool
+Perl_do_open9(pTHX_ GV *gv, register const char *name, I32 len, int 
+as_raw,
+              int rawmode, int rawperm, PerlIO *supplied_fp, SV *svs,
+              I32 num_svs)
+{
+    PERL_UNUSED_ARG(num_svs);
+    return do_openn(gv, name, len, as_raw, rawmode, rawperm,
+                    supplied_fp, &svs, 1);
+}
+
+int
+Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode)
+{
+ /* The old body of this is now in non-LAYER part of perlio.c
+  * This is a stub for any XS code which might have been calling it.
+  */
+ const char *name = ":raw";
+#ifdef PERLIO_USING_CRLF
+ if (!(mode & O_BINARY))
+     name = ":crlf";
+#endif
+ return PerlIO_binmode(aTHX_ fp, iotype, mode, name);
+}
+
+
 /*
  * Local variables:
  * c-indentation-style: bsd
