@@ -7671,97 +7671,6 @@ Perl_sv_true(pTHX_ register SV *sv)
 }
 
 /*
-=for apidoc sv_iv
-
-A private implementation of the C<SvIVx> macro for compilers which can't
-cope with complex macro expressions. Always use the macro instead.
-
-=cut
-*/
-
-IV
-Perl_sv_iv(pTHX_ register SV *sv)
-{
-    if (SvIOK(sv)) {
-	if (SvIsUV(sv))
-	    return (IV)SvUVX(sv);
-	return SvIVX(sv);
-    }
-    return sv_2iv(sv);
-}
-
-/*
-=for apidoc sv_uv
-
-A private implementation of the C<SvUVx> macro for compilers which can't
-cope with complex macro expressions. Always use the macro instead.
-
-=cut
-*/
-
-UV
-Perl_sv_uv(pTHX_ register SV *sv)
-{
-    if (SvIOK(sv)) {
-	if (SvIsUV(sv))
-	    return SvUVX(sv);
-	return (UV)SvIVX(sv);
-    }
-    return sv_2uv(sv);
-}
-
-/*
-=for apidoc sv_nv
-
-A private implementation of the C<SvNVx> macro for compilers which can't
-cope with complex macro expressions. Always use the macro instead.
-
-=cut
-*/
-
-NV
-Perl_sv_nv(pTHX_ register SV *sv)
-{
-    if (SvNOK(sv))
-	return SvNVX(sv);
-    return sv_2nv(sv);
-}
-
-/*
-=for apidoc sv_pv
-
-Use the C<SvPV_nolen> macro instead
-
-=for apidoc sv_pvn
-
-A private implementation of the C<SvPV> macro for compilers which can't
-cope with complex macro expressions. Always use the macro instead.
-
-=cut
-*/
-
-char *
-Perl_sv_pvn(pTHX_ SV *sv, STRLEN *lp)
-{
-    if (SvPOK(sv)) {
-	*lp = SvCUR(sv);
-	return SvPVX(sv);
-    }
-    return sv_2pv(sv, lp);
-}
-
-
-char *
-Perl_sv_pvn_nomg(pTHX_ register SV *sv, STRLEN *lp)
-{
-    if (SvPOK(sv)) {
-	*lp = SvCUR(sv);
-	return SvPVX(sv);
-    }
-    return sv_2pv_flags(sv, lp, 0);
-}
-
-/*
 =for apidoc sv_pvn_force
 
 Get a sensible string out of the SV somehow.
@@ -7830,32 +7739,9 @@ Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
 }
 
 /*
-=for apidoc sv_pvbyte
-
-Use C<SvPVbyte_nolen> instead.
-
-=for apidoc sv_pvbyten
-
-A private implementation of the C<SvPVbyte> macro for compilers
-which can't cope with complex macro expressions. Always use the macro
-instead.
-
-=cut
-*/
-
-char *
-Perl_sv_pvbyten(pTHX_ SV *sv, STRLEN *lp)
-{
-    sv_utf8_downgrade(sv,0);
-    return sv_pvn(sv,lp);
-}
-
-/*
 =for apidoc sv_pvbyten_force
 
-A private implementation of the C<SvPVbytex_force> macro for compilers
-which can't cope with complex macro expressions. Always use the macro
-instead.
+The backend for the C<SvPVbytex_force> macro. Always use the macro instead.
 
 =cut
 */
@@ -7870,32 +7756,9 @@ Perl_sv_pvbyten_force(pTHX_ SV *sv, STRLEN *lp)
 }
 
 /*
-=for apidoc sv_pvutf8
-
-Use the C<SvPVutf8_nolen> macro instead
-
-=for apidoc sv_pvutf8n
-
-A private implementation of the C<SvPVutf8> macro for compilers
-which can't cope with complex macro expressions. Always use the macro
-instead.
-
-=cut
-*/
-
-char *
-Perl_sv_pvutf8n(pTHX_ SV *sv, STRLEN *lp)
-{
-    sv_utf8_upgrade(sv);
-    return sv_pvn(sv,lp);
-}
-
-/*
 =for apidoc sv_pvutf8n_force
 
-A private implementation of the C<SvPVutf8_force> macro for compilers
-which can't cope with complex macro expressions. Always use the macro
-instead.
+The backend for the C<SvPVutf8x_force> macro. Always use the macro instead.
 
 =cut
 */
