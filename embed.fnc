@@ -902,8 +902,8 @@ Ap	|int	|runops_debug
 Afpd	|void	|sv_catpvf_mg	|NN SV *sv|NN const char* pat|...
 Apd	|void	|sv_vcatpvf_mg	|NN SV* sv|NN const char* pat|NULLOK va_list* args
 Apd	|void	|sv_catpv_mg	|NN SV *sv|NN const char *ptr
-Apd	|void	|sv_catpvn_mg	|NN SV *sv|NN const char *ptr|STRLEN len
-Apd	|void	|sv_catsv_mg	|NN SV *dstr|NULLOK SV *sstr
+Apdbm	|void	|sv_catpvn_mg	|NN SV *sv|NN const char *ptr|STRLEN len
+Apdbm	|void	|sv_catsv_mg	|NN SV *dstr|NULLOK SV *sstr
 Afpd	|void	|sv_setpvf_mg	|NN SV *sv|NN const char* pat|...
 Apd	|void	|sv_vsetpvf_mg	|NN SV* sv|NN const char* pat|NULLOK va_list* args
 Apd	|void	|sv_setiv_mg	|NN SV *sv|IV i

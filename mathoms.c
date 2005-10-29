@@ -180,6 +180,20 @@ Perl_sv_catpvn(pTHX_ SV *dsv, const char* sstr, STRLEN slen)
     sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC);
 }
 
+/*
+=for apidoc sv_catpvn_mg
+
+Like C<sv_catpvn>, but also handles 'set' magic.
+
+=cut
+*/
+
+void
+Perl_sv_catpvn_mg(pTHX_ register SV *sv, register const char *ptr, register STRLEN len)
+{
+    sv_catpvn_flags(sv,ptr,len,SV_GMAGIC|SV_SMAGIC);
+}
+
 /* sv_catsv() is now a macro using Perl_sv_catsv_flags();
  * this function provided for binary compatibility only
  */
@@ -188,6 +202,20 @@ void
 Perl_sv_catsv(pTHX_ SV *dstr, register SV *sstr)
 {
     sv_catsv_flags(dstr, sstr, SV_GMAGIC);
+}
+
+/*
+=for apidoc sv_catsv_mg
+
+Like C<sv_catsv>, but also handles 'set' magic.
+
+=cut
+*/
+
+void
+Perl_sv_catsv_mg(pTHX_ SV *dsv, register SV *ssv)
+{
+    sv_catsv_flags(dsv,ssv,SV_GMAGIC|SV_SMAGIC);
 }
 
 /*

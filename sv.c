@@ -4593,20 +4593,6 @@ Perl_sv_catpvn_flags(pTHX_ register SV *dsv, register const char *sstr, register
 }
 
 /*
-=for apidoc sv_catpvn_mg
-
-Like C<sv_catpvn>, but also handles 'set' magic.
-
-=cut
-*/
-
-void
-Perl_sv_catpvn_mg(pTHX_ register SV *sv, register const char *ptr, register STRLEN len)
-{
-    sv_catpvn_flags(sv,ptr,len,SV_GMAGIC|SV_SMAGIC);
-}
-
-/*
 =for apidoc sv_catsv
 
 Concatenates the string from SV C<ssv> onto the end of the string in
@@ -4659,20 +4645,6 @@ Perl_sv_catsv_flags(pTHX_ SV *dsv, register SV *ssv, I32 flags)
     }
     if (flags & SV_SMAGIC)
 	SvSETMAGIC(dsv);
-}
-
-/*
-=for apidoc sv_catsv_mg
-
-Like C<sv_catsv>, but also handles 'set' magic.
-
-=cut
-*/
-
-void
-Perl_sv_catsv_mg(pTHX_ SV *dsv, register SV *ssv)
-{
-    sv_catsv_flags(dsv,ssv,SV_GMAGIC|SV_SMAGIC);
 }
 
 /*
