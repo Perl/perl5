@@ -1203,13 +1203,14 @@ Perl_to_uni_lower_lc(pTHX_ U32 c)
 }
 
 static bool
-S_is_utf8_common(pTHX_ U8 *const p, SV **swash, char *const swashname)
+S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
+		 const char *const swashname)
 {
-    if (!is_utf8_char(p))
+    if (!is_utf8_char((U8 *)p))
 	return FALSE;
     if (!*swash)
-	*swash = swash_init("utf8", swashname, &PL_sv_undef, 0, 0);
-    return swash_fetch(*swash, p, TRUE) != 0;
+	*swash = swash_init("utf8", (char *)swashname, &PL_sv_undef, 0, 0);
+    return swash_fetch(*swash, (U8 *)p, TRUE) != 0;
 }
 
 bool

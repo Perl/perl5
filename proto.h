@@ -1007,9 +1007,7 @@ PERL_CALLCONV I32	Perl_call_method(pTHX_ const char* methname, I32 flags);
 PERL_CALLCONV I32	Perl_call_pv(pTHX_ const char* sub_name, I32 flags);
 PERL_CALLCONV I32	Perl_call_sv(pTHX_ SV* sv, I32 flags);
 PERL_CALLCONV void	Perl_despatch_signals(pTHX);
-PERL_CALLCONV OP *	Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
-			__attribute__nonnull__(pTHX_1);
-
+PERL_CALLCONV OP *	Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref);
 PERL_CALLCONV SV*	Perl_eval_pv(pTHX_ const char* p, I32 croak_on_error);
 PERL_CALLCONV I32	Perl_eval_sv(pTHX_ SV* sv, I32 flags);
 PERL_CALLCONV SV*	Perl_get_sv(pTHX_ const char* name, I32 create);
@@ -1982,6 +1980,9 @@ STATIC NV	S_mulexp10(NV value, I32 exponent);
 
 #if defined(PERL_IN_UTF8_C) || defined(PERL_DECL_PROT)
 STATIC STRLEN	S_is_utf8_char_slow(pTHX_ const U8 *s, const STRLEN len);
+STATIC bool	S_is_utf8_common(pTHX_ const U8 *const p, SV **swash, const char * const swashname)
+			__attribute__warn_unused_result__;
+
 #endif
 
 START_EXTERN_C

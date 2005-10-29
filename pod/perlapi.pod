@@ -2302,6 +2302,55 @@ Found in file util.c
 
 =back
 
+=head1 Multicall Functions
+
+=over 8
+
+=item dMULTICALL
+X<dMULTICALL>
+
+Declare local variables for a multicall. See L<perlcall/Lightweight Callbacks>.
+
+		dMULTICALL;
+
+=for hackers
+Found in file cop.h
+
+=item MULTICALL
+X<MULTICALL>
+
+Make a lightweight callback. See L<perlcall/Lightweight Callbacks>.
+
+		MULTICALL;
+
+=for hackers
+Found in file cop.h
+
+=item POP_MULTICALL
+X<POP_MULTICALL>
+
+Closing bracket for a lightweight callback.
+See L<perlcall/Lightweight Callbacks>.
+
+		POP_MULTICALL;
+
+=for hackers
+Found in file cop.h
+
+=item PUSH_MULTICALL
+X<PUSH_MULTICALL>
+
+Opening bracket for a lightweight callback.
+See L<perlcall/Lightweight Callbacks>.
+
+		PUSH_MULTICALL;
+
+=for hackers
+Found in file cop.h
+
+
+=back
+
 =head1 Numeric functions
 
 =over 8

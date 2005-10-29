@@ -1823,23 +1823,32 @@ PP(pp_return)
     I32 optype = 0;
     SV *sv;
 
-    if (PL_curstackinfo->si_type == PERLSI_SORT) {
-	if (cxstack_ix == PL_sortcxix
-	    || dopoptosub(cxstack_ix) <= PL_sortcxix)
-	{
-	    if (cxstack_ix > PL_sortcxix)
-		dounwind(PL_sortcxix);
-	    AvARRAY(PL_curstack)[1] = *SP;
+    cxix = dopoptosub(cxstack_ix);
+    if (cxix < 0) {
+	if (CxMULTICALL(cxstack)) { /* In this case we must be in a
+				     * sort block, which is a CXt_NULL
+				     * not a CXt_SUB */
+	    dounwind(0);
+	    PL_stack_base[1] = *PL_stack_sp;
 	    PL_stack_sp = PL_stack_base + 1;
 	    return 0;
 	}
+	else
+	    DIE(aTHX_ "Can't return outside a subroutine");
     }
-
-    cxix = dopoptosub(cxstack_ix);
-    if (cxix < 0)
-	DIE(aTHX_ "Can't return outside a subroutine");
     if (cxix < cxstack_ix)
 	dounwind(cxix);
+
+    if (CxMULTICALL(&cxstack[cxix])) {
+	gimme = cxstack[cxix].blk_gimme;
+	if (gimme == G_VOID)
+	    PL_stack_sp = PL_stack_base;
+	else if (gimme == G_SCALAR) {
+	    PL_stack_base[1] = *PL_stack_sp;
+	    PL_stack_sp = PL_stack_base + 1;
+	}
+	return 0;
+    }
 
     POPBLOCK(cx,newpm);
     switch (CxTYPE(cx)) {
@@ -2185,6 +2194,8 @@ PP(pp_goto)
 		else
 		    DIE(aTHX_ "Can't goto subroutine from an eval-block");
 	    }
+	    else if (CxMULTICALL(cx))
+		DIE(aTHX_ "Can't goto subroutine from a sort sub (or similar callback)");
 	    if (CxTYPE(cx) == CXt_SUB && cx->blk_sub.hasargs) {
 		/* put @_ back onto stack */
 		AV* av = cx->blk_sub.argarray;
@@ -2422,7 +2433,7 @@ PP(pp_goto)
 		    gotoprobe = PL_main_root;
 		break;
 	    case CXt_SUB:
-		if (CvDEPTH(cx->blk_sub.cv)) {
+		if (CvDEPTH(cx->blk_sub.cv) && !CxMULTICALL(cx)) {
 		    gotoprobe = CvROOT(cx->blk_sub.cv);
 		    break;
 		}
