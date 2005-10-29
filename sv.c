@@ -4588,6 +4588,8 @@ Perl_sv_catpvn_flags(pTHX_ register SV *dsv, register const char *sstr, register
     *SvEND(dsv) = '\0';
     (void)SvPOK_only_UTF8(dsv);		/* validate pointer */
     SvTAINT(dsv);
+    if (flags & SV_SMAGIC)
+	SvSETMAGIC(dsv);
 }
 
 /*
@@ -4601,8 +4603,7 @@ Like C<sv_catpvn>, but also handles 'set' magic.
 void
 Perl_sv_catpvn_mg(pTHX_ register SV *sv, register const char *ptr, register STRLEN len)
 {
-    sv_catpvn(sv,ptr,len);
-    SvSETMAGIC(sv);
+    sv_catpvn_flags(sv,ptr,len,SV_GMAGIC|SV_SMAGIC);
 }
 
 /*
@@ -4626,36 +4627,38 @@ Perl_sv_catsv_flags(pTHX_ SV *dsv, register SV *ssv, I32 flags)
 {
     const char *spv;
     STRLEN slen;
-    if (!ssv)
-	return;
-    if ((spv = SvPV_const(ssv, slen))) {
-	/*  sutf8 and dutf8 were type bool, but under USE_ITHREADS,
-	    gcc version 2.95.2 20000220 (Debian GNU/Linux) for
-	    Linux xxx 2.2.17 on sparc64 with gcc -O2, we erroneously
-	    get dutf8 = 0x20000000, (i.e.  SVf_UTF8) even though
-	    dsv->sv_flags doesn't have that bit set.
+    if (ssv) {
+	if ((spv = SvPV_const(ssv, slen))) {
+	    /*  sutf8 and dutf8 were type bool, but under USE_ITHREADS,
+		gcc version 2.95.2 20000220 (Debian GNU/Linux) for
+		Linux xxx 2.2.17 on sparc64 with gcc -O2, we erroneously
+		get dutf8 = 0x20000000, (i.e.  SVf_UTF8) even though
+		dsv->sv_flags doesn't have that bit set.
 		Andy Dougherty  12 Oct 2001
-	*/
-	const I32 sutf8 = DO_UTF8(ssv);
-	I32 dutf8;
+	    */
+	    const I32 sutf8 = DO_UTF8(ssv);
+	    I32 dutf8;
 
-	if (SvGMAGICAL(dsv) && (flags & SV_GMAGIC))
-	    mg_get(dsv);
-	dutf8 = DO_UTF8(dsv);
+	    if (SvGMAGICAL(dsv) && (flags & SV_GMAGIC))
+		mg_get(dsv);
+	    dutf8 = DO_UTF8(dsv);
 
-	if (dutf8 != sutf8) {
-	    if (dutf8) {
-		/* Not modifying source SV, so taking a temporary copy. */
-		SV* csv = sv_2mortal(newSVpvn(spv, slen));
+	    if (dutf8 != sutf8) {
+		if (dutf8) {
+		    /* Not modifying source SV, so taking a temporary copy. */
+		    SV* csv = sv_2mortal(newSVpvn(spv, slen));
 
-		sv_utf8_upgrade(csv);
-		spv = SvPV_const(csv, slen);
+		    sv_utf8_upgrade(csv);
+		    spv = SvPV_const(csv, slen);
+		}
+		else
+		    sv_utf8_upgrade_nomg(dsv);
 	    }
-	    else
-		sv_utf8_upgrade_nomg(dsv);
+	    sv_catpvn_nomg(dsv, spv, slen);
 	}
-	sv_catpvn_nomg(dsv, spv, slen);
     }
+    if (flags & SV_SMAGIC)
+	SvSETMAGIC(dsv);
 }
 
 /*
@@ -4669,8 +4672,7 @@ Like C<sv_catsv>, but also handles 'set' magic.
 void
 Perl_sv_catsv_mg(pTHX_ SV *dsv, register SV *ssv)
 {
-    sv_catsv(dsv,ssv);
-    SvSETMAGIC(dsv);
+    sv_catsv_flags(dsv,ssv,SV_GMAGIC|SV_SMAGIC);
 }
 
 /*
