@@ -6072,7 +6072,7 @@ Perl_pregfree(pTHX_ struct regexp *r)
 			reg_trie_data *trie=(reg_trie_data*)r->data->data[n];
 			U32 refcount;
 			OP_REFCNT_LOCK;
-			refcount = trie->refcount--;
+			refcount = --trie->refcount;
 			OP_REFCNT_UNLOCK;
 			if ( !refcount ) {
 			    Safefree(trie->charmap);
