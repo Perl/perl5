@@ -2248,8 +2248,8 @@ PERL_CALLCONV void	Perl_sv_setpvn(pTHX_ SV* sv, const char* ptr, STRLEN len)
 /* PERL_CALLCONV void	sv_setsv(pTHX_ SV* dsv, SV* ssv)
 			__attribute__nonnull__(pTHX_1); */
 
-PERL_CALLCONV void	Perl_sv_taint(pTHX_ SV* sv)
-			__attribute__nonnull__(pTHX_1);
+/* PERL_CALLCONV void	sv_taint(pTHX_ SV* sv)
+			__attribute__nonnull__(pTHX_1); */
 
 PERL_CALLCONV bool	Perl_sv_tainted(pTHX_ SV* sv)
 			__attribute__warn_unused_result__

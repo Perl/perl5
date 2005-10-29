@@ -36,6 +36,19 @@ Perl_ref(pTHX_ OP *o, I32 type)
     return doref(o, type, TRUE);
 }
 
+/*
+=for apidoc sv_taint
+
+Taint an SV. Use C<SvTAINTED_on> instead.
+=cut
+*/
+
+void
+Perl_sv_taint(pTHX_ SV *sv)
+{
+    sv_magic((sv), Nullsv, PERL_MAGIC_taint, Nullch, 0);
+}
+
 /* sv_2iv() is now a macro using Perl_sv_2iv_flags();
  * this function provided for binary compatibility only
  */

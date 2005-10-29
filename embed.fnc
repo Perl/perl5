@@ -811,7 +811,7 @@ Apd	|SV*	|sv_setref_pvn	|NN SV* rv|NULLOK const char* classname|NN const char* p
 Apd	|void	|sv_setpv	|NN SV* sv|NULLOK const char* ptr
 Apd	|void	|sv_setpvn	|NN SV* sv|NULLOK const char* ptr|STRLEN len
 Amdb	|void	|sv_setsv	|NN SV* dsv|NULLOK SV* ssv
-Apd	|void	|sv_taint	|NN SV* sv
+Amdb	|void	|sv_taint	|NN SV* sv
 ApdR	|bool	|sv_tainted	|NN SV* sv
 Apd	|int	|sv_unmagic	|NN SV* sv|int type
 Apd	|void	|sv_unref	|NN SV* sv

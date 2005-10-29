@@ -1034,6 +1034,8 @@ Taints an SV if tainting is enabled.
 =cut
 */
 
+#define sv_taint(sv)	  sv_magic((sv), Nullsv, PERL_MAGIC_taint, Nullch, 0)
+
 #define SvTAINTED(sv)	  (SvMAGICAL(sv) && sv_tainted(sv))
 #define SvTAINTED_on(sv)  STMT_START{ if(PL_tainting){sv_taint(sv);}   }STMT_END
 #define SvTAINTED_off(sv) STMT_START{ if(PL_tainting){sv_untaint(sv);} }STMT_END
