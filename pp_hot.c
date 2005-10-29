@@ -2331,6 +2331,9 @@ PP(pp_leavesub)
     register PERL_CONTEXT *cx;
     SV *sv;
 
+    if (CxMULTICALL(&cxstack[cxstack_ix]))
+	return 0;
+
     POPBLOCK(cx,newpm);
     cxstack_ix++; /* temporarily protect top context */
 
@@ -2390,6 +2393,9 @@ PP(pp_leavesublv)
     I32 gimme;
     register PERL_CONTEXT *cx;
     SV *sv;
+
+    if (CxMULTICALL(&cxstack[cxstack_ix]))
+	return 0;
 
     POPBLOCK(cx,newpm);
     cxstack_ix++; /* temporarily protect top context */

@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 use warnings;
-print "1..129\n";
+print "1..141\n";
 
 # these shouldn't hang
 {
@@ -18,6 +18,7 @@ print "1..129\n";
 
 sub Backwards { $a lt $b ? 1 : $a gt $b ? -1 : 0 }
 sub Backwards_stacked($$) { my($a,$b) = @_; $a lt $b ? 1 : $a gt $b ? -1 : 0 }
+sub Backwards_other { $a lt $b ? 1 : $a gt $b ? -1 : 0 }
 
 my $upperfirst = 'A' lt 'a';
 
@@ -114,12 +115,12 @@ print "# x = '@b'\n";
 print ("@b" eq '1 2 3 4' ? "ok 16\n" : "not ok 16\n");
 print "# x = '@b'\n";
 
-# redefining sort sub inside the sort sub should fail
-sub twoface { *twoface = sub { $a <=> $b }; &twoface }
+# redefining sort sub inside the sort sub should not fail
+sub twoface { no warnings 'redefine'; *twoface = sub { $a <=> $b }; &twoface }
 eval { @b = sort twoface 4,1,3,2 };
-print ($@ =~ /redefine active sort/ ? "ok 17\n" : "not ok 17\n");
+print ($@ eq '' ? "ok 17\n" : "not ok 17\n");
 
-# redefining sort subs outside the sort should not fail
+# redefining sort subs outside the sort should also not fail
 eval { no warnings 'redefine'; *twoface = sub { &Backwards } };
 print $@ ? "not ok 18\n" : "ok 18\n";
 
@@ -128,21 +129,22 @@ print ("@b" eq '4 3 2 1' ? "ok 19\n" : "not ok 19 |@b|\n");
 
 {
   no warnings 'redefine';
-  *twoface = sub { *twoface = *Backwards; $a <=> $b };
+  *twoface = sub { *twoface = *Backwards_other; $a <=> $b };
 }
-eval { @b = sort twoface 4,1 };
-print ($@ =~ /redefine active sort/ ? "ok 20\n" : "not ok 20\n");
+# The redefinition should not take effect during the sort
+eval { @b = sort twoface 4,1,9,5 };
+print (($@ eq "" && "@b" eq "1 4 5 9") ? "ok 20\n" : "not ok 20 # $@|@b\n");
 
 {
   no warnings 'redefine';
   *twoface = sub {
                  eval 'sub twoface { $a <=> $b }';
-		 die($@ =~ /redefine active sort/ ? "ok 21\n" : "not ok 21\n");
+		 die($@ eq "" ? "ok 21\n" : "not ok 21\n");
 		 $a <=> $b;
 	       };
 }
 eval { @b = sort twoface 4,1 };
-print $@ ? "$@" : "not ok 21\n";
+print($@ ? "$@" : "not ok 21 # $@\n");
 
 eval <<'CODE';
     my @result = sort main'Backwards 'one', 'two';
@@ -670,3 +672,122 @@ ok "@output", "0 C B A", 'reversed sort with trailing argument';
 
 @output = reverse (0, sort(qw(C A B)));
 ok "@output", "C B A 0", 'reversed sort with leading argument';
+
+eval { @output = sort {goto sub {}} 1,2; };
+print(($@ =~ /^Can't goto subroutine outside a subroutine/ ?
+	"ok " :
+	"not ok "),
+	$test++, " # $@");
+
+sub goto_sub {goto sub{}}
+eval { @output = sort goto_sub 1,2; };
+print(($@ =~ /^Can't goto subroutine from a sort sub/ ?
+	"ok " :
+	"not ok "),
+	$test++, " # $@");
+
+eval { @output = sort {goto label} 1,2; };
+print(($@ =~ /^Can't "goto" out of a pseudo block/ ?
+	"ok " :
+	"not ok "),
+	$test++, " # $@");
+
+sub goto_label {goto label}
+label: eval { @output = sort goto_label 1,2; };
+print(($@ =~ /^Can't "goto" out of a pseudo block/ ?
+	"ok " :
+	"not ok "),
+	$test++, " # $@");
+
+sub self_immolate {undef &self_immolate; $a<=>$b}
+eval { @output = sort self_immolate 1,2,3 };
+print(($@ =~ /^Can't undef active subroutine/ ?
+	"ok " :
+	"not ok "),
+	$test++, " # $@");
+
+{
+    my $failed = 0;
+
+    sub rec {
+	my $n = shift;
+	if (!defined($n)) {  # No arg means we're being called by sort()
+	    return 1;
+	}
+	if ($n<5) { rec($n+1); }
+	else { () = sort rec 1,2; }
+
+	$failed = 1 if !defined $n;
+    }
+
+    rec(1);
+    print((!$failed ? "ok " : "not ok "), $test++, " - sort from active sub\n");
+}
+
+# $a and $b are set in the package the sort() is called from,
+# *not* the package the sort sub is in. This is longstanding
+# de facto behaviour that shouldn't be broken.
+package main;
+my $answer = "ok ";
+() = sort OtherPack::foo 1,2,3,4;
+
+{package OtherPack; sub foo {
+  $answer = "not ok " if
+    defined($a) || defined($b) || !defined($main::a) || !defined($main::b);
+  $main::a <=> $main::b;
+}}
+
+print $answer, $test++, "\n";
+
+
+# Bug 36430 - sort called in package2 while a
+# sort in package1 is active should set $package2::a/b.
+
+$answer = "ok ";
+my @list = sort { A::min(@$a) <=> A::min(@$b) }
+  [3, 1, 5], [2, 4], [0];
+
+print $answer, $test++, "\n";
+
+package A;
+sub min {
+  my @list = sort {
+    $answer = "not ok " if !defined($a) || !defined($b);
+    $a <=> $b;
+  } @_;
+  $list[0];
+}
+
+# Bug 7567 - an array shouldn't be modifiable while it's being
+# sorted in-place.
+eval { @a=(1..8); @a = sort { @a = (0) } @a; };
+
+print(($@ =~ /^Modification of a read-only value attempted/ ?
+	"ok " :
+	"not ok "),
+	$test++, " # $@");
+
+# Sorting shouldn't increase the refcount of a sub
+sub foo {(1+$a) <=> (1+$b)}
+my $refcnt = &Internals::SvREFCNT(\&foo);
+@output = sort foo 3,7,9;
+package Foo;
+ok($refcnt, &Internals::SvREFCNT(\&foo), "sort sub refcnt");
+
+# Sorting a read-only array in-place shouldn't be allowed
+my @readonly = (1..10);
+Internals::SvREADONLY(@readonly, 1);
+eval { @readonly = sort @readonly; };
+print(($@ =~ /^Modification of a read-only value attempted/ ?
+	"ok " :
+	"not ok "),
+	$test++, " # $@");
+
+# Using return() should be okay even in a deeper context
+@b = sort {while (1) {return ($a <=> $b)} } 1..10;
+ok("@b", "1 2 3 4 5 6 7 8 9 10", "return within loop");
+
+# Clearing the array we're sorting should be okay.
+@a = (1..10);
+@b = sort {@a=(); ($a+1)<=>($b+1)} @a;
+ok("@b", "1 2 3 4 5 6 7 8 9 10", "clear array being sorted");

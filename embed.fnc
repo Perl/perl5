@@ -1436,7 +1436,7 @@ pd	|void	|pad_tidy	|padtidy_type type
 pd 	|void	|do_dump_pad	|I32 level|NN PerlIO *file|NULLOK PADLIST *padlist|int full
 pd	|void	|pad_fixup_inner_anons|NN PADLIST *padlist|NN CV *old_cv|NN CV *new_cv
 
-pd	|void	|pad_push	|NN PADLIST *padlist|int depth
+pdX	|void	|pad_push	|NN PADLIST *padlist|int depth
 pR	|HV*	|pad_compname_type|const PADOFFSET po
 
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)

@@ -250,7 +250,6 @@ if ($PLATFORM eq 'win32') {
 		     PL_linestart
 		     PL_modcount
 		     PL_pending_ident
-		     PL_sortcxix
 		     PL_sublex_info
 		     PL_timesbuf
 		     main
@@ -308,7 +307,6 @@ if ($PLATFORM eq 'wince') {
 		     PL_linestart
 		     PL_modcount
 		     PL_pending_ident
-		     PL_sortcxix
 		     PL_sublex_info
 		     PL_timesbuf
 		     PL_collation_ix
@@ -509,7 +507,6 @@ elsif ($PLATFORM eq 'netware') {
 			PL_linestart
 			PL_modcount
 			PL_pending_ident
-			PL_sortcxix
 			PL_sublex_info
 			PL_timesbuf
 			main

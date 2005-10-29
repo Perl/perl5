@@ -138,7 +138,6 @@
 #define PL_screamnext		(vTHX->Tscreamnext)
 #define PL_secondgv		(vTHX->Tsecondgv)
 #define PL_sortcop		(vTHX->Tsortcop)
-#define PL_sortcxix		(vTHX->Tsortcxix)
 #define PL_sortstash		(vTHX->Tsortstash)
 #define PL_stack_base		(vTHX->Tstack_base)
 #define PL_stack_max		(vTHX->Tstack_max)
@@ -861,7 +860,6 @@
 #define PL_Tscreamnext		PL_screamnext
 #define PL_Tsecondgv		PL_secondgv
 #define PL_Tsortcop		PL_sortcop
-#define PL_Tsortcxix		PL_sortcxix
 #define PL_Tsortstash		PL_sortstash
 #define PL_Tstack_base		PL_stack_base
 #define PL_Tstack_max		PL_stack_max

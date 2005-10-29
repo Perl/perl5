@@ -11,6 +11,9 @@ BEGIN {
 	    exit 0;
 	}
     }
+    elsif(!grep {/blib/} @INC) {
+      unshift(@INC, qw(./inc ./blib/arch ./blib/lib));
+    }
 }
 
 use Test::More tests => 4;

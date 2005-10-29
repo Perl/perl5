@@ -15,7 +15,8 @@ BEGIN {
 
 
 use List::Util qw(reduce min);
-use Test::More tests => 14;
+use Test::More;
+plan tests => ($::PERL_ONLY ? 21 : 23);
 
 my $v = reduce {};
 
@@ -70,3 +71,71 @@ $a = 8; $b = 9;
 $v = reduce { $a * $b } 1,2,3;
 is( $a, 8, 'restore $a');
 is( $b, 9, 'restore $b');
+
+# Can we leave the sub with 'return'?
+$v = reduce {return $a+$b} 2,4,6;
+is($v, 12, 'return');
+
+# ... even in a loop?
+$v = reduce {while(1) {return $a+$b} } 2,4,6;
+is($v, 12, 'return from loop');
+
+# Does it work from another package?
+{ package Foo;
+  $a = $b;
+  ::is((List::Util::reduce {$a*$b} (1..4)), 24, 'other package');
+}
+
+# Can we undefine a reduce sub while it's running?
+sub self_immolate {undef &self_immolate; 1}
+eval { $v = reduce \&self_immolate, 1,2; };
+like($@, qr/^Can't undef active subroutine/, "undef active sub");
+
+# Redefining an active sub should not fail, but whether the
+# redefinition takes effect immediately depends on whether we're
+# running the Perl or XS implementation.
+
+sub self_updating { local $^W; *self_updating = sub{1} ;1 }
+eval { $v = reduce \&self_updating, 1,2; };
+is($@, '', 'redefine self');
+
+{ my $failed = 0;
+
+    sub rec { my $n = shift;
+        if (!defined($n)) {  # No arg means we're being called by reduce()
+            return 1; }
+        if ($n<5) { rec($n+1); }
+        else { $v = reduce \&rec, 1,2; }
+        $failed = 1 if !defined $n;
+    }
+
+    rec(1);
+    ok(!$failed, 'from active sub');
+}
+
+# Calling a sub from reduce should leave its refcount unchanged.
+SKIP: {
+    skip("No Internals::SvREFCNT", 1) if !defined &Internals::SvREFCNT;
+    sub mult {$a*$b}
+    my $refcnt = &Internals::SvREFCNT(\&mult);
+    $v = reduce \&mult, 1..6;
+    is(&Internals::SvREFCNT(\&mult), $refcnt, "Refcount unchanged");
+}
+
+# The remainder of the tests are only relevant for the XS
+# implementation. The Perl-only implementation behaves differently
+# (and more flexibly) in a way that we can't emulate from XS.
+if (!$::PERL_ONLY) { SKIP: {
+
+    skip("Poor man's MULTICALL can't cope", 2)
+      if !$List::Util::REAL_MULTICALL;
+
+    # Can we goto a label from the reduction sub?
+    eval {()=reduce{goto foo} 1,2; foo: 1};
+    like($@, qr/^Can't "goto" out of a pseudo block/, "goto label");
+
+    # Can we goto a subroutine?
+    eval {()=reduce{goto sub{}} 1,2;};
+    like($@, qr/^Can't goto subroutine from a sort sub/, "goto sub");
+
+} }

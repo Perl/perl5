@@ -541,6 +541,10 @@ struct context {
 #define CXt_BLOCK	5
 #define CXt_FORMAT	6
 
+/* private flags for CXt_SUB and CXt_NULL */
+#define CXp_MULTICALL	0x00000400	/* part of a multicall (so don't
+					   tear down context on exit). */ 
+
 /* private flags for CXt_EVAL */
 #define CXp_REAL	0x00000100	/* truly eval'', not a lookalike */
 #define CXp_TRYBLOCK	0x00000200	/* eval{}, not eval'' or similar */
@@ -555,6 +559,8 @@ struct context {
 #endif
 
 #define CxTYPE(c)	((c)->cx_type & CXTYPEMASK)
+#define CxMULTICALL(c)	(((c)->cx_type & CXp_MULTICALL)			\
+			 == CXp_MULTICALL)
 #define CxREALEVAL(c)	(((c)->cx_type & (CXt_EVAL|CXp_REAL))		\
 			 == (CXt_EVAL|CXp_REAL))
 #define CxTRYBLOCK(c)	(((c)->cx_type & (CXt_EVAL|CXp_TRYBLOCK))	\
@@ -700,3 +706,63 @@ typedef struct stackinfo PERL_SI;
 #define IN_PERL_COMPILETIME	(PL_curcop == &PL_compiling)
 #define IN_PERL_RUNTIME		(PL_curcop != &PL_compiling)
 
+/*
+=head1 Multicall Functions
+
+=for apidoc Ams||dMULTICALL
+Declare local variables for a multicall. See L<perlcall/Lightweight Callbacks>.
+
+=for apidoc Ams||PUSH_MULTICALL
+Opening bracket for a lightweight callback.
+See L<perlcall/Lightweight Callbacks>.
+
+=for apidoc Ams||MULTICALL
+Make a lightweight callback. See L<perlcall/Lightweight Callbacks>.
+
+=for apidoc Ams||POP_MULTICALL
+Closing bracket for a lightweight callback.
+See L<perlcall/Lightweight Callbacks>.
+
+=cut
+*/
+
+#define dMULTICALL \
+    SV **newsp;			/* set by POPBLOCK */			\
+    PERL_CONTEXT *cx;							\
+    CV *cv;								\
+    OP *multicall_cop;							\
+    bool multicall_oldcatch; 						\
+    U8 hasargs = 0		/* used by PUSHSUB */
+
+#define PUSH_MULTICALL \
+    STMT_START {							\
+	AV* padlist = CvPADLIST(cv);					\
+	ENTER;								\
+ 	multicall_oldcatch = CATCH_GET;					\
+	SAVETMPS; SAVEVPTR(PL_op);					\
+	CATCH_SET(TRUE);						\
+	PUSHBLOCK(cx, CXt_SUB|CXp_MULTICALL, PL_stack_sp);		\
+	PUSHSUB(cx);							\
+	if (++CvDEPTH(cv) >= 2) {					\
+	    PERL_STACK_OVERFLOW_CHECK();				\
+	    Perl_pad_push(aTHX_ padlist, CvDEPTH(cv));			\
+	}								\
+	SAVECOMPPAD();							\
+	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));			\
+	multicall_cop = CvSTART(cv);					\
+    } STMT_END
+
+#define MULTICALL \
+    STMT_START {							\
+	PL_op = multicall_cop;						\
+	CALLRUNOPS(aTHX);						\
+    } STMT_END
+
+#define POP_MULTICALL \
+    STMT_START {							\
+	LEAVESUB(cv);							\
+	CvDEPTH(cv)--;							\
+	POPBLOCK(cx,PL_curpm);						\
+	CATCH_SET(multicall_oldcatch);					\
+	LEAVE;								\
+    } STMT_END

@@ -7,6 +7,8 @@
 #include <perl.h>
 #include <XSUB.h>
 
+#include "multicall.h"
+
 #ifndef PERL_VERSION
 #    include <patchlevel.h>
 #    if !(defined(PERL_VERSION) || (SUBVERSION > 0 && defined(PATCHLEVEL)))
@@ -127,6 +129,10 @@ sv_tainted(SV *sv)
 #define dVAR dNOOP
 #endif
 
+#ifndef GvSVn
+#  define GvSVn GvSV
+#endif
+
 MODULE=List::Util	PACKAGE=List::Util
 
 void
@@ -230,52 +236,32 @@ reduce(block,...)
 PROTOTYPE: &@
 CODE:
 {
-    dVAR;
+    dVAR; dMULTICALL;
     SV *ret = sv_newmortal();
     int index;
     GV *agv,*bgv,*gv;
     HV *stash;
-    CV *cv;
-    OP *reducecop;
-    PERL_CONTEXT *cx;
-    SV** newsp;
     I32 gimme = G_SCALAR;
-    U8 hasargs = 0;
-    bool oldcatch = CATCH_GET;
+    SV **args = &PL_stack_base[ax];
 
     if(items <= 1) {
 	XSRETURN_UNDEF;
     }
+    cv = sv_2cv(block, &stash, &gv, 0);
+    PUSH_MULTICALL;
     agv = gv_fetchpv("a", TRUE, SVt_PV);
     bgv = gv_fetchpv("b", TRUE, SVt_PV);
     SAVESPTR(GvSV(agv));
     SAVESPTR(GvSV(bgv));
     GvSV(agv) = ret;
-    cv = sv_2cv(block, &stash, &gv, 0);
-    reducecop = CvSTART(cv);
-    SAVESPTR(CvROOT(cv)->op_ppaddr);
-    CvROOT(cv)->op_ppaddr = PL_ppaddr[OP_NULL];
-#ifdef PAD_SET_CUR
-    PAD_SET_CUR(CvPADLIST(cv),1);
-#else
-    SAVESPTR(PL_curpad);
-    PL_curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
-#endif
-    SAVETMPS;
-    SAVESPTR(PL_op);
-    SvSetSV(ret, ST(1));
-    CATCH_SET(TRUE);
-    PUSHBLOCK(cx, CXt_SUB, SP);
-    PUSHSUB(cx);
+    SvSetSV(ret, args[1]);
     for(index = 2 ; index < items ; index++) {
-	GvSV(bgv) = ST(index);
-	PL_op = reducecop;
-	CALLRUNOPS(aTHX);
+	GvSV(bgv) = args[index];
+	MULTICALL;
 	SvSetSV(ret, *PL_stack_sp);
     }
+    POP_MULTICALL;
     ST(0) = ret;
-    POPBLOCK(cx,PL_curpm);
-    CATCH_SET(oldcatch);
     XSRETURN(1);
 }
 
@@ -285,51 +271,30 @@ first(block,...)
 PROTOTYPE: &@
 CODE:
 {
-    dVAR;
+    dVAR; dMULTICALL;
     int index;
     GV *gv;
     HV *stash;
-    CV *cv;
-    OP *reducecop;
-    PERL_CONTEXT *cx;
-    SV** newsp;
     I32 gimme = G_SCALAR;
-    U8 hasargs = 0;
-    bool oldcatch = CATCH_GET;
+    SV **args = &PL_stack_base[ax];
 
     if(items <= 1) {
 	XSRETURN_UNDEF;
     }
-    SAVESPTR(GvSV(PL_defgv));
     cv = sv_2cv(block, &stash, &gv, 0);
-    reducecop = CvSTART(cv);
-    SAVESPTR(CvROOT(cv)->op_ppaddr);
-    CvROOT(cv)->op_ppaddr = PL_ppaddr[OP_NULL];
-#ifdef PAD_SET_CUR
-    PAD_SET_CUR(CvPADLIST(cv),1);
-#else
-    SAVESPTR(PL_curpad);
-    PL_curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
-#endif
-    SAVETMPS;
-    SAVESPTR(PL_op);
-    CATCH_SET(TRUE);
-    PUSHBLOCK(cx, CXt_SUB, SP);
-    PUSHSUB(cx);
+    PUSH_MULTICALL;
+    SAVESPTR(GvSV(PL_defgv));
 
     for(index = 1 ; index < items ; index++) {
-	GvSV(PL_defgv) = ST(index);
-	PL_op = reducecop;
-	CALLRUNOPS(aTHX);
+	GvSV(PL_defgv) = args[index];
+	MULTICALL;
 	if (SvTRUE(*PL_stack_sp)) {
+	  POP_MULTICALL;
 	  ST(0) = ST(index);
-	  POPBLOCK(cx,PL_curpm);
-	  CATCH_SET(oldcatch);
 	  XSRETURN(1);
 	}
     }
-    POPBLOCK(cx,PL_curpm);
-    CATCH_SET(oldcatch);
+    POP_MULTICALL;
     XSRETURN_UNDEF;
 }
 
@@ -538,19 +503,30 @@ CODE:
 
 BOOT:
 {
+    HV *lu_stash = gv_stashpvn("List::Util", 10, TRUE);
+    GV *rmcgv = *(GV**)hv_fetch(lu_stash, "REAL_MULTICALL", 14, TRUE);
+    SV *rmcsv;
 #if !defined(SvWEAKREF) || !defined(SvVOK)
-    HV *stash = gv_stashpvn("Scalar::Util", 12, TRUE);
-    GV *vargv = *(GV**)hv_fetch(stash, "EXPORT_FAIL", 11, TRUE);
+    HV *su_stash = gv_stashpvn("Scalar::Util", 12, TRUE);
+    GV *vargv = *(GV**)hv_fetch(su_stash, "EXPORT_FAIL", 11, TRUE);
     AV *varav;
     if (SvTYPE(vargv) != SVt_PVGV)
-	gv_init(vargv, stash, "Scalar::Util", 12, TRUE);
+	gv_init(vargv, su_stash, "Scalar::Util", 12, TRUE);
     varav = GvAVn(vargv);
 #endif
+    if (SvTYPE(rmcgv) != SVt_PVGV)
+	gv_init(rmcgv, lu_stash, "List::Util", 12, TRUE);
+    rmcsv = GvSVn(rmcgv);
 #ifndef SvWEAKREF
     av_push(varav, newSVpv("weaken",6));
     av_push(varav, newSVpv("isweak",6));
 #endif
 #ifndef SvVOK
     av_push(varav, newSVpv("isvstring",9));
+#endif
+#ifdef REAL_MULTICALL
+    sv_setsv(rmcsv, &PL_sv_yes);
+#else
+    sv_setsv(rmcsv, &PL_sv_no);
 #endif
 }

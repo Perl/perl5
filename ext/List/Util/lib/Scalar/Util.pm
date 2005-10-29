@@ -11,7 +11,7 @@ require List::Util; # List::Util loads the XS
 
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly openhandle refaddr isvstring looks_like_number set_prototype);
-$VERSION    = "1.17";
+$VERSION    = "1.18";
 $VERSION   = eval $VERSION;
 
 sub export_fail {
@@ -67,10 +67,15 @@ sub blessed ($) {
 
 sub refaddr($) {
   my $pkg = ref($_[0]) or return undef;
-  bless $_[0], 'Scalar::Util::Fake';
+  if (blessed($_[0])) {
+    bless $_[0], 'Scalar::Util::Fake';
+  }
+  else {
+    $pkg = undef;
+  }
   "$_[0]" =~ /0x(\w+)/;
   my $i = do { local $^W; hex $1 };
-  bless $_[0], $pkg;
+  bless $_[0], $pkg if defined $pkg;
   $i;
 }
 

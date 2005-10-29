@@ -147,7 +147,6 @@ PERLVAR(Tsortcop,	OP *)		/* user defined sort routine */
 PERLVAR(Tsortstash,	HV *)		/* which is in some package or other */
 PERLVAR(Tfirstgv,	GV *)		/* $a */
 PERLVAR(Tsecondgv,	GV *)		/* $b */
-PERLVAR(Tsortcxix,	I32)		/* from pp_ctl.c */
 
 /* float buffer */
 PERLVAR(Tefloatbuf,	char*)

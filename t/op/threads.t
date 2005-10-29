@@ -17,7 +17,7 @@ BEGIN {
        print "1..0 # Skip: no dynamic loading on miniperl, no threads\n";
        exit 0;
      }
-     plan(3);
+     plan(4);
 }
 use threads;
 
@@ -59,3 +59,39 @@ weaken $ref;
 threads->new(sub { $ref = $object } )->join; # $ref = $object causes problems
 print "ok";
 EOI
+
+#PR30333 - sort() crash with threads
+sub mycmp { length($b) <=> length($a) }
+
+sub do_sort_one_thread {
+   my $kid = shift;
+   print "# kid $kid before sort\n";
+   my @list = ( 'x', 'yy', 'zzz', 'a', 'bb', 'ccc', 'aaaaa', 'z',
+                'hello', 's', 'thisisalongname', '1', '2', '3',
+                'abc', 'xyz', '1234567890', 'm', 'n', 'p' );
+
+   for my $j (1..99999) {
+      for my $k (sort mycmp @list) {}
+   }
+   print "# kid $kid after sort, sleeping 1\n";
+   sleep(1);
+   print "# kid $kid exit\n";
+}
+
+sub do_sort_threads {
+   my $nthreads = shift;
+   my @kids = ();
+   for my $i (1..$nthreads) {
+      my $t = threads->new(\&do_sort_one_thread, $i);
+      print "# parent $$: continue\n";
+      push(@kids, $t);
+   }
+   for my $t (@kids) {
+      print "# parent $$: waiting for join\n";
+      $t->join();
+      print "# parent $$: thread exited\n";
+   }
+}
+
+do_sort_threads(2);        # crashes
+ok(1);

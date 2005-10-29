@@ -910,8 +910,6 @@ END_EXTERN_C
 #define PL_secondgv		(*Perl_Tsecondgv_ptr(aTHX))
 #undef  PL_sortcop
 #define PL_sortcop		(*Perl_Tsortcop_ptr(aTHX))
-#undef  PL_sortcxix
-#define PL_sortcxix		(*Perl_Tsortcxix_ptr(aTHX))
 #undef  PL_sortstash
 #define PL_sortstash		(*Perl_Tsortstash_ptr(aTHX))
 #undef  PL_stack_base

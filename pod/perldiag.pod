@@ -761,6 +761,11 @@ a block, except that it isn't a proper block.  This usually occurs if
 you tried to jump out of a sort() block or subroutine, which is a no-no.
 See L<perlfunc/goto>.
 
+=item Can't goto subroutine from a sort sub (or similar callback)
+(F) The "goto subroutine" call can't be used to jump out of the
+comparison sub for a sort(), or from a similar callback (such
+as the reduce() function in List::Util).
+
 =item Can't goto subroutine from an eval-%s
 
 (F) The "goto subroutine" call can't be used to jump out of an eval
@@ -953,13 +958,6 @@ from the CRTL's internal environment array and discovered the array was
 missing.  You need to figure out where your CRTL misplaced its environ
 or define F<PERL_ENV_TABLES> (see L<perlvms>) so that environ is not
 searched.
-
-=item Can't redefine active sort subroutine %s
-
-(F) Perl optimizes the internal handling of sort subroutines and keeps
-pointers into them.  You tried to redefine one such sort subroutine when
-it was currently active, which is not allowed.  If you really want to do
-this, you should write C<sort { &func } @x> instead of C<sort func @x>.
 
 =item Can't "redo" outside a loop block
 

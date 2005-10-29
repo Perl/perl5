@@ -3760,11 +3760,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		GvNAMELEN(dstr) = len;
 		SvFAKE_on(dstr);	/* can coerce to non-glob */
 	    }
-	    /* ahem, death to those who redefine active sort subs */
-	    else if (PL_curstackinfo->si_type == PERLSI_SORT
-		     && GvCV(dstr) && PL_sortcop == CvSTART(GvCV(dstr)))
-		Perl_croak(aTHX_ "Can't redefine active sort subroutine %s",
-		      GvNAME(dstr));
 
 #ifdef GV_UNIQUE_CHECK
                 if (GvUNIQUE((GV*)dstr)) {
@@ -3867,13 +3862,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 			    if (!GvCVGEN((GV*)dstr) &&
 				(CvROOT(cv) || CvXSUB(cv)))
 			    {
-				/* ahem, death to those who redefine
-				 * active sort subs */
-				if (PL_curstackinfo->si_type == PERLSI_SORT &&
-				      PL_sortcop == CvSTART(cv))
-				    Perl_croak(aTHX_
-				    "Can't redefine active sort subroutine %s",
-					  GvENAME((GV*)dstr));
  				/* Redefining a sub - warning is mandatory if
  				   it was a const and its value changed. */
  				if (ckWARN(WARN_REDEFINE)
@@ -11525,7 +11513,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_sortstash	= hv_dup(proto_perl->Tsortstash, param);
     PL_firstgv		= gv_dup(proto_perl->Tfirstgv, param);
     PL_secondgv		= gv_dup(proto_perl->Tsecondgv, param);
-    PL_sortcxix		= proto_perl->Tsortcxix;
     PL_efloatbuf	= Nullch;		/* reinits on demand */
     PL_efloatsize	= 0;			/* reinits on demand */
 

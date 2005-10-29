@@ -706,6 +706,7 @@ ext/List/Util/Changes		Util extension
 ext/List/Util/lib/List/Util.pm	List::Util
 ext/List/Util/lib/Scalar/Util.pm	Scalar::Util
 ext/List/Util/Makefile.PL	Util extension
+ext/List/Util/multicall.h	Util extension
 ext/List/Util/README		Util extension
 ext/List/Util/t/blessed.t	Scalar::Util
 ext/List/Util/t/dualvar.t	Scalar::Util

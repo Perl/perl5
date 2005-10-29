@@ -14,7 +14,7 @@ BEGIN {
 }
 
 
-use Test::More tests => 19;
+use Test::More tests => 29;
 
 use Scalar::Util qw(refaddr);
 use vars qw($t $y $x *F $v $r);
@@ -32,10 +32,13 @@ foreach $r ({}, \$t, [], \*F, sub {}) {
   my $n = "$r";
   $n =~ /0x(\w+)/;
   my $addr = do { local $^W; hex $1 };
+  my $before = ref($r);
   is( refaddr($r), $addr, $n);
+  is( ref($r), $before, $n);
 
   my $obj = bless $r, 'FooBar';
   is( refaddr($r), $addr, "blessed with overload $n");
+  is( ref($r), 'FooBar', $n);
 }
 
 {

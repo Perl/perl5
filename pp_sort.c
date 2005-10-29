@@ -1542,14 +1542,8 @@ PP(pp_sort)
 
 	    if (is_xsub)
 		PL_sortcop = (OP*)cv;
-	    else {
+	    else
 		PL_sortcop = CvSTART(cv);
-		SAVEVPTR(CvROOT(cv)->op_ppaddr);
-		CvROOT(cv)->op_ppaddr = PL_ppaddr[OP_NULL];
-
-		SAVECOMPPAD();
-		PAD_SET_CUR_NOSAVE(CvPADLIST(cv), 1);
-            }
 	}
     }
     else {
@@ -1574,6 +1568,10 @@ PP(pp_sort)
 	    }
 	}
 	else {
+	    if (SvREADONLY(av))
+		Perl_croak(aTHX_ PL_no_modify);
+	    else
+		SvREADONLY_on(av);
 	    p1 = p2 = AvARRAY(av);
 	    sorting_av = 1;
 	}
@@ -1645,13 +1643,12 @@ PP(pp_sort)
 	    CATCH_SET(TRUE);
 	    PUSHSTACKi(PERLSI_SORT);
 	    if (!hasargs && !is_xsub) {
-		if (PL_sortstash != stash || !PL_firstgv || !PL_secondgv) {
-		    SAVESPTR(PL_firstgv);
-		    SAVESPTR(PL_secondgv);
-		    PL_firstgv = gv_fetchpv("a", TRUE, SVt_PV);
-		    PL_secondgv = gv_fetchpv("b", TRUE, SVt_PV);
-		    PL_sortstash = stash;
-		}
+		SAVESPTR(PL_firstgv);
+		SAVESPTR(PL_secondgv);
+		SAVESPTR(PL_sortstash);
+		PL_firstgv = gv_fetchpv("a", TRUE, SVt_PV);
+		PL_secondgv = gv_fetchpv("b", TRUE, SVt_PV);
+		PL_sortstash = stash;
 		SAVESPTR(GvSV(PL_firstgv));
 		SAVESPTR(GvSV(PL_secondgv));
 	    }
@@ -1661,23 +1658,39 @@ PP(pp_sort)
 		cx->cx_type = CXt_SUB;
 		cx->blk_gimme = G_SCALAR;
 		PUSHSUB(cx);
-	    }
-	    PL_sortcxix = cxstack_ix;
+		if (!is_xsub) {
+		    AV* padlist = CvPADLIST(cv);
 
-	    if (hasargs && !is_xsub) {
-		/* This is mostly copied from pp_entersub */
-		AV *av = (AV*)PAD_SVl(0);
+		    if (++CvDEPTH(cv) >= 2) {
+			PERL_STACK_OVERFLOW_CHECK();
+			pad_push(padlist, CvDEPTH(cv));
+		    }
+		    SAVECOMPPAD();
+		    PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
 
-		cx->blk_sub.savearray = GvAV(PL_defgv);
-		GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
-		CX_CURPAD_SAVE(cx->blk_sub);
-		cx->blk_sub.argarray = av;
+		    if (hasargs) {
+			/* This is mostly copied from pp_entersub */
+			AV *av = (AV*)PAD_SVl(0);
+
+			cx->blk_sub.savearray = GvAV(PL_defgv);
+			GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
+			CX_CURPAD_SAVE(cx->blk_sub);
+			cx->blk_sub.argarray = av;
+		    }
+
+		}
 	    }
+	    cx->cx_type |= CXp_MULTICALL;
 	    
 	    start = p1 - max;
 	    sortsvp(aTHX_ start, max,
 		    is_xsub ? sortcv_xsub : hasargs ? sortcv_stacked : sortcv);
 
+	    if (!(flags & OPf_SPECIAL)) {
+		LEAVESUB(cv);
+		if (!is_xsub)
+		    CvDEPTH(cv)--;
+	    }
 	    POPBLOCK(cx,PL_curpm);
 	    PL_stack_sp = newsp;
 	    POPSTACK;
@@ -1706,7 +1719,9 @@ PP(pp_sort)
 	    }
 	}
     }
-    if (av && !sorting_av) {
+    if (sorting_av)
+	SvREADONLY_off(av);
+    else if (av && !sorting_av) {
 	/* simulate pp_aassign of tied AV */
 	SV** const base = ORIGMARK+1;
 	for (i=0; i < max; i++) {

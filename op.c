@@ -4345,9 +4345,6 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		SAVEFREESV(PL_compcv);
 		goto done;
 	    }
-	    /* ahem, death to those who redefine active sort subs */
-	    if (PL_curstackinfo->si_type == PERLSI_SORT && PL_sortcop == CvSTART(cv))
-		Perl_croak(aTHX_ "Can't redefine active sort subroutine %s", name);
 	    if (block) {
 		if (ckWARN(WARN_REDEFINE)
 		    || (CvCONST(cv)
