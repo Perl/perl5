@@ -2034,8 +2034,8 @@ to enter commands and have a valid context to be in.
             $term || &setterm;
             print_help(<<EOP);
 Debugged program terminated.  Use B<q> to quit or B<R> to restart,
-  use B<O> I<inhibit_exit> to avoid stopping after program termination,
-  B<h q>, B<h R> or B<h O> to get additional info.  
+  use B<o> I<inhibit_exit> to avoid stopping after program termination,
+  B<h q>, B<h R> or B<h o> to get additional info.  
 EOP
 
             # Set the DB::eval context appropriately.
