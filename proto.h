@@ -662,9 +662,9 @@ PERL_CALLCONV SV*	Perl_hv_iterkeysv(pTHX_ HE* entry)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV HE*	Perl_hv_iternext(pTHX_ HV* tb)
+/* PERL_CALLCONV HE*	Perl_hv_iternext(pTHX_ HV* tb)
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
+			__attribute__nonnull__(pTHX_1); */
 
 PERL_CALLCONV SV*	Perl_hv_iternextsv(pTHX_ HV* hv, char** key, I32* retlen)
 			__attribute__warn_unused_result__

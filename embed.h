@@ -273,7 +273,6 @@
 #define hv_iterinit		Perl_hv_iterinit
 #define hv_iterkey		Perl_hv_iterkey
 #define hv_iterkeysv		Perl_hv_iterkeysv
-#define hv_iternext		Perl_hv_iternext
 #define hv_iternextsv		Perl_hv_iternextsv
 #define hv_iternext_flags	Perl_hv_iternext_flags
 #define hv_iterval		Perl_hv_iterval
@@ -2263,7 +2262,6 @@
 #define hv_iterinit(a)		Perl_hv_iterinit(aTHX_ a)
 #define hv_iterkey(a,b)		Perl_hv_iterkey(aTHX_ a,b)
 #define hv_iterkeysv(a)		Perl_hv_iterkeysv(aTHX_ a)
-#define hv_iternext(a)		Perl_hv_iternext(aTHX_ a)
 #define hv_iternextsv(a,b,c)	Perl_hv_iternextsv(aTHX_ a,b,c)
 #define hv_iternext_flags(a,b)	Perl_hv_iternext_flags(aTHX_ a,b)
 #define hv_iterval(a,b)		Perl_hv_iterval(aTHX_ a,b)

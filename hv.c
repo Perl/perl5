@@ -1889,6 +1889,8 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, I32 len, int flags)
 }
 
 /*
+hv_iternext is implemented as a macro in hv.h
+
 =for apidoc hv_iternext
 
 Returns entries from a hash iterator.  See C<hv_iterinit>.
@@ -1901,16 +1903,6 @@ to free the entry on the next call to C<hv_iternext>, so you must not discard
 your iterator immediately else the entry will leak - call C<hv_iternext> to
 trigger the resource deallocation.
 
-=cut
-*/
-
-HE *
-Perl_hv_iternext(pTHX_ HV *hv)
-{
-    return hv_iternext_flags(hv, 0);
-}
-
-/*
 =for apidoc hv_iternext_flags
 
 Returns entries from a hash iterator.  See C<hv_iterinit> and C<hv_iternext>.

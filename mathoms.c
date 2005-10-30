@@ -595,6 +595,12 @@ Perl_gv_fetchmethod(pTHX_ HV *stash, const char *name)
     return gv_fetchmethod_autoload(stash, name, TRUE);
 }
 
+HE *
+Perl_hv_iternext(pTHX_ HV *hv)
+{
+    return hv_iternext_flags(hv, 0);
+}
+
 AV *
 Perl_av_fake(pTHX_ register I32 size, register SV **strp)
 {

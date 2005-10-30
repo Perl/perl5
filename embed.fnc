@@ -285,7 +285,7 @@ Ap	|void	|hv_free_ent	|NN HV* hv|NULLOK HE* entryK
 Apd	|I32	|hv_iterinit	|NN HV* tb
 ApdR	|char*	|hv_iterkey	|NN HE* entry|NN I32* retlen
 ApdR	|SV*	|hv_iterkeysv	|NN HE* entry
-ApdR	|HE*	|hv_iternext	|NN HV* tb
+ApdRbm	|HE*	|hv_iternext	|NN HV* tb
 ApdR	|SV*	|hv_iternextsv	|NN HV* hv|NN char** key|NN I32* retlen
 ApMdR	|HE*	|hv_iternext_flags|NN HV* tb|I32 flags
 ApdR	|SV*	|hv_iterval	|NN HV* tb|NN HE* entry
