@@ -782,6 +782,12 @@ PP(pp_mapstart)
     DIE(aTHX_ "panic: mapstart");	/* uses grepstart */
 }
 
+U8 *
+Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
+{
+    return Perl_uvuni_to_utf8_flags(aTHX_ d, uv, 0);
+}
+
 bool
 Perl_is_utf8_string_loc(pTHX_ const U8 *s, STRLEN len, const U8 **ep)
 {

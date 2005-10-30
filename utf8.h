@@ -332,6 +332,7 @@ encoded character.
 
 #define IS_UTF8_CHAR_FAST(n) ((n) <= 4)
 
+#define uvuni_to_utf8(d, uv)		uvuni_to_utf8_flags(d, uv, 0)
 #define is_utf8_string_loc(s, len, ep)	is_utf8_string_loclen(s, len, ep, 0)
 
 #endif /* IS_UTF8_CHAR() for UTF-8 */

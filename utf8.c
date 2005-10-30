@@ -166,12 +166,6 @@ Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 #endif
 #endif /* Loop style */
 }
- 
-U8 *
-Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
-{
-    return Perl_uvuni_to_utf8_flags(aTHX_ d, uv, 0);
-}
 
 /*
 
