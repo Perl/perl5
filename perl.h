@@ -5402,8 +5402,10 @@ extern void moncontrol(int);
 /* do_exec is a real function implemented in a platform specific file.  */
 #  define do_exec			Perl_do_exec
 #endif
-#ifndef OS2
-#define do_aexec(really, mark,sp)	do_aexec5(really, mark, sp, 0, 0)
+#ifdef OS2
+#  define do_aexec			Perl_do_aexec
+#else
+#  define do_aexec(really, mark,sp)	do_aexec5(really, mark, sp, 0, 0)
 #endif
 
 /* and finally... */
