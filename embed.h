@@ -165,7 +165,6 @@
 #define do_close		Perl_do_close
 #ifdef PERL_CORE
 #define do_eof			Perl_do_eof
-#define do_exec			Perl_do_exec
 #endif
 #if defined(WIN32) || defined(__SYMBIAN32__)
 #define do_aspawn		Perl_do_aspawn
@@ -2159,7 +2158,6 @@
 #define do_close(a,b)		Perl_do_close(aTHX_ a,b)
 #ifdef PERL_CORE
 #define do_eof(a)		Perl_do_eof(aTHX_ a)
-#define do_exec(a)		Perl_do_exec(aTHX_ a)
 #endif
 #if defined(WIN32) || defined(__SYMBIAN32__)
 #define do_aspawn(a,b,c)	Perl_do_aspawn(aTHX_ a,b,c)

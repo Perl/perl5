@@ -5390,8 +5390,15 @@ extern void moncontrol(int);
 #pragma message disable (mainparm) /* Perl uses the envp in main(). */
 #endif
 
+#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC) && !defined(__SYMBIAN32__) && !defined(MACOS_TRADITIONAL)
+#define PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
+#endif
+
 #define do_open(g, n, l, a, rm, rp, sf) \
 	do_openn(g, n, l, a, rm, rp, sf, (SV **) NULL, 0)
+#ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
+#define do_exec(cmd)	do_exec3(cmd,0,0)
+#endif
 
 /* and finally... */
 #define PERL_PATCHLEVEL_H_IMPLICIT

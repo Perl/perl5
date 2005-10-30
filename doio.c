@@ -1473,13 +1473,7 @@ Perl_do_execfree(pTHX)
     PL_Cmd = Nullch;
 }
 
-#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC) && !defined(__SYMBIAN32__) && !defined(MACOS_TRADITIONAL)
-
-bool
-Perl_do_exec(pTHX_ const char *cmd)
-{
-    return do_exec3(cmd,0,0);
-}
+#ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
 
 bool
 Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
