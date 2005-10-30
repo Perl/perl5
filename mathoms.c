@@ -734,6 +734,13 @@ badexit:
 }
 #endif
 
+/* Backwards compatibility. */
+int
+Perl_init_i18nl14n(pTHX_ int printwarn)
+{
+    return init_i18nl10n(printwarn);
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd

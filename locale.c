@@ -543,13 +543,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     return ok;
 }
 
-/* Backwards compatibility. */
-int
-Perl_init_i18nl14n(pTHX_ int printwarn)
-{
-    return init_i18nl10n(printwarn);
-}
-
 #ifdef USE_LOCALE_COLLATE
 
 /*
