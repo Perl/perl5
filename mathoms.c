@@ -601,6 +601,22 @@ Perl_hv_iternext(pTHX_ HV *hv)
     return hv_iternext_flags(hv, 0);
 }
 
+void
+Perl_hv_magic(pTHX_ HV *hv, GV *gv, int how)
+{
+    sv_magic((SV*)hv, (SV*)gv, how, Nullch, 0);
+}
+
+#if 0 /* use the macro from hv.h instead */
+
+char*	
+Perl_sharepvn(pTHX_ const char *sv, I32 len, U32 hash)
+{
+    return HEK_KEY(share_hek(sv, len, hash));
+}
+
+#endif
+
 AV *
 Perl_av_fake(pTHX_ register I32 size, register SV **strp)
 {

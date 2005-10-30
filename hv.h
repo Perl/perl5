@@ -361,6 +361,7 @@ C<SV*>.
 #define HV_ITERNEXT_WANTPLACEHOLDERS	0x01	/* Don't skip placeholders.  */
 
 #define hv_iternext(hv)	hv_iternext_flags(hv, 0)
+#define hv_magic(hv, gv, how) sv_magic((SV*)(hv), (SV*)(gv), how, Nullch, 0)
 
 /* available as a function in hv.c */
 #define Perl_sharepvn(sv, len, hash) HEK_KEY(share_hek(sv, len, hash))

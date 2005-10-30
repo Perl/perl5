@@ -684,8 +684,8 @@ PERL_CALLCONV SV*	Perl_hv_iterval(pTHX_ HV* tb, HE* entry)
 PERL_CALLCONV void	Perl_hv_ksplit(pTHX_ HV* hv, IV newmax)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV void	Perl_hv_magic(pTHX_ HV* hv, GV* gv, int how)
-			__attribute__nonnull__(pTHX_1);
+/* PERL_CALLCONV void	Perl_hv_magic(pTHX_ HV* hv, GV* gv, int how)
+			__attribute__nonnull__(pTHX_1); */
 
 PERL_CALLCONV SV**	Perl_hv_store(pTHX_ HV* tb, const char* key, I32 klen, SV* val, U32 hash);
 PERL_CALLCONV HE*	Perl_hv_store_ent(pTHX_ HV* tb, SV* key, SV* val, U32 hash);

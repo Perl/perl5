@@ -277,7 +277,6 @@
 #define hv_iternext_flags	Perl_hv_iternext_flags
 #define hv_iterval		Perl_hv_iterval
 #define hv_ksplit		Perl_hv_ksplit
-#define hv_magic		Perl_hv_magic
 #define hv_store		Perl_hv_store
 #define hv_store_ent		Perl_hv_store_ent
 #define hv_store_flags		Perl_hv_store_flags
@@ -2266,7 +2265,6 @@
 #define hv_iternext_flags(a,b)	Perl_hv_iternext_flags(aTHX_ a,b)
 #define hv_iterval(a,b)		Perl_hv_iterval(aTHX_ a,b)
 #define hv_ksplit(a,b)		Perl_hv_ksplit(aTHX_ a,b)
-#define hv_magic(a,b,c)		Perl_hv_magic(aTHX_ a,b,c)
 #define hv_store(a,b,c,d,e)	Perl_hv_store(aTHX_ a,b,c,d,e)
 #define hv_store_ent(a,b,c,d)	Perl_hv_store_ent(aTHX_ a,b,c,d)
 #define hv_store_flags(a,b,c,d,e,f)	Perl_hv_store_flags(aTHX_ a,b,c,d,e,f)

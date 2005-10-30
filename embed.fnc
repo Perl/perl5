@@ -290,7 +290,7 @@ ApdR	|SV*	|hv_iternextsv	|NN HV* hv|NN char** key|NN I32* retlen
 ApMdR	|HE*	|hv_iternext_flags|NN HV* tb|I32 flags
 ApdR	|SV*	|hv_iterval	|NN HV* tb|NN HE* entry
 Ap	|void	|hv_ksplit	|NN HV* hv|IV newmax
-Apd	|void	|hv_magic	|NN HV* hv|NULLOK GV* gv|int how
+Apdbm	|void	|hv_magic	|NN HV* hv|NULLOK GV* gv|int how
 Apd	|SV**	|hv_store	|NULLOK HV* tb|NULLOK const char* key|I32 klen|NULLOK SV* val \
 				|U32 hash
 Apd	|HE*	|hv_store_ent	|NULLOK HV* tb|NULLOK SV* key|NULLOK SV* val|U32 hash
