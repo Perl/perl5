@@ -500,7 +500,7 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
 #ifdef USE_LOCALE_NUMERIC
     if (PL_numeric_radix_sv && IN_LOCALE) { 
         STRLEN len;
-        const char* radix = SvPV(PL_numeric_radix_sv, len);
+        const char * const radix = SvPV(PL_numeric_radix_sv, len);
         if (*sp + len <= send && memEQ(*sp, radix, len)) {
             *sp += len;
             return TRUE; 
@@ -543,7 +543,7 @@ int
 Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
 {
   const char *s = pv;
-  const char *send = pv + len;
+  const char * const send = pv + len;
   const UV max_div_10 = UV_MAX / 10;
   const char max_mod_10 = UV_MAX % 10;
   int numtype = 0;
@@ -765,7 +765,7 @@ S_mulexp10(NV value, I32 exponent)
 
 #if ((defined(VMS) && !defined(__IEEE_FP)) || defined(_UNICOS)) && defined(NV_MAX_10_EXP)
     STMT_START {
-	NV exp_v = log10(value);
+	const NV exp_v = log10(value);
 	if (exponent >= NV_MAX_10_EXP || exponent + exp_v >= NV_MAX_10_EXP)
 	    return NV_MAX;
 	if (exponent < 0) {

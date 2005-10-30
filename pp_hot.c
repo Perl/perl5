@@ -553,7 +553,7 @@ PP(pp_pushre)
      * We ass_u_me that LvTARGOFF() comes first, and that two STRLENs
      * will be enough to hold an OP*.
      */
-    SV* sv = sv_newmortal();
+    SV* const sv = sv_newmortal();
     sv_upgrade(sv, SVt_PVLV);
     LvTYPE(sv) = '/';
     Copy(&PL_op, &LvTARGOFF(sv), 1, OP*);
@@ -1159,9 +1159,9 @@ PP(pp_aassign)
 PP(pp_qr)
 {
     dSP;
-    register PMOP *pm = cPMOP;
-    SV *rv = sv_newmortal();
-    SV *sv = newSVrv(rv, "Regexp");
+    register PMOP * const pm = cPMOP;
+    SV * const rv = sv_newmortal();
+    SV * const sv = newSVrv(rv, "Regexp");
     if (pm->op_pmdynflags & PMdf_TAINTED)
         SvTAINTED_on(rv);
     sv_magic(sv,(SV*)ReREFCNT_inc(PM_GETRE(pm)), PERL_MAGIC_qr,0,0);
@@ -2282,7 +2282,7 @@ PP(pp_grepwhile)
     /* All done yet? */
     if (PL_stack_base + *PL_markstack_ptr > SP) {
 	I32 items;
-	I32 gimme = GIMME_V;
+	const I32 gimme = GIMME_V;
 
 	LEAVE;					/* exit outer scope */
 	(void)POPMARK;				/* pop src */
@@ -2291,7 +2291,7 @@ PP(pp_grepwhile)
 	SP = PL_stack_base + POPMARK;		/* pop original mark */
 	if (gimme == G_SCALAR) {
 	    if (PL_op->op_private & OPpGREP_LEX) {
-		SV* sv = sv_newmortal();
+		SV* const sv = sv_newmortal();
 		sv_setiv(sv, items);
 		PUSHs(sv);
 	    }

@@ -4507,8 +4507,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	const char *tname = (name ? name : aname);
 
 	if (PERLDB_SUBLINE && PL_curstash != PL_debstash) {
-	    SV *sv = NEWSV(0,0);
-	    SV *tmpstr = sv_newmortal();
+	    SV * const sv = NEWSV(0,0);
+	    SV * const tmpstr = sv_newmortal();
 	    GV *db_postponed = gv_fetchpv("DB::postponed", GV_ADDMULTI, SVt_PVHV);
 	    HV *hv;
 

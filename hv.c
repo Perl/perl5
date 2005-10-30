@@ -1942,7 +1942,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
     oldentry = entry = iter->xhv_eiter; /* HvEITER(hv) */
 
     if ((mg = SvTIED_mg((SV*)hv, PERL_MAGIC_tied))) {
-	SV *key = sv_newmortal();
+	SV * const key = sv_newmortal();
 	if (entry) {
 	    sv_setsv(key, HeSVKEY_force(entry));
 	    SvREFCNT_dec(HeSVKEY(entry));	/* get rid of previous key */
@@ -2092,7 +2092,7 @@ Perl_hv_iterval(pTHX_ HV *hv, register HE *entry)
 {
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv, PERL_MAGIC_tied)) {
-	    SV* sv = sv_newmortal();
+	    SV* const sv = sv_newmortal();
 	    if (HeKLEN(entry) == HEf_SVKEY)
 		mg_copy((SV*)hv, sv, (char*)HeKEY_sv(entry), HEf_SVKEY);
 	    else

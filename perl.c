@@ -810,10 +810,10 @@ perl_destruct(pTHXx)
      */
     {
         I32 i = AvFILLp(PL_regex_padav) + 1;
-        SV **ary = AvARRAY(PL_regex_padav);
+        SV * const * const ary = AvARRAY(PL_regex_padav);
 
         while (i) {
-            SV *resv = ary[--i];
+            SV * const resv = ary[--i];
 
             if (SvFLAGS(resv) & SVf_BREAK) {
                 /* this is PL_reg_curpm, already freed
@@ -1089,7 +1089,7 @@ perl_destruct(pTHXx)
 	 */
 	I32 riter = 0;
 	const I32 max = HvMAX(PL_strtab);
-	HE ** const array = HvARRAY(PL_strtab);
+	HE * const * const array = HvARRAY(PL_strtab);
 	HE *hent = array[0];
 
 	for (;;) {
@@ -1826,7 +1826,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 			 */
 
 			const char *space;
-			char *pv = SvPV_nolen(opts_prog);
+			char * const pv = SvPV_nolen(opts_prog);
 			const char c = pv[opts+76];
 			pv[opts+76] = '\0';
 			space = strrchr(pv+opts+26, ' ');
@@ -2337,7 +2337,7 @@ set and the variable does not exist then NULL is returned.
 AV*
 Perl_get_av(pTHX_ const char *name, I32 create)
 {
-    GV* gv = gv_fetchpv(name, create, SVt_PVAV);
+    GV* const gv = gv_fetchpv(name, create, SVt_PVAV);
     if (create)
     	return GvAVn(gv);
     if (gv)
@@ -2384,7 +2384,7 @@ subroutine does not exist then NULL is returned.
 CV*
 Perl_get_cv(pTHX_ const char *name, I32 create)
 {
-    GV* gv = gv_fetchpv(name, create, SVt_PVCV);
+    GV* const gv = gv_fetchpv(name, create, SVt_PVCV);
     /* XXX unsafe for threads if eval_owner isn't held */
     /* XXX this is probably not what they think they're getting.
      * It has the same effect as "sub name;", i.e. just a forward
@@ -2486,7 +2486,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
     I32 oldscope;
     bool oldcatch = CATCH_GET;
     int ret;
-    OP* oldop = PL_op;
+    OP* const oldop = PL_op;
     dJMPENV;
 
     if (flags & G_DISCARD) {
@@ -2653,7 +2653,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     volatile I32 oldmark = SP - PL_stack_base;
     volatile I32 retval = 0;
     int ret;
-    OP* oldop = PL_op;
+    OP* const oldop = PL_op;
     dJMPENV;
 
     if (flags & G_DISCARD) {
@@ -2786,9 +2786,9 @@ Perl_require_pv(pTHX_ const char *pv)
 void
 Perl_magicname(pTHX_ const char *sym, const char *name, I32 namlen)
 {
-    register GV *gv;
+    register GV * const gv = gv_fetchpv(sym,TRUE, SVt_PV);
 
-    if ((gv = gv_fetchpv(sym,TRUE, SVt_PV)))
+    if (gv)
 	sv_magic(GvSV(gv), (SV*)gv, PERL_MAGIC_sv, name, namlen);
 }
 
@@ -2880,7 +2880,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
 	static const char debopts[] = "psltocPmfrxu HXDSTRJvCAq";
 
 	for (; isALNUM(**s); (*s)++) {
-	    const char *d = strchr(debopts,**s);
+	    const char * const d = strchr(debopts,**s);
 	    if (d)
 		i |= 1 << (d - debopts);
 	    else if (ckWARN_d(WARN_DEBUGGING))
@@ -2989,8 +2989,7 @@ Perl_moreswitches(pTHX_ char *s)
 	   in the fashion that -MSome::Mod does. */
 	if (*s == ':' || *s == '=') {
             const char *start;
-	    SV *sv;
-	    sv = newSVpv("use Devel::", 0);
+	    SV * const sv = newSVpv("use Devel::", 0);
 	    start = ++s;
 	    /* We now allow -d:Module=Foo,Bar */
 	    while(isALNUM(*s) || *s==':') ++s;
@@ -3540,9 +3539,9 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
     }
 #else /* IAMSUID */
     else if (PL_preprocess) {
-	const char *cpp_cfg = CPPSTDIN;
-	SV *cpp = newSVpvn("",0);
-	SV *cmd = NEWSV(0,0);
+	const char * const cpp_cfg = CPPSTDIN;
+	SV * const cpp = newSVpvn("",0);
+	SV * const cmd = NEWSV(0,0);
 
 	if (cpp_cfg[0] == 0) /* PERL_MICRO? */
 	     Perl_croak(aTHX_ "Can't run with cpp -P with CPPSTDIN undefined");
@@ -4337,7 +4336,7 @@ S_forbid_setid(pTHX_ const char *s)
 void
 Perl_init_debugger(pTHX)
 {
-    HV *ostash = PL_curstash;
+    HV * const ostash = PL_curstash;
 
     PL_curstash = PL_debstash;
     PL_dbargs = GvAV(gv_AVadd((gv_fetchpv("DB::args", GV_ADDMULTI, SVt_PVAV))));
@@ -4908,8 +4907,8 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
 	if (addsubdirs || addoldvers) {
 #ifdef PERL_INC_VERSION_LIST
 	    /* Configure terminates PERL_INC_VERSION_LIST with a NULL */
-	    const char *incverlist[] = { PERL_INC_VERSION_LIST };
-	    const char **incver;
+	    const char * const incverlist[] = { PERL_INC_VERSION_LIST };
+	    const char * const *incver;
 #endif
 #ifdef VMS
 	    char *unix;

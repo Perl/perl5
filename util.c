@@ -552,7 +552,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	return Nullch;
     }
     if (SvTYPE(littlestr) != SVt_PVBM || !SvVALID(littlestr)) {
-	char *b = ninstr((char*)big,(char*)bigend,
+	char * const b = ninstr((char*)big,(char*)bigend,
 			 (char*)little, (char*)little + littlelen);
 
 	if (!b && SvTAIL(littlestr)) {	/* Automatically multiline!  */
@@ -569,7 +569,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
     }
 
     {	/* Do actual FBM.  */
-	register const unsigned char *table = little + littlelen + FBM_TABLE_OFFSET;
+	register const unsigned char * const table = little + littlelen + FBM_TABLE_OFFSET;
 	register const unsigned char *oldlittle;
 
 	if (littlelen > (STRLEN)(bigend - big))
@@ -985,7 +985,7 @@ S_closest_cop(pTHX_ COP *cop, const OP *o)
 SV *
 Perl_vmess(pTHX_ const char *pat, va_list *args)
 {
-    SV *sv = mess_alloc();
+    SV * const sv = mess_alloc();
     static const char dgd[] = " during global destruction.\n";
 
     sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
@@ -1510,16 +1510,17 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
         if (val == NULL) {
             (void)unsetenv(nam);
         } else {
-            int nlen = strlen(nam);
-            int vlen = strlen(val);
-            char *new_env =
+	    const int nlen = strlen(nam);
+	    const int vlen = strlen(val);
+	    char * const new_env =
                 (char*)safesysmalloc((nlen + vlen + 2) * sizeof(char));
             my_setenv_format(new_env, nam, nlen, val, vlen);
             (void)putenv(new_env);
         }
 #       else /* ! HAS_UNSETENV */
         char *new_env;
-        int nlen = strlen(nam), vlen;
+	const int nlen = strlen(nam);
+	int vlen;
         if (!val) {
 	   val = "";
         }
@@ -2640,12 +2641,9 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 #ifdef PERL_USES_PL_PIDSTATUS
     {
 	if (pid > 0) {
-	    SV** svp;
-
 	    /* The keys in PL_pidstatus are now the raw 4 (or 8) bytes of the
 	       pid, rather than a string form.  */
-
-	    svp = hv_fetch(PL_pidstatus,(const char*) &pid,sizeof(Pid_t),FALSE);
+	    SV * const * const svp = hv_fetch(PL_pidstatus,(const char*) &pid,sizeof(Pid_t),FALSE);
 	    if (svp && *svp != &PL_sv_undef) {
 		*statusp = SvIVX(*svp);
 		(void)hv_delete(PL_pidstatus,(const char*) &pid,sizeof(Pid_t),
@@ -2658,7 +2656,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 
 	    hv_iterinit(PL_pidstatus);
 	    if ((entry = hv_iternext(PL_pidstatus))) {
-		SV *sv = hv_iterval(PL_pidstatus,entry);
+		SV * const sv = hv_iterval(PL_pidstatus,entry);
 		I32 len;
 		const char *spid = hv_iterkey(entry,&len);
 
@@ -2740,7 +2738,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 #endif
 {
     /* Needs work for PerlIO ! */
-    FILE *f = PerlIO_findFILE(ptr);
+    FILE * const f = PerlIO_findFILE(ptr);
     I32 result = pclose(f);
     PerlIO_releaseFILE(ptr,f);
     return result;
@@ -2753,7 +2751,7 @@ I32
 Perl_my_pclose(pTHX_ PerlIO *ptr)
 {
     /* Needs work for PerlIO ! */
-    FILE *f = PerlIO_findFILE(ptr);
+    FILE * const f = PerlIO_findFILE(ptr);
     I32 result = djgpp_pclose(f);
     result = (result << 8) & 0xff00;
     PerlIO_releaseFILE(ptr,f);
@@ -2765,7 +2763,7 @@ void
 Perl_repeatcpy(pTHX_ register char *to, register const char *from, I32 len, register I32 count)
 {
     register I32 todo;
-    register const char *frombase = from;
+    register const char * const frombase = from;
 
     if (len == 1) {
 	register const char c = *from;
@@ -2789,7 +2787,7 @@ Perl_same_dirent(pTHX_ const char *a, const char *b)
     char *fb = strrchr(b,'/');
     Stat_t tmpstatbuf1;
     Stat_t tmpstatbuf2;
-    SV *tmpsv = sv_newmortal();
+    SV * const tmpsv = sv_newmortal();
 
     if (fa)
 	fa++;
@@ -2875,16 +2873,16 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 #  ifdef ALWAYS_DEFTYPES
     len = strlen(scriptname);
     if (!(len == 1 && *scriptname == '-') && scriptname[len-1] != ':') {
-	int hasdir, idx = 0, deftypes = 1;
+	int idx = 0, deftypes = 1;
 	bool seen_dot = 1;
 
-	hasdir = !dosearch || (strpbrk(scriptname,":[</") != Nullch) ;
+	const int hasdir = !dosearch || (strpbrk(scriptname,":[</") != Nullch);
 #  else
     if (dosearch) {
-	int hasdir, idx = 0, deftypes = 1;
+	int idx = 0, deftypes = 1;
 	bool seen_dot = 1;
 
-	hasdir = (strpbrk(scriptname,":[</") != Nullch) ;
+	const int hasdir = (strpbrk(scriptname,":[</") != Nullch);
 #  endif
 	/* The first time through, just add SEARCH_EXTS to whatever we
 	 * already have, so we can check for default file types. */

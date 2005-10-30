@@ -36,7 +36,7 @@ S_do_trans_simple(pTHX_ SV *sv)
     const I32 grows = PL_op->op_private & OPpTRANS_GROWS;
     STRLEN len;
 
-    const short *tbl = (short*)cPVOP->op_pv;
+    const short * const tbl = (short*)cPVOP->op_pv;
     if (!tbl)
 	Perl_croak(aTHX_ "panic: do_trans_simple line %d",__LINE__);
 
@@ -49,10 +49,9 @@ S_do_trans_simple(pTHX_ SV *sv)
 	    const I32 ch = tbl[*s];
 	    if (ch >= 0) {
 		matches++;
-		*s++ = (U8)ch;
+		*s = (U8)ch;
 	    }
-	    else
-		s++;
+	    s++;
 	}
 	SvSETMAGIC(sv);
         return matches;
@@ -308,7 +307,7 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)
 
     SV* const  rv = (SV*)cSVOP->op_sv;
     HV* const  hv = (HV*)SvRV(rv);
-    SV** svp = hv_fetch(hv, "NONE", 4, FALSE);
+    SV* const * svp = hv_fetch(hv, "NONE", 4, FALSE);
     const UV none = svp ? SvUV(*svp) : 0x7fffffff;
     const UV extra = none + 1;
     UV final = 0;
@@ -319,7 +318,8 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)
     s = (U8*)SvPV(sv, len);
     isutf8 = SvUTF8(sv);
     if (!isutf8) {
-	const U8 *t = s, *e = s + len;
+	const U8 *t = s;
+	const U8 * const e = s + len;
 	while (t < e) {
 	    const U8 ch = *t++;
 	    if ((hibit = !NATIVE_IS_INVARIANT(ch)))
@@ -402,7 +402,7 @@ S_do_trans_count_utf8(pTHX_ SV *sv)
 
     SV* const rv = (SV*)cSVOP->op_sv;
     HV* const hv = (HV*)SvRV(rv);
-    SV** const svp = hv_fetch(hv, "NONE", 4, FALSE);
+    SV* const * const svp = hv_fetch(hv, "NONE", 4, FALSE);
     const UV none = svp ? SvUV(*svp) : 0x7fffffff;
     const UV extra = none + 1;
     U8 hibit = 0;
@@ -410,7 +410,7 @@ S_do_trans_count_utf8(pTHX_ SV *sv)
     s = (const U8*)SvPV_const(sv, len);
     if (!SvUTF8(sv)) {
 	const U8 *t = s;
-	const U8 *e = s + len;
+	const U8 * const e = s + len;
 	while (t < e) {
 	    const U8 ch = *t++;
 	    if ((hibit = !NATIVE_IS_INVARIANT(ch)))
@@ -422,8 +422,8 @@ S_do_trans_count_utf8(pTHX_ SV *sv)
     send = s + len;
 
     while (s < send) {
-	UV uv;
-	if ((uv = swash_fetch(rv, s, TRUE)) < none || uv == extra)
+	const UV uv = swash_fetch(rv, s, TRUE);
+	if (uv < none || uv == extra)
 	    matches++;
 	s += UTF8SKIP(s);
     }
@@ -444,7 +444,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv)
     const I32 grows    = PL_op->op_private & OPpTRANS_GROWS;
     SV * const rv = (SV*)cSVOP->op_sv;
     HV * const hv = (HV*)SvRV(rv);
-    SV** svp = hv_fetch(hv, "NONE", 4, FALSE);
+    SV * const *svp = hv_fetch(hv, "NONE", 4, FALSE);
     const UV none = svp ? SvUV(*svp) : 0x7fffffff;
     const UV extra = none + 1;
     UV final = 0;
@@ -855,7 +855,6 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 void
 Perl_do_vecset(pTHX_ SV *sv)
 {
-    SV *targ = LvTARG(sv);
     register I32 offset;
     register I32 size;
     register unsigned char *s;
@@ -863,6 +862,7 @@ Perl_do_vecset(pTHX_ SV *sv)
     I32 mask;
     STRLEN targlen;
     STRLEN len;
+    SV * const targ = LvTARG(sv);
 
     if (!targ)
 	return;
@@ -941,7 +941,7 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
 
     if (SvTYPE(sv) == SVt_PVAV) {
 	register I32 i;
-	AV* av = (AV*)sv;
+	AV* const av = (AV*)sv;
 	const I32 max = AvFILL(av);
 
 	for (i = 0; i <= max; i++) {
@@ -952,7 +952,7 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
         return;
     }
     else if (SvTYPE(sv) == SVt_PVHV) {
-        HV* hv = (HV*)sv;
+	HV* const hv = (HV*)sv;
 	HE* entry;
         (void)hv_iterinit(hv);
         while ((entry = hv_iternext(hv)))
@@ -972,7 +972,7 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
 	s = SvPV_force(sv, len);
     if (DO_UTF8(sv)) {
 	if (s && len) {
-	    char *send = s + len;
+	    char * const send = s + len;
 	    char *start = s;
 	    s = send - 1;
 	    while (s > start && UTF8_IS_CONTINUATION(*s))
@@ -1192,7 +1192,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     (void)SvPOK_only(sv);
     if (left_utf || right_utf) {
 	UV duc, luc, ruc;
-	char *dcsave = dc;
+	char * const dcsave = dc;
 	STRLEN lulen = leftlen;
 	STRLEN rulen = rightlen;
 	STRLEN ulen;
@@ -1330,7 +1330,7 @@ OP *
 Perl_do_kv(pTHX)
 {
     dSP;
-    HV *hv = (HV*)POPs;
+    HV * const hv = (HV*)POPs;
     HV *keys;
     register HE *entry;
     const I32 gimme = GIMME_V;
