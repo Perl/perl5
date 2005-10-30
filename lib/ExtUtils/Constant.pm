@@ -1,6 +1,6 @@
 package ExtUtils::Constant;
 use vars qw (@ISA $VERSION @EXPORT_OK %EXPORT_TAGS);
-$VERSION = 0.16;
+$VERSION = 0.17;
 
 =head1 NAME
 
@@ -474,8 +474,18 @@ sub WriteConstants {
 
   croak "Module name not specified" unless length $ARGS{NAME};
 
-  open my $c_fh, ">$ARGS{C_FILE}" or die "Can't open $ARGS{C_FILE}: $!";
-  open my $xs_fh, ">$ARGS{XS_FILE}" or die "Can't open $ARGS{XS_FILE}: $!";
+  my ($c_fh, $xs_fh);
+  if ($] <= 5.008) {
+      # We need these little games, rather than doing things unconditionally,
+      # because we're used in core Makefile.PLs before IO is available (needed
+      # by filehandle), but also we want to work on older perls where undefined
+      # scalars do not automatically turn into anonymous file handles.
+      require FileHandle;
+      $c_fh = FileHandle->new();
+      $xs_fh = FileHandle->new();
+  }
+  open $c_fh, ">$ARGS{C_FILE}" or die "Can't open $ARGS{C_FILE}: $!";
+  open $xs_fh, ">$ARGS{XS_FILE}" or die "Can't open $ARGS{XS_FILE}: $!";
 
   # As this subroutine is intended to make code that isn't edited, there's no
   # need for the user to specify any types that aren't found in the list of
