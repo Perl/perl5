@@ -1250,38 +1250,16 @@ S_is_utf8_common(pTHX_ const U8 const *p, SV **swash,
 bool
 Perl_is_utf8_alnum(pTHX_ const U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_alnum)
-	/* NOTE: "IsWord", not "IsAlnum", since Alnum is a true
-	 * descendant of isalnum(3), in other words, it doesn't
-	 * contain the '_'. --jhi */
-	PL_utf8_alnum = swash_init("utf8", "IsWord", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_alnum, p, TRUE) != 0;
-/*    return *p == '_' || is_utf8_alpha(p) || is_utf8_digit(p); */
-#ifdef SURPRISINGLY_SLOWER  /* probably because alpha is usually true */
-    if (!PL_utf8_alnum)
-	PL_utf8_alnum = swash_init("utf8", "",
-	    sv_2mortal(newSVpv("+utf8::IsAlpha\n+utf8::IsDigit\n005F\n",0)), 0, 0);
-    return swash_fetch(PL_utf8_alnum, p, TRUE) != 0;
-#endif
+    /* NOTE: "IsWord", not "IsAlnum", since Alnum is a true
+     * descendant of isalnum(3), in other words, it doesn't
+     * contain the '_'. --jhi */
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_alnum, "IsWord");
 }
 
 bool
 Perl_is_utf8_alnumc(pTHX_ const U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_alnumc)
-	PL_utf8_alnumc = swash_init("utf8", "IsAlnumC", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_alnumc, p, TRUE) != 0;
-/*    return is_utf8_alpha(p) || is_utf8_digit(p); */
-#ifdef SURPRISINGLY_SLOWER  /* probably because alpha is usually true */
-    if (!PL_utf8_alnum)
-	PL_utf8_alnum = swash_init("utf8", "",
-	    sv_2mortal(newSVpv("+utf8::IsAlpha\n+utf8::IsDigit\n005F\n",0)), 0, 0);
-    return swash_fetch(PL_utf8_alnum, p, TRUE) != 0;
-#endif
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_alnumc, "IsAlnumC");
 }
 
 bool
