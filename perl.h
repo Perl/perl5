@@ -5390,6 +5390,9 @@ extern void moncontrol(int);
 #pragma message disable (mainparm) /* Perl uses the envp in main(). */
 #endif
 
+#define do_open(g, n, l, a, rm, rp, sf) \
+	do_openn(g, n, l, a, rm, rp, sf, (SV **) NULL, 0)
+
 /* and finally... */
 #define PERL_PATCHLEVEL_H_IMPLICIT
 #include "patchlevel.h"

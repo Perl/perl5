@@ -441,9 +441,9 @@ PERL_CALLCONV void	Perl_do_join(pTHX_ SV* sv, SV* del, SV** mark, SV** sp)
 			__attribute__nonnull__(pTHX_4);
 
 PERL_CALLCONV OP*	Perl_do_kv(pTHX);
-PERL_CALLCONV bool	Perl_do_open(pTHX_ GV* gv, const char* name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO* supplied_fp)
+/* PERL_CALLCONV bool	Perl_do_open(pTHX_ GV* gv, const char* name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO* supplied_fp)
 			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_2); */
 
 PERL_CALLCONV bool	Perl_do_open9(pTHX_ GV *gv, const char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp, SV *svs, I32 num)
 			__attribute__nonnull__(pTHX_1)

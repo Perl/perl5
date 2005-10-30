@@ -59,14 +59,6 @@
 #include <signal.h>
 
 bool
-Perl_do_open(pTHX_ GV *gv, register const char *name, I32 len, int as_raw,
-	     int rawmode, int rawperm, PerlIO *supplied_fp)
-{
-    return do_openn(gv, name, len, as_raw, rawmode, rawperm,
-		    supplied_fp, (SV **) NULL, 0);
-}
-
-bool
 Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	      int rawmode, int rawperm, PerlIO *supplied_fp, SV **svp,
 	      I32 num_svs)

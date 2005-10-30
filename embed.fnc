@@ -203,7 +203,7 @@ p	|I32	|do_shmio	|I32 optype|NN SV** mark|NN SV** sp
 #endif
 Ap	|void	|do_join	|NN SV* sv|NN SV* del|NN SV** mark|NN SV** sp
 p	|OP*	|do_kv
-Ap	|bool	|do_open	|NN GV* gv|NN const char* name|I32 len|int as_raw \
+Apmb	|bool	|do_open	|NN GV* gv|NN const char* name|I32 len|int as_raw \
 				|int rawmode|int rawperm|NULLOK PerlIO* supplied_fp
 Ap	|bool	|do_open9	|NN GV *gv|NN const char *name|I32 len|int as_raw \
 				|int rawmode|int rawperm|NULLOK PerlIO *supplied_fp \

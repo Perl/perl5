@@ -194,7 +194,6 @@
 #ifdef PERL_CORE
 #define do_kv			Perl_do_kv
 #endif
-#define do_open			Perl_do_open
 #define do_open9		Perl_do_open9
 #define do_openn		Perl_do_openn
 #ifdef PERL_CORE
@@ -2189,7 +2188,6 @@
 #ifdef PERL_CORE
 #define do_kv()			Perl_do_kv(aTHX)
 #endif
-#define do_open(a,b,c,d,e,f,g)	Perl_do_open(aTHX_ a,b,c,d,e,f,g)
 #define do_open9(a,b,c,d,e,f,g,h,i)	Perl_do_open9(aTHX_ a,b,c,d,e,f,g,h,i)
 #define do_openn(a,b,c,d,e,f,g,h,i)	Perl_do_openn(aTHX_ a,b,c,d,e,f,g,h,i)
 #ifdef PERL_CORE
