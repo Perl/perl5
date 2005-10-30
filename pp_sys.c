@@ -241,10 +241,10 @@ void endservent(void);
 STATIC int
 S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 {
-    Uid_t ruid = getuid();
-    Uid_t euid = geteuid();
-    Gid_t rgid = getgid();
-    Gid_t egid = getegid();
+    const Uid_t ruid = getuid();
+    const Uid_t euid = geteuid();
+    const Gid_t rgid = getgid();
+    const Gid_t egid = getegid();
     int res;
 
     LOCK_CRED_MUTEX;
@@ -528,31 +528,33 @@ PP(pp_open)
     dSP;
     dMARK; dORIGMARK;
     dTARGET;
-    GV *gv;
     SV *sv;
     IO *io;
     const char *tmps;
     STRLEN len;
-    MAGIC *mg;
     bool  ok;
 
-    gv = (GV *)*++MARK;
+    GV * const gv = (GV *)*++MARK;
+
     if (!isGV(gv))
 	DIE(aTHX_ PL_no_usym, "filehandle");
     if ((io = GvIOp(gv)))
 	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
 
-    if (io && (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar))) {
-	/* Method's args are same as ours ... */
-	/* ... except handle is replaced by the object */
-	*MARK-- = SvTIED_obj((SV*)io, mg);
-	PUSHMARK(MARK);
-	PUTBACK;
-	ENTER;
-	call_method("OPEN", G_SCALAR);
-	LEAVE;
-	SPAGAIN;
-	RETURN;
+    if (io) {
+	MAGIC * const mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar);
+	if (mg) {
+	    /* Method's args are same as ours ... */
+	    /* ... except handle is replaced by the object */
+	    *MARK-- = SvTIED_obj((SV*)io, mg);
+	    PUSHMARK(MARK);
+	    PUTBACK;
+	    ENTER;
+	    call_method("OPEN", G_SCALAR);
+	    LEAVE;
+	    SPAGAIN;
+	    RETURN;
+	}
     }
 
     if (MARK < SP) {
@@ -577,14 +579,9 @@ PP(pp_open)
 PP(pp_close)
 {
     dSP;
-    GV *gv;
     IO *io;
     MAGIC *mg;
-
-    if (MAXARG == 0)
-	gv = PL_defoutgv;
-    else
-	gv = (GV*)POPs;
+    GV * const gv = (MAXARG == 0) ? PL_defoutgv : (GV*)POPs;
 
     if (gv && (io = GvIO(gv))
 	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
@@ -607,14 +604,12 @@ PP(pp_pipe_op)
 {
 #ifdef HAS_PIPE
     dSP;
-    GV *rgv;
-    GV *wgv;
     register IO *rstio;
     register IO *wstio;
     int fd[2];
 
-    wgv = (GV*)POPs;
-    rgv = (GV*)POPs;
+    GV * const wgv = (GV*)POPs;
+    GV * const rgv = (GV*)POPs;
 
     if (!rgv || !wgv)
 	goto badexit;
@@ -786,7 +781,6 @@ PP(pp_binmode)
 PP(pp_tie)
 {
     dSP; dMARK;
-    SV *varsv;
     HV* stash;
     GV *gv;
     SV *sv;
@@ -794,8 +788,8 @@ PP(pp_tie)
     const char *methname;
     int how = PERL_MAGIC_tied;
     U32 items;
+    SV *varsv = *++MARK;
 
-    varsv = *++MARK;
     switch(SvTYPE(varsv)) {
 	case SVt_PVHV:
 	    methname = "TIEHASH";
@@ -885,11 +879,10 @@ PP(pp_untie)
 
     if ((mg = SvTIED_mg(sv, how))) {
 	SV * const obj = SvRV(SvTIED_obj(sv, mg));
-	GV *gv;
 	CV *cv = NULL;
         if (obj) {
-	    if ((gv = gv_fetchmethod_autoload(SvSTASH(obj), "UNTIE", FALSE)) &&
-               isGV(gv) && (cv = GvCV(gv))) {
+	    GV * const gv = gv_fetchmethod_autoload(SvSTASH(obj), "UNTIE", FALSE);
+	    if (gv && isGV(gv) && (cv = GvCV(gv))) {
 	       PUSHMARK(SP);
 	       XPUSHs(SvTIED_obj((SV*)gv, mg));
 	       XPUSHs(sv_2mortal(newSViv(SvREFCNT(obj)-1)));
@@ -903,7 +896,7 @@ PP(pp_untie)
 		  Perl_warner(aTHX_ packWARN(WARN_UNTIE),
 		      "untie attempted while %"UVuf" inner references still exist",
 		       (UV)SvREFCNT(obj) - 1 ) ;
-           }
+	    }
         }
     }
     sv_unmagic(sv, how) ;
@@ -937,11 +930,10 @@ PP(pp_dbmopen)
     dPOPPOPssrl;
     HV* stash;
     GV *gv;
-    SV *sv;
 
     HV * const hv = (HV*)POPs;
+    SV * const sv = sv_mortalcopy(&PL_sv_no);
 
-    sv = sv_mortalcopy(&PL_sv_no);
     sv_setpv(sv, "AnyDBM_File");
     stash = gv_stashsv(sv, FALSE);
     if (!stash || !(gv = gv_fetchmethod(stash, "TIEHASH"))) {
@@ -1017,7 +1009,7 @@ PP(pp_sselect)
 
     SP -= 4;
     for (i = 1; i <= 3; i++) {
-	SV *sv = SP[i];
+	SV * const sv = SP[i];
 	if (!SvOK(sv))
 	    continue;
 	if (SvREADONLY(sv)) {
@@ -1176,7 +1168,7 @@ PP(pp_select)
     if (! hv)
 	XPUSHs(&PL_sv_undef);
     else {
-	GV ** const gvp = (GV**)hv_fetch(hv, GvNAME(egv), GvNAMELEN(egv), FALSE);
+	GV * const * const gvp = (GV**)hv_fetch(hv, GvNAME(egv), GvNAMELEN(egv), FALSE);
 	if (gvp && *gvp == egv) {
 	    gv_efullname4(TARG, PL_defoutgv, NULL, TRUE);
 	    XPUSHTARG;
@@ -1435,16 +1427,12 @@ PP(pp_leavewrite)
 PP(pp_prtf)
 {
     dSP; dMARK; dORIGMARK;
-    GV *gv;
     IO *io;
     PerlIO *fp;
     SV *sv;
     MAGIC *mg;
 
-    if (PL_op->op_flags & OPf_STACKED)
-	gv = (GV*)*++MARK;
-    else
-	gv = PL_defoutgv;
+    GV * const gv = (PL_op->op_flags & OPf_STACKED) ? (GV*)*++MARK : PL_defoutgv;
 
     if (gv && (io = GvIO(gv))
 	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
@@ -2053,10 +2041,9 @@ PP(pp_tell)
     IO *io;
     MAGIC *mg;
 
-    if (MAXARG == 0)
-	gv = PL_last_in_gv;
-    else
-	gv = PL_last_in_gv = (GV*)POPs;
+    if (MAXARG != 0)
+	PL_last_in_gv = (GV*)POPs;
+    gv = PL_last_in_gv;
 
     if (gv && (io = GvIO(gv))
 	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))

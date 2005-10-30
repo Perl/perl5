@@ -2730,7 +2730,7 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
 	 * chars in the PV.  Given that there isn't such a flag
 	 * make the loop as fast as possible. */
 	const U8 *s = (U8 *) SvPVX_const(sv);
-	const U8 *e = (U8 *) SvEND(sv);
+	const U8 * const e = (U8 *) SvEND(sv);
 	const U8 *t = s;
 	int hibit = 0;
 	
@@ -8523,7 +8523,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		&& (PL_op->op_type == OP_PRTF || PL_op->op_type == OP_SPRINTF)
 		&& ckWARN(WARN_PRINTF))
 	    {
-		SV *msg = sv_newmortal();
+		SV * const msg = sv_newmortal();
 		Perl_sv_setpvf(aTHX_ msg, "Invalid conversion in %sprintf: ",
 			  (PL_op->op_type == OP_PRTF) ? "" : "s");
 		if (c) {

@@ -354,7 +354,7 @@ S_tokereport(pTHX_ I32 rv)
 STATIC void
 S_printbuf(pTHX_ const char* fmt, const char* s)
 {
-    SV* tmp = newSVpvn("", 0);
+    SV* const tmp = newSVpvn("", 0);
     PerlIO_printf(Perl_debug_log, fmt,
 		  pv_display(tmp, (char *)s, strlen(s), 0, 60));
     SvREFCNT_dec(tmp);
@@ -689,7 +689,7 @@ S_incline(pTHX_ char *s)
     *t = '\0';
     if (t - s > 0) {
 #ifndef USE_ITHREADS
-	const char *cf = CopFILE(PL_curcop);
+	const char * const cf = CopFILE(PL_curcop);
 	STRLEN tmplen = cf ? strlen(cf) : 0;
 	if (tmplen > 7 && strnEQ(cf, "(eval ", 6)) {
 	    /* must copy *{"::_<(eval N)[oldfilename:L]"}
