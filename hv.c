@@ -107,7 +107,7 @@ S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
     return hek;
 }
 
-/* free the pool of temporary HE/HEK pairs retunrned by hv_fetch_ent
+/* free the pool of temporary HE/HEK pairs returned by hv_fetch_ent
  * for tied hashes */
 
 void
