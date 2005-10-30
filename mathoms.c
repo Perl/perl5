@@ -636,6 +636,14 @@ Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode)
  return PerlIO_binmode(aTHX_ fp, iotype, mode, name);
 }
 
+#ifndef OS2
+bool
+Perl_do_aexec(pTHX_ SV *really, register SV **mark, register SV **sp)
+{
+    return do_aexec5(really, mark, sp, 0, 0);
+}
+#endif
+
 #ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
 bool
 Perl_do_exec(pTHX_ const char *cmd)

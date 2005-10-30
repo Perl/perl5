@@ -155,7 +155,6 @@
 #endif
 #define dounwind		Perl_dounwind
 #ifdef PERL_CORE
-#define do_aexec		Perl_do_aexec
 #define do_aexec5		Perl_do_aexec5
 #endif
 #define do_binmode		Perl_do_binmode
@@ -2148,7 +2147,6 @@
 #endif
 #define dounwind(a)		Perl_dounwind(aTHX_ a)
 #ifdef PERL_CORE
-#define do_aexec(a,b,c)		Perl_do_aexec(aTHX_ a,b,c)
 #define do_aexec5(a,b,c,d,e)	Perl_do_aexec5(aTHX_ a,b,c,d,e)
 #endif
 #define do_binmode(a,b,c)	Perl_do_binmode(aTHX_ a,b,c)

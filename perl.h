@@ -5397,7 +5397,10 @@ extern void moncontrol(int);
 #define do_open(g, n, l, a, rm, rp, sf) \
 	do_openn(g, n, l, a, rm, rp, sf, (SV **) NULL, 0)
 #ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
-#define do_exec(cmd)	do_exec3(cmd,0,0)
+#define do_exec(cmd)			do_exec3(cmd,0,0)
+#endif
+#ifndef OS2
+#define do_aexec(really, mark,sp)	do_aexec5(really, mark, sp, 0, 0)
 #endif
 
 /* and finally... */

@@ -1409,14 +1409,6 @@ Perl_my_lstat(pTHX)
     return PL_laststatval;
 }
 
-#ifndef OS2
-bool
-Perl_do_aexec(pTHX_ SV *really, register SV **mark, register SV **sp)
-{
-    return do_aexec5(really, mark, sp, 0, 0);
-}
-#endif
-
 bool
 Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 	       int fd, int do_report)
