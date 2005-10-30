@@ -307,6 +307,16 @@ Perl_is_utf8_string(pTHX_ const U8 *s, STRLEN len)
 }
 
 /*
+Implemented as a macro in utf8.h
+
+=for apidoc A|bool|is_utf8_string_loc|const U8 *s|STRLEN len|const U8 **ep
+
+Like is_utf8_string() but stores the location of the failure (in the
+case of "utf8ness failure") or the location s+len (in the case of
+"utf8ness success") in the C<ep>.
+
+See also is_utf8_string_loclen() and is_utf8_string().
+
 =for apidoc A|bool|is_utf8_string_loclen|const U8 *s|STRLEN len|const U8 **ep|const STRLEN *el
 
 Like is_utf8_string() but stores the location of the failure (in the
@@ -368,24 +378,7 @@ Perl_is_utf8_string_loclen(pTHX_ const U8 *s, STRLEN len, const U8 **ep, STRLEN 
 }
 
 /*
-=for apidoc A|bool|is_utf8_string_loc|const U8 *s|STRLEN len|const U8 **ep|const STRLEN *el
 
-Like is_utf8_string() but stores the location of the failure (in the
-case of "utf8ness failure") or the location s+len (in the case of
-"utf8ness success") in the C<ep>.
-
-See also is_utf8_string_loclen() and is_utf8_string().
-
-=cut
-*/
-
-bool
-Perl_is_utf8_string_loc(pTHX_ const U8 *s, STRLEN len, const U8 **ep)
-{
-    return is_utf8_string_loclen(s, len, ep, 0);
-}
-
-/*
 =for apidoc A|UV|utf8n_to_uvuni|const U8 *s|STRLEN curlen|STRLEN *retlen|U32 flags
 
 Bottom level UTF-8 decode routine.

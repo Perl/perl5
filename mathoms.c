@@ -782,6 +782,12 @@ PP(pp_mapstart)
     DIE(aTHX_ "panic: mapstart");	/* uses grepstart */
 }
 
+bool
+Perl_is_utf8_string_loc(pTHX_ const U8 *s, STRLEN len, const U8 **ep)
+{
+    return is_utf8_string_loclen(s, len, ep, 0);
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd

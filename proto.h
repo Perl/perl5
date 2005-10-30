@@ -883,8 +883,8 @@ PERL_CALLCONV STRLEN	Perl_is_utf8_char(pTHX_ const U8 *p)
 PERL_CALLCONV bool	Perl_is_utf8_string(pTHX_ const U8 *s, STRLEN len)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV bool	Perl_is_utf8_string_loc(pTHX_ const U8 *s, STRLEN len, const U8 **p)
-			__attribute__nonnull__(pTHX_1);
+/* PERL_CALLCONV bool	Perl_is_utf8_string_loc(pTHX_ const U8 *s, STRLEN len, const U8 **p)
+			__attribute__nonnull__(pTHX_1); */
 
 PERL_CALLCONV bool	Perl_is_utf8_string_loclen(pTHX_ const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 			__attribute__nonnull__(pTHX_1);

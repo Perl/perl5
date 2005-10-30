@@ -1,6 +1,6 @@
 /*    utf8.h
  *
- *    Copyright (C) 2000, 2001, 2002, by Larry Wall and others
+ *    Copyright (C) 2000, 2001, 2002, 2005 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -331,5 +331,7 @@ encoded character.
 	 (n) == 4 ? IS_UTF8_CHAR_4(p) : 0)
 
 #define IS_UTF8_CHAR_FAST(n) ((n) <= 4)
+
+#define is_utf8_string_loc(s, len, ep)	is_utf8_string_loclen(s, len, ep, 0)
 
 #endif /* IS_UTF8_CHAR() for UTF-8 */
