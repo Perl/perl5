@@ -127,11 +127,6 @@ PP(pp_padhv)
     RETURN;
 }
 
-PP(pp_padany)
-{
-    DIE(aTHX_ "NOT IMPL LINE %d",__LINE__);
-}
-
 /* Translations. */
 
 PP(pp_rv2gv)
@@ -4788,11 +4783,6 @@ PP(pp_lock)
     }
     SETs(retsv);
     RETURN;
-}
-
-PP(pp_threadsv)
-{
-    DIE(aTHX_ "tried to access per-thread data in non-threaded perl");
 }
 
 /*

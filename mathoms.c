@@ -748,6 +748,40 @@ Perl_save_hints(pTHX)
     Perl_croak(aTHX_ "internal error: obsolete function save_hints() called");
 }
 
+#if 0
+OP *
+Perl_ck_retarget(pTHX_ OP *o)
+{
+    Perl_croak(aTHX_ "NOT IMPL LINE %d",__LINE__);
+    /* STUB */
+    return o;
+}
+#endif
+
+OP *
+Perl_oopsCV(pTHX_ OP *o)
+{
+    Perl_croak(aTHX_ "NOT IMPL LINE %d",__LINE__);
+    /* STUB */
+    PERL_UNUSED_ARG(o);
+    NORETURN_FUNCTION_END;
+}
+
+PP(pp_padany)
+{
+    DIE(aTHX_ "NOT IMPL LINE %d",__LINE__);
+}
+
+PP(pp_threadsv)
+{
+    DIE(aTHX_ "tried to access per-thread data in non-threaded perl");
+}
+
+PP(pp_mapstart)
+{
+    DIE(aTHX_ "panic: mapstart");	/* uses grepstart */
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd

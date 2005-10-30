@@ -940,11 +940,6 @@ PP(pp_grepstart)
     return ((LOGOP*)PL_op->op_next)->op_other;
 }
 
-PP(pp_mapstart)
-{
-    DIE(aTHX_ "panic: mapstart");	/* uses grepstart */
-}
-
 PP(pp_mapwhile)
 {
     dVAR; dSP;
