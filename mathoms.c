@@ -795,6 +795,43 @@ Perl_is_utf8_string_loc(pTHX_ const U8 *s, STRLEN len, const U8 **ep)
 }
 
 /*
+=for apidoc sv_nolocking
+
+Dummy routine which "locks" an SV when there is no locking module present.
+Exists to avoid test for a NULL function pointer and because it could
+potentially warn under some level of strict-ness.
+
+"Superseded" by sv_nosharing().
+
+=cut
+*/
+
+void
+Perl_sv_nolocking(pTHX_ SV *sv)
+{
+    PERL_UNUSED_ARG(sv);
+}
+
+
+/*
+=for apidoc sv_nounlocking
+
+Dummy routine which "unlocks" an SV when there is no locking module present.
+Exists to avoid test for a NULL function pointer and because it could
+potentially warn under some level of strict-ness.
+
+"Superseded" by sv_nosharing().
+
+=cut
+*/
+
+void
+Perl_sv_nounlocking(pTHX_ SV *sv)
+{
+    PERL_UNUSED_ARG(sv);
+}
+
+/*
  * Local variables:
  * c-indentation-style: bsd
  * c-basic-offset: 4

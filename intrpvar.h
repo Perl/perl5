@@ -508,8 +508,8 @@ PERLVAR(Ireentrant_retint, int)	/* Integer return value from reentrant functions
 
 /* Hooks to shared SVs and locks. */
 PERLVARI(Isharehook,	share_proc_t,	MEMBER_TO_FPTR(Perl_sv_nosharing))
-PERLVARI(Ilockhook,	share_proc_t,	MEMBER_TO_FPTR(Perl_sv_nolocking))
-PERLVARI(Iunlockhook,	share_proc_t,	MEMBER_TO_FPTR(Perl_sv_nounlocking))
+PERLVARI(Ilockhook,	share_proc_t,	MEMBER_TO_FPTR(Perl_sv_nosharing))
+PERLVARI(Iunlockhook,	share_proc_t,	MEMBER_TO_FPTR(Perl_sv_nosharing))
 PERLVARI(Ithreadhook,	thrhook_proc_t,	MEMBER_TO_FPTR(Perl_nothreadhook))
 
 /* Force inclusion of both runops options */

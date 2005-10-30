@@ -988,8 +988,8 @@ pMX	|int	|sv_release_IVX	|NN SV *sv
 #endif
 
 Adp	|void	|sv_nosharing	|NULLOK SV *
-Adp	|void	|sv_nolocking	|NULLOK SV *
-Adp	|void	|sv_nounlocking	|NULLOK SV *
+Adpbm	|void	|sv_nolocking	|NULLOK SV *
+Adpbm	|void	|sv_nounlocking	|NULLOK SV *
 Adp	|int	|nothreadhook
 
 END_EXTERN_C
