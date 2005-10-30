@@ -92,8 +92,10 @@ Perl_debstackptrs
 Perl_delimcpy
 Perl_die
 Perl_dounwind
+Perl_do_aexec
 Perl_do_binmode
 Perl_do_close
+Perl_do_exec
 Perl_do_aspawn
 Perl_do_spawn
 Perl_do_spawn_nowait
