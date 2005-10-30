@@ -309,7 +309,7 @@ Perl_is_utf8_string(pTHX_ const U8 *s, STRLEN len)
 /*
 =for apidoc A|bool|is_utf8_string_loclen|const U8 *s|STRLEN len|const U8 **ep|const STRLEN *el
 
-Like is_ut8_string() but stores the location of the failure (in the
+Like is_utf8_string() but stores the location of the failure (in the
 case of "utf8ness failure") or the location s+len (in the case of
 "utf8ness success") in the C<ep>, and the number of UTF-8
 encoded characters in the C<el>.
@@ -370,7 +370,7 @@ Perl_is_utf8_string_loclen(pTHX_ const U8 *s, STRLEN len, const U8 **ep, STRLEN 
 /*
 =for apidoc A|bool|is_utf8_string_loc|const U8 *s|STRLEN len|const U8 **ep|const STRLEN *el
 
-Like is_ut8_string() but stores the location of the failure (in the
+Like is_utf8_string() but stores the location of the failure (in the
 case of "utf8ness failure") or the location s+len (in the case of
 "utf8ness success") in the C<ep>.
 
