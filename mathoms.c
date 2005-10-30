@@ -741,6 +741,13 @@ Perl_init_i18nl14n(pTHX_ int printwarn)
     return init_i18nl10n(printwarn);
 }
 
+/* XXX kept for BINCOMPAT only */
+void
+Perl_save_hints(pTHX)
+{
+    Perl_croak(aTHX_ "internal error: obsolete function save_hints() called");
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd

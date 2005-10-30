@@ -1871,13 +1871,6 @@ Perl_scope(pTHX_ OP *o)
     return o;
 }
 
-/* XXX kept for BINCOMPAT only */
-void
-Perl_save_hints(pTHX)
-{
-    Perl_croak(aTHX_ "internal error: obsolete function save_hints() called");
-}
-
 int
 Perl_block_start(pTHX_ int full)
 {
