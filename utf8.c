@@ -1237,6 +1237,17 @@ Perl_to_uni_lower_lc(pTHX_ U32 c)
 }
 
 bool
+S_is_utf8_common(pTHX_ const U8 const *p, SV **swash,
+		 const char *const swashname)
+{
+    if (!is_utf8_char(p))
+	return FALSE;
+    if (!*swash)
+	*swash = swash_init("utf8", swashname, &PL_sv_undef, 0, 0);
+    return swash_fetch(*swash, p, TRUE) != 0;
+}
+
+bool
 Perl_is_utf8_alnum(pTHX_ const U8 *p)
 {
     if (!is_utf8_char(p))
@@ -1278,11 +1289,8 @@ Perl_is_utf8_idfirst(pTHX_ const U8 *p) /* The naming is historical. */
 {
     if (*p == '_')
 	return TRUE;
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_idstart) /* is_utf8_idstart would be more logical. */
-	PL_utf8_idstart = swash_init("utf8", "IdStart", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_idstart, p, TRUE) != 0;
+    /* is_utf8_idstart would be more logical. */
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_idstart, "IdStart");
 }
 
 bool
@@ -1290,131 +1298,79 @@ Perl_is_utf8_idcont(pTHX_ const U8 *p)
 {
     if (*p == '_')
 	return TRUE;
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_idcont)
-	PL_utf8_idcont = swash_init("utf8", "IdContinue", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_idcont, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_idcont, "IdContinue");
 }
 
 bool
 Perl_is_utf8_alpha(pTHX_ const U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_alpha)
-	PL_utf8_alpha = swash_init("utf8", "IsAlpha", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_alpha, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_alpha, "IsAlpha");
 }
 
 bool
 Perl_is_utf8_ascii(pTHX_ const U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_ascii)
-	PL_utf8_ascii = swash_init("utf8", "IsAscii", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_ascii, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_ascii, "IsAscii");
 }
 
 bool
 Perl_is_utf8_space(pTHX_ const U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_space)
-	PL_utf8_space = swash_init("utf8", "IsSpacePerl", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_space, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_space, "IsSpacePerl");
 }
 
 bool
 Perl_is_utf8_digit(pTHX_ const U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_digit)
-	PL_utf8_digit = swash_init("utf8", "IsDigit", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_digit, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_digit, "IsDigit");
 }
 
 bool
 Perl_is_utf8_upper(pTHX_ const U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_upper)
-	PL_utf8_upper = swash_init("utf8", "IsUppercase", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_upper, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_upper, "IsUppercase");
 }
 
 bool
 Perl_is_utf8_lower(pTHX_ const U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_lower)
-	PL_utf8_lower = swash_init("utf8", "IsLowercase", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_lower, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_lower, "IsLowercase");
 }
 
 bool
 Perl_is_utf8_cntrl(pTHX_ const U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_cntrl)
-	PL_utf8_cntrl = swash_init("utf8", "IsCntrl", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_cntrl, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_cntrl, "IsCntrl");
 }
 
 bool
 Perl_is_utf8_graph(pTHX_ const U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_graph)
-	PL_utf8_graph = swash_init("utf8", "IsGraph", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_graph, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_graph, "IsGraph");
 }
 
 bool
 Perl_is_utf8_print(pTHX_ const U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_print)
-	PL_utf8_print = swash_init("utf8", "IsPrint", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_print, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_print, "IsPrint");
 }
 
 bool
 Perl_is_utf8_punct(pTHX_ const U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_punct)
-	PL_utf8_punct = swash_init("utf8", "IsPunct", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_punct, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_punct, "IsPunct");
 }
 
 bool
 Perl_is_utf8_xdigit(pTHX_ const U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_xdigit)
-	PL_utf8_xdigit = swash_init("utf8", "IsXDigit", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_xdigit, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_xdigit, "Isxdigit");
 }
 
 bool
 Perl_is_utf8_mark(pTHX_ const U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_mark)
-	PL_utf8_mark = swash_init("utf8", "IsM", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_mark, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_mark, "IsM");
 }
 
 /*
