@@ -581,6 +581,20 @@ Perl_gv_efullname3(pTHX_ SV *sv, const GV *gv, const char *prefix)
     gv_efullname4(sv, gv, prefix, TRUE);
 }
 
+/*
+=for apidoc gv_fetchmethod
+
+See L<gv_fetchmethod_autoload>.
+
+=cut
+*/
+
+GV *
+Perl_gv_fetchmethod(pTHX_ HV *stash, const char *name)
+{
+    return gv_fetchmethod_autoload(stash, name, TRUE);
+}
+
 AV *
 Perl_av_fake(pTHX_ register I32 size, register SV **strp)
 {

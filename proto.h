@@ -591,8 +591,8 @@ PERL_CALLCONV GV*	Perl_gv_fetchmeth(pTHX_ HV* stash, const char* name, STRLEN le
 PERL_CALLCONV GV*	Perl_gv_fetchmeth_autoload(pTHX_ HV* stash, const char* name, STRLEN len, I32 level)
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV GV*	Perl_gv_fetchmethod(pTHX_ HV* stash, const char* name)
-			__attribute__nonnull__(pTHX_2);
+/* PERL_CALLCONV GV*	Perl_gv_fetchmethod(pTHX_ HV* stash, const char* name)
+			__attribute__nonnull__(pTHX_2); */
 
 PERL_CALLCONV GV*	Perl_gv_fetchmethod_autoload(pTHX_ HV* stash, const char* name, I32 autoload)
 			__attribute__nonnull__(pTHX_2);

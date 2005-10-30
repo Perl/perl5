@@ -397,20 +397,6 @@ Perl_gv_fetchmeth_autoload(pTHX_ HV *stash, const char *name, STRLEN len, I32 le
 }
 
 /*
-=for apidoc gv_fetchmethod
-
-See L<gv_fetchmethod_autoload>.
-
-=cut
-*/
-
-GV *
-Perl_gv_fetchmethod(pTHX_ HV *stash, const char *name)
-{
-    return gv_fetchmethod_autoload(stash, name, TRUE);
-}
-
-/*
 =for apidoc gv_fetchmethod_autoload
 
 Returns the glob which contains the subroutine to call to invoke the method

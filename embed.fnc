@@ -263,7 +263,7 @@ Ap	|void	|gv_efullname4	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix|boo
 Ap	|GV*	|gv_fetchfile	|NN const char* name
 Apd	|GV*	|gv_fetchmeth	|NULLOK HV* stash|NN const char* name|STRLEN len|I32 level
 Apd	|GV*	|gv_fetchmeth_autoload	|NULLOK HV* stash|NN const char* name|STRLEN len|I32 level
-Apd	|GV*	|gv_fetchmethod	|NULLOK HV* stash|NN const char* name
+Apdmb	|GV*	|gv_fetchmethod	|NULLOK HV* stash|NN const char* name
 Apd	|GV*	|gv_fetchmethod_autoload|NULLOK HV* stash|NN const char* name|I32 autoload
 Ap	|GV*	|gv_fetchpv	|NN const char* name|I32 add|I32 sv_type
 Ap	|void	|gv_fullname	|NN SV* sv|NN const GV* gv

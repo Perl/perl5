@@ -160,3 +160,4 @@ Return the SV from the GV.
 */
 #define gv_fullname3(sv,gv,prefix) gv_fullname4(sv,gv,prefix,TRUE)
 #define gv_efullname3(sv,gv,prefix) gv_efullname4(sv,gv,prefix,TRUE)
+#define gv_fetchmethod(stash, name) gv_fetchmethod_autoload(stash, name, TRUE)

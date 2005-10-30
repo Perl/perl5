@@ -253,7 +253,6 @@
 #define gv_fetchfile		Perl_gv_fetchfile
 #define gv_fetchmeth		Perl_gv_fetchmeth
 #define gv_fetchmeth_autoload	Perl_gv_fetchmeth_autoload
-#define gv_fetchmethod		Perl_gv_fetchmethod
 #define gv_fetchmethod_autoload	Perl_gv_fetchmethod_autoload
 #define gv_fetchpv		Perl_gv_fetchpv
 #define gv_fullname		Perl_gv_fullname
@@ -2244,7 +2243,6 @@
 #define gv_fetchfile(a)		Perl_gv_fetchfile(aTHX_ a)
 #define gv_fetchmeth(a,b,c,d)	Perl_gv_fetchmeth(aTHX_ a,b,c,d)
 #define gv_fetchmeth_autoload(a,b,c,d)	Perl_gv_fetchmeth_autoload(aTHX_ a,b,c,d)
-#define gv_fetchmethod(a,b)	Perl_gv_fetchmethod(aTHX_ a,b)
 #define gv_fetchmethod_autoload(a,b,c)	Perl_gv_fetchmethod_autoload(aTHX_ a,b,c)
 #define gv_fetchpv(a,b,c)	Perl_gv_fetchpv(aTHX_ a,b,c)
 #define gv_fullname(a,b)	Perl_gv_fullname(aTHX_ a,b)
