@@ -18,8 +18,8 @@ The DLL includes a C++ class called CPerlBase, which one can then
 (derive from and) use to embed Perl into applications, see F<symbian/README>.
 
 The base port of Perl to Symbian only implements the basic POSIX-like
-functionality; it does not implement any further Symbian or Series 60
-or Series 80 bindings for Perl.
+functionality; it does not implement any further Symbian or Series 60,
+Series 80, or UIQ bindings for Perl.
 
 It is also possible to generate Symbian executables for "miniperl"
 and "perl", but since there is no standard command line interface
@@ -33,7 +33,8 @@ mainly as demonstrations.
     These instructions have been tested under various Nokia Series 60
     Symbian SDKs (1.2 to 2.6, 2.8 should also work, 1.2 compiles but
     does not work), and Series 80 2.0.  You can get the SDKs from
-    Forum Nokia (http://www.forum.nokia.com/).
+    Forum Nokia (http://www.forum.nokia.com/).  A very rough port
+    ("it compiles") to UIQ 2.1 has also been made.
 
     A prerequisite for any of the SDKs is to install ActivePerl
     from ActiveState, http://www.activestate.com/Products/ActivePerl/
@@ -84,8 +85,8 @@ mainly as demonstrations.
     the VC6 makefiles and workspaces.  "make vc6" will compile for the VC6,
     and "make cw" for the CodeWarrior.
 
-    The following Series 60 and Series 80 SDK and compiler configurations
-    and Nokia phones that were tested at some point in time
+    The following Series 60, Series 80, and UIQ SDK and compiler
+    configurations and Nokia phones that were tested at some point in time
     (+ = compiled and PerlApp run, - = not),
     both for Perl 5.8.x and 5.9.x:
 
@@ -95,8 +96,10 @@ mainly as demonstrations.
         S60 2.0 | +  | +  | 6600
         S60 2.1 | -  | +  | 6670
         S60 2.6 | +  | +  | 6630    
+        S60 2.8 | -  | +  | (not tested in device)
+        S80 2.6 | -  | +  | 9300
+        UIQ 2.0 | -  | +  | (not tested in device)
 
-    Also S60 2.8 should work fine.
 
     If you are using the 'make' directly, it is the GNU make from the SDKs,
     and it will invoke the right make commands for the Windows emulator
@@ -375,6 +378,15 @@ time.
   - Perl 5.9.3 (patch level 25741)
   - Compress::Zlib and IO::Zlib supported
   - sisify.pl added
+
+We maintain the binary incompatibility.
+
+=item *
+
+0.3.0: October 2005
+
+  - Perl 5.9.3 (patch level 25911)
+  - Series 80 2.0 and UIQ 2.1 support
 
 We maintain the binary incompatibility.
 

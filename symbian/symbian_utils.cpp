@@ -9,7 +9,7 @@
 #define SYMBIAN_UTILS_CPP
 #include <e32base.h>
 #include <e32std.h>
-#include <textresolver.h>
+// #include <textresolver.h> // textresolver not used since seems not to work
 #include <utf.h>
 #include <hal.h>
 
@@ -45,8 +45,8 @@ extern "C" {
     EXPORT_C char* symbian_get_error_string(TInt error)
     {
 	// CTextResolver seems to be unreliable, so we roll our own
-        // at least for the basic Symbian errors (but does not work
-        // for the various subsystems).
+        // at least for the basic Symbian errors (this does not cover
+        // the various subsystems).
         dTHX;
         if (error >= 0)
             return strerror(error);

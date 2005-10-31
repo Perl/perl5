@@ -2648,12 +2648,13 @@ symbian/find_writeable_data.pl	Development utility
 symbian/hexdump.pl		Helper for sisify.pl updating
 symbian/install.cfg		Installation instructions
 symbian/makesis.pl		Installation file creator
-symbian/PerlAppAif.rss		Symbian sample app code
-symbian/PerlApp.cpp		Symbian sample app code
-symbian/PerlApp.h		Symbian sample app header
-symbian/PerlApp.hrh		Symbian sample app resource header
-symbian/PerlAppS60.rss		Symbian sample app resource definition
-symbian/PerlAppS80.rss		Symbian sample app resource definition
+symbian/PerlAppAif.rss		Symbian app launcher code
+symbian/PerlApp.cpp		Symbian app launcher code
+symbian/PerlApp.h		Symbian app launcher header
+symbian/PerlApp.hrh		Symbian app launcher resource header
+symbian/PerlAppS60.rss		Symbian app launcher resource definition
+symbian/PerlAppS80.rss		Symbian app launcher resource definition
+symbian/PerlAppUIQ.rss		Symbian app launcher resource definition
 symbian/PerlBase.cpp		Symbian Perl base class
 symbian/PerlBase.h		Symbian Perl base class header
 symbian/PerlBase.pod		Symbian Perl base class documentation

@@ -29,13 +29,24 @@ if ($ENV{PATH} =~ m!\\Symbian\\(.+?)\\(.+?)\\Epoc32\\gcc\\bin!i) {
 	$SDK_VARIANT = 'S80';
 	$SDK_VERSION = $ENV{S80SDK} = '2.0';
     }
+} elsif ($ENV{PATH} =~ m!\\Symbian\\UIQ_(\d)(\d)\\Epoc32\\gcc\\bin!i) {
+    $SDK_NAME    = 'UIQ';
+    $SDK_VARIANT = 'UIQ';
+    $SDK_VERSION = $ENV{UIQSDK} = "$1.$2";
+    if ($SDK_VERSION =~ /^2\./) {
+	$SYMBIAN_VERSION = '7.0s';
+    } else {
+	die "$0: Unknown UIQ version '$SDK_VERSION'\n";
+    }
+    $WIN = 'winscw'; # This is CodeWarrior, how about Borland?
+    $ENV{WIN} = $WIN; 
 }
 
-if (open(GCC, "gcc -v 2>&1|")) {
+if (open(GCC, "gcc -v 2>&1 |")) {
    while (<GCC>) {
      if (/Reading specs from ((?:C:)?\\Symbian.+?)\\Epoc32\\/i) {
        $SYMBIAN_ROOT = $1;
-       # The S60SDK/S60SDK tells the Series 60 SDK version.
+       # The S60SDK tells the Series 60 SDK version.
        if ($ENV{S60SDK}) {
 	   if ($SYMBIAN_ROOT eq 'C:\Symbian\6.1\Shared') { # Visual C. 
 	       $SYMBIAN_ROOT = 'C:\Symbian\6.1\Series60';

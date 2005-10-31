@@ -24,6 +24,12 @@
 # include <cknconf.h>
 #endif /* #ifdef __SERIES80__ */
 
+#ifdef __UIQ__
+# include <qikon.hrh>
+# include <eikedwin.h>
+# include <eiklabel.h>
+#endif /* #ifdef __UIQ__ */
+
 #include <apparc.h>
 #include <e32base.h>
 #include <e32cons.h>
@@ -140,15 +146,6 @@ CPerlAppUi::~CPerlAppUi()
 
 #ifndef PerlAppMinimal
 
-#ifdef __SERIES60__
-
-static TBool DlgOk(CAknNoteDialog* dlg)
-{
-    return dlg && dlg->RunDlgLD() == EAknSoftkeyOk;
-}
-
-#endif /* #ifdef __SERIES60__ */
-
 static TBool OkCancelDialogL(TDesC& aMessage)
 {
 #ifdef __SERIES60__
@@ -156,11 +153,15 @@ static TBool OkCancelDialogL(TDesC& aMessage)
         new (ELeave) CAknNoteDialog(CAknNoteDialog::EConfirmationTone);
     dlg->PrepareLC(R_OK_CANCEL_DIALOG);
     dlg->SetTextL(aMessage);
-    return DlgOk(dlg);
+    return dlg->RunDlgLD() == EAknSoftkeyOk;
 #endif /* #ifdef __SERIES60__ */
 #ifdef __SERIES80__
     return CCknConfirmationDialog::RunDlgWithDefaultIconLD(aMessage, R_EIK_BUTTONS_CANCEL_OK);
 #endif /* #ifdef __SERIES80__ */
+#ifdef __UIQ__
+    CEikDialog* dlg = new (ELeave) CEikDialog();
+    return dlg->ExecuteLD(R_OK_CANCEL_DIALOG) == EEikBidOk;
+#endif /* #ifdef __UIQ__ */
 }
 
 static TBool YesNoDialogL(TDesC& aMessage)
@@ -170,11 +171,15 @@ static TBool YesNoDialogL(TDesC& aMessage)
         new (ELeave) CAknNoteDialog(CAknNoteDialog::EConfirmationTone);
     dlg->PrepareLC(R_YES_NO_DIALOG);
     dlg->SetTextL(aMessage);
-    return DlgOk(dlg);
+    return dlg->RunDlgLD() == EAknSoftkeyOk;
 #endif /* #ifdef __SERIES60__ */
 #ifdef __SERIES80__
     return CCknConfirmationDialog::RunDlgWithDefaultIconLD(aMessage, R_EIK_BUTTONS_NO_YES);
 #endif /* #ifdef __SERIES80__ */
+#ifdef __UIQ__
+    CEikDialog* dlg = new (ELeave) CEikDialog();
+    return dlg->ExecuteLD(R_YES_NO_DIALOG) == EEikBidOk;
+#endif /* #ifdef __UIQ__ */
 }
 
 static void InformationNoteL(TDesC& aMessage)
@@ -183,9 +188,9 @@ static void InformationNoteL(TDesC& aMessage)
     CAknInformationNote* note = new (ELeave) CAknInformationNote;
     note->ExecuteLD(aMessage);
 #endif /* #ifdef __SERIES60__ */
-#ifdef __SERIES80__
+#if defined(__SERIES80__) || defined(__UIQ__)
     CEikonEnv::Static()->InfoMsg(aMessage);
-#endif /* #ifdef __SERIES80__ */
+#endif /* #if defined(__SERIES80__) || defined(__UIQ__) */
 }
 
 static TInt WarningNoteL(TDesC& aMessage)
@@ -194,13 +199,13 @@ static TInt WarningNoteL(TDesC& aMessage)
     CAknWarningNote* note = new (ELeave) CAknWarningNote;
     return note->ExecuteLD(aMessage);
 #endif /* #ifdef __SERIES60__ */
-#ifdef __SERIES80__
+#if defined(__SERIES80__) || defined(__UIQ__)
     CEikonEnv::Static()->AlertWin(aMessage);
     return ETrue;
-#endif /* #ifdef __SERIES80__ */
+#endif /* #if defined(__SERIES80__) || defined(__UIQ__) */
 }
 
-#ifdef __SERIES80__
+#if defined(__SERIES80__) || defined(__UIQ__)
 
 CPerlAppTextQueryDialog::CPerlAppTextQueryDialog(HBufC*& aBuffer) :
   iData(aBuffer)
@@ -223,7 +228,7 @@ void CPerlAppTextQueryDialog::PreLayoutDynInitL()
 /* TODO: OfferKeyEventL() so that newline can be seen as 'OK'.
  * Or a hotkey for the button? */
 
-#endif /* #ifdef __SERIES80__ */
+#endif /* #if defined(__SERIES80__) || defined(__UIQ__) */
 
 static TInt TextQueryDialogL(const TDesC& aTitle, const TDesC& aPrompt, TDes& aData, const TInt aMaxLength)
 {
@@ -234,7 +239,7 @@ static TInt TextQueryDialogL(const TDesC& aTitle, const TDesC& aPrompt, TDes& aD
     dlg->SetMaxLength(aMaxLength);
     return dlg->ExecuteLD(R_TEXT_QUERY_DIALOG);
 #endif /* #ifdef __SERIES60__ */
-#ifdef __SERIES80__
+#if defined(__SERIES80__) || defined(__UIQ__)
     HBufC* data = NULL;
     CPerlAppTextQueryDialog* dlg =
       new (ELeave) CPerlAppTextQueryDialog(data);
@@ -246,14 +251,14 @@ static TInt TextQueryDialogL(const TDesC& aTitle, const TDesC& aPrompt, TDes& aD
       return ETrue;
     }
     return EFalse;
-#endif /* #ifdef __SERIES80__ */
+#endif /* #if defined(__SERIES80__) || defined(__UIQ__) */
 }
 
 static TBool FileQueryDialogL(TDes& aFilename)
 {
 #ifdef __SERIES60__
-  return AknCommonDialogs::RunSelectLD(aFilename,
-				       R_MEMORY_SELECTION_DIALOG);
+  return AknCommonDialogs::RunSelectDlgLD(aFilename,
+					  R_MEMORY_SELECTION_DIALOG);
 #endif /* #ifdef __SERIES60__ */
 #ifdef __SERIES80__
   if (CCknOpenFileDialog::RunDlgLD(aFilename,
@@ -271,6 +276,9 @@ static TBool FileQueryDialogL(TDes& aFilename)
   }
   return EFalse;
 #endif /* #ifdef __SERIES80__ */
+#ifdef __UIQ__
+  return EFalse; // No filesystem access in UIQ 2.x!
+#endif /* #ifdef __UIQ__ */
 }
 
 // The isXXX() come from the Perl headers.
@@ -602,9 +610,9 @@ static void DoHandleCommandL(TInt aCommand) {
 #ifdef __SERIES60__
             _LIT(prompt, "Oneliner:");
 #endif /* #ifdef __SERIES60__ */
-#ifdef __SERIES80__
+#if defined(__SERIES80__) || defined(__UIQ__)
             _LIT(prompt, "Code:"); // The title has "Oneliner" already.
-#endif /* #ifdef __SERIES80__ */
+#endif /* #if defined(__SERIES80__) || defined(__UIQ__) */
             CPerlAppUi* cAppUi =
               STATIC_CAST(CPerlAppUi*, CEikonEnv::Static()->EikAppUi());
             if (TextQueryDialogL(_L("Oneliner"),
@@ -681,7 +689,7 @@ void CPerlAppUi::HandleCommandL(TInt aCommand)
 
 #endif /* #ifdef __SERIES60__ */
 
-#ifdef __SERIES80__
+#if defined(__SERIES80__) || defined(__UIQ__)
 
 void CPerlAppView::HandleCommandL(TInt aCommand) {
     DoHandleCommandL(aCommand);
@@ -699,7 +707,7 @@ void CPerlAppUi::HandleCommandL(TInt aCommand) {
     }
 }
 
-#endif /* #ifdef __SERIES80__ */
+#endif /* #if defined(__SERIES80__) || defined(__UIQ__) */
 
 CPerlAppView* CPerlAppView::NewL(const TRect& aRect)
 {

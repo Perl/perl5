@@ -10,7 +10,19 @@ do "sanity.pl";
 
 my $CoreBuild = -d "ext" && -f "perl.h" && -d "symbian" && -f "perl.c";
 
-my $SymbianVersion = $ENV{XSBUILD_SYMBIAN_VERSION};
+my $SymbianVersion;
+
+if (exists $ENV{EPOCROOT}) {
+    if ($ENV{EPOCROOT} =~ m!\\Symbian\\UIQ_21\\$!i) {
+	$SymbianVersion = '7.0s'; # TODO: other UIQ versions
+    } elsif ($ENV{EPOCROOT} =~ m!\\Symbian\\(.+?)\\!i) {
+	$SymbianVersion = $1;
+    }
+}
+
+$SymbianVersion = $ENV{XSBUILD_SYMBIAN_VERSION}
+  if exists $ENV{XSBUILD_SYMBIAN_VERSION};
+
 my $PerlVersion    = $ENV{XSBUILD_PERL_VERSION};
 my $CSuffix        = '.c';
 my $CPlusPlus;
@@ -44,10 +56,8 @@ if ( !defined $PerlVersion && $0 =~ m:\\symbian\\perl\\(.+)\\bin\\xsbuild.pl:i )
 }
 
 if ( !defined $SymbianVersion) {
-    ($SymbianVersion) = ($ENV{PATH} =~ m!C:\\Symbian\\(.+?)\\!i);
+    ($SymbianVersion) = ($ENV{PATH} =~ m!\\Symbian\\(.+?)\\!i);
 }
-
-my $S60SDK;
 
 my ($SYMBIAN_ROOT, $SYMBIAN_VERSION, $SDK_NAME, $SDK_VARIANT, $SDK_VERSION);
 
@@ -61,7 +71,6 @@ if ($CoreBuild) {
     $R_V_SV  = "$VERSION{REVISION}.$VERSION{VERSION}.$VERSION{SUBVERSION}";
     $BUILDROOT    = do "cwd.pl";
     $PerlVersion    = $R_V_SV;
-    $S60SDK = $ENV{S60SDK}; # from sdk.pl
 }
 
 usage()
@@ -218,7 +227,7 @@ sub write_mmp {
     $CONF{SOURCEPATH}    = [ $CWD, $BUILDROOT ];
     $CONF{USERINCLUDE}   = [ $CWD, $BUILDROOT ];
     $CONF{SYSTEMINCLUDE} = ["$PERLSDK\\include"] unless $CoreBuild;
-    $CONF{SYSTEMINCLUDE} = [ $BUILDROOT ] if $CoreBuild;
+    $CONF{SYSTEMINCLUDE} = [ $BUILDROOT, "$BUILDROOT\\symbian" ] if $CoreBuild;
     $CONF{LIBRARY}       = [];
     $CONF{MACRO}         = [];
     read_mmp( \%CONF, "_init.mmp" );
@@ -249,6 +258,19 @@ sub write_mmp {
     push @{ $CONF{MACRO} },         "PERL_GLOBAL_STRUCT";
     push @{ $CONF{MACRO} },         "PERL_GLOBAL_STRUCT_PRIVATE";
 
+    if ($SDK_VARIANT eq 'S60') {
+      push @{ $CONF{MACRO} }, '__SERIES60__'
+	unless grep { $_ eq '__SERIES60__' } @{ $CONF{MACRO} };
+    }
+    if ($SDK_VARIANT eq 'S80') {
+      push @{ $CONF{MACRO} }, '__SERIES80__'
+	unless grep { $_ eq '__SERIES80__' } @{ $CONF{MACRO} };
+    }
+    if ($SDK_VARIANT eq 'UIQ') {
+      push @{ $CONF{MACRO} }, '__UIQ__'
+	unless grep { $_ eq '__UIQ__' } @{ $CONF{MACRO} };
+    }
+
     for my $u (qw(SOURCE SOURCEPATH SYSTEMINCLUDE USERINCLUDE LIBRARY MACRO)) {
         $CONF{$u} = uniquefy_filenames( $CONF{$u} );
     }
@@ -270,9 +292,12 @@ __EOF__
     print BASE_MMP <<__EOF__;
 LIBRARY		@{$CONF{LIBRARY}}
 MACRO		@{$CONF{MACRO}}
-// OPTION	MSVC /P
-// OPTION	GCC -E
+// OPTION	MSVC /P // Uncomment for creating .i (cpp'ed .cpp)
+// OPTION	GCC -E  // Uncomment for creating .i (cpp'ed .cpp)
 __EOF__
+#    if (-f "$base.rss") {
+#        print BASE_MMP "RESOURCE\t$base.rss\n";
+#    }
     close(BASE_MMP);
 
 }
@@ -287,7 +312,7 @@ sub write_makefile {
     my $armdef1 = "$SYMBIAN_ROOT\\Epoc32\\Build$CWD\\$base\\$ARM\\$base.def";
     my $armdef2 = "..\\BMARM\\${base}u.def";
 
-    my $wrap = $SYMBIAN_ROOT && $S60SDK eq '1.2' && $SYMBIAN_ROOT !~ /_CW$/;
+    my $wrap = $SYMBIAN_ROOT && defined $SDK_VARIANT eq 'S60' && $SDK_VERSION eq '1.2' && $SYMBIAN_ROOT !~ /_CW$/;
     my $ABLD = $wrap ? 'perl b.pl' : 'abld';
 
     open( MAKEFILE, ">Makefile" ) or die "$0: Makefile: $!\n";
@@ -550,7 +575,7 @@ sub xsconfig {
             print "\tUsing $EXTVERSION for version...\n";
             $MM{VERSION} = $MM{XS_VERSION} = $EXTVERSION;
         }
-        die "VERSION or XS_VERSION undefined\n"
+        die "$0: VERSION or XS_VERSION undefined\n"
           unless defined $MM{VERSION} && defined $MM{XS_VERSION};
         if ( open( BASE_C, ">$basec" ) ) {
             print BASE_C <<__EOF__;

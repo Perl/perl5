@@ -20,6 +20,13 @@
 # include <eikdialg.h>
 #endif /* #ifdef __SERIES60__ */
 
+#ifdef __UIQ__
+# include <qikapplication.h>
+# include <qikappui.h>
+# include <qikdocument.h>
+# include <eikdialg.h>
+#endif /* #ifdef __UIQ____ */
+
 #include <coecntrl.h>
 #include <f32file.h>
 
@@ -66,6 +73,14 @@
 # define CMyNoteDialog  CCknFlashingDialog
 # define CMyAppView     CEikBorderedControl
 #endif /* #ifdef __SERIES60__ */
+
+#ifdef __UIQ__
+# define CMyDocument    CEikDocument
+# define CMyApplication CQikApplication
+# define CMyAppUi       CQikAppUi
+# define CMyNoteDialog  CCknFlashingDialog
+# define CMyAppView     CCoeControl
+#endif /* #ifdef __UIQ__ */
 
 class CPerlAppDocument : public CMyDocument
 {
@@ -115,14 +130,14 @@ class CPerlAppView : public CMyAppView
     static CPerlAppView* NewLC(const TRect& aRect);
     ~CPerlAppView();
     void Draw(const TRect& aRect) const;
-#ifdef __SERIES80__
+#if defined(__SERIES80__) || defined(__UIQ__)
     void HandleCommandL(TInt aCommand);
-#endif /* #ifdef __SERIES80__ */
+#endif /* #if defined(__SERIES80__) || defined(__UIQ__) */
   private:
     void ConstructL(const TRect& aRect);
 };
 
-#ifdef __SERIES80__
+#if defined(__SERIES80__) || defined(__UIQ__)
 
 class CPerlAppTextQueryDialog : public CEikDialog
 {
@@ -139,6 +154,6 @@ class CPerlAppTextQueryDialog : public CEikDialog
     TBool OkToExitL(TInt aKeycode);
 };
 
-#endif /* #ifdef __SERIES80__ */
+#endif /* #if defined(__SERIES80__) || defined(__UIQ__) */
 
 #endif // __PerlApp_h__

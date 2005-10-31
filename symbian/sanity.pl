@@ -1,17 +1,22 @@
 use strict;
 
 if (exists $ENV{'!C:'}) {
-  print "You are running this under Cygwin, aren't you?\n";
+  print "You are running this under Cygwin, aren't you? (found '!C' in %ENV)\n";
+  print "Are you perhaps using Cygwin Perl? (\$^O is '$^O')\n" if $^O =~ /cygwin/;
   print "I'm sorry but only cmd.exe will work.\n";
   exit(1);
 }
 
-if (# SDK 2.x
-    $ENV{PATH} !~ m!c:\\program files\\common files\\symbian\\tools!i
+if (# S60 2.x or S80 2.x
+    $ENV{PATH} !~ m!\\program files\\common files\\symbian\\tools!i
     &&
-    # SDK 1.2
-    $ENV{PATH} !~ m!c:\\symbian\\6.1\\shared\\epoc32\\tools!i) {
-  print "I think you have not installed the Symbian SDK.\n";
+    # S60 1.2
+    $ENV{PATH} !~ m!\\symbian\\6.1\\shared\\epoc32\\tools!i
+    &&
+    # UIQ
+    $ENV{PATH} !~ m!\\symbian\\uiq.+?\\epoc32!i
+    ) {
+  print "I do not think you have installed the Symbian SDK.\n";
   exit(1);
 }
 
