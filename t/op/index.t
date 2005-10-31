@@ -7,7 +7,7 @@ BEGIN {
 
 use strict;
 require './test.pl';
-plan( tests => 46 );
+plan( tests => 58 );
 
 my $foo = 'Now is the time for all good men to come to the aid of their country.';
 
@@ -44,6 +44,20 @@ is(rindex("ababa","a",2), 2);
 is(rindex("ababa","a",3), 2);
 is(rindex("ababa","a",4), 4);
 is(rindex("ababa","a",5), 4);
+
+# tests for empty search string
+is(index("abc", "", -1), 0);
+is(index("abc", "", 0), 0);
+is(index("abc", "", 1), 1);
+is(index("abc", "", 2), 2);
+is(index("abc", "", 3), 3);
+is(index("abc", "", 4), 3);
+is(rindex("abc", "", -1), 0);
+is(rindex("abc", "", 0), 0);
+is(rindex("abc", "", 1), 1);
+is(rindex("abc", "", 2), 2);
+is(rindex("abc", "", 3), 3);
+is(rindex("abc", "", 4), 3);
 
 $a = "foo \x{1234}bar";
 
