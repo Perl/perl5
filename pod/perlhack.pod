@@ -2482,7 +2482,7 @@ file and line number (and C function name, if supported by the C compiler).
 
 This logging is somewhat similar to C<-Dm> but independent of C<-DDEBUGGING>,
 and at a higher level (the C<-Dm> is directly at the point of C<malloc()>,
-while the C<PERL_MEMLOG> is at the level of C<New()>>.
+while the C<PERL_MEM_LOG> is at the level of C<New()>>.
 
 =head2 Profiling
 
