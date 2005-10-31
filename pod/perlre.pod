@@ -960,14 +960,14 @@ But that isn't going to match; at least, not the way you're hoping.  It
 claims that there is no 123 in the string.  Here's a clearer picture of
 why that pattern matches, contrary to popular expectations:
 
-    $x = 'ABC123' ;
-    $y = 'ABC445' ;
+    $x = 'ABC123';
+    $y = 'ABC445';
 
-    print "1: got $1\n" if $x =~ /^(ABC)(?!123)/ ;
-    print "2: got $1\n" if $y =~ /^(ABC)(?!123)/ ;
+    print "1: got $1\n" if $x =~ /^(ABC)(?!123)/;
+    print "2: got $1\n" if $y =~ /^(ABC)(?!123)/;
 
-    print "3: got $1\n" if $x =~ /^(\D*)(?!123)/ ;
-    print "4: got $1\n" if $y =~ /^(\D*)(?!123)/ ;
+    print "3: got $1\n" if $x =~ /^(\D*)(?!123)/;
+    print "4: got $1\n" if $y =~ /^(\D*)(?!123)/;
 
 This prints
 
@@ -1002,8 +1002,8 @@ are zero-width expressions--they only look, but don't consume any
 of the string in their match.  So rewriting this way produces what
 you'd expect; that is, case 5 will fail, but case 6 succeeds:
 
-    print "5: got $1\n" if $x =~ /^(\D*)(?=\d)(?!123)/ ;
-    print "6: got $1\n" if $y =~ /^(\D*)(?=\d)(?!123)/ ;
+    print "5: got $1\n" if $x =~ /^(\D*)(?=\d)(?!123)/;
+    print "6: got $1\n" if $y =~ /^(\D*)(?=\d)(?!123)/;
 
     6: got ABC
 

@@ -588,7 +588,7 @@ Here's a truly obscure example:
 
      bool_t
      rpcb_gettime(host,timep)
-          time_t &timep ; /* \$v{timep}=@{[$v{timep}=$arg]} */
+          time_t &timep; /* \$v{timep}=@{[$v{timep}=$arg]} */
           char *host + SvOK($v{timep}) ? SvPV($arg,PL_na) : NULL;
         OUTPUT:
           timep
@@ -1902,7 +1902,7 @@ Below is an example module that makes use of the macros.
           dMY_CXT;
         CODE:
           if (MY_CXT.count >= 3) {
-              warn("Already have 3 blind mice") ;
+              warn("Already have 3 blind mice");
               RETVAL = 0;
           }
           else {

@@ -1400,17 +1400,17 @@ nest properly.
 
 Examples of valid syntax (even though the attributes are unknown):
 
-    sub fnord (&\%) : switch(10,foo(7,3))  :  expensive ;
-    sub plugh () : Ugly('\(") :Bad ;
+    sub fnord (&\%) : switch(10,foo(7,3))  :  expensive;
+    sub plugh () : Ugly('\(") :Bad;
     sub xyzzy : _5x5 { ... }
 
 Examples of invalid syntax:
 
-    sub fnord : switch(10,foo() ; # ()-string not balanced
-    sub snoid : Ugly('(') ;	  # ()-string not balanced
-    sub xyzzy : 5x5 ;		  # "5x5" not a valid identifier
-    sub plugh : Y2::north ;	  # "Y2::north" not a simple identifier
-    sub snurt : foo + bar ;	  # "+" not a colon or space
+    sub fnord : switch(10,foo(); # ()-string not balanced
+    sub snoid : Ugly('(');	  # ()-string not balanced
+    sub xyzzy : 5x5;		  # "5x5" not a valid identifier
+    sub plugh : Y2::north;	  # "Y2::north" not a simple identifier
+    sub snurt : foo + bar;	  # "+" not a colon or space
 
 The attribute list is passed as a list of constant strings to the code
 which associates them with the subroutine.  In particular, the second example

@@ -448,8 +448,8 @@ Given that C<::> is now the preferred package delimiter, it is debatable
 whether this should be classed as a bug or not.
 (The older package delimiter, ' ,is used here)
 
-    $x = 10 ;
-    print "x=${'x}\n" ;
+    $x = 10;
+    print "x=${'x}\n";
 
     # perl4 prints: x=10
     # perl5 prints: Can't find string terminator "'" anywhere before EOF
@@ -457,8 +457,8 @@ whether this should be classed as a bug or not.
 You can avoid this problem, and remain compatible with perl4, if you
 always explicitly include the package name:
 
-    $x = 10 ;
-    print "x=${main'x}\n" ;
+    $x = 10;
+    print "x=${main'x}\n";
 
 Also see precedence traps, for parsing C<$:>.
 
@@ -497,7 +497,7 @@ of a variable, or as a delimiter for any kind of quote construct.
 Double darn.
 
     $a = ("foo bar");
-    $b = q baz ;
+    $b = q baz;
     print "a is $a, b is $b\n";
 
     # perl4 prints: a is foo bar, b is baz
@@ -1219,7 +1219,7 @@ C<[$opt]> is a character class in perl4 and an array subscript in perl5
     $opt  = 'r';
     $_ = 'bar';
     s/^([^$grpc]*$grpc[$opt]?)/foo/;
-    print ;
+    print;
 
     # perl4 prints: foo
     # perl5 prints: foobar
@@ -1334,11 +1334,11 @@ for append,  it  is  impossible to overwrite information already in
 the file.
 
     open(TEST,">>seek.test");
-    $start = tell TEST ;
+    $start = tell TEST;
     foreach(1 .. 9){
         print TEST "$_ ";
     }
-    $end = tell TEST ;
+    $end = tell TEST;
     seek(TEST,$start,0);
     print TEST "18 characters here";
 

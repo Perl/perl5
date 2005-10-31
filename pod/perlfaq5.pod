@@ -57,7 +57,7 @@ thing you do with them.  You can use IO::Handle:
 or IO::Socket:
 
     use IO::Socket;		  # this one is kinda a pipe?
-	my $sock = IO::Socket::INET->new( 'www.example.com:80' ) ;
+	my $sock = IO::Socket::INET->new( 'www.example.com:80' );
 
     $sock->autoflush();
 

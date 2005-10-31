@@ -2215,8 +2215,8 @@ you're supplying bitstrings: If an operand is a number, that will imply
 a B<numeric> bitwise operation.  You may explicitly show which type of
 operation you intend by using C<""> or C<0+>, as in the examples below.
 
-    $foo =  150  |  105 ;	# yields 255  (0x96 | 0x69 is 0xFF)
-    $foo = '150' |  105 ;	# yields 255
+    $foo =  150  |  105;	# yields 255  (0x96 | 0x69 is 0xFF)
+    $foo = '150' |  105;	# yields 255
     $foo =  150  | '105';	# yields 255
     $foo = '150' | '105';	# yields string '155' (under ASCII)
 

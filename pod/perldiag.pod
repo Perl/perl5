@@ -4344,7 +4344,7 @@ L<perlref> for more on this.
 This warning will not be issued for numerical constants equal to 0 or 1
 since they are often used in statements like
 
-    1 while sub_with_side_effects() ;
+    1 while sub_with_side_effects();
 
 String constants that would normally evaluate to 0 or 1 are warned
 about.
