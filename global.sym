@@ -435,7 +435,6 @@ Perl_scan_oct
 Perl_screaminstr
 Perl_share_hek
 Perl_csighandler
-Perl_csighandler
 Perl_stack_grow
 Perl_start_subparse
 Perl_sv_2bool
