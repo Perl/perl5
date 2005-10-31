@@ -47,7 +47,7 @@ $needs_fh_reopen = 1 if (defined &Win32::IsWin95 && Win32::IsWin95());
 my $skip_mode_checks =
     $^O eq 'cygwin' && $ENV{CYGWIN} !~ /ntsec/;
 
-plan tests => 42;
+plan tests => 49;
 
 
 if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
@@ -206,10 +206,27 @@ is($ino, undef, "ino of renamed file a should be undef");
 
 $delta = $accurate_timestamps ? 1 : 2;	# Granularity of time on the filesystem
 chmod 0777, 'b';
+
 $foo = (utime 500000000,500000000 + $delta,'b');
-
 is($foo, 1, "utime");
+check_utime_result();
 
+utime undef, undef, 'b';
+($atime,$mtime) = (stat 'b')[8,9];
+print "# utime undef, undef --> $atime, $mtime\n";
+isnt($atime, 500000000, 'atime');
+isnt($mtime, 500000000 + $delta, 'mtime');
+
+SKIP: {
+    skip "no futimes", 4 unless ($Config{d_futimes} || "") eq "define";
+    open(my $fh, "<", 'b');
+    $foo = (utime 500000000,500000000 + $delta, $fh);
+    is($foo, 1, "futime");
+    check_utime_result();
+}
+
+
+sub check_utime_result {
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('b');
 
@@ -258,6 +275,14 @@ SKIP: {
             fail("mtime");
         }
     }
+}
+}
+
+SKIP: {
+    skip "has futimes", 1 if ($Config{d_futimes} || "") eq "define";
+    open(my $fh, "<", "b") || die;
+    eval { utime(undef, undef, $fh); };
+    like($@, qr/^The futimes function is unimplemented at/, "futimes is unimplemented");
 }
 
 is(unlink('b'), 1, "unlink b");

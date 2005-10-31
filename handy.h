@@ -175,7 +175,7 @@ typedef U64TYPE U64;
 #endif
 
 /* HMB H.Merijn Brand - a placeholder for preparing Configure patches */
-#if defined(HAS_MALLOC_SIZE) && defined(HAS_MALLOC_GOOD_SIZE) && defined(HAS_CLEARENV) && defined(HAS_FUTIMES)
+#if defined(HAS_MALLOC_SIZE) && defined(HAS_MALLOC_GOOD_SIZE) && defined(HAS_CLEARENV)
 /* Not (yet) used at top level, but mention them for metaconfig */
 #endif
 

@@ -6779,6 +6779,10 @@ be equivalent of passing it as 0 and will not have the same effect as
 described when they are both C<undef>.  This case will also trigger an
 uninitialized warning.
 
+On systems that support futimes, you might pass file handles among the
+files.  On systems that don't support futimes, passing file handles
+produces a fatal error at run time.
+
 =item values HASH
 X<values>
 

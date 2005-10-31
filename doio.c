@@ -1766,12 +1766,15 @@ nothing in the core.
 	    }
 	}
 	break;
-#ifdef HAS_UTIME
+#if defined(HAS_UTIME) || defined(HAS_FUTIMES)
     case OP_UTIME:
 	what = "utime";
 	APPLY_TAINT_PROPER();
 	if (sp - mark > 2) {
-#if defined(I_UTIME) || defined(VMS)
+#if defined(HAS_FUTIMES)
+	    struct timeval utbuf[2];
+	    void *utbufp = utbuf;
+#elif defined(I_UTIME) || defined(VMS)
 	    struct utimbuf utbuf;
 	    struct utimbuf *utbufp = &utbuf;
 #else
@@ -1793,7 +1796,12 @@ nothing in the core.
                 utbufp = NULL;
            else {
                 Zero(&utbuf, sizeof utbuf, char);
-#ifdef BIG_TIME
+#ifdef HAS_FUTIMES
+		utbuf[0].tv_sec = (long)SvIVx(accessed);  /* time accessed */
+		utbuf[0].tv_usec = 0;
+		utbuf[1].tv_sec = (long)SvIVx(modified);  /* time modified */
+		utbuf[1].tv_usec = 0;
+#elif defined(BIG_TIME)
                 utbuf.actime = (Time_t)SvNVx(accessed);  /* time accessed */
                 utbuf.modtime = (Time_t)SvNVx(modified); /* time modified */
 #else
@@ -1804,10 +1812,38 @@ nothing in the core.
 	    APPLY_TAINT_PROPER();
 	    tot = sp - mark;
 	    while (++mark <= sp) {
-		char *name = SvPV_nolen(*mark);
-		APPLY_TAINT_PROPER();
-		if (PerlLIO_utime(name, utbufp))
-		    tot--;
+                GV* gv;
+                if (SvTYPE(*mark) == SVt_PVGV) {
+                    gv = (GV*)*mark;
+		do_futimes:
+		    if (GvIO(gv) && IoIFP(GvIOp(gv))) {
+#ifdef HAS_FUTIMES
+			APPLY_TAINT_PROPER();
+			if (futimes(PerlIO_fileno(IoIFP(GvIOn(gv))), utbufp))
+			    tot--;
+#else
+			Perl_die(aTHX_ PL_no_func, "futimes");
+#endif
+		    }
+		    else {
+			tot--;
+		    }
+		}
+		else if (SvROK(*mark) && SvTYPE(SvRV(*mark)) == SVt_PVGV) {
+		    gv = (GV*)SvRV(*mark);
+		    goto do_futimes;
+		}
+		else {
+		    const char *name = SvPV_nolen_const(*mark);
+		    APPLY_TAINT_PROPER();
+#ifdef HAS_FUTIMES
+		    if (utimes(name, utbufp))
+#else
+		    if (PerlLIO_utime(name, utbufp))
+#endif
+			tot--;
+		}
+
 	    }
 	}
 	else
