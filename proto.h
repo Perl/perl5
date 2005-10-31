@@ -3697,9 +3697,7 @@ STATIC SV*	S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *
 			__attribute__nonnull__(pTHX_4);
 
 #  if defined(DEBUGGING)
-STATIC int	S_tokereport(pTHX_ const char *s, I32 rv)
-			__attribute__nonnull__(pTHX_1);
-
+STATIC int	S_tokereport(pTHX_ I32 rv);
 #  endif
 STATIC int	S_ao(pTHX_ int toketype);
 STATIC void	S_depcom(pTHX);

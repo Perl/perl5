@@ -3327,7 +3327,7 @@
 #endif
 #  if defined(DEBUGGING)
 #ifdef PERL_CORE
-#define tokereport(a,b)		S_tokereport(aTHX_ a,b)
+#define tokereport(a)		S_tokereport(aTHX_ a)
 #endif
 #  endif
 #ifdef PERL_CORE

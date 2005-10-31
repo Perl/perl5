@@ -1321,7 +1321,7 @@ sR	|char *	|tokenize_use	|int|NN char*
 s	|SV*	|new_constant	|NULLOK const char *s|STRLEN len|NN const char *key|NN SV *sv \
 				|NULLOK SV *pv|NULLOK const char *type
 #  if defined(DEBUGGING)
-s	|int	|tokereport	|NN const char *s|I32 rv
+s	|int	|tokereport	|I32 rv
 #  endif
 s	|int	|ao		|int toketype
 s	|void	|depcom
