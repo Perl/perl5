@@ -53,11 +53,6 @@ PP(pp_stub)
     RETURN;
 }
 
-PP(pp_scalar)
-{
-    return NORMAL;
-}
-
 /* Pushy stuff. */
 
 PP(pp_padav)
@@ -3845,16 +3840,6 @@ PP(pp_each)
 	RETPUSHUNDEF;
 
     RETURN;
-}
-
-PP(pp_values)
-{
-    return do_kv();
-}
-
-PP(pp_keys)
-{
-    return do_kv();
 }
 
 PP(pp_delete)

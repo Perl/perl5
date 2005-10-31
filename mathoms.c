@@ -667,6 +667,190 @@ PP(pp_mapstart)
     DIE(aTHX_ "panic: mapstart");	/* uses grepstart */
 }
 
+/* These ops all have the same body as pp_null.  */
+PP(pp_scalar)
+{
+    return NORMAL;
+}
+
+PP(pp_regcmaybe)
+{
+    return NORMAL;
+}
+
+PP(pp_lineseq)
+{
+    return NORMAL;
+}
+
+PP(pp_scope)
+{
+    return NORMAL;
+}
+
+/* Ops that are calls to do_kv.  */
+PP(pp_values)
+{
+    return do_kv();
+}
+
+PP(pp_keys)
+{
+    return do_kv();
+}
+
+/* Ops that are simply calls to other ops.  */
+PP(pp_dump)
+{
+    return pp_goto();
+    /*NOTREACHED*/
+}
+
+PP(pp_dofile)
+{
+    return pp_require();
+}
+
+PP(pp_dbmclose)
+{
+    return pp_untie();
+}
+
+PP(pp_read)
+{
+    return pp_sysread();
+}
+
+PP(pp_recv)
+{
+    return pp_sysread();
+}
+
+PP(pp_seek)
+{
+    return pp_sysseek();
+}
+
+PP(pp_fcntl)
+{
+    return pp_ioctl();
+}
+
+PP(pp_gsockopt)
+{
+    return pp_ssockopt();
+}
+
+PP(pp_getsockname)
+{
+    return pp_getpeername();
+}
+
+PP(pp_lstat)
+{
+    return pp_stat();
+}
+
+PP(pp_fteowned)
+{
+    return pp_ftrowned();
+}
+
+PP(pp_ftbinary)
+{
+    return pp_fttext();
+}
+
+PP(pp_localtime)
+{
+    return pp_gmtime();
+}
+
+PP(pp_shmget)
+{
+    return pp_semget();
+}
+
+PP(pp_shmctl)
+{
+    return pp_semctl();
+}
+
+PP(pp_shmread)
+{
+    return pp_shmwrite();
+}
+
+PP(pp_msgget)
+{
+    return pp_semget();
+}
+
+PP(pp_msgctl)
+{
+    return pp_semctl();
+}
+
+PP(pp_ghbyname)
+{
+    return pp_ghostent();
+}
+
+PP(pp_ghbyaddr)
+{
+    return pp_ghostent();
+}
+
+PP(pp_gnbyname)
+{
+    return pp_gnetent();
+}
+
+PP(pp_gnbyaddr)
+{
+    return pp_gnetent();
+}
+
+PP(pp_gpbyname)
+{
+    return pp_gprotoent();
+}
+
+PP(pp_gpbynumber)
+{
+    return pp_gprotoent();
+}
+
+PP(pp_gsbyname)
+{
+    return pp_gservent();
+}
+
+PP(pp_gsbyport)
+{
+    return pp_gservent();
+}
+
+PP(pp_gpwnam)
+{
+    return pp_gpwent();
+}
+
+PP(pp_gpwuid)
+{
+    return pp_gpwent();
+}
+
+PP(pp_ggrnam)
+{
+    return pp_ggrent();
+}
+
+PP(pp_ggrgid)
+{
+    return pp_ggrent();
+}
+
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {

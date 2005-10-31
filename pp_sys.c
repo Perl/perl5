@@ -987,11 +987,6 @@ PP(pp_dbmopen)
     RETURN;
 }
 
-PP(pp_dbmclose)
-{
-    return pp_untie();
-}
-
 PP(pp_sselect)
 {
 #ifdef HAS_SELECT
@@ -1245,11 +1240,6 @@ PP(pp_getc)
     }
     PUSHTARG;
     RETURN;
-}
-
-PP(pp_read)
-{
-    return pp_sysread();
 }
 
 STATIC OP *
@@ -1939,11 +1929,6 @@ PP(pp_send)
     RETPUSHUNDEF;
 }
 
-PP(pp_recv)
-{
-    return pp_sysread();
-}
-
 PP(pp_eof)
 {
     dVAR; dSP;
@@ -2021,11 +2006,6 @@ PP(pp_tell)
     PUSHi( do_tell(gv) );
 #endif
     RETURN;
-}
-
-PP(pp_seek)
-{
-    return pp_sysseek();
 }
 
 PP(pp_sysseek)
@@ -2174,11 +2154,6 @@ PP(pp_truncate)
 	    SETERRNO(EBADF,RMS_IFI);
 	RETPUSHUNDEF;
     }
-}
-
-PP(pp_fcntl)
-{
-    return pp_ioctl();
 }
 
 PP(pp_ioctl)
@@ -2625,11 +2600,6 @@ nuts:
 #endif
 }
 
-PP(pp_gsockopt)
-{
-    return pp_ssockopt();
-}
-
 PP(pp_ssockopt)
 {
 #ifdef HAS_SOCKET
@@ -2716,11 +2686,6 @@ nuts2:
 #endif
 }
 
-PP(pp_getsockname)
-{
-    return pp_getpeername();
-}
-
 PP(pp_getpeername)
 {
 #ifdef HAS_SOCKET
@@ -2786,11 +2751,6 @@ nuts2:
 }
 
 /* Stat calls. */
-
-PP(pp_lstat)
-{
-    return pp_stat();
-}
 
 PP(pp_stat)
 {
@@ -3093,11 +3053,6 @@ PP(pp_ftis)
     if (result < 0)
 	RETPUSHUNDEF;
     RETPUSHYES;
-}
-
-PP(pp_fteowned)
-{
-    return pp_ftrowned();
 }
 
 PP(pp_ftrowned)
@@ -3524,11 +3479,6 @@ PP(pp_fttext)
 	RETPUSHNO;
     else
 	RETPUSHYES;
-}
-
-PP(pp_ftbinary)
-{
-    return pp_fttext();
 }
 
 /* File calls. */
@@ -4538,11 +4488,6 @@ PP(pp_tms)
 #endif /* HAS_TIMES */
 }
 
-PP(pp_localtime)
-{
-    return pp_gmtime();
-}
-
 #ifdef LOCALTIME_EDGECASE_BROKEN
 static struct tm *S_my_localtime (pTHX_ Time_t *tp)
 {
@@ -4682,21 +4627,6 @@ PP(pp_sleep)
 
 /* Shared memory. */
 
-PP(pp_shmget)
-{
-    return pp_semget();
-}
-
-PP(pp_shmctl)
-{
-    return pp_semctl();
-}
-
-PP(pp_shmread)
-{
-    return pp_shmwrite();
-}
-
 PP(pp_shmwrite)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
@@ -4711,16 +4641,6 @@ PP(pp_shmwrite)
 }
 
 /* Message passing. */
-
-PP(pp_msgget)
-{
-    return pp_semget();
-}
-
-PP(pp_msgctl)
-{
-    return pp_semctl();
-}
 
 PP(pp_msgsnd)
 {
@@ -4799,16 +4719,6 @@ PP(pp_semop)
 }
 
 /* Get system info. */
-
-PP(pp_ghbyname)
-{
-    return pp_ghostent();
-}
-
-PP(pp_ghbyaddr)
-{
-    return pp_ghostent();
-}
 
 PP(pp_ghostent)
 {
@@ -4908,16 +4818,6 @@ PP(pp_ghostent)
 #endif
 }
 
-PP(pp_gnbyname)
-{
-    return pp_gnetent();
-}
-
-PP(pp_gnbyaddr)
-{
-    return pp_gnetent();
-}
-
 PP(pp_gnetent)
 {
 #if defined(HAS_GETNETBYNAME) || defined(HAS_GETNETBYADDR) || defined(HAS_GETNETENT)
@@ -5000,16 +4900,6 @@ PP(pp_gnetent)
 #endif
 }
 
-PP(pp_gpbyname)
-{
-    return pp_gprotoent();
-}
-
-PP(pp_gpbynumber)
-{
-    return pp_gprotoent();
-}
-
 PP(pp_gprotoent)
 {
 #if defined(HAS_GETPROTOBYNAME) || defined(HAS_GETPROTOBYNUMBER) || defined(HAS_GETPROTOENT)
@@ -5076,16 +4966,6 @@ PP(pp_gprotoent)
 #else
     DIE(aTHX_ PL_no_sock_func, "getprotoent");
 #endif
-}
-
-PP(pp_gsbyname)
-{
-    return pp_gservent();
-}
-
-PP(pp_gsbyport)
-{
-    return pp_gservent();
 }
 
 PP(pp_gservent)
@@ -5270,16 +5150,6 @@ PP(pp_eservent)
 #else
     DIE(aTHX_ PL_no_sock_func, "endservent");
 #endif
-}
-
-PP(pp_gpwnam)
-{
-    return pp_gpwent();
-}
-
-PP(pp_gpwuid)
-{
-    return pp_gpwent();
 }
 
 PP(pp_gpwent)
@@ -5538,16 +5408,6 @@ PP(pp_epwent)
 #else
     DIE(aTHX_ PL_no_func, "endpwent");
 #endif
-}
-
-PP(pp_ggrnam)
-{
-    return pp_ggrent();
-}
-
-PP(pp_ggrgid)
-{
-    return pp_ggrent();
 }
 
 PP(pp_ggrent)
