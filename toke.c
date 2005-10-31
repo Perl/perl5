@@ -157,7 +157,7 @@ int yyactlevel = -1;
  */
 
 #ifdef DEBUGGING /* Serve -DT. */
-#   define REPORT(retval) tokereport(s,(int)retval)
+#   define REPORT(retval) tokereport((I32)retval)
 #else
 #   define REPORT(retval) (retval)
 #endif
@@ -292,7 +292,7 @@ static struct debug_tokens { const int token, type; const char *name; }
 /* dump the returned token in rv, plus any optional arg in yylval */
 
 STATIC int
-S_tokereport(pTHX_ const char* s, I32 rv)
+S_tokereport(pTHX_ I32 rv)
 {
     if (DEBUG_T_TEST) {
 	const char *name = NULL;
