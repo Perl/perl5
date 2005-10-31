@@ -2,7 +2,7 @@ package open;
 use warnings;
 $open::hint_bits = 0x20000; # HINT_LOCALIZE_HH
 
-our $VERSION = '1.04_01';
+our $VERSION = '1.05';
 
 require 5.008001; # for PerlIO::get_layers()
 
@@ -216,8 +216,8 @@ details and the list of supported locales.
 Note that C<:utf8> PerlIO layer must always be specified exactly like
 that, it is not subject to the loose matching of encoding names.
 
-When open() is given an explicit list of layers they are appended to
-the list declared using this pragma.
+When open() is given an explicit list of layers (with the three-arg
+syntax), they override the list declared using this pragma.
 
 The C<:std> subpragma on its own has no effect, but if combined with
 the C<:utf8> or C<:encoding> subpragmas, it converts the standard
@@ -229,7 +229,7 @@ chosen to be in C<< :encoding(koi8r) >>, a C<:std> will cause only the
 STDOUT and STDERR to be in C<koi8r>.  The C<:locale> subpragma
 implicitly turns on C<:std>.
 
-The logic of C<:locale> is described in full in L</encoding>,
+The logic of C<:locale> is described in full in L<encoding>,
 but in short it is first trying nl_langinfo(CODESET) and then
 guessing from the LC_ALL and LANG locale environment variables.
 

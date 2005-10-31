@@ -1461,7 +1461,7 @@ PerlIO_resolve_layers(pTHX_ const char *layers,
 	     */
 	}
     }
-    if (!layers)
+    if (!layers || !*layers)
 	layers = PerlIO_context_layers(aTHX_ mode);
     if (layers && *layers) {
 	PerlIO_list_t *av;
@@ -1497,7 +1497,7 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 {
     if (!f && narg == 1 && *args == &PL_sv_undef) {
 	if ((f = PerlIO_tmpfile())) {
-	    if (!layers)
+	    if (!layers || !*layers)
 		layers = PerlIO_context_layers(aTHX_ mode);
 	    if (layers && *layers)
 		PerlIO_apply_layers(aTHX_ f, mode, layers);
