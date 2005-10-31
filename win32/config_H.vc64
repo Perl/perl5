@@ -1045,7 +1045,7 @@
 #endif /* NeXT */
 
 /* CAT2:
- *	This macro catenates 2 tokens together.
+ *	This macro concatenates 2 tokens together.
  */
 /* STRINGIFY:
  *	This macro surrounds its token with double quotes.
@@ -3872,8 +3872,8 @@
 /*#define HAS_ILOGBL		/**/
 
 /* LIBM_LIB_VERSION:
- *    This symbol, if defined, indicates that libm exports _LIB_VERSION
- *    and that math.h defines the enum to manipulate it.
+ *	This symbol, if defined, indicates that libm exports _LIB_VERSION
+ *	and that math.h defines the enum to manipulate it.
  */
 /*#define LIBM_LIB_VERSION         /**/
 
@@ -3945,12 +3945,12 @@
 /*#define	HAS_SOCKATMARK_PROTO	/**/
 
 /* SPRINTF_RETURNS_STRLEN:
- *      This variable defines whether sprintf returns the length of the string
- *      (as per the ANSI spec). Some C libraries retain compatibility with
- *      pre-ANSI C and return a pointer to the passed in buffer; for these
- *      this variable will be undef.
+ *	This variable defines whether sprintf returns the length of the string
+ *	(as per the ANSI spec). Some C libraries retain compatibility with
+ *	pre-ANSI C and return a pointer to the passed in buffer; for these
+ *	this variable will be undef.
  */
-#define	 SPRINTF_RETURNS_STRLEN       /**/
+#define SPRINTF_RETURNS_STRLEN       /**/
 
 /* HAS_SETRESGID_PROTO:
  *	This symbol, if defined, indicates that the system provides
@@ -3976,13 +3976,13 @@
 
 /* HAS_STRLCAT:
  *	This symbol, if defined, indicates that the strlcat () routine is
- *      available to do string concatenation.
+ *	available to do string concatenation.
  */
 /*#define HAS_STRLCAT			/**/
 
 /* HAS_STRLCPY:
  *	This symbol, if defined, indicates that the strlcpy () routine is
- *      available to do string copying.
+ *	available to do string copying.
  */
 /*#define HAS_STRLCPY			/**/
 
