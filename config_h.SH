@@ -1458,6 +1458,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_ftello HAS_FTELLO		/**/
 
+/* HAS_FUTIMES:
+ *	This symbol, if defined, indicates that the futimes routine is
+ *	available to change file descriptor time stamps with struct timevals.
+ */
+#$d_futimes HAS_FUTIMES		/**/
+
 /* Gconvert:
  *	This preprocessor macro is defined to convert a floating point
  *	number to a string without a trailing decimal point.  This
@@ -1947,6 +1953,18 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to map a file into memory.
  */
 #$d_madvise HAS_MADVISE		/**/
+
+/* HAS_MALLOC_SIZE:
+ *	This symbol, if defined, indicates that the malloc_size
+ *	routine is available for use.
+ */
+#$d_malloc_size HAS_MALLOC_SIZE		/**/
+
+/* HAS_MALLOC_GOOD_SIZE:
+ *	This symbol, if defined, indicates that the malloc_good_size
+ *	routine is available for use.
+ */
+#$d_malloc_good_size HAS_MALLOC_GOOD_SIZE	/**/
 
 /* HAS_MEMCHR:
  *	This symbol, if defined, indicates that the memchr routine is available
@@ -3900,18 +3918,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	and that math.h defines the enum to manipulate it.
  */
 #$d_libm_lib_version LIBM_LIB_VERSION		/**/
-
-/* HAS_MALLOC_SIZE:
- *	This symbol, if defined, indicates that the malloc_size
- *	routine is available for use.
- */
-#$d_malloc_size HAS_MALLOC_SIZE		/**/
-
-/* HAS_MALLOC_GOOD_SIZE:
- *	This symbol, if defined, indicates that the malloc_good_size
- *	routine is available for use.
- */
-#$d_malloc_good_size HAS_MALLOC_GOOD_SIZE	/**/
 
 /* HAS_NL_LANGINFO:
  *	This symbol, if defined, indicates that the nl_langinfo routine is

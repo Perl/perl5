@@ -810,6 +810,10 @@ d_ftime (d_ftime.U):
 	that the ftime() routine exists.  The ftime() routine is basically
 	a sub-second accuracy clock.
 
+d_futimes (f_futimes.U):
+	This variable conditionally defines the HAS_FUTIMES symbol, which
+	indicates to the C program that the futimes() routine is available.
+
 d_Gconvert (d_gconvert.U):
 	This variable holds what Gconvert is defined as to convert
 	floating point numbers into strings.  By default, Configure
