@@ -1,8 +1,8 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (pmqs@cpan.org)
-# last modified 9th October 2005
-# version 1.812
+# last modified 31st October 2005
+# version 1.813
 #
 #     Copyright (c) 1995-2005 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -165,7 +165,7 @@ our ($db_version, $use_XSLoader, $splice_end_array);
 use Carp;
 
 
-$VERSION = "1.812" ;
+$VERSION = "1.813" ;
 
 {
     local $SIG{__WARN__} = sub {$splice_end_array = "@_";};
@@ -268,6 +268,10 @@ sub tie_hash_or_array
 
     # make recno in Berkeley DB version 2 (or better) work like 
     # recno in version 1.
+    if ($db_version >= 4 and ! $tieHASH) {
+        $arg[2] |= O_CREAT();
+    }
+
     if ($db_version > 1 and defined $arg[4] and $arg[4] =~ /RECNO/ and 
 	$arg[1] and ! -e $arg[1]) {
 	open(FH, ">$arg[1]") or return undef ;

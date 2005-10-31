@@ -1,5 +1,9 @@
 
 
+1.813 31st October 2005
+
+   * Updates for Berkeley DB 4.4
+
 1.812 9th October 2005
 
    * Added libscan to Makefile.PL
