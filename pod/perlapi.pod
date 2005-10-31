@@ -742,6 +742,276 @@ Found in file perl.c
 
 =back
 
+=head1 Functions in file mathoms.c
+
+
+=over 8
+
+=item gv_fetchmethod
+X<gv_fetchmethod>
+
+See L<gv_fetchmethod_autoload>.
+
+	GV*	gv_fetchmethod(HV* stash, const char* name)
+
+=for hackers
+Found in file mathoms.c
+
+=item sv_2pvbyte_nolen
+X<sv_2pvbyte_nolen>
+
+Return a pointer to the byte-encoded representation of the SV.
+May cause the SV to be downgraded from UTF-8 as a side-effect.
+
+Usually accessed via the C<SvPVbyte_nolen> macro.
+
+	char*	sv_2pvbyte_nolen(SV* sv)
+
+=for hackers
+Found in file mathoms.c
+
+=item sv_2pvutf8_nolen
+X<sv_2pvutf8_nolen>
+
+Return a pointer to the UTF-8-encoded representation of the SV.
+May cause the SV to be upgraded to UTF-8 as a side-effect.
+
+Usually accessed via the C<SvPVutf8_nolen> macro.
+
+	char*	sv_2pvutf8_nolen(SV* sv)
+
+=for hackers
+Found in file mathoms.c
+
+=item sv_2pv_nolen
+X<sv_2pv_nolen>
+
+Like C<sv_2pv()>, but doesn't return the length too. You should usually
+use the macro wrapper C<SvPV_nolen(sv)> instead.
+	char*	sv_2pv_nolen(SV* sv)
+
+=for hackers
+Found in file mathoms.c
+
+=item sv_catpvn_mg
+X<sv_catpvn_mg>
+
+Like C<sv_catpvn>, but also handles 'set' magic.
+
+	void	sv_catpvn_mg(SV *sv, const char *ptr, STRLEN len)
+
+=for hackers
+Found in file mathoms.c
+
+=item sv_catsv_mg
+X<sv_catsv_mg>
+
+Like C<sv_catsv>, but also handles 'set' magic.
+
+	void	sv_catsv_mg(SV *dstr, SV *sstr)
+
+=for hackers
+Found in file mathoms.c
+
+=item sv_force_normal
+X<sv_force_normal>
+
+Undo various types of fakery on an SV: if the PV is a shared string, make
+a private copy; if we're a ref, stop refing; if we're a glob, downgrade to
+an xpvmg. See also C<sv_force_normal_flags>.
+
+	void	sv_force_normal(SV *sv)
+
+=for hackers
+Found in file mathoms.c
+
+=item sv_iv
+X<sv_iv>
+
+A private implementation of the C<SvIVx> macro for compilers which can't
+cope with complex macro expressions. Always use the macro instead.
+
+	IV	sv_iv(SV* sv)
+
+=for hackers
+Found in file mathoms.c
+
+=item sv_nolocking
+X<sv_nolocking>
+
+Dummy routine which "locks" an SV when there is no locking module present.
+Exists to avoid test for a NULL function pointer and because it could
+potentially warn under some level of strict-ness.
+
+"Superseded" by sv_nosharing().
+
+	void	sv_nolocking(SV *)
+
+=for hackers
+Found in file mathoms.c
+
+=item sv_nounlocking
+X<sv_nounlocking>
+
+Dummy routine which "unlocks" an SV when there is no locking module present.
+Exists to avoid test for a NULL function pointer and because it could
+potentially warn under some level of strict-ness.
+
+"Superseded" by sv_nosharing().
+
+	void	sv_nounlocking(SV *)
+
+=for hackers
+Found in file mathoms.c
+
+=item sv_nv
+X<sv_nv>
+
+A private implementation of the C<SvNVx> macro for compilers which can't
+cope with complex macro expressions. Always use the macro instead.
+
+	NV	sv_nv(SV* sv)
+
+=for hackers
+Found in file mathoms.c
+
+=item sv_pv
+X<sv_pv>
+
+Use the C<SvPV_nolen> macro instead
+
+	char*	sv_pv(SV *sv)
+
+=for hackers
+Found in file mathoms.c
+
+=item sv_pvbyte
+X<sv_pvbyte>
+
+Use C<SvPVbyte_nolen> instead.
+
+	char*	sv_pvbyte(SV *sv)
+
+=for hackers
+Found in file mathoms.c
+
+=item sv_pvbyten
+X<sv_pvbyten>
+
+A private implementation of the C<SvPVbyte> macro for compilers
+which can't cope with complex macro expressions. Always use the macro
+instead.
+
+	char*	sv_pvbyten(SV *sv, STRLEN *len)
+
+=for hackers
+Found in file mathoms.c
+
+=item sv_pvn
+X<sv_pvn>
+
+A private implementation of the C<SvPV> macro for compilers which can't
+cope with complex macro expressions. Always use the macro instead.
+
+	char*	sv_pvn(SV *sv, STRLEN *len)
+
+=for hackers
+Found in file mathoms.c
+
+=item sv_pvutf8
+X<sv_pvutf8>
+
+Use the C<SvPVutf8_nolen> macro instead
+
+	char*	sv_pvutf8(SV *sv)
+
+=for hackers
+Found in file mathoms.c
+
+=item sv_pvutf8n
+X<sv_pvutf8n>
+
+A private implementation of the C<SvPVutf8> macro for compilers
+which can't cope with complex macro expressions. Always use the macro
+instead.
+
+	char*	sv_pvutf8n(SV *sv, STRLEN *len)
+
+=for hackers
+Found in file mathoms.c
+
+=item sv_taint
+X<sv_taint>
+
+Taint an SV. Use C<SvTAINTED_on> instead.
+	void	sv_taint(SV* sv)
+
+=for hackers
+Found in file mathoms.c
+
+=item sv_unref
+X<sv_unref>
+
+Unsets the RV status of the SV, and decrements the reference count of
+whatever was being referenced by the RV.  This can almost be thought of
+as a reversal of C<newSVrv>.  This is C<sv_unref_flags> with the C<flag>
+being zero.  See C<SvROK_off>.
+
+	void	sv_unref(SV* sv)
+
+=for hackers
+Found in file mathoms.c
+
+=item sv_uv
+X<sv_uv>
+
+A private implementation of the C<SvUVx> macro for compilers which can't
+cope with complex macro expressions. Always use the macro instead.
+
+	UV	sv_uv(SV* sv)
+
+=for hackers
+Found in file mathoms.c
+
+=item utf8n_to_uvchr
+X<utf8n_to_uvchr>
+
+flags
+
+Returns the native character value of the first character in the string 
+C<s>
+which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
+length, in bytes, of that character.
+
+Allows length and flags to be passed to low level routine.
+
+	UV	utf8n_to_uvchr(const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
+
+=for hackers
+Found in file mathoms.c
+
+=item uvchr_to_utf8
+X<uvchr_to_utf8>
+
+Adds the UTF-8 representation of the Native codepoint C<uv> to the end
+of the string C<d>; C<d> should be have at least C<UTF8_MAXBYTES+1> free
+bytes available. The return value is the pointer to the byte after the
+end of the new character. In other words,
+
+    d = uvchr_to_utf8(d, uv);
+
+is the recommended wide native character-aware way of saying
+
+    *(d++) = uv;
+
+	U8*	uvchr_to_utf8(U8 *d, UV uv)
+
+=for hackers
+Found in file mathoms.c
+
+
+=back
+
 =head1 Functions in file pp_pack.c
 
 
@@ -893,16 +1163,6 @@ the GV directly; instead, you should use the method's CV, which can be
 obtained from the GV with the C<GvCV> macro.
 
 	GV*	gv_fetchmeth(HV* stash, const char* name, STRLEN len, I32 level)
-
-=for hackers
-Found in file gv.c
-
-=item gv_fetchmethod
-X<gv_fetchmethod>
-
-See L<gv_fetchmethod_autoload>.
-
-	GV*	gv_fetchmethod(HV* stash, const char* name)
 
 =for hackers
 Found in file gv.c
@@ -1955,6 +2215,18 @@ Fill the sv with current working directory
 =for hackers
 Found in file util.c
 
+=item my_sprintf
+X<my_sprintf>
+
+The C library C<sprintf>, wrapped if necessary, to ensure that it will return
+the length of the string written to the buffer. Only rare pre-ANSI systems
+need the wrapper function - usually this is a direct call to C<sprintf>.
+
+	int	my_sprintf(char *buffer, const char *pat, ...)
+
+=for hackers
+Found in file util.c
+
 =item new_version
 X<new_version>
 
@@ -2083,38 +2355,15 @@ wrapper for C<strncmp>).
 =for hackers
 Found in file handy.h
 
-=item sv_nolocking
-X<sv_nolocking>
-
-Dummy routine which "locks" an SV when there is no locking module present.
-Exists to avoid test for a NULL function pointer and because it could potentially warn under
-some level of strict-ness.
-
-	void	sv_nolocking(SV *)
-
-=for hackers
-Found in file util.c
-
 =item sv_nosharing
 X<sv_nosharing>
 
 Dummy routine which "shares" an SV when there is no sharing module present.
-Exists to avoid test for a NULL function pointer and because it could potentially warn under
-some level of strict-ness.
+Or "locks" it. Or "unlocks" it. In other words, ignores its single SV argument.
+Exists to avoid test for a NULL function pointer and because it could
+potentially warn under some level of strict-ness.
 
 	void	sv_nosharing(SV *)
-
-=for hackers
-Found in file util.c
-
-=item sv_nounlocking
-X<sv_nounlocking>
-
-Dummy routine which "unlocks" an SV when there is no locking module present.
-Exists to avoid test for a NULL function pointer and because it could potentially warn under
-some level of strict-ness.
-
-	void	sv_nounlocking(SV *)
 
 =for hackers
 Found in file util.c
@@ -4351,45 +4600,6 @@ Usually accessed via the C<SvPVbyte> macro.
 =for hackers
 Found in file sv.c
 
-=item sv_2pvbyte_nolen
-X<sv_2pvbyte_nolen>
-
-Return a pointer to the byte-encoded representation of the SV.
-May cause the SV to be downgraded from UTF-8 as a side-effect.
-
-Usually accessed via the C<SvPVbyte_nolen> macro.
-
-	char*	sv_2pvbyte_nolen(SV* sv)
-
-=for hackers
-Found in file sv.c
-
-=item sv_2pvutf8
-X<sv_2pvutf8>
-
-Return a pointer to the UTF-8-encoded representation of the SV, and set *lp
-to its length.  May cause the SV to be upgraded to UTF-8 as a side-effect.
-
-Usually accessed via the C<SvPVutf8> macro.
-
-	char*	sv_2pvutf8(SV* sv, STRLEN* lp)
-
-=for hackers
-Found in file sv.c
-
-=item sv_2pvutf8_nolen
-X<sv_2pvutf8_nolen>
-
-Return a pointer to the UTF-8-encoded representation of the SV.
-May cause the SV to be upgraded to UTF-8 as a side-effect.
-
-Usually accessed via the C<SvPVutf8_nolen> macro.
-
-	char*	sv_2pvutf8_nolen(SV* sv)
-
-=for hackers
-Found in file sv.c
-
 =item sv_2pv_flags
 X<sv_2pv_flags>
 
@@ -4400,16 +4610,6 @@ Normally invoked via the C<SvPV_flags> macro. C<sv_2pv()> and C<sv_2pv_nomg>
 usually end up here too.
 
 	char*	sv_2pv_flags(SV* sv, STRLEN* lp, I32 flags)
-
-=for hackers
-Found in file sv.c
-
-=item sv_2pv_nolen
-X<sv_2pv_nolen>
-
-Like C<sv_2pv()>, but doesn't return the length too. You should usually
-use the macro wrapper C<SvPV_nolen(sv)> instead.
-	char*	sv_2pv_nolen(SV* sv)
 
 =for hackers
 Found in file sv.c
@@ -4515,16 +4715,6 @@ in terms of this function.
 =for hackers
 Found in file sv.c
 
-=item sv_catpvn_mg
-X<sv_catpvn_mg>
-
-Like C<sv_catpvn>, but also handles 'set' magic.
-
-	void	sv_catpvn_mg(SV *sv, const char *ptr, STRLEN len)
-
-=for hackers
-Found in file sv.c
-
 =item sv_catpvn_nomg
 X<sv_catpvn_nomg>
 
@@ -4566,16 +4756,6 @@ bit set, will C<mg_get> on the SVs if appropriate, else not. C<sv_catsv>
 and C<sv_catsv_nomg> are implemented in terms of this function.
 
 	void	sv_catsv_flags(SV* dsv, SV* ssv, I32 flags)
-
-=for hackers
-Found in file sv.c
-
-=item sv_catsv_mg
-X<sv_catsv_mg>
-
-Like C<sv_catsv>, but also handles 'set' magic.
-
-	void	sv_catsv_mg(SV *dstr, SV *sstr)
 
 =for hackers
 Found in file sv.c
@@ -4712,18 +4892,6 @@ coerce its args to strings if necessary.
 =for hackers
 Found in file sv.c
 
-=item sv_force_normal
-X<sv_force_normal>
-
-Undo various types of fakery on an SV: if the PV is a shared string, make
-a private copy; if we're a ref, stop refing; if we're a glob, downgrade to
-an xpvmg. See also C<sv_force_normal_flags>.
-
-	void	sv_force_normal(SV *sv)
-
-=for hackers
-Found in file sv.c
-
 =item sv_force_normal_flags
 X<sv_force_normal_flags>
 
@@ -4820,17 +4988,6 @@ object.  If the SV is not an RV, or if the object is not blessed, then this
 will return false.
 
 	int	sv_isobject(SV* sv)
-
-=for hackers
-Found in file sv.c
-
-=item sv_iv
-X<sv_iv>
-
-A private implementation of the C<SvIVx> macro for compilers which can't
-cope with complex macro expressions. Always use the macro instead.
-
-	IV	sv_iv(SV* sv)
 
 =for hackers
 Found in file sv.c
@@ -4933,17 +5090,6 @@ instead.
 =for hackers
 Found in file sv.c
 
-=item sv_nv
-X<sv_nv>
-
-A private implementation of the C<SvNVx> macro for compilers which can't
-cope with complex macro expressions. Always use the macro instead.
-
-	NV	sv_nv(SV* sv)
-
-=for hackers
-Found in file sv.c
-
 =item sv_pos_b2u
 X<sv_pos_b2u>
 
@@ -4970,57 +5116,12 @@ type coercion.
 =for hackers
 Found in file sv.c
 
-=item sv_pv
-X<sv_pv>
-
-Use the C<SvPV_nolen> macro instead
-
-	char*	sv_pv(SV *sv)
-
-=for hackers
-Found in file sv.c
-
-=item sv_pvbyte
-X<sv_pvbyte>
-
-Use C<SvPVbyte_nolen> instead.
-
-	char*	sv_pvbyte(SV *sv)
-
-=for hackers
-Found in file sv.c
-
-=item sv_pvbyten
-X<sv_pvbyten>
-
-A private implementation of the C<SvPVbyte> macro for compilers
-which can't cope with complex macro expressions. Always use the macro
-instead.
-
-	char*	sv_pvbyten(SV *sv, STRLEN *len)
-
-=for hackers
-Found in file sv.c
-
 =item sv_pvbyten_force
 X<sv_pvbyten_force>
 
-A private implementation of the C<SvPVbytex_force> macro for compilers
-which can't cope with complex macro expressions. Always use the macro
-instead.
+The backend for the C<SvPVbytex_force> macro. Always use the macro instead.
 
 	char*	sv_pvbyten_force(SV* sv, STRLEN* lp)
-
-=for hackers
-Found in file sv.c
-
-=item sv_pvn
-X<sv_pvn>
-
-A private implementation of the C<SvPV> macro for compilers which can't
-cope with complex macro expressions. Always use the macro instead.
-
-	char*	sv_pvn(SV *sv, STRLEN *len)
 
 =for hackers
 Found in file sv.c
@@ -5052,34 +5153,10 @@ C<SvPV_force> and C<SvPV_force_nomg>
 =for hackers
 Found in file sv.c
 
-=item sv_pvutf8
-X<sv_pvutf8>
-
-Use the C<SvPVutf8_nolen> macro instead
-
-	char*	sv_pvutf8(SV *sv)
-
-=for hackers
-Found in file sv.c
-
-=item sv_pvutf8n
-X<sv_pvutf8n>
-
-A private implementation of the C<SvPVutf8> macro for compilers
-which can't cope with complex macro expressions. Always use the macro
-instead.
-
-	char*	sv_pvutf8n(SV *sv, STRLEN *len)
-
-=for hackers
-Found in file sv.c
-
 =item sv_pvutf8n_force
 X<sv_pvutf8n_force>
 
-A private implementation of the C<SvPVutf8_force> macro for compilers
-which can't cope with complex macro expressions. Always use the macro
-instead.
+The backend for the C<SvPVutf8x_force> macro. Always use the macro instead.
 
 	char*	sv_pvutf8n_force(SV* sv, STRLEN* lp)
 
@@ -5435,15 +5512,6 @@ Like C<sv_setuv>, but also handles 'set' magic.
 =for hackers
 Found in file sv.c
 
-=item sv_taint
-X<sv_taint>
-
-Taint an SV. Use C<SvTAINTED_on> instead.
-	void	sv_taint(SV* sv)
-
-=for hackers
-Found in file sv.c
-
 =item sv_tainted
 X<sv_tainted>
 
@@ -5471,19 +5539,6 @@ X<sv_unmagic>
 Removes all magic of type C<type> from an SV.
 
 	int	sv_unmagic(SV* sv, int type)
-
-=for hackers
-Found in file sv.c
-
-=item sv_unref
-X<sv_unref>
-
-Unsets the RV status of the SV, and decrements the reference count of
-whatever was being referenced by the RV.  This can almost be thought of
-as a reversal of C<newSVrv>.  This is C<sv_unref_flags> with the C<flag>
-being zero.  See C<SvROK_off>.
-
-	void	sv_unref(SV* sv)
 
 =for hackers
 Found in file sv.c
@@ -5628,17 +5683,6 @@ This is not as a general purpose byte encoding to Unicode interface:
 use the Encode extension for that.
 
 	STRLEN	sv_utf8_upgrade_flags(SV *sv, I32 flags)
-
-=for hackers
-Found in file sv.c
-
-=item sv_uv
-X<sv_uv>
-
-A private implementation of the C<SvUVx> macro for compilers which can't
-cope with complex macro expressions. Always use the macro instead.
-
-	UV	sv_uv(SV* sv)
 
 =for hackers
 Found in file sv.c
@@ -5825,7 +5869,7 @@ Found in file utf8.c
 =item is_utf8_string_loc
 X<is_utf8_string_loc>
 
-Like is_ut8_string() but stores the location of the failure (in the
+Like is_utf8_string() but stores the location of the failure (in the
 case of "utf8ness failure") or the location s+len (in the case of
 "utf8ness success") in the C<ep>.
 
@@ -5839,7 +5883,7 @@ Found in file utf8.c
 =item is_utf8_string_loclen
 X<is_utf8_string_loclen>
 
-Like is_ut8_string() but stores the location of the failure (in the
+Like is_utf8_string() but stores the location of the failure (in the
 case of "utf8ness failure") or the location s+len (in the case of
 "utf8ness success") in the C<ep>, and the number of UTF-8
 encoded characters in the C<el>.
@@ -6018,20 +6062,6 @@ The first character of the uppercased version is returned
 =for hackers
 Found in file utf8.c
 
-=item utf8n_to_uvchr
-X<utf8n_to_uvchr>
-
-Returns the native character value of the first character in the string C<s>
-which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
-length, in bytes, of that character.
-
-Allows length and flags to be passed to low level routine.
-
-	UV	utf8n_to_uvchr(const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
-
-=for hackers
-Found in file utf8.c
-
 =item utf8n_to_uvuni
 X<utf8n_to_uvuni>
 
@@ -6144,25 +6174,6 @@ If C<s> does not point to a well-formed UTF-8 character, zero is
 returned and retlen is set, if possible, to -1.
 
 	UV	utf8_to_uvuni(const U8 *s, STRLEN *retlen)
-
-=for hackers
-Found in file utf8.c
-
-=item uvchr_to_utf8
-X<uvchr_to_utf8>
-
-Adds the UTF-8 representation of the Native codepoint C<uv> to the end
-of the string C<d>; C<d> should be have at least C<UTF8_MAXBYTES+1> free
-bytes available. The return value is the pointer to the byte after the
-end of the new character. In other words,
-
-    d = uvchr_to_utf8(d, uv);
-
-is the recommended wide native character-aware way of saying
-
-    *(d++) = uv;
-
-	U8*	uvchr_to_utf8(U8 *d, UV uv)
 
 =for hackers
 Found in file utf8.c
