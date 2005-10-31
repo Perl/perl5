@@ -614,8 +614,8 @@ returned and retlen is set, if possible, to -1.
 UV
 Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
 {
-    return Perl_utf8n_to_uvchr(aTHX_ s, UTF8_MAXBYTES, retlen,
-			       ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
+    return utf8n_to_uvchr(s, UTF8_MAXBYTES, retlen,
+			  ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
 }
 
 /*
@@ -1773,7 +1773,6 @@ is the recommended wide native character-aware way of saying
 /* On ASCII machines this is normally a macro but we want a
    real function in case XS code wants it
 */
-#undef Perl_uvchr_to_utf8
 U8 *
 Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv)
 {
@@ -1802,7 +1801,6 @@ Allows length and flags to be passed to low level routine.
 /* On ASCII machines this is normally a macro but we want
    a real function in case XS code wants it
 */
-#undef Perl_utf8n_to_uvchr
 UV
 Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, 
 U32 flags)

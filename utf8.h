@@ -58,8 +58,8 @@ END_EXTERN_C
 #define ASCII_TO_NEED(enc,ch)    (ch)
 
 /* As there are no translations avoid the function wrapper */
-#define Perl_utf8n_to_uvchr Perl_utf8n_to_uvuni
-#define Perl_uvchr_to_utf8  Perl_uvuni_to_utf8
+#define utf8n_to_uvchr utf8n_to_uvuni
+#define uvchr_to_utf8  uvuni_to_utf8
 
 /*
 

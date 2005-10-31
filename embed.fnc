@@ -857,9 +857,21 @@ ApMd	|U8*	|bytes_from_utf8|NN const U8 *s|NN STRLEN *len|NULLOK bool *is_utf8
 ApMd	|U8*	|bytes_to_utf8	|NN const U8 *s|NN STRLEN *len
 Apd	|UV	|utf8_to_uvchr	|NN const U8 *s|NULLOK STRLEN *retlen
 Apd	|UV	|utf8_to_uvuni	|NN const U8 *s|NULLOK STRLEN *retlen
+
+#ifdef EBCDIC
 Adp	|UV	|utf8n_to_uvchr	|NN const U8 *s|STRLEN curlen|NULLOK STRLEN *retlen|U32 flags
+#else
+Adpbm	|UV	|utf8n_to_uvchr	|NN const U8 *s|STRLEN curlen|NULLOK STRLEN *retlen|U32 flags
+#endif
+
 Adp	|UV	|utf8n_to_uvuni	|NN const U8 *s|STRLEN curlen|NULLOK STRLEN *retlen|U32 flags
+
+#ifdef EBCDIC
 Apd	|U8*	|uvchr_to_utf8	|NN U8 *d|UV uv
+#else
+Apdbm	|U8*	|uvchr_to_utf8	|NN U8 *d|UV uv
+#endif
+
 Apbm	|U8*	|uvuni_to_utf8	|NN U8 *d|UV uv
 Ap	|U8*	|uvchr_to_utf8_flags	|NN U8 *d|UV uv|UV flags
 Apd	|U8*	|uvuni_to_utf8_flags	|NN U8 *d|UV uv|UV flags

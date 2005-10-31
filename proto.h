@@ -2388,14 +2388,30 @@ PERL_CALLCONV UV	Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
 PERL_CALLCONV UV	Perl_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
 			__attribute__nonnull__(pTHX_1);
 
+
+#ifdef EBCDIC
 PERL_CALLCONV UV	Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 			__attribute__nonnull__(pTHX_1);
+
+#else
+/* PERL_CALLCONV UV	Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
+			__attribute__nonnull__(pTHX_1); */
+
+#endif
 
 PERL_CALLCONV UV	Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 			__attribute__nonnull__(pTHX_1);
 
+
+#ifdef EBCDIC
 PERL_CALLCONV U8*	Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv)
 			__attribute__nonnull__(pTHX_1);
+
+#else
+/* PERL_CALLCONV U8*	Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv)
+			__attribute__nonnull__(pTHX_1); */
+
+#endif
 
 /* PERL_CALLCONV U8*	Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 			__attribute__nonnull__(pTHX_1); */
