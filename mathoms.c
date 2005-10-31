@@ -406,58 +406,6 @@ Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
     return sv_utf8_upgrade_flags(sv, SV_GMAGIC);
 }
 
-/*
-=for apidoc A|U8 *|uvchr_to_utf8|U8 *d|UV uv
-
-Adds the UTF-8 representation of the Native codepoint C<uv> to the end
-of the string C<d>; C<d> should be have at least C<UTF8_MAXBYTES+1> free
-bytes available. The return value is the pointer to the byte after the
-end of the new character. In other words,
-
-    d = uvchr_to_utf8(d, uv);
-
-is the recommended wide native character-aware way of saying
-
-    *(d++) = uv;
-
-=cut
-*/
-
-/* On ASCII machines this is normally a macro but we want a
-   real function in case XS code wants it
-*/
-#undef Perl_uvchr_to_utf8
-U8 *
-Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv)
-{
-    return Perl_uvuni_to_utf8_flags(aTHX_ d, NATIVE_TO_UNI(uv), 0);
-}
-
-
-/*
-=for apidoc A|UV|utf8n_to_uvchr|U8 *s|STRLEN curlen|STRLEN *retlen|U32 
-flags
-
-Returns the native character value of the first character in the string 
-C<s>
-which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
-length, in bytes, of that character.
-
-Allows length and flags to be passed to low level routine.
-
-=cut
-*/
-/* On ASCII machines this is normally a macro but we want
-   a real function in case XS code wants it
-*/
-#undef Perl_utf8n_to_uvchr
-UV
-Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, 
-U32 flags)
-{
-    const UV uv = Perl_utf8n_to_uvuni(aTHX_ s, curlen, retlen, flags);
-    return UNI_TO_NATIVE(uv);
-}
 int
 Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...)
 {
