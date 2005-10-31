@@ -39,11 +39,11 @@ my %alias;
 
 # Format is "this function" => "does these op names"
 my @raw_alias = (
-		 Perl_do_kv => 'keys values',
+		 Perl_do_kv => [qw( keys values )],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {
-    $alias{$_} = $func foreach split ' ', $names;
+    $alias{$_} = $func for @$names;
 }
 
 # Emit defines.
@@ -183,8 +183,13 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 END
 
 for (@ops) {
-    my $name = $alias{$_} || "Perl_pp_$_";
-    print "\tMEMBER_TO_FPTR($name),\n" unless $_ eq "custom";
+    $_ eq "custom" and next;
+    if (my $name = $alias{$_}) {
+	print "\tMEMBER_TO_FPTR($name),\t/* Perl_pp_$_ */\n";
+    }
+    else {
+	print "\tMEMBER_TO_FPTR(Perl_pp_$_),\n";
+    }
 }
 
 print <<END;
