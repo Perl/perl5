@@ -4785,6 +4785,13 @@ PP(pp_lock)
     RETURN;
 }
 
+
+PP(unimplemented_op)
+{
+    DIE(aTHX_ "panic: unimplemented op %s (#%d) called", OP_NAME(PL_op),
+	PL_op->op_type);
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd

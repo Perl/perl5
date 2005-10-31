@@ -20,6 +20,8 @@
 #define Perl_pp_i_postinc Perl_pp_postinc
 #define Perl_pp_i_postdec Perl_pp_postdec
 
+PERL_PPDEF(Perl_unimplemented_op)
+
 START_EXTERN_C
 
 #define OP_NAME(o) ((o)->op_type == OP_CUSTOM ? custom_op_name(o) : \
@@ -776,7 +778,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_padsv),
 	MEMBER_TO_FPTR(Perl_pp_padav),
 	MEMBER_TO_FPTR(Perl_pp_padhv),
-	MEMBER_TO_FPTR(Perl_pp_padany),
+	MEMBER_TO_FPTR(Perl_unimplemented_op),	/* Perl_pp_padany */
 	MEMBER_TO_FPTR(Perl_pp_pushre),
 	MEMBER_TO_FPTR(Perl_pp_rv2gv),
 	MEMBER_TO_FPTR(Perl_pp_rv2sv),
@@ -918,7 +920,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_reverse),
 	MEMBER_TO_FPTR(Perl_pp_grepstart),
 	MEMBER_TO_FPTR(Perl_pp_grepwhile),
-	MEMBER_TO_FPTR(Perl_pp_mapstart),
+	MEMBER_TO_FPTR(Perl_unimplemented_op),	/* Perl_pp_mapstart */
 	MEMBER_TO_FPTR(Perl_pp_mapwhile),
 	MEMBER_TO_FPTR(Perl_pp_range),
 	MEMBER_TO_FPTR(Perl_pp_flip),
@@ -1112,7 +1114,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_getlogin),
 	MEMBER_TO_FPTR(Perl_pp_syscall),
 	MEMBER_TO_FPTR(Perl_pp_lock),
-	MEMBER_TO_FPTR(Perl_pp_threadsv),
+	MEMBER_TO_FPTR(Perl_unimplemented_op),	/* Perl_pp_threadsv */
 	MEMBER_TO_FPTR(Perl_pp_setstate),
 	MEMBER_TO_FPTR(Perl_pp_method_named),
 	MEMBER_TO_FPTR(Perl_pp_dor),

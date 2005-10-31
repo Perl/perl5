@@ -40,7 +40,8 @@ my %alias;
 # Format is "this function" => "does these op names"
 my @raw_alias = (
 		 Perl_do_kv => [qw( keys values )],
-		);
+		 Perl_unimplemented_op => [qw(padany threadsv mapstart)],
+		 );
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {
     $alias{$_} = $func for @$names;
@@ -71,6 +72,8 @@ print <<"END";
 #define Perl_pp_i_predec Perl_pp_predec
 #define Perl_pp_i_postinc Perl_pp_postinc
 #define Perl_pp_i_postdec Perl_pp_postdec
+
+PERL_PPDEF(Perl_unimplemented_op)
 
 END
 

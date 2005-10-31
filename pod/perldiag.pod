@@ -2916,10 +2916,6 @@ references to an object.
 
 (P) Something requested a negative number of bytes of malloc.
 
-=item panic: mapstart
-
-(P) The compiler is screwed up with respect to the map() function.
-
 =item panic: memory wrap
 
 (P) Something tried to allocate more memory than possible.
@@ -2999,6 +2995,11 @@ was string.
 =item panic: top_env
 
 (P) The compiler attempted to do a goto, or something weird like that.
+
+=item panic: unimplemented op %s (#%d) called
+
+(P) The compiler is screwed up and attempted to use an op that isn't permitted
+at run time.
 
 =item panic: utf16_to_utf8: odd bytelen
 
