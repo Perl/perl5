@@ -2627,11 +2627,7 @@ nuts:
 
 PP(pp_gsockopt)
 {
-#ifdef HAS_SOCKET
     return pp_ssockopt();
-#else
-    DIE(aTHX_ PL_no_sock_func, "getsockopt");
-#endif
 }
 
 PP(pp_ssockopt)
@@ -2716,17 +2712,13 @@ nuts2:
     RETPUSHUNDEF;
 
 #else
-    DIE(aTHX_ PL_no_sock_func, "setsockopt");
+    DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
 #endif
 }
 
 PP(pp_getsockname)
 {
-#ifdef HAS_SOCKET
     return pp_getpeername();
-#else
-    DIE(aTHX_ PL_no_sock_func, "getsockname");
-#endif
 }
 
 PP(pp_getpeername)
@@ -2789,7 +2781,7 @@ nuts2:
     RETPUSHUNDEF;
 
 #else
-    DIE(aTHX_ PL_no_sock_func, "getpeername");
+    DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
 #endif
 }
 
@@ -4810,20 +4802,12 @@ PP(pp_semop)
 
 PP(pp_ghbyname)
 {
-#ifdef HAS_GETHOSTBYNAME
     return pp_ghostent();
-#else
-    DIE(aTHX_ PL_no_sock_func, "gethostbyname");
-#endif
 }
 
 PP(pp_ghbyaddr)
 {
-#ifdef HAS_GETHOSTBYADDR
     return pp_ghostent();
-#else
-    DIE(aTHX_ PL_no_sock_func, "gethostbyaddr");
-#endif
 }
 
 PP(pp_ghostent)
@@ -4926,20 +4910,12 @@ PP(pp_ghostent)
 
 PP(pp_gnbyname)
 {
-#ifdef HAS_GETNETBYNAME
     return pp_gnetent();
-#else
-    DIE(aTHX_ PL_no_sock_func, "getnetbyname");
-#endif
 }
 
 PP(pp_gnbyaddr)
 {
-#ifdef HAS_GETNETBYADDR
     return pp_gnetent();
-#else
-    DIE(aTHX_ PL_no_sock_func, "getnetbyaddr");
-#endif
 }
 
 PP(pp_gnetent)
@@ -5026,20 +5002,12 @@ PP(pp_gnetent)
 
 PP(pp_gpbyname)
 {
-#ifdef HAS_GETPROTOBYNAME
     return pp_gprotoent();
-#else
-    DIE(aTHX_ PL_no_sock_func, "getprotobyname");
-#endif
 }
 
 PP(pp_gpbynumber)
 {
-#ifdef HAS_GETPROTOBYNUMBER
     return pp_gprotoent();
-#else
-    DIE(aTHX_ PL_no_sock_func, "getprotobynumber");
-#endif
 }
 
 PP(pp_gprotoent)
@@ -5112,20 +5080,12 @@ PP(pp_gprotoent)
 
 PP(pp_gsbyname)
 {
-#ifdef HAS_GETSERVBYNAME
     return pp_gservent();
-#else
-    DIE(aTHX_ PL_no_sock_func, "getservbyname");
-#endif
 }
 
 PP(pp_gsbyport)
 {
-#ifdef HAS_GETSERVBYPORT
     return pp_gservent();
-#else
-    DIE(aTHX_ PL_no_sock_func, "getservbyport");
-#endif
 }
 
 PP(pp_gservent)
@@ -5314,20 +5274,12 @@ PP(pp_eservent)
 
 PP(pp_gpwnam)
 {
-#ifdef HAS_PASSWD
     return pp_gpwent();
-#else
-    DIE(aTHX_ PL_no_func, "getpwnam");
-#endif
 }
 
 PP(pp_gpwuid)
 {
-#ifdef HAS_PASSWD
     return pp_gpwent();
-#else
-    DIE(aTHX_ PL_no_func, "getpwuid");
-#endif
 }
 
 PP(pp_gpwent)
@@ -5562,7 +5514,7 @@ PP(pp_gpwent)
     }
     RETURN;
 #else
-    DIE(aTHX_ PL_no_func, "getpwent");
+    DIE(aTHX_ PL_no_func, PL_op_desc[PL_op->op_type]);
 #endif
 }
 
@@ -5590,20 +5542,12 @@ PP(pp_epwent)
 
 PP(pp_ggrnam)
 {
-#ifdef HAS_GROUP
     return pp_ggrent();
-#else
-    DIE(aTHX_ PL_no_func, "getgrnam");
-#endif
 }
 
 PP(pp_ggrgid)
 {
-#ifdef HAS_GROUP
     return pp_ggrent();
-#else
-    DIE(aTHX_ PL_no_func, "getgrgid");
-#endif
 }
 
 PP(pp_ggrent)
@@ -5674,7 +5618,7 @@ PP(pp_ggrent)
 
     RETURN;
 #else
-    DIE(aTHX_ PL_no_func, "getgrent");
+    DIE(aTHX_ PL_no_func, PL_op_desc[PL_op->op_type]);
 #endif
 }
 
