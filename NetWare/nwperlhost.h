@@ -890,7 +890,7 @@ PerlLIOUnlink(struct IPerlLIO* piPerl, const char *filename)
 }
 
 int
-PerlLIOUtime(struct IPerlLIO* piPerl, char *filename, struct utimbuf *times)
+PerlLIOUtime(struct IPerlLIO* piPerl, const char *filename, struct utimbuf *times)
 {
     return nw_utime(filename, times);
 }

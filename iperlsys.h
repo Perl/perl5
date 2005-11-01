@@ -632,7 +632,7 @@ typedef int		(*LPLIONameStat)(struct IPerlLIO*, const char*,
 typedef char*		(*LPLIOTmpnam)(struct IPerlLIO*, char*);
 typedef int		(*LPLIOUmask)(struct IPerlLIO*, int);
 typedef int		(*LPLIOUnlink)(struct IPerlLIO*, const char*);
-typedef int		(*LPLIOUtime)(struct IPerlLIO*, char*, struct utimbuf*);
+typedef int		(*LPLIOUtime)(struct IPerlLIO*, const char*, struct utimbuf*);
 typedef int		(*LPLIOWrite)(struct IPerlLIO*, int, const void*,
 			    unsigned int);
 
