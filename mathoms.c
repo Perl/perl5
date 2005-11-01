@@ -14,6 +14,8 @@
  * hand to hand were of that sort." 
  */
 
+#ifndef NO_MATHOMS
+
 /* 
  * This file contains mathoms, various binary artifacts from previous
  * versions of Perl.  For binary or source compatibility reasons, though,
@@ -26,6 +28,8 @@
 #include "EXTERN.h"
 #define PERL_IN_MATHOMS_C
 #include "perl.h"
+
+void Perl_mathoms() {}
 
 /* ref() is now a macro using Perl_doref;
  * this version provided for binary compatibility only.
@@ -1029,6 +1033,8 @@ Perl_sv_nounlocking(pTHX_ SV *sv)
 {
     PERL_UNUSED_ARG(sv);
 }
+
+#endif /* NO_MATHOMS */
 
 /*
  * Local variables:
