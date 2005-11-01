@@ -2734,9 +2734,31 @@ win32_fstat(int fd, Stat_t *sbufptr)
      * for write operations, probably because it is opened for reading.
      * --Vadim Konovalov
      */
-    int rc = fstat(fd,sbufptr);
     BY_HANDLE_FILE_INFORMATION bhfi;
+#if defined(WIN64) || defined(USE_LARGE_FILES)    
+    /* Borland 5.5.1 has a 64-bit stat, but only a 32-bit fstat */
+    struct stat tmp;
+    int rc = fstat(fd,&tmp);
+   
+    sbufptr->st_dev   = tmp.st_dev;
+    sbufptr->st_ino   = tmp.st_ino;
+    sbufptr->st_mode  = tmp.st_mode;
+    sbufptr->st_nlink = tmp.st_nlink;
+    sbufptr->st_uid   = tmp.st_uid;
+    sbufptr->st_gid   = tmp.st_gid;
+    sbufptr->st_rdev  = tmp.st_rdev;
+    sbufptr->st_size  = tmp.st_size;
+    sbufptr->st_atime = tmp.st_atime;
+    sbufptr->st_mtime = tmp.st_mtime;
+    sbufptr->st_ctime = tmp.st_ctime;
+#else
+    int rc = fstat(fd,sbufptr);
+#endif       
+
     if (GetFileInformationByHandle((HANDLE)_get_osfhandle(fd), &bhfi)) {
+#if defined(WIN64) || defined(USE_LARGE_FILES)    
+        sbufptr->st_size = (bhfi.nFileSizeHigh << 32) + bhfi.nFileSizeLow ;
+#endif
         sbufptr->st_mode &= 0xFE00;
         if (bhfi.dwFileAttributes & FILE_ATTRIBUTE_READONLY)
             sbufptr->st_mode |= (S_IREAD + (S_IREAD >> 3) + (S_IREAD >> 6));
