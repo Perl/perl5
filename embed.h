@@ -165,6 +165,12 @@
 #ifdef PERL_CORE
 #define do_eof			Perl_do_eof
 #endif
+#ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
+#else
+#ifdef PERL_CORE
+#define do_exec			Perl_do_exec
+#endif
+#endif
 #if defined(WIN32) || defined(__SYMBIAN32__)
 #define do_aspawn		Perl_do_aspawn
 #define do_spawn		Perl_do_spawn
@@ -2155,6 +2161,14 @@
 #define do_close(a,b)		Perl_do_close(aTHX_ a,b)
 #ifdef PERL_CORE
 #define do_eof(a)		Perl_do_eof(aTHX_ a)
+#endif
+#ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
+#ifdef PERL_CORE
+#endif
+#else
+#ifdef PERL_CORE
+#define do_exec(a)		Perl_do_exec(aTHX_ a)
+#endif
 #endif
 #if defined(WIN32) || defined(__SYMBIAN32__)
 #define do_aspawn(a,b,c)	Perl_do_aspawn(aTHX_ a,b,c)
