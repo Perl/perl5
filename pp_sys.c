@@ -3046,17 +3046,20 @@ PP(pp_fteexec)
 PP(pp_ftis)
 {
     I32 result;
+    const int op_type = PL_op->op_type;
     dSP;
     STACKED_FTEST_CHECK;
     result = my_stat();
     SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
+    if (op_type == OP_FTIS)
+	RETPUSHYES;
     {
+	/* You can't dTARGET inside OP_FTIS, because you'll get
+	   "panic: pad_sv po" - the op is not flagged to have a target.  */
 	dTARGET;
-	switch (PL_op->op_type) {
-	case OP_FTIS:
-	    RETPUSHYES;
+	switch (op_type) {
 	case OP_FTSIZE:
 #if Off_t_size > IVSIZE
 	    PUSHn(PL_statcache.st_size);
