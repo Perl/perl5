@@ -731,11 +731,15 @@ package main;
 my $answer = "ok ";
 () = sort OtherPack::foo 1,2,3,4;
 
-{package OtherPack; sub foo {
-  $answer = "not ok " if
-    defined($a) || defined($b) || !defined($main::a) || !defined($main::b);
-  $main::a <=> $main::b;
-}}
+{
+    package OtherPack;
+    no warnings 'once';
+    sub foo {
+	$answer = "not ok " if
+	defined($a) || defined($b) || !defined($main::a) || !defined($main::b);
+	$main::a <=> $main::b;
+    }
+}
 
 print $answer, $test++, "\n";
 
@@ -786,8 +790,3 @@ print(($@ =~ /^Modification of a read-only value attempted/ ?
 # Using return() should be okay even in a deeper context
 @b = sort {while (1) {return ($a <=> $b)} } 1..10;
 ok("@b", "1 2 3 4 5 6 7 8 9 10", "return within loop");
-
-# Clearing the array we're sorting should be okay.
-@a = (1..10);
-@b = sort {@a=(); ($a+1)<=>($b+1)} @a;
-ok("@b", "1 2 3 4 5 6 7 8 9 10", "clear array being sorted");
