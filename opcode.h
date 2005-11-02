@@ -1032,9 +1032,9 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_chdir),
 	MEMBER_TO_FPTR(Perl_pp_chown),
 	MEMBER_TO_FPTR(Perl_pp_chroot),
-	MEMBER_TO_FPTR(Perl_pp_unlink),
-	MEMBER_TO_FPTR(Perl_pp_chmod),
-	MEMBER_TO_FPTR(Perl_pp_utime),
+	MEMBER_TO_FPTR(Perl_pp_chown),	/* Perl_pp_unlink */
+	MEMBER_TO_FPTR(Perl_pp_chown),	/* Perl_pp_chmod */
+	MEMBER_TO_FPTR(Perl_pp_chown),	/* Perl_pp_utime */
 	MEMBER_TO_FPTR(Perl_pp_rename),
 	MEMBER_TO_FPTR(Perl_pp_link),
 	MEMBER_TO_FPTR(Perl_pp_symlink),
@@ -1052,7 +1052,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_waitpid),
 	MEMBER_TO_FPTR(Perl_pp_system),
 	MEMBER_TO_FPTR(Perl_pp_exec),
-	MEMBER_TO_FPTR(Perl_pp_kill),
+	MEMBER_TO_FPTR(Perl_pp_chown),	/* Perl_pp_kill */
 	MEMBER_TO_FPTR(Perl_pp_getppid),
 	MEMBER_TO_FPTR(Perl_pp_getpgrp),
 	MEMBER_TO_FPTR(Perl_pp_setpgrp),

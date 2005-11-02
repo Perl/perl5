@@ -921,6 +921,26 @@ PP(pp_ftsvtx)
     return pp_ftrowned();
 }
 
+PP(pp_unlink)
+{
+    return pp_chown();
+}
+
+PP(pp_chmod)
+{
+    return pp_chown();
+}
+
+PP(pp_utime)
+{
+    return pp_chown();
+}
+
+PP(pp_kill)
+{
+    return pp_chown();
+}
+
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {

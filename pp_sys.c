@@ -3456,7 +3456,7 @@ PP(pp_chdir)
 PP(pp_chown)
 {
     dSP; dMARK; dTARGET;
-    I32 value = (I32)apply(PL_op->op_type, MARK, SP);
+    const I32 value = (I32)apply(PL_op->op_type, MARK, SP);
 
     SP = MARK;
     PUSHi(value);
@@ -3474,36 +3474,6 @@ PP(pp_chroot)
 #else
     DIE(aTHX_ PL_no_func, "chroot");
 #endif
-}
-
-PP(pp_unlink)
-{
-    dSP; dMARK; dTARGET;
-    I32 value;
-    value = (I32)apply(PL_op->op_type, MARK, SP);
-    SP = MARK;
-    PUSHi(value);
-    RETURN;
-}
-
-PP(pp_chmod)
-{
-    dSP; dMARK; dTARGET;
-    I32 value;
-    value = (I32)apply(PL_op->op_type, MARK, SP);
-    SP = MARK;
-    PUSHi(value);
-    RETURN;
-}
-
-PP(pp_utime)
-{
-    dSP; dMARK; dTARGET;
-    I32 value;
-    value = (I32)apply(PL_op->op_type, MARK, SP);
-    SP = MARK;
-    PUSHi(value);
-    RETURN;
 }
 
 PP(pp_rename)
@@ -4206,16 +4176,6 @@ PP(pp_exec)
     }
 
     SP = ORIGMARK;
-    PUSHi(value);
-    RETURN;
-}
-
-PP(pp_kill)
-{
-    dSP; dMARK; dTARGET;
-    I32 value;
-    value = (I32)apply(PL_op->op_type, MARK, SP);
-    SP = MARK;
     PUSHi(value);
     RETURN;
 }

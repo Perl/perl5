@@ -67,9 +67,9 @@ my @raw_alias = (
 		 Perl_pp_gservent => [qw(gsbyname gsbyport)],
 		 Perl_pp_gpwent => [qw(gpwnam gpwuid)],
 		 Perl_pp_ggrent => [qw(ggrnam ggrgid)],
-
 		 Perl_pp_ftis => [qw(ftsize ftmtime ftatime ftctime)],
-);
+		 Perl_pp_chown => [qw(unlink chmod utime kill)],
+		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {
     $alias{$_} = $func for @$names;
