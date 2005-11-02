@@ -1572,6 +1572,19 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
     const char *s;
     SV ** const oldmark = mark;
 
+    /* Doing this ahead of the switch statement preserves the old behaviour,
+       where attempting to use kill as a taint test test would fail on
+       platforms where kill was not defined.  */
+#ifndef HAS_KILL
+    if (type == OP_KILL)
+	DIE(aTHX_ PL_no_func, "kill");
+#endif
+#ifndef HAS_CHOWN
+    if (type == OP_CHOWN)
+	DIE(aTHX_ PL_no_func, "chown");
+#endif
+
+
 #define APPLY_TAINT_PROPER() \
     STMT_START {							\
 	if (PL_tainted) { TAINT_PROPER(what); }				\

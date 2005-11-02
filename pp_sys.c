@@ -3455,16 +3455,12 @@ PP(pp_chdir)
 
 PP(pp_chown)
 {
-#ifdef HAS_CHOWN
     dSP; dMARK; dTARGET;
     I32 value = (I32)apply(PL_op->op_type, MARK, SP);
 
     SP = MARK;
     PUSHi(value);
     RETURN;
-#else
-    DIE(aTHX_ PL_no_func, "chown");
-#endif
 }
 
 PP(pp_chroot)
@@ -4216,16 +4212,12 @@ PP(pp_exec)
 
 PP(pp_kill)
 {
-#ifdef HAS_KILL
     dSP; dMARK; dTARGET;
     I32 value;
     value = (I32)apply(PL_op->op_type, MARK, SP);
     SP = MARK;
     PUSHi(value);
     RETURN;
-#else
-    DIE(aTHX_ PL_no_func, "kill");
-#endif
 }
 
 PP(pp_getppid)
