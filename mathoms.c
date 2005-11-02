@@ -853,22 +853,22 @@ PP(pp_ggrgid)
 
 PP(pp_ftsize)
 {
-    return Perl_pp_ftis();
+    return pp_ftis();
 }
 
 PP(pp_ftmtime)
 {
-    return Perl_pp_ftis();
+    return pp_ftis();
 }
 
 PP(pp_ftatime)
 {
-    return Perl_pp_ftis();
+    return pp_ftis();
 }
 
 PP(pp_ftctime)
 {
-    return Perl_pp_ftis();
+    return pp_ftis();
 }
 
 U8 *
