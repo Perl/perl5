@@ -906,6 +906,21 @@ PP(pp_ftpipe)
     return pp_ftrowned();
 }
 
+PP(pp_ftsuid)
+{
+    return pp_ftrowned();
+}
+
+PP(pp_ftsgid)
+{
+    return pp_ftrowned();
+}
+
+PP(pp_ftsvtx)
+{
+    return pp_ftrowned();
+}
+
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {

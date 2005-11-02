@@ -3085,6 +3085,22 @@ PP(pp_ftrowned)
 {
     I32 result;
     dSP;
+
+    /* I believe that all these three are likely to be defined on most every
+       system these days.  */
+#ifndef S_ISUID
+    if(PL_op->op_type == OP_FTSUID)
+	RETPUSHNO;
+#endif
+#ifndef S_ISGID
+    if(PL_op->op_type == OP_FTSGID)
+	RETPUSHNO;
+#endif
+#ifndef S_ISVTX
+    if(PL_op->op_type == OP_FTSVTX)
+	RETPUSHNO;
+#endif
+
     STACKED_FTEST_CHECK;
     result = my_stat();
     SPAGAIN;
@@ -3127,6 +3143,24 @@ PP(pp_ftrowned)
 	if (S_ISFIFO(PL_statcache.st_mode))
 	    RETPUSHYES;
 	break;
+#ifdef S_ISUID
+    case OP_FTSUID:
+	if (PL_statcache.st_mode & S_ISUID)
+	    RETPUSHYES;
+	break;
+#endif
+#ifdef S_ISGID
+    case OP_FTSGID:
+	if (PL_statcache.st_mode & S_ISGID)
+	    RETPUSHYES;
+	break;
+#endif
+#ifdef S_ISVTX
+    case OP_FTSVTX:
+	if (PL_statcache.st_mode & S_ISVTX)
+	    RETPUSHYES;
+	break;
+#endif
     }
     RETPUSHNO;
 }
@@ -3139,54 +3173,6 @@ PP(pp_ftlink)
 	RETPUSHUNDEF;
     if (S_ISLNK(PL_statcache.st_mode))
 	RETPUSHYES;
-    RETPUSHNO;
-}
-
-PP(pp_ftsuid)
-{
-    dSP;
-#ifdef S_ISUID
-    I32 result;
-    STACKED_FTEST_CHECK;
-    result = my_stat();
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (PL_statcache.st_mode & S_ISUID)
-	RETPUSHYES;
-#endif
-    RETPUSHNO;
-}
-
-PP(pp_ftsgid)
-{
-    dSP;
-#ifdef S_ISGID
-    I32 result;
-    STACKED_FTEST_CHECK;
-    result = my_stat();
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (PL_statcache.st_mode & S_ISGID)
-	RETPUSHYES;
-#endif
-    RETPUSHNO;
-}
-
-PP(pp_ftsvtx)
-{
-    dSP;
-#ifdef S_ISVTX
-    I32 result;
-    STACKED_FTEST_CHECK;
-    result = my_stat();
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (PL_statcache.st_mode & S_ISVTX)
-	RETPUSHYES;
-#endif
     RETPUSHNO;
 }
 

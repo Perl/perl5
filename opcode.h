@@ -1023,9 +1023,9 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftdir */
 	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftpipe */
 	MEMBER_TO_FPTR(Perl_pp_ftlink),
-	MEMBER_TO_FPTR(Perl_pp_ftsuid),
-	MEMBER_TO_FPTR(Perl_pp_ftsgid),
-	MEMBER_TO_FPTR(Perl_pp_ftsvtx),
+	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftsuid */
+	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftsgid */
+	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftsvtx */
 	MEMBER_TO_FPTR(Perl_pp_fttty),
 	MEMBER_TO_FPTR(Perl_pp_fttext),
 	MEMBER_TO_FPTR(Perl_pp_fttext),	/* Perl_pp_ftbinary */
