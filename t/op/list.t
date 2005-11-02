@@ -96,7 +96,7 @@ for ($x = 0; $x < 3; $x++) {
     print "not " if join(':',@b) ne '30:';
     print "ok 30\n";
 
-    my @d = ()[1..1];
-    print "not " if @d != undef;
+    my $size = scalar(()[1..1]);
+    print "not " if $size != 0;
     print "ok 31\n";
 }
