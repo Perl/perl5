@@ -3052,7 +3052,30 @@ PP(pp_ftis)
     SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
-    RETPUSHYES;
+    {
+	dTARGET;
+	switch (PL_op->op_type) {
+	case OP_FTIS:
+	    RETPUSHYES;
+	case OP_FTSIZE:
+#if Off_t_size > IVSIZE
+	    PUSHn(PL_statcache.st_size);
+#else
+	    PUSHi(PL_statcache.st_size);
+#endif
+	    break;
+	case OP_FTMTIME:
+	    PUSHn( (((NV)PL_basetime - PL_statcache.st_mtime)) / 86400.0 );
+	    break;
+	case OP_FTATIME:
+	    PUSHn( (((NV)PL_basetime - PL_statcache.st_atime)) / 86400.0 );
+	    break;
+	case OP_FTCTIME:
+	    PUSHn( (((NV)PL_basetime - PL_statcache.st_ctime)) / 86400.0 );
+	    break;
+	}
+    }
+    RETURN;
 }
 
 PP(pp_ftrowned)
@@ -3082,62 +3105,6 @@ PP(pp_ftzero)
     if (PL_statcache.st_size == 0)
 	RETPUSHYES;
     RETPUSHNO;
-}
-
-PP(pp_ftsize)
-{
-    I32 result;
-    dSP; dTARGET;
-    STACKED_FTEST_CHECK;
-    result = my_stat();
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-#if Off_t_size > IVSIZE
-    PUSHn(PL_statcache.st_size);
-#else
-    PUSHi(PL_statcache.st_size);
-#endif
-    RETURN;
-}
-
-PP(pp_ftmtime)
-{
-    I32 result;
-    dSP; dTARGET;
-    STACKED_FTEST_CHECK;
-    result = my_stat();
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    PUSHn( (((NV)PL_basetime - PL_statcache.st_mtime)) / 86400.0 );
-    RETURN;
-}
-
-PP(pp_ftatime)
-{
-    I32 result;
-    dSP; dTARGET;
-    STACKED_FTEST_CHECK;
-    result = my_stat();
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    PUSHn( (((NV)PL_basetime - PL_statcache.st_atime)) / 86400.0 );
-    RETURN;
-}
-
-PP(pp_ftctime)
-{
-    I32 result;
-    dSP; dTARGET;
-    STACKED_FTEST_CHECK;
-    result = my_stat();
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    PUSHn( (((NV)PL_basetime - PL_statcache.st_ctime)) / 86400.0 );
-    RETURN;
 }
 
 PP(pp_ftsock)

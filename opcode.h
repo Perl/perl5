@@ -1012,10 +1012,10 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_fteowned */
 	MEMBER_TO_FPTR(Perl_pp_ftrowned),
 	MEMBER_TO_FPTR(Perl_pp_ftzero),
-	MEMBER_TO_FPTR(Perl_pp_ftsize),
-	MEMBER_TO_FPTR(Perl_pp_ftmtime),
-	MEMBER_TO_FPTR(Perl_pp_ftatime),
-	MEMBER_TO_FPTR(Perl_pp_ftctime),
+	MEMBER_TO_FPTR(Perl_pp_ftis),	/* Perl_pp_ftsize */
+	MEMBER_TO_FPTR(Perl_pp_ftis),	/* Perl_pp_ftmtime */
+	MEMBER_TO_FPTR(Perl_pp_ftis),	/* Perl_pp_ftatime */
+	MEMBER_TO_FPTR(Perl_pp_ftis),	/* Perl_pp_ftctime */
 	MEMBER_TO_FPTR(Perl_pp_ftsock),
 	MEMBER_TO_FPTR(Perl_pp_ftchr),
 	MEMBER_TO_FPTR(Perl_pp_ftblk),

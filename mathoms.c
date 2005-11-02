@@ -851,6 +851,26 @@ PP(pp_ggrgid)
     return pp_ggrent();
 }
 
+PP(pp_ftsize)
+{
+    return Perl_pp_ftis();
+}
+
+PP(pp_ftmtime)
+{
+    return Perl_pp_ftis();
+}
+
+PP(pp_ftatime)
+{
+    return Perl_pp_ftis();
+}
+
+PP(pp_ftctime)
+{
+    return Perl_pp_ftis();
+}
+
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {
