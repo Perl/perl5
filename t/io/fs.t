@@ -78,10 +78,10 @@ SKIP: {
     is((umask(0)&0777), 022, 'umask'),
 }
 
-open(fh,'>x') || die "Can't create x";
-close(fh);
-open(fh,'>a') || die "Can't create a";
-close(fh);
+open(FH,'>x') || die "Can't create x";
+close(FH);
+open(FH,'>a') || die "Can't create a";
+close(FH);
 
 my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks);
@@ -405,8 +405,8 @@ SKIP: {
       if $^O eq 'cygwin';
 
     chdir './tmp';
-    open(fh,'>x') || die "Can't create x";
-    close(fh);
+    open(FH,'>x') || die "Can't create x";
+    close(FH);
     rename('x', 'X');
 
     # this works on win32 only, because fs isn't casesensitive
