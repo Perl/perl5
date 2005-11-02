@@ -1646,7 +1646,7 @@ EXT const U32 PL_opargs[] = {
 	0x00017604,	/* pop */
 	0x00017604,	/* shift */
 	0x0004691d,	/* unshift */
-	0x0005a801,	/* sort */
+	0x0005a841,	/* sort */
 	0x00004809,	/* reverse */
 	0x0004a841,	/* grepstart */
 	0x00000648,	/* grepwhile */

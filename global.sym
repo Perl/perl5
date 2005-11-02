@@ -682,6 +682,7 @@ Perl_PerlIO_get_cnt
 Perl_PerlIO_stdin
 Perl_PerlIO_stdout
 Perl_PerlIO_stderr
+Perl_pad_push
 Perl_save_set_svflags
 Perl_hv_assert
 Perl_hv_scalar

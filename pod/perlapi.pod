@@ -973,42 +973,6 @@ cope with complex macro expressions. Always use the macro instead.
 =for hackers
 Found in file mathoms.c
 
-=item utf8n_to_uvchr
-X<utf8n_to_uvchr>
-
-flags
-
-Returns the native character value of the first character in the string 
-C<s>
-which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
-length, in bytes, of that character.
-
-Allows length and flags to be passed to low level routine.
-
-	UV	utf8n_to_uvchr(const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
-
-=for hackers
-Found in file mathoms.c
-
-=item uvchr_to_utf8
-X<uvchr_to_utf8>
-
-Adds the UTF-8 representation of the Native codepoint C<uv> to the end
-of the string C<d>; C<d> should be have at least C<UTF8_MAXBYTES+1> free
-bytes available. The return value is the pointer to the byte after the
-end of the new character. In other words,
-
-    d = uvchr_to_utf8(d, uv);
-
-is the recommended wide native character-aware way of saying
-
-    *(d++) = uv;
-
-	U8*	uvchr_to_utf8(U8 *d, UV uv)
-
-=for hackers
-Found in file mathoms.c
-
 
 =back
 
@@ -2452,6 +2416,55 @@ confused by derived classes which may contain additional hash entries):
 
 =for hackers
 Found in file util.c
+
+
+=back
+
+=head1 Multicall Functions
+
+=over 8
+
+=item dMULTICALL
+X<dMULTICALL>
+
+Declare local variables for a multicall. See L<perlcall/Lightweight Callbacks>.
+
+		dMULTICALL;
+
+=for hackers
+Found in file cop.h
+
+=item MULTICALL
+X<MULTICALL>
+
+Make a lightweight callback. See L<perlcall/Lightweight Callbacks>.
+
+		MULTICALL;
+
+=for hackers
+Found in file cop.h
+
+=item POP_MULTICALL
+X<POP_MULTICALL>
+
+Closing bracket for a lightweight callback.
+See L<perlcall/Lightweight Callbacks>.
+
+		POP_MULTICALL;
+
+=for hackers
+Found in file cop.h
+
+=item PUSH_MULTICALL
+X<PUSH_MULTICALL>
+
+Opening bracket for a lightweight callback.
+See L<perlcall/Lightweight Callbacks>.
+
+		PUSH_MULTICALL;
+
+=for hackers
+Found in file cop.h
 
 
 =back
@@ -6062,6 +6075,23 @@ The first character of the uppercased version is returned
 =for hackers
 Found in file utf8.c
 
+=item utf8n_to_uvchr
+X<utf8n_to_uvchr>
+
+flags
+
+Returns the native character value of the first character in the string 
+C<s>
+which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
+length, in bytes, of that character.
+
+Allows length and flags to be passed to low level routine.
+
+	UV	utf8n_to_uvchr(const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
+
+=for hackers
+Found in file utf8.c
+
 =item utf8n_to_uvuni
 X<utf8n_to_uvuni>
 
@@ -6174,6 +6204,25 @@ If C<s> does not point to a well-formed UTF-8 character, zero is
 returned and retlen is set, if possible, to -1.
 
 	UV	utf8_to_uvuni(const U8 *s, STRLEN *retlen)
+
+=for hackers
+Found in file utf8.c
+
+=item uvchr_to_utf8
+X<uvchr_to_utf8>
+
+Adds the UTF-8 representation of the Native codepoint C<uv> to the end
+of the string C<d>; C<d> should be have at least C<UTF8_MAXBYTES+1> free
+bytes available. The return value is the pointer to the byte after the
+end of the new character. In other words,
+
+    d = uvchr_to_utf8(d, uv);
+
+is the recommended wide native character-aware way of saying
+
+    *(d++) = uv;
+
+	U8*	uvchr_to_utf8(U8 *d, UV uv)
 
 =for hackers
 Found in file utf8.c

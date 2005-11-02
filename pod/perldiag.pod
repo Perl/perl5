@@ -762,6 +762,7 @@ you tried to jump out of a sort() block or subroutine, which is a no-no.
 See L<perlfunc/goto>.
 
 =item Can't goto subroutine from a sort sub (or similar callback)
+
 (F) The "goto subroutine" call can't be used to jump out of the
 comparison sub for a sort(), or from a similar callback (such
 as the reduce() function in List::Util).
