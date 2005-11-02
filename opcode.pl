@@ -53,7 +53,8 @@ my @raw_alias = (
 		 Perl_pp_ssockopt => ['gsockopt'],
 		 Perl_pp_getpeername => ['getsockname'],
 		 Perl_pp_stat => ['lstat'],
-		 Perl_pp_ftrowned => ['fteowned'],
+		 Perl_pp_ftrowned => [qw(fteowned ftzero ftsock ftchr ftblk
+					 ftfile ftdir ftpipe)],
 		 Perl_pp_fttext => ['ftbinary'],
 		 Perl_pp_gmtime => ['localtime'],
 		 Perl_pp_semget => [qw(shmget msgget)],

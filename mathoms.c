@@ -871,6 +871,41 @@ PP(pp_ftctime)
     return pp_ftis();
 }
 
+PP(pp_ftzero)
+{
+    return pp_ftrowned();
+}
+
+PP(pp_ftsock)
+{
+    return pp_ftrowned();
+}
+
+PP(pp_ftchr)
+{
+    return pp_ftrowned();
+}
+
+PP(pp_ftblk)
+{
+    return pp_ftrowned();
+}
+
+PP(pp_ftfile)
+{
+    return pp_ftrowned();
+}
+
+PP(pp_ftdir)
+{
+    return pp_ftrowned();
+}
+
+PP(pp_ftpipe)
+{
+    return pp_ftrowned();
+}
+
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {

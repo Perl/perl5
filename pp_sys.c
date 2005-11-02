@@ -3090,107 +3090,44 @@ PP(pp_ftrowned)
     SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (PL_statcache.st_uid == (PL_op->op_type == OP_FTEOWNED ?
-				PL_euid : PL_uid) )
-	RETPUSHYES;
-    RETPUSHNO;
-}
-
-PP(pp_ftzero)
-{
-    I32 result;
-    dSP;
-    STACKED_FTEST_CHECK;
-    result = my_stat();
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (PL_statcache.st_size == 0)
-	RETPUSHYES;
-    RETPUSHNO;
-}
-
-PP(pp_ftsock)
-{
-    I32 result;
-    dSP;
-    STACKED_FTEST_CHECK;
-    result = my_stat();
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (S_ISSOCK(PL_statcache.st_mode))
-	RETPUSHYES;
-    RETPUSHNO;
-}
-
-PP(pp_ftchr)
-{
-    I32 result;
-    dSP;
-    STACKED_FTEST_CHECK;
-    result = my_stat();
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (S_ISCHR(PL_statcache.st_mode))
-	RETPUSHYES;
-    RETPUSHNO;
-}
-
-PP(pp_ftblk)
-{
-    I32 result;
-    dSP;
-    STACKED_FTEST_CHECK;
-    result = my_stat();
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (S_ISBLK(PL_statcache.st_mode))
-	RETPUSHYES;
-    RETPUSHNO;
-}
-
-PP(pp_ftfile)
-{
-    I32 result;
-    dSP;
-    STACKED_FTEST_CHECK;
-    result = my_stat();
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (S_ISREG(PL_statcache.st_mode))
-	RETPUSHYES;
-    RETPUSHNO;
-}
-
-PP(pp_ftdir)
-{
-    I32 result;
-    dSP;
-    STACKED_FTEST_CHECK;
-    result = my_stat();
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (S_ISDIR(PL_statcache.st_mode))
-	RETPUSHYES;
-    RETPUSHNO;
-}
-
-PP(pp_ftpipe)
-{
-    I32 result;
-    dSP;
-    STACKED_FTEST_CHECK;
-    result = my_stat();
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (S_ISFIFO(PL_statcache.st_mode))
-	RETPUSHYES;
+    switch (PL_op->op_type) {
+    case OP_FTROWNED:
+	if (PL_statcache.st_uid == PL_uid);
+	    RETPUSHYES;
+	break;
+    case OP_FTEOWNED:
+	if (PL_statcache.st_uid == PL_euid)
+	    RETPUSHYES;
+	break;
+    case OP_FTZERO:
+	if (PL_statcache.st_size == 0)
+	    RETPUSHYES;
+	break;
+    case OP_FTSOCK:
+	if (S_ISSOCK(PL_statcache.st_mode))
+	    RETPUSHYES;
+	break;
+    case OP_FTCHR:
+	if (S_ISCHR(PL_statcache.st_mode))
+	    RETPUSHYES;
+	break;
+    case OP_FTBLK:
+	if (S_ISBLK(PL_statcache.st_mode))
+	    RETPUSHYES;
+	break;
+    case OP_FTFILE:
+	if (S_ISREG(PL_statcache.st_mode))
+	    RETPUSHYES;
+	break;
+    case OP_FTDIR:
+	if (S_ISDIR(PL_statcache.st_mode))
+	    RETPUSHYES;
+	break;
+    case OP_FTPIPE:
+	if (S_ISFIFO(PL_statcache.st_mode))
+	    RETPUSHYES;
+	break;
+    }
     RETPUSHNO;
 }
 
