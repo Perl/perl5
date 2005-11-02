@@ -89,7 +89,7 @@ BEGIN {
 use Getopt::Std;
 use Carp;
 use Test::More tests => ( 1 * !!$Config::Config{useithreads}
-			  + 2 * ($] > 5.009)
+			  + 3 * ($] > 5.009)
 			  + 777 );
 
 require_ok("B::Concise");
