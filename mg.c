@@ -2742,7 +2742,11 @@ Perl_sighandler(int sig)
 		   PUSHs(newSVpv((void*)sip, sizeof(*sip)));
 	      }
 
-	      va_end(args);
+	      /*
+               * This va_end caused tests to fail ext/B/t/f_sort.t.  What was
+               * that line about Jenga again?
+               * va_end(args);
+               */
 	 }
     }
 #endif
