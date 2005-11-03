@@ -173,10 +173,16 @@ SKIP: {
     ok(open(my $fh, "<", "a"), "open a");
     is(chmod(0, $fh), 1, "fchmod");
     $mode = (stat "a")[2];
-    is($mode & 0777, 0, "perm reset");
+    SKIP: {
+        skip "no mode checks", 1 if $skip_mode_checks;
+        is($mode & 0777, 0, "perm reset");
+    }
     is(chmod($newmode, "a"), 1, "fchmod");
     $mode = (stat $fh)[2];
-    is($mode & 0777, $newmode, "perm restored");
+    SKIP: { 
+        skip "no mode checks", 1 if $skip_mode_checks;
+        is($mode & 0777, $newmode, "perm restored");
+    }
 }
 
 SKIP: {
