@@ -69,6 +69,7 @@ my @raw_alias = (
 		 Perl_pp_ggrent => [qw(ggrnam ggrgid)],
 		 Perl_pp_ftis => [qw(ftsize ftmtime ftatime ftctime)],
 		 Perl_pp_chown => [qw(unlink chmod utime kill)],
+		 Perl_pp_link => ['symlink'],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {

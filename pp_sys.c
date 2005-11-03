@@ -3501,33 +3501,54 @@ PP(pp_rename)
     RETURN;
 }
 
+#if defined(HAS_LINK) || defined(HAS_SYMLINK)
 PP(pp_link)
 {
-#ifdef HAS_LINK
     dSP; dTARGET;
-    const char *tmps2 = POPpconstx;
-    const char *tmps = SvPV_nolen_const(TOPs);
-    TAINT_PROPER("link");
-    SETi( PerlLIO_link(tmps, tmps2) >= 0 );
-    RETURN;
-#else
-    DIE(aTHX_ PL_no_func, "link");
-#endif
-}
+    const int op_type = PL_op->op_type;
+    int result;
 
-PP(pp_symlink)
-{
-#ifdef HAS_SYMLINK
-    dSP; dTARGET;
-    const char *tmps2 = POPpconstx;
-    const char *tmps = SvPV_nolen_const(TOPs);
-    TAINT_PROPER("symlink");
-    SETi( symlink(tmps, tmps2) >= 0 );
+#  ifndef HAS_LINK
+    if (op_type == OP_LINK)
+	DIE(aTHX_ PL_no_func, "link");
+#  endif
+#  ifndef HAS_SYMLINK
+    if (op_type == OP_SYMLINK)
+	DIE(aTHX_ PL_no_func, "symlink");
+#  endif
+
+    {
+	const char *tmps2 = POPpconstx;
+	const char *tmps = SvPV_nolen_const(TOPs);
+	TAINT_PROPER(PL_op_desc[op_type]);
+	result =
+#  if defined(HAS_LINK)
+#    if defined(HAS_SYMLINK)
+	    /* Both present - need to choose which.  */
+	    (op_type == OP_LINK) ?
+	    PerlLIO_link(tmps, tmps2) : symlink(tmps, tmps2);
+#    else
+    /* Only have symlink, so calls to pp_link will have DIE()d above.  */
+	symlink(tmps, tmps2);
+#    endif
+#  else
+#    if defined(HAS_SYMLINK)
+    /* Only have link, so calls to pp_symlink will have DIE()d above.  */
+	PerlLIO_link(tmps, tmps2);
+#    endif
+#  endif
+    }
+
+    SETi( result >= 0 );
     RETURN;
-#else
-    DIE(aTHX_ PL_no_func, "symlink");
-#endif
 }
+#else
+PP(pp_link)
+{
+    /* Have neither.  */
+    DIE(aTHX_ PL_no_func, PL_op_desc[PL_op->op_type]);
+}
+#endif
 
 PP(pp_readlink)
 {

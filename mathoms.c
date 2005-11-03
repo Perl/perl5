@@ -941,6 +941,11 @@ PP(pp_kill)
     return pp_chown();
 }
 
+PP(pp_symlink)
+{
+    return pp_link();
+}
+
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {

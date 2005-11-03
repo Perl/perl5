@@ -1037,7 +1037,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_chown),	/* Perl_pp_utime */
 	MEMBER_TO_FPTR(Perl_pp_rename),
 	MEMBER_TO_FPTR(Perl_pp_link),
-	MEMBER_TO_FPTR(Perl_pp_symlink),
+	MEMBER_TO_FPTR(Perl_pp_link),	/* Perl_pp_symlink */
 	MEMBER_TO_FPTR(Perl_pp_readlink),
 	MEMBER_TO_FPTR(Perl_pp_mkdir),
 	MEMBER_TO_FPTR(Perl_pp_rmdir),
