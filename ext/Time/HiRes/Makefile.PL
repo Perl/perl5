@@ -15,6 +15,7 @@ my $VERBOSE = $ENV{VERBOSE};
 my $DEFINE;
 my $LIBS = [];
 my $XSOPT = '';
+my $SYSCALL_H;
 
 use vars qw($self); # Used in 'sourcing' the hints.
 
@@ -141,7 +142,7 @@ sub try_compile_and_link {
 	    my $tmp_exe = "$tmp$ld_exeext";
 	    printf "cccmd = $cccmd\n" if $VERBOSE;
 	    my $res = system($cccmd);
-	    $ok = defined($res) && $res==0 && -s $tmp_exe && -x _;
+	    $ok = defined($res) && $res == 0 && -s $tmp_exe && -x _;
 
 	    if ( $ok && exists $args{run} && $args{run}) {
 		my $tmp_exe =
@@ -151,7 +152,14 @@ sub try_compile_and_link {
 		    $ok = 1;
 		} else {
 		    $ok = 0;
-		    print "[ system('$tmp_exe') failed: status $? ] ";
+		    my $errno = $? >> 8;
+		    local $! = $errno;
+		    printf <<EOF;
+
+*** The test run of '$tmp_exe' failed: status $?
+*** (the status means: errno = $errno or '$!')
+*** DO NOT PANIC: this just means that *some* functionality will be missing.
+EOF
 		}
 	    }
 	    unlink("$tmp.c", $tmp_exe);
@@ -241,7 +249,7 @@ int main() {
     ts2.tv_sec  = 0;
     ts2.tv_nsec = 0;
     errno = 0;
-    ret = nanosleep(&ts1, &ts2); /* E.g. in AIX nanosleep() fail and set errno to ENOSYS. */
+    ret = nanosleep(&ts1, &ts2); /* E.g. in AIX nanosleep() fails and sets errno to ENOSYS. */
     ret == 0 ? exit(0) : exit(errno ? errno : -1);
 }
 EOM
@@ -264,6 +272,43 @@ EOM
     return 0;
 }
 
+sub has_clock_x_syscall {
+    my $x = shift;
+    return 0 unless defined $SYSCALL_H;
+    return 1 if
+    try_compile_and_link(<<EOM, run => 1);
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
+#include <$SYSCALL_H>
+int main _((int argc, char** argv, char** env))
+{
+    struct timespec ts;
+    /* Many Linuxes get ENOSYS even though the syscall exists. */
+    /* All implementations are supposed to support CLOCK_REALTIME. */
+    int ret = syscall(SYS_clock_$x, CLOCK_REALTIME, &ts);
+    ret == 0 ? exit(0) : exit(errno ? errno : -1);
+}
+EOM
+}
+
+sub has_clock_x {
+    my $x = shift;
+    return 1 if
+    try_compile_and_link(<<EOM, run => 1);
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
+int main _((int argc, char** argv, char** env))
+{
+    struct timespec ts;
+    int ret = clock_$x(CLOCK_REALTIME, &ts); /* Many Linuxes get ENOSYS. */
+    /* All implementations are supposed to support CLOCK_REALTIME. */
+    ret == 0 ? exit(0) : exit(errno ? errno : -1);
+}
+EOM
+}
+
 sub init {
     my $hints = File::Spec->catfile("hints", "$^O.pl");
     if (-f $hints) {
@@ -277,6 +322,21 @@ sub init {
     }
 
     $DEFINE = '';
+
+    if ($Config{d_syscall}) {
+	print "Have syscall(), looking for syscall.h... ";
+	if (has_include('syscall.h')) {
+	    $SYSCALL_H = 'syscall.h';
+	} elsif (has_include('sys/syscall.h')) {
+	    $SYSCALL_H = 'sys/syscall.h';
+	}
+    }
+
+    if (defined $SYSCALL_H) {
+	print "found <$SYSCALL_H>.\n";
+    } else {
+	print "NOT found.\n";
+    }
 
     print "Looking for gettimeofday()... ";
     my $has_gettimeofday;
@@ -417,6 +477,50 @@ EOD
         print "(It would not be portable anyway.)\n";
     }
 
+    print "Looking for clock_gettime()... ";
+    my $has_clock_gettime;
+    if (exists $Config{d_clock_gettime}) {
+        $has_clock_gettime++ if $Config{d_clock_gettime}; # Unlikely...
+    } elsif (has_clock_x('gettime')) {
+        $has_clock_gettime++;
+	$DEFINE .= ' -DTIME_HIRES_CLOCK_GETTIME';
+    } elsif (defined $SYSCALL_H && has_clock_x_syscall('gettime')) {
+        $has_clock_gettime++;
+	$DEFINE .= ' -DTIME_HIRES_CLOCK_GETTIME -DTIME_HIRES_CLOCK_GETTIME_SYSCALL';
+    }
+
+    if ($has_clock_gettime) {
+        if ($DEFINE =~ /-DTIME_HIRES_CLOCK_GETTIME_SYSCALL/) {
+	    print "found (via syscall).\n";
+	} else {
+	    print "found.\n";
+	}
+    } else {
+	print "NOT found.\n";
+    }
+
+    print "Looking for clock_getres()... ";
+    my $has_clock_getres;
+    if (exists $Config{d_clock_getres}) {
+        $has_clock_getres++ if $Config{d_clock_getres}; # Unlikely...
+    } elsif (has_clock_x('getres')) {
+        $has_clock_getres++;
+	$DEFINE .= ' -DTIME_HIRES_CLOCK_GETRES';
+    } elsif (defined $SYSCALL_H && has_clock_x_syscall('getres')) {
+        $has_clock_getres++;
+	$DEFINE .= ' -DTIME_HIRES_CLOCK_GETRES -DTIME_HIRES_CLOCK_GETRES_SYSCALL';
+    }
+
+    if ($has_clock_getres) {
+        if ($DEFINE =~ /-DTIME_HIRES_CLOCK_GETRES_SYSCALL/) {
+	    print "found (via syscall).\n";
+	} else {
+	    print "found.\n";
+	}
+    } else {
+	print "NOT found.\n";
+    }
+
     my $has_w32api_windows_h;
     if ($^O eq 'cygwin') {
         print "Looking for <w32api/windows.h>... ";
@@ -457,7 +561,8 @@ sub doMakefile {
 	'LIBS'	=> $LIBS,   # e.g., '-lm'
 	'DEFINE'	=> $DEFINE,     # e.g., '-DHAS_SOMETHING'
 	'XSOPT'	=> $XSOPT,
-    # do not even think about 'INC' => '-I/usr/ucbinclude', Solaris will avenge.
+	  # Do not even think about 'INC' => '-I/usr/ucbinclude',
+	  # Solaris will avenge.
 	'INC'	=> '',     # e.g., '-I/usr/include/other'
 	'INSTALLDIRS' => ($] >= 5.008 ? 'perl' : 'site'),
 	'dist'      => {
@@ -478,12 +583,17 @@ sub doMakefile {
 
 sub doConstants {
     if (eval {require ExtUtils::Constant; 1}) {
-	my @names = (qw(ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF
+	my @names = (qw(CLOCK_HIGHRES CLOCK_MONOTONIC
+			CLOCK_PROCESS_CPUTIME_ID
+			CLOCK_REALTIME
+			CLOCK_THREAD_CPUTIME_ID
+			CLOCK_TIMEOFDAY
+			ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF
 			ITIMER_REALPROF));
 	foreach (qw (d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
-		     d_nanosleep)) {
+		     d_nanosleep d_clock_gettime d_clock_getres)) {
 	    my $macro = $_;
-	    if ($macro eq 'd_nanosleep') {
+	    if ($macro =~ /^(d_nanosleep|d_clock_gettime|d_clock_getres)$/) {
 		$macro =~ s/d_(.*)/TIME_HIRES_\U$1/;
 	    } else {
 		$macro =~ s/d_(.*)/HAS_\U$1/;
@@ -532,7 +642,7 @@ EOM
            (exists $ENV{LC_CTYPE} && $ENV{LC_CTYPE} =~ /utf-?8/i) ||
            (exists $ENV{LANG}     && $ENV{LANG}     =~ /utf-?8/i)) {
             print  <<EOM;
-NOTE: if you get an error like this (the line number may vary):
+NOTE: if you get an error like this (the Makefile line number may vary):
 Makefile:91: *** missing separator
 then set the environment variable LC_ALL to "C" and retry
 from scratch (re-run perl "Makefile.PL").

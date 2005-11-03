@@ -12,7 +12,7 @@ BEGIN {
     }
 }
 
-BEGIN { $| = 1; print "1..29\n"; }
+BEGIN { $| = 1; print "1..31\n"; }
 
 END { print "not ok 1\n" unless $loaded }
 
@@ -24,22 +24,26 @@ print "ok 1\n";
 
 use strict;
 
-my $have_gettimeofday	= defined &Time::HiRes::gettimeofday;
-my $have_usleep		= defined &Time::HiRes::usleep;
-my $have_nanosleep	= defined &Time::HiRes::nanosleep;
-my $have_ualarm		= defined &Time::HiRes::ualarm;
-my $have_time		= defined &Time::HiRes::time;
+my $have_gettimeofday	= &Time::HiRes::d_gettimeofday;
+my $have_usleep		= &Time::HiRes::d_usleep;
+my $have_nanosleep	= &Time::HiRes::d_nanosleep;
+my $have_ualarm		= &Time::HiRes::d_ualarm;
+my $have_clock_gettime	= &Time::HiRes::d_clock_gettime;
+my $have_clock_getres	= &Time::HiRes::d_clock_getres;
 
-printf "# have_gettimeofday = %d\n", $have_gettimeofday;
-printf "# have_usleep       = %d\n", $have_usleep;
-printf "# have_nanosleep    = %d\n", $have_nanosleep;
-printf "# have_ualarm       = %d\n", $have_ualarm;
-printf "# have_time         = %d\n", $have_time;
+printf "# have_gettimeofday  = %d\n", $have_gettimeofday;
+printf "# have_usleep        = %d\n", $have_usleep;
+printf "# have_nanosleep     = %d\n", $have_nanosleep;
+printf "# have_ualarm        = %d\n", $have_ualarm;
+printf "# have_clock_gettime = %d\n", $have_clock_gettime;
+printf "# have_clock_getres  = %d\n", $have_clock_getres;
 
 import Time::HiRes 'gettimeofday'	if $have_gettimeofday;
 import Time::HiRes 'usleep'		if $have_usleep;
 import Time::HiRes 'nanosleep'		if $have_nanosleep;
 import Time::HiRes 'ualarm'		if $have_ualarm;
+import Time::HiRes 'clock_gettime'	if $have_clock_gettime;
+import Time::HiRes 'clock_getres'	if $have_clock_getres;
 
 use Config;
 
@@ -192,7 +196,7 @@ else {
 
 # Did we even get close?
 
-unless ($have_time) {
+unless ($have_gettimeofday) {
     skip 14;
 } else {
  my ($s, $n, $i) = (0);
@@ -218,7 +222,7 @@ unless (   defined &Time::HiRes::gettimeofday
 	print "ok $_ # Skip: no gettimeofday or no ualarm or no usleep\n";
     }
 } else {
-    use Time::HiRes qw (time alarm sleep);
+    use Time::HiRes qw(time alarm sleep);
 
     my ($f, $r, $i, $not, $ok);
 
@@ -281,7 +285,7 @@ unless (   defined &Time::HiRes::gettimeofday
 
 unless (   defined &Time::HiRes::setitimer
 	&& defined &Time::HiRes::getitimer
-	&& eval    'Time::HiRes::ITIMER_VIRTUAL'
+        && exists  &Time::HiRes::ITIMER_VIRTUAL
 	&& $Config{d_select}
 	&& $Config{sig_name} =~ m/\bVTALRM\b/) {
     for (18..19) {
@@ -414,13 +418,105 @@ if ($have_nanosleep) {
 if ($have_ualarm && $] >= 5.008001) {
     # http://groups.google.com/group/perl.perl5.porters/browse_thread/thread/adaffaaf939b042e/20dafc298df737f0%2320dafc298df737f0?sa=X&oi=groupsr&start=0&num=3
     # Perl changes [18765] and [18770], perl bug [perl #20920]
+
+    # First we will find the loop size N (a for() loop 0..N-1)
+    # that will take more than T seconds.
+
+    my $T = 0.01;
+    use Time::HiRes qw(time);
+    my $N = 1024;
+    my $i;
+    N: {
+	do {
+	    my $t0 = time();
+	    for ($i = 0; $i < $N; $i++) { }
+	    my $t1 = time();
+	    my $dt = $t1 - $t0;
+	    print "# N = $N, t1 = $t1, t0 = $t0, dt = $dt\n";
+	    last N if $dt > $T;
+	    $N *= 2;
+	} while (1);
+    }
+
+    # The time-burner which takes at least T seconds.
+    my $F = sub {
+	my $c = @_ ? shift : 1;
+	my $n = $c * $N;
+	my $i;
+	for ($i = 0; $i < $n; $i++) { }
+    };
+
+    # Then we will setup a periodic timer (the two-argument alarm() of
+    # Time::HiRes, behind the curtains the libc ualarm()) which has
+    # a signal handler that takes so much time (on the first initial
+    # invocation) that the first periodic invocation (second invocation)
+    # will happen before the first invocation has finished.  In Perl 5.8.0
+    # the "safe signals" concept was implemented, with unfortunately at least
+    # one bug that caused a core dump on reentering the handler. This bug
+    # was fixed by the time of Perl 5.8.1.
+
+    my $a = 0; # Number of alarms we receive.
+    my $A = 2; # Number of alarms we will handle before disarming.
+               # (We may well get $A + 1 alarms.)
+
+    $SIG{ALRM} = sub {
+	$a++;
+	print "# Alarm $a - ", time(), "\n";
+	alarm(0) if $a >= $A; # Disarm the alarm.
+	$F->(2); # Try burning CPU at least for 2T seconds.
+    }; 
+
     use Time::HiRes qw(alarm); 
-    $SIG{ALRM} = sub { 1 for 1..100000 }; 
-    alarm(0.01, 0.01); 
-    sleep(1);
+    alarm($T, $T);  # Arm the alarm.
+
+    $F->(10); # Try burning CPU at least for 10T seconds.
+
     print "ok 29\n"; # Not core dumping by now is considered to be the success.
 } else {
     skip 29;
+}
+
+if ($have_clock_gettime) {
+    # All implementations are SUPPOSED TO support CLOCK_REALTIME...
+    eval 'use Time::HiRes qw(CLOCK_REALTIME)';
+    unless ($@) {
+        my $t0 = clock_gettime(&CLOCK_REALTIME);
+        use Time::HiRes qw(sleep);
+        my $T = 0.1;
+        sleep($T);
+        my $t1 = clock_gettime(&CLOCK_REALTIME);
+	if ($t0 > 0 && $t1) {
+	    print "# t1 = $t1, t0 = $t0\n";
+	    my $dt = $t1 - $t0;
+	    my $rt = abs(1 - $dt / $T);
+	    if ($rt <= 0.25) { # Allow 25% jitter.
+		print "ok 30 # dt = $dt, r = $rt\n";
+	    } else {
+		print "not ok 30 # dt = $dt, rt = $rt\n";
+	    }
+	} else {
+	    print "# Error '$!'\n";
+	    skip 30;
+	}
+    } else {
+        print "# No CLOCK_REALTIME ($@)\n";
+	skip 30;
+    }
+} else {
+    print "# No clock_gettime\n";
+    skip 30;
+}
+
+if ($have_clock_getres) {
+    my $tr = clock_getres();
+   if ($tr > 0) {
+       print "ok 31 # tr = $tr\n";
+   } else {
+       print "not ok 31 # tr = $tr\n";
+   }
+} else {
+    print "# No clock_getres\n";
+    skip 31;
 }
 
 END {

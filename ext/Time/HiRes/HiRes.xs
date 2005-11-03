@@ -30,6 +30,9 @@ extern "C" {
 #  include <sys/select.h>
 # endif
 #endif
+#if defined(TIME_HIRES_CLOCK_GETTIME_SYSCALL) || defined(TIME_HIRES_CLOCK_GETRES_SYSCALL)
+#include <syscall.h>
+#endif
 #ifdef __cplusplus
 }
 #endif
@@ -739,6 +742,15 @@ nanosleep(nseconds)
 	OUTPUT:
 	RETVAL
 
+#else  /* #if defined(TIME_HIRES_NANOSLEEP) */
+
+NV
+nanosleep(nseconds)
+        NV nseconds
+    CODE:
+        croak("Time::HiRes::nanosleep(): unimplemented in this platform");
+        RETVAL = 0.0;
+
 #endif /* #if defined(TIME_HIRES_NANOSLEEP) */
 
 NV
@@ -778,6 +790,15 @@ sleep(...)
 	OUTPUT:
 	RETVAL
 
+#else  /* #if defined(HAS_USLEEP) && defined(HAS_GETTIMEOFDAY) */
+
+NV
+usleep(useconds)
+        NV useconds
+    CODE:
+        croak("Time::HiRes::usleep(): unimplemented in this platform");
+        RETVAL = 0.0;
+
 #endif /* #if defined(HAS_USLEEP) && defined(HAS_GETTIMEOFDAY) */
 
 #ifdef HAS_UALARM
@@ -806,6 +827,24 @@ alarm(seconds,interval=0)
 
 	OUTPUT:
 	RETVAL
+
+#else
+
+int
+ualarm(useconds,interval=0)
+	int useconds
+	int interval
+    CODE:
+        croak("Time::HiRes::ualarm(): unimplemented in this platform");
+	RETVAL = -1;
+
+NV
+alarm(seconds,interval=0)
+	NV seconds
+	NV interval
+    CODE:
+        croak("Time::HiRes::alarm(): unimplemented in this platform");
+	RETVAL = 0.0;
 
 #endif /* #ifdef HAS_UALARM */
 
@@ -933,4 +972,64 @@ getitimer(which)
 	}
 
 #endif /* #if defined(HAS_GETITIMER) && defined(HAS_SETITIMER) */
+
+#if defined(TIME_HIRES_CLOCK_GETTIME)
+
+NV
+clock_gettime(clock_id = CLOCK_REALTIME)
+	int clock_id
+    PREINIT:
+	struct timespec ts;
+	int status = -1;
+    CODE:
+#ifdef TIME_HIRES_CLOCK_GETTIME_SYSCALL
+	status = syscall(SYS_clock_gettime, clock_id, &ts);
+#else
+	status = clock_gettime(clock_id, &ts);
+#endif
+	RETVAL = status == 0 ? ts.tv_sec + (NV) ts.tv_nsec / (NV) 1e9 : -1;
+
+    OUTPUT:
+	RETVAL
+
+#else  /* if defined(TIME_HIRES_CLOCK_GETTIME) */
+
+NV
+clock_gettime(clock_id = 0)
+	int clock_id
+    CODE:
+        croak("Time::HiRes::clock_gettime(): unimplemented in this platform");
+        RETVAL = 0.0;
+
+#endif /*  #if defined(TIME_HIRES_CLOCK_GETTIME) */
+
+#if defined(TIME_HIRES_CLOCK_GETRES)
+
+NV
+clock_getres(clock_id = CLOCK_REALTIME)
+	int clock_id
+    PREINIT:
+	int status = -1;
+	struct timespec ts;
+    CODE:
+#ifdef TIME_HIRES_CLOCK_GETRES_SYSCALL
+	status = syscall(SYS_clock_getres, clock_id, &ts);
+#else
+	status = clock_getres(clock_id, &ts);
+#endif
+	RETVAL = status == 0 ? ts.tv_sec + (NV) ts.tv_nsec / (NV) 1e9 : -1;
+
+    OUTPUT:
+	RETVAL
+
+#else  /* if defined(TIME_HIRES_CLOCK_GETRES) */
+
+NV
+clock_getres(clock_id = 0)
+	int clock_id
+    CODE:
+        croak("Time::HiRes::clock_getres(): unimplemented in this platform");
+        RETVAL = 0.0;
+
+#endif /*  #if defined(TIME_HIRES_CLOCK_GETRES) */
 

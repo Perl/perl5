@@ -10,20 +10,24 @@ require DynaLoader;
 
 @EXPORT = qw( );
 @EXPORT_OK = qw (usleep sleep ualarm alarm gettimeofday time tv_interval
-		 getitimer setitimer nanosleep
+		 getitimer setitimer nanosleep clock_gettime clock_getres
+		 CLOCK_HIGHRES CLOCK_MONOTONIC CLOCK_PROCESS_CPUTIME_ID
+		 CLOCK_REALTIME CLOCK_THREAD_CPUTIME_ID CLOCK_TIMEOFDAY
 		 ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF ITIMER_REALPROF
 		 d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
-		 d_nanosleep);
+		 d_nanosleep d_clock_gettime d_clock_getres);
 	
-$VERSION = '1.76';
+$VERSION = '1.77';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
 sub AUTOLOAD {
     my $constname;
     ($constname = $AUTOLOAD) =~ s/.*:://;
+    # print "AUTOLOAD: constname = $constname ($AUTOLOAD)\n";
     die "&Time::HiRes::constant not defined" if $constname eq 'constant';
     my ($error, $val) = constant($constname);
+    # print "AUTOLOAD: error = $error, val = $val\n";
     if ($error) {
         my (undef,$file,$line) = caller;
         die "$error at $file line $line.\n";
@@ -33,6 +37,21 @@ sub AUTOLOAD {
 	*$AUTOLOAD = sub { $val };
     }
     goto &$AUTOLOAD;
+}
+
+sub import {
+    my $this = shift;
+    for my $i (@_) {
+	if (($i eq 'clock_getres'  && !&d_clock_getres)  ||
+	    ($i eq 'clock_gettime' && !&d_clock_gettime) ||
+	    ($i eq 'nanosleep'     && !&d_nanosleep)     ||
+	    ($i eq 'usleep'        && !&d_usleep)        ||
+	    ($i eq 'ualarm'        && !&d_ualarm)) {
+	    require Carp;
+	    Carp::croak("Time::HiRes::$i(): unimplemented in this platform");
+	}
+    }
+    Time::HiRes->export_to_level(1, $this, @_);
 }
 
 bootstrap Time::HiRes;
@@ -57,7 +76,8 @@ Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
 
 =head1 SYNOPSIS
 
-  use Time::HiRes qw( usleep ualarm gettimeofday tv_interval nanosleep );
+  use Time::HiRes qw( usleep ualarm gettimeofday tv_interval nanosleep
+		      clock_gettime clock_getres );
 
   usleep ($microseconds);
   nanosleep ($nanoseconds);
@@ -84,6 +104,8 @@ Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
 
   setitimer ($which, $floating_seconds, $floating_interval );
   getitimer ($which);
+
+  $realtime = clock_gettime(CLOCK_REALTIME);
 
 =head1 DESCRIPTION
 
@@ -174,7 +196,8 @@ B<NOTE 1>: This higher resolution timer can return values either less
 or more than the core C<time()>, depending on whether your platform
 rounds the higher resolution timer values up, down, or to the nearest second
 to get the core C<time()>, but naturally the difference should be never
-more than half a second.
+more than half a second.  See also L</clock_getres>, if available
+in your system.
 
 B<NOTE 2>: Since Sunday, September 9th, 2001 at 01:46:40 AM GMT, when
 the C<time()> seconds since epoch rolled over to 1_000_000_000, the
@@ -267,6 +290,27 @@ In scalar context, the remaining time is returned.
 In list context, both the remaining time and the interval are returned.
 The interval is always what you put in using C<setitimer()>.
 
+=item clock_gettime ( $which )
+
+Return as seconds the current value of the POSIX high resolution timer
+specified by C<$which>.  All implementations that support POSIX high
+resolution timers are supposed to support at least the C<$which> value
+of C<CLOCK_REALTIME>, which is supposed to return results close to the
+results of C<gettimeofday>, or the number of seconds since 00:00:00:00
+January 1, 1970 Greenwich Mean Time (GMT).  Do not assume that
+CLOCK_REALTIME is zero, it might be one, or something else.
+Another potentially useful (but not available everywhere) value is
+C<CLOCK_MONOTONIC>, which guarantees a monotonically increasing time
+value (unlike time(), which can be adjusted).  See your system
+documentation for other possibly supported values.
+
+=item clock_getres ( $which )
+
+Return as seconds the resolution of the POSIX high resolution timer
+specified by C<$which>.  All implementations that support POSIX high
+resolution timers are supposed to support at least the C<$which> value
+of C<CLOCK_REALTIME>,  see L</clock_gettime>.
+
 =back
 
 =head1 EXAMPLES
@@ -314,6 +358,10 @@ The interval is always what you put in using C<setitimer()>.
 
   $SIG{VTALRM} = sub { print time, "\n" };
   setitimer(ITIMER_VIRTUAL, 10, 2.5);
+
+  # How accurate we can be, really?
+
+  my $reso = clock_gettime(CLOCK_REALTIME);
 
 =head1 C API
 
@@ -365,10 +413,15 @@ time as gracefully as UNIX ntp does).  For example in Win32 (and derived
 platforms like Cygwin and MinGW) the Time::HiRes::time() may temporarily
 drift off from the system clock (and the original time())  by up to 0.5
 seconds. Time::HiRes will notice this eventually and recalibrate.
+Note that since Time::HiRes 1.77 the clock_gettime(CLOCK_MONOTONIC)
+might help in this (in case your system supports it).
 
 =head1 SEE ALSO
 
-L<BSD::Resource>, L<Time::TAI64>.
+Perl modules L<BSD::Resource>, L<Time::TAI64>.
+
+Your system documentation for C<clock_gettime>, C<clock_settime>,
+C<gettimeofday>, C<getitimer>, C<setitimer>, C<ualarm>.
 
 =head1 AUTHORS
 

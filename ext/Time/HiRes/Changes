@@ -1,5 +1,14 @@
 Revision history for Perl extension Time::HiRes.
 
+1.77	[2005-10-03]
+	- add support for the POSIX clock_gettime() and clock_getres(),
+	  if available, either as library calls or as syscalls
+	- be more defensive about missing functionality: break out
+	  early (during 'use') if no e.g. clock_getres() is available,
+	  and protect our back by trapping those cases also in HiRes.xs
+	- the test added in 1.76 could cause an endless loop e.g. in Solaris,
+	  due to mixing of sleep() and alarm() (bad programmer, no cookie!)
+
 1.76	[2005-10-22]
 	- testing for nanosleep had wrong logic which caused nanosleep
 	  to become undefined for e.g. Mac OS X
