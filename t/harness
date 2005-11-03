@@ -16,7 +16,7 @@ use Test::Harness;
 $Test::Harness::switches = "";    # Too much noise otherwise
 $Test::Harness::verbose = shift if @ARGV && $ARGV[0] eq '-v';
 
-if ($ARGV[0] eq '-torture') {
+if ($ARGV[0] && $ARGV[0] eq '-torture') {
     shift;
     $torture = 1;
 }
@@ -54,7 +54,7 @@ sub _populate_hash {
     return map {$_, 1} split /\s+/, $_[0];
 }
 
-if ($ARGV[0]=~/^-re/) {
+if ($ARGV[0] && $ARGV[0]=~/^-re/) {
     if ($ARGV[0]!~/=/) {
         shift;
         $re=join "|",@ARGV;
