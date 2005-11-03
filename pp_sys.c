@@ -2763,6 +2763,7 @@ PP(pp_stat)
 	gv = cGVOP_gv;
 	if (PL_op->op_type == OP_LSTAT) {
 	    if (gv != PL_defgv) {
+	    do_fstat_warning_check:
 		if (ckWARN(WARN_IO))
 		    Perl_warner(aTHX_ packWARN(WARN_IO),
 			"lstat() on filehandle %s", GvENAME(gv));
@@ -2792,9 +2793,8 @@ PP(pp_stat)
 	}
 	else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
 	    gv = (GV*)SvRV(sv);
-	    if (PL_op->op_type == OP_LSTAT && ckWARN(WARN_IO))
-		Perl_warner(aTHX_ packWARN(WARN_IO),
-			"lstat() on filehandle %s", GvENAME(gv));
+	    if (PL_op->op_type == OP_LSTAT)
+		goto do_fstat_warning_check;
 	    goto do_fstat;
 	}
 	sv_setpv(PL_statname, SvPV_nolen_const(sv));
