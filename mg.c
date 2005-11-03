@@ -2741,6 +2741,8 @@ Perl_sighandler(int sig)
 		   PUSHs((SV*)rv);
 		   PUSHs(newSVpv((void*)sip, sizeof(*sip)));
 	      }
+
+	      va_end(args);
 	 }
     }
 #endif
