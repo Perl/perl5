@@ -1872,9 +1872,10 @@ nothing in the core.
 /* Do the permissions allow some operation?  Assumes statcache already set. */
 #ifndef VMS /* VMS' cando is in vms.c */
 bool
-Perl_cando(pTHX_ Mode_t mode, Uid_t effective, register const Stat_t *statbufp)
-/* Note: we use "effective" both for uids and gids.
- * Here we are betting on Uid_t being equal or wider than Gid_t.  */
+Perl_cando(pTHX_ Mode_t mode, bool effective, register const Stat_t *statbufp)
+/* effective is a flag, true for EUID, or for checking if the effective gid
+ *  is in the list of groups returned from getgroups().
+ */
 {
 #ifdef DOSISH
     /* [Comments and code from Len Reed]
@@ -1926,7 +1927,7 @@ Perl_cando(pTHX_ Mode_t mode, Uid_t effective, register const Stat_t *statbufp)
 #endif /* ! VMS */
 
 bool
-Perl_ingroup(pTHX_ Gid_t testgid, Uid_t effective)
+Perl_ingroup(pTHX_ Gid_t testgid, bool effective)
 {
 #ifdef MACOS_TRADITIONAL
     /* This is simply not correct for AppleShare, but fix it yerself. */

@@ -119,7 +119,7 @@ pR	|int	|block_start	|int full
 p	|void	|boot_core_UNIVERSAL
 p	|void	|boot_core_PerlIO
 Ap	|void	|call_list	|I32 oldscope|NN AV* av_list
-pR	|bool	|cando		|Mode_t mode|Uid_t effective|NN const Stat_t* statbufp
+pR	|bool	|cando		|Mode_t mode|bool effective|NN const Stat_t* statbufp
 ApR	|U32	|cast_ulong	|NV f
 ApR	|I32	|cast_i32	|NV f
 ApR	|IV	|cast_iv	|NV f
@@ -307,7 +307,7 @@ ApP	|I32	|ibcmp		|NN const char* a|NN const char* b|I32 len
 ApP	|I32	|ibcmp_locale	|NN const char* a|NN const char* b|I32 len
 Apd	|I32	|ibcmp_utf8	|NN const char* a|NULLOK char **pe1|UV l1|bool u1 \
 				|NN const char* b|NULLOK char **pe2|UV l2|bool u2
-pR	|bool	|ingroup	|Gid_t testgid|Uid_t effective
+pR	|bool	|ingroup	|Gid_t testgid|bool effective
 p	|void	|init_argv_symbols|int argc|NN char **argv
 p	|void	|init_debugger
 Ap	|void	|init_stacks
