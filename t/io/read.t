@@ -35,6 +35,7 @@ SKIP: {
     skip "no EBADF", 1 if (!exists &Errno::EBADF);
 
     $! = 0;
+    no warnings 'unopened';
     read(B,$b,1);
     ok($! == &Errno::EBADF);
 }

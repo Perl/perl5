@@ -167,6 +167,7 @@ SKIP: {
 # Test new semantics for missing command in piped open
 # 19990114 M-J. Dominus mjd@plover.com
 { local *P;
+  no warnings 'pipe';
   ok( !open(P, "|    "),        'missing command in piped open input' );
   ok( !open(P, "     |"),       '                              output');
 }
