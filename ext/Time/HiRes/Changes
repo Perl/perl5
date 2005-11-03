@@ -1,5 +1,10 @@
 Revision history for Perl extension Time::HiRes.
 
+1.78	[2005-10-03]
+	- ITIMER_VIRTUAL detection in HiRes.t had problems (that we cannot
+	  in the general case fail already at 'use' is suboptimal)
+	- fixes to the documentation of clock_gettime() and clock_getres()
+
 1.77	[2005-10-03]
 	- add support for the POSIX clock_gettime() and clock_getres(),
 	  if available, either as library calls or as syscalls

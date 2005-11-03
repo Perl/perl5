@@ -17,7 +17,7 @@ require DynaLoader;
 		 d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
 		 d_nanosleep d_clock_gettime d_clock_getres);
 	
-$VERSION = '1.77';
+$VERSION = '1.78';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -359,9 +359,11 @@ of C<CLOCK_REALTIME>,  see L</clock_gettime>.
   $SIG{VTALRM} = sub { print time, "\n" };
   setitimer(ITIMER_VIRTUAL, 10, 2.5);
 
-  # How accurate we can be, really?
-
-  my $reso = clock_gettime(CLOCK_REALTIME);
+  use Time::HiRes qw( clock_gettime clock_getres CLOCK_REALTIME );
+  # Read the POSIX high resolution timer.
+  my $high = clock_getres(CLOCK_REALTIME);
+  # But how accurate we can be, really?
+  my $reso = clock_getres(CLOCK_REALTIME);
 
 =head1 C API
 
@@ -414,7 +416,7 @@ platforms like Cygwin and MinGW) the Time::HiRes::time() may temporarily
 drift off from the system clock (and the original time())  by up to 0.5
 seconds. Time::HiRes will notice this eventually and recalibrate.
 Note that since Time::HiRes 1.77 the clock_gettime(CLOCK_MONOTONIC)
-might help in this (in case your system supports it).
+might help in this (in case your system supports CLOCK_MONOTONIC).
 
 =head1 SEE ALSO
 
