@@ -40,6 +40,8 @@ if (${^UNICODE} & 1) {
 	# Unconditional
 	$UNICODE_STDIN = 1;
     }
+} else {
+    $UNICODE_STDIN = 0;
 }
 my $NTEST = 44 - (($DOSISH || !$FASTSTDIO) ? 7 : 0) - ($DOSISH ? 5 : 0)
     + $UNICODE_STDIN;

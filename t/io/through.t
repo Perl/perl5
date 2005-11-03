@@ -34,7 +34,8 @@ $c += 6;	# Tests with sleep()...
 print "1..$c\n";
 
 my $set_out = '';
-$set_out = "binmode STDOUT, ':crlf'" if $main::use_crlf = 1;
+$set_out = "binmode STDOUT, ':crlf'"
+    if defined  $main::use_crlf && $main::use_crlf == 1;
 
 sub testread ($$$$$$$) {
   my ($fh, $str, $read_c, $how_r, $write_c, $how_w, $why) = @_;
@@ -76,7 +77,8 @@ sub testpipe ($$$$$$) {
   } else {
     die "Unrecognized write: '$how_w'";
   }
-  binmode $fh, ':crlf' if $main::use_crlf = 1;
+  binmode $fh, ':crlf'
+      if defined $main::use_crlf && $main::use_crlf == 1;
   testread($fh, $str, $read_c, $how_r, $write_c, $how_w, "pipe$why");
 }
 
@@ -86,7 +88,8 @@ sub testfile ($$$$$$) {
 
   open my $fh, '>', 'io_io.tmp' or die;
   select $fh;
-  binmode $fh, ':crlf' if $main::use_crlf = 1;
+  binmode $fh, ':crlf' 
+      if defined $main::use_crlf && $main::use_crlf == 1;
   if ($how_w eq 'print') {	# AUTOFLUSH???
     $| = 0;
     print $fh $_ for @data;
@@ -100,7 +103,8 @@ sub testfile ($$$$$$) {
   }
   close $fh or die "close: $!";
   open $fh, '<', 'io_io.tmp' or die;
-  binmode $fh, ':crlf' if $main::use_crlf = 1;
+  binmode $fh, ':crlf'
+      if defined $main::use_crlf && $main::use_crlf == 1;
   testread($fh, $str, $read_c, $how_r, $write_c, $how_w, "file$why");
 }
 
@@ -109,7 +113,8 @@ open my $fh, '-|', qq[$Perl -we "eval qq(\\x24\\x7c = 1) or die; binmode STDOUT;
 ok(1, 'open pipe');
 binmode $fh, q(:crlf);
 ok(1, 'binmode');
-my (@c, $c);
+$c = undef;
+my @c;
 push @c, ord $c while $c = getc $fh;
 ok(1, 'got chars');
 is(scalar @c, 9, 'got 9 chars');
