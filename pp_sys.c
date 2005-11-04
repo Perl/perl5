@@ -3466,13 +3466,13 @@ PP(pp_link)
 	    (op_type == OP_LINK) ?
 	    PerlLIO_link(tmps, tmps2) : symlink(tmps, tmps2);
 #    else
-    /* Only have symlink, so calls to pp_link will have DIE()d above.  */
-	symlink(tmps, tmps2);
+    /* Only have link, so calls to pp_symlink will have DIE()d above.  */
+	PerlLIO_link(tmps, tmps2);
 #    endif
 #  else
 #    if defined(HAS_SYMLINK)
-    /* Only have link, so calls to pp_symlink will have DIE()d above.  */
-	PerlLIO_link(tmps, tmps2);
+    /* Only have symlink, so calls to pp_link will have DIE()d above.  */
+	symlink(tmps, tmps2);
 #    endif
 #  endif
     }
