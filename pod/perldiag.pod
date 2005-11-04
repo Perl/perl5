@@ -2830,6 +2830,13 @@ page.  See L<perlform>.
 
 (P) An internal error.
 
+=item panic: attempt to call %s in %s
+
+(P) One of the file test operators entered a code branch that calls
+an ACL related-function, but that function is not available on this
+platform.  Earlier checks mean that it should not be possible to
+enter this branch on this platform.
+
 =item panic: ck_grep
 
 (P) Failed an internal consistency check trying to compile a grep.
