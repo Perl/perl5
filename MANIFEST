@@ -3274,7 +3274,6 @@ x2p/hash.c			Hashes again
 x2p/hash.h			Public declarations for the above
 x2p/INTERN.h			Same as above
 x2p/Makefile.SH			Precursor to Makefile
-x2p/proto.h			Dummy header
 x2p/s2p.PL			Sed to perl translator
 x2p/str.c			String handling package
 x2p/str.h			Public declarations for the above
