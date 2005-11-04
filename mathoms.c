@@ -997,7 +997,7 @@ PP(pp_semop)
 
 PP(pp_dor)
 {
-    return pp_dor();
+    return pp_defined();
 }
 
 U8 *
