@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Oct 31 19:12:32 CET 2005 [metaconfig 3.0 PL70]
+# Generated on Fri Nov  4 17:55:32 CET 2005 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -12556,9 +12556,40 @@ case "$longsize" in
 8) echo "(Your long is 64 bits, so you could use ftell.)" ;;
 esac
 
-: see if futimes exists
-set futimes d_futimes
-eval $inlibc
+d_futimes="$undef"
+: check for a working futimes
+echo " "
+echo "Checking for a working futimes()" >&4
+$cat >try.c <<EOCP
+#include <stdio.h>
+#include <sys/time.h>
+#include <errno.h>
+#include <fcntl.h>
+
+int main ()
+{
+    int fd, rv;
+    fd = open ("try.c", O_RDWR);
+    if (-1 == fd) exit (1);
+    rv = futimes (fd, NULL);
+    exit (rv == -1 ? errno : 0);
+}
+EOCP
+set try
+if eval $compile; then
+    `$run ./try`
+    rc=$?
+    case "$rc" in
+	0)  echo "Yes, it does" >&4
+	    d_futimes="$define"
+	    ;;
+	*)  echo "No, it has futimes, but it isn't working ($rc) (probably harmless)\n" >&4
+	    ;;
+    esac
+else
+    echo "No, it does not (probably harmless)\n" >&4
+fi
+$rm -f try.* try core core.try.*
 
 : see if getcwd exists
 set getcwd d_getcwd
