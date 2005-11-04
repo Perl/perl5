@@ -2953,6 +2953,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
     SV *tsv, *origsv;
     char tbuf[64];	/* Must fit sprintf/Gconvert of longest IV/NV */
     char *tmpbuf = tbuf;
+    STRLEN len = 0;	/* Hush gcc. len is always initialised before use.  */
 
     if (!sv) {
 	if (lp)
@@ -2972,12 +2973,10 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	    return SvPVX(sv);
 	}
 	if (SvIOKp(sv)) {
-	    if (SvIsUV(sv))
-		(void)sprintf(tmpbuf,"%"UVuf, (UV)SvUVX(sv));
-	    else
-		(void)sprintf(tmpbuf,"%"IVdf, (IV)SvIVX(sv));
+	    len = SvIsUV(sv) ? my_sprintf(tmpbuf,"%"UVuf, (UV)SvUVX(sv))
+		: my_sprintf(tmpbuf,"%"IVdf, (IV)SvIVX(sv));
 	    tsv = Nullsv;
-	    goto tokensave;
+	    goto tokensave_has_len;
 	}
 	if (SvNOKp(sv)) {
 	    Gconvert(SvNVX(sv), NV_DIG, 0, tmpbuf);
@@ -3236,12 +3235,15 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
     return SvPVX(sv);
 
   tokensave:
+    len = strlen(tmpbuf);
+ tokensave_has_len:
+    assert (!tsv);
     if (SvROK(sv)) {	/* XXX Skip this when sv_pvn_force calls */
 	/* Sneaky stuff here */
 
       tokensaveref:
 	if (!tsv)
-	    tsv = newSVpv(tmpbuf, 0);
+	    tsv = newSVpvn(tmpbuf, len);
 	sv_2mortal(tsv);
 	if (lp)
 	    *lp = SvCUR(tsv);
@@ -3249,23 +3251,11 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
     }
     else {
         dVAR;
-	STRLEN len;
-        const char *t;
 
-	assert (!tsv);
-	if (tsv) {
-	    /* There is no code path that can get you here.  */
-	    sv_2mortal(tsv);
-	    t = SvPVX_const(tsv);
-	    len = SvCUR(tsv);
-	}
-	else {
-	    t = tmpbuf;
-	    len = strlen(tmpbuf);
-	}
 #ifdef FIXNEGATIVEZERO
-	if (len == 2 && t[0] == '-' && t[1] == '0') {
-	    t = "0";
+	if (len == 2 && tmpbuf[0] == '-' && tmpbuf[1] == '0') {
+	    tmpbuf[0] = '0';
+	    tmpbuf[1] = 0;
 	    len = 1;
 	}
 #endif
@@ -3275,7 +3265,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	s = SvGROW_mutable(sv, len + 1);
 	SvCUR_set(sv, len);
 	SvPOKp_on(sv);
-	return memcpy(s, t, len + 1);
+	return memcpy(s, tmpbuf, len + 1);
     }
 }
 
