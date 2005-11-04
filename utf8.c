@@ -1236,7 +1236,7 @@ Perl_to_uni_lower_lc(pTHX_ U32 c)
     return (U32)to_uni_lower(c, tmpbuf, &len);
 }
 
-bool
+static bool
 S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
 		 const char *const swashname)
 {

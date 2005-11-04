@@ -66,7 +66,7 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
     {
 	if (SvIV(subgen) == (IV)PL_sub_generation) {
 	    SV* sv;
-	    SV** svp = (SV**)hv_fetch(hv, name, len, FALSE);
+	    SV** const svp = (SV**)hv_fetch(hv, name, len, FALSE);
 	    if (svp && (sv = *svp) != (SV*)&PL_sv_undef) {
 	        DEBUG_o( Perl_deb(aTHX_ "Using cached ISA %s for package %s\n",
 				  name, hvname) );
@@ -435,7 +435,7 @@ XS(XS_version_stringify)
 	  Perl_croak(aTHX_ "Usage: version::stringify(lobj, ...)");
      SP -= items;
      {
-	  SV *	lobj = Nullsv;
+	  SV *	lobj;
 
 	  if (sv_derived_from(ST(0), "version")) {
 	       lobj = SvRV(ST(0));
@@ -457,7 +457,7 @@ XS(XS_version_numify)
 	  Perl_croak(aTHX_ "Usage: version::numify(lobj, ...)");
      SP -= items;
      {
-	  SV *	lobj = Nullsv;
+	  SV *	lobj;
 
 	  if (sv_derived_from(ST(0), "version")) {
 	       lobj = SvRV(ST(0));
@@ -479,7 +479,7 @@ XS(XS_version_normal)
 	  Perl_croak(aTHX_ "Usage: version::normal(lobj, ...)");
      SP -= items;
      {
-	  SV *	lobj = Nullsv;
+	  SV *	lobj;
 
 	  if (sv_derived_from(ST(0), "version")) {
 	       lobj = SvRV(ST(0));
@@ -501,7 +501,7 @@ XS(XS_version_vcmp)
 	  Perl_croak(aTHX_ "Usage: version::vcmp(lobj, ...)");
      SP -= items;
      {
-	  SV *	lobj = Nullsv;
+	  SV *	lobj;
 
 	  if (sv_derived_from(ST(0), "version")) {
 	       lobj = SvRV(ST(0));
@@ -513,7 +513,7 @@ XS(XS_version_vcmp)
 	       SV	*rs;
 	       SV	*rvs;
 	       SV * robj = ST(1);
-	       IV	 swap = (IV)SvIV(ST(2));
+	       const IV	 swap = (IV)SvIV(ST(2));
 
 	       if ( ! sv_derived_from(robj, "version") )
 	       {

@@ -3762,6 +3762,12 @@ STATIC NV	S_mulexp10(NV value, I32 exponent);
 STATIC STRLEN	S_is_utf8_char_slow(pTHX_ const U8 *s, const STRLEN len)
 			__attribute__nonnull__(pTHX_1);
 
+STATIC bool	S_is_utf8_common(pTHX_ const U8 *const p, SV **swash, const char * const swashname)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+
 #endif
 
 START_EXTERN_C

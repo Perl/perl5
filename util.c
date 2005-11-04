@@ -291,7 +291,7 @@ char *
 Perl_ninstr(pTHX_ register const char *big, register const char *bigend, const char *little, const char *lend)
 {
     register const I32 first = *little;
-    register const char *littleend = lend;
+    register const char * const littleend = lend;
 
     if (!first && little >= littleend)
 	return (char*)big;
@@ -321,7 +321,7 @@ Perl_rninstr(pTHX_ register const char *big, const char *bigend, const char *lit
 {
     register const char *bigbeg;
     register const I32 first = *little;
-    register const char *littleend = lend;
+    register const char * const littleend = lend;
 
     if (!first && little >= littleend)
 	return (char*)bigend;
@@ -839,7 +839,7 @@ char *
 Perl_savesvpv(pTHX_ SV *sv)
 {
     STRLEN len;
-    const char *pv = SvPV_const(sv, len);
+    const char * const pv = SvPV_const(sv, len);
     register char *newaddr;
 
     ++len;
@@ -1358,7 +1358,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
     if (ckDEAD(err)) {
 	SV * const msv = vmess(pat, args);
 	STRLEN msglen;
-	const char *message = SvPV_const(msv, msglen);
+	const char * const message = SvPV_const(msv, msglen);
 	const I32 utf8 = SvUTF8(msv);
 
 	if (PL_diehook) {
@@ -2739,7 +2739,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 {
     /* Needs work for PerlIO ! */
     FILE * const f = PerlIO_findFILE(ptr);
-    I32 result = pclose(f);
+    const I32 result = pclose(f);
     PerlIO_releaseFILE(ptr,f);
     return result;
 }
@@ -3147,7 +3147,7 @@ Perl_getenv_len(pTHX_ const char *env_elem, unsigned long *len)
 MGVTBL*
 Perl_get_vtbl(pTHX_ int vtbl_id)
 {
-    const MGVTBL* result = Null(MGVTBL*);
+    const MGVTBL* result;
 
     switch(vtbl_id) {
     case want_vtbl_sv:
@@ -3241,6 +3241,9 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
 	break;
     case want_vtbl_utf8:
 	result = &PL_vtbl_utf8;
+	break;
+    default:
+	result = Null(MGVTBL*);
 	break;
     }
     return (MGVTBL*)result;
@@ -3916,8 +3919,8 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
     int saw_period = 0;
     int alpha = 0;
     int width = 3;
-    AV *av = newAV();
-    SV *hv = newSVrv(rv, "version"); /* create an SV and upgrade the RV */
+    AV * const av = newAV();
+    SV * const hv = newSVrv(rv, "version"); /* create an SV and upgrade the RV */
     (void)sv_upgrade(hv, SVt_PVHV); /* needs to be an HV type */
 
 #ifndef NODEFAULT_SHAREKEYS
@@ -4705,7 +4708,7 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
 #endif
   tidy_up_and_fail:
     {
-	int save_errno = errno;
+	const int save_errno = errno;
 	if (listener != -1)
 	    PerlLIO_close(listener);
 	if (connector != -1)
@@ -4945,8 +4948,8 @@ Perl_init_global_struct(pTHX)
 #ifdef PERL_GLOBAL_STRUCT
 #  define PERL_GLOBAL_STRUCT_INIT
 #  include "opcode.h" /* the ppaddr and check */
-    IV nppaddr = sizeof(Gppaddr)/sizeof(Perl_ppaddr_t);
-    IV ncheck  = sizeof(Gcheck) /sizeof(Perl_check_t);
+    const IV nppaddr = sizeof(Gppaddr)/sizeof(Perl_ppaddr_t);
+    const IV ncheck  = sizeof(Gcheck) /sizeof(Perl_check_t);
 #  ifdef PERL_GLOBAL_STRUCT_PRIVATE
     /* PerlMem_malloc() because can't use even safesysmalloc() this early. */
     plvarsp = (struct perl_vars*)PerlMem_malloc(sizeof(struct perl_vars));

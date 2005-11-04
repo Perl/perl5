@@ -169,7 +169,7 @@ S_save_scalar_at(pTHX_ SV **sptr)
 SV *
 Perl_save_scalar(pTHX_ GV *gv)
 {
-    SV **sptr = &GvSV(gv);
+    SV ** const sptr = &GvSV(gv);
     PL_localizing = 1;
     SvGETMAGIC(*sptr);
     PL_localizing = 0;
@@ -963,8 +963,8 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_SAVESWITCHSTACK:
 	    {
 		dSP;
-		AV* t = (AV*)SSPOPPTR;
-		AV* f = (AV*)SSPOPPTR;
+		AV* const t = (AV*)SSPOPPTR;
+		AV* const f = (AV*)SSPOPPTR;
 		SWITCHSTACK(t,f);
 		PL_curstackinfo->si_stack = f;
 	    }

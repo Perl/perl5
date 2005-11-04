@@ -53,7 +53,7 @@
 STATIC char *
 S_stdize_locale(pTHX_ char *locs)
 {
-    const char *s = strchr(locs, '=');
+    const char * const s = strchr(locs, '=');
     bool okay = TRUE;
 
     if (s) {
@@ -82,9 +82,8 @@ Perl_set_numeric_radix(pTHX)
 {
 #ifdef USE_LOCALE_NUMERIC
 # ifdef HAS_LOCALECONV
-    struct lconv* lc;
+    const struct lconv* const lc = localeconv();
 
-    lc = localeconv();
     if (lc && lc->decimal_point) {
 	if (lc->decimal_point[0] == '.' && lc->decimal_point[1] == 0) {
 	    SvREFCNT_dec(PL_numeric_radix_sv);
@@ -254,10 +253,10 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     char *curnum     = NULL;
 #endif /* USE_LOCALE_NUMERIC */
 #ifdef __GLIBC__
-    char *language   = PerlEnv_getenv("LANGUAGE");
+    char * const language   = PerlEnv_getenv("LANGUAGE");
 #endif
-    char *lc_all     = PerlEnv_getenv("LC_ALL");
-    char *lang       = PerlEnv_getenv("LANG");
+    char * const lc_all     = PerlEnv_getenv("LC_ALL");
+    char * const lang       = PerlEnv_getenv("LANG");
     bool setlocale_failure = FALSE;
 
 #ifdef LOCALE_ENVIRON_REQUIRED
