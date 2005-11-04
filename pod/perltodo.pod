@@ -366,14 +366,6 @@ typically requiring 4 byte alignment, and then an odd C<bool> later on.
 to review the ordering of the variables, to see how much alignment padding can
 be removed.
 
-=head2 repeated code in filetest operators
-
-F<pp_sys.c> has a lot of partially repeated code in the filetest operators (for
-example C<pp_ftrowned>, C<pp_ftzero>, C<pp_ftsize>, and C<pp_ftmtime>,
-C<pp_ftatime>, C<pp_ftctime>). It would be good to investigate whether some
-of this could be refactored out into common static functions. A similar
-refactoring on F<utf8.c> saved about 1.5K of object code size.
-
 =head2 bincompat functions
 
 There are lots of functions which are retained for binary compatibility.

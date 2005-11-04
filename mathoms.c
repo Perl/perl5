@@ -946,6 +946,31 @@ PP(pp_symlink)
     return pp_link();
 }
 
+PP(pp_ftrwrite)
+{
+    return pp_ftrread();
+}
+
+PP(pp_ftrexec)
+{
+    return pp_ftrread();
+}
+
+PP(pp_fteread)
+{
+    return pp_ftrread();
+}
+
+PP(pp_ftewrite)
+{
+    return pp_ftrread();
+}
+
+PP(pp_fteexec)
+{
+    return pp_ftrread();
+}
+
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {

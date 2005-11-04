@@ -1003,11 +1003,11 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_stat),	/* Perl_pp_lstat */
 	MEMBER_TO_FPTR(Perl_pp_stat),
 	MEMBER_TO_FPTR(Perl_pp_ftrread),
-	MEMBER_TO_FPTR(Perl_pp_ftrwrite),
-	MEMBER_TO_FPTR(Perl_pp_ftrexec),
-	MEMBER_TO_FPTR(Perl_pp_fteread),
-	MEMBER_TO_FPTR(Perl_pp_ftewrite),
-	MEMBER_TO_FPTR(Perl_pp_fteexec),
+	MEMBER_TO_FPTR(Perl_pp_ftrread),	/* Perl_pp_ftrwrite */
+	MEMBER_TO_FPTR(Perl_pp_ftrread),	/* Perl_pp_ftrexec */
+	MEMBER_TO_FPTR(Perl_pp_ftrread),	/* Perl_pp_fteread */
+	MEMBER_TO_FPTR(Perl_pp_ftrread),	/* Perl_pp_ftewrite */
+	MEMBER_TO_FPTR(Perl_pp_ftrread),	/* Perl_pp_fteexec */
 	MEMBER_TO_FPTR(Perl_pp_ftis),
 	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_fteowned */
 	MEMBER_TO_FPTR(Perl_pp_ftrowned),

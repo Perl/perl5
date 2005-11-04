@@ -70,6 +70,8 @@ my @raw_alias = (
 		 Perl_pp_ftis => [qw(ftsize ftmtime ftatime ftctime)],
 		 Perl_pp_chown => [qw(unlink chmod utime kill)],
 		 Perl_pp_link => ['symlink'],
+		 Perl_pp_ftrread => [qw(ftrwrite ftrexec fteread ftewrite
+ 					fteexec)],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {

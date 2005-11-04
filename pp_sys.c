@@ -2873,161 +2873,110 @@ PP(pp_stat)
 PP(pp_ftrread)
 {
     I32 result;
-    dSP;
-    STACKED_FTEST_CHECK;
-#if defined(HAS_ACCESS) && defined(R_OK)
-    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	result = access(POPpx, R_OK);
-	if (result == 0)
-	    RETPUSHYES;
-	if (result < 0)
-	    RETPUSHUNDEF;
-	RETPUSHNO;
-    }
-    else
-	result = my_stat();
+    /* Not const, because things tweak this below. Not bool, because there's
+       no guarantee that OPp_FT_ACCESS is <= CHAR_MAX  */
+#if defined(HAS_ACCESS) || defined (PERL_EFF_ACCESS)
+    I32 use_access = PL_op->op_private & OPpFT_ACCESS;
+    /* Giving some sort of initial value silences compilers.  */
+#  ifdef R_OK
+    int access_mode = R_OK;
+#  else
+    int access_mode = 0;
+#  endif
 #else
-    result = my_stat();
+    /* access_mode is never used, but leaving use_access in makes the
+       conditional compiling below much clearer.  */
+    I32 use_access = 0;
 #endif
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (cando(S_IRUSR, 0, &PL_statcache))
-	RETPUSHYES;
-    RETPUSHNO;
-}
+    int stat_mode = S_IRUSR;
 
-PP(pp_ftrwrite)
-{
-    I32 result;
+    bool effective = FALSE;
     dSP;
+
     STACKED_FTEST_CHECK;
+
+    switch (PL_op->op_type) {
+    case OP_FTRREAD:
+#if !(defined(HAS_ACCESS) && defined(R_OK))
+	use_access = 0;
+#endif
+	break;
+
+    case OP_FTRWRITE:
 #if defined(HAS_ACCESS) && defined(W_OK)
-    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	result = access(POPpx, W_OK);
-	if (result == 0)
-	    RETPUSHYES;
-	if (result < 0)
-	    RETPUSHUNDEF;
-	RETPUSHNO;
-    }
-    else
-	result = my_stat();
+	access_mode = W_OK;
 #else
-    result = my_stat();
+	use_access = 0;
 #endif
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (cando(S_IWUSR, 0, &PL_statcache))
-	RETPUSHYES;
-    RETPUSHNO;
-}
+	stat_mode = S_IWUSR;
+	break;
 
-PP(pp_ftrexec)
-{
-    I32 result;
-    dSP;
-    STACKED_FTEST_CHECK;
+    case OP_FTREXEC:
 #if defined(HAS_ACCESS) && defined(X_OK)
-    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	result = access(POPpx, X_OK);
-	if (result == 0)
-	    RETPUSHYES;
-	if (result < 0)
-	    RETPUSHUNDEF;
-	RETPUSHNO;
-    }
-    else
-	result = my_stat();
+	access_mode = X_OK;
 #else
-    result = my_stat();
+	use_access = 0;
 #endif
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (cando(S_IXUSR, 0, &PL_statcache))
-	RETPUSHYES;
-    RETPUSHNO;
-}
+	stat_mode = S_IXUSR;
+	break;
 
-PP(pp_fteread)
-{
-    I32 result;
-    dSP;
-    STACKED_FTEST_CHECK;
+    case OP_FTEWRITE:
 #ifdef PERL_EFF_ACCESS
-    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	result = PERL_EFF_ACCESS(POPpx, R_OK);
-	if (result == 0)
-	    RETPUSHYES;
-	if (result < 0)
-	    RETPUSHUNDEF;
-	RETPUSHNO;
-    }
-    else
-	result = my_stat();
-#else
-    result = my_stat();
+	access_mode = W_OK;
 #endif
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (cando(S_IRUSR, 1, &PL_statcache))
-	RETPUSHYES;
-    RETPUSHNO;
-}
+	stat_mode = S_IWUSR;
+	/* Fall through  */
 
-PP(pp_ftewrite)
-{
-    I32 result;
-    dSP;
-    STACKED_FTEST_CHECK;
-#ifdef PERL_EFF_ACCESS
-    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	result = PERL_EFF_ACCESS(POPpx, W_OK);
-	if (result == 0)
-	    RETPUSHYES;
-	if (result < 0)
-	    RETPUSHUNDEF;
-	RETPUSHNO;
-    }
-    else
-	result = my_stat();
-#else
-    result = my_stat();
+    case OP_FTEREAD:
+#ifndef PERL_EFF_ACCESS
+	use_access = 0;
 #endif
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (cando(S_IWUSR, 1, &PL_statcache))
-	RETPUSHYES;
-    RETPUSHNO;
-}
+	effective = TRUE;
+	break;
 
-PP(pp_fteexec)
-{
-    I32 result;
-    dSP;
-    STACKED_FTEST_CHECK;
+
+    case OP_FTEEXEC:
 #ifdef PERL_EFF_ACCESS
-    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	result = PERL_EFF_ACCESS(POPpx, X_OK);
+	access_mode = W_OK;
+#else
+	use_access = 0;
+#endif
+	stat_mode = S_IXUSR;
+	effective = TRUE;
+	break;
+    }
+
+    if (use_access) {
+#if defined(HAS_ACCESS) || defined (PERL_EFF_ACCESS)
+	const char *const name = POPpx;
+	if (effective) {
+#  ifdef PERL_EFF_ACCESS
+	    result = PERL_EFF_ACCESS(name, access_mode);
+#  else
+	    DIE(aTHX_ "panic: attempt to call PERL_EFF_ACCESS in %s",
+		OP_NAME(PL_op));
+#  endif
+	}
+	else {
+#  ifdef HAS_ACCESS
+	    result = access(name, access_mode);
+#  else
+	    DIE(aTHX_ "panic: attempt to call access() in %s", OP_NAME(PL_op));
+#  endif
+	}
 	if (result == 0)
 	    RETPUSHYES;
 	if (result < 0)
 	    RETPUSHUNDEF;
 	RETPUSHNO;
-    }
-    else
-	result = my_stat();
-#else
-    result = my_stat();
 #endif
+    }
+
+    result = my_stat();
     SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (cando(S_IXUSR, 1, &PL_statcache))
+    if (cando(stat_mode, effective, &PL_statcache))
 	RETPUSHYES;
     RETPUSHNO;
 }
