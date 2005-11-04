@@ -6218,7 +6218,7 @@ Perl_save_re_context(pTHX)
 	    for (i = 1; i <= rx->nparens; i++) {
 		GV *mgv;
 		char digits[TYPE_CHARS(long)];
-		const STRLEN len = sprintf(digits, "%lu", (long)i);
+		const STRLEN len = my_sprintf(digits, "%lu", (long)i);
 		if ((mgv = gv_fetchpvn_flags(digits, len, FALSE, SVt_PV)))
 		    save_scalar(mgv);
 	    }
