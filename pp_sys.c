@@ -200,6 +200,7 @@ void endservent(void);
 #undef PERL_EFF_ACCESS_R_OK	/* EFFective uid/gid ACCESS R_OK */
 #undef PERL_EFF_ACCESS_W_OK
 #undef PERL_EFF_ACCESS_X_OK
+#undef PERL_EFF_ACCESS
 
 /* AIX 5.2 and below use mktime for localtime, and defines the edge case
  * for time 0x7fffffff to be valid only in UTC. AIX 5.3 provides localtime64
@@ -212,38 +213,31 @@ void endservent(void);
 
 /* F_OK unused: if stat() cannot find it... */
 
-#if !defined(PERL_EFF_ACCESS_R_OK) && defined(HAS_ACCESS) && defined(EFF_ONLY_OK) && !defined(NO_EFF_ONLY_OK)
+#if !defined(PERL_EFF_ACCESS) && defined(HAS_ACCESS) && defined(EFF_ONLY_OK) && !defined(NO_EFF_ONLY_OK)
     /* Digital UNIX (when the EFF_ONLY_OK gets fixed), UnixWare */
-#   define PERL_EFF_ACCESS_R_OK(p) (access((p), R_OK | EFF_ONLY_OK))
-#   define PERL_EFF_ACCESS_W_OK(p) (access((p), W_OK | EFF_ONLY_OK))
-#   define PERL_EFF_ACCESS_X_OK(p) (access((p), X_OK | EFF_ONLY_OK))
+#   define PERL_EFF_ACCESS(p,f) (access((p), (f) | EFF_ONLY_OK))
 #endif
 
-#if !defined(PERL_EFF_ACCESS_R_OK) && defined(HAS_EACCESS)
+#if !defined(PERL_EFF_ACCESS) && defined(HAS_EACCESS)
 #   ifdef I_SYS_SECURITY
 #       include <sys/security.h>
 #   endif
 #   ifdef ACC_SELF
         /* HP SecureWare */
-#       define PERL_EFF_ACCESS_R_OK(p) (eaccess((p), R_OK, ACC_SELF))
-#       define PERL_EFF_ACCESS_W_OK(p) (eaccess((p), W_OK, ACC_SELF))
-#       define PERL_EFF_ACCESS_X_OK(p) (eaccess((p), X_OK, ACC_SELF))
+#       define PERL_EFF_ACCESS(p,f) (eaccess((p), (f), ACC_SELF))
 #   else
         /* SCO */
-#       define PERL_EFF_ACCESS_R_OK(p) (eaccess((p), R_OK))
-#       define PERL_EFF_ACCESS_W_OK(p) (eaccess((p), W_OK))
-#       define PERL_EFF_ACCESS_X_OK(p) (eaccess((p), X_OK))
+#       define PERL_EFF_ACCESS(p,f) (eaccess((p), (f)))
 #   endif
 #endif
 
-#if !defined(PERL_EFF_ACCESS_R_OK) && defined(HAS_ACCESSX) && defined(ACC_SELF)
+#if !defined(PERL_EFF_ACCESS) && defined(HAS_ACCESSX) && defined(ACC_SELF)
     /* AIX */
-#   define PERL_EFF_ACCESS_R_OK(p) (accessx((p), R_OK, ACC_SELF))
-#   define PERL_EFF_ACCESS_W_OK(p) (accessx((p), W_OK, ACC_SELF))
-#   define PERL_EFF_ACCESS_X_OK(p) (accessx((p), X_OK, ACC_SELF))
+#   define PERL_EFF_ACCESS(p,f) (accessx((p), (f), ACC_SELF))
 #endif
 
-#if !defined(PERL_EFF_ACCESS_R_OK) && defined(HAS_ACCESS)	\
+
+#if !defined(PERL_EFF_ACCESS) && defined(HAS_ACCESS)	\
     && (defined(HAS_SETREUID) || defined(HAS_SETRESUID)		\
 	|| defined(HAS_SETREGID) || defined(HAS_SETRESGID))
 /* The Hard Way. */
@@ -306,12 +300,14 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 
     return res;
 }
-#   define PERL_EFF_ACCESS_R_OK(p) (emulate_eaccess((p), R_OK))
-#   define PERL_EFF_ACCESS_W_OK(p) (emulate_eaccess((p), W_OK))
-#   define PERL_EFF_ACCESS_X_OK(p) (emulate_eaccess((p), X_OK))
+#   define PERL_EFF_ACCESS(p,f) (emulate_eaccess((p), (f)))
 #endif
 
-#if !defined(PERL_EFF_ACCESS_R_OK)
+#if defined(PERL_EFF_ACCESS)
+#   define PERL_EFF_ACCESS_R_OK(p) (PERL_EFF_ACCESS((p), R_OK))
+#   define PERL_EFF_ACCESS_W_OK(p) (PERL_EFF_ACCESS((p), W_OK))
+#   define PERL_EFF_ACCESS_X_OK(p) (PERL_EFF_ACCESS((p), X_OK))
+#else
 /* With it or without it: anyway you get a warning: either that
    it is unused, or it is declared static and never defined.
  */
