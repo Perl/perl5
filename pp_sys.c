@@ -1768,20 +1768,6 @@ PP(pp_sysread)
     RETPUSHUNDEF;
 }
 
-PP(pp_syswrite)
-{
-    dVAR; dSP;
-    const int items = (SP - PL_stack_base) - TOPMARK;
-    if (items == 2) {
-	SV *sv;
-        EXTEND(SP, 1);
-	sv = sv_2mortal(newSViv(sv_len(*SP)));
-	PUSHs(sv);
-        PUTBACK;
-    }
-    return pp_send();
-}
-
 PP(pp_send)
 {
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
@@ -1789,20 +1775,28 @@ PP(pp_send)
     IO *io;
     SV *bufsv;
     const char *buffer;
-    Size_t length;
+    Size_t length = 0;
     SSize_t retval;
     STRLEN blen;
     MAGIC *mg;
-
+    const int op_type = PL_op->op_type;
+    
     gv = (GV*)*++MARK;
     if (PL_op->op_type == OP_SYSWRITE
 	&& gv && (io = GvIO(gv))
 	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
     {
 	SV *sv;
+
+	if (MARK == SP - 1) {
+	    EXTEND(SP, 1000);
+	    sv = sv_2mortal(newSViv(sv_len(*SP)));
+	    PUSHs(sv);
+	    PUTBACK;
+	}
 	
-	PUSHMARK(MARK-1);
-	*MARK = SvTIED_obj((SV*)io, mg);
+	PUSHMARK(ORIGMARK);
+	*(ORIGMARK+1) = SvTIED_obj((SV*)io, mg);
 	ENTER;
 	call_method("WRITE", G_SCALAR);
 	LEAVE;
@@ -1814,14 +1808,22 @@ PP(pp_send)
     }
     if (!gv)
 	goto say_undef;
+
     bufsv = *++MARK;
+
+    if (op_type == OP_SYSWRITE) {
+	if (MARK >= SP) {
+	    length = (Size_t) sv_len(bufsv);
+	} else {
 #if Size_t_size > IVSIZE
-    length = (Size_t)SvNVx(*++MARK);
+	    length = (Size_t)SvNVx(*++MARK);
 #else
-    length = (Size_t)SvIVx(*++MARK);
+	    length = (Size_t)SvIVx(*++MARK);
 #endif
-    if ((SSize_t)length < 0)
-	DIE(aTHX_ "Negative length");
+	    if ((SSize_t)length < 0)
+		DIE(aTHX_ "Negative length");
+	}
+    }
     SETERRNO(0,0);
     io = GvIO(gv);
     if (!io || !IoIFP(io)) {
@@ -1848,7 +1850,7 @@ PP(pp_send)
 	 buffer = SvPV_const(bufsv, blen);
     }
 
-    if (PL_op->op_type == OP_SYSWRITE) {
+    if (op_type == OP_SYSWRITE) {
 	IV offset;
 	if (DO_UTF8(bufsv)) {
 	    /* length and offset are in chars */
@@ -1887,16 +1889,19 @@ PP(pp_send)
 	}
     }
 #ifdef HAS_SOCKET
-    else if (SP > MARK) {
-	STRLEN mlen;
-	char * const sockbuf = SvPVx(*++MARK, mlen);
-	/* length is really flags */
-	retval = PerlSock_sendto(PerlIO_fileno(IoIFP(io)), buffer, blen,
-				 length, (struct sockaddr *)sockbuf, mlen);
+    else {
+	const int flags = SvIVx(*++MARK);
+	if (SP > MARK) {
+	    STRLEN mlen;
+	    char * const sockbuf = SvPVx(*++MARK, mlen);
+	    retval = PerlSock_sendto(PerlIO_fileno(IoIFP(io)), buffer, blen,
+				     flags, (struct sockaddr *)sockbuf, mlen);
+	}
+	else {
+	    retval
+		= PerlSock_send(PerlIO_fileno(IoIFP(io)), buffer, blen, flags);
+	}
     }
-    else
-	/* length is really flags */
-	retval = PerlSock_send(PerlIO_fileno(IoIFP(io)), buffer, blen, length);
 #else
     else
 	DIE(aTHX_ PL_no_sock_func, "send");

@@ -979,7 +979,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_sysopen),
 	MEMBER_TO_FPTR(Perl_pp_sysseek),
 	MEMBER_TO_FPTR(Perl_pp_sysread),
-	MEMBER_TO_FPTR(Perl_pp_syswrite),
+	MEMBER_TO_FPTR(Perl_pp_send),	/* Perl_pp_syswrite */
 	MEMBER_TO_FPTR(Perl_pp_send),
 	MEMBER_TO_FPTR(Perl_pp_sysread),	/* Perl_pp_recv */
 	MEMBER_TO_FPTR(Perl_pp_eof),

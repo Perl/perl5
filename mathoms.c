@@ -985,6 +985,11 @@ PP(pp_msgrcv)
     return pp_shmwrite();
 }
 
+PP(pp_syswrite)
+{
+    return pp_send();
+}
+
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {

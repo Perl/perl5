@@ -73,6 +73,7 @@ my @raw_alias = (
 		 Perl_pp_ftrread => [qw(ftrwrite ftrexec fteread ftewrite
  					fteexec)],
 		 Perl_pp_shmwrite => [qw(msgsnd msgrcv)],
+		 Perl_pp_send => ['syswrite'],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {
