@@ -4150,8 +4150,8 @@ Perl_upg_version(pTHX_ SV *ver)
     if ( SvNOK(ver) ) /* may get too much accuracy */ 
     {
 	char tbuf[64];
-	sprintf(tbuf,"%.9"NVgf, SvNVX(ver));
-	version = savepv(tbuf);
+	const STRLEN len = my_sprintf(tbuf,"%.9"NVgf, SvNVX(ver));
+	version = savepvn(tbuf, len);
     }
 #ifdef SvVOK
     else if ( SvVOK(ver) ) { /* already a v-string */
@@ -5020,11 +5020,12 @@ Perl_mem_log_alloc(const UV n, const UV typesize, const char *typename, Malloc_t
 #ifdef PERL_MEM_LOG_STDERR
     /* We can't use PerlIO for obvious reasons. */
     char buf[PERL_MEM_LOG_SPRINTF_BUF_SIZE];
-    sprintf(buf,
-	    "alloc: %s:%d:%s: %"IVdf" %"UVuf" %s = %"IVdf": %"UVxf"\n",
-	    filename, linenumber, funcname,
-	    n, typesize, typename, n * typesize, PTR2UV(newalloc));
-    PerlLIO_write(2,  buf, strlen(buf));
+    const STRLEN len = my_sprintf(buf,
+				  "alloc: %s:%d:%s: %"IVdf" %"UVuf
+				  " %s = %"IVdf": %"UVxf"\n",
+				  filename, linenumber, funcname, n, typesize,
+				  typename, n * typesize, PTR2UV(newalloc));
+    PerlLIO_write(2,  buf, len));
 #endif
     return newalloc;
 }
@@ -5035,11 +5036,12 @@ Perl_mem_log_realloc(const UV n, const UV typesize, const char *typename, Malloc
 #ifdef PERL_MEM_LOG_STDERR
     /* We can't use PerlIO for obvious reasons. */
     char buf[PERL_MEM_LOG_SPRINTF_BUF_SIZE];
-    sprintf(buf,
-	    "realloc: %s:%d:%s: %"IVdf" %"UVuf" %s = %"IVdf": %"UVxf" -> %"UVxf"\n",
-	    filename, linenumber, funcname,
-	    n, typesize, typename, n * typesize, PTR2UV(oldalloc), PTR2UV(newalloc));
-    PerlLIO_write(2,  buf, strlen(buf));
+    const STRLEN len = my_sprintf(buf, "realloc: %s:%d:%s: %"IVdf" %"UVuf
+				  " %s = %"IVdf": %"UVxf" -> %"UVxf"\n",
+				  filename, linenumber, funcname, n, typesize,
+				  typename, n * typesize, PTR2UV(oldalloc),
+				  PTR2UV(newalloc));
+    PerlLIO_write(2,  buf, len);
 #endif
     return newalloc;
 }
@@ -5050,9 +5052,10 @@ Perl_mem_log_free(Malloc_t oldalloc, const char *filename, const int linenumber,
 #ifdef PERL_MEM_LOG_STDERR
     /* We can't use PerlIO for obvious reasons. */
     char buf[PERL_MEM_LOG_SPRINTF_BUF_SIZE];
-    sprintf(buf, "free: %s:%d:%s: %"UVxf"\n",
-	    filename, linenumber, funcname, PTR2UV(oldalloc));
-    PerlLIO_write(2,  buf, strlen(buf));
+    const STRLEN len = my_sprintf(buf, "free: %s:%d:%s: %"UVxf"\n",
+				  filename, linenumber, funcname,
+				  PTR2UV(oldalloc));
+    PerlLIO_write(2,  buf, len);
 #endif
     return oldalloc;
 }
