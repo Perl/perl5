@@ -3108,7 +3108,7 @@ PP(pp_ftrowned)
 	RETPUSHUNDEF;
     switch (PL_op->op_type) {
     case OP_FTROWNED:
-	if (PL_statcache.st_uid == PL_uid);
+	if (PL_statcache.st_uid == PL_uid)
 	    RETPUSHYES;
 	break;
     case OP_FTEOWNED:
