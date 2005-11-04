@@ -1,5 +1,8 @@
 Revision history for Perl extension Time::HiRes.
 
+1.80	[2005-10-04]
+	- Gisle noticed a mistake (using HAS_NANOSLEEP) in 1.79
+
 1.79	[2005-10-03]
 	- try nanosleep for emulating usleep -- may help in some weird
 	  embedded realtime places which have nanosleep but neither usleep

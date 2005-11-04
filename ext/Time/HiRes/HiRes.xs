@@ -361,7 +361,8 @@ gettimeofday (struct timeval *tp, void *tpz)
 
 
  /* Do not use H A S _ N A N O S L E E P
-  * so that Perl Configure doesn't scan for it.
+  * so that Perl Configure doesn't scan for it (and pull in -lrt and
+  * the like which are not usually good ideas for the default Perl).
   * (We are part of the core perl now.)
   * The TIME_HIRES_NANOSLEEP is set by Makefile.PL. */
 #if !defined(HAS_USLEEP) && defined(TIME_HIRES_NANOSLEEP)
@@ -409,7 +410,7 @@ hrt_usleep(unsigned long usec)
 }
 #endif /* #if !defined(HAS_USLEEP) && defined(WIN32) */
 
-#if !defined(HAS_USLEEP) && defined(HAS_NANOSLEEP)
+#if !defined(HAS_USLEEP) && defined(TIME_HIRES_NANOSLEEP)
 #define HAS_USLEEP
 #define usleep hrt_usleep  /* could conflict with ncurses for static build */
 

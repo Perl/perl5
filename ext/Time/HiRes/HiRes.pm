@@ -17,7 +17,7 @@ require DynaLoader;
 		 d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
 		 d_nanosleep d_clock_gettime d_clock_getres);
 	
-$VERSION = '1.79';
+$VERSION = '1.80';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -119,8 +119,8 @@ C<gettimeofday>, and C<setitimer>/C<getitimer> calls.
 
 If your system lacks C<gettimeofday()> or an emulation of it you don't
 get C<gettimeofday()> or the one-argument form of C<tv_interval()>.
-If your system lacks all of C<nanosleep()>, C<usleep()>, and
-C<select()>, you don't get C<Time::HiRes::usleep()>,
+If your system lacks all of C<nanosleep()>, C<usleep()>, C<select()>,
+and C<poll()>, you don't get C<Time::HiRes::usleep()>,
 C<Time::HiRes::nanosleep()>, or C<Time::HiRes::sleep()>.  If your
 system lacks both C<ualarm()> and C<setitimer()> you don't get
 C<Time::HiRes::ualarm()> or C<Time::HiRes::alarm()>.
@@ -318,13 +318,13 @@ of C<CLOCK_REALTIME>,  see L</clock_gettime>.
   use Time::HiRes qw(usleep ualarm gettimeofday tv_interval);
 
   $microseconds = 750_000;
-  usleep $microseconds;
+  usleep($microseconds);
 
   # signal alarm in 2.5s & every .1s thereafter
-  ualarm 2_500_000, 100_000;	
+  ualarm(2_500_000, 100_000);
 
   # get seconds and microseconds since the epoch
-  ($s, $usec) = gettimeofday;
+  ($s, $usec) = gettimeofday();
 
   # measure elapsed time 
   # (could also do by subtracting 2 gettimeofday return values)
