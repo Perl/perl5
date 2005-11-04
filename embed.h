@@ -1410,6 +1410,7 @@
 #if defined(PERL_IN_UTF8_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define is_utf8_char_slow	S_is_utf8_char_slow
+#define is_utf8_common		S_is_utf8_common
 #endif
 #endif
 #define sv_setsv_flags		Perl_sv_setsv_flags
@@ -3449,6 +3450,7 @@
 #if defined(PERL_IN_UTF8_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define is_utf8_char_slow(a,b)	S_is_utf8_char_slow(aTHX_ a,b)
+#define is_utf8_common(a,b,c)	S_is_utf8_common(aTHX_ a,b,c)
 #endif
 #endif
 #define sv_setsv_flags(a,b,c)	Perl_sv_setsv_flags(aTHX_ a,b,c)

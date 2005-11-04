@@ -179,7 +179,7 @@ Perl_deb_stack_all(pTHX)
 {
 #ifdef DEBUGGING
     I32		 ix, si_ix;
-    PERL_SI	 *si;
+    const PERL_SI *si;
 
     /* rewind to start of chain */
     si = PL_curstackinfo;
@@ -190,13 +190,13 @@ Perl_deb_stack_all(pTHX)
     for (;;)
     {
         const int si_name_ix = si->si_type+1; /* -1 is a valid index */
-        const char *si_name = (si_name_ix>= sizeof(si_names)) ? "????" : si_names[si_name_ix];
+        const char * const si_name = (si_name_ix>= sizeof(si_names)) ? "????" : si_names[si_name_ix];
 	PerlIO_printf(Perl_debug_log, "STACK %"IVdf": %s\n",
 						(IV)si_ix, si_name);
 
 	for (ix=0; ix<=si->si_cxix; ix++) {
 
-	    const PERL_CONTEXT *cx = &(si->si_cxstack[ix]);
+	    const PERL_CONTEXT * const cx = &(si->si_cxstack[ix]);
 	    PerlIO_printf(Perl_debug_log,
 		    "  CX %"IVdf": %-6s => ",
 		    (IV)ix, PL_block_type[CxTYPE(cx)]
@@ -214,8 +214,8 @@ Perl_deb_stack_all(pTHX)
 
 		I32 i, stack_min, stack_max, mark_min, mark_max;
 		I32 ret_min, ret_max;
-		PERL_CONTEXT *cx_n = NULL;
-		PERL_SI      *si_n;
+		const PERL_CONTEXT *cx_n = NULL;
+		const PERL_SI      *si_n;
 
 		/* there's a separate stack per SI, so only search
 		 * this one */

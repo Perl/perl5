@@ -322,7 +322,7 @@ char *
 Perl_ninstr(pTHX_ register const char *big, register const char *bigend, const char *little, const char *lend)
 {
     register const I32 first = *little;
-    register const char *littleend = lend;
+    register const char * const littleend = lend;
 
     if (!first && little >= littleend)
 	return (char*)big;
@@ -352,7 +352,7 @@ Perl_rninstr(pTHX_ register const char *big, const char *bigend, const char *lit
 {
     register const char *bigbeg;
     register const I32 first = *little;
-    register const char *littleend = lend;
+    register const char * const littleend = lend;
 
     if (!first && little >= littleend)
 	return (char*)bigend;
@@ -867,7 +867,7 @@ char *
 Perl_savesvpv(pTHX_ SV *sv)
 {
     STRLEN len;
-    const char *pv = SvPV_const(sv, len);
+    const char * const pv = SvPV_const(sv, len);
     register char *newaddr;
 
     ++len;
@@ -1391,7 +1391,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
     if (ckDEAD(err)) {
 	SV * const msv = vmess(pat, args);
 	STRLEN msglen;
-	const char *message = SvPV_const(msv, msglen);
+	const char * const message = SvPV_const(msv, msglen);
 	const I32 utf8 = SvUTF8(msv);
 
 #ifdef USE_5005THREADS
@@ -2767,7 +2767,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 {
     /* Needs work for PerlIO ! */
     FILE * const f = PerlIO_findFILE(ptr);
-    I32 result = pclose(f);
+    const I32 result = pclose(f);
     PerlIO_releaseFILE(ptr,f);
     return result;
 }
@@ -3457,7 +3457,7 @@ Perl_getenv_len(pTHX_ const char *env_elem, unsigned long *len)
 MGVTBL*
 Perl_get_vtbl(pTHX_ int vtbl_id)
 {
-    const MGVTBL* result = Null(MGVTBL*);
+    const MGVTBL* result;
 
     switch(vtbl_id) {
     case want_vtbl_sv:
@@ -3556,6 +3556,9 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
 	break;
     case want_vtbl_utf8:
 	result = &PL_vtbl_utf8;
+	break;
+    default:
+	result = Null(MGVTBL*);
 	break;
     }
     return (MGVTBL*)result;
@@ -4438,7 +4441,7 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
 #endif
   tidy_up_and_fail:
     {
-	int save_errno = errno;
+	const int save_errno = errno;
 	if (listener != -1)
 	    PerlLIO_close(listener);
 	if (connector != -1)

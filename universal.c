@@ -66,7 +66,7 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
     {
 	if (SvIV(subgen) == (IV)PL_sub_generation) {
 	    SV* sv;
-	    SV** svp = (SV**)hv_fetch(hv, name, len, FALSE);
+	    SV** const svp = (SV**)hv_fetch(hv, name, len, FALSE);
 	    if (svp && (sv = *svp) != (SV*)&PL_sv_undef) {
 	        DEBUG_o( Perl_deb(aTHX_ "Using cached ISA %s for package %s\n",
 				  name, hvname) );

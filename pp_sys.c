@@ -330,10 +330,7 @@ PP(pp_backtick)
 	mode = "rt";
     fp = PerlProc_popen((char*)tmps, (char *)mode);
     if (fp) {
-        const char *type = NULL;
-	if (PL_curcop->cop_io) {
-	    type = SvPV_nolen_const(PL_curcop->cop_io);
-	}
+        const char * const type = PL_curcop->cop_io ? SvPV_nolen_const(PL_curcop->cop_io) : NULL;
 	if (type && *type)
 	    PerlIO_apply_layers(aTHX_ fp,mode,type);
 
@@ -487,11 +484,11 @@ PP(pp_die)
 	    if (!multiarg)
 		SvSetSV(error,tmpsv);
 	    else if (sv_isobject(error)) {
-		HV *stash = SvSTASH(SvRV(error));
-		GV *gv = gv_fetchmethod(stash, "PROPAGATE");
+		HV * const stash = SvSTASH(SvRV(error));
+		GV * const gv = gv_fetchmethod(stash, "PROPAGATE");
 		if (gv) {
-		    SV *file = sv_2mortal(newSVpv(CopFILE(PL_curcop),0));
-		    SV *line = sv_2mortal(newSVuv(CopLINE(PL_curcop)));
+		    SV * const file = sv_2mortal(newSVpv(CopFILE(PL_curcop),0));
+		    SV * const line = sv_2mortal(newSVuv(CopLINE(PL_curcop)));
 		    EXTEND(SP, 3);
 		    PUSHMARK(SP);
 		    PUSHs(error);
@@ -879,7 +876,7 @@ PP(pp_untie)
 
     if ((mg = SvTIED_mg(sv, how))) {
 	SV * const obj = SvRV(SvTIED_obj(sv, mg));
-	CV *cv = NULL;
+	CV *cv;
         if (obj) {
 	    GV * const gv = gv_fetchmethod_autoload(SvSTASH(obj), "UNTIE", FALSE);
 	    if (gv && isGV(gv) && (cv = GvCV(gv))) {
@@ -1156,12 +1153,10 @@ Perl_setdefout(pTHX_ GV *gv)
 PP(pp_select)
 {
     dSP; dTARGET;
-    GV *egv;
     HV *hv;
-
     GV * const newdefout = (PL_op->op_private > 0) ? ((GV *) POPs) : (GV *) NULL;
+    GV * egv = GvEGV(PL_defoutgv);
 
-    egv = GvEGV(PL_defoutgv);
     if (!egv)
 	egv = PL_defoutgv;
     hv = GvSTASH(egv);
@@ -1772,7 +1767,6 @@ PP(pp_sysread)
 PP(pp_send)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
-    GV *gv;
     IO *io;
     SV *bufsv;
     const char *buffer;
@@ -1784,7 +1778,7 @@ PP(pp_send)
     bool doing_utf8;
     U8 *tmpbuf = NULL;
     
-    gv = (GV*)*++MARK;
+    GV *const gv = (GV*)*++MARK;
     if (PL_op->op_type == OP_SYSWRITE
 	&& gv && (io = GvIO(gv))
 	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
@@ -2069,17 +2063,16 @@ PP(pp_tell)
 PP(pp_sysseek)
 {
     dSP;
-    GV *gv;
     IO *io;
     const int whence = POPi;
 #if LSEEKSIZE > IVSIZE
-    Off_t offset = (Off_t)SvNVx(POPs);
+    const Off_t offset = (Off_t)SvNVx(POPs);
 #else
-    Off_t offset = (Off_t)SvIVx(POPs);
+    const Off_t offset = (Off_t)SvIVx(POPs);
 #endif
     MAGIC *mg;
 
-    gv = PL_last_in_gv = (GV*)POPs;
+    GV * const gv = PL_last_in_gv = (GV*)POPs;
 
     if (gv && (io = GvIO(gv))
 	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
@@ -2107,7 +2100,7 @@ PP(pp_sysseek)
         if (sought < 0)
             PUSHs(&PL_sv_undef);
         else {
-            SV* sv = sought ?
+            SV* const sv = sought ?
 #if LSEEKSIZE > IVSIZE
                 newSVnv((NV)sought)
 #else
@@ -2128,12 +2121,11 @@ PP(pp_truncate)
      * general one would think that when using large files, off_t is
      * at least as wide as size_t, so using an off_t should be okay. */
     /* XXX Configure probe for the length type of *truncate() needed XXX */
-    Off_t len;
 
 #if Off_t_size > IVSIZE
-    len = (Off_t)POPn;
+    const Off_t len = (Off_t)POPn;
 #else
-    len = (Off_t)POPi;
+    const Off_t len = (Off_t)POPi;
 #endif
     /* Checking for length < 0 is problematic as the type might or
      * might not be signed: if it is not, clever compilers will moan. */
@@ -2170,7 +2162,7 @@ PP(pp_truncate)
 	    }
 	}
 	else {
-	    SV *sv = POPs;
+	    SV * const sv = POPs;
 	    const  char *name;
 
 	    if (SvTYPE(sv) == SVt_PVGV) {
@@ -2193,9 +2185,9 @@ PP(pp_truncate)
 	        result = 0;
 #else
 	    {
-	        int tmpfd;
+		const int tmpfd = PerlLIO_open(name, O_RDWR);
 
-		if ((tmpfd = PerlLIO_open(name, O_RDWR)) < 0)
+		if (tmpfd < 0)
 		    result = 0;
 		else {
 		    if (my_chsize(tmpfd, len) < 0)
@@ -2217,13 +2209,13 @@ PP(pp_truncate)
 PP(pp_ioctl)
 {
     dSP; dTARGET;
-    SV *argsv = POPs;
+    SV * const argsv = POPs;
     const unsigned int func = POPu;
     const int optype = PL_op->op_type;
+    GV * const gv = (GV*)POPs;
+    IO * const io = gv ? GvIOn(gv) : Null(IO*);
     char *s;
     IV retval;
-    GV *gv = (GV*)POPs;
-    IO *io = gv ? GvIOn(gv) : 0;
 
     if (!io || !argsv || !IoIFP(io)) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
@@ -2294,16 +2286,11 @@ PP(pp_flock)
 #ifdef FLOCK
     dSP; dTARGET;
     I32 value;
-    int argtype;
-    GV *gv;
     IO *io = NULL;
     PerlIO *fp;
+    const int argtype = POPi;
+    GV * const gv = (MAXARG == 0) ? PL_last_in_gv : (GV*)POPs;
 
-    argtype = POPi;
-    if (MAXARG == 0)
-	gv = PL_last_in_gv;
-    else
-	gv = (GV*)POPs;
     if (gv && (io = GvIO(gv)))
 	fp = IoIFP(io);
     else {
@@ -2333,15 +2320,12 @@ PP(pp_socket)
 {
 #ifdef HAS_SOCKET
     dSP;
-    GV *gv;
-    register IO *io;
-    int protocol = POPi;
-    int type = POPi;
-    int domain = POPi;
+    const int protocol = POPi;
+    const int type = POPi;
+    const int domain = POPi;
+    GV * const gv = (GV*)POPs;
+    register IO * const io = gv ? GvIOn(gv) : NULL;
     int fd;
-
-    gv = (GV*)POPs;
-    io = gv ? GvIOn(gv) : NULL;
 
     if (!gv || !io) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
@@ -2386,19 +2370,15 @@ PP(pp_sockpair)
 {
 #if defined (HAS_SOCKETPAIR) || (defined (HAS_SOCKET) && defined(SOCK_DGRAM) && defined(AF_INET) && defined(PF_INET))
     dSP;
-    GV *gv1;
-    GV *gv2;
-    register IO *io1;
-    register IO *io2;
-    int protocol = POPi;
-    int type = POPi;
-    int domain = POPi;
+    const int protocol = POPi;
+    const int type = POPi;
+    const int domain = POPi;
+    GV * const gv2 = (GV*)POPs;
+    GV * const gv1 = (GV*)POPs;
+    register IO * const io1 = gv1 ? GvIOn(gv1) : NULL;
+    register IO * const io2 = gv2 ? GvIOn(gv2) : NULL;
     int fd[2];
 
-    gv2 = (GV*)POPs;
-    gv1 = (GV*)POPs;
-    io1 = gv1 ? GvIOn(gv1) : NULL;
-    io2 = gv2 ? GvIOn(gv2) : NULL;
     if (!gv1 || !gv2 || !io1 || !io2) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED)) {
 	    if (!gv1 || !io1)
@@ -2451,11 +2431,11 @@ PP(pp_bind)
 {
 #ifdef HAS_SOCKET
     dSP;
-    SV *addrsv = POPs;
+    SV * const addrsv = POPs;
     /* OK, so on what platform does bind modify addr?  */
     const char *addr;
-    GV *gv = (GV*)POPs;
-    register IO *io = GvIOn(gv);
+    GV * const gv = (GV*)POPs;
+    register IO * const io = GvIOn(gv);
     STRLEN len;
     int bind_ok = 0;
 
@@ -2488,10 +2468,10 @@ PP(pp_connect)
 {
 #ifdef HAS_SOCKET
     dSP;
-    SV *addrsv = POPs;
+    SV * const addrsv = POPs;
+    GV * const gv = (GV*)POPs;
+    register IO * const io = GvIOn(gv);
     const char *addr;
-    GV *gv = (GV*)POPs;
-    register IO *io = GvIOn(gv);
     STRLEN len;
 
     if (!io || !IoIFP(io))
@@ -2518,9 +2498,9 @@ PP(pp_listen)
 {
 #ifdef HAS_SOCKET
     dSP;
-    int backlog = POPi;
-    GV *gv = (GV*)POPs;
-    register IO *io = gv ? GvIOn(gv) : NULL;
+    const int backlog = POPi;
+    GV * const gv = (GV*)POPs;
+    register IO * const io = gv ? GvIOn(gv) : NULL;
 
     if (!gv || !io || !IoIFP(io))
 	goto nuts;
@@ -2544,8 +2524,6 @@ PP(pp_accept)
 {
 #ifdef HAS_SOCKET
     dSP; dTARGET;
-    GV *ngv;
-    GV *ggv;
     register IO *nstio;
     register IO *gstio;
     char namebuf[MAXPATHLEN];
@@ -2554,10 +2532,9 @@ PP(pp_accept)
 #else
     Sock_size_t len = sizeof namebuf;
 #endif
+    GV * const ggv = (GV*)POPs;
+    GV * const ngv = (GV*)POPs;
     int fd;
-
-    ggv = (GV*)POPs;
-    ngv = (GV*)POPs;
 
     if (!ngv)
 	goto badexit;
@@ -2615,9 +2592,9 @@ PP(pp_shutdown)
 {
 #ifdef HAS_SOCKET
     dSP; dTARGET;
-    int how = POPi;
-    GV *gv = (GV*)POPs;
-    register IO *io = GvIOn(gv);
+    const int how = POPi;
+    GV * const gv = (GV*)POPs;
+    register IO * const io = GvIOn(gv);
 
     if (!io || !IoIFP(io))
 	goto nuts;
@@ -2639,24 +2616,15 @@ PP(pp_ssockopt)
 {
 #ifdef HAS_SOCKET
     dSP;
-    int optype = PL_op->op_type;
-    SV *sv;
+    const int optype = PL_op->op_type;
+    SV * const sv = (optype == OP_GSOCKOPT) ? sv_2mortal(NEWSV(22, 257)) : POPs;
+    const unsigned int optname = (unsigned int) POPi;
+    const unsigned int lvl = (unsigned int) POPi;
+    GV * const gv = (GV*)POPs;
+    register IO * const io = GvIOn(gv);
     int fd;
-    unsigned int optname;
-    unsigned int lvl;
-    GV *gv;
-    register IO *io;
     Sock_size_t len;
 
-    if (optype == OP_GSOCKOPT)
-	sv = sv_2mortal(NEWSV(22, 257));
-    else
-	sv = POPs;
-    optname = (unsigned int) POPi;
-    lvl = (unsigned int) POPi;
-
-    gv = (GV*)POPs;
-    io = GvIOn(gv);
     if (!io || !IoIFP(io))
 	goto nuts;
 
@@ -2725,12 +2693,12 @@ PP(pp_getpeername)
 {
 #ifdef HAS_SOCKET
     dSP;
-    int optype = PL_op->op_type;
+    const int optype = PL_op->op_type;
+    GV * const gv = (GV*)POPs;
+    register IO * const io = GvIOn(gv);
+    Sock_size_t len;
     SV *sv;
     int fd;
-    GV *gv = (GV*)POPs;
-    register IO *io = GvIOn(gv);
-    Sock_size_t len;
 
     if (!io || !IoIFP(io))
 	goto nuts;
@@ -2821,7 +2789,7 @@ PP(pp_stat)
 	}
     }
     else {
-	SV* sv = POPs;
+	SV* const sv = POPs;
 	if (SvTYPE(sv) == SVt_PVGV) {
 	    gv = (GV*)sv;
 	    goto do_fstat;
@@ -3431,7 +3399,7 @@ PP(pp_chroot)
 {
 #ifdef HAS_CHROOT
     dSP; dTARGET;
-    char *tmps = POPpx;
+    char * const tmps = POPpx;
     TAINT_PROPER("chroot");
     PUSHi( chroot(tmps) >= 0 );
     RETURN;
@@ -3444,8 +3412,8 @@ PP(pp_rename)
 {
     dSP; dTARGET;
     int anum;
-    const char *tmps2 = POPpconstx;
-    const char *tmps = SvPV_nolen_const(TOPs);
+    const char * const tmps2 = POPpconstx;
+    const char * const tmps = SvPV_nolen_const(TOPs);
     TAINT_PROPER("rename");
 #ifdef HAS_RENAME
     anum = PerlLIO_rename(tmps, tmps2);
@@ -3482,8 +3450,8 @@ PP(pp_link)
 #  endif
 
     {
-	const char *tmps2 = POPpconstx;
-	const char *tmps = SvPV_nolen_const(TOPs);
+	const char * const tmps2 = POPpconstx;
+	const char * const tmps = SvPV_nolen_const(TOPs);
 	TAINT_PROPER(PL_op_desc[op_type]);
 	result =
 #  if defined(HAS_LINK)
@@ -3649,18 +3617,13 @@ S_dooneliner(pTHX_ const char *cmd, const char *filename)
 PP(pp_mkdir)
 {
     dSP; dTARGET;
-    int mode;
 #ifndef HAS_MKDIR
     int oldumask;
 #endif
     STRLEN len;
     const char *tmps;
     bool copy = FALSE;
-
-    if (MAXARG > 1)
-	mode = POPi;
-    else
-	mode = 0777;
+    const int mode = (MAXARG > 1) ? POPi : 0777;
 
     TRIMSLASHES(tmps,len,copy);
 
@@ -3703,9 +3666,9 @@ PP(pp_open_dir)
 {
 #if defined(Direntry_t) && defined(HAS_READDIR)
     dSP;
-    const char *dirname = POPpconstx;
-    GV *gv = (GV*)POPs;
-    register IO *io = GvIOn(gv);
+    const char * const dirname = POPpconstx;
+    GV * const gv = (GV*)POPs;
+    register IO * const io = GvIOn(gv);
 
     if (!io)
 	goto nope;
@@ -3737,9 +3700,9 @@ PP(pp_readdir)
 
     SV *sv;
     const I32 gimme = GIMME;
-    GV *gv = (GV *)POPs;
-    register Direntry_t *dp;
-    register IO *io = GvIOn(gv);
+    GV * const gv = (GV *)POPs;
+    register const Direntry_t *dp;
+    register IO * const io = GvIOn(gv);
 
     if (!io || !IoDIRP(io))
 	goto nope;
@@ -3787,8 +3750,8 @@ PP(pp_telldir)
 # if !defined(HAS_TELLDIR_PROTO) || defined(NEED_TELLDIR_PROTO)
     long telldir (DIR *);
 # endif
-    GV *gv = (GV*)POPs;
-    register IO *io = GvIOn(gv);
+    GV * const gv = (GV*)POPs;
+    register IO * const io = GvIOn(gv);
 
     if (!io || !IoDIRP(io))
 	goto nope;
@@ -3808,9 +3771,9 @@ PP(pp_seekdir)
 {
 #if defined(HAS_SEEKDIR) || defined(seekdir)
     dSP;
-    long along = POPl;
-    GV *gv = (GV*)POPs;
-    register IO *io = GvIOn(gv);
+    const long along = POPl;
+    GV * const gv = (GV*)POPs;
+    register IO * const io = GvIOn(gv);
 
     if (!io || !IoDIRP(io))
 	goto nope;
@@ -3831,8 +3794,8 @@ PP(pp_rewinddir)
 {
 #if defined(HAS_REWINDDIR) || defined(rewinddir)
     dSP;
-    GV *gv = (GV*)POPs;
-    register IO *io = GvIOn(gv);
+    GV * const gv = (GV*)POPs;
+    register IO * const io = GvIOn(gv);
 
     if (!io || !IoDIRP(io))
 	goto nope;
@@ -3852,8 +3815,8 @@ PP(pp_closedir)
 {
 #if defined(Direntry_t) && defined(HAS_READDIR)
     dSP;
-    GV *gv = (GV*)POPs;
-    register IO *io = GvIOn(gv);
+    GV * const gv = (GV*)POPs;
+    register IO * const io = GvIOn(gv);
 
     if (!io || !IoDIRP(io))
 	goto nope;
@@ -3885,7 +3848,6 @@ PP(pp_fork)
 #ifdef HAS_FORK
     dSP; dTARGET;
     Pid_t childpid;
-    GV *tmpgv;
 
     EXTEND(SP, 1);
     PERL_FLUSHALL_FOR_CHILD;
@@ -3893,7 +3855,8 @@ PP(pp_fork)
     if (childpid < 0)
 	RETSETUNDEF;
     if (!childpid) {
-	if ((tmpgv = gv_fetchpv("$", GV_ADD, SVt_PV))) {
+	GV * const tmpgv = gv_fetchpv("$", GV_ADD, SVt_PV);
+	if (tmpgv) {
             SvREADONLY_off(GvSV(tmpgv));
 	    sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());
             SvREADONLY_on(GvSV(tmpgv));
