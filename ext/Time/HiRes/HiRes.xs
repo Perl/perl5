@@ -362,6 +362,7 @@ gettimeofday (struct timeval *tp, void *tpz)
 
  /* Do not use H A S _ N A N O S L E E P
   * so that Perl Configure doesn't scan for it.
+  * (We are part of the core perl now.)
   * The TIME_HIRES_NANOSLEEP is set by Makefile.PL. */
 #if !defined(HAS_USLEEP) && defined(TIME_HIRES_NANOSLEEP)
 #define HAS_USLEEP
@@ -408,6 +409,33 @@ hrt_usleep(unsigned long usec)
 }
 #endif /* #if !defined(HAS_USLEEP) && defined(WIN32) */
 
+#if !defined(HAS_USLEEP) && defined(HAS_NANOSLEEP)
+#define HAS_USLEEP
+#define usleep hrt_usleep  /* could conflict with ncurses for static build */
+
+void
+hrt_usleep(unsigned long usec)
+{
+	struct timespec tsa;
+	tsa.tv_sec  = usec * 1000; /* Ignoring wraparound. */
+	tsa.tv_nsec = 0;
+	nanosleep(&tsa, NULL);
+}
+
+#endif /* #if !defined(HAS_USLEEP) && defined(HAS_POLL) */
+
+#if !defined(HAS_USLEEP) && defined(HAS_POLL)
+#define HAS_USLEEP
+#define usleep hrt_usleep  /* could conflict with ncurses for static build */
+
+void
+hrt_usleep(unsigned long usec)
+{
+    int msec = usec / 1000;
+    poll(0, 0, msec);
+}
+
+#endif /* #if !defined(HAS_USLEEP) && defined(HAS_POLL) */
 
 #if !defined(HAS_UALARM) && defined(HAS_SETITIMER)
 #define HAS_UALARM
