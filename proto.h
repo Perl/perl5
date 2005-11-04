@@ -4083,6 +4083,8 @@ PERL_CALLCONV int	Perl_my_sprintf(char *buffer, const char *pat, ...)
 
 #endif
 
+PERL_CALLCONV void	Perl_my_clearenv(pTHX);
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:

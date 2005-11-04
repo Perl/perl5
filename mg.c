@@ -1121,12 +1121,12 @@ Perl_magic_clearenv(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_set_all_env(pTHX_ SV *sv, MAGIC *mg)
 {
-#if defined(VMS) || defined(EPOC)
+#if defined(VMS)
     Perl_die(aTHX_ "Can't make list assignment to %%ENV on this system");
 #else
     if (PL_localizing) {
 	HE* entry;
-	magic_clear_all_env(sv,mg);
+	my_clearenv();
 	hv_iterinit((HV*)sv);
 	while ((entry = hv_iternext((HV*)sv))) {
 	    I32 keylen;
@@ -1142,39 +1142,13 @@ int
 Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
-#ifndef PERL_MICRO
-#if defined(VMS) || defined(EPOC)
-    Perl_die(aTHX_ "Can't make list assignment to %%ENV on this system");
-#else
-#  if defined(PERL_IMPLICIT_SYS) || defined(WIN32)
-    PerlEnv_clearenv();
-#  else
-#    ifdef USE_ENVIRON_ARRAY
-#      if defined(USE_ITHREADS)
-    /* only the parent thread can clobber the process environment */
-    if (PL_curinterp == aTHX)
-#      endif
-    {
-#      ifndef PERL_USE_SAFE_PUTENV
-    if (!PL_use_safe_putenv) {
-    I32 i;
-
-    if (environ == PL_origenviron)
-	environ = (char**)safesysmalloc(sizeof(char*));
-    else
-	for (i = 0; environ[i]; i++)
-	    safesysfree(environ[i]);
-    }
-#      endif /* PERL_USE_SAFE_PUTENV */
-
-    environ[0] = Nullch;
-    }
-#    endif /* USE_ENVIRON_ARRAY */
-#   endif /* PERL_IMPLICIT_SYS || WIN32 */
-#endif /* VMS || EPOC */
-#endif /* !PERL_MICRO */
     PERL_UNUSED_ARG(sv);
     PERL_UNUSED_ARG(mg);
+#if defined(VMS)
+    Perl_die(aTHX_ "Can't make list assignment to %%ENV on this system");
+#else
+    my_clearenv();
+#endif
     return 0;
 }
 
