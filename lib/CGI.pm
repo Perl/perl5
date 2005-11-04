@@ -19,7 +19,7 @@ use Carp 'croak';
 #   http://stein.cshl.org/WWW/software/CGI/
 
 $CGI::revision = '$Id: CGI.pm,v 1.240 2007/11/30 18:58:27 lstein Exp $';
-$CGI::VERSION='3.31';
+$CGI::VERSION='3.31_01';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -3379,7 +3379,11 @@ sub read_multipart {
         $param .= $TAINTED;
 
 	# Bug:  Netscape doesn't escape quotation marks in file names!!!
-	my($filename) = $header{'Content-Disposition'}=~/ filename="([^"]*)"/;
+	# See RFC 1867, 2183, 2045
+	# NB: File content will be loaded into memory should
+	# content-disposition parsing fail.
+	my ($filename) = $header{'Content-Disposition'}=~/ filename=(("[^"]*")|([a-z\d!\#'\*\+,\.^_\`\{\}\|\~]*))/i;
+	$filename =~ s/^"([^"]*)"$/$1/;
 	# Test for Opera's multiple upload feature
 	my($multipart) = ( defined( $header{'Content-Type'} ) &&
 		$header{'Content-Type'} =~ /multipart\/mixed/ ) ?
