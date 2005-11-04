@@ -2177,7 +2177,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 	prog->subbeg = PL_bostr;
 	prog->sublen = PL_regeol - PL_bostr; /* strend may have been modified */
     }
-    /* prog->startp[0] = startpos - PL_bostr; */
+    prog->startp[0] = startpos - PL_bostr;
     PL_reginput = startpos;
     PL_regstartp = prog->startp;
     PL_regendp = prog->endp;
@@ -2221,7 +2221,6 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 #endif
     REGCP_SET(lastcp);
     if (regmatch(prog->program + 1)) {
-	prog->startp[0] = startpos - PL_bostr;
 	prog->endp[0] = PL_reginput - PL_bostr;
 	return 1;
     }
