@@ -995,6 +995,11 @@ PP(pp_semop)
     return pp_shmwrite();
 }
 
+PP(pp_dor)
+{
+    return pp_dor();
+}
+
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {

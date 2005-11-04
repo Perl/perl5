@@ -1117,7 +1117,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_unimplemented_op),	/* Perl_pp_threadsv */
 	MEMBER_TO_FPTR(Perl_pp_setstate),
 	MEMBER_TO_FPTR(Perl_pp_method_named),
-	MEMBER_TO_FPTR(Perl_pp_dor),
+	MEMBER_TO_FPTR(Perl_pp_defined),	/* Perl_pp_dor */
 	MEMBER_TO_FPTR(Perl_pp_dorassign),
 }
 #endif

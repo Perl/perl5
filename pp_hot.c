@@ -324,38 +324,57 @@ PP(pp_or)
     }
 }
 
-PP(pp_dor)
+PP(pp_defined)
 {
-    /* Most of this is lifted straight from pp_defined */
     dSP;
-    register SV* const sv = TOPs;
+    register SV* sv;
+    bool defined = FALSE;
+    const int op_type = PL_op->op_type;
 
-    if (!sv || !SvANY(sv)) {
-	--SP;
-	RETURNOP(cLOGOP->op_other);
+    if(op_type == OP_DOR) {
+        sv = TOPs;
+        if (!sv || !SvANY(sv)) {
+            --SP;
+            RETURNOP(cLOGOP->op_other);
+        }
+    } else if (op_type == OP_DEFINED) {
+        sv = POPs;
+        if (!sv || !SvANY(sv))
+            RETPUSHNO;
     }
-    
+
     switch (SvTYPE(sv)) {
     case SVt_PVAV:
 	if (AvMAX(sv) >= 0 || SvGMAGICAL(sv) || (SvRMAGICAL(sv) && mg_find(sv, PERL_MAGIC_tied)))
-	    RETURN;
+	    defined = TRUE;
 	break;
     case SVt_PVHV:
 	if (HvARRAY(sv) || SvGMAGICAL(sv) || (SvRMAGICAL(sv) && mg_find(sv, PERL_MAGIC_tied)))
-	    RETURN;
+	    defined = TRUE;
 	break;
     case SVt_PVCV:
 	if (CvROOT(sv) || CvXSUB(sv))
-	    RETURN;
+	    defined = TRUE;
 	break;
     default:
 	SvGETMAGIC(sv);
 	if (SvOK(sv))
-	    RETURN;
+	    defined = TRUE;
     }
     
-    --SP;
-    RETURNOP(cLOGOP->op_other);
+    if(defined) {
+         if(op_type == OP_DOR)
+             RETURN;
+         else if (op_type == OP_DEFINED) 
+             RETPUSHYES;
+    }
+
+    if(op_type == OP_DOR) {
+        --SP;
+        RETURNOP(cLOGOP->op_other);
+    } else if (op_type == OP_DEFINED) {
+        RETPUSHNO;
+    }
 }
 
 PP(pp_add)

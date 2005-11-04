@@ -722,36 +722,6 @@ PP(pp_chomp)
     RETURN;
 }
 
-PP(pp_defined)
-{
-    dSP;
-    register SV* const sv = POPs;
-
-    if (!sv || !SvANY(sv))
-	RETPUSHNO;
-    switch (SvTYPE(sv)) {
-    case SVt_PVAV:
-	if (AvMAX(sv) >= 0 || SvGMAGICAL(sv)
-		|| (SvRMAGICAL(sv) && mg_find(sv, PERL_MAGIC_tied)))
-	    RETPUSHYES;
-	break;
-    case SVt_PVHV:
-	if (HvARRAY(sv) || SvGMAGICAL(sv)
-		|| (SvRMAGICAL(sv) && mg_find(sv, PERL_MAGIC_tied)))
-	    RETPUSHYES;
-	break;
-    case SVt_PVCV:
-	if (CvROOT(sv) || CvXSUB(sv))
-	    RETPUSHYES;
-	break;
-    default:
-	SvGETMAGIC(sv);
-	if (SvOK(sv))
-	    RETPUSHYES;
-    }
-    RETPUSHNO;
-}
-
 PP(pp_undef)
 {
     dSP;

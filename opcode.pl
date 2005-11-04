@@ -73,6 +73,7 @@ my @raw_alias = (
  					fteexec)],
 		 Perl_pp_shmwrite => [qw(shmread msgsnd msgrcv semop)],
 		 Perl_pp_send => ['syswrite'],
+		 Perl_pp_defined => ['dor'],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {
