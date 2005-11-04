@@ -971,6 +971,16 @@ PP(pp_fteexec)
     return pp_ftrread();
 }
 
+PP(pp_msgsnd)
+{
+    return pp_shmwrite();
+}
+
+PP(pp_msgrcv)
+{
+    return pp_shmwrite();
+}
+
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {

@@ -4430,40 +4430,27 @@ PP(pp_sleep)
 }
 
 /* Shared memory. */
+/* Merged with some message passing. */
 
 PP(pp_shmwrite)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
     dSP; dMARK; dTARGET;
-    I32 value = (I32)(do_shmio(PL_op->op_type, MARK, SP) >= 0);
-    SP = MARK;
-    PUSHi(value);
-    RETURN;
-#else
-    return pp_semget();
-#endif
-}
+    const int op_type = PL_op->op_type;
+    I32 value;
 
-/* Message passing. */
+    switch (op_type) {
+    case OP_MSGSND:
+	value = (I32)(do_msgsnd(MARK, SP) >= 0);
+	break;
+    case OP_MSGRCV:
+	value = (I32)(do_msgrcv(MARK, SP) >= 0);
+	break;
+    default:
+	value = (I32)(do_shmio(op_type, MARK, SP) >= 0);
+	break;
+    }
 
-PP(pp_msgsnd)
-{
-#if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-    dSP; dMARK; dTARGET;
-    I32 value = (I32)(do_msgsnd(MARK, SP) >= 0);
-    SP = MARK;
-    PUSHi(value);
-    RETURN;
-#else
-    return pp_semget();
-#endif
-}
-
-PP(pp_msgrcv)
-{
-#if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-    dSP; dMARK; dTARGET;
-    I32 value = (I32)(do_msgrcv(MARK, SP) >= 0);
     SP = MARK;
     PUSHi(value);
     RETURN;
