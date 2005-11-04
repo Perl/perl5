@@ -3252,7 +3252,9 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	STRLEN len;
         const char *t;
 
+	assert (!tsv);
 	if (tsv) {
+	    /* There is no code path that can get you here.  */
 	    sv_2mortal(tsv);
 	    t = SvPVX_const(tsv);
 	    len = SvCUR(tsv);
