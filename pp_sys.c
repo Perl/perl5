@@ -197,10 +197,7 @@ void setservent(int);
 void endservent(void);
 #endif
 
-#undef PERL_EFF_ACCESS_R_OK	/* EFFective uid/gid ACCESS R_OK */
-#undef PERL_EFF_ACCESS_W_OK
-#undef PERL_EFF_ACCESS_X_OK
-#undef PERL_EFF_ACCESS
+#undef PERL_EFF_ACCESS	/* EFFective uid/gid ACCESS */
 
 /* AIX 5.2 and below use mktime for localtime, and defines the edge case
  * for time 0x7fffffff to be valid only in UTC. AIX 5.3 provides localtime64
@@ -303,11 +300,7 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 #   define PERL_EFF_ACCESS(p,f) (emulate_eaccess((p), (f)))
 #endif
 
-#if defined(PERL_EFF_ACCESS)
-#   define PERL_EFF_ACCESS_R_OK(p) (PERL_EFF_ACCESS((p), R_OK))
-#   define PERL_EFF_ACCESS_W_OK(p) (PERL_EFF_ACCESS((p), W_OK))
-#   define PERL_EFF_ACCESS_X_OK(p) (PERL_EFF_ACCESS((p), X_OK))
-#else
+#if !defined(PERL_EFF_ACCESS)
 /* With it or without it: anyway you get a warning: either that
    it is unused, or it is declared static and never defined.
  */
@@ -2963,9 +2956,9 @@ PP(pp_fteread)
     I32 result;
     dSP;
     STACKED_FTEST_CHECK;
-#ifdef PERL_EFF_ACCESS_R_OK
+#ifdef PERL_EFF_ACCESS
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	result = PERL_EFF_ACCESS_R_OK(POPpx);
+	result = PERL_EFF_ACCESS(POPpx, R_OK);
 	if (result == 0)
 	    RETPUSHYES;
 	if (result < 0)
@@ -2990,9 +2983,9 @@ PP(pp_ftewrite)
     I32 result;
     dSP;
     STACKED_FTEST_CHECK;
-#ifdef PERL_EFF_ACCESS_W_OK
+#ifdef PERL_EFF_ACCESS
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	result = PERL_EFF_ACCESS_W_OK(POPpx);
+	result = PERL_EFF_ACCESS(POPpx, W_OK);
 	if (result == 0)
 	    RETPUSHYES;
 	if (result < 0)
@@ -3017,9 +3010,9 @@ PP(pp_fteexec)
     I32 result;
     dSP;
     STACKED_FTEST_CHECK;
-#ifdef PERL_EFF_ACCESS_X_OK
+#ifdef PERL_EFF_ACCESS
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	result = PERL_EFF_ACCESS_X_OK(POPpx);
+	result = PERL_EFF_ACCESS(POPpx, X_OK);
 	if (result == 0)
 	    RETPUSHYES;
 	if (result < 0)
