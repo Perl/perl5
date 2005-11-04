@@ -1949,6 +1949,8 @@ PP(pp_return)
 				     * sort block, which is a CXt_NULL
 				     * not a CXt_SUB */
 	    dounwind(0);
+	    PL_stack_base[1] = *PL_stack_sp;
+	    PL_stack_sp = PL_stack_base + 1;
 	    return 0;
 	}
 	else
@@ -1957,8 +1959,16 @@ PP(pp_return)
     if (cxix < cxstack_ix)
 	dounwind(cxix);
 
-    if (CxMULTICALL(&cxstack[cxix]))
+    if (CxMULTICALL(&cxstack[cxix])) {
+	gimme = cxstack[cxix].blk_gimme;
+	if (gimme == G_VOID)
+	    PL_stack_sp = PL_stack_base;
+	else if (gimme == G_SCALAR) {
+	    PL_stack_base[1] = *PL_stack_sp;
+	    PL_stack_sp = PL_stack_base + 1;
+	}
 	return 0;
+    }
 
     POPBLOCK(cx,newpm);
     switch (CxTYPE(cx)) {
