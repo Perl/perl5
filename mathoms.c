@@ -990,6 +990,11 @@ PP(pp_syswrite)
     return pp_send();
 }
 
+PP(pp_semop)
+{
+    return pp_shmwrite();
+}
+
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {

@@ -60,7 +60,6 @@ my @raw_alias = (
 		 Perl_pp_gmtime => ['localtime'],
 		 Perl_pp_semget => [qw(shmget msgget)],
 		 Perl_pp_semctl => [qw(shmctl msgctl)],
-		 Perl_pp_shmwrite => ['shmread'],
 		 Perl_pp_ghostent => [qw(ghbyname ghbyaddr)],
 		 Perl_pp_gnetent => [qw(gnbyname gnbyaddr)],
 		 Perl_pp_gprotoent => [qw(gpbyname gpbynumber)],
@@ -72,7 +71,7 @@ my @raw_alias = (
 		 Perl_pp_link => ['symlink'],
 		 Perl_pp_ftrread => [qw(ftrwrite ftrexec fteread ftewrite
  					fteexec)],
-		 Perl_pp_shmwrite => [qw(msgsnd msgrcv)],
+		 Perl_pp_shmwrite => [qw(shmread msgsnd msgrcv semop)],
 		 Perl_pp_send => ['syswrite'],
 		);
 

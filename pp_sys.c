@@ -4451,6 +4451,9 @@ PP(pp_shmwrite)
     case OP_MSGRCV:
 	value = (I32)(do_msgrcv(MARK, SP) >= 0);
 	break;
+    case OP_SEMOP:
+	value = (I32)(do_semop(MARK, SP) >= 0);
+	break;
     default:
 	value = (I32)(do_shmio(op_type, MARK, SP) >= 0);
 	break;
@@ -4495,19 +4498,6 @@ PP(pp_semctl)
     else {
 	PUSHp(zero_but_true, ZBTLEN);
     }
-    RETURN;
-#else
-    return pp_semget();
-#endif
-}
-
-PP(pp_semop)
-{
-#if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-    dSP; dMARK; dTARGET;
-    I32 value = (I32)(do_semop(MARK, SP) >= 0);
-    SP = MARK;
-    PUSHi(value);
     RETURN;
 #else
     return pp_semget();

@@ -1074,7 +1074,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_shmwrite),	/* Perl_pp_msgrcv */
 	MEMBER_TO_FPTR(Perl_pp_semget),
 	MEMBER_TO_FPTR(Perl_pp_semctl),
-	MEMBER_TO_FPTR(Perl_pp_semop),
+	MEMBER_TO_FPTR(Perl_pp_shmwrite),	/* Perl_pp_semop */
 	MEMBER_TO_FPTR(Perl_pp_require),
 	MEMBER_TO_FPTR(Perl_pp_require),	/* Perl_pp_dofile */
 	MEMBER_TO_FPTR(Perl_pp_entereval),
