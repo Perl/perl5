@@ -60,11 +60,6 @@ PP(pp_wantarray)
     }
 }
 
-PP(pp_regcmaybe)
-{
-    return NORMAL;
-}
-
 PP(pp_regcreset)
 {
     /* XXXX Should store the old value to allow for tie/overload - and
@@ -1619,11 +1614,6 @@ PP(pp_reset)
     RETURN;
 }
 
-PP(pp_lineseq)
-{
-    return NORMAL;
-}
-
 /* like pp_nextstate, but used instead when the debugger is active */
 
 PP(pp_dbstate)
@@ -1682,11 +1672,6 @@ PP(pp_dbstate)
     }
     else
 	return NORMAL;
-}
-
-PP(pp_scope)
-{
-    return NORMAL;
 }
 
 PP(pp_enteriter)
@@ -2144,12 +2129,6 @@ S_dofindlabel(pTHX_ OP *o, const char *label, OP **opstack, OP **oplimit)
     }
     *ops = 0;
     return 0;
-}
-
-PP(pp_dump)
-{
-    return pp_goto();
-    /*NOTREACHED*/
 }
 
 PP(pp_goto)
@@ -3427,11 +3406,6 @@ PP(pp_require)
     PL_encoding = encoding;
 
     return op;
-}
-
-PP(pp_dofile)
-{
-    return pp_require();
 }
 
 PP(pp_entereval)

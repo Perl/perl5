@@ -33,6 +33,49 @@ while (<DATA>) {
     $args{$key} = $args;
 }
 
+# Set up aliases
+
+my %alias;
+
+# Format is "this function" => "does these op names"
+my @raw_alias = (
+		 Perl_do_kv => [qw( keys values )],
+		 Perl_unimplemented_op => [qw(padany threadsv mapstart)],
+		 # All the ops with a body of { return NORMAL; }
+		 Perl_pp_null => [qw(scalar regcmaybe lineseq scope)],
+
+		 Perl_pp_goto => ['dump'],
+		 Perl_pp_require => ['dofile'],
+		 Perl_pp_untie => ['dbmclose'],
+		 Perl_pp_sysread => [qw(read recv)],
+		 Perl_pp_sysseek => ['seek'],
+		 Perl_pp_ioctl => ['fcntl'],
+		 Perl_pp_ssockopt => ['gsockopt'],
+		 Perl_pp_getpeername => ['getsockname'],
+		 Perl_pp_stat => ['lstat'],
+		 Perl_pp_ftrowned => [qw(fteowned ftzero ftsock ftchr ftblk
+					 ftfile ftdir ftpipe ftsuid ftsgid
+ 					 ftsvtx)],
+		 Perl_pp_fttext => ['ftbinary'],
+		 Perl_pp_gmtime => ['localtime'],
+		 Perl_pp_semget => [qw(shmget msgget)],
+		 Perl_pp_semctl => [qw(shmctl msgctl)],
+		 Perl_pp_shmwrite => ['shmread'],
+		 Perl_pp_ghostent => [qw(ghbyname ghbyaddr)],
+		 Perl_pp_gnetent => [qw(gnbyname gnbyaddr)],
+		 Perl_pp_gprotoent => [qw(gpbyname gpbynumber)],
+		 Perl_pp_gservent => [qw(gsbyname gsbyport)],
+		 Perl_pp_gpwent => [qw(gpwnam gpwuid)],
+		 Perl_pp_ggrent => [qw(ggrnam ggrgid)],
+		 Perl_pp_ftis => [qw(ftsize ftmtime ftatime ftctime)],
+		 Perl_pp_chown => [qw(unlink chmod utime kill)],
+		 Perl_pp_link => ['symlink'],
+		);
+
+while (my ($func, $names) = splice @raw_alias, 0, 2) {
+    $alias{$_} = $func for @$names;
+}
+
 # Emit defines.
 
 $i = 0;
@@ -56,6 +99,8 @@ print <<"END";
 #define Perl_pp_i_predec Perl_pp_predec
 #define Perl_pp_i_postinc Perl_pp_postinc
 #define Perl_pp_i_postdec Perl_pp_postdec
+
+PERL_PPDEF(Perl_unimplemented_op)
 
 END
 
@@ -165,7 +210,13 @@ EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX) = {
 END
 
 for (@ops) {
-    print "\tMEMBER_TO_FPTR(Perl_pp_$_),\n" unless $_ eq "custom";
+    $_ eq "custom" and next;
+    if (my $name = $alias{$_}) {
+	print "\tMEMBER_TO_FPTR($name),\t/* Perl_pp_$_ */\n";
+    }
+    else {
+	print "\tMEMBER_TO_FPTR(Perl_pp_$_),\n";
+    }
 }
 
 print <<END;

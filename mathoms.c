@@ -680,16 +680,295 @@ PP(pp_mapstart)
     DIE(aTHX_ "panic: mapstart");	/* uses grepstart */
 }
 
-bool
-Perl_is_utf8_string_loc(pTHX_ U8 *s, STRLEN len, U8 **ep)
+/* These ops all have the same body as pp_null.  */
+PP(pp_scalar)
 {
-    return is_utf8_string_loclen(s, len, (const U8 **)ep, 0);
+    return NORMAL;
+}
+
+PP(pp_regcmaybe)
+{
+    return NORMAL;
+}
+
+PP(pp_lineseq)
+{
+    return NORMAL;
+}
+
+PP(pp_scope)
+{
+    return NORMAL;
+}
+
+/* Ops that are calls to do_kv.  */
+PP(pp_values)
+{
+    return do_kv();
+}
+
+PP(pp_keys)
+{
+    return do_kv();
+}
+
+/* Ops that are simply calls to other ops.  */
+PP(pp_dump)
+{
+    return pp_goto();
+    /*NOTREACHED*/
+}
+
+PP(pp_dofile)
+{
+    return pp_require();
+}
+
+PP(pp_dbmclose)
+{
+    return pp_untie();
+}
+
+PP(pp_read)
+{
+    return pp_sysread();
+}
+
+PP(pp_recv)
+{
+    return pp_sysread();
+}
+
+PP(pp_seek)
+{
+    return pp_sysseek();
+}
+
+PP(pp_fcntl)
+{
+    return pp_ioctl();
+}
+
+PP(pp_gsockopt)
+{
+    return pp_ssockopt();
+}
+
+PP(pp_getsockname)
+{
+    return pp_getpeername();
+}
+
+PP(pp_lstat)
+{
+    return pp_stat();
+}
+
+PP(pp_fteowned)
+{
+    return pp_ftrowned();
+}
+
+PP(pp_ftbinary)
+{
+    return pp_fttext();
+}
+
+PP(pp_localtime)
+{
+    return pp_gmtime();
+}
+
+PP(pp_shmget)
+{
+    return pp_semget();
+}
+
+PP(pp_shmctl)
+{
+    return pp_semctl();
+}
+
+PP(pp_shmread)
+{
+    return pp_shmwrite();
+}
+
+PP(pp_msgget)
+{
+    return pp_semget();
+}
+
+PP(pp_msgctl)
+{
+    return pp_semctl();
+}
+
+PP(pp_ghbyname)
+{
+    return pp_ghostent();
+}
+
+PP(pp_ghbyaddr)
+{
+    return pp_ghostent();
+}
+
+PP(pp_gnbyname)
+{
+    return pp_gnetent();
+}
+
+PP(pp_gnbyaddr)
+{
+    return pp_gnetent();
+}
+
+PP(pp_gpbyname)
+{
+    return pp_gprotoent();
+}
+
+PP(pp_gpbynumber)
+{
+    return pp_gprotoent();
+}
+
+PP(pp_gsbyname)
+{
+    return pp_gservent();
+}
+
+PP(pp_gsbyport)
+{
+    return pp_gservent();
+}
+
+PP(pp_gpwnam)
+{
+    return pp_gpwent();
+}
+
+PP(pp_gpwuid)
+{
+    return pp_gpwent();
+}
+
+PP(pp_ggrnam)
+{
+    return pp_ggrent();
+}
+
+PP(pp_ggrgid)
+{
+    return pp_ggrent();
+}
+
+PP(pp_ftsize)
+{
+    return pp_ftis();
+}
+
+PP(pp_ftmtime)
+{
+    return pp_ftis();
+}
+
+PP(pp_ftatime)
+{
+    return pp_ftis();
+}
+
+PP(pp_ftctime)
+{
+    return pp_ftis();
+}
+
+PP(pp_ftzero)
+{
+    return pp_ftrowned();
+}
+
+PP(pp_ftsock)
+{
+    return pp_ftrowned();
+}
+
+PP(pp_ftchr)
+{
+    return pp_ftrowned();
+}
+
+PP(pp_ftblk)
+{
+    return pp_ftrowned();
+}
+
+PP(pp_ftfile)
+{
+    return pp_ftrowned();
+}
+
+PP(pp_ftdir)
+{
+    return pp_ftrowned();
+}
+
+PP(pp_ftpipe)
+{
+    return pp_ftrowned();
+}
+
+PP(pp_ftsuid)
+{
+    return pp_ftrowned();
+}
+
+PP(pp_ftsgid)
+{
+    return pp_ftrowned();
+}
+
+PP(pp_ftsvtx)
+{
+    return pp_ftrowned();
+}
+
+PP(pp_unlink)
+{
+    return pp_chown();
+}
+
+PP(pp_chmod)
+{
+    return pp_chown();
+}
+
+PP(pp_utime)
+{
+    return pp_chown();
+}
+
+PP(pp_kill)
+{
+    return pp_chown();
+}
+
+PP(pp_symlink)
+{
+    return pp_link();
 }
 
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {
     return Perl_uvuni_to_utf8_flags(aTHX_ d, uv, 0);
+}
+
+bool
+Perl_is_utf8_string_loc(pTHX_ U8 *s, STRLEN len, U8 **ep)
+{
+    return is_utf8_string_loclen(s, len, (const U8 **)ep, 0);
 }
 
 /*

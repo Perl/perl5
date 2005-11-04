@@ -998,11 +998,6 @@ PP(pp_dbmopen)
     RETURN;
 }
 
-PP(pp_dbmclose)
-{
-    return pp_untie();
-}
-
 PP(pp_sselect)
 {
 #ifdef HAS_SELECT
@@ -1256,11 +1251,6 @@ PP(pp_getc)
     }
     PUSHTARG;
     RETURN;
-}
-
-PP(pp_read)
-{
-    return pp_sysread();
 }
 
 STATIC OP *
@@ -1953,11 +1943,6 @@ PP(pp_send)
     RETPUSHUNDEF;
 }
 
-PP(pp_recv)
-{
-    return pp_sysread();
-}
-
 PP(pp_eof)
 {
     dSP;
@@ -2036,11 +2021,6 @@ PP(pp_tell)
     PUSHi( do_tell(gv) );
 #endif
     RETURN;
-}
-
-PP(pp_seek)
-{
-    return pp_sysseek();
 }
 
 PP(pp_sysseek)
@@ -2189,11 +2169,6 @@ PP(pp_truncate)
 	    SETERRNO(EBADF,RMS_IFI);
 	RETPUSHUNDEF;
     }
-}
-
-PP(pp_fcntl)
-{
-    return pp_ioctl();
 }
 
 PP(pp_ioctl)
@@ -2617,15 +2592,6 @@ nuts:
 #endif
 }
 
-PP(pp_gsockopt)
-{
-#ifdef HAS_SOCKET
-    return pp_ssockopt();
-#else
-    DIE(aTHX_ PL_no_sock_func, "getsockopt");
-#endif
-}
-
 PP(pp_ssockopt)
 {
 #ifdef HAS_SOCKET
@@ -2694,16 +2660,7 @@ nuts2:
     RETPUSHUNDEF;
 
 #else
-    DIE(aTHX_ PL_no_sock_func, "setsockopt");
-#endif
-}
-
-PP(pp_getsockname)
-{
-#ifdef HAS_SOCKET
-    return pp_getpeername();
-#else
-    DIE(aTHX_ PL_no_sock_func, "getsockname");
+    DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
 #endif
 }
 
@@ -2767,16 +2724,11 @@ nuts2:
     RETPUSHUNDEF;
 
 #else
-    DIE(aTHX_ PL_no_sock_func, "getpeername");
+    DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
 #endif
 }
 
 /* Stat calls. */
-
-PP(pp_lstat)
-{
-    return pp_stat();
-}
 
 PP(pp_stat)
 {
@@ -2789,6 +2741,7 @@ PP(pp_stat)
 	gv = cGVOP_gv;
 	if (PL_op->op_type == OP_LSTAT) {
 	    if (gv != PL_defgv) {
+	    do_fstat_warning_check:
 		if (ckWARN(WARN_IO))
 		    Perl_warner(aTHX_ packWARN(WARN_IO),
 			"lstat() on filehandle %s", GvENAME(gv));
@@ -2818,9 +2771,8 @@ PP(pp_stat)
 	}
 	else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
 	    gv = (GV*)SvRV(sv);
-	    if (PL_op->op_type == OP_LSTAT && ckWARN(WARN_IO))
-		Perl_warner(aTHX_ packWARN(WARN_IO),
-			"lstat() on filehandle %s", GvENAME(gv));
+	    if (PL_op->op_type == OP_LSTAT)
+		goto do_fstat_warning_check;
 	    goto do_fstat;
 	}
 	sv_setpv(PL_statname, SvPV_nolen_const(sv));
@@ -3057,147 +3009,116 @@ PP(pp_fteexec)
 PP(pp_ftis)
 {
     I32 result = my_stat();
+    const int op_type = PL_op->op_type;
     dSP;
     if (result < 0)
 	RETPUSHUNDEF;
-    RETPUSHYES;
-}
-
-PP(pp_fteowned)
-{
-    return pp_ftrowned();
+    if (op_type == OP_FTIS)
+	RETPUSHYES;
+    {
+	/* You can't dTARGET inside OP_FTIS, because you'll get
+	   "panic: pad_sv po" - the op is not flagged to have a target.  */
+	dTARGET;
+	switch (op_type) {
+	case OP_FTSIZE:
+#if Off_t_size > IVSIZE
+	    PUSHn(PL_statcache.st_size);
+#else
+	    PUSHi(PL_statcache.st_size);
+#endif
+	    break;
+	case OP_FTMTIME:
+	    PUSHn( (((NV)PL_basetime - PL_statcache.st_mtime)) / 86400.0 );
+	    break;
+	case OP_FTATIME:
+	    PUSHn( (((NV)PL_basetime - PL_statcache.st_atime)) / 86400.0 );
+	    break;
+	case OP_FTCTIME:
+	    PUSHn( (((NV)PL_basetime - PL_statcache.st_ctime)) / 86400.0 );
+	    break;
+	}
+    }
+    RETURN;
 }
 
 PP(pp_ftrowned)
 {
     I32 result = my_stat();
     dSP;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (PL_statcache.st_uid == (PL_op->op_type == OP_FTEOWNED ?
-				PL_euid : PL_uid) )
-	RETPUSHYES;
-    RETPUSHNO;
-}
 
-PP(pp_ftzero)
-{
-    I32 result = my_stat();
-    dSP;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (PL_statcache.st_size == 0)
-	RETPUSHYES;
-    RETPUSHNO;
-}
-
-PP(pp_ftsize)
-{
-    I32 result = my_stat();
-    dSP; dTARGET;
-    if (result < 0)
-	RETPUSHUNDEF;
-#if Off_t_size > IVSIZE
-    PUSHn(PL_statcache.st_size);
-#else
-    PUSHi(PL_statcache.st_size);
+    /* I believe that all these three are likely to be defined on most every
+       system these days.  */
+#ifndef S_ISUID
+    if(PL_op->op_type == OP_FTSUID)
+	RETPUSHNO;
 #endif
-    RETURN;
-}
+#ifndef S_ISGID
+    if(PL_op->op_type == OP_FTSGID)
+	RETPUSHNO;
+#endif
+#ifndef S_ISVTX
+    if(PL_op->op_type == OP_FTSVTX)
+	RETPUSHNO;
+#endif
 
-PP(pp_ftmtime)
-{
-    I32 result = my_stat();
-    dSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
-    PUSHn( (((NV)PL_basetime - PL_statcache.st_mtime)) / 86400.0 );
-    RETURN;
-}
-
-PP(pp_ftatime)
-{
-    I32 result = my_stat();
-    dSP; dTARGET;
-    if (result < 0)
-	RETPUSHUNDEF;
-    PUSHn( (((NV)PL_basetime - PL_statcache.st_atime)) / 86400.0 );
-    RETURN;
-}
-
-PP(pp_ftctime)
-{
-    I32 result = my_stat();
-    dSP; dTARGET;
-    if (result < 0)
-	RETPUSHUNDEF;
-    PUSHn( (((NV)PL_basetime - PL_statcache.st_ctime)) / 86400.0 );
-    RETURN;
-}
-
-PP(pp_ftsock)
-{
-    I32 result = my_stat();
-    dSP;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (S_ISSOCK(PL_statcache.st_mode))
-	RETPUSHYES;
-    RETPUSHNO;
-}
-
-PP(pp_ftchr)
-{
-    I32 result = my_stat();
-    dSP;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (S_ISCHR(PL_statcache.st_mode))
-	RETPUSHYES;
-    RETPUSHNO;
-}
-
-PP(pp_ftblk)
-{
-    I32 result = my_stat();
-    dSP;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (S_ISBLK(PL_statcache.st_mode))
-	RETPUSHYES;
-    RETPUSHNO;
-}
-
-PP(pp_ftfile)
-{
-    I32 result = my_stat();
-    dSP;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (S_ISREG(PL_statcache.st_mode))
-	RETPUSHYES;
-    RETPUSHNO;
-}
-
-PP(pp_ftdir)
-{
-    I32 result = my_stat();
-    dSP;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (S_ISDIR(PL_statcache.st_mode))
-	RETPUSHYES;
-    RETPUSHNO;
-}
-
-PP(pp_ftpipe)
-{
-    I32 result = my_stat();
-    dSP;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (S_ISFIFO(PL_statcache.st_mode))
-	RETPUSHYES;
+    switch (PL_op->op_type) {
+    case OP_FTROWNED:
+	if (PL_statcache.st_uid == PL_uid)
+	    RETPUSHYES;
+	break;
+    case OP_FTEOWNED:
+	if (PL_statcache.st_uid == PL_euid)
+	    RETPUSHYES;
+	break;
+    case OP_FTZERO:
+	if (PL_statcache.st_size == 0)
+	    RETPUSHYES;
+	break;
+    case OP_FTSOCK:
+	if (S_ISSOCK(PL_statcache.st_mode))
+	    RETPUSHYES;
+	break;
+    case OP_FTCHR:
+	if (S_ISCHR(PL_statcache.st_mode))
+	    RETPUSHYES;
+	break;
+    case OP_FTBLK:
+	if (S_ISBLK(PL_statcache.st_mode))
+	    RETPUSHYES;
+	break;
+    case OP_FTFILE:
+	if (S_ISREG(PL_statcache.st_mode))
+	    RETPUSHYES;
+	break;
+    case OP_FTDIR:
+	if (S_ISDIR(PL_statcache.st_mode))
+	    RETPUSHYES;
+	break;
+    case OP_FTPIPE:
+	if (S_ISFIFO(PL_statcache.st_mode))
+	    RETPUSHYES;
+	break;
+#ifdef S_ISUID
+    case OP_FTSUID:
+	if (PL_statcache.st_mode & S_ISUID)
+	    RETPUSHYES;
+	break;
+#endif
+#ifdef S_ISGID
+    case OP_FTSGID:
+	if (PL_statcache.st_mode & S_ISGID)
+	    RETPUSHYES;
+	break;
+#endif
+#ifdef S_ISVTX
+    case OP_FTSVTX:
+	if (PL_statcache.st_mode & S_ISVTX)
+	    RETPUSHYES;
+	break;
+#endif
+    }
     RETPUSHNO;
 }
 
@@ -3209,48 +3130,6 @@ PP(pp_ftlink)
 	RETPUSHUNDEF;
     if (S_ISLNK(PL_statcache.st_mode))
 	RETPUSHYES;
-    RETPUSHNO;
-}
-
-PP(pp_ftsuid)
-{
-    dSP;
-#ifdef S_ISUID
-    I32 result = my_stat();
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (PL_statcache.st_mode & S_ISUID)
-	RETPUSHYES;
-#endif
-    RETPUSHNO;
-}
-
-PP(pp_ftsgid)
-{
-    dSP;
-#ifdef S_ISGID
-    I32 result = my_stat();
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (PL_statcache.st_mode & S_ISGID)
-	RETPUSHYES;
-#endif
-    RETPUSHNO;
-}
-
-PP(pp_ftsvtx)
-{
-    dSP;
-#ifdef S_ISVTX
-    I32 result = my_stat();
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (PL_statcache.st_mode & S_ISVTX)
-	RETPUSHYES;
-#endif
     RETPUSHNO;
 }
 
@@ -3443,11 +3322,6 @@ PP(pp_fttext)
 	RETPUSHYES;
 }
 
-PP(pp_ftbinary)
-{
-    return pp_fttext();
-}
-
 /* File calls. */
 
 PP(pp_chdir)
@@ -3527,16 +3401,12 @@ PP(pp_chdir)
 
 PP(pp_chown)
 {
-#ifdef HAS_CHOWN
     dSP; dMARK; dTARGET;
-    I32 value = (I32)apply(PL_op->op_type, MARK, SP);
+    const I32 value = (I32)apply(PL_op->op_type, MARK, SP);
 
     SP = MARK;
     XPUSHi(value);
     RETURN;
-#else
-    DIE(aTHX_ PL_no_func, "chown");
-#endif
 }
 
 PP(pp_chroot)
@@ -3550,36 +3420,6 @@ PP(pp_chroot)
 #else
     DIE(aTHX_ PL_no_func, "chroot");
 #endif
-}
-
-PP(pp_unlink)
-{
-    dSP; dMARK; dTARGET;
-    I32 value;
-    value = (I32)apply(PL_op->op_type, MARK, SP);
-    SP = MARK;
-    PUSHi(value);
-    RETURN;
-}
-
-PP(pp_chmod)
-{
-    dSP; dMARK; dTARGET;
-    I32 value;
-    value = (I32)apply(PL_op->op_type, MARK, SP);
-    SP = MARK;
-    PUSHi(value);
-    RETURN;
-}
-
-PP(pp_utime)
-{
-    dSP; dMARK; dTARGET;
-    I32 value;
-    value = (I32)apply(PL_op->op_type, MARK, SP);
-    SP = MARK;
-    PUSHi(value);
-    RETURN;
 }
 
 PP(pp_rename)
@@ -3607,33 +3447,54 @@ PP(pp_rename)
     RETURN;
 }
 
+#if defined(HAS_LINK) || defined(HAS_SYMLINK)
 PP(pp_link)
 {
-#ifdef HAS_LINK
     dSP; dTARGET;
-    const char *tmps2 = POPpconstx;
-    const char *tmps = SvPV_nolen_const(TOPs);
-    TAINT_PROPER("link");
-    SETi( PerlLIO_link(tmps, tmps2) >= 0 );
-    RETURN;
-#else
-    DIE(aTHX_ PL_no_func, "link");
-#endif
-}
+    const int op_type = PL_op->op_type;
+    int result;
 
-PP(pp_symlink)
-{
-#ifdef HAS_SYMLINK
-    dSP; dTARGET;
-    const char *tmps2 = POPpconstx;
-    const char *tmps = SvPV_nolen_const(TOPs);
-    TAINT_PROPER("symlink");
-    SETi( symlink(tmps, tmps2) >= 0 );
+#  ifndef HAS_LINK
+    if (op_type == OP_LINK)
+	DIE(aTHX_ PL_no_func, "link");
+#  endif
+#  ifndef HAS_SYMLINK
+    if (op_type == OP_SYMLINK)
+	DIE(aTHX_ PL_no_func, "symlink");
+#  endif
+
+    {
+	const char *tmps2 = POPpconstx;
+	const char *tmps = SvPV_nolen_const(TOPs);
+	TAINT_PROPER(PL_op_desc[op_type]);
+	result =
+#  if defined(HAS_LINK)
+#    if defined(HAS_SYMLINK)
+	    /* Both present - need to choose which.  */
+	    (op_type == OP_LINK) ?
+	    PerlLIO_link(tmps, tmps2) : symlink(tmps, tmps2);
+#    else
+    /* Only have link, so calls to pp_symlink will have DIE()d above.  */
+	PerlLIO_link(tmps, tmps2);
+#    endif
+#  else
+#    if defined(HAS_SYMLINK)
+    /* Only have symlink, so calls to pp_link will have DIE()d above.  */
+	symlink(tmps, tmps2);
+#    endif
+#  endif
+    }
+
+    SETi( result >= 0 );
     RETURN;
-#else
-    DIE(aTHX_ PL_no_func, "symlink");
-#endif
 }
+#else
+PP(pp_link)
+{
+    /* Have neither.  */
+    DIE(aTHX_ PL_no_func, PL_op_desc[PL_op->op_type]);
+}
+#endif
 
 PP(pp_readlink)
 {
@@ -4284,20 +4145,6 @@ PP(pp_exec)
     RETURN;
 }
 
-PP(pp_kill)
-{
-#ifdef HAS_KILL
-    dSP; dMARK; dTARGET;
-    I32 value;
-    value = (I32)apply(PL_op->op_type, MARK, SP);
-    SP = MARK;
-    PUSHi(value);
-    RETURN;
-#else
-    DIE(aTHX_ PL_no_func, "kill");
-#endif
-}
-
 PP(pp_getppid)
 {
 #ifdef HAS_GETPPID
@@ -4451,11 +4298,6 @@ PP(pp_tms)
 #endif /* HAS_TIMES */
 }
 
-PP(pp_localtime)
-{
-    return pp_gmtime();
-}
-
 #ifdef LOCALTIME_EDGECASE_BROKEN
 static struct tm *S_my_localtime (pTHX_ Time_t *tp)
 {
@@ -4595,21 +4437,6 @@ PP(pp_sleep)
 
 /* Shared memory. */
 
-PP(pp_shmget)
-{
-    return pp_semget();
-}
-
-PP(pp_shmctl)
-{
-    return pp_semctl();
-}
-
-PP(pp_shmread)
-{
-    return pp_shmwrite();
-}
-
 PP(pp_shmwrite)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
@@ -4624,16 +4451,6 @@ PP(pp_shmwrite)
 }
 
 /* Message passing. */
-
-PP(pp_msgget)
-{
-    return pp_semget();
-}
-
-PP(pp_msgctl)
-{
-    return pp_semctl();
-}
 
 PP(pp_msgsnd)
 {
@@ -4712,24 +4529,6 @@ PP(pp_semop)
 }
 
 /* Get system info. */
-
-PP(pp_ghbyname)
-{
-#ifdef HAS_GETHOSTBYNAME
-    return pp_ghostent();
-#else
-    DIE(aTHX_ PL_no_sock_func, "gethostbyname");
-#endif
-}
-
-PP(pp_ghbyaddr)
-{
-#ifdef HAS_GETHOSTBYADDR
-    return pp_ghostent();
-#else
-    DIE(aTHX_ PL_no_sock_func, "gethostbyaddr");
-#endif
-}
 
 PP(pp_ghostent)
 {
@@ -4829,24 +4628,6 @@ PP(pp_ghostent)
 #endif
 }
 
-PP(pp_gnbyname)
-{
-#ifdef HAS_GETNETBYNAME
-    return pp_gnetent();
-#else
-    DIE(aTHX_ PL_no_sock_func, "getnetbyname");
-#endif
-}
-
-PP(pp_gnbyaddr)
-{
-#ifdef HAS_GETNETBYADDR
-    return pp_gnetent();
-#else
-    DIE(aTHX_ PL_no_sock_func, "getnetbyaddr");
-#endif
-}
-
 PP(pp_gnetent)
 {
 #if defined(HAS_GETNETBYNAME) || defined(HAS_GETNETBYADDR) || defined(HAS_GETNETENT)
@@ -4929,24 +4710,6 @@ PP(pp_gnetent)
 #endif
 }
 
-PP(pp_gpbyname)
-{
-#ifdef HAS_GETPROTOBYNAME
-    return pp_gprotoent();
-#else
-    DIE(aTHX_ PL_no_sock_func, "getprotobyname");
-#endif
-}
-
-PP(pp_gpbynumber)
-{
-#ifdef HAS_GETPROTOBYNUMBER
-    return pp_gprotoent();
-#else
-    DIE(aTHX_ PL_no_sock_func, "getprotobynumber");
-#endif
-}
-
 PP(pp_gprotoent)
 {
 #if defined(HAS_GETPROTOBYNAME) || defined(HAS_GETPROTOBYNUMBER) || defined(HAS_GETPROTOENT)
@@ -5012,24 +4775,6 @@ PP(pp_gprotoent)
     RETURN;
 #else
     DIE(aTHX_ PL_no_sock_func, "getprotoent");
-#endif
-}
-
-PP(pp_gsbyname)
-{
-#ifdef HAS_GETSERVBYNAME
-    return pp_gservent();
-#else
-    DIE(aTHX_ PL_no_sock_func, "getservbyname");
-#endif
-}
-
-PP(pp_gsbyport)
-{
-#ifdef HAS_GETSERVBYPORT
-    return pp_gservent();
-#else
-    DIE(aTHX_ PL_no_sock_func, "getservbyport");
 #endif
 }
 
@@ -5214,24 +4959,6 @@ PP(pp_eservent)
     RETPUSHYES;
 #else
     DIE(aTHX_ PL_no_sock_func, "endservent");
-#endif
-}
-
-PP(pp_gpwnam)
-{
-#ifdef HAS_PASSWD
-    return pp_gpwent();
-#else
-    DIE(aTHX_ PL_no_func, "getpwnam");
-#endif
-}
-
-PP(pp_gpwuid)
-{
-#ifdef HAS_PASSWD
-    return pp_gpwent();
-#else
-    DIE(aTHX_ PL_no_func, "getpwuid");
 #endif
 }
 
@@ -5467,7 +5194,7 @@ PP(pp_gpwent)
     }
     RETURN;
 #else
-    DIE(aTHX_ PL_no_func, "getpwent");
+    DIE(aTHX_ PL_no_func, PL_op_desc[PL_op->op_type]);
 #endif
 }
 
@@ -5490,24 +5217,6 @@ PP(pp_epwent)
     RETPUSHYES;
 #else
     DIE(aTHX_ PL_no_func, "endpwent");
-#endif
-}
-
-PP(pp_ggrnam)
-{
-#ifdef HAS_GROUP
-    return pp_ggrent();
-#else
-    DIE(aTHX_ PL_no_func, "getgrnam");
-#endif
-}
-
-PP(pp_ggrgid)
-{
-#ifdef HAS_GROUP
-    return pp_ggrent();
-#else
-    DIE(aTHX_ PL_no_func, "getgrgid");
 #endif
 }
 
@@ -5579,7 +5288,7 @@ PP(pp_ggrent)
 
     RETURN;
 #else
-    DIE(aTHX_ PL_no_func, "getgrent");
+    DIE(aTHX_ PL_no_func, PL_op_desc[PL_op->op_type]);
 #endif
 }
 

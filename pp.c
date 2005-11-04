@@ -53,11 +53,6 @@ PP(pp_stub)
     RETURN;
 }
 
-PP(pp_scalar)
-{
-    return NORMAL;
-}
-
 /* Pushy stuff. */
 
 PP(pp_padav)
@@ -3835,16 +3830,6 @@ PP(pp_each)
     RETURN;
 }
 
-PP(pp_values)
-{
-    return do_kv();
-}
-
-PP(pp_keys)
-{
-    return do_kv();
-}
-
 PP(pp_delete)
 {
     dSP;
@@ -4806,6 +4791,13 @@ PP(pp_lock)
     }
     SETs(retsv);
     RETURN;
+}
+
+
+PP(unimplemented_op)
+{
+    DIE(aTHX_ "panic: unimplemented op %s (#%d) called", OP_NAME(PL_op),
+	PL_op->op_type);
 }
 
 /*
