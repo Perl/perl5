@@ -3196,7 +3196,7 @@ $_ = "x"; s/x/func "in multiline subst"/em;
 # bug #19049
 $_="abcdef\n";
 @x = m/./g;
-ok("abcde" eq "$`", '# TODO #19049 - global match not setting $`');
+ok("abcde" eq "$`", '#19049 - global match not setting $`');
 
 ok("123\x{100}" =~ /^.*1.*23\x{100}$/, 'uft8 + multiple floating substr');
 
@@ -3390,7 +3390,7 @@ ok(("foba  ba$s" =~ qr/(foo|BaSS|bar)/i)
     $s = $1;
     $s = $2;
     ok($s eq 'cd',
-       "# TODO assigning to original string should not corrupt match vars");
+       "# assigning to original string should not corrupt match vars");
 }
 
 # last test 1187
