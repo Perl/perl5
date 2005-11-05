@@ -677,12 +677,12 @@ PP(pp_print)
 	}
     }
     SP = ORIGMARK;
-    PUSHs(&PL_sv_yes);
+    XPUSHs(&PL_sv_yes);
     RETURN;
 
   just_say_no:
     SP = ORIGMARK;
-    PUSHs(&PL_sv_undef);
+    XPUSHs(&PL_sv_undef);
     RETURN;
 }
 
