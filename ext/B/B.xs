@@ -1563,6 +1563,17 @@ SSize_t
 AvMAX(av)
 	B::AV	av
 
+#if PERL_VERSION < 9
+			   
+
+#define AvOFF(av) ((XPVAV*)SvANY(av))->xof_off
+
+IV
+AvOFF(av)
+	B::AV	av
+
+#endif
+
 void
 AvARRAY(av)
 	B::AV	av
@@ -1583,6 +1594,16 @@ AvARRAYelt(av, idx)
 	    XPUSHs(make_sv_object(aTHX_ sv_newmortal(), (AvARRAY(av)[idx])));
 	else
 	    XPUSHs(make_sv_object(aTHX_ sv_newmortal(), NULL));
+
+#if PERL_VERSION < 9
+				   
+MODULE = B	PACKAGE = B::AV
+
+U8
+AvFLAGS(av)
+	B::AV	av
+
+#endif
 
 MODULE = B	PACKAGE = B::FM		PREFIX = Fm
 
@@ -1681,6 +1702,14 @@ HvRITER(hv)
 char *
 HvNAME(hv)
 	B::HV	hv
+
+#if PERL_VERSION < 9
+
+B::PMOP
+HvPMROOT(hv)
+	B::HV	hv
+
+#endif
 
 void
 HvARRAY(hv)

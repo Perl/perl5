@@ -7,7 +7,7 @@
 #
 package B;
 
-our $VERSION = '1.09';
+our $VERSION = '1.10';
 
 use XSLoader ();
 require Exporter;
@@ -855,6 +855,16 @@ IoIFP($io) == PerlIO_stdin() ).
 Like C<ARRAY>, but takes an index as an argument to get only one element,
 rather than a list of all of them.
 
+=item OFF
+
+This method is deprecated if running under Perl 5.8, and is no longer present
+if running under Perl 5.9
+
+=item AvFLAGS
+
+This method returns the AV specific flags. In Perl 5.9 these are now stored
+in with the main SV flags, so this method is no longer present.
+
 =back
 
 =head2 B::CV Methods
@@ -906,6 +916,11 @@ For constant subroutines, returns the constant SV returned by the subroutine.
 =item NAME
 
 =item ARRAY
+
+=item PMROOT
+
+This method is not present if running under Perl 5.9, as the PMROOT
+information is no longer stored directly in the hash.
 
 =back
 
