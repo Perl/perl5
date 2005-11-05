@@ -67,9 +67,9 @@ use vars qw($VERSION @EXPORT $AUTOLOAD $DEBUG $META $HAS_USABLE $term
 @CPAN::ISA = qw(CPAN::Debug Exporter);
 
 @EXPORT = qw(
-             autobundle bundle expand force notest get cvs_import
+	     autobundle bundle expand force notest get cvs_import
 	     install make readme recompile shell test clean
-	     perldoc recent
+             perldoc recent
 	    );
 
 #-> sub CPAN::AUTOLOAD ;
@@ -1289,7 +1289,7 @@ END
 
 #-> sub CPAN::Config::load ;
 sub load {
-    my($self, %args) = [at]_;
+    my($self, %args) = @_;
 	$CPAN::Be_Silent++ if $args{be_silent};
 
     my(@miss);
@@ -1681,8 +1681,8 @@ sub reload {
     if ($command =~ /cpan/i) {
         for my $f (qw(CPAN.pm CPAN/FirstTime.pm)) {
             next unless $INC{$f};
-            CPAN->debug("reloading the whole '$f' from '$INC{$f}' while pwd='$p
-wd'")
+            my $pwd = CPAN::anycwd();
+            CPAN->debug("reloading the whole '$f' from '$INC{$f}' while pwd='$pwd'")
                 if $CPAN::DEBUG;
             my $fh = FileHandle->new($INC{$f});
             local($/);
@@ -1805,11 +1805,11 @@ sub _u_r_common {
 	    push @result, sprintf "%s %s\n", $module->id, $have;
 	} elsif ($what eq "r") {
 	    push @result, $module->id;
-            next MODULE if $seen{$file}++;
+	    next MODULE if $seen{$file}++;
 	} elsif ($what eq "u") {
 	    push @result, $module->id;
-            next MODULE if $seen{$file}++;
-            next MODULE if $file =~ /^Contact/;
+	    next MODULE if $seen{$file}++;
+	    next MODULE if $file =~ /^Contact/;
 	}
 	unless ($headerdone++){
 	    $CPAN::Frontend->myprint("\n");
@@ -2166,7 +2166,7 @@ sub rematein {
     shift;
     my($meth,@some) = @_;
     my @pragma;
-    if ($meth =~ /^(force|notest)$/) {
+    while($meth =~ /^(force|notest)$/) {
 	push @pragma, $meth;
 	$meth = shift @some;
     }
@@ -2279,7 +2279,7 @@ to find objects with matching identifiers.
 
 #-> sub CPAN::Shell::recent ;
 sub recent {
-  my($self) = [at]_;
+  my($self) = @_;
 
   CPAN::Distribution::_display_url( $self, $CPAN::Defaultrecent );
   return;
@@ -3802,14 +3802,12 @@ sub ls {
     my(@dl);
     @dl = $self->dir_listing([$csf[0],"CHECKSUMS"], 0, 1);
     unless (grep {$_->[2] eq $csf[1]} @dl) {
-        $CPAN::Frontend->myprint("Directory $csf[1]/ does not exist\n") unless
-$silent ;
+        $CPAN::Frontend->myprint("Directory $csf[1]/ does not exist\n") unless $silent ;
         return;
     }
     @dl = $self->dir_listing([@csf[0,1],"CHECKSUMS"], 0, 1);
     unless (grep {$_->[2] eq $csf[2]} @dl) {
-        $CPAN::Frontend->myprint("Directory $id/ does not exist\n") unless $sil
-ent;
+        $CPAN::Frontend->myprint("Directory $id/ does not exist\n") unless $silent;
         return;
     }
     @dl = $self->dir_listing([@csf,"CHECKSUMS"], 1, 1);
@@ -3828,7 +3826,7 @@ sub dir_listing {
     my $lc_want =
 	File::Spec->catfile($CPAN::Config->{keep_source_where},
 			    "authors", "id", @$chksumfile);
-    
+
     my $fh;
 
     # Purge and refetch old (pre-PGP) CHECKSUMS; they are a security
@@ -3839,6 +3837,7 @@ sub dir_listing {
 	my $line = <$fh>; close $fh;
 	unlink($lc_want) unless $line =~ /PGP/;
     }
+
     local($") = "/";
     # connect "force" argument with "index_expire".
     my $force = 0;
@@ -3999,13 +3998,13 @@ sub upload_date {
   my $self = shift;
   return $self->{UPLOAD_DATE} if exists $self->{UPLOAD_DATE};
   my(@local_wanted) = split(/\//,$self->id);
-  my $filename = pop [at]local_wanted;
-  push [at]local_wanted, "CHECKSUMS";
+  my $filename = pop @local_wanted;
+  push @local_wanted, "CHECKSUMS";
   my $author = CPAN::Shell->expand("Author",$self->cpan_userid);
   return unless $author;
-  my [at]dl = $author->dir_listing(\@local_wanted,0,$CPAN::Config->{show_upload_date});
-  return unless [at]dl;
-  my($dirent) = grep { $_->[2] eq $filename } [at]dl;
+  my @dl = $author->dir_listing(\@local_wanted,0,$CPAN::Config->{show_upload_date});
+  return unless @dl;
+  my($dirent) = grep { $_->[2] eq $filename } @dl;
   # warn sprintf "dirent[%s]id[%s]", $dirent, $self->id;
   return unless $dirent->[1];
   return $self->{UPLOAD_DATE} = $dirent->[1];
@@ -4651,13 +4650,13 @@ sub force {
 }
 
 sub notest {
-  my($self, $method) = [at]_;
+  my($self, $method) = @_;
   # warn "XDEBUG: set notest for $self $method";
   $self->{"notest"}++; # name should probably have been force_install
 }
 
 sub unnotest {
-  my($self) = [at]_;
+  my($self) = @_;
   # warn "XDEBUG: deleting notest";
   delete $self->{'notest'};
 }
@@ -5176,7 +5175,7 @@ sub dir {
 
 #-> sub CPAN::Distribution::perldoc ;
 sub perldoc {
-    my($self) = [at]_;
+    my($self) = @_;
 
     my($dist) = $self->id;
     my $package = $self->called_for;
@@ -5186,7 +5185,7 @@ sub perldoc {
 
 #-> sub CPAN::Distribution::_check_binary ;
 sub _check_binary {
-    my ($dist,$shell,$binary) = [at]_;
+    my ($dist,$shell,$binary) = @_;
     my ($pid,$readme,$out);
 
     $CPAN::Frontend->myprint(qq{ + _check_binary($binary)\n})
@@ -5207,7 +5206,7 @@ sub _check_binary {
 
 #-> sub CPAN::Distribution::_display_url ;
 sub _display_url {
-    my($self,$url) = [at]_;
+    my($self,$url) = @_;
     my($res,$saved_file,$pid,$readme,$out);
 
     $CPAN::Frontend->myprint(qq{ + _display_url($url)\n})
@@ -5293,7 +5292,7 @@ with browser $browser
 
 #-> sub CPAN::Distribution::_getsave_url ;
 sub _getsave_url {
-    my($dist, $shell, $url) = [at]_;
+    my($dist, $shell, $url) = @_;
 
     $CPAN::Frontend->myprint(qq{ + _getsave_url($url)\n})
       if $CPAN::DEBUG;
@@ -5949,7 +5948,7 @@ sub force {
 }
 
 sub notest {
-    my($self) = [at]_;
+    my($self) = @_;
     # warn "XDEBUG: set notest for Module";
     $self->{'notest'}++;
 }

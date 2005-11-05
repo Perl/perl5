@@ -1,9 +1,9 @@
 # test if our own version numbers meet expectations
 
-my [at]m = qw(CPAN CPAN::FirstTime CPAN::Nox);
+my @m = qw(CPAN CPAN::FirstTime CPAN::Nox);
 
 use Test::More;
-plan(tests => scalar [at]m);
+plan(tests => scalar @m);
 
 for my $m (@m) {
   eval "require $m";

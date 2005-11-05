@@ -32,7 +32,7 @@ package CPAN::Version;
 
 # CPAN::Version::vcmp courtesy Jost Krieger
 sub vcmp {
-  my($self,$l,$r) = [at]_;
+  my($self,$l,$r) = @_;
   local($^W) = 0;
   CPAN->debug("l[$l] r[$r]") if $CPAN::DEBUG;
 
@@ -64,19 +64,19 @@ sub vcmp {
 }
 
 sub vgt {
-  my($self,$l,$r) = [at]_;
+  my($self,$l,$r) = @_;
   $self->vcmp($l,$r) > 0;
 }
 
 sub vstring {
-  my($self,$n) = [at]_;
+  my($self,$n) = @_;
   $n =~ s/^v// or die "CPAN::Version::vstring() called with invalid arg [$n]";
   pack "U*", split /\./, $n;
 }
 
 # vv => visible vstring
 sub float2vv {
-    my($self,$n) = [at]_;
+    my($self,$n) = @_;
     my($rev) = int($n);
     $rev ||= 0;
     my($mantissa) = $n =~ /\.(\d{1,12})/; # limit to 12 digits to limit
@@ -94,7 +94,7 @@ sub float2vv {
 }
 
 sub readable {
-  my($self,$n) = [at]_;
+  my($self,$n) = @_;
   $n =~ /^([\w\-\+\.]+)/;
 
   return $1 if defined $1 && length($1)>0;
