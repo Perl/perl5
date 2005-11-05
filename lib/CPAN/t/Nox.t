@@ -24,3 +24,8 @@ for my $mod (qw( Digest::MD5 LWP Compress::Zlib )) {
 # and these will be set to those in CPAN
 is( @CPAN::Nox::EXPORT, @CPAN::EXPORT, 'should export just what CPAN does' );
 is( \&CPAN::Nox::AUTOLOAD, \&CPAN::AUTOLOAD, 'AUTOLOAD should be aliased' );
+
+# Local Variables:
+# mode: cperl
+# cperl-indent-level: 2
+# End:

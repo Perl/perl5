@@ -18,7 +18,7 @@ use File::Basename ();
 use File::Path ();
 use File::Spec;
 use vars qw($VERSION);
-$VERSION = substr q$Revision: 1.60_01 $, 10;
+our $VERSION = sprintf "%.3f", 2 + substr(q$Rev: 147 $,4)/1000;
 
 =head1 NAME
 
@@ -35,10 +35,11 @@ file. Nothing special.
 
 =cut
 
-
 sub init {
-    my($configpm) = @_;
+    my($configpm, %args) = @_;
+
     use Config;
+
     unless ($CPAN::VERSION) {
 	require CPAN::Nox;
     }
@@ -68,7 +69,14 @@ dialog anytime later by typing 'o conf init' at the cpan prompt.)
 
 ];
 
-    my $manual_conf = prompt("Are you ready for manual configuration?", "yes");
+    my $manual_conf;
+
+    local *_real_prompt = \&ExtUtils::MakeMaker::prompt;
+    if ( $args{autoconfig} ) {
+        $manual_conf = "no";
+    } else {
+        $manual_conf = prompt("Are you ready for manual configuration?", "yes");
+    }
     my $fastread;
     {
       if ($manual_conf =~ /^y/i) {
@@ -82,36 +90,39 @@ dialog anytime later by typing 'o conf init' at the cpan prompt.)
 	*_real_prompt = sub ($;$) {
 	  my($q,$a) = @_;
 	  my($ret) = defined $a ? $a : "";
-	  printf qq{%s [%s]\n\n}, $q, $ret;
-
+	  $CPAN::Frontend->myprint(sprintf qq{%s [%s]\n\n}, $q, $ret);
+          eval { require Time::HiRes };
+          unless ($@) {
+              Time::HiRes::sleep(0.1);
+          }
 	  $ret;
 	};
       }
     }
-    print qq{
+    $CPAN::Frontend->myprint(qq{
 
 The following questions are intended to help you with the
 configuration. The CPAN module needs a directory of its own to cache
 important index files and maybe keep a temporary mirror of CPAN files.
 This may be a site-wide directory or a personal directory.
 
-};
+});
 
     my $cpan_home = $CPAN::Config->{cpan_home} || File::Spec->catdir($ENV{HOME}, ".cpan");
     if (-d $cpan_home) {
-	print qq{
+	$CPAN::Frontend->myprint(qq{
 
 I see you already have a  directory
     $cpan_home
 Shall we use it as the general CPAN build and cache directory?
 
-};
+});
     } else {
-	print qq{
+	$CPAN::Frontend->myprint(qq{
 
 First of all, I\'d like to create this directory. Where?
 
-};
+});
     }
 
     $default = $cpan_home;
@@ -139,14 +150,15 @@ Please retry.\n";
     }
     $CPAN::Config->{cpan_home} = $ans;
 
-    print qq{
+    $CPAN::Frontend->myprint( qq{
 
-If you want, I can keep the source files after a build in the cpan
-home directory. If you choose so then future builds will take the
-files from there. If you don\'t want to keep them, answer 0 to the
-next question.
+If you like, I can cache the source files after I build them.  Doing
+so means that, if you ever rebuild that module in the future, the
+files will be taken from the cache. The tradeoff is that it takes up
+space.  How much space would you like to allocate to this cache?  (If
+you don\'t want me to keep a cache, answer 0.)
 
-};
+});
 
     $CPAN::Config->{keep_source_where} = File::Spec->catdir($CPAN::Config->{cpan_home},"sources");
     $CPAN::Config->{build_dir} = File::Spec->catdir($CPAN::Config->{cpan_home},"build");
@@ -155,27 +167,29 @@ next question.
     # Cache size, Index expire
     #
 
-    print qq{
+    $CPAN::Frontend->myprint( qq{
 
 How big should the disk cache be for keeping the build directories
 with all the intermediate files\?
 
-};
+});
 
-    $default = $CPAN::Config->{build_cache} || 10;
+    $default = $CPAN::Config->{build_cache} || 100; # large enough to
+                                                    # build large
+                                                    # dists like Tk
     $ans = prompt("Cache size for build directory (in MB)?", $default);
     $CPAN::Config->{build_cache} = $ans;
 
     # XXX This the time when we refetch the index files (in days)
     $CPAN::Config->{'index_expire'} = 1;
 
-    print qq{
+    $CPAN::Frontend->myprint( qq{
 
-By default, each time the CPAN module is started, cache scanning
-is performed to keep the cache size in sync. To prevent from this,
-disable the cache scanning with 'never'.
+By default, each time the CPAN module is started, cache scanning is
+performed to keep the cache size in sync. To prevent this, answer
+'never'.
 
-};
+});
 
     $default = $CPAN::Config->{scan_cache} || 'atstart';
     do {
@@ -186,13 +200,13 @@ disable the cache scanning with 'never'.
     #
     # cache_metadata
     #
-    print qq{
+	$CPAN::Frontend->myprint( qq{
 
 To considerably speed up the initial CPAN shell startup, it is
 possible to use Storable to create a cache of metadata. If Storable
 is not available, the normal index mechanism will be used.
 
-};
+});
 
     defined($default = $CPAN::Config->{cache_metadata}) or $default = 1;
     do {
@@ -203,19 +217,19 @@ is not available, the normal index mechanism will be used.
     #
     # term_is_latin
     #
-    print qq{
+	$CPAN::Frontend->myprint( qq{
 
-The next option deals with the charset your terminal supports. In
-general CPAN is English speaking territory, thus the charset does not
-matter much, but some of the aliens out there who upload their
-software to CPAN bear names that are outside the ASCII range. If your
-terminal supports UTF-8, you say no to the next question, if it
-supports ISO-8859-1 (also known as LATIN1) then you say yes, and if it
-supports neither nor, your answer does not matter, you will not be
-able to read the names of some authors anyway. If you answer no, names
-will be output in UTF-8.
+The next option deals with the charset (aka character set) your
+terminal supports. In general, CPAN is English speaking territory, so
+the charset does not matter much, but some of the aliens out there who
+upload their software to CPAN bear names that are outside the ASCII
+range. If your terminal supports UTF-8, you should say no to the next
+question.  If it supports ISO-8859-1 (also known as LATIN1) then you
+should say yes.  If it supports neither, your answer does not matter
+because you will not be able to read the names of some authors
+anyway. If you answer no, names will be output in UTF-8.
 
-};
+});
 
     defined($default = $CPAN::Config->{term_is_latin}) or $default = 1;
     do {
@@ -227,7 +241,7 @@ will be output in UTF-8.
     #
     # save history in file histfile
     #
-    print qq{
+    $CPAN::Frontend->myprint( qq{
 
 If you have one of the readline packages (Term::ReadLine::Perl,
 Term::ReadLine::Gnu, possibly others) installed, the interactive CPAN
@@ -235,7 +249,7 @@ shell will have history support. The next two questions deal with the
 filename of the history file and with its size. If you do not want to
 set this variable, please hit SPACE RETURN to the following question.
 
-};
+});
 
     defined($default = $CPAN::Config->{histfile}) or
         $default = File::Spec->catfile($CPAN::Config->{cpan_home},"histfile");
@@ -249,18 +263,37 @@ set this variable, please hit SPACE RETURN to the following question.
     }
 
     #
+    # do an ls on the m or the d command
+    #
+    $CPAN::Frontend->myprint( qq{
+
+The 'd' and the 'm' command normally only show you information they
+have in their in-memory database and thus will never connect to the
+internet. If you set the 'show_upload_date' variable to true, 'm' and
+'d' will additionally show you the upload date of the module or
+distribution. Per default this feature is off because it may require a
+net connection to get at the upload date.
+
+});
+
+    defined($default = $CPAN::Config->{show_upload_date}) or
+        $default = 0;
+    $ans = prompt("Always try to show upload date with 'd' and 'm' command?", $default);
+    $CPAN::Config->{show_upload_date} = $ans;
+
+    #
     # prerequisites_policy
     # Do we follow PREREQ_PM?
     #
-    print qq{
+    $CPAN::Frontend->myprint( qq{
 
-The CPAN module can detect when a module that which you are trying to
-build depends on prerequisites. If this happens, it can build the
+The CPAN module can detect when a module which you are trying to build
+depends on prerequisites. If this happens, it can build the
 prerequisites for you automatically ('follow'), ask you for
 confirmation ('ask'), or just ignore them ('ignore'). Please set your
 policy to one of the three values.
 
-};
+});
 
     $default = $CPAN::Config->{prerequisites_policy} || 'ask';
     do {
@@ -274,7 +307,7 @@ policy to one of the three values.
     # External programs
     #
 
-    print qq{
+    $CPAN::Frontend->myprint(qq{
 
 The CPAN module will need a few external programs to work properly.
 Please correct me, if I guess the wrong path for a program. Don\'t
@@ -282,15 +315,15 @@ panic if you do not have some of them, just press ENTER for those. To
 disable the use of a download program, you can type a space followed
 by ENTER.
 
-};
+});
 
     my $old_warn = $^W;
     local $^W if $^O eq 'MacOS';
     my(@path) = split /$Config{'path_sep'}/, $ENV{'PATH'};
     local $^W = $old_warn;
     my $progname;
-    for $progname (qw/gzip tar unzip make 
-                      curl lynx wget ncftpget ncftp ftp 
+    for $progname (qw/gzip tar unzip make
+                      curl lynx wget ncftpget ncftp ftp
                       gpg/)
     {
       if ($^O eq 'MacOS') {
@@ -318,7 +351,7 @@ by ENTER.
       }
 
       $path ||= find_exe($progcall,[@path]);
-      warn "Warning: $progcall not found in PATH\n" unless
+      $CPAN::Frontend->mywarn("Warning: $progcall not found in PATH\n") unless
 	  $path; # not -e $path, because find_exe already checked that
       $ans = prompt("Where is your $progname program?",$path) || $path;
       $CPAN::Config->{$progname} = $ans;
@@ -347,16 +380,16 @@ by ENTER.
     # Arguments to make etc.
     #
 
-    print qq{
+    $CPAN::Frontend->myprint( qq{
 
 Every Makefile.PL is run by perl in a separate process. Likewise we
-run \'make\' and \'make install\' in processes. If you have any
-parameters \(e.g. PREFIX, LIB, UNINST or the like\) you want to pass
-to the calls, please specify them here.
+run \'make\' and \'make install\' in separate processes. If you have
+any parameters \(e.g. PREFIX, LIB, UNINST or the like\) you want to
+pass to the calls, please specify them here.
 
 If you don\'t understand this question, just press ENTER.
 
-};
+});
 
     $default = $CPAN::Config->{makepl_arg} || "";
     $CPAN::Config->{makepl_arg} =
@@ -374,6 +407,17 @@ Typical frequently used setting:
 
 Your choice: ",$default);
 
+    $default = $CPAN::Config->{make_install_make_command} || $CPAN::Config->{make} || "";
+    $CPAN::Config->{make_install_make_command} =
+	prompt("Do you want to use a different make command for 'make install'?
+Cautious people will probably prefer:
+
+    sudo make
+or
+    /path1/to/sudo -u admin_account /path2/to/make
+
+or some such. Your choice: ",$default);
+
     $default = $CPAN::Config->{make_install_arg} || $CPAN::Config->{make_arg} || "";
     $CPAN::Config->{make_install_arg} =
 	prompt("Parameters for the 'make install' command?
@@ -387,17 +431,17 @@ Your choice: ",$default);
     # Alarm period
     #
 
-    print qq{
+    $CPAN::Frontend->myprint( qq{
 
 Sometimes you may wish to leave the processes run by CPAN alone
-without caring about them. As sometimes the Makefile.PL contains
+without caring about them. Because the Makefile.PL sometimes contains
 question you\'re expected to answer, you can set a timer that will
 kill a 'perl Makefile.PL' process after the specified time in seconds.
 
 If you set this value to 0, these processes will wait forever. This is
 the default and recommended setting.
 
-};
+});
 
     $default = $CPAN::Config->{inactivity_timeout} || 0;
     $CPAN::Config->{inactivity_timeout} =
@@ -405,13 +449,13 @@ the default and recommended setting.
 
     # Proxies
 
-    print qq{
+    $CPAN::Frontend->myprint( qq{
 
 If you\'re accessing the net via proxies, you can specify them in the
 CPAN configuration or via environment variables. The variable in
 the \$CPAN::Config takes precedence.
 
-};
+});
 
     for (qw/ftp_proxy http_proxy no_proxy/) {
 	$default = $CPAN::Config->{$_} || $ENV{$_};
@@ -421,32 +465,32 @@ the \$CPAN::Config takes precedence.
     if ($CPAN::Config->{ftp_proxy} ||
         $CPAN::Config->{http_proxy}) {
         $default = $CPAN::Config->{proxy_user} || $CPAN::LWP::UserAgent::USER;
-        print qq{
+		$CPAN::Frontend->myprint( qq{
 
 If your proxy is an authenticating proxy, you can store your username
 permanently. If you do not want that, just press RETURN. You will then
 be asked for your username in every future session.
 
-};
+});
         if ($CPAN::Config->{proxy_user} = prompt("Your proxy user id?",$default)) {
-            print qq{
+			$CPAN::Frontend->myprint( qq{
 
 Your password for the authenticating proxy can also be stored
 permanently on disk. If this violates your security policy, just press
 RETURN. You will then be asked for the password in every future
 session.
 
-};
+});
 
             if ($CPAN::META->has_inst("Term::ReadKey")) {
                 Term::ReadKey::ReadMode("noecho");
             } else {
-                print qq{
+				$CPAN::Frontend->myprint( qq{
 
 Warning: Term::ReadKey seems not to be available, your password will
 be echoed to the terminal!
 
-};
+});
             }
             $CPAN::Config->{proxy_pass} = prompt_no_strip("Your proxy password?");
             if ($CPAN::META->has_inst("Term::ReadKey")) {
@@ -466,7 +510,7 @@ be echoed to the terminal!
     $CPAN::Config->{'inhibit_startup_message'} = 0;
     $CPAN::Config->{'getcwd'} = 'cwd';
 
-    print "\n\n";
+    $CPAN::Frontend->myprint("\n\n");
     CPAN::Config->commit($configpm);
 }
 
@@ -733,9 +777,6 @@ sub prompt ($;$) {
 sub prompt_no_strip ($;$) {
     return _real_prompt(@_);
 }
-
-
-*_real_prompt = \*ExtUtils::MakeMaker::prompt;
 
 
 1;
