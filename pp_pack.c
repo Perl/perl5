@@ -369,7 +369,7 @@ S_mul128(pTHX_ SV *sv, U8 m)
 typedef U8 packprops_t;
 #if 'J'-'I' == 1
 /* ASCII */
-const packprops_t packprops[512] = {
+STATIC const packprops_t packprops[512] = {
     /* normal */
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -490,7 +490,7 @@ const packprops_t packprops[512] = {
 };
 #else
 /* EBCDIC (or bust) */
-const packprops_t packprops[512] = {
+STATIC const packprops_t packprops[512] = {
     /* normal */
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
