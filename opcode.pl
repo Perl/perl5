@@ -73,7 +73,9 @@ my @raw_alias = (
  					fteexec)],
 		 Perl_pp_shmwrite => [qw(shmread msgsnd msgrcv semop)],
 		 Perl_pp_send => ['syswrite'],
-		 Perl_pp_defined => ['dor'],
+		 Perl_pp_defined => [qw(dor dorassign)],
+                 Perl_pp_and => ['and'],
+		 Perl_pp_or => ['or'],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {

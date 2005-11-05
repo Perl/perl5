@@ -100,7 +100,8 @@ PP(pp_and)
     if (!SvTRUE(TOPs))
 	RETURN;
     else {
-	--SP;
+        if (PL_op->op_type == OP_AND)
+	    --SP;
 	RETURNOP(cLOGOP->op_other);
     }
 }
@@ -319,7 +320,8 @@ PP(pp_or)
     if (SvTRUE(TOPs))
 	RETURN;
     else {
-	--SP;
+	if (PL_op->op_type == OP_OR)
+            --SP;
 	RETURNOP(cLOGOP->op_other);
     }
 }
@@ -331,7 +333,7 @@ PP(pp_defined)
     bool defined = FALSE;
     const int op_type = PL_op->op_type;
 
-    if(op_type == OP_DOR) {
+    if(op_type == OP_DOR || op_type == OP_DORASSIGN) {
         sv = TOPs;
         if (!sv || !SvANY(sv)) {
             --SP;
@@ -362,17 +364,15 @@ PP(pp_defined)
 	    defined = TRUE;
     }
     
-    if(defined) {
-         if(op_type == OP_DOR)
-             RETURN;
-         else if (op_type == OP_DEFINED) 
-             RETPUSHYES;
-    }
-
-    if(op_type == OP_DOR) {
-        --SP;
+    if(op_type == OP_DOR || op_type == OP_DORASSIGN) {
+        if(defined) 
+            RETURN; 
+        if(op_type == OP_DOR)
+            --SP;
         RETURNOP(cLOGOP->op_other);
     } else if (op_type == OP_DEFINED) {
+        if(defined) 
+            RETPUSHYES;
         RETPUSHNO;
     }
 }

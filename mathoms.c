@@ -1000,6 +1000,21 @@ PP(pp_dor)
     return pp_defined();
 }
 
+PP(pp_andassign)
+{
+    return pp_and();
+}
+
+PP(pp_orassign)
+{
+    return pp_or();
+}
+
+PP(pp_dorassign)
+{
+    return pp_defined();
+} 
+
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {
