@@ -329,7 +329,7 @@ PP(pp_or)
 PP(pp_defined)
 {
     dSP;
-    register SV* sv;
+    register SV* sv = NULL;
     bool defined = FALSE;
     const int op_type = PL_op->op_type;
 
@@ -344,7 +344,8 @@ PP(pp_defined)
         sv = POPs;
         if (!sv || !SvANY(sv))
             RETPUSHNO;
-    }
+    } else
+        DIE(aTHX_ "panic:  Invalid op passed to dd_defined()");
 
     switch (SvTYPE(sv)) {
     case SVt_PVAV:
@@ -371,11 +372,11 @@ PP(pp_defined)
         if(op_type == OP_DOR)
             --SP;
         RETURNOP(cLOGOP->op_other);
-    } else if (op_type == OP_DEFINED) {
-        if(defined) 
-            RETPUSHYES;
-        RETPUSHNO;
     }
+    /* assuming OP_DEFINED */
+    if(defined) 
+        RETPUSHYES;
+    RETPUSHNO;
 }
 
 PP(pp_add)
