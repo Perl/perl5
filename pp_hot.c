@@ -336,7 +336,8 @@ PP(pp_defined)
     if(op_type == OP_DOR || op_type == OP_DORASSIGN) {
         sv = TOPs;
         if (!sv || !SvANY(sv)) {
-            --SP;
+	    if (op_type == OP_DOR)
+		--SP;
             RETURNOP(cLOGOP->op_other);
         }
     } else if (op_type == OP_DEFINED) {
