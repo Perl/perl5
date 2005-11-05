@@ -2093,7 +2093,7 @@ PP(pp_ncmp)
 
 PP(pp_slt)
 {
-    dSP; tryAMAGICbinSET(slt,0);
+    dSP; tryAMAGICbinSET_var(slt_amg,0);
     {
       dPOPTOPssrl;
       const int cmp = (IN_LOCALE_RUNTIME
@@ -2106,7 +2106,7 @@ PP(pp_slt)
 
 PP(pp_sgt)
 {
-    dSP; tryAMAGICbinSET(sgt,0);
+    dSP; tryAMAGICbinSET_var(sgt_amg,0);
     {
       dPOPTOPssrl;
       const int cmp = (IN_LOCALE_RUNTIME
@@ -2119,7 +2119,7 @@ PP(pp_sgt)
 
 PP(pp_sle)
 {
-    dSP; tryAMAGICbinSET(sle,0);
+    dSP; tryAMAGICbinSET_var(sle_amg,0);
     {
       dPOPTOPssrl;
       const int cmp = (IN_LOCALE_RUNTIME
@@ -2132,7 +2132,7 @@ PP(pp_sle)
 
 PP(pp_sge)
 {
-    dSP; tryAMAGICbinSET(sge,0);
+    dSP; tryAMAGICbinSET_var(sge_amg,0);
     {
       dPOPTOPssrl;
       const int cmp = (IN_LOCALE_RUNTIME
