@@ -74,8 +74,8 @@ my @raw_alias = (
 		 Perl_pp_shmwrite => [qw(shmread msgsnd msgrcv semop)],
 		 Perl_pp_send => ['syswrite'],
 		 Perl_pp_defined => [qw(dor dorassign)],
-                 Perl_pp_and => ['and'],
-		 Perl_pp_or => ['or'],
+                 Perl_pp_and => ['andassign'],
+		 Perl_pp_or => ['orassign'],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {

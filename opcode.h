@@ -925,12 +925,12 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_range),
 	MEMBER_TO_FPTR(Perl_pp_flip),
 	MEMBER_TO_FPTR(Perl_pp_flop),
-	MEMBER_TO_FPTR(Perl_pp_and),	/* Perl_pp_and */
-	MEMBER_TO_FPTR(Perl_pp_or),	/* Perl_pp_or */
+	MEMBER_TO_FPTR(Perl_pp_and),
+	MEMBER_TO_FPTR(Perl_pp_or),
 	MEMBER_TO_FPTR(Perl_pp_xor),
 	MEMBER_TO_FPTR(Perl_pp_cond_expr),
-	MEMBER_TO_FPTR(Perl_pp_andassign),
-	MEMBER_TO_FPTR(Perl_pp_orassign),
+	MEMBER_TO_FPTR(Perl_pp_and),	/* Perl_pp_andassign */
+	MEMBER_TO_FPTR(Perl_pp_or),	/* Perl_pp_orassign */
 	MEMBER_TO_FPTR(Perl_pp_method),
 	MEMBER_TO_FPTR(Perl_pp_entersub),
 	MEMBER_TO_FPTR(Perl_pp_leavesub),
