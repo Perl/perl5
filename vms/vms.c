@@ -9240,7 +9240,7 @@ is_null_device(name)
  * subset of the applicable information.
  */
 bool
-Perl_cando(pTHX_ Mode_t bit, Uid_t effective, const Stat_t *statbufp)
+Perl_cando(pTHX_ Mode_t bit, bool effective, const Stat_t *statbufp)
 {
   char fname_phdev[NAM$C_MAXRSS+1];
 #if __CRTL_VER >= 80200000 && !defined(__VAX)
@@ -9293,9 +9293,9 @@ Perl_cando(pTHX_ Mode_t bit, Uid_t effective, const Stat_t *statbufp)
 /*}}}*/
 
 
-/*{{{I32 cando_by_name(I32 bit, Uid_t effective, char *fname)*/
+/*{{{I32 cando_by_name(I32 bit, bool effective, char *fname)*/
 I32
-Perl_cando_by_name(pTHX_ I32 bit, Uid_t effective, const char *fname)
+Perl_cando_by_name(pTHX_ I32 bit, bool effective, const char *fname)
 {
   static char usrname[L_cuserid];
   static struct dsc$descriptor_s usrdsc =
