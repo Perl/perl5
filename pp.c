@@ -700,7 +700,7 @@ PP(pp_chop)
     while (MARK < SP)
 	do_chop(TARG, *++MARK);
     SP = ORIGMARK;
-    PUSHTARG;
+    XPUSHTARG;
     RETURN;
 }
 
@@ -718,7 +718,7 @@ PP(pp_chomp)
 
     while (SP > MARK)
 	count += do_chomp(POPs);
-    PUSHi(count);
+    XPUSHi(count);
     RETURN;
 }
 

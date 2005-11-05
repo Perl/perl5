@@ -430,11 +430,15 @@ PP(pp_warn)
     SV *tmpsv;
     const char *tmps;
     STRLEN len;
-    if (SP - MARK != 1) {
+    if (SP - MARK > 1) {
 	dTARGET;
 	do_join(TARG, &PL_sv_no, MARK, SP);
 	tmpsv = TARG;
 	SP = MARK + 1;
+    }
+    else if (SP == MARK) {
+	tmpsv = &PL_sv_no;
+	EXTEND(SP, 1);
     }
     else {
 	tmpsv = TOPs;
@@ -3402,7 +3406,7 @@ PP(pp_chown)
     const I32 value = (I32)apply(PL_op->op_type, MARK, SP);
 
     SP = MARK;
-    PUSHi(value);
+    XPUSHi(value);
     RETURN;
 }
 
@@ -3993,7 +3997,7 @@ PP(pp_system)
 	    if (errno != EAGAIN) {
 		value = -1;
 		SP = ORIGMARK;
-		PUSHi(value);
+		XPUSHi(value);
 		if (did_pipes) {
 		    PerlLIO_close(pp[0]);
 		    PerlLIO_close(pp[1]);
@@ -4042,7 +4046,7 @@ PP(pp_system)
 		    STATUS_NATIVE_CHILD_SET(-1);
 		}
 	    }
-	    PUSHi(STATUS_CURRENT);
+	    XPUSHi(STATUS_CURRENT);
 	    RETURN;
 	}
 	if (did_pipes) {
@@ -4088,7 +4092,7 @@ PP(pp_system)
     STATUS_NATIVE_CHILD_SET(value);
     do_execfree();
     SP = ORIGMARK;
-    PUSHi(result ? value : STATUS_CURRENT);
+    XPUSHi(result ? value : STATUS_CURRENT);
 #endif /* !FORK or VMS */
     RETURN;
 }
@@ -4140,7 +4144,7 @@ PP(pp_exec)
     }
 
     SP = ORIGMARK;
-    PUSHi(value);
+    XPUSHi(value);
     RETURN;
 }
 

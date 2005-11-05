@@ -1504,6 +1504,7 @@ PP(pp_sort)
 
     if (gimme != G_ARRAY) {
 	SP = MARK;
+	EXTEND(SP,1);
 	RETPUSHUNDEF;
     }
 
