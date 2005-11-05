@@ -1,5 +1,35 @@
 Revision history for Perl extension Time::HiRes.
 
+1.81	[2005-10-05]
+	- try to be more robust and consistent in the detection of
+          CLOCK_REALTIME and ITIMER_VIRTUAL in HiRes.t: the proper
+	  way is
+
+		sub has_symbol {
+		    my $symbol = shift;
+		    eval 'import Time::HiRes qw($symbol)';
+		    return 0 unless $@ eq '';
+		    return exists ${"Time::HiRes::$symbol"};
+		}
+
+	  and then use
+
+		&FOO_BAR
+
+	  in the test.  All these moves are needed because
+
+	  1) one cannot directly do eval 'Time::HiRes::FOO_BAR'
+	     because FOO_BAR might have a true value of zero
+	     (or in the general case an empty string or even undef)
+
+	  2) In case FOO_BAR is not available in this platform,
+	     &FOO_BAR avoids the bareword warning
+
+	- wait more (1.5 seconds instead of 0.1) for the CLOCK_REALTIME test
+	  but expect the 'customary' slop of 0.20 instead of 0.25
+	- fixed inside a comment HAS_POLL -> TIME_HIRES_NANOSLEEP
+	- at the end of HiRest.t tell how close we were to termination
+
 1.80	[2005-10-04]
 	- Gisle noticed a mistake (using HAS_NANOSLEEP) in 1.79
 

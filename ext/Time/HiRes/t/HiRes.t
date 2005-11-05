@@ -31,6 +31,13 @@ my $have_ualarm		= &Time::HiRes::d_ualarm;
 my $have_clock_gettime	= &Time::HiRes::d_clock_gettime;
 my $have_clock_getres	= &Time::HiRes::d_clock_getres;
 
+sub has_symbol {
+    my $symbol = shift;
+    eval "import Time::HiRes qw($symbol)";
+    return 0 unless $@ eq '';
+    return exists &{"Time::HiRes::$symbol"};
+}
+
 printf "# have_gettimeofday  = %d\n", $have_gettimeofday;
 printf "# have_usleep        = %d\n", $have_usleep;
 printf "# have_nanosleep     = %d\n", $have_nanosleep;
@@ -51,6 +58,7 @@ my $have_alarm = $Config{d_alarm};
 my $have_fork  = $Config{d_fork};
 my $waitfor = 60; # 10-20 seconds is normal (load affects this).
 my $timer_pid;
+my $TheEnd;
 
 if ($have_fork) {
     print "# I am the main process $$, starting the timer process...\n";
@@ -65,7 +73,8 @@ if ($have_fork) {
 	    print "# This is the timer process $$, over and out.\n";
 	    exit(0);
 	} else {
-	    print "# Timer process $timer_pid launched, continuing testing...\n";
+	    print "# The timer process $timer_pid launched, continuing testing...\n";
+	    $TheEnd = time() + $waitfor;
 	}
     } else {
 	warn "$0: fork failed: $!\n";
@@ -285,41 +294,39 @@ unless (   defined &Time::HiRes::gettimeofday
 
 unless (   defined &Time::HiRes::setitimer
 	&& defined &Time::HiRes::getitimer
-	&& eval 'use Time::HiRes qw(ITIMER_VIRTUAL); print ITIMER_VIRTUAL'
-	&& $Config{d_select}
-	&& $Config{d_select}
+	&& has_symbol('ITIMER_VIRTUAL')
 	&& $Config{sig_name} =~ m/\bVTALRM\b/) {
     for (18..19) {
 	print "ok $_ # Skip: no virtual interval timers\n";
     }
 } else {
-    use Time::HiRes qw (setitimer getitimer ITIMER_VIRTUAL);
+    use Time::HiRes qw(setitimer getitimer ITIMER_VIRTUAL);
 
     my $i = 3;
     my $r = [Time::HiRes::gettimeofday()];
 
     $SIG{VTALRM} = sub {
-	$i ? $i-- : setitimer(ITIMER_VIRTUAL, 0);
+	$i ? $i-- : setitimer(&ITIMER_VIRTUAL, 0);
 	print "# Tick! $i ", Time::HiRes::tv_interval($r), "\n";
     };	
 
     print "# setitimer: ", join(" ", setitimer(ITIMER_VIRTUAL, 0.5, 0.4)), "\n";
 
     # Assume interval timer granularity of $limit * 0.5 seconds.  Too bold?
-    my $virt = getitimer(ITIMER_VIRTUAL);
+    my $virt = getitimer(&ITIMER_VIRTUAL);
     print "not " unless defined $virt && abs($virt / 0.5) - 1 < $limit;
     print "ok 18\n";
 
     print "# getitimer: ", join(" ", getitimer(ITIMER_VIRTUAL)), "\n";
 
-    while (getitimer(ITIMER_VIRTUAL)) {
+    while (getitimer(&ITIMER_VIRTUAL)) {
 	my $j;
 	for (1..1000) { $j++ } # Can't be unbreakable, must test getitimer().
     }
 
     print "# getitimer: ", join(" ", getitimer(ITIMER_VIRTUAL)), "\n";
 
-    $virt = getitimer(ITIMER_VIRTUAL);
+    $virt = getitimer(&ITIMER_VIRTUAL);
     print "not " unless defined $virt && $virt == 0;
     print "ok 19\n";
 
@@ -456,6 +463,8 @@ if ($have_ualarm && $] >= 5.008001) {
     # one bug that caused a core dump on reentering the handler. This bug
     # was fixed by the time of Perl 5.8.1.
 
+    # Do not try mixing sleep() and alarm() for testing this.
+
     my $a = 0; # Number of alarms we receive.
     my $A = 2; # Number of alarms we will handle before disarming.
                # (We may well get $A + 1 alarms.)
@@ -477,30 +486,26 @@ if ($have_ualarm && $] >= 5.008001) {
     skip 29;
 }
 
-if ($have_clock_gettime) {
-    # All implementations are SUPPOSED TO support CLOCK_REALTIME...
-    eval 'use Time::HiRes qw(CLOCK_REALTIME)';
-    unless ($@) {
-        my $t0 = clock_gettime(&CLOCK_REALTIME);
-        use Time::HiRes qw(sleep);
-        my $T = 0.1;
-        sleep($T);
-        my $t1 = clock_gettime(&CLOCK_REALTIME);
-	if ($t0 > 0 && $t1) {
-	    print "# t1 = $t1, t0 = $t0\n";
-	    my $dt = $t1 - $t0;
-	    my $rt = abs(1 - $dt / $T);
-	    if ($rt <= 0.25) { # Allow 25% jitter.
-		print "ok 30 # dt = $dt, r = $rt\n";
-	    } else {
-		print "not ok 30 # dt = $dt, rt = $rt\n";
-	    }
+if ($have_clock_gettime &&
+    # All implementations of clock_gettime() 
+    # are SUPPOSED TO support CLOCK_REALTIME.
+    has_symbol('CLOCK_REALTIME')) {
+    my $t0 = clock_gettime(&CLOCK_REALTIME);
+    use Time::HiRes qw(sleep);
+    my $T = 1.5;
+    sleep($T);
+    my $t1 = clock_gettime(&CLOCK_REALTIME);
+    if ($t0 > 0 && $t1 > $t0) {
+	print "# t1 = $t1, t0 = $t0\n";
+	my $dt = $t1 - $t0;
+	my $rt = abs(1 - $dt / $T);
+	if ($rt <= $limit) {
+	    print "ok 30 # dt = $dt, r = $rt\n";
 	} else {
-	    print "# Error '$!'\n";
-	    skip 30;
+	    print "not ok 30 # dt = $dt, rt = $rt\n";
 	}
     } else {
-        print "# No CLOCK_REALTIME ($@)\n";
+	print "# Error: t0 = $t0, t1 = $t1\n";
 	skip 30;
     }
 } else {
@@ -522,7 +527,8 @@ if ($have_clock_getres) {
 
 END {
     if (defined $timer_pid) {
-	print "# I am the main process $$, terminating the timer process $timer_pid.\n";
+	my $left = $TheEnd - time();
+	printf "# I am the main process $$, terminating the timer process $timer_pid\n# before it terminates me in %d seconds (testing took %d seconds).\n", $left, $waitfor - $left;
 	kill('TERM', $timer_pid); # We are done, the timer can go.
 	unlink("ktrace.out"); # Used in BSD system call tracing.
 	print "# All done.\n";

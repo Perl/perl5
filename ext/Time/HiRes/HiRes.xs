@@ -423,7 +423,7 @@ hrt_usleep(unsigned long usec)
 	nanosleep(&tsa, NULL);
 }
 
-#endif /* #if !defined(HAS_USLEEP) && defined(HAS_POLL) */
+#endif /* #if !defined(HAS_USLEEP) && defined(TIME_HIRES_NANOSLEEP) */
 
 #if !defined(HAS_USLEEP) && defined(HAS_POLL)
 #define HAS_USLEEP
