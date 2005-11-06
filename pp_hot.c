@@ -345,7 +345,7 @@ PP(pp_defined)
         if (!sv || !SvANY(sv))
             RETPUSHNO;
     } else
-        DIE(aTHX_ "panic:  Invalid op passed to dd_defined()");
+        DIE(aTHX_ "panic:  Invalid op (%s) in pp_defined()", OP_NAME(PL_op));
 
     switch (SvTYPE(sv)) {
     case SVt_PVAV:
