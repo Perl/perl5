@@ -1,5 +1,12 @@
 Revision history for Perl extension Time::HiRes.
 
+1.82	[2005-10-06]
+	- CLOCK_REALTIME is an enum value (of the clockid_t enum)
+	  in HP-UX (and might be so elsewhere, too), debugged by
+	  H. Merijn Brand
+	- include const-c.inc as late as possible (from Randy Kobes,
+	  [rt.cpan.org #15552] to avoid undefined usleep() on Win32
+
 1.81	[2005-10-05]
 	- try to be more robust and consistent in the detection of
           CLOCK_REALTIME and ITIMER_VIRTUAL in HiRes.t: the proper
@@ -134,7 +141,9 @@ Revision history for Perl extension Time::HiRes.
 	- fix the 'hierachy' typo in Makefile.PL [rt.cpan.org #8492]
 	- should now build in Solaris [rt.cpan.org #7165] (since 1.64)
 	- should now build in Cygwin [rt.cpan.org #7535] (since 1.64)
-	- close also [rt.cpan.org #5933] "Time::HiRes::time does not pick up time adjustments like ntp" since ever reproducing it in the same environment
+	- close also [rt.cpan.org #5933] "Time::HiRes::time does not
+	  pick up time adjustments like ntp" since ever reproducing it
+	  (and therefore verifying a possible fix) in the same environment 
 	  has become rather unlikely
 
 1.65	[2004-09-18]

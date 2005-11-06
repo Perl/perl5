@@ -54,6 +54,8 @@ import Time::HiRes 'clock_getres'	if $have_clock_getres;
 
 use Config;
 
+use Time::HiRes qw(gettimeofday);
+
 my $have_alarm = $Config{d_alarm};
 my $have_fork  = $Config{d_fork};
 my $waitfor = 60; # 10-20 seconds is normal (load affects this).
@@ -140,6 +142,7 @@ unless ($have_usleep) {
     skip 7..8;
 }
 else {
+    use Time::HiRes qw(usleep);
     my $one = time;
     usleep(10_000);
     my $two = time;
@@ -178,7 +181,7 @@ unless ($have_usleep && $have_gettimeofday) {
     skip 11;
 }
 else {
-    my $r = [gettimeofday()];
+    my $r = [ gettimeofday() ];
     Time::HiRes::sleep( 0.5 );
     my $f = tv_interval $r;
     ok 11, $f > 0.4 && $f < 0.9, "slept $f instead of 0.5 secs.";
@@ -333,7 +336,10 @@ unless (   defined &Time::HiRes::setitimer
     $SIG{VTALRM} = 'DEFAULT';
 }
 
-if ($have_gettimeofday) {
+if ($have_gettimeofday &&
+    $have_usleep) {
+    use Time::HiRes qw(usleep);
+
     my ($t0, $td);
 
     my $sleep = 1.5; # seconds

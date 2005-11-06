@@ -65,7 +65,17 @@ extern "C" {
 # endif
 #endif
 
-#include "const-c.inc"
+#if defined(TIME_HIRES_CLOCK_GETTIME) && defined(_STRUCT_ITIMERSPEC)
+
+/* HP-UX has CLOCK_XXX values but as enums, not as defines.
+ * The only way to detect these would be to test compile for each. */
+# ifdef __hpux
+#  define CLOCK_REALTIME CLOCK_REALTIME
+#  define CLOCK_VIRTUAL  CLOCK_VIRTUAL
+#  define CLOCK_PROFILE  CLOCK_PROFILE
+# endif /* # ifdef __hpux */
+
+#endif /* #if defined(TIME_HIRES_CLOCK_GETTIME) && defined(_STRUCT_ITIMERSPEC) */
 
 #if defined(WIN32) || defined(CYGWIN_WITH_W32API)
 
@@ -677,6 +687,8 @@ myNVtime()
 }
 
 #endif /* #ifdef HAS_GETTIMEOFDAY */
+
+#include "const-c.inc"
 
 MODULE = Time::HiRes            PACKAGE = Time::HiRes
 

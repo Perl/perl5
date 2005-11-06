@@ -594,9 +594,9 @@ sub doConstants {
 		     d_nanosleep d_clock_gettime d_clock_getres)) {
 	    my $macro = $_;
 	    if ($macro =~ /^(d_nanosleep|d_clock_gettime|d_clock_getres)$/) {
-		$macro =~ s/d_(.*)/TIME_HIRES_\U$1/;
+		$macro =~ s/^d_(.+)/TIME_HIRES_\U$1/;
 	    } else {
-		$macro =~ s/d_(.*)/HAS_\U$1/;
+		$macro =~ s/^d_(.+)/HAS_\U$1/;
 	    }
 	    push @names, {name => $_, macro => $macro, value => 1,
 			  default => ["IV", "0"]};
