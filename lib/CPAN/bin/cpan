@@ -116,8 +116,7 @@ brian d foy <bdfoy@cpan.org>
 use CPAN ();
 use Getopt::Std;
 
-my $VERSION = 
-	sprintf "%d.%02d", q$Revision: 1.3 $ =~ m/ (\d+) \. (\d+) /xg;
+my $VERSION = sprintf "%.3f", 1.2 + substr(q$Rev: 228 $,4)/1000;
 
 my $Default = 'default';
 

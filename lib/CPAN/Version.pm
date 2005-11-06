@@ -30,6 +30,9 @@ version strings visible and comparable.
 
 package CPAN::Version;
 
+use vars qw($VERSION);
+$VERSION = sprintf "%.2f", substr(q$Rev: 231 $,4)/100;
+
 # CPAN::Version::vcmp courtesy Jost Krieger
 sub vcmp {
   my($self,$l,$r) = @_;
@@ -109,7 +112,11 @@ sub readable {
 
     # And if they say v1.2, then the old perl takes it as "v12"
 
-    $CPAN::Frontend->mywarn("Suspicious version string seen [$n]\n");
+    if (defined $CPAN::Frontend) {
+      $CPAN::Frontend->mywarn("Suspicious version string seen [$n]\n");
+    } else {
+      warn("Suspicious version string seen [$n]\n");
+    }
     return $n;
   }
   my $better = sprintf "v%vd", $n;

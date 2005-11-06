@@ -1,6 +1,6 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
-$VERSION = '1.76_60';
+$VERSION = '1.76_61';
 $VERSION = eval $VERSION;
 
 use CPAN::Version;
@@ -14,13 +14,13 @@ use File::Basename ();
 use File::Copy ();
 use File::Find;
 use File::Path ();
-use FileHandle ();
-use Safe ();
-use Text::ParseWords ();
-use Text::Wrap;
 use File::Spec;
 use File::Temp ();
+use FileHandle ();
+use Safe ();
 use Sys::Hostname;
+use Text::ParseWords ();
+use Text::Wrap;
 no lib "."; # we need to run chdir all over and we would get at wrong
             # libraries there
 
@@ -5191,12 +5191,12 @@ sub _check_binary {
     $CPAN::Frontend->myprint(qq{ + _check_binary($binary)\n})
       if $CPAN::DEBUG;
 
-    $pid = open $readme, "-|", "which", $binary
-      or $CPAN::Frontend->mydie(qq{Could not fork $binary: $!});
+    $pid = open $readme, "which $binary|"
+      or $CPAN::Frontend->mydie(qq{Could not fork 'which $binary': $!});
     while (<$readme>) {
 	$out .= $_;
     }
-    close $readme;
+    close $readme or die "Could not run 'which $binary': $!";
 
     $CPAN::Frontend->myprint(qq{   + $out \n})
       if $CPAN::DEBUG && $out;
@@ -5232,9 +5232,9 @@ sub _display_url {
             $CPAN::Frontend->myprint(qq{ERROR: problems while getting $url, $!\n})
               unless defined($saved_file);
 
-	    $pid = open $readme, "-|", $html_converter, $saved_file
+	    $pid = open $readme, "$html_converter $saved_file |"
 	      or $CPAN::Frontend->mydie(qq{
-Could not fork $html_converter $saved_file: $!});
+Could not fork '$html_converter $saved_file': $!});
 	    my $fh = File::Temp->new(
                                      template => 'cpan_htmlconvert_XXXX',
                                      suffix => '.txt',
@@ -5244,7 +5244,7 @@ Could not fork $html_converter $saved_file: $!});
                 $fh->print($_);
             }
 	    close $readme
-	      or $CPAN::Frontend->mydie(qq{Could not close file handle: $!});
+	      or $CPAN::Frontend->mydie(qq{Could not run '$html_converter $saved_file': $!});
             my $tmpin = $fh->filename;
 	    $CPAN::Frontend->myprint(sprintf(qq{
 Run '%s %s' and

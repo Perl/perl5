@@ -1,11 +1,12 @@
+# http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         CPAN
-version:      1.76
+version:      1.76_61
 version_from: lib/CPAN.pm
 installdirs:  perl
 requires:
-    Test::More:                    0
     File::Spec:                    0
+    Test::More:                    0
 
 distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.12
+generated_by: ExtUtils::MakeMaker version 6.30

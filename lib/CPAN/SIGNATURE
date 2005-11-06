@@ -1,12 +1,12 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.26.
+signed via the Module::Signature module, version 0.50.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
 
     % cpansign -v
 
-It would check each file's integrity, as well as the signature's
+It will check each file's integrity, as well as the signature's
 validity.  If "==> Signature verified OK! <==" is not displayed,
 the distribution may already have been compromised, and you should
 not run its Makefile.PL or Build.PL.
@@ -14,32 +14,38 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 efbe8e6882a2caa0d741b113959a706830ab5882 BUNDLE/Test/Builder.pm
-SHA1 ae1d68262bedc2475e2c6fd478d99b259b4fb109 BUNDLE/Test/More.pm
-SHA1 2b02ead396d701c16a93a54b0f15f7073addb407 ChangeLog
+SHA1 dffb8c2be808260012cfb2b880133a115ef4b363 ChangeLog
+SHA1 9b97524a7a91c815e46b19302a33829d3c26bbbf ChangeLog.old
 SHA1 a029ffa2f2252bb8914eb658666244710994d256 Changes.old
-SHA1 ed0c9e6c6b83e39e3822cf71aeed81f829386dd9 MANIFEST
-SHA1 21e313600b36ee8adb724a43c247ee0f873b5b81 MANIFEST.SKIP
-SHA1 1b0753e38574181a9d0e041cb9082d09c32f0fbf META.yml
-SHA1 441f9a3ec80bfa266d889d5c56a9a75eeb119626 Makefile.PL
+SHA1 61a9837044c45b47246f41424c101ec5b739cabf MANIFEST
+SHA1 0a72807a1326b4be93a15f6ed0e5e03ee931859e MANIFEST.SKIP
+SHA1 4fb4a21dcc19b02a37f33f533a8e399fd2d973d9 META.yml
+SHA1 c2c1d8faff850ce133841076e7c815e6e36b1351 Makefile.PL
 SHA1 37e858c51409a297ef5d3fb35dc57cd3b57f9a4d PAUSE2003.pub
-SHA1 0006bf6573858fbeb094d0becc5030c36d41a46d README
-SHA1 9e6e9cf9ae517d91ef3bda61f2c5d0c6409073d6 Todo
+SHA1 af016003ad503ed078c5f8254521d13a3e0c494f PAUSE2005.pub
+SHA1 9db44d9b3219c20bffbc0579a8fd6db3ee41269e README
+SHA1 5adbf645e60685d6552fbcfff6e577399fe1f958 Releasenotes
+SHA1 4fb30323ec1614bd17279e5f9a274352b044af25 Todo
+SHA1 64f8ddd58693d482b282475210b4812b10d94f46 cpan
+SHA1 efbe8e6882a2caa0d741b113959a706830ab5882 inc/Test/Builder.pm
+SHA1 ae1d68262bedc2475e2c6fd478d99b259b4fb109 inc/Test/More.pm
 SHA1 859ee1f3ba026d269c44b29d715d9af1e35333bc lib/Bundle/CPAN.pm
-SHA1 3aaaaf913748abe1cfa3f89ccf70d8f6315e5fe8 lib/CPAN.pm
-SHA1 e00d87017076b26de7696ae8b75d397bee737bbb lib/CPAN/Admin.pm
-SHA1 536e9720a6161510b50a2948c768d1daabc87dcd lib/CPAN/FirstTime.pm
-SHA1 33dd610c4b5d679bbcf3e61df290e33b460feaab lib/CPAN/Nox.pm
+SHA1 ce3cb7368e12240dded13175e3e8b1f2e92019ed lib/CPAN.pm
+SHA1 263a3def2375e38c67808d6a00b6dde14e91ed40 lib/CPAN/Admin.pm
+SHA1 a09f2474f4be085c40790af007a7163558f52eef lib/CPAN/FirstTime.pm
+SHA1 4fa9695417b54fc8d4e29684ad61689bc108274b lib/CPAN/Nox.pm
+SHA1 f703cd15b95c5fd4ca6c0576b8b4566501882ccf lib/CPAN/Version.pm
 SHA1 0a7b5d987e699afe63d9e314f1aa456214c8e1d0 scripts/cpan
-SHA1 1ef040435bd29f7d46db02c079fcb79cc279780c t/Nox.t
-SHA1 6a3fa699be244f587ef1d14e4c345bc57affd0c8 t/loadme.t
-SHA1 d765dc589a77265e305ef27ff386e31f562ad70b t/mirroredby.t
-SHA1 44ee216f4a129193a62fc1cd61088fd2de8e9538 t/signature.t
-SHA1 ada872f52e59a537c444e12ca9d79e4df4bd18c4 t/vcmp.t
+SHA1 67e80e1cfc3530932de7743dd0c833b2c387609d t/Nox.t
+SHA1 215dace24b507de20011d36cbe2d16ddea78bcf3 t/loadme.t
+SHA1 9e7950a79a153b532c5094c7091757d51040b218 t/mirroredby.t
+SHA1 952e77e7944637eed1b5d202afa98baef8a4c64c t/signature.t
+SHA1 d773586d80dbd79605a4b08c3ef310379c4d09c5 t/vcmp.t
+SHA1 5ff8e84beac28a6ea06995f1f1840e21ffb0dd7b t/version.t
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.2.2 (GNU/Linux)
+Version: GnuPG v1.4.2 (GNU/Linux)
 
-iD8DBQE/KTBH7IA58KMXwV0RAvwzAKDqt5FPLl5zA2RkWRoLz/ASslZqKACfV1pg
-VUyR6PLFLNoGHDZXCzmn1co=
-=8wMs
+iD8DBQFDbdxt7IA58KMXwV0RAsgsAKCouQ0mcWsUs0aiycaU2JjONmqXTACgrB19
+ugwiu8ljK7CeNm5x5+8n3Qw=
+=uum0
 -----END PGP SIGNATURE-----
