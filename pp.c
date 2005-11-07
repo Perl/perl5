@@ -2091,54 +2091,40 @@ PP(pp_ncmp)
     }
 }
 
-PP(pp_slt)
-{
-    dSP; tryAMAGICbinSET_var(slt_amg,0);
-    {
-      dPOPTOPssrl;
-      const int cmp = (IN_LOCALE_RUNTIME
-		 ? sv_cmp_locale(left, right)
-		 : sv_cmp(left, right));
-      SETs(boolSV(cmp < 0));
-      RETURN;
-    }
-}
-
-PP(pp_sgt)
-{
-    dSP; tryAMAGICbinSET_var(sgt_amg,0);
-    {
-      dPOPTOPssrl;
-      const int cmp = (IN_LOCALE_RUNTIME
-		 ? sv_cmp_locale(left, right)
-		 : sv_cmp(left, right));
-      SETs(boolSV(cmp > 0));
-      RETURN;
-    }
-}
-
 PP(pp_sle)
 {
-    dSP; tryAMAGICbinSET_var(sle_amg,0);
-    {
-      dPOPTOPssrl;
-      const int cmp = (IN_LOCALE_RUNTIME
-		 ? sv_cmp_locale(left, right)
-		 : sv_cmp(left, right));
-      SETs(boolSV(cmp <= 0));
-      RETURN;
-    }
-}
+    dSP;
 
-PP(pp_sge)
-{
-    dSP; tryAMAGICbinSET_var(sge_amg,0);
+    int amg_type = sle_amg;
+    int multiplier = 1;
+    int rhs = 1;
+
+    switch (PL_op->op_type) {
+    case OP_SLT:
+	amg_type = slt_amg;
+	/* cmp < 0 */
+	rhs = 0;
+	break;
+    case OP_SGT:
+	amg_type = sgt_amg;
+	/* cmp > 0 */
+	multiplier = -1;
+	rhs = 0;
+	break;
+    case OP_SGE:
+	amg_type = sge_amg;
+	/* cmp >= 0 */
+	multiplier = -1;
+	break;
+    }
+
+    tryAMAGICbinSET_var(amg_type,0);
     {
       dPOPTOPssrl;
       const int cmp = (IN_LOCALE_RUNTIME
 		 ? sv_cmp_locale(left, right)
 		 : sv_cmp(left, right));
-      SETs(boolSV(cmp >= 0));
+      SETs(boolSV(cmp * multiplier < rhs));
       RETURN;
     }
 }

@@ -1020,6 +1020,21 @@ PP(pp_lcfirst)
     return pp_ucfirst();
 }
 
+PP(pp_slt)
+{
+    return pp_sle();
+}
+
+PP(pp_sgt)
+{
+    return pp_sle();
+}
+
+PP(pp_sge)
+{
+    return pp_sle();
+}
+
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {

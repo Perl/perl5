@@ -850,10 +850,10 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_i_ne),
 	MEMBER_TO_FPTR(Perl_pp_ncmp),
 	MEMBER_TO_FPTR(Perl_pp_i_ncmp),
-	MEMBER_TO_FPTR(Perl_pp_slt),
-	MEMBER_TO_FPTR(Perl_pp_sgt),
+	MEMBER_TO_FPTR(Perl_pp_sle),	/* Perl_pp_slt */
+	MEMBER_TO_FPTR(Perl_pp_sle),	/* Perl_pp_sgt */
 	MEMBER_TO_FPTR(Perl_pp_sle),
-	MEMBER_TO_FPTR(Perl_pp_sge),
+	MEMBER_TO_FPTR(Perl_pp_sle),	/* Perl_pp_sge */
 	MEMBER_TO_FPTR(Perl_pp_seq),
 	MEMBER_TO_FPTR(Perl_pp_sne),
 	MEMBER_TO_FPTR(Perl_pp_scmp),

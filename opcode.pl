@@ -77,6 +77,7 @@ my @raw_alias = (
                  Perl_pp_and => ['andassign'],
 		 Perl_pp_or => ['orassign'],
 		 Perl_pp_ucfirst => ['lcfirst'],
+		 Perl_pp_sle => [qw(slt sgt sge)],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {
