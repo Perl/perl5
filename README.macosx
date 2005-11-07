@@ -111,6 +111,11 @@ applications like Tk: in that case consider building shared Perl
 but remember that there's a startup cost to pay in that case (see above
 "libperl and Prebinding").
 
+Starting with Tiger (Mac OS X 10.4), Apple shipped broken locale files for
+the eu_ES locale (Basque-Spain).  When testing Perl, this will show up as
+test failues in the tests C<..lib/locale>.  Unless you require the
+eu_ES locale, you should be OK to install Perl.  If you do need this 
+locale, you should contact Apple support.
 
 =head2 MacPerl
 
