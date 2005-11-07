@@ -76,6 +76,7 @@ my @raw_alias = (
 		 Perl_pp_defined => [qw(dor dorassign)],
                  Perl_pp_and => ['andassign'],
 		 Perl_pp_or => ['orassign'],
+		 Perl_pp_ucfirst => ['lcfirst'],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {

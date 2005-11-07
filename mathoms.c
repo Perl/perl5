@@ -1015,6 +1015,11 @@ PP(pp_dorassign)
     return pp_defined();
 } 
 
+PP(pp_lcfirst)
+{
+    return pp_ucfirst();
+}
+
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {

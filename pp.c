@@ -3381,6 +3381,7 @@ PP(pp_ucfirst)
     SV *sv = TOPs;
     const U8 *s;
     STRLEN slen;
+    const int op_type = PL_op->op_type;
 
     SvGETMAGIC(sv);
     if (DO_UTF8(sv) &&
@@ -3391,17 +3392,21 @@ PP(pp_ucfirst)
 	STRLEN tculen;
 
 	utf8_to_uvchr(s, &ulen);
-	toTITLE_utf8(s, tmpbuf, &tculen);
+	if (op_type == OP_UCFIRST) {
+	    toTITLE_utf8(s, tmpbuf, &tculen);
+	} else {
+	    toLOWER_utf8(s, tmpbuf, &tculen);
+	}
 
 	if (!SvPADTMP(sv) || SvREADONLY(sv) || ulen != tculen) {
 	    dTARGET;
 	    /* slen is the byte length of the whole SV.
 	     * ulen is the byte length of the original Unicode character
 	     * stored as UTF-8 at s.
-	     * tculen is the byte length of the freshly titlecased
-	     * Unicode character stored as UTF-8 at tmpbuf.
-	     * We first set the result to be the titlecased character,
-	     * and then append the rest of the SV data. */
+	     * tculen is the byte length of the freshly titlecased (or
+	     * lowercased) Unicode character stored as UTF-8 at tmpbuf.
+	     * We first set the result to be the titlecased (/lowercased)
+	     * character, and then append the rest of the SV data. */
 	    sv_setpvn(TARG, (char*)tmpbuf, tculen);
 	    if (slen > ulen)
 	        sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
@@ -3427,65 +3432,11 @@ PP(pp_ucfirst)
 	    if (IN_LOCALE_RUNTIME) {
 		TAINT;
 		SvTAINTED_on(sv);
-		*s1 = toUPPER_LC(*s1);
+		*s1 = (op_type == OP_UCFIRST)
+		    ? toUPPER_LC(*s1) : toLOWER_LC(*s1);
 	    }
 	    else
-		*s1 = toUPPER(*s1);
-	}
-    }
-    SvSETMAGIC(sv);
-    RETURN;
-}
-
-PP(pp_lcfirst)
-{
-    dSP;
-    SV *sv = TOPs;
-    const U8 *s;
-    STRLEN slen;
-
-    SvGETMAGIC(sv);
-    if (DO_UTF8(sv) &&
-	(s = (const U8*)SvPV_nomg_const(sv, slen)) && slen &&
-	UTF8_IS_START(*s)) {
-	STRLEN ulen;
-	STRLEN lculen;
-	U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
-
-	utf8_to_uvchr(s, &ulen);
-	toLOWER_utf8(s, tmpbuf, &lculen);
-
-	if (!SvPADTMP(sv) || SvREADONLY(sv) || ulen != lculen) {
-	    dTARGET;
-	    sv_setpvn(TARG, (char*)tmpbuf, lculen);
-	    if (slen > ulen)
-	        sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
-	    SvUTF8_on(TARG);
-	    SETs(TARG);
-	}
-	else {
-	    s = (U8*)SvPV_force_nomg(sv, slen);
-	    Copy(tmpbuf, s, ulen, U8);
-	}
-    }
-    else {
-	U8 *s1;
-	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
-	    dTARGET;
-	    SvUTF8_off(TARG);				/* decontaminate */
-	    sv_setsv_nomg(TARG, sv);
-	    sv = TARG;
-	    SETs(sv);
-	}
-	s1 = (U8*)SvPV_force_nomg(sv, slen);
-	if (*s1) {
-	    if (IN_LOCALE_RUNTIME) {
-		TAINT;
-		SvTAINTED_on(sv);
-		*s1 = toLOWER_LC(*s1);
-	    }
-	    else
-		*s1 = toLOWER(*s1);
+		*s1 = (op_type == OP_UCFIRST) ? toUPPER(*s1) : toLOWER(*s1);
 	}
     }
     SvSETMAGIC(sv);
