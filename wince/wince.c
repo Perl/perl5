@@ -1937,15 +1937,8 @@ win32_get_childdir(void)
 {
     dTHX;
     char* ptr;
-    char szfilename[(MAX_PATH+1)*2];
-    if (USING_WIDE()) {
-	WCHAR wfilename[MAX_PATH+1];
-	GetCurrentDirectoryW(MAX_PATH+1, wfilename);
-	W2AHELPER(wfilename, szfilename, sizeof(szfilename));
-    }
-    else {
-	GetCurrentDirectoryA(MAX_PATH+1, szfilename);
-    }
+    char szfilename[MAX_PATH+1];
+    GetCurrentDirectoryA(MAX_PATH+1, szfilename);
 
     Newx(ptr, strlen(szfilename)+1, char);
     strcpy(ptr, szfilename);

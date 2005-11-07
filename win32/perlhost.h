@@ -2414,13 +2414,7 @@ CPerlHost::Chdir(const char *dirname)
 	errno = ENOENT;
 	return -1;
     }
-    if (USING_WIDE()) {
-	WCHAR wBuffer[MAX_PATH];
-	A2WHELPER(dirname, wBuffer, sizeof(wBuffer));
-	ret = m_pvDir->SetCurrentDirectoryW(wBuffer);
-    }
-    else
-	ret = m_pvDir->SetCurrentDirectoryA((char*)dirname);
+    ret = m_pvDir->SetCurrentDirectoryA((char*)dirname);
     if(ret < 0) {
 	errno = ENOENT;
     }

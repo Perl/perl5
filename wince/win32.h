@@ -404,22 +404,6 @@ DllExport int win32_async_check(pTHX);
 #define w32_use_showwindow	(PL_sys_intern.thr_intern.Wuse_showwindow)
 #define w32_showwindow		(PL_sys_intern.thr_intern.Wshowwindow)
 
-/* UNICODE<>ANSI translation helpers */
-/* Use CP_ACP when mode is ANSI */
-/* Use CP_UTF8 when mode is UTF8 */
-
-#define A2WHELPER_LEN(lpa, alen, lpw, nBytes)\
-    (lpw[0] = 0, MultiByteToWideChar((IN_BYTES) ? CP_ACP : CP_UTF8, 0, \
-				    lpa, alen, lpw, (nBytes/sizeof(WCHAR))))
-#define A2WHELPER(lpa, lpw, nBytes)	A2WHELPER_LEN(lpa, -1, lpw, nBytes)
-
-#define W2AHELPER_LEN(lpw, wlen, lpa, nChars)\
-    (lpa[0] = '\0', WideCharToMultiByte((IN_BYTES) ? CP_ACP : CP_UTF8, 0, \
-				       lpw, wlen, (LPSTR)lpa, nChars,NULL,NULL))
-#define W2AHELPER(lpw, lpa, nChars)	W2AHELPER_LEN(lpw, -1, lpa, nChars)
-
-#define USING_WIDE() (0)
-
 #ifdef USE_ITHREADS
 #  define PERL_WAIT_FOR_CHILDREN \
     STMT_START {							\
