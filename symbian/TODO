@@ -45,8 +45,6 @@
 
 - in S60 1.2 (at least in 3650 Nokia 3650 v3.11) setjmp/longjmp is
   fragile (see Symbian FAQ-0929), intensive debugging and fix needed
-- in S60 2.6 (at least in Nokia 6630 v4.03.11) launching scripts via
-  FExplorer does not open up the console
 
 =head2 Unicode
 
@@ -62,10 +60,13 @@
 =head2 Build
 
 - make xsbuild.pl much more robust (for building external extensions)
+  (see symbian\ext\README and symbian\ext\Moped\Msg\README)
+- now the .mmp functions both as input and as output - bad
 - MakeMaker?  Pure PM, PM + XS?
 - currently the PerlApp UID is in both config.pl (hardwired) and
   in makesis.pl (computed), this is quite error prone
-- Enable building also under Cygwin?
+- Enable building also under Cygwin? (could be really hard,
+  the Symbian SDKs pretty much assume cmd.exe)
 
 =head1 PACKAGING
 
@@ -85,28 +86,52 @@
 =head1 PerlApp
 
 - In "Run" see how one could show also the file extensions.
-- when autostarting also offer to display the file (via Notes?)
-  instead of installing/running it?
-- Allow passing command line options to scripts being run?
-- Add "OneLiner" menu item? (-e, -M) (requires a UI form)
-- Terminate/Pause menu entries?
+- How to allow passing command line options to scripts being run?
+- Terminate/Pause menu entries (to be used while the script is running)?
 - review for proper Symbian coding practices
 
-=head1 CORE LIBRARIES
+=head2 All UIs
 
-- Fix Devel::PPPort (worth it?) (Note that there is D::PPP 3.x out by now)
-- Fix Encode to not to have writeable data: seems to be tricky indeed
-  because of copious global non-const data.
-- Verify that the modified File::Spec::Win32 does work in Symbian.
-  (File::Spec::Epoc does not seem to be relevant?)
-- What does Cwd really do since the concept of cwd is a bit fuzzy in Symbian.
-- What should Sys::Hostname return?  GPRS? BT? WLAN?
-- ByteLoader problem: byterun.c does not see VERSION and XS_VERSION.
-- POSIX problem: STDLIB POSIX is not that POSIX.
+- Make it possible to call UI elements (or any other Symbianic
+  asynchronous services) from Perl.
 
-=head1 REGRESSION SUITE
+  There is now a sample of enabling calling CPerlUi::TextQueryDialogL()
+  from Perl as PerlApp::TextQuery(), see symbian_utils.c.  This, however,
+  does not work: calling the dialog code blocks so that the screen is not
+  redrawn at all.  Perl should do both: "yield" so that the GUI framework
+  can redraw, but in the meanwhile Perl should wait for the completion
+  (OK or Cancel) of the dialog.  Welcome to the wonderful world of cooperative
+  multitasking.  The right solution surely involves Active Objects.
+  The problem may require having a different Perl op dispatch
+  loop than the standard ones in run.c and debug.c.
 
-- how to run the standard test suite on a Symbian device?
+- menu/toolbar support
+- selection lists (single cf multi cf radio)
+- on/off (special case of two-item radio selection list)
+- forms (multicontrols)
+- "secret editor" (special case of text query)
+
+=head2 Series 60
+
+- in S60 2.6 (at least in Nokia 6630 v4.03.11) launching scripts via
+  FExplorer does not open up the console
+
+=head2 Series 80
+
+- On exit "PerlApp" gets Symbian USER Panic 44: "This panic is raised
+  by the Free() and FreeZ() member functions of an RHeap. It is caused
+  when the cell being freed overlaps the next cell on the free list
+  (i.e. the first cell on the free list with an address higher than the
+  one being freed)."  Reason unknown.
+- Hotkey Newline so that it functions as 'OK' in dialogs
+
+=head2 UIQ
+
+- UIQ 3.0? UIQ 2.0? (now only tried in UIQ 2.1)
+- UIQ, at least UIQ 2.1, does not have "file select dialogs" since
+  "files" are supposed to be hidden from the user.  Therefore, no
+  "Run" in PerlApp.  (For similar stylistic reasons there is no "Exit".)
+- Long notes (e.g. the EPerlAppCommandAbout) are shown badly truncated.
 
 =head1 CPAN LIBRARIES
 
@@ -115,7 +140,7 @@
    all of it, even after pm-stripping):
 	- libnet
 	- Bundle::CPAN
-		- Archive::Tar
+		- Archive::Tar (now included in 5.9.x)
 		- Term::ReadKey (useless?)
 		- Term::ReadLine (useless?)
 	- Bundle::LWP
@@ -137,11 +162,34 @@
 	- DBD::SQLite? (sqlite?)
 	- SOAP? XML-RPC?
 
+=head1 CORE LIBRARIES
+
+- Fix Devel::PPPort (worth it?) (Note that there is D::PPP 3.x out by now)
+- Fix Encode to not to have writeable data: seems to be tricky indeed
+  because of copious global non-const data.
+- Verify that the modified File::Spec::Win32 does work in Symbian.
+  (File::Spec::Epoc does not seem to be relevant?)
+- What does Cwd really do since the concept of cwd is a bit fuzzy in Symbian.
+- What should Sys::Hostname return?  GPRS? BT? WLAN?
+- ByteLoader problem: byterun.c does not see VERSION and XS_VERSION.
+- POSIX problem: STDLIB POSIX is not that POSIX.
+
+=head1 REGRESSION SUITE
+
+- how to run the standard test suite on a Symbian device?
+
 =head1 FUTURE POSSIBILITIES
 
+- GUI support (problematic that the MVC model enforces an "application")
+  (name suggestion: Moped::Gui)
+  (see above for the need of sorting out the Active Objectedness)
+- Messaging support (sms:, mms:, mailto:, irdaobex:, btobex:,
+  cell location, WLAN)
+  (name suggestion: Moped::Msg)
+- PDA support (address book)
+  (name suggestion: Moped::Msg)
+- Device support (memory, camera)
+  (name suggestion: Moped::Dev)
 - Remote console (Bluetooth/IR)
-- S60 GUI support
-- S60 PDA support
-- Phone APIs
-- S80
-- UIQ
+- Phone APIs (how to catch an incoming call: BIO messaging)
+

@@ -1,6 +1,8 @@
 /* Copyright (c) 2004-2005 Nokia. All rights reserved. */ 
 
-/* The PerlApp application is licensed under the same terms as Perl itself. */
+/* The PerlUi class is licensed under the same terms as Perl itself. */
+
+/* The S60 definitions. */
 
 NAME PERL
 
@@ -8,6 +10,7 @@ NAME PERL
 #include <avkon.rh>
 #include <avkon.rsg>
 
+#include "PerlUi.hrh"
 #include "PerlApp.hrh"
 
 RESOURCE RSS_SIGNATURE
@@ -63,7 +66,7 @@ RESOURCE MENU_PANE r_Perl_menu
         };
 }
 
-RESOURCE DIALOG r_ok_cancel_dialog
+RESOURCE DIALOG r_perlui_ok_cancel_dialog
 {
     flags = EEikDialogFlagWait | EEikDialogFlagCbaButtons;
     buttons = R_AVKON_SOFTKEYS_OK_CANCEL;
@@ -80,7 +83,7 @@ RESOURCE DIALOG r_ok_cancel_dialog
     };
 }
 
-RESOURCE DIALOG r_yes_no_dialog
+RESOURCE DIALOG r_perlui_yes_no_dialog
 {
     flags = EEikDialogFlagWait | EEikDialogFlagCbaButtons;
     buttons = R_AVKON_SOFTKEYS_YES_NO;
@@ -97,7 +100,7 @@ RESOURCE DIALOG r_yes_no_dialog
     };
 }
 
-RESOURCE DIALOG r_text_query_dialog
+RESOURCE DIALOG r_perlui_text_query_dialog
 {
     flags = EGeneralQueryFlags;
     buttons = R_AVKON_SOFTKEYS_OK_CANCEL;
@@ -115,7 +118,7 @@ RESOURCE DIALOG r_text_query_dialog
     }; 
 }
 
-RESOURCE AVKON_LIST_QUERY r_list_query_dialog
+RESOURCE AVKON_LIST_QUERY r_perlui_list_query_dialog
 {
     flags = EGeneralQueryFlags;
     softkeys = R_AVKON_SOFTKEYS_OK_CANCEL;
@@ -135,7 +138,7 @@ RESOURCE AVKON_LIST_QUERY r_list_query_dialog
 #include <CommonDialogs.hrh>
 #include <CommonDialogs.rh>
 
-RESOURCE MEMORYSELECTIONDIALOG r_memory_selection_dialog
+RESOURCE MEMORYSELECTIONDIALOG r_perlui_file_selection_dialog
 {
 }
 

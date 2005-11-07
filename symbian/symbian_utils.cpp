@@ -9,14 +9,21 @@
 #define SYMBIAN_UTILS_CPP
 #include <e32base.h>
 #include <e32std.h>
-// #include <textresolver.h> // textresolver not used since seems not to work
 #include <utf.h>
 #include <hal.h>
+
+#include <eikenv.h>
 
 #include <string.h>
 #include <ctype.h>
 
+#include "PerlUi.h"
 #include "PerlBase.h"
+#include "PerlUtil.h"
+
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
 
 extern "C" {
     EXPORT_C int symbian_sys_init(int *argcp, char ***argvp)
@@ -26,6 +33,43 @@ extern "C" {
 #endif
         (void)times(&PL_timesbase);
         return 0;
+    }
+    XS(XS_PerlApp_TextQuery) // Can't be made static because of XS().
+    {
+        dXSARGS;
+	if (items != 0)
+	    Perl_croak(aTHX_ "PerlApp::TextQuery: no arguments, please");
+	SP -= items;
+	// TODO: parse arguments for title, prompt, and maxsize.
+	// Suggested syntax:
+	// TextQuery(title => ..., prompt => ..., maxsize => ...)
+	// For an example see e.g. universal.c:XS_PerlIO_get_layers().
+	_LIT(KTitle,  "Title");
+	_LIT(KPrompt, "Prompt");
+        HBufC* cData = HBufC::New(KPerlUiOneLinerSize);
+	TBool cSuccess = EFalse;
+	if (cData) {
+	    TPtr cPtr(cData->Des());
+	    if (CPerlUi::TextQueryDialogL(KTitle,
+					  KPrompt,
+					  cPtr,
+					  KPerlUiOneLinerSize)) {
+	        ST(0) = sv_2mortal(PerlUtil::newSvPVfromTDesC16(*cData));
+		cSuccess = ETrue;
+	    }
+	    delete cData;
+	}
+	if (cSuccess)
+	    XSRETURN(1);
+	else
+	    XSRETURN_UNDEF;
+    }
+    EXPORT_C void init_os_extras(void)
+    {
+        dTHX;
+	char *file = __FILE__;
+	dXSUB_SYS;
+	newXS("PerlApp::TextQuery", XS_PerlApp_TextQuery, file);
     }
     EXPORT_C SSize_t symbian_read_stdin(const int fd, char *b, int n)
     {
@@ -185,10 +229,10 @@ extern "C" {
             return tmsbuf->tms_utime;
         }
     }
-    class CE32ProcessWait : public CActive
+    class CProcessWait : public CActive
     {
     public:
-        CE32ProcessWait() : CActive(EPriorityStandard) {
+        CProcessWait() : CActive(EPriorityStandard) {
           CActiveScheduler::Add(this);
         }
 #ifdef __WINS__
@@ -208,7 +252,6 @@ extern "C" {
       void RunL() {
           CActiveScheduler::Stop();
       }
-      CActiveSchedulerWait iWait;
     };
     class CSpawnIoRedirect : public CBase
     {
@@ -262,7 +305,7 @@ extern "C" {
 #endif
         if (error == KErrNone) {
             if ((TInt)aFlag & (TInt)ESpawnWait) {
-              CE32ProcessWait* w = new CE32ProcessWait();
+              CProcessWait* w = new CProcessWait();
               if (w) {
                   error = w->Wait(proc);
                   delete w;

@@ -2064,7 +2064,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     if (xsinit)
 	(*xsinit)(aTHX);	/* in case linked C routines want magical variables */
 #ifndef PERL_MICRO
-#if defined(VMS) || defined(WIN32) || defined(DJGPP) || defined(__CYGWIN__) || defined(EPOC)
+#if defined(VMS) || defined(WIN32) || defined(DJGPP) || defined(__CYGWIN__) || defined(EPOC) || defined(SYMBIAN)
     init_os_extras();
 #endif
 #endif

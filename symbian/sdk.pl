@@ -77,26 +77,26 @@ $ENV{UARM} = $UARM;
 
 # The following is a cheat sheet for the right S60/S80 SDK settings.
 #
-# macro.bat:
+# symbiancommon.bat:
 # set EPOC_BIN=%EPOCROOT%Epoc32\gcc\bin;%EPOCROOT%Epoc32\Tools
 # set MWCW=C:\Program Files\Metrowerks\CodeWarrior for Symbian OEM v2.8
 # set MSVC=C:\Program Files\Microsoft Visual Studio
-# set MSVC_BIN=%MSVC%\VC98\Bin;%MSVC%\Common\MSDev98\Bin
+# set MSVC_BIN=%MSVC%\VC98\Bin;%MSVC%\Aux\MSDev98\Bin
 # set MSVC_INC=%MSVC%\VC98\atl\include;%MSVC%\mfc\include;%MSVC%\include
 # set MSVC_LIB=%MSVC%\mfc\lib;%MSVC%\lib
 #
 # s60-1.2-cw:
 #
 # set EPOCROOT=\Symbian\Series60_1_2_CW\
-# macro
-# set PATH=%EPOC_BIN%;%MSVC_BIN%;%MWCW%\Bin;%MWCW%\Symbian_Tools\Command_Line_Tools;%PATH%
+# symbiancommon
+# set PATH=%EPOC_BIN%;%MSVC_BIN%;%MWCW%\Bin;%MWCW%\Symbian_Tools\Command_Line_Tools;%MSVC_BIN%;C:\perl\bin;C:\winnt\system32
 # set USERDEFS=%USERDEFS% -D__SERIES60_12__ -D__SERIES60_MAJOR__=1 -D__SERIES60_MINOR__=2 -D__SERIES60_1X__
 #
 # s60-1.2-vc:
 #
 # set EPOCROOT=\Symbian\6.1\Series60\
-# macro
-# set PATH=\Symbian\6.1\Shared\Epoc32\gcc\bin;\Symbian\6.1\Shared\Epoc32\Tools;%MSVC_BIN%;%PATH%
+# symbiancommon
+# set PATH=\Symbian\6.1\Shared\Epoc32\gcc\bin;\Symbian\6.1\Shared\Epoc32\Tools;%MSVC_BIN%;C:\perl\bin;C:\winnt\system32
 # set INCLUDE=%MSVC_INC%
 # set LIB=%MSVC_LIB%
 # set USERDEFS=%USERDEFS% -D__SERIES60_12__ -D__SERIES60_MAJOR__=1 -D__SERIES60_MINOR__=2 -D__SERIES60_1X__
@@ -105,16 +105,16 @@ $ENV{UARM} = $UARM;
 #
 # set EPOCROOT=\Symbian\7.0s\Series60_v20_CW\
 # set EPOCDEVICE=Series60_2_0_CW:com.Nokia.Series60_2_0_CW
-# macro
-# set PATH=%EPOC_BIN%;%MWCW%\Bin;%MWCW%\Symbian_Tools\Command_Line_Tools;%PATH%
+# symbiancommon
+# set PATH=%EPOC_BIN%;%MWCW%\Bin;%MWCW%\Symbian_Tools\Command_Line_Tools;%MSVC_BIN%;C:\perl\bin;C:\winnt\system32
 # set USERDEFS=%USERDEFS% -D__SERIES60_20__ -D__SERIES60_MAJOR__=2 -D__SERIES60_MINOR__=0 -D__SERIES60_2X__
 # 
 # s60-2.0-vc:
 #
 # set EPOCROOT=\Symbian\7.0s\Series60_v20\
 # set EPOCDEVICE=Series60_v20:com.nokia.series60
-# macro
-# set PATH=%EPOC_BIN%;%MSVC_BIN%;%PATH%
+# symbiancommon
+# set PATH=%EPOC_BIN%;%MSVC_BIN%;C:\perl\bin;C:\winnt\system32
 # set INCLUDE=%MSVC_INC%
 # set LIB=%MSVC_LIB%
 # set USERDEFS=%USERDEFS% -D__SERIES60_20__ -D__SERIES60_MAJOR__=2 -D__SERIES60_MINOR__=0 -D__SERIES60_2X__
@@ -123,24 +123,24 @@ $ENV{UARM} = $UARM;
 #
 # set EPOCROOT=\Symbian\7.0s\Series60_v21_CW\
 # set EPOCDEVICE=Series60_v21_CW:com.Nokia.series60
-# macro
-# set PATH=%EPOC_BIN%;%MWCW%\Bin;%MWCW%\Symbian_Tools\Command_Line_Tools;%PATH%
+# symbiancommon
+# set PATH=%EPOC_BIN%;%MWCW%\Bin;%MWCW%\Symbian_Tools\Command_Line_Tools;%MSVC_BIN%;C:\perl\bin;C:\winnt\system32
 # set USERDEFS=%USERDEFS% -D__SERIES60_21__ -D__SERIES60_MAJOR__=2 -D__SERIES60_MINOR__=1 -D__SERIES60_2X__
 # 
 # s60-2.6-cw:
 #
 # set EPOCROOT=\Symbian\8.0a\S60_2nd_FP2_CW\
 # set EPOCDEVICE=S60_2nd_FP2_CW:com.nokia.series60
-# macro
-# set PATH=%EPOC_BIN%;%MWCW%\Bin;%MWCW%\Symbian_Tools\Command_Line_Tools;%PATH%
+# symbiancommon
+# set PATH=%EPOC_BIN%;%MWCW%\Bin;%MWCW%\Symbian_Tools\Command_Line_Tools;%MSVC_BIN%;C:\perl\bin;C:\winnt\system32
 # set USERDEFS=%USERDEFS% -D__SERIES60_26__ -D__SERIES60_MAJOR__=2 -D__SERIES60_MINOR__=6 -D__SERIES60_2X__ -D__BLUETOOTH_API_V2__
 # 
 # s60-2.6-vc:
 #
 # set EPOCROOT=\Symbian\8.0a\S60_2nd_FP2\
 # set EPOCDEVICE=S60_2nd_FP2:com.nokia.Series60
-# macro
-# set PATH=%EPOC_BIN%;%MSVC_BIN%;%PATH%
+# symbiancommon
+# set PATH=%EPOC_BIN%;%MSVC_BIN%;C:\perl\bin;C:\winnt\system32
 # set INCLUDE=%MSVC_INC%
 # set LIB=%MSVC_LIB%
 # set USERDEFS=%USERDEFS% -D__SERIES60_26__ -D__SERIES60_MAJOR__=2 -D__SERIES60_MINOR__=6 -D__SERIES60_2X__ -D__BLUETOOTH_API_V2__
@@ -149,25 +149,37 @@ $ENV{UARM} = $UARM;
 #
 # set EPOCROOT=\Symbian\8.1a\S60_2nd_FP3\
 # set EPOCDEVICE=S60_2nd_FP3:com.nokia.series60
-# macro
-# set PATH=%EPOC_BIN%;%MWCW%\Bin;%MWCW%\Symbian_Tools\Command_Line_Tools;%PATH%
+# symbiancommon
+# set PATH=%EPOC_BIN%;%MWCW%\Bin;%MWCW%\Symbian_Tools\Command_Line_Tools;%MSVC_BIN%;C:\perl\bin;C:\winnt\system32
 # set USERDEFS=%USERDEFS% -D__SERIES60_28__ -D__SERIES60_MAJOR__=2 -D__SERIES60_MINOR__=8 -D__SERIES60_2X__ -D__BLUETOOTH_API_V2__
 # 
 # s80-2.0-cw:
 #
 # set EPOCROOT=\Symbian\7.0s\S80_DP2_0_SDK_CW\
 # set EPOCDEVICE=Series80_DP2_0_SDK_CW:com.nokia.Series80
-# macro
-# set PATH=%EPOC_BIN%;%MWCW%\Bin;%MWCW%\Symbian_Tools\Command_Line_Tools;%PATH%
+# symbiancommon
+# set PATH=%EPOC_BIN%;%MWCW%\Bin;%MWCW%\Symbian_Tools\Command_Line_Tools;%MSVC_BIN%;C:\perl\bin;C:\winnt\system32
 # set USERDEFS=%USERDEFS% -D__SERIES80_20__ -D__SERIES80_MAJOR__=2 -D__SERIES80_MINOR__=0 -D__SERIES80_2X__
 #
 # s80-2.0-vc:
 #
 # set EPOCROOT=\Symbian\7.0s\S80_DP2_0_SDK\
 # set EPOCDEVICE=Series80_DP2_0_SDK:com.nokia.Series80
-# macro
-# set PATH=%EPOC_BIN%;%MWCW%\Bin;%MWCW%\Symbian_Tools\Command_Line_Tools;%PATH%
+# symbiancommon
+# set PATH=%EPOC_BIN%;%MWCW%\Bin;%MWCW%\Symbian_Tools\Command_Line_Tools;%MSVC_BIN%;C:\perl\bin;C:\winnt\system32
 # set USERDEFS=%USERDEFS% -D__SERIES80_20__ -D__SERIES80_MAJOR__=2 -D__SERIES80_MINOR__=0 -D__SERIES80_2X__
+#
+# UIQ-2.1-vc:
+# set EPOCROOT=\Symbian\UIQ_21\
+# set EPOCDEVICE=
+# set EPOC_BIN=%EPOCROOT%Epoc32\gcc\bin;%EPOCROOT%Epoc32\Tools
+# set MWCW=C:\APPS\codewarrior_3.0
+# set MSVC=C:\Program Files\Microsoft Visual Studio
+# set MSVC_BIN=%MSVC%;%MSVC%\Common\MSDev98\Bin
+# set MSVC_INC=%MSVC%\VC98\atl\include;%MSVC%\mfc\include;%MSVC%\include
+# set MSVC_LIB=%MSVC%\mfc\lib;%MSVC%\lib
+# set PATH=%EPOC_BIN%;%MWCW%\Bin;%MWCW%\Symbian_Tools\Command_Line_Tools;%MSVC_BIN%;C:\perl\bin;C:\winnt\system32
+# set USERDEFS=%USERDEFS% -D__UIQ_21__ -D__UIQ_MAJOR__=2 -D__UIQ_MINOR__=1 -D__UIQ_2X__
 #
 # EOF
 

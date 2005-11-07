@@ -47,7 +47,7 @@ class CPerlBase : public CBase
   public:
     CPerlBase();
     IMPORT_C virtual ~CPerlBase();
-    IMPORT_C static CPerlBase* NewInterpreterL(TBool iCloseStdlib = ETrue,
+    IMPORT_C static CPerlBase* NewInterpreterL(TBool aCloseStdlib = ETrue,
                                                void (*aStdioInitFunc)(void*) = NULL,
                                                void *aStdioInitCookie = NULL);
     IMPORT_C static CPerlBase* NewInterpreterLC(TBool iCloseStdlib = ETrue,
@@ -84,7 +84,6 @@ class CPerlBase : public CBase
     TPerlState        iState;
 
    private:
- 
     void              ConstructL();
     CConsoleBase*     iConsole;		/* The screen. */
     TUint16*          iConsoleBuffer;	/* The UTF-16 characters. */
@@ -113,6 +112,13 @@ class CPerlBase : public CBase
 #define PerlCopy(s,d,n,t)	(MEM_WRAP_CHECK(n,t), (void)memcpy((char*)(d),(char*)(s), (n) * sizeof(t)))
 #define PerlCopyD(s,d,n,t)	(MEM_WRAP_CHECK(n,t), memcpy((char*)(d),(char*)(s), (n) * sizeof(t)))
 #define PerlNew(x,v,n,t)	(v = (MEM_WRAP_CHECK(n,t), (t*)safemalloc((MEM_SIZE)((n)*sizeof(t)))))
+
+// This is like the Symbian _LIT() but without the embedded L prefix,
+// which enables using #defined constants (which need to carry their
+// own L prefix).
+#ifndef _LIT_NO_L
+# define _LIT_NO_L(n, s) static const TLitC<sizeof(s)/2> n={sizeof(s)/2-1,s}
+#endif // #ifndef _LIT_NO_L
 
 #endif /* #ifndef __PerlBase_h__ */
 

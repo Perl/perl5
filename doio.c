@@ -1577,11 +1577,11 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
        platforms where kill was not defined.  */
 #ifndef HAS_KILL
     if (type == OP_KILL)
-	DIE(aTHX_ PL_no_func, "kill");
+	Perl_die(aTHX_ PL_no_func, "kill");
 #endif
 #ifndef HAS_CHOWN
     if (type == OP_CHOWN)
-	DIE(aTHX_ PL_no_func, "chown");
+	Perl_die(aTHX_ PL_no_func, "chown");
 #endif
 
 

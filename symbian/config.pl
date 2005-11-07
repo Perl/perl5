@@ -113,6 +113,9 @@ SYSTEMINCLUDE	\\epoc32\\include\\libc
 SYSTEMINCLUDE	\\epoc32\\include
 LIBRARY		euser.lib
 LIBRARY		estlib.lib
+LIBRARY		eikcore.lib
+LIBRARY		cone.lib
+LIBRARY		efsrv.lib
 __EOF__
         if ( $miniperl || $perl || $type eq 'dll' ) {
             print $fh <<__EOF__;
@@ -126,6 +129,28 @@ __EOF__
 LIBRARY		commonengine.lib
 __EOF__
 	}
+	if (defined $S60SDK) {
+	    print $fh <<__EOF__;
+LIBRARY		avkon.lib
+LIBRARY		commondialogs.lib 
+__EOF__
+        }
+	if (defined $S80SDK) {
+	    print $fh <<__EOF__;
+LIBRARY		eikctl.lib
+LIBRARY		eikcoctl.lib
+LIBRARY		eikdlg.lib
+LIBRARY		ckndlg.lib
+__EOF__
+        }
+	if (defined $UIQSDK) {
+	    print $fh <<__EOF__;
+LIBRARY		eikctl.lib
+LIBRARY		eikcoctl.lib
+LIBRARY		eikdlg.lib
+LIBRARY		qikctl.lib
+__EOF__
+        }
         if ( $type eq 'exe' ) {
             print $fh <<__EOF__;
 STATICLIBRARY	ecrt0.lib
@@ -150,6 +175,7 @@ __EOF__
             print $fh <<__EOF__;
 MACRO		PERL_GLOBAL_STRUCT
 MACRO		PERL_GLOBAL_STRUCT_PRIVATE
+RESOURCE	symbian\\PerlUi.rss
 __EOF__
         }
         close $fh;
@@ -219,7 +245,7 @@ sub create_config_h {
 __EOF__
             while (<CONFIG_H_SH>) {
                 last if /!GROK!THIS/;
-                s/\$(\w+)/exists $config{$1} ? $config{$1} : ""/eg;
+                s/\$(\w+)/exists $config{$1} ? $config{$1} : (warn "$0: config.sh missing '$1'\n", "")/eg;
                 s/^#undef\s+(\S+).+/#undef $1/g;
                 s:\Q/**/::;
                 print CONFIG_H;
@@ -355,13 +381,16 @@ create_mmp(
     'miniperl',             'exe',
     'miniperlmain.c',       'symbian\symbian_stubs.c',
     'symbian\PerlBase.cpp',
+    'symbian\PerlUi.cpp',
     'symbian\PerlUtil.cpp',
     'symbian\symbian_utils.cpp',
 );
 create_mmp(
     "perl",                      'exe',
     'perlmain.c',                'symbian\symbian_stubs.c',
-    'symbian\symbian_utils.cpp', 'symbian\PerlBase.cpp',
+    'symbian\symbian_utils.cpp',
+    'symbian\PerlBase.cpp',
+    'symbian\PerlUi.cpp',
     'symbian\PerlUtil.cpp',
     'ext\DynaLoader\DynaLoader.cpp',
 );
@@ -369,7 +398,9 @@ create_mmp(
 create_mmp(
     "perl$VERSION",              'dll',
     'symbian\symbian_dll.cpp',   'symbian\symbian_stubs.c',
-    'symbian\symbian_utils.cpp', 'symbian\PerlBase.cpp',
+    'symbian\symbian_utils.cpp',
+    'symbian\PerlBase.cpp',
+    'symbian\PerlUi.cpp',
     'symbian\PerlUtil.cpp',
     'ext\DynaLoader\DynaLoader.cpp',
 );
@@ -384,6 +415,8 @@ create_PerlApp_pkg();
 if ( open( PERLAPP_MMP, ">symbian/PerlApp.mmp" ) ) {
     my @MACRO;
     my @LIB;
+    push @MACRO, 'PERL_IMPLICIT_CONTEXT';
+    push @MACRO, 'MULTIPLICITY';
     if (defined $S60SDK) {
         push @MACRO, '__SERIES60__';
         push @MACRO, '__SERIES60_1X__' if $S60SDK =~ /^1\./;
@@ -428,8 +461,6 @@ EXPORTUNFROZEN
 SOURCEPATH        .
 SOURCE            PerlApp.cpp 
 
-RESOURCE          PerlApp.rss
-
 USERINCLUDE       .
 USERINCLUDE       ..
 USERINCLUDE       \\symbian\\perl\\$R_V_SV\\include
@@ -440,14 +471,14 @@ SYSTEMINCLUDE     \\epoc32\\include\\libc
 LIBRARY           apparc.lib
 LIBRARY           bafl.lib
 LIBRARY           charconv.lib 
-LIBRARY           cone.lib 
+LIBRARY           cone.lib
 LIBRARY           efsrv.lib
-LIBRARY           eikcore.lib 
+LIBRARY           eikcore.lib
 LIBRARY           estlib.lib 
 LIBRARY           euser.lib
 LIBRARY           perl$VERSION.lib
 @LIB
-
+RESOURCE          perlapp.rss
 __EOF__
     if (@MACRO) {
 	for my $macro (@MACRO) {
@@ -474,6 +505,7 @@ if ( open( MAKEFILE, ">Makefile" ) ) {
     my $windef2 = "..\\BWINS\\${perl}u.def";
     my $armdef1 = "$SYMBIAN_ROOT\\Epoc32\\Build$CWD\\$perl\\$ARM\\$perl.def";
     my $armdef2 = "..\\BMARM\\${perl}u.def";
+    my $MF = $WIN eq 'wins' ? 'vc6' : $WIN eq 'winscw' ? 'cw_ide' : "UNKNOWN";
     print "\tMakefile\n";
     print MAKEFILE <<__EOF__;
 help:
@@ -492,30 +524,30 @@ build:	rename_makedef build_${WIN} build_arm
 @unclean: symbian\\config.pl
 	perl symbian\\config.pl
 
-build_${WIN}:	abld.bat ${WIN}_perl.mf ${WIN}_miniperl.mf ${WIN}_${VERSION}.mf perldll_${WIN}
+build_${WIN}:	abld.bat perldll_${WIN}
 
-build_vc6:	abld.bat ${WIN}_perl.mf ${WIN}_miniperl.mf ${WIN}_${VERSION}.mf vc6.mf perldll_wins
+build_vc6:	abld.bat perldll_wins
 
-build_vc7:	abld.bat ${WIN}_perl.mf ${WIN}_miniperl.mf ${WIN}_${VERSION}.mf vc7.mf perldll_wins
+build_vc7:	abld.bat perldll_wins
 
-build_cw:	abld.bat ${WIN}_perl.mf ${WIN}_miniperl.mf ${WIN}_${VERSION}.mf cw.mf perldll_winscw
+build_cw:	abld.bat perldll_winscw
 
-build_arm:	abld.bat perl_arm miniperl_arm arm_${VERSION}.mf perldll_arm
+build_arm:	abld.bat perl_arm miniperl_arm perldll_arm
 
-miniperl_win miniperl_${WIN}:	miniperl.mmp abld.bat ${WIN}_miniperl.mf rename_makedef
+miniperl_win miniperl_${WIN}:	miniperl.mmp abld.bat rename_makedef
 	abld build ${WIN} udeb miniperl
 
-miniperl_arm:	miniperl.mmp abld.bat arm_miniperl.mf rename_makedef
+miniperl_arm:	miniperl.mmp abld.bat rename_makedef
 	abld build \$(ARM) $UARM miniperl
 
 miniperl:	miniperl_${WIN} miniperl_arm
 
 perl:	perl_${WIN} perl_arm
 
-perl_win perl_${WIN}:	perl.mmp abld.bat ${WIN}_perl.mf rename_makedef
+perl_win perl_${WIN}:	perl.mmp abld.bat rename_makedef
 	abld build ${WIN} perl
 
-perl_arm:	perl.mmp abld.bat arm_perl.mf rename_makedef
+perl_arm:	perl.mmp abld.bat rename_makedef
 	abld build \$(ARM) $UARM perl
 
 perldll_win perldll_${WIN}: perl${VERSION}_${WIN} freeze_${WIN} perl${VERSION}_${WIN}
@@ -525,7 +557,7 @@ perl${VERSION}_win perl${VERSION}_${WIN}:	perl$VERSION.mmp abld.bat rename_maked
 
 perldll_arm: perl${VERSION}_arm freeze_arm perl${VERSION}_arm
 
-perl${VERSION}_arm:	perl$VERSION.mmp arm_${VERSION}.mf abld.bat rename_makedef
+perl${VERSION}_arm:	perl$VERSION.mmp abld.bat rename_makedef
 	abld build \$(ARM) $UARM perl$VERSION
 
 perldll perl$VERSION:	perldll_${WIN} perldll_arm
@@ -542,10 +574,11 @@ rename_makedef:
 rerename_makedef:
 	-ren nomakedef.pl makedef.pl
 
-abld.bat abld: bld.inf
-	bldmake bldfiles
+symbian\\PerlUi.rss: symbian\\PerlUi$SDK_VARIANT.rss
+	copy symbian\\PerlUi$SDK_VARIANT.rss symbian\\PerlUi.rss
 
-makefiles: win.mf arm.mf vc6 vc7.mf cw.mf
+abld.bat abld: bld.inf symbian\\PerlUi.rss
+	bldmake bldfiles
 
 vc6:	win.mf vc6.mf build_vc6
 
@@ -554,15 +587,15 @@ vc7:	win.mf vc7.mf build_vc7
 cw:	win.mf cw.mf build_cw
 
 ${WIN}_miniperl.mf: abld.bat symbian\\config.pl
-	abld makefile ${WIN} miniperl
+	abld makefile ${MF} miniperl
 	echo > ${WIN}_miniperl.mf
 
 ${WIN}_perl.mf: abld.bat symbian\\config.pl
-	abld makefile ${WIN} perl
+	abld makefile ${MF} perl
 	echo > ${WIN}_perl.mf
 
 ${WIN}_${VERSION}.mf: abld.bat symbian\\config.pl
-	abld makefile ${WIN} perl${VERSION}
+	abld makefile ${MF} perl${VERSION}
 	echo > ${WIN}_${VERSION}.mf
 
 symbian\\${WIN}.mf:
@@ -571,15 +604,12 @@ symbian\\${WIN}.mf:
 ${WIN}.mf: ${WIN}_miniperl.mf ${WIN}_perl.mf ${WIN}_${VERSION}.mf symbian\\${WIN}.mf
 
 arm_miniperl.mf: abld.bat symbian\\config.pl
-	abld makefile \$(ARM) miniperl
 	echo > arm_miniperl.mf
 
 arm_perl.mf: abld.bat symbian\\config.pl
-	abld makefile \$(ARM) perl
 	echo > arm_perl.mf
 
 arm_${VERSION}.mf: abld.bat symbian\\config.pl
-	abld makefile \$(ARM) perl${VERSION}
 	echo > arm_${VERSION}.mf
 
 arm.mf: arm_miniperl.mf arm_perl.mf arm_${VERSION}.mf
@@ -694,6 +724,7 @@ sdkinstall:
 	copy /y symbian\\xsbuild.pl    \$(APIDIR)\\bin
 	copy /y symbian\\sisify.pl     \$(APIDIR)\\bin
 	copy /y symbian\\PerlBase.h    \$(APIDIR)\\include
+	copy /y symbian\\PerlUi.h      \$(APIDIR)\\include
 	copy /y symbian\\PerlUtil.h    \$(APIDIR)\\include
 	copy /y symbian\\symbian*.h    \$(APIDIR)\\include\\symbian
 	copy /y symbian\\PerlBase.pod  \$(APIDIR)\\pod
@@ -782,8 +813,8 @@ clean:	clean_${WIN} clean_arm rerename_makedef
 	-del /f abld.bat @unclean *.pkg *.sis *.zip
 	-del /f symbian\\abld.bat symbian\\*.sis symbian\\*.zip
 	-del /f symbian\\perl5*.pkg symbian\\miniperl.pkg
-	-del /f symbian\\PerlApp.rss
 	-del arm_*.mf ${WIN}_*.mf vc*.mf cw*.mf
+	-del symbian\\PerlUi.rss
 	-del perlappmin.hex perlrscmin.hex
 	-perl symbian\\xsbuild.pl \$(XSBOPT) --clean \$(EXT)
 	-rmdir /s /q perl${VERSION}_Data
@@ -813,29 +844,32 @@ if ( open( MAKEFILE, ">symbian/Makefile")) {
     my $wrap = defined $S60SDK && $S60SDK eq '1.2' && $WIN ne '${WIN}cw';
     my $ABLD = $wrap ? 'perl b.pl': 'abld';
     print "\tsymbian/Makefile\n";
+    my $MF = $WIN eq 'wins' ? 'vc6' : $WIN eq 'winscw' ? 'cw_ide' : "UNKNOWN";
     print MAKEFILE <<__EOF__;
 WIN = $WIN
 ARM = $ARM
 ABLD = $ABLD
+MF = $MF
 
 abld.bat:
 	bldmake bldfiles
 
 perlapp_${WIN}: abld.bat ..\\config.h PerlApp.h PerlApp.cpp
+	copy PerlUi$SDK_VARIANT.rss PerlApp.rss
 	bldmake bldfiles
-	copy PerlApp$SDK_VARIANT.rss PerlApp.rss
 	\$(ABLD) build ${WIN} udeb
 
 perlapp_arm: ..\\config.h PerlApp.h PerlApp.cpp
+	copy PerlUi$SDK_VARIANT.rss PerlApp.rss
 	bldmake bldfiles
-	copy PerlApp$SDK_VARIANT.rss PerlApp.rss
 	\$(ABLD) build ${ARM} $UARM
+
+$MF:
+	abld makefile $MF
 
 win.mf:
 	bldmake bldfiles
-	abld makefile vc6
-	abld makefile vc7
-	abld makefile cw_ide
+	abld makefile $MF
 
 perlapp_demo_extract:
 	perl demo_pl extract
@@ -849,6 +883,7 @@ clean:
 	-perl demo_pl cleanup
 	-del /f perlapp.sis
 	-del /f b.pl
+	-del PerlApp.rss
 	abld clean $WIN
 	abld clean thumb
 

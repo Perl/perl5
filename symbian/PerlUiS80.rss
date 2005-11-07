@@ -1,12 +1,15 @@
 /* Copyright (c) 2004-2005 Nokia. All rights reserved. */ 
 
-/* The PerlApp application is licensed under the same terms as Perl itself. */
+/* The PerlUi class is licensed under the same terms as Perl itself. */
+
+/* The S80 definitions. */
 
 NAME PERL
 
 #include <eikon.rh>
 #include <eikon.rsg>
 
+#include "PerlUi.hrh"
 #include "PerlApp.hrh"
 
 RESOURCE RSS_SIGNATURE
@@ -20,11 +23,11 @@ RESOURCE TBUF r_default_document_name
 
 RESOURCE EIK_APP_INFO
 {
-    menubar = r_Perl_menubar;
-    cba = r_Perl_cba;
+    menubar = r_perlui_menubar;
+    cba = r_perlui_cba;
 }
 
-RESOURCE CBA r_Perl_cba
+RESOURCE CBA r_perlui_cba
 {
     buttons = {
         CBA_BUTTON { id = EPerlAppCommandRunFile;        txt = "Run"; },
@@ -35,18 +38,18 @@ RESOURCE CBA r_Perl_cba
 }
 
 
-RESOURCE MENU_BAR r_Perl_menubar
+RESOURCE MENU_BAR r_perlui_menubar
 {
     titles = {
         MENU_TITLE
             {
-            menu_pane = r_Perl_menu; txt = "Options";
+            menu_pane = r_perlui_menu; txt = "Options";
             }
     };
 }
 
 
-RESOURCE MENU_PANE r_Perl_menu
+RESOURCE MENU_PANE r_perlui_menu
 {
     items = {
         MENU_ITEM {
@@ -72,8 +75,7 @@ RESOURCE MENU_PANE r_Perl_menu
         };
 }
 
-
-RESOURCE DIALOG r_Perl_oneliner_dialog
+RESOURCE DIALOG r_perlui_oneliner_dialog
 {
     title = "Title";
     buttons = R_EIK_BUTTONS_CANCEL_OK;
@@ -82,7 +84,7 @@ RESOURCE DIALOG r_Perl_oneliner_dialog
         DLG_LINE {
             type = EEikCtEdwin;
 	    prompt = "Prompt";
-            id = EPerlAppTextQueryInputField;
+            id = EPerlUiTextQueryInputField;
             control = EDWIN {
                 width = 10;
                 maxlength = 128;

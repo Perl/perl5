@@ -2647,6 +2647,13 @@ symbian/config.pl		Configuration script for Symbian
 symbian/config.sh		Configuration data for Symbian
 symbian/cwd.pl			Helper code for config.pl
 symbian/demo_pl			"Archive" of demo code
+symbian/ext/Moped/Msg/bld.inf	Demo extension build configuraion
+symbian/ext/Moped/Msg/location.pl	Demo extension script
+symbian/ext/Moped/Msg/Msg.mmp	Demo extension building
+symbian/ext/Moped/Msg/Msg.pkg	Demo extension packaging
+symbian/ext/Moped/Msg/Msg.pm	Demo extension Perl glue
+symbian/ext/Moped/Msg/Msg.xs	Demo extension code
+symbian/ext/Moped/Msg/README	Demo extension documentation
 symbian/find_writeable_data.pl	Development utility
 symbian/hexdump.pl		Helper for sisify.pl updating
 symbian/install.cfg		Installation instructions
@@ -2655,14 +2662,17 @@ symbian/PerlAppAif.rss		Symbian app launcher code
 symbian/PerlApp.cpp		Symbian app launcher code
 symbian/PerlApp.h		Symbian app launcher header
 symbian/PerlApp.hrh		Symbian app launcher resource header
-symbian/PerlAppS60.rss		Symbian app launcher resource definition
-symbian/PerlAppS80.rss		Symbian app launcher resource definition
-symbian/PerlAppUIQ.rss		Symbian app launcher resource definition
 symbian/PerlBase.cpp		Symbian Perl base class
 symbian/PerlBase.h		Symbian Perl base class header
 symbian/PerlBase.pod		Symbian Perl base class documentation
 symbian/PerlRecog.cpp		Symbian recognizer code
 symbian/PerlRecog.mmp		Symbian recognizer build
+symbian/PerlUi.cpp		Symbian Perl UI class
+symbian/PerlUi.h		Symbian Perl UI class header
+symbian/PerlUi.hrh		Symbian Perl UI class resource header
+symbian/PerlUiS60.rss		Symbian app launcher resource definition
+symbian/PerlUiS80.rss		Symbian app launcher resource definition
+symbian/PerlUiUIQ.rss		Symbian app launcher resource definition
 symbian/PerlUtil.cpp		Symbian Perl utility class
 symbian/PerlUtil.h		Symbian Perl utility class header
 symbian/PerlUtil.pod		Symbian Perl utility class documentation

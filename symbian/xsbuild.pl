@@ -35,8 +35,9 @@ my $Sis;
 sub usage {
     die <<__EOF__;
 $0: Usage: $0 [--symbian=version] [--perl=version]
-              [--csuffix=csuffix] [--cplusplus]
-	      [--win=win] [--arm=arm]
+              [--extversion=x.y]
+              [--csuffix=csuffix] [--cplusplus|--cpp]
+              [--win=win] [--arm=arm]
               [--config|--build|--clean|--distclean|--sis] ext
 __EOF__
 }
@@ -73,19 +74,22 @@ if ($CoreBuild) {
     $PerlVersion    = $R_V_SV;
 }
 
+my %CONF;
+
 usage()
   unless GetOptions(
-    'symbian=s' => \$SymbianVersion,
-    'perl=s'    => \$PerlVersion,
-    'csuffix=s' => \$CSuffix,
-    'cplusplus' => \$CPlusPlus,
-    'win=s'     => \$WIN,
-    'arm=s'     => \$ARM,
-    'config'    => \$Config,
-    'build'     => \$Build,
-    'clean'     => \$Clean,
-    'distclean' => \$DistClean,
-    'sis'       => \$Sis
+    'symbian=s'     => \$SymbianVersion,
+    'perl=s'        => \$PerlVersion,
+    'extversion=s'  => \$CONF{EXTVERSION},
+    'csuffix=s'     => \$CSuffix,
+    'cplusplus|cpp' => \$CPlusPlus,
+    'win=s'         => \$WIN,
+    'arm=s'         => \$ARM,
+    'config'        => \$Config,
+    'build'         => \$Build,
+    'clean'         => \$Clean,
+    'distclean'     => \$DistClean,
+    'sis'           => \$Sis
   );
 
 usage() unless @ARGV;
@@ -128,7 +132,6 @@ if (exists $ENV{UREL}) {
     $SRCDBG = $UARM eq 'udeb' ? "SRCDBG" : "";
 }
 
-my %CONF;
 my %EXTCFG;
 
 sub write_bld_inf {
@@ -689,7 +692,7 @@ sub update_cwd {
 for my $ext (@ARGV) {
 
     $ext =~ s!::!\\!g;
-    my $extdash = "ext\\$ext"; $extdash =~ s!\\!-!g;
+    my $extdash = $ext =~ /ext\\/ ? $ext : "ext\\$ext"; $extdash =~ s!\\!-!g;
     $ext =~ s!/!\\!g;
 
     my $cfg;

@@ -143,7 +143,7 @@ pid_t wait(int *status);
 
 #undef PERL_EXPORT_C
 #define PERL_EXPORT_C EXPORT_C /* for perlio.h */
-#define PERL_CALLCONV EXPORT_C /* for prototype.h */
+#define PERL_CALLCONV EXPORT_C /* for proto.h */
 #undef PERL_XS_EXPORT_C
 #define PERL_XS_EXPORT_C EXPORT_C
 

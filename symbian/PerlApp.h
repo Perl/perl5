@@ -5,30 +5,7 @@
 #ifndef __PerlApp_h__
 #define __PerlApp_h__
 
-#ifdef __SERIES60__
-# include <aknapp.h>
-# include <aknappui.h>
-# include <akndoc.h>
-#endif /* #ifdef __SERIES60__ */
-
-#ifdef __SERIES80__
-# include <eikapp.h>
-# include <eikappui.h>
-# include <eikdoc.h>
-# include <eikbctrl.h>
-# include <eikgted.h>
-# include <eikdialg.h>
-#endif /* #ifdef __SERIES60__ */
-
-#ifdef __UIQ__
-# include <qikapplication.h>
-# include <qikappui.h>
-# include <qikdocument.h>
-# include <eikdialg.h>
-#endif /* #ifdef __UIQ____ */
-
-#include <coecntrl.h>
-#include <f32file.h>
+#include "PerlUi.h"
 
 /* The source code can be compiled into "PerlApp" which is the simple
  * launchpad application/demonstrator, or into "PerlAppMinimal", which
@@ -58,34 +35,10 @@
 # endif
 #endif
 
-#ifdef __SERIES60__
-# define CMyDocument    CAknDocument
-# define CMyApplication CAknApplication
-# define CMyAppUi       CAknAppUi
-# define CMyNoteDialog  CAknNoteDialog
-# define CMyAppView     CCoeControl
-#endif /* #ifdef __SERIES60__ */
-
-#ifdef __SERIES80__
-# define CMyDocument    CEikDocument
-# define CMyApplication CEikApplication
-# define CMyAppUi       CEikAppUi
-# define CMyNoteDialog  CCknFlashingDialog
-# define CMyAppView     CEikBorderedControl
-#endif /* #ifdef __SERIES60__ */
-
-#ifdef __UIQ__
-# define CMyDocument    CEikDocument
-# define CMyApplication CQikApplication
-# define CMyAppUi       CQikAppUi
-# define CMyNoteDialog  CCknFlashingDialog
-# define CMyAppView     CCoeControl
-#endif /* #ifdef __UIQ__ */
-
-class CPerlAppDocument : public CMyDocument
+class CPerlAppDocument : public CgPerlUiDocument
 {
   public:
-    CPerlAppDocument(CEikApplication& aApp):CMyDocument(aApp) {;}
+    CPerlAppDocument(CEikApplication& aApp) : CgPerlUiDocument(aApp) {;}
 #ifndef PerlAppMinimal
     CFileStore* OpenFileL(TBool aDoOpen, const TDesC& aFilename, RFs& aFs);
 #endif // #ifndef PerlAppMinimal
@@ -93,67 +46,36 @@ class CPerlAppDocument : public CMyDocument
     CEikAppUi* CreateAppUiL();
 };
 
-class CPerlAppApplication : public CMyApplication
+class CPerlAppApplication : public CPerlUiApplication
 {
   private:
     CApaDocument* CreateDocumentL();
     TUid AppDllUid() const;
 };
 
-const TUint KPerlAppPromptSize   = 20;
-const TUint KPerlAppOneLinerSize = 128;
+class CPerlAppAppView;
 
-class CPerlAppView;
-
-class CPerlAppUi : public CMyAppUi
+class CPerlAppAppUi : public CPerlUiAppUi
 {
   public:
-    void ConstructL();
-     ~CPerlAppUi();
     TBool ProcessCommandParametersL(TApaCommand aCommand, TFileName& aDocumentName, const TDesC8& aTail);
-    void HandleCommandL(TInt aCommand);
+    void DoHandleCommandL(TInt aCommand);
 #ifndef PerlAppMinimal
     void OpenFileL(const TDesC& aFileName);
     void InstallOrRunL(const TFileName& aFileName);
     void SetFs(const RFs& aFs);
 #endif // #ifndef PerlAppMinimal
-    TBuf<KPerlAppOneLinerSize> iOneLiner; // Perl source code to evaluate.
-    CPerlAppView* iAppView;
+    ~CPerlAppAppUi();
   private:
     RFs* iFs;
 };
 
-class CPerlAppView : public CMyAppView
+class CPerlAppAppView : public CPerlUiAppView
 {
   public:
-    static CPerlAppView* NewL(const TRect& aRect);
-    static CPerlAppView* NewLC(const TRect& aRect);
-    ~CPerlAppView();
-    void Draw(const TRect& aRect) const;
 #if defined(__SERIES80__) || defined(__UIQ__)
     void HandleCommandL(TInt aCommand);
 #endif /* #if defined(__SERIES80__) || defined(__UIQ__) */
-  private:
-    void ConstructL(const TRect& aRect);
 };
-
-#if defined(__SERIES80__) || defined(__UIQ__)
-
-class CPerlAppTextQueryDialog : public CEikDialog
-{
-  public:
-    CPerlAppTextQueryDialog(HBufC*& aBuffer);
-    /* TODO: OfferKeyEventL() so that newline can be seen as 'OK'. */
-    HBufC*& iData;
-    TPtrC iTitle;  // used in S80 but not in S60
-    TPtrC iPrompt; // used in S60 and S80
-    TInt iMaxLength;
-  protected:
-    void PreLayoutDynInitL();
-  private:
-    TBool OkToExitL(TInt aKeycode);
-};
-
-#endif /* #if defined(__SERIES80__) || defined(__UIQ__) */
 
 #endif // __PerlApp_h__
