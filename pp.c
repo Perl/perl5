@@ -3392,9 +3392,8 @@ PP(pp_ucfirst)
 
 	utf8_to_uvchr(s, &ulen);
 	toTITLE_utf8(s, tmpbuf, &tculen);
-	utf8_to_uvchr(tmpbuf, 0);
 
-	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
+	if (!SvPADTMP(sv) || SvREADONLY(sv) || ulen != tculen) {
 	    dTARGET;
 	    /* slen is the byte length of the whole SV.
 	     * ulen is the byte length of the original Unicode character
@@ -3450,17 +3449,15 @@ PP(pp_lcfirst)
 	(s = (const U8*)SvPV_nomg_const(sv, slen)) && slen &&
 	UTF8_IS_START(*s)) {
 	STRLEN ulen;
+	STRLEN lculen;
 	U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
-	U8 *tend;
-	UV uv;
 
-	toLOWER_utf8(s, tmpbuf, &ulen);
-	uv = utf8_to_uvchr(tmpbuf, 0);
-	tend = uvchr_to_utf8(tmpbuf, uv);
+	utf8_to_uvchr(s, &ulen);
+	toLOWER_utf8(s, tmpbuf, &lculen);
 
-	if (!SvPADTMP(sv) || (STRLEN)(tend - tmpbuf) != ulen || SvREADONLY(sv)) {
+	if (!SvPADTMP(sv) || SvREADONLY(sv) || ulen != lculen) {
 	    dTARGET;
-	    sv_setpvn(TARG, (char*)tmpbuf, tend - tmpbuf);
+	    sv_setpvn(TARG, (char*)tmpbuf, lculen);
 	    if (slen > ulen)
 	        sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
 	    SvUTF8_on(TARG);
