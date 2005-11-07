@@ -1354,6 +1354,7 @@ lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
 lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
 lib/CPAN/PAUSE2003.pub		CPAN public key
 lib/CPAN/PAUSE2005.pub		CPAN public key
+lib/CPAN/SIGNATURE		CPAN public key
 lib/CPAN/Version.pm		Simple math with different flavors of version strings
 lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
 lib/CPAN/t/loadme.t		See if CPAN the module works
