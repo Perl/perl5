@@ -2277,12 +2277,12 @@ X<gmtime> X<UTC> X<Greenwich>
 
 =item gmtime
 
-Converts a time as returned by the time function to an 8-element list
+Converts a time as returned by the time function to an 9-element list
 with the time localized for the standard Greenwich time zone.
 Typically used as follows:
 
-    #  0    1    2     3     4    5     6     7
-    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday) =
+    #  0    1    2     3     4    5     6     7     8
+    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
 					    gmtime(time);
 
 All list elements are numeric, and come straight out of the C `struct
@@ -2292,7 +2292,8 @@ itself, in the range C<0..11> with 0 indicating January and 11
 indicating December.  $year is the number of years since 1900.  That
 is, $year is C<123> in year 2023.  $wday is the day of the week, with
 0 indicating Sunday and 3 indicating Wednesday.  $yday is the day of
-the year, in the range C<0..364> (or C<0..365> in leap years.)
+the year, in the range C<0..364> (or C<0..365> in leap years).  $isdst
+is always C<0>.
 
 Note that the $year element is I<not> simply the last two digits of
 the year.  If you assume it is then you create non-Y2K-compliant
