@@ -23979,7 +23979,7 @@ ____________________________________________________________________________
 	   ! MANIFEST Makefile.SH pod/buildtoc
 ____________________________________________________________________________
 [ 20766] By: jhi                                   on 2003/08/19  12:04:22
-        Log: Nick Clark's podulator.  The win32 makefile
+        Log: Nicholas Clark's podulator.  The win32 makefile
              generation doesn't seem to be working yet.
      Branch: perl
 	   + pod.lst pod/buildtoc
@@ -24390,7 +24390,7 @@ ____________________________________________________________________________
 	   ! ext/Opcode/Opcode.pm
 ____________________________________________________________________________
 [ 20688] By: jhi                                   on 2003/08/14  04:51:30
-        Log: A swath of VERSION patches from Nick Clark.
+        Log: A swath of VERSION patches from Nicholas Clark.
      Branch: perl
 	   ! lib/AutoSplit.pm lib/CPAN/Nox.pm lib/Cwd.pm lib/English.pm
 	   ! lib/File/Basename.pm lib/File/Copy.pm lib/File/Path.pm
@@ -24667,7 +24667,7 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 20632] By: jhi                                   on 2003/08/12  08:11:08
         Log: The Debian people have expressed a wish for the boilerplate
-             being specific about the Perl version; patch from Nick Clark.
+             being specific about the Perl version; patch from Nicholas Clark.
      Branch: perl
 	   ! utils/h2xs.PL
 ____________________________________________________________________________
@@ -31978,7 +31978,7 @@ ____________________________________________________________________________
 	   ! ext/B/t/deparse.t
 ____________________________________________________________________________
 [ 19191] By: jhi                                   on 2003/04/12  16:51:12
-        Log: Benchmark nit from Nick Clark (in OpenBSD the result could
+        Log: Benchmark nit from Nicholas Clark (in OpenBSD the result could
              be a negative zero, -0).
      Branch: perl
 	   ! lib/Benchmark.t
@@ -33690,7 +33690,7 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 18868] By: jhi                                   on 2003/03/09  19:04:22
         Log: Export the symbols from #18863; do not prototype (but export)
-             Nick Clark's experimental COW functions.
+             Nicholas Clark's experimental COW functions.
              Sidenote: the embed.fnc/embed.fnc/makedef.pl thing is becoming
              a mess of Herculean proportions.  Someone should redesign and
              clean up the stables.
