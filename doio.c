@@ -408,7 +408,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 		}
 		else  {
 		    if (!num_svs) {
-			namesv = sv_2mortal(newSVpvn(type,strlen(type)));
+			namesv = sv_2mortal(newSVpvn(type,tend - type));
 			num_svs = 1;
 			svp = &namesv;
 		        type = Nullch;
@@ -446,7 +446,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	    }
 	    else {
 		if (!num_svs) {
-		    namesv = sv_2mortal(newSVpvn(type,strlen(type)));
+		    namesv = sv_2mortal(newSVpvn(type,tend - type));
 		    num_svs = 1;
 		    svp = &namesv;
 		    type = Nullch;
@@ -538,7 +538,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	    }
 	    else {
 		if (!num_svs) {
-		    namesv = sv_2mortal(newSVpvn(type,strlen(type)));
+		    namesv = sv_2mortal(newSVpvn(type,tend - type));
 		    num_svs = 1;
 		    svp = &namesv;
 		    type = Nullch;
