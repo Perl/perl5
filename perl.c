@@ -1743,6 +1743,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef DEBUGGING
 			     " DEBUGGING"
 #  endif
+#  ifdef DEBUG_LEAKING_SCALARS
+			     " DEBUG_LEAKING_SCALARS"
+#  endif
 #  ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 			     " DEBUG_LEAKING_SCALARS_FORK_DUMP"
 #  endif
