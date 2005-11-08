@@ -475,8 +475,8 @@ PerlIO_debug(const char *fmt, ...)
 	/* Use fixed buffer as sv_catpvf etc. needs SVs */
 	char buffer[1024];
 	const STRLEN len = my_sprintf(buffer, "%.40s:%" IVdf " ", s ? s : "(none)", (IV) CopLINE(PL_curcop));
-	vsprintf(buffer+len, fmt, ap);
-	PerlLIO_write(PL_perlio_debug_fd, buffer, strlen(buffer));
+	const STRLEN len2 = vsprintf(buffer+len, fmt, ap);
+	PerlLIO_write(PL_perlio_debug_fd, buffer, len + len2);
 #else
 	const char *s = CopFILE(PL_curcop);
 	STRLEN len;
@@ -4785,7 +4785,7 @@ PerlIO *
 PerlIO_open(const char *path, const char *mode)
 {
     dTHX;
-    SV *name = sv_2mortal(newSVpvn(path, strlen(path)));
+    SV *name = sv_2mortal(newSVpv(path, 0));
     return PerlIO_openn(aTHX_ Nullch, mode, -1, 0, 0, NULL, 1, &name);
 }
 
@@ -4794,7 +4794,7 @@ PerlIO *
 PerlIO_reopen(const char *path, const char *mode, PerlIO *f)
 {
     dTHX;
-    SV *name = sv_2mortal(newSVpvn(path, strlen(path)));
+    SV *name = sv_2mortal(newSVpv(path,0));
     return PerlIO_openn(aTHX_ Nullch, mode, -1, 0, 0, f, 1, &name);
 }
 

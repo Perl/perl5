@@ -8720,7 +8720,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		{
 			q++; /* skip past the rest of the %vd format */
 			eptr = (const char *) vecstr;
-			elen = strlen(eptr);
+			elen = veclen;
 			vectorize=FALSE;
 			goto string;
 		}

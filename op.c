@@ -5940,8 +5940,9 @@ Perl_ck_require(pTHX_ OP *o)
 
 	    for (s = SvPVX(sv); *s; s++) {
 		if (*s == ':' && s[1] == ':') {
+		    const STRLEN len = strlen(s+2)+1;
 		    *s = '/';
-		    Move(s+2, s+1, strlen(s+2)+1, char);
+		    Move(s+2, s+1, len, char);
 		    SvCUR_set(sv, SvCUR(sv) - 1);
 		}
 	    }

@@ -681,7 +681,8 @@ S_incline(pTHX_ char *s)
     if (t - s > 0) {
 #ifndef USE_ITHREADS
 	const char * const cf = CopFILE(PL_curcop);
-	if (cf && strlen(cf) > 7 && strnEQ(cf, "(eval ", 6)) {
+	STRLEN tmplen = cf ? strlen(cf) : 0;
+	if (tmplen > 7 && strnEQ(cf, "(eval ", 6)) {
 	    /* must copy *{"::_<(eval N)[oldfilename:L]"}
 	     * to *{"::_<newfilename"} */
 	    char smallbuf[256], smallbuf2[256];

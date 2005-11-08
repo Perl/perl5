@@ -3759,7 +3759,7 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
 	 * size from the heap if they are given a NULL buffer pointer.
 	 * The problem is that this behaviour is not portable. */
 	if (getcwd(buf, sizeof(buf) - 1)) {
-	    sv_setpvn(sv, buf, strlen(buf));
+	    sv_setpv(sv, buf);
 	    return TRUE;
 	}
 	else {
