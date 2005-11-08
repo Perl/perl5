@@ -1899,14 +1899,12 @@ it. It's also inherently slower.)
 
 The pattern of macro calls is like this:
 
-    dMULTICALL;			/* Declare variables (including 'CV* cv') */
+    dMULTICALL;			/* Declare local variables */
     I32 gimme = G_SCALAR;	/* context of the call: G_SCALAR,
 				 * G_LIST, or G_VOID */
 
-    /* Here you must arrange for 'cv' to be set to the CV of
-     * the sub you want to call. */
-
-    PUSH_MULTICALL;		/* Set up the calling context */
+    PUSH_MULTICALL(cv);		/* Set up the context for calling cv,
+				   and set local vars appropriately */
 
     /* loop */ {
         /* set the value(s) af your parameter variables */

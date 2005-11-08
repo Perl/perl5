@@ -127,6 +127,7 @@ SKIP: {
 # (and more flexibly) in a way that we can't emulate from XS.
 if (!$::PERL_ONLY) { SKIP: {
 
+    $List::Util::REAL_MULTICALL ||= 0; # Avoid use only once
     skip("Poor man's MULTICALL can't cope", 2)
       if !$List::Util::REAL_MULTICALL;
 

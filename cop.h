@@ -734,13 +734,15 @@ See L<perlcall/Lightweight Callbacks>.
 #define dMULTICALL \
     SV **newsp;			/* set by POPBLOCK */			\
     PERL_CONTEXT *cx;							\
-    CV *cv;								\
+    CV *multicall_cv;							\
     OP *multicall_cop;							\
     bool multicall_oldcatch; 						\
     U8 hasargs = 0		/* used by PUSHSUB */
 
-#define PUSH_MULTICALL \
+#define PUSH_MULTICALL(the_cv) \
     STMT_START {							\
+	CV *_nOnclAshIngNamE_ = the_cv;					\
+	CV *cv = _nOnclAshIngNamE_;					\
 	AV* padlist = CvPADLIST(cv);					\
 	ENTER;								\
  	multicall_oldcatch = CATCH_GET;					\
@@ -754,6 +756,7 @@ See L<perlcall/Lightweight Callbacks>.
 	}								\
 	SAVECOMPPAD();							\
 	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));			\
+	multicall_cv = cv;						\
 	multicall_cop = CvSTART(cv);					\
     } STMT_END
 
@@ -765,8 +768,8 @@ See L<perlcall/Lightweight Callbacks>.
 
 #define POP_MULTICALL \
     STMT_START {							\
-	LEAVESUB(cv);							\
-	CvDEPTH(cv)--;							\
+	LEAVESUB(multicall_cv);						\
+	CvDEPTH(multicall_cv)--;					\
 	POPBLOCK(cx,PL_curpm);						\
 	CATCH_SET(multicall_oldcatch);					\
 	LEAVE;								\

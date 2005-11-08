@@ -86,7 +86,7 @@ multicall_pad_push(pTHX_ AV *padlist, int depth)
 #define dMULTICALL \
     SV **newsp;			/* set by POPBLOCK */			\
     PERL_CONTEXT *cx;							\
-    CV *cv;								\
+    CV *multicall_cv;							\
     OP *multicall_cop;							\
     bool multicall_oldcatch;						\
     U8 hasargs = 0
@@ -109,40 +109,41 @@ multicall_pad_push(pTHX_ AV *padlist, int depth)
 #else
 #  define PUSHSUB_RETSTACK(cx) cx->blk_sub.retop = Nullop;
 #endif
-#undef PUSHSUB
-#define PUSHSUB(cx)                                                     \
-        cx->blk_sub.cv = cv;                                            \
-        cx->blk_sub.olddepth = CvDEPTH(cv);                             \
-        cx->blk_sub.hasargs = hasargs;                                  \
-        cx->blk_sub.lval = PL_op->op_private &                          \
+#define MULTICALL_PUSHSUB(cx, the_cv) \
+        cx->blk_sub.cv = the_cv;					\
+        cx->blk_sub.olddepth = CvDEPTH(the_cv);				\
+        cx->blk_sub.hasargs = hasargs;					\
+        cx->blk_sub.lval = PL_op->op_private &				\
                               (OPpLVAL_INTRO|OPpENTERSUB_INARGS);	\
 	PUSHSUB_RETSTACK(cx)						\
-        if (!CvDEPTH(cv)) {                                             \
-            (void)SvREFCNT_inc(cv);                                     \
-            (void)SvREFCNT_inc(cv);                                     \
-            SAVEFREESV(cv);                                             \
+        if (!CvDEPTH(the_cv)) {						\
+            (void)SvREFCNT_inc(the_cv);					\
+            (void)SvREFCNT_inc(the_cv);					\
+            SAVEFREESV(the_cv);						\
         }
 
-#define PUSH_MULTICALL \
+#define PUSH_MULTICALL(the_cv) \
     STMT_START {							\
-	AV* padlist = CvPADLIST(cv);					\
+	CV *_nOnclAshIngNamE_ = the_cv;					\
+	AV* padlist = CvPADLIST(_nOnclAshIngNamE_);			\
+	multicall_cv = _nOnclAshIngNamE_;				\
 	ENTER;								\
  	multicall_oldcatch = CATCH_GET;					\
-	SAVESPTR(CvROOT(cv)->op_ppaddr);				\
-	CvROOT(cv)->op_ppaddr = PL_ppaddr[OP_NULL];			\
+	SAVESPTR(CvROOT(multicall_cv)->op_ppaddr);			\
+	CvROOT(multicall_cv)->op_ppaddr = PL_ppaddr[OP_NULL];		\
 	SAVETMPS; SAVEVPTR(PL_op);					\
 	CATCH_SET(TRUE);						\
 	PUSHSTACKi(PERLSI_SORT);					\
 	PUSHBLOCK(cx, CXt_SUB, PL_stack_sp);				\
-	PUSHSUB(cx);							\
-	if (++CvDEPTH(cv) >= 2) {					\
+	MULTICALL_PUSHSUB(cx, multicall_cv);				\
+	if (++CvDEPTH(multicall_cv) >= 2) {				\
 	    PERL_STACK_OVERFLOW_CHECK();				\
-	    multicall_pad_push(aTHX_ padlist, CvDEPTH(cv));		\
+	    multicall_pad_push(aTHX_ padlist, CvDEPTH(multicall_cv));	\
 	}								\
 	SAVECOMPPAD();							\
-	PL_comppad = (AV*) (AvARRAY(padlist)[CvDEPTH(cv)]);		\
+	PL_comppad = (AV*) (AvARRAY(padlist)[CvDEPTH(multicall_cv)]);	\
 	PL_curpad = AvARRAY(PL_comppad);				\
-	multicall_cop = CvSTART(cv);					\
+	multicall_cop = CvSTART(multicall_cv);				\
     } STMT_END
 
 #define MULTICALL \
@@ -153,8 +154,8 @@ multicall_pad_push(pTHX_ AV *padlist, int depth)
 
 #define POP_MULTICALL \
     STMT_START {							\
-	CvDEPTH(cv)--;							\
-	LEAVESUB(cv);							\
+	CvDEPTH(multicall_cv)--;					\
+	LEAVESUB(multicall_cv);						\
 	POPBLOCK(cx,PL_curpm);						\
 	POPSTACK;							\
 	CATCH_SET(multicall_oldcatch);					\

@@ -7,8 +7,6 @@
 #include <perl.h>
 #include <XSUB.h>
 
-#include "multicall.h"
-
 #ifndef PERL_VERSION
 #    include <patchlevel.h>
 #    if !(defined(PERL_VERSION) || (SUBVERSION > 0 && defined(PATCHLEVEL)))
@@ -19,11 +17,14 @@
 #    define PERL_SUBVERSION	SUBVERSION
 #endif
 
+#if PERL_VERSION >= 6
+#  include "multicall.h"
+#endif
+
 #ifndef aTHX
 #  define aTHX
 #  define pTHX
 #endif
-
 /* Some platforms have strict exports. And before 5.7.3 cxinc (or Perl_cxinc)
    was not exported. Therefore platforms like win32, VMS etc have problems
    so we redefine it here -- GMB
@@ -230,6 +231,8 @@ CODE:
 
 
 
+#ifdef dMULTICALL
+
 void
 reduce(block,...)
     SV * block
@@ -243,12 +246,13 @@ CODE:
     HV *stash;
     I32 gimme = G_SCALAR;
     SV **args = &PL_stack_base[ax];
+    CV *cv;
 
     if(items <= 1) {
 	XSRETURN_UNDEF;
     }
     cv = sv_2cv(block, &stash, &gv, 0);
-    PUSH_MULTICALL;
+    PUSH_MULTICALL(cv);
     agv = gv_fetchpv("a", TRUE, SVt_PV);
     bgv = gv_fetchpv("b", TRUE, SVt_PV);
     SAVESPTR(GvSV(agv));
@@ -277,12 +281,13 @@ CODE:
     HV *stash;
     I32 gimme = G_SCALAR;
     SV **args = &PL_stack_base[ax];
+    CV *cv;
 
     if(items <= 1) {
 	XSRETURN_UNDEF;
     }
     cv = sv_2cv(block, &stash, &gv, 0);
-    PUSH_MULTICALL;
+    PUSH_MULTICALL(cv);
     SAVESPTR(GvSV(PL_defgv));
 
     for(index = 1 ; index < items ; index++) {
@@ -298,6 +303,8 @@ CODE:
     XSRETURN_UNDEF;
 }
 
+#endif
+
 void
 shuffle(...)
 PROTOTYPE: @
@@ -305,6 +312,7 @@ CODE:
 {
     dVAR;
     int index;
+#if (PERL_VERSION < 8) || (PERL_VERSION == 8 && PERL_SUBVERSION <1)
     struct op dmy_op;
     struct op *old_op = PL_op;
 
@@ -317,6 +325,16 @@ CODE:
     PL_op = &dmy_op;
     (void)*(PL_ppaddr[OP_RAND])(aTHX);
     PL_op = old_op;
+#else
+    /* Initialize Drand01 if rand() or srand() has
+       not already been called
+    */
+    if (!PL_srand_called) {
+        (void)seedDrand01((Rand_seed_t)Perl_seed(aTHX));
+        PL_srand_called = TRUE;
+    }
+#endif
+
     for (index = items ; index > 1 ; ) {
 	int swap = (int)(Drand01() * (double)(index--));
 	SV *tmp = ST(swap);
