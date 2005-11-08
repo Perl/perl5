@@ -1349,7 +1349,6 @@ lib/Config.t			See if Config works
 lib/constant.pm			For "use constant"
 lib/constant.t			See if compile-time constants work
 lib/CPAN/bin/cpan		easily interact with CPAN from the command line
-lib/CPAN/Admin.pm		A CPAN Shell for CPAN admins
 lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
 lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
 lib/CPAN/PAUSE2003.pub		CPAN public key

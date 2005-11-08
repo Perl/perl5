@@ -1,6 +1,6 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
-$VERSION = '1.76_61';
+$VERSION = '1.76_65';
 $VERSION = eval $VERSION;
 
 use CPAN::Version;
@@ -7614,6 +7614,11 @@ Or you can use
 and then 'make install' directly in the subshell.
 
 Or you leave the CPAN shell and start it again.
+
+Or, if you're not really sure and just want to run some make, test or
+install command without this pesky error message, say C<force get
+Foo::Bar> first and then continue as always. C<Force get> I<forgets>
+previous error conditions.
 
 For the really curious, by accessing internals directly, you I<could>
 
