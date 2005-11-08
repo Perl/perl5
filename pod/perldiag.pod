@@ -1133,7 +1133,7 @@ references are disallowed.  See L<perlref>.
 
 (F) The compiler tried to interpret a bracketed expression as a
 subscript.  But to the left of the brackets was an expression that
-didn't look like an array reference, or anything else subscriptable.
+didn't look like a hash or array reference, or anything else subscriptable.
 
 =item Can't use \%c to mean $%c in expression
 
