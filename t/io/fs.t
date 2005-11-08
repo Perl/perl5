@@ -49,7 +49,7 @@ $needs_fh_reopen = 1 if (defined &Win32::IsWin95 && Win32::IsWin95());
 my $skip_mode_checks =
     $^O eq 'cygwin' && $ENV{CYGWIN} !~ /ntsec/;
 
-plan tests => 49;
+plan tests => 51;
 
 
 if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
@@ -438,6 +438,17 @@ else {
 }
 
 ok(-d 'tmp1', "rename on directories working");
+
+{
+    # Change 26011: Re: A surprising segfault
+    # to make sure only that these obfuscated sentences will not crash.
+
+    map chmod(+()), ('')x68;
+    ok(1, "extend sp in pp_chmod");
+
+    map chown(+()), ('')x68;
+    ok(1, "extend sp in pp_chown");
+}
 
 # need to remove 'tmp' if rename() in test 28 failed!
 END { rmdir 'tmp1'; rmdir 'tmp'; 1 while unlink "Iofs.tmp"; }
