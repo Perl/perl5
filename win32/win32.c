@@ -1395,7 +1395,7 @@ win32_putenv(const char *name)
     dTHX;
     char* curitem;
     char* val;
-    int length, relval = -1;
+    int relval = -1;
 
     if (name) {
         Newx(curitem,strlen(name)+1,char);
