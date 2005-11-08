@@ -688,7 +688,6 @@ S_incline(pTHX_ char *s)
 	    char smallbuf[256], smallbuf2[256];
 	    char *tmpbuf, *tmpbuf2;
 	    GV **gvp, *gv2;
-	    STRLEN tmplen = strlen(cf);
 	    STRLEN tmplen2 = strlen(s);
 	    if (tmplen + 3 < sizeof smallbuf)
 		tmpbuf = smallbuf;
