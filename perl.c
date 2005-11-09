@@ -1758,6 +1758,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef MYMALLOC
 			     " MYMALLOC"
 #  endif
+#  ifdef NO_MATHOMS
+                            " NO_MATHOMS"
+#  endif
 #  ifdef PERL_DONT_CREATE_GVSV
 			     " PERL_DONT_CREATE_GVSV"
 #  endif
