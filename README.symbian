@@ -368,8 +368,8 @@ The Symbian port is licensed under the same terms as Perl itself.
 
 Since this is 0.something release, any future releases are almost
 guaranteed to be binary incompatible.  As a sign of this the Symbian
-symbol exports are kept unfrozen and the .def files rebuilt every
-time.
+symbol exports are kept unfrozen and the .def files fully rebuilt
+every time.
 
 =item *
 
@@ -387,6 +387,15 @@ We maintain the binary incompatibility.
 
   - Perl 5.9.3 (patch level 25911)
   - Series 80 2.0 and UIQ 2.1 support
+
+We maintain the binary incompatibility.
+
+=item *
+
+0.4.0: November 2005
+
+  - Perl 5.9.3 (patch level 26052)
+  - adding a sample Symbian extension
 
 We maintain the binary incompatibility.
 

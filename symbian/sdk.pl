@@ -15,7 +15,7 @@ if ($ENV{PATH} =~ m!\\Symbian\\(.+?)\\(.+?)\\Epoc32\\gcc\\bin!i) {
     $ENV{WIN} = $WIN; 
     if ($SDK_NAME =~ m!Series60_v20!) {
 	$SDK_VARIANT = 'S60';
-	$ENV{S60SDK} = '2.0';
+	$SDK_VERSION = $ENV{S60SDK} = '2.0';
     } elsif ($SDK_NAME =~ m!Series60_v21!) {
 	$SDK_VARIANT = 'S60';
 	$SDK_VERSION = $ENV{S60SDK} = '2.1';
@@ -44,6 +44,7 @@ if ($ENV{PATH} =~ m!\\Symbian\\(.+?)\\(.+?)\\Epoc32\\gcc\\bin!i) {
 
 if (open(GCC, "gcc -v 2>&1 |")) {
    while (<GCC>) {
+     # print;
      if (/Reading specs from ((?:C:)?\\Symbian.+?)\\Epoc32\\/i) {
        $SYMBIAN_ROOT = $1;
        # The S60SDK tells the Series 60 SDK version.
@@ -82,7 +83,7 @@ $ENV{UARM} = $UARM;
 # set MWCW=C:\Program Files\Metrowerks\CodeWarrior for Symbian OEM v2.8
 # set MSVC=C:\Program Files\Microsoft Visual Studio
 # set MSVC_BIN=%MSVC%\VC98\Bin;%MSVC%\Aux\MSDev98\Bin
-# set MSVC_INC=%MSVC%\VC98\atl\include;%MSVC%\mfc\include;%MSVC%\include
+# set MSVC_INC=%MSVC%\VC98\atl\include;%MSVC%\VC98\include;%MSVC%\mfc\include;%MSVC%\include
 # set MSVC_LIB=%MSVC%\mfc\lib;%MSVC%\lib
 #
 # s60-1.2-cw:

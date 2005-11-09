@@ -100,10 +100,11 @@
   does not work: calling the dialog code blocks so that the screen is not
   redrawn at all.  Perl should do both: "yield" so that the GUI framework
   can redraw, but in the meanwhile Perl should wait for the completion
-  (OK or Cancel) of the dialog.  Welcome to the wonderful world of cooperative
-  multitasking.  The right solution surely involves Active Objects.
-  The problem may require having a different Perl op dispatch
-  loop than the standard ones in run.c and debug.c.
+  (OK or Cancel) of the dialog, but Perl must not exit the current PL_op.
+  Welcome to the wonderful world of cooperative multitasking.  The right
+  solution surely involves Active Objects.  The problem may require having
+  a different Perl op dispatch loop than the standard and debug ones in
+  run.c and dump.c.
 
 - menu/toolbar support
 - selection lists (single cf multi cf radio)
@@ -187,9 +188,9 @@
   cell location, WLAN)
   (name suggestion: Moped::Msg)
 - PDA support (address book)
-  (name suggestion: Moped::Msg)
+  (name suggestion: Moped::PDA)
 - Device support (memory, camera)
-  (name suggestion: Moped::Dev)
-- Remote console (Bluetooth/IR)
-- Phone APIs (how to catch an incoming call: BIO messaging)
+  (name suggestion: Moped::Dev::Memory, Moped::Dev::Drives, Moped::Dev::Camera)
+- Phone APIs (e.g. how to catch an incoming call: BIO messaging)
+- Remote console (Bluetooth/IR/USB?)
 
