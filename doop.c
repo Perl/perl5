@@ -1174,7 +1174,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     }
     else if (SvOK(sv) || SvTYPE(sv) > SVt_PVMG) {
 	dc = SvPV_force_nomg_nolen(sv);
-	if (SvCUR(sv) < (STRLEN)len) {
+	if (SvLEN(sv) < (STRLEN)(len + 1)) {
 	    dc = SvGROW(sv, (STRLEN)(len + 1));
 	    (void)memzero(dc + SvCUR(sv), len - SvCUR(sv) + 1);
 	}
@@ -1303,6 +1303,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	case OP_BIT_AND:
 	    while (len--)
 		*dc++ = *lc++ & *rc++;
+	    *dc = '\0';
 	    break;
 	case OP_BIT_XOR:
 	    while (len--)
