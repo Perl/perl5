@@ -152,18 +152,24 @@ open F, ">:utf8", "a" or die $!;
 print F $a;
 close F;
 open F, ">>", "a" or die $!;
+binmode(F, ":bytes");
 print F chr(130)."\n";
 close F;
 
 open F, "<", "a" or die $!;
+binmode(F, ":bytes");
 $x = <F>; chomp $x;
-is( $x, $chr );
+SKIP: {
+    skip("Defaulting to UTF-8 output means that we can't generate a mangled file")
+	if $UTF8_OUTPUT;
+    is( $x, $chr );
+}
 
 # Now we have a deformed file.
 
 SKIP: {
     if (ord('A') == 193) {
-	skip( "EBCDIC doesn't complain" );
+	skip("EBCDIC doesn't complain", 2);
     } else {
 	my @warnings;
 	open F, "<:utf8", "a" or die $!;
