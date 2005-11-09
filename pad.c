@@ -393,7 +393,13 @@ for a slot which has no name and no active value.
 
 /* XXX DAPM integrate alloc(), add_name() and add_anon(),
  * or at least rationalise ??? */
-
+/* And flag whether the incoming name is UTF8 or 8 bit?
+   Could do this either with the +ve/-ve hack of the HV code, or expanding
+   the flag bits. Either way, this makes proper Unicode safe pad support.
+   Also could change the sv structure to make the NV a union with 2 U32s,
+   so that SvCUR() could stop being overloaded in pad SVs.
+   NWC
+*/
 
 PADOFFSET
 Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
