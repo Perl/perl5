@@ -6,6 +6,8 @@
 
 package Scalar::Util;
 
+use strict;
+use vars qw(@ISA @EXPORT_OK $VERSION);
 require Exporter;
 require List::Util; # List::Util loads the XS
 
@@ -51,6 +53,7 @@ sub openhandle ($) {
 
 eval <<'ESQ' unless defined &dualvar;
 
+use vars qw(@EXPORT_FAIL);
 push @EXPORT_FAIL, qw(weaken isweak dualvar isvstring set_prototype);
 
 # The code beyond here is only used if the XS is not installed
@@ -128,7 +131,7 @@ sub looks_like_number {
   local $_ = shift;
 
   # checks from perlfaq4
-  return $] < 5.008005 unless defined;
+  return 0 if !defined($_) or ref($_);
   return 1 if (/^[+-]?\d+$/); # is a +/- integer
   return 1 if (/^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/); # a C float
   return 1 if ($] >= 5.008 and /^(Inf(inity)?|NaN)$/i) or ($] >= 5.006001 and /^Inf$/i);
@@ -148,7 +151,8 @@ Scalar::Util - A selection of general-utility scalar subroutines
 
 =head1 SYNOPSIS
 
-    use Scalar::Util qw(blessed dualvar isweak readonly refaddr reftype tainted weaken isvstring looks_like_number set_prototype);
+    use Scalar::Util qw(blessed dualvar isweak readonly refaddr reftype tainted
+                        weaken isvstring looks_like_number set_prototype);
 
 =head1 DESCRIPTION
 
@@ -201,6 +205,11 @@ If EXPR is a scalar which is a weak reference the result is true.
     $weak = isweak($ref);               # false
     weaken($ref);
     $weak = isweak($ref);               # true
+
+B<NOTE>: Copying a weak reference creates a normal, strong, reference.
+
+    $copy = $ref;
+    $weak = isweak($ref);               # false
 
 =item looks_like_number EXPR
 

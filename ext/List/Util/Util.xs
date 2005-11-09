@@ -485,7 +485,16 @@ looks_like_number(sv)
 	SV *sv
 PROTOTYPE: $
 CODE:
+#if (PERL_VERSION < 8) || (PERL_VERSION == 8 && PERL_SUBVERSION <5)
+  if (SvPOK(sv) || SvPOKp(sv)) {
+    RETVAL = looks_like_number(sv);
+  }
+  else {
+    RETVAL = SvFLAGS(sv) & (SVf_NOK|SVp_NOK|SVf_IOK|SVp_IOK);
+  }
+#else
   RETVAL = looks_like_number(sv);
+#endif
 OUTPUT:
   RETVAL
 
