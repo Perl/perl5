@@ -3313,10 +3313,8 @@ PP(pp_require)
     else
 	SETERRNO(0, SS_NORMAL);
 
-    /* FIXME - is name ever assigned to after the SvPVX_const that also set
-       len?  If no, then this strlen() is superfluous.  */
     /* Assume success here to prevent recursive requirement. */
-    len = strlen(name);
+    /* name is never assigned to again, so len is still strlen(name)  */
     /* Check whether a hook in @INC has already filled %INC */
     if (!hook_sv) {
 	(void)hv_store(GvHVn(PL_incgv), name, len, newSVpv(CopFILE(&PL_compiling),0),0);
