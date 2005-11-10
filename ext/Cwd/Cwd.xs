@@ -434,7 +434,7 @@ PPCODE:
 #endif
 }
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(UNDER_CE)
 
 void
 getdcwd(...)

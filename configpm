@@ -859,6 +859,7 @@ EOS
   $cross =~ s/\*\*\*replace-marker\*\*\*/$Opts{cross}/g;
   print CROSS $cross;
   close CROSS;
+  unshift(@INC,"xlib/$Opts{cross}");
 }
 
 # Now do some simple tests on the Config.pm file we have created
