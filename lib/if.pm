@@ -1,9 +1,11 @@
 package if;
 
-$VERSION = '0.0401';
+$VERSION = '0.05';
 
 sub work {
   my $method = shift() ? 'import' : 'unimport';
+  die "Too few arguments to `use if' (some code returning an empty list in list context?)"
+    unless @_ >= 2;
   return unless shift;		# CONDITION
 
   my $p = $_[0];		# PACKAGE
@@ -37,6 +39,9 @@ has no effect unless C<CONDITION> is true.  In this case the effect is
 the same as of
 
   use MODULE ARGUMENTS;
+
+Above C<< => >> provides necessary quoting of C<MODULE>.  If not used (e.g.,
+no ARGUMENTS to give), you'd better quote C<MODULE> yourselves.
 
 =head1 BUGS
 
