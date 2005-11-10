@@ -1546,8 +1546,8 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 		Perl_croak(aTHX_ "More than one argument to open(,':%s')",tab->name);
 	    }
 	    PerlIO_debug("openn(%s,'%s','%s',%d,%x,%o,%p,%d,%p)\n",
-			 tab->name, layers, mode, fd, imode, perm,
-			 (void*)f, narg, (void*)args);
+			 tab->name, layers ? layers : "(Null)", mode, fd,
+			 imode, perm, (void*)f, narg, (void*)args);
 	    if (tab->Open)
 		 f = (*tab->Open) (aTHX_ tab, layera, n, mode, fd, imode, perm,
 				   f, narg, args);
