@@ -9,7 +9,7 @@ BEGIN {
 }
 
 require "./test.pl";
-plan( tests => 54 );
+plan( tests => 56 );
 
 eval '%@x=0;';
 like( $@, qr/^Can't modify hash dereference in repeat \(x\)/, '%@x=0' );
@@ -22,6 +22,13 @@ like( $@, qr/syntax error/, 'syntax error, used to dump core' );
 eval q/"\x{"/;
 like( $@, qr/^Missing right brace on \\x/,
     'syntax error in string, used to dump core' );
+
+eval q/"\N{"/;
+like( $@, qr/^Missing right brace on \\N/,
+    'syntax error in string with incomplete \N' );
+eval q/"\Nfoo"/;
+like( $@, qr/^Missing braces on \\N/,
+    'syntax error in string with incomplete \N' );
 
 eval "a.b.c.d.e.f;sub";
 like( $@, qr/^Illegal declaration of anonymous subroutine/,
