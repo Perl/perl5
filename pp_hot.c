@@ -756,7 +756,7 @@ PP(pp_rv2av)
 	if (SvRMAGICAL(av)) {
 	    U32 i;
 	    for (i=0; i < (U32)maxarg; i++) {
-		SV **svp = av_fetch(av, i, FALSE);
+		SV ** const svp = av_fetch(av, i, FALSE);
 		/* See note in pp_helem, and bug id #27839 */
 		SP[i+1] = svp
 		    ? SvGMAGICAL(*svp) ? sv_mortalcopy(*svp) : *svp
@@ -1430,7 +1430,7 @@ yup:					/* Confirmed by INTUIT */
 	rx->subbeg = (char *) truebase;
 	rx->startp[0] = s - truebase;
 	if (RX_MATCH_UTF8(rx)) {
-	    char *t = (char*)utf8_hop((U8*)s, rx->minlen);
+	    char * const t = (char*)utf8_hop((U8*)s, rx->minlen);
 	    rx->endp[0] = t - truebase;
 	}
 	else {
@@ -1926,11 +1926,8 @@ PP(pp_iter)
 	    RETPUSHNO;
 
 	if (SvMAGICAL(av) || AvREIFY(av)) {
-	    SV **svp = av_fetch(av, ++cx->blk_loop.iterix, FALSE);
-	    if (svp)
-		sv = *svp;
-	    else
-		sv = NULL;
+	    SV ** const svp = av_fetch(av, ++cx->blk_loop.iterix, FALSE);
+	    sv = svp ? *svp : NULL;
 	}
 	else {
 	    sv = AvARRAY(av)[++cx->blk_loop.iterix];
@@ -1994,7 +1991,7 @@ PP(pp_subst)
     register REGEXP *rx = PM_GETRE(pm);
     STRLEN len;
     int force_on_match = 0;
-    I32 oldsave = PL_savestack_ix;
+    const I32 oldsave = PL_savestack_ix;
     STRLEN slen;
     bool doutf8 = FALSE;
     SV *nsv = NULL;
@@ -2545,7 +2542,7 @@ PP(pp_leavesublv)
 STATIC CV *
 S_get_db_sub(pTHX_ SV **svp, CV *cv)
 {
-    SV *dbsv = GvSVn(PL_DBsub);
+    SV * const dbsv = GvSVn(PL_DBsub);
 
     save_item(dbsv);
     if (!PERLDB_SUB_NN) {
@@ -2889,7 +2886,7 @@ try_autoload:
     else {
 	dMARK;
 	register I32 items = SP - MARK;
-	AV* padlist = CvPADLIST(cv);
+	AV* const padlist = CvPADLIST(cv);
 	push_return(PL_op->op_next);
 	PUSHBLOCK(cx, CXt_SUB, MARK);
 	PUSHSUB(cx);
@@ -2924,14 +2921,7 @@ try_autoload:
 	if (hasargs)
 #endif /* USE_5005THREADS */
 	{
-	    AV* av;
-	    SV** ary;
-
-#if 0
-	    DEBUG_S(PerlIO_printf(Perl_debug_log,
-	    			  "%p entersub preparing @_\n", thr));
-#endif
-	    av = (AV*)PAD_SVl(0);
+	    AV *const av = (AV*)PAD_SVl(0);
 	    if (AvREAL(av)) {
 		/* @_ is normally not REAL--this should only ever
 		 * happen when DB::sub() calls things that modify @_ */
@@ -2948,7 +2938,7 @@ try_autoload:
 	    ++MARK;
 
 	    if (items > AvMAX(av) + 1) {
-		ary = AvALLOC(av);
+		SV **ary = AvALLOC(av);
 		if (AvARRAY(av) != ary) {
 		    AvMAX(av) += AvARRAY(av) - AvALLOC(av);
 		    SvPVX(av) = (char*)ary;
@@ -3003,7 +2993,7 @@ PP(pp_aelem)
     SV** svp;
     SV* const elemsv = POPs;
     IV elem = SvIV(elemsv);
-    AV* av = (AV*)POPs;
+    AV* const av = (AV*)POPs;
     const U32 lval = PL_op->op_flags & OPf_MOD || LVRET;
     const U32 defer = (PL_op->op_private & OPpLVAL_DEFER) && (elem > av_len(av));
     SV *sv;
