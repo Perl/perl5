@@ -741,9 +741,9 @@ See L<perlcall/Lightweight Callbacks>.
 
 #define PUSH_MULTICALL(the_cv) \
     STMT_START {							\
-	CV *_nOnclAshIngNamE_ = the_cv;					\
-	CV *cv = _nOnclAshIngNamE_;					\
-	AV* padlist = CvPADLIST(cv);					\
+	CV * const _nOnclAshIngNamE_ = the_cv;				\
+	CV * const cv = _nOnclAshIngNamE_;				\
+	AV * const padlist = CvPADLIST(cv);				\
 	ENTER;								\
  	multicall_oldcatch = CATCH_GET;					\
 	SAVETMPS; SAVEVPTR(PL_op);					\

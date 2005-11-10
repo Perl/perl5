@@ -479,7 +479,7 @@ PP(pp_die)
         tmps = SvROK(tmpsv) ? Nullch : SvPV_const(tmpsv, len);
     }
     if (!tmps || !len) {
-  	SV *error = ERRSV;
+	SV * const error = ERRSV;
 	SvUPGRADE(error, SVt_PV);
 	if (multiarg ? SvROK(error) : SvROK(tmpsv)) {
 	    if (!multiarg)
@@ -877,7 +877,7 @@ PP(pp_untie)
 
     if ((mg = SvTIED_mg(sv, how))) {
 	SV * const obj = SvRV(SvTIED_obj(sv, mg));
-	CV *cv;
+	CV *cv = NULL;
         if (obj) {
 	    GV * const gv = gv_fetchmethod_autoload(SvSTASH(obj), "UNTIE", FALSE);
 	    if (gv && isGV(gv) && (cv = GvCV(gv))) {
@@ -2036,7 +2036,7 @@ PP(pp_sysseek)
     if (PL_op->op_type == OP_SEEK)
 	PUSHs(boolSV(do_seek(gv, offset, whence)));
     else {
-	Off_t sought = do_sysseek(gv, offset, whence);
+	const Off_t sought = do_sysseek(gv, offset, whence);
         if (sought < 0)
             PUSHs(&PL_sv_undef);
         else {
@@ -2061,11 +2061,12 @@ PP(pp_truncate)
      * general one would think that when using large files, off_t is
      * at least as wide as size_t, so using an off_t should be okay. */
     /* XXX Configure probe for the length type of *truncate() needed XXX */
+    Off_t len;
 
 #if Off_t_size > IVSIZE
-    const Off_t len = (Off_t)POPn;
+    len = (Off_t)POPn;
 #else
-    const Off_t len = (Off_t)POPi;
+    len = (Off_t)POPi;
 #endif
     /* Checking for length < 0 is problematic as the type might or
      * might not be signed: if it is not, clever compilers will moan. */
@@ -2237,6 +2238,7 @@ PP(pp_flock)
 	fp = Nullfp;
 	io = NULL;
     }
+    /* XXX Looks to me like io is always NULL at this point */
     if (fp) {
 	(void)PerlIO_flush(fp);
 	value = (I32)(PerlLIO_flock(PerlIO_fileno(fp), argtype) >= 0);
@@ -3512,7 +3514,7 @@ S_dooneliner(pTHX_ const char *cmd, const char *filename)
     Safefree(cmdline);
 
     if (myfp) {
-	SV *tmpsv = sv_newmortal();
+	SV * const tmpsv = sv_newmortal();
 	/* Need to save/restore 'PL_rs' ?? */
 	s = sv_gets(tmpsv, myfp, 0);
 	(void)PerlProc_pclose(myfp);
@@ -3600,9 +3602,6 @@ S_dooneliner(pTHX_ const char *cmd, const char *filename)
 PP(pp_mkdir)
 {
     dSP; dTARGET;
-#ifndef HAS_MKDIR
-    int oldumask;
-#endif
     STRLEN len;
     const char *tmps;
     bool copy = FALSE;
@@ -3614,10 +3613,13 @@ PP(pp_mkdir)
 #ifdef HAS_MKDIR
     SETi( PerlDir_mkdir(tmps, mode) >= 0 );
 #else
+    {
+    int oldumask;
     SETi( dooneliner("mkdir", tmps) );
     oldumask = PerlLIO_umask(0);
     PerlLIO_umask(oldumask);
     PerlLIO_chmod(tmps, (mode & ~oldumask) & 0777);
+    }
 #endif
     if (copy)
 	Safefree(tmps);
@@ -3903,13 +3905,11 @@ PP(pp_waitpid)
 {
 #if (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(MACOS_TRADITIONAL)
     dSP; dTARGET;
-    Pid_t pid;
+    const int optype = POPi;
+    const Pid_t pid = TOPi;
     Pid_t result;
-    int optype;
     int argflags;
 
-    optype = POPi;
-    pid = TOPi;
     if (PL_signals & PERL_SIGNALS_UNSAFE_FLAG)
         result = wait4pid(pid, &argflags, optype);
     else {
@@ -4019,7 +4019,7 @@ PP(pp_system)
 #endif
 	}
 	if (PL_op->op_flags & OPf_STACKED) {
-	    SV *really = *++MARK;
+	    SV * const really = *++MARK;
 	    value = (I32)do_aexec5(really, MARK, SP, pp[1], did_pipes);
 	}
 	else if (SP - MARK != 1)
@@ -4033,7 +4033,7 @@ PP(pp_system)
     PL_statusvalue = 0;
     result = 0;
     if (PL_op->op_flags & OPf_STACKED) {
-	SV *really = *++MARK;
+	SV * const really = *++MARK;
 #  if defined(WIN32) || defined(OS2) || defined(__SYMBIAN32__)
 	value = (I32)do_aspawn(really, MARK, SP);
 #  else
@@ -4077,7 +4077,7 @@ PP(pp_exec)
     }
     PERL_FLUSHALL_FOR_CHILD;
     if (PL_op->op_flags & OPf_STACKED) {
-	SV *really = *++MARK;
+	SV * const really = *++MARK;
 	value = (I32)do_aexec(really, MARK, SP);
     }
     else if (SP - MARK != 1)
@@ -4133,13 +4133,9 @@ PP(pp_getpgrp)
 {
 #ifdef HAS_GETPGRP
     dSP; dTARGET;
-    Pid_t pid;
     Pid_t pgrp;
+    const Pid_t pid = (MAXARG < 1) ? 0 : SvIVx(POPs);
 
-    if (MAXARG < 1)
-	pid = 0;
-    else
-	pid = SvIVx(POPs);
 #ifdef BSD_GETPGRP
     pgrp = (I32)BSD_GETPGRP(pid);
 #else
@@ -4190,8 +4186,8 @@ PP(pp_getpriority)
 {
 #ifdef HAS_GETPRIORITY
     dSP; dTARGET;
-    int who = POPi;
-    int which = TOPi;
+    const int who = POPi;
+    const int which = TOPi;
     SETi( getpriority(which, who) );
     RETURN;
 #else
@@ -4203,9 +4199,9 @@ PP(pp_setpriority)
 {
 #ifdef HAS_SETPRIORITY
     dSP; dTARGET;
-    int niceval = POPi;
-    int who = POPi;
-    int which = TOPi;
+    const int niceval = POPi;
+    const int who = POPi;
+    const int which = TOPi;
     TAINT_PROPER("setpriority");
     SETi( setpriority(which, who, niceval) >= 0 );
     RETURN;
@@ -4440,7 +4436,7 @@ PP(pp_semget)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
     dSP; dMARK; dTARGET;
-    int anum = do_ipcget(PL_op->op_type, MARK, SP);
+    const int anum = do_ipcget(PL_op->op_type, MARK, SP);
     SP = MARK;
     if (anum == -1)
 	RETPUSHUNDEF;
@@ -4455,7 +4451,7 @@ PP(pp_semctl)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
     dSP; dMARK; dTARGET;
-    int anum = do_ipcctl(PL_op->op_type, MARK, SP);
+    const int anum = do_ipcctl(PL_op->op_type, MARK, SP);
     SP = MARK;
     if (anum == -1)
 	RETSETUNDEF;
@@ -4491,7 +4487,7 @@ PP(pp_ghostent)
     EXTEND(SP, 10);
     if (which == OP_GHBYNAME) {
 #ifdef HAS_GETHOSTBYNAME
-        char* name = POPpbytex;
+	const char* const name = POPpbytex;
 	hent = PerlSock_gethostbyname(name);
 #else
 	DIE(aTHX_ PL_no_sock_func, "gethostbyname");
@@ -4499,10 +4495,10 @@ PP(pp_ghostent)
     }
     else if (which == OP_GHBYADDR) {
 #ifdef HAS_GETHOSTBYADDR
-	int addrtype = POPi;
-	SV *addrsv = POPs;
+	const int addrtype = POPi;
+	SV * const addrsv = POPs;
 	STRLEN addrlen;
-	Netdb_host_t addr = (Netdb_host_t) SvPVbyte(addrsv, addrlen);
+	const Netdb_host_t addr = (Netdb_host_t) SvPVbyte(addrsv, addrlen);
 
 	hent = PerlSock_gethostbyaddr(addr, (Netdb_hlen_t) addrlen, addrtype);
 #else
@@ -4587,7 +4583,7 @@ PP(pp_gnetent)
 
     if (which == OP_GNBYNAME){
 #ifdef HAS_GETNETBYNAME
-        char *name = POPpbytex;
+	const char * const name = POPpbytex;
 	nent = PerlSock_getnetbyname(name);
 #else
         DIE(aTHX_ PL_no_sock_func, "getnetbyname");
@@ -4595,8 +4591,8 @@ PP(pp_gnetent)
     }
     else if (which == OP_GNBYADDR) {
 #ifdef HAS_GETNETBYADDR
-	int addrtype = POPi;
-	Netdb_net_t addr = (Netdb_net_t) (U32)POPu;
+	const int addrtype = POPi;
+	const Netdb_net_t addr = (Netdb_net_t) (U32)POPu;
 	nent = PerlSock_getnetbyaddr(addr, addrtype);
 #else
 	DIE(aTHX_ PL_no_sock_func, "getnetbyaddr");
@@ -4669,7 +4665,7 @@ PP(pp_gprotoent)
 
     if (which == OP_GPBYNAME) {
 #ifdef HAS_GETPROTOBYNAME
-        char* name = POPpbytex;
+	const char* const name = POPpbytex;
 	pent = PerlSock_getprotobyname(name);
 #else
 	DIE(aTHX_ PL_no_sock_func, "getprotobyname");
@@ -4677,7 +4673,7 @@ PP(pp_gprotoent)
     }
     else if (which == OP_GPBYNUMBER) {
 #ifdef HAS_GETPROTOBYNUMBER
-        int number = POPi;
+	const int number = POPi;
 	pent = PerlSock_getprotobynumber(number);
 #else
 	DIE(aTHX_ PL_no_sock_func, "getprotobynumber");
@@ -4737,29 +4733,21 @@ PP(pp_gservent)
 
     if (which == OP_GSBYNAME) {
 #ifdef HAS_GETSERVBYNAME
-	char *proto = POPpbytex;
-	char *name = POPpbytex;
-
-	if (proto && !*proto)
-	    proto = Nullch;
-
-	sent = PerlSock_getservbyname(name, proto);
+	const char * const proto = POPpbytex;
+	const char * const name = POPpbytex;
+	sent = PerlSock_getservbyname(name, (proto && !*proto) ? Nullch : proto);
 #else
 	DIE(aTHX_ PL_no_sock_func, "getservbyname");
 #endif
     }
     else if (which == OP_GSBYPORT) {
 #ifdef HAS_GETSERVBYPORT
-	char *proto = POPpbytex;
+	const char * const proto = POPpbytex;
 	unsigned short port = (unsigned short)POPu;
-
-	if (proto && !*proto)
-	    proto = Nullch;
-
 #ifdef HAS_HTONS
 	port = PerlSock_htons(port);
 #endif
-	sent = PerlSock_getservbyport(port, proto);
+	sent = PerlSock_getservbyport(port, (proto && !*proto) ? Nullch : proto);
 #else
 	DIE(aTHX_ PL_no_sock_func, "getservbyport");
 #endif
@@ -4981,7 +4969,7 @@ PP(pp_gpwent)
     switch (which) {
     case OP_GPWNAM:
       {
-	char* name = POPpbytex;
+	const char* const name = POPpbytex;
 	pwent  = getpwnam(name);
       }
       break;
@@ -5045,14 +5033,12 @@ PP(pp_gpwent)
 	 * has a different API than the Solaris/IRIX one. */
 #   if defined(HAS_GETSPNAM) && !defined(_AIX)
 	{
-	    struct spwd *spwent;
-	    int saverrno; /* Save and restore errno so that
+	    const int saverrno = errno;
+	    const struct spwd * const spwent = getspnam(pwent->pw_name);
+			  /* Save and restore errno so that
 			   * underprivileged attempts seem
 			   * to have never made the unsccessful
 			   * attempt to retrieve the shadow password. */
-
-	    saverrno = errno;
-	    spwent = getspnam(pwent->pw_name);
 	    errno = saverrno;
 	    if (spwent && spwent->sp_pwdp)
 		sv_setpv(sv, spwent->sp_pwdp);
@@ -5173,11 +5159,11 @@ PP(pp_ggrent)
     struct group *grent;
 
     if (which == OP_GGRNAM) {
-        char* name = POPpbytex;
+	const char* const name = POPpbytex;
 	grent = (struct group *)getgrnam(name);
     }
     else if (which == OP_GGRGID) {
-        Gid_t gid = POPi;
+	const Gid_t gid = POPi;
 	grent = (struct group *)getgrgid(gid);
     }
     else
@@ -5437,11 +5423,10 @@ static int
 lockf_emulate_flock(int fd, int operation)
 {
     int i;
-    int save_errno;
+    const int save_errno = errno;
     Off_t pos;
 
     /* flock locks entire file so for lockf we need to do the same	*/
-    save_errno = errno;
     pos = PerlLIO_lseek(fd, (Off_t)0, SEEK_CUR);    /* get pos to restore later */
     if (pos > 0)	/* is seekable and needs to be repositioned	*/
 	if (PerlLIO_lseek(fd, (Off_t)0, SEEK_SET) < 0)

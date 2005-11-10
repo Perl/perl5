@@ -179,7 +179,7 @@ S_mul128(pTHX_ SV *sv, U8 m)
   char           *t;
 
   if (!strnEQ(s, "0000", 4)) {  /* need to grow sv */
-    SV             *tmpNew = newSVpvn("0000000000", 10);
+    SV * const tmpNew = newSVpvn("0000000000", 10);
 
     sv_catsv(tmpNew, sv);
     SvREFCNT_dec(sv);		/* free old sv */
@@ -612,9 +612,8 @@ STATIC const packprops_t packprops[512] = {
 STATIC U8
 uni_to_byte(pTHX_ const char **s, const char *end, I32 datumtype)
 {
-    UV val;
     STRLEN retlen;
-    val = utf8n_to_uvchr((U8 *) *s, end-*s, &retlen,
+    UV val = utf8n_to_uvchr((U8 *) *s, end-*s, &retlen,
 			 ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
     /* We try to process malformed UTF-8 as much as possible (preferrably with
        warnings), but these two mean we make no progress in the string and
@@ -685,9 +684,8 @@ uni_to_bytes(pTHX_ const char **s, const char *end, const char *buf, int buf_len
 STATIC bool
 next_uni_uu(pTHX_ const char **s, const char *end, I32 *out)
 {
-    UV val;
     STRLEN retlen;
-    val = utf8n_to_uvchr((U8 *) *s, end-*s, &retlen, UTF8_CHECK_ONLY);
+    const UV val = utf8n_to_uvchr((U8 *) *s, end-*s, &retlen, UTF8_CHECK_ONLY);
     if (val >= 0x100 || !ISUUCHAR(val) ||
 	retlen == (STRLEN) -1 || retlen == 0) {
 	*out = 0;
@@ -701,7 +699,7 @@ next_uni_uu(pTHX_ const char **s, const char *end, I32 *out)
 STATIC void
 bytes_to_uni(pTHX_ const U8 *start, STRLEN len, char **dest) {
     U8 buffer[UTF8_MAXLEN];
-    const U8 *end = start + len;
+    const U8 * const end = start + len;
     char *d = *dest;
     while (start < end) {
         const int length =
@@ -943,7 +941,7 @@ STATIC bool
 S_next_symbol(pTHX_ tempsym_t* symptr )
 {
   const char* patptr = symptr->patptr;
-  const char* patend = symptr->patend;
+  const char* const patend = symptr->patend;
 
   symptr->flags &= ~FLAG_SLASH;
 

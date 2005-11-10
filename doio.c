@@ -686,7 +686,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
     }
 #if defined(HAS_FCNTL) && defined(F_SETFD)
     if (fd >= 0) {
-	int save_errno = errno;
+	const int save_errno = errno;
 	fcntl(fd,F_SETFD,fd > PL_maxsysfd); /* can change errno */
 	errno = save_errno;
     }
@@ -990,12 +990,12 @@ Perl_io_close(pTHX_ IO *io, bool not_implicit)
 	    retval = TRUE;
 	else {
 	    if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {		/* a socket */
-		bool prev_err = PerlIO_error(IoOFP(io));
+		const bool prev_err = PerlIO_error(IoOFP(io));
 		retval = (PerlIO_close(IoOFP(io)) != EOF && !prev_err);
 		PerlIO_close(IoIFP(io));	/* clear stdio, fd already closed */
 	    }
 	    else {
-		bool prev_err = PerlIO_error(IoIFP(io));
+		const bool prev_err = PerlIO_error(IoIFP(io));
 		retval = (PerlIO_close(IoIFP(io)) != EOF && !prev_err);
 	    }
 	}
@@ -1011,10 +1011,7 @@ Perl_io_close(pTHX_ IO *io, bool not_implicit)
 bool
 Perl_do_eof(pTHX_ GV *gv)
 {
-    register IO *io;
-    int ch;
-
-    io = GvIO(gv);
+    register IO * const io = GvIO(gv);
 
     if (!io)
 	return TRUE;
@@ -1023,6 +1020,7 @@ Perl_do_eof(pTHX_ GV *gv)
 
     while (IoIFP(io)) {
         int saverrno;
+	int ch;
 
         if (PerlIO_has_cntptr(IoIFP(io))) {	/* (the code works without this) */
 	    if (PerlIO_get_cnt(IoIFP(io)) > 0)	/* cheat a little, since */
@@ -1297,7 +1295,7 @@ Perl_my_stat(pTHX)
 	return PL_laststatval;
     }
     else {
-	SV* sv = POPs;
+	SV* const sv = POPs;
 	const char *s;
 	STRLEN len;
 	PUTBACK;
@@ -1428,10 +1426,9 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
     register char **a;
     register char *s;
     char *cmd;
-    int cmdlen;
 
     /* Make a copy so we can change it */
-    cmdlen = strlen(incmd);
+    const int cmdlen = strlen(incmd);
     Newx(cmd, cmdlen+1, char);
     strncpy(cmd, incmd, cmdlen);
     cmd[cmdlen] = 0;
@@ -1463,7 +1460,7 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 	  if (*s == ' ')
 	      s++;
 	  if (*s++ == '\'') {
-	      char *ncmd = s;
+	      char * const ncmd = s;
 
 	      while (*s)
 		  s++;
@@ -1738,7 +1735,7 @@ nothing in the core.
 	if (val < 0) {
 	    val = -val;
 	    while (++mark <= sp) {
-		I32 proc = SvIVx(*mark);
+		const I32 proc = SvIVx(*mark);
 		APPLY_TAINT_PROPER();
 #ifdef HAS_KILLPG
 		if (PerlProc_killpg(proc,val))	/* BSD */
@@ -1750,7 +1747,7 @@ nothing in the core.
 	}
 	else {
 	    while (++mark <= sp) {
-		I32 proc = SvIVx(*mark);
+		const I32 proc = SvIVx(*mark);
 		APPLY_TAINT_PROPER();
 		if (PerlProc_kill(proc, val))
 		    tot--;
@@ -1798,8 +1795,8 @@ nothing in the core.
 	    void *utbufp = &utbuf;
 #endif
 
-           SV* accessed = *++mark;
-           SV* modified = *++mark;
+	   SV* const accessed = *++mark;
+	   SV* const modified = *++mark;
 
            /* Be like C, and if both times are undefined, let the C
             * library figure out what to do.  This usually means
@@ -1847,7 +1844,7 @@ nothing in the core.
 		    goto do_futimes;
 		}
 		else {
-		    const char *name = SvPV_nolen_const(*mark);
+		    const char * const name = SvPV_nolen_const(*mark);
 		    APPLY_TAINT_PROPER();
 #ifdef HAS_FUTIMES
 		    if (utimes(name, utbufp))
@@ -1958,7 +1955,7 @@ Perl_ingroup(pTHX_ Gid_t testgid, bool effective)
 I32
 Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
 {
-    key_t key = (key_t)SvNVx(*++mark);
+    const key_t key = (key_t)SvNVx(*++mark);
     const I32 n = (optype == OP_MSGGET) ? 0 : SvIVx(*++mark);
     const I32 flags = SvIVx(*++mark);
     (void)sp;
@@ -1989,19 +1986,16 @@ Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
 I32
 Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 {
-    SV *astr;
     char *a;
-    STRLEN infosize;
-    I32 getinfo;
     I32 ret = -1;
     const I32 id  = SvIVx(*++mark);
     const I32 n   = (optype == OP_SEMCTL) ? SvIVx(*++mark) : 0;
     const I32 cmd = SvIVx(*++mark);
-    PERL_UNUSED_ARG(sp);
+    SV * const astr = *++mark;
+    STRLEN infosize = 0;
+    I32 getinfo = (cmd == IPC_STAT);
 
-    astr = *++mark;
-    infosize = 0;
-    getinfo = (cmd == IPC_STAT);
+    PERL_UNUSED_ARG(sp);
 
     switch (optype)
     {
@@ -2069,7 +2063,7 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
     }
     else
     {
-	IV i = SvIV(astr);
+	const IV i = SvIV(astr);
 	a = INT2PTR(char *,i);		/* ouch */
     }
     SETERRNO(0,0);
@@ -2115,17 +2109,16 @@ I32
 Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
 {
 #ifdef HAS_MSG
-    SV *mstr;
-    const char *mbuf;
-    I32 msize, flags;
     STRLEN len;
     const I32 id = SvIVx(*++mark);
+    SV * const mstr = *++mark;
+    const I32 flags = SvIVx(*++mark);
+    const char * const mbuf = SvPV_const(mstr, len);
+    const I32 msize = len - sizeof(long);
+
     PERL_UNUSED_ARG(sp);
 
-    mstr = *++mark;
-    flags = SvIVx(*++mark);
-    mbuf = SvPV_const(mstr, len);
-    if ((msize = len - sizeof(long)) < 0)
+    if (msize < 0)
 	Perl_croak(aTHX_ "Arg too short for msgsnd");
     SETERRNO(0,0);
     return msgsnd(id, (struct msgbuf *)mbuf, msize, flags);
@@ -2138,14 +2131,13 @@ I32
 Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
 {
 #ifdef HAS_MSG
-    SV *mstr;
     char *mbuf;
     long mtype;
     I32 msize, flags, ret;
     const I32 id = SvIVx(*++mark);
+    SV * const mstr = *++mark;
     PERL_UNUSED_ARG(sp);
 
-    mstr = *++mark;
     /* suppress warning when reading into undef var --jhi */
     if (! SvOK(mstr))
 	sv_setpvn(mstr, "", 0);
@@ -2175,14 +2167,12 @@ I32
 Perl_do_semop(pTHX_ SV **mark, SV **sp)
 {
 #ifdef HAS_SEM
-    SV *opstr;
-    const char *opbuf;
     STRLEN opsize;
     const I32 id = SvIVx(*++mark);
+    SV * const opstr = *++mark;
+    const char * const opbuf = SvPV_const(opstr, opsize);
     PERL_UNUSED_ARG(sp);
 
-    opstr = *++mark;
-    opbuf = SvPV_const(opstr, opsize);
     if (opsize < 3 * SHORTSIZE
 	|| (opsize % (3 * SHORTSIZE))) {
 	SETERRNO(EINVAL,LIB_INVARG);
@@ -2193,7 +2183,7 @@ Perl_do_semop(pTHX_ SV **mark, SV **sp)
     {
         const int nsops  = opsize / (3 * sizeof (short));
         int i      = nsops;
-        short *ops = (short *) opbuf;
+        short * const ops = (short *) opbuf;
         short *o   = ops;
         struct sembuf *temps, *t;
         I32 result;
@@ -2228,16 +2218,14 @@ I32
 Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 {
 #ifdef HAS_SHM
-    SV *mstr;
     char *shm;
-    I32 mpos, msize;
     struct shmid_ds shmds;
     const I32 id = SvIVx(*++mark);
+    SV * const mstr = *++mark;
+    const I32 mpos = SvIVx(*++mark);
+    const I32 msize = SvIVx(*++mark);
     PERL_UNUSED_ARG(sp);
 
-    mstr = *++mark;
-    mpos = SvIVx(*++mark);
-    msize = SvIVx(*++mark);
     SETERRNO(0,0);
     if (shmctl(id, IPC_STAT, &shmds) == -1)
 	return -1;

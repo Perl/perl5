@@ -1322,24 +1322,24 @@ S_qsortsvu(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
 static I32
 cmpindir(pTHX_ gptr a, gptr b)
 {
-    I32 sense;
     gptr * const ap = (gptr *)a;
     gptr * const bp = (gptr *)b;
+    const I32 sense = PL_sort_RealCmp(aTHX_ *ap, *bp);
 
-    if ((sense = PL_sort_RealCmp(aTHX_ *ap, *bp)) == 0)
-	 sense = (ap > bp) ? 1 : ((ap < bp) ? -1 : 0);
-    return sense;
+    if (sense)
+	return sense;
+    return (ap > bp) ? 1 : ((ap < bp) ? -1 : 0);
 }
 
 static I32
 cmpindir_desc(pTHX_ gptr a, gptr b)
 {
-    I32 sense;
     gptr * const ap = (gptr *)a;
     gptr * const bp = (gptr *)b;
+    const I32 sense = PL_sort_RealCmp(aTHX_ *ap, *bp);
 
     /* Reverse the default */
-    if ((sense = PL_sort_RealCmp(aTHX_ *ap, *bp)))
+    if (sense)
 	return -sense;
     /* But don't reverse the stability test.  */
     return (ap > bp) ? 1 : ((ap < bp) ? -1 : 0);
@@ -1491,7 +1491,7 @@ PP(pp_sort)
     GV *gv;
     CV *cv = 0;
     I32 gimme = GIMME;
-    OP* nextop = PL_op->op_next;
+    OP* const nextop = PL_op->op_next;
     I32 overloading = 0;
     bool hasargs = FALSE;
     I32 is_xsub = 0;
@@ -1660,7 +1660,7 @@ PP(pp_sort)
 		cx->blk_gimme = G_SCALAR;
 		PUSHSUB(cx);
 		if (!is_xsub) {
-		    AV* padlist = CvPADLIST(cv);
+		    AV* const padlist = CvPADLIST(cv);
 
 		    if (++CvDEPTH(cv) >= 2) {
 			PERL_STACK_OVERFLOW_CHECK();
@@ -1714,7 +1714,7 @@ PP(pp_sort)
 	if (priv & OPpSORT_REVERSE) {
 	    SV **q = start+max-1;
 	    while (start < q) {
-		SV *tmp = *start;
+		SV * const tmp = *start;
 		*start++ = *q;
 		*q-- = tmp;
 	    }

@@ -2654,7 +2654,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 	    if ((entry = hv_iternext(PL_pidstatus))) {
 		SV * const sv = hv_iterval(PL_pidstatus,entry);
 		I32 len;
-		const char *spid = hv_iterkey(entry,&len);
+		const char * const spid = hv_iterkey(entry,&len);
 
 		assert (len == sizeof(Pid_t));
 		memcpy((char *)&pid, spid, len);
@@ -2836,7 +2836,7 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 #endif
     /* additional extensions to try in each dir if scriptname not found */
 #ifdef SEARCH_EXTS
-    const char *const exts[] = { SEARCH_EXTS };
+    static const char *const exts[] = { SEARCH_EXTS };
     const char *const *const ext = search_ext ? search_ext : exts;
     int extidx = 0, i = 0;
     const char *curext = Nullch;

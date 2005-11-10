@@ -311,7 +311,6 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)
     const UV none = svp ? SvUV(*svp) : 0x7fffffff;
     const UV extra = none + 1;
     UV final = 0;
-    UV uv;
     I32 isutf8;
     U8 hibit = 0;
 
@@ -347,7 +346,8 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)
     }
 
     while (s < send) {
-	if ((uv = swash_fetch(rv, s, TRUE)) < none) {
+	const UV uv = swash_fetch(rv, s, TRUE);
+	if (uv < none) {
 	    s += UTF8SKIP(s);
 	    matches++;
 	    d = uvuni_to_utf8(d, uv);
@@ -973,7 +973,7 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
     if (DO_UTF8(sv)) {
 	if (s && len) {
 	    char * const send = s + len;
-	    char *start = s;
+	    char * const start = s;
 	    s = send - 1;
 	    while (s > start && UTF8_IS_CONTINUATION(*s))
 		s--;

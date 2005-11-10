@@ -9703,8 +9703,8 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS* param)
 		if (mg->mg_type == PERL_MAGIC_overload_table &&
 			AMT_AMAGIC((AMT*)mg->mg_ptr))
 		{
-		    AMT *amtp = (AMT*)mg->mg_ptr;
-		    AMT *namtp = (AMT*)nmg->mg_ptr;
+		    AMT * const amtp = (AMT*)mg->mg_ptr;
+		    AMT * const namtp = (AMT*)nmg->mg_ptr;
 		    I32 i;
 		    for (i = 1; i < NofAMmeth; i++) {
 			namtp->table[i] = cv_dup_inc(amtp->table[i], param);
