@@ -887,7 +887,7 @@ p	|void	|vivify_defelem	|NN SV* sv
 p	|void	|vivify_ref	|NN SV* sv|U32 to_what
 p	|I32	|wait4pid	|Pid_t pid|NN int* statusp|int flags
 p	|U32	|parse_unicode_opts|NN const char **popt
-p	|U32	|seed
+Ap	|U32	|seed
 pR	|UV	|get_hash_seed
 p	|void	|report_evil_fh	|NULLOK const GV *gv|NULLOK const IO *io|I32 op
 pd	|void	|report_uninit	|NULLOK SV* uninit_sv
