@@ -5,7 +5,7 @@
 #      You may distribute under the terms of either the GNU General Public
 #      License or the Artistic License, as specified in the README file.
 
-$B::Disassembler::VERSION = '1.04';
+$B::Disassembler::VERSION = '1.05';
 
 package B::Disassembler::BytecodeStream;
 
@@ -154,12 +154,12 @@ sub GET_IV {
     $Config{ivsize} == 4 ? &GET_I32 : &GET_IV64;
 }
 
-sub B::::GET_PADOFFSET {
-    $Config{ptrsize} == 8 ? &B::GET_IV64 : &B::GET_U32;
+sub GET_PADOFFSET {
+    $Config{ptrsize} == 8 ? &GET_IV64 : &GET_U32;
 }
 
-sub B::::GET_long {
-    $Config{longsize} == 8 ? &B::GET_IV64 : &B::GET_U32;
+sub GET_long {
+    $Config{longsize} == 8 ? &GET_IV64 : &GET_U32;
 }
 
 
