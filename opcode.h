@@ -876,7 +876,7 @@ EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX) = {
 	MEMBER_TO_FPTR(Perl_pp_chr),
 	MEMBER_TO_FPTR(Perl_pp_crypt),
 	MEMBER_TO_FPTR(Perl_pp_ucfirst),
-	MEMBER_TO_FPTR(Perl_pp_lcfirst),
+	MEMBER_TO_FPTR(Perl_pp_ucfirst),	/* Perl_pp_lcfirst */
 	MEMBER_TO_FPTR(Perl_pp_uc),
 	MEMBER_TO_FPTR(Perl_pp_lc),
 	MEMBER_TO_FPTR(Perl_pp_quotemeta),
@@ -918,8 +918,8 @@ EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX) = {
 	MEMBER_TO_FPTR(Perl_pp_or),
 	MEMBER_TO_FPTR(Perl_pp_xor),
 	MEMBER_TO_FPTR(Perl_pp_cond_expr),
-	MEMBER_TO_FPTR(Perl_pp_andassign),
-	MEMBER_TO_FPTR(Perl_pp_orassign),
+	MEMBER_TO_FPTR(Perl_pp_and),	/* Perl_pp_andassign */
+	MEMBER_TO_FPTR(Perl_pp_or),	/* Perl_pp_orassign */
 	MEMBER_TO_FPTR(Perl_pp_method),
 	MEMBER_TO_FPTR(Perl_pp_entersub),
 	MEMBER_TO_FPTR(Perl_pp_leavesub),

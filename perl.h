@@ -749,6 +749,10 @@ int usleep(unsigned int);
 
 #endif /* PERL_CORE */
 
+#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC) && !defined(__SYMBIAN32__) && !defined(MACOS_TRADITIONAL)
+#define PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
+#endif
+
 /* Cannot include embed.h here on Win32 as win32.h has not 
    yet been included and defines some config variables e.g. HAVE_INTERP_INTERN
  */
@@ -4855,10 +4859,6 @@ extern void moncontrol(int);
 
 #if defined(__DECC) && defined(__osf__)
 #pragma message disable (mainparm) /* Perl uses the envp in main(). */
-#endif
-
-#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC) && !defined(__SYMBIAN32__) && !defined(MACOS_TRADITIONAL)
-#define PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
 #endif
 
 #define do_open(g, n, l, a, rm, rp, sf) \

@@ -29,7 +29,7 @@
 #define PERL_IN_MATHOMS_C
 #include "perl.h"
 
-void Perl_mathoms() {}
+void Perl_mathoms(void) {}
 
 #if 0
 /* ref() is now a macro using Perl_doref;
@@ -1006,6 +1006,21 @@ PP(pp_syswrite)
 PP(pp_semop)
 {
     return pp_shmwrite();
+}
+
+PP(pp_andassign)
+{
+    return pp_and();
+}
+
+PP(pp_orassign)
+{
+    return pp_or();
+}
+
+PP(pp_lcfirst)
+{
+    return pp_ucfirst();
 }
 
 U8 *

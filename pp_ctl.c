@@ -1417,24 +1417,6 @@ PP(pp_xor)
 	RETSETNO;
 }
 
-PP(pp_andassign)
-{
-    dSP;
-    if (!SvTRUE(TOPs))
-	RETURN;
-    else
-	RETURNOP(cLOGOP->op_other);
-}
-
-PP(pp_orassign)
-{
-    dSP;
-    if (SvTRUE(TOPs))
-	RETURN;
-    else
-	RETURNOP(cLOGOP->op_other);
-}
-	
 PP(pp_caller)
 {
     dSP;

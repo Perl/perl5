@@ -104,7 +104,8 @@ PP(pp_and)
     if (!SvTRUE(TOPs))
 	RETURN;
     else {
-	--SP;
+        if (PL_op->op_type == OP_AND)
+	    --SP;
 	RETURNOP(cLOGOP->op_other);
     }
 }
@@ -335,7 +336,8 @@ PP(pp_or)
     if (SvTRUE(TOPs))
 	RETURN;
     else {
-	--SP;
+	if (PL_op->op_type == OP_OR)
+            --SP;
 	RETURNOP(cLOGOP->op_other);
     }
 }

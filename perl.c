@@ -138,9 +138,10 @@ static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 #endif
 
 #ifndef NO_MATHOMS
-/* This reference ensure that the mathoms are linked with perl */
-void Perl_mathoms_ref() {
-    extern void Perl_mathoms();
+/* This reference ensures that the mathoms are linked with perl */
+extern void Perl_mathoms(void);
+void Perl_mathoms_ref(void);
+void Perl_mathoms_ref(void) {
     Perl_mathoms();
 }
 #endif
@@ -1819,6 +1820,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  endif
 #  ifdef MYMALLOC
 			     " MYMALLOC"
+#  endif
+#  ifdef NO_MATHOMS
+                            " NO_MATHOMS"
 #  endif
 #  ifdef PERL_DONT_CREATE_GVSV
 			     " PERL_DONT_CREATE_GVSV"
