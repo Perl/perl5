@@ -139,8 +139,9 @@ static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 
 #ifndef NO_MATHOMS
 /* This reference ensures that the mathoms are linked with perl */
-extern void Perl_mathoms();
-void Perl_mathoms_ref() {
+extern void Perl_mathoms(void);
+void Perl_mathoms_ref(void);
+void Perl_mathoms_ref(void) {
     Perl_mathoms();
 }
 #endif
