@@ -5641,6 +5641,7 @@ static SV *magic_check(pTHX_ stcxt_t *cxt)
     int length;
     int use_network_order;
     int use_NV_size;
+    int old_magic = 0;
     int version_major;
     int version_minor = 0;
 
@@ -5674,6 +5675,7 @@ static SV *magic_check(pTHX_ stcxt_t *cxt)
             
             if (memNE(buf, old_magicstr, old_len))
                 CROAK(("File is not a perl storable"));
+	    old_magic++;
             current = buf + old_len;
         }
         use_network_order = *current;
@@ -5685,9 +5687,14 @@ static SV *magic_check(pTHX_ stcxt_t *cxt)
      * indicate the version number of the binary, and therefore governs the
      * setting of sv_retrieve_vtbl. See magic_write().
      */
-
-    version_major = use_network_order >> 1;
-    cxt->retrieve_vtbl = (SV*(**)(pTHX_ stcxt_t *cxt, const char *cname)) (version_major ? sv_retrieve : sv_old_retrieve);
+    if (old_magic && use_network_order > 1) {
+	/*  0.1 dump - use_network_order is really byte order length */
+	version_major = -1;
+    }
+    else {
+        version_major = use_network_order >> 1;
+    }
+    cxt->retrieve_vtbl = (SV*(**)(pTHX_ stcxt_t *cxt, const char *cname)) (version_major > 0 ? sv_retrieve : sv_old_retrieve);
 
     TRACEME(("magic_check: netorder = 0x%x", use_network_order));
 
@@ -5750,7 +5757,12 @@ static SV *magic_check(pTHX_ stcxt_t *cxt)
     /* In C truth is 1, falsehood is 0. Very convienient.  */
     use_NV_size = version_major >= 2 && version_minor >= 2;
 
-    GETMARK(c);
+    if (version_major >= 0) {
+        GETMARK(c);
+    }
+    else {
+	c = use_network_order;
+    }
     length = c + 3 + use_NV_size;
     READ(buf, length);	/* Not null-terminated */
 

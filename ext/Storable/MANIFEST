@@ -15,6 +15,7 @@ t/blessed.t		    See if Storable works
 t/canonical.t		    See if Storable works
 t/circular_hook.t	    Test thaw hook called depth-first for circular refs
 t/code.t		    Test (de)serialization of code references
+t/compat01.t		    See if Storable is compatible with v0.1 and v0.4 dumps
 t/compat06.t		    See if Storable works
 t/croak.t		    See if Storable works
 t/dclone.t		    See if Storable works

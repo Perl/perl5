@@ -892,6 +892,7 @@ ext/Storable/t/blessed.t	See if Storable works
 ext/Storable/t/canonical.t	See if Storable works
 ext/Storable/t/circular_hook.t	Test thaw hook called depth-first for circular refs
 ext/Storable/t/code.t		See if Storable works
+ext/Storable/t/compat01.t	See if Storable works
 ext/Storable/t/compat06.t	See if Storable works
 ext/Storable/t/croak.t		See if Storable works
 ext/Storable/t/dclone.t		See if Storable works
