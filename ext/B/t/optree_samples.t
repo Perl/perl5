@@ -607,7 +607,7 @@ checkOptree ( name	=> 'map $_+42, 10..20',
 # 3  <$> const[AV ] s
 # 4  <1> rv2av lKPM/1
 # 5  <@> mapstart K
-# 6  <|> mapwhile(other->7)[t7] K
+# 6  <|> mapwhile(other->7)[t5] K
 # 7      <#> gvsv[*_] s
 # 8      <$> const[IV 42] s
 # 9      <2> add[t2] sK/2
