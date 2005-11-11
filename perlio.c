@@ -1296,9 +1296,10 @@ PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
 int
 PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
 {
-    PerlIO_debug("PerlIO_binmode f=%p %s %c %x %s\n",
-		 (void*)f, PerlIOBase(f)->tab->name, iotype, mode,
-		 (names) ? names : "(Null)");
+    PerlIO_debug("PerlIO_binmode f=%p %s %c %x %s\n", (void*)f,
+                 (PerlIOBase(f)) ? PerlIOBase(f)->tab->name : "(Null)",
+                 iotype, mode, (names) ? names : "(Null)");
+
     if (names) {
 	/* Do not flush etc. if (e.g.) switching encodings.
 	   if a pushed layer knows it needs to flush lower layers
