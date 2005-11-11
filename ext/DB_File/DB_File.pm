@@ -1,8 +1,8 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (pmqs@cpan.org)
-# last modified 31st October 2005
-# version 1.813
+# last modified 11th November 2005
+# version 1.814
 #
 #     Copyright (c) 1995-2005 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -161,11 +161,11 @@ package DB_File ;
 use warnings;
 use strict;
 our ($VERSION, @ISA, @EXPORT, $AUTOLOAD, $DB_BTREE, $DB_HASH, $DB_RECNO);
-our ($db_version, $use_XSLoader, $splice_end_array);
+our ($db_version, $use_XSLoader, $splice_end_array, $Error);
 use Carp;
 
 
-$VERSION = "1.813" ;
+$VERSION = "1.814" ;
 
 {
     local $SIG{__WARN__} = sub {$splice_end_array = "@_";};

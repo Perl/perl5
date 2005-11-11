@@ -1,5 +1,13 @@
 
 
+1.814 11 November 2005
+
+   * Fix from Dominic Dunlop to tidy up an OS-X specific warning in
+     db-btree.t.
+
+   * Silenced a warning about $DB_File::Error only being used once.
+     Issue spotted by Dominic Dunlop.
+
 1.813 31st October 2005
 
    * Updates for Berkeley DB 4.4
