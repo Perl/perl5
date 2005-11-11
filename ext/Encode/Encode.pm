@@ -825,7 +825,7 @@ goes "liberal"
 
   find_encoding("UTF-8")->name # is 'utf-8-strict'
   find_encoding("utf-8")->name # ditto. names are case insensitive
-  find_encoding("utf8")->name  # ditto. "_" are treated as "-"
+  find_encoding("utf_8")->name  # ditto. "_" are treated as "-"
   find_encoding("UTF8")->name  # is 'utf8'.
 
 
