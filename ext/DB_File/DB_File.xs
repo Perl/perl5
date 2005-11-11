@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess <pmqs@cpan.org>
- last modified 12th March 2005
- version 1.811
+ last modified 11th November 2005
+ version 1.814
 
  All comments/suggestions/problems are welcome
 
@@ -111,6 +111,9 @@
         1.809 - no change
         1.810 - no change
         1.811 - no change
+        1.812 - no change
+        1.813 - no change
+        1.814 - no change
 
 */
 
@@ -192,8 +195,20 @@
 #    define AT_LEAST_DB_3_2
 #endif
 
+#if DB_VERSION_MAJOR > 3 || (DB_VERSION_MAJOR == 3 && DB_VERSION_MINOR >= 3)
+#    define AT_LEAST_DB_3_3
+#endif
+
 #if DB_VERSION_MAJOR > 4 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 1)
 #    define AT_LEAST_DB_4_1
+#endif
+
+#if DB_VERSION_MAJOR > 4 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 3)
+#    define AT_LEAST_DB_4_3
+#endif
+
+#ifdef AT_LEAST_DB_3_3
+#   define WANT_ERROR
 #endif
 
 /* map version 2 features & constants onto their version 1 equivalent */
@@ -769,14 +784,13 @@ HASH_CB_SIZE_TYPE size ;
     return (retval) ;
 }
 
-#if 0
+#ifdef WANT_ERROR
+
 static void
-#ifdef CAN_PROTOTYPE
-db_errcall_cb(const char * db_errpfx, char * buffer)
+#ifdef AT_LEAST_DB_4_3
+db_errcall_cb(const DB_ENV* dbenv, const char * db_errpfx, const char * buffer)
 #else
-db_errcall_cb(db_errpfx, buffer)
-const char * db_errpfx;
-char * buffer;
+db_errcall_cb(const char * db_errpfx, char * buffer)
 #endif
 {
 #ifdef dTHX
@@ -1236,6 +1250,9 @@ SV *   sv ;
     }	
     dbp = RETVAL->dbp ;
 
+#ifdef WANT_ERROR
+	    RETVAL->dbp->set_errcall(RETVAL->dbp, db_errcall_cb) ;
+#endif
     if (sv)
     {
         if (! SvROK(sv) )
@@ -1430,6 +1447,12 @@ SV *   sv ;
             Flags |= DB_TRUNCATE ;
 #endif
 
+#ifdef AT_LEAST_DB_4_4
+        /* need this for recno */
+        if ((flags & O_TRUNC) == O_TRUNC)
+            Flags |= DB_CREATE ;
+#endif
+
 #ifdef AT_LEAST_DB_4_1
         status = (RETVAL->dbp->open)(RETVAL->dbp, NULL, name, NULL, RETVAL->type, 
 	    			Flags, mode) ; 
@@ -1440,7 +1463,6 @@ SV *   sv ;
 	/* printf("open returned %d %s\n", status, db_strerror(status)) ; */
 
         if (status == 0) {
-	    /* RETVAL->dbp->set_errcall(RETVAL->dbp, db_errcall_cb) ;*/
 
             status = (RETVAL->dbp->cursor)(RETVAL->dbp, NULL, &RETVAL->cursor,
 			0) ;
@@ -1470,7 +1492,9 @@ BOOT:
 #ifdef dTHX
     dTHX;
 #endif    
-    /* SV * sv_err = perl_get_sv(ERR_BUFF, GV_ADD|GV_ADDMULTI) ;  */
+#ifdef WANT_ERROR
+    SV * sv_err = perl_get_sv(ERR_BUFF, GV_ADD|GV_ADDMULTI) ; 
+#endif
     MY_CXT_INIT;
     __getBerkeleyDBInfo() ;
  
