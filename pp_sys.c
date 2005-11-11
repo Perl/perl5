@@ -4498,7 +4498,7 @@ PP(pp_ghostent)
 	const int addrtype = POPi;
 	SV * const addrsv = POPs;
 	STRLEN addrlen;
-	const Netdb_host_t addr = (Netdb_host_t) SvPVbyte(addrsv, addrlen);
+	Netdb_host_t addr = (Netdb_host_t) SvPVbyte(addrsv, addrlen);
 
 	hent = PerlSock_gethostbyaddr(addr, (Netdb_hlen_t) addrlen, addrtype);
 #else
