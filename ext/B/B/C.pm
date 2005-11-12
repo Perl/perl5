@@ -1182,14 +1182,19 @@ sub B::AV::save {
     my ($av) = @_;
     my $sym = objsym($av);
     return $sym if defined $sym;
-    $xpvavsect->add(sprintf("0, -1, -1, 0, 0.0, 0, Nullhv, 0, 0"));
+    my $line = "0, -1, -1, 0, 0.0, 0, Nullhv, 0, 0";
+    $line .= sprintf(", 0x%x", $av->AvFLAGS) if $] < 5.009;
+    $xpvavsect->add($line);
     $svsect->add(sprintf("&xpvav_list[%d], %lu, 0x%x",
 			 $xpvavsect->index, $av->REFCNT  , $av->FLAGS));
     my $sv_list_index = $svsect->index;
     my $fill = $av->FILL;
     $av->save_magic;
-    warn sprintf("saving AV 0x%x FILL=$fill", $$av)
-	if $debug_av;
+    if ($debug_av) {
+	$line = sprintf("saving AV 0x%x FILL=$fill", $$av);
+	$line .= sprintf(" AvFLAGS=0x%x", $av->AvFLAGS) if $] < 5.009;
+	warn $line;
+    }
     # XXX AVf_REAL is wrong test: need to save comppadlist but not stack
     #if ($fill > -1 && ($avflags & AVf_REAL)) {
     if ($fill > -1) {

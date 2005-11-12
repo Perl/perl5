@@ -232,6 +232,9 @@ sub B::AV::debug {
 	MAX		%d
 	OFF		%d
 EOT
+    printf <<'EOT', $av->AvFLAGS if $] < 5.009;
+	AvFLAGS		%d
+EOT
 }
 
 sub B::GV::debug {
