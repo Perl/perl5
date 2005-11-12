@@ -84,6 +84,10 @@ BEGIN {
         print "1..0 # Skip -- Perl configured without B module\n";
         exit 0;
     }
+    unless ($Config::Config{useperlio}) {
+        print "1..0 # Skip -- Perl configured without perlio\n";
+        exit 0;
+    }
 }
 
 use Getopt::Std;
