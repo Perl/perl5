@@ -6342,6 +6342,11 @@ MODULE = Storable	PACKAGE = Storable
 PROTOTYPES: ENABLE
 
 BOOT:
+    HV *stash = gv_stashpvn("Storable", 8, TRUE);
+    newCONSTSUB(stash, "BIN_MAJOR", newSViv(STORABLE_BIN_MAJOR));
+    newCONSTSUB(stash, "BIN_MINOR", newSViv(STORABLE_BIN_MINOR));
+    newCONSTSUB(stash, "BIN_WRITE_MINOR", newSViv(STORABLE_BIN_WRITE_MINOR));
+
     init_perinterp(aTHX);
     gv_fetchpv("Storable::drop_utf8",   GV_ADDMULTI, SVt_PV);
 #ifdef DEBUGME
