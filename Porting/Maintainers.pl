@@ -50,6 +50,7 @@ package Maintainers;
 	'rmbarker'	=> 'Robin Barker <rmbarker@cpan.org>',
 	'rra'		=> 'Russ Allbery <rra@cpan.org>',
 	'sadahiro'	=> 'SADAHIRO Tomoyuki <SADAHIRO@cpan.org>',
+	'saper'		=> 'Sébastien Aperghis-Tramoni <saper@cpan.org>',
 	'sburke'	=> 'Sean Burke <sburke@cpan.org>',
 	'mschwern'	=> 'Michael Schwern <mschwern@cpan.org>',
 	'smccam'	=> 'Stephen McCamant <smccam@cpan.org>',
@@ -110,7 +111,7 @@ package Maintainers;
 	'Compress::Zlib' =>
 		{
 		'MAINTAINER'	=> 'pmqs',
-		'FILES'		=> q[ext/Compress/Zlib],
+		'FILES'		=> q[ext/Compress/Zlib t/lib/ZlibTestUtils.pm],
 		'CPAN'		=> 1,
 		},
 
@@ -280,9 +281,9 @@ package Maintainers;
 
 	'IO' =>
 		{
-		'MAINTAINER'	=> 'p5p', # Not gbarr.
+		'MAINTAINER'	=> 'gbarr',
 		'FILES'		=> q[ext/IO],
-		'CPAN'		=> 0,
+		'CPAN'		=> 1,
 		},
 
 	'IO::Zlib' =>
@@ -316,7 +317,7 @@ package Maintainers;
 
 	'Locale::Maketext' =>
 		{
-		'MAINTAINER'	=> 'sburke',
+		'MAINTAINER'	=> 'petdance',
 		'FILES'		=> q[lib/Locale/Maketext.pm lib/Locale/Maketext],
 		'CPAN'		=> 1,
 		},
@@ -444,7 +445,7 @@ package Maintainers;
 		'CPAN'		=> 0,
 		},
 
-	'PodParser' => {
+	'Pod::Parser' => {
 		'MAINTAINER'	=> 'marekr',
 		'FILES' => q[lib/Pod/{InputObjects,Parser,ParseUtils,Select,PlainText,Usage,Checker,Find}.pm pod/pod{select,2usage,checker}.PL t/pod/testcmp.pl t/pod/testp2pt.pl t/pod/testpchk.pl t/pod/emptycmd.* t/pod/find.t t/pod/for.* t/pod/headings.* t/pod/include.* t/pod/included.* t/pod/lref.* t/pod/multiline_items.* t/pod/nested_items.* t/pod/nested_seqs.* t/pod/oneline_cmds.* t/pod/poderrs.* t/pod/pod2usage.* t/pod/podselect.* t/pod/special_seqs.*],
 		'CPAN'		=> 1,
@@ -628,6 +629,13 @@ package Maintainers;
 		'MAINTAINER'	=> 'jand',
 		'FILES'		=> q[win32 README.win32 t/win32],
 		'CPAN'		=> 0,
+		},
+
+	'XSLoader' =>
+		{
+		'MAINTAINER'	=> 'saper',
+		'FILES'		=> q[ext/DynaLoader/t/XSLoader.t ext/DynaLoader/XSLoader_pm.PL],
+		'CPAN'		=> 1,
 		},
 
 	's2p' =>

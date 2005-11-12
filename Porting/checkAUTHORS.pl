@@ -36,6 +36,8 @@ my %map = reverse (
 		   pudge => "pudge\100pobox.com",
 		   rgs => "rgarciasuarez\100free.fr",
 		   sky => "sky\100nanisky.com", 
+		   steveh => "steve.hay\100uk.radan.com",
+		   stevep => "steve\100fisharerojo.org",
 		   "abigail\100abigail.nl"=> "abigail\100foad.org",
 		   "chromatic\100wgz.org" => "chromatic\100rmci.net",
 		   "slaven\100rezic.de" => "slaven.rezic\100berlin.de",
@@ -60,7 +62,8 @@ $map{"artur\100contiller.se"} = $map{"arthur\100contiller.se"} = "sky";
 $map{"autrijus\100egb.elixus.org"} = $map{"autrijus\100geb.elixus.org"}
   = "autrijus\100autrijus.org";
 $map{"craig.berry\100psinetcs.com"} = $map{"craig.berry\100metamorgs.com"}
-  = $map{"craig.berry\100signaltreesolutions.com"} = "craigberry\100mac.com";
+  = $map{"craig.berry\100signaltreesolutions.com"}
+  = $map{"craigberry\100mac.com"} = "craigb";
 $map{"davem\100fdgroup.co.uk"} = "davem";
 $map{"ilya\100math.ohio-state.edu"} = $map{"ilya\100math.berkeley.edu"}
   = $map{"ilya\100math.berkeley.edu"} = "nospam-abuse\100ilyaz.org";
@@ -70,7 +73,9 @@ $map{"nick\100ccl4.org"} = $map{"nick\100talking.bollo.cx"}
   = $map{"nick\100bagpuss.unfortu.net"} = "nicholas";
 $map{"philip.newton\100gmx.net"} = $map{"philip.newton\100datenrevision.de"}
   = "pnewton\100gmx.de",
-$map{"raphel.garcia-suarez\100hexaflux.com"} = "rgs";
+$map{"rgarciasuarez\100mandrakesoft.com"}
+  = $map{"rgarciasuarez\100mandriva.com"}
+  = $map{"raphel.garcia-suarez\100hexaflux.com"} = "rgs";
 $map{"simon\100pembro4.pmb.ox.ac.uk"} = $map{"simon\100brecon.co.uk"}
   = $map{"simon\100othersideofthe.earth.li"} = $map{"simon\100cozens.net"}
   = $map{"simon\100netthink.co.uk"} = "simon\100simon-cozens.org";
@@ -84,6 +89,8 @@ $map{"a.koenig\100mind.de"} = "andreas.koenig\100anima.de";
 $map{"japhy\100perlmonk.org"} = $map{"japhy\100cpan.org"}
   = "japhy\100pobox.com";
 $map{"rmbarker\100cpan.org"} = "robin.barker\100npl.co.uk";
+
+$map{"h.m.brand\100hccnet.nl"} = $map{"merijn\100l1.procura.nl"} = "merijn";
 
 if (@authors) {
   my %raw;
@@ -124,12 +131,14 @@ while (<>) {
     $log = $_;
     my $prefix = " " x length $1;
     LOG: while (<>) {
+      next if /^$/;
       if (s/^$prefix//) {
 	$log .= $_;
       } elsif (/^\s+Branch:/) {
 	last LOG;
       } else {
-	die "Malformed log end with $_";
+	chomp;
+	die "Malformed log end with '$_'";
       }
     }
   }
