@@ -172,7 +172,7 @@ sub B::HV::ix {
 	    asm "ldsv", $varix = $ix unless $ix == $varix;
 	    ($i = not $i) ? asm ("newpv", pvstring $_) : asm("hv_store", $_)
 		for @array;
-	    if (VERSION >= 5.009) {
+	    if (VERSION < 5.009) {
 		asm "xnv", $hv->NVX;
 	    }
 	    asm "xmg_stash", $stashix;
