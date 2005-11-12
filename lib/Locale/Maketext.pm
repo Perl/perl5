@@ -14,7 +14,7 @@ use I18N::LangTags 0.30 ();
 BEGIN { unless(defined &DEBUG) { *DEBUG = sub () {0} } }
  # define the constant 'DEBUG' at compile-time
 
-$VERSION = "1.09_01";
+$VERSION = "1.10_01";
 @ISA = ();
 
 $MATCH_SUPERS = 1;

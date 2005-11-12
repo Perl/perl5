@@ -1,6 +1,13 @@
 Revision history for Perl suite Locale::Maketext
                                         Time-stamp: "2004-03-30 21:38:07 AST"
 
+2005-11-10  Andy Lester
+	* Release 1.10:
+
+	New maintainer.  No changes at all.  Bumped up the version number
+	and released it so that I can get the RT queue and any future mail.
+
+
 2004-03-30  Sean M. Burke  sburke@cpan.org
 	* Release 1.09:
 
@@ -10,7 +17,6 @@ Revision history for Perl suite Locale::Maketext
 	Thanks to Autrijus Tang for catching some errors in the dist!
 
 
-	
 2004-01-19  Sean M. Burke  sburke@cpan.org
 	
 	* Release 1.08:
