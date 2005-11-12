@@ -317,7 +317,7 @@ package Maintainers;
 
 	'Locale::Maketext' =>
 		{
-		'MAINTAINER'	=> 'sburke',
+		'MAINTAINER'	=> 'petdance',
 		'FILES'		=> q[lib/Locale/Maketext.pm lib/Locale/Maketext],
 		'CPAN'		=> 1,
 		},
