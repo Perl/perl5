@@ -178,11 +178,6 @@ documented. It should be changed to use Filter::Simple, tested and documented.
 There are lots of functions which are retained for binary compatibility.
 Clean these up. Move them to mathom.c, and don't compile for blead?
 
-=head2 Use fchown/fchmod internally
-
-The old perltodo notes "This has been done in places, but needs a thorough
-code review. Also fchdir is available in some platforms."
-
 =head2 Constant folding
 
 The peephole optimiser should trap errors during constant folding, and give
