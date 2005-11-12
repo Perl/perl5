@@ -3284,14 +3284,15 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	OP *curop;
 
 	PL_modcount = 0;
-	PL_eval_start = right;	/* Grandfathering $[ assignment here.  Bletch.*/
+	/* Grandfathering $[ assignment here.  Bletch.*/
+	/* Only simple assignments like C<< ($[) = 1 >> are allowed */
+	PL_eval_start = (left->op_type == OP_CONST) ? right : 0;
 	left = mod(left, OP_AASSIGN);
 	if (PL_eval_start)
 	    PL_eval_start = 0;
-	else {
-	    op_free(left);
-	    op_free(right);
-	    return Nullop;
+	else if (left->op_type == OP_CONST) {
+	    /* Result of assignment is always 1 (or we'd be dead already) */
+	    return newSVOP(OP_CONST, 0, newSViv(1));
 	}
 	/* optimise C<my @x = ()> to C<my @x>, and likewise for hashes */
 	if ((left->op_type == OP_PADAV || left->op_type == OP_PADHV)
@@ -3437,8 +3438,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	if (PL_eval_start)
 	    PL_eval_start = 0;
 	else {
-	    op_free(o);
-	    return Nullop;
+	    o = newSVOP(OP_CONST, 0, newSViv(PL_compiling.cop_arybase));
 	}
     }
     return o;
@@ -4212,6 +4212,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     STRLEN ps_len;
     register CV *cv=0;
     SV *const_sv;
+    I32 gv_fetch_flags;
 
     const char * const name = o ? SvPVx_nolen_const(cSVOPo->op_sv) : Nullch;
 
@@ -4231,10 +4232,13 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     }
     else
 	aname = Nullch;
+
+    /* There may be future conflict here as change 23766 is not yet merged.  */
+    gv_fetch_flags = (block || attrs || (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS))
+	? GV_ADDMULTI : GV_ADDMULTI | GV_NOINIT;
     gv = gv_fetchpv(name ? name : (aname ? aname : 
 		    (PL_curstash ? "__ANON__" : "__ANON__::__ANON__")),
-		    GV_ADDMULTI | ((block || attrs) ? 0 : GV_NOINIT),
-		    SVt_PVCV);
+		    gv_fetch_flags, SVt_PVCV);
 
     if (o)
 	SAVEFREEOP(o);
@@ -4271,7 +4275,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     }
 #endif
 
-    if (!block || !ps || *ps || attrs)
+    if (!block || !ps || *ps || attrs || (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS))
 	const_sv = Nullsv;
     else
 	const_sv = op_const_sv(block, Nullcv);
@@ -5861,6 +5865,7 @@ Perl_ck_open(pTHX_ OP *o)
 	     (last->op_private & OPpCONST_STRICT) &&
 	     (oa = first->op_sibling) &&		/* The fh. */
 	     (oa = oa->op_sibling) &&			/* The mode. */
+	     (oa->op_type == OP_CONST) &&
 	     SvPOK(((SVOP*)oa)->op_sv) &&
 	     (mode = SvPVX_const(((SVOP*)oa)->op_sv)) &&
 	     mode[0] == '>' && mode[1] == '&' &&	/* A dup open. */
