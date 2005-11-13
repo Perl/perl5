@@ -10615,8 +10615,9 @@ Perl_yyerror(pTHX_ char *s)
 
     if (!yychar || (yychar == ';' && !PL_rsfp))
 	where = "at EOF";
-    else if (PL_bufptr > PL_oldoldbufptr && PL_bufptr - PL_oldoldbufptr < 200 &&
-      PL_oldoldbufptr != PL_oldbufptr && PL_oldbufptr != PL_bufptr) {
+    else if (PL_oldoldbufptr && PL_bufptr > PL_oldoldbufptr &&
+      PL_bufptr - PL_oldoldbufptr < 200 && PL_oldoldbufptr != PL_oldbufptr &&
+      PL_oldbufptr != PL_bufptr) {
 	/*
 		Only for NetWare:
 		The code below is removed for NetWare because it abends/crashes on NetWare
@@ -10631,8 +10632,8 @@ Perl_yyerror(pTHX_ char *s)
 	context = PL_oldoldbufptr;
 	contlen = PL_bufptr - PL_oldoldbufptr;
     }
-    else if (PL_bufptr > PL_oldbufptr && PL_bufptr - PL_oldbufptr < 200 &&
-      PL_oldbufptr != PL_bufptr) {
+    else if (PL_oldbufptr && PL_bufptr > PL_oldbufptr &&
+      PL_bufptr - PL_oldbufptr < 200 && PL_oldbufptr != PL_bufptr) {
 	/*
 		Only for NetWare:
 		The code below is removed for NetWare because it abends/crashes on NetWare
