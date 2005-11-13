@@ -565,7 +565,10 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	}
     }
     if (!fp) {
-	if (ckWARN(WARN_NEWLINE) && IoTYPE(io) == IoTYPE_RDONLY && strchr(name, '\n'))
+	if (IoTYPE(io) == IoTYPE_RDONLY && ckWARN(WARN_NEWLINE)
+	    && strchr(name, '\n')
+	    
+	)
 	    Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "open");
 	goto say_false;
     }
@@ -1078,7 +1081,7 @@ Perl_do_eof(pTHX_ GV *gv)
 
     if (!io)
 	return TRUE;
-    else if (ckWARN(WARN_IO) && (IoTYPE(io) == IoTYPE_WRONLY))
+    else if ((IoTYPE(io) == IoTYPE_WRONLY) && ckWARN(WARN_IO))
 	report_evil_fh(gv, io, OP_phoney_OUTPUT_ONLY);
 
     while (IoIFP(io)) {

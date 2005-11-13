@@ -2155,7 +2155,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	    return asIV(sv);
 	if (!SvROK(sv)) {
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
-		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
+		if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
 		    report_uninit();
 	    }
 	    return 0;
@@ -2415,7 +2415,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 #endif /* NV_PRESERVES_UV */
 	}
     } else  {
-	if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
+	if (!PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP) && ckWARN(WARN_UNINITIALIZED))
 	    report_uninit();
 	if (SvTYPE(sv) < SVt_IV)
 	    /* Typically the caller expects that sv_any is not NULL now.  */
@@ -2452,7 +2452,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	    return asUV(sv);
 	if (!SvROK(sv)) {
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
-		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
+		if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
 		    report_uninit();
 	    }
 	    return 0;
@@ -2693,7 +2693,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
     }
     else  {
 	if (!(SvFLAGS(sv) & SVs_PADTMP)) {
-	    if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
+	    if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
 		report_uninit();
 	}
 	if (SvTYPE(sv) < SVt_IV)
@@ -2727,7 +2727,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	if (SvNOKp(sv))
 	    return SvNVX(sv);
 	if (SvPOKp(sv) && SvLEN(sv)) {
-	    if (ckWARN(WARN_NUMERIC) && !SvIOKp(sv) &&
+	    if (!SvIOKp(sv) && ckWARN(WARN_NUMERIC) &&
 		!grok_number(SvPVX_const(sv), SvCUR(sv), NULL))
 		not_a_number(sv);
 	    return Atof(SvPVX_const(sv));
@@ -2740,7 +2740,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	}	
         if (!SvROK(sv)) {
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
-		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
+		if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
 		    report_uninit();
 	    }
             return (NV)0;
@@ -2807,7 +2807,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     else if (SvPOKp(sv) && SvLEN(sv)) {
 	UV value;
 	const int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
-	if (ckWARN(WARN_NUMERIC) && !SvIOKp(sv) && !numtype)
+	if (!SvIOKp(sv) && !numtype && ckWARN(WARN_NUMERIC))
 	    not_a_number(sv);
 #ifdef NV_PRESERVES_UV
 	if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
@@ -2889,7 +2889,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 #endif /* NV_PRESERVES_UV */
     }
     else  {
-	if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
+	if (!PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP) && ckWARN(WARN_UNINITIALIZED))
 	    report_uninit();
 	if (SvTYPE(sv) < SVt_NV)
 	    /* Typically the caller expects that sv_any is not NULL now.  */
@@ -3074,7 +3074,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	}
         if (!SvROK(sv)) {
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
-		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
+		if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
 		    report_uninit();
 	    }
 	    if (lp)
@@ -3299,8 +3299,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 #endif
     }
     else {
-	if (ckWARN(WARN_UNINITIALIZED)
-	    && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
+	if (!PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP) && ckWARN(WARN_UNINITIALIZED))
 	    report_uninit();
 	if (lp)
 	*lp = 0;
@@ -9446,8 +9445,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	default:
       unknown:
-	    if (!args && ckWARN(WARN_PRINTF) &&
-		  (PL_op->op_type == OP_PRTF || PL_op->op_type == OP_SPRINTF)) {
+	    if (!args
+		&& (PL_op->op_type == OP_PRTF || PL_op->op_type == OP_SPRINTF)
+		&& ckWARN(WARN_PRINTF))
+	    {
 		SV *msg = sv_newmortal();
 		Perl_sv_setpvf(aTHX_ msg, "Invalid conversion in %sprintf: ",
 			  (PL_op->op_type == OP_PRTF) ? "" : "s");

@@ -3901,6 +3901,8 @@ PERL_CALLCONV GV*	Perl_gv_SVadd(pTHX_ GV* gv)
 			__attribute__nonnull__(pTHX_1);
 
 #endif
+PERL_CALLCONV bool	Perl_ckwarn(pTHX_ U32 w);
+PERL_CALLCONV bool	Perl_ckwarn_d(pTHX_ U32 w);
 
 END_EXTERN_C
 /*

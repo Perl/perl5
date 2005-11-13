@@ -1568,6 +1568,8 @@ p	|void	|dump_sv_child	|NN SV *sv
 #ifdef PERL_DONT_CREATE_GVSV
 Ap	|GV*	|gv_SVadd	|NN GV* gv
 #endif
+Apo	|bool	|ckwarn		|U32 w
+Apo	|bool	|ckwarn_d	|U32 w
 
 END_EXTERN_C
 /*

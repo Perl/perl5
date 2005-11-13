@@ -1537,8 +1537,9 @@ Perl_do_readline(pTHX)
 	}
     }
     if (!fp) {
-	if (ckWARN2(WARN_GLOB, WARN_CLOSED)
-		&& (!io || !(IoFLAGS(io) & IOf_START))) {
+	if ((!io || !(IoFLAGS(io) & IOf_START))
+	    && ckWARN2(WARN_GLOB, WARN_CLOSED))
+	{
 	    if (type == OP_GLOB)
 		Perl_warner(aTHX_ packWARN(WARN_GLOB),
 			    "glob failed (can't start child: %s)",
