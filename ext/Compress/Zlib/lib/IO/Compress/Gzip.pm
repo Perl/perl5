@@ -458,8 +458,7 @@ sub checkParams
             'Strict'   => [Parse_boolean,   1],
             'Append'   => [Parse_boolean,   0],
             'Merge'    => [Parse_boolean,   0],
-            'BinModeIn' => [Parse_boolean,   undef],
-            'BinModeOut'=> [Parse_boolean,   undef],
+            'BinModeIn' => [Parse_boolean,   0],
 
             # zlib behaviour
             #'Method'   => [Parse_unsigned,  Z_DEFLATED],
@@ -486,8 +485,7 @@ sub checkParams
             'Strict'    => [Parse_boolean,   1],
             'Append'    => [Parse_boolean,   0],
             'Merge'     => [Parse_boolean,   0],
-            'BinModeIn' => [Parse_boolean,   undef],
-            'BinModeOut'=> [Parse_boolean,   undef],
+            'BinModeIn' => [Parse_boolean,   0],
 
             # zlib behaviour
             #'Method'   => [Parse_unsigned,  Z_DEFLATED],
@@ -678,7 +676,7 @@ sub new
             if ($outType eq 'handle') {
                 $outValue->flush() ;
                 *$obj->{FH} = $outValue ;
-                setBinModeOutput(*$obj->{FH}, $got->valueOrDefault('BinModeOut')) ;
+                setBinModeOutput(*$obj->{FH}) ;
                 *$obj->{Handle} = 1 ;
                 if ($appendOutput)
                 {
@@ -694,7 +692,7 @@ sub new
                 *$obj->{FH} = new IO::File "$mode $outValue" 
                     or return $obj->saveErrorString(undef, "cannot open file '$outValue': $!", $!) ;
                 *$obj->{StdIO} = ($outValue eq '-'); 
-                setBinModeOutput(*$obj->{FH}, $got->valueOrDefault('BinModeOut')) ;
+                setBinModeOutput(*$obj->{FH}) ;
             }
 
             if (!$rfc1951) {
@@ -922,7 +920,7 @@ sub _wr2
             $fh = new IO::File "<$input"
                 or return $self->saveErrorString(undef, "cannot open file '$input': $!", $!) ;
         }
-        setBinModeInput($fh, *$self->{Got}->valueOrDefault('BinModeIn')) ;
+        binmode $fh if *$self->{Got}->valueOrDefault('BinModeIn') ;
 
         my $status ;
         my $buff ;

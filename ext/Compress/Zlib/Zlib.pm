@@ -181,13 +181,13 @@ sub gzopen($$)
 
     if ($writing) {
         $gz = new IO::Compress::Gzip($file, Minimal => 1, AutoClose => 1, 
-                                            BinModeOut => 1, %defOpts) 
+                                            %defOpts) 
             or $Compress::Zlib::gzerrno = $IO::Compress::Gzip::GzipError;
     }
     else {
         $gz = new IO::Uncompress::Gunzip($file, 
                                             Transparent => 1,
-                                            BinModeIn => 1, Append => 0, 
+                                            Append => 0, 
                                             AutoClose => 1, Strict => 0) 
             or $Compress::Zlib::gzerrno = $IO::Uncompress::Gunzip::GunzipError;
     }

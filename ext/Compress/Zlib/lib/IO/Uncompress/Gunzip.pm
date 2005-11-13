@@ -701,8 +701,7 @@ sub checkParams
                     'Transparent'   => [Parse_any,      1],
                     'Scan'          => [Parse_boolean,  0],
                     'InputLength'   => [Parse_unsigned, undef],
-                    'BinModeIn'     => [Parse_boolean,  undef],
-                    'BinModeOut'    => [Parse_boolean,  undef],                    
+                    'BinModeOut'    => [Parse_boolean,  0],                    
                     #'Todo - Revert to ordinary file on end Z_STREAM_END'=> 0,
                     # ContinueAfterEof
                 } ;
@@ -772,7 +771,7 @@ sub new
             *$obj->{LineNo} = 0;
         }
         
-        setBinModeInput(*$obj->{FH}, $got->valueOrDefault('BinModeIn')) ;
+        setBinModeInput(*$obj->{FH}) ;
 
         my $buff = "" ;
         *$obj->{Buffer} = \$buff ;
@@ -1048,13 +1047,13 @@ sub _singleTarget
             if $x->{Got}->value('Append') ;
         $x->{fh} = new IO::File "$mode $output" 
             or return retErr($x, "cannot open file '$output': $!") ;
-        setBinModeOutput($x->{fh}, $x->{Got}->valueOrDefault('BinModeOut'));
+        binmode $x->{fh} if $x->{Got}->valueOrDefault('BinModeOut');
 
     }
 
     elsif ($x->{outType} eq 'handle') {
         $x->{fh} = $output;
-        setBinModeOutput($x->{fh}, $x->{Got}->valueOrDefault('BinModeOut'));
+        binmode $x->{fh} if $x->{Got}->valueOrDefault('BinModeOut');
         if ($x->{Got}->value('Append')) {
                 seek($x->{fh}, 0, SEEK_END)
                     or return retErr($x, "Cannot seek to end of output filehandle: $!") ;

@@ -23,26 +23,25 @@ $VERSION = '2.000_05';
               WANT_HASH
           );  
 
-our ($wantBinmode);
-$wantBinmode = ($] >= 5.006 && eval ' ${^UNICODE} || ${^UTF8LOCALE} ')
+our ($needBinmode);
+$needBinmode = ($^O eq 'MSWin32' || 
+                    ($] >= 5.006 && eval ' ${^UNICODE} || ${^UTF8LOCALE} '))
                     ? 1 : 0 ;
 
-sub setBinModeInput($$)
+sub setBinModeInput($)
 {
     my $handle = shift ;
-    my $want   = defined $_[0] ? shift : $wantBinmode ;
 
     binmode $handle 
-        if  $want;
+        if  $needBinmode;
 }
 
-sub setBinModeOutput($$)
+sub setBinModeOutput($)
 {
     my $handle = shift ;
-    my $want   = defined $_[0] ? shift : $wantBinmode ;
 
     binmode $handle 
-        if  $want;
+        if  $needBinmode;
 }
 
 sub isaFilehandle($)

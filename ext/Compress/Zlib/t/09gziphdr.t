@@ -20,7 +20,7 @@ BEGIN {
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
 
-    plan tests => 788 + $extra ;
+    plan tests => 920 + $extra ;
 
     use_ok('Compress::Zlib', 2) ;
     use_ok('Compress::Gzip::Constants') ;
@@ -157,6 +157,37 @@ my $lex = new LexFile $name ;
     ok ! defined $hdr->{ExtraFieldRaw} ;
     ok ! $hdr->{isMinimalHeader} ;
     ok ! $hdr->{TextFlag} ;
+    ok ! defined $hdr->{HeaderCRC} ;
+    is $hdr->{OsID}, $ThisOS_code ;
+
+}
+
+for my $value ( "0D", "0A", "0A0D", "0D0A", "0A0A", "0D0D")
+{
+    title "Comment with $value" ;
+
+    my $v = pack "H*", $value;
+    my $comment = "my${v}comment$v";
+    my $hdr = readHeaderInfo $name, 
+                    Time => 0,
+                  -TextFlag   => 1, 
+                  -Name       => "",
+                  -Comment    => $comment,
+                  -ExtraField => "";
+    my $after = time ;
+
+    is $hdr->{Time}, 0 ;
+
+    ok defined $hdr->{Name} ;
+    ok $hdr->{Name} eq "";
+    ok defined $hdr->{Comment} ;
+    is $hdr->{Comment}, $comment;
+    ok defined $hdr->{ExtraFieldRaw} ;
+    ok $hdr->{ExtraFieldRaw} eq "";
+    is $hdr->{ExtraFlags}, 0;
+
+    ok ! $hdr->{isMinimalHeader} ;
+    ok   $hdr->{TextFlag} ;
     ok ! defined $hdr->{HeaderCRC} ;
     is $hdr->{OsID}, $ThisOS_code ;
 
