@@ -796,7 +796,7 @@ uni.data: miniperl$(EXE_EXT) $(CONFIGPM) lib/unicore/mktables
 	touch uni.data
 
 extra.pods: miniperl$(EXE_EXT)
-	-@test -f extra.pods && rm -f `cat extra.pods`
+	-@test ! -f extra.pods || rm -f `cat extra.pods`
 	-@rm -f extra.pods
 	-@for x in `grep -l '^=[a-z]' README.* | grep -v README.vms` ; do \
 	    nx=`echo $$x | sed -e "s/README\.//"`; \
@@ -807,14 +807,15 @@ extra.pods: miniperl$(EXE_EXT)
 	-@test -f vms/perlvms.pod && cd pod && $(LNS) ../vms/perlvms.pod perlvms.pod && cd .. && echo "pod/perlvms.pod" >> extra.pods
 	-@rm -f pod/perldelta.pod
 	-@test -f pod/perl593delta.pod && cd pod && $(LNS) perl593delta.pod perldelta.pod && cd .. && echo "pod/perldelta.pod" >> extra.pods # See buildtoc
+
 extras.make: perl$(EXE_EXT)
-	-@test -s extras.lst && PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(LDLIBPTH) ./perl -Ilib -MCPAN -e '@ARGV&&make(@ARGV)' `cat extras.lst`
+	-@test ! -s extras.lst || PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(LDLIBPTH) ./perl -Ilib -MCPAN -e '@ARGV&&make(@ARGV)' `cat extras.lst`
 
 extras.test: perl$(EXE_EXT)
-	-@test -s extras.lst && PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(LDLIBPTH) ./perl -Ilib -MCPAN -e '@ARGV&&test(@ARGV)' `cat extras.lst`
+	-@test ! -s extras.lst || PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(LDLIBPTH) ./perl -Ilib -MCPAN -e '@ARGV&&test(@ARGV)' `cat extras.lst`
 
 extras.install: perl$(EXE_EXT)
-	-@test -s extras.lst && PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(LDLIBPTH) ./perl -Ilib -MCPAN -e '@ARGV&&install(@ARGV)' `cat extras.lst`
+	-@test ! -s extras.lst || PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(LDLIBPTH) ./perl -Ilib -MCPAN -e '@ARGV&&install(@ARGV)' `cat extras.lst`
 
 .PHONY: install install-strip install-all install-verbose install-silent \
 	no-install install.perl install.man install.html
