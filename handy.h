@@ -713,7 +713,7 @@ Malloc_t Perl_mem_log_free(Malloc_t oldalloc, const char *filename, const int li
 
 #ifdef PERL_POISON
 #define Safefree(d) \
-  ((d) ? (void)(safefree(MEM_LOG_FREE((Malloc_t)(d)))), Poison(&(d), 1, Malloc_t)) : (void) 0)
+  ((d) ? (void)(safefree(MEM_LOG_FREE((Malloc_t)(d))), Poison(&(d), 1, Malloc_t)) : (void) 0)
 #else
 #define Safefree(d)	safefree(MEM_LOG_FREE((Malloc_t)(d)))
 #endif
