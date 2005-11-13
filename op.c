@@ -4538,8 +4538,10 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    goto done;
 
 	if (strEQ(s, "BEGIN") && !PL_error_count) {
+	    dSP;
 	    const I32 oldscope = PL_scopestack_ix;
 	    ENTER;
+	    PUSHSTACKi(PERLSI_REQUIRE);
 	    SAVECOPFILE(&PL_compiling);
 	    SAVECOPLINE(&PL_compiling);
 
@@ -4552,6 +4554,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
 	    PL_curcop = &PL_compiling;
 	    PL_compiling.op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
+	    POPSTACK;
 	    LEAVE;
 	}
 	else if (strEQ(s, "END") && !PL_error_count) {
