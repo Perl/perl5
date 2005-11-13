@@ -1173,8 +1173,9 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	Newxz(dc, needlen + 1, char);
     }
     else if (SvOK(sv) || SvTYPE(sv) > SVt_PVMG) {
-	STRLEN n_a;
-	dc = SvPV_force(sv, n_a);
+	/* Fix this to nong when change 22613 is integrated.
+	   (Which in turn awaits merging sv_2iv and sv_2uv)  */
+	dc = SvPV_force_nolen(sv);
 	if (SvCUR(sv) < (STRLEN)len) {
 	    dc = SvGROW(sv, (STRLEN)(len + 1));
 	    (void)memzero(dc + SvCUR(sv), len - SvCUR(sv) + 1);
