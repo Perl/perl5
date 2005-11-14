@@ -6342,6 +6342,7 @@ MODULE = Storable	PACKAGE = Storable
 PROTOTYPES: ENABLE
 
 BOOT:
+{
     HV *stash = gv_stashpvn("Storable", 8, TRUE);
     newCONSTSUB(stash, "BIN_MAJOR", newSViv(STORABLE_BIN_MAJOR));
     newCONSTSUB(stash, "BIN_MINOR", newSViv(STORABLE_BIN_MINOR));
@@ -6356,6 +6357,7 @@ BOOT:
 #ifdef USE_56_INTERWORK_KLUDGE
     gv_fetchpv("Storable::interwork_56_64bit",   GV_ADDMULTI, SVt_PV);
 #endif
+}
 
 void
 init_perinterp()
