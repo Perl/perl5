@@ -4613,6 +4613,19 @@ Usually accessed via the C<SvPVbyte> macro.
 =for hackers
 Found in file sv.c
 
+=item sv_2pvutf8
+X<sv_2pvutf8>
+
+Return a pointer to the UTF-8-encoded representation of the SV, and set *lp
+to its length.  May cause the SV to be upgraded to UTF-8 as a side-effect.
+
+Usually accessed via the C<SvPVutf8> macro.
+
+	char*	sv_2pvutf8(SV* sv, STRLEN* lp)
+
+=for hackers
+Found in file sv.c
+
 =item sv_2pv_flags
 X<sv_2pv_flags>
 
