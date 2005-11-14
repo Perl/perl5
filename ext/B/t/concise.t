@@ -138,7 +138,7 @@ sub render {
 
 SKIP: {
     # tests output to GLOB, using perlio feature directly
-    skip "no perlio on this build", 122
+    skip "no perlio on this build", 127
 	unless $Config::Config{useperlio};
     
     set_style_standard('concise');  # MUST CALL before output needed
