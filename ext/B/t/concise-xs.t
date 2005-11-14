@@ -88,16 +88,17 @@ BEGIN {
 
 use Getopt::Std;
 use Carp;
+# One 5.009-only test to go when no 6; is integrated (25344)
 use Test::More tests => ( 1 * !!$Config::Config{useithreads}
-			  + 0 * ($] > 5.009)
+			  + 1 * ($] > 5.009)
 			  + 778);
 
 require_ok("B::Concise");
 
 my $testpkgs = {
-    
+
     Digest::MD5 => [qw/ ! import /],
-      
+
     B => [qw/ ! class clearsym compile_stats debug objsym parents
 	      peekop savesym timing_info walkoptree_exec
 	      walkoptree_slow walksymtable /],
@@ -136,7 +137,7 @@ usage: PERL_CORE=1 ./perl ext/B/t/concise-xs.t [-av] [module-list]
     -a	: runs all modules in CoreList
     -c  : writes test corrections as a Data::Dumper expression
     -r <file>	: reads file of tests, as written by -c
-    <args>	: additional modules are loaded and tested 
+    <args>	: additional modules are loaded and tested
     	(will report failures, since no XS funcs are known aprior)
 
 EODIE
@@ -153,7 +154,7 @@ my %report;
 if ($opts{r}) {
     my $refpkgs = require "$opts{r}";
     $testpkgs->{$_} = $refpkgs->{$_} foreach keys %$refpkgs;
-}    
+}
 
 unless ($opts{a}) {
     unless (@argpkgs) {
@@ -178,10 +179,10 @@ sub test_pkg {
 	warn "no XS/non-XS function list given, assuming empty XS list";
 	$xslist = [''];
     }
-    
+
     my $assumeXS = 0;	# assume list enumerates XS funcs, not perl ones
     $assumeXS = 1	if $xslist->[0] and $xslist->[0] eq '!';
-    
+
     # build %stash: keys are func-names, vals: 1 if XS, 0 if not
     my (%stash) = map
 	( ($_ => $assumeXS)
@@ -189,10 +190,10 @@ sub test_pkg {
 	       => grep !/__ANON__/		# but not anon subs
 	       => keys %{$pkg_name.'::'}	# from symbol table
 	       ));
-    
+
     # now invert according to supplied list
     $stash{$_} = int ! $assumeXS foreach @$xslist;
-    
+
     # and cleanup cruft (easier than preventing)
     delete @stash{'!',''};
 

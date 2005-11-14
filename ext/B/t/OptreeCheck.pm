@@ -200,7 +200,7 @@ being tested, and saved into the synthesized property B<wanted>.
 =head2 bcopts => $bcopts || [ @bcopts ]
 
 When getRendering() runs, it passes bcopts into B::Concise::compile().
-The bcopts arg can be a singls string, or an array of strings.
+The bcopts arg can be a single string, or an array of strings.
 
 =head2 errs => $err_str_regex || [ @err_str_regexs ] 
 
@@ -627,7 +627,7 @@ the test-cases; we want the match to be as rigorous as possible, and
 thats easier to achieve when matching against 1 input than 2.
 
 Opcode arguments (text within braces) are disregarded for matching
-purposes.  This loses some info in 'add[t5]', but greatly simplifys
+purposes.  This loses some info in 'add[t5]', but greatly simplifies
 matching 'nextstate(main 22 (eval 10):1)'.  Besides, we are testing
 for regressions, not for complete accuracy.
 
@@ -804,7 +804,7 @@ build's threaded-ness.  This has several benefits:
  1. native reference data allows closer/easier matching by regex.
  2. samples can be eyeballed to grok T-nT differences.
  3. data can help to validate mkCheckRex() operation.
- 4. can develop regexes which accomodate T-nT differences.
+ 4. can develop regexes which accommodate T-nT differences.
  5. can test with both native and cross-converted regexes.
 
 Cross-testing (expect_nt on threaded, expect on non-threaded) exposes

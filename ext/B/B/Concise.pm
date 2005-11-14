@@ -559,7 +559,7 @@ $priv{$_}{64} = "REFC" for ("leave", "leavesub", "leavesublv", "leavewrite");
 $priv{"aassign"}{64} = "COMMON";
 $priv{"aassign"}{32} = "PHASH" if $] < 5.009;
 $priv{"sassign"}{64} = "BKWARD";
-$priv{$_}{64} = "RTIME" for ("match", "subst", "substcont");
+$priv{$_}{64} = "RTIME" for ("match", "subst", "substcont", "qr");
 @{$priv{"trans"}}{1,2,4,8,16,64} = ("<UTF", ">UTF", "IDENT", "SQUASH", "DEL",
 				    "COMPL", "GROWS");
 $priv{"repeat"}{64} = "DOLIST";
@@ -627,7 +627,7 @@ sub private_flags {
 }
 
 sub concise_sv {
-    my($sv, $hr) = @_;
+    my($sv, $hr, $preferpv) = @_;
     $hr->{svclass} = class($sv);
     $hr->{svclass} = "UV"
       if $hr->{svclass} eq "IV" and $sv->FLAGS & SVf_IVisUV;
@@ -650,6 +650,8 @@ sub concise_sv {
 	}
 	if (class($sv) eq "SPECIAL") {
 	    $hr->{svval} .= ["Null", "sv_undef", "sv_yes", "sv_no"]->[$$sv];
+	} elsif ($preferpv && $sv->FLAGS & SVf_POK) {
+	    $hr->{svval} .= cstring($sv->PV);
 	} elsif ($sv->FLAGS & SVf_NOK) {
 	    $hr->{svval} .= $sv->NV;
 	} elsif ($sv->FLAGS & SVf_IOK) {
@@ -764,12 +766,13 @@ sub concise_op {
     elsif ($h{class} eq "SVOP" or $h{class} eq "PADOP") {
 	unless ($h{name} eq 'aelemfast' and $op->flags & OPf_SPECIAL) {
 	    my $idx = ($h{class} eq "SVOP") ? $op->targ : $op->padix;
+	    my $preferpv = $h{name} eq "method_named";
 	    if ($h{class} eq "PADOP" or !${$op->sv}) {
 		my $sv = (($curcv->PADLIST->ARRAY)[1]->ARRAY)[$idx];
-		$h{arg} = "[" . concise_sv($sv, \%h) . "]";
+		$h{arg} = "[" . concise_sv($sv, \%h, $preferpv) . "]";
 		$h{targarglife} = $h{targarg} = "";
 	    } else {
-		$h{arg} = "(" . concise_sv($op->sv, \%h) . ")";
+		$h{arg} = "(" . concise_sv($op->sv, \%h, $preferpv) . ")";
 	    }
 	}
     }
@@ -938,7 +941,7 @@ tree in one of several space-efficient text formats suitable for debugging
 the inner workings of perl or other compiler backends. It can print OPs in
 the order they appear in the OP tree, in the order they will execute, or
 in a text approximation to their tree structure, and the format of the
-information displyed is customizable. Its function is similar to that of
+information displayed is customizable. Its function is similar to that of
 perl's B<-Dx> debugging flag or the B<B::Terse> module, but it is more
 sophisticated and flexible.
 
@@ -1610,12 +1613,13 @@ the output.
 
 =head2 Errors
 
-All detected errors, (invalid arguments, internal errors, etc.) are
-resolved with a die($message). Use an eval if you wish to catch these
-errors and continue processing.
+Errors in rendering (non-existent function-name, non-existent coderef)
+are written to the STDOUT, or wherever you've set it via
+walk_output().
 
-In particular, B<compile> will die if you've asked for a non-existent
-function-name, a non-existent coderef, or a non-CODE reference.
+Errors using the various *style* calls, and bad args to walk_output(),
+result in die().  Use an eval if you wish to catch these errors and
+continue processing.
 
 =head1 AUTHOR
 

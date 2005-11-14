@@ -160,7 +160,7 @@ check_same (\%orig, \%postdec);
 
 {
     no warnings 'uninitialized';
-    my $x, $y;
+    my ($x, $y);
     eval {
 	$y ="$x\n";
 	++$x;
@@ -168,7 +168,7 @@ check_same (\%orig, \%postdec);
     ok($x == 1, $x);
     ok($@ eq '', $@);
 
-    my $p, $q;
+    my ($p, $q);
     eval {
 	$q ="$p\n";
 	--$p;
