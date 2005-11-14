@@ -3547,7 +3547,8 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    if (len <= 2) len = 45;
 	    else len = len / 3 * 3;
 	    if (len >= 64) {
-		Perl_warner(aTHX_ packWARN(WARN_PACK),
+		if (ckWARN(WARN_PACK))
+		    Perl_warner(aTHX_ packWARN(WARN_PACK),
 			    "Field too wide in 'u' format in pack");
 		len = 63;
 	    }
