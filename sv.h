@@ -59,8 +59,17 @@ typedef enum {
 	SVt_PVCV,	/* 12 */
 	SVt_PVGV,	/* 13 */
 	SVt_PVFM,	/* 14 */
-	SVt_PVIO	/* 15 */
+	SVt_PVIO,	/* 15 */
+	SVt_LAST	/* keep last in enum. used to size arrays */
 } svtype;
+
+#ifdef PERL_IN_SV_C
+#define PTE_SVSLOT	SVt_LAST
+#endif
+#if defined(PERL_IN_HV_C) || defined(PERL_IN_XS_APITEST)
+#define HE_SVSLOT	(SVt_LAST + 1)
+#endif
+#define PERL_ARENA_ROOTS_SIZE	(SVt_LAST + 2)
 
 /* Using C's structural equivalence to help emulate C++ inheritance here... */
 

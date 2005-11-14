@@ -213,6 +213,8 @@
 #define PL_beginav		(PERL_GET_INTERP->Ibeginav)
 #define PL_beginav_save		(PERL_GET_INTERP->Ibeginav_save)
 #define PL_bitcount		(PERL_GET_INTERP->Ibitcount)
+#define PL_body_arenaroots	(PERL_GET_INTERP->Ibody_arenaroots)
+#define PL_body_roots		(PERL_GET_INTERP->Ibody_roots)
 #define PL_bufend		(PERL_GET_INTERP->Ibufend)
 #define PL_bufptr		(PERL_GET_INTERP->Ibufptr)
 #define PL_checkav		(PERL_GET_INTERP->Icheckav)
@@ -485,8 +487,6 @@
 #define PL_xpvbm_root		(PERL_GET_INTERP->Ixpvbm_root)
 #define PL_xpvcv_arenaroot	(PERL_GET_INTERP->Ixpvcv_arenaroot)
 #define PL_xpvcv_root		(PERL_GET_INTERP->Ixpvcv_root)
-#define PL_xpvgv_arenaroot	(PERL_GET_INTERP->Ixpvgv_arenaroot)
-#define PL_xpvgv_root		(PERL_GET_INTERP->Ixpvgv_root)
 #define PL_xpvhv_arenaroot	(PERL_GET_INTERP->Ixpvhv_arenaroot)
 #define PL_xpvhv_root		(PERL_GET_INTERP->Ixpvhv_root)
 #define PL_xpviv_arenaroot	(PERL_GET_INTERP->Ixpviv_arenaroot)
@@ -540,6 +540,8 @@
 #define PL_beginav		(vTHX->Ibeginav)
 #define PL_beginav_save		(vTHX->Ibeginav_save)
 #define PL_bitcount		(vTHX->Ibitcount)
+#define PL_body_arenaroots	(vTHX->Ibody_arenaroots)
+#define PL_body_roots		(vTHX->Ibody_roots)
 #define PL_bufend		(vTHX->Ibufend)
 #define PL_bufptr		(vTHX->Ibufptr)
 #define PL_checkav		(vTHX->Icheckav)
@@ -812,8 +814,6 @@
 #define PL_xpvbm_root		(vTHX->Ixpvbm_root)
 #define PL_xpvcv_arenaroot	(vTHX->Ixpvcv_arenaroot)
 #define PL_xpvcv_root		(vTHX->Ixpvcv_root)
-#define PL_xpvgv_arenaroot	(vTHX->Ixpvgv_arenaroot)
-#define PL_xpvgv_root		(vTHX->Ixpvgv_root)
 #define PL_xpvhv_arenaroot	(vTHX->Ixpvhv_arenaroot)
 #define PL_xpvhv_root		(vTHX->Ixpvhv_root)
 #define PL_xpviv_arenaroot	(vTHX->Ixpviv_arenaroot)
@@ -870,6 +870,8 @@
 #define PL_Ibeginav		PL_beginav
 #define PL_Ibeginav_save	PL_beginav_save
 #define PL_Ibitcount		PL_bitcount
+#define PL_Ibody_arenaroots	PL_body_arenaroots
+#define PL_Ibody_roots		PL_body_roots
 #define PL_Ibufend		PL_bufend
 #define PL_Ibufptr		PL_bufptr
 #define PL_Icheckav		PL_checkav
@@ -1142,8 +1144,6 @@
 #define PL_Ixpvbm_root		PL_xpvbm_root
 #define PL_Ixpvcv_arenaroot	PL_xpvcv_arenaroot
 #define PL_Ixpvcv_root		PL_xpvcv_root
-#define PL_Ixpvgv_arenaroot	PL_xpvgv_arenaroot
-#define PL_Ixpvgv_root		PL_xpvgv_root
 #define PL_Ixpvhv_arenaroot	PL_xpvhv_arenaroot
 #define PL_Ixpvhv_root		PL_xpvhv_root
 #define PL_Ixpviv_arenaroot	PL_xpviv_arenaroot

@@ -268,6 +268,7 @@ PERLVAR(Ixpvmg_root,	XPVMG *)	/* free xpvmg list */
 PERLVAR(Ixpvlv_root,	XPVLV *)	/* free xpvlv list */
 PERLVAR(Ixpvbm_root,	XPVBM *)	/* free xpvbm list */
 PERLVAR(Ihe_root,	HE *)		/* free he list */
+
 PERLVAR(Inice_chunk,	char *)		/* a nice chunk of memory to reuse */
 PERLVAR(Inice_chunk_size,	U32)	/* how nice the chunk of memory is */
 
@@ -587,5 +588,5 @@ PERLVAR(Ipte_arenaroot,	XPV*)		/* list of allocated pte areas */
 PERLVARI(Idumper_fd, int, -1)
 #endif
 
-PERLVAR(Ixpvgv_root,	XPVGV *)	/* free xpvgv list */
-PERLVAR(Ixpvgv_arenaroot,XPVGV*)	/* list of allocated xpvgv areas */
+PERLVARA(Ibody_roots, PERL_ARENA_ROOTS_SIZE, void*) /* array of body roots */
+PERLVARA(Ibody_arenaroots, PERL_ARENA_ROOTS_SIZE, void*) /* consolidated body-arena pointers */

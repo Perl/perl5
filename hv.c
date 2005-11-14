@@ -36,16 +36,14 @@ holds the key and hash value.
 STATIC void
 S_more_he(pTHX)
 {
-    register HE* he;
-    register HE* heend;
-    XPV *ptr;
-    Newx(ptr, PERL_ARENA_SIZE/sizeof(XPV), XPV);
-    ptr->xpv_pv = (char*)PL_he_arenaroot;
-    PL_he_arenaroot = ptr;
+    HE* he;
+    HE* heend;
+    Newx(he, PERL_ARENA_SIZE/sizeof(HE), HE);
+    HeNEXT(he) = (HE*) PL_body_arenaroots[HE_SVSLOT];
+    PL_body_arenaroots[HE_SVSLOT] = he;
 
-    he = (HE*)ptr;
     heend = &he[PERL_ARENA_SIZE / sizeof(HE) - 1];
-    PL_he_root = ++he;
+    PL_body_roots[HE_SVSLOT] = ++he;
     while (he < heend) {
 	HeNEXT(he) = (HE*)(he + 1);
 	he++;
@@ -64,11 +62,13 @@ STATIC HE*
 S_new_he(pTHX)
 {
     HE* he;
+    void **root = &PL_body_roots[HE_SVSLOT];
+
     LOCK_SV_MUTEX;
-    if (!PL_he_root)
+    if (!*root)
 	S_more_he(aTHX);
-    he = PL_he_root;
-    PL_he_root = HeNEXT(he);
+    he = *root;
+    *root = HeNEXT(he);
     UNLOCK_SV_MUTEX;
     return he;
 }
@@ -77,8 +77,8 @@ S_new_he(pTHX)
 #define del_HE(p) \
     STMT_START { \
 	LOCK_SV_MUTEX; \
-	HeNEXT(p) = (HE*)PL_he_root; \
-	PL_he_root = p; \
+	HeNEXT(p) = (HE*)(PL_body_roots[HE_SVSLOT]);	\
+	PL_body_roots[HE_SVSLOT] = p; \
 	UNLOCK_SV_MUTEX; \
     } STMT_END
 
