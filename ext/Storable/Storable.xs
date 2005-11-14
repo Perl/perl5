@@ -3099,7 +3099,7 @@ static int store_hook(
 #else
 		tag = *svh;
 #endif
-		ary[i] = tag
+		ary[i] = tag;
 		TRACEME(("listed object %d at 0x%"UVxf" is tag #%"UVuf,
 			 i-1, PTR2UV(xsv), PTR2UV(tag)));
 	}
