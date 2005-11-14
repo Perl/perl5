@@ -314,7 +314,7 @@ Ap	|void	|init_stacks
 Ap	|void	|init_tm	|NN struct tm *ptm
 pd	|U32	|intro_my
 ApPR	|char*	|instr		|NN const char* big|NN const char* little
-pR	|bool	|io_close	|NN IO* io|bool not_implicit
+p	|bool	|io_close	|NN IO* io|bool not_implicit
 pR	|OP*	|invert		|NULLOK OP* cmd
 dpR	|bool	|is_gv_magical	|NN const char *name|STRLEN len|U32 flags
 ApR	|I32	|is_lvalue_sub

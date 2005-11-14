@@ -732,7 +732,6 @@ PERL_CALLCONV char*	Perl_instr(pTHX_ const char* big, const char* little)
 			__attribute__nonnull__(pTHX_2);
 
 PERL_CALLCONV bool	Perl_io_close(pTHX_ IO* io, bool not_implicit)
-			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV OP*	Perl_invert(pTHX_ OP* cmd)
