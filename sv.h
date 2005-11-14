@@ -59,7 +59,8 @@ typedef enum {
 	SVt_PVHV,	/* 12 */
 	SVt_PVCV,	/* 13 */
 	SVt_PVFM,	/* 14 */
-	SVt_PVIO	/* 15 */
+	SVt_PVIO,	/* 15 */
+	SVt_LAST	/* keep last in enum. used to size arrays */
 } svtype;
 
 

@@ -247,18 +247,10 @@ PERLVAR(Iosname,	char *)		/* operating system */
 
 PERLVAR(Isighandlerp,	Sighandler_t)
 
-PERLVAR(Ixnv_root,	NV *)		/* free xnv list */
-PERLVAR(Ixpv_root,	xpv_allocated *)	/* free xpv list */
-PERLVAR(Ixpviv_root,	xpviv_allocated *)	/* free xpviv list */
-PERLVAR(Ixpvnv_root,	XPVNV *)	/* free xpvnv list */
-PERLVAR(Ixpvcv_root,	XPVCV *)	/* free xpvcv list */
-PERLVAR(Ixpvav_root,	xpvav_allocated *)	/* free xpvav list */
-PERLVAR(Ixpvhv_root,	xpvhv_allocated *)	/* free xpvhv list */
-PERLVAR(Ixpvmg_root,	XPVMG *)	/* free xpvmg list */
-PERLVAR(Ixpvgv_root,	XPVGV *)	/* free xpvgv list */
-PERLVAR(Ixpvlv_root,	XPVLV *)	/* free xpvlv list */
-PERLVAR(Ixpvbm_root,	XPVBM *)	/* free xpvbm list */
+PERLVARA(Ibody_roots,	SVt_LAST, void*) /* array of body roots */
+
 PERLVAR(Ihe_root,	HE *)		/* free he list */
+
 #if defined(USE_ITHREADS)
 PERLVAR(Ipte_root,	struct ptr_tbl_ent *)	/* free ptr_tbl_ent list */
 #endif
@@ -426,21 +418,14 @@ PERLVAR(Iptr_table,	PTR_TBL_t*)
 #endif
 PERLVARI(Ibeginav_save, AV*, Nullav)	/* save BEGIN{}s when compiling */
 
-PERLVAR(Ixnv_arenaroot,	XPV*)		/* list of allocated xnv areas */
-PERLVAR(Ixpv_arenaroot,	xpv_allocated *)	/* list of allocated xpv areas */
-PERLVAR(Ixpviv_arenaroot,xpviv_allocated*)	/* list of allocated xpviv areas */
-PERLVAR(Ixpvnv_arenaroot,XPVNV*)	/* list of allocated xpvnv areas */
-PERLVAR(Ixpvcv_arenaroot,XPVCV*)	/* list of allocated xpvcv areas */
-PERLVAR(Ixpvav_arenaroot,xpvav_allocated*)	/* list of allocated xpvav areas */
-PERLVAR(Ixpvhv_arenaroot,xpvhv_allocated*)	/* list of allocated xpvhv areas */
-PERLVAR(Ixpvmg_arenaroot,XPVMG*)	/* list of allocated xpvmg areas */
-PERLVAR(Ixpvgv_arenaroot,XPVGV*)	/* list of allocated xpvgv areas */
-PERLVAR(Ixpvlv_arenaroot,XPVLV*)	/* list of allocated xpvlv areas */
-PERLVAR(Ixpvbm_arenaroot,XPVBM*)	/* list of allocated xpvbm areas */
+PERLVARA(Ibody_arenaroots, SVt_LAST, void*) /* consolidated body-arena pointers */
+
 PERLVAR(Ihe_arenaroot,	HE *)		/* list of allocated he areas */
 #if defined(USE_ITHREADS)
 PERLVAR(Ipte_arenaroot,	struct ptr_tbl_ent *) /* list of allocated pte areas */
+
 #endif
+
      /* 5.6.0 stopped here */
 
 PERLVAR(Ipsig_pend, int *)		/* per-signal "count" of pending */

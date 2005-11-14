@@ -180,6 +180,10 @@ END_EXTERN_C
 #define PL_beginav_save		(*Perl_Ibeginav_save_ptr(aTHX))
 #undef  PL_bitcount
 #define PL_bitcount		(*Perl_Ibitcount_ptr(aTHX))
+#undef  PL_body_arenaroots
+#define PL_body_arenaroots	(*Perl_Ibody_arenaroots_ptr(aTHX))
+#undef  PL_body_roots
+#define PL_body_roots		(*Perl_Ibody_roots_ptr(aTHX))
 #undef  PL_bufend
 #define PL_bufend		(*Perl_Ibufend_ptr(aTHX))
 #undef  PL_bufptr
@@ -666,50 +670,6 @@ END_EXTERN_C
 #define PL_warnhook		(*Perl_Iwarnhook_ptr(aTHX))
 #undef  PL_widesyscalls
 #define PL_widesyscalls		(*Perl_Iwidesyscalls_ptr(aTHX))
-#undef  PL_xnv_arenaroot
-#define PL_xnv_arenaroot	(*Perl_Ixnv_arenaroot_ptr(aTHX))
-#undef  PL_xnv_root
-#define PL_xnv_root		(*Perl_Ixnv_root_ptr(aTHX))
-#undef  PL_xpv_arenaroot
-#define PL_xpv_arenaroot	(*Perl_Ixpv_arenaroot_ptr(aTHX))
-#undef  PL_xpv_root
-#define PL_xpv_root		(*Perl_Ixpv_root_ptr(aTHX))
-#undef  PL_xpvav_arenaroot
-#define PL_xpvav_arenaroot	(*Perl_Ixpvav_arenaroot_ptr(aTHX))
-#undef  PL_xpvav_root
-#define PL_xpvav_root		(*Perl_Ixpvav_root_ptr(aTHX))
-#undef  PL_xpvbm_arenaroot
-#define PL_xpvbm_arenaroot	(*Perl_Ixpvbm_arenaroot_ptr(aTHX))
-#undef  PL_xpvbm_root
-#define PL_xpvbm_root		(*Perl_Ixpvbm_root_ptr(aTHX))
-#undef  PL_xpvcv_arenaroot
-#define PL_xpvcv_arenaroot	(*Perl_Ixpvcv_arenaroot_ptr(aTHX))
-#undef  PL_xpvcv_root
-#define PL_xpvcv_root		(*Perl_Ixpvcv_root_ptr(aTHX))
-#undef  PL_xpvgv_arenaroot
-#define PL_xpvgv_arenaroot	(*Perl_Ixpvgv_arenaroot_ptr(aTHX))
-#undef  PL_xpvgv_root
-#define PL_xpvgv_root		(*Perl_Ixpvgv_root_ptr(aTHX))
-#undef  PL_xpvhv_arenaroot
-#define PL_xpvhv_arenaroot	(*Perl_Ixpvhv_arenaroot_ptr(aTHX))
-#undef  PL_xpvhv_root
-#define PL_xpvhv_root		(*Perl_Ixpvhv_root_ptr(aTHX))
-#undef  PL_xpviv_arenaroot
-#define PL_xpviv_arenaroot	(*Perl_Ixpviv_arenaroot_ptr(aTHX))
-#undef  PL_xpviv_root
-#define PL_xpviv_root		(*Perl_Ixpviv_root_ptr(aTHX))
-#undef  PL_xpvlv_arenaroot
-#define PL_xpvlv_arenaroot	(*Perl_Ixpvlv_arenaroot_ptr(aTHX))
-#undef  PL_xpvlv_root
-#define PL_xpvlv_root		(*Perl_Ixpvlv_root_ptr(aTHX))
-#undef  PL_xpvmg_arenaroot
-#define PL_xpvmg_arenaroot	(*Perl_Ixpvmg_arenaroot_ptr(aTHX))
-#undef  PL_xpvmg_root
-#define PL_xpvmg_root		(*Perl_Ixpvmg_root_ptr(aTHX))
-#undef  PL_xpvnv_arenaroot
-#define PL_xpvnv_arenaroot	(*Perl_Ixpvnv_arenaroot_ptr(aTHX))
-#undef  PL_xpvnv_root
-#define PL_xpvnv_root		(*Perl_Ixpvnv_root_ptr(aTHX))
 #undef  PL_yycharp
 #define PL_yycharp		(*Perl_Iyycharp_ptr(aTHX))
 #undef  PL_yylvalp
