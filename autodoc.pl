@@ -65,6 +65,7 @@ sub walk_table (&@) {
 my %apidocs;
 my %gutsdocs;
 my %docfuncs;
+my %seenfuncs;
 
 my $curheader = "Unknown section";
 
@@ -164,26 +165,27 @@ open (DOC, ">pod/perlapi.pod") or
 	die "Can't create pod/perlapi.pod: $!\n";
 binmode DOC;
 
-walk_table {	# load documented functions into approriate hash
+walk_table {	# load documented functions into appropriate hash
     if (@_ > 1) {
 	my($flags, $retval, $func, @args) = @_;
 	return "" unless $flags =~ /d/;
 	$func =~ s/\t//g; $flags =~ s/p//; # clean up fields from embed.pl
 	$retval =~ s/\t//;
 	my $docref = delete $docfuncs{$func};
+	$seenfuncs{$func} = 1;
 	if ($docref and @$docref) {
 	    if ($flags =~ /A/) {
 		$docref->[0].="x" if $flags =~ /M/;
-		$apidocs{$docref->[4]}{$func} = 
-		    [$docref->[0] . 'A', $docref->[1], $retval,
-		    				$docref->[3], @args];
+		$apidocs{$docref->[4]}{$func} =
+		    [$docref->[0] . 'A', $docref->[1], $retval, $docref->[3],
+			@args];
 	    } else {
-		$gutsdocs{$docref->[4]}{$func} = 
+		$gutsdocs{$docref->[4]}{$func} =
 		    [$docref->[0], $docref->[1], $retval, $docref->[3], @args];
 	    }
 	}
 	else {
-	    warn "no docs for $func\n" unless $docref and @$docref;
+	    warn "no docs for $func\n" unless $seenfuncs{$func};
 	}
     }
     return "";
