@@ -623,7 +623,7 @@ Perl_leave_scope(pTHX_ I32 base)
     register GV *gv;
     register AV *av;
     register HV *hv;
-    register void* ptr;
+    void* ptr;
     register char* str;
     I32 i;
 
