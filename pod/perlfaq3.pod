@@ -85,10 +85,12 @@ with File::Find which is part of the standard library.
     use File::Find;
     my @files;
 
-    find sub { push @files, $File::Find::name if -f _ && /\.pm$/ },
-         @INC;
+    find(
+      sub { push @files, $File::Find::name if -f $File::Find::name && /\.pm$/ },
+      @INC
+    );
 
-	print join "\n", @files;
+    print "$_\n" for @files;
 
 If you simply need to quickly check to see if a module is
 available, you can check for its documentation.  If you can
