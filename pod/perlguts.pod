@@ -2611,9 +2611,7 @@ need to enter a name and description for your op at the appropriate
 place in the C<PL_custom_op_names> and C<PL_custom_op_descs> hashes.
 
 Forthcoming versions of C<B::Generate> (version 1.0 and above) should
-directly support the creation of custom ops by name; C<Opcodes::Custom> 
-will provide functions which make it trivial to "register" custom ops to
-the Perl interpreter.
+directly support the creation of custom ops by name.
 
 =head1 AUTHORS
 
