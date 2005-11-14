@@ -233,7 +233,7 @@ Perl_pad_undef(pTHX_ CV* cv)
 
     if (!padlist)
 	return;
-    if (!SvREFCNT(CvPADLIST(cv))) /* may be during global destruction */
+    if (SvIS_FREED(padlist)) /* may be during global destruction */
 	return;
 
     DEBUG_X(PerlIO_printf(Perl_debug_log,

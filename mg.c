@@ -2040,7 +2040,9 @@ Perl_magic_killbackrefs(pTHX_ SV *sv, MAGIC *mg)
     SV **svp = AvARRAY(av);
     PERL_UNUSED_ARG(sv);
 
-    if (svp) {
+    /* Not sure why the av can get freed ahead of its sv, but somehow it does
+       in ext/B/t/bytecode.t test 15 (involving print <DATA>)  */
+    if (svp && !SvIS_FREED(av)) {
 	SV *const *const last = svp + AvFILLp(av);
 
 	while (svp <= last) {

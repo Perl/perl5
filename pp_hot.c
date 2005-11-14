@@ -1909,7 +1909,7 @@ PP(pp_iter)
 	}
     }
 
-    if (sv && SvREFCNT(sv) == 0) {
+    if (sv && SvIS_FREED(sv)) {
 	*itersvp = Nullsv;
 	Perl_croak(aTHX_ "Use of freed value in iteration");
     }

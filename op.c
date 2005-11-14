@@ -407,7 +407,7 @@ Perl_op_clear(pTHX_ OP *o)
 clear_pmop:
 	{
 	    HV * const pmstash = PmopSTASH(cPMOPo);
-	    if (pmstash && SvREFCNT(pmstash)) {
+	    if (pmstash && !SvIS_FREED(pmstash)) {
 		MAGIC * const mg = mg_find((SV*)pmstash, PERL_MAGIC_symtab);
 		if (mg) {
 		    PMOP *pmop = (PMOP*) mg->mg_obj;

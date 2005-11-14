@@ -185,6 +185,11 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVTYPEMASK	0xff
 #define SvTYPE(sv)	((sv)->sv_flags & SVTYPEMASK)
 
+/* Sadly there are some parts of the core that have pointers to already-freed
+   SV heads, and rely on being able to tell that they are now free. So mark
+   them all by using a consistent macro.  */
+#define SvIS_FREED(sv)	((sv)->sv_flags == SVTYPEMASK)
+
 #define SvUPGRADE(sv, mt) (SvTYPE(sv) >= (mt) || (sv_upgrade(sv, mt), 1))
 
 #define SVs_PADSTALE	0x00000100	/* lexical has gone out of scope */
