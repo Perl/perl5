@@ -255,6 +255,10 @@ LIB_EXT = $_a
 OBJ_EXT = $_o
 PATH_SEP = $p_
 
+# If you're going to use valgrind and it can't be invoked as plain valgrind
+# then you'll need to change this, or override it on the make command line.
+VALGRIND=valgrind
+
 FIRSTMAKEFILE = $firstmakefile
 
 # Any special object files needed by this architecture, e.g. os2/os2.obj
@@ -648,7 +652,7 @@ perl.valgrind.config: config.sh
 	@grep "^usemymalloc="    config.sh
 	@grep "^usemymalloc='n'" config.sh >/dev/null || exit 1
 	@echo "And of course you have to have valgrind..."
-	valgrind ./perl -e 1 2>/dev/null || exit 1
+	$(VALGRIND) ./perl -e 1 2>/dev/null || exit 1
 
 # Third Degree Perl (Tru64 only)
 
@@ -1164,7 +1168,7 @@ test_prep.valgrind: test_prep perl.valgrind
 	PERL=./perl $(MAKE) _test_prep
 
 test.valgrind check.valgrind:	test_prep perl.valgrind.config
-	PERL=./perl PERL_DEBUG=PERL_VALGRIND=1 $(MAKE) _test
+	PERL=./perl PERL_DEBUG=PERL_VALGRIND=1 VALGRIND='$(VALGRIND)' $(MAKE) _test
 
 utest.valgrind ucheck.valgrind: test_prep.valgrind perl.valgrind
 	PERL=./perl PERL_DEBUG=PERL_VALGRIND=1 TEST_ARGS=-utf8 $(MAKE) _test

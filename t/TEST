@@ -364,9 +364,10 @@ EOT
 	    my $perl = $ENV{PERL} || './perl';
 	    my $redir = $^O eq 'VMS' ? '2>&1' : '';
 	    if ($ENV{PERL_VALGRIND}) {
-		$perl = "valgrind --suppressions=perl.supp --leak-check=yes "
-			       . "--leak-resolution=high --show-reachable=yes "
-			       . "--num-callers=50 --logfile-fd=3 $perl";
+		my $valgrind = $ENV{VALGRIND} // 'valgrind';
+		$perl = "$valgrind --suppressions=perl.supp --leak-check=yes "
+			        . "--leak-resolution=high --show-reachable=yes "
+			        . "--num-callers=50 --logfile-fd=3 $perl";
 		$redir = "3>$valgrind_log";
 	    }
 	    my $run = "$perl" . _quote_args("$testswitch $switch $utf8")
