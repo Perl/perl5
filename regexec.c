@@ -518,6 +518,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		     || ((slen = SvCUR(check)) > 1
 			 && memNE(SvPVX_const(check), s, slen)))
 		goto report_neq;
+	    check_at = s;
 	    goto success_at_start;
 	  }
 	}
