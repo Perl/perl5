@@ -360,8 +360,6 @@
 #define PL_psig_name		(vTHX->Ipsig_name)
 #define PL_psig_pend		(vTHX->Ipsig_pend)
 #define PL_psig_ptr		(vTHX->Ipsig_ptr)
-#define PL_pte_arenaroot	(vTHX->Ipte_arenaroot)
-#define PL_pte_root		(vTHX->Ipte_root)
 #define PL_ptr_table		(vTHX->Iptr_table)
 #define PL_reentrant_buffer	(vTHX->Ireentrant_buffer)
 #define PL_reentrant_retint	(vTHX->Ireentrant_retint)
@@ -643,8 +641,6 @@
 #define PL_Ipsig_name		PL_psig_name
 #define PL_Ipsig_pend		PL_psig_pend
 #define PL_Ipsig_ptr		PL_psig_ptr
-#define PL_Ipte_arenaroot	PL_pte_arenaroot
-#define PL_Ipte_root		PL_pte_root
 #define PL_Iptr_table		PL_ptr_table
 #define PL_Ireentrant_buffer	PL_reentrant_buffer
 #define PL_Ireentrant_retint	PL_reentrant_retint

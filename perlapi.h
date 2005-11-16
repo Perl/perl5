@@ -518,10 +518,6 @@ END_EXTERN_C
 #define PL_psig_pend		(*Perl_Ipsig_pend_ptr(aTHX))
 #undef  PL_psig_ptr
 #define PL_psig_ptr		(*Perl_Ipsig_ptr_ptr(aTHX))
-#undef  PL_pte_arenaroot
-#define PL_pte_arenaroot	(*Perl_Ipte_arenaroot_ptr(aTHX))
-#undef  PL_pte_root
-#define PL_pte_root		(*Perl_Ipte_root_ptr(aTHX))
 #undef  PL_ptr_table
 #define PL_ptr_table		(*Perl_Iptr_table_ptr(aTHX))
 #undef  PL_reentrant_buffer

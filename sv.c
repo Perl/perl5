@@ -597,9 +597,6 @@ Perl_sv_free_arenas(pTHX)
     }
 
     free_arena(he);
-#if defined(USE_ITHREADS)
-    free_arena(pte);
-#endif
 
     Safefree(PL_nice_chunk);
     PL_nice_chunk = Nullch;
@@ -9867,7 +9864,7 @@ Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, const void *oldsv, void *newsv)
 	    return;
 	}
     }
-    new_body_inline(tblent, (void**)&PL_pte_root,
+    new_body_inline(tblent, &PL_body_roots[PTE_SVSLOT],
 		    sizeof(struct ptr_tbl_ent), PTE_SVSLOT);
     tblent->oldval = oldsv;
     tblent->newval = newsv;
@@ -10968,10 +10965,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_he_arenaroot	= NULL;
     PL_he_root		= NULL;
 
-#if defined(USE_ITHREADS)
-    PL_pte_arenaroot	= NULL;
-    PL_pte_root		= NULL;
-#endif
     PL_nice_chunk	= NULL;
     PL_nice_chunk_size	= 0;
     PL_sv_count		= 0;
