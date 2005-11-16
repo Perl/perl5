@@ -36,7 +36,7 @@ my %PLATFORM;
 defined $PLATFORM || die "PLATFORM undefined, must be one of: @PLATFORM\n";
 exists $PLATFORM{$PLATFORM} || die "PLATFORM must be one of: @PLATFORM\n";
 
-if ($PLATFORM eq 'win32' or $PLATFORM eq "aix") {
+if ($PLATFORM eq 'win32' or $PLATFORM eq 'wince' or $PLATFORM eq "aix") {
 	# Add the compile-time options that miniperl was built with to %define.
 	# On Win32 these are not the same options as perl itself will be built
 	# with since miniperl is built with a canned config (one of the win32/
@@ -45,7 +45,8 @@ if ($PLATFORM eq 'win32' or $PLATFORM eq "aix") {
 	# source files and header files and don't include any BUILDOPT's that
 	# the user might have chosen to disable because the canned configs are
 	# minimal configs that don't include any of those options.
-	my $config = `$^X -Ilib -V`;
+	my $opts = ($PLATFORM eq 'wince' ? '-MCross' : '');
+	my $config = `$^X $opts -Ilib -V`;
 	my($options) = $config =~ /^  Compile-time options: (.*?)\n^  \S/ms;
 	$options =~ s/\s+/ /g;
 	print STDERR "Options: ($options)\n";

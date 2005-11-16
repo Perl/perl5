@@ -470,9 +470,7 @@ win32_times(struct tms *timebuf)
 Sighandler_t
 win32_signal(int sig, Sighandler_t subcode)
 {
-  dTHX;
-  Perl_croak_nocontext("signal() TBD on this platform");
-  return FALSE;
+  return xcesignal(sig, subcode);
 }
 
 static void
