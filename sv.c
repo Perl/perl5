@@ -1265,16 +1265,16 @@ static int offset_by_svtype[] = {
 
 
 #define new_body_type(sv_type)			\
-    S_new_body(aTHX_ sizeof_body_by_svtype[sv_type], sv_type)	\
-	+ offset_by_svtype[sv_type]
+    (void *)((char *)S_new_body(aTHX_ sizeof_body_by_svtype[sv_type], sv_type)\
+	     + offset_by_svtype[sv_type])
 
 #define del_body_type(p, sv_type)	\
     del_body(p, &PL_body_roots[sv_type])
 
 
 #define new_body_allocated(sv_type)		\
-    S_new_body(aTHX_ sizeof_body_by_svtype[sv_type], sv_type)	\
-	+ offset_by_svtype[sv_type]
+    (void *)((char *)S_new_body(aTHX_ sizeof_body_by_svtype[sv_type], sv_type)\
+	     + offset_by_svtype[sv_type])
 
 #define del_body_allocated(p, sv_type)		\
     del_body(p - offset_by_svtype[sv_type], &PL_body_roots[sv_type])
