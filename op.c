@@ -4697,9 +4697,10 @@ Perl_newCONSTSUB(pTHX_ HV *stash, char *name, SV *sv)
     CvCONST_on(cv);
     sv_setpvn((SV*)cv, "", 0);  /* prototype is "" */
 
+#ifdef USE_ITHREADS
     if (stash)
 	CopSTASH_free(PL_curcop);
-
+#endif
     LEAVE;
 
     return cv;
