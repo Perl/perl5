@@ -63,6 +63,9 @@ typedef enum {
 	SVt_LAST	/* keep last in enum. used to size arrays */
 } svtype;
 
+#ifdef PERL_IN_SV_C
+#define PTE_SVSLOT	SVt_RV
+#endif
 
 /* typedefs to eliminate some typing */
 typedef struct he HE;

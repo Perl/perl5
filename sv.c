@@ -1112,7 +1112,6 @@ Perl_report_uninit(pTHX_ SV* uninit_sv)
   of the unused body-slots for PTEs, then use it in those (2) PTE
   contexts below (line ~10k)
 */
-#define PTE_SVSLOT	SVt_IV
 
 STATIC void *
 S_more_bodies (pTHX_ size_t size, svtype sv_type)
