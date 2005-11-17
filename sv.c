@@ -1161,6 +1161,11 @@ S_more_bodies (pTHX_ size_t size, svtype sv_type)
 
 /* now use the inline version in the proper function */
 
+#ifndef PURIFY
+
+/* This isn't being used with -DPURIFY, so don't declare it. Otherwise
+   compilers issue warnings.  */
+
 STATIC void *
 S_new_body(pTHX_ size_t size, svtype sv_type)
 {
@@ -1168,6 +1173,8 @@ S_new_body(pTHX_ size_t size, svtype sv_type)
     new_body_inline(xpv, &PL_body_roots[sv_type], size, sv_type);
     return xpv;
 }
+
+#endif
 
 /* return a thing to the free list */
 
@@ -1397,12 +1404,12 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	sv_force_normal_flags(sv, 0);
     }
 
-    if (SvTYPE(sv) == mt)
+    if (old_type == mt)
 	return;
 
-    if (SvTYPE(sv) > mt)
+    if (old_type > mt)
 	Perl_croak(aTHX_ "sv_upgrade from type %d down to type %d",
-		(int)SvTYPE(sv), (int)mt);
+		(int)old_type, (int)mt);
 
 
     old_body = SvANY(sv);
@@ -1448,7 +1455,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
        So we are careful and work out the size of used parts of all the
        structures.  */
 
-    switch (SvTYPE(sv)) {
+    switch (old_type) {
     case SVt_NULL:
 	break;
     case SVt_IV:
