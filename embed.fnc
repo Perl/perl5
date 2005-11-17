@@ -1186,6 +1186,18 @@ sR	|CV*	|get_db_sub	|NN SV **svp|NN CV *cv
 sR	|SV*	|method_common	|NN SV* meth|NULLOK U32* hashp
 #endif
 
+#if defined(PERL_IN_PP_SORT_C) || defined(PERL_DECL_PROT)
+s	|I32	|sv_ncmp	|NN SV *a|NN SV *b
+s	|I32	|sv_i_ncmp	|NN SV *a|NN SV *b
+s	|I32	|amagic_ncmp	|NN SV *a|NN SV *b
+s	|I32	|amagic_i_ncmp	|NN SV *a|NN SV *b
+s	|I32	|amagic_cmp	|NN SV *a|NN SV *b
+s	|I32	|amagic_cmp_locale|NN SV *a|NN SV *b
+s	|I32	|sortcv		|NN SV *a|NN SV *b
+s	|I32	|sortcv_xsub	|NN SV *a|NN SV *b
+s	|I32	|sortcv_stacked	|NN SV *a|NN SV *b
+#endif
+
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 s	|OP*	|doform		|NN CV *cv|NN GV *gv|NN OP *retop
 s	|int	|emulate_eaccess|NN const char* path|Mode_t mode

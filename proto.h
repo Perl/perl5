@@ -3307,6 +3307,45 @@ STATIC SV*	S_method_common(pTHX_ SV* meth, U32* hashp)
 
 #endif
 
+#if defined(PERL_IN_PP_SORT_C) || defined(PERL_DECL_PROT)
+STATIC I32	S_sv_ncmp(pTHX_ SV *a, SV *b)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC I32	S_sv_i_ncmp(pTHX_ SV *a, SV *b)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC I32	S_amagic_ncmp(pTHX_ SV *a, SV *b)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC I32	S_amagic_i_ncmp(pTHX_ SV *a, SV *b)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC I32	S_amagic_cmp(pTHX_ SV *a, SV *b)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC I32	S_amagic_cmp_locale(pTHX_ SV *a, SV *b)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC I32	S_sortcv(pTHX_ SV *a, SV *b)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC I32	S_sortcv_xsub(pTHX_ SV *a, SV *b)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC I32	S_sortcv_stacked(pTHX_ SV *a, SV *b)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+#endif
+
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 STATIC OP*	S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 			__attribute__nonnull__(pTHX_1)

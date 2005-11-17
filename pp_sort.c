@@ -33,16 +33,6 @@
 #define	small xsmall
 #endif
 
-static I32 sortcv(pTHX_ SV *a, SV *b);
-static I32 sortcv_stacked(pTHX_ SV *a, SV *b);
-static I32 sortcv_xsub(pTHX_ SV *a, SV *b);
-static I32 sv_ncmp(pTHX_ SV *a, SV *b);
-static I32 sv_i_ncmp(pTHX_ SV *a, SV *b);
-static I32 amagic_ncmp(pTHX_ SV *a, SV *b);
-static I32 amagic_i_ncmp(pTHX_ SV *a, SV *b);
-static I32 amagic_cmp(pTHX_ SV *a, SV *b);
-static I32 amagic_cmp_locale(pTHX_ SV *a, SV *b);
-
 #define sv_cmp_static Perl_sv_cmp
 #define sv_cmp_locale_static Perl_sv_cmp_locale
 
@@ -1685,7 +1675,7 @@ PP(pp_sort)
 	    
 	    start = p1 - max;
 	    sortsvp(aTHX_ start, max,
-		    is_xsub ? sortcv_xsub : hasargs ? sortcv_stacked : sortcv);
+		    is_xsub ? S_sortcv_xsub : hasargs ? S_sortcv_stacked : S_sortcv);
 
 	    if (!(flags & OPf_SPECIAL)) {
 		LEAVESUB(cv);
@@ -1703,13 +1693,13 @@ PP(pp_sort)
 	    sortsvp(aTHX_ start, max,
 		    (priv & OPpSORT_NUMERIC)
 		        ? ( ( ( priv & OPpSORT_INTEGER) || all_SIVs)
-			    ? ( overloading ? amagic_i_ncmp : sv_i_ncmp)
-			    : ( overloading ? amagic_ncmp : sv_ncmp ) )
+			    ? ( overloading ? S_amagic_i_ncmp : S_sv_i_ncmp)
+			    : ( overloading ? S_amagic_ncmp : S_sv_ncmp ) )
 			: ( IN_LOCALE_RUNTIME
 			    ? ( overloading
-				? amagic_cmp_locale
+				? S_amagic_cmp_locale
 				: sv_cmp_locale_static)
-			    : ( overloading ? amagic_cmp : sv_cmp_static)));
+			    : ( overloading ? S_amagic_cmp : sv_cmp_static)));
 	}
 	if (priv & OPpSORT_REVERSE) {
 	    SV **q = start+max-1;
@@ -1745,7 +1735,7 @@ PP(pp_sort)
 }
 
 static I32
-sortcv(pTHX_ SV *a, SV *b)
+S_sortcv(pTHX_ SV *a, SV *b)
 {
     dVAR;
     const I32 oldsaveix = PL_savestack_ix;
@@ -1769,7 +1759,7 @@ sortcv(pTHX_ SV *a, SV *b)
 }
 
 static I32
-sortcv_stacked(pTHX_ SV *a, SV *b)
+S_sortcv_stacked(pTHX_ SV *a, SV *b)
 {
     dVAR;
     const I32 oldsaveix = PL_savestack_ix;
@@ -1809,7 +1799,7 @@ sortcv_stacked(pTHX_ SV *a, SV *b)
 }
 
 static I32
-sortcv_xsub(pTHX_ SV *a, SV *b)
+S_sortcv_xsub(pTHX_ SV *a, SV *b)
 {
     dVAR; dSP;
     const I32 oldsaveix = PL_savestack_ix;
@@ -1838,7 +1828,7 @@ sortcv_xsub(pTHX_ SV *a, SV *b)
 
 
 static I32
-sv_ncmp(pTHX_ SV *a, SV *b)
+S_sv_ncmp(pTHX_ SV *a, SV *b)
 {
     const NV nv1 = SvNSIV(a);
     const NV nv2 = SvNSIV(b);
@@ -1846,7 +1836,7 @@ sv_ncmp(pTHX_ SV *a, SV *b)
 }
 
 static I32
-sv_i_ncmp(pTHX_ SV *a, SV *b)
+S_sv_i_ncmp(pTHX_ SV *a, SV *b)
 {
     const IV iv1 = SvIV(a);
     const IV iv2 = SvIV(b);
@@ -1859,7 +1849,7 @@ sv_i_ncmp(pTHX_ SV *a, SV *b)
 	: Nullsv;
 
 static I32
-amagic_ncmp(pTHX_ register SV *a, register SV *b)
+S_amagic_ncmp(pTHX_ register SV *a, register SV *b)
 {
     SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp);
     if (tmpsv) {
@@ -1876,11 +1866,11 @@ amagic_ncmp(pTHX_ register SV *a, register SV *b)
 	    return d ? -1 : 0;
 	}
      }
-     return sv_ncmp(aTHX_ a, b);
+     return S_sv_ncmp(aTHX_ a, b);
 }
 
 static I32
-amagic_i_ncmp(pTHX_ register SV *a, register SV *b)
+S_amagic_i_ncmp(pTHX_ register SV *a, register SV *b)
 {
     SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp);
     if (tmpsv) {
@@ -1897,11 +1887,11 @@ amagic_i_ncmp(pTHX_ register SV *a, register SV *b)
 	    return d ? -1 : 0;
 	}
     }
-    return sv_i_ncmp(aTHX_ a, b);
+    return S_sv_i_ncmp(aTHX_ a, b);
 }
 
 static I32
-amagic_cmp(pTHX_ register SV *str1, register SV *str2)
+S_amagic_cmp(pTHX_ register SV *str1, register SV *str2)
 {
     SV * const tmpsv = tryCALL_AMAGICbin(str1,str2,scmp);
     if (tmpsv) {
@@ -1922,7 +1912,7 @@ amagic_cmp(pTHX_ register SV *str1, register SV *str2)
 }
 
 static I32
-amagic_cmp_locale(pTHX_ register SV *str1, register SV *str2)
+S_amagic_cmp_locale(pTHX_ register SV *str1, register SV *str2)
 {
     SV * const tmpsv = tryCALL_AMAGICbin(str1,str2,scmp);
     if (tmpsv) {

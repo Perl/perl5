@@ -1207,6 +1207,19 @@
 #define method_common		S_method_common
 #endif
 #endif
+#if defined(PERL_IN_PP_SORT_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define sv_ncmp			S_sv_ncmp
+#define sv_i_ncmp		S_sv_i_ncmp
+#define amagic_ncmp		S_amagic_ncmp
+#define amagic_i_ncmp		S_amagic_i_ncmp
+#define amagic_cmp		S_amagic_cmp
+#define amagic_cmp_locale	S_amagic_cmp_locale
+#define sortcv			S_sortcv
+#define sortcv_xsub		S_sortcv_xsub
+#define sortcv_stacked		S_sortcv_stacked
+#endif
+#endif
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define doform			S_doform
@@ -3196,6 +3209,19 @@
 #define do_oddball(a,b,c)	S_do_oddball(aTHX_ a,b,c)
 #define get_db_sub(a,b)		S_get_db_sub(aTHX_ a,b)
 #define method_common(a,b)	S_method_common(aTHX_ a,b)
+#endif
+#endif
+#if defined(PERL_IN_PP_SORT_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define sv_ncmp(a,b)		S_sv_ncmp(aTHX_ a,b)
+#define sv_i_ncmp(a,b)		S_sv_i_ncmp(aTHX_ a,b)
+#define amagic_ncmp(a,b)	S_amagic_ncmp(aTHX_ a,b)
+#define amagic_i_ncmp(a,b)	S_amagic_i_ncmp(aTHX_ a,b)
+#define amagic_cmp(a,b)		S_amagic_cmp(aTHX_ a,b)
+#define amagic_cmp_locale(a,b)	S_amagic_cmp_locale(aTHX_ a,b)
+#define sortcv(a,b)		S_sortcv(aTHX_ a,b)
+#define sortcv_xsub(a,b)	S_sortcv_xsub(aTHX_ a,b)
+#define sortcv_stacked(a,b)	S_sortcv_stacked(aTHX_ a,b)
 #endif
 #endif
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
