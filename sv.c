@@ -1224,33 +1224,59 @@ S_new_body(pTHX_ size_t size, svtype sv_type)
 */
 
 struct body_details {
-    size_t size;
+    size_t size;	/* Size to allocate  */
+    size_t copy;	/* Size of structure to copy (may be shorter)  */
     int offset;
 };
 
 struct body_details bodies_by_type[] = {
-    {0, 0},
-    {0, 0},
-    {sizeof(NV), 0},		/* 8 bytes on most ILP32 with IEEE doubles */
-    {0, 0},
-    {sizeof(xpv_allocated),	/* 8 bytes on most ILP32 with IEEE doubles */
-     STRUCT_OFFSET(xpv_allocated,   xpv_cur) - STRUCT_OFFSET(XPV,   xpv_cur)},
-    {sizeof(xpviv_allocated),	/* 12 */
-     STRUCT_OFFSET(xpviv_allocated, xpv_cur) - STRUCT_OFFSET(XPVIV, xpv_cur)},
-    {sizeof(XPVNV), 0},		/* 20 */
-    {sizeof(XPVMG), 0},		/* 28 */
-    {sizeof(XPVBM), 0},		/* 36 */
-    {sizeof(XPVGV), 0},		/* 48 */
-    {sizeof(XPVLV), 0},		/* 64 */
-    {sizeof(xpvav_allocated),	/* 20 */
+    {0, 0, 0},
+    /* IVs are in the head, so the allocation size is 0  */
+    {0, sizeof(IV), STRUCT_OFFSET(XPVIV, xiv_iv)},
+    /* 8 bytes on most ILP32 with IEEE doubles */
+    {sizeof(NV), sizeof(NV), 0},
+    /* RVs are in the head now */
+    {0, 0, 0},
+    /* 8 bytes on most ILP32 with IEEE doubles */
+    {sizeof(xpv_allocated),
+     STRUCT_OFFSET(XPV, xpv_len) + sizeof (((XPV*)SvANY((SV*)0))->xpv_len)
+     - STRUCT_OFFSET(xpv_allocated, xpv_cur) + STRUCT_OFFSET(XPV, xpv_cur),
+     + STRUCT_OFFSET(xpv_allocated, xpv_cur) - STRUCT_OFFSET(XPV, xpv_cur)
+     },
+    /* 12 */
+    {sizeof(xpviv_allocated),
+     STRUCT_OFFSET(XPVIV, xiv_u) + sizeof (((XPVIV*)SvANY((SV*)0))->xiv_u)
+     - STRUCT_OFFSET(xpviv_allocated, xpv_cur) + STRUCT_OFFSET(XPVIV, xpv_cur),
+     + STRUCT_OFFSET(xpviv_allocated, xpv_cur) - STRUCT_OFFSET(XPVIV, xpv_cur)
+    },
+    /* 20 */
+    {sizeof(XPVNV),
+     STRUCT_OFFSET(XPVNV, xiv_u) + sizeof (((XPVNV*)SvANY((SV*)0))->xiv_u),
+     0},
+    /* 28 */
+    {sizeof(XPVMG),
+     STRUCT_OFFSET(XPVMG, xmg_stash) + sizeof (((XPVMG*)SvANY((SV*)0))->xmg_stash),
+     0},
+    /* 36 */
+    {sizeof(XPVBM), 0, 0},
+    /* 48 */
+    {sizeof(XPVGV), 0, 0},
+    /* 64 */
+    {sizeof(XPVLV), 0, 0},
+    /* 20 */
+    {sizeof(xpvav_allocated), 0,
      STRUCT_OFFSET(xpvav_allocated, xav_fill)
      - STRUCT_OFFSET(XPVAV, xav_fill)},
-    {sizeof(xpvhv_allocated),	/* 20 */
+    /* 20 */
+    {sizeof(xpvhv_allocated), 0, 
      STRUCT_OFFSET(xpvhv_allocated, xhv_fill)
      - STRUCT_OFFSET(XPVHV, xhv_fill)},
-    {sizeof(XPVCV), 0},		/* 76 */
-    {sizeof(XPVFM), 0},		/* 80 */
-    {sizeof(XPVIO), 0}		/* 84 */
+    /* 76 */
+    {sizeof(XPVCV), 0, 0},
+    /* 80 */
+    {sizeof(XPVFM), 0, 0},
+    /* 84 */
+    {sizeof(XPVIO), 0, 0}
 };
 
 #define new_body_type(sv_type)			\
@@ -1445,12 +1471,12 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	    mt = SVt_PVNV;
 	else if (mt < SVt_PVIV)
 	    mt = SVt_PVIV;
-	old_body_offset = STRUCT_OFFSET(XPVIV, xiv_iv);
-	old_body_length = sizeof(IV);
+	old_body_offset = bodies_by_type[old_type].offset;
+	old_body_length = bodies_by_type[old_type].copy;
 	break;
     case SVt_NV:
-	old_body_arena = &PL_body_roots[SVt_NV];
-	old_body_length = sizeof(NV);
+	old_body_arena = &PL_body_roots[old_type];
+	old_body_length = bodies_by_type[old_type].copy;
 #ifndef NV_ZERO_IS_ALLBITS_ZERO
 	zero_nv = FALSE;
 #endif
@@ -1461,7 +1487,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	break;
     case SVt_PV:
 	old_body_arena = &PL_body_roots[SVt_PV];
-	old_body_offset = - bodies_by_type[SVt_PVIV].offset;
+	old_body_offset = - bodies_by_type[SVt_PV].offset;
 	old_body_length = STRUCT_OFFSET(XPV, xpv_len)
 	    + sizeof (((XPV*)SvANY(sv))->xpv_len)
 	    - old_body_offset;
