@@ -1234,7 +1234,7 @@ struct body_details {
 struct body_details bodies_by_type[] = {
     {0, 0, 0, FALSE, TRUE},
     /* IVs are in the head, so the allocation size is 0  */
-    {0, sizeof(IV), STRUCT_OFFSET(XPVIV, xiv_iv), FALSE, TRUE},
+    {0, sizeof(IV), -STRUCT_OFFSET(XPVIV, xiv_iv), FALSE, TRUE},
     /* 8 bytes on most ILP32 with IEEE doubles */
     {sizeof(NV), sizeof(NV), 0, FALSE, FALSE},
     /* RVs are in the head now */
@@ -1394,9 +1394,6 @@ You generally want to use the C<SvUPGRADE> macro wrapper. See also C<svtype>.
 void
 Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 {
-    void**	old_body_arena;
-    size_t	old_body_offset;
-    size_t	old_body_length;	/* Well, the length to copy.  */
     void*	old_body;
     void*	new_body;
     size_t	new_body_length;
@@ -1420,9 +1417,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 
 
     old_body = SvANY(sv);
-    old_body_arena = 0;
-    old_body_offset = 0;
-    old_body_length = 0;
     new_body_offset = 0;
     new_body_length = ~0;
 
@@ -1470,34 +1464,22 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	    mt = SVt_PVNV;
 	else if (mt < SVt_PVIV)
 	    mt = SVt_PVIV;
-	old_body_offset = old_type_details->offset;
-	old_body_length = old_type_details->copy;
 	break;
     case SVt_NV:
-	old_body_arena = &PL_body_roots[old_type];
-	old_body_length = old_type_details->copy;
 	if (mt < SVt_PVNV)
 	    mt = SVt_PVNV;
 	break;
     case SVt_RV:
 	break;
     case SVt_PV:
-	old_body_arena = &PL_body_roots[SVt_PV];
-	old_body_offset = - bodies_by_type[SVt_PV].offset;
-	old_body_length = bodies_by_type[SVt_PV].copy;
 	if (mt <= SVt_IV)
 	    mt = SVt_PVIV;
 	else if (mt == SVt_NV)
 	    mt = SVt_PVNV;
 	break;
     case SVt_PVIV:
-	old_body_arena = &PL_body_roots[SVt_PVIV];
-	old_body_offset = - bodies_by_type[SVt_PVIV].offset;
-	old_body_length = bodies_by_type[SVt_PVIV].copy;
 	break;
     case SVt_PVNV:
-	old_body_arena = &PL_body_roots[SVt_PVNV];
-	old_body_length = bodies_by_type[SVt_PVNV].copy;
 	break;
     case SVt_PVMG:
 	/* Because the XPVMG of PL_mess_sv isn't allocated from the arena,
@@ -1508,8 +1490,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	   Given that it only has meaning inside the pad, it shouldn't be set
 	   on anything that can get upgraded.  */
 	assert((SvFLAGS(sv) & SVpad_TYPED) == 0);
-	old_body_arena = &PL_body_roots[SVt_PVMG];
-	old_body_length = bodies_by_type[SVt_PVMG].copy;
 	break;
     default:
 	if (old_type_details->cant_upgrade)
@@ -1630,10 +1610,10 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	new_body = ((char *)new_body) - new_body_offset;
 	SvANY(sv) = new_body;
 
-	if (old_body_length) {
-	    Copy((char *)old_body + old_body_offset,
-		 (char *)new_body + old_body_offset,
-		 old_body_length, char);
+	if (old_type_details->copy) {
+	    Copy((char *)old_body - old_type_details->offset,
+		 (char *)new_body - old_type_details->offset,
+		 old_type_details->copy, char);
 	}
 
 #ifndef NV_ZERO_IS_ALLBITS_ZERO
@@ -1652,13 +1632,13 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu", mt);
     }
 
-
-    if (old_body_arena) {
+    if (old_type_details->size) {
+	/* If the old body had an allocated size, then we need to free it.  */
 #ifdef PURIFY
 	my_safefree(old_body);
 #else
-	del_body((void*)((char*)old_body + old_body_offset),
-		 old_body_arena);
+	del_body((void*)((char*)old_body - old_type_details->offset),
+		 &PL_body_roots[old_type]);
 #endif
     }
 }
