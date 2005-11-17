@@ -289,7 +289,7 @@ a string eval, which e.g. can be a problem in a mod_perl environment.
 An C<END> code block is executed as late as possible, that is, after
 perl has finished running the program and just before the interpreter
 is being exited, even if it is exiting as a result of a die() function.
-(But not if it's polymorphing into another program via C<exec>, or
+(But not if it's morphing into another program via C<exec>, or
 being blown out of the water by a signal--you have to trap that yourself
 (if you can).)  You may have multiple C<END> blocks within a file--they
 will execute in reverse order of definition; that is: last in, first
