@@ -1393,6 +1393,8 @@ static const struct body_details bodies_by_type[] = {
 /* no arena for you! */
 
 #define new_NOARENA(details) \
+	my_safemalloc((details)->size - (details)->offset)
+#define new_NOARENAZ(details) \
 	my_safecalloc((details)->size - (details)->offset)
 
 #define new_XPVFM()	my_safemalloc(sizeof(XPVFM))
@@ -1597,11 +1599,11 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	    Zero(new_body, new_type_details->size, char);
 	    new_body = ((char *)new_body) + new_type_details->offset;
 	} else {
-	    new_body = new_NOARENA(new_type_details);
+	    new_body = new_NOARENAZ(new_type_details);
 	}
 #else
 	/* We always allocated the full length item with PURIFY */
-	new_body = new_NOARENA(new_type_details);
+	new_body = new_NOARENAZ(new_type_details);
 #endif
 	SvANY(sv) = new_body;
 
@@ -10058,7 +10060,6 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	    const svtype sv_type = SvTYPE(sstr);
 	    const struct body_details *const sv_type_details
 		= bodies_by_type + sv_type;
-	    
 
 	    switch (sv_type) {
 	    default:
