@@ -1323,17 +1323,8 @@ static const struct body_details bodies_by_type[] = {
 #define new_XNV()	my_safemalloc(sizeof(XPVNV))
 #define del_XNV(p)	my_safefree(p)
 
-#define new_XPV()	my_safemalloc(sizeof(XPV))
-#define del_XPV(p)	my_safefree(p)
-
-#define new_XPVIV()	my_safemalloc(sizeof(XPVIV))
-#define del_XPVIV(p)	my_safefree(p)
-
 #define new_XPVNV()	my_safemalloc(sizeof(XPVNV))
 #define del_XPVNV(p)	my_safefree(p)
-
-#define new_XPVCV()	my_safemalloc(sizeof(XPVCV))
-#define del_XPVCV(p)	my_safefree(p)
 
 #define new_XPVAV()	my_safemalloc(sizeof(XPVAV))
 #define del_XPVAV(p)	my_safefree(p)
@@ -1347,28 +1338,13 @@ static const struct body_details bodies_by_type[] = {
 #define new_XPVGV()	my_safemalloc(sizeof(XPVGV))
 #define del_XPVGV(p)	my_safefree(p)
 
-#define new_XPVLV()	my_safemalloc(sizeof(XPVLV))
-#define del_XPVLV(p)	my_safefree(p)
-
-#define new_XPVBM()	my_safemalloc(sizeof(XPVBM))
-#define del_XPVBM(p)	my_safefree(p)
-
 #else /* !PURIFY */
 
 #define new_XNV()	new_body_type(SVt_NV)
 #define del_XNV(p)	del_body_type(p, SVt_NV)
 
-#define new_XPV()	new_body_allocated(SVt_PV)
-#define del_XPV(p)	del_body_allocated(p, SVt_PV)
-
-#define new_XPVIV()	new_body_allocated(SVt_PVIV)
-#define del_XPVIV(p)	del_body_allocated(p, SVt_PVIV)
-
 #define new_XPVNV()	new_body_type(SVt_PVNV)
 #define del_XPVNV(p)	del_body_type(p, SVt_PVNV)
-
-#define new_XPVCV()	new_body_type(SVt_PVCV)
-#define del_XPVCV(p)	del_body_type(p, SVt_PVCV)
 
 #define new_XPVAV()	new_body_allocated(SVt_PVAV)
 #define del_XPVAV(p)	del_body_allocated(p, SVt_PVAV)
@@ -1382,12 +1358,6 @@ static const struct body_details bodies_by_type[] = {
 #define new_XPVGV()	new_body_type(SVt_PVGV)
 #define del_XPVGV(p)	del_body_type(p, SVt_PVGV)
 
-#define new_XPVLV()	new_body_type(SVt_PVLV)
-#define del_XPVLV(p)	del_body_type(p, SVt_PVLV)
-
-#define new_XPVBM()	new_body_type(SVt_PVBM)
-#define del_XPVBM(p)	del_body_type(p, SVt_PVBM)
-
 #endif /* PURIFY */
 
 /* no arena for you! */
@@ -1396,14 +1366,6 @@ static const struct body_details bodies_by_type[] = {
 	my_safemalloc((details)->size - (details)->offset)
 #define new_NOARENAZ(details) \
 	my_safecalloc((details)->size - (details)->offset)
-
-#define new_XPVFM()	my_safemalloc(sizeof(XPVFM))
-#define del_XPVFM(p)	my_safefree(p)
-
-#define new_XPVIO()	my_safemalloc(sizeof(XPVIO))
-#define del_XPVIO(p)	my_safefree(p)
-
-
 
 /*
 =for apidoc sv_upgrade
