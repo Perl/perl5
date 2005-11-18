@@ -1410,7 +1410,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
     void*	old_body;
     void*	new_body;
     size_t	new_body_length;
-    size_t	new_body_offset;
     const U32	old_type = SvTYPE(sv);
     const struct body_details *const old_type_details
 	= bodies_by_type + old_type;
@@ -1429,7 +1428,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 
 
     old_body = SvANY(sv);
-    new_body_offset = 0;
     new_body_length = ~0;
 
     /* Copying structures onto other structures that have been neatly zeroed
@@ -1571,47 +1569,37 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
     case SVt_PVIO:
     case SVt_PVFM:
 	new_body = new_NOARENA(new_type_details->size);
-	new_body_length = new_type_details->copy;
 	goto post_zero;
 
+    case SVt_PVIV:
+	/* XXX Is this still needed?  Was it ever needed?   Surely as there is
+	   no route from NV to PVIV, NOK can never be true  */
+	assert(!SvNOKp(sv));
+	assert(!SvNOK(sv));
     case SVt_PVBM:
     case SVt_PVGV:
     case SVt_PVCV:
     case SVt_PVLV:
     case SVt_PVMG:
     case SVt_PVNV:
-	new_body_length = bodies_by_type[new_type].size;
-	goto new_body;
-
-    case SVt_PVIV:
-	new_body_offset = - bodies_by_type[SVt_PVIV].offset;
-	new_body_length = sizeof(XPVIV) - new_body_offset;
-	/* XXX Is this still needed?  Was it ever needed?   Surely as there is
-	   no route from NV to PVIV, NOK can never be true  */
-	assert(!SvNOKp(sv));
-	assert(!SvNOK(sv));
-	goto new_body_no_NV; 
     case SVt_PV:
-	new_body_offset = - bodies_by_type[SVt_PV].offset;
-	new_body_length = sizeof(XPV) - new_body_offset;
-    new_body_no_NV:
-	/* PV and PVIV don't have an NV slot.  */
 
-    new_body:
+	new_body_length = bodies_by_type[new_type].size;
 	assert(new_body_length);
 #ifndef PURIFY
 	/* This points to the start of the allocated area.  */
 	new_body_inline(new_body, new_body_length, new_type);
 #else
 	/* We always allocated the full length item with PURIFY */
-	new_body_length += new_body_offset;
-	new_body_offset = 0;
+	new_body_length += - bodies_by_type[new_type].offset;
 	new_body = my_safemalloc(new_body_length);
 
 #endif
 	Zero(new_body, new_body_length, char);
     post_zero:
-	new_body = ((char *)new_body) - new_body_offset;
+#ifndef PURIFY
+	new_body = ((char *)new_body) + bodies_by_type[new_type].offset;
+#endif
 	SvANY(sv) = new_body;
 
 	if (old_type_details->copy) {
