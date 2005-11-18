@@ -83,6 +83,11 @@ case "`${cc:-cc} -V 2>&1`" in
     '') optimize='-O3' ;;
     esac
     ;;
+*"Sun C"*)
+    optimize='-xO2'
+    cccdlflags='-KPIC'
+    lddlflags='-G -Bdynamic'
+    ;;
 esac
 
 case "$optimize" in
