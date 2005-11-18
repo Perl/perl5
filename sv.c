@@ -10054,7 +10054,6 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
     default:
 	{
 	    /* These are all the types that need complex bodies allocating.  */
-	    size_t new_body_length;
 	    void *new_body;
 	    const svtype sv_type = SvTYPE(sstr);
 	    const struct body_details *const sv_type_details
@@ -10070,14 +10069,11 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	    case SVt_PVIO:
 	    case SVt_PVFM:
 		new_body = new_NOARENA(sv_type_details);
-		new_body_length = sv_type_details->copy;
 		break;
 
 	    case SVt_PVHV:
-		new_body_length = sv_type_details->copy;
 		goto new_body;
 	    case SVt_PVAV:
-		new_body_length = sv_type_details->copy;
 		goto new_body;
 	    case SVt_PVGV:
 		if (GvUNIQUE((GV*)sstr)) {
@@ -10088,24 +10084,20 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	    case SVt_PVLV:
 	    case SVt_PVMG:
 	    case SVt_PVNV:
-		new_body_length = sv_type_details->copy;
 		goto new_body;
 
 	    case SVt_PVIV:
-		new_body_length = sv_type_details->copy;
 		goto new_body; 
 	    case SVt_PV:
-		new_body_length = sv_type_details->copy;
 	    new_body:
-		assert(new_body_length);
+		assert(sv_type_details->copy);
 #ifndef PURIFY
-		new_body_inline(new_body, new_body_length, SvTYPE(sstr));
+		new_body_inline(new_body, sv_type_details->copy, sv_type);
 
 		new_body = (void*)((char*)new_body + sv_type_details->offset);
 #else
 		/* We always allocated the full length item with PURIFY */
-		new_body_length += - sv_type_details->offset;
-		new_body = my_safemalloc(new_body_length);
+		new_body = new_NOARENA(sv_type_details);
 #endif
 	    }
 	    assert(new_body);
@@ -10114,14 +10106,14 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 #ifndef PURIFY
 	    Copy(((char*)SvANY(sstr)) - sv_type_details->offset,
 		 ((char*)SvANY(dstr)) - sv_type_details->offset,
-		 new_body_length, char);
+		 sv_type_details->copy, char);
 #else
 	    Copy(((char*)SvANY(sstr)),
 		 ((char*)SvANY(dstr)),
-		 new_body_length, char);
+		 sv_type_details->size - sv_type_details->offset, char);
 #endif
 
-	    if (SvTYPE(sstr) != SVt_PVAV && SvTYPE(sstr) != SVt_PVHV)
+	    if (sv_type != SVt_PVAV && sv_type != SVt_PVHV)
 		Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 
 	    /* The Copy above means that all the source (unduplicated) pointers
@@ -10129,14 +10121,15 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	       pointers in either, but it's possible that there's less cache
 	       missing by always going for the destination.
 	       FIXME - instrument and check that assumption  */
-	    if (SvTYPE(sstr) >= SVt_PVMG) {
+	    if (sv_type >= SVt_PVMG) {
 		if (SvMAGIC(dstr))
 		    SvMAGIC_set(dstr, mg_dup(SvMAGIC(dstr), param));
 		if (SvSTASH(dstr))
 		    SvSTASH_set(dstr, hv_dup_inc(SvSTASH(dstr), param));
 	    }
 
-	    switch (SvTYPE(sstr)) {
+	    /* The cast silences a GCC warning about unhandled types.  */
+	    switch ((int)sv_type) {
 	    case SVt_PV:
 		break;
 	    case SVt_PVIV:
