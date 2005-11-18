@@ -1149,12 +1149,13 @@ S_more_bodies (pTHX_ size_t size, svtype sv_type)
 
 /* 1st, the inline version  */
 
-#define new_body_inline(xpv, root, size, sv_type) \
+#define new_body_inline(xpv, size, sv_type) \
     STMT_START { \
+	void **r3wt = &PL_body_roots[sv_type]; \
 	LOCK_SV_MUTEX; \
-	xpv = *((void **)(root)) \
-	  ? *((void **)(root)) : S_more_bodies(aTHX_ size, sv_type); \
-	*(root) = *(void**)(xpv); \
+	xpv = *((void **)(r3wt)) \
+	  ? *((void **)(r3wt)) : S_more_bodies(aTHX_ size, sv_type); \
+	*(r3wt) = *(void**)(xpv); \
 	UNLOCK_SV_MUTEX; \
     } STMT_END
 
@@ -1169,7 +1170,7 @@ STATIC void *
 S_new_body(pTHX_ size_t size, svtype sv_type)
 {
     void *xpv;
-    new_body_inline(xpv, &PL_body_roots[sv_type], size, sv_type);
+    new_body_inline(xpv, size, sv_type);
     return xpv;
 }
 
@@ -1410,8 +1411,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
     void*	new_body;
     size_t	new_body_length;
     size_t	new_body_offset;
-    void**	new_body_arena;
-    void**	new_body_arenaroot;
     const U32	old_type = SvTYPE(sv);
     const struct body_details *const old_type_details
 	= bodies_by_type + old_type;
@@ -1582,15 +1581,11 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
     case SVt_PVMG:
     case SVt_PVNV:
 	new_body_length = bodies_by_type[new_type].size;
-	new_body_arena = &PL_body_roots[new_type];
-	new_body_arenaroot = &PL_body_arenaroots[new_type];
 	goto new_body;
 
     case SVt_PVIV:
 	new_body_offset = - bodies_by_type[SVt_PVIV].offset;
 	new_body_length = sizeof(XPVIV) - new_body_offset;
-	new_body_arena = &PL_body_roots[SVt_PVIV];
-	new_body_arenaroot = &PL_body_arenaroots[SVt_PVIV];
 	/* XXX Is this still needed?  Was it ever needed?   Surely as there is
 	   no route from NV to PVIV, NOK can never be true  */
 	assert(!SvNOKp(sv));
@@ -1599,8 +1594,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
     case SVt_PV:
 	new_body_offset = - bodies_by_type[SVt_PV].offset;
 	new_body_length = sizeof(XPV) - new_body_offset;
-	new_body_arena = &PL_body_roots[SVt_PV];
-	new_body_arenaroot = &PL_body_arenaroots[SVt_PV];
     new_body_no_NV:
 	/* PV and PVIV don't have an NV slot.  */
 
@@ -1608,7 +1601,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	assert(new_body_length);
 #ifndef PURIFY
 	/* This points to the start of the allocated area.  */
-	new_body_inline(new_body, new_body_arena, new_body_length, new_type);
+	new_body_inline(new_body, new_body_length, new_type);
 #else
 	/* We always allocated the full length item with PURIFY */
 	new_body_length += new_body_offset;
@@ -9854,8 +9847,7 @@ Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, const void *oldsv, void *newsv)
 	    return;
 	}
     }
-    new_body_inline(tblent, &PL_body_roots[PTE_SVSLOT],
-		    sizeof(struct ptr_tbl_ent), PTE_SVSLOT);
+    new_body_inline(tblent, sizeof(struct ptr_tbl_ent), PTE_SVSLOT);
     tblent->oldval = oldsv;
     tblent->newval = newsv;
     tblent->next = *otblent;
@@ -10073,8 +10065,6 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	    /* These are all the types that need complex bodies allocating.  */
 	    size_t new_body_length;
 	    size_t new_body_offset = 0;
-	    void **new_body_arena;
-	    void **new_body_arenaroot;
 	    void *new_body;
 	    svtype sv_type = SvTYPE(sstr);
 
@@ -10094,8 +10084,6 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 		break;
 
 	    case SVt_PVHV:
-		new_body_arena = &PL_body_roots[SVt_PVHV];
-		new_body_arenaroot = &PL_body_arenaroots[SVt_PVHV];
 		new_body_offset = - bodies_by_type[SVt_PVHV].offset;
 
 		new_body_length = STRUCT_OFFSET(XPVHV, xmg_stash)
@@ -10103,8 +10091,6 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 		    - new_body_offset;
 		goto new_body;
 	    case SVt_PVAV:
-		new_body_arena = &PL_body_roots[SVt_PVAV];
-		new_body_arenaroot = &PL_body_arenaroots[SVt_PVAV];
 		new_body_offset =  - bodies_by_type[SVt_PVAV].offset;
 
 		new_body_length = STRUCT_OFFSET(XPVHV, xmg_stash)
@@ -10121,26 +10107,19 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	    case SVt_PVMG:
 	    case SVt_PVNV:
 		new_body_length = bodies_by_type[sv_type].size;
-		new_body_arena = &PL_body_roots[sv_type];
-		new_body_arenaroot = &PL_body_arenaroots[sv_type];
 		goto new_body;
 
 	    case SVt_PVIV:
 		new_body_offset = - bodies_by_type[SVt_PVIV].offset;
 		new_body_length = sizeof(XPVIV) - new_body_offset;
-		new_body_arena = &PL_body_roots[SVt_PVIV];
-		new_body_arenaroot = &PL_body_arenaroots[SVt_PVIV];
 		goto new_body; 
 	    case SVt_PV:
 		new_body_offset = - bodies_by_type[SVt_PV].offset;
 		new_body_length = sizeof(XPV) - new_body_offset;
-		new_body_arena = &PL_body_roots[SVt_PV];
-		new_body_arenaroot = &PL_body_arenaroots[SVt_PV];
 	    new_body:
 		assert(new_body_length);
 #ifndef PURIFY
-		new_body_inline(new_body, new_body_arena,
-				new_body_length, SvTYPE(sstr));
+		new_body_inline(new_body, new_body_length, SvTYPE(sstr));
 
 		new_body = (void*)((char*)new_body - new_body_offset);
 #else
