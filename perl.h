@@ -148,12 +148,14 @@
 #  ifndef MULTIPLICITY
 #    define MULTIPLICITY
 #  endif
-#  define pTHX	register PerlInterpreter *my_perl PERL_UNUSED_DECL
+#  define tTHX	PerlInterpreter*
+#  define sTHX	(sizeof(tTHX) + (MEM_ALIGNBYTES - sizeof(tTHX)%MEM_ALIGNBYTES) % MEM_ALIGNBYTES)
+#  define pTHX	register tTHX my_perl PERL_UNUSED_DECL
 #  define aTHX	my_perl
 #  ifdef PERL_GLOBAL_STRUCT
-#    define dTHXa(a)	dVAR; pTHX = (PerlInterpreter*)a
+#    define dTHXa(a)	dVAR; pTHX = (tTHX)a
 #  else
-#    define dTHXa(a)	pTHX = (PerlInterpreter*)a
+#    define dTHXa(a)	pTHX = (tTHX)a
 #  endif
 #  ifdef PERL_GLOBAL_STRUCT
 #    define dTHX		dVAR; pTHX = PERL_GET_THX
@@ -171,6 +173,11 @@
 #  define pTHX_7	8
 #  define pTHX_8	9
 #  define pTHX_9	10
+#  if defined(DEBUGGING) && !defined(PERL_TRACK_MEMPOOL)
+#    define PERL_TRACK_MEMPOOL
+#  endif
+#else
+#  undef PERL_TRACK_MEMPOOL
 #endif
 
 #define STATIC static
@@ -231,6 +238,9 @@
 #define dNOOP extern int Perl___notused PERL_UNUSED_DECL
 
 #ifndef pTHX
+/* Don't bother defining tTHX and sTHX; using them outside
+ * code guarded by PERL_IMPLICIT_CONTEXT is an error.
+ */
 #  define pTHX		void
 #  define pTHX_
 #  define aTHX

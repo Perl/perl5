@@ -81,6 +81,9 @@ Perl_safesysmalloc(MEM_SIZE size)
 	    my_exit(1);
 	}
 #endif /* HAS_64K_LIMIT */
+#ifdef PERL_TRACK_MEMPOOL
+    size += sTHX;
+#endif
 #ifdef DEBUGGING
     if ((long)size < 0)
 	Perl_croak_nocontext("panic: malloc");
@@ -88,8 +91,13 @@ Perl_safesysmalloc(MEM_SIZE size)
     ptr = (Malloc_t)PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
     PERL_ALLOC_CHECK(ptr);
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) malloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
-    if (ptr != Nullch)
+    if (ptr != Nullch) {
+#ifdef PERL_TRACK_MEMPOOL
+        *(tTHX*)ptr = aTHX;
+        ptr = (Malloc_t)((char*)ptr+sTHX);
+#endif
 	return ptr;
+}
     else if (PL_nomemok)
 	return Nullch;
     else {
@@ -123,6 +131,14 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 
     if (!where)
 	return safesysmalloc(size);
+#ifdef PERL_TRACK_MEMPOOL
+    where = (Malloc_t)((char*)where-sTHX);
+    size += sTHX;
+    if (*(tTHX*)where != aTHX) {
+	/* int *nowhere = NULL; *nowhere = 0; */
+        Perl_croak_nocontext("panic: realloc from wrong pool");
+    }
+#endif
 #ifdef DEBUGGING
     if ((long)size < 0)
 	Perl_croak_nocontext("panic: realloc");
@@ -133,8 +149,12 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) rfree\n",PTR2UV(where),(long)PL_an++));
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) realloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
 
-    if (ptr != Nullch)
+    if (ptr != Nullch) {
+#ifdef PERL_TRACK_MEMPOOL
+        ptr = (Malloc_t)((char*)ptr+sTHX);
+#endif
 	return ptr;
+    }
     else if (PL_nomemok)
 	return Nullch;
     else {
@@ -149,11 +169,18 @@ Free_t
 Perl_safesysfree(Malloc_t where)
 {
     dVAR;
-#ifdef PERL_IMPLICIT_SYS
+#if defined(PERL_IMPLICIT_SYS) || defined(PERL_TRACK_MEMPOOL)
     dTHX;
 #endif
     DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) free\n",PTR2UV(where),(long)PL_an++));
     if (where) {
+#ifdef PERL_TRACK_MEMPOOL
+        where = (Malloc_t)((char*)where-sTHX);
+        if (*(tTHX*)where != aTHX) {
+	    /* int *nowhere = NULL; *nowhere = 0; */
+            Perl_croak_nocontext("panic: free from wrong pool");
+	}
+#endif
 	PerlMem_free(where);
     }
 }
@@ -178,11 +205,18 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 	Perl_croak_nocontext("panic: calloc");
 #endif
     size *= count;
+#ifdef PERL_TRACK_MEMPOOL
+    size += sTHX;
+#endif
     ptr = (Malloc_t)PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
     PERL_ALLOC_CHECK(ptr);
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) calloc %ld x %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)count,(long)size));
     if (ptr != Nullch) {
 	memset((void*)ptr, 0, size);
+#ifdef PERL_TRACK_MEMPOOL
+        *(tTHX*)ptr = aTHX;
+        ptr = (Malloc_t)((char*)ptr+sTHX);
+#endif
 	return ptr;
     }
     else if (PL_nomemok)
