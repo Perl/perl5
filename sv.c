@@ -5351,18 +5351,15 @@ void
 Perl_sv_clear(pTHX_ register SV *sv)
 {
     dVAR;
-    void** old_body_arena;
-    size_t old_body_offset;
     const U32 type = SvTYPE(sv);
+    const struct body_details *const sv_type_details
+	= bodies_by_type + type;
 
     assert(sv);
     assert(SvREFCNT(sv) == 0);
 
     if (type <= SVt_IV)
 	return;
-
-    old_body_arena = 0;
-    old_body_offset = 0;
 
     if (SvOBJECT(sv)) {
 	if (PL_defstash) {		/* Still have a symbol table? */
@@ -5435,26 +5432,18 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	Safefree(IoTOP_NAME(sv));
 	Safefree(IoFMT_NAME(sv));
 	Safefree(IoBOTTOM_NAME(sv));
-	/* PVIOs aren't from arenas  */
 	goto freescalar;
     case SVt_PVBM:
-	old_body_arena = &PL_body_roots[SVt_PVBM];
 	goto freescalar;
     case SVt_PVCV:
-	old_body_arena = &PL_body_roots[SVt_PVCV];
     case SVt_PVFM:
-	/* PVFMs aren't from arenas  */
 	cv_undef((CV*)sv);
 	goto freescalar;
     case SVt_PVHV:
 	hv_undef((HV*)sv);
-	old_body_arena = &PL_body_roots[SVt_PVHV];
-	old_body_offset = STRUCT_OFFSET(XPVHV, xhv_fill);
 	break;
     case SVt_PVAV:
 	av_undef((AV*)sv);
-	old_body_arena = &PL_body_roots[SVt_PVAV];
-	old_body_offset = STRUCT_OFFSET(XPVAV, xav_fill);
 	break;
     case SVt_PVLV:
 	if (LvTYPE(sv) == 'T') { /* for tie: return HE to pool */
@@ -5464,7 +5453,6 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	}
 	else if (LvTYPE(sv) != 't') /* unless tie: unrefcnted fake SV**  */
 	    SvREFCNT_dec(LvTARG(sv));
-	old_body_arena = &PL_body_roots[SVt_PVLV];
 	goto freescalar;
     case SVt_PVGV:
 	gp_free((GV*)sv);
@@ -5473,29 +5461,17 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	   have a back reference to us, which needs to be cleared.  */
 	if (GvSTASH(sv))
 	    sv_del_backref((SV*)GvSTASH(sv), sv);
-	old_body_arena = &PL_body_roots[SVt_PVGV];
-	goto freescalar;
     case SVt_PVMG:
-	old_body_arena = &PL_body_roots[SVt_PVMG];
-	goto freescalar;
     case SVt_PVNV:
-	old_body_arena = &PL_body_roots[SVt_PVNV];
-	goto freescalar;
     case SVt_PVIV:
-	old_body_arena = &PL_body_roots[SVt_PVIV];
-	old_body_offset = STRUCT_OFFSET(XPVIV, xpv_cur);
       freescalar:
 	/* Don't bother with SvOOK_off(sv); as we're only going to free it.  */
 	if (SvOOK(sv)) {
 	    SvPV_set(sv, SvPVX_mutable(sv) - SvIVX(sv));
 	    /* Don't even bother with turning off the OOK flag.  */
 	}
-	goto pvrv_common;
     case SVt_PV:
-	old_body_arena = &PL_body_roots[SVt_PV];
-	old_body_offset = STRUCT_OFFSET(XPV, xpv_cur);
     case SVt_RV:
-    pvrv_common:
 	if (SvROK(sv)) {
 	    SV *target = SvRV(sv);
 	    if (SvWEAKREF(sv))
@@ -5530,7 +5506,6 @@ Perl_sv_clear(pTHX_ register SV *sv)
 #endif
 	break;
     case SVt_NV:
-	old_body_arena = PL_body_roots[SVt_NV];
 	break;
     }
 
@@ -5538,14 +5513,18 @@ Perl_sv_clear(pTHX_ register SV *sv)
     SvFLAGS(sv) |= SVTYPEMASK;
 
 #ifndef PURIFY
-    if (old_body_arena) {
-	del_body(((char *)SvANY(sv) + old_body_offset), old_body_arena);
+    if (sv_type_details->arena) {
+	del_body(((char *)SvANY(sv) - sv_type_details->offset),
+		 &PL_body_roots[type]);
     }
-    else
+    else if (sv_type_details->size) {
+	my_safefree(SvANY(sv));
+    }
+#else
+    if (sv_type_details->size) {
+	my_safefree(SvANY(sv));
+    }
 #endif
-	if (type > SVt_RV) {
-	    my_safefree(SvANY(sv));
-	}
 }
 
 /*
