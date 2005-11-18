@@ -1460,10 +1460,10 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
     case SVt_NULL:
 	break;
     case SVt_IV:
-	if (new_type == SVt_NV)
-	    new_type = SVt_PVNV;
-	else if (new_type < SVt_PVIV)
-	    new_type = SVt_PVIV;
+	if (new_type < SVt_PVIV) {
+	    new_type = (new_type == SVt_NV)
+		? SVt_PVNV : SVt_PVIV;
+	}
 	break;
     case SVt_NV:
 	if (new_type < SVt_PVNV)
@@ -1580,9 +1580,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	new_body_arenaroot = &PL_body_arenaroots[SVt_PVIV];
 	/* XXX Is this still needed?  Was it ever needed?   Surely as there is
 	   no route from NV to PVIV, NOK can never be true  */
-	if (SvNIOK(sv))
-	    (void)SvIOK_on(sv);
-	SvNOK_off(sv);
+	assert(!SvNOKp(sv));
+	assert(!SvNOK(sv));
 	goto new_body_no_NV; 
     case SVt_PV:
 	new_body_offset = - bodies_by_type[SVt_PV].offset;
