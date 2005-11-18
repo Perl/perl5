@@ -1229,56 +1229,64 @@ struct body_details {
     int offset;
     bool cant_upgrade;	/* Can upgrade this type */
     bool zero_nv;	/* zero the NV when upgrading from this */
+    bool arena;		/* Allocated from an arena */
 };
 
+#define HADNV FALSE
+#define NONV TRUE
+
+#define HASARENA TRUE
+#define NOARENA FALSE
+
 static const struct body_details bodies_by_type[] = {
-    {0, 0, 0, FALSE, TRUE},
+    {0, 0, 0, FALSE, NONV, NOARENA},
     /* IVs are in the head, so the allocation size is 0  */
-    {0, sizeof(IV), -STRUCT_OFFSET(XPVIV, xiv_iv), FALSE, TRUE},
+    {0, sizeof(IV), -STRUCT_OFFSET(XPVIV, xiv_iv), FALSE, NONV, NOARENA},
     /* 8 bytes on most ILP32 with IEEE doubles */
-    {sizeof(NV), sizeof(NV), 0, FALSE, FALSE},
+    {sizeof(NV), sizeof(NV), 0, FALSE, HADNV, HASARENA},
     /* RVs are in the head now */
-    {0, 0, 0, FALSE, TRUE},
+    /* However, this slot is overloaded and used by the pte  */
+    {0, 0, 0, FALSE, NONV, NOARENA},
     /* 8 bytes on most ILP32 with IEEE doubles */
     {sizeof(xpv_allocated),
      STRUCT_OFFSET(XPV, xpv_len) + sizeof (((XPV*)SvANY((SV*)0))->xpv_len)
      + STRUCT_OFFSET(xpv_allocated, xpv_cur) - STRUCT_OFFSET(XPV, xpv_cur),
      + STRUCT_OFFSET(xpv_allocated, xpv_cur) - STRUCT_OFFSET(XPV, xpv_cur)
-     , FALSE, TRUE},
+     , FALSE, NONV, HASARENA},
     /* 12 */
     {sizeof(xpviv_allocated),
      STRUCT_OFFSET(XPVIV, xiv_u) + sizeof (((XPVIV*)SvANY((SV*)0))->xiv_u)
      + STRUCT_OFFSET(xpviv_allocated, xpv_cur) - STRUCT_OFFSET(XPVIV, xpv_cur),
      + STRUCT_OFFSET(xpviv_allocated, xpv_cur) - STRUCT_OFFSET(XPVIV, xpv_cur)
-    , FALSE, TRUE},
+    , FALSE, NONV, HASARENA},
     /* 20 */
     {sizeof(XPVNV),
      STRUCT_OFFSET(XPVNV, xiv_u) + sizeof (((XPVNV*)SvANY((SV*)0))->xiv_u),
-     0, FALSE, FALSE},
+     0, FALSE, HADNV, HASARENA},
     /* 28 */
     {sizeof(XPVMG),
      STRUCT_OFFSET(XPVMG, xmg_stash) + sizeof (((XPVMG*)SvANY((SV*)0))->xmg_stash),
-     0, FALSE, FALSE},
+     0, FALSE, HADNV, HASARENA},
     /* 36 */
-    {sizeof(XPVBM), 0, 0, TRUE, FALSE},
+    {sizeof(XPVBM), sizeof(XPVBM), 0, TRUE, HADNV, HASARENA},
     /* 48 */
-    {sizeof(XPVGV), 0, 0, TRUE, FALSE},
+    {sizeof(XPVGV), sizeof(XPVGV), 0, TRUE, HADNV, HASARENA},
     /* 64 */
-    {sizeof(XPVLV), 0, 0, TRUE, FALSE},
+    {sizeof(XPVLV), sizeof(XPVLV), 0, TRUE, HADNV, HASARENA},
     /* 20 */
-    {sizeof(xpvav_allocated), 0,
+    {sizeof(xpvav_allocated), sizeof(xpvav_allocated),
      STRUCT_OFFSET(xpvav_allocated, xav_fill)
-     - STRUCT_OFFSET(XPVAV, xav_fill), TRUE, FALSE},
+     - STRUCT_OFFSET(XPVAV, xav_fill), TRUE, HADNV, HASARENA},
     /* 20 */
-    {sizeof(xpvhv_allocated), 0, 
+    {sizeof(xpvhv_allocated), sizeof(xpvhv_allocated), 
      STRUCT_OFFSET(xpvhv_allocated, xhv_fill)
-     - STRUCT_OFFSET(XPVHV, xhv_fill), TRUE, FALSE},
+     - STRUCT_OFFSET(XPVHV, xhv_fill), TRUE, HADNV, HASARENA},
     /* 76 */
-    {sizeof(XPVCV), 0, 0, TRUE, FALSE},
+    {sizeof(XPVCV), sizeof(XPVCV), 0, TRUE, HADNV, HASARENA},
     /* 80 */
-    {sizeof(XPVFM), 0, 0, TRUE, FALSE},
+    {sizeof(XPVFM), sizeof(XPVFM), 0, TRUE, HADNV, NOARENA},
     /* 84 */
-    {sizeof(XPVIO), 0, 0, TRUE, FALSE}
+    {sizeof(XPVIO), sizeof(XPVIO), 0, TRUE, HADNV, NOARENA}
 };
 
 #define new_body_type(sv_type)			\
@@ -1298,6 +1306,7 @@ static const struct body_details bodies_by_type[] = {
 
 
 #define my_safemalloc(s)	(void*)safemalloc(s)
+#define my_safecalloc(s)	(void*)safecalloc(s, 1)
 #define my_safefree(p)	safefree((char*)p)
 
 #ifdef PURIFY
@@ -1373,6 +1382,9 @@ static const struct body_details bodies_by_type[] = {
 #endif /* PURIFY */
 
 /* no arena for you! */
+
+#define new_NOARENA(s)	my_safecalloc(s)
+
 #define new_XPVFM()	my_safemalloc(sizeof(XPVFM))
 #define del_XPVFM(p)	my_safefree(p)
 
@@ -1403,6 +1415,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
     const U32	old_type = SvTYPE(sv);
     const struct body_details *const old_type_details
 	= bodies_by_type + old_type;
+    const struct body_details *new_type_details = bodies_by_type + new_type;
 
     if (new_type != SVt_PV && SvIsCOW(sv)) {
 	sv_force_normal_flags(sv, 0);
@@ -1463,11 +1476,14 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	if (new_type < SVt_PVIV) {
 	    new_type = (new_type == SVt_NV)
 		? SVt_PVNV : SVt_PVIV;
+	    new_type_details = bodies_by_type + new_type;
 	}
 	break;
     case SVt_NV:
-	if (new_type < SVt_PVNV)
+	if (new_type < SVt_PVNV) {
 	    new_type = SVt_PVNV;
+	    new_type_details = bodies_by_type + new_type;
+	}
 	break;
     case SVt_RV:
 	break;
@@ -1554,13 +1570,10 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	break;
 
     case SVt_PVIO:
-	new_body = new_XPVIO();
-	new_body_length = sizeof(XPVIO);
-	goto zero;
     case SVt_PVFM:
-	new_body = new_XPVFM();
-	new_body_length = sizeof(XPVFM);
-	goto zero;
+	new_body = new_NOARENA(new_type_details->size);
+	new_body_length = new_type_details->copy;
+	goto post_zero;
 
     case SVt_PVBM:
     case SVt_PVGV:
@@ -1603,8 +1616,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	new_body = my_safemalloc(new_body_length);
 
 #endif
-    zero:
 	Zero(new_body, new_body_length, char);
+    post_zero:
 	new_body = ((char *)new_body) - new_body_offset;
 	SvANY(sv) = new_body;
 
