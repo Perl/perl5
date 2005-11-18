@@ -1392,7 +1392,7 @@ You generally want to use the C<SvUPGRADE> macro wrapper. See also C<svtype>.
 */
 
 void
-Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
+Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 {
     void*	old_body;
     void*	new_body;
@@ -1404,16 +1404,16 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     const struct body_details *const old_type_details
 	= bodies_by_type + old_type;
 
-    if (mt != SVt_PV && SvIsCOW(sv)) {
+    if (new_type != SVt_PV && SvIsCOW(sv)) {
 	sv_force_normal_flags(sv, 0);
     }
 
-    if (old_type == mt)
+    if (old_type == new_type)
 	return;
 
-    if (old_type > mt)
+    if (old_type > new_type)
 	Perl_croak(aTHX_ "sv_upgrade from type %d down to type %d",
-		(int)old_type, (int)mt);
+		(int)old_type, (int)new_type);
 
 
     old_body = SvANY(sv);
@@ -1460,22 +1460,22 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     case SVt_NULL:
 	break;
     case SVt_IV:
-	if (mt == SVt_NV)
-	    mt = SVt_PVNV;
-	else if (mt < SVt_PVIV)
-	    mt = SVt_PVIV;
+	if (new_type == SVt_NV)
+	    new_type = SVt_PVNV;
+	else if (new_type < SVt_PVIV)
+	    new_type = SVt_PVIV;
 	break;
     case SVt_NV:
-	if (mt < SVt_PVNV)
-	    mt = SVt_PVNV;
+	if (new_type < SVt_PVNV)
+	    new_type = SVt_PVNV;
 	break;
     case SVt_RV:
 	break;
     case SVt_PV:
-	if (mt <= SVt_IV)
-	    mt = SVt_PVIV;
-	else if (mt == SVt_NV)
-	    mt = SVt_PVNV;
+	if (new_type <= SVt_IV)
+	    new_type = SVt_PVIV;
+	else if (new_type == SVt_NV)
+	    new_type = SVt_PVNV;
 	break;
     case SVt_PVIV:
 	break;
@@ -1497,9 +1497,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     }
 
     SvFLAGS(sv) &= ~SVTYPEMASK;
-    SvFLAGS(sv) |= mt;
+    SvFLAGS(sv) |= new_type;
 
-    switch (mt) {
+    switch (new_type) {
     case SVt_NULL:
 	Perl_croak(aTHX_ "Can't upgrade to undef");
     case SVt_IV:
@@ -1569,9 +1569,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     case SVt_PVLV:
     case SVt_PVMG:
     case SVt_PVNV:
-	new_body_length = bodies_by_type[mt].size;
-	new_body_arena = &PL_body_roots[mt];
-	new_body_arenaroot = &PL_body_arenaroots[mt];
+	new_body_length = bodies_by_type[new_type].size;
+	new_body_arena = &PL_body_roots[new_type];
+	new_body_arenaroot = &PL_body_arenaroots[new_type];
 	goto new_body;
 
     case SVt_PVIV:
@@ -1597,7 +1597,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	assert(new_body_length);
 #ifndef PURIFY
 	/* This points to the start of the allocated area.  */
-	new_body_inline(new_body, new_body_arena, new_body_length, mt);
+	new_body_inline(new_body, new_body_arena, new_body_length, new_type);
 #else
 	/* We always allocated the full length item with PURIFY */
 	new_body_length += new_body_offset;
@@ -1623,13 +1623,13 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	    SvNV_set(sv, 0);
 #endif
 
-	if (mt == SVt_PVIO)
+	if (new_type == SVt_PVIO)
 	    IoPAGE_LEN(sv)	= 60;
 	if (old_type < SVt_RV)
 	    SvPV_set(sv, 0);
 	break;
     default:
-	Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu", mt);
+	Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu", new_type);
     }
 
     if (old_type_details->size) {
