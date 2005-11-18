@@ -1231,7 +1231,7 @@ struct body_details {
     bool zero_nv;	/* zero the NV when upgrading from this */
 };
 
-struct body_details bodies_by_type[] = {
+static const struct body_details bodies_by_type[] = {
     {0, 0, 0, FALSE, TRUE},
     /* IVs are in the head, so the allocation size is 0  */
     {0, sizeof(IV), -STRUCT_OFFSET(XPVIV, xiv_iv), FALSE, TRUE},
@@ -1472,10 +1472,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
     case SVt_RV:
 	break;
     case SVt_PV:
-	if (new_type <= SVt_IV)
-	    new_type = SVt_PVIV;
-	else if (new_type == SVt_NV)
-	    new_type = SVt_PVNV;
+	assert(new_type > SVt_PV);
+	assert(SVt_IV < SVt_PV);
+	assert(SVt_NV < SVt_PV);
 	break;
     case SVt_PVIV:
 	break;
