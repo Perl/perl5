@@ -10066,35 +10066,30 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 			   (IV)SvTYPE(sstr));
 		break;
 
-	    case SVt_PVIO:
-	    case SVt_PVFM:
-		new_body = new_NOARENA(sv_type_details);
-		break;
-
-	    case SVt_PVHV:
-		goto new_body;
-	    case SVt_PVAV:
-		goto new_body;
 	    case SVt_PVGV:
 		if (GvUNIQUE((GV*)sstr)) {
 		    /* Do sharing here, and fall through */
 		}
+	    case SVt_PVIO:
+	    case SVt_PVFM:
+	    case SVt_PVHV:
+	    case SVt_PVAV:
 	    case SVt_PVBM:
 	    case SVt_PVCV:
 	    case SVt_PVLV:
 	    case SVt_PVMG:
 	    case SVt_PVNV:
-		goto new_body;
-
 	    case SVt_PVIV:
-		goto new_body; 
 	    case SVt_PV:
-	    new_body:
 		assert(sv_type_details->copy);
 #ifndef PURIFY
-		new_body_inline(new_body, sv_type_details->copy, sv_type);
-
-		new_body = (void*)((char*)new_body + sv_type_details->offset);
+		if (sv_type_details->arena) {
+		    new_body_inline(new_body, sv_type_details->copy, sv_type);
+		    new_body
+			= (void*)((char*)new_body + sv_type_details->offset);
+		} else {
+		    new_body = new_NOARENA(sv_type_details);
+		}
 #else
 		/* We always allocated the full length item with PURIFY */
 		new_body = new_NOARENA(sv_type_details);
