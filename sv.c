@@ -1275,11 +1275,19 @@ static const struct body_details bodies_by_type[] = {
     /* 64 */
     {sizeof(XPVLV), sizeof(XPVLV), 0, TRUE, HADNV, HASARENA},
     /* 20 */
-    {sizeof(xpvav_allocated), sizeof(xpvav_allocated),
+    {sizeof(xpvav_allocated),
+     STRUCT_OFFSET(XPVAV, xmg_stash)
+     + sizeof (((XPVAV*)SvANY((SV *)0))->xmg_stash)
+     + STRUCT_OFFSET(xpvav_allocated, xav_fill)
+     - STRUCT_OFFSET(XPVAV, xav_fill),
      STRUCT_OFFSET(xpvav_allocated, xav_fill)
      - STRUCT_OFFSET(XPVAV, xav_fill), TRUE, HADNV, HASARENA},
     /* 20 */
-    {sizeof(xpvhv_allocated), sizeof(xpvhv_allocated), 
+    {sizeof(xpvhv_allocated),
+     STRUCT_OFFSET(XPVHV, xmg_stash)
+     + sizeof (((XPVHV*)SvANY((SV *)0))->xmg_stash)
+     + STRUCT_OFFSET(xpvhv_allocated, xhv_fill)
+     - STRUCT_OFFSET(XPVHV, xhv_fill),
      STRUCT_OFFSET(xpvhv_allocated, xhv_fill)
      - STRUCT_OFFSET(XPVHV, xhv_fill), TRUE, HADNV, HASARENA},
     /* 76 */
@@ -10047,9 +10055,11 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	{
 	    /* These are all the types that need complex bodies allocating.  */
 	    size_t new_body_length;
-	    size_t new_body_offset = 0;
 	    void *new_body;
-	    svtype sv_type = SvTYPE(sstr);
+	    const svtype sv_type = SvTYPE(sstr);
+	    const struct body_details *const sv_type_details
+		= bodies_by_type + sv_type;
+	    
 
 	    switch (sv_type) {
 	    default:
@@ -10058,27 +10068,16 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 		break;
 
 	    case SVt_PVIO:
-		new_body = new_XPVIO();
-		new_body_length = sizeof(XPVIO);
-		break;
 	    case SVt_PVFM:
-		new_body = new_XPVFM();
-		new_body_length = sizeof(XPVFM);
+		new_body = new_NOARENA(sv_type_details);
+		new_body_length = sv_type_details->copy;
 		break;
 
 	    case SVt_PVHV:
-		new_body_offset = - bodies_by_type[SVt_PVHV].offset;
-
-		new_body_length = STRUCT_OFFSET(XPVHV, xmg_stash)
-		    + sizeof (((XPVHV*)SvANY(sstr))->xmg_stash)
-		    - new_body_offset;
+		new_body_length = sv_type_details->copy;
 		goto new_body;
 	    case SVt_PVAV:
-		new_body_offset =  - bodies_by_type[SVt_PVAV].offset;
-
-		new_body_length = STRUCT_OFFSET(XPVHV, xmg_stash)
-		    + sizeof (((XPVHV*)SvANY(sstr))->xmg_stash)
-		    - new_body_offset;
+		new_body_length = sv_type_details->copy;
 		goto new_body;
 	    case SVt_PVGV:
 		if (GvUNIQUE((GV*)sstr)) {
@@ -10089,35 +10088,38 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	    case SVt_PVLV:
 	    case SVt_PVMG:
 	    case SVt_PVNV:
-		new_body_length = bodies_by_type[sv_type].size;
+		new_body_length = sv_type_details->copy;
 		goto new_body;
 
 	    case SVt_PVIV:
-		new_body_offset = - bodies_by_type[SVt_PVIV].offset;
-		new_body_length = sizeof(XPVIV) - new_body_offset;
+		new_body_length = sv_type_details->copy;
 		goto new_body; 
 	    case SVt_PV:
-		new_body_offset = - bodies_by_type[SVt_PV].offset;
-		new_body_length = sizeof(XPV) - new_body_offset;
+		new_body_length = sv_type_details->copy;
 	    new_body:
 		assert(new_body_length);
 #ifndef PURIFY
 		new_body_inline(new_body, new_body_length, SvTYPE(sstr));
 
-		new_body = (void*)((char*)new_body - new_body_offset);
+		new_body = (void*)((char*)new_body + sv_type_details->offset);
 #else
 		/* We always allocated the full length item with PURIFY */
-		new_body_length += new_body_offset;
-		new_body_offset = 0;
+		new_body_length += - sv_type_details->offset;
 		new_body = my_safemalloc(new_body_length);
 #endif
 	    }
 	    assert(new_body);
 	    SvANY(dstr) = new_body;
 
-	    Copy(((char*)SvANY(sstr)) + new_body_offset,
-		 ((char*)SvANY(dstr)) + new_body_offset,
+#ifndef PURIFY
+	    Copy(((char*)SvANY(sstr)) - sv_type_details->offset,
+		 ((char*)SvANY(dstr)) - sv_type_details->offset,
 		 new_body_length, char);
+#else
+	    Copy(((char*)SvANY(sstr)),
+		 ((char*)SvANY(dstr)),
+		 new_body_length, char);
+#endif
 
 	    if (SvTYPE(sstr) != SVt_PVAV && SvTYPE(sstr) != SVt_PVHV)
 		Perl_rvpv_dup(aTHX_ dstr, sstr, param);
