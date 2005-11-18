@@ -1409,7 +1409,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 {
     void*	old_body;
     void*	new_body;
-    size_t	new_body_length;
     const U32	old_type = SvTYPE(sv);
     const struct body_details *const old_type_details
 	= bodies_by_type + old_type;
@@ -1428,7 +1427,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 
 
     old_body = SvANY(sv);
-    new_body_length = ~0;
 
     /* Copying structures onto other structures that have been neatly zeroed
        has a subtle gotcha. Consider XPVMG
@@ -1584,18 +1582,16 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
     case SVt_PVNV:
     case SVt_PV:
 
-	new_body_length = bodies_by_type[new_type].size;
-	assert(new_body_length);
 #ifndef PURIFY
 	/* This points to the start of the allocated area.  */
-	new_body_inline(new_body, new_body_length, new_type);
+	new_body_inline(new_body, bodies_by_type[new_type].size, new_type);
+	Zero(new_body, bodies_by_type[new_type].size, char);
 #else
 	/* We always allocated the full length item with PURIFY */
-	new_body_length += - bodies_by_type[new_type].offset;
-	new_body = my_safemalloc(new_body_length);
+	new_body = my_safemalloc(bodies_by_type[new_type].size - bodies_by_type[new_type].offset);
+	Zero(new_body, bodies_by_type[new_type].size - bodies_by_type[new_type].offset, char);
 
 #endif
-	Zero(new_body, new_body_length, char);
     post_zero:
 #ifndef PURIFY
 	new_body = ((char *)new_body) + bodies_by_type[new_type].offset;
