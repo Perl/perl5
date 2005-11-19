@@ -1,7 +1,5 @@
 #!./perl
 
-# $RCSfile: auto.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:39 $
-
 print "1..37\n";
 
 $x = 10000;

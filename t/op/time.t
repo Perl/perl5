@@ -1,7 +1,5 @@
 #!./perl
 
-# $RCSfile: time.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:32 $
-
 if ( $does_gmtime = gmtime(time) ) { 
     print "1..7\n" 
 }

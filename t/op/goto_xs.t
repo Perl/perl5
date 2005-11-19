@@ -1,8 +1,6 @@
 #!./perl
 # tests for "goto &sub"-ing into XSUBs
 
-# $RCSfile$$Revision$$Date$
-
 # Note: This only tests things that should *work*.  At some point, it may
 #       be worth while to write some failure tests for things that should
 #       *break* (such as calls with wrong number of args).  For now, I'm
