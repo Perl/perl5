@@ -212,8 +212,10 @@ sv_x(pTHX_ SV *sv, const char *str, STRLEN len, I32 n)
 {
     if (sv == Nullsv)
 	sv = newSVpvn("", 0);
+#ifdef DEBUGGING
     else
 	assert(SvTYPE(sv) >= SVt_PV);
+#endif
 
     if (n > 0) {
 	SvGROW(sv, len*n + SvCUR(sv) + 1);
@@ -966,7 +968,7 @@ Data_Dumper_Dumpxs(href, ...)
 	    todumpav = namesav = Nullav;
 	    seenhv = Nullhv;
 	    val = pad = xpad = apad = sep = pair = varname
-		= freezer = toaster = bless = &PL_sv_undef;
+		= freezer = toaster = bless = sortkeys = &PL_sv_undef;
 	    name = sv_newmortal();
 	    indent = 2;
 	    terse = purity = deepcopy = 0;

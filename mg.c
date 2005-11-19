@@ -1121,6 +1121,7 @@ Perl_magic_clearenv(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_set_all_env(pTHX_ SV *sv, MAGIC *mg)
 {
+    PERL_UNUSED_ARG(mg);
 #if defined(VMS)
     Perl_die(aTHX_ "Can't make list assignment to %%ENV on this system");
 #else

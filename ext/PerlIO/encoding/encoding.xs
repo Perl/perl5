@@ -255,7 +255,7 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	STDCHAR *ptr = PerlIO_get_ptr(n);
 	SSize_t use  = (avail >= 0) ? avail : 0;
 	SV *uni;
-	char *s;
+	char *s = Nullch;
 	STRLEN len = 0;
 	e->base.ptr = e->base.end = (STDCHAR *) Nullch;
 	(void) PerlIOEncode_get_base(aTHX_ f);

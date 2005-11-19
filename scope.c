@@ -1091,6 +1091,8 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 		PTR2UV(cx->sb_rxres));
 	break;
     }
+#else
+    PERL_UNUSED_ARG(cx);
 #endif	/* DEBUGGING */
 }
 

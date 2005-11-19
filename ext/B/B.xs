@@ -1322,6 +1322,7 @@ precomp(mg)
         B::MAGIC        mg
     CODE:
         if (mg->mg_type == 'r') {
+            RETVAL = Nullsv;
             REGEXP* rx = (REGEXP*)mg->mg_obj;
             if( rx )
                 RETVAL = newSVpvn( rx->precomp, rx->prelen );

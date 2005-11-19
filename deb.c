@@ -44,6 +44,8 @@ Perl_deb(pTHX_ const char *pat, ...)
     va_start(args, pat);
     vdeb(pat, &args);
     va_end(args);
+#else
+    PERL_UNUSED_ARG(pat);
 #endif /* DEBUGGING */
 }
 
@@ -56,6 +58,9 @@ Perl_vdeb(pTHX_ const char *pat, va_list *args)
     PerlIO_printf(Perl_debug_log, "(%s:%ld)\t", (file ? file : "<free>"),
 		  (long)CopLINE(PL_curcop));
     (void) PerlIO_vprintf(Perl_debug_log, pat, *args);
+#else
+    PERL_UNUSED_ARG(pat);
+    PERL_UNUSED_ARG(args);
 #endif /* DEBUGGING */
 }
 
@@ -122,6 +127,12 @@ S_deb_stack_n(pTHX_ SV** stack_base, I32 stack_min, I32 stack_max,
     }
     while (1);
     PerlIO_printf(Perl_debug_log, "\n");
+#else
+    PERL_UNUSED_ARG(stack_base);
+    PERL_UNUSED_ARG(stack_min);
+    PERL_UNUSED_ARG(stack_max);
+    PERL_UNUSED_ARG(mark_min);
+    PERL_UNUSED_ARG(mark_max);
 #endif /* DEBUGGING */
 }
 
