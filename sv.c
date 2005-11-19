@@ -1242,6 +1242,34 @@ struct body_details {
 #endif
 #define NOARENA FALSE
 
+/* A macro to work out the offset needed to subtract from a pointer to (say)
+
+typedef struct {
+    STRLEN	xpv_cur;
+    STRLEN	xpv_len;
+} xpv_allocated;
+
+to make its members accessible via a pointer to (say)
+
+struct xpv {
+    NV		xnv_nv;
+    STRLEN	xpv_cur;
+    STRLEN	xpv_len;
+};
+
+*/
+
+#define relative_STRUCT_OFFSET(longer, shorter, member) \
+    STRUCT_OFFSET(shorter, member) - STRUCT_OFFSET(longer, member)
+
+/* Calculate the length to copy. Specifically work out the length less any
+   final padding the compiler needed to add.  See the comment in sv_upgrade
+   for why copying the padding proved to be a bug.  */
+
+#define copy_length(type, last_member) \
+	STRUCT_OFFSET(type, last_member) \
+	+ sizeof (((type*)SvANY((SV*)0))->last_member)
+
 static const struct body_details bodies_by_type[] = {
     {0, 0, 0, FALSE, NONV, NOARENA},
     /* IVs are in the head, so the allocation size is 0  */
@@ -1253,24 +1281,20 @@ static const struct body_details bodies_by_type[] = {
     {0, 0, 0, FALSE, NONV, NOARENA},
     /* 8 bytes on most ILP32 with IEEE doubles */
     {sizeof(xpv_allocated),
-     STRUCT_OFFSET(XPV, xpv_len) + sizeof (((XPV*)SvANY((SV*)0))->xpv_len)
-     + STRUCT_OFFSET(xpv_allocated, xpv_cur) - STRUCT_OFFSET(XPV, xpv_cur),
-     + STRUCT_OFFSET(xpv_allocated, xpv_cur) - STRUCT_OFFSET(XPV, xpv_cur)
-     , FALSE, NONV, HASARENA},
+     copy_length(XPV, xpv_len)
+     + relative_STRUCT_OFFSET(XPV, xpv_allocated, xpv_cur),
+     + relative_STRUCT_OFFSET(XPV, xpv_allocated, xpv_cur),
+     FALSE, NONV, HASARENA},
     /* 12 */
     {sizeof(xpviv_allocated),
-     STRUCT_OFFSET(XPVIV, xiv_u) + sizeof (((XPVIV*)SvANY((SV*)0))->xiv_u)
-     + STRUCT_OFFSET(xpviv_allocated, xpv_cur) - STRUCT_OFFSET(XPVIV, xpv_cur),
-     + STRUCT_OFFSET(xpviv_allocated, xpv_cur) - STRUCT_OFFSET(XPVIV, xpv_cur)
-    , FALSE, NONV, HASARENA},
+     copy_length(XPVIV, xiv_u)
+     + relative_STRUCT_OFFSET(XPVIV, xpviv_allocated, xpv_cur),
+     + relative_STRUCT_OFFSET(XPVIV, xpviv_allocated, xpv_cur),
+     FALSE, NONV, HASARENA},
     /* 20 */
-    {sizeof(XPVNV),
-     STRUCT_OFFSET(XPVNV, xiv_u) + sizeof (((XPVNV*)SvANY((SV*)0))->xiv_u),
-     0, FALSE, HADNV, HASARENA},
+    {sizeof(XPVNV), copy_length(XPVNV, xiv_u), 0, FALSE, HADNV, HASARENA},
     /* 28 */
-    {sizeof(XPVMG),
-     STRUCT_OFFSET(XPVMG, xmg_stash) + sizeof (((XPVMG*)SvANY((SV*)0))->xmg_stash),
-     0, FALSE, HADNV, HASARENA},
+    {sizeof(XPVMG), copy_length(XPVMG, xmg_stash), 0, FALSE, HADNV, HASARENA},
     /* 36 */
     {sizeof(XPVBM), sizeof(XPVBM), 0, TRUE, HADNV, HASARENA},
     /* 48 */
@@ -1279,20 +1303,16 @@ static const struct body_details bodies_by_type[] = {
     {sizeof(XPVLV), sizeof(XPVLV), 0, TRUE, HADNV, HASARENA},
     /* 20 */
     {sizeof(xpvav_allocated),
-     STRUCT_OFFSET(XPVAV, xmg_stash)
-     + sizeof (((XPVAV*)SvANY((SV *)0))->xmg_stash)
-     + STRUCT_OFFSET(xpvav_allocated, xav_fill)
-     - STRUCT_OFFSET(XPVAV, xav_fill),
-     STRUCT_OFFSET(xpvav_allocated, xav_fill)
-     - STRUCT_OFFSET(XPVAV, xav_fill), TRUE, HADNV, HASARENA},
+     copy_length(XPVAV, xmg_stash)
+     + relative_STRUCT_OFFSET(XPVAV, xpvav_allocated, xav_fill),
+     relative_STRUCT_OFFSET(XPVAV, xpvav_allocated, xav_fill),
+     TRUE, HADNV, HASARENA},
     /* 20 */
     {sizeof(xpvhv_allocated),
-     STRUCT_OFFSET(XPVHV, xmg_stash)
-     + sizeof (((XPVHV*)SvANY((SV *)0))->xmg_stash)
-     + STRUCT_OFFSET(xpvhv_allocated, xhv_fill)
-     - STRUCT_OFFSET(XPVHV, xhv_fill),
-     STRUCT_OFFSET(xpvhv_allocated, xhv_fill)
-     - STRUCT_OFFSET(XPVHV, xhv_fill), TRUE, HADNV, HASARENA},
+     copy_length(XPVHV, xmg_stash)
+     + relative_STRUCT_OFFSET(XPVHV, xpvhv_allocated, xhv_fill),
+     relative_STRUCT_OFFSET(XPVHV, xpvhv_allocated, xhv_fill),
+     TRUE, HADNV, HASARENA},
     /* 76 */
     {sizeof(XPVCV), sizeof(XPVCV), 0, TRUE, HADNV, HASARENA},
     /* 80 */
