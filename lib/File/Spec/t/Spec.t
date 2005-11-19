@@ -102,7 +102,7 @@ if ($^O eq 'MacOS') {
 [ "Unix->canonpath('/../../')",                '/'              ],
 [ "Unix->canonpath('/../..')",                 '/'              ],
 
-[  "Unix->abs2rel('/t1/t2/t3','/t1/t2/t3')",          ''                   ],
+[  "Unix->abs2rel('/t1/t2/t3','/t1/t2/t3')",          '.'                  ],
 [  "Unix->abs2rel('/t1/t2/t4','/t1/t2/t3')",          '../t4'              ],
 [  "Unix->abs2rel('/t1/t2','/t1/t2/t3')",             '..'                 ],
 [  "Unix->abs2rel('/t1/t2/t3/t4','/t1/t2/t3')",       't4'                 ],
@@ -236,7 +236,7 @@ if ($^O eq 'MacOS') {
 
 # FakeWin32 subclass (see below) just sets CWD to C:\one\two and getdcwd('D') to D:\alpha\beta
 
-[ "FakeWin32->abs2rel('/t1/t2/t3','/t1/t2/t3')",     ''                       ],
+[ "FakeWin32->abs2rel('/t1/t2/t3','/t1/t2/t3')",     '.'                      ],
 [ "FakeWin32->abs2rel('/t1/t2/t4','/t1/t2/t3')",     '..\\t4'                 ],
 [ "FakeWin32->abs2rel('/t1/t2','/t1/t2/t3')",        '..'                     ],
 [ "FakeWin32->abs2rel('/t1/t2/t3/t4','/t1/t2/t3')",  't4'                     ],
@@ -248,7 +248,7 @@ if ($^O eq 'MacOS') {
 [ "FakeWin32->abs2rel('/./','/t1/t2/t3')",           '..\\..\\..'             ],
 [ "FakeWin32->abs2rel('\\\\a/t1/t2/t4','/t2/t3')",   '\\\\a\\t1\\t2\\t4'      ],
 [ "FakeWin32->abs2rel('//a/t1/t2/t4','/t2/t3')",     '\\\\a\\t1\\t2\\t4'      ],
-[ "FakeWin32->abs2rel('A:/t1/t2/t3','A:/t1/t2/t3')",     ''                   ],
+[ "FakeWin32->abs2rel('A:/t1/t2/t3','A:/t1/t2/t3')",     '.'                  ],
 [ "FakeWin32->abs2rel('A:/t1/t2/t3/t4','A:/t1/t2/t3')",  't4'                 ],
 [ "FakeWin32->abs2rel('A:/t1/t2/t3','A:/t1/t2/t3/t4')",  '..'                 ],
 [ "FakeWin32->abs2rel('A:/t1/t2/t3','B:/t1/t2/t3')",     'A:\\t1\\t2\\t3'     ],
@@ -356,11 +356,11 @@ if ($^O eq 'MacOS') {
 [ "VMS->catdir('[.name]')",                                               '[.name]'            ],
 [ "VMS->catdir('[.name]','[.name]')",                                     '[.name.name]'],
 
-[  "VMS->abs2rel('node::volume:[t1.t2.t3]','node::volume:[t1.t2.t3]')", ''                 ],
+[  "VMS->abs2rel('node::volume:[t1.t2.t3]','node::volume:[t1.t2.t3]')", '[]'                 ],
 [  "VMS->abs2rel('node::volume:[t1.t2.t3]','[t1.t2.t3]')", 'node::volume:[t1.t2.t3]'                 ],
 [  "VMS->abs2rel('node::volume:[t1.t2.t4]','node::volume:[t1.t2.t3]')", '[-.t4]'           ],
 [  "VMS->abs2rel('node::volume:[t1.t2.t4]','[t1.t2.t3]')", 'node::volume:[t1.t2.t4]'           ],
-[  "VMS->abs2rel('[t1.t2.t3]','[t1.t2.t3]')",              ''                 ],
+[  "VMS->abs2rel('[t1.t2.t3]','[t1.t2.t3]')",              '[]'               ],
 [  "VMS->abs2rel('[t1.t2.t3]file','[t1.t2.t3]')",          'file'             ],
 [  "VMS->abs2rel('[t1.t2.t3]file','[t1.t2]')",             '[.t3]file'        ],
 [  "VMS->abs2rel('v:[t1.t2.t3]file','v:[t1.t2]')",         '[.t3]file'        ],
@@ -369,7 +369,7 @@ if ($^O eq 'MacOS') {
 [  "VMS->abs2rel('[t1.t2.t3.t4]','[t1.t2.t3]')",           '[.t4]'            ],
 [  "VMS->abs2rel('[t4.t5.t6]','[t1.t2.t3]')",              '[---.t4.t5.t6]'   ],
 [ "VMS->abs2rel('[000000]','[t1.t2.t3]')",                 '[---]'            ],
-[ "VMS->abs2rel('a:[t1.t2.t4]','a:[t1.t2.t3]')",             '[-.t4]'           ],
+[ "VMS->abs2rel('a:[t1.t2.t4]','a:[t1.t2.t3]')",           '[-.t4]'           ],
 [ "VMS->abs2rel('a:[t1.t2.t4]','[t1.t2.t3]')",             'a:[t1.t2.t4]'           ],
 [ "VMS->abs2rel('[a.-.b.c.-]','[t1.t2.t3]')",              '[---.b]'          ],
 

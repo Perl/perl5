@@ -1,5 +1,35 @@
 Revision history for Perl distribution PathTools.
 
+3.14  Thu Nov 17 18:08:44 CST 2005
+
+ - canonpath() has some logic in it that avoids collapsing a
+   //double/slash at the beginning of a pathname on platforms where
+   that means something special.  It used to check the value of $^O
+   rather than the classname it was called as, which meant that
+   calling File::Spec::Cygwin->canonpath() didn't act like cygwin
+   unless you were actually *on* cygwin.  Now it does.
+
+ - Fixed a major bug on Cygwin in which catdir() could sometimes
+   create things that look like //network/paths in cases when it
+   shouldn't (e.g. catdir("/", "foo", "bar")).
+
+3.13  Tue Nov 15 23:50:37 CST 2005
+
+ - Calling tmpdir() on Win32 had the unintended side-effect of storing
+   some undef values in %INC for the TMPDIR, TEMP, and TMP entries if
+   they didn't exist already.  This is probably a bug in perl itself
+   (submitted as #37441 on rt.perl.org), which we're now working
+   around. [Thomas L. Shinnick]
+
+ - Integrated a change from bleadperl - a certain #ifdef in Cwd.xs
+   needs to apply to WIN32 but not WinCE. [Vadim Konovalov]
+
+ - abs2rel() used to return the empty string when its two arguments
+   were identical, which made no sense.  Now it returns
+   curdir(). [Spotted by David Golden]
+
+ - The Unix and Win32 implementations of abs2rel() have been unified.
+
 3.12  Mon Oct  3 22:09:12 CDT 2005
 
  - Fixed a testing error on OS/2 in which a drive letter for the root

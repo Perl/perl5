@@ -43,6 +43,18 @@ sub canonpath {
     return $self->SUPER::canonpath($path);
 }
 
+sub catdir {
+    my $self = shift;
+
+    # Don't create something that looks like a //network/path
+    if ($_[0] eq '/' or $_[0] eq '\\') {
+        shift;
+        return $self->SUPER::catdir('', @_);
+    }
+
+    $self->SUPER::catdir(@_);
+}
+
 =pod
 
 =item file_name_is_absolute

@@ -347,6 +347,8 @@ sub abs2rel {
         shift @basechunks ;
     }
 
+    return $self->curdir unless @pathchunks || @basechunks;
+
     # @basechunks now contains the directories to climb out of,
     # @pathchunks now has the directories to descend in to.
     $path_directories = join '.', ('-' x @basechunks, @pathchunks) ;
