@@ -249,8 +249,6 @@ PERLVAR(Isighandlerp,	Sighandler_t)
 
 PERLVARA(Ibody_roots,	SVt_LAST, void*) /* array of body roots */
 
-PERLVAR(Ihe_root,	HE *)		/* free he list */
-
 PERLVAR(Inice_chunk,	char *)		/* a nice chunk of memory to reuse */
 PERLVAR(Inice_chunk_size,	U32)	/* how nice the chunk of memory is */
 
@@ -416,8 +414,6 @@ PERLVAR(Iptr_table,	PTR_TBL_t*)
 PERLVARI(Ibeginav_save, AV*, Nullav)	/* save BEGIN{}s when compiling */
 
 PERLVARA(Ibody_arenaroots, SVt_LAST, void*) /* consolidated body-arena pointers */
-
-PERLVAR(Ihe_arenaroot,	HE *)		/* list of allocated he areas */
 
      /* 5.6.0 stopped here */
 

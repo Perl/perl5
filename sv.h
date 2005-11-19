@@ -66,6 +66,9 @@ typedef enum {
 #ifdef PERL_IN_SV_C
 #define PTE_SVSLOT	SVt_RV
 #endif
+#if defined(PERL_IN_HV_C) || defined(PERL_IN_XS_APITEST)
+#define HE_SVSLOT	SVt_NULL
+#endif
 
 /* typedefs to eliminate some typing */
 typedef struct he HE;

@@ -112,8 +112,7 @@ list, and call more_xiv() etc to add a new arena if the list is empty.
 
 At the time of very final cleanup, sv_free_arenas() is called from
 perl_destruct() to physically free all the arenas allocated since the
-start of the interpreter.  Note that this also clears PL_he_arenaroot,
-which is otherwise dealt with in hv.c.
+start of the interpreter.
 
 Manipulation of any of the PL_*root pointers is protected by enclosing
 LOCK_SV_MUTEX; ... UNLOCK_SV_MUTEX calls which should Do the Right Thing
@@ -595,8 +594,6 @@ Perl_sv_free_arenas(pTHX)
 	PL_body_arenaroots[i] = 0;
 	PL_body_roots[i] = 0;
     }
-
-    free_arena(he);
 
     Safefree(PL_nice_chunk);
     PL_nice_chunk = Nullch;
@@ -10846,9 +10843,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     Zero(&PL_body_arenaroots, 1, PL_body_arenaroots);
     Zero(&PL_body_roots, 1, PL_body_roots);
     
-    PL_he_arenaroot	= NULL;
-    PL_he_root		= NULL;
-
     PL_nice_chunk	= NULL;
     PL_nice_chunk_size	= 0;
     PL_sv_count		= 0;

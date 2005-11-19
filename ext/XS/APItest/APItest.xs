@@ -1,3 +1,4 @@
+#define PERL_IN_XS_APITEST
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -30,10 +31,10 @@ test_freeent(freeent_function *f) {
 
     /* We need to "inline" new_he here as it's static, and the functions we
        test expect to be able to call del_HE on the HE  */
-    if (!PL_he_root)
+    if (!PL_body_roots[HE_SVSLOT])
 	croak("PL_he_root is 0");
-    victim = PL_he_root;
-    PL_he_root = HeNEXT(victim);
+    victim = PL_body_roots[HE_SVSLOT];
+    PL_body_roots[HE_SVSLOT] = HeNEXT(victim);
 #endif
 
     victim->hent_hek = Perl_share_hek(aTHX_ "", 0, 0);

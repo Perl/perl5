@@ -257,8 +257,6 @@
 #define PL_globalstash		(vTHX->Iglobalstash)
 #define PL_hash_seed		(vTHX->Ihash_seed)
 #define PL_hash_seed_set	(vTHX->Ihash_seed_set)
-#define PL_he_arenaroot		(vTHX->Ihe_arenaroot)
-#define PL_he_root		(vTHX->Ihe_root)
 #define PL_hintgv		(vTHX->Ihintgv)
 #define PL_hints		(vTHX->Ihints)
 #define PL_in_clean_all		(vTHX->Iin_clean_all)
@@ -538,8 +536,6 @@
 #define PL_Iglobalstash		PL_globalstash
 #define PL_Ihash_seed		PL_hash_seed
 #define PL_Ihash_seed_set	PL_hash_seed_set
-#define PL_Ihe_arenaroot	PL_he_arenaroot
-#define PL_Ihe_root		PL_he_root
 #define PL_Ihintgv		PL_hintgv
 #define PL_Ihints		PL_hints
 #define PL_Iin_clean_all	PL_in_clean_all

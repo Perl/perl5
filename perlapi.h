@@ -312,10 +312,6 @@ END_EXTERN_C
 #define PL_hash_seed		(*Perl_Ihash_seed_ptr(aTHX))
 #undef  PL_hash_seed_set
 #define PL_hash_seed_set	(*Perl_Ihash_seed_set_ptr(aTHX))
-#undef  PL_he_arenaroot
-#define PL_he_arenaroot		(*Perl_Ihe_arenaroot_ptr(aTHX))
-#undef  PL_he_root
-#define PL_he_root		(*Perl_Ihe_root_ptr(aTHX))
 #undef  PL_hintgv
 #define PL_hintgv		(*Perl_Ihintgv_ptr(aTHX))
 #undef  PL_hints
