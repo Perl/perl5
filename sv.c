@@ -1233,7 +1233,13 @@ struct body_details {
 #define HADNV FALSE
 #define NONV TRUE
 
+#ifdef PURIFY
+/* With -DPURFIY we allocate everything directly, and don't use arenas.
+   This seems a rather elegant way to simplify some of the code below.  */
+#define HASARENA FALSE
+#else
 #define HASARENA TRUE
+#endif
 #define NOARENA FALSE
 
 static const struct body_details bodies_by_type[] = {
@@ -1551,7 +1557,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
     case SVt_PV:
 
 	assert(new_type_details->size);
-#ifndef PURIFY
+	/* We always allocated the full length item with PURIFY. To do this
+	   we fake things so that arena is false for all 16 types..  */
 	if(new_type_details->arena) {
 	    /* This points to the start of the allocated area.  */
 	    new_body_inline(new_body, new_type_details->size, new_type);
@@ -1560,10 +1567,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	} else {
 	    new_body = new_NOARENAZ(new_type_details);
 	}
-#else
-	/* We always allocated the full length item with PURIFY */
-	new_body = new_NOARENAZ(new_type_details);
-#endif
 	SvANY(sv) = new_body;
 
 	if (old_type_details->copy) {
@@ -5471,7 +5474,6 @@ Perl_sv_clear(pTHX_ register SV *sv)
     SvFLAGS(sv) &= SVf_BREAK;
     SvFLAGS(sv) |= SVTYPEMASK;
 
-#ifndef PURIFY
     if (sv_type_details->arena) {
 	del_body(((char *)SvANY(sv) - sv_type_details->offset),
 		 &PL_body_roots[type]);
@@ -5479,11 +5481,6 @@ Perl_sv_clear(pTHX_ register SV *sv)
     else if (sv_type_details->size) {
 	my_safefree(SvANY(sv));
     }
-#else
-    if (sv_type_details->size) {
-	my_safefree(SvANY(sv));
-    }
-#endif
 }
 
 /*
@@ -10021,7 +10018,6 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	    case SVt_PVIV:
 	    case SVt_PV:
 		assert(sv_type_details->copy);
-#ifndef PURIFY
 		if (sv_type_details->arena) {
 		    new_body_inline(new_body, sv_type_details->copy, sv_type);
 		    new_body
@@ -10029,10 +10025,6 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 		} else {
 		    new_body = new_NOARENA(sv_type_details);
 		}
-#else
-		/* We always allocated the full length item with PURIFY */
-		new_body = new_NOARENA(sv_type_details);
-#endif
 	    }
 	    assert(new_body);
 	    SvANY(dstr) = new_body;
