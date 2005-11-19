@@ -1,7 +1,5 @@
 #!./perl
 
-# $RCSfile: my.t,v $
-
 print "1..36\n";
 
 sub foo {
