@@ -320,7 +320,7 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 */
 
 #define DBM_setFilter(db_type,code)				\
-	{							\
+	STMT_START {						\
 	    if (db_type)					\
 	        RETVAL = sv_mortalcopy(db_type) ;		\
 	    ST(0) = RETVAL ;					\
@@ -334,9 +334,10 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 	        else						\
 	            db_type = newSVsv(code) ;			\
 	    }	    						\
-	}
+	} STMT_END
 
 #define DBM_ckFilter(arg,type,name)				\
+        STMT_START {						\
 	if (db->type) {						\
 	    if (db->filtering) {				\
 	        croak("recursion detected in %s", name) ;	\
@@ -361,7 +362,7 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
                 arg = sv_2mortal(arg);                          \
             }                                                   \
             SvOKp(arg);                                         \
-	}
+	} } STMT_END                                                     
 
 #if 1		/* for compatibility */
 #  define VTBL_sv		&PL_vtbl_sv
