@@ -2746,9 +2746,11 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
 		       code, (unsigned long)++PL_evalseq,
 		       CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
 	tmpbuf = SvPVX(sv);
+	len = SvCUR(sv);
     }
     else
-	sprintf(tmpbuf, "_<(%.10s_eval %lu)", code, (unsigned long)++PL_evalseq);
+	len = my_sprintf(tmpbuf, "_<(%.10s_eval %lu)", code,
+			 (unsigned long)++PL_evalseq);
     SAVECOPFILE_FREE(&PL_compiling);
     CopFILE_set(&PL_compiling, tmpbuf+2);
     SAVECOPLINE(&PL_compiling);
@@ -2758,7 +2760,6 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
        (i.e. before run-time proper). To work around the coredump that
        ensues, we always turn GvMULTI_on for any globals that were
        introduced within evals. See force_ident(). GSAR 96-10-12 */
-    len = strlen(tmpbuf);
     safestr = savepvn(tmpbuf, len);
     SAVEDELETE(PL_defstash, safestr, len);
     SAVEHINTS();
@@ -3406,9 +3407,10 @@ PP(pp_entereval)
 		       (unsigned long)++PL_evalseq,
 		       CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
 	tmpbuf = SvPVX(sv);
+	len = SvCUR(sv);
     }
     else
-	sprintf(tmpbuf, "_<(eval %lu)", (unsigned long)++PL_evalseq);
+	len = my_sprintf(tmpbuf, "_<(eval %lu)", (unsigned long)++PL_evalseq);
     SAVECOPFILE_FREE(&PL_compiling);
     CopFILE_set(&PL_compiling, tmpbuf+2);
     SAVECOPLINE(&PL_compiling);
@@ -3418,7 +3420,6 @@ PP(pp_entereval)
        (i.e. before run-time proper). To work around the coredump that
        ensues, we always turn GvMULTI_on for any globals that were
        introduced within evals. See force_ident(). GSAR 96-10-12 */
-    len = strlen(tmpbuf);
     safestr = savepvn(tmpbuf, len);
     SAVEDELETE(PL_defstash, safestr, len);
     SAVEHINTS();
