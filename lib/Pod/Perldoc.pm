@@ -12,7 +12,7 @@ use File::Spec::Functions qw(catfile catdir splitdir);
 use vars qw($VERSION @Pagers $Bindir $Pod2man
   $Temp_Files_Created $Temp_File_Lifetime
 );
-$VERSION = '3.14';
+$VERSION = '3.14_01';
 #..........................................................................
 
 BEGIN {  # Make a DEBUG constant very first thing...
@@ -62,7 +62,7 @@ $Pod2man = "pod2man" . ( $Config{'versiononly'} ? $Config{'version'} : '' );
 #
 # Option accessors...
 
-foreach my $subname (map "opt_$_", split '', q{mhlvriFfXqnTdU}) {
+foreach my $subname (map "opt_$_", split '', q{mhlvriFfXqnTdUL}) {
   no strict 'refs';
   *$subname = do{ use strict 'refs';  sub () { shift->_elem($subname, @_) } };
 }
@@ -71,6 +71,7 @@ foreach my $subname (map "opt_$_", split '', q{mhlvriFfXqnTdU}) {
 sub opt_f_with { shift->_elem('opt_f', @_) }
 sub opt_q_with { shift->_elem('opt_q', @_) }
 sub opt_d_with { shift->_elem('opt_d', @_) }
+sub opt_L_with { shift->_elem('opt_L', @_) }
 
 sub opt_w_with { # Specify an option for the formatter subclass
   my($self, $value) = @_;
@@ -247,18 +248,19 @@ Options:
     -i   Ignore case
     -t   Display pod using pod2text instead of pod2man and nroff
              (-t is the default on win32 unless -n is specified)
-    -u	 Display unformatted pod text
+    -u   Display unformatted pod text
     -m   Display module's file in its entirety
     -n   Specify replacement for nroff
     -l   Display the module's file name
     -F   Arguments are file names, not modules
-    -v	 Verbosely describe what's going on
+    -v   Verbosely describe what's going on
     -T   Send output to STDOUT without any pager
     -d output_filename_to_send_to
     -o output_format_name
     -M FormatterModuleNameToUse
     -w formatter_option:option_value
-    -X	 use index if present (looks for pod.idx at $Config{archlib})
+    -L translation_code   Choose doc translation (if any)
+    -X   use index if present (looks for pod.idx at $Config{archlib})
     -q   Search the text of questions (not answers) in perlfaq[1-9]
 
 PageName|ModuleName...
@@ -291,7 +293,7 @@ sub usage_brief {
   $me =~ s,.*[/\\],,; # get basename
   
   die <<"EOUSAGE";
-Usage: $me [-h] [-V] [-r] [-i] [-v] [-t] [-u] [-m] [-n nroffer_program] [-l] [-T] [-d output_filename] [-o output_format] [-M FormatterModuleNameToUse] [-w formatter_option:option_value] [-F] [-X] PageName|ModuleName|ProgramName
+Usage: $me [-h] [-V] [-r] [-i] [-v] [-t] [-u] [-m] [-n nroffer_program] [-l] [-T] [-d output_filename] [-o output_format] [-M FormatterModuleNameToUse] [-w formatter_option:option_value] [-L translation_code] [-F] [-X] PageName|ModuleName|ProgramName
        $me -f PerlFunc
        $me -q FAQKeywords
 
@@ -416,6 +418,12 @@ sub process {
                          }
 
     return $self->usage_brief  unless  @pages;
+
+    # Adjusts pages for translation packages
+    if ( $self->opt_L ) {
+        eval "require POD2::" . uc($self->opt_L);
+        @pages = map { 'POD2::' . uc($self->opt_L) . '::' . $_ } @pages if ! $@;
+    }
 
     $self->find_good_formatter_class();
     $self->formatter_sanity_check();
@@ -817,11 +825,17 @@ sub search_perlfunc {
 
     DEBUG > 2 and
      print "Going to perlfunc-scan for $search_re in $perlfunc\n";
-    
+
+    my $re = 'Alphabetical Listing of Perl Functions';
+    if ( $self->opt_L ) {
+        my $code = 'POD2::' . uc($self->opt_L);
+        $re =  $code->search_perlfunc_re if $code->can('search_perlfunc_re');
+    }
+
     # Skip introduction
     local $_;
     while (<PFUNC>) {
-        last if /^=head2 Alphabetical Listing of Perl Functions/;
+        last if /^=head2 $re/;
     }
 
     # Look for our function
