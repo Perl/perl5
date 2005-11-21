@@ -1224,7 +1224,7 @@ S_new_body(pTHX_ size_t size, svtype sv_type)
 struct body_details {
     size_t size;	/* Size to allocate  */
     size_t copy;	/* Size of structure to copy (may be shorter)  */
-    int offset;
+    size_t offset;
     bool cant_upgrade;	/* Can upgrade this type */
     bool zero_nv;	/* zero the NV when upgrading from this */
     bool arena;		/* Allocated from an arena */
@@ -1260,7 +1260,7 @@ struct xpv {
 */
 
 #define relative_STRUCT_OFFSET(longer, shorter, member) \
-    STRUCT_OFFSET(shorter, member) - STRUCT_OFFSET(longer, member)
+    (STRUCT_OFFSET(shorter, member) - STRUCT_OFFSET(longer, member))
 
 /* Calculate the length to copy. Specifically work out the length less any
    final padding the compiler needed to add.  See the comment in sv_upgrade
@@ -1273,7 +1273,7 @@ struct xpv {
 static const struct body_details bodies_by_type[] = {
     {0, 0, 0, FALSE, NONV, NOARENA},
     /* IVs are in the head, so the allocation size is 0  */
-    {0, sizeof(IV), -STRUCT_OFFSET(XPVIV, xiv_iv), FALSE, NONV, NOARENA},
+    {0, sizeof(IV), STRUCT_OFFSET(XPVIV, xiv_iv), FALSE, NONV, NOARENA},
     /* 8 bytes on most ILP32 with IEEE doubles */
     {sizeof(NV), sizeof(NV), 0, FALSE, HADNV, HASARENA},
     /* RVs are in the head now */
@@ -1283,13 +1283,13 @@ static const struct body_details bodies_by_type[] = {
     {sizeof(xpv_allocated),
      copy_length(XPV, xpv_len)
      + relative_STRUCT_OFFSET(XPV, xpv_allocated, xpv_cur),
-     + relative_STRUCT_OFFSET(XPV, xpv_allocated, xpv_cur),
+     - relative_STRUCT_OFFSET(XPV, xpv_allocated, xpv_cur),
      FALSE, NONV, HASARENA},
     /* 12 */
     {sizeof(xpviv_allocated),
      copy_length(XPVIV, xiv_u)
      + relative_STRUCT_OFFSET(XPVIV, xpviv_allocated, xpv_cur),
-     + relative_STRUCT_OFFSET(XPVIV, xpviv_allocated, xpv_cur),
+     - relative_STRUCT_OFFSET(XPVIV, xpviv_allocated, xpv_cur),
      FALSE, NONV, HASARENA},
     /* 20 */
     {sizeof(XPVNV), copy_length(XPVNV, xiv_u), 0, FALSE, HADNV, HASARENA},
@@ -1305,13 +1305,13 @@ static const struct body_details bodies_by_type[] = {
     {sizeof(xpvav_allocated),
      copy_length(XPVAV, xmg_stash)
      + relative_STRUCT_OFFSET(XPVAV, xpvav_allocated, xav_fill),
-     relative_STRUCT_OFFSET(XPVAV, xpvav_allocated, xav_fill),
+     - relative_STRUCT_OFFSET(XPVAV, xpvav_allocated, xav_fill),
      TRUE, HADNV, HASARENA},
     /* 20 */
     {sizeof(xpvhv_allocated),
      copy_length(XPVHV, xmg_stash)
      + relative_STRUCT_OFFSET(XPVHV, xpvhv_allocated, xhv_fill),
-     relative_STRUCT_OFFSET(XPVHV, xpvhv_allocated, xhv_fill),
+     - relative_STRUCT_OFFSET(XPVHV, xpvhv_allocated, xhv_fill),
      TRUE, HADNV, HASARENA},
     /* 76 */
     {sizeof(XPVCV), sizeof(XPVCV), 0, TRUE, HADNV, HASARENA},
@@ -1323,7 +1323,7 @@ static const struct body_details bodies_by_type[] = {
 
 #define new_body_type(sv_type)			\
     (void *)((char *)S_new_body(aTHX_ bodies_by_type[sv_type].size, sv_type)\
-	     + bodies_by_type[sv_type].offset)
+	     - bodies_by_type[sv_type].offset)
 
 #define del_body_type(p, sv_type)	\
     del_body(p, &PL_body_roots[sv_type])
@@ -1331,10 +1331,10 @@ static const struct body_details bodies_by_type[] = {
 
 #define new_body_allocated(sv_type)		\
     (void *)((char *)S_new_body(aTHX_ bodies_by_type[sv_type].size, sv_type)\
-	     + bodies_by_type[sv_type].offset)
+	     - bodies_by_type[sv_type].offset)
 
 #define del_body_allocated(p, sv_type)		\
-    del_body(p - bodies_by_type[sv_type].offset, &PL_body_roots[sv_type])
+    del_body(p + bodies_by_type[sv_type].offset, &PL_body_roots[sv_type])
 
 
 #define my_safemalloc(s)	(void*)safemalloc(s)
@@ -1386,9 +1386,9 @@ static const struct body_details bodies_by_type[] = {
 /* no arena for you! */
 
 #define new_NOARENA(details) \
-	my_safemalloc((details)->size - (details)->offset)
+	my_safemalloc((details)->size + (details)->offset)
 #define new_NOARENAZ(details) \
-	my_safecalloc((details)->size - (details)->offset)
+	my_safecalloc((details)->size + (details)->offset)
 
 /*
 =for apidoc sv_upgrade
@@ -1583,15 +1583,15 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	    /* This points to the start of the allocated area.  */
 	    new_body_inline(new_body, new_type_details->size, new_type);
 	    Zero(new_body, new_type_details->size, char);
-	    new_body = ((char *)new_body) + new_type_details->offset;
+	    new_body = ((char *)new_body) - new_type_details->offset;
 	} else {
 	    new_body = new_NOARENAZ(new_type_details);
 	}
 	SvANY(sv) = new_body;
 
 	if (old_type_details->copy) {
-	    Copy((char *)old_body - old_type_details->offset,
-		 (char *)new_body - old_type_details->offset,
+	    Copy((char *)old_body + old_type_details->offset,
+		 (char *)new_body + old_type_details->offset,
 		 old_type_details->copy, char);
 	}
 
@@ -1616,7 +1616,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 #ifdef PURIFY
 	my_safefree(old_body);
 #else
-	del_body((void*)((char*)old_body - old_type_details->offset),
+	del_body((void*)((char*)old_body + old_type_details->offset),
 		 &PL_body_roots[old_type]);
 #endif
     }
@@ -5495,7 +5495,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
     SvFLAGS(sv) |= SVTYPEMASK;
 
     if (sv_type_details->arena) {
-	del_body(((char *)SvANY(sv) - sv_type_details->offset),
+	del_body(((char *)SvANY(sv) + sv_type_details->offset),
 		 &PL_body_roots[type]);
     }
     else if (sv_type_details->size) {
@@ -10041,7 +10041,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 		if (sv_type_details->arena) {
 		    new_body_inline(new_body, sv_type_details->copy, sv_type);
 		    new_body
-			= (void*)((char*)new_body + sv_type_details->offset);
+			= (void*)((char*)new_body - sv_type_details->offset);
 		} else {
 		    new_body = new_NOARENA(sv_type_details);
 		}
@@ -10050,13 +10050,13 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	    SvANY(dstr) = new_body;
 
 #ifndef PURIFY
-	    Copy(((char*)SvANY(sstr)) - sv_type_details->offset,
-		 ((char*)SvANY(dstr)) - sv_type_details->offset,
+	    Copy(((char*)SvANY(sstr)) + sv_type_details->offset,
+		 ((char*)SvANY(dstr)) + sv_type_details->offset,
 		 sv_type_details->copy, char);
 #else
 	    Copy(((char*)SvANY(sstr)),
 		 ((char*)SvANY(dstr)),
-		 sv_type_details->size - sv_type_details->offset, char);
+		 sv_type_details->size + sv_type_details->offset, char);
 #endif
 
 	    if (sv_type != SVt_PVAV && sv_type != SVt_PVHV)
