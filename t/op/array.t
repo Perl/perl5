@@ -61,7 +61,7 @@ is($r, "0,0");
 $bar[2] = '2';
 $r = join(',', $#bar, @bar);
 is($r, "2,0,,2");
-reset 'b';
+reset 'b' if $^O ne 'VMS';
 @bar = ();
 $bar[0] = '0';
 $r = join(',', $#bar, @bar);
