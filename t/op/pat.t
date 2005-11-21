@@ -79,12 +79,21 @@ $XXX{345} = 345;
 while ($_ = shift(@XXX)) {
     ?(.*)? && (print $1,"\n");
     /not/ && reset;
-    /not ok 26/ && reset 'X';
+    if (/not ok 26/) {
+      if ($^O eq 'VMS') {
+	$_ = shift(@XXX);
+      }
+      else {
+	reset 'X';
+      }
+   }
 }
 
-while (($key,$val) = each(%XXX)) {
+if ($^O ne 'VMS') {
+  while (($key,$val) = each(%XXX)) {
     print "not ok 27\n";
     exit;
+  }
 }
 
 print "ok 27\n";
