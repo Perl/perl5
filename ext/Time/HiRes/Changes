@@ -1,5 +1,14 @@
 Revision history for Perl extension Time::HiRes.
 
+1.83	[2005-11-19]
+	- has_symbol() was wrong since e.g. ITIMER_VIRTUAL is exported
+	  via @EXPORT_OK even when it is not available.  This is heinous.
+	  @EXPORT_OK should be determined at Makefile.PL time.
+	- be more lenient is testing clock_gettime(): allow more slop,
+	  and retry up to three times, sleeping a random nap between
+	  the retries
+	- human months are one-based (noticed by Anton Berezin)
+
 1.82	[2005-10-06]
 	- CLOCK_REALTIME is an enum value (of the clockid_t enum)
 	  in HP-UX (and might be so elsewhere, too), debugged by
@@ -7,7 +16,7 @@ Revision history for Perl extension Time::HiRes.
 	- include const-c.inc as late as possible (from Randy Kobes,
 	  [rt.cpan.org #15552] to avoid undefined usleep() on Win32
 
-1.81	[2005-10-05]
+1.81	[2005-11-05]
 	- try to be more robust and consistent in the detection of
           CLOCK_REALTIME and ITIMER_VIRTUAL in HiRes.t: the proper
 	  way is
@@ -37,10 +46,10 @@ Revision history for Perl extension Time::HiRes.
 	- fixed inside a comment HAS_POLL -> TIME_HIRES_NANOSLEEP
 	- at the end of HiRest.t tell how close we were to termination
 
-1.80	[2005-10-04]
+1.80	[2005-11-04]
 	- Gisle noticed a mistake (using HAS_NANOSLEEP) in 1.79
 
-1.79	[2005-10-03]
+1.79	[2005-11-03]
 	- try nanosleep for emulating usleep -- may help in some weird
 	  embedded realtime places which have nanosleep but neither usleep
 	  nor select nor poll (doesn't have to be weird embedded realtime
@@ -49,12 +58,12 @@ Revision history for Perl extension Time::HiRes.
 	  SVR4 places that have neither usleep nor select
 	- a redundant test guard in HiRes.t
 
-1.78	[2005-10-03]
+1.78	[2005-11-03]
 	- ITIMER_VIRTUAL detection in HiRes.t had problems (that we cannot
 	  in the general case fail already at 'use' phase is suboptimal)
 	- fixes to the documentation of clock_gettime() and clock_getres()
 
-1.77	[2005-10-03]
+1.77	[2005-11-03]
 	- add support for the POSIX clock_gettime() and clock_getres(),
 	  if available, either as library calls or as syscalls
 	- be more defensive about missing functionality: break out

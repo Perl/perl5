@@ -33,9 +33,10 @@ my $have_clock_getres	= &Time::HiRes::d_clock_getres;
 
 sub has_symbol {
     my $symbol = shift;
-    eval "import Time::HiRes qw($symbol)";
+    eval "use Time::HiRes qw($symbol)";
     return 0 unless $@ eq '';
-    return exists &{"Time::HiRes::$symbol"};
+    eval "my \$a = $symbol";
+    return $@ eq '';
 }
 
 printf "# have_gettimeofday  = %d\n", $have_gettimeofday;
@@ -496,23 +497,36 @@ if ($have_clock_gettime &&
     # All implementations of clock_gettime() 
     # are SUPPOSED TO support CLOCK_REALTIME.
     has_symbol('CLOCK_REALTIME')) {
-    my $t0 = clock_gettime(&CLOCK_REALTIME);
-    use Time::HiRes qw(sleep);
-    my $T = 1.5;
-    sleep($T);
-    my $t1 = clock_gettime(&CLOCK_REALTIME);
-    if ($t0 > 0 && $t1 > $t0) {
-	print "# t1 = $t1, t0 = $t0\n";
-	my $dt = $t1 - $t0;
-	my $rt = abs(1 - $dt / $T);
-	if ($rt <= $limit) {
-	    print "ok 30 # dt = $dt, r = $rt\n";
-	} else {
-	    print "not ok 30 # dt = $dt, rt = $rt\n";
+    my $ok = 0;
+ TRY: {
+	for my $try (1..3) {
+	    print "# CLOCK_REALTIME: try = $try\n";
+	    my $t0 = clock_gettime(&CLOCK_REALTIME);
+	    use Time::HiRes qw(sleep);
+	    my $T = 1.5;
+	    sleep($T);
+	    my $t1 = clock_gettime(&CLOCK_REALTIME);
+	    if ($t0 > 0 && $t1 > $t0) {
+		print "# t1 = $t1, t0 = $t0\n";
+		my $dt = $t1 - $t0;
+		my $rt = abs(1 - $dt / $T);
+		print "# dt = $dt, rt = $rt\n";
+		if ($rt <= 2 * $limit) {
+		    $ok = 1;
+		    last TRY;
+		}
+	    } else {
+		print "# Error: t0 = $t0, t1 = $t1\n";
+	    }
+	    my $r = rand() + rand();
+	    printf "# Sleeping for %.6f seconds...\n";
+	    sleep($r);
 	}
+    }
+    if ($ok) {
+	print "ok 30\n";
     } else {
-	print "# Error: t0 = $t0, t1 = $t1\n";
-	skip 30;
+	print "not ok 30\n";
     }
 } else {
     print "# No clock_gettime\n";

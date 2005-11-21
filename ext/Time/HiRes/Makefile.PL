@@ -324,18 +324,22 @@ sub init {
     $DEFINE = '';
 
     if ($Config{d_syscall}) {
-	print "Have syscall(), looking for syscall.h... ";
+	print "Have syscall()... looking for syscall.h... ";
 	if (has_include('syscall.h')) {
 	    $SYSCALL_H = 'syscall.h';
 	} elsif (has_include('sys/syscall.h')) {
 	    $SYSCALL_H = 'sys/syscall.h';
 	}
+    } else {
+	print "No syscall()...\n";
     }
 
-    if (defined $SYSCALL_H) {
-	print "found <$SYSCALL_H>.\n";
-    } else {
-	print "NOT found.\n";
+    if ($Config{d_syscall}) {
+	if (defined $SYSCALL_H) {
+	    print "found <$SYSCALL_H>.\n";
+	} else {
+	    print "NOT found.\n";
+	}
     }
 
     print "Looking for gettimeofday()... ";
@@ -628,6 +632,7 @@ sub main {
     if ($^O =~ /Win32/i) {
       $DEFINE = '-DSELECT_IS_BROKEN';
       $LIBS = [];
+      print "System is $^O, skipping full configure...\n";
     } else {
       init();
     }
