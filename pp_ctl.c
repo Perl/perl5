@@ -726,7 +726,7 @@ PP(pp_formline)
 	    {
 		const char *s = chophere;
 		if (chopspace) {
-		    while (*s && isSPACE(*s))
+		    while (isSPACE(*s))
 			s++;
 		}
 		sv_chop(sv,s);
@@ -864,7 +864,7 @@ PP(pp_formline)
 		const char *s = chophere;
 		const char *send = item + len;
 		if (chopspace) {
-		    while (*s && isSPACE(*s) && s < send)
+		    while (isSPACE(*s) && (s < send))
 			s++;
 		}
 		if (s < send) {
