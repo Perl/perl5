@@ -267,8 +267,8 @@ $x .= $y;	# should warn once
 $y .= $y;	# should warn once
 EXPECT
 Use of uninitialized value $x in concatenation (.) or string at - line 5.
-Use of uninitialized value $y in concatenation (.) or string at - line 6.
 Use of uninitialized value $x in concatenation (.) or string at - line 6.
+Use of uninitialized value $y in concatenation (.) or string at - line 6.
 Use of uninitialized value $y in concatenation (.) or string at - line 7.
 Use of uninitialized value $y in concatenation (.) or string at - line 8.
 ########

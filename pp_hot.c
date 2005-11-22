@@ -148,11 +148,14 @@ PP(pp_concat)
     dPOPTOPssrl;
     bool lbyte;
     STRLEN rlen;
-    const char *rpv = SvPV_const(right, rlen);	/* mg_get(right) happens here */
-    const bool rbyte = !DO_UTF8(right);
+    const char *rpv;
+    bool rbyte;
     bool rcopied = FALSE;
 
     if (TARG == right && right != left) {
+	/* mg_get(right) may happen here ... */
+	rpv = SvPV_const(right, rlen);
+	rbyte = !DO_UTF8(right);
 	right = sv_2mortal(newSVpvn(rpv, rlen));
 	rpv = SvPV_const(right, rlen);	/* no point setting UTF-8 here */
 	rcopied = TRUE;
@@ -171,14 +174,22 @@ PP(pp_concat)
     else { /* TARG == left */
         STRLEN llen;
 	SvGETMAGIC(left);		/* or mg_get(left) may happen here */
-	if (!SvOK(TARG))
+	if (!SvOK(TARG)) {
+	    if (left == right && ckWARN(WARN_UNINITIALIZED))
+		report_uninit(right);
 	    sv_setpvn(left, "", 0);
+	}
 	(void)SvPV_nomg_const(left, llen);    /* Needed to set UTF8 flag */
 	lbyte = !DO_UTF8(left);
 	if (IN_BYTES)
 	    SvUTF8_off(TARG);
     }
 
+    /* or mg_get(right) may happen here */
+    if (!rcopied) {
+	rpv = SvPV_const(right, rlen);
+	rbyte = !DO_UTF8(right);
+    }
     if (lbyte != rbyte) {
 	if (lbyte)
 	    sv_utf8_upgrade_nomg(TARG);
