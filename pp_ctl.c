@@ -1802,8 +1802,8 @@ PP(pp_enteriter)
 	    }
 	}
 	else if (PL_op->op_private & OPpITER_REVERSED) {
-	    cx->blk_loop.itermax = -1;
-	    cx->blk_loop.iterix = AvFILL(cx->blk_loop.iterary);
+	    cx->blk_loop.itermax = 0;
+	    cx->blk_loop.iterix = AvFILL(cx->blk_loop.iterary) + 1;
 
 	}
     }
@@ -1811,8 +1811,8 @@ PP(pp_enteriter)
 	cx->blk_loop.iterary = PL_curstack;
 	AvFILLp(PL_curstack) = SP - PL_stack_base;
 	if (PL_op->op_private & OPpITER_REVERSED) {
-	    cx->blk_loop.itermax = MARK - PL_stack_base;
-	    cx->blk_loop.iterix = cx->blk_oldsp;
+	    cx->blk_loop.itermax = MARK - PL_stack_base + 1;
+	    cx->blk_loop.iterix = cx->blk_oldsp + 1;
 	}
 	else {
 	    cx->blk_loop.iterix = MARK - PL_stack_base;

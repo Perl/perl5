@@ -31,7 +31,7 @@
 #
 #  -- .robin. <robin@kitsite.com>  2001-03-13
 
-print "1..46\n";
+print "1..47\n";
 
 my $ok;
 
@@ -992,3 +992,16 @@ print ($ok ? "ok 41\n" : "not ok 41\n");
     }
 
 }
+
+{
+    # [perl #37725]
+
+    $a37725[3] = 1; # use package var
+    $i = 2;
+    for my $x (reverse @a37725) {
+	$x = $i++;
+    }
+    print "@a37725" == "5 4 3 2" ? "" : "not ",
+	"ok 47 - reverse with empty slots (@a37725)\n";
+}
+
