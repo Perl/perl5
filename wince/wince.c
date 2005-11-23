@@ -466,7 +466,6 @@ win32_times(struct tms *timebuf)
   return -1;
 }
 
-/* TODO */
 Sighandler_t
 win32_signal(int sig, Sighandler_t subcode)
 {

@@ -3250,7 +3250,6 @@ wince/perlhost.h	Perl "host" implementation
 wince/perllib.c				WinCE port
 wince/perlmain.c			WinCE port
 wince/perl.rc				WinCE port
-wince/README.perlce			WinCE port
 wince/registry.bat			WinCE port
 wince/runperl.c				WinCE port
 wince/splittree.pl			WinCE port

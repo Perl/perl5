@@ -782,7 +782,7 @@ NOT_COMPILE_EXT = $(NOT_COMPILE_EXT) !XS/Typemap
 
 Extensions: ..\win32\buildext.pl $(PERLDEP) $(CONFIGPM)
 	$(HPERL) -I..\lib -I..\win32 -MCross=$(CROSS_NAME) ..\win32\buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) \
-	!POSIX !Math/BigInt/FastCalc $(NOT_COMPILE_EXT)
+	!POSIX $(NOT_COMPILE_EXT)
 
 Extensions_clean: 
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) clean
