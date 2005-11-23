@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..1187\n";
+print "1..1191\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3006,6 +3006,15 @@ END
 print "\x{0712}" =~ /\p{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
 print "\x{072F}" =~ /\P{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
 
+print "# user-defined character properties may lack \\n at the end\n";
+sub InGreekSmall   { return "03B1\t03C9" }
+sub InGreekCapital { return "0391\t03A9\n-03A2" }
+
+ok("\x{03C0}" =~ /\p{InGreekSmall}/,   "Small pi");
+ok("\x{03C2}" =~ /\p{InGreekSmall}/,   "Final sigma");
+ok("\x{03A0}" =~ /\p{InGreekCapital}/, "Capital PI");
+ok("\x{03A2}" =~ /\P{InGreekCapital}/, "Reserved");
+
 {
     print "# Change #18179\n";
     # previously failed with "panic: end_shift
@@ -3402,5 +3411,5 @@ ok(("foba  ba$s" =~ qr/(foo|BaSS|bar)/i)
        "# TODO assigning to original string should not corrupt match vars");
 }
 
-# last test 1187
+# last test 1191
 

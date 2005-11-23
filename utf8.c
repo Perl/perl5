@@ -1696,8 +1696,8 @@ Perl_swash_fetch(pTHX_ SV *sv, const U8 *ptr, bool do_utf8)
 	    SV *errsv_save;
 	    ENTER;
 	    SAVETMPS;
-	    save_re_context();
-	    PUSHSTACKi(PERLSI_MAGIC);
+	/*  save_re_context();  */
+	/*  PUSHSTACKi(PERLSI_MAGIC);  */
 	    PUSHMARK(SP);
 	    EXTEND(SP,3);
 	    PUSHs((SV*)sv);
@@ -1714,7 +1714,7 @@ Perl_swash_fetch(pTHX_ SV *sv, const U8 *ptr, bool do_utf8)
 	    if (!SvTRUE(ERRSV))
 		sv_setsv(ERRSV, errsv_save);
 	    SvREFCNT_dec(errsv_save);
-	    POPSTACK;
+	/*  POPSTACK; */
 	    FREETMPS;
 	    LEAVE;
 	    if (IN_PERL_COMPILETIME)
