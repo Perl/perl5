@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..1187\n";
+print "1..1195\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2995,8 +2995,8 @@ sub IsSyriac1 {
 END
 }
 
-print "\x{0712}" =~ /\p{IsSyriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
-print "\x{072F}" =~ /\P{IsSyriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
+ok("\x{0712}" =~ /\p{IsSyriac1}/, '\x{0712}, \p{IsSyriac1}');
+ok("\x{072F}" =~ /\P{IsSyriac1}/, '\x{072F}, \P{IsSyriac1}');
 
 sub Syriac1 {
     return <<'END';
@@ -3005,8 +3005,29 @@ sub Syriac1 {
 END
 }
 
-print "\x{0712}" =~ /\p{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
-print "\x{072F}" =~ /\P{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
+ok("\x{0712}" =~ /\p{Syriac1}/, '\x{0712}, \p{Syriac1}');
+ok("\x{072F}" =~ /\P{Syriac1}/, '\x{072F}, \p{Syriac1}');
+
+print "# user-defined character properties may lack \\n at the end\n";
+sub InGreekSmall   { return "03B1\t03C9" }
+sub InGreekCapital { return "0391\t03A9\n-03A2" }
+
+ok("\x{03C0}" =~ /\p{InGreekSmall}/,   "Small pi");
+ok("\x{03C2}" =~ /\p{InGreekSmall}/,   "Final sigma");
+ok("\x{03A0}" =~ /\p{InGreekCapital}/, "Capital PI");
+ok("\x{03A2}" =~ /\P{InGreekCapital}/, "Reserved");
+
+sub AsciiHexAndDash {
+    return <<'END';
++utf8::ASCII_Hex_Digit
++utf8::Dash
+END
+}
+
+ok("-" =~ /\p{Dash}/,            "'-' is Dash");
+ok("A" =~ /\p{ASCII_Hex_Digit}/, "'A' is ASCII_Hex_Digit");
+ok("-" =~ /\p{AsciiHexAndDash}/, "'-' is AsciiHexAndDash");
+ok("A" =~ /\p{AsciiHexAndDash}/, "'A' is AsciiHexAndDash");
 
 {
     print "# Change #18179\n";
@@ -3395,5 +3416,5 @@ ok(("foba  ba$s" =~ qr/(foo|BaSS|bar)/i)
        "# assigning to original string should not corrupt match vars");
 }
 
-# last test 1187
+# last test 1195
 

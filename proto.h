@@ -1261,7 +1261,7 @@ PERL_CALLCONV NV	Perl_str_to_version(pTHX_ SV *sv)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV SV*	Perl_swash_init(pTHX_ char* pkg, char* name, SV* listsv, I32 minbits, I32 none);
-PERL_CALLCONV UV	Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr, bool do_utf8);
+PERL_CALLCONV UV	Perl_swash_fetch(pTHX_ SV *swash, U8 *ptr, bool do_utf8);
 PERL_CALLCONV void	Perl_taint_env(pTHX);
 PERL_CALLCONV void	Perl_taint_proper(pTHX_ const char* f, const char* s);
 PERL_CALLCONV UV	Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *normal, char *special);
@@ -2021,6 +2021,10 @@ STATIC NV	S_mulexp10(NV value, I32 exponent);
 STATIC STRLEN	S_is_utf8_char_slow(pTHX_ const U8 *s, const STRLEN len);
 STATIC bool	S_is_utf8_common(pTHX_ const U8 *const p, SV **swash, const char * const swashname)
 			__attribute__warn_unused_result__;
+
+STATIC SV*	S_swash_get(pTHX_ SV* swash, UV start, UV span)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
 
 #endif
 

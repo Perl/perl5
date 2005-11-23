@@ -844,7 +844,7 @@ Apd	|void	|sv_vsetpvfn	|NN SV* sv|NN const char* pat|STRLEN patlen \
 				|NULLOK bool *maybe_tainted
 ApR	|NV	|str_to_version	|NN SV *sv
 Ap	|SV*	|swash_init	|NN char* pkg|NN char* name|NN SV* listsv|I32 minbits|I32 none
-Ap	|UV	|swash_fetch	|NN SV *sv|NN U8 *ptr|bool do_utf8
+Ap	|UV	|swash_fetch	|NN SV *swash|NN U8 *ptr|bool do_utf8
 Ap	|void	|taint_env
 Ap	|void	|taint_proper	|NULLOK const char* f|NN const char* s
 Apd	|UV	|to_utf8_case	|NN U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp \
@@ -1378,7 +1378,8 @@ sn	|NV|mulexp10	|NV value|I32 exponent
 
 #if defined(PERL_IN_UTF8_C) || defined(PERL_DECL_PROT)
 s	|STRLEN	|is_utf8_char_slow|NN const U8 *s|const STRLEN len
-spR	|bool	|is_utf8_common	|NN const U8 *const p|NN SV **swash|NN const char * const swashname
+sR	|bool	|is_utf8_common	|NN const U8 *const p|NN SV **swash|NN const char * const swashname
+sR	|SV*	|swash_get	|NN SV* swash|UV start|UV span
 #endif
 
 START_EXTERN_C
