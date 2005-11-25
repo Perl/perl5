@@ -1364,7 +1364,7 @@ of the result.
 The "swashp" is a pointer to the swash to use.
 
 Both the special and normal mappings are stored lib/unicore/To/Foo.pl,
-and loaded by SWASHGET, using lib/utf8_heavy.pl.  The special (usually,
+and loaded by SWASHNEW, using lib/utf8_heavy.pl.  The special (usually,
 but not always, a multicharacter mapping), is tried first.
 
 The "special" is a string like "utf8::ToSpecLower", which means the
@@ -1696,8 +1696,8 @@ Perl_swash_fetch(pTHX_ SV *sv, const U8 *ptr, bool do_utf8)
 	    SV *errsv_save;
 	    ENTER;
 	    SAVETMPS;
-	/*  save_re_context();  */
-	/*  PUSHSTACKi(PERLSI_MAGIC);  */
+	/*  save_re_context(); */ /* Now SWASHGET doesn't use regex */
+	    PUSHSTACKi(PERLSI_MAGIC);
 	    PUSHMARK(SP);
 	    EXTEND(SP,3);
 	    PUSHs((SV*)sv);
@@ -1714,7 +1714,7 @@ Perl_swash_fetch(pTHX_ SV *sv, const U8 *ptr, bool do_utf8)
 	    if (!SvTRUE(ERRSV))
 		sv_setsv(ERRSV, errsv_save);
 	    SvREFCNT_dec(errsv_save);
-	/*  POPSTACK; */
+	    POPSTACK;
 	    FREETMPS;
 	    LEAVE;
 	    if (IN_PERL_COMPILETIME)

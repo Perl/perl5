@@ -989,7 +989,7 @@ XS(XS_utf8_SWASHGET_heavy)
 	bitssvp = hv_fetch(hv, "BITS", 4, FALSE);
 	nonesvp = hv_fetch(hv, "NONE", 4, FALSE);
 	extssvp = hv_fetch(hv, "EXTRAS", 6, FALSE);
-	typestr = SvPV_nolen(*typesvp);
+	typestr = (U8*)SvPV_nolen(*typesvp);
 	typeto  = typestr[0] == 'T' && typestr[1] == 'o';
 	bits    = (U32)SvUV(*bitssvp);
 	none    = (U32)SvUV(*nonesvp);
@@ -1048,7 +1048,7 @@ XS(XS_utf8_SWASHGET_heavy)
 	    nextline = (U8*)memchr(l, '\n', lend - l);
 
 	    numlen = lend - l;
-	    min = (U32)grok_hex(l, &numlen, &flags, NULL);
+	    min = (U32)grok_hex((char *)l, &numlen, &flags, NULL);
 	    if (numlen)
 		l += numlen;
 	    else if (nextline) {
@@ -1064,7 +1064,7 @@ XS(XS_utf8_SWASHGET_heavy)
 		++l;
 		flags = PERL_SCAN_SILENT_ILLDIGIT | PERL_SCAN_DISALLOW_PREFIX;
 		numlen = lend - l;
-		max = (U32)grok_hex(l, &numlen, &flags, NULL);
+		max = (U32)grok_hex((char *)l, &numlen, &flags, NULL);
 		if (numlen)
 		    l += numlen;
 		else
@@ -1076,7 +1076,7 @@ XS(XS_utf8_SWASHGET_heavy)
 			flags = PERL_SCAN_SILENT_ILLDIGIT |
 				PERL_SCAN_DISALLOW_PREFIX;
 			numlen = lend - l;
-			val = (U32)grok_hex(l, &numlen, &flags, NULL);
+			val = (U32)grok_hex((char *)l, &numlen, &flags, NULL);
 			if (numlen)
 			    l += numlen;
 			else
@@ -1219,7 +1219,7 @@ XS(XS_utf8_SWASHGET_heavy)
 		HV* otherhv;
 		SV **otherbitssvp;
 
-		othersvp = hv_fetch(hv, namestr, namelen, FALSE);
+		othersvp = hv_fetch(hv, (char *)namestr, namelen, FALSE);
 		if (*othersvp && SvROK(*othersvp) &&
 				 SvTYPE(SvRV(*othersvp))==SVt_PVHV)
 		    otherhv = (HV*)SvRV(*othersvp);
@@ -1250,7 +1250,7 @@ XS(XS_utf8_SWASHGET_heavy)
 
 		    if (!olen)
 			Perl_croak(aTHX_ "SWASHGET didn't return valid swatch");
-		    s = SvPV(swatch, slen);
+		    s = (U8*)SvPV(swatch, slen);
 		    if (bits == 1 && otherbits == 1) {
 			if (slen != olen)
 			    Perl_croak(aTHX_ "SWASHGET length mismatch");
