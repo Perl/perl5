@@ -602,479 +602,6 @@ Perl_sv_free_arenas(pTHX)
     PL_sv_root = 0;
 }
 
-/* ---------------------------------------------------------------------
- *
- * support functions for report_uninit()
- */
-
-/* the maxiumum size of array or hash where we will scan looking
- * for the undefined element that triggered the warning */
-
-#define FUV_MAX_SEARCH_SIZE 1000
-
-/* Look for an entry in the hash whose value has the same SV as val;
- * If so, return a mortal copy of the key. */
-
-STATIC SV*
-S_find_hash_subscript(pTHX_ HV *hv, SV* val)
-{
-    dVAR;
-    register HE **array;
-    I32 i;
-
-    if (!hv || SvMAGICAL(hv) || !HvARRAY(hv) ||
-			(HvTOTALKEYS(hv) > FUV_MAX_SEARCH_SIZE))
-	return Nullsv;
-
-    array = HvARRAY(hv);
-
-    for (i=HvMAX(hv); i>0; i--) {
-	register HE *entry;
-	for (entry = array[i]; entry; entry = HeNEXT(entry)) {
-	    if (HeVAL(entry) != val)
-		continue;
-	    if (    HeVAL(entry) == &PL_sv_undef ||
-		    HeVAL(entry) == &PL_sv_placeholder)
-		continue;
-	    if (!HeKEY(entry))
-		return Nullsv;
-	    if (HeKLEN(entry) == HEf_SVKEY)
-		return sv_mortalcopy(HeKEY_sv(entry));
-	    return sv_2mortal(newSVpvn(HeKEY(entry), HeKLEN(entry)));
-	}
-    }
-    return Nullsv;
-}
-
-/* Look for an entry in the array whose value has the same SV as val;
- * If so, return the index, otherwise return -1. */
-
-STATIC I32
-S_find_array_subscript(pTHX_ AV *av, SV* val)
-{
-    SV** svp;
-    I32 i;
-    if (!av || SvMAGICAL(av) || !AvARRAY(av) ||
-			(AvFILLp(av) > FUV_MAX_SEARCH_SIZE))
-	return -1;
-
-    svp = AvARRAY(av);
-    for (i=AvFILLp(av); i>=0; i--) {
-	if (svp[i] == val && svp[i] != &PL_sv_undef)
-	    return i;
-    }
-    return -1;
-}
-
-/* S_varname(): return the name of a variable, optionally with a subscript.
- * If gv is non-zero, use the name of that global, along with gvtype (one
- * of "$", "@", "%"); otherwise use the name of the lexical at pad offset
- * targ.  Depending on the value of the subscript_type flag, return:
- */
-
-#define FUV_SUBSCRIPT_NONE	1	/* "@foo"          */
-#define FUV_SUBSCRIPT_ARRAY	2	/* "$foo[aindex]"  */
-#define FUV_SUBSCRIPT_HASH	3	/* "$foo{keyname}" */
-#define FUV_SUBSCRIPT_WITHIN	4	/* "within @foo"   */
-
-STATIC SV*
-S_varname(pTHX_ GV *gv, const char gvtype, PADOFFSET targ,
-	SV* keyname, I32 aindex, int subscript_type)
-{
-
-    SV * const name = sv_newmortal();
-    if (gv) {
-	char buffer[2];
-	buffer[0] = gvtype;
-	buffer[1] = 0;
-
-	/* as gv_fullname4(), but add literal '^' for $^FOO names  */
-
-	gv_fullname4(name, gv, buffer, 0);
-
-	if ((unsigned int)SvPVX(name)[1] <= 26) {
-	    buffer[0] = '^';
-	    buffer[1] = SvPVX(name)[1] + 'A' - 1;
-
-	    /* Swap the 1 unprintable control character for the 2 byte pretty
-	       version - ie substr($name, 1, 1) = $buffer; */
-	    sv_insert(name, 1, 1, buffer, 2);
-	}
-    }
-    else {
-	U32 unused;
-	CV * const cv = find_runcv(&unused);
-	SV *sv;
-	AV *av;
-
-	if (!cv || !CvPADLIST(cv))
-	    return Nullsv;
-	av = (AV*)(*av_fetch(CvPADLIST(cv), 0, FALSE));
-	sv = *av_fetch(av, targ, FALSE);
-	/* SvLEN in a pad name is not to be trusted */
-	sv_setpv(name, SvPV_nolen_const(sv));
-    }
-
-    if (subscript_type == FUV_SUBSCRIPT_HASH) {
-	SV * const sv = NEWSV(0,0);
-	*SvPVX(name) = '$';
-	Perl_sv_catpvf(aTHX_ name, "{%s}",
-	    pv_display(sv,SvPVX_const(keyname), SvCUR(keyname), 0, 32));
-	SvREFCNT_dec(sv);
-    }
-    else if (subscript_type == FUV_SUBSCRIPT_ARRAY) {
-	*SvPVX(name) = '$';
-	Perl_sv_catpvf(aTHX_ name, "[%"IVdf"]", (IV)aindex);
-    }
-    else if (subscript_type == FUV_SUBSCRIPT_WITHIN)
-	sv_insert(name, 0, 0,  "within ", 7);
-
-    return name;
-}
-
-
-/*
-=for apidoc find_uninit_var
-
-Find the name of the undefined variable (if any) that caused the operator o
-to issue a "Use of uninitialized value" warning.
-If match is true, only return a name if it's value matches uninit_sv.
-So roughly speaking, if a unary operator (such as OP_COS) generates a
-warning, then following the direct child of the op may yield an
-OP_PADSV or OP_GV that gives the name of the undefined variable. On the
-other hand, with OP_ADD there are two branches to follow, so we only print
-the variable name if we get an exact match.
-
-The name is returned as a mortal SV.
-
-Assumes that PL_op is the op that originally triggered the error, and that
-PL_comppad/PL_curpad points to the currently executing pad.
-
-=cut
-*/
-
-STATIC SV *
-S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
-{
-    dVAR;
-    SV *sv;
-    AV *av;
-    GV *gv;
-    OP *o, *o2, *kid;
-
-    if (!obase || (match && (!uninit_sv || uninit_sv == &PL_sv_undef ||
-			    uninit_sv == &PL_sv_placeholder)))
-	return Nullsv;
-
-    switch (obase->op_type) {
-
-    case OP_RV2AV:
-    case OP_RV2HV:
-    case OP_PADAV:
-    case OP_PADHV:
-      {
-	const bool pad  = (obase->op_type == OP_PADAV || obase->op_type == OP_PADHV);
-	const bool hash = (obase->op_type == OP_PADHV || obase->op_type == OP_RV2HV);
-	I32 index = 0;
-	SV *keysv = Nullsv;
-	int subscript_type = FUV_SUBSCRIPT_WITHIN;
-
-	if (pad) { /* @lex, %lex */
-	    sv = PAD_SVl(obase->op_targ);
-	    gv = Nullgv;
-	}
-	else {
-	    if (cUNOPx(obase)->op_first->op_type == OP_GV) {
-	    /* @global, %global */
-		gv = cGVOPx_gv(cUNOPx(obase)->op_first);
-		if (!gv)
-		    break;
-		sv = hash ? (SV*)GvHV(gv): (SV*)GvAV(gv);
-	    }
-	    else /* @{expr}, %{expr} */
-		return find_uninit_var(cUNOPx(obase)->op_first,
-						    uninit_sv, match);
-	}
-
-	/* attempt to find a match within the aggregate */
-	if (hash) {
-	    keysv = S_find_hash_subscript(aTHX_ (HV*)sv, uninit_sv);
-	    if (keysv)
-		subscript_type = FUV_SUBSCRIPT_HASH;
-	}
-	else {
-	    index = S_find_array_subscript(aTHX_ (AV*)sv, uninit_sv);
-	    if (index >= 0)
-		subscript_type = FUV_SUBSCRIPT_ARRAY;
-	}
-
-	if (match && subscript_type == FUV_SUBSCRIPT_WITHIN)
-	    break;
-
-	return varname(gv, hash ? '%' : '@', obase->op_targ,
-				    keysv, index, subscript_type);
-      }
-
-    case OP_PADSV:
-	if (match && PAD_SVl(obase->op_targ) != uninit_sv)
-	    break;
-	return varname(Nullgv, '$', obase->op_targ,
-				    Nullsv, 0, FUV_SUBSCRIPT_NONE);
-
-    case OP_GVSV:
-	gv = cGVOPx_gv(obase);
-	if (!gv || (match && GvSV(gv) != uninit_sv))
-	    break;
-	return varname(gv, '$', 0, Nullsv, 0, FUV_SUBSCRIPT_NONE);
-
-    case OP_AELEMFAST:
-	if (obase->op_flags & OPf_SPECIAL) { /* lexical array */
-	    if (match) {
-		SV **svp;
-		av = (AV*)PAD_SV(obase->op_targ);
-		if (!av || SvRMAGICAL(av))
-		    break;
-		svp = av_fetch(av, (I32)obase->op_private, FALSE);
-		if (!svp || *svp != uninit_sv)
-		    break;
-	    }
-	    return varname(Nullgv, '$', obase->op_targ,
-		    Nullsv, (I32)obase->op_private, FUV_SUBSCRIPT_ARRAY);
-	}
-	else {
-	    gv = cGVOPx_gv(obase);
-	    if (!gv)
-		break;
-	    if (match) {
-		SV **svp;
-		av = GvAV(gv);
-		if (!av || SvRMAGICAL(av))
-		    break;
-		svp = av_fetch(av, (I32)obase->op_private, FALSE);
-		if (!svp || *svp != uninit_sv)
-		    break;
-	    }
-	    return varname(gv, '$', 0,
-		    Nullsv, (I32)obase->op_private, FUV_SUBSCRIPT_ARRAY);
-	}
-	break;
-
-    case OP_EXISTS:
-	o = cUNOPx(obase)->op_first;
-	if (!o || o->op_type != OP_NULL ||
-		! (o->op_targ == OP_AELEM || o->op_targ == OP_HELEM))
-	    break;
-	return find_uninit_var(cBINOPo->op_last, uninit_sv, match);
-
-    case OP_AELEM:
-    case OP_HELEM:
-	if (PL_op == obase)
-	    /* $a[uninit_expr] or $h{uninit_expr} */
-	    return find_uninit_var(cBINOPx(obase)->op_last, uninit_sv, match);
-
-	gv = Nullgv;
-	o = cBINOPx(obase)->op_first;
-	kid = cBINOPx(obase)->op_last;
-
-	/* get the av or hv, and optionally the gv */
-	sv = Nullsv;
-	if  (o->op_type == OP_PADAV || o->op_type == OP_PADHV) {
-	    sv = PAD_SV(o->op_targ);
-	}
-	else if ((o->op_type == OP_RV2AV || o->op_type == OP_RV2HV)
-		&& cUNOPo->op_first->op_type == OP_GV)
-	{
-	    gv = cGVOPx_gv(cUNOPo->op_first);
-	    if (!gv)
-		break;
-	    sv = o->op_type == OP_RV2HV ? (SV*)GvHV(gv) : (SV*)GvAV(gv);
-	}
-	if (!sv)
-	    break;
-
-	if (kid && kid->op_type == OP_CONST && SvOK(cSVOPx_sv(kid))) {
-	    /* index is constant */
-	    if (match) {
-		if (SvMAGICAL(sv))
-		    break;
-		if (obase->op_type == OP_HELEM) {
-		    HE* he = hv_fetch_ent((HV*)sv, cSVOPx_sv(kid), 0, 0);
-		    if (!he || HeVAL(he) != uninit_sv)
-			break;
-		}
-		else {
-		    SV ** const svp = av_fetch((AV*)sv, SvIV(cSVOPx_sv(kid)), FALSE);
-		    if (!svp || *svp != uninit_sv)
-			break;
-		}
-	    }
-	    if (obase->op_type == OP_HELEM)
-		return varname(gv, '%', o->op_targ,
-			    cSVOPx_sv(kid), 0, FUV_SUBSCRIPT_HASH);
-	    else
-		return varname(gv, '@', o->op_targ, Nullsv,
-			    SvIV(cSVOPx_sv(kid)), FUV_SUBSCRIPT_ARRAY);
-	    ;
-	}
-	else  {
-	    /* index is an expression;
-	     * attempt to find a match within the aggregate */
-	    if (obase->op_type == OP_HELEM) {
-		SV * const keysv = S_find_hash_subscript(aTHX_ (HV*)sv, uninit_sv);
-		if (keysv)
-		    return varname(gv, '%', o->op_targ,
-						keysv, 0, FUV_SUBSCRIPT_HASH);
-	    }
-	    else {
-		const I32 index = S_find_array_subscript(aTHX_ (AV*)sv, uninit_sv);
-		if (index >= 0)
-		    return varname(gv, '@', o->op_targ,
-					Nullsv, index, FUV_SUBSCRIPT_ARRAY);
-	    }
-	    if (match)
-		break;
-	    return varname(gv,
-		(o->op_type == OP_PADAV || o->op_type == OP_RV2AV)
-		? '@' : '%',
-		o->op_targ, Nullsv, 0, FUV_SUBSCRIPT_WITHIN);
-	}
-
-	break;
-
-    case OP_AASSIGN:
-	/* only examine RHS */
-	return find_uninit_var(cBINOPx(obase)->op_first, uninit_sv, match);
-
-    case OP_OPEN:
-	o = cUNOPx(obase)->op_first;
-	if (o->op_type == OP_PUSHMARK)
-	    o = o->op_sibling;
-
-	if (!o->op_sibling) {
-	    /* one-arg version of open is highly magical */
-
-	    if (o->op_type == OP_GV) { /* open FOO; */
-		gv = cGVOPx_gv(o);
-		if (match && GvSV(gv) != uninit_sv)
-		    break;
-		return varname(gv, '$', 0,
-			    Nullsv, 0, FUV_SUBSCRIPT_NONE);
-	    }
-	    /* other possibilities not handled are:
-	     * open $x; or open my $x;	should return '${*$x}'
-	     * open expr;		should return '$'.expr ideally
-	     */
-	     break;
-	}
-	goto do_op;
-
-    /* ops where $_ may be an implicit arg */
-    case OP_TRANS:
-    case OP_SUBST:
-    case OP_MATCH:
-	if ( !(obase->op_flags & OPf_STACKED)) {
-	    if (uninit_sv == ((obase->op_private & OPpTARGET_MY)
-				 ? PAD_SVl(obase->op_targ)
-				 : DEFSV))
-	    {
-		sv = sv_newmortal();
-		sv_setpvn(sv, "$_", 2);
-		return sv;
-	    }
-	}
-	goto do_op;
-
-    case OP_PRTF:
-    case OP_PRINT:
-	/* skip filehandle as it can't produce 'undef' warning  */
-	o = cUNOPx(obase)->op_first;
-	if ((obase->op_flags & OPf_STACKED) && o->op_type == OP_PUSHMARK)
-	    o = o->op_sibling->op_sibling;
-	goto do_op2;
-
-
-    case OP_RV2SV:
-    case OP_CUSTOM:
-    case OP_ENTERSUB:
-	match = 1; /* XS or custom code could trigger random warnings */
-	goto do_op;
-
-    case OP_SCHOMP:
-    case OP_CHOMP:
-	if (SvROK(PL_rs) && uninit_sv == SvRV(PL_rs))
-	    return sv_2mortal(newSVpvn("${$/}", 5));
-	/* FALL THROUGH */
-
-    default:
-    do_op:
-	if (!(obase->op_flags & OPf_KIDS))
-	    break;
-	o = cUNOPx(obase)->op_first;
-	
-    do_op2:
-	if (!o)
-	    break;
-
-	/* if all except one arg are constant, or have no side-effects,
-	 * or are optimized away, then it's unambiguous */
-	o2 = Nullop;
-	for (kid=o; kid; kid = kid->op_sibling) {
-	    if (kid &&
-		(    (kid->op_type == OP_CONST && SvOK(cSVOPx_sv(kid)))
-		  || (kid->op_type == OP_NULL  && ! (kid->op_flags & OPf_KIDS))
-		  || (kid->op_type == OP_PUSHMARK)
-		)
-	    )
-		continue;
-	    if (o2) { /* more than one found */
-		o2 = Nullop;
-		break;
-	    }
-	    o2 = kid;
-	}
-	if (o2)
-	    return find_uninit_var(o2, uninit_sv, match);
-
-	/* scan all args */
-	while (o) {
-	    sv = find_uninit_var(o, uninit_sv, 1);
-	    if (sv)
-		return sv;
-	    o = o->op_sibling;
-	}
-	break;
-    }
-    return Nullsv;
-}
-
-
-/*
-=for apidoc report_uninit
-
-Print appropriate "Use of uninitialized variable" warning
-
-=cut
-*/
-
-void
-Perl_report_uninit(pTHX_ SV* uninit_sv)
-{
-    if (PL_op) {
-	SV* varname = Nullsv;
-	if (uninit_sv) {
-	    varname = find_uninit_var(PL_op, uninit_sv,0);
-	    if (varname)
-		sv_insert(varname, 0, 0, " ", 1);
-	}
-	Perl_warner(aTHX_ packWARN(WARN_UNINITIALIZED), PL_warn_uninit,
-		varname ? SvPV_nolen_const(varname) : "",
-		" in ", OP_DESC(PL_op));
-    }
-    else
-	Perl_warner(aTHX_ packWARN(WARN_UNINITIALIZED), PL_warn_uninit,
-		    "", "", "");
-}
-
 /*
   Here are mid-level routines that manage the allocation of bodies out
   of the various arenas.  There are 5 kinds of arenas:
@@ -11651,6 +11178,480 @@ Perl_sv_cat_decode(pTHX_ SV *dsv, SV *encoding,
     else
         Perl_croak(aTHX_ "Invalid argument to sv_cat_decode");
     return ret;
+
+}
+
+/* ---------------------------------------------------------------------
+ *
+ * support functions for report_uninit()
+ */
+
+/* the maxiumum size of array or hash where we will scan looking
+ * for the undefined element that triggered the warning */
+
+#define FUV_MAX_SEARCH_SIZE 1000
+
+/* Look for an entry in the hash whose value has the same SV as val;
+ * If so, return a mortal copy of the key. */
+
+STATIC SV*
+S_find_hash_subscript(pTHX_ HV *hv, SV* val)
+{
+    dVAR;
+    register HE **array;
+    I32 i;
+
+    if (!hv || SvMAGICAL(hv) || !HvARRAY(hv) ||
+			(HvTOTALKEYS(hv) > FUV_MAX_SEARCH_SIZE))
+	return Nullsv;
+
+    array = HvARRAY(hv);
+
+    for (i=HvMAX(hv); i>0; i--) {
+	register HE *entry;
+	for (entry = array[i]; entry; entry = HeNEXT(entry)) {
+	    if (HeVAL(entry) != val)
+		continue;
+	    if (    HeVAL(entry) == &PL_sv_undef ||
+		    HeVAL(entry) == &PL_sv_placeholder)
+		continue;
+	    if (!HeKEY(entry))
+		return Nullsv;
+	    if (HeKLEN(entry) == HEf_SVKEY)
+		return sv_mortalcopy(HeKEY_sv(entry));
+	    return sv_2mortal(newSVpvn(HeKEY(entry), HeKLEN(entry)));
+	}
+    }
+    return Nullsv;
+}
+
+/* Look for an entry in the array whose value has the same SV as val;
+ * If so, return the index, otherwise return -1. */
+
+STATIC I32
+S_find_array_subscript(pTHX_ AV *av, SV* val)
+{
+    SV** svp;
+    I32 i;
+    if (!av || SvMAGICAL(av) || !AvARRAY(av) ||
+			(AvFILLp(av) > FUV_MAX_SEARCH_SIZE))
+	return -1;
+
+    svp = AvARRAY(av);
+    for (i=AvFILLp(av); i>=0; i--) {
+	if (svp[i] == val && svp[i] != &PL_sv_undef)
+	    return i;
+    }
+    return -1;
+}
+
+/* S_varname(): return the name of a variable, optionally with a subscript.
+ * If gv is non-zero, use the name of that global, along with gvtype (one
+ * of "$", "@", "%"); otherwise use the name of the lexical at pad offset
+ * targ.  Depending on the value of the subscript_type flag, return:
+ */
+
+#define FUV_SUBSCRIPT_NONE	1	/* "@foo"          */
+#define FUV_SUBSCRIPT_ARRAY	2	/* "$foo[aindex]"  */
+#define FUV_SUBSCRIPT_HASH	3	/* "$foo{keyname}" */
+#define FUV_SUBSCRIPT_WITHIN	4	/* "within @foo"   */
+
+STATIC SV*
+S_varname(pTHX_ GV *gv, const char gvtype, PADOFFSET targ,
+	SV* keyname, I32 aindex, int subscript_type)
+{
+
+    SV * const name = sv_newmortal();
+    if (gv) {
+	char buffer[2];
+	buffer[0] = gvtype;
+	buffer[1] = 0;
+
+	/* as gv_fullname4(), but add literal '^' for $^FOO names  */
+
+	gv_fullname4(name, gv, buffer, 0);
+
+	if ((unsigned int)SvPVX(name)[1] <= 26) {
+	    buffer[0] = '^';
+	    buffer[1] = SvPVX(name)[1] + 'A' - 1;
+
+	    /* Swap the 1 unprintable control character for the 2 byte pretty
+	       version - ie substr($name, 1, 1) = $buffer; */
+	    sv_insert(name, 1, 1, buffer, 2);
+	}
+    }
+    else {
+	U32 unused;
+	CV * const cv = find_runcv(&unused);
+	SV *sv;
+	AV *av;
+
+	if (!cv || !CvPADLIST(cv))
+	    return Nullsv;
+	av = (AV*)(*av_fetch(CvPADLIST(cv), 0, FALSE));
+	sv = *av_fetch(av, targ, FALSE);
+	/* SvLEN in a pad name is not to be trusted */
+	sv_setpv(name, SvPV_nolen_const(sv));
+    }
+
+    if (subscript_type == FUV_SUBSCRIPT_HASH) {
+	SV * const sv = NEWSV(0,0);
+	*SvPVX(name) = '$';
+	Perl_sv_catpvf(aTHX_ name, "{%s}",
+	    pv_display(sv,SvPVX_const(keyname), SvCUR(keyname), 0, 32));
+	SvREFCNT_dec(sv);
+    }
+    else if (subscript_type == FUV_SUBSCRIPT_ARRAY) {
+	*SvPVX(name) = '$';
+	Perl_sv_catpvf(aTHX_ name, "[%"IVdf"]", (IV)aindex);
+    }
+    else if (subscript_type == FUV_SUBSCRIPT_WITHIN)
+	sv_insert(name, 0, 0,  "within ", 7);
+
+    return name;
+}
+
+
+/*
+=for apidoc find_uninit_var
+
+Find the name of the undefined variable (if any) that caused the operator o
+to issue a "Use of uninitialized value" warning.
+If match is true, only return a name if it's value matches uninit_sv.
+So roughly speaking, if a unary operator (such as OP_COS) generates a
+warning, then following the direct child of the op may yield an
+OP_PADSV or OP_GV that gives the name of the undefined variable. On the
+other hand, with OP_ADD there are two branches to follow, so we only print
+the variable name if we get an exact match.
+
+The name is returned as a mortal SV.
+
+Assumes that PL_op is the op that originally triggered the error, and that
+PL_comppad/PL_curpad points to the currently executing pad.
+
+=cut
+*/
+
+STATIC SV *
+S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
+{
+    dVAR;
+    SV *sv;
+    AV *av;
+    GV *gv;
+    OP *o, *o2, *kid;
+
+    if (!obase || (match && (!uninit_sv || uninit_sv == &PL_sv_undef ||
+			    uninit_sv == &PL_sv_placeholder)))
+	return Nullsv;
+
+    switch (obase->op_type) {
+
+    case OP_RV2AV:
+    case OP_RV2HV:
+    case OP_PADAV:
+    case OP_PADHV:
+      {
+	const bool pad  = (obase->op_type == OP_PADAV || obase->op_type == OP_PADHV);
+	const bool hash = (obase->op_type == OP_PADHV || obase->op_type == OP_RV2HV);
+	I32 index = 0;
+	SV *keysv = Nullsv;
+	int subscript_type = FUV_SUBSCRIPT_WITHIN;
+
+	if (pad) { /* @lex, %lex */
+	    sv = PAD_SVl(obase->op_targ);
+	    gv = Nullgv;
+	}
+	else {
+	    if (cUNOPx(obase)->op_first->op_type == OP_GV) {
+	    /* @global, %global */
+		gv = cGVOPx_gv(cUNOPx(obase)->op_first);
+		if (!gv)
+		    break;
+		sv = hash ? (SV*)GvHV(gv): (SV*)GvAV(gv);
+	    }
+	    else /* @{expr}, %{expr} */
+		return find_uninit_var(cUNOPx(obase)->op_first,
+						    uninit_sv, match);
+	}
+
+	/* attempt to find a match within the aggregate */
+	if (hash) {
+	    keysv = S_find_hash_subscript(aTHX_ (HV*)sv, uninit_sv);
+	    if (keysv)
+		subscript_type = FUV_SUBSCRIPT_HASH;
+	}
+	else {
+	    index = S_find_array_subscript(aTHX_ (AV*)sv, uninit_sv);
+	    if (index >= 0)
+		subscript_type = FUV_SUBSCRIPT_ARRAY;
+	}
+
+	if (match && subscript_type == FUV_SUBSCRIPT_WITHIN)
+	    break;
+
+	return varname(gv, hash ? '%' : '@', obase->op_targ,
+				    keysv, index, subscript_type);
+      }
+
+    case OP_PADSV:
+	if (match && PAD_SVl(obase->op_targ) != uninit_sv)
+	    break;
+	return varname(Nullgv, '$', obase->op_targ,
+				    Nullsv, 0, FUV_SUBSCRIPT_NONE);
+
+    case OP_GVSV:
+	gv = cGVOPx_gv(obase);
+	if (!gv || (match && GvSV(gv) != uninit_sv))
+	    break;
+	return varname(gv, '$', 0, Nullsv, 0, FUV_SUBSCRIPT_NONE);
+
+    case OP_AELEMFAST:
+	if (obase->op_flags & OPf_SPECIAL) { /* lexical array */
+	    if (match) {
+		SV **svp;
+		av = (AV*)PAD_SV(obase->op_targ);
+		if (!av || SvRMAGICAL(av))
+		    break;
+		svp = av_fetch(av, (I32)obase->op_private, FALSE);
+		if (!svp || *svp != uninit_sv)
+		    break;
+	    }
+	    return varname(Nullgv, '$', obase->op_targ,
+		    Nullsv, (I32)obase->op_private, FUV_SUBSCRIPT_ARRAY);
+	}
+	else {
+	    gv = cGVOPx_gv(obase);
+	    if (!gv)
+		break;
+	    if (match) {
+		SV **svp;
+		av = GvAV(gv);
+		if (!av || SvRMAGICAL(av))
+		    break;
+		svp = av_fetch(av, (I32)obase->op_private, FALSE);
+		if (!svp || *svp != uninit_sv)
+		    break;
+	    }
+	    return varname(gv, '$', 0,
+		    Nullsv, (I32)obase->op_private, FUV_SUBSCRIPT_ARRAY);
+	}
+	break;
+
+    case OP_EXISTS:
+	o = cUNOPx(obase)->op_first;
+	if (!o || o->op_type != OP_NULL ||
+		! (o->op_targ == OP_AELEM || o->op_targ == OP_HELEM))
+	    break;
+	return find_uninit_var(cBINOPo->op_last, uninit_sv, match);
+
+    case OP_AELEM:
+    case OP_HELEM:
+	if (PL_op == obase)
+	    /* $a[uninit_expr] or $h{uninit_expr} */
+	    return find_uninit_var(cBINOPx(obase)->op_last, uninit_sv, match);
+
+	gv = Nullgv;
+	o = cBINOPx(obase)->op_first;
+	kid = cBINOPx(obase)->op_last;
+
+	/* get the av or hv, and optionally the gv */
+	sv = Nullsv;
+	if  (o->op_type == OP_PADAV || o->op_type == OP_PADHV) {
+	    sv = PAD_SV(o->op_targ);
+	}
+	else if ((o->op_type == OP_RV2AV || o->op_type == OP_RV2HV)
+		&& cUNOPo->op_first->op_type == OP_GV)
+	{
+	    gv = cGVOPx_gv(cUNOPo->op_first);
+	    if (!gv)
+		break;
+	    sv = o->op_type == OP_RV2HV ? (SV*)GvHV(gv) : (SV*)GvAV(gv);
+	}
+	if (!sv)
+	    break;
+
+	if (kid && kid->op_type == OP_CONST && SvOK(cSVOPx_sv(kid))) {
+	    /* index is constant */
+	    if (match) {
+		if (SvMAGICAL(sv))
+		    break;
+		if (obase->op_type == OP_HELEM) {
+		    HE* he = hv_fetch_ent((HV*)sv, cSVOPx_sv(kid), 0, 0);
+		    if (!he || HeVAL(he) != uninit_sv)
+			break;
+		}
+		else {
+		    SV ** const svp = av_fetch((AV*)sv, SvIV(cSVOPx_sv(kid)), FALSE);
+		    if (!svp || *svp != uninit_sv)
+			break;
+		}
+	    }
+	    if (obase->op_type == OP_HELEM)
+		return varname(gv, '%', o->op_targ,
+			    cSVOPx_sv(kid), 0, FUV_SUBSCRIPT_HASH);
+	    else
+		return varname(gv, '@', o->op_targ, Nullsv,
+			    SvIV(cSVOPx_sv(kid)), FUV_SUBSCRIPT_ARRAY);
+	    ;
+	}
+	else  {
+	    /* index is an expression;
+	     * attempt to find a match within the aggregate */
+	    if (obase->op_type == OP_HELEM) {
+		SV * const keysv = S_find_hash_subscript(aTHX_ (HV*)sv, uninit_sv);
+		if (keysv)
+		    return varname(gv, '%', o->op_targ,
+						keysv, 0, FUV_SUBSCRIPT_HASH);
+	    }
+	    else {
+		const I32 index = S_find_array_subscript(aTHX_ (AV*)sv, uninit_sv);
+		if (index >= 0)
+		    return varname(gv, '@', o->op_targ,
+					Nullsv, index, FUV_SUBSCRIPT_ARRAY);
+	    }
+	    if (match)
+		break;
+	    return varname(gv,
+		(o->op_type == OP_PADAV || o->op_type == OP_RV2AV)
+		? '@' : '%',
+		o->op_targ, Nullsv, 0, FUV_SUBSCRIPT_WITHIN);
+	}
+
+	break;
+
+    case OP_AASSIGN:
+	/* only examine RHS */
+	return find_uninit_var(cBINOPx(obase)->op_first, uninit_sv, match);
+
+    case OP_OPEN:
+	o = cUNOPx(obase)->op_first;
+	if (o->op_type == OP_PUSHMARK)
+	    o = o->op_sibling;
+
+	if (!o->op_sibling) {
+	    /* one-arg version of open is highly magical */
+
+	    if (o->op_type == OP_GV) { /* open FOO; */
+		gv = cGVOPx_gv(o);
+		if (match && GvSV(gv) != uninit_sv)
+		    break;
+		return varname(gv, '$', 0,
+			    Nullsv, 0, FUV_SUBSCRIPT_NONE);
+	    }
+	    /* other possibilities not handled are:
+	     * open $x; or open my $x;	should return '${*$x}'
+	     * open expr;		should return '$'.expr ideally
+	     */
+	     break;
+	}
+	goto do_op;
+
+    /* ops where $_ may be an implicit arg */
+    case OP_TRANS:
+    case OP_SUBST:
+    case OP_MATCH:
+	if ( !(obase->op_flags & OPf_STACKED)) {
+	    if (uninit_sv == ((obase->op_private & OPpTARGET_MY)
+				 ? PAD_SVl(obase->op_targ)
+				 : DEFSV))
+	    {
+		sv = sv_newmortal();
+		sv_setpvn(sv, "$_", 2);
+		return sv;
+	    }
+	}
+	goto do_op;
+
+    case OP_PRTF:
+    case OP_PRINT:
+	/* skip filehandle as it can't produce 'undef' warning  */
+	o = cUNOPx(obase)->op_first;
+	if ((obase->op_flags & OPf_STACKED) && o->op_type == OP_PUSHMARK)
+	    o = o->op_sibling->op_sibling;
+	goto do_op2;
+
+
+    case OP_RV2SV:
+    case OP_CUSTOM:
+    case OP_ENTERSUB:
+	match = 1; /* XS or custom code could trigger random warnings */
+	goto do_op;
+
+    case OP_SCHOMP:
+    case OP_CHOMP:
+	if (SvROK(PL_rs) && uninit_sv == SvRV(PL_rs))
+	    return sv_2mortal(newSVpvn("${$/}", 5));
+	/* FALL THROUGH */
+
+    default:
+    do_op:
+	if (!(obase->op_flags & OPf_KIDS))
+	    break;
+	o = cUNOPx(obase)->op_first;
+	
+    do_op2:
+	if (!o)
+	    break;
+
+	/* if all except one arg are constant, or have no side-effects,
+	 * or are optimized away, then it's unambiguous */
+	o2 = Nullop;
+	for (kid=o; kid; kid = kid->op_sibling) {
+	    if (kid &&
+		(    (kid->op_type == OP_CONST && SvOK(cSVOPx_sv(kid)))
+		  || (kid->op_type == OP_NULL  && ! (kid->op_flags & OPf_KIDS))
+		  || (kid->op_type == OP_PUSHMARK)
+		)
+	    )
+		continue;
+	    if (o2) { /* more than one found */
+		o2 = Nullop;
+		break;
+	    }
+	    o2 = kid;
+	}
+	if (o2)
+	    return find_uninit_var(o2, uninit_sv, match);
+
+	/* scan all args */
+	while (o) {
+	    sv = find_uninit_var(o, uninit_sv, 1);
+	    if (sv)
+		return sv;
+	    o = o->op_sibling;
+	}
+	break;
+    }
+    return Nullsv;
+}
+
+
+/*
+=for apidoc report_uninit
+
+Print appropriate "Use of uninitialized variable" warning
+
+=cut
+*/
+
+void
+Perl_report_uninit(pTHX_ SV* uninit_sv)
+{
+    if (PL_op) {
+	SV* varname = Nullsv;
+	if (uninit_sv) {
+	    varname = find_uninit_var(PL_op, uninit_sv,0);
+	    if (varname)
+		sv_insert(varname, 0, 0, " ", 1);
+	}
+	Perl_warner(aTHX_ packWARN(WARN_UNINITIALIZED), PL_warn_uninit,
+		varname ? SvPV_nolen_const(varname) : "",
+		" in ", OP_DESC(PL_op));
+    }
+    else
+	Perl_warner(aTHX_ packWARN(WARN_UNINITIALIZED), PL_warn_uninit,
+		    "", "", "");
 }
 
 /*
