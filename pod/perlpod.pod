@@ -64,6 +64,7 @@ with "=", followed by an identifier, followed by arbitrary text that
 the command can use however it pleases.  Currently recognized commands
 are
 
+    =pod
     =head1 Heading Text
     =head2 Heading Text
     =head3 Heading Text
@@ -71,11 +72,11 @@ are
     =over indentlevel
     =item stuff
     =back
-    =cut
-    =pod
     =begin format
     =end format
     =for format text...
+    =encoding type
+    =cut
 
 To explain them each in detail:
 
