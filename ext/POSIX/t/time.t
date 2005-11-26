@@ -4,7 +4,7 @@ use strict;
 
 use Config;
 use POSIX;
-use Test::More qw(no_plan);
+use Test::More tests => 9;
 
 # go to UTC to avoid DST issues around the world when testing.  SUS3 says that
 # null should get you UTC, but some environments want the explicit names.
@@ -42,9 +42,11 @@ if ($^O eq "MSWin32") {
 }
 setlocale(LC_TIME, $orig_loc) || die "Cannot setlocale() back to orig: $!";
 
-# Hard to test other than to make sure it returns something numeric and < 0
+# clock() seems to have different definitions of what it does between POSIX
+# and BSD.  Cygwin, Win32, and Linux lean the BSD way.  So, the tests just
+# check the basics.
 like(clock(), qr/\d*/, "clock() returns a numeric value");
-ok(clock() > 0, "...and its greater than zero");
+ok(clock() >= 0, "...and it returns something >= 0");
 
 SKIP: {
     skip "No difftime()", 1 if $Config{d_difftime} ne 'define';
