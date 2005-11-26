@@ -1,4 +1,4 @@
-/* $Id: MD5.xs,v 1.42 2003/12/06 22:35:16 gisle Exp $ */
+/* $Id: MD5.xs,v 1.45 2005/11/26 11:06:20 gisle Exp $ */
 
 /* 
  * This library is free software; you can redistribute it and/or
