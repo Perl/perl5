@@ -6,20 +6,19 @@ use Config;
 use POSIX;
 use Test::More qw(no_plan);
 
-# go to UTC to avoid DST issues around the world when testing
-{
-    no warnings 'uninitialized';
-    $ENV{TZ} = undef;
-}
+# go to UTC to avoid DST issues around the world when testing.  SUS3 says that
+# null should get you UTC, but some environments want the explicit names.
+# Those with a working tzset() should be able to use the TZ below.
+$ENV{TZ} = "UTC0UTC";
 
 SKIP: {
     # It looks like POSIX.xs claims that only VMS and Mac OS traditional
-    # don't have tzset().  A config setting might be helpful.  Win32 actually
-    # seems ambiguous
+    # don't have tzset().  Win32 works to call the function, but it doesn't
+    # actually do anything.  Cygwin works in some places, but not others.  The
+    # other Win32's below are guesses.
     skip "No tzset()", 2
-       if $^O eq "MacOS" || $^O eq "VMS" || $^O eq "cygwin" ||
-          $^O eq "MSWin32" || $^O eq "dos" || $^O eq "interix" || 
-          $^O eq "openbsd";
+       if $^O eq "MacOS" || $^O eq "VMS" || $^O eq "cygwin" || $^O eq "djgpp" ||
+          $^O eq "MSWin32" || $^O eq "dos" || $^O eq "interix";
     tzset();
     my @tzname = tzname();
     like($tzname[0], qr/[GMT|UTC]/i, "tzset() to GMT/UTC");
