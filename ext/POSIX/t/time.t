@@ -18,7 +18,8 @@ SKIP: {
     # seems ambiguous
     skip "No tzset()", 2
        if $^O eq "MacOS" || $^O eq "VMS" || $^O eq "cygwin" ||
-          $^O eq "MSWin32" || $^O eq "dos" || $^O eq "interix";
+          $^O eq "MSWin32" || $^O eq "dos" || $^O eq "interix" || 
+          $^O eq "openbsd";
     tzset();
     my @tzname = tzname();
     like($tzname[0], qr/[GMT|UTC]/i, "tzset() to GMT/UTC");
@@ -32,13 +33,15 @@ is(asctime(localtime(0)), ctime(0), "asctime() and ctime() at zero");
 is(asctime(localtime(12345678)), ctime(12345678), "asctime() and ctime() at 12345678");
 
 # Careful!  strftime() is locale sensative.  Let's take care of that
-SKIP: {
-    skip "Win32's is missing a %e" if $^O eq "MSWin32";
-    my $orig_loc = setlocale(LC_TIME, "C") || die "Cannot setlocale() to C:  $!";
-    is(ctime(86400), strftime("%a %b %e %H:%M:%S %Y\n", localtime(86400)),
+my $orig_loc = setlocale(LC_TIME, "C") || die "Cannot setlocale() to C:  $!";
+if ($^O eq "MSWin32") {
+    is(ctime(0), strftime("%a %b %#d %H:%M:%S %Y\n", localtime(0)),
         "get ctime() equal to strftime()");
-    setlocale(LC_TIME, $orig_loc) || die "Cannot setlocale() back to orig: $!";
+} else {
+    is(ctime(0), strftime("%a %b %e %H:%M:%S %Y\n", localtime(0)),
+        "get ctime() equal to strftime()");
 }
+setlocale(LC_TIME, $orig_loc) || die "Cannot setlocale() back to orig: $!";
 
 # Hard to test other than to make sure it returns something numeric and < 0
 like(clock(), qr/\d*/, "clock() returns a numeric value");
