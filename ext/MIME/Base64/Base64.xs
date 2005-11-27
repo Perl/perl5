@@ -1,4 +1,4 @@
-/* $Id: Base64.xs,v 3.4 2004/08/24 16:29:35 gisle Exp $
+/* $Id: Base64.xs,v 3.5 2005/11/26 10:44:14 gisle Exp $
 
 Copyright 1997-2004 Gisle Aas
 
