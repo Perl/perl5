@@ -425,8 +425,8 @@ based on a sphere surface.  The radius of the sphere is B<rho>, also
 known as the I<radial> coordinate.  The angle in the I<xy>-plane
 (around the I<z>-axis) is B<theta>, also known as the I<azimuthal>
 coordinate.  The angle from the I<z>-axis is B<phi>, also known as the
-I<polar> coordinate.  The `North Pole' is therefore I<0, 0, rho>, and
-the `Bay of Guinea' (think of the missing big chunk of Africa) I<0,
+I<polar> coordinate.  The North Pole is therefore I<0, 0, rho>, and
+the Gulf of Guinea (think of the missing big chunk of Africa) I<0,
 pi/2, rho>.  In geographical terms I<phi> is latitude (northward
 positive, southward negative) and I<theta> is longitude (eastward
 positive, westward negative).
