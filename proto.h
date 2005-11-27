@@ -3806,6 +3806,10 @@ STATIC bool	S_is_utf8_common(pTHX_ const U8 *const p, SV **swash, const char * c
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 
+STATIC SV*	S_swash_get(pTHX_ SV* swash, UV start, UV span)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+
 #endif
 
 START_EXTERN_C

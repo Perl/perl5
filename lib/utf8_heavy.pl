@@ -266,12 +266,6 @@ sub SWASHNEW {
     return $SWASH;
 }
 
-# NOTE: utf8.c:swash_init() assumes entries are never modified once generated.
-sub SWASHGET {
-    # See utf8.c:Perl_swash_fetch for problems with this interface.
-    # See universal.c for XS utf8::SWASHGET_heavy.
-    # USAGE: $swatch = utf8::SWASHGET_heavy($self, $start, $len, DEBUG);
-    return utf8::SWASHGET_heavy($_[0], $_[1], $_[2], DEBUG);
-}
+# Now SWASHGET is recasted into a C function S_swash_get (see utf8.c).
 
 1;

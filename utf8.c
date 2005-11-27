@@ -1621,6 +1621,7 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
  * (see lib/unicore/SpecCase.txt) The SWASHGET in lib/utf8_heavy.pl is
  * the lower-level routine, and it is similarly broken for returning
  * multiple values.  --jhi */
+/* Now SWASHGET is recasted into S_swash_get in this file. */
 UV
 Perl_swash_fetch(pTHX_ SV *sv, const U8 *ptr, bool do_utf8)
 {
@@ -1632,14 +1633,14 @@ Perl_swash_fetch(pTHX_ SV *sv, const U8 *ptr, bool do_utf8)
     STRLEN needents;
     const U8 *tmps = NULL;
     U32 bit;
-    SV *retval;
+    SV *swatch;
     U8 tmputf8[2];
     UV c = NATIVE_TO_ASCII(*ptr);
 
     if (!do_utf8 && !UNI_IS_INVARIANT(c)) {
-        tmputf8[0] = (U8)UTF8_EIGHT_BIT_HI(c);
-        tmputf8[1] = (U8)UTF8_EIGHT_BIT_LO(c);
-        ptr = tmputf8;
+	tmputf8[0] = (U8)UTF8_EIGHT_BIT_HI(c);
+	tmputf8[1] = (U8)UTF8_EIGHT_BIT_LO(c);
+	ptr = tmputf8;
     }
     /* Given a UTF-X encoded char 0xAA..0xYY,0xZZ
      * then the "swatch" is a vec() for al the chars which start
@@ -1649,20 +1650,18 @@ Perl_swash_fetch(pTHX_ SV *sv, const U8 *ptr, bool do_utf8)
     klen = UTF8SKIP(ptr) - 1;
     off  = ptr[klen];
 
-    if (klen == 0)
-     {
+    if (klen == 0) {
       /* If char in invariant then swatch is for all the invariant chars
        * In both UTF-8 and UTF-8-MOD that happens to be UTF_CONTINUATION_MARK
        */
-      needents = UTF_CONTINUATION_MARK;
-      off      = NATIVE_TO_UTF(ptr[klen]);
-     }
-    else
-     {
+	needents = UTF_CONTINUATION_MARK;
+	off      = NATIVE_TO_UTF(ptr[klen]);
+    }
+    else {
       /* If char is encoded then swatch is for the prefix */
-      needents = (1 << UTF_ACCUMULATION_SHIFT);
-      off      = NATIVE_TO_UTF(ptr[klen]) & UTF_CONTINUATION_MASK;
-     }
+	needents = (1 << UTF_ACCUMULATION_SHIFT);
+	off      = NATIVE_TO_UTF(ptr[klen]) & UTF_CONTINUATION_MASK;
+    }
 
     /*
      * This single-entry cache saves about 1/3 of the utf8 overhead in test
@@ -1684,46 +1683,28 @@ Perl_swash_fetch(pTHX_ SV *sv, const U8 *ptr, bool do_utf8)
 	/* Try our second-level swatch cache, kept in a hash. */
 	SV** svp = hv_fetch(hv, (const char*)ptr, klen, FALSE);
 
-	/* If not cached, generate it via utf8::SWASHGET */
-	if (!svp || !SvPOK(*svp) || !(tmps = (const U8*)SvPV_const(*svp, slen))) {
-	    dSP;
+	/* If not cached, generate it via swash_get */
+	if (!svp || !SvPOK(*svp)
+		 || !(tmps = (const U8*)SvPV_const(*svp, slen))) {
 	    /* We use utf8n_to_uvuni() as we want an index into
 	       Unicode tables, not a native character number.
 	     */
 	    const UV code_point = utf8n_to_uvuni(ptr, UTF8_MAXBYTES, 0,
 					   ckWARN(WARN_UTF8) ?
 					   0 : UTF8_ALLOW_ANY);
-	    SV *errsv_save;
-	    ENTER;
-	    SAVETMPS;
-	/*  save_re_context(); */ /* Now SWASHGET doesn't use regex */
-	    PUSHSTACKi(PERLSI_MAGIC);
-	    PUSHMARK(SP);
-	    EXTEND(SP,3);
-	    PUSHs((SV*)sv);
-	    /* On EBCDIC & ~(0xA0-1) isn't a useful thing to do */
-	    PUSHs(sv_2mortal(newSViv((klen) ?
-				     (code_point & ~(needents - 1)) : 0)));
-	    PUSHs(sv_2mortal(newSViv(needents)));
-	    PUTBACK;
-	    errsv_save = newSVsv(ERRSV);
-	    if (call_method("SWASHGET", G_SCALAR))
-		retval = newSVsv(*PL_stack_sp--);
-	    else
-		retval = &PL_sv_undef;
-	    if (!SvTRUE(ERRSV))
-		sv_setsv(ERRSV, errsv_save);
-	    SvREFCNT_dec(errsv_save);
-	    POPSTACK;
-	    FREETMPS;
-	    LEAVE;
+	    swatch = swash_get(sv,
+		    /* On EBCDIC & ~(0xA0-1) isn't a useful thing to do */
+				(klen) ? (code_point & ~(needents - 1)) : 0,
+				needents);
+
 	    if (IN_PERL_COMPILETIME)
 		PL_curcop->op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
 
-	    svp = hv_store(hv, (const char *)ptr, klen, retval, 0);
+	    svp = hv_store(hv, (const char *)ptr, klen, swatch, 0);
 
-	    if (!svp || !(tmps = (U8*)SvPV(*svp, slen)) || (slen << 3) < needents)
-		Perl_croak(aTHX_ "SWASHGET didn't return result of proper length");
+	    if (!svp || !(tmps = (U8*)SvPV(*svp, slen))
+		     || (slen << 3) < needents)
+		Perl_croak(aTHX_ "The swatch does not have proper length");
 	}
 
 	PL_last_swash_hv = hv;
@@ -1751,6 +1732,319 @@ Perl_swash_fetch(pTHX_ SV *sv, const U8 *ptr, bool do_utf8)
     }
     Perl_croak(aTHX_ "panic: swash_fetch");
     return 0;
+}
+
+/* Note:
+ * Returns a swatch (a bit vector string) for a code point sequence
+ * that starts from the value C<start> and comprises the number C<span>.
+ * A C<swash> must be an object created by SWASHNEW (see lib/utf8_heavy.pl).
+ * Should be used via swash_fetch, which will cache the swatch in C<swash>.
+ */
+STATIC SV*
+S_swash_get(pTHX_ SV* swash, UV start, UV span)
+{
+    SV *swatch;
+    U8 *l, *lend, *x, *xend, *s, *nl;
+    STRLEN lcur, xcur, scur;
+
+    HV* const hv = (HV*)SvRV(swash);
+    SV** listsvp = hv_fetch(hv, "LIST", 4, FALSE);
+    SV** typesvp = hv_fetch(hv, "TYPE", 4, FALSE);
+    SV** bitssvp = hv_fetch(hv, "BITS", 4, FALSE);
+    SV** nonesvp = hv_fetch(hv, "NONE", 4, FALSE);
+    SV** extssvp = hv_fetch(hv, "EXTRAS", 6, FALSE);
+    U8*  typestr = (U8*)SvPV_nolen(*typesvp);
+    int  typeto  = typestr[0] == 'T' && typestr[1] == 'o';
+    STRLEN bits  = SvUV(*bitssvp);
+    STRLEN octets = bits >> 3; /* if bits == 1, then octets == 0 */
+    UV     none  = SvUV(*nonesvp);
+    UV     end   = start + span;
+
+    if (bits != 1 && bits != 8 && bits != 16 && bits != 32) {
+	Perl_croak(aTHX_ "swash_get: unknown bits %"UVuf, (UV) bits);
+    }
+
+    /* create and initialize $swatch */
+    swatch = newSVpvn("",0);
+    scur   = octets ? (span * octets) : (span + 7) / 8;
+    SvGROW(swatch, scur + 1);
+    s = (U8*)SvPVX(swatch);
+    if (octets && none) {
+	const U8* e = s + scur;
+	while (s < e) {
+	    if (bits == 8)
+		*s++ = (U8)(none & 0xff);
+	    else if (bits == 16) {
+		*s++ = (U8)((none >>  8) & 0xff);
+		*s++ = (U8)( none        & 0xff);
+	    }
+	    else if (bits == 32) {
+		*s++ = (U8)((none >> 24) & 0xff);
+		*s++ = (U8)((none >> 16) & 0xff);
+		*s++ = (U8)((none >>  8) & 0xff);
+		*s++ = (U8)( none        & 0xff);
+	    }
+	}
+	*s = '\0';
+    }
+    else {
+	(void)memzero((U8*)s, scur + 1);
+    }
+    SvCUR_set(swatch, scur);
+    s = (U8*)SvPVX(swatch);
+
+    /* read $swash->{LIST} */
+    l = (U8*)SvPV(*listsvp, lcur);
+    lend = l + lcur;
+    while (l < lend) {
+	UV min, max, val, key;
+	STRLEN numlen;
+	I32 flags = PERL_SCAN_SILENT_ILLDIGIT | PERL_SCAN_DISALLOW_PREFIX;
+
+	nl = (U8*)memchr(l, '\n', lend - l);
+
+	numlen = lend - l;
+	min = grok_hex((char *)l, &numlen, &flags, NULL);
+	if (numlen)
+	    l += numlen;
+	else if (nl) {
+	    l = nl + 1; /* 1 is length of "\n" */
+	    continue;
+	}
+	else {
+	    l = lend; /* to LIST's end at which \n is not found */
+	    break;
+	}
+
+	if (isBLANK(*l)) {
+	    ++l;
+	    flags = PERL_SCAN_SILENT_ILLDIGIT | PERL_SCAN_DISALLOW_PREFIX;
+	    numlen = lend - l;
+	    max = grok_hex((char *)l, &numlen, &flags, NULL);
+	    if (numlen)
+		l += numlen;
+	    else
+		max = min;
+
+	    if (octets) {
+		if (isBLANK(*l)) {
+		    ++l;
+		    flags = PERL_SCAN_SILENT_ILLDIGIT |
+			    PERL_SCAN_DISALLOW_PREFIX;
+		    numlen = lend - l;
+		    val = grok_hex((char *)l, &numlen, &flags, NULL);
+		    if (numlen)
+			l += numlen;
+		    else
+			val = 0;
+		}
+		else {
+		    val = 0;
+		    if (typeto) {
+			Perl_croak(aTHX_ "%s: illegal mapping '%s'",
+					 typestr, l);
+		    }
+		}
+	    }
+	}
+	else {
+	    max = min;
+	    if (octets) {
+		val = 0;
+		if (typeto) {
+		    Perl_croak(aTHX_ "%s: illegal mapping '%s'", typestr, l);
+		}
+	    }
+	}
+
+	if (nl)
+	    l = nl + 1;
+	else
+	    l = lend;
+
+	if (max < start)
+	    continue;
+
+	if (octets) {
+	    if (min < start) {
+		if (!none || val < none) {
+		    val += start - min;
+		}
+		min = start;
+	    }
+	    for (key = min; key <= max; key++) {
+		STRLEN offset;
+		if (key >= end)
+		    goto go_out_list;
+		/* offset must be non-negative (start <= min <= key < end) */
+		offset = octets * (key - start);
+		if (bits == 8)
+		    s[offset] = (U8)(val & 0xff);
+		else if (bits == 16) {
+		    s[offset    ] = (U8)((val >>  8) & 0xff);
+		    s[offset + 1] = (U8)( val        & 0xff);
+		}
+		else if (bits == 32) {
+		    s[offset    ] = (U8)((val >> 24) & 0xff);
+		    s[offset + 1] = (U8)((val >> 16) & 0xff);
+		    s[offset + 2] = (U8)((val >>  8) & 0xff);
+		    s[offset + 3] = (U8)( val        & 0xff);
+		}
+
+		if (!none || val < none)
+		    ++val;
+	    }
+	}
+	else {
+	    if (min < start)
+		min = start;
+	    for (key = min; key <= max; key++) {
+		STRLEN offset = (STRLEN)(key - start);
+		if (key >= end)
+		    goto go_out_list;
+		s[offset >> 3] |= 1 << (offset & 7);
+	    }
+	}
+    } /* while */
+  go_out_list:
+
+    /* read $swash->{EXTRAS} */
+    x = (U8*)SvPV(*extssvp, xcur);
+    xend = x + xcur;
+    while (x < xend) {
+	STRLEN namelen;
+	U8 *namestr;
+	SV** othersvp;
+	HV* otherhv;
+	STRLEN otherbits;
+	SV **otherbitssvp, *other;
+	U8 *s, *o;
+	STRLEN slen, olen;
+
+	U8 opc = *x++;
+	if (opc == '\n')
+	    continue;
+
+	nl = (U8*)memchr(x, '\n', xend - x);
+
+	if (opc != '-' && opc != '+' && opc != '!' && opc != '&') {
+	    if (nl) {
+		x = nl + 1; /* 1 is length of "\n" */
+		continue;
+	    }
+	    else {
+		x = xend; /* to EXTRAS' end at which \n is not found */
+		break;
+	    }
+	}
+
+	namestr = x;
+	if (nl) {
+	    namelen = nl - namestr;
+	    x = nl + 1;
+	}
+	else {
+	    namelen = xend - namestr;
+	    x = xend;
+	}
+
+	othersvp = hv_fetch(hv, (char *)namestr, namelen, FALSE);
+	if (*othersvp && SvROK(*othersvp) &&
+			 SvTYPE(SvRV(*othersvp))==SVt_PVHV)
+	    otherhv = (HV*)SvRV(*othersvp);
+	else
+	    Perl_croak(aTHX_ "otherhv is not a hash reference");
+
+	otherbitssvp = hv_fetch(otherhv, "BITS", 4, FALSE);
+	otherbits = (STRLEN)SvUV(*otherbitssvp);
+	if (bits < otherbits)
+	    Perl_croak(aTHX_ "swash_get: swatch size mismatch");
+
+	/* The "other" swatch must be destroyed after. */
+	other = swash_get(*othersvp, start, span);
+	o = (U8*)SvPV(other, olen);
+
+	if (!olen)
+	    Perl_croak(aTHX_ "swash_get didn't return valid swatch for other");
+
+	s = (U8*)SvPV(swatch, slen);
+	if (bits == 1 && otherbits == 1) {
+	    if (slen != olen)
+		Perl_croak(aTHX_ "swash_get: swatch length mismatch");
+
+	    switch (opc) {
+	    case '+':
+		while (slen--)
+		    *s++ |= *o++;
+		break;
+	    case '!':
+		while (slen--)
+		    *s++ |= ~*o++;
+		break;
+	    case '-':
+		while (slen--)
+		    *s++ &= ~*o++;
+		break;
+	    case '&':
+		while (slen--)
+		    *s++ &= *o++;
+		break;
+	    default:
+		break;
+	    }
+	}
+	else { /* bits >= 8 */
+	       /* XXX: but weirdly otherval is treated as boolean */
+	    STRLEN otheroctets = otherbits >> 3;
+	    STRLEN offset = 0;
+	    U8* send = s + slen;
+
+	    while (s < send) {
+		UV otherval = 0;
+
+		if (otherbits == 1) {
+		    otherval = (o[offset >> 3] >> (offset & 7)) & 1;
+		    ++offset;
+		}
+		else {
+		    STRLEN vlen = otheroctets;
+		    otherval = *o++;
+		    while (--vlen) {
+			otherval <<= 8;
+			otherval |= *o++;
+		    }
+		}
+
+		if      (opc == '+' && otherval)
+		    otherval = 1;
+		else if (opc == '!' && !otherval)
+		    otherval = 1;
+		else if (opc == '-' && otherval)
+		    otherval = 0;
+		else if (opc == '&' && !otherval)
+		    otherval = 0;
+		else {
+		    s += octets; /* not modify orig swatch */
+		    continue;
+		}
+
+		if (bits == 8)
+		    *s++ = (U8)( otherval & 0xff);
+		else if (bits == 16) {
+		    *s++ = (U8)((otherval >>  8) & 0xff);
+		    *s++ = (U8)( otherval        & 0xff);
+		}
+		else if (bits == 32) {
+		    *s++ = (U8)((otherval >> 24) & 0xff);
+		    *s++ = (U8)((otherval >> 16) & 0xff);
+		    *s++ = (U8)((otherval >>  8) & 0xff);
+		    *s++ = (U8)( otherval        & 0xff);
+		}
+	    }
+	}
+	sv_free(other); /* through with it! */
+    } /* while */
+    return swatch;
 }
 
 /*

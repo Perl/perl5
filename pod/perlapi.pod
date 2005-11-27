@@ -6008,7 +6008,7 @@ of the result.
 The "swashp" is a pointer to the swash to use.
 
 Both the special and normal mappings are stored lib/unicore/To/Foo.pl,
-and loaded by SWASHGET, using lib/utf8_heavy.pl.  The special (usually,
+and loaded by SWASHNEW, using lib/utf8_heavy.pl.  The special (usually,
 but not always, a multicharacter mapping), is tried first.
 
 The "special" is a string like "utf8::ToSpecLower", which means the

@@ -1385,7 +1385,8 @@ sn	|NV|mulexp10	|NV value|I32 exponent
 
 #if defined(PERL_IN_UTF8_C) || defined(PERL_DECL_PROT)
 s	|STRLEN	|is_utf8_char_slow|NN const U8 *s|const STRLEN len
-spR	|bool	|is_utf8_common	|NN const U8 *const p|NN SV **swash|NN const char * const swashname
+sR	|bool	|is_utf8_common	|NN const U8 *const p|NN SV **swash|NN const char * const swashname
+sR	|SV*	|swash_get	|NN SV* swash|UV start|UV span
 #endif
 
 START_EXTERN_C

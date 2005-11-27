@@ -357,8 +357,8 @@ END_EXTERN_C
 /*
  * Note: we should try and be careful never to call the isXXX_utf8() functions
  * unless we're pretty sure we've seen the beginning of a UTF-EBCDIC character
- * Otherwise we risk loading in the heavy-duty SWASHINIT and SWASHGET routines
- * unnecessarily.
+ * Otherwise we risk loading in the heavy-duty swash_init and swash_fetch
+ * routines unnecessarily.
  */
 
 #define isIDFIRST_lazy_if(p,c) ((IN_BYTES || (!c || UTF8_IS_INVARIANT(*p))) \

@@ -145,7 +145,7 @@ encoded character.
  * Note: we try to be careful never to call the isXXX_utf8() functions
  * unless we're pretty sure we've seen the beginning of a UTF-8 character
  * (that is, the two high bits are set).  Otherwise we risk loading in the
- * heavy-duty SWASHINIT and SWASHGET routines unnecessarily.
+ * heavy-duty swash_init and swash_fetch routines unnecessarily.
  */
 #define isIDFIRST_lazy_if(p,c) ((IN_BYTES || (!c || (*((const U8*)p) < 0xc0))) \
 				? isIDFIRST(*(p)) \
