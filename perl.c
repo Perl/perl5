@@ -5247,9 +5247,6 @@ STATIC void
 S_my_exit_jump(pTHX)
 {
     dVAR;
-    register PERL_CONTEXT *cx;
-    I32 gimme;
-    SV **newsp;
 
     if (PL_e_script) {
 	SvREFCNT_dec(PL_e_script);
@@ -5257,16 +5254,10 @@ S_my_exit_jump(pTHX)
     }
 
     POPSTACK_TO(PL_mainstack);
-    if (cxstack_ix >= 0) {
-	if (cxstack_ix > 0)
-	    dounwind(0);
-	POPBLOCK(cx,PL_curpm);
-	LEAVE;
-    }
+    dounwind(-1);
+    LEAVE_SCOPE(0);
 
     JMPENV_JUMP(2);
-    PERL_UNUSED_VAR(gimme);
-    PERL_UNUSED_VAR(newsp);
 }
 
 static I32
