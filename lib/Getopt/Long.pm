@@ -2,17 +2,17 @@
 
 package Getopt::Long;
 
-# RCS Status      : $Id: GetoptLong.pm,v 2.68 2003-09-23 15:24:53+02 jv Exp jv $
+# RCS Status      : $Id: GetoptLong.pm,v 2.72 2005-04-28 21:18:33+02 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Dec 31 20:48:15 2003
-# Update Count    : 1440
+# Last Modified On: Thu Apr 28 21:14:19 2005
+# Update Count    : 1456
 # Status          : Released
 
 ################ Copyright ################
 
-# This program is Copyright 1990,2002 by Johan Vromans.
+# This program is Copyright 1990,2005 by Johan Vromans.
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the Perl Artistic License or the
 # GNU General Public License as published by the Free Software
@@ -35,10 +35,10 @@ use 5.004;
 use strict;
 
 use vars qw($VERSION);
-$VERSION        =  2.3401;
+$VERSION        =  2.3404;
 # For testing versions only.
 use vars qw($VERSION_STRING);
-$VERSION_STRING = "2.34_01";
+$VERSION_STRING = "2.34_04";
 
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK);
@@ -63,7 +63,7 @@ use vars qw($error $debug $major_version $minor_version);
 use vars qw($autoabbrev $getopt_compat $ignorecase $bundling $order
 	    $passthrough);
 # Official invisible variables.
-use vars qw($genprefix $caller $gnu_compat $auto_help $auto_version);
+use vars qw($genprefix $caller $gnu_compat $auto_help $auto_version $longprefix);
 
 # Public subroutines.
 sub config(@);			# deprecated name
@@ -106,6 +106,7 @@ sub ConfigDefaults() {
     $ignorecase = 1;		# ignore case when matching options
     $passthrough = 0;		# leave unrecognized options alone
     $gnu_compat = 0;		# require --opt=val if value is optional
+    $longprefix = "(--)";       # what does a long prefix look like
 }
 
 # Override import.
@@ -266,7 +267,7 @@ sub GetOptions(@) {
 	local ($^W) = 0;
 	print STDERR
 	  ("Getopt::Long $Getopt::Long::VERSION (",
-	   '$Revision: 2.68 $', ") ",
+	   '$Revision: 2.72 $', ") ",
 	   "called from package \"$pkg\".",
 	   "\n  ",
 	   "ARGV: (@ARGV)",
@@ -280,7 +281,8 @@ sub GetOptions(@) {
 	   "ignorecase=$ignorecase,",
 	   "requested_version=$requested_version,",
 	   "passthrough=$passthrough,",
-	   "genprefix=\"$genprefix\".",
+	   "genprefix=\"$genprefix\",",
+	   "longprefix=\"$longprefix\".",
 	   "\n");
     }
 
@@ -611,7 +613,7 @@ sub GetOptions(@) {
 		}
 
 		$argcnt++;
-		last if $argcnt >= $ctl->[CTL_AMAX];
+		last if $argcnt >= $ctl->[CTL_AMAX] && $ctl->[CTL_AMAX] != -1;
 		undef($arg);
 
 		# Need more args?
@@ -858,7 +860,7 @@ sub FindOption ($$$$) {
 
     # If it is a long option, it may include the value.
     # With getopt_compat, only if not bundling.
-    if ( ($starter eq "--" 
+    if ( ($starter=~/^$longprefix$/
           || ($getopt_compat && ($bundling == 0 || $bundling == 2)))
 	  && $opt =~ /^([^=]+)=(.*)$/s ) {
 	$opt = $1;
@@ -913,9 +915,10 @@ sub FindOption ($$$$) {
 	    # See if all matches are for the same option.
 	    my %hit;
 	    foreach ( @hits ) {
-		$_ = $opctl->{$_}->[CTL_CNAME]
-		  if defined $opctl->{$_}->[CTL_CNAME];
-		$hit{$_} = 1;
+		my $hit = $_;
+		$hit = $opctl->{$hit}->[CTL_CNAME]
+		  if defined $opctl->{$hit}->[CTL_CNAME];
+		$hit{$hit} = 1;
 	    }
 	    # Remove auto-supplied options (version, help).
 	    if ( keys(%hit) == 2 ) {
@@ -956,7 +959,7 @@ sub FindOption ($$$$) {
     unless  ( defined $ctl ) {
 	return (0) if $passthrough;
 	# Pretend one char when bundling.
-	if ( $bundling == 1) {
+	if ( $bundling == 1 && length($starter) == 1 ) {
 	    $opt = substr($opt,0,1);
             unshift (@ARGV, $starter.$rest) if defined $rest;
 	}
@@ -1202,13 +1205,14 @@ sub Configure (@) {
     my $prevconfig =
       [ $error, $debug, $major_version, $minor_version,
 	$autoabbrev, $getopt_compat, $ignorecase, $bundling, $order,
-	$gnu_compat, $passthrough, $genprefix, $auto_version, $auto_help ];
+	$gnu_compat, $passthrough, $genprefix, $auto_version, $auto_help,
+	$longprefix ];
 
     if ( ref($options[0]) eq 'ARRAY' ) {
 	( $error, $debug, $major_version, $minor_version,
 	  $autoabbrev, $getopt_compat, $ignorecase, $bundling, $order,
-	  $gnu_compat, $passthrough, $genprefix, $auto_version, $auto_help ) =
-	    @{shift(@options)};
+	  $gnu_compat, $passthrough, $genprefix, $auto_version, $auto_help,
+	  $longprefix ) = @{shift(@options)};
     }
 
     my $opt;
@@ -1283,8 +1287,16 @@ sub Configure (@) {
 	    # Parenthesize if needed.
 	    $genprefix = "(" . $genprefix . ")"
 	      unless $genprefix =~ /^\(.*\)$/;
-	    eval { '' =~ /$genprefix/; };
+	    eval { '' =~ m"$genprefix"; };
 	    die("Getopt::Long: invalid pattern \"$genprefix\"") if $@;
+	}
+	elsif ( $try =~ /^long_prefix_pattern=(.+)$/ && $action ) {
+	    $longprefix = $1;
+	    # Parenthesize if needed.
+	    $longprefix = "(" . $longprefix . ")"
+	      unless $longprefix =~ /^\(.*\)$/;
+	    eval { '' =~ m"$longprefix"; };
+	    die("Getopt::Long: invalid long prefix pattern \"$longprefix\"") if $@;
 	}
 	elsif ( $try eq 'debug' ) {
 	    $debug = $action;
@@ -1605,7 +1617,7 @@ destination:
 Used with the example above, C<@libfiles> (or C<@$libfiles>) would
 contain two strings upon completion: C<"lib/srdlib"> and
 C<"lib/extlib">, in that order. It is also possible to specify that
-only integer or floating point numbers are acceptable values.
+only integer or floating point numbers are acceptible values.
 
 Often it is useful to allow comma-separated lists of values as well as
 multiple occurrences of the options. This is easy using Perl's split()
@@ -1656,7 +1668,7 @@ When used with command line options:
 the hash C<%defines> (or C<%$defines>) will contain two keys, C<"os">
 with value C<"linux> and C<"vendor"> with value C<"redhat">. It is
 also possible to specify that only integer or floating point numbers
-are acceptable values. The keys are always taken to be strings.
+are acceptible values. The keys are always taken to be strings.
 
 =head2 User-defined subroutines to handle options
 
@@ -1686,7 +1698,7 @@ the desired error message as its argument. GetOptions() will catch the
 die(), issue the error message, and record that an error result must
 be returned upon completion.
 
-If the text of the error message starts with an exclamation mark C<!>
+If the text of the error message starts with an exclamantion mark C<!>
 it is interpreted specially by GetOptions(). There is currently one
 special command implemented: C<die("!FINISH")> will cause GetOptions()
 to stop processing options, as if it encountered a double dash C<-->.
@@ -1702,7 +1714,8 @@ the above example:
     GetOptions ('length|height=f' => \$length);
 
 The first name is called the I<primary> name, the other names are
-called I<aliases>.
+called I<aliases>. When using a hash to store options, the key will
+always be the primary name.
 
 Multiple alternate names are possible.
 
@@ -1890,7 +1903,7 @@ messages. For example:
 
     =head1 DESCRIPTION
 
-    B<This program> will read the given input file(s) and do something
+    B<This program> will read the given input file(s) and do someting
     useful with the contents thereof.
 
     =cut
@@ -1962,7 +1975,7 @@ The first level of bundling can be enabled with:
 
 Configured this way, single-character options can be bundled but long
 options B<must> always start with a double dash C<--> to avoid
-ambiguity. For example, when C<vax>, C<a>, C<v> and C<x> are all valid
+abiguity. For example, when C<vax>, C<a>, C<v> and C<x> are all valid
 options,
 
     -vax
@@ -2115,7 +2128,7 @@ is equivalent to
     --foo --bar arg1 arg2 arg3
 
 If an argument callback routine is specified, C<@ARGV> will always be
-empty upon successful return of GetOptions() since all options have been
+empty upon succesful return of GetOptions() since all options have been
 processed. The only exception is when C<--> is used:
 
     --foo arg1 --bar arg2 -- arg3
@@ -2152,7 +2165,7 @@ auto_abbrev enabled, possible arguments and option settings are:
     -al, -la, -ala, -all,...     a, l
     --al, --all                  all
 
-The surprising part is that C<--a> sets option C<a> (due to auto
+The suprising part is that C<--a> sets option C<a> (due to auto
 completion), not C<all>.
 
 Note: disabling C<bundling> also disables C<bundling_override>.
@@ -2236,8 +2249,21 @@ sufficient, see C<prefix_pattern>.
 =item prefix_pattern
 
 A Perl pattern that identifies the strings that introduce options.
-Default is C<(--|-|\+)> unless environment variable
-POSIXLY_CORRECT has been set, in which case it is C<(--|-)>.
+Default is C<--|-|\+> unless environment variable
+POSIXLY_CORRECT has been set, in which case it is C<--|->.
+
+=item long_prefix_pattern
+
+A Perl pattern that allows the disambiguation of long and short
+prefixes. Default is C<-->.
+
+Typically you only need to set this if you are using nonstandard
+prefixes and want some or all of them to have the same semantics as
+'--' does under normal circumstances.
+
+For example, setting prefix_pattern to C<--|-|\+|\/> and
+long_prefix_pattern to C<--|\/> would add Win32 style argument
+handling.
 
 =item debug (default: disabled)
 
@@ -2449,7 +2475,7 @@ Johan Vromans <jvromans@squirrel.nl>
 
 =head1 COPYRIGHT AND DISCLAIMER
 
-This program is Copyright 2003,1990 by Johan Vromans.
+This program is Copyright 1990,2005 by Johan Vromans.
 This program is free software; you can redistribute it and/or
 modify it under the terms of the Perl Artistic License or the
 GNU General Public License as published by the Free Software
