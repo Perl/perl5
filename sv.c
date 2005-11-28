@@ -5928,8 +5928,16 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 	pv1 = "";
 	cur1 = 0;
     }
-    else
+    else {
+	/* if pv1 and pv2 are the same, second SvPV_const call may
+	 * invalidate pv1, so we may need to make a copy */
+	if (sv1 == sv2 && (SvTHINKFIRST(sv1) || SvGMAGICAL(sv1))) {
+	    pv1 = SvPV_const(sv1, cur1);
+	    sv1 = sv_2mortal(newSVpvn(pv1, cur1));
+	    if (SvUTF8(sv2)) SvUTF8_on(sv1);
+	}
 	pv1 = SvPV_const(sv1, cur1);
+    }
 
     if (!sv2){
 	pv2 = "";
