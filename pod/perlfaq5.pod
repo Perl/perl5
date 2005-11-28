@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 1.38 $, $Date: 2005/10/13 19:49:13 $)
+perlfaq5 - Files and Formats ($Revision: 1.40 $, $Date: 2005/11/10 16:06:07 $)
 
 =head1 DESCRIPTION
 
@@ -687,7 +687,7 @@ X<timestamp> X<file, timestamp>
 
 If you want to retrieve the time at which the file was last
 read, written, or had its meta-data (owner, etc) changed,
-you use the B<-M>, B<-A>, or B<-C> file test operations as
+you use the B<-A>, B<-M>, or B<-C> file test operations as
 documented in L<perlfunc>.  These retrieve the age of the
 file (measured against the start-time of your program) in
 days as a floating point number. Some platforms may not have

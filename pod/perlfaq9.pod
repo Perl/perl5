@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq9 - Networking ($Revision: 1.24 $, $Date: 2005/10/13 19:43:13 $)
+perlfaq9 - Networking ($Revision: 1.26 $, $Date: 2005/11/21 17:43:13 $)
 
 =head1 DESCRIPTION
 
@@ -253,19 +253,18 @@ the content appropriately.
 
 =head2 How do I decode or create those %-encodings on the web?
 
-
 If you are writing a CGI script, you should be using the CGI.pm module
 that comes with perl, or some other equivalent module.  The CGI module
 automatically decodes queries for you, and provides an escape()
 function to handle encoding.
-
 
 The best source of detailed information on URI encoding is RFC 2396.
 Basically, the following substitutions do it:
 
     s/([^\w()'*~!.-])/sprintf '%%%02x', ord $1/eg;   # encode
 
-    s/%([A-Fa-f\d]{2})/chr hex $1/eg;            # decode
+    s/%([A-Fa-f\d]{2})/chr hex $1/eg;                # decode
+	s/%([[:xdigit:]]{2})/chr hex $1/eg;          # same thing
 
 However, you should only apply them to individual URI components, not
 the entire URI, otherwise you'll lose information and generally mess
@@ -596,29 +595,37 @@ Or more succinctly,
     $msg[$msgno] .= $_;
     END { print @msg[ sort { $sub[$a] cmp $sub[$b] || $a <=> $b } (0 .. $#msg) ] }
 
-=head2 How do I find out my hostname/domainname/IP address?
+=head2 How do I find out my hostname, domainname, or IP address?
+X<hostname, domainname, IP address, host, domain, hostfqdn, inet_ntoa,
+gethostbyname, Socket, Net::Domain, Sys::Hostname>
 
-The normal way to find your own hostname is to call the C<`hostname`>
-program.  While sometimes expedient, this has some problems, such as
-not knowing whether you've got the canonical name or not.  It's one of
-those tradeoffs of convenience versus portability.
+(contributed by brian d foy)
 
-The Sys::Hostname module (part of the standard perl distribution) will
-give you the hostname after which you can find out the IP address
-(assuming you have working DNS) with a gethostbyname() call.
+The Net::Domain module, which is part of the standard distribution starting
+in perl5.7.3, can get you the fully qualified domain name (FQDN), the host
+name, or the domain name.
+
+	use Net::Domain qw(hostname hostfqdn hostdomain);
+	
+	my $host = hostfqdn();
+
+The C<Sys::Hostname> module, included in the standard distribution since
+perl5.6, can also get the hostname.
+
+	use Sys::Hostname;
+	
+	$host = hostname();
+
+To get the IP address, you can use the C<gethostbyname> built-in function
+to turn the name into a number. To turn that number into the dotted octet
+form (a.b.c.d) that most people expect, use the C<inet_ntoa> function
+from the <Socket> module, which also comes with perl.
 
     use Socket;
-    use Sys::Hostname;
-    my $host = hostname();
-    my $addr = inet_ntoa(scalar gethostbyname($host || 'localhost'));
-
-Probably the simplest way to learn your DNS domain name is to grok
-it out of /etc/resolv.conf, at least under Unix.  Of course, this
-assumes several things about your resolv.conf configuration, including
-that it exists.
-
-(We still need a good DNS domain name-learning method for non-Unix
-systems.)
+    
+    my $address = inet_ntoa( 
+    	scalar gethostbyname( $host || 'localhost' )
+    	);
 
 =head2 How do I fetch a news article or the active newsgroups?
 

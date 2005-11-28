@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.52 $, $Date: 2005/10/13 19:43:13 $)
+perlfaq3 - Programming Tools ($Revision: 1.54 $, $Date: 2005/11/17 17:22:02 $)
 
 =head1 DESCRIPTION
 
@@ -42,12 +42,12 @@ operations typically found in symbolic debuggers.
 
 =head2 Is there a Perl shell?
 
-The psh (Perl sh) is currently at version 1.8. The Perl Shell is a
-shell that combines the interactive nature of a Unix shell with the
-power of Perl. The goal is a full featured shell that behaves as
-expected for normal shell activity and uses Perl syntax and
-functionality for control-flow statements and other things.
-You can get psh at http://sourceforge.net/projects/psh/ .
+The psh (Perl sh) is currently at version 1.8. The Perl Shell is a shell
+that combines the interactive nature of a Unix shell with the power of
+Perl. The goal is a full featured shell that behaves as expected for
+normal shell activity and uses Perl syntax and functionality for
+control-flow statements and other things. You can get psh at
+http://sourceforge.net/projects/psh/ .
 
 Zoidberg is a similar project and provides a shell written in perl,
 configured in perl and operated in perl. It is intended as a login shell
@@ -55,17 +55,16 @@ and development environment. It can be found at http://zoidberg.sf.net/
 or your local CPAN mirror.
 
 The Shell.pm module (distributed with Perl) makes Perl try commands
-which aren't part of the Perl language as shell commands.  perlsh
-from the source distribution is simplistic and uninteresting, but
-may still be what you want.
+which aren't part of the Perl language as shell commands.  perlsh from
+the source distribution is simplistic and uninteresting, but may still
+be what you want.
 
 =head2 How do I find which modules are installed on my system?
 
-You can use the ExtUtils::Installed module to show all
-installed distributions, although it can take awhile to do
-its magic.  The standard library which comes with Perl just
-shows up as "Perl" (although you can get those with
-Module::CoreList).
+You can use the ExtUtils::Installed module to show all installed
+distributions, although it can take awhile to do its magic.  The
+standard library which comes with Perl just shows up as "Perl" (although
+you can get those with Module::CoreList).
 
 	use ExtUtils::Installed;
 
@@ -86,11 +85,15 @@ with File::Find which is part of the standard library.
     my @files;
 
     find(
-      sub { push @files, $File::Find::name if -f $File::Find::name && /\.pm$/ },
+      sub { 
+      	push @files, $File::Find::name 
+      		if -f $File::Find::name && /\.pm$/ 
+      	},
+      	
       @INC
-    );
+      );
 
-    print "$_\n" for @files;
+	print join "\n", @files;
 
 If you simply need to quickly check to see if a module is
 available, you can check for its documentation.  If you can

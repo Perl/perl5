@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.69 $, $Date: 2005/10/14 15:34:06 $)
+perlfaq4 - Data Manipulation ($Revision: 1.71 $, $Date: 2005/11/23 07:46:45 $)
 
 =head1 DESCRIPTION
 
@@ -392,7 +392,7 @@ integers (inclusive), For example: C<random_int_in(50,120)>.
 The localtime function returns the day of the year.  Without an
 argument localtime uses the current time.
 
-    $day_of_year = (localtime)[7];
+	$day_of_year = (localtime)[7];
 
 The POSIX module can also format a date as the day of the year or
 week of the year.
@@ -1786,27 +1786,50 @@ such as each().
 
 =head2 How do I sort a hash (optionally by value instead of key)?
 
-Internally, hashes are stored in a way that prevents you from imposing
-an order on key-value pairs.  Instead, you have to sort a list of the
-keys or values:
+(contributed by brian d foy)
 
-    @keys = sort keys %hash;	# sorted by key
-    @keys = sort {
-		    $hash{$a} cmp $hash{$b}
-	    } keys %hash; 	# and by value
+To sort a hash, start with the keys. In this example, we give the list of
+keys to the sort function which then compares them ASCIIbetically (which
+might be affected by your locale settings). The output list has the keys
+in ASCIIbetical order. Once we have the keys, we can go through them to
+create a report which lists the keys in ASCIIbetical order.
 
-Here we'll do a reverse numeric sort by value, and if two keys are
-identical, sort by length of key, or if that fails, by straight ASCII
-comparison of the keys (well, possibly modified by your locale--see
-L<perllocale>).
+	my @keys = sort { $a cmp $b } keys %hash;
+	
+	foreach my $key ( @keys )
+		{
+		printf "%-20s %6d\n", $key, $hash{$value};
+		}
 
-    @keys = sort {
-		$hash{$b} <=> $hash{$a}
-			  ||
-		length($b) <=> length($a)
-			  ||
-		      $a cmp $b
-    } keys %hash;
+We could get more fancy in the C<sort()> block though. Instead of 
+comparing the keys, we can compute a value with them and use that
+value as the comparison.  
+
+For instance, to make our report order case-insensitive, we use
+the C<\L> sequence in a double-quoted string to make everything 
+lowercase. The C<sort()> block then compares the lowercased
+values to determine in which order to put the keys.
+
+	my @keys = sort { "\L$a" cmp "\L$b" } keys %hash;
+	
+Note: if the computation is expensive or the hash has many elements,
+you may want to look at the Schwartzian Transform to cache the 
+computation results.
+
+If we want to sort by the hash value instead, we use the hash key
+to look it up. We still get out a list of keys, but this time they
+are ordered by their value.
+
+	my @keys = sort { $hash{$a} <=> $hash{$b} } keys %hash;
+
+From there we can get more complex. If the hash values are the same,
+we can provide a secondary sort on the hash key.
+
+	my @keys = sort { 
+		$hash{$a} <=> $hash{$b} 
+			or
+		"\L$a" cmp "\L$b"
+		} keys %hash;
 
 =head2 How can I always keep my hash sorted?
 
