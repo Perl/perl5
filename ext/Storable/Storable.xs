@@ -4767,6 +4767,11 @@ static SV *retrieve_lscalar(pTHX_ stcxt_t *cxt, const char *cname)
 	sv = NEWSV(10002, len);
 	SEEN(sv, cname, 0);	/* Associate this new scalar with tag "tagnum" */
 
+	if (len ==  0) {
+	    sv_setpvn(sv, "", 0);
+	    return sv;
+	}
+
 	/*
 	 * WARNING: duplicates parts of sv_setpv and breaks SV data encapsulation.
 	 *
