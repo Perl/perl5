@@ -308,6 +308,10 @@ and so is the following:
 
     my $fred = (reverse "rettirC")->find(reverse "derF");
 
+The right side of the arrow typically is the method name, but a simple 
+scalar variable containing either the method name or a subroutine 
+reference can also be used.
+
 =head2 Indirect Object Syntax
 X<indirect object syntax> X<invocation, indirect> X<indirect>
 
