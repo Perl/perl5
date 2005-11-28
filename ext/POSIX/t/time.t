@@ -22,7 +22,10 @@ SKIP: {
     tzset();
     my @tzname = tzname();
     like($tzname[0], qr/[GMT|UTC]/i, "tzset() to GMT/UTC");
-    like($tzname[1], qr/[GMT|UTC]/i, "The whole year?");
+    SKIP: {
+        skip "Mac OS X/Darwin doesn't handle this", 1 if $^O =~ /darwin/i;
+        like($tzname[1], qr/[GMT|UTC]/i, "The whole year?");
+    }
 }
 
 # asctime and ctime...Let's stay below INT_MAX for 32-bits and
