@@ -37,7 +37,7 @@ is(asctime(localtime(12345678)), ctime(12345678), "asctime() and ctime() at 1234
 # Careful!  strftime() is locale sensative.  Let's take care of that
 my $orig_loc = setlocale(LC_TIME, "C") || die "Cannot setlocale() to C:  $!";
 if ($^O eq "MSWin32") {
-    is(ctime(0), strftime("%a %b %#d %H:%M:%S %Y\n", localtime(0)),
+    is(ctime(0), strftime("%a %b %d %H:%M:%S %Y\n", localtime(0)),
         "get ctime() equal to strftime()");
 } else {
     is(ctime(0), strftime("%a %b %e %H:%M:%S %Y\n", localtime(0)),
