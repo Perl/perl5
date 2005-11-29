@@ -1865,6 +1865,12 @@ lib/PerlIO/via/QuotedPrint.pm	PerlIO::via::QuotedPrint
 lib/PerlIO/via/t/QuotedPrint.t	PerlIO::via::QuotedPrint
 lib/ph.t			See if h2ph works
 lib/Pod/Checker.pm		Pod-Parser - check POD documents for syntax errors
+lib/Pod/Escapes/ChangeLog	ChangeLog for Pod::Escapes
+lib/Pod/Escapes/README		README for Pod::Escapes
+lib/Pod/Escapes/t/01_about_verbose.t	test Pod::Escapes
+lib/Pod/Escapes/t/10_main.t	test Pod::Escapes
+lib/Pod/Escapes/t/15_name2charnum.t	test Pod::Escapes
+lib/Pod/Escapes.pm		Pod::Escapes
 lib/Pod/Find.pm			used by pod/splitpod
 lib/Pod/Functions.pm		used by pod/splitpod
 lib/Pod/Html.pm			Convert POD data to HTML

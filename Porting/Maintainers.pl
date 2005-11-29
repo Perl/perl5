@@ -445,7 +445,14 @@ package Maintainers;
 		'CPAN'		=> 0,
 		},
 
-	'Pod::Parser' => {
+	'Pod::Escapes' =>
+                {
+                'MAINTAINER'    => 'sburke',
+                'FILES'         => q[lib/Pod/Escapes.pm lib/Pod/Escapes]
+                'CPAN'          => 1,
+                },
+
+        'Pod::Parser' => {
 		'MAINTAINER'	=> 'marekr',
 		'FILES' => q[lib/Pod/{InputObjects,Parser,ParseUtils,Select,PlainText,Usage,Checker,Find}.pm pod/pod{select,2usage,checker}.PL t/pod/testcmp.pl t/pod/testp2pt.pl t/pod/testpchk.pl t/pod/emptycmd.* t/pod/find.t t/pod/for.* t/pod/headings.* t/pod/include.* t/pod/included.* t/pod/lref.* t/pod/multiline_items.* t/pod/nested_items.* t/pod/nested_seqs.* t/pod/oneline_cmds.* t/pod/poderrs.* t/pod/pod2usage.* t/pod/podselect.* t/pod/special_seqs.*],
 		'CPAN'		=> 1,
