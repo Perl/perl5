@@ -7978,8 +7978,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	}
 	else if (svix < svmax) {
 	    sv_catsv(sv, *svargs);
-	    if (DO_UTF8(*svargs))
-		SvUTF8_on(sv);
 	}
 	return;
     }
@@ -7987,8 +7985,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		pat[1] == '-' && pat[2] == 'p') {
 	argsv = va_arg(*args, SV*);
 	sv_catsv(sv, argsv);
-	if (DO_UTF8(argsv))
-	    SvUTF8_on(sv);
 	return;
     }
 
