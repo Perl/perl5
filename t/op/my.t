@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..34\n";
+print "1..36\n";
 
 sub foo {
     my($a, $b) = @_;
@@ -120,3 +120,13 @@ eval { foo3(); foo3(); };
 print "not " if $@;
 print "ok 34\n";
 
+# my $foo = undef should always assign [perl #37776]
+{
+    my $count = 35;
+    loop:
+    my $test = undef;
+    print "not " if defined $test;
+    print "ok $count\n";
+    $test = 42;
+    goto loop if ++$count < 37;
+}
