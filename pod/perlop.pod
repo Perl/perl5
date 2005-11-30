@@ -687,7 +687,7 @@ That should probably be written more simply as:
 
 =head2 Assignment Operators
 X<assignment> X<operator, assignment> X<=> X<**=> X<+=> X<*=> X<&=>
-X<<< <<= >>> X<&&=> X<-=> X</=> X<|=> X<<< >>= >>> X<||=> X<.=>
+X<<< <<= >>> X<&&=> X<-=> X</=> X<|=> X<<< >>= >>> X<||=> X<//=> X<.=>
 X<%=> X<^=> X<x=>
 
 "=" is the ordinary assignment operator.
@@ -705,7 +705,7 @@ might trigger, such as from tie().  Other assignment operators work similarly.
 The following are recognized:
 
     **=    +=    *=    &=    <<=    &&=
-           -=    /=    |=    >>=    ||=
+    -=     /=    |=    >>=   ||=    //=
            .=    %=    ^=
 	         x=
 
