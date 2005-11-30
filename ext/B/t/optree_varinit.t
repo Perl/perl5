@@ -131,15 +131,19 @@ checkOptree ( name	=> 'sub {my $a=undef}',
 	      code	=> sub {my $a=undef},
 	      bcopts	=> '-basic',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-3  <1> leavesub[1 ref] K/REFC,1 ->(end)
--     <@> lineseq KP ->3
-1        <;> nextstate(main 24 optree.t:99) v ->2
-2        <0> padsv[$a:24,25] sRM*/LVINTRO ->3
+5  <1> leavesub[1 ref] K/REFC,1 ->(end)
+-     <@> lineseq KP ->5
+1        <;> nextstate(main 641 optree_varinit.t:130) v ->2
+4        <2> sassign sKS/2 ->5
+2           <0> undef s ->3
+3           <0> padsv[$a:641,642] sRM*/LVINTRO ->4
 EOT_EOT
-# 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->3
-# 1        <;> nextstate(main 54 optree.t:149) v ->2
-# 2        <0> padsv[$a:54,55] sRM*/LVINTRO ->3
+# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->5
+# 1        <;> nextstate(main 641 optree_varinit.t:130) v ->2
+# 4        <2> sassign sKS/2 ->5
+# 2           <0> undef s ->3
+# 3           <0> padsv[$a:641,642] sRM*/LVINTRO ->4
 EONT_EONT
 
 checkOptree ( name	=> 'sub {our $a=undef}',
@@ -190,15 +194,19 @@ checkOptree ( name	=> 'my $a=undef',
 	      prog	=> 'my $a=undef',
 	      bcopts	=> '-basic',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-4  <@> leave[1 ref] vKP/REFC ->(end)
+6  <@> leave[1 ref] vKP/REFC ->(end)
 1     <0> enter ->2
 2     <;> nextstate(main 1 -e:1) v ->3
-3     <0> padsv[$a:1,2] vRM*/LVINTRO ->4
+5     <2> sassign vKS/2 ->6
+3        <0> undef s ->4
+4        <0> padsv[$a:1,2] sRM*/LVINTRO ->5
 EOT_EOT
-# 4  <@> leave[1 ref] vKP/REFC ->(end)
+# 6  <@> leave[1 ref] vKP/REFC ->(end)
 # 1     <0> enter ->2
 # 2     <;> nextstate(main 1 -e:1) v ->3
-# 3     <0> padsv[$a:1,2] vRM*/LVINTRO ->4
+# 5     <2> sassign vKS/2 ->6
+# 3        <0> undef s ->4
+# 4        <0> padsv[$a:1,2] sRM*/LVINTRO ->5
 EONT_EONT
 
 checkOptree ( name	=> 'our $a=undef',
