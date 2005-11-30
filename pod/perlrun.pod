@@ -451,11 +451,10 @@ to use semicolons where you would in a normal program.
 =item B<-f>
 X<-f>
 
-Disable executing F<$Config{siteperl}/sitecustomize.pl> at
-startup.
+Disable executing F<$Config{sitelib}/sitecustomize.pl> at startup.
 
 Perl can be built so that it by default will try to execute
-F<$Config{siteperl}/sitecustomize.pl> at startup.  This is a hook that
+F<$Config{sitelib}/sitecustomize.pl> at startup.  This is a hook that
 allows the sysadmin to customize how perl behaves.  It can for
 instance be used to add entries to the @INC array to make perl find
 modules in non-standard locations.
