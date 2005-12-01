@@ -8593,6 +8593,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 			*--ptr = '0';
 		    break;
 		case 2:
+		    if (!uv)
+			alt = FALSE;
 		    do {
 			dig = uv & 1;
 			*--ptr = '0' + dig;
@@ -8889,6 +8891,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	/* calculate width before utf8_upgrade changes it */
 	have = esignlen + zeros + elen;
+	if (have < zeros)
+	    Perl_croak_nocontext(PL_memory_wrap);
 
 	if (is_utf8 != has_utf8) {
 	     if (is_utf8) {
