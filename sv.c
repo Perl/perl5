@@ -8891,10 +8891,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	/* calculate width before utf8_upgrade changes it */
 	have = esignlen + zeros + elen;
-#ifdef PERL_MALLOC_WRAP
 	if (have < zeros)
 	    Perl_croak_nocontext(PL_memory_wrap);
-#endif
 
 	if (is_utf8 != has_utf8) {
 	     if (is_utf8) {
@@ -8915,10 +8913,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	need = (have > width ? have : width);
 	gap = need - have;
 
-#ifdef PERL_MALLOC_WRAP
 	if (need >= (((STRLEN)~0) - SvCUR(sv) - dotstrlen - 1))
 	    Perl_croak_nocontext(PL_memory_wrap);
-#endif
 	SvGROW(sv, SvCUR(sv) + need + dotstrlen + 1);
 	p = SvEND(sv);
 	if (esignlen && fill == '0') {
