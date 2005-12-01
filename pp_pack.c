@@ -2033,7 +2033,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    if (symptr->howlen == e_star)
 	        Perl_croak(aTHX_ "'P' must have an explicit size in unpack");
 	    EXTEND(SP, 1);
-	    if (sizeof(char*) <= strend - s) {
+	    if (s + sizeof(char*) <= strend) {
 		char *aptr;
 		SHIFT_VAR(utf8, s, strend, aptr, datumtype);
 		DO_BO_UNPACK_PC(aptr);
@@ -2125,9 +2125,9 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
              * (and just as fast as doing character arithmetic)
              */
             if (PL_uudmap['M'] == 0) {
-                int i;
+		size_t i;
 
-                for (i = 0; i < sizeof(PL_uuemap); i += 1)
+		for (i = 0; i < sizeof(PL_uuemap); ++i)
                     PL_uudmap[(U8)PL_uuemap[i]] = i;
                 /*
                  * Because ' ' and '`' map to the same value,
