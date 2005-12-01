@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }   
 
-plan tests => 3;
+plan tests => 4;
 
 is(
     sprintf("%.40g ",0.01),
@@ -26,3 +26,11 @@ is(
 		q(width calculation under utf8 upgrade)
 	);
 }
+
+# Used to mangle PL_sv_undef
+fresh_perl_is(
+    'print sprintf "xxx%n\n"; print undef',
+    'Modification of a read-only value attempted at - line 1.',
+    { switches => [ '-w' ] },
+    q(%n should not be able to modify read-only constants),
+)
