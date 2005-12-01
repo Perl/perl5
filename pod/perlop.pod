@@ -705,8 +705,8 @@ might trigger, such as from tie().  Other assignment operators work similarly.
 The following are recognized:
 
     **=    +=    *=    &=    <<=    &&=
-    -=     /=    |=    >>=   ||=    //=
-           .=    %=    ^=
+           -=    /=    |=    >>=    ||=    
+           .=    %=    ^=           //= 
 	         x=
 
 Although these are grouped by family, they all have the precedence
