@@ -8359,9 +8359,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	if (vectorize)
 	    argsv = vecsv;
-	else if (!args)
-	    argsv = (efix ? efix <= svmax : svix < svmax) ?
-		    svargs[efix ? efix-1 : svix++] : &PL_sv_undef;
+	else if (!args) {
+	    I32 i = efix ? efix-1 : svix++;
+	    argsv = (i >= 0 && i < svmax) ? svargs[i] : &PL_sv_undef;
+	}
 
 	switch (c = *q++) {
 

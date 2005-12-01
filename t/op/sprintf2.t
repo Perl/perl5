@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }   
 
-plan tests => 4;
+plan tests => 7;
 
 is(
     sprintf("%.40g ",0.01),
@@ -33,4 +33,24 @@ fresh_perl_is(
     'Modification of a read-only value attempted at - line 1.',
     { switches => [ '-w' ] },
     q(%n should not be able to modify read-only constants),
-)
+);
+
+# check %NNN$ for range bounds, especially negative 2's complement
+
+{
+    my ($warn, $bad) = (0,0);
+    local $SIG{__WARN__} = sub {
+	if ($_[0] =~ /uninitialized/) {
+	    $warn++
+	}
+	else {
+	    $bad++
+	}
+    };
+    my $result = sprintf join('', map("%$_\$s%" . ~$_ . '$s', 1..20)),
+	qw(a b c d);
+    is($result, "abcd", "only four valid values");
+    is($warn, 36, "expected warnings");
+    is($bad,   0, "unexpected warnings");
+}
+
