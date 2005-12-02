@@ -78,7 +78,8 @@ eval {
 
   my $template = File::Spec->catfile(File::Spec->tmpdir, 'fcmpXXXX');
   my($tfh,$filename) = mkstemp($template);
-  open my $tfhCR, ">", "$filename\cM"
+  # NB. The trailing space is intentional (see [perl #37716])
+  open my $tfhCR, ">", "$filename "
       or die "Could no open '$filename^M' for writing: $!";
   {
     local $/; #slurp
@@ -95,8 +96,8 @@ eval {
   $donetests[0] = compare($tfh, 'README');
   $donetests[1] = compare($filename, 'README');
   unlink0($tfh,$filename);
-  $donetests[2] = compare('README', "$filename\cM");
-  unlink "$filename\cM";
+  $donetests[2] = compare('README', "$filename ");
+  unlink "$filename ";
 };
 print "# problem '$@' when testing with a temporary file\n" if $@;
 
