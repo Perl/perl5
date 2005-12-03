@@ -2898,7 +2898,7 @@ free_pipelocs(pTHX_ void *head)
     p = *pHead;
     while (p) {
         pnext = p->next;
-        Safefree(p);
+        PerlMem_free(p);
         p = pnext;
     }
     *pHead = 0;
@@ -2922,7 +2922,7 @@ store_pipelocs(pTHX)
 
 /*  the . directory from @INC comes last */
 
-    Newx(p,1,PLOC);
+    p = (pPLOC) PerlMem_malloc(sizeof(PLOC));
     p->next = head_PLOC;
     head_PLOC = p;
     strcpy(p->dir,"./");
@@ -2952,7 +2952,7 @@ store_pipelocs(pTHX)
 	}
 
         if ((unixdir = tounixpath(temp, Nullch)) != Nullch) {
-            Newx(p,1,PLOC);
+            p = (pPLOC) PerlMem_malloc(sizeof(PLOC));
             p->next = head_PLOC;
             head_PLOC = p;
             strncpy(p->dir,unixdir,sizeof(p->dir)-1);
@@ -2976,7 +2976,7 @@ store_pipelocs(pTHX)
         if ((unixdir = tounixpath(dir, Nullch)) == Nullch)
             continue;
 
-        Newx(p,1,PLOC);
+        p = (pPLOC) PerlMem_malloc(sizeof(PLOC));
         p->next = head_PLOC;
         head_PLOC = p;
         strncpy(p->dir,unixdir,sizeof(p->dir)-1);
@@ -2987,7 +2987,7 @@ store_pipelocs(pTHX)
 
 #ifdef ARCHLIB_EXP
     if ((unixdir = tounixpath(ARCHLIB_EXP, Nullch)) != Nullch) {
-        Newx(p,1,PLOC);
+        p = (pPLOC) PerlMem_malloc(sizeof(PLOC));
         p->next = head_PLOC;
         head_PLOC = p;
         strncpy(p->dir,unixdir,sizeof(p->dir)-1);
@@ -6482,7 +6482,7 @@ mp_getredirection(pTHX_ int *ac, char ***av)
      * Allocate and fill in the new argument vector, Some Unix's terminate
      * the list with an extra null pointer.
      */
-    Newx(argv, item_count+1, char *);
+    argv = (char **) PerlMem_malloc((item_count+1) * sizeof(char *));
     *av = argv;
     for (j = 0; j < item_count; ++j, list_head = list_head->next)
 	argv[j] = list_head->value;
@@ -6577,11 +6577,11 @@ static void add_item(struct list_item **head,
 {
     if (*head == 0)
 	{
-	Newx(*head,1,struct list_item);
+	*head = (struct list_item *) PerlMem_malloc(sizeof(struct list_item));
 	*tail = *head;
 	}
     else {
-	Newx((*tail)->next,1,struct list_item);
+	(*tail)->next = (struct list_item *) PerlMem_malloc(sizeof(struct list_item));
 	*tail = (*tail)->next;
 	}
     (*tail)->value = value;
@@ -6847,6 +6847,8 @@ unsigned long int flags = 17, one = 1, retsts;
 #  define KGB$M_SUBSYSTEM 0x8
 #endif
 
+/* Avoid Newx() in vms_image_init as thread context has not been initialized. */
+
 /*{{{void vms_image_init(int *, char ***)*/
 void
 vms_image_init(int *argcp, char ***argvp)
@@ -6895,8 +6897,8 @@ vms_image_init(int *argcp, char ***argvp)
                          "Check your rights database for corruption.\n");
          exit(SS$_ABORT);
       }
-      if (jpilist[1].bufadr != rlst) Safefree(jpilist[1].bufadr);
-      jpilist[1].bufadr = Newx(mask,rsz,unsigned long int);
+      if (jpilist[1].bufadr != rlst) PerlMem_free(jpilist[1].bufadr);
+      jpilist[1].bufadr = mask = (unsigned long int *) PerlMem_malloc(rsz * sizeof(unsigned long int));
       jpilist[1].buflen = rsz * sizeof(unsigned long int);
       _ckvmssts_noperl(sys$getjpiw(0,NULL,NULL,&jpilist[1],iosb,NULL,NULL));
       _ckvmssts_noperl(iosb[0]);
@@ -6947,9 +6949,9 @@ vms_image_init(int *argcp, char ***argvp)
   if (will_taint) {
     char **newargv, **oldargv;
     oldargv = *argvp;
-    Newx(newargv,(*argcp)+2,char *);
+    newargv = (char **) PerlMem_malloc(((*argcp)+2) * sizeof(char *));
     newargv[0] = oldargv[0];
-    Newx(newargv[1],3,char);
+    newargv[1] = (char *) PerlMem_malloc(3 * sizeof(char));
     strcpy(newargv[1], "-T");
     Copy(&oldargv[1],&newargv[2],(*argcp)-1,char **);
     (*argcp)++;
@@ -6976,12 +6978,12 @@ vms_image_init(int *argcp, char ***argvp)
   for (tabidx = 0;
        len = my_trnlnm("PERL_ENV_TABLES",eqv,tabidx);
        tabidx++) {
-    if (!tabidx) Newx(tabvec,tabct,struct dsc$descriptor_s *);
+    if (!tabidx) tabvec = (struct dsc$descriptor_s **) PerlMem_malloc(tabct * sizeof(struct dsc$descriptor_s *));
     else if (tabidx >= tabct) {
       tabct += 8;
-      Renew(tabvec,tabct,struct dsc$descriptor_s *);
+      tabvec = (struct dsc$descriptor_s **) PerlMem_realloc(tabvec, tabct * sizeof(struct dsc$descriptor_s *));
     }
-    Newx(tabvec[tabidx],1,struct dsc$descriptor_s);
+    tabvec[tabidx] = (struct dsc$descriptor_s *) PerlMem_malloc(sizeof(struct dsc$descriptor_s));
     tabvec[tabidx]->dsc$w_length  = 0;
     tabvec[tabidx]->dsc$b_dtype   = DSC$K_DTYPE_T;
     tabvec[tabidx]->dsc$b_class   = DSC$K_CLASS_D;
