@@ -69,9 +69,9 @@ B<You should use openlog() before calling syslog().>
 
 =item syslog $priority, $format, @args
 
-If I<$priority> permits, logs I<($format, @args)>
-printed as by C<printf(3V)>, with the addition that I<%m>
-is replaced with C<"$!"> (the latest error message).
+If I<$priority> permits, logs I<$message> or I<sprintf($format, @args)>
+with the addition that I<%m> in $message or $format is replaced with
+C<"$!"> (the latest error message).
 
 If you didn't use openlog() before using syslog(), syslog will try to
 guess the I<$ident> by extracting the shortest prefix of I<$format>
