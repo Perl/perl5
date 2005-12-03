@@ -30,8 +30,9 @@ version strings visible and comparable.
 
 package CPAN::Version;
 
+use strict;
 use vars qw($VERSION);
-$VERSION = sprintf "%.2f", substr(q$Rev: 231 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 254 $,4)/100;
 
 # CPAN::Version::vcmp courtesy Jost Krieger
 sub vcmp {

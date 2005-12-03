@@ -1,6 +1,6 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
-$VERSION = '1.76_65';
+$VERSION = '1.80';
 $VERSION = eval $VERSION;
 
 use CPAN::Version;
@@ -57,7 +57,7 @@ $CPAN::Defaultrecent ||= "http://search.cpan.org/recent";
 
 
 package CPAN;
-use strict qw(vars);
+use strict;
 
 use vars qw($VERSION @EXPORT $AUTOLOAD $DEBUG $META $HAS_USABLE $term
             $Signal $End $Suppress_readline $Frontend
@@ -752,7 +752,7 @@ sub has_usable {
                        sub {require HTTP::Request},
                        sub {require URI::URL},
                       ],
-               Net::FTP => [
+               'Net::FTP' => [
                             sub {require Net::FTP},
                             sub {require Net::Config},
                            ]
@@ -803,7 +803,7 @@ sub has_inst {
 
 	$CPAN::Frontend->myprint("CPAN: $mod loaded ok\n");
 	if ($mod eq "CPAN::WAIT") {
-	    push @CPAN::Shell::ISA, CPAN::WAIT;
+	    push @CPAN::Shell::ISA, 'CPAN::WAIT';
 	}
 	return 1;
     } elsif ($mod eq "Net::FTP") {
@@ -1435,23 +1435,24 @@ Display Information
  i        WORD or /REGEXP/  about any of the above
  r        NONE              report updatable modules
  ls       AUTHOR            about files in the author's directory
- recent   NONE              latest CPAN uploads
+    (with WORD being a module, bundle or author name or a distribution
+    name of the form AUTHOR/DISTRIBUTION)
 
 Download, Test, Make, Install...
- get                        download
- make                       make (implies get)
- test      MODULES,         make test (implies make)
- install   DISTS, BUNDLES   make install (implies test)
- clean                      make clean
- look                       open subshell in these dists' directories
- readme                     display these dists' README files
- perldoc                    display module's POD documentation
+ get      download                     clean    make clean
+ make     make (implies get)           look     open subshell in dist directory
+ test     make test (implies make)     readme   display these README files
+ install  make install (implies test)  perldoc  display POD documentation
+
+Pragmas
+ force COMMAND    unconditionally do command
+ notest COMMAND   skip testing
 
 Other
  h,?           display this menu       ! perl-code   eval a perl command
  o conf [opt]  set and query options   q             quit the cpan shell
  reload cpan   load CPAN.pm again      reload index  load newer indices
- autobundle    Snapshot                force cmd     unconditionally do cmd});
+ autobundle    Snapshot                recent        latest CPAN uploads});
     }
 }
 
@@ -3323,7 +3324,7 @@ sub rd_authindex {
     return unless defined $index_target;
     $CPAN::Frontend->myprint("Going to read $index_target\n");
     local(*FH);
-    tie *FH, CPAN::Tarzip, $index_target;
+    tie *FH, 'CPAN::Tarzip', $index_target;
     local($/) = "\n";
     push @lines, split /\012/ while <FH>;
     foreach (@lines) {
@@ -3401,7 +3402,7 @@ happen.\a
                       $last_updated);
         $DATE_OF_02 = $last_updated;
 
-        if ($CPAN::META->has_inst(HTTP::Date)) {
+        if ($CPAN::META->has_inst('HTTP::Date')) {
             require HTTP::Date;
             my($age) = (time - HTTP::Date::str2time($last_updated))/3600/24;
             if ($age > 30) {
@@ -3475,9 +3476,13 @@ happen.\a
 
 	}
 
-	if ($id->cpan_file ne $dist){ # update only if file is
-                                      # different. CPAN prohibits same
-                                      # name with different version
+        # Although CPAN prohibits same name with different version the
+        # indexer may have changed the version for the same distro
+        # since the last time ("Force Reindexing" feature)
+	if ($id->cpan_file ne $dist
+            ||
+            $id->cpan_version ne $version
+           ){
 	    $userid = $id->userid || $self->userid($dist);
 	    $id->set(
 		     'CPAN_USERID' => $userid,
@@ -5561,7 +5566,7 @@ explicitly a file $s.
         $self->debug("type[$type] s[$s]") if $CPAN::DEBUG;
 	my $obj = $CPAN::META->instance($type,$s);
 	$obj->$meth();
-        if ($obj->isa(CPAN::Bundle)
+        if ($obj->isa('CPAN::Bundle')
             &&
             exists $obj->{install_failed}
             &&
