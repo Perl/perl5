@@ -5503,12 +5503,13 @@ For example:
 
 =item vector flag
 
-The vector flag C<v>, optionally specifying the join string to use.
-This flag tells perl to interpret the supplied string as a vector
-of integers, one for each character in the string, separated by
-a given string (a dot C<.> by default). This can be useful for
-displaying ordinal values of characters in arbitrary strings:
+This flag tells perl to interpret the supplied string as a vector of
+integers, one for each character in the string. Perl applies the format to
+each integer in turn, then joins the resulting strings with a separator (a
+dot C<.> by default). This can be useful for displaying ordinal values of
+characters in arbitrary strings:
 
+  printf "%vd", "AB\x{100}";           # prints "65.66.256"
   printf "version is v%vd\n", $^V;     # Perl's version
 
 Put an asterisk C<*> before the C<v> to override the string to
