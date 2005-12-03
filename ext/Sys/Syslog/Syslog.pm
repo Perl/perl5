@@ -7,7 +7,7 @@ use strict;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(openlog closelog setlogmask syslog);
 our @EXPORT_OK = qw(setlogsock);
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 # it would be nice to try stream/unix first, since that will be
 # most efficient. However streams are dodgy - see _syslog_send_stream
@@ -64,6 +64,8 @@ your system. This function will croak if it can't connect to the syslog
 daemon.
 
 B<You should use openlog() before calling syslog().>
+
+=item syslog $priority, $message
 
 =item syslog $priority, $format, @args
 
@@ -320,7 +322,7 @@ sub syslog {
 
     $mask =~ s/(?<!%)%m/$!/g;
     $mask .= "\n" unless $mask =~ /\n$/;
-    $message = sprintf ($mask, @_);
+    $message = @_ ? sprintf($mask, @_) : $mask;
 
     $sum = $numpri + $numfac;
     my $buf = "<$sum>$whoami: $message\0";
