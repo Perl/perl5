@@ -4,12 +4,12 @@
 
 #########################
 
-use Test::More tests => 200;
+use Test::More tests => 202;
 
 diag "Tests with base class" unless $ENV{PERL_CORE};
 
 BEGIN {
-    use_ok("version", 0.47); # If we made it this far, we are ok.
+    use_ok("version", 0.50); # If we made it this far, we are ok.
 }
 
 BaseTests("version");
@@ -17,10 +17,10 @@ BaseTests("version");
 diag "Tests with empty derived class" unless $ENV{PERL_CORE};
 
 package version::Empty;
-use vars qw($VERSION @ISA);
-use version;
-@ISA = qw(version);
+use base version;
 $VERSION = 0.01;
+no warnings 'redefine';
+*::qv = sub { return bless version::qv(shift), __PACKAGE__; };
 
 package version::Bad;
 use base version;
@@ -235,6 +235,7 @@ sub BaseTests {
 	ok ( $version eq "1.2.0", 'qv("1.2") eq "1.2.0"' );
 	$version = qv(1.2);
 	ok ( $version eq "1.2.0", 'qv(1.2) eq "1.2.0"' );
+	isa_ok( qv('5.008'), $CLASS );
 
 	# test creation from existing version object
 	diag "create new from existing version" unless $ENV{PERL_CORE};

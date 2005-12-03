@@ -4298,7 +4298,7 @@ Perl_vnumify(pTHX_ SV *vs)
     {
 	digit = SvIV(*av_fetch(av, i, 0));
 	if ( width < 3 ) {
-	    const int denom = (int)pow(10,(3-width));
+	    const int denom = (width == 2 ? 10 : 100);
 	    const div_t term = div((int)PERL_ABS(digit),denom);
 	    Perl_sv_catpvf(aTHX_ sv, "%0*d_%d", width, term.quot, term.rem);
 	}
