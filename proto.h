@@ -1425,7 +1425,6 @@ PERL_CALLCONV OP*	Perl_newSTATEOP(pTHX_ I32 flags, char* label, OP* o)
 
 PERL_CALLCONV CV*	Perl_newSUB(pTHX_ I32 floor, OP* o, OP* proto, OP* block);
 PERL_CALLCONV CV*	Perl_newXS(pTHX_ const char* name, XSUBADDR_t f, const char* filename)
-			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 

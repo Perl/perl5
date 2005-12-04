@@ -519,7 +519,7 @@ Apa	|OP*	|newRANGE	|I32 flags|NN OP* left|NN OP* right
 Apa	|OP*	|newSLICEOP	|I32 flags|NULLOK OP* subscript|NULLOK OP* listop
 Apa	|OP*	|newSTATEOP	|I32 flags|NULLOK char* label|NULLOK OP* o
 Ap	|CV*	|newSUB		|I32 floor|NULLOK OP* o|NULLOK OP* proto|NULLOK OP* block
-Apd	|CV*	|newXS		|NN const char* name|NN XSUBADDR_t f|NN const char* filename
+Apd	|CV*	|newXS		|NULLOK const char* name|NN XSUBADDR_t f|NN const char* filename
 Apda	|AV*	|newAV
 Apa	|OP*	|newAVREF	|NN OP* o
 Apa	|OP*	|newBINOP	|I32 type|I32 flags|NULLOK OP* first|NULLOK OP* last
