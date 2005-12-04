@@ -4664,7 +4664,7 @@ Perl_regclass_swash(pTHX_ register const regnode* node, bool doinit, SV** listsv
 	    SV **const ary = AvARRAY(av);
 	    SV **a, **b;
 	
-	    /* See the end of regcomp.c:S_reglass() for
+	    /* See the end of regcomp.c:S_regclass() for
 	     * documentation of these array elements. */
 
 	    si = *ary;

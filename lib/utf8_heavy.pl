@@ -25,10 +25,27 @@ sub SWASHNEW {
 
     ##
     ## Get the list of codepoints for the type.
-    ## Called from utf8.c
+    ## Called from swash_init (see utf8.c) or SWASHNEW itself.
+    ##
+    ## Callers of swash_init:
+    ##     op.c:pmtrans             -- for tr/// and y///
+    ##     regexec.c:regclass_swash -- for /[]/, \p, and \P
+    ##     utf8.c:is_utf8_common    -- for common Unicode properties
+    ##     utf8.c:to_utf8_case      -- for lc, uc, ucfirst, etc. and //i
     ##
     ## Given a $type, our goal is to fill $list with the set of codepoint
-    ## ranges.
+    ## ranges. If $type is false, $list passed is used.
+    ##
+    ## $minbits:
+    ##     For binary properties, $minbits must be 1.
+    ##     For character mappings (case and transliteration), $minbits must
+    ##     be a number except 1.
+    ##
+    ## $list (or that filled according to $type):
+    ##     Refer to perlunicode.pod, "User-Defined Character Properties."
+    ##     
+    ##     For binary properties, only characters with the property value
+    ##     of True should be listed. The 3rd column, if any, will be ignored.
     ##
     ## To make the parsing of $type clear, this code takes the a rather
     ## unorthodox approach of last'ing out of the block once we have the
@@ -43,7 +60,7 @@ sub SWASHNEW {
         $type =~ s/^\s+//;
         $type =~ s/\s+$//;
 
-        print "type = $type\n" if DEBUG;
+        print STDERR "type = $type\n" if DEBUG;
 
       GETFILE:
         {
@@ -117,7 +134,7 @@ sub SWASHNEW {
             ##
             my $canonical = lc $type;
             $canonical =~ s/(?<=[a-z\d])(?:\s+|[-_])(?=[a-z\d])//g;
-            print "canonical = $canonical\n" if DEBUG;
+            print STDERR "canonical = $canonical\n" if DEBUG;
 
             require "unicore/Canonical.pl";
             if (my $base = ($utf8::Canonical{$canonical} || $utf8::Canonical{ lc $utf8::PropertyAlias{$canonical} })) {
@@ -148,8 +165,7 @@ sub SWASHNEW {
 	    ## The user-level way to access ToDigit() and ToFold()
 	    ## is to use Unicode::UCD.
             ##
-            if ($type =~ /^To(Digit|Fold|Lower|Title|Upper)$/)
-            {
+            if ($type =~ /^To(Digit|Fold|Lower|Title|Upper)$/) {
                 $file = "unicore/To/$1.pl";
                 ## would like to test to see if $file actually exists....
                 last GETFILE;
@@ -164,7 +180,7 @@ sub SWASHNEW {
         }
 
 	if (defined $file) {
-	    print "found it (file='$file')\n" if DEBUG;
+	    print STDERR "found it (file='$file')\n" if DEBUG;
 
 	    ##
 	    ## If we reach here, it was due to a 'last GETFILE' above
@@ -173,9 +189,8 @@ sub SWASHNEW {
 	    ## If we have, return the cached results. The cache key is the
 	    ## file to load.
 	    ##
-	    if ($Cache{$file} and ref($Cache{$file}) eq $class)
-	    {
-		print "Returning cached '$file' for \\p{$type}\n" if DEBUG;
+	    if ($Cache{$file} and ref($Cache{$file}) eq $class) {
+		print STDERR "Returning cached '$file' for \\p{$type}\n" if DEBUG;
 		return $Cache{$class, $file};
 	    }
 
@@ -186,7 +201,7 @@ sub SWASHNEW {
     }
 
     my $extras;
-    my $bits = 0;
+    my $bits = $minbits;
 
     my $ORIG = $list;
     if ($list) {
@@ -206,7 +221,7 @@ sub SWASHNEW {
 	$list =~ s/\tXXXX$/\t$hextra/mg;
     }
 
-    if ($minbits < 32) {
+    if ($minbits != 1 && $minbits < 32) { # not binary property
 	my $top = 0;
 	while ($list =~ /^([0-9a-fA-F]+)(?:[\t]([0-9a-fA-F]+)?)(?:[ \t]([0-9a-fA-F]+))?/mg) {
 	    my $min = hex $1;
@@ -215,12 +230,11 @@ sub SWASHNEW {
 	    $val += $max - $min if defined $3;
 	    $top = $val if $val > $top;
 	}
-	$bits =
+	my $topbits =
 	    $top > 0xffff ? 32 :
-	    $top > 0xff ? 16 :
-	    $top > 1 ? 8 : 1
+	    $top > 0xff ? 16 : 8;
+	$bits = $topbits if $bits < $topbits;
     }
-    $bits = $minbits if $bits < $minbits;
 
     my @extras;
     for my $x ($extras) {
@@ -233,13 +247,13 @@ sub SWASHNEW {
 		my ($c,$t) = split(/::/, $name, 2);	# bogus use of ::, really
 		my $subobj;
 		if ($c eq 'utf8') {
-		    $subobj = utf8->SWASHNEW($t, "", 0, 0, 0);
+		    $subobj = utf8->SWASHNEW($t, "", $minbits, 0);
 		}
 		elsif (exists &$name) {
-		    $subobj = utf8->SWASHNEW($name, "", 0, 0, 0);
+		    $subobj = utf8->SWASHNEW($name, "", $minbits, 0);
 		}
 		elsif ($c =~ /^([0-9a-fA-F]+)/) {
-		    $subobj = utf8->SWASHNEW("", $c, 0, 0, 0);
+		    $subobj = utf8->SWASHNEW("", $c, $minbits, 0);
 		}
 		return $subobj unless ref $subobj;
 		push @extras, $name => $subobj;
