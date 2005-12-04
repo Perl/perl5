@@ -1708,7 +1708,7 @@ Perl_swash_fetch(pTHX_ SV *sv, const U8 *ptr, bool do_utf8)
 
 	    if (!svp || !(tmps = (U8*)SvPV(*svp, slen))
 		     || (slen << 3) < needents)
-		Perl_croak(aTHX_ "The swatch does not have proper length");
+		Perl_croak(aTHX_ "panic: swash_fetch got improper swatch");
 	}
 
 	PL_last_swash_hv = hv;
@@ -1734,7 +1734,7 @@ Perl_swash_fetch(pTHX_ SV *sv, const U8 *ptr, bool do_utf8)
 	off <<= 2;
 	return (tmps[off] << 24) + (tmps[off+1] << 16) + (tmps[off+2] << 8) + tmps[off + 3] ;
     }
-    Perl_croak(aTHX_ "panic: swash_fetch");
+    Perl_croak(aTHX_ "panic: swash_fetch got swatch of unexpected bit width");
     return 0;
 }
 
@@ -1765,7 +1765,8 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
     UV     end   = start + span;
 
     if (bits != 1 && bits != 8 && bits != 16 && bits != 32) {
-	Perl_croak(aTHX_ "swash_get: unknown bits %"UVuf, (UV) bits);
+	Perl_croak(aTHX_ "panic: swash_get doesn't expect bits %"UVuf,
+						 (UV)bits);
     }
 
     /* create and initialize $swatch */
@@ -1957,28 +1958,23 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 	}
 
 	othersvp = hv_fetch(hv, (char *)namestr, namelen, FALSE);
-	if (*othersvp && SvROK(*othersvp) &&
-			 SvTYPE(SvRV(*othersvp))==SVt_PVHV)
-	    otherhv = (HV*)SvRV(*othersvp);
-	else
-	    Perl_croak(aTHX_ "otherhv is not a hash reference");
-
+	otherhv = (HV*)SvRV(*othersvp);
 	otherbitssvp = hv_fetch(otherhv, "BITS", 4, FALSE);
 	otherbits = (STRLEN)SvUV(*otherbitssvp);
 	if (bits < otherbits)
-	    Perl_croak(aTHX_ "swash_get: swatch size mismatch");
+	    Perl_croak(aTHX_ "panic: swash_get found swatch size mismatch");
 
 	/* The "other" swatch must be destroyed after. */
 	other = swash_get(*othersvp, start, span);
 	o = (U8*)SvPV(other, olen);
 
 	if (!olen)
-	    Perl_croak(aTHX_ "swash_get didn't return valid swatch for other");
+	    Perl_croak(aTHX_ "panic: swash_get got improper swatch");
 
 	s = (U8*)SvPV(swatch, slen);
 	if (bits == 1 && otherbits == 1) {
 	    if (slen != olen)
-		Perl_croak(aTHX_ "swash_get: swatch length mismatch");
+		Perl_croak(aTHX_ "panic: swash_get found swatch length mismatch");
 
 	    switch (opc) {
 	    case '+':
