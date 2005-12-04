@@ -1239,6 +1239,7 @@ eval {
        }
      };
 
+$author =~ s/'/\\'/g if defined $author;
 $author ||= "A. U. Thor";
 $email  ||= 'a.u.thor@a.galaxy.far.far.away';
 
