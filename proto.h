@@ -2296,7 +2296,7 @@ PERL_CALLCONV SV*	Perl_swash_init(pTHX_ const char* pkg, const char* name, SV* l
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 
-PERL_CALLCONV UV	Perl_swash_fetch(pTHX_ SV *sv, const U8 *ptr, bool do_utf8)
+PERL_CALLCONV UV	Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 

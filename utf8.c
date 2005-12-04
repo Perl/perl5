@@ -1626,11 +1626,18 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
  * the lower-level routine, and it is similarly broken for returning
  * multiple values.  --jhi */
 /* Now SWASHGET is recasted into S_swash_get in this file. */
+
+/* Note:
+ * Returns the value of property/mapping C<swash> for the first character
+ * of the string C<ptr>. If C<do_utf8> is true, the string C<ptr> is
+ * assumed to be in utf8. If C<do_utf8> is false, the string C<ptr> is
+ * assumed to be in native 8-bit encoding. Caches the swatch in C<swash>.
+ */
 UV
-Perl_swash_fetch(pTHX_ SV *sv, const U8 *ptr, bool do_utf8)
+Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
 {
     dVAR;
-    HV* const hv = (HV*)SvRV(sv);
+    HV* const hv = (HV*)SvRV(swash);
     U32 klen;
     U32 off;
     STRLEN slen;
@@ -1696,7 +1703,7 @@ Perl_swash_fetch(pTHX_ SV *sv, const U8 *ptr, bool do_utf8)
 	    const UV code_point = utf8n_to_uvuni(ptr, UTF8_MAXBYTES, 0,
 					   ckWARN(WARN_UTF8) ?
 					   0 : UTF8_ALLOW_ANY);
-	    swatch = swash_get(sv,
+	    swatch = swash_get(swash,
 		    /* On EBCDIC & ~(0xA0-1) isn't a useful thing to do */
 				(klen) ? (code_point & ~(needents - 1)) : 0,
 				needents);
