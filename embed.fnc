@@ -1129,6 +1129,7 @@ s	|void*	|parse_body	|NULLOK char **env|XSINIT_t xsinit
 rs	|void	|run_body	|I32 oldscope
 s	|void	|call_body	|NN const OP *myop|bool is_eval
 s	|void*	|call_list_body	|NN CV *cv
+s	|SV *	|incpush_if_exists|NN SV *dir
 #if defined(PERL_FLEXIBLE_EXCEPTIONS)
 s	|void*	|vparse_body	|va_list args
 s	|void*	|vrun_body	|va_list args
@@ -1158,6 +1159,7 @@ s	|int	|div128		|NN SV *pnum|NN bool *done
 s	|const char *|group_end	|NN const char *pat|NN const char *patend \
 				|char ender
 s	|const char *|get_num	|NN const char *ppat|NN I32 *lenptr
+sR	|char *	|sv_exp_grow	|NN SV *sv|STRLEN needed
 #endif
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
@@ -1179,6 +1181,7 @@ sR	|OP*	|doeval		|int gimme|NULLOK OP** startop|NULLOK CV* outside|U32 seq
 sR	|PerlIO *|check_type_and_open|NN const char *name|NN const char *mode
 sR	|PerlIO *|doopen_pm	|NN const char *name|NN const char *mode
 sR	|bool	|path_is_absolute|NN const char *name
+sR	|I32	|run_user_filter|int idx|NN SV *buf_sv|int maxlen
 #endif
 
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
@@ -1342,7 +1345,7 @@ sR	|I32	|sublex_push
 sR	|I32	|sublex_start
 sR	|char *	|filter_gets	|NN SV *sv|NN PerlIO *fp|STRLEN append
 sR	|HV *	|find_in_my_stash|NN const char *pkgname|I32 len
-sR	|char *	|tokenize_use	|int|NN char*
+sR	|char *	|tokenize_use	|int is_use|NN char*
 s	|SV*	|new_constant	|NULLOK const char *s|STRLEN len|NN const char *key|NN SV *sv \
 				|NULLOK SV *pv|NULLOK const char *type
 #  if defined(DEBUGGING)
@@ -1353,6 +1356,7 @@ s	|void	|depcom
 s	|const char*|incl_perldb
 #  if defined(PERL_CR_FILTER)
 s	|I32	|cr_textfilter	|int idx|NULLOK SV *sv|int maxlen
+s	|void	|strip_return	|NN SV *sv
 #  endif
 #endif
 
@@ -1370,6 +1374,7 @@ s	|SV*	|mess_alloc
 xo	|const char *|vdie_croak_common|NULLOK const char *pat|NULLOK va_list *args \
 				|NULLOK STRLEN *msglen|NULLOK I32* utf8
 xo	|void	|vdie_common	|NULLOK const char *message|STRLEN msglen|I32 utf8
+sr	|char *	|write_no_mem
 #endif
 
 #if defined(PERL_IN_NUMERIC_C) || defined(PERL_DECL_PROT)

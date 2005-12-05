@@ -115,8 +115,8 @@ PP(pp_sassign)
     dSP; dPOPTOPssrl;
 
     if (PL_op->op_private & OPpASSIGN_BACKWARDS) {
-	SV *temp;
-	temp = left; left = right; right = temp;
+	SV * const temp = left;
+	left = right; right = temp;
     }
     if (PL_tainting && PL_tainted && !SvTAINTED(left))
 	TAINT_NOT;
@@ -263,8 +263,8 @@ PP(pp_eq)
 	   right argument if we know the left is integer.  */
       SvIV_please(TOPm1s);
 	if (SvIOK(TOPm1s)) {
-	    bool auvok = SvUOK(TOPm1s);
-	    bool buvok = SvUOK(TOPs);
+	    const bool auvok = SvUOK(TOPm1s);
+	    const bool buvok = SvUOK(TOPs);
 	
 	    if (auvok == buvok) { /* ## IV == IV or UV == UV ## */
                 /* Casting IV to UV before comparison isn't going to matter
@@ -273,8 +273,8 @@ PP(pp_eq)
                    differ from normal zero. As I understand it. (Need to
                    check - is negative zero implementation defined behaviour
                    anyway?). NWC  */
-		UV buv = SvUVX(POPs);
-		UV auv = SvUVX(TOPs);
+		const UV buv = SvUVX(POPs);
+		const UV auv = SvUVX(TOPs);
 		
 		SETs(boolSV(auv == buv));
 		RETURN;
@@ -509,7 +509,7 @@ PP(pp_aelemfast)
     AV *av = PL_op->op_flags & OPf_SPECIAL ?
 		(AV*)PAD_SV(PL_op->op_targ) : GvAV(cGVOP_gv);
     const U32 lval = PL_op->op_flags & OPf_MOD;
-    SV** svp = av_fetch(av, PL_op->op_private, lval);
+    SV** const svp = av_fetch(av, PL_op->op_private, lval);
     SV *sv = (svp ? *svp : &PL_sv_undef);
     EXTEND(SP, 1);
     if (!lval && SvGMAGICAL(sv))	/* see note in pp_helem() */
@@ -552,15 +552,10 @@ PP(pp_pushre)
 PP(pp_print)
 {
     dSP; dMARK; dORIGMARK;
-    GV *gv;
     IO *io;
     register PerlIO *fp;
     MAGIC *mg;
-
-    if (PL_op->op_flags & OPf_STACKED)
-	gv = (GV*)*++MARK;
-    else
-	gv = PL_defoutgv;
+    GV * const gv = (PL_op->op_flags & OPf_STACKED) ? (GV*)*++MARK : PL_defoutgv;
 
     if (gv && (io = GvIO(gv))
 	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))

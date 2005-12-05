@@ -38,8 +38,6 @@
 
 #define DOCATCH(o) ((CATCH_GET == TRUE) ? docatch(o) : (o))
 
-static I32 run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen);
-
 PP(pp_wantarray)
 {
     dSP;
@@ -1490,7 +1488,7 @@ PP(pp_caller)
     if (!MAXARG)
 	RETURN;
     if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
-	GV *cvgv = CvGV(ccstack[cxix].blk_sub.cv);
+	GV * const cvgv = CvGV(ccstack[cxix].blk_sub.cv);
 	/* So is ccstack[dbcxix]. */
 	if (isGV(cvgv)) {
 	    SV * const sv = NEWSV(49, 0);
@@ -1540,9 +1538,8 @@ PP(pp_caller)
 	const int off = AvARRAY(ary) - AvALLOC(ary);
 
 	if (!PL_dbargs) {
-	    GV* tmpgv;
-	    PL_dbargs = GvAV(gv_AVadd(tmpgv = gv_fetchpv("DB::args", TRUE,
-				SVt_PVAV)));
+	    GV* const tmpgv = gv_fetchpv("DB::args", TRUE, SVt_PVAV);
+	    PL_dbargs = GvAV(gv_AVadd(tmpgv));
 	    GvMULTI_on(tmpgv);
 	    AvREAL_off(PL_dbargs);	/* XXX should be REIFY (see av.h) */
 	}
@@ -1559,7 +1556,7 @@ PP(pp_caller)
 			     HINT_PRIVATE_MASK)));
     {
 	SV * mask ;
-	SV * old_warnings = cx->blk_oldcop->cop_warnings ;
+	SV * const old_warnings = cx->blk_oldcop->cop_warnings ;
 
 	if  (old_warnings == pWARN_NONE ||
 		(old_warnings == pWARN_STD && (PL_dowarn & G_WARN_ON) == 0))
@@ -1569,7 +1566,7 @@ PP(pp_caller)
 	    /* Get the bit mask for $warnings::Bits{all}, because
 	     * it could have been extended by warnings::register */
 	    SV **bits_all;
-	    HV *bits = get_hv("warnings::Bits", FALSE);
+	    HV * const bits = get_hv("warnings::Bits", FALSE);
 	    if (bits && (bits_all=hv_fetch(bits, "all", 3, FALSE))) {
 		mask = newSVsv(*bits_all);
 	    }
@@ -1587,12 +1584,7 @@ PP(pp_caller)
 PP(pp_reset)
 {
     dSP;
-    const char *tmps;
-
-    if (MAXARG < 1)
-	tmps = "";
-    else
-	tmps = POPpconstx;
+    const char * const tmps = (MAXARG < 1) ? "" : POPpconstx;
     sv_reset((char *)tmps, CopSTASH(PL_curcop));
     PUSHs(&PL_sv_yes);
     RETURN;
@@ -1611,14 +1603,12 @@ PP(pp_dbstate)
 	    || SvIV(PL_DBsingle) || SvIV(PL_DBsignal) || SvIV(PL_DBtrace))
     {
 	dSP;
-	register CV *cv;
 	register PERL_CONTEXT *cx;
 	const I32 gimme = G_ARRAY;
 	U8 hasargs;
-	GV *gv;
+	GV * const gv = PL_DBgv;
+	register CV * const cv = GvCV(gv);
 
-	gv = PL_DBgv;
-	cv = GvCV(gv);
 	if (!cv)
 	    DIE(aTHX_ "No DB::DB routine defined");
 
@@ -1691,7 +1681,7 @@ PP(pp_enteriter)
 #endif
     }
     else {
-	GV *gv = (GV*)POPs;
+	GV * const gv = (GV*)POPs;
 	svp = &GvSV(gv);			/* symbol table variable */
 	SAVEGENERICSV(*svp);
 	*svp = NEWSV(0,0);
@@ -1712,7 +1702,7 @@ PP(pp_enteriter)
 	cx->blk_loop.iterary = (AV*)SvREFCNT_inc(POPs);
 	if (SvTYPE(cx->blk_loop.iterary) != SVt_PVAV) {
 	    dPOPss;
-	    SV *right = (SV*)cx->blk_loop.iterary;
+	    SV * const right = (SV*)cx->blk_loop.iterary;
 	    SvGETMAGIC(sv);
 	    SvGETMAGIC(right);
 	    if (RANGE_IS_NUMERIC(sv,right)) {
@@ -1813,7 +1803,6 @@ PP(pp_leaveloop)
 PP(pp_return)
 {
     dSP; dMARK;
-    I32 cxix;
     register PERL_CONTEXT *cx;
     bool popsub2 = FALSE;
     bool clear_errsv = FALSE;
@@ -1823,7 +1812,8 @@ PP(pp_return)
     I32 optype = 0;
     SV *sv;
 
-    cxix = dopoptosub(cxstack_ix);
+    const I32 cxix = dopoptosub(cxstack_ix);
+
     if (cxix < 0) {
 	if (CxMULTICALL(cxstack)) { /* In this case we must be in a
 				     * sort block, which is a CXt_NULL
@@ -2485,7 +2475,7 @@ PP(pp_goto)
 	/* push wanted frames */
 
 	if (*enterops && enterops[1]) {
-	    OP *oldop = PL_op;
+	    OP * const oldop = PL_op;
 	    ix = enterops[1]->op_type == OP_ENTER && in_block ? 2 : 1;
 	    for (; enterops[ix]; ix++) {
 		PL_op = enterops[ix];
@@ -2997,7 +2987,6 @@ PP(pp_require)
     STRLEN len;
     const char *tryname = Nullch;
     SV *namesv = Nullsv;
-    SV** svp;
     const I32 gimme = GIMME_V;
     int filter_has_file = 0;
     PerlIO *tryrsfp = NULL;
@@ -3103,10 +3092,11 @@ PP(pp_require)
     if (!(name && len > 0 && *name))
 	DIE(aTHX_ "Null filename used");
     TAINT_PROPER("require");
-    if (PL_op->op_type == OP_REQUIRE &&
-      (svp = hv_fetch(GvHVn(PL_incgv), name, len, 0)) &&
-      *svp != &PL_sv_undef)
-	RETPUSHYES;
+    if (PL_op->op_type == OP_REQUIRE) {
+	SV * const * const svp = hv_fetch(GvHVn(PL_incgv), name, len, 0);
+	if (svp && *svp != &PL_sv_undef)
+	    RETPUSHYES;
+    }
 
     /* prepare to compile file */
 
@@ -3374,7 +3364,7 @@ PP(pp_require)
     PL_compiling.cop_io = Nullsv;
 
     if (filter_sub || filter_cache) {
-	SV * const datasv = filter_add(run_user_filter, Nullsv);
+	SV * const datasv = filter_add(S_run_user_filter, Nullsv);
 	IoLINES(datasv) = filter_has_file;
 	IoTOP_GV(datasv) = (GV *)filter_state;
 	IoBOTTOM_GV(datasv) = (GV *)filter_sub;
@@ -3900,10 +3890,11 @@ S_num_overflow(NV value, I32 fldsize, I32 frcsize)
 }
 
 static I32
-run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
+S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 {
-    SV *datasv = FILTER_DATA(idx);
+    SV * const datasv = FILTER_DATA(idx);
     const int filter_has_file = IoLINES(datasv);
+    GV * const filter_child_proc = (GV *)IoFMT_GV(datasv);
     SV * const filter_state = (SV *)IoTOP_GV(datasv);
     SV * const filter_sub = (SV *)IoBOTTOM_GV(datasv);
     int status = 0;
@@ -4058,7 +4049,7 @@ run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	    SvREFCNT_dec(filter_sub);
 	    IoBOTTOM_GV(datasv) = NULL;
 	}
-	filter_del(run_user_filter);
+	filter_del(S_run_user_filter);
     }
     if (status == 0 && read_from_cache) {
 	/* If we read some data from the cache (and by getting here it implies
@@ -4076,11 +4067,12 @@ S_path_is_absolute(pTHX_ const char *name)
 {
     if (PERL_FILE_IS_ABSOLUTE(name)
 #ifdef MACOS_TRADITIONAL
-	|| (*name == ':'))
+	|| (*name == ':')
 #else
 	|| (*name == '.' && (name[1] == '/' ||
-			     (name[1] == '.' && name[2] == '/'))))
+			     (name[1] == '.' && name[2] == '/')))
 #endif
+	 )
     {
 	return TRUE;
     }
