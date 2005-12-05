@@ -2680,7 +2680,8 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		case SVt_PV:
 		case SVt_PVIV:
 		case SVt_PVNV:
-		case SVt_PVBM:	typestr = SvROK(sv) ? "REF" : "SCALAR"; break;
+		case SVt_PVBM:	typestr = SvVOK(sv) ? "VSTRING"
+				    : SvROK(sv) ? "REF" : "SCALAR"; break;
 		case SVt_PVLV:	typestr = SvROK(sv) ? "REF"
 				/* tied lvalues should appear to be
 				 * scalars for backwards compatitbility */
