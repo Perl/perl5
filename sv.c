@@ -2670,31 +2670,8 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		    return mg->mg_ptr;
 		}
 
+		typestr = sv_reftype(sv, 0);
 
-		switch (SvTYPE(sv)) {
-		case SVt_NULL:
-		case SVt_IV:
-		case SVt_NV:
-		case SVt_RV:
-		case SVt_PV:
-		case SVt_PVIV:
-		case SVt_PVNV:
-		case SVt_PVMG:
-		case SVt_PVBM:	typestr = SvVOK(sv) ? "VSTRING"
-				    : SvROK(sv) ? "REF" : "SCALAR"; break;
-		case SVt_PVLV:	typestr = SvROK(sv) ? "REF"
-				/* tied lvalues should appear to be
-				 * scalars for backwards compatitbility */
-				: (LvTYPE(sv) == 't' || LvTYPE(sv) == 'T')
-				    ? "SCALAR" : "LVALUE";	break;
-		case SVt_PVAV:	typestr = "ARRAY";	break;
-		case SVt_PVHV:	typestr = "HASH";	break;
-		case SVt_PVCV:	typestr = "CODE";	break;
-		case SVt_PVGV:	typestr = "GLOB";	break;
-		case SVt_PVFM:	typestr = "FORMAT";	break;
-		case SVt_PVIO:	typestr = "IO";		break;
-		default:	typestr = "UNKNOWN";	break;
-		}
 		tsv = NEWSV(0,0);
 		if (SvOBJECT(sv)) {
 		    const char * const name = HvNAME_get(SvSTASH(sv));
