@@ -160,7 +160,7 @@ Perl_debstack(pTHX)
 
 
 #ifdef DEBUGGING
-static const char * si_names[] = {
+static const char * const si_names[] = {
     "UNKNOWN",
     "UNDEF",
     "MAIN",
@@ -182,7 +182,7 @@ void
 Perl_deb_stack_all(pTHX)
 {
 #ifdef DEBUGGING
-    I32		 ix, si_ix;
+    I32 si_ix;
     const PERL_SI *si;
 
     /* rewind to start of chain */
@@ -195,6 +195,7 @@ Perl_deb_stack_all(pTHX)
     {
         const int si_name_ix = si->si_type+1; /* -1 is a valid index */
         const char * const si_name = (si_name_ix>= sizeof(si_names)) ? "????" : si_names[si_name_ix];
+	I32 ix;
 	PerlIO_printf(Perl_debug_log, "STACK %"IVdf": %s\n",
 						(IV)si_ix, si_name);
 

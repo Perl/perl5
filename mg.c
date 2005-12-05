@@ -485,14 +485,15 @@ Perl_mg_free(pTHX_ SV *sv)
 U32
 Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
 {
-    register const REGEXP *rx;
     PERL_UNUSED_ARG(sv);
 
-    if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	if (mg->mg_obj)		/* @+ */
-	    return rx->nparens;
-	else			/* @- */
-	    return rx->lastparen;
+    if (PL_curpm) {
+	register const REGEXP * const rx = PM_GETRE(PL_curpm);
+	if (rx) {
+	    return mg->mg_obj
+		? rx->nparens       /* @+ */
+		: rx->lastparen;    /* @- */
+	}
     }
 
     return (U32)-1;
@@ -501,32 +502,33 @@ Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 {
-    register REGEXP *rx;
+    if (PL_curpm) {
+	register const REGEXP * const rx = PM_GETRE(PL_curpm);
+	if (rx) {
+	    register const I32 paren = mg->mg_len;
+	    register I32 s;
+	    register I32 t;
+	    if (paren < 0)
+		return 0;
+	    if (paren <= (I32)rx->nparens &&
+		(s = rx->startp[paren]) != -1 &&
+		(t = rx->endp[paren]) != -1)
+		{
+		    register I32 i;
+		    if (mg->mg_obj)		/* @+ */
+			i = t;
+		    else			/* @- */
+			i = s;
 
-    if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-        register const I32 paren = mg->mg_len;
-        register I32 s;
-        register I32 t;
-	if (paren < 0)
-	    return 0;
-	if (paren <= (I32)rx->nparens &&
-	    (s = rx->startp[paren]) != -1 &&
-	    (t = rx->endp[paren]) != -1)
-	    {
-                register I32 i;
-		if (mg->mg_obj)		/* @+ */
-		    i = t;
-		else			/* @- */
-		    i = s;
+		    if (i > 0 && RX_MATCH_UTF8(rx)) {
+			const char * const b = rx->subbeg;
+			if (b)
+			    i = Perl_utf8_length(aTHX_ (U8*)b, (U8*)(b+i));
+		    }
 
-		if (i > 0 && RX_MATCH_UTF8(rx)) {
-		    const char * const b = rx->subbeg;
-		    if (b)
-		        i = Perl_utf8_length(aTHX_ (U8*)b, (U8*)(b+i));
+		    sv_setiv(sv, i);
 		}
-
-		sv_setiv(sv, i);
-	    }
+	}
     }
     return 0;
 }
@@ -1158,7 +1160,7 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
 static void
 restore_sigmask(pTHX_ SV *save_sv)
 {
-    const sigset_t *ossetp = (const sigset_t *) SvPV_nolen_const( save_sv );
+    const sigset_t * const ossetp = (const sigset_t *) SvPV_nolen_const( save_sv );
     (void)sigprocmask(SIG_SETMASK, ossetp, (sigset_t *)0);
 }
 #endif

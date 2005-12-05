@@ -65,7 +65,7 @@ STATIC HE*
 S_new_he(pTHX)
 {
     HE* he;
-    void **root = &PL_body_roots[HE_SVSLOT];
+    void ** const root = &PL_body_roots[HE_SVSLOT];
 
     LOCK_SV_MUTEX;
     if (!*root)
@@ -490,7 +490,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		    if (isLOWER(key[i])) {
 			/* Would be nice if we had a routine to do the
 			   copy and upercase in a single pass through.  */
-			const char *nkey = strupr(savepvn(key,klen));
+			const char * const nkey = strupr(savepvn(key,klen));
 			/* Note that this fetch is for nkey (the uppercased
 			   key) whereas the store is for key (the original)  */
 			entry = hv_fetch_common(hv, Nullsv, nkey, klen,
@@ -1785,14 +1785,12 @@ value, you can get it through the macro C<HvFILL(tb)>.
 I32
 Perl_hv_iterinit(pTHX_ HV *hv)
 {
-    HE *entry;
-
     if (!hv)
 	Perl_croak(aTHX_ "Bad hash");
 
     if (SvOOK(hv)) {
 	struct xpvhv_aux *iter = HvAUX(hv);
-	entry = iter->xhv_eiter; /* HvEITER(hv) */
+	HE * const entry = iter->xhv_eiter; /* HvEITER(hv) */
 	if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
 	    HvLAZYDEL_off(hv);
 	    hv_free_ent(hv, entry);
@@ -2053,7 +2051,7 @@ Perl_hv_iterkey(pTHX_ register HE *entry, I32 *retlen)
 {
     if (HeKLEN(entry) == HEf_SVKEY) {
 	STRLEN len;
-	char *p = SvPV(HeKEY_sv(entry), len);
+	char * const p = SvPV(HeKEY_sv(entry), len);
 	*retlen = len;
 	return p;
     }
@@ -2117,8 +2115,9 @@ operation.
 SV *
 Perl_hv_iternextsv(pTHX_ HV *hv, char **key, I32 *retlen)
 {
-    HE *he;
-    if ( (he = hv_iternext_flags(hv, 0)) == NULL)
+    HE * const he = hv_iternext_flags(hv, 0);
+
+    if (!he)
 	return NULL;
     *key = hv_iterkey(he, retlen);
     return hv_iterval(hv, he);

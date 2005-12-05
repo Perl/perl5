@@ -3178,6 +3178,9 @@ STATIC void	S_call_body(pTHX_ const OP *myop, bool is_eval)
 STATIC void*	S_call_list_body(pTHX_ CV *cv)
 			__attribute__nonnull__(pTHX_1);
 
+STATIC SV *	S_incpush_if_exists(pTHX_ SV *dir)
+			__attribute__nonnull__(pTHX_1);
+
 #endif
 
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
@@ -3234,6 +3237,10 @@ STATIC char	S_first_symbol(const char *pat, const char *patend)
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(2);
 
+STATIC char *	S_sv_exp_grow(pTHX_ SV *sv, STRLEN needed)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+
 #endif
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
@@ -3286,6 +3293,10 @@ STATIC PerlIO *	S_doopen_pm(pTHX_ const char *name, const char *mode)
 STATIC bool	S_path_is_absolute(pTHX_ const char *name)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
+
+STATIC I32	S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_2);
 
 #endif
 
@@ -3556,6 +3567,8 @@ STATIC CV*	S_deb_curcv(pTHX_ I32 ix);
 STATIC void	S_debprof(pTHX_ const OP *o)
 			__attribute__nonnull__(pTHX_1);
 
+STATIC void	S_sequence(pTHX_ const OP *o);
+STATIC UV	S_sequence_num(pTHX_ const OP *o);
 #endif
 
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
@@ -3749,7 +3762,7 @@ STATIC HV *	S_find_in_my_stash(pTHX_ const char *pkgname, I32 len)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
-STATIC char *	S_tokenize_use(pTHX_ int, char*)
+STATIC char *	S_tokenize_use(pTHX_ int is_use, char*)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 
@@ -3765,6 +3778,9 @@ STATIC void	S_depcom(pTHX);
 STATIC const char*	S_incl_perldb(pTHX);
 #  if defined(PERL_CR_FILTER)
 STATIC I32	S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen);
+STATIC void	S_strip_return(pTHX_ SV *sv)
+			__attribute__nonnull__(pTHX_1);
+
 #  endif
 #endif
 
@@ -3789,6 +3805,9 @@ STATIC COP*	S_closest_cop(pTHX_ COP *cop, const OP *o)
 STATIC SV*	S_mess_alloc(pTHX);
 STATIC const char *	S_vdie_croak_common(pTHX_ const char *pat, va_list *args, STRLEN *msglen, I32* utf8);
 STATIC void	S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8);
+STATIC char *	S_write_no_mem(pTHX)
+			__attribute__noreturn__;
+
 #endif
 
 #if defined(PERL_IN_NUMERIC_C) || defined(PERL_DECL_PROT)

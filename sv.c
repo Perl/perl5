@@ -357,7 +357,7 @@ and split it into a list of free SVs.
 void
 Perl_sv_add_arena(pTHX_ char *ptr, U32 size, U32 flags)
 {
-    SV* sva = (SV*)ptr;
+    SV* const sva = (SV*)ptr;
     register SV* sv;
     register SV* svend;
 

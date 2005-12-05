@@ -26,12 +26,7 @@
 #define yychar	(*PL_yycharp)
 #define yylval	(*PL_yylvalp)
 
-static const char ident_too_long[] =
-  "Identifier too long";
-static const char c_without_g[] =
-  "Use of /c modifier is meaningless without /g";
-static const char c_in_subst[] =
-  "Use of /c modifier is meaningless in s///";
+static const char ident_too_long[] = "Identifier too long";
 
 static void restore_rsfp(pTHX_ void *f);
 #ifndef PERL_NO_UTF16_FILTER
@@ -2651,10 +2646,9 @@ Perl_yylex(pTHX)
 	    PL_last_uni = 0;
 	    PL_last_lop = 0;
 	    if (PL_lex_brackets) {
- 	        if (PL_lex_formbrack)
-		    yyerror("Format not terminated");
-                else
-		    yyerror("Missing right curly or square bracket");
+		yyerror(PL_lex_formbrack
+		    ? "Format not terminated"
+		    : "Missing right curly or square bracket");
 	    }
             DEBUG_T( { PerlIO_printf(Perl_debug_log,
                         "### Tokener got EOF\n");
@@ -3319,11 +3313,9 @@ Perl_yylex(pTHX)
 		   context messages from yyerror().
 		 */
 		PL_bufptr = s;
-		if (!*s)
-		    yyerror("Unterminated attribute list");
-		else
-		    yyerror(Perl_form(aTHX_ "Invalid separator character %c%c%c in attribute list",
-				      q, *s, q));
+		yyerror( *s
+		    ? Perl_form(aTHX_ "Invalid separator character %c%c%c in attribute list", q, *s, q)
+		    : "Unterminated attribute list" );
 		if (attrs)
 		    op_free(attrs);
 		OPERATOR(':');
@@ -9367,7 +9359,7 @@ S_scan_pat(pTHX_ char *start, I32 type)
     if ((pm->op_pmflags & PMf_CONTINUE) && !(pm->op_pmflags & PMf_GLOBAL)
 	    && ckWARN(WARN_REGEXP))
     {
-        Perl_warner(aTHX_ packWARN(WARN_REGEXP), c_without_g);
+        Perl_warner(aTHX_ packWARN(WARN_REGEXP), "Use of /c modifier is meaningless without /g" );
     }
 
     pm->op_pmpermflags = pm->op_pmflags;
@@ -9419,10 +9411,8 @@ S_scan_subst(pTHX_ char *start)
 	    break;
     }
 
-    /* /c is not meaningful with s/// */
-    if ((pm->op_pmflags & PMf_CONTINUE) && ckWARN(WARN_REGEXP))
-    {
-        Perl_warner(aTHX_ packWARN(WARN_REGEXP), c_in_subst);
+    if ((pm->op_pmflags & PMf_CONTINUE) && ckWARN(WARN_REGEXP)) {
+        Perl_warner(aTHX_ packWARN(WARN_REGEXP), "Use of /c modifier is meaningless in s///" );
     }
 
     if (es) {
@@ -10932,7 +10922,7 @@ S_swallow_bom(pTHX_ U8 *s)
 static void
 restore_rsfp(pTHX_ void *f)
 {
-    PerlIO *fp = (PerlIO*)f;
+    PerlIO * const fp = (PerlIO*)f;
 
     if (PL_rsfp == PerlIO_stdin())
 	PerlIO_clearerr(PL_rsfp);
@@ -11020,16 +11010,15 @@ Perl_scan_vstring(pTHX_ const char *s, SV *sv)
     }
 
     if (!isALPHA(*pos)) {
-	UV rev;
 	U8 tmpbuf[UTF8_MAXBYTES+1];
-	U8 *tmpend;
 
 	if (*s == 'v') s++;  /* get past 'v' */
 
 	sv_setpvn(sv, "", 0);
 
 	for (;;) {
-	    rev = 0;
+	    U8 *tmpend;
+	    UV rev = 0;
 	    {
 		/* this is atoi() that tolerates underscores */
 		const char *end = pos;

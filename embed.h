@@ -1160,6 +1160,7 @@
 #define run_body		S_run_body
 #define call_body		S_call_body
 #define call_list_body		S_call_list_body
+#define incpush_if_exists	S_incpush_if_exists
 #endif
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
@@ -1180,6 +1181,7 @@
 #define get_num			S_get_num
 #define need_utf8		S_need_utf8
 #define first_symbol		S_first_symbol
+#define sv_exp_grow		S_sv_exp_grow
 #endif
 #endif
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
@@ -1198,6 +1200,7 @@
 #define doeval			S_doeval
 #define doopen_pm		S_doopen_pm
 #define path_is_absolute	S_path_is_absolute
+#define run_user_filter		S_run_user_filter
 #endif
 #endif
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
@@ -1300,6 +1303,8 @@
 #ifdef PERL_CORE
 #define deb_curcv		S_deb_curcv
 #define debprof			S_debprof
+#define sequence		S_sequence
+#define sequence_num		S_sequence_num
 #endif
 #endif
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
@@ -1393,6 +1398,7 @@
 #  if defined(PERL_CR_FILTER)
 #ifdef PERL_CORE
 #define cr_textfilter		S_cr_textfilter
+#define strip_return		S_strip_return
 #endif
 #  endif
 #endif
@@ -1414,6 +1420,7 @@
 #define mess_alloc		S_mess_alloc
 #define vdie_croak_common	S_vdie_croak_common
 #define vdie_common		S_vdie_common
+#define write_no_mem		S_write_no_mem
 #endif
 #endif
 #if defined(PERL_IN_NUMERIC_C) || defined(PERL_DECL_PROT)
@@ -3165,6 +3172,7 @@
 #define run_body(a)		S_run_body(aTHX_ a)
 #define call_body(a,b)		S_call_body(aTHX_ a,b)
 #define call_list_body(a)	S_call_list_body(aTHX_ a)
+#define incpush_if_exists(a)	S_incpush_if_exists(aTHX_ a)
 #endif
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
@@ -3185,6 +3193,7 @@
 #define get_num(a,b)		S_get_num(aTHX_ a,b)
 #define need_utf8		S_need_utf8
 #define first_symbol		S_first_symbol
+#define sv_exp_grow(a,b)	S_sv_exp_grow(aTHX_ a,b)
 #endif
 #endif
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
@@ -3203,6 +3212,7 @@
 #define doeval(a,b,c,d)		S_doeval(aTHX_ a,b,c,d)
 #define doopen_pm(a,b)		S_doopen_pm(aTHX_ a,b)
 #define path_is_absolute(a)	S_path_is_absolute(aTHX_ a)
+#define run_user_filter(a,b,c)	S_run_user_filter(aTHX_ a,b,c)
 #endif
 #endif
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
@@ -3304,6 +3314,8 @@
 #ifdef PERL_CORE
 #define deb_curcv(a)		S_deb_curcv(aTHX_ a)
 #define debprof(a)		S_debprof(aTHX_ a)
+#define sequence(a)		S_sequence(aTHX_ a)
+#define sequence_num(a)		S_sequence_num(aTHX_ a)
 #endif
 #endif
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
@@ -3399,6 +3411,7 @@
 #  if defined(PERL_CR_FILTER)
 #ifdef PERL_CORE
 #define cr_textfilter(a,b,c)	S_cr_textfilter(aTHX_ a,b,c)
+#define strip_return(a)		S_strip_return(aTHX_ a)
 #endif
 #  endif
 #endif
@@ -3420,6 +3433,7 @@
 #define mess_alloc()		S_mess_alloc(aTHX)
 #define vdie_croak_common(a,b,c,d)	S_vdie_croak_common(aTHX_ a,b,c,d)
 #define vdie_common(a,b,c)	S_vdie_common(aTHX_ a,b,c)
+#define write_no_mem()		S_write_no_mem(aTHX)
 #endif
 #endif
 #if defined(PERL_IN_NUMERIC_C) || defined(PERL_DECL_PROT)

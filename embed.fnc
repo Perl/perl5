@@ -1142,6 +1142,7 @@ s	|void*	|parse_body	|NULLOK char **env|XSINIT_t xsinit
 rs	|void	|run_body	|I32 oldscope
 s	|void	|call_body	|NN const OP *myop|bool is_eval
 s	|void*	|call_list_body	|NN CV *cv
+s	|SV *	|incpush_if_exists|NN SV *dir
 #endif
 
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
@@ -1161,6 +1162,7 @@ s	|const char *|group_end	|NN const char *pat|NN const char *patend|char ender
 sR	|const char *|get_num	|NN const char *ppat|NN I32 *lenptr
 ns	|bool	|need_utf8	|NN const char *pat|NN const char *patend
 ns	|char	|first_symbol	|NN const char *pat|NN const char *patend
+sR	|char *	|sv_exp_grow	|NN SV *sv|STRLEN needed
 #endif
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
@@ -1178,6 +1180,7 @@ s	|void	|save_lines	|NULLOK AV *array|NN SV *sv
 sR	|OP*	|doeval		|int gimme|NULLOK OP** startop|NULLOK CV* outside|U32 seq
 sR	|PerlIO *|doopen_pm	|NN const char *name|NN const char *mode
 sR	|bool	|path_is_absolute|NN const char *name
+sR	|I32	|run_user_filter|int idx|NN SV *buf_sv|int maxlen
 #endif
 
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
@@ -1271,6 +1274,8 @@ Es	|void	|to_byte_substr	|NN regexp * prog
 #if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
 s	|CV*	|deb_curcv	|I32 ix
 s	|void	|debprof	|NN const OP *o
+s	|void	|sequence	|NULLOK const OP *o
+s	|UV	|sequence_num	|NULLOK const OP *o
 #endif
 
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
@@ -1347,7 +1352,7 @@ sR	|I32	|sublex_push
 sR	|I32	|sublex_start
 sR	|char *	|filter_gets	|NN SV *sv|NN PerlIO *fp|STRLEN append
 sR	|HV *	|find_in_my_stash|NN const char *pkgname|I32 len
-sR	|char *	|tokenize_use	|int|NN char*
+sR	|char *	|tokenize_use	|int is_use|NN char*
 s	|SV*	|new_constant	|NULLOK const char *s|STRLEN len|NN const char *key|NN SV *sv \
 				|NULLOK SV *pv|NULLOK const char *type
 #  if defined(DEBUGGING)
@@ -1358,6 +1363,7 @@ s	|void	|depcom
 s	|const char*|incl_perldb
 #  if defined(PERL_CR_FILTER)
 s	|I32	|cr_textfilter	|int idx|NULLOK SV *sv|int maxlen
+s	|void	|strip_return	|NN SV *sv
 #  endif
 #endif
 
@@ -1377,6 +1383,7 @@ s	|SV*	|mess_alloc
 s	|const char *|vdie_croak_common|NULLOK const char *pat|NULLOK va_list *args \
 				|NULLOK STRLEN *msglen|NULLOK I32* utf8
 s	|void	|vdie_common	|NULLOK const char *message|STRLEN msglen|I32 utf8
+sr	|char *	|write_no_mem
 #endif
 
 #if defined(PERL_IN_NUMERIC_C) || defined(PERL_DECL_PROT)

@@ -1520,7 +1520,7 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 STATIC OP *
 S_dup_attrlist(pTHX_ OP *o)
 {
-    OP *rop = Nullop;
+    OP *rop;
 
     /* An attrlist is either a simple OP_CONST or an OP_LIST with kids,
      * where the first kid is OP_PUSHMARK and the remaining ones
@@ -1530,6 +1530,7 @@ S_dup_attrlist(pTHX_ OP *o)
 	rop = newSVOP(OP_CONST, o->op_flags, SvREFCNT_inc(cSVOPo->op_sv));
     else {
 	assert((o->op_type == OP_LIST) && (o->op_flags & OPf_KIDS));
+	rop = Nullop;
 	for (o = cLISTOPo->op_first; o; o=o->op_sibling) {
 	    if (o->op_type == OP_CONST)
 		rop = append_elem(OP_LIST, rop,
@@ -1734,7 +1735,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 OP *
 Perl_my_attrs(pTHX_ OP *o, OP *attrs)
 {
-    OP *rops = Nullop;
+    OP *rops;
     int maybe_scalar = 0;
 
 /* [perl #17376]: this appears to be premature, and results in code such as
@@ -1749,6 +1750,7 @@ Perl_my_attrs(pTHX_ OP *o, OP *attrs)
 #endif
     if (attrs)
 	SAVEFREEOP(attrs);
+    rops = Nullop;
     o = my_kid(o, attrs, &rops);
     if (rops) {
 	if (maybe_scalar && o->op_type == OP_PADSV) {
@@ -2772,7 +2774,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	cLISTOPx(expr)->op_first->op_sibling == cLISTOPx(expr)->op_last)
     {
 	/* convert single element list to element */
-	OP* oe = expr;
+	OP* const oe = expr;
 	expr = cLISTOPx(oe)->op_first->op_sibling;
 	cLISTOPx(oe)->op_first->op_sibling = Nullop;
 	cLISTOPx(oe)->op_last = Nullop;
@@ -4493,7 +4495,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
     if (name || aname) {
 	const char *s;
-	const char *tname = (name ? name : aname);
+	const char * const tname = (name ? name : aname);
 
 	if (PERLDB_SUBLINE && PL_curstash != PL_debstash) {
 	    SV * const sv = NEWSV(0,0);
@@ -4745,13 +4747,11 @@ void
 Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
 {
     register CV *cv;
-    GV *gv;
 
-    if (o)
-	gv = gv_fetchsv(cSVOPo->op_sv, TRUE, SVt_PVFM);
-    else
-	gv = gv_fetchpv("STDOUT", TRUE, SVt_PVFM);
-    
+    GV * const gv = o
+	? gv_fetchsv(cSVOPo->op_sv, TRUE, SVt_PVFM)
+	: gv_fetchpv("STDOUT", TRUE, SVt_PVFM);
+
 #ifdef GV_UNIQUE_CHECK
     if (GvUNIQUE(gv)) {
         Perl_croak(aTHX_ "Bad symbol for form (GV is unique)");
@@ -4977,7 +4977,7 @@ Perl_ck_bitop(pTHX_ OP *o)
 OP *
 Perl_ck_concat(pTHX_ OP *o)
 {
-    const OP *kid = cUNOPo->op_first;
+    const OP * const kid = cUNOPo->op_first;
     if (kid->op_type == OP_CONCAT && !(kid->op_private & OPpTARGET_MY) &&
 	    !(kUNOP->op_first->op_flags & OPf_MOD))
         o->op_flags |= OPf_STACKED;
@@ -5164,7 +5164,7 @@ OP *
 Perl_ck_rvconst(pTHX_ register OP *o)
 {
     dVAR;
-    SVOP *kid = (SVOP*)cUNOPo->op_first;
+    SVOP * const kid = (SVOP*)cUNOPo->op_first;
 
     o->op_private |= (PL_hints & HINT_STRICT_REFS);
     if (kid->op_type == OP_CONST) {
@@ -5174,7 +5174,7 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 
 	/* Is it a constant from cv_const_sv()? */
 	if (SvROK(kidsv) && SvREADONLY(kidsv)) {
-	    SV *rsv = SvRV(kidsv);
+	    SV * const rsv = SvRV(kidsv);
 	    const int svtype = SvTYPE(rsv);
             const char *badtype = Nullch;
 
@@ -5406,7 +5406,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		    if (kid->op_type == OP_CONST &&
 			(kid->op_private & OPpCONST_BARE))
 		    {
-			OP *newop = newGVOP(OP_GV, 0,
+			OP * const newop = newGVOP(OP_GV, 0,
 			    gv_fetchsv(((SVOP*)kid)->op_sv, TRUE, SVt_PVIO) );
 			if (!(o->op_private & 1) && /* if not unop */
 			    kid == cLISTOPo->op_last)
@@ -5446,7 +5446,7 @@ Perl_ck_fun(pTHX_ OP *o)
 			    else if (kid->op_type == OP_RV2SV
 				     && kUNOP->op_first->op_type == OP_GV)
 			    {
-				GV *gv = cGVOPx_gv(kUNOP->op_first);
+				GV * const gv = cGVOPx_gv(kUNOP->op_first);
 				name = GvNAME(gv);
 				len = GvNAMELEN(gv);
 			    }
@@ -6349,6 +6349,7 @@ Perl_ck_subr(pTHX_ OP *o)
 		     break;
 		case ']':
 		     if (contextclass) {
+			 /* XXX We shouldn't be modifying proto, so we can const proto */
 		         char *p = proto;
 			 const char s = *p;
 			 contextclass = 0;
@@ -6605,7 +6606,7 @@ Perl_peep(pTHX_ register OP *o)
 	case OP_PADAV:
 	case OP_GV:
 	    if (o->op_type == OP_PADAV || o->op_next->op_type == OP_RV2AV) {
-		OP* pop = (o->op_type == OP_PADAV) ?
+		OP* const pop = (o->op_type == OP_PADAV) ?
 			    o->op_next : o->op_next->op_next;
 		IV i;
 		if (pop && pop->op_type == OP_CONST &&

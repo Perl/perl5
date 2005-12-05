@@ -1320,11 +1320,11 @@ Perl_my_stat(pTHX)
     }
 }
 
-static const char no_prev_lstat[] = "The stat preceding -l _ wasn't an lstat";
 
 I32
 Perl_my_lstat(pTHX)
 {
+    static const char no_prev_lstat[] = "The stat preceding -l _ wasn't an lstat";
     dSP;
     SV *sv;
     if (PL_op->op_flags & OPf_REF) {

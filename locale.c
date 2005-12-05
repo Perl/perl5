@@ -337,7 +337,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
     if (setlocale_failure) {
 	char *p;
-	bool locwarn = (printwarn > 1 ||
+	const bool locwarn = (printwarn > 1 ||
 			(printwarn &&
 			 (!(p = PerlEnv_getenv("PERL_BADLANG")) || atoi(p))));
 

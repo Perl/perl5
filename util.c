@@ -64,7 +64,7 @@ S_write_no_mem(pTHX)
     PerlLIO_write(PerlIO_fileno(Perl_error_log),
 		  PL_no_mem, strlen(PL_no_mem));
     my_exit(1);
-    return Nullch;
+    NORETURN_FUNCTION_END
 }
 
 /* paranoid version of system's malloc() */
@@ -101,7 +101,7 @@ Perl_safesysmalloc(MEM_SIZE size)
     else if (PL_nomemok)
 	return Nullch;
     else {
-	return S_write_no_mem(aTHX);
+	return write_no_mem();
     }
     /*NOTREACHED*/
 }
@@ -158,7 +158,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
     else if (PL_nomemok)
 	return Nullch;
     else {
-	return S_write_no_mem(aTHX);
+	return write_no_mem();
     }
     /*NOTREACHED*/
 }
@@ -221,10 +221,7 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
     }
     else if (PL_nomemok)
 	return Nullch;
-    else {
-	return S_write_no_mem(aTHX);
-    }
-    /*NOTREACHED*/
+    return write_no_mem();
 }
 
 /* These must be defined when not using Perl's malloc for binary
@@ -851,7 +848,7 @@ Perl_savesharedpv(pTHX_ const char *pv)
     pvlen = strlen(pv)+1;
     newaddr = (char*)PerlMemShared_malloc(pvlen);
     if (!newaddr) {
-	return S_write_no_mem(aTHX);
+	return write_no_mem();
     }
     return memcpy(newaddr,pv,pvlen);
 }

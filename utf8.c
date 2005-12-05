@@ -1759,17 +1759,17 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
     STRLEN lcur, xcur, scur;
 
     HV* const hv = (HV*)SvRV(swash);
-    SV** listsvp = hv_fetch(hv, "LIST", 4, FALSE);
-    SV** typesvp = hv_fetch(hv, "TYPE", 4, FALSE);
-    SV** bitssvp = hv_fetch(hv, "BITS", 4, FALSE);
-    SV** nonesvp = hv_fetch(hv, "NONE", 4, FALSE);
-    SV** extssvp = hv_fetch(hv, "EXTRAS", 6, FALSE);
-    U8*  typestr = (U8*)SvPV_nolen(*typesvp);
-    int  typeto  = typestr[0] == 'T' && typestr[1] == 'o';
-    STRLEN bits  = SvUV(*bitssvp);
-    STRLEN octets = bits >> 3; /* if bits == 1, then octets == 0 */
-    UV     none  = SvUV(*nonesvp);
-    UV     end   = start + span;
+    SV** const listsvp = hv_fetch(hv, "LIST", 4, FALSE);
+    SV** const typesvp = hv_fetch(hv, "TYPE", 4, FALSE);
+    SV** const bitssvp = hv_fetch(hv, "BITS", 4, FALSE);
+    SV** const nonesvp = hv_fetch(hv, "NONE", 4, FALSE);
+    SV** const extssvp = hv_fetch(hv, "EXTRAS", 6, FALSE);
+    const U8* const typestr = (U8*)SvPV_nolen(*typesvp);
+    const int  typeto  = typestr[0] == 'T' && typestr[1] == 'o';
+    const STRLEN bits  = SvUV(*bitssvp);
+    const STRLEN octets = bits >> 3; /* if bits == 1, then octets == 0 */
+    const UV     none  = SvUV(*nonesvp);
+    const UV     end   = start + span;
 
     if (bits != 1 && bits != 8 && bits != 16 && bits != 32) {
 	Perl_croak(aTHX_ "panic: swash_get doesn't expect bits %"UVuf,
@@ -1782,7 +1782,7 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
     SvGROW(swatch, scur + 1);
     s = (U8*)SvPVX(swatch);
     if (octets && none) {
-	const U8* e = s + scur;
+	const U8* const e = s + scur;
 	while (s < e) {
 	    if (bits == 8)
 		*s++ = (U8)(none & 0xff);
@@ -1813,7 +1813,7 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 	STRLEN numlen;
 	I32 flags = PERL_SCAN_SILENT_ILLDIGIT | PERL_SCAN_DISALLOW_PREFIX;
 
-	U8* nl = (U8*)memchr(l, '\n', lend - l);
+	U8* const nl = (U8*)memchr(l, '\n', lend - l);
 
 	numlen = lend - l;
 	min = grok_hex((char *)l, &numlen, &flags, NULL);
@@ -1915,7 +1915,7 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 	    if (min < start)
 		min = start;
 	    for (key = min; key <= max; key++) {
-		STRLEN offset = (STRLEN)(key - start);
+		const STRLEN offset = (STRLEN)(key - start);
 		if (key >= end)
 		    goto go_out_list;
 		s[offset >> 3] |= 1 << (offset & 7);
@@ -2151,7 +2151,7 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim, UV f
 	 u = utf8_to_uvchr((U8*)s, 0);
 	 if (u < 256) {
 	     const unsigned char c = (unsigned char)u & 0xFF;
-	     if (!ok && (flags & UNI_DISPLAY_BACKSLASH)) {
+	     if (flags & UNI_DISPLAY_BACKSLASH) {
 	         switch (c) {
 		 case '\n':
 		     ok = 'n'; break;

@@ -24,6 +24,8 @@
 #define PERL_IN_DUMP_C
 #include "perl.h"
 #include "regcomp.h"
+#include "proto.h"
+
 
 #define Sequence PL_op_sequence
 
@@ -402,7 +404,7 @@ Perl_pmop_dump(pTHX_ PMOP *pm)
 /* An op sequencer.  We visit the ops in the order they're to execute. */
 
 STATIC void
-sequence(pTHX_ register const OP *o)
+S_sequence(pTHX_ register const OP *o)
 {
     dVAR;
     SV      *op;
@@ -456,7 +458,7 @@ sequence(pTHX_ register const OP *o)
 	    hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
 	    for (l = cLOGOPo->op_other; l && l->op_type == OP_NULL; l = l->op_next)
 		;
-	    sequence(aTHX_ l);
+	    sequence(l);
 	    break;
 
 	case OP_ENTERLOOP:
@@ -464,13 +466,13 @@ sequence(pTHX_ register const OP *o)
 	    hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
 	    for (l = cLOOPo->op_redoop; l && l->op_type == OP_NULL; l = l->op_next)
 		;
-	    sequence(aTHX_ l);
+	    sequence(l);
 	    for (l = cLOOPo->op_nextop; l && l->op_type == OP_NULL; l = l->op_next)
 		;
-	    sequence(aTHX_ l);
+	    sequence(l);
 	    for (l = cLOOPo->op_lastop; l && l->op_type == OP_NULL; l = l->op_next)
 		;
-	    sequence(aTHX_ l);
+	    sequence(l);
 	    break;
 
 	case OP_QR:
@@ -479,7 +481,7 @@ sequence(pTHX_ register const OP *o)
 	    hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
 	    for (l = cPMOPo->op_pmreplstart; l && l->op_type == OP_NULL; l = l->op_next)
 		;
-	    sequence(aTHX_ l);
+	    sequence(l);
 	    break;
 
 	case OP_HELEM:
@@ -494,7 +496,7 @@ sequence(pTHX_ register const OP *o)
 }
 
 STATIC UV
-sequence_num(pTHX_ const OP *o)
+S_sequence_num(pTHX_ const OP *o)
 {
     dVAR;
     SV     *op,
@@ -513,10 +515,10 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 {
     dVAR;
     UV      seq;
-    sequence(aTHX_ o);
+    sequence(o);
     Perl_dump_indent(aTHX_ level, file, "{\n");
     level++;
-    seq = sequence_num(aTHX_ o);
+    seq = sequence_num(o);
     if (seq)
 	PerlIO_printf(file, "%-4"UVf, seq);
     else
@@ -526,7 +528,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 		  (int)(PL_dumpindent*level-4), "", OP_NAME(o));
     if (o->op_next)
 	PerlIO_printf(file, seq ? "%"UVf"\n" : "(%"UVf")\n",
-				sequence_num(aTHX_ o->op_next));
+				sequence_num(o->op_next));
     else
 	PerlIO_printf(file, "DONE\n");
     if (o->op_targ) {
@@ -800,17 +802,17 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
     case OP_ENTERLOOP:
 	Perl_dump_indent(aTHX_ level, file, "REDO ===> ");
 	if (cLOOPo->op_redoop)
-	    PerlIO_printf(file, "%"UVf"\n", sequence_num(aTHX_ cLOOPo->op_redoop));
+	    PerlIO_printf(file, "%"UVf"\n", sequence_num(cLOOPo->op_redoop));
 	else
 	    PerlIO_printf(file, "DONE\n");
 	Perl_dump_indent(aTHX_ level, file, "NEXT ===> ");
 	if (cLOOPo->op_nextop)
-	    PerlIO_printf(file, "%"UVf"\n", sequence_num(aTHX_ cLOOPo->op_nextop));
+	    PerlIO_printf(file, "%"UVf"\n", sequence_num(cLOOPo->op_nextop));
 	else
 	    PerlIO_printf(file, "DONE\n");
 	Perl_dump_indent(aTHX_ level, file, "LAST ===> ");
 	if (cLOOPo->op_lastop)
-	    PerlIO_printf(file, "%"UVf"\n", sequence_num(aTHX_ cLOOPo->op_lastop));
+	    PerlIO_printf(file, "%"UVf"\n", sequence_num(cLOOPo->op_lastop));
 	else
 	    PerlIO_printf(file, "DONE\n");
 	break;
@@ -822,7 +824,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
     case OP_AND:
 	Perl_dump_indent(aTHX_ level, file, "OTHER ===> ");
 	if (cLOGOPo->op_other)
-	    PerlIO_printf(file, "%"UVf"\n", sequence_num(aTHX_ cLOGOPo->op_other));
+	    PerlIO_printf(file, "%"UVf"\n", sequence_num(cLOGOPo->op_other));
 	else
 	    PerlIO_printf(file, "DONE\n");
 	break;
@@ -1470,7 +1472,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     case SVt_PVFM:
 	do_hv_dump(level, file, "  COMP_STASH", CvSTASH(sv));
 	if (CvSTART(sv))
-	    Perl_dump_indent(aTHX_ level, file, "  START = 0x%"UVxf" ===> %"IVdf"\n", PTR2UV(CvSTART(sv)), (IV)sequence_num(aTHX_ CvSTART(sv)));
+	    Perl_dump_indent(aTHX_ level, file, "  START = 0x%"UVxf" ===> %"IVdf"\n", PTR2UV(CvSTART(sv)), (IV)sequence_num(CvSTART(sv)));
 	Perl_dump_indent(aTHX_ level, file, "  ROOT = 0x%"UVxf"\n", PTR2UV(CvROOT(sv)));
         if (CvROOT(sv) && dumpops)
 	    do_op_dump(level+1, file, CvROOT(sv));

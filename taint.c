@@ -161,7 +161,7 @@ Perl_taint_env(pTHX)
 #endif /* !VMS */
 
     for (e = misc_env; *e; e++) {
-	SV ** const svp = hv_fetch(GvHVn(PL_envgv), *e, strlen(*e), FALSE);
+	SV * const * const svp = hv_fetch(GvHVn(PL_envgv), *e, strlen(*e), FALSE);
 	if (svp && *svp != &PL_sv_undef && SvTAINTED(*svp)) {
 	    TAINT;
 	    taint_proper("Insecure $ENV{%s}%s", *e);

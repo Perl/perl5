@@ -78,7 +78,7 @@ PP(pp_padav)
 	if (SvMAGICAL(TARG)) {
 	    U32 i;
 	    for (i=0; i < (U32)maxarg; i++) {
-		SV ** const svp = av_fetch((AV*)TARG, i, FALSE);
+		SV * const * const svp = av_fetch((AV*)TARG, i, FALSE);
 		SP[i+1] = (svp) ? *svp : &PL_sv_undef;
 	    }
 	}
@@ -160,13 +160,13 @@ PP(pp_rv2gv)
 		    GV *gv;
 		    if (cUNOP->op_targ) {
 			STRLEN len;
-			SV *namesv = PAD_SV(cUNOP->op_targ);
-			const char *name = SvPV(namesv, len);
+			SV * const namesv = PAD_SV(cUNOP->op_targ);
+			const char * const name = SvPV(namesv, len);
 			gv = (GV*)NEWSV(0,0);
 			gv_init(gv, CopSTASH(PL_curcop), name, len, 0);
 		    }
 		    else {
-			const char *name = CopSTASHPV(PL_curcop);
+			const char * const name = CopSTASHPV(PL_curcop);
 			gv = newGVgen(name);
 		    }
 		    if (SvTYPE(sv) < SVt_RV)
@@ -364,7 +364,7 @@ PP(pp_prototype)
 
     ret = &PL_sv_undef;
     if (SvPOK(TOPs) && SvCUR(TOPs) >= 7) {
-	const char *s = SvPVX_const(TOPs);
+	const char * const s = SvPVX_const(TOPs);
 	if (strnEQ(s, "CORE::", 6)) {
 	    const int code = keyword(s + 6, SvCUR(TOPs) - 6);
 	    if (code < 0) {	/* Overridable. */
@@ -755,7 +755,7 @@ PP(pp_undef)
     case SVt_PVFM:
 	{
 	    /* let user-undef'd sub keep its identity */
-	    GV* gv = CvGV((CV*)sv);
+	    GV* const gv = CvGV((CV*)sv);
 	    cv_undef((CV*)sv);
 	    CvGV((CV*)sv) = gv;
 	}
@@ -1260,7 +1260,7 @@ PP(pp_modulo)
                 if (!left_neg) {
                     left = SvUVX(POPs);
                 } else {
-                    IV aiv = SvIVX(POPs);
+		    const IV aiv = SvIVX(POPs);
                     if (aiv >= 0) {
                         left = aiv;
                         left_neg = FALSE; /* effectively it's a UV now */
@@ -1352,7 +1352,7 @@ PP(pp_repeat)
 	      else
 		   count = uv;
 	 } else {
-	      IV iv = SvIV(sv);
+	      const IV iv = SvIV(sv);
 	      if (iv < 0)
 		   count = 0;
 	      else
@@ -1370,12 +1370,10 @@ PP(pp_repeat)
 	 count = SvIVx(sv);
     if (GIMME == G_ARRAY && PL_op->op_private & OPpREPEAT_DOLIST) {
 	dMARK;
-	I32 items = SP - MARK;
-	I32 max;
-	static const char oom_list_extend[] =
-	  "Out of memory during list extend";
+	static const char oom_list_extend[] = "Out of memory during list extend";
+	const I32 items = SP - MARK;
+	const I32 max = items * count;
 
-	max = items * count;
 	MEM_WRAP_CHECK_1(max, SV*, oom_list_extend);
 	/* Did the max computation overflow? */
 	if (items > 0 && max > 0 && (max < items || max < count))
@@ -1421,7 +1419,7 @@ PP(pp_repeat)
 	    SP -= items;
     }
     else {	/* Note: mark already snarfed by pp_list */
-	SV *tmpstr = POPs;
+	SV * const tmpstr = POPs;
 	STRLEN len;
 	bool isutf;
 	static const char oom_string_extend[] =
@@ -1604,11 +1602,11 @@ PP(pp_right_shift)
     {
       const IV shift = POPi;
       if (PL_op->op_private & HINT_INTEGER) {
-	IV i = TOPi;
+	const IV i = TOPi;
 	SETi(i >> shift);
       }
       else {
-	UV u = TOPu;
+	const UV u = TOPu;
 	SETu(u >> shift);
       }
       RETURN;
@@ -1933,8 +1931,8 @@ PP(pp_ne)
     if (SvIOK(TOPs)) {
 	SvIV_please(TOPm1s);
 	if (SvIOK(TOPm1s)) {
-	    bool auvok = SvUOK(TOPm1s);
-	    bool buvok = SvUOK(TOPs);
+	    const bool auvok = SvUOK(TOPm1s);
+	    const bool buvok = SvUOK(TOPs);
 	
 	    if (auvok == buvok) { /* ## IV == IV or UV == UV ## */
                 /* Casting IV to UV before comparison isn't going to matter
@@ -1992,8 +1990,8 @@ PP(pp_ncmp)
     dSP; dTARGET; tryAMAGICbin(ncmp,0);
 #ifndef NV_PRESERVES_UV
     if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
-        UV right = PTR2UV(SvRV(POPs));
-        UV left = PTR2UV(SvRV(TOPs));
+	const UV right = PTR2UV(SvRV(POPs));
+	const UV left = PTR2UV(SvRV(TOPs));
 	SETi((left > right) - (left < right));
 	RETURN;
     }
@@ -2680,11 +2678,7 @@ PP(pp_rand)
 PP(pp_srand)
 {
     dSP;
-    UV anum;
-    if (MAXARG < 1)
-	anum = seed();
-    else
-	anum = POPu;
+    const UV anum = (MAXARG < 1) ? seed() : POPu;
     (void)seedDrand01((Rand_seed_t)anum);
     PL_srand_called = TRUE;
     EXTEND(SP, 1);
@@ -2883,7 +2877,7 @@ PP(pp_oct)
 PP(pp_length)
 {
     dSP; dTARGET;
-    SV *sv = TOPs;
+    SV * const sv = TOPs;
 
     if (DO_UTF8(sv))
 	SETi(sv_len_utf8(sv));
@@ -3463,7 +3457,7 @@ PP(pp_uc)
 		if (ulen > u && (SvLEN(TARG) < (min += ulen - u))) {
 		    /* If the eventually required minimum size outgrows
 		     * the available space, we need to grow. */
-		    UV o = d - (U8*)SvPVX_const(TARG);
+		    const UV o = d - (U8*)SvPVX_const(TARG);
 
 		    /* If someone uppercases one million U+03B0s we
 		     * SvGROW() one million times.  Or we could try
@@ -3566,7 +3560,7 @@ PP(pp_lc)
 		if (ulen > u && (SvLEN(TARG) < (min += ulen - u))) {
 		    /* If the eventually required minimum size outgrows
 		     * the available space, we need to grow. */
-		    UV o = d - (U8*)SvPVX_const(TARG);
+		    const UV o = d - (U8*)SvPVX_const(TARG);
 
 		    /* If someone lowercases one million U+0130s we
 		     * SvGROW() one million times.  Or we could try
@@ -3811,7 +3805,7 @@ PP(pp_exists)
 
     if (PL_op->op_private & OPpEXISTS_SUB) {
 	GV *gv;
-	SV *sv = POPs;
+	SV * const sv = POPs;
 	CV * const cv = sv_2cv(sv, &hv, &gv, FALSE);
 	if (cv)
 	    RETPUSHYES;

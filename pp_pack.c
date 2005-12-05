@@ -735,7 +735,7 @@ STMT_START {					\
     STRLEN glen = (in_len);			\
     if (utf8) glen *= UTF8_EXPAND;		\
     if ((cur) + glen >= (start) + SvLEN(cat)) {	\
-	(start) = sv_exp_grow(aTHX_ cat, glen);	\
+	(start) = sv_exp_grow(cat, glen);	\
 	(cur) = (start) + SvCUR(cat);		\
     }						\
 } STMT_END
@@ -748,7 +748,7 @@ STMT_START {					\
     if ((cur) + gl >= (start) + SvLEN(cat)) {	\
         *cur = '\0';				\
         SvCUR_set((cat), (cur) - (start));	\
-	(start) = sv_exp_grow(aTHX_ cat, gl);	\
+	(start) = sv_exp_grow(cat, gl);		\
 	(cur) = (start) + SvCUR(cat);		\
     }						\
     PUSH_BYTES(utf8, cur, buf, glen);		\
@@ -2502,7 +2502,7 @@ marked_upgrade(pTHX_ SV *sv, tempsym_t *sym_ptr) {
    Only grows the string if there is an actual lack of space
 */
 STATIC char *
-sv_exp_grow(pTHX_ SV *sv, STRLEN needed) {
+S_sv_exp_grow(pTHX_ SV *sv, STRLEN needed) {
     const STRLEN cur = SvCUR(sv);
     const STRLEN len = SvLEN(sv);
     STRLEN extend;
