@@ -2587,92 +2587,91 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	    else {
 		MAGIC *mg;
 		
-		switch (SvTYPE(sv)) {
-		case SVt_PVMG:
-		    if ( ((SvFLAGS(sv) &
+		if (SvTYPE(sv) == SVt_PVMG && ((SvFLAGS(sv) &
 			   (SVs_OBJECT|SVf_OK|SVs_GMG|SVs_SMG|SVs_RMG))
 			  == (SVs_OBJECT|SVs_SMG))
-			 && (mg = mg_find(sv, PERL_MAGIC_qr))) {
-                        const regexp *re = (regexp *)mg->mg_obj;
+		    && (mg = mg_find(sv, PERL_MAGIC_qr))) {
+		    const regexp *re = (regexp *)mg->mg_obj;
 
-			if (!mg->mg_ptr) {
-                            const char *fptr = "msix";
-			    char reflags[6];
-			    char ch;
-			    int left = 0;
-			    int right = 4;
-                            char need_newline = 0;
- 			    U16 reganch = (U16)((re->reganch & PMf_COMPILETIME) >> 12);
+		    if (!mg->mg_ptr) {
+			const char *fptr = "msix";
+			char reflags[6];
+			char ch;
+			int left = 0;
+			int right = 4;
+			char need_newline = 0;
+			U16 reganch =
+			    (U16)((re->reganch & PMf_COMPILETIME) >> 12);
 
- 			    while((ch = *fptr++)) {
- 				if(reganch & 1) {
- 				    reflags[left++] = ch;
- 				}
- 				else {
- 				    reflags[right--] = ch;
- 				}
- 				reganch >>= 1;
- 			    }
- 			    if(left != 4) {
- 				reflags[left] = '-';
- 				left = 5;
- 			    }
-
-			    mg->mg_len = re->prelen + 4 + left;
-                            /*
-                             * If /x was used, we have to worry about a regex
-                             * ending with a comment later being embedded
-                             * within another regex. If so, we don't want this
-                             * regex's "commentization" to leak out to the
-                             * right part of the enclosing regex, we must cap
-                             * it with a newline.
-                             *
-                             * So, if /x was used, we scan backwards from the
-                             * end of the regex. If we find a '#' before we
-                             * find a newline, we need to add a newline
-                             * ourself. If we find a '\n' first (or if we
-                             * don't find '#' or '\n'), we don't need to add
-                             * anything.  -jfriedl
-                             */
-                            if (PMf_EXTENDED & re->reganch)
-                            {
-                                const char *endptr = re->precomp + re->prelen;
-                                while (endptr >= re->precomp)
-                                {
-                                    const char c = *(endptr--);
-                                    if (c == '\n')
-                                        break; /* don't need another */
-                                    if (c == '#') {
-                                        /* we end while in a comment, so we
-                                           need a newline */
-                                        mg->mg_len++; /* save space for it */
-                                        need_newline = 1; /* note to add it */
-					break;
-                                    }
-                                }
-                            }
-
-			    Newx(mg->mg_ptr, mg->mg_len + 1 + left, char);
-			    Copy("(?", mg->mg_ptr, 2, char);
-			    Copy(reflags, mg->mg_ptr+2, left, char);
-			    Copy(":", mg->mg_ptr+left+2, 1, char);
-			    Copy(re->precomp, mg->mg_ptr+3+left, re->prelen, char);
-                            if (need_newline)
-                                mg->mg_ptr[mg->mg_len - 2] = '\n';
-			    mg->mg_ptr[mg->mg_len - 1] = ')';
-			    mg->mg_ptr[mg->mg_len] = 0;
+			while((ch = *fptr++)) {
+			    if(reganch & 1) {
+				reflags[left++] = ch;
+			    }
+			    else {
+				reflags[right--] = ch;
+			    }
+			    reganch >>= 1;
 			}
-			PL_reginterp_cnt += re->program[0].next_off;
+			if(left != 4) {
+			    reflags[left] = '-';
+			    left = 5;
+			}
 
-			if (re->reganch & ROPT_UTF8)
-			    SvUTF8_on(origsv);
-			else
-			    SvUTF8_off(origsv);
-			if (lp)
-			    *lp = mg->mg_len;
-			return mg->mg_ptr;
+			mg->mg_len = re->prelen + 4 + left;
+			/*
+			 * If /x was used, we have to worry about a regex
+			 * ending with a comment later being embedded
+			 * within another regex. If so, we don't want this
+			 * regex's "commentization" to leak out to the
+			 * right part of the enclosing regex, we must cap
+			 * it with a newline.
+			 *
+			 * So, if /x was used, we scan backwards from the
+			 * end of the regex. If we find a '#' before we
+			 * find a newline, we need to add a newline
+			 * ourself. If we find a '\n' first (or if we
+			 * don't find '#' or '\n'), we don't need to add
+			 * anything.  -jfriedl
+			 */
+			if (PMf_EXTENDED & re->reganch) {
+			    const char *endptr = re->precomp + re->prelen;
+			    while (endptr >= re->precomp) {
+				const char c = *(endptr--);
+				if (c == '\n')
+				    break; /* don't need another */
+				if (c == '#') {
+				    /* we end while in a comment, so we
+				       need a newline */
+				    mg->mg_len++; /* save space for it */
+				    need_newline = 1; /* note to add it */
+				    break;
+				}
+			    }
+			}
+
+			Newx(mg->mg_ptr, mg->mg_len + 1 + left, char);
+			Copy("(?", mg->mg_ptr, 2, char);
+			Copy(reflags, mg->mg_ptr+2, left, char);
+			Copy(":", mg->mg_ptr+left+2, 1, char);
+			Copy(re->precomp, mg->mg_ptr+3+left, re->prelen, char);
+			if (need_newline)
+			    mg->mg_ptr[mg->mg_len - 2] = '\n';
+			mg->mg_ptr[mg->mg_len - 1] = ')';
+			mg->mg_ptr[mg->mg_len] = 0;
 		    }
-					/* Fall through */
+		    PL_reginterp_cnt += re->program[0].next_off;
+
+		    if (re->reganch & ROPT_UTF8)
+			SvUTF8_on(origsv);
+		    else
+			SvUTF8_off(origsv);
+		    if (lp)
+			*lp = mg->mg_len;
+		    return mg->mg_ptr;
+		}
+
+
+		switch (SvTYPE(sv)) {
 		case SVt_NULL:
 		case SVt_IV:
 		case SVt_NV:
@@ -2680,6 +2679,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		case SVt_PV:
 		case SVt_PVIV:
 		case SVt_PVNV:
+		case SVt_PVMG:
 		case SVt_PVBM:	typestr = SvVOK(sv) ? "VSTRING"
 				    : SvROK(sv) ? "REF" : "SCALAR"; break;
 		case SVt_PVLV:	typestr = SvROK(sv) ? "REF"
