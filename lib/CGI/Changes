@@ -1,3 +1,23 @@
+  Version 3.13
+    1. Removed extraneous empty "?" from end of self_url().
+
+  Version 3.12
+    1. Fixed virtual_port so that it works properly with https protocol.
+    2. Fixed documentation for upload_hook().
+    3. Added POSTDATA documentation.
+    4. Made upload_hook() work in function-oriented mode.
+    5. Fixed POST_MAX behavior so that it doesn't cause client to hang.
+    6. Disabled automatic tab indexes and added new -tabindex pragma to
+	turn automatic indexes back on.
+    7. The url() and self_url() methods now work better in the context of Apache
+       mod_rewrite. Be advised that path_info() may give you confusing results
+       when mod_rewrite is active because Apache calculates the path info *after*
+       rewriting. This is mostly worked around in url() and self_url(), but you
+       may notice some anomalies.
+    8. Removed empty (and non-validating) <div> from code emitted by end_form().
+    9. Fixed CGI::Carp to work correctly with Mod_perl 1.29 in an Apache 2 environment.
+   10. Setting $CGI::TMPDIRECTORY should now be effective.
+
   Version 3.11
     1. Killed warning in CGI::Cookie about MOD_PERL_API_VERSION
     2. Fixed append() so that it works in function mode.
