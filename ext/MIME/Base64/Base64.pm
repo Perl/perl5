@@ -1,6 +1,6 @@
 package MIME::Base64;
 
-# $Id: Base64.pm,v 3.9 2005/11/26 10:47:48 gisle Exp $
+# $Id: Base64.pm,v 3.11 2005/11/29 20:59:55 gisle Exp $
 
 use strict;
 use vars qw(@ISA @EXPORT $VERSION);
@@ -9,7 +9,7 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(encode_base64 decode_base64);
 
-$VERSION = '3.06';
+$VERSION = '3.07';
 
 require XSLoader;
 XSLoader::load('MIME::Base64', $VERSION);
@@ -91,8 +91,8 @@ C<-w> switch:
 
 The number of characters to decode is not a multiple of 4.  Legal
 base64 data should be padded with one or two "=" characters to make
-its length a multiple of 4.  The decoded result will anyway be as if
-the padding was there.
+its length a multiple of 4.  The decoded result will be the same
+whether the padding is present or not.
 
 =item Premature padding of base64 data
 

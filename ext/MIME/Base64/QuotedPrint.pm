@@ -1,6 +1,6 @@
 package MIME::QuotedPrint;
 
-# $Id: QuotedPrint.pm,v 3.6 2005/11/26 10:47:48 gisle Exp $
+# $Id: QuotedPrint.pm,v 3.7 2005/11/29 20:49:46 gisle Exp $
 
 use strict;
 use vars qw(@ISA @EXPORT $VERSION);
@@ -9,7 +9,7 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(encode_qp decode_qp);
 
-$VERSION = "3.06";
+$VERSION = "3.07";
 
 use MIME::Base64;  # will load XS version of {en,de}code_qp()
 
