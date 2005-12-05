@@ -2509,7 +2509,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 {
     register char *s;
     int olderrno;
-    SV *tsv, *origsv;
+    SV *tsv;
     char tbuf[64];	/* Must fit sprintf/Gconvert of longest IV/NV */
     char *tmpbuf = tbuf;
     STRLEN len = 0;	/* Hush gcc. len is always initialised before use.  */
@@ -2555,6 +2555,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
 	    SV* tmpstr;
+	    SV *referent;
             register const char *typestr;
             if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,string)) &&
                 (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
@@ -2580,17 +2581,16 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
                     SvUTF8_off(sv);
                 return pv;
             }
-	    origsv = sv;
-	    sv = (SV*)SvRV(sv);
-	    if (!sv)
+	    referent = (SV*)SvRV(sv);
+	    if (!referent)
 		typestr = "NULLREF";
 	    else {
 		MAGIC *mg;
 		
-		if (SvTYPE(sv) == SVt_PVMG && ((SvFLAGS(sv) &
+		if (SvTYPE(referent) == SVt_PVMG && ((SvFLAGS(referent) &
 			   (SVs_OBJECT|SVf_OK|SVs_GMG|SVs_SMG|SVs_RMG))
 			  == (SVs_OBJECT|SVs_SMG))
-		    && (mg = mg_find(sv, PERL_MAGIC_qr))) {
+		    && (mg = mg_find(referent, PERL_MAGIC_qr))) {
 		    const regexp *re = (regexp *)mg->mg_obj;
 
 		    if (!mg->mg_ptr) {
@@ -2662,24 +2662,24 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		    PL_reginterp_cnt += re->program[0].next_off;
 
 		    if (re->reganch & ROPT_UTF8)
-			SvUTF8_on(origsv);
+			SvUTF8_on(sv);
 		    else
-			SvUTF8_off(origsv);
+			SvUTF8_off(sv);
 		    if (lp)
 			*lp = mg->mg_len;
 		    return mg->mg_ptr;
 		}
 
-		typestr = sv_reftype(sv, 0);
+		typestr = sv_reftype(referent, 0);
 
 		tsv = sv_newmortal();
-		if (SvOBJECT(sv)) {
-		    const char * const name = HvNAME_get(SvSTASH(sv));
+		if (SvOBJECT(referent)) {
+		    const char * const name = HvNAME_get(SvSTASH(referent));
 		    Perl_sv_setpvf(aTHX_ tsv, "%s=%s(0x%"UVxf")",
-				   name ? name : "__ANON__" , typestr, PTR2UV(sv));
+				   name ? name : "__ANON__" , typestr, PTR2UV(referent));
 		}
 		else
-		    Perl_sv_setpvf(aTHX_ tsv, "%s(0x%"UVxf")", typestr, PTR2UV(sv));
+		    Perl_sv_setpvf(aTHX_ tsv, "%s(0x%"UVxf")", typestr, PTR2UV(referent));
 		if (lp)
 		    *lp = SvCUR(tsv);
 		return SvPVX(tsv);
