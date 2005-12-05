@@ -2170,7 +2170,8 @@ when the function is called.
 
 =item Malformed UTF-8 character (%s)
 
-(W utf8) Perl detected something that didn't comply with UTF-8 encoding rules.
+(S utf8) (F) Perl detected something that didn't comply with UTF-8
+encoding rules.
 
 One possible cause is that you read in data that you thought to be in
 UTF-8 but it wasn't (it was for example legacy 8-bit data).  Another
