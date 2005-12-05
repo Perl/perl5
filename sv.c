@@ -2672,7 +2672,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 
 		typestr = sv_reftype(sv, 0);
 
-		tsv = NEWSV(0,0);
+		tsv = sv_newmortal();
 		if (SvOBJECT(sv)) {
 		    const char * const name = HvNAME_get(SvSTASH(sv));
 		    Perl_sv_setpvf(aTHX_ tsv, "%s=%s(0x%"UVxf")",
@@ -2680,7 +2680,9 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		}
 		else
 		    Perl_sv_setpvf(aTHX_ tsv, "%s(0x%"UVxf")", typestr, PTR2UV(sv));
-		goto tokensaveref;
+		if (lp)
+		    *lp = SvCUR(tsv);
+		return SvPVX(tsv);
 	    }
 	    if (lp)
 		*lp = strlen(typestr);
@@ -2778,7 +2780,6 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
     if (SvROK(sv)) {	/* XXX Skip this when sv_pvn_force calls */
 	/* Sneaky stuff here */
 
-      tokensaveref:
 	if (!tsv)
 	    tsv = newSVpvn(tmpbuf, len);
 	sv_2mortal(tsv);
