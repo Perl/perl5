@@ -1752,13 +1752,11 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
 		)
 		SvIOK_on(sv);
 	    SvIsUV_on(sv);
-	  ret_iv_max:
 	    DEBUG_c(PerlIO_printf(Perl_debug_log,
 				  "0x%"UVxf" 2iv(%"UVuf" => %"IVdf") (as unsigned)\n",
 				  PTR2UV(sv),
 				  SvUVX(sv),
 				  SvUVX(sv)));
-	    return (IV)SvUVX(sv);
 	}
     }
     else if (SvPOKp(sv) && SvLEN(sv)) {
@@ -1872,7 +1870,6 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
 			SvIsUV_on(sv);
 		    }
 		}
-		goto ret_iv_max;
 	    }
 #else /* NV_PRESERVES_UV */
             if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
@@ -1906,9 +1903,7 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
                          1      1       already read UV.
                        so there's no point in sv_2iuv_non_preserve() attempting
                        to use atol, strtol, strtoul etc.  */
-                    if (sv_2iuv_non_preserve (sv, numtype)
-                        >= IS_NUMBER_OVERFLOW_IV)
-                    goto ret_iv_max;
+                    sv_2iuv_non_preserve (sv, numtype);
                 }
             }
 #endif /* NV_PRESERVES_UV */
