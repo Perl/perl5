@@ -1678,14 +1678,8 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
 	}
     }
     if (SvIOKp(sv)) {
-	if (SvIsUV(sv)) {
-	    return (IV)(SvUVX(sv));
-	}
-	else {
-	    return SvIVX(sv);
-	}
     }
-    if (SvNOKp(sv)) {
+    else if (SvNOKp(sv)) {
 	/* erm. not sure. *should* never get NOKp (without NOK) from sv_2nv
 	 * without also getting a cached IV/UV from it at the same time
 	 * (ie PV->NV conversion should detect loss of accuracy and cache
@@ -1971,14 +1965,8 @@ Perl_sv_2uv_flags(pTHX_ register SV *sv, I32 flags)
 	}
     }
     if (SvIOKp(sv)) {
-	if (SvIsUV(sv)) {
-	    return SvUVX(sv);
-	}
-	else {
-	    return (UV)SvIVX(sv);
-	}
     }
-    if (SvNOKp(sv)) {
+    else if (SvNOKp(sv)) {
 	/* erm. not sure. *should* never get NOKp (without NOK) from sv_2nv
 	 * without also getting a cached IV/UV from it at the same time
 	 * (ie PV->NV conversion should detect loss of accuracy and cache
