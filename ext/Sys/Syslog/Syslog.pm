@@ -328,7 +328,14 @@ sub syslog {
 
     $whoami .= "[$$]" if our $lo_pid;
 
-    $mask =~ s/(?<!%)%m/$!/g;
+    if ($mask =~ /%m/) {
+	my $err = $!;
+	# escape percent signs if sprintf will be called
+	$err =~ s/%/%%/g if @_;
+	# replace %m with $err, if preceded by an even number of percent signs
+	$mask =~ s/(?<!%)((?:%%)*)%m/$1$err/g;
+    }
+
     $mask .= "\n" unless $mask =~ /\n$/;
     $message = @_ ? sprintf($mask, @_) : $mask;
 
