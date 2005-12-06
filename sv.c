@@ -1625,65 +1625,14 @@ S_sv_2iuv_non_preserve(pTHX_ register SV *sv, I32 numtype)
 }
 #endif /* !NV_PRESERVES_UV*/
 
-/*
-=for apidoc sv_2iv_flags
-
-Return the integer value of an SV, doing any necessary string
-conversion.  If flags includes SV_GMAGIC, does an mg_get() first.
-Normally used via the C<SvIV(sv)> and C<SvIVx(sv)> macros.
-
-=cut
-*/
-
-IV
-Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
-{
-    if (!sv)
-	return 0;
-    if (SvGMAGICAL(sv)) {
-	if (flags & SV_GMAGIC)
-	    mg_get(sv);
-	if (SvIOKp(sv))
-	    return SvIVX(sv);
-	if (SvNOKp(sv)) {
-	    return I_V(SvNVX(sv));
-	}
-	if (SvPOKp(sv) && SvLEN(sv))
-	    return asIV(sv);
-	if (!SvROK(sv)) {
-	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
-		if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
-		    report_uninit(sv);
-	    }
-	    return 0;
-	}
-    }
-    if (SvTHINKFIRST(sv)) {
-	if (SvROK(sv)) {
-	    if (SvAMAGIC(sv)) {
-		SV * const tmpstr=AMG_CALLun(sv,numer);
-		if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
-		    return SvIV(tmpstr);
-		}
-	    }
-	    return PTR2IV(SvRV(sv));
-	}
-	if (SvIsCOW(sv)) {
-	    sv_force_normal_flags(sv, 0);
-	}
-	if (SvREADONLY(sv) && !SvOK(sv)) {
-	    if (ckWARN(WARN_UNINITIALIZED))
-		report_uninit(sv);
-	    return 0;
-	}
-    }
-    if (SvIOKp(sv)) {
-    }
-    else if (SvNOKp(sv)) {
+STATIC bool
+S_sv_2iuv_common(pTHX_ SV *sv) {
+    if (SvNOKp(sv)) {
 	/* erm. not sure. *should* never get NOKp (without NOK) from sv_2nv
 	 * without also getting a cached IV/UV from it at the same time
 	 * (ie PV->NV conversion should detect loss of accuracy and cache
-	 * IV or UV at same time to avoid this.  NWC */
+	 * IV or UV at same time to avoid this. */
+	/* IV-over-UV optimisation - choose to cache IV if possible */
 
 	if (SvTYPE(sv) == SVt_NV)
 	    sv_upgrade(sv, SVt_PVNV);
@@ -1756,14 +1705,14 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
     else if (SvPOKp(sv) && SvLEN(sv)) {
 	UV value;
 	const int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
-	/* We want to avoid a possible problem when we cache an IV which
+	/* We want to avoid a possible problem when we cache an IV/ a UV which
 	   may be later translated to an NV, and the resulting NV is not
 	   the same as the direct translation of the initial string
 	   (eg 123.456 can shortcut to the IV 123 with atol(), but we must
 	   be careful to ensure that the value with the .456 is around if the
 	   NV value is requested in the future).
 	
-	   This means that if we cache such an IV, we need to cache the
+	   This means that if we cache such an IV/a UV, we need to cache the
 	   NV as well.  Moreover, we trade speed for space, and do not
 	   cache the NV if we are sure it's not needed.
 	 */
@@ -1795,6 +1744,7 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
 		if (value <= (UV)IV_MAX) {
 		    SvIV_set(sv, (IV)value);
 		} else {
+		    /* it didn't overflow, and it was positive. */
 		    SvUV_set(sv, value);
 		    SvIsUV_on(sv);
 		}
@@ -1835,40 +1785,40 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
 				  PTR2UV(sv), SvNVX(sv)));
 #endif
 
-
 #ifdef NV_PRESERVES_UV
-	    (void)SvIOKp_on(sv);
-	    (void)SvNOK_on(sv);
-	    if (SvNVX(sv) < (NV)IV_MAX + 0.5) {
-		SvIV_set(sv, I_V(SvNVX(sv)));
-		if ((NV)(SvIVX(sv)) == SvNVX(sv)) {
-		    SvIOK_on(sv);
-		} else {
-		    /* Integer is imprecise. NOK, IOKp */
-		}
-		/* UV will not work better than IV */
-	    } else {
-		if (SvNVX(sv) > (NV)UV_MAX) {
-		    SvIsUV_on(sv);
-		    /* Integer is inaccurate. NOK, IOKp, is UV */
-		    SvUV_set(sv, UV_MAX);
-		    SvIsUV_on(sv);
-		} else {
-		    SvUV_set(sv, U_V(SvNVX(sv)));
-		    /* 0xFFFFFFFFFFFFFFFF not an issue in here */
-		    if ((NV)(SvUVX(sv)) == SvNVX(sv)) {
-			SvIOK_on(sv);
-			SvIsUV_on(sv);
-		    } else {
-			/* Integer is imprecise. NOK, IOKp, is UV */
-			SvIsUV_on(sv);
-		    }
-		}
-	    }
+            (void)SvIOKp_on(sv);
+            (void)SvNOK_on(sv);
+            if (SvNVX(sv) < (NV)IV_MAX + 0.5) {
+                SvIV_set(sv, I_V(SvNVX(sv)));
+                if ((NV)(SvIVX(sv)) == SvNVX(sv)) {
+                    SvIOK_on(sv);
+                } else {
+                    /* Integer is imprecise. NOK, IOKp */
+                }
+                /* UV will not work better than IV */
+            } else {
+                if (SvNVX(sv) > (NV)UV_MAX) {
+                    SvIsUV_on(sv);
+                    /* Integer is inaccurate. NOK, IOKp, is UV */
+                    SvUV_set(sv, UV_MAX);
+                    SvIsUV_on(sv);
+                } else {
+                    SvUV_set(sv, U_V(SvNVX(sv)));
+                    /* 0xFFFFFFFFFFFFFFFF not an issue in here, NVs
+                       NV preservse UV so can do correct comparison.  */
+                    if ((NV)(SvUVX(sv)) == SvNVX(sv)) {
+                        SvIOK_on(sv);
+                        SvIsUV_on(sv);
+                    } else {
+                        /* Integer is imprecise. NOK, IOKp, is UV */
+                        SvIsUV_on(sv);
+                    }
+                }
+            }
 #else /* NV_PRESERVES_UV */
             if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
                 == (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT)) {
-                /* The IV slot will have been set from value returned by
+                /* The IV/UV slot will have been set from value returned by
                    grok_number above.  The NV slot has just been set using
                    Atof.  */
 	        SvNOK_on(sv);
@@ -1902,13 +1852,76 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
             }
 #endif /* NV_PRESERVES_UV */
 	}
-    } else  {
-	if (!PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP) && ckWARN(WARN_UNINITIALIZED))
-	    report_uninit(sv);
+    }
+    else  {
+	if (!(SvFLAGS(sv) & SVs_PADTMP)) {
+	    if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
+		report_uninit(sv);
+	}
 	if (SvTYPE(sv) < SVt_IV)
 	    /* Typically the caller expects that sv_any is not NULL now.  */
 	    sv_upgrade(sv, SVt_IV);
+	/* Return 0 from the caller.  */
+	return TRUE;
+    }
+    return FALSE;
+}
+
+/*
+=for apidoc sv_2iv_flags
+
+Return the integer value of an SV, doing any necessary string
+conversion.  If flags includes SV_GMAGIC, does an mg_get() first.
+Normally used via the C<SvIV(sv)> and C<SvIVx(sv)> macros.
+
+=cut
+*/
+
+IV
+Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
+{
+    if (!sv)
 	return 0;
+    if (SvGMAGICAL(sv)) {
+	if (flags & SV_GMAGIC)
+	    mg_get(sv);
+	if (SvIOKp(sv))
+	    return SvIVX(sv);
+	if (SvNOKp(sv)) {
+	    return I_V(SvNVX(sv));
+	}
+	if (SvPOKp(sv) && SvLEN(sv))
+	    return asIV(sv);
+	if (!SvROK(sv)) {
+	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
+		if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
+		    report_uninit(sv);
+	    }
+	    return 0;
+	}
+    }
+    if (SvTHINKFIRST(sv)) {
+	if (SvROK(sv)) {
+	    if (SvAMAGIC(sv)) {
+		SV * const tmpstr=AMG_CALLun(sv,numer);
+		if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
+		    return SvIV(tmpstr);
+		}
+	    }
+	    return PTR2IV(SvRV(sv));
+	}
+	if (SvIsCOW(sv)) {
+	    sv_force_normal_flags(sv, 0);
+	}
+	if (SvREADONLY(sv) && !SvOK(sv)) {
+	    if (ckWARN(WARN_UNINITIALIZED))
+		report_uninit(sv);
+	    return 0;
+	}
+    }
+    if (!SvIOKp(sv)) {
+	if (S_sv_2iuv_common(aTHX_ sv))
+	    return 0;
     }
     DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2iv(%"IVdf")\n",
 	PTR2UV(sv),SvIVX(sv)));
@@ -1964,225 +1977,9 @@ Perl_sv_2uv_flags(pTHX_ register SV *sv, I32 flags)
 	    return 0;
 	}
     }
-    if (SvIOKp(sv)) {
-    }
-    else if (SvNOKp(sv)) {
-	/* erm. not sure. *should* never get NOKp (without NOK) from sv_2nv
-	 * without also getting a cached IV/UV from it at the same time
-	 * (ie PV->NV conversion should detect loss of accuracy and cache
-	 * IV or UV at same time to avoid this. */
-	/* IV-over-UV optimisation - choose to cache IV if possible */
-
-	if (SvTYPE(sv) == SVt_NV)
-	    sv_upgrade(sv, SVt_PVNV);
-
-	(void)SvIOKp_on(sv);	/* Must do this first, to clear any SvOOK */
-	if (SvNVX(sv) < (NV)IV_MAX + 0.5) {
-	    SvIV_set(sv, I_V(SvNVX(sv)));
-	    if (SvNVX(sv) == (NV) SvIVX(sv)
-#ifndef NV_PRESERVES_UV
-		&& (((UV)1 << NV_PRESERVES_UV_BITS) >
-		    (UV)(SvIVX(sv) > 0 ? SvIVX(sv) : -SvIVX(sv)))
-		/* Don't flag it as "accurately an integer" if the number
-		   came from a (by definition imprecise) NV operation, and
-		   we're outside the range of NV integer precision */
-#endif
-		) {
-		SvIOK_on(sv);  /* Can this go wrong with rounding? NWC */
-		DEBUG_c(PerlIO_printf(Perl_debug_log,
-				      "0x%"UVxf" uv(%"NVgf" => %"IVdf") (precise)\n",
-				      PTR2UV(sv),
-				      SvNVX(sv),
-				      SvIVX(sv)));
-
-	    } else {
-		/* IV not precise.  No need to convert from PV, as NV
-		   conversion would already have cached IV if it detected
-		   that PV->IV would be better than PV->NV->IV
-		   flags already correct - don't set public IOK.  */
-		DEBUG_c(PerlIO_printf(Perl_debug_log,
-				      "0x%"UVxf" uv(%"NVgf" => %"IVdf") (imprecise)\n",
-				      PTR2UV(sv),
-				      SvNVX(sv),
-				      SvIVX(sv)));
-	    }
-	    /* Can the above go wrong if SvIVX == IV_MIN and SvNVX < IV_MIN,
-	       but the cast (NV)IV_MIN rounds to a the value less (more
-	       negative) than IV_MIN which happens to be equal to SvNVX ??
-	       Analogous to 0xFFFFFFFFFFFFFFFF rounding up to NV (2**64) and
-	       NV rounding back to 0xFFFFFFFFFFFFFFFF, so UVX == UV(NVX) and
-	       (NV)UVX == NVX are both true, but the values differ. :-(
-	       Hopefully for 2s complement IV_MIN is something like
-	       0x8000000000000000 which will be exact. NWC */
-	}
-	else {
-	    SvUV_set(sv, U_V(SvNVX(sv)));
-	    if (
-		(SvNVX(sv) == (NV) SvUVX(sv))
-#ifndef  NV_PRESERVES_UV
-		/* Make sure it's not 0xFFFFFFFFFFFFFFFF */
-		/*&& (SvUVX(sv) != UV_MAX) irrelevant with code below */
-		&& (((UV)1 << NV_PRESERVES_UV_BITS) > SvUVX(sv))
-		/* Don't flag it as "accurately an integer" if the number
-		   came from a (by definition imprecise) NV operation, and
-		   we're outside the range of NV integer precision */
-#endif
-		)
-		SvIOK_on(sv);
-	    SvIsUV_on(sv);
-	    DEBUG_c(PerlIO_printf(Perl_debug_log,
-				  "0x%"UVxf" 2uv(%"UVuf" => %"IVdf") (as unsigned)\n",
-				  PTR2UV(sv),
-				  SvUVX(sv),
-				  SvUVX(sv)));
-	}
-    }
-    else if (SvPOKp(sv) && SvLEN(sv)) {
-	UV value;
-	const int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
-
-	/* We want to avoid a possible problem when we cache a UV which
-	   may be later translated to an NV, and the resulting NV is not
-	   the translation of the initial data.
-	
-	   This means that if we cache such a UV, we need to cache the
-	   NV as well.  Moreover, we trade speed for space, and do not
-	   cache the NV if not needed.
-	 */
-
-	/* SVt_PVNV is one higher than SVt_PVIV, hence this order  */
-	if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
-	     == IS_NUMBER_IN_UV) {
-	    /* It's definitely an integer, only upgrade to PVIV */
-	    if (SvTYPE(sv) < SVt_PVIV)
-		sv_upgrade(sv, SVt_PVIV);
-	    (void)SvIOK_on(sv);
-	} else if (SvTYPE(sv) < SVt_PVNV)
-	    sv_upgrade(sv, SVt_PVNV);
-
-	/* If NV preserves UV then we only use the UV value if we know that
-	   we aren't going to call atof() below. If NVs don't preserve UVs
-	   then the value returned may have more precision than atof() will
-	   return, even though it isn't accurate.  */
-	if ((numtype & (IS_NUMBER_IN_UV
-#ifdef NV_PRESERVES_UV
-			| IS_NUMBER_NOT_INT
-#endif
-	    )) == IS_NUMBER_IN_UV) {
-	    /* This won't turn off the public IOK flag if it was set above  */
-	    (void)SvIOKp_on(sv);
-
-	    if (!(numtype & IS_NUMBER_NEG)) {
-		/* positive */;
-		if (value <= (UV)IV_MAX) {
-		    SvIV_set(sv, (IV)value);
-		} else {
-		    /* it didn't overflow, and it was positive. */
-		    SvUV_set(sv, value);
-		    SvIsUV_on(sv);
-		}
-	    } else {
-		/* 2s complement assumption  */
-		if (value <= (UV)IV_MIN) {
-		    SvIV_set(sv, -(IV)value);
-		} else {
-		    /* Too negative for an IV.  This is a double upgrade, but
-		       I'm assuming it will be rare.  */
-		    if (SvTYPE(sv) < SVt_PVNV)
-			sv_upgrade(sv, SVt_PVNV);
-		    SvNOK_on(sv);
-		    SvIOK_off(sv);
-		    SvIOKp_on(sv);
-		    SvNV_set(sv, -(NV)value);
-		    SvIV_set(sv, IV_MIN);
-		}
-	    }
-	}
-	
-	if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
-	    != IS_NUMBER_IN_UV) {
-	    /* It wasn't an integer, or it overflowed the UV. */
-	    SvNV_set(sv, Atof(SvPVX_const(sv)));
-
-            if (! numtype && ckWARN(WARN_NUMERIC))
-		    not_a_number(sv);
-
-#if defined(USE_LONG_DOUBLE)
-            DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2uv(%" PERL_PRIgldbl ")\n",
-                                  PTR2UV(sv), SvNVX(sv)));
-#else
-            DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2uv(%"NVgf")\n",
-                                  PTR2UV(sv), SvNVX(sv)));
-#endif
-
-#ifdef NV_PRESERVES_UV
-            (void)SvIOKp_on(sv);
-            (void)SvNOK_on(sv);
-            if (SvNVX(sv) < (NV)IV_MAX + 0.5) {
-                SvIV_set(sv, I_V(SvNVX(sv)));
-                if ((NV)(SvIVX(sv)) == SvNVX(sv)) {
-                    SvIOK_on(sv);
-                } else {
-                    /* Integer is imprecise. NOK, IOKp */
-                }
-                /* UV will not work better than IV */
-            } else {
-                if (SvNVX(sv) > (NV)UV_MAX) {
-                    SvIsUV_on(sv);
-                    /* Integer is inaccurate. NOK, IOKp, is UV */
-                    SvUV_set(sv, UV_MAX);
-                    SvIsUV_on(sv);
-                } else {
-                    SvUV_set(sv, U_V(SvNVX(sv)));
-                    /* 0xFFFFFFFFFFFFFFFF not an issue in here, NVs
-                       NV preservse UV so can do correct comparison.  */
-                    if ((NV)(SvUVX(sv)) == SvNVX(sv)) {
-                        SvIOK_on(sv);
-                        SvIsUV_on(sv);
-                    } else {
-                        /* Integer is imprecise. NOK, IOKp, is UV */
-                        SvIsUV_on(sv);
-                    }
-                }
-            }
-#else /* NV_PRESERVES_UV */
-            if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
-                == (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT)) {
-                /* The UV slot will have been set from value returned by
-                   grok_number above.  The NV slot has just been set using
-                   Atof.  */
-	        SvNOK_on(sv);
-                assert (SvIOKp(sv));
-            } else {
-                if (((UV)1 << NV_PRESERVES_UV_BITS) >
-                    U_V(SvNVX(sv) > 0 ? SvNVX(sv) : -SvNVX(sv))) {
-                    /* Small enough to preserve all bits. */
-                    (void)SvIOKp_on(sv);
-                    SvNOK_on(sv);
-                    SvIV_set(sv, I_V(SvNVX(sv)));
-                    if ((NV)(SvIVX(sv)) == SvNVX(sv))
-                        SvIOK_on(sv);
-                    /* Assumption: first non-preserved integer is < IV_MAX,
-                       this NV is in the preserved range, therefore: */
-                    if (!(U_V(SvNVX(sv) > 0 ? SvNVX(sv) : -SvNVX(sv))
-                          < (UV)IV_MAX)) {
-                        Perl_croak(aTHX_ "sv_2uv assumed (U_V(fabs((double)SvNVX(sv))) < (UV)IV_MAX) but SvNVX(sv)=%"NVgf" U_V is 0x%"UVxf", IV_MAX is 0x%"UVxf"\n", SvNVX(sv), U_V(SvNVX(sv)), (UV)IV_MAX);
-                    }
-                } else
-                    sv_2iuv_non_preserve (sv, numtype);
-            }
-#endif /* NV_PRESERVES_UV */
-	}
-    }
-    else  {
-	if (!(SvFLAGS(sv) & SVs_PADTMP)) {
-	    if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
-		report_uninit(sv);
-	}
-	if (SvTYPE(sv) < SVt_IV)
-	    /* Typically the caller expects that sv_any is not NULL now.  */
-	    sv_upgrade(sv, SVt_IV);
-	return 0;
+    if (!SvIOKp(sv)) {
+	if (S_sv_2iuv_common(aTHX_ sv))
+	    return 0;
     }
 
     DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2uv(%"UVuf")\n",
