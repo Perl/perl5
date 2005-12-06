@@ -4710,9 +4710,13 @@ S_reginclass(pTHX_ register const regnode *n, register const U8* p, STRLEN* lenp
     STRLEN len = 0;
     STRLEN plen;
 
-    if (do_utf8 && !UTF8_IS_INVARIANT(c))
-	 c = utf8n_to_uvchr(p, UTF8_MAXBYTES, &len,
-			    ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
+    if (do_utf8 && !UTF8_IS_INVARIANT(c)) {
+	c = utf8n_to_uvchr(p, UTF8_MAXBYTES, &len,
+			    ckWARN(WARN_UTF8) ? UTF8_CHECK_ONLY :
+					UTF8_ALLOW_ANYUV|UTF8_CHECK_ONLY);
+	if (len == (STRLEN)-1)
+	    Perl_croak(aTHX_ "Malformed UTF-8 character (fatal)");
+    }
 
     plen = lenp ? *lenp : UNISKIP(NATIVE_TO_UNI(c));
     if (do_utf8 || (flags & ANYOF_UNICODE)) {
