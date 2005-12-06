@@ -64,7 +64,7 @@ S_write_no_mem(pTHX)
     PerlLIO_write(PerlIO_fileno(Perl_error_log),
 		  PL_no_mem, strlen(PL_no_mem));
     my_exit(1);
-    NORETURN_FUNCTION_END
+    NORETURN_FUNCTION_END;
 }
 
 /* paranoid version of system's malloc() */
