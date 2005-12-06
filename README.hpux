@@ -206,8 +206,8 @@ HP also ships servers with the 128-bit Itanium processor(s). As of the
 date of this document's last update, the following systems contain
 Itanium or Itanium 2 chips (this is very likely to be out of date):
 
-  rx1600, rx1620, rx2600, rx2600hptc, rx2620, rx4610, rx4640, rx5670,
-  rx7620, rx8620, rx9610
+  BL60p, rx1600, rx1620, rx2600, rx2600hptc, rx2620, rx4610, rx4640,
+  rx5670, rx7620, rx8620, rx9610
 
 To see all about your machine, type
 
@@ -352,7 +352,7 @@ on that page to rebuild gcc using itself.
 
 On PA-RISC you need a different compiler for 32-bit applications and for
 64-bit applications. On PA-RISC, 32-bit objects and 64-bit objects do
-not mix. period. There is no different behaviour for HP C-ANSI-C or GNU
+not mix. Period. There is no different behaviour for HP C-ANSI-C or GNU
 gcc. So if you require your perl binary to use 64-bit libraries, like
 Oracle-64bit, you MUST build a 64-bit perl.
 
@@ -579,6 +579,6 @@ With much assistance regarding shared libraries from Marc Sabatella.
 
 =head1 DATE
 
-Version 0.7.4: 2005-06-02
+Version 0.7.5: 2005-12-06
 
 =cut
