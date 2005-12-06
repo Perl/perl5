@@ -2509,10 +2509,6 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 {
     register char *s;
     int olderrno;
-    SV *tsv;
-    char tbuf[64];	/* Must fit sprintf/Gconvert of longest IV/NV */
-    char *tmpbuf = tbuf;
-    STRLEN len = 0;	/* Hush gcc. len is always initialised before use.  */
 
     if (!sv) {
 	if (lp)
@@ -2531,16 +2527,45 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		return (char *)SvPVX_const(sv);
 	    return SvPVX(sv);
 	}
-	if (SvIOKp(sv)) {
-	    len = SvIsUV(sv) ? my_sprintf(tmpbuf,"%"UVuf, (UV)SvUVX(sv))
-		: my_sprintf(tmpbuf,"%"IVdf, (IV)SvIVX(sv));
-	    tsv = Nullsv;
-	    goto tokensave_has_len;
-	}
-	if (SvNOKp(sv)) {
-	    Gconvert(SvNVX(sv), NV_DIG, 0, tmpbuf);
-	    tsv = Nullsv;
-	    goto tokensave;
+	if (SvIOKp(sv) || SvNOKp(sv)) {
+	    char tbuf[64];  /* Must fit sprintf/Gconvert of longest IV/NV */
+	    char *tmpbuf = tbuf;
+	    STRLEN len;
+
+	    if (SvIOKp(sv)) {
+		len = SvIsUV(sv) ? my_sprintf(tmpbuf,"%"UVuf, (UV)SvUVX(sv))
+		    : my_sprintf(tmpbuf,"%"IVdf, (IV)SvIVX(sv));
+	    } else {
+		Gconvert(SvNVX(sv), NV_DIG, 0, tmpbuf);
+		len = strlen(tmpbuf);
+	    }
+	    if (SvROK(sv)) {	/* XXX Skip this when sv_pvn_force calls */
+		/* Sneaky stuff here */
+		SV *tsv = newSVpvn(tmpbuf, len);
+
+		sv_2mortal(tsv);
+		if (lp)
+		    *lp = SvCUR(tsv);
+		return SvPVX(tsv);
+	    }
+	    else {
+		dVAR;
+
+#ifdef FIXNEGATIVEZERO
+		if (len == 2 && tmpbuf[0] == '-' && tmpbuf[1] == '0') {
+		    tmpbuf[0] = '0';
+		    tmpbuf[1] = 0;
+		    len = 1;
+		}
+#endif
+		SvUPGRADE(sv, SVt_PV);
+		if (lp)
+		    *lp = len;
+		s = SvGROW_mutable(sv, len + 1);
+		SvCUR_set(sv, len);
+		SvPOKp_on(sv);
+		return memcpy(s, tmpbuf, len + 1);
+	    }
 	}
         if (!SvROK(sv)) {
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
@@ -2580,6 +2605,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
                     SvUTF8_off(sv);
                 return pv;
             } else {
+		SV *tsv;
 		MAGIC *mg;
 		const SV *const referent = (SV*)SvRV(sv);
 
@@ -2770,39 +2796,6 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
     if (flags & SV_MUTABLE_RETURN)
 	return SvPVX_mutable(sv);
     return SvPVX(sv);
-
-  tokensave:
-    len = strlen(tmpbuf);
- tokensave_has_len:
-    assert (!tsv);
-    if (SvROK(sv)) {	/* XXX Skip this when sv_pvn_force calls */
-	/* Sneaky stuff here */
-
-	if (!tsv)
-	    tsv = newSVpvn(tmpbuf, len);
-	sv_2mortal(tsv);
-	if (lp)
-	    *lp = SvCUR(tsv);
-	return SvPVX(tsv);
-    }
-    else {
-        dVAR;
-
-#ifdef FIXNEGATIVEZERO
-	if (len == 2 && tmpbuf[0] == '-' && tmpbuf[1] == '0') {
-	    tmpbuf[0] = '0';
-	    tmpbuf[1] = 0;
-	    len = 1;
-	}
-#endif
-	SvUPGRADE(sv, SVt_PV);
-	if (lp)
-	    *lp = len;
-	s = SvGROW_mutable(sv, len + 1);
-	SvCUR_set(sv, len);
-	SvPOKp_on(sv);
-	return memcpy(s, tmpbuf, len + 1);
-    }
 }
 
 /*
