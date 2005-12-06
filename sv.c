@@ -2584,15 +2584,12 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		const SV *const referent = (SV*)SvRV(sv);
 
 		if (!referent) {
-		    if (lp)
-			*lp = 7;
-		    return (char *)"NULLREF";
-		}
-		
-		if (SvTYPE(referent) == SVt_PVMG && ((SvFLAGS(referent) &
-			   (SVs_OBJECT|SVf_OK|SVs_GMG|SVs_SMG|SVs_RMG))
-			  == (SVs_OBJECT|SVs_SMG))
-		    && (mg = mg_find(referent, PERL_MAGIC_qr))) {
+		    tsv = sv_2mortal(newSVpvn("NULLREF", 7));
+		} else if (SvTYPE(referent) == SVt_PVMG
+			   && ((SvFLAGS(referent) &
+				(SVs_OBJECT|SVf_OK|SVs_GMG|SVs_SMG|SVs_RMG))
+			       == (SVs_OBJECT|SVs_SMG))
+			   && (mg = mg_find(referent, PERL_MAGIC_qr))) {
 		    const regexp *re = (regexp *)mg->mg_obj;
 
 		    if (!mg->mg_ptr) {
@@ -2683,10 +2680,10 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		    else
 			Perl_sv_setpvf(aTHX_ tsv, "%s(0x%"UVxf")", typestr,
 				       PTR2UV(referent));
-		    if (lp)
-			*lp = SvCUR(tsv);
-		    return SvPVX(tsv);
 		}
+		if (lp)
+		    *lp = SvCUR(tsv);
+		return SvPVX(tsv);
 	    }
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
