@@ -2529,19 +2529,18 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	}
 	if (SvIOKp(sv) || SvNOKp(sv)) {
 	    char tbuf[64];  /* Must fit sprintf/Gconvert of longest IV/NV */
-	    char *tmpbuf = tbuf;
 	    STRLEN len;
 
 	    if (SvIOKp(sv)) {
-		len = SvIsUV(sv) ? my_sprintf(tmpbuf,"%"UVuf, (UV)SvUVX(sv))
-		    : my_sprintf(tmpbuf,"%"IVdf, (IV)SvIVX(sv));
+		len = SvIsUV(sv) ? my_sprintf(tbuf,"%"UVuf, (UV)SvUVX(sv))
+		    : my_sprintf(tbuf,"%"IVdf, (IV)SvIVX(sv));
 	    } else {
-		Gconvert(SvNVX(sv), NV_DIG, 0, tmpbuf);
-		len = strlen(tmpbuf);
+		Gconvert(SvNVX(sv), NV_DIG, 0, tbuf);
+		len = strlen(tbuf);
 	    }
 	    if (SvROK(sv)) {	/* XXX Skip this when sv_pvn_force calls */
 		/* Sneaky stuff here */
-		SV *tsv = newSVpvn(tmpbuf, len);
+		SV *tsv = newSVpvn(tbuf, len);
 
 		sv_2mortal(tsv);
 		if (lp)
@@ -2552,9 +2551,9 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		dVAR;
 
 #ifdef FIXNEGATIVEZERO
-		if (len == 2 && tmpbuf[0] == '-' && tmpbuf[1] == '0') {
-		    tmpbuf[0] = '0';
-		    tmpbuf[1] = 0;
+		if (len == 2 && tbuf[0] == '-' && tbuf[1] == '0') {
+		    tbuf[0] = '0';
+		    tbuf[1] = 0;
 		    len = 1;
 		}
 #endif
@@ -2564,7 +2563,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		s = SvGROW_mutable(sv, len + 1);
 		SvCUR_set(sv, len);
 		SvPOKp_on(sv);
-		return memcpy(s, tmpbuf, len + 1);
+		return memcpy(s, tbuf, len + 1);
 	    }
 	}
         if (!SvROK(sv)) {
