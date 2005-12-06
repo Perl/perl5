@@ -8,7 +8,7 @@ BEGIN {
 require 'test.pl';
 use strict qw(refs subs);
 
-plan (96);
+plan (98);
 
 # Test glob operations.
 
@@ -53,6 +53,11 @@ $FOO = \$BAR;
 $BAR = \$BAZ;
 $BAZ = "hit";
 is ($$$FOO, 'hit');
+
+# test that ref(vstring) makes sense
+my $vstref = \v1;
+is (ref($vstref), "VSTRING", "ref(vstr) eq VSTRING");
+like ( $vstref, qr/VSTRING\(0x[0-9a-f]+\)/, '\vstr is also VSTRING');
 
 # Test references to real arrays.
 
