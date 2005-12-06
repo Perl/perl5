@@ -7,7 +7,7 @@ use strict;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(openlog closelog setlogmask syslog);
 our @EXPORT_OK = qw(setlogsock);
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 # it would be nice to try stream/unix first, since that will be
 # most efficient. However streams are dodgy - see _syslog_send_stream
@@ -65,15 +65,25 @@ daemon.
 
 B<You should use openlog() before calling syslog().>
 
+=item syslog $priority, $message
+
 =item syslog $priority, $format, @args
 
-If I<$priority> permits, logs I<($format, @args)>
-printed as by C<printf(3V)>, with the addition that I<%m>
-is replaced with C<"$!"> (the latest error message).
+If I<$priority> permits, logs I<$message> or I<sprintf($format, @args)>
+with the addition that I<%m> in $message or $format is replaced with
+C<"$!"> (the latest error message).
 
 If you didn't use openlog() before using syslog(), syslog will try to
 guess the I<$ident> by extracting the shortest prefix of I<$format>
 that ends in a ":".
+
+Note that Sys::Syslog version v0.07 and older passed the $message as
+the formatting string to sprintf() even when no formatting arguments
+were provided.  If the code calling syslog() might execute with older
+versions of this module, make sure to call the function as
+syslog($priority, "%s", $message) instead of syslog($priority,
+$message).  This protects against hostile formatting sequences that
+might show up if $message contains tainted data.
 
 =item setlogmask $mask_priority
 
@@ -318,9 +328,16 @@ sub syslog {
 
     $whoami .= "[$$]" if our $lo_pid;
 
-    $mask =~ s/(?<!%)%m/$!/g;
+    if ($mask =~ /%m/) {
+	my $err = $!;
+	# escape percent signs if sprintf will be called
+	$err =~ s/%/%%/g if @_;
+	# replace %m with $err, if preceded by an even number of percent signs
+	$mask =~ s/(?<!%)((?:%%)*)%m/$1$err/g;
+    }
+
     $mask .= "\n" unless $mask =~ /\n$/;
-    $message = sprintf ($mask, @_);
+    $message = @_ ? sprintf($mask, @_) : $mask;
 
     $sum = $numpri + $numfac;
     my $buf = "<$sum>$whoami: $message\0";
