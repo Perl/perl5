@@ -79,7 +79,7 @@ that ends in a ":".
 
 Note that Sys::Syslog version v0.07 and older passed the $message as
 the formatting string to sprintf() even when no formatting arguments
-where provided.  If the code calling syslog() might execute with older
+were provided.  If the code calling syslog() might execute with older
 versions of this module, make sure to call the function as
 syslog($priority, "%s", $message) instead of syslog($priority,
 $message).  This protects against hostile formatting sequences that
