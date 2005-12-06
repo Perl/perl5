@@ -77,6 +77,14 @@ If you didn't use openlog() before using syslog(), syslog will try to
 guess the I<$ident> by extracting the shortest prefix of I<$format>
 that ends in a ":".
 
+Note that Sys::Syslog version v0.07 and older passed the $message as
+the formatting string to sprintf() even when no formatting arguments
+where provided.  If the code calling syslog() might execute with older
+versions of this module, make sure to call the function as
+syslog($priority, "%s", $message) instead of syslog($priority,
+$message).  This protects against hostile formatting sequences that
+might show up if $message contains tainted data.
+
 =item setlogmask $mask_priority
 
 Sets log mask I<$mask_priority> and returns the old mask.
