@@ -2674,9 +2674,10 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 			}
 
 			Newx(mg->mg_ptr, mg->mg_len + 1 + left, char);
-			Copy("(?", mg->mg_ptr, 2, char);
+			mg->mg_ptr[0] = '(';
+			mg->mg_ptr[1] = '?';
 			Copy(reflags, mg->mg_ptr+2, left, char);
-			Copy(":", mg->mg_ptr+left+2, 1, char);
+			*(mg->mg_ptr+left+2) = ':';
 			Copy(re->precomp, mg->mg_ptr+3+left, re->prelen, char);
 			if (need_newline)
 			    mg->mg_ptr[mg->mg_len - 2] = '\n';
