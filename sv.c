@@ -8894,9 +8894,15 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	if (vectorize)
 	    argsv = vecsv;
-	else if (!args)
-	    argsv = (efix ? efix <= svmax : svix < svmax) ?
-		    svargs[efix ? efix-1 : svix++] : &PL_sv_undef;
+	else if (!args) {
+	    if (efix) {
+		const I32 i = efix-1;
+		argsv = (i >= 0 && i < svmax) ? svargs[i] : &PL_sv_undef;
+	    } else {
+		argsv = (svix >= 0 && svix < svmax)
+		    ? svargs[svix++] : &PL_sv_undef;
+	    }
+	}
 
 	switch (c = *q++) {
 
@@ -9160,6 +9166,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 			*--ptr = '0';
 		    break;
 		case 2:
+		    if (!uv)
+			alt = FALSE;
 		    do {
 			dig = uv & 1;
 			*--ptr = '0' + dig;
@@ -9468,6 +9476,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	/* calculate width before utf8_upgrade changes it */
 	have = esignlen + zeros + elen;
+	if (have < zeros)
+	    Perl_croak_nocontext(PL_memory_wrap);
 
 	if (is_utf8 != has_utf8) {
 	     if (is_utf8) {
@@ -9495,6 +9505,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	need = (have > width ? have : width);
 	gap = need - have;
 
+	if (need >= (((STRLEN)~0) - SvCUR(sv) - dotstrlen - 1))
+	    Perl_croak_nocontext(PL_memory_wrap);
 	SvGROW(sv, SvCUR(sv) + need + dotstrlen + 1);
 	p = SvEND(sv);
 	if (esignlen && fill == '0') {

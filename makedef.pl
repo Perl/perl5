@@ -654,12 +654,6 @@ else {
 		    )];
 }
 
-if ($define{'PERL_MALLOC_WRAP'}) {
-    emit_symbols [qw(
-		    PL_memory_wrap
-		    )];
-}
-
 if ($define{'PERL_USE_SAFE_PUTENV'}) {
     skip_symbols [qw(
                    PL_use_safe_putenv
