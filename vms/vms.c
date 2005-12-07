@@ -2084,14 +2084,14 @@ pipe_exit_routine(pTHX)
 
     while (info) {
       int need_eof;
-      _ckvmssts(sys$setast(0));
+      _ckvmssts_noperl(sys$setast(0));
       if (info->in && !info->in->shut_on_empty) {
-        _ckvmssts(sys$qio(0,info->in->chan_in,IO$_WRITEOF,0,0,0,
+        _ckvmssts_noperl(sys$qio(0,info->in->chan_in,IO$_WRITEOF,0,0,0,
                           0, 0, 0, 0, 0, 0));
         info->waiting = 1;
         did_stuff = 1;
       }
-      _ckvmssts(sys$setast(1));
+      _ckvmssts_noperl(sys$setast(1));
       info = info->next;
     }
 
@@ -2102,11 +2102,11 @@ pipe_exit_routine(pTHX)
 
         info = open_pipes;
         while (info) {
-          _ckvmssts(sys$setast(0));
+          _ckvmssts_noperl(sys$setast(0));
           if (info->waiting && info->done) 
                 info->waiting = 0;
           nwait += info->waiting;
-          _ckvmssts(sys$setast(1));
+          _ckvmssts_noperl(sys$setast(1));
           info = info->next;
         }
         if (!nwait) break;
@@ -2116,13 +2116,13 @@ pipe_exit_routine(pTHX)
     did_stuff = 0;
     info = open_pipes;
     while (info) {
-      _ckvmssts(sys$setast(0));
+      _ckvmssts_noperl(sys$setast(0));
       if (!info->done) { /* Tap them gently on the shoulder . . .*/
         sts = sys$forcex(&info->pid,0,&abort);
-        if (!(sts&1) && sts != SS$_NONEXPR) _ckvmssts(sts); 
+        if (!(sts&1) && sts != SS$_NONEXPR) _ckvmssts_noperl(sts); 
         did_stuff = 1;
       }
-      _ckvmssts(sys$setast(1));
+      _ckvmssts_noperl(sys$setast(1));
       info = info->next;
     }
 
@@ -2133,11 +2133,11 @@ pipe_exit_routine(pTHX)
 
         info = open_pipes;
         while (info) {
-          _ckvmssts(sys$setast(0));
+          _ckvmssts_noperl(sys$setast(0));
           if (info->waiting && info->done) 
                 info->waiting = 0;
           nwait += info->waiting;
-          _ckvmssts(sys$setast(1));
+          _ckvmssts_noperl(sys$setast(1));
           info = info->next;
         }
         if (!nwait) break;
@@ -2146,12 +2146,12 @@ pipe_exit_routine(pTHX)
 
     info = open_pipes;
     while (info) {
-      _ckvmssts(sys$setast(0));
+      _ckvmssts_noperl(sys$setast(0));
       if (!info->done) {  /* We tried to be nice . . . */
         sts = sys$delprc(&info->pid,0);
-        if (!(sts&1) && sts != SS$_NONEXPR) _ckvmssts(sts); 
+        if (!(sts&1) && sts != SS$_NONEXPR) _ckvmssts_noperl(sts); 
       }
-      _ckvmssts(sys$setast(1));
+      _ckvmssts_noperl(sys$setast(1));
       info = info->next;
     }
 
@@ -2317,7 +2317,8 @@ pipe_tochild_setup(pTHX_ char *rmbx, char *wmbx)
     unsigned int dviitm = DVI$_DEVBUFSIZ;
     int j, n;
 
-    Newx(p, 1, Pipe);
+    n = sizeof(Pipe);
+    _ckvmssts(lib$get_vm(&n, &p));
 
     create_mbx(aTHX_ &p->chan_in , &d_mbx1);
     create_mbx(aTHX_ &p->chan_out, &d_mbx2);
@@ -2487,12 +2488,14 @@ pipe_infromchild_setup(pTHX_ char *rmbx, char *wmbx)
                                       DSC$K_CLASS_S, mbx2};
     unsigned int dviitm = DVI$_DEVBUFSIZ;
 
-    Newx(p, 1, Pipe);
+    int n = sizeof(Pipe);
+    _ckvmssts(lib$get_vm(&n, &p));
     create_mbx(aTHX_ &p->chan_in , &d_mbx1);
     create_mbx(aTHX_ &p->chan_out, &d_mbx2);
 
     _ckvmssts(lib$getdvi(&dviitm, &p->chan_in, 0, &p->bufsize));
-    Newx(p->buf, p->bufsize, char);
+    n = p->bufsize * sizeof(char);
+    _ckvmssts(lib$get_vm(&n, &p->buf));
     p->shut_on_empty = FALSE;
     p->info   = 0;
     p->type   = 0;
@@ -2610,11 +2613,13 @@ pipe_mbxtofd_setup(pTHX_ int fd, char *out)
         }
     }
 
-    Newx(p, 1, Pipe);
+    int n = sizeof(Pipe);
+    _ckvmssts(lib$get_vm(&n, &p));
     p->fd_out = dup(fd);
     create_mbx(aTHX_ &p->chan_in, &d_mbx);
     _ckvmssts(lib$getdvi(&dviitm, &p->chan_in, 0, &p->bufsize));
-    Newx(p->buf, p->bufsize+1, char);
+    n = (p->bufsize+1) * sizeof(char);
+    _ckvmssts(lib$get_vm(&n, &p->buf));
     p->shut_on_empty = FALSE;
     p->retry = 0;
     p->info  = 0;
@@ -2690,7 +2695,7 @@ free_pipelocs(pTHX_ void *head)
     p = *pHead;
     while (p) {
         pnext = p->next;
-        Safefree(p);
+        PerlMem_free(p);
         p = pnext;
     }
     *pHead = 0;
@@ -2714,7 +2719,7 @@ store_pipelocs(pTHX)
 
 /*  the . directory from @INC comes last */
 
-    Newx(p,1,PLOC);
+    p = (pPLOC) PerlMem_malloc(sizeof(PLOC));
     p->next = head_PLOC;
     head_PLOC = p;
     strcpy(p->dir,"./");
@@ -2731,7 +2736,7 @@ store_pipelocs(pTHX)
         if (x) x[1] = '\0';
 
         if ((unixdir = tounixpath(temp, Nullch)) != Nullch) {
-            Newx(p,1,PLOC);
+            p = (pPLOC) PerlMem_malloc(sizeof(PLOC));
             p->next = head_PLOC;
             head_PLOC = p;
             strncpy(p->dir,unixdir,sizeof(p->dir)-1);
@@ -2755,7 +2760,7 @@ store_pipelocs(pTHX)
         if ((unixdir = tounixpath(dir, Nullch)) == Nullch)
             continue;
 
-        Newx(p,1,PLOC);
+        p = (pPLOC) PerlMem_malloc(sizeof(PLOC));
         p->next = head_PLOC;
         head_PLOC = p;
         strncpy(p->dir,unixdir,sizeof(p->dir)-1);
@@ -2766,7 +2771,7 @@ store_pipelocs(pTHX)
 
 #ifdef ARCHLIB_EXP
     if ((unixdir = tounixpath(ARCHLIB_EXP, Nullch)) != Nullch) {
-        Newx(p,1,PLOC);
+        p = (pPLOC) PerlMem_malloc(sizeof(PLOC));
         p->next = head_PLOC;
         head_PLOC = p;
         strncpy(p->dir,unixdir,sizeof(p->dir)-1);
@@ -2907,12 +2912,12 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
      * environment.  Hence we've switched to LOCAL symbol table.
      */
     unsigned int table = LIB$K_CLI_LOCAL_SYM;
-    int j, wait = 0;
+    int j, wait = 0, n;
     char *p, mode[10], symbol[MAX_DCL_SYMBOL+1], *vmspipe;
     char in[512], out[512], err[512], mbx[512];
     FILE *tpipe = 0;
     char tfilebuf[NAM$C_MAXRSS+1];
-    pInfo info;
+    pInfo info = NULL;
     char cmd_sym_name[20];
     struct dsc$descriptor_s d_symbol= {0, DSC$K_DTYPE_T,
                                       DSC$K_CLASS_S, symbol};
@@ -2999,7 +3004,8 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
       *psts = sts;
       return Nullfp; 
     }
-    Newx(info,1,Info);
+    n = sizeof(Info);
+    _ckvmssts(lib$get_vm(&n, &info));
         
     strcpy(mode,in_mode);
     info->mode = *mode;
@@ -3053,9 +3059,14 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
                 if (!done) _ckvmssts(sys$waitfr(pipe_ef));
             }
 
-            if (info->out->buf) Safefree(info->out->buf);
-            Safefree(info->out);
-            Safefree(info);
+            if (info->out->buf) {
+                n = info->out->bufsize * sizeof(char);
+                _ckvmssts(lib$free_vm(&n, &info->out->buf));
+            }
+            n = sizeof(Pipe);
+            _ckvmssts(lib$free_vm(&n, &info->out));
+            n = sizeof(Info);
+            _ckvmssts(lib$free_vm(&n, &info));
             *psts = RMS$_FNF;
             return Nullfp;
         }
@@ -3112,9 +3123,14 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
                 if (!done) _ckvmssts(sys$waitfr(pipe_ef));
             }
 
-            if (info->in->buf) Safefree(info->in->buf);
-            Safefree(info->in);
-            Safefree(info);
+            if (info->in->buf) {
+                n = info->in->bufsize * sizeof(char);
+                _ckvmssts(lib$free_vm(&n, &info->in->buf));
+            }
+            n = sizeof(Pipe);
+            _ckvmssts(lib$free_vm(&n, &info->in));
+            n = sizeof(Info);
+            _ckvmssts(lib$free_vm(&n, &info));
             *psts = RMS$_FNF;
             return Nullfp;
         }
@@ -3150,9 +3166,6 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
     d_symbol.dsc$w_length = strlen(symbol);
     _ckvmssts(lib$set_symbol(&d_sym_out, &d_symbol, &table));
 
-    p = vmscmd->dsc$a_pointer;
-    while (*p && *p != '\n') p++;
-    *p = '\0';                                  /* truncate on \n */
     p = vmscmd->dsc$a_pointer;
     while (*p == ' ' || *p == '\t') p++;        /* remove leading whitespace */
     if (*p == '$') p++;                         /* remove leading $ */
@@ -3244,7 +3257,7 @@ I32 Perl_my_pclose(pTHX_ PerlIO *fp)
 {
     pInfo info, last = NULL;
     unsigned long int retsts;
-    int done, iss;
+    int done, iss, n;
     
     for (info = open_pipes; info != NULL; last = info, info = info->next)
         if (info->fp == fp) break;
@@ -3264,7 +3277,7 @@ I32 Perl_my_pclose(pTHX_ PerlIO *fp)
      */
      if (info->fp) {
         if (!info->useFILE) 
-     PerlIO_flush(info->fp);   /* first, flush data */
+            PerlIO_flush(info->fp);   /* first, flush data */
         else 
             fflush((FILE *)info->fp);
     }
@@ -3287,7 +3300,7 @@ I32 Perl_my_pclose(pTHX_ PerlIO *fp)
     _ckvmssts(sys$setast(1));
     if (info->fp) {
      if (!info->useFILE) 
-    PerlIO_close(info->fp);
+        PerlIO_close(info->fp);
      else 
         fclose((FILE *)info->fp);
     }
@@ -3315,18 +3328,31 @@ I32 Perl_my_pclose(pTHX_ PerlIO *fp)
     /* free buffers and structures */
 
     if (info->in) {
-        if (info->in->buf) Safefree(info->in->buf);
-        Safefree(info->in);
+        if (info->in->buf) {
+            n = info->in->bufsize * sizeof(char);
+            _ckvmssts(lib$free_vm(&n, &info->in->buf));
+        }
+        n = sizeof(Pipe);
+        _ckvmssts(lib$free_vm(&n, &info->in));
     }
     if (info->out) {
-        if (info->out->buf) Safefree(info->out->buf);
-        Safefree(info->out);
+        if (info->out->buf) {
+            n = info->out->bufsize * sizeof(char);
+            _ckvmssts(lib$free_vm(&n, &info->out->buf));
+        }
+        n = sizeof(Pipe);
+        _ckvmssts(lib$free_vm(&n, &info->out));
     }
     if (info->err) {
-        if (info->err->buf) Safefree(info->err->buf);
-        Safefree(info->err);
+        if (info->err->buf) {
+            n = info->err->bufsize * sizeof(char);
+            _ckvmssts(lib$free_vm(&n, &info->err->buf));
+        }
+        n = sizeof(Pipe);
+        _ckvmssts(lib$free_vm(&n, &info->err));
     }
-    Safefree(info);
+    n = sizeof(Info);
+    _ckvmssts(lib$free_vm(&n, &info));
 
     return retsts;
 
@@ -5152,7 +5178,7 @@ mp_getredirection(pTHX_ int *ac, char ***av)
      * Allocate and fill in the new argument vector, Some Unix's terminate
      * the list with an extra null pointer.
      */
-    Newx(argv, item_count+1, char *);
+    argv = (char **) PerlMem_malloc((item_count+1) * sizeof(char *));
     *av = argv;
     for (j = 0; j < item_count; ++j, list_head = list_head->next)
 	argv[j] = list_head->value;
@@ -5247,11 +5273,11 @@ static void add_item(struct list_item **head,
 {
     if (*head == 0)
 	{
-	Newx(*head,1,struct list_item);
+	*head = (struct list_item *) PerlMem_malloc(sizeof(struct list_item));
 	*tail = *head;
 	}
     else {
-	Newx((*tail)->next,1,struct list_item);
+	(*tail)->next = (struct list_item *) PerlMem_malloc(sizeof(struct list_item));
 	*tail = (*tail)->next;
 	}
     (*tail)->value = value;
@@ -5517,6 +5543,8 @@ unsigned long int flags = 17, one = 1, retsts;
 #  define KGB$M_SUBSYSTEM 0x8
 #endif
 
+/* Avoid Newx() in vms_image_init as thread context has not been initialized. */
+
 /*{{{void vms_image_init(int *, char ***)*/
 void
 vms_image_init(int *argcp, char ***argvp)
@@ -5565,8 +5593,8 @@ vms_image_init(int *argcp, char ***argvp)
                          "Check your rights database for corruption.\n");
          exit(SS$_ABORT);
       }
-      if (jpilist[1].bufadr != rlst) Safefree(jpilist[1].bufadr);
-      jpilist[1].bufadr = Newx(mask,rsz,unsigned long int);
+      if (jpilist[1].bufadr != rlst) PerlMem_free(jpilist[1].bufadr);
+      jpilist[1].bufadr = mask = (unsigned long int *) PerlMem_malloc(rsz * sizeof(unsigned long int));
       jpilist[1].buflen = rsz * sizeof(unsigned long int);
       _ckvmssts_noperl(sys$getjpiw(0,NULL,NULL,&jpilist[1],iosb,NULL,NULL));
       _ckvmssts_noperl(iosb[0]);
@@ -5617,9 +5645,9 @@ vms_image_init(int *argcp, char ***argvp)
   if (will_taint) {
     char **newargv, **oldargv;
     oldargv = *argvp;
-    Newx(newargv,(*argcp)+2,char *);
+    newargv = (char **) PerlMem_malloc(((*argcp)+2) * sizeof(char *));
     newargv[0] = oldargv[0];
-    Newx(newargv[1],3,char);
+    newargv[1] = (char *) PerlMem_malloc(3 * sizeof(char));
     strcpy(newargv[1], "-T");
     Copy(&oldargv[1],&newargv[2],(*argcp)-1,char **);
     (*argcp)++;
@@ -5646,12 +5674,12 @@ vms_image_init(int *argcp, char ***argvp)
   for (tabidx = 0;
        len = my_trnlnm("PERL_ENV_TABLES",eqv,tabidx);
        tabidx++) {
-    if (!tabidx) Newx(tabvec,tabct,struct dsc$descriptor_s *);
+    if (!tabidx) tabvec = (struct dsc$descriptor_s **) PerlMem_malloc(tabct * sizeof(struct dsc$descriptor_s *));
     else if (tabidx >= tabct) {
       tabct += 8;
-      Renew(tabvec,tabct,struct dsc$descriptor_s *);
+      tabvec = (struct dsc$descriptor_s **) PerlMem_realloc(tabvec, tabct * sizeof(struct dsc$descriptor_s *));
     }
-    Newx(tabvec[tabidx],1,struct dsc$descriptor_s);
+    tabvec[tabidx] = (struct dsc$descriptor_s *) PerlMem_malloc(sizeof(struct dsc$descriptor_s));
     tabvec[tabidx]->dsc$w_length  = 0;
     tabvec[tabidx]->dsc$b_dtype   = DSC$K_DTYPE_T;
     tabvec[tabidx]->dsc$b_class   = DSC$K_CLASS_D;
