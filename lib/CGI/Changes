@@ -1,3 +1,6 @@
+  Version 3.14 Tue Dec  6 17:12:03 EST 2005
+   1. Fixed broken scrolling_list() select attribute.
+	
   Version 3.13
     1. Removed extraneous empty "?" from end of self_url().
 

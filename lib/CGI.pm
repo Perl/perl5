@@ -18,8 +18,8 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.193 2005/12/05 13:52:24 lstein Exp $';
-$CGI::VERSION='3.13_01';
+$CGI::revision = '$Id: CGI.pm,v 1.194 2005/12/06 22:12:56 lstein Exp $';
+$CGI::VERSION='3.14_01';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -2509,7 +2509,7 @@ sub scrolling_list {
 	$label=$self->escapeHTML($label);
 	my($value)=$self->escapeHTML($_,1);
         my $attribs = $self->_set_attributes($_, $attributes);
-        $result .= "<option$selectit$attribs value=\"$value\">$label</option>\n";
+        $result .= "<option ${selectit}${attribs}value=\"$value\">$label</option>\n";
     }
     $result .= "</select>";
     $self->register_parameter($name);
