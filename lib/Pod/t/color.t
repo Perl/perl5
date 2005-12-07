@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
-# $Id: text.t,v 1.3 2004/12/31 21:29:48 eagle Exp $
+# $Id: color.t,v 1.1 2004/12/31 21:50:05 eagle Exp $
 #
-# text.t -- Additional specialized tests for Pod::Text.
+# color.t -- Additional specialized tests for Pod::Text::Color.
 #
 # Copyright 2002, 2004 by Russ Allbery <rra@stanford.edu>
 #
@@ -17,14 +17,22 @@ BEGIN {
     }
     unshift (@INC, '../blib/lib');
     $| = 1;
-    print "1..3\n";
+    print "1..2\n";
 }
 
 END {
     print "not ok 1\n" unless $loaded;
 }
 
-use Pod::Text;
+eval { require Term::ANSIColor };
+if ($@) {
+    for (1..2) {
+        print "ok $_ # skip\n";
+    }
+    $loaded = 1;
+    exit;
+}
+require Pod::Text::Color;
 
 $loaded = 1;
 print "ok 1\n";
@@ -38,7 +46,7 @@ while (<DATA>) {
         print TMP $_;
     }
     close TMP;
-    my $parser = Pod::Text->new or die "Cannot create parser\n";
+    my $parser = Pod::Text::Color->new or die "Cannot create parser\n";
     $parser->parse_from_file ('tmp.pod', 'out.tmp');
     undef $parser;
     open (TMP, 'out.tmp') or die "Cannot open out.tmp: $!\n";
@@ -63,28 +71,18 @@ while (<DATA>) {
     $n++;
 }
 
-# Below the marker are bits of POD and corresponding expected text output.
-# This is used to test specific features or problems with Pod::Text.  The
+# Below the marker are bits of POD and corresponding expected output.  This is
+# used to test specific features or problems with Pod::Text::Termcap.  The
 # input and output are separated by lines containing only ###.
 
 __DATA__
 
 ###
-=head1 PERIODS
+=head1 WRAPPING
 
-This C<.> should be quoted.
+B<I<Do>> I<B<not>> B<I<include>> B<I<formatting codes when>> B<I<wrapping>>.
 ###
-PERIODS
-    This "." should be quoted.
-
-###
-
-###
-=head1 CE<lt>E<gt> WITH SPACES
-
-What does C<<  this.  >> end up looking like?
-###
-C<> WITH SPACES
-    What does "this." end up looking like?
+[1mWRAPPING[0m
+    [1m[33mDo[0m[0m [33m[1mnot[0m[0m [1m[33minclude[0m[0m [1m[33mformatting codes when[0m[0m [1m[33mwrapping[0m[0m.
 
 ###

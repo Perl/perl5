@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
-# $Id: text-options.t,v 1.2 2002/08/04 03:38:24 eagle Exp $
+# $Id: text-options.t,v 1.4 2004/12/31 21:29:34 eagle Exp $
 #
 # text-options.t -- Additional tests for Pod::Text options.
 #
-# Copyright 2002 by Russ Allbery <rra@stanford.edu>
+# Copyright 2002, 2004 by Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -17,7 +17,7 @@ BEGIN {
     }
     unshift (@INC, '../blib/lib');
     $| = 1;
-    print "1..3\n";
+    print "1..5\n";
 }
 
 END {
@@ -46,6 +46,7 @@ while (<DATA>) {
     close TMP;
     my $parser = Pod::Text->new (%options) or die "Cannot create parser\n";
     $parser->parse_from_file ('tmp.pod', 'out.tmp');
+    undef $parser;
     open (TMP, 'out.tmp') or die "Cannot open out.tmp: $!\n";
     my $output;
     {
@@ -140,5 +141,51 @@ This is another indented paragraph.
         Test  This is a test of an indented paragraph.
 
               This is another indented paragraph.
+
+###
+
+###
+code 1
+###
+This is some random text.
+This is more random text.
+
+This is some random text.
+This is more random text.
+
+=head1 SAMPLE
+
+This is POD.
+
+=cut
+
+This is more random text.
+###
+This is some random text.
+This is more random text.
+
+This is some random text.
+This is more random text.
+
+SAMPLE
+    This is POD.
+
+
+This is more random text.
+###
+
+###
+sentence 1
+###
+=head1 EXAMPLE
+
+Whitespace around C<<  this.  >> must be ignored per perlpodspec.  >>
+needs to eat all of the space in front of it.
+
+=cut
+###
+EXAMPLE
+    Whitespace around "this." must be ignored per perlpodspec.  >> needs to
+    eat all of the space in front of it.
 
 ###

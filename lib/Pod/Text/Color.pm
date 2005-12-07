@@ -1,7 +1,7 @@
 # Pod::Text::Color -- Convert POD data to formatted color ASCII text
-# $Id: Color.pm,v 1.4 2002/07/15 05:46:00 eagle Exp $
+# $Id: Color.pm,v 2.1 2004/12/31 21:50:00 eagle Exp $
 #
-# Copyright 1999, 2001 by Russ Allbery <rra@stanford.edu>
+# Copyright 1999, 2001, 2004 by Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -29,8 +29,7 @@ use vars qw(@ISA $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 1.04;
-
+$VERSION = 2.01;
 
 ##############################################################################
 # Overrides
@@ -38,24 +37,22 @@ $VERSION = 1.04;
 
 # Make level one headings bold.
 sub cmd_head1 {
-    my $self = shift;
-    local $_ = shift;
-    s/\s+$//;
-    $self->SUPER::cmd_head1 (colored ($_, 'bold'));
+    my ($self, $attrs, $text) = @_;
+    $text =~ s/\s+$//;
+    $self->SUPER::cmd_head1 ($attrs, colored ($text, 'bold'));
 }
 
 # Make level two headings bold.
 sub cmd_head2 {
-    my $self = shift;
-    local $_ = shift;
-    s/\s+$//;
-    $self->SUPER::cmd_head2 (colored ($_, 'bold'));
+    my ($self, $attrs, $text) = @_;
+    $text =~ s/\s+$//;
+    $self->SUPER::cmd_head2 ($attrs, colored ($text, 'bold'));
 }
 
 # Fix the various formatting codes.
-sub seq_b { return colored ($_[1], 'bold')   }
-sub seq_f { return colored ($_[1], 'cyan')   }
-sub seq_i { return colored ($_[1], 'yellow') }
+sub cmd_b { return colored ($_[2], 'bold')   }
+sub cmd_f { return colored ($_[2], 'cyan')   }
+sub cmd_i { return colored ($_[2], 'yellow') }
 
 # Output any included code in green.
 sub output_code {
@@ -71,10 +68,10 @@ sub wrap {
     local $_ = shift;
     my $output = '';
     my $spaces = ' ' x $$self{MARGIN};
-    my $width = $$self{width} - $$self{MARGIN};
+    my $width = $$self{opt_width} - $$self{MARGIN};
+    my $char = '(?:(?:\e\[[\d;]+m)*[^\n])';
     while (length > $width) {
-        if (s/^((?:(?:\e\[[\d;]+m)?[^\n]){0,$width})\s+//
-            || s/^((?:(?:\e\[[\d;]+m)?[^\n]){$width})//) {
+        if (s/^(${char}{0,$width})\s+// || s/^(${char}{$width})//) {
             $output .= $spaces . $1 . "\n";
         } else {
             last;
@@ -125,7 +122,7 @@ B<pod2text> should be taught about those.
 
 =head1 SEE ALSO
 
-L<Pod::Text>, L<Pod::Parser>
+L<Pod::Text>, L<Pod::Simple>
 
 The current version of this module is always available from its web site at
 L<http://www.eyrie.org/~eagle/software/podlators/>.  It is also part of the
@@ -137,7 +134,7 @@ Russ Allbery <rra@stanford.edu>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999, 2001 by Russ Allbery <rra@stanford.edu>.
+Copyright 1999, 2001, 2004 by Russ Allbery <rra@stanford.edu>.
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.

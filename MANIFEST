@@ -2077,6 +2077,7 @@ lib/Pod/t/basic.ovr		podlators test
 lib/Pod/t/basic.pod		podlators test
 lib/Pod/t/basic.t		podlators test
 lib/Pod/t/basic.txt		podlators test
+lib/Pod/t/color.t		podlators test
 lib/Pod/t/contains_pod.t	Pod-Parser test
 lib/Pod/t/eol.t			end of line agnosticism
 lib/Pod/Text/Color.pm		Convert POD data to color ASCII text
@@ -2096,7 +2097,7 @@ lib/Pod/t/parselink.t		podlators test
 lib/Pod/t/pod2html-lib.pl	pod2html testing library
 lib/Pod/t/pod2latex.t		See if Pod::LaTeX works
 lib/Pod/t/Select.t		See if Pod::Select works
-lib/Pod/t/text-errors.t		podlators test
+lib/Pod/t/termcap.t		podlators test
 lib/Pod/t/text-options.t		podlators test
 lib/Pod/t/text.t		podlators test
 lib/Pod/t/Usage.t		See if Pod::Usage works

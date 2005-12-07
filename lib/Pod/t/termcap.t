@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
-# $Id: text.t,v 1.3 2004/12/31 21:29:48 eagle Exp $
+# $Id: termcap.t,v 1.2 2005/11/28 23:38:02 eagle Exp $
 #
-# text.t -- Additional specialized tests for Pod::Text.
+# termcap.t -- Additional specialized tests for Pod::Text::Termcap.
 #
 # Copyright 2002, 2004 by Russ Allbery <rra@stanford.edu>
 #
@@ -17,14 +17,19 @@ BEGIN {
     }
     unshift (@INC, '../blib/lib');
     $| = 1;
-    print "1..3\n";
+    print "1..2\n";
 }
 
 END {
     print "not ok 1\n" unless $loaded;
 }
 
-use Pod::Text;
+# Hard-code a few values to try to get reproducible results.
+$ENV{COLUMNS} = 80;
+$ENV{TERM} = 'xterm';
+$ENV{TERMCAP} = 'xterm:co=80:do=^J:md=\E[1m:us=\E[4m:me=\E[m';
+
+use Pod::Text::Termcap;
 
 $loaded = 1;
 print "ok 1\n";
@@ -38,7 +43,7 @@ while (<DATA>) {
         print TMP $_;
     }
     close TMP;
-    my $parser = Pod::Text->new or die "Cannot create parser\n";
+    my $parser = Pod::Text::Termcap->new or die "Cannot create parser\n";
     $parser->parse_from_file ('tmp.pod', 'out.tmp');
     undef $parser;
     open (TMP, 'out.tmp') or die "Cannot open out.tmp: $!\n";
@@ -63,28 +68,18 @@ while (<DATA>) {
     $n++;
 }
 
-# Below the marker are bits of POD and corresponding expected text output.
-# This is used to test specific features or problems with Pod::Text.  The
+# Below the marker are bits of POD and corresponding expected output.  This is
+# used to test specific features or problems with Pod::Text::Termcap.  The
 # input and output are separated by lines containing only ###.
 
 __DATA__
 
 ###
-=head1 PERIODS
+=head1 WRAPPING
 
-This C<.> should be quoted.
+B<I<Do>> I<B<not>> B<I<include>> B<I<formatting codes when>> B<I<wrapping>>.
 ###
-PERIODS
-    This "." should be quoted.
-
-###
-
-###
-=head1 CE<lt>E<gt> WITH SPACES
-
-What does C<<  this.  >> end up looking like?
-###
-C<> WITH SPACES
-    What does "this." end up looking like?
+[1mWRAPPING[m
+    [1m[4mDo[m[m [4m[1mnot[m[m [1m[4minclude[m[m [1m[4mformatting codes when[m[m [1m[4mwrapping[m[m.
 
 ###
