@@ -1986,7 +1986,7 @@ PERL_CALLCONV Signal_t	Perl_csighandler(int sig, ...);
 PERL_CALLCONV Signal_t	Perl_sighandler(int sig);
 PERL_CALLCONV Signal_t	Perl_csighandler(int sig);
 #endif
-PERL_CALLCONV SV**	Perl_stack_grow(pTHX_ SV** sp, SV**p, int n)
+PERL_CALLCONV SV**	Perl_stack_grow(pTHX_ SV** sp, SV** p, int n)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
@@ -2787,9 +2787,9 @@ PERL_CALLCONV int	Perl_sv_release_IVX(pTHX_ SV *sv)
 
 #endif
 
-PERL_CALLCONV void	Perl_sv_nosharing(pTHX_ SV *);
-/* PERL_CALLCONV void	Perl_sv_nolocking(pTHX_ SV *); */
-/* PERL_CALLCONV void	Perl_sv_nounlocking(pTHX_ SV *); */
+PERL_CALLCONV void	Perl_sv_nosharing(pTHX_ SV *sv);
+/* PERL_CALLCONV void	Perl_sv_nolocking(pTHX_ SV *sv); */
+/* PERL_CALLCONV void	Perl_sv_nounlocking(pTHX_ SV *sv); */
 PERL_CALLCONV int	Perl_nothreadhook(pTHX);
 
 END_EXTERN_C
@@ -3427,7 +3427,7 @@ STATIC char*	S_regwhite(pTHX_ char *p, const char *e)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-STATIC char*	S_nextchar(pTHX_ struct RExC_state_t*)
+STATIC char*	S_nextchar(pTHX_ struct RExC_state_t *state)
 			__attribute__nonnull__(pTHX_1);
 
 #  ifdef DEBUGGING
@@ -3440,22 +3440,22 @@ STATIC void	S_put_byte(pTHX_ SV* sv, int c)
 			__attribute__nonnull__(pTHX_1);
 
 #  endif
-STATIC void	S_scan_commit(pTHX_ struct RExC_state_t*, struct scan_data_t *data)
+STATIC void	S_scan_commit(pTHX_ struct RExC_state_t* state, struct scan_data_t *data)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-STATIC void	S_cl_anything(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl)
+STATIC void	S_cl_anything(pTHX_ struct RExC_state_t* state, struct regnode_charclass_class *cl)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
 STATIC int	S_cl_is_anything(pTHX_ const struct regnode_charclass_class *cl)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC void	S_cl_init(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl)
+STATIC void	S_cl_init(pTHX_ struct RExC_state_t* state, struct regnode_charclass_class *cl)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-STATIC void	S_cl_init_zero(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl)
+STATIC void	S_cl_init_zero(pTHX_ struct RExC_state_t* state, struct regnode_charclass_class *cl)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
@@ -3463,18 +3463,18 @@ STATIC void	S_cl_and(pTHX_ struct regnode_charclass_class *cl, const struct regn
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-STATIC void	S_cl_or(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with)
+STATIC void	S_cl_or(pTHX_ struct RExC_state_t* state, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 
-STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t* pRExC_state, regnode **scanp, I32 *deltap, regnode *last, struct scan_data_t *data, U32 flags, U32 depth)
+STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t* state, regnode **scanp, I32 *deltap, regnode *last, struct scan_data_t *data, U32 flags, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)
 			__attribute__nonnull__(pTHX_4);
 
-STATIC I32	S_add_data(pTHX_ struct RExC_state_t*, I32 n, const char *s)
+STATIC I32	S_add_data(pTHX_ struct RExC_state_t* state, I32 n, const char *s)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
 
@@ -3483,14 +3483,14 @@ STATIC void	S_re_croak2(pTHX_ const char* pat1, const char* pat2, ...)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-STATIC I32	S_regpposixcc(pTHX_ struct RExC_state_t*, I32 value)
+STATIC I32	S_regpposixcc(pTHX_ struct RExC_state_t* state, I32 value)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC void	S_checkposixcc(pTHX_ struct RExC_state_t*)
+STATIC void	S_checkposixcc(pTHX_ struct RExC_state_t* state)
 			__attribute__nonnull__(pTHX_1);
 
 
-STATIC I32	S_make_trie(pTHX_ struct RExC_state_t*, regnode *startbranch, regnode *first, regnode *last, regnode *tail, U32 flags)
+STATIC I32	S_make_trie(pTHX_ struct RExC_state_t* state, regnode *startbranch, regnode *first, regnode *last, regnode *tail, U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)
@@ -3762,7 +3762,7 @@ STATIC HV *	S_find_in_my_stash(pTHX_ const char *pkgname, I32 len)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
-STATIC char *	S_tokenize_use(pTHX_ int is_use, char*)
+STATIC char *	S_tokenize_use(pTHX_ int is_use, char *s)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 

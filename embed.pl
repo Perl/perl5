@@ -124,26 +124,6 @@ sub munge_c_files () {
     } '/dev/null', '', '';
     local $^I = '.bak';
     while (<>) {
-#	if (/^#\s*include\s+"perl.h"/) {
-#	    my $file = uc $ARGV;
-#	    $file =~ s/\./_/g;
-#	    print "#define PERL_IN_$file\n";
-#	}
-#	s{^(\w+)\s*\(}
-#	 {
-#	    my $f = $1;
-#	    my $repl = "$f(";
-#	    if (exists $functions->{$f}) {
-#		my $flags = $functions->{$f}[0];
-#		$repl = "Perl_$repl" if $flags =~ /p/;
-#		unless ($flags =~ /n/) {
-#		    $repl .= "pTHX";
-#		    $repl .= "_ " if @{$functions->{$f}} > 3;
-#		}
-#		warn("$ARGV:$.:$repl\n");
-#	    }
-#	    $repl;
-#	 }e;
 	s{(\b(\w+)[ \t]*\([ \t]*(?!aTHX))}
 	 {
 	    my $repl = $1;
@@ -201,6 +181,15 @@ sub write_protos {
 		}
 		push( @nonnull, $n ) if ( $arg =~ s/\s*\bNN\b\s+// );
 		$arg =~ s/\s*\bNULLOK\b\s+//; # strip NULLOK with no effect
+
+		# Make sure each arg has at least a type and a var name.
+		# An arg of "int" is valid C, but want it to be "int foo".
+		my $temp_arg = $arg;
+		$temp_arg =~ s/\*//g;
+		$temp_arg =~ s/\s*\bstruct\b\s*/ /g;
+		if ( ($temp_arg ne "...") && ($temp_arg !~ /\w+\s+\w+/) ) {
+		    warn "$func: $arg doesn't have a name\n";
+		}
 	    }
 	    $ret .= join ", ", @args;
 	}

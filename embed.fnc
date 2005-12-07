@@ -724,7 +724,7 @@ Anp	|Signal_t |csighandler	|int sig|...
 np	|Signal_t |sighandler	|int sig
 Anp	|Signal_t |csighandler	|int sig
 #endif
-Ap	|SV**	|stack_grow	|NN SV** sp|NN SV**p|int n
+Ap	|SV**	|stack_grow	|NN SV** sp|NN SV** p|int n
 Ap	|I32	|start_subparse	|I32 is_format|U32 flags
 p	|void	|sub_crush_depth|NN CV* cv
 Apd	|bool	|sv_2bool	|NN SV* sv
@@ -1005,9 +1005,9 @@ ApR	|char *	|custom_op_desc	|NN const OP* op
 pMX	|int	|sv_release_IVX	|NN SV *sv
 #endif
 
-Adp	|void	|sv_nosharing	|NULLOK SV *
-Adpbm	|void	|sv_nolocking	|NULLOK SV *
-Adpbm	|void	|sv_nounlocking	|NULLOK SV *
+Adp	|void	|sv_nosharing	|NULLOK SV *sv
+Adpbm	|void	|sv_nolocking	|NULLOK SV *sv
+Adpbm	|void	|sv_nounlocking	|NULLOK SV *sv
 Adp	|int	|nothreadhook
 
 END_EXTERN_C
@@ -1223,30 +1223,30 @@ Es	|void	|reginsert	|NN struct RExC_state_t *state|U8 op|NN regnode *opnd
 Es	|void	|regoptail	|NN struct RExC_state_t *state|NN regnode *p|NN regnode *val
 Es	|void	|regtail	|NN struct RExC_state_t *state|NN regnode *p|NN regnode *val
 Es	|char*	|regwhite	|NN char *p|NN const char *e
-Es	|char*	|nextchar	|NN struct RExC_state_t*
+Es	|char*	|nextchar	|NN struct RExC_state_t *state
 #  ifdef DEBUGGING
 Es	|regnode*|dumpuntil	|NN regnode *start|NN regnode *node \
 				|NULLOK regnode *last|NN SV* sv|I32 l
 Es	|void	|put_byte	|NN SV* sv|int c
 #  endif
-Es	|void	|scan_commit	|NN struct RExC_state_t*|NN struct scan_data_t *data
-Es	|void	|cl_anything	|NN struct RExC_state_t*|NN struct regnode_charclass_class *cl
+Es	|void	|scan_commit	|NN struct RExC_state_t* state|NN struct scan_data_t *data
+Es	|void	|cl_anything	|NN struct RExC_state_t* state|NN struct regnode_charclass_class *cl
 Es	|int	|cl_is_anything	|NN const struct regnode_charclass_class *cl
-Es	|void	|cl_init	|NN struct RExC_state_t*|NN struct regnode_charclass_class *cl
-Es	|void	|cl_init_zero	|NN struct RExC_state_t*|NN struct regnode_charclass_class *cl
+Es	|void	|cl_init	|NN struct RExC_state_t* state|NN struct regnode_charclass_class *cl
+Es	|void	|cl_init_zero	|NN struct RExC_state_t* state|NN struct regnode_charclass_class *cl
 Es	|void	|cl_and		|NN struct regnode_charclass_class *cl \
 				|NN const struct regnode_charclass_class *and_with
-Es	|void	|cl_or		|NN struct RExC_state_t*|NN struct regnode_charclass_class *cl \
+Es	|void	|cl_or		|NN struct RExC_state_t* state|NN struct regnode_charclass_class *cl \
 				|NN const struct regnode_charclass_class *or_with
-Es	|I32	|study_chunk	|NN struct RExC_state_t* pRExC_state|NN regnode **scanp \
+Es	|I32	|study_chunk	|NN struct RExC_state_t* state|NN regnode **scanp \
 				|NN I32 *deltap|NN regnode *last|NULLOK struct scan_data_t *data \
 				|U32 flags|U32 depth
-Es	|I32	|add_data	|NN struct RExC_state_t*|I32 n|NN const char *s
+Es	|I32	|add_data	|NN struct RExC_state_t* state|I32 n|NN const char *s
 rs	|void	|re_croak2	|NN const char* pat1|NN const char* pat2|...
-Es	|I32	|regpposixcc	|NN struct RExC_state_t*|I32 value
-Es	|void	|checkposixcc	|NN struct RExC_state_t*
+Es	|I32	|regpposixcc	|NN struct RExC_state_t* state|I32 value
+Es	|void	|checkposixcc	|NN struct RExC_state_t* state
 
-Es	|I32	|make_trie	|NN struct RExC_state_t*|NN regnode *startbranch \
+Es	|I32	|make_trie	|NN struct RExC_state_t* state|NN regnode *startbranch \
 				|NN regnode *first|NN regnode *last|NN regnode *tail \
 				|U32 flags
 #endif
@@ -1352,7 +1352,7 @@ sR	|I32	|sublex_push
 sR	|I32	|sublex_start
 sR	|char *	|filter_gets	|NN SV *sv|NN PerlIO *fp|STRLEN append
 sR	|HV *	|find_in_my_stash|NN const char *pkgname|I32 len
-sR	|char *	|tokenize_use	|int is_use|NN char*
+sR	|char *	|tokenize_use	|int is_use|NN char *s
 s	|SV*	|new_constant	|NULLOK const char *s|STRLEN len|NN const char *key|NN SV *sv \
 				|NULLOK SV *pv|NULLOK const char *type
 #  if defined(DEBUGGING)
