@@ -862,7 +862,8 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
     return new_offset;
 }
 
-		
+
+#ifdef DEBUGGING
 /*
 =for apidoc pad_sv
 
@@ -897,7 +898,6 @@ Use the macro PAD_SETSV() rather than calling this function directly.
 =cut
 */
 
-#ifdef DEBUGGING
 void
 Perl_pad_setsv(pTHX_ PADOFFSET po, SV* sv)
 {
