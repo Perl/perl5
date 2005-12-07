@@ -1801,19 +1801,17 @@ S_sv_2iuv_common(pTHX_ SV *sv) {
                     SvIsUV_on(sv);
                     /* Integer is inaccurate. NOK, IOKp, is UV */
                     SvUV_set(sv, UV_MAX);
-                    SvIsUV_on(sv);
                 } else {
                     SvUV_set(sv, U_V(SvNVX(sv)));
                     /* 0xFFFFFFFFFFFFFFFF not an issue in here, NVs
                        NV preservse UV so can do correct comparison.  */
                     if ((NV)(SvUVX(sv)) == SvNVX(sv)) {
                         SvIOK_on(sv);
-                        SvIsUV_on(sv);
                     } else {
                         /* Integer is imprecise. NOK, IOKp, is UV */
-                        SvIsUV_on(sv);
                     }
                 }
+		SvIsUV_on(sv);
             }
 #else /* NV_PRESERVES_UV */
             if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
