@@ -36,6 +36,7 @@ WriteMakefile(
 		  SUFFIX	=> 'gz',
 		  DIST_DEFAULT => 'all tardist',
 	      },
+	      MAN1PODS	=> {},
 	      MAN3PODS	=> {},
 	      INC       => "-I./Encode",
 	      PMLIBDIRS => \@pmlibdirs,
