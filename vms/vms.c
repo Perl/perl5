@@ -3391,9 +3391,6 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
     _ckvmssts(lib$set_symbol(&d_sym_out, &d_symbol, &table));
 
     p = vmscmd->dsc$a_pointer;
-    while (*p && *p != '\n') p++;
-    *p = '\0';                                  /* truncate on \n */
-    p = vmscmd->dsc$a_pointer;
     while (*p == ' ' || *p == '\t') p++;        /* remove leading whitespace */
     if (*p == '$') p++;                         /* remove leading $ */
     while (*p == ' ' || *p == '\t') p++;
