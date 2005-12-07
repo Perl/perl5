@@ -1966,7 +1966,7 @@ lib/Pod/Simple/t/corpus/laozi38.txt		Pod::Simple test file
 lib/Pod/Simple/t/corpus/laozi38.xml		Pod::Simple test file
 lib/Pod/Simple/t/corpus/nonesuch.txt		Pod::Simple test file
 lib/Pod/Simple/t/corpus/nonesuch.xml		Pod::Simple test file
-lib/Pod/Simple/t/corpus_not_yet_impl/fiqhakbar_iso6.txt Pod::Simple test file
+lib/Pod/Simple/t/corpus_not_yet_impl/fiqhakbar_iso6.txt	Pod::Simple test file
 lib/Pod/Simple/t/corpus_not_yet_impl/fiqhakbar_iso6.xml	Pod::Simple test file
 lib/Pod/Simple/t/corpus_not_yet_impl/polish_implicit_utf8.txt	Pod::Simple test file
 lib/Pod/Simple/t/corpus_not_yet_impl/polish_utf16be_bom.txt	Pod::Simple test file
