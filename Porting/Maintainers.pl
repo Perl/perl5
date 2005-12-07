@@ -13,6 +13,7 @@ package Maintainers;
 	'abergman'	=> 'Arthur Bergman <abergman@cpan.org>',
 	'ams'		=> 'Abhijit Menon-Sen <ams@cpan.org>',
 	'andk'		=> 'Andreas J. Koenig <andk@cpan.org>',
+	'arandal'       => 'Allison Randal <allison@perl.org>',
 	'autrijus'	=> 'Autrijus Tang <autrijus@cpan.org>',
 	'bbb'		=> 'Rob Brown <bbb@cpan.org>',
 	'craig'		=> 'Craig Berry <craigberry@mac.com>',
@@ -455,6 +456,12 @@ package Maintainers;
         'Pod::Parser' => {
 		'MAINTAINER'	=> 'marekr',
 		'FILES' => q[lib/Pod/{InputObjects,Parser,ParseUtils,Select,PlainText,Usage,Checker,Find}.pm pod/pod{select,2usage,checker}.PL t/pod/testcmp.pl t/pod/testp2pt.pl t/pod/testpchk.pl t/pod/emptycmd.* t/pod/find.t t/pod/for.* t/pod/headings.* t/pod/include.* t/pod/included.* t/pod/lref.* t/pod/multiline_items.* t/pod/nested_items.* t/pod/nested_seqs.* t/pod/oneline_cmds.* t/pod/poderrs.* t/pod/pod2usage.* t/pod/podselect.* t/pod/special_seqs.*],
+		'CPAN'		=> 1,
+		},
+
+        'Pod::Simple' =>
+		'MAINTAINER'	=> 'arandal',
+		'FILES'		=> q[lib/Pod/Simple.pm lib/Pod/Simple.pod lib/Pod/Simple]
 		'CPAN'		=> 1,
 		},
 
